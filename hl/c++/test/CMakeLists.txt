@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.2.2)
+cmake_minimum_required (VERSION 3.10)
 PROJECT (HDF5_HL_CPP_TEST)
 
 #-----------------------------------------------------------------------------
@@ -17,7 +17,6 @@ INCLUDE_DIRECTORIES (${HDF5_CPP_SRC_DIR}/src)
 
 add_executable (hl_ptableTest ${HDF5_HL_CPP_TEST_SOURCE_DIR}/ptableTest.cpp)
 TARGET_C_PROPERTIES (hl_ptableTest STATIC " " " ")
-TARGET_NAMING (hl_ptableTest STATIC)
 target_link_libraries (
     hl_ptableTest
     ${HDF5_LIB_TARGET}

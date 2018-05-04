@@ -211,7 +211,6 @@ if test $nerrors -eq 0 ; then
     echo "flush/refresh objects tests passed."
     if test -z "$HDF5_NOCLEANUP"; then
         # delete the test directory
-        cd ..
         rm -rf flushrefresh_test
     fi
     exit 0

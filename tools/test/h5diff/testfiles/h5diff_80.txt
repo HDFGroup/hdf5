@@ -59,79 +59,79 @@ dataset: </g1/VLstring> and </g1/VLstring>
 size:           [2]           [2]
 position        VLstring        VLstring        difference          
 ------------------------------------------------------------
-[ 0 ]            a            z
-[ 0 ]            b            z
-[ 1 ]            d            z
-[ 1 ]            e            z
+[ 0 ]            z            a
+[ 0 ]            z            b
+[ 1 ]            z            d
+[ 1 ]            z            e
 4 differences found
 dataset: </g1/VLstring2D> and </g1/VLstring2D>
 size:           [3x2]           [3x2]
 position        VLstring2D      VLstring2D      difference          
 ------------------------------------------------------------
-[ 0 0 ]            a            z
-[ 0 0 ]            b            z
-[ 0 1 ]            c            z
-[ 0 1 ]            d            z
-[ 1 0 ]            e            z
-[ 1 0 ]            f            z
-[ 1 1 ]            g            z
-[ 1 1 ]            h            z
-[ 2 0 ]            i            z
-[ 2 0 ]            j            z
-[ 2 1 ]            k            z
-[ 2 1 ]            l            z
+[ 0 0 ]            z            a
+[ 0 0 ]            z            b
+[ 0 1 ]            z            c
+[ 0 1 ]            z            d
+[ 1 0 ]            z            e
+[ 1 0 ]            z            f
+[ 1 1 ]            z            g
+[ 1 1 ]            z            h
+[ 2 0 ]            z            i
+[ 2 0 ]            z            j
+[ 2 1 ]            z            k
+[ 2 1 ]            z            l
 12 differences found
 dataset: </g1/VLstring3D> and </g1/VLstring3D>
 size:           [4x3x2]           [4x3x2]
 position        VLstring3D      VLstring3D      difference          
 ------------------------------------------------------------
-[ 0 0 0 ]            a            z
-[ 0 0 0 ]            b            z
-[ 0 0 1 ]            c            z
-[ 0 0 1 ]            d            z
-[ 0 1 0 ]            e            z
-[ 0 1 0 ]            f            z
-[ 0 1 1 ]            g            z
-[ 0 1 1 ]            h            z
-[ 0 2 0 ]            i            z
-[ 0 2 0 ]            j            z
-[ 0 2 1 ]            k            z
-[ 0 2 1 ]            l            z
-[ 1 0 0 ]            m            z
-[ 1 0 0 ]            n            z
-[ 1 0 1 ]            p            z
-[ 1 0 1 ]            q            z
-[ 1 1 0 ]            r            z
-[ 1 1 0 ]            s            z
-[ 1 1 1 ]            t            z
-[ 1 1 1 ]            u            z
-[ 1 2 0 ]            v            z
-[ 1 2 0 ]            w            z
-[ 1 2 1 ]            x            z
-[ 2 0 0 ]            A            z
-[ 2 0 0 ]            B            z
-[ 2 0 1 ]            C            z
-[ 2 0 1 ]            D            z
-[ 2 1 0 ]            E            z
-[ 2 1 0 ]            F            z
-[ 2 1 1 ]            G            z
-[ 2 1 1 ]            H            z
-[ 2 2 0 ]            I            z
-[ 2 2 0 ]            J            z
-[ 2 2 1 ]            K            z
-[ 2 2 1 ]            L            z
-[ 3 0 0 ]            M            z
-[ 3 0 0 ]            N            z
-[ 3 0 1 ]            P            z
-[ 3 0 1 ]            Q            z
-[ 3 1 0 ]            R            z
-[ 3 1 0 ]            S            z
-[ 3 1 1 ]            T            z
-[ 3 1 1 ]            U            z
-[ 3 2 0 ]            V            z
-[ 3 2 0 ]            W            z
-[ 3 2 1 ]            X            z
-[ 3 2 1 ]            Z            z
+[ 0 0 0 ]            z            a
+[ 0 0 0 ]            z            b
+[ 0 0 1 ]            z            c
+[ 0 0 1 ]            z            d
+[ 0 1 0 ]            z            e
+[ 0 1 0 ]            z            f
+[ 0 1 1 ]            z            g
+[ 0 1 1 ]            z            h
+[ 0 2 0 ]            z            i
+[ 0 2 0 ]            z            j
+[ 0 2 1 ]            z            k
+[ 0 2 1 ]            z            l
+[ 1 0 0 ]            z            m
+[ 1 0 0 ]            z            n
+[ 1 0 1 ]            z            p
+[ 1 0 1 ]            z            q
+[ 1 1 0 ]            z            r
+[ 1 1 0 ]            z            s
+[ 1 1 1 ]            z            t
+[ 1 1 1 ]            z            u
+[ 1 2 0 ]            z            v
+[ 1 2 0 ]            z            w
+[ 1 2 1 ]            z            x
+[ 2 0 0 ]            z            A
+[ 2 0 0 ]            z            B
+[ 2 0 1 ]            z            C
+[ 2 0 1 ]            z            D
+[ 2 1 0 ]            z            E
+[ 2 1 0 ]            z            F
+[ 2 1 1 ]            z            G
+[ 2 1 1 ]            z            H
+[ 2 2 0 ]            z            I
+[ 2 2 0 ]            z            J
+[ 2 2 1 ]            z            K
+[ 2 2 1 ]            z            L
+[ 3 0 0 ]            z            M
+[ 3 0 0 ]            z            N
+[ 3 0 1 ]            z            P
+[ 3 0 1 ]            z            Q
+[ 3 1 0 ]            z            R
+[ 3 1 0 ]            z            S
+[ 3 1 1 ]            z            T
+[ 3 1 1 ]            z            U
+[ 3 2 0 ]            z            V
+[ 3 2 0 ]            z            W
+[ 3 2 1 ]            z            X
+[ 3 2 1 ]            z            Z
 47 differences found
 dataset: </g1/array> and </g1/array>
 size:           [2]           [2]
@@ -702,79 +702,79 @@ dataset: </g1/string> and </g1/string>
 size:           [2]           [2]
 position        string          string          difference          
 ------------------------------------------------------------
-[ 0 ]            a            z
-[ 0 ]            b            z
-[ 1 ]            d            z
-[ 1 ]            e            z
+[ 0 ]            z            a
+[ 0 ]            z            b
+[ 1 ]            z            d
+[ 1 ]            z            e
 4 differences found
 dataset: </g1/string2D> and </g1/string2D>
 size:           [3x2]           [3x2]
 position        string2D        string2D        difference          
 ------------------------------------------------------------
-[ 0 0 ]            a            z
-[ 0 0 ]            b            z
-[ 0 1 ]            c            z
-[ 0 1 ]            d            z
-[ 1 0 ]            e            z
-[ 1 0 ]            f            z
-[ 1 1 ]            g            z
-[ 1 1 ]            h            z
-[ 2 0 ]            i            z
-[ 2 0 ]            j            z
-[ 2 1 ]            k            z
-[ 2 1 ]            l            z
+[ 0 0 ]            z            a
+[ 0 0 ]            z            b
+[ 0 1 ]            z            c
+[ 0 1 ]            z            d
+[ 1 0 ]            z            e
+[ 1 0 ]            z            f
+[ 1 1 ]            z            g
+[ 1 1 ]            z            h
+[ 2 0 ]            z            i
+[ 2 0 ]            z            j
+[ 2 1 ]            z            k
+[ 2 1 ]            z            l
 12 differences found
 dataset: </g1/string3D> and </g1/string3D>
 size:           [4x3x2]           [4x3x2]
 position        string3D        string3D        difference          
 ------------------------------------------------------------
-[ 0 0 0 ]            a            z
-[ 0 0 0 ]            b            z
-[ 0 0 1 ]            c            z
-[ 0 0 1 ]            d            z
-[ 0 1 0 ]            e            z
-[ 0 1 0 ]            f            z
-[ 0 1 1 ]            g            z
-[ 0 1 1 ]            h            z
-[ 0 2 0 ]            i            z
-[ 0 2 0 ]            j            z
-[ 0 2 1 ]            k            z
-[ 0 2 1 ]            l            z
-[ 1 0 0 ]            m            z
-[ 1 0 0 ]            n            z
-[ 1 0 1 ]            p            z
-[ 1 0 1 ]            q            z
-[ 1 1 0 ]            r            z
-[ 1 1 0 ]            s            z
-[ 1 1 1 ]            t            z
-[ 1 1 1 ]            u            z
-[ 1 2 0 ]            v            z
-[ 1 2 0 ]            w            z
-[ 1 2 1 ]            x            z
-[ 2 0 0 ]            A            z
-[ 2 0 0 ]            B            z
-[ 2 0 1 ]            C            z
-[ 2 0 1 ]            D            z
-[ 2 1 0 ]            E            z
-[ 2 1 0 ]            F            z
-[ 2 1 1 ]            G            z
-[ 2 1 1 ]            H            z
-[ 2 2 0 ]            I            z
-[ 2 2 0 ]            J            z
-[ 2 2 1 ]            K            z
-[ 2 2 1 ]            L            z
-[ 3 0 0 ]            M            z
-[ 3 0 0 ]            N            z
-[ 3 0 1 ]            P            z
-[ 3 0 1 ]            Q            z
-[ 3 1 0 ]            R            z
-[ 3 1 0 ]            S            z
-[ 3 1 1 ]            T            z
-[ 3 1 1 ]            U            z
-[ 3 2 0 ]            V            z
-[ 3 2 0 ]            W            z
-[ 3 2 1 ]            X            z
-[ 3 2 1 ]            Z            z
+[ 0 0 0 ]            z            a
+[ 0 0 0 ]            z            b
+[ 0 0 1 ]            z            c
+[ 0 0 1 ]            z            d
+[ 0 1 0 ]            z            e
+[ 0 1 0 ]            z            f
+[ 0 1 1 ]            z            g
+[ 0 1 1 ]            z            h
+[ 0 2 0 ]            z            i
+[ 0 2 0 ]            z            j
+[ 0 2 1 ]            z            k
+[ 0 2 1 ]            z            l
+[ 1 0 0 ]            z            m
+[ 1 0 0 ]            z            n
+[ 1 0 1 ]            z            p
+[ 1 0 1 ]            z            q
+[ 1 1 0 ]            z            r
+[ 1 1 0 ]            z            s
+[ 1 1 1 ]            z            t
+[ 1 1 1 ]            z            u
+[ 1 2 0 ]            z            v
+[ 1 2 0 ]            z            w
+[ 1 2 1 ]            z            x
+[ 2 0 0 ]            z            A
+[ 2 0 0 ]            z            B
+[ 2 0 1 ]            z            C
+[ 2 0 1 ]            z            D
+[ 2 1 0 ]            z            E
+[ 2 1 0 ]            z            F
+[ 2 1 1 ]            z            G
+[ 2 1 1 ]            z            H
+[ 2 2 0 ]            z            I
+[ 2 2 0 ]            z            J
+[ 2 2 1 ]            z            K
+[ 2 2 1 ]            z            L
+[ 3 0 0 ]            z            M
+[ 3 0 0 ]            z            N
+[ 3 0 1 ]            z            P
+[ 3 0 1 ]            z            Q
+[ 3 1 0 ]            z            R
+[ 3 1 0 ]            z            S
+[ 3 1 1 ]            z            T
+[ 3 1 1 ]            z            U
+[ 3 2 0 ]            z            V
+[ 3 2 0 ]            z            W
+[ 3 2 1 ]            z            X
+[ 3 2 1 ]            z            Z
 47 differences found
 dataset: </g1/vlen> and </g1/vlen>
 size:           [2]           [2]
@@ -865,7 +865,7 @@ position        vlen3D          vlen3D          difference
 [ 3 2 1 ]          59              0               59             
 59 differences found
 dataset: </refreg> and </refreg>
-Referenced dataset      10720            10720
+Referenced dataset      10784            10784
 ------------------------------------------------------------
 Region blocks
 block #0           (2,2)-(7,7)           (0,0)-(2,2)

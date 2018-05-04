@@ -24,6 +24,7 @@
 #include "H5OcreatProp.h"
 #include "H5DxferProp.h"
 #include "H5DcreatProp.h"
+#include "H5LcreatProp.h"
 #include "H5LaccProp.h"
 #include "H5Location.h"
 #include "H5Object.h"
@@ -110,8 +111,7 @@ void H5Library::getLibVersion(unsigned& majnum, unsigned& minnum, unsigned& reln
 ///\exception   H5::LibraryIException
 ///\par Description
 ///             For information about library version, please refer to
-///             the C layer Reference Manual at:
-/// http://www.hdfgroup.org/HDF5/doc/RM/RM_H5.html#Library-VersCheck
+///             the H5check_version API in the HDF5 C Reference Manual.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void H5Library::checkVersion(unsigned majnum, unsigned minnum, unsigned relnum)
@@ -188,6 +188,10 @@ void H5Library::initH5cpp()
     if (ret_value != 0)
         throw LibraryIException("H5Library::initH5cpp", "Registrating LinkAccPropList::deleteConstants failed");
 
+    ret_value = std::atexit(LinkCreatPropList::deleteConstants);
+    if (ret_value != 0)
+        throw LibraryIException("H5Library::initH5cpp", "Registrating LinkCreatPropList::deleteConstants failed");
+
     ret_value = std::atexit(FileAccPropList::deleteConstants);
     if (ret_value != 0)
         throw LibraryIException("H5Library::initH5cpp", "Registrating FileAccPropList::deleteConstants failed");
@@ -240,9 +244,8 @@ void H5Library::termH5cpp()
 ///\exception   H5::LibraryIException
 ///\par Description
 ///             Setting a value of -1 for a limit means no limit of that type.
-///             For more information on free list limits, please refer to C
-///             layer Reference Manual at:
-/// http://www.hdfgroup.org/HDF5/doc/RM/RM_H5.html#Library-SetFreeListLimits
+///             For more information on free list limits, please refer to
+///             the H5set_free_list_limits API in the HDF5 C Reference Manual.
 // Programmer   Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
 void H5Library::setFreeListLimits(int reg_global_lim, int reg_list_lim,

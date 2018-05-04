@@ -66,10 +66,10 @@ h5_crtatt.chkexe_: h5_rdwt.chkexe_
 # Additional dependencies for the examples are listed below
 if BUILD_PARALLEL_CONDITIONAL
 $(EXTRA_PROG): $(H5FC_PP)
-	$(H5FC_PP) $(H5CCFLAGS) $(FCFLAGS) -o $@ $(srcdir)/$@.f90;
+	$(H5FC_PP) $(H5CCFLAGS) -o $@ $(srcdir)/$@.f90;
 else
 $(EXTRA_PROG): $(H5FC)
-	$(H5FC) $(H5CCFLAGS) $(FCFLAGS) -o $@ $(srcdir)/$@.f90;
+	$(H5FC) $(H5CCFLAGS) -o $@ $(srcdir)/$@.f90;
 endif
 
 # Tell automake how to install examples

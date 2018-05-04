@@ -18,7 +18,7 @@
 namespace H5 {
 
 /*! \class StrType
-    \brief StrType is derived from a DataType and operates on HDF5
+    \brief StrType is a derivative of a DataType and operates on HDF5
     string datatype.
 */
 //  Inheritance: AtomType -> DataType -> H5Object -> H5Location -> IdComponent
@@ -39,6 +39,10 @@ class H5_DLLCPP StrType : public AtomType {
         // Constructors that open an HDF5 string datatype, given a location.
         StrType(const H5Location& loc, const char* name);
         StrType(const H5Location& loc, const H5std_string& name);
+
+        // Returns an StrType object via DataType* by decoding the
+        // binary object description of this type.
+        virtual DataType* decode() const;
 
         // Retrieves the character set type of this string datatype.
         H5T_cset_t getCset() const;
@@ -61,7 +65,7 @@ class H5_DLLCPP StrType : public AtomType {
         // Creates a string datatype using an existing id
         StrType(const hid_t existing_id);
 
-        // Copy constructor - makes a copy of the original object
+        // Copy constructor: same as the original StrType.
         StrType(const StrType& original);
 
         // Noop destructor.

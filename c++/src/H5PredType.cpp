@@ -19,6 +19,7 @@
 #include "H5PropList.h"
 #include "H5OcreatProp.h"
 #include "H5DcreatProp.h"
+#include "H5LcreatProp.h"
 #include "H5LaccProp.h"
 #include "H5Location.h"
 #include "H5Object.h"
@@ -54,7 +55,7 @@ PredType::PredType() : AtomType() {}
 
 //--------------------------------------------------------------------------
 // Function:    PredType copy constructor
-///\brief       Copy constructor: makes a copy of the original PredType object.
+///\brief       Copy constructor: same HDF5 object as \a original
 ///\param       original - IN: PredType instance to copy
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------

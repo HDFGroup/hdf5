@@ -39,7 +39,7 @@ Exception::Exception(const H5std_string& func, const H5std_string& message) : de
 
 //--------------------------------------------------------------------------
 // Function:    Exception copy constructor
-///\brief       Copy constructor: makes a copy of the original Exception object.
+///\brief       Copy constructor: same HDF5 object as \a original
 ///\param       orig - IN: Exception instance to copy
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
@@ -317,11 +317,12 @@ void Exception::printErrorStack(FILE* stream, hid_t err_stack)
 //              This function can be removed in next major release.
 //              -BMR, 2014/04/24
 //              Removed from documentation. -BMR, 2016/03/23
+//              Removed from code. -BMR, 2017/08/11 1.8.20 and 1.10.2
 //--------------------------------------------------------------------------
-void Exception::printError(FILE* stream) const
-{
-    Exception::printErrorStack(stream, H5E_DEFAULT);
-}
+//void Exception::printError(FILE* stream) const
+//{
+//    Exception::printErrorStack(stream, H5E_DEFAULT);
+//}
 
 //--------------------------------------------------------------------------
 // Function:    Exception destructor

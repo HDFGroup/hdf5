@@ -1019,7 +1019,7 @@ Java_hdf_hdf5lib_H5_H5DreadVL
     } /* end else */
 
     return (jint)status;
-} /* end Java_hdf_hdf5lib_H5_H5Dread_1VLStrings */
+} /* end Java_hdf_hdf5lib_H5_H5Dread_1VL */
 
 herr_t
 H5DreadVL_asstr

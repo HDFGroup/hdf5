@@ -78,7 +78,6 @@ const H5std_string    FILE4("tfile4.h5");
  *                     passed to verify_val to 'long' as well.  If problems
  *                     arises later, this will have to be specificly handled
  *                     with a special routine.
- *
  *-------------------------------------------------------------------------
  */
 static void test_file_create()
@@ -285,7 +284,6 @@ static void test_file_create()
  *                     passed to verify_val to 'long' as well.  If problems
  *                     arises later, this will have to be specificly handled
  *                     with a special routine.
- *
  *-------------------------------------------------------------------------
  */
 static void test_file_open()
@@ -360,9 +358,6 @@ static void test_file_open()
  *
  * Programmer   Raymond Lu
  *              June, 2004
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void test_file_size()
@@ -425,9 +420,6 @@ static void test_file_size()
  *
  * Programmer   Binh-Minh Ribler
  *              July, 2004
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 const int        RANK = 2;
@@ -507,6 +499,15 @@ static void test_file_name()
 }   // test_file_name()
 
 
+/*-------------------------------------------------------------------------
+ *
+ * Function:    test_file_attribute
+ *
+ * Purpose      Test file attributes
+ *
+ * Return       None
+ *-------------------------------------------------------------------------
+ */
 const int        RANK1 = 1;
 const int        ATTR1_DIM1 = 3;
 const H5std_string        FILE5("tfattrs.h5");
@@ -618,11 +619,6 @@ static void test_file_attribute()
 }   // test_file_attribute()
 
 
-const H5std_string        FILE6("tfile5.h5");
-const H5std_string        ROOTGROUP("/");
-const H5std_string        GROUP1("/G1");
-const H5std_string        SUBGROUP3("/G1/G3");
-
 /*-------------------------------------------------------------------------
  * Function:    test_libver_bounds_real
  *
@@ -634,9 +630,13 @@ const H5std_string        SUBGROUP3("/G1/G3");
  *
  * Programmer   Binh-Minh Ribler (use C version)
  *              March, 2015
- *
  *-------------------------------------------------------------------------
  */
+const H5std_string        FILE6("tfile5.h5");
+const H5std_string        ROOTGROUP("/");
+const H5std_string        GROUP1("/G1");
+const H5std_string        SUBGROUP3("/G1/G3");
+
 static void test_libver_bounds_real(
                 H5F_libver_t libver_create, unsigned oh_vers_create,
                 H5F_libver_t libver_mod, unsigned oh_vers_mod)
@@ -707,6 +707,7 @@ static void test_libver_bounds_real(
 
 } /* end test_libver_bounds_real() */
 
+
 /*-------------------------------------------------------------------------
  *
  * Function:    test_libver_bounds
@@ -718,7 +719,6 @@ static void test_libver_bounds_real(
  *
  * Programmer   Binh-Minh Ribler (use C version)
  *              March 2015
- *
  *-------------------------------------------------------------------------
  */
 static void test_libver_bounds()
@@ -731,9 +731,10 @@ static void test_libver_bounds()
     test_libver_bounds_real(H5F_LIBVER_LATEST, H5O_VERSION_2, H5F_LIBVER_EARLIEST, H5O_VERSION_2);
     PASSED();
 } /* end test_libver_bounds() */
+
 
 /*-------------------------------------------------------------------------
- * Function:        test_commonfg
+ * Function:    test_commonfg
  *
  * Purpose      Verify that H5File works as a root group.
  *
@@ -741,7 +742,6 @@ static void test_libver_bounds()
  *
  * Programmer   Binh-Minh Ribler (use C version)
  *              March, 2015
- *
  *-------------------------------------------------------------------------
  */
 static void test_commonfg()
@@ -793,9 +793,8 @@ static void test_commonfg()
     }
 
 } /* end test_commonfg() */
-
-const H5std_string        FILE7("tfile7.h5");
 
+
 /*-------------------------------------------------------------------------
  * Function:    test_file_info
  *
@@ -807,11 +806,12 @@ const H5std_string        FILE7("tfile7.h5");
  *
  * Programmer   Binh-Minh Ribler
  *              February, 2017
- *
  *-------------------------------------------------------------------------
  */
+const H5std_string FILE7("tfile7.h5");
 const hsize_t FSP_SIZE_DEF = 4096;
 const hsize_t FSP_SIZE512 = 512;
+
 static void test_file_info()
 {
     // Output message about test being performed
@@ -932,6 +932,7 @@ static void test_file_info()
         issue_fail_msg("test_filespace_info()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }  /* test_file_info() */
+
 
 /*-------------------------------------------------------------------------
  * Function:    test_file
@@ -942,9 +943,6 @@ static void test_file_info()
  *
  * Programmer   Binh-Minh Ribler (use C version)
  *              January 2001
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 extern "C"
@@ -970,11 +968,6 @@ void test_file()
  * Purpose      Cleanup temporary test files
  *
  * Return       none
- *
- * Programmer   (use C version)
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 #ifdef __cplusplus

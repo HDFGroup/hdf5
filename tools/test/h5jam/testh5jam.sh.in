@@ -107,10 +107,10 @@ COPY_TESTFILES_TO_TESTDIR()
             INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
             INODE_DDIR=`$LS -i -d $TESTDIR | $AWK -F' ' '{print $1}'`
             if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
-    	        $CP -f $tstfile $TESTDIR
+                $CP -f $tstfile $TESTDIR
                 if [ $? -ne 0 ]; then
                     echo "Error: FAILED to copy $tstfile ."
-                
+
                     # Comment out this to CREATE expected file
                     exit $EXIT_FAILURE
                 fi
@@ -154,19 +154,19 @@ SKIP() {
  echo  " -SKIP-"
 }
 
-# 
+#
 #  COMPARE_FILES a.h5 b.h5
-#    Compare two files, skipping the first line.  This is used to 
+#    Compare two files, skipping the first line.  This is used to
 #    compare the output of the dumper, skipping the file name which
 #    is different.
 #    The result is stored in 'compval'.
 #
 cmpval=0;
 COMPARE_FILES() {
-	$AWK 'NR > 1' $1 > $1.cmp
-	$AWK 'NR > 1' $2 > $2.cmp
- 	$CMP $1.cmp $2.cmp 
- 	cmpval=$?
+    $AWK 'NR > 1' $1 > $1.cmp
+    $AWK 'NR > 1' $2 > $2.cmp
+    $CMP $1.cmp $2.cmp
+    cmpval=$?
         rm -f $1.cmp $2.cmp
 }
 
@@ -174,10 +174,10 @@ COMPARE_FILES() {
 #     Clean up named files.
 CLEANUP() {
    if test -z "$HDF5_NOCLEANUP"; then
-	for i in $*
-	do
-		rm -f $i
-	done
+    for i in $*
+    do
+        rm -f $i
+    done
    fi
 }
 
@@ -190,7 +190,7 @@ CLEANUP() {
 #    the "cat" command.
 #
 SETUP() {
-	cat < $1 > $2
+    cat < $1 > $2
 }
 
 #
@@ -233,7 +233,7 @@ CHECKFILE() {
 }
 
 #
-# CHECK_UB file.h5 user_block_file origfile.h5 
+# CHECK_UB file.h5 user_block_file origfile.h5
 #
 #   Check the user block in 'file.h5' is the same as
 #   'user_block' (allowing for padding).
@@ -243,73 +243,73 @@ CHECKFILE() {
 #   and the test file compared to:
 #      cat compare_ub user_block_file.
 #
-#   This test uses './getub' to extract the user block from 
+#   This test uses './getub' to extract the user block from
 #   'file.h5', which is compared to the file described above.
 #
 #   The result is set in variable 'result1'.
 #
 result1=0;
 CHECK_UB_1() {
-	hfile="$1"
-	ufile="$2"
+    hfile="$1"
+    ufile="$2"
 
-	# check for third argument (the original file)
-	origfile="";
-	if [ -n "$3" ];
-	then
-		origfile="$3"
-	fi
+    # check for third argument (the original file)
+    origfile="";
+    if [ -n "$3" ];
+    then
+        origfile="$3"
+    fi
 
-	# find the length of the user block to check
-	s1=`cat $ufile | wc -c | sed -e 's/ //g'`
-	if [ "$s1" = "0" ];
-	then
-		echo "File "$ufile" is empty"
-		result1=1;
-	fi
+    # find the length of the user block to check
+    s1=`cat $ufile | wc -c | sed -e 's/ //g'`
+    if [ "$s1" = "0" ];
+    then
+        echo "File "$ufile" is empty"
+        result1=1;
+    fi
 
-	# Get the size of the original user block, if any.
-	if [ -n "$origfile" ];
-	then
-		# 'tellub' calls H5Fget_user_block to get the size
-		#  of the user block
-		s2=`$JAM_BIN/tellub $origfile`
-		if [ "$s2" = "0" ];
-		then
-			size=$s1;
-			cmpfile=$ufile
-		else
-			cmpfile="tt2"
-			size=`expr $s2 + $s1`
-			$JAM_BIN/getub -c $s2 $origfile > $cmpfile
-			cat $ufile >> $cmpfile
-		fi
-	else
-		# assume no user block
-		s2="0"
-		size=$s1;
-		cmpfile=$ufile
-	fi
+    # Get the size of the original user block, if any.
+    if [ -n "$origfile" ];
+    then
+        # 'tellub' calls H5Fget_user_block to get the size
+        #  of the user block
+        s2=`$JAM_BIN/tellub $origfile`
+        if [ "$s2" = "0" ];
+        then
+            size=$s1;
+            cmpfile=$ufile
+        else
+            cmpfile="tt2"
+            size=`expr $s2 + $s1`
+            $JAM_BIN/getub -c $s2 $origfile > $cmpfile
+            cat $ufile >> $cmpfile
+        fi
+    else
+        # assume no user block
+        s2="0"
+        size=$s1;
+        cmpfile=$ufile
+    fi
 
-	# Extract 'size' bytes from the front of 'hfile'
-	# Compare to 'cmpfile', result is set in result1
-	tfile="tt1"
-	$JAM_BIN/getub -c $size $hfile > $tfile
-	res=`cmp $cmpfile $tfile`
-	if [ "$?" != "0" ];
-	then
-		echo $res
-		result1=1;
-	else
-		result1=0;
-	fi
+    # Extract 'size' bytes from the front of 'hfile'
+    # Compare to 'cmpfile', result is set in result1
+    tfile="tt1"
+    $JAM_BIN/getub -c $size $hfile > $tfile
+    res=`cmp $cmpfile $tfile`
+    if [ "$?" != "0" ];
+    then
+        echo $res
+        result1=1;
+    else
+        result1=0;
+    fi
 
-	# clean up
-	rm -f  $tfile
-	if [ "$s2" != "0" ] ;
-	then
-		rm -f $cmpfile
-	fi
+    # clean up
+    rm -f  $tfile
+    if [ "$s2" != "0" ] ;
+    then
+        rm -f $cmpfile
+    fi
 }
 
 
@@ -321,25 +321,25 @@ CHECK_UB_1() {
 result2=0;
 
 CHECK_NOUB() {
-	hfile="$1"
+    hfile="$1"
 
-	# call 'ubsize' to get the size of the user block
-	ubsize=`$JAM_BIN/tellub $hfile`
+    # call 'ubsize' to get the size of the user block
+    ubsize=`$JAM_BIN/tellub $hfile`
 
-	if [ "$?" != "0" ];
-	then
-		# error
-		result2=1;
-	else
-	if [ "$ubsize" = "0" ];
-	then
-		# pass
-		result2=0;
-	else
-		# fail
-		result2=1;
-	fi
-	fi
+    if [ "$?" != "0" ];
+    then
+        # error
+        result2=1;
+    else
+    if [ "$ubsize" = "0" ];
+    then
+        # pass
+        result2=0;
+    else
+        # fail
+        result2=1;
+    fi
+    fi
 }
 
 #  JAMTEST user_block file.h5 [--clobber] [ofile.h5]
@@ -351,119 +351,119 @@ CHECK_NOUB() {
 #      3. check the user block is correct in the output (Check_UB)
 #    If the user block is correct, print "PASSED", else "*FAILED*"
 JAMTEST() {
-	ufile="$1"
-	ifile="$2"
-	compare_test=""   # the file to test
-	compare_orig=""   # the comparison to test against
-	cleanup=""
+    ufile="$1"
+    ifile="$2"
+    compare_test=""   # the file to test
+    compare_orig=""   # the comparison to test against
+    cleanup=""
 
-	# sort out the arguments for the test and the check
-	do_clobber="no"
-	if [ "$3" = "--clobber" ];
-	then
-		#  clobber overwrites any existing user block
-		do_clobber="yes"
-		clobber="--clobber"
-		compare_orig=""
-		if [ -z "$4" ];
-		then
-			# output goes to infile, compare ubfile to infile
-			ofile=""
-			compare_test="$ifile"
-		else
-			# output goes to $4,  compare ofile to ubfile
-			ofile="$4"
-			compare_test="$ofile"
-		fi
-	else
-		clobber=""
-		# add user block to existing ub, if any 
-		if [ -z "$3" ];
-		then
-			# output goes to infile, compare ubfile to infile
-			ofile=""
-			compare_test="$ifile"
-			cp $ifile xxofile.h5
-			compare_orig="xxofile.h5"
-			cleanup="$cleanup $compare_orig"
-		else
-			# output goes to $3,  compare ofile to ubfile
-			ofile="$3"
-			compare_test="$ofile"
-			compare_orig="$ifile"
-		fi
-	fi
+    # sort out the arguments for the test and the check
+    do_clobber="no"
+    if [ "$3" = "--clobber" ];
+    then
+        #  clobber overwrites any existing user block
+        do_clobber="yes"
+        clobber="--clobber"
+        compare_orig=""
+        if [ -z "$4" ];
+        then
+            # output goes to infile, compare ubfile to infile
+            ofile=""
+            compare_test="$ifile"
+        else
+            # output goes to $4,  compare ofile to ubfile
+            ofile="$4"
+            compare_test="$ofile"
+        fi
+    else
+        clobber=""
+        # add user block to existing ub, if any
+        if [ -z "$3" ];
+        then
+            # output goes to infile, compare ubfile to infile
+            ofile=""
+            compare_test="$ifile"
+            cp $ifile xxofile.h5
+            compare_orig="xxofile.h5"
+            cleanup="$cleanup $compare_orig"
+        else
+            # output goes to $3,  compare ofile to ubfile
+            ofile="$3"
+            compare_test="$ofile"
+            compare_orig="$ifile"
+        fi
+    fi
 
-	# call 'jam' with the appropriate arguments
-	if [ -n "$ofile" ];
-	then
-		TESTING h5jam -u `basename $ufile` -i `basename $ifile` -o `basename $ofile` $clobber
-		$JAM_BIN/$JAM -u $ufile -i $ifile -o $ofile $clobber
-	else
-		TESTING jam -u `basename $ufile` -i `basename $ifile` $clobber
-		$JAM_BIN/$JAM -u $ufile -i $ifile $clobber
-	fi
+    # call 'jam' with the appropriate arguments
+    if [ -n "$ofile" ];
+    then
+        TESTING h5jam -u `basename $ufile` -i `basename $ifile` -o `basename $ofile` $clobber
+        $JAM_BIN/$JAM -u $ufile -i $ifile -o $ofile $clobber
+    else
+        TESTING jam -u `basename $ufile` -i `basename $ifile` $clobber
+        $JAM_BIN/$JAM -u $ufile -i $ifile $clobber
+    fi
 
-	#echo "CHECK_UB_1 $compare_test $ufile $compare_orig"
-	CHECK_UB_1 $compare_test $ufile $compare_orig
+    #echo "CHECK_UB_1 $compare_test $ufile $compare_orig"
+    CHECK_UB_1 $compare_test $ufile $compare_orig
 
-	if [ "$result1" = "0" ] ;
-	then
-		echo " PASSED"
-	else
-		echo " *FAILED*"
-      		nerrors="`expr $nerrors + 1`"
-	fi
- 	CLEANUP $cleanup
+    if [ "$result1" = "0" ] ;
+    then
+        echo " PASSED"
+    else
+        echo " *FAILED*"
+            nerrors="`expr $nerrors + 1`"
+    fi
+    CLEANUP $cleanup
 }
-	
+
 # UNJAMTEST  file.h5 [- | --delete] ofile
 #
 #  Test the 'unjam' tool
 #
 ###fix the working directory here and in jamtest
 UNJAMTEST () {
-	infile="$1"
-	ofile="$3"
-	if [ "$2" = "-" ];
-	then
-		uofile="uofile"
-		TESTING h5unjam -i `basename $infile` -o `basename $ofile` "> "`basename $uofile`
-		$JAM_BIN/$UNJAM -i $infile -o $ofile > $uofile
-	else
-	if [ "$2" = "--delete" ];
-	then
-		uofile="none"
-		TESTING h5unjam -i `basename $infile` -o `basename $ofile` --delete
-		$JAM_BIN/$UNJAM  -i $infile -o $ofile --delete 
+    infile="$1"
+    ofile="$3"
+    if [ "$2" = "-" ];
+    then
+        uofile="uofile"
+        TESTING h5unjam -i `basename $infile` -o `basename $ofile` "> "`basename $uofile`
+        $JAM_BIN/$UNJAM -i $infile -o $ofile > $uofile
+    else
+    if [ "$2" = "--delete" ];
+    then
+        uofile="none"
+        TESTING h5unjam -i `basename $infile` -o `basename $ofile` --delete
+        $JAM_BIN/$UNJAM  -i $infile -o $ofile --delete
 
-	else
-		uofile="$2"
-		TESTING h5unjam -i `basename $infile` -u `basename $uofile` -o `basename $ofile`
-		$JAM_BIN/$UNJAM  -i $infile -u $uofile -o $ofile
-	fi
-	fi
+    else
+        uofile="$2"
+        TESTING h5unjam -i `basename $infile` -u `basename $uofile` -o `basename $ofile`
+        $JAM_BIN/$UNJAM  -i $infile -u $uofile -o $ofile
+    fi
+    fi
 
-	result1=0
-	result2=0
-	cleanup=""
-	if [ "$uofile" != "none" ];
-	then
-		# sets result1
-		CHECK_UB_1 $infile $uofile
-		CLEANUP $uofile
-	fi
+    result1=0
+    result2=0
+    cleanup=""
+    if [ "$uofile" != "none" ];
+    then
+        # sets result1
+        CHECK_UB_1 $infile $uofile
+        CLEANUP $uofile
+    fi
 
-	# sets result2
-	CHECK_NOUB $ofile
+    # sets result2
+    CHECK_NOUB $ofile
 
-	if [ "$result1" = "0" -a "$result2" = "0" ];
-	then
-		echo " PASSED"
-	else
-		echo " *FAILED*"
-	      nerrors="`expr $nerrors + 1`"
-	fi
+    if [ "$result1" = "0" -a "$result2" = "0" ];
+    then
+        echo " PASSED"
+    else
+        echo " *FAILED*"
+        nerrors="`expr $nerrors + 1`"
+    fi
 }
 
 
@@ -500,28 +500,30 @@ TOOLTEST_OUTPUT() {
     STDOUT_FILTER $actual
     cp $actual_err $actual_err_sav
     STDERR_FILTER $actual_err
-    # combine stderr to stdout for output compare 
+    # combine stderr to stdout for output compare
     cat $actual_err >> $actual
 
     if [ ! -f $expect ]; then
-	    # Create the expect file if it doesn't yet exist.
+        # Create the expect file if it doesn't yet exist.
         echo " CREATED"
         cp $actual $expect
-	    rm -f $actual $actual_sav $actual_err $actual_err_sav
+        echo "    Expected result (*.ls) missing"
+        nerrors="`expr $nerrors + 1`"
+        rm -f $actual $actual_sav $actual_err $actual_err_sav
     elif $CMP $expect $actual; then
         echo " PASSED"
-	    rm -f $actual $actual_sav $actual_err $actual_err_sav
+        rm -f $actual $actual_sav $actual_err $actual_err_sav
     else
         echo "*FAILED*"
-	    echo "    Expected result differs from actual result"
-	    nerrors="`expr $nerrors + 1`"
+        echo "    Expected result differs from actual result"
+        nerrors="`expr $nerrors + 1`"
         test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
     fi
 }
 
 ##############################################################################
 ##############################################################################
-###			  T H E   T E S T S                                ###
+###              T H E   T E S T S                                ###
 ##############################################################################
 ##############################################################################
 # prepare for test
@@ -550,19 +552,19 @@ CHECKFILE $TESTDIR/tall.h5 ta5.h5
 CLEANUP ta5.h5
 
 SETUP $TESTDIR/tall.h5 ta6.h5
-JAMTEST $TESTDIR/u10.txt ta6.h5 
+JAMTEST $TESTDIR/u10.txt ta6.h5
 CHECKFILE $TESTDIR/tall.h5 ta6.h5
 CLEANUP ta6.h5
 SETUP $TESTDIR/tall.h5 ta7.h5
-JAMTEST $TESTDIR/u511.txt ta7.h5 
+JAMTEST $TESTDIR/u511.txt ta7.h5
 CHECKFILE $TESTDIR/tall.h5 ta7.h5
 CLEANUP ta7.h5
 SETUP $TESTDIR/tall.h5 ta8.h5
-JAMTEST $TESTDIR/u512.txt ta8.h5 
+JAMTEST $TESTDIR/u512.txt ta8.h5
 CHECKFILE $TESTDIR/tall.h5 ta8.h5
 CLEANUP ta8.h5
 SETUP $TESTDIR/tall.h5 ta9.h5
-JAMTEST $TESTDIR/u513.txt ta9.h5 
+JAMTEST $TESTDIR/u513.txt ta9.h5
 CHECKFILE $TESTDIR/tall.h5 ta9.h5
 CLEANUP ta9.h5
 
@@ -592,29 +594,29 @@ JAMTEST $TESTDIR/u513.txt $TESTDIR/twithub513.h5 tax9.h5
 CHECKFILE $TESTDIR/tall.h5 tax9.h5
 CLEANUP tax9.h5
 
-JAMTEST $TESTDIR/u10.txt $TESTDIR/twithub.h5 --clobber taz2.h5 
+JAMTEST $TESTDIR/u10.txt $TESTDIR/twithub.h5 --clobber taz2.h5
 CHECKFILE $TESTDIR/tall.h5 taz2.h5
 CLEANUP taz2.h5
 JAMTEST $TESTDIR/u511.txt $TESTDIR/twithub.h5 --clobber taz3.h5
 CHECKFILE $TESTDIR/tall.h5 taz3.h5
 CLEANUP taz3.h5
-JAMTEST $TESTDIR/u512.txt $TESTDIR/twithub.h5 --clobber taz4.h5 
+JAMTEST $TESTDIR/u512.txt $TESTDIR/twithub.h5 --clobber taz4.h5
 CHECKFILE $TESTDIR/tall.h5 taz4.h5
 CLEANUP taz4.h5
-JAMTEST $TESTDIR/u513.txt $TESTDIR/twithub.h5 --clobber taz5.h5 
+JAMTEST $TESTDIR/u513.txt $TESTDIR/twithub.h5 --clobber taz5.h5
 CHECKFILE $TESTDIR/tall.h5 taz5.h5
 CLEANUP taz5.h5
 
-JAMTEST $TESTDIR/u10.txt $TESTDIR/twithub513.h5 --clobber taz6.h5 
+JAMTEST $TESTDIR/u10.txt $TESTDIR/twithub513.h5 --clobber taz6.h5
 CHECKFILE $TESTDIR/tall.h5 taz6.h5
 CLEANUP taz6.h5
 JAMTEST $TESTDIR/u511.txt $TESTDIR/twithub513.h5 --clobber taz7.h5
 CHECKFILE $TESTDIR/tall.h5 taz7.h5
 CLEANUP taz7.h5
-JAMTEST $TESTDIR/u512.txt $TESTDIR/twithub513.h5 --clobber taz8.h5 
+JAMTEST $TESTDIR/u512.txt $TESTDIR/twithub513.h5 --clobber taz8.h5
 CHECKFILE $TESTDIR/tall.h5 taz8.h5
 CLEANUP taz8.h5
-JAMTEST $TESTDIR/u513.txt $TESTDIR/twithub513.h5 --clobber taz9.h5 
+JAMTEST $TESTDIR/u513.txt $TESTDIR/twithub513.h5 --clobber taz9.h5
 CHECKFILE $TESTDIR/tall.h5 taz9.h5
 CLEANUP taz9.h5
 
@@ -653,7 +655,7 @@ CHECKFILE $TESTDIR/tall.h5 tay9.h5
 CLEANUP tay9.h5
 
 #---------------------------------
-# Testing h5unjam 
+# Testing h5unjam
 #---------------------------------
 # help page
 TOOLTEST_OUTPUT UNJAM h5unjam-help.txt 0 -h

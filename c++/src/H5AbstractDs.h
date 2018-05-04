@@ -31,7 +31,7 @@ class DataSpace;
      and DataSet.
 
     It provides a collection of services that are common to both Attribute
-    and DataSet.  AbstractDs inherits from H5Object.
+    and DataSet.
 */
 class H5_DLLCPP AbstractDs {
    public:
@@ -73,18 +73,6 @@ class H5_DLLCPP AbstractDs {
    protected:
         // Default constructor
         AbstractDs();
-
-        // *** Deprecation warning ***
-        // The following two constructors are no longer appropriate after the
-        // data member "id" had been moved to the sub-classes.
-        // The copy constructor is a noop and is removed in 1.8.15 and the
-        // other will be removed from 1.10 release, and then from 1.8 if its
-        // removal does not raise any problems in two 1.10 releases.
-
-        // Mar 2016 -BMR, AbstractDs(const hid_t h5_id);
-
-        // Copy constructor
-        // AbstractDs( const AbstractDs& original );
 
    private:
         // This member function is implemented by DataSet and Attribute - pure virtual.

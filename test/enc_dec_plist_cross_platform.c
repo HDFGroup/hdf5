@@ -178,7 +178,7 @@ test_plists(const char *filename_prefix)
 
             /* Read file 1 */
             testfile = H5_get_srcdir_filename(filename);
-            if((fd_1 = HDopen(testfile, O_RDONLY, 0666)) < 0)
+            if((fd_1 = HDopen(testfile, O_RDONLY)) < 0)
                 TEST_ERROR
             size_1 = (size_t)HDlseek(fd_1, (HDoff_t)0, SEEK_END);
             HDlseek(fd_1, (HDoff_t)0, SEEK_SET);
@@ -195,7 +195,7 @@ test_plists(const char *filename_prefix)
 
             /* Read file 1 */
             testfile = H5_get_srcdir_filename(filename);
-            if((fd_2 = HDopen(testfile, O_RDONLY, 0666)) < 0)
+            if((fd_2 = HDopen(testfile, O_RDONLY)) < 0)
                 TEST_ERROR
             size_2 = (size_t)HDlseek(fd_2, (HDoff_t)0, SEEK_END);
             HDlseek(fd_2, (HDoff_t)0, SEEK_SET);

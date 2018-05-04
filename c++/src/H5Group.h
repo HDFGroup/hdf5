@@ -20,11 +20,7 @@ namespace H5 {
 /*! \class Group
     \brief Class Group represents an HDF5 group.
 */
-// Class forwarding
-class ArrayType;
-class VarLenType;
-
-//  Inheritance: CommonFG/H5Object -> IdComponent
+//  Inheritance: CommonFG/H5Object -> H5Location -> IdComponent
 class H5_DLLCPP Group : public H5Object, public CommonFG {
    public:
         // Close this group.
@@ -44,6 +40,9 @@ class H5_DLLCPP Group : public H5Object, public CommonFG {
         // Removed in 1.10.1, because H5Location is baseclass
 //        Group(const Attribute& attr, const void* ref, H5R_type_t ref_type = H5R_OBJECT, const PropList& plist = PropList::DEFAULT);
 
+        // Returns the number of objects in this group.
+        hsize_t getNumObjs() const;
+
         // Opens an object within a group or a file, i.e., root group.
         hid_t getObjId(const char* name, const PropList& plist = PropList::DEFAULT) const;
         hid_t getObjId(const H5std_string& name, const PropList& plist = PropList::DEFAULT) const;
@@ -51,13 +50,10 @@ class H5_DLLCPP Group : public H5Object, public CommonFG {
         // Closes an object opened by getObjId().
         void closeObjId(hid_t obj_id) const;
 
-        // Returns the number of objects in this group.
-        hsize_t getNumObjs() const;
-
         // default constructor
         Group();
 
-        // Copy constructor: makes a copy of the original object
+        // Copy constructor: same as the original Group.
         Group(const Group& original);
 
         // Gets the group id.

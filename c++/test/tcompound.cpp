@@ -49,9 +49,6 @@ typedef struct complex_t {
  *
  * Programmer   Binh-Minh Ribler (using C version)
  *              January, 2007
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void test_compound_1()
@@ -86,9 +83,6 @@ static void test_compound_1()
  *
  * Programmer   Binh-Minh Ribler (use C version)
  *              January, 2007
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void test_compound_2()
@@ -211,9 +205,6 @@ static void test_compound_2()
  *
  * Programmer   Binh-Minh Ribler (use C version)
  *              January, 2007
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void test_compound_3()
@@ -333,9 +324,6 @@ static void test_compound_3()
  *
  * Programmer   Binh-Minh Ribler (use C version)
  *              January, 2007
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void test_compound_4()
@@ -466,9 +454,6 @@ static void test_compound_4()
  *
  * Programmer   Binh-Minh Ribler (use C version)
  *              January, 2007
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void test_compound_5()
@@ -569,9 +554,6 @@ static void test_compound_5()
  *
  * Programmer   Binh-Minh Ribler (use C version)
  *              January, 2007
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void test_compound_6()
@@ -651,6 +633,7 @@ static void test_compound_6()
     }
 }   // test_compound_6()
 
+
 /*-------------------------------------------------------------------------
  * Function:    test_compound_7
  *
@@ -661,9 +644,6 @@ static void test_compound_6()
  *
  * Programmer   Binh-Minh Ribler (use C version)
  *              January, 2007
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void test_compound_7()
@@ -717,6 +697,7 @@ static void test_compound_7()
         issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__, E.getCDetailMsg());
     }
 }   // test_compound_7()
+
 
 /*-------------------------------------------------------------------------
  * Function:    test_compound_set_size
@@ -727,12 +708,10 @@ static void test_compound_7()
  *
  * Programmer   Binh-Minh Ribler (use partial C version test_ooo_order)
  *              March, 2014
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 const H5std_string COMPFILE("tcompound_types.h5");
+
 static void test_compound_set_size()
 {
     typedef struct {
@@ -807,6 +786,7 @@ static void test_compound_set_size()
         issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__, E.getCDetailMsg());
     }
 }   // test_compound_set_size()
+
 
 /*-------------------------------------------------------------------------
  * Function:    test_compound
@@ -817,9 +797,6 @@ static void test_compound_set_size()
  *
  * Programmer   Binh-Minh Ribler
  *              January 2007
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 extern "C"
@@ -844,10 +821,7 @@ void test_compound()
  *
  * Purpose      Cleanup temporary test files - nothing at this time.
  *
- * Return       none
- *
- * Modifications:
- *
+ * Return       None
  *-------------------------------------------------------------------------
  */
 extern "C"

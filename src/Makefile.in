@@ -208,24 +208,26 @@ am__libhdf5_la_SOURCES_DIST = H5.c H5checksum.c H5dbg.c H5system.c \
 	H5O.c H5Oainfo.c H5Oalloc.c H5Oattr.c H5Oattribute.c \
 	H5Obogus.c H5Obtreek.c H5Ocache.c H5Ocache_image.c H5Ochunk.c \
 	H5Ocont.c H5Ocopy.c H5Odbg.c H5Odrvinfo.c H5Odtype.c H5Oefl.c \
-	H5Ofill.c H5Oflush.c H5Ofsinfo.c H5Oginfo.c H5Olayout.c \
-	H5Olinfo.c H5Olink.c H5Omessage.c H5Omtime.c H5Oname.c \
-	H5Onull.c H5Opline.c H5Orefcount.c H5Osdspace.c H5Oshared.c \
-	H5Oshmesg.c H5Ostab.c H5Otest.c H5Ounknown.c H5P.c H5Pacpl.c \
-	H5Pdapl.c H5Pdcpl.c H5Pdeprec.c H5Pdxpl.c H5Pencdec.c \
-	H5Pfapl.c H5Pfcpl.c H5Pfmpl.c H5Pgcpl.c H5Pint.c H5Plapl.c \
-	H5Plcpl.c H5Pocpl.c H5Pocpypl.c H5Pstrcpl.c H5Ptest.c H5PB.c \
-	H5PL.c H5R.c H5Rdeprec.c H5UC.c H5RS.c H5S.c H5Sall.c H5Sdbg.c \
-	H5Shyper.c H5Snone.c H5Spoint.c H5Sselect.c H5Stest.c H5SL.c \
-	H5SM.c H5SMbtree2.c H5SMcache.c H5SMmessage.c H5SMtest.c \
-	H5ST.c H5T.c H5Tarray.c H5Tbit.c H5Tcommit.c H5Tcompound.c \
-	H5Tconv.c H5Tcset.c H5Tdbg.c H5Tdeprec.c H5Tenum.c H5Tfields.c \
-	H5Tfixed.c H5Tfloat.c H5Tinit.c H5Tnative.c H5Toffset.c \
-	H5Toh.c H5Topaque.c H5Torder.c H5Tpad.c H5Tprecis.c \
-	H5Tstrpad.c H5Tvisit.c H5Tvlen.c H5TS.c H5VM.c H5WB.c H5Z.c \
-	H5Zdeflate.c H5Zfletcher32.c H5Znbit.c H5Zshuffle.c \
-	H5Zscaleoffset.c H5Zszip.c H5Ztrans.c H5ACmpio.c H5Cmpio.c \
-	H5Dmpio.c H5Fmpi.c H5FDmpi.c H5FDmpio.c H5Smpio.c H5FDdirect.c
+	H5Ofill.c H5Oflush.c H5Ofsinfo.c H5Oginfo.c H5Oint.c \
+	H5Olayout.c H5Olinfo.c H5Olink.c H5Omessage.c H5Omtime.c \
+	H5Oname.c H5Onull.c H5Opline.c H5Orefcount.c H5Osdspace.c \
+	H5Oshared.c H5Oshmesg.c H5Ostab.c H5Otest.c H5Ounknown.c H5P.c \
+	H5Pacpl.c H5Pdapl.c H5Pdcpl.c H5Pdeprec.c H5Pdxpl.c \
+	H5Pencdec.c H5Pfapl.c H5Pfcpl.c H5Pfmpl.c H5Pgcpl.c H5Pint.c \
+	H5Plapl.c H5Plcpl.c H5Pocpl.c H5Pocpypl.c H5Pstrcpl.c \
+	H5Ptest.c H5PB.c H5PL.c H5PLint.c H5PLpath.c \
+	H5PLplugin_cache.c H5R.c H5Rint.c H5Rdeprec.c H5UC.c H5RS.c \
+	H5S.c H5Sall.c H5Sdbg.c H5Shyper.c H5Snone.c H5Spoint.c \
+	H5Sselect.c H5Stest.c H5SL.c H5SM.c H5SMbtree2.c H5SMcache.c \
+	H5SMmessage.c H5SMtest.c H5ST.c H5T.c H5Tarray.c H5Tbit.c \
+	H5Tcommit.c H5Tcompound.c H5Tconv.c H5Tcset.c H5Tdbg.c \
+	H5Tdeprec.c H5Tenum.c H5Tfields.c H5Tfixed.c H5Tfloat.c \
+	H5Tinit.c H5Tnative.c H5Toffset.c H5Toh.c H5Topaque.c \
+	H5Torder.c H5Tpad.c H5Tprecis.c H5Tstrpad.c H5Tvisit.c \
+	H5Tvlen.c H5TS.c H5VM.c H5WB.c H5Z.c H5Zdeflate.c \
+	H5Zfletcher32.c H5Znbit.c H5Zshuffle.c H5Zscaleoffset.c \
+	H5Zszip.c H5Ztrans.c H5ACmpio.c H5Cmpio.c H5Dmpio.c H5Fmpi.c \
+	H5FDmpi.c H5FDmpio.c H5Smpio.c H5FDdirect.c
 @BUILD_PARALLEL_CONDITIONAL_TRUE@am__objects_1 = H5ACmpio.lo \
 @BUILD_PARALLEL_CONDITIONAL_TRUE@	H5Cmpio.lo H5Dmpio.lo \
 @BUILD_PARALLEL_CONDITIONAL_TRUE@	H5Fmpi.lo H5FDmpi.lo \
@@ -270,25 +272,26 @@ am_libhdf5_la_OBJECTS = H5.lo H5checksum.lo H5dbg.lo H5system.lo \
 	H5Oattribute.lo H5Obogus.lo H5Obtreek.lo H5Ocache.lo \
 	H5Ocache_image.lo H5Ochunk.lo H5Ocont.lo H5Ocopy.lo H5Odbg.lo \
 	H5Odrvinfo.lo H5Odtype.lo H5Oefl.lo H5Ofill.lo H5Oflush.lo \
-	H5Ofsinfo.lo H5Oginfo.lo H5Olayout.lo H5Olinfo.lo H5Olink.lo \
-	H5Omessage.lo H5Omtime.lo H5Oname.lo H5Onull.lo H5Opline.lo \
-	H5Orefcount.lo H5Osdspace.lo H5Oshared.lo H5Oshmesg.lo \
-	H5Ostab.lo H5Otest.lo H5Ounknown.lo H5P.lo H5Pacpl.lo \
-	H5Pdapl.lo H5Pdcpl.lo H5Pdeprec.lo H5Pdxpl.lo H5Pencdec.lo \
-	H5Pfapl.lo H5Pfcpl.lo H5Pfmpl.lo H5Pgcpl.lo H5Pint.lo \
-	H5Plapl.lo H5Plcpl.lo H5Pocpl.lo H5Pocpypl.lo H5Pstrcpl.lo \
-	H5Ptest.lo H5PB.lo H5PL.lo H5R.lo H5Rdeprec.lo H5UC.lo H5RS.lo \
-	H5S.lo H5Sall.lo H5Sdbg.lo H5Shyper.lo H5Snone.lo H5Spoint.lo \
-	H5Sselect.lo H5Stest.lo H5SL.lo H5SM.lo H5SMbtree2.lo \
-	H5SMcache.lo H5SMmessage.lo H5SMtest.lo H5ST.lo H5T.lo \
-	H5Tarray.lo H5Tbit.lo H5Tcommit.lo H5Tcompound.lo H5Tconv.lo \
-	H5Tcset.lo H5Tdbg.lo H5Tdeprec.lo H5Tenum.lo H5Tfields.lo \
-	H5Tfixed.lo H5Tfloat.lo H5Tinit.lo H5Tnative.lo H5Toffset.lo \
-	H5Toh.lo H5Topaque.lo H5Torder.lo H5Tpad.lo H5Tprecis.lo \
-	H5Tstrpad.lo H5Tvisit.lo H5Tvlen.lo H5TS.lo H5VM.lo H5WB.lo \
-	H5Z.lo H5Zdeflate.lo H5Zfletcher32.lo H5Znbit.lo H5Zshuffle.lo \
-	H5Zscaleoffset.lo H5Zszip.lo H5Ztrans.lo $(am__objects_1) \
-	$(am__objects_2)
+	H5Ofsinfo.lo H5Oginfo.lo H5Oint.lo H5Olayout.lo H5Olinfo.lo \
+	H5Olink.lo H5Omessage.lo H5Omtime.lo H5Oname.lo H5Onull.lo \
+	H5Opline.lo H5Orefcount.lo H5Osdspace.lo H5Oshared.lo \
+	H5Oshmesg.lo H5Ostab.lo H5Otest.lo H5Ounknown.lo H5P.lo \
+	H5Pacpl.lo H5Pdapl.lo H5Pdcpl.lo H5Pdeprec.lo H5Pdxpl.lo \
+	H5Pencdec.lo H5Pfapl.lo H5Pfcpl.lo H5Pfmpl.lo H5Pgcpl.lo \
+	H5Pint.lo H5Plapl.lo H5Plcpl.lo H5Pocpl.lo H5Pocpypl.lo \
+	H5Pstrcpl.lo H5Ptest.lo H5PB.lo H5PL.lo H5PLint.lo H5PLpath.lo \
+	H5PLplugin_cache.lo H5R.lo H5Rint.lo H5Rdeprec.lo H5UC.lo \
+	H5RS.lo H5S.lo H5Sall.lo H5Sdbg.lo H5Shyper.lo H5Snone.lo \
+	H5Spoint.lo H5Sselect.lo H5Stest.lo H5SL.lo H5SM.lo \
+	H5SMbtree2.lo H5SMcache.lo H5SMmessage.lo H5SMtest.lo H5ST.lo \
+	H5T.lo H5Tarray.lo H5Tbit.lo H5Tcommit.lo H5Tcompound.lo \
+	H5Tconv.lo H5Tcset.lo H5Tdbg.lo H5Tdeprec.lo H5Tenum.lo \
+	H5Tfields.lo H5Tfixed.lo H5Tfloat.lo H5Tinit.lo H5Tnative.lo \
+	H5Toffset.lo H5Toh.lo H5Topaque.lo H5Torder.lo H5Tpad.lo \
+	H5Tprecis.lo H5Tstrpad.lo H5Tvisit.lo H5Tvlen.lo H5TS.lo \
+	H5VM.lo H5WB.lo H5Z.lo H5Zdeflate.lo H5Zfletcher32.lo \
+	H5Znbit.lo H5Zshuffle.lo H5Zscaleoffset.lo H5Zszip.lo \
+	H5Ztrans.lo $(am__objects_1) $(am__objects_2)
 libhdf5_la_OBJECTS = $(am_libhdf5_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -566,6 +569,7 @@ AM_JAVAFLAGS = @AM_JAVAFLAGS@
 AM_JNIFLAGS = @AM_JNIFLAGS@
 AM_LDFLAGS = @AM_LDFLAGS@ @H5_LDFLAGS@
 AR = @AR@
+AR_FLAGS = @AR_FLAGS@
 ASSERTS = @ASSERTS@
 AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
@@ -779,6 +783,7 @@ dvidir = @dvidir@
 enable_shared = @enable_shared@
 enable_static = @enable_static@
 exec_prefix = @exec_prefix@
+fortran_linux_linker_option = @fortran_linux_linker_option@
 host = @host@
 host_alias = @host_alias@
 host_cpu = @host_cpu@
@@ -861,30 +866,30 @@ TRACE = perl $(top_srcdir)/bin/trace
 # .chklog files are output from those tests.
 # *.clog and *.clog2 are from the MPE option.
 CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.clog2
-LT_VERS_INTERFACE = 101
+LT_VERS_INTERFACE = 102
 LT_VERS_REVISION = 0
-LT_VERS_AGE = 0
-LT_CXX_VERS_INTERFACE = 101
+LT_VERS_AGE = 1
+LT_CXX_VERS_INTERFACE = 102
 LT_CXX_VERS_REVISION = 0
 LT_CXX_VERS_AGE = 0
 LT_F_VERS_INTERFACE = 101
-LT_F_VERS_REVISION = 0
+LT_F_VERS_REVISION = 1
 LT_F_VERS_AGE = 1
-LT_HL_VERS_INTERFACE = 100
-LT_HL_VERS_REVISION = 1
-LT_HL_VERS_AGE = 0
+LT_HL_VERS_INTERFACE = 101
+LT_HL_VERS_REVISION = 0
+LT_HL_VERS_AGE = 1
 LT_HL_CXX_VERS_INTERFACE = 101
-LT_HL_CXX_VERS_REVISION = 0
+LT_HL_CXX_VERS_REVISION = 1
 LT_HL_CXX_VERS_AGE = 1
 LT_HL_F_VERS_INTERFACE = 100
-LT_HL_F_VERS_REVISION = 1
+LT_HL_F_VERS_REVISION = 2
 LT_HL_F_VERS_AGE = 0
-LT_JAVA_VERS_INTERFACE = 101
+LT_JAVA_VERS_INTERFACE = 102
 LT_JAVA_VERS_REVISION = 0
-LT_JAVA_VERS_AGE = 1
-LT_TOOLS_VERS_INTERFACE = 100
-LT_TOOLS_VERS_REVISION = 1
-LT_TOOLS_VERS_AGE = 0
+LT_JAVA_VERS_AGE = 2
+LT_TOOLS_VERS_INTERFACE = 101
+LT_TOOLS_VERS_REVISION = 0
+LT_TOOLS_VERS_AGE = 1
 
 # Our main target, the HDF5 library
 lib_LTLIBRARIES = libhdf5.la
@@ -933,24 +938,25 @@ libhdf5_la_SOURCES = H5.c H5checksum.c H5dbg.c H5system.c H5timer.c \
 	H5O.c H5Oainfo.c H5Oalloc.c H5Oattr.c H5Oattribute.c \
 	H5Obogus.c H5Obtreek.c H5Ocache.c H5Ocache_image.c H5Ochunk.c \
 	H5Ocont.c H5Ocopy.c H5Odbg.c H5Odrvinfo.c H5Odtype.c H5Oefl.c \
-	H5Ofill.c H5Oflush.c H5Ofsinfo.c H5Oginfo.c H5Olayout.c \
-	H5Olinfo.c H5Olink.c H5Omessage.c H5Omtime.c H5Oname.c \
-	H5Onull.c H5Opline.c H5Orefcount.c H5Osdspace.c H5Oshared.c \
-	H5Oshmesg.c H5Ostab.c H5Otest.c H5Ounknown.c H5P.c H5Pacpl.c \
-	H5Pdapl.c H5Pdcpl.c H5Pdeprec.c H5Pdxpl.c H5Pencdec.c \
-	H5Pfapl.c H5Pfcpl.c H5Pfmpl.c H5Pgcpl.c H5Pint.c H5Plapl.c \
-	H5Plcpl.c H5Pocpl.c H5Pocpypl.c H5Pstrcpl.c H5Ptest.c H5PB.c \
-	H5PL.c H5R.c H5Rdeprec.c H5UC.c H5RS.c H5S.c H5Sall.c H5Sdbg.c \
-	H5Shyper.c H5Snone.c H5Spoint.c H5Sselect.c H5Stest.c H5SL.c \
-	H5SM.c H5SMbtree2.c H5SMcache.c H5SMmessage.c H5SMtest.c \
-	H5ST.c H5T.c H5Tarray.c H5Tbit.c H5Tcommit.c H5Tcompound.c \
-	H5Tconv.c H5Tcset.c H5Tdbg.c H5Tdeprec.c H5Tenum.c H5Tfields.c \
-	H5Tfixed.c H5Tfloat.c H5Tinit.c H5Tnative.c H5Toffset.c \
-	H5Toh.c H5Topaque.c H5Torder.c H5Tpad.c H5Tprecis.c \
-	H5Tstrpad.c H5Tvisit.c H5Tvlen.c H5TS.c H5VM.c H5WB.c H5Z.c \
-	H5Zdeflate.c H5Zfletcher32.c H5Znbit.c H5Zshuffle.c \
-	H5Zscaleoffset.c H5Zszip.c H5Ztrans.c $(am__append_1) \
-	$(am__append_2)
+	H5Ofill.c H5Oflush.c H5Ofsinfo.c H5Oginfo.c H5Oint.c \
+	H5Olayout.c H5Olinfo.c H5Olink.c H5Omessage.c H5Omtime.c \
+	H5Oname.c H5Onull.c H5Opline.c H5Orefcount.c H5Osdspace.c \
+	H5Oshared.c H5Oshmesg.c H5Ostab.c H5Otest.c H5Ounknown.c H5P.c \
+	H5Pacpl.c H5Pdapl.c H5Pdcpl.c H5Pdeprec.c H5Pdxpl.c \
+	H5Pencdec.c H5Pfapl.c H5Pfcpl.c H5Pfmpl.c H5Pgcpl.c H5Pint.c \
+	H5Plapl.c H5Plcpl.c H5Pocpl.c H5Pocpypl.c H5Pstrcpl.c \
+	H5Ptest.c H5PB.c H5PL.c H5PLint.c H5PLpath.c \
+	H5PLplugin_cache.c H5R.c H5Rint.c H5Rdeprec.c H5UC.c H5RS.c \
+	H5S.c H5Sall.c H5Sdbg.c H5Shyper.c H5Snone.c H5Spoint.c \
+	H5Sselect.c H5Stest.c H5SL.c H5SM.c H5SMbtree2.c H5SMcache.c \
+	H5SMmessage.c H5SMtest.c H5ST.c H5T.c H5Tarray.c H5Tbit.c \
+	H5Tcommit.c H5Tcompound.c H5Tconv.c H5Tcset.c H5Tdbg.c \
+	H5Tdeprec.c H5Tenum.c H5Tfields.c H5Tfixed.c H5Tfloat.c \
+	H5Tinit.c H5Tnative.c H5Toffset.c H5Toh.c H5Topaque.c \
+	H5Torder.c H5Tpad.c H5Tprecis.c H5Tstrpad.c H5Tvisit.c \
+	H5Tvlen.c H5TS.c H5VM.c H5WB.c H5Z.c H5Zdeflate.c \
+	H5Zfletcher32.c H5Znbit.c H5Zshuffle.c H5Zscaleoffset.c \
+	H5Zszip.c H5Ztrans.c $(am__append_1) $(am__append_2)
 
 # Public headers
 include_HEADERS = hdf5.h H5api_adpt.h H5overflow.h H5pubconf.h H5public.h H5version.h \
@@ -971,7 +977,7 @@ include_HEADERS = hdf5.h H5api_adpt.h H5overflow.h H5pubconf.h H5public.h H5vers
 settingsdir = $(libdir)
 settings_DATA = libhdf5.settings
 
-# Automake needs to be taught how to build lib, dyn, progs and tests targets.
+# Automake needs to be taught how to build lib, progs and tests targets.
 # These will be filled in automatically for the most part (e.g.,
 # lib_LIBRARIES are built for lib target), but EXTRA_LIB, EXTRA_PROG, and
 # EXTRA_TEST variables are supplied to allow the user to force targets to
@@ -979,15 +985,14 @@ settings_DATA = libhdf5.settings
 LIB = $(lib_LIBRARIES) $(lib_LTLIBRARIES) $(noinst_LIBRARIES)                 \
       $(noinst_LTLIBRARIES) $(check_LIBRARIES) $(check_LTLIBRARIES) $(EXTRA_LIB)
 
-DYN = $(dyn_LTLIBRARIES)
 PROGS = $(bin_PROGRAMS) $(bin_SCRIPTS) $(noinst_PROGRAMS) $(noinst_SCRIPTS)   \
         $(EXTRA_PROG)
 
 chk_TESTS = $(check_PROGRAMS) $(check_SCRIPTS) $(EXTRA_TEST) 
-dyndir = $(libdir)
 TEST_EXTENSIONS = .sh
 SH_LOG_COMPILER = $(SHELL)
 AM_SH_LOG_FLAGS = 
+REALTIMEOUTPUT = $(realtimeOutput)
 TEST_PROG_CHKEXE = $(TEST_PROG:=.chkexe_)
 TEST_PROG_PARA_CHKEXE = $(TEST_PROG_PARA:=.chkexe_)
 TEST_SCRIPT_CHKSH = $(TEST_SCRIPT:=.chkexe_)
@@ -1302,6 +1307,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Oflush.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Ofsinfo.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Oginfo.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Oint.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Olayout.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Olinfo.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Olink.Plo@am__quote@
@@ -1320,6 +1326,9 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5P.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5PB.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5PL.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5PLint.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5PLpath.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5PLplugin_cache.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Pacpl.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Pdapl.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Pdcpl.Plo@am__quote@
@@ -1340,6 +1349,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5R.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5RS.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Rdeprec.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Rint.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5S.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5SL.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5SM.Plo@am__quote@
@@ -1910,7 +1920,6 @@ trace: $(libhdf5_la_SOURCES)
 
 # lib/progs/tests targets recurse into subdirectories. build-* targets
 # build files in this directory.
-build-dyn: $(DYN)
 build-lib: $(LIB)
 build-progs: $(LIB) $(PROGS)
 build-tests: $(LIB) $(PROGS) $(chk_TESTS)
@@ -1918,7 +1927,7 @@ build-tests: $(LIB) $(PROGS) $(chk_TESTS)
 # General rule for recursive building targets.
 # BUILT_SOURCES contain targets that need to be built before anything else
 # in the directory (e.g., for Fortran type detection)
-lib dyn progs tests check-s check-p :: $(BUILT_SOURCES)
+lib progs tests check-s check-p :: $(BUILT_SOURCES)
 	@$(MAKE) $(AM_MAKEFLAGS) build-$@ || exit 1;
 	@for d in X $(SUBDIRS); do                                             \
 	    if test $$d != X && test $$d != .; then                           \
@@ -1996,28 +2005,62 @@ $(TEST_PROG_CHKEXE) $(TEST_PROG_PARA_CHKEXE) dummy.chkexe_:
 	   if $(top_srcdir)/bin/newer $(@:.chkexe_=.chkexe) $${tname}; then \
 	      echo "No need to test $${tname} again."; \
 	   else \
-	      echo "============================" > $${log}; \
-	      if test "X$(FORTRAN_API)" = "Xyes"; then \
-	         echo "Fortran API: Testing $(HDF5_DRIVER) $${tname} $(TEST_FLAGS)"; \
-	         echo "Fortran API: $(HDF5_DRIVER) $${tname} $(TEST_FLAGS) Test Log" >> $${log}; \
-	      elif test "X$(CXX_API)" = "Xyes"; then \
-	         echo "C++ API: Testing $(HDF5_DRIVER) $${tname} $(TEST_FLAGS)"; \
-	         echo "C++ API: $(HDF5_DRIVER) $${tname} $(TEST_FLAGS) Test Log" >> $${log};\
-	      else \
-	         echo "Testing $(HDF5_DRIVER) $${tname} $(TEST_FLAGS)"; \
-	         echo "$(HDF5_DRIVER) $${tname} $(TEST_FLAGS) Test Log" >> $${log}; \
-	      fi; \
-	      echo "============================" >> $${log}; \
-	      srcdir="$(srcdir)" \
-	         $(TIME) $(RUNEXEC) ./$${tname} $(TEST_FLAGS) >> $${log} 2>&1 \
-	         && touch $(@:.chkexe_=.chkexe) || \
-	         (test $$HDF5_Make_Ignore && echo "*** Error ignored") || \
-	         (cat $${log} && false) || exit 1; \
+              if test -n "$(REALTIMEOUTPUT)"; then \
+                 echo "============================" | tee $${log}; \
+              else \
+                 echo "============================" > $${log}; \
+              fi; \
+              if test "X$(FORTRAN_API)" = "Xyes"; then \
+                 echo "Fortran API: Testing $(HDF5_DRIVER) $${tname} $(TEST_FLAGS)"; \
+                 if test -n "$(REALTIMEOUTPUT)"; then \
+                    echo "Fortran API: $(HDF5_DRIVER) $${tname} $(TEST_FLAGS) Test Log" | tee -a $${log}; \
+                 else \
+                    echo "Fortran API: $(HDF5_DRIVER) $${tname} $(TEST_FLAGS) Test Log" >> $${log}; \
+                 fi; \
+              elif test "X$(CXX_API)" = "Xyes"; then \
+                 echo "C++ API: Testing $(HDF5_DRIVER) $${tname} $(TEST_FLAGS)"; \
+                 if test -n "$(REALTIMEOUTPUT)"; then \
+                    echo "C++ API: $(HDF5_DRIVER) $${tname} $(TEST_FLAGS) Test Log" | tee -a $${log};\
+                 else \
+                    echo "C++ API: $(HDF5_DRIVER) $${tname} $(TEST_FLAGS) Test Log" >> $${log};\
+                 fi; \
+              else \
+                 echo "Testing $(HDF5_DRIVER) $${tname} $(TEST_FLAGS)"; \
+                 if test -n "$(REALTIMEOUTPUT)"; then \
+                    echo "$(HDF5_DRIVER) $${tname} $(TEST_FLAGS) Test Log" | tee -a $${log}; \
+                 else \
+                    echo "$(HDF5_DRIVER) $${tname} $(TEST_FLAGS) Test Log" >> $${log}; \
+                 fi; \
+              fi; \
+              if test -n "$(REALTIMEOUTPUT)"; then \
+                 echo "============================" | tee -a $${log}; \
+              else \
+                 echo "============================" >> $${log}; \
+              fi; \
+              if test -n "$(REALTIMEOUTPUT)"; then \
+                 srcdir="$(srcdir)" \
+                 $(TIME) $(RUNEXEC) ./$${tname} $(TEST_FLAGS) | tee -a $${log} 2>&1 \
+                 && touch $(@:.chkexe_=.chkexe) || \
+                 (test $$HDF5_Make_Ignore && echo "*** Error ignored") || \
+                 (cat $${log} && false) || exit 1; \
+              else \
+                 srcdir="$(srcdir)" \
+                 $(TIME) $(RUNEXEC) ./$${tname} $(TEST_FLAGS) >> $${log} 2>&1 \
+                 && touch $(@:.chkexe_=.chkexe) || \
+                 (test $$HDF5_Make_Ignore && echo "*** Error ignored") || \
+                 (cat $${log} && false) || exit 1; \
+              fi; \
 	      echo "" >> $${log}; \
-	      echo "Finished testing $${tname} $(TEST_FLAGS)" >> $${log}; \
-	      echo "============================" >> $${log}; \
-	      echo "Finished testing $${tname} $(TEST_FLAGS)"; \
-	      cat $${log}; \
+              if test -n "$(REALTIMEOUTPUT)"; then \
+                 echo "Finished testing $${tname} $(TEST_FLAGS)" | tee -a $${log}; \
+                 echo "============================" | tee -a $${log}; \
+              else \
+                 echo "Finished testing $${tname} $(TEST_FLAGS)" >> $${log}; \
+                 echo "============================" >> $${log}; \
+              fi; \
+              if test -z "$(REALTIMEOUTPUT)"; then \
+                 cat $${log}; \
+              fi; \
 	   fi; \
 	fi
 

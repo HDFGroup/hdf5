@@ -30,6 +30,8 @@ DIRNAME='dirname'
 LS='ls'
 AWK='awk'
 
+WORDS_BIGENDIAN="@WORDS_BIGENDIAN@"
+
 nerrors=0
 verbose=yes
 
@@ -78,6 +80,7 @@ $SRC_H5DUMP_TESTFILES/tdset.h5
 $SRC_H5DUMP_TESTFILES/tdset2.h5
 $SRC_H5DUMP_TESTFILES/tempty.h5
 $SRC_H5DUMP_TESTFILES/tenum.h5
+$SRC_H5DUMP_TESTFILES/test35.nc
 $SRC_H5DUMP_TESTFILES/textlink.h5
 $SRC_H5DUMP_TESTFILES/tfpformat.h5
 $SRC_H5DUMP_TESTFILES/tgroup.h5
@@ -94,6 +97,7 @@ $SRC_H5DUMP_TESTFILES/tname-sp.h5
 $SRC_H5DUMP_TESTFILES/tnamed_dtype_attr.h5
 $SRC_H5DUMP_TESTFILES/tnestedcomp.h5
 $SRC_H5DUMP_TESTFILES/tnodata.h5
+$SRC_H5DUMP_TESTFILES/tnullspace.h5
 $SRC_H5DUMP_TESTFILES/tobjref.h5
 $SRC_H5DUMP_TESTFILES/topaque.h5
 $SRC_H5DUMP_TESTFILES/torderattr.h5
@@ -124,7 +128,8 @@ $SRC_H5DUMP_TESTFILES/tarray3.h5.xml
 $SRC_H5DUMP_TESTFILES/tarray6.h5.xml
 $SRC_H5DUMP_TESTFILES/tarray7.h5.xml
 $SRC_H5DUMP_TESTFILES/tattr.h5.xml
-$SRC_H5DUMP_TESTFILES/tbitfields.h5.xml
+$SRC_H5DUMP_TESTFILES/tbitfields_be.h5.xml
+$SRC_H5DUMP_TESTFILES/tbitfields_le.h5.xml
 $SRC_H5DUMP_TESTFILES/tcompound_complex.h5.xml
 $SRC_H5DUMP_TESTFILES/tcompound.h5.xml
 $SRC_H5DUMP_TESTFILES/tcompound2.h5.xml
@@ -141,6 +146,7 @@ $SRC_H5DUMP_TESTFILES/tempty-nons-uri.h5.xml
 $SRC_H5DUMP_TESTFILES/tempty-ns.h5.xml
 $SRC_H5DUMP_TESTFILES/tempty-ns-2.h5.xml
 $SRC_H5DUMP_TESTFILES/tenum.h5.xml
+$SRC_H5DUMP_TESTFILES/test35.nc.xml
 $SRC_H5DUMP_TESTFILES/textlink.h5.xml
 $SRC_H5DUMP_TESTFILES/tfpformat.h5.xml
 $SRC_H5DUMP_TESTFILES/tgroup.h5.xml
@@ -157,6 +163,7 @@ $SRC_H5DUMP_TESTFILES/tname-quot.h5.xml
 $SRC_H5DUMP_TESTFILES/tname-sp.h5.xml
 $SRC_H5DUMP_TESTFILES/tnestedcomp.h5.xml
 $SRC_H5DUMP_TESTFILES/tnodata.h5.xml
+$SRC_H5DUMP_TESTFILES/tnullspace.h5.xml
 $SRC_H5DUMP_TESTFILES/tobjref.h5.xml
 $SRC_H5DUMP_TESTFILES/topaque.h5.xml
 $SRC_H5DUMP_TESTFILES/torderattr1.h5.xml
@@ -202,10 +209,10 @@ COPY_TESTFILES_TO_TESTDIR()
             INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
             INODE_DDIR=`$LS -i -d $TESTDIR | $AWK -F' ' '{print $1}'`
             if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
-    	        $CP -f $tstfile $TESTDIR
+                $CP -f $tstfile $TESTDIR
                 if [ $? -ne 0 ]; then
                     echo "Error: FAILED to copy $tstfile ."
-                
+
                     # Comment out this to CREATE expected file
                     exit $EXIT_FAILURE
                 fi
@@ -263,7 +270,9 @@ TOOLTEST() {
    if [ ! -f $expect ]; then
     # Create the expect file if it doesn't yet exist.
     echo " CREATED"
-     cp $actual $expect      
+     cp $actual $expect
+     echo "    Expected result (*.xml) missing"
+     nerrors="`expr $nerrors + 1`"
    elif  $CMP $expect $actual; then
       echo " PASSED"
    else
@@ -279,7 +288,7 @@ TOOLTEST() {
    fi
 }
 
-# Print a "SKIP" message    
+# Print a "SKIP" message
 SKIP() {
          TESTING $DUMPER $@
           echo  " -SKIP-"
@@ -297,7 +306,11 @@ COPY_TESTFILES_TO_TESTDIR
 # test XML
 TOOLTEST tall.h5.xml --xml tall.h5
 TOOLTEST tattr.h5.xml --xml tattr.h5
-TOOLTEST tbitfields.h5.xml --xml tbitfields.h5
+if test $WORDS_BIGENDIAN != "yes"; then
+TOOLTEST tbitfields_le.h5.xml --xml tbitfields.h5
+else
+TOOLTEST tbitfields_be.h5.xml --xml tbitfields.h5
+fi
 TOOLTEST tcompound.h5.xml --xml tcompound.h5
 TOOLTEST tcompound2.h5.xml --xml tcompound2.h5
 TOOLTEST tdatareg.h5.xml --xml tdatareg.h5
@@ -344,9 +357,7 @@ TOOLTEST tvlstr.h5.xml --xml tvlstr.h5
 TOOLTEST tsaf.h5.xml --xml tsaf.h5
 TOOLTEST tempty.h5.xml --xml tempty.h5
 TOOLTEST tnamed_dtype_attr.h5.xml --xml tnamed_dtype_attr.h5
-##Test dataset and attribute of null space.  Commented out:
-## wait until the XML schema is updated for null space. 
-##TOOLTEST tnullspace.h5.xml --xml tnulspace.h5
+TOOLTEST tnullspace.h5.xml --xml tnullspace.h5
 
 # other options for xml
 
@@ -356,7 +367,7 @@ TOOLTEST tempty-nons.h5.xml --xml -X ":" tempty.h5
 TOOLTEST tempty-nons-2.h5.xml --xml --xml-ns=":" tempty.h5
 
 ## Some of these combinations are syntactically correct but
-##  the URLs are dummies 
+##  the URLs are dummies
 TOOLTEST tempty-ns.h5.xml --xml -X "thing:" tempty.h5
 TOOLTEST tempty-ns-2.h5.xml --xml --xml-ns="thing:" tempty.h5
 TOOLTEST tempty-nons-uri.h5.xml --xml --xml-ns=":" --xml-dtd="http://somewhere.net" tempty.h5
@@ -373,6 +384,9 @@ TOOLTEST torderattr4.h5.xml --xml -H --sort_by=creation_order --sort_order=desce
 
 # tests for floating point user defined printf format
 TOOLTEST tfpformat.h5.xml -u -m %.7f tfpformat.h5
+
+# test for HDFFV-10256 issue
+TOOLTEST test35.nc.xml --xml test35.nc
 
 # Clean up temporary files/directories
 CLEAN_TESTFILES_AND_TESTDIR

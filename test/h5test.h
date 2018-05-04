@@ -20,8 +20,13 @@
 #ifndef _H5TEST_H
 #define _H5TEST_H
 
+/*
+ * Include required headers.  This file tests internal library functions,
+ * so we include the private headers here.
+ */
 #include "hdf5.h"
 #include "H5private.h"
+#include "H5Eprivate.h"
 
 /*
  * Predefined test verbosity levels.
@@ -136,6 +141,7 @@ H5TEST_DLL h5_stat_size_t h5_get_file_size(const char *filename, hid_t fapl);
 H5TEST_DLL int print_func(const char *format, ...);
 H5TEST_DLL int h5_make_local_copy(const char *origfilename, const char *local_copy_name);
 H5TEST_DLL herr_t h5_verify_cached_stabs(const char *base_name[], hid_t fapl);
+H5TEST_DLL H5FD_class_t *h5_get_dummy_vfd_class(void);
 
 /* Functions that will replace VFD-dependent functions that violate
  * the single responsibility principle. Unlike their predecessors,

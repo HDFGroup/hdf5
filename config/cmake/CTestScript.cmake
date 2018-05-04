@@ -9,7 +9,7 @@
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
-cmake_minimum_required (VERSION 3.2.2 FATAL_ERROR)
+cmake_minimum_required (VERSION 3.10)
 ########################################################
 # For any comments please contact cdashhelp@hdfgroup.org
 #
@@ -63,13 +63,6 @@ if (APPLE)
   set (ENV{CC} "${XCODE_CC}")
   set (ENV{CXX} "${XCODE_CXX}")
 
-  if (NOT NO_MAC_FORTRAN)
-    # Shared fortran is not supported, build static
-    set (BUILD_OPTIONS "${BUILD_OPTIONS} -DBUILD_SHARED_LIBS:BOOL=OFF -DCMAKE_ANSI_CFLAGS:STRING=-fPIC")
-  else ()
-    set (BUILD_OPTIONS "${BUILD_OPTIONS} -DHDF5_BUILD_FORTRAN:BOOL=OFF")
-  endif ()
-
   set (BUILD_OPTIONS "${BUILD_OPTIONS} -DCTEST_USE_LAUNCHERS:BOOL=ON -DCMAKE_BUILD_WITH_INSTALL_RPATH:BOOL=OFF")
 endif ()
 
@@ -117,8 +110,12 @@ endif ()
 #-----------------------------------------------------------------------------
 # Initialize the CTEST commands
 #------------------------------
+set(CTEST_CONFIGURE_TOOLSET  "")
+if(CMAKE_GENERATOR_TOOLSET)
+  set(CTEST_CONFIGURE_TOOLSET  "-T${CMAKE_GENERATOR_TOOLSET}")
+endif()
 set (CTEST_CONFIGURE_COMMAND
-    "${CTEST_CMAKE_COMMAND} -C \"${CTEST_SOURCE_DIRECTORY}/config/cmake/cacheinit.cmake\" -DCMAKE_BUILD_TYPE:STRING=${CTEST_CONFIGURATION_TYPE} ${BUILD_OPTIONS} \"-G${CTEST_CMAKE_GENERATOR}\" \"${CTEST_SOURCE_DIRECTORY}\""
+    "${CTEST_CMAKE_COMMAND} -C \"${CTEST_SOURCE_DIRECTORY}/config/cmake/cacheinit.cmake\" -DCMAKE_BUILD_TYPE:STRING=${CTEST_CONFIGURATION_TYPE} ${BUILD_OPTIONS} \"-G${CTEST_CMAKE_GENERATOR}\" \"${CTEST_CONFIGURE_TOOLSET}\" \"${CTEST_SOURCE_DIRECTORY}\""
 )
 #-----------------------------------------------------------------------------
 

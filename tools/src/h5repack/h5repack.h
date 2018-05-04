@@ -29,10 +29,10 @@
 #define MAX_COMPACT_DSIZE  64512  /* max data size for compact layout. -1k for header size */
 
 /* File space default information */
-#define FS_PAGESIZE_DEF		4096
-#define FS_STRATEGY_DEF        	H5F_FSPACE_STRATEGY_FSM_AGGR
-#define FS_PERSIST_DEF         	FALSE
-#define FS_THRESHOLD_DEF       	1
+#define FS_PAGESIZE_DEF            4096
+#define FS_STRATEGY_DEF            H5F_FSPACE_STRATEGY_FSM_AGGR
+#define FS_PERSIST_DEF             FALSE
+#define FS_THRESHOLD_DEF           1
 
 
 /*-------------------------------------------------------------------------
@@ -42,7 +42,7 @@
 
 /* a list of names */
 typedef struct {
- char obj[MAX_NC_NAME];
+    char         obj[MAX_NC_NAME];
 } obj_list_t;
 
 /*
@@ -60,15 +60,16 @@ typedef struct {
 #define CD_VALUES 20
 
 typedef struct {
- H5Z_filter_t filtn;                           /* filter identification number */
- unsigned     cd_values[CD_VALUES];            /* filter client data values */
- size_t       cd_nelmts;                       /* filter client number of values */
+    H5Z_filter_t filtn;                           /* filter identification number */
+    unsigned     filt_flag;                       /* filter definition flag */
+    unsigned     cd_values[CD_VALUES];            /* filter client data values */
+    size_t       cd_nelmts;                       /* filter client number of values */
 } filter_info_t;
 
 /* chunk lengths along each dimension and rank */
 typedef struct {
- hsize_t chunk_lengths[MAX_VAR_DIMS];
- int     rank;
+    hsize_t      chunk_lengths[MAX_VAR_DIMS];
+    int          rank;
 } chunk_info_t;
 
 /* we currently define a maximum value for the filters array,
@@ -77,19 +78,19 @@ typedef struct {
 
 /* information for one object, contains PATH, CHUNK info and FILTER info */
 typedef struct {
- char          path[MAX_NC_NAME];               /* name of object */
- filter_info_t filter[H5_REPACK_MAX_NFILTERS];  /* filter array */
- int           nfilters;                        /* current number of filters */
- H5D_layout_t  layout;                          /* layout information */
- chunk_info_t  chunk;                           /* chunk information */
- hid_t         refobj_id;                       /* object ID, references */
+    char          path[MAX_NC_NAME];               /* name of object */
+    filter_info_t filter[H5_REPACK_MAX_NFILTERS];  /* filter array */
+    int           nfilters;                        /* current number of filters */
+    H5D_layout_t  layout;                          /* layout information */
+    chunk_info_t  chunk;                           /* chunk information */
+    hid_t         refobj_id;                       /* object ID, references */
 } pack_info_t;
 
 /* store a table of all objects */
 typedef struct {
-    unsigned int size;
-    unsigned int nelems;
-    pack_info_t  *objs;
+    unsigned int  size;
+    unsigned int  nelems;
+    pack_info_t   *objs;
 } pack_opttbl_t;
 
 
@@ -100,30 +101,32 @@ typedef struct {
 
 /* all the above, ready to go to the hrepack call */
 typedef struct {
- pack_opttbl_t   *op_tbl;     /*table with all -c and -f options */
- int             all_layout;  /*apply the layout to all objects */
- int             all_filter;  /*apply the filter to all objects */
- filter_info_t   filter_g[H5_REPACK_MAX_NFILTERS];    /*global filter array for the ALL case */
- int             n_filter_g;  /*number of global filters */
- chunk_info_t    chunk_g;     /*global chunk INFO for the ALL case */
- H5D_layout_t    layout_g;    /*global layout information for the ALL case */
- int             verbose;     /*verbose mode */
- hsize_t         min_comp;    /*minimum size to compress, in bytes */
- int             use_native;  /*use a native type in write */
- hbool_t         latest;      /*pack file with the latest file format */
- int             grp_compact; /* Set the maximum number of links to store as header messages in the group */
- int             grp_indexed; /* Set the minimum number of links to store in the indexed format */
- int             msg_size[8]; /* Minimum size of shared messages: dataspace,
-                                 datatype, fill value, filter pipleline, attribute */
- const char      *ublock_filename; /* user block file name */
- hsize_t         ublock_size;      /* user block size */
- hsize_t         meta_block_size;  /* metadata aggregation block size (for H5Pset_meta_block_size) */
- hsize_t         threshold;        /* alignment threshold for H5Pset_alignment */
- hsize_t         alignment;        /* alignment for H5Pset_alignment */
- H5F_fspace_strategy_t fs_strategy;	/* File space handling strategy */
- int		fs_persist; 		/* Free space section threshold */
- long		fs_threshold; 		/* Free space section threshold */
- long long 	fs_pagesize;   		/* File space page size */
+    pack_opttbl_t   *op_tbl;        /*table with all -c and -f options */
+    int             all_layout;     /*apply the layout to all objects */
+    int             all_filter;     /*apply the filter to all objects */
+    filter_info_t   filter_g[H5_REPACK_MAX_NFILTERS];    /*global filter array for the ALL case */
+    int             n_filter_g;     /*number of global filters */
+    chunk_info_t    chunk_g;        /*global chunk INFO for the ALL case */
+    H5D_layout_t    layout_g;       /*global layout information for the ALL case */
+    int             verbose;        /*verbose mode */
+    hsize_t         min_comp;       /*minimum size to compress, in bytes */
+    int             use_native;     /*use a native type in write */
+    hbool_t         latest;         /*pack file with the latest file format */
+    H5F_libver_t    low_bound;      /* The file's low bound as in H5Fset_libver_bounds() */
+    H5F_libver_t    high_bound;     /* The file's high bound as in H5Fset_libver_bounds() */
+    int             grp_compact;    /* Set the maximum number of links to store as header messages in the group */
+    int             grp_indexed;    /* Set the minimum number of links to store in the indexed format */
+    int             msg_size[8];    /* Minimum size of shared messages: dataspace,
+                                       datatype, fill value, filter pipleline, attribute */
+    const char      *ublock_filename;  /* user block file name */
+    hsize_t         ublock_size;       /* user block size */
+    hsize_t         meta_block_size;   /* metadata aggregation block size (for H5Pset_meta_block_size) */
+    hsize_t         threshold;         /* alignment threshold for H5Pset_alignment */
+    hsize_t         alignment;         /* alignment for H5Pset_alignment */
+    H5F_fspace_strategy_t fs_strategy; /* File space handling strategy */
+    int             fs_persist;        /* Free space section threshold */
+    long            fs_threshold;      /* Free space section threshold */
+    long long       fs_pagesize;       /* File space page size */
 } pack_opt_t;
 
 
@@ -150,10 +153,10 @@ int h5repack_end(pack_opt_t *options);
 int h5repack_verify(const char *in_fname, const char *out_fname, pack_opt_t *options);
 int h5repack_cmp_pl(const char *fname1, const char *fname2);
 
-/* Note: The below copy_named_datatype(), named_datatype_free(), copy_attr() 
- * and struct named_dt_t were located in h5repack_copy.c as static prior to 
- * bugfix1726. 
- * Made shared functions as copy_attr() was needed in h5repack_refs.c. 
+/* Note: The below copy_named_datatype(), named_datatype_free(), copy_attr()
+ * and struct named_dt_t were located in h5repack_copy.c as static prior to
+ * bugfix1726.
+ * Made shared functions as copy_attr() was needed in h5repack_refs.c.
  * However copy_attr() may be obsoleted when H5Acopy is available and put back
  * others to static in h5repack_copy.c.
  */
@@ -213,18 +216,18 @@ int apply_filters(const char* name,    /* object name from traverse list */
  * options table
  *-------------------------------------------------------------------------
  */
-int          options_table_init( pack_opttbl_t **tbl );
-int          options_table_free( pack_opttbl_t *table );
-int          options_add_layout( obj_list_t *obj_list,
-                                 unsigned n_objs,
-                                 pack_info_t *pack,
-                                 pack_opttbl_t *table );
-int          options_add_filter ( obj_list_t *obj_list,
-                                 unsigned n_objs,
-                                 filter_info_t filt,
-                                 pack_opttbl_t *table );
-pack_info_t* options_get_object( const char *path,
-                                 pack_opttbl_t *table);
+int          options_table_init(pack_opttbl_t **tbl);
+int          options_table_free(pack_opttbl_t *table);
+int          options_add_layout(obj_list_t *obj_list,
+                                unsigned n_objs,
+                                pack_info_t *pack,
+                                pack_opttbl_t *table);
+int          options_add_filter(obj_list_t *obj_list,
+                                unsigned n_objs,
+                                filter_info_t filt,
+                                pack_opttbl_t *table);
+pack_info_t* options_get_object(const char *path,
+                                pack_opttbl_t *table);
 
 /*-------------------------------------------------------------------------
  * parse functions

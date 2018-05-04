@@ -84,6 +84,10 @@ PROGRAM H5_CRTATT
   !
   CALL h5aclose_f(attr_id, error)
   !
+  ! Close the attribute datatype.
+  !
+  CALL h5tclose_f(atype_id, error)
+  !
   ! Terminate access to the data space.
   !
   CALL h5sclose_f(aspace_id, error)

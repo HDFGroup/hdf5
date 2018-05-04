@@ -61,6 +61,8 @@
           COMMAND    ${CMAKE_COMMAND}
               -E remove
                   ${resultfile}.h5
+                  ${resultfile}.out
+                  ${resultfile}.out.err
       )
       set_tests_properties (H5MKGRP-${resultfile}-clear-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
     endif ()
@@ -101,6 +103,8 @@
           COMMAND    ${CMAKE_COMMAND}
               -E remove
                   ${resultfile}.h5
+                  ${resultfile}.out
+                  ${resultfile}.out.err
       )
       set_tests_properties (H5MKGRP_CMP-${resultfile}-clear-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
       add_test (

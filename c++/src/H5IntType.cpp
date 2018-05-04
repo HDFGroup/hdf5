@@ -20,6 +20,7 @@
 #include "H5OcreatProp.h"
 #include "H5DcreatProp.h"
 #include "H5DxferProp.h"
+#include "H5LcreatProp.h"
 #include "H5LaccProp.h"
 #include "H5Location.h"
 #include "H5Object.h"
@@ -42,7 +43,7 @@ IntType::IntType() {}
 
 //--------------------------------------------------------------------------
 // Function:    IntType copy constructor
-///\brief       Copy constructor: makes a copy of the original IntType object.
+///\brief       Copy constructor: same HDF5 object as \a original
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 IntType::IntType(const IntType& original) : AtomType( original ) {}
@@ -117,13 +118,34 @@ IntType::IntType(const H5Location& loc, const char *dtype_name) : AtomType()
 // Programmer   Binh-Minh Ribler - Dec 2016
 // Description
 //              In 1.10.1, this constructor was introduced and may replace the
-//              existing function CommonFG::openArrayType(const H5std_string&)
+//              existing function CommonFG::openIntType(const H5std_string&)
 //              to improve usability.
 //              -BMR, Dec 2016
 //--------------------------------------------------------------------------
 IntType::IntType(const H5Location& loc, const H5std_string& dtype_name) : AtomType()
 {
     id = p_opentype(loc, dtype_name.c_str());
+}
+
+//--------------------------------------------------------------------------
+// Function:    IntType::decode
+///\brief       Returns an IntType object via DataType* by decoding the
+///             binary object description of this type.
+///\exception   H5::DataTypeIException
+// Programmer   Binh-Minh Ribler - Aug 2017
+//--------------------------------------------------------------------------
+DataType* IntType::decode() const
+{
+    hid_t encoded_inttype_id = H5I_INVALID_HID;
+    try {
+        encoded_inttype_id = p_decode();
+    }
+    catch (DataTypeIException &err) {
+        throw;
+    }
+    IntType *encoded_inttype = new IntType;
+    encoded_inttype->p_setId(encoded_inttype_id);
+    return(encoded_inttype);
 }
 
 //--------------------------------------------------------------------------

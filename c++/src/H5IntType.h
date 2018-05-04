@@ -18,7 +18,7 @@
 namespace H5 {
 
 /*! \class IntType
-    \brief IntType is derived from a DataType and operates on HDF5
+    \brief IntType is a derivative of a DataType and operates on HDF5
     integer datatype.
 */
 //  Inheritance: AtomType -> DataType -> H5Object -> H5Location -> IdComponent
@@ -33,6 +33,10 @@ class H5_DLLCPP IntType : public AtomType {
         // Constructors that open an HDF5 integer datatype, given a location.
         IntType(const H5Location& loc, const char* name);
         IntType(const H5Location& loc, const H5std_string& name);
+
+        // Returns an IntType object via DataType* by decoding the
+        // binary object description of this type.
+        virtual DataType* decode() const;
 
         // Retrieves the sign type for an integer type
         H5T_sign_t getSign() const;
@@ -49,7 +53,7 @@ class H5_DLLCPP IntType : public AtomType {
         // Creates a integer datatype using an existing id
         IntType(const hid_t existing_id);
 
-        // Copy constructor: makes copy of IntType object
+        // Copy constructor: same as the original IntType.
         IntType(const IntType& original);
 
         // Noop destructor.

@@ -20,8 +20,6 @@
  * trying it on a new platform, ...), you need to verify the correctness
  * of the expected output and update the corresponding *.ddl files.
  */
-#include <assert.h>
-#include <limits.h>
 
 #include "hdf5.h"
 #include "H5private.h"
@@ -277,7 +275,7 @@ gent_ub(const char * filename, size_t ub_size, size_t ub_fill)
 
     HDassert(ub_size <= BUF_SIZE);
 
-    fd = HDopen(filename, O_RDWR, 0);
+    fd = HDopen(filename, O_RDWR);
     HDassert(fd >= 0);
 
     /* fill buf with pattern */

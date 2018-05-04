@@ -153,6 +153,7 @@ H5_DLL H5FD_t *H5FD_open(const char *name, unsigned flags, hid_t fapl_id,
 		  haddr_t maxaddr);
 H5_DLL herr_t H5FD_close(H5FD_t *file);
 H5_DLL int H5FD_cmp(const H5FD_t *f1, const H5FD_t *f2);
+H5_DLL herr_t H5FD_driver_query(const H5FD_class_t *driver, unsigned long *flags/*out*/);
 H5_DLL haddr_t H5FD_alloc(H5FD_t *file, hid_t dxpl_id, H5FD_mem_t type, 
     struct H5F_t *f, hsize_t size, haddr_t *frag_addr, hsize_t *frag_size);
 H5_DLL herr_t H5FD_free(H5FD_t *file, hid_t dxpl_id, H5FD_mem_t type, struct H5F_t *f,
@@ -202,6 +203,7 @@ H5_DLL int H5FD_mpi_get_rank(const H5FD_t *file);
 H5_DLL int H5FD_mpi_get_size(const H5FD_t *file);
 H5_DLL MPI_Comm H5FD_mpi_get_comm(const H5FD_t *_file);
 H5_DLL herr_t H5FD_get_mpi_info(H5FD_t *file, void** file_info);
+H5_DLL void H5FD_mpio_mark_pre_trunc_barrier_unecessary(H5FD_t *_file);
 #endif /* H5_HAVE_PARALLEL */
 
 #endif /* !_H5FDprivate_H */

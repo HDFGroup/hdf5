@@ -82,13 +82,13 @@ struct space4_struct {
 /* Null dataspace */
 int space5_data = 7;
 
+
 /*-------------------------------------------------------------------------
- *
  * Function:    test_h5s_basic
  *
  * Purpose      Test basic H5S (dataspace) code
  *
- * Return       none
+ * Return       None
  *
  * Programmer   Binh-Minh Ribler (using C version)
  *              Mar 2001
@@ -214,13 +214,13 @@ static void test_h5s_basic()
     }
 }   // test_h5s_basic()
 
+
 /*-------------------------------------------------------------------------
- *
  * Function:    test_h5s_scalar_write
  *
  * Purpose      Test scalar H5S (dataspace) writing code
  *
- * Return       none
+ * Return       None
  *
  * Programmer   Binh-Minh Ribler (using C version)
  *              Mar 2001
@@ -278,13 +278,13 @@ static void test_h5s_scalar_write()
     }
 }   // test_h5s_scalar_write()
 
+
 /*-------------------------------------------------------------------------
- *
  * Function:    test_h5s_scalar_read
  *
  * Purpose      Test scalar H5S (dataspace) reading code
  *
- * Return       none
+ * Return       None
  *
  * Programmer   Binh-Minh Ribler (using C version)
  *              Mar 2001
@@ -340,13 +340,13 @@ static void test_h5s_scalar_read()
 
 }   // test_h5s_scalar_read()
 
+
 /*-------------------------------------------------------------------------
- *
  * Function:    test_h5s_null
  *
  * Purpose      Test null H5S (dataspace) code
  *
- * Return       none
+ * Return       None
  *
  * Programmer   Raymond Lu (using C version)
  *              May 18, 2004
@@ -394,14 +394,14 @@ static void test_h5s_null()
     }
 }   // test_h5s_null()
 
+
 /*-------------------------------------------------------------------------
- *
  * Function:    test_h5s_compound_scalar_write
  *
  * Purpose      Test scalar H5S (dataspace) writing for compound
  *              datatypes
  *
- * Return       none
+ * Return       None
  *
  * Programmer   Binh-Minh Ribler (using C version)
  *              Mar 2001
@@ -467,14 +467,14 @@ static void test_h5s_compound_scalar_write()
     }
 }   // test_h5s_compound_scalar_write()
 
+
 /*-------------------------------------------------------------------------
- *
  * Function:    test_h5s_compound_scalar_read
  *
  * Purpose      Test scalar H5S (dataspace) reading for compound
  *              datatypes
  *
- * Return       none
+ * Return       None
  *
  * Programmer   Binh-Minh Ribler (using C version)
  *              Mar 2001
@@ -541,18 +541,16 @@ static void test_h5s_compound_scalar_read()
     }
 }   // test_h5s_compound_scalar_read()
 
+
 /*-------------------------------------------------------------------------
- *
  * Function:    test_h5s
  *
  * Purpose      Main dataspace testing routine
  *
- * Return       none
+ * Return       None
  *
  * Programmer   Binh-Minh Ribler (using C version)
  *              Mar 2001
- *
- * Modifications:
  *-------------------------------------------------------------------------
  */
 extern "C"
@@ -575,13 +573,7 @@ void test_h5s()
  *
  * Purpose      Cleanup temporary test files
  *
- * Return       none
- *
- * Programmer   Albert Cheng
- *              July 2, 1998
- *
- * Modifications:
- *
+ * Return       None
  *-------------------------------------------------------------------------
  */
 extern "C"

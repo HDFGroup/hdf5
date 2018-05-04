@@ -14,6 +14,15 @@
 #ifndef USE_CASE_COMMON_H
 #define USE_CASE_COMMON_H
 
+/* Use FUNC to safely handle variations of C99 __func__ keyword handling */
+#ifdef H5_HAVE_C99_FUNC
+#define FUNC __func__
+#elif defined(H5_HAVE_FUNCTION)
+#define FUNC __FUNCTION__
+#else
+#error "We need __func__ or __FUNCTION__ to test function names!"
+#endif
+
 /******************************************
  * Symbols used across multiple use cases *
  ******************************************/
@@ -32,7 +41,7 @@
 #define FALSE 0
 
 /* Testing macros */
-#define AT()        printf ("   at %s:%d in %s()...\n", __FILE__, __LINE__, __func__);
+#define AT()        printf ("   at %s:%d in %s()...\n", __FILE__, __LINE__, FUNC);
 #define UC_ERROR    {puts("*ERROR*"); fflush(stdout); AT(); goto error;}
 
 #endif /* USE_CASE_COMMON_H */

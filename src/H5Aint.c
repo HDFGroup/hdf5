@@ -33,14 +33,14 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5Apkg.h"		/* Attributes	  			*/
-#include "H5Dprivate.h"		/* Datasets				*/
-#include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5Iprivate.h"		/* IDs			  		*/
-#include "H5MMprivate.h"	/* Memory management			*/
-#include "H5Opkg.h"             /* Object headers			*/
-#include "H5SMprivate.h"	/* Shared Object Header Messages	*/
+#include "H5private.h"          /* Generic Functions                        */
+#include "H5Apkg.h"             /* Attributes                               */
+#include "H5Dprivate.h"         /* Datasets                                 */
+#include "H5Eprivate.h"         /* Error handling                           */
+#include "H5Iprivate.h"         /* IDs                                      */
+#include "H5MMprivate.h"        /* Memory management                        */
+#include "H5Opkg.h"             /* Object headers                           */
+#include "H5SMprivate.h"        /* Shared Object Header Messages            */
 
 
 /****************/
@@ -102,6 +102,12 @@ static herr_t H5A__attr_sort_table(H5A_attr_table_t *atable, H5_index_t idx_type
 /* Package Variables */
 /*********************/
 
+/* Format version bounds for attribute */
+const unsigned H5O_attr_ver_bounds[] = {
+    H5O_ATTR_VERSION_1,         /* H5F_LIBVER_EARLIEST */
+    H5O_ATTR_VERSION_3,         /* H5F_LIBVER_V18 */
+    H5O_ATTR_VERSION_LATEST     /* H5F_LIBVER_LATEST */
+};
 
 /*****************************/
 /* Library Private Variables */
@@ -209,18 +215,16 @@ H5A_create(const H5G_loc_t *loc, const char *name, const H5T_t *type,
     if(H5T_set_loc(attr->shared->dt, loc->oloc->file, H5T_LOC_DISK) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "invalid datatype location")
 
-    /* Set the latest format for datatype, if requested */
-    if(H5F_USE_LATEST_FLAGS(loc->oloc->file, H5F_LATEST_DATATYPE))
-        if(H5T_set_latest_version(attr->shared->dt) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set latest version of datatype")
+    /* Set the version for datatype */
+    if(H5T_set_version(loc->oloc->file, attr->shared->dt) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set version of datatype")
 
     /* Copy the dataspace for the attribute */
     attr->shared->ds = H5S_copy(space, FALSE, TRUE);
 
-    /* Set the latest format for dataspace, if requested */
-    if(H5F_USE_LATEST_FLAGS(loc->oloc->file, H5F_LATEST_DATASPACE))
-        if(H5S_set_latest_version(attr->shared->ds) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set latest version of dataspace")
+    /* Set the version for dataspace */
+    if(H5S_set_version(loc->oloc->file, attr->shared->ds) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set version of dataspace")
 
     /* Copy the object header information */
     if(H5O_loc_copy(&(attr->oloc), loc->oloc, H5_COPY_DEEP) < 0)
@@ -735,86 +739,89 @@ H5A__get_name(H5A_t *attr, size_t buf_size, char *buf)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5A_get_space
+ * Function:    H5A_get_space
  *
- * Purpose:	Returns dataspace of the attribute.
+ * Purpose:     Returns dataspace of the attribute.
  *
- * Return:	Success:	dataspace
+ * Return:      Success:    A valid ID for the dataspace of an attribute
  *
- *		Failure:	NULL
- *
- * Programmer:	Mohamad Chaarawi
- *		March, 2012
+ *              Failure:    H5I_INVALID_ID
  *
  *-------------------------------------------------------------------------
  */
-H5S_t *
+hid_t
 H5A_get_space(H5A_t *attr)
 {
-    H5S_t *ret_value = NULL;
+    H5S_t      *ds = NULL;
+    hid_t       ret_value = H5I_INVALID_HID;
 
     FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(attr);
 
     /* Copy the attribute's dataspace */
-    if(NULL == (ret_value = H5S_copy(attr->shared->ds, FALSE, TRUE)))
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, NULL, "unable to copy dataspace")
+    if (NULL == (ds = H5S_copy(attr->shared->ds, FALSE, TRUE)))
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, H5I_INVALID_HID, "unable to copy dataspace")
+
+    /* Atomize */
+    if ((ret_value = H5I_register(H5I_DATASPACE, ds, TRUE)) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register dataspace atom")
 
 done:
+    if (H5I_INVALID_HID == ret_value && ds && H5S_close(ds) < 0)
+        HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release dataspace")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5A_get_space() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5A_get_type
+ * Function:    H5A_get_type
  *
- * Purpose:	Returns datatype of the dataset.
+ * Purpose:     Returns an ID for the datatype of an attribute
  *
- * Return:	Success:	datatype
+ * Return:      Success:    A valid ID for the datatype of an attribute
  *
- *		Failure:	NULL
- *
- * Programmer:	Mohamad Chaarawi
- *		March, 2012
+ *              Failure:	H5I_INVALID_HID
  *
  *-------------------------------------------------------------------------
  */
-H5T_t *
+hid_t
 H5A_get_type(H5A_t *attr)
 {
     H5T_t *dt = NULL;
-    H5T_t *ret_value = NULL;
+    hid_t ret_value = H5I_INVALID_HID;
 
     FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(attr);
 
     /* Patch the datatype's "top level" file pointer */
-    if(H5T_patch_file(attr->shared->dt, attr->oloc.file) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, NULL, "unable to patch datatype's file pointer")
+    if (H5T_patch_file(attr->shared->dt, attr->oloc.file) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, H5I_INVALID_HID, "unable to patch datatype's file pointer")
 
-    /*
-     * Copy the attribute's datatype.  If the type is a named type then
+    /* Copy the attribute's datatype.  If the type is a named type then
      * reopen the type before returning it to the user. Make the type
      * read-only.
      */
-    if(NULL == (dt = H5T_copy(attr->shared->dt, H5T_COPY_REOPEN)))
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, NULL, "unable to copy datatype")
+    if (NULL == (dt = H5T_copy(attr->shared->dt, H5T_COPY_REOPEN)))
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, H5I_INVALID_HID, "unable to copy datatype")
 
     /* Mark any datatypes as being in memory now */
-    if(H5T_set_loc(dt, NULL, H5T_LOC_MEMORY) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "invalid datatype location")
+    if (H5T_set_loc(dt, NULL, H5T_LOC_MEMORY) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5I_INVALID_HID, "invalid datatype location")
 
     /* Lock copied type */
-    if(H5T_lock(dt, FALSE) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to lock transient datatype")
+    if (H5T_lock(dt, FALSE) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5I_INVALID_HID, "unable to lock transient datatype")
 
-    ret_value = dt;
+    /* Atomize */
+    if ((ret_value = H5I_register(H5I_DATATYPE, dt, TRUE)) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register datatype")
 
 done:
-    if(!ret_value && dt && (H5T_close(dt) < 0))
-        HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, NULL, "unable to release datatype")
+    if (H5I_INVALID_HID == ret_value && dt && (H5T_close(dt) < 0))
+        HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release datatype")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5A_get_type() */
@@ -1840,11 +1847,11 @@ done:
  * Function:    H5A_set_version
  *
  * Purpose:     Sets the correct version to encode attribute with.
- *              Chooses the oldest version possible, unless the "use the
- *              latest format" flag is set.
+ *              Chooses the oldest version possible, unless the
+ *              file's low bound indicates otherwise.
  *
- * Return:	Success:        Non-negative
- *		Failure:	Negative
+ * Return:	Success:    Non-negative
+ *          Failure:    Negative
  *
  * Programmer:  Quincey Koziol
  *              koziol@hdfgroup.org
@@ -1856,17 +1863,14 @@ herr_t
 H5A_set_version(const H5F_t *f, H5A_t *attr)
 {
     hbool_t type_shared, space_shared;  /* Flags to indicate that shared messages are used for this attribute */
-    hbool_t use_latest_format;          /* Flag indicating the latest attribute version support is enabled */
-    herr_t ret_value = SUCCEED;   /* Return value */
+    uint8_t version;                    /* Message version */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* check arguments */
     HDassert(f);
     HDassert(attr);
-
-    /* Get the file's 'use the latest attribute version support' flag */
-    use_latest_format = H5F_USE_LATEST_FLAGS(f, H5F_LATEST_ATTRIBUTE);
 
     /* Check whether datatype and dataspace are shared */
     if(H5O_msg_is_shared(H5O_DTYPE_ID, attr->shared->dt) > 0)
@@ -1880,14 +1884,22 @@ H5A_set_version(const H5F_t *f, H5A_t *attr)
         space_shared = FALSE;
 
     /* Check which version to encode attribute with */
-    if(use_latest_format)
-        attr->shared->version = H5O_ATTR_VERSION_LATEST;      /* Write out latest attribute version */
-    else if(attr->shared->encoding != H5T_CSET_ASCII)
-        attr->shared->version = H5O_ATTR_VERSION_3;   /* Write version which includes the character encoding */
+    if(attr->shared->encoding != H5T_CSET_ASCII)
+        version = H5O_ATTR_VERSION_3;   /* Write version which includes the character encoding */
     else if(type_shared || space_shared)
-        attr->shared->version = H5O_ATTR_VERSION_2;   /* Write out version with flag for indicating shared datatype or dataspace */
+        version = H5O_ATTR_VERSION_2;   /* Write out version with flag for indicating shared datatype or dataspace */
     else
-        attr->shared->version = H5O_ATTR_VERSION_1;   /* Write out basic version */
+        version = H5O_ATTR_VERSION_1;   /* Write out basic version */
+
+    /* Upgrade to the version indicated by the file's low bound if higher */
+    version = MAX(version, (uint8_t)H5O_attr_ver_bounds[H5F_LOW_BOUND(f)]);
+
+    /* Version bounds check */
+    if(version > H5O_attr_ver_bounds[H5F_HIGH_BOUND(f)])
+        HGOTO_ERROR(H5E_ATTR, H5E_BADRANGE, FAIL, "attribute version out of bounds")
+
+    /* Set the message version */
+    attr->shared->version = version;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

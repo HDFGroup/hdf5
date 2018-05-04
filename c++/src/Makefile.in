@@ -168,12 +168,12 @@ LTLIBRARIES = $(lib_LTLIBRARIES)
 libhdf5_cpp_la_DEPENDENCIES = $(LIBHDF5)
 am_libhdf5_cpp_la_OBJECTS = H5Exception.lo H5IdComponent.lo \
 	H5DataSpace.lo H5PropList.lo H5Library.lo H5FaccProp.lo \
-	H5FcreatProp.lo H5LaccProp.lo H5DxferProp.lo H5DcreatProp.lo \
-	H5Location.lo H5AbstractDs.lo H5Attribute.lo H5Object.lo \
-	H5OcreatProp.lo H5DataType.lo H5AtomType.lo H5PredType.lo \
-	H5EnumType.lo H5IntType.lo H5FloatType.lo H5StrType.lo \
-	H5ArrayType.lo H5VarLenType.lo H5CompType.lo H5DataSet.lo \
-	H5CommonFG.lo H5Group.lo H5File.lo
+	H5FcreatProp.lo H5LcreatProp.lo H5LaccProp.lo H5DxferProp.lo \
+	H5DcreatProp.lo H5Location.lo H5AbstractDs.lo H5Attribute.lo \
+	H5Object.lo H5OcreatProp.lo H5DataType.lo H5AtomType.lo \
+	H5PredType.lo H5EnumType.lo H5IntType.lo H5FloatType.lo \
+	H5StrType.lo H5ArrayType.lo H5VarLenType.lo H5CompType.lo \
+	H5DataSet.lo H5CommonFG.lo H5Group.lo H5File.lo
 libhdf5_cpp_la_OBJECTS = $(am_libhdf5_cpp_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -445,6 +445,7 @@ AM_JAVAFLAGS = @AM_JAVAFLAGS@
 AM_JNIFLAGS = @AM_JNIFLAGS@
 AM_LDFLAGS = @AM_LDFLAGS@ @H5_LDFLAGS@
 AR = @AR@
+AR_FLAGS = @AR_FLAGS@
 ASSERTS = @ASSERTS@
 AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
@@ -658,6 +659,7 @@ dvidir = @dvidir@
 enable_shared = @enable_shared@
 enable_static = @enable_static@
 exec_prefix = @exec_prefix@
+fortran_linux_linker_option = @fortran_linux_linker_option@
 host = @host@
 host_alias = @host_alias@
 host_cpu = @host_cpu@
@@ -740,30 +742,30 @@ TRACE = perl $(top_srcdir)/bin/trace
 # .chklog files are output from those tests.
 # *.clog and *.clog2 are from the MPE option.
 CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.clog2
-LT_VERS_INTERFACE = 101
+LT_VERS_INTERFACE = 102
 LT_VERS_REVISION = 0
-LT_VERS_AGE = 0
-LT_CXX_VERS_INTERFACE = 101
+LT_VERS_AGE = 1
+LT_CXX_VERS_INTERFACE = 102
 LT_CXX_VERS_REVISION = 0
 LT_CXX_VERS_AGE = 0
 LT_F_VERS_INTERFACE = 101
-LT_F_VERS_REVISION = 0
+LT_F_VERS_REVISION = 1
 LT_F_VERS_AGE = 1
-LT_HL_VERS_INTERFACE = 100
-LT_HL_VERS_REVISION = 1
-LT_HL_VERS_AGE = 0
+LT_HL_VERS_INTERFACE = 101
+LT_HL_VERS_REVISION = 0
+LT_HL_VERS_AGE = 1
 LT_HL_CXX_VERS_INTERFACE = 101
-LT_HL_CXX_VERS_REVISION = 0
+LT_HL_CXX_VERS_REVISION = 1
 LT_HL_CXX_VERS_AGE = 1
 LT_HL_F_VERS_INTERFACE = 100
-LT_HL_F_VERS_REVISION = 1
+LT_HL_F_VERS_REVISION = 2
 LT_HL_F_VERS_AGE = 0
-LT_JAVA_VERS_INTERFACE = 101
+LT_JAVA_VERS_INTERFACE = 102
 LT_JAVA_VERS_REVISION = 0
-LT_JAVA_VERS_AGE = 1
-LT_TOOLS_VERS_INTERFACE = 100
-LT_TOOLS_VERS_REVISION = 1
-LT_TOOLS_VERS_AGE = 0
+LT_JAVA_VERS_AGE = 2
+LT_TOOLS_VERS_INTERFACE = 101
+LT_TOOLS_VERS_REVISION = 0
+LT_TOOLS_VERS_AGE = 1
 
 # This is our main target
 lib_LTLIBRARIES = libhdf5_cpp.la
@@ -774,28 +776,30 @@ bin_SCRIPTS = h5c++
 
 # Source files for the library
 libhdf5_cpp_la_SOURCES = H5Exception.cpp H5IdComponent.cpp	\
-	H5DataSpace.cpp H5PropList.cpp H5Library.cpp		\
-	H5FaccProp.cpp H5FcreatProp.cpp H5LaccProp.cpp		\
-	H5DxferProp.cpp H5DcreatProp.cpp H5Location.cpp		\
-	H5AbstractDs.cpp H5Attribute.cpp H5Object.cpp		\
-	H5OcreatProp.cpp H5DataType.cpp H5AtomType.cpp		\
-	H5PredType.cpp H5EnumType.cpp H5IntType.cpp		\
-	H5FloatType.cpp H5StrType.cpp H5ArrayType.cpp		\
-	H5VarLenType.cpp H5CompType.cpp H5DataSet.cpp		\
-	H5CommonFG.cpp H5Group.cpp H5File.cpp
+	H5DataSpace.cpp H5PropList.cpp H5Library.cpp			\
+	H5FaccProp.cpp H5FcreatProp.cpp H5LcreatProp.cpp		\
+	H5LaccProp.cpp H5DxferProp.cpp H5DcreatProp.cpp			\
+	H5Location.cpp H5AbstractDs.cpp H5Attribute.cpp			\
+	H5Object.cpp H5OcreatProp.cpp H5DataType.cpp			\
+	H5AtomType.cpp H5PredType.cpp H5EnumType.cpp			\
+	H5IntType.cpp H5FloatType.cpp H5StrType.cpp				\
+	H5ArrayType.cpp H5VarLenType.cpp H5CompType.cpp			\
+	H5DataSet.cpp H5CommonFG.cpp H5Group.cpp H5File.cpp
 
 
 # HDF5 C++ library depends on HDF5 Library.
 libhdf5_cpp_la_LIBADD = $(LIBHDF5)
 
 # Public headers
-include_HEADERS = H5Cpp.h H5AbstractDs.h H5AtomType.h H5Attribute.h H5Classes.h \
-	H5CommonFG.h H5CompType.h H5DataSet.h H5DataSpace.h H5DataType.h      \
-	H5OcreatProp.h H5DcreatProp.h H5DxferProp.h H5EnumType.h              \
-	H5Exception.h H5FaccProp.h H5FcreatProp.h H5File.h H5FloatType.h      \
-	H5Group.h H5IdComponent.h H5Include.h H5IntType.h H5LaccProp.h        \
-	H5Library.h H5Location.h H5Object.h H5PredType.h H5PropList.h         \
-	H5StrType.h H5CppDoc.h H5ArrayType.h H5VarLenType.h
+include_HEADERS = H5Cpp.h H5AbstractDs.h H5AtomType.h H5Attribute.h	\
+	H5Classes.h H5CommonFG.h H5CompType.h H5DataSet.h		\
+	H5DataSpace.h H5DataType.h H5OcreatProp.h H5DcreatProp.h\
+	H5DxferProp.h H5EnumType.h H5Exception.h H5FaccProp.h	\
+	H5FcreatProp.h H5File.h H5FloatType.h H5Group.h			\
+	H5IdComponent.h H5Include.h H5IntType.h H5LcreatProp.h	\
+	H5LaccProp.h H5Library.h H5Location.h H5Object.h		\
+	H5PredType.h H5PropList.h H5StrType.h H5CppDoc.h		\
+	H5ArrayType.h H5VarLenType.h
 
 
 # h5c++ and libhdf5.settings are generated during configure.  Remove only when
@@ -805,7 +809,7 @@ DISTCLEANFILES = h5c++ libhdf5.settings
 # Mark this directory as part of the C++ API
 CXX_API = yes
 
-# Automake needs to be taught how to build lib, dyn, progs and tests targets.
+# Automake needs to be taught how to build lib, progs and tests targets.
 # These will be filled in automatically for the most part (e.g.,
 # lib_LIBRARIES are built for lib target), but EXTRA_LIB, EXTRA_PROG, and
 # EXTRA_TEST variables are supplied to allow the user to force targets to
@@ -813,15 +817,14 @@ CXX_API = yes
 LIB = $(lib_LIBRARIES) $(lib_LTLIBRARIES) $(noinst_LIBRARIES)                 \
       $(noinst_LTLIBRARIES) $(check_LIBRARIES) $(check_LTLIBRARIES) $(EXTRA_LIB)
 
-DYN = $(dyn_LTLIBRARIES)
 PROGS = $(bin_PROGRAMS) $(bin_SCRIPTS) $(noinst_PROGRAMS) $(noinst_SCRIPTS)   \
         $(EXTRA_PROG)
 
 chk_TESTS = $(check_PROGRAMS) $(check_SCRIPTS) $(EXTRA_TEST) 
-dyndir = $(libdir)
 TEST_EXTENSIONS = .sh
 SH_LOG_COMPILER = $(SHELL)
 AM_SH_LOG_FLAGS = 
+REALTIMEOUTPUT = $(realtimeOutput)
 TEST_PROG_CHKEXE = $(TEST_PROG:=.chkexe_)
 TEST_PROG_PARA_CHKEXE = $(TEST_PROG_PARA:=.chkexe_)
 TEST_SCRIPT_CHKSH = $(TEST_SCRIPT:=.chkexe_)
@@ -963,6 +966,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5IdComponent.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5IntType.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5LaccProp.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5LcreatProp.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Library.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Location.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Object.Plo@am__quote@
@@ -1408,7 +1412,6 @@ mostlyclean-local:
 
 # lib/progs/tests targets recurse into subdirectories. build-* targets
 # build files in this directory.
-build-dyn: $(DYN)
 build-lib: $(LIB)
 build-progs: $(LIB) $(PROGS)
 build-tests: $(LIB) $(PROGS) $(chk_TESTS)
@@ -1416,7 +1419,7 @@ build-tests: $(LIB) $(PROGS) $(chk_TESTS)
 # General rule for recursive building targets.
 # BUILT_SOURCES contain targets that need to be built before anything else
 # in the directory (e.g., for Fortran type detection)
-lib dyn progs tests check-s check-p :: $(BUILT_SOURCES)
+lib progs tests check-s check-p :: $(BUILT_SOURCES)
 	@$(MAKE) $(AM_MAKEFLAGS) build-$@ || exit 1;
 	@for d in X $(SUBDIRS); do                                             \
 	    if test $$d != X && test $$d != .; then                           \
@@ -1494,28 +1497,62 @@ $(TEST_PROG_CHKEXE) $(TEST_PROG_PARA_CHKEXE) dummy.chkexe_:
 	   if $(top_srcdir)/bin/newer $(@:.chkexe_=.chkexe) $${tname}; then \
 	      echo "No need to test $${tname} again."; \
 	   else \
-	      echo "============================" > $${log}; \
-	      if test "X$(FORTRAN_API)" = "Xyes"; then \
-	         echo "Fortran API: Testing $(HDF5_DRIVER) $${tname} $(TEST_FLAGS)"; \
-	         echo "Fortran API: $(HDF5_DRIVER) $${tname} $(TEST_FLAGS) Test Log" >> $${log}; \
-	      elif test "X$(CXX_API)" = "Xyes"; then \
-	         echo "C++ API: Testing $(HDF5_DRIVER) $${tname} $(TEST_FLAGS)"; \
-	         echo "C++ API: $(HDF5_DRIVER) $${tname} $(TEST_FLAGS) Test Log" >> $${log};\
-	      else \
-	         echo "Testing $(HDF5_DRIVER) $${tname} $(TEST_FLAGS)"; \
-	         echo "$(HDF5_DRIVER) $${tname} $(TEST_FLAGS) Test Log" >> $${log}; \
-	      fi; \
-	      echo "============================" >> $${log}; \
-	      srcdir="$(srcdir)" \
-	         $(TIME) $(RUNEXEC) ./$${tname} $(TEST_FLAGS) >> $${log} 2>&1 \
-	         && touch $(@:.chkexe_=.chkexe) || \
-	         (test $$HDF5_Make_Ignore && echo "*** Error ignored") || \
-	         (cat $${log} && false) || exit 1; \
+              if test -n "$(REALTIMEOUTPUT)"; then \
+                 echo "============================" | tee $${log}; \
+              else \
+                 echo "============================" > $${log}; \
+              fi; \
+              if test "X$(FORTRAN_API)" = "Xyes"; then \
+                 echo "Fortran API: Testing $(HDF5_DRIVER) $${tname} $(TEST_FLAGS)"; \
+                 if test -n "$(REALTIMEOUTPUT)"; then \
+                    echo "Fortran API: $(HDF5_DRIVER) $${tname} $(TEST_FLAGS) Test Log" | tee -a $${log}; \
+                 else \
+                    echo "Fortran API: $(HDF5_DRIVER) $${tname} $(TEST_FLAGS) Test Log" >> $${log}; \
+                 fi; \
+              elif test "X$(CXX_API)" = "Xyes"; then \
+                 echo "C++ API: Testing $(HDF5_DRIVER) $${tname} $(TEST_FLAGS)"; \
+                 if test -n "$(REALTIMEOUTPUT)"; then \
+                    echo "C++ API: $(HDF5_DRIVER) $${tname} $(TEST_FLAGS) Test Log" | tee -a $${log};\
+                 else \
+                    echo "C++ API: $(HDF5_DRIVER) $${tname} $(TEST_FLAGS) Test Log" >> $${log};\
+                 fi; \
+              else \
+                 echo "Testing $(HDF5_DRIVER) $${tname} $(TEST_FLAGS)"; \
+                 if test -n "$(REALTIMEOUTPUT)"; then \
+                    echo "$(HDF5_DRIVER) $${tname} $(TEST_FLAGS) Test Log" | tee -a $${log}; \
+                 else \
+                    echo "$(HDF5_DRIVER) $${tname} $(TEST_FLAGS) Test Log" >> $${log}; \
+                 fi; \
+              fi; \
+              if test -n "$(REALTIMEOUTPUT)"; then \
+                 echo "============================" | tee -a $${log}; \
+              else \
+                 echo "============================" >> $${log}; \
+              fi; \
+              if test -n "$(REALTIMEOUTPUT)"; then \
+                 srcdir="$(srcdir)" \
+                 $(TIME) $(RUNEXEC) ./$${tname} $(TEST_FLAGS) | tee -a $${log} 2>&1 \
+                 && touch $(@:.chkexe_=.chkexe) || \
+                 (test $$HDF5_Make_Ignore && echo "*** Error ignored") || \
+                 (cat $${log} && false) || exit 1; \
+              else \
+                 srcdir="$(srcdir)" \
+                 $(TIME) $(RUNEXEC) ./$${tname} $(TEST_FLAGS) >> $${log} 2>&1 \
+                 && touch $(@:.chkexe_=.chkexe) || \
+                 (test $$HDF5_Make_Ignore && echo "*** Error ignored") || \
+                 (cat $${log} && false) || exit 1; \
+              fi; \
 	      echo "" >> $${log}; \
-	      echo "Finished testing $${tname} $(TEST_FLAGS)" >> $${log}; \
-	      echo "============================" >> $${log}; \
-	      echo "Finished testing $${tname} $(TEST_FLAGS)"; \
-	      cat $${log}; \
+              if test -n "$(REALTIMEOUTPUT)"; then \
+                 echo "Finished testing $${tname} $(TEST_FLAGS)" | tee -a $${log}; \
+                 echo "============================" | tee -a $${log}; \
+              else \
+                 echo "Finished testing $${tname} $(TEST_FLAGS)" >> $${log}; \
+                 echo "============================" >> $${log}; \
+              fi; \
+              if test -z "$(REALTIMEOUTPUT)"; then \
+                 cat $${log}; \
+              fi; \
 	   fi; \
 	fi
 

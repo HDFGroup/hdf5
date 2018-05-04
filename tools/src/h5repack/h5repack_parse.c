@@ -42,12 +42,12 @@ obj_list_t* parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt,
     size_t      i, m, u;
     char        c;
     size_t      len = HDstrlen(str);
-    int         k, l, p, q, end_obj = -1, no_param = 0;
+    int         f, k, l, p, q, end_obj = -1, no_param = 0;
     unsigned    j, n;
     char        sobj[MAX_NC_NAME];
-    char        scomp[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-    char        stype[6] = {0, 0, 0, 0, 0, 0};
-    char        smask[3] = {0, 0, 0};
+    char        scomp[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    char        stype[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    char        smask[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
     obj_list_t* obj_list = NULL;
     unsigned    pixels_per_block;
 
@@ -58,26 +58,30 @@ obj_list_t* parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt,
     /* check for the end of object list and number of objects */
     for (i = 0, n = 0; i < len; i++) {
         c = str[i];
-        if (c == ':')
+        if (c == ':') {
             end_obj = (int) i;
+            break;
+        }
         if (c == ',')
             n++;
     }
+    n++;
 
     /* Check for missing : */
     if (end_obj == -1) {
         /* apply to all objects */
         options->all_filter = 1;
         *is_glb = 1;
+        *n_objs = 1;
     }
+    else
+        *n_objs = n;
 
-    n++;
     obj_list = (obj_list_t *) HDmalloc(n * sizeof(obj_list_t));
     if (obj_list == NULL) {
         error_msg("could not allocate object list\n");
         return NULL;
     }
-    *n_objs = n;
 
     /* get object list */
     if (end_obj > 0)
@@ -89,6 +93,7 @@ obj_list_t* parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt,
                     sobj[k] = '\0';
                 else
                     sobj[k + 1] = '\0';
+
                 HDstrcpy(obj_list[n].obj, sobj);
                 HDmemset(sobj, 0, sizeof(sobj));
                 n++;
@@ -111,7 +116,6 @@ obj_list_t* parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt,
         if (c == '=' || i == len - 1) {
             if (c == '=') { /*one more parameter */
                 scomp[k] = '\0'; /*cut space */
-
                 /*-------------------------------------------------------------------------
                 * H5Z_FILTER_SZIP
                 * szip has the format SZIP=<pixels per block,coding>
@@ -142,7 +146,6 @@ obj_list_t* parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt,
                             if (l == 2) {
                                 smask[l] = '\0';
                                 i = len - 1; /* end */
-                                (*n_objs)--; /* we counted an extra ',' */
                                 if (HDstrcmp(smask,"NN") == 0)
                                     filt->cd_values[j++] = H5_SZIP_NN_OPTION_MASK;
                                 else if (HDstrcmp(smask,"EC") == 0)
@@ -193,7 +196,6 @@ obj_list_t* parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt,
                             if (l == 2) {
                                 smask[l] = '\0';
                                 i = len - 1; /* end */
-                                (*n_objs)--; /* we counted an extra ',' */
                                 if (HDstrcmp(smask,"IN") == 0)
                                     filt->cd_values[j++] = H5Z_SO_INT;
                                 else if (HDstrcmp(smask, "DS") == H5Z_SO_FLOAT_DSCALE)
@@ -209,13 +211,14 @@ obj_list_t* parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt,
 
                 /*-------------------------------------------------------------------------
                 * User Defined
-                *   has the format UD=<filter_number,cd_value_count,value_1[,value_2,...,value_N]>
+                *   has the format UD=<filter_number,filter_flag,cd_value_count,value_1[,value_2,...,value_N]>
                 *  BZIP2 example
-                *  UD=307,1,9
+                *  UD=307,0,1,9
                 *-------------------------------------------------------------------------
                 */
                 else if (HDstrcmp(scomp, "UD") == 0) {
                     l = -1; /* filter number index check */
+                    f = -1; /* filter flag index check */
                     p = -1; /* CD_VAL count check */
                     for (m = 0, q = 0, u = i + 1; u < len; u++, m++, q++) {
                         if (str[u] == ',') {
@@ -224,12 +227,17 @@ obj_list_t* parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt,
                                 filt->filtn = HDatoi(stype);
                                 l = 0;
                             }
+                            else if (f == -1) {
+                                filt->filt_flag = HDstrtoul(stype, NULL, 0);
+                                f = 0;
+                            }
                             else if (p == -1) {
                                 filt->cd_nelmts = HDstrtoull(stype, NULL, 0);
                                 p = 0;
                             }
-                            else
+                            else {
                                 filt->cd_values[j++] = (unsigned)HDstrtoul(stype, NULL, 0);
+                            }
                             q = 0;
                             u++; /* skip ',' */
                         }
@@ -238,6 +246,12 @@ obj_list_t* parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt,
                             if (obj_list)
                                 HDfree(obj_list);
                             error_msg("filter number parameter is not a digit in <%s>\n", str);
+                            HDexit(EXIT_FAILURE);
+                        }
+                        else if (!HDisdigit(c) && f == -1) {
+                            if (obj_list)
+                                HDfree(obj_list);
+                            error_msg("filter flag parameter is not a digit in <%s>\n", str);
                             HDexit(EXIT_FAILURE);
                         }
                         stype[q] = c;
@@ -448,7 +462,7 @@ obj_list_t* parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt,
     return obj_list;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function: parse_layout
  *

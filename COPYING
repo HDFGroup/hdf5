@@ -49,7 +49,7 @@ advised of the possibility of such damage.
 Limited portions of HDF5 were developed by Lawrence Berkeley National 
 Laboratory (LBNL). LBNL's Copyright Notice and Licensing Terms can be
 found here: COPYING_LBNL_HDF5 file in this directory or at 
-https://support.hdfgroup.org/ftp/HDF5/releases/COPYING_LBNL_HDF5. 
+http://support.hdfgroup.org/ftp/HDF5/releases/COPYING_LBNL_HDF5. 
 
 -----------------------------------------------------------------------------
 -----------------------------------------------------------------------------
@@ -99,8 +99,7 @@ and/or accompanying materials:
 
 HDF5 is available with the SZIP compression library but SZIP is not part 
 of HDF5 and has separate copyright and license terms. See “Szip Compression 
-in HDF Products” (https://support.hdfgroup.org/doc_resource/SZIP/) for 
-further details.
+in HDF Products” (https://support.hdfgroup.org/doc_resource/SZIP/) for further details.
 
 -----------------------------------------------------------------------------
 

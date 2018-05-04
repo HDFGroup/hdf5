@@ -211,15 +211,6 @@ H5_DLL int HDfprintf (FILE *stream, const char *fmt, ...);
     #define HDoff_t             off_t
 #endif
 
-#ifndef H5_HAVE_WIN32_API
-/* These definitions differ in Windows and are defined in
- * H5win32defs for that platform.
- */
-typedef struct stat         h5_stat_t;
-typedef off_t               h5_stat_size_t;
-#define HDoff_t             off_t
-#endif /* H5_HAVE_WIN32_API */
-
 #define HDftell(F)              ftell(F)
 #define HDftruncate(F,L)        ftruncate(F,L)
 #define HDfwrite(M,Z,N,F)       fwrite(M,Z,N,F)

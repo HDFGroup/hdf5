@@ -726,7 +726,8 @@ tools/testfiles/tattrreg.h5 -text
 tools/testfiles/tbigdims.h5 -text
 tools/testfiles/tbinary.h5 -text
 tools/testfiles/tbitfields.h5 -text
-tools/testfiles/tbitnopaque.ddl -text
+tools/testfiles/tbitnopaque_be.ddl -text
+tools/testfiles/tbitnopaque_le.ddl -text
 tools/testfiles/tbitnopaque.h5 -text svneol=unset#application/x-hdf
 tools/testfiles/tchar.h5 -text
 tools/testfiles/tcmpdattrintsize.h5 -text

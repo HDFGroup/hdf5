@@ -34,8 +34,8 @@ fi
 if test "X-" = "X-$FC"; then
     case $CC_BASENAME in
         gcc*|pgcc*)
-            FC=gfortran40
-            FC_BASENAME=gfortran40
+            FC=gfortran
+            FC_BASENAME=gfortran
             ;;
         icc*)
             FC=ifort

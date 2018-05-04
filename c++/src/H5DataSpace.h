@@ -21,6 +21,7 @@ namespace H5 {
     \brief Class DataSpace inherits from IdComponent and provides wrappers for
      the HDF5's dataspaces.
 */
+//  Inheritance: IdComponent
 class H5_DLLCPP DataSpace : public IdComponent {
    public:
         ///\brief Default DataSpace objects
@@ -35,7 +36,7 @@ class H5_DLLCPP DataSpace : public IdComponent {
         // Creates a DataSpace object using an existing dataspace id.
         DataSpace(const hid_t space_id);
 
-        // Copy constructor: makes a copy of the original DataSpace object.
+        // Copy constructor - same as the original DataSpace.
         DataSpace(const DataSpace& original);
 
         // Assignment operator

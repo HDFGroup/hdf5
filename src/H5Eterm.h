@@ -194,7 +194,9 @@ H5E_CANTSORT_g=
 /* Parallel MPI errors */    
 H5E_MPI_g=    
 H5E_MPIERRSTR_g=    
-H5E_CANTRECV_g=
+H5E_CANTRECV_g=    
+H5E_CANTGATHER_g=    
+H5E_NO_INDEPENDENT_g=
 
 /* Dataspace errors */    
 H5E_CANTCLIP_g=    

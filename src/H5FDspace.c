@@ -99,9 +99,7 @@ H5FL_DEFINE(H5FD_free_t);
 static haddr_t
 H5FD_extend(H5FD_t *file, H5FD_mem_t type, hsize_t size)
 {
-    hsize_t orig_size = size;   /* Original allocation size */
     haddr_t eoa;                /* Address of end-of-allocated space */
-    hsize_t extra;        	/* Extra space to allocate, to align request */
     haddr_t ret_value = HADDR_UNDEF;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT

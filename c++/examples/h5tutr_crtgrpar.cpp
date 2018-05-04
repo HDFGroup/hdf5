@@ -68,14 +68,14 @@ int main(void)
     // catch failure caused by the File operations
     catch(FileIException error)
     {
-	error.printError();
+	error.printErrorStack();
 	return -1;
     }
 
     // catch failure caused by the Group operations
     catch(GroupIException error)
     {
-	error.printError();
+	error.printErrorStack();
 	return -1;
     }
 

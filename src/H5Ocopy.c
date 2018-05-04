@@ -347,36 +347,8 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/,
     if(NULL == (obj_class = H5O_obj_class(oloc_src, dxpl_id)))
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to determine object type")
 
-    /* Check if the object at the address is already open in the file */
-    if(H5FO_opened(oloc_src->file, oloc_src->addr) != NULL) {
-	H5G_loc_t   tmp_loc; 	/* Location of object */
-	H5O_loc_t   tmp_oloc; 	/* Location of object */
-	H5G_name_t  tmp_path;	/* Object's path */
-	void *obj_ptr = NULL;	/* Object pointer */
-	hid_t tmp_id = -1;	/* Object ID */
-
-	tmp_loc.oloc = &tmp_oloc;
-	tmp_loc.path = &tmp_path;
-	tmp_oloc.file = oloc_src->file;
-	tmp_oloc.addr = oloc_src->addr;
-	tmp_oloc.holding_file = FALSE;
-	H5G_name_reset(tmp_loc.path);
-
-	/* Get a temporary ID */
-	if((tmp_id = obj_class->open(&tmp_loc, H5P_DEFAULT, dxpl_id, FALSE)) < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTFLUSH, FAIL, "unable to open object")
-
-	/* Get object pointer */
-	obj_ptr = H5I_object(tmp_id);
-
-	/* Flush the object */
-        if(obj_class->flush && obj_class->flush(obj_ptr, dxpl_id) < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTFLUSH, FAIL, "unable to flush object")
-
-	/* Release the temporary ID */
-	if(tmp_id != -1 && H5I_dec_app_ref(tmp_id))
-	    HGOTO_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "unable to close temporary ID")
-    } /* end if */
+    /* Set the pointer to the shared struct for the object if opened in the file */
+    cpy_info->shared_fo = H5FO_opened(oloc_src->file, oloc_src->addr);
 
     /* Get source object header */
     if(NULL == (oh_src = H5O_protect(oloc_src, dxpl_id, H5AC__READ_ONLY_FLAG, FALSE)))
@@ -443,6 +415,11 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/,
 
     /* Initialize header information */
     oh_dst->version = oh_src->version;
+
+    /* Version bounds check for destination object header */
+    if(oh_dst->version > H5O_obj_ver_bounds[H5F_HIGH_BOUND(oloc_dst->file)])
+        HGOTO_ERROR(H5E_OHDR, H5E_BADRANGE, FAIL, "destination object header version out of bounds")
+
     oh_dst->flags = oh_src->flags;
     oh_dst->link_msgs_seen = oh_src->link_msgs_seen;
     oh_dst->attr_msgs_seen = oh_src->attr_msgs_seen;
@@ -517,6 +494,12 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/,
         if(copy_type->pre_copy_file) {
             /* Decode the message if necessary. */
             H5O_LOAD_NATIVE(oloc_src->file, dxpl_id, 0, oh_src, mesg_src, FAIL)
+
+            /* Save destination file pointer in cpy_info so that it can be used
+               in the pre_copy_file callback to obtain the destination file's
+               high bound.  The high bound is used to index into the corresponding
+               message's array of versions for doing version bounds check. */
+            cpy_info->file_dst = oloc_dst->file;
 
             /* Perform "pre copy" operation on message */
             if((copy_type->pre_copy_file)(oloc_src->file, mesg_src->native,
@@ -899,12 +882,19 @@ done:
         HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
 
     /* Free destination object header on failure */
-    if(ret_value < 0 && oh_dst && !inserted) {
-        if(H5O__free(oh_dst) < 0)
-            HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to destroy object header data")
-        if(H5O_loc_reset(oloc_dst) < 0)
-            HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to destroy object header data")
-    } /* end if */
+    if(ret_value < 0) {
+        if(oh_dst && !inserted) {
+            if(H5O__free(oh_dst) < 0)
+                HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to destroy object header data")
+            if(H5O_loc_reset(oloc_dst) < 0)
+                HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to destroy object header data")
+        } /* end if */
+
+        if(addr_map == NULL && cpy_udata) {
+            if(obj_class && obj_class->free_copy_file_udata)
+                obj_class->free_copy_file_udata(cpy_udata);
+        } /* end if */
+    }
 
     FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
 } /* end H5O_copy_header_real() */

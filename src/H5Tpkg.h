@@ -332,6 +332,9 @@ typedef struct {
 /* Typedef for datatype iteration operations */
 typedef herr_t (*H5T_operator_t)(H5T_t *dt, void *op_data/*in,out*/);
 
+/*  Array of versions for Datatype */
+H5_DLLVAR const unsigned H5O_dtype_ver_bounds[H5F_LIBVER_NBOUNDS];
+
 /*
  * Alignment information for native types. A value of N indicates that the
  * data must be aligned on an address ADDR such that 0 == ADDR mod N. When

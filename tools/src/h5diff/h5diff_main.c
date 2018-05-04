@@ -11,9 +11,6 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <stdlib.h>
-#include <assert.h>
-#include <memory.h>
 #include "H5private.h"
 #include "h5diff.h"
 #include "h5diff_common.h"
@@ -72,33 +69,50 @@
 int main(int argc, const char *argv[])
 {
     int        ret;
+    H5E_auto2_t         func;
+    H5E_auto2_t         tools_func;
+    void               *edata;
+    void               *tools_edata;
     const char *fname1 = NULL;
     const char *fname2 = NULL;
     const char *objname1  = NULL;
     const char *objname2  = NULL;
     hsize_t    nfound=0;
-    diff_opt_t options;
+    diff_opt_t opts;
 
     h5tools_setprogname(PROGRAMNAME);
     h5tools_setstatus(EXIT_SUCCESS);
 
+    /* Disable error reporting */
+    H5Eget_auto2(H5E_DEFAULT, &func, &edata);
+    H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
+
     /* Initialize h5tools lib */
     h5tools_init();
+
+    /* Disable tools error reporting */
+    H5Eget_auto2(H5tools_ERR_STACK_g, &tools_func, &tools_edata);
+    H5Eset_auto2(H5tools_ERR_STACK_g, NULL, NULL);
 
     /*-------------------------------------------------------------------------
     * process the command-line
     *-------------------------------------------------------------------------
     */
-    parse_command_line(argc, argv, &fname1, &fname2, &objname1, &objname2, &options);
+    parse_command_line(argc, argv, &fname1, &fname2, &objname1, &objname2, &opts);
+
+    if (enable_error_stack > 0) {
+        H5Eset_auto2(H5E_DEFAULT, func, edata);
+        H5Eset_auto2(H5tools_ERR_STACK_g, tools_func, tools_edata);
+    }
 
     /*-------------------------------------------------------------------------
     * do the diff
     *-------------------------------------------------------------------------
     */
 
-    nfound = h5diff(fname1,fname2,objname1,objname2,&options);
+    nfound = h5diff(fname1, fname2, objname1, objname2, &opts);
 
-    print_info(&options);
+    print_info(&opts);
 
    /*-------------------------------------------------------------------------
     * exit code
@@ -106,17 +120,17 @@ int main(int argc, const char *argv[])
     *-------------------------------------------------------------------------
     */
 
-    ret = (nfound == 0 ? 0 : 1 );
+    ret = (nfound == 0 ? 0 : 1);
 
     /* if graph difference return 1 for differences  */
-    if ( options.contents == 0 )
+    if (opts.contents == 0)
         ret = 1;
 
     /* and return 2 for error */
-    if (options.err_stat)
+    if (opts.err_stat)
         ret = 2;
 
-    return ret;
+    h5diff_exit(ret);
 }
 
 /*-------------------------------------------------------------------------
@@ -138,6 +152,8 @@ int main(int argc, const char *argv[])
 H5_ATTR_NORETURN void
 h5diff_exit(int status)
 {
+    h5tools_close();
+
     HDexit(status);
 }
 

@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.2.2)
+cmake_minimum_required (VERSION 3.10)
 PROJECT (HDF5_TOOLS_TEST_H5STAT)
 
 #-----------------------------------------------------------------------------
@@ -11,7 +11,6 @@ INCLUDE_DIRECTORIES (${HDF5_TOOLS_DIR}/lib)
   # --------------------------------------------------------------------
   if (HDF5_BUILD_GENERATORS)
     add_executable (h5stat_gentest ${HDF5_TOOLS_TEST_H5STAT_SOURCE_DIR}/h5stat_gentest.c)
-    TARGET_NAMING (h5stat_gentest STATIC)
     TARGET_C_PROPERTIES (h5stat_gentest STATIC " " " ")
     target_link_libraries (h5stat_gentest ${HDF5_LIB_TARGET})
     set_target_properties (h5stat_gentest PROPERTIES FOLDER generator/tools)

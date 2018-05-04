@@ -1206,8 +1206,8 @@ Java_hdf_hdf5lib_H5_H5Sencode
         if (status < 0) {
             h5libraryError(env);
         } /* end else if */
-        else if (buf_size < 0) {
-            h5badArgument(env, "H5Sencode:  buf_size < 0");
+        else if (buf_size == 0) {
+            h5badArgument(env, "H5Sencode:  buf_size = 0");
         } /* end if */
         else {
             bufPtr = (unsigned char*)HDcalloc((size_t) 1, buf_size);

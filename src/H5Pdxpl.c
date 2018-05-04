@@ -169,6 +169,13 @@
 #define H5D_XFER_DIRECT_CHUNK_WRITE_OFFSET_DEF		NULL
 #define H5D_XFER_DIRECT_CHUNK_WRITE_DATASIZE_SIZE	sizeof(uint32_t)
 #define H5D_XFER_DIRECT_CHUNK_WRITE_DATASIZE_DEF	0
+/* Definitions for properties of direct chunk read */
+#define H5D_XFER_DIRECT_CHUNK_READ_FLAG_SIZE        sizeof(hbool_t)
+#define H5D_XFER_DIRECT_CHUNK_READ_FLAG_DEF         FALSE
+#define H5D_XFER_DIRECT_CHUNK_READ_FILTERS_SIZE     sizeof(uint32_t)
+#define H5D_XFER_DIRECT_CHUNK_READ_FILTERS_DEF      0
+#define H5D_XFER_DIRECT_CHUNK_READ_OFFSET_SIZE      sizeof(hsize_t *)
+#define H5D_XFER_DIRECT_CHUNK_READ_OFFSET_DEF       NULL
 /* Ring type - private property */
 #define H5AC_XFER_RING_SIZE      sizeof(unsigned)
 #define H5AC_XFER_RING_DEF       H5AC_RING_USER
@@ -205,21 +212,21 @@
 static herr_t H5P__dxfr_reg_prop(H5P_genclass_t *pclass);
 
 /* Property list callbacks */
-static herr_t H5P__dxfr_bkgr_buf_type_enc(const void *value, void **pp, size_t *size);
+static herr_t H5P__dxfr_bkgr_buf_type_enc(const void *value, void **pp, size_t *size, void *udata);
 static herr_t H5P__dxfr_bkgr_buf_type_dec(const void **pp, void *value);
-static herr_t H5P__dxfr_btree_split_ratio_enc(const void *value, void **pp, size_t *size);
+static herr_t H5P__dxfr_btree_split_ratio_enc(const void *value, void **pp, size_t *size, void *udata);
 static herr_t H5P__dxfr_btree_split_ratio_dec(const void **pp, void *value);
-static herr_t H5P__dxfr_io_xfer_mode_enc(const void *value, void **pp, size_t *size);
+static herr_t H5P__dxfr_io_xfer_mode_enc(const void *value, void **pp, size_t *size, void *udata);
 static herr_t H5P__dxfr_io_xfer_mode_dec(const void **pp, void *value);
-static herr_t H5P__dxfr_mpio_collective_opt_enc(const void *value, void **pp, size_t *size);
+static herr_t H5P__dxfr_mpio_collective_opt_enc(const void *value, void **pp, size_t *size, void *udata);
 static herr_t H5P__dxfr_mpio_collective_opt_dec(const void **pp, void *value);
-static herr_t H5P__dxfr_mpio_chunk_opt_hard_enc(const void *value, void **pp, size_t *size);
+static herr_t H5P__dxfr_mpio_chunk_opt_hard_enc(const void *value, void **pp, size_t *size, void *udata);
 static herr_t H5P__dxfr_mpio_chunk_opt_hard_dec(const void **pp, void *value);
-static herr_t H5P__dxfr_edc_enc(const void *value, void **pp, size_t *size);
+static herr_t H5P__dxfr_edc_enc(const void *value, void **pp, size_t *size, void *udata);
 static herr_t H5P__dxfr_edc_dec(const void **pp, void *value);
 static herr_t H5P__dxfr_xform_set(hid_t prop_id, const char* name, size_t size, void* value);
 static herr_t H5P__dxfr_xform_get(hid_t prop_id, const char* name, size_t size, void* value);
-static herr_t H5P__dxfr_xform_enc(const void *value, void **pp, size_t *size);
+static herr_t H5P__dxfr_xform_enc(const void *value, void **pp, size_t *size, void *udata);
 static herr_t H5P__dxfr_xform_dec(const void **pp, void *value);
 static herr_t H5P__dxfr_xform_del(hid_t prop_id, const char* name, size_t size, void* value);
 static herr_t H5P__dxfr_xform_copy(const char* name, size_t size, void* value);
@@ -293,6 +300,9 @@ static const hbool_t H5D_def_direct_chunk_flag_g = H5D_XFER_DIRECT_CHUNK_WRITE_F
 static const uint32_t H5D_def_direct_chunk_filters_g = H5D_XFER_DIRECT_CHUNK_WRITE_FILTERS_DEF;	/* Default value for the filters of direct chunk write */
 static const hsize_t *H5D_def_direct_chunk_offset_g = H5D_XFER_DIRECT_CHUNK_WRITE_OFFSET_DEF; 	/* Default value for the offset of direct chunk write */
 static const uint32_t H5D_def_direct_chunk_datasize_g = H5D_XFER_DIRECT_CHUNK_WRITE_DATASIZE_DEF; /* Default value for the datasize of direct chunk write */
+static const hbool_t direct_chunk_read_flag = H5D_XFER_DIRECT_CHUNK_READ_FLAG_DEF;         /* Default value for the flag of direct chunk read */
+static const hsize_t *direct_chunk_read_offset = H5D_XFER_DIRECT_CHUNK_READ_OFFSET_DEF;    /* Default value for the offset of direct chunk read */
+static const uint32_t direct_chunk_read_filters = H5D_XFER_DIRECT_CHUNK_READ_FILTERS_DEF;    /* Default value for the filters of direct chunk read */
 static const H5AC_ring_t H5D_ring_g = H5AC_XFER_RING_DEF; /* Default value for the cache entry ring type */
 #ifdef H5_DEBUG_BUILD
 static const H5FD_dxpl_type_t H5D_dxpl_type_g = H5FD_NOIO_DXPL; /* Default value for the dxpl type */
@@ -497,6 +507,24 @@ H5P__dxfr_reg_prop(H5P_genclass_t *pclass)
             NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
+    /* Register the property of flag for direct chunk read */
+    /* (Note: this property should not have an encode/decode callback) */
+    if(H5P_register_real(pclass, H5D_XFER_DIRECT_CHUNK_READ_FLAG_NAME, H5D_XFER_DIRECT_CHUNK_READ_FLAG_SIZE, &direct_chunk_read_flag,
+            NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register the property of filter for direct chunk read */
+    /* (Note: this property should not have an encode/decode callback) */
+    if(H5P_register_real(pclass, H5D_XFER_DIRECT_CHUNK_READ_FILTERS_NAME, H5D_XFER_DIRECT_CHUNK_READ_FILTERS_SIZE, &direct_chunk_read_filters,
+            NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register the property of offset for direct chunk read */
+    /* (Note: this property should not have an encode/decode callback) */
+    if(H5P_register_real(pclass, H5D_XFER_DIRECT_CHUNK_READ_OFFSET_NAME, H5D_XFER_DIRECT_CHUNK_READ_OFFSET_SIZE, &direct_chunk_read_offset,
+            NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
     /* Register the ring property (private) */
     if(H5P_register_real(pclass, H5AC_RING_NAME, H5AC_XFER_RING_SIZE, &H5D_ring_g,
             NULL, NULL, NULL, H5AC_XFER_RING_ENC, H5AC_XFER_RING_DEC, 
@@ -531,7 +559,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5P__dxfr_bkgr_buf_type_enc(const void *value, void **_pp, size_t *size)
+H5P__dxfr_bkgr_buf_type_enc(const void *value, void **_pp, size_t *size, void H5_ATTR_UNUSED *udata)
 {
     const H5T_bkg_t *bkgr_buf_type = (const H5T_bkg_t *)value; /* Create local alias for values */
     uint8_t **pp = (uint8_t **)_pp;
@@ -604,7 +632,7 @@ H5P__dxfr_bkgr_buf_type_dec(const void **_pp, void *_value)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5P__dxfr_btree_split_ratio_enc(const void *value, void **_pp, size_t *size)
+H5P__dxfr_btree_split_ratio_enc(const void *value, void **_pp, size_t *size, void H5_ATTR_UNUSED *udata)
 {
     const double *btree_split_ratio = (const double *)value; /* Create local alias for values */
     uint8_t **pp = (uint8_t **)_pp;
@@ -765,7 +793,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5P__dxfr_xform_enc(const void *value, void **_pp, size_t *size)
+H5P__dxfr_xform_enc(const void *value, void **_pp, size_t *size, void H5_ATTR_UNUSED *udata)
 {
     const H5Z_data_xform_t *data_xform_prop = *(const H5Z_data_xform_t * const *)value; /* Create local alias for values */
     const char *pexp = NULL;            /* Pointer to transform expression */
@@ -1853,7 +1881,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5P__dxfr_io_xfer_mode_enc(const void *value, void **_pp, size_t *size)
+H5P__dxfr_io_xfer_mode_enc(const void *value, void **_pp, size_t *size, void H5_ATTR_UNUSED *udata)
 {
     const H5FD_mpio_xfer_t *xfer_mode = (const H5FD_mpio_xfer_t *)value; /* Create local alias for values */
     uint8_t **pp = (uint8_t **)_pp;
@@ -1926,7 +1954,7 @@ H5P__dxfr_io_xfer_mode_dec(const void **_pp, void *_value)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5P__dxfr_mpio_collective_opt_enc(const void *value, void **_pp, size_t *size)
+H5P__dxfr_mpio_collective_opt_enc(const void *value, void **_pp, size_t *size, void H5_ATTR_UNUSED *udata)
 {
     const H5FD_mpio_collective_opt_t *coll_opt = (const H5FD_mpio_collective_opt_t *)value; /* Create local alias for values */
     uint8_t **pp = (uint8_t **)_pp;
@@ -1999,7 +2027,7 @@ H5P__dxfr_mpio_collective_opt_dec(const void **_pp, void *_value)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5P__dxfr_mpio_chunk_opt_hard_enc(const void *value, void **_pp, size_t *size)
+H5P__dxfr_mpio_chunk_opt_hard_enc(const void *value, void **_pp, size_t *size, void H5_ATTR_UNUSED *udata)
 {
     const H5FD_mpio_chunk_opt_t *chunk_opt = (const H5FD_mpio_chunk_opt_t *)value; /* Create local alias for values */
     uint8_t **pp = (uint8_t **)_pp;
@@ -2184,7 +2212,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5P__dxfr_edc_enc(const void *value, void **_pp, size_t *size)
+H5P__dxfr_edc_enc(const void *value, void **_pp, size_t *size, void H5_ATTR_UNUSED *udata)
 {
     const H5Z_EDC_t *check = (const H5Z_EDC_t *)value; /* Create local alias for values */
     uint8_t **pp = (uint8_t **)_pp;
