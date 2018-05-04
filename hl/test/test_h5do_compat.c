@@ -1,23 +1,21 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-* Copyright by The HDF Group.                                               *
-* Copyright by the Board of Trustees of the University of Illinois.         *
-* All rights reserved.                                                      *
-*                                                                           *
-* This file is part of HDF5.  The full HDF5 copyright notice, including     *
-* terms governing use, modification, and redistribution, is contained in    *
+ * Copyright by The HDF Group.                                               *
+ * Copyright by the Board of Trustees of the University of Illinois.         *
+ * All rights reserved.                                                      *
+ *                                                                           *
+ * This file is part of HDF5.  The full HDF5 copyright notice, including     *
+ * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
  * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
-* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include "h5hltest.h"
 #include "H5DOpublic.h"
 
-/* This test is a direct copy of the direct_chunk.c test from test/ but
- * with the H5Dread/write_chunk calls replaced with H5DOread/write_chunk.
- * This ensures that older code which uses the H5DO calls can still
- * work with the newer library.
+/* This test is a minimal test to ensure that the H5DO compatibility wrappers
+ * work correctly.
  */
 
 #define FILE_NAME       "h5do_compat.h5"
