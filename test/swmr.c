@@ -24,7 +24,6 @@
 *
 *************************************************************/
 
-#include "hdf5.h"
 #include "h5test.h"
 #include "H5Iprivate.h"
 
@@ -116,15 +115,36 @@ static int test_multiple_same(hid_t in_fapl, hbool_t new_format);
 static int
 test_metadata_read_attempts(hid_t in_fapl)
 {
-    hid_t fapl;             /* File access property list */
-    hid_t file_fapl;            /* The file's access property list */
-    hid_t fid, fid1, fid2;          /* File IDs */
-    unsigned attempts;          /* The # of read attempts */
-    char filename[NAME_BUF_SIZE];       /* File name */
-    herr_t ret;                 /* Generic return value */
+    hid_t fapl = -1;                        /* File access property list            */
+    hid_t file_fapl = -1;                   /* The file's access property list      */
+    hid_t fid = -1, fid1 = -1, fid2 = -1;   /* File IDs                             */
+    hid_t driver_id = -1;                   /* ID for this VFD                      */
+    unsigned long driver_flags = 0;         /* VFD feature flags                    */
+    hbool_t compat_w_default_vfd;           /* current VFD compat w/ H5P_DEFAULT?   */
+    unsigned attempts;                      /* The # of read attempts               */
+    char filename[NAME_BUF_SIZE];           /* File name                            */
+    herr_t ret;                             /* Generic return value                 */
 
     /* Output message about test being performed */
     TESTING("H5Pget/set_metadata_read_attempts()");
+
+    /* Check if the driver is compatible with the default VFD.
+     * Most of the tests will attempt to create and open files with both the
+     * VFD specified in the passed-in fapl and the default VFD. Since this
+     * will clearly not work with VFDs that are not compatible with the default
+     * fapl (e.g.: split/multi), we just skip this entire test.
+     */
+    if ((driver_id = H5Pget_driver(in_fapl)) < 0)
+        FAIL_STACK_ERROR
+    if (H5FDdriver_query(driver_id, &driver_flags) < 0)
+        FAIL_STACK_ERROR
+    compat_w_default_vfd = (driver_flags & H5FD_FEAT_DEFAULT_VFD_COMPATIBLE) ? TRUE : FALSE;
+
+    if (!compat_w_default_vfd) {
+        SKIPPED()
+        HDputs("    The current VFD is not compatible with the default VFD.");
+        return 0;
+    }
 
     /* Get a copy of the parameter fapl */
     if((fapl = H5Pcopy(in_fapl)) < 0)

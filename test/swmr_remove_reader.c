@@ -227,7 +227,7 @@ read_records(const char *filename, unsigned verbose, unsigned long nseconds,
 
             /* Determine the offset of the symbol, within level 0 symbols */
             /* (level 0 symbols are the most common symbols) */
-            offset = (unsigned)(HDrandom() % symbol_count[0]);
+            offset = (unsigned)HDrandom() % symbol_count[0];
             sym_com[v] = &symbol_info[0][offset];
 
             /* Emit informational message */

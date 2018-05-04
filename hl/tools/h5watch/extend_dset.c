@@ -38,24 +38,24 @@ static herr_t extend_dset_one(const char *file, char *dname, int action);
 
 /* Data structures for datasets with compound data type */
 typedef struct sub22_t {
-    unsigned int a;
-    unsigned int b;
-    unsigned int c;
+    int a;
+    int b;
+    int c;
 } sub22_t;
 
 typedef struct sub2_t {
-    unsigned int a;
+    int a;
     sub22_t b;
-    unsigned int c;
+    int c;
 } sub2_t;
 
 typedef struct sub4_t {
-    unsigned int a;
-    unsigned int b;
+    int a;
+    int b;
 } sub4_t;
 
 typedef struct set_t {
-    unsigned int field1;
+    int field1;
     sub2_t field2;
     double field3;
     sub4_t field4;
@@ -78,7 +78,7 @@ extend_dset_two(const char *file, char *dname, int action1, int action2)
     hid_t sid = -1;         /* dataspace id                                     */
     hid_t dtid = -1;        /* dataset's datatype id                            */
     int ndims;              /* # of dimension sizes                             */
-    unsigned i, j;          /* local index variable                             */
+    unsigned i;             /* local index variable                             */
     hsize_t ext_dims[2];    /* new dimension sizes after extension              */
     hsize_t cur_dims[2];    /* current dimension sizes                          */
     size_t dtype_size;      /* size of the dataset's datatype                   */
@@ -144,23 +144,23 @@ extend_dset_two(const char *file, char *dname, int action1, int action2)
         goto error;
 
     num_elmts = 1;
-    for(j = 0; j < (unsigned)ndims; j++)
-        num_elmts *= (unsigned)ext_dims[j];
+    for(i = 0; i < (unsigned)ndims; i++)
+        num_elmts *= (unsigned)ext_dims[i];
 
     /* Compound type */
     if(!HDstrcmp(dname, DSET_CMPD_TWO)) {
 
         HDmemset(cbuf, 0, TEST_BUF_SIZE * sizeof(set_t));
-        for(j = 0; j < num_elmts; j++) {
-            cbuf[j].field1 = action1;
-            cbuf[j].field2.a = action1;
-            cbuf[j].field2.c = action1;
-            cbuf[j].field2.b.a = action1;
-            cbuf[j].field2.b.b = action1;
-            cbuf[j].field2.b.c = action1;
-            cbuf[j].field3 = action1;
-            cbuf[j].field4.a = action1;
-            cbuf[j].field4.b = action1;
+        for(i = 0; i < num_elmts; i++) {
+            cbuf[i].field1 = action1;
+            cbuf[i].field2.a = action1;
+            cbuf[i].field2.c = action1;
+            cbuf[i].field2.b.a = action1;
+            cbuf[i].field2.b.b = action1;
+            cbuf[i].field2.b.c = action1;
+            cbuf[i].field3 = action1;
+            cbuf[i].field4.a = action1;
+            cbuf[i].field4.b = action1;
         } /* end for */
 
        /* Write to the dataset */
@@ -169,8 +169,8 @@ extend_dset_two(const char *file, char *dname, int action1, int action2)
 
     } else { /* Integer type */
         HDmemset(ibuf, 0, TEST_BUF_SIZE * sizeof(int));
-        for(j = 0; j < num_elmts; j++)
-            ibuf[j] = action1;
+        for(i = 0; i < num_elmts; i++)
+            ibuf[i] = action1;
 
         /* Write to the dataset */
         if(H5Dwrite(did, dtid, H5S_ALL, H5S_ALL, H5P_DEFAULT, ibuf) < 0)
@@ -225,7 +225,7 @@ extend_dset_one(const char *file, char *dname, int action)
     hid_t dtid = -1;        /* dataset's datatype id                            */
     hid_t sid = -1;         /* dataspace id                                     */
     hid_t mid = -1;         /* memory space id                                  */
-    unsigned i, j;          /* local index variable                             */
+    int i;                  /* local index variable                             */
     hsize_t cur_dims[1];    /* current dimension sizes                          */
     hsize_t ext_dims[1];    /* new dimension sizes after extension              */
     hsize_t offset[1];      /* starting offsets of appended data                */
@@ -304,18 +304,18 @@ extend_dset_one(const char *file, char *dname, int action)
         if(!HDstrcmp(dname, DSET_CMPD) || !HDstrcmp(dname, DSET_CMPD_ESC)) {
 
             HDmemset(cbuf, 0, TEST_BUF_SIZE * sizeof(set_t));
-            for(j = 0; j < (unsigned)action; j++) {
-                cbuf[j].field1 = j + 1;
-                cbuf[j].field2.a = j + 2;
-                cbuf[j].field2.b.a = j + 2;
-                cbuf[j].field2.b.b = j + 2;
-                cbuf[j].field2.b.c = j + 2;
-                cbuf[j].field2.c = j + 2;
+            for(i = 0; i < action; i++) {
+                cbuf[i].field1 = i + 1;
+                cbuf[i].field2.a = i + 2;
+                cbuf[i].field2.b.a = i + 2;
+                cbuf[i].field2.b.b = i + 2;
+                cbuf[i].field2.b.c = i + 2;
+                cbuf[i].field2.c = i + 2;
 
-                cbuf[j].field3 = j + 3;
+                cbuf[i].field3 = i + 3;
 
-                cbuf[j].field4.a = j + 4;
-                cbuf[j].field4.b = j + 4;
+                cbuf[i].field4.a = i + 4;
+                cbuf[i].field4.b = i + 4;
             } /* end for */
 
             /* Write to the extended region of the dataset */
@@ -324,8 +324,8 @@ extend_dset_one(const char *file, char *dname, int action)
         } else { /* Integer type */
 
             HDmemset(ibuf, 0, TEST_BUF_SIZE * sizeof(int));
-            for(j = 0; j < (unsigned)action; j++)
-                ibuf[j] = (int)j;
+            for(i = 0; i < action; i++)
+                ibuf[i] = (int)i;
 
             /* Write to the extended region of the dataset */
             if(H5Dwrite(did, dtid, mid, sid, H5P_DEFAULT, ibuf) < 0)

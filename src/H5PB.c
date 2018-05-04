@@ -1506,7 +1506,7 @@ H5PB__write_entry(const H5F_io_info2_t *fio_info, H5PB_entry_t *page_entry)
     HDassert(page_entry);
 
     /* Retrieve the 'eoa' for the file */
-    if(HADDR_UNDEF == (eoa = H5F_get_eoa(fio_info->f, page_entry->type)))
+    if(HADDR_UNDEF == (eoa = H5F_get_eoa(fio_info->f, (H5FD_mem_t)page_entry->type)))
         HGOTO_ERROR(H5E_PAGEBUF, H5E_CANTGET, FAIL, "driver get_eoa request failed")
 
     /* If the starting address of the page is larger than
@@ -1525,7 +1525,7 @@ H5PB__write_entry(const H5F_io_info2_t *fio_info, H5PB_entry_t *page_entry)
         fdio_info.meta_dxpl = fio_info->meta_dxpl;
         fdio_info.raw_dxpl = fio_info->raw_dxpl;
 
-        if(H5FD_write(&fdio_info, page_entry->type, page_entry->addr, page_size, page_entry->page_buf_ptr) < 0)
+        if(H5FD_write(&fdio_info, (H5FD_mem_t)page_entry->type, page_entry->addr, page_size, page_entry->page_buf_ptr) < 0)
             HGOTO_ERROR(H5E_PAGEBUF, H5E_WRITEERROR, FAIL, "file write failed")
     } /* end if */
 

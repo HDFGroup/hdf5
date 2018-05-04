@@ -185,7 +185,7 @@ H5G__obj_create_real(H5F_t *f, hid_t dxpl_id, const H5O_ginfo_t *ginfo,
     H5G_obj_create_t *gcrt_info, H5O_loc_t *oloc/*out*/)
 {
     size_t hdr_size;                    /* Size of object header to request */
-    hbool_t use_latest_format;          /* Flag indicating the new group format should be used */
+    hbool_t use_at_least_v18;           /* Flag indicating the new group format should be used */
     hid_t gcpl_id = gcrt_info->gcpl_id; /* Group creation property list ID */
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -202,24 +202,23 @@ H5G__obj_create_real(H5F_t *f, hid_t dxpl_id, const H5O_ginfo_t *ginfo,
 
     /* Check for invalid access request */
     if(0 == (H5F_INTENT(f) & H5F_ACC_RDWR))
-	HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "no write intent on file")
+        HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "no write intent on file")
 
-    /* Check for using the latest version of the group format */
+    /* Check for using the latest version of the group format which is introduced in v18 */
     /* (add more checks for creating "new format" groups when needed) */
-    if(H5F_USE_LATEST_FLAGS(f, H5F_LATEST_STYLE_GROUP) || linfo->track_corder
-            || (pline && pline->nused))
-        use_latest_format = TRUE;
+    if((H5F_LOW_BOUND(f) >= H5F_LIBVER_V18) || linfo->track_corder || (pline && pline->nused))
+        use_at_least_v18 = TRUE;
     else
-        use_latest_format = FALSE;
+        use_at_least_v18 = FALSE;
 
     /* Make certain that the creation order is being tracked if an index is
      *  going to be built on it.
      */
     if(linfo->index_corder && !linfo->track_corder)
-	HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "must track creation order to create index for it")
+        HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "must track creation order to create index for it")
 
     /* Check if we should be using the latest version of the group format */
-    if(use_latest_format) {
+    if(use_at_least_v18) {
         H5O_link_t lnk;                     /* Temporary link message info for computing message size */
         char null_char = '\0';              /* Character for creating null string */
         size_t ginfo_size;                  /* Size of the group info message */
@@ -262,10 +261,10 @@ H5G__obj_create_real(H5F_t *f, hid_t dxpl_id, const H5O_ginfo_t *ginfo,
      * incremented if the object is added to the group directed graph.
      */
     if(H5O_create(f, dxpl_id, hdr_size, (size_t)1, gcpl_id, oloc/*out*/) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create header")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create header")
 
     /* Check for format of group to create */
-    if(use_latest_format) {
+    if(use_at_least_v18) {
         /* Insert link info message */
         /* (Casting away const OK - QAK) */
         if(H5O_msg_create(oloc, H5O_LINFO_ID, 0, H5O_UPDATE_TIME, (void *)linfo, dxpl_id) < 0)

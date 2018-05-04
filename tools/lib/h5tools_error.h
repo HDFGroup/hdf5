@@ -62,11 +62,19 @@ H5TOOLS_DLLVAR hid_t H5E_tools_min_id_g;
 
 
 /*
+ * H5TOOLS_INFO macro, used to facilitate error reporting .  The arguments are the major
+ * error number, the minor error number, and a description of the error.
+ */
+#define H5TOOLS_INFO(min_id, ...) {                                                                        \
+        H5Epush2(H5tools_ERR_STACK_g, __FILE__, FUNC, __LINE__, H5tools_ERR_CLS_g, H5E_tools_g, min_id, __VA_ARGS__);     \
+}
+
+/*
  * HERROR macro, used to facilitate error reporting .  The arguments are the major
  * error number, the minor error number, and a description of the error.
  */
-#define HERROR(maj_id, min_id, str) {                                                                        \
-        H5Epush2(H5tools_ERR_STACK_g, __FILE__, FUNC, __LINE__, H5tools_ERR_CLS_g, maj_id, min_id, str);     \
+#define HERROR(maj_id, min_id, ...) {                                                                        \
+        H5Epush2(H5tools_ERR_STACK_g, __FILE__, FUNC, __LINE__, H5tools_ERR_CLS_g, maj_id, min_id, __VA_ARGS__);     \
         ret_value = FAIL;                                                                                    \
 }
 
@@ -95,8 +103,8 @@ H5TOOLS_DLLVAR hid_t H5E_tools_min_id_g;
  * The return value is assigned to a variable `ret_value' and control branches
  * to the `catch_except' label, if we're not already past it.
  */
-#define H5E_THROW(fail_value, min_id, str) {        \
-    H5Epush2(H5tools_ERR_STACK_g, __FILE__, FUNC, __LINE__, H5tools_ERR_CLS_g, H5E_tools_g, min_id, str);     \
+#define H5E_THROW(fail_value, min_id, ...) {        \
+    H5Epush2(H5tools_ERR_STACK_g, __FILE__, FUNC, __LINE__, H5tools_ERR_CLS_g, H5E_tools_g, min_id, __VA_ARGS__);     \
     H5_LEAVE(fail_value)                            \
 }
 
@@ -106,8 +114,8 @@ H5TOOLS_DLLVAR hid_t H5E_tools_min_id_g;
  * error string.  The return value is assigned to a variable `ret_value' and
  * control branches to the `done' label.
  */
-#define HGOTO_ERROR(fail_value, min_id, str) {        \
-   HERROR(H5E_tools_g, min_id, str);                 \
+#define HGOTO_ERROR(fail_value, min_id, ...) {        \
+   HERROR(H5E_tools_g, min_id, __VA_ARGS__);                 \
    HGOTO_DONE(fail_value)                          \
 }
 

@@ -36,16 +36,11 @@ LDADD=$(LIBH5TOOLS) $(LIBHDF5)
 
 if HAVE_SHARED_CONDITIONAL
   # Build it as shared library if configure is enabled for shared library.
-  dyn_LTLIBRARIES=libdynlibls.la
+  noinst_LTLIBRARIES=libdynlibls.la
   libdynlibls_la_SOURCES=dynlib_ls.c
-  libdynlibls_la_LDFLAGS = -avoid-version -module -shared -export-dynamic
-
-libdynlibls.la: $(libdynlibls_la_OBJECTS) $(libdynlibls_la_DEPENDENCIES) $(EXTRA_libdynlibls_la_DEPENDENCIES)
-	$(AM_V_CCLD)$(libdynlibls_la_LINK) $(am_libdynlibls_la_rpath) $(libdynlibls_la_OBJECTS) $(libdynlibls_la_LIBADD)
-
-#install-exec-hook:
-#	$(RM) $(DESTDIR)$(dyndir)/*dynlib*
+  libdynlibls_la_LDFLAGS=$(AM_LDFLAGS) -avoid-version -module -shared -export-dynamic -rpath /nowhere
 endif
+
 
 DISTCLEANFILES=h5ls_plugin.sh
 

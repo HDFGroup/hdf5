@@ -28,6 +28,7 @@ Linking Options:
                      AM_LDFLAGS: @AM_LDFLAGS@
                 Extra libraries: @LIBS@
                        Archiver: @AR@
+                       AR_FLAGS: @AR_FLAGS@
                          Ranlib: @RANLIB@
 
 Languages:

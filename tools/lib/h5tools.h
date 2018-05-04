@@ -522,7 +522,7 @@ typedef struct h5tools_context_t {
     hsize_t acc[H5S_MAX_RANK];        /* accumulator position */
     hsize_t pos[H5S_MAX_RANK];        /* matrix position */
     hsize_t sm_pos;                   /* current stripmine element position */
-    struct H5LD_memb_t **cmpd_listv;  /* h5watch: vector containing info about the list of compound fields to be printed */
+    const struct H5LD_memb_t * const *cmpd_listv;  /* h5watch: vector containing info about the list of compound fields to be printed */
 } h5tools_context_t;
 
 typedef struct subset_d {
@@ -568,8 +568,12 @@ H5TOOLS_DLLVAR int     oid_output;          /* oid output */
 H5TOOLS_DLLVAR int     data_output;         /* data output */
 H5TOOLS_DLLVAR int     attr_data_output;    /* attribute data output */
 
+/* sort parameters */
+H5TOOLS_DLLVAR H5_index_t   sort_by;        /*sort_by [creation_order | name]  */
+H5TOOLS_DLLVAR H5_iter_order_t sort_order;  /*sort_order [ascending | descending]   */
+
 /* things to display or which are set via command line parameters */
-H5TOOLS_DLLVAR int     enable_error_stack; /* re-enable error stack */
+H5TOOLS_DLLVAR int     enable_error_stack; /* re-enable error stack; disable=0 enable=1 */
 
 /* Strings for output */
 #define H5_TOOLS_GROUP           "GROUP"
@@ -586,7 +590,6 @@ H5TOOLS_DLL int     h5tools_set_output_file(const char *fname, int is_bin);
 H5TOOLS_DLL int     h5tools_set_error_file(const char *fname, int is_bin);
 H5TOOLS_DLL hid_t   h5tools_fopen(const char *fname, unsigned flags, hid_t fapl,
                             const char *driver, char *drivername, size_t drivername_len);
-H5TOOLS_DLL hid_t   h5tools_get_native_type(hid_t type);
 H5TOOLS_DLL hid_t   h5tools_get_little_endian_type(hid_t type);
 H5TOOLS_DLL hid_t   h5tools_get_big_endian_type(hid_t type);
 H5TOOLS_DLL htri_t  h5tools_detect_vlen(hid_t tid);

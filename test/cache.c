@@ -239,9 +239,15 @@ smoke_check_1(int express_test, unsigned paged)
     H5F_t * file_ptr = NULL;
 
     if(paged)
-        TESTING("smoke check #1 -- all clean, ins, dest, ren, 4/2 MB cache, paged aggregation")
+        TESTING("smoke check #1P -- all clean, ins, dest, ren, 4/2 MB cache")
     else
         TESTING("smoke check #1 -- all clean, ins, dest, ren, 4/2 MB cache")
+
+    if ( paged && ( express_test > 0 ) ) {
+
+        SKIPPED();
+        return(0);
+    }
 
     switch (express_test)
     {
@@ -440,9 +446,15 @@ smoke_check_2(int express_test, unsigned paged)
     H5F_t * file_ptr = NULL;
 
     if(paged)
-        TESTING("smoke check #2 -- ~1/2 dirty, ins, dest, ren, 4/2 MB cache, paged aggregation")
+        TESTING("smoke check #2P -- ~1/2 dirty, ins, dest, ren, 4/2 MB cache")
     else
         TESTING("smoke check #2 -- ~1/2 dirty, ins, dest, ren, 4/2 MB cache")
+
+    if ( paged && ( express_test > 0 ) ) {
+
+        SKIPPED();
+        return(0);
+    }
 
     switch (express_test)
     {
@@ -640,9 +652,15 @@ smoke_check_3(int express_test, unsigned paged)
     H5F_t * file_ptr = NULL;
 
     if(paged)
-        TESTING("smoke check #3 -- all clean, ins, dest, ren, 2/1 KB cache, paged aggregation")
+        TESTING("smoke check #3P -- all clean, ins, dest, ren, 2/1 KB cache")
     else
         TESTING("smoke check #3 -- all clean, ins, dest, ren, 2/1 KB cache")
+
+    if ( paged && ( express_test > 0 ) ) {
+
+        SKIPPED();
+        return(0);
+    }
 
     switch (express_test)
     {
@@ -841,9 +859,15 @@ smoke_check_4(int express_test, unsigned paged)
     H5F_t * file_ptr = NULL;
 
     if(paged)
-        TESTING("smoke check #4 -- ~1/2 dirty, ins, dest, ren, 2/1 KB cache, paged aggregation")
+        TESTING("smoke check #4P -- ~1/2 dirty, ins, dest, ren, 2/1 KB cache")
     else
         TESTING("smoke check #4 -- ~1/2 dirty, ins, dest, ren, 2/1 KB cache")
+
+    if ( paged && ( express_test > 0 ) ) {
+
+        SKIPPED();
+        return(0);
+    }
 
     switch (express_test)
     {
@@ -1090,9 +1114,15 @@ smoke_check_5(int express_test, unsigned paged)
     };
 
     if(paged)
-        TESTING("smoke check #5 -- all clean, ins, prot, unprot, AR cache 1, paged aggregation")
+        TESTING("smoke check #5P -- all clean, ins, prot, unprot, AR cache 1")
     else
         TESTING("smoke check #5 -- all clean, ins, prot, unprot, AR cache 1")
+
+    if ( paged && ( express_test > 0 ) ) {
+
+        SKIPPED();
+        return(0);
+    }
 
     switch (express_test)
     {
@@ -1328,9 +1358,15 @@ smoke_check_6(int express_test, unsigned paged)
     };
 
     if(paged)
-        TESTING("smoke check #6 -- ~1/2 dirty, ins, prot, unprot, AR cache 1, paged aggregation")
+        TESTING("smoke check #6P -- ~1/2 dirty, ins, prot, unprot, AR cache 1")
     else
         TESTING("smoke check #6 -- ~1/2 dirty, ins, prot, unprot, AR cache 1")
+
+    if ( paged && ( express_test > 0 ) ) {
+
+        SKIPPED();
+        return(0);
+    }
 
     pass = TRUE;
 
@@ -1567,9 +1603,15 @@ smoke_check_7(int express_test, unsigned paged)
     };
 
     if(paged)
-        TESTING("smoke check #7 -- all clean, ins, prot, unprot, AR cache 2, paged aggregation")
+        TESTING("smoke check #7P -- all clean, ins, prot, unprot, AR cache 2")
     else
         TESTING("smoke check #7 -- all clean, ins, prot, unprot, AR cache 2")
+
+    if ( paged && ( express_test > 0 ) ) {
+
+        SKIPPED();
+        return(0);
+    }
 
     switch (express_test)
     {
@@ -1806,9 +1848,15 @@ smoke_check_8(int express_test, unsigned paged)
     };
 
     if(paged)
-        TESTING("smoke check #8 -- ~1/2 dirty, ins, prot, unprot, AR cache 2, paged aggregation")
+        TESTING("smoke check #8P -- ~1/2 dirty, ins, prot, unprot, AR cache 2")
     else
         TESTING("smoke check #8 -- ~1/2 dirty, ins, prot, unprot, AR cache 2")
+
+    if ( paged && ( express_test > 0 ) ) {
+
+        SKIPPED();
+        return(0);
+    }
 
     switch (express_test)
     {
@@ -2006,9 +2054,15 @@ smoke_check_9(int express_test, unsigned paged)
     H5C_t * cache_ptr = NULL;
 
     if(paged)
-        TESTING("smoke check #9 -- all clean, ins, dest, ren, 4/2 MB, corked, paged aggregation")
+        TESTING("smoke check #9P -- all clean, ins, dest, ren, 4/2 MB, corked")
     else
         TESTING("smoke check #9 -- all clean, ins, dest, ren, 4/2 MB, corked")
+
+    if ( paged && ( express_test > 0 ) ) {
+
+        SKIPPED();
+        return(0);
+    }
 
     switch (express_test)
     {
@@ -2328,9 +2382,15 @@ smoke_check_10(int express_test, unsigned paged)
     H5C_t * cache_ptr = NULL;
 
     if(paged)
-        TESTING("smoke check #10 -- ~1/2 dirty, ins, dest, ren, 4/2 MB, corked, paged aggregation")
+        TESTING("smoke check #10P -- ~1/2 dirty, ins, dest, ren, 4/2 MB, corked")
     else
         TESTING("smoke check #10 -- ~1/2 dirty, ins, dest, ren, 4/2 MB, corked")
+
+    if ( paged && ( express_test > 0 ) ) {
+
+        SKIPPED();
+        return(0);
+    }
 
     switch (express_test)
     {
@@ -2644,7 +2704,7 @@ express_test, unsigned paged)
 #endif /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
 
     if(paged)
-        TESTING("write permitted check -- 1/0 MB cache, paged aggregation")
+        TESTING("write permitted check -- 1/0 MB cache (paged aggregation)")
     else
         TESTING("write permitted check -- 1/0 MB cache")
 
@@ -3056,13 +3116,14 @@ check_insert_entry(unsigned paged)
 	     (cache_ptr->pel_len != 2) ||
 	     (cache_ptr->pel_size != 2 * entry_sizes[entry_type]) ||
 	     (cache_ptr->LRU_list_len != 2) ||
-	     (cache_ptr->LRU_list_size != 2 * entry_sizes[entry_type]) ||
+	     (cache_ptr->LRU_list_size != 2 * entry_sizes[entry_type])
 #if H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS
-	     (cache_ptr->dLRU_list_len != 2) ||
+	     || (cache_ptr->dLRU_list_len != 2) ||
 	     (cache_ptr->dLRU_list_size != 2 * entry_sizes[entry_type]) ||
-#endif /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
 	     (cache_ptr->cLRU_list_len != 0) ||
-	     (cache_ptr->cLRU_list_size != (size_t)0)) {
+	     (cache_ptr->cLRU_list_size != (size_t)0)
+#endif /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
+             ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected insert results 10.";
@@ -13327,7 +13388,7 @@ check_multiple_read_protect(unsigned paged)
     test_entry_t * entry_ptr;
 
     if(paged)
-        TESTING("multiple read only protects on a single entry (paged aggregation)")
+        TESTING("multiple read only protects on a single entry (paged aggr)")
     else
         TESTING("multiple read only protects on a single entry")
 
@@ -15952,7 +16013,7 @@ check_destroy_pinned_err(unsigned paged)
     H5F_t * file_ptr = NULL;
 
     if(paged)
-        TESTING("destroy cache with permanently pinned entry error (paged aggregation)")
+        TESTING("destroy cache with permanently pinned entry error (pgd aggr)")
     else
         TESTING("destroy cache with permanently pinned entry error")
 
@@ -24436,7 +24497,7 @@ check_auto_cache_resize_epoch_markers(unsigned paged)
     };
 
     if(paged)
-        TESTING("automatic cache resize epoch marker management (paged aggregation)")
+        TESTING("automatic cache resize epoch marker management (paged aggr)")
     else
         TESTING("automatic cache resize epoch marker management")
 
@@ -28228,13 +28289,13 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion, unsigned paged)
 
     if(fill_via_insertion) {
         if(paged)
-            TESTING("to ensure metadata blizzard absence when inserting (paged aggregation)")
+            TESTING("to ensure metadata blizzard absence when inserting (pgd aggr)")
         else
             TESTING("to ensure metadata blizzard absence when inserting")
     } /* end if */
     else {
         if(paged)
-            TESTING("to ensure metadata blizzard absence on protect/unprotect (paged aggregation)")
+            TESTING("to ensure metadata blizzard absence on protect/unprotect (pa)")
         else
             TESTING("to ensure metadata blizzard absence on protect/unprotect")
     } /* end else */
@@ -34381,7 +34442,7 @@ check_entry_deletions_during_scans(unsigned paged)
     H5F_t *      file_ptr = NULL;
 
     if(paged)
-        TESTING("entry deletion during list scan detection and adaption (paged aggregation)")
+        TESTING("entry deletion during list scan detection and adaption (par)")
     else
         TESTING("entry deletion during list scan detection and adaption")
 
@@ -36392,6 +36453,18 @@ main(void)
     /* Test with paged aggregation enabled or not */
     /* Each test will call setup_cache() which set up the file space strategy according to "paged" */
     for(paged = FALSE; paged <= TRUE; paged++) {
+
+        if ( paged ) {
+
+            HDfprintf(stdout,
+                      "\n\nRe-running tests with paged aggregation:\n");
+
+            if ( express_test > 0 )
+                HDfprintf(stdout, "    Skipping smoke checks.\n");
+
+            HDfprintf(stdout, "\n");
+        }
+
         nerrs += smoke_check_1(express_test, paged);
         nerrs += smoke_check_2(express_test, paged);
         nerrs += smoke_check_3(express_test, paged);

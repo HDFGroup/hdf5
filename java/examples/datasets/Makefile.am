@@ -63,10 +63,10 @@ noinst_DATA = $(jarfile)
 
 .PHONY: classes
 
-check_SCRIPTS = runExample.sh
+check_SCRIPTS = JavaDatasetExample.sh
 TEST_SCRIPT = $(check_SCRIPTS)
 
-CLEANFILES = classnoinst.stamp $(jarfile) $(JAVAROOT)/$(pkgpath)/*.class runExample.sh
+CLEANFILES = classnoinst.stamp $(jarfile) $(JAVAROOT)/$(pkgpath)/*.class JavaDatasetExample.sh
 
 clean:
 	rm -rf $(JAVAROOT)/*

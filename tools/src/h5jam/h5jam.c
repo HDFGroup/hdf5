@@ -73,13 +73,13 @@ usage (const char *prog)
     HDfprintf (stdout,
     "Adds user block to front of an HDF5 file and creates a new concatenated file.\n");
     HDfprintf (stdout, "\n");
-    HDfprintf (stdout, 
+    HDfprintf (stdout,
     "OPTIONS\n");
-    HDfprintf (stdout, 
+    HDfprintf (stdout,
     "  -i in_file.h5    Specifies the input HDF5 file.\n");
-    HDfprintf (stdout, 
+    HDfprintf (stdout,
     "  -u in_user_file  Specifies the file to be inserted into the user block.\n");
-    HDfprintf (stdout, 
+    HDfprintf (stdout,
     "                   Can be any file format except an HDF5 format.\n");
     HDfprintf (stdout,
     "  -o out_file.h5   Specifies the output HDF5 file.\n");
@@ -179,9 +179,11 @@ parse_command_line (int argc, const char *argv[])
       case 'h':
           usage (h5tools_getprogname());
           leave (EXIT_SUCCESS);
+          break;
       case 'V':
           print_version (h5tools_getprogname());
           leave (EXIT_SUCCESS);
+          break;
       case '?':
       default:
           usage (h5tools_getprogname());
@@ -197,10 +199,6 @@ parse_command_line (int argc, const char *argv[])
  *
  * Return:      Success:    0
  *              Failure:    1
- *
- * Programmer:
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -292,7 +290,7 @@ main (int argc, const char *argv[])
     H5Pclose(plist);
     H5Fclose(ifile);
 
-    ufid = HDopen(ub_file, O_RDONLY, 0);
+    ufid = HDopen(ub_file, O_RDONLY);
     if(ufid < 0) {
         error_msg("unable to open user block file \"%s\"\n", ub_file);
         leave (EXIT_FAILURE);
@@ -307,7 +305,7 @@ main (int argc, const char *argv[])
 
     fsize = (off_t)sbuf.st_size;
 
-    h5fid = HDopen(input_file, O_RDONLY, 0);
+    h5fid = HDopen(input_file, O_RDONLY);
     if(h5fid < 0) {
         error_msg("unable to open HDF5 file for read \"%s\"\n", input_file);
         HDclose (ufid);
@@ -325,7 +323,7 @@ main (int argc, const char *argv[])
     h5fsize = (hsize_t)sbuf2.st_size;
 
     if (output_file == NULL) {
-        ofid = HDopen (input_file, O_WRONLY, 0);
+        ofid = HDopen(input_file, O_WRONLY);
 
         if (ofid < 0) {
             error_msg("unable to open output file \"%s\"\n", output_file);
@@ -335,7 +333,7 @@ main (int argc, const char *argv[])
         }
     }
     else {
-        ofid = HDopen (output_file, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+        ofid = HDopen(output_file, O_WRONLY | O_CREAT | O_TRUNC, H5_POSIX_CREATE_MODE_RW);
 
         if (ofid < 0) {
             error_msg("unable to create output file \"%s\"\n", output_file);
@@ -392,7 +390,7 @@ main (int argc, const char *argv[])
         HDfree (input_file);
     if(output_file)
         HDfree (output_file);
-    
+
     if(ufid >= 0)
         HDclose (ufid);
     if(h5fid >= 0)
@@ -548,7 +546,8 @@ write_pad(int ofile, hsize_t old_where, hsize_t *new_where)
     char buf[1];
     hsize_t psize;
 
-    HDassert(new_where);
+    if(new_where == NULL)
+        return FAIL;
 
     buf[0] = '\0';
 

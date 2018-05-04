@@ -649,8 +649,10 @@ H5C__deserialize_prefetched_entry(H5F_t *f, hid_t dxpl_id, H5C_t *cache_ptr,
     /* Initialize fields supporting replacement policies: */
     ds_entry_ptr->next                      	= NULL;
     ds_entry_ptr->prev                      	= NULL;
+#if H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS
     ds_entry_ptr->aux_next                  	= NULL;
     ds_entry_ptr->aux_prev                  	= NULL;
+#endif /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
 #ifdef H5_HAVE_PARALLEL
     pf_entry_ptr->coll_next                 	= NULL;
     pf_entry_ptr->coll_prev                 	= NULL;
@@ -1380,9 +1382,12 @@ H5C__prep_image_for_file_close(H5F_t *f, hid_t dxpl_id, hbool_t *image_generated
      * Note that under some error conditions, the superblock will be 
      * undefined in this case as well -- if so, assume that the 
      * superblock does not support superblock extension messages.
+     * Also verify that the file's high_bound is at least release
+     * 1.10.x, otherwise cancel the request for a cache image
      */
     if((NULL == f->shared->sblock) ||
-         (f->shared->sblock->super_vers < HDF5_SUPERBLOCK_VERSION_2)) {
+         (f->shared->sblock->super_vers < HDF5_SUPERBLOCK_VERSION_2) ||
+         (f->shared->high_bound < H5F_LIBVER_V110)) {
         H5C_cache_image_ctl_t default_image_ctl = H5C__DEFAULT_CACHE_IMAGE_CTL;
 
         cache_ptr->image_ctl = default_image_ctl;

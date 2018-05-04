@@ -2651,11 +2651,8 @@ compress_readAll(void)
                     nerrors++;
                 }
 
-            /* Writing to the compressed, chunked dataset in parallel should fail */
-            H5E_BEGIN_TRY {
-                ret = H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, xfer_plist, data_read);
-            } H5E_END_TRY;
-            VRFY((ret < 0), "H5Dwrite failed");
+            ret = H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, xfer_plist, data_read);
+            VRFY((ret >= 0), "H5Dwrite succeeded");
 
             ret = H5Pclose(xfer_plist);
             VRFY((ret >= 0), "H5Pclose succeeded");

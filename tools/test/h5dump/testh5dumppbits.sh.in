@@ -241,6 +241,8 @@ TOOLTEST() {
     # Create the expect file if it doesn't yet exist.
      echo " CREATED"
      cp $actual $expect
+     echo "    Expected result (*.ddl) missing"
+     nerrors="`expr $nerrors + 1`"
     elif $CMP $expect $actual; then
      echo " PASSED"
     else
@@ -282,11 +284,15 @@ TOOLTEST2() {
     # Create the expect file if it doesn't yet exist.
      echo " CREATED"
      cp $actual $expect
+     echo "    Expected result (*.ddl) missing"
+     nerrors="`expr $nerrors + 1`"
     elif $CMP $expect $actual; then
       if [ ! -f $expectdata ]; then
       # Create the expect data file if it doesn't yet exist.
         echo " CREATED"
         cp $actualdata $expectdata
+        echo "    Expected data (*.exp) missing"
+        nerrors="`expr $nerrors + 1`"
       elif $CMP $expectdata $actualdata; then
         echo " PASSED"
       else
@@ -348,6 +354,8 @@ TOOLTEST3() {
     # Create the expect file if it doesn't yet exist.
      echo " CREATED"
      cp $actual $expect
+     echo "    Expected result (*.ddl) missing"
+     nerrors="`expr $nerrors + 1`"
     elif $CMP $expect $actual; then
      echo " PASSED"
     else
@@ -404,15 +412,17 @@ TOOLTEST4() {
     # Create the expect file if it doesn't yet exist.
      echo " CREATED"
      cp $actual $expect
+     echo "    Expected result (*.ddl) missing"
+     nerrors="`expr $nerrors + 1`"
     elif $CMP $expect $actual; then
      if $CMP $expect_err $actual_ext; then
       echo " PASSED"
-    else
-     echo "*FAILED*"
-     echo "    Expected result (*.err) differs from actual result (*.oerr)"
-     nerrors="`expr $nerrors + 1`"
-     test yes = "$verbose" && $DIFF $expect_err $actual_ext |sed 's/^/    /'
-    fi
+     else
+      echo "*FAILED*"
+      echo "    Expected result (*.err) differs from actual result (*.oerr)"
+      nerrors="`expr $nerrors + 1`"
+      test yes = "$verbose" && $DIFF $expect_err $actual_ext |sed 's/^/    /'
+     fi
     else
      echo "*FAILED*"
      echo "    Expected result (*.ddl) differs from actual result (*.out)"

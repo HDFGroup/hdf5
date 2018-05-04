@@ -98,7 +98,7 @@ COPY_TESTFILES_TO_TESTDIR()
                 $CP -f $tstfile $TESTDIR
                 if [ $? -ne 0 ]; then
                     echo "Error: FAILED to copy $tstfile ."
-                
+
                     # Comment out this to CREATE expected file
                     exit $EXIT_FAILURE
                 fi
@@ -122,7 +122,7 @@ CLEAN_TESTFILES_AND_TESTDIR()
 
 # Print a line-line message left justified in a field of 70 characters
 # beginning with the word "Testing".
-TESTING() 
+TESTING()
 {
     SPACES="                                                               "
     echo "Testing $* $SPACES" |cut -c1-70 |tr -d '\012'
@@ -134,7 +134,7 @@ TESTING()
 # Print a line-line message left justified in a field of 70 characters
 # beginning with the word "Verifying".
 #
-VERIFY_H5LS() 
+VERIFY_H5LS()
 {
     SPACES="                                                               "
     echo "Verifying h5ls file structure $* $SPACES" | cut -c1-70 | tr -d '\012'
@@ -146,7 +146,7 @@ VERIFY_H5LS()
 # Assumed arguments:
 # $* arguments for h5mkgrp.
 
-TOOLTEST() 
+TOOLTEST()
 {
     TESTING $H5MKGRP $@
     (
@@ -171,7 +171,7 @@ TOOLTEST()
 
 # Call the h5ls tool to verify the correct output data in the destination file
 #
-H5LSTEST() 
+H5LSTEST()
 {
     expect="$TESTDIR/`basename $1 .h5`.ls"
     actual="$TESTDIR/`basename $1 .h5`.out"
@@ -191,9 +191,11 @@ H5LSTEST()
     STDERR_FILTER $actual
 
    if [ ! -f $expect ]; then
-    # Create the expect file if it doesn't yet exist.
-    echo " CREATED"
-    cp $actual $expect
+      # Create the expect file if it doesn't yet exist.
+      echo " CREATED"
+      cp $actual $expect
+      echo "    Expected result (*.ls) missing"
+      nerrors="`expr $nerrors + 1`"
    elif $CMP $expect $actual; then
       echo " PASSED"
    else
@@ -215,7 +217,7 @@ H5LSTEST()
 # $1 is test file name
 # $2 is h5mkgrp options
 # $* are groups to create
-RUNTEST() 
+RUNTEST()
 {
     FILEOUT=$1
     shift
@@ -244,7 +246,7 @@ RUNTEST()
 # $1 is test expected output file
 # $2 is h5mkgrp options
 # $* are groups to create
-CMPTEST() 
+CMPTEST()
 {
     FILEOUT=$1
     expect="$TESTDIR/`basename $1 .h5`.txt"
@@ -260,11 +262,13 @@ CMPTEST()
     $RUNSERIAL $H5MKGRP_BIN $@
     ) >$actual 2>$actual_err
     cat $actual_err >> $actual
-    
+
    if [ ! -f $expect ]; then
     # Create the expect file if it doesn't yet exist.
-    echo " CREATED"
-    cp $actual $expect
+      echo " CREATED"
+      cp $actual $expect
+      echo "    Expected result (*.txt) missing"
+      nerrors="`expr $nerrors + 1`"
    elif $CMP $expect $actual; then
       echo " PASSED"
    else
@@ -302,7 +306,7 @@ RUNTEST h5mkgrp_several_v.h5 "-v" one two
 RUNTEST h5mkgrp_several_p.h5 "-p" one two
 RUNTEST h5mkgrp_several_l.h5 "-l" one two
 
-# Create various nested groups 
+# Create various nested groups
 RUNTEST h5mkgrp_nested_p.h5 "-p" /one/two
 RUNTEST h5mkgrp_nested_lp.h5 "-lp" /one/two
 RUNTEST h5mkgrp_nested_mult_p.h5 "-p" /one/two /three/four

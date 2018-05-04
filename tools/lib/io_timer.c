@@ -22,15 +22,8 @@
  * This is a module of useful timing functions for performance testing.
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-
 #include "H5private.h"
 #include "hdf5.h"
-
-#ifdef H5_HAVE_PARALLEL
-#include <mpi.h>
-#endif
 
 #include "io_timer.h"
 

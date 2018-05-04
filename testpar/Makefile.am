@@ -23,7 +23,7 @@ AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_srcdir)/test
 
 # Test programs.  These are our main targets.
 #
-TEST_PROG_PARA=t_mpi testphdf5 t_cache t_cache_image t_pflush1 t_pflush2 t_pshutdown t_prestart t_init_term t_shapesame
+TEST_PROG_PARA=t_mpi t_bigio testphdf5 t_cache t_cache_image t_pflush1 t_pflush2 t_pread t_pshutdown t_prestart t_init_term t_shapesame t_filters_parallel
 
 check_PROGRAMS = $(TEST_PROG_PARA)
 
@@ -37,9 +37,12 @@ LDADD = $(LIBH5TEST) $(LIBHDF5)
 # Temporary files
 # MPItest.h5 is from t_mpi
 # Para*.h5 are from testphdf
+# bigio_test.h5 is from t_bigio
+# ShapeSameTest.h5 is from t_shapesame
 # shutdown.h5 is from t_pshutdown
 # after_mpi_fin.h5 is from t_init_term
 # go is used for debugging. See testphdf5.c.
-CHECK_CLEANFILES+=MPItest.h5 Para*.h5 CacheTestDummy.h5 shutdown.h5  after_mpi_fin.h5 go
+CHECK_CLEANFILES+=MPItest.h5 Para*.h5 bigio_test.h5 CacheTestDummy.h5 \
+		  ShapeSameTest.h5 shutdown.h5  after_mpi_fin.h5 go
 
 include $(top_srcdir)/config/conclude.am

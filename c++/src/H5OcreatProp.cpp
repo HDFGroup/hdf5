@@ -88,7 +88,7 @@ ObjCreatPropList::ObjCreatPropList() : PropList(H5P_OBJECT_CREATE) {}
 
 //--------------------------------------------------------------------------
 // Function:    ObjCreatPropList copy constructor
-///\brief       Copy Constructor: makes a copy of the original
+///\brief       Copy constructor: same HDF5 object as \a original
 ///\param       original - IN: ObjCreatPropList instance to copy
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
@@ -113,8 +113,7 @@ ObjCreatPropList::ObjCreatPropList(const hid_t plist_id) : PropList(plist_id) {}
 ///\par Description
 ///             If \c max_compact is set to 0, dense storage will be used.
 ///             For more detail about on attribute storage, please refer to the
-///             C layer Reference Manual at:
-/// https://www.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-SetAttrPhaseChange
+///             H5Pset_attr_phase_change API in the HDF5 C Reference Manual.
 // Programmer   Binh-Minh Ribler - September 2015
 //--------------------------------------------------------------------------
 void ObjCreatPropList::setAttrPhaseChange(unsigned max_compact, unsigned min_dense) const
@@ -137,8 +136,7 @@ void ObjCreatPropList::setAttrPhaseChange(unsigned max_compact, unsigned min_den
 ///\par Description
 ///             If \c max_compact is set to 0, dense storage will be used.
 ///             For more detail about on attribute storage, please refer to the
-///             C layer Reference Manual at:
-/// https://www.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-GetAttrPhaseChange
+///             H5Pget_attr_phase_change API in the HDF5 C Reference Manual.
 // Programmer   Binh-Minh Ribler - September 2015
 //--------------------------------------------------------------------------
 void ObjCreatPropList::getAttrPhaseChange(unsigned& max_compact, unsigned& min_dense) const
@@ -166,8 +164,8 @@ void ObjCreatPropList::getAttrPhaseChange(unsigned& max_compact, unsigned& min_d
 ///             tracked not indexed.  Note that HDF5 currently provides no
 ///             mechanism to turn on attribute creation order tracking at object
 ///             creation time and to build the index later.
-///             The C layer Reference Manual at can be found at:
-/// https://www.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-SetAttrCreationOrder
+///             For detail, please refer to the H5Pset_attr_creation_order API
+///             in the HDF5 C Reference Manual.
 // Programmer   Binh-Minh Ribler - September 2015
 //--------------------------------------------------------------------------
 void ObjCreatPropList::setAttrCrtOrder(unsigned crt_order_flags) const
@@ -188,8 +186,8 @@ void ObjCreatPropList::setAttrCrtOrder(unsigned crt_order_flags) const
 ///\par Description
 ///             When no flag is set, i.e. crt_order_flags = 0, attribute
 ///             creation order is neither tracked not indexed.
-///             The C layer Reference Manual at can be found at:
-/// https://www.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-GetAttrCreationOrder
+///             For detail, please refer to the H5Pget_attr_creation_order API
+///             in the HDF5 C Reference Manual.
 // Programmer   Binh-Minh Ribler - September 2015
 //--------------------------------------------------------------------------
 unsigned ObjCreatPropList::getAttrCrtOrder() const

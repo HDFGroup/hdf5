@@ -196,6 +196,8 @@ TOOLTEST() {
     # Create the expect file if it doesn't yet exist.
      echo " CREATED"
      cp $actual $expect
+     echo "    Expected result (*.ddl) missing"
+     nerrors="`expr $nerrors + 1`"
     elif $CMP $expect $actual > /dev/null 2>&1 ; then
      echo " PASSED"
     else

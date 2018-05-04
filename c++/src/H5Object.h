@@ -20,8 +20,7 @@ namespace H5 {
 /*! \class H5Object
     \brief Class H5Object is a bridge between H5Location and DataSet, DataType,
      and Group.
-*/
-/*
+
     Modification:
         Sept 18, 2012: Added class H5Location in between IdComponent and
                 H5Object.  An H5File now inherits from H5Location.  All HDF5
@@ -38,9 +37,7 @@ namespace H5 {
                 can be in H5Location and those that cannot take attribute id
                 can be in H5Object.
 */
-// Class forwarding
-class H5Object;
-class Attribute;
+// Inheritance: H5Location -> IdComponent
 
 // Define the operator function pointer for H5Aiterate().
 typedef void (*attr_operator_t)(H5Object& loc/*in*/,
@@ -55,7 +52,6 @@ class UserData4Aiterate {
         H5Object* location;
 };
 
-//  Inheritance: H5Location -> IdComponent
 class H5_DLLCPP H5Object : public H5Location {
    public:
         // Creates an attribute for the specified object
@@ -78,6 +74,9 @@ class H5_DLLCPP H5Object : public H5Location {
         // Returns the object header version of an object
         unsigned objVersion() const;
 
+        // Determines the number of attributes belong to this object.
+        int getNumAttrs() const;
+
         // Checks whether the named attribute exists for this object.
         bool attrExists(const char* name) const;
         bool attrExists(const H5std_string& name) const;
@@ -93,29 +92,17 @@ class H5_DLLCPP H5Object : public H5Location {
         // Returns an identifier.
         virtual hid_t getId() const = 0;
 
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
         // Gets the name of this HDF5 object, i.e., Group, DataSet, or
-        // DataType.  These should have const but are retiring anyway.
+        // DataType.
         ssize_t getObjName(char *obj_name, size_t buf_size = 0) const;
         ssize_t getObjName(H5std_string& obj_name, size_t len = 0) const;
         H5std_string getObjName() const;
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+
    protected:
         // Default constructor
         H5Object();
-
-        // *** Deprecation warning ***
-        // The following two constructors are no longer appropriate after the
-        // data member "id" had been moved to the sub-classes.
-        // The copy constructor is a noop and is removed in 1.8.15 and the
-        // other will be removed from 1.10 release, and then from 1.8 if its
-        // removal does not raise any problems in two 1.10 releases.
-
-        // Creates a copy of an existing object giving the object id
-        H5Object(const hid_t object_id);
-
-        // Copy constructor: makes copy of an H5Object object.
-        // H5Object(const H5Object& original);
 
         // Sets the identifier of this object to a new value. - this one
         // doesn't increment reference count

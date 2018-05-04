@@ -71,7 +71,7 @@ if test "X-gfortran" = "X-$f9x_vendor"; then
     #esac
 
     # General
-    FC_BASENAME=gfortran40
+    FC_BASENAME=gfortran
     F9XSUFFIXFLAG=""
     FSEARCH_DIRS=""
     H5_FCFLAGS="$H5_FCFLAGS -pedantic -Wall -Wextra -Wunderflow -Wimplicit-interface -Wsurprising"

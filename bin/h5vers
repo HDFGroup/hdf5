@@ -371,7 +371,7 @@ if ($H5_JAVA) {
   my $sub_rel_ver_str = (
      $newver[3] eq ""
      ? sprintf("\"%s\"", "")
-     : sprintf("\"%s\"", "-".$newver[3])
+     : sprintf("\"%s\"", "-".$newver[3].", currently under development")
      );
   my $version_string1 = sprintf("%d.%d.%d", @newver[0,1,2]);
   my $version_string2 = sprintf("%d, %d, %d", @newver[0,1,2]);
@@ -389,7 +389,7 @@ if ($TESTH5_JAVA) {
   my $sub_rel_ver_str = (
      $newver[3] eq ""
      ? sprintf("\"%s\"", "")
-     : sprintf("\"%s\"", "-".$newver[3])
+     : sprintf("\"%s\"", "-".$newver[3].", currently under development")
      );
   my $version_string1 = sprintf("%d, %d, %d", @newver[0,1,2]);
   my $version_string2 = sprintf("int majnum = %d, minnum = %d, relnum = %d", @newver[0,1,2]);

@@ -115,6 +115,7 @@ hbool_t H5_PKG_INIT_VAR = FALSE;
 /* Local Variables */
 /*******************/
 
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5MF_init_merge_flags
@@ -1519,7 +1520,7 @@ H5MF_try_shrink(H5F_t *f, H5FD_mem_t alloc_type, hid_t dxpl_id, haddr_t addr,
     H5AC_ring_t fsm_ring = H5AC_RING_INV;   /* Ring of fsm */
     H5F_mem_page_t fs_type;                 /* Free space type */
     hbool_t reset_ring = FALSE;             /* Whether the ring was set */
-    htri_t ret_value = FAIL;                /* Return value */
+    htri_t ret_value = FALSE;               /* Return value */
 
     FUNC_ENTER_NOAPI_TAG(dxpl_id, H5AC__FREESPACE_TAG, FAIL)
 #ifdef H5MF_ALLOC_DEBUG
@@ -3246,7 +3247,6 @@ H5MF_settle_meta_data_fsm(H5F_t *f, hid_t dxpl_id, hbool_t *fsm_settled)
                                         /* for self referential FSMs */
     haddr_t eoa_post_fsm_fsalloc;       /* eoa post file space allocation */
                                         /* for self referential FSMs */
-    H5FS_stat_t fs_stat;                /* Information for hdr FSM */
     H5P_genplist_t *dxpl = NULL;        /* DXPL for setting ring */
     H5AC_ring_t orig_ring = H5AC_RING_INV; /* Original ring value */
     hbool_t	reset_ring = FALSE;     /* Whether we set the ring */
@@ -3309,6 +3309,9 @@ H5MF_settle_meta_data_fsm(H5F_t *f, hid_t dxpl_id, hbool_t *fsm_settled)
         reset_ring = TRUE;
 
 #ifndef NDEBUG
+{
+        H5FS_stat_t fs_stat;                /* Information for hdr FSM */
+
         /* Verify that sm_hdr_fspace is floating if it exists */
         if(sm_hdr_fspace) {
             /* Query free space manager info for this type */
@@ -3356,6 +3359,7 @@ H5MF_settle_meta_data_fsm(H5F_t *f, hid_t dxpl_id, hbool_t *fsm_settled)
                 HDassert(fs_stat.alloc_sect_size == 0);
             } /* end if */
         } /* end if */
+}
 #endif /* NDEBUG */
 
         /* Free the space in the metadata aggregator.  Do this via the

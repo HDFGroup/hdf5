@@ -368,9 +368,11 @@ H5D__compact_flush(H5D_t *dset, hid_t dxpl_id)
 
     /* Check if the buffered compact information is dirty */
     if(dset->shared->layout.storage.u.compact.dirty) {
-        if(H5O_msg_write(&(dset->oloc), H5O_LAYOUT_ID, 0, H5O_UPDATE_TIME, &(dset->shared->layout), dxpl_id) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to update layout message")
         dset->shared->layout.storage.u.compact.dirty = FALSE;
+        if(H5O_msg_write(&(dset->oloc), H5O_LAYOUT_ID, 0, H5O_UPDATE_TIME, &(dset->shared->layout), dxpl_id) < 0) {
+            dset->shared->layout.storage.u.compact.dirty = TRUE;
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to update layout message")
+        }
     } /* end if */
 
 done:
@@ -418,7 +420,7 @@ H5D__compact_dest(H5D_t *dset, hid_t H5_ATTR_UNUSED dxpl_id)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D__compact_copy(H5F_t *f_src, H5O_storage_compact_t *storage_src, H5F_t *f_dst,
+H5D__compact_copy(H5F_t *f_src, H5O_storage_compact_t *_storage_src, H5F_t *f_dst,
     H5O_storage_compact_t *storage_dst, H5T_t *dt_src, H5O_copy_t *cpy_info,
     hid_t dxpl_id)
 {
@@ -429,6 +431,8 @@ H5D__compact_copy(H5F_t *f_src, H5O_storage_compact_t *storage_src, H5F_t *f_dst
     void       *bkg = NULL;             /* Temporary buffer for copying data */
     void       *reclaim_buf = NULL;     /* Buffer for reclaiming data */
     hid_t       buf_sid = -1;           /* ID for buffer dataspace */
+    H5D_shared_t    *shared_fo = (H5D_shared_t *)cpy_info->shared_fo;   /* Pointer to the shared struct for dataset object */
+    H5O_storage_compact_t *storage_src = _storage_src;  /* Pointer to storage_src */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -440,6 +444,10 @@ H5D__compact_copy(H5F_t *f_src, H5O_storage_compact_t *storage_src, H5F_t *f_dst
     HDassert(storage_dst);
     HDassert(storage_dst->buf);
     HDassert(dt_src);
+
+    /* If the dataset is open in the file, point to "layout" in the shared struct */
+    if(shared_fo != NULL)
+        storage_src = &(shared_fo->layout.storage.u.compact);
 
     /* Create datatype ID for src datatype, so it gets freed */
     if((tid_src = H5I_register(H5I_DATATYPE, dt_src, FALSE)) < 0)

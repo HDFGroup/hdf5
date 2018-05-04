@@ -34,6 +34,10 @@ class H5_DLLCPP FloatType : public AtomType {
         FloatType(const H5Location& loc, const char* name);
         FloatType(const H5Location& loc, const H5std_string& name);
 
+        // Returns an FloatType object via DataType* by decoding the
+        // binary object description of this type.
+        virtual DataType* decode() const;
+
         // Retrieves the exponent bias of a floating-point type.
         size_t getEbias() const;
 
@@ -67,7 +71,7 @@ class H5_DLLCPP FloatType : public AtomType {
         // Creates a floating-point datatype using an existing id.
         FloatType(const hid_t existing_id);
 
-        // Copy constructor: makes a copy of the original FloatType object.
+        // Copy constructor: same as the original FloatType.
         FloatType(const FloatType& original);
 
         // Noop destructor.

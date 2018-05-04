@@ -18,20 +18,27 @@
 namespace H5 {
 
 /*! \class VarLenType
-    \brief VarLenType is derived from a DataType and operates on HDF5
-    C's Variable-length Datatypes.
+    \brief VarLenType is a derivative of a DataType and operates on HDF5
+    Variable-length Datatypes.
 */
 //  Inheritance: DataType -> H5Object -> H5Location -> IdComponent
 class H5_DLLCPP VarLenType : public DataType {
    public:
         // Constructor that creates a variable-length datatype based
         // on the specified base type.
+        VarLenType(const DataType& base_type);
+
+        // Deprecated - will be removed after 1.10.2
         VarLenType(const DataType* base_type);
+
+        // Returns an VarLenType object via DataType* by decoding the
+        // binary object description of this type.
+        virtual DataType* decode() const;
 
         ///\brief Returns this class name.
         virtual H5std_string fromClass () const { return("VarLenType"); }
 
-        // Copy constructor: makes copy of the original object.
+        // Copy constructor: same as the original VarLenType.
         VarLenType(const VarLenType& original);
 
         // Constructor that takes an existing id

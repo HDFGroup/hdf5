@@ -193,6 +193,8 @@ hid_t H5E_CANTSORT_g       = FAIL;      /* Can't sort objects */
 hid_t H5E_MPI_g            = FAIL;      /* Some MPI function failed */
 hid_t H5E_MPIERRSTR_g      = FAIL;      /* MPI Error String */
 hid_t H5E_CANTRECV_g       = FAIL;      /* Can't receive data */
+hid_t H5E_CANTGATHER_g     = FAIL;      /* Can't gather data */
+hid_t H5E_NO_INDEPENDENT_g = FAIL;      /* Can't perform independent IO */
 
 /* Dataspace errors */
 hid_t H5E_CANTCLIP_g       = FAIL;      /* Can't clip hyperslab region */

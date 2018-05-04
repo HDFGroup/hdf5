@@ -49,10 +49,6 @@
 /* Local Prototypes */
 /********************/
 
-/* Internal I/O routines */
-static herr_t H5D__pre_write(H5D_t *dset, hbool_t direct_write, hid_t mem_type_id, 
-    const H5S_t *mem_space, const H5S_t *file_space, hid_t dxpl_id, const void *buf);
-
 /* Setup/teardown routines */
 static herr_t H5D__ioinfo_init(H5D_t *dset,
 #ifndef H5_HAVE_PARALLEL
@@ -125,9 +121,13 @@ H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 	hid_t file_space_id, hid_t plist_id, void *buf/*out*/)
 {
     H5D_t		   *dset = NULL;
-    const H5S_t		   *mem_space = NULL;
-    const H5S_t		   *file_space = NULL;
-    herr_t                  ret_value = SUCCEED;  /* Return value */
+    const H5S_t	    *mem_space = NULL;
+    const H5S_t	    *file_space = NULL;
+    H5P_genplist_t     *plist;              /* Property list pointer */
+    hsize_t         *direct_offset = NULL;
+    hbool_t         direct_read = FALSE;
+    uint32_t        direct_filters = 0;
+    herr_t          ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE6("e", "iiiiix", dset_id, mem_type_id, mem_space_id, file_space_id,
@@ -135,28 +135,29 @@ H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 
     /* check arguments */
     if(NULL == (dset = (H5D_t *)H5I_object_verify(dset_id, H5I_DATASET)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
     if(NULL == dset->oloc.file)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
 
     if(mem_space_id < 0 || file_space_id < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
 
     if(H5S_ALL != mem_space_id) {
-	if(NULL == (mem_space = (const H5S_t *)H5I_object_verify(mem_space_id, H5I_DATASPACE)))
-	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
+        if(NULL == (mem_space = (const H5S_t *)H5I_object_verify(mem_space_id, H5I_DATASPACE)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
 
-	/* Check for valid selection */
-	if(H5S_SELECT_VALID(mem_space) != TRUE)
-	    HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "selection+offset not within extent")
+        /* Check for valid selection */
+        if(H5S_SELECT_VALID(mem_space) != TRUE)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "selection+offset not within extent")
     } /* end if */
-    if(H5S_ALL != file_space_id) {
-	if(NULL == (file_space = (const H5S_t *)H5I_object_verify(file_space_id, H5I_DATASPACE)))
-	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
 
-	/* Check for valid selection */
-	if(H5S_SELECT_VALID(file_space) != TRUE)
-	    HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "selection+offset not within extent")
+    if(H5S_ALL != file_space_id) {
+        if(NULL == (file_space = (const H5S_t *)H5I_object_verify(file_space_id, H5I_DATASPACE)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
+
+        /* Check for valid selection */
+        if(H5S_SELECT_VALID(file_space) != TRUE)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "selection+offset not within extent")
     } /* end if */
 
     /* Get the default dataset transfer property list if the user didn't provide one */
@@ -166,9 +167,54 @@ H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
         if(TRUE != H5P_isa_class(plist_id, H5P_DATASET_XFER))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms")
 
-    /* read raw data */
-    if(H5D__read(dset, mem_type_id, mem_space, file_space, plist_id, buf/*out*/) < 0)
-	HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data")
+    /* Get the dataset transfer property list */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(plist_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list")
+
+    /* Retrieve the 'direct read' flag */
+    if(H5P_get(plist, H5D_XFER_DIRECT_CHUNK_READ_FLAG_NAME, &direct_read) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "error getting flag for direct chunk read")
+
+    if(direct_read) {
+        unsigned u;
+        hsize_t  internal_offset[H5O_LAYOUT_NDIMS];
+
+        if(H5D_CHUNKED != dset->shared->layout.type)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a chunked dataset")
+
+        /* Get the direct chunk offset property */
+        if(H5P_get(plist, H5D_XFER_DIRECT_CHUNK_READ_OFFSET_NAME, &direct_offset) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "error getting direct offset from xfer properties")
+
+        /* The library's chunking code requires the offset terminates with a zero. So transfer the
+         * offset array to an internal offset array */
+        for(u = 0; u < dset->shared->ndims; u++) {
+            /* Make sure the offset doesn't exceed the dataset's dimensions */
+            if(direct_offset[u] > dset->shared->curr_dims[u])
+                HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "offset exceeds dimensions of dataset")
+
+            /* Make sure the offset fall right on a chunk's boundary */
+            if(direct_offset[u] % dset->shared->layout.u.chunk.dim[u])
+                HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "offset doesn't fall on chunks's boundary")
+
+            internal_offset[u] = direct_offset[u];
+        } /* end for */
+
+        /* Terminate the offset with a zero */
+        internal_offset[dset->shared->ndims] = 0;
+
+        /* Read the raw chunk */
+        if(H5D__chunk_direct_read(dset, plist_id, internal_offset, &direct_filters, buf) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read chunk directly")
+        /* Set the chunk filter mask property */
+        if(H5P_set(plist, H5D_XFER_DIRECT_CHUNK_READ_FILTERS_NAME, &direct_filters) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "error setting filter mask xfer property")
+    }
+    else {
+        /* read raw data */
+        if(H5D__read(dset, mem_type_id, mem_space, file_space, plist_id, buf/*out*/) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data")
+    }
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -245,28 +291,28 @@ H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
     /* Check dataspace selections if this is not a direct write */
     if(!direct_write) {
         if(mem_space_id < 0 || file_space_id < 0)
-	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
 
-	if(H5S_ALL != mem_space_id) {
-	    if(NULL == (mem_space = (const H5S_t *)H5I_object_verify(mem_space_id, H5I_DATASPACE)))
-	        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
+        if(H5S_ALL != mem_space_id) {
+            if(NULL == (mem_space = (const H5S_t *)H5I_object_verify(mem_space_id, H5I_DATASPACE)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
 
-	    /* Check for valid selection */
-	    if(H5S_SELECT_VALID(mem_space) != TRUE)
-		HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "memory selection+offset not within extent")
-	} /* end if */
-	if(H5S_ALL != file_space_id) {
-	    if(NULL == (file_space = (const H5S_t *)H5I_object_verify(file_space_id, H5I_DATASPACE)))
-		HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
+            /* Check for valid selection */
+            if(H5S_SELECT_VALID(mem_space) != TRUE)
+                HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "memory selection+offset not within extent")
+        } /* end if */
+        if(H5S_ALL != file_space_id) {
+            if(NULL == (file_space = (const H5S_t *)H5I_object_verify(file_space_id, H5I_DATASPACE)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
 
-	    /* Check for valid selection */
-	    if(H5S_SELECT_VALID(file_space) != TRUE)
-		HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "file selection+offset not within extent")
-	} /* end if */
+            /* Check for valid selection */
+            if(H5S_SELECT_VALID(file_space) != TRUE)
+                HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "file selection+offset not within extent")
+        } /* end if */
     }
 
     if(H5D__pre_write(dset, direct_write, mem_type_id, mem_space, file_space, dxpl_id, buf) < 0) 
-	HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't prepare for writing data")
+        HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't prepare for writing data")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -274,18 +320,15 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__pre_write
+ * Function:    H5D__pre_write
  *
- * Purpose:	Preparation for writing data.  
+ * Purpose:     Preparation for writing data.
  *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Raymond Lu
- *		2 November 2012
+ * Return:      SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+herr_t
 H5D__pre_write(H5D_t *dset, hbool_t direct_write, hid_t mem_type_id, 
          const H5S_t *mem_space, const H5S_t *file_space, 
          hid_t dxpl_id, const void *buf)
@@ -300,15 +343,15 @@ H5D__pre_write(H5D_t *dset, hbool_t direct_write, hid_t mem_type_id,
         uint32_t direct_filters;
         hsize_t *direct_offset;
         uint32_t direct_datasize;
-	hsize_t  internal_offset[H5O_LAYOUT_NDIMS];
-	unsigned u;                 /* Local index variable */
+        hsize_t  internal_offset[H5O_LAYOUT_NDIMS];
+        unsigned u;                 /* Local index variable */
 
         /* Get the dataset transfer property list */
         if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list")
 
         if(H5D_CHUNKED != dset->shared->layout.type)
-	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a chunked dataset")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a chunked dataset")
 
         /* Retrieve parameters for direct chunk write */
         if(H5P_get(plist, H5D_XFER_DIRECT_CHUNK_WRITE_FILTERS_NAME, &direct_filters) < 0)
@@ -318,19 +361,19 @@ H5D__pre_write(H5D_t *dset, hbool_t direct_write, hid_t mem_type_id,
         if(H5P_get(plist, H5D_XFER_DIRECT_CHUNK_WRITE_DATASIZE_NAME, &direct_datasize) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "error getting data size for direct chunk write")
 
-	/* The library's chunking code requires the offset terminates with a zero. So transfer the 
+        /* The library's chunking code requires the offset terminates with a zero. So transfer the 
          * offset array to an internal offset array */ 
-	for(u = 0; u < dset->shared->ndims; u++) {
-	    /* Make sure the offset doesn't exceed the dataset's dimensions */
+        for(u = 0; u < dset->shared->ndims; u++) {
+            /* Make sure the offset doesn't exceed the dataset's dimensions */
             if(direct_offset[u] > dset->shared->curr_dims[u])
-		HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "offset exceeds dimensions of dataset")
+                HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "offset exceeds dimensions of dataset")
 
             /* Make sure the offset fall right on a chunk's boundary */
-	    if(direct_offset[u] % dset->shared->layout.u.chunk.dim[u])
-		HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "offset doesn't fall on chunks's boundary")
+            if(direct_offset[u] % dset->shared->layout.u.chunk.dim[u])
+                HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "offset doesn't fall on chunks's boundary")
 
-	    internal_offset[u] = direct_offset[u]; 
-	} /* end for */
+            internal_offset[u] = direct_offset[u]; 
+        } /* end for */
 	   
 	/* Terminate the offset with a zero */ 
 	internal_offset[dset->shared->ndims] = 0;
@@ -342,7 +385,7 @@ H5D__pre_write(H5D_t *dset, hbool_t direct_write, hid_t mem_type_id,
     else {     /* Normal write */
         /* write raw data */
         if(H5D__write(dset, mem_type_id, mem_space, file_space, dxpl_id, buf) < 0)
-	    HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
+            HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
     } /* end else */
 
 done:
@@ -664,11 +707,6 @@ H5D__write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
         if(H5T_get_class(type_info.mem_type, TRUE) == H5T_REFERENCE &&
                 H5T_get_ref_type(type_info.mem_type) == H5R_DATASET_REGION)
             HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "Parallel IO does not support writing region reference datatypes yet")
-
-        /* Can't write to chunked datasets with filters, in parallel */
-        if(dataset->shared->layout.type == H5D_CHUNKED &&
-                dataset->shared->dcpl_cache.pline.nused > 0)
-            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "cannot write to chunked storage with filters in parallel")
     } /* end if */
     else {
         /* Collective access is not permissible without a MPI based VFD */
@@ -917,7 +955,9 @@ const
     io_info->using_mpi_vfd = H5F_HAS_FEATURE(dset->oloc.file, H5FD_FEAT_HAS_MPI);
 #endif /* H5_HAVE_PARALLEL */
 
-done:
+#ifdef H5_DEBUG_BUILD
+	done:
+#endif /* H5_DEBUG_BUILD */
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__ioinfo_init() */
 
@@ -1145,7 +1185,7 @@ H5D__ioinfo_adjust(H5D_io_info_t *io_info, const H5D_t *dset, hid_t dxpl_id,
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't retrieve MPI communicator")
 
         /* Check if we can set direct MPI-IO read/write functions */
-        if((opt = H5D__mpio_opt_possible(io_info, file_space, mem_space, type_info, fm, dx_plist)) < 0)
+        if((opt = H5D__mpio_opt_possible(io_info, file_space, mem_space, type_info, dx_plist)) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "invalid check for direct IO dataspace ")
 
         /* Check if we can use the optimized parallel I/O routines */
@@ -1157,6 +1197,67 @@ H5D__ioinfo_adjust(H5D_io_info_t *io_info, const H5D_t *dset, hid_t dxpl_id,
             io_info->io_ops.single_write = H5D__mpio_select_write;
         } /* end if */
         else {
+            /* Check if there are any filters in the pipeline. If there are,
+             * we cannot break to independent I/O if this is a write operation;
+             * otherwise there will be metadata inconsistencies in the file.
+             */
+            if (io_info->op_type == H5D_IO_OP_WRITE && io_info->dset->shared->dcpl_cache.pline.nused > 0) {
+                H5D_mpio_no_collective_cause_t  cause;
+                uint32_t                        local_no_collective_cause;
+                uint32_t                        global_no_collective_cause;
+                hbool_t                         local_error_message_previously_written = FALSE;
+                hbool_t                         global_error_message_previously_written = FALSE;
+                size_t                          index;
+                char                            local_no_collective_cause_string[256] = "";
+                char                            global_no_collective_cause_string[256] = "";
+                const char                     *cause_strings[] = { "independent I/O was requested",
+                                                                    "datatype conversions were required",
+                                                                    "data transforms needed to be applied",
+                                                                    "optimized MPI types flag wasn't set",
+                                                                    "one of the dataspaces was neither simple nor scalar",
+                                                                    "dataset was not contiguous or chunked" };
+
+                if (H5P_get(dx_plist, H5D_MPIO_LOCAL_NO_COLLECTIVE_CAUSE_NAME, &local_no_collective_cause) < 0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get local no collective cause value")
+                if (H5P_get(dx_plist, H5D_MPIO_GLOBAL_NO_COLLECTIVE_CAUSE_NAME, &global_no_collective_cause) < 0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get global no collective cause value")
+
+                /* Append each of the "reason for breaking collective I/O" error messages to the
+                 * local and global no collective cause strings */
+                for (cause = 1, index = 0; cause < H5D_MPIO_NO_COLLECTIVE_MAX_CAUSE; cause <<= 1, index++) {
+                    size_t cause_strlen = strlen(cause_strings[index]);
+
+                    if (cause & local_no_collective_cause) {
+                        /* Check if there were any previous error messages included. If so, prepend a semicolon
+                         * to separate the messages.
+                         */
+                        if (local_error_message_previously_written) strncat(local_no_collective_cause_string, "; ", 2);
+
+                        strncat(local_no_collective_cause_string, cause_strings[index], cause_strlen);
+
+                        local_error_message_previously_written = TRUE;
+                    } /* end if */
+
+                    if (cause & global_no_collective_cause) {
+                        /* Check if there were any previous error messages included. If so, prepend a semicolon
+                         * to separate the messages.
+                         */
+                        if (global_error_message_previously_written) strncat(global_no_collective_cause_string, "; ", 2);
+
+                        strncat(global_no_collective_cause_string, cause_strings[index], cause_strlen);
+
+                        global_error_message_previously_written = TRUE;
+                    } /* end if */
+                } /* end for */
+
+                HGOTO_ERROR(H5E_IO, H5E_NO_INDEPENDENT, FAIL, "Can't perform independent write with filters in pipeline.\n"
+                                                              "    The following caused a break from collective I/O:\n"
+                                                              "        Local causes: %s\n"
+                                                              "        Global causes: %s",
+                                                              local_no_collective_cause_string,
+                                                              global_no_collective_cause_string);
+            } /* end if */
+
             /* If we won't be doing collective I/O, but the user asked for
              * collective I/O, change the request to use independent I/O, but
              * mark it so that we remember to revert the change.

@@ -39,7 +39,7 @@
 
 /* PRIVATE PROTOTYPES */
 static void *H5O__layout_decode(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
-    unsigned mesg_flags, unsigned *ioflags, const uint8_t *p);
+    unsigned mesg_flags, unsigned *ioflags, size_t p_size, const uint8_t *p);
 static herr_t H5O__layout_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
 static void *H5O__layout_copy(const void *_mesg, void *_dest);
 static size_t H5O__layout_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
@@ -47,6 +47,8 @@ static herr_t H5O__layout_reset(void *_mesg);
 static herr_t H5O__layout_free(void *_mesg);
 static herr_t H5O__layout_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
     void *_mesg);
+static herr_t H5O__layout_pre_copy_file(H5F_t *file_src, const void *mesg_src,
+    hbool_t *deleted, const H5O_copy_t *cpy_info, void *udata);
 static void *H5O__layout_copy_file(H5F_t *file_src, void *mesg_src,
     H5F_t *file_dst, hbool_t *recompute_size, unsigned *mesg_flags,
     H5O_copy_t *cpy_info, void *udata, hid_t dxpl_id);
@@ -69,7 +71,7 @@ const H5O_msg_class_t H5O_MSG_LAYOUT[1] = {{
     NULL,                       /* link method                          */
     NULL,                       /* set share method                     */
     NULL,                       /* can share method                     */
-    NULL,                       /* pre copy native value to file        */
+    H5O__layout_pre_copy_file,  /* pre copy native value to file        */
     H5O__layout_copy_file,      /* copy native value to file            */
     NULL,                       /* post copy native value to file       */
     NULL,                       /* get creation index                   */
@@ -99,7 +101,8 @@ H5FL_DEFINE(H5O_layout_t);
  */
 static void *
 H5O__layout_decode(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED *open_oh,
-    unsigned H5_ATTR_UNUSED mesg_flags, unsigned H5_ATTR_UNUSED *ioflags, const uint8_t *p)
+    unsigned H5_ATTR_UNUSED mesg_flags, unsigned H5_ATTR_UNUSED *ioflags,
+    size_t H5_ATTR_UNUSED p_size, const uint8_t *p)
 {
     H5O_layout_t           *mesg = NULL;
     uint8_t                *heap_block = NULL;
@@ -549,10 +552,11 @@ done:
 static herr_t
 H5O__layout_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, const void *_mesg)
 {
-    const H5O_layout_t     *mesg = (const H5O_layout_t *) _mesg;
-    uint8_t                *heap_block = NULL;
+    const H5O_layout_t      *mesg = (const H5O_layout_t *) _mesg;
+    uint8_t                 *heap_block = NULL;
     size_t                  *str_size = NULL;
-    unsigned               u;
+    unsigned                u;
+    H5F_libver_t            saved_low, saved_high;
     herr_t ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_STATIC
@@ -568,6 +572,9 @@ H5O__layout_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, 
 
     /* Layout class */
     *p++ = mesg->type;
+
+    saved_low = H5F_LOW_BOUND(f);
+    saved_high  = H5F_HIGH_BOUND(f);
 
     /* Write out layout class specific information */
     switch(mesg->type) {
@@ -680,6 +687,7 @@ H5O__layout_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, 
             /* Note that we assume here that the contents of the heap block
              * cannot change!  If this ever stops being the case we must change
              * this code to allow overwrites of the heap block.  -NAF */
+            
             if((mesg->storage.u.virt.serial_list_hobjid.addr == HADDR_UNDEF)
                     && (mesg->storage.u.virt.list_nused > 0)) {
                 uint8_t *heap_block_p;
@@ -688,6 +696,9 @@ H5O__layout_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, 
                 hsize_t tmp_hsize;
                 uint32_t chksum;
                 size_t i;
+
+                 if(H5F_set_libver_bounds(f, H5F_LIBVER_V110, H5F_LIBVER_V110) < 0)
+                    HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "cannot set low/high bounds")
 
                 /* Allocate array for caching results of strlen */
                 if(NULL == (str_size = (size_t *)H5MM_malloc(2 * mesg->storage.u.virt.list_nused *sizeof(size_t))))
@@ -715,12 +726,12 @@ H5O__layout_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, 
                     block_size += str_size[(2 * i) + 1];
 
                     /* Source selection */
-                    if((select_serial_size = H5S_SELECT_SERIAL_SIZE(mesg->storage.u.virt.list[i].source_select)) < 0)
+                    if((select_serial_size = H5S_SELECT_SERIAL_SIZE(mesg->storage.u.virt.list[i].source_select, f)) < 0)
                         HGOTO_ERROR(H5E_OHDR, H5E_CANTENCODE, FAIL, "unable to check dataspace selection size")
                     block_size += (size_t)select_serial_size;
 
                     /* Virtual dataset selection */
-                    if((select_serial_size = H5S_SELECT_SERIAL_SIZE(mesg->storage.u.virt.list[i].source_dset.virtual_select)) < 0)
+                    if((select_serial_size = H5S_SELECT_SERIAL_SIZE(mesg->storage.u.virt.list[i].source_dset.virtual_select, f)) < 0)
                         HGOTO_ERROR(H5E_OHDR, H5E_CANTENCODE, FAIL, "unable to check dataspace selection size")
                     block_size += (size_t)select_serial_size;
                 } /* end for */
@@ -755,11 +766,11 @@ H5O__layout_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, 
                     heap_block_p += str_size[(2 * i) + 1];
 
                     /* Source selection */
-                    if(H5S_SELECT_SERIALIZE(mesg->storage.u.virt.list[i].source_select, &heap_block_p) < 0)
+                    if(H5S_SELECT_SERIALIZE(mesg->storage.u.virt.list[i].source_select, &heap_block_p, f) < 0)
                         HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to serialize source selection")
 
                     /* Virtual selection */
-                    if(H5S_SELECT_SERIALIZE(mesg->storage.u.virt.list[i].source_dset.virtual_select, &heap_block_p) < 0)
+                    if(H5S_SELECT_SERIALIZE(mesg->storage.u.virt.list[i].source_dset.virtual_select, &heap_block_p, f) < 0)
                         HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to serialize virtual selection")
                 } /* end for */
 
@@ -785,6 +796,9 @@ H5O__layout_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, 
     } /* end switch */
 
 done:
+    if(H5F_set_libver_bounds(f, saved_low, saved_high) < 0)
+        HDONE_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "cannot reset low/high bounds")
+
     heap_block = (uint8_t *)H5MM_xfree(heap_block);
     str_size = (size_t *)H5MM_xfree(str_size);
 
@@ -1042,6 +1056,42 @@ H5O__layout_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, void *_mesg)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__layout_delete() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5O__layout_pre_copy_file
+ *
+ * Purpose:     Perform any necessary actions before copying message between
+ *              files.
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
+ *
+ * Programmer:  Vailin Choi; Dec 2017
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5O__layout_pre_copy_file(H5F_t H5_ATTR_UNUSED *file_src, const void *mesg_src,
+    hbool_t H5_ATTR_UNUSED *deleted, const H5O_copy_t *cpy_info, void H5_ATTR_UNUSED *udata)
+{
+    const H5O_layout_t *layout_src = (const H5O_layout_t *)mesg_src;  /* Source layout */
+    herr_t ret_value = SUCCEED;   /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* check args */
+    HDassert(cpy_info);
+    HDassert(cpy_info->file_dst);
+
+    /* Check to ensure that the version of the message to be copied does not exceed
+       the message version allowed by the destination file's high bound */
+    if(layout_src->version > H5O_layout_ver_bounds[H5F_HIGH_BOUND(cpy_info->file_dst)])
+        HGOTO_ERROR(H5E_OHDR, H5E_BADRANGE, FAIL, "layout message version out of bounds")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O__layout_pre_copy_file() */
 
 
 /*-------------------------------------------------------------------------

@@ -34,7 +34,7 @@ class H5_DLLCPP PredType : public AtomType {
         // id in the left hand side object.
         PredType& operator=(const PredType& rhs);
 
-        // Copy constructor - makes copy of the original object
+        // Copy constructor: same as the original PredType.
         PredType(const PredType& original);
 
         // Noop destructor

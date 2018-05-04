@@ -415,6 +415,7 @@ JUnit version 4.11
 .testH5PH5Pset_shared_mesg_phase_change_HighMaxlistValue
 .testH5P_layout
 .testH5Pget_link_creation_order
+.testH5Pget_efile_prefix
 .testH5Pset_shared_mesg_nindexes_InvalidHIGHnindexes
 .testH5P_file_space_page_size
 .testH5Pget_shared_mesg_index_Invalid_indexnum
@@ -444,6 +445,7 @@ JUnit version 4.11
 .testH5Pset_est_link_info_InvalidValues
 .testH5Pset_local_heap_size_hint
 .testH5Pget_est_link_info
+.testH5Pset_efile_prefix_null
 .testH5Pset_scaleoffset
 .testH5Pset_create_intermediate_group_invalidobject
 .testH5PH5Pset_shared_mesg_phase_change_HighMinbtreeValue
@@ -466,6 +468,7 @@ JUnit version 4.11
 .testH5Pget_sym_k_null
 .testH5Pset_nlinks
 .testH5P_obj_track_times
+.testH5Pset_efile_prefix
 .testH5P_userblock
 .testH5Pget_local_heap_size_hint
 .testH5Pset_shared_mesg_index_Invalid_indexnum
@@ -504,6 +507,7 @@ JUnit version 4.11
 .testH5Pset_mdc_config
 .testH5P_small_data_block_size
 .testH5Pset_fapl_log
+.testH5P_evict_on_close
 .testH5Pset_libver_bounds
 .testH5P_sieve_buf_size
 .testH5P_elink_file_cache_size
@@ -530,11 +534,14 @@ JUnit version 4.11
 .testH5Pget_source_datasetname
 .testH5Pvirtual_storage
 .testH5Pget_selection_source_dataset
+.testH5Pget_virtual_prefix
 .testH5Pget_source_filename
 .testH5Pset_get_virtual_printf_gap
 .testH5Pget_virtual_count
+.testH5Pset_virtual_prefix
 .testH5Pset_get_virtual_view
 .testH5Pget_mapping_parameters
+.testH5Pset_virtual_prefix_null
 .testH5P_genprop_basic_class
 .testH5P_genprop_class_iter
 .testH5P_genprop_basic_class_prop
@@ -640,7 +647,7 @@ JUnit version 4.11
 
 Time:  XXXX
 
-OK (638 tests)
+OK (645 tests)
 
 HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
   #000: (file name) line (number) in H5Fopen(): can't set access and transfer property lists

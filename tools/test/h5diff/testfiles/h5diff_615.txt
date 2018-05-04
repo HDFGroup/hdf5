@@ -1,5 +1,5 @@
 <-p 0x1> is not a valid option
-usage: h5diff [OPTIONS] file1 file2 [obj1[ obj2]] 
+usage: h5diff [OPTIONS] file1 file2 [obj1[ obj2]]
   file1             File name of the first HDF5 file
   file2             File name of the second HDF5 file
   [obj1]            Name of an HDF5 object, in absolute path
@@ -24,6 +24,8 @@ usage: h5diff [OPTIONS] file1 file2 [obj1[ obj2]]
               status report.
    -q, --quiet
          Quiet mode. Do not produce output.
+   --enable-error-stack
+                   Prints messages from the HDF5 error stack as they occur.
    --follow-symlinks
          Follow symbolic links (soft links and external links and compare the)
          links' target objects.
@@ -60,19 +62,22 @@ usage: h5diff [OPTIONS] file1 file2 [obj1[ obj2]]
    -n C, --count=C
          Print differences up to C. C must be a positive integer.
    -d D, --delta=D
-         Print difference if (|a-b| > D). D must be a positive number.
+         Print difference if (|a-b| > D). D must be a positive number. Where a
+         is the data point value in file1 and b is the data point value in file2.
          Can not use with '-p' or '--use-system-epsilon'.
    -p R, --relative=R
-         Print difference if (|(a-b)/b| > R). R must be a positive number.
+         Print difference if (|(a-b)/b| > R). R must be a positive number. Where a
+         is the data point value in file1 and b is the data point value in file2.
          Can not use with '-d' or '--use-system-epsilon'.
    --use-system-epsilon
-         Print difference if (|a-b| > EPSILON), EPSILON is system defined value.
+         Print difference if (|a-b| > EPSILON), EPSILON is system defined value. Where a
+         is the data point value in file1 and b is the data point value in file2.
          If the system epsilon is not defined,one of the following predefined
          values will be used:
            FLT_EPSILON = 1.19209E-07 for floating-point type
            DBL_EPSILON = 2.22045E-16 for double precision type
          Can not use with '-p' or '-d'.
-   --exclude-path "path" 
+   --exclude-path "path"
          Exclude the specified path to an object when comparing files or groups.
          If a group is excluded, all member objects will also be excluded.
          The specified path is excluded wherever it occurs.
@@ -107,15 +112,15 @@ usage: h5diff [OPTIONS] file1 file2 [obj1[ obj2]]
   common objects.
 
  Object comparison:
-  1) Groups 
+  1) Groups
       First compares the names of member objects (relative path, from the
       specified group) and generates a report of objects that appear in only
       one group or in both groups. Common objects are then compared recursively.
-  2) Datasets 
+  2) Datasets
       Array rank and dimensions, datatypes, and data values are compared.
-  3) Datatypes 
+  3) Datatypes
       The comparison is based on the return value of H5Tequal.
-  4) Symbolic links 
+  4) Symbolic links
       The paths to the target objects are compared.
       (The option --follow-symlinks overrides the default behavior when
        symbolic links are compared.).

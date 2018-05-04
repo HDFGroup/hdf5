@@ -1648,8 +1648,10 @@ typedef struct H5C_cache_entry_t {
     /* fields supporting replacement policies: */
     struct H5C_cache_entry_t   *next;
     struct H5C_cache_entry_t   *prev;
+#if H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS
     struct H5C_cache_entry_t   *aux_next;
     struct H5C_cache_entry_t   *aux_prev;
+#endif /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
 #ifdef H5_HAVE_PARALLEL
     struct H5C_cache_entry_t   *coll_next;
     struct H5C_cache_entry_t   *coll_prev;

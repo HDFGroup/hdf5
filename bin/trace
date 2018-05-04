@@ -76,7 +76,7 @@ $Source = "";
                "off_t"                      => "o",
                "H5O_type_t"                 => "Ot",
                "H5P_class_t"                => "p",
-               "hobj_ref_t"		    => "r",
+               "hobj_ref_t"                 => "r",
                "H5R_type_t"                 => "Rt",
                "char"                       => "s",
                "unsigned char"              => "s",
@@ -124,7 +124,7 @@ $Source = "";
                "H5G_iterate_t"              => "x",
                "H5G_info_t"                 => "x",
                "H5I_free_t"                 => "x",
-               "H5I_search_func_t"         => "x",
+               "H5I_search_func_t"          => "x",
                "H5L_class_t"                => "x",
                "H5L_elink_traverse_t"       => "x",
                "H5L_iterate_t"              => "x",
@@ -161,6 +161,8 @@ $Source = "";
 ##############################################################################
 # Print an error message.
 #
+my $found_errors = 0;
+
 sub errmesg ($$@) {
   my ($file, $func, @mesg) = @_;
   my ($mesg) = join "", @mesg;
@@ -169,6 +171,8 @@ sub errmesg ($$@) {
     local $_ = $1;
     $lineno = tr/\n/\n/;
   }
+
+  $found_errors = 1;
 
   print "$file: in function \`$func\':\n";
   print "$file:$lineno: $mesg\n";
@@ -339,4 +343,13 @@ for $file (@ARGV) {
   }
 }
 
-printf "Finished processing HDF5 API calls\n"
+if ($found_errors eq 1) {
+    printf "\n";
+    printf "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n";
+    printf "*** ERRORS FOUND *** ERRORS FOUND *** ERRORS FOUND ****\n";
+    printf "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n";
+    exit 1;
+} else {
+    printf "Finished processing HDF5 API calls\n";
+}
+

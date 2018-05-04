@@ -72,6 +72,14 @@
       f-3.h5
       vds-eiger.h5
   )
+  set (HDF5_REFERENCE_PREFIX_VDS
+      1_vds.h5
+      2_vds.h5
+      4_vds.h5
+      5_vds.h5
+      vds-percival-unlim-maxmin.h5
+      vds-eiger.h5
+  )
   set (HDF5_ERROR_REFERENCE_VDS
   )
 
@@ -80,10 +88,19 @@
     HDFTEST_COPY_FILE("${HDF5_TOOLS_DIR}/testfiles/vds/${vds_h5_file}" "${PROJECT_BINARY_DIR}/testfiles/vds/${fname}" "h5dump_vds_files")
   endforeach ()
 
+  foreach (vds_h5_file ${HDF5_REFERENCE_PREFIX_VDS})
+    get_filename_component(fname "${vds_h5_file}" NAME)
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_DIR}/testfiles/vds/${vds_h5_file}" "${PROJECT_BINARY_DIR}/testfiles/vds/prefix/${fname}" "h5dump_vds_files")
+  endforeach ()
 
   foreach (ddl_vds ${HDF5_REFERENCE_VDS})
     get_filename_component(fname "${ddl_vds}" NAME)
     HDFTEST_COPY_FILE("${HDF5_TOOLS_DIR}/testfiles/vds/${ddl_vds}" "${PROJECT_BINARY_DIR}/testfiles/vds/${fname}" "h5dump_vds_files")
+  endforeach ()
+
+  foreach (ddl_vds ${HDF5_REFERENCE_VDS})
+    get_filename_component(fname "${ddl_vds}" NAME)
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_DIR}/testfiles/vds/${ddl_vds}" "${PROJECT_BINARY_DIR}/testfiles/vds/prefix/${fname}" "h5dump_vds_files")
   endforeach ()
 
   foreach (ddl_vds ${HDF5_ERROR_REFERENCE_VDS})
@@ -103,13 +120,22 @@
     if (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (NAME H5DUMP-${resultfile} COMMAND $<TARGET_FILE:h5dump> ${ARGN})
       set_tests_properties (H5DUMP-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/vds")
-      if (NOT ${resultcode} STREQUAL "0")
+      if (NOT "${resultcode}" STREQUAL "0")
         set_tests_properties (H5DUMP-${resultfile} PROPERTIES WILL_FAIL "true")
       endif ()
       if (NOT "${last_vds_test}" STREQUAL "")
         set_tests_properties (H5DUMP-${resultfile} PROPERTIES DEPENDS ${last_VDS_test})
       endif ()
     else ()
+      # Remove any output file left over from previous test run
+      add_test (
+          NAME H5DUMP-${resultfile}-clear-objects
+          COMMAND    ${CMAKE_COMMAND}
+              -E remove
+              ${resultfile}.out
+              ${resultfile}.out.err
+      )
+      set_tests_properties (H5DUMP-${resultfile}-clear-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/vds")
       add_test (
           NAME H5DUMP-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
@@ -121,6 +147,48 @@
               -D "TEST_REFERENCE=${resultfile}.ddl"
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
+      set_tests_properties (H5DUMP-${resultfile} PROPERTIES DEPENDS H5DUMP-${resultfile}-clear-objects)
+    endif ()
+  endmacro ()
+
+  macro (ADD_H5_VDS_PREFIX_TEST resultfile resultcode)
+    # If using memchecker add tests without using scripts
+    if (HDF5_ENABLE_USING_MEMCHECKER)
+      add_test (NAME H5DUMP_PREFIX-${resultfile} COMMAND $<TARGET_FILE:h5dump> ${ARGN})
+      set_tests_properties (H5DUMP_PREFIX-${resultfile} PROPERTIES
+          ENVIRONMENT "HDF5_VDS_PREFIX=${PROJECT_BINARY_DIR}/testfiles/vds/"
+          WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/vds/prefix"
+      )
+      if (NOT "${resultcode}" STREQUAL "0")
+        set_tests_properties (H5DUMP_PREFIX-${resultfile} PROPERTIES WILL_FAIL "true")
+      endif ()
+      if (NOT "${last_vds_test}" STREQUAL "")
+        set_tests_properties (H5DUMP_PREFIX-${resultfile} PROPERTIES DEPENDS ${last_VDS_test})
+      endif ()
+    else ()
+      # Remove any output file left over from previous test run
+      add_test (
+          NAME H5DUMP_PREFIX-${resultfile}-clear-objects
+          COMMAND    ${CMAKE_COMMAND}
+              -E remove
+              ${resultfile}.out
+              ${resultfile}.out.err
+      )
+      set_tests_properties (H5DUMP_PREFIX-${resultfile}-clear-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/vds/prefix")
+      add_test (
+          NAME H5DUMP_PREFIX-${resultfile}
+          COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
+              -D "TEST_ARGS:STRING=${ARGN}"
+              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/vds/prefix"
+              -D "TEST_OUTPUT=${resultfile}.out"
+              -D "TEST_EXPECT=${resultcode}"
+              -D "TEST_REFERENCE=${resultfile}.ddl"
+              -D "TEST_ENV_VAR=HDF5_VDS_PREFIX"
+              -D "TEST_ENV_VALUE=${PROJECT_BINARY_DIR}/testfiles/vds/"
+              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+      )
+      set_tests_properties (H5DUMP_PREFIX-${resultfile} PROPERTIES DEPENDS H5DUMP_PREFIX-${resultfile}-clear-objects)
     endif ()
   endmacro ()
 
@@ -129,13 +197,22 @@
     if (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (NAME H5DUMP-${resultfile} COMMAND $<TARGET_FILE:h5dump> -p ${ARGN})
       set_tests_properties (H5DUMP-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/vds")
-      if (NOT ${resultcode} STREQUAL "0")
+      if (NOT "${resultcode}" STREQUAL "0")
         set_tests_properties (H5DUMP-${resultfile} PROPERTIES WILL_FAIL "true")
       endif ()
       if (NOT "${last_vds_test}" STREQUAL "")
         set_tests_properties (H5DUMP-${resultfile} PROPERTIES DEPENDS ${last_VDS_test})
       endif ()
     else ()
+      # Remove any output file left over from previous test run
+      add_test (
+          NAME H5DUMP-${resultfile}-clear-objects
+          COMMAND    ${CMAKE_COMMAND}
+              -E remove
+              ${resultfile}.out
+              ${resultfile}.out.err
+      )
+      set_tests_properties (H5DUMP-${resultfile}-clear-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/vds")
       add_test (
           NAME H5DUMP-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
@@ -242,3 +319,15 @@
     ADD_H5_VDS_LAYOUT (vds_layout-eiger 0 --enable-error-stack vds-eiger.h5)
     ADD_H5_VDS_LAYOUT (vds_layout-maxmin 0 --enable-error-stack vds-percival-unlim-maxmin.h5)
   endif ()
+
+  # Data read with prefix
+  if (USE_FILTER_DEFLATE)
+    ADD_H5_VDS_PREFIX_TEST (tvds-1 0 --enable-error-stack 1_vds.h5)
+    ADD_H5_VDS_PREFIX_TEST (tvds-2 0 --enable-error-stack 2_vds.h5)
+    ADD_H5_VDS_PREFIX_TEST (tvds-4 0 --enable-error-stack 4_vds.h5)
+    ADD_H5_VDS_PREFIX_TEST (tvds-5 0 --enable-error-stack 5_vds.h5)
+    ADD_H5_VDS_PREFIX_TEST (vds-first 0 --vds-view-first-missing --enable-error-stack vds-percival-unlim-maxmin.h5)
+    ADD_H5_VDS_PREFIX_TEST (vds-gap1 0 -d /VDS-Eiger --vds-gap-size=1 --enable-error-stack vds-eiger.h5)
+    ADD_H5_VDS_PREFIX_TEST (vds-gap2 0 --vds-gap-size=2 --enable-error-stack vds-eiger.h5)
+  endif ()
+

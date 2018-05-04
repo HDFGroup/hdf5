@@ -111,11 +111,14 @@ static void test_transfplist()
 }
 
 
-/****************************************************************
-**
-**  test_dsproplist(): Main dataset property list testing routine.
-**
-****************************************************************/
+/*-------------------------------------------------------------------------
+ * Function:    test_dsproplist
+ *
+ * Purpose      Main dataset property list testing routine
+ *
+ * Return       None
+ *-------------------------------------------------------------------------
+ */
 extern "C"
 void test_dsproplist()
 {
@@ -126,6 +129,15 @@ void test_dsproplist()
 
 }   // test_dsproplist()
 
+
+/*-------------------------------------------------------------------------
+ * Function:    cleanup_dsproplist
+ *
+ * Purpose      Cleanup temporary test files
+ *
+ * Return       none
+ *-------------------------------------------------------------------------
+ */
 extern "C"
 void cleanup_dsproplist()
 {

@@ -6,7 +6,13 @@ usage: h5repack [OPTIONS] file1 file2
    -v, --verbose           Verbose mode, print object information
    -V, --version           Print version number and exit
    -n, --native            Use a native HDF5 type when repacking
+   --enable-error-stack    Prints messages from the HDF5 error stack as they occur
    -L, --latest            Use latest version of file format
+                           This option will take precedence over the -j and -k options
+   --low=BOUND             The low bound for library release versions to use when creating
+                           objects in the file (default is H5F_LIBVER_EARLIEST)
+   --high=BOUND            The high bound for library release versions to use when creating
+                           objects in the file (default is H5F_LIBVER_LATEST)
    -c L1, --compact=L1     Maximum number of links in header messages
    -d L2, --indexed=L2     Minimum number of links in the indexed format
    -s S[:F], --ssize=S[:F] Shared object header message minimum size
@@ -17,6 +23,8 @@ usage: h5repack [OPTIONS] file1 file2
    -M A, --metadata_block_size=A  Metadata block size for H5Pset_meta_block_size
    -t T, --threshold=T     Threshold value for H5Pset_alignment
    -a A, --alignment=A     Alignment value for H5Pset_alignment
+   -q Q, --sort_by=Q       Sort groups and attributes by index Q
+   -z Z, --sort_order=Z    Sort groups and attributes by order Z
    -f FILT, --filter=FILT  Filter type
    -l LAYT, --layout=LAYT  Layout type
    -S FS_STRATEGY, --fs_strategy=FS_STRATEGY  File space management strategy for H5Pset_file_space_strategy
@@ -24,19 +32,25 @@ usage: h5repack [OPTIONS] file1 file2
    -T FS_THRESHOLD, --fs_threshold=FS_THRESHOLD   Free-space section threshold for H5Pset_file_space_strategy
    -G FS_PAGESIZE, --fs_pagesize=FS_PAGESIZE   File space page size for H5Pset_file_space_page_size
 
-    M - is an integer greater than 1, size of dataset in bytes (default is 0) 
+    M - is an integer greater than 1, size of dataset in bytes (default is 0)
     E - is a filename.
     S - is an integer
     U - is a filename.
     T - is an integer
     A - is an integer greater than zero
+    Q - is the sort index type for the input file. It can be "name" or "creation_order" (default)
+    Z - is the sort order type for the input file. It can be "descending" or "ascending" (default)
     B - is the user block size, any value that is 512 or greater and is
         a power of 2 (1024 default)
     F - is the shared object header message type, any of <dspace|dtype|fill|
         pline|attr>. If F is not specified, S applies to all messages
 
-     --enable-error-stack Prints messages from the HDF5 error stack as they
-                          occur.
+    BOUND is an integer indicating the library release versions to use when creating
+          objects in the file (see H5Pset_libver_bounds()):
+        0: This is H5F_LIBVER_EARLIEST in H5F_libver_t struct
+        1: This is H5F_LIBVER_V18 in H5F_libver_t struct
+        2: This is H5F_LIBVER_V110 in H5F_libver_t struct
+           (H5F_LIBVER_LATEST is aliased to H5F_LIBVER_V110 for this release
 
     FS_STRATEGY is a string indicating the file space strategy used:
         FSM_AGGR:
@@ -85,8 +99,8 @@ usage: h5repack [OPTIONS] file1 file2
         NBIT (no parameter)
         SOFF=<scale_factor,scale_type> scale_factor is an integer and scale_type
             is either IN or DS
-        UD=<filter_number,cd_value_count,value_1[,value_2,...,value_N]>
-            required values for filter_number,cd_value_count,value_1
+        UD=<filter_number,filter_flag,cd_value_count,value_1[,value_2,...,value_N]>
+            required values for filter_number,filter_flag,cd_value_count,value_1
             optional values for value_2 to value_N
         NONE (no parameter)
 
@@ -121,16 +135,21 @@ Examples of use:
    Chunked layout, with a layout size of 20x10, to objects dset1 and dset2
    and remove filters to objects dset3, dset4, dset5
 
-4) h5repack -L -c 10 -s 20:dtype file1 file2 
+4) h5repack -L -c 10 -s 20:dtype file1 file2
 
    Using latest file format with maximum compact group size of 10 and
    and minimum shared datatype size of 20
 
-5) h5repack -f SHUF -f GZIP=1 file1 file2 
+5) h5repack --low=0 --high=1 file1 file2
+
+   Set low=H5F_LIBVER_EARLIEST and high=H5F_LIBVER_V18 via H5Pset_libver_bounds() when
+   creating the repacked file: file2
+
+5) h5repack -f SHUF -f GZIP=1 file1 file2
 
    Add both filters SHUF and GZIP in this order to all datasets
 
-6) h5repack -f UD=307,1,9 file1 file2 
+6) h5repack -f UD=307,0,1,9 file1 file2
 
    Add bzip2 filter to all datasets
 

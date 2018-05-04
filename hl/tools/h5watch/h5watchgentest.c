@@ -58,24 +58,24 @@
 
 /* Data structures for datasets with compound types */
 typedef struct sub22_t {
-    unsigned int a;
-    unsigned int b;
-    unsigned int c;
+    int a;
+    int b;
+    int c;
 } sub22_t;
 
 typedef struct sub2_t {
-    unsigned int a;
+    int a;
     sub22_t b;
-    unsigned int c;
+    int c;
 } sub2_t;
 
 typedef struct sub4_t {
-    unsigned int a;
-    unsigned int b;
+    int a;
+    int b;
 } sub4_t;
 
 typedef struct set_t {
-    unsigned int field1;
+    int field1;
     sub2_t field2;
     double field3;
     sub4_t field4;

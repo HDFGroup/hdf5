@@ -21,7 +21,7 @@ namespace H5 {
     \brief Class DataType provides generic operations on HDF5 datatypes.
 
     DataType inherits from H5Object because a named datatype is an HDF5
-    object, and is a base class of ArrayType, AtomType, CompType, EnumType,
+    object and is a base class of ArrayType, AtomType, CompType, EnumType,
     and VarLenType.
 */
 //  Inheritance: DataType -> H5Object -> H5Location -> IdComponent
@@ -30,11 +30,15 @@ class H5_DLLCPP DataType : public H5Object {
         // Creates a datatype given its class and size
         DataType(const H5T_class_t type_class, size_t size);
 
-        // Copy constructor: makes a copy of the original object
+        // Copy constructor - same as the original DataType.
         DataType(const DataType& original);
 
         // Creates a copy of a predefined type
         DataType(const PredType& pred_type);
+
+        // Constructors to open a generic named datatype at a given location.
+        DataType(const H5Location& loc, const char* name);
+        DataType(const H5Location& loc, const H5std_string& name);
 
         // Creates a datatype by way of dereference.
         DataType(const H5Location& loc, const void* ref, H5R_type_t ref_type = H5R_OBJECT, const PropList& plist = PropList::DEFAULT);
@@ -48,6 +52,13 @@ class H5_DLLCPP DataType : public H5Object {
 
         // Copies the datatype of dset to this datatype object.
         void copy(const DataSet& dset);
+
+        // Returns a DataType instance by decoding the binary object
+        // description of this datatype.
+        virtual DataType* decode() const;
+
+        // Creates a binary object description of this datatype.
+        void encode();
 
         // Returns the datatype class identifier.
         H5T_class_t getClass() const;
@@ -106,6 +117,7 @@ class H5_DLLCPP DataType : public H5Object {
 
         // Checks whether this datatype contains (or is) a certain type class.
         bool detectClass(H5T_class_t cls) const;
+        static bool detectClass(const PredType& pred_type, H5T_class_t cls);
 
         // Checks whether this datatype is a variable-length string.
         bool isVariableStr() const;
@@ -116,18 +128,14 @@ class H5_DLLCPP DataType : public H5Object {
         ///\brief Returns this class name.
         virtual H5std_string fromClass () const { return("DataType"); }
 
-// From CommonFG then H5Location
-        // Constructors to open a generic named datatype at a given location.
-        DataType(const H5Location& loc, const char* name);
-        DataType(const H5Location& loc, const H5std_string& name);
-
-// End of From CommonFG then H5Location
-
         // Creates a copy of an existing DataType using its id
         DataType(const hid_t type_id);
 
         // Default constructor
         DataType();
+
+        // Determines whether this datatype has a binary object description.
+        bool hasBinaryDesc() const;
 
         // Gets the datatype id.
         virtual hid_t getId() const;
@@ -139,6 +147,10 @@ class H5_DLLCPP DataType : public H5Object {
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
         hid_t id;    // HDF5 datatype id
 
+        // Returns an id of a type by decoding the binary object
+        // description of this datatype.
+        hid_t p_decode() const;
+
         // Sets the datatype id.
         virtual void p_setId(const hid_t new_id);
 
@@ -148,6 +160,11 @@ class H5_DLLCPP DataType : public H5Object {
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
    private:
+        // Buffer for binary object description of this datatype, allocated
+        // in DataType::encode and used in DataType::decode
+        unsigned char *encoded_buf;
+        size_t buf_size;
+
         // Friend function to set DataType id.  For library use only.
         friend void f_DataType_setId(DataType* dtype, hid_t new_id);
 

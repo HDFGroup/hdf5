@@ -16377,6 +16377,16 @@ main(void)
     unsigned	nerrors = 0;            /* Cumulative error count */
     unsigned num_pb_fs = 1;             /* The number of settings to test for page buffering and file space handling */
     int	ExpressMode;                    /* Express testing level */
+    const char *envval;                 /* Environment variable */
+    hbool_t contig_addr_vfd;            /* Whether VFD used has a contigous address space */
+
+    /* Don't run this test using certain file drivers */
+    envval = HDgetenv("HDF5_DRIVER");
+    if(envval == NULL)
+        envval = "nomatch";
+
+    /* Current VFD that does not support contigous address space */
+    contig_addr_vfd = (hbool_t)(HDstrcmp(envval, "split") && HDstrcmp(envval, "multi"));
 
     /* Reset library */
     h5_reset();
@@ -16428,6 +16438,12 @@ main(void)
         shared_wobj_g[u] = (unsigned char)u;
 
     for(v = 0; v < num_pb_fs; v++) {
+        /* Skip test when:
+           a) multi/split drivers and
+           b) persisting free-space or using paged aggregation strategy 
+           because the library will fail file creation (temporary) for the above conditions */
+        if(!contig_addr_vfd && v)
+            break;
 
         if((fcpl = H5Pcopy(def_fcpl)) < 0) 
             TEST_ERROR
@@ -16442,6 +16458,33 @@ main(void)
                 if(H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_FSM_AGGR, TRUE, (hsize_t)1) < 0)
                     TEST_ERROR
                 fapl = def_fapl;
+                /* This is a fix for the daily test failure from the checkin for libver bounds. */
+                /* 
+                 * Many tests failed the file size check when comparing (a) and (b) as below:
+                 * --Create a file and close the file.  Got the initial file size (a).
+                 * --Reopen the file, perform fractal heap operations, and close the file.
+                 *   Got the file size (b).
+                 * The cause for the file size differences:
+                 *   When the file is initially created with persisting free-space and with 
+                 *   (earliest, latest) libver bounds, the file will have version 2 superblock 
+                 *   due to non-default free-space handling.  As the low bound is earliest,
+                 *   the library uses version 1 object header when creating the superblock
+                 *   extension message.
+                 *   When the file is reopened with the same libver bounds, the file's low
+                 *   bound is upgraded to v18 because the file has version 2 superblock.
+                 *   When the library creates the superblock extension message on file close,
+                 *   the library uses version 2 object header for the superblock extension
+                 *   message since the low bound is v18.
+                 *   This leads to the discrepancy in file sizes as the file is persisting
+                 *   free-space and there is object header version differences.
+                 *  The fix:
+                 *    Set libver bounds in fapl to (v18, latest) so that the file created in the
+                 *    test routines will have low bound set to v18.  This will cause the
+                 *    library to use version 2 object header for the superblock extension 
+                 *    message.
+                 */
+                if(H5Pset_libver_bounds(fapl, H5F_LIBVER_V18, H5F_LIBVER_LATEST) < 0)
+                    TEST_ERROR
                 break;
             case 2:
                 if(H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, FALSE, (hsize_t)1) < 0)

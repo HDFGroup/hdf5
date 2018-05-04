@@ -132,22 +132,31 @@ CONFIG_HEADER = $(top_builddir)/src/H5config.h \
 	$(top_builddir)/fortran/src/H5config_f.inc
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
-am__EXEEXT_1 = t_mpi$(EXEEXT) testphdf5$(EXEEXT) t_cache$(EXEEXT) \
-	t_cache_image$(EXEEXT) t_pflush1$(EXEEXT) t_pflush2$(EXEEXT) \
-	t_pshutdown$(EXEEXT) t_prestart$(EXEEXT) t_init_term$(EXEEXT) \
-	t_shapesame$(EXEEXT)
-t_cache_SOURCES = t_cache.c
-t_cache_OBJECTS = t_cache.$(OBJEXT)
-t_cache_LDADD = $(LDADD)
-t_cache_DEPENDENCIES = $(LIBH5TEST) $(LIBHDF5)
+am__EXEEXT_1 = t_mpi$(EXEEXT) t_bigio$(EXEEXT) testphdf5$(EXEEXT) \
+	t_cache$(EXEEXT) t_cache_image$(EXEEXT) t_pflush1$(EXEEXT) \
+	t_pflush2$(EXEEXT) t_pread$(EXEEXT) t_pshutdown$(EXEEXT) \
+	t_prestart$(EXEEXT) t_init_term$(EXEEXT) t_shapesame$(EXEEXT) \
+	t_filters_parallel$(EXEEXT)
+t_bigio_SOURCES = t_bigio.c
+t_bigio_OBJECTS = t_bigio.$(OBJEXT)
+t_bigio_LDADD = $(LDADD)
+t_bigio_DEPENDENCIES = $(LIBH5TEST) $(LIBHDF5)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
 am__v_lt_1 = 
+t_cache_SOURCES = t_cache.c
+t_cache_OBJECTS = t_cache.$(OBJEXT)
+t_cache_LDADD = $(LDADD)
+t_cache_DEPENDENCIES = $(LIBH5TEST) $(LIBHDF5)
 t_cache_image_SOURCES = t_cache_image.c
 t_cache_image_OBJECTS = t_cache_image.$(OBJEXT)
 t_cache_image_LDADD = $(LDADD)
 t_cache_image_DEPENDENCIES = $(LIBH5TEST) $(LIBHDF5)
+t_filters_parallel_SOURCES = t_filters_parallel.c
+t_filters_parallel_OBJECTS = t_filters_parallel.$(OBJEXT)
+t_filters_parallel_LDADD = $(LDADD)
+t_filters_parallel_DEPENDENCIES = $(LIBH5TEST) $(LIBHDF5)
 t_init_term_SOURCES = t_init_term.c
 t_init_term_OBJECTS = t_init_term.$(OBJEXT)
 t_init_term_LDADD = $(LDADD)
@@ -164,6 +173,10 @@ t_pflush2_SOURCES = t_pflush2.c
 t_pflush2_OBJECTS = t_pflush2.$(OBJEXT)
 t_pflush2_LDADD = $(LDADD)
 t_pflush2_DEPENDENCIES = $(LIBH5TEST) $(LIBHDF5)
+t_pread_SOURCES = t_pread.c
+t_pread_OBJECTS = t_pread.$(OBJEXT)
+t_pread_LDADD = $(LDADD)
+t_pread_DEPENDENCIES = $(LIBH5TEST) $(LIBHDF5)
 t_prestart_SOURCES = t_prestart.c
 t_prestart_OBJECTS = t_prestart.$(OBJEXT)
 t_prestart_LDADD = $(LDADD)
@@ -218,12 +231,13 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = t_cache.c t_cache_image.c t_init_term.c t_mpi.c t_pflush1.c \
-	t_pflush2.c t_prestart.c t_pshutdown.c t_shapesame.c \
+SOURCES = t_bigio.c t_cache.c t_cache_image.c t_filters_parallel.c \
+	t_init_term.c t_mpi.c t_pflush1.c t_pflush2.c t_pread.c \
+	t_prestart.c t_pshutdown.c t_shapesame.c $(testphdf5_SOURCES)
+DIST_SOURCES = t_bigio.c t_cache.c t_cache_image.c \
+	t_filters_parallel.c t_init_term.c t_mpi.c t_pflush1.c \
+	t_pflush2.c t_pread.c t_prestart.c t_pshutdown.c t_shapesame.c \
 	$(testphdf5_SOURCES)
-DIST_SOURCES = t_cache.c t_cache_image.c t_init_term.c t_mpi.c \
-	t_pflush1.c t_pflush2.c t_prestart.c t_pshutdown.c \
-	t_shapesame.c $(testphdf5_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -472,6 +486,7 @@ AM_JAVAFLAGS = @AM_JAVAFLAGS@
 AM_JNIFLAGS = @AM_JNIFLAGS@
 AM_LDFLAGS = @AM_LDFLAGS@ @H5_LDFLAGS@
 AR = @AR@
+AR_FLAGS = @AR_FLAGS@
 ASSERTS = @ASSERTS@
 AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
@@ -685,6 +700,7 @@ dvidir = @dvidir@
 enable_shared = @enable_shared@
 enable_static = @enable_static@
 exec_prefix = @exec_prefix@
+fortran_linux_linker_option = @fortran_linux_linker_option@
 host = @host@
 host_alias = @host_alias@
 host_cpu = @host_cpu@
@@ -770,15 +786,18 @@ TRACE = perl $(top_srcdir)/bin/trace
 # Temporary files
 # MPItest.h5 is from t_mpi
 # Para*.h5 are from testphdf
+# bigio_test.h5 is from t_bigio
+# ShapeSameTest.h5 is from t_shapesame
 # shutdown.h5 is from t_pshutdown
 # after_mpi_fin.h5 is from t_init_term
 # go is used for debugging. See testphdf5.c.
 CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.clog2 MPItest.h5 \
-	Para*.h5 CacheTestDummy.h5 shutdown.h5 after_mpi_fin.h5 go
+	Para*.h5 bigio_test.h5 CacheTestDummy.h5 ShapeSameTest.h5 \
+	shutdown.h5 after_mpi_fin.h5 go
 
 # Test programs.  These are our main targets.
 #
-TEST_PROG_PARA = t_mpi testphdf5 t_cache t_cache_image t_pflush1 t_pflush2 t_pshutdown t_prestart t_init_term t_shapesame
+TEST_PROG_PARA = t_mpi t_bigio testphdf5 t_cache t_cache_image t_pflush1 t_pflush2 t_pread t_pshutdown t_prestart t_init_term t_shapesame t_filters_parallel
 testphdf5_SOURCES = testphdf5.c t_dset.c t_file.c t_file_image.c t_mdset.c \
 	t_ph5basic.c t_coll_chunk.c t_span_tree.c t_chunk_alloc.c t_filter_read.c \
 	t_prop.c
@@ -787,7 +806,7 @@ testphdf5_SOURCES = testphdf5.c t_dset.c t_file.c t_file_image.c t_mdset.c \
 # The tests all depend on the hdf5 library and the test library
 LDADD = $(LIBH5TEST) $(LIBHDF5)
 
-# Automake needs to be taught how to build lib, dyn, progs and tests targets.
+# Automake needs to be taught how to build lib, progs and tests targets.
 # These will be filled in automatically for the most part (e.g.,
 # lib_LIBRARIES are built for lib target), but EXTRA_LIB, EXTRA_PROG, and
 # EXTRA_TEST variables are supplied to allow the user to force targets to
@@ -795,15 +814,14 @@ LDADD = $(LIBH5TEST) $(LIBHDF5)
 LIB = $(lib_LIBRARIES) $(lib_LTLIBRARIES) $(noinst_LIBRARIES)                 \
       $(noinst_LTLIBRARIES) $(check_LIBRARIES) $(check_LTLIBRARIES) $(EXTRA_LIB)
 
-DYN = $(dyn_LTLIBRARIES)
 PROGS = $(bin_PROGRAMS) $(bin_SCRIPTS) $(noinst_PROGRAMS) $(noinst_SCRIPTS)   \
         $(EXTRA_PROG)
 
 chk_TESTS = $(check_PROGRAMS) $(check_SCRIPTS) $(EXTRA_TEST) 
-dyndir = $(libdir)
 TEST_EXTENSIONS = .sh
 SH_LOG_COMPILER = $(SHELL)
 AM_SH_LOG_FLAGS = 
+REALTIMEOUTPUT = $(realtimeOutput)
 TEST_PROG_CHKEXE = $(TEST_PROG:=.chkexe_)
 TEST_PROG_PARA_CHKEXE = $(TEST_PROG_PARA:=.chkexe_)
 TEST_SCRIPT_CHKSH = $(TEST_SCRIPT:=.chkexe_)
@@ -852,6 +870,10 @@ clean-checkPROGRAMS:
 	echo " rm -f" $$list; \
 	rm -f $$list
 
+t_bigio$(EXEEXT): $(t_bigio_OBJECTS) $(t_bigio_DEPENDENCIES) $(EXTRA_t_bigio_DEPENDENCIES) 
+	@rm -f t_bigio$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(t_bigio_OBJECTS) $(t_bigio_LDADD) $(LIBS)
+
 t_cache$(EXEEXT): $(t_cache_OBJECTS) $(t_cache_DEPENDENCIES) $(EXTRA_t_cache_DEPENDENCIES) 
 	@rm -f t_cache$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(t_cache_OBJECTS) $(t_cache_LDADD) $(LIBS)
@@ -859,6 +881,10 @@ t_cache$(EXEEXT): $(t_cache_OBJECTS) $(t_cache_DEPENDENCIES) $(EXTRA_t_cache_DEP
 t_cache_image$(EXEEXT): $(t_cache_image_OBJECTS) $(t_cache_image_DEPENDENCIES) $(EXTRA_t_cache_image_DEPENDENCIES) 
 	@rm -f t_cache_image$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(t_cache_image_OBJECTS) $(t_cache_image_LDADD) $(LIBS)
+
+t_filters_parallel$(EXEEXT): $(t_filters_parallel_OBJECTS) $(t_filters_parallel_DEPENDENCIES) $(EXTRA_t_filters_parallel_DEPENDENCIES) 
+	@rm -f t_filters_parallel$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(t_filters_parallel_OBJECTS) $(t_filters_parallel_LDADD) $(LIBS)
 
 t_init_term$(EXEEXT): $(t_init_term_OBJECTS) $(t_init_term_DEPENDENCIES) $(EXTRA_t_init_term_DEPENDENCIES) 
 	@rm -f t_init_term$(EXEEXT)
@@ -875,6 +901,10 @@ t_pflush1$(EXEEXT): $(t_pflush1_OBJECTS) $(t_pflush1_DEPENDENCIES) $(EXTRA_t_pfl
 t_pflush2$(EXEEXT): $(t_pflush2_OBJECTS) $(t_pflush2_DEPENDENCIES) $(EXTRA_t_pflush2_DEPENDENCIES) 
 	@rm -f t_pflush2$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(t_pflush2_OBJECTS) $(t_pflush2_LDADD) $(LIBS)
+
+t_pread$(EXEEXT): $(t_pread_OBJECTS) $(t_pread_DEPENDENCIES) $(EXTRA_t_pread_DEPENDENCIES) 
+	@rm -f t_pread$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(t_pread_OBJECTS) $(t_pread_LDADD) $(LIBS)
 
 t_prestart$(EXEEXT): $(t_prestart_OBJECTS) $(t_prestart_DEPENDENCIES) $(EXTRA_t_prestart_DEPENDENCIES) 
 	@rm -f t_prestart$(EXEEXT)
@@ -898,6 +928,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t_bigio.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t_cache.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t_cache_image.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t_chunk_alloc.Po@am__quote@
@@ -906,12 +937,14 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t_file.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t_file_image.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t_filter_read.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t_filters_parallel.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t_init_term.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t_mdset.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t_mpi.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t_pflush1.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t_pflush2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t_ph5basic.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t_pread.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t_prestart.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t_prop.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t_pshutdown.Po@am__quote@
@@ -1318,7 +1351,6 @@ help:
 
 # lib/progs/tests targets recurse into subdirectories. build-* targets
 # build files in this directory.
-build-dyn: $(DYN)
 build-lib: $(LIB)
 build-progs: $(LIB) $(PROGS)
 build-tests: $(LIB) $(PROGS) $(chk_TESTS)
@@ -1326,7 +1358,7 @@ build-tests: $(LIB) $(PROGS) $(chk_TESTS)
 # General rule for recursive building targets.
 # BUILT_SOURCES contain targets that need to be built before anything else
 # in the directory (e.g., for Fortran type detection)
-lib dyn progs tests check-s check-p :: $(BUILT_SOURCES)
+lib progs tests check-s check-p :: $(BUILT_SOURCES)
 	@$(MAKE) $(AM_MAKEFLAGS) build-$@ || exit 1;
 	@for d in X $(SUBDIRS); do                                             \
 	    if test $$d != X && test $$d != .; then                           \
@@ -1404,28 +1436,62 @@ $(TEST_PROG_CHKEXE) $(TEST_PROG_PARA_CHKEXE) dummy.chkexe_:
 	   if $(top_srcdir)/bin/newer $(@:.chkexe_=.chkexe) $${tname}; then \
 	      echo "No need to test $${tname} again."; \
 	   else \
-	      echo "============================" > $${log}; \
-	      if test "X$(FORTRAN_API)" = "Xyes"; then \
-	         echo "Fortran API: Testing $(HDF5_DRIVER) $${tname} $(TEST_FLAGS)"; \
-	         echo "Fortran API: $(HDF5_DRIVER) $${tname} $(TEST_FLAGS) Test Log" >> $${log}; \
-	      elif test "X$(CXX_API)" = "Xyes"; then \
-	         echo "C++ API: Testing $(HDF5_DRIVER) $${tname} $(TEST_FLAGS)"; \
-	         echo "C++ API: $(HDF5_DRIVER) $${tname} $(TEST_FLAGS) Test Log" >> $${log};\
-	      else \
-	         echo "Testing $(HDF5_DRIVER) $${tname} $(TEST_FLAGS)"; \
-	         echo "$(HDF5_DRIVER) $${tname} $(TEST_FLAGS) Test Log" >> $${log}; \
-	      fi; \
-	      echo "============================" >> $${log}; \
-	      srcdir="$(srcdir)" \
-	         $(TIME) $(RUNEXEC) ./$${tname} $(TEST_FLAGS) >> $${log} 2>&1 \
-	         && touch $(@:.chkexe_=.chkexe) || \
-	         (test $$HDF5_Make_Ignore && echo "*** Error ignored") || \
-	         (cat $${log} && false) || exit 1; \
+              if test -n "$(REALTIMEOUTPUT)"; then \
+                 echo "============================" | tee $${log}; \
+              else \
+                 echo "============================" > $${log}; \
+              fi; \
+              if test "X$(FORTRAN_API)" = "Xyes"; then \
+                 echo "Fortran API: Testing $(HDF5_DRIVER) $${tname} $(TEST_FLAGS)"; \
+                 if test -n "$(REALTIMEOUTPUT)"; then \
+                    echo "Fortran API: $(HDF5_DRIVER) $${tname} $(TEST_FLAGS) Test Log" | tee -a $${log}; \
+                 else \
+                    echo "Fortran API: $(HDF5_DRIVER) $${tname} $(TEST_FLAGS) Test Log" >> $${log}; \
+                 fi; \
+              elif test "X$(CXX_API)" = "Xyes"; then \
+                 echo "C++ API: Testing $(HDF5_DRIVER) $${tname} $(TEST_FLAGS)"; \
+                 if test -n "$(REALTIMEOUTPUT)"; then \
+                    echo "C++ API: $(HDF5_DRIVER) $${tname} $(TEST_FLAGS) Test Log" | tee -a $${log};\
+                 else \
+                    echo "C++ API: $(HDF5_DRIVER) $${tname} $(TEST_FLAGS) Test Log" >> $${log};\
+                 fi; \
+              else \
+                 echo "Testing $(HDF5_DRIVER) $${tname} $(TEST_FLAGS)"; \
+                 if test -n "$(REALTIMEOUTPUT)"; then \
+                    echo "$(HDF5_DRIVER) $${tname} $(TEST_FLAGS) Test Log" | tee -a $${log}; \
+                 else \
+                    echo "$(HDF5_DRIVER) $${tname} $(TEST_FLAGS) Test Log" >> $${log}; \
+                 fi; \
+              fi; \
+              if test -n "$(REALTIMEOUTPUT)"; then \
+                 echo "============================" | tee -a $${log}; \
+              else \
+                 echo "============================" >> $${log}; \
+              fi; \
+              if test -n "$(REALTIMEOUTPUT)"; then \
+                 srcdir="$(srcdir)" \
+                 $(TIME) $(RUNEXEC) ./$${tname} $(TEST_FLAGS) | tee -a $${log} 2>&1 \
+                 && touch $(@:.chkexe_=.chkexe) || \
+                 (test $$HDF5_Make_Ignore && echo "*** Error ignored") || \
+                 (cat $${log} && false) || exit 1; \
+              else \
+                 srcdir="$(srcdir)" \
+                 $(TIME) $(RUNEXEC) ./$${tname} $(TEST_FLAGS) >> $${log} 2>&1 \
+                 && touch $(@:.chkexe_=.chkexe) || \
+                 (test $$HDF5_Make_Ignore && echo "*** Error ignored") || \
+                 (cat $${log} && false) || exit 1; \
+              fi; \
 	      echo "" >> $${log}; \
-	      echo "Finished testing $${tname} $(TEST_FLAGS)" >> $${log}; \
-	      echo "============================" >> $${log}; \
-	      echo "Finished testing $${tname} $(TEST_FLAGS)"; \
-	      cat $${log}; \
+              if test -n "$(REALTIMEOUTPUT)"; then \
+                 echo "Finished testing $${tname} $(TEST_FLAGS)" | tee -a $${log}; \
+                 echo "============================" | tee -a $${log}; \
+              else \
+                 echo "Finished testing $${tname} $(TEST_FLAGS)" >> $${log}; \
+                 echo "============================" >> $${log}; \
+              fi; \
+              if test -z "$(REALTIMEOUTPUT)"; then \
+                 cat $${log}; \
+              fi; \
 	   fi; \
 	fi
 

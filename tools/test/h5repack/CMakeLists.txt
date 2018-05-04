@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.2.2)
+cmake_minimum_required (VERSION 3.10)
 PROJECT (HDF5_TOOLS_TEST_H5REPACK)
 
 #-----------------------------------------------------------------------------
@@ -12,7 +12,6 @@ INCLUDE_DIRECTORIES (${HDF5_TEST_SRC_DIR})
 # Add h5Repack test executables
 # --------------------------------------------------------------------
 add_executable (testh5repack_detect_szip ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testh5repack_detect_szip.c)
-TARGET_NAMING (testh5repack_detect_szip STATIC)
 TARGET_C_PROPERTIES (testh5repack_detect_szip STATIC " " " ")
 target_link_libraries (testh5repack_detect_szip ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
 set_target_properties (testh5repack_detect_szip PROPERTIES FOLDER tools)
@@ -27,7 +26,6 @@ set (REPACK_COMMON_SOURCES
     ${HDF5_TOOLS_SRC_H5REPACK_SOURCE_DIR}/h5repack.c
 )
 add_executable (h5repacktest ${REPACK_COMMON_SOURCES} ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/h5repacktst.c)
-TARGET_NAMING (h5repacktest STATIC)
 TARGET_C_PROPERTIES (h5repacktest STATIC " " " ")
 target_link_libraries (h5repacktest  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
 set_target_properties (h5repacktest PROPERTIES FOLDER tools)

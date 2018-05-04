@@ -29,7 +29,7 @@ namespace H5 {
 class H5_DLLCPP Attribute : public AbstractDs, public H5Location {
    public:
 
-        // Copy constructor: makes a copy of an existing Attribute object.
+        // Copy constructor: same as the original Attribute.
         Attribute(const Attribute& original);
 
         // Default constructor

@@ -487,7 +487,7 @@ H5FD_direct_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxadd
     o_flags |= O_DIRECT;
 
     /* Open the file */
-    if ((fd=HDopen(name, o_flags, 0666))<0)
+    if ((fd = HDopen(name, o_flags, H5_POSIX_CREATE_MODE_RW))<0)
         HSYS_GOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file")
 
     if (HDfstat(fd, &sb)<0)
@@ -698,6 +698,7 @@ H5FD_direct_query(const H5FD_t H5_ATTR_UNUSED * _f, unsigned long *flags /* out 
         *flags |= H5FD_FEAT_ACCUMULATE_METADATA;    /* OK to accumulate metadata for faster writes                      */
         *flags |= H5FD_FEAT_DATA_SIEVE;             /* OK to perform data sieving for faster raw data reads & writes    */
         *flags |= H5FD_FEAT_AGGREGATE_SMALLDATA;    /* OK to aggregate "small" raw data allocations                     */
+        *flags |= H5FD_FEAT_DEFAULT_VFD_COMPATIBLE; /* VFD creates a file which can be opened with the default VFD      */
     }
 
     FUNC_LEAVE_NOAPI(SUCCEED)
