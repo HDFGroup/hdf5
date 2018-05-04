@@ -144,10 +144,6 @@ H5Dcreate2(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
     if(NULL == (dset = H5D__create_named(&loc, name, type_id, space, lcpl_id, dcpl_id, dapl_id, dxpl_id)))
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create dataset")
 
-    if (H5F_HAS_FEATURE(loc.oloc->file, H5FD_FEAT_ALLOCATE_EARLY)) {
-        dset->shared->dcpl_cache.fill.alloc_time = H5D_ALLOC_TIME_EARLY;
-    }
-
     if((ret_value = H5I_register(H5I_DATASET, dset, TRUE)) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL, "unable to register dataset")
 
@@ -297,9 +293,6 @@ H5Dopen2(hid_t loc_id, const char *name, hid_t dapl_id)
     /* Open the dataset */
     if(NULL == (dset = H5D__open_name(&loc, name, dapl_id, dxpl_id)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "unable to open dataset")
-
-    if(H5F_HAS_FEATURE(loc.oloc->file, H5FD_FEAT_ALLOCATE_EARLY))
-        dset->shared->dcpl_cache.fill.alloc_time = H5D_ALLOC_TIME_EARLY;
 
     /* Register an atom for the dataset */
     if((ret_value = H5I_register(H5I_DATASET, dset, TRUE)) < 0)

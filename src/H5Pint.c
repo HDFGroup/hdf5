@@ -3419,9 +3419,8 @@ H5P_cmp_prop(const H5P_genprop_t *prop1, const H5P_genprop_t *prop2)
     if(prop1->value != NULL && prop2->value == NULL) HGOTO_DONE(1);
     if(prop1->value != NULL) {
         /* Call comparison routine */
-        if((cmp_value = prop1->cmp(prop1->value, prop2->value, prop1->size)) != 0) {
+        if((cmp_value = prop1->cmp(prop1->value, prop2->value, prop1->size)) != 0)
             HGOTO_DONE(cmp_value);
-	}
     } /* end if */
 
 done:
