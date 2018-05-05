@@ -108,7 +108,7 @@ H5Dcreate2(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
     H5D_t          *dset = NULL;        /* New dataset's info */
     const H5S_t    *space;              /* Dataspace for dataset */
     hid_t           dxpl_id = H5AC_ind_read_dxpl_id; /* dxpl used by library */
-    hid_t           ret_value = 0;      /* Return value */
+    hid_t           ret_value;          /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE7("i", "i*siiiii", loc_id, name, type_id, space_id, lcpl_id, dcpl_id,

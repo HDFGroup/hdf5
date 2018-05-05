@@ -1659,13 +1659,6 @@ H5D__open_oid(H5D_t *dataset, hid_t dapl_id, hid_t dxpl_id)
             || (dataset->shared->layout.type == H5D_CHUNKED && fill_prop->alloc_time == H5D_ALLOC_TIME_INCR)
             || (dataset->shared->layout.type == H5D_VIRTUAL && fill_prop->alloc_time == H5D_ALLOC_TIME_INCR))
         alloc_time_state = 1;
-#ifdef H5_HAVE_PARALLEL
-        if((dataset->shared->layout.type == H5D_VIRTUAL) &&
-            H5F_HAS_FEATURE(dataset->oloc.file, H5FD_FEAT_HAS_MPI)) {
-            fill_prop->alloc_time = H5D_ALLOC_TIME_EARLY;
-            alloc_time_state = 1;
-        }
-#endif
 
     /* Set revised fill value properties, if they are different from the defaults */
     if(H5P_fill_value_cmp(&H5D_def_dset.dcpl_cache.fill, fill_prop, sizeof(H5O_fill_t))) {
