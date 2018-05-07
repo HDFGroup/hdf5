@@ -48,12 +48,15 @@ target_include_directories(H5_buildiface
     PRIVATE
         "${HDF5_BINARY_DIR};${HDF5_F90_BINARY_DIR}"
 )
-if (BUILD_SHARED_LIBS)
-  target_compile_definitions(H5_buildiface
-      PRIVATE
-          $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:/MT>
-  )
-endif ()
+#if (BUILD_SHARED_LIBS)
+#  target_compile_definitions(H5_buildiface
+#      PRIVATE
+#          $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:/MT>
+#  )
+#endif ()
+if(MSVC)
+  set_property(TARGET H5_buildiface PROPERTY COMPILE_FLAGS "/MT")
+endif()
 #set_property(TARGET H5_buildiface APPEND PROPERTY
 #    LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">
 #)
