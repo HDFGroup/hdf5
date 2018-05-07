@@ -36,7 +36,7 @@ target_link_libraries (parallel_test
 #    LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
 #)
 if(MSVC)
-  set_property(TARGET parallel_test PROPERTY LINK_FLAGS "/SUBSYSTEM:CONSOLE;${WIN_LINK_FLAGS}")
+  set_property(TARGET parallel_test PROPERTY LINK_FLAGS "/SUBSYSTEM:CONSOLE ${WIN_LINK_FLAGS}")
 endif()
 set_target_properties (parallel_test PROPERTIES
     FOLDER test/fortran

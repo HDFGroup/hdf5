@@ -54,7 +54,7 @@ foreach (example ${examples})
 #      LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:>
 #  )
   if(MSVC)
-    set_property(TARGET H5_buildiface PROPERTY LINK_FLAGS "/SUBSYSTEM:CONSOLE;${WIN_LINK_FLAGS}")
+    set_property(TARGET H5_buildiface PROPERTY LINK_FLAGS "/SUBSYSTEM:CONSOLE ${WIN_LINK_FLAGS}")
   endif()
   set_target_properties (f90_ex_${example} PROPERTIES
       LINKER_LANGUAGE Fortran
@@ -83,7 +83,7 @@ foreach (example ${examples})
 #        LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
 #    )
     if(MSVC)
-      set_property(TARGET f90_ex_${example}-shared PROPERTY LINK_FLAGS "/SUBSYSTEM:CONSOLE;${WIN_LINK_FLAGS}")
+      set_property(TARGET f90_ex_${example}-shared PROPERTY LINK_FLAGS "/SUBSYSTEM:CONSOLE ${WIN_LINK_FLAGS}")
     endif()
     set_target_properties (f90_ex_${example}-shared PROPERTIES
         LINKER_LANGUAGE Fortran
@@ -114,7 +114,7 @@ foreach (example ${F2003_examples})
 #      LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
 #  )
   if(MSVC)
-    set_property(TARGET f03_ex_${example} PROPERTY LINK_FLAGS "/SUBSYSTEM:CONSOLE;${WIN_LINK_FLAGS}")
+    set_property(TARGET f03_ex_${example} PROPERTY LINK_FLAGS "/SUBSYSTEM:CONSOLE ${WIN_LINK_FLAGS}")
   endif()
   set_target_properties (f03_ex_${example} PROPERTIES
       LINKER_LANGUAGE Fortran
@@ -143,7 +143,7 @@ foreach (example ${F2003_examples})
 #        LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
 #    )
     if(MSVC)
-      set_property(TARGET f03_ex_${example}-shared PROPERTY LINK_FLAGS "/SUBSYSTEM:CONSOLE;${WIN_LINK_FLAGS}")
+      set_property(TARGET f03_ex_${example}-shared PROPERTY LINK_FLAGS "/SUBSYSTEM:CONSOLE ${WIN_LINK_FLAGS}")
     endif()
     set_target_properties (f03_ex_${example}-shared PROPERTIES
         LINKER_LANGUAGE Fortran
@@ -174,7 +174,7 @@ if (H5_HAVE_PARALLEL AND MPI_Fortran_FOUND)
 #      LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
 #  )
   if(MSVC)
-    set_property(TARGET f90_ex_ph5example PROPERTY LINK_FLAGS "/SUBSYSTEM:CONSOLE;${WIN_LINK_FLAGS}")
+    set_property(TARGET f90_ex_ph5example PROPERTY LINK_FLAGS "/SUBSYSTEM:CONSOLE ${WIN_LINK_FLAGS}")
   endif()
   set_target_properties (f90_ex_ph5example PROPERTIES
       LINKER_LANGUAGE Fortran
@@ -203,7 +203,7 @@ if (H5_HAVE_PARALLEL AND MPI_Fortran_FOUND)
 #          LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
 #    )
     if(MSVC)
-      set_property(TARGET f90_ex_ph5example-shared PROPERTY LINK_FLAGS "/SUBSYSTEM:CONSOLE;${WIN_LINK_FLAGS}")
+      set_property(TARGET f90_ex_ph5example-shared PROPERTY LINK_FLAGS "/SUBSYSTEM:CONSOLE ${WIN_LINK_FLAGS}")
     endif()
     set_target_properties (f90_ex_ph5example-shared PROPERTIES
         LINKER_LANGUAGE Fortran
