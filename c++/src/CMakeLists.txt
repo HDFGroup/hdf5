@@ -13,6 +13,7 @@ configure_file (${HDF_RESOURCES_DIR}/H5cxx_config.h.in
 #-----------------------------------------------------------------------------
 set (CPP_SRCS
     ${HDF5_CPP_SRC_SOURCE_DIR}/H5AbstractDs.cpp
+    ${HDF5_CPP_SRC_SOURCE_DIR}/H5AcreatProp.cpp
     ${HDF5_CPP_SRC_SOURCE_DIR}/H5ArrayType.cpp
     ${HDF5_CPP_SRC_SOURCE_DIR}/H5AtomType.cpp
     ${HDF5_CPP_SRC_SOURCE_DIR}/H5Attribute.cpp
@@ -33,18 +34,21 @@ set (CPP_SRCS
     ${HDF5_CPP_SRC_SOURCE_DIR}/H5IdComponent.cpp
     ${HDF5_CPP_SRC_SOURCE_DIR}/H5IntType.cpp
     ${HDF5_CPP_SRC_SOURCE_DIR}/H5LaccProp.cpp
+    ${HDF5_CPP_SRC_SOURCE_DIR}/H5LcreatProp.cpp
     ${HDF5_CPP_SRC_SOURCE_DIR}/H5Library.cpp
     ${HDF5_CPP_SRC_SOURCE_DIR}/H5Location.cpp
     ${HDF5_CPP_SRC_SOURCE_DIR}/H5Object.cpp
     ${HDF5_CPP_SRC_SOURCE_DIR}/H5OcreatProp.cpp
     ${HDF5_CPP_SRC_SOURCE_DIR}/H5PredType.cpp
     ${HDF5_CPP_SRC_SOURCE_DIR}/H5PropList.cpp
+    ${HDF5_CPP_SRC_SOURCE_DIR}/H5StrcreatProp.cpp
     ${HDF5_CPP_SRC_SOURCE_DIR}/H5StrType.cpp
     ${HDF5_CPP_SRC_SOURCE_DIR}/H5VarLenType.cpp
 )
 
 set (CPP_HDRS
     ${HDF5_CPP_SRC_SOURCE_DIR}/H5AbstractDs.h
+    ${HDF5_CPP_SRC_SOURCE_DIR}/H5AcreatProp.h
     ${HDF5_CPP_SRC_SOURCE_DIR}/H5Alltypes.h
     ${HDF5_CPP_SRC_SOURCE_DIR}/H5ArrayType.h
     ${HDF5_CPP_SRC_SOURCE_DIR}/H5AtomType.h
@@ -70,12 +74,14 @@ set (CPP_HDRS
     ${HDF5_CPP_SRC_SOURCE_DIR}/H5Include.h
     ${HDF5_CPP_SRC_SOURCE_DIR}/H5IntType.h
     ${HDF5_CPP_SRC_SOURCE_DIR}/H5LaccProp.h
+    ${HDF5_CPP_SRC_SOURCE_DIR}/H5LcreatProp.h
     ${HDF5_CPP_SRC_SOURCE_DIR}/H5Library.h
     ${HDF5_CPP_SRC_SOURCE_DIR}/H5Location.h
     ${HDF5_CPP_SRC_SOURCE_DIR}/H5Object.h
     ${HDF5_CPP_SRC_SOURCE_DIR}/H5OcreatProp.h
     ${HDF5_CPP_SRC_SOURCE_DIR}/H5PredType.h
     ${HDF5_CPP_SRC_SOURCE_DIR}/H5PropList.h
+    ${HDF5_CPP_SRC_SOURCE_DIR}/H5StrcreatProp.h
     ${HDF5_CPP_SRC_SOURCE_DIR}/H5StrType.h
     ${HDF5_CPP_SRC_SOURCE_DIR}/H5VarLenType.h
 )

@@ -117,7 +117,6 @@ ArrayType::ArrayType(const H5Location& loc, const H5std_string& type_name) : Dat
 //              Closes the id on the lhs object first with setId, then copies
 //              each data member from the rhs object. (Issue HDFFV-9562)
 // Programmer   Binh-Minh Ribler - Mar 2016
-// Modification
 //--------------------------------------------------------------------------
 ArrayType& ArrayType::operator=(const ArrayType& rhs)
 {

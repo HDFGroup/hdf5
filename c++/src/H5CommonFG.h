@@ -30,8 +30,8 @@ class H5_DLLCPP CommonFG {
    public:
         // Creates a new group at this location which can be a file
         // or another group.
-        Group createGroup(const char* name, size_t size_hint = 0) const;
-        Group createGroup(const H5std_string& name, size_t size_hint = 0) const;
+        Group createGroup(const char* name, size_t size_hint = 0, const LinkCreatPropList& lc_plist = LinkCreatPropList::DEFAULT) const;
+        Group createGroup(const H5std_string& name, size_t size_hint = 0, const LinkCreatPropList& lc_plist = LinkCreatPropList::DEFAULT) const;
 
         // Opens an existing group in a location which can be a file
         // or another group.

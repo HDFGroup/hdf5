@@ -361,7 +361,7 @@ static void test_open_object_header()
         // There should be one object, the datatype
 
         // Close datatype object opened from the file
-        file1.closeObjId(obj_dtype);
+        H5Location::closeObjId(obj_dtype);
 
         dset.setId(obj_dset);
         dspace = dset.getSpace();
@@ -377,10 +377,10 @@ static void test_open_object_header()
         dtype.close();
 
         // Close datatype object
-        grp2.closeObjId(obj_dtype);
+        H5Location::closeObjId(obj_dtype);
 
         // Close the group object
-        file1.closeObjId(obj_grp);
+        H5Location::closeObjId(obj_grp);
 
         // Try doing something with group, the ID should still work
         num_objs = grp2.getNumObjs();

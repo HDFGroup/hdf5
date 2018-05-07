@@ -27,6 +27,8 @@
 #include "H5OcreatProp.h"
 #include "H5DcreatProp.h"
 #include "H5LaccProp.h"
+#include "H5StrcreatProp.h"
+#include "H5LcreatProp.h"
 #include "H5Location.h"
 #include "H5Object.h"
 #include "H5CommonFG.h"
@@ -229,7 +231,7 @@ bool H5File::isHdf5(const H5std_string& name)
 ///                             will be reopened. Absence of this flag
 ///                             implies read-only access.
 ///
-///             H5F_ACC_RDONLY: Open with read only access. - default
+///             H5F_ACC_RDONLY: Open with read only access.
 ///
 // Programmer   Binh-Minh Ribler - Oct, 2005
 //--------------------------------------------------------------------------

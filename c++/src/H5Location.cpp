@@ -95,7 +95,7 @@ May, 2017 (1.8.19)
 
 //--------------------------------------------------------------------------
 // Function:    H5Location::createAttribute
-///\brief       Deprecated - replaced by H5Object::createAttribute
+///\brief       Deprecated - replaced by H5Object::createAttribute()
 //  brief       Creates an attribute for a group, dataset, or named datatype.
 ///\param       name - IN: Name of the attribute
 ///\param       data_type - IN: Datatype for the attribute
@@ -114,6 +114,8 @@ May, 2017 (1.8.19)
 ///             delete the existing one with \c H5Location::removeAttr, then
 ///             recreate it with this function.
 // Programmer   Binh-Minh Ribler - 2000
+// Modification
+//          - Moved to H5Object in 1.8.19. -BMR
 //--------------------------------------------------------------------------
 Attribute H5Location::createAttribute(const char* name, const DataType& data_type, const DataSpace& data_space, const PropList& create_plist) const
 {
@@ -135,11 +137,13 @@ Attribute H5Location::createAttribute(const char* name, const DataType& data_typ
 
 //--------------------------------------------------------------------------
 // Function:    H5Location::createAttribute
-///\brief       Deprecated - replaced by H5Object::createAttribute
+///\brief       Deprecated - replaced by H5Object::createAttribute()
 //  brief       This is an overloaded member function, provided for convenience.
 ///             It differs from the above function in that it takes
 ///             a reference to an \c H5std_string for \a name.
 // Programmer   Binh-Minh Ribler - 2000
+// Modification
+//          - Moved to H5Object in 1.8.19. -BMR
 //--------------------------------------------------------------------------
 Attribute H5Location::createAttribute(const H5std_string& name, const DataType& data_type, const DataSpace& data_space, const PropList& create_plist) const
 {
@@ -148,12 +152,14 @@ Attribute H5Location::createAttribute(const H5std_string& name, const DataType& 
 
 //--------------------------------------------------------------------------
 // Function:    H5Location::openAttribute
-///\brief       Deprecated - replaced by H5Object::openAttribute
+///\brief       Deprecated - replaced by H5Object::openAttribute()
 //  brief       Opens an attribute given its name.
 ///\param       name - IN: Name of the attribute
 ///\return      Attribute instance
 ///\exception   H5::AttributeIException
 // Programmer   Binh-Minh Ribler - 2000
+// Modification
+//          - Moved to H5Object in 1.8.19. -BMR
 //--------------------------------------------------------------------------
 Attribute H5Location::openAttribute(const char* name) const
 {
@@ -172,12 +178,14 @@ Attribute H5Location::openAttribute(const char* name) const
 
 //--------------------------------------------------------------------------
 // Function:    H5Location::openAttribute
-///\brief       Deprecated - replaced by H5Object::openAttribute
+///\brief       Deprecated - replaced by H5Object::openAttribute()
 //  brief       This is an overloaded member function, provided for convenience.
 //              It differs from the above function in that it takes
 //              a reference to an \c H5std_string for \a name.
 ///\param       name - IN: Name of the attribute
 // Programmer   Binh-Minh Ribler - 2000
+// Modification
+//          - Moved to H5Object in 1.8.19. -BMR
 //--------------------------------------------------------------------------
 Attribute H5Location::openAttribute(const H5std_string& name) const
 {
@@ -186,12 +194,14 @@ Attribute H5Location::openAttribute(const H5std_string& name) const
 
 //--------------------------------------------------------------------------
 // Function:    H5Location::openAttribute
-///\brief       Deprecated - replaced by H5Object::openAttribute
+///\brief       Deprecated - replaced by H5Object::openAttribute()
 //  brief       Opens an attribute given its index.
 ///\param       idx - IN: Index of the attribute, a 0-based, non-negative integer
 ///\return      Attribute instance
 ///\exception   H5::AttributeIException
 // Programmer   Binh-Minh Ribler - 2000
+// Modification
+//          - Moved to H5Object in 1.8.19. -BMR
 //--------------------------------------------------------------------------
 Attribute H5Location::openAttribute(const unsigned int idx) const
 {
@@ -225,7 +235,6 @@ Attribute H5Location::openAttribute(const unsigned int idx) const
 ///             For information, please refer to the C layer Reference Manual
 ///             at:
 /// https://support.hdfgroup.org/HDF5/doc/RM/RM_H5A.html#Annot-Iterate
-// Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 int H5Location::iterateAttrs(attr_operator_t user_op, unsigned *_idx, void *op_data)
 {
@@ -261,6 +270,8 @@ int H5Location::iterateAttrs(attr_operator_t user_op, unsigned *_idx, void *op_d
 ///\param       name - IN: Name of the attribute to be queried
 ///\exception   H5::AttributeIException
 // Programmer   Binh-Minh Ribler - 2013
+// Modification
+//          - Moved to H5Object in 1.8.19. -BMR
 //--------------------------------------------------------------------------
 bool H5Location::attrExists(const char* name) const
 {
@@ -284,6 +295,8 @@ bool H5Location::attrExists(const char* name) const
 //              a reference to an \c H5std_string for \a name.
 ///\param       name - IN: Name of the attribute to be queried
 // Programmer   Binh-Minh Ribler - 2013
+// Modification
+//          - Moved to H5Object in 1.8.19. -BMR
 //--------------------------------------------------------------------------
 bool H5Location::attrExists(const H5std_string& name) const
 {
@@ -297,6 +310,8 @@ bool H5Location::attrExists(const H5std_string& name) const
 ///\param       name - IN: Name of the attribute to be removed
 ///\exception   H5::AttributeIException
 // Programmer   Binh-Minh Ribler - 2000
+// Modification
+//          - Moved to H5Object in 1.8.19. -BMR
 //--------------------------------------------------------------------------
 void H5Location::removeAttr(const char* name) const
 {
@@ -313,6 +328,8 @@ void H5Location::removeAttr(const char* name) const
 //              a reference to an \c H5std_string for \a name.
 ///\param       name - IN: Name of the attribute to be removed
 // Programmer   Binh-Minh Ribler - 2000
+// Modification
+//          - Moved to H5Object in 1.8.19. -BMR
 //--------------------------------------------------------------------------
 void H5Location::removeAttr(const H5std_string& name) const
 {
@@ -327,6 +344,8 @@ void H5Location::removeAttr(const H5std_string& name) const
 ///\param       newname - IN: New name ame of the attribute
 ///\exception   H5::AttributeIException
 // Programmer   Binh-Minh Ribler - Mar, 2005
+// Modification
+//          - Moved to H5Object in 1.8.19. -BMR
 //--------------------------------------------------------------------------
 void H5Location::renameAttr(const char* oldname, const char* newname) const
 {
@@ -346,6 +365,8 @@ void H5Location::renameAttr(const char* oldname, const char* newname) const
 ///\param       newname - IN: New name ame of the attribute
 ///\exception   H5::AttributeIException
 // Programmer   Binh-Minh Ribler - Mar, 2005
+// Modification
+//          - Moved to H5Object in 1.8.19. -BMR
 //--------------------------------------------------------------------------
 void H5Location::renameAttr(const H5std_string& oldname, const H5std_string& newname) const
 {
@@ -358,9 +379,9 @@ void H5Location::renameAttr(const H5std_string& oldname, const H5std_string& new
 //  brief       Returns the number of attributes attached to this HDF5 object.
 ///\return      Number of attributes
 ///\exception   H5::AttributeIException
-// Programmer   Binh-Minh Ribler - 2000
+// 2000
 // Modification
-//          - Moved to H5Object in 1.8.20. -BMR
+//          - Moved to H5Object in 1.8.19. -BMR
 //--------------------------------------------------------------------------
 int H5Location::getNumAttrs() const
 {
@@ -378,8 +399,7 @@ int H5Location::getNumAttrs() const
 ///\param       name - IN: Searched name - \c char*
 ///\param       lapl - IN: Link access property list
 ///\exception   H5::LocationException
-// Programmer   Binh-Minh Ribler - Nov, 2016
-// Modification
+// Nov, 2016
 //--------------------------------------------------------------------------
 bool H5Location::nameExists(const char* name, const LinkAccPropList& lapl) const
 {
@@ -452,6 +472,7 @@ H5std_string H5Location::getFileName() const
 //--------------------------------------------------------------------------
 // Function:    H5Location::getObjectInfo
 ///\brief       Retrieve information about an object, specified by location.
+///
 ///\exception   H5::LocationException
 // Programmer   Binh-Minh Ribler - Aug, 2017
 //--------------------------------------------------------------------------
@@ -467,6 +488,7 @@ void H5Location::getObjectInfo(H5O_info_t *objinfo) const
 //--------------------------------------------------------------------------
 // Function:    H5Location::getObjectInfo
 ///\brief       Retrieve information about an object, specified by name.
+///
 ///\exception   H5::LocationException
 // Programmer   Binh-Minh Ribler - Aug, 2017
 //--------------------------------------------------------------------------
@@ -483,6 +505,7 @@ void H5Location::getObjectInfo(const char *name, H5O_info_t *objinfo,
 //--------------------------------------------------------------------------
 // Function:    H5Location::getObjectInfo
 ///\brief       Retrieve information about an object, specified by name.
+///
 ///\exception   H5::LocationException
 // Programmer   Binh-Minh Ribler - Aug, 2017
 //--------------------------------------------------------------------------
@@ -507,6 +530,9 @@ void H5Location::getObjectInfo(const H5std_string& name, H5O_info_t *objinfo,
 ///             - an error returned by the C API
 ///             - version number is not one of the valid values above
 // Programmer   Binh-Minh Ribler - May, 2017
+// Developer's Note
+//              Maybe, this should be moved to H5Object because H5Oget_info is
+//              supposed to take an object ID, so it shouldn't be a location.
 //--------------------------------------------------------------------------
 unsigned H5Location::objVersion() const
 {
@@ -773,14 +799,14 @@ hid_t H5Location::openObjId(const H5std_string& obj_name, const LinkAccPropList&
 ///\brief       Closes an object, which was opened with H5Location::openObjId
 ///
 ///\exception   H5::LocationException
-// Programmer   Binh-Minh Ribler - May, 2017
+// May, 2017
 //--------------------------------------------------------------------------
-void H5Location::closeObjId(hid_t obj_id) const
+void H5Location::closeObjId(hid_t obj_id)
 {
     herr_t ret_value = H5Oclose(obj_id);
     if (ret_value < 0)
     {
-        throw LocationException(inMemFunc("closeObjId"), "H5Oclose failed");
+        throw Exception("closeObjId", "H5Oclose failed");
     }
 }
 
