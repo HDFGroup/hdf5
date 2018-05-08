@@ -28,6 +28,7 @@
 #include "H5srcdir.h"
 
 #include "H5Bprivate.h"
+#include "H5CXprivate.h"        /* API Contexts                         */
 #include "H5Iprivate.h"
 #include "H5Pprivate.h"
 
@@ -2036,6 +2037,7 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
     if(H5Dclose (dataset) < 0) goto error;
     if(H5Sclose (sid) < 0) goto error;
     if(H5Pclose (dxpl) < 0) goto error;
+    if(H5Pclose (write_dxpl) < 0) goto error;
     HDfree (tconv_buf);
 
     return(0);
@@ -2532,6 +2534,7 @@ test_missing_filter(hid_t file)
     size_t      i,j;            /* Local index variables */
     herr_t      ret;            /* Generic return value */
     const char *testfile = H5_get_srcdir_filename(FILE_DEFLATE_NAME); /* Corrected test file name */
+    hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
 
     TESTING("dataset access with missing filter");
 
@@ -2544,8 +2547,13 @@ test_missing_filter(hid_t file)
             goto error;
         } /* end if */
 
-        /* Unregister deflate filter (use internal function) */
-        if(H5Z_unregister(H5Z_FILTER_DEFLATE) < 0) {
+        /* Push API context */
+        if(H5CX_push() < 0) FAIL_STACK_ERROR
+        api_ctx_pushed = TRUE;
+
+        /* Unregister deflate filter */
+        /* (Use private routine, to avoid range checking on filter ID) */
+        if(H5Z__unregister(H5Z_FILTER_DEFLATE) < 0) {
             H5_FAILED();
             printf("    Line %d: Can't unregister deflate filter\n",__LINE__);
             goto error;
@@ -2738,10 +2746,16 @@ test_missing_filter(hid_t file)
         } /* end if */
 #endif /* H5_HAVE_FILTER_DEFLATE */
 
+    /* Pop API context */
+    if(api_ctx_pushed && H5CX_pop() < 0) FAIL_STACK_ERROR
+    api_ctx_pushed = FALSE;
+
     PASSED();
     return 0;
 
 error:
+    if(api_ctx_pushed) H5CX_pop();
+
     return -1;
 }
 

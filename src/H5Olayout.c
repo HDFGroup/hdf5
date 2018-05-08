@@ -33,27 +33,23 @@
 
 /* Local macros */
 
-/* Version # of encoded virtual dataset global heap blocks */
-#define H5O_LAYOUT_VDS_GH_ENC_VERS      0
-
 
 /* PRIVATE PROTOTYPES */
-static void *H5O__layout_decode(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
-    unsigned mesg_flags, unsigned *ioflags, size_t p_size, const uint8_t *p);
+static void *H5O__layout_decode(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags,
+    unsigned *ioflags, size_t p_size, const uint8_t *p);
 static herr_t H5O__layout_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
 static void *H5O__layout_copy(const void *_mesg, void *_dest);
 static size_t H5O__layout_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
 static herr_t H5O__layout_reset(void *_mesg);
 static herr_t H5O__layout_free(void *_mesg);
-static herr_t H5O__layout_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
-    void *_mesg);
+static herr_t H5O__layout_delete(H5F_t *f, H5O_t *open_oh, void *_mesg);
 static herr_t H5O__layout_pre_copy_file(H5F_t *file_src, const void *mesg_src,
     hbool_t *deleted, const H5O_copy_t *cpy_info, void *udata);
 static void *H5O__layout_copy_file(H5F_t *file_src, void *mesg_src,
     H5F_t *file_dst, hbool_t *recompute_size, unsigned *mesg_flags,
-    H5O_copy_t *cpy_info, void *udata, hid_t dxpl_id);
-static herr_t H5O__layout_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg,
-    FILE * stream, int indent, int fwidth);
+    H5O_copy_t *cpy_info, void *udata);
+static herr_t H5O__layout_debug(H5F_t *f, const void *_mesg, FILE *stream,
+    int indent, int fwidth);
 
 /* This message derives from H5O message class */
 const H5O_msg_class_t H5O_MSG_LAYOUT[1] = {{
@@ -100,7 +96,7 @@ H5FL_DEFINE(H5O_layout_t);
  *-------------------------------------------------------------------------
  */
 static void *
-H5O__layout_decode(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED *open_oh,
+H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh,
     unsigned H5_ATTR_UNUSED mesg_flags, unsigned H5_ATTR_UNUSED *ioflags,
     size_t H5_ATTR_UNUSED p_size, const uint8_t *p)
 {
@@ -398,7 +394,7 @@ H5O__layout_decode(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED 
                     size_t i;
 
                     /* Read heap */
-                    if(NULL == (heap_block = (uint8_t *)H5HG_read(f, dxpl_id, &(mesg->storage.u.virt.serial_list_hobjid), NULL, &block_size)))
+                    if(NULL == (heap_block = (uint8_t *)H5HG_read(f, &(mesg->storage.u.virt.serial_list_hobjid), NULL, &block_size)))
                         HGOTO_ERROR(H5E_OHDR, H5E_READERROR, NULL, "Unable to read global heap block")
 
                     heap_block_p = (const uint8_t *)heap_block;
@@ -779,14 +775,13 @@ H5O__layout_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, 
                 UINT32ENCODE(heap_block_p, chksum)
 
                 /* Insert block into global heap */
-                if(H5HG_insert(f, H5AC_ind_read_dxpl_id, block_size, heap_block, &((H5O_layout_t *)mesg)->storage.u.virt.serial_list_hobjid) < 0) /* Casting away const OK  --NAF */
+                if(H5HG_insert(f, block_size, heap_block, &((H5O_layout_t *)mesg)->storage.u.virt.serial_list_hobjid) < 0) /* Casting away const OK  --NAF */
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, FAIL, "unable to insert virtual dataset heap block")
             } /* end if */
 
             /* Heap information */
             H5F_addr_encode(f, &p, mesg->storage.u.virt.serial_list_hobjid.addr);
             UINT32ENCODE(p, mesg->storage.u.virt.serial_list_hobjid.idx);
-
             break;
 
         case H5D_LAYOUT_ERROR:
@@ -1011,7 +1006,7 @@ H5O__layout_free(void *_mesg)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O__layout_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, void *_mesg)
+H5O__layout_delete(H5F_t *f, H5O_t *open_oh, void *_mesg)
 {
     H5O_layout_t *mesg = (H5O_layout_t *) _mesg;
     herr_t ret_value = SUCCEED;   /* Return value */
@@ -1031,19 +1026,19 @@ H5O__layout_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, void *_mesg)
 
         case H5D_CONTIGUOUS:    /* Contiguous block on disk */
             /* Free the file space for the raw data */
-            if(H5D__contig_delete(f, dxpl_id, &mesg->storage) < 0)
+            if(H5D__contig_delete(f, &mesg->storage) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free raw data")
             break;
 
         case H5D_CHUNKED:       /* Chunked blocks on disk */
             /* Free the file space for the index & chunk raw data */
-            if(H5D__chunk_delete(f, dxpl_id, open_oh, &mesg->storage) < 0)
+            if(H5D__chunk_delete(f, open_oh, &mesg->storage) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free raw data")
             break;
 
         case H5D_VIRTUAL:       /* Virtual dataset */
             /* Free the file space virtual dataset */
-            if(H5D__virtual_delete(f, dxpl_id, &mesg->storage) < 0)
+            if(H5D__virtual_delete(f, &mesg->storage) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free raw data")
             break;
 
@@ -1111,7 +1106,7 @@ done:
 static void *
 H5O__layout_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst,
     hbool_t H5_ATTR_UNUSED *recompute_size, unsigned H5_ATTR_UNUSED *mesg_flags,
-    H5O_copy_t *cpy_info, void *_udata, hid_t dxpl_id)
+    H5O_copy_t *cpy_info, void *_udata)
 {
     H5D_copy_file_ud_t *udata = (H5D_copy_file_ud_t *)_udata;   /* Dataset copying user data */
     H5O_layout_t       *layout_src = (H5O_layout_t *) mesg_src;
@@ -1135,7 +1130,7 @@ H5O__layout_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst,
         case H5D_COMPACT:
             if(layout_src->storage.u.compact.buf) {
                 /* copy compact raw data */
-                if(H5D__compact_copy(file_src, &layout_src->storage.u.compact, file_dst, &layout_dst->storage.u.compact, udata->src_dtype, cpy_info, dxpl_id) < 0)
+                if(H5D__compact_copy(file_src, &layout_src->storage.u.compact, file_dst, &layout_dst->storage.u.compact, udata->src_dtype, cpy_info) < 0)
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "unable to copy chunked storage")
                 copied = TRUE;
             } /* end if */
@@ -1152,7 +1147,7 @@ H5O__layout_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst,
 
             if(H5D__contig_is_space_alloc(&layout_src->storage)) {
                 /* copy contiguous raw data */
-                if(H5D__contig_copy(file_src, &layout_src->storage.u.contig, file_dst, &layout_dst->storage.u.contig, udata->src_dtype, cpy_info, dxpl_id) < 0)
+                if(H5D__contig_copy(file_src, &layout_src->storage.u.contig, file_dst, &layout_dst->storage.u.contig, udata->src_dtype, cpy_info) < 0)
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "unable to copy contiguous storage")
                 copied = TRUE;
             } /* end if */
@@ -1161,7 +1156,7 @@ H5O__layout_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst,
         case H5D_CHUNKED:
             if(H5D__chunk_is_space_alloc(&layout_src->storage)) {
                 /* Create chunked layout */
-                if(H5D__chunk_copy(file_src, &layout_src->storage.u.chunk, &layout_src->u.chunk, file_dst, &layout_dst->storage.u.chunk, udata->src_space_extent, udata->src_dtype, udata->common.src_pline, cpy_info, dxpl_id) < 0)
+                if(H5D__chunk_copy(file_src, &layout_src->storage.u.chunk, &layout_src->u.chunk, file_dst, &layout_dst->storage.u.chunk, udata->src_space_extent, udata->src_dtype, udata->common.src_pline, cpy_info) < 0)
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "unable to copy chunked storage")
                 copied = TRUE;
             } /* end if */
@@ -1170,7 +1165,7 @@ H5O__layout_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst,
         case H5D_VIRTUAL:
             /* Copy virtual layout.  Always copy so the memory fields get copied
              * properly. */
-            if(H5D__virtual_copy(file_dst, layout_dst, dxpl_id) < 0)
+            if(H5D__virtual_copy(file_dst, layout_dst) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "unable to copy virtual storage")
             break;
 
@@ -1209,8 +1204,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O__layout_debug(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, const void *_mesg,
-    FILE * stream, int indent, int fwidth)
+H5O__layout_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream,
+    int indent, int fwidth)
 {
     const H5O_layout_t     *mesg = (const H5O_layout_t *) _mesg;
     size_t                  u;

@@ -1150,18 +1150,9 @@ test_vds_prefix(unsigned config, hid_t fapl)
     hid_t       srcdset[4] = {-1, -1, -1, -1}; /* Source datsets */
     hid_t       vdset = -1;     /* Virtual dataset */
     hsize_t     dims[4] = {10, 26, 0, 0}; /* Data space current size */
-    hsize_t     start[4];       /* Hyperslab start */
-    hsize_t     stride[4];      /* Hyperslab stride */
-    hsize_t     count[4];       /* Hyperslab count */
-    hsize_t     block[4];       /* Hyperslab block */
-    hssize_t    offset[2] = {0, 0}; /* Selection offset */
     int         buf[10][26];    /* Write and expected read buffer */
     int         rbuf[10][26];   /* Read buffer */
-    int         rbuf99[9][9];   /* 9x9 Read buffer */
-    int         evbuf[10][26];  /* Expected VDS "buffer" */
-    int         erbuf[10][26];  /* Expected read buffer */
     int         fill = -1;      /* Fill value */
-    herr_t      ret;            /* Generic return value */
     int         i, j;
     char        buffer[1024];   /* buffer to read vds_prefix       */
 

@@ -1,15 +1,11 @@
 cmake_minimum_required (VERSION 3.10)
-PROJECT (HDF5_TOOLS_SRC_H5COPY)
-
-#-----------------------------------------------------------------------------
-# Setup include Directories
-#-----------------------------------------------------------------------------
-INCLUDE_DIRECTORIES (${HDF5_TOOLS_DIR}/lib)
+project (HDF5_TOOLS_SRC_H5COPY C)
 
 # --------------------------------------------------------------------
 # Add the h5copy and test executables
 # --------------------------------------------------------------------
 add_executable (h5copy ${HDF5_TOOLS_SRC_H5COPY_SOURCE_DIR}/h5copy.c)
+set_property(TARGET h5copy APPEND PROPERTY INCLUDE_DIRECTORIES "${HDF5_TOOLS_DIR}/lib;${HDF5_SRC_DIR};${HDF5_BINARY_DIR}")
 TARGET_C_PROPERTIES (h5copy STATIC " " " ")
 target_link_libraries (h5copy  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
 set_target_properties (h5copy PROPERTIES FOLDER tools)
@@ -19,6 +15,7 @@ set (H5_DEP_EXECUTABLES h5copy)
 
 if (BUILD_SHARED_LIBS)
   add_executable (h5copy-shared ${HDF5_TOOLS_SRC_H5COPY_SOURCE_DIR}/h5copy.c)
+  set_property(TARGET h5copy-shared APPEND PROPERTY INCLUDE_DIRECTORIES "${HDF5_TOOLS_DIR}/lib;${HDF5_SRC_DIR};${HDF5_BINARY_DIR}")
   TARGET_C_PROPERTIES (h5copy-shared SHARED " " " ")
   target_link_libraries (h5copy-shared  ${HDF5_TOOLS_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
   set_target_properties (h5copy-shared PROPERTIES FOLDER tools)

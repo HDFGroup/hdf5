@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.10)
-PROJECT (HDFJAVA_EXAMPLES)
+project (HDFJAVA_EXAMPLES Java)
 
 add_subdirectory (datasets)
 add_subdirectory (datatypes)

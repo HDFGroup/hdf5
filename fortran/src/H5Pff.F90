@@ -7769,8 +7769,8 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     INTEGER, INTENT(OUT)         :: hdferr
 !*****
     INTERFACE
-       INTEGER(HID_T) FUNCTION h5pget_virtual_count(dcpl_id, count) BIND(C,NAME='H5Pget_virtual_count')
-         IMPORT :: HID_T, SIZE_T
+       INTEGER(C_INT) FUNCTION h5pget_virtual_count(dcpl_id, count) BIND(C,NAME='H5Pget_virtual_count')
+         IMPORT :: HID_T, SIZE_T, C_INT
          IMPLICIT NONE
          INTEGER(HID_T) , INTENT(IN), VALUE :: dcpl_id
          INTEGER(SIZE_T), INTENT(OUT) :: count

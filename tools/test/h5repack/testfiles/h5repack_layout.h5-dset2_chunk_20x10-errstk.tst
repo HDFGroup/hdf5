@@ -8,17 +8,17 @@ HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
   #002: (file name) line (number) in H5L_link_object(): unable to create new link to object
     major: Links
     minor: Unable to initialize object
-  #003: (file name) line (number) in H5L_create_real(): can't insert link
-    major: Symbol table
+  #003: (file name) line (number) in H5L__create_real(): can't insert link
+    major: Links
     minor: Unable to insert object
   #004: (file name) line (number) in H5G_traverse(): internal path traversal failed
     major: Symbol table
     minor: Object not found
-  #005: (file name) line (number) in H5G_traverse_real(): traversal operator failed
+  #005: (file name) line (number) in H5G__traverse_real(): traversal operator failed
     major: Symbol table
     minor: Callback failed
-  #006: (file name) line (number) in H5L_link_cb(): unable to create object
-    major: Object header
+  #006: (file name) line (number) in H5L__link_cb(): unable to create object
+    major: Links
     minor: Unable to initialize object
   #007: (file name) line (number) in H5O_obj_create(): unable to open object
     major: Object header

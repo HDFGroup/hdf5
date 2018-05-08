@@ -32,8 +32,6 @@ main(void)
     hsize_t dims[RANK];         /* current size of dataset          */
     hsize_t max_dims[RANK];     /* max size of dataset              */
 
-    hbool_t has_errors  = FALSE;/* if the read data contains errors */
-
 
     /* Open the VDS file and dataset */
     if((fid = H5Fopen(VDS_FILE_NAME, H5F_ACC_RDONLY | H5F_ACC_SWMR_READ, H5P_DEFAULT)) < 0)
