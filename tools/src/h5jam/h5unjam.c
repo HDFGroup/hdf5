@@ -56,11 +56,6 @@ static struct long_options l_opts[] = {
  * Purpose:     Print the usage message
  *
  * Return:      void
- *
- * Programmer:
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -124,9 +119,7 @@ usage(const char *prog)
  * Purpose:     Parse the command line for the h5dumper.
  *
  * Return:      Success:    EXIT_SUCCESS;
- *
  *              Failure:    Exits function with EXIT_FAILURE value.
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -199,11 +192,6 @@ done:
  *
  * Return:      Success:    0
  *              Failure:    1
- *
- * Programmer:
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -235,7 +223,7 @@ main(int argc, const char *argv[])
 
     if (input_file == NULL) {
         /* no user block  */
-        error_msg("missing arguemnt for HDF5 file input.\n");
+        error_msg("missing argument for HDF5 file input.\n");
         help_ref_msg(stderr);
         h5tools_setstatus(EXIT_FAILURE);
         goto done;
@@ -336,11 +324,12 @@ done:
     return h5tools_getstatus();
 }
 
-/*
+/*-------------------------------------------------------------------------
  *  Copy 'how_much' bytes from the input file to the output file,
  *  starting at byte 'where' in the input file.
  *
  *  Returns 0 on success, -1 on failure.
+ *-------------------------------------------------------------------------
  */
 herr_t
 copy_to_file( FILE *infid, FILE *ofid, ssize_t _where, ssize_t show_much )
