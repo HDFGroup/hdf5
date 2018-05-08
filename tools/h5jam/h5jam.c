@@ -241,7 +241,7 @@ main (int argc, const char *argv[])
 
     if (ub_file == NULL) {
         /* no user block */
-        error_msg("missing arguemnt for -u <user_file>.\n");
+        error_msg("missing argument for -u <user_file>.\n");
         help_ref_msg(stderr);
         leave (EXIT_FAILURE);
     }
@@ -255,7 +255,7 @@ main (int argc, const char *argv[])
     }
 
     if (input_file == NULL) {
-        error_msg("missing arguemnt for -i <HDF5 file>.\n");
+        error_msg("missing argument for -i <HDF5 file>.\n");
         help_ref_msg(stderr);
         leave (EXIT_FAILURE);
     }
