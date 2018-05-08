@@ -928,7 +928,7 @@ done:
 
 
 /*
- * Function:    gather_regular_file_info_
+ * Function:    H5FD_mpio_fileinfo_get
  *
  * Purpose:     Implements a normal file open for MPI rank 0.  This
  *              essentially a copy of the H5FD_sec2_open, where we
@@ -942,8 +942,10 @@ done:
  *              function.
  */
 static void
-gather_regular_file_info_(const char *name, unsigned flags, H5FD_mpio_t *file)
+H5FD_mpio_fileinfo_get(const char *name, unsigned flags, H5FD_mpio_t *file)
 {
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
     int             fd          = -1;       /* File descriptor          */
     int             o_flags;                /* Flags for open() call    */
     h5_stat_t       sb;
@@ -958,14 +960,14 @@ gather_regular_file_info_(const char *name, unsigned flags, H5FD_mpio_t *file)
     if((fd = HDopen(name, o_flags, H5_POSIX_CREATE_MODE_RW)) < 0) {
 #ifdef H5FDmpio_DEBUG
 if (H5FD_mpio_Debug[(int)'t'])
-fprintf(stdout, "gather_regular_file_info_: HDopen failed!\n");
+fprintf(stdout, "H5FD_mpio_fileinfo_get: HDopen failed!\n");
 #endif
         goto done;
     }
     if(HDfstat(fd, &sb) < 0) {
 #ifdef H5FDmpio_DEBUG
 if (H5FD_mpio_Debug[(int)'t'])
-fprintf(stdout, "gather_regular_file_info_: HDfstat failed!\n");
+fprintf(stdout, "H5FD_mpio_fileinfo_get: HDfstat failed!\n");
 #endif
         goto done;
     }
@@ -988,6 +990,8 @@ fprintf(stdout, "gather_regular_file_info_: HDfstat failed!\n");
 done:
     if(fd >= 0)
         HDclose(fd);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
 }
 
 
@@ -1134,7 +1138,7 @@ H5FD_mpio_open(const char *name, unsigned flags, hid_t fapl_id,
 
     if (mpi_rank == 0) {
         /* Gather some file info for future comparisons */
-        gather_regular_file_info_( name, flags, file );
+        H5FD_mpio_fileinfo_get( name, flags, file );
     }
     /* Set return value */
     ret_value=(H5FD_t*)file;
@@ -1181,8 +1185,9 @@ H5FD_mpio_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
     const H5FD_mpio_t   *f1 = (const H5FD_mpio_t *)_f1;
     const H5FD_mpio_t   *f2 = (const H5FD_mpio_t *)_f2;
     int ret_value = 0;
-
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    int cmp_value = 0;
+    int mpi_result;
+    FUNC_ENTER_NOAPI_NOINIT
 
     if (f1->mpi_rank == 0) {
         /* Because MPI file handles may NOT have any relation to
@@ -1192,37 +1197,40 @@ H5FD_mpio_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
          * relevant comparison values which we use for comparisons
          * below.
          */
-        if (ret_value == 0) {
 #ifdef H5_HAVE_WIN32_API
-            if(f1->dwVolumeSerialNumber < f2->dwVolumeSerialNumber) HGOTO_DONE(-1)
-            if(f1->dwVolumeSerialNumber > f2->dwVolumeSerialNumber) HGOTO_DONE(1)
-
-            if(f1->nFileIndexHigh < f2->nFileIndexHigh) HGOTO_DONE(-1)
-            if(f1->nFileIndexHigh > f2->nFileIndexHigh) HGOTO_DONE(1)
-
-            if(f1->nFileIndexLow < f2->nFileIndexLow) HGOTO_DONE(-1)
-            if(f1->nFileIndexLow > f2->nFileIndexLow) HGOTO_DONE(1)
+        if ((f1->dwVolumeSerialNumber < f2->dwVolumeSerialNumber) ||
+            (f1->nFileIndexHigh       < f2->nFileIndexHigh)       ||
+            (f1->nFileIndexLow        < f2->nFileIndexLow))
+            cmp_value = -1;
+        else
+        if ((f1->dwVolumeSerialNumber > f2->dwVolumeSerialNumber) ||
+	    (f1->nFileIndexHigh       > f2->nFileIndexHigh)       ||
+            (f1->nFileIndexLow        > f2->nFileIndexLow))
+            cmp_value = 1;
 #else  /* Not WIN32 */
 #ifdef H5_DEV_T_IS_SCALAR
-            if(f1->device < f2->device) HGOTO_DONE(-1)
-            if(f1->device > f2->device) HGOTO_DONE(1)
+        if (f1->device < f2->device)     cmp_value = -1;
+        else if(f1->device > f2->device) cmp_value = 1;
 #else /* H5_DEV_T_IS_SCALAR */
-            /* If dev_t isn't a scalar value on this system, just use memcmp to
-             * determine if the values are the same or not.  The actual return value
-             * shouldn't really matter...
-             */
-            if(HDmemcmp(&(f1->device),&(f2->device),sizeof(dev_t)) < 0) HGOTO_DONE(-1)
-            if(HDmemcmp(&(f1->device),&(f2->device),sizeof(dev_t)) > 0) HGOTO_DONE(1)
+        /* If dev_t isn't a scalar value on this system, just use memcmp to
+         * determine if the values are the same or not.  The actual return value
+         * shouldn't really matter...
+         */
+        cmp_value = HDmemcmp(&(f1->device),&(f2->device),sizeof(dev_t));
 #endif /* H5_DEV_T_IS_SCALAR */
-            if(f1->inode < f2->inode) HGOTO_DONE(-1)
-            if(f1->inode > f2->inode) HGOTO_DONE(1)
+        /* Continue checking ONLY if we haven't failed yet */
+        if (!cmp_value) {
+           if(f1->inode < f2->inode)     cmp_value = -1;
+           else if(f1->inode > f2->inode) cmp_value = 1;
 #endif /* H5_HAVE_WIN32_API */
         }
     }
+    if (MPI_SUCCESS != (mpi_result = MPI_Bcast(&cmp_value, 1, MPI_INT, 0, f1->comm)))
+        HMPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", mpi_result)
 
+    ret_value = cmp_value;
 done:
 
-    MPI_Bcast(&ret_value, 1, MPI_INT, 0, f1->comm);
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_mpio_cmp() */
 
