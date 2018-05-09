@@ -41,6 +41,7 @@ endif()
 set_target_properties (parallel_test PROPERTIES
     FOLDER test/fortran
     LINKER_LANGUAGE Fortran
+    Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/static
 )
 endif ()
 
