@@ -237,7 +237,7 @@ main(int argc, const char *argv[])
 
     if (input_file == NULL) {
         /* no user block  */
-        error_msg("missing arguemnt for HDF5 file input.\n");
+        error_msg("missing argument for HDF5 file input.\n");
         help_ref_msg(stderr);
         h5tools_setstatus(EXIT_FAILURE);
         goto done;
