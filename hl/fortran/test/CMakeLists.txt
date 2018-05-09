@@ -37,6 +37,7 @@ macro (ADD_H5_FORTRAN_EXE file)
   set_target_properties (hl_f90_${file} PROPERTIES
       LINKER_LANGUAGE Fortran
       FOLDER test/hl/fortran
+      Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/static
   )
   if (BUILD_SHARED_LIBS)
     add_executable (hl_f90_${file}-shared ${file}.F90)

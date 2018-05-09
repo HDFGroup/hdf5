@@ -88,7 +88,7 @@ target_include_directories(${HDF5_CPP_LIB_TARGET}
     INTERFACE "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
 )
 target_compile_definitions(${HDF5_CPP_LIB_TARGET}
-    PRIVATE $<$<BOOL:${HDF5_ENABLE_PARALLEL}>:"-DMPICH_SKIP_MPICXX;-DMPICH_IGNORE_CXX_SEEK"># Parallel/MPI, prevent spurious cpp/cxx warnings
+    PRIVATE $<$<BOOL:${HDF5_ENABLE_PARALLEL}>:MPICH_SKIP_MPICXX;MPICH_IGNORE_CXX_SEEK># Parallel/MPI, prevent spurious cpp/cxx warnings
 )
 TARGET_C_PROPERTIES (${HDF5_CPP_LIB_TARGET} STATIC)
 target_link_libraries (${HDF5_CPP_LIB_TARGET} PUBLIC ${HDF5_LIB_TARGET})
@@ -105,7 +105,7 @@ if (BUILD_SHARED_LIBS)
   )
   target_compile_definitions(${HDF5_CPP_LIBSH_TARGET}
       PUBLIC "H5_BUILT_AS_DYNAMIC_LIB"
-      PRIVATE $<$<BOOL:${HDF5_ENABLE_PARALLEL}>:"-DMPICH_SKIP_MPICXX;-DMPICH_IGNORE_CXX_SEEK"># Parallel/MPI, prevent spurious cpp/cxx warnings
+      PRIVATE $<$<BOOL:${HDF5_ENABLE_PARALLEL}>:MPICH_SKIP_MPICXX;MPICH_IGNORE_CXX_SEEK># Parallel/MPI, prevent spurious cpp/cxx warnings
   )
   TARGET_C_PROPERTIES (${HDF5_CPP_LIBSH_TARGET} SHARED)
   target_link_libraries (${HDF5_CPP_LIBSH_TARGET} PUBLIC ${HDF5_LIBSH_TARGET})

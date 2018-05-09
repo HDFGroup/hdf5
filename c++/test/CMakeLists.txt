@@ -40,7 +40,7 @@ configure_file (${HDF5_CPP_TEST_SOURCE_DIR}/H5srcdir_str.h.in H5srcdir_str.h  @O
 add_executable (cpp_testhdf5 ${CPP_TEST_SOURCES} )
 target_include_directories(cpp_testhdf5 PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};${HDF5_TEST_BINARY_DIR}")
 target_compile_definitions(cpp_testhdf5
-    PRIVATE $<$<BOOL:${HDF5_ENABLE_PARALLEL}>:"-DMPICH_SKIP_MPICXX;-DMPICH_IGNORE_CXX_SEEK"># Parallel/MPI, prevent spurious cpp/cxx warnings
+    PRIVATE $<$<BOOL:${HDF5_ENABLE_PARALLEL}>:MPICH_SKIP_MPICXX;MPICH_IGNORE_CXX_SEEK># Parallel/MPI, prevent spurious cpp/cxx warnings
 )
 TARGET_C_PROPERTIES (cpp_testhdf5 STATIC)
 target_link_libraries (cpp_testhdf5 PRIVATE

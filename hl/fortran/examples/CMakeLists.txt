@@ -32,6 +32,7 @@ foreach (example ${examples})
   set_target_properties (hl_f90_ex_${example} PROPERTIES
       LINKER_LANGUAGE Fortran
       FOLDER examples/hl/fortran
+      Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/static
   )
 endforeach ()
 
