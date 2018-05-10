@@ -39,7 +39,7 @@ AttrCreatPropList* AttrCreatPropList::DEFAULT_ = 0;
 //              If AttrCreatPropList::DEFAULT_ already points to an allocated
 //              object, throw a PropListIException.  This scenario should not
 //              happen.
-// May, 2018
+// May 2018
 //--------------------------------------------------------------------------
 AttrCreatPropList* AttrCreatPropList::getConstant()
 {
@@ -65,7 +65,7 @@ AttrCreatPropList* AttrCreatPropList::getConstant()
 // Purpose:     Deletes the constant object that AttrCreatPropList::DEFAULT_
 //              points to.
 // exception    H5::PropListIException
-// May, 2018
+// May 2018
 //--------------------------------------------------------------------------
 void AttrCreatPropList::deleteConstants()
 {
@@ -83,7 +83,7 @@ const AttrCreatPropList& AttrCreatPropList::DEFAULT = *getConstant();
 //--------------------------------------------------------------------------
 // Function:    Default Constructor
 ///\brief       Creates a file access property list
-// May, 2018
+// May 2018
 //--------------------------------------------------------------------------
 AttrCreatPropList::AttrCreatPropList() : StrCreatPropList(H5P_ATTRIBUTE_CREATE) {}
 
@@ -91,7 +91,7 @@ AttrCreatPropList::AttrCreatPropList() : StrCreatPropList(H5P_ATTRIBUTE_CREATE) 
 // Function:    AttrCreatPropList copy constructor
 ///\brief       Copy constructor: same HDF5 object as \a original
 ///\param       original - IN: AttrCreatPropList instance to copy
-// May, 2018
+// May 2018
 //--------------------------------------------------------------------------
 AttrCreatPropList::AttrCreatPropList(const AttrCreatPropList& original) : StrCreatPropList(original) {}
 
@@ -99,14 +99,14 @@ AttrCreatPropList::AttrCreatPropList(const AttrCreatPropList& original) : StrCre
 // Function:    AttrCreatPropList overloaded constructor
 ///\brief       Creates a file access property list using the id of an
 ///             existing one.
-// May, 2018
+// May 2018
 //--------------------------------------------------------------------------
 AttrCreatPropList::AttrCreatPropList(const hid_t plist_id) : StrCreatPropList(plist_id) {}
 
 //--------------------------------------------------------------------------
 // Function:    AttrCreatPropList destructor
 ///\brief       Noop destructor
-// May, 2018
+// May 2018
 //--------------------------------------------------------------------------
 AttrCreatPropList::~AttrCreatPropList() {}
 

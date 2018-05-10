@@ -12,9 +12,6 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// Class LinkAccPropList represents the HDF5 file access property list and
-// inherits from DataType.
-
 #ifndef __H5LinkAccPropList_H
 #define __H5LinkAccPropList_H
 

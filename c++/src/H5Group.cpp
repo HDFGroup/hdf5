@@ -165,7 +165,7 @@ void Group::p_setId(const hid_t new_id)
 ///\brief       Closes this group.
 ///
 ///\exception   H5::GroupIException
-// Programmer   Binh-Minh Ribler - Mar 9, 2005
+// March 2005
 //--------------------------------------------------------------------------
 void Group::close()
 {
@@ -187,19 +187,11 @@ void Group::close()
 ///\param       func_name - Name of the function where failure occurs
 ///\param       msg       - Message describing the failure
 ///\exception   H5::GroupIException
-// Description
-//              This function is used in CommonFG implementation so that
-//              proper exception can be thrown for file or group.  The
-//              argument func_name is a member of CommonFG and "Group::"
-//              will be inserted to indicate the function called is an
-//              implementation of Group.
-// Programmer   Binh-Minh Ribler - 2000
+// December 2000
 //--------------------------------------------------------------------------
 void Group::throwException(const H5std_string& func_name, const H5std_string& msg) const
 {
-    H5std_string full_name = func_name;
-    full_name.insert(0, "Group::");
-    throw GroupIException(full_name, msg);
+    throw GroupIException(inMemFunc(func_name.c_str()), msg);
 }
 
 //--------------------------------------------------------------------------

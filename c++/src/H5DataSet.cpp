@@ -826,6 +826,19 @@ void DataSet::close()
 }
 
 //--------------------------------------------------------------------------
+// Function:    DataSet::throwException
+///\brief       Throws H5::DataSetIException.
+///\param       func_name - Name of the function where failure occurs
+///\param       msg       - Message describing the failure
+///\exception   H5::DataSetIException
+// May 2018
+//--------------------------------------------------------------------------
+void DataSet::throwException(const H5std_string& func_name, const H5std_string& msg) const
+{
+    throw DataSetIException(inMemFunc(func_name.c_str()), msg);
+}
+
+//--------------------------------------------------------------------------
 // Function:    DataSet destructor
 ///\brief       Properly terminates access to this dataset.
 // Programmer   Binh-Minh Ribler - 2000

@@ -191,7 +191,7 @@ H5std_string CompType::getMemberName(unsigned member_num) const
 ///             Members are stored in no particular order with numbers 0
 ///             through N-1, where N is the value returned by the member
 ///             function \c CompType::getNmembers.
-// May 16, 2002
+// May 2002
 //--------------------------------------------------------------------------
 int CompType::getMemberIndex(const char* name) const
 {
@@ -216,7 +216,7 @@ int CompType::getMemberIndex(const char* name) const
 ///             Members are stored in no particular order with numbers 0
 ///             through N-1, where N is the value returned by the member
 ///             function \c CompType::getNmembers.
-// Apr 18, 2018
+// Apr 2018
 //--------------------------------------------------------------------------
 int CompType::getMemberIndex(const H5std_string& name) const
 {
@@ -311,7 +311,7 @@ DataType CompType::getMemberDataType(unsigned member_num) const
 ///\param       member_num - IN: Zero-based index of the member
 ///\return      ArrayType instance
 ///\exception   H5::DataTypeIException
-// Jul, 2005
+// Jul 2005
 //--------------------------------------------------------------------------
 ArrayType CompType::getMemberArrayType(unsigned member_num) const
 {
@@ -437,7 +437,7 @@ StrType CompType::getMemberStrType(unsigned member_num) const
 ///\param       member_num - IN: Zero-based index of the member
 ///\return      VarLenType instance
 ///\exception   H5::DataTypeIException
-// Jul, 2005
+// Jul 2005
 //--------------------------------------------------------------------------
 VarLenType CompType::getMemberVarLenType(unsigned member_num) const
 {
@@ -533,7 +533,7 @@ void CompType::pack() const
 ///\exception   H5::DataTypeIException
 // Note
 //      H5Tset_size works on atom datatypes and compound datatypes only
-// 2014
+// March 2014
 //--------------------------------------------------------------------------
 void CompType::setSize(size_t size) const
 {

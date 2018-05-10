@@ -48,6 +48,9 @@ class H5_DLLCPP H5Object : public H5Location {
         // Given its index, opens the attribute that belongs to this object.
         Attribute openAttribute(const unsigned int idx) const;
 
+        // Determines the number of attributes belong to this object.
+        int getNumAttrs() const;
+
         // Checks whether the named attribute exists for this object.
         bool attrExists(const char* name) const;
         bool attrExists(const H5std_string& name) const;
@@ -59,9 +62,6 @@ class H5_DLLCPP H5Object : public H5Location {
         // Removes the named attribute from this object.
         void removeAttr(const char* name) const;
         void removeAttr(const H5std_string& name) const;
-
-        // Determines the number of attributes belong to this object.
-        int getNumAttrs() const;
 
         // Gets the name of this HDF5 object, i.e., Group, DataSet, or
         // DataType.

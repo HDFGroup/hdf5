@@ -11,6 +11,12 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#ifdef OLD_HEADER_FILENAME
+#include <iostream.h>
+#else
+#include <iostream>
+#endif
+
 #include <string>
 
 #include "H5private.h"          // for HDmemset
@@ -27,6 +33,11 @@
 #include "H5DataType.h"
 
 namespace H5 {
+
+#ifndef H5_NO_STD
+    using std::cerr;
+    using std::endl;
+#endif  // H5_NO_STD
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 // userAttrOpWrpr simply interfaces between the user's function and the
@@ -299,10 +310,10 @@ void H5Object::renameAttr(const H5std_string& oldname, const H5std_string& newna
 //--------------------------------------------------------------------------
 int H5Object::getNumAttrs() const
 {
-   H5O_info_t oinfo;    /* Object info */
+    H5O_info_t oinfo;    /* Object info */
 
     if(H5Oget_info(getId(), &oinfo) < 0)
-        throw AttributeIException(inMemFunc("getNumAttrs"), "H5Oget_info failed");
+        throwException("getNumAttrs", "H5Oget_info failed");
     else
         return(static_cast<int>(oinfo.num_attrs));
 }
@@ -321,11 +332,11 @@ ssize_t H5Object::getObjName(char *obj_name, size_t buf_size) const
     // If H5Iget_name returns a negative value, raise an exception
     if (name_size < 0)
     {
-        throw Exception(inMemFunc("getObjName"), "H5Iget_name failed");
+        throwException("getObjName", "H5Iget_name failed");
     }
     else if (name_size == 0)
     {
-        throw Exception(inMemFunc("getObjName"), "Object must have a name, but name length is 0");
+        throwException("getObjName", "Object must have a name, but name length is 0");
     }
     // Return length of the name
     return(name_size);
@@ -337,7 +348,6 @@ ssize_t H5Object::getObjName(char *obj_name, size_t buf_size) const
 ///\return      Name of the object
 ///\exception   H5::Exception
 // Programmer   Binh-Minh Ribler - Mar, 2014
-// Modification
 //--------------------------------------------------------------------------
 H5std_string H5Object::getObjName() const
 {
@@ -349,11 +359,11 @@ H5std_string H5Object::getObjName() const
     // If H5Iget_name failed, throw exception
     if (name_size < 0)
     {
-        throw Exception(inMemFunc("getObjName"), "H5Iget_name failed");
+        throwException("getObjName", "H5Iget_name failed");
     }
     else if (name_size == 0)
     {
-        throw Exception(inMemFunc("getObjName"), "Object must have a name, but name length is 0");
+        throwException("getObjName", "Object must have a name, but name length is 0");
     }
     // Object's name exists, retrieve it
     else if (name_size > 0)

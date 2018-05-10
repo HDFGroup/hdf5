@@ -326,11 +326,9 @@ static const char *FILENAME[] = {
  * Purpose:     Test building a file with assorted links.
  *
  * Return:      Success: 0
- *
  *              Failure: -1
  *
- * Programmer:  Binh-Minh Ribler
- *              October 16, 2009
+ * October, 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -369,7 +367,6 @@ static void test_basic_links(hid_t fapl_id, hbool_t new_format)
 
         // Because these are not implemented in the C++ API yet, they are
         // used so CommonFG::getLinkval can be tested.
-        // Create a hard link
         if(H5Lcreate_hard(
                 file_id, "dset1", H5L_SAME_LOC, "grp1/hard1",
                 H5P_DEFAULT, H5P_DEFAULT) < 0)
@@ -433,7 +430,7 @@ static void test_basic_links(hid_t fapl_id, hbool_t new_format)
     {
         issue_fail_msg("test_basic_links()", __LINE__, __FILE__, E.getCDetailMsg());
     }
-}
+} // test_basic_links
 
 /*-------------------------------------------------------------------------
  * Function:    test_num_links
@@ -441,12 +438,9 @@ static void test_basic_links(hid_t fapl_id, hbool_t new_format)
  * Purpose:     Test setting and getting limit of number of links
  *
  * Return:      Success: 0
- *
  *              Failure: -1
  *
- * Programmer:  Binh-Minh Ribler
- *              Mar, 2017
- *
+ * March, 2017
  *-------------------------------------------------------------------------
  */
 static void test_num_links(hid_t fapl_id, hbool_t new_format)
@@ -535,9 +529,12 @@ void test_links()
             test_basic_links(my_fapl_id, new_format);
             test_num_links(my_fapl_id, new_format);
 #if 0
+
 // these tests are from the C test links.c and left here for future
 // implementation of H5L API
-        nerrors += test_basic_links(fapl_id, new_format) < 0 ? 1 : 0;
+            test_move(my_fapl_id, new_format);
+            test_copy(my_fapl_id, new_format);
+            test_lcpl(my_fapl_id, new_format);
         nerrors += cklinks(my_fapl, new_format) < 0 ? 1 : 0;
         nerrors += new_links(my_fapl, new_format) < 0 ? 1 : 0;
         nerrors += ck_new_links(my_fapl, new_format) < 0 ? 1 : 0;
@@ -545,9 +542,6 @@ void test_links()
         nerrors += toomany(my_fapl, new_format) < 0 ? 1 : 0;
 
         /* Test new H5L link creation routine */
-        nerrors += test_lcpl(my_fapl, new_format);
-        nerrors += test_move(my_fapl, new_format);
-        nerrors += test_copy(my_fapl, new_format);
         nerrors += test_move_preserves(my_fapl, new_format);
 #ifndef H5_NO_DEPRECATED_SYMBOLS
         nerrors += test_deprec(my_fapl, new_format);

@@ -924,6 +924,19 @@ void DataType::close()
 }
 
 //--------------------------------------------------------------------------
+// Function:    DataType::throwException
+///\brief       Throws H5::DataTypeIException.
+///\param       func_name - Name of the function where failure occurs
+///\param       msg       - Message describing the failure
+///\exception   H5::DataTypeIException
+// May 2018
+//--------------------------------------------------------------------------
+void DataType::throwException(const H5std_string& func_name, const H5std_string& msg) const
+{
+    throw DataTypeIException(inMemFunc(func_name.c_str()), msg);
+}
+
+//--------------------------------------------------------------------------
 // Function:    DataType destructor
 ///\brief       Properly terminates access to this datatype.
 // Programmer   Binh-Minh Ribler - 2000
