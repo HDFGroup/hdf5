@@ -115,8 +115,8 @@ class H5_DLLCPP H5Location : public IdComponent {
         hid_t openObjId(const char* name, const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
         hid_t openObjId(const H5std_string& name, const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
 
-        // Closes an object opened by openObjId().
-        void closeObjId(hid_t obj_id) const;
+        // Closes an object opened by openObjId()
+        static void closeObjId(hid_t obj_id);
 
         ///\brief Returns an identifier. (pure virtual)
         virtual hid_t getId() const = 0;

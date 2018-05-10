@@ -24,6 +24,8 @@
 #include "H5DxferProp.h"
 #include "H5DcreatProp.h"
 #include "H5LaccProp.h"
+#include "H5StrcreatProp.h"
+#include "H5LcreatProp.h"
 #include "H5Location.h"
 #include "H5Object.h"
 #include "H5CommonFG.h"
@@ -53,9 +55,11 @@ namespace H5 {
 // Function:    CommonFG::createGroup
 ///\brief       Creates a new group at this location which can be a file
 ///             or another group.
-///\param       name  - IN: Name of the group to create
+///\param       name      - IN: Name of the group to create
 ///\param       size_hint - IN: Indicates the number of bytes to reserve for
-///             the names that will appear in the group
+///                         the names that will appear in the group - default to 0
+///\param       lcpl      - IN: Link creation property list - default to
+///                         LinkCreatPropList::DEFAULT
 ///\return      Group instance
 ///\exception   H5::FileIException or H5::GroupIException
 ///\par Description
@@ -63,9 +67,12 @@ namespace H5 {
 ///             reserve for storing the names that will appear in this new
 ///             group. If a non-positive value is provided for the \a size_hint
 ///             then a default size is chosen.
-// Programmer   Binh-Minh Ribler - 2000
+// 2000
+// Modification:
+//      May 2018 - 1.8.21
+//          - Added an argument with default value LinkCreatPropList::DEFAULT
 //--------------------------------------------------------------------------
-Group CommonFG::createGroup(const char* name, size_t size_hint) const
+Group CommonFG::createGroup(const char* name, size_t size_hint, const LinkCreatPropList& lcpl) const
 {
     // Group creation property list for size hint
     hid_t gcpl_id = 0;
@@ -85,7 +92,7 @@ Group CommonFG::createGroup(const char* name, size_t size_hint) const
 
     // Call C routine H5Gcreate2 to create the named group, giving the
     // location id which can be a file id or a group id
-    hid_t group_id = H5Gcreate2(getLocId(), name, H5P_DEFAULT, gcpl_id, H5P_DEFAULT);
+    hid_t group_id = H5Gcreate2(getLocId(), name, lcpl.getId(), gcpl_id, H5P_DEFAULT);
 
     // Close the group creation property list, if necessary
     if(gcpl_id > 0)
@@ -107,11 +114,13 @@ Group CommonFG::createGroup(const char* name, size_t size_hint) const
 ///\brief       This is an overloaded member function, provided for convenience.
 ///             It differs from the above function in that it takes an
 ///             \c H5std_string for \a name.
-// Programmer   Binh-Minh Ribler - 2000
+// Modification:
+//      May 2018 - 1.8.21
+//          - Added LinkCreatPropList& with default value LinkCreatPropList::DEFAULT
 //--------------------------------------------------------------------------
-Group CommonFG::createGroup(const H5std_string& name, size_t size_hint) const
+Group CommonFG::createGroup(const H5std_string& name, size_t size_hint, const LinkCreatPropList& lcpl) const
 {
-    return(createGroup(name.c_str(), size_hint));
+    return(createGroup(name.c_str(), size_hint, lcpl));
 }
 
 //--------------------------------------------------------------------------
