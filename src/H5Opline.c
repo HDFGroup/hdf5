@@ -132,8 +132,15 @@ H5O_pline_decode(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5
 
     /* Number of filters */
     pline->nused = *p++;
-    if(pline->nused > H5Z_MAX_NFILTERS)
-	HGOTO_ERROR(H5E_PLINE, H5E_CANTLOAD, NULL, "filter pipeline message has too many filters")
+    if(pline->nused > H5Z_MAX_NFILTERS) {
+
+        /* Reset the number of filters used to avoid array traversal in error
+         * handling code.
+         */
+        pline->nused = 0;
+
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTLOAD, NULL, "filter pipeline message has too many filters")
+    }
 
     /* Reserved */
     if(pline->version == H5O_PLINE_VERSION_1)
@@ -495,23 +502,30 @@ H5O_pline_reset(void *mesg)
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
+    /* NOTE: This function can be called during error processing from
+     *       other API calls so DO NOT ASSUME THAT ANY VALUES ARE SANE.
+     */
+
     HDassert(pline);
 
-    /* Free information for each filter */
-    for(i = 0; i < pline->nused; i++) {
-        if(pline->filter[i].name && pline->filter[i].name != pline->filter[i]._name)
-            HDassert((HDstrlen(pline->filter[i].name) + 1) > H5Z_COMMON_NAME_LEN);
-        if(pline->filter[i].name != pline->filter[i]._name)
-            pline->filter[i].name = (char *)H5MM_xfree(pline->filter[i].name);
-        if(pline->filter[i].cd_values && pline->filter[i].cd_values != pline->filter[i]._cd_values)
-            HDassert(pline->filter[i].cd_nelmts > H5Z_COMMON_CD_VALUES);
-        if(pline->filter[i].cd_values != pline->filter[i]._cd_values)
-            pline->filter[i].cd_values = (unsigned *)H5MM_xfree(pline->filter[i].cd_values);
-    } /* end for */
+    /* Free the filter information and array */
+    if (pline->filter) {
 
-    /* Free filter array */
-    if(pline->filter)
+        /* Free information for each filter */
+        for(i = 0; i < pline->nused; i++) {
+            if(pline->filter[i].name && pline->filter[i].name != pline->filter[i]._name)
+                HDassert((HDstrlen(pline->filter[i].name) + 1) > H5Z_COMMON_NAME_LEN);
+            if(pline->filter[i].name != pline->filter[i]._name)
+                pline->filter[i].name = (char *)H5MM_xfree(pline->filter[i].name);
+            if(pline->filter[i].cd_values && pline->filter[i].cd_values != pline->filter[i]._cd_values)
+                HDassert(pline->filter[i].cd_nelmts > H5Z_COMMON_CD_VALUES);
+            if(pline->filter[i].cd_values != pline->filter[i]._cd_values)
+                pline->filter[i].cd_values = (unsigned *)H5MM_xfree(pline->filter[i].cd_values);
+        } /* end for */
+
+        /* Free filter array */
         pline->filter = (H5Z_filter_info_t *)H5MM_xfree(pline->filter);
+    }
 
     /* Reset # of filters */
     pline->nused = pline->nalloc = 0;
