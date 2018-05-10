@@ -552,7 +552,6 @@ H5O__layout_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, 
     uint8_t                 *heap_block = NULL;
     size_t                  *str_size = NULL;
     unsigned                u;
-    H5F_libver_t            saved_low, saved_high;
     herr_t ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_STATIC
@@ -568,9 +567,6 @@ H5O__layout_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, 
 
     /* Layout class */
     *p++ = mesg->type;
-
-    saved_low = H5F_LOW_BOUND(f);
-    saved_high  = H5F_HIGH_BOUND(f);
 
     /* Write out layout class specific information */
     switch(mesg->type) {
@@ -691,8 +687,6 @@ H5O__layout_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, 
     } /* end switch */
 
 done:
-    if(H5F_set_libver_bounds(f, saved_low, saved_high) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "cannot reset low/high bounds")
 
     heap_block = (uint8_t *)H5MM_xfree(heap_block);
     str_size = (size_t *)H5MM_xfree(str_size);
