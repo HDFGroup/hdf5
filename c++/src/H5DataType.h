@@ -122,6 +122,9 @@ class H5_DLLCPP DataType : public H5Object {
         ///\brief Returns this class name.
         virtual H5std_string fromClass () const { return("DataType"); }
 
+        // Throw DataTypeIException.
+        virtual void throwException(const H5std_string& func_name, const H5std_string& msg) const;
+
         // Creates a copy of an existing DataType using its id
         DataType(const hid_t type_id);
 

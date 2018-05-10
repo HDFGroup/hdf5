@@ -497,15 +497,10 @@ static void test_file_name()
         comp_type.getFileName();
         verify_val(file_name, FILE4, "CompType::getFileName", __LINE__, __FILE__);
 
- /* file4.close();
-file4.openFile(FILE4, H5F_ACC_RDWR);
- */ 
         // Get the file's version information.
         H5F_info_t finfo;
-        file4.getFileInfo(finfo);   // there's no C test for H5Fget_info
-  /*  cerr << "file4: super_ext_size = " << finfo.super_ext_size << endl;
- */ 
-        //verify_val(finfo.sohm.hdr_size, 0, "H5File::getFileInfo", __LINE__, __FILE__);
+        file4.getFileInfo(finfo);
+        verify_val(finfo.sohm.hdr_size, 0, "H5File::getFileInfo", __LINE__, __FILE__);
 
         PASSED();
     }   // end of try block
@@ -642,6 +637,11 @@ static void test_file_attribute()
         PASSED();
     }   // end of try block
 
+    // Catch creating existing attribute
+    catch (AttributeIException& E)
+    {} // do nothing, exception expected
+
+    // Catch all other exceptions
     catch (Exception& E)
     {
         issue_fail_msg("test_file_attribute()", __LINE__, __FILE__, E.getCDetailMsg());

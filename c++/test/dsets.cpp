@@ -68,6 +68,8 @@ static size_t filter_bogus(unsigned int flags, size_t cd_nelmts,
  *
  *-------------------------------------------------------------------------
  */
+const H5std_string DSET_COMMENT ("This is a dataset");
+const H5std_string NON_EXISTING_DSET ("does_not_exist");
 static herr_t
 test_create( H5File& file)
 {
@@ -83,13 +85,12 @@ test_create( H5File& file)
         DataSpace space (2, dims, NULL);
 
         // Create a dataset using the default dataset creation properties.
-        // We're not sure what they are, so we won't check.
         dataset = new DataSet (file.createDataSet
                 (DSET_DEFAULT_NAME, PredType::NATIVE_DOUBLE, space));
 
 
         // Add a comment to the dataset
-        file.setComment (DSET_DEFAULT_NAME, "This is a dataset");
+        file.setComment (DSET_DEFAULT_NAME, DSET_COMMENT);
 
         // Close the dataset
         delete dataset;
@@ -120,7 +121,7 @@ test_create( H5File& file)
         // Get and verify the comment from this dataset, using
         // H5std_string getComment(const H5std_string& name, <buf_size=0, by default>)
         H5std_string comment = file.getComment(DSET_DEFAULT_NAME);
-        verify_val(comment, "This is a dataset", "DataSet::getComment", __LINE__, __FILE__);
+        verify_val(comment, DSET_COMMENT, "DataSet::getComment", __LINE__, __FILE__);
 
         // Close the dataset when accessing is completed
         delete dataset;
@@ -132,24 +133,24 @@ test_create( H5File& file)
         // exception is not thrown for this action by openDataSet, then
         // display failure information and throw an exception.
         try {
-            dataset = new DataSet (file.openDataSet( "does_not_exist" ));
+            dataset = new DataSet (file.openDataSet(NON_EXISTING_DSET));
 
             // continuation here, that means no exception has been thrown
             throw InvalidActionException("H5File::openDataSet", "Attempted to open a non-existent dataset");
         }
-        catch (FileIException& E ) // catching creating non-existent dataset
+        catch (FileIException& E ) // catching opening non-existent dataset
         {} // do nothing, exception expected
 
-        // Create a new dataset that uses chunked storage instead of the default
-        // layout.
+        // Create a new dataset that uses chunked storage instead of the
+        // default layout.
         DSetCreatPropList create_parms;
-        hsize_t     csize[2];
+        hsize_t csize[2];
         csize[0] = 5;
         csize[1] = 100;
         create_parms.setChunk( 2, csize );
 
         dataset = new DataSet (file.createDataSet
-                (DSET_CHUNKED_NAME, PredType::NATIVE_DOUBLE, space, create_parms));
+             (DSET_CHUNKED_NAME, PredType::NATIVE_DOUBLE, space, create_parms));
         // Note: this one has no error message in C when failure occurs?
 
         // clean up and return with success

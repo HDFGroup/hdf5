@@ -25,7 +25,7 @@ namespace H5 {
 // Function:    StrCreatPropList::setCharEncoding
 ///\brief       Sets the character encoding of the string.
 ///\exception   H5::PropListIException
-// March, 2018
+// March 2018
 //--------------------------------------------------------------------------
 void StrCreatPropList::setCharEncoding(H5T_cset_t encoding) const
 {
@@ -33,7 +33,7 @@ void StrCreatPropList::setCharEncoding(H5T_cset_t encoding) const
     // Throw exception if H5Pset_char_encoding returns failure
     if (ret_value < 0)
     {
-        throw PropListIException("setCharEncoding", "H5Pset_char_encoding failed");
+        throw PropListIException("StrCreatPropList::setCharEncoding", "H5Pset_char_encoding failed");
     }
 }
 
@@ -41,7 +41,7 @@ void StrCreatPropList::setCharEncoding(H5T_cset_t encoding) const
 // Function:    StrCreatPropList::getCharEncoding
 ///\brief       Gets the character encoding of the string.
 ///\exception   H5::PropListIException
-// March, 2018
+// March 2018
 //--------------------------------------------------------------------------
 H5T_cset_t StrCreatPropList::getCharEncoding() const
 {
@@ -50,7 +50,7 @@ H5T_cset_t StrCreatPropList::getCharEncoding() const
     // Throw exception if H5Pget_char_encoding returns failure
     if (ret_value < 0)
     {
-        throw PropListIException("getCharEncoding", "H5Pget_char_encoding failed");
+        throw PropListIException("StrCreatPropList::getCharEncoding", "H5Pget_char_encoding failed");
     }
     return(encoding);
 }

@@ -39,7 +39,7 @@ LinkCreatPropList* LinkCreatPropList::DEFAULT_ = 0;
 //              If LinkCreatPropList::DEFAULT_ already points to an allocated
 //              object, throw a PropListIException.  This scenario should not
 //              happen.
-// May, 2018
+// May 2018
 //--------------------------------------------------------------------------
 LinkCreatPropList* LinkCreatPropList::getConstant()
 {
@@ -65,7 +65,7 @@ LinkCreatPropList* LinkCreatPropList::getConstant()
 // Purpose:     Deletes the constant object that LinkCreatPropList::DEFAULT_
 //              points to.
 // exception    H5::PropListIException
-// May, 2018
+// May 2018
 //--------------------------------------------------------------------------
 void LinkCreatPropList::deleteConstants()
 {
@@ -83,7 +83,7 @@ const LinkCreatPropList& LinkCreatPropList::DEFAULT = *getConstant();
 //--------------------------------------------------------------------------
 // Function:    Default Constructor
 ///\brief       Creates a file access property list
-// May, 2018
+// May 2018
 //--------------------------------------------------------------------------
 LinkCreatPropList::LinkCreatPropList() : StrCreatPropList(H5P_LINK_CREATE) {}
 
@@ -91,7 +91,7 @@ LinkCreatPropList::LinkCreatPropList() : StrCreatPropList(H5P_LINK_CREATE) {}
 // Function:    LinkCreatPropList copy constructor
 ///\brief       Copy constructor: same HDF5 object as \a original
 ///\param       original - IN: LinkCreatPropList instance to copy
-// May, 2018
+// May 2018
 //--------------------------------------------------------------------------
 LinkCreatPropList::LinkCreatPropList(const LinkCreatPropList& original) : StrCreatPropList(original) {}
 
@@ -99,14 +99,14 @@ LinkCreatPropList::LinkCreatPropList(const LinkCreatPropList& original) : StrCre
 // Function:    LinkCreatPropList overloaded constructor
 ///\brief       Creates a file access property list using the id of an
 ///             existing one.
-// May, 2018
+// May 2018
 //--------------------------------------------------------------------------
 LinkCreatPropList::LinkCreatPropList(const hid_t plist_id) : StrCreatPropList(plist_id) {}
 
 //--------------------------------------------------------------------------
 // Function:    LinkCreatPropList destructor
 ///\brief       Noop destructor
-// May, 2018
+// May 2018
 //--------------------------------------------------------------------------
 LinkCreatPropList::~LinkCreatPropList() {}
 

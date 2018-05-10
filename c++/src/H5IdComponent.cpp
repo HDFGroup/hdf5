@@ -299,11 +299,7 @@ IdComponent::IdComponent()
 // Function:    IdComponent::p_get_file_name (protected)
 // Purpose:     Gets the name of the file, in which this object belongs.
 // Exception:   H5::IdComponentException
-// Description:
-//              This function is protected so that the user applications can
-//              only have access to its code via allowable classes, namely,
-//              Attribute and H5Location subclasses.
-// Programmer   Binh-Minh Ribler - Jul, 2004
+// July 2004
 //--------------------------------------------------------------------------
 H5std_string IdComponent::p_get_file_name() const
 {
@@ -312,7 +308,7 @@ H5std_string IdComponent::p_get_file_name() const
     // Preliminary call to H5Fget_name to get the length of the file name
     ssize_t name_size = H5Fget_name(temp_id, NULL, 0);
 
-    // If H5Aget_name returns a negative value, raise an exception,
+    // If H5Fget_name returns a negative value, raise an exception,
     if(name_size < 0)
     {
         throw IdComponentException("", "H5Fget_name failed");
