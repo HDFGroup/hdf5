@@ -155,6 +155,25 @@ Bug Fixes since HDF5-1.8.20
 
       (DER - 2018/02/06, HDFFV-10354)
 
+    - If an HDF5 file contains a filter pipeline message which contains
+      a 'number of filters' field that exceeds the actual number of
+      filters in the message, the HDF5 C library will read off the end of
+      the read buffer.
+
+      This issue was reported to The HDF Group as issue #CVE-2017-17506.
+
+      NOTE: The HDF5 C library cannot produce such a file. This condition
+            should only occur in a corrupt (or deliberately altered) file
+            or a file created by third-party software.
+
+      The problem was fixed by passing the buffer size with the buffer
+      and ensuring that the pointer cannot be incremented off the end
+      of the buffer. A mismatch between the number of filters declared
+      and the actual number of filters will now invoke normal HDF5
+      error handling.
+
+      (DER - 2018/02/26, HDFFV-10355)
+
     Configuration
     -------------
     - CMake
