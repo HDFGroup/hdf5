@@ -209,6 +209,23 @@ Bug Fixes since HDF5-1.8.20
 
       (DER - 2018/02/26, HDFFV-10357)
 
+    - If an HDF5 file contains a malformed symbol table node that declares
+      it contains more symbols than it actually contains, the library
+      can run off the end of the metadata cache buffer while processing
+      the symbol table node.
+
+      This issue was reported to The HDF Group as issue #CVE-2017-17509.
+
+      NOTE: The HDF5 C library cannot produce such a file. This condition
+            should only occur in a corrupt (or deliberately altered) file
+            or a file created by third-party software.
+
+      Performing bounds checks on the buffer while processing fixes the
+      problem. Instead of the segmentation fault, the normal HDF5 error
+      handling is invoked.
+
+      (DER - 2018/03/12, HDFFV-10358)
+
     Configuration
     -------------
     - CMake
