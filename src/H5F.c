@@ -1476,7 +1476,7 @@ H5Fset_libver_bounds(hid_t file_id, H5F_libver_t low, H5F_libver_t high)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set collective metadata read info")
 
     /* Call internal set_libver_bounds function */
-    if(H5F_set_libver_bounds(f, low, high) < 0)
+    if(H5F__set_libver_bounds(f, low, high) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "cannot set low/high bounds")
 
 done:
