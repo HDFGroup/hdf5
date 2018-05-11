@@ -9,9 +9,9 @@ set (HDF5_TOOL_PLUGIN_LIB_NAME             "${HDF5_EXTERNAL_LIB_PREFIX}${HDF5_TO
 set (HDF5_TOOL_PLUGIN_LIB_TARGET           ${HDF5_TOOL_PLUGIN_LIB_CORENAME})
 
 add_library (${HDF5_TOOL_PLUGIN_LIB_TARGET} SHARED dynlib_dump.c)
-set_property(TARGET ${HDF5_TOOL_PLUGIN_LIB_TARGET} APPEND PROPERTY INCLUDE_DIRECTORIES "${HDF5_SRC_DIR};${HDF5_BINARY_DIR}")
-TARGET_C_PROPERTIES (${HDF5_TOOL_PLUGIN_LIB_TARGET} SHARED " " " ")
-target_link_libraries (${HDF5_TOOL_PLUGIN_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
+target_include_directories(${HDF5_TOOL_PLUGIN_LIB_TARGET} PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR}")
+TARGET_C_PROPERTIES (${HDF5_TOOL_PLUGIN_LIB_TARGET} SHARED)
+target_link_libraries (${HDF5_TOOL_PLUGIN_LIB_TARGET} PRIVATE ${HDF5_TEST_LIB_TARGET})
 H5_SET_LIB_OPTIONS (${HDF5_TOOL_PLUGIN_LIB_TARGET} ${HDF5_TOOL_PLUGIN_LIB_NAME} SHARED "LIB")
 
 # make plugins dir
@@ -33,9 +33,9 @@ add_custom_command (
 # --------------------------------------------------------------------
 if (HDF5_BUILD_GENERATORS)
   add_executable (h5dumpgentest ${HDF5_TOOLS_TEST_H5DUMP_SOURCE_DIR}/h5dumpgentest.c)
-  set_property(TARGET h5dumpgentest APPEND PROPERTY INCLUDE_DIRECTORIES "${HDF5_SRC_DIR};${HDF5_BINARY_DIR}")
-  TARGET_C_PROPERTIES (h5dumpgentest STATIC " " " ")
-  target_link_libraries (h5dumpgentest ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
+  target_include_directories(h5dumpgentest PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR}")
+  TARGET_C_PROPERTIES (h5dumpgentest STATIC)
+  target_link_libraries (h5dumpgentest PRIVATE ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
   set_target_properties (h5dumpgentest PROPERTIES FOLDER generator/tools)
 
   #add_test (NAME h5dumpgentest COMMAND $<TARGET_FILE:h5dumpgentest>)

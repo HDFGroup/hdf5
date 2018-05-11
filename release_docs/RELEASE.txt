@@ -46,16 +46,16 @@ New Features
 
     Configuration:
     -------------
-    - 
+    -
 
     Library:
     --------
-    - 
+    -
 
 
     Parallel Library:
     -----------------
-    - 
+    -
 
     Fortran Library:
     ----------------
@@ -121,7 +121,19 @@ Bug Fixes since HDF5-1.10.2 release
 
     Configuration
     -------------
-    -
+    - Converted CMake global commands ADD_DEFINITIONS and INCLUDE_DIRECTORIES
+      to use target_* type commands. This change modernizes the CMake usage
+      in the HDF5 library.
+
+      In addition, there is the intention to convert to generator expressions,
+      where possible. The exception is Fortran FLAGS on Windows Visual Studio.
+      The HDF macros TARGET_C_PROPERTIES and TARGET_FORTRAN_PROPERTIES have
+      been removed with this change in usage.
+
+      The additional language (C++ and Fortran) checks have also been localized
+      to only be checked when that language is enabled.
+
+      (ADB 2018/05/08)
 
     Performance
     -------------

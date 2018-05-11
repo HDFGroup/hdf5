@@ -5,10 +5,9 @@ project (HDF5_HL_CPP_EXAMPLES CXX)
 #  Add in the examples for the Packet Table codes
 # --------------------------------------------------------------------
 add_executable (ptExampleFL ${HDF5_HL_CPP_EXAMPLES_SOURCE_DIR}/ptExampleFL.cpp)
-set_property(TARGET ptExampleFL APPEND PROPERTY INCLUDE_DIRECTORIES "${HDF5_SRC_DIR};${HDF5_BINARY_DIR}")
-TARGET_C_PROPERTIES (ptExampleFL STATIC " " " ")
-target_link_libraries (
-    ptExampleFL
+target_include_directories(ptExampleFL PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR}")
+TARGET_C_PROPERTIES (ptExampleFL STATIC)
+target_link_libraries (ptExampleFL PRIVATE
     ${HDF5_HL_CPP_LIB_TARGET}
     ${HDF5_HL_LIB_TARGET}
     ${HDF5_LIB_TARGET}
