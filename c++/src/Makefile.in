@@ -151,7 +151,8 @@ LTLIBRARIES = $(lib_LTLIBRARIES)
 libhdf5_cpp_la_DEPENDENCIES = $(LIBHDF5)
 am_libhdf5_cpp_la_OBJECTS = H5Exception.lo H5IdComponent.lo \
 	H5DataSpace.lo H5PropList.lo H5Library.lo H5FaccProp.lo \
-	H5FcreatProp.lo H5LaccProp.lo H5DxferProp.lo H5DcreatProp.lo \
+	H5FcreatProp.lo H5LaccProp.lo H5StrcreatProp.lo \
+	H5LcreatProp.lo H5AcreatProp.lo H5DxferProp.lo H5DcreatProp.lo \
 	H5Location.lo H5AbstractDs.lo H5Attribute.lo H5Object.lo \
 	H5OcreatProp.lo H5DataType.lo H5AtomType.lo H5PredType.lo \
 	H5EnumType.lo H5IntType.lo H5FloatType.lo H5StrType.lo \
@@ -713,14 +714,15 @@ bin_SCRIPTS = h5c++
 
 # Source files for the library
 libhdf5_cpp_la_SOURCES = H5Exception.cpp H5IdComponent.cpp    \
-    H5DataSpace.cpp H5PropList.cpp H5Library.cpp        \
-    H5FaccProp.cpp H5FcreatProp.cpp H5LaccProp.cpp      \
-    H5DxferProp.cpp H5DcreatProp.cpp H5Location.cpp     \
-    H5AbstractDs.cpp H5Attribute.cpp H5Object.cpp       \
-    H5OcreatProp.cpp H5DataType.cpp H5AtomType.cpp      \
-    H5PredType.cpp H5EnumType.cpp H5IntType.cpp     \
-    H5FloatType.cpp H5StrType.cpp H5ArrayType.cpp       \
-    H5VarLenType.cpp H5CompType.cpp H5DataSet.cpp       \
+    H5DataSpace.cpp H5PropList.cpp H5Library.cpp        	\
+    H5FaccProp.cpp H5FcreatProp.cpp H5LaccProp.cpp      	\
+	H5StrcreatProp.cpp H5LcreatProp.cpp H5AcreatProp.cpp 	\
+    H5DxferProp.cpp H5DcreatProp.cpp H5Location.cpp     	\
+    H5AbstractDs.cpp H5Attribute.cpp H5Object.cpp       	\
+    H5OcreatProp.cpp H5DataType.cpp H5AtomType.cpp      	\
+    H5PredType.cpp H5EnumType.cpp H5IntType.cpp     		\
+    H5FloatType.cpp H5StrType.cpp H5ArrayType.cpp       	\
+    H5VarLenType.cpp H5CompType.cpp H5DataSet.cpp       	\
     H5CommonFG.cpp H5Group.cpp H5File.cpp
 
 
@@ -733,6 +735,7 @@ include_HEADERS = H5Cpp.h H5AbstractDs.h H5AtomType.h H5Attribute.h H5Classes.h 
     H5OcreatProp.h H5DcreatProp.h H5DxferProp.h H5EnumType.h              \
     H5Exception.h H5FaccProp.h H5FcreatProp.h H5File.h H5FloatType.h      \
     H5Group.h H5IdComponent.h H5Include.h H5IntType.h H5LaccProp.h        \
+	H5StrcreatProp.h H5LcreatProp.h H5AcreatProp.h						  \
     H5Library.h H5Location.h H5Object.h H5PredType.h H5PropList.h         \
     H5StrType.h H5CppDoc.h H5ArrayType.h H5VarLenType.h
 
@@ -881,6 +884,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5AbstractDs.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5AcreatProp.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5ArrayType.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5AtomType.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Attribute.Plo@am__quote@
@@ -901,6 +905,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5IdComponent.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5IntType.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5LaccProp.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5LcreatProp.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Library.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Location.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Object.Plo@am__quote@
@@ -908,6 +913,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5PredType.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5PropList.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5StrType.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5StrcreatProp.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5VarLenType.Plo@am__quote@
 
 .cpp.o:

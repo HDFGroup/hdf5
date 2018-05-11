@@ -12,44 +12,36 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef __H5LinkAccPropList_H
-#define __H5LinkAccPropList_H
+#ifndef __H5LinkCreatPropList_H
+#define __H5LinkCreatPropList_H
 
 namespace H5 {
 
-/*! \class LinkAccPropList
-    \brief Class LinkAccPropList inherits from PropList and provides
-    wrappers for the HDF5 link access property list.
-
-    Inheritance: PropList -> IdComponent
+/*! \class LinkCreatPropList
+    \brief Class LinkCreatPropList inherits from StrCreatPropList and provides
+    wrappers for the HDF5 link creation property list.
 */
-class H5_DLLCPP LinkAccPropList : public PropList {
+// Inheritance: StrCreatPropList -> PropList -> IdComponent
+class H5_DLLCPP LinkCreatPropList : public StrCreatPropList {
    public:
-        ///\brief Default link access property list.
-        static const LinkAccPropList& DEFAULT;
+        ///\brief Default link creation property list.
+        static const LinkCreatPropList& DEFAULT;
 
-        // Creates a link access property list.
-        LinkAccPropList();
+        // Creates a link creation property list.
+        LinkCreatPropList();
 
         ///\brief Returns this class name.
-        virtual H5std_string fromClass () const { return("LinkAccPropList"); }
+        virtual H5std_string fromClass () const { return("LinkCreatPropList"); }
 
-        // Copy constructor: creates a copy of a LinkAccPropList object.
-        LinkAccPropList(const LinkAccPropList& original);
+        // Copy constructor: same as the original LinkCreatPropList.
+        LinkCreatPropList(const LinkCreatPropList& original);
 
-        // Creates a copy of an existing link access property list
+        // Creates a copy of an existing link creation property list
         // using the property list id.
-        LinkAccPropList(const hid_t lapl_id);
-
-        // Sets the number of soft or user-defined links that can be
-        // traversed before a failure occurs.
-        void setNumLinks(size_t nlinks) const;
-
-        // Gets the number of soft or user-defined link traversals allowed
-        size_t getNumLinks() const;
+        LinkCreatPropList(const hid_t lcpl_id);
 
         // Noop destructor
-        virtual ~LinkAccPropList();
+        virtual ~LinkCreatPropList();
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
@@ -57,14 +49,14 @@ class H5_DLLCPP LinkAccPropList : public PropList {
         static void deleteConstants();
 
     private:
-        static LinkAccPropList* DEFAULT_;
+        static LinkCreatPropList* DEFAULT_;
 
         // Creates the global constant, should only be used by the library
-        static LinkAccPropList* getConstant();
+        static LinkCreatPropList* getConstant();
 
 #endif // DOXYGEN_SHOULD_SKIP_THIS
+}; // end of LinkCreatPropList
 
-}; // end of LinkAccPropList
 } // namespace H5
 
-#endif // __H5LinkAccPropList_H
+#endif // __H5LinkCreatPropList_H

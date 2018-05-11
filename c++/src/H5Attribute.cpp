@@ -278,23 +278,6 @@ DataSpace Attribute::getSpace() const
 }
 
 //--------------------------------------------------------------------------
-// Function:    Attribute::getFileName
-///\brief       Gets the name of the file, in which this attribute belongs.
-///\return      File name
-///\exception   H5::IdComponentException
-// Programmer   Binh-Minh Ribler - Jul, 2004
-//--------------------------------------------------------------------------
-H5std_string Attribute::getFileName() const
-{
-    try {
-        return(p_get_file_name());
-    }
-    catch (IdComponentException& E) {
-        throw FileIException("Attribute::getFileName", E.getDetailMsg());
-    }
-}
-
-//--------------------------------------------------------------------------
 // Function:    Attribute::getName
 ///\brief       Gets the name of this attribute, returning its length.
 ///\param       attr_name - OUT: Buffer for the name string as char*
@@ -633,6 +616,20 @@ void Attribute::p_setId(const hid_t new_id)
     // reset object's id to the given id
     id = new_id;
 }
+
+//--------------------------------------------------------------------------
+// Function:    Attribute::throwException
+///\brief       Throws H5::AttributeIException.
+///\param       func_name - Name of the function where failure occurs
+///\param       msg       - Message describing the failure
+///\exception   H5::AttributeIException
+// May 2018
+//--------------------------------------------------------------------------
+void Attribute::throwException(const H5std_string& func_name, const H5std_string& msg) const
+{
+    throw AttributeIException(inMemFunc(func_name.c_str()), msg);
+}
+
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
 //--------------------------------------------------------------------------

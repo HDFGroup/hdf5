@@ -17,7 +17,8 @@
 #include "H5Exception.h"
 #include "H5IdComponent.h"
 #include "H5PropList.h"
-#include "H5LaccProp.h"
+#include "H5StrcreatProp.h"
+#include "H5LcreatProp.h"
 
 namespace H5 {
 
@@ -27,20 +28,20 @@ namespace H5 {
 // in "H5PredType.cpp" for information.
 
 // Initialize a pointer for the constant
-LinkAccPropList* LinkAccPropList::DEFAULT_ = 0;
+LinkCreatPropList* LinkCreatPropList::DEFAULT_ = 0;
 
 //--------------------------------------------------------------------------
-// Function:    LinkAccPropList::getConstant
-//              Creates a LinkAccPropList object representing the HDF5 constant
-//              H5P_LINK_ACCESS, pointed to by LinkAccPropList::DEFAULT_
+// Function:    LinkCreatPropList::getConstant
+//              Creates a LinkCreatPropList object representing the HDF5 constant
+//              H5P_LINK_CREATE, pointed to by LinkCreatPropList::DEFAULT_
 // exception    H5::PropListIException
 // Description
-//              If LinkAccPropList::DEFAULT_ already points to an allocated
+//              If LinkCreatPropList::DEFAULT_ already points to an allocated
 //              object, throw a PropListIException.  This scenario should not
 //              happen.
-// Programmer   Binh-Minh Ribler - December, 2016
+// May 2018
 //--------------------------------------------------------------------------
-LinkAccPropList* LinkAccPropList::getConstant()
+LinkCreatPropList* LinkCreatPropList::getConstant()
 {
     // Tell the C library not to clean up, H5Library::termH5cpp will call
     // H5close - more dependency if use H5Library::dontAtExit()
@@ -53,97 +54,60 @@ LinkAccPropList* LinkAccPropList::getConstant()
     // If the constant pointer is not allocated, allocate it. Otherwise,
     // throw because it shouldn't be.
     if (DEFAULT_ == 0)
-        DEFAULT_ = new LinkAccPropList(H5P_LINK_ACCESS);
+        DEFAULT_ = new LinkCreatPropList(H5P_LINK_CREATE);
     else
-        throw PropListIException("LinkAccPropList::getConstant", "LinkAccPropList::getConstant is being invoked on an allocated DEFAULT_");
+        throw PropListIException("LinkCreatPropList::getConstant", "LinkCreatPropList::getConstant is being invoked on an allocated DEFAULT_");
     return(DEFAULT_);
 }
 
 //--------------------------------------------------------------------------
-// Function:    LinkAccPropList::deleteConstants
-// Purpose:     Deletes the constant object that LinkAccPropList::DEFAULT_
+// Function:    LinkCreatPropList::deleteConstants
+// Purpose:     Deletes the constant object that LinkCreatPropList::DEFAULT_
 //              points to.
 // exception    H5::PropListIException
-// Programmer   Binh-Minh Ribler - December, 2016
+// May 2018
 //--------------------------------------------------------------------------
-void LinkAccPropList::deleteConstants()
+void LinkCreatPropList::deleteConstants()
 {
     if (DEFAULT_ != 0)
         delete DEFAULT_;
 }
 
 //--------------------------------------------------------------------------
-// Purpose:     Constant for default property
+// Purpose:     Constant for default link creation property
 //--------------------------------------------------------------------------
-const LinkAccPropList& LinkAccPropList::DEFAULT = *getConstant();
+const LinkCreatPropList& LinkCreatPropList::DEFAULT = *getConstant();
 
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
 //--------------------------------------------------------------------------
 // Function:    Default Constructor
 ///\brief       Creates a file access property list
-// Programmer   Binh-Minh Ribler - December, 2016
+// May 2018
 //--------------------------------------------------------------------------
-LinkAccPropList::LinkAccPropList() : PropList(H5P_LINK_ACCESS) {}
+LinkCreatPropList::LinkCreatPropList() : StrCreatPropList(H5P_LINK_CREATE) {}
 
 //--------------------------------------------------------------------------
-// Function:    LinkAccPropList copy constructor
-///\brief       Copy Constructor: makes a copy of the original
-///\param       original - IN: LinkAccPropList instance to copy
-// Programmer   Binh-Minh Ribler - December, 2016
+// Function:    LinkCreatPropList copy constructor
+///\brief       Copy constructor: same HDF5 object as \a original
+///\param       original - IN: LinkCreatPropList instance to copy
+// May 2018
 //--------------------------------------------------------------------------
-LinkAccPropList::LinkAccPropList(const LinkAccPropList& original) : PropList(original) {}
+LinkCreatPropList::LinkCreatPropList(const LinkCreatPropList& original) : StrCreatPropList(original) {}
 
 //--------------------------------------------------------------------------
-// Function:    LinkAccPropList overloaded constructor
+// Function:    LinkCreatPropList overloaded constructor
 ///\brief       Creates a file access property list using the id of an
 ///             existing one.
-// Programmer   Binh-Minh Ribler - December, 2016
+// May 2018
 //--------------------------------------------------------------------------
-LinkAccPropList::LinkAccPropList(const hid_t plist_id) : PropList(plist_id) {}
+LinkCreatPropList::LinkCreatPropList(const hid_t plist_id) : StrCreatPropList(plist_id) {}
 
 //--------------------------------------------------------------------------
-// Function:    LinkAccPropList::setNumLinks
-///\brief       Set the number of soft or user-defined link traversals allowed
-///             before the library assumes it has found a cycle and aborts the
-///             traversal.
-///\exception   H5::PropListIException
-// Programmer   Binh-Minh Ribler - March 1, 2017
-//--------------------------------------------------------------------------
-void LinkAccPropList::setNumLinks(size_t nlinks) const
-{
-    herr_t ret_value = H5Pset_nlinks(id, nlinks);
-    // Throw exception if H5Pset_nlinks returns failure
-    if (ret_value < 0)
-    {
-        throw PropListIException("LinkAccPropList::setNumLinks", "H5Pset_nlinks failed");
-    }
-}
-
-//--------------------------------------------------------------------------
-// Function:    LinkAccPropList::getNumLinks
-///\brief       Gets the number of soft or user-defined links that can be
-///             traversed before a failure occurs.
-///\exception   H5::PropListIException
-// Programmer   Binh-Minh Ribler - March 1, 2017
-//--------------------------------------------------------------------------
-size_t LinkAccPropList::getNumLinks() const
-{
-    size_t nlinks = 0;
-    herr_t ret_value = H5Pget_nlinks(id, &nlinks);
-    // Throw exception if H5Pget_nlinks returns failure
-    if (ret_value < 0)
-    {
-        throw PropListIException("LinkAccPropList::getNumLinks", "H5Pget_nlinks failed");
-    }
-    return(nlinks);
-}
-
-//--------------------------------------------------------------------------
-// Function:    LinkAccPropList destructor
+// Function:    LinkCreatPropList destructor
 ///\brief       Noop destructor
-// Programmer   Binh-Minh Ribler - December, 2016
+// May 2018
 //--------------------------------------------------------------------------
-LinkAccPropList::~LinkAccPropList() {}
+LinkCreatPropList::~LinkCreatPropList() {}
 
 } // end namespace

@@ -72,6 +72,10 @@ class H5_DLLCPP IdComponent {
         // Gets the identifier of this object.
         virtual hid_t getId () const = 0;
 
+        // For subclasses to throw appropriate exception, used in H5Location,
+        // H5CommonFG, and H5Object.
+        virtual void throwException(const H5std_string& func_name, const H5std_string& msg) const {};
+
         // Pure virtual function for there are various H5*close for the
         // subclasses.
         virtual void close() = 0;

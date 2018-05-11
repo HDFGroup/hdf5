@@ -85,6 +85,9 @@ class H5_DLLCPP DataSet : public H5Object, public AbstractDs {
         ///\brief Returns this class name.
         virtual H5std_string fromClass () const { return("DataSet"); }
 
+        // Throw DataSetIException.
+        virtual void throwException(const H5std_string& func_name, const H5std_string& msg) const;
+
         // Creates a dataset by way of dereference.
         DataSet(const H5Location& loc, const void* ref, H5R_type_t ref_type = H5R_OBJECT);
         DataSet(const Attribute& attr, const void* ref, H5R_type_t ref_type = H5R_OBJECT);

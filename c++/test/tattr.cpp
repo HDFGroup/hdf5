@@ -653,7 +653,8 @@ static void test_attr_compound_read()
         verify_val((long)dims[1], (long)ATTR4_DIM2, "DataSpace::getSimpleExtentDims",__LINE__, __FILE__);
 
         // Get the class of the datatype that is used by attr
-        H5T_class_t type_class = attr.getTypeClass();
+        H5T_class_t type_class;
+        type_class = attr.getTypeClass();
 
         // Verify that the type is of compound datatype
         verify_val(type_class, H5T_COMPOUND, "Attribute::getTypeClass", __LINE__, __FILE__);
@@ -1289,6 +1290,7 @@ static void test_attr_dtype_shared()
 
         // Retrieve and verify information about the type
         H5O_info_t oinfo;
+        dtype.getObjectInfo(TYPE1_NAME, &oinfo);
         fid1.getObjectInfo(TYPE1_NAME, &oinfo);
         if (oinfo.type != H5O_TYPE_NAMED_DATATYPE)
             TestErrPrintf("Line %d: object type wrong!\n", __LINE__);
@@ -1402,6 +1404,14 @@ static void test_attr_dtype_shared()
         PASSED();
     }   // end try block
 
+    catch (DataTypeIException& E)
+    {
+        issue_fail_msg("test_attr_dtype_shared()", __LINE__, __FILE__, E.getCDetailMsg());
+    }
+    catch (FileIException& E)
+    {
+        issue_fail_msg("test_attr_dtype_shared()", __LINE__, __FILE__, E.getCDetailMsg());
+    }
     catch (Exception& E)
     {
         issue_fail_msg("test_attr_dtype_shared()", __LINE__, __FILE__, E.getCDetailMsg());
