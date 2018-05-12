@@ -308,8 +308,7 @@ void CommonFG::link(H5L_type_t link_type, const H5std_string& curr_name, const H
 // Modification
 //      May 2018:
 //              This function is deprecated immediately, in 1.8.21, because
-//              their replacement have two arguments and one of them is a
-//              default.
+//              its replacement has two arguments and one of them is a default.
 //      2007: QAK modified to use H5L APIs - BMR
 //--------------------------------------------------------------------------
 void CommonFG::unlink(const char* name) const
@@ -325,8 +324,7 @@ void CommonFG::unlink(const char* name) const
 // Modification
 //      May 2018:
 //              This function is deprecated immediately, in 1.8.21, because
-//              their replacement have two arguments and one of them is a
-//              default.
+//              its replacement has two arguments and one of them is a default.
 //--------------------------------------------------------------------------
 void CommonFG::unlink(const H5std_string& name) const
 {

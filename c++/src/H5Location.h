@@ -41,6 +41,9 @@ class UserData4Aiterate { // user data for attribute iteration
 //  Inheritance: IdComponent
 class H5_DLLCPP H5Location : public IdComponent {
    public:
+        // Determines the number of attributes belong to this object.
+        int getNumAttrs() const;
+
         // Checks if a link of a given name exists in this location
         bool nameExists(const char* name, const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
         bool nameExists(const H5std_string& name, const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
@@ -59,10 +62,6 @@ class H5_DLLCPP H5Location : public IdComponent {
                 const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
         void getObjectInfo(const H5std_string& name, H5O_info_t *oinfo,
                 const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
-
-        // Determines the number of attributes at this location.
-        // - moved to H5Object (1.8.20)
-        int getNumAttrs() const;    // Deprecated
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS
         // Retrieves the type of object that an object reference points to.

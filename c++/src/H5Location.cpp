@@ -148,6 +148,25 @@ int H5Location::iterateAttrs(attr_operator_t user_op, unsigned *_idx, void *op_d
 }
 
 //--------------------------------------------------------------------------
+// Function:    H5Location::getNumAttrs
+///\brief       Returns the number of attributes attached to an HDF5 object.
+///\return      Number of attributes
+///\exception   H5::AttributeIException
+// Modification
+//          - Moved from H5Object to allow passing an attribute id to the
+//            C API, in 1.8.20.
+//--------------------------------------------------------------------------
+int H5Location::getNumAttrs() const
+{
+    H5O_info_t objinfo;    /* Object info */
+
+    if(H5Oget_info(getId(), &objinfo) < 0)
+        throwException("getNumAttrs", "H5Oget_info failed");
+    else
+        return(static_cast<int>(objinfo.num_attrs));
+}
+
+//--------------------------------------------------------------------------
 // Function:    H5Location::nameExists
 ///\brief       Checks if a link of a given name exists in a location.
 ///\param       name - IN: Searched name - \c char*
@@ -305,25 +324,6 @@ void H5Location::getObjectInfo(const H5std_string& name, H5O_info_t *objinfo,
     {
         throwException("getObjectInfo", "H5Oget_info_by_name failed");
     }
-}
-
-//--------------------------------------------------------------------------
-// Function:    H5Location::getNumAttrs
-///\brief       Replaced by H5Object::getNumAttrs.
-///\return      Number of attributes
-///\exception   H5::AttributeIException
-// Programmer   Binh-Minh Ribler - 2000
-// Modification
-//          - Moved to H5Object in 1.8.20. -BMR Oct, 2017
-//--------------------------------------------------------------------------
-int H5Location::getNumAttrs() const
-{
-    H5O_info_t oinfo;    /* Object info */
-
-    if(H5Oget_info(getId(), &oinfo) < 0)
-        throwException("getNumAttrs", "H5Oget_info failed");
-    else
-        return(static_cast<int>(oinfo.num_attrs));
 }
 
 //--------------------------------------------------------------------------
@@ -1138,66 +1138,6 @@ void H5Location::link(const H5std_string& curr_name, const hid_t same_loc,
     link(curr_name.c_str(), same_loc, new_name.c_str(), lcpl, lapl);
 }
 
-#if 0
-//--------------------------------------------------------------------------
-// Function:    H5Location::link
-///\brief       Creates a link of the specified type from \a new_name to
-///             \a curr_name.
-///\param       link_type  - IN: Link type; possible values are
-///             \li \c H5G_LINK_HARD
-///             \li \c H5G_LINK_SOFT
-///\param       curr_name - IN: Name of the existing object if link is a hard
-///             link; can be anything for the soft link
-///\param       new_name - IN: New name for the object
-///\exception   H5::FileIException or H5::GroupIException
-///\par Description
-///             Note that both names are interpreted relative to the
-///             specified location.
-///             For information on creating hard link and soft link, please
-///             refer to the C layer Reference Manual at:
-/// https://support.hdfgroup.org/HDF5/doc/RM/RM_H5L.html#Link-CreateHard and
-/// https://support.hdfgroup.org/HDF5/doc/RM/RM_H5L.html#Link-CreateSoft
-// Programmer   Binh-Minh Ribler - 2000
-// Modification
-//      2007: QAK modified to use H5L APIs - BMR
-//--------------------------------------------------------------------------
-void H5Location::link(H5L_type_t link_type, const char* curr_name, const char* new_name) const
-{
-    herr_t ret_value = -1;
-
-    switch(link_type) {
-        case H5L_TYPE_HARD:
-            ret_value = H5Lcreate_hard(getId(), curr_name, H5L_SAME_LOC, new_name, H5P_DEFAULT, H5P_DEFAULT);
-            break;
-
-        case H5L_TYPE_SOFT:
-            ret_value = H5Lcreate_soft(curr_name, getId(), new_name, H5P_DEFAULT, H5P_DEFAULT);
-            break;
-
-        case H5L_TYPE_ERROR:
-        case H5L_TYPE_EXTERNAL:
-        case H5L_TYPE_MAX:
-        default:
-            throwException("link", "unknown link type");
-            break;
-    } /* end switch */
-
-    if(ret_value < 0)
-        throwException("link", "creating link failed");
-}
-
-//--------------------------------------------------------------------------
-// Function:    H5Location::link
-///\brief       This is an overloaded member function, provided for convenience.
-///             It differs from the above function in that it takes an
-///             \c H5std_string for \a curr_name and \a new_name.
-// Programmer   Binh-Minh Ribler - 2000
-//--------------------------------------------------------------------------
-void H5Location::link(H5L_type_t link_type, const H5std_string& curr_name, const H5std_string& new_name) const
-{
-    link(link_type, curr_name.c_str(), new_name.c_str());
-}
-#endif
 
 //--------------------------------------------------------------------------
 // Function:    H5Location::copyLink

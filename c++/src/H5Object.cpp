@@ -285,12 +285,14 @@ void H5Object::renameAttr(const H5std_string& oldname, const H5std_string& newna
 
 //--------------------------------------------------------------------------
 // Function:    H5Object::getNumAttrs
-///\brief       Returns the number of attributes attached to this HDF5 object.
+///\brief       Deprecated - replaced by H5Location::getNumAttrs()
+//  brief       Returns the number of attributes attached to this HDF5 object.
 ///\return      Number of attributes
 ///\exception   H5::AttributeIException
 // Programmer   Binh-Minh Ribler - 2000
 // Modification
-//          - Moved from H5Location in 1.8.20. -BMR Oct, 2017
+//          - Moved to H5Location to allow passing an attribute id to the
+//            C API, in 1.8.20.
 //--------------------------------------------------------------------------
 int H5Object::getNumAttrs() const
 {

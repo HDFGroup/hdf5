@@ -99,7 +99,7 @@ class H5_DLLCPP CommonFG {
 
         // Removes the specified name at this location.
         // Deprecated in favor of H5Location::unlink overloaded (1.8.21)
-        // These functions can be removed immediately because their replacement
+        // These functions can be removed immediately because their replacements
         // have a default argument out of two.
         //void unlink(const char* name) const;
         //void unlink(const H5std_string& name) const;
