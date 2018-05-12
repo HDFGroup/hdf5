@@ -299,13 +299,16 @@ void CommonFG::link(H5L_type_t link_type, const H5std_string& curr_name, const H
     link(link_type, curr_name.c_str(), new_name.c_str());
 }
 
+#if 0
 //--------------------------------------------------------------------------
 // Function:    CommonFG::unlink
-///\brief       Removes the specified name at this location.
+///\brief       Deprecated - replaced by H5Location::unlink
 ///\param       name  - IN: Name of the object to be removed
 ///\exception   H5::FileIException or H5::GroupIException
-// Programmer   Binh-Minh Ribler - 2000
 // Modification
+//      May 2018:
+//              This function is deprecated immediately, in 1.8.21, because
+//              its replacement has two arguments and one of them is a default.
 //      2007: QAK modified to use H5L APIs - BMR
 //--------------------------------------------------------------------------
 void CommonFG::unlink(const char* name) const
@@ -317,15 +320,17 @@ void CommonFG::unlink(const char* name) const
 
 //--------------------------------------------------------------------------
 // Function:    CommonFG::unlink
-///\brief       This is an overloaded member function, provided for convenience.
-///             It differs from the above function in that it takes an
-///             \c H5std_string for \a name.
-// Programmer   Binh-Minh Ribler - 2000
+///\brief       Deprecated - replaced by H5Location::unlink
+// Modification
+//      May 2018:
+//              This function is deprecated immediately, in 1.8.21, because
+//              its replacement has two arguments and one of them is a default.
 //--------------------------------------------------------------------------
 void CommonFG::unlink(const H5std_string& name) const
 {
     unlink(name.c_str());
 }
+#endif
 
 //--------------------------------------------------------------------------
 // Function:    CommonFG::move
@@ -338,9 +343,10 @@ void CommonFG::unlink(const H5std_string& name) const
 ///             data in a file inaccessible with Group::move. Please refer
 ///             to the Group Interface in the HDF5 User's Guide for details at:
 /// https://support.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/index.html#t=HDF5_Users_Guide%2FGroups%2FHDF5_Groups.htm
-// Programmer   Binh-Minh Ribler - 2000
+// 2000
 // Modification
 //      2007: QAK modified to use H5L APIs - BMR
+//      May 2018: Deprecated in favor of H5Location::moveLink (1.8.21)
 //--------------------------------------------------------------------------
 void CommonFG::move(const char* src, const char* dst) const
 {
@@ -354,7 +360,9 @@ void CommonFG::move(const char* src, const char* dst) const
 ///\brief       This is an overloaded member function, provided for convenience.
 ///             It differs from the above function in that it takes an
 ///             \c H5std_string for \a src and \a dst.
-// Programmer   Binh-Minh Ribler - 2000
+// 2000
+// Modification
+//      May 2018: Deprecated in favor of H5Location::moveLink (1.8.21)
 //--------------------------------------------------------------------------
 void CommonFG::move(const H5std_string& src, const H5std_string& dst) const
 {
@@ -422,6 +430,8 @@ void CommonFG::getObjinfo(const H5std_string& name, H5G_stat_t& statbuf) const
 }
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
+#if 0
+// Moved to H5Location in 1.8.21
 //--------------------------------------------------------------------------
 // Function:    CommonFG::getLinkval
 ///\brief       Returns the name of the object that the symbolic link points to.
@@ -480,6 +490,8 @@ H5std_string CommonFG::getLinkval(const H5std_string& name, size_t size) const
     return(getLinkval(name.c_str(), size));
 }
 
+#endif
+
 //--------------------------------------------------------------------------
 // Function:    CommonFG::mount
 ///\brief       Mounts the file \a child onto this group.
@@ -507,26 +519,6 @@ void CommonFG::mount(const char* name, const H5File& child, const PropList& plis
 
 //--------------------------------------------------------------------------
 // Function:    CommonFG::mount
-// Purpose      This is an overloaded member function, kept for backward
-//              compatibility.  It differs from the above function in that it
-//              misses const's.  This wrapper will be removed in future release.
-// Param        name  - IN: Name of the group
-// Param        child - IN: File to mount
-// Param        plist - IN: Property list to use
-// Exception    H5::FileIException or H5::GroupIException
-// Programmer   Binh-Minh Ribler - 2000
-// Modification
-//              Modified to call its replacement. -BMR, 2014/04/16
-//              Removed from documentation. -BMR, 2016/03/07 1.8.17 and 1.10.0
-//              Removed from code. -BMR, 2016/08/11 1.8.18 and 1.10.1
-//--------------------------------------------------------------------------
-//void CommonFG::mount(const char* name, H5File& child, PropList& plist) const
-//{
-//   mount(name, child, plist);
-//}
-
-//--------------------------------------------------------------------------
-// Function:    CommonFG::mount
 ///\brief       This is an overloaded member function, provided for convenience.
 ///             It takes an \c H5std_string for \a name.
 // Programmer   Binh-Minh Ribler - 2000
@@ -537,22 +529,6 @@ void CommonFG::mount(const H5std_string& name, const H5File& child, const PropLi
 {
     mount(name.c_str(), child, plist);
 }
-
-//--------------------------------------------------------------------------
-// Function:    CommonFG::mount
-// Purpose      This is an overloaded member function, kept for backward
-//              compatibility.  It differs from the above function in that it
-//              misses const's.  This wrapper will be removed in future release.
-// Programmer   Binh-Minh Ribler - 2014
-// Modification
-//              Modified to call its replacement. -BMR, 2014/04/16
-//              Removed from documentation. -BMR, 2016/03/07 1.8.17 and 1.10.0
-//              Removed from code. -BMR, 2016/08/11 1.8.18 and 1.10.1
-//--------------------------------------------------------------------------
-//void CommonFG::mount(const H5std_string& name, H5File& child, PropList& plist) const
-//{
-//   mount(name.c_str(), child, plist);
-//}
 
 //--------------------------------------------------------------------------
 // Function:    CommonFG::unmount

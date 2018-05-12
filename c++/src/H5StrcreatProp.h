@@ -37,14 +37,14 @@ class H5_DLLCPP StrCreatPropList : public PropList {
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
     protected:
         // Creates a link creation property list.
-        StrCreatPropList() {};
+        StrCreatPropList();
 
         // Copy constructor: same as the original StrCreatPropList.
-        StrCreatPropList(const StrCreatPropList& original) {};
+        StrCreatPropList(const StrCreatPropList& original);
 
         // Creates a copy of an existing link creation property list
         // using the property list id.
-        StrCreatPropList(const hid_t plist_id) {};
+        StrCreatPropList(const hid_t plist_id);
 
         // Noop destructor
         virtual ~StrCreatPropList() {};
