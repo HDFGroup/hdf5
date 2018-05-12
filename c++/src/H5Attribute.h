@@ -47,8 +47,8 @@ class H5_DLLCPP Attribute : public AbstractDs, public H5Location {
         H5std_string getName() const;
         ssize_t getName(H5std_string& attr_name, size_t len = 0) const;
         // The overloaded function below is replaced by the one above and it
-        // is kept for backward compatibility purpose.
-        ssize_t getName(size_t buf_size, H5std_string& attr_name) const;
+        // is kept for backward compatibility purpose.  Removed in 1.8.21.
+        // ssize_t getName(size_t buf_size, H5std_string& attr_name) const;
 
         // Gets a copy of the dataspace for this attribute.
         virtual DataSpace getSpace() const;

@@ -47,8 +47,9 @@ class H5_DLLCPP CommonFG {
         DataSet openDataSet(const H5std_string& name) const;
 
         // Returns the value of a symbolic link.
-        H5std_string getLinkval(const char* link_name, size_t size=0) const;
-        H5std_string getLinkval(const H5std_string& link_name, size_t size=0) const;
+        // Moved to H5Location in 1.8.21.
+        //H5std_string getLinkval(const char* link_name, size_t size=0) const;
+        //H5std_string getLinkval(const H5std_string& link_name, size_t size=0) const;
 
         // Returns the number of objects in this group.
         hsize_t getNumObjs() const;
@@ -92,24 +93,27 @@ class H5_DLLCPP CommonFG {
 
         // Creates a link of the specified type from new_name to current_name;
         // both names are interpreted relative to the specified location id.
+        // Deprecated in favor of H5Location::link overloaded (1.8.21)
         void link(H5L_type_t link_type, const char* curr_name, const char* new_name) const;
         void link(H5L_type_t link_type, const H5std_string& curr_name, const H5std_string& new_name) const;
 
         // Removes the specified name at this location.
-        void unlink(const char* name) const;
-        void unlink(const H5std_string& name) const;
+        // Deprecated in favor of H5Location::unlink overloaded (1.8.21)
+        // These functions can be removed immediately because their replacement
+        // have a default argument out of two.
+        //void unlink(const char* name) const;
+        //void unlink(const H5std_string& name) const;
 
         // Mounts the file 'child' onto this location.
         void mount(const char* name, const H5File& child, const PropList& plist) const;
-        //void mount(const char* name, H5File& child, PropList& plist) const; // removed from 1.8.18 and 1.10.1
         void mount(const H5std_string& name, const H5File& child, const PropList& plist) const;
-        //void mount(const H5std_string& name, H5File& child, PropList& plist) const; // removed from 1.8.18 and 1.10.1
 
         // Unmounts the file named 'name' from this parent location.
         void unmount(const char* name) const;
         void unmount(const H5std_string& name) const;
 
         // Renames an object at this location.
+        // Deprecated in favor of H5Location::moveLink (1.8.21)
         void move(const char* src, const char* dst) const;
         void move(const H5std_string& src, const H5std_string& dst) const;
 
