@@ -117,7 +117,72 @@ New Features
 
     C++ API
     -------
-    - None
+    - The following C++ API wrappers have been added to class H5Location
+      + H5Lcreate_soft:
+        // Creates a soft link from link_name to target_name.
+        void link(const char *target_name, const char *link_name,...)
+        void link(const H5std_string& target_name,...)
+
+      + H5Lcreate_hard:
+        // Creates a hard link from new_name to curr_name.
+        void link(const char *curr_name, const Group& new_loc,...)
+        void link(const H5std_string& curr_name, const Group& new_loc,...)
+
+        // Creates a hard link from new_name to curr_name in the same location.
+        void link(const char *curr_name, const hid_t same_loc,...)
+        void link(const H5std_string& curr_name, const hid_t same_loc,...)
+
+        Note: previous version CommonFG::link will be deprecated.
+
+      + H5Lcopy:
+        // Copy an object from a group of file to another.
+        void copyLink(const char *src_name, const Group& dst,...)
+        void copyLink(const H5std_string& src_name, const Group& dst,...)
+
+        // Copy an object from a group of file to the same location.
+        void copyLink(const char *src_name, const char *dst_name,...)
+        void copyLink(const H5std_string& src_name,...)
+
+      + H5Lmove:
+        // Rename an object in a group or file to a new location.
+        void moveLink(const char* src_name, const Group& dst,...)
+        void moveLink(const H5std_string& src_name, const Group& dst,...)
+
+        // Rename an object in a group or file to the same location.
+        void moveLink(const char* src_name, const char* dst_name,...)
+        void moveLink(const H5std_string& src_name,...)
+
+        Note: previous version CommonFG::move will be deprecated.
+
+      + H5Ldelete:
+        // Removes the specified link from this location.
+        void unlink(const char *link_name,
+            const LinkAccPropList& lapl = LinkAccPropList::DEFAULT)
+        void unlink(const H5std_string& link_name,
+            const LinkAccPropList& lapl = LinkAccPropList::DEFAULT)
+
+        Note: An additional parameter is added to CommonFG::unlink and it
+              is moved to H5Location.
+
+      (BMR - 2018/05/11 - HDFFV-10445)
+
+    - New property list subclasses
+
+      Property list subclasses StrCreatPropList, LinkCreatPropList, and
+      AttrCreatPropList are added for the C property list classes
+      H5P_STRING_CREATE, H5P_LINK_CREATE, and H5P_ATTRIBUTE_CREATE.
+
+      (BMR - 2018/05/11 - HDFFV-10445)
+
+    - Another argument, LinkCreatPropList& lcpl, is added to the following
+      functions for the use of link creation property list.
+        Group createGroup(const char* name, size_t size_hint = 0,
+                    const LinkCreatPropList& lcpl = LinkCreatPropList::DEFAULT)
+        Group createGroup(const H5std_string& name, size_t size_hint = 0,
+                    const LinkCreatPropList& lcpl = LinkCreatPropList::DEFAULT)
+
+      (BMR - 2018/05/11 - HDFFV-10445)
+
 
     High-Level APIs
     ---------------
@@ -367,7 +432,32 @@ Bug Fixes since HDF5-1.8.20
 
     C++ API
     -------
-    - None
+    - Removal of memory leaks
+
+      A private function was inadvertently called, causing memory leaks.  This
+      is now fixed.
+
+      (BMR - 2018/04/12 - User reported in email)
+
+    - Changes in exception classes
+
+      Some exception classes are reorganized to reflect the HDF5 object
+      hierarchy and allow customization.
+        DataSetIException -> LocationException -> Exception
+        DataTypeIException -> LocationException -> Exception
+        GroupIException -> LocationException -> Exception
+        AttributeIException -> LocationException -> Exception
+        FileIException -> GroupIException -> LocationException -> Exception
+      Member functions in H5Location and H5Object now throw specific exceptions
+      associated with the invoking objects.
+
+      (BMR - 2018/05/11)
+
+    - H5Location::closeObjId is made static
+      (BMR - 2018/05/11)
+
+    - H5A wrappers in H5Location are removed as they have been in H5Object.
+      (BMR - 2018/05/11)
 
 
     High-Level APIs:
