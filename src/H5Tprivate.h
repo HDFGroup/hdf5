@@ -112,6 +112,8 @@ H5_DLL H5T_class_t H5T_get_class(const H5T_t *dt, htri_t internal);
 H5_DLL htri_t H5T_detect_class(const H5T_t *dt, H5T_class_t cls, hbool_t from_api);
 H5_DLL size_t H5T_get_size(const H5T_t *dt);
 H5_DLL int    H5T_cmp(const H5T_t *dt1, const H5T_t *dt2, hbool_t superset);
+H5_DLL herr_t H5T_encode(H5T_t *obj, unsigned char *buf, size_t *nalloc);
+H5_DLL H5T_t *H5T_decode(size_t buf_size, const unsigned char *buf);
 H5_DLL herr_t H5T_debug(const H5T_t *dt, FILE * stream);
 H5_DLL struct H5O_loc_t *H5T_oloc(H5T_t *dt);
 H5_DLL H5G_name_t *H5T_nameof(H5T_t *dt);
