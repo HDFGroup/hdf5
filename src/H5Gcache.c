@@ -103,49 +103,43 @@ H5FL_SEQ_EXTERN(H5G_entry_t);
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_node_load
+ * Function:    H5G_node_load
  *
- * Purpose:	Loads a symbol table node from the file.
+ * Purpose:     Loads a symbol table node from the file.
  *
- * Return:	Success:	Ptr to the new table.
+ * Return:      Success:    Ptr to the new table.
+ *              Failure:    NULL
  *
- *		Failure:	NULL
- *
- * Programmer:	Robb Matzke
- *		matzke@llnl.gov
- *		Jun 23 1997
+ * Programmer:  Robb Matzke
+ *              matzke@llnl.gov
+ *              Jun 23 1997
  *
  *-------------------------------------------------------------------------
  */
 static H5G_node_t *
 H5G_node_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata)
 {
-    H5G_node_t		   *sym = NULL;
-    H5WB_t                 *wb = NULL;     /* Wrapped buffer for node data */
-    uint8_t                 node_buf[H5G_NODE_BUF_SIZE]; /* Buffer for node */
-    uint8_t		   *node;           /* Pointer to node buffer */
+    H5G_node_t         *sym = NULL;
+    H5WB_t             *wb = NULL;                      /* Wrapped buffer for node data */
+    uint8_t             node_buf[H5G_NODE_BUF_SIZE];    /* Buffer for node */
+    uint8_t            *node;                           /* Pointer to node buffer */
     const uint8_t	   *p;
-    H5G_node_t		   *ret_value;	/*for error handling */
+    const uint8_t	   *p_end;
+    H5G_node_t         *ret_value;                      /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    /*
-     * Check arguments.
-     */
+    /* Sanity checks */
     HDassert(f);
     HDassert(H5F_addr_defined(addr));
     HDassert(udata);
 
-    /*
-     * Initialize variables.
-     */
-
     /* Allocate symbol table data structures */
     if(NULL == (sym = H5FL_CALLOC(H5G_node_t)))
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
     sym->node_size = H5G_NODE_SIZE(f);
     if(NULL == (sym->entry = H5FL_SEQ_CALLOC(H5G_entry_t, (size_t)(2 * H5F_SYM_LEAF_K(f)))))
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Wrap the local buffer for serialized node info */
     if(NULL == (wb = H5WB_wrap(node_buf, sizeof(node_buf))))
@@ -157,19 +151,24 @@ H5G_node_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata)
 
     /* Read the serialized symbol table node. */
     if(H5F_block_read(f, H5FD_MEM_BTREE, addr, sym->node_size, dxpl_id, node) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_READERROR, NULL, "unable to read symbol table node")
+        HGOTO_ERROR(H5E_SYM, H5E_READERROR, NULL, "unable to read symbol table node")
 
     /* Get temporary pointer to serialized node */
     p = node;
 
+    /* Get a pointer to the end of the node. This ensures we don't run off
+     * the end of the buffer if the file is corrupt.
+     */
+    p_end = p + sym->node_size - 1;
+
     /* magic */
     if(HDmemcmp(p, H5G_NODE_MAGIC, (size_t)H5_SIZEOF_MAGIC))
-	HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, NULL, "bad symbol table node signature")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, NULL, "bad symbol table node signature")
     p += 4;
 
     /* version */
     if(H5G_NODE_VERS != *p++)
-	HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, NULL, "bad symbol table node version")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, NULL, "bad symbol table node version")
 
     /* reserved */
     p++;
@@ -178,8 +177,8 @@ H5G_node_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata)
     UINT16DECODE(p, sym->nsyms);
 
     /* entries */
-    if(H5G__ent_decode_vec(f, &p, sym->entry, sym->nsyms) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, NULL, "unable to decode symbol table entries")
+    if(H5G__ent_decode_vec(f, &p, p_end, sym->entry, sym->nsyms) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, NULL, "unable to decode symbol table entries")
 
     /* Set return value */
     ret_value = sym;
