@@ -41,6 +41,9 @@ class UserData4Aiterate { // user data for attribute iteration
 //  Inheritance: IdComponent
 class H5_DLLCPP H5Location : public IdComponent {
    public:
+        // Determines the number of attributes belong to this object.
+        int getNumAttrs() const;
+
         // Checks if a link of a given name exists in this location
         bool nameExists(const char* name, const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
         bool nameExists(const H5std_string& name, const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
@@ -59,10 +62,6 @@ class H5_DLLCPP H5Location : public IdComponent {
                 const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
         void getObjectInfo(const H5std_string& name, H5O_info_t *oinfo,
                 const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
-
-        // Determines the number of attributes at this location.
-        // - moved to H5Object (1.8.20)
-        int getNumAttrs() const;    // Deprecated
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS
         // Retrieves the type of object that an object reference points to.
@@ -118,6 +117,87 @@ class H5_DLLCPP H5Location : public IdComponent {
         // Closes an object opened by openObjId()
         static void closeObjId(hid_t obj_id);
 
+        // Creates a soft link from link_name to target_name.
+        void link(const char *target_name, const char *link_name,
+             const LinkCreatPropList& lcpl = LinkCreatPropList::DEFAULT,
+             const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
+        void link(const H5std_string& target_name,
+             const H5std_string& link_name,
+             const LinkCreatPropList& lcpl = LinkCreatPropList::DEFAULT,
+             const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
+
+        // Creates a hard link from new_name to curr_name.
+        void link(const char *curr_name,
+             const H5Location& new_loc, const char *new_name,
+             const LinkCreatPropList& lcpl = LinkCreatPropList::DEFAULT,
+             const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
+        void link(const H5std_string& curr_name,
+             const H5Location& new_loc, const H5std_string& new_name,
+             const LinkCreatPropList& lcpl = LinkCreatPropList::DEFAULT,
+             const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
+
+        // Creates a hard link from new_name to curr_name in same location.
+        void link(const char *curr_name,
+             const hid_t same_loc, const char *new_name,
+             const LinkCreatPropList& lcpl = LinkCreatPropList::DEFAULT,
+             const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
+        void link(const H5std_string& curr_name,
+             const hid_t same_loc, const H5std_string& new_name,
+             const LinkCreatPropList& lcpl = LinkCreatPropList::DEFAULT,
+             const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
+
+        // Removes the specified link from this location.
+        void unlink(const char *link_name,
+            const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
+        void unlink(const H5std_string& link_name,
+            const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
+
+        // Copies a link from this location to another.
+        void copyLink(const char *src_name,
+             const H5Location& dst, const char *dst_name,
+             const LinkCreatPropList& lcpl = LinkCreatPropList::DEFAULT,
+             const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
+        void copyLink(const H5std_string& src_name,
+             const H5Location& dst, const H5std_string& dst_name,
+             const LinkCreatPropList& lcpl = LinkCreatPropList::DEFAULT,
+             const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
+
+        // Makes a copy of a link in the same location.
+        void copyLink(const char *src_name, const char *dst_name,
+             const LinkCreatPropList& lcpl = LinkCreatPropList::DEFAULT,
+             const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
+        void copyLink(const H5std_string& src_name,
+             const H5std_string& dst_name,
+             const LinkCreatPropList& lcpl = LinkCreatPropList::DEFAULT,
+             const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
+
+        // Renames a link in this location and moves to a new location.
+        void moveLink(const char* src_name,
+            const H5Location& dst, const char* dst_name,
+            const LinkCreatPropList& lcpl = LinkCreatPropList::DEFAULT,
+            const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
+        void moveLink(const H5std_string& src_name,
+            const H5Location& dst, const H5std_string& dst_name,
+            const LinkCreatPropList& lcpl = LinkCreatPropList::DEFAULT,
+            const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
+
+        // Renames a link in this location.
+        void moveLink(const char* src_name, const char* dst_name,
+            const LinkCreatPropList& lcpl = LinkCreatPropList::DEFAULT,
+            const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
+        void moveLink(const H5std_string& src_name,
+            const H5std_string& dst_name,
+            const LinkCreatPropList& lcpl = LinkCreatPropList::DEFAULT,
+            const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
+
+        // Returns the information of the named link.
+        H5L_info_t getLinkInfo(const char* link_name, const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
+        H5L_info_t getLinkInfo(const H5std_string& link_name, const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
+
+        // Returns the value of a symbolic link.
+        H5std_string getLinkval(const char* link_name, size_t size=0) const;
+        H5std_string getLinkval(const H5std_string& link_name, size_t size=0) const;
+
         ///\brief Returns an identifier. (pure virtual)
         virtual hid_t getId() const = 0;
 
@@ -127,23 +207,24 @@ class H5_DLLCPP H5Location : public IdComponent {
         These H5A wrappers are marked "deprecated" in 1.8.19.
         They are moved to H5Object to prevent the object id from being
         passed in to H5A APIs.
+        Updated: they are removed from source code in 1.8.21.
 ***************************************************************************/
 
         // Creates an attribute for the specified object at this location
         // PropList is currently not used, so always be default.
         // Deprecated
-        virtual Attribute createAttribute(const char* name, const DataType& type, const DataSpace& space, const PropList& create_plist = PropList::DEFAULT) const;
-        virtual Attribute createAttribute(const H5std_string& name, const DataType& type, const DataSpace& space, const PropList& create_plist = PropList::DEFAULT) const;
+        //virtual Attribute createAttribute(const char* name, const DataType& type, const DataSpace& space, const PropList& create_plist = PropList::DEFAULT) const;
+        //virtual Attribute createAttribute(const H5std_string& name, const DataType& type, const DataSpace& space, const PropList& create_plist = PropList::DEFAULT) const;
 
         // Given its name, opens the attribute that belongs to an object at
         // this location.
         // Deprecated
-        virtual Attribute openAttribute(const char* name) const;
-        virtual Attribute openAttribute(const H5std_string& name) const;
+        //virtual Attribute openAttribute(const char* name) const;
+        //virtual Attribute openAttribute(const H5std_string& name) const;
 
         // Given its index, opens the attribute that belongs to an object at
         // this location.
-        virtual Attribute openAttribute(const unsigned int idx) const; // Deprecated
+        //virtual Attribute openAttribute(const unsigned int idx) const; // Deprecated
 
         // Iterate user's function over the attributes at this location.
         virtual int iterateAttrs(attr_operator_t user_op, unsigned* idx = NULL,
@@ -151,24 +232,24 @@ class H5_DLLCPP H5Location : public IdComponent {
 
         // Checks whether the named attribute exists at this location.
         // Deprecated
-        virtual bool attrExists(const char* name) const;
-        virtual bool attrExists(const H5std_string& name) const;
+        //virtual bool attrExists(const char* name) const;
+        //virtual bool attrExists(const H5std_string& name) const;
 
         // Renames the named attribute to a new name.
         // Deprecated
-        virtual void renameAttr(const char* oldname, const char* newname) const;
-        virtual void renameAttr(const H5std_string& oldname, const H5std_string& newname) const;
+        //virtual void renameAttr(const char* oldname, const char* newname) const;
+        //virtual void renameAttr(const H5std_string& oldname, const H5std_string& newname) const;
 
         // Removes the named attribute from this location.
         // Deprecated
-        virtual void removeAttr(const char* name) const;
-        virtual void removeAttr(const H5std_string& name) const;
+        //virtual void removeAttr(const char* name) const;
+        //virtual void removeAttr(const H5std_string& name) const;
 
 /**************************** End of H5A note *******************************/
 
    protected:
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-        // Default constructor,
+        // Default constructor
         H5Location();
 
         // *** Deprecation warning ***

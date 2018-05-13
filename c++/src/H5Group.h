@@ -55,6 +55,15 @@ class H5_DLLCPP Group : public H5Object, public CommonFG {
         // Creates a copy of an existing group using its id.
         Group(const hid_t group_id);
 
+        // The "using" lines below are to avoid the compilation error
+        // "error: request for member ‘link’ is ambiguous" when both CommonFG and
+        // H5Location have overloaded functions of the same name. CommonFG's
+        // member functions need to be kept for backward compatibility for a while.
+        // They can be removed after these functions are removed.
+        // -BMR, May 2018
+        using H5Location::link;
+        using CommonFG::link;
+
    protected:
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
         // Sets the group id.
