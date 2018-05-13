@@ -53,10 +53,10 @@
 #define @H5_FC_FUNC_@
 
 /* Define if Fortran C_LONG_DOUBLE is different from C_DOUBLE */
-#cmakedefine H5_FORTRAN_C_LONG_DOUBLE_IS_UNIQUE @H5_FORTRAN_C_LONG_DOUBLE_IS_UNIQUE@
+#define H5_FORTRAN_C_LONG_DOUBLE_IS_UNIQUE @H5_FORTRAN_C_LONG_DOUBLE_IS_UNIQUE@
 
 /* Define if we have Fortran C_LONG_DOUBLE */
-#cmakedefine H5_FORTRAN_HAVE_C_LONG_DOUBLE @H5_FORTRAN_HAVE_C_LONG_DOUBLE@
+#define H5_FORTRAN_HAVE_C_LONG_DOUBLE @H5_FORTRAN_HAVE_C_LONG_DOUBLE@
 
 /* Define if we have Fortran intrinsic C_SIZEOF */
 #cmakedefine H5_FORTRAN_HAVE_C_SIZEOF @H5_FORTRAN_HAVE_C_SIZEOF@
@@ -71,7 +71,7 @@
 #cmakedefine H5_FORTRAN_SIZEOF_LONG_DOUBLE @H5_FORTRAN_SIZEOF_LONG_DOUBLE@
 
 /* Define Fortran compiler ID */
-#cmakedefine H5_Fortran_COMPILER_ID @H5_Fortran_COMPILER_ID@
+#define H5_Fortran_COMPILER_ID @CMAKE_Fortran_COMPILER_ID@
 
 /* Define valid Fortran INTEGER KINDs */
 #cmakedefine H5_H5CONFIG_F_IKIND @H5_HH5_H5CONFIG_F_NUM_RKIND5CONFIG_F_IKIND@
@@ -509,7 +509,7 @@
 #define H5_PACKAGE_VERSION "@HDF5_PACKAGE_VERSION_STRING@"
 
 /* Determine the maximum decimal precision in C */
-#define H5_PAC_C_MAX_REAL_PRECISION @H5_PAC_C_MAX_REAL_PRECISION@
+#cmakedefine H5_PAC_C_MAX_REAL_PRECISION @H5_PAC_C_MAX_REAL_PRECISION@
 
 /* Define Fortran Maximum Real Decimal Precision */
 #cmakedefine H5_PAC_FC_MAX_REAL_PRECISION @H5_PAC_FC_MAX_REAL_PRECISION@
