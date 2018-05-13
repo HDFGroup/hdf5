@@ -152,7 +152,7 @@ H5O__flush(hid_t obj_id)
     const H5O_obj_class_t  *obj_class;	/* Class of object */
     herr_t ret_value = SUCCEED;	/* Return value */
 
-    FUNC_ENTER_STATIC_VOL
+    FUNC_ENTER_STATIC
 
     /* Check args */
     if(NULL == (oloc = H5O_get_loc(obj_id)))
@@ -175,7 +175,7 @@ H5O__flush(hid_t obj_id)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTFLUSH, FAIL, "unable to flush object and object flush callback")
 
 done:
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__flush() */
 
 
@@ -483,7 +483,7 @@ H5O__refresh(hid_t obj_id)
     H5O_loc_t *oloc;            /* Object location */
     herr_t ret_value = SUCCEED;	/* Return value */
 
-    FUNC_ENTER_STATIC_VOL
+    FUNC_ENTER_STATIC
 
     /* Check args */
     if(NULL == (oloc = H5O_get_loc(obj_id)))
@@ -494,6 +494,6 @@ H5O__refresh(hid_t obj_id)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to refresh object")
 
 done:
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__refresh() */
 

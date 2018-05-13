@@ -585,7 +585,7 @@ H5O__open_name(const H5G_loc_t *loc, const char *name)
 {
     hid_t ret_value = H5I_INVALID_HID;	/* Return value */
 
-    FUNC_ENTER_PACKAGE_VOL
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(loc);
@@ -596,7 +596,7 @@ H5O__open_name(const H5G_loc_t *loc, const char *name)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open object")
 
 done:
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__open_name() */
 
 
@@ -626,7 +626,7 @@ H5O__open_by_idx(const H5G_loc_t *loc, const char *name, H5_index_t idx_type,
     hbool_t     loc_found = FALSE;      /* Entry at 'name' found */
     hid_t ret_value = H5I_INVALID_HID;	/* Return value */
 
-    FUNC_ENTER_PACKAGE_VOL
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(loc);
@@ -651,7 +651,7 @@ done:
         if(H5G_loc_free(&obj_loc) < 0)
             HDONE_ERROR(H5E_OHDR, H5E_CANTRELEASE, H5I_INVALID_HID, "can't free location")
 
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__open_by_idx() */
 
 
@@ -679,7 +679,7 @@ H5O__open_by_addr(const H5G_loc_t *loc, haddr_t addr)
     H5O_loc_t   obj_oloc;            	/* Opened object object location */
     hid_t ret_value = H5I_INVALID_HID;	/* Return value */
 
-    FUNC_ENTER_PACKAGE_VOL
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(loc);
@@ -697,7 +697,7 @@ H5O__open_by_addr(const H5G_loc_t *loc, haddr_t addr)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open object")
 
 done:
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__open_by_addr() */
 
 
@@ -760,7 +760,7 @@ H5O__create_link(const H5G_loc_t *new_loc, const char *new_name,
 {
     herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_PACKAGE_VOL
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(new_loc);
@@ -772,7 +772,7 @@ H5O__create_link(const H5G_loc_t *new_loc, const char *new_name,
         HGOTO_ERROR(H5E_OHDR, H5E_CANTCREATE, FAIL, "unable to create link")
 
 done:
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__create_link() */
 
 
@@ -1024,7 +1024,7 @@ H5O__link(const H5O_loc_t *oloc, int adjust)
 {
     herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_PACKAGE_VOL
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(oloc);
@@ -1034,7 +1034,7 @@ H5O__link(const H5O_loc_t *oloc, int adjust)
         HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, FAIL, "modifying object link count failed")
 
 done:
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__link() */
 
 
@@ -2071,7 +2071,7 @@ H5O__exists_by_name(const H5G_loc_t *loc, const char *name)
 {
     htri_t ret_value = FAIL;	/* Return value */
 
-    FUNC_ENTER_PACKAGE_VOL
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(loc);
@@ -2082,7 +2082,7 @@ H5O__exists_by_name(const H5G_loc_t *loc, const char *name)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to determine if '%s' exists", name)
 
 done:
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__exists_by_name() */
 
 
@@ -2352,7 +2352,7 @@ H5O__get_info_by_name(const H5G_loc_t *loc, const char *name, H5O_info_t *oinfo)
 {
     herr_t ret_value = SUCCEED;		/* Return value */
 
-    FUNC_ENTER_PACKAGE_VOL
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(loc);
@@ -2364,7 +2364,7 @@ H5O__get_info_by_name(const H5G_loc_t *loc, const char *name, H5O_info_t *oinfo)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't retrieve object info")
 
 done:
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__get_info_by_name() */
 
 
@@ -2395,7 +2395,7 @@ H5O__get_info_by_idx(const H5G_loc_t *loc, const char *group_name, H5_index_t id
     hbool_t     loc_found = FALSE;      /* Entry at 'name' found */
     herr_t ret_value = SUCCEED;		/* Return value */
 
-    FUNC_ENTER_PACKAGE_VOL
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(loc);
@@ -2421,7 +2421,7 @@ done:
     if(loc_found && H5G_loc_free(&obj_loc) < 0)
         HDONE_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "can't free location")
 
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__get_info_by_idx() */
 
 
@@ -2447,7 +2447,7 @@ H5O__set_comment_by_name(const H5G_loc_t *loc, const char *name,
 {
     herr_t ret_value = SUCCEED;		/* Return value */
 
-    FUNC_ENTER_PACKAGE_VOL
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(loc);
@@ -2458,7 +2458,7 @@ H5O__set_comment_by_name(const H5G_loc_t *loc, const char *name,
         HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set comment for object")
 
 done:
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__set_comment_by_name() */
 
 
@@ -2484,7 +2484,7 @@ H5O__get_comment_by_name(const H5G_loc_t *loc, const char *name,
 {
     ssize_t ret_value = FAIL;		/* Return value */
 
-    FUNC_ENTER_PACKAGE_VOL
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(loc);
@@ -2495,7 +2495,7 @@ H5O__get_comment_by_name(const H5G_loc_t *loc, const char *name,
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't get comment for object")
 
 done:
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__get_comment_by_name() */
 
 
@@ -2877,7 +2877,7 @@ H5O__visit(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
     hid_t       obj_id = (-1);  /* ID of object */
     herr_t      ret_value = FAIL;       /* Return value */
 
-    FUNC_ENTER_PACKAGE_VOL
+    FUNC_ENTER_PACKAGE
 
     /* Portably initialize user data struct to zeros */
     HDmemset(&udata, 0, sizeof(udata));
@@ -2964,7 +2964,7 @@ done:
     if(udata.visited)
         H5SL_destroy(udata.visited, H5O__free_visit_visited, NULL);
 
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__visit() */
 
 

@@ -393,7 +393,7 @@ H5G__link(hid_t cur_loc_id, const char *cur_name, H5G_link_t type,
     H5G_loc_t	new_loc;                /* Information about new link's group */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_STATIC_VOL
+    FUNC_ENTER_STATIC
 
     /* Create the appropriate kind of link */
     if(type == H5L_TYPE_HARD) {
@@ -441,7 +441,7 @@ H5G__link(hid_t cur_loc_id, const char *cur_name, H5G_link_t type,
         HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "Not a valid link type")
 
 done:
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G__link() */
 
 
@@ -531,7 +531,7 @@ H5G__move(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
     H5G_loc_t	dst_loc, *dst_loc_p;    /* Group info for destination location */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_STATIC_VOL
+    FUNC_ENTER_STATIC
 
     /* Check arguments */
     if(src_loc_id != H5L_SAME_LOC && H5G_loc(src_loc_id, &src_loc) < 0)
@@ -556,7 +556,7 @@ H5G__move(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
 	HGOTO_ERROR(H5E_SYM, H5E_CANTMOVE, FAIL, "unable to move link")
 
 done:
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G__move() */
 
 
@@ -615,14 +615,14 @@ H5G__unlink(H5G_loc_t *loc, const char *name)
 {
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_STATIC_VOL
+    FUNC_ENTER_STATIC
 
     /* Call H5L routine... */
     if(H5L_delete(loc, name) < 0)
       HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "couldn't delete link")
 
 done:
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G__unlink() */
 
 
@@ -683,14 +683,14 @@ H5G__get_linkval(const H5G_loc_t *loc, const char *name, size_t size,
 {
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_STATIC_VOL
+    FUNC_ENTER_STATIC
 
     /* Call the link routine which provides this capability */
     if(H5L_get_val(loc, name, buf, size) < 0)
       HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "couldn't get link info")
 
 done:
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G__get_linkval() */
 
 
@@ -758,14 +758,14 @@ H5G__set_comment(const H5G_loc_t *loc, const char *name, const char *comment)
 {
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_STATIC_VOL
+    FUNC_ENTER_STATIC
 
     /* Call the common routine which provides this capability */
     if(H5G_loc_set_comment(loc, name, comment) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "unable to set comment value")
 
 done:
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G__set_comment() */
 
 
@@ -842,14 +842,14 @@ H5G__get_comment(const H5G_loc_t *loc, const char *name, char *buf,
 {
     int ret_value = FAIL;       /* Return value */
 
-    FUNC_ENTER_STATIC_VOL
+    FUNC_ENTER_STATIC
 
     /* Call the common routine which provides this capability */
     if((ret_value = (int)H5G_loc_get_comment(loc, name, buf, bufsize)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to get comment value")
 
 done:
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G__get_comment() */
 
 
@@ -940,14 +940,14 @@ H5G__iterate(hid_t loc_id, const char *name, H5_index_t idx_type,
 {
     herr_t ret_value = FAIL;            /* Return value */
 
-    FUNC_ENTER_STATIC_VOL
+    FUNC_ENTER_STATIC
 
     /* Call the common routine which provides this capability */
     if((ret_value = H5G_iterate(loc_id, name, idx_type, order, idx, last_lnk, lnk_op, op_data)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "group iteration failed")
 
 done:
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G__iterate() */
 
 
@@ -1016,7 +1016,7 @@ H5G__get_num_objs(const H5O_loc_t *oloc, H5G_info_t *grp_info)
     H5O_type_t obj_type;                /* Type of object at location */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_STATIC_VOL
+    FUNC_ENTER_STATIC
 
     /* Check args */
     if(H5O_obj_type(oloc, &obj_type) < 0)
@@ -1029,7 +1029,7 @@ H5G__get_num_objs(const H5O_loc_t *oloc, H5G_info_t *grp_info)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTCOUNT, FAIL, "can't determine # of objects")
 
 done:
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G__get_num_objs() */
 
 
@@ -1177,7 +1177,7 @@ H5G__get_objinfo(const H5G_loc_t *loc, const char *name, hbool_t follow_link,
     H5G_trav_goi_t udata;           /* User data for callback */
     herr_t      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_STATIC_VOL
+    FUNC_ENTER_STATIC
 
     /* Sanity checks */
     HDassert(loc);
@@ -1220,7 +1220,7 @@ H5G__get_objinfo(const H5G_loc_t *loc, const char *name, hbool_t follow_link,
     } /* end if */
 
 done:
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G__get_objinfo() */
 
 
@@ -1291,7 +1291,7 @@ H5G__get_objname_by_idx(const H5O_loc_t *oloc, H5_index_t idx_type,
     H5O_type_t obj_type;        /* Type of object at location */
     ssize_t ret_value = FAIL;   /* Return value */
 
-    FUNC_ENTER_STATIC_VOL
+    FUNC_ENTER_STATIC
 
     /* Check args */
     if(H5O_obj_type(oloc, &obj_type) < 0)
@@ -1304,7 +1304,7 @@ H5G__get_objname_by_idx(const H5O_loc_t *oloc, H5_index_t idx_type,
 	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get object name")
 
 done:
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G__get_objname_by_idx() */
 
 
@@ -1368,7 +1368,7 @@ H5G__obj_get_type_by_idx(H5O_loc_t *oloc, hsize_t idx)
     H5O_type_t obj_type;        /* Type of object at location */
     H5G_obj_t ret_value = H5G_UNKNOWN;  /* Return value */
 
-    FUNC_ENTER_STATIC_VOL_TAG(oloc->addr)
+    FUNC_ENTER_STATIC_TAG(oloc->addr)
 
     /* Sanity check */
     HDassert(oloc);
@@ -1401,7 +1401,7 @@ H5G__obj_get_type_by_idx(H5O_loc_t *oloc, hsize_t idx)
     } /* end else */
 
 done:
-    FUNC_LEAVE_NOAPI_VOL_TAG(ret_value)
+    FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5G__obj_get_type_by_idx() */
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 

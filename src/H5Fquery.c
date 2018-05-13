@@ -1215,3 +1215,29 @@ H5F_get_eoa_pre_fsm_fsalloc(const H5F_t *f)
     FUNC_LEAVE_NOAPI(f->shared->eoa_pre_fsm_fsalloc)
 } /* end H5F_get_eoa_pre_fsm_fsalloc() */
 
+
+/*-------------------------------------------------------------------------
+ * Function: H5F_get_swmr_deltat
+ *
+ * Purpose:  Retrieve the 'SWMR delta-T' value for the file.
+ *
+ * Return:   Success:    Non-negative, the 'SWMR delta-T'
+ *           Failure:    (can't happen)
+ *
+ * Programmer:  Quincey Koziol
+ *              May 11, 2018
+ *
+ *-------------------------------------------------------------------------
+ */
+unsigned
+H5F_get_swmr_deltat(const H5F_t *f)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDassert(f);
+    HDassert(f->shared);
+
+    FUNC_LEAVE_NOAPI(f->shared->swmr_deltat)
+} /* end H5F_get_swmr_deltat() */
+

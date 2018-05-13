@@ -681,10 +681,6 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, hbool_t initial_read)
     /* Decode the optional superblock extension info */
     if(H5F_addr_defined(sblock->ext_addr)) {
         H5O_loc_t ext_loc;      /* "Object location" for superblock extension */
-        H5O_btreek_t btreek;    /* v1 B-tree 'K' value message from superblock extension */
-        H5O_drvinfo_t drvinfo;  /* Driver info message from superblock extension */
-        H5O_swmr_deltat_t swmr_deltat;  /* SWMR delta t message from superblock extension */
-        size_t u;               /* Local index variable */
         htri_t status;          /* Status for message existing */
 
         /* Sanity check - superblock extension should only be defined for
@@ -712,11 +708,10 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, hbool_t initial_read)
         /* Check for the extension having a 'swmr delta t' message */
         if((status = H5O_msg_exists(&ext_loc, H5O_SWMR_DELTAT_ID)) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_EXISTS, FAIL, "unable to read object header")
-        if(status) {
+        if(status)
             /* Retrieve the 'SWMR delta t' structure */
-            if(NULL == H5O_msg_read(&ext_loc, H5O_SWMR_DELTAT_ID, &swmr_deltat))
+            if(NULL == H5O_msg_read(&ext_loc, H5O_SWMR_DELTAT_ID, &f->shared->swmr_deltat))
                 HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "driver info message not present")
-        } /* end if */
 
         /* Check for the extension having a 'driver info' message */
         if((status = H5O_msg_exists(&ext_loc, H5O_DRVINFO_ID)) < 0)
@@ -724,6 +719,7 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, hbool_t initial_read)
         if(status) {
             /* Check for ignoring the driver info for this file */
             if(!udata.ignore_drvrinfo) {
+                H5O_drvinfo_t drvinfo;  /* Driver info message from superblock extension */
 
                 /* Retrieve the 'driver info' structure */
                 if(NULL == H5O_msg_read(&ext_loc, H5O_DRVINFO_ID, &drvinfo))
@@ -751,6 +747,8 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, hbool_t initial_read)
         if((status = H5O_msg_exists(&ext_loc, H5O_BTREEK_ID)) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_EXISTS, FAIL, "unable to read object header")
         if(status) {
+            H5O_btreek_t btreek;    /* v1 B-tree 'K' value message from superblock extension */
+
             /* Retrieve the 'v1 B-tree "K"' structure */
             if(NULL == H5O_msg_read(&ext_loc, H5O_BTREEK_ID, &btreek))
                 HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "v1 B-tree 'K' info message not present")
@@ -781,6 +779,7 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, hbool_t initial_read)
             if(!(flags & H5O_MSG_FLAG_WAS_UNKNOWN)) {
                 H5O_fsinfo_t fsinfo;   /* File space info message from superblock extension */
                 hbool_t null_fsm_addr = FALSE;  /* Whether to drop free-space to the floor */
+                size_t u;               /* Local index variable */
 
                 /* The h5clear tool uses this property to tell the library
                  * to drop free-space to the floor
@@ -1398,8 +1397,10 @@ H5F__super_init(H5F_t *f)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to update free-space info header message")
 	} /* end if */
 
-        // FULLSWMR TODO
-        // Write swmr deltat value
+        /* FULLSWMR Write swmr deltat value */
+        if(f->shared->swmr_deltat > 0) 
+            if(H5O_msg_create(&ext_loc, H5O_SWMR_DELTAT_ID, H5O_MSG_FLAG_DONTSHARE, H5O_UPDATE_TIME, &f->shared->swmr_deltat) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to SWMR delta t header message")
     } /* end if */
     else {
         /* Check for creating an "old-style" driver info block */

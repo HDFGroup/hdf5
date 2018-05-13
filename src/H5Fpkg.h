@@ -361,9 +361,7 @@ struct H5F_file_t {
     H5F_object_flush_t 	object_flush;	    /* Information for object flush callback */
 
     /* SWMR-related fields */
-    unsigned swmr_deltat;                   /* Delta t value for SWMR */
-    hbool_t  is_api_call_start;             /* Indicator of transaction started */
-    uint64_t api_call_start_time;           /* Timestamp of first metadata access */
+    H5O_swmr_deltat_t swmr_deltat;          /* "Delta-T" value for SWMR space recycling */
 };
 
 /*

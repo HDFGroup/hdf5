@@ -806,7 +806,7 @@ H5F__is_hdf5(const char *name)
     haddr_t    sig_addr;               /* Addess of hdf5 file signature */
     htri_t     ret_value = FAIL;       /* Return value */
 
-    FUNC_ENTER_PACKAGE_VOL
+    FUNC_ENTER_PACKAGE
 
     /* Open the file at the virtual file layer */
     if(NULL == (file = H5FD_open(name, H5F_ACC_RDONLY, H5P_FILE_ACCESS_DEFAULT, HADDR_UNDEF)))
@@ -823,7 +823,7 @@ done:
         if(H5FD_close(file) < 0 && ret_value >= 0)
             HDONE_ERROR(H5E_IO, H5E_CANTCLOSEFILE, FAIL, "unable to close file")
 
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__is_hdf5() */
 
 
@@ -1377,7 +1377,7 @@ H5F__create(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 {
     H5F_t       *ret_value = NULL;      /* Return value */
 
-    FUNC_ENTER_PACKAGE_VOL
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(filename);
@@ -1387,7 +1387,7 @@ H5F__create(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file")
 
 done:
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__create() */
 
 
@@ -1413,7 +1413,7 @@ H5F__open(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 {
     H5F_t       *ret_value = NULL;      /* Return value */
 
-    FUNC_ENTER_PACKAGE_VOL
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(filename);
@@ -1423,7 +1423,7 @@ H5F__open(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file")
 
 done:
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__open() */
 
 
@@ -2019,7 +2019,7 @@ H5F__flush(H5F_t *f, H5F_scope_t scope)
 {
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_PACKAGE_VOL
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(f);
@@ -2037,7 +2037,7 @@ H5F__flush(H5F_t *f, H5F_scope_t scope)
             HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush file's cached information")
 
 done:
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__flush() */
 
 
@@ -2063,7 +2063,7 @@ H5F__close(hid_t file_id)
     H5F_t       *f;                     /* File pointer */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_PACKAGE_VOL
+    FUNC_ENTER_PACKAGE
 
     /* Flush file if this is the last reference to this id and we have write
      * intent, unless it will be flushed by the "shared" file being closed.
@@ -2072,6 +2072,7 @@ H5F__close(hid_t file_id)
      */
     if(NULL == (f = (H5F_t *)H5I_object(file_id)))
         HGOTO_ERROR(H5E_FILE, H5E_BADTYPE, FAIL, "invalid file identifier")
+
     if((f->shared->nrefs > 1) && (H5F_INTENT(f) & H5F_ACC_RDWR)) {
         int nref;       /* Number of references to file ID */
 
@@ -2088,7 +2089,7 @@ H5F__close(hid_t file_id)
         HGOTO_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "decrementing file ID failed")
 
 done:
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__close() */
 
 
@@ -2114,7 +2115,7 @@ H5F__close_cb(H5F_t *f)
 {
     herr_t ret_value = SUCCEED;                 /* Return value */
 
-    FUNC_ENTER_PACKAGE_VOL
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(f);
@@ -2146,7 +2147,7 @@ H5F__close_cb(H5F_t *f)
         HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close file")
 
 done:
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__close_cb() */
 
 
@@ -2844,7 +2845,7 @@ H5F__set_libver_bounds(H5F_t *f, H5F_libver_t low, H5F_libver_t high)
 {
     herr_t     ret_value = SUCCEED;     /* Return value */
 
-    FUNC_ENTER_PACKAGE_VOL
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(f);
@@ -2902,7 +2903,7 @@ H5F__get_freespace(H5F_t *f, hsize_t *tot_space)
 {
     herr_t     ret_value = SUCCEED;     /* Return value */
 
-    FUNC_ENTER_PACKAGE_VOL
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(f);
@@ -2913,7 +2914,7 @@ H5F__get_freespace(H5F_t *f, hsize_t *tot_space)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to check free space for file")
 
 done:
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5F__get_freespace() */
 
 
@@ -2936,7 +2937,7 @@ H5F__get_file_image(H5F_t *file, void *buf_ptr, size_t buf_len)
     haddr_t     eoa;                    /* End of file address */
     ssize_t     ret_value = -1;         /* Return value */
 
-    FUNC_ENTER_PACKAGE_VOL
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     if(!file || !file->shared || !file->shared->lf)
@@ -3023,7 +3024,7 @@ H5F__get_file_image(H5F_t *file, void *buf_ptr, size_t buf_len)
     } /* end if */
 
 done:
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5F__get_file_image() */
 
 
@@ -3044,7 +3045,7 @@ H5F__get_info(H5F_t *f, H5F_info2_t *finfo)
 {
     herr_t ret_value = SUCCEED;  /* Return value */
 
-    FUNC_ENTER_PACKAGE_VOL
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(f);
@@ -3073,7 +3074,7 @@ H5F__get_info(H5F_t *f, H5F_info2_t *finfo)
     finfo->free.version = HDF5_FREESPACE_VERSION;
 
 done:
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5F__get_info() */
 
 
@@ -3181,7 +3182,7 @@ H5F__get_free_sections(H5F_t *f, H5FD_mem_t type, size_t nsects,
 {
     ssize_t     ret_value = -1;         /* Return value */
 
-    FUNC_ENTER_PACKAGE_VOL
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(f);
@@ -3192,7 +3193,7 @@ H5F__get_free_sections(H5F_t *f, H5FD_mem_t type, size_t nsects,
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to get free space sections for file")
 
 done:
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5F__get_free_sections() */
 
 
@@ -3520,7 +3521,7 @@ H5F__start_swmr_write(H5F_t *f)
     hbool_t setup = FALSE;          /* Boolean flag to indicate whether SWMR setting is enabled */
     herr_t ret_value = SUCCEED;     /* Return value */
 
-    FUNC_ENTER_PACKAGE_VOL
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(f);
@@ -3694,7 +3695,7 @@ done:
     if(obj_paths)
         H5MM_xfree(obj_paths);
 
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5F__start_swmr_write() */
 
 
@@ -3716,7 +3717,7 @@ H5F__format_convert(H5F_t *f)
     hbool_t mark_dirty = FALSE;		/* Whether to mark the file's superblock dirty */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_PACKAGE_VOL
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(f);
@@ -3759,6 +3760,6 @@ H5F__format_convert(H5F_t *f)
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTMARKDIRTY, FAIL, "unable to mark superblock as dirty")
 
 done:
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5F__format_convert() */
 

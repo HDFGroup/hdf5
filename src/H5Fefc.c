@@ -482,7 +482,7 @@ H5F__efc_release(H5F_efc_t *efc)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_PACKAGE_VOL
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(efc);
@@ -492,7 +492,7 @@ H5F__efc_release(H5F_efc_t *efc)
         HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't remove entry from external file cache")
 
 done:
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_efc_release() */
 
 

@@ -134,7 +134,7 @@ H5G__create_named(const H5G_loc_t *loc, const char *name, hid_t lcpl_id,
     H5G_obj_create_t gcrt_info;         /* Information for group creation */
     H5G_t *ret_value = NULL;            /* Return value */
 
-    FUNC_ENTER_PACKAGE_VOL
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(loc);
@@ -161,7 +161,7 @@ H5G__create_named(const H5G_loc_t *loc, const char *name, hid_t lcpl_id,
     ret_value = (H5G_t *)ocrt_info.new_obj;
 
 done:
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G__create_named() */
 
 
@@ -187,7 +187,7 @@ H5G__create_anon(H5F_t *file, H5G_obj_create_t *gcrt_info)
 {
     H5G_t       *ret_value = NULL;      /* Return value */
 
-    FUNC_ENTER_PACKAGE_VOL
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(file);
@@ -198,7 +198,7 @@ H5G__create_anon(H5F_t *file, H5G_obj_create_t *gcrt_info)
         HGOTO_ERROR(H5E_SYM, H5E_CANTCREATE, NULL, "unable to create group")
 
 done:
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G__create_anon() */
 
 
@@ -302,7 +302,7 @@ H5G__open_name(const H5G_loc_t *loc, const char *name)
     H5O_type_t  obj_type;               /* Type of object at location */
     H5G_t *ret_value = NULL;            /* Return value */
 
-    FUNC_ENTER_PACKAGE_VOL
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(loc);
@@ -336,7 +336,7 @@ done:
         if(loc_found && H5G_loc_free(&grp_loc) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, NULL, "can't free location")
 
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G__open_name() */
 
 
@@ -502,7 +502,7 @@ H5G__close_cb(H5G_t *grp)
 {
     herr_t ret_value = SUCCEED;                 /* Return value */
 
-    FUNC_ENTER_PACKAGE_VOL
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(grp && grp->shared);
@@ -513,7 +513,7 @@ H5G__close_cb(H5G_t *grp)
         HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEOBJ, FAIL, "problem closing group")
 
 done:
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G__close_cb() */
 
 
@@ -878,6 +878,7 @@ H5G_iterate(hid_t loc_id, const char *group_name,
      */
     if(H5G_loc(loc_id, &loc) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+
     if(NULL == (grp = H5G__open_name(&loc, group_name)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open group")
     if((gid = H5I_register(H5I_GROUP, grp, TRUE)) < 0)
@@ -1198,6 +1199,7 @@ H5G_visit(hid_t loc_id, const char *group_name, H5_index_t idx_type,
     /* Attempt to get the link info for this group */
     if((linfo_exists = H5G__obj_get_linfo(&(grp->oloc), &linfo)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't check for link info message")
+
     if(linfo_exists) {
         /* Check for creation order tracking, if creation order index lookup requested */
         if(idx_type == H5_INDEX_CRT_ORDER) {
@@ -1262,7 +1264,7 @@ H5G__get_create_plist(const H5G_t *grp)
 {
     hid_t ret_value = H5I_INVALID_HID;  /* Return value */
 
-    FUNC_ENTER_PACKAGE_VOL
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(grp);
@@ -1272,7 +1274,7 @@ H5G__get_create_plist(const H5G_t *grp)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, H5I_INVALID_HID, "can't get group's creation property list")
 
 done:
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G__get_create_plist() */
 
 
@@ -1392,7 +1394,7 @@ H5G__get_info(const H5G_loc_t *loc, H5G_info_t *grp_info)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_PACKAGE_VOL
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(loc);
@@ -1403,7 +1405,7 @@ H5G__get_info(const H5G_loc_t *loc, H5G_info_t *grp_info)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve group info")
 
 done:
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G__get_info() */
 
 
@@ -1432,7 +1434,7 @@ H5G__get_info_by_name(const H5G_loc_t *loc, const char *name, H5G_info_t *grp_in
     hbool_t     loc_found = FALSE;      /* Location at 'name' found */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_PACKAGE_VOL
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(loc);
@@ -1457,7 +1459,7 @@ done:
     if(loc_found && H5G_loc_free(&grp_loc) < 0)
         HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't free location")
 
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G__get_info_by_name() */
 
 
@@ -1487,7 +1489,7 @@ H5G__get_info_by_idx(const H5G_loc_t *loc, const char *group_name,
     hbool_t     loc_found = FALSE;      /* Location at 'name' found */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_PACKAGE_VOL
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(loc);
@@ -1512,7 +1514,7 @@ done:
     if(loc_found && H5G_loc_free(&grp_loc) < 0)
         HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't free location")
 
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G__get_info_by_idx() */
 
 
@@ -1537,7 +1539,7 @@ H5G__flush(H5G_t *grp, hid_t group_id)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_PACKAGE_VOL
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(grp);
@@ -1547,7 +1549,7 @@ H5G__flush(H5G_t *grp, hid_t group_id)
         HGOTO_ERROR(H5E_SYM, H5E_CANTFLUSH, FAIL, "unable to flush group and object flush callback")
 
 done:
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5G__flush */
 
 
@@ -1572,7 +1574,7 @@ H5G__refresh(H5G_t *grp, hid_t group_id)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_PACKAGE_VOL
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(grp);
@@ -1582,6 +1584,6 @@ H5G__refresh(H5G_t *grp, hid_t group_id)
         HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, FAIL, "unable to refresh group")
 
 done:
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5G__refresh */
 

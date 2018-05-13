@@ -265,7 +265,7 @@ H5O__copy(const H5G_loc_t *loc, const char *src_name, H5G_loc_t *dst_loc,
     hbool_t     obj_open = FALSE;       /* Entry at 'name' found */
     herr_t      ret_value = SUCCEED;	/* Return value */
 
-    FUNC_ENTER_STATIC_VOL
+    FUNC_ENTER_STATIC
 
     /* Check arguments */
     HDassert(loc);
@@ -322,7 +322,7 @@ done:
     if(obj_open && H5O_close(&src_oloc, NULL) < 0)
         HDONE_ERROR(H5E_OHDR, H5E_CLOSEERROR, FAIL, "unable to release object header")
 
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__copy() */
 
 

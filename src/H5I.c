@@ -2057,7 +2057,7 @@ H5I__get_name(const H5G_loc_t *loc, char *name, size_t size)
 {
     ssize_t ret_value = FAIL;   /* Return value */
 
-    FUNC_ENTER_STATIC_VOL
+    FUNC_ENTER_STATIC
 
     /* Check arguments */
     HDassert(loc);
@@ -2067,7 +2067,7 @@ H5I__get_name(const H5G_loc_t *loc, char *name, size_t size)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't retrieve object name")
 
 done:
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I__get_name() */
 
 

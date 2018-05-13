@@ -717,7 +717,7 @@ H5C__deserialize_prefetched_entry(H5F_t *f, H5C_t *cache_ptr,
     /* Insert the deserialized entry into the cache.  */
     H5C__INSERT_IN_INDEX(cache_ptr, ds_entry_ptr, FAIL)
 
-    /* FULLSWMR TODO add to timestamp list */
+    /* FULLSWMR add to timestamp list */
     H5C__INSERT_IN_TS_LIST(cache_ptr, ds_entry_ptr, FAIL);
 
     HDassert(!ds_entry_ptr->in_slist);

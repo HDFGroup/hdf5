@@ -2359,18 +2359,15 @@ H5C_protect(H5F_t *		f,
         unsigned deltat;        /* SWMR delta-t set by SWMR writer */
 
         /* Check for a file that has a SWMR delta-t value set by a SWMR writer */
-        deltat = f->shared->swmr_deltat;
+        deltat = H5F_SWMR_DELTAT(f);
         if(deltat > 0) {
             uint64_t now_time;                  /* The current time */
-            hbool_t is_swmr_first_access;       /* Whether this is the first metadata access */
 
             /* Get the current time */
             now_time = H5_now_usec();
 
-            is_swmr_first_access = H5CX_get_swmr_first_metadata_access();
-
             /* Check for first metadata access */
-            if(is_swmr_first_access) {
+            if(H5CX_get_swmr_first_metadata_access()) {
                 uint64_t too_old;       /* Time boundary for old entries */
 
                 /* Record the SWMR "transaction" metadata access start time*/

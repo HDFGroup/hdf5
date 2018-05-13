@@ -310,7 +310,7 @@ H5A__create(const H5G_loc_t *loc, const char *name, const H5T_t *type,
 {
     H5A_t	*ret_value = NULL;      /* Return value */
 
-    FUNC_ENTER_PACKAGE_VOL
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(loc);
@@ -323,7 +323,7 @@ H5A__create(const H5G_loc_t *loc, const char *name, const H5T_t *type,
 	HGOTO_ERROR(H5E_ATTR, H5E_CANTCREATE, NULL, "unable to create attribute")
 
 done:
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5A__create() */
 
 
@@ -350,7 +350,7 @@ H5A__create_by_name(const H5G_loc_t *loc, const char *obj_name, const char *attr
     H5A_t       *attr = NULL;           /* Attribute from object header */
     H5A_t       *ret_value = NULL;      /* Return value */
 
-    FUNC_ENTER_PACKAGE_VOL
+    FUNC_ENTER_PACKAGE
 
     /* check args */
     HDassert(loc);
@@ -384,7 +384,7 @@ done:
         if(attr && H5A__close(attr) < 0)
             HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, NULL, "can't close attribute")
 
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5A__create_by_name() */
 
 
@@ -467,7 +467,7 @@ H5A__open(const H5G_loc_t *loc, const char *attr_name)
     H5A_t       *attr = NULL;           /* Attribute from object header */
     H5A_t       *ret_value = NULL;      /* Return value */
 
-    FUNC_ENTER_PACKAGE_VOL
+    FUNC_ENTER_PACKAGE
 
     /* check args */
     HDassert(loc);
@@ -490,7 +490,7 @@ done:
         if(attr && H5A__close(attr) < 0)
             HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, NULL, "can't close attribute")
 
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5A__open() */
 
 
@@ -517,7 +517,7 @@ H5A__open_by_idx(const H5G_loc_t *loc, const char *obj_name, H5_index_t idx_type
     H5A_t       *attr = NULL;           /* Attribute from object header */
     H5A_t       *ret_value = NULL;      /* Return value */
 
-    FUNC_ENTER_PACKAGE_VOL
+    FUNC_ENTER_PACKAGE
 
     /* check args */
     HDassert(loc);
@@ -554,7 +554,7 @@ done:
         if(attr && H5A__close(attr) < 0)
             HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, NULL, "can't close attribute")
 
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5A__open_by_idx() */
 
 
@@ -580,7 +580,7 @@ H5A__open_by_name(const H5G_loc_t *loc, const char *obj_name, const char *attr_n
     H5A_t       *attr = NULL;           /* Attribute from object header */
     H5A_t       *ret_value = NULL;      /* Return value */
 
-    FUNC_ENTER_PACKAGE_VOL
+    FUNC_ENTER_PACKAGE
 
     /* check args */
     HDassert(loc);
@@ -618,7 +618,7 @@ done:
         if(attr && H5A__close(attr) < 0)
             HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, NULL, "can't close attribute")
 
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5A__open_by_name() */
 
 
@@ -652,7 +652,7 @@ H5A__read(const H5A_t *attr, const H5T_t *mem_type, void *buf)
     size_t		buf_size;		/* desired buffer size	*/
     herr_t		ret_value = SUCCEED;
 
-    FUNC_ENTER_PACKAGE_VOL_TAG(attr->oloc.addr)
+    FUNC_ENTER_PACKAGE_TAG(attr->oloc.addr)
 
     HDassert(attr);
     HDassert(mem_type);
@@ -721,7 +721,7 @@ done:
     if(bkg_buf)
 	bkg_buf = H5FL_BLK_FREE(attr_buf, bkg_buf);
 
-    FUNC_LEAVE_NOAPI_VOL_TAG(ret_value)
+    FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* H5A__read() */
 
 
@@ -756,7 +756,7 @@ H5A__write(H5A_t *attr, const H5T_t *mem_type, const void *buf)
     size_t		buf_size;		/* desired buffer size	*/
     herr_t		ret_value = SUCCEED;
 
-    FUNC_ENTER_PACKAGE_VOL_TAG(attr->oloc.addr)
+    FUNC_ENTER_PACKAGE_TAG(attr->oloc.addr)
 
     HDassert(attr);
     HDassert(mem_type);
@@ -835,7 +835,7 @@ done:
     if(bkg_buf)
         bkg_buf = H5FL_BLK_FREE(attr_buf, bkg_buf);
 
-    FUNC_LEAVE_NOAPI_VOL_TAG(ret_value)
+    FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* H5A__write() */
 
 
@@ -939,7 +939,7 @@ H5A__get_type(H5A_t *attr)
     H5T_t *dt = NULL;
     hid_t ret_value = H5I_INVALID_HID;
 
-    FUNC_ENTER_PACKAGE_VOL
+    FUNC_ENTER_PACKAGE
 
     HDassert(attr);
 
@@ -970,7 +970,7 @@ done:
     if(H5I_INVALID_HID == ret_value && dt && (H5T_close(dt) < 0))
         HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release datatype")
 
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5A__get_type() */
 
 
@@ -1192,7 +1192,7 @@ H5A__close_cb(H5A_t *attr)
 {
     herr_t ret_value = SUCCEED;                 /* Return value */
 
-    FUNC_ENTER_PACKAGE_VOL
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(attr);
@@ -1203,7 +1203,7 @@ H5A__close_cb(H5A_t *attr)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTCLOSEOBJ, FAIL, "problem closing attribute")
 
 done:
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5A__close_cb() */
 
 
@@ -1376,14 +1376,14 @@ H5A__exists(const H5G_loc_t *loc, const char *name)
 {
     htri_t ret_value = FAIL;    /* Return value */
 
-    FUNC_ENTER_PACKAGE_VOL
+    FUNC_ENTER_PACKAGE
 
     /* Check if the attribute exists */
     if((ret_value = H5O__attr_exists(loc->oloc, name)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "unable to determine if attribute exists")
 
 done:
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5A__exists() */
 
 
@@ -1409,7 +1409,7 @@ H5A__exists_by_name(H5G_loc_t loc, const char *obj_name, const char *attr_name)
     hbool_t     loc_found = FALSE;      /* Entry at 'obj_name' found */
     htri_t	ret_value = FAIL;       /* Return value */
 
-    FUNC_ENTER_PACKAGE_VOL
+    FUNC_ENTER_PACKAGE
 
     /* Set up opened group location to fill in */
     obj_loc.oloc = &obj_oloc;
@@ -1430,7 +1430,7 @@ done:
     if(loc_found && H5G_loc_free(&obj_loc) < 0)
         HDONE_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't free location")
 
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5A__exists_by_name() */
 
 
@@ -2620,14 +2620,14 @@ H5A__rename(const H5G_loc_t *loc, const char *old_name, const char *new_name)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_PACKAGE_VOL
+    FUNC_ENTER_PACKAGE
 
     /* Call object header attribute rename routine */
     if(H5O__attr_rename(loc->oloc, old_name, new_name) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTRENAME, FAIL, "can't rename attribute")
 
 done:
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5A__rename() */
 
 
@@ -2654,7 +2654,7 @@ H5A__rename_by_name(H5G_loc_t loc, const char *obj_name, const char *old_attr_na
     hbool_t     loc_found = FALSE;      /* Entry at 'obj_name' found */
     herr_t	ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_PACKAGE_VOL
+    FUNC_ENTER_PACKAGE
 
     /* Set up opened group location to fill in */
     obj_loc.oloc = &obj_oloc;
@@ -2675,7 +2675,7 @@ done:
     if(loc_found && H5G_loc_free(&obj_loc) < 0)
         HDONE_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't free location")
 
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5A__rename_by_name() */
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS
@@ -2702,14 +2702,14 @@ H5A__get_num_attrs(const H5O_loc_t *loc)
 {
     int ret_value = FAIL;       /* Return value */
 
-    FUNC_ENTER_PACKAGE_VOL
+    FUNC_ENTER_PACKAGE
 
     /* Look up the # of attributes for the object */
     if((ret_value = H5O__attr_count(loc)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTCOUNT, FAIL, "can't get attribute count for object")
 
 done:
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5A__get_num_attrs() */
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
@@ -2774,7 +2774,7 @@ H5A__iterate(hid_t loc_id, H5_index_t idx_type, H5_iter_order_t order,
     H5A_attr_iter_op_t  attr_op;        /* Attribute operator */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_PACKAGE_VOL
+    FUNC_ENTER_PACKAGE
 
     /* Build attribute operator info */
     attr_op.op_type = H5A_ATTR_OP_APP2;
@@ -2785,7 +2785,7 @@ H5A__iterate(hid_t loc_id, H5_index_t idx_type, H5_iter_order_t order,
         HGOTO_ERROR(H5E_ATTR, H5E_BADITER, FAIL, "error iterating over attributes")
 
 done:
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5A__iterate() */
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS
@@ -2811,7 +2811,7 @@ H5A__iterate_old(hid_t loc_id, unsigned *attr_num, H5A_operator1_t op,
     hsize_t idx;                        /* Index of attribute to start iterating at */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_PACKAGE_VOL
+    FUNC_ENTER_PACKAGE
 
     /* Build attribute operator info */
     attr_op.op_type = H5A_ATTR_OP_APP;
@@ -2829,7 +2829,7 @@ H5A__iterate_old(hid_t loc_id, unsigned *attr_num, H5A_operator1_t op,
         *attr_num = (unsigned)idx;
 
 done:
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5A__iterate_old() */
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
@@ -2863,7 +2863,7 @@ H5A__iterate_by_name(const H5G_loc_t *loc, const char *obj_name, H5_index_t idx_
     H5A_attr_iter_op_t  attr_op;        /* Attribute operator */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_PACKAGE_VOL
+    FUNC_ENTER_PACKAGE
 
     /* Set up opened group location to fill in */
     obj_loc.oloc = &obj_oloc;
@@ -2896,7 +2896,7 @@ done:
     else if(loc_found && H5G_loc_free(&obj_loc) < 0)
         HDONE_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't free location")
 
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5A__iterate_by_name() */
 
 
@@ -2922,14 +2922,14 @@ H5A__delete(const H5G_loc_t *loc, const char *name)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_PACKAGE_VOL
+    FUNC_ENTER_PACKAGE
 
     /* Call object header attribute delete attribute routine */
     if(H5O__attr_remove(loc->oloc, name) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, FAIL, "unable to delete attribute")
 
 done:
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5A__delete() */
 
 
@@ -2955,7 +2955,7 @@ H5A__delete_by_name(const H5G_loc_t *loc, const char *obj_name, const char *attr
     hbool_t     loc_found = FALSE;      /* Entry at 'obj_name' found */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_PACKAGE_VOL
+    FUNC_ENTER_PACKAGE
 
     /* Set up opened group location to fill in */
     obj_loc.oloc = &obj_oloc;
@@ -2976,7 +2976,7 @@ done:
     if(loc_found && H5G_loc_free(&obj_loc) < 0)
         HDONE_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't free location")
 
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5A__delete_by_name() */
 
 
@@ -3003,7 +3003,7 @@ H5A__delete_by_idx(const H5G_loc_t *loc, const char *obj_name, H5_index_t idx_ty
     hbool_t     loc_found = FALSE;      /* Entry at 'obj_name' found */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_PACKAGE_VOL
+    FUNC_ENTER_PACKAGE
 
     /* Set up opened group location to fill in */
     obj_loc.oloc = &obj_oloc;
@@ -3024,6 +3024,6 @@ done:
     if(loc_found && H5G_loc_free(&obj_loc) < 0)
         HDONE_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't free location")
 
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5A__delete_by_idx() */
 

@@ -3714,7 +3714,7 @@ H5T__close_cb(H5T_t *dt)
 {
     herr_t ret_value = SUCCEED;                 /* Return value */
 
-    FUNC_ENTER_STATIC_VOL
+     FUNC_ENTER_STATIC
 
     /* check args */
     HDassert(dt && dt->shared);
@@ -3724,7 +3724,7 @@ H5T__close_cb(H5T_t *dt)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, FAIL, "can't close datatype");
 
 done:
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T__close_cb() */
 
 

@@ -1916,7 +1916,7 @@ H5L__create_hard(H5G_loc_t *cur_loc, const char *cur_name,
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_STATIC_VOL
+    FUNC_ENTER_STATIC
 
     /* Check arguments */
     HDassert(cur_loc);
@@ -1929,7 +1929,7 @@ H5L__create_hard(H5G_loc_t *cur_loc, const char *cur_name,
 	HGOTO_ERROR(H5E_LINK, H5E_CANTCREATE, FAIL, "unable to create link")
 
 done:
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5L__create_hard() */
 
 
@@ -2003,7 +2003,7 @@ H5L__create_soft(const char *target_path, const H5G_loc_t *link_loc,
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_STATIC_VOL
+    FUNC_ENTER_STATIC
 
     /* Check arguments */
     HDassert(target_path);
@@ -2015,7 +2015,7 @@ H5L__create_soft(const char *target_path, const H5G_loc_t *link_loc,
 	HGOTO_ERROR(H5E_LINK, H5E_CANTCREATE, FAIL, "unable to create link")
 
 done:
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5L__create_soft() */
 
 
@@ -2039,7 +2039,7 @@ H5L__create_ud(const H5G_loc_t *link_loc, const char *link_name,
     H5O_link_t lnk;                     /* Link to insert */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_PACKAGE_VOL
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(type >= H5L_TYPE_UD_MIN && type <= H5L_TYPE_MAX);
@@ -2073,7 +2073,7 @@ done:
     /* Free the link's udata buffer if it's been allocated */
     H5MM_xfree(lnk.u.ud.udata);
 
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5L__create_ud() */
 
 
@@ -2236,7 +2236,7 @@ H5L__get_val(const H5G_loc_t *loc, const char *name, void *buf/*out*/, size_t si
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_STATIC_VOL
+    FUNC_ENTER_STATIC
 
     /* Check arguments */
     HDassert(loc);
@@ -2247,7 +2247,7 @@ H5L__get_val(const H5G_loc_t *loc, const char *name, void *buf/*out*/, size_t si
 	HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "unable to get link value for '%s'", name)
 
 done:
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5L__get_val() */
 
 
@@ -2326,7 +2326,7 @@ H5L__get_val_by_idx(const H5G_loc_t *loc, const char *name, H5_index_t idx_type,
     H5L_trav_gvbi_t udata;              /* User data for callback */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_STATIC_VOL
+    FUNC_ENTER_STATIC
 
     /* Check arguments */
     HDassert(loc);
@@ -2344,7 +2344,7 @@ H5L__get_val_by_idx(const H5G_loc_t *loc, const char *name, H5_index_t idx_type,
         HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't get link info for index: %llu", (unsigned long long)n)
 
 done:
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5L__get_val_by_idx() */
 
 
@@ -2459,7 +2459,7 @@ H5L__delete(const H5G_loc_t *loc, const char *name)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_STATIC_VOL
+    FUNC_ENTER_STATIC
 
     /* Check arguments */
     HDassert(loc);
@@ -2470,7 +2470,7 @@ H5L__delete(const H5G_loc_t *loc, const char *name)
 	HGOTO_ERROR(H5E_LINK, H5E_CANTDELETE, FAIL, "unable to delete link: %s", name)
 
 done:
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5L__delete() */
 
 
@@ -2537,7 +2537,7 @@ H5L__delete_by_idx(const H5G_loc_t *loc, const char *name, H5_index_t idx_type,
     H5L_trav_rmbi_t udata;              /* User data for callback */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_STATIC_VOL
+    FUNC_ENTER_STATIC
 
     /* Check arguments */
     HDassert(loc);
@@ -2553,7 +2553,7 @@ H5L__delete_by_idx(const H5G_loc_t *loc, const char *name, H5_index_t idx_type,
         HGOTO_ERROR(H5E_LINK, H5E_CANTDELETE, FAIL, "link doesn't exist")
 
 done:
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5L__delete() */
 
 
@@ -2885,7 +2885,7 @@ H5L__move(const H5G_loc_t *src_loc, const char *src_name, H5G_loc_t *dst_loc,
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_STATIC_VOL
+    FUNC_ENTER_STATIC
 
     /* Check arguments */
     HDassert(src_loc);
@@ -2898,7 +2898,7 @@ H5L__move(const H5G_loc_t *src_loc, const char *src_name, H5G_loc_t *dst_loc,
 	HGOTO_ERROR(H5E_LINK, H5E_CANTMOVE, FAIL, "unable to move link")
 
 done:
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5L__move() */
 
 
@@ -3083,7 +3083,7 @@ H5L__exists(const H5G_loc_t *loc, const char *name)
     H5L_trav_le_t udata;        /* User data for traversal */
     htri_t ret_value = FAIL;    /* Return value */
 
-    FUNC_ENTER_STATIC_VOL
+    FUNC_ENTER_STATIC
 
     /* A path of "/" will always exist in a file */
     if(0 == HDstrcmp(name, "/"))
@@ -3098,7 +3098,7 @@ H5L__exists(const H5G_loc_t *loc, const char *name)
     ret_value = (htri_t)udata.exists;
 
 done:
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5L__exists() */
 
 
@@ -3193,7 +3193,7 @@ H5L__get_info(const H5G_loc_t *loc, const char *name, H5L_info_t *linfo/*out*/)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_STATIC_VOL
+    FUNC_ENTER_STATIC
 
     /* Check arguments */
     HDassert(loc);
@@ -3204,7 +3204,7 @@ H5L__get_info(const H5G_loc_t *loc, const char *name, H5L_info_t *linfo/*out*/)
 	HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "unable to get link info for: '%s'", name)
 
 done:
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5L__get_info() */
 
 
@@ -3283,7 +3283,7 @@ H5L__get_info_by_idx(const H5G_loc_t *loc, const char *name, H5_index_t idx_type
     H5L_trav_gibi_t udata;              /* User data for callback */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_STATIC_VOL
+    FUNC_ENTER_STATIC
 
     /* Check arguments */
     HDassert(loc);
@@ -3301,7 +3301,7 @@ H5L__get_info_by_idx(const H5G_loc_t *loc, const char *name, H5_index_t idx_type
 	HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "unable to get link info")
 
 done:
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5L__get_info_by_idx() */
 
 
@@ -3370,7 +3370,7 @@ H5L__get_name_by_idx(const H5G_loc_t *loc, const char *group_name,
     H5L_trav_gnbi_t udata;      /* User data for callback */
     ssize_t ret_value = FAIL;   /* Return value */
 
-    FUNC_ENTER_STATIC_VOL
+    FUNC_ENTER_STATIC
 
     /* Check arguments */
     HDassert(loc);
@@ -3392,7 +3392,7 @@ H5L__get_name_by_idx(const H5G_loc_t *loc, const char *group_name,
     ret_value = udata.name_len;
 
 done:
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5L__get_name_by_idx() */
 
 
@@ -3421,7 +3421,7 @@ H5L__iterate(hid_t grp_id, const char *group_name, H5_index_t idx_type,
     hsize_t	        idx;            /* Internal location to hold index  */
     herr_t              ret_value = FAIL; /* Return value                     */
 
-    FUNC_ENTER_STATIC_VOL
+    FUNC_ENTER_STATIC
 
     /* Check arguments */
     HDassert(group_name);
@@ -3444,7 +3444,7 @@ H5L__iterate(hid_t grp_id, const char *group_name, H5_index_t idx_type,
         *idx_p = last_lnk;
 
 done:
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5L__iterate() */
 
 
@@ -3470,7 +3470,7 @@ H5L__visit(hid_t grp_id, const char *group_name, H5_index_t idx_type,
 {
     herr_t ret_value = FAIL;    /* Return value */
 
-    FUNC_ENTER_STATIC_VOL
+    FUNC_ENTER_STATIC
 
     /* Check arguments */
     HDassert(group_name);
@@ -3481,7 +3481,7 @@ H5L__visit(hid_t grp_id, const char *group_name, H5_index_t idx_type,
 	HGOTO_ERROR(H5E_LINK, H5E_BADITER, FAIL, "link visitation failed")
 
 done:
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5L__visit() */
 
 

@@ -109,7 +109,7 @@ static int test_swmr_deltat_getset(hid_t fapl);
 static int test_swmr_deltat_file_create(hid_t fapl);
 static int test_swmr_deltat_file_create_without_swmr_write(hid_t fapl);
 static int test_swmr_deltat_read_concur(hid_t in_fapl);
-
+static int test_swmr_reader_timeout(hid_t in_fapl);
 /*
  * Tests for H5Pget/set_metadata_read_attemps(), H5Fget_metadata_read_retry_info()
  */
@@ -6538,6 +6538,190 @@ error:
     return -1;
 } /* end test_swmr_deltat_read_concur() */
 
+/****************************************************************
+**
+**  test_swmr_reader_timeout_iter_func():
+**    Iterate function for test_swmr_reader_timeout
+**
+*****************************************************************/
+static herr_t test_swmr_reader_timeout_iter_func(hid_t H5_ATTR_UNUSED g_id,
+    const char H5_ATTR_UNUSED *name, const H5_ATTR_UNUSED H5L_info_t *info,
+    void H5_ATTR_UNUSED *op_data)
+{
+    return 0;
+}
+
+/****************************************************************
+**
+**  test_swmr_reader_timeout():
+**    Test for the SWMR reader to get timed out when iterating for
+**    more than 2*deltat time
+**
+*****************************************************************/
+static int
+test_swmr_reader_timeout(hid_t in_fapl)
+{
+    hid_t fid = -1;             /* File ID */
+    hid_t grp = -1;             /* Group ID */
+    hid_t fapl = -1;                    /* File access property list */
+    char filename[NAME_BUF_SIZE];       /* File name */
+    pid_t childpid=0;           /* Child process ID */
+    int child_status;           /* Status passed to waitpid */
+    int child_wait_option=0;        /* Options passed to waitpid */
+    int out_pdf[2];
+    int notify = 0;
+    unsigned deltat = 64 * 1024;        /* Large enough that slow machines will
+                                         * get to the H5Literate call, small
+                                         * enough that fast machines will not
+                                         * make it through H5Literate without
+                                         * timing out.
+                                         */
+    const char *grp_name = "/Data";
+    hsize_t i, ncreate, idx;
+    herr_t ret_val;
+
+    /* Output message about test being performed */
+    TESTING("SWMR reader timeout");
+
+    if((fapl = H5Pcopy(in_fapl)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Set the filename to use for this test (dependent on fapl) */
+    h5_fixname(FILENAME[4], fapl, filename, sizeof(filename));
+
+    /* Create a file. */
+    if((fid = H5Fcreate(filename, H5F_ACC_TRUNC | H5F_ACC_SWMR_WRITE, H5P_DEFAULT, fapl)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Create a group. */
+    if((grp = H5Gcreate(fid, grp_name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Create a number of links */
+    ncreate = 100000;
+    for (i = 0; i < ncreate; i++) {
+        char link_name[NAME_BUF_SIZE];
+
+        sprintf(link_name, "link%lld", i);
+        if((ret_val = H5Lcreate_soft("target_link", grp, link_name, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+            FAIL_STACK_ERROR
+    } /* end for */
+
+    /* Close the group */
+    if(H5Gclose(grp) < 0)
+        FAIL_STACK_ERROR
+
+    /* Close the file */
+    if(H5Fclose(fid) < 0)
+        FAIL_STACK_ERROR
+
+    if(HDpipe(out_pdf) < 0)
+        TEST_ERROR
+
+    /* Fork child process */
+    if((childpid = HDfork()) < 0)
+        TEST_ERROR
+
+    /* Parent process open with SWMR_WRITE, child process open with SWMR_READ */
+    if(childpid == 0) {         /* Child process */
+        hid_t child_fid;        /* File ID */
+        hid_t child_grp;        /* Group ID */
+        int child_notify = 0;
+
+        /* Close unused write end for out_pdf */
+        if(HDclose(out_pdf[1]) < 0)
+            HDexit(EXIT_FAILURE);
+
+        /* Wait for notification from parent process */
+        while(child_notify != 1)
+            if(HDread(out_pdf[0], &child_notify, sizeof(int)) < 0)
+                HDexit(EXIT_FAILURE);
+
+        /* Open the test file */
+        H5E_BEGIN_TRY {
+            child_fid = H5Fopen(filename, H5F_ACC_RDONLY|H5F_ACC_SWMR_READ, fapl);
+        } H5E_END_TRY;
+
+        /* Should succeed */
+        if(child_fid >= 0) {
+            if((child_grp = H5Gopen(child_fid, grp_name, H5P_DEFAULT)) < 0)
+                FAIL_STACK_ERROR
+
+            /* Iterate through cache entries for longer time than 2*deltat */
+            /* should get timed out and not iterate over all links */
+            idx = 0;
+            H5E_BEGIN_TRY {
+                ret_val = H5Literate(child_grp, H5_INDEX_NAME, H5_ITER_INC, &idx, test_swmr_reader_timeout_iter_func, NULL);
+            } H5E_END_TRY;
+            if (ret_val >= 0) 
+                HDexit(EXIT_FAILURE);
+
+            if(H5Gclose(child_grp) < 0)
+                FAIL_STACK_ERROR
+
+            if(H5Fclose(child_fid) < 0)
+                FAIL_STACK_ERROR
+
+            HDexit(EXIT_SUCCESS);
+        } /* end if */
+
+        /* Close the pipe */
+        if(HDclose(out_pdf[0]) < 0)
+            HDexit(EXIT_FAILURE);
+
+        HDexit(EXIT_FAILURE);
+    } /* end if */
+
+    /* Close unused read end for out_pdf */
+    if(HDclose(out_pdf[0]) < 0)
+        FAIL_STACK_ERROR
+
+    /* set delta t value */
+    if(H5Pset_swmr_deltat(fapl, deltat) < 0)
+        FAIL_STACK_ERROR
+
+    /* Open the test file */
+    if((fid = H5Fopen(filename, H5F_ACC_RDWR|H5F_ACC_SWMR_WRITE, fapl)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Notify child process */
+    notify = 1;
+    if(HDwrite(out_pdf[1], &notify, sizeof(int)) < 0)
+        TEST_ERROR;
+
+    /* Close the pipe */
+    if(HDclose(out_pdf[1]) < 0)
+        TEST_ERROR;
+
+    /* Wait for child process to complete */
+    if(HDwaitpid(childpid, &child_status, child_wait_option) < 0)
+        TEST_ERROR
+
+    /* Check if child terminated normally */
+    if(WIFEXITED(child_status)) {
+        /* Check exit status of the child */
+        if(WEXITSTATUS(child_status) != 0)
+            TEST_ERROR
+    } /* end if */
+    else
+        FAIL_STACK_ERROR
+
+    /* Close the file */
+    if(H5Fclose(fid) < 0)
+        FAIL_STACK_ERROR
+
+    PASSED();
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Pclose(fapl);
+        H5Pclose(fid);
+    } H5E_END_TRY;
+
+    return -1;
+} /* end test_swmr_reader_timeout() */
 
 /****************************************************************
 **
@@ -7619,6 +7803,7 @@ main(void)
         nerrors += test_swmr_deltat_read_concur(fapl);
         nerrors += test_swmr_deltat_delete_on_file_close(fapl);
         nerrors += test_swmr_deltat_with_start_swmr_write(fapl);
+        nerrors += test_swmr_reader_timeout(fapl);
     } /* end if */
 
     /* Tests SWMR VFD compatibility flag.
