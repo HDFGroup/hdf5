@@ -32,7 +32,7 @@ namespace H5 {
 //--------------------------------------------------------------------------
 // Function:    StrCreatPropList default constructor
 ///\brief       Default constructor: Creates a string create property list
-// Programmer   Binh-Minh Ribler - 2000
+// May 2018
 //--------------------------------------------------------------------------
 StrCreatPropList::StrCreatPropList() : PropList(H5P_STRING_CREATE) {}
 
@@ -41,7 +41,7 @@ StrCreatPropList::StrCreatPropList() : PropList(H5P_STRING_CREATE) {}
 ///\brief       Copy constructor: makes a copy of the original
 ///             StrCreatPropList object.
 ///\param       original - IN: StrCreatPropList instance to copy
-// Programmer   Binh-Minh Ribler - 2000
+// May 2018
 //--------------------------------------------------------------------------
 StrCreatPropList::StrCreatPropList(const StrCreatPropList& original) : PropList(original) {}
 
@@ -50,7 +50,7 @@ StrCreatPropList::StrCreatPropList(const StrCreatPropList& original) : PropList(
 ///\brief       Creates a file creation property list using the id of an
 ///             existing one.
 ///\param       plist_id - IN: StrCreatPropList id to use
-// Programmer   Binh-Minh Ribler - 2000
+// May 2018
 //--------------------------------------------------------------------------
 StrCreatPropList::StrCreatPropList(const hid_t plist_id) : PropList(plist_id) {}
 
@@ -59,8 +59,9 @@ StrCreatPropList::StrCreatPropList(const hid_t plist_id) : PropList(plist_id) {}
 //--------------------------------------------------------------------------
 // Function:    StrCreatPropList::setCharEncoding
 ///\brief       Sets the character encoding of the string.
+///\param       encoding - IN: String encoding character set
 ///\exception   H5::PropListIException
-// March 2018
+// May 2018
 //--------------------------------------------------------------------------
 void StrCreatPropList::setCharEncoding(H5T_cset_t encoding) const
 {
@@ -75,8 +76,9 @@ void StrCreatPropList::setCharEncoding(H5T_cset_t encoding) const
 //--------------------------------------------------------------------------
 // Function:    StrCreatPropList::getCharEncoding
 ///\brief       Gets the character encoding of the string.
+///\return      The string encoding character set
 ///\exception   H5::PropListIException
-// March 2018
+// May 2018
 //--------------------------------------------------------------------------
 H5T_cset_t StrCreatPropList::getCharEncoding() const
 {
