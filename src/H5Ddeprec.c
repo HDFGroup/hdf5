@@ -90,7 +90,7 @@
  *		properties (DCPL_ID).
  *
  *		All arguments are copied into the dataset, so the caller is
- *		allowed to derive new types, data spaces, and creation
+ *		allowed to derive new types, dataspaces, and creation
  *		parameters from the old ones and reuse them in calls to
  *		create other datasets.
  *

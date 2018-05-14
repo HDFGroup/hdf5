@@ -838,10 +838,10 @@ H5Z_prepare_prelude_callback_dcpl(hid_t dcpl_id, hid_t type_id, H5Z_prelude_type
                 size_t  u;               /* Local index variable */
 
                 /* Create a dataspace for a chunk & set the extent */
-                for (u = 0; u < dcpl_layout->u.chunk.ndims; u++)
+                for(u = 0; u < dcpl_layout->u.chunk.ndims; u++)
                     chunk_dims[u] = dcpl_layout->u.chunk.dim[u];
-                if (NULL == (space = H5S_create_simple(dcpl_layout->u.chunk.ndims, chunk_dims, NULL)))
-                    HGOTO_ERROR (H5E_DATASPACE, H5E_CANTCREATE, FAIL, "can't create simple dataspace")
+                if(NULL == (space = H5S_create_simple(dcpl_layout->u.chunk.ndims, chunk_dims, NULL)))
+                    HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, FAIL, "can't create simple dataspace")
 
                 /* Get ID for dataspace to pass to filter routines */
                 if ((space_id = H5I_register(H5I_DATASPACE, space, FALSE)) < 0) {
