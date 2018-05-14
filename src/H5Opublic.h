@@ -75,16 +75,14 @@
 
 /* Flags for H5Oget_info.
  * Theses flags determine which fields will be filled in in the H5O_info_t
- * struct.  Some fields are always filled in because there is no performance
- * penalty.
- * A value of 0 returns basic information: fileno, addr, type, rc and will be 
- * returned regardless.
+ * struct.  
  */
-#define H5O_INFO_TIME           0x0001u         /* Fill in the atime, mtime, ctime, and btime fields */
-#define H5O_INFO_NUM_ATTRS      0x0002u         /* Fill in the num_attrs field */
-#define H5O_INFO_HDR            0x0004u         /* Fill in the hdr field */
-#define H5O_INFO_META_SIZE      0x0008u         /* Fill in the meta_size field */
-#define H5O_INFO_ALL            (H5O_INFO_TIME | H5O_INFO_NUM_ATTRS | H5O_INFO_HDR | H5O_INFO_META_SIZE)
+#define H5O_INFO_BASIC          0x0001u         /* Fill in the fileno, addr, type, and rc fields */
+#define H5O_INFO_TIME           0x0002u         /* Fill in the atime, mtime, ctime, and btime fields */
+#define H5O_INFO_NUM_ATTRS      0x0004u         /* Fill in the num_attrs field */
+#define H5O_INFO_HDR            0x0008u         /* Fill in the hdr field */
+#define H5O_INFO_META_SIZE      0x0010u         /* Fill in the meta_size field */
+#define H5O_INFO_ALL            (H5O_INFO_BASIC | H5O_INFO_TIME | H5O_INFO_NUM_ATTRS | H5O_INFO_HDR | H5O_INFO_META_SIZE)
 
 /*******************/
 /* Public Typedefs */

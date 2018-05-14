@@ -2243,24 +2243,27 @@ H5O_get_info(const H5O_loc_t *loc, H5O_info_t *oinfo, unsigned fields)
     if(NULL == (oh = H5O_protect(loc, H5AC__READ_ONLY_FLAG, FALSE)))
         HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header")
 
-    /* Reset the object info structure */
-    HDmemset(oinfo, 0, sizeof(*oinfo));
-
-    /* Retrieve the file's fileno */
-    H5F_GET_FILENO(loc->file, oinfo->fileno);
-
-    /* Set the object's address */
-    oinfo->addr = loc->addr;
-
     /* Get class for object */
     if(NULL == (obj_class = H5O__obj_class_real(oh)))
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to determine object class")
 
-    /* Retrieve the type of the object */
-    oinfo->type = obj_class->type;
+    /* Reset the object info structure */
+    HDmemset(oinfo, 0, sizeof(*oinfo));
 
-    /* Set the object's reference count */
-    oinfo->rc = oh->nlink;
+    /* Get basic information, if requested */
+    if(fields & H5O_INFO_BASIC) {
+        /* Retrieve the file's fileno */
+        H5F_GET_FILENO(loc->file, oinfo->fileno);
+
+        /* Set the object's address */
+        oinfo->addr = loc->addr;
+
+        /* Retrieve the type of the object */
+        oinfo->type = obj_class->type;
+
+        /* Set the object's reference count */
+        oinfo->rc = oh->nlink;
+    } 
 
     /* Get time information, if requested */
     if(fields & H5O_INFO_TIME) {

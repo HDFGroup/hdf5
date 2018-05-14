@@ -1665,7 +1665,7 @@ test_attr_dtype_shared(hid_t fapl)
     CHECK(ret, FAIL, "H5Tcommit2");
 
     /* Check reference count on named datatype */
-    ret = H5Oget_info_by_name2(file_id, TYPE1_NAME, &oinfo, 0, H5P_DEFAULT);
+    ret = H5Oget_info_by_name2(file_id, TYPE1_NAME, &oinfo, H5O_INFO_BASIC, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Oget_info_by_name");
     VERIFY(oinfo.rc, 1, "H5Oget_info_by_name");
 
@@ -1678,7 +1678,7 @@ test_attr_dtype_shared(hid_t fapl)
     CHECK(dset_id, FAIL, "H5Dcreate2");
 
     /* Check reference count on named datatype */
-    ret = H5Oget_info_by_name2(file_id, TYPE1_NAME, &oinfo, 0, H5P_DEFAULT);
+    ret = H5Oget_info_by_name2(file_id, TYPE1_NAME, &oinfo, H5O_INFO_BASIC, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Oget_info_by_name");
     VERIFY(oinfo.rc, 2, "H5Oget_info_by_name");
 
@@ -1687,7 +1687,7 @@ test_attr_dtype_shared(hid_t fapl)
     CHECK(attr_id, FAIL, "H5Acreate2");
 
     /* Check reference count on named datatype */
-    ret = H5Oget_info_by_name2(file_id, TYPE1_NAME, &oinfo, 0, H5P_DEFAULT);
+    ret = H5Oget_info_by_name2(file_id, TYPE1_NAME, &oinfo, H5O_INFO_BASIC, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Oget_info_by_name");
     VERIFY(oinfo.rc, 3, "H5Oget_info_by_name");
 
@@ -1700,7 +1700,7 @@ test_attr_dtype_shared(hid_t fapl)
     CHECK(ret, FAIL, "H5Adelete");
 
     /* Check reference count on named datatype */
-    ret = H5Oget_info_by_name2(file_id, TYPE1_NAME, &oinfo, 0, H5P_DEFAULT);
+    ret = H5Oget_info_by_name2(file_id, TYPE1_NAME, &oinfo, H5O_INFO_BASIC, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Oget_info_by_name");
     VERIFY(oinfo.rc, 2, "H5Oget_info_by_name");
 
@@ -1709,7 +1709,7 @@ test_attr_dtype_shared(hid_t fapl)
     CHECK(attr_id, FAIL, "H5Acreate2");
 
     /* Check reference count on named datatype */
-    ret = H5Oget_info_by_name2(file_id, TYPE1_NAME, &oinfo, 0, H5P_DEFAULT);
+    ret = H5Oget_info_by_name2(file_id, TYPE1_NAME, &oinfo, H5O_INFO_BASIC, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Oget_info_by_name");
     VERIFY(oinfo.rc, 3, "H5Oget_info_by_name");
 
@@ -1764,7 +1764,7 @@ test_attr_dtype_shared(hid_t fapl)
     CHECK(ret, FAIL, "H5Dclose");
 
     /* Check reference count on named datatype */
-    ret = H5Oget_info_by_name2(file_id, TYPE1_NAME, &oinfo, 0, H5P_DEFAULT);
+    ret = H5Oget_info_by_name2(file_id, TYPE1_NAME, &oinfo, H5O_INFO_BASIC, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Oget_info_by_name");
     VERIFY(oinfo.rc, 3, "H5Oget_info_by_name");
 
@@ -1773,7 +1773,7 @@ test_attr_dtype_shared(hid_t fapl)
     CHECK(ret, FAIL, "H5Ldelete");
 
     /* Check reference count on named datatype */
-    ret = H5Oget_info_by_name2(file_id, TYPE1_NAME, &oinfo, 0, H5P_DEFAULT);
+    ret = H5Oget_info_by_name2(file_id, TYPE1_NAME, &oinfo, H5O_INFO_BASIC, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Oget_info_by_name");
     VERIFY(oinfo.rc, 1, "H5Oget_info_by_name");
 
@@ -10484,7 +10484,7 @@ test_attr_bug8(hid_t fcpl, hid_t fapl)
     CHECK(gid, FAIL, "H5Gcreate2");
 
     /* Get root group address */
-    ret = H5Oget_info2(fid, &oinfo, 0);
+    ret = H5Oget_info2(fid, &oinfo, H5O_INFO_BASIC);
     CHECK(ret, FAIL, "H5Oget_info");
     root_addr = oinfo.addr;
 
@@ -10509,7 +10509,7 @@ test_attr_bug8(hid_t fcpl, hid_t fapl)
     CHECK(gid, FAIL, "H5Gopen2");
     oid = H5Oopen(gid, LINK1_NAME, H5P_DEFAULT);
     CHECK(oid, FAIL, "H5Oopen");
-    ret = H5Oget_info2(oid, &oinfo, 0);
+    ret = H5Oget_info2(oid, &oinfo, H5O_INFO_BASIC);
     CHECK(ret, FAIL, "H5Oget_info");
     if(oinfo.addr != root_addr)
         TestErrPrintf("incorrect link target address: addr: %llu, expected: %llu\n", (long long unsigned)oinfo.addr, (long long unsigned)root_addr);
@@ -10554,7 +10554,7 @@ test_attr_bug8(hid_t fcpl, hid_t fapl)
     CHECK(gid, FAIL, "H5Gopen2");
     oid = H5Oopen(gid, LINK1_NAME, H5P_DEFAULT);
     CHECK(oid, FAIL, "H5Oopen");
-    ret = H5Oget_info2(oid, &oinfo, 0);
+    ret = H5Oget_info2(oid, &oinfo, H5O_INFO_BASIC);
     CHECK(ret, FAIL, "H5Oget_info");
     if(oinfo.addr != root_addr)
         TestErrPrintf("incorrect link target address: addr: %llu, expected: %llu\n", (long long unsigned)oinfo.addr, (long long unsigned)root_addr);

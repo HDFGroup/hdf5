@@ -358,9 +358,9 @@ trav_fileinfo_add(trav_info_t *info, hid_t loc_id)
     size_t idx = info->nused - 1;
 
     if ( info->paths[idx].path && HDstrcmp(info->paths[idx].path, "."))
-      H5Oget_info_by_name2(loc_id, info->paths[idx].path, &oinfo, 0, H5P_DEFAULT);
+      H5Oget_info_by_name2(loc_id, info->paths[idx].path, &oinfo, H5O_INFO_BASIC, H5P_DEFAULT);
     else
-      H5Oget_info2(loc_id, &oinfo, 0);
+      H5Oget_info2(loc_id, &oinfo, H5O_INFO_BASIC);
 
     info->paths[idx].objno = oinfo.addr;
     info->paths[idx].fileno = oinfo.fileno;
@@ -438,7 +438,7 @@ h5trav_getinfo(hid_t file_id, trav_info_t *info)
     info_visitor.udata = info;
 
     /* Traverse all objects in the file, visiting each object & link */
-    if(traverse(file_id, "/", TRUE, TRUE, &info_visitor, 0) < 0)
+    if(traverse(file_id, "/", TRUE, TRUE, &info_visitor, H5O_INFO_BASIC) < 0)
         HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "traverse failed");
 
 done:
@@ -604,7 +604,7 @@ h5trav_gettable(hid_t fid, trav_table_t *table)
     table_visitor.udata = table;
 
     /* Traverse all objects in the file, visiting each object & link */
-    if(traverse(fid, "/", TRUE, TRUE, &table_visitor, 0) < 0)
+    if(traverse(fid, "/", TRUE, TRUE, &table_visitor, H5O_INFO_BASIC) < 0)
         HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "traverse failed");
 
 done:
@@ -1029,7 +1029,7 @@ h5trav_print(hid_t fid)
     print_visitor.udata = &print_udata;
 
     /* Traverse all objects in the file, visiting each object & link */
-    if(traverse(fid, "/", TRUE, TRUE, &print_visitor, 0) < 0)
+    if(traverse(fid, "/", TRUE, TRUE, &print_visitor, H5O_INFO_BASIC) < 0)
         HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "traverse failed");
 
 done:

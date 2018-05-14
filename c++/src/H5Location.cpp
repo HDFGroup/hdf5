@@ -1827,7 +1827,7 @@ H5O_type_t H5Location::childObjType(const char* objname) const
     H5O_type_t objtype = H5O_TYPE_UNKNOWN;
 
     // Use C API to get information of the object
-    herr_t ret_value = H5Oget_info_by_name2(getId(), objname, &objinfo, 0, H5P_DEFAULT);
+    herr_t ret_value = H5Oget_info_by_name2(getId(), objname, &objinfo, H5O_INFO_BASIC, H5P_DEFAULT);
 
     // Throw exception if C API returns failure
     if (ret_value < 0)
@@ -1902,7 +1902,7 @@ H5O_type_t H5Location::childObjType(hsize_t index, H5_index_t index_type, H5_ite
     H5O_type_t objtype = H5O_TYPE_UNKNOWN;
 
     // Use C API to get information of the object
-    ret_value = H5Oget_info_by_idx2(getId(), objname, index_type, order, index, &objinfo, 0, H5P_DEFAULT);
+    ret_value = H5Oget_info_by_idx2(getId(), objname, index_type, order, index, &objinfo, H5O_INFO_BASIC, H5P_DEFAULT);
 
     // Throw exception if C API returns failure
     if (ret_value < 0)

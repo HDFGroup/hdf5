@@ -433,7 +433,7 @@ trav_grp_symlinks(const char *path, const H5L_info_t *linfo, void *udata)
                 HGOTO_DONE(0);
 
             if(h5trav_visit(tinfo->fid, path, TRUE, TRUE,
-                         trav_grp_objs,trav_grp_symlinks, tinfo, 0) < 0) {
+                         trav_grp_objs,trav_grp_symlinks, tinfo, H5O_INFO_BASIC) < 0) {
                 parallel_print("Error: Could not get file contents\n");
                 opts->err_stat = 1;
                 HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "Error: Could not get file contents");
@@ -465,7 +465,7 @@ trav_grp_symlinks(const char *path, const H5L_info_t *linfo, void *udata)
                 HGOTO_DONE(0);
 
             if(h5trav_visit(tinfo->fid, path, TRUE, TRUE,
-                            trav_grp_objs,trav_grp_symlinks, tinfo, 0) < 0) {
+                            trav_grp_objs,trav_grp_symlinks, tinfo, H5O_INFO_BASIC) < 0) {
                 parallel_print("Error: Could not get file contents\n");
                 opts->err_stat = 1;
                 HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "Error: Could not get file contents\n");
@@ -645,7 +645,7 @@ h5diff(const char *fname1,
                 /* optional data pass */
                 info1_obj->opts = (diff_opt_t*)opts;
 
-                if(H5Oget_info_by_name2(file1_id, obj1fullname, &oinfo1, 0, H5P_DEFAULT) < 0) {
+                if(H5Oget_info_by_name2(file1_id, obj1fullname, &oinfo1, H5O_INFO_BASIC, H5P_DEFAULT) < 0) {
                     parallel_print("Error: Could not get file contents\n");
                     HGOTO_ERROR(1, H5E_tools_min_id_g, "Error: Could not get file contents");
                 }
@@ -695,7 +695,7 @@ h5diff(const char *fname1,
                 /* optional data pass */
                 info2_obj->opts = (diff_opt_t*)opts;
 
-                if(H5Oget_info_by_name2(file2_id, obj2fullname, &oinfo2, 0, H5P_DEFAULT) < 0) {
+                if(H5Oget_info_by_name2(file2_id, obj2fullname, &oinfo2, H5O_INFO_BASIC, H5P_DEFAULT) < 0) {
                     parallel_print("Error: Could not get file contents\n");
                     HGOTO_ERROR(1, H5E_tools_min_id_g, "Error: Could not get file contents");
                 }
@@ -846,7 +846,7 @@ h5diff(const char *fname1,
         info1_grp->opts = (diff_opt_t*)opts;
 
         if(h5trav_visit(file1_id, obj1fullname, TRUE, TRUE,
-                        trav_grp_objs, trav_grp_symlinks, info1_grp, 0) < 0) {
+                        trav_grp_objs, trav_grp_symlinks, info1_grp, H5O_INFO_BASIC) < 0) {
             parallel_print("Error: Could not get file contents\n");
             HGOTO_ERROR(1, H5E_tools_min_id_g, "Could not get file contents");
         }
@@ -860,7 +860,7 @@ h5diff(const char *fname1,
         info2_grp->opts = (diff_opt_t*)opts;
 
         if(h5trav_visit(file2_id, obj2fullname, TRUE, TRUE,
-                        trav_grp_objs, trav_grp_symlinks, info2_grp, 0) < 0) {
+                        trav_grp_objs, trav_grp_symlinks, info2_grp, H5O_INFO_BASIC) < 0) {
             parallel_print("Error: Could not get file contents\n");
             HGOTO_ERROR(1, H5E_tools_min_id_g, "Could not get file contents");
        } /* end if */

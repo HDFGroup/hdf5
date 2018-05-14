@@ -30,7 +30,6 @@
 #define TEST6_DIM1 100
 #define TEST6_DIM2 100
 
-//#define NUM_GROUPS  100000
 #define NUM_GROUPS  100
 #define NUM_ATTRS 10
 #define NUM_DSETS 50
@@ -415,13 +414,13 @@ test_h5o_refcount(void)
     CHECK(ret, FAIL, "H5Sclose");
 
     /* Get ref counts for each object.  They should all be 1, since each object has a hard link. */
-    ret = H5Oget_info_by_name2(fid, "group", &oinfo, 0, H5P_DEFAULT);
+    ret = H5Oget_info_by_name2(fid, "group", &oinfo, H5O_INFO_BASIC, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Oget_info_by_name");
     VERIFY(oinfo.rc, 1, "reference count in H5Oget_info_by_name");
-    ret = H5Oget_info_by_name2(fid, "datatype", &oinfo, 0, H5P_DEFAULT);
+    ret = H5Oget_info_by_name2(fid, "datatype", &oinfo, H5O_INFO_BASIC, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Oget_info_by_name");
     VERIFY(oinfo.rc, 1, "reference count in H5Oget_info_by_name");
-    ret = H5Oget_info_by_name2(fid, "dataset", &oinfo, 0, H5P_DEFAULT);
+    ret = H5Oget_info_by_name2(fid, "dataset", &oinfo, H5O_INFO_BASIC, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Oget_info_by_name");
     VERIFY(oinfo.rc, 1, "reference count in H5Oget_info_by_name");
 
@@ -434,13 +433,13 @@ test_h5o_refcount(void)
     CHECK(ret, FAIL, "H5Oincr_refcount");
 
     /* Get ref counts for each object.  They should all be 2 now. */
-    ret = H5Oget_info_by_name2(fid, "group", &oinfo, 0, H5P_DEFAULT);
+    ret = H5Oget_info_by_name2(fid, "group", &oinfo, H5O_INFO_BASIC, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Oget_info_by_name");
     VERIFY(oinfo.rc, 2, "reference count in H5Oget_info_by_name");
-    ret = H5Oget_info_by_name2(fid, "datatype", &oinfo, 0, H5P_DEFAULT);
+    ret = H5Oget_info_by_name2(fid, "datatype", &oinfo, H5O_INFO_BASIC, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Oget_info_by_name");
     VERIFY(oinfo.rc, 2, "reference count in H5Oget_info_by_name");
-    ret = H5Oget_info_by_name2(fid, "dataset", &oinfo, 0, H5P_DEFAULT);
+    ret = H5Oget_info_by_name2(fid, "dataset", &oinfo, H5O_INFO_BASIC, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Oget_info_by_name");
     VERIFY(oinfo.rc, 2, "reference count in H5Oget_info_by_name");
 
@@ -452,13 +451,13 @@ test_h5o_refcount(void)
     ret = H5Odecr_refcount(dset);
     CHECK(ret, FAIL, "H5Odecr_refcount");
 
-    ret = H5Oget_info_by_name2(fid, "group", &oinfo, 0, H5P_DEFAULT);
+    ret = H5Oget_info_by_name2(fid, "group", &oinfo, H5O_INFO_BASIC, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Oget_info_by_name");
     VERIFY(oinfo.rc, 1, "reference count in H5Oget_info_by_name");
-    ret = H5Oget_info_by_name2(fid, "datatype", &oinfo, 0, H5P_DEFAULT);
+    ret = H5Oget_info_by_name2(fid, "datatype", &oinfo, H5O_INFO_BASIC, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Oget_info_by_name");
     VERIFY(oinfo.rc, 1, "reference count in H5Oget_info_by_name");
-    ret = H5Oget_info_by_name2(fid, "dataset", &oinfo, 0, H5P_DEFAULT);
+    ret = H5Oget_info_by_name2(fid, "dataset", &oinfo, H5O_INFO_BASIC, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Oget_info_by_name");
     VERIFY(oinfo.rc, 1, "reference count in H5Oget_info_by_name");
 
@@ -490,13 +489,13 @@ test_h5o_refcount(void)
     dset = H5Dopen2(fid, "dataset", H5P_DEFAULT);
     CHECK(dset, FAIL, "H5Dopen2");
 
-    ret = H5Oget_info_by_name2(fid, "group", &oinfo, 0, H5P_DEFAULT);
+    ret = H5Oget_info_by_name2(fid, "group", &oinfo, H5O_INFO_BASIC, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Oget_info_by_name");
     VERIFY(oinfo.rc, 2, "reference count in H5Oget_info_by_name");
-    ret = H5Oget_info_by_name2(fid, "datatype", &oinfo, 0, H5P_DEFAULT);
+    ret = H5Oget_info_by_name2(fid, "datatype", &oinfo, H5O_INFO_BASIC, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Oget_info_by_name");
     VERIFY(oinfo.rc, 2, "reference count in H5Oget_info_by_name");
-    ret = H5Oget_info_by_name2(fid, "dataset", &oinfo, 0, H5P_DEFAULT);
+    ret = H5Oget_info_by_name2(fid, "dataset", &oinfo, H5O_INFO_BASIC, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Oget_info_by_name");
     VERIFY(oinfo.rc, 2, "reference count in H5Oget_info_by_name");
 
@@ -528,13 +527,13 @@ test_h5o_refcount(void)
     dset = H5Dopen2(fid, "dataset", H5P_DEFAULT);
     CHECK(dset, FAIL, "H5Dopen2");
 
-    ret = H5Oget_info_by_name2(fid, "group", &oinfo, 0, H5P_DEFAULT);
+    ret = H5Oget_info_by_name2(fid, "group", &oinfo, H5O_INFO_BASIC, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Oget_info_by_name");
     VERIFY(oinfo.rc, 1, "reference count in H5Oget_info_by_name");
-    ret = H5Oget_info_by_name2(fid, "datatype", &oinfo, 0, H5P_DEFAULT);
+    ret = H5Oget_info_by_name2(fid, "datatype", &oinfo, H5O_INFO_BASIC, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Oget_info_by_name");
     VERIFY(oinfo.rc, 1, "reference count in H5Oget_info_by_name");
-    ret = H5Oget_info_by_name2(fid, "dataset", &oinfo, 0, H5P_DEFAULT);
+    ret = H5Oget_info_by_name2(fid, "dataset", &oinfo, H5O_INFO_BASIC, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Oget_info_by_name");
     VERIFY(oinfo.rc, 1, "reference count in H5Oget_info_by_name");
 
@@ -1277,9 +1276,9 @@ test_h5o_getinfo_same_file(void)
     HDmemset(&oinfo2, 0, sizeof(oinfo2));
 
     /* Query the object info for each object, through group IDs */
-    ret = H5Oget_info2(gid1, &oinfo1, 0);
+    ret = H5Oget_info2(gid1, &oinfo1, H5O_INFO_BASIC);
     CHECK(ret, FAIL, "H5Oget_info");
-    ret = H5Oget_info2(gid2, &oinfo2, 0);
+    ret = H5Oget_info2(gid2, &oinfo2, H5O_INFO_BASIC);
     CHECK(ret, FAIL, "H5Oget_info");
 
     VERIFY(oinfo1.fileno, oinfo2.fileno, "file number from H5Oget_info");
@@ -1289,9 +1288,9 @@ test_h5o_getinfo_same_file(void)
     HDmemset(&oinfo2, 0, sizeof(oinfo2));
 
     /* Query the object info for each object, by name */
-    ret = H5Oget_info_by_name2(fid1, "group1", &oinfo1, 0, H5P_DEFAULT);
+    ret = H5Oget_info_by_name2(fid1, "group1", &oinfo1, H5O_INFO_BASIC, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Oget_info_by_name");
-    ret = H5Oget_info_by_name2(fid1, "group2", &oinfo2, 0, H5P_DEFAULT);
+    ret = H5Oget_info_by_name2(fid1, "group2", &oinfo2, H5O_INFO_BASIC, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Oget_info_by_name");
 
     VERIFY(oinfo1.fileno, oinfo2.fileno, "file number from H5Oget_info");
@@ -1322,9 +1321,9 @@ test_h5o_getinfo_same_file(void)
     HDmemset(&oinfo2, 0, sizeof(oinfo2));
 
     /* Query the object info for each object, through group IDs */
-    ret = H5Oget_info2(gid1, &oinfo1, 0);
+    ret = H5Oget_info2(gid1, &oinfo1, H5O_INFO_BASIC);
     CHECK(ret, FAIL, "H5Oget_info");
-    ret = H5Oget_info2(gid2, &oinfo2, 0);
+    ret = H5Oget_info2(gid2, &oinfo2, H5O_INFO_BASIC);
     CHECK(ret, FAIL, "H5Oget_info");
 
     VERIFY(oinfo1.fileno, oinfo2.fileno, "file number from H5Oget_info");
@@ -1334,9 +1333,9 @@ test_h5o_getinfo_same_file(void)
     HDmemset(&oinfo2, 0, sizeof(oinfo2));
 
     /* Query the object info for each object, by name */
-    ret = H5Oget_info_by_name2(fid1, "group1", &oinfo1, 0, H5P_DEFAULT);
+    ret = H5Oget_info_by_name2(fid1, "group1", &oinfo1, H5O_INFO_BASIC, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Oget_info_by_name");
-    ret = H5Oget_info_by_name2(fid1, "group2", &oinfo2, 0, H5P_DEFAULT);
+    ret = H5Oget_info_by_name2(fid1, "group2", &oinfo2, H5O_INFO_BASIC, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Oget_info_by_name");
 
     VERIFY(oinfo1.fileno, oinfo2.fileno, "file number from H5Oget_info");
@@ -1443,7 +1442,7 @@ test_h5o_getinfo_visit(void)
     /* Query the object info for "group1" via H5Oget_info1 and H5Oget_info2 */
     ret = H5Oget_info1(gid1, &oinfo1);
     CHECK(ret, FAIL, "H5Oget_info");
-    ret = H5Oget_info2(gid1, &oinfo2, H5O_INFO_NUM_ATTRS);
+    ret = H5Oget_info2(gid1, &oinfo2, H5O_INFO_BASIC|H5O_INFO_NUM_ATTRS);
     CHECK(ret, FAIL, "H5Oget_info");
 
     /* Verify the object info for "group1" is correct */
@@ -1632,8 +1631,8 @@ test_h5o_perform_getinfo_visit(void)
     HDgettimeofday(&startTime, 0);
 
     /* Recursively visit all the objects from the root group via H5Ovisit2 */
-    /* Object info with fields = 0 is returned to perform_visit_obj_cb() */
-    ret = H5Ovisit2(fid, H5_INDEX_NAME, H5_ITER_INC, perform_visit_obj_cb, NULL, 0);
+    /* Object info with fields = H5O_INFO_BASIC is returned to perform_visit_obj_cb() */
+    ret = H5Ovisit2(fid, H5_INDEX_NAME, H5_ITER_INC, perform_visit_obj_cb, NULL, H5O_INFO_BASIC);
     CHECK(ret, FAIL, "H5Ovisit2");
 
     /* Get the ending time */

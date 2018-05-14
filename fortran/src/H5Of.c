@@ -250,8 +250,7 @@ h5ovisit_c(hid_t_f *group_id, int_f *index_type, int_f *order, H5O_iterate_t op,
   /*
    * Call H5Ovisit
    */
-  /* TO DO: See H5Opublic.h: #define H5O_INFO_ALL (H5O_INFO_TIME|H5O_INFO_NUM_ATTRS|H5O_INFO_HDR|H5O_INFO_META_SIZE) */
-  func_ret_value = H5Ovisit( (hid_t)*group_id, (H5_index_t)*index_type, (H5_iter_order_t)*order, op, op_data, (unsigned)15);
+  func_ret_value = H5Ovisit( (hid_t)*group_id, (H5_index_t)*index_type, (H5_iter_order_t)*order, op, op_data, H5O_INFO_ALL);
 
   ret_value = (int_f)func_ret_value;
 
@@ -331,9 +330,8 @@ h5oget_info_by_name_c (hid_t_f *loc_id, _fcd name, size_t_f *namelen, hid_t_f *l
   /*
    * Call H5Oinfo_by_name function.
    */
-  /* TO DO: See H5Opublic.h: #define H5O_INFO_ALL (H5O_INFO_TIME|H5O_INFO_NUM_ATTRS|H5O_INFO_HDR|H5O_INFO_META_SIZE) */
   if(H5Oget_info_by_name2((hid_t)*loc_id, c_name,
-			 &Oinfo, (unsigned)15, (hid_t)*lapl_id) < 0)
+			 &Oinfo, H5O_INFO_ALL, (hid_t)*lapl_id) < 0)
     HGOTO_DONE(FAIL);
 
   ret_value = fill_h5o_info_t_f(Oinfo,object_info);
@@ -387,9 +385,8 @@ h5oget_info_by_idx_c (hid_t_f *loc_id, _fcd  group_name, size_t_f *namelen,
   /*
    * Call H5Oinfo_by_idx function.
    */
-  /* TO DO: See H5Opublic.h: #define H5O_INFO_ALL (H5O_INFO_TIME|H5O_INFO_NUM_ATTRS|H5O_INFO_HDR|H5O_INFO_META_SIZE) */
   if(H5Oget_info_by_idx2((hid_t)*loc_id, c_group_name, c_index_field, c_order, (hsize_t)*n,
-			 &Oinfo, (unsigned)15, (hid_t)*lapl_id) < 0)
+			 &Oinfo, H5O_INFO_ALL, (hid_t)*lapl_id) < 0)
     HGOTO_DONE(FAIL);
 
   ret_value = fill_h5o_info_t_f(Oinfo,object_info);
@@ -427,8 +424,7 @@ h5oget_info_c (hid_t_f *object_id, H5O_info_t_f *object_info)
   /*
    * Call H5Oinfo_by_name function.
    */
-  /* TO DO: See H5Opublic.h: #define H5O_INFO_ALL (H5O_INFO_TIME|H5O_INFO_NUM_ATTRS|H5O_INFO_HDR|H5O_INFO_META_SIZE) */
-  if(H5Oget_info2((hid_t)*object_id, &Oinfo, (unsigned)15) < 0)
+  if(H5Oget_info2((hid_t)*object_id, &Oinfo, H5O_INFO_ALL) < 0)
     HGOTO_DONE(FAIL);
 
   ret_value = fill_h5o_info_t_f(Oinfo,object_info);
@@ -536,9 +532,8 @@ h5ovisit_by_name_c(hid_t_f *loc_id,  _fcd object_name, size_t_f *namelen, int_f 
   /*
    * Call H5Ovisit
    */
-  /* TO DO: See H5Opublic.h: #define H5O_INFO_ALL (H5O_INFO_TIME|H5O_INFO_NUM_ATTRS|H5O_INFO_HDR|H5O_INFO_META_SIZE) */
   func_ret_value = H5Ovisit_by_name2( (hid_t)*loc_id, c_object_name, (H5_index_t)*index_type, (H5_iter_order_t)*order,
-				     op, op_data, (unsigned)15, (hid_t)*lapl_id);
+				     op, op_data, H5O_INFO_ALL, (hid_t)*lapl_id);
   ret_value = (int_f)func_ret_value;
 
  done:

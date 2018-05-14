@@ -90,9 +90,9 @@ main(void)
      */
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
     if((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR;
-    if(H5Oget_info_by_name2(file, "dset", &oi1, H5O_INFO_TIME, H5P_DEFAULT) < 0) TEST_ERROR;
+    if(H5Oget_info_by_name2(file, "dset", &oi1, H5O_INFO_BASIC|H5O_INFO_TIME, H5P_DEFAULT) < 0) TEST_ERROR;
     if((dset = H5Dopen2(file, "dset", H5P_DEFAULT)) < 0) TEST_ERROR;
-    if(H5Oget_info2(dset, &oi2, H5O_INFO_TIME) < 0) TEST_ERROR;
+    if(H5Oget_info2(dset, &oi2, H5O_INFO_BASIC|H5O_INFO_TIME) < 0) TEST_ERROR;
     if(H5Dclose(dset) < 0) TEST_ERROR;
     if(H5Fclose(file) < 0) TEST_ERROR;
 

@@ -807,7 +807,7 @@ MapIdToName(hid_t refobj_id, trav_table_t *travt)
             H5O_info_t   ref_oinfo;     /* Stat for the refobj id */
 
             /* obtain information to identify the referenced object uniquely */
-            if(H5Oget_info2(refobj_id, &ref_oinfo, 0) < 0)
+            if(H5Oget_info2(refobj_id, &ref_oinfo, H5O_INFO_BASIC) < 0)
                 goto out;
 
             if(ref_oinfo.addr == travt->objs[u].objno) {
