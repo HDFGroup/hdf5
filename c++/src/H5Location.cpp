@@ -162,8 +162,7 @@ int H5Location::getNumAttrs() const
 
     if(H5Oget_info(getId(), &objinfo) < 0)
         throwException("getNumAttrs", "H5Oget_info failed");
-    else
-        return(static_cast<int>(objinfo.num_attrs));
+    return(static_cast<int>(objinfo.num_attrs));
 }
 
 //--------------------------------------------------------------------------
@@ -823,11 +822,11 @@ void H5Location::dereference(const H5Location& loc, const void* ref, H5R_type_t 
 
 //--------------------------------------------------------------------------
 // Function:    H5Location::dereference
-///\brief       Dereferences a reference into an HDF5 object, given an attribute.
-///\param       attr - IN: Attribute specifying the location of the referenced object
-///\param       ref - IN: Reference pointer
-///\param       ref_type - IN: Reference type
-///\exception   H5::ReferenceException
+// brief        Dereferences a reference into an HDF5 object, given an attribute.
+// param        attr - IN: Attribute specifying the location of the referenced object
+// param        ref - IN: Reference pointer
+// param        ref_type - IN: Reference type
+// exception    H5::ReferenceException
 // October 2006
 // Modification
 //      May, 2008
@@ -1093,7 +1092,7 @@ void H5Location::link(const H5std_string& curr_name, const H5Location& new_loc,
 ///\brief       Creates a hard link from \a new_name to \a curr_name - can be
 ///             used to pass in H5L_SAME_LOC.
 ///\param       curr_name - IN: Name of the existing object
-///\param       loc_id    - IN: Location ID, or H5L_SAME_LOC
+///\param       same_loc  - IN: Location ID, or H5L_SAME_LOC
 ///\param       new_name  - IN: New name for the link
 ///\param       lcpl - IN: Link creation plist - default to LinkCreatPropList::DEFAULT
 ///\param       lapl - IN: Link access plist - default to LinkAccPropList::DEFAULT
@@ -1322,6 +1321,7 @@ void H5Location::moveLink(const H5std_string& src_name,
 // Function:    H5Location::unlink
 ///\brief       Removes the specified link from this location.
 ///\param       name  - IN: Name of the object to be removed
+///\param       lapl - IN: Link access plist - default to LinkAccPropList::DEFAULT
 ///\exception   One of the following:
 ///                 H5::GroupIException
 ///                 H5::FileIException
@@ -1357,7 +1357,7 @@ void H5Location::unlink(const H5std_string& name, const LinkAccPropList& lapl) c
 // Function:    H5Location::getLinkInfo
 ///\brief       Returns the information of the named link.
 ///\param       link_name  - IN: Symbolic link to the object
-///\param       size - IN: Maximum number of characters of value to be returned
+///\param       lapl       - IN: Link access plist - default LinkAccPropList::DEFAULT
 ///\return      Name of the object
 ///\exception   H5::FileIException/H5::GroupIException/H5::LocationException
 // 2000
