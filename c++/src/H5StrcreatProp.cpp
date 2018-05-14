@@ -26,6 +26,9 @@
 
 namespace H5 {
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+// Currently, StrCreatPropList is an internal base class.
+
 //--------------------------------------------------------------------------
 // Function:    StrCreatPropList default constructor
 ///\brief       Default constructor: Creates a string create property list
@@ -50,6 +53,8 @@ StrCreatPropList::StrCreatPropList(const StrCreatPropList& original) : PropList(
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 StrCreatPropList::StrCreatPropList(const hid_t plist_id) : PropList(plist_id) {}
+
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 //--------------------------------------------------------------------------
 // Function:    StrCreatPropList::setCharEncoding
