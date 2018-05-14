@@ -433,6 +433,366 @@ static void test_basic_links(hid_t fapl_id, hbool_t new_format)
 } // test_basic_links
 
 /*-------------------------------------------------------------------------
+ * Function:    test_lcpl
+ *
+ * Purpose:     Tests link creation property lists, specifically, the
+ *              character encoding property.
+ *
+ * Return:      Success:        0
+ *              Failure:        number of errors
+ * May 2018
+ *-------------------------------------------------------------------------
+ */
+const H5std_string GROUP1NAME("First_group");
+const H5std_string GROUP2NAME("Second_group");
+static void
+test_lcpl(hid_t fapl_id, hbool_t new_format)
+{
+    H5L_info_t linfo;
+    char filename[1024];
+    hsize_t dims[2];
+
+    if(new_format)
+        SUBTEST("Link creation property lists (w/new group format)")
+    else
+        SUBTEST("Link creation property lists")
+
+    try
+    {
+        FileAccPropList fapl(fapl_id);
+
+        // Create a new file.
+        h5_fixname(FILENAME[0], fapl_id, filename, sizeof filename);
+        H5File file(filename, H5F_ACC_TRUNC, FileCreatPropList::DEFAULT, fapl);
+
+        // Create and link a group with the default LCPL.
+        Group grp_1(file.createGroup(GROUP1NAME));
+        grp_1.close();
+
+        // Check that its character encoding is the default.
+        linfo = file.getLinkInfo(GROUP1NAME);
+        if(linfo.cset != H5T_CSET_ASCII)
+            throw InvalidActionException("H5Lget_info", "Character encoding is not default");
+
+        // Create and commit a datatype with the default LCPL.
+        IntType dtype(PredType::NATIVE_INT);
+        dtype.commit(file, "/type");
+        dtype.close();
+
+        // Check that its character encoding is the default.
+        linfo = file.getLinkInfo("/type");
+        verify_val(linfo.cset, H5T_CSET_ASCII, "Character encoding is not default", __LINE__, __FILE__);
+
+        // Create a simple dataspace.
+        dims[0] = H5L_DIM1;
+        dims[1] = H5L_DIM2;
+        DataSpace dspace(2 ,dims);
+
+        // Create a dataset using the default LCPL.
+        DataSet dset(file.createDataSet("/dataset", PredType::NATIVE_INT, dspace));
+        dset.close();
+
+        // Check that its character encoding is the default.
+        linfo = file.getLinkInfo("/dataset");
+        verify_val(linfo.cset, H5T_CSET_ASCII, "Character encoding is not default", __LINE__, __FILE__);
+
+        // Create a link creation property list with the UTF-8 character encoding.
+        LinkCreatPropList lcpl;
+        lcpl.setCharEncoding(H5T_CSET_UTF8);
+
+        // Create and link a group with the new LCPL.
+        Group grp_2(file.createGroup(GROUP2NAME, 0, lcpl));
+        grp_2.close();
+
+        // Check that its character encoding is UTF-8.
+        linfo = file.getLinkInfo(GROUP2NAME);
+        verify_val(linfo.cset, H5T_CSET_UTF8, "Character encoding is not UTF-8", __LINE__, __FILE__);
+
+        PASSED();
+    } // end of try block
+    catch (Exception& E)
+    {
+        issue_fail_msg("test_lcpl()", __LINE__, __FILE__, E.getCDetailMsg());
+    }
+} // end test_lcpl()
+
+/*-------------------------------------------------------------------------
+ * Function:    test_move
+ *
+ * Purpose:     Tests wrappers of H5Lmove()
+ *
+ * Return:      Success: 0
+ *              Failure: number of errors
+ * May 2018
+ *-------------------------------------------------------------------------
+ */
+static void
+test_move(hid_t fapl_id, hbool_t new_format)
+{
+    char   filename[1024];
+
+    if(new_format)
+        SUBTEST("Group::moveLink (w/new group format)")
+    else
+        SUBTEST("Group::moveLink")
+
+    try
+    {
+        FileAccPropList fapl(fapl_id);
+
+        // Create two new files
+        h5_fixname(FILENAME[0], fapl_id, filename, sizeof filename);
+        H5File file_a(filename, H5F_ACC_TRUNC, FileCreatPropList::DEFAULT, fapl);
+        h5_fixname(FILENAME[1], fapl_id, filename, sizeof filename);
+        H5File file_b(filename, H5F_ACC_TRUNC, FileCreatPropList::DEFAULT, fapl);
+
+        // Create groups in first file
+        Group grp_1(file_a.createGroup(GROUP1NAME));
+        Group grp_2(file_a.createGroup(GROUP2NAME));
+        Group grp_move(grp_1.createGroup("group_move"));
+
+        // Create hard and soft links
+        grp_1.link(H5L_TYPE_HARD, "group_move", "hard");
+        grp_2.link(H5L_TYPE_SOFT, "/First_group/group_copy", "soft");
+
+        // Move a group across files, should fail
+        try {
+            grp_1.moveLink("group_move", file_b, "group_new_name");
+
+            // Should throw an exception but didn't
+    	    H5_FAILED();
+	        cerr << "    Group group_move should not be moved across files" << endl;
+        } catch (Exception& E) {
+            // expected
+        }
+
+        // Move a soft link across files, should succeed
+        grp_2.moveLink("soft", file_b, "soft_new_name");
+        if(file_b.nameExists("soft_new_name") != TRUE)
+            throw InvalidActionException("H5File::nameExists", "grp1/soft doesn't exist");
+
+        // Move a group across groups in the same file while renaming it
+        grp_1.moveLink("group_move", grp_2, "group_new_name");
+
+        // Open the group just moved to the new location. */
+        Group moved_grp = grp_2.openGroup("group_new_name");
+        moved_grp.close();
+
+        // Verify that the group is no longer in the original location
+        try {
+            moved_grp = grp_1.openGroup("group_move");
+
+            // Should throw an exception but didn't
+    	    H5_FAILED();
+	        cerr << "    Group group_move should not be in original location" << endl;
+        } catch (Exception& E) {
+            // expected
+        }
+
+        // Use H5Lmove to rename a group without moving it
+        H5std_string new_name("group_new_name");
+        H5std_string newer_name("group_newer_name");
+        grp_2.moveLink(new_name, newer_name);
+
+        // Open the group
+        moved_grp = grp_2.openGroup("group_newer_name");
+        moved_grp.close();
+
+        // Use H5Lmove to move a group without renaming it
+        grp_2.moveLink(newer_name, grp_1, newer_name);
+
+        // Open the group
+        moved_grp = grp_1.openGroup("group_newer_name");
+        moved_grp.close();
+
+        // Move the group while giving long paths
+        file_a.moveLink("/First_group/group_newer_name", grp_2, "/Second_group/group_newest_name");
+
+        // Open the group just moved to the new location
+        moved_grp = grp_2.openGroup("group_newest_name");
+        moved_grp.close();
+
+        // Verify that the groups are not in previous locations
+        try {
+            moved_grp = grp_1.openGroup("group_newer_name");
+            moved_grp.close();
+
+    	    H5_FAILED(); // Should throw an exception but didn't
+	        cerr << "    Group group_newer_name should not be in GROUP1NAME" << endl;
+        } catch (Exception& E) {
+            // expected
+        }
+        try {
+            moved_grp = grp_2.openGroup("group_newer_name");
+            moved_grp.close();
+
+    	    H5_FAILED(); // Should throw an exception but didn't
+	        cerr << "    Group group_newer_name should not be in GROUP2NAME" << endl;
+        } catch (Exception& E) {
+            // expected
+        }
+        try {
+            moved_grp = grp_2.openGroup("group_new_name");
+            moved_grp.close();
+
+    	    H5_FAILED(); // Should throw an exception but didn't
+	        cerr << "    Group group_new_name should not be in GROUP2NAME" << endl;
+        } catch (Exception& E) {
+            // expected
+        }
+        try {
+            moved_grp = grp_1.openGroup("group_copy");
+            moved_grp.close();
+
+    	    H5_FAILED(); // Should throw an exception but didn't
+	        cerr << "    Group group_copy should not be in GROUP1NAME" << endl;
+        } catch (Exception& E) {
+            // expected
+        }
+        PASSED();
+    } // end of try block
+    catch (Exception& E)
+    {
+        issue_fail_msg("test_move()", __LINE__, __FILE__, E.getCDetailMsg());
+    }
+} // test_move
+
+/*-------------------------------------------------------------------------
+ * Function:    test_copy
+ *
+ * Purpose:     Tests wrappers of H5Lcopy() and H5Ldelete()
+ *
+ * Return:      Success: 0
+ *              Failure: number of errors
+ * May 2018
+ *-------------------------------------------------------------------------
+ */
+static void test_copy(hid_t fapl_id, hbool_t new_format)
+{
+    char filename[1024];
+
+    if(new_format)
+        SUBTEST("Group::copyLink (w/new group format)")
+    else
+        SUBTEST("Group::copyLink")
+
+    try
+    {
+        // Create two new files
+        h5_fixname(FILENAME[0], fapl_id, filename, sizeof filename);
+        H5File file_a(filename, H5F_ACC_TRUNC, FileCreatPropList::DEFAULT, fapl_id);
+        h5_fixname(FILENAME[1], fapl_id, filename, sizeof filename);
+        H5File file_b(filename, H5F_ACC_TRUNC, FileCreatPropList::DEFAULT, fapl_id);
+
+        // Create groups in first file
+        Group grp_1(file_a.createGroup(GROUP1NAME));
+        Group grp_2(file_a.createGroup(GROUP2NAME));
+        Group grp_move(grp_1.createGroup("group_copy"));
+
+        // Create hard and soft links
+        grp_1.link("group_copy", H5L_SAME_LOC, "hard");
+        grp_2.link("/First_group/group_copy", "soft");
+
+        // Copy a group across files, should fail
+        try {
+            grp_1.copyLink("group_copy", file_b, "group_new_name");
+        } catch (Exception& E) {
+            // expected
+        }
+
+        // Copy a soft link across files, should succeed
+        grp_2.copyLink("soft", file_b, "soft_new_name");
+        if (file_b.nameExists("soft_new_name") != TRUE)
+            throw InvalidActionException("H5File::nameExists", "soft_new_name doesn't exist");
+
+        // Move a group across groups in the same file while renaming it
+        H5std_string copy_name("group_copy");
+        H5std_string new_name("group_new_name");
+        grp_1.copyLink(copy_name, grp_2, new_name);
+
+        // Open the group just moved to the new location.
+        Group moved_grp(grp_2.openGroup("group_new_name"));
+        moved_grp.close();
+
+        // Verify that the group is also in the original location
+        moved_grp = grp_1.openGroup("group_copy");
+        moved_grp.close();
+
+        // Create a group in the same location with a different name
+        grp_2.copyLink("group_new_name", "group_newer_name");
+
+        // Open the group
+        moved_grp = grp_2.openGroup("group_newer_name");
+        moved_grp.close();
+
+        // Verify that the group is also in the original location
+        moved_grp = grp_2.openGroup("group_new_name");
+        moved_grp.close();
+
+        // Use H5Lcopy to copy to a different location with the same name
+        grp_2.copyLink("group_newer_name", grp_1, "group_newer_name");
+
+        // Open the group
+        moved_grp = grp_1.openGroup("group_newer_name");
+        moved_grp.close();
+
+        // Verify that the group is still in the previous location
+        moved_grp = grp_2.openGroup("group_new_name");
+        moved_grp.close();
+
+        // Copy the group while giving long paths
+        file_a.copyLink("/First_group/group_newer_name", grp_2, "/Second_group/group_newest_name");
+
+        // Open the newest group just moved to the new location
+        moved_grp = grp_2.openGroup("group_newest_name");
+        moved_grp.close();
+
+        // Verify that the group is still in all previous original locations
+        moved_grp = grp_1.openGroup("group_newer_name");
+        moved_grp.close();
+
+        moved_grp = grp_2.openGroup("group_newer_name");
+        moved_grp.close();
+
+        moved_grp = grp_2.openGroup("group_new_name");
+        moved_grp.close();
+
+        moved_grp = grp_1.openGroup("group_copy");
+        moved_grp.close();
+
+        // Delete "group_newer_name" from group 2, then try to open it.
+        grp_2.unlink("group_newer_name");
+        try {
+            moved_grp = grp_2.openGroup("group_newer_name");
+            moved_grp.close();
+
+    	    H5_FAILED(); // Should throw an exception but didn't
+	        cerr << "    Group group_newer_name should not be in GROUP2NAME" << endl;
+        } catch (Exception& E) {
+            // expected
+        }
+
+        // Delete "group_copy" from group 1, then try to open it.
+        grp_1.unlink("group_copy");
+        try {
+            moved_grp = grp_1.openGroup("group_copy");
+            moved_grp.close();
+
+    	    H5_FAILED(); // Should throw an exception but didn't
+	        cerr << "    Group group_copy should not be in GROUP1NAME" << endl;
+        } catch (Exception& E) {
+            // expected
+        }
+
+        PASSED();
+    } // end of try block
+    catch (Exception& E)
+    {
+        issue_fail_msg("test_copy()", __LINE__, __FILE__, E.getCDetailMsg());
+    }
+} // test_copy
+
+/*-------------------------------------------------------------------------
  * Function:    test_num_links
  *
  * Purpose:     Test setting and getting limit of number of links
@@ -528,13 +888,13 @@ void test_links()
             // FileAccPropList may be passed in instead of fapl id
             test_basic_links(my_fapl_id, new_format);
             test_num_links(my_fapl_id, new_format);
+            test_lcpl(my_fapl_id, new_format);
+            test_move(my_fapl_id, new_format);
+            test_copy(my_fapl_id, new_format);
 #if 0
 
 // these tests are from the C test links.c and left here for future
 // implementation of H5L API
-            test_move(my_fapl_id, new_format);
-            test_copy(my_fapl_id, new_format);
-            test_lcpl(my_fapl_id, new_format);
         nerrors += cklinks(my_fapl, new_format) < 0 ? 1 : 0;
         nerrors += new_links(my_fapl, new_format) < 0 ? 1 : 0;
         nerrors += ck_new_links(my_fapl, new_format) < 0 ? 1 : 0;

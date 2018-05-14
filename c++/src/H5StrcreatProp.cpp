@@ -13,6 +13,11 @@
 
 #include <string>
 
+#include <iostream>
+    using std::cerr;
+    using std::endl;
+
+
 #include "H5Include.h"
 #include "H5Exception.h"
 #include "H5IdComponent.h"
@@ -20,6 +25,36 @@
 #include "H5StrcreatProp.h"
 
 namespace H5 {
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+// Currently, StrCreatPropList is an internal base class.
+
+//--------------------------------------------------------------------------
+// Function:    StrCreatPropList default constructor
+///\brief       Default constructor: Creates a string create property list
+// Programmer   Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
+StrCreatPropList::StrCreatPropList() : PropList(H5P_STRING_CREATE) {}
+
+//--------------------------------------------------------------------------
+// Function:    StrCreatPropList copy constructor
+///\brief       Copy constructor: makes a copy of the original
+///             StrCreatPropList object.
+///\param       original - IN: StrCreatPropList instance to copy
+// Programmer   Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
+StrCreatPropList::StrCreatPropList(const StrCreatPropList& original) : PropList(original) {}
+
+//--------------------------------------------------------------------------
+// Function:    StrCreatPropList overloaded constructor
+///\brief       Creates a file creation property list using the id of an
+///             existing one.
+///\param       plist_id - IN: StrCreatPropList id to use
+// Programmer   Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
+StrCreatPropList::StrCreatPropList(const hid_t plist_id) : PropList(plist_id) {}
+
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 //--------------------------------------------------------------------------
 // Function:    StrCreatPropList::setCharEncoding
