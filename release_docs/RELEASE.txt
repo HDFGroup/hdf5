@@ -4,9 +4,11 @@ HDF5 version 1.8.21-pre1 currently under development
 INTRODUCTION
 ============
 
-This document describes the differences between HDF5-1.8.21 and HDF5 1.10.22, and
-contains information on the platforms tested and known problems in HDF5-1.10.21.
-For more details check the HISTORY*.txt files in the HDF5 source.
+This document describes the differences between HDF5-1.8.20 and
+HDF5-1.8.21, and contains information on the platforms tested and
+known problems in HDF5-1.8.21.
+For more details, see the files HISTORY-1_0-1_8_0_rc3.txt
+and HISTORY-1_8.txt in the release_docs/ directory of the HDF5 source.
 
 Links to the HDF5 1.8.21 source code, documentation, and additional materials
 can be found on the HDF5 web page at:
@@ -17,7 +19,7 @@ The HDF5 1.8.21 release can be obtained from:
 
      https://support.hdfgroup.org/HDF5/release/obtain518.html
 
-User documentation for the snapshot can be accessed directly at this location:
+User documentation for 1.8.21 can be accessed directly at this location:
 
      https://support.hdfgroup.org/HDF5/doc1.8/
 
@@ -28,8 +30,8 @@ in 1.8.0?" document:
      https://support.hdfgroup.org/HDF5/doc/ADGuide/WhatsNew180.html
 
 All new and modified APIs are listed in detail in the "HDF5 Software Changes
-from Release to Release" document, in the section "Release 1.8.22 (current
-release) versus Release 1.8.21
+from Release to Release" document, in the section "Release 1.8.21 (current
+release) versus Release 1.8.20
 
      https://support.hdfgroup.org/HDF5/doc1.8/ADGuide/Changes.html
 
@@ -55,6 +57,36 @@ New Features
 
     Configuration
     -------------
+    - CMake
+
+      Change minimum version to 3.10.
+
+      This change removes the need to support a copy of the FindMPI.cmake module,
+      which has been removed, along with its subfolder in the config/cmake_ext_mod
+      location.
+
+      (ADB - 2018/03/09)
+
+    - CMake
+
+      Add pkg-config file generation
+
+      Added pkg-config file generation for the C, C++, HL, and HL C++ libraries.
+      In addition, builds on linux will create h5cXXX scripts that use the pkg-config
+      files. This is a limited implementation of a script like autotools h5cc.
+
+      (ADB - 2018/03/08, HDFFV-4359)
+
+    - CMake
+
+      Refactor use of CMAKE_BUILD_TYPE for new variable, which understands
+      the type of generator in use.
+
+      Added new configuration macros to use new HDF_BUILD_TYPE variable. This
+      variable is set correctly for the type of generator being used for the build.
+
+      (ADB - 2018/01/08, HDFFV-10385, HDFFV-10296)
+
     - None
 
 
@@ -100,14 +132,143 @@ Support for New Platforms, Languages, and Compilers
 Bug Fixes since HDF5-1.8.20
 ===========================
 
+    - If an HDF5 file contains a filter pipeline message with a 'number of
+      filters' field that exceeds the maximum number of allowed filters,
+      the error handling code will attempt to dereference a NULL pointer.
+
+      This issue was reported to The HDF Group as issue #CVE-2017-17505.
+
+      NOTE: The HDF5 C library cannot produce such a file. This condition
+            should only occur in a corrupt (or deliberately altered) file
+            or a file created by third-party software.
+
+      This problem arose because the error handling code assumed that
+      the 'number of filters' field implied that a dynamic array of that
+      size had already been created and that the cleanup code should
+      iterate over that array and clean up each element's resources. If
+      an error occurred before the array has been allocated, this will
+      not be true.
+
+      This has been changed so that the number of filters is set to
+      zero on errors. Additionally, the filter array traversal in the
+      error handling code now requires that the filter array not be NULL.
+
+      (DER - 2018/02/06, HDFFV-10354)
+
+    - If an HDF5 file contains a filter pipeline message which contains
+      a 'number of filters' field that exceeds the actual number of
+      filters in the message, the HDF5 C library will read off the end of
+      the read buffer.
+
+      This issue was reported to The HDF Group as issue #CVE-2017-17506.
+
+      NOTE: The HDF5 C library cannot produce such a file. This condition
+            should only occur in a corrupt (or deliberately altered) file
+            or a file created by third-party software.
+
+      The problem was fixed by passing the buffer size with the buffer
+      and ensuring that the pointer cannot be incremented off the end
+      of the buffer. A mismatch between the number of filters declared
+      and the actual number of filters will now invoke normal HDF5
+      error handling.
+
+      (DER - 2018/02/26, HDFFV-10355)
+
+    - If an HDF5 file contains a malformed compound datatype with a
+      suitably large offset, the type conversion code can run off
+      the end of the type conversion buffer, causing a segmentation
+      fault.
+
+      This issue was reported to The HDF Group as issue #CVE-2017-17507.
+
+      NOTE: The HDF5 C library cannot produce such a file. This condition
+            should only occur in a corrupt (or deliberately altered) file
+            or a file created by third-party software.
+
+      THE HDF GROUP WILL NOT FIX THIS BUG AT THIS TIME
+
+      Fixing this problem would involve updating the publicly visible
+      H5T_conv_t function pointer typedef and versioning the API calls
+      which use it. We normally only modify the public API during
+      major releases, so this bug will not be fixed at this time.
+
+      (DER - 2018/02/26, HDFFV-10356)
+
+    - If an HDF5 file contains a malformed compound type which contains
+      a member of size zero, a division by zero error will occur while
+      processing the type.
+
+      This issue was reported to The HDF Group as issue #CVE-2017-17508.
+
+      NOTE: The HDF5 C library cannot produce such a file. This condition
+            should only occur in a corrupt (or deliberately altered) file
+            or a file created by third-party software.
+
+      Checking for zero before dividing fixes the problem. Instead of the
+      division by zero, the normal HDF5 error handling is invoked.
+
+      (DER - 2018/02/26, HDFFV-10357)
+
+    - If an HDF5 file contains a malformed symbol table node that declares
+      it contains more symbols than it actually contains, the library
+      can run off the end of the metadata cache buffer while processing
+      the symbol table node.
+
+      This issue was reported to The HDF Group as issue #CVE-2017-17509.
+
+      NOTE: The HDF5 C library cannot produce such a file. This condition
+            should only occur in a corrupt (or deliberately altered) file
+            or a file created by third-party software.
+
+      Performing bounds checks on the buffer while processing fixes the
+      problem. Instead of the segmentation fault, the normal HDF5 error
+      handling is invoked.
+
+      (DER - 2018/03/12, HDFFV-10358)
+
     Configuration
     -------------
-    - None
+    - CMake
+
+      Update CMake commands configuration.
+
+      A number of improvements were made to the CMake commands. Most
+      changes simplify usage or eliminate unused constructs. Also,
+      some changes support better cross-platform support.
+
+      (ADB - 2018/02/01, HDFFV-10398)
+
+    - CMake
+
+      Correct usage of CMAKE_BUILD_TYPE variable.
+
+      The use of the CMAKE_BUILD_TYPE is incorrect for multi-config
+      generators (Visual Studio and XCode) and is optional for single
+      config generators. Created a new macro to check
+        GLOBAL PROPERTY -> GENERATOR_IS_MULTI_CONFIG
+      Created two new HDF variable, HDF_BUILD_TYPE and HDF_CFG_BUILD_TYPE.
+      Defaults for these variables is "Release".
+
+      (ADB - 2018/01/10, HDFFV-10385)
+
+    - CMake
+
+      Add replacement of fortran flags if using static CRT.
+
+      Added TARGET_STATIC_CRT_FLAGS call to HDFUseFortran.cmake file in
+      config/cmake_ext_mod folder.
+
+      (ADB - 2018/01/08, HDFFV-10334)
 
 
     Library
     -------
-    - None
+    - Utility function can not handle lowercase Windows drive letters
+
+      Added call to toupper function for drive letter.
+
+      (ADB - 2017/12/18, HDFFV-10307)
+
 
 
     Parallel Library
@@ -122,7 +283,81 @@ Bug Fixes since HDF5-1.8.20
 
     Tools
     -----
-    - None
+    - h5repack
+
+      h5repack changes the chunk parameters when a change of layout is not
+      specified and a filter is applied.
+
+      HDFFV-10297, HDFFV-10319 reworked code for h5repack and h5diff code
+      in the tools library. The check for an existing layout was incorrectly
+      placed into an if block and not executed. The check was moved into
+      the normal path of the function.
+
+      (ADB - 2018/02/21, HDFFV-10412)
+
+    - h5dump
+
+      the tools library will hide the error stack during file open.
+
+      While this is preferable almost always, there are reasons to enable
+      display of the error stack when a tool will not open a file. Adding an
+      optional argument to the --enable-error-stack will provide this use case.
+      As an optional argument it will not affect the operation of the
+      --enable-error-stack. h5dump is the only tool to implement this change.
+
+      (ADB - 2018/02/15, HDFFV-10384)
+
+    - h5dump
+
+      h5dump would output an indented blank line in the filters section.
+
+      h5dump overused the h5tools_simple_prefix function, which is a
+      function intended to account for the data index (x,y,z) option.
+      Removed the function call for header information.
+
+      (ADB - 2018/01/25, HDFFV-10396)
+
+    - h5repack
+
+      h5repack incorrectly searched internal object table for name.
+
+      h5repack would search the table of objects for a name, if the
+      name did not match it tried to determine if the name without a
+      leading slash would match. The logic was flawed! The table
+      stored names(paths) without a leading slash and did a strstr
+      of the table path to the name.
+      The assumption was that if there was a difference of one then
+      it was a match, however "pressure" would match "/pressure" as
+      well as "/pressure1", "/pressure2", etc. Changed logic to remove
+      any leading slash and then do a full compare of the name.
+
+      (ADB - 2018/01/18, HDFFV-10393)
+
+    - h5repack
+
+      h5repack failed to handle more then 9 chars for int conversion.
+
+      User defined filter parameter conversions would fail for integers
+      larger then 9 characters. Increased local variable array for storing
+      the current command line parameter to prevent buffer overflows.
+
+      (ADB - 2018/01/17, HDFFV-10392)
+
+    - h5diff
+
+      h5diff seg-faulted if comparing VL strings against fixed strings.
+
+      Reworked solution for HDFFV-8625 and HDFFV-8639. Implemented the check
+      for string objects of same type in the diff_can_type function by
+      adding an if(tclass1 == H5T_STRING) block. This if block moves the
+      same check that was added for attributes to this function, which is
+      used by all object types. This function also handles complex type
+      structures.
+      Also added a new test file in h5diffgenttest for testing this issue
+      and removed the temporary files used in the test scripts.
+
+      (ADB - 2018/01/04, HDFFV-8745)
+
 
 
     Fortran API
@@ -156,10 +391,10 @@ They are built with the configure process unless specified otherwise.
                                      Versions 4.9.3, 5.3.0, 6.2.0
                                   PGI C, Fortran, C++ for 64-bit target on
                                   x86-64;
-                                      Version 16.10-0
+                                      Version 17.10-0
                                   Intel(R) C (icc), C++ (icpc), Fortran (icc)
                                   compilers:
-                                     Version 17.0.0.196 Build 20160721
+                                     Version 17.0.4.196 Build 20160721
                                   MPICH 3.1.4 compiled with GCC 4.9.3
                                   OpenMPI 2.0.1 compiled with GCC 4.9.3
 
