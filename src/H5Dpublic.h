@@ -178,7 +178,19 @@ H5_DLL herr_t H5Dget_chunk_index_type(hid_t did, H5D_chunk_index_t *idx_type);
 /* Macros */
 #define H5D_CHUNK_BTREE H5D_CHUNK_IDX_BTREE
 
-
+/* Formerly used to support the H5DOread/write_chunk() API calls.
+ * These symbols are no longer used in the library.
+ */
+/* Property names for H5DOwrite_chunk */
+#define H5D_XFER_DIRECT_CHUNK_WRITE_FLAG_NAME       "direct_chunk_flag"
+#define H5D_XFER_DIRECT_CHUNK_WRITE_FILTERS_NAME    "direct_chunk_filters"
+#define H5D_XFER_DIRECT_CHUNK_WRITE_OFFSET_NAME     "direct_chunk_offset"
+#define H5D_XFER_DIRECT_CHUNK_WRITE_DATASIZE_NAME   "direct_chunk_datasize"
+/* Property names for H5DOread_chunk */
+#define H5D_XFER_DIRECT_CHUNK_READ_FLAG_NAME        "direct_chunk_read_flag"
+#define H5D_XFER_DIRECT_CHUNK_READ_OFFSET_NAME      "direct_chunk_read_offset"
+#define H5D_XFER_DIRECT_CHUNK_READ_FILTERS_NAME     "direct_chunk_read_filters"
+ 
 /* Typedefs */
 
 
