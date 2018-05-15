@@ -8,9 +8,9 @@ add_executable (h5diff
     ${HDF5_TOOLS_SRC_H5DIFF_SOURCE_DIR}/h5diff_common.c
     ${HDF5_TOOLS_SRC_H5DIFF_SOURCE_DIR}/h5diff_main.c
 )
-set_property(TARGET h5diff APPEND PROPERTY INCLUDE_DIRECTORIES "${HDF5_TOOLS_DIR}/lib;${HDF5_SRC_DIR};${HDF5_BINARY_DIR}")
-TARGET_C_PROPERTIES (h5diff STATIC " " " ")
-target_link_libraries (h5diff  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
+target_include_directories(h5diff PRIVATE "${HDF5_TOOLS_DIR}/lib;${HDF5_SRC_DIR};${HDF5_BINARY_DIR}")
+TARGET_C_PROPERTIES (h5diff STATIC)
+target_link_libraries (h5diff PRIVATE ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
 set_target_properties (h5diff PROPERTIES FOLDER tools)
 set_global_variable (HDF5_UTILS_TO_EXPORT "${HDF5_UTILS_TO_EXPORT};h5diff")
 
@@ -21,9 +21,9 @@ if (BUILD_SHARED_LIBS)
       ${HDF5_TOOLS_SRC_H5DIFF_SOURCE_DIR}/h5diff_common.c
       ${HDF5_TOOLS_SRC_H5DIFF_SOURCE_DIR}/h5diff_main.c
   )
-  set_property(TARGET h5diff-shared APPEND PROPERTY INCLUDE_DIRECTORIES "${HDF5_TOOLS_DIR}/lib;${HDF5_SRC_DIR};${HDF5_BINARY_DIR}")
-  TARGET_C_PROPERTIES (h5diff-shared SHARED " " " ")
-  target_link_libraries (h5diff-shared  ${HDF5_TOOLS_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
+  target_include_directories(h5diff-shared PRIVATE "${HDF5_TOOLS_DIR}/lib;${HDF5_SRC_DIR};${HDF5_BINARY_DIR}")
+  TARGET_C_PROPERTIES (h5diff-shared SHARED)
+  target_link_libraries (h5diff-shared PRIVATE ${HDF5_TOOLS_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
   set_target_properties (h5diff-shared PROPERTIES FOLDER tools)
   set_global_variable (HDF5_UTILS_TO_EXPORT "${HDF5_UTILS_TO_EXPORT};h5diff-shared")
 
@@ -35,9 +35,9 @@ if (H5_HAVE_PARALLEL)
       ${HDF5_TOOLS_SRC_H5DIFF_SOURCE_DIR}/h5diff_common.c
       ${HDF5_TOOLS_SRC_H5DIFF_SOURCE_DIR}/ph5diff_main.c
   )
-  set_property(TARGET ph5diff APPEND PROPERTY INCLUDE_DIRECTORIES "${HDF5_TOOLS_DIR}/lib;${HDF5_SRC_DIR};${HDF5_BINARY_DIR}")
-  TARGET_C_PROPERTIES (ph5diff STATIC " " " ")
-  target_link_libraries (ph5diff  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
+  target_include_directories(ph5diff PRIVATE "${HDF5_TOOLS_DIR}/lib;${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+  TARGET_C_PROPERTIES (ph5diff STATIC)
+  target_link_libraries (ph5diff PRIVATE ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET} $<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_LIBRARIES}>)
   set_target_properties (ph5diff PROPERTIES FOLDER tools)
   set_global_variable (HDF5_UTILS_TO_EXPORT "${HDF5_UTILS_TO_EXPORT};ph5diff")
 endif ()

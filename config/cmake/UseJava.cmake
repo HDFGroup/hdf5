@@ -794,9 +794,11 @@ function(add_jar _TARGET_NAME)
   if (_GENERATE_NATIVE_HEADERS)
     # create an INTERFACE library encapsulating include directory for generated headers
     add_library (${_GENERATE_NATIVE_HEADERS_TARGET} INTERFACE)
-    target_include_directories (${_GENERATE_NATIVE_HEADERS_TARGET} INTERFACE
-      "${_GENERATE_NATIVE_HEADERS_OUTPUT_DIR}"
-      ${JNI_INCLUDE_DIRS})
+    target_include_directories (${_GENERATE_NATIVE_HEADERS_TARGET}
+        INTERFACE
+            "${_GENERATE_NATIVE_HEADERS_OUTPUT_DIR}"
+            ${JNI_INCLUDE_DIRS}
+    )
     # this INTERFACE library depends on jar generation
     add_dependencies (${_GENERATE_NATIVE_HEADERS_TARGET} ${_TARGET_NAME})
 
