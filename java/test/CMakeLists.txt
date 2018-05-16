@@ -70,7 +70,7 @@ foreach (test_file ${HDF5_JAVA_TEST_SOURCES})
 endforeach ()
 
 foreach (h5_file ${HDF5_JAVA_TEST_SOURCES})
-  HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/testfiles/JUnit-${h5_file}.txt" "${PROJECT_BINARY_DIR}/${h5_file}.txt" "${HDF5_JAVA_TEST_LIB_TARGET}_files")
+  HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/testfiles/JUnit-${h5_file}.txt" "${PROJECT_BINARY_DIR}/JUnit-${h5_file}.txt" "${HDF5_JAVA_TEST_LIB_TARGET}_files")
 endforeach ()
 
 HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/h5ex_g_iterate.orig" "${PROJECT_BINARY_DIR}/h5ex_g_iterate.hdf" "${HDF5_JAVA_TEST_LIB_TARGET}_files")
