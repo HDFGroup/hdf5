@@ -121,6 +121,16 @@ Bug Fixes since HDF5-1.10.2 release
 
     Configuration
     -------------
+      Reworked java test suite into individual JUnit tests.
+
+      Testing the whole suite of java unit tests in a single JUnit run
+      made it difficult to determine actual failures when tests would fail.
+      Running each file set of tests individually, allows individual failures
+      to be diagnosed easier. A side benifit is that tests for optional components
+      of the library can be disabled if not configured.
+
+      (ADB 2018/05/16, HDFFV-9739)
+
     - Converted CMake global commands ADD_DEFINITIONS and INCLUDE_DIRECTORIES
       to use target_* type commands. This change modernizes the CMake usage
       in the HDF5 library.
