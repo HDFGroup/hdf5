@@ -183,25 +183,18 @@ They are built with the configure process unless specified otherwise.
     (emu)                         Sun Fortran 95 8.6 SunOS_sparc
                                   Sun C++ 5.12 SunOS_sparc
 
-    Windows 7                     Visual Studio 2012 w/ Intel Fortran 15 (cmake)
-                                  Visual Studio 2013 w/ Intel Fortran 15 (cmake)
-                                  Visual Studio 2015 w/ Intel Fortran 16 (cmake)
+    Windows 7                     Visual Studio 2015 w/ Intel Fortran 16 (cmake)
 
     Windows 7 x64                 Visual Studio 2012 w/ Intel Fortran 15 (cmake)
                                   Visual Studio 2013 w/ Intel Fortran 15 (cmake)
                                   Visual Studio 2015 w/ Intel Fortran 16 (cmake)
                                   Visual Studio 2015 w/ Intel C, Fortran 2017 (cmake)
                                   Visual Studio 2015 w/ MSMPI 8 (cmake)
-                                  Cygwin(CYGWIN_NT-6.1 2.8.0(0.309/5/3)
-                                      gcc and gfortran compilers (GCC 5.4.0)
-                                      (cmake and autotools)
 
     Windows 10                    Visual Studio 2015 w/ Intel Fortran 16 (cmake)
-                                  Cygwin(CYGWIN_NT-6.1 2.8.0(0.309/5/3)
-                                      gcc and gfortran compilers (GCC 5.4.0)
-                                      (cmake and autotools)
 
     Windows 10 x64                Visual Studio 2015 w/ Intel Fortran 16 (cmake)
+                                  Visual Studio 2017 w/ Intel Fortran 18 (cmake)
 
     Mac OS X Mavericks 10.9.5     Apple LLVM version 6.0 (clang-600.0.57)
     64-bit                        gfortran GNU Fortran (GCC) 4.9.2
