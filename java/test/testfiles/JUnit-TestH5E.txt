@@ -8,3 +8,4 @@ JUnit version 4.11
 Time:  XXXX
 
 OK (5 tests)
+
