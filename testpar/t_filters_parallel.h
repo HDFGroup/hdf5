@@ -66,6 +66,13 @@ size_t             cd_nelmts = FILTER_NUM_CDVALUES;
 #define DIM0_SCALE_FACTOR 4
 #define DIM1_SCALE_FACTOR 2
 
+/* Struct type for the compound datatype filtered dataset tests */
+typedef struct {
+    short  field1;
+    int    field2;
+    long   field3;
+} COMPOUND_C_DATATYPE;
+
 /* Defines for the one-chunk filtered dataset write test */
 #define WRITE_ONE_CHUNK_FILTERED_DATASET_NAME       "one_chunk_filtered_dataset_write"
 #define WRITE_ONE_CHUNK_FILTERED_DATASET_DIMS       2
@@ -149,13 +156,6 @@ size_t             cd_nelmts = FILTER_NUM_CDVALUES;
 #define WRITE_SHARED_FILTERED_CHUNKS_3D_NROWS        (WRITE_SHARED_FILTERED_CHUNKS_3D_CH_NROWS * DIM0_SCALE_FACTOR)
 #define WRITE_SHARED_FILTERED_CHUNKS_3D_NCOLS        (WRITE_SHARED_FILTERED_CHUNKS_3D_CH_NCOLS * DIM1_SCALE_FACTOR)
 #define WRITE_SHARED_FILTERED_CHUNKS_3D_DEPTH        (mpi_size)
-
-/* Struct type for the compound datatype filtered dataset tests */
-typedef struct {
-    short  field1;
-    int    field2;
-    long   field3;
-} COMPOUND_C_DATATYPE;
 
 /* Defines for the compound datatype filtered dataset no conversion write test with unshared chunks */
 #define WRITE_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_UNSHARED_DATASET_NAME      "compound_unshared_filtered_chunks_no_conversion_write"
@@ -276,6 +276,42 @@ typedef struct {
 #define READ_SHARED_FILTERED_CHUNKS_3D_NROWS        (READ_SHARED_FILTERED_CHUNKS_3D_CH_NROWS * DIM0_SCALE_FACTOR)
 #define READ_SHARED_FILTERED_CHUNKS_3D_NCOLS        (READ_SHARED_FILTERED_CHUNKS_3D_CH_NCOLS * DIM1_SCALE_FACTOR)
 #define READ_SHARED_FILTERED_CHUNKS_3D_DEPTH        (mpi_size)
+
+/* Defines for the compound datatype filtered dataset no conversion read test with unshared chunks */
+#define READ_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_UNSHARED_DATASET_NAME      "compound_unshared_filtered_chunks_no_conversion_read"
+#define READ_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_UNSHARED_DATASET_DIMS      2
+#define READ_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_UNSHARED_NROWS             1
+#define READ_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_UNSHARED_NCOLS             mpi_size
+#define READ_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_UNSHARED_CH_NROWS          1
+#define READ_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_UNSHARED_CH_NCOLS          1
+#define READ_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_UNSHARED_ENTRIES_PER_PROC  (READ_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_UNSHARED_NCOLS / mpi_size)
+
+/* Defines for the compound datatype filtered dataset no conversion read test with shared chunks */
+#define READ_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_SHARED_DATASET_NAME      "compound_shared_filtered_chunks_no_conversion_read"
+#define READ_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_SHARED_DATASET_DIMS      2
+#define READ_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_SHARED_NROWS             mpi_size
+#define READ_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_SHARED_NCOLS             mpi_size
+#define READ_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_SHARED_CH_NROWS          mpi_size
+#define READ_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_SHARED_CH_NCOLS          1
+#define READ_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_SHARED_ENTRIES_PER_PROC  READ_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_SHARED_NCOLS
+
+/* Defines for the compound datatype filtered dataset type conversion read test with unshared chunks */
+#define READ_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_UNSHARED_DATASET_NAME      "compound_unshared_filtered_chunks_type_conversion_read"
+#define READ_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_UNSHARED_DATASET_DIMS      2
+#define READ_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_UNSHARED_NROWS             1
+#define READ_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_UNSHARED_NCOLS             mpi_size
+#define READ_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_UNSHARED_CH_NROWS          1
+#define READ_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_UNSHARED_CH_NCOLS          1
+#define READ_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_UNSHARED_ENTRIES_PER_PROC  (READ_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_UNSHARED_NCOLS / mpi_size)
+
+/* Defines for the compound datatype filtered dataset type conversion read test with shared chunks */
+#define READ_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_SHARED_DATASET_NAME      "compound_shared_filtered_chunks_type_conversion_read"
+#define READ_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_SHARED_DATASET_DIMS      2
+#define READ_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_SHARED_NROWS             mpi_size
+#define READ_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_SHARED_NCOLS             mpi_size
+#define READ_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_SHARED_CH_NROWS          mpi_size
+#define READ_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_SHARED_CH_NCOLS          1
+#define READ_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_SHARED_ENTRIES_PER_PROC  READ_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_SHARED_NCOLS
 
 /* Defines for the write file serially/read in parallel test */
 #define WRITE_SERIAL_READ_PARALLEL_DATASET_NAME "write_serial_read_parallel"

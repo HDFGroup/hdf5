@@ -2985,6 +2985,7 @@ H5D__filtered_collective_chunk_entry_io(H5D_filtered_collective_io_info_t *chunk
 {
     H5D_chunk_info_t *chunk_info = NULL;
     H5S_sel_iter_t   *mem_iter = NULL; /* Memory iterator for H5D__scatter_mem/H5D__gather_mem */
+    H5S_sel_iter_t   *file_iter = NULL;
     unsigned char    *mod_data = NULL; /* Chunk modification data sent by a process to a chunk's owner */
     H5Z_EDC_t         err_detect;       /* Error detection info */
     H5Z_cb_t          filter_cb;        /* I/O filter callback function */
@@ -2993,11 +2994,13 @@ H5D__filtered_collective_chunk_entry_io(H5D_filtered_collective_io_info_t *chunk
     hssize_t          extent_npoints;
     hsize_t           true_chunk_size;
     hbool_t           mem_iter_init = FALSE;
+    hbool_t           file_iter_init = FALSE;
     size_t            buf_size;
     size_t            i;
     H5S_t            *dataspace = NULL; /* Other process' dataspace for the chunk */
-    void             *tmp_gath_buf = NULL; /* Temporary gather buffer for owner of the chunk to gather into from
-                                            application write buffer before scattering out to the chunk data buffer */
+    void             *tmp_gath_buf = NULL; /* Temporary gather buffer to gather into from application buffer
+                                              before scattering out to the chunk data buffer (when writing data),
+                                              or vice versa (when reading data) */
     int               mpi_code;
     herr_t            ret_value = SUCCEED;
 
@@ -3077,9 +3080,6 @@ H5D__filtered_collective_chunk_entry_io(H5D_filtered_collective_io_info_t *chunk
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize memory selection information")
     mem_iter_init = TRUE;
 
-    if ((iter_nelmts = H5S_GET_SELECT_NPOINTS(chunk_info->mspace)) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTCOUNT, FAIL, "dataspace is invalid")
-
     /* If this is a read operation, scatter the read chunk data to the user's buffer.
      *
      * If this is a write operation, update the chunk data buffer with the modifications
@@ -3088,11 +3088,34 @@ H5D__filtered_collective_chunk_entry_io(H5D_filtered_collective_io_info_t *chunk
      */
     switch (io_info->op_type) {
         case H5D_IO_OP_READ:
-            if (H5D__scatter_mem(chunk_entry->buf, chunk_info->mspace, mem_iter, (size_t)iter_nelmts, io_info->u.rbuf) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "couldn't scatter to read buffer")
+            if (NULL == (file_iter = (H5S_sel_iter_t *) H5MM_malloc(sizeof(H5S_sel_iter_t))))
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate file iterator")
+
+            if (H5S_select_iter_init(file_iter, chunk_info->fspace, type_info->src_type_size) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize memory selection information")
+            file_iter_init = TRUE;
+
+            if ((iter_nelmts = H5S_GET_SELECT_NPOINTS(chunk_info->fspace)) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTCOUNT, FAIL, "dataspace is invalid")
+
+            if (NULL == (tmp_gath_buf = H5MM_malloc((hsize_t) iter_nelmts * type_info->src_type_size)))
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate temporary gather buffer")
+
+            if (!H5D__gather_mem(chunk_entry->buf, chunk_info->fspace, file_iter, iter_nelmts, tmp_gath_buf))
+                HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "couldn't gather from chunk buffer")
+
+            if ((iter_nelmts = H5S_GET_SELECT_NPOINTS(chunk_info->mspace)) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTCOUNT, FAIL, "dataspace is invalid")
+
+            if (H5D__scatter_mem(tmp_gath_buf, chunk_info->mspace, mem_iter, (size_t)iter_nelmts, io_info->u.rbuf) < 0)
+                   HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "couldn't scatter to read buffer")
+
             break;
 
         case H5D_IO_OP_WRITE:
+            if ((iter_nelmts = H5S_GET_SELECT_NPOINTS(chunk_info->mspace)) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTCOUNT, FAIL, "dataspace is invalid")
+
             if (NULL == (tmp_gath_buf = H5MM_malloc((hsize_t) iter_nelmts * type_info->src_type_size)))
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate temporary gather buffer")
 
@@ -3189,6 +3212,10 @@ done:
         HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "couldn't release selection iterator")
     if (mem_iter)
         H5MM_free(mem_iter);
+    if (file_iter_init && H5S_SELECT_ITER_RELEASE(file_iter) < 0)
+        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "couldn't release selection iterator")
+    if (file_iter)
+        H5MM_free(file_iter);
     if (dataspace)
         if (H5S_close(dataspace) < 0)
             HDONE_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "can't close dataspace")
