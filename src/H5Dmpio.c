@@ -2982,7 +2982,6 @@ H5D__filtered_collective_chunk_entry_io(H5D_filtered_collective_io_info_t *chunk
     H5D_chunk_info_t *chunk_info = NULL;
     H5S_sel_iter_t   *mem_iter = NULL; /* Memory iterator for H5D__scatter_mem/H5D__gather_mem */
     H5S_sel_iter_t   *file_iter = NULL;
-    unsigned char    *mod_data = NULL; /* Chunk modification data sent by a process to a chunk's owner */
     H5Z_EDC_t         err_detect;       /* Error detection info */
     H5Z_cb_t          filter_cb;        /* I/O filter callback function */
     unsigned          filter_mask = 0;
@@ -3200,18 +3199,16 @@ done:
         H5MM_free(chunk_entry->async_info.receive_buffer_array);
     if (chunk_entry->async_info.receive_requests_array)
         H5MM_free(chunk_entry->async_info.receive_requests_array);
-    if (mod_data)
-        H5MM_free(mod_data);
     if (tmp_gath_buf)
         H5MM_free(tmp_gath_buf);
-    if (mem_iter_init && H5S_SELECT_ITER_RELEASE(mem_iter) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "couldn't release selection iterator")
-    if (mem_iter)
-        H5MM_free(mem_iter);
     if (file_iter_init && H5S_SELECT_ITER_RELEASE(file_iter) < 0)
         HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "couldn't release selection iterator")
     if (file_iter)
         H5MM_free(file_iter);
+    if (mem_iter_init && H5S_SELECT_ITER_RELEASE(mem_iter) < 0)
+        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "couldn't release selection iterator")
+    if (mem_iter)
+        H5MM_free(mem_iter);
     if (dataspace)
         if (H5S_close(dataspace) < 0)
             HDONE_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "can't close dataspace")
