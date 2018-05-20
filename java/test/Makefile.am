@@ -70,7 +70,9 @@ noinst_JAVA = \
     TestH5Ocopy.java \
     TestH5PL.java \
     TestH5Z.java \
-    TestUnit.java
+    TestH5E.java \
+    TestH5Edefault.java \
+    TestH5Giterate.java
 
 $(jarfile): classnoinst.stamp classes
 	$(JAR) cvf $@ -C $(JAVAROOT)/ $(pkgpath)
