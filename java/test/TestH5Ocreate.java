@@ -37,7 +37,7 @@ import org.junit.rules.TestName;
 
 public class TestH5Ocreate {
     @Rule public TestName testname = new TestName();
-    private static final String H5_EXTFILE = "h5ex_g_iterate.hdf";
+    private static final String H5_EXTFILE = "h5ex_g_iterateO2.hdf";
     private static final String H5_FILE = "testO.h5";
     private static final int DIM_X = 4;
     private static final int DIM_Y = 6;

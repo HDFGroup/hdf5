@@ -205,11 +205,15 @@ COPY_DATAFILES_TO_BLDDIR()
         fi
     done
     $CP -f $HDFTEST_HOME/h5ex_g_iterate.orig $BLDDIR/h5ex_g_iterate.hdf
+    $CP -f $HDFTEST_HOME/h5ex_g_iterate.orig $BLDDIR/h5ex_g_iterateL1.hdf
+    $CP -f $HDFTEST_HOME/h5ex_g_iterate.orig $BLDDIR/h5ex_g_iterateL2.hdf
+    $CP -f $HDFTEST_HOME/h5ex_g_iterate.orig $BLDDIR/h5ex_g_iterateO1.hdf
+    $CP -f $HDFTEST_HOME/h5ex_g_iterate.orig $BLDDIR/h5ex_g_iterateO2.hdf
 }
 
 CLEAN_DATAFILES_AND_BLDDIR()
 {
-        $RM $BLDDIR/h5ex_g_iterate.hdf
+        $RM $BLDDIR/h5ex_g_iterate*.hdf
         $RM $BLDDIR/JUnit-*.out
         $RM $BLDDIR/JUnit-*.ext
         $RM $BLDDIR/JUnit-*.err
