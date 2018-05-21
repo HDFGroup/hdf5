@@ -3048,9 +3048,6 @@
 ./java/test/Makefile.am
 ./java/test/CMakeLists.txt
 ./java/test/junit.sh.in
-./java/test/JUnit-interface.txt
-./java/test/JUnit-unit.txt
-./java/test/JUnit-interface.ert
 ./java/test/testfiles/JUnit-TestH5.txt
 ./java/test/testfiles/JUnit-TestH5A.txt
 ./java/test/testfiles/JUnit-TestH5Dparams.txt
@@ -3125,7 +3122,6 @@
 ./java/test/TestH5T.java
 ./java/test/TestH5Z.java
 ./java/test/TestAll.java
-./java/test/TestUnit.java
 
 ./java/lib/hamcrest-core.jar
 ./java/lib/junit.jar
