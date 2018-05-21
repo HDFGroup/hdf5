@@ -12,7 +12,7 @@
 #############################################################################################
 ### ${CTEST_SCRIPT_ARG} is of the form OPTION=VALUE                                       ###
 ### BUILD_GENERATOR required [Unix, VS2017, VS201764, VS2015, VS201564, VS2013, VS201364] ###
-### ctest -S HDF518config.cmake,BUILD_GENERATOR=VS201264 -C Release -VV -O hdf518.log     ###
+### ctest -S HDF518config.cmake,BUILD_GENERATOR=VS201764 -C Release -VV -O hdf518.log     ###
 #############################################################################################
 
 cmake_minimum_required (VERSION 3.10)
@@ -42,7 +42,7 @@ set (CTEST_SOURCE_VERSEXT "")
 #BUILD_GENERATOR - which CMake generator to use, required
 #INSTALLDIR - HDF5-1.8 root folder
 #CTEST_CONFIGURATION_TYPE - Release, Debug, RelWithDebInfo
-#CTEST_SOURCE_NAME - name of source folder; HDF5-1.8.20
+#CTEST_SOURCE_NAME - name of source folder; HDF5-1.8.x
 if (DEFINED CTEST_SCRIPT_ARG)
     # transform ctest script arguments of the form
     # script.ctest,var1=value1,var2=value2
@@ -184,7 +184,7 @@ set (MODEL "Experimental")
 #####       Following controls source update                  #####
 #set (LOCAL_UPDATE "TRUE")
 set (REPOSITORY_URL "https://git@bitbucket.hdfgroup.org/scm/hdffv/hdf5.git")
-set (REPOSITORY_BRANCH "hdf5_1_8_20")
+set (REPOSITORY_BRANCH "hdf5_1_8_22")
 
 #uncomment to use a compressed source file: *.tar on linux or mac *.zip on windows
 #set(CTEST_USE_TAR_SOURCE "${CTEST_SOURCE_VERSION}")
