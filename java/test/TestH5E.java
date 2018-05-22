@@ -78,14 +78,15 @@ public class TestH5E {
             H5.H5Fopen("test", 0, 1);
         }
         catch (HDF5LibraryException hdferr) {
+            long errnum = hdferr.getMajorErrorNumber();
             int[] error_msg_type = { HDF5Constants.H5E_MAJOR };
             String msg = null;
             try {
-                msg = H5.H5Eget_msg(hdferr.getMajorErrorNumber(), error_msg_type);
+                msg = H5.H5Eget_msg(errnum, error_msg_type);
             }
             catch (Throwable err) {
                 err.printStackTrace();
-                fail("H5.H5Eget_msg: " + err);
+                fail("H5.H5Eget_msg(Throwable): " + err);
             }
             assertNotNull("H5.H5Eget_msg: " + msg, msg);
             assertEquals("H5.H5Eget_msg: ", "Invalid arguments to routine", msg);
@@ -93,7 +94,7 @@ public class TestH5E {
         }
         catch (Throwable err) {
             err.printStackTrace();
-            fail("H5.H5Eget_msg: " + err);
+            fail("H5.H5Eget_msg(Other): " + err);
         }
     }
 
@@ -103,10 +104,11 @@ public class TestH5E {
             H5.H5Fopen("test", 0, 1);
         }
         catch (HDF5LibraryException hdferr) {
+            long errnum = hdferr.getMinorErrorNumber();
             int[] error_msg_type = { HDF5Constants.H5E_MINOR };
             String msg = null;
             try {
-                msg = H5.H5Eget_msg(hdferr.getMinorErrorNumber(), error_msg_type);
+                msg = H5.H5Eget_msg(errnum, error_msg_type);
             }
             catch (Throwable err) {
                 err.printStackTrace();
@@ -323,11 +325,6 @@ public class TestH5E {
         }
         assertFalse("testH5Ewalk:H5Ewalk2 ",((H5E_walk_data)walk_data).walkdata.isEmpty());
         assertTrue("testH5Ewalk:H5Ewalk2 "+((H5E_walk_data)walk_data).walkdata.size(),((H5E_walk_data)walk_data).walkdata.size()==3);
-        assertTrue("testH5Ewalk:H5Ewalk2 "+((wdata)((H5E_walk_data)walk_data).walkdata.get(0)).line,((wdata)((H5E_walk_data)walk_data).walkdata.get(0)).line==3765);
-        assertTrue("testH5Ewalk:H5Ewalk2 "+((wdata)((H5E_walk_data)walk_data).walkdata.get(1)).line,((wdata)((H5E_walk_data)walk_data).walkdata.get(1)).line==5504);
-        assertTrue("testH5Ewalk:H5Ewalk2 "+((wdata)((H5E_walk_data)walk_data).walkdata.get(1)).func_name,((wdata)((H5E_walk_data)walk_data).walkdata.get(1)).func_name.compareToIgnoreCase("H5P_verify_apl_and_dxpl")==0);
-        assertTrue("testH5Ewalk:H5Ewalk2 "+((wdata)((H5E_walk_data)walk_data).walkdata.get(0)).err_desc,((wdata)((H5E_walk_data)walk_data).walkdata.get(0)).err_desc.compareToIgnoreCase("not a property list")==0);
-        assertTrue("testH5Ewalk:H5Ewalk2 "+((wdata)((H5E_walk_data)walk_data).walkdata.get(1)).err_desc,((wdata)((H5E_walk_data)walk_data).walkdata.get(1)).err_desc.compareToIgnoreCase("not the required access property list")==0);
     }
 
 }

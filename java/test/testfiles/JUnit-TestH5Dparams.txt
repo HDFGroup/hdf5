@@ -1,0 +1,26 @@
+JUnit version 4.11
+.testH5Dget_space_status_invalid
+.testH5Dget_access_plist_invalid
+.testH5Dget_type_invalid
+.testH5Dget_create_plist_invalid
+.testH5Dget_offset_invalid
+.testH5Dvlen_get_buf_size_invalid
+.testH5Dcreate_null
+.testH5Dset_extent_status_null
+.testH5Dvlen_reclaim_null
+.testH5Dcreate_invalid
+.testH5Dcreate_anon_invalid
+.testH5Dset_extent_status_invalid
+.testH5Dvlen_reclaim_invalid
+.testH5Dopen_invalid
+.testH5Dclose_invalid
+.testH5Dflush_invalid
+.testH5Drefresh_invalid
+.testH5Dget_storage_size_invalid
+.testH5Dget_space_invalid
+.testH5Dopen_null
+
+Time:  XXXX
+
+OK (20 tests)
+

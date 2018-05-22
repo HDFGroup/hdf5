@@ -1,23 +1,20 @@
 cmake_minimum_required (VERSION 3.10)
-PROJECT (HDF5_TOOLS_SRC_H5JAM)
-
-#-----------------------------------------------------------------------------
-# Setup include Directories
-#-----------------------------------------------------------------------------
-INCLUDE_DIRECTORIES (${HDF5_TOOLS_DIR}/lib)
+project (HDF5_TOOLS_SRC_H5JAM C)
 
 # --------------------------------------------------------------------
 # Add the h5jam executables
 # --------------------------------------------------------------------
 add_executable (h5jam ${HDF5_TOOLS_SRC_H5JAM_SOURCE_DIR}/h5jam.c)
-TARGET_C_PROPERTIES (h5jam STATIC " " " ")
-target_link_libraries (h5jam  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
+target_include_directories(h5jam PRIVATE "${HDF5_TOOLS_DIR}/lib;${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+TARGET_C_PROPERTIES (h5jam STATIC)
+target_link_libraries (h5jam PRIVATE ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
 set_target_properties (h5jam PROPERTIES FOLDER tools)
 set_global_variable (HDF5_UTILS_TO_EXPORT "${HDF5_UTILS_TO_EXPORT};h5jam")
 
 add_executable (h5unjam ${HDF5_TOOLS_SRC_H5JAM_SOURCE_DIR}/h5unjam.c)
-TARGET_C_PROPERTIES (h5unjam STATIC " " " ")
-target_link_libraries (h5unjam  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
+target_include_directories(h5unjam PRIVATE "${HDF5_TOOLS_DIR}/lib;${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+TARGET_C_PROPERTIES (h5unjam STATIC)
+target_link_libraries (h5unjam PRIVATE ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
 set_target_properties (h5unjam PROPERTIES FOLDER tools)
 set_global_variable (HDF5_UTILS_TO_EXPORT "${HDF5_UTILS_TO_EXPORT};h5unjam")
 

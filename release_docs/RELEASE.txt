@@ -114,7 +114,38 @@ Bug Fixes since HDF5-1.10.2 release
 
     Configuration
     -------------
-    -
+    - Moved the location of gcc attribute.
+
+      The gcc attribute(no_sanitize), named as the macro HDF_NO_UBSAN,
+      was located after the function name. Builds with GCC 7 did not
+      indicate any problem, but GCC 8 issued errors. Moved the
+      attribute before the function name, as required.
+
+      (ADB 2018/05/22, HDFFV-10473)
+
+    - Reworked java test suite into individual JUnit tests.
+
+      Testing the whole suite of java unit tests in a single JUnit run
+      made it difficult to determine actual failures when tests would fail.
+      Running each file set of tests individually, allows individual failures
+      to be diagnosed easier. A side benefit is that tests for optional components
+      of the library can be disabled if not configured.
+
+      (ADB 2018/05/16, HDFFV-9739)
+
+    - Converted CMake global commands ADD_DEFINITIONS and INCLUDE_DIRECTORIES
+      to use target_* type commands. This change modernizes the CMake usage
+      in the HDF5 library.
+
+      In addition, there is the intention to convert to generator expressions,
+      where possible. The exception is Fortran FLAGS on Windows Visual Studio.
+      The HDF macros TARGET_C_PROPERTIES and TARGET_FORTRAN_PROPERTIES have
+      been removed with this change in usage.
+
+      The additional language (C++ and Fortran) checks have also been localized
+      to only be checked when that language is enabled.
+
+      (ADB 2018/05/08)
 
     Performance
     -------------
@@ -174,25 +205,18 @@ Supported Platforms
     (emu)                         Sun Fortran 95 8.6 SunOS_sparc
                                   Sun C++ 5.12 SunOS_sparc
 
-    Windows 7                     Visual Studio 2012 w/ Intel Fortran 15 (cmake)
-                                  Visual Studio 2013 w/ Intel Fortran 15 (cmake)
-                                  Visual Studio 2015 w/ Intel Fortran 16 (cmake)
+    Windows 7                     Visual Studio 2015 w/ Intel Fortran 16 (cmake)
 
     Windows 7 x64                 Visual Studio 2012 w/ Intel Fortran 15 (cmake)
                                   Visual Studio 2013 w/ Intel Fortran 15 (cmake)
                                   Visual Studio 2015 w/ Intel Fortran 16 (cmake)
                                   Visual Studio 2015 w/ Intel C, Fortran 2017 (cmake)
                                   Visual Studio 2015 w/ MSMPI 8 (cmake)
-                                  Cygwin(CYGWIN_NT-6.1 2.8.0(0.309/5/3)
-                                      gcc and gfortran compilers (GCC 5.4.0)
-                                      (cmake and autotools)
 
     Windows 10                    Visual Studio 2015 w/ Intel Fortran 16 (cmake)
-                                  Cygwin(CYGWIN_NT-6.1 2.8.0(0.309/5/3)
-                                      gcc and gfortran compilers (GCC 5.4.0)
-                                      (cmake and autotools)
 
     Windows 10 x64                Visual Studio 2015 w/ Intel Fortran 16 (cmake)
+                                  Visual Studio 2017 w/ Intel Fortran 18 (cmake)
 
     Mac OS X Yosemite 10.10.5     Apple clang/clang++ version 6.1 from Xcode 7.0
     64-bit                        gfortran GNU Fortran (GCC) 4.9.2

@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.10)
-PROJECT (HDF5_HL_F90 C CXX Fortran)
+project (HDF5_HL_F90 C Fortran)
 
 #-----------------------------------------------------------------------------
 # List Source files

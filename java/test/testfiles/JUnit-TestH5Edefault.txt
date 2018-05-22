@@ -1,0 +1,54 @@
+JUnit version 4.11
+.testH5EprintInt
+.testH5Eset_current_stack_invalid_stkid
+.testH5Eset_current_stack
+.testH5Eget_num
+.testH5Eclear
+.testH5Eprint
+.testH5Epush_null_name
+.testH5Eget_num_with_msg
+.testH5Eclear2_with_msg
+.testH5Epush_invalid_stkid
+.testH5Eget_current_stack
+.testH5Ecreate_stack
+.testH5Eget_msg_invalid_msgid
+.testH5Eauto_is_v2
+.testH5EclearInt
+.testH5Eauto_is_v2_invalid_stkid
+.testH5Eclose_msg_invalid_errid
+.testH5Eclose_stack_invalid_stackid
+.testH5Eget_class_name_invalid_classname
+.testH5Eget_num_invalid_stkid
+.testH5EprintInt_invalid_classid
+.testH5Epop
+.testH5Epop_invalid_stkid
+.testH5Eget_current_stack_pop
+.testH5Eget_class_name_invalid_classid
+.testH5Ecreate_msg_invalid_errid
+.testH5Eclear2_invalid_stkid
+.testH5Eprint2_invalid_classid
+
+Time:  XXXX
+
+OK (28 tests)
+
+HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
+  #000: (file name) line (number) in H5Fopen(): can't set access and transfer property lists
+    major: File accessibilty
+    minor: Can't set value
+  #001: (file name) line (number) in H5P_verify_apl_and_dxpl(): not the required access property list
+    major: Property lists
+    minor: Inappropriate type
+  #002: (file name) line (number) in H5P_isa_class(): not a property list
+    major: Invalid arguments to routine
+    minor: Inappropriate type
+HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
+  #000: (file name) line (number) in H5Fopen(): can't set access and transfer property lists
+    major: File accessibilty
+    minor: Can't set value
+  #001: (file name) line (number) in H5P_verify_apl_and_dxpl(): not the required access property list
+    major: Property lists
+    minor: Inappropriate type
+  #002: (file name) line (number) in H5P_isa_class(): not a property list
+    major: Invalid arguments to routine
+    minor: Inappropriate type

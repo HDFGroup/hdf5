@@ -34,7 +34,7 @@ import org.junit.rules.TestName;
 
 public class TestH5Lbasic {
     @Rule public TestName testname = new TestName();
-    private static final String H5_FILE = "h5ex_g_iterate.hdf";
+    private static final String H5_FILE = "h5ex_g_iterateL1.hdf";
     long H5fid = -1;
 
     @Before

@@ -1,0 +1,11 @@
+JUnit version 4.11
+.testH5Tequal_not
+.testH5Tcopy
+.testH5Tequal
+.testH5Torder_size
+.testH5Tconvert
+
+Time:  XXXX
+
+OK (5 tests)
+
