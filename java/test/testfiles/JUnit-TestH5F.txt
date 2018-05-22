@@ -1,0 +1,14 @@
+JUnit version 4.11
+.testH5Fget_access_plist
+.testH5Fget_obj_ids
+.testH5Fget_intent_rdwr
+.testH5Fget_access_plist_closed
+.testH5Fget_create_plist_closed
+.testH5Fget_intent_rdonly
+.testH5Fget_create_plist
+.testH5Fget_obj_count
+
+Time:  XXXX
+
+OK (8 tests)
+

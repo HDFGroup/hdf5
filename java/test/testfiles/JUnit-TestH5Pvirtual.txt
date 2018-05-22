@@ -1,0 +1,17 @@
+JUnit version 4.11
+.testH5Pget_source_datasetname
+.testH5Pvirtual_storage
+.testH5Pget_selection_source_dataset
+.testH5Pget_virtual_prefix
+.testH5Pget_source_filename
+.testH5Pset_get_virtual_printf_gap
+.testH5Pget_virtual_count
+.testH5Pset_virtual_prefix
+.testH5Pset_get_virtual_view
+.testH5Pget_mapping_parameters
+.testH5Pset_virtual_prefix_null
+
+Time:  XXXX
+
+OK (11 tests)
+
