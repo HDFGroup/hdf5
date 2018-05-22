@@ -125,7 +125,7 @@ Bug Fixes since HDF5-1.10.2 release
 
       The gcc attribute(no_sanitize), named as the macro HDF_NO_UBSAN,
       was located after the function name. Builds with GCC 7 did not
-      indicate any problem, but GCC 8 issied errors. Moved the
+      indicate any problem, but GCC 8 issued errors. Moved the
       attribute before the function name, as required.
 
       (ADB 2018/05/22, HDFFV-10473)
