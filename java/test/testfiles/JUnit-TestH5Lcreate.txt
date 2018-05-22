@@ -1,0 +1,42 @@
+JUnit version 4.11
+.testH5Lget_info_by_idx_n0_create
+.testH5Ldelete_soft_link_dangle
+.testH5Lget_value_by_idx_external_create
+.testH5Ldelete_by_idx_not_exist_create
+.testH5Lvisit_create
+.testH5Lmove_dst_link_exists
+.testH5Lcreate_soft_dangle
+.testH5Literate_create
+.testH5Lcopy_cur_not_exists
+.testH5Lcopy
+.testH5Lmove
+.testH5Lget_value_by_idx_n2_create
+.testH5Lget_value_soft
+.testH5Ldelete_by_idx_n2_name
+.testH5Lget_info_by_idx_n1_create
+.testH5Lcreate_external
+.testH5Lget_value_dangle
+.testH5Lcreate_hard_dst_link_exists
+.testH5Lget_value_by_idx_n2_name
+.testH5Lcreate_soft_dst_link_exists
+.testH5Lcreate_hard
+.testH5Lcreate_soft
+.testH5Lmove_cur_not_exists
+.testH5Lcreate_hard_cur_not_exists
+.testH5Lget_info_softlink_dangle
+.testH5Ldelete_by_idx_n2_create
+.testH5Ldelete_soft_link
+.testH5Lget_info_externallink
+.testH5Lcopy_dst_link_exists
+.testH5Lget_value_by_idx_external_name
+.testH5Ldelete_by_idx_not_exist_name
+.testH5Lget_info_softlink
+.testH5Lget_value_external
+.testH5Lget_value_by_idx_not_exist_create
+.testH5Lget_value_by_idx_not_exist_name
+.testH5Ldelete_hard_link
+
+Time:  XXXX
+
+OK (36 tests)
+

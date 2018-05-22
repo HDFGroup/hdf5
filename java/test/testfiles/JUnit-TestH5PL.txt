@@ -1,0 +1,8 @@
+JUnit version 4.11
+.TestH5PLplugins
+.TestH5PLpaths
+
+Time:  XXXX
+
+OK (2 tests)
+

@@ -1,0 +1,23 @@
+JUnit version 4.11
+.testH5Rgetregion_Nullreference
+.testH5Rget_obj_type2_Invalidreftype
+.testH5Rdereference
+.testH5Rget_name
+.testH5Rcreate_Invalidreftype
+.testH5Rget_name_NULLreference
+.testH5Rget_region
+.testH5Rdereference_Nullreference
+.testH5Rcreate_refobj
+.testH5Rcreate_Invalidspace_id
+.testH5Rdereference_Invalidreference
+.testH5Rgetregion_Badreferencetype
+.testH5Rcreate_regionrefobj
+.testH5Rget_name_Invalidreftype
+.testH5Rgetregion_Invalidreftype
+.testH5Rget_obj_type2
+.testH5Rcreate_InvalidObjectName
+
+Time:  XXXX
+
+OK (17 tests)
+
