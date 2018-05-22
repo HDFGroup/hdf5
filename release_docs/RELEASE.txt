@@ -121,7 +121,16 @@ Bug Fixes since HDF5-1.10.2 release
 
     Configuration
     -------------
-      Reworked java test suite into individual JUnit tests.
+    - Moved the location of gcc attribute.
+
+      The gcc attribute(no_sanitize), named as the macro HDF_NO_UBSAN,
+      was located after the function name. Builds with GCC 7 did not
+      indicate any problem, but GCC 8 issued errors. Moved the
+      attribute before the function name, as required.
+
+      (ADB 2018/05/22, HDFFV-10473)
+
+    - Reworked java test suite into individual JUnit tests.
 
       Testing the whole suite of java unit tests in a single JUnit run
       made it difficult to determine actual failures when tests would fail.
