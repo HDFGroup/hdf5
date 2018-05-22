@@ -1,0 +1,40 @@
+============================
+ external  Test Log
+============================
+Testing with the default file format:
+Testing fixed-size data space, exact storage                           PASSED
+Testing external storage is too small                                  PASSED
+Testing extendible dataspace, exact external size                      PASSED
+Testing extendible dataspace, external storage is too small            PASSED
+Testing unlimited dataspace, unlimited external storage                PASSED
+Testing multiple external files                                        PASSED
+Testing external file following unlimited file                         PASSED
+Testing address overflow in external files                             PASSED
+Testing read external dataset                                          PASSED
+Testing write external dataset                                         PASSED
+Testing absolute filenames for external file                           PASSED
+Testing filenames relative to current directory for external file      PASSED
+Testing filenames relative to HDF5 file for external file              PASSED
+Testing prefix in HDF5_EXTFILE_PREFIX                                  PASSED
+
+Testing with the latest file format:
+Testing fixed-size data space, exact storage                           PASSED
+Testing external storage is too small                                  PASSED
+Testing extendible dataspace, exact external size                      PASSED
+Testing extendible dataspace, external storage is too small            PASSED
+Testing unlimited dataspace, unlimited external storage                PASSED
+Testing multiple external files                                        PASSED
+Testing external file following unlimited file                         PASSED
+Testing address overflow in external files                             PASSED
+Testing read external dataset                                          PASSED
+Testing write external dataset                                         PASSED
+Testing absolute filenames for external file                           PASSED
+Testing filenames relative to current directory for external file      PASSED
+Testing filenames relative to HDF5 file for external file              PASSED
+Testing prefix in HDF5_EXTFILE_PREFIX                                  PASSED
+All external storage tests passed.
+0.06user 0.04system 0:00.27elapsed 39%CPU (0avgtext+0avgdata 7076maxresident)k
+0inputs+1168outputs (0major+9179minor)pagefaults 0swaps
+
+Finished testing external 
+============================

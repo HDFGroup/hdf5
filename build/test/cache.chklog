@@ -1,0 +1,52 @@
+============================
+ cache  Test Log
+============================
+Testing smoke check #1 -- all clean, ins, dest, ren, 4/2 MB cache      PASSED
+Testing smoke check #2 -- ~1/2 dirty, ins, dest, ren, 4/2 MB cache     PASSED
+Testing smoke check #3 -- all clean, ins, dest, ren, 2/1 KB cache      PASSED
+Testing smoke check #4 -- ~1/2 dirty, ins, dest, ren, 2/1 KB cache     PASSED
+Testing smoke check #5 -- all clean, ins, prot, unprot, AR cache 1     PASSED
+Testing smoke check #6 -- ~1/2 dirty, ins, prot, unprot, AR cache 1    PASSED
+Testing smoke check #7 -- all clean, ins, prot, unprot, AR cache 2     PASSED
+Testing smoke check #8 -- ~1/2 dirty, ins, prot, unprot, AR cache 2    PASSED
+Testing smoke check #9 -- all clean, ins, dest, ren, 4/2 MB, corked    PASSED
+Testing smoke check #10 -- ~1/2 dirty, ins, dest, ren, 4/2 MB, corked  PASSED
+Testing write permitted check -- 1/0 MB cache                          -SKIP-
+	Clean and dirty LRU lists disabled.
+Testing H5C_insert_entry() functionality                               PASSED
+Testing H5C_flush_cache() functionality                                PASSED
+Testing H5C_get_entry_status() functionality                           PASSED
+Testing H5C_expunge_entry() functionality                              PASSED
+Testing multiple read only protects on a single entry                  PASSED
+Testing H5C_move_entry() functionality                                 PASSED
+Testing H5C_pin_protected_entry() functionality                        PASSED
+Testing entry resize functionality                                     PASSED
+Testing evictions enabled/disabled functionality                       PASSED
+Testing flush cache with protected entry error                         PASSED
+Testing destroy cache with permanently pinned entry error              PASSED
+Testing destroy cache with protected entry error                       PASSED
+Testing duplicate entry insertion error                                PASSED
+Testing move to existing entry errors                                  PASSED
+Testing pin a pinned entry error                                       PASSED
+Testing unpin an unpinned entry error                                  PASSED
+Testing pin entry related errors                                       PASSED
+Testing protect a protected entry error                                PASSED
+Testing unprotect an unprotected entry error                           PASSED
+Testing mark entry dirty related errors                                PASSED
+Testing expunge entry related errors                                   PASSED
+Testing resize entry related errors                                    PASSED
+Testing unprotect a read only entry dirty error                        PASSED
+Testing protect a read only entry rw error                             PASSED
+Testing get/set evictions enabled errors                               PASSED
+Testing automatic cache resizing                                       PASSED
+Testing automatic cache resize disable                                 PASSED
+Testing automatic cache resize epoch marker management                 PASSED
+Testing automatic cache resize input errors                            PASSED
+Testing automatic cache resize auxilary functions                      PASSED
+Testing to ensure metadata blizzard absence when inserting             PASSED
+Testing to ensure metadata blizzard absence on protect/unprotect       PASSED
+12.18user 0.16system 0:13.18elapsed 93%CPU (0avgtext+0avgdata 128752maxresident)k
+0inputs+1600outputs (0major+76670minor)pagefaults 0swaps
+
+Finished testing cache 
+============================

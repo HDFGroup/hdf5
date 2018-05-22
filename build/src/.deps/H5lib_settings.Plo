@@ -1,0 +1,3 @@
+H5lib_settings.lo: H5lib_settings.c /usr/include/stdc-predef.h
+
+/usr/include/stdc-predef.h:

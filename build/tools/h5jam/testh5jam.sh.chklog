@@ -1,0 +1,88 @@
+============================
+testh5jam.sh  Test Log
+============================
+Testing h5jam -h                                                       PASSED
+Testing h5jam -i tall.h5 -u tall.h5 -o tall-tmp.h5                     PASSED
+Testing h5jam -u u10.txt -i tall.h5 -o ta2.h5                          PASSED
+Compare ta2.h5 to ./testfiles/tall.h5                                  PASSED
+Testing h5jam -u u511.txt -i tall.h5 -o ta3.h5                         PASSED
+Compare ta3.h5 to ./testfiles/tall.h5                                  PASSED
+Testing h5jam -u u512.txt -i tall.h5 -o ta4.h5                         PASSED
+Compare ta4.h5 to ./testfiles/tall.h5                                  PASSED
+Testing h5jam -u u513.txt -i tall.h5 -o ta5.h5                         PASSED
+Compare ta5.h5 to ./testfiles/tall.h5                                  PASSED
+Testing jam -u u10.txt -i ta6.h5                                       PASSED
+Compare ta6.h5 to ./testfiles/tall.h5                                  PASSED
+Testing jam -u u511.txt -i ta7.h5                                      PASSED
+Compare ta7.h5 to ./testfiles/tall.h5                                  PASSED
+Testing jam -u u512.txt -i ta8.h5                                      PASSED
+Compare ta8.h5 to ./testfiles/tall.h5                                  PASSED
+Testing jam -u u513.txt -i ta9.h5                                      PASSED
+Compare ta9.h5 to ./testfiles/tall.h5                                  PASSED
+Testing h5jam -u u10.txt -i twithub.h5 -o tax2.h5                      PASSED
+Compare tax2.h5 to ./testfiles/tall.h5                                 PASSED
+Testing h5jam -u u511.txt -i twithub.h5 -o tax3.h5                     PASSED
+Compare tax3.h5 to ./testfiles/tall.h5                                 PASSED
+Testing h5jam -u u512.txt -i twithub.h5 -o tax4.h5                     PASSED
+Compare tax4.h5 to ./testfiles/tall.h5                                 PASSED
+Testing h5jam -u u513.txt -i twithub.h5 -o tax5.h5                     PASSED
+Compare tax5.h5 to ./testfiles/tall.h5                                 PASSED
+Testing h5jam -u u10.txt -i twithub513.h5 -o tax6.h5                   PASSED
+Compare tax6.h5 to ./testfiles/tall.h5                                 PASSED
+Testing h5jam -u u511.txt -i twithub513.h5 -o tax7.h5                  PASSED
+Compare tax7.h5 to ./testfiles/tall.h5                                 PASSED
+Testing h5jam -u u512.txt -i twithub513.h5 -o tax8.h5                  PASSED
+Compare tax8.h5 to ./testfiles/tall.h5                                 PASSED
+Testing h5jam -u u513.txt -i twithub513.h5 -o tax9.h5                  PASSED
+Compare tax9.h5 to ./testfiles/tall.h5                                 PASSED
+Testing h5jam -u u10.txt -i twithub.h5 -o taz2.h5 --clobber            PASSED
+Compare taz2.h5 to ./testfiles/tall.h5                                 PASSED
+Testing h5jam -u u511.txt -i twithub.h5 -o taz3.h5 --clobber           PASSED
+Compare taz3.h5 to ./testfiles/tall.h5                                 PASSED
+Testing h5jam -u u512.txt -i twithub.h5 -o taz4.h5 --clobber           PASSED
+Compare taz4.h5 to ./testfiles/tall.h5                                 PASSED
+Testing h5jam -u u513.txt -i twithub.h5 -o taz5.h5 --clobber           PASSED
+Compare taz5.h5 to ./testfiles/tall.h5                                 PASSED
+Testing h5jam -u u10.txt -i twithub513.h5 -o taz6.h5 --clobber         PASSED
+Compare taz6.h5 to ./testfiles/tall.h5                                 PASSED
+Testing h5jam -u u511.txt -i twithub513.h5 -o taz7.h5 --clobber        PASSED
+Compare taz7.h5 to ./testfiles/tall.h5                                 PASSED
+Testing h5jam -u u512.txt -i twithub513.h5 -o taz8.h5 --clobber        PASSED
+Compare taz8.h5 to ./testfiles/tall.h5                                 PASSED
+Testing h5jam -u u513.txt -i twithub513.h5 -o taz9.h5 --clobber        PASSED
+Compare taz9.h5 to ./testfiles/tall.h5                                 PASSED
+Testing jam -u u10.txt -i tay2.h5 --clobber                            PASSED
+Compare tay2.h5 to ./testfiles/tall.h5                                 PASSED
+Testing jam -u u511.txt -i tay3.h5 --clobber                           PASSED
+Compare tay3.h5 to ./testfiles/tall.h5                                 PASSED
+Testing jam -u u512.txt -i tay4.h5 --clobber                           PASSED
+Compare tay4.h5 to ./testfiles/tall.h5                                 PASSED
+Testing jam -u u513.txt -i tay5.h5 --clobber                           PASSED
+Compare tay5.h5 to ./testfiles/tall.h5                                 PASSED
+Testing jam -u u10.txt -i tay6.h5 --clobber                            PASSED
+Compare tay6.h5 to ./testfiles/tall.h5                                 PASSED
+Testing jam -u u511.txt -i tay7.h5 --clobber                           PASSED
+Compare tay7.h5 to ./testfiles/tall.h5                                 PASSED
+Testing jam -u u512.txt -i tay8.h5 --clobber                           PASSED
+Compare tay8.h5 to ./testfiles/tall.h5                                 PASSED
+Testing jam -u u513.txt -i tay9.h5 --clobber                           PASSED
+Compare tay9.h5 to ./testfiles/tall.h5                                 PASSED
+Testing h5jam -h                                                       PASSED
+Testing h5unjam -i tai1.h5 -u o10.txt -o taa1.h5                       PASSED
+Compare taa1.h5 to ./testfiles/tall.h5                                 PASSED
+Testing h5unjam -i tai2.h5 -u o512.txt -o taa2.h5                      PASSED
+Compare taa2.h5 to ./testfiles/tall.h5                                 PASSED
+Testing h5unjam -i tai3.h5 -o taa3.h5 > uofile                         PASSED
+Compare taa3.h5 to ./testfiles/tall.h5                                 PASSED
+Testing h5unjam -i tai4.h5 -o taa4.h5 > uofile                         PASSED
+Compare taa4.h5 to ./testfiles/tall.h5                                 PASSED
+Testing h5unjam -i taj2.h5 -o tac2.h5 --delete                         PASSED
+Compare tac2.h5 to ./testfiles/tall.h5                                 PASSED
+Testing h5unjam -i taj3.h5 -o tac3.h5 --delete                         PASSED
+Compare tac3.h5 to ./testfiles/tall.h5                                 PASSED
+All h5jam/h5unjam tests passed.
+3.01user 4.61system 0:06.54elapsed 116%CPU (0avgtext+0avgdata 7316maxresident)k
+0inputs+5448outputs (0major+1433222minor)pagefaults 0swaps
+
+Finished testing testh5jam.sh 
+============================

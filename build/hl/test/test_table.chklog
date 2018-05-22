@@ -1,0 +1,48 @@
+============================
+ test_table  Test Log
+============================
+Testing table with file creation mode (read/write in native architecture):
+Testing     making table                                               PASSED
+Testing     reading table                                              PASSED
+Testing     writing records                                            PASSED
+Testing     reading records                                            PASSED
+Testing     appending records                                          PASSED
+Testing     inserting records                                          PASSED
+Testing     deleting records                                           PASSED
+Testing     deleting records (differing memory layout)                 PASSED
+Testing     adding records                                             PASSED
+Testing     combining tables                                           PASSED
+Testing     writing fields by name                                     PASSED
+Testing     reading fields by name                                     PASSED
+Testing     writing fields by index                                    PASSED
+Testing     reading fields by index                                    PASSED
+Testing     inserting fields                                           PASSED
+Testing     deleting fields                                            PASSED
+Testing     getting table info                                         PASSED
+Testing     getting field info                                         PASSED
+Testing table with file open mode (read big-endian data):
+Testing     reading table                                              PASSED
+Testing     reading records                                            PASSED
+Testing     reading fields by name                                     PASSED
+Testing     reading fields by index                                    PASSED
+Testing     getting table info                                         PASSED
+Testing     getting field info                                         PASSED
+Testing table with file open mode (read little-endian data):
+Testing     reading table                                              PASSED
+Testing     reading records                                            PASSED
+Testing     reading fields by name                                     PASSED
+Testing     reading fields by index                                    PASSED
+Testing     getting table info                                         PASSED
+Testing     getting field info                                         PASSED
+Testing table with file open mode (read Cray data):
+Testing     reading table                                              PASSED
+Testing     reading records                                            PASSED
+Testing     reading fields by name                                     PASSED
+Testing     reading fields by index                                    PASSED
+Testing     getting table info                                         PASSED
+Testing     getting field info                                         PASSED
+0.11user 0.05system 0:00.19elapsed 88%CPU (0avgtext+0avgdata 7252maxresident)k
+0inputs+272outputs (0major+25234minor)pagefaults 0swaps
+
+Finished testing test_table 
+============================

@@ -1,0 +1,87 @@
+============================
+ dtransform  Test Log
+============================
+Testing Intializing test...                                            PASSED
+Testing H5Pget_data_transform (get before set)                         PASSED
+Testing H5Pset_data_transform (set with NULL transform)                PASSED
+Testing H5Pset_data_transform (set with invalid transform 1)           PASSED
+Testing H5Pset_data_transform (set with invalid transform 2)           PASSED
+Testing H5Pset_data_transform (set with invalid transform 3)           PASSED
+Testing H5Pset_data_transform (set with invalid transform 4)           PASSED
+Testing H5Pset_data_transform (set with invalid transform 5)           PASSED
+Testing H5Pset_data_transform (set with invalid transform 6)           PASSED
+Testing H5Pset_data_transform (set with invalid transform 7)           PASSED
+Testing H5Pset_data_transform (set with invalid transform 8)           PASSED
+Testing contiguous, no data type conversion (char->char)               PASSED
+Testing contiguous, byte order conversion (char->char)                 PASSED
+Testing contiguous, no data type conversion (uchar->uchar)             PASSED
+Testing contiguous, byte order conversion (uchar->uchar)               PASSED
+Testing contiguous, no data type conversion (schar->schar)             PASSED
+Testing contiguous, byte order conversion (schar->schar)               PASSED
+Testing contiguous, with type conversion (float->schar)                PASSED
+Testing contiguous, no data type conversion (short->short)             PASSED
+Testing contiguous, byte order conversion (short->short)               PASSED
+Testing contiguous, with type conversion (float->short)                PASSED
+Testing contiguous, no data type conversion (ushort->ushort)           PASSED
+Testing contiguous, byte order conversion (ushort->ushort)             PASSED
+Testing contiguous, no data type conversion (int->int)                 PASSED
+Testing contiguous, byte order conversion (int->int)                   PASSED
+Testing contiguous, with type conversion (float->int)                  PASSED
+Testing contiguous, no data type conversion (uint->uint)               PASSED
+Testing contiguous, byte order conversion (uint->uint)                 PASSED
+Testing contiguous, no data type conversion (long->long)               PASSED
+Testing contiguous, byte order conversion (long->long)                 PASSED
+Testing contiguous, with type conversion (float->long)                 PASSED
+Testing contiguous, no data type conversion (ulong->ulong)             PASSED
+Testing contiguous, byte order conversion (ulong->ulong)               PASSED
+Testing contiguous, no data type conversion (llong->llong)             PASSED
+Testing contiguous, byte order conversion (llong->llong)               PASSED
+Testing contiguous, with type conversion (float->llong)                PASSED
+Testing contiguous, no data type conversion (ullong->ullong)           PASSED
+Testing contiguous, byte order conversion (ullong->ullong)             PASSED
+Testing contiguous, no data type conversion (float->float)             PASSED
+Testing contiguous, byte order conversion (float->float)               PASSED
+Testing contiguous, with type conversion (float->float)                PASSED
+Testing contiguous, no data type conversion (double->double)           PASSED
+Testing contiguous, byte order conversion (double->double)             PASSED
+Testing contiguous, with type conversion (float->double)               PASSED
+Testing contiguous, no data type conversion (ldouble->ldouble)         PASSED
+Testing contiguous, byte order conversion (ldouble->ldouble)           PASSED
+Testing contiguous, with type conversion (float->ldouble)              PASSED
+Testing chunked, no data type conversion (char->char)                  PASSED
+Testing chunked, no data type conversion (uchar->uchar)                PASSED
+Testing chunked, no data type conversion (schar->schar)                PASSED
+Testing chunked, with type conversion (float->schar)                   PASSED
+Testing chunked, no data type conversion (short->short)                PASSED
+Testing chunked, with type conversion (float->short)                   PASSED
+Testing chunked, no data type conversion (ushort->ushort)              PASSED
+Testing chunked, no data type conversion (int->int)                    PASSED
+Testing chunked, with type conversion (float->int)                     PASSED
+Testing chunked, no data type conversion (uint->uint)                  PASSED
+Testing chunked, no data type conversion (long->long)                  PASSED
+Testing chunked, with type conversion (float->long)                    PASSED
+Testing chunked, no data type conversion (ulong->ulong)                PASSED
+Testing chunked, no data type conversion (llong->llong)                PASSED
+Testing chunked, with type conversion (float->llong)                   PASSED
+Testing chunked, no data type conversion (ullong->ullong)              PASSED
+Testing chunked, no data type conversion (float->float)                PASSED
+Testing chunked, with type conversion (float->float)                   PASSED
+Testing chunked, no data type conversion (double->double)              PASSED
+Testing chunked, with type conversion (float->double)                  PASSED
+Testing chunked, no data type conversion (ldouble->ldouble)            PASSED
+Testing chunked, with type conversion (float->ldouble)                 PASSED
+Testing data transform, linear transform w/ copied property            PASSED
+Testing data transform, polynomial transform w/ copied property        PASSED
+Testing data transform, trivial transform, without type conversion     PASSED
+Testing data transform, trivial transform, with type conversion        PASSED
+Testing data transform, polynomial transform (int->float)              PASSED
+Testing data transform, polynomial transform (float->int)              PASSED
+Testing H5Pget_data_transform                                          PASSED
+Testing data transform, read after reseting of transform property      PASSED
+Testing H5Pget_data_transform, after resetting transform property      PASSED
+Testing data transform of some special cases                           PASSED
+0.06user 0.03system 0:00.09elapsed 103%CPU (0avgtext+0avgdata 7088maxresident)k
+0inputs+536outputs (0major+9003minor)pagefaults 0swaps
+
+Finished testing dtransform 
+============================

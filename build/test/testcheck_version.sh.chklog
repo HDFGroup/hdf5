@@ -1,0 +1,40 @@
+============================
+testcheck_version.sh  Test Log
+============================
+Tests for the H5check_version function.
+Note that abort messages may appear due to the expected termination
+of the program when it is tested with mis-matched version numnbers.
+tcheck_version                                                         PASSED
+tcheck_version -tM                                                     PASSED
+tcheck_version -tm                                                     PASSED
+tcheck_version -tr                                                     PASSED
+env HDF5_DISABLE_VERSION_CHECK= tcheck_version                         PASSED
+env HDF5_DISABLE_VERSION_CHECK= tcheck_version -tM                     PASSED
+env HDF5_DISABLE_VERSION_CHECK= tcheck_version -tm                     PASSED
+env HDF5_DISABLE_VERSION_CHECK= tcheck_version -tr                     PASSED
+env HDF5_DISABLE_VERSION_CHECK=-1 tcheck_version                       PASSED
+env HDF5_DISABLE_VERSION_CHECK=-1 tcheck_version -tM                   PASSED
+env HDF5_DISABLE_VERSION_CHECK=-1 tcheck_version -tm                   PASSED
+env HDF5_DISABLE_VERSION_CHECK=-1 tcheck_version -tr                   PASSED
+env HDF5_DISABLE_VERSION_CHECK=0 tcheck_version                        PASSED
+env HDF5_DISABLE_VERSION_CHECK=0 tcheck_version -tM                    PASSED
+env HDF5_DISABLE_VERSION_CHECK=0 tcheck_version -tm                    PASSED
+env HDF5_DISABLE_VERSION_CHECK=0 tcheck_version -tr                    PASSED
+env HDF5_DISABLE_VERSION_CHECK=1 tcheck_version                        PASSED
+env HDF5_DISABLE_VERSION_CHECK=1 tcheck_version -tM                    PASSED
+env HDF5_DISABLE_VERSION_CHECK=1 tcheck_version -tm                    PASSED
+env HDF5_DISABLE_VERSION_CHECK=1 tcheck_version -tr                    PASSED
+env HDF5_DISABLE_VERSION_CHECK=2 tcheck_version                        PASSED
+env HDF5_DISABLE_VERSION_CHECK=2 tcheck_version -tM                    PASSED
+env HDF5_DISABLE_VERSION_CHECK=2 tcheck_version -tm                    PASSED
+env HDF5_DISABLE_VERSION_CHECK=2 tcheck_version -tr                    PASSED
+env HDF5_DISABLE_VERSION_CHECK=3 tcheck_version                        PASSED
+env HDF5_DISABLE_VERSION_CHECK=3 tcheck_version -tM                    PASSED
+env HDF5_DISABLE_VERSION_CHECK=3 tcheck_version -tm                    PASSED
+env HDF5_DISABLE_VERSION_CHECK=3 tcheck_version -tr                    PASSED
+No error encountered
+0.35user 0.74system 0:00.89elapsed 122%CPU (0avgtext+0avgdata 6900maxresident)k
+0inputs+480outputs (0major+219470minor)pagefaults 0swaps
+
+Finished testing testcheck_version.sh 
+============================

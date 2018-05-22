@@ -1,0 +1,239 @@
+============================
+h5repack.sh  Test Log
+============================
+Testing h5repack -h                                                    PASSED
+fill h5repack_fill.h5
+Testing h5repack                                                       PASSED
+Verifying h5diff output h5repack_fill.h5 out-fill.h5repack_fill.h5     PASSED
+objs h5repack_objs.h5
+Testing h5repack                                                       PASSED
+Verifying h5diff output h5repack_objs.h5 out-objs.h5repack_objs.h5     PASSED
+attr h5repack_attr.h5
+Testing h5repack                                                       PASSED
+Verifying h5diff output h5repack_attr.h5 out-attr.h5repack_attr.h5     PASSED
+hlink h5repack_hlink.h5
+Testing h5repack                                                       PASSED
+Verifying h5diff output h5repack_hlink.h5 out-hlink.h5repack_hlink.h5  PASSED
+layout h5repack_layout.h5
+Testing h5repack                                                       PASSED
+Verifying h5diff output h5repack_layout.h5 out-layout.h5repack_layout. PASSED
+early h5repack_early.h5
+Testing h5repack                                                       PASSED
+Verifying h5diff output h5repack_early.h5 out-early.h5repack_early.h5  PASSED
+nested_8bit_enum h5repack_nested_8bit_enum_deflated.h5
+Testing h5repack                                                       PASSED
+Verifying h5diff output h5repack_nested_8bit_enum_deflated.h5 out-nest PASSED
+gzip_individual h5repack_layout.h5 -f dset1:GZIP=1 -l dset1:CHUNK=20x10
+Testing h5repack -f dset1:GZIP=1 -l dset1:CHUNK=20x10                  PASSED
+Verifying h5diff output h5repack_layout.h5 out-gzip_individual.h5repac PASSED
+gzip_all h5repack_layout.h5 -f GZIP=1
+Testing h5repack -f GZIP=1                                             PASSED
+Verifying h5diff output h5repack_layout.h5 out-gzip_all.h5repack_layou PASSED
+Testing h5repack h5repack_layout.h5 -f dset2:SZIP=8,EC -l dset2:CHUNK= -SKIP-
+Testing h5repack h5repack_layout.h5 -f SZIP=8,NN                       -SKIP-
+shuffle_individual h5repack_layout.h5 -f dset2:SHUF -l dset2:CHUNK=20x10
+Testing h5repack -f dset2:SHUF -l dset2:CHUNK=20x10                    PASSED
+Verifying h5diff output h5repack_layout.h5 out-shuffle_individual.h5re PASSED
+shuffle_all h5repack_layout.h5 -f SHUF
+Testing h5repack -f SHUF                                               PASSED
+Verifying h5diff output h5repack_layout.h5 out-shuffle_all.h5repack_la PASSED
+fletcher_individual h5repack_layout.h5 -f dset2:FLET -l dset2:CHUNK=20x10
+Testing h5repack -f dset2:FLET -l dset2:CHUNK=20x10                    PASSED
+Verifying h5diff output h5repack_layout.h5 out-fletcher_individual.h5r PASSED
+fletcher_all h5repack_layout.h5 -f FLET
+Testing h5repack -f FLET                                               PASSED
+Verifying h5diff output h5repack_layout.h5 out-fletcher_all.h5repack_l PASSED
+Testing h5repack h5repack_layout.h5 -f dset2:SHUF -f dset2:FLET -f dse -SKIP-
+Testing h5repack -v -f /dset_deflate:GZIP=9                            PASSED
+Verifying h5diff output h5repack_filters.h5 out-gzip_verbose_filters.h PASSED
+Verifying output from h5repack -v -f /dset_deflate:GZIP=9              PASSED
+Testing h5repack h5repack_szip.h5                                      -SKIP-
+Testing h5repack h5repack_szip.h5 --filter=dset_szip:NONE              -SKIP-
+deflate_copy h5repack_deflate.h5
+Testing h5repack                                                       PASSED
+Verifying h5diff output h5repack_deflate.h5 out-deflate_copy.h5repack_ PASSED
+deflate_remove h5repack_deflate.h5 -f dset_deflate:NONE
+Testing h5repack -f dset_deflate:NONE                                  PASSED
+Verifying h5diff output h5repack_deflate.h5 out-deflate_remove.h5repac PASSED
+shuffle_copy h5repack_shuffle.h5
+Testing h5repack                                                       PASSED
+Verifying h5diff output h5repack_shuffle.h5 out-shuffle_copy.h5repack_ PASSED
+shuffle_remove h5repack_shuffle.h5 -f dset_shuffle:NONE
+Testing h5repack -f dset_shuffle:NONE                                  PASSED
+Verifying h5diff output h5repack_shuffle.h5 out-shuffle_remove.h5repac PASSED
+fletcher_copy h5repack_fletcher.h5
+Testing h5repack                                                       PASSED
+Verifying h5diff output h5repack_fletcher.h5 out-fletcher_copy.h5repac PASSED
+fletcher_remove h5repack_fletcher.h5 -f dset_fletcher32:NONE
+Testing h5repack -f dset_fletcher32:NONE                               PASSED
+Verifying h5diff output h5repack_fletcher.h5 out-fletcher_remove.h5rep PASSED
+nbit_copy h5repack_nbit.h5
+Testing h5repack                                                       PASSED
+Verifying h5diff output h5repack_nbit.h5 out-nbit_copy.h5repack_nbit.h PASSED
+nbit_remove h5repack_nbit.h5 -f dset_nbit:NONE
+Testing h5repack -f dset_nbit:NONE                                     PASSED
+Verifying h5diff output h5repack_nbit.h5 out-nbit_remove.h5repack_nbit PASSED
+nbit_add h5repack_nbit.h5 -f dset_int31:NBIT
+Testing h5repack -f dset_int31:NBIT                                    PASSED
+Verifying h5diff output h5repack_nbit.h5 out-nbit_add.h5repack_nbit.h5 PASSED
+scale_copy h5repack_soffset.h5
+Testing h5repack                                                       PASSED
+Verifying h5diff output h5repack_soffset.h5 out-scale_copy.h5repack_so PASSED
+scale_add h5repack_soffset.h5 -f dset_none:SOFF=31,IN
+Testing h5repack -f dset_none:SOFF=31,IN                               PASSED
+Verifying h5diff output h5repack_soffset.h5 out-scale_add.h5repack_sof PASSED
+scale_remove h5repack_soffset.h5 -f dset_scaleoffset:NONE
+Testing h5repack -f dset_scaleoffset:NONE                              PASSED
+Verifying h5diff output h5repack_soffset.h5 out-scale_remove.h5repack_ PASSED
+Testing h5repack h5repack_filters.h5 -f NONE                           -SKIP-
+Testing h5repack h5repack_deflate.h5 -f dset_deflate:SZIP=8,NN         -SKIP-
+Testing h5repack h5repack_szip.h5 -f dset_szip:GZIP=1                  -SKIP-
+Testing h5repack -f GZIP=1 -m 1024                                     PASSED
+Verifying h5dump output -f GZIP=1 -m 1024                              PASSED
+deflate_file h5repack_layout.h5 -e h5repack.info
+Testing h5repack -e h5repack.info                                      PASSED
+Verifying h5diff output h5repack_layout.h5 out-deflate_file.h5repack_l PASSED
+Testing h5repack -L                                                    PASSED
+Verifying h5dump output -L                                             PASSED
+Testing h5repack --layout dset2:CHUNK=20x10                            PASSED
+Verifying h5diff output h5repack_layout.h5 out-dset2_chunk_20x10.h5rep PASSED
+Verifying a dataset layout                                             PASSED
+Testing h5repack -l CHUNK=20x10                                        PASSED
+Verifying h5diff output h5repack_layout.h5 out-chunk_20x10.h5repack_la PASSED
+Verifying layouts                                                     
+Testing /mnt/wrk/lrknox/hdf5_hdf5/build/tools/h5repack/../h5dump/h5dum PASSED
+Testing h5repack -l dset2:CONTI                                        PASSED
+Verifying h5diff output h5repack_layout.h5 out-dset2_conti.h5repack_la PASSED
+Verifying a dataset layout                                             PASSED
+Testing h5repack -l CONTI                                              PASSED
+Verifying h5diff output h5repack_layout.h5 out-conti.h5repack_layout.h PASSED
+Verifying layouts                                                     
+Testing /mnt/wrk/lrknox/hdf5_hdf5/build/tools/h5repack/../h5dump/h5dum PASSED
+Testing h5repack -l dset2:COMPA                                        PASSED
+Verifying h5diff output h5repack_layout.h5 out-dset2_compa.h5repack_la PASSED
+Verifying a dataset layout                                             PASSED
+Testing h5repack -l COMPA                                              PASSED
+Verifying h5diff output h5repack_layout.h5 out-compa.h5repack_layout.h PASSED
+Verifying layouts                                                     
+Testing /mnt/wrk/lrknox/hdf5_hdf5/build/tools/h5repack/../h5dump/h5dum PASSED
+Testing h5repack -l dset_compact:CONTI                                 PASSED
+Verifying h5diff output h5repack_layout.h5 out-dset_compa_conti.h5repa PASSED
+Verifying a dataset layout                                             PASSED
+Testing h5repack -l dset_compact:CHUNK=2x5                             PASSED
+Verifying h5diff output h5repack_layout.h5 out-dset_compa_chunk.h5repa PASSED
+Verifying a dataset layout                                             PASSED
+Testing h5repack -l dset_compact:COMPA                                 PASSED
+Verifying h5diff output h5repack_layout.h5 out-dset_compa_compa.h5repa PASSED
+Verifying a dataset layout                                             PASSED
+Testing h5repack -l dset_contiguous:COMPA                              PASSED
+Verifying h5diff output h5repack_layout.h5 out-dset_conti_compa.h5repa PASSED
+Verifying a dataset layout                                             PASSED
+Testing h5repack -l dset_contiguous:CHUNK=3x6                          PASSED
+Verifying h5diff output h5repack_layout.h5 out-dset_conti_chunk.h5repa PASSED
+Verifying a dataset layout                                             PASSED
+Testing h5repack -l dset_contiguous:CONTI                              PASSED
+Verifying h5diff output h5repack_layout.h5 out-dset_conti_conti.h5repa PASSED
+Verifying a dataset layout                                             PASSED
+Testing h5repack -l dset_chunk:COMPA                                   PASSED
+Verifying h5diff output h5repack_layout.h5 out-chunk_compa.h5repack_la PASSED
+Verifying a dataset layout                                             PASSED
+Testing h5repack -l dset_chunk:CONTI                                   PASSED
+Verifying h5diff output h5repack_layout.h5 out-chunk_conti.h5repack_la PASSED
+Verifying a dataset layout                                             PASSED
+Testing h5repack -l dset_chunk:CHUNK=18x13                             PASSED
+Verifying h5diff output h5repack_layout.h5 out-chunk_18x13.h5repack_la PASSED
+Verifying a dataset layout                                             PASSED
+Testing h5repack -l contig_small:COMPA                                 PASSED
+Verifying h5diff output h5repack_layout2.h5 out-contig_small_compa.h5r PASSED
+Verifying a dataset layout                                             PASSED
+Testing h5repack -l chunked_small_fixed:COMPA                          PASSED
+Verifying h5diff output h5repack_layout2.h5 out-contig_small_fixed_com PASSED
+Verifying a dataset layout                                             PASSED
+Testing h5repack -l chunk_unlimit1:CHUNK=100x300                       PASSED
+Verifying h5diff output h5repack_layout3.h5 out-chunk2chunk.h5repack_l PASSED
+Verifying a dataset layout                                             PASSED
+Testing h5repack -l chunk_unlimit1:CONTI                               PASSED
+Verifying h5diff output h5repack_layout3.h5 out-chunk2conti.h5repack_l PASSED
+Verifying a dataset layout                                             PASSED
+Testing h5repack -l chunk_unlimit1:COMPA                               PASSED
+Verifying h5diff output h5repack_layout3.h5 out-chunk2compa.h5repack_l PASSED
+Verifying a dataset layout                                             PASSED
+Testing h5repack -f chunk_unlimit1:NONE                                PASSED
+Verifying h5diff output h5repack_layout3.h5 out-error1.h5repack_layout PASSED
+Verifying a dataset layout                                             PASSED
+Testing h5repack -f chunk_unlimit2:NONE                                PASSED
+Verifying h5diff output h5repack_layout3.h5 out-error2.h5repack_layout PASSED
+Verifying a dataset layout                                             PASSED
+Testing h5repack -f chunk_unlimit3:NONE                                PASSED
+Verifying h5diff output h5repack_layout3.h5 out-error3.h5repack_layout PASSED
+Verifying a dataset layout                                             PASSED
+error4 h5repack_layout3.h5 -f NONE
+Testing h5repack -f NONE                                               PASSED
+Verifying h5diff output h5repack_layout3.h5 out-error4.h5repack_layout PASSED
+Testing h5repack -l chunk_unlimit2:CONTI                               PASSED
+Verifying h5diff output h5repack_layout3.h5 out-ckdim_biger.h5repack_l PASSED
+Verifying a dataset layout                                             PASSED
+Testing h5repack -l chunk_unlimit3:CONTI                               PASSED
+Verifying h5diff output h5repack_layout3.h5 out-ckdim_smaller.h5repack PASSED
+Verifying a dataset layout                                             PASSED
+native_fill h5repack_fill.h5 -n
+Testing h5repack -n                                                    PASSED
+Verifying h5diff output h5repack_fill.h5 out-native_fill.h5repack_fill PASSED
+native_attr h5repack_attr.h5 -n
+Testing h5repack -n                                                    PASSED
+Verifying h5diff output h5repack_attr.h5 out-native_attr.h5repack_attr PASSED
+Testing h5repack --layout CHUNK=20x10 --filter GZIP=1 --minimum=10 --n PASSED
+Verifying h5diff output h5repack_layout.h5 out-layout_long_switches.h5 PASSED
+Verifying layouts                                                     
+Testing /mnt/wrk/lrknox/hdf5_hdf5/build/tools/h5repack/../h5dump/h5dum PASSED
+Testing h5repack -l CHUNK=20x10 -f GZIP=1 -m 10 -n -L -c 8 -d 6 -s 8[: PASSED
+Verifying h5diff output h5repack_layout.h5 out-layout_short_switches.h PASSED
+Verifying layouts                                                     
+Testing /mnt/wrk/lrknox/hdf5_hdf5/build/tools/h5repack/../h5dump/h5dum PASSED
+global_filters h5repack_layout.h5 --filter GZIP=1 --filter SHUF
+Testing h5repack --filter GZIP=1 --filter SHUF                         PASSED
+Verifying h5diff output h5repack_layout.h5 out-global_filters.h5repack PASSED
+Testing h5repack -l CHUNK=20x10 -f GZIP=1 -m 10 -n -L -c 8 -d 6 -s 8[: PASSED
+Verifying h5diff output h5repack_layout.h5 out-old_style_layout_short_ PASSED
+add_userblock h5repack_objs.h5 -u ublock.bin -b 2048
+Testing h5repack -u ublock.bin -b 2048                                 PASSED
+Verifying h5diff output h5repack_objs.h5 out-add_userblock.h5repack_ob PASSED
+add_alignment h5repack_objs.h5 -t 1 -a 1
+Testing h5repack -t 1 -a 1                                             PASSED
+Verifying h5diff output h5repack_objs.h5 out-add_alignment.h5repack_ob PASSED
+upgrade_layout h5repack_layouto.h5
+Testing h5repack                                                       PASSED
+Verifying h5diff output h5repack_layouto.h5 out-upgrade_layout.h5repac PASSED
+gt_mallocsize h5repack_objs.h5 -f GZIP=1
+Testing h5repack -f GZIP=1                                             PASSED
+Verifying h5diff output h5repack_objs.h5 out-gt_mallocsize.h5repack_ob PASSED
+committed_dt h5repack_named_dtypes.h5
+Testing h5repack                                                       PASSED
+Verifying h5diff output h5repack_named_dtypes.h5 out-committed_dt.h5re PASSED
+Testing h5repack                                                       PASSED
+Verifying h5diff output tfamily%05d.h5 out-family.tfamily%05d.h5       PASSED
+bug1814 h5repack_refs.h5
+Testing h5repack                                                       PASSED
+Verifying h5diff output h5repack_refs.h5 out-bug1814.h5repack_refs.h5  PASSED
+HDFFV-5932 h5repack_attr_refs.h5
+Testing h5repack                                                       PASSED
+Verifying h5diff output h5repack_attr_refs.h5 out-HDFFV-5932.h5repack_ PASSED
+HDFFV-7840 h5diff_attr1.h5
+Testing h5repack                                                       PASSED
+Verifying h5diff output h5diff_attr1.h5 out-HDFFV-7840.h5diff_attr1.h5 PASSED
+Testing h5repack -M 8192                                               PASSED
+Verifying h5diff output h5repack_layout.h5 out-meta_short.h5repack_lay PASSED
+Testing h5repack -M 8192                                               PASSED
+Verifying h5diff output h5repack_layout.h5 out-meta_short.h5repack_lay PASSED
+Verify the sizes of both output files (27280 vs 27488)                 PASSED
+Testing h5repack --metadata_block_size=8192                            PASSED
+Verifying h5diff output h5repack_layout.h5 out-meta_long.h5repack_layo PASSED
+Testing h5repack --metadata_block_size=8192                            PASSED
+Verifying h5diff output h5repack_layout.h5 out-meta_long.h5repack_layo PASSED
+Verify the sizes of both output files (27280 vs 27488)                 PASSED
+All h5repack tests passed.
+3.64user 4.64system 0:07.26elapsed 114%CPU (0avgtext+0avgdata 11664maxresident)k
+0inputs+18840outputs (0major+1441505minor)pagefaults 0swaps
+
+Finished testing h5repack.sh 
+============================

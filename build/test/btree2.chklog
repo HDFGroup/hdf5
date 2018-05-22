@@ -1,0 +1,163 @@
+============================
+ btree2  Test Log
+============================
+Testing without reopening B-tree:
+Testing B-tree creation                                                PASSED
+Testing B-tree iteration: empty B-tree                                 PASSED
+Testing B-tree insert: first record                                    PASSED
+Testing B-tree insert: several records                                 PASSED
+Testing B-tree insert: split root                                      PASSED
+Testing B-tree insert: redistribute 2 leaves in level 1 B-tree (l->r)  PASSED
+Testing B-tree insert: redistribute 2 leaves in level 1 B-tree (r->l)  PASSED
+Testing B-tree insert: split side leaf into 2 leaves in level 1 B-tree (l->r) PASSED
+Testing B-tree insert: split side leaf into 2 leaves in level 1 B-tree (r->l) PASSED
+Testing B-tree insert: redistribute 3 leaves in level 1 B-tree         PASSED
+Testing B-tree insert: split middle leaf into 2 leaves in level 1 B-tree PASSED
+Testing B-tree insert: make level 2 B-tree                             PASSED
+Testing B-tree insert: redistrib right-most leaf in level 2 B-tree     PASSED
+Testing B-tree insert: redistrib left-most leaf in level 2 B-tree      PASSED
+Testing B-tree insert: redistrib middle leaf in level 2 B-tree         PASSED
+Testing B-tree insert: split right-most leaf in level 2 B-tree         PASSED
+Testing B-tree insert: split left-most leaf in level 2 B-tree          PASSED
+Testing B-tree insert: split middle leaf in level 2 B-tree             PASSED
+Testing B-tree insert: redist. 2 internal (r->l) in level 2 B-tree     PASSED
+Testing B-tree insert: redist. 2 internal (l->r) in level 2 B-tree     PASSED
+Testing B-tree insert: split side internal node to 2 in level 2 B-tree (r->l) PASSED
+Testing B-tree insert: split side internal node to 2 in level 2 B-tree (l->2) PASSED
+Testing B-tree insert: redistrib 3 internals in level 2 B-tree         PASSED
+Testing B-tree insert: split 3 internals to 4 in level 2 B-tree        PASSED
+Testing B-tree insert: create random level 4 B-tree                    PASSED
+Testing B-tree insert: attempt duplicate record in level 4 B-tree      PASSED
+Testing B-tree remove: record from empty B-tree                        PASSED
+Testing B-tree remove: non-existant record from 1 record B-tree        PASSED
+Testing B-tree remove: existant record from 1 record B-tree            PASSED
+Testing B-tree remove: adding records to B-tree after removal          PASSED
+Testing B-tree remove: non-existant record from level-0 B-tree         PASSED
+Testing B-tree remove: mult. existant records from level-0 B-tree      PASSED
+Testing B-tree remove: non-existant record from level-1 B-tree         PASSED
+Testing B-tree remove: record from right leaf of level-1 B-tree        PASSED
+Testing B-tree remove: record from left leaf of level-1 B-tree         PASSED
+Testing B-tree remove: record from middle leaf of level-1 B-tree       PASSED
+Testing B-tree remove: redistribute 2 leaves in level-1 B-tree (r->l)  PASSED
+Testing B-tree remove: redistribute 2 leaves in level-1 B-tree (l->r)  PASSED
+Testing B-tree remove: redistribute 3 leaves in level-1 B-tree         PASSED
+Testing B-tree remove: merge 2 leaves to 1 in level-1 B-tree (r->l)    PASSED
+Testing B-tree remove: merge 2 leaves to 1 in level-1 B-tree (l->r)    PASSED
+Testing B-tree remove: merge 3 leaves to 2 in level-1 B-tree           PASSED
+Testing B-tree remove: promote from right leaf of level-1 B-tree       PASSED
+Testing B-tree remove: promote from left leaf of level-1 B-tree        PASSED
+Testing B-tree remove: promote from middle leaf of level-1 B-tree      PASSED
+Testing B-tree remove: promote from leaf of level-1 B-tree w/2 node redistrib PASSED
+Testing B-tree remove: promote from leaf of level-1 B-tree w/3 node redistrib PASSED
+Testing B-tree remove: promote from leaf of level-1 B-tree w/2->1 merge PASSED
+Testing B-tree remove: promote from leaf of level-1 B-tree w/3->2 merge PASSED
+Testing B-tree remove: collapse level-1 B-tree back to level-0         PASSED
+Testing B-tree remove: promote from right internal of level-2 B-tree   PASSED
+Testing B-tree remove: promote from left internal of level-2 B-tree    PASSED
+Testing B-tree remove: promote from middle internal of level-2 B-tree  PASSED
+Testing B-tree remove: promote record from root of level-2 B-tree      PASSED
+Testing B-tree remove: promote from right internal of level-2 B-tree w/redistrib PASSED
+Testing B-tree remove: promote from left internal of level-2 B-tree w/redistrib PASSED
+Testing B-tree remove: promote from right internal of level-2 B-tree w/merge PASSED
+Testing B-tree remove: promote from middle internal of level-2 B-tree w/merge PASSED
+Testing B-tree remove: merge 2 internal nodes to 1 in level-2 B-tree (l->r) PASSED
+Testing B-tree remove: merge 2 internal nodes to 1 in level-2 B-tree (r->l) PASSED
+Testing B-tree remove: merge 3 internal nodes to 2 in level-2 B-tree   PASSED
+Testing B-tree remove: collapse level-2 B-tree back to level-1 (r->l)  PASSED
+Testing B-tree remove: create random level 4 B-tree and delete all records in random order PASSED
+Testing B-tree remove: create random level 4 B-tree and delete all records by index, in random order PASSED
+Testing B-tree remove: create random level 4 B-tree and delete all records by index, in increasing order PASSED
+Testing B-tree remove: create random level 4 B-tree and delete all records by index, in decreasing order PASSED
+Testing B-tree find: nearest neighbor less than a value                PASSED
+Testing B-tree find: nearest neighbor greater than a value             PASSED
+Testing B-tree delete: delete empty B-tree                             PASSED
+Testing B-tree delete: delete level-0 B-tree                           PASSED
+Testing B-tree delete: delete level-1 B-tree                           PASSED
+Testing B-tree delete: delete level-2 B-tree                           PASSED
+Testing B-tree modify: attempt to modify non-existant record           PASSED
+Testing B-tree modify: modify record in leaf node                      PASSED
+Testing B-tree modify: modify record in internal node                  PASSED
+Testing B-tree modify: modify record in root node                      PASSED
+Testing with reopening B-tree:
+Testing B-tree creation                                                PASSED
+Testing B-tree iteration: empty B-tree                                 PASSED
+Testing B-tree insert: first record                                    PASSED
+Testing B-tree insert: several records                                 PASSED
+Testing B-tree insert: split root                                      PASSED
+Testing B-tree insert: redistribute 2 leaves in level 1 B-tree (l->r)  PASSED
+Testing B-tree insert: redistribute 2 leaves in level 1 B-tree (r->l)  PASSED
+Testing B-tree insert: split side leaf into 2 leaves in level 1 B-tree (l->r) PASSED
+Testing B-tree insert: split side leaf into 2 leaves in level 1 B-tree (r->l) PASSED
+Testing B-tree insert: redistribute 3 leaves in level 1 B-tree         PASSED
+Testing B-tree insert: split middle leaf into 2 leaves in level 1 B-tree PASSED
+Testing B-tree insert: make level 2 B-tree                             PASSED
+Testing B-tree insert: redistrib right-most leaf in level 2 B-tree     PASSED
+Testing B-tree insert: redistrib left-most leaf in level 2 B-tree      PASSED
+Testing B-tree insert: redistrib middle leaf in level 2 B-tree         PASSED
+Testing B-tree insert: split right-most leaf in level 2 B-tree         PASSED
+Testing B-tree insert: split left-most leaf in level 2 B-tree          PASSED
+Testing B-tree insert: split middle leaf in level 2 B-tree             PASSED
+Testing B-tree insert: redist. 2 internal (r->l) in level 2 B-tree     PASSED
+Testing B-tree insert: redist. 2 internal (l->r) in level 2 B-tree     PASSED
+Testing B-tree insert: split side internal node to 2 in level 2 B-tree (r->l) PASSED
+Testing B-tree insert: split side internal node to 2 in level 2 B-tree (l->2) PASSED
+Testing B-tree insert: redistrib 3 internals in level 2 B-tree         PASSED
+Testing B-tree insert: split 3 internals to 4 in level 2 B-tree        PASSED
+Testing B-tree insert: create random level 4 B-tree                    PASSED
+Testing B-tree insert: attempt duplicate record in level 4 B-tree      PASSED
+Testing B-tree remove: record from empty B-tree                        PASSED
+Testing B-tree remove: non-existant record from 1 record B-tree        PASSED
+Testing B-tree remove: existant record from 1 record B-tree            PASSED
+Testing B-tree remove: adding records to B-tree after removal          PASSED
+Testing B-tree remove: non-existant record from level-0 B-tree         PASSED
+Testing B-tree remove: mult. existant records from level-0 B-tree      PASSED
+Testing B-tree remove: non-existant record from level-1 B-tree         PASSED
+Testing B-tree remove: record from right leaf of level-1 B-tree        PASSED
+Testing B-tree remove: record from left leaf of level-1 B-tree         PASSED
+Testing B-tree remove: record from middle leaf of level-1 B-tree       PASSED
+Testing B-tree remove: redistribute 2 leaves in level-1 B-tree (r->l)  PASSED
+Testing B-tree remove: redistribute 2 leaves in level-1 B-tree (l->r)  PASSED
+Testing B-tree remove: redistribute 3 leaves in level-1 B-tree         PASSED
+Testing B-tree remove: merge 2 leaves to 1 in level-1 B-tree (r->l)    PASSED
+Testing B-tree remove: merge 2 leaves to 1 in level-1 B-tree (l->r)    PASSED
+Testing B-tree remove: merge 3 leaves to 2 in level-1 B-tree           PASSED
+Testing B-tree remove: promote from right leaf of level-1 B-tree       PASSED
+Testing B-tree remove: promote from left leaf of level-1 B-tree        PASSED
+Testing B-tree remove: promote from middle leaf of level-1 B-tree      PASSED
+Testing B-tree remove: promote from leaf of level-1 B-tree w/2 node redistrib PASSED
+Testing B-tree remove: promote from leaf of level-1 B-tree w/3 node redistrib PASSED
+Testing B-tree remove: promote from leaf of level-1 B-tree w/2->1 merge PASSED
+Testing B-tree remove: promote from leaf of level-1 B-tree w/3->2 merge PASSED
+Testing B-tree remove: collapse level-1 B-tree back to level-0         PASSED
+Testing B-tree remove: promote from right internal of level-2 B-tree   PASSED
+Testing B-tree remove: promote from left internal of level-2 B-tree    PASSED
+Testing B-tree remove: promote from middle internal of level-2 B-tree  PASSED
+Testing B-tree remove: promote record from root of level-2 B-tree      PASSED
+Testing B-tree remove: promote from right internal of level-2 B-tree w/redistrib PASSED
+Testing B-tree remove: promote from left internal of level-2 B-tree w/redistrib PASSED
+Testing B-tree remove: promote from right internal of level-2 B-tree w/merge PASSED
+Testing B-tree remove: promote from middle internal of level-2 B-tree w/merge PASSED
+Testing B-tree remove: merge 2 internal nodes to 1 in level-2 B-tree (l->r) PASSED
+Testing B-tree remove: merge 2 internal nodes to 1 in level-2 B-tree (r->l) PASSED
+Testing B-tree remove: merge 3 internal nodes to 2 in level-2 B-tree   PASSED
+Testing B-tree remove: collapse level-2 B-tree back to level-1 (r->l)  PASSED
+Testing B-tree remove: create random level 4 B-tree and delete all records in random order PASSED
+Testing B-tree remove: create random level 4 B-tree and delete all records by index, in random order PASSED
+Testing B-tree remove: create random level 4 B-tree and delete all records by index, in increasing order PASSED
+Testing B-tree remove: create random level 4 B-tree and delete all records by index, in decreasing order PASSED
+Testing B-tree find: nearest neighbor less than a value                PASSED
+Testing B-tree find: nearest neighbor greater than a value             PASSED
+Testing B-tree delete: delete empty B-tree                             PASSED
+Testing B-tree delete: delete level-0 B-tree                           PASSED
+Testing B-tree delete: delete level-1 B-tree                           PASSED
+Testing B-tree delete: delete level-2 B-tree                           PASSED
+Testing B-tree modify: attempt to modify non-existant record           PASSED
+Testing B-tree modify: modify record in leaf node                      PASSED
+Testing B-tree modify: modify record in internal node                  PASSED
+Testing B-tree modify: modify record in root node                      PASSED
+All v2 B-tree tests passed.
+33.39user 3.04system 0:37.72elapsed 96%CPU (0avgtext+0avgdata 35680maxresident)k
+0inputs+285336outputs (0major+45071minor)pagefaults 0swaps
+
+Finished testing btree2 
+============================

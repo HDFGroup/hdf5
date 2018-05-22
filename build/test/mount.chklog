@@ -1,0 +1,42 @@
+============================
+ mount  Test Log
+============================
+Testing basic functionality                                            PASSED
+Testing illegal mount operations                                       PASSED
+Testing same file mount operations                                     PASSED
+Testing name hiding under mount point                                  PASSED
+Testing mount point open                                               PASSED
+Testing multi-linked mount point                                       PASSED
+Testing mount point unlinking                                          PASSED
+Testing object renaming                                                PASSED
+Testing mount point renaming                                           PASSED
+Testing preopening objects under the mount point                       PASSED
+Testing open object access after unmount                               PASSED
+Testing interfile hard links                                           -SKIP-
+    Test skipped due file pointer sharing issue (Jira 7638).
+ PASSED
+Testing file handle uniformity                                         PASSED
+Testing file handle close                                              PASSED
+Testing mounting on group after file is closed                         PASSED
+Testing mounting after file is unmounted                               PASSED
+Testing missing unmount                                                PASSED
+Testing hold open w/file                                               PASSED
+Testing hold open w/group                                              PASSED
+Testing file close degrees must be same                                PASSED
+Testing 'semi' file close degree                                       PASSED
+Testing 'strong' file close degree                                     PASSED
+Testing access permissions                                             PASSED
+Testing multiple mounts                                                PASSED
+Testing nested mounts survive                                          PASSED
+Testing close parent                                                   PASSED
+Testing cutting mount graph                                            PASSED
+Testing symlinks                                                       PASSED
+Testing shared mount access                                            PASSED
+Testing closing shared mounts                                          PASSED
+Testing closing multiple shared mounts                                 PASSED
+All mount tests passed.
+0.16user 0.05system 0:00.28elapsed 77%CPU (0avgtext+0avgdata 7960maxresident)k
+0inputs+1280outputs (0major+12301minor)pagefaults 0swaps
+
+Finished testing mount 
+============================

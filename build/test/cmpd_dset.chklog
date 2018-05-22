@@ -1,0 +1,47 @@
+============================
+ cmpd_dset  Test Log
+============================
+Testing compound dataset:
+Testing basic compound write                                           PASSED
+Testing basic compound read                                            PASSED
+Testing reversal of struct members                                     PASSED
+Testing subset struct read                                             PASSED
+Testing partially initialized superset read                            PASSED
+Testing partially initialized superset optimized read                  PASSED
+Testing partially initialized superset write                           PASSED
+Testing explicit data space                                            PASSED
+Testing hyperslab partial read to array                                PASSED
+Testing hyperslab partial read to another hyperslab                    PASSED
+Testing hyperslab to hyperslab part initialized read                   PASSED
+Testing hyperslab part initialized write                               PASSED
+Testing the optimization of when the source type is a subset of the dest:
+Testing writing data to contiguous and chunked datasets                PASSED
+Testing rewriting data with a subset of original data type             PASSED
+Testing reading data with a subset of original data type               PASSED
+Testing the optimization of when the dest type is a subset of the source:
+Testing writing data to contiguous and chunked datasets                PASSED
+Testing rewriting data with a subset of original data type             PASSED
+Testing reading data with a subset of original data type               PASSED
+Testing that compound types can be packed out of order:
+Without extra space at the end of compound...
+Testing random member insertion with empty compound subtype            PASSED
+Testing random member insertion with full compound subtype             PASSED
+Testing reverse member insertion with empty compound subtype           PASSED
+Testing reverse member insertion with full compound subtype            PASSED
+Testing forward member insertion with empty compound subtype           PASSED
+Testing forward member insertion with full compound subtype            PASSED
+With extra space at the end of compound...
+Testing random member insertion with empty compound subtype            PASSED
+Testing random member insertion with full compound subtype             PASSED
+Testing reverse member insertion with empty compound subtype           PASSED
+Testing reverse member insertion with full compound subtype            PASSED
+Testing forward member insertion with empty compound subtype           PASSED
+Testing forward member insertion with full compound subtype            PASSED
+Testing compound member ordering:
+Testing that compound member insertion order is preserved              PASSED
+All compound dataset tests passed.
+0.28user 0.71system 0:01.04elapsed 96%CPU (0avgtext+0avgdata 156292maxresident)k
+0inputs+329472outputs (0major+71472minor)pagefaults 0swaps
+
+Finished testing cmpd_dset 
+============================

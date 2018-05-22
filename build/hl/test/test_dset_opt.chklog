@@ -1,0 +1,20 @@
+============================
+ test_dset_opt  Test Log
+============================
+Testing basic functionality of H5DOwrite_chunk                         PASSED
+Testing overwriting existing data with H5DOwrite_chunk                 PASSED
+Testing skipping compression filter for H5DOwrite_chunk/H5DOread_chunk PASSED
+Testing skipping compression filters but keep two other filters        PASSED
+Testing data conversion for H5DOwrite_chunk/H5DOread_chunk             PASSED
+Testing invalid parameters for H5DOwrite_chunk/H5DOread_chunk          PASSED
+Testing basic functionality of H5DOread_chunk (chunk cache disabled)   PASSED
+Testing basic functionality of H5DOread_chunk (flush chunk cache)      PASSED
+Testing basic functionality of H5DOread_chunk (does not flush chunk cache) PASSED
+Testing basic functionality of H5DOread_chunk on unfiltered datasets   PASSED
+Testing H5DOread_chunk with unallocated chunks                         PASSED
+All direct chunk read/write tests passed.
+0.04user 0.02system 0:00.12elapsed 59%CPU (0avgtext+0avgdata 7128maxresident)k
+0inputs+272outputs (0major+9280minor)pagefaults 0swaps
+
+Finished testing test_dset_opt 
+============================

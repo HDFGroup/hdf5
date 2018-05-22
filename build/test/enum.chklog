@@ -1,0 +1,15 @@
+============================
+ enum  Test Log
+============================
+Testing named enumeration types                                        PASSED
+Testing enumeration conversions                                        PASSED
+Testing O(1) conversions                                               PASSED
+Testing O(log N) converions                                            PASSED
+Testing for non-existing name and value                                PASSED
+Testing some functions with enumeration types                          PASSED
+All enum tests passed.
+0.05user 0.02system 0:00.07elapsed 100%CPU (0avgtext+0avgdata 7040maxresident)k
+0inputs+192outputs (0major+8910minor)pagefaults 0swaps
+
+Finished testing enum 
+============================

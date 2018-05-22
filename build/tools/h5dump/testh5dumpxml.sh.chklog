@@ -1,0 +1,74 @@
+============================
+testh5dumpxml.sh  Test Log
+============================
+Testing h5dump --xml tall.h5                                           PASSED
+Testing h5dump --xml tattr.h5                                          PASSED
+Testing h5dump --xml tbitfields.h5                                     PASSED
+Testing h5dump --xml tcompound.h5                                      PASSED
+Testing h5dump --xml tcompound2.h5                                     PASSED
+Testing h5dump --xml tdatareg.h5                                       PASSED
+Testing h5dump --xml tdset.h5                                          PASSED
+Testing h5dump --xml tdset2.h5                                         PASSED
+Testing h5dump --xml tenum.h5                                          PASSED
+Testing h5dump --xml tgroup.h5                                         PASSED
+Testing h5dump --xml thlink.h5                                         PASSED
+Testing h5dump --xml tloop.h5                                          PASSED
+Testing h5dump --xml tloop2.h5                                         PASSED
+Testing h5dump --xml tmany.h5                                          PASSED
+Testing h5dump --xml tnestedcomp.h5                                    PASSED
+Testing h5dump --xml tcompound_complex.h5                              PASSED
+Testing h5dump --xml tobjref.h5                                        PASSED
+Testing h5dump --xml topaque.h5                                        PASSED
+Testing h5dump --xml tslink.h5                                         PASSED
+Testing h5dump --xml tudlink.h5                                        PASSED
+Testing h5dump --xml textlink.h5                                       PASSED
+Testing h5dump --xml tstr.h5                                           PASSED
+Testing h5dump --xml tstr2.h5                                          PASSED
+Testing h5dump --xml tref.h5                                           PASSED
+Testing h5dump --xml tname-amp.h5                                      PASSED
+Testing h5dump --xml tname-apos.h5                                     PASSED
+Testing h5dump --xml tname-gt.h5                                       PASSED
+Testing h5dump --xml tname-lt.h5                                       PASSED
+Testing h5dump --xml tname-quot.h5                                     PASSED
+Testing h5dump --xml tname-sp.h5                                       PASSED
+Testing h5dump --xml tstring.h5                                        PASSED
+Testing h5dump --xml tstring-at.h5                                     PASSED
+Testing h5dump --xml tref-escapes.h5                                   PASSED
+Testing h5dump --xml tref-escapes-at.h5                                PASSED
+Testing h5dump --xml tnodata.h5                                        PASSED
+Testing h5dump --xml tarray1.h5                                        PASSED
+Testing h5dump --xml tarray2.h5                                        PASSED
+Testing h5dump --xml tarray3.h5                                        PASSED
+Testing h5dump --xml tarray6.h5                                        PASSED
+Testing h5dump --xml tarray7.h5                                        PASSED
+Testing h5dump --xml tvldtypes1.h5                                     PASSED
+Testing h5dump --xml tvldtypes2.h5                                     PASSED
+Testing h5dump --xml tvldtypes3.h5                                     PASSED
+Testing h5dump --xml tvldtypes4.h5                                     PASSED
+Testing h5dump --xml tvldtypes5.h5                                     PASSED
+Testing h5dump --xml tvlstr.h5                                         PASSED
+Testing h5dump --xml tsaf.h5                                           PASSED
+Testing h5dump --xml tempty.h5                                         PASSED
+Testing h5dump --xml tnamed_dtype_attr.h5                              PASSED
+Testing h5dump --xml tnullspace.h5                                     PASSED
+Testing h5dump --xml --use-dtd tempty.h5                               PASSED
+Testing h5dump --xml -u tempty.h5                                      PASSED
+Testing h5dump --xml -X : tempty.h5                                    PASSED
+Testing h5dump --xml --xml-ns=: tempty.h5                              PASSED
+Testing h5dump --xml -X thing: tempty.h5                               PASSED
+Testing h5dump --xml --xml-ns=thing: tempty.h5                         PASSED
+Testing h5dump --xml --xml-ns=: --xml-dtd=http://somewhere.net tempty. PASSED
+Testing h5dump --xml --use-dtd --xml-dtd=http://somewhere.net tempty.h PASSED
+Testing h5dump --xml -A tall.h5                                        PASSED
+Testing h5dump --xml -H --sort_by=name --sort_order=ascending torderat PASSED
+Testing h5dump --xml -H --sort_by=name --sort_order=descending tordera PASSED
+Testing h5dump --xml -H --sort_by=creation_order --sort_order=ascendin PASSED
+Testing h5dump --xml -H --sort_by=creation_order --sort_order=descendi PASSED
+Testing h5dump -u -m %.7f tfpformat.h5                                 PASSED
+Testing h5dump --xml test35.nc                                         PASSED
+All h5dumpxml tests passed.
+1.17user 2.44system 0:02.73elapsed 131%CPU (0avgtext+0avgdata 7188maxresident)k
+0inputs+4312outputs (0major+957317minor)pagefaults 0swaps
+
+Finished testing testh5dumpxml.sh 
+============================

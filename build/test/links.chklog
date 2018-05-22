@@ -1,0 +1,284 @@
+============================
+ links  Test Log
+============================
+Testing link creation                                                  PASSED
+Testing link queries                                                   PASSED
+Testing H5Lcreate functions                                            PASSED
+Testing new link queries                                               PASSED
+Testing long names for objects & links                                 PASSED
+Testing too many links                                                 PASSED
+Testing link creation property lists                                   PASSED
+Testing H5Lmove                                                        PASSED
+Testing H5Lcopy                                                        PASSED
+Testing moving and copying links preserves their properties            PASSED
+Testing backwards compatibility                                        PASSED
+Testing external file cache with external links                        PASSED
+Testing external links across multiple files                           PASSED
+Testing H5Pset/get_elink_acc_flags()                                   PASSED
+
+---Testing without external file cache---
+Testing external link to root                                          PASSED
+Testing external link to object on path                                PASSED
+Testing external link to self                                          PASSED
+Testing external links back and forth                                  PASSED
+Testing too many external links                                        PASSED
+Testing dangling external links                                        PASSED
+Testing recursive external links                                       PASSED
+Testing query aspects of external link                                 PASSED
+Testing unlinking external link in compact group                       PASSED
+Testing unlinking external link in dense group                         PASSED
+Testing move external link                                             PASSED
+Testing external link along for the ride                               PASSED
+Testing that external files are closed during traversal                PASSED
+Testing endianness of external links                                   PASSED
+Testing that external files work with strong file close degree         PASSED
+Testing external links via H5Pset_elink_prefix()                       PASSED
+Testing external links via main file's absolute path                   PASSED
+Testing external links via main file's CWD + relative path             PASSED
+Testing external links via current working directory                   PASSED
+Testing external links via target's absolute path                      PASSED
+Testing external links via main file's CWD                             PASSED
+Testing external links via main file's CWD + target's relative path    PASSED
+Testing external links via chdir and found in current working directory PASSED
+Testing H5Pset/get_elink_fapl() with different physical layouts        PASSED
+Testing H5Pset/get_elink_fapl() with same physical layout              PASSED
+Testing H5Pset/get_fapl()                                              PASSED
+Testing H5Pset/get_elink_cb()                                          PASSED
+Testing external links w/symlink files                                 PASSED
+Testing copying invalid external links to the source file              PASSED
+Testing that invalid external links don't open the source file         PASSED
+Testing opening object twice through elink                             PASSED
+Testing attach committed datatype to external group's attribute/dataset PASSED
+
+---Testing with external file cache---
+Testing external link to root                                          PASSED
+Testing external link to object on path                                PASSED
+Testing external link to self                                          PASSED
+Testing external links back and forth                                  PASSED
+Testing too many external links                                        PASSED
+Testing dangling external links                                        PASSED
+Testing recursive external links                                       PASSED
+Testing query aspects of external link                                 PASSED
+Testing unlinking external link in compact group                       PASSED
+Testing unlinking external link in dense group                         PASSED
+Testing move external link                                             PASSED
+Testing external link along for the ride                               PASSED
+Testing that external files are closed during traversal                PASSED
+Testing endianness of external links                                   PASSED
+Testing that external files work with strong file close degree         PASSED
+Testing external links via H5Pset_elink_prefix()                       PASSED
+Testing external links via main file's absolute path                   PASSED
+Testing external links via main file's CWD + relative path             PASSED
+Testing external links via current working directory                   PASSED
+Testing external links via target's absolute path                      PASSED
+Testing external links via main file's CWD                             PASSED
+Testing external links via main file's CWD + target's relative path    PASSED
+Testing external links via chdir and found in current working directory PASSED
+Testing H5Pset/get_elink_fapl() with different physical layouts        PASSED
+Testing H5Pset/get_elink_fapl() with same physical layout              PASSED
+Testing H5Pset/get_fapl()                                              PASSED
+Testing H5Pset/get_elink_cb()                                          PASSED
+Testing external links w/symlink files                                 PASSED
+Testing copying invalid external links to the source file              PASSED
+Testing that invalid external links don't open the source file         PASSED
+Testing opening object twice through elink                             PASSED
+Testing attach committed datatype to external group's attribute/dataset PASSED
+Testing user-defined link callbacks                                    PASSED
+Testing user-defined link error conditions                             PASSED
+Testing user data passed through lapl                                  PASSED
+Testing adjusting nlinks with LAPL                                     PASSED
+Testing link type field in H5Lget_info                                 PASSED
+Testing link visiting                                                  PASSED
+Testing link visiting by name                                          PASSED
+Testing object visiting                                                PASSED
+Testing object visiting by name                                        PASSED
+Testing stopping object iteration                                      PASSED
+Testing group link filters                                             PASSED
+Testing object exists                                                  PASSED
+Testing that all files were closed correctly                           PASSED
+Testing link creation (w/new group format)                             PASSED
+Testing link queries (w/new group format)                              PASSED
+Testing H5Lcreate functions (w/new group format)                       PASSED
+Testing new link queries (w/new group format)                          PASSED
+Testing long names for objects & links (w/new group format)            PASSED
+Testing too many links (w/new group format)                            PASSED
+Testing link creation property lists (w/new group format)              PASSED
+Testing H5Lmove (w/new group format)                                   PASSED
+Testing H5Lcopy (w/new group format)                                   PASSED
+Testing moving and copying links preserves their properties (w/new group format) PASSED
+Testing backwards compatibility (w/new group format)                   PASSED
+Testing external file cache with external links (w/new group format)   PASSED
+Testing external links across multiple files (w/new group format)      PASSED
+Testing H5Pset/get_elink_acc_flags() (w/new group format)              PASSED
+
+---Testing without external file cache---
+Testing external link to root (w/new group format)                     PASSED
+Testing external link to object on path (w/new group format)           PASSED
+Testing external link to self (w/new group format)                     PASSED
+Testing external links back and forth (w/new group format)             PASSED
+Testing too many external links (w/new group format)                   PASSED
+Testing dangling external links (w/new group format)                   PASSED
+Testing recursive external links (w/new group format)                  PASSED
+Testing query aspects of external link (w/new group format)            PASSED
+Testing unlinking external link in compact group (w/new group format)  PASSED
+Testing unlinking external link in dense group (w/new group format)    PASSED
+Testing move external link (w/new group format)                        PASSED
+Testing external link along for the ride (w/new group format)          PASSED
+Testing that external files are closed during traversal (w/new group format) PASSED
+Testing endianness of external links (w/new group format)              PASSED
+Testing that external files work with strong file close degree (w/new group format) PASSED
+Testing external links via H5Pset_elink_prefix()(w/new group format)   PASSED
+Testing external links via main file's absolute path (w/new group format) PASSED
+Testing external links via main file's CWD + relative path(w/new group format) PASSED
+Testing external links via current working directory(w/new group format) PASSED
+Testing external links via target's absolute path (w/new group format) PASSED
+Testing external links via main file's CWD (w/new group format)        PASSED
+Testing external links via main file's CWD + target's relative path(w/new group format) PASSED
+Testing external links via chdir and found in current working directory (w/new group format) PASSED
+Testing H5Pset/get_elink_fapl() with different physical layouts (w/new group format) PASSED
+Testing H5Pset/get_elink_fapl() with same physical layout (w/new group format) PASSED
+Testing H5Pset/get_fapl() (w/new group format)                         PASSED
+Testing H5Pset/get_elink_cb() (w/new group format)                     PASSED
+Testing external links w/symlink files (w/new group format)            PASSED
+Testing copying invalid external links to the source file (w/new group format) PASSED
+Testing that invalid external links don't open the source file (w/new group format) PASSED
+Testing opening object twice through elink (w/new group format)        PASSED
+Testing attach committed datatype to external group's attribute/dataset(w/new group format) PASSED
+
+---Testing with external file cache---
+Testing external link to root (w/new group format)                     PASSED
+Testing external link to object on path (w/new group format)           PASSED
+Testing external link to self (w/new group format)                     PASSED
+Testing external links back and forth (w/new group format)             PASSED
+Testing too many external links (w/new group format)                   PASSED
+Testing dangling external links (w/new group format)                   PASSED
+Testing recursive external links (w/new group format)                  PASSED
+Testing query aspects of external link (w/new group format)            PASSED
+Testing unlinking external link in compact group (w/new group format)  PASSED
+Testing unlinking external link in dense group (w/new group format)    PASSED
+Testing move external link (w/new group format)                        PASSED
+Testing external link along for the ride (w/new group format)          PASSED
+Testing that external files are closed during traversal (w/new group format) PASSED
+Testing endianness of external links (w/new group format)              PASSED
+Testing that external files work with strong file close degree (w/new group format) PASSED
+Testing external links via H5Pset_elink_prefix()(w/new group format)   PASSED
+Testing external links via main file's absolute path (w/new group format) PASSED
+Testing external links via main file's CWD + relative path(w/new group format) PASSED
+Testing external links via current working directory(w/new group format) PASSED
+Testing external links via target's absolute path (w/new group format) PASSED
+Testing external links via main file's CWD (w/new group format)        PASSED
+Testing external links via main file's CWD + target's relative path(w/new group format) PASSED
+Testing external links via chdir and found in current working directory (w/new group format) PASSED
+Testing H5Pset/get_elink_fapl() with different physical layouts (w/new group format) PASSED
+Testing H5Pset/get_elink_fapl() with same physical layout (w/new group format) PASSED
+Testing H5Pset/get_fapl() (w/new group format)                         PASSED
+Testing H5Pset/get_elink_cb() (w/new group format)                     PASSED
+Testing external links w/symlink files (w/new group format)            PASSED
+Testing copying invalid external links to the source file (w/new group format) PASSED
+Testing that invalid external links don't open the source file (w/new group format) PASSED
+Testing opening object twice through elink (w/new group format)        PASSED
+Testing attach committed datatype to external group's attribute/dataset(w/new group format) PASSED
+Testing user-defined hard link (w/new group format)                    PASSED
+Testing registering a new class for existing UD links (w/new group format) PASSED
+Testing user-defined link callbacks (w/new group format)               PASSED
+Testing user-defined link error conditions (w/new group format)        PASSED
+Testing user data passed through lapl (w/new group format)             PASSED
+Testing adjusting nlinks with LAPL (w/new group format)                PASSED
+Testing link type field in H5Lget_info (w/new group format)            PASSED
+Testing link visiting (w/new group format)                             PASSED
+Testing link visiting by name (w/new group format)                     PASSED
+Testing object visiting (w/new group format)                           PASSED
+Testing object visiting by name (w/new group format)                   PASSED
+Testing stopping object iteration (w/new group format)                 PASSED
+Testing group link filters (w/new group format)                        PASSED
+Testing object exists (w/new group format)                             PASSED
+Testing that all files were closed correctly (w/new group format)      PASSED
+Testing creating empty group with creation order indexing              PASSED
+Testing creating compact group with creation order indexing            PASSED
+Testing creating dense group with creation order indexing              PASSED
+Testing transitioning group with creation order indexing between dense & compact forms PASSED
+Testing deleting group with creation order indexing in dense form      PASSED
+Testing querying info by index w/o creation order index, using soft links PASSED
+Testing querying info by index w/creation order index, using soft links PASSED
+Testing querying info by index w/o creation order index, using hard links PASSED
+Testing querying info by index w/creation order index, using hard links PASSED
+Testing deleting links by name index in increasing order w/o creation order index PASSED
+Testing deleting links by name index in increasing order w/creation order index PASSED
+Testing deleting links by name index in decreasing order w/o creation order index PASSED
+Testing deleting links by name index in decreasing order w/creation order index PASSED
+Testing deleting links by creation order index in increasing order w/o creation order index PASSED
+Testing deleting links by creation order index in increasing order w/creation order index PASSED
+Testing deleting links by creation order index in decreasing order w/o creation order index PASSED
+Testing deleting links by creation order index in decreasing order w/creation order index PASSED
+Testing iterating over links by name index in increasing order w/o creation order index PASSED
+Testing iterating over links by name index in increasing order w/creation order index PASSED
+Testing iterating over links by name index in decreasing order w/o creation order index PASSED
+Testing iterating over links by name index in decreasing order w/creation order index PASSED
+Testing iterating over links by name index in native order w/o creation order index PASSED
+Testing iterating over links by name index in native order w/creation order index PASSED
+Testing iterating over links by creation order index in increasing order w/o creation order index PASSED
+Testing iterating over links by creation order index in increasing order w/creation order index PASSED
+Testing iterating over links by creation order index in decreasing order w/o creation order index PASSED
+Testing iterating over links by creation order index in decreasing order w/creation order index PASSED
+Testing iterating over links by creation order index in native order w/o creation order index PASSED
+Testing iterating over links by creation order index in native order w/creation order index PASSED
+Testing open object by name index in increasing order w/o creation order index PASSED
+Testing open object by name index in increasing order w/creation order index PASSED
+Testing open object by name index in decreasing order w/o creation order index PASSED
+Testing open object by name index in decreasing order w/creation order index PASSED
+Testing open object by name index in native order w/o creation order index PASSED
+Testing open object by name index in native order w/creation order index PASSED
+Testing open object by creation order index in increasing order w/o creation order index PASSED
+Testing open object by creation order index in increasing order w/creation order index PASSED
+Testing open object by creation order index in decreasing order w/o creation order index PASSED
+Testing open object by creation order index in decreasing order w/creation order index PASSED
+Testing open object by creation order index in native order w/o creation order index PASSED
+Testing open object by creation order index in native order w/creation order index PASSED
+Testing query object info by name index in increasing order w/o creation order index PASSED
+Testing query object info by name index in increasing order w/creation order index PASSED
+Testing query object info by name index in decreasing order w/o creation order index PASSED
+Testing query object info by name index in decreasing order w/creation order index PASSED
+Testing query object info by name index in native order w/o creation order index PASSED
+Testing query object info by name index in native order w/creation order index PASSED
+Testing query object info by creation order index in increasing order w/o creation order index PASSED
+Testing query object info by creation order index in increasing order w/creation order index PASSED
+Testing query object info by creation order index in decreasing order w/o creation order index PASSED
+Testing query object info by creation order index in decreasing order w/creation order index PASSED
+Testing query object info by creation order index in native order w/o creation order index PASSED
+Testing query object info by creation order index in native order w/creation order index PASSED
+Testing query group info by name index in increasing order w/o creation order index PASSED
+Testing query group info by name index in increasing order w/creation order index PASSED
+Testing query group info by name index in decreasing order w/o creation order index PASSED
+Testing query group info by name index in decreasing order w/creation order index PASSED
+Testing query group info by name index in native order w/o creation order index PASSED
+Testing query group info by name index in native order w/creation order index PASSED
+Testing query group info by creation order index in increasing order w/o creation order index PASSED
+Testing query group info by creation order index in increasing order w/creation order index PASSED
+Testing query group info by creation order index in decreasing order w/o creation order index PASSED
+Testing query group info by creation order index in decreasing order w/creation order index PASSED
+Testing query group info by creation order index in native order w/o creation order index PASSED
+Testing query group info by creation order index in native order w/creation order index PASSED
+Testing timestamps on objects                                          PASSED
+Testing querying info by index in old-style group, using soft links    PASSED
+Testing querying info by index in old-style group, using hard links    PASSED
+Testing deleting links by index in increasing order in old-style group PASSED
+Testing deleting links by index in decreasing order in old-style group PASSED
+Testing iterating over links by name index in increasing order in old-style group PASSED
+Testing iterating over links by name index in decreasing order in old-style group PASSED
+Testing iterating over links by name index in native order in old-style group PASSED
+Testing open object by name index in increasing order in old-style group PASSED
+Testing open object by name index in decreasing order in old-style group PASSED
+Testing open object by name index in native order in old-style group   PASSED
+Testing query object info by name index in increasing order in old-style group PASSED
+Testing query object info by name index in decreasing order in old-style group PASSED
+Testing query object info by name index in native order in old-style group PASSED
+Testing query group info by name index in increasing order in old-style group PASSED
+Testing query group info by name index in decreasing order in old-style group PASSED
+Testing query group info by name index in native order in old-style group PASSED
+Testing external links are registered after reset                      PASSED
+All link tests passed.
+2.45user 0.15system 0:03.61elapsed 72%CPU (0avgtext+0avgdata 9052maxresident)k
+0inputs+15048outputs (0major+24157minor)pagefaults 0swaps
+
+Finished testing links 
+============================

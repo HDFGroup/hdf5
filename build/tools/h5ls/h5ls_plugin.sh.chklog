@@ -1,0 +1,10 @@
+============================
+h5ls_plugin.sh  Test Log
+============================
+Testing h5ls -w80 -d tudfilter.h5                                      PASSED
+All Plugin API tests passed.
+0.07user 0.10system 0:00.21elapsed 82%CPU (0avgtext+0avgdata 7348maxresident)k
+0inputs+704outputs (0major+28072minor)pagefaults 0swaps
+
+Finished testing h5ls_plugin.sh 
+============================

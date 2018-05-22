@@ -1,0 +1,23 @@
+Open took: (0.000066 s)
+Stat took: (0.000001 s)
+         0-        96 (        96 bytes) (H5FD_MEM_SUPER) Allocated
+        96-      2143 (      2048 bytes) (H5FD_MEM_DEFAULT) Allocated
+Seek: From      UNDEF To          0 (0.000001 s)
+         0-        95 (        96 bytes) (H5FD_MEM_SUPER) Written (0.000011 s)
+Seek: From      UNDEF To         96 (0.000001 s)
+        96-       799 (       704 bytes) (H5FD_MEM_DEFAULT) Written (0.000006 s)
+Close took: (0.000008 s)
+Total number of read operations: 0
+Total number of write operations: 2
+Total number of seek operations: 2
+Total number of truncate operations: 1
+Total time in read operations: 0.000000 s
+Total time in write operations: 0.000017 s
+Total time in seek operations: 0.000002 s
+Dumping write I/O information:
+	Addr          0-       799 (       800 bytes) written to   1 times
+Dumping read I/O information:
+	Addr          0-       799 (       800 bytes) read from   0 times
+Dumping I/O flavor information:
+	Addr          0-        95 (        96 bytes) flavor is H5FD_MEM_SUPER
+	Addr         96-       799 (       704 bytes) flavor is H5FD_MEM_DEFAULT

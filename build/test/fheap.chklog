@@ -1,0 +1,1016 @@
+============================
+ fheap  Test Log
+============================
+Testing with normal parameters
+Testing fractal heap creation                                          PASSED
+Testing query heap creation parameters                                 PASSED
+Testing create, close & reopen fractal heap                            PASSED
+Testing open fractal heap twice                                        PASSED
+Testing deleting open fractal heap                                     PASSED
+Testing limits of heap ID lengths                                      PASSED
+Testing creating heaps with I/O filters                                PASSED
+Testing querying heap statistics                                       PASSED
+Testing reopening header through different file                        PASSED
+Bulk-filling blocks w/large objects
+Testing inserting 'weird' sized objects into absolute heap             PASSED
+Testing inserting objects to create first direct block in recursive indirect blocks five levels deep PASSED
+Testing removing bad heap IDs from absolute heap                       PASSED
+Testing removing single object from absolute heap                      PASSED
+Testing removing two objects from absolute heap                        PASSED
+Testing removing single larger object from absolute heap               PASSED
+Testing removing two larger objects from absolute heap (forward)       PASSED
+Testing removing two larger objects from absolute heap (reverse)       PASSED
+Testing removing three larger objects from absolute heap (forward)     PASSED
+Testing removing three larger objects from absolute heap (reverse)     PASSED
+Testing incremental object insertion and removal                       PASSED
+Testing removing all objects from root direct block of absolute heap (all - forward) PASSED
+Testing removing all objects from two direct blocks of absolute heap (all - forward) PASSED
+Testing removing all objects from first row of direct blocks of absolute heap (all - forward) PASSED
+Testing removing all objects from first two rows of direct blocks of absolute heap (all - forward) PASSED
+Testing removing all objects from first four rows of direct blocks of absolute heap (all - forward) PASSED
+Testing removing all objects from all direct blocks of root group in absolute heap (all - forward) PASSED
+Testing removing all objects from 2nd level indirect blocks of absolute heap (all - forward) PASSED
+Testing removing all objects from 3rd level indirect blocks of absolute heap (all - forward) PASSED
+Testing inserting object that is too large for starting block, then remove all objects (all - forward) PASSED
+Testing skipping starting block, then adding object back to first block, then remove all objects (all - forward) PASSED
+Testing skipping starting block, then adding objects to backfill and extend, then remove all objects (all - forward) PASSED
+Testing insert object to initial block, then add object too large for starting direct blocks, then remove all objects (all - forward) PASSED
+Testing insert object to initial block, then add object too large for starting direct blocks, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing skipping blocks with indirect root, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing filling first row, then skipping rows, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing skipping direct blocks to last row and skipping two rows of root indirect block, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing filling direct blocks and skipping blocks in non-root indirect block, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing filling direct blocks and skipping row of non-root indirect blocks, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, except last one, and insert object too large for 2nd level indirect blocks, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing filling direct blocks and skipping row of non-root indirect blocks, then skip row of direct blocks, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing filling direct blocks and skipping two rows of root indirect block, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing filling direct blocks and skipping two rows of root indirect block, skip one row of root indirect block, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, and skip first rows of direct blocks of 3rd level indirect block, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect block's direct blocks, and skip first rows of direct blocks of 3rd level indirect block's 2nd level indirect block, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect block's direct blocks, and skip first row of indirect blocks of 3rd level indirect block, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect block's direct blocks, and skip first two rows of indirect blocks of 3rd level indirect block, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling first row of 3rd level indirect blocks, except last one, fill all direct blocks in last 3rd level indirect block, and insert object too large for it's 2nd level indirect blocks, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling first row of 3rd level indirect blocks, fill all direct blocks in next 3rd level indirect block, fill all 1st row of 2nd level indirect blocks, except last one, and insert object too large for 2nd level indirect block, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill 4th level indirect block's direct blocks, and skip first row of 2nd indirect blocks of 4th level indirect block, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill 4th level indirect block's direct, 2nd level indirect blocks and 3rd level direct block, and skip first row of 2nd indirect blocks of 4th level indirect block's 3rd level indirect block, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill first row of 4th level indirect blocks, fill 2nd row 4th level indirect block's direct, 2nd level indirect blocks, first row of 3rd level indirect blocks, 3rd level direct block in 2nd row, and skip first row of 2nd indirect blocks of 4th level indirect block's 3rd level indirect block, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill first row of 3rd level indirect blocks in 4th level indirect block except last 3rd level block, fill direct blocks in 3rd level block, and skip row of 2nd indirect blocks of 4th level indirect block's 3rd level indirect block, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill first row of 4th level indirect blocks, except last one, fill first row of 3rd level indirect blocks in last 4th level indirect block except last 3rd level block, fill direct blocks in 3rd level block, and skip row of 2nd indirect blocks of 4th level indirect block's 3rd level indirect block, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing fragmenting small blocks, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing fragmenting direct blocks, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing fill root direct blocks, then fragment 2nd level indirect block's direct blocks, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing fill root direct blocks and 2nd level indirect blocks, then fragment 3rd level indirect block's direct blocks, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing removing all objects from root direct block of absolute heap (half, refill, all - forward) PASSED
+Testing removing all objects from two direct blocks of absolute heap (half, refill, all - forward) PASSED
+Testing removing all objects from first row of direct blocks of absolute heap (half, refill, all - forward) PASSED
+Testing removing all objects from first two rows of direct blocks of absolute heap (half, refill, all - forward) PASSED
+Testing removing all objects from first four rows of direct blocks of absolute heap (half, refill, all - forward) PASSED
+Testing removing all objects from all direct blocks of root group in absolute heap (half, refill, all - forward) PASSED
+Testing removing all objects from 2nd level indirect blocks of absolute heap (half, refill, all - forward) PASSED
+Testing removing all objects from 3rd level indirect blocks of absolute heap (half, refill, all - forward) PASSED
+Testing inserting object that is too large for starting block, then remove all objects (half, refill, all - forward) PASSED
+Testing skipping starting block, then adding object back to first block, then remove all objects (half, refill, all - forward) PASSED
+Testing skipping starting block, then adding objects to backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing insert object to initial block, then add object too large for starting direct blocks, then remove all objects (half, refill, all - forward) PASSED
+Testing insert object to initial block, then add object too large for starting direct blocks, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing skipping blocks with indirect root, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing filling first row, then skipping rows, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing skipping direct blocks to last row and skipping two rows of root indirect block, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing filling direct blocks and skipping blocks in non-root indirect block, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing filling direct blocks and skipping row of non-root indirect blocks, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, except last one, and insert object too large for 2nd level indirect blocks, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing filling direct blocks and skipping row of non-root indirect blocks, then skip row of direct blocks, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing filling direct blocks and skipping two rows of root indirect block, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing filling direct blocks and skipping two rows of root indirect block, skip one row of root indirect block, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, and skip first rows of direct blocks of 3rd level indirect block, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect block's direct blocks, and skip first rows of direct blocks of 3rd level indirect block's 2nd level indirect block, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect block's direct blocks, and skip first row of indirect blocks of 3rd level indirect block, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect block's direct blocks, and skip first two rows of indirect blocks of 3rd level indirect block, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling first row of 3rd level indirect blocks, except last one, fill all direct blocks in last 3rd level indirect block, and insert object too large for it's 2nd level indirect blocks, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling first row of 3rd level indirect blocks, fill all direct blocks in next 3rd level indirect block, fill all 1st row of 2nd level indirect blocks, except last one, and insert object too large for 2nd level indirect block, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill 4th level indirect block's direct blocks, and skip first row of 2nd indirect blocks of 4th level indirect block, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill 4th level indirect block's direct, 2nd level indirect blocks and 3rd level direct block, and skip first row of 2nd indirect blocks of 4th level indirect block's 3rd level indirect block, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill first row of 4th level indirect blocks, fill 2nd row 4th level indirect block's direct, 2nd level indirect blocks, first row of 3rd level indirect blocks, 3rd level direct block in 2nd row, and skip first row of 2nd indirect blocks of 4th level indirect block's 3rd level indirect block, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill first row of 3rd level indirect blocks in 4th level indirect block except last 3rd level block, fill direct blocks in 3rd level block, and skip row of 2nd indirect blocks of 4th level indirect block's 3rd level indirect block, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill first row of 4th level indirect blocks, except last one, fill first row of 3rd level indirect blocks in last 4th level indirect block except last 3rd level block, fill direct blocks in 3rd level block, and skip row of 2nd indirect blocks of 4th level indirect block's 3rd level indirect block, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing fragmenting small blocks, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing fragmenting direct blocks, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing fill root direct blocks, then fragment 2nd level indirect block's direct blocks, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing fill root direct blocks and 2nd level indirect blocks, then fragment 3rd level indirect block's direct blocks, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing removing all objects from root direct block of absolute heap (all - reverse) PASSED
+Testing removing all objects from two direct blocks of absolute heap (all - reverse) PASSED
+Testing removing all objects from first row of direct blocks of absolute heap (all - reverse) PASSED
+Testing removing all objects from first two rows of direct blocks of absolute heap (all - reverse) PASSED
+Testing removing all objects from first four rows of direct blocks of absolute heap (all - reverse) PASSED
+Testing removing all objects from all direct blocks of root group in absolute heap (all - reverse) PASSED
+Testing removing all objects from 2nd level indirect blocks of absolute heap (all - reverse) PASSED
+Testing removing all objects from 3rd level indirect blocks of absolute heap (all - reverse) PASSED
+Testing inserting object that is too large for starting block, then remove all objects (all - reverse) PASSED
+Testing skipping starting block, then adding object back to first block, then remove all objects (all - reverse) PASSED
+Testing skipping starting block, then adding objects to backfill and extend, then remove all objects (all - reverse) PASSED
+Testing insert object to initial block, then add object too large for starting direct blocks, then remove all objects (all - reverse) PASSED
+Testing insert object to initial block, then add object too large for starting direct blocks, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing skipping blocks with indirect root, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing filling first row, then skipping rows, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing skipping direct blocks to last row and skipping two rows of root indirect block, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing filling direct blocks and skipping blocks in non-root indirect block, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing filling direct blocks and skipping row of non-root indirect blocks, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, except last one, and insert object too large for 2nd level indirect blocks, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing filling direct blocks and skipping row of non-root indirect blocks, then skip row of direct blocks, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing filling direct blocks and skipping two rows of root indirect block, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing filling direct blocks and skipping two rows of root indirect block, skip one row of root indirect block, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, and skip first rows of direct blocks of 3rd level indirect block, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect block's direct blocks, and skip first rows of direct blocks of 3rd level indirect block's 2nd level indirect block, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect block's direct blocks, and skip first row of indirect blocks of 3rd level indirect block, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect block's direct blocks, and skip first two rows of indirect blocks of 3rd level indirect block, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling first row of 3rd level indirect blocks, except last one, fill all direct blocks in last 3rd level indirect block, and insert object too large for it's 2nd level indirect blocks, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling first row of 3rd level indirect blocks, fill all direct blocks in next 3rd level indirect block, fill all 1st row of 2nd level indirect blocks, except last one, and insert object too large for 2nd level indirect block, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill 4th level indirect block's direct blocks, and skip first row of 2nd indirect blocks of 4th level indirect block, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill 4th level indirect block's direct, 2nd level indirect blocks and 3rd level direct block, and skip first row of 2nd indirect blocks of 4th level indirect block's 3rd level indirect block, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill first row of 4th level indirect blocks, fill 2nd row 4th level indirect block's direct, 2nd level indirect blocks, first row of 3rd level indirect blocks, 3rd level direct block in 2nd row, and skip first row of 2nd indirect blocks of 4th level indirect block's 3rd level indirect block, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill first row of 3rd level indirect blocks in 4th level indirect block except last 3rd level block, fill direct blocks in 3rd level block, and skip row of 2nd indirect blocks of 4th level indirect block's 3rd level indirect block, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill first row of 4th level indirect blocks, except last one, fill first row of 3rd level indirect blocks in last 4th level indirect block except last 3rd level block, fill direct blocks in 3rd level block, and skip row of 2nd indirect blocks of 4th level indirect block's 3rd level indirect block, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing fragmenting small blocks, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing fragmenting direct blocks, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing fill root direct blocks, then fragment 2nd level indirect block's direct blocks, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing fill root direct blocks and 2nd level indirect blocks, then fragment 3rd level indirect block's direct blocks, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing removing all objects from root direct block of absolute heap (half, refill, all - reverse) PASSED
+Testing removing all objects from two direct blocks of absolute heap (half, refill, all - reverse) PASSED
+Testing removing all objects from first row of direct blocks of absolute heap (half, refill, all - reverse) PASSED
+Testing removing all objects from first two rows of direct blocks of absolute heap (half, refill, all - reverse) PASSED
+Testing removing all objects from first four rows of direct blocks of absolute heap (half, refill, all - reverse) PASSED
+Testing removing all objects from all direct blocks of root group in absolute heap (half, refill, all - reverse) PASSED
+Testing removing all objects from 2nd level indirect blocks of absolute heap (half, refill, all - reverse) PASSED
+Testing removing all objects from 3rd level indirect blocks of absolute heap (half, refill, all - reverse) PASSED
+Testing inserting object that is too large for starting block, then remove all objects (half, refill, all - reverse) PASSED
+Testing skipping starting block, then adding object back to first block, then remove all objects (half, refill, all - reverse) PASSED
+Testing skipping starting block, then adding objects to backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing insert object to initial block, then add object too large for starting direct blocks, then remove all objects (half, refill, all - reverse) PASSED
+Testing insert object to initial block, then add object too large for starting direct blocks, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing skipping blocks with indirect root, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing filling first row, then skipping rows, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing skipping direct blocks to last row and skipping two rows of root indirect block, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing filling direct blocks and skipping blocks in non-root indirect block, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing filling direct blocks and skipping row of non-root indirect blocks, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, except last one, and insert object too large for 2nd level indirect blocks, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing filling direct blocks and skipping row of non-root indirect blocks, then skip row of direct blocks, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing filling direct blocks and skipping two rows of root indirect block, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing filling direct blocks and skipping two rows of root indirect block, skip one row of root indirect block, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, and skip first rows of direct blocks of 3rd level indirect block, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect block's direct blocks, and skip first rows of direct blocks of 3rd level indirect block's 2nd level indirect block, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect block's direct blocks, and skip first row of indirect blocks of 3rd level indirect block, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect block's direct blocks, and skip first two rows of indirect blocks of 3rd level indirect block, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling first row of 3rd level indirect blocks, except last one, fill all direct blocks in last 3rd level indirect block, and insert object too large for it's 2nd level indirect blocks, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling first row of 3rd level indirect blocks, fill all direct blocks in next 3rd level indirect block, fill all 1st row of 2nd level indirect blocks, except last one, and insert object too large for 2nd level indirect block, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill 4th level indirect block's direct blocks, and skip first row of 2nd indirect blocks of 4th level indirect block, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill 4th level indirect block's direct, 2nd level indirect blocks and 3rd level direct block, and skip first row of 2nd indirect blocks of 4th level indirect block's 3rd level indirect block, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill first row of 4th level indirect blocks, fill 2nd row 4th level indirect block's direct, 2nd level indirect blocks, first row of 3rd level indirect blocks, 3rd level direct block in 2nd row, and skip first row of 2nd indirect blocks of 4th level indirect block's 3rd level indirect block, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill first row of 3rd level indirect blocks in 4th level indirect block except last 3rd level block, fill direct blocks in 3rd level block, and skip row of 2nd indirect blocks of 4th level indirect block's 3rd level indirect block, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill first row of 4th level indirect blocks, except last one, fill first row of 3rd level indirect blocks in last 4th level indirect block except last 3rd level block, fill direct blocks in 3rd level block, and skip row of 2nd indirect blocks of 4th level indirect block's 3rd level indirect block, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing fragmenting small blocks, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing fragmenting direct blocks, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing fill root direct blocks, then fragment 2nd level indirect block's direct blocks, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing fill root direct blocks and 2nd level indirect blocks, then fragment 3rd level indirect block's direct blocks, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing removing all objects from root direct block of absolute heap (all - deleting heap) PASSED
+Testing removing all objects from two direct blocks of absolute heap (all - deleting heap) PASSED
+Testing removing all objects from first row of direct blocks of absolute heap (all - deleting heap) PASSED
+Testing removing all objects from first two rows of direct blocks of absolute heap (all - deleting heap) PASSED
+Testing removing all objects from first four rows of direct blocks of absolute heap (all - deleting heap) PASSED
+Testing removing all objects from all direct blocks of root group in absolute heap (all - deleting heap) PASSED
+Testing removing all objects from 2nd level indirect blocks of absolute heap (all - deleting heap) PASSED
+Testing removing all objects from 3rd level indirect blocks of absolute heap (all - deleting heap) PASSED
+Testing inserting object that is too large for starting block, then remove all objects (all - deleting heap) PASSED
+Testing skipping starting block, then adding object back to first block, then remove all objects (all - deleting heap) PASSED
+Testing skipping starting block, then adding objects to backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing insert object to initial block, then add object too large for starting direct blocks, then remove all objects (all - deleting heap) PASSED
+Testing insert object to initial block, then add object too large for starting direct blocks, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing skipping blocks with indirect root, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing filling first row, then skipping rows, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing skipping direct blocks to last row and skipping two rows of root indirect block, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing filling direct blocks and skipping blocks in non-root indirect block, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing filling direct blocks and skipping row of non-root indirect blocks, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, except last one, and insert object too large for 2nd level indirect blocks, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing filling direct blocks and skipping row of non-root indirect blocks, then skip row of direct blocks, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing filling direct blocks and skipping two rows of root indirect block, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing filling direct blocks and skipping two rows of root indirect block, skip one row of root indirect block, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, and skip first rows of direct blocks of 3rd level indirect block, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect block's direct blocks, and skip first rows of direct blocks of 3rd level indirect block's 2nd level indirect block, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect block's direct blocks, and skip first row of indirect blocks of 3rd level indirect block, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect block's direct blocks, and skip first two rows of indirect blocks of 3rd level indirect block, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling first row of 3rd level indirect blocks, except last one, fill all direct blocks in last 3rd level indirect block, and insert object too large for it's 2nd level indirect blocks, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling first row of 3rd level indirect blocks, fill all direct blocks in next 3rd level indirect block, fill all 1st row of 2nd level indirect blocks, except last one, and insert object too large for 2nd level indirect block, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill 4th level indirect block's direct blocks, and skip first row of 2nd indirect blocks of 4th level indirect block, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill 4th level indirect block's direct, 2nd level indirect blocks and 3rd level direct block, and skip first row of 2nd indirect blocks of 4th level indirect block's 3rd level indirect block, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill first row of 4th level indirect blocks, fill 2nd row 4th level indirect block's direct, 2nd level indirect blocks, first row of 3rd level indirect blocks, 3rd level direct block in 2nd row, and skip first row of 2nd indirect blocks of 4th level indirect block's 3rd level indirect block, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill first row of 3rd level indirect blocks in 4th level indirect block except last 3rd level block, fill direct blocks in 3rd level block, and skip row of 2nd indirect blocks of 4th level indirect block's 3rd level indirect block, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill first row of 4th level indirect blocks, except last one, fill first row of 3rd level indirect blocks in last 4th level indirect block except last 3rd level block, fill direct blocks in 3rd level block, and skip row of 2nd indirect blocks of 4th level indirect block's 3rd level indirect block, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing fragmenting small blocks, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing fragmenting direct blocks, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing fill root direct blocks, then fragment 2nd level indirect block's direct blocks, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing fill root direct blocks and 2nd level indirect blocks, then fragment 3rd level indirect block's direct blocks, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Bulk-filling blocks w/single object
+Testing inserting 'weird' sized objects into absolute heap             PASSED
+Testing inserting objects to create first direct block in recursive indirect blocks five levels deep PASSED
+Testing removing bad heap IDs from absolute heap                       PASSED
+Testing removing single object from absolute heap                      PASSED
+Testing removing two objects from absolute heap                        PASSED
+Testing removing single larger object from absolute heap               PASSED
+Testing removing two larger objects from absolute heap (forward)       PASSED
+Testing removing two larger objects from absolute heap (reverse)       PASSED
+Testing removing three larger objects from absolute heap (forward)     PASSED
+Testing removing three larger objects from absolute heap (reverse)     PASSED
+Testing incremental object insertion and removal                       PASSED
+Testing removing all objects from root direct block of absolute heap (all - forward) PASSED
+Testing removing all objects from two direct blocks of absolute heap (all - forward) PASSED
+Testing removing all objects from first row of direct blocks of absolute heap (all - forward) PASSED
+Testing removing all objects from first two rows of direct blocks of absolute heap (all - forward) PASSED
+Testing removing all objects from first four rows of direct blocks of absolute heap (all - forward) PASSED
+Testing removing all objects from all direct blocks of root group in absolute heap (all - forward) PASSED
+Testing removing all objects from 2nd level indirect blocks of absolute heap (all - forward) PASSED
+Testing removing all objects from 3rd level indirect blocks of absolute heap (all - forward) PASSED
+Testing inserting object that is too large for starting block, then remove all objects (all - forward) PASSED
+Testing skipping starting block, then adding object back to first block, then remove all objects (all - forward) PASSED
+Testing skipping starting block, then adding objects to backfill and extend, then remove all objects (all - forward) PASSED
+Testing insert object to initial block, then add object too large for starting direct blocks, then remove all objects (all - forward) PASSED
+Testing insert object to initial block, then add object too large for starting direct blocks, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing skipping blocks with indirect root, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing filling first row, then skipping rows, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing skipping direct blocks to last row and skipping two rows of root indirect block, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing filling direct blocks and skipping blocks in non-root indirect block, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing filling direct blocks and skipping row of non-root indirect blocks, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, except last one, and insert object too large for 2nd level indirect blocks, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing filling direct blocks and skipping row of non-root indirect blocks, then skip row of direct blocks, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing filling direct blocks and skipping two rows of root indirect block, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing filling direct blocks and skipping two rows of root indirect block, skip one row of root indirect block, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, and skip first rows of direct blocks of 3rd level indirect block, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect block's direct blocks, and skip first rows of direct blocks of 3rd level indirect block's 2nd level indirect block, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect block's direct blocks, and skip first row of indirect blocks of 3rd level indirect block, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect block's direct blocks, and skip first two rows of indirect blocks of 3rd level indirect block, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling first row of 3rd level indirect blocks, except last one, fill all direct blocks in last 3rd level indirect block, and insert object too large for it's 2nd level indirect blocks, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling first row of 3rd level indirect blocks, fill all direct blocks in next 3rd level indirect block, fill all 1st row of 2nd level indirect blocks, except last one, and insert object too large for 2nd level indirect block, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill 4th level indirect block's direct blocks, and skip first row of 2nd indirect blocks of 4th level indirect block, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill 4th level indirect block's direct, 2nd level indirect blocks and 3rd level direct block, and skip first row of 2nd indirect blocks of 4th level indirect block's 3rd level indirect block, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill first row of 4th level indirect blocks, fill 2nd row 4th level indirect block's direct, 2nd level indirect blocks, first row of 3rd level indirect blocks, 3rd level direct block in 2nd row, and skip first row of 2nd indirect blocks of 4th level indirect block's 3rd level indirect block, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill first row of 3rd level indirect blocks in 4th level indirect block except last 3rd level block, fill direct blocks in 3rd level block, and skip row of 2nd indirect blocks of 4th level indirect block's 3rd level indirect block, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill first row of 4th level indirect blocks, except last one, fill first row of 3rd level indirect blocks in last 4th level indirect block except last 3rd level block, fill direct blocks in 3rd level block, and skip row of 2nd indirect blocks of 4th level indirect block's 3rd level indirect block, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing fragmenting small blocks, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing fragmenting direct blocks, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing fill root direct blocks, then fragment 2nd level indirect block's direct blocks, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing fill root direct blocks and 2nd level indirect blocks, then fragment 3rd level indirect block's direct blocks, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing removing all objects from root direct block of absolute heap (half, refill, all - forward) PASSED
+Testing removing all objects from two direct blocks of absolute heap (half, refill, all - forward) PASSED
+Testing removing all objects from first row of direct blocks of absolute heap (half, refill, all - forward) PASSED
+Testing removing all objects from first two rows of direct blocks of absolute heap (half, refill, all - forward) PASSED
+Testing removing all objects from first four rows of direct blocks of absolute heap (half, refill, all - forward) PASSED
+Testing removing all objects from all direct blocks of root group in absolute heap (half, refill, all - forward) PASSED
+Testing removing all objects from 2nd level indirect blocks of absolute heap (half, refill, all - forward) PASSED
+Testing removing all objects from 3rd level indirect blocks of absolute heap (half, refill, all - forward) PASSED
+Testing inserting object that is too large for starting block, then remove all objects (half, refill, all - forward) PASSED
+Testing skipping starting block, then adding object back to first block, then remove all objects (half, refill, all - forward) PASSED
+Testing skipping starting block, then adding objects to backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing insert object to initial block, then add object too large for starting direct blocks, then remove all objects (half, refill, all - forward) PASSED
+Testing insert object to initial block, then add object too large for starting direct blocks, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing skipping blocks with indirect root, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing filling first row, then skipping rows, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing skipping direct blocks to last row and skipping two rows of root indirect block, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing filling direct blocks and skipping blocks in non-root indirect block, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing filling direct blocks and skipping row of non-root indirect blocks, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, except last one, and insert object too large for 2nd level indirect blocks, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing filling direct blocks and skipping row of non-root indirect blocks, then skip row of direct blocks, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing filling direct blocks and skipping two rows of root indirect block, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing filling direct blocks and skipping two rows of root indirect block, skip one row of root indirect block, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, and skip first rows of direct blocks of 3rd level indirect block, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect block's direct blocks, and skip first rows of direct blocks of 3rd level indirect block's 2nd level indirect block, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect block's direct blocks, and skip first row of indirect blocks of 3rd level indirect block, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect block's direct blocks, and skip first two rows of indirect blocks of 3rd level indirect block, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling first row of 3rd level indirect blocks, except last one, fill all direct blocks in last 3rd level indirect block, and insert object too large for it's 2nd level indirect blocks, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling first row of 3rd level indirect blocks, fill all direct blocks in next 3rd level indirect block, fill all 1st row of 2nd level indirect blocks, except last one, and insert object too large for 2nd level indirect block, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill 4th level indirect block's direct blocks, and skip first row of 2nd indirect blocks of 4th level indirect block, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill 4th level indirect block's direct, 2nd level indirect blocks and 3rd level direct block, and skip first row of 2nd indirect blocks of 4th level indirect block's 3rd level indirect block, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill first row of 4th level indirect blocks, fill 2nd row 4th level indirect block's direct, 2nd level indirect blocks, first row of 3rd level indirect blocks, 3rd level direct block in 2nd row, and skip first row of 2nd indirect blocks of 4th level indirect block's 3rd level indirect block, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill first row of 3rd level indirect blocks in 4th level indirect block except last 3rd level block, fill direct blocks in 3rd level block, and skip row of 2nd indirect blocks of 4th level indirect block's 3rd level indirect block, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill first row of 4th level indirect blocks, except last one, fill first row of 3rd level indirect blocks in last 4th level indirect block except last 3rd level block, fill direct blocks in 3rd level block, and skip row of 2nd indirect blocks of 4th level indirect block's 3rd level indirect block, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing fragmenting small blocks, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing fragmenting direct blocks, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing fill root direct blocks, then fragment 2nd level indirect block's direct blocks, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing fill root direct blocks and 2nd level indirect blocks, then fragment 3rd level indirect block's direct blocks, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing removing all objects from root direct block of absolute heap (all - reverse) PASSED
+Testing removing all objects from two direct blocks of absolute heap (all - reverse) PASSED
+Testing removing all objects from first row of direct blocks of absolute heap (all - reverse) PASSED
+Testing removing all objects from first two rows of direct blocks of absolute heap (all - reverse) PASSED
+Testing removing all objects from first four rows of direct blocks of absolute heap (all - reverse) PASSED
+Testing removing all objects from all direct blocks of root group in absolute heap (all - reverse) PASSED
+Testing removing all objects from 2nd level indirect blocks of absolute heap (all - reverse) PASSED
+Testing removing all objects from 3rd level indirect blocks of absolute heap (all - reverse) PASSED
+Testing inserting object that is too large for starting block, then remove all objects (all - reverse) PASSED
+Testing skipping starting block, then adding object back to first block, then remove all objects (all - reverse) PASSED
+Testing skipping starting block, then adding objects to backfill and extend, then remove all objects (all - reverse) PASSED
+Testing insert object to initial block, then add object too large for starting direct blocks, then remove all objects (all - reverse) PASSED
+Testing insert object to initial block, then add object too large for starting direct blocks, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing skipping blocks with indirect root, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing filling first row, then skipping rows, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing skipping direct blocks to last row and skipping two rows of root indirect block, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing filling direct blocks and skipping blocks in non-root indirect block, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing filling direct blocks and skipping row of non-root indirect blocks, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, except last one, and insert object too large for 2nd level indirect blocks, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing filling direct blocks and skipping row of non-root indirect blocks, then skip row of direct blocks, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing filling direct blocks and skipping two rows of root indirect block, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing filling direct blocks and skipping two rows of root indirect block, skip one row of root indirect block, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, and skip first rows of direct blocks of 3rd level indirect block, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect block's direct blocks, and skip first rows of direct blocks of 3rd level indirect block's 2nd level indirect block, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect block's direct blocks, and skip first row of indirect blocks of 3rd level indirect block, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect block's direct blocks, and skip first two rows of indirect blocks of 3rd level indirect block, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling first row of 3rd level indirect blocks, except last one, fill all direct blocks in last 3rd level indirect block, and insert object too large for it's 2nd level indirect blocks, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling first row of 3rd level indirect blocks, fill all direct blocks in next 3rd level indirect block, fill all 1st row of 2nd level indirect blocks, except last one, and insert object too large for 2nd level indirect block, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill 4th level indirect block's direct blocks, and skip first row of 2nd indirect blocks of 4th level indirect block, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill 4th level indirect block's direct, 2nd level indirect blocks and 3rd level direct block, and skip first row of 2nd indirect blocks of 4th level indirect block's 3rd level indirect block, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill first row of 4th level indirect blocks, fill 2nd row 4th level indirect block's direct, 2nd level indirect blocks, first row of 3rd level indirect blocks, 3rd level direct block in 2nd row, and skip first row of 2nd indirect blocks of 4th level indirect block's 3rd level indirect block, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill first row of 3rd level indirect blocks in 4th level indirect block except last 3rd level block, fill direct blocks in 3rd level block, and skip row of 2nd indirect blocks of 4th level indirect block's 3rd level indirect block, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill first row of 4th level indirect blocks, except last one, fill first row of 3rd level indirect blocks in last 4th level indirect block except last 3rd level block, fill direct blocks in 3rd level block, and skip row of 2nd indirect blocks of 4th level indirect block's 3rd level indirect block, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing fragmenting small blocks, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing fragmenting direct blocks, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing fill root direct blocks, then fragment 2nd level indirect block's direct blocks, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing fill root direct blocks and 2nd level indirect blocks, then fragment 3rd level indirect block's direct blocks, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing removing all objects from root direct block of absolute heap (half, refill, all - reverse) PASSED
+Testing removing all objects from two direct blocks of absolute heap (half, refill, all - reverse) PASSED
+Testing removing all objects from first row of direct blocks of absolute heap (half, refill, all - reverse) PASSED
+Testing removing all objects from first two rows of direct blocks of absolute heap (half, refill, all - reverse) PASSED
+Testing removing all objects from first four rows of direct blocks of absolute heap (half, refill, all - reverse) PASSED
+Testing removing all objects from all direct blocks of root group in absolute heap (half, refill, all - reverse) PASSED
+Testing removing all objects from 2nd level indirect blocks of absolute heap (half, refill, all - reverse) PASSED
+Testing removing all objects from 3rd level indirect blocks of absolute heap (half, refill, all - reverse) PASSED
+Testing inserting object that is too large for starting block, then remove all objects (half, refill, all - reverse) PASSED
+Testing skipping starting block, then adding object back to first block, then remove all objects (half, refill, all - reverse) PASSED
+Testing skipping starting block, then adding objects to backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing insert object to initial block, then add object too large for starting direct blocks, then remove all objects (half, refill, all - reverse) PASSED
+Testing insert object to initial block, then add object too large for starting direct blocks, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing skipping blocks with indirect root, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing filling first row, then skipping rows, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing skipping direct blocks to last row and skipping two rows of root indirect block, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing filling direct blocks and skipping blocks in non-root indirect block, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing filling direct blocks and skipping row of non-root indirect blocks, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, except last one, and insert object too large for 2nd level indirect blocks, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing filling direct blocks and skipping row of non-root indirect blocks, then skip row of direct blocks, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing filling direct blocks and skipping two rows of root indirect block, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing filling direct blocks and skipping two rows of root indirect block, skip one row of root indirect block, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, and skip first rows of direct blocks of 3rd level indirect block, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect block's direct blocks, and skip first rows of direct blocks of 3rd level indirect block's 2nd level indirect block, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect block's direct blocks, and skip first row of indirect blocks of 3rd level indirect block, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect block's direct blocks, and skip first two rows of indirect blocks of 3rd level indirect block, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling first row of 3rd level indirect blocks, except last one, fill all direct blocks in last 3rd level indirect block, and insert object too large for it's 2nd level indirect blocks, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling first row of 3rd level indirect blocks, fill all direct blocks in next 3rd level indirect block, fill all 1st row of 2nd level indirect blocks, except last one, and insert object too large for 2nd level indirect block, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill 4th level indirect block's direct blocks, and skip first row of 2nd indirect blocks of 4th level indirect block, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill 4th level indirect block's direct, 2nd level indirect blocks and 3rd level direct block, and skip first row of 2nd indirect blocks of 4th level indirect block's 3rd level indirect block, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill first row of 4th level indirect blocks, fill 2nd row 4th level indirect block's direct, 2nd level indirect blocks, first row of 3rd level indirect blocks, 3rd level direct block in 2nd row, and skip first row of 2nd indirect blocks of 4th level indirect block's 3rd level indirect block, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill first row of 3rd level indirect blocks in 4th level indirect block except last 3rd level block, fill direct blocks in 3rd level block, and skip row of 2nd indirect blocks of 4th level indirect block's 3rd level indirect block, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill first row of 4th level indirect blocks, except last one, fill first row of 3rd level indirect blocks in last 4th level indirect block except last 3rd level block, fill direct blocks in 3rd level block, and skip row of 2nd indirect blocks of 4th level indirect block's 3rd level indirect block, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing fragmenting small blocks, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing fragmenting direct blocks, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing fill root direct blocks, then fragment 2nd level indirect block's direct blocks, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing fill root direct blocks and 2nd level indirect blocks, then fragment 3rd level indirect block's direct blocks, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing removing all objects from root direct block of absolute heap (all - deleting heap) PASSED
+Testing removing all objects from two direct blocks of absolute heap (all - deleting heap) PASSED
+Testing removing all objects from first row of direct blocks of absolute heap (all - deleting heap) PASSED
+Testing removing all objects from first two rows of direct blocks of absolute heap (all - deleting heap) PASSED
+Testing removing all objects from first four rows of direct blocks of absolute heap (all - deleting heap) PASSED
+Testing removing all objects from all direct blocks of root group in absolute heap (all - deleting heap) PASSED
+Testing removing all objects from 2nd level indirect blocks of absolute heap (all - deleting heap) PASSED
+Testing removing all objects from 3rd level indirect blocks of absolute heap (all - deleting heap) PASSED
+Testing inserting object that is too large for starting block, then remove all objects (all - deleting heap) PASSED
+Testing skipping starting block, then adding object back to first block, then remove all objects (all - deleting heap) PASSED
+Testing skipping starting block, then adding objects to backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing insert object to initial block, then add object too large for starting direct blocks, then remove all objects (all - deleting heap) PASSED
+Testing insert object to initial block, then add object too large for starting direct blocks, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing skipping blocks with indirect root, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing filling first row, then skipping rows, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing skipping direct blocks to last row and skipping two rows of root indirect block, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing filling direct blocks and skipping blocks in non-root indirect block, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing filling direct blocks and skipping row of non-root indirect blocks, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, except last one, and insert object too large for 2nd level indirect blocks, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing filling direct blocks and skipping row of non-root indirect blocks, then skip row of direct blocks, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing filling direct blocks and skipping two rows of root indirect block, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing filling direct blocks and skipping two rows of root indirect block, skip one row of root indirect block, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, and skip first rows of direct blocks of 3rd level indirect block, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect block's direct blocks, and skip first rows of direct blocks of 3rd level indirect block's 2nd level indirect block, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect block's direct blocks, and skip first row of indirect blocks of 3rd level indirect block, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect block's direct blocks, and skip first two rows of indirect blocks of 3rd level indirect block, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling first row of 3rd level indirect blocks, except last one, fill all direct blocks in last 3rd level indirect block, and insert object too large for it's 2nd level indirect blocks, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling first row of 3rd level indirect blocks, fill all direct blocks in next 3rd level indirect block, fill all 1st row of 2nd level indirect blocks, except last one, and insert object too large for 2nd level indirect block, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill 4th level indirect block's direct blocks, and skip first row of 2nd indirect blocks of 4th level indirect block, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill 4th level indirect block's direct, 2nd level indirect blocks and 3rd level direct block, and skip first row of 2nd indirect blocks of 4th level indirect block's 3rd level indirect block, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill first row of 4th level indirect blocks, fill 2nd row 4th level indirect block's direct, 2nd level indirect blocks, first row of 3rd level indirect blocks, 3rd level direct block in 2nd row, and skip first row of 2nd indirect blocks of 4th level indirect block's 3rd level indirect block, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill first row of 3rd level indirect blocks in 4th level indirect block except last 3rd level block, fill direct blocks in 3rd level block, and skip row of 2nd indirect blocks of 4th level indirect block's 3rd level indirect block, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill first row of 4th level indirect blocks, except last one, fill first row of 3rd level indirect blocks in last 4th level indirect block except last 3rd level block, fill direct blocks in 3rd level block, and skip row of 2nd indirect blocks of 4th level indirect block's 3rd level indirect block, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing fragmenting small blocks, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing fragmenting direct blocks, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing fill root direct blocks, then fragment 2nd level indirect block's direct blocks, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing fill root direct blocks and 2nd level indirect blocks, then fragment 3rd level indirect block's direct blocks, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Using 'normal' heap ID format for 'huge' objects
+Testing insert one huge object, then remove (all - forward)            PASSED
+Testing insert two huge objects, then remove (all - forward)           PASSED
+Testing insert three huge objects, then remove (all - forward)         PASSED
+Testing insert mix of normal & huge objects, then remove (all - forward) PASSED
+Testing insert 'huge' object into heap with I/O filters, then remove (all - forward) PASSED
+Testing insert one tiny object, then remove (all - forward)            PASSED
+Testing insert two tiny objects, then remove (all - forward)           PASSED
+Testing insert mix of normal, huge & tiny objects, then remove (all - forward) PASSED
+Testing insert one huge object, then remove (all - reverse)            PASSED
+Testing insert two huge objects, then remove (all - reverse)           PASSED
+Testing insert three huge objects, then remove (all - reverse)         PASSED
+Testing insert mix of normal & huge objects, then remove (all - reverse) PASSED
+Testing insert 'huge' object into heap with I/O filters, then remove (all - reverse) PASSED
+Testing insert one tiny object, then remove (all - reverse)            PASSED
+Testing insert two tiny objects, then remove (all - reverse)           PASSED
+Testing insert mix of normal, huge & tiny objects, then remove (all - reverse) PASSED
+Testing insert one huge object, then remove (all - deleting heap)      PASSED
+Testing insert two huge objects, then remove (all - deleting heap)     PASSED
+Testing insert three huge objects, then remove (all - deleting heap)   PASSED
+Testing insert mix of normal & huge objects, then remove (all - deleting heap) PASSED
+Testing insert 'huge' object into heap with I/O filters, then remove (all - deleting heap) PASSED
+Testing insert one tiny object, then remove (all - deleting heap)      PASSED
+Testing insert two tiny objects, then remove (all - deleting heap)     PASSED
+Testing insert mix of normal, huge & tiny objects, then remove (all - deleting heap) PASSED
+Using 'direct' heap ID format for 'huge' objects
+Testing insert one huge object, then remove (all - forward)            PASSED
+Testing insert two huge objects, then remove (all - forward)           PASSED
+Testing insert three huge objects, then remove (all - forward)         PASSED
+Testing insert mix of normal & huge objects, then remove (all - forward) PASSED
+Testing insert 'huge' object into heap with I/O filters, then remove (all - forward) PASSED
+Testing insert one tiny object, then remove (all - forward)            PASSED
+Testing insert two tiny objects, then remove (all - forward)           PASSED
+Testing insert mix of normal, huge & tiny objects, then remove (all - forward) PASSED
+Testing insert one huge object, then remove (all - reverse)            PASSED
+Testing insert two huge objects, then remove (all - reverse)           PASSED
+Testing insert three huge objects, then remove (all - reverse)         PASSED
+Testing insert mix of normal & huge objects, then remove (all - reverse) PASSED
+Testing insert 'huge' object into heap with I/O filters, then remove (all - reverse) PASSED
+Testing insert one tiny object, then remove (all - reverse)            PASSED
+Testing insert two tiny objects, then remove (all - reverse)           PASSED
+Testing insert mix of normal, huge & tiny objects, then remove (all - reverse) PASSED
+Testing insert one huge object, then remove (all - deleting heap)      PASSED
+Testing insert two huge objects, then remove (all - deleting heap)     PASSED
+Testing insert three huge objects, then remove (all - deleting heap)   PASSED
+Testing insert mix of normal & huge objects, then remove (all - deleting heap) PASSED
+Testing insert 'huge' object into heap with I/O filters, then remove (all - deleting heap) PASSED
+Testing insert one tiny object, then remove (all - deleting heap)      PASSED
+Testing insert two tiny objects, then remove (all - deleting heap)     PASSED
+Testing insert mix of normal, huge & tiny objects, then remove (all - deleting heap) PASSED
+Using 'direct' heap ID format for 'huge' objects and larger IDs for 'tiny' objects
+Testing insert one huge object, then remove (all - forward)            PASSED
+Testing insert two huge objects, then remove (all - forward)           PASSED
+Testing insert three huge objects, then remove (all - forward)         PASSED
+Testing insert mix of normal & huge objects, then remove (all - forward) PASSED
+Testing insert 'huge' object into heap with I/O filters, then remove (all - forward) PASSED
+Testing insert one tiny object, then remove (all - forward)            PASSED
+Testing insert two tiny objects, then remove (all - forward)           PASSED
+Testing insert mix of normal, huge & tiny objects, then remove (all - forward) PASSED
+Testing insert one huge object, then remove (all - reverse)            PASSED
+Testing insert two huge objects, then remove (all - reverse)           PASSED
+Testing insert three huge objects, then remove (all - reverse)         PASSED
+Testing insert mix of normal & huge objects, then remove (all - reverse) PASSED
+Testing insert 'huge' object into heap with I/O filters, then remove (all - reverse) PASSED
+Testing insert one tiny object, then remove (all - reverse)            PASSED
+Testing insert two tiny objects, then remove (all - reverse)           PASSED
+Testing insert mix of normal, huge & tiny objects, then remove (all - reverse) PASSED
+Testing insert one huge object, then remove (all - deleting heap)      PASSED
+Testing insert two huge objects, then remove (all - deleting heap)     PASSED
+Testing insert three huge objects, then remove (all - deleting heap)   PASSED
+Testing insert mix of normal & huge objects, then remove (all - deleting heap) PASSED
+Testing insert 'huge' object into heap with I/O filters, then remove (all - deleting heap) PASSED
+Testing insert one tiny object, then remove (all - deleting heap)      PASSED
+Testing insert two tiny objects, then remove (all - deleting heap)     PASSED
+Testing insert mix of normal, huge & tiny objects, then remove (all - deleting heap) PASSED
+Testing insert one 'managed' object into heap with I/O filters, then remove (all - forward) PASSED
+Testing insert two 'managed' objects into heap with I/O filters, then remove (all - forward) PASSED
+Testing inserting random-sized objects in heap with compressed blocks, then remove all objects (all - random) PASSED
+Testing inserting random-sized objects with power of 2 distribution in heap with compressed blocks, then remove all objects (all - random) PASSED
+Testing insert one 'managed' object into heap with I/O filters, then remove (all - reverse) PASSED
+Testing insert two 'managed' objects into heap with I/O filters, then remove (all - reverse) PASSED
+Testing inserting random-sized objects in heap with compressed blocks, then remove all objects (all - random) PASSED
+Testing inserting random-sized objects with power of 2 distribution in heap with compressed blocks, then remove all objects (all - random) PASSED
+Testing insert one 'managed' object into heap with I/O filters, then remove (all - deleting heap) PASSED
+Testing insert two 'managed' objects into heap with I/O filters, then remove (all - deleting heap) PASSED
+Testing inserting random-sized objects in heap with compressed blocks, then remove all objects (all - deleting heap) PASSED
+Testing inserting random-sized objects with power of 2 distribution in heap with compressed blocks, then remove all objects (all - deleting heap) PASSED
+Using 'small' heap creation parameters
+Testing inserting random-sized objects, then remove all objects (all - random) PASSED
+Testing inserting random-sized objects with power of 2 distribution, then remove all objects (all - random) PASSED
+Testing inserting random-sized objects, then remove all objects (all - deleting heap) PASSED
+Testing inserting random-sized objects with power of 2 distribution, then remove all objects (all - deleting heap) PASSED
+Using 'large' heap creation parameters
+Testing inserting random-sized objects, then remove all objects (all - random) PASSED
+Testing inserting random-sized objects with power of 2 distribution, then remove all objects (all - random) PASSED
+Testing inserting random-sized objects, then remove all objects (all - deleting heap) PASSED
+Testing inserting random-sized objects with power of 2 distribution, then remove all objects (all - deleting heap) PASSED
+Testing writing objects in heap                                        PASSED
+Testing writing objects in heap with compressed blocks                 PASSED
+Testing with reopen heap flag set
+Testing fractal heap creation                                          PASSED
+Testing query heap creation parameters                                 PASSED
+Testing create, close & reopen fractal heap                            PASSED
+Testing open fractal heap twice                                        PASSED
+Testing deleting open fractal heap                                     PASSED
+Testing limits of heap ID lengths                                      PASSED
+Testing creating heaps with I/O filters                                PASSED
+Testing querying heap statistics                                       PASSED
+Testing reopening header through different file                        PASSED
+Bulk-filling blocks w/large objects
+Testing inserting 'weird' sized objects into absolute heap             PASSED
+Testing inserting objects to create first direct block in recursive indirect blocks five levels deep PASSED
+Testing removing bad heap IDs from absolute heap                       PASSED
+Testing removing single object from absolute heap                      PASSED
+Testing removing two objects from absolute heap                        PASSED
+Testing removing single larger object from absolute heap               PASSED
+Testing removing two larger objects from absolute heap (forward)       PASSED
+Testing removing two larger objects from absolute heap (reverse)       PASSED
+Testing removing three larger objects from absolute heap (forward)     PASSED
+Testing removing three larger objects from absolute heap (reverse)     PASSED
+Testing incremental object insertion and removal                       PASSED
+Testing removing all objects from root direct block of absolute heap (all - forward) PASSED
+Testing removing all objects from two direct blocks of absolute heap (all - forward) PASSED
+Testing removing all objects from first row of direct blocks of absolute heap (all - forward) PASSED
+Testing removing all objects from first two rows of direct blocks of absolute heap (all - forward) PASSED
+Testing removing all objects from first four rows of direct blocks of absolute heap (all - forward) PASSED
+Testing removing all objects from all direct blocks of root group in absolute heap (all - forward) PASSED
+Testing removing all objects from 2nd level indirect blocks of absolute heap (all - forward) PASSED
+Testing removing all objects from 3rd level indirect blocks of absolute heap (all - forward) PASSED
+Testing inserting object that is too large for starting block, then remove all objects (all - forward) PASSED
+Testing skipping starting block, then adding object back to first block, then remove all objects (all - forward) PASSED
+Testing skipping starting block, then adding objects to backfill and extend, then remove all objects (all - forward) PASSED
+Testing insert object to initial block, then add object too large for starting direct blocks, then remove all objects (all - forward) PASSED
+Testing insert object to initial block, then add object too large for starting direct blocks, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing skipping blocks with indirect root, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing filling first row, then skipping rows, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing skipping direct blocks to last row and skipping two rows of root indirect block, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing filling direct blocks and skipping blocks in non-root indirect block, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing filling direct blocks and skipping row of non-root indirect blocks, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, except last one, and insert object too large for 2nd level indirect blocks, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing filling direct blocks and skipping row of non-root indirect blocks, then skip row of direct blocks, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing filling direct blocks and skipping two rows of root indirect block, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing filling direct blocks and skipping two rows of root indirect block, skip one row of root indirect block, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, and skip first rows of direct blocks of 3rd level indirect block, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect block's direct blocks, and skip first rows of direct blocks of 3rd level indirect block's 2nd level indirect block, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect block's direct blocks, and skip first row of indirect blocks of 3rd level indirect block, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect block's direct blocks, and skip first two rows of indirect blocks of 3rd level indirect block, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling first row of 3rd level indirect blocks, except last one, fill all direct blocks in last 3rd level indirect block, and insert object too large for it's 2nd level indirect blocks, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling first row of 3rd level indirect blocks, fill all direct blocks in next 3rd level indirect block, fill all 1st row of 2nd level indirect blocks, except last one, and insert object too large for 2nd level indirect block, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill 4th level indirect block's direct blocks, and skip first row of 2nd indirect blocks of 4th level indirect block, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill 4th level indirect block's direct, 2nd level indirect blocks and 3rd level direct block, and skip first row of 2nd indirect blocks of 4th level indirect block's 3rd level indirect block, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill first row of 4th level indirect blocks, fill 2nd row 4th level indirect block's direct, 2nd level indirect blocks, first row of 3rd level indirect blocks, 3rd level direct block in 2nd row, and skip first row of 2nd indirect blocks of 4th level indirect block's 3rd level indirect block, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill first row of 3rd level indirect blocks in 4th level indirect block except last 3rd level block, fill direct blocks in 3rd level block, and skip row of 2nd indirect blocks of 4th level indirect block's 3rd level indirect block, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill first row of 4th level indirect blocks, except last one, fill first row of 3rd level indirect blocks in last 4th level indirect block except last 3rd level block, fill direct blocks in 3rd level block, and skip row of 2nd indirect blocks of 4th level indirect block's 3rd level indirect block, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing fragmenting small blocks, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing fragmenting direct blocks, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing fill root direct blocks, then fragment 2nd level indirect block's direct blocks, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing fill root direct blocks and 2nd level indirect blocks, then fragment 3rd level indirect block's direct blocks, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing removing all objects from root direct block of absolute heap (half, refill, all - forward) PASSED
+Testing removing all objects from two direct blocks of absolute heap (half, refill, all - forward) PASSED
+Testing removing all objects from first row of direct blocks of absolute heap (half, refill, all - forward) PASSED
+Testing removing all objects from first two rows of direct blocks of absolute heap (half, refill, all - forward) PASSED
+Testing removing all objects from first four rows of direct blocks of absolute heap (half, refill, all - forward) PASSED
+Testing removing all objects from all direct blocks of root group in absolute heap (half, refill, all - forward) PASSED
+Testing removing all objects from 2nd level indirect blocks of absolute heap (half, refill, all - forward) PASSED
+Testing removing all objects from 3rd level indirect blocks of absolute heap (half, refill, all - forward) PASSED
+Testing inserting object that is too large for starting block, then remove all objects (half, refill, all - forward) PASSED
+Testing skipping starting block, then adding object back to first block, then remove all objects (half, refill, all - forward) PASSED
+Testing skipping starting block, then adding objects to backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing insert object to initial block, then add object too large for starting direct blocks, then remove all objects (half, refill, all - forward) PASSED
+Testing insert object to initial block, then add object too large for starting direct blocks, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing skipping blocks with indirect root, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing filling first row, then skipping rows, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing skipping direct blocks to last row and skipping two rows of root indirect block, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing filling direct blocks and skipping blocks in non-root indirect block, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing filling direct blocks and skipping row of non-root indirect blocks, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, except last one, and insert object too large for 2nd level indirect blocks, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing filling direct blocks and skipping row of non-root indirect blocks, then skip row of direct blocks, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing filling direct blocks and skipping two rows of root indirect block, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing filling direct blocks and skipping two rows of root indirect block, skip one row of root indirect block, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, and skip first rows of direct blocks of 3rd level indirect block, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect block's direct blocks, and skip first rows of direct blocks of 3rd level indirect block's 2nd level indirect block, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect block's direct blocks, and skip first row of indirect blocks of 3rd level indirect block, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect block's direct blocks, and skip first two rows of indirect blocks of 3rd level indirect block, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling first row of 3rd level indirect blocks, except last one, fill all direct blocks in last 3rd level indirect block, and insert object too large for it's 2nd level indirect blocks, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling first row of 3rd level indirect blocks, fill all direct blocks in next 3rd level indirect block, fill all 1st row of 2nd level indirect blocks, except last one, and insert object too large for 2nd level indirect block, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill 4th level indirect block's direct blocks, and skip first row of 2nd indirect blocks of 4th level indirect block, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill 4th level indirect block's direct, 2nd level indirect blocks and 3rd level direct block, and skip first row of 2nd indirect blocks of 4th level indirect block's 3rd level indirect block, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill first row of 4th level indirect blocks, fill 2nd row 4th level indirect block's direct, 2nd level indirect blocks, first row of 3rd level indirect blocks, 3rd level direct block in 2nd row, and skip first row of 2nd indirect blocks of 4th level indirect block's 3rd level indirect block, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill first row of 3rd level indirect blocks in 4th level indirect block except last 3rd level block, fill direct blocks in 3rd level block, and skip row of 2nd indirect blocks of 4th level indirect block's 3rd level indirect block, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill first row of 4th level indirect blocks, except last one, fill first row of 3rd level indirect blocks in last 4th level indirect block except last 3rd level block, fill direct blocks in 3rd level block, and skip row of 2nd indirect blocks of 4th level indirect block's 3rd level indirect block, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing fragmenting small blocks, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing fragmenting direct blocks, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing fill root direct blocks, then fragment 2nd level indirect block's direct blocks, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing fill root direct blocks and 2nd level indirect blocks, then fragment 3rd level indirect block's direct blocks, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing removing all objects from root direct block of absolute heap (all - reverse) PASSED
+Testing removing all objects from two direct blocks of absolute heap (all - reverse) PASSED
+Testing removing all objects from first row of direct blocks of absolute heap (all - reverse) PASSED
+Testing removing all objects from first two rows of direct blocks of absolute heap (all - reverse) PASSED
+Testing removing all objects from first four rows of direct blocks of absolute heap (all - reverse) PASSED
+Testing removing all objects from all direct blocks of root group in absolute heap (all - reverse) PASSED
+Testing removing all objects from 2nd level indirect blocks of absolute heap (all - reverse) PASSED
+Testing removing all objects from 3rd level indirect blocks of absolute heap (all - reverse) PASSED
+Testing inserting object that is too large for starting block, then remove all objects (all - reverse) PASSED
+Testing skipping starting block, then adding object back to first block, then remove all objects (all - reverse) PASSED
+Testing skipping starting block, then adding objects to backfill and extend, then remove all objects (all - reverse) PASSED
+Testing insert object to initial block, then add object too large for starting direct blocks, then remove all objects (all - reverse) PASSED
+Testing insert object to initial block, then add object too large for starting direct blocks, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing skipping blocks with indirect root, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing filling first row, then skipping rows, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing skipping direct blocks to last row and skipping two rows of root indirect block, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing filling direct blocks and skipping blocks in non-root indirect block, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing filling direct blocks and skipping row of non-root indirect blocks, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, except last one, and insert object too large for 2nd level indirect blocks, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing filling direct blocks and skipping row of non-root indirect blocks, then skip row of direct blocks, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing filling direct blocks and skipping two rows of root indirect block, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing filling direct blocks and skipping two rows of root indirect block, skip one row of root indirect block, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, and skip first rows of direct blocks of 3rd level indirect block, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect block's direct blocks, and skip first rows of direct blocks of 3rd level indirect block's 2nd level indirect block, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect block's direct blocks, and skip first row of indirect blocks of 3rd level indirect block, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect block's direct blocks, and skip first two rows of indirect blocks of 3rd level indirect block, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling first row of 3rd level indirect blocks, except last one, fill all direct blocks in last 3rd level indirect block, and insert object too large for it's 2nd level indirect blocks, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling first row of 3rd level indirect blocks, fill all direct blocks in next 3rd level indirect block, fill all 1st row of 2nd level indirect blocks, except last one, and insert object too large for 2nd level indirect block, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill 4th level indirect block's direct blocks, and skip first row of 2nd indirect blocks of 4th level indirect block, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill 4th level indirect block's direct, 2nd level indirect blocks and 3rd level direct block, and skip first row of 2nd indirect blocks of 4th level indirect block's 3rd level indirect block, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill first row of 4th level indirect blocks, fill 2nd row 4th level indirect block's direct, 2nd level indirect blocks, first row of 3rd level indirect blocks, 3rd level direct block in 2nd row, and skip first row of 2nd indirect blocks of 4th level indirect block's 3rd level indirect block, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill first row of 3rd level indirect blocks in 4th level indirect block except last 3rd level block, fill direct blocks in 3rd level block, and skip row of 2nd indirect blocks of 4th level indirect block's 3rd level indirect block, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill first row of 4th level indirect blocks, except last one, fill first row of 3rd level indirect blocks in last 4th level indirect block except last 3rd level block, fill direct blocks in 3rd level block, and skip row of 2nd indirect blocks of 4th level indirect block's 3rd level indirect block, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing fragmenting small blocks, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing fragmenting direct blocks, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing fill root direct blocks, then fragment 2nd level indirect block's direct blocks, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing fill root direct blocks and 2nd level indirect blocks, then fragment 3rd level indirect block's direct blocks, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing removing all objects from root direct block of absolute heap (half, refill, all - reverse) PASSED
+Testing removing all objects from two direct blocks of absolute heap (half, refill, all - reverse) PASSED
+Testing removing all objects from first row of direct blocks of absolute heap (half, refill, all - reverse) PASSED
+Testing removing all objects from first two rows of direct blocks of absolute heap (half, refill, all - reverse) PASSED
+Testing removing all objects from first four rows of direct blocks of absolute heap (half, refill, all - reverse) PASSED
+Testing removing all objects from all direct blocks of root group in absolute heap (half, refill, all - reverse) PASSED
+Testing removing all objects from 2nd level indirect blocks of absolute heap (half, refill, all - reverse) PASSED
+Testing removing all objects from 3rd level indirect blocks of absolute heap (half, refill, all - reverse) PASSED
+Testing inserting object that is too large for starting block, then remove all objects (half, refill, all - reverse) PASSED
+Testing skipping starting block, then adding object back to first block, then remove all objects (half, refill, all - reverse) PASSED
+Testing skipping starting block, then adding objects to backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing insert object to initial block, then add object too large for starting direct blocks, then remove all objects (half, refill, all - reverse) PASSED
+Testing insert object to initial block, then add object too large for starting direct blocks, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing skipping blocks with indirect root, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing filling first row, then skipping rows, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing skipping direct blocks to last row and skipping two rows of root indirect block, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing filling direct blocks and skipping blocks in non-root indirect block, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing filling direct blocks and skipping row of non-root indirect blocks, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, except last one, and insert object too large for 2nd level indirect blocks, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing filling direct blocks and skipping row of non-root indirect blocks, then skip row of direct blocks, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing filling direct blocks and skipping two rows of root indirect block, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing filling direct blocks and skipping two rows of root indirect block, skip one row of root indirect block, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, and skip first rows of direct blocks of 3rd level indirect block, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect block's direct blocks, and skip first rows of direct blocks of 3rd level indirect block's 2nd level indirect block, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect block's direct blocks, and skip first row of indirect blocks of 3rd level indirect block, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect block's direct blocks, and skip first two rows of indirect blocks of 3rd level indirect block, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling first row of 3rd level indirect blocks, except last one, fill all direct blocks in last 3rd level indirect block, and insert object too large for it's 2nd level indirect blocks, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling first row of 3rd level indirect blocks, fill all direct blocks in next 3rd level indirect block, fill all 1st row of 2nd level indirect blocks, except last one, and insert object too large for 2nd level indirect block, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill 4th level indirect block's direct blocks, and skip first row of 2nd indirect blocks of 4th level indirect block, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill 4th level indirect block's direct, 2nd level indirect blocks and 3rd level direct block, and skip first row of 2nd indirect blocks of 4th level indirect block's 3rd level indirect block, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill first row of 4th level indirect blocks, fill 2nd row 4th level indirect block's direct, 2nd level indirect blocks, first row of 3rd level indirect blocks, 3rd level direct block in 2nd row, and skip first row of 2nd indirect blocks of 4th level indirect block's 3rd level indirect block, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill first row of 3rd level indirect blocks in 4th level indirect block except last 3rd level block, fill direct blocks in 3rd level block, and skip row of 2nd indirect blocks of 4th level indirect block's 3rd level indirect block, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill first row of 4th level indirect blocks, except last one, fill first row of 3rd level indirect blocks in last 4th level indirect block except last 3rd level block, fill direct blocks in 3rd level block, and skip row of 2nd indirect blocks of 4th level indirect block's 3rd level indirect block, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing fragmenting small blocks, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing fragmenting direct blocks, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing fill root direct blocks, then fragment 2nd level indirect block's direct blocks, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing fill root direct blocks and 2nd level indirect blocks, then fragment 3rd level indirect block's direct blocks, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing removing all objects from root direct block of absolute heap (all - deleting heap) PASSED
+Testing removing all objects from two direct blocks of absolute heap (all - deleting heap) PASSED
+Testing removing all objects from first row of direct blocks of absolute heap (all - deleting heap) PASSED
+Testing removing all objects from first two rows of direct blocks of absolute heap (all - deleting heap) PASSED
+Testing removing all objects from first four rows of direct blocks of absolute heap (all - deleting heap) PASSED
+Testing removing all objects from all direct blocks of root group in absolute heap (all - deleting heap) PASSED
+Testing removing all objects from 2nd level indirect blocks of absolute heap (all - deleting heap) PASSED
+Testing removing all objects from 3rd level indirect blocks of absolute heap (all - deleting heap) PASSED
+Testing inserting object that is too large for starting block, then remove all objects (all - deleting heap) PASSED
+Testing skipping starting block, then adding object back to first block, then remove all objects (all - deleting heap) PASSED
+Testing skipping starting block, then adding objects to backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing insert object to initial block, then add object too large for starting direct blocks, then remove all objects (all - deleting heap) PASSED
+Testing insert object to initial block, then add object too large for starting direct blocks, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing skipping blocks with indirect root, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing filling first row, then skipping rows, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing skipping direct blocks to last row and skipping two rows of root indirect block, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing filling direct blocks and skipping blocks in non-root indirect block, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing filling direct blocks and skipping row of non-root indirect blocks, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, except last one, and insert object too large for 2nd level indirect blocks, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing filling direct blocks and skipping row of non-root indirect blocks, then skip row of direct blocks, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing filling direct blocks and skipping two rows of root indirect block, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing filling direct blocks and skipping two rows of root indirect block, skip one row of root indirect block, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, and skip first rows of direct blocks of 3rd level indirect block, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect block's direct blocks, and skip first rows of direct blocks of 3rd level indirect block's 2nd level indirect block, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect block's direct blocks, and skip first row of indirect blocks of 3rd level indirect block, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect block's direct blocks, and skip first two rows of indirect blocks of 3rd level indirect block, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling first row of 3rd level indirect blocks, except last one, fill all direct blocks in last 3rd level indirect block, and insert object too large for it's 2nd level indirect blocks, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling first row of 3rd level indirect blocks, fill all direct blocks in next 3rd level indirect block, fill all 1st row of 2nd level indirect blocks, except last one, and insert object too large for 2nd level indirect block, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill 4th level indirect block's direct blocks, and skip first row of 2nd indirect blocks of 4th level indirect block, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill 4th level indirect block's direct, 2nd level indirect blocks and 3rd level direct block, and skip first row of 2nd indirect blocks of 4th level indirect block's 3rd level indirect block, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill first row of 4th level indirect blocks, fill 2nd row 4th level indirect block's direct, 2nd level indirect blocks, first row of 3rd level indirect blocks, 3rd level direct block in 2nd row, and skip first row of 2nd indirect blocks of 4th level indirect block's 3rd level indirect block, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill first row of 3rd level indirect blocks in 4th level indirect block except last 3rd level block, fill direct blocks in 3rd level block, and skip row of 2nd indirect blocks of 4th level indirect block's 3rd level indirect block, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill first row of 4th level indirect blocks, except last one, fill first row of 3rd level indirect blocks in last 4th level indirect block except last 3rd level block, fill direct blocks in 3rd level block, and skip row of 2nd indirect blocks of 4th level indirect block's 3rd level indirect block, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing fragmenting small blocks, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing fragmenting direct blocks, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing fill root direct blocks, then fragment 2nd level indirect block's direct blocks, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing fill root direct blocks and 2nd level indirect blocks, then fragment 3rd level indirect block's direct blocks, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Bulk-filling blocks w/single object
+Testing inserting 'weird' sized objects into absolute heap             PASSED
+Testing inserting objects to create first direct block in recursive indirect blocks five levels deep PASSED
+Testing removing bad heap IDs from absolute heap                       PASSED
+Testing removing single object from absolute heap                      PASSED
+Testing removing two objects from absolute heap                        PASSED
+Testing removing single larger object from absolute heap               PASSED
+Testing removing two larger objects from absolute heap (forward)       PASSED
+Testing removing two larger objects from absolute heap (reverse)       PASSED
+Testing removing three larger objects from absolute heap (forward)     PASSED
+Testing removing three larger objects from absolute heap (reverse)     PASSED
+Testing incremental object insertion and removal                       PASSED
+Testing removing all objects from root direct block of absolute heap (all - forward) PASSED
+Testing removing all objects from two direct blocks of absolute heap (all - forward) PASSED
+Testing removing all objects from first row of direct blocks of absolute heap (all - forward) PASSED
+Testing removing all objects from first two rows of direct blocks of absolute heap (all - forward) PASSED
+Testing removing all objects from first four rows of direct blocks of absolute heap (all - forward) PASSED
+Testing removing all objects from all direct blocks of root group in absolute heap (all - forward) PASSED
+Testing removing all objects from 2nd level indirect blocks of absolute heap (all - forward) PASSED
+Testing removing all objects from 3rd level indirect blocks of absolute heap (all - forward) PASSED
+Testing inserting object that is too large for starting block, then remove all objects (all - forward) PASSED
+Testing skipping starting block, then adding object back to first block, then remove all objects (all - forward) PASSED
+Testing skipping starting block, then adding objects to backfill and extend, then remove all objects (all - forward) PASSED
+Testing insert object to initial block, then add object too large for starting direct blocks, then remove all objects (all - forward) PASSED
+Testing insert object to initial block, then add object too large for starting direct blocks, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing skipping blocks with indirect root, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing filling first row, then skipping rows, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing skipping direct blocks to last row and skipping two rows of root indirect block, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing filling direct blocks and skipping blocks in non-root indirect block, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing filling direct blocks and skipping row of non-root indirect blocks, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, except last one, and insert object too large for 2nd level indirect blocks, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing filling direct blocks and skipping row of non-root indirect blocks, then skip row of direct blocks, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing filling direct blocks and skipping two rows of root indirect block, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing filling direct blocks and skipping two rows of root indirect block, skip one row of root indirect block, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, and skip first rows of direct blocks of 3rd level indirect block, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect block's direct blocks, and skip first rows of direct blocks of 3rd level indirect block's 2nd level indirect block, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect block's direct blocks, and skip first row of indirect blocks of 3rd level indirect block, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect block's direct blocks, and skip first two rows of indirect blocks of 3rd level indirect block, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling first row of 3rd level indirect blocks, except last one, fill all direct blocks in last 3rd level indirect block, and insert object too large for it's 2nd level indirect blocks, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling first row of 3rd level indirect blocks, fill all direct blocks in next 3rd level indirect block, fill all 1st row of 2nd level indirect blocks, except last one, and insert object too large for 2nd level indirect block, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill 4th level indirect block's direct blocks, and skip first row of 2nd indirect blocks of 4th level indirect block, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill 4th level indirect block's direct, 2nd level indirect blocks and 3rd level direct block, and skip first row of 2nd indirect blocks of 4th level indirect block's 3rd level indirect block, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill first row of 4th level indirect blocks, fill 2nd row 4th level indirect block's direct, 2nd level indirect blocks, first row of 3rd level indirect blocks, 3rd level direct block in 2nd row, and skip first row of 2nd indirect blocks of 4th level indirect block's 3rd level indirect block, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill first row of 3rd level indirect blocks in 4th level indirect block except last 3rd level block, fill direct blocks in 3rd level block, and skip row of 2nd indirect blocks of 4th level indirect block's 3rd level indirect block, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill first row of 4th level indirect blocks, except last one, fill first row of 3rd level indirect blocks in last 4th level indirect block except last 3rd level block, fill direct blocks in 3rd level block, and skip row of 2nd indirect blocks of 4th level indirect block's 3rd level indirect block, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing fragmenting small blocks, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing fragmenting direct blocks, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing fill root direct blocks, then fragment 2nd level indirect block's direct blocks, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing fill root direct blocks and 2nd level indirect blocks, then fragment 3rd level indirect block's direct blocks, then backfill and extend, then remove all objects (all - forward) PASSED
+Testing removing all objects from root direct block of absolute heap (half, refill, all - forward) PASSED
+Testing removing all objects from two direct blocks of absolute heap (half, refill, all - forward) PASSED
+Testing removing all objects from first row of direct blocks of absolute heap (half, refill, all - forward) PASSED
+Testing removing all objects from first two rows of direct blocks of absolute heap (half, refill, all - forward) PASSED
+Testing removing all objects from first four rows of direct blocks of absolute heap (half, refill, all - forward) PASSED
+Testing removing all objects from all direct blocks of root group in absolute heap (half, refill, all - forward) PASSED
+Testing removing all objects from 2nd level indirect blocks of absolute heap (half, refill, all - forward) PASSED
+Testing removing all objects from 3rd level indirect blocks of absolute heap (half, refill, all - forward) PASSED
+Testing inserting object that is too large for starting block, then remove all objects (half, refill, all - forward) PASSED
+Testing skipping starting block, then adding object back to first block, then remove all objects (half, refill, all - forward) PASSED
+Testing skipping starting block, then adding objects to backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing insert object to initial block, then add object too large for starting direct blocks, then remove all objects (half, refill, all - forward) PASSED
+Testing insert object to initial block, then add object too large for starting direct blocks, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing skipping blocks with indirect root, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing filling first row, then skipping rows, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing skipping direct blocks to last row and skipping two rows of root indirect block, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing filling direct blocks and skipping blocks in non-root indirect block, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing filling direct blocks and skipping row of non-root indirect blocks, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, except last one, and insert object too large for 2nd level indirect blocks, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing filling direct blocks and skipping row of non-root indirect blocks, then skip row of direct blocks, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing filling direct blocks and skipping two rows of root indirect block, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing filling direct blocks and skipping two rows of root indirect block, skip one row of root indirect block, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, and skip first rows of direct blocks of 3rd level indirect block, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect block's direct blocks, and skip first rows of direct blocks of 3rd level indirect block's 2nd level indirect block, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect block's direct blocks, and skip first row of indirect blocks of 3rd level indirect block, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect block's direct blocks, and skip first two rows of indirect blocks of 3rd level indirect block, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling first row of 3rd level indirect blocks, except last one, fill all direct blocks in last 3rd level indirect block, and insert object too large for it's 2nd level indirect blocks, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling first row of 3rd level indirect blocks, fill all direct blocks in next 3rd level indirect block, fill all 1st row of 2nd level indirect blocks, except last one, and insert object too large for 2nd level indirect block, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill 4th level indirect block's direct blocks, and skip first row of 2nd indirect blocks of 4th level indirect block, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill 4th level indirect block's direct, 2nd level indirect blocks and 3rd level direct block, and skip first row of 2nd indirect blocks of 4th level indirect block's 3rd level indirect block, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill first row of 4th level indirect blocks, fill 2nd row 4th level indirect block's direct, 2nd level indirect blocks, first row of 3rd level indirect blocks, 3rd level direct block in 2nd row, and skip first row of 2nd indirect blocks of 4th level indirect block's 3rd level indirect block, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill first row of 3rd level indirect blocks in 4th level indirect block except last 3rd level block, fill direct blocks in 3rd level block, and skip row of 2nd indirect blocks of 4th level indirect block's 3rd level indirect block, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill first row of 4th level indirect blocks, except last one, fill first row of 3rd level indirect blocks in last 4th level indirect block except last 3rd level block, fill direct blocks in 3rd level block, and skip row of 2nd indirect blocks of 4th level indirect block's 3rd level indirect block, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing fragmenting small blocks, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing fragmenting direct blocks, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing fill root direct blocks, then fragment 2nd level indirect block's direct blocks, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing fill root direct blocks and 2nd level indirect blocks, then fragment 3rd level indirect block's direct blocks, then backfill and extend, then remove all objects (half, refill, all - forward) PASSED
+Testing removing all objects from root direct block of absolute heap (all - reverse) PASSED
+Testing removing all objects from two direct blocks of absolute heap (all - reverse) PASSED
+Testing removing all objects from first row of direct blocks of absolute heap (all - reverse) PASSED
+Testing removing all objects from first two rows of direct blocks of absolute heap (all - reverse) PASSED
+Testing removing all objects from first four rows of direct blocks of absolute heap (all - reverse) PASSED
+Testing removing all objects from all direct blocks of root group in absolute heap (all - reverse) PASSED
+Testing removing all objects from 2nd level indirect blocks of absolute heap (all - reverse) PASSED
+Testing removing all objects from 3rd level indirect blocks of absolute heap (all - reverse) PASSED
+Testing inserting object that is too large for starting block, then remove all objects (all - reverse) PASSED
+Testing skipping starting block, then adding object back to first block, then remove all objects (all - reverse) PASSED
+Testing skipping starting block, then adding objects to backfill and extend, then remove all objects (all - reverse) PASSED
+Testing insert object to initial block, then add object too large for starting direct blocks, then remove all objects (all - reverse) PASSED
+Testing insert object to initial block, then add object too large for starting direct blocks, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing skipping blocks with indirect root, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing filling first row, then skipping rows, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing skipping direct blocks to last row and skipping two rows of root indirect block, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing filling direct blocks and skipping blocks in non-root indirect block, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing filling direct blocks and skipping row of non-root indirect blocks, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, except last one, and insert object too large for 2nd level indirect blocks, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing filling direct blocks and skipping row of non-root indirect blocks, then skip row of direct blocks, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing filling direct blocks and skipping two rows of root indirect block, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing filling direct blocks and skipping two rows of root indirect block, skip one row of root indirect block, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, and skip first rows of direct blocks of 3rd level indirect block, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect block's direct blocks, and skip first rows of direct blocks of 3rd level indirect block's 2nd level indirect block, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect block's direct blocks, and skip first row of indirect blocks of 3rd level indirect block, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect block's direct blocks, and skip first two rows of indirect blocks of 3rd level indirect block, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling first row of 3rd level indirect blocks, except last one, fill all direct blocks in last 3rd level indirect block, and insert object too large for it's 2nd level indirect blocks, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling first row of 3rd level indirect blocks, fill all direct blocks in next 3rd level indirect block, fill all 1st row of 2nd level indirect blocks, except last one, and insert object too large for 2nd level indirect block, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill 4th level indirect block's direct blocks, and skip first row of 2nd indirect blocks of 4th level indirect block, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill 4th level indirect block's direct, 2nd level indirect blocks and 3rd level direct block, and skip first row of 2nd indirect blocks of 4th level indirect block's 3rd level indirect block, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill first row of 4th level indirect blocks, fill 2nd row 4th level indirect block's direct, 2nd level indirect blocks, first row of 3rd level indirect blocks, 3rd level direct block in 2nd row, and skip first row of 2nd indirect blocks of 4th level indirect block's 3rd level indirect block, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill first row of 3rd level indirect blocks in 4th level indirect block except last 3rd level block, fill direct blocks in 3rd level block, and skip row of 2nd indirect blocks of 4th level indirect block's 3rd level indirect block, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill first row of 4th level indirect blocks, except last one, fill first row of 3rd level indirect blocks in last 4th level indirect block except last 3rd level block, fill direct blocks in 3rd level block, and skip row of 2nd indirect blocks of 4th level indirect block's 3rd level indirect block, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing fragmenting small blocks, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing fragmenting direct blocks, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing fill root direct blocks, then fragment 2nd level indirect block's direct blocks, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing fill root direct blocks and 2nd level indirect blocks, then fragment 3rd level indirect block's direct blocks, then backfill and extend, then remove all objects (all - reverse) PASSED
+Testing removing all objects from root direct block of absolute heap (half, refill, all - reverse) PASSED
+Testing removing all objects from two direct blocks of absolute heap (half, refill, all - reverse) PASSED
+Testing removing all objects from first row of direct blocks of absolute heap (half, refill, all - reverse) PASSED
+Testing removing all objects from first two rows of direct blocks of absolute heap (half, refill, all - reverse) PASSED
+Testing removing all objects from first four rows of direct blocks of absolute heap (half, refill, all - reverse) PASSED
+Testing removing all objects from all direct blocks of root group in absolute heap (half, refill, all - reverse) PASSED
+Testing removing all objects from 2nd level indirect blocks of absolute heap (half, refill, all - reverse) PASSED
+Testing removing all objects from 3rd level indirect blocks of absolute heap (half, refill, all - reverse) PASSED
+Testing inserting object that is too large for starting block, then remove all objects (half, refill, all - reverse) PASSED
+Testing skipping starting block, then adding object back to first block, then remove all objects (half, refill, all - reverse) PASSED
+Testing skipping starting block, then adding objects to backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing insert object to initial block, then add object too large for starting direct blocks, then remove all objects (half, refill, all - reverse) PASSED
+Testing insert object to initial block, then add object too large for starting direct blocks, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing skipping blocks with indirect root, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing filling first row, then skipping rows, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing skipping direct blocks to last row and skipping two rows of root indirect block, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing filling direct blocks and skipping blocks in non-root indirect block, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing filling direct blocks and skipping row of non-root indirect blocks, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, except last one, and insert object too large for 2nd level indirect blocks, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing filling direct blocks and skipping row of non-root indirect blocks, then skip row of direct blocks, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing filling direct blocks and skipping two rows of root indirect block, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing filling direct blocks and skipping two rows of root indirect block, skip one row of root indirect block, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, and skip first rows of direct blocks of 3rd level indirect block, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect block's direct blocks, and skip first rows of direct blocks of 3rd level indirect block's 2nd level indirect block, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect block's direct blocks, and skip first row of indirect blocks of 3rd level indirect block, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect block's direct blocks, and skip first two rows of indirect blocks of 3rd level indirect block, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling first row of 3rd level indirect blocks, except last one, fill all direct blocks in last 3rd level indirect block, and insert object too large for it's 2nd level indirect blocks, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling first row of 3rd level indirect blocks, fill all direct blocks in next 3rd level indirect block, fill all 1st row of 2nd level indirect blocks, except last one, and insert object too large for 2nd level indirect block, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill 4th level indirect block's direct blocks, and skip first row of 2nd indirect blocks of 4th level indirect block, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill 4th level indirect block's direct, 2nd level indirect blocks and 3rd level direct block, and skip first row of 2nd indirect blocks of 4th level indirect block's 3rd level indirect block, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill first row of 4th level indirect blocks, fill 2nd row 4th level indirect block's direct, 2nd level indirect blocks, first row of 3rd level indirect blocks, 3rd level direct block in 2nd row, and skip first row of 2nd indirect blocks of 4th level indirect block's 3rd level indirect block, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill first row of 3rd level indirect blocks in 4th level indirect block except last 3rd level block, fill direct blocks in 3rd level block, and skip row of 2nd indirect blocks of 4th level indirect block's 3rd level indirect block, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill first row of 4th level indirect blocks, except last one, fill first row of 3rd level indirect blocks in last 4th level indirect block except last 3rd level block, fill direct blocks in 3rd level block, and skip row of 2nd indirect blocks of 4th level indirect block's 3rd level indirect block, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing fragmenting small blocks, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing fragmenting direct blocks, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing fill root direct blocks, then fragment 2nd level indirect block's direct blocks, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing fill root direct blocks and 2nd level indirect blocks, then fragment 3rd level indirect block's direct blocks, then backfill and extend, then remove all objects (half, refill, all - reverse) PASSED
+Testing removing all objects from root direct block of absolute heap (all - deleting heap) PASSED
+Testing removing all objects from two direct blocks of absolute heap (all - deleting heap) PASSED
+Testing removing all objects from first row of direct blocks of absolute heap (all - deleting heap) PASSED
+Testing removing all objects from first two rows of direct blocks of absolute heap (all - deleting heap) PASSED
+Testing removing all objects from first four rows of direct blocks of absolute heap (all - deleting heap) PASSED
+Testing removing all objects from all direct blocks of root group in absolute heap (all - deleting heap) PASSED
+Testing removing all objects from 2nd level indirect blocks of absolute heap (all - deleting heap) PASSED
+Testing removing all objects from 3rd level indirect blocks of absolute heap (all - deleting heap) PASSED
+Testing inserting object that is too large for starting block, then remove all objects (all - deleting heap) PASSED
+Testing skipping starting block, then adding object back to first block, then remove all objects (all - deleting heap) PASSED
+Testing skipping starting block, then adding objects to backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing insert object to initial block, then add object too large for starting direct blocks, then remove all objects (all - deleting heap) PASSED
+Testing insert object to initial block, then add object too large for starting direct blocks, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing skipping blocks with indirect root, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing filling first row, then skipping rows, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing skipping direct blocks to last row and skipping two rows of root indirect block, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing filling direct blocks and skipping blocks in non-root indirect block, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing filling direct blocks and skipping row of non-root indirect blocks, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, except last one, and insert object too large for 2nd level indirect blocks, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing filling direct blocks and skipping row of non-root indirect blocks, then skip row of direct blocks, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing filling direct blocks and skipping two rows of root indirect block, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing filling direct blocks and skipping two rows of root indirect block, skip one row of root indirect block, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, and skip first rows of direct blocks of 3rd level indirect block, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect block's direct blocks, and skip first rows of direct blocks of 3rd level indirect block's 2nd level indirect block, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect block's direct blocks, and skip first row of indirect blocks of 3rd level indirect block, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect block's direct blocks, and skip first two rows of indirect blocks of 3rd level indirect block, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling first row of 3rd level indirect blocks, except last one, fill all direct blocks in last 3rd level indirect block, and insert object too large for it's 2nd level indirect blocks, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling first row of 3rd level indirect blocks, fill all direct blocks in next 3rd level indirect block, fill all 1st row of 2nd level indirect blocks, except last one, and insert object too large for 2nd level indirect block, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill 4th level indirect block's direct blocks, and skip first row of 2nd indirect blocks of 4th level indirect block, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill 4th level indirect block's direct, 2nd level indirect blocks and 3rd level direct block, and skip first row of 2nd indirect blocks of 4th level indirect block's 3rd level indirect block, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill first row of 4th level indirect blocks, fill 2nd row 4th level indirect block's direct, 2nd level indirect blocks, first row of 3rd level indirect blocks, 3rd level direct block in 2nd row, and skip first row of 2nd indirect blocks of 4th level indirect block's 3rd level indirect block, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill first row of 3rd level indirect blocks in 4th level indirect block except last 3rd level block, fill direct blocks in 3rd level block, and skip row of 2nd indirect blocks of 4th level indirect block's 3rd level indirect block, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill first row of 4th level indirect blocks, except last one, fill first row of 3rd level indirect blocks in last 4th level indirect block except last 3rd level block, fill direct blocks in 3rd level block, and skip row of 2nd indirect blocks of 4th level indirect block's 3rd level indirect block, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing fragmenting small blocks, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing fragmenting direct blocks, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing fill root direct blocks, then fragment 2nd level indirect block's direct blocks, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Testing fill root direct blocks and 2nd level indirect blocks, then fragment 3rd level indirect block's direct blocks, then backfill and extend, then remove all objects (all - deleting heap) PASSED
+Using 'normal' heap ID format for 'huge' objects
+Testing insert one huge object, then remove (all - forward)            PASSED
+Testing insert two huge objects, then remove (all - forward)           PASSED
+Testing insert three huge objects, then remove (all - forward)         PASSED
+Testing insert mix of normal & huge objects, then remove (all - forward) PASSED
+Testing insert 'huge' object into heap with I/O filters, then remove (all - forward) PASSED
+Testing insert one tiny object, then remove (all - forward)            PASSED
+Testing insert two tiny objects, then remove (all - forward)           PASSED
+Testing insert mix of normal, huge & tiny objects, then remove (all - forward) PASSED
+Testing insert one huge object, then remove (all - reverse)            PASSED
+Testing insert two huge objects, then remove (all - reverse)           PASSED
+Testing insert three huge objects, then remove (all - reverse)         PASSED
+Testing insert mix of normal & huge objects, then remove (all - reverse) PASSED
+Testing insert 'huge' object into heap with I/O filters, then remove (all - reverse) PASSED
+Testing insert one tiny object, then remove (all - reverse)            PASSED
+Testing insert two tiny objects, then remove (all - reverse)           PASSED
+Testing insert mix of normal, huge & tiny objects, then remove (all - reverse) PASSED
+Testing insert one huge object, then remove (all - deleting heap)      PASSED
+Testing insert two huge objects, then remove (all - deleting heap)     PASSED
+Testing insert three huge objects, then remove (all - deleting heap)   PASSED
+Testing insert mix of normal & huge objects, then remove (all - deleting heap) PASSED
+Testing insert 'huge' object into heap with I/O filters, then remove (all - deleting heap) PASSED
+Testing insert one tiny object, then remove (all - deleting heap)      PASSED
+Testing insert two tiny objects, then remove (all - deleting heap)     PASSED
+Testing insert mix of normal, huge & tiny objects, then remove (all - deleting heap) PASSED
+Using 'direct' heap ID format for 'huge' objects
+Testing insert one huge object, then remove (all - forward)            PASSED
+Testing insert two huge objects, then remove (all - forward)           PASSED
+Testing insert three huge objects, then remove (all - forward)         PASSED
+Testing insert mix of normal & huge objects, then remove (all - forward) PASSED
+Testing insert 'huge' object into heap with I/O filters, then remove (all - forward) PASSED
+Testing insert one tiny object, then remove (all - forward)            PASSED
+Testing insert two tiny objects, then remove (all - forward)           PASSED
+Testing insert mix of normal, huge & tiny objects, then remove (all - forward) PASSED
+Testing insert one huge object, then remove (all - reverse)            PASSED
+Testing insert two huge objects, then remove (all - reverse)           PASSED
+Testing insert three huge objects, then remove (all - reverse)         PASSED
+Testing insert mix of normal & huge objects, then remove (all - reverse) PASSED
+Testing insert 'huge' object into heap with I/O filters, then remove (all - reverse) PASSED
+Testing insert one tiny object, then remove (all - reverse)            PASSED
+Testing insert two tiny objects, then remove (all - reverse)           PASSED
+Testing insert mix of normal, huge & tiny objects, then remove (all - reverse) PASSED
+Testing insert one huge object, then remove (all - deleting heap)      PASSED
+Testing insert two huge objects, then remove (all - deleting heap)     PASSED
+Testing insert three huge objects, then remove (all - deleting heap)   PASSED
+Testing insert mix of normal & huge objects, then remove (all - deleting heap) PASSED
+Testing insert 'huge' object into heap with I/O filters, then remove (all - deleting heap) PASSED
+Testing insert one tiny object, then remove (all - deleting heap)      PASSED
+Testing insert two tiny objects, then remove (all - deleting heap)     PASSED
+Testing insert mix of normal, huge & tiny objects, then remove (all - deleting heap) PASSED
+Using 'direct' heap ID format for 'huge' objects and larger IDs for 'tiny' objects
+Testing insert one huge object, then remove (all - forward)            PASSED
+Testing insert two huge objects, then remove (all - forward)           PASSED
+Testing insert three huge objects, then remove (all - forward)         PASSED
+Testing insert mix of normal & huge objects, then remove (all - forward) PASSED
+Testing insert 'huge' object into heap with I/O filters, then remove (all - forward) PASSED
+Testing insert one tiny object, then remove (all - forward)            PASSED
+Testing insert two tiny objects, then remove (all - forward)           PASSED
+Testing insert mix of normal, huge & tiny objects, then remove (all - forward) PASSED
+Testing insert one huge object, then remove (all - reverse)            PASSED
+Testing insert two huge objects, then remove (all - reverse)           PASSED
+Testing insert three huge objects, then remove (all - reverse)         PASSED
+Testing insert mix of normal & huge objects, then remove (all - reverse) PASSED
+Testing insert 'huge' object into heap with I/O filters, then remove (all - reverse) PASSED
+Testing insert one tiny object, then remove (all - reverse)            PASSED
+Testing insert two tiny objects, then remove (all - reverse)           PASSED
+Testing insert mix of normal, huge & tiny objects, then remove (all - reverse) PASSED
+Testing insert one huge object, then remove (all - deleting heap)      PASSED
+Testing insert two huge objects, then remove (all - deleting heap)     PASSED
+Testing insert three huge objects, then remove (all - deleting heap)   PASSED
+Testing insert mix of normal & huge objects, then remove (all - deleting heap) PASSED
+Testing insert 'huge' object into heap with I/O filters, then remove (all - deleting heap) PASSED
+Testing insert one tiny object, then remove (all - deleting heap)      PASSED
+Testing insert two tiny objects, then remove (all - deleting heap)     PASSED
+Testing insert mix of normal, huge & tiny objects, then remove (all - deleting heap) PASSED
+Testing insert one 'managed' object into heap with I/O filters, then remove (all - forward) PASSED
+Testing insert two 'managed' objects into heap with I/O filters, then remove (all - forward) PASSED
+Testing inserting random-sized objects in heap with compressed blocks, then remove all objects (all - random) PASSED
+Testing inserting random-sized objects with power of 2 distribution in heap with compressed blocks, then remove all objects (all - random) PASSED
+Testing insert one 'managed' object into heap with I/O filters, then remove (all - reverse) PASSED
+Testing insert two 'managed' objects into heap with I/O filters, then remove (all - reverse) PASSED
+Testing inserting random-sized objects in heap with compressed blocks, then remove all objects (all - random) PASSED
+Testing inserting random-sized objects with power of 2 distribution in heap with compressed blocks, then remove all objects (all - random) PASSED
+Testing insert one 'managed' object into heap with I/O filters, then remove (all - deleting heap) PASSED
+Testing insert two 'managed' objects into heap with I/O filters, then remove (all - deleting heap) PASSED
+Testing inserting random-sized objects in heap with compressed blocks, then remove all objects (all - deleting heap) PASSED
+Testing inserting random-sized objects with power of 2 distribution in heap with compressed blocks, then remove all objects (all - deleting heap) PASSED
+Using 'small' heap creation parameters
+Testing inserting random-sized objects, then remove all objects (all - random) PASSED
+Testing inserting random-sized objects with power of 2 distribution, then remove all objects (all - random) PASSED
+Testing inserting random-sized objects, then remove all objects (all - deleting heap) PASSED
+Testing inserting random-sized objects with power of 2 distribution, then remove all objects (all - deleting heap) PASSED
+Using 'large' heap creation parameters
+Testing inserting random-sized objects, then remove all objects (all - random) PASSED
+Testing inserting random-sized objects with power of 2 distribution, then remove all objects (all - random) PASSED
+Testing inserting random-sized objects, then remove all objects (all - deleting heap) PASSED
+Testing inserting random-sized objects with power of 2 distribution, then remove all objects (all - deleting heap) PASSED
+Testing writing objects in heap                                        PASSED
+Testing writing objects in heap with compressed blocks                 PASSED
+Testing bug1: inserting several objects & removing one, then re-inserting PASSED
+All fractal heap tests passed.
+102.77user 8.19system 2:02.41elapsed 90%CPU (0avgtext+0avgdata 70504maxresident)k
+0inputs+17255304outputs (0major+93268minor)pagefaults 0swaps
+
+Finished testing fheap 
+============================

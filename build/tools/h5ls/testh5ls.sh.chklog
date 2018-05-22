@@ -1,0 +1,63 @@
+============================
+testh5ls.sh  Test Log
+============================
+Testing h5ls -w80 -h                                                   PASSED
+Testing h5ls -w80 -help                                                PASSED
+Testing h5ls -w80 -?                                                   PASSED
+Testing h5ls -w80 tall.h5                                              PASSED
+Testing h5ls -w80 -r -d tall.h5                                        PASSED
+Testing h5ls -w80 tgroup.h5                                            PASSED
+Testing h5ls -w80 tgroup.h5/g1                                         PASSED
+Testing h5ls -w80 -r -g tgroup.h5                                      PASSED
+Testing h5ls -w80 -g tgroup.h5/g1                                      PASSED
+Testing h5ls -w80 -v -g tgrp_comments.h5/glongcomment                  PASSED
+Testing h5ls -w80 -r -d tdset.h5                                       PASSED
+Testing h5ls -w80 -r tslink.h5                                         PASSED
+Testing h5ls --follow-symlinks tsoftlinks.h5                           PASSED
+Testing h5ls --follow-symlinks -r tsoftlinks.h5                        PASSED
+Testing h5ls --follow-symlinks tsoftlinks.h5/group1                    PASSED
+Testing h5ls --follow-symlinks -r tsoftlinks.h5/group1                 PASSED
+Testing h5ls --follow-symlinks tsoftlinks.h5/soft_dset1                PASSED
+Testing h5ls -w80 -r textlink.h5                                       PASSED
+Testing h5ls -w80 --follow-symlinks -r textlinksrc.h5                  PASSED
+Testing h5ls -w80 --follow-symlinks -rv textlinksrc.h5/ext_link5       PASSED
+Testing h5ls -w80 --follow-symlinks -r textlinksrc.h5/ext_link1        PASSED
+Testing h5ls -w80 -r textlinksrc.h5                                    PASSED
+Testing h5ls -w80 -r textlinksrc.h5/ext_link1                          PASSED
+Testing h5ls -w80 --follow-symlinks textlinksrc.h5                     PASSED
+Testing h5ls -w80 --follow-symlinks textlinksrc.h5/ext_link1           PASSED
+Testing h5ls -w80 -r tudlink.h5                                        PASSED
+Testing h5ls -w80 -Er textlinksrc.h5                                   PASSED
+Testing h5ls -w80 -Erv textlinksrc.h5/ext_link5                        PASSED
+Testing h5ls -w80 -Er textlinksrc.h5/ext_link1                         PASSED
+Testing h5ls -w80 -E textlinksrc.h5                                    PASSED
+Testing h5ls -w80 -E textlinksrc.h5/ext_link1                          PASSED
+Testing h5ls -w80 --no-dangling-links textlinksrc.h5                   PASSED
+Testing h5ls -w80 --follow-symlinks --no-dangling-links textlinksrc.h5 PASSED
+Testing h5ls -w80 --follow-symlinks --no-dangling-links tsoftlinks.h5  PASSED
+Testing h5ls -w80 --follow-symlinks --no-dangling-links thlink.h5      PASSED
+Testing h5ls -w80 thlink.h5 tslink.h5                                  PASSED
+Testing h5ls -w80 thlink.h5                                            PASSED
+Testing h5ls -w80 -r -d tcompound.h5                                   PASSED
+Testing h5ls -w80 -r -d tnestedcomp.h5                                 PASSED
+Testing h5ls -w80 -r -d -S tnestedcomp.h5                              PASSED
+Testing h5ls -w80 -r -d -l tnestedcomp.h5                              PASSED
+Testing h5ls -w80 -r -d -l -S tnestedcomp.h5                           PASSED
+Testing h5ls -w80 -r -d tloop.h5                                       PASSED
+Testing h5ls -w80 -r -d tstr.h5                                        PASSED
+Testing h5ls -w80 -r -d tsaf.h5                                        PASSED
+Testing h5ls -w80 -r -d tvldtypes1.h5                                  PASSED
+Testing h5ls -w80 -r -d tarray1.h5                                     PASSED
+Testing h5ls -w80 -d tempty.h5                                         PASSED
+Testing h5ls -w80 -v -S tgrpnullspace.h5                               PASSED
+Testing h5ls -w80 -v -S tattr2.h5                                      PASSED
+Testing h5ls -w80 -v -d tattrreg.h5                                    PASSED
+Testing h5ls nosuchfile.h5                                             PASSED
+Testing h5ls -v tvldtypes1.h5                                          PASSED
+Testing h5ls -v tdatareg.h5                                            PASSED
+All h5ls tests passed.
+1.77user 3.37system 0:04.56elapsed 112%CPU (0avgtext+0avgdata 7796maxresident)k
+0inputs+5792outputs (0major+981108minor)pagefaults 0swaps
+
+Finished testing testh5ls.sh 
+============================

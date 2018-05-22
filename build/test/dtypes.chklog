@@ -1,0 +1,55 @@
+============================
+ dtypes  Test Log
+============================
+Testing non-aligned conversions (ALIGNMENT=1)....
+Testing H5Tget_class()                                                 PASSED
+Testing H5Tcopy()                                                      PASSED
+Testing H5Tdetect_class()                                              PASSED
+Testing compound datatypes                                             PASSED
+Testing query functions of compound and enumeration types              PASSED
+Testing transient datatypes                                            PASSED
+Testing named datatypes                                                PASSED
+Testing functions of encoding and decoding datatypes                   PASSED
+Testing encoding datatypes with the 'use the latest format' flag       PASSED
+Testing exceptions for int <-> float conversions                       PASSED
+Testing indirectly reopening committed datatypes                       PASSED
+Testing indirectly reopening recursively committed datatypes including file reopening PASSED
+Testing deleting objects that use named datatypes                      PASSED
+Testing deleting objects that use named datatypes                      PASSED
+Testing H5Tset/get_order for compound type                             PASSED
+Testing string type creation using H5Tcreate                           PASSED
+Testing deprected API routines for datatypes                           PASSED
+Testing string conversions                                             PASSED
+Testing random string conversion speed                                 PASSED
+Testing some type functions for string                                 PASSED
+Testing compound element reordering                                    PASSED
+Testing compound subset conversions                                    PASSED
+Testing compound element shrinking & reordering                        PASSED
+Testing optimized struct converter                                     PASSED
+Testing compound element growing                                       PASSED
+Testing compound element insertion                                     PASSED
+Testing packing compound datatypes                                     PASSED
+Testing compound datatype with VL string                               PASSED
+Testing array datatype of compound type with VL string                 PASSED
+Testing registering type conversion routine with compound conversions  PASSED
+Testing adjust size of compound datatypes                              PASSED
+Testing compound datatypes of boundary size with latest format         PASSED
+Testing unaligned VL strings in compound                               PASSED
+Testing compound subset conversion with extra space in source          PASSED
+Testing visibility of internally registered type ids                   PASSED
+Testing that H5Tpack removes trailing bytes                            PASSED
+Testing accessing objects with compound datatypes that have no fields  PASSED
+Testing random enum conversion O(N)                                    PASSED
+Testing random enum conversion O(N log N)                              PASSED
+Testing non-native enumeration type conversion                         PASSED
+Testing bitfield conversions                                           PASSED
+Testing some type functions for bitfield                               PASSED
+Testing opaque datatypes                                               PASSED
+Testing H5Tset/get_order                                               PASSED
+Testing string conversion between ASCII and UTF                        PASSED
+All datatype tests passed.
+0.40user 0.06system 0:00.56elapsed 82%CPU (0avgtext+0avgdata 25384maxresident)k
+0inputs+1096outputs (0major+20170minor)pagefaults 0swaps
+
+Finished testing dtypes 
+============================

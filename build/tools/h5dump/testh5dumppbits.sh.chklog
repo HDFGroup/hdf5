@@ -1,0 +1,62 @@
+============================
+testh5dumppbits.sh  Test Log
+============================
+Testing h5dump --enable-error-stack                                    PASSED
+Testing h5dump --enable-error-stack -d /DS08BITS -M 0,8 packedbits.h5  PASSED
+Testing h5dump --enable-error-stack -d /DU08BITS -M 0,8 packedbits.h5  PASSED
+Testing h5dump --enable-error-stack -d /DS16BITS -M 0,16 packedbits.h5 PASSED
+Testing h5dump --enable-error-stack -d /DU16BITS -M 0,16 packedbits.h5 PASSED
+Testing h5dump --enable-error-stack -d /DS32BITS -M 0,32 packedbits.h5 PASSED
+Testing h5dump --enable-error-stack -d /DU32BITS -M 0,32 packedbits.h5 PASSED
+Testing h5dump --enable-error-stack -d /DS64BITS -M 0,64 packedbits.h5 PASSED
+Testing h5dump --enable-error-stack -d /DU64BITS -M 0,64 packedbits.h5 PASSED
+Testing h5dump --enable-error-stack -d /DS64BITS -M 0,63 packedbits.h5 PASSED
+Testing h5dump --enable-error-stack -d /DU64BITS -M 0,63 packedbits.h5 PASSED
+Testing h5dump --enable-error-stack -d /DS64BITS -M 1,63 packedbits.h5 PASSED
+Testing h5dump --enable-error-stack -d /DU64BITS -M 1,63 packedbits.h5 PASSED
+Testing h5dump --enable-error-stack -d /DS08BITS -M 0,4,4,4 packedbits PASSED
+Testing h5dump --enable-error-stack -d /DU08BITS -M 0,4,4,4 packedbits PASSED
+Testing h5dump --enable-error-stack -d /DS16BITS -M 0,8,8,8 packedbits PASSED
+Testing h5dump --enable-error-stack -d /DU16BITS -M 0,8,8,8 packedbits PASSED
+Testing h5dump --enable-error-stack -d /DS32BITS -M 0,16,16,16 packedb PASSED
+Testing h5dump --enable-error-stack -d /DU32BITS -M 0,16,16,16 packedb PASSED
+Testing h5dump --enable-error-stack -d /DS64BITS -M 0,32,32,32 packedb PASSED
+Testing h5dump --enable-error-stack -d /DU64BITS -M 0,32,32,32 packedb PASSED
+Testing h5dump --enable-error-stack -d /DS08BITS -M 0,2,2,2,4,2,6,2 pa PASSED
+Testing h5dump --enable-error-stack -d /DU08BITS -M 0,2,2,2,4,2,6,2 pa PASSED
+Testing h5dump --enable-error-stack -d /DS16BITS -M 0,4,4,4,8,4,12,4 p PASSED
+Testing h5dump --enable-error-stack -d /DU16BITS -M 0,4,4,4,8,4,12,4 p PASSED
+Testing h5dump --enable-error-stack -d /DS32BITS -M 0,8,8,8,16,8,24,8  PASSED
+Testing h5dump --enable-error-stack -d /DU32BITS -M 0,8,8,8,16,8,24,8  PASSED
+Testing h5dump --enable-error-stack -d /DS64BITS -M 0,16,16,16,32,16,4 PASSED
+Testing h5dump --enable-error-stack -d /DU64BITS -M 0,16,16,16,32,16,4 PASSED
+Testing h5dump --enable-error-stack -d /DS08BITS -M 0,2,2,6 packedbits PASSED
+Testing h5dump --enable-error-stack -d /DU08BITS -M 0,2,2,6 packedbits PASSED
+Testing h5dump --enable-error-stack -d /DS16BITS -M 0,2,10,6 packedbit PASSED
+Testing h5dump --enable-error-stack -d /DU16BITS -M 0,2,10,6 packedbit PASSED
+Testing h5dump --enable-error-stack -d /DS32BITS -M 0,2,26,6 packedbit PASSED
+Testing h5dump --enable-error-stack -d /DU32BITS -M 0,2,26,6 packedbit PASSED
+Testing h5dump --enable-error-stack -d /DS64BITS -M 0,2,58,6 packedbit PASSED
+Testing h5dump --enable-error-stack -d /DU64BITS -M 0,2,58,6 packedbit PASSED
+Testing h5dump --enable-error-stack -d /DS08BITS -M 0,1,1,1,2,1,0,3 pa PASSED
+Testing h5dump --enable-error-stack -d /DS08BITS -M 0,1,1,1,2,1,3,1,4, PASSED
+Testing h5dump --enable-error-stack -d /dset1 -M 0,1,1,1 tcompound.h5  PASSED
+Testing h5dump --enable-error-stack -d /Dataset1 -M 0,1,1,1 tarray1.h5 PASSED
+Testing h5dump --enable-error-stack -d /DS08BITS -M 0,1,0,1,1,1,2,1,3, PASSED
+Testing h5dump --enable-error-stack -d /DS08BITS -M 64,1 packedbits.h5 PASSED
+Testing h5dump --enable-error-stack -d /DS08BITS -M 8,1 packedbits.h5  PASSED
+Testing h5dump --enable-error-stack -d /DS16BITS -M 16,1 packedbits.h5 PASSED
+Testing h5dump --enable-error-stack -d /DS32BITS -M 32,1 packedbits.h5 PASSED
+Testing h5dump --enable-error-stack -d /DS08BITS -M -1,1 packedbits.h5 PASSED
+Testing h5dump --enable-error-stack -d /DS08BITS -M 4,0 packedbits.h5  PASSED
+Testing h5dump --enable-error-stack -d /DS08BITS -M 37,28 packedbits.h PASSED
+Testing h5dump --enable-error-stack -d /DS08BITS -M 2,7 packedbits.h5  PASSED
+Testing h5dump --enable-error-stack -d /DS16BITS -M 10,7 packedbits.h5 PASSED
+Testing h5dump --enable-error-stack -d /DS32BITS -M 26,7 packedbits.h5 PASSED
+Testing h5dump --enable-error-stack -d /DS08BITS -M 0,2,2,1,0,2,2, pac PASSED
+All h5dump tests passed.
+1.08user 2.44system 0:02.95elapsed 119%CPU (0avgtext+0avgdata 5324maxresident)k
+0inputs+6080outputs (0major+921638minor)pagefaults 0swaps
+
+Finished testing testh5dumppbits.sh 
+============================

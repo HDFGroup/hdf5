@@ -1,0 +1,194 @@
+============================
+testh5diff.sh  Test Log
+============================
+Testing h5diff -h                                                      PASSED
+Testing h5diff h5diff_basic1.h5 h5diff_basic2.h5                       PASSED
+Testing h5diff h5diff_basic1.h5 h5diff_basic2.h5 g1/dset1 g1/dset2     PASSED
+Testing h5diff -r h5diff_basic1.h5 h5diff_basic2.h5                    PASSED
+Testing h5diff -r h5diff_basic1.h5 h5diff_basic2.h5 g1/dset1 g1/dset2  PASSED
+Testing h5diff --report --delta=5 h5diff_basic1.h5 h5diff_basic2.h5 g1 PASSED
+Testing h5diff -v -p 0.02 h5diff_basic1.h5 h5diff_basic1.h5 g1/dset5 g PASSED
+Testing h5diff --verbose --relative=0.02 h5diff_basic1.h5 h5diff_basic PASSED
+Testing h5diff -v -p 0.02 h5diff_basic1.h5 h5diff_basic1.h5 g1/dset9 g PASSED
+Testing h5diff -v h5diff_basic1.h5 h5diff_basic2.h5                    PASSED
+Testing h5diff -v h5diff_basic1.h5 h5diff_basic1.h5 /g1/fp19 /g1/fp19_ PASSED
+Testing h5diff -v h5diff_basic1.h5 h5diff_basic1.h5 /g1/fp20 /g1/fp20_ PASSED
+Testing h5diff -q h5diff_basic1.h5 h5diff_basic2.h5                    PASSED
+Testing h5diff -v -q h5diff_basic1.h5 h5diff_basic2.h5                 PASSED
+Testing h5diff -v h5diff_types.h5 h5diff_types.h5 dset g1              PASSED
+Testing h5diff -v h5diff_types.h5 h5diff_types.h5 dset l1              PASSED
+Testing h5diff -v h5diff_types.h5 h5diff_types.h5 dset t1              PASSED
+Testing h5diff -v h5diff_types.h5 h5diff_types.h5 g1 g1                PASSED
+Testing h5diff -v h5diff_types.h5 h5diff_types.h5 t1 t1                PASSED
+Testing h5diff -v h5diff_types.h5 h5diff_types.h5 l1 l1                PASSED
+Testing h5diff -v h5diff_types.h5 h5diff_types.h5 g1 g2                PASSED
+Testing h5diff -v h5diff_types.h5 h5diff_types.h5 t1 t2                PASSED
+Testing h5diff -v h5diff_types.h5 h5diff_types.h5 l1 l2                PASSED
+Testing h5diff -v h5diff_enum_invalid_values.h5 h5diff_enum_invalid_va PASSED
+Testing h5diff -v h5diff_dtypes.h5 h5diff_dtypes.h5 dset0a dset0b      PASSED
+Testing h5diff -v h5diff_dtypes.h5 h5diff_dtypes.h5 dset1a dset1b      PASSED
+Testing h5diff -v h5diff_dtypes.h5 h5diff_dtypes.h5 dset2a dset2b      PASSED
+Testing h5diff -v h5diff_dtypes.h5 h5diff_dtypes.h5 dset3a dset4b      PASSED
+Testing h5diff -v h5diff_dtypes.h5 h5diff_dtypes.h5 dset4a dset4b      PASSED
+Testing h5diff -v h5diff_dtypes.h5 h5diff_dtypes.h5 dset5a dset5b      PASSED
+Testing h5diff -v h5diff_dtypes.h5 h5diff_dtypes.h5 dset6a dset6b      PASSED
+Testing h5diff -v h5diff_dtypes.h5 h5diff_dtypes.h5 dset7a dset7b      PASSED
+Testing h5diff -v h5diff_dset1.h5 h5diff_dset2.h5 refreg               PASSED
+Testing h5diff -v h5diff_dtypes.h5 h5diff_dtypes.h5 dset11a dset11b    PASSED
+Testing h5diff -v diff_strings1.h5 diff_strings2.h5 string1 string1    PASSED
+Testing h5diff -v diff_strings1.h5 diff_strings2.h5 string2 string2    PASSED
+Testing h5diff -v diff_strings1.h5 diff_strings2.h5 string3 string3    PASSED
+Testing h5diff -v diff_strings1.h5 diff_strings2.h5 string4 string4    PASSED
+Testing h5diff h5diff_basic1.h5                                        PASSED
+Testing h5diff h5diff_basic1.h5 h5diff_basic1.h5 nono_obj              PASSED
+Testing h5diff -d -4 h5diff_basic1.h5 h5diff_basic2.h5 g1/dset3 g1/dse PASSED
+Testing h5diff -d 0 h5diff_basic1.h5 h5diff_basic2.h5 g1/dset3 g1/dset PASSED
+Testing h5diff -d u h5diff_basic1.h5 h5diff_basic2.h5 g1/dset3 g1/dset PASSED
+Testing h5diff -d 0x1 h5diff_basic1.h5 h5diff_basic2.h5 g1/dset3 g1/ds PASSED
+Testing h5diff -d 1 h5diff_basic1.h5 h5diff_basic2.h5 g1/dset3 g1/dset PASSED
+Testing h5diff --use-system-epsilon h5diff_basic1.h5 h5diff_basic2.h5  PASSED
+Testing h5diff -d 200 h5diff_basic1.h5 h5diff_basic2.h5 g1/dset3 g1/ds PASSED
+Testing h5diff -d 1 h5diff_basic1.h5 h5diff_basic2.h5 g1/dset3 g1/dset PASSED
+Testing h5diff -p -4 h5diff_basic1.h5 h5diff_basic2.h5 g1/dset3 g1/dse PASSED
+Testing h5diff -p 0 h5diff_basic1.h5 h5diff_basic2.h5 g1/dset3 g1/dset PASSED
+Testing h5diff -p u h5diff_basic1.h5 h5diff_basic2.h5 g1/dset3 g1/dset PASSED
+Testing h5diff -p 0x1 h5diff_basic1.h5 h5diff_basic2.h5 g1/dset3 g1/ds PASSED
+Testing h5diff -p 0.21 h5diff_basic1.h5 h5diff_basic2.h5 g1/dset3 g1/d PASSED
+Testing h5diff -p 0.21 -p 0.22 h5diff_basic1.h5 h5diff_basic2.h5 g1/ds PASSED
+Testing h5diff -p 2 h5diff_basic1.h5 h5diff_basic2.h5 g1/dset3 g1/dset PASSED
+Testing h5diff -p 0.005 h5diff_basic1.h5 h5diff_basic2.h5 g1/dset3 g1/ PASSED
+Testing h5diff -n -4 h5diff_basic1.h5 h5diff_basic2.h5 g1/dset3 g1/dse PASSED
+Testing h5diff -n 0 h5diff_basic1.h5 h5diff_basic2.h5 g1/dset3 g1/dset PASSED
+Testing h5diff -n u h5diff_basic1.h5 h5diff_basic2.h5 g1/dset3 g1/dset PASSED
+Testing h5diff -n 0x1 h5diff_basic1.h5 h5diff_basic2.h5 g1/dset3 g1/ds PASSED
+Testing h5diff -n 2 h5diff_basic1.h5 h5diff_basic2.h5 g1/dset3 g1/dset PASSED
+Testing h5diff -n 2 -n 3 h5diff_basic1.h5 h5diff_basic2.h5 g1/dset3 g1 PASSED
+Testing h5diff --count=200 h5diff_basic1.h5 h5diff_basic2.h5 g1/dset3  PASSED
+Testing h5diff -n 1 h5diff_basic1.h5 h5diff_basic2.h5 g1/dset3 g1/dset PASSED
+Testing h5diff -v -d 0.0001 h5diff_basic1.h5 h5diff_basic1.h5 g1/fp18  PASSED
+Testing h5diff -v --use-system-epsilon h5diff_basic1.h5 h5diff_basic1. PASSED
+Testing h5diff -v h5diff_attr1.h5 h5diff_attr2.h5                      PASSED
+Testing h5diff -v1 h5diff_attr1.h5 h5diff_attr2.h5                     PASSED
+Testing h5diff -v2 h5diff_attr1.h5 h5diff_attr2.h5                     PASSED
+Testing h5diff --verbose=1 h5diff_attr1.h5 h5diff_attr2.h5             PASSED
+Testing h5diff --verbose=2 h5diff_attr1.h5 h5diff_attr2.h5             PASSED
+Testing h5diff -v2 h5diff_attr_v_level1.h5 h5diff_attr_v_level2.h5 /g  PASSED
+Testing h5diff -v2 h5diff_attr_v_level1.h5 h5diff_attr_v_level2.h5 /ds PASSED
+Testing h5diff -v2 h5diff_attr_v_level1.h5 h5diff_attr_v_level2.h5 /nt PASSED
+Testing h5diff -v2 h5diff_attr_v_level1.h5 h5diff_attr_v_level2.h5 /g2 PASSED
+Testing h5diff -v2 h5diff_attr_v_level1.h5 h5diff_attr_v_level2.h5 /g3 PASSED
+Testing h5diff -v2 h5diff_attr_v_level1.h5 h5diff_attr_v_level2.h5 /g4 PASSED
+Testing h5diff -v2 h5diff_attr_v_level1.h5 h5diff_attr_v_level2.h5     PASSED
+Testing h5diff -v h5diff_dset1.h5 h5diff_dset2.h5                      PASSED
+Testing h5diff -v h5diff_basic2.h5 h5diff_basic2.h5                    PASSED
+Testing h5diff -v h5diff_hyper1.h5 h5diff_hyper2.h5                    PASSED
+Testing h5diff -v h5diff_basic1.h5 h5diff_basic1.h5 g1/d1 g1/d2        PASSED
+Testing h5diff -v h5diff_basic1.h5 h5diff_basic1.h5 g1/fp1 g1/fp2      PASSED
+Testing h5diff -v --use-system-epsilon h5diff_basic1.h5 h5diff_basic1. PASSED
+Testing h5diff -v --use-system-epsilon h5diff_basic1.h5 h5diff_basic1. PASSED
+Testing h5diff h5diff_basic2.h5 h5diff_basic2.h5 g2/dset1 g2/dset2     PASSED
+Testing h5diff -c h5diff_basic2.h5 h5diff_basic2.h5 g2/dset1 g2/dset2  PASSED
+Testing h5diff -c h5diff_basic2.h5 h5diff_basic2.h5 g2/dset2 g2/dset3  PASSED
+Testing h5diff -c h5diff_basic2.h5 h5diff_basic2.h5 g2/dset3 g2/dset4  PASSED
+Testing h5diff -c h5diff_basic2.h5 h5diff_basic2.h5 g2/dset4 g2/dset5  PASSED
+Testing h5diff -c h5diff_basic2.h5 h5diff_basic2.h5 g2/dset5 g2/dset6  PASSED
+Testing h5diff -c h5diff_basic2.h5 h5diff_basic2.h5 g2/dset7 g2/dset8  PASSED
+Testing h5diff -c h5diff_basic2.h5 h5diff_basic2.h5 g2/dset8 g2/dset9  PASSED
+Testing h5diff -c h5diff_dset_zero_dim_size1.h5 h5diff_dset_zero_dim_s PASSED
+Testing h5diff -c non_comparables1.h5 non_comparables2.h5 /g1          PASSED
+Testing h5diff -c non_comparables1.h5 non_comparables2.h5 /g2          PASSED
+Testing h5diff -c non_comparables1.h5 non_comparables2.h5              PASSED
+Testing h5diff -c non_comparables1.h5 non_comparables2.h5 /diffobjtype PASSED
+Testing h5diff -c non_comparables2.h5 non_comparables1.h5 /diffobjtype PASSED
+Testing h5diff -v h5diff_links.h5 h5diff_links.h5 /link_g1 /link_g2    PASSED
+Testing h5diff --follow-symlinks -v h5diff_softlinks.h5 h5diff_softlin PASSED
+Testing h5diff --follow-symlinks -v h5diff_softlinks.h5 h5diff_softlin PASSED
+Testing h5diff --follow-symlinks -v h5diff_softlinks.h5 h5diff_softlin PASSED
+Testing h5diff --follow-symlinks -v h5diff_softlinks.h5 h5diff_softlin PASSED
+Testing h5diff --follow-symlinks -v h5diff_extlink_src.h5 h5diff_extli PASSED
+Testing h5diff --follow-symlinks -v h5diff_extlink_src.h5 h5diff_extli PASSED
+Testing h5diff --follow-symlinks -v h5diff_extlink_trg.h5 h5diff_extli PASSED
+Testing h5diff --follow-symlinks -v h5diff_extlink_src.h5 h5diff_extli PASSED
+Testing h5diff --follow-symlinks -v h5diff_softlinks.h5 h5diff_extlink PASSED
+Testing h5diff --follow-symlinks -v h5diff_extlink_src.h5 h5diff_softl PASSED
+Testing h5diff --follow-symlinks -v h5diff_linked_softlink.h5 h5diff_l PASSED
+Testing h5diff --follow-symlinks -v h5diff_linked_softlink.h5 h5diff_l PASSED
+Testing h5diff --follow-symlinks -v h5diff_linked_softlink.h5 h5diff_l PASSED
+Testing h5diff --follow-symlinks -v h5diff_linked_softlink.h5 h5diff_l PASSED
+Testing h5diff --follow-symlinks -v h5diff_linked_softlink.h5 h5diff_l PASSED
+Testing h5diff --follow-symlinks -v h5diff_linked_softlink.h5 h5diff_l PASSED
+Testing h5diff --follow-symlinks -v h5diff_linked_softlink.h5 h5diff_l PASSED
+Testing h5diff --follow-symlinks -v h5diff_softlinks.h5 h5diff_softlin PASSED
+Testing h5diff --follow-symlinks -v h5diff_softlinks.h5 h5diff_softlin PASSED
+Testing h5diff --follow-symlinks -v h5diff_extlink_src.h5 h5diff_extli PASSED
+Testing h5diff --follow-symlinks -v h5diff_extlink_src.h5 h5diff_extli PASSED
+Testing h5diff --follow-symlinks -v h5diff_extlink_src.h5 h5diff_extli PASSED
+Testing h5diff --follow-symlinks -v h5diff_extlink_src.h5 h5diff_extli PASSED
+Testing h5diff --follow-symlinks -v h5diff_ext2softlink_src.h5 h5diff_ PASSED
+Testing h5diff --follow-symlinks -v h5diff_ext2softlink_trg.h5 h5diff_ PASSED
+Testing h5diff --follow-symlinks -v h5diff_ext2softlink_src.h5 h5diff_ PASSED
+Testing h5diff --follow-symlinks -v h5diff_danglelinks1.h5 h5diff_dang PASSED
+Testing h5diff --follow-symlinks -v --no-dangling-links h5diff_danglel PASSED
+Testing h5diff --no-dangling-links h5diff_softlinks.h5 h5diff_softlink PASSED
+Testing h5diff --follow-symlinks -v --no-dangling-links h5diff_softlin PASSED
+Testing h5diff --follow-symlinks -v --no-dangling-links h5diff_softlin PASSED
+Testing h5diff --follow-symlinks -v --no-dangling-links h5diff_softlin PASSED
+Testing h5diff --follow-symlinks -v --no-dangling-links h5diff_extlink PASSED
+Testing h5diff --follow-symlinks -v --no-dangling-links h5diff_extlink PASSED
+Testing h5diff --follow-symlinks -v --no-dangling-links h5diff_extlink PASSED
+Testing h5diff --follow-symlinks -v --no-dangling-links h5diff_extlink PASSED
+Testing h5diff --follow-symlinks h5diff_danglelinks1.h5 h5diff_danglel PASSED
+Testing h5diff -v --follow-symlinks h5diff_danglelinks1.h5 h5diff_dang PASSED
+Testing h5diff -v --follow-symlinks h5diff_danglelinks1.h5 h5diff_dang PASSED
+Testing h5diff -v --follow-symlinks h5diff_danglelinks1.h5 h5diff_dang PASSED
+Testing h5diff -v --follow-symlinks h5diff_danglelinks1.h5 h5diff_dang PASSED
+Testing h5diff -v h5diff_danglelinks1.h5 h5diff_danglelinks2.h5        PASSED
+Testing h5diff -v h5diff_danglelinks1.h5 h5diff_danglelinks2.h5 /soft_ PASSED
+Testing h5diff -v h5diff_danglelinks1.h5 h5diff_danglelinks2.h5 /soft_ PASSED
+Testing h5diff -v h5diff_danglelinks1.h5 h5diff_danglelinks2.h5 /ext_l PASSED
+Testing h5diff -v h5diff_danglelinks1.h5 h5diff_danglelinks2.h5 /ext_l PASSED
+Testing h5diff -v h5diff_grp_recurse1.h5 h5diff_grp_recurse2.h5 / /    PASSED
+Testing h5diff -v --follow-symlinks h5diff_grp_recurse1.h5 h5diff_grp_ PASSED
+Testing h5diff -v h5diff_grp_recurse1.h5 h5diff_grp_recurse2.h5 / /grp PASSED
+Testing h5diff -v h5diff_grp_recurse1.h5 h5diff_grp_recurse2.h5 /grp1  PASSED
+Testing h5diff -v h5diff_grp_recurse1.h5 h5diff_grp_recurse2.h5 /grp1/ PASSED
+Testing h5diff -v h5diff_grp_recurse1.h5 h5diff_grp_recurse2.h5 /grp1  PASSED
+Testing h5diff -v --follow-symlinks h5diff_grp_recurse1.h5 h5diff_grp_ PASSED
+Testing h5diff -v h5diff_grp_recurse1.h5 h5diff_grp_recurse2.h5 /grp1  PASSED
+Testing h5diff -v --follow-symlinks h5diff_grp_recurse1.h5 h5diff_grp_ PASSED
+Testing h5diff -v h5diff_grp_recurse1.h5 h5diff_grp_recurse2.h5 /slink PASSED
+Testing h5diff -v --follow-symlinks h5diff_grp_recurse1.h5 h5diff_grp_ PASSED
+Testing h5diff -v h5diff_grp_recurse1.h5 h5diff_grp_recurse2.h5 /grp10 PASSED
+Testing h5diff -v --follow-symlinks h5diff_grp_recurse1.h5 h5diff_grp_ PASSED
+Testing h5diff -v h5diff_grp_recurse1.h5 h5diff_grp_recurse2.h5 /slink PASSED
+Testing h5diff -v --follow-symlinks h5diff_grp_recurse1.h5 h5diff_grp_ PASSED
+Testing h5diff -v h5diff_grp_recurse_ext1.h5 h5diff_grp_recurse_ext2-1 PASSED
+Testing h5diff -v --follow-symlinks h5diff_grp_recurse_ext1.h5 h5diff_ PASSED
+Testing h5diff -v h5diff_grp_recurse_ext1.h5 h5diff_grp_recurse_ext2-1 PASSED
+Testing h5diff -v --follow-symlinks h5diff_grp_recurse_ext1.h5 h5diff_ PASSED
+Testing h5diff -v --exclude-path /group1/dset3 h5diff_exclude1-1.h5 h5 PASSED
+Testing h5diff -v h5diff_exclude1-1.h5 h5diff_exclude1-2.h5            PASSED
+Testing h5diff -v --exclude-path /group1 --exclude-path /dset1 h5diff_ PASSED
+Testing h5diff -v --exclude-path /group1 h5diff_exclude2-1.h5 h5diff_e PASSED
+Testing h5diff -v --exclude-path /dset3 h5diff_exclude1-1.h5 h5diff_ex PASSED
+Testing h5diff -v --exclude-path /group1 h5diff_exclude3-1.h5 h5diff_e PASSED
+Testing h5diff -v --exclude-path /group1 h5diff_exclude3-2.h5 h5diff_e PASSED
+Testing h5diff -v --exclude-path /group1/dset h5diff_exclude3-1.h5 h5d PASSED
+Testing h5diff -v h5diff_comp_vl_strs.h5 h5diff_comp_vl_strs.h5 /group PASSED
+Testing h5diff -v --enable-error-stack h5diff_comp_vl_strs.h5 h5diff_c PASSED
+Testing h5diff -v h5diff_attr3.h5 h5diff_attr2.h5 /g1                  PASSED
+Testing h5diff -v tvlstr.h5 tvlstr2.h5                                 PASSED
+Testing h5diff -v compounds_array_vlen1.h5 compounds_array_vlen2.h5    PASSED
+Testing h5diff -v -d 5 -p 0.05 --use-system-epsilon h5diff_basic1.h5 h PASSED
+Testing h5diff -v -d 5 -p 0.05 h5diff_basic1.h5 h5diff_basic2.h5 /g1/d PASSED
+Testing h5diff -v -p 0.05 -d 5 h5diff_basic1.h5 h5diff_basic2.h5 /g1/d PASSED
+Testing h5diff -v -d 5 --use-system-epsilon h5diff_basic1.h5 h5diff_ba PASSED
+Testing h5diff -v --use-system-epsilon -d 5 h5diff_basic1.h5 h5diff_ba PASSED
+Testing h5diff -v -p 0.05 --use-system-epsilon h5diff_basic1.h5 h5diff PASSED
+Testing h5diff -v --use-system-epsilon -p 0.05 h5diff_basic1.h5 h5diff PASSED
+All h5diff tests passed.
+6.66user 10.90system 0:15.69elapsed 111%CPU (0avgtext+0avgdata 73448maxresident)k
+0inputs+27952outputs (0major+3294459minor)pagefaults 0swaps
+
+Finished testing testh5diff.sh 
+============================

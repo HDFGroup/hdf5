@@ -1,0 +1,16 @@
+============================
+ h5diffgentest  Test Log
+============================
+HDF5-DIAG: Error detected in HDF5 (1.8.21-pre1) thread 0:
+  #000: ../../src/H5D.c line 413 in H5Dclose(): not a dataset
+    major: Invalid arguments to routine
+    minor: Inappropriate type
+HDF5-DIAG: Error detected in HDF5 (1.8.21-pre1) thread 0:
+  #000: ../../src/H5D.c line 413 in H5Dclose(): not a dataset
+    major: Invalid arguments to routine
+    minor: Inappropriate type
+0.53user 0.27system 0:00.99elapsed 81%CPU (0avgtext+0avgdata 136480maxresident)k
+0inputs+6560outputs (0major+52630minor)pagefaults 0swaps
+
+Finished testing h5diffgentest 
+============================

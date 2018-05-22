@@ -1,0 +1,359 @@
+============================
+ dt_arith  Test Log
+============================
+Testing non-aligned conversions (ALIGNMENT=1)....
+Testing query functions of compiler conversion                         PASSED
+Testing user-define and query functions of floating-point types        PASSED
+Testing user-define and query functions of integer types               PASSED
+Floating-point overflow cases will be tested.
+Testing noop float -> float conversions                                PASSED
+Testing noop double -> double conversions                              PASSED
+Testing noop long double -> long double conversions                    PASSED
+Testing hard normalized float -> double conversions                    PASSED
+Testing hard normalized double -> float conversions                    PASSED
+Testing hard normalized float -> long double conversions               PASSED
+Testing hard normalized double -> long double conversions              PASSED
+Testing hard normalized long double -> float conversions               PASSED
+Testing hard normalized long double -> double conversions              PASSED
+Testing hard denormalized float -> double conversions                  PASSED
+Testing hard denormalized double -> float conversions                  PASSED
+Testing hard denormalized float -> long double conversions             PASSED
+Testing hard denormalized double -> long double conversions            PASSED
+Testing hard denormalized long double -> float conversions             PASSED
+Testing hard denormalized long double -> double conversions            PASSED
+Testing hard special float -> double conversions                       PASSED
+Testing hard special double -> float conversions                       PASSED
+Testing hard special float -> long double conversions                  PASSED
+Testing hard special double -> long double conversions                 PASSED
+Testing hard special long double -> float conversions                  PASSED
+Testing hard special long double -> double conversions                 PASSED
+Testing hard signed char -> unsigned char conversions                  PASSED
+Testing hard signed char -> short conversions                          PASSED
+Testing hard signed char -> unsigned short conversions                 PASSED
+Testing hard signed char -> int conversions                            PASSED
+Testing hard signed char -> unsigned int conversions                   PASSED
+Testing hard signed char -> long conversions                           PASSED
+Testing hard signed char -> unsigned long conversions                  PASSED
+Testing hard unsigned char -> signed char conversions                  PASSED
+Testing hard unsigned char -> short conversions                        PASSED
+Testing hard unsigned char -> unsigned short conversions               PASSED
+Testing hard unsigned char -> int conversions                          PASSED
+Testing hard unsigned char -> unsigned int conversions                 PASSED
+Testing hard unsigned char -> long conversions                         PASSED
+Testing hard unsigned char -> unsigned long conversions                PASSED
+Testing hard short -> signed char conversions                          PASSED
+Testing hard short -> unsigned char conversions                        PASSED
+Testing hard short -> unsigned short conversions                       PASSED
+Testing hard short -> int conversions                                  PASSED
+Testing hard short -> unsigned int conversions                         PASSED
+Testing hard short -> long conversions                                 PASSED
+Testing hard short -> unsigned long conversions                        PASSED
+Testing hard unsigned short -> signed char conversions                 PASSED
+Testing hard unsigned short -> unsigned char conversions               PASSED
+Testing hard unsigned short -> short conversions                       PASSED
+Testing hard unsigned short -> int conversions                         PASSED
+Testing hard unsigned short -> unsigned int conversions                PASSED
+Testing hard unsigned short -> long conversions                        PASSED
+Testing hard unsigned short -> unsigned long conversions               PASSED
+Testing hard int -> signed char conversions                            PASSED
+Testing hard int -> unsigned char conversions                          PASSED
+Testing hard int -> short conversions                                  PASSED
+Testing hard int -> unsigned short conversions                         PASSED
+Testing hard int -> unsigned int conversions                           PASSED
+Testing hard int -> long conversions                                   PASSED
+Testing hard int -> unsigned long conversions                          PASSED
+Testing hard unsigned int -> signed char conversions                   PASSED
+Testing hard unsigned int -> unsigned char conversions                 PASSED
+Testing hard unsigned int -> short conversions                         PASSED
+Testing hard unsigned int -> unsigned short conversions                PASSED
+Testing hard unsigned int -> int conversions                           PASSED
+Testing hard unsigned int -> long conversions                          PASSED
+Testing hard unsigned int -> unsigned long conversions                 PASSED
+Testing hard long -> signed char conversions                           PASSED
+Testing hard long -> unsigned char conversions                         PASSED
+Testing hard long -> short conversions                                 PASSED
+Testing hard long -> unsigned short conversions                        PASSED
+Testing hard long -> int conversions                                   PASSED
+Testing hard long -> unsigned int conversions                          PASSED
+Testing hard long -> unsigned long conversions                         PASSED
+Testing hard unsigned long -> signed char conversions                  PASSED
+Testing hard unsigned long -> unsigned char conversions                PASSED
+Testing hard unsigned long -> short conversions                        PASSED
+Testing hard unsigned long -> unsigned short conversions               PASSED
+Testing hard unsigned long -> int conversions                          PASSED
+Testing hard unsigned long -> unsigned int conversions                 PASSED
+Testing hard unsigned long -> long conversions                         PASSED
+Testing hard signed char -> float conversions                          PASSED
+Testing hard signed char -> double conversions                         PASSED
+Testing hard unsigned char -> float conversions                        PASSED
+Testing hard unsigned char -> double conversions                       PASSED
+Testing hard short -> float conversions                                PASSED
+Testing hard short -> double conversions                               PASSED
+Testing hard unsigned short -> float conversions                       PASSED
+Testing hard unsigned short -> double conversions                      PASSED
+Testing hard int -> float conversions                                  PASSED
+Testing hard int -> double conversions                                 PASSED
+Testing hard unsigned int -> float conversions                         PASSED
+Testing hard unsigned int -> double conversions                        PASSED
+Testing hard long -> float conversions                                 PASSED
+Testing hard long -> double conversions                                PASSED
+Testing hard unsigned long -> float conversions                        PASSED
+Testing hard unsigned long -> double conversions                       PASSED
+Testing hard signed char -> long double conversions                    PASSED
+Testing hard unsigned char -> long double conversions                  PASSED
+Testing hard short -> long double conversions                          PASSED
+Testing hard unsigned short -> long double conversions                 PASSED
+Testing hard int -> long double conversions                            PASSED
+Testing hard unsigned int -> long double conversions                   PASSED
+Testing hard long -> long double conversions                           PASSED
+Testing hard unsigned long -> long double conversions                  PASSED
+Testing hard normalized float -> signed char conversions               PASSED
+Testing hard normalized double -> signed char conversions              PASSED
+Testing hard normalized float -> unsigned char conversions             PASSED
+Testing hard normalized double -> unsigned char conversions            PASSED
+Testing hard normalized float -> short conversions                     PASSED
+Testing hard normalized double -> short conversions                    PASSED
+Testing hard normalized float -> unsigned short conversions            PASSED
+Testing hard normalized double -> unsigned short conversions           PASSED
+Testing hard normalized float -> int conversions                       PASSED
+Testing hard normalized double -> int conversions                      PASSED
+Testing hard normalized float -> unsigned int conversions              PASSED
+Testing hard normalized double -> unsigned int conversions             PASSED
+Testing hard normalized float -> long conversions                      PASSED
+Testing hard normalized double -> long conversions                     PASSED
+Testing hard normalized float -> unsigned long conversions             PASSED
+Testing hard normalized double -> unsigned long conversions            PASSED
+Testing hard normalized long double -> signed char conversions         PASSED
+Testing hard normalized long double -> unsigned char conversions       PASSED
+Testing hard normalized long double -> short conversions               PASSED
+Testing hard normalized long double -> unsigned short conversions      PASSED
+Testing hard normalized long double -> int conversions                 PASSED
+Testing hard normalized long double -> unsigned int conversions        PASSED
+Testing hard normalized long double -> long conversions                PASSED
+Testing hard normalized long double -> unsigned long conversions       PASSED
+Testing hard denormalized float -> signed char conversions             PASSED
+Testing hard denormalized double -> signed char conversions            PASSED
+Testing hard denormalized float -> unsigned char conversions           PASSED
+Testing hard denormalized double -> unsigned char conversions          PASSED
+Testing hard denormalized float -> short conversions                   PASSED
+Testing hard denormalized double -> short conversions                  PASSED
+Testing hard denormalized float -> unsigned short conversions          PASSED
+Testing hard denormalized double -> unsigned short conversions         PASSED
+Testing hard denormalized float -> int conversions                     PASSED
+Testing hard denormalized double -> int conversions                    PASSED
+Testing hard denormalized float -> unsigned int conversions            PASSED
+Testing hard denormalized double -> unsigned int conversions           PASSED
+Testing hard denormalized float -> long conversions                    PASSED
+Testing hard denormalized double -> long conversions                   PASSED
+Testing hard denormalized float -> unsigned long conversions           PASSED
+Testing hard denormalized double -> unsigned long conversions          PASSED
+Testing hard denormalized long double -> signed char conversions       PASSED
+Testing hard denormalized long double -> unsigned char conversions     PASSED
+Testing hard denormalized long double -> short conversions             PASSED
+Testing hard denormalized long double -> unsigned short conversions    PASSED
+Testing hard denormalized long double -> int conversions               PASSED
+Testing hard denormalized long double -> unsigned int conversions      PASSED
+Testing hard denormalized long double -> long conversions              PASSED
+Testing hard denormalized long double -> unsigned long conversions     PASSED
+Testing hard special float -> signed char conversions                  PASSED
+Testing hard special double -> signed char conversions                 PASSED
+Testing hard special float -> unsigned char conversions                PASSED
+Testing hard special double -> unsigned char conversions               PASSED
+Testing hard special float -> short conversions                        PASSED
+Testing hard special double -> short conversions                       PASSED
+Testing hard special float -> unsigned short conversions               PASSED
+Testing hard special double -> unsigned short conversions              PASSED
+Testing hard special float -> int conversions                          PASSED
+Testing hard special double -> int conversions                         PASSED
+Testing hard special float -> unsigned int conversions                 PASSED
+Testing hard special double -> unsigned int conversions                PASSED
+Testing hard special float -> long conversions                         PASSED
+Testing hard special double -> long conversions                        PASSED
+Testing hard special float -> unsigned long conversions                PASSED
+Testing hard special double -> unsigned long conversions               PASSED
+Testing hard special long double -> signed char conversions            PASSED
+Testing hard special long double -> unsigned char conversions          PASSED
+Testing hard special long double -> short conversions                  PASSED
+Testing hard special long double -> unsigned short conversions         PASSED
+Testing hard special long double -> int conversions                    PASSED
+Testing hard special long double -> unsigned int conversions           PASSED
+Testing hard special long double -> long conversions                   PASSED
+Testing hard special long double -> unsigned long conversions          PASSED
+Testing hard particular floating number -> integer conversions         PASSED
+Testing soft normalized float -> double conversions                    PASSED
+Testing soft normalized double -> float conversions                    PASSED
+Testing soft normalized float -> long double conversions               PASSED
+Testing soft normalized double -> long double conversions              PASSED
+Testing soft normalized long double -> float conversions               PASSED
+Testing soft normalized long double -> double conversions              PASSED
+Testing soft denormalized float -> double conversions                  PASSED
+Testing soft denormalized double -> float conversions                  PASSED
+Testing soft denormalized float -> long double conversions             PASSED
+Testing soft denormalized double -> long double conversions            PASSED
+Testing soft denormalized long double -> float conversions             PASSED
+Testing soft denormalized long double -> double conversions            PASSED
+Testing soft special float -> double conversions                       PASSED
+Testing soft special double -> float conversions                       PASSED
+Testing soft special float -> long double conversions                  PASSED
+Testing soft special double -> long double conversions                 PASSED
+Testing soft special long double -> float conversions                  PASSED
+Testing soft special long double -> double conversions                 PASSED
+Testing overlap calculations                                           PASSED
+Testing soft signed char -> unsigned char conversions                  PASSED
+Testing soft signed char -> short conversions                          PASSED
+Testing soft signed char -> unsigned short conversions                 PASSED
+Testing soft signed char -> int conversions                            PASSED
+Testing soft signed char -> unsigned int conversions                   PASSED
+Testing soft signed char -> long conversions                           PASSED
+Testing soft signed char -> unsigned long conversions                  PASSED
+Testing soft unsigned char -> signed char conversions                  PASSED
+Testing soft unsigned char -> short conversions                        PASSED
+Testing soft unsigned char -> unsigned short conversions               PASSED
+Testing soft unsigned char -> int conversions                          PASSED
+Testing soft unsigned char -> unsigned int conversions                 PASSED
+Testing soft unsigned char -> long conversions                         PASSED
+Testing soft unsigned char -> unsigned long conversions                PASSED
+Testing soft short -> signed char conversions                          PASSED
+Testing soft short -> unsigned char conversions                        PASSED
+Testing soft short -> unsigned short conversions                       PASSED
+Testing soft short -> int conversions                                  PASSED
+Testing soft short -> unsigned int conversions                         PASSED
+Testing soft short -> long conversions                                 PASSED
+Testing soft short -> unsigned long conversions                        PASSED
+Testing soft unsigned short -> signed char conversions                 PASSED
+Testing soft unsigned short -> unsigned char conversions               PASSED
+Testing soft unsigned short -> short conversions                       PASSED
+Testing soft unsigned short -> int conversions                         PASSED
+Testing soft unsigned short -> unsigned int conversions                PASSED
+Testing soft unsigned short -> long conversions                        PASSED
+Testing soft unsigned short -> unsigned long conversions               PASSED
+Testing soft int -> signed char conversions                            PASSED
+Testing soft int -> unsigned char conversions                          PASSED
+Testing soft int -> short conversions                                  PASSED
+Testing soft int -> unsigned short conversions                         PASSED
+Testing soft int -> unsigned int conversions                           PASSED
+Testing soft int -> long conversions                                   PASSED
+Testing soft int -> unsigned long conversions                          PASSED
+Testing soft unsigned int -> signed char conversions                   PASSED
+Testing soft unsigned int -> unsigned char conversions                 PASSED
+Testing soft unsigned int -> short conversions                         PASSED
+Testing soft unsigned int -> unsigned short conversions                PASSED
+Testing soft unsigned int -> int conversions                           PASSED
+Testing soft unsigned int -> long conversions                          PASSED
+Testing soft unsigned int -> unsigned long conversions                 PASSED
+Testing soft long -> signed char conversions                           PASSED
+Testing soft long -> unsigned char conversions                         PASSED
+Testing soft long -> short conversions                                 PASSED
+Testing soft long -> unsigned short conversions                        PASSED
+Testing soft long -> int conversions                                   PASSED
+Testing soft long -> unsigned int conversions                          PASSED
+Testing soft long -> unsigned long conversions                         PASSED
+Testing soft unsigned long -> signed char conversions                  PASSED
+Testing soft unsigned long -> unsigned char conversions                PASSED
+Testing soft unsigned long -> short conversions                        PASSED
+Testing soft unsigned long -> unsigned short conversions               PASSED
+Testing soft unsigned long -> int conversions                          PASSED
+Testing soft unsigned long -> unsigned int conversions                 PASSED
+Testing soft unsigned long -> long conversions                         PASSED
+Testing soft normalized float -> signed char conversions               PASSED
+Testing soft normalized double -> signed char conversions              PASSED
+Testing soft normalized float -> unsigned char conversions             PASSED
+Testing soft normalized double -> unsigned char conversions            PASSED
+Testing soft normalized float -> short conversions                     PASSED
+Testing soft normalized double -> short conversions                    PASSED
+Testing soft normalized float -> unsigned short conversions            PASSED
+Testing soft normalized double -> unsigned short conversions           PASSED
+Testing soft normalized float -> int conversions                       PASSED
+Testing soft normalized double -> int conversions                      PASSED
+Testing soft normalized float -> unsigned int conversions              PASSED
+Testing soft normalized double -> unsigned int conversions             PASSED
+Testing soft normalized float -> long conversions                      PASSED
+Testing soft normalized double -> long conversions                     PASSED
+Testing soft normalized float -> unsigned long conversions             PASSED
+Testing soft normalized double -> unsigned long conversions            PASSED
+Testing soft normalized long double -> signed char conversions         PASSED
+Testing soft normalized long double -> unsigned char conversions       PASSED
+Testing soft normalized long double -> short conversions               PASSED
+Testing soft normalized long double -> unsigned short conversions      PASSED
+Testing soft normalized long double -> int conversions                 PASSED
+Testing soft normalized long double -> unsigned int conversions        PASSED
+Testing soft normalized long double -> long conversions                PASSED
+Testing soft normalized long double -> unsigned long conversions       PASSED
+Testing soft denormalized float -> signed char conversions             PASSED
+Testing soft denormalized double -> signed char conversions            PASSED
+Testing soft denormalized float -> unsigned char conversions           PASSED
+Testing soft denormalized double -> unsigned char conversions          PASSED
+Testing soft denormalized float -> short conversions                   PASSED
+Testing soft denormalized double -> short conversions                  PASSED
+Testing soft denormalized float -> unsigned short conversions          PASSED
+Testing soft denormalized double -> unsigned short conversions         PASSED
+Testing soft denormalized float -> int conversions                     PASSED
+Testing soft denormalized double -> int conversions                    PASSED
+Testing soft denormalized float -> unsigned int conversions            PASSED
+Testing soft denormalized double -> unsigned int conversions           PASSED
+Testing soft denormalized float -> long conversions                    PASSED
+Testing soft denormalized double -> long conversions                   PASSED
+Testing soft denormalized float -> unsigned long conversions           PASSED
+Testing soft denormalized double -> unsigned long conversions          PASSED
+Testing soft denormalized long double -> signed char conversions       PASSED
+Testing soft denormalized long double -> unsigned char conversions     PASSED
+Testing soft denormalized long double -> short conversions             PASSED
+Testing soft denormalized long double -> unsigned short conversions    PASSED
+Testing soft denormalized long double -> int conversions               PASSED
+Testing soft denormalized long double -> unsigned int conversions      PASSED
+Testing soft denormalized long double -> long conversions              PASSED
+Testing soft denormalized long double -> unsigned long conversions     PASSED
+Testing soft special float -> signed char conversions                  PASSED
+Testing soft special double -> signed char conversions                 PASSED
+Testing soft special float -> unsigned char conversions                PASSED
+Testing soft special double -> unsigned char conversions               PASSED
+Testing soft special float -> short conversions                        PASSED
+Testing soft special double -> short conversions                       PASSED
+Testing soft special float -> unsigned short conversions               PASSED
+Testing soft special double -> unsigned short conversions              PASSED
+Testing soft special float -> int conversions                          PASSED
+Testing soft special double -> int conversions                         PASSED
+Testing soft special float -> unsigned int conversions                 PASSED
+Testing soft special double -> unsigned int conversions                PASSED
+Testing soft special float -> long conversions                         PASSED
+Testing soft special double -> long conversions                        PASSED
+Testing soft special float -> unsigned long conversions                PASSED
+Testing soft special double -> unsigned long conversions               PASSED
+Testing soft special long double -> signed char conversions            PASSED
+Testing soft special long double -> unsigned char conversions          PASSED
+Testing soft special long double -> short conversions                  PASSED
+Testing soft special long double -> unsigned short conversions         PASSED
+Testing soft special long double -> int conversions                    PASSED
+Testing soft special long double -> unsigned int conversions           PASSED
+Testing soft special long double -> long conversions                   PASSED
+Testing soft special long double -> unsigned long conversions          PASSED
+Testing soft signed char -> float conversions                          PASSED
+Testing soft signed char -> double conversions                         PASSED
+Testing soft unsigned char -> float conversions                        PASSED
+Testing soft unsigned char -> double conversions                       PASSED
+Testing soft short -> float conversions                                PASSED
+Testing soft short -> double conversions                               PASSED
+Testing soft unsigned short -> float conversions                       PASSED
+Testing soft unsigned short -> double conversions                      PASSED
+Testing soft int -> float conversions                                  PASSED
+Testing soft int -> double conversions                                 PASSED
+Testing soft unsigned int -> float conversions                         PASSED
+Testing soft unsigned int -> double conversions                        PASSED
+Testing soft long -> float conversions                                 PASSED
+Testing soft long -> double conversions                                PASSED
+Testing soft unsigned long -> float conversions                        PASSED
+Testing soft unsigned long -> double conversions                       PASSED
+Testing soft signed char -> long double conversions                    PASSED
+Testing soft unsigned char -> long double conversions                  PASSED
+Testing soft short -> long double conversions                          PASSED
+Testing soft unsigned short -> long double conversions                 PASSED
+Testing soft int -> long double conversions                            PASSED
+Testing soft unsigned int -> long double conversions                   PASSED
+Testing soft long -> long double conversions                           PASSED
+Testing soft unsigned long -> long double conversions                  PASSED
+All data type tests passed.
+1.63user 0.06system 0:01.73elapsed 98%CPU (0avgtext+0avgdata 7116maxresident)k
+0inputs+528outputs (0major+25485minor)pagefaults 0swaps
+
+Finished testing dt_arith 
+============================

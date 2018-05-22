@@ -1,0 +1,14 @@
+============================
+ cache_api  Test Log
+============================
+Testing MDC/FAPL related API calls                                     PASSED
+Testing MDC/FILE related API calls                                     PASSED
+Testing MDC API smoke check                                            -SKIP-
+     Long tests disabled.
+Testing MDC/FAPL related API input errors                              PASSED
+Testing MDC/FILE related API input errors                              PASSED
+0.04user 0.03system 0:00.12elapsed 65%CPU (0avgtext+0avgdata 7164maxresident)k
+0inputs+584outputs (0major+8767minor)pagefaults 0swaps
+
+Finished testing cache_api 
+============================

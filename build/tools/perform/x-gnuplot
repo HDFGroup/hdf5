@@ -1,0 +1,44 @@
+set yrange [0:1.2]
+set ytics 0, 0.1, 1
+set xlabel "Request size as a fraction of chunk size"
+set ylabel "Efficiency"
+set title "Cache 25 chunks, w0=0.75, Size=(total=2000, chunk=100)"
+set terminal postscript
+set output "x-rowmaj-rd.ps"
+plot "x-rowmaj-rd.dat" title "RowMaj-Read" with lines
+set terminal x11
+replot
+pause -1
+set yrange [0:1.2]
+set ytics 0, 0.1, 1
+set xlabel "Request size as a fraction of chunk size"
+set ylabel "Efficiency"
+set title "Cache 25 chunks,w0=0.75, Size=(total=2000, chunk=100)"
+set terminal postscript
+set output "x-rowmaj-wr.ps"
+plot "x-rowmaj-wr.dat" title "RowMaj-Write" with lines
+set terminal x11
+replot
+pause -1
+set yrange [0:1.2]
+set ytics 0, 0.1, 1
+set xlabel "Request size as a fraction of chunk size"
+set ylabel "Efficiency"
+set title "Cache 25 chunks,w0=0.75, Size=(total=2000, chunk=100)"
+set terminal postscript
+set output "x-diag-rd.ps"
+plot "x-diag-rd.dat" title "Diag-Read" with lines
+set terminal x11
+replot
+pause -1
+set yrange [0:1.2]
+set ytics 0, 0.1, 1
+set xlabel "Request size as a fraction of chunk size"
+set ylabel "Efficiency"
+set title "Cache 25 chunks, w0=0.75, Size=(total=2000, chunk=100)"
+set terminal postscript
+set output "x-diag-wr.ps"
+plot "x-diag-wr.dat" title "Diag-Write" with lines
+set terminal x11
+replot
+pause -1
