@@ -38,10 +38,10 @@ import org.junit.rules.TestName;
 public class TestH5Pfapl {
     @Rule public TestName testname = new TestName();
 
-    private static final String H5_FILE = "test.h5";
-    private static final String H5_LOG_FILE = "test.log";
-    private static final String H5_FAMILY_FILE = "test%05d";
-    private static final String H5_MULTI_FILE = "testmulti";
+    private static final String H5_FILE = "testPf.h5";
+    private static final String H5_LOG_FILE = "testPf.log";
+    private static final String H5_FAMILY_FILE = "testPf%05d";
+    private static final String H5_MULTI_FILE = "testPfmulti";
     private static char  MULTI_LETTERS[] = {'X','s','b','r','g','l','o'};
     private static final int DIM_X = 4;
     private static final int DIM_Y = 6;

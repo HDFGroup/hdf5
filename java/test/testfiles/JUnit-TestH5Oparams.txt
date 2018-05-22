@@ -1,0 +1,30 @@
+JUnit version 4.11
+.testH5Oget_comment_by_name_null
+.testH5Ovisit_by_name_nullname
+.testH5Oget_info_invalid
+.testH5Ovisit_by_name_null
+.testH5Oget_comment_invalid
+.testH5Oset_comment_by_name_invalid
+.testH5Oopen_null
+.testH5Oclose_invalid
+.testH5Oflush_invalid
+.testH5Oget_comment_by_name_invalid
+.testH5Orefresh_invalid
+.testH5Ocopy_null_dest
+.testH5Olink_invalid
+.testH5Oget_info_by_idx_invalid
+.testH5Oget_info_by_idx_null
+.testH5Olink_null_dest
+.testH5Oget_info_by_name_invalid
+.testH5Oget_info_by_name_null
+.testH5Ocopy_invalid
+.testH5Oset_comment_by_name_null
+.testH5Ocopy_null_current
+.testH5Oset_comment_invalid
+.testH5Oopen_invalid
+.testH5Ovisit_null
+
+Time:  XXXX
+
+OK (24 tests)
+

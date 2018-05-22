@@ -1,0 +1,11 @@
+JUnit version 4.11
+.testH5Eregister_class_lib_name_null
+.testH5Eregister_class_version_null
+.testH5Eunregister_class_invalid_classid
+.testH5Eregister_class
+.testH5Eregister_class_cls_name_null
+
+Time:  XXXX
+
+OK (5 tests)
+

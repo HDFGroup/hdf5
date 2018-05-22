@@ -27,13 +27,7 @@
  * Each test module should include ttsafe.h and define a unique set of
  * names for test files they create.
  *
- * BUGS/LIMITATIONS
- *
- * EXPORTED ROUTINES/VARIABLES:
- *
  */
-
-#include "h5test.h"
 
 /* ANY new test needs to have a prototype in ttsafe.h */
 #include "ttsafe.h"
@@ -120,7 +114,7 @@ int main(int argc, char *argv[])
 
 #else /* H5_HAVE_THREADSAFE */
 
-    printf("Most thread-safety tests skipped because THREADSAFE not enabled\n");
+    HDprintf("Most thread-safety tests skipped because THREADSAFE not enabled\n");
 
 #endif /* H5_HAVE_THREADSAFE */
 

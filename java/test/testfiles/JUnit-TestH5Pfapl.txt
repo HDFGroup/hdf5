@@ -1,0 +1,41 @@
+JUnit version 4.11
+.testH5P_elink_fapl
+.testH5P_fapl_direct
+.testH5P_alignment
+.testH5P_fapl_family
+.testH5P_chunk_cache
+.testH5P_meta_block_size
+.testH5Fmdc_logging
+.testH5Pget_elink_fapl
+.testH5Pset_mdc_config
+.testH5P_small_data_block_size
+.testH5Pset_fapl_log
+.testH5P_evict_on_close
+.testH5Pset_libver_bounds
+.testH5P_sieve_buf_size
+.testH5P_elink_file_cache_size
+.testH5P_cache
+.testH5Pget_mdc_config
+.testH5P_fapl_muti_defaults
+.testH5Pget_libver_bounds
+.testH5P_btree_ratios
+.testH5P_fapl_muti_nulls
+.testH5Pset_fapl_sec2
+.testH5Pmulti_transform
+.testH5Pset_elink_fapl_NegativeID
+.testH5Pset_fapl_stdio
+.testH5P_edc_check
+.testH5Pset_elink_fapl
+.testH5P_hyper_vector_size
+.testH5P_gc_references
+.testH5P_family_offset
+.testH5P_fapl_core
+.testH5P_fapl_muti
+.testH5P_fapl_split
+.testH5Pset_fapl_windows
+.testH5P_fclose_degree
+
+Time:  XXXX
+
+OK (35 tests)
+
