@@ -34,7 +34,7 @@ import org.junit.rules.TestName;
 public class TestH5PData {
     @Rule public TestName testname = new TestName();
 
-    private static final String H5_FILE = "test.h5";
+    private static final String H5_FILE = "testPD.h5";
     private static final int DIM_X = 12;
     private static final int DIM_Y = 18;
     long H5fid = -1;

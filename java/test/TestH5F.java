@@ -31,7 +31,7 @@ import org.junit.rules.TestName;
 
 public class TestH5F {
     @Rule public TestName testname = new TestName();
-    private static final String H5_FILE = "test.h5";
+    private static final String H5_FILE = "testF.h5";
 
     private static final int COUNT_OBJ_FILE = 1;
     private static final int COUNT_OBJ_DATASET = 0;

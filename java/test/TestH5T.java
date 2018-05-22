@@ -32,7 +32,7 @@ import org.junit.rules.TestName;
 
 public class TestH5T {
     @Rule public TestName testname = new TestName();
-    private static final String H5_FILE = "test.h5";
+    private static final String H5_FILE = "testT.h5";
     long H5fid = -1;
     long H5strdid = -1;
 
