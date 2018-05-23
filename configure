@@ -22385,6 +22385,8 @@ fi
 ## ----------------------------------------------------------------------
 ## Production flags?  Save the value in $CONFIG_MODE so we have it for
 ## the record.
+## To switch the default between production and development, move X-|
+## to X-yes) or X-no)
 ##
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for production mode" >&5
 $as_echo_n "checking for production mode... " >&6; }

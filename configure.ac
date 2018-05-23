@@ -777,6 +777,8 @@ fi
 ## ----------------------------------------------------------------------
 ## Production flags?  Save the value in $CONFIG_MODE so we have it for
 ## the record.
+## To switch the default between production and development, move X-|
+## to X-yes) or X-no)
 ##
 AC_MSG_CHECKING([for production mode])
 AC_ARG_ENABLE([production],
