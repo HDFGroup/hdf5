@@ -963,6 +963,7 @@ H5HF__man_iblock_create(H5HF_hdr_t *hdr, H5HF_indirect_t *par_iblock,
     unsigned par_entry, unsigned nrows, unsigned max_rows, haddr_t *addr_p)
 {
     H5HF_indirect_t *iblock = NULL;     /* Pointer to indirect block */
+    haddr_t iblock_addr;                /* Indirect block's address */
     size_t u;                           /* Local index variable */
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -1036,21 +1037,21 @@ H5HF__man_iblock_create(H5HF_hdr_t *hdr, H5HF_indirect_t *par_iblock,
 
     /* Allocate [temporary] space for the indirect block on disk */
     if(H5F_USE_TMP_SPACE(hdr->f)) {
-        if(HADDR_UNDEF == (*addr_p = H5MF_alloc_tmp(hdr->f, (hsize_t)iblock->size)))
+        if(HADDR_UNDEF == (iblock_addr = H5MF_alloc_tmp(hdr->f, (hsize_t)iblock->size)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "file allocation failed for fractal heap indirect block")
     } /* end if */
     else {
-        if(HADDR_UNDEF == (*addr_p = H5MF_alloc(hdr->f, H5FD_MEM_FHEAP_IBLOCK, (hsize_t)iblock->size)))
+        if(HADDR_UNDEF == (iblock_addr = H5MF_alloc(hdr->f, H5FD_MEM_FHEAP_IBLOCK, (hsize_t)iblock->size)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "file allocation failed for fractal heap indirect block")
     } /* end else */
-    iblock->addr = *addr_p;
+    iblock->addr = iblock_addr;
 
     /* Attach to parent indirect block, if there is one */
     iblock->parent = par_iblock;
     iblock->par_entry = par_entry;
     if(iblock->parent) {
         /* Attach new block to parent */
-        if(H5HF_man_iblock_attach(iblock->parent, par_entry, *addr_p) < 0)
+        if(H5HF_man_iblock_attach(iblock->parent, par_entry, iblock_addr) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTATTACH, FAIL, "can't attach indirect block to parent indirect block")
 
         /* Compute the indirect block's offset in the heap's address space */
@@ -1074,14 +1075,28 @@ H5HF__man_iblock_create(H5HF_hdr_t *hdr, H5HF_indirect_t *par_iblock,
     iblock->max_child = 0;
 
     /* Cache the new indirect block */
-    if(H5AC_insert_entry(hdr->f, H5AC_FHEAP_IBLOCK, *addr_p, iblock, H5AC__NO_FLAGS_SET) < 0)
+    if(H5AC_insert_entry(hdr->f, H5AC_FHEAP_IBLOCK, iblock_addr, iblock, H5AC__NO_FLAGS_SET) < 0)
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't add fractal heap indirect block to cache")
 
+    /* Add indirect block as child of 'top' proxy */
+    if(hdr->top_proxy) {
+        if(H5AC_proxy_entry_add_child(hdr->top_proxy, hdr->f, iblock) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTSET, FAIL, "unable to add fractal heap entry as child of heap proxy")
+        iblock->top_proxy = hdr->top_proxy;
+    } /* end if */
+    else
+        iblock->top_proxy = NULL;
+
+    /* Set the address of indirect block */
+    *addr_p = iblock_addr;
+
 done:
-    if(ret_value < 0)
+    if(ret_value < 0) {
         if(iblock)
             if(H5HF_man_iblock_dest(iblock) < 0)
                 HDONE_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to destroy fractal heap indirect block")
+        *addr_p = HADDR_UNDEF;
+    } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF__man_iblock_create() */
@@ -1209,6 +1224,14 @@ H5HF__man_iblock_protect(H5HF_hdr_t *hdr, haddr_t iblock_addr,
     else
         /* Indicate that the indirect block was _not_ protected */
         *did_protect = FALSE;
+
+    /* Add to top proxy, if not already there */
+    if(hdr->top_proxy && NULL == iblock->top_proxy) {
+        /* Add indirect block as child of 'top' proxy */
+        if(H5AC_proxy_entry_add_child(hdr->top_proxy, hdr->f, iblock) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTSET, NULL, "unable to add fractal heap entry as child of heap proxy")
+        iblock->top_proxy = hdr->top_proxy;
+    } /* end if */
 
     /* Set the return value */
     ret_value = iblock;
@@ -1881,6 +1904,9 @@ H5HF_man_iblock_dest(H5HF_indirect_t *iblock)
         iblock->filt_ents = H5FL_SEQ_FREE(H5HF_indirect_filt_ent_t, iblock->filt_ents);
     if(iblock->child_iblocks)
         iblock->child_iblocks = H5FL_SEQ_FREE(H5HF_indirect_ptr_t, iblock->child_iblocks);
+
+    /* Sanity check */
+    HDassert(NULL == iblock->top_proxy);
 
     /* Free fractal heap indirect block info */
     iblock = H5FL_FREE(H5HF_indirect_t, iblock);

@@ -358,6 +358,29 @@ typedef struct H5HF_hdr_t {
     uint8_t     heap_off_size;  /* Size of heap offsets (in bytes) */
     uint8_t     heap_len_size;  /* Size of heap ID lengths (in bytes) */
     hbool_t     checked_filters; /* TRUE if pipeline passes can_apply checks */
+
+    /* FULLSWMR: SWMR / Flush dependency information (not stored) */
+    hbool_t swmr_write;                 /* Flag indicating the file is opened with SWMR-write access */
+    H5AC_proxy_entry_t *top_proxy;      /* 'Top' proxy cache entry for all heap entries */
+    void *parent;		        /* Pointer to 'top' proxy flush dependency
+                                         * parent, if it exists, otherwise NULL.
+                                         * If the fractal heap is being used
+                                         * as part of a compound data structure
+                                         * (like the heap + B-tree used for groups)
+                                         * and the object's metadata is modified
+                                         * by a SWMR writer, this field will be
+                                         * set equal to the proxy that is the
+                                         * flush dependency parent of the
+                                         * fractal heap  header.
+ 					 *
+ 					 * The field is used to avoid duplicate
+					 * setups of the flush dependency 
+					 * relationship, and to allow the 
+					 * fractal heap header to destroy
+					 * the flush dependency on receipt of 
+					 * an eviction notification from the
+					 * metadata cache.
+					 */
 } H5HF_hdr_t;
 
 /* Common indirect block doubling table entry */
@@ -382,12 +405,6 @@ struct H5HF_indirect_t {
     size_t      rc;             /* Reference count of objects using this block */
     H5HF_hdr_t	*hdr;	        /* Shared heap header info	              */
     struct H5HF_indirect_t *parent;	/* Shared parent indirect block info  */
-    void        *fd_parent;	/* Saved copy of the parent pointer -- this   */
-				/* necessary as the parent field is sometimes */
-				/* nulled out before the eviction notify call */
-				/* is made from the metadata cache.  Since    */
-				/* this call cancels flush dependencies, it   */
-				/* needs this information.		      */
     unsigned    par_entry;      /* Entry in parent's table                    */
     haddr_t     addr;           /* Address of this indirect block on disk     */
     size_t      size;           /* Size of indirect block on disk             */
@@ -400,6 +417,15 @@ struct H5HF_indirect_t {
                                 /* been removed from the metadata cache, but  */
                                 /* is still 'live' due to a refcount (rc) > 0 */
                                 /* (usually from free space sections)         */
+
+    /* FULLSWMR: SWMR / Flush dependency information (not stored) */
+    H5AC_proxy_entry_t *top_proxy;      /* 'Top' proxy cache entry for all heap entries */
+    void        *fd_parent;	/* Saved copy of the parent pointer -- this   */
+				/* necessary as the parent field is sometimes */
+				/* nulled out before the eviction notify call */
+				/* is made from the metadata cache.  Since    */
+				/* this call cancels flush dependencies, it   */
+				/* needs this information.		      */
 
     /* Stored values */
     hsize_t     block_off;      /* Offset of the block within the heap's address space */
@@ -415,12 +441,6 @@ typedef struct H5HF_direct_t {
     /* Internal heap information */
     H5HF_hdr_t	*hdr;	        /* Shared heap header info	              */
     H5HF_indirect_t *parent;	/* Shared parent indirect block info          */
-    void        *fd_parent;	/* Saved copy of the parent pointer -- this   */
-				/* necessary as the parent field is sometimes */
-				/* nulled out before the eviction notify call */
-				/* is made from the metadata cache.  Since    */
-				/* this call cancels flush dependencies, it   */
-				/* needs this information.		      */
     unsigned    par_entry;      /* Entry in parent's table                    */
     size_t      size;           /* Size of direct block                       */
     hsize_t     file_size;      /* Size of direct block in file (only valid when block's space is being freed) */
@@ -450,6 +470,15 @@ typedef struct H5HF_direct_t {
                                 /* blk field by the pre-serialize function,    */
                                 /* and back to NULL by the serialize function. */
     size_t	write_size;     /* size of the buffer pointed to by write_buf. */
+
+    /* FULLSWMR: SWMR / Flush dependency information (not stored) */
+    H5AC_proxy_entry_t *top_proxy;      /* 'Top' proxy cache entry for all heap entries */
+    void        *fd_parent;	/* Saved copy of the parent pointer -- this   */
+				/* necessary as the parent field is sometimes */
+				/* nulled out before the eviction notify call */
+				/* is made from the metadata cache.  Since    */
+				/* this call cancels flush dependencies, it   */
+				/* needs this information.		      */
 
     /* Stored values */
     hsize_t     block_off;      /* Offset of the block within the heap's address space */

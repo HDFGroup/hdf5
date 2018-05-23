@@ -189,11 +189,20 @@ H5HF__man_dblock_create(H5HF_hdr_t *hdr, H5HF_indirect_t *par_iblock,
     if(H5AC_insert_entry(hdr->f, H5AC_FHEAP_DBLOCK, dblock_addr, dblock, H5AC__NO_FLAGS_SET) < 0)
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't add fractal heap direct block to cache")
 
+    /* Add direct block as child of 'top' proxy */
+    if(hdr->top_proxy) {
+        if(H5AC_proxy_entry_add_child(hdr->top_proxy, hdr->f, dblock) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTSET, FAIL, "unable to add fractal heap entry as child of heap proxy")
+        dblock->top_proxy = hdr->top_proxy;
+    } /* end if */
+    else
+        dblock->top_proxy = NULL;
+
     /* Increase the allocated heap size */
     if(H5HF_hdr_inc_alloc(hdr, dblock->size) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't increase allocated heap size")
 
-    /* Set the address of of direct block, if requested */
+    /* Set the address of direct block, if requested */
     if(addr_p)
         *addr_p = dblock_addr;
 
@@ -499,6 +508,14 @@ H5HF__man_dblock_protect(H5HF_hdr_t *hdr, haddr_t dblock_addr,
     if(NULL == (dblock = (H5HF_direct_t *)H5AC_protect(hdr->f, H5AC_FHEAP_DBLOCK, dblock_addr, &udata, flags)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, NULL, "unable to protect fractal heap direct block")
 
+    /* Add to top proxy, if not already there */
+    if(hdr->top_proxy && NULL == dblock->top_proxy) {
+        /* Add direct block as child of 'top' proxy */
+        if(H5AC_proxy_entry_add_child(hdr->top_proxy, hdr->f, dblock) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTSET, NULL, "unable to add fractal heap entry as child of heap proxy")
+        dblock->top_proxy = hdr->top_proxy;
+    } /* end if */
+
     /* Set the return value */
     ret_value = dblock;
 
@@ -716,6 +733,9 @@ H5HF_man_dblock_dest(H5HF_direct_t *dblock)
 
     /* Free block's buffer */
     dblock->blk = H5FL_BLK_FREE(direct_block, dblock->blk);
+
+    /* Sanity check */
+    HDassert(NULL == dblock->top_proxy);
 
     /* Free fractal heap direct block info */
     dblock = H5FL_FREE(H5HF_direct_t, dblock);

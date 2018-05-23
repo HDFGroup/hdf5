@@ -83,6 +83,7 @@ static herr_t H5HF__cache_hdr_pre_serialize(H5F_t *f, void *thing, haddr_t addr,
     size_t len, haddr_t *new_addr, size_t *new_len, unsigned *flags); 
 static herr_t H5HF__cache_hdr_serialize(const H5F_t *f, void *image,
     size_t len, void *thing); 
+static herr_t H5HF__cache_hdr_notify(H5AC_notify_action_t action, void *thing, ...);
 static herr_t H5HF__cache_hdr_free_icr(void *thing);
 
 static herr_t H5HF__cache_iblock_get_initial_load_size(void *udata, size_t *image_len);
@@ -143,7 +144,7 @@ const H5AC_class_t H5AC_FHEAP_HDR[1] = {{
     H5HF__cache_hdr_image_len,          /* 'image_len' callback */
     H5HF__cache_hdr_pre_serialize,      /* 'pre_serialize' callback */
     H5HF__cache_hdr_serialize,          /* 'serialize' callback */
-    NULL,                               /* 'notify' callback */
+    H5HF__cache_hdr_notify,             /* 'notify' callback */
     H5HF__cache_hdr_free_icr,           /* 'free_icr' callback */
     NULL,                               /* 'fsf_size' callback */
 }};
@@ -842,6 +843,92 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5EA__cache_hdr_notify
+ *
+ * Purpose:	Handle cache action notifications
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	John Mainzer
+ *              11/30/15
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5HF__cache_hdr_notify(H5AC_notify_action_t action, void *_thing, ...)
+{
+    H5HF_hdr_t *hdr = (H5HF_hdr_t *)_thing;      /* Pointer to the object */
+    herr_t      	 ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity check */
+    HDassert(hdr);
+
+    /* Check if the file was opened with SWMR-write access */
+    if(hdr->swmr_write) {
+        /* Determine which action to take */
+        switch(action) {
+            case H5AC_NOTIFY_ACTION_AFTER_INSERT:
+	    case H5AC_NOTIFY_ACTION_AFTER_LOAD:
+	    case H5AC_NOTIFY_ACTION_AFTER_FLUSH:
+            case H5AC_NOTIFY_ACTION_ENTRY_DIRTIED:
+            case H5AC_NOTIFY_ACTION_ENTRY_CLEANED:
+            case H5AC_NOTIFY_ACTION_CHILD_DIRTIED:
+            case H5AC_NOTIFY_ACTION_CHILD_CLEANED:
+            case H5AC_NOTIFY_ACTION_CHILD_UNSERIALIZED:
+            case H5AC_NOTIFY_ACTION_CHILD_SERIALIZED:
+            case H5AC_NOTIFY_ACTION_CHILD_UNDEPEND_DIRTY:
+		/* do nothing */
+		break;
+
+	    case H5AC_NOTIFY_ACTION_BEFORE_EVICT:
+                /* If hdr->parent != NULL, hdr->parent is used to destroy
+                 * the flush dependency before the header is evicted.
+                 */
+                if(hdr->parent) {
+                    /* Sanity check */
+                    HDassert(hdr->top_proxy);
+
+		    /* Destroy flush dependency on meta proxy */
+		    if(H5AC_proxy_entry_remove_child((H5AC_proxy_entry_t *)hdr->parent, (void *)hdr->top_proxy) < 0)
+                        HGOTO_ERROR(H5E_HEAP, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency between fractal heap and meta proxy")
+                    hdr->parent = NULL;
+		} /* end if */
+
+                /* Detach from 'top' proxy for extensible array */
+                if(hdr->top_proxy) {
+                    if(H5AC_proxy_entry_remove_child(hdr->top_proxy, hdr) < 0)
+                        HGOTO_ERROR(H5E_HEAP, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency between header and fractal heap 'top' proxy")
+                    /* Don't reset hdr->top_proxy here, it's destroyed when the header is freed -QAK */
+                } /* end if */
+		break;
+
+            case H5AC_NOTIFY_ACTION_CHILD_BEFORE_EVICT:
+#ifdef NDEBUG
+                HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "invalid notify action from metadata cache")
+#else /* NDEBUG */
+                HDassert(0 && "Invalid action?!?");
+#endif /* NDEBUG */
+                break;
+
+            default:
+#ifdef NDEBUG
+                HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "Unknown action from metadata cache")
+#else /* NDEBUG */
+                HDassert(0 && "Unknown action?!?");
+#endif /* NDEBUG */
+        } /* end switch */
+    } /* end if */
+    else
+        HDassert(NULL == hdr->parent);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5HF__cache_hdr_notify() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5HF__cache_hdr_free_icr
  *
  * Purpose:	Free the in core representation of the fractal heap header.
@@ -1514,7 +1601,15 @@ H5HF__cache_iblock_notify(H5AC_notify_action_t action, void *_thing, ...)
                     HGOTO_ERROR(H5E_HEAP, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency")
                 iblock->fd_parent = NULL;
             } /* end if */
+
+            /* Detach from 'top' proxy for fractal heap */
+            if(iblock->top_proxy) {
+                if(H5AC_proxy_entry_remove_child(iblock->top_proxy, iblock) < 0)
+                    HGOTO_ERROR(H5E_HEAP, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency between indirect block and fractal heap 'top' proxy")
+                iblock->top_proxy = NULL;
+            } /* end if */
             break;
+
 
         case H5AC_NOTIFY_ACTION_CHILD_BEFORE_EVICT:
 #ifdef NDEBUG
@@ -2539,6 +2634,13 @@ H5HF__cache_dblock_notify(H5AC_notify_action_t action, void *_thing, ...)
                 if(H5AC_destroy_flush_dependency(dblock->fd_parent, dblock) < 0)
                     HGOTO_ERROR(H5E_HEAP, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency")
                 dblock->fd_parent = NULL;
+            } /* end if */
+
+            /* Detach from 'top' proxy for fractal heap */
+            if(dblock->top_proxy) {
+                if(H5AC_proxy_entry_remove_child(dblock->top_proxy, dblock) < 0)
+                    HGOTO_ERROR(H5E_HEAP, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency between direct block and fractal heap 'top' proxy")
+                dblock->top_proxy = NULL;
             } /* end if */
             break;
 

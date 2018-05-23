@@ -124,6 +124,7 @@ H5HF_hdr_alloc(H5F_t *f)
 
     /* Set the internal parameters for the heap */
     hdr->f = f;
+    hdr->swmr_write = (H5F_INTENT(f) & H5F_ACC_SWMR_WRITE) > 0;
     hdr->sizeof_size = H5F_SIZEOF_SIZE(f);
     hdr->sizeof_addr = H5F_SIZEOF_ADDR(f);
 
@@ -500,6 +501,14 @@ H5HF_hdr_create(H5F_t *f, const H5HF_create_t *cparam)
     if(H5AC_insert_entry(f, H5AC_FHEAP_HDR, hdr->heap_addr, hdr, H5AC__NO_FLAGS_SET) < 0)
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTINSERT, HADDR_UNDEF, "can't add fractal heap header to cache")
 
+    /* Create 'top' proxy for fractal heap entries and add header as child */
+    if(hdr->swmr_write) {
+        if(NULL == (hdr->top_proxy = H5AC_proxy_entry_create()))
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTCREATE, HADDR_UNDEF, "can't create fractal heap entry proxy")
+        if(H5AC_proxy_entry_add_child(hdr->top_proxy, f, hdr) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTSET, HADDR_UNDEF, "unable to add fractal heap entry as child of heap proxy")
+    } /* end if */
+
     /* Set address of heap header to return */
     ret_value = hdr->heap_addr;
 
@@ -553,6 +562,14 @@ H5HF__hdr_protect(H5F_t *f, haddr_t addr, unsigned flags)
 
     /* Update header's file pointer */
     hdr->f = f;
+
+    /* Create top proxy, if it doesn't exist, and add header to it as child */
+    if(hdr->swmr_write && NULL == hdr->top_proxy) {
+        if(NULL == (hdr->top_proxy = H5AC_proxy_entry_create()))
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTCREATE, NULL, "can't create fractal heap entry proxy")
+        if(H5AC_proxy_entry_add_child(hdr->top_proxy, f, hdr) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTSET, NULL, "unable to add fractal heap entry as child of heap proxy")
+    } /* end if */
 
     /* Set the return value */
     ret_value = hdr;
@@ -1418,6 +1435,17 @@ H5HF_hdr_free(H5HF_hdr_t *hdr)
     if(hdr->pline.nused)
         if(H5O_msg_reset(H5O_PLINE_ID, &(hdr->pline)) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to reset I/O pipeline message")
+
+    /* Destroy the 'top' proxy */
+    if(hdr->top_proxy) {
+        /* Sanity check - shouldn't be a dependency on another data structure */
+        HDassert(NULL == hdr->parent);
+
+        /* Destroy proxy */
+        if(H5AC_proxy_entry_dest(hdr->top_proxy) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "unable to destroy fractal heap 'top' proxy")
+        hdr->top_proxy = NULL;
+    } /* end if */
 
     /* Free the shared info itself */
     hdr = H5FL_FREE(H5HF_hdr_t, hdr);
