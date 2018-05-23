@@ -810,7 +810,7 @@ H5O__cache_chk_deserialize(const void *image, size_t len, void *_udata,
     } /* end else */
 
     /* Increment reference count of object header */
-    if(H5O_inc_rc(udata->oh) < 0)
+    if(H5O__inc_rc(udata->oh) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINC, NULL, "can't increment reference count on object header")
     chk_proxy->oh = udata->oh;
 
@@ -923,7 +923,6 @@ static herr_t
 H5O__cache_chk_notify(H5AC_notify_action_t action, void *_thing)
 {
     H5O_chunk_proxy_t *chk_proxy = (H5O_chunk_proxy_t *)_thing;
-    H5O_chunk_proxy_t *cont_chk_proxy = NULL; /* Proxy for chunk containing continuation message that points to this chunk, if not chunk 0 */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
@@ -938,37 +937,26 @@ H5O__cache_chk_notify(H5AC_notify_action_t action, void *_thing)
         case H5AC_NOTIFY_ACTION_AFTER_INSERT:
         case H5AC_NOTIFY_ACTION_AFTER_LOAD:
             if(chk_proxy->oh->swmr_write) {
-                /* Add flush dependency on chunk parent */
-                {
-                    void *parent;       /* Chunk containing continuation message that points to this chunk */
-
-                    /* Determine the parent of the chunk */
-                    if(chk_proxy->cont_chunkno == 0)
-                        parent = chk_proxy->oh;
-                    else {
-                        if(NULL == (cont_chk_proxy = H5O_chunk_protect(chk_proxy->f, H5AC_ind_read_dxpl_id, chk_proxy->oh, chk_proxy->cont_chunkno)))
-                            HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header chunk")
-                        parent = cont_chk_proxy;
-                    } /* end else */
-
+                /* Add flush dependency on chunk with continuation, if one exists */
+                if(chk_proxy->fd_parent) {
                     /* Sanity checks */
-                    HDassert(parent);
-                    HDassert(((H5C_cache_entry_t *)parent)->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
-                    HDassert(((H5C_cache_entry_t *)parent)->type);
-                    HDassert((((H5C_cache_entry_t *)(parent))->type->id == H5AC_OHDR_ID)
-                             || (((H5C_cache_entry_t *)(parent))->type->id == H5AC_OHDR_CHK_ID));
+                    HDassert(((H5C_cache_entry_t *)(chk_proxy->fd_parent))->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
+                    HDassert(((H5C_cache_entry_t *)(chk_proxy->fd_parent))->type);
+                    HDassert((((H5C_cache_entry_t *)(chk_proxy->fd_parent))->type->id == H5AC_OHDR_ID)
+                             || (((H5C_cache_entry_t *)(chk_proxy->fd_parent))->type->id == H5AC_OHDR_CHK_ID));
 
                     /* Add flush dependency from chunk containing the continuation message
                      * that points to this chunk (either oh or another chunk proxy object)
                      */
-                    if(H5AC_create_flush_dependency(parent, chk_proxy) < 0)
+                    if(H5AC_create_flush_dependency(chk_proxy->fd_parent, chk_proxy) < 0)
                         HGOTO_ERROR(H5E_OHDR, H5E_CANTDEPEND, FAIL, "unable to create flush dependency")
+                } /* end if */
 
-                    /* Make note of the address and pointer of the flush dependency
-                     * parent so we can take the dependency down on eviction.
-                     */
-                    chk_proxy->parent = parent;
-                }
+                /* Add flush dependency on object header */
+                {
+                    if(H5AC_create_flush_dependency(chk_proxy->oh, chk_proxy) < 0)
+                        HGOTO_ERROR(H5E_OHDR, H5E_CANTDEPEND, FAIL, "unable to create flush dependency")
+                } /* end if */
 
                 /* Add flush dependency on object header proxy, if proxy exists */
                 {
@@ -1007,17 +995,21 @@ H5O__cache_chk_notify(H5AC_notify_action_t action, void *_thing)
 
         case H5AC_NOTIFY_ACTION_BEFORE_EVICT:
             if(chk_proxy->oh->swmr_write) {
-                /* Remove flush dependency on parent object header chunk */
-                {
+                /* Remove flush dependency on parent object header chunk, if one is set */
+                if(chk_proxy->fd_parent) {
                     /* Sanity checks */
-                    HDassert(chk_proxy->parent != NULL);
-                    HDassert(((H5C_cache_entry_t *)(chk_proxy->parent))->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
-                    HDassert(((H5C_cache_entry_t *)(chk_proxy->parent))->type);
-                    HDassert((((H5C_cache_entry_t *)(chk_proxy->parent))->type->id == H5AC_OHDR_ID) || (((H5C_cache_entry_t *)(chk_proxy->parent))->type->id == H5AC_OHDR_CHK_ID));
+                    HDassert(((H5C_cache_entry_t *)(chk_proxy->fd_parent))->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
+                    HDassert(((H5C_cache_entry_t *)(chk_proxy->fd_parent))->type);
+                    HDassert((((H5C_cache_entry_t *)(chk_proxy->fd_parent))->type->id == H5AC_OHDR_ID) || (((H5C_cache_entry_t *)(chk_proxy->fd_parent))->type->id == H5AC_OHDR_CHK_ID));
 
-                    if(H5AC_destroy_flush_dependency(chk_proxy->parent, chk_proxy) < 0)
+                    if(H5AC_destroy_flush_dependency(chk_proxy->fd_parent, chk_proxy) < 0)
                         HGOTO_ERROR(H5E_OHDR, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency")
-                }
+                    chk_proxy->fd_parent = NULL;
+                } /* end if */
+
+                /* Unregister the object header as a parent of the virtual entry */
+                if(H5AC_destroy_flush_dependency(chk_proxy->oh, chk_proxy) < 0)
+                    HGOTO_ERROR(H5E_OHDR, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency")
 
                 /* Unregister the object header chunk as a parent of the virtual entry */
                 if(H5AC_proxy_entry_remove_parent(chk_proxy->oh->proxy, chk_proxy) < 0)
@@ -1034,10 +1026,6 @@ H5O__cache_chk_notify(H5AC_notify_action_t action, void *_thing)
     } /* end switch */
 
 done:
-    if(cont_chk_proxy)
-        if(H5O_chunk_unprotect(chk_proxy->f, H5AC_ind_read_dxpl_id, cont_chk_proxy, FALSE) < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to unprotect object header chunk")
-
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__cache_chk_notify() */
 
@@ -1540,7 +1528,7 @@ H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t len, const uint8_t *image
                 H5O_cont_t *cont;
 
                 /* Decode continuation message */
-                cont = (H5O_cont_t *)(H5O_MSG_CONT->decode)(udata->f, udata->dxpl_id, NULL, 0, &ioflags, mesg->raw_size, mesg->raw);
+                cont = (H5O_cont_t *)(H5O_MSG_CONT->decode)(udata->f, NULL, 0, &ioflags, mesg->raw_size, mesg->raw);
                 H5_CHECKED_ASSIGN(cont->chunkno, unsigned, udata->cont_msg_info->nmsgs + 1, size_t); /* the next continuation message/chunk */
 
                 /* Save 'native' form of continuation message */
@@ -1556,7 +1544,7 @@ H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t len, const uint8_t *image
 
                 /* Decode ref. count message */
                 HDassert(oh->version > H5O_VERSION_1);
-                refcount = (H5O_refcount_t *)(H5O_MSG_REFCOUNT->decode)(udata->f, udata->dxpl_id, NULL, 0, &ioflags, mesg->raw_size, mesg->raw);
+                refcount = (H5O_refcount_t *)(H5O_MSG_REFCOUNT->decode)(udata->f, NULL, 0, &ioflags, mesg->raw_size, mesg->raw);
 
                 /* Save 'native' form of ref. count message */
                 mesg->native = refcount;

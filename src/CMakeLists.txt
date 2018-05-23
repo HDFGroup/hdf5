@@ -108,6 +108,14 @@ set (H5CS_HDRS
 IDE_GENERATED_PROPERTIES ("H5CS" "${H5CS_HDRS}" "${H5CS_SOURCES}" )
 
 
+set (H5CX_SOURCES
+    ${HDF5_SRC_DIR}/H5CX.c
+)
+set (H5CX_HDRS
+)
+IDE_GENERATED_PROPERTIES ("H5CX" "${H5CX_HDRS}" "${H5CX_SOURCES}" )
+
+
 set (H5D_SOURCES
     ${HDF5_SRC_DIR}/H5D.c
     ${HDF5_SRC_DIR}/H5Dbtree.c
@@ -689,6 +697,7 @@ set (common_SRCS
     ${H5B2_SOURCES}
     ${H5C_SOURCES}
     ${H5CS_SOURCES}
+    ${H5CX_SOURCES}
     ${H5D_SOURCES}
     ${H5E_SOURCES}
     ${H5EA_SOURCES}
@@ -768,6 +777,7 @@ set (H5_PRIVATE_HEADERS
     ${HDF5_SRC_DIR}/H5Bprivate.h
     ${HDF5_SRC_DIR}/H5Cprivate.h
     ${HDF5_SRC_DIR}/H5CSprivate.h
+    ${HDF5_SRC_DIR}/H5CXprivate.h
     ${HDF5_SRC_DIR}/H5Dprivate.h
     ${HDF5_SRC_DIR}/H5Eprivate.h
     ${HDF5_SRC_DIR}/H5EAprivate.h
@@ -876,7 +886,7 @@ add_custom_command (
 )
 
 ## all_packages="AC,B,B2,D,F,FA,FL,FS,HL,I,O,S,ST,T,Z"
-#all_packages="AC,B2,D,F,HL,I,O,S,ST,T,Z"
+#all_packages="AC,B2,CX,D,F,HL,I,O,S,ST,T,Z"
 option (HDF5_ENABLE_DEBUG_APIS "Turn on extra debug output in all packages" OFF)
 
 #-----------------------------------------------------------------------------

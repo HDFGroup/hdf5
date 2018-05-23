@@ -3521,7 +3521,7 @@ external_set_elink_fapl1(hid_t fapl, hbool_t new_format)
     hid_t	lapl_idA=-1, lapl_idB=-1;
     H5FD_mem_t	mt, memb_map[H5FD_MEM_NTYPES];
     hid_t	memb_fapl[H5FD_MEM_NTYPES];
-    char        sv[H5FD_MEM_NTYPES][500];
+    char        sv[H5FD_MEM_NTYPES][64];
     const	char *memb_name[H5FD_MEM_NTYPES];
     haddr_t	memb_addr[H5FD_MEM_NTYPES];
 
@@ -7762,7 +7762,8 @@ done:
 /* Traverse a hard link by opening the object */
 static hid_t
 UD_hard_traverse(const char H5_ATTR_UNUSED *link_name, hid_t cur_group,
-    const void *udata, size_t udata_size, hid_t H5_ATTR_UNUSED lapl_id)
+    const void *udata, size_t udata_size, hid_t H5_ATTR_UNUSED lapl_id,
+    hid_t H5_ATTR_UNUSED dxpl_id)
 {
     haddr_t addr;
     hid_t ret_value = -1;
@@ -7998,7 +7999,8 @@ ud_hard_links(hid_t fapl)
  */
 static hid_t
 UD_rereg_traverse(const char H5_ATTR_UNUSED * link_name, hid_t cur_group,
-    const void H5_ATTR_UNUSED *udata, size_t H5_ATTR_UNUSED udata_size, hid_t lapl_id)
+    const void H5_ATTR_UNUSED *udata, size_t H5_ATTR_UNUSED udata_size, hid_t lapl_id,
+    hid_t H5_ATTR_UNUSED dxpl_id)
 {
     hid_t ret_value;
 
@@ -8201,7 +8203,7 @@ error:
 
 static hid_t
 UD_cb_traverse(const char * link_name, hid_t cur_group, const void *udata,
-    size_t udata_size, hid_t lapl_id)
+    size_t udata_size, hid_t lapl_id, hid_t H5_ATTR_UNUSED dxpl_id)
 {
     const char *target = (const char *)udata;
     hid_t ret_value;
@@ -8437,7 +8439,8 @@ error:
  */
 static hid_t
 UD_plist_traverse(const char H5_ATTR_UNUSED * link_name, hid_t cur_group,
-    const void H5_ATTR_UNUSED *udata, size_t udata_size, hid_t lapl_id)
+    const void H5_ATTR_UNUSED *udata, size_t udata_size, hid_t lapl_id,
+    hid_t H5_ATTR_UNUSED dxpl_id)
 {
     char target[NAME_BUF_SIZE];
     hid_t ret_value;
@@ -8587,7 +8590,8 @@ UD_cbsucc_create(const char H5_ATTR_UNUSED * link_name, hid_t H5_ATTR_UNUSED loc
 
 static hid_t
 UD_cbsucc_traverse(const char H5_ATTR_UNUSED *link_name, hid_t cur_group,
-    const void *udata, size_t H5_ATTR_UNUSED udata_size, hid_t lapl_id)
+    const void *udata, size_t H5_ATTR_UNUSED udata_size, hid_t lapl_id,
+    hid_t H5_ATTR_UNUSED dxpl_id)
 {
     const char *target = (const char *)udata;
     hid_t ret_value;

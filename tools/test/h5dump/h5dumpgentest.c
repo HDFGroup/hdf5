@@ -172,7 +172,8 @@ const H5Z_class2_t H5Z_DYNLIBUD[1] = {{
 
 /* A UD link traversal function.  Shouldn't actually be called. */
 static hid_t UD_traverse(H5_ATTR_UNUSED const char * link_name, H5_ATTR_UNUSED hid_t cur_group,
-        H5_ATTR_UNUSED const void * udata, H5_ATTR_UNUSED size_t udata_size, H5_ATTR_UNUSED hid_t lapl_id)
+    H5_ATTR_UNUSED const void * udata, H5_ATTR_UNUSED size_t udata_size, H5_ATTR_UNUSED hid_t lapl_id,
+    H5_ATTR_UNUSED hid_t dxpl_id)
 {
     return -1;
 }

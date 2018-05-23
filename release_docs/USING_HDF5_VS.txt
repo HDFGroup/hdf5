@@ -15,9 +15,9 @@ NOTE: Building applications with the dynamic/shared hdf5 libraries requires
 The following two sections are helpful if you do not use CMake to build
 your applications.
 
-========================================================================
-Using Visual Studio 2010 with HDF5 Libraries built with Visual Studio 2010
-========================================================================
+==============================================================================================
+Using Visual Studio 2010 and above with HDF5 Libraries built with Visual Studio 2010 and above
+==============================================================================================
 
    1. Set up path for external libraries and headers
 
@@ -79,13 +79,9 @@ Using Visual Studio 2008 with HDF5 Libraries built with Visual Studio 2008
     3.1 FAQ
 
     Many other common questions and hints are located online and being updated
-    in the HDF5 FAQ.  For Windows-specific questions, please see:
+    in the HDF Knowledge Base, please see:
 
-        https://support.hdfgroup.org/HDF5/faq/windows.html
-
-    For all other general questions, you can look in the general FAQ:
-
-        https://support.hdfgroup.org/HDF5/HDF5-FAQ.html
+       https://portal.hdfgroup.org/display/knowledge/HDF+Knowledge+Base
 
 ************************************************************************
  Please send email to help@hdfgroup.org for further assistance.
