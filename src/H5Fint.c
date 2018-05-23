@@ -104,7 +104,7 @@ H5FL_DEFINE(H5F_t);
 H5FL_DEFINE(H5F_file_t);
 
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5F_get_access_plist
  *
@@ -218,7 +218,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_get_access_plist() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5F_get_obj_count
  *
@@ -246,7 +246,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_get_obj_count() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5F_get_obj_ids
  *
@@ -273,7 +273,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_get_obj_ids() */
 
-
+
 /*---------------------------------------------------------------------------
  * Function: H5F_get_objects
  *
@@ -375,7 +375,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_get_objects() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5F_get_objects_cb
  *
@@ -484,7 +484,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_get_objects_cb() */
 
-
+
 /*--------------------------------------------------------------------------
  * Function: H5F__build_name
  *
@@ -510,13 +510,13 @@ H5F__build_name(const char *prefix, const char *file_name, char **full_name/*out
 
     /* Compose the full file name */
     HDsnprintf(*full_name, (prefix_len + fname_len + 2), "%s%s%s", prefix,
-        (H5_CHECK_DELIMITER(prefix[prefix_len - 1]) ? "" : H5_DIR_SEPS), file_name);
+        ((prefix_len == 0 || H5_CHECK_DELIMITER(prefix[prefix_len - 1])) ? "" : H5_DIR_SEPS), file_name);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5F__build_name() */
 
-
+
 /*--------------------------------------------------------------------------
  * Function: H5F__getenv_prefix_name
  *
@@ -553,7 +553,7 @@ H5F__getenv_prefix_name(char **env_prefix/*in,out*/)
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__getenv_prefix_name() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5F_prefix_open_file
  *
@@ -775,7 +775,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5F_prefix_open_file() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5F__is_hdf5
  *
@@ -816,7 +816,7 @@ done:
     FUNC_LEAVE_NOAPI_VOL(ret_value)
 } /* end H5F__is_hdf5() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5F_new
  *
@@ -1076,7 +1076,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_new() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5F__dest
  *
@@ -1330,7 +1330,7 @@ H5F__dest(H5F_t *f, hbool_t flush)
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__dest() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5F__create
  *
@@ -1343,8 +1343,8 @@ H5F__dest(H5F_t *f, hbool_t flush)
  * Return:      Success:    Non-NULL, pointer to new file object.
  *              Failure:    NULL
  *
- * Programmer:	Quincey Koziol
- *		December 13, 2017
+ * Programmer:    Quincey Koziol
+ *        December 13, 2017
  *
  *-------------------------------------------------------------------------
  */
@@ -1366,7 +1366,7 @@ done:
     FUNC_LEAVE_NOAPI_VOL(ret_value)
 } /* end H5F__create() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5F__open
  *
@@ -1379,8 +1379,8 @@ done:
  * Return:      Success:    Non-NULL, pointer to new file object.
  *              Failure:    NULL
  *
- * Programmer:	Quincey Koziol
- *		December 13, 2017
+ * Programmer:    Quincey Koziol
+ *        December 13, 2017
  *
  *-------------------------------------------------------------------------
  */
@@ -1402,7 +1402,7 @@ done:
     FUNC_LEAVE_NOAPI_VOL(ret_value)
 } /* end H5F__open() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5F_open
  *
@@ -1818,7 +1818,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_open() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5F_flush_phase1
  *
@@ -1855,7 +1855,7 @@ H5F__flush_phase1(H5F_t *f)
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__flush_phase1() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5F__flush_phase2
  *
@@ -1881,8 +1881,8 @@ H5F__flush_phase2(H5F_t *f, hbool_t closing)
 
 #ifdef H5_HAVE_PARALLEL
     if(H5F_HAS_FEATURE(f, H5FD_FEAT_HAS_MPI))
-        /* Since we just returned from a call to H5AC_flush(), we just 
-         * passed through a barrier.  Hence we can skip the barrier on 
+        /* Since we just returned from a call to H5AC_flush(), we just
+         * passed through a barrier.  Hence we can skip the barrier on
          * entry to the mpio file driver truncate call below, and the first
          * barrier in the following call to flush the cache again.
          */
@@ -1923,7 +1923,7 @@ H5F__flush_phase2(H5F_t *f, hbool_t closing)
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__flush_phase2() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5F__flush_real
  *
@@ -1955,7 +1955,7 @@ H5F__flush_real(H5F_t *f)
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__flush_real() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5F__flush
  *
@@ -1967,8 +1967,8 @@ H5F__flush_real(H5F_t *f)
  *
  * Return:      Non-negative on success / Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		December 13, 2017
+ * Programmer:    Quincey Koziol
+ *        December 13, 2017
  *
  *-------------------------------------------------------------------------
  */
@@ -1998,7 +1998,7 @@ done:
     FUNC_LEAVE_NOAPI_VOL(ret_value)
 } /* end H5F__flush() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5F__close
  *
@@ -2010,8 +2010,8 @@ done:
  *
  * Return:      Non-negative on success / Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		December 16, 2017
+ * Programmer:    Quincey Koziol
+ *        December 16, 2017
  *
  *-------------------------------------------------------------------------
  */
@@ -2049,7 +2049,7 @@ done:
     FUNC_LEAVE_NOAPI_VOL(ret_value)
 } /* end H5F__close() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5F__close_cb
  *
@@ -2107,7 +2107,7 @@ done:
     FUNC_LEAVE_NOAPI_VOL(ret_value)
 } /* end H5F__close_cb() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5F_try_close
  *
@@ -2281,7 +2281,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_try_close() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5F_get_id
  *
@@ -2317,7 +2317,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_get_id() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5F_incr_nopen_objs
  *
@@ -2338,7 +2338,7 @@ H5F_incr_nopen_objs(H5F_t *f)
     FUNC_LEAVE_NOAPI(++f->nopen_objs)
 } /* end H5F_incr_nopen_objs() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5F_decr_nopen_objs
  *
@@ -2359,7 +2359,7 @@ H5F_decr_nopen_objs(H5F_t *f)
     FUNC_LEAVE_NOAPI(--f->nopen_objs)
 } /* end H5F_decr_nopen_objs() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5F_build_actual_name
  *
@@ -2481,7 +2481,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5F_build_actual_name() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5F_addr_encode_len
  *
@@ -2518,7 +2518,7 @@ H5F_addr_encode_len(size_t addr_len, uint8_t **pp/*in,out*/, haddr_t addr)
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5F_addr_encode_len() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5F_addr_encode
  *
@@ -2542,7 +2542,7 @@ H5F_addr_encode(const H5F_t *f, uint8_t **pp/*in,out*/, haddr_t addr)
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5F_addr_encode() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5F_addr_decode_len
  *
@@ -2606,7 +2606,7 @@ H5F_addr_decode_len(size_t addr_len, const uint8_t **pp/*in,out*/, haddr_t *addr
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5F_addr_decode_len() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5F_addr_decode
  *
@@ -2633,7 +2633,7 @@ H5F_addr_decode(const H5F_t *f, const uint8_t **pp/*in,out*/, haddr_t *addr_p/*o
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5F_addr_decode() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5F_set_grp_btree_shared
  *
@@ -2659,7 +2659,7 @@ H5F_set_grp_btree_shared(H5F_t *f, H5UC_t *rc)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5F_set_grp_btree_shared() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5F_set_sohm_addr
  *
@@ -2684,7 +2684,7 @@ H5F_set_sohm_addr(H5F_t *f, haddr_t addr)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5F_set_sohm_addr() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5F_set_sohm_vers
  *
@@ -2709,7 +2709,7 @@ H5F_set_sohm_vers(H5F_t *f, unsigned vers)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5F_set_sohm_vers() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5F_set_sohm_nindexes
  *
@@ -2734,7 +2734,7 @@ H5F_set_sohm_nindexes(H5F_t *f, unsigned nindexes)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5F_set_sohm_nindexes() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5F_set_store_msg_crt_idx
  *
@@ -2759,7 +2759,7 @@ H5F_set_store_msg_crt_idx(H5F_t *f, hbool_t flag)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5F_set_store_msg_crt_idx() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5F_set_libver_bounds()
  *
@@ -2792,19 +2792,19 @@ H5F__set_libver_bounds(H5F_t *f, H5F_libver_t low, H5F_libver_t high)
          *      metadata entry class changes when the file format low / high
          *      bounds are changed and an unwritten entry of that class is
          *      sitting in the metadata cache.
-         *      
+         *
          *      If that happens, it's possible that the entry's size could
          *      become larger, potentially corrupting the file (if the larger
          *      entry is fully written, overwriting data outside its allocated
          *      space), or corrupting the entry (if the entry is truncated to
          *      fit into the allocated space).
-         *      
+         *
          *      Although I'm not aware of any metadata with this behavior
          *      currently, it would be very difficult to guard against and / or
          *      detect, but if we flush everything here, the format version
          *      for metadata entries in the cache will be finalized and these
          *      sorts of problems can be avoided.
-         *      
+         *
          *      QAK - April, 2018
          */
         if(H5F__flush_real(f) < 0)
@@ -2819,7 +2819,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5F_set_libver_bounds() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5F__get_freespace
  *
@@ -2851,7 +2851,7 @@ done:
     FUNC_LEAVE_NOAPI_VOL(ret_value)
 } /* H5F__get_freespace() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5F__get_file_image
  *
@@ -2961,7 +2961,7 @@ done:
     FUNC_LEAVE_NOAPI_VOL(ret_value)
 } /* H5F__get_file_image() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5F__get_info
  *
@@ -3011,7 +3011,7 @@ done:
     FUNC_LEAVE_NOAPI_VOL(ret_value)
 } /* H5F__get_info() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5F_track_metadata_read_retries
  *
@@ -3059,7 +3059,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5F_track_metadata_read_retries() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5F_set_retries
  *
@@ -3095,7 +3095,7 @@ H5F_set_retries(H5F_t *f)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5F_set_retries() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5F__get_free_sections
  *
@@ -3128,7 +3128,7 @@ done:
     FUNC_LEAVE_NOAPI_VOL(ret_value)
 } /* H5F__get_free_sections() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5F_object_flush_cb
  *
@@ -3158,7 +3158,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5F_object_flush_cb() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5F__set_base_addr
  *
@@ -3185,7 +3185,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__set_base_addr() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5F__set_eoa
  *
@@ -3212,7 +3212,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__set_eoa() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5F__set_paged_aggr
  *
@@ -3240,7 +3240,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__set_paged_aggr() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5F__get_max_eof_eoa
  *
@@ -3279,7 +3279,7 @@ done:
 } /* end H5F__get_max_eof_eoa() */
 
 #ifdef H5_HAVE_PARALLEL
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5F_set_coll_md_read
  *
@@ -3304,7 +3304,7 @@ H5F_set_coll_md_read(H5F_t *f, H5P_coll_md_read_flag_t cmr)
 } /* H5F_set_coll_md_read() */
 #endif /* H5_HAVE_PARALLEL */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5F__get_metadata_read_retry_info
  *
@@ -3394,7 +3394,7 @@ done:
 } /* end H5F__get_metadata_read_retry_info() */
 
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5F__start_swmr_write
  *
@@ -3619,7 +3619,7 @@ done:
     FUNC_LEAVE_NOAPI_VOL(ret_value)
 } /* H5F__start_swmr_write() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5F__format_convert
  *
@@ -3635,7 +3635,7 @@ done:
 herr_t
 H5F__format_convert(H5F_t *f)
 {
-    hbool_t mark_dirty = FALSE;		/* Whether to mark the file's superblock dirty */
+    hbool_t mark_dirty = FALSE;        /* Whether to mark the file's superblock dirty */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_PACKAGE_VOL
@@ -3646,39 +3646,39 @@ H5F__format_convert(H5F_t *f)
 
     /* Check if the superblock should be downgraded */
     if(f->shared->sblock->super_vers > HDF5_SUPERBLOCK_VERSION_V18_LATEST) {
-	f->shared->sblock->super_vers = HDF5_SUPERBLOCK_VERSION_V18_LATEST;
-	mark_dirty = TRUE;
+    f->shared->sblock->super_vers = HDF5_SUPERBLOCK_VERSION_V18_LATEST;
+    mark_dirty = TRUE;
     } /* end if */
 
     /* Check for persistent freespace manager, which needs to be downgraded */
     if(!(f->shared->fs_strategy == H5F_FILE_SPACE_STRATEGY_DEF &&
-	    f->shared->fs_persist == H5F_FREE_SPACE_PERSIST_DEF &&
-	    f->shared->fs_threshold == H5F_FREE_SPACE_THRESHOLD_DEF &&
-	    f->shared->fs_page_size == H5F_FILE_SPACE_PAGE_SIZE_DEF)) {
-	/* Check to remove free-space manager info message from superblock extension */
-	if(H5F_addr_defined(f->shared->sblock->ext_addr))
-	    if(H5F__super_ext_remove_msg(f, H5O_FSINFO_ID) < 0)
-		HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "error in removing message from superblock extension")
+        f->shared->fs_persist == H5F_FREE_SPACE_PERSIST_DEF &&
+        f->shared->fs_threshold == H5F_FREE_SPACE_THRESHOLD_DEF &&
+        f->shared->fs_page_size == H5F_FILE_SPACE_PAGE_SIZE_DEF)) {
+    /* Check to remove free-space manager info message from superblock extension */
+    if(H5F_addr_defined(f->shared->sblock->ext_addr))
+        if(H5F__super_ext_remove_msg(f, H5O_FSINFO_ID) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "error in removing message from superblock extension")
 
-	/* Close freespace manager */
-	if(H5MF_try_close(f) < 0)
-	    HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "unable to free free-space address")
+    /* Close freespace manager */
+    if(H5MF_try_close(f) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "unable to free free-space address")
 
-	/* Set non-persistent freespace manager */
-	f->shared->fs_strategy = H5F_FILE_SPACE_STRATEGY_DEF;
-	f->shared->fs_persist = H5F_FREE_SPACE_PERSIST_DEF;
-	f->shared->fs_threshold = H5F_FREE_SPACE_THRESHOLD_DEF;
-	f->shared->fs_page_size = H5F_FILE_SPACE_PAGE_SIZE_DEF;
+    /* Set non-persistent freespace manager */
+    f->shared->fs_strategy = H5F_FILE_SPACE_STRATEGY_DEF;
+    f->shared->fs_persist = H5F_FREE_SPACE_PERSIST_DEF;
+    f->shared->fs_threshold = H5F_FREE_SPACE_THRESHOLD_DEF;
+    f->shared->fs_page_size = H5F_FILE_SPACE_PAGE_SIZE_DEF;
 
-	/* Indicate that the superblock should be marked dirty */
-	mark_dirty = TRUE;
+    /* Indicate that the superblock should be marked dirty */
+    mark_dirty = TRUE;
     } /* end if */
 
     /* Check if we should mark the superblock dirty */
     if(mark_dirty)
-	/* Mark superblock as dirty */
-	if(H5F_super_dirty(f) < 0)
-	    HGOTO_ERROR(H5E_FILE, H5E_CANTMARKDIRTY, FAIL, "unable to mark superblock as dirty")
+    /* Mark superblock as dirty */
+    if(H5F_super_dirty(f) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTMARKDIRTY, FAIL, "unable to mark superblock as dirty")
 
 done:
     FUNC_LEAVE_NOAPI_VOL(ret_value)
