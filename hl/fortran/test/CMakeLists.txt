@@ -47,7 +47,6 @@ macro (ADD_H5_FORTRAN_EXE file)
     )
     target_compile_options(hl_f90_${file}-shared
         PRIVATE
-            $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:/dll>
             $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_COMPILE_FLAGS}>
     )
     target_link_libraries (hl_f90_${file}-shared
