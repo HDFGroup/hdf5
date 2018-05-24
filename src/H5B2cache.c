@@ -485,13 +485,14 @@ H5B2__cache_hdr_notify(H5AC_notify_action_t action, void *_thing, ...)
 
 	    case H5AC_NOTIFY_ACTION_BEFORE_EVICT:
                 /* If hdr->parent != NULL, hdr->parent is used to destroy
-                 * the flush dependency before the header is evicted.
+                 * the flush dependency before the meta-proxy data structure
+                 * is evicted.
                  */
                 if(hdr->parent) {
                     /* Sanity check */
                     HDassert(hdr->top_proxy);
 
-		    /* Destroy flush dependency on object header proxy */
+		    /* Destroy flush dependency on parent meta-proxy */
 		    if(H5AC_proxy_entry_remove_child((H5AC_proxy_entry_t *)hdr->parent, (void *)hdr->top_proxy) < 0)
                         HGOTO_ERROR(H5E_BTREE, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency between v2 B-tree and proxy")
                     hdr->parent = NULL;

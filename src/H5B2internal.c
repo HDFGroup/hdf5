@@ -225,7 +225,7 @@ H5B2__protect_internal(H5B2_hdr_t *hdr, void *parent, H5B2_node_ptr_t *node_ptr,
     if(NULL == (internal = (H5B2_internal_t *)H5AC_protect(hdr->f, H5AC_BT2_INT, node_ptr->addr, &udata, flags)))
         HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, NULL, "unable to protect B-tree internal node")
 
-    /* Add to 'top' proxy, if node isn't already there */
+    /* Add to 'top' proxy, if not already there */
     if(hdr->top_proxy && NULL == internal->top_proxy) {
         /* Add internal node as child of 'top' proxy */
         if(H5AC_proxy_entry_add_child(hdr->top_proxy, hdr->f, internal) < 0)
@@ -233,7 +233,7 @@ H5B2__protect_internal(H5B2_hdr_t *hdr, void *parent, H5B2_node_ptr_t *node_ptr,
         internal->top_proxy = hdr->top_proxy;
     } /* end if */
 
-    /* Add to 'bottom' proxy, if node isn't already there */
+    /* Add to 'bottom' proxy, if not already there */
     if(hdr->bot_proxy && NULL == internal->bot_proxy) {
         /* Add internal node as parent of 'bottom' proxy */
         if(H5AC_proxy_entry_add_parent(hdr->bot_proxy, internal) < 0)

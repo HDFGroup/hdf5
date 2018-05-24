@@ -1081,11 +1081,20 @@ H5HF__man_iblock_create(H5HF_hdr_t *hdr, H5HF_indirect_t *par_iblock,
     /* Add indirect block as child of 'top' proxy */
     if(hdr->top_proxy) {
         if(H5AC_proxy_entry_add_child(hdr->top_proxy, hdr->f, iblock) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTSET, FAIL, "unable to add fractal heap entry as child of heap proxy")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTSET, FAIL, "unable to add fractal heap entry as child of heap 'top' proxy")
         iblock->top_proxy = hdr->top_proxy;
     } /* end if */
     else
         iblock->top_proxy = NULL;
+
+    /* Add indirect block as parent of 'bottom' proxy */
+    if(hdr->bot_proxy) {
+        if(H5AC_proxy_entry_add_parent(hdr->bot_proxy, iblock) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTSET, FAIL, "unable to add fractal heap entry as parent of heap 'bottom' proxy")
+        iblock->bot_proxy = hdr->bot_proxy;
+    } /* end if */
+    else
+        iblock->bot_proxy = NULL;
 
     /* Set the address of indirect block */
     *addr_p = iblock_addr;
@@ -1225,12 +1234,20 @@ H5HF__man_iblock_protect(H5HF_hdr_t *hdr, haddr_t iblock_addr,
         /* Indicate that the indirect block was _not_ protected */
         *did_protect = FALSE;
 
-    /* Add to top proxy, if not already there */
+    /* Add to 'top' proxy, if not already there */
     if(hdr->top_proxy && NULL == iblock->top_proxy) {
         /* Add indirect block as child of 'top' proxy */
         if(H5AC_proxy_entry_add_child(hdr->top_proxy, hdr->f, iblock) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTSET, NULL, "unable to add fractal heap entry as child of heap proxy")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTSET, NULL, "unable to add fractal heap entry as child of heap 'top' proxy")
         iblock->top_proxy = hdr->top_proxy;
+    } /* end if */
+
+    /* Add to 'bottom' proxy, if not already there */
+    if(hdr->bot_proxy && NULL == iblock->bot_proxy) {
+        /* Add indirect block as parent of 'bottom' proxy */
+        if(H5AC_proxy_entry_add_parent(hdr->bot_proxy, iblock) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTSET, NULL, "unable to add fractal heap entry as parent  of heap 'bottom' proxy")
+        iblock->bot_proxy = hdr->bot_proxy;
     } /* end if */
 
     /* Set the return value */
@@ -1905,8 +1922,9 @@ H5HF_man_iblock_dest(H5HF_indirect_t *iblock)
     if(iblock->child_iblocks)
         iblock->child_iblocks = H5FL_SEQ_FREE(H5HF_indirect_ptr_t, iblock->child_iblocks);
 
-    /* Sanity check */
+    /* Sanity checks */
     HDassert(NULL == iblock->top_proxy);
+    HDassert(NULL == iblock->bot_proxy);
 
     /* Free fractal heap indirect block info */
     iblock = H5FL_FREE(H5HF_indirect_t, iblock);

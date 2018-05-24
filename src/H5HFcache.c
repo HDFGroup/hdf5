@@ -884,23 +884,31 @@ H5HF__cache_hdr_notify(H5AC_notify_action_t action, void *_thing, ...)
 
 	    case H5AC_NOTIFY_ACTION_BEFORE_EVICT:
                 /* If hdr->parent != NULL, hdr->parent is used to destroy
-                 * the flush dependency before the header is evicted.
+                 * the flush dependency before the meta-proxy data structure
+                 * is evicted.
                  */
                 if(hdr->parent) {
                     /* Sanity check */
                     HDassert(hdr->top_proxy);
 
-		    /* Destroy flush dependency on meta proxy */
+		    /* Destroy flush dependency on parent meta-proxy */
 		    if(H5AC_proxy_entry_remove_child((H5AC_proxy_entry_t *)hdr->parent, (void *)hdr->top_proxy) < 0)
                         HGOTO_ERROR(H5E_HEAP, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency between fractal heap and meta proxy")
                     hdr->parent = NULL;
 		} /* end if */
 
-                /* Detach from 'top' proxy for extensible array */
+                /* Detach from 'top' proxy for fractal heap */
                 if(hdr->top_proxy) {
                     if(H5AC_proxy_entry_remove_child(hdr->top_proxy, hdr) < 0)
                         HGOTO_ERROR(H5E_HEAP, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency between header and fractal heap 'top' proxy")
                     /* Don't reset hdr->top_proxy here, it's destroyed when the header is freed -QAK */
+                } /* end if */
+
+                /* Detach from 'bottom' proxy for fractal heap */
+                if(hdr->bot_proxy) {
+                    if(H5AC_proxy_entry_remove_parent(hdr->bot_proxy, hdr) < 0)
+                        HGOTO_ERROR(H5E_BTREE, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency between header and fractal heap 'bottom' proxy")
+                    /* Don't reset hdr->bot_proxy here, it's destroyed when the header is freed -QAK */
                 } /* end if */
 		break;
 
@@ -1607,6 +1615,13 @@ H5HF__cache_iblock_notify(H5AC_notify_action_t action, void *_thing, ...)
                 if(H5AC_proxy_entry_remove_child(iblock->top_proxy, iblock) < 0)
                     HGOTO_ERROR(H5E_HEAP, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency between indirect block and fractal heap 'top' proxy")
                 iblock->top_proxy = NULL;
+            } /* end if */
+
+            /* Detach from 'bottom' proxy for fractal heap */
+            if(iblock->bot_proxy) {
+                if(H5AC_proxy_entry_remove_parent(iblock->bot_proxy, iblock) < 0)
+                    HGOTO_ERROR(H5E_HEAP, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency between indirect block and fractal heap 'bottom' proxy")
+                iblock->bot_proxy = NULL;
             } /* end if */
             break;
 
@@ -2641,6 +2656,13 @@ H5HF__cache_dblock_notify(H5AC_notify_action_t action, void *_thing, ...)
                 if(H5AC_proxy_entry_remove_child(dblock->top_proxy, dblock) < 0)
                     HGOTO_ERROR(H5E_HEAP, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency between direct block and fractal heap 'top' proxy")
                 dblock->top_proxy = NULL;
+            } /* end if */
+
+            /* Detach from 'bottom' proxy for fractal heap */
+            if(dblock->bot_proxy) {
+                if(H5AC_proxy_entry_remove_parent(dblock->bot_proxy, dblock) < 0)
+                    HGOTO_ERROR(H5E_HEAP, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency between direct block and fractal heap 'bottom' proxy")
+                dblock->bot_proxy = NULL;
             } /* end if */
             break;
 

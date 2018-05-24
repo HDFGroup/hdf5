@@ -360,27 +360,26 @@ typedef struct H5HF_hdr_t {
     hbool_t     checked_filters; /* TRUE if pipeline passes can_apply checks */
 
     /* FULLSWMR: SWMR / Flush dependency information (not stored) */
-    hbool_t swmr_write;                 /* Flag indicating the file is opened with SWMR-write access */
-    H5AC_proxy_entry_t *top_proxy;      /* 'Top' proxy cache entry for all heap entries */
-    void *parent;		        /* Pointer to 'top' proxy flush dependency
-                                         * parent, if it exists, otherwise NULL.
-                                         * If the fractal heap is being used
-                                         * as part of a compound data structure
-                                         * (like the heap + B-tree used for groups)
-                                         * and the object's metadata is modified
-                                         * by a SWMR writer, this field will be
-                                         * set equal to the proxy that is the
-                                         * flush dependency parent of the
-                                         * fractal heap  header.
- 					 *
- 					 * The field is used to avoid duplicate
-					 * setups of the flush dependency 
-					 * relationship, and to allow the 
-					 * fractal heap header to destroy
-					 * the flush dependency on receipt of 
-					 * an eviction notification from the
-					 * metadata cache.
-					 */
+    hbool_t swmr_write;             /* Flag indicating the file is opened with SWMR-write access */
+    H5AC_proxy_entry_t *top_proxy;  /* 'Top' proxy cache entry for all heap entries */
+    H5AC_proxy_entry_t *bot_proxy;  /* 'Bottom' proxy cache entry for all heap entries */
+    void *parent;		    /* Pointer to 'top' proxy flush dependency
+                                     * parent, if it exists, otherwise NULL.
+                                     * If the fractal heap is being used as part
+                                     * of a compound data structure (like the
+                                     * heap + B-tree used for groups) and the
+                                     * object's metadata is modified by a SWMR
+                                     * writer, this field will be set equal to
+                                     * the proxy that is the flush dependency
+                                     * parent of the fractal heap header.
+ 				     *
+ 				     * The field is used to avoid duplicate
+				     * setups of the flush dependency
+                                     * relationship, and to allow the fractal
+                                     * heap header to destroy the flush
+                                     * dependency on receipt of an eviction
+                                     * notification from the metadata cache.
+				     */
 } H5HF_hdr_t;
 
 /* Common indirect block doubling table entry */
@@ -419,7 +418,8 @@ struct H5HF_indirect_t {
                                 /* (usually from free space sections)         */
 
     /* FULLSWMR: SWMR / Flush dependency information (not stored) */
-    H5AC_proxy_entry_t *top_proxy;      /* 'Top' proxy cache entry for all heap entries */
+    H5AC_proxy_entry_t *top_proxy;  /* 'Top' proxy cache entry for all heap entries */
+    H5AC_proxy_entry_t *bot_proxy;  /* 'Bottom' proxy cache entry for all heap entries */
     void        *fd_parent;	/* Saved copy of the parent pointer -- this   */
 				/* necessary as the parent field is sometimes */
 				/* nulled out before the eviction notify call */
@@ -472,7 +472,8 @@ typedef struct H5HF_direct_t {
     size_t	write_size;     /* size of the buffer pointed to by write_buf. */
 
     /* FULLSWMR: SWMR / Flush dependency information (not stored) */
-    H5AC_proxy_entry_t *top_proxy;      /* 'Top' proxy cache entry for all heap entries */
+    H5AC_proxy_entry_t *top_proxy;  /* 'Top' proxy cache entry for all heap entries */
+    H5AC_proxy_entry_t *bot_proxy;  /* 'Bottom' proxy cache entry for all heap entries */
     void        *fd_parent;	/* Saved copy of the parent pointer -- this   */
 				/* necessary as the parent field is sometimes */
 				/* nulled out before the eviction notify call */

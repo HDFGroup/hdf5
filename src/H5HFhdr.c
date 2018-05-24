@@ -501,12 +501,19 @@ H5HF_hdr_create(H5F_t *f, const H5HF_create_t *cparam)
     if(H5AC_insert_entry(f, H5AC_FHEAP_HDR, hdr->heap_addr, hdr, H5AC__NO_FLAGS_SET) < 0)
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTINSERT, HADDR_UNDEF, "can't add fractal heap header to cache")
 
-    /* Create 'top' proxy for fractal heap entries and add header as child */
+    /* Create proxies for fractal heap entries */
     if(hdr->swmr_write) {
+        /* Create 'top' proxy for fractal heaptree entries and add header as child */
         if(NULL == (hdr->top_proxy = H5AC_proxy_entry_create()))
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTCREATE, HADDR_UNDEF, "can't create fractal heap entry proxy")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTCREATE, HADDR_UNDEF, "can't create fractal heap entry 'top' proxy")
         if(H5AC_proxy_entry_add_child(hdr->top_proxy, f, hdr) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTSET, HADDR_UNDEF, "unable to add fractal heap entry as child of heap proxy")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTSET, HADDR_UNDEF, "unable to add fractal heap entry as child of heap 'top' proxy")
+
+        /* Create 'bottom' proxy for fractal heap entries and add header as parent */
+        if(NULL == (hdr->bot_proxy = H5AC_proxy_entry_create()))
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTCREATE, HADDR_UNDEF, "can't create fractal heap entry 'bottom' proxy")
+        if(H5AC_proxy_entry_add_parent(hdr->bot_proxy, hdr) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTSET, HADDR_UNDEF, "unable to add fractal heap entry as parent of heap 'bottom' proxy")
     } /* end if */
 
     /* Set address of heap header to return */
@@ -563,12 +570,23 @@ H5HF__hdr_protect(H5F_t *f, haddr_t addr, unsigned flags)
     /* Update header's file pointer */
     hdr->f = f;
 
-    /* Create top proxy, if it doesn't exist, and add header to it as child */
-    if(hdr->swmr_write && NULL == hdr->top_proxy) {
-        if(NULL == (hdr->top_proxy = H5AC_proxy_entry_create()))
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTCREATE, NULL, "can't create fractal heap entry proxy")
-        if(H5AC_proxy_entry_add_child(hdr->top_proxy, f, hdr) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTSET, NULL, "unable to add fractal heap entry as child of heap proxy")
+    /* Create 'top' & 'bottom' proxies, if they don't exist */
+    if(hdr->swmr_write && (NULL == hdr->top_proxy || NULL == hdr->bot_proxy)) {
+        /* Create 'top' proxy for fractal heap entries, and add header as child */
+        if(NULL == hdr->top_proxy) {
+            if(NULL == (hdr->top_proxy = H5AC_proxy_entry_create()))
+                HGOTO_ERROR(H5E_HEAP, H5E_CANTCREATE, NULL, "can't create fractal heap entry 'top' proxy")
+            if(H5AC_proxy_entry_add_child(hdr->top_proxy, f, hdr) < 0)
+                HGOTO_ERROR(H5E_HEAP, H5E_CANTSET, NULL, "unable to add fractal heap entry as child of heap 'top' proxy")
+        } /* end if */
+
+        /* Create 'bottom' proxy for fractal heap entries, and add header as parent */
+        if(NULL == hdr->bot_proxy) {
+            if(NULL == (hdr->bot_proxy = H5AC_proxy_entry_create()))
+                HGOTO_ERROR(H5E_HEAP, H5E_CANTCREATE, NULL, "can't create fractal heap entry 'bottom' proxy")
+            if(H5AC_proxy_entry_add_parent(hdr->bot_proxy, hdr) < 0)
+                HGOTO_ERROR(H5E_HEAP, H5E_CANTSET, NULL, "unable to add fractal heap entry as parent of heap 'bottom' proxy")
+        } /* end if */
     } /* end if */
 
     /* Set the return value */
@@ -1445,6 +1463,13 @@ H5HF_hdr_free(H5HF_hdr_t *hdr)
         if(H5AC_proxy_entry_dest(hdr->top_proxy) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "unable to destroy fractal heap 'top' proxy")
         hdr->top_proxy = NULL;
+    } /* end if */
+
+    /* Destroy the 'bottom' proxy */
+    if(hdr->bot_proxy) {
+        if(H5AC_proxy_entry_dest(hdr->bot_proxy) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "unable to destroy fractal heap 'bottom' proxy")
+        hdr->bot_proxy = NULL;
     } /* end if */
 
     /* Free the shared info itself */

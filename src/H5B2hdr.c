@@ -201,9 +201,8 @@ H5B2__hdr_init(H5B2_hdr_t *hdr, const H5B2_create_t *cparam, void *ctx_udata,
         } /* end for */
     } /* end if */
 
-    /* Determine if we are doing SWMR writes.  Only enable for data chunks for now. */
-    hdr->swmr_write = (H5F_INTENT(hdr->f) & H5F_ACC_SWMR_WRITE) > 0
-            && (hdr->cls->id == H5B2_CDSET_ID || hdr->cls->id == H5B2_CDSET_FILT_ID);
+    /* Determine if we are doing SWMR writes */
+    hdr->swmr_write = (H5F_INTENT(hdr->f) & H5F_ACC_SWMR_WRITE) > 0;
 
     /* Reset the shadow epoch */
     hdr->shadow_epoch = 0;
@@ -308,26 +307,25 @@ H5B2__hdr_create(H5F_t *f, const H5B2_create_t *cparam, void *ctx_udata)
     if(HADDR_UNDEF == (hdr->addr = H5MF_alloc(f, H5FD_MEM_BTREE, (hsize_t)hdr->hdr_size)))
         HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, HADDR_UNDEF, "file allocation failed for B-tree header")
 
-    /* Create proxies for v2 B-tree entries */
-    if(hdr->swmr_write) {
-        if(NULL == (hdr->top_proxy = H5AC_proxy_entry_create()))
-            HGOTO_ERROR(H5E_BTREE, H5E_CANTCREATE, HADDR_UNDEF, "can't create v2 B-tree 'top' proxy")
-        if(NULL == (hdr->bot_proxy = H5AC_proxy_entry_create()))
-            HGOTO_ERROR(H5E_BTREE, H5E_CANTCREATE, HADDR_UNDEF, "can't create v2 B-tree 'bottom' proxy")
-    } /* end if */
-
     /* Cache the new B-tree node */
     if(H5AC_insert_entry(f, H5AC_BT2_HDR, hdr->addr, hdr, H5AC__NO_FLAGS_SET) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTINSERT, HADDR_UNDEF, "can't add B-tree header to cache")
     inserted = TRUE;
 
-    /* Add header to 'top' & 'bottom' proxies */
-    if(hdr->top_proxy)
+    /* Create proxies for v2 B-tree entries */
+    if(hdr->swmr_write) {
+        /* Create 'top' proxy for v2 B-tree entries and add header as child */
+        if(NULL == (hdr->top_proxy = H5AC_proxy_entry_create()))
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTCREATE, HADDR_UNDEF, "can't create v2 B-tree 'top' proxy")
         if(H5AC_proxy_entry_add_child(hdr->top_proxy, f, hdr) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTSET, HADDR_UNDEF, "unable to add v2 B-tree header as child of B-tree proxy")
-    if(hdr->bot_proxy)
+
+        /* Create 'bottom' proxy for v2 B-tree entries and add header as parent */
+        if(NULL == (hdr->bot_proxy = H5AC_proxy_entry_create()))
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTCREATE, HADDR_UNDEF, "can't create v2 B-tree 'bottom' proxy")
         if(H5AC_proxy_entry_add_parent(hdr->bot_proxy, hdr) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTSET, HADDR_UNDEF, "unable to add v2 B-tree header as parent of B-tree proxy")
+    } /* end if */
 
     /* Set address of v2 B-tree header to return */
     ret_value = hdr->addr;
@@ -555,7 +553,7 @@ H5B2__hdr_protect(H5F_t *f, haddr_t hdr_addr, void *ctx_udata,
         HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, NULL, "unable to load v2 B-tree header, address = %llu", (unsigned long long)hdr_addr)
     hdr->f = f;   /* (Must be set again here, in case the header was already in the cache -QAK) */
 
-    /* Create top proxy, if it doesn't exist */
+    /* Create 'top' & 'bottom' proxies, if they don't exist */
     if(hdr->swmr_write && (NULL == hdr->top_proxy || NULL == hdr->bot_proxy)) {
         /* Create 'top' proxy for v2 B-tree entries, and add header as child */
         if(NULL == hdr->top_proxy) {
