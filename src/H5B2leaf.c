@@ -140,8 +140,15 @@ H5B2__create_leaf(H5B2_hdr_t *hdr, void *parent, H5B2_node_ptr_t *node_ptr)
     /* Add leaf node as child of 'top' proxy */
     if(hdr->top_proxy) {
         if(H5AC_proxy_entry_add_child(hdr->top_proxy, hdr->f, leaf) < 0)
-            HGOTO_ERROR(H5E_BTREE, H5E_CANTSET, FAIL, "unable to add v2 B-tree node as child of proxy")
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTSET, FAIL, "unable to add v2 B-tree node as child of 'top' proxy")
         leaf->top_proxy = hdr->top_proxy;
+    } /* end if */
+
+    /* Add leaf node as parent of 'bottom' proxy */
+    if(hdr->bot_proxy) {
+        if(H5AC_proxy_entry_add_parent(hdr->bot_proxy, leaf) < 0)
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTSET, FAIL, "unable to add v2 B-tree node as parent of 'bottom' proxy")
+        leaf->bot_proxy = hdr->bot_proxy;
     } /* end if */
 
 done:
@@ -207,12 +214,20 @@ H5B2__protect_leaf(H5B2_hdr_t *hdr, void *parent, H5B2_node_ptr_t *node_ptr,
     if(NULL == (leaf = (H5B2_leaf_t *)H5AC_protect(hdr->f, H5AC_BT2_LEAF, node_ptr->addr, &udata, flags)))
         HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, NULL, "unable to protect B-tree leaf node")
 
-    /* Create top proxy, if it doesn't exist */
+    /* Add to 'top' proxy, if node isn't already there */
     if(hdr->top_proxy && NULL == leaf->top_proxy) {
         /* Add leaf node as child of 'top' proxy */
         if(H5AC_proxy_entry_add_child(hdr->top_proxy, hdr->f, leaf) < 0)
-            HGOTO_ERROR(H5E_BTREE, H5E_CANTSET, NULL, "unable to add v2 B-tree leaf node as child of proxy")
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTSET, NULL, "unable to add v2 B-tree leaf node as child of 'top' proxy")
         leaf->top_proxy = hdr->top_proxy;
+    } /* end if */
+
+    /* Add to 'bottom' proxy, if node isn't already there */
+    if(hdr->bot_proxy && NULL == leaf->bot_proxy) {
+        /* Add leaf node as parent of 'bottom' proxy */
+        if(H5AC_proxy_entry_add_parent(hdr->bot_proxy, leaf) < 0)
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTSET, NULL, "unable to add v2 B-tree leaf node as parent of 'bottom' proxy")
+        leaf->bot_proxy = hdr->bot_proxy;
     } /* end if */
 
     /* Shadow the node, if requested */
@@ -228,11 +243,18 @@ done:
     if(!ret_value) {
         /* Release the leaf node, if it was protected */
         if(leaf) {
-            /* Remove from v2 B-tree's proxy, if added */
+            /* Remove from v2 B-tree's 'top' proxy, if added */
             if(leaf->top_proxy) {
                 if(H5AC_proxy_entry_remove_child(leaf->top_proxy, leaf) < 0)
                     HDONE_ERROR(H5E_BTREE, H5E_CANTUNDEPEND, NULL, "unable to destroy flush dependency between leaf node and v2 B-tree 'top' proxy")
                 leaf->top_proxy = NULL;
+            } /* end if */
+
+            /* Remove from v2 B-tree's 'bottom' proxy, if added */
+            if(leaf->bot_proxy) {
+                if(H5AC_proxy_entry_remove_parent(leaf->bot_proxy, leaf) < 0)
+                    HDONE_ERROR(H5E_BTREE, H5E_CANTUNDEPEND, NULL, "unable to destroy flush dependency between leaf node and v2 B-tree 'bottom' proxy")
+                leaf->bot_proxy = NULL;
             } /* end if */
 
             /* Unprotect leaf node */
@@ -1001,8 +1023,9 @@ H5B2__leaf_free(H5B2_leaf_t *leaf)
     if(H5B2__hdr_decr(leaf->hdr) < 0)
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTDEC, FAIL, "can't decrement ref. count on B-tree header")
 
-    /* Sanity check */
+    /* Sanity checks */
     HDassert(NULL == leaf->top_proxy);
+    HDassert(NULL == leaf->bot_proxy);
 
     /* Free B-tree leaf node info */
     leaf = H5FL_FREE(H5B2_leaf_t, leaf);

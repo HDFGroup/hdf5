@@ -497,11 +497,18 @@ H5B2__cache_hdr_notify(H5AC_notify_action_t action, void *_thing, ...)
                     hdr->parent = NULL;
 		} /* end if */
 
-                /* Detach from 'top' proxy for extensible array */
+                /* Detach from 'top' proxy for v2 B-tree */
                 if(hdr->top_proxy) {
                     if(H5AC_proxy_entry_remove_child(hdr->top_proxy, hdr) < 0)
                         HGOTO_ERROR(H5E_BTREE, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency between header and v2 B-tree 'top' proxy")
                     /* Don't reset hdr->top_proxy here, it's destroyed when the header is freed -QAK */
+                } /* end if */
+
+                /* Detach from 'bottom' proxy for v2 B-tree */
+                if(hdr->bot_proxy) {
+                    if(H5AC_proxy_entry_remove_parent(hdr->bot_proxy, hdr) < 0)
+                        HGOTO_ERROR(H5E_BTREE, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency between header and v2 B-tree 'bottom' proxy")
+                    /* Don't reset hdr->bot_proxy here, it's destroyed when the header is freed -QAK */
                 } /* end if */
 		break;
 
@@ -521,8 +528,11 @@ H5B2__cache_hdr_notify(H5AC_notify_action_t action, void *_thing, ...)
 #endif /* NDEBUG */
         } /* end switch */
     } /* end if */
-    else
+    else {
         HDassert(NULL == hdr->parent);
+        HDassert(NULL == hdr->top_proxy);
+        HDassert(NULL == hdr->bot_proxy);
+    } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -931,6 +941,13 @@ H5B2__cache_int_notify(H5AC_notify_action_t action, void *_thing, ...)
                         HGOTO_ERROR(H5E_BTREE, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency between internal node and v2 B-tree 'top' proxy")
                     internal->top_proxy = NULL;
                 } /* end if */
+
+                /* Detach from 'bottom' proxy for v2 B-tree */
+                if(internal->bot_proxy) {
+                    if(H5AC_proxy_entry_remove_parent(internal->bot_proxy, internal) < 0)
+                        HGOTO_ERROR(H5E_BTREE, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency between internal node and v2 B-tree 'bottom' proxy")
+                    internal->bot_proxy = NULL;
+                } /* end if */
                 break;
 
             case H5AC_NOTIFY_ACTION_CHILD_BEFORE_EVICT:
@@ -949,8 +966,10 @@ H5B2__cache_int_notify(H5AC_notify_action_t action, void *_thing, ...)
 #endif /* NDEBUG */
         } /* end switch */
     } /* end if */
-    else
+    else {
         HDassert(NULL == internal->top_proxy);
+        HDassert(NULL == internal->bot_proxy);
+    } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1328,6 +1347,13 @@ H5B2__cache_leaf_notify(H5AC_notify_action_t action, void *_thing, ...)
                         HGOTO_ERROR(H5E_BTREE, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency between leaf node and v2 B-tree 'top' proxy")
                     leaf->top_proxy = NULL;
                 } /* end if */
+
+                /* Detach from 'bottom' proxy for v2 B-tree */
+                if(leaf->bot_proxy) {
+                    if(H5AC_proxy_entry_remove_parent(leaf->bot_proxy, leaf) < 0)
+                        HGOTO_ERROR(H5E_BTREE, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency between leaf node and v2 B-tree 'bottom' proxy")
+                    leaf->bot_proxy = NULL;
+                } /* end if */
                 break;
 
             case H5AC_NOTIFY_ACTION_CHILD_BEFORE_EVICT:
@@ -1346,8 +1372,10 @@ H5B2__cache_leaf_notify(H5AC_notify_action_t action, void *_thing, ...)
 #endif /* NDEBUG */
         } /* end switch */
     } /* end if */
-    else
+    else {
         HDassert(NULL == leaf->top_proxy);
+        HDassert(NULL == leaf->bot_proxy);
+    } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

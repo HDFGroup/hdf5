@@ -149,8 +149,15 @@ H5B2__create_internal(H5B2_hdr_t *hdr, void *parent, H5B2_node_ptr_t *node_ptr,
     /* Add internal node as child of 'top' proxy */
     if(hdr->top_proxy) {
         if(H5AC_proxy_entry_add_child(hdr->top_proxy, hdr->f, internal) < 0)
-            HGOTO_ERROR(H5E_BTREE, H5E_CANTSET, FAIL, "unable to add v2 B-tree node as child of proxy")
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTSET, FAIL, "unable to add v2 B-tree node as child of 'top' proxy")
         internal->top_proxy = hdr->top_proxy;
+    } /* end if */
+
+    /* Add internal node as parent of 'bottom' proxy */
+    if(hdr->bot_proxy) {
+        if(H5AC_proxy_entry_add_parent(hdr->bot_proxy, internal) < 0)
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTSET, FAIL, "unable to add v2 B-tree node as parent of 'bottom' proxy")
+        internal->bot_proxy = hdr->bot_proxy;
     } /* end if */
 
 done:
@@ -218,12 +225,20 @@ H5B2__protect_internal(H5B2_hdr_t *hdr, void *parent, H5B2_node_ptr_t *node_ptr,
     if(NULL == (internal = (H5B2_internal_t *)H5AC_protect(hdr->f, H5AC_BT2_INT, node_ptr->addr, &udata, flags)))
         HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, NULL, "unable to protect B-tree internal node")
 
-    /* Create top proxy, if it doesn't exist */
+    /* Add to 'top' proxy, if node isn't already there */
     if(hdr->top_proxy && NULL == internal->top_proxy) {
         /* Add internal node as child of 'top' proxy */
         if(H5AC_proxy_entry_add_child(hdr->top_proxy, hdr->f, internal) < 0)
-            HGOTO_ERROR(H5E_BTREE, H5E_CANTSET, NULL, "unable to add v2 B-tree internal node as child of proxy")
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTSET, NULL, "unable to add v2 B-tree internal node as child of 'top' proxy")
         internal->top_proxy = hdr->top_proxy;
+    } /* end if */
+
+    /* Add to 'bottom' proxy, if node isn't already there */
+    if(hdr->bot_proxy && NULL == internal->bot_proxy) {
+        /* Add internal node as parent of 'bottom' proxy */
+        if(H5AC_proxy_entry_add_parent(hdr->bot_proxy, internal) < 0)
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTSET, NULL, "unable to add v2 B-tree internal node as parent of 'bottom' proxy")
+        internal->bot_proxy = hdr->bot_proxy;
     } /* end if */
 
     /* Shadow the node, if requested */
@@ -239,11 +254,18 @@ done:
     if(!ret_value) {
         /* Release the internal node, if it was protected */
         if(internal) {
-            /* Remove from v2 B-tree's proxy, if added */
+            /* Remove from v2 B-tree's 'top' proxy, if added */
             if(internal->top_proxy) {
                 if(H5AC_proxy_entry_remove_child(internal->top_proxy, internal) < 0)
                     HDONE_ERROR(H5E_BTREE, H5E_CANTUNDEPEND, NULL, "unable to destroy flush dependency between internal node and v2 B-tree 'top' proxy")
                 internal->top_proxy = NULL;
+            } /* end if */
+
+            /* Remove from v2 B-tree's 'bottom' proxy, if added */
+            if(internal->bot_proxy) {
+                if(H5AC_proxy_entry_remove_parent(internal->bot_proxy, internal) < 0)
+                    HDONE_ERROR(H5E_BTREE, H5E_CANTUNDEPEND, NULL, "unable to destroy flush dependency between internal node and v2 B-tree 'bottom' proxy")
+                internal->bot_proxy = NULL;
             } /* end if */
 
             /* Unprotect internal node */
@@ -1329,8 +1351,9 @@ H5B2__internal_free(H5B2_internal_t *internal)
     if(H5B2__hdr_decr(internal->hdr) < 0)
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTDEC, FAIL, "can't decrement ref. count on B-tree header")
 
-    /* Sanity check */
+    /* Sanity checks */
     HDassert(NULL == internal->top_proxy);
+    HDassert(NULL == internal->bot_proxy);
 
     /* Free B-tree internal node info */
     internal = H5FL_FREE(H5B2_internal_t, internal);

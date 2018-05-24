@@ -189,6 +189,7 @@ typedef struct H5B2_hdr_t {
     /* SWMR / Flush dependency information (not stored) */
     hbool_t     swmr_write;     /* Whether we are doing SWMR writes */
     H5AC_proxy_entry_t *top_proxy;  /* 'Top' proxy cache entry for all B-tree entries */
+    H5AC_proxy_entry_t *bot_proxy;  /* 'Bottom' proxy cache entry for all B-tree entries */
     void        *parent;        /* Pointer to 'top' proxy flush dependency
                                  * parent, if it exists, otherwise NULL.
                                  * If the v2 B-tree is being used to index a
@@ -223,6 +224,7 @@ typedef struct H5B2_leaf_t {
 
     /* SWMR / Flush dependency information (not stored) */
     H5AC_proxy_entry_t *top_proxy;  /* 'Top' proxy cache entry for all B-tree entries */
+    H5AC_proxy_entry_t *bot_proxy;  /* 'Bottom' proxy cache entry for all B-tree entries */
     void        *parent;        /* Flush dependency parent for leaf           */
     uint64_t    shadow_epoch;   /* Epoch of node, for making shadow copies */
 } H5B2_leaf_t;
@@ -241,6 +243,7 @@ typedef struct H5B2_internal_t {
 
     /* SWMR / Flush dependency information (not stored) */
     H5AC_proxy_entry_t *top_proxy;  /* 'Top' proxy cache entry for all B-tree entries */
+    H5AC_proxy_entry_t *bot_proxy;  /* 'Bottom' proxy cache entry for all B-tree entries */
     void        *parent;        /* Flush dependency parent for internal node  */
     uint64_t    shadow_epoch;   /* Epoch of node, for making shadow copies */
 } H5B2_internal_t;
