@@ -2197,14 +2197,14 @@ done:
  *
  * Purpose:     Verify that the sections managed are mostly sane
  *
- * Return:      SUCCEED/FAIL
+ * Return:      void
  *
  * Programmer:  Quincey Koziol
  *              Jul 17 2006
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+void
 H5FS__sect_assert(const H5FS_t *fspace)
 {
     hsize_t separate_obj;       /* The number of separate objects managed */
@@ -2256,7 +2256,7 @@ HDfprintf(stderr, "%s: fspace->tot_sect_count = %Hu\n", "H5FS__sect_assert", fsp
                     size_t size_ghost_count;        /* # of ghost sections of this size */
 
                     /* Get section size node */
-                    fspace_node = H5SL_item(curr_size_node);
+                    fspace_node = (H5FS_node_t *)H5SL_item(curr_size_node);
 
                     /* Check sections on list */
                     curr_sect_node = H5SL_first(fspace_node->sect_list);
@@ -2267,7 +2267,7 @@ HDfprintf(stderr, "%s: fspace->tot_sect_count = %Hu\n", "H5FS__sect_assert", fsp
                         H5FS_section_info_t *sect;      /* Section */
 
                         /* Get section node & it's class */
-                        sect = H5SL_item(curr_sect_node);
+                        sect = (H5FS_section_info_t *)H5SL_item(curr_sect_node);
                         cls = &fspace->sect_cls[sect->type];
 #ifdef QAK
 HDfprintf(stderr, "%s: sect->size = %Hu, sect->addr = %a, sect->type = %u\n", "H5FS__sect_assert", sect->size, sect->addr, sect->type);
@@ -2337,7 +2337,7 @@ HDfprintf(stderr, "%s: sect->size = %Hu, sect->addr = %a, sect->type = %u\n", "H
     if(fspace->sinfo->merge_list)
         HDassert(fspace->tot_sect_count == (separate_obj + H5SL_count(fspace->sinfo->merge_list)));
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+    FUNC_LEAVE_NOAPI_VOID
 } /* end H5FS__sect_assert() */
 #endif /* H5FS_DEBUG_ASSERT */
 
