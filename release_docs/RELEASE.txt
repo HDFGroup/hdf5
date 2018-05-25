@@ -1,4 +1,4 @@
-HDF5 version 1.8.21-pre1 released on 2018-05-21
+HDF5 version 1.8.21 currently under development
 ================================================================================
 
 INTRODUCTION
@@ -262,6 +262,17 @@ Bug Fixes since HDF5-1.8.20
 
     Configuration
     -------------
+    - Library
+
+      Moved the location of gcc attribute.
+
+      The gcc attribute(no_sanitize), named as the macro HDF_NO_UBSAN,
+      was located after the function name. Builds with GCC 7 did not
+      indicate any problem, but GCC 8 issued errors. Moved the
+      attribute before the function name, as required.
+
+      (ADB 2018/05/22, HDFFV-10473)
+
     - CMake
 
       Update CMake commands configuration.
