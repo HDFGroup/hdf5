@@ -224,8 +224,8 @@ CLEAN_DATAFILES_AND_BLDDIR()
     INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
     INODE_DDIR=`$LS -i -d $BLDDIR | $AWK -F' ' '{print $1}'`
     if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
-        $RM $BLDDIR/JUnit-interface.ert
-        $RM $BLDDIR/JUnit-interface.txt
+        $RM $BLDDIR/JUnit-*.ert
+        $RM $BLDDIR/JUnit-*.txt
     fi
 }
 
