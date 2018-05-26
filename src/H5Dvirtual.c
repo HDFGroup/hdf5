@@ -882,11 +882,8 @@ H5D__virtual_open_source_dset(const H5D_t *vdset,
     H5O_storage_virtual_srcdset_t *source_dset, hid_t dxpl_id)
 {
     H5F_t       *src_file = NULL;       /* Source file */
-    hbool_t     src_file_open = FALSE;  /* Whether we have opened and need to close src_file */
-    H5G_loc_t   src_root_loc;           /* Object location of source file root group */
     herr_t      ret_value = SUCCEED;    /* Return value */
     hid_t       plist_id = -1;          /* Property list pointer */
-    unsigned    intent;                 /* File access permissions */
 
     FUNC_ENTER_STATIC
 
@@ -898,54 +895,60 @@ H5D__virtual_open_source_dset(const H5D_t *vdset,
     HDassert(source_dset->dset_name);
 
     /* Check if we need to open the source file */
-    if(HDstrcmp(source_dset->file_name, ".")) {
-        if((plist_id = H5D_get_access_plist((H5D_t *)vdset)) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "Can't get access plist")
-        intent = H5F_INTENT(vdset->oloc.file);
-        if(NULL == (src_file = H5F_prefix_open_file(plist_id, vdset->oloc.file, H5D_ACS_VDS_PREFIX_NAME, source_dset->file_name, intent,
-                vdset->shared->layout.storage.u.virt.source_fapl, dxpl_id)))
-            H5E_clear_stack(NULL); /* Quick hack until proper support for H5Fopen with missing file is implemented */
-        else
-            src_file_open = TRUE;
-    } /* end if */
-    else
+    if(!HDstrcmp(source_dset->file_name, "."))
         /* Source file is ".", use the virtual dataset's file */
         src_file = vdset->oloc.file;
+    else if(source_dset->file)
+        /* Use previously opened file */
+        src_file = source_dset->file;
+    else {
+        unsigned    intent;                 /* File access permissions */
+
+        if((plist_id = H5D_get_access_plist((H5D_t *)vdset)) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "Can't get access plist")
+
+        /* Get the virtual dataset's file open flags ("intent") */
+        intent = H5F_INTENT(vdset->oloc.file);
+
+        /* Try opening the file */
+	src_file = H5F_prefix_open_file(plist_id, vdset->oloc.file, H5D_ACS_VDS_PREFIX_NAME, source_dset->file_name, intent,
+					vdset->shared->layout.storage.u.virt.source_fapl, dxpl_id);
+        /* Reset the error stack if we did not find the file */
+        if(!src_file)
+            H5E_clear_stack(NULL);
+
+        source_dset->file = src_file;
+
+    } /* end if */
 
     if(src_file) {
+        H5G_loc_t   src_root_loc;           /* Object location of source file root group */
+
         /* Set up the root group in the destination file */
         if(NULL == (src_root_loc.oloc = H5G_oloc(H5G_rootof(src_file))))
             HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "unable to get object location for root group")
         if(NULL == (src_root_loc.path = H5G_nameof(H5G_rootof(src_file))))
             HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "unable to get path for root group")
 
-        /* Open the source dataset */
-        if(NULL == (source_dset->dset = H5D__open_name(&src_root_loc, source_dset->dset_name, vdset->shared->layout.storage.u.virt.source_dapl, dxpl_id))) {
-            H5E_clear_stack(NULL); /* Quick hack until proper support for H5Dopen with missing file is implemented */
+        /* Try opening the source dataset */
+        source_dset->dset = H5D__open_name(&src_root_loc, source_dset->dset_name, vdset->shared->layout.storage.u.virt.source_dapl, dxpl_id);
 
-            /* Dataset does not exist */
-            source_dset->dset_exists = FALSE;
-        } /* end if */
-        else {
-            /* Dataset exists */
-            source_dset->dset_exists = TRUE;
+        /* Dataset does not exist */
+        if(NULL == source_dset->dset)
+            /* Reset the error stack */
+            H5E_clear_stack(NULL);
 
+        else 
             /* Patch the source selection if necessary */
             if(virtual_ent->source_space_status != H5O_VIRTUAL_STATUS_CORRECT) {
                 if(H5S_extent_copy(virtual_ent->source_select, source_dset->dset->shared->space) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "can't copy source dataspace extent")
                 virtual_ent->source_space_status = H5O_VIRTUAL_STATUS_CORRECT;
             } /* end if */
-        } /* end else */
+
     } /* end if */
 
 done:
-    if(plist_id >= 0)
-        H5Pclose(plist_id);
-    /* Close source file */
-    if(src_file_open)
-        if(H5F_efc_close(vdset->oloc.file, src_file) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEFILE, FAIL, "can't close source file")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__virtual_open_source_dset() */
@@ -979,6 +982,14 @@ H5D__virtual_reset_source_dset(H5O_storage_virtual_ent_t *virtual_ent,
         if(H5D_close(source_dset->dset) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to close source dataset")
         source_dset->dset = NULL;
+    } /* end if */
+
+    /* Close file */
+    if(source_dset->file) {
+        HDassert(virtual_ent->virtual_file);
+        if(H5F_efc_close(virtual_ent->virtual_file, source_dset->file) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEFILE, FAIL, "can't close source file")
+        source_dset->file = NULL;
     } /* end if */
 
     /* Free file name */
@@ -1587,7 +1598,7 @@ H5D__virtual_set_extent_unlim(const H5D_t *dset, hid_t dxpl_id)
                     } /* end if */
 
                     /* Check if the dataset was already opened */
-                    if(storage->list[i].sub_dset[j].dset_exists)
+                    if(storage->list[i].sub_dset[j].dset)
                         first_missing = j + 1;
                     else {
                         /* Resolve file name */
@@ -2132,6 +2143,9 @@ H5D__virtual_init(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, const H5D_t *dset,
             HGOTO_ERROR(H5E_DATASET, H5E_BADSELECT, FAIL, "unable to normalize dataspace by offset")
         if(H5S_hyper_normalize_offset(storage->list[i].source_select, old_offset) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_BADSELECT, FAIL, "unable to normalize dataspace by offset")
+
+        /* Save pointer to virtual dataset in entry */
+        storage->list[i].virtual_file = (H5F_t *)dset->oloc.file;
     } /* end for */
 
     /* Get dataset access property list */

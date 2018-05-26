@@ -125,7 +125,7 @@ static const H5FD_class_mpi_t H5FD_mpio_g = {
     {   /* Start of superclass information */
     "mpio",					/*name			*/
     HADDR_MAX,					/*maxaddr		*/
-    H5F_CLOSE_WEAK,				/* fc_degree		*/
+    H5F_CLOSE_SEMI,				/* fc_degree		*/
     H5FD_mpio_term,                             /*terminate             */
     NULL,					/*sb_size		*/
     NULL,					/*sb_encode		*/
@@ -991,7 +991,7 @@ done:
     if(fd >= 0)
         HDclose(fd);
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+    FUNC_LEAVE_NOAPI_VOID
 }
 
 
@@ -1187,7 +1187,33 @@ H5FD_mpio_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
     int ret_value = 0;
     int cmp_value = 0;
     int mpi_result;
+    MPI_Group f1_grp;
+    MPI_Group f2_grp;
+
     FUNC_ENTER_NOAPI_NOINIT
+
+    if ((mpi_result = MPI_Comm_group(f1->comm, &f1_grp)) != MPI_SUCCESS)
+        HMPI_GOTO_ERROR(FAIL, "MPI_Comm_group(comm1) failed", mpi_result)
+
+    if ((mpi_result = MPI_Comm_group(f1->comm, &f2_grp)) != MPI_SUCCESS)
+        HMPI_GOTO_ERROR(FAIL, "MPI_Comm_group(comm2) failed", mpi_result)
+
+    if ((mpi_result = MPI_Group_compare(f1_grp,f2_grp,&cmp_value)) != MPI_SUCCESS)
+        HMPI_GOTO_ERROR(FAIL, "MPI_Group_compare failed", mpi_result)
+
+    /*  The group compare return values can be one of the following:
+     *   MPI_IDENT(0)     == two groups/communicators are identical
+     *   MPI_CONGRUENT(1) == two groups/communicators are equal but
+     *                       are distinct communication domains
+     *  ----------------  for comparison purposes, the above are ok
+     *  ----------------  but those below can lead to unexpected
+     *  ----------------  results, so we will FAIL the comparison.
+     *   MPI_SIMILAR(2)   == two groups have the same members but
+     *                       ordering may be different
+     *   MPI_UNEQUAL(3)   == self descriptive (unequal)
+     */
+    if (cmp_value >= MPI_SIMILAR)
+        HMPI_GOTO_ERROR(FAIL, "MPI Comms are incompatable", cmp_value)
 
     if (f1->mpi_rank == 0) {
         /* Because MPI file handles may NOT have any relation to

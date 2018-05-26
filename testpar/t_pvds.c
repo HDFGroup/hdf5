@@ -1849,10 +1849,6 @@ test_basic_io(unsigned config, hid_t fapl)
                 TEST_ERROR
         } /* end if */
 
-        /* Close copied virtual file */
-        if(H5Fclose(vfile2) < 0)
-            TEST_ERROR
-        vfile2 = -1;
     } /* end if */
 
     /* Close */
@@ -1871,6 +1867,12 @@ test_basic_io(unsigned config, hid_t fapl)
     if(H5Fclose(vfile) < 0)
         TEST_ERROR
     vfile = -1;
+
+    /* Close copied virtual file */
+    if((vfile2 != -1) && (H5Fclose(vfile2) < 0))
+        TEST_ERROR
+    vfile2 = -1;
+
     if(H5Sclose(srcspace[0]) < 0)
         TEST_ERROR
     srcspace[0] = -1;
