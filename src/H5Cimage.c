@@ -626,7 +626,6 @@ H5C__deserialize_prefetched_entry(H5F_t *f, H5C_t *cache_ptr,
     ds_entry_ptr->coll_access               	= FALSE;
 #endif /* H5_HAVE_PARALLEL */
     ds_entry_ptr->flush_in_progress         	= FALSE;
-    ds_entry_ptr->destroy_in_progress       	= FALSE;
 
     ds_entry_ptr->ring		            	= pf_entry_ptr->ring;
 

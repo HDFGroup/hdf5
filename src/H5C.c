@@ -1334,7 +1334,6 @@ H5C_insert_entry(H5F_t *             f,
 #endif /* H5_HAVE_PARALLEL */
 
     entry_ptr->flush_in_progress = FALSE;
-    entry_ptr->destroy_in_progress = FALSE;
 
     entry_ptr->ring = ring;
 
@@ -1832,7 +1831,8 @@ H5C_move_entry(H5C_t *	     cache_ptr,
 {
     H5C_cache_entry_t *	entry_ptr = NULL;
     H5C_cache_entry_t *	test_entry_ptr = NULL;
-    herr_t			ret_value = SUCCEED;      /* Return value */
+    hbool_t		was_dirty;      /* Whether the entry was previously dirty */
+    herr_t		ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -1884,63 +1884,52 @@ H5C_move_entry(H5C_t *	     cache_ptr,
      *
      * Note that we do not check the size of the cache, or evict anything.
      * Since this is a simple re-name, cache size should be unaffected.
-     *
-     * Check to see if the target entry is in the process of being destroyed
-     * before we delete from the index, etc.  If it is, all we do is
-     * change the addr.  If the entry is only in the process of being flushed,
-     * don't mark it as dirty either, lest we confuse the flush call back.
      */
-    if(!entry_ptr->destroy_in_progress) {
-        H5C__DELETE_FROM_INDEX(cache_ptr, entry_ptr, FAIL)
-
-        if(entry_ptr->in_slist) {
-            HDassert(cache_ptr->slist_ptr);
-            H5C__REMOVE_ENTRY_FROM_SLIST(cache_ptr, entry_ptr, FALSE)
-        } /* end if */
+    H5C__DELETE_FROM_INDEX(cache_ptr, entry_ptr, FAIL)
+    if(entry_ptr->in_slist) {
+        HDassert(cache_ptr->slist_ptr);
+        H5C__REMOVE_ENTRY_FROM_SLIST(cache_ptr, entry_ptr, FALSE)
     } /* end if */
 
+    /* Move entry to new address */
     entry_ptr->addr = new_addr;
 
-    if(!entry_ptr->destroy_in_progress) {
-        hbool_t		was_dirty;      /* Whether the entry was previously dirty */
+    /* Remember previous dirty status */
+    was_dirty = entry_ptr->is_dirty;
 
-        /* Remember previous dirty status */
-        was_dirty = entry_ptr->is_dirty;
+    /* Mark the entry as dirty if it isn't already */
+    entry_ptr->is_dirty = TRUE;
 
-        /* Mark the entry as dirty if it isn't already */
-	entry_ptr->is_dirty = TRUE;
+    /* This shouldn't be needed, but it keeps the test code happy */
+    if(entry_ptr->image_up_to_date) {
+        entry_ptr->image_up_to_date = FALSE;
+        if(entry_ptr->flush_dep_nparents > 0)
+            if(H5C__mark_flush_dep_unserialized(entry_ptr) < 0)
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, FAIL, "Can't propagate serialization status to fd parents")
+    } /* end if */
 
-	/* This shouldn't be needed, but it keeps the test code happy */
-        if(entry_ptr->image_up_to_date) {
-            entry_ptr->image_up_to_date = FALSE;
+    /* (Re-)insert into cache data structures */
+    H5C__INSERT_IN_INDEX(cache_ptr, entry_ptr, FAIL)
+    H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr, FAIL)
+
+    /* Skip some actions if we're in the middle of flushing the entry */
+    if(!entry_ptr->flush_in_progress) {
+        /* Update the replacement policy for the entry */
+        H5C__UPDATE_RP_FOR_MOVE(cache_ptr, entry_ptr, was_dirty, FAIL)
+
+        /* Check for entry changing status and do notifications, etc. */
+        if(!was_dirty) {
+            /* If the entry's type has a 'notify' callback send a 'entry dirtied'
+             * notice now that the entry is fully integrated into the cache.
+             */
+            if(entry_ptr->type->notify &&
+                    (entry_ptr->type->notify)(H5C_NOTIFY_ACTION_ENTRY_DIRTIED, entry_ptr) < 0)
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, FAIL, "can't notify client about entry dirty flag set")
+
+            /* Propagate the dirty flag up the flush dependency chain if appropriate */
             if(entry_ptr->flush_dep_nparents > 0)
-                if(H5C__mark_flush_dep_unserialized(entry_ptr) < 0)
-                    HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, FAIL, "Can't propagate serialization status to fd parents")
-        } /* end if */
-
-        /* Modify cache data structures */
-        H5C__INSERT_IN_INDEX(cache_ptr, entry_ptr, FAIL)
-        H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr, FAIL)
-
-        /* Skip some actions if we're in the middle of flushing the entry */
-	if(!entry_ptr->flush_in_progress) {
-            /* Update the replacement policy for the entry */
-            H5C__UPDATE_RP_FOR_MOVE(cache_ptr, entry_ptr, was_dirty, FAIL)
-
-            /* Check for entry changing status and do notifications, etc. */
-            if(!was_dirty) {
-                /* If the entry's type has a 'notify' callback send a 'entry dirtied'
-                 * notice now that the entry is fully integrated into the cache.
-                 */
-                if(entry_ptr->type->notify &&
-                        (entry_ptr->type->notify)(H5C_NOTIFY_ACTION_ENTRY_DIRTIED, entry_ptr) < 0)
-                    HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, FAIL, "can't notify client about entry dirty flag set")
-
-                /* Propagate the dirty flag up the flush dependency chain if appropriate */
-                if(entry_ptr->flush_dep_nparents > 0)
-                    if(H5C__mark_flush_dep_dirty(entry_ptr) < 0)
-                        HGOTO_ERROR(H5E_CACHE, H5E_CANTMARKDIRTY, FAIL, "Can't propagate flush dep dirty flag")
-            } /* end if */
+                if(H5C__mark_flush_dep_dirty(entry_ptr) < 0)
+                    HGOTO_ERROR(H5E_CACHE, H5E_CANTMARKDIRTY, FAIL, "Can't propagate flush dep dirty flag")
         } /* end if */
     } /* end if */
 
@@ -6376,7 +6365,6 @@ H5C__flush_single_entry(H5F_t *f, H5C_cache_entry_t *entry_ptr, unsigned flags)
             HDassert(!destroy_entry);
         else
             HDassert(destroy_entry);
-        HDassert(!entry_ptr->is_pinned);
 
         /* Update stats, while entry is still in the cache */
         H5C__UPDATE_STATS_FOR_EVICTION(cache_ptr, entry_ptr, take_ownership)
@@ -6387,6 +6375,9 @@ H5C__flush_single_entry(H5F_t *f, H5C_cache_entry_t *entry_ptr, unsigned flags)
          */
         if(entry_ptr->type->notify && (entry_ptr->type->notify)(H5C_NOTIFY_ACTION_BEFORE_EVICT, entry_ptr) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, FAIL, "can't notify client about entry to evict")
+
+        /* Sanity check */
+        HDassert(!entry_ptr->is_pinned);
 
         /* If there's any flush dependency parents, let them know that this
          *      entry is being evicted.  "Normal" flush dependencies for data
@@ -6998,7 +6989,6 @@ H5C_load_entry(H5F_t *              f,
     entry->coll_access                  = coll_access;
 #endif /* H5_HAVE_PARALLEL */
     entry->flush_in_progress            = FALSE;
-    entry->destroy_in_progress          = FALSE;
 
     entry->ring                         = H5C_RING_UNDEFINED;
 

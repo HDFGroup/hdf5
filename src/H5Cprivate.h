@@ -1163,9 +1163,6 @@ typedef int H5C_ring_t;
  * 		is in the process of being flushed.  This allows the cache
  * 		to detect when a call is the result of a flush callback.
  *
- * destroy_in_progress:  Boolean flag that is set to true iff the entry
- * 		is in the process of being flushed and destroyed.
- *
  *
  * Fields supporting rings for flush ordering:
  *
@@ -1625,7 +1622,6 @@ typedef struct H5C_cache_entry_t {
     hbool_t			coll_access;
 #endif /* H5_HAVE_PARALLEL */
     hbool_t			flush_in_progress;
-    hbool_t			destroy_in_progress;
 
     /* fields supporting rings for purposes of flush ordering */
     H5C_ring_t                  ring;
