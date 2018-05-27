@@ -235,15 +235,15 @@ H5MF__freedspace_notify(H5AC_notify_action_t action, void *_thing, ...)
              */
             break;
 
-        case H5C_NOTIFY_ACTION_AFTER_INSERT:
-        case H5C_NOTIFY_ACTION_AFTER_LOAD:
-        case H5C_NOTIFY_ACTION_AFTER_FLUSH:
-        case H5C_NOTIFY_ACTION_ENTRY_DIRTIED:
-        case H5C_NOTIFY_ACTION_ENTRY_CLEANED:
-        case H5C_NOTIFY_ACTION_BEFORE_EVICT:
-        case H5C_NOTIFY_ACTION_CHILD_UNSERIALIZED:
-        case H5C_NOTIFY_ACTION_CHILD_SERIALIZED:
-        case H5C_NOTIFY_ACTION_CHILD_DIRTIED:
+        case H5AC_NOTIFY_ACTION_AFTER_INSERT:
+        case H5AC_NOTIFY_ACTION_AFTER_LOAD:
+        case H5AC_NOTIFY_ACTION_AFTER_FLUSH:
+        case H5AC_NOTIFY_ACTION_ENTRY_DIRTIED:
+        case H5AC_NOTIFY_ACTION_ENTRY_CLEANED:
+        case H5AC_NOTIFY_ACTION_BEFORE_EVICT:
+        case H5AC_NOTIFY_ACTION_CHILD_UNSERIALIZED:
+        case H5AC_NOTIFY_ACTION_CHILD_SERIALIZED:
+        case H5AC_NOTIFY_ACTION_CHILD_DIRTIED:
             break;
 
         default:
