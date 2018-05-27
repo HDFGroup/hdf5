@@ -33,7 +33,6 @@
 #include "H5Cprivate.h"		/* Cache				*/
 #include "H5Fprivate.h"		/* File access				*/
 #include "H5Pprivate.h"		/* Property lists			*/
-#include "H5SLprivate.h"        /* Skip lists 				*/
 
 #ifdef H5_METADATA_TRACE_FILE
 #define H5AC__TRACE_FILE_ENABLED	1
@@ -200,6 +199,7 @@ typedef H5C_notify_func_t		H5AC_notify_func_t;
 typedef H5C_free_icr_func_t		H5AC_free_icr_func_t;
 typedef H5C_get_fsf_size_t		H5AC_get_fsf_size_t;
 
+/* Cache classes */
 typedef H5C_class_t			H5AC_class_t;
 
 /* Cache entry iteration callback */
@@ -211,6 +211,9 @@ typedef H5C_cache_entry_t		H5AC_info_t;
 /* Typedef for metadata cache (defined in H5Cpkg.h) */
 typedef H5C_t	H5AC_t;
 
+/* Forward declaration of proxy entry parent list node (for propty entry type def) */
+struct H5AC_proxy_parent_t;
+
 /* Metadata cache proxy entry type */
 typedef struct H5AC_proxy_entry_t {
     H5AC_info_t cache_info;             /* Information for H5AC cache functions */
@@ -220,8 +223,8 @@ typedef struct H5AC_proxy_entry_t {
     haddr_t addr;                       /* Address of the entry in the file */
                                         /* (Should be in 'temporary' address space) */
 
-    /* Parent fields */
-    H5SL_t *parents;                    /* Skip list to track parent addresses */
+    /* Parent list */
+    struct H5AC_proxy_parent_t *parents; /* List to track parent entries */
 
     /* Child fields */
     size_t nchildren;                   /* Number of children */

@@ -45,6 +45,13 @@
 /* Local Typedefs */
 /******************/
 
+/* Proxy entry parent list node */
+typedef struct H5AC_proxy_parent_t {
+    struct H5AC_proxy_parent_t *next;   /* Pointer to next node in parent list */
+    struct H5AC_proxy_parent_t *prev;   /* Pointer to previous node in parent list */
+    H5AC_info_t *parent;                /* Pointer to parent entry */
+} H5AC_proxy_parent_t;
+
 
 /********************/
 /* Package Typedefs */
@@ -97,6 +104,9 @@ const H5AC_class_t H5AC_PROXY_ENTRY[1] = {{
 /* Declare a free list to manage H5AC_proxy_entry_t objects */
 H5FL_DEFINE_STATIC(H5AC_proxy_entry_t);
 
+/* Declare a free list to manage H5AC_proxy_parent_t objects */
+H5FL_DEFINE_STATIC(H5AC_proxy_parent_t);
+
 
 
 /*-------------------------------------------------------------------------
@@ -145,6 +155,10 @@ done:
  *
  * Purpose:     Add a parent to a proxy entry
  *
+ * Note:	Defers creating flush dependencies on parents until there are
+ *		children of the proxy entry (because the proxy entry can't be
+ *		dirty until it has children).
+ *
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
@@ -156,6 +170,7 @@ herr_t
 H5AC_proxy_entry_add_parent(H5AC_proxy_entry_t *pentry, void *_parent)
 {
     H5AC_info_t *parent = (H5AC_info_t *)_parent; /* Parent entry's cache info */
+    H5AC_proxy_parent_t *proxy_parent = NULL;   /* Proxy parent node for new parent */
     herr_t ret_value = SUCCEED;         	/* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -164,16 +179,21 @@ H5AC_proxy_entry_add_parent(H5AC_proxy_entry_t *pentry, void *_parent)
     HDassert(parent);
     HDassert(pentry);
 
-    /* Add parent to the list of parents */
-    if(NULL == pentry->parents)
-        if(NULL == (pentry->parents = H5SL_create(H5SL_TYPE_HADDR, NULL)))
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTCREATE, FAIL, "unable to create skip list for parents of proxy entry")
+    /* Allocate a proxy parent node */
+    if(NULL == (proxy_parent = H5FL_MALLOC(H5AC_proxy_parent_t)))
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL, "can't allocate proxy parent node")
 
-    /* Insert parent address into skip list */
-    if(H5SL_insert(pentry->parents, parent, &parent->addr) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTINSERT, FAIL, "unable to insert parent into proxy's skip list")
+    /* Set (parent) entry for proxy parent node */
+    proxy_parent->parent = parent;
 
-    /* Add flush dependency on parent */
+    /* Add proxy parent node into list */
+    proxy_parent->prev = NULL;
+    proxy_parent->next = pentry->parents;
+    if(pentry->parents)
+        pentry->parents->prev = proxy_parent;
+    pentry->parents = proxy_parent;
+
+    /* Add flush dependency on parent, if the proxy entry has children */
     if(pentry->nchildren > 0) {
         /* Sanity check */
         HDassert(H5F_addr_defined(pentry->addr));
@@ -183,6 +203,19 @@ H5AC_proxy_entry_add_parent(H5AC_proxy_entry_t *pentry, void *_parent)
     } /* end if */
 
 done:
+    if(ret_value < 0)
+        if(proxy_parent) {
+            /* Unlink from list, if in it */
+            if(pentry->parents == proxy_parent) {
+                if(proxy_parent->next)
+                    proxy_parent->next->prev = NULL;
+                pentry->parents = proxy_parent->next;
+            } /* end if */
+
+            /* Free the proxy parent node */
+            proxy_parent = H5FL_FREE(H5AC_proxy_parent_t, proxy_parent);
+        } /* end if */
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5AC_proxy_entry_add_parent() */
 
@@ -203,7 +236,7 @@ herr_t
 H5AC_proxy_entry_remove_parent(H5AC_proxy_entry_t *pentry, void *_parent)
 {
     H5AC_info_t *parent = (H5AC_info_t *)_parent;   /* Pointer to the parent entry */
-    H5AC_info_t *rem_parent;            /* Pointer to the removed parent entry */
+    H5AC_proxy_parent_t *proxy_parent;  /* Entry's parent node in proxy */
     herr_t ret_value = SUCCEED;        	/* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -213,21 +246,42 @@ H5AC_proxy_entry_remove_parent(H5AC_proxy_entry_t *pentry, void *_parent)
     HDassert(pentry->parents);
     HDassert(parent);
 
-    /* Remove parent from skip list */
-    if(NULL == (rem_parent = (H5AC_info_t *)H5SL_remove(pentry->parents, &parent->addr)))
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTREMOVE, FAIL, "unable to remove proxy entry parent from skip list")
-    if(!H5F_addr_eq(rem_parent->addr, parent->addr))
-        HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "removed proxy entry parent not the same as real parent")
+    /* Find proxy parent in list */
+    /* (Linear search, but these lists probably aren't huge) */
+    proxy_parent = pentry->parents;
+    while(proxy_parent) {
+        /* Check for entry being removed */
+        if(proxy_parent->parent == parent)
+            break;
 
-    /* Shut down the skip list, if this is the last parent */
-    if(0 == H5SL_count(pentry->parents)) {
+        /* Advance to next proxy parent node */
+        proxy_parent = proxy_parent->next;
+    } /* end while */
+    if(NULL == proxy_parent)
+        HGOTO_ERROR(H5E_CACHE, H5E_NOTFOUND, FAIL, "unable to find proxy entry parent in list")
+
+    /* Remove proxy parent from list */
+    if(pentry->parents == proxy_parent) {
         /* Sanity check */
-        HDassert(0 == pentry->nchildren);
+        HDassert(NULL == proxy_parent->prev);
 
-        if(H5SL_close(pentry->parents) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CLOSEERROR, FAIL, "can't close proxy parent skip list")
-        pentry->parents = NULL;
+        /* Detech from head of list */
+        if(proxy_parent->next)
+            proxy_parent->next->prev = NULL;
+        pentry->parents = proxy_parent->next;
     } /* end if */
+    else {
+        /* Sanity check */
+        HDassert(proxy_parent->prev);
+
+        /* Detach from middle or end of list */
+        proxy_parent->prev->next = proxy_parent->next;
+        if(proxy_parent->next)
+            proxy_parent->next->prev = proxy_parent->prev;
+    } /* end else */
+
+    /* Free the proxy parent node */
+    proxy_parent = H5FL_FREE(H5AC_proxy_parent_t, proxy_parent);
 
     /* Remove flush dependency between the proxy entry and a parent */
     if(pentry->nchildren > 0)
@@ -237,38 +291,6 @@ H5AC_proxy_entry_remove_parent(H5AC_proxy_entry_t *pentry, void *_parent)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5AC_proxy_entry_remove_parent() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5AC__proxy_entry_add_child_cb
- *
- * Purpose:	Callback routine for adding an entry as a flush dependency for
- *		a proxy entry.
- *
- * Return:	Success:	Non-negative on success
- *		Failure:	Negative
- *
- * Programmer:	Quincey Koziol
- *		Thursday, September 22, 2016
- *
- *-------------------------------------------------------------------------
- */
-static int
-H5AC__proxy_entry_add_child_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
-{
-    H5AC_info_t *parent = (H5AC_info_t *)_item;   /* Pointer to the parent entry */
-    H5AC_proxy_entry_t *pentry = (H5AC_proxy_entry_t *)_udata; /* Pointer to the proxy entry */
-    int ret_value = H5_ITER_CONT;     /* Callback return value */
-
-    FUNC_ENTER_STATIC
-
-    /* Add flush dependency on parent for proxy entry */
-    if(H5AC_create_flush_dependency(parent, pentry) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTDEPEND, H5_ITER_ERROR, "unable to set flush dependency for virtual entry")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5AC__proxy_entry_add_child_cb() */
 
 
 /*-------------------------------------------------------------------------
@@ -314,9 +336,20 @@ H5AC_proxy_entry_add_child(H5AC_proxy_entry_t *pentry, H5F_t *f, void *child)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTSERIALIZE, FAIL, "can't mark proxy entry clean")
 
         /* If there are currently parents, iterate over the list of parents, creating flush dependency on them */
-        if(pentry->parents)
-            if(H5SL_iterate(pentry->parents, H5AC__proxy_entry_add_child_cb, pentry) < 0)
-                HGOTO_ERROR(H5E_CACHE, H5E_BADITER, FAIL, "can't visit parents")
+        if(pentry->parents) {
+            H5AC_proxy_parent_t *proxy_parent;  /* Entry's parent node in proxy */
+
+            /* Iterate over proxy parent nodes */
+            proxy_parent = pentry->parents;
+            while(proxy_parent) {
+                /* Add flush dependency on parent for proxy entry */
+                if(H5AC_create_flush_dependency(proxy_parent->parent, pentry) < 0)
+                    HGOTO_ERROR(H5E_CACHE, H5E_CANTDEPEND, FAIL, "unable to set flush dependency for proxy entry")
+
+                /* Advance to next proxy parent node */
+                proxy_parent = proxy_parent->next;
+            } /* end while */
+        } /* end if */
     } /* end if */
 
     /* Add flush dependency on proxy entry */
@@ -329,38 +362,6 @@ H5AC_proxy_entry_add_child(H5AC_proxy_entry_t *pentry, H5F_t *f, void *child)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5AC_proxy_entry_add_child() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5AC__proxy_entry_remove_child_cb
- *
- * Purpose:	Callback routine for removing an entry as a flush dependency for
- *		proxy entry.
- *
- * Return:	Success:	Non-negative on success
- *		Failure:	Negative
- *
- * Programmer:	Quincey Koziol
- *		Thursday, September 22, 2016
- *
- *-------------------------------------------------------------------------
- */
-static int
-H5AC__proxy_entry_remove_child_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
-{
-    H5AC_info_t *parent = (H5AC_info_t *)_item;   /* Pointer to the parent entry */
-    H5AC_proxy_entry_t *pentry = (H5AC_proxy_entry_t *)_udata; /* Pointer to the proxy entry */
-    int ret_value = H5_ITER_CONT;     /* Callback return value */
-
-    FUNC_ENTER_STATIC
-
-    /* Remove flush dependency on parent for proxy entry */
-    if(H5AC_destroy_flush_dependency(parent, pentry) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTUNDEPEND, H5_ITER_ERROR, "unable to remove flush dependency for proxy entry")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5AC__proxy_entry_remove_child_cb() */
 
 
 /*-------------------------------------------------------------------------
@@ -396,10 +397,20 @@ H5AC_proxy_entry_remove_child(H5AC_proxy_entry_t *pentry, void *child)
     /* Check for last child */
     if(0 == pentry->nchildren) {
         /* Check for flush dependencies on proxy's parents */
-        if(pentry->parents)
-            /* Iterate over the list of parents, removing flush dependency on them */
-            if(H5SL_iterate(pentry->parents, H5AC__proxy_entry_remove_child_cb, pentry) < 0)
-                HGOTO_ERROR(H5E_CACHE, H5E_BADITER, FAIL, "can't visit parents")
+        if(pentry->parents) {
+            H5AC_proxy_parent_t *proxy_parent;  /* Entry's parent node in proxy */
+
+            /* Iterate over proxy parent nodes */
+            proxy_parent = pentry->parents;
+            while(proxy_parent) {
+                /* Remove flush dependency on parent for proxy entry */
+                if(H5AC_destroy_flush_dependency(proxy_parent->parent, pentry) < 0)
+                    HGOTO_ERROR(H5E_CACHE, H5E_CANTUNDEPEND, FAIL, "unable to remove flush dependency for proxy entry")
+
+                /* Advance to next proxy parent node */
+                proxy_parent = proxy_parent->next;
+            } /* end while */
+        } /* end if */
 
         /* Unpin proxy */
         if(H5AC_unpin_entry(pentry) < 0)
