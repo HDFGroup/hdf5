@@ -2325,6 +2325,7 @@ H5_DLL herr_t H5C_get_flush_dep_nchildren(const H5C_cache_entry_t *entry_ptr,
 H5_DLL herr_t H5C_get_entry_from_addr(H5C_t *cache_ptr, haddr_t addr,
     void **entry_ptr_ptr);
 H5_DLL herr_t H5C_get_entry_ring(const H5F_t *f, haddr_t addr, H5C_ring_t *ring);
+H5_DLL htri_t H5C_cache_is_clean(const H5C_t *cache_ptr, H5C_ring_t inner_ring);
 H5_DLL herr_t H5C_unsettle_entry_ring(void *thing);
 H5_DLL herr_t H5C_unsettle_ring(H5F_t * f, H5C_ring_t ring);
 H5_DLL herr_t H5C_remove_entry(void *thing);
@@ -2348,7 +2349,6 @@ H5_DLL herr_t H5C_mark_entries_as_clean(H5F_t *f, unsigned ce_array_len,
 H5_DLL herr_t H5C_dump_cache(H5C_t *cache_ptr, const char *cache_name);
 H5_DLL herr_t H5C_dump_cache_LRU(H5C_t *cache_ptr, const char *cache_name);
 H5_DLL hbool_t H5C_get_serialization_in_progress(const H5C_t *cache_ptr);
-H5_DLL htri_t H5C_cache_is_clean(const H5C_t *cache_ptr, H5C_ring_t inner_ring);
 H5_DLL herr_t H5C_dump_cache_skip_list(FILE *stream, H5C_t *cache_ptr, const char *calling_fcn);
 #ifdef H5_HAVE_PARALLEL
 H5_DLL herr_t H5C_dump_coll_write_list(H5C_t * cache_ptr, char * calling_fcn);

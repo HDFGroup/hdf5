@@ -113,6 +113,8 @@
  * incorrect conversions. */
 #if (H5_WANT_DATA_ACCURACY && defined(H5_LLONG_TO_LDOUBLE_CORRECT)) || (!H5_WANT_DATA_ACCURACY)
 #define H5T_CONV_INTERNAL_LLONG_LDOUBLE       1
+#else
+#define H5T_CONV_INTERNAL_LLONG_LDOUBLE       0
 #endif
 
 /* Define an internal macro for converting unsigned long long to long double.  SGI compilers give
@@ -122,6 +124,8 @@
  * Mac OS 10.4 gives some incorrect result. */
 #if (H5_WANT_DATA_ACCURACY && defined(H5_LLONG_TO_LDOUBLE_CORRECT)) || (!H5_WANT_DATA_ACCURACY)
 #define H5T_CONV_INTERNAL_ULLONG_LDOUBLE         1
+#else
+#define H5T_CONV_INTERNAL_ULLONG_LDOUBLE         0
 #endif
 
 /* Define an internal macro for converting long double to long long.  SGI compilers give some incorrect
@@ -130,6 +134,8 @@
 #if (H5_WANT_DATA_ACCURACY && defined(H5_LDOUBLE_TO_LLONG_ACCURATE)) || \
     (!H5_WANT_DATA_ACCURACY)
 #define H5T_CONV_INTERNAL_LDOUBLE_LLONG         1
+#else
+#define H5T_CONV_INTERNAL_LDOUBLE_LLONG         0
 #endif
 
 /* Define an internal macro for converting long double to unsigned long long.  SGI compilers give some

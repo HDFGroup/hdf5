@@ -40,6 +40,10 @@
 /* Get needed headers */
 #include "H5Cprivate.h"         /* Cache                                */
 #include "H5FLprivate.h"        /* Free Lists                           */
+#ifdef H5_HAVE_PARALLEL
+#include "H5SLprivate.h"        /* Skip lists 				*/
+#endif /* H5_HAVE_PARALLEL */
+
 
 /*****************************/
 /* Package Private Variables */

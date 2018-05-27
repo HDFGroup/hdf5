@@ -1048,7 +1048,9 @@ H5C_flush_cache(H5F_t *f, unsigned flags)
     H5C_ring_t		ring;
     H5C_t             * cache_ptr;
     hbool_t             destroy;
+#ifndef NDEBUG
     hbool_t		ignore_protected;
+#endif /* NDEBUG */
     herr_t		ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -1093,7 +1095,9 @@ H5C_flush_cache(H5F_t *f, unsigned flags)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "an extreme sanity check failed on entry")
 #endif /* H5C_DO_EXTREME_SANITY_CHECKS */
 
+#ifndef NDEBUG
     ignore_protected = ( (flags & H5C__FLUSH_IGNORE_PROTECTED_FLAG) != 0 );
+#endif /* NDEBUG */
     destroy = ( (flags & H5C__FLUSH_INVALIDATE_FLAG) != 0 );
     HDassert( ! ( destroy && ignore_protected ) );
     HDassert( ! ( cache_ptr->flush_in_progress ) );
