@@ -1133,9 +1133,7 @@ H5B2__merge2(H5B2_hdr_t *hdr, uint16_t depth, H5B2_node_ptr_t *curr_node_ptr,
 
         /* Mark nodes as dirty */
         left_child_flags |= H5AC__DIRTIED_FLAG;
-        right_child_flags |= H5AC__DELETED_FLAG;
-        if(!(hdr->swmr_write))
-            right_child_flags |= H5AC__DIRTIED_FLAG | H5AC__FREE_FILE_SPACE_FLAG;
+        right_child_flags |= H5AC__DELETED_FLAG | H5AC__DIRTIED_FLAG | H5AC__FREE_FILE_SPACE_FLAG;
     } /* end block */
 
     /* Update # of records in child nodes */
@@ -1369,9 +1367,7 @@ H5B2__merge3(H5B2_hdr_t *hdr, uint16_t depth, H5B2_node_ptr_t *curr_node_ptr,
 
         /* Mark nodes as dirty */
         middle_child_flags |= H5AC__DIRTIED_FLAG;
-        right_child_flags |= H5AC__DELETED_FLAG;
-        if(!(hdr->swmr_write))
-            right_child_flags |= H5AC__DIRTIED_FLAG | H5AC__FREE_FILE_SPACE_FLAG;
+        right_child_flags |= H5AC__DELETED_FLAG | H5AC__DIRTIED_FLAG | H5AC__FREE_FILE_SPACE_FLAG;
     } /* end block */
 
     /* Update # of records in child nodes */
@@ -1679,7 +1675,7 @@ H5B2__delete_node(H5B2_hdr_t *hdr, uint16_t depth, const H5B2_node_ptr_t *curr_n
 
 done:
     /* Unlock & delete current node */
-    if(node && H5AC_unprotect(hdr->f, curr_node_class, curr_node->addr, node, (unsigned)(H5AC__DELETED_FLAG | (hdr->swmr_write ? 0 : H5AC__FREE_FILE_SPACE_FLAG))) < 0)
+    if(node && H5AC_unprotect(hdr->f, curr_node_class, curr_node->addr, node, (unsigned)(H5AC__DELETED_FLAG | H5AC__FREE_FILE_SPACE_FLAG)) < 0)
         HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
 
     FUNC_LEAVE_NOAPI(ret_value)

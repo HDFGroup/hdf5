@@ -450,7 +450,7 @@ static herr_t
 H5B2__cache_hdr_notify(H5AC_notify_action_t action, void *_thing, ...)
 {
     H5B2_hdr_t 	*hdr = (H5B2_hdr_t *)_thing;
-    herr_t 	ret_value = SUCCEED;
+    herr_t 	ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_STATIC
 

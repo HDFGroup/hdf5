@@ -765,27 +765,30 @@ H5B2__shadow_internal(H5B2_internal_t *internal, H5B2_node_ptr_t *curr_node_ptr)
      * last time the header was flushed, as otherwise it will be unreachable by
      * the readers so there will be no need to shadow.  To check if it has been
      * shadowed, compare the epoch of this node and the header.  If this node's
-     * epoch is <= to the header's, it hasn't been shadowed yet. */
+     * epoch is <= to the header's, it hasn't been shadowed yet.
+     */
     if(internal->shadow_epoch <= hdr->shadow_epoch) {
+        haddr_t prev_node_addr;         /* Address node moved from */
         haddr_t new_node_addr;          /* Address to move node to */
 
         /*
          * We must clone the old node so readers with an out-of-date version of
          * the parent can still see the correct number of children, via the
-         * shadowed node.  Remove it from cache but do not mark it free on disk.
+         * shadowed node.
          */
         /* Allocate space for the cloned node */
         if(HADDR_UNDEF == (new_node_addr = H5MF_alloc(hdr->f, H5FD_MEM_BTREE, (hsize_t)hdr->node_size)))
             HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, FAIL, "unable to allocate file space to move B-tree node")
 
-        /* Move the location of the node on the disk */
+        /* Move the location of the node on disk */
+        prev_node_addr = curr_node_ptr->addr;
         if(H5AC_move_entry(hdr->f, H5AC_BT2_INT, curr_node_ptr->addr, new_node_addr) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTMOVE, FAIL, "unable to move B-tree node")
         curr_node_ptr->addr = new_node_addr;
 
-        /* Should free the space in the file, but this is not supported by
-         * SWMR_WRITE code yet - QAK, 2016/12/01
-         */
+        /* Free the space in the file for the previous location of the node */
+        if(H5MF_xfree(hdr->f, H5FD_MEM_BTREE, prev_node_addr, (hsize_t)hdr->node_size) < 0)
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to release file space for v2 B-tree internal node")
 
         /* Set shadow epoch for node ahead of header */
         internal->shadow_epoch = hdr->shadow_epoch + 1;
