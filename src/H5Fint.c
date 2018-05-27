@@ -520,7 +520,7 @@ H5F__build_name(const char *prefix, const char *file_name, char **full_name/*out
 
     /* Compose the full file name */
     HDsnprintf(*full_name, (prefix_len + fname_len + 2), "%s%s%s", prefix,
-        (H5_CHECK_DELIMITER(prefix[prefix_len - 1]) ? "" : H5_DIR_SEPS), file_name);
+        ((prefix_len == 0 || H5_CHECK_DELIMITER(prefix[prefix_len - 1])) ? "" : H5_DIR_SEPS), file_name);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1367,8 +1367,8 @@ H5F__dest(H5F_t *f, hbool_t flush)
  * Return:      Success:    Non-NULL, pointer to new file object.
  *              Failure:    NULL
  *
- * Programmer:	Quincey Koziol
- *		December 13, 2017
+ * Programmer:    Quincey Koziol
+ *        December 13, 2017
  *
  *-------------------------------------------------------------------------
  */
@@ -1403,8 +1403,8 @@ done:
  * Return:      Success:    Non-NULL, pointer to new file object.
  *              Failure:    NULL
  *
- * Programmer:	Quincey Koziol
- *		December 13, 2017
+ * Programmer:    Quincey Koziol
+ *        December 13, 2017
  *
  *-------------------------------------------------------------------------
  */
@@ -1919,8 +1919,8 @@ H5F__flush_phase2(H5F_t *f, hbool_t closing)
 
 #ifdef H5_HAVE_PARALLEL
     if(H5F_HAS_FEATURE(f, H5FD_FEAT_HAS_MPI))
-        /* Since we just returned from a call to H5AC_flush(), we just 
-         * passed through a barrier.  Hence we can skip the barrier on 
+        /* Since we just returned from a call to H5AC_flush(), we just
+         * passed through a barrier.  Hence we can skip the barrier on
          * entry to the mpio file driver truncate call below, and the first
          * barrier in the following call to flush the cache again.
          */
@@ -2009,8 +2009,8 @@ H5F__flush_real(H5F_t *f)
  *
  * Return:      Non-negative on success / Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		December 13, 2017
+ * Programmer:    Quincey Koziol
+ *        December 13, 2017
  *
  *-------------------------------------------------------------------------
  */
@@ -2858,19 +2858,19 @@ H5F__set_libver_bounds(H5F_t *f, H5F_libver_t low, H5F_libver_t high)
          *      metadata entry class changes when the file format low / high
          *      bounds are changed and an unwritten entry of that class is
          *      sitting in the metadata cache.
-         *      
+         *
          *      If that happens, it's possible that the entry's size could
          *      become larger, potentially corrupting the file (if the larger
          *      entry is fully written, overwriting data outside its allocated
          *      space), or corrupting the entry (if the entry is truncated to
          *      fit into the allocated space).
-         *      
+         *
          *      Although I'm not aware of any metadata with this behavior
          *      currently, it would be very difficult to guard against and / or
          *      detect, but if we flush everything here, the format version
          *      for metadata entries in the cache will be finalized and these
          *      sorts of problems can be avoided.
-         *      
+         *
          *      QAK - April, 2018
          */
         if(H5F__flush_real(f) < 0)
@@ -3714,7 +3714,7 @@ done:
 herr_t
 H5F__format_convert(H5F_t *f)
 {
-    hbool_t mark_dirty = FALSE;		/* Whether to mark the file's superblock dirty */
+    hbool_t mark_dirty = FALSE;        /* Whether to mark the file's superblock dirty */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -3725,39 +3725,39 @@ H5F__format_convert(H5F_t *f)
 
     /* Check if the superblock should be downgraded */
     if(f->shared->sblock->super_vers > HDF5_SUPERBLOCK_VERSION_V18_LATEST) {
-	f->shared->sblock->super_vers = HDF5_SUPERBLOCK_VERSION_V18_LATEST;
-	mark_dirty = TRUE;
+    f->shared->sblock->super_vers = HDF5_SUPERBLOCK_VERSION_V18_LATEST;
+    mark_dirty = TRUE;
     } /* end if */
 
     /* Check for persistent freespace manager, which needs to be downgraded */
     if(!(f->shared->fs_strategy == H5F_FILE_SPACE_STRATEGY_DEF &&
-	    f->shared->fs_persist == H5F_FREE_SPACE_PERSIST_DEF &&
-	    f->shared->fs_threshold == H5F_FREE_SPACE_THRESHOLD_DEF &&
-	    f->shared->fs_page_size == H5F_FILE_SPACE_PAGE_SIZE_DEF)) {
-	/* Check to remove free-space manager info message from superblock extension */
-	if(H5F_addr_defined(f->shared->sblock->ext_addr))
-	    if(H5F__super_ext_remove_msg(f, H5O_FSINFO_ID) < 0)
-		HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "error in removing message from superblock extension")
+        f->shared->fs_persist == H5F_FREE_SPACE_PERSIST_DEF &&
+        f->shared->fs_threshold == H5F_FREE_SPACE_THRESHOLD_DEF &&
+        f->shared->fs_page_size == H5F_FILE_SPACE_PAGE_SIZE_DEF)) {
+    /* Check to remove free-space manager info message from superblock extension */
+    if(H5F_addr_defined(f->shared->sblock->ext_addr))
+        if(H5F__super_ext_remove_msg(f, H5O_FSINFO_ID) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "error in removing message from superblock extension")
 
-	/* Close freespace manager */
-	if(H5MF_try_close(f) < 0)
-	    HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "unable to free free-space address")
+    /* Close freespace manager */
+    if(H5MF_try_close(f) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "unable to free free-space address")
 
-	/* Set non-persistent freespace manager */
-	f->shared->fs_strategy = H5F_FILE_SPACE_STRATEGY_DEF;
-	f->shared->fs_persist = H5F_FREE_SPACE_PERSIST_DEF;
-	f->shared->fs_threshold = H5F_FREE_SPACE_THRESHOLD_DEF;
-	f->shared->fs_page_size = H5F_FILE_SPACE_PAGE_SIZE_DEF;
+    /* Set non-persistent freespace manager */
+    f->shared->fs_strategy = H5F_FILE_SPACE_STRATEGY_DEF;
+    f->shared->fs_persist = H5F_FREE_SPACE_PERSIST_DEF;
+    f->shared->fs_threshold = H5F_FREE_SPACE_THRESHOLD_DEF;
+    f->shared->fs_page_size = H5F_FILE_SPACE_PAGE_SIZE_DEF;
 
-	/* Indicate that the superblock should be marked dirty */
-	mark_dirty = TRUE;
+    /* Indicate that the superblock should be marked dirty */
+    mark_dirty = TRUE;
     } /* end if */
 
     /* Check if we should mark the superblock dirty */
     if(mark_dirty)
-	/* Mark superblock as dirty */
-	if(H5F_super_dirty(f) < 0)
-	    HGOTO_ERROR(H5E_FILE, H5E_CANTMARKDIRTY, FAIL, "unable to mark superblock as dirty")
+    /* Mark superblock as dirty */
+    if(H5F_super_dirty(f) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTMARKDIRTY, FAIL, "unable to mark superblock as dirty")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

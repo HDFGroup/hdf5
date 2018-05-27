@@ -54,7 +54,7 @@ foreach (example ${examples})
 #      LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:>
 #  )
   if(MSVC)
-    set_property(TARGET H5_buildiface PROPERTY LINK_FLAGS "/SUBSYSTEM:CONSOLE ${WIN_LINK_FLAGS}")
+    set_property(TARGET f90_ex_${example} PROPERTY LINK_FLAGS "/SUBSYSTEM:CONSOLE ${WIN_LINK_FLAGS}")
   endif()
   set_target_properties (f90_ex_${example} PROPERTIES
       LINKER_LANGUAGE Fortran
@@ -69,7 +69,6 @@ foreach (example ${examples})
     )
     target_compile_options(f90_ex_${example}-shared
         PRIVATE
-            $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:/dll>
             $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_COMPILE_FLAGS}>
     )
     target_link_libraries (f90_ex_${example}-shared
@@ -129,7 +128,6 @@ foreach (example ${F2003_examples})
     )
     target_compile_options(f03_ex_${example}-shared
         PRIVATE
-            $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:/dll>
             $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_COMPILE_FLAGS}>
     )
     target_link_libraries (f03_ex_${example}-shared
@@ -189,7 +187,6 @@ if (H5_HAVE_PARALLEL AND MPI_Fortran_FOUND)
     )
     target_compile_options(f90_ex_ph5example-shared
         PRIVATE
-            $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:/dll>
             $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_COMPILE_FLAGS}>
     )
     target_link_libraries (f90_ex_ph5example-shared
