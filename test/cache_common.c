@@ -1625,8 +1625,7 @@ free_icr(test_entry_t *entry, int32_t entry_type)
     HDassert(entry == entry->self);
     HDassert(entry->cache_ptr != NULL);
     HDassert(entry->cache_ptr->magic == H5C__H5C_T_MAGIC);
-    HDassert((entry->header.destroy_in_progress) ||
-              (entry->header.addr == entry->addr));
+    HDassert(entry->header.addr == entry->addr);
     HDassert(entry->header.magic == H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC);
     HDassert(entry->header.size == entry->size);
     HDassert((entry->type == VARIABLE_ENTRY_TYPE) ||
@@ -4061,8 +4060,7 @@ move_entry(H5C_t * cache_ptr,
         if ( ! done ) {
 
             if ( ( result < 0 ) ||
-	         ( ( ! ( entry_ptr->header.destroy_in_progress ) ) &&
-	           ( entry_ptr->header.addr != new_addr ) ) ) {
+	         ( entry_ptr->header.addr != new_addr ) ) {
 
                 pass = FALSE;
                 failure_mssg = "error in H5C_move_entry().";

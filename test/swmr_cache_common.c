@@ -362,8 +362,6 @@ fullswmr_cache_free_icr(void *thing)
     HDassert(entry->index <= (int)entry_array_nelem_g);
     HDassert(entry == &entry_array_g[entry->index]);
 
-    /* HDassert((entry->header.destroy_in_progress) || */
-    /*           (entry->header.addr == entry->addr)); */
     HDassert(entry->header.magic == H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC);
     HDassert(entry->header.size == entry->size);
     HDassert(entry->header.tl_next == NULL);

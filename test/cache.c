@@ -9392,8 +9392,7 @@ check_flush_cache__flush_op_test(H5F_t * file_ptr,
             entry_ptr = &(base_addr[check[i].entry_index]);
 
 	    if((entry_ptr->size != check[i].expected_size) ||
-		 ((!entry_ptr->header.destroy_in_progress) &&
-		   (check[i].in_cache) &&
+		 ((check[i].in_cache) &&
 		   (entry_ptr->header.size != check[i].expected_size)) ||
 		 (entry_ptr->at_main_addr != check[i].at_main_addr) ||
 		 (entry_ptr->is_dirty != check[i].is_dirty) ||
@@ -9413,8 +9412,7 @@ check_flush_cache__flush_op_test(H5F_t * file_ptr,
 			      (int)(entry_ptr->size),
 			      (int)(check[i].expected_size));
 		}
-		if((!entry_ptr->header.destroy_in_progress) &&
-		     (check[i].in_cache) &&
+		if((check[i].in_cache) &&
                      (entry_ptr->header.size != check[i].expected_size)) {
                     HDfprintf(stdout,
                               "(!destroy in progress and in cache and size (expected) = %d (%d).\n",
