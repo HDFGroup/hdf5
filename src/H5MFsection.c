@@ -116,7 +116,7 @@ H5FS_section_class_t H5MF_FSPACE_SECT_CLS_SIMPLE[1] = {{
     H5MF__sect_simple_merge,		/* Merge sections               */
     H5MF__sect_simple_can_shrink,	/* Can section shrink container?*/
     H5MF__sect_simple_shrink,		/* Shrink container w/section   */
-    H5MF_sect_free,			/* Free section                 */
+    H5MF__sect_free,			/* Free section                 */
     H5MF__sect_valid,			/* Check validity of section    */
     H5MF__sect_split,			/* Split section node for alignment */
     NULL,				/* Dump debugging for section   */
@@ -142,7 +142,7 @@ H5FS_section_class_t H5MF_FSPACE_SECT_CLS_SMALL[1] = {{
     H5MF__sect_small_merge,      /* Merge sections               */
     NULL,		                /* Can section shrink container?*/
     NULL,		                /* Shrink container w/section   */
-    H5MF_sect_free,             /* Free section                 */
+    H5MF__sect_free,             /* Free section                 */
     H5MF__sect_valid,            /* Check validity of section    */
     H5MF__sect_split,            /* Split section node for alignment */
     NULL,                       /* Dump debugging for section   */
@@ -168,7 +168,7 @@ H5FS_section_class_t H5MF_FSPACE_SECT_CLS_LARGE[1] = {{
     H5MF__sect_large_merge,		/* Merge sections               */
     H5MF__sect_large_can_shrink,		/* Can section shrink container?*/
     H5MF__sect_large_shrink,		/* Shrink container w/section   */
-    H5MF_sect_free,			/* Free section                 */
+    H5MF__sect_free,			/* Free section                 */
     H5MF__sect_valid,			/* Check validity of section    */
     H5MF__sect_split,			/* Split section node for alignment */
     NULL,				/* Dump debugging for section   */
@@ -192,7 +192,7 @@ H5FL_DEFINE(H5MF_free_section_t);
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5MF_sect_new
+ * Function:	H5MF__sect_new
  *
  * Purpose:	Create a new section of "ctype" and return it to the caller
  *
@@ -205,12 +205,12 @@ H5FL_DEFINE(H5MF_free_section_t);
  *-------------------------------------------------------------------------
  */
 H5MF_free_section_t *
-H5MF_sect_new(unsigned ctype, haddr_t sect_off, hsize_t sect_size)
+H5MF__sect_new(unsigned ctype, haddr_t sect_off, hsize_t sect_size)
 {
     H5MF_free_section_t *sect;          /* 'Simple' free space section to add */
     H5MF_free_section_t *ret_value = NULL;      /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments.  */
     HDassert(sect_size);
@@ -232,11 +232,11 @@ H5MF_sect_new(unsigned ctype, haddr_t sect_off, hsize_t sect_size)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5MF_sect_new() */
+} /* end H5MF__sect_new() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5MF_sect_free
+ * Function:	H5MF__sect_free
  *
  * Purpose:	Free a 'simple/small/large' section node
  *
@@ -249,11 +249,11 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5MF_sect_free(H5FS_section_info_t *_sect)
+H5MF__sect_free(H5FS_section_info_t *_sect)
 {
     H5MF_free_section_t *sect = (H5MF_free_section_t *)_sect;   /* File free section */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments. */
     HDassert(sect);
@@ -262,11 +262,11 @@ H5MF_sect_free(H5FS_section_info_t *_sect)
     sect = H5FL_FREE(H5MF_free_section_t, sect);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-}   /* H5MF_sect_free() */
+}   /* H5MF__sect_free() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5MF_sect_deserialize
+ * Function:	H5MF__sect_deserialize
  *
  * Purpose:	Deserialize a buffer into a "live" section
  *
@@ -294,7 +294,7 @@ H5MF__sect_deserialize(const H5FS_section_class_t *cls,
     HDassert(sect_size);
 
     /* Create free space section for block */
-    if(NULL == (sect = H5MF_sect_new(cls->type, sect_addr, sect_size)))
+    if(NULL == (sect = H5MF__sect_new(cls->type, sect_addr, sect_size)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "can't initialize free space section")
 
     /* Set return value */
@@ -360,7 +360,7 @@ H5MF__sect_split(H5FS_section_info_t *sect, hsize_t frag_size)
     FUNC_ENTER_STATIC
 
     /* Allocate space for new section */
-    if(NULL == (ret_value = H5MF_sect_new(sect->type, sect->addr, frag_size)))
+    if(NULL == (ret_value = H5MF__sect_new(sect->type, sect->addr, frag_size)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "can't initialize free space section")
 
     /* Set new section's info */
@@ -449,7 +449,7 @@ H5MF__sect_simple_merge(H5FS_section_info_t **_sect1, H5FS_section_info_t *_sect
     (*sect1)->sect_info.size += sect2->sect_info.size;
 
     /* Get rid of second section */
-    if(H5MF_sect_free((H5FS_section_info_t *)sect2) < 0)
+    if(H5MF__sect_free((H5FS_section_info_t *)sect2) < 0)
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "can't free section node")
 
 done:
@@ -514,7 +514,7 @@ HDfprintf(stderr, "%s: section {%a, %Hu}, shrinks file, eoa = %a\n", FUNC, sect-
             htri_t status;              /* Status from aggregator adjoin */
 
             /* See if section can absorb the aggregator & vice versa */
-            if((status = H5MF_aggr_can_absorb(udata->f, &(udata->f->shared->meta_aggr), sect, &(udata->shrink))) < 0)
+            if((status = H5MF__aggr_can_absorb(udata->f, &(udata->f->shared->meta_aggr), sect, &(udata->shrink))) < 0)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTMERGE, FAIL, "error merging section with aggregation block")
             else if(status > 0) {
                 /* Set the aggregator to operate on */
@@ -533,7 +533,7 @@ HDfprintf(stderr, "%s: section {%a, %Hu}, adjoins metadata aggregator\n", FUNC, 
             htri_t status;              /* Status from aggregator adjoin */
 
             /* See if section can absorb the aggregator & vice versa */
-            if((status = H5MF_aggr_can_absorb(udata->f, &(udata->f->shared->sdata_aggr), sect, &(udata->shrink))) < 0)
+            if((status = H5MF__aggr_can_absorb(udata->f, &(udata->f->shared->sdata_aggr), sect, &(udata->shrink))) < 0)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTMERGE, FAIL, "error merging section with aggregation block")
             else if(status > 0) {
                 /* Set the aggregator to operate on */
@@ -597,14 +597,14 @@ H5MF__sect_simple_shrink(H5FS_section_info_t **_sect, void *_udata)
         HDassert(udata->aggr);
 
         /* Absorb the section into the aggregator or vice versa */
-        if(H5MF_aggr_absorb(udata->f, udata->aggr, *sect, udata->allow_sect_absorb) < 0)
+        if(H5MF__aggr_absorb(udata->f, udata->aggr, *sect, udata->allow_sect_absorb) < 0)
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTMERGE, FAIL, "can't absorb section into aggregator or vice versa")
     } /* end else */
 
     /* Check for freeing section */
     if(udata->shrink != H5MF_SHRINK_SECT_ABSORB_AGGR) {
         /* Free section */
-        if(H5MF_sect_free((H5FS_section_info_t *)*sect) < 0)
+        if(H5MF__sect_free((H5FS_section_info_t *)*sect) < 0)
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "can't free simple section node")
 
         /* Mark section as freed, for free space manager */
@@ -660,7 +660,7 @@ HDfprintf(stderr, "%s: Entering, section {%a, %Hu}\n", FUNC, (*sect)->sect_info.
 
     /* Drop the section if it is at page end and its size is <= pgend threshold */
     if(!rem && (*sect)->sect_info.size <= H5F_PGEND_META_THRES(udata->f) && (*flags & H5FS_ADD_RETURNED_SPACE)) {
-        if(H5MF_sect_free((H5FS_section_info_t *)(*sect)) < 0)
+        if(H5MF__sect_free((H5FS_section_info_t *)(*sect)) < 0)
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "can't free section node")
         *sect = NULL;
         *flags &= (unsigned)~H5FS_ADD_RETURNED_SPACE;
@@ -779,13 +779,13 @@ H5MF__sect_small_merge(H5FS_section_info_t **_sect1, H5FS_section_info_t *_sect2
             if(H5PB_remove_entry(udata->f, (*sect1)->sect_info.addr) < 0)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "can't free merged section")
 
-        if(H5MF_sect_free((H5FS_section_info_t *)(*sect1)) < 0)
+        if(H5MF__sect_free((H5FS_section_info_t *)(*sect1)) < 0)
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "can't free section node")
         *sect1 = NULL;
     } /* end if */
 
     /* Get rid of second section */
-    if(H5MF_sect_free((H5FS_section_info_t *)sect2) < 0)
+    if(H5MF__sect_free((H5FS_section_info_t *)sect2) < 0)
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "can't free section node")
 
 done:
@@ -872,7 +872,7 @@ H5MF__sect_large_merge(H5FS_section_info_t **_sect1, H5FS_section_info_t *_sect2
     (*sect1)->sect_info.size += sect2->sect_info.size;
 
     /* Get rid of second section */
-    if(H5MF_sect_free((H5FS_section_info_t *)sect2) < 0)
+    if(H5MF__sect_free((H5FS_section_info_t *)sect2) < 0)
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "can't free section node")
 
 done:
@@ -976,7 +976,7 @@ H5MF__sect_large_shrink(H5FS_section_info_t **_sect, void *_udata)
         (*sect)->sect_info.size = frag_size;
     else {
         /* Free section */
-        if(H5MF_sect_free((H5FS_section_info_t *)*sect) < 0)
+        if(H5MF__sect_free((H5FS_section_info_t *)*sect) < 0)
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "can't free simple section node")
 
         /* Mark section as freed, for free space manager */
