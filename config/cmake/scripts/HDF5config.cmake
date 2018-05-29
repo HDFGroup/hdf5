@@ -35,7 +35,7 @@ cmake_minimum_required (VERSION 3.10)
 ##############################################################################
 
 set (CTEST_SOURCE_VERSION "1.10.3")
-set (CTEST_SOURCE_VERSEXT "-snap1")
+set (CTEST_SOURCE_VERSEXT "-snap2")
 
 ##############################################################################
 # handle input parameters to script.
