@@ -503,7 +503,7 @@ H5HF_hdr_create(H5F_t *f, const H5HF_create_t *cparam)
 
     /* Create proxies for fractal heap entries */
     if(hdr->swmr_write) {
-        /* Create 'top' proxy for fractal heaptree entries and add header as child */
+        /* Create 'top' proxy for fractal heap entries and add header as child */
         if(NULL == (hdr->top_proxy = H5AC_proxy_entry_create()))
             HGOTO_ERROR(H5E_HEAP, H5E_CANTCREATE, HADDR_UNDEF, "can't create fractal heap entry 'top' proxy")
         if(H5AC_proxy_entry_add_child(hdr->top_proxy, f, hdr) < 0)

@@ -907,7 +907,7 @@ H5HF__cache_hdr_notify(H5AC_notify_action_t action, void *_thing, ...)
                 /* Detach from 'bottom' proxy for fractal heap */
                 if(hdr->bot_proxy) {
                     if(H5AC_proxy_entry_remove_parent(hdr->bot_proxy, hdr) < 0)
-                        HGOTO_ERROR(H5E_BTREE, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency between header and fractal heap 'bottom' proxy")
+                        HGOTO_ERROR(H5E_HEAP, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency between header and fractal heap 'bottom' proxy")
                     /* Don't reset hdr->bot_proxy here, it's destroyed when the header is freed -QAK */
                 } /* end if */
 		break;
