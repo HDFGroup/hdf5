@@ -329,7 +329,8 @@ struct H5O_t {
     hbool_t     chunks_pinned;          /* Whether chunks are pinned from ohdr protect */
 
     /* Object header proxy information (not stored) */
-    H5AC_proxy_entry_t *proxy;          /* Proxy cache entry for all ohdr entries */
+    H5AC_proxy_entry_t *top_proxy;      /* 'Top' proxy cache entry for all header entries */
+    H5AC_proxy_entry_t *bot_proxy;      /* 'Bottom' proxy cache entry for all header entries */
 };
 
 /* Class for types of objects in file */
@@ -403,6 +404,10 @@ typedef struct H5O_chunk_proxy_t {
      * or the chunk with the continuation message that references this chunk.
      */
     void *fd_parent;                    /* Pointer to flush dependency parent */
+
+    /* Object header proxy information (not stored) */
+    H5AC_proxy_entry_t *top_proxy;      /* 'Top' proxy cache entry for all header entries */
+    H5AC_proxy_entry_t *bot_proxy;      /* 'Bottom' proxy cache entry for all header entries */
 } H5O_chunk_proxy_t;
 
 /* Callback information for loading object header chunk from disk */

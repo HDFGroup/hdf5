@@ -336,15 +336,6 @@ H5O_create(H5F_t *f, size_t size_hint, size_t initial_rc, hid_t ocpl_id,
     }
 #endif /* H5O_ENABLE_BAD_MESG_COUNT */
 
-    /* Create object header proxy if doing SWMR writes */
-    if(oh->swmr_write) {
-        /* Create virtual entry, for use as proxy */
-        if(NULL == (oh->proxy = H5AC_proxy_entry_create()))
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTCREATE, FAIL, "can't create object header proxy")
-    }
-    else
-        oh->proxy = NULL;
-
     /* Set initial status flags */
     oh->flags = oh_flags;
 
@@ -436,7 +427,7 @@ H5O_create(H5F_t *f, size_t size_hint, size_t initial_rc, hid_t ocpl_id,
         /* Set the initial refcount & pin the header when its inserted */
         oh->rc = initial_rc;
         insert_flags |= H5AC__PIN_ENTRY_FLAG;
-    }
+    } /* end if */
 
     /* Set metadata tag in API context */
     H5_BEGIN_TAG(oh_addr);
@@ -444,6 +435,21 @@ H5O_create(H5F_t *f, size_t size_hint, size_t initial_rc, hid_t ocpl_id,
     /* Cache object header */
     if(H5AC_insert_entry(f, H5AC_OHDR, oh_addr, oh, insert_flags) < 0)
         HGOTO_ERROR_TAG(H5E_OHDR, H5E_CANTINSERT, FAIL, "unable to cache object header")
+
+    /* Create object header proxies if doing SWMR writes */
+    if(oh->swmr_write) {
+        /* Create 'top' proxy for object header entries and add header as child */
+        if(NULL == (oh->top_proxy = H5AC_proxy_entry_create()))
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTCREATE, FAIL, "can't create object header 'top' proxy")
+        if(H5AC_proxy_entry_add_child(oh->top_proxy, f, oh) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't add object header as child of 'top' proxy")
+
+        /* Create 'bottom' proxy for object header entries and add header as parent */
+        if(NULL == (oh->bot_proxy = H5AC_proxy_entry_create()))
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTCREATE, FAIL, "can't create object header 'bottom' proxy")
+        if(H5AC_proxy_entry_add_parent(oh->bot_proxy, oh) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't add object header as parent of 'bottom' proxy")
+    } /* end if */
 
     /* Reset object header pointer, now that it's been inserted into the cache */
     oh = NULL;
@@ -1099,6 +1105,25 @@ H5O_protect(const H5O_loc_t *loc, unsigned prot_flags, hbool_t pin_all_chunks)
     if(NULL == (oh = (H5O_t *)H5AC_protect(loc->file, H5AC_OHDR, loc->addr, &udata, prot_flags)))
         HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, NULL, "unable to load object header")
 
+    /* Create 'top' & 'bottom' proxies, if they don't exist */
+    if(oh->swmr_write && (NULL == oh->top_proxy || NULL == oh->bot_proxy)) {
+        /* Create 'top' proxy for object header entries, and add header as child */
+        if(NULL == oh->top_proxy) {
+            if(NULL == (oh->top_proxy = H5AC_proxy_entry_create()))
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTCREATE, NULL, "can't create object header entry 'top' proxy")
+            if(H5AC_proxy_entry_add_child(oh->top_proxy, loc->file, oh) < 0)
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, NULL, "unable to add object header entry as child of 'top' proxy")
+        } /* end if */
+
+        /* Create 'bottom' proxy for object header entries, and add header as parent */
+        if(NULL == oh->bot_proxy) {
+            if(NULL == (oh->bot_proxy = H5AC_proxy_entry_create()))
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTCREATE, NULL, "can't create object header entry 'bottom' proxy")
+            if(H5AC_proxy_entry_add_parent(oh->bot_proxy, oh) < 0)
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, NULL, "unable to add object header entry as parent of 'bottom' proxy")
+        } /* end if */
+    } /* end if */
+
     /* Check if there are any continuation messages to process */
     if(cont_msg_info.nmsgs > 0) {
         size_t curr_msg;        /* Current continuation message to process */
@@ -1352,7 +1377,7 @@ H5O_unprotect(const H5O_loc_t *loc, H5O_t *oh, unsigned oh_flags)
             } /* end if */
         } /* end for */
 
-        /* Reet the flag from the unprotect */
+        /* Reset the flag from the unprotect */
         oh->chunks_pinned = FALSE;
     } /* end if */
 
@@ -3084,9 +3109,33 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_get_proxy
+ * Function:	H5O_get_top_proxy
  *
- * Purpose:	Retrieve the proxy for the object header.
+ * Purpose:	Retrieve the 'top' proxy for the object header.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		May 26 2018
+ *
+ *-------------------------------------------------------------------------
+ */
+H5AC_proxy_entry_t *
+H5O_get_top_proxy(const H5O_t *oh)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    /* Check args */
+    HDassert(oh);
+
+    FUNC_LEAVE_NOAPI(oh->top_proxy)
+} /* end H5O_get_top_proxy() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_get_bot_proxy
+ *
+ * Purpose:	Retrieve the 'bottom' proxy for the object header.
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -3096,15 +3145,15 @@ done:
  *-------------------------------------------------------------------------
  */
 H5AC_proxy_entry_t *
-H5O_get_proxy(const H5O_t *oh)
+H5O_get_bot_proxy(const H5O_t *oh)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check args */
     HDassert(oh);
 
-    FUNC_LEAVE_NOAPI(oh->proxy)
-} /* end H5O_get_proxy() */
+    FUNC_LEAVE_NOAPI(oh->bot_proxy)
+} /* end H5O_get_bot_proxy() */
 
 
 /*-------------------------------------------------------------------------
@@ -3161,10 +3210,17 @@ H5O__free(H5O_t *oh)
         oh->mesg = (H5O_mesg_t *)H5FL_SEQ_FREE(H5O_mesg_t, oh->mesg);
     } /* end if */
 
-    /* Destroy the proxy */
-    if(oh->proxy)
-        if(H5AC_proxy_entry_dest(oh->proxy) < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to destroy virtual entry used for proxy")
+    /* Destroy the proxies */
+    if(oh->top_proxy) {
+        if(H5AC_proxy_entry_dest(oh->top_proxy) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "can't destroy object header 'top' proxy")
+        oh->top_proxy = NULL;
+    } /* end if */
+    if(oh->bot_proxy) {
+        if(H5AC_proxy_entry_dest(oh->bot_proxy) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "can't destroy object header 'bottom' proxy")
+        oh->bot_proxy = NULL;
+    } /* end if */
 
     /* destroy object header */
     oh = H5FL_FREE(H5O_t, oh);

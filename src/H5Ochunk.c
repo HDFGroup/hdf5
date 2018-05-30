@@ -128,6 +128,26 @@ H5O__chunk_add(H5F_t *f, H5O_t *oh, unsigned idx, unsigned cont_chunkno)
     /* Insert the chunk proxy into the cache */
     if(H5AC_insert_entry(f, H5AC_OHDR_CHK, oh->chunk[idx].addr, chk_proxy, H5AC__NO_FLAGS_SET) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, FAIL, "unable to cache object header chunk")
+
+    /* Add chunk as child of 'top' proxy */
+    if(oh->top_proxy) {
+        if(H5AC_proxy_entry_add_child(oh->top_proxy, f, chk_proxy) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "unable to add object header chunk entry as child of object header 'top' proxy")
+        chk_proxy->top_proxy = oh->top_proxy;
+    } /* end if */
+    else
+        chk_proxy->top_proxy = NULL;
+
+    /* Add chunk as parent of 'bottom' proxy */
+    if(oh->bot_proxy) {
+        if(H5AC_proxy_entry_add_parent(oh->bot_proxy, chk_proxy) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "unable to add object header chunk entry as parent of object header 'bottom' proxy")
+        chk_proxy->bot_proxy = oh->bot_proxy;
+    } /* end if */
+    else
+        chk_proxy->bot_proxy = NULL;
+
+    /* Reset pointer, now that it's in the cache */
     chk_proxy = NULL;
 
 done:
@@ -201,6 +221,22 @@ H5O__chunk_protect(H5F_t *f, H5O_t *oh, unsigned idx)
         /* Get the chunk proxy */
         if(NULL == (chk_proxy = (H5O_chunk_proxy_t *)H5AC_protect(f, H5AC_OHDR_CHK, oh->chunk[idx].addr, &chk_udata, H5AC__NO_FLAGS_SET)))
             HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, NULL, "unable to load object header chunk")
+
+        /* Add to 'top' proxy, if not already there */
+        if(oh->top_proxy && NULL == chk_proxy->top_proxy) {
+            /* Add object header chunk as child of 'top' proxy */
+            if(H5AC_proxy_entry_add_child(oh->top_proxy, f, chk_proxy) < 0)
+                HGOTO_ERROR(H5E_HEAP, H5E_CANTSET, NULL, "unable to add object header chunk entry as child of object header 'top' proxy")
+            chk_proxy->top_proxy = oh->top_proxy;
+        } /* end if */
+
+        /* Add to 'bottom' proxy, if not already there */
+        if(oh->bot_proxy && NULL == chk_proxy->bot_proxy) {
+            /* Add object header chunk as parent of 'bottom' proxy */
+            if(H5AC_proxy_entry_add_parent(oh->bot_proxy, chk_proxy) < 0)
+                HGOTO_ERROR(H5E_HEAP, H5E_CANTSET, NULL, "unable to add object header chunk entry as parent of object header 'bottom' proxy")
+            chk_proxy->bot_proxy = oh->bot_proxy;
+        } /* end if */
 
         /* Sanity check */
         HDassert(chk_proxy->oh == oh);

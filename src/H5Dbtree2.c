@@ -662,7 +662,7 @@ H5D__btree2_idx_depend(const H5D_chk_idx_info_t *idx_info)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTPROTECT, FAIL, "unable to protect object header")
 
     /* Retrieve the dataset's object header proxy */
-    if(NULL == (oh_proxy = H5O_get_proxy(oh)))
+    if(NULL == (oh_proxy = H5O_get_bot_proxy(oh)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to get dataset object header proxy")
 
     /* Make the v2 B-tree a child flush dependency of the dataset's object header proxy */

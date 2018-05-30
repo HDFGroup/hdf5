@@ -473,15 +473,6 @@ H5O__copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/,
     oh_dst->max_compact = oh_src->max_compact;
     oh_dst->min_dense = oh_src->min_dense;
 
-    /* Create object header proxy if doing SWMR writes */
-    if(oh_dst->swmr_write) {
-        /* Create virtual entry, for use as proxy */
-        if(NULL == (oh_dst->proxy = H5AC_proxy_entry_create()))
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTCREATE, FAIL, "can't create object header proxy")
-    } /* end if */
-    else
-        oh_dst->proxy = NULL;
-
     /* Initialize size of chunk array.  Start off with zero chunks so this field
      * is consistent with the current state of the chunk array.  This is
      * important if an error occurs.
@@ -895,10 +886,27 @@ H5O__copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/,
     /* Insert destination object header in cache */
     if(H5AC_insert_entry(oloc_dst->file, H5AC_OHDR, oloc_dst->addr, oh_dst, H5AC__NO_FLAGS_SET) < 0)
         HGOTO_ERROR_TAG(H5E_OHDR, H5E_CANTINSERT, FAIL, "unable to cache object header")
-    oh_dst = NULL;
     inserted = TRUE;
 
-    /* Reset metadat tag */
+    /* Create object header proxies if doing SWMR writes */
+    if(oh_dst->swmr_write) {
+        /* Create 'top' proxy for object header entries and add header as child */
+        if(NULL == (oh_dst->top_proxy = H5AC_proxy_entry_create()))
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTCREATE, FAIL, "can't create object header 'top' proxy")
+        if(H5AC_proxy_entry_add_child(oh_dst->top_proxy, oloc_dst->file, oh_dst) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't add object header as child of 'top' proxy")
+
+        /* Create 'bottom' proxy for object header entries and add header as parent */
+        if(NULL == (oh_dst->bot_proxy = H5AC_proxy_entry_create()))
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTCREATE, FAIL, "can't create object header 'bottom' proxy")
+        if(H5AC_proxy_entry_add_parent(oh_dst->bot_proxy, oh_dst) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't add object header as parent of 'bottom' proxy")
+    } /* end if */
+
+    /* Reset pointer, now that it's in the cache */
+    oh_dst = NULL;
+
+    /* Reset metadata tag */
     H5_END_TAG
 
     /* Set obj_type and udata, if requested */
