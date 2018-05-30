@@ -160,6 +160,7 @@ New Features
 Support for New Platforms, Languages, and Compilers
 ===================================================
 
+None
 
 
 Bug Fixes since HDF5-1.8.20
