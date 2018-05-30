@@ -1195,14 +1195,14 @@ H5FS_get_sect_count(const H5FS_t *frsp, hsize_t *tot_sect_count)
  *
  * Purpose:     Verify that the free space manager is mostly sane
  *
- * Return:      SUCCEED (Can't fail)
+ * Return:      void
  *
  * Programmer:  Quincey Koziol
  *              Jul 17 2006
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+void
 H5FS__assert(const H5FS_t *fspace)
 {
     FUNC_ENTER_PACKAGE_NOERR
@@ -1228,7 +1228,7 @@ HDfprintf(stderr, "%s: fspace->tot_sect_count = %Hu\n", "H5FS__assert", fspace->
     HDassert(fspace->serial_sect_count > 0 || fspace->ghost_sect_count == 0);
 #endif /* QAK */
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+    FUNC_LEAVE_NOAPI_VOID
 } /* end H5FS__assert() */
 #endif /* H5FS_DEBUG_ASSERT */
 

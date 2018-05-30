@@ -56,44 +56,40 @@
 /********************/
 
 /* 'simple/small/large' section callbacks */
-static H5FS_section_info_t *H5MF_sect_deserialize(const H5FS_section_class_t *cls,
+static H5FS_section_info_t *H5MF__sect_deserialize(const H5FS_section_class_t *cls,
     const uint8_t *buf, haddr_t sect_addr, hsize_t sect_size, unsigned *des_flags);
-static herr_t H5MF_sect_valid(const H5FS_section_class_t *cls,
+static herr_t H5MF__sect_valid(const H5FS_section_class_t *cls,
     const H5FS_section_info_t *sect);
-static H5FS_section_info_t *H5MF_sect_split(H5FS_section_info_t *sect,
+static H5FS_section_info_t *H5MF__sect_split(H5FS_section_info_t *sect,
     hsize_t frag_size);
 
 
 /* 'simple' section callbacks */
-static htri_t H5MF_sect_simple_can_merge(const H5FS_section_info_t *sect1,
+static htri_t H5MF__sect_simple_can_merge(const H5FS_section_info_t *sect1,
     const H5FS_section_info_t *sect2, void *udata);
-static herr_t H5MF_sect_simple_merge(H5FS_section_info_t **sect1,
+static herr_t H5MF__sect_simple_merge(H5FS_section_info_t **sect1,
     H5FS_section_info_t *sect2, void *udata);
-static htri_t H5MF_sect_simple_can_shrink(const H5FS_section_info_t *_sect,
+static htri_t H5MF__sect_simple_can_shrink(const H5FS_section_info_t *_sect,
     void *udata);
-static herr_t H5MF_sect_simple_shrink(H5FS_section_info_t **_sect,
+static herr_t H5MF__sect_simple_shrink(H5FS_section_info_t **_sect,
     void *udata);
 
 
 /* 'small' section callbacks */
-static herr_t H5MF_sect_small_add(H5FS_section_info_t **_sect, unsigned *flags, void *_udata);
-static htri_t H5MF_sect_small_can_merge(const H5FS_section_info_t *sect1,
+static herr_t H5MF__sect_small_add(H5FS_section_info_t **_sect, unsigned *flags, void *_udata);
+static htri_t H5MF__sect_small_can_merge(const H5FS_section_info_t *sect1,
     const H5FS_section_info_t *sect2, void *udata);
-static herr_t H5MF_sect_small_merge(H5FS_section_info_t **sect1,
+static herr_t H5MF__sect_small_merge(H5FS_section_info_t **sect1,
     H5FS_section_info_t *sect2, void *udata);
-static htri_t H5MF_sect_small_can_shrink(const H5FS_section_info_t *_sect,
-    void *udata);
-static herr_t H5MF_sect_small_shrink(H5FS_section_info_t **_sect,
-    void *udata);
 
 /* 'large' section callbacks */
-static htri_t H5MF_sect_large_can_merge(const H5FS_section_info_t *sect1,
+static htri_t H5MF__sect_large_can_merge(const H5FS_section_info_t *sect1,
     const H5FS_section_info_t *sect2, void *udata);
-static herr_t H5MF_sect_large_merge(H5FS_section_info_t **sect1,
+static herr_t H5MF__sect_large_merge(H5FS_section_info_t **sect1,
     H5FS_section_info_t *sect2, void *udata);
-static htri_t H5MF_sect_large_can_shrink(const H5FS_section_info_t *_sect,
+static htri_t H5MF__sect_large_can_shrink(const H5FS_section_info_t *_sect,
     void *udata);
-static herr_t H5MF_sect_large_shrink(H5FS_section_info_t **_sect,
+static herr_t H5MF__sect_large_shrink(H5FS_section_info_t **_sect,
     void *udata);
 
 /*********************/
@@ -115,14 +111,14 @@ H5FS_section_class_t H5MF_FSPACE_SECT_CLS_SIMPLE[1] = {{
     /* Object methods */
     NULL,				/* Add section                  */
     NULL,				/* Serialize section            */
-    H5MF_sect_deserialize,		/* Deserialize section          */
-    H5MF_sect_simple_can_merge,		/* Can sections merge?          */
-    H5MF_sect_simple_merge,		/* Merge sections               */
-    H5MF_sect_simple_can_shrink,	/* Can section shrink container?*/
-    H5MF_sect_simple_shrink,		/* Shrink container w/section   */
+    H5MF__sect_deserialize,		/* Deserialize section          */
+    H5MF__sect_simple_can_merge,		/* Can sections merge?          */
+    H5MF__sect_simple_merge,		/* Merge sections               */
+    H5MF__sect_simple_can_shrink,	/* Can section shrink container?*/
+    H5MF__sect_simple_shrink,		/* Shrink container w/section   */
     H5MF_sect_free,			/* Free section                 */
-    H5MF_sect_valid,			/* Check validity of section    */
-    H5MF_sect_split,			/* Split section node for alignment */
+    H5MF__sect_valid,			/* Check validity of section    */
+    H5MF__sect_split,			/* Split section node for alignment */
     NULL,				/* Dump debugging for section   */
 }};
 
@@ -139,16 +135,16 @@ H5FS_section_class_t H5MF_FSPACE_SECT_CLS_SMALL[1] = {{
     NULL,                       /* Terminate section class      */
 
     /* Object methods */
-    H5MF_sect_small_add,        /* Add section                  */
+    H5MF__sect_small_add,        /* Add section                  */
     NULL,                       /* Serialize section            */
-    H5MF_sect_deserialize,		/* Deserialize section          */
-    H5MF_sect_small_can_merge,  /* Can sections merge?          */
-    H5MF_sect_small_merge,      /* Merge sections               */
-    NULL,			/* Can section shrink container?*/
-    NULL,			/* Shrink container w/section   */
+    H5MF__sect_deserialize,		/* Deserialize section          */
+    H5MF__sect_small_can_merge,  /* Can sections merge?          */
+    H5MF__sect_small_merge,      /* Merge sections               */
+    NULL,		                /* Can section shrink container?*/
+    NULL,		                /* Shrink container w/section   */
     H5MF_sect_free,             /* Free section                 */
-    H5MF_sect_valid,            /* Check validity of section    */
-    H5MF_sect_split,            /* Split section node for alignment */
+    H5MF__sect_valid,            /* Check validity of section    */
+    H5MF__sect_split,            /* Split section node for alignment */
     NULL,                       /* Dump debugging for section   */
 }};
 
@@ -167,14 +163,14 @@ H5FS_section_class_t H5MF_FSPACE_SECT_CLS_LARGE[1] = {{
     /* Object methods */
     NULL,				/* Add section                  */
     NULL,				/* Serialize section            */
-    H5MF_sect_deserialize,		/* Deserialize section          */
-    H5MF_sect_large_can_merge,		/* Can sections merge?          */
-    H5MF_sect_large_merge,		/* Merge sections               */
-    H5MF_sect_large_can_shrink,		/* Can section shrink container?*/
-    H5MF_sect_large_shrink,		/* Shrink container w/section   */
+    H5MF__sect_deserialize,		/* Deserialize section          */
+    H5MF__sect_large_can_merge,		/* Can sections merge?          */
+    H5MF__sect_large_merge,		/* Merge sections               */
+    H5MF__sect_large_can_shrink,		/* Can section shrink container?*/
+    H5MF__sect_large_shrink,		/* Shrink container w/section   */
     H5MF_sect_free,			/* Free section                 */
-    H5MF_sect_valid,			/* Check validity of section    */
-    H5MF_sect_split,			/* Split section node for alignment */
+    H5MF__sect_valid,			/* Check validity of section    */
+    H5MF__sect_split,			/* Split section node for alignment */
     NULL,				/* Dump debugging for section   */
 }};
 
@@ -283,14 +279,14 @@ H5MF_sect_free(H5FS_section_info_t *_sect)
  *-------------------------------------------------------------------------
  */
 static H5FS_section_info_t *
-H5MF_sect_deserialize(const H5FS_section_class_t *cls,
+H5MF__sect_deserialize(const H5FS_section_class_t *cls,
     const uint8_t H5_ATTR_UNUSED *buf, haddr_t sect_addr,
     hsize_t sect_size, unsigned H5_ATTR_UNUSED *des_flags)
 {
     H5MF_free_section_t *sect;          /* New section */
     H5FS_section_info_t *ret_value = NULL;      /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Check arguments. */
     HDassert(cls);
@@ -306,11 +302,11 @@ H5MF_sect_deserialize(const H5FS_section_class_t *cls,
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5MF_sect_deserialize() */
+} /* H5MF__sect_deserialize() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5MF_sect_valid
+ * Function:	H5MF__sect_valid
  *
  * Purpose:	Check the validity of a section
  *
@@ -323,7 +319,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5MF_sect_valid(const H5FS_section_class_t H5_ATTR_UNUSED *cls,
+H5MF__sect_valid(const H5FS_section_class_t H5_ATTR_UNUSED *cls,
     const H5FS_section_info_t
 #ifdef NDEBUG
     H5_ATTR_UNUSED
@@ -334,17 +330,17 @@ H5MF_sect_valid(const H5FS_section_class_t H5_ATTR_UNUSED *cls,
     const H5MF_free_section_t *sect = (const H5MF_free_section_t *)_sect;   /* File free section */
 #endif /* NDEBUG */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* Check arguments. */
     HDassert(sect);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-}   /* H5MF_sect_valid() */
+}   /* H5MF__sect_valid() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5MF_sect_split
+ * Function:	H5MF__sect_split
  *
  * Purpose:	Split SECT into 2 sections: fragment for alignment & the aligned section
  *          SECT's addr and size are updated to point to the aligned section
@@ -357,11 +353,11 @@ H5MF_sect_valid(const H5FS_section_class_t H5_ATTR_UNUSED *cls,
  *-------------------------------------------------------------------------
  */
 static H5FS_section_info_t *
-H5MF_sect_split(H5FS_section_info_t *sect, hsize_t frag_size)
+H5MF__sect_split(H5FS_section_info_t *sect, hsize_t frag_size)
 {
     H5MF_free_section_t *ret_value = NULL;      /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Allocate space for new section */
     if(NULL == (ret_value = H5MF_sect_new(sect->type, sect->addr, frag_size)))
@@ -373,14 +369,14 @@ H5MF_sect_split(H5FS_section_info_t *sect, hsize_t frag_size)
 
 done:
     FUNC_LEAVE_NOAPI((H5FS_section_info_t *)ret_value)
-} /* end H5MF_sect_split() */
+} /* end H5MF__sect_split() */
 
 /* 
  * "simple" section callbacks
  */
 
 /*-------------------------------------------------------------------------
- * Function:	H5MF_sect_simple_can_merge
+ * Function:	H5MF__sect_simple_can_merge
  *
  * Purpose:	Can two sections of this type merge?
  *
@@ -395,14 +391,14 @@ done:
  *-------------------------------------------------------------------------
  */
 static htri_t
-H5MF_sect_simple_can_merge(const H5FS_section_info_t *_sect1,
+H5MF__sect_simple_can_merge(const H5FS_section_info_t *_sect1,
     const H5FS_section_info_t *_sect2, void H5_ATTR_UNUSED *_udata)
 {
     const H5MF_free_section_t *sect1 = (const H5MF_free_section_t *)_sect1;   /* File free section */
     const H5MF_free_section_t *sect2 = (const H5MF_free_section_t *)_sect2;   /* File free section */
     htri_t ret_value = FAIL;            /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* Check arguments. */
     HDassert(sect1);
@@ -414,11 +410,11 @@ H5MF_sect_simple_can_merge(const H5FS_section_info_t *_sect1,
     ret_value = H5F_addr_eq(sect1->sect_info.addr + sect1->sect_info.size, sect2->sect_info.addr);
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5MF_sect_simple_can_merge() */
+} /* H5MF__sect_simple_can_merge() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5MF_sect_simple_merge
+ * Function:	H5MF__sect_simple_merge
  *
  * Purpose:	Merge two sections of this type
  *
@@ -433,14 +429,14 @@ H5MF_sect_simple_can_merge(const H5FS_section_info_t *_sect1,
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5MF_sect_simple_merge(H5FS_section_info_t **_sect1, H5FS_section_info_t *_sect2,
+H5MF__sect_simple_merge(H5FS_section_info_t **_sect1, H5FS_section_info_t *_sect2,
     void H5_ATTR_UNUSED *_udata)
 {
     H5MF_free_section_t **sect1 = (H5MF_free_section_t **)_sect1;   /* File free section */
     H5MF_free_section_t *sect2 = (H5MF_free_section_t *)_sect2;   /* File free section */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Check arguments. */
     HDassert(sect1);
@@ -458,11 +454,11 @@ H5MF_sect_simple_merge(H5FS_section_info_t **_sect1, H5FS_section_info_t *_sect2
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5MF_sect_simple_merge() */
+} /* H5MF__sect_simple_merge() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5MF_sect_simple_can_shrink
+ * Function:	H5MF__sect_simple_can_shrink
  *
  * Purpose:	Can this section shrink the container?
  *
@@ -475,7 +471,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static htri_t
-H5MF_sect_simple_can_shrink(const H5FS_section_info_t *_sect, void *_udata)
+H5MF__sect_simple_can_shrink(const H5FS_section_info_t *_sect, void *_udata)
 {
     const H5MF_free_section_t *sect = (const H5MF_free_section_t *)_sect;   /* File free section */
     H5MF_sect_ud_t *udata = (H5MF_sect_ud_t *)_udata;   /* User data for callback */
@@ -483,7 +479,7 @@ H5MF_sect_simple_can_shrink(const H5FS_section_info_t *_sect, void *_udata)
     haddr_t end;                /* End of section to extend */
     htri_t ret_value = FAIL;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Check arguments. */
     HDassert(sect);
@@ -557,11 +553,11 @@ HDfprintf(stderr, "%s: section {%a, %Hu}, adjoins small data aggregator\n", FUNC
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5MF_sect_simple_can_shrink() */
+} /* H5MF__sect_simple_can_shrink() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5MF_sect_simple_shrink
+ * Function:	H5MF__sect_simple_shrink
  *
  * Purpose:	Shrink container with section
  *
@@ -574,13 +570,13 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5MF_sect_simple_shrink(H5FS_section_info_t **_sect, void *_udata)
+H5MF__sect_simple_shrink(H5FS_section_info_t **_sect, void *_udata)
 {
     H5MF_free_section_t **sect = (H5MF_free_section_t **)_sect;   /* File free section */
     H5MF_sect_ud_t *udata = (H5MF_sect_ud_t *)_udata;   /* User data for callback */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Check arguments. */
     HDassert(sect);
@@ -617,7 +613,7 @@ H5MF_sect_simple_shrink(H5FS_section_info_t **_sect, void *_udata)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5MF_sect_simple_shrink() */
+} /* H5MF__sect_simple_shrink() */
 
 /* 
  * "small" section callbacks
@@ -625,7 +621,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5MF_sect_small_add
+ * Function:    H5MF__sect_small_add
  *
  * Purpose:     Perform actions on a small "meta" action before adding it to the free space manager:
  *              1) Drop the section if it is at page end and its size <= page end threshold
@@ -640,7 +636,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5MF_sect_small_add(H5FS_section_info_t **_sect, unsigned *flags, void *_udata)
+H5MF__sect_small_add(H5FS_section_info_t **_sect, unsigned *flags, void *_udata)
 {
     H5MF_free_section_t **sect = (H5MF_free_section_t **)_sect;   /* Fractal heap free section */
     H5MF_sect_ud_t *udata = (H5MF_sect_ud_t *)_udata;   /* User data for callback */
@@ -648,7 +644,7 @@ H5MF_sect_small_add(H5FS_section_info_t **_sect, unsigned *flags, void *_udata)
     hsize_t rem, prem;
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
 #ifdef H5MF_ALLOC_DEBUG_MORE
 HDfprintf(stderr, "%s: Entering, section {%a, %Hu}\n", FUNC, (*sect)->sect_info.addr, (*sect)->sect_info.size);
@@ -684,122 +680,11 @@ HDfprintf(stderr, "%s: section is adjusted {%a, %Hu}\n", FUNC, (*sect)->sect_inf
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5MF_sect_small_add() */
+} /* H5MF__sect_small_add() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5MF_sect_small_can_shrink
- *
- * Purpose:	Can this section shrink the container?
- *
- * Note: 	A small section is allowed to shrink only at closing.
- *
- * Note:	This is unused currently, to maintain the invariant that the
- *		file size is always a multiple of the page size.
- *
- *		(This function should probably be deleted, or the invariant
- *		relaxed)
- *
- * Return:	Success:	non-negative (TRUE/FALSE)
- *          Failure:	negative
- *
- * Programmer:	Vailin Choi; Dec 2012
- *
- *-------------------------------------------------------------------------
- */
-static htri_t
-H5MF_sect_small_can_shrink(const H5FS_section_info_t *_sect, void *_udata)
-{
-    const H5MF_free_section_t *sect = (const H5MF_free_section_t *)_sect;   /* File free section */
-    H5MF_sect_ud_t *udata = (H5MF_sect_ud_t *)_udata;   /* User data for callback */
-    haddr_t eoa;                /* End of address space in the file */
-    haddr_t end;                /* End of section to extend */
-    htri_t ret_value = FALSE;	/* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-    /* Check arguments. */
-    HDassert(sect);
-    HDassert(udata);
-    HDassert(udata->f);
-
-    /* Retrieve the end of the file's address space */
-    if(HADDR_UNDEF == (eoa = H5FD_get_eoa(udata->f->shared->lf, udata->alloc_type)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "driver get_eoa request failed")
-
-    /* Compute address of end of section to check */
-    end = sect->sect_info.addr + sect->sect_info.size;
-
-    /* Check if the section is exactly at the end of the allocated space in the file */
-    if(H5F_addr_eq(end, eoa) && sect->sect_info.size == udata->f->shared->fs_page_size) {
-        udata->shrink = H5MF_SHRINK_EOA;
-
-#ifdef H5MF_ALLOC_DEBUG_MORE
-HDfprintf(stderr, "%s: section {%a, %Hu}, shrinks file, eoa = %a\n", FUNC, sect->sect_info.addr, sect->sect_info.size, eoa);
-#endif /* H5MF_ALLOC_DEBUG_MORE */
-
-        /* Indicate shrinking can occur */
-        HGOTO_DONE(TRUE)
-    } /* end if */
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5MF_sect_small_can_shrink() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5MF_sect_small_shrink
- *
- * Purpose:	Shrink container with section
- *
- * Note:	This is unused currently, to maintain the invariant that the
- *		file size is always a multiple of the page size.
- *
- *		(This function should probably be deleted, or the invariant
- *		relaxed)
- *
- * Return:	Success:	non-negative
- *          Failure:	negative 
- * 
- * Programmer:	Vailin Choi; Dec 2012
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5MF_sect_small_shrink(H5FS_section_info_t **_sect, void *_udata)
-{
-    H5MF_free_section_t **sect = (H5MF_free_section_t **)_sect;   /* File free section */
-    H5MF_sect_ud_t *udata = (H5MF_sect_ud_t *)_udata;   /* User data for callback */
-    herr_t ret_value = SUCCEED;         /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-    /* Check arguments. */
-    HDassert(sect);
-    HDassert((*sect)->sect_info.type == H5MF_FSPACE_SECT_SMALL);
-    HDassert(udata);
-    HDassert(udata->f);
-    HDassert(udata->shrink == H5MF_SHRINK_EOA);
-    HDassert(H5F_INTENT(udata->f) & H5F_ACC_RDWR);
-
-    /* Release section's space at EOA */
-    if(H5F__free(udata->f, udata->alloc_type, (*sect)->sect_info.addr, (*sect)->sect_info.size) < 0)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "driver free request failed")
-
-    /* Free section */
-    if(H5MF_sect_free((H5FS_section_info_t *)*sect) < 0)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "can't free simple section node")
-
-    /* Mark section as freed, for free space manager */
-    *sect = NULL;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5MF_sect_small_shrink() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5MF_sect_small_can_merge
+ * Function:	H5MF__sect_small_can_merge
  *
  * Purpose:	Can two sections of this type merge?
  *
@@ -814,7 +699,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static htri_t
-H5MF_sect_small_can_merge(const H5FS_section_info_t *_sect1,
+H5MF__sect_small_can_merge(const H5FS_section_info_t *_sect1,
     const H5FS_section_info_t *_sect2, void *_udata)
 {
     const H5MF_free_section_t *sect1 = (const H5MF_free_section_t *)_sect1;   /* File free section */
@@ -822,7 +707,7 @@ H5MF_sect_small_can_merge(const H5FS_section_info_t *_sect1,
     H5MF_sect_ud_t *udata = (H5MF_sect_ud_t *)_udata;   /* User data for callback */
     htri_t ret_value = FALSE;                   	/* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* Check arguments. */
     HDassert(sect1);
@@ -842,11 +727,11 @@ HDfprintf(stderr, "%s: Leaving: ret_value = %t\n", FUNC, ret_value);
 #endif /* H5MF_ALLOC_DEBUG_MORE */
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5MF_sect_small_can_merge() */
+} /* H5MF__sect_small_can_merge() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5MF_sect_small_merge
+ * Function:	H5MF__sect_small_merge
  *
  * Purpose:	Merge two sections of this type
  *
@@ -862,7 +747,7 @@ HDfprintf(stderr, "%s: Leaving: ret_value = %t\n", FUNC, ret_value);
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5MF_sect_small_merge(H5FS_section_info_t **_sect1, H5FS_section_info_t *_sect2,
+H5MF__sect_small_merge(H5FS_section_info_t **_sect1, H5FS_section_info_t *_sect2,
     void *_udata)
 {
     H5MF_free_section_t **sect1 = (H5MF_free_section_t **)_sect1;   /* File free section */
@@ -870,7 +755,7 @@ H5MF_sect_small_merge(H5FS_section_info_t **_sect1, H5FS_section_info_t *_sect2,
     H5MF_sect_ud_t *udata = (H5MF_sect_ud_t *)_udata;   /* User data for callback */
     herr_t ret_value = SUCCEED;         		/* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Check arguments. */
     HDassert(sect1);
@@ -905,7 +790,7 @@ H5MF_sect_small_merge(H5FS_section_info_t **_sect1, H5FS_section_info_t *_sect2,
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5MF_sect_small_merge() */
+} /* H5MF__sect_small_merge() */
 
 /* 
  * "Large" section callbacks
@@ -913,7 +798,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5MF_sect_large_can_merge (same as H5MF_sect_simple_can_merge)
+ * Function:	H5MF__sect_large_can_merge (same as H5MF__sect_simple_can_merge)
  *
  * Purpose:	Can two sections of this type merge?
  *
@@ -927,14 +812,14 @@ done:
  *-------------------------------------------------------------------------
  */
 static htri_t
-H5MF_sect_large_can_merge(const H5FS_section_info_t *_sect1,
+H5MF__sect_large_can_merge(const H5FS_section_info_t *_sect1,
     const H5FS_section_info_t *_sect2, void H5_ATTR_UNUSED *_udata)
 {
     const H5MF_free_section_t *sect1 = (const H5MF_free_section_t *)_sect1;   	/* File free section */
     const H5MF_free_section_t *sect2 = (const H5MF_free_section_t *)_sect2;   	/* File free section */
     htri_t ret_value = FALSE;           /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* Check arguments. */
     HDassert(sect1);
@@ -949,11 +834,11 @@ HDfprintf(stderr, "%s: Leaving: ret_value = %t\n", FUNC, ret_value);
 #endif /* H5MF_ALLOC_DEBUG_MORE */
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5MF_sect_large_can_merge() */
+} /* H5MF__sect_large_can_merge() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5MF_sect_large_merge (same as H5MF_sect_simple_merge)
+ * Function:	H5MF__sect_large_merge (same as H5MF__sect_simple_merge)
  *
  * Purpose:	Merge two sections of this type
  *
@@ -967,14 +852,14 @@ HDfprintf(stderr, "%s: Leaving: ret_value = %t\n", FUNC, ret_value);
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5MF_sect_large_merge(H5FS_section_info_t **_sect1, H5FS_section_info_t *_sect2,
+H5MF__sect_large_merge(H5FS_section_info_t **_sect1, H5FS_section_info_t *_sect2,
     void H5_ATTR_UNUSED *_udata)
 {
     H5MF_free_section_t **sect1 = (H5MF_free_section_t **)_sect1;   /* File free section */
     H5MF_free_section_t *sect2 = (H5MF_free_section_t *)_sect2;   /* File free section */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Check arguments. */
     HDassert(sect1);
@@ -992,11 +877,11 @@ H5MF_sect_large_merge(H5FS_section_info_t **_sect1, H5FS_section_info_t *_sect2,
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5MF_sect_large_merge() */
+} /* H5MF__sect_large_merge() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5MF_sect_large_can_shrink
+ * Function:	H5MF__sect_large_can_shrink
  *
  * Purpose:	Can this section shrink the container?
  *
@@ -1008,7 +893,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static htri_t
-H5MF_sect_large_can_shrink(const H5FS_section_info_t *_sect, void *_udata)
+H5MF__sect_large_can_shrink(const H5FS_section_info_t *_sect, void *_udata)
 {
     const H5MF_free_section_t *sect = (const H5MF_free_section_t *)_sect;   /* File free section */
     H5MF_sect_ud_t *udata = (H5MF_sect_ud_t *)_udata;   /* User data for callback */
@@ -1016,7 +901,7 @@ H5MF_sect_large_can_shrink(const H5FS_section_info_t *_sect, void *_udata)
     haddr_t end;                /* End of section to extend */
     htri_t ret_value = FALSE;	/* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Check arguments. */
     HDassert(sect);
@@ -1045,11 +930,11 @@ HDfprintf(stderr, "%s: section {%a, %Hu}, shrinks file, eoa = %a\n", FUNC, sect-
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5MF_sect_large_can_shrink() */
+} /* H5MF__sect_large_can_shrink() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5MF_sect_large_shrink
+ * Function:	H5MF__sect_large_shrink
  *
  * Purpose:     Shrink a large-sized section
  *
@@ -1061,14 +946,14 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5MF_sect_large_shrink(H5FS_section_info_t **_sect, void *_udata)
+H5MF__sect_large_shrink(H5FS_section_info_t **_sect, void *_udata)
 {
     H5MF_free_section_t **sect = (H5MF_free_section_t **)_sect; /* File free section */
     H5MF_sect_ud_t *udata = (H5MF_sect_ud_t *)_udata;           /* User data for callback */
     hsize_t frag_size = 0;              /* Fragment size */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Check arguments. */
     HDassert(sect);
@@ -1100,5 +985,5 @@ H5MF_sect_large_shrink(H5FS_section_info_t **_sect, void *_udata)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5MF_sect_large_shrink() */
+} /* H5MF__sect_large_shrink() */
 
