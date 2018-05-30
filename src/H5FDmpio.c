@@ -59,6 +59,24 @@ static char H5FD_mpi_native_g[] = "native";
  */
 typedef struct H5FD_mpio_t {
     H5FD_t	pub;		/*public stuff, must be first		*/
+
+/* For comparisons */
+#ifndef H5_HAVE_WIN32_API
+    /* On most systems the combination of device and i-node number uniquely
+     * identify a file.  Note that Cygwin, MinGW and other Windows POSIX
+     * environments have the stat function (which fakes inodes)
+     * and will use the 'device + inodes' scheme as opposed to the
+     * Windows code further below.
+     */
+    dev_t       device;     /* file device number   */
+    ino_t       inode;      /* file i-node number   */
+
+#else
+    DWORD       nFileIndexLow;
+    DWORD       nFileIndexHigh;
+    DWORD       dwVolumeSerialNumber;
+
+#endif
     MPI_File	f;		/*MPIO file handle			*/
     MPI_Comm	comm;		/*communicator				*/
     MPI_Info	info;		/*file information			*/
@@ -80,6 +98,7 @@ static herr_t H5FD_mpio_fapl_free(void *_fa);
 static H5FD_t *H5FD_mpio_open(const char *name, unsigned flags, hid_t fapl_id,
 			      haddr_t maxaddr);
 static herr_t H5FD_mpio_close(H5FD_t *_file);
+static int H5FD_mpio_cmp(const H5FD_t *_f1, const H5FD_t *_f2);
 static herr_t H5FD_mpio_query(const H5FD_t *_f1, unsigned long *flags);
 static haddr_t H5FD_mpio_get_eoa(const H5FD_t *_file, H5FD_mem_t type);
 static herr_t H5FD_mpio_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t addr);
@@ -115,7 +134,7 @@ static const H5FD_class_mpi_t H5FD_mpio_g = {
     NULL,					/*dxpl_free		*/
     H5FD_mpio_open,				/*open			*/
     H5FD_mpio_close,				/*close			*/
-    NULL,					/*cmp			*/
+    H5FD_mpio_cmp,                              /*cmp                   */
     H5FD_mpio_query,		                /*query			*/
     NULL,					/*get_type_map		*/
     NULL,					/*alloc			*/
@@ -902,6 +921,73 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
+/*
+ * Function:    H5FD_mpio_fileinfo_get
+ *
+ * Purpose:     Implements a normal file open for MPI rank 0.  This
+ *              essentially a copy of the H5FD_sec2_open, where we
+ *              open the file and cache a few key structures before
+ *              closing.  These cached structures are those which
+ *              are eventually utilized for file comparisons.
+ *
+ * Return:      NONE.  Any failures that occur here should ultimately
+ *              be reflected in the actual MPI_File_open call which
+ *              occurs immediately following completion of this
+ *              function.
+ */
+static void
+H5FD_mpio_fileinfo_get(const char *name, unsigned flags, H5FD_mpio_t *file)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    int             fd          = -1;       /* File descriptor          */
+    int             o_flags;                /* Flags for open() call    */
+    h5_stat_t       sb;
+
+#ifdef H5_HAVE_WIN32_API
+    struct _BY_HANDLE_FILE_INFORMATION fileinfo;
+    HANDLE          hFile;                  /* Native windows file handle */
+#endif
+    o_flags = (H5F_ACC_RDWR & flags) ? O_RDWR : O_RDONLY;
+
+    /* Open the file */
+    if((fd = HDopen(name, o_flags, H5_POSIX_CREATE_MODE_RW)) < 0) {
+#ifdef H5FDmpio_DEBUG
+if (H5FD_mpio_Debug[(int)'t'])
+fprintf(stdout, "H5FD_mpio_fileinfo_get: HDopen failed!\n");
+#endif
+        goto done;
+    }
+    if(HDfstat(fd, &sb) < 0) {
+#ifdef H5FDmpio_DEBUG
+if (H5FD_mpio_Debug[(int)'t'])
+fprintf(stdout, "H5FD_mpio_fileinfo_get: HDfstat failed!\n");
+#endif
+        goto done;
+    }
+#ifdef H5_HAVE_WIN32_API
+    hFile = (HANDLE)_get_osfhandle(fd);
+    if(INVALID_HANDLE_VALUE == hFile)
+        goto done;
+
+    if(!GetFileInformationByHandle((HANDLE)hFile, &fileinfo))
+        goto done;
+
+    file->nFileIndexHigh = fileinfo.nFileIndexHigh;
+    file->nFileIndexLow = fileinfo.nFileIndexLow;
+    file->dwVolumeSerialNumber = fileinfo.dwVolumeSerialNumber;
+#else /* H5_HAVE_WIN32_API */
+    file->device = sb.st_dev;
+    file->inode = sb.st_ino;
+#endif /* H5_HAVE_WIN32_API */
+
+done:
+    if(fd >= 0)
+        HDclose(fd);
+
+    FUNC_LEAVE_NOAPI_VOID
+}
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5FD_mpio_open
@@ -1040,6 +1126,14 @@ H5FD_mpio_open(const char *name, unsigned flags, hid_t fapl_id,
     file->eof = H5FD_mpi_MPIOff_to_haddr(size);
     file->local_eof = file->eof;
 
+    /* Mark initial barriers in H5FD_mpio_truncate() as necessary */
+    // file->do_pre_trunc_barrier = TRUE;
+
+    if (mpi_rank == 0) {
+        /* Gather some file info for future comparisons */
+        H5FD_mpio_fileinfo_get( name, flags, file );
+    }
+
     /* Set return value */
     ret_value=(H5FD_t*)file;
 
@@ -1061,6 +1155,103 @@ done:
 #endif
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_mpio_open() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD_mpio_cmp
+ *
+ * Purpose:     Compares two files belonging to this driver using an
+ *              arbitrary (but consistent) ordering.
+ *
+ * Return:      Success:    A value like strcmp()
+ *              Failure:    never fails (arguments were checked by the
+ *                          caller).
+ *
+ * Programmer:  Richard Warren
+ *              Borrowed from H5FD_sec2_cmp (Robb Matzke)
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5FD_mpio_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
+{
+    const H5FD_mpio_t   *f1 = (const H5FD_mpio_t *)_f1;
+    const H5FD_mpio_t   *f2 = (const H5FD_mpio_t *)_f2;
+    int ret_value = 0;
+    int cmp_value = 0;
+    int mpi_result;
+    MPI_Group f1_grp;
+    MPI_Group f2_grp;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if ((mpi_result = MPI_Comm_group(f1->comm, &f1_grp)) != MPI_SUCCESS)
+        HMPI_GOTO_ERROR(FAIL, "MPI_Comm_group(comm1) failed", mpi_result)
+
+    if ((mpi_result = MPI_Comm_group(f1->comm, &f2_grp)) != MPI_SUCCESS)
+        HMPI_GOTO_ERROR(FAIL, "MPI_Comm_group(comm2) failed", mpi_result)
+
+    if ((mpi_result = MPI_Group_compare(f1_grp,f2_grp,&cmp_value)) != MPI_SUCCESS)
+        HMPI_GOTO_ERROR(FAIL, "MPI_Group_compare failed", mpi_result)
+
+    /*  The group compare return values can be one of the following:
+     *   MPI_IDENT(0)     == two groups/communicators are identical
+     *   MPI_CONGRUENT(1) == two groups/communicators are equal but
+     *                       are distinct communication domains
+     *  ----------------  for comparison purposes, the above are ok
+     *  ----------------  but those below can lead to unexpected
+     *  ----------------  results, so we will FAIL the comparison.
+     *   MPI_SIMILAR(2)   == two groups have the same members but
+     *                       ordering may be different
+     *   MPI_UNEQUAL(3)   == self descriptive (unequal)
+     */
+    if (cmp_value >= MPI_SIMILAR)
+        HMPI_GOTO_ERROR(FAIL, "MPI Comms are incompatable", cmp_value)
+
+    if (f1->mpi_rank == 0) {
+        /* Because MPI file handles may NOT have any relation to
+         * to actual file handle, we utilize a "regular" file open
+         * on MPI rank 0 prior to opening with the MPI-IO routines.
+         * The H5FD_mpio_t structure is utilized to cache the
+         * relevant comparison values which we use for comparisons
+         * below.
+         */
+#ifdef H5_HAVE_WIN32_API
+        if ((f1->dwVolumeSerialNumber < f2->dwVolumeSerialNumber) ||
+            (f1->nFileIndexHigh       < f2->nFileIndexHigh)       ||
+            (f1->nFileIndexLow        < f2->nFileIndexLow))
+            cmp_value = -1;
+        else
+        if ((f1->dwVolumeSerialNumber > f2->dwVolumeSerialNumber) ||
+	    (f1->nFileIndexHigh       > f2->nFileIndexHigh)       ||
+            (f1->nFileIndexLow        > f2->nFileIndexLow))
+            cmp_value = 1;
+#else  /* Not WIN32 */
+#ifdef H5_DEV_T_IS_SCALAR
+        if (f1->device < f2->device)     cmp_value = -1;
+        else if(f1->device > f2->device) cmp_value = 1;
+#else /* H5_DEV_T_IS_SCALAR */
+        /* If dev_t isn't a scalar value on this system, just use memcmp to
+         * determine if the values are the same or not.  The actual return value
+         * shouldn't really matter...
+         */
+        cmp_value = HDmemcmp(&(f1->device),&(f2->device),sizeof(dev_t));
+#endif /* H5_DEV_T_IS_SCALAR */
+        /* Continue checking ONLY if we haven't failed yet */
+        if (!cmp_value) {
+           if(f1->inode < f2->inode)     cmp_value = -1;
+           else if(f1->inode > f2->inode) cmp_value = 1;
+#endif /* H5_HAVE_WIN32_API */
+        }
+    }
+    if (MPI_SUCCESS != (mpi_result = MPI_Bcast(&cmp_value, 1, MPI_INT, 0, f1->comm)))
+        HMPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", mpi_result)
+
+    ret_value = cmp_value;
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD_mpio_cmp() */
 
 
 /*-------------------------------------------------------------------------

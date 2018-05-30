@@ -673,7 +673,15 @@ H5O__layout_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, 
             break;
 
         case H5D_VIRTUAL:
-            /* Encode heap ID for VDS info */
+
+            /* Heap block should have been created already! */
+            HDassert((mesg->storage.u.virt.serial_list_hobjid.addr != HADDR_UNDEF)
+		     || (mesg->storage.u.virt.list_nused == 0));
+
+            /* Heap information
+             * During H5Fclose, the cache flushing can call H5O_msg_flush calls
+             * which we need to handle here...
+             */
             H5F_addr_encode(f, &p, mesg->storage.u.virt.serial_list_hobjid.addr);
             UINT32ENCODE(p, mesg->storage.u.virt.serial_list_hobjid.idx);
             break;

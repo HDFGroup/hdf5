@@ -87,6 +87,8 @@ static herr_t H5D__virtual_write(H5D_io_info_t *io_info,
 static herr_t H5D__virtual_flush(H5D_t *dset);
 
 /* Other functions */
+static herr_t H5D__virtual_insert_gh_obj(H5F_t *f,
+    H5O_storage_virtual_t *storage);
 static herr_t H5D__virtual_open_source_dset(const H5D_t *vdset,
     H5O_storage_virtual_ent_t *virtual_ent,
     H5O_storage_virtual_srcdset_t *source_dset);
@@ -424,7 +426,7 @@ H5D__virtual_store_layout(H5F_t *f, H5O_layout_t *layout)
     /* Sanity checking */
     HDassert(f);
     HDassert(layout);
-    HDassert(layout->storage.u.virt.serial_list_hobjid.addr == HADDR_UNDEF);
+    // HDassert(layout->storage.u.virt.serial_list_hobjid.addr == HADDR_UNDEF);
 
     /* Create block if # of used entries > 0 */
     if(layout->storage.u.virt.list_nused > 0) {
@@ -816,6 +818,137 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5D__virtual_insert_gh_obj
+ *
+ * Purpose:     Creates and inserts the global heap object for the virtual
+ *              dataset.  This object contains the VDS mappings.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Neil Fortner
+ *              August 11, 2017
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D__virtual_insert_gh_obj(H5F_t *f, H5O_storage_virtual_t *storage)
+{
+    uint8_t     *heap_block = NULL;
+    size_t      *str_size = NULL;
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Note that we assume here that the contents of the heap block cannot
+     * change!  If this ever stops being the case we must change this code to
+     * allow overwrites of the heap block.  -NAF */
+
+    if((storage->serial_list_hobjid.addr == HADDR_UNDEF)
+                    && (storage->list_nused > 0)) {
+        uint8_t *heap_block_p;
+        size_t block_size;
+        hssize_t select_serial_size;
+        hsize_t tmp_hsize;
+        uint32_t chksum;
+        size_t i;
+
+        // if(H5F_set_libver_bounds(f, H5F_LIBVER_V110, H5F_LIBVER_V110) < 0)
+        if(H5Fset_libver_bounds(H5F_FILE_ID(f), H5F_LOW_BOUND(f), H5F_HIGH_BOUND(f)) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "cannot set low/high bounds")
+
+        /* Allocate array for caching results of strlen */
+        if(NULL == (str_size = (size_t *)H5MM_malloc(2 * storage->list_nused *sizeof(size_t))))
+            HGOTO_ERROR(H5E_OHDR, H5E_RESOURCE, FAIL, "unable to allocate string length array")
+
+        /*
+         * Calculate heap block size
+         */
+        /* Version and number of entries */
+        block_size = (size_t)1 + H5F_SIZEOF_SIZE(f);
+
+        /* Calculate size of each entry */
+        for(i = 0; i < storage->list_nused; i++) {
+            HDassert(storage->list[i].source_file_name);
+            HDassert(storage->list[i].source_dset_name);
+            HDassert(storage->list[i].source_select);
+            HDassert(storage->list[i].source_dset.virtual_select);
+
+            /* Source file name */
+            str_size[2 * i] = HDstrlen(storage->list[i].source_file_name) + (size_t)1;
+            block_size += str_size[2 * i];
+
+            /* Source dset name */
+            str_size[(2 * i) + 1] = HDstrlen(storage->list[i].source_dset_name) + (size_t)1;
+            block_size += str_size[(2 * i) + 1];
+
+            /* Source selection */
+            if((select_serial_size = H5S_SELECT_SERIAL_SIZE(storage->list[i].source_select)) < 0)
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTENCODE, FAIL, "unable to check dataspace selection size")
+            block_size += (size_t)select_serial_size;
+
+            /* Virtual dataset selection */
+            if((select_serial_size = H5S_SELECT_SERIAL_SIZE(storage->list[i].source_dset.virtual_select)) < 0)
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTENCODE, FAIL, "unable to check dataspace selection size")
+            block_size += (size_t)select_serial_size;
+        } /* end for */
+
+        /* Checksum */
+        block_size += 4;
+
+        /* Allocate heap block */
+        if(NULL == (heap_block = (uint8_t *)H5MM_malloc(block_size)))
+            HGOTO_ERROR(H5E_OHDR, H5E_RESOURCE, FAIL, "unable to allocate heap block")
+
+        /*
+         * Encode heap block
+         */
+        heap_block_p = heap_block;
+
+        /* Encode heap block encoding version */
+        *heap_block_p++ = (uint8_t)H5O_LAYOUT_VDS_GH_ENC_VERS;
+
+        /* Number of entries */
+        tmp_hsize = (hsize_t)storage->list_nused;
+        H5F_ENCODE_LENGTH(f, heap_block_p, tmp_hsize)
+
+        /* Encode each entry */
+        for(i = 0; i < storage->list_nused; i++) {
+            /* Source file name */
+            (void)HDmemcpy((char *)heap_block_p, storage->list[i].source_file_name, str_size[2 * i]);
+            heap_block_p += str_size[2 * i];
+
+            /* Source dataset name */
+            (void)HDmemcpy((char *)heap_block_p, storage->list[i].source_dset_name, str_size[(2 * i) + 1]);
+            heap_block_p += str_size[(2 * i) + 1];
+
+            /* Source selection */
+            if(H5S_SELECT_SERIALIZE(storage->list[i].source_select, &heap_block_p) < 0)
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to serialize source selection")
+
+            /* Virtual selection */
+            if(H5S_SELECT_SERIALIZE(storage->list[i].source_dset.virtual_select, &heap_block_p) < 0)
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to serialize virtual selection")
+        } /* end for */
+
+        /* Checksum */
+        chksum = H5_checksum_metadata(heap_block, block_size - (size_t)4, 0);
+        UINT32ENCODE(heap_block_p, chksum)
+
+        /* Insert block into global heap */
+        if(H5HG_insert(f, block_size, heap_block, &storage->serial_list_hobjid) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, FAIL, "unable to insert virtual dataset heap block")
+
+    } /* end if */
+
+done:
+    heap_block = (uint8_t *)H5MM_xfree(heap_block);
+    str_size = (size_t *)H5MM_xfree(str_size);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D__virtual_insert_gh_obj() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5D__virtual_delete
  *
  * Purpose:     Delete the file space for a virtual dataset
@@ -882,7 +1015,6 @@ H5D__virtual_open_source_dset(const H5D_t *vdset,
     H5O_storage_virtual_srcdset_t *source_dset)
 {
     H5F_t       *src_file = NULL;       /* Source file */
-    hbool_t     src_file_open = FALSE;  /* Whether we have opened and need to close src_file */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_STATIC
@@ -895,7 +1027,13 @@ H5D__virtual_open_source_dset(const H5D_t *vdset,
     HDassert(source_dset->dset_name);
 
     /* Check if we need to open the source file */
-    if(HDstrcmp(source_dset->file_name, ".")) {
+    if(!HDstrcmp(source_dset->file_name, "."))
+        /* Source file is ".", use the virtual dataset's file */
+        src_file = vdset->oloc.file;
+    else if(source_dset->file)
+        /* Use previously opened file */
+        src_file = source_dset->file;
+    else {
         unsigned    intent;                 /* File access permissions */
 
         /* Get the virtual dataset's file open flags ("intent") */
@@ -904,16 +1042,13 @@ H5D__virtual_open_source_dset(const H5D_t *vdset,
         /* Try opening the file */
         src_file = H5F_prefix_open_file(vdset->oloc.file, H5F_PREFIX_VDS, vdset->shared->vds_prefix, source_dset->file_name, intent, vdset->shared->layout.storage.u.virt.source_fapl);
 
-        /* If we opened the source file here, we should close it when leaving */
-        if(src_file)
-            src_file_open = TRUE;
-        else
-            /* Reset the error stack */
+        /* Reset the error stack if we did not find the file */
+        if(!src_file)
             H5E_clear_stack(NULL);
+
+        source_dset->file = src_file;
+
     } /* end if */
-    else
-        /* Source file is ".", use the virtual dataset's file */
-        src_file = vdset->oloc.file;
 
     if(src_file) {
         H5G_loc_t   src_root_loc;           /* Object location of source file root group */
@@ -928,30 +1063,21 @@ H5D__virtual_open_source_dset(const H5D_t *vdset,
         source_dset->dset = H5D__open_name(&src_root_loc, source_dset->dset_name, vdset->shared->layout.storage.u.virt.source_dapl);
 
         /* Dataset does not exist */
-        if(NULL == source_dset->dset) {
+        if(NULL == source_dset->dset) 
             /* Reset the error stack */
             H5E_clear_stack(NULL);
 
-            source_dset->dset_exists = FALSE;
-        } /* end if */
         else {
-            /* Dataset exists */
-            source_dset->dset_exists = TRUE;
-
             /* Patch the source selection if necessary */
             if(virtual_ent->source_space_status != H5O_VIRTUAL_STATUS_CORRECT) {
                 if(H5S_extent_copy(virtual_ent->source_select, source_dset->dset->shared->space) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "can't copy source dataspace extent")
                 virtual_ent->source_space_status = H5O_VIRTUAL_STATUS_CORRECT;
             } /* end if */
-        } /* end else */
+        }
     } /* end if */
 
 done:
-    /* Release resources */
-    if(src_file_open)
-        if(H5F_efc_close(vdset->oloc.file, src_file) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEFILE, FAIL, "can't close source file")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__virtual_open_source_dset() */
@@ -985,6 +1111,14 @@ H5D__virtual_reset_source_dset(H5O_storage_virtual_ent_t *virtual_ent,
         if(H5D_close(source_dset->dset) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to close source dataset")
         source_dset->dset = NULL;
+    } /* end if */
+
+    /* Close file */
+    if(source_dset->file) {
+        HDassert(virtual_ent->virtual_file);
+        if(H5F_efc_close(virtual_ent->virtual_file, source_dset->file) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEFILE, FAIL, "can't close source file")
+        source_dset->file = NULL;
     } /* end if */
 
     /* Free file name */
@@ -1593,7 +1727,7 @@ H5D__virtual_set_extent_unlim(const H5D_t *dset)
                     } /* end if */
 
                     /* Check if the dataset was already opened */
-                    if(storage->list[i].sub_dset[j].dset_exists)
+                    if(storage->list[i].sub_dset[j].dset)
                         first_missing = j + 1;
                     else {
                         /* Resolve file name */
@@ -2137,6 +2271,9 @@ H5D__virtual_init(H5F_t *f, const H5D_t *dset, hid_t dapl_id)
             HGOTO_ERROR(H5E_DATASET, H5E_BADSELECT, FAIL, "unable to normalize dataspace by offset")
         if(H5S_hyper_normalize_offset(storage->list[i].source_select, old_offset) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_BADSELECT, FAIL, "unable to normalize dataspace by offset")
+
+        /* Save pointer to virtual dataset in entry */
+        storage->list[i].virtual_file = (H5F_t *)dset->oloc.file;
     } /* end for */
 
     /* Get dataset access property list */
@@ -2168,6 +2305,13 @@ H5D__virtual_init(H5F_t *f, const H5D_t *dset, hid_t dapl_id)
     /* Mark layout as not fully initialized (must be done prior to I/O for
      * unlimited/printf selections) */
     storage->init = FALSE;
+
+    /* Insert global heap object if it does not already exist.  Do this now so
+     * we don't have to insert an object into the cache when encoding the
+     * layout, which would cause problems in parallel. */
+    if(storage->serial_list_hobjid.addr == HADDR_UNDEF)
+        if(H5D__virtual_insert_gh_obj(f, storage) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, FAIL, "unable to insert global heap object for virtual dataset")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2589,12 +2733,6 @@ H5D__virtual_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
     storage = &io_info->dset->shared->layout.storage.u.virt;
     HDassert((storage->view == H5D_VDS_FIRST_MISSING) || (storage->view == H5D_VDS_LAST_AVAILABLE));
 
-#ifdef H5_HAVE_PARALLEL
-    /* Parallel reads are not supported (yet) */
-    if(H5F_HAS_FEATURE(io_info->dset->oloc.file, H5FD_FEAT_HAS_MPI))
-        HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "parallel reads not supported on virtual datasets")
-#endif /* H5_HAVE_PARALLEL */
-
     /* Prepare for I/O operation */
     if(H5D__virtual_pre_io(io_info, storage, file_space, mem_space, &tot_nelmts) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTCLIP, FAIL, "unable to prepare for I/O operation")
@@ -2778,12 +2916,6 @@ H5D__virtual_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
 
     storage = &io_info->dset->shared->layout.storage.u.virt;
     HDassert((storage->view == H5D_VDS_FIRST_MISSING) || (storage->view == H5D_VDS_LAST_AVAILABLE));
-
-#ifdef H5_HAVE_PARALLEL
-    /* Parallel writes are not supported (yet) */
-    if(H5F_HAS_FEATURE(io_info->dset->oloc.file, H5FD_FEAT_HAS_MPI))
-        HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "parallel writes not supported on virtual datasets")
-#endif /* H5_HAVE_PARALLEL */
 
     /* Prepare for I/O operation */
     if(H5D__virtual_pre_io(io_info, storage, file_space, mem_space, &tot_nelmts) < 0)

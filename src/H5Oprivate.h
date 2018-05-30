@@ -425,6 +425,9 @@ typedef struct H5O_efl_t {
  *      and 'size' callbacks for places to change when updating this. */
 #define H5O_LAYOUT_VERSION_LATEST H5O_LAYOUT_VERSION_4
 
+/* Version # of encoded virtual dataset global heap blocks */
+#define H5O_LAYOUT_VDS_GH_ENC_VERS      0
+
 /* Forward declaration of structs used below */
 struct H5D_layout_ops_t;                /* Defined in H5Dpkg.h               */
 struct H5D_chunk_ops_t;                 /* Defined in H5Dpkg.h               */
@@ -498,7 +501,7 @@ typedef struct H5O_storage_virtual_srcdset_t {
     struct H5S_t *clipped_source_select; /* Clipped version of source_select  */
     struct H5S_t *clipped_virtual_select; /* Clipped version of virtual_select */
     struct H5D_t *dset;                 /* Source dataset                     */
-    hbool_t dset_exists;                /* Whether the dataset exists (was opened successfully) */
+    struct H5F_t *file;                 /* Source file (if one was opened for this dataset) */
 
     /* Temporary - only used during I/O operation, NULL at all other times */
     struct H5S_t *projected_mem_space;  /* Selection within mem_space for this mapping */
@@ -543,6 +546,7 @@ typedef struct H5O_storage_virtual_ent_t {
     hsize_t clip_size_source;           /* Size selection would be clipped to in source selection when virtual extent == unlim_extent_virtual */
     H5O_virtual_space_status_t source_space_status; /* Extent patching status of source_select */
     H5O_virtual_space_status_t virtual_space_status; /* Extent patching status of virtual_select */
+    H5F_t *virtual_file;                /* Convenience pointer to file containing virtual dataset */
 } H5O_storage_virtual_ent_t;
 
 typedef struct H5O_storage_virtual_t {

@@ -52,6 +52,7 @@ set (H5P_TESTS
     t_pread
     t_pshutdown
     t_prestart
+    t_pvds
     t_init_term
     t_shapesame
     t_filters_parallel

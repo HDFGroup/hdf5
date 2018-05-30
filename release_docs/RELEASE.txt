@@ -55,6 +55,12 @@ New Features
 
     Parallel Library:
     -----------------
+    - Create VDS in parallel
+      The creation, along with reading and writing of Virtual Data Sets (VDS)
+      is now supported. 
+      
+      (HDFFV-10287, RAW, 2018/05/30)
+
     -
 
     Fortran Library:
