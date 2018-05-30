@@ -161,7 +161,8 @@ CHECK_CLEANFILES+=accum.h5 cmpd_dset.h5 compact_dataset.h5 dataset.h5 dset_offse
     earray_hdr_fd.h5 farray_hdr_fd.h5 bt2_hdr_fd.h5 \
     storage_size.h5 dls_01_strings.h5 \
     extend.h5 istore.h5 extlinks*.h5 frspace.h5 links*.h5 \
-    sys_file1 tfile[1-7].h5 th5s[1-4].h5 lheap.h5 fheap.h5 ohdr.h5 \
+    sys_file1 tfile[1-9].h5 tfile1[0-5].h5 th5s[1-4].h5 \
+    lheap.h5 fheap.h5 ohdr.h5 \
     stab.h5 extern_[1-5].h5 extern_[1-4][rw].raw gheap[0-4].h5 \
     dt_arith[1-2] links.h5 links[0-6]*.h5 extlinks[0-15].h5 tmp \
     big.data big[0-9][0-9][0-9][0-9][0-9].h5  \

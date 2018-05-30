@@ -137,6 +137,15 @@
 /* Declaration for test_incr_filesize() */
 #define FILE8            "tfile8.h5"    /* Test file */
 
+/* Declarations for test_libver_bounds_*() */
+#define FILE9            "tfile9.h5"    /* Test file */
+#define FILE10           "tfile10.h5"   /* Test file */
+#define FILE11           "tfile11.h5"   /* Test file */
+#define FILE12           "tfile12.h5"   /* Test file */
+#define FILE13           "tfile13.h5"   /* Test file */
+#define FILE14           "tfile14.h5"   /* Test file */
+#define FILE15           "tfile15.h5"   /* Test file */
+
 /* Files created under 1.6 branch and 1.8 branch--used in test_filespace_compatible() */
 const char *OLD_FILENAME[] = {
     "filespace_1_6.h5",    /* 1.6 HDF5 file */
@@ -5337,7 +5346,7 @@ test_libver_bounds_super_create(hid_t fapl, hid_t fcpl, htri_t is_swmr)
 
     /* Try to create the file */
     H5E_BEGIN_TRY {
-        fid = H5Fcreate(FILE8, H5F_ACC_TRUNC | (is_swmr ? H5F_ACC_SWMR_WRITE : 0), fcpl, fapl);
+        fid = H5Fcreate(FILE9, H5F_ACC_TRUNC | (is_swmr ? H5F_ACC_SWMR_WRITE : 0), fcpl, fapl);
     } H5E_END_TRY;
 
     /* Get the internal file pointer if the create succeeds */
@@ -5486,7 +5495,7 @@ test_libver_bounds_super_open(hid_t fapl, hid_t fcpl, htri_t is_swmr)
     herr_t ret;                /* Return value */
 
     /* Create the file with the input fcpl and fapl */
-    fid = H5Fcreate(FILE8, H5F_ACC_TRUNC, fcpl, fapl);
+    fid = H5Fcreate(FILE10, H5F_ACC_TRUNC, fcpl, fapl);
     CHECK(fid, FAIL, "H5Fcreate");
 
     /* Get the internal file pointer */
@@ -5517,7 +5526,7 @@ test_libver_bounds_super_open(hid_t fapl, hid_t fcpl, htri_t is_swmr)
 
             /* Open the file with or without SWMR access */
             H5E_BEGIN_TRY {
-                fid = H5Fopen(FILE8, H5F_ACC_RDWR | (is_swmr ? H5F_ACC_SWMR_WRITE : 0), new_fapl);
+                fid = H5Fopen(FILE10, H5F_ACC_RDWR | (is_swmr ? H5F_ACC_SWMR_WRITE : 0), new_fapl);
             } H5E_END_TRY;
 
             /* Get the internal file pointer if the open succeeds */
@@ -5636,7 +5645,7 @@ test_libver_bounds_obj(hid_t fapl)
     CHECK(ret, FAIL, "H5Pset_shared_mesg_index");
 
     /* Create the file with the fcpl and the input fapl */
-    fid = H5Fcreate(FILE8, H5F_ACC_TRUNC, fcpl, fapl);
+    fid = H5Fcreate(FILE11, H5F_ACC_TRUNC, fcpl, fapl);
     CHECK(fid, FAIL, "H5Fcreate");
 
     /* Get root group's object info */
@@ -5655,7 +5664,7 @@ test_libver_bounds_obj(hid_t fapl)
     CHECK(ret, FAIL, "H5Pclose");
 
     /* Create a file with the default fcpl and input fapl */
-    fid = H5Fcreate(FILE8, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+    fid = H5Fcreate(FILE11, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
     CHECK(fid, FAIL, "H5Fcreate");
 
     /* Get root group's object info */
@@ -5688,7 +5697,7 @@ test_libver_bounds_obj(hid_t fapl)
 
             /* Open the file */
             H5E_BEGIN_TRY {
-                fid = H5Fopen(FILE8, H5F_ACC_RDWR, new_fapl);
+                fid = H5Fopen(FILE11, H5F_ACC_RDWR, new_fapl);
             } H5E_END_TRY;
 
             if(fid >=0 ) { /* The file open succeeds */
@@ -5790,7 +5799,7 @@ test_libver_bounds_dataset(hid_t fapl)
     CHECK(ret, FAIL, "H5Pget_libver_bounds");
 
     /* Create the file with the input fapl */
-    fid = H5Fcreate(FILE8, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+    fid = H5Fcreate(FILE12, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
     CHECK(fid, FAIL, "H5Fcreate");
 
     /* Create the dataspace */
@@ -5899,7 +5908,7 @@ test_libver_bounds_dataset(hid_t fapl)
 
             /* Open the file */
             H5E_BEGIN_TRY {
-                fid = H5Fopen(FILE8, H5F_ACC_RDWR, new_fapl);
+                fid = H5Fopen(FILE12, H5F_ACC_RDWR, new_fapl);
             } H5E_END_TRY;
 
             if(fid >=0 ) { /* The file open succeeds */
@@ -6016,7 +6025,7 @@ test_libver_bounds_dataspace(hid_t fapl)
     CHECK(ret, FAIL, "H5Pget_libver_bounds");
 
     /* Create the file with the input fapl */
-    fid = H5Fcreate(FILE8, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+    fid = H5Fcreate(FILE13, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
     CHECK(fid, FAIL, "H5Fcreate");
 
     /* Create scalar dataspace */
@@ -6115,7 +6124,7 @@ test_libver_bounds_dataspace(hid_t fapl)
 
             /* Open the file */
             H5E_BEGIN_TRY {
-                fid = H5Fopen(FILE8, H5F_ACC_RDWR, new_fapl);
+                fid = H5Fopen(FILE13, H5F_ACC_RDWR, new_fapl);
             } H5E_END_TRY;
 
             if(fid >=0 ) { /* The file open succeeds */
@@ -6346,7 +6355,7 @@ test_libver_bounds_datatype_check(hid_t fapl, hid_t tid)
     CHECK(ret, FAIL, "H5Pget_libver_bounds");
 
     /* Create the file with the input fapl */
-    fid = H5Fcreate(FILE8, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+    fid = H5Fcreate(FILE14, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
     CHECK(fid, FAIL, "H5Fcreate");
 
     /* Create a committed datatype of string which will be used
@@ -6437,7 +6446,7 @@ test_libver_bounds_datatype_check(hid_t fapl, hid_t tid)
 
             /* Open the file */
             H5E_BEGIN_TRY {
-                fid = H5Fopen(FILE8, H5F_ACC_RDWR, new_fapl);
+                fid = H5Fopen(FILE14, H5F_ACC_RDWR, new_fapl);
             } H5E_END_TRY;
 
             if(fid >= 0 ) {  /* The file open succeeds */
@@ -6577,7 +6586,7 @@ test_libver_bounds_attributes(hid_t fapl)
     CHECK(ret, FAIL, "H5Pget_libver_bounds");
 
     /* Create the file */
-    fid = H5Fcreate(FILE8, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+    fid = H5Fcreate(FILE15, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
     CHECK(fid, FAIL, "H5Fcreate");
 
     /* Integer datatpye */
@@ -6686,7 +6695,7 @@ test_libver_bounds_attributes(hid_t fapl)
     CHECK(ret, FAIL, "H5Pset_shared_mesg_index");
 
     /* Create the file with shared datatype message enabled */
-    fid = H5Fcreate(FILE8, H5F_ACC_TRUNC, fcpl, fapl);
+    fid = H5Fcreate(FILE15, H5F_ACC_TRUNC, fcpl, fapl);
     CHECK(fid, FAIL, "H5Fcreate");
 
     /* Create an integer datatye */
@@ -6758,7 +6767,7 @@ test_libver_bounds_attributes(hid_t fapl)
 
             /* Open the file */
             H5E_BEGIN_TRY {
-                fid = H5Fopen(FILE8, H5F_ACC_RDWR, new_fapl);
+                fid = H5Fopen(FILE15, H5F_ACC_RDWR, new_fapl);
             } H5E_END_TRY;
 
             if(fid >=0 ) { /* The file open succeeds */
@@ -7367,5 +7376,13 @@ cleanup_file(void)
     HDremove(FILE5);
     HDremove(FILE6);
     HDremove(FILE7);
+    HDremove(FILE8);
+    HDremove(FILE9);
+    HDremove(FILE10);
+    HDremove(FILE11);
+    HDremove(FILE12);
+    HDremove(FILE13);
+    HDremove(FILE14);
+    HDremove(FILE15);
 }
 
