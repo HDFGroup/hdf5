@@ -425,7 +425,7 @@ h5str_sprintf
 
                 this_str = (char*)HDmalloc(64);
                 obj = H5Rdereference2(container, H5P_DEFAULT, H5R_OBJECT, ptr);
-                H5Oget_info(obj, &oi);
+                H5Oget_info2(obj, &oi, H5O_INFO_ALL);
 
                 /* Print object data and close object */
                 sprintf(this_str, "%u-%lu", (unsigned) oi.type, oi.addr);
@@ -2552,7 +2552,7 @@ obj_info_all
     info_all_t *datainfo = (info_all_t*)op_data;
     H5O_info_t  object_info;
 
-    retVal = H5Oget_info_by_name(loc_id, name, &object_info, H5P_DEFAULT);
+    retVal = H5Oget_info_by_name2(loc_id, name, &object_info, H5O_INFO_ALL, H5P_DEFAULT);
 
     if (retVal < 0) {
         *(datainfo->otype+datainfo->count) = -1;
@@ -2591,7 +2591,7 @@ obj_info_max
     info_all_t *datainfo = (info_all_t*)op_data;
     H5O_info_t  object_info;
 
-    retVal = H5Oget_info(loc_id, &object_info);
+    retVal = H5Oget_info2(loc_id, &object_info, H5O_INFO_ALL);
     if (retVal < 0) {
         *(datainfo->otype+datainfo->count) = -1;
         *(datainfo->ltype+datainfo->count) = -1;
