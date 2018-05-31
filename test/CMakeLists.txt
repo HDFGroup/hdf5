@@ -200,6 +200,7 @@ set (H5_TESTS
     cmpd_dset
     filter_fail
     extend
+    direct_chunk
     external
     efc
     objcopy
