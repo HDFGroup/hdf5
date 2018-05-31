@@ -371,9 +371,9 @@ Bug Fixes since HDF5-1.8.20
 
       h5repack failed to handle command line parameters for customer filters.
 
-      User defined filter parameter conversions would fail whenintegers were 
-      represented on the command line with character string
-      larger then 9 characters. Increased local variable array for storing
+      User defined filter parameter conversions would fail when integers
+      were represented on the command line with character strings
+      larger than 9 characters. Increased local variable array for storing
       the current command line parameter to prevent buffer overflows.
 
       (ADB - 2018/01/17, HDFFV-10392)
@@ -387,7 +387,7 @@ Bug Fixes since HDF5-1.8.20
       adding an if(tclass1 == H5T_STRING) block. This "if block" moves the
       same check that was added for attributes to this function, which is
       used by all object types. This function handles complex type structures.
-      Also added a new test file in h5diffgenttest for testing this issue
+      Also added a new test file in h5diffgentest for testing this issue
       and removed the temporary files used in the test scripts.
 
       (ADB - 2018/01/04, HDFFV-8745)
