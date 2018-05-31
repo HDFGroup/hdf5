@@ -160,7 +160,7 @@ New Features
 Support for New Platforms, Languages, and Compilers
 ===================================================
 
-
+    - Added support for Visual Studio 2017 w/ Intel Fortran 18 on Windows 10 x64.
 
 Bug Fixes since HDF5-1.8.20
 ===========================
@@ -369,9 +369,10 @@ Bug Fixes since HDF5-1.8.20
 
     - h5repack
 
-      h5repack failed to handle more then 9 chars for int conversion.
+      h5repack failed to handle command line parameters for customer filters.
 
-      User defined filter parameter conversions would fail for integers
+      User defined filter parameter conversions would fail whenintegers were 
+      represented on the command line with character string
       larger then 9 characters. Increased local variable array for storing
       the current command line parameter to prevent buffer overflows.
 
@@ -379,14 +380,13 @@ Bug Fixes since HDF5-1.8.20
 
     - h5diff
 
-      h5diff seg-faulted if comparing VL strings against fixed strings.
+      h5diff seg faulted if comparing VL strings against fixed strings.
 
       Reworked solution for HDFFV-8625 and HDFFV-8639. Implemented the check
       for string objects of same type in the diff_can_type function by
-      adding an if(tclass1 == H5T_STRING) block. This if block moves the
+      adding an if(tclass1 == H5T_STRING) block. This "if block" moves the
       same check that was added for attributes to this function, which is
-      used by all object types. This function also handles complex type
-      structures.
+      used by all object types. This function handles complex type structures.
       Also added a new test file in h5diffgenttest for testing this issue
       and removed the temporary files used in the test scripts.
 
