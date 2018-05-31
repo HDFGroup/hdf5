@@ -2937,7 +2937,7 @@ test_elinks(hid_t fapl)
     /* Query the external link object's name */
     *name = '\0';
     name_cached = FALSE;
-    namelen = H5I_get_name_test(group, (char*)name, sizeof(name), &name_cached);
+    namelen = H5I__get_name_test(group, (char*)name, sizeof(name), &name_cached);
     if(!((HDstrcmp(name, "/Group2") == 0) && (namelen == 7) && name_cached))
         TEST_ERROR
 
@@ -2952,7 +2952,7 @@ test_elinks(hid_t fapl)
     /* Query the external link to external link object's name */
     *name = '\0';
     name_cached = FALSE;
-    namelen = H5I_get_name_test(group, (char*)name, sizeof(name), &name_cached);
+    namelen = H5I__get_name_test(group, (char*)name, sizeof(name), &name_cached);
     if(!((HDstrcmp(name, "/Group2") == 0) && (namelen == 7) && name_cached))
         TEST_ERROR
 
