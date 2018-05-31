@@ -105,11 +105,11 @@ Java_hdf_hdf5lib_H5_H5Ocopy
 /*
  * Class:     hdf_hdf5lib_H5
  * Method:    H5Oget_info
- * Signature: (J)Lhdf/hdf5lib/structs/H5O_info_t;
+ * Signature: (JI)Lhdf/hdf5lib/structs/H5O_info_t;
  */
 JNIEXPORT jobject JNICALL
 Java_hdf_hdf5lib_H5_H5Oget_1info
-    (JNIEnv *env, jclass clss, jlong loc_id)
+    (JNIEnv *env, jclass clss, jlong loc_id, jint fields)
 {
     herr_t      status = -1;
     H5O_info_t  infobuf;
@@ -119,7 +119,7 @@ Java_hdf_hdf5lib_H5_H5Oget_1info
     jobject     ihinfobuf2;
     jobject     ret_obj = NULL;
 
-    status = H5Oget_info((hid_t)loc_id, &infobuf);
+    status = H5Oget_info2((hid_t)loc_id, &infobuf, (unsigned)fields);
 
     if (status < 0) {
         h5libraryError(env);
@@ -168,11 +168,11 @@ Java_hdf_hdf5lib_H5_H5Oget_1info
 /*
  * Class:     hdf_hdf5lib_H5
  * Method:    H5Oget_info_by_name
- * Signature: (JLjava/lang/String;J)Lhdf/hdf5lib/structs/H5O_info_t;
+ * Signature: (JLjava/lang/String;IJ)Lhdf/hdf5lib/structs/H5O_info_t;
  */
 JNIEXPORT jobject JNICALL
 Java_hdf_hdf5lib_H5_H5Oget_1info_1by_1name
-    (JNIEnv *env, jclass clss, jlong loc_id, jstring name, jlong access_id)
+    (JNIEnv *env, jclass clss, jlong loc_id, jstring name, jint fields, jlong access_id)
 {
     const char *lName;
     herr_t      status = -1;
@@ -185,7 +185,7 @@ Java_hdf_hdf5lib_H5_H5Oget_1info_1by_1name
 
     PIN_JAVA_STRING(name, lName);
     if (lName != NULL) {
-        status = H5Oget_info_by_name((hid_t)loc_id, lName, &infobuf, (hid_t)access_id);
+        status = H5Oget_info_by_name2((hid_t)loc_id, lName, &infobuf, (unsigned)fields, (hid_t)access_id);
 
         UNPIN_JAVA_STRING(name, lName);
 
@@ -237,12 +237,12 @@ Java_hdf_hdf5lib_H5_H5Oget_1info_1by_1name
 /*
  * Class:     hdf_hdf5lib_H5
  * Method:    H5Oget_info_by_idx
- * Signature: (JLjava/lang/String;IIJJ)Lhdf/hdf5lib/structs/H5O_info_t;
+ * Signature: (JLjava/lang/String;IIJIJ)Lhdf/hdf5lib/structs/H5O_info_t;
  */
 JNIEXPORT jobject JNICALL
 Java_hdf_hdf5lib_H5_H5Oget_1info_1by_1idx
     (JNIEnv *env, jclass clss, jlong loc_id,
-        jstring name, jint index_field, jint order, jlong link_n, jlong access_id)
+        jstring name, jint index_field, jint order, jlong link_n, jint fields, jlong access_id)
 {
     const char *lName;
     herr_t      status;
@@ -255,7 +255,7 @@ Java_hdf_hdf5lib_H5_H5Oget_1info_1by_1idx
 
     PIN_JAVA_STRING(name, lName);
     if (lName != NULL) {
-        status = H5Oget_info_by_idx((hid_t)loc_id, lName, (H5_index_t)index_field, (H5_iter_order_t)order, (hsize_t)link_n, &infobuf, (hid_t)access_id);
+        status = H5Oget_info_by_idx2((hid_t)loc_id, lName, (H5_index_t)index_field, (H5_iter_order_t)order, (hsize_t)link_n, &infobuf, (unsigned)fields, (hid_t)access_id);
 
         UNPIN_JAVA_STRING(name, lName);
 
@@ -423,12 +423,12 @@ H5O_iterate_cb
 /*
  * Class:     hdf_hdf5lib_H5
  * Method:    H5Ovisit
- * Signature: (JIILjava/lang/Object;Ljava/lang/Object;)I
+ * Signature: (JIILjava/lang/Object;Ljava/lang/Object;I)I
  */
 JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_H5_H5Ovisit
     (JNIEnv *env, jclass clss, jlong grp_id, jint idx_type, jint order,
-        jobject callback_op, jobject op_data)
+        jobject callback_op, jobject op_data, jint fields)
 {
     herr_t   status = -1;
 
@@ -442,7 +442,7 @@ Java_hdf_hdf5lib_H5_H5Ovisit
         h5nullArgument(env, "H5Ovisit:  callback_op is NULL");
     } /* end if */
     else {
-        status = H5Ovisit((hid_t)grp_id, (H5_index_t)idx_type, (H5_iter_order_t)order, (H5O_iterate_t)H5O_iterate_cb, (void*)op_data);
+        status = H5Ovisit((hid_t)grp_id, (H5_index_t)idx_type, (H5_iter_order_t)order, (H5O_iterate_t)H5O_iterate_cb, (void*)op_data, (unsigned)fields);
 
         if (status < 0)
             h5libraryError(env);
@@ -454,12 +454,12 @@ Java_hdf_hdf5lib_H5_H5Ovisit
 /*
  * Class:     hdf_hdf5lib_H5
  * Method:    H5Ovisit_by_name
- * Signature: (JLjava/lang/String;IILjava/lang/Object;Ljava/lang/Object;J)I
+ * Signature: (JLjava/lang/String;IILjava/lang/Object;Ljava/lang/Object;IJ)I
  */
 JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_H5_H5Ovisit_1by_1name
     (JNIEnv *env, jclass clss, jlong grp_id, jstring name, jint idx_type, jint order,
-        jobject callback_op, jobject op_data, jlong access_id)
+        jobject callback_op, jobject op_data, jint fields, jlong access_id)
 {
     herr_t        status = -1;
     const char   *lName;
@@ -478,7 +478,7 @@ Java_hdf_hdf5lib_H5_H5Ovisit_1by_1name
     else {
         PIN_JAVA_STRING(name, lName);
         if (lName != NULL) {
-            status = H5Ovisit_by_name((hid_t)grp_id, lName, (H5_index_t)idx_type, (H5_iter_order_t)order, (H5O_iterate_t)H5O_iterate_cb, (void*)op_data, (hid_t)access_id);
+            status = H5Ovisit_by_name((hid_t)grp_id, lName, (H5_index_t)idx_type, (H5_iter_order_t)order, (H5O_iterate_t)H5O_iterate_cb, (void*)op_data, (unsigned)fields, (hid_t)access_id);
 
             UNPIN_JAVA_STRING(name, lName);
 

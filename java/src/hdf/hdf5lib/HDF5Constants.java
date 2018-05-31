@@ -330,6 +330,12 @@ public class HDF5Constants {
     public static final int H5O_COPY_EXPAND_REFERENCE_FLAG = H5O_COPY_EXPAND_REFERENCE_FLAG();
     public static final int H5O_COPY_WITHOUT_ATTR_FLAG = H5O_COPY_WITHOUT_ATTR_FLAG();
     public static final int H5O_COPY_PRESERVE_NULL_FLAG = H5O_COPY_PRESERVE_NULL_FLAG();
+    public static final int H5O_INFO_BASIC = H5O_INFO_BASIC();
+    public static final int H5O_INFO_TIME = H5O_INFO_TIME();
+    public static final int H5O_INFO_NUM_ATTRS = H5O_INFO_NUM_ATTRS();
+    public static final int H5O_INFO_HDR = H5O_INFO_HDR();
+    public static final int H5O_INFO_META_SIZE = H5O_INFO_META_SIZE();
+    public static final int H5O_INFO_ALL = H5O_INFO_ALL();
     public static final int H5O_SHMESG_NONE_FLAG = H5O_SHMESG_NONE_FLAG();
     public static final int H5O_SHMESG_SDSPACE_FLAG = H5O_SHMESG_SDSPACE_FLAG();
     public static final int H5O_SHMESG_DTYPE_FLAG = H5O_SHMESG_DTYPE_FLAG();
@@ -1238,6 +1244,18 @@ public class HDF5Constants {
     private static native final int H5O_COPY_WITHOUT_ATTR_FLAG();
 
     private static native final int H5O_COPY_PRESERVE_NULL_FLAG();
+
+    private static native final int H5O_INFO_BASIC();
+
+    private static native final int H5O_INFO_TIME();
+
+    private static native final int H5O_INFO_NUM_ATTRS();
+
+    private static native final int H5O_INFO_HDR();
+
+    private static native final int H5O_INFO_META_SIZE();
+
+    private static native final int H5O_INFO_ALL();
 
     private static native final int H5O_SHMESG_NONE_FLAG();
 
