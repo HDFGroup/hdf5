@@ -43,6 +43,7 @@ typedef struct {
     hbool_t is_absolute;            /* Whether the traversal has absolute paths */
     const char *base_grp_name;      /* Name of the group that serves as the base
                                      * for iteration */
+    unsigned fields;                /* Fields needed in H5O_info_t struct */
 } trav_ud_traverse_t;
 
 typedef struct {
@@ -201,7 +202,7 @@ traverse_cb(hid_t loc_id, const char *path, const H5L_info_t *linfo,
         H5O_info_t oinfo;
 
         /* Get information about the object */
-        if(H5Oget_info_by_name(loc_id, path, &oinfo, H5P_DEFAULT) < 0) {
+        if(H5Oget_info_by_name2(loc_id, path, &oinfo, udata->fields, H5P_DEFAULT) < 0) {
             if(new_name)
                 HDfree(new_name);
             return(H5_ITER_ERROR);
@@ -251,13 +252,13 @@ traverse_cb(hid_t loc_id, const char *path, const H5L_info_t *linfo,
  */
 static int
 traverse(hid_t file_id, const char *grp_name, hbool_t visit_start,
-        hbool_t recurse, const trav_visitor_t *visitor)
+        hbool_t recurse, const trav_visitor_t *visitor, unsigned fields)
 {
     H5O_info_t  oinfo;          /* Object info for starting group */
     int         ret_value = SUCCEED;
 
     /* Get info for starting object */
-    if(H5Oget_info_by_name(file_id, grp_name, &oinfo, H5P_DEFAULT) < 0)
+    if(H5Oget_info_by_name2(file_id, grp_name, &oinfo, fields, H5P_DEFAULT) < 0)
         HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Oget_info_by_name failed");
 
     /* Visit the starting object */
@@ -282,6 +283,7 @@ traverse(hid_t file_id, const char *grp_name, hbool_t visit_start,
         udata.visitor = visitor;
         udata.is_absolute = (*grp_name == '/');
         udata.base_grp_name = grp_name;
+        udata.fields = fields;
 
         /* Check for iteration of links vs. visiting all links recursively */
         if(recurse) {
@@ -356,9 +358,9 @@ trav_fileinfo_add(trav_info_t *info, hid_t loc_id)
     size_t idx = info->nused - 1;
 
     if ( info->paths[idx].path && HDstrcmp(info->paths[idx].path, "."))
-      H5Oget_info_by_name(loc_id, info->paths[idx].path, &oinfo, H5P_DEFAULT);
+      H5Oget_info_by_name2(loc_id, info->paths[idx].path, &oinfo, H5O_INFO_BASIC, H5P_DEFAULT);
     else
-      H5Oget_info(loc_id, &oinfo);
+      H5Oget_info2(loc_id, &oinfo, H5O_INFO_BASIC);
 
     info->paths[idx].objno = oinfo.addr;
     info->paths[idx].fileno = oinfo.fileno;
@@ -436,7 +438,7 @@ h5trav_getinfo(hid_t file_id, trav_info_t *info)
     info_visitor.udata = info;
 
     /* Traverse all objects in the file, visiting each object & link */
-    if(traverse(file_id, "/", TRUE, TRUE, &info_visitor) < 0)
+    if(traverse(file_id, "/", TRUE, TRUE, &info_visitor, H5O_INFO_BASIC) < 0)
         HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "traverse failed");
 
 done:
@@ -602,7 +604,7 @@ h5trav_gettable(hid_t fid, trav_table_t *table)
     table_visitor.udata = table;
 
     /* Traverse all objects in the file, visiting each object & link */
-    if(traverse(fid, "/", TRUE, TRUE, &table_visitor) < 0)
+    if(traverse(fid, "/", TRUE, TRUE, &table_visitor, H5O_INFO_BASIC) < 0)
         HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "traverse failed");
 
 done:
@@ -1027,7 +1029,7 @@ h5trav_print(hid_t fid)
     print_visitor.udata = &print_udata;
 
     /* Traverse all objects in the file, visiting each object & link */
-    if(traverse(fid, "/", TRUE, TRUE, &print_visitor) < 0)
+    if(traverse(fid, "/", TRUE, TRUE, &print_visitor, H5O_INFO_BASIC) < 0)
         HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "traverse failed");
 
 done:
@@ -1047,7 +1049,7 @@ done:
 int
 h5trav_visit(hid_t fid, const char *grp_name, hbool_t visit_start,
     hbool_t recurse, h5trav_obj_func_t visit_obj, h5trav_lnk_func_t visit_lnk,
-    void *udata)
+    void *udata, unsigned fields)
 {
     trav_visitor_t visitor;             /* Visitor structure for objects */
     int            ret_value = SUCCEED;
@@ -1058,7 +1060,7 @@ h5trav_visit(hid_t fid, const char *grp_name, hbool_t visit_start,
     visitor.udata = udata;
 
     /* Traverse all objects in the file, visiting each object & link */
-    if(traverse(fid, grp_name, visit_start, recurse, &visitor) < 0)
+    if(traverse(fid, grp_name, visit_start, recurse, &visitor, fields) < 0)
         HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "traverse failed");
 
 done:

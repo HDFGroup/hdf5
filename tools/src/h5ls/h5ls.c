@@ -1320,7 +1320,7 @@ print_type(h5tools_str_t *buffer, hid_t type, int ind)
     if(H5Tcommitted(type)) {
         H5O_info_t  oi;
 
-        if(H5Oget_info(type, &oi) >= 0)
+        if(H5Oget_info2(type, &oi, H5O_INFO_BASIC) >= 0)
             h5tools_str_append(buffer,"shared-%lu:"H5_PRINTF_HADDR_FMT" ",
                     oi.fileno, oi.addr);
         else
@@ -2386,7 +2386,7 @@ visit_obj(hid_t file, const char *oname, iter_t *iter)
     h5tools_str_reset(&buffer);
 
     /* Retrieve info for object to list */
-    if(H5Oget_info_by_name(file, oname, &oi, H5P_DEFAULT) < 0) {
+    if(H5Oget_info_by_name2(file, oname, &oi, H5O_INFO_BASIC|H5O_INFO_TIME, H5P_DEFAULT) < 0) {
         if(iter->symlink_target) {
             h5tools_str_append(&buffer, "{**NOT FOUND**}\n");
             iter->symlink_target = FALSE;
@@ -2414,7 +2414,7 @@ visit_obj(hid_t file, const char *oname, iter_t *iter)
         iter->name_start = iter->base_len;
 
         /* Specified name is a group. List the complete contents of the group. */
-        h5trav_visit(file, oname, (hbool_t) (display_root_g || iter->symlink_target), recursive_g, list_obj, list_lnk, iter);
+        h5trav_visit(file, oname, (hbool_t) (display_root_g || iter->symlink_target), recursive_g, list_obj, list_lnk, iter, H5O_INFO_BASIC|H5O_INFO_TIME);
 
         /* Close group */
         if(!iter->symlink_target)

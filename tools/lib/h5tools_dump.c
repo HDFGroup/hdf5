@@ -1905,7 +1905,7 @@ h5tools_print_datatype(FILE *stream, h5tools_str_t *buffer, const h5tool_format_
         H5O_info_t  oinfo;
         obj_t      *obj = NULL;    /* Found object */
 
-        H5Oget_info(type, &oinfo);
+        H5Oget_info2(type, &oinfo, H5O_INFO_BASIC);
         obj = search_obj(h5dump_type_table, oinfo.addr);
 
         if(obj) {

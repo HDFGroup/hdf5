@@ -848,7 +848,7 @@ herr_t flush_verification(const char * obj_pathname, const char * expected)
     H5E_BEGIN_TRY {
         fid = H5Fopen(FILENAME, H5F_ACC_SWMR_READ, H5P_DEFAULT);
         oid = H5Oopen(fid, obj_pathname, H5P_DEFAULT);
-        status = H5Oget_info(oid, &oinfo);
+        status = H5Oget_info2(oid, &oinfo, H5O_INFO_BASIC);
     } H5E_END_TRY;
 
     /* Compare to expected result */
@@ -989,7 +989,7 @@ herr_t refresh_verification(const char * obj_pathname)
     if((oid = H5Oopen(fid, obj_pathname, H5P_DEFAULT)) < 0) PROCESS_ERROR;
 
     /* Get Object info */
-    if((status = H5Oget_info(oid, &flushed_oinfo)) < 0) PROCESS_ERROR;
+    if((status = H5Oget_info2(oid, &flushed_oinfo, H5O_INFO_BASIC|H5O_INFO_NUM_ATTRS|H5O_INFO_HDR)) < 0) PROCESS_ERROR;
     
     /* Make sure there are no attributes on the object. This is just a sanity
         check to ensure we didn't erroneously flush the attribute before
@@ -1008,7 +1008,7 @@ herr_t refresh_verification(const char * obj_pathname)
     /* Get object info again. This will NOT reflect what's on disk, only what's 
        in the cache. Thus, all values will be unchanged from above, despite 
        newer information being on disk. */
-    if((status = H5Oget_info(oid, &refreshed_oinfo)) < 0) PROCESS_ERROR;
+    if((status = H5Oget_info2(oid, &refreshed_oinfo, H5O_INFO_BASIC|H5O_INFO_NUM_ATTRS|H5O_INFO_HDR)) < 0) PROCESS_ERROR;
 
     /* Verify that before doing a refresh, getting the object info returns stale
        information. (i.e., unchanged from above, despite new info on disk). */
@@ -1046,7 +1046,7 @@ herr_t refresh_verification(const char * obj_pathname)
 	} /* end else */
 
 	/* Get object info. This should now accurately reflect the refreshed object on disk. */
-	if((status = H5Oget_info(oid, &refreshed_oinfo)) < 0) PROCESS_ERROR;
+	if((status = H5Oget_info2(oid, &refreshed_oinfo, H5O_INFO_BASIC|H5O_INFO_NUM_ATTRS|H5O_INFO_HDR)) < 0) PROCESS_ERROR;
     
 	/* Confirm following (first 4) attributes are the same: */
 	/* Confirm following (last 4) attributes are different */

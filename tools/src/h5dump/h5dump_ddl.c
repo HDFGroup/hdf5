@@ -229,7 +229,7 @@ dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void H5_ATTR
         H5O_info_t  oinfo;
 
         /* Stat the object */
-        if(H5Oget_info_by_name(group, name, &oinfo, H5P_DEFAULT) < 0) {
+        if(H5Oget_info_by_name2(group, name, &oinfo, H5O_INFO_BASIC, H5P_DEFAULT) < 0) {
             error_msg("unable to get object information for \"%s\"\n", name);
             h5tools_setstatus(EXIT_FAILURE);
             ret = FAIL;
@@ -706,7 +706,7 @@ dump_named_datatype(hid_t tid, const char *name)
                         h5tools_dump_header_format->datatypeblockbegin);
     h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
 
-    H5Oget_info(tid, &oinfo);
+    H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC);
 
     /* Must check for uniqueness of all objects if we've traversed an elink,
      * otherwise only check if the reference count > 1.
@@ -876,7 +876,7 @@ dump_group(hid_t gid, const char *name)
 
     h5tools_dump_comment(rawoutstream, outputformat, &ctx, gid);
 
-    H5Oget_info(gid, &oinfo);
+    H5Oget_info2(gid, &oinfo, H5O_INFO_BASIC);
 
     /* Must check for uniqueness of all objects if we've traversed an elink,
      * otherwise only check if the reference count > 1.
@@ -1512,7 +1512,7 @@ handle_paths(hid_t fid, const char *path_name, void H5_ATTR_UNUSED * data, int H
 
         handle_udata.fid = fid;
         handle_udata.op_name = path_name;
-        if(h5trav_visit(fid, "/", TRUE, TRUE, obj_search, lnk_search, &handle_udata) < 0) {
+        if(h5trav_visit(fid, "/", TRUE, TRUE, obj_search, lnk_search, &handle_udata, H5O_INFO_BASIC) < 0) {
             error_msg("error traversing information\n");
             h5tools_setstatus(EXIT_FAILURE);
         }
@@ -1800,7 +1800,7 @@ handle_datasets(hid_t fid, const char *dset, void *data, int pe, const char *dis
     } /* end if */
 
 
-    H5Oget_info(dsetid, &oinfo);
+    H5Oget_info2(dsetid, &oinfo, H5O_INFO_BASIC);
     if(oinfo.rc > 1 || hit_elink) {
         obj_t  *found_obj;    /* Found object */
 
@@ -2101,7 +2101,7 @@ dump_extlink(hid_t group, const char *linkname, const char *objname)
         goto fail;
 
     /* Get object info */
-    if (H5Oget_info(oid, &oi) < 0) {
+    if (H5Oget_info2(oid, &oi, H5O_INFO_BASIC) < 0) {
         H5Oclose(oid);
         goto fail;
     }
