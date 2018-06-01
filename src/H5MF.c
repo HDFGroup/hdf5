@@ -1106,6 +1106,67 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5MF_get_shadow_addr
+ *
+ * Purpose:     Get a 'shadow' address for an object
+ *
+ * Note:	The address returned is non-overlapping with any other address
+ *		in the file and suitable for insertion into the metadata
+ *		cache.
+ *
+ *		The address is _not_ suitable for actual file I/O and will
+ *		cause an error if it is so used.
+ *
+ *		The space allocated with this routine should _not_ be freed,
+ *		it should just be abandoned.  Calling H5MF_xfree() with space
+ *              from this routine will cause an error.
+ *
+ * Return:      Success:        Shadow file address
+ *              Failure:        HADDR_UNDEF
+ *
+ * Programmer:  Quincey Koziol
+ *              Saturday, May 26, 2018
+ *
+ *-------------------------------------------------------------------------
+ */
+haddr_t
+H5MF_get_shadow_addr(const H5F_t *f, haddr_t addr)
+{
+    haddr_t eoa;                        /* End of allocated space in the file */
+    haddr_t ret_value = HADDR_UNDEF;    /* Return value */
+
+    FUNC_ENTER_NOAPI(HADDR_UNDEF)
+#ifdef H5MF_ALLOC_DEBUG
+HDfprintf(stderr, "%s: addr = %a\n", FUNC, addr);
+#endif /* H5MF_ALLOC_DEBUG */
+
+    /* check args */
+    HDassert(f);
+    HDassert(f->shared);
+    HDassert(f->shared->lf);
+    HDassert(H5F_addr_defined(addr));
+
+    /* Retrieve the 'eoa' for the file */
+    if(HADDR_UNDEF == (eoa = H5F_get_eoa(f, H5FD_MEM_DEFAULT)))
+	HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, HADDR_UNDEF, "driver get_eoa request failed")
+
+    /* Compute value to return */
+    ret_value = f->shared->shadow_addr + addr;
+
+    /* Check for overlap into the actual allocated space in the file */
+    if(H5F_addr_le(ret_value, eoa))
+	HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, HADDR_UNDEF, "shadow address overlaps with actual addresses")
+
+    /* Check for overlap into the temporary allocated space in the file */
+    if(H5F_addr_le(f->shared->tmp_addr, ret_value))
+	HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, HADDR_UNDEF, "shadow address overlaps with temporary addresses")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5MF_get_shadow_addr() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5MF__xfree_real
  *
  * Purpose:     Frees part of a file, making that part of the file

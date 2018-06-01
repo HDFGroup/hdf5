@@ -318,6 +318,7 @@ struct H5F_file_t {
     hbool_t     fs_persist;     /* Free-space persist or not */
     hbool_t     use_tmp_space;  /* Whether temp. file space allocation is allowed */
     haddr_t	tmp_addr;       /* Next address to use for temp. space in the file */
+    haddr_t	shadow_addr;    /* Address to begin 'shadow' addresses at */
     hbool_t     point_of_no_return; /* Flag to indicate that we can't go back and delete a freespace header when it's used up */
 
     H5F_fs_state_t fs_state[H5F_MEM_PAGE_NTYPES];   /* State of free space manager for each type */

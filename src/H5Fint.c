@@ -988,6 +988,7 @@ H5F_new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_t
         if(H5MF_init_merge_flags(f) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "problem initializing free space merge flags")
         f->shared->tmp_addr = f->shared->maxaddr;
+        f->shared->shadow_addr = f->shared->maxaddr / 2;
         /* Disable temp. space allocation for parallel I/O (for now) */
         /* (When we've arranged to have the relocated metadata addresses (and
          *      sizes) broadcast during the "end of epoch" metadata operations,
