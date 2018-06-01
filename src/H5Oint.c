@@ -3113,7 +3113,8 @@ done:
  *
  * Purpose:	Retrieve the 'top' proxy for the object header.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:	Success:	Pointer to top proxy
+ *		Failure:	NULL
  *
  * Programmer:	Quincey Koziol
  *		May 26 2018
@@ -3137,7 +3138,8 @@ H5O_get_top_proxy(const H5O_t *oh)
  *
  * Purpose:	Retrieve the 'bottom' proxy for the object header.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:	Success:	Pointer to top proxy
+ *		Failure:	NULL
  *
  * Programmer:	Quincey Koziol
  *		July 24 2016
