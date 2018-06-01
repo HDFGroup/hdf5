@@ -3019,6 +3019,105 @@ if ( ( (cache_ptr)->index_size !=                                           \
 
 /*-------------------------------------------------------------------------
  *
+ * Macro:	H5C__UPDATE_RP_FOR_PIN
+ *
+ * Purpose:     Update the replacement policy data structures for a
+ *		pin of an unprotected cache entry.
+ *
+ *		To do this, unlink the specified entry from the data
+ *		structures used by the current replacement policy and
+ *		insert it into the pinned entry list.
+ *
+ *		At present, we only support the modified LRU policy, so
+ *		this function deals with that case unconditionally.  If
+ *		we ever support other replacement policies, the macro
+ *		should switch on the current policy and act accordingly.
+ *
+ * Return:      N/A
+ *
+ * Programmer:  Quincey Koziol, 5/31/18
+ *
+ *-------------------------------------------------------------------------
+ */
+
+#if H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS
+
+#define H5C__UPDATE_RP_FOR_PIN(cache_ptr, entry_ptr, fail_val)         \
+{                                                                      \
+    HDassert( (cache_ptr) );                                           \
+    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                \
+    HDassert( (entry_ptr) );                                           \
+    HDassert( !((entry_ptr)->is_protected) );                          \
+    HDassert( !((entry_ptr)->is_read_only) );                          \
+    HDassert( ((entry_ptr)->ro_ref_count) == 0 );                      \
+    HDassert( (entry_ptr)->is_pinned);                                 \
+    HDassert( (entry_ptr)->size > 0 );                                 \
+                                                                       \
+    /* Remove the entry from the LRU list. */                          \
+    H5C__DLL_REMOVE((entry_ptr), (cache_ptr)->LRU_head_ptr,            \
+                    (cache_ptr)->LRU_tail_ptr,                         \
+                    (cache_ptr)->LRU_list_len,                         \
+                    (cache_ptr)->LRU_list_size, (fail_val))            \
+                                                                       \
+    /* Similarly, remove the entry from either the clean               \
+     * or dirty LRU list as appropriate.                               \
+     */                                                                \
+    if((entry_ptr)->is_dirty) {                                        \
+        H5C__AUX_DLL_REMOVE((entry_ptr), (cache_ptr)->dLRU_head_ptr,   \
+                            (cache_ptr)->dLRU_tail_ptr,                \
+                            (cache_ptr)->dLRU_list_len,                \
+                            (cache_ptr)->dLRU_list_size, (fail_val))   \
+    } /* end if */                                                     \
+    else {                                                             \
+        H5C__AUX_DLL_REMOVE((entry_ptr), (cache_ptr)->cLRU_head_ptr,   \
+                            (cache_ptr)->cLRU_tail_ptr,                \
+                            (cache_ptr)->cLRU_list_len,                \
+                            (cache_ptr)->cLRU_list_size, (fail_val))   \
+    } /* end else */                                                   \
+                                                                       \
+    /* Regardless of the replacement policy, insert the entry into the \
+     * pinned entry list.                                              \
+     */                                                                \
+    H5C__DLL_PREPEND((entry_ptr), (cache_ptr)->pel_head_ptr,           \
+                     (cache_ptr)->pel_tail_ptr,                        \
+                     (cache_ptr)->pel_len,                             \
+                     (cache_ptr)->pel_size, (fail_val))                \
+                                                                       \
+} /* H5C__UPDATE_RP_FOR_PIN */
+
+#else /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
+
+#define H5C__UPDATE_RP_FOR_PIN(cache_ptr, entry_ptr, fail_val)         \
+{                                                                      \
+    HDassert( (cache_ptr) );                                           \
+    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                \
+    HDassert( (entry_ptr) );                                           \
+    HDassert( !((entry_ptr)->is_protected) );                          \
+    HDassert( !((entry_ptr)->is_read_only) );                          \
+    HDassert( ((entry_ptr)->ro_ref_count) == 0 );                      \
+    HDassert( (entry_ptr)->is_pinned);                                 \
+    HDassert( (entry_ptr)->size > 0 );                                 \
+                                                                       \
+    /* Remove the entry from the LRU list. */                          \
+    H5C__DLL_REMOVE((entry_ptr), (cache_ptr)->LRU_head_ptr,            \
+                    (cache_ptr)->LRU_tail_ptr,                         \
+                    (cache_ptr)->LRU_list_len,                         \
+                    (cache_ptr)->LRU_list_size, (fail_val))            \
+                                                                       \
+    /* Regardless of the replacement policy, insert the entry into the \
+     * pinned entry list.                                              \
+     */                                                                \
+    H5C__DLL_PREPEND((entry_ptr), (cache_ptr)->pel_head_ptr,           \
+                     (cache_ptr)->pel_tail_ptr,                        \
+                     (cache_ptr)->pel_len,                             \
+                     (cache_ptr)->pel_size, (fail_val))                \
+} /* H5C__UPDATE_RP_FOR_PIN */
+
+#endif /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
+
+
+/*-------------------------------------------------------------------------
+ *
  * Macro:	H5C__UPDATE_RP_FOR_UNPIN
  *
  * Purpose:     Update the replacement policy data structures for an

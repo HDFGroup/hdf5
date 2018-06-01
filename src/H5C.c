@@ -3789,8 +3789,6 @@ H5C_create_flush_dependency(void * parent_thing, void * child_thing)
     /* More sanity checks */
     if(child_entry == parent_entry)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTDEPEND, FAIL, "Child entry flush dependency parent can't be itself")
-    if(!(parent_entry->is_protected || parent_entry->is_pinned))
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTDEPEND, FAIL, "Parent entry isn't pinned or protected")
 
     /* Check for parent not pinned */
     if(!parent_entry->is_pinned) {
@@ -3802,6 +3800,10 @@ H5C_create_flush_dependency(void * parent_thing, void * child_thing)
         /* Pin the parent entry */
         parent_entry->is_pinned = TRUE;
         H5C__UPDATE_STATS_FOR_PIN(cache_ptr, parent_entry)
+
+        /* Update the replacement policy if the parent entry is not protected */
+        if(!parent_entry->is_protected)
+            H5C__UPDATE_RP_FOR_PIN(cache_ptr, parent_entry, FAIL)
     } /* end else */
 
     /* Mark the entry as pinned from the cache's action (possibly redundantly) */
