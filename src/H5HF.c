@@ -802,6 +802,85 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5HF_depend
+ *
+ * Purpose:     Make a child flush dependency between the fractal heap's
+ *              header and another piece of metadata in the file.
+ *
+ * Return:      SUCCEED / FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@lbl.gov
+ *		May 26 2018
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5HF_depend(H5HF_t *fh, H5AC_proxy_entry_t *parent)
+{
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /*
+     * Check arguments.
+     */
+    HDassert(fh);
+    HDassert(fh->hdr);
+    HDassert(parent);
+    HDassert(fh->hdr->parent == NULL || fh->hdr->parent == parent);
+
+    /*
+     * Check to see if the flush dependency between the parent
+     * and the fractal heaptree header has already been setup.  If it hasn't,
+     * then set it up.
+     */
+    if(NULL == fh->hdr->parent) {
+        /* Sanity check */
+        HDassert(fh->hdr->top_proxy);
+
+        /* Set the shared heap header's file context for this operation */
+        fh->hdr->f = fh->f;
+
+        /* Add the fractal heap's 'top' proxy as a child of the parent */
+        if(H5AC_proxy_entry_add_child(parent, fh->hdr->f, fh->hdr->top_proxy) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTSET, FAIL, "unable to add fractal heap as child of proxy")
+	fh->hdr->parent = parent;
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5HF_depend() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5HF_get_top_proxy
+ *
+ * Purpose:	Retrieve the 'top' proxy for the fractal heap.
+ *
+ * Return:	Success:	Pointer to top proxy
+ *		Failure:	NULL
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@lbl.gov
+ *		May 26 2018
+ *
+ *-------------------------------------------------------------------------
+ */
+H5AC_proxy_entry_t *
+H5HF_get_top_proxy(const H5HF_t *fh)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    /* Check args */
+    HDassert(fh);
+    HDassert(fh->hdr);
+
+    FUNC_LEAVE_NOAPI(fh->hdr->top_proxy)
+} /* end H5HF_get_top_proxy() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5HF_close
  *
  * Purpose:	Close a fractal heap

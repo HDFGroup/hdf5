@@ -123,6 +123,10 @@ H5_DLL herr_t H5HF_remove(H5HF_t *fh, const void *id);
 H5_DLL herr_t H5HF_close(H5HF_t *fh);
 H5_DLL herr_t H5HF_delete(H5F_t *f, haddr_t fh_addr);
 
+/* Flush dependency routines */
+H5_DLL herr_t H5HF_depend(H5HF_t *fh, H5AC_proxy_entry_t *parent);
+H5_DLL H5AC_proxy_entry_t *H5HF_get_top_proxy(const H5HF_t *fh);
+
 /* Statistics routines */
 H5_DLL herr_t H5HF_stat_info(const H5HF_t *fh, H5HF_stat_t *stats);
 H5_DLL herr_t H5HF_size(const H5HF_t *fh, hsize_t *heap_size/*out*/);
