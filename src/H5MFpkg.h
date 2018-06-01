@@ -226,7 +226,6 @@ H5_DLL herr_t H5MF_aggr_query(const H5F_t *f, const H5F_blk_aggr_t *aggr,
 H5_DLL herr_t H5MF__freedspace_create(H5F_t *f, H5FD_mem_t alloc_type,
     haddr_t addr, hsize_t siz, H5MF_freedspace_t** fs);
 H5_DLL herr_t H5MF__xfree_freedspace(H5MF_freedspace_t *freedspace);
-H5_DLL herr_t H5MF__xfree_real(H5F_t *f, H5FD_mem_t alloc_type, haddr_t addr, hsize_t size);
 H5_DLL herr_t H5MF__freedspace_dest(H5MF_freedspace_t *pentry);
 H5_DLL herr_t H5MF__freedspace_push(H5MF_freedspace_t **head, H5MF_freedspace_t **tail, H5MF_freedspace_t *freedspace);
 H5_DLL herr_t H5MF__freedspace_dequeue_time_limit(H5F_t *f, H5MF_freedspace_t **freedspace, uint64_t time_limit);

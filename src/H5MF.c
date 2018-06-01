@@ -78,6 +78,10 @@ typedef struct {
 /* Local Prototypes */
 /********************/
 
+/* General routines */
+static herr_t H5MF__xfree_real(H5F_t *f, H5FD_mem_t alloc_type, haddr_t addr,
+    hsize_t size);
+
 /* Allocator routines */
 static haddr_t H5MF__alloc_pagefs(H5F_t *f, H5FD_mem_t alloc_type, hsize_t size);
 
@@ -1115,7 +1119,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5MF__xfree_real(H5F_t *f, H5FD_mem_t alloc_type, haddr_t addr, hsize_t size)
 {
     H5F_mem_page_t  fs_type;            /* Free space type (mapped from allocation type) */
@@ -1130,11 +1134,14 @@ H5MF__xfree_real(H5F_t *f, H5FD_mem_t alloc_type, haddr_t addr, hsize_t size)
 HDfprintf(stderr, "%s: Entering - alloc_type = %u, addr = %a, size = %Hu\n", FUNC, (unsigned)alloc_type, addr, size);
 #endif /* H5MF_ALLOC_DEBUG */
 
-    /* check arguments */
+    /* Check arguments */
     HDassert(f);
-    if(!H5F_addr_defined(addr) || 0 == size)
-        HGOTO_DONE(SUCCEED)
-    HDassert(addr != 0);        /* Can't deallocate the superblock :-) */
+    HDassert(H5F_addr_defined(addr));
+    HDassert(size > 0);
+
+    /* Check for attempting to free space that's a 'temporary' file address */
+    if(H5F_addr_le(f->shared->tmp_addr, addr))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_BADRANGE, FAIL, "attempting to free temporary file space")
 
     if(f->shared->first_alloc_dealloc) {
         HDassert(!H5AC_cache_image_pending(f));
@@ -1159,10 +1166,6 @@ HDfprintf(stderr, "%s: Entering - alloc_type = %u, addr = %a, size = %Hu\n", FUN
     if(H5F_HAVE_FREE_SPACE_MANAGER(f))
         if(H5AC_unsettle_ring(f, fsm_ring) < 0)
             HGOTO_ERROR(H5E_RESOURCE, H5E_SYSTEM, FAIL, "attempt to notify cache that ring is unsettled failed")
-
-    /* Check for attempting to free space that's a 'temporary' file address */
-    if(H5F_addr_le(f->shared->tmp_addr, addr))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_BADRANGE, FAIL, "attempting to free temporary file space")
 
     /* If it's metadata, check if the space to free intersects with the file's
      * metadata accumulator
