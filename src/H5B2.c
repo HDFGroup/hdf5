@@ -1533,6 +1533,38 @@ H5B2_get_bot_proxy(const H5B2_t *bt2)
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5B2_flush
+ *
+ * Purpose:     Flush a v2 B-tree's entries in the metadata cache.
+ *
+ * Return:      SUCCEED / FAIL
+ *
+ * Programmer:  Quincey Koziol
+ *		May 30 2018
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5B2_flush(H5F_t *f, haddr_t addr, unsigned cache_flags)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Check arguments */
+    HDassert(f);
+    HDassert(H5F_addr_defined(addr));
+
+    /* Flush the v2 B-tree, starting at the header */
+    if(H5AC_flush_by_dep(f, addr, cache_flags) < 0)
+	HGOTO_ERROR(H5E_BTREE, H5E_CANTFLUSH, FAIL, "unable to flush v2 B-tree")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5B2_flush() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5B2_close
  *
  * Purpose:	Close a v2 B-tree

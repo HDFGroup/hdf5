@@ -145,6 +145,7 @@ H5_DLL herr_t H5B2_remove(H5B2_t *b2, void *udata, H5B2_remove_t op,
     void *op_data);
 H5_DLL herr_t H5B2_remove_by_idx(H5B2_t *bt2, H5_iter_order_t order,
     hsize_t idx, H5B2_remove_t op, void *op_data);
+H5_DLL herr_t H5B2_flush(H5F_t *f, haddr_t addr, unsigned cache_flags);
 H5_DLL herr_t H5B2_close(H5B2_t *bt2);
 H5_DLL herr_t H5B2_delete(H5F_t *f, haddr_t addr, void *ctx_udata,
     H5B2_remove_t op, void *op_data);
