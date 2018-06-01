@@ -5204,10 +5204,10 @@ Java_hdf_hdf5lib_H5_H5Pset_1append_1flush
     visit_callback = callback_op;
 
     if (op_data == NULL) {
-        h5nullArgument(env, "H5Ovisit:  op_data is NULL");
+        h5nullArgument(env, "H5Pset_append_flush:  op_data is NULL");
     } /* end if */
     else if (callback_op == NULL) {
-        h5nullArgument(env, "H5Ovisit:  callback_op is NULL");
+        h5nullArgument(env, "H5Pset_append_flush:  callback_op is NULL");
     } /* end if */
     else {
         status = H5Pset_append_flush((hid_t)plist_id, (unsigned)ndims, (const hsize_t*)boundary, (H5D_append_cb_t)H5D_append_cb, (void*)op_data);

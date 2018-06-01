@@ -442,7 +442,7 @@ Java_hdf_hdf5lib_H5_H5Ovisit
         h5nullArgument(env, "H5Ovisit:  callback_op is NULL");
     } /* end if */
     else {
-        status = H5Ovisit((hid_t)grp_id, (H5_index_t)idx_type, (H5_iter_order_t)order, (H5O_iterate_t)H5O_iterate_cb, (void*)op_data, (unsigned)fields);
+        status = H5Ovisit2((hid_t)grp_id, (H5_index_t)idx_type, (H5_iter_order_t)order, (H5O_iterate_t)H5O_iterate_cb, (void*)op_data, (unsigned)fields);
 
         if (status < 0)
             h5libraryError(env);
@@ -478,7 +478,7 @@ Java_hdf_hdf5lib_H5_H5Ovisit_1by_1name
     else {
         PIN_JAVA_STRING(name, lName);
         if (lName != NULL) {
-            status = H5Ovisit_by_name((hid_t)grp_id, lName, (H5_index_t)idx_type, (H5_iter_order_t)order, (H5O_iterate_t)H5O_iterate_cb, (void*)op_data, (unsigned)fields, (hid_t)access_id);
+            status = H5Ovisit_by_name2((hid_t)grp_id, lName, (H5_index_t)idx_type, (H5_iter_order_t)order, (H5O_iterate_t)H5O_iterate_cb, (void*)op_data, (unsigned)fields, (hid_t)access_id);
 
             UNPIN_JAVA_STRING(name, lName);
 
