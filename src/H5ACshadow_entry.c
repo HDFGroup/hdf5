@@ -527,35 +527,17 @@ H5AC__shadow_entry_notify(H5AC_notify_action_t action, void *_thing, ...)
 
                 /* Reset pointer to proxy in shadow entry */
                 if(child_entry == shadow->ohdr_proxy)
-{
-HDfprintf(stderr, "%s: ohdr_proxy being evicted\n", FUNC);
                     shadow->ohdr_proxy = NULL;
-}
                 else if(child_entry == shadow->obj_heap_proxy)
-{
-HDfprintf(stderr, "%s: obj_heap_proxy being evicted\n", FUNC);
                     shadow->obj_heap_proxy = NULL;
-}
                 else if(child_entry == shadow->obj_idx_proxy)
-{
-HDfprintf(stderr, "%s: obj_idx_proxy being evicted\n", FUNC);
                     shadow->obj_idx_proxy = NULL;
-}
                 else if(child_entry == shadow->obj_aux_idx_proxy)
-{
-HDfprintf(stderr, "%s: obj_aux_idx_proxy being evicted\n", FUNC);
                     shadow->obj_aux_idx_proxy = NULL;
-}
                 else if(child_entry == shadow->attr_heap_proxy)
-{
-HDfprintf(stderr, "%s: attr_heap_proxy being evicted\n", FUNC);
                     shadow->attr_heap_proxy = NULL;
-}
                 else if(child_entry == shadow->attr_idx_proxy)
-{
-HDfprintf(stderr, "%s: attr_idx_proxy being evicted\n", FUNC);
                     shadow->attr_idx_proxy = NULL;
-}
                 else
                     HGOTO_ERROR(H5E_CACHE, H5E_NOTFOUND, FAIL, "proxy entry not a component of shadow entry?")
 
