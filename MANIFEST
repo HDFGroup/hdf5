@@ -485,6 +485,7 @@
 ./src/H5ACprivate.h
 ./src/H5ACpublic.h
 ./src/H5ACproxy_entry.c
+./src/H5ACshadow_entry.c
 ./src/H5B.c
 ./src/H5Bcache.c
 ./src/H5Bdbg.c

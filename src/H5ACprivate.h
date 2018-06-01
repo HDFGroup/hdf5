@@ -82,6 +82,7 @@ typedef enum {
     H5AC_PROXY_ENTRY_ID,        /* (28) cache entry proxy                           */
     H5AC_PREFETCHED_ENTRY_ID, 	/* (29) prefetched entry - always internal to cache */
     H5AC_FREEDSPACE_ID,         /* (30) freedspace                                  */
+    H5AC_SHADOW_ENTRY_ID,       /* (31) shadow object                               */
     H5AC_NTYPES                 /* Number of types, must be last                    */
 } H5AC_type_t;
 
@@ -233,6 +234,46 @@ typedef struct H5AC_proxy_entry_t {
     size_t nunser_children;             /* Number of unserialized children */
                                         /* (Note that this currently duplicates some cache functionality) */
 } H5AC_proxy_entry_t;
+
+/* Shadow entry component types */
+typedef enum {
+    H5AC_SHADOW_OHDR,                   /* Object header 'top' proxy */
+    H5AC_SHADOW_OBJ_HEAP,               /* Object heap 'top' proxy */
+    H5AC_SHADOW_OBJ_IDX,                /* Object primary index 'top' proxy */
+    H5AC_SHADOW_OBJ_AUX_IDX,            /* Object secondary index 'top' proxy */
+    H5AC_SHADOW_ATTR_HEAP,              /* Object attribute heap 'top' proxy */
+    H5AC_SHADOW_ATTR_IDX                /* Object attribute index 'top' proxy */
+} H5AC_shadow_comp_t;
+
+/* Shadow entry "last operation" state */
+typedef enum {
+    H5AC_SHADOW_LAST_OP_NONE = 0,       /* No previous operation on object */
+    H5AC_SHADOW_LAST_OP_INSERT,         /* Last operation on object was insert */
+    H5AC_SHADOW_LAST_OP_REMOVE,         /* Last operation on object was remove */
+    H5AC_SHADOW_LAST_OP_MODIFY,         /* Last operation on object was modify */
+} H5AC_shadow_last_op_t;
+
+/* Metadata cache shadow entry type */
+typedef struct H5AC_shadow_entry_t {
+    H5AC_info_t cache_info;             /* Information for H5AC cache functions */
+                                        /* (MUST be first field in structure) */
+
+    /* General fields */
+    H5F_t *f;                           /* File that shadow is within */
+    haddr_t addr;                       /* Address of the entry in the file */
+                                        /* (Should be in 'shadow' address space) */
+
+    /* Operation tracking fields */
+    H5AC_shadow_last_op_t last_op;      /* The last operation on the object */
+
+    /* Component tracking fields */
+    H5AC_proxy_entry_t *ohdr_proxy;     /* Pointer to object header proxy */
+    H5AC_proxy_entry_t *obj_heap_proxy; /* Pointer to object's heap top proxy */
+    H5AC_proxy_entry_t *obj_idx_proxy;  /* Pointer to object's primary index top proxy */
+    H5AC_proxy_entry_t *obj_aux_idx_proxy;  /* Pointer to object's secondary index top proxy */
+    H5AC_proxy_entry_t *attr_heap_proxy;/* Pointer to object's attribute heap top proxy */
+    H5AC_proxy_entry_t *attr_idx_proxy; /* Pointer to object's attribute index top proxy */
+} H5AC_shadow_entry_t;
 
 /* Default cache configuration. */
 #define H5AC__DEFAULT_METADATA_WRITE_STRATEGY   \
@@ -390,6 +431,7 @@ H5_DLLVAR const H5AC_class_t H5AC_EPOCH_MARKER[1];
 H5_DLLVAR const H5AC_class_t H5AC_PROXY_ENTRY[1];
 H5_DLLVAR const H5AC_class_t H5AC_PREFETCHED_ENTRY[1];
 H5_DLLVAR const H5AC_class_t H5AC_FREEDSPACE[1];
+H5_DLLVAR const H5AC_class_t H5AC_SHADOW_ENTRY[1];
 
 /* external function declarations: */
 
@@ -471,6 +513,16 @@ H5_DLL herr_t H5AC_proxy_entry_add_child(H5AC_proxy_entry_t *pentry, H5F_t *f,
     void *child);
 H5_DLL herr_t H5AC_proxy_entry_remove_child(H5AC_proxy_entry_t *pentry, void *child);
 H5_DLL herr_t H5AC_proxy_entry_dest(H5AC_proxy_entry_t *pentry);
+
+/* Shadow entry routines */
+H5_DLL H5AC_shadow_entry_t *H5AC_shadow_entry_create(H5F_t *f, haddr_t addr);
+H5_DLL H5AC_shadow_entry_t *H5AC_shadow_entry_protect(H5F_t *f, haddr_t addr,
+    unsigned flags);
+H5_DLL herr_t H5AC_shadow_entry_add_component(H5AC_shadow_entry_t *shadow,
+    H5AC_shadow_comp_t comp_type, H5AC_proxy_entry_t *comp);
+H5_DLL herr_t H5AC_shadow_entry_unprotect(H5AC_shadow_entry_t *shadow,
+    unsigned cache_flags);
+H5_DLL herr_t H5AC_shadow_entry_dest(H5AC_shadow_entry_t *shadow);
 
 #ifdef H5_HAVE_PARALLEL
 H5_DLL herr_t H5AC_add_candidate(H5AC_t * cache_ptr, haddr_t addr);

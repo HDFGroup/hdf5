@@ -39,7 +39,7 @@
 /**************************/
 
 /* Cache configuration settings */
-#define H5C__MAX_NUM_TYPE_IDS   31
+#define H5C__MAX_NUM_TYPE_IDS   32
 #define H5C__PREFIX_LEN         32
 
 /* This sanity checking constant was picked out of the air.  Increase

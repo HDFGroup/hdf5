@@ -6433,8 +6433,9 @@ H5C__flush_single_entry(H5F_t *f, H5C_cache_entry_t *entry_ptr, unsigned flags)
         /* If there's any flush dependency parents, let them know that this
          *      entry is being evicted.  "Normal" flush dependencies for data
          *      structures, etc. shouldn't be in place, but this entry could
-         *      be a child of a flush dependency from a 'freedspace' entry,
-         *      which needs to be told that the entry is being evicted. QAK - 2017/08/03
+         *      be a child of a flush dependency from a 'freedspace' or
+         *      'shadow' entry, which needs to be told that the entry is
+         *      being evicted. QAK - 2017/08/03 (added 'shadow', 2018/05/30)
          */
         if(entry_ptr->flush_dep_nparents > 0) {
             int i;              /* Local index variable */
@@ -9010,9 +9011,9 @@ H5C_remove_entry(void *_entry)
     /* If there's any flush dependency parents, let them know that this
      *      entry is being evicted.  "Normal" flush dependencies for data
      *      structures, etc. shouldn't be in place, but this entry could
-     *      be a child of a flush dependency from a 'freedspace' entry,
-     *      which needs to be told that the entry is being evicted.
-     *      QAK - 2018/05/30
+     *      be a child of a flush dependency from a 'freedspace' or
+     *      'shadow' entry, which needs to be told that the entry is
+     *      being evicted. QAK - 2018/05/30
      */
     if(entry->flush_dep_nparents > 0) {
         int i;              /* Local index variable */
