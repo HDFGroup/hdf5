@@ -248,9 +248,9 @@ h5ovisit_c(hid_t_f *group_id, int_f *index_type, int_f *order, H5O_iterate_t op,
   herr_t func_ret_value; /* H5Linterate return value */
 
   /*
-   * Call H5Ovisit
+   * Call H5Ovisit2
    */
-  func_ret_value = H5Ovisit( (hid_t)*group_id, (H5_index_t)*index_type, (H5_iter_order_t)*order, op, op_data, H5O_INFO_ALL);
+  func_ret_value = H5Ovisit2( (hid_t)*group_id, (H5_index_t)*index_type, (H5_iter_order_t)*order, op, op_data, H5O_INFO_ALL);
 
   ret_value = (int_f)func_ret_value;
 
