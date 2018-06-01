@@ -39,6 +39,7 @@
 #include "H5HLprivate.h"	/* Local Heaps				*/
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5Lprivate.h"         /* Links			  	*/
+#include "H5MFprivate.h"        /* File memory management               */
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Pprivate.h"         /* Property Lists			*/
 
@@ -583,7 +584,7 @@ H5G_obj_insert(const H5O_loc_t *grp_oloc, const char *name, H5O_link_t *obj_lnk,
             use_old_format = TRUE;
     } /* end if */
 
-    /* Insert into symbol table or "dense" storage */
+    /* Insert into symbol table or "new style" storage */
     if(use_old_format) {
         /* Insert into symbol table */
         if(H5G__stab_insert(grp_oloc, name, obj_lnk, obj_type, crt_info) < 0)
@@ -600,14 +601,12 @@ H5G_obj_insert(const H5O_loc_t *grp_oloc, const char *name, H5O_link_t *obj_lnk,
             if(H5G__compact_insert(grp_oloc, obj_lnk) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "unable to insert link as link message")
         } /* end else */
-    } /* end else */
 
-    /* Increment the number of objects in this group */
-    if(!use_old_format) {
+        /* Increment the number of objects in this group */
         linfo.nlinks++;
         if(H5O_msg_write(grp_oloc, H5O_LINFO_ID, 0, H5O_UPDATE_TIME, &linfo) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "can't update link info message")
-    } /* end if */
+    } /* end else */
 
     /* Increment link count on object, if requested and it's a hard link */
     if(adj_link && obj_lnk->type == H5L_TYPE_HARD) {
