@@ -881,6 +881,33 @@ H5HF_get_top_proxy(const H5HF_t *fh)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5HF_get_bot_proxy
+ *
+ * Purpose:	Retrieve the 'bottom' proxy for the fractal heap.
+ *
+ * Return:	Success:	Pointer to bottom proxy
+ *		Failure:	NULL
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@lbl.gov
+ *		May 31 2018
+ *
+ *-------------------------------------------------------------------------
+ */
+H5AC_proxy_entry_t *
+H5HF_get_bot_proxy(const H5HF_t *fh)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    /* Check args */
+    HDassert(fh);
+    HDassert(fh->hdr);
+
+    FUNC_LEAVE_NOAPI(fh->hdr->bot_proxy)
+} /* end H5HF_get_bot_proxy() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5HF_close
  *
  * Purpose:	Close a fractal heap
