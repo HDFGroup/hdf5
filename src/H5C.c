@@ -8989,14 +8989,6 @@ H5C_remove_entry(void *_entry)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTREMOVE, FAIL, "can't remove protected entry from cache")
     if(entry->is_pinned)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTREMOVE, FAIL, "can't remove pinned entry from cache")
-    /* NOTE: If these two errors are getting tripped because the entry is
-     *          in a flush dependency with a freedspace entry, move the checks
-     *          after the "before evict" message is sent, and add the
-     *          "child being evicted" message to the "before evict" notify
-     *          section below.  QAK - 2017/08/03
-     */
-    if(entry->flush_dep_nparents > 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTREMOVE, FAIL, "can't remove entry with flush dependency parents from cache")
     if(entry->flush_dep_nchildren > 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTREMOVE, FAIL, "can't remove entry with flush dependency children from cache")
 
@@ -9012,6 +9004,32 @@ H5C_remove_entry(void *_entry)
 
     /* Update stats, as if we are "destroying" and taking ownership of the entry */
     H5C__UPDATE_STATS_FOR_EVICTION(cache, entry, TRUE)
+
+    /* If there's any flush dependency parents, let them know that this
+     *      entry is being evicted.  "Normal" flush dependencies for data
+     *      structures, etc. shouldn't be in place, but this entry could
+     *      be a child of a flush dependency from a 'freedspace' entry,
+     *      which needs to be told that the entry is being evicted.
+     *      QAK - 2018/05/30
+     */
+    if(entry->flush_dep_nparents > 0) {
+        int i;              /* Local index variable */
+
+        /* Iterate over the parent entries */
+        /* (Extract this loop into a function if it's used in more locations) */
+        /* (Note that the iteration from high to low compensates for notify
+         *  callbacks that remove the current flush dependency - QAK, 2017/08/05)
+         */
+        for(i = (int)(entry->flush_dep_nparents - 1); i >= 0; i--) {
+            /* Sanity check */
+            HDassert(entry->flush_dep_parent[i]->flush_dep_nchildren > 0);
+
+            /* If the parent has a 'notify' callback, send a 'child entry cleaned' notice */
+            if(entry->flush_dep_parent[i]->type->notify &&
+                    (entry->flush_dep_parent[i]->type->notify)(H5C_NOTIFY_ACTION_CHILD_BEFORE_EVICT, entry->flush_dep_parent[i], entry->addr) < 0)
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, FAIL, "can't notify parent about child entry being evicted")
+        } /* end for */
+    } /* end if */
 
     /* If the entry's type has a 'notify' callback, send a 'before eviction'
      * notice while the entry is still fully integrated in the cache.
