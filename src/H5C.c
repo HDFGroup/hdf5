@@ -2167,7 +2167,6 @@ done:
  * Function:    H5C__flush_recursive_by_dep
  *
  * Purpose:     Flush entries recursively by their flush dependency.
- *              
  *
  * Return:      Non-negative on success/Negative on failure or if there was
  *		an attempt to flush a protected item.
@@ -2200,6 +2199,52 @@ H5C__flush_recursive_by_dep(H5F_t *f, H5C_cache_entry_t *entry_ptr,
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5C__flush_recursive_by_dep() */
+
+
+/*-------------------------------------------------------------------------
+ *
+ * Function:    H5C_flush_by_dep
+ *
+ * Purpose:     Flush entries recursively by their flush dependency.
+ *
+ * Return:      Non-negative on success / Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              May 30, 2018
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t 
+H5C_flush_by_dep(H5F_t *f, haddr_t addr, unsigned flags)
+{
+    H5C_t *cache;                       /* Metadata cache for file */
+    H5C_cache_entry_t *entry;           /* Entry for address */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity checks */
+    HDassert(f);
+    HDassert(f->shared);
+    cache = f->shared->cache;
+    HDassert(cache != NULL);
+    HDassert(cache->magic == H5C__H5C_T_MAGIC);
+    HDassert(H5F_addr_defined(addr));
+
+    /* Find the entry in the cache */
+    H5C__SEARCH_INDEX(cache, addr, entry, FAIL)
+
+    /* Check if entry is in the cache */
+    if(NULL == entry)
+        HGOTO_ERROR(H5E_CACHE, H5E_NOTFOUND, FAIL, "can't find entry in index")
+
+    /* Recursively flush and evict flush dependency children of the entry */
+    if(H5C__flush_recursive_by_dep(f, entry, flags) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "can't flush entry and it's flush dep children")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5C_flush_by_dep() */
 
 
 /*-------------------------------------------------------------------------
@@ -6405,7 +6450,6 @@ H5C__flush_single_entry(H5F_t *f, H5C_cache_entry_t *entry_ptr, unsigned flags)
                 if(entry_ptr->flush_dep_parent[i]->type->notify &&
                         (entry_ptr->flush_dep_parent[i]->type->notify)(H5C_NOTIFY_ACTION_CHILD_BEFORE_EVICT, entry_ptr->flush_dep_parent[i], entry_ptr->addr) < 0)
                     HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, FAIL, "can't notify parent about child entry being evicted")
-
             } /* end for */
         } /* end if */
 

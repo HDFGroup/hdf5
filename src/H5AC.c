@@ -3304,3 +3304,36 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC_get_entry_from_addr() */
 
+
+/*------------------------------------------------------------------------------
+ * Function:    H5AC_flush_by_dep()
+ *
+ * Purpose:     Wrapper for cache level function which flushes all metadata
+ *              according to their flush dependencies.
+ * 
+ * Return:      SUCCEED on success, FAIL otherwise.
+ *
+ * Programmer:  Quincey Koziol
+ *              May 30, 2018
+ *
+ *------------------------------------------------------------------------------
+ */
+herr_t
+H5AC_flush_by_dep(H5F_t *f, haddr_t addr, unsigned flags)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+ 
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity checks */
+    HDassert(f);
+    HDassert(H5F_addr_defined(addr));
+
+    /* Call cache level function to flush metadata entries by dependencies */
+    if(H5C_flush_by_dep(f, addr, flags) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "can't flush metadata by dependencies")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5AC_flush_by_dep */
+

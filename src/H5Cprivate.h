@@ -2322,6 +2322,7 @@ H5_DLL herr_t H5C_cork(H5C_t *cache_ptr, haddr_t obj_addr, unsigned action, hboo
 H5_DLL htri_t H5C_has_dirty_entry(const H5C_t *cache);
 H5_DLL herr_t H5C_get_flush_dep_nchildren(const H5C_cache_entry_t *entry_ptr,
     unsigned *nchildren);
+H5_DLL herr_t H5C_flush_by_dep(H5F_t *f, haddr_t addr, unsigned flags);
 H5_DLL herr_t H5C_get_entry_from_addr(H5C_t *cache_ptr, haddr_t addr,
     void **entry_ptr_ptr);
 H5_DLL herr_t H5C_get_entry_ring(const H5F_t *f, haddr_t addr, H5C_ring_t *ring);

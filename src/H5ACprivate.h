@@ -434,6 +434,7 @@ H5_DLL herr_t H5AC_validate_config(H5AC_cache_config_t *config_ptr);
 H5_DLL herr_t H5AC_get_entry_type(const H5AC_info_t *entry);
 H5_DLL herr_t H5AC_get_flush_dep_nchildren(const H5AC_info_t *entry,
     unsigned *nchildren);
+H5_DLL herr_t H5AC_flush_by_dep(H5F_t *f, haddr_t addr, unsigned flags);
 H5_DLL herr_t H5AC_get_entry_from_addr(const H5F_t *f, haddr_t addr,
     void **entry_ptr_ptr);
 H5_DLL htri_t H5AC_cache_is_clean(const H5F_t *f, H5AC_ring_t inner_ring);
@@ -462,7 +463,7 @@ H5_DLL herr_t H5AC_expunge_tag_type_metadata(H5F_t *f, haddr_t tag, int type_id,
     unsigned flags);
 H5_DLL herr_t H5AC_get_tag(const void *thing, /*OUT*/ haddr_t *tag);
 
-/* Virtual entry routines */
+/* Proxy entry routines */
 H5_DLL H5AC_proxy_entry_t *H5AC_proxy_entry_create(void);
 H5_DLL herr_t H5AC_proxy_entry_add_parent(H5AC_proxy_entry_t *pentry, void *parent);
 H5_DLL herr_t H5AC_proxy_entry_remove_parent(H5AC_proxy_entry_t *pentry, void *parent);
