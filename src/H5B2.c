@@ -257,6 +257,67 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5B2_patch_file
+ *
+ * Purpose:     Patch the top-level file pointer contained in bt2
+ *              to point to idx_info->f if they are different.  
+ *		This is possible because the file pointer in bt2 can be
+ *		closed out if bt2 remains open.
+ *
+ * Return:      SUCCEED
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5B2_patch_file(H5B2_t *bt2, H5F_t *f)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    /*
+     * Check arguments.
+     */
+    HDassert(bt2);
+    HDassert(f);
+
+    if(bt2->f != f || bt2->hdr->f != f)
+        bt2->f = bt2->hdr->f = f;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* H5B2_patch_file() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5B2_get_addr
+ *
+ * Purpose:	Get the address of a v2 B-tree
+ *
+ * Return:	SUCCEED/FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Nov  5 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5B2_get_addr(const H5B2_t *bt2, haddr_t *addr_p)
+{
+    FUNC_ENTER_NOAPI_NOERR
+
+    /*
+     * Check arguments.
+     */
+    HDassert(bt2);
+    HDassert(addr_p);
+
+    /* Retrieve the header address for this v2 B-tree */
+    *addr_p = bt2->hdr->addr;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5B2_get_addr() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5B2_insert
  *
  * Purpose:	Adds a new record to the B-tree.
@@ -369,37 +430,6 @@ H5B2_update(H5B2_t *bt2, void *udata, H5B2_modify_t op, void *op_data)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5B2_update() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5B2_get_addr
- *
- * Purpose:	Get the address of a v2 B-tree
- *
- * Return:	SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		Nov  5 2009
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5B2_get_addr(const H5B2_t *bt2, haddr_t *addr_p)
-{
-    FUNC_ENTER_NOAPI_NOERR
-
-    /*
-     * Check arguments.
-     */
-    HDassert(bt2);
-    HDassert(addr_p);
-
-    /* Retrieve the header address for this v2 B-tree */
-    *addr_p = bt2->hdr->addr;
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5B2_get_addr() */
 
 
 /*-------------------------------------------------------------------------
@@ -1044,35 +1074,6 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5B2_get_nrec
- *
- * Purpose:	Retrieves the number of records in a B-tree
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		Feb 25 2005
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5B2_get_nrec(const H5B2_t *bt2, hsize_t *nrec)
-{
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    /* Check arguments. */
-    HDassert(bt2);
-    HDassert(nrec);
-
-    /* Get B-tree number of records */
-    *nrec = bt2->hdr->root.all_nrec;
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* H5B2_get_nrec() */
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5B2_neighbor
  *
  * Purpose:	Locate a record relative to the specified information in a
@@ -1377,6 +1378,161 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5B2_depend
+ *
+ * Purpose:     Make a child flush dependency between the v2 B-tree's
+ *              header and another piece of metadata in the file.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ * Programmer:  Dana Robinson
+ *              Fall 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5B2_depend(H5B2_t *bt2, H5AC_proxy_entry_t *parent)
+{
+    /* Local variables */
+    H5B2_hdr_t  *hdr = bt2->hdr;        /* Header for B-tree */
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /*
+     * Check arguments.
+     */
+    HDassert(bt2);
+    HDassert(hdr);
+    HDassert(parent);
+    HDassert(hdr->parent == NULL || hdr->parent == parent);
+
+    /*
+     * Check to see if the flush dependency between the parent
+     * and the v2 B-tree header has already been setup.  If it hasn't, then
+     * set it up.
+     */
+    if(NULL == hdr->parent) {
+        /* Sanity check */
+        HDassert(hdr->top_proxy);
+
+        /* Set the shared v2 B-tree header's file context for this operation */
+        hdr->f = bt2->f;
+
+        /* Add the v2 B-tree's 'top' proxy as a child of the parent */
+        if(H5AC_proxy_entry_add_child(parent, hdr->f, hdr->top_proxy) < 0)
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTSET, FAIL, "unable to add v2 B-tree as child of proxy")
+	hdr->parent = parent;
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5B2_depend() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5B2_undepend
+ *
+ * Purpose:     Remove a child flush dependency between the v2 B-tree's
+ *              header and another piece of metadata in the file.
+ *
+ * Return:      SUCCEED / FAIL
+ *
+ * Programmer:  Quincey Koziol
+ *		May 30 2018
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5B2_undepend(H5F_t *f, haddr_t addr)
+{
+    H5B2_hdr_t *hdr = NULL;             /* Pointer to the B-tree header */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /*
+     * Check arguments.
+     */
+    HDassert(f);
+    HDassert(H5F_addr_defined(addr));
+
+    /* Look up the B-tree header */
+    if(NULL == (hdr = H5B2__hdr_protect(f, addr, NULL, H5AC__READ_ONLY_FLAG)))
+	HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect v2 B-tree header")
+
+    /* Is flush dependency between a parent and the v2 B-tree header setup? */
+    if(NULL == hdr->parent)
+	HGOTO_ERROR(H5E_BTREE, H5E_UNINITIALIZED, FAIL, "v2 B-tree has no parent")
+
+    /* Remove flush dependency */
+    if(H5AC_proxy_entry_remove_child((H5AC_proxy_entry_t *)hdr->parent, hdr->top_proxy) < 0)
+	HGOTO_ERROR(H5E_BTREE, H5E_CANTUNDEPEND, FAIL, "can't remove dependency on parent")
+
+    /* Reset parent */
+    hdr->parent = NULL;
+
+done:
+    if(hdr && H5B2__hdr_unprotect(hdr, H5AC__NO_FLAGS_SET) < 0)
+        HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release v2 B-tree header")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5B2_depend() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5B2_get_top_proxy
+ *
+ * Purpose:	Retrieve the 'top' proxy for the v2 B-tree.
+ *
+ * Return:	Success:	Pointer to top proxy
+ *		Failure:	NULL
+ *
+ * Programmer:	Quincey Koziol
+ *		May 26 2018
+ *
+ *-------------------------------------------------------------------------
+ */
+H5AC_proxy_entry_t *
+H5B2_get_top_proxy(const H5B2_t *bt2)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    /* Check args */
+    HDassert(bt2);
+    HDassert(bt2->hdr);
+
+    FUNC_LEAVE_NOAPI(bt2->hdr->top_proxy)
+} /* end H5B2_get_top_proxy() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5B2_get_bot_proxy
+ *
+ * Purpose:	Retrieve the 'bottom' proxy for the v2 B-tree.
+ *
+ * Return:	Success:	Pointer to bottom proxy
+ *		Failure:	NULL
+ *
+ * Programmer:	Quincey Koziol
+ *		May 30 2018
+ *
+ *-------------------------------------------------------------------------
+ */
+H5AC_proxy_entry_t *
+H5B2_get_bot_proxy(const H5B2_t *bt2)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    /* Check args */
+    HDassert(bt2);
+    HDassert(bt2->hdr);
+
+    FUNC_LEAVE_NOAPI(bt2->hdr->bot_proxy)
+} /* end H5B2_get_bot_proxy() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5B2_close
  *
  * Purpose:	Close a v2 B-tree
@@ -1542,87 +1698,4 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5B2_delete() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5B2_depend
- *
- * Purpose:     Make a child flush dependency between the v2 B-tree's
- *              header and another piece of metadata in the file.
- *
- * Return:      SUCCEED/FAIL
- *
- * Programmer:  Dana Robinson
- *              Fall 2012
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5B2_depend(H5B2_t *bt2, H5AC_proxy_entry_t *parent)
-{
-    /* Local variables */
-    H5B2_hdr_t  *hdr = bt2->hdr;        /* Header for B-tree */
-    herr_t      ret_value = SUCCEED;    /* Return value */
-
-    FUNC_ENTER_NOAPI(SUCCEED)
-
-    /*
-     * Check arguments.
-     */
-    HDassert(bt2);
-    HDassert(hdr);
-    HDassert(parent);
-    HDassert(hdr->parent == NULL || hdr->parent == parent);
-
-    /*
-     * Check to see if the flush dependency between the parent
-     * and the v2 B-tree header has already been setup.  If it hasn't, then
-     * set it up.
-     */
-    if(NULL == hdr->parent) {
-        /* Sanity check */
-        HDassert(hdr->top_proxy);
-
-        /* Set the shared v2 B-tree header's file context for this operation */
-        hdr->f = bt2->f;
-
-        /* Add the v2 B-tree as a child of the parent (proxy) */
-        if(H5AC_proxy_entry_add_child(parent, hdr->f, hdr->top_proxy) < 0)
-            HGOTO_ERROR(H5E_BTREE, H5E_CANTSET, FAIL, "unable to add v2 B-tree as child of proxy")
-	hdr->parent = parent;
-    } /* end if */
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5B2_depend() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5B2_patch_file
- *
- * Purpose:     Patch the top-level file pointer contained in bt2
- *              to point to idx_info->f if they are different.  
- *		This is possible because the file pointer in bt2 can be
- *		closed out if bt2 remains open.
- *
- * Return:      SUCCEED
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5B2_patch_file(H5B2_t *bt2, H5F_t *f)
-{
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    /*
-     * Check arguments.
-     */
-    HDassert(bt2);
-    HDassert(f);
-
-    if(bt2->f != f || bt2->hdr->f != f)
-        bt2->f = bt2->hdr->f = f;
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* H5B2_patch_file() */
 

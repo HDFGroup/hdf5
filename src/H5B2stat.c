@@ -69,6 +69,35 @@
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5B2_get_nrec
+ *
+ * Purpose:	Retrieves the number of records in a B-tree
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Feb 25 2005
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5B2_get_nrec(const H5B2_t *bt2, hsize_t *nrec)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    /* Check arguments. */
+    HDassert(bt2);
+    HDassert(nrec);
+
+    /* Get B-tree number of records */
+    *nrec = bt2->hdr->root.all_nrec;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* H5B2_get_nrec() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5B2_stat_info
  *
  * Purpose:     Retrieve metadata statistics for a v2 B-tree
