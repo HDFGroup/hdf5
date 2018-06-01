@@ -30939,7 +30939,7 @@ check_flush_deps_err(unsigned paged)
     /* Loop over test cases, check for various errors in configuring flush
      *  dependencies.  Verify that all performs as expected.
      */
-    for(test_count = 0; test_count < 7; test_count++) {
+    for(test_count = 0; test_count < 6; test_count++) {
         unsigned u;             /* Local index variable */
         herr_t result;          /* Generic return value */
 
@@ -30956,14 +30956,8 @@ check_flush_deps_err(unsigned paged)
 
         /* Various test cases */
         switch(test_count) {
-            /* Verify that parent entry in flush dependency must be protected */
-            case 0:
-                result = H5C_create_flush_dependency(&((entries[entry_type])[0]), &((entries[entry_type])[1]));
-                if(result != FAIL) CACHE_ERROR("Creating flush dependency with unprotected entry succeeded")
-                break;
-
             /* Verify that entry can't have flush dependency on itself */
-            case 1:
+            case 0:
                 protect_entry(file_ptr, entry_type, 0);
                 if(!pass) CACHE_ERROR("protect_entry failed")
 
@@ -30978,13 +30972,13 @@ check_flush_deps_err(unsigned paged)
                 break;
 
             /* Verify that parent entry must be protected */
-            case 2:
+            case 1:
                 result = H5C_destroy_flush_dependency(&((entries[entry_type])[0]), &((entries[entry_type])[1]));
                 if(result != FAIL) CACHE_ERROR("Destroying [non-existant] dependency when parent isn't protected")
                 break;
 
             /* Verify that parent entry has flush dependency */
-            case 3:
+            case 2:
                 protect_entry(file_ptr, entry_type, 0);
                 if(!pass) CACHE_ERROR("protect_entry failed")
 
@@ -30999,7 +30993,7 @@ check_flush_deps_err(unsigned paged)
                 break;
 
             /* Verify that child entry is in flush dependency relationship */
-            case 4:
+            case 3:
                 protect_entry(file_ptr, entry_type, 0);
                 if(!pass) CACHE_ERROR("protect_entry failed")
 
@@ -31020,7 +31014,7 @@ check_flush_deps_err(unsigned paged)
                 break;
 
             /* Verify that parent has child as direct descendant */
-            case 5:
+            case 4:
                 protect_entry(file_ptr, entry_type, 0);
                 if(!pass) CACHE_ERROR("protect_entry failed")
 
@@ -31072,7 +31066,7 @@ check_flush_deps_err(unsigned paged)
 
 
             /* Verify that child entry is child of parent */
-            case 6:
+            case 5:
                 protect_entry(file_ptr, entry_type, 0);
                 if(!pass) CACHE_ERROR("protect_entry failed")
 
@@ -36754,10 +36748,14 @@ main(void)
     /* can't fail, returns void */
     free_entry_arrays();
 
-    if(nerrs > 0)
+    if(nerrs > 0) {
+        puts("*** TESTS FAILED ***");
         return EXIT_FAILURE;
-    else
+    } /* end if */
+    else {
+        puts("All metadata cache tests passed.");
         return EXIT_SUCCESS;
+    } /* end else */
 
 } /* main() */
 
