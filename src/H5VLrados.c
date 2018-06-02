@@ -55,6 +55,9 @@ hid_t H5VL_RADOS_g = -1;
 #define H5VL_RADOS_TYPE_DSET  0x4000000000000000ull
 #define H5VL_RADOS_TYPE_DTYPE 0x8000000000000000ull
 
+/* Definitions for chunking code */
+#define H5VL_RADOS_DEFAULT_NUM_SEL_CHUNKS 64
+
 /*
  * Typedefs
  */
@@ -97,6 +100,16 @@ typedef struct {
     uint64_t idx;
 } H5VL_rados_vl_file_ud_t;
 #endif
+
+/* Information about a singular selected chunk during a Dataset read/write */
+typedef struct H5VL_rados_select_chunk_info_t {
+    uint64_t chunk_coords[H5S_MAX_RANK]; /* The starting coordinates ("upper left corner") of the chunk */
+    hid_t    mspace_id;                  /* The memory space corresponding to the
+                                            selection in the chunk in memory */
+    hid_t    fspace_id;                  /* The file space corresponding to the
+                                            selection in the chunk in the file */
+} H5VL_rados_select_chunk_info_t;
+
 /*
  * Prototypes
  */
@@ -214,8 +227,11 @@ static void *H5VL_rados_group_reconstitute(H5VL_rados_file_t *file,
 static htri_t H5VL_rados_need_bkg(hid_t src_type_id, hid_t dst_type_id,
     size_t *dst_type_size, hbool_t *fill_bkg);
 static herr_t H5VL_rados_tconv_init(hid_t src_type_id, size_t *src_type_size,
-    hid_t dst_type_id, size_t *dst_type_size, size_t num_elem, void **tconv_buf,
-    void **bkg_buf, H5VL_rados_tconv_reuse_t *reuse, hbool_t *fill_bkg);
+    hid_t dst_type_id, size_t *dst_type_size, hbool_t *_types_equal,
+    H5VL_rados_tconv_reuse_t *reuse, hbool_t *_need_bkg, hbool_t *fill_bkg);
+static herr_t H5VL_rados_get_selected_chunk_info(hid_t dcpl_id,
+    hid_t file_space_id, hid_t mem_space_id,
+    H5VL_rados_select_chunk_info_t **chunk_info, size_t *chunk_info_len);
 static herr_t H5VL_rados_build_io_op_merge(H5S_t *mem_space, H5S_t *file_space,
     size_t type_size, size_t tot_nelem, void *rbuf, const void *wbuf,
     rados_read_op_t read_op, rados_write_op_t write_op);
@@ -364,12 +380,15 @@ done:
 
 
 /* Create a RADOS string oid for a data chunk given the file name, binary oid,
- * dataset rank, and chunk location */
+ * dataset rank, and chunk location. If *oid is not NULL, it is assumed to be a
+ * buffer large enough, i.e. one previously returned by this function with the
+ * same file and rank */
 static herr_t
 H5VL_rados_oid_create_chunk(const H5VL_rados_file_t *file, uint64_t bin_oid,
-    int rank, hsize_t *chunk_loc, char **oid)
+    int rank, uint64_t *chunk_loc, char **oid)
 {
-    char *tmp_oid = NULL;
+    char *tmp_buf = NULL;
+    char *enc_buf = NULL;
     size_t oid_len;
     size_t oid_off;
     int i;
@@ -379,31 +398,40 @@ H5VL_rados_oid_create_chunk(const H5VL_rados_file_t *file, uint64_t bin_oid,
 
     HDassert((rank >= 0) && (rank <= 99));
 
-    /* Allocate space for oid */
+    /* Calculate space needed for oid */
     oid_len = 2 + file->file_name_len + 16 + ((size_t)rank * 16) + 1;
-    if(NULL == (tmp_oid = (char *)H5MM_malloc(oid_len)))
-        HGOTO_ERROR(H5E_VOL, H5E_CANTALLOC, FAIL, "can't allocate RADOS object id")
+
+    /* Assign encoding buffer and allocate buffer, if needed */
+    if(*oid)
+        enc_buf = *oid;
+    else {
+        if(NULL == (tmp_buf = (char *)H5MM_malloc(oid_len)))
+            HGOTO_ERROR(H5E_VOL, H5E_CANTALLOC, FAIL, "can't allocate RADOS object id")
+        enc_buf = tmp_buf;
+    } /* end else */
 
     /* Encode file name and binary oid into string oid */
-    if(HDsnprintf(tmp_oid, oid_len, "%02d%s%016llX", rank, file->file_name,
+    if(HDsnprintf(enc_buf, oid_len, "%02d%s%016llX", rank, file->file_name,
             (long long unsigned)bin_oid) != 2 + (int)file->file_name_len + 16)
         HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't encode string object id")
     oid_off = 2 + file->file_name_len + 16;
 
     /* Encode chunk location */
     for(i = 0; i < rank; i++) {
-        if(HDsnprintf(tmp_oid + oid_off, oid_len - oid_off, "%016llX", chunk_loc[i])
+        if(HDsnprintf(enc_buf + oid_off, oid_len - oid_off, "%016llX", (long long unsigned)chunk_loc[i])
                 != 16)
             HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't encode string object id")
         oid_off += 16;
     } /* end for */
 
     /* Return oid string value */
-    *oid = tmp_oid;
-    tmp_oid = NULL;
+    if(!*oid) {
+        *oid = tmp_buf;
+        tmp_buf = NULL;
+    } /* end if */
 
 done:
-    H5MM_xfree(tmp_oid);
+    H5MM_xfree(tmp_buf);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_rados_oid_create_chunk() */
@@ -2470,10 +2498,10 @@ done:
  */
 static herr_t
 H5VL_rados_tconv_init(hid_t src_type_id, size_t *src_type_size,
-    hid_t dst_type_id, size_t *dst_type_size, size_t num_elem, void **tconv_buf,
-    void **bkg_buf, H5VL_rados_tconv_reuse_t *reuse, hbool_t *fill_bkg)
+    hid_t dst_type_id, size_t *dst_type_size, hbool_t *_types_equal,
+    H5VL_rados_tconv_reuse_t *reuse, hbool_t *_need_bkg, hbool_t *fill_bkg)
 {
-    htri_t need_bkg;
+    htri_t need_bkg = FALSE;
     htri_t types_equal;
     herr_t ret_value = SUCCEED;
 
@@ -2481,10 +2509,8 @@ H5VL_rados_tconv_init(hid_t src_type_id, size_t *src_type_size,
 
     HDassert(src_type_size);
     HDassert(dst_type_size);
-    HDassert(tconv_buf);
-    HDassert(!*tconv_buf);
-    HDassert(bkg_buf);
-    HDassert(!*bkg_buf);
+    HDassert(_types_equal);
+    HDassert(_need_bkg);
     HDassert(fill_bkg);
     HDassert(!*fill_bkg);
 
@@ -2514,27 +2540,16 @@ H5VL_rados_tconv_init(hid_t src_type_id, size_t *src_type_size,
             else if(need_bkg)
                 *reuse = H5VL_RADOS_TCONV_REUSE_BKG;
         } /* end if */
-
-        /* Allocate conversion buffer if it is not being reused */
-        if(!reuse || (*reuse != H5VL_RADOS_TCONV_REUSE_TCONV))
-            if(NULL == (*tconv_buf = H5MM_malloc(num_elem * (*src_type_size
-                    > *dst_type_size ? *src_type_size : *dst_type_size))))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate type conversion buffer")
-
-        /* Allocate background buffer if one is needed and it is not being
-         * reused */
-        if(need_bkg && (!reuse || (*reuse != H5VL_RADOS_TCONV_REUSE_BKG)))
-            if(NULL == (*bkg_buf = H5MM_calloc(num_elem * *dst_type_size)))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate background buffer")
     } /* end else */
+
+    /* Set return values */
+    *_types_equal = types_equal;
+    *_need_bkg = need_bkg;
 
 done:
     /* Cleanup on failure */
     if(ret_value < 0) {
-        *tconv_buf = H5MM_xfree(*tconv_buf);
-        *bkg_buf = H5MM_xfree(*bkg_buf);
-        if(reuse)
-            *reuse = H5VL_RADOS_TCONV_REUSE_NONE;
+        *reuse = H5VL_RADOS_TCONV_REUSE_NONE;
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2924,6 +2939,254 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_rados_dataset_open() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_rados_get_selected_chunk_info
+ *
+ * Purpose:     Calculates the starting coordinates for the chunks selected
+ *              in the file space given by file_space_id and sets up
+ *              individual memory and file spaces for each chunk. The chunk
+ *              coordinates and dataspaces are returned through the
+ *              chunk_info struct pointer.
+ *
+ *              XXX: Note that performance could be increased by
+ *                   calculating all of the chunks in the entire dataset
+ *                   and then caching them in the dataset object for
+ *                   re-use in subsequent reads/writes
+ *
+ * Return:      Success: 0
+ *              Failure: -1
+ *
+ * Programmer:  Neil Fortner
+ *              May, 2018
+ *              Based on H5VL_daosm_get_selected_chunk_info by Jordan
+ *              Henderson, May, 2017
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL_rados_get_selected_chunk_info(hid_t dcpl,
+    hid_t file_space_id, hid_t mem_space_id,
+    H5VL_rados_select_chunk_info_t **chunk_info, size_t *chunk_info_len)
+{
+    H5VL_rados_select_chunk_info_t *_chunk_info = NULL;
+    hssize_t  num_sel_points;
+    hssize_t  chunk_file_space_adjust[H5O_LAYOUT_NDIMS];
+    hsize_t   chunk_dims[H5S_MAX_RANK];
+    hsize_t   file_sel_start[H5S_MAX_RANK], file_sel_end[H5S_MAX_RANK];
+    hsize_t   mem_sel_start[H5S_MAX_RANK], mem_sel_end[H5S_MAX_RANK];
+    hsize_t   start_coords[H5O_LAYOUT_NDIMS], end_coords[H5O_LAYOUT_NDIMS];
+    hsize_t   selection_start_coords[H5O_LAYOUT_NDIMS];
+    hsize_t   num_sel_points_cast;
+    htri_t    space_same_shape = FALSE;
+    size_t    info_buf_alloced;
+    size_t    i, j;
+    H5S_t    *fspace = NULL, *mspace = NULL;
+    int       fspace_ndims, mspace_ndims;
+    int       increment_dim;
+    herr_t    ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(chunk_info);
+    HDassert(chunk_info_len);
+
+    if ((num_sel_points = H5Sget_select_npoints(file_space_id)) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "can't get number of points select in dataspace")
+    H5_CHECKED_ASSIGN(num_sel_points_cast, hsize_t, num_sel_points, hssize_t);
+
+    /* Get the chunking information */
+    if (H5Pget_chunk(dcpl, H5S_MAX_RANK, chunk_dims) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get chunking information")
+
+    if ((fspace_ndims = H5Sget_simple_extent_ndims(file_space_id)) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't get file space dimensionality")
+    if ((mspace_ndims = H5Sget_simple_extent_ndims(mem_space_id)) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't get memory space dimensionality")
+    HDassert(mspace_ndims == fspace_ndims);
+
+    /* Get the bounding box for the current selection in the file space */
+    if (H5Sget_select_bounds(file_space_id, file_sel_start, file_sel_end) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't get bounding box for file selection")
+
+    if (H5Sget_select_bounds(mem_space_id, mem_sel_start, mem_sel_end) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't get bounding box for memory selection")
+
+    /* Calculate the adjustment for memory selection from the file selection */
+    for (i = 0; i < (size_t) fspace_ndims; i++) {
+        H5_CHECK_OVERFLOW(file_sel_start[i], hsize_t, hssize_t);
+        H5_CHECK_OVERFLOW(mem_sel_start[i], hsize_t, hssize_t);
+        chunk_file_space_adjust[i] = (hssize_t) file_sel_start[i] - (hssize_t) mem_sel_start[i];
+    } /* end for */
+
+    if (NULL == (_chunk_info = (H5VL_rados_select_chunk_info_t *) H5MM_malloc(H5VL_RADOS_DEFAULT_NUM_SEL_CHUNKS * sizeof(*_chunk_info))))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate space for selected chunk info buffer")
+    info_buf_alloced = H5VL_RADOS_DEFAULT_NUM_SEL_CHUNKS * sizeof(*_chunk_info);
+
+    /* Calculate the coordinates for the initial chunk */
+    for (i = 0; i < (size_t) fspace_ndims; i++) {
+        start_coords[i] = selection_start_coords[i] = (file_sel_start[i] / chunk_dims[i]) * chunk_dims[i];
+        end_coords[i] = (start_coords[i] + chunk_dims[i]) - 1;
+    } /* end for */
+
+    if (NULL == (fspace = (H5S_t *) H5I_object_verify(file_space_id, H5I_DATASPACE)))
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "not a dataspace")
+    if (NULL == (mspace = (H5S_t *) H5I_object_verify(mem_space_id, H5I_DATASPACE)))
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "not a dataspace")
+
+    if (FAIL == (space_same_shape = H5S_select_shape_same(fspace, mspace)))
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "not a dataspace")
+
+    /* Iterate through each "chunk" in the dataset */
+    for (i = 0; num_sel_points_cast;) {
+        /* Check for intersection of file selection and "chunk". If there is
+         * an intersection, set up a valid memory and file space for the chunk. */
+        if (TRUE == H5S_hyper_intersect_block(fspace, start_coords, end_coords)) {
+            hssize_t  chunk_mem_space_adjust[H5O_LAYOUT_NDIMS];
+            hssize_t  chunk_sel_npoints;
+            hid_t     tmp_chunk_fspace_id;
+            H5S_t    *tmp_chunk_fspace = NULL;
+
+            /* Re-allocate selected chunk info buffer if necessary */
+            while (i > (info_buf_alloced / sizeof(*_chunk_info)) - 1) {
+                if (NULL == (_chunk_info = (H5VL_rados_select_chunk_info_t *) H5MM_realloc(_chunk_info, 2 * info_buf_alloced)))
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't reallocate space for selected chunk info buffer")
+                info_buf_alloced *= 2;
+            } /* end while */
+
+            /*
+             * Set up the file Dataspace for this chunk.
+             */
+
+            /* Create temporary chunk for selection operations */
+            if ((tmp_chunk_fspace_id = H5Scopy(file_space_id)) < 0)
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "unable to copy file space")
+
+            if (NULL == (tmp_chunk_fspace = (H5S_t *) H5I_object_verify(tmp_chunk_fspace_id, H5I_DATASPACE)))
+                HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "not a dataspace")
+
+            /* Make certain selections are stored in span tree form (not "optimized hyperslab" or "all") */
+            if (H5S_hyper_convert(tmp_chunk_fspace) < 0) {
+                (void) H5S_close(tmp_chunk_fspace);
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to convert selection to span trees")
+            } /* end if */
+
+            /* "AND" temporary chunk and current chunk */
+            if (H5S_select_hyperslab(tmp_chunk_fspace, H5S_SELECT_AND, start_coords, NULL, chunk_dims, NULL) < 0) {
+                (void) H5S_close(tmp_chunk_fspace);
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSELECT, FAIL, "can't create chunk selection")
+            } /* end if */
+
+            /* Resize chunk's dataspace dimensions to size of chunk */
+            if (H5S_set_extent_real(tmp_chunk_fspace, chunk_dims) < 0) {
+                (void) H5S_close(tmp_chunk_fspace);
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSELECT, FAIL, "can't adjust chunk dimensions")
+            } /* end if */
+
+            /* Move selection back to have correct offset in chunk */
+            if (H5S_SELECT_ADJUST_U(tmp_chunk_fspace, start_coords) < 0) {
+                (void) H5S_close(tmp_chunk_fspace);
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSELECT, FAIL, "can't adjust chunk selection")
+            } /* end if */
+
+            /* Copy the chunk's coordinates to the selected chunk info buffer */
+            HDmemcpy(_chunk_info[i].chunk_coords, start_coords, (size_t) fspace_ndims * sizeof(hsize_t));
+
+            _chunk_info[i].fspace_id = tmp_chunk_fspace_id;
+
+            /*
+             * Now set up the memory Dataspace for this chunk.
+             */
+            if (space_same_shape) {
+                hid_t  tmp_chunk_mspace_id;
+                H5S_t *tmp_chunk_mspace = NULL;
+
+                if ((tmp_chunk_mspace_id = H5Scopy(mem_space_id)) < 0)
+                    HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "unable to copy memory space")
+
+                if (NULL == (tmp_chunk_mspace = (H5S_t *) H5I_object_verify(tmp_chunk_mspace_id, H5I_DATASPACE)))
+                    HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "not a dataspace")
+
+                /* Release the current selection */
+                if (H5S_SELECT_RELEASE(tmp_chunk_mspace) < 0) {
+                    (void) H5S_close(tmp_chunk_mspace);
+                    HGOTO_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection")
+                } /* end if */
+
+                /* Copy the chunk's file space selection to its memory space selection */
+                if (H5S_select_copy(tmp_chunk_mspace, tmp_chunk_fspace, FALSE) < 0) {
+                    (void) H5S_close(tmp_chunk_mspace);
+                    HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "unable to copy selection")
+                } /* end if */
+
+                /* Compute the adjustment for the chunk */
+                for (j = 0; j < (size_t) fspace_ndims; j++) {
+                    H5_CHECK_OVERFLOW(_chunk_info[i].chunk_coords[j], hsize_t, hssize_t);
+                    chunk_mem_space_adjust[j] = chunk_file_space_adjust[j] - (hssize_t) _chunk_info[i].chunk_coords[j];
+                } /* end for */
+
+                /* Adjust the selection */
+                if (H5S_hyper_adjust_s(tmp_chunk_mspace, chunk_mem_space_adjust) < 0) {
+                    (void) H5S_close(tmp_chunk_mspace);
+                    HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSELECT, FAIL, "can't adjust chunk memory space selection")
+                } /* end if */
+
+                _chunk_info[i].mspace_id = tmp_chunk_mspace_id;
+            } /* end if */
+            else {
+                HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "file and memory selections must currently have the same shape")
+            } /* end else */
+
+            i++;
+
+            /* Determine if there are more chunks to process */
+            if ((chunk_sel_npoints = H5S_GET_SELECT_NPOINTS(tmp_chunk_fspace)) < 0)
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't get number of points selected in chunk file space")
+
+            num_sel_points_cast -= (hsize_t) chunk_sel_npoints;
+
+            if (num_sel_points_cast == 0)
+                HGOTO_DONE(SUCCEED)
+        } /* end if */
+
+        /* Set current increment dimension */
+        increment_dim = fspace_ndims - 1;
+
+        /* Increment chunk location in fastest changing dimension */
+        H5_CHECK_OVERFLOW(chunk_dims[increment_dim], hsize_t, hssize_t);
+        start_coords[increment_dim] += chunk_dims[increment_dim];
+        end_coords[increment_dim] += chunk_dims[increment_dim];
+
+        /* Bring chunk location back into bounds, if necessary */
+        if (start_coords[increment_dim] > file_sel_end[increment_dim]) {
+            do {
+                /* Reset current dimension's location to 0 */
+                start_coords[increment_dim] = selection_start_coords[increment_dim];
+                end_coords[increment_dim] = (start_coords[increment_dim] + chunk_dims[increment_dim]) - 1;
+
+                /* Decrement current dimension */
+                increment_dim--;
+
+                /* Increment chunk location in current dimension */
+                start_coords[increment_dim] += chunk_dims[increment_dim];
+                end_coords[increment_dim] = (start_coords[increment_dim] + chunk_dims[increment_dim]) - 1;
+            } while (start_coords[increment_dim] > file_sel_end[increment_dim]);
+        } /* end if */
+    } /* end for */
+
+done:
+    if (ret_value >= 0) {
+        *chunk_info = _chunk_info;
+        *chunk_info_len = i;
+    } /* end if */
+    else {
+        if (_chunk_info)
+            H5MM_free(_chunk_info);
+    } /* end else */
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_rados_get_selected_chunk_info() */
 
 
 /*-------------------------------------------------------------------------
@@ -3357,6 +3620,7 @@ static herr_t
 H5VL_rados_dataset_read(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
     hid_t file_space_id, hid_t dxpl_id, void *buf, void H5_ATTR_UNUSED **req)
 {
+    H5VL_rados_select_chunk_info_t *chunk_info = NULL; /* Array of info for each chunk selected in the file */
     H5VL_rados_dset_t *dset = (H5VL_rados_dset_t *)_dset;
     H5S_sel_iter_t sel_iter;    /* Selection iteration info */
     hbool_t sel_iter_init = FALSE;      /* Selection iteration info has been initialized */
@@ -3365,19 +3629,29 @@ H5VL_rados_dataset_read(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
     hid_t real_file_space_id;
     hid_t real_mem_space_id;
     hssize_t num_elem;
-    hsize_t chunk_coords[H5S_MAX_RANK];
+    hssize_t num_elem_chunk;
+    size_t chunk_info_len;
     char *chunk_oid = NULL;
     rados_read_op_t read_op;
     hbool_t read_op_init = FALSE;
+    size_t file_type_size = 0;
+    size_t mem_type_size;
+    hbool_t types_equal = TRUE;
+    hbool_t need_bkg = FALSE;
+    hbool_t fill_bkg = FALSE;
     //hid_t base_type_id = FAIL;
     //size_t base_type_size = 0;
-    void *tconv_buf = NULL;
-    void *bkg_buf = NULL;
+    void *tmp_tconv_buf = NULL;
+    void *tmp_bkg_buf = NULL;
+    void *tconv_buf;
+    void *bkg_buf;
     //H5T_class_t type_class;
     //hbool_t is_vl = FALSE;
     //htri_t is_vl_str = FALSE;
+    hbool_t close_spaces = FALSE;
     H5VL_rados_tconv_reuse_t reuse = H5VL_RADOS_TCONV_REUSE_NONE;
     int ret;
+    uint64_t i;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -3418,15 +3692,6 @@ H5VL_rados_dataset_read(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
     if(num_elem == 0)
         HGOTO_DONE(SUCCEED)
 
-    /* Create chunk key - always contiguous for now */
-    chunk_coords[0] = 0;
-    if(H5VL_rados_oid_create_chunk(dset->obj.item.file, dset->obj.bin_oid, 1,
-            chunk_coords, &chunk_oid) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't create dataset chunk oid")
-
-    /* Create read op */
-    read_op = rados_create_read_op();
-    read_op_init = TRUE;
 #if 0
     /* Check for vlen */
     if(H5T_NO_CLASS == (type_class = H5Tget_class(mem_type_id)))
@@ -3447,194 +3712,291 @@ H5VL_rados_dataset_read(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
         if(is_vl_str)
             is_vl = TRUE;
     } /* end if */
-
-    /* Check for variable length */
-    if(is_vl) {
-        H5VL_daosm_vl_mem_ud_t mem_ud;
-        H5VL_daosm_vl_file_ud_t file_ud;
-
-        /* Get number of elements in selection */
-        if((num_elem = H5Sget_select_npoints(real_mem_space_id)) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get number of points in selection")
-
-        /* Allocate array of akey pointers */
-        if(NULL == (akeys = (uint8_t **)H5MM_calloc((size_t)num_elem * sizeof(uint8_t *))))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate buffer for akey array")
-
-        /* Allocate array of iods */
-        if(NULL == (iods = (daos_iod_t *)H5MM_calloc((size_t)num_elem * sizeof(daos_iod_t))))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate buffer for I/O descriptor array")
-
-        /* Fill in size fields of iod as DAOS_REC_ANY so we can read the vl
-         * sizes */
-        for(i = 0; i < (uint64_t)num_elem; i++)
-            iods[i].iod_size = DAOS_REC_ANY;
-
-        /* Iterate over file selection.  Note the bogus buffer and type_id,
-         * these don't matter since the "elem" parameter of the callback is not
-         * used. */
-        file_ud.akeys = akeys;
-        file_ud.iods = iods;
-        file_ud.idx = 0;
-        if(H5Diterate((void *)buf, mem_type_id, real_file_space_id, H5VL_daosm_dataset_file_vl_cb, &file_ud) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_BADITER, FAIL, "file selection iteration failed")
-        HDassert(file_ud.idx == (uint64_t)num_elem);
-
-        /* Read vl sizes from dataset */
-        /* Note cast to unsigned reduces width to 32 bits.  Should eventually
-         * check for overflow and iterate over 2^32 size blocks */
-        if(0 != (ret = daos_obj_fetch(dset->obj.obj_oh, dset->obj.item.file->epoch, &dkey, (unsigned)num_elem, iods, NULL, NULL /*maps*/, NULL /*event*/)))
-            HGOTO_ERROR(H5E_ATTR, H5E_READERROR, FAIL, "can't read vl data sizes from dataset: %d", ret)
-
-        /* Allocate array of sg_iovs */
-        if(NULL == (sg_iovs = (daos_iov_t *)H5MM_malloc((size_t)num_elem * sizeof(daos_iov_t))))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate buffer for scatter gather list")
-
-        /* Allocate array of sgls */
-        if(NULL == (sgls = (daos_sg_list_t *)H5MM_malloc((size_t)num_elem * sizeof(daos_sg_list_t))))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate buffer for scatter gather list array")
-
-        /* Iterate over memory selection */
-        mem_ud.iods = iods;
-        mem_ud.sgls = sgls;
-        mem_ud.sg_iovs = sg_iovs;
-        mem_ud.is_vl_str = is_vl_str;
-        mem_ud.base_type_size = base_type_size;
-        mem_ud.offset = 0;
-        mem_ud.idx = 0;
-        if(H5Diterate((void *)buf, mem_type_id, real_mem_space_id, H5VL_daosm_dataset_mem_vl_rd_cb, &mem_ud) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_BADITER, FAIL, "memory selection iteration failed")
-        HDassert(mem_ud.idx == (uint64_t)num_elem);
-
-        /* Read data from dataset */
-        /* Note cast to unsigned reduces width to 32 bits.  Should eventually
-         * check for overflow and iterate over 2^32 size blocks */
-        if(0 != (ret = daos_obj_fetch(dset->obj.obj_oh, dset->obj.item.file->epoch, &dkey, (unsigned)((uint64_t)num_elem - mem_ud.offset), iods, sgls, NULL /*maps*/, NULL /*event*/)))
-            HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data from dataset: %d", ret)
-    } /* end if */
     else
 #endif
     {
-        H5S_t *file_space = NULL;
-        H5S_t *mem_space = NULL;
-        size_t file_type_size;
-        htri_t types_equal;
+        /* Initialize type conversion */
+        if(H5VL_rados_tconv_init(dset->type_id, &file_type_size, mem_type_id, &mem_type_size, &types_equal, &reuse, &need_bkg, &fill_bkg) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize type conversion")
+    } /* end else */
 
-        /* Get datatype size */
-        if((file_type_size = H5Tget_size(dset->type_id)) == 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get datatype size")
+    /* Check if the dataset actually has a chunked storage layout. If it does not, simply
+     * set up the dataset as a single "chunk".
+     */
+    switch(H5Pget_layout(dset->dcpl_id)) {
+        case H5D_COMPACT:
+        case H5D_CONTIGUOUS:
+            if (NULL == (chunk_info = (H5VL_rados_select_chunk_info_t *)H5MM_malloc(sizeof(H5VL_rados_select_chunk_info_t))))
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate single chunk info buffer")
+            chunk_info_len = 1;
 
-        /* Get file dataspace object */
-        if(NULL == (file_space = (H5S_t *)H5I_object(real_file_space_id)))
-            HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+            /* Set up "single-chunk dataset", with the "chunk" starting at coordinate 0 */
+            chunk_info->fspace_id = real_file_space_id;
+            chunk_info->mspace_id = real_mem_space_id;
+            HDmemset(chunk_info->chunk_coords, 0, sizeof(chunk_info->chunk_coords));
 
-        /* Check if the types are equal */
-        if((types_equal = H5Tequal(dset->type_id, mem_type_id)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOMPARE, FAIL, "can't check if types are equal")
-        if(types_equal) {
-            /* No type conversion necessary */
-            /* Check for memory space is H5S_ALL, use file space in this case */
-            if(mem_space_id == H5S_ALL) {
-                /* Build read op from file space */
-                if(H5VL_rados_build_io_op_match(file_space, file_type_size, (size_t)num_elem, buf, NULL, read_op, NULL) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't generate RADOS read op")
+            break;
+
+        case H5D_CHUNKED:
+//            if(is_vl)
+//                HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "vlen types are currently unsupported with chunking")
+
+            /* Get the coordinates of the currently selected chunks in the file, setting up memory and file dataspaces for them */
+            if(H5VL_rados_get_selected_chunk_info(dset->dcpl_id, real_file_space_id, real_mem_space_id, &chunk_info, &chunk_info_len) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get selected chunk info")
+
+            close_spaces = TRUE;
+
+            break;
+        default:
+            HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "invalid, unknown or unsupported dataset storage layout type")
+    } /* end switch */
+
+    /* Get number of elements in a chunk */
+    if((num_elem_chunk = H5Sget_simple_extent_npoints(chunk_info[0].fspace_id)) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get number of points in chunk")
+
+    /* Iterate through each of the "chunks" in the dataset */
+    for(i = 0; i < chunk_info_len; i++) {
+        /* Create read op */
+        read_op = rados_create_read_op();
+        read_op_init = TRUE;
+
+        /* Create chunk key */
+        if(H5VL_rados_oid_create_chunk(dset->obj.item.file, dset->obj.bin_oid, ndims,
+                chunk_info[i].chunk_coords, &chunk_oid) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't create dataset chunk oid")
+
+        /* Get number of elements in selection */
+        if((num_elem = H5Sget_select_npoints(chunk_info[i].mspace_id)) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get number of points in selection")
+#if 0
+        /* Check for variable length */
+        if(is_vl) {
+            H5VL_daosm_vl_mem_ud_t mem_ud;
+            H5VL_daosm_vl_file_ud_t file_ud;
+
+            /* Get number of elements in selection */
+            if((num_elem = H5Sget_select_npoints(real_mem_space_id)) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get number of points in selection")
+
+            /* Allocate array of akey pointers */
+            if(NULL == (akeys = (uint8_t **)H5MM_calloc((size_t)num_elem * sizeof(uint8_t *))))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate buffer for akey array")
+
+            /* Allocate array of iods */
+            if(NULL == (iods = (daos_iod_t *)H5MM_calloc((size_t)num_elem * sizeof(daos_iod_t))))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate buffer for I/O descriptor array")
+
+            /* Fill in size fields of iod as DAOS_REC_ANY so we can read the vl
+             * sizes */
+            for(i = 0; i < (uint64_t)num_elem; i++)
+                iods[i].iod_size = DAOS_REC_ANY;
+
+            /* Iterate over file selection.  Note the bogus buffer and type_id,
+             * these don't matter since the "elem" parameter of the callback is not
+             * used. */
+            file_ud.akeys = akeys;
+            file_ud.iods = iods;
+            file_ud.idx = 0;
+            if(H5Diterate((void *)buf, mem_type_id, real_file_space_id, H5VL_daosm_dataset_file_vl_cb, &file_ud) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_BADITER, FAIL, "file selection iteration failed")
+            HDassert(file_ud.idx == (uint64_t)num_elem);
+
+            /* Read vl sizes from dataset */
+            /* Note cast to unsigned reduces width to 32 bits.  Should eventually
+             * check for overflow and iterate over 2^32 size blocks */
+            if(0 != (ret = daos_obj_fetch(dset->obj.obj_oh, dset->obj.item.file->epoch, &dkey, (unsigned)num_elem, iods, NULL, NULL /*maps*/, NULL /*event*/)))
+                HGOTO_ERROR(H5E_ATTR, H5E_READERROR, FAIL, "can't read vl data sizes from dataset: %d", ret)
+
+            /* Allocate array of sg_iovs */
+            if(NULL == (sg_iovs = (daos_iov_t *)H5MM_malloc((size_t)num_elem * sizeof(daos_iov_t))))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate buffer for scatter gather list")
+
+            /* Allocate array of sgls */
+            if(NULL == (sgls = (daos_sg_list_t *)H5MM_malloc((size_t)num_elem * sizeof(daos_sg_list_t))))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate buffer for scatter gather list array")
+
+            /* Iterate over memory selection */
+            mem_ud.iods = iods;
+            mem_ud.sgls = sgls;
+            mem_ud.sg_iovs = sg_iovs;
+            mem_ud.is_vl_str = is_vl_str;
+            mem_ud.base_type_size = base_type_size;
+            mem_ud.offset = 0;
+            mem_ud.idx = 0;
+            if(H5Diterate((void *)buf, mem_type_id, real_mem_space_id, H5VL_daosm_dataset_mem_vl_rd_cb, &mem_ud) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_BADITER, FAIL, "memory selection iteration failed")
+            HDassert(mem_ud.idx == (uint64_t)num_elem);
+
+            /* Read data from dataset */
+            /* Note cast to unsigned reduces width to 32 bits.  Should eventually
+             * check for overflow and iterate over 2^32 size blocks */
+            if(0 != (ret = daos_obj_fetch(dset->obj.obj_oh, dset->obj.item.file->epoch, &dkey, (unsigned)((uint64_t)num_elem - mem_ud.offset), iods, sgls, NULL /*maps*/, NULL /*event*/)))
+                HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data from dataset: %d", ret)
+        } /* end if */
+        else
+#endif
+        {
+            H5S_t *chunk_fspace = NULL;
+            H5S_t *chunk_mspace = NULL;
+            htri_t match_select = FALSE;
+
+            /* Get file dataspace object */
+            if(NULL == (chunk_fspace = (H5S_t *) H5I_object_verify(chunk_info[i].fspace_id, H5I_DATASPACE)))
+                HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "not a dataspace")
+
+            /* Check if the types are equal */
+            if(types_equal) {
+                /* No type conversion necessary */
+                /* Check if we should match the file and memory sequence lists
+                 * (serialized selections).  We can do this if the memory space
+                 * is H5S_ALL and the chunk extent equals the file extent.  If
+                 * the number of chunks selected is more than one we do not need
+                 * to check the extents because they cannot be the same.  We
+                 * could also allow the case where the memory space is not
+                 * H5S_ALL but is equivalent. */
+                if(mem_space_id == H5S_ALL && chunk_info_len == 1)
+                    if((match_select = H5Sextent_equal(real_file_space_id, chunk_info[i].fspace_id)) < 0)
+                        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOMPARE, FAIL, "can't check if file and chunk dataspaces are equal")
+
+                /* Check for matching selections */
+                if(match_select) {
+                    /* Build read op from file space */
+                    if(H5VL_rados_build_io_op_match(chunk_fspace, file_type_size, (size_t)num_elem, buf, NULL, read_op, NULL) < 0)
+                        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't generate RADOS read op")
+                } /* end if */
+                else {
+                    /* Get memory dataspace object */
+                    if(NULL == (chunk_mspace = (H5S_t *) H5I_object_verify(chunk_info[i].mspace_id, H5I_DATASPACE)))
+                        HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "not a dataspace")
+
+                    /* Build read op from file space and mem space */
+                    if(H5VL_rados_build_io_op_merge(chunk_mspace, chunk_fspace, file_type_size, (size_t)num_elem, buf, NULL, read_op, NULL) < 0)
+                        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't generate RADOS read op")
+                } /* end else */
+
+                /* Read data from dataset */
+                if((ret = rados_read_op_operate(read_op, ioctx_g, chunk_oid, LIBRADOS_OPERATION_NOFLAG)) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data from dataset: %s", strerror(-ret))
             } /* end if */
             else {
+                size_t nseq_tmp;
+                size_t nelem_tmp;
+                hsize_t sel_off;
+                size_t sel_len;
+                hbool_t contig;
+
+                /* Type conversion necessary */
                 /* Get memory dataspace object */
-                if(NULL == (mem_space = (H5S_t *)H5I_object(real_mem_space_id)))
-                    HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+                if(NULL == (chunk_mspace = (H5S_t *) H5I_object_verify(chunk_info[i].mspace_id, H5I_DATASPACE)))
+                    HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "not a dataspace")
 
-                /* Build read op from file space and mem space */
-                if(H5VL_rados_build_io_op_merge(mem_space, file_space, file_type_size, (size_t)num_elem, buf, NULL, read_op, NULL) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't generate RADOS read op")
-            } /* end else */
+                /* Check for contiguous memory buffer */
 
-            /* Read data from dataset */
-            if((ret = rados_read_op_operate(read_op, ioctx_g, chunk_oid, LIBRADOS_OPERATION_NOFLAG)) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data from dataset: %s", strerror(-ret))
-        } /* end if */
-        else {
-            size_t nseq_tmp;
-            size_t nelem_tmp;
-            hsize_t sel_off;
-            size_t sel_len;
-            size_t mem_type_size;
-            hbool_t fill_bkg = FALSE;
-            hbool_t contig;
+                /* Initialize selection iterator  */
+                if(H5S_select_iter_init(&sel_iter, chunk_mspace, (size_t)1) < 0)
+                    HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize selection iterator")
+                sel_iter_init = TRUE;       /* Selection iteration info has been initialized */
 
-            /* Type conversion necessary */
-            /* Check for contiguous memory buffer */
-            /* Get memory dataspace object */
-            if(NULL == (mem_space = (H5S_t *)H5I_object(real_mem_space_id)))
-                HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
-
-            /* Initialize selection iterator  */
-            if(H5S_select_iter_init(&sel_iter, mem_space, (size_t)1) < 0)
-                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize selection iterator")
-            sel_iter_init = TRUE;       /* Selection iteration info has been initialized */
-
-            /* Get the sequence list - only check the first sequence because we only
-             * care if it is contiguous and if so where the contiguous selection
-             * begins */
-            if(H5S_SELECT_GET_SEQ_LIST(mem_space, 0, &sel_iter, (size_t)1, (size_t)-1, &nseq_tmp, &nelem_tmp, &sel_off, &sel_len) < 0)
-                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "sequence length generation failed")
-            contig = (sel_len == (size_t)num_elem);
-
-            /* Initialize type conversion */
-            if(H5VL_rados_tconv_init(dset->type_id, &file_type_size, mem_type_id, &mem_type_size, (size_t)num_elem, &tconv_buf, &bkg_buf, contig ? &reuse : NULL, &fill_bkg) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize type conversion")
-
-            /* Reuse buffer as appropriate */
-            if(contig) {
+                /* Get the sequence list - only check the first sequence because we only
+                 * care if it is contiguous and if so where the contiguous selection
+                 * begins */
+                if(H5S_SELECT_GET_SEQ_LIST(chunk_mspace, 0, &sel_iter, (size_t)1, (size_t)-1, &nseq_tmp, &nelem_tmp, &sel_off, &sel_len) < 0)
+                    HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "sequence length generation failed")
+                contig = (sel_len == (size_t)num_elem);
                 sel_off *= (hsize_t)mem_type_size;
-                if(reuse == H5VL_RADOS_TCONV_REUSE_TCONV)
+
+                /* Release selection iterator */
+                if(H5S_SELECT_ITER_RELEASE(&sel_iter) < 0)
+                    HGOTO_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection iterator")
+                sel_iter_init = FALSE;
+
+                /* Find or allocate usable type conversion buffer */
+                if(contig && (reuse == H5VL_RADOS_TCONV_REUSE_TCONV))
                     tconv_buf = (char *)buf + (size_t)sel_off;
-                else if(reuse == H5VL_RADOS_TCONV_REUSE_BKG)
-                    bkg_buf = (char *)buf + (size_t)sel_off;
-            } /* end if */
+                else {
+                    if(!tmp_tconv_buf)
+                        if(NULL == (tmp_tconv_buf = H5MM_malloc(
+                                (size_t)num_elem_chunk * (file_type_size
+                                > mem_type_size ? file_type_size
+                                : mem_type_size))))
+                            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate type conversion buffer")
+                    tconv_buf = tmp_tconv_buf;
+                } /* end else */
 
-            /* Build read op from file space */
-            if(H5VL_rados_build_io_op_contig(file_space, file_type_size, (size_t)num_elem, tconv_buf, NULL, read_op, NULL) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't generate RADOS write op")
+                /* Find or allocate usable background buffer */
+                if(need_bkg) {
+                    if(contig && (reuse == H5VL_RADOS_TCONV_REUSE_BKG))
+                        bkg_buf = (char *)buf + (size_t)sel_off;
+                    else {
+                        if(!tmp_bkg_buf)
+                            if(NULL == (tmp_bkg_buf = H5MM_malloc(
+                                    (size_t)num_elem_chunk * mem_type_size)))
+                                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate background buffer")
+                        bkg_buf = tmp_bkg_buf;
+                    } /* end else */
+                } /* end if */
+                else
+                    bkg_buf = NULL;
 
-            /* Read data from dataset */
-            if((ret = rados_read_op_operate(read_op, ioctx_g, chunk_oid, LIBRADOS_OPERATION_NOFLAG)) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data from dataset: %s", strerror(-ret))
+                /* Build read op from file space */
+                if(H5VL_rados_build_io_op_contig(chunk_fspace, file_type_size, (size_t)num_elem, tconv_buf, NULL, read_op, NULL) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't generate RADOS write op")
 
-            /* Gather data to background buffer if necessary */
-            if(fill_bkg && (reuse != H5VL_RADOS_TCONV_REUSE_BKG))
-                if(H5Dgather(real_mem_space_id, buf, mem_type_id, (size_t)num_elem * mem_type_size, bkg_buf, NULL, NULL) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't gather data to background buffer")
+                /* Read data from dataset */
+                if((ret = rados_read_op_operate(read_op, ioctx_g, chunk_oid, LIBRADOS_OPERATION_NOFLAG)) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data from dataset: %s", strerror(-ret))
 
-            /* Perform type conversion */
-            if(H5Tconvert(dset->type_id, mem_type_id, (size_t)num_elem, tconv_buf, bkg_buf, dxpl_id) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "can't perform type conversion")
+                /* Gather data to background buffer if necessary */
+                if(fill_bkg && (bkg_buf == tmp_bkg_buf))
+                    if(H5Dgather(chunk_info[i].mspace_id, buf, mem_type_id, (size_t)num_elem * mem_type_size, bkg_buf, NULL, NULL) < 0)
+                        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't gather data to background buffer")
 
-            /* Scatter data to memory buffer if necessary */
-            if(reuse != H5VL_RADOS_TCONV_REUSE_TCONV) {
-                H5VL_rados_scatter_cb_ud_t scatter_cb_ud;
+                /* Perform type conversion */
+                if(H5Tconvert(dset->type_id, mem_type_id, (size_t)num_elem, tconv_buf, bkg_buf, dxpl_id) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "can't perform type conversion")
 
-                scatter_cb_ud.buf = tconv_buf;
-                scatter_cb_ud.len = (size_t)num_elem * mem_type_size;
-                if(H5Dscatter(H5VL_rados_scatter_cb, &scatter_cb_ud, mem_type_id, real_mem_space_id, buf) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't scatter data to read buffer")
-            } /* end if */
+                /* Scatter data to memory buffer if necessary */
+                if(tconv_buf == tmp_tconv_buf) {
+                    H5VL_rados_scatter_cb_ud_t scatter_cb_ud;
+
+                    scatter_cb_ud.buf = tconv_buf;
+                    scatter_cb_ud.len = (size_t)num_elem * mem_type_size;
+                    if(H5Dscatter(H5VL_rados_scatter_cb, &scatter_cb_ud, mem_type_id, chunk_info[i].mspace_id, buf) < 0)
+                        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't scatter data to read buffer")
+                } /* end if */
+            } /* end else */
         } /* end else */
-    } /* end else */
+
+        rados_release_read_op(read_op);
+        read_op_init = FALSE;
+    } /* end for */
 
 done:
     /* Free memory */
     if(read_op_init)
         rados_release_read_op(read_op);
     H5MM_xfree(chunk_oid);
-    if(tconv_buf && (reuse != H5VL_RADOS_TCONV_REUSE_TCONV))
-        H5MM_free(tconv_buf);
-    if(bkg_buf && (reuse != H5VL_RADOS_TCONV_REUSE_BKG))
-        H5MM_free(bkg_buf);
+    H5MM_xfree(tmp_tconv_buf);
+    H5MM_xfree(tmp_bkg_buf);
 
     /*if(base_type_id != FAIL)
         if(H5I_dec_app_ref(base_type_id) < 0)
             HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, FAIL, "can't close base type id")*/
+
+    if(chunk_info) {
+        if(close_spaces) {
+            for(i = 0; i < chunk_info_len; i++) {
+                if(H5Sclose(chunk_info[i].mspace_id) < 0)
+                    HDONE_ERROR(H5E_DATASPACE, H5E_CANTCLOSEOBJ, FAIL, "can't close memory space");
+                if(H5Sclose(chunk_info[i].fspace_id) < 0)
+                    HDONE_ERROR(H5E_DATASPACE, H5E_CANTCLOSEOBJ, FAIL, "can't close file space");
+            } /* end for */
+        } /* end if */
+
+        H5MM_free(chunk_info);
+    } /* end if */
 
     /* Release selection iterator */
     if(sel_iter_init && H5S_SELECT_ITER_RELEASE(&sel_iter) < 0)
@@ -3738,20 +4100,25 @@ H5VL_rados_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
     hid_t file_space_id, hid_t H5_ATTR_UNUSED dxpl_id,
     const void *buf, void H5_ATTR_UNUSED **req)
 {
+    H5VL_rados_select_chunk_info_t *chunk_info = NULL; /* Array of info for each chunk selected in the file */
     H5VL_rados_dset_t *dset = (H5VL_rados_dset_t *)_dset;
     int ndims;
     hsize_t dim[H5S_MAX_RANK];
     hid_t real_file_space_id;
     hid_t real_mem_space_id;
-    H5S_t *file_space = NULL;
-    H5S_t *mem_space = NULL;
     hssize_t num_elem;
-    hsize_t chunk_coords[H5S_MAX_RANK];
+    hssize_t num_elem_chunk;
+    size_t chunk_info_len;
     char *chunk_oid = NULL;
     rados_write_op_t write_op;
     hbool_t write_op_init = FALSE;
     rados_read_op_t read_op;
     hbool_t read_op_init = FALSE;
+    size_t file_type_size;
+    size_t mem_type_size;
+    hbool_t types_equal = TRUE;
+    hbool_t need_bkg = FALSE;
+    hbool_t fill_bkg = FALSE;
     //hid_t base_type_id = FAIL;
     //size_t base_type_size = 0;
     void *tconv_buf = NULL;
@@ -3759,7 +4126,10 @@ H5VL_rados_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
     //H5T_class_t type_class;
     //hbool_t is_vl = FALSE;
     //uhtri_t is_vl_str = FALSE;
+    hbool_t close_spaces = FALSE;
+    H5VL_rados_tconv_reuse_t reuse = H5VL_RADOS_TCONV_REUSE_NONE;
     int ret;
+    uint64_t i;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -3803,16 +4173,6 @@ H5VL_rados_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
     /* Check for no selection */
     if(num_elem == 0)
         HGOTO_DONE(SUCCEED)
-
-    /* Create chunk key - always contiguous for now */
-    chunk_coords[0] = 0;
-    if(H5VL_rados_oid_create_chunk(dset->obj.item.file, dset->obj.bin_oid, 1,
-            chunk_coords, &chunk_oid) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't create dataset chunk oid")
-
-    /* Create write op */
-    write_op = rados_create_write_op();
-    write_op_init = TRUE;
 #if 0
     /* Check for vlen */
     if(H5T_NO_CLASS == (type_class = H5Tget_class(mem_type_id)))
@@ -3833,125 +4193,211 @@ H5VL_rados_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
         if(is_vl_str)
             is_vl = TRUE;
     } /* end if */
-
-    /* Check for variable length */
-    if(is_vl) {
-        H5VL_daosm_vl_mem_ud_t mem_ud;
-        H5VL_daosm_vl_file_ud_t file_ud;
-
-        /* Allocate array of akey pointers */
-        if(NULL == (akeys = (uint8_t **)H5MM_calloc((size_t)num_elem * sizeof(uint8_t *))))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate buffer for akey array")
-
-        /* Allocate array of iods */
-        if(NULL == (iods = (daos_iod_t *)H5MM_calloc((size_t)num_elem * sizeof(daos_iod_t))))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate buffer for I/O descriptor array")
-
-        /* Allocate array of sg_iovs */
-        if(NULL == (sg_iovs = (daos_iov_t *)H5MM_malloc((size_t)num_elem * sizeof(daos_iov_t))))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate buffer for scatter gather list")
-
-        /* Allocate array of sgls */
-        if(NULL == (sgls = (daos_sg_list_t *)H5MM_malloc((size_t)num_elem * sizeof(daos_sg_list_t))))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate buffer for scatter gather list array")
-
-        /* Iterate over memory selection */
-        mem_ud.iods = iods;
-        mem_ud.sgls = sgls;
-        mem_ud.sg_iovs = sg_iovs;
-        mem_ud.is_vl_str = is_vl_str;
-        mem_ud.base_type_size = base_type_size;
-        mem_ud.idx = 0;
-        if(H5Diterate((void *)buf, mem_type_id, real_mem_space_id, H5VL_daosm_dataset_mem_vl_wr_cb, &mem_ud) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_BADITER, FAIL, "memory selection iteration failed")
-        HDassert(mem_ud.idx == (uint64_t)num_elem);
-
-        /* Iterate over file selection.  Note the bogus buffer and type_id,
-         * these don't matter since the "elem" parameter of the callback is not
-         * used. */
-        file_ud.akeys = akeys;
-        file_ud.iods = iods;
-        file_ud.idx = 0;
-        if(H5Diterate((void *)buf, mem_type_id, real_file_space_id, H5VL_daosm_dataset_file_vl_cb, &file_ud) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_BADITER, FAIL, "file selection iteration failed")
-        HDassert(file_ud.idx == (uint64_t)num_elem);
-
-        /* Write data to dataset */
-        /* Note cast to unsigned reduces width to 32 bits.  Should eventually
-         * check for overflow and iterate over 2^32 size blocks */
-        if(0 != (ret = daos_obj_update(dset->obj.obj_oh, dset->obj.item.file->epoch, &dkey, (unsigned)num_elem, iods, sgls, NULL /*event*/)))
-            HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data to dataset: %d", ret)
-    } /* end if */
     else
 #endif
-     {
-        size_t file_type_size;
-        size_t mem_type_size;
-        hbool_t fill_bkg = FALSE;
-
+    {
         /* Initialize type conversion */
-        if(H5VL_rados_tconv_init(mem_type_id, &mem_type_size, dset->type_id, &file_type_size, (size_t)num_elem, &tconv_buf, &bkg_buf, NULL, &fill_bkg) < 0)
+        if(H5VL_rados_tconv_init(dset->type_id, &file_type_size, mem_type_id, &mem_type_size, &types_equal, &reuse, &need_bkg, &fill_bkg) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize type conversion")
+    } /* end else */
 
-        /* Build recxs and sg_iovs */
-        /* Get file dataspace object */
-        if(NULL == (file_space = (H5S_t *)H5I_object(real_file_space_id)))
-            HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+    /* Check if the dataset actually has a chunked storage layout. If it does not, simply
+     * set up the dataset as a single "chunk".
+     */
+    switch(H5Pget_layout(dset->dcpl_id)) {
+        case H5D_COMPACT:
+        case H5D_CONTIGUOUS:
+            if (NULL == (chunk_info = (H5VL_rados_select_chunk_info_t *)H5MM_malloc(sizeof(H5VL_rados_select_chunk_info_t))))
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate single chunk info buffer")
+            chunk_info_len = 1;
 
-        /* Check for type conversion */
-        if(tconv_buf) {
-            /* Check if we need to fill background buffer */
-            if(fill_bkg) {
-                HDassert(bkg_buf);
+            /* Set up "single-chunk dataset", with the "chunk" starting at coordinate 0 */
+            chunk_info->fspace_id = real_file_space_id;
+            chunk_info->mspace_id = real_mem_space_id;
+            HDmemset(chunk_info->chunk_coords, 0, sizeof(chunk_info->chunk_coords));
 
-                /* Create read op */
-                read_op = rados_create_read_op();
-                read_op_init = TRUE;
+            break;
 
-                /* Build io ops (to read to bkg_buf and write from tconv_buf)
-                 * from file space */
-                if(H5VL_rados_build_io_op_contig(file_space, file_type_size, (size_t)num_elem, bkg_buf, tconv_buf, read_op, write_op) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't generate RADOS write op")
+        case H5D_CHUNKED:
+//            if(is_vl)
+//                HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "vlen types are currently unsupported with chunking")
 
-                /* Read data from dataset to background buffer */
-                if((ret = rados_read_op_operate(read_op, ioctx_g, chunk_oid, LIBRADOS_OPERATION_NOFLAG)) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data from dataset: %s", strerror(-ret))
-            } /* end if */
-            else
-                /* Build write op from file space */
-                if(H5VL_rados_build_io_op_contig(file_space, file_type_size, (size_t)num_elem, NULL, tconv_buf, NULL, write_op) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't generate RADOS write op")
+            /* Get the coordinates of the currently selected chunks in the file, setting up memory and file dataspaces for them */
+            if(H5VL_rados_get_selected_chunk_info(dset->dcpl_id, real_file_space_id, real_mem_space_id, &chunk_info, &chunk_info_len) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get selected chunk info")
 
-            /* Gather data to conversion buffer */
-            if(H5Dgather(real_mem_space_id, buf, mem_type_id, (size_t)num_elem * mem_type_size, tconv_buf, NULL, NULL) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't gather data to conversion buffer")
+            close_spaces = TRUE;
 
-            /* Perform type conversion */
-            if(H5Tconvert(mem_type_id, dset->type_id, (size_t)num_elem, tconv_buf, bkg_buf, dxpl_id) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "can't perform type conversion")
+            break;
+        default:
+            HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "invalid, unknown or unsupported dataset storage layout type")
+    } /* end switch */
+
+    /* Get number of elements in a chunk */
+    if((num_elem_chunk = H5Sget_simple_extent_npoints(chunk_info[0].fspace_id)) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get number of points in chunk")
+
+    /* Allocate tconv_buf if necessary */
+    if(!types_equal)
+        if(NULL == (tconv_buf = H5MM_malloc( (size_t)num_elem_chunk
+                * (file_type_size > mem_type_size ? file_type_size
+                : mem_type_size))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate type conversion buffer")
+
+    /* Allocate bkg_buf if necessary */
+    if(need_bkg)
+        if(NULL == (bkg_buf = H5MM_malloc((size_t)num_elem_chunk
+                * mem_type_size)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate background buffer")
+
+    /* Iterate through each of the "chunks" in the dataset */
+    for(i = 0; i < chunk_info_len; i++) {
+        /* Create write op */
+        write_op = rados_create_write_op();
+        write_op_init = TRUE;
+
+        /* Create chunk key */
+        if(H5VL_rados_oid_create_chunk(dset->obj.item.file, dset->obj.bin_oid, ndims,
+                chunk_info[i].chunk_coords, &chunk_oid) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't create dataset chunk oid")
+
+        /* Get number of elements in selection */
+        if((num_elem = H5Sget_select_npoints(chunk_info[i].mspace_id)) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get number of points in selection")
+#if 0
+        /* Check for variable length */
+        if(is_vl) {
+            H5VL_daosm_vl_mem_ud_t mem_ud;
+            H5VL_daosm_vl_file_ud_t file_ud;
+
+            /* Allocate array of akey pointers */
+            if(NULL == (akeys = (uint8_t **)H5MM_calloc((size_t)num_elem * sizeof(uint8_t *))))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate buffer for akey array")
+
+            /* Allocate array of iods */
+            if(NULL == (iods = (daos_iod_t *)H5MM_calloc((size_t)num_elem * sizeof(daos_iod_t))))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate buffer for I/O descriptor array")
+
+            /* Allocate array of sg_iovs */
+            if(NULL == (sg_iovs = (daos_iov_t *)H5MM_malloc((size_t)num_elem * sizeof(daos_iov_t))))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate buffer for scatter gather list")
+
+            /* Allocate array of sgls */
+            if(NULL == (sgls = (daos_sg_list_t *)H5MM_malloc((size_t)num_elem * sizeof(daos_sg_list_t))))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate buffer for scatter gather list array")
+
+            /* Iterate over memory selection */
+            mem_ud.iods = iods;
+            mem_ud.sgls = sgls;
+            mem_ud.sg_iovs = sg_iovs;
+            mem_ud.is_vl_str = is_vl_str;
+            mem_ud.base_type_size = base_type_size;
+            mem_ud.idx = 0;
+            if(H5Diterate((void *)buf, mem_type_id, real_mem_space_id, H5VL_daosm_dataset_mem_vl_wr_cb, &mem_ud) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_BADITER, FAIL, "memory selection iteration failed")
+            HDassert(mem_ud.idx == (uint64_t)num_elem);
+
+            /* Iterate over file selection.  Note the bogus buffer and type_id,
+             * these don't matter since the "elem" parameter of the callback is not
+             * used. */
+            file_ud.akeys = akeys;
+            file_ud.iods = iods;
+            file_ud.idx = 0;
+            if(H5Diterate((void *)buf, mem_type_id, real_file_space_id, H5VL_daosm_dataset_file_vl_cb, &file_ud) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_BADITER, FAIL, "file selection iteration failed")
+            HDassert(file_ud.idx == (uint64_t)num_elem);
+
+            /* Write data to dataset */
+            /* Note cast to unsigned reduces width to 32 bits.  Should eventually
+             * check for overflow and iterate over 2^32 size blocks */
+            if(0 != (ret = daos_obj_update(dset->obj.obj_oh, dset->obj.item.file->epoch, &dkey, (unsigned)num_elem, iods, sgls, NULL /*event*/)))
+                HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data to dataset: %d", ret)
         } /* end if */
-        else {
-            /* Check for memory space is H5S_ALL, use file space in this case */
-            if(mem_space_id == H5S_ALL) {
-                /* Build write op from file space */
-                if(H5VL_rados_build_io_op_match(file_space, file_type_size, (size_t)num_elem, NULL, buf, NULL, write_op) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't generate RADOS write op")
+        else
+#endif
+        {
+            H5S_t *chunk_fspace = NULL;
+            H5S_t *chunk_mspace = NULL;
+            htri_t match_select = FALSE;
+
+            /* Get file dataspace object */
+            if(NULL == (chunk_fspace = (H5S_t *) H5I_object_verify(chunk_info[i].fspace_id, H5I_DATASPACE)))
+                HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "not a dataspace")
+
+            /* Check if the types are equal */
+            if(types_equal) {
+                /* No type conversion necessary */
+                /* Check if we should match the file and memory sequence lists
+                 * (serialized selections).  We can do this if the memory space
+                 * is H5S_ALL and the chunk extent equals the file extent.  If
+                 * the number of chunks selected is more than one we do not need
+                 * to check the extents because they cannot be the same.  We
+                 * could also allow the case where the memory space is not
+                 * H5S_ALL but is equivalent. */
+                if(mem_space_id == H5S_ALL && chunk_info_len == 1)
+                    if((match_select = H5Sextent_equal(real_file_space_id, chunk_info[i].fspace_id)) < 0)
+                        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOMPARE, FAIL, "can't check if file and chunk dataspaces are equal")
+
+                /* Check for matching selections */
+                if(match_select) {
+                    /* Build write op from file space */
+                    if(H5VL_rados_build_io_op_match(chunk_fspace, file_type_size, (size_t)num_elem, NULL, buf, NULL, write_op) < 0)
+                        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't generate RADOS write op")
+                } /* end if */
+                else {
+                    /* Get memory dataspace object */
+                    if(NULL == (chunk_mspace = (H5S_t *)H5I_object_verify(chunk_info[i].mspace_id, H5I_DATASPACE)))
+                        HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "not a dataspace")
+
+                    /* Build write op from file space and mem space */
+                    if(H5VL_rados_build_io_op_merge(chunk_mspace, chunk_fspace, file_type_size, (size_t)num_elem, NULL, buf, NULL, write_op) < 0)
+                        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't generate RADOS write op")
+                } /* end else */
             } /* end if */
             else {
-                /* Get memory dataspace object */
-                if(NULL == (mem_space = (H5S_t *)H5I_object(real_mem_space_id)))
-                    HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+                /* Type conversion necessary */
+                /* Check if we need to fill background buffer */
+                if(fill_bkg) {
+                    HDassert(bkg_buf);
 
-                /* Build write op from file space and mem space */
-                if(H5VL_rados_build_io_op_merge(mem_space, file_space, file_type_size, (size_t)num_elem, NULL, buf, NULL, write_op) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't generate RADOS write op")
+                    /* Create read op */
+                    read_op = rados_create_read_op();
+                    read_op_init = TRUE;
+
+                    /* Build io ops (to read to bkg_buf and write from tconv_buf)
+                     * from file space */
+                    if(H5VL_rados_build_io_op_contig(chunk_fspace, file_type_size, (size_t)num_elem, bkg_buf, tconv_buf, read_op, write_op) < 0)
+                        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't generate RADOS write op")
+
+                    /* Read data from dataset to background buffer */
+                    if((ret = rados_read_op_operate(read_op, ioctx_g, chunk_oid, LIBRADOS_OPERATION_NOFLAG)) < 0)
+                        HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data from dataset: %s", strerror(-ret))
+
+                    rados_release_read_op(read_op);
+                    read_op_init = FALSE;
+                } /* end if */
+                else
+                    /* Build write op from file space */
+                    if(H5VL_rados_build_io_op_contig(chunk_fspace, file_type_size, (size_t)num_elem, NULL, tconv_buf, NULL, write_op) < 0)
+                        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't generate RADOS write op")
+
+                /* Gather data to conversion buffer */
+                if(H5Dgather(chunk_info[i].mspace_id, buf, mem_type_id, (size_t)num_elem * mem_type_size, tconv_buf, NULL, NULL) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't gather data to conversion buffer")
+
+                /* Perform type conversion */
+                if(H5Tconvert(mem_type_id, dset->type_id, (size_t)num_elem, tconv_buf, bkg_buf, dxpl_id) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "can't perform type conversion")
             } /* end else */
+
+            /* Write data to dataset */
+            if((ret = rados_write_op_operate(write_op, ioctx_g, chunk_oid, NULL, LIBRADOS_OPERATION_NOFLAG)) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data to dataset: %s", strerror(-ret))
         } /* end else */
 
-        /* Write data to dataset */
-        if((ret = rados_write_op_operate(write_op, ioctx_g, chunk_oid, NULL, LIBRADOS_OPERATION_NOFLAG)) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data to dataset: %s", strerror(-ret))
-    } /* end else */
+        rados_release_write_op(write_op);
+        write_op_init = FALSE;
+    } /* end for */
 
 done:
     /* Free memory */
@@ -3966,6 +4412,19 @@ done:
     /*if(base_type_id != FAIL)
         if(H5I_dec_app_ref(base_type_id) < 0)
             HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, FAIL, "can't close base type id")*/
+
+    if(chunk_info) {
+        if(close_spaces) {
+            for(i = 0; i < chunk_info_len; i++) {
+                if(H5Sclose(chunk_info[i].mspace_id) < 0)
+                    HDONE_ERROR(H5E_DATASPACE, H5E_CANTCLOSEOBJ, FAIL, "can't close memory space");
+                if(H5Sclose(chunk_info[i].fspace_id) < 0)
+                    HDONE_ERROR(H5E_DATASPACE, H5E_CANTCLOSEOBJ, FAIL, "can't close file space");
+            } /* end for */
+        } /* end if */
+
+        H5MM_free(chunk_info);
+    } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_rados_dataset_write() */
