@@ -54,11 +54,11 @@ Using Visual Studio with HDF5 Libraries
     Many other common questions and hints are located online and being updated
     in the HDF5 FAQ.  For Windows-specific questions, please see:
 
-        http://www.hdfgroup.org/HDF5/faq/windows.html
+        http://support.hdfgroup.org/HDF5/faq/windows.html
 
     For all other general questions, you can look in the general FAQ:
 
-        http://hdfgroup.org/HDF5-FAQ.html
+        http://support.hdfgroup.org/HDF5/HDF5-FAQ.html
 
 ************************************************************************
  Please send email to help@hdfgroup.org for further assistance.
