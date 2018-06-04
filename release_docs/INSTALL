@@ -2,18 +2,18 @@ Instructions for the Installation of HDF5 Software
 ==================================================
 
 This file provides instructions for installing the HDF5 software.  
-If you have any problems with the installation, please see The HDF Group's
-support page at the following location:
 
-    http://www.hdfgroup.org/services/support.html
+For help with installing, questions can be posted to the HDF Forum or sent to the HDF Helpdesk:
+
+   HDF Forum:     https://forum.hdfgroup.org/
+   HDF Helpdesk:  https://portal.hdfgroup.org/display/support/The+HDF+Help+Desk
 
 CONTENTS
 --------
         1. Obtaining HDF5
 
         2. Quick installation
-        2.1. UNIX platforms
-        2.2. Windows and Cygwin
+        2.1. Windows and Cygwin
 
         3. HDF5 dependencies
         3.1. Make
@@ -46,23 +46,17 @@ CONTENTS
 
         5. Using the Library
 
-        6. Support
-
-        A. Building and testing with other compilers
-        A.1.  Building and testing with Intel compilers
-        A.2.  Building and testing with PGI compilers
 
 *****************************************************************************
 
 1. Obtaining HDF5
         The latest supported public release of HDF5 is available from
-        https://support.hdfgroup.org/HDF5/release/obtain5.html.  For Unix and 
-        UNIX-like platforms, it is available in tar format compressed with gzip.  
+        https://www.hdfgroup.org/downloads/hdf5/.  For Unix and UNIX-like
+        platforms, it is available in tar format compressed with gzip.  
         For Microsoft Windows, it is in ZIP format.
 
 
 2. Quick installation
-2.1. UNIX platforms
         For those who don't like to read ;-) the following steps can be used
         to configure, build, test, and install the HDF5 Library, header files,
         and support programs. For example, to install HDF5 version X.Y.Z at
@@ -98,7 +92,7 @@ CONTENTS
         In this case, PATH_TO_SZIP would be replaced with the path to the 
         installed location of the SZIP library.
 
-2.2. Windows and Cygwin
+2.1. Windows and Cygwin
         Users of Microsoft Windows should see the INSTALL_Windows files for
         detailed instructions.  INSTALL_Cygwin also exists for those platforms.
 
@@ -119,17 +113,19 @@ CONTENTS
 3.3. Szip (optional)
         The HDF5 Library includes a predefined compression filter that
         uses the extended-Rice lossless compression algorithm for chunked
-        datasets. For more information about Szip compression and license
-        terms, see http://hdfgroup.org/doc_resource/SZIP/.
+        datasets. For information on Szip compression, license terms, 
+        and obtaining the Szip source code, see:
 
-        The Szip source code can be obtained from the HDF5 Download page
-        http://www.hdfgroup.org/HDF5/release/obtain5.html#extlibs. Building
-        instructions are available with the Szip source code.
+           https://portal.hdfgroup.org/display/HDF5/Szip+Compression+in+HDF+Products
+
+        Building instructions are available with the Szip source code.
 
         The HDF Group does not distribute separate Szip precompiled libraries,
-        but the HDF5 binaries available from
-        http://www.hdfgroup.org/HDF5/release/obtain5.html include 
-        the Szip encoder enabled binary for the corresponding platform.
+        but the HDF5 pre-built binaries provided on The HDF Group download page
+        include the Szip library with the encoder enabled. These can be found
+        here:
+
+           https://www.hdfgroup.org/downloads/hdf5/
 
         To configure the HDF5 Library with the Szip compression filter, use
         the '--with-szlib=/PATH_TO_SZIP' flag. For more information, see
@@ -165,16 +161,12 @@ CONTENTS
             $ gunzip < hdf5-X.Y.Z.tar.gz | tar xf -
             Or
             $ tar zxf hdf5-X.Y.Z.tar.gz
-            Or
-            $ tar xf hdf5-X.Y.Z.tar.gz
 
 4.1.3. Bzip'd tar archive (*.tar.bz2)
 
             $ bunzip2 < hdf5-X.Y.Z.tar.bz2 | tar xf -
             Or
             $ tar jxf hdf5-X.Y.Z.tar.bz2
-            Or
-            $ tar xf hdf5-X.Y.Z.tar.bz2
 
 
 4.2. Source versus build directories
@@ -237,11 +229,13 @@ CONTENTS
 
             $ CC=cc ./configure
 
-        A parallel version of HDF5 can be built by specifying `mpicc' as
-        the C compiler.   Using the `mpicc' compiler will insure that the
-        correct MPI and MPI-IO header files and libraries are used.
+        A parallel version of HDF5 can be built by specifying `mpicc'
+        as the C compiler.  (The `--enable-parallel' flag documented
+        below is optional in this case.)  Using the `mpicc' compiler
+        will insure that the correct MPI and MPI-IO header files and
+        libraries are used.
 
-            $ CC=/usr/local/mpi/bin/mpicc ./configure --enable-parallel
+            $ CC=/usr/local/mpi/bin/mpicc ./configure
 
 4.3.3. Configuring for 64 or 32 bit support
         Some machine architectures support 32-bit or 64-bit binaries.
@@ -294,7 +288,7 @@ CONTENTS
         fort lf95 g95 ifc efc gfc. To use an alternate compiler specify it with 
         the FC variable:
 
-            $ FC=/usr/local/bin/gfortran ./configure --enable-fortran --enable-fortran2003
+            $ FC=/usr/local/bin/g95 ./configure --enable-fortran --enable-fortran2003
 
         Note: The Fortran and C++ interfaces are not supported on all the
               platforms the main HDF5 Library supports. Also, the Fortran
@@ -399,10 +393,7 @@ CONTENTS
         (such as type conversion execution times and extensive invariant 
         condition checking). To enable this debugging, supply a
         comma-separated list of package names to to the `--enable-debug'
-        switch.  See "Debugging HDF5 Applications" for a list of package 
-        names:
-
-            http://www.hdfgroup.org/HDF5/doc/H5.user/Debugging.html
+        switch. 
 
         Debugging can be disabled by saying `--disable-debug'. 
         The default debugging level for snapshots is a subset of the
@@ -418,22 +409,21 @@ CONTENTS
         arguments, and the return values. To enable or disable the
         ability to trace the API say `--enable-trace' (the default for
         snapshots) or `--disable-trace' (the default for public releases). 
-        The tracing must also be enabled at runtime to see any output 
-        (see "Debugging HDF5 Applications," reference above).
+        The tracing must also be enabled at runtime to see any output. 
 
 4.3.10. Parallel versus serial library
         The HDF5 Library can be configured to use MPI and MPI-IO for
         parallelism on a distributed multi-processor system.  Read the
-        file INSTALL_parallel for detailed explanations.
+        file INSTALL_parallel for detailed information.
 
 4.3.11. Threadsafe capability
         The HDF5 Library can be configured to be thread-safe (on a very
         large scale) with the `--enable-threadsafe' flag to the configure
         script.  Some platforms may also require the '-with-pthread=INC,LIB'
         (or '--with-pthread=DIR') flag to the configure script.
-        For further details, see "HDF5 Thread Safe Library":
+        For further information, see:
 
-            http://www.hdfgroup.org/HDF5/doc/TechNotes/ThreadSafeLibrary.html
+           https://portal.hdfgroup.org/display/knowledge/Questions+about+thread-safety+and+concurrent+access
 
 4.3.12. Backward compatibility
         The 1.8 version of the HDF5 Library can be configured to operate
@@ -441,14 +431,14 @@ CONTENTS
             --with-default-api-version=v16
         configure flag. This allows existing code to be compiled with the
         v1.8 library without requiring immediate changes to the application 
-        source code.  For addtional configuration options and other details, 
-        see "API Compatibility Macros in HDF5":
+        source code.  For additional configuration options and other details, 
+        see "API Compatibility Macros":
 
-            http://www.hdfgroup.org/HDF5/doc/RM/APICompatMacros.html 
+            https://portal.hdfgroup.org/display/HDF5/API+Compatibility+Macros
 
 4.4. Building
         The library, confidence tests, and programs can be built by
-        saying just:
+        specifying:
 
             $ make
 
@@ -465,7 +455,7 @@ CONTENTS
 
 4.5. Testing
         HDF5 comes with various test suites, all of which can be run by
-        saying
+        specifying
 
             $ make check
 
@@ -494,12 +484,13 @@ CONTENTS
         longer test, set HDF5TestExpress to 0.  1 is the default.
 
 4.6. Installing HDF5
-        The HDF5 Library, include files, and support programs can be
-        installed in a (semi-)public place by saying `make install'. The
-        files are installed under the directory specified with `--prefix=DIR'
-        (default is 'hdf5' in the build directory) in directories named `lib',
-        `include', and `bin'. The directories, if not existing, will be created
-        automatically, provided the mkdir command supports the -p option.
+        The HDF5 library, include files, and support programs can be
+        installed by specifying `make install'. The files are installed under the
+        directory specified with `--prefix=DIR' (or if not specified, in 'hdf5'
+        in the top directory of the HDF5 source code). They will be
+        placed in directories named `lib', `include', and `bin'. The directories,
+        if not existing, will be created automatically, provided the mkdir command
+        supports the -p option.
 
         If `make install' fails because the install command at your site
         somehow fails, you may use the install-sh that comes with the
@@ -544,78 +535,35 @@ CONTENTS
             The configuration information:
                 ./src/H5pubconf.h
         
-            The support programs that are useful are:
-            ./tools/h5ls/h5ls               (list file contents)
-            ./tools/h5dump/h5dump           (dump file contents)
-            ./tools/misc/h5repart           (repartition file families)
-            ./tools/misc/h5debug            (low-level file debugging)
-            ./tools/h5import/h5import       (imports data to HDF5 file)
-            ./tools/h5diff/h5diff           (compares two HDF5 files)
-            ./tools/gifconv/h52gif          (HDF5 to GIF converter) 
-            ./tools/gifconv/gif2h5          (GIF to HDF5 converter)
+            Useful support programs installed in bin and built in 
+            subdirectories of tools/:
+            h5ls/h5ls               (list file contents)
+            h5dump/h5dump           (dump file contents)
+            h5copy/h5copy           (copy objects to another file)
+            h5repack/h5repack       (copy file changing compression/chunking)
+            h5jam/h5jam             (add user block to front of HDF5 file)
+            h5jam/h5unjam           (splits user block to separate file)
+            misc/h5repart           (repartition file families)
+            misc/h5debug            (low-level file debugging)
+            misc/h5mkgrp            (create a new HDF5 group in a file)
+            h5import/h5import       (imports data to HDF5 file)
+            h5diff/h5diff           (compares two HDF5 files)
+            h5stat/h5stat           (reports HDF5 file and object statistics)
+            gifconv/h52gif          (HDF5 to GIF converter) 
+            gifconv/gif2h5          (GIF to HDF5 converter)
+            misc/h5redeploy         (update HDF5 compiler tools after 
+                                     installing HDF5 in a new location)
+          
 
 
 5. Using the Library
-        Please see the "HDF5 User's Guide" and the "HDF5 Reference Manual":
 
-            http://www.hdfgroup.org/HDF5/doc/
+        For information on using HDF5 see the documentation, tutorials and examples
+        found here:
 
-        Most programs will include <hdf5.h> and link with -lhdf5.
-        Additional libraries may also be necessary depending on whether
-        support for compression, etc., was compiled into the HDF5 Library.
+           https://portal.hdfgroup.org/display/HDF5/HDF5
 
-        A summary of the HDF5 installation can be found in the
-        libhdf5.settings file in the same directory as the static and/or
-        shared HDF5 Libraries.
-
-
-6. Support
-        Support is described in the README file.
-
-
-*****************************************************************************
-                                APPENDICES
-*****************************************************************************
-
-A. Building and testing with other compilers
-A.1.  Building and testing with Intel compilers
-        When Intel compilers are used (icc or ecc), you will need to modify
-        the generated "libtool" program after configuration is finished.
-        On or around line 104 of the libtool file, there are lines which 
-        look like:
-
-            # How to pass a linker flag through the compiler.
-            wl=""
-
-        Change these lines to this:
-
-            # How to pass a linker flag through the compiler.
-            wl="-Wl,"
-
-        UPDATE: This is now done automatically by the configure script. 
-        However, if you still experience a problem, you may want to check this 
-        line in the libtool file and make sure that it has the correct value.
-
-A.2.  Building and testing with PGI compilers
-        When PGI C and C++ compilers are used (pgcc or pgCC), you will need to 
-        modify the generated "libtool" program after configuration is finished.
-        On or around line 104 of the libtool file, there are lines which 
-        look like this:
-
-            # How to pass a linker flag through the compiler.
-            wl=""
-
-        Change these lines to this:
-
-            # How to pass a linker flag through the compiler.
-            wl="-Wl,"
-
-        UPDATE: This is now done automatically by the configure script. However,
-        if you still experience a problem, you may want to check this line in
-        the libtool file and make sure that it has the correct value.
-
-        To build the HDF5 C++ Library with pgCC (version 4.0 and later), set
-        the environment variable CXX to "pgCC -tlocal"
-            setenv CXX "pgCC -tlocal"
-        before running the configure script.
+        A summary of the features included in the built HDF5 installation can be found
+        in the libhdf5.settings file in the same directory as the static and/or
+        shared HDF5 libraries.
 
