@@ -69,6 +69,9 @@ static void test_read_cmpd_filtered_dataset_no_conversion_shared(void);
 static void test_read_cmpd_filtered_dataset_type_conversion_unshared(void);
 static void test_read_cmpd_filtered_dataset_type_conversion_shared(void);
 
+/* Other miscellaneous tests */
+static void test_shrinking_growing_chunks(void);
+
 /*
  * Tests for attempting to round-trip the data going from
  *
@@ -117,6 +120,7 @@ static void (*tests[])(void) = {
     test_read_cmpd_filtered_dataset_type_conversion_shared,
     test_write_serial_read_parallel,
     test_write_parallel_read_serial,
+    test_shrinking_growing_chunks,
 };
 
 /*
@@ -5696,6 +5700,142 @@ test_write_parallel_read_serial(void)
         VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
         VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
     }
+
+    return;
+}
+
+/*
+ * Tests that causing chunks to continually grow and shrink
+ * by writing random data followed by zeroed-out data (and
+ * thus controlling the compression ratio) does not cause
+ * problems.
+ *
+ * Programmer: Jordan Henderson
+ *             06/04/2018
+ */
+static void
+test_shrinking_growing_chunks(void)
+{
+    float   *data = NULL;
+    hsize_t  dataset_dims[SHRINKING_GROWING_CHUNKS_DATASET_DIMS];
+    hsize_t  chunk_dims[SHRINKING_GROWING_CHUNKS_DATASET_DIMS];
+    hsize_t  sel_dims[SHRINKING_GROWING_CHUNKS_DATASET_DIMS];
+    hsize_t  start[SHRINKING_GROWING_CHUNKS_DATASET_DIMS];
+    hsize_t  stride[SHRINKING_GROWING_CHUNKS_DATASET_DIMS];
+    hsize_t  count[SHRINKING_GROWING_CHUNKS_DATASET_DIMS];
+    hsize_t  block[SHRINKING_GROWING_CHUNKS_DATASET_DIMS];
+    size_t   i, data_size;
+    hid_t    file_id = -1, dset_id = -1, plist_id = -1;
+    hid_t    filespace = -1, memspace = -1;
+
+    if (MAINPROCESS) puts("Testing continually shrinking/growing chunks");
+
+    /* Set up file access property list with parallel I/O access */
+    plist_id = H5Pcreate(H5P_FILE_ACCESS);
+    VRFY((plist_id >= 0), "FAPL creation succeeded");
+
+    VRFY((H5Pset_fapl_mpio(plist_id, comm, info) >= 0),
+            "Set FAPL MPIO succeeded");
+
+    VRFY((H5Pset_libver_bounds(plist_id, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) >= 0),
+            "Set libver bounds succeeded");
+
+    file_id = H5Fopen(filenames[0], H5F_ACC_RDWR, plist_id);
+    VRFY((file_id >= 0), "Test file open succeeded");
+
+    VRFY((H5Pclose(plist_id) >= 0), "FAPL close succeeded");
+
+    /* Create the dataspace for the dataset */
+    dataset_dims[0] = (hsize_t) SHRINKING_GROWING_CHUNKS_NROWS;
+    dataset_dims[1] = (hsize_t) SHRINKING_GROWING_CHUNKS_NCOLS;
+    chunk_dims[0] = (hsize_t) SHRINKING_GROWING_CHUNKS_CH_NROWS;
+    chunk_dims[1] = (hsize_t) SHRINKING_GROWING_CHUNKS_CH_NCOLS;
+    sel_dims[0] = (hsize_t) SHRINKING_GROWING_CHUNKS_CH_NROWS;
+    sel_dims[1] = (hsize_t) SHRINKING_GROWING_CHUNKS_NCOLS;
+
+    filespace = H5Screate_simple(SHRINKING_GROWING_CHUNKS_DATASET_DIMS, dataset_dims, NULL);
+    VRFY((filespace >= 0), "File dataspace creation succeeded");
+
+    memspace = H5Screate_simple(SHRINKING_GROWING_CHUNKS_DATASET_DIMS, sel_dims, NULL);
+    VRFY((memspace >= 0), "Memory dataspace creation succeeded");
+
+    /* Create chunked dataset */
+    plist_id = H5Pcreate(H5P_DATASET_CREATE);
+    VRFY((plist_id >= 0), "DCPL creation succeeded");
+
+    VRFY((H5Pset_chunk(plist_id, SHRINKING_GROWING_CHUNKS_DATASET_DIMS, chunk_dims) >= 0),
+            "Chunk size set");
+
+    /* Add test filter to the pipeline */
+    VRFY((set_dcpl_filter(plist_id) >= 0), "Filter set");
+
+    dset_id = H5Dcreate2(file_id, SHRINKING_GROWING_CHUNKS_DATASET_NAME, H5T_NATIVE_DOUBLE, filespace,
+            H5P_DEFAULT, plist_id, H5P_DEFAULT);
+    VRFY((dset_id >= 0), "Dataset creation succeeded");
+
+    VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
+    VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
+
+    /*
+     * Each process defines the dataset selection in memory and writes
+     * it to the hyperslab in the file
+     */
+    count[0] = 1;
+    count[1] = (hsize_t) SHRINKING_GROWING_CHUNKS_NCOLS / (hsize_t) SHRINKING_GROWING_CHUNKS_CH_NCOLS;
+    stride[0] = (hsize_t) SHRINKING_GROWING_CHUNKS_CH_NROWS;
+    stride[1] = (hsize_t) SHRINKING_GROWING_CHUNKS_CH_NCOLS;
+    block[0] = (hsize_t) SHRINKING_GROWING_CHUNKS_CH_NROWS;
+    block[1] = (hsize_t) SHRINKING_GROWING_CHUNKS_CH_NCOLS;
+    start[0] = ((hsize_t) mpi_rank * (hsize_t) SHRINKING_GROWING_CHUNKS_CH_NROWS * count[0]);
+    start[1] = 0;
+
+    if (VERBOSE_MED) {
+        printf("Process %d is writing with count[ %llu, %llu ], stride[ %llu, %llu ], start[ %llu, %llu ], block size[ %llu, %llu ]\n",
+                mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
+        fflush(stdout);
+    }
+
+    /* Select hyperslab in the file */
+    filespace = H5Dget_space(dset_id);
+    VRFY((dset_id >= 0), "File dataspace retrieval succeeded");
+
+    VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
+            "Hyperslab selection succeeded");
+
+    /* Create property list for collective dataset write */
+    plist_id = H5Pcreate(H5P_DATASET_XFER);
+    VRFY((plist_id >= 0), "DXPL creation succeeded");
+
+    VRFY((H5Pset_dxpl_mpio(plist_id, H5FD_MPIO_COLLECTIVE) >= 0),
+            "Set DXPL MPIO succeeded");
+
+    data_size = sel_dims[0] * sel_dims[1] * sizeof(*data);
+
+    data = (float *) HDcalloc(1, data_size);
+    VRFY((NULL != data), "HDcalloc succeeded");
+
+    for (i = 0; i < SHRINKING_GROWING_CHUNKS_NLOOPS; i++) {
+        /* Continually write random float data, followed by zeroed-out data */
+        if ((i % 2))
+            HDmemset(data, 0, data_size);
+        else {
+            size_t j;
+            for (j = 0; j < data_size / sizeof(*data); j++) {
+                data[j] = (float) ( rand() / (double) (RAND_MAX / (double) 1.0L) );
+            }
+        }
+
+        VRFY((H5Dwrite(dset_id, H5T_NATIVE_DOUBLE, memspace, filespace, plist_id, data) >= 0),
+                "Dataset write succeeded");
+    }
+
+    if (data) HDfree(data);
+
+    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
+    VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
+    VRFY((H5Sclose(memspace) >= 0), "Memory dataspace close succeeded");
+    VRFY((H5Pclose(plist_id) >= 0), "DXPL close succeeded");
+    VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
 
     return;
 }
