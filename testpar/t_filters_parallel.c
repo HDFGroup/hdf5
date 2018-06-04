@@ -31,7 +31,11 @@ char filenames[1][256];
 
 int nerrors = 0;
 
+size_t cur_filter_idx = 0;
+
 #define ARRAY_SIZE(a) sizeof(a) / sizeof(a[0])
+
+static herr_t set_dcpl_filter(hid_t dcpl);
 
 /* Tests for writing data in parallel */
 static void test_write_one_chunk_filtered_dataset(void);
@@ -116,6 +120,26 @@ static void (*tests[])(void) = {
 };
 
 /*
+ * Function to call the appropriate HDF5 filter-setting function
+ * depending on the currently set index. Used to re-run the tests
+ * with different filters to check that the data still comes back
+ * correctly under a variety of circumstances, such as the
+ * Fletcher32 checksum filter increasing the size of the chunk.
+ */
+static herr_t
+set_dcpl_filter(hid_t dcpl)
+{
+    switch (cur_filter_idx) {
+        case 0:
+            return H5Pset_deflate(dcpl, DEFAULT_DEFLATE_LEVEL);
+        case 1:
+            return H5Pset_fletcher32(dcpl);
+        default:
+            return H5Pset_deflate(dcpl, DEFAULT_DEFLATE_LEVEL);
+    }
+}
+
+/*
  * Tests parallel write of filtered data in the special
  * case where a dataset is composed of a single chunk.
  *
@@ -177,7 +201,7 @@ test_write_one_chunk_filtered_dataset(void)
             "Chunk size set");
 
     /* Add test filter to the pipeline */
-    VRFY((SET_FILTER(plist_id) >= 0), "Filter set");
+    VRFY((set_dcpl_filter(plist_id) >= 0), "Filter set");
 
     dset_id = H5Dcreate2(file_id, WRITE_ONE_CHUNK_FILTERED_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
             H5P_DEFAULT, plist_id, H5P_DEFAULT);
@@ -333,7 +357,7 @@ test_write_filtered_dataset_no_overlap(void)
             "Chunk size set");
 
     /* Add test filter to the pipeline */
-    VRFY((SET_FILTER(plist_id) >= 0), "Filter set");
+    VRFY((set_dcpl_filter(plist_id) >= 0), "Filter set");
 
     dset_id = H5Dcreate2(file_id, WRITE_UNSHARED_FILTERED_CHUNKS_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
             H5P_DEFAULT, plist_id, H5P_DEFAULT);
@@ -492,7 +516,7 @@ test_write_filtered_dataset_overlap(void)
             "Chunk size set");
 
     /* Add test filter to the pipeline */
-    VRFY((SET_FILTER(plist_id) >= 0), "Filter set");
+    VRFY((set_dcpl_filter(plist_id) >= 0), "Filter set");
 
     dset_id = H5Dcreate2(file_id, WRITE_SHARED_FILTERED_CHUNKS_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
             H5P_DEFAULT, plist_id, H5P_DEFAULT);
@@ -657,7 +681,7 @@ test_write_filtered_dataset_single_no_selection(void)
             "Chunk size set");
 
     /* Add test filter to the pipeline */
-    VRFY((SET_FILTER(plist_id) >= 0), "Filter set");
+    VRFY((set_dcpl_filter(plist_id) >= 0), "Filter set");
 
     dset_id = H5Dcreate2(file_id, WRITE_SINGLE_NO_SELECTION_FILTERED_CHUNKS_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
             H5P_DEFAULT, plist_id, H5P_DEFAULT);
@@ -822,7 +846,7 @@ test_write_filtered_dataset_all_no_selection(void)
             "Chunk size set");
 
     /* Add test filter to the pipeline */
-    VRFY((SET_FILTER(plist_id) >= 0), "Filter set");
+    VRFY((set_dcpl_filter(plist_id) >= 0), "Filter set");
 
     dset_id = H5Dcreate2(file_id, WRITE_ALL_NO_SELECTION_FILTERED_CHUNKS_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
             H5P_DEFAULT, plist_id, H5P_DEFAULT);
@@ -949,7 +973,7 @@ test_write_filtered_dataset_point_selection(void)
             "Chunk size set");
 
     /* Add test filter to the pipeline */
-    VRFY((SET_FILTER(plist_id) >= 0), "Filter set");
+    VRFY((set_dcpl_filter(plist_id) >= 0), "Filter set");
 
     dset_id = H5Dcreate2(file_id, WRITE_POINT_SELECTION_FILTERED_CHUNKS_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
             H5P_DEFAULT, plist_id, H5P_DEFAULT);
@@ -1102,7 +1126,7 @@ test_write_filtered_dataset_interleaved_write(void)
             "Chunk size set");
 
     /* Add test filter to the pipeline */
-    VRFY((SET_FILTER(plist_id) >= 0), "Filter set");
+    VRFY((set_dcpl_filter(plist_id) >= 0), "Filter set");
 
     dset_id = H5Dcreate2(file_id, INTERLEAVED_WRITE_FILTERED_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
             H5P_DEFAULT, plist_id, H5P_DEFAULT);
@@ -1268,7 +1292,7 @@ test_write_3d_filtered_dataset_no_overlap_separate_pages(void)
             "Chunk size set");
 
     /* Add test filter to the pipeline */
-    VRFY((SET_FILTER(plist_id) >= 0), "Filter set");
+    VRFY((set_dcpl_filter(plist_id) >= 0), "Filter set");
 
     dset_id = H5Dcreate2(file_id, WRITE_UNSHARED_FILTERED_CHUNKS_3D_SEP_PAGE_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
             H5P_DEFAULT, plist_id, H5P_DEFAULT);
@@ -1429,7 +1453,7 @@ test_write_3d_filtered_dataset_no_overlap_same_pages(void)
             "Chunk size set");
 
     /* Add test filter to the pipeline */
-    VRFY((SET_FILTER(plist_id) >= 0), "Filter set");
+    VRFY((set_dcpl_filter(plist_id) >= 0), "Filter set");
 
     dset_id = H5Dcreate2(file_id, WRITE_UNSHARED_FILTERED_CHUNKS_3D_SAME_PAGE_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
             H5P_DEFAULT, plist_id, H5P_DEFAULT);
@@ -1593,7 +1617,7 @@ test_write_3d_filtered_dataset_overlap(void)
             "Chunk size set");
 
     /* Add test filter to the pipeline */
-    VRFY((SET_FILTER(plist_id) >= 0), "Filter set");
+    VRFY((set_dcpl_filter(plist_id) >= 0), "Filter set");
 
     dset_id = H5Dcreate2(file_id, WRITE_SHARED_FILTERED_CHUNKS_3D_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
             H5P_DEFAULT, plist_id, H5P_DEFAULT);
@@ -1762,7 +1786,7 @@ test_write_cmpd_filtered_dataset_no_conversion_unshared(void)
             "Chunk size set");
 
     /* Add test filter to the pipeline */
-    VRFY((SET_FILTER(plist_id) >= 0), "Filter set");
+    VRFY((set_dcpl_filter(plist_id) >= 0), "Filter set");
 
     /* Create the compound type for memory. */
     memtype = H5Tcreate(H5T_COMPOUND, sizeof(COMPOUND_C_DATATYPE));
@@ -1943,7 +1967,7 @@ test_write_cmpd_filtered_dataset_no_conversion_shared(void)
             "Chunk size set");
 
     /* Add test filter to the pipeline */
-    VRFY((SET_FILTER(plist_id) >= 0), "Filter set");
+    VRFY((set_dcpl_filter(plist_id) >= 0), "Filter set");
 
     /* Create the compound type for memory. */
     memtype = H5Tcreate(H5T_COMPOUND, sizeof(COMPOUND_C_DATATYPE));
@@ -2132,7 +2156,7 @@ test_write_cmpd_filtered_dataset_type_conversion_unshared(void)
             "Chunk size set");
 
     /* Add test filter to the pipeline */
-    VRFY((SET_FILTER(plist_id) >= 0), "Filter set");
+    VRFY((set_dcpl_filter(plist_id) >= 0), "Filter set");
 
     /* Create the compound type for memory. */
     memtype = H5Tcreate(H5T_COMPOUND, sizeof(COMPOUND_C_DATATYPE));
@@ -2316,7 +2340,7 @@ test_write_cmpd_filtered_dataset_type_conversion_shared(void)
             "Chunk size set");
 
     /* Add test filter to the pipeline */
-    VRFY((SET_FILTER(plist_id) >= 0), "Filter set");
+    VRFY((set_dcpl_filter(plist_id) >= 0), "Filter set");
 
     /* Create the compound type for memory. */
     memtype = H5Tcreate(H5T_COMPOUND, sizeof(COMPOUND_C_DATATYPE));
@@ -2505,7 +2529,7 @@ test_read_one_chunk_filtered_dataset(void)
                 "Chunk size set");
 
         /* Add test filter to the pipeline */
-        VRFY((SET_FILTER(plist_id) >= 0), "Filter set");
+        VRFY((set_dcpl_filter(plist_id) >= 0), "Filter set");
 
         dset_id = H5Dcreate2(file_id, READ_ONE_CHUNK_FILTERED_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
                 H5P_DEFAULT, plist_id, H5P_DEFAULT);
@@ -2702,7 +2726,7 @@ test_read_filtered_dataset_no_overlap(void)
                 "Chunk size set");
 
         /* Add test filter to the pipeline */
-        VRFY((SET_FILTER(plist_id) >= 0), "Filter set");
+        VRFY((set_dcpl_filter(plist_id) >= 0), "Filter set");
 
         dset_id = H5Dcreate2(file_id, READ_UNSHARED_FILTERED_CHUNKS_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
                 H5P_DEFAULT, plist_id, H5P_DEFAULT);
@@ -2901,7 +2925,7 @@ test_read_filtered_dataset_overlap(void)
                 "Chunk size set");
 
         /* Add test filter to the pipeline */
-        VRFY((SET_FILTER(plist_id) >= 0), "Filter set");
+        VRFY((set_dcpl_filter(plist_id) >= 0), "Filter set");
 
         dset_id = H5Dcreate2(file_id, READ_SHARED_FILTERED_CHUNKS_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
                 H5P_DEFAULT, plist_id, H5P_DEFAULT);
@@ -3121,7 +3145,7 @@ test_read_filtered_dataset_single_no_selection(void)
                 "Chunk size set");
 
         /* Add test filter to the pipeline */
-        VRFY((SET_FILTER(plist_id) >= 0), "Filter set");
+        VRFY((set_dcpl_filter(plist_id) >= 0), "Filter set");
 
         dset_id = H5Dcreate2(file_id, READ_SINGLE_NO_SELECTION_FILTERED_CHUNKS_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
                 H5P_DEFAULT, plist_id, H5P_DEFAULT);
@@ -3317,7 +3341,7 @@ test_read_filtered_dataset_all_no_selection(void)
                 "Chunk size set");
 
         /* Add test filter to the pipeline */
-        VRFY((SET_FILTER(plist_id) >= 0), "Filter set");
+        VRFY((set_dcpl_filter(plist_id) >= 0), "Filter set");
 
         dset_id = H5Dcreate2(file_id, READ_ALL_NO_SELECTION_FILTERED_CHUNKS_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
                 H5P_DEFAULT, plist_id, H5P_DEFAULT);
@@ -3465,7 +3489,7 @@ test_read_filtered_dataset_point_selection(void)
                 "Chunk size set");
 
         /* Add test filter to the pipeline */
-        VRFY((SET_FILTER(plist_id) >= 0), "Filter set");
+        VRFY((set_dcpl_filter(plist_id) >= 0), "Filter set");
 
         dset_id = H5Dcreate2(file_id, READ_POINT_SELECTION_FILTERED_CHUNKS_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
                 H5P_DEFAULT, plist_id, H5P_DEFAULT);
@@ -3680,7 +3704,7 @@ test_read_filtered_dataset_interleaved_read(void)
                 "Chunk size set");
 
         /* Add test filter to the pipeline */
-        VRFY((SET_FILTER(plist_id) >= 0), "Filter set");
+        VRFY((set_dcpl_filter(plist_id) >= 0), "Filter set");
 
         dset_id = H5Dcreate2(file_id, INTERLEAVED_READ_FILTERED_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
                 H5P_DEFAULT, plist_id, H5P_DEFAULT);
@@ -3892,7 +3916,7 @@ test_read_3d_filtered_dataset_no_overlap_separate_pages(void)
                 "Chunk size set");
 
         /* Add test filter to the pipeline */
-        VRFY((SET_FILTER(plist_id) >= 0), "Filter set");
+        VRFY((set_dcpl_filter(plist_id) >= 0), "Filter set");
 
         dset_id = H5Dcreate2(file_id, READ_UNSHARED_FILTERED_CHUNKS_3D_SEP_PAGE_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
                 H5P_DEFAULT, plist_id, H5P_DEFAULT);
@@ -4102,7 +4126,7 @@ test_read_3d_filtered_dataset_no_overlap_same_pages(void)
                 "Chunk size set");
 
         /* Add test filter to the pipeline */
-        VRFY((SET_FILTER(plist_id) >= 0), "Filter set");
+        VRFY((set_dcpl_filter(plist_id) >= 0), "Filter set");
 
         dset_id = H5Dcreate2(file_id, READ_UNSHARED_FILTERED_CHUNKS_3D_SAME_PAGE_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
                 H5P_DEFAULT, plist_id, H5P_DEFAULT);
@@ -4317,7 +4341,7 @@ test_read_3d_filtered_dataset_overlap(void)
                 "Chunk size set");
 
         /* Add test filter to the pipeline */
-        VRFY((SET_FILTER(plist_id) >= 0), "Filter set");
+        VRFY((set_dcpl_filter(plist_id) >= 0), "Filter set");
 
         dset_id = H5Dcreate2(file_id, READ_SHARED_FILTERED_CHUNKS_3D_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
                 H5P_DEFAULT, plist_id, H5P_DEFAULT);
@@ -4551,7 +4575,7 @@ test_read_cmpd_filtered_dataset_no_conversion_unshared(void)
                 "Chunk size set");
 
         /* Add test filter to the pipeline */
-        VRFY((SET_FILTER(plist_id) >= 0), "Filter set");
+        VRFY((set_dcpl_filter(plist_id) >= 0), "Filter set");
 
         dset_id = H5Dcreate2(file_id, READ_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_UNSHARED_DATASET_NAME, memtype, filespace,
                 H5P_DEFAULT, plist_id, H5P_DEFAULT);
@@ -4775,7 +4799,7 @@ test_read_cmpd_filtered_dataset_no_conversion_shared(void)
                 "Chunk size set");
 
         /* Add test filter to the pipeline */
-        VRFY((SET_FILTER(plist_id) >= 0), "Filter set");
+        VRFY((set_dcpl_filter(plist_id) >= 0), "Filter set");
 
         dset_id = H5Dcreate2(file_id, READ_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_SHARED_DATASET_NAME, memtype, filespace,
                 H5P_DEFAULT, plist_id, H5P_DEFAULT);
@@ -5007,7 +5031,7 @@ test_read_cmpd_filtered_dataset_type_conversion_unshared(void)
                 "Chunk size set");
 
         /* Add test filter to the pipeline */
-        VRFY((SET_FILTER(plist_id) >= 0), "Filter set");
+        VRFY((set_dcpl_filter(plist_id) >= 0), "Filter set");
 
         dset_id = H5Dcreate2(file_id, READ_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_UNSHARED_DATASET_NAME, filetype, filespace,
                 H5P_DEFAULT, plist_id, H5P_DEFAULT);
@@ -5243,7 +5267,7 @@ test_read_cmpd_filtered_dataset_type_conversion_shared(void)
                 "Chunk size set");
 
         /* Add test filter to the pipeline */
-        VRFY((SET_FILTER(plist_id) >= 0), "Filter set");
+        VRFY((set_dcpl_filter(plist_id) >= 0), "Filter set");
 
         dset_id = H5Dcreate2(file_id, READ_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_SHARED_DATASET_NAME, filetype, filespace,
                 H5P_DEFAULT, plist_id, H5P_DEFAULT);
@@ -5423,7 +5447,7 @@ test_write_serial_read_parallel(void)
                 "Chunk size set");
 
         /* Add test filter to the pipeline */
-        VRFY((SET_FILTER(plist_id) >= 0), "Filter set");
+        VRFY((set_dcpl_filter(plist_id) >= 0), "Filter set");
 
         dset_id = H5Dcreate2(file_id, WRITE_SERIAL_READ_PARALLEL_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
                 H5P_DEFAULT, plist_id, H5P_DEFAULT);
@@ -5569,7 +5593,7 @@ test_write_parallel_read_serial(void)
             "Chunk size set");
 
     /* Add test filter to the pipeline */
-    VRFY((SET_FILTER(plist_id) >= 0), "Filter set");
+    VRFY((set_dcpl_filter(plist_id) >= 0), "Filter set");
 
     dset_id = H5Dcreate2(file_id, WRITE_PARALLEL_READ_SERIAL_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
             H5P_DEFAULT, plist_id, H5P_DEFAULT);
@@ -5731,6 +5755,43 @@ main(int argc, char** argv)
     VRFY((file_id >= 0), "Test file creation succeeded");
 
     VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
+
+    for (i = 0; i < ARRAY_SIZE(tests); i++) {
+        if (MPI_SUCCESS == (mpi_code = MPI_Barrier(comm))) {
+            (*tests[i])();
+        }
+        else {
+            if (MAINPROCESS) MESG("MPI_Barrier failed");
+            nerrors++;
+        }
+    }
+
+    /*
+     * Increment the filter index to switch to the checksum filter
+     * and re-run the tests.
+     */
+    cur_filter_idx++;
+
+    h5_clean_files(FILENAME, fapl);
+
+    fapl = H5Pcreate(H5P_FILE_ACCESS);
+    VRFY((fapl >= 0), "FAPL creation succeeded");
+
+    VRFY((H5Pset_fapl_mpio(fapl, comm, info) >= 0), "Set FAPL MPIO succeeded");
+
+    VRFY((H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) >= 0),
+            "Set libver bounds succeeded");
+
+    file_id = H5Fcreate(filenames[0], H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+    VRFY((file_id >= 0), "Test file creation succeeded");
+
+    VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
+
+    if (MAINPROCESS) {
+        printf("\n=================================================================\n");
+        printf("Re-running Parallel Filters tests with Fletcher32 checksum filter\n");
+        printf("=================================================================\n\n");
+    }
 
     for (i = 0; i < ARRAY_SIZE(tests); i++) {
         if (MPI_SUCCESS == (mpi_code = MPI_Barrier(comm))) {

@@ -57,11 +57,7 @@ size_t             cd_nelmts = FILTER_NUM_CDVALUES;
 #define INCREMENTAL_DATA(i)  ((size_t) mpi_rank + i)  /* Generates incremental test data */
 #define RANK_DATA(i)         (mpi_rank)               /* Generates test data to visibly show which rank wrote to which parts of the dataset */
 
-#ifdef DYNAMIC_FILTER
-#define SET_FILTER(dcpl)     H5Pset_filter(dcpl, filter_id, flags, FILTER_NUM_CDVALUES, cd_values) /* Test other filter in parallel */
-#else
-#define SET_FILTER(dcpl)     H5Pset_deflate(dcpl, 6) /* Test GZIP filter in parallel */
-#endif
+#define DEFAULT_DEFLATE_LEVEL 6
 
 #define DIM0_SCALE_FACTOR 4
 #define DIM1_SCALE_FACTOR 2
