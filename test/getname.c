@@ -2390,7 +2390,7 @@ test_main(hid_t file_id, hid_t fapl)
     if((size = H5Iget_name(dtype_anon, NULL,0)) != 0) TEST_ERROR
 
     /* Store the address of the datatype for later use */
-    if(H5Oget_info(dtype_anon, &oinfo) < 0) TEST_ERROR
+    if(H5Oget_info2(dtype_anon, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
 
     /* Update the reference count to dtype_anon to preserve the datatype */
     if(H5Oincr_refcount(dtype_anon) < 0) TEST_ERROR
@@ -2937,7 +2937,7 @@ test_elinks(hid_t fapl)
     /* Query the external link object's name */
     *name = '\0';
     name_cached = FALSE;
-    namelen = H5I_get_name_test(group, (char*)name, sizeof(name), &name_cached);
+    namelen = H5I__get_name_test(group, (char*)name, sizeof(name), &name_cached);
     if(!((HDstrcmp(name, "/Group2") == 0) && (namelen == 7) && name_cached))
         TEST_ERROR
 
@@ -2952,7 +2952,7 @@ test_elinks(hid_t fapl)
     /* Query the external link to external link object's name */
     *name = '\0';
     name_cached = FALSE;
-    namelen = H5I_get_name_test(group, (char*)name, sizeof(name), &name_cached);
+    namelen = H5I__get_name_test(group, (char*)name, sizeof(name), &name_cached);
     if(!((HDstrcmp(name, "/Group2") == 0) && (namelen == 7) && name_cached))
         TEST_ERROR
 

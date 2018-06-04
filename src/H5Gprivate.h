@@ -277,7 +277,7 @@ H5_DLL herr_t H5G_loc_find_by_idx(const H5G_loc_t *loc, const char *group_name,
     H5G_loc_t *obj_loc/*out*/);
 H5_DLL htri_t H5G_loc_exists(const H5G_loc_t *loc, const char *name);
 H5_DLL herr_t H5G_loc_info(const H5G_loc_t *loc, const char *name,
-    hbool_t want_ih_info, H5O_info_t *oinfo/*out*/);
+    H5O_info_t *oinfo/*out*/, unsigned fields);
 H5_DLL herr_t H5G_loc_set_comment(const H5G_loc_t *loc, const char *name,
     const char *comment);
 H5_DLL ssize_t H5G_loc_get_comment(const H5G_loc_t *loc, const char *name,
