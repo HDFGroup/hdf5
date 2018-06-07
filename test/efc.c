@@ -36,8 +36,8 @@ static char filename[6][1024];
 
 /* Global property lists - just copies of the defaults (necessary to use
  * internal functions */
-hid_t fcpl_id = -1;
-hid_t fapl_id = -1;
+hid_t fcpl_id = H5I_INVALID_HID;
+hid_t fapl_id = H5I_INVALID_HID;
 
 
 /*-------------------------------------------------------------------------
@@ -68,8 +68,9 @@ test_single(void)
 
     TESTING("single EFC");
 
-    /* Set EFC size to 3.  Do this instead of H5F_efc_create() so we can pass
-     * a file pointer to H5F__efc_open containing the EFC. */
+    /* Set EFC size to 3. Do this instead of H5F__efc_create() so we can pass
+     * a file pointer to H5F__efc_open containing the EFC.
+     */
     if(H5Pset_elink_file_cache_size(fapl_id, 3) < 0)
         TEST_ERROR
 
@@ -84,8 +85,9 @@ test_single(void)
 
 
     /* Test 1: Open file 1 through EFC, close, then open normally, verify ref
-     * count = 2, release EFC, verify ref count = 1.  Verifies a file can be
-     * held open by the EFC. */
+     * count = 2, release EFC, verify ref count = 1. Verifies a file can be
+     * held open by the EFC.
+     */
     if(NULL == (f1 = H5F__efc_open(f0, filename[1],
             H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR
@@ -502,17 +504,19 @@ test_graph_nocycle(void)
 
     TESTING("graph of EFCs without cycles");
 
-    /* Set EFC size to 8.  Do this instead of H5F_efc_create() so we can pass
-     * a file pointer to H5F__efc_open containing the EFC.  Set to a high number
-     * because we don't test the EFC becoming too large in this test. */
+    /* Set EFC size to 8. Do this instead of H5F__efc_create() so we can pass
+     * a file pointer to H5F__efc_open containing the EFC. Set to a high number
+     * because we don't test the EFC becoming too large in this test.
+     */
     if(H5Pset_elink_file_cache_size(fapl_id, 8) < 0)
         TEST_ERROR
 
 
-    /* Test 1: Simple 3 file chain.  Open file 1 through file 0, then open file
-     * 2 through file 1.  Release file 0's EFC and verify that file 2 gets its
-     * ref count reduced (implying file 1 was closed).  Do the same with the
-     * opening order reversed. */
+    /* Test 1: Simple 3 file chain. Open file 1 through file 0, then open file
+     * 2 through file 1. Release file 0's EFC and verify that file 2 gets its
+     * ref count reduced (implying file 1 was closed). Do the same with the
+     * opening order reversed.
+     */
     if(NULL == (f0 = H5F_open(filename[0],
             H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR
@@ -847,15 +851,17 @@ test_graph_cycle(void)
 
     TESTING("graph of EFCs with cycles");
 
-    /* Set EFC size to 8.  Do this instead of H5F_efc_create() so we can pass
-     * a file pointer to H5F__efc_open containing the EFC.  Set to a high number
-     * because we don't test the EFC becoming too large in this test. */
+    /* Set EFC size to 8. Do this instead of H5F__efc_create() so we can pass
+     * a file pointer to H5F__efc_open containing the EFC. Set to a high number
+     * because we don't test the EFC becoming too large in this test.
+     */
     if(H5Pset_elink_file_cache_size(fapl_id, 8) < 0)
         TEST_ERROR
 
 
-    /* Test 1: File caches itself.  Verify that closing the file causes it to be
-     * actually closed, and there is no other unexpected behavior. */
+    /* Test 1: File caches itself. Verify that closing the file causes it to be
+     * actually closed, and there is no other unexpected behavior. 
+     */
     if(NULL == (f0 = H5F_open(filename[0],
             H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR
