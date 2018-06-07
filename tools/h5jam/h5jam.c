@@ -182,9 +182,11 @@ parse_command_line (int argc, const char *argv[])
       case 'h':
           usage (h5tools_getprogname());
           leave (EXIT_SUCCESS);
+          break;
       case 'V':
           print_version (h5tools_getprogname());
           leave (EXIT_SUCCESS);
+          break;
       case '?':
       default:
           usage (h5tools_getprogname());
@@ -200,10 +202,6 @@ parse_command_line (int argc, const char *argv[])
  *
  * Return:      Success:    0
  *              Failure:    1
- *
- * Programmer:
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -243,7 +241,7 @@ main (int argc, const char *argv[])
 
     if (ub_file == NULL) {
         /* no user block */
-        error_msg("missing arguemnt for -u <user_file>.\n");
+        error_msg("missing argument for -u <user_file>.\n");
         help_ref_msg(stderr);
         leave (EXIT_FAILURE);
     }
@@ -257,7 +255,7 @@ main (int argc, const char *argv[])
     }
 
     if (input_file == NULL) {
-        error_msg("missing arguemnt for -i <HDF5 file>.\n");
+        error_msg("missing argument for -i <HDF5 file>.\n");
         help_ref_msg(stderr);
         leave (EXIT_FAILURE);
     }

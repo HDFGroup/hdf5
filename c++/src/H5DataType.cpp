@@ -23,6 +23,8 @@
 #include "H5Exception.h"
 #include "H5IdComponent.h"
 #include "H5PropList.h"
+#include "H5StrcreatProp.h"
+#include "H5LcreatProp.h"
 #include "H5LaccProp.h"
 #include "H5Location.h"
 #include "H5Object.h"
@@ -828,7 +830,7 @@ void DataType::p_commit(hid_t loc_id, const char* name)
 }
 
 //--------------------------------------------------------------------------
-// Function:    DataType::p_decode (protected)
+// Function:    DataType::p_decode
 // Purpose      Returns an id of a type by decoding the binary object
 ///             description of this datatype.
 ///\exception   H5::DataTypeIException
@@ -857,7 +859,7 @@ hid_t DataType::p_decode() const
 }
 
 //--------------------------------------------------------------------------
-// Function:    DataType::p_opentype (protected)
+// Function:    DataType::p_opentype (private)
 ///\brief       Opens an HDF5 datatype given its name
 ///\param       loc        - IN: Location of the type
 ///\param       type_name - IN: Datatype name
@@ -877,7 +879,7 @@ hid_t DataType::p_opentype(const H5Location& loc, const char *type_name) const
 }
 
 //--------------------------------------------------------------------------
-// Function:    DataType::p_setId (protected)
+// Function:    DataType::p_setId
 ///\brief       Sets the identifier of this object to a new value.
 ///
 ///\exception   H5::IdComponentException when the attempt to close the HDF5
@@ -921,6 +923,19 @@ void DataType::close()
         // reset the id
         id = H5I_INVALID_HID;
     }
+}
+
+//--------------------------------------------------------------------------
+// Function:    DataType::throwException
+///\brief       Throws H5::DataTypeIException.
+///\param       func_name - Name of the function where failure occurs
+///\param       msg       - Message describing the failure
+///\exception   H5::DataTypeIException
+// May 2018
+//--------------------------------------------------------------------------
+void DataType::throwException(const H5std_string& func_name, const H5std_string& msg) const
+{
+    throw DataTypeIException(inMemFunc(func_name.c_str()), msg);
 }
 
 //--------------------------------------------------------------------------

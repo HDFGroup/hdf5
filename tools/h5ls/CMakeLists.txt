@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.2.2)
+cmake_minimum_required (VERSION 3.10)
 PROJECT (HDF5_TOOLS_H5LS)
 
 #-----------------------------------------------------------------------------
@@ -10,7 +10,6 @@ INCLUDE_DIRECTORIES (${HDF5_TOOLS_SRC_DIR}/lib)
 # Add the h5ls executable
 #-----------------------------------------------------------------------------
 add_executable (h5ls ${HDF5_TOOLS_H5LS_SOURCE_DIR}/h5ls.c)
-TARGET_NAMING (h5ls STATIC)
 TARGET_C_PROPERTIES (h5ls STATIC " " " ")
 target_link_libraries (h5ls  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
 set_target_properties (h5ls PROPERTIES FOLDER tools)
@@ -20,7 +19,6 @@ set (H5_DEP_EXECUTABLES h5ls)
 
 if (BUILD_SHARED_LIBS)
   add_executable (h5ls-shared ${HDF5_TOOLS_H5LS_SOURCE_DIR}/h5ls.c)
-  TARGET_NAMING (h5ls-shared SHARED)
   TARGET_C_PROPERTIES (h5ls-shared SHARED " " " ")
   target_link_libraries (h5ls-shared  ${HDF5_TOOLS_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
   set_target_properties (h5ls-shared PROPERTIES FOLDER tools)
@@ -43,7 +41,7 @@ if (BUILD_TESTING)
   add_library (${HDF5_TOOL_PLUGIN_LIB_TARGET} SHARED dynlib_ls.c)
   TARGET_C_PROPERTIES (${HDF5_TOOL_PLUGIN_LIB_TARGET} SHARED " " " ")
   target_link_libraries (${HDF5_TOOL_PLUGIN_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
-  H5_SET_LIB_OPTIONS (${HDF5_TOOL_PLUGIN_LIB_TARGET} ${HDF5_TOOL_PLUGIN_LIB_NAME} SHARED ${HDF5_PACKAGE_SOVERSION})
+  H5_SET_LIB_OPTIONS (${HDF5_TOOL_PLUGIN_LIB_TARGET} ${HDF5_TOOL_PLUGIN_LIB_NAME} SHARED "LIB")
 
   # make plugins dir
   file (MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/plugins")
@@ -73,10 +71,9 @@ endif ()
 # Rules for Installation of tools using make Install target
 #-----------------------------------------------------------------------------
 if (HDF5_EXPORTED_TARGETS)
-  if (BUILD_SHARED_LIBS)
-    INSTALL_PROGRAM_PDB (h5ls-shared ${HDF5_INSTALL_BIN_DIR} toolsapplications)
-  endif ()
-  INSTALL_PROGRAM_PDB (h5ls ${HDF5_INSTALL_BIN_DIR} toolsapplications)
+  foreach (exec ${H5_DEP_EXECUTABLES})
+    INSTALL_PROGRAM_PDB (${exec} ${HDF5_INSTALL_BIN_DIR} toolsapplications)
+  endforeach ()
 
   install (
       TARGETS

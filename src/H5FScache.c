@@ -750,7 +750,7 @@ H5FS_sinfo_serialize_sect_cb(void *_item, void H5_ATTR_UNUSED *key, void *_udata
         /* Call 'serialize' callback for this section */
         if(sect_cls->serialize) {
             if((*sect_cls->serialize)(sect_cls, sect, *udata->p) < 0)
-                HGOTO_ERROR(H5E_FSPACE, H5E_CANTSERIALIZE, FAIL, "can't syncronize section")
+                HGOTO_ERROR(H5E_FSPACE, H5E_CANTSERIALIZE, FAIL, "can't synchronize section")
 
             /* Update offset in serialization buffer */
             (*udata->p) += sect_cls->serial_size;

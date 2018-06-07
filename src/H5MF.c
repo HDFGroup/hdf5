@@ -1117,7 +1117,7 @@ HDfprintf(stderr, "%s: Check 2.0 - f->shared->fs_man[%u] = %p, f->shared->fs_add
 #endif /* H5MF_ALLOC_DEBUG_MORE */
 
         /* If there is free space manager info for this type, delete it */
-        /* (XXX: Make this optional when free space for a file can be persistant) */
+        /* (XXX: Make this optional when free space for a file can be persistent) */
         if(H5F_addr_defined(f->shared->fs_addr[type])) {
             haddr_t tmp_fs_addr;            /* Temporary holder for free space manager address */
 

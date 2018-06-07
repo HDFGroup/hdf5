@@ -73,6 +73,19 @@ static void test_get_objname()
         Group grp1_1 = grp1.createGroup(GROUP1_1, 0);
         Group grp1_2 = grp1.createGroup(GROUP1_2, 0);
 
+        // Attempted to create a same group to generate a failure, which should
+        // be caught with sub-class exception clause, if available.
+        try {
+            Group grp1_2 = grp1.createGroup(GROUP1_2, 0);
+        }
+        catch (GroupIException& E)
+        {} // do nothing, exception expected
+        catch (Exception& E)
+        {
+            cerr << "Exception should have been caught by the previous catch" << endl;
+            issue_fail_msg("test_get_objname", __LINE__, __FILE__);
+        }
+
         // Get part of the group's name, random length using
         // ssize_t getObjName(char* comment, size_t buf_size)
 
@@ -302,6 +315,7 @@ static void test_get_objtype()
  *-------------------------------------------------------------------------
  */
 const H5std_string GROUPNAME("group");
+const H5std_string NOGROUPNAME("non-existent-group");
 const H5std_string DTYPENAME("group/datatype");
 const H5std_string DTYPENAME_INGRP("datatype");
 const H5std_string DSETNAME("dataset");
@@ -323,22 +337,25 @@ static void test_open_object_header()
 
         // Create a group in the root group
         Group grp(file1.createGroup(GROUPNAME));
-        grp.close();
 
         // Commit the type inside the file
         IntType dtype(PredType::NATIVE_INT);
         dtype.commit(file1, DTYPENAME);
         dtype.close();
 
-        // Create a new dataset
+        // Create a new dataset in the file
         dims[0] = DIM0;
         dims[1] = DIM1;
         DataSpace dspace(RANK, dims);
         DataSet dset(file1.createDataSet(DSETNAME, PredType::NATIVE_INT, dspace));
 
-        // Close dataset and dataspace
+        // Create a dataset in the group
+        DataSet dsingrp(grp.createDataSet(DSET_IN_GRP1, PredType::NATIVE_INT, dspace));
+
+        // Close dataset, dataspace, and group
         dset.close();
         dspace.close();
+        grp.close();
 
         // Now make sure that openObjId can open all three types of objects
         hid_t obj_grp = file1.openObjId(GROUPNAME);
@@ -357,12 +374,12 @@ static void test_open_object_header()
 
         Group grp2(obj_grp);
         hsize_t num_objs = grp2.getNumObjs();
-        verify_val(num_objs, 1, "H5Gget_info", __LINE__, __FILE__);
-        // There should be one object, the datatype
+        verify_val(num_objs, 2, "H5Gget_info", __LINE__, __FILE__);
 
         // Close datatype object opened from the file
-        file1.closeObjId(obj_dtype);
+        H5Location::closeObjId(obj_dtype);
 
+        // Do a few things using the dset object identifier
         dset.setId(obj_dset);
         dspace = dset.getSpace();
         bool is_simple = dspace.isSimple();
@@ -371,23 +388,37 @@ static void test_open_object_header()
         // Open datatype object from the group
         obj_dtype = grp2.openObjId(DTYPENAME_INGRP);
 
+        // Do a few things using the datatype object identifier
         dtype.setId(obj_dtype);
         H5T_class_t type_class = dtype.getClass();
         verify_val(type_class, H5T_INTEGER, "H5Tget_class", __LINE__, __FILE__);
         dtype.close();
 
         // Close datatype object
-        grp2.closeObjId(obj_dtype);
+        H5Location::closeObjId(obj_dtype);
 
         // Close the group object
-        file1.closeObjId(obj_grp);
+        H5Location::closeObjId(obj_grp);
 
         // Try doing something with group, the ID should still work
         num_objs = grp2.getNumObjs();
-        verify_val(num_objs, 1, "H5Gget_info", __LINE__, __FILE__);
+        verify_val(num_objs, 2, "H5Gget_info", __LINE__, __FILE__);
 
         // Close the cloned group
         grp2.close();
+
+        // Attempted to open a non-existing group, which should
+        // be caught with sub-class exception clause, if available.
+        try {
+            Group grp3 = dsingrp.openObjId(NOGROUPNAME);
+        }
+        catch (DataSetIException& E)
+        {} // do nothing, exception expected and caught correctly
+        catch (Exception& E)
+        {
+            cerr << "Exception should have been caught by the previous catch" << endl;
+            issue_fail_msg("test_get_objname", __LINE__, __FILE__);
+        }
 
         PASSED();
     }   // end of try block
@@ -401,7 +432,6 @@ static void test_open_object_header()
     // catch all other exceptions
     catch (Exception& E)
     {
-        cerr << " in Exception" << endl;
         issue_fail_msg("test_file_name()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 } /* test_open_object_header() */
@@ -454,7 +484,6 @@ static void test_is_valid()
     // catch all other exceptions
     catch (Exception& E)
     {
-  cerr << " in catch " << endl;
         issue_fail_msg("test_get_objtype", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }   // test_is_valid

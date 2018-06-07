@@ -14,8 +14,8 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5Omessage.c
- *			Dec  3 2006
- *			Quincey Koziol <koziol@hdfgroup.org>
+ *              Dec  3 2006
+ *              Quincey Koziol <koziol@hdfgroup.org>
  *
  * Purpose:		Object header message routines.
  *
@@ -31,14 +31,14 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5Aprivate.h"		/* Attributes	  			*/
+#include "H5private.h"		/* Generic Functions        */
+#include "H5Aprivate.h"		/* Attributes               */
 #include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5Fprivate.h"		/* File access				*/
-#include "H5Iprivate.h"		/* IDs			  		*/
-#include "H5MMprivate.h"	/* Memory management			*/
-#include "H5Opkg.h"             /* Object headers			*/
-#include "H5SMprivate.h"        /* Shared object header messages        */
+#include "H5Fprivate.h"		/* File access              */
+#include "H5Iprivate.h"		/* IDs                      */
+#include "H5MMprivate.h"	/* Memory management        */
+#include "H5Opkg.h"         /* Object headers           */
+#include "H5SMprivate.h"    /* Shared object header messages */
 
 
 /****************/
@@ -102,11 +102,11 @@ static herr_t H5O_copy_mesg(H5F_t *f, hid_t dxpl_id, H5O_t *oh, size_t idx,
  *
  * Return:	Success:	Non-negative
  *
- *		Failure:	Negative
+ *          Failure:	Negative
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		Dec  1 2006
+ *          koziol@hdfgroup.org
+ *          Dec  1 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -150,11 +150,11 @@ done:
  *
  * Return:	Success:	Non-negative
  *
- *		Failure:	Negative
+ *          Failure:	Negative
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		Dec 31 2002
+ *          koziol@ncsa.uiuc.edu
+ *          Dec 31 2002
  *
  *-------------------------------------------------------------------------
  */
@@ -445,10 +445,10 @@ done:
  *		to hold the result and return its pointer instead.
  *
  * Return:	Success:	Ptr to message in native format.  The message
- *				should be freed by calling H5O_msg_reset().  If
- *				MESG is a null pointer then the caller should
- *				also call H5MM_xfree() on the return value
- *				after calling H5O_msg_reset().
+ *              should be freed by calling H5O_msg_reset().  If
+ *              MESG is a null pointer then the caller should
+ *              also call H5MM_xfree() on the return value
+ *              after calling H5O_msg_reset().
  *
  *		Failure:	NULL
  *
@@ -499,10 +499,10 @@ done:
  *		to hold the result and return its pointer instead.
  *
  * Return:	Success:	Ptr to message in native format.  The message
- *				should be freed by calling H5O_msg_reset().  If
- *				MESG is a null pointer then the caller should
- *				also call H5MM_xfree() on the return value
- *				after calling H5O_msg_reset().
+ *              should be freed by calling H5O_msg_reset().  If
+ *              MESG is a null pointer then the caller should
+ *              also call H5MM_xfree() on the return value
+ *              after calling H5O_msg_reset().
  *
  *		Failure:	NULL
  *
@@ -858,11 +858,11 @@ H5O_msg_count_real(const H5O_t *oh, const H5O_msg_class_t *type)
  *		header without trying to decode the message.
  *
  * Return:	Success:	FALSE if the message does not exist; TRUE if
- *				th message exists.
+ *              the message exists.
  *
  *		Failure:	FAIL if the existence of the message could
- *				not be determined due to some error such as
- *				not being able to read the object header.
+ *              not be determined due to some error such as
+ *              not being able to read the object header.
  *
  * Programmer:	Robb Matzke
  *              Monday, November  2, 1998
@@ -904,11 +904,11 @@ done:
  *		header without trying to decode the message.
  *
  * Return:	Success:	FALSE if the message does not exist; TRUE if
- *				th message exists.
+ *                      the message exists.
  *
  *		Failure:	FAIL if the existence of the message could
- *				not be determined due to some error such as
- *				not being able to read the object header.
+ *              not be determined due to some error such as
+ *              not being able to read the object header.
  *
  * Programmer:	Robb Matzke
  *              Monday, November  2, 1998
@@ -1821,7 +1821,7 @@ done:
  */
 void *
 H5O_msg_decode(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, unsigned type_id,
-    const unsigned char *buf)
+    size_t buf_size, const unsigned char *buf)
 {
     const H5O_msg_class_t   *type;      /* Actual H5O class type for the ID */
     void *ret_value;                    /* Return value */
@@ -1836,7 +1836,7 @@ H5O_msg_decode(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, unsigned type_id,
     HDassert(type);
 
     /* decode */
-    if((ret_value = (type->decode)(f, dxpl_id, open_oh, 0, &ioflags, buf)) == NULL)
+    if((ret_value = (type->decode)(f, dxpl_id, open_oh, 0, &ioflags, buf_size, buf)) == NULL)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, NULL, "unable to decode message")
 
 done:

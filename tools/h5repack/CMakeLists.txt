@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.2.2)
+cmake_minimum_required (VERSION 3.10)
 PROJECT (HDF5_TOOLS_H5REPACK)
 
 #-----------------------------------------------------------------------------
@@ -21,7 +21,6 @@ set (REPACK_COMMON_SRCS
 )
 
 add_executable (h5repack ${REPACK_COMMON_SRCS} ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/h5repack_main.c)
-TARGET_NAMING (h5repack STATIC)
 TARGET_C_PROPERTIES (h5repack STATIC " " " ")
 target_link_libraries (h5repack  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
 set_target_properties (h5repack PROPERTIES FOLDER tools)
@@ -31,7 +30,6 @@ set (H5_DEP_EXECUTABLES h5repack)
 
 if (BUILD_SHARED_LIBS)
   add_executable (h5repack-shared ${REPACK_COMMON_SRCS} ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/h5repack_main.c)
-  TARGET_NAMING (h5repack-shared SHARED)
   TARGET_C_PROPERTIES (h5repack-shared SHARED " " " ")
   target_link_libraries (h5repack-shared  ${HDF5_TOOLS_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
   set_target_properties (h5repack-shared PROPERTIES FOLDER tools)
@@ -45,13 +43,11 @@ if (BUILD_TESTING)
   # Add h5Repack test executables
   # --------------------------------------------------------------------
   add_executable (testh5repack_detect_szip ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/testh5repack_detect_szip.c)
-  TARGET_NAMING (testh5repack_detect_szip STATIC)
   TARGET_C_PROPERTIES (testh5repack_detect_szip STATIC " " " ")
   target_link_libraries (testh5repack_detect_szip ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
   set_target_properties (testh5repack_detect_szip PROPERTIES FOLDER tools)
 
   add_executable (h5repacktest ${REPACK_COMMON_SRCS} ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/h5repacktst.c)
-  TARGET_NAMING (h5repacktest STATIC)
   TARGET_C_PROPERTIES (h5repacktest STATIC " " " ")
   target_link_libraries (h5repacktest  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
   set_target_properties (h5repacktest PROPERTIES FOLDER tools)
@@ -71,12 +67,12 @@ if (BUILD_TESTING)
   add_library (${HDF5_TOOL_PLUGIN_LIB_TARGET} SHARED dynlib_rpk.c)
   TARGET_C_PROPERTIES (${HDF5_TOOL_PLUGIN_LIB_TARGET} SHARED " " " ")
   target_link_libraries (${HDF5_TOOL_PLUGIN_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
-  H5_SET_LIB_OPTIONS (${HDF5_TOOL_PLUGIN_LIB_TARGET} ${HDF5_TOOL_PLUGIN_LIB_NAME} SHARED ${HDF5_PACKAGE_SOVERSION})
+  H5_SET_LIB_OPTIONS (${HDF5_TOOL_PLUGIN_LIB_TARGET} ${HDF5_TOOL_PLUGIN_LIB_NAME} SHARED "LIB")
 
   add_library (${HDF5_TOOL_PLUGIN_LIB_VTARGET} SHARED dynlib_vrpk.c)
   TARGET_C_PROPERTIES (${HDF5_TOOL_PLUGIN_LIB_VTARGET} SHARED " " " ")
   target_link_libraries (${HDF5_TOOL_PLUGIN_LIB_VTARGET} ${HDF5_TEST_LIB_TARGET})
-  H5_SET_LIB_OPTIONS (${HDF5_TOOL_PLUGIN_LIB_VTARGET} ${HDF5_TOOL_PLUGIN_LIB_VNAME} SHARED ${HDF5_PACKAGE_SOVERSION})
+  H5_SET_LIB_OPTIONS (${HDF5_TOOL_PLUGIN_LIB_VTARGET} ${HDF5_TOOL_PLUGIN_LIB_VNAME} SHARED "LIB")
 
   # make plugins dir
   file (MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/plugins")
@@ -114,10 +110,9 @@ endif ()
 # Rules for Installation of tools using make Install target
 #-----------------------------------------------------------------------------
 if (HDF5_EXPORTED_TARGETS)
-  if (BUILD_SHARED_LIBS)
-    INSTALL_PROGRAM_PDB (h5repack-shared ${HDF5_INSTALL_BIN_DIR} toolsapplications)
-  endif ()
-  INSTALL_PROGRAM_PDB (h5repack ${HDF5_INSTALL_BIN_DIR} toolsapplications)
+  foreach (exec ${H5_DEP_EXECUTABLES})
+    INSTALL_PROGRAM_PDB (${exec} ${HDF5_INSTALL_BIN_DIR} toolsapplications)
+  endforeach ()
 
   install (
       TARGETS

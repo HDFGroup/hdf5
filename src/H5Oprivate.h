@@ -710,7 +710,7 @@ H5_DLL herr_t H5O_msg_get_crt_index(unsigned type_id, const void *mesg,
 H5_DLL herr_t H5O_msg_encode(H5F_t *f, unsigned type_id, hbool_t disable_shared,
     unsigned char *buf, const void *obj);
 H5_DLL void* H5O_msg_decode(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
-    unsigned type_id, const unsigned char *buf);
+    unsigned type_id, size_t buf_size, const unsigned char *buf);
 H5_DLL herr_t H5O_msg_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
     unsigned type_id, void *mesg);
 H5_DLL int H5O_msg_get_chunkno(const H5O_loc_t *loc, unsigned type_id, hid_t dxpl_id);

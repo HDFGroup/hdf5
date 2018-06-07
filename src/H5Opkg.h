@@ -186,7 +186,7 @@
                                                                               \
         /* Decode the message */                                              \
         HDassert(msg_type->decode);                                           \
-        if(NULL == ((MSG)->native = (msg_type->decode)((F), (DXPL), (OH), (MSG)->flags, &ioflags, (MSG)->raw))) \
+        if(NULL == ((MSG)->native = (msg_type->decode)((F), (DXPL), (OH), (MSG)->flags, &ioflags, (MSG)->raw_size, (MSG)->raw))) \
             HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, ERR, "unable to decode message") \
                                                                               \
         /* Mark the message dirty if it was changed by decoding */            \
@@ -222,7 +222,7 @@ struct H5O_msg_class_t {
     const char	*name;				/*for debugging             */
     size_t	native_size;			/*size of native message    */
     unsigned    share_flags;			/* Message sharing settings */
-    void	*(*decode)(H5F_t *, hid_t, H5O_t *, unsigned, unsigned *, const uint8_t *);
+    void	*(*decode)(H5F_t *, hid_t, H5O_t *, unsigned, unsigned *, size_t, const uint8_t *);
     herr_t	(*encode)(H5F_t *, hbool_t, uint8_t *, const void *);
     void	*(*copy)(const void *, void *);	/*copy native value         */
     size_t	(*raw_size)(const H5F_t *, hbool_t, const void *);/*sizeof encoded message	*/

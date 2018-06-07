@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.2.2)
+cmake_minimum_required (VERSION 3.10)
 PROJECT (HDF5_TOOLS_H5DIFF)
 
 #-----------------------------------------------------------------------------
@@ -13,7 +13,6 @@ add_executable (h5diff
     ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/h5diff_common.c
     ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/h5diff_main.c
 )
-TARGET_NAMING (h5diff STATIC)
 TARGET_C_PROPERTIES (h5diff STATIC " " " ")
 target_link_libraries (h5diff  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
 set_target_properties (h5diff PROPERTIES FOLDER tools)
@@ -26,7 +25,6 @@ if (BUILD_SHARED_LIBS)
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/h5diff_common.c
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/h5diff_main.c
   )
-  TARGET_NAMING (h5diff-shared SHARED)
   TARGET_C_PROPERTIES (h5diff-shared SHARED " " " ")
   target_link_libraries (h5diff-shared  ${HDF5_TOOLS_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
   set_target_properties (h5diff-shared PROPERTIES FOLDER tools)
@@ -40,7 +38,6 @@ if (H5_HAVE_PARALLEL)
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/h5diff_common.c
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/ph5diff_main.c
   )
-  TARGET_NAMING (ph5diff STATIC)
   TARGET_C_PROPERTIES (ph5diff STATIC " " " ")
   target_link_libraries (ph5diff  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
   set_target_properties (ph5diff PROPERTIES FOLDER tools)
@@ -53,7 +50,6 @@ if (BUILD_TESTING)
   # --------------------------------------------------------------------
   if (HDF5_BUILD_GENERATORS)
     add_executable (h5diffgentest ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/h5diffgentest.c)
-    TARGET_NAMING (h5diffgentest STATIC)
     TARGET_C_PROPERTIES (h5diffgentest STATIC " " " ")
     target_link_libraries (h5diffgentest ${HDF5_LIB_TARGET})
     set_target_properties (h5diffgentest PROPERTIES FOLDER generator/tools)
@@ -74,7 +70,7 @@ if (BUILD_TESTING)
     add_library (${HDF5_TOOL_PLUGIN_LIB_TARGET} SHARED dynlib_diff.c)
     TARGET_C_PROPERTIES (${HDF5_TOOL_PLUGIN_LIB_TARGET} SHARED " " " ")
     target_link_libraries (${HDF5_TOOL_PLUGIN_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
-    H5_SET_LIB_OPTIONS (${HDF5_TOOL_PLUGIN_LIB_TARGET} ${HDF5_TOOL_PLUGIN_LIB_NAME} SHARED ${HDF5_PACKAGE_SOVERSION})
+    H5_SET_LIB_OPTIONS (${HDF5_TOOL_PLUGIN_LIB_TARGET} ${HDF5_TOOL_PLUGIN_LIB_NAME} SHARED "LIB")
 
     # make plugins dir
     file (MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/plugins")
@@ -105,10 +101,9 @@ endif ()
 # Rules for Installation of tools using make Install target
 #-----------------------------------------------------------------------------
 if (HDF5_EXPORTED_TARGETS)
-  if (BUILD_SHARED_LIBS)
-    INSTALL_PROGRAM_PDB (h5diff-shared ${HDF5_INSTALL_BIN_DIR} toolsapplications)
-  endif ()
-  INSTALL_PROGRAM_PDB (h5diff ${HDF5_INSTALL_BIN_DIR} toolsapplications)
+  foreach (exec ${H5_DEP_EXECUTABLES})
+    INSTALL_PROGRAM_PDB (${exec} ${HDF5_INSTALL_BIN_DIR} toolsapplications)
+  endforeach ()
 
   install (
       TARGETS

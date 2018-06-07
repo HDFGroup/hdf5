@@ -331,27 +331,27 @@ void Exception::printError(FILE* stream) const
 Exception::~Exception() throw() {}
 
 //--------------------------------------------------------------------------
-// Subclass:    FileIException
-// Programmer   Binh-Minh Ribler - 2000
+// Subclass:    LocationException
+// Programmer   Binh-Minh Ribler - 2014
 //--------------------------------------------------------------------------
 //--------------------------------------------------------------------------
-// Function:    FileIException default constructor
+// Function:    LocationException default constructor
 ///\brief       Default constructor.
 //--------------------------------------------------------------------------
-FileIException::FileIException():Exception(){}
+LocationException::LocationException() : Exception(){}
 //--------------------------------------------------------------------------
-// Function:    FileIException overloaded constructor
-///\brief       Creates a FileIException with the name of the function,
+// Function:    LocationException overloaded constructor
+///\brief       Creates a LocationException with the name of the function,
 ///             in which the failure occurs, and an optional detailed message.
 ///\param       func - IN: Name of the function where failure occurs
 ///\param       message   - IN: Message on the failure
 //--------------------------------------------------------------------------
-FileIException::FileIException(const H5std_string& func, const H5std_string& message) : Exception(func, message) {}
+LocationException::LocationException(const H5std_string& func, const H5std_string& message) : Exception(func, message) {}
 //--------------------------------------------------------------------------
-// Function:    FileIException destructor
+// Function:    LocationException destructor
 ///\brief       Noop destructor.
 //--------------------------------------------------------------------------
-FileIException::~FileIException() throw() {}
+LocationException::~LocationException() throw() {}
 
 //--------------------------------------------------------------------------
 // Subclass:    GroupIException
@@ -361,7 +361,7 @@ FileIException::~FileIException() throw() {}
 // Function:    GroupIException default constructor
 ///\brief       Default constructor.
 //--------------------------------------------------------------------------
-GroupIException::GroupIException():Exception(){}
+GroupIException::GroupIException() : LocationException(){}
 //--------------------------------------------------------------------------
 // Function:    GroupIException overloaded constructor
 ///\brief       Creates a GroupIException with the name of the function,
@@ -369,12 +369,35 @@ GroupIException::GroupIException():Exception(){}
 ///\param       func - IN: Name of the function where failure occurs
 ///\param       message   - IN: Message on the failure
 //--------------------------------------------------------------------------
-GroupIException::GroupIException(const H5std_string& func, const H5std_string& message) : Exception(func, message) {}
+GroupIException::GroupIException(const H5std_string& func, const H5std_string& message) : LocationException(func, message) {}
 //--------------------------------------------------------------------------
 // Function:    GroupIException destructor
 ///\brief       Noop destructor.
 //--------------------------------------------------------------------------
 GroupIException::~GroupIException() throw() {}
+
+//--------------------------------------------------------------------------
+// Subclass:    FileIException
+// Programmer   Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
+//--------------------------------------------------------------------------
+// Function:    FileIException default constructor
+///\brief       Default constructor.
+//--------------------------------------------------------------------------
+FileIException::FileIException():GroupIException(){}
+//--------------------------------------------------------------------------
+// Function:    FileIException overloaded constructor
+///\brief       Creates a FileIException with the name of the function,
+///             in which the failure occurs, and an optional detailed message.
+///\param       func - IN: Name of the function where failure occurs
+///\param       message   - IN: Message on the failure
+//--------------------------------------------------------------------------
+FileIException::FileIException(const H5std_string& func, const H5std_string& message) : GroupIException(func, message) {}
+//--------------------------------------------------------------------------
+// Function:    FileIException destructor
+///\brief       Noop destructor.
+//--------------------------------------------------------------------------
+FileIException::~FileIException() throw() {}
 
 //--------------------------------------------------------------------------
 // Subclass:    DataSpaceIException
@@ -384,7 +407,7 @@ GroupIException::~GroupIException() throw() {}
 // Function:    DataSpaceIException default constructor
 ///\brief       Default constructor.
 //--------------------------------------------------------------------------
-DataSpaceIException::DataSpaceIException():Exception(){}
+DataSpaceIException::DataSpaceIException() : Exception(){}
 //--------------------------------------------------------------------------
 // Function:    DataSpaceIException overloaded constructor
 ///\brief       Creates a DataSpaceIException with the name of the function,
@@ -407,7 +430,7 @@ DataSpaceIException::~DataSpaceIException() throw() {}
 // Function:    DataTypeIException default constructor
 ///\brief       Default constructor.
 //--------------------------------------------------------------------------
-DataTypeIException::DataTypeIException():Exception(){}
+DataTypeIException::DataTypeIException() : LocationException(){}
 //--------------------------------------------------------------------------
 // Function:    DataTypeIException overloaded constructor
 ///\brief       Creates a DataTypeIException with the name of the function,
@@ -415,7 +438,7 @@ DataTypeIException::DataTypeIException():Exception(){}
 ///\param       func - IN: Name of the function where failure occurs
 ///\param       message   - IN: Message on the failure
 //--------------------------------------------------------------------------
-DataTypeIException::DataTypeIException(const H5std_string& func, const H5std_string& message) : Exception(func, message) {}
+DataTypeIException::DataTypeIException(const H5std_string& func, const H5std_string& message) : LocationException(func, message) {}
 //--------------------------------------------------------------------------
 // Function:    DataTypeIException destructor
 ///\brief       Noop destructor.
@@ -430,7 +453,7 @@ DataTypeIException::~DataTypeIException() throw() {}
 // Function:    PropListIException default constructor
 ///\brief       Default constructor.
 //--------------------------------------------------------------------------
-PropListIException::PropListIException():Exception(){}
+PropListIException::PropListIException() : Exception(){}
 //--------------------------------------------------------------------------
 // Function:    PropListIException overloaded constructor
 ///\brief       Creates a PropListIException with the name of the function,
@@ -453,7 +476,7 @@ PropListIException::~PropListIException() throw() {}
 // Function:    DataSetIException default constructor
 ///\brief       Default constructor.
 //--------------------------------------------------------------------------
-DataSetIException::DataSetIException():Exception(){}
+DataSetIException::DataSetIException() : LocationException(){}
 //--------------------------------------------------------------------------
 // Function:    DataSetIException overloaded constructor
 ///\brief       Creates a DataSetIException with the name of the function,
@@ -461,7 +484,7 @@ DataSetIException::DataSetIException():Exception(){}
 ///\param       func - IN: Name of the function where failure occurs
 ///\param       message   - IN: Message on the failure
 //--------------------------------------------------------------------------
-DataSetIException::DataSetIException(const H5std_string& func, const H5std_string& message) : Exception(func, message) {}
+DataSetIException::DataSetIException(const H5std_string& func, const H5std_string& message) : LocationException(func, message) {}
 //--------------------------------------------------------------------------
 // Function:    DataSetIException destructor
 ///\brief       Noop destructor.
@@ -476,7 +499,7 @@ DataSetIException::~DataSetIException() throw() {}
 // Function:    AttributeIException default constructor
 ///\brief       Default constructor.
 //--------------------------------------------------------------------------
-AttributeIException::AttributeIException():Exception(){}
+AttributeIException::AttributeIException() : LocationException(){}
 //--------------------------------------------------------------------------
 // Function:    AttributeIException overloaded constructor
 ///\brief       Creates an AttributeIException with the name of the function,
@@ -484,7 +507,7 @@ AttributeIException::AttributeIException():Exception(){}
 ///\param       func - IN: Name of the function where failure occurs
 ///\param       message   - IN: Message on the failure
 //--------------------------------------------------------------------------
-AttributeIException::AttributeIException(const H5std_string& func, const H5std_string& message) : Exception(func, message) {}
+AttributeIException::AttributeIException(const H5std_string& func, const H5std_string& message) : LocationException(func, message) {}
 //--------------------------------------------------------------------------
 // Function:    AttributeIException destructor
 ///\brief       Noop destructor.
@@ -499,7 +522,7 @@ AttributeIException::~AttributeIException() throw() {}
 // Function:    ReferenceException default constructor
 ///\brief       Default constructor.
 //--------------------------------------------------------------------------
-ReferenceException::ReferenceException():Exception(){}
+ReferenceException::ReferenceException() : Exception(){}
 //--------------------------------------------------------------------------
 // Function:    ReferenceException overloaded constructor
 ///\brief       Creates a ReferenceException with the name of the function,
@@ -522,7 +545,7 @@ ReferenceException::~ReferenceException() throw() {}
 // Function:    LibraryIException default constructor
 ///\brief       Default constructor.
 //--------------------------------------------------------------------------
-LibraryIException::LibraryIException():Exception(){}
+LibraryIException::LibraryIException() : Exception(){}
 //--------------------------------------------------------------------------
 // Function:    LibraryIException overloaded constructor
 ///\brief       Creates a LibraryIException with the name of the function,
@@ -536,29 +559,6 @@ LibraryIException::LibraryIException(const H5std_string& func, const H5std_strin
 ///\brief       Noop destructor.
 //--------------------------------------------------------------------------
 LibraryIException::~LibraryIException() throw() {}
-
-//--------------------------------------------------------------------------
-// Subclass:    LocationException
-// Programmer   Binh-Minh Ribler - 2014
-//--------------------------------------------------------------------------
-//--------------------------------------------------------------------------
-// Function:    LocationException default constructor
-///\brief       Default constructor.
-//--------------------------------------------------------------------------
-LocationException::LocationException():Exception(){}
-//--------------------------------------------------------------------------
-// Function:    LocationException overloaded constructor
-///\brief       Creates a LocationException with the name of the function,
-///             in which the failure occurs, and an optional detailed message.
-///\param       func - IN: Name of the function where failure occurs
-///\param       message   - IN: Message on the failure
-//--------------------------------------------------------------------------
-LocationException::LocationException(const H5std_string& func, const H5std_string& message) : Exception(func, message) {}
-//--------------------------------------------------------------------------
-// Function:    LocationException destructor
-///\brief       Noop destructor.
-//--------------------------------------------------------------------------
-LocationException::~LocationException() throw() {}
 
 //--------------------------------------------------------------------------
 // Subclass:    IdComponentException
