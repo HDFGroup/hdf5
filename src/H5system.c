@@ -1197,8 +1197,8 @@ H5_nanosleep(uint64_t nanosec)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Set up time to sleep */
-    sleeptime.tv_sec = 0;
-    sleeptime.tv_nsec = (long)nanosec;
+    sleeptime.tv_sec = (long)(nanosec / (uint64_t)(1000 * 1000 * 1000));
+    sleeptime.tv_nsec = (long)(nanosec % (uint64_t)(1000 * 1000 * 1000));
 
     HDnanosleep(&sleeptime, NULL);
 
