@@ -438,29 +438,43 @@ H5F_is_mount(const H5F_t *file)
 herr_t
 H5Fmount(hid_t loc_id, const char *name, hid_t child_id, hid_t plist_id)
 {
-    H5G_loc_t	loc;
-    H5F_t	*child = NULL;
-    herr_t      ret_value = SUCCEED;        /* Return value */
+    H5G_loc_t	    loc;                        /* Parent location      */
+    H5F_t	       *child = NULL;               /* Child object         */
+    H5I_type_t      loc_type;                   /* ID type of location  */
+    H5I_type_t      child_type;                 /* ID type of child     */
+    herr_t          ret_value = SUCCEED;        /* Return value         */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE4("e", "i*sii", loc_id, name, child_id, plist_id);
 
     /* Check arguments */
-    if(H5G_loc(loc_id, &loc) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
-    if(!name || !*name)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
-    if(NULL == (child = (H5F_t *)H5I_object_verify(child_id, H5I_FILE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
+    loc_type = H5I_get_type(loc_id);
+    if(H5I_FILE != loc_type && H5I_GROUP != loc_type)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "loc_id parameter not a file or group ID")
+    if(!name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "name parameter cannot be NULL")
+    if(!*name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "name parameter cannot be the empty string")
+    child_type = H5I_get_type(child_id);
+    if(H5I_FILE != child_type)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "child_id parameter not a file ID")
     if(H5P_DEFAULT == plist_id)
         plist_id = H5P_FILE_MOUNT_DEFAULT;
     else
         if(TRUE != H5P_isa_class(plist_id, H5P_FILE_MOUNT))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not property list")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "plist_id is not a property list ID")
 
     /* Set up collective metadata if appropriate */
     if(H5CX_set_loc(loc_id) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set collective metadata read info")
+
+    /* Get the location object */
+    if(H5G_loc(loc_id, &loc) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "could not get location object")
+
+    /* Get the child object */
+    if(NULL == (child = (H5F_t *)H5I_object_verify(child_id, H5I_FILE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "could not get child object")
 
     /* Perform the mount operation */
     if(H5F__mount(&loc, name, child, plist_id) < 0)
@@ -490,23 +504,31 @@ done:
 herr_t
 H5Funmount(hid_t loc_id, const char *name)
 {
-    H5G_loc_t	loc;
-    herr_t      ret_value = SUCCEED;        /* Return value */
+    H5G_loc_t	    loc;                        /* Parent location      */
+    H5I_type_t      loc_type;                   /* ID type of location  */
+    herr_t          ret_value = SUCCEED;        /* Return value         */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*s", loc_id, name);
 
-    /* Check args */
-    if(H5G_loc(loc_id, &loc) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
-    if(!name || !*name)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
+    /* Check arguments */
+    loc_type = H5I_get_type(loc_id);
+    if(H5I_FILE != loc_type && H5I_GROUP != loc_type)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "loc_id parameter not a file or group ID")
+    if(!name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "name parameter cannot be NULL")
+    if(!*name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "name parameter cannot be the empty string")
 
     /* Set up collective metadata if appropriate */
     if(H5CX_set_loc(loc_id) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set collective metadata read info")
 
-    /* Unmount */
+    /* Get the location object */
+    if(H5G_loc(loc_id, &loc) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "could not get location object")
+
+    /* Perform the unmount operation */
     if(H5F__unmount(&loc, name) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "unable to unmount file")
 
