@@ -856,9 +856,7 @@ H5B2__remove_internal(H5B2_hdr_t *hdr, hbool_t *depth_decreased,
             HGOTO_ERROR(H5E_BTREE, H5E_CANTSPLIT, FAIL, "unable to merge child node")
 
         /* Let the cache know that the object is deleted */
-        internal_flags |= H5AC__DELETED_FLAG;
-        if(!hdr->swmr_write)
-            internal_flags |= H5AC__FREE_FILE_SPACE_FLAG;
+        internal_flags |= H5AC__DELETED_FLAG | H5AC__FREE_FILE_SPACE_FLAG;
 
         /* Reset information in header's root node pointer */
         curr_node_ptr->addr = internal->node_ptrs[0].addr;
@@ -1092,9 +1090,7 @@ H5B2__remove_internal_by_idx(H5B2_hdr_t *hdr, hbool_t *depth_decreased,
             HGOTO_ERROR(H5E_BTREE, H5E_CANTSPLIT, FAIL, "unable to merge child node")
 
         /* Let the cache know that the object is deleted */
-        internal_flags |= H5AC__DELETED_FLAG;
-        if(!hdr->swmr_write)
-            internal_flags |= H5AC__FREE_FILE_SPACE_FLAG;
+        internal_flags |= H5AC__DELETED_FLAG | H5AC__FREE_FILE_SPACE_FLAG;
 
         /* Reset information in header's root node pointer */
         curr_node_ptr->addr = internal->node_ptrs[0].addr;
