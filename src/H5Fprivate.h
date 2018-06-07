@@ -580,7 +580,7 @@ typedef struct H5F_t H5F_t;
 
 /* Metadata read attempt values */
 #define H5F_METADATA_READ_ATTEMPTS        1    /* Default # of read attempts for non-SWMR access */
-#define H5F_SWMR_METADATA_READ_ATTEMPTS        100    /* Default # of read attempts for SWMR access */
+#define H5F_SWMR_METADATA_READ_ATTEMPTS   30   /* Default # of read attempts for SWMR access */
 
 
 /* Macros to define signatures of all objects in the file */
