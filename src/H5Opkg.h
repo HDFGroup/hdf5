@@ -283,7 +283,6 @@ struct H5O_t {
     /* File-specific information (not stored) */
     size_t      sizeof_size;            /* Size of file sizes 		     */
     size_t      sizeof_addr;            /* Size of file addresses	     */
-    hbool_t     swmr_write;             /* Whether we are doing SWMR writes  */
 
     /* Debugging information (not stored) */
 #ifdef H5O_ENABLE_BAD_MESG_COUNT
@@ -328,7 +327,8 @@ struct H5O_t {
     H5O_chunk_t *chunk;			/*array of chunks		     */
     hbool_t     chunks_pinned;          /* Whether chunks are pinned from ohdr protect */
 
-    /* Object header proxy information (not stored) */
+    /* SWMR / Flush dependency information (not stored) */
+    hbool_t     swmr_write;             /* Whether we are doing SWMR writes  */
     H5AC_proxy_entry_t *top_proxy;      /* 'Top' proxy cache entry for all header entries */
     H5AC_proxy_entry_t *bot_proxy;      /* 'Bottom' proxy cache entry for all header entries */
 };
