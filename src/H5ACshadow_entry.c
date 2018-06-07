@@ -515,7 +515,7 @@ H5AC__shadow_entry_notify(H5AC_notify_action_t action, void *_thing, ...)
                 va_start(ap, _thing);
                 va_started = TRUE;
 
-                /* The child freedspace entry address in the varg */
+                /* The child entry address in the varg */
                 child_addr = va_arg(ap, haddr_t);
                 HDassert(H5F_addr_defined(child_addr));
 
