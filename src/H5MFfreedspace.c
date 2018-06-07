@@ -32,6 +32,7 @@
 /* Headers */
 /***********/
 #include "H5private.h"          /* Generic Functions                    */
+#include "H5CXprivate.h"        /* API Contexts                         */
 #include "H5Eprivate.h"         /* Error handling                       */
 #include "H5Fpkg.h"             /* File access				*/
 #include "H5MFpkg.h"		/* File memory management		*/
@@ -247,6 +248,7 @@ H5MF__freedspace_create(H5F_t *f, H5FD_mem_t alloc_type, haddr_t addr,
 
     /* Check if there's any dirty entries in the cache currently */
     if(!cache_clean) {
+        H5MF_freedspace_ctx_t fs_ctx;       /* Context for cache iteration */
         unsigned status = 0;    /* Cache entry status for address being freed */
 
         /* Check cache status of address being freed */
@@ -254,45 +256,43 @@ H5MF__freedspace_create(H5F_t *f, H5FD_mem_t alloc_type, haddr_t addr,
             if(H5AC_get_entry_status(f, addr, &status) < 0)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "unable to get entry status")
 
-        /* If the entry is in the cache, attempt to create a freedspace entry for it */
-        if(alloc_type == H5FD_MEM_DRAW || (status & H5AC_ES__IN_CACHE) != 0) {
-            H5MF_freedspace_ctx_t fs_ctx;       /* Context for cache iteration */
+        /* Create a freed space ctx */
+        fs_ctx.f           = f;
+        if(alloc_type == H5FD_MEM_DRAW)
+            fs_ctx.ring     = H5AC_RING_USER;
+        else if((status & H5AC_ES__IN_CACHE) != 0) {
+            if(H5AC_get_entry_ring(f, addr, &fs_ctx.ring) < 0)
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "can't get ring of entry")
+        } /* end if */
+        else
+            fs_ctx.ring    = H5CX_get_ring();
+        fs_ctx.alloc_type  = alloc_type;
+        fs_ctx.addr        = addr;
+        fs_ctx.size        = size;
+        fs_ctx.fs          = NULL;
 
-            /* Create a freed space ctx */
-            fs_ctx.f           = f;
-            if(alloc_type == H5FD_MEM_DRAW)
-                fs_ctx.ring     = H5AC_RING_USER;
-            else
-                if(H5AC_get_entry_ring(f, addr, &fs_ctx.ring) < 0)
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "can't get ring of entry")
-            fs_ctx.alloc_type  = alloc_type;
-            fs_ctx.addr        = addr;
-            fs_ctx.size        = size;
-            fs_ctx.fs          = NULL;
+        /* Iterate through cache entries, setting up flush dependencies */
+        if(H5AC_iterate(f, H5MF__freedspace_create_cb, &fs_ctx) < 0)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_BADITER, FAIL, "unable to iterate cache entries")
 
-            /* Iterate through cache entries, setting up flush dependencies */
-            if(H5AC_iterate(f, H5MF__freedspace_create_cb, &fs_ctx) < 0)
-                HGOTO_ERROR(H5E_RESOURCE, H5E_BADITER, FAIL, "unable to iterate cache entries")
-
-            /* If there were entries in the cache that set up flush dependencies, finish setting up freedspace object */
-            if(NULL != fs_ctx.fs) {
+        /* If there were entries in the cache that set up flush dependencies, finish setting up freedspace object */
+        if(NULL != fs_ctx.fs) {
 #if defined H5_DEBUG_BUILD
 {
-    unsigned nchildren;         /* # of flush dependency children for freedspace object */
+unsigned nchildren;         /* # of flush dependency children for freedspace object */
 
-    /* Get # of flush dependency children now */
-    if(H5AC_get_flush_dep_nchildren((H5AC_info_t *)fs_ctx.fs, &nchildren) < 0)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "can't get cache entry nchildren")
+/* Get # of flush dependency children now */
+if(H5AC_get_flush_dep_nchildren((H5AC_info_t *)fs_ctx.fs, &nchildren) < 0)
+    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "can't get cache entry nchildren")
 
-    /* Sanity check to make certain that freedspace entry has at least one flush dependency child entry */
-    if(0 == nchildren)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_BADVALUE, FAIL, "no flush dependency children for new freedspace object")
+/* Sanity check to make certain that freedspace entry has at least one flush dependency child entry */
+if(0 == nchildren)
+    HGOTO_ERROR(H5E_RESOURCE, H5E_BADVALUE, FAIL, "no flush dependency children for new freedspace object")
 }
 #endif /* H5_DEBUG_BUILD */
 
-                /* Set the pointer to the freedspace entry, for the calling routine */
-                *fs = fs_ctx.fs;
-            } /* end if */
+            /* Set the pointer to the freedspace entry, for the calling routine */
+            *fs = fs_ctx.fs;
         } /* end if */
     } /* end if */
 
