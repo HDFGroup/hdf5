@@ -1,4 +1,4 @@
-#
+
 # Copyright by The HDF Group.
 # All rights reserved.
 #
@@ -107,6 +107,11 @@ set (HDF5_REFERENCE_TEST_FILES
     be_data.h5
     be_extlink1.h5
     be_extlink2.h5
+    bounds_earliest_latest.h5
+    bounds_earliest_v18.h5
+    bounds_latest_latest.h5
+    bounds_v18_latest.h5
+    bounds_v18_v18.h5
     corrupt_stab_msg.h5
     deflate.h5
     family_v16_00000.h5
@@ -500,21 +505,28 @@ add_test (NAME H5TEST-clear-error_test-objects
     WORKING_DIRECTORY
         ${HDF5_TEST_BINARY_DIR}/H5TEST
 )
-add_test (NAME H5TEST-error_test COMMAND "${CMAKE_COMMAND}"
-    -D "TEST_PROGRAM=$<TARGET_FILE:error_test>"
-    -D "TEST_ARGS:STRING="
-    -D "TEST_EXPECT=0"
-    -D "TEST_MASK_ERROR=true"
-    -D "TEST_OUTPUT=error_test.txt"
-    -D "TEST_REFERENCE=error_test_1"
-    -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/H5TEST"
-    -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
-)
-set_tests_properties (H5TEST-error_test PROPERTIES
-    DEPENDS H5TEST-clear-error_test-objects
-    ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST;HDF5_PLUGIN_PRELOAD=::"
-    WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
-)
+if (HDF5_USE_16_API_DEFAULT)
+  add_test (
+      NAME H5TEST-error_test-SKIPPED
+      COMMAND ${CMAKE_COMMAND} -E echo "SKIP $<TARGET_FILE:error_test>"
+  )
+else ()
+  add_test (NAME H5TEST-error_test COMMAND "${CMAKE_COMMAND}"
+      -D "TEST_PROGRAM=$<TARGET_FILE:error_test>"
+      -D "TEST_ARGS:STRING="
+      -D "TEST_EXPECT=0"
+      -D "TEST_MASK_ERROR=true"
+      -D "TEST_OUTPUT=error_test.txt"
+      -D "TEST_REFERENCE=error_test_1"
+      -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/H5TEST"
+      -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+  )
+  set_tests_properties (H5TEST-error_test PROPERTIES
+      DEPENDS H5TEST-clear-error_test-objects
+      ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST;HDF5_PLUGIN_PRELOAD=::"
+      WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
+  )
+endif ()
 
 #-- Adding test for links_env
 add_test (NAME H5TEST-clear-links_env-objects
@@ -655,21 +667,28 @@ if (BUILD_SHARED_LIBS AND TEST_SHARED_PROGRAMS)
       WORKING_DIRECTORY
           ${HDF5_TEST_BINARY_DIR}/H5TEST-shared
   )
-  add_test (NAME H5TEST-shared-error_test COMMAND "${CMAKE_COMMAND}"
-      -D "TEST_PROGRAM=$<TARGET_FILE:error_test-shared>"
-      -D "TEST_ARGS:STRING="
-      -D "TEST_EXPECT=0"
-      -D "TEST_MASK_ERROR=true"
-      -D "TEST_OUTPUT=error_test.txt"
-      -D "TEST_REFERENCE=error_test_1"
-      -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/H5TEST-shared"
-      -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
-  )
-  set_tests_properties (H5TEST-shared-error_test PROPERTIES
-      DEPENDS H5TEST-shared-clear-error_test-objects
-      ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST-shared;HDF5_PLUGIN_PRELOAD=::"
-      WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST-shared
-  )
+  if (HDF5_USE_16_API_DEFAULT)
+    add_test (
+        NAME H5TEST-shared-error_test-SKIPPED
+        COMMAND ${CMAKE_COMMAND} -E echo "SKIP $<TARGET_FILE:error_test-shared>"
+    )
+  else ()
+    add_test (NAME H5TEST-shared-error_test COMMAND "${CMAKE_COMMAND}"
+        -D "TEST_PROGRAM=$<TARGET_FILE:error_test-shared>"
+        -D "TEST_ARGS:STRING="
+        -D "TEST_EXPECT=0"
+        -D "TEST_MASK_ERROR=true"
+        -D "TEST_OUTPUT=error_test.txt"
+        -D "TEST_REFERENCE=error_test_1"
+        -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/H5TEST-shared"
+        -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+    )
+    set_tests_properties (H5TEST-shared-error_test PROPERTIES
+        DEPENDS H5TEST-shared-clear-error_test-objects
+        ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST-shared;HDF5_PLUGIN_PRELOAD=::"
+        WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST-shared
+    )
+  endif ()
 
   #-- Adding test for links_env
   add_test (NAME H5TEST-shared-clear-links_env-objects
@@ -709,12 +728,14 @@ if (BUILD_SHARED_LIBS AND TEST_SHARED_PROGRAMS)
 endif ()
 
 ##############################################################################
-###    P L U G I N  T E S T S
+###    F I L T E R  P L U G I N  T E S T S
 ##############################################################################
 if (WIN32)
   set (CMAKE_SEP "\;")
+  set (BIN_REL_PATH "../../")
 else ()
   set (CMAKE_SEP ":")
+  set (BIN_REL_PATH "../")
 endif ()
 
 add_test (NAME H5PLUGIN-plugin COMMAND $<TARGET_FILE:plugin>)
@@ -791,7 +812,7 @@ if (HDF5_TEST_VFD)
   macro (CHECK_VFD_TEST vfdtest vfdname resultcode)
     if ("${vfdtest}" STREQUAL "flush1" OR "${vfdtest}" STREQUAL "flush2")
       if ("${vfdname}" STREQUAL "multi" OR "${vfdname}" STREQUAL "split")
-        if (NOT BUILD_SHARED_LIBS AND NOT CMAKE_BUILD_TYPE MATCHES Debug)
+        if (NOT BUILD_SHARED_LIBS AND NOT ${HDF_CFG_NAME} MATCHES "Debug")
           add_test (NAME VFD-${vfdname}-${vfdtest}
               COMMAND "${CMAKE_COMMAND}"
                   -D "TEST_PROGRAM=$<TARGET_FILE:${vfdtest}>"
@@ -1009,7 +1030,6 @@ endif ()
 if (HDF5_BUILD_GENERATORS)
   macro (ADD_H5_GENERATOR genfile)
     add_executable (${genfile} ${HDF5_TEST_SOURCE_DIR}/${genfile}.c)
-    TARGET_NAMING (${genfile} STATIC)
     TARGET_C_PROPERTIES (${genfile} STATIC " " " ")
     target_link_libraries (${genfile} ${HDF5_TEST_LIB_TARGET} ${HDF5_LIB_TARGET})
     set_target_properties (${genfile} PROPERTIES FOLDER generator/test)

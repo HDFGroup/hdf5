@@ -156,7 +156,7 @@ H5O_shared_read(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, unsigned *ioflags,
             HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "can't read message from fractal heap.")
 
         /* Decode the message */
-        if(NULL == (ret_value = (type->decode)(f, dxpl_id, open_oh, 0, ioflags, mesg_ptr)))
+        if(NULL == (ret_value = (type->decode)(f, dxpl_id, open_oh, 0, ioflags, mesg_size, mesg_ptr)))
             HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, NULL, "can't decode shared message.")
     } /* end if */
     else {

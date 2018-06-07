@@ -1044,7 +1044,7 @@ H5O_copy_header(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
     HDassert(H5F_addr_defined(oloc_src->addr));
     HDassert(oloc_dst->file);
 
-    /* Intialize copy info before errors can be thrown */
+    /* Initialize copy info before errors can be thrown */
     HDmemset(&cpy_info, 0, sizeof(H5O_copy_t));
 
     /* Get the copy property list */

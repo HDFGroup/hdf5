@@ -293,7 +293,7 @@ main (int argc, const char *argv[])
             break;
 
         case 'E':
-            enable_error_stack = TRUE;
+            enable_error_stack = 1;
             break;
 
         default:
@@ -330,7 +330,7 @@ main (int argc, const char *argv[])
         leave(EXIT_FAILURE);
     }
 
-    if (enable_error_stack) {
+    if (enable_error_stack > 0) {
         H5Eset_auto2(H5E_DEFAULT, func, edata);
         H5Eset_auto2(H5tools_ERR_STACK_g, tools_func, tools_edata);
     }

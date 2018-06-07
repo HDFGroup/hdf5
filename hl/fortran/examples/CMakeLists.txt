@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.2.2)
+cmake_minimum_required (VERSION 3.10)
 PROJECT (HDF5_HL_F90_EXAMPLES C CXX Fortran)
 
 #-----------------------------------------------------------------------------
@@ -16,7 +16,6 @@ set (examples
 
 foreach (example ${examples})
   add_executable (hl_f90_ex_${example} ${HDF5_HL_F90_EXAMPLES_SOURCE_DIR}/${example}.f90)
-  TARGET_NAMING (hl_f90_ex_${example} STATIC)
   TARGET_FORTRAN_PROPERTIES (hl_f90_ex_${example} STATIC " " " ")
   target_link_libraries (hl_f90_ex_${example}
       ${HDF5_HL_F90_LIB_TARGET}

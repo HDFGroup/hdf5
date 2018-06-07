@@ -92,7 +92,7 @@ DSetMemXferPropList::DSetMemXferPropList() : PropList(H5P_DATASET_XFER) {}
 // Function     DSetMemXferPropList constructor
 ///\brief       Creates a dataset transfer property list with transform
 ///             expression.
-// Programmer:  Binh-Minh Ribler - 2000
+// March 2014
 //--------------------------------------------------------------------------
 DSetMemXferPropList::DSetMemXferPropList(const char* exp) : PropList(H5P_DATASET_XFER)
 {

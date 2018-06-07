@@ -17,6 +17,8 @@
 #include "H5Exception.h"
 #include "H5IdComponent.h"
 #include "H5PropList.h"
+#include "H5StrcreatProp.h"
+#include "H5LcreatProp.h"
 #include "H5LaccProp.h"
 #include "H5Location.h"
 #include "H5Object.h"
@@ -31,7 +33,7 @@ namespace H5 {
 //--------------------------------------------------------------------------
 // Function:    CompType default constructor
 ///\brief       Default constructor: Creates a stub compound datatype
-// Programmer   Binh-Minh Ribler - 2000
+// 2000
 //--------------------------------------------------------------------------
 CompType::CompType() : DataType() {}
 
@@ -39,7 +41,7 @@ CompType::CompType() : DataType() {}
 // Function:    CompType copy constructor
 ///\brief       Copy constructor: makes copy of the original CompType object
 ///\param       original - IN: Original CompType instance
-// Programmer   Binh-Minh Ribler - 2000
+// 2000
 //--------------------------------------------------------------------------
 CompType::CompType(const CompType& original) : DataType(original) {}
 
@@ -47,7 +49,7 @@ CompType::CompType(const CompType& original) : DataType(original) {}
 // Function:    CompType overloaded constructor
 ///\brief       Creates a CompType object using the id of an existing datatype.
 ///\param       existing_id - IN: Id of an existing compound datatype
-// Programmer   Binh-Minh Ribler - 2000
+// 2000
 //--------------------------------------------------------------------------
 CompType::CompType(const hid_t existing_id) : DataType(existing_id) {}
 
@@ -59,7 +61,7 @@ CompType::CompType(const hid_t existing_id) : DataType(existing_id) {}
 // Description
 //              The DataType constructor calls the C API H5Tcreate to create
 //              the compound datatype.
-// Programmer   Binh-Minh Ribler - 2000
+// 2000
 //--------------------------------------------------------------------------
 CompType::CompType(size_t size) : DataType(H5T_COMPOUND, size) {}
 
@@ -69,7 +71,7 @@ CompType::CompType(size_t size) : DataType(H5T_COMPOUND, size) {}
 ///\param       dataset - IN: Dataset that this enum datatype associates with
 ///\return      CompType instance
 ///\exception   H5::DataTypeIException
-// Programmer   Binh-Minh Ribler - 2000
+// 2000
 //--------------------------------------------------------------------------
 CompType::CompType(const DataSet& dataset) : DataType()
 {
@@ -90,7 +92,7 @@ CompType::CompType(const DataSet& dataset) : DataType()
 ///\param       loc       - IN: Location of the type
 ///\param       type_name - IN: Compound type name
 ///\exception   H5::DataTypeIException
-// Programmer   Binh-Minh Ribler - Sept 2017
+// Sept 2017
 // Description
 //              In 1.8.20, this constructor was introduced and may replace the
 //              existing function CommonFG::openCompType(const char*) to
@@ -109,7 +111,7 @@ CompType::CompType(const H5Location& loc, const char *type_name) : DataType()
 ///\param       loc       - IN: Location of the type
 ///\param       type_name - IN: Compound type name
 ///\exception   H5::DataTypeIException
-// Programmer   Binh-Minh Ribler - Sept 2017
+// Sept 2017
 // Description
 //              In 1.8.20, this constructor was introduced and may replace the
 //              existing function CommonFG::openCompType(const H5std_string&) to
@@ -126,7 +128,7 @@ CompType::CompType(const H5Location& loc, const H5std_string& type_name) : DataT
 ///\brief       Returns a CompType object via DataType* by decoding the
 ///             binary object description of this datatype.
 ///\exception   H5::DataTypeIException
-// Programmer   Binh-Minh Ribler - Sept 2017
+// Sept 2017
 //--------------------------------------------------------------------------
 DataType* CompType::decode() const
 {
@@ -147,7 +149,7 @@ DataType* CompType::decode() const
 ///\brief       Returns the number of members in this compound datatype.
 ///\return      Number of members
 ///\exception   H5::DataTypeIException
-// Programmer   Binh-Minh Ribler - 2000
+// 2000
 //--------------------------------------------------------------------------
 int CompType::getNmembers() const
 {
@@ -166,7 +168,7 @@ int CompType::getNmembers() const
 ///\param       member_num - IN: Zero-based index of the member
 ///\return      Name of member
 ///\exception   H5::DataTypeIException
-// Programmer   Binh-Minh Ribler - 2000
+// 2000
 //--------------------------------------------------------------------------
 H5std_string CompType::getMemberName(unsigned member_num) const
 {
@@ -184,14 +186,14 @@ H5std_string CompType::getMemberName(unsigned member_num) const
 //--------------------------------------------------------------------------
 // Function:    CompType::getMemberIndex
 ///\brief       Returns the index of a member in this compound datatype.
-///\param       name - IN: Name of the member
+///\param       name - IN: Name of the member - \c char*
 ///\return      Index of member
 ///\exception   H5::DataTypeIException
 ///\par Description
 ///             Members are stored in no particular order with numbers 0
 ///             through N-1, where N is the value returned by the member
 ///             function \c CompType::getNmembers.
-// Programmer   Binh-Minh Ribler - May 16, 2002
+// May 2002
 //--------------------------------------------------------------------------
 int CompType::getMemberIndex(const char* name) const
 {
@@ -203,6 +205,21 @@ int CompType::getMemberIndex(const char* name) const
     }
     return(member_index);
 }
+
+//--------------------------------------------------------------------------
+// Function:    CompType::getMemberIndex
+///\brief       This is an overloaded member function, provided for convenience.
+///             It differs from the above function in that it takes an
+///             \c H5std_string for \a name.
+///\param       name - IN: Name of the member - \c H5std_string
+///\return      Index of member
+///\exception   H5::DataTypeIException
+///\par Description
+///             Members are stored in no particular order with numbers 0
+///             through N-1, where N is the value returned by the member
+///             function \c CompType::getNmembers.
+// Apr 2018
+//--------------------------------------------------------------------------
 int CompType::getMemberIndex(const H5std_string& name) const
 {
     return(getMemberIndex(name.c_str()));
@@ -214,14 +231,14 @@ int CompType::getMemberIndex(const H5std_string& name) const
 ///             respect to the beginning of the compound data type datum.
 ///\param       member_num - IN: Zero-based index of the member
 ///\return      Byte offset
-// Programmer   Binh-Minh Ribler - 2000
+// 2000
 // Description
 ///             Members are stored in no particular order with numbers 0
 ///             through N-1, where N is the value returned by the member
 ///             function \c CompType::getNmembers.
 //
 //              Note that byte offset being returned as 0 doesn't indicate
-//              a failure. (According to Quincey)
+//              a failure.
 //--------------------------------------------------------------------------
 size_t CompType::getMemberOffset(unsigned member_num) const
 {
@@ -235,7 +252,7 @@ size_t CompType::getMemberOffset(unsigned member_num) const
 ///\param       member_num - IN: Zero-based index of the member
 ///\return      Type class of the member
 ///\exception   H5::DataTypeIException
-// Programmer   Binh-Minh Ribler - 2000
+// 2000
 // Modification
 //              Modified to use H5Tget_member_class instead. - Jul, 2005
 //--------------------------------------------------------------------------
@@ -275,7 +292,7 @@ hid_t CompType::p_get_member_type(unsigned member_num) const
 ///\param       member_num - IN: Zero-based index of the member
 ///\return      DataType instance
 ///\exception   H5::DataTypeIException
-// Programmer   Binh-Minh Ribler - 2000
+// 2000
 //--------------------------------------------------------------------------
 DataType CompType::getMemberDataType(unsigned member_num) const
 {
@@ -296,12 +313,12 @@ DataType CompType::getMemberDataType(unsigned member_num) const
 ///\param       member_num - IN: Zero-based index of the member
 ///\return      ArrayType instance
 ///\exception   H5::DataTypeIException
-// Programmer   Binh-Minh Ribler - Jul, 2005
+// Jul 2005
 //--------------------------------------------------------------------------
 ArrayType CompType::getMemberArrayType(unsigned member_num) const
 {
     try {
-        ArrayType arraytype(p_get_member_type(member_num));
+        ArrayType arraytype;
         f_DataType_setId(&arraytype, p_get_member_type(member_num));
         return(arraytype);
     }
@@ -317,12 +334,12 @@ ArrayType CompType::getMemberArrayType(unsigned member_num) const
 ///\param       member_num - IN: Zero-based index of the member
 ///\return      CompType instance
 ///\exception   H5::DataTypeIException
-// Programmer   Binh-Minh Ribler - 2000
+// 2000
 //--------------------------------------------------------------------------
 CompType CompType::getMemberCompType(unsigned member_num) const
 {
     try {
-      CompType comptype(p_get_member_type(member_num));
+        CompType comptype;
         f_DataType_setId(&comptype, p_get_member_type(member_num));
         return(comptype);
     }
@@ -338,12 +355,12 @@ CompType CompType::getMemberCompType(unsigned member_num) const
 ///\param       member_num - IN: Zero-based index of the member
 ///\return      EnumType instance
 ///\exception   H5::DataTypeIException
-// Programmer   Binh-Minh Ribler - 2000
+// 2000
 //--------------------------------------------------------------------------
 EnumType CompType::getMemberEnumType(unsigned member_num) const
 {
     try {
-      EnumType enumtype(p_get_member_type(member_num));
+        EnumType enumtype;
         f_DataType_setId(&enumtype, p_get_member_type(member_num));
         return(enumtype);
     }
@@ -359,12 +376,12 @@ EnumType CompType::getMemberEnumType(unsigned member_num) const
 ///\param       member_num - IN: Zero-based index of the member
 ///\return      IntType instance
 ///\exception   H5::DataTypeIException
-// Programmer   Binh-Minh Ribler - 2000
+// 2000
 //--------------------------------------------------------------------------
 IntType CompType::getMemberIntType(unsigned member_num) const
 {
     try {
-      IntType inttype(p_get_member_type(member_num));
+        IntType inttype;
         f_DataType_setId(&inttype, p_get_member_type(member_num));
         return(inttype);
     }
@@ -380,12 +397,12 @@ IntType CompType::getMemberIntType(unsigned member_num) const
 ///\param       member_num - IN: Zero-based index of the member
 ///\return      FloatType instance
 ///\exception   H5::DataTypeIException
-// Programmer   Binh-Minh Ribler - 2000
+// 2000
 //--------------------------------------------------------------------------
 FloatType CompType::getMemberFloatType(unsigned member_num) const
 {
     try {
-      FloatType floatype(p_get_member_type(member_num));
+        FloatType floatype;
         f_DataType_setId(&floatype, p_get_member_type(member_num));
         return(floatype);
     }
@@ -401,12 +418,12 @@ FloatType CompType::getMemberFloatType(unsigned member_num) const
 ///\param       member_num - IN: Zero-based index of the member
 ///\return      StrType instance
 ///\exception   H5::DataTypeIException
-// Programmer   Binh-Minh Ribler - 2000
+// 2000
 //--------------------------------------------------------------------------
 StrType CompType::getMemberStrType(unsigned member_num) const
 {
     try {
-      StrType strtype(p_get_member_type(member_num));
+        StrType strtype;
         f_DataType_setId(&strtype, p_get_member_type(member_num));
         return(strtype);
     }
@@ -422,12 +439,12 @@ StrType CompType::getMemberStrType(unsigned member_num) const
 ///\param       member_num - IN: Zero-based index of the member
 ///\return      VarLenType instance
 ///\exception   H5::DataTypeIException
-// Programmer   Binh-Minh Ribler - Jul, 2005
+// Jul 2005
 //--------------------------------------------------------------------------
 VarLenType CompType::getMemberVarLenType(unsigned member_num) const
 {
     try {
-      VarLenType varlentype(p_get_member_type(member_num));
+        VarLenType varlentype;
         f_DataType_setId(&varlentype, p_get_member_type(member_num));
         return(varlentype);
     }
@@ -476,7 +493,7 @@ void CompType::getMemberType(unsigned member_num, StrType& strtype) const
 ///\param       offset - IN: Offset in memory structure of the field to insert
 ///\param       new_member - IN: New member to be inserted
 ///\exception   H5::DataTypeIException
-// Programmer   Binh-Minh Ribler - 2000
+// 2000
 //--------------------------------------------------------------------------
 void CompType::insertMember(const H5std_string& name, size_t offset, const DataType& new_member) const
 {
@@ -499,7 +516,7 @@ void CompType::insertMember(const H5std_string& name, size_t offset, const DataT
 ///\brief       Recursively removes padding from within a compound datatype.
 ///
 ///\exception   H5::DataTypeIException
-// Programmer   Binh-Minh Ribler - 2000
+// 2000
 //--------------------------------------------------------------------------
 void CompType::pack() const
 {
@@ -518,7 +535,7 @@ void CompType::pack() const
 ///\exception   H5::DataTypeIException
 // Note
 //      H5Tset_size works on atom datatypes and compound datatypes only
-// Programmer   Binh-Minh Ribler - 2014
+// March 2014
 //--------------------------------------------------------------------------
 void CompType::setSize(size_t size) const
 {
@@ -533,7 +550,7 @@ void CompType::setSize(size_t size) const
 //--------------------------------------------------------------------------
 // Function:    CompType destructor
 ///\brief       Properly terminates access to this compound datatype.
-// Programmer   Binh-Minh Ribler - 2000
+// 2000
 //--------------------------------------------------------------------------
 CompType::~CompType() {}
 

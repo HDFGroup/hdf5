@@ -39,7 +39,7 @@ extern "C" {
  * structure H5AC_cache_config_t
  *
  * H5AC_cache_config_t is a public structure intended for use in public APIs.
- * At least in its initial incarnation, it is basicaly a copy of struct
+ * At least in its initial incarnation, it is basically a copy of struct
  * H5C_auto_size_ctl_t, minus the report_fcn field, and plus the
  * dirty_bytes_threshold field.
  *
@@ -76,7 +76,7 @@ extern "C" {
  * open_trace_file: Boolean field indicating whether the trace_file_name
  * 	field should be used to open a trace file for the cache.
  *
- * 	The trace file is a debuging feature that allow the capture of
+ * 	The trace file is a debugging feature that allow the capture of
  * 	top level metadata cache requests for purposes of debugging and/or
  * 	optimization.  This field should normally be set to FALSE, as
  * 	trace file collection imposes considerable overhead.
@@ -206,7 +206,7 @@ extern "C" {
  *
  * flash_incr_mode:  Instance of the H5C_cache_flash_incr_mode enumerated
  *      type whose value indicates whether and by which algorithm we should
- *      make flash increases in the size of the cache to accomodate insertion
+ *      make flash increases in the size of the cache to accommodate insertion
  *      of large entries and large increases in the size of a single entry.
  *
  *      The addition of the flash increment mode was occasioned by performance

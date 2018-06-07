@@ -661,6 +661,7 @@ chk_TESTS = $(check_PROGRAMS) $(check_SCRIPTS) $(EXTRA_TEST)
 TEST_EXTENSIONS = .sh
 SH_LOG_COMPILER = $(SHELL)
 AM_SH_LOG_FLAGS = 
+REALTIMEOUTPUT = $(realtimeOutput)
 TEST_PROG_CHKEXE = $(TEST_PROG:=.chkexe_)
 TEST_PROG_PARA_CHKEXE = $(TEST_PROG_PARA:=.chkexe_)
 TEST_SCRIPT_CHKSH = $(TEST_SCRIPT:=.chkexe_)
@@ -1100,7 +1101,6 @@ installcheck-local:
 	    (cd $(EXAMPLEDIR);                                                           \
 	     /bin/sh ./$(TEST_EXAMPLES_SCRIPT);)                                                   \
 	fi
-
 # lib/progs/tests targets recurse into subdirectories. build-* targets
 # build files in this directory.
 build-lib: $(LIB)
@@ -1188,28 +1188,62 @@ $(TEST_PROG_CHKEXE) $(TEST_PROG_PARA_CHKEXE) dummy.chkexe_:
 	   if $(top_srcdir)/bin/newer $(@:.chkexe_=.chkexe) $${tname}; then \
 	      echo "No need to test $${tname} again."; \
 	   else \
-	      echo "============================" > $${log}; \
-	      if test "X$(FORTRAN_API)" = "Xyes"; then \
-	         echo "Fortran API: Testing $(HDF5_DRIVER) $${tname} $(TEST_FLAGS)"; \
-	         echo "Fortran API: $(HDF5_DRIVER) $${tname} $(TEST_FLAGS) Test Log" >> $${log}; \
-	      elif test "X$(CXX_API)" = "Xyes"; then \
-	         echo "C++ API: Testing $(HDF5_DRIVER) $${tname} $(TEST_FLAGS)"; \
-	         echo "C++ API: $(HDF5_DRIVER) $${tname} $(TEST_FLAGS) Test Log" >> $${log};\
-	      else \
-	         echo "Testing $(HDF5_DRIVER) $${tname} $(TEST_FLAGS)"; \
-	         echo "$(HDF5_DRIVER) $${tname} $(TEST_FLAGS) Test Log" >> $${log}; \
-	      fi; \
-	      echo "============================" >> $${log}; \
-	      srcdir="$(srcdir)" \
-	         $(TIME) $(RUNEXEC) ./$${tname} $(TEST_FLAGS) >> $${log} 2>&1 \
-	         && touch $(@:.chkexe_=.chkexe) || \
-	         (test $$HDF5_Make_Ignore && echo "*** Error ignored") || \
-	         (cat $${log} && false) || exit 1; \
+              if test -n "$(REALTIMEOUTPUT)"; then \
+                 echo "============================" | tee $${log}; \
+              else \
+                 echo "============================" > $${log}; \
+              fi; \
+              if test "X$(FORTRAN_API)" = "Xyes"; then \
+                 echo "Fortran API: Testing $(HDF5_DRIVER) $${tname} $(TEST_FLAGS)"; \
+                 if test -n "$(REALTIMEOUTPUT)"; then \
+                    echo "Fortran API: $(HDF5_DRIVER) $${tname} $(TEST_FLAGS) Test Log" | tee -a $${log}; \
+                 else \
+                    echo "Fortran API: $(HDF5_DRIVER) $${tname} $(TEST_FLAGS) Test Log" >> $${log}; \
+                 fi; \
+              elif test "X$(CXX_API)" = "Xyes"; then \
+                 echo "C++ API: Testing $(HDF5_DRIVER) $${tname} $(TEST_FLAGS)"; \
+                 if test -n "$(REALTIMEOUTPUT)"; then \
+                    echo "C++ API: $(HDF5_DRIVER) $${tname} $(TEST_FLAGS) Test Log" | tee -a $${log};\
+                 else \
+                    echo "C++ API: $(HDF5_DRIVER) $${tname} $(TEST_FLAGS) Test Log" >> $${log};\
+                 fi; \
+              else \
+                 echo "Testing $(HDF5_DRIVER) $${tname} $(TEST_FLAGS)"; \
+                 if test -n "$(REALTIMEOUTPUT)"; then \
+                    echo "$(HDF5_DRIVER) $${tname} $(TEST_FLAGS) Test Log" | tee -a $${log}; \
+                 else \
+                    echo "$(HDF5_DRIVER) $${tname} $(TEST_FLAGS) Test Log" >> $${log}; \
+                 fi; \
+              fi; \
+              if test -n "$(REALTIMEOUTPUT)"; then \
+                 echo "============================" | tee -a $${log}; \
+              else \
+                 echo "============================" >> $${log}; \
+              fi; \
+              if test -n "$(REALTIMEOUTPUT)"; then \
+                 srcdir="$(srcdir)" \
+                 $(TIME) $(RUNEXEC) ./$${tname} $(TEST_FLAGS) | tee -a $${log} 2>&1 \
+                 && touch $(@:.chkexe_=.chkexe) || \
+                 (test $$HDF5_Make_Ignore && echo "*** Error ignored") || \
+                 (cat $${log} && false) || exit 1; \
+              else \
+                 srcdir="$(srcdir)" \
+                 $(TIME) $(RUNEXEC) ./$${tname} $(TEST_FLAGS) >> $${log} 2>&1 \
+                 && touch $(@:.chkexe_=.chkexe) || \
+                 (test $$HDF5_Make_Ignore && echo "*** Error ignored") || \
+                 (cat $${log} && false) || exit 1; \
+              fi; \
 	      echo "" >> $${log}; \
-	      echo "Finished testing $${tname} $(TEST_FLAGS)" >> $${log}; \
-	      echo "============================" >> $${log}; \
-	      echo "Finished testing $${tname} $(TEST_FLAGS)"; \
-	      cat $${log}; \
+              if test -n "$(REALTIMEOUTPUT)"; then \
+                 echo "Finished testing $${tname} $(TEST_FLAGS)" | tee -a $${log}; \
+                 echo "============================" | tee -a $${log}; \
+              else \
+                 echo "Finished testing $${tname} $(TEST_FLAGS)" >> $${log}; \
+                 echo "============================" >> $${log}; \
+              fi; \
+              if test -z "$(REALTIMEOUTPUT)"; then \
+                 cat $${log}; \
+              fi; \
 	   fi; \
 	fi
 

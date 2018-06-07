@@ -298,8 +298,6 @@ static herr_t H5T_unregister(H5T_pers_t pers, const char *name, H5T_t *src,
 static herr_t H5T_register(H5T_pers_t pers, const char *name, H5T_t *src,
             H5T_t *dst, H5T_conv_t func, hid_t dxpl_id, hbool_t api_call);
 static htri_t H5T_compiler_conv(H5T_t *src, H5T_t *dst);
-static herr_t H5T_encode(H5T_t *obj, unsigned char *buf, size_t *nalloc);
-static H5T_t *H5T_decode(const unsigned char *buf);
 static herr_t H5T_set_size(H5T_t *dt, size_t size);
 
 
@@ -2801,8 +2799,13 @@ H5Tdecode(const void *buf)
     if(buf == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "empty buffer")
 
-    /* Create datatype by decoding buffer */
-    if(NULL == (dt = H5T_decode((const unsigned char *)buf)))
+    /* Create datatype by decoding buffer
+     * There is no way to get the size of the buffer, so we pass in
+     * SIZE_MAX and assume the caller knows what they are doing.
+     * Really fixing this will require an H5Tdecode2() call that
+     * takes a size parameter.
+     */
+    if(NULL == (dt = H5T_decode(SIZE_MAX, (const unsigned char *)buf)))
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL, "can't decode object")
 
     /* Register the type and return the ID */
@@ -2834,7 +2837,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+herr_t
 H5T_encode(H5T_t *obj, unsigned char *buf, size_t *nalloc)
 {
     size_t      buf_size;               /* Encoded size of datatype */
@@ -2890,8 +2893,8 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static H5T_t *
-H5T_decode(const unsigned char *buf)
+H5T_t *
+H5T_decode(size_t buf_size, const unsigned char *buf)
 {
     H5F_t *f = NULL;            /* Fake file structure*/
     H5T_t *ret_value = NULL;    /* Return value */
@@ -2911,7 +2914,7 @@ H5T_decode(const unsigned char *buf)
         HGOTO_ERROR(H5E_DATATYPE, H5E_VERSION, NULL, "unknown version of encoded datatype")
 
     /* Decode the serialized datatype message */
-    if(NULL == (ret_value = (H5T_t *)H5O_msg_decode(f, H5AC_ind_dxpl_id, NULL, H5O_DTYPE_ID, buf)))
+    if(NULL == (ret_value = (H5T_t *)H5O_msg_decode(f, H5AC_ind_dxpl_id, NULL, H5O_DTYPE_ID, buf_size, buf)))
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, NULL, "can't decode object")
 
     /* Mark datatype as being in memory now */
@@ -5171,6 +5174,11 @@ H5T_set_loc(H5T_t *dt, H5F_t *f, H5T_loc_t loc)
 
                             /* Check if the field changed size */
                             if(old_size != memb_type->shared->size) {
+
+                                /* Fail if the old_size is zero */
+                                if (0 == old_size)
+                                    HGOTO_ERROR(H5E_DATATYPE, H5E_BADVALUE, FAIL, "old_size of zero would cause division by zero");
+
                                 /* Adjust the size of the member */
                                 dt->shared->u.compnd.memb[i].size = (dt->shared->u.compnd.memb[i].size*memb_type->shared->size)/old_size;
 

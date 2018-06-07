@@ -1005,7 +1005,7 @@ struct H5C_t
  * We maintain doubly linked lists of instances of H5C_cache_entry_t for a
  * variety of reasons -- protected list, LRU list, and the clean and dirty
  * LRU lists at present.  The following macros support linking and unlinking
- * of instances of H5C_cache_entry_t by both their regular and auxilary next
+ * of instances of H5C_cache_entry_t by both their regular and auxiliary next
  * and previous pointers.
  *
  * The size and length fields are also maintained.
@@ -2509,7 +2509,7 @@ if ( (cache_ptr)->index_size !=                                             \
  *		a bit more performance out of the cache.
  *
  *		At least for the first cut, I am leaving the comments and
- *		white space in the macro.  If they cause dificulties with
+ *		white space in the macro.  If they cause difficulties with
  *		the pre-processor, I'll have to remove them.
  *
  *		JRM - 7/28/04
@@ -2620,7 +2620,7 @@ if ( (cache_ptr)->index_size !=                                             \
  *		a bit more performance out of the cache.
  *
  *		At least for the first cut, I am leaving the comments and
- *		white space in the macro.  If they cause dificulties with
+ *		white space in the macro.  If they cause difficulties with
  *		pre-processor, I'll have to remove them.
  *
  *		JRM - 7/28/04
@@ -2764,7 +2764,7 @@ if ( (cache_ptr)->index_size !=                                             \
  *		a bit more performance out of the cache.
  *
  *		At least for the first cut, I am leaving the comments and
- *		white space in the macro.  If they cause dificulties with
+ *		white space in the macro.  If they cause difficulties with
  *		pre-processor, I'll have to remove them.
  *
  *		JRM - 7/28/04
@@ -2902,7 +2902,7 @@ if ( (cache_ptr)->index_size !=                                             \
  *		a bit more performance out of the cache.
  *
  *		At least for the first cut, I am leaving the comments and
- *		white space in the macro.  If they cause dificulties with
+ *		white space in the macro.  If they cause difficulties with
  *		pre-processor, I'll have to remove them.
  *
  *		JRM - 7/28/04
@@ -3443,7 +3443,7 @@ if ( (cache_ptr)->index_size !=                                             \
  *		squeeze a bit more performance out of the cache.
  *
  *		At least for the first cut, I am leaving the comments and
- *		white space in the macro.  If they cause dificulties with
+ *		white space in the macro.  If they cause difficulties with
  *		pre-processor, I'll have to remove them.
  *
  *		JRM - 7/28/04

@@ -24,7 +24,7 @@ AC_PREREQ([2.69])
 ## NOTE: Do not forget to change the version number here when we do a
 ## release!!!
 ##
-AC_INIT([HDF5], [1.8.20], [help@hdfgroup.org])
+AC_INIT([HDF5], [1.8.21], [help@hdfgroup.org])
 AC_CONFIG_SRCDIR([src/H5.c])
 AC_CONFIG_HEADERS([src/H5config.h])
 
@@ -777,8 +777,8 @@ fi
 ## ----------------------------------------------------------------------
 ## Production flags?  Save the value in $CONFIG_MODE so we have it for
 ## the record.
-## To switch the default between production and development, move X-| 
-## to X-yes) or X-no) 
+## To switch the default between production and development, move X-|
+## to X-yes) or X-no)
 ##
 AC_MSG_CHECKING([for production mode])
 AC_ARG_ENABLE([production],

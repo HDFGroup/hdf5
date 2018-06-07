@@ -27,6 +27,8 @@
 #include "H5OcreatProp.h"
 #include "H5DcreatProp.h"
 #include "H5LaccProp.h"
+#include "H5StrcreatProp.h"
+#include "H5LcreatProp.h"
 #include "H5Location.h"
 #include "H5Object.h"
 #include "H5CommonFG.h"
@@ -229,7 +231,7 @@ bool H5File::isHdf5(const H5std_string& name)
 ///                             will be reopened. Absence of this flag
 ///                             implies read-only access.
 ///
-///             H5F_ACC_RDONLY: Open with read only access. - default
+///             H5F_ACC_RDONLY: Open with read only access.
 ///
 // Programmer   Binh-Minh Ribler - Oct, 2005
 //--------------------------------------------------------------------------
@@ -632,23 +634,15 @@ void H5File::close()
 
 //--------------------------------------------------------------------------
 // Function:    H5File::throwException
-///\brief       Throws file exception - initially implemented for CommonFG
+///\brief       Throws H5::FileIException.
 ///\param       func_name - Name of the function where failure occurs
 ///\param       msg       - Message describing the failure
 ///\exception   H5::FileIException
-// Description
-//              This function is used in CommonFG implementation so that
-//              proper exception can be thrown for file or group.  The
-//              argument func_name is a member of CommonFG and "H5File::"
-//              will be inserted to indicate the function called is an
-//              implementation of H5File.
-// Programmer   Binh-Minh Ribler - 2000
+// December 2000
 //--------------------------------------------------------------------------
 void H5File::throwException(const H5std_string& func_name, const H5std_string& msg) const
 {
-    H5std_string full_name = func_name;
-    full_name.insert(0, "H5File::");
-    throw FileIException(full_name, msg);
+    throw FileIException(inMemFunc(func_name.c_str()), msg);
 }
 
 //--------------------------------------------------------------------------

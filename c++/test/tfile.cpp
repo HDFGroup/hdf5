@@ -336,9 +336,12 @@ static void test_file_open()
         // Truncating should succeed now.
         H5File file3(FILE2, H5F_ACC_TRUNC);
 
-        // Opening another file to file3 object, FILE2 should be closed, so
-        // the next attempt to truncate FILE2 should succeed.
+        // Opening another file to file3 object.
         file3.openFile(FILE1, H5F_ACC_RDONLY);
+
+        // In the previous statement, openFile closes FILE2 first before
+        // opening FILE1, so when H5File constructs file4 with an
+        // attempt to truncate FILE2, it should succeed.
         H5File file4(FILE2, H5F_ACC_TRUNC);
 
         PASSED();
@@ -493,6 +496,12 @@ static void test_file_name()
         // Get and verify file name via a committed datatype.
         comp_type.getFileName();
         verify_val(file_name, FILE4, "CompType::getFileName", __LINE__, __FILE__);
+
+        // Get the file's version information.
+        H5F_info_t finfo;
+        file4.getFileInfo(finfo);
+        verify_val(finfo.sohm.hdr_size, 0, "H5File::getFileInfo", __LINE__, __FILE__);
+
         PASSED();
     }   // end of try block
 
@@ -503,6 +512,15 @@ static void test_file_name()
 }   // test_file_name()
 
 
+/*-------------------------------------------------------------------------
+ *
+ * Function:    test_file_attribute
+ *
+ * Purpose      Test file attributes
+ *
+ * Return       None
+ *-------------------------------------------------------------------------
+ */
 const int   RANK1 = 1;
 const int   ATTR1_DIM1 = 3;
 const H5std_string  FILE5("tfattrs.h5");
@@ -619,6 +637,11 @@ static void test_file_attribute()
         PASSED();
     }   // end of try block
 
+    // Catch creating existing attribute
+    catch (AttributeIException& E)
+    {} // do nothing, exception expected
+
+    // Catch all other exceptions
     catch (Exception& E)
     {
         issue_fail_msg("test_file_attribute()", __LINE__, __FILE__, E.getCDetailMsg());

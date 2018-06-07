@@ -116,7 +116,7 @@ void LinkAccPropList::setNumLinks(size_t nlinks) const
     // Throw exception if H5Pset_nlinks returns failure
     if (ret_value < 0)
     {
-        throw PropListIException("setNumLinks", "H5Pset_nlinks failed");
+        throw PropListIException("LinkAccPropList::setNumLinks", "H5Pset_nlinks failed");
     }
 }
 
@@ -134,7 +134,7 @@ size_t LinkAccPropList::getNumLinks() const
     // Throw exception if H5Pget_nlinks returns failure
     if (ret_value < 0)
     {
-        throw PropListIException("getNumLinks", "H5Pget_nlinks failed");
+        throw PropListIException("LinkAccPropList::getNumLinks", "H5Pget_nlinks failed");
     }
     return(nlinks);
 }

@@ -91,18 +91,25 @@ class H5_DLLCPP Exception {
         H5std_string func_name;
 };
 
-class H5_DLLCPP FileIException : public Exception {
+class H5_DLLCPP LocationException : public Exception {
    public:
-        FileIException(const H5std_string& func_name, const H5std_string& message = DEFAULT_MSG);
-        FileIException();
-        virtual ~FileIException() throw();
+        LocationException(const H5std_string& func_name, const H5std_string& message = DEFAULT_MSG);
+        LocationException();
+        virtual ~LocationException() throw();
 };
 
-class H5_DLLCPP GroupIException : public Exception {
+class H5_DLLCPP GroupIException : public LocationException {
    public:
         GroupIException(const H5std_string& func_name, const H5std_string& message = DEFAULT_MSG);
         GroupIException();
         virtual ~GroupIException() throw();
+};
+
+class H5_DLLCPP FileIException : public GroupIException {
+   public:
+        FileIException(const H5std_string& func_name, const H5std_string& message = DEFAULT_MSG);
+        FileIException();
+        virtual ~FileIException() throw();
 };
 
 class H5_DLLCPP DataSpaceIException : public Exception {
@@ -112,7 +119,7 @@ class H5_DLLCPP DataSpaceIException : public Exception {
         virtual ~DataSpaceIException() throw();
 };
 
-class H5_DLLCPP DataTypeIException : public Exception {
+class H5_DLLCPP DataTypeIException : public LocationException {
    public:
         DataTypeIException(const H5std_string& func_name, const H5std_string& message = DEFAULT_MSG);
         DataTypeIException();
@@ -126,14 +133,14 @@ class H5_DLLCPP PropListIException : public Exception {
         virtual ~PropListIException() throw();
 };
 
-class H5_DLLCPP DataSetIException : public Exception {
+class H5_DLLCPP DataSetIException : public LocationException {
    public:
         DataSetIException(const H5std_string& func_name, const H5std_string& message = DEFAULT_MSG);
         DataSetIException();
         virtual ~DataSetIException() throw();
 };
 
-class H5_DLLCPP AttributeIException : public Exception {
+class H5_DLLCPP AttributeIException : public LocationException {
    public:
         AttributeIException(const H5std_string& func_name, const H5std_string& message = DEFAULT_MSG);
         AttributeIException();
@@ -152,13 +159,6 @@ class H5_DLLCPP LibraryIException : public Exception {
         LibraryIException(const H5std_string& func_name, const H5std_string& message = DEFAULT_MSG);
         LibraryIException();
         virtual ~LibraryIException() throw();
-};
-
-class H5_DLLCPP LocationException : public Exception {
-   public:
-        LocationException(const H5std_string& func_name, const H5std_string& message = DEFAULT_MSG);
-        LocationException();
-        virtual ~LocationException() throw();
 };
 
 class H5_DLLCPP IdComponentException : public Exception {
