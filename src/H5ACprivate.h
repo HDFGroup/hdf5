@@ -212,8 +212,9 @@ typedef H5C_cache_entry_t		H5AC_info_t;
 /* Typedef for metadata cache (defined in H5Cpkg.h) */
 typedef H5C_t	H5AC_t;
 
-/* Forward declaration of proxy entry parent list node (for propty entry type def) */
+/* Forward declaration of types for proxy entry typedef */
 struct H5AC_proxy_parent_t;
+struct H5AC_proxy_tmp_child_t;
 
 /* Metadata cache proxy entry type */
 typedef struct H5AC_proxy_entry_t {
@@ -234,6 +235,7 @@ typedef struct H5AC_proxy_entry_t {
                                         /* (Note that this currently duplicates some cache functionality) */
     size_t nunser_children;             /* Number of unserialized children */
                                         /* (Note that this currently duplicates some cache functionality) */
+    struct H5AC_proxy_tmp_child_t *tmp_children; /* List to track temporary child entries */
 } H5AC_proxy_entry_t;
 
 /* Shadow entry component types */
@@ -511,6 +513,8 @@ H5_DLL H5AC_proxy_entry_t *H5AC_proxy_entry_create(H5F_t *f);
 H5_DLL herr_t H5AC_proxy_entry_add_parent(H5AC_proxy_entry_t *pentry, void *parent);
 H5_DLL herr_t H5AC_proxy_entry_remove_parent(H5AC_proxy_entry_t *pentry, void *parent);
 H5_DLL herr_t H5AC_proxy_entry_add_child(H5AC_proxy_entry_t *pentry, void *child);
+H5_DLL herr_t H5AC_proxy_entry_add_tmp_child(H5AC_proxy_entry_t *pentry,
+    void *child);
 H5_DLL herr_t H5AC_proxy_entry_remove_child(H5AC_proxy_entry_t *pentry, void *child);
 H5_DLL herr_t H5AC_proxy_entry_dest(H5AC_proxy_entry_t *pentry);
 

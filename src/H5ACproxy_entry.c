@@ -52,6 +52,13 @@ typedef struct H5AC_proxy_parent_t {
     H5AC_info_t *parent;                /* Pointer to parent entry */
 } H5AC_proxy_parent_t;
 
+/* Proxy entry temporary child list node */
+typedef struct H5AC_proxy_tmp_child_t {
+    struct H5AC_proxy_tmp_child_t *next;   /* Pointer to next node in temp. child list */
+    struct H5AC_proxy_tmp_child_t *prev;   /* Pointer to previous node in temp. child list */
+    H5AC_info_t *tmp_child;                /* Pointer to temp. child entry */
+} H5AC_proxy_tmp_child_t;
+
 
 /********************/
 /* Package Typedefs */
@@ -61,6 +68,10 @@ typedef struct H5AC_proxy_parent_t {
 /********************/
 /* Local Prototypes */
 /********************/
+
+/* Temporary child helper routine */
+static herr_t H5AC__proxy_entry_tmp_child_check(H5AC_proxy_entry_t *pentry,
+    haddr_t child_addr, hbool_t err_on_non_tmp_child);
 
 /* Metadata cache (H5AC) callbacks */
 static herr_t H5AC__proxy_entry_image_len(const void *thing, size_t *image_len);
@@ -106,6 +117,9 @@ H5FL_DEFINE_STATIC(H5AC_proxy_entry_t);
 
 /* Declare a free list to manage H5AC_proxy_parent_t objects */
 H5FL_DEFINE_STATIC(H5AC_proxy_parent_t);
+
+/* Declare a free list to manage H5AC_proxy_tmp_child_t objects */
+H5FL_DEFINE_STATIC(H5AC_proxy_tmp_child_t);
 
 
 
@@ -366,6 +380,153 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5AC_proxy_entry_add_tmp_child
+ *
+ * Purpose:     Add a temporary child to a proxy entry
+ *
+ * Note:	Temporary children are removed automatically from the proxy
+ *		when they are marked clean or evicted from the cache.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              May 31, 2018
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5AC_proxy_entry_add_tmp_child(H5AC_proxy_entry_t *pentry, void *_tmp_child)
+{
+    H5AC_info_t *tmp_child = (H5AC_info_t *)_tmp_child; /* Temp. child entry's cache info */
+    H5AC_proxy_tmp_child_t *proxy_tmp_child = NULL;   /* Proxy temp. child node for new temp. child */
+    herr_t ret_value = SUCCEED;         	/* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity checks */
+    HDassert(pentry);
+    HDassert(tmp_child);
+
+    /* Add the child to the proxy */
+    if(H5AC_proxy_entry_add_child(pentry, tmp_child) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTSET, FAIL, "unable to add child to proxy")
+
+    /* Allocate a proxy temp. child node */
+    if(NULL == (proxy_tmp_child = H5FL_MALLOC(H5AC_proxy_tmp_child_t)))
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL, "can't allocate proxy temp. child node")
+
+    /* Set (temp. child) entry for proxy temp. child node */
+    proxy_tmp_child->tmp_child = tmp_child;
+
+    /* Add proxy temp. child node into list */
+    proxy_tmp_child->prev = NULL;
+    proxy_tmp_child->next = pentry->tmp_children;
+    if(pentry->tmp_children)
+        pentry->tmp_children->prev = proxy_tmp_child;
+    pentry->tmp_children = proxy_tmp_child;
+
+done:
+    if(ret_value < 0)
+        if(proxy_tmp_child) {
+            /* Unlink from list, if in it */
+            if(pentry->tmp_children == proxy_tmp_child) {
+                if(proxy_tmp_child->next)
+                    proxy_tmp_child->next->prev = NULL;
+                pentry->tmp_children = proxy_tmp_child->next;
+            } /* end if */
+
+            /* Free the proxy temp. child node */
+            proxy_tmp_child = H5FL_FREE(H5AC_proxy_tmp_child_t, proxy_tmp_child);
+        } /* end if */
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5AC_proxy_entry_add_tmp_child() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5AC__proxy_entry_tmp_child_check
+ *
+ * Purpose:     Check if child being cleaned / evicted is a temporary child
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              May 31, 2018
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5AC__proxy_entry_tmp_child_check(H5AC_proxy_entry_t *pentry, haddr_t child_addr,
+    hbool_t err_on_non_tmp_child)
+{
+    H5AC_proxy_tmp_child_t *proxy_tmp_child;   /* Proxy temp. child node for new temp. child */
+    void *child_entry;                  /* Child entry */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity check */
+    HDassert(pentry);
+    HDassert(H5F_addr_defined(child_addr));
+
+    /* Get the cache entry for the child address */
+    if(H5AC_get_entry_from_addr(pentry->f, child_addr, &child_entry) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "can't lookup cache entry at address")
+    if(NULL == child_entry)
+        HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "no cache entry at address")
+
+    /* Check if this is a temporary child */
+    /* (Linear search, but these lists probably aren't huge) */
+    proxy_tmp_child = pentry->tmp_children;
+    while(proxy_tmp_child) {
+        /* Check for entry being removed */
+        if(proxy_tmp_child->tmp_child == child_entry)
+            break;
+
+        /* Advance to next proxy temp. child node */
+        proxy_tmp_child = proxy_tmp_child->next;
+    } /* end while */
+
+    /* Error if not temp. child, else remove from proxy */
+    if(NULL == proxy_tmp_child) {
+        if(err_on_non_tmp_child)
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTREMOVE, FAIL, "can't remove non-temporary child")
+    } /* end if */
+    else {
+        /* Remove proxy temp. child from list */
+        if(pentry->tmp_children == proxy_tmp_child) {
+            /* Sanity check */
+            HDassert(NULL == proxy_tmp_child->prev);
+
+            /* Detech from head of list */
+            if(proxy_tmp_child->next)
+                proxy_tmp_child->next->prev = NULL;
+            pentry->tmp_children = proxy_tmp_child->next;
+        } /* end if */
+        else {
+            /* Sanity check */
+            HDassert(proxy_tmp_child->prev);
+
+            /* Detach from middle or end of list */
+            proxy_tmp_child->prev->next = proxy_tmp_child->next;
+            if(proxy_tmp_child->next)
+                proxy_tmp_child->next->prev = proxy_tmp_child->prev;
+        } /* end else */
+
+        /* Free the proxy temp. child node */
+        proxy_tmp_child = H5FL_FREE(H5AC_proxy_tmp_child_t, proxy_tmp_child);
+
+        /* Remove child from proxy */
+        if(H5AC_proxy_entry_remove_child(pentry, child_entry) < 0)
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTREMOVE, FAIL, "can't remove temporary child")
+    } /* end else */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5AC__proxy_entry_tmp_child_check() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5AC_proxy_entry_remove_child
  *
  * Purpose:     Remove a child a proxy entry
@@ -533,7 +694,9 @@ static herr_t
 H5AC__proxy_entry_notify(H5AC_notify_action_t action, void *_thing, ...)
 {
     H5AC_proxy_entry_t *pentry = (H5AC_proxy_entry_t *)_thing;
-    herr_t ret_value = SUCCEED;         	/* Return value */
+    va_list ap;                     /* Varargs parameter */
+    hbool_t va_started = FALSE;     /* Whether the variable argument list is open */
+    herr_t ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -594,16 +757,32 @@ H5AC__proxy_entry_notify(H5AC_notify_action_t action, void *_thing, ...)
 
         case H5AC_NOTIFY_ACTION_CHILD_CLEANED:
         case H5AC_NOTIFY_ACTION_CHILD_UNDEPEND_DIRTY:
-            /* Sanity check */
-            HDassert(pentry->ndirty_children > 0);
+            {
+                haddr_t child_addr;             /* Address of child entry */
 
-            /* Decrement # of dirty children */
-            pentry->ndirty_children--;
+                /* Sanity check */
+                HDassert(pentry->ndirty_children > 0);
 
-            /* Check for last dirty child */
-            if(0 == pentry->ndirty_children)
-                if(H5AC_mark_entry_clean(pentry) < 0)
-                    HGOTO_ERROR(H5E_CACHE, H5E_CANTCLEAN, FAIL, "can't mark proxy entry clean")
+                /* Decrement # of dirty children */
+                pentry->ndirty_children--;
+
+                /* Check for last dirty child */
+                if(0 == pentry->ndirty_children)
+                    if(H5AC_mark_entry_clean(pentry) < 0)
+                        HGOTO_ERROR(H5E_CACHE, H5E_CANTCLEAN, FAIL, "can't mark proxy entry clean")
+
+                /* Initialize the argument list */
+                va_start(ap, _thing);
+                va_started = TRUE;
+
+                /* The child entry address in the varg */
+                child_addr = va_arg(ap, haddr_t);
+                HDassert(H5F_addr_defined(child_addr));
+
+                /* Check if this is a temporary child */
+                if(H5AC__proxy_entry_tmp_child_check(pentry, child_addr, FALSE) < 0)
+                    HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "check for temporary child failed")
+            } /* end case */
             break;
 
         case H5AC_NOTIFY_ACTION_CHILD_UNSERIALIZED:
@@ -630,11 +809,21 @@ H5AC__proxy_entry_notify(H5AC_notify_action_t action, void *_thing, ...)
             break;
 
         case H5AC_NOTIFY_ACTION_CHILD_BEFORE_EVICT:
-#ifdef NDEBUG
-            HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "invalid notify action from metadata cache")
-#else /* NDEBUG */
-            HDassert(0 && "Invalid action?!?");
-#endif /* NDEBUG */
+            {
+                haddr_t child_addr;             /* Address of child entry */
+
+                /* Initialize the argument list */
+                va_start(ap, _thing);
+                va_started = TRUE;
+
+                /* The child entry address in the varg */
+                child_addr = va_arg(ap, haddr_t);
+                HDassert(H5F_addr_defined(child_addr));
+
+                /* Check if this is a temporary child */
+                if(H5AC__proxy_entry_tmp_child_check(pentry, child_addr, TRUE) < 0)
+                    HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "check for temporary child failed")
+            } /* end case */
 	    break;
 
         default:
@@ -646,6 +835,9 @@ H5AC__proxy_entry_notify(H5AC_notify_action_t action, void *_thing, ...)
     } /* end switch */
 
 done:
+    if(va_started)
+        va_end(ap);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5AC__proxy_entry_notify() */
 
