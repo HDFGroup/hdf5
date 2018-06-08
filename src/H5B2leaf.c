@@ -139,7 +139,7 @@ H5B2__create_leaf(H5B2_hdr_t *hdr, void *parent, H5B2_node_ptr_t *node_ptr)
 
     /* Add leaf node as child of 'top' proxy */
     if(hdr->top_proxy) {
-        if(H5AC_proxy_entry_add_child(hdr->top_proxy, hdr->f, leaf) < 0)
+        if(H5AC_proxy_entry_add_child(hdr->top_proxy, leaf) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTSET, FAIL, "unable to add v2 B-tree node as child of 'top' proxy")
         leaf->top_proxy = hdr->top_proxy;
     } /* end if */
@@ -217,7 +217,7 @@ H5B2__protect_leaf(H5B2_hdr_t *hdr, void *parent, H5B2_node_ptr_t *node_ptr,
     /* Add to 'top' proxy, if node isn't already there */
     if(hdr->top_proxy && NULL == leaf->top_proxy) {
         /* Add leaf node as child of 'top' proxy */
-        if(H5AC_proxy_entry_add_child(hdr->top_proxy, hdr->f, leaf) < 0)
+        if(H5AC_proxy_entry_add_child(hdr->top_proxy, leaf) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTSET, NULL, "unable to add v2 B-tree leaf node as child of 'top' proxy")
         leaf->top_proxy = hdr->top_proxy;
     } /* end if */

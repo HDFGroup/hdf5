@@ -219,7 +219,7 @@ H5FA__hdr_create(H5F_t *f, const H5FA_create_t *cparam, void *ctx_udata))
 
     /* Create 'top' proxy for extensible array entries */
     if(hdr->swmr_write)
-        if(NULL == (hdr->top_proxy = H5AC_proxy_entry_create()))
+        if(NULL == (hdr->top_proxy = H5AC_proxy_entry_create(f)))
             H5E_THROW(H5E_CANTCREATE, "can't create fixed array entry proxy")
 
     /* Cache the new Fixed Array header */
@@ -229,7 +229,7 @@ H5FA__hdr_create(H5F_t *f, const H5FA_create_t *cparam, void *ctx_udata))
 
     /* Add header as child of 'top' proxy */
     if(hdr->top_proxy)
-        if(H5AC_proxy_entry_add_child(hdr->top_proxy, f, hdr) < 0)
+        if(H5AC_proxy_entry_add_child(hdr->top_proxy, hdr) < 0)
             H5E_THROW(H5E_CANTSET, "unable to add fixed array entry as child of array proxy")
 
     /* Set address of array header to return */
@@ -446,11 +446,11 @@ H5FA__hdr_protect(H5F_t *f, haddr_t fa_addr, void *ctx_udata, unsigned flags))
     /* Create top proxy, if it doesn't exist */
     if(hdr->swmr_write && NULL == hdr->top_proxy) {
         /* Create 'top' proxy for fixed array entries */
-        if(NULL == (hdr->top_proxy = H5AC_proxy_entry_create()))
+        if(NULL == (hdr->top_proxy = H5AC_proxy_entry_create(f)))
             H5E_THROW(H5E_CANTCREATE, "can't create fixed array entry proxy")
 
         /* Add header as child of 'top' proxy */
-        if(H5AC_proxy_entry_add_child(hdr->top_proxy, f, hdr) < 0)
+        if(H5AC_proxy_entry_add_child(hdr->top_proxy, hdr) < 0)
             H5E_THROW(H5E_CANTSET, "unable to add fixed array entry as child of array proxy")
     } /* end if */
 

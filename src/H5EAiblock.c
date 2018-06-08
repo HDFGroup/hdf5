@@ -236,7 +236,7 @@ HDfprintf(stderr, "%s: iblock->size = %Zu\n", FUNC, iblock->size);
 
     /* Add index block as child of 'top' proxy */
     if(hdr->top_proxy) {
-        if(H5AC_proxy_entry_add_child(hdr->top_proxy, hdr->f, iblock) < 0)
+        if(H5AC_proxy_entry_add_child(hdr->top_proxy, iblock) < 0)
             H5E_THROW(H5E_CANTSET, "unable to add extensible array entry as child of array proxy")
         iblock->top_proxy = hdr->top_proxy;
     } /* end if */
@@ -313,7 +313,7 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
     /* Create top proxy, if it doesn't exist */
     if(hdr->top_proxy && NULL == iblock->top_proxy) {
         /* Add index block as child of 'top' proxy */
-        if(H5AC_proxy_entry_add_child(hdr->top_proxy, hdr->f, iblock) < 0)
+        if(H5AC_proxy_entry_add_child(hdr->top_proxy, iblock) < 0)
             H5E_THROW(H5E_CANTSET, "unable to add extensible array entry as child of array proxy")
         iblock->top_proxy = hdr->top_proxy;
     } /* end if */

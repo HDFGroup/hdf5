@@ -221,6 +221,7 @@ typedef struct H5AC_proxy_entry_t {
                                         /* (MUST be first field in structure) */
 
     /* General fields */
+    H5F_t *f;                           /* File that proxy is within */
     haddr_t addr;                       /* Address of the entry in the file */
                                         /* (Should be in 'temporary' address space) */
 
@@ -506,11 +507,10 @@ H5_DLL herr_t H5AC_expunge_tag_type_metadata(H5F_t *f, haddr_t tag, int type_id,
 H5_DLL herr_t H5AC_get_tag(const void *thing, /*OUT*/ haddr_t *tag);
 
 /* Proxy entry routines */
-H5_DLL H5AC_proxy_entry_t *H5AC_proxy_entry_create(void);
+H5_DLL H5AC_proxy_entry_t *H5AC_proxy_entry_create(H5F_t *f);
 H5_DLL herr_t H5AC_proxy_entry_add_parent(H5AC_proxy_entry_t *pentry, void *parent);
 H5_DLL herr_t H5AC_proxy_entry_remove_parent(H5AC_proxy_entry_t *pentry, void *parent);
-H5_DLL herr_t H5AC_proxy_entry_add_child(H5AC_proxy_entry_t *pentry, H5F_t *f,
-    void *child);
+H5_DLL herr_t H5AC_proxy_entry_add_child(H5AC_proxy_entry_t *pentry, void *child);
 H5_DLL herr_t H5AC_proxy_entry_remove_child(H5AC_proxy_entry_t *pentry, void *child);
 H5_DLL herr_t H5AC_proxy_entry_dest(H5AC_proxy_entry_t *pentry);
 

@@ -131,7 +131,7 @@ H5O__chunk_add(H5F_t *f, H5O_t *oh, unsigned idx, unsigned cont_chunkno)
 
     /* Add chunk as child of 'top' proxy */
     if(oh->top_proxy) {
-        if(H5AC_proxy_entry_add_child(oh->top_proxy, f, chk_proxy) < 0)
+        if(H5AC_proxy_entry_add_child(oh->top_proxy, chk_proxy) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "unable to add object header chunk entry as child of object header 'top' proxy")
         chk_proxy->top_proxy = oh->top_proxy;
     } /* end if */
@@ -225,7 +225,7 @@ H5O__chunk_protect(H5F_t *f, H5O_t *oh, unsigned idx)
         /* Add to 'top' proxy, if not already there */
         if(oh->top_proxy && NULL == chk_proxy->top_proxy) {
             /* Add object header chunk as child of 'top' proxy */
-            if(H5AC_proxy_entry_add_child(oh->top_proxy, f, chk_proxy) < 0)
+            if(H5AC_proxy_entry_add_child(oh->top_proxy, chk_proxy) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTSET, NULL, "unable to add object header chunk entry as child of object header 'top' proxy")
             chk_proxy->top_proxy = oh->top_proxy;
         } /* end if */

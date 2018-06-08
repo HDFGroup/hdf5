@@ -148,7 +148,7 @@ H5B2__create_internal(H5B2_hdr_t *hdr, void *parent, H5B2_node_ptr_t *node_ptr,
 
     /* Add internal node as child of 'top' proxy */
     if(hdr->top_proxy) {
-        if(H5AC_proxy_entry_add_child(hdr->top_proxy, hdr->f, internal) < 0)
+        if(H5AC_proxy_entry_add_child(hdr->top_proxy, internal) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTSET, FAIL, "unable to add v2 B-tree node as child of 'top' proxy")
         internal->top_proxy = hdr->top_proxy;
     } /* end if */
@@ -228,7 +228,7 @@ H5B2__protect_internal(H5B2_hdr_t *hdr, void *parent, H5B2_node_ptr_t *node_ptr,
     /* Add to 'top' proxy, if not already there */
     if(hdr->top_proxy && NULL == internal->top_proxy) {
         /* Add internal node as child of 'top' proxy */
-        if(H5AC_proxy_entry_add_child(hdr->top_proxy, hdr->f, internal) < 0)
+        if(H5AC_proxy_entry_add_child(hdr->top_proxy, internal) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTSET, NULL, "unable to add v2 B-tree internal node as child of 'top' proxy")
         internal->top_proxy = hdr->top_proxy;
     } /* end if */

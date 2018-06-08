@@ -839,11 +839,8 @@ H5HF_depend(H5HF_t *fh, H5AC_proxy_entry_t *parent)
         /* Sanity check */
         HDassert(fh->hdr->top_proxy);
 
-        /* Set the shared heap header's file context for this operation */
-        fh->hdr->f = fh->f;
-
         /* Add the fractal heap's 'top' proxy as a child of the parent */
-        if(H5AC_proxy_entry_add_child(parent, fh->hdr->f, fh->hdr->top_proxy) < 0)
+        if(H5AC_proxy_entry_add_child(parent, fh->hdr->top_proxy) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTSET, FAIL, "unable to add fractal heap as child of proxy")
 	fh->hdr->parent = parent;
     } /* end if */

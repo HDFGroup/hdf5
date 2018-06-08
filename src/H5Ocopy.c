@@ -891,13 +891,13 @@ H5O__copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/,
     /* Create object header proxies if doing SWMR writes */
     if(oh_dst->swmr_write) {
         /* Create 'top' proxy for object header entries and add header as child */
-        if(NULL == (oh_dst->top_proxy = H5AC_proxy_entry_create()))
+        if(NULL == (oh_dst->top_proxy = H5AC_proxy_entry_create(oloc_dst->file)))
             HGOTO_ERROR(H5E_OHDR, H5E_CANTCREATE, FAIL, "can't create object header 'top' proxy")
-        if(H5AC_proxy_entry_add_child(oh_dst->top_proxy, oloc_dst->file, oh_dst) < 0)
+        if(H5AC_proxy_entry_add_child(oh_dst->top_proxy, oh_dst) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't add object header as child of 'top' proxy")
 
         /* Create 'bottom' proxy for object header entries and add header as parent */
-        if(NULL == (oh_dst->bot_proxy = H5AC_proxy_entry_create()))
+        if(NULL == (oh_dst->bot_proxy = H5AC_proxy_entry_create(oloc_dst->file)))
             HGOTO_ERROR(H5E_OHDR, H5E_CANTCREATE, FAIL, "can't create object header 'bottom' proxy")
         if(H5AC_proxy_entry_add_parent(oh_dst->bot_proxy, oh_dst) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't add object header as parent of 'bottom' proxy")

@@ -123,7 +123,7 @@ H5FL_DEFINE_STATIC(H5AC_proxy_parent_t);
  *-------------------------------------------------------------------------
  */
 H5AC_proxy_entry_t *
-H5AC_proxy_entry_create(void)
+H5AC_proxy_entry_create(H5F_t *f)
 {
     H5AC_proxy_entry_t *pentry = NULL;  /* Pointer to new proxy entry */
     H5AC_proxy_entry_t *ret_value = NULL;       /* Return value */
@@ -135,6 +135,7 @@ H5AC_proxy_entry_create(void)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, NULL, "can't allocate proxy entry")
 
     /* Set non-zero fields */
+    pentry->f = f;
     pentry->addr = HADDR_UNDEF;
 
     /* Set return value */
@@ -176,8 +177,8 @@ H5AC_proxy_entry_add_parent(H5AC_proxy_entry_t *pentry, void *_parent)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(parent);
     HDassert(pentry);
+    HDassert(parent);
 
     /* Allocate a proxy parent node */
     if(NULL == (proxy_parent = H5FL_MALLOC(H5AC_proxy_parent_t)))
@@ -306,7 +307,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5AC_proxy_entry_add_child(H5AC_proxy_entry_t *pentry, H5F_t *f, void *child)
+H5AC_proxy_entry_add_child(H5AC_proxy_entry_t *pentry, void *child)
 {
     herr_t ret_value = SUCCEED;         	/* Return value */
 
@@ -320,11 +321,11 @@ H5AC_proxy_entry_add_child(H5AC_proxy_entry_t *pentry, H5F_t *f, void *child)
     if(0 == pentry->nchildren) {
         /* Get an address, if the proxy doesn't already have one */
         if(!H5F_addr_defined(pentry->addr))
-            if(HADDR_UNDEF == (pentry->addr = H5MF_alloc_tmp(f, 1)))
+            if(HADDR_UNDEF == (pentry->addr = H5MF_alloc_tmp(pentry->f, 1)))
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL, "temporary file space allocation failed for proxy entry")
 
         /* Insert the proxy entry into the cache */
-        if(H5AC_insert_entry(f, H5AC_PROXY_ENTRY, pentry->addr, pentry, H5AC__PIN_ENTRY_FLAG) < 0)
+        if(H5AC_insert_entry(pentry->f, H5AC_PROXY_ENTRY, pentry->addr, pentry, H5AC__PIN_ENTRY_FLAG) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTINSERT, FAIL, "unable to cache proxy entry")
 
         /* Proxies start out clean (insertions are automatically marked dirty) */

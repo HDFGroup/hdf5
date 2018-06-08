@@ -191,7 +191,7 @@ H5HF__man_dblock_create(H5HF_hdr_t *hdr, H5HF_indirect_t *par_iblock,
 
     /* Add direct block as child of 'top' proxy */
     if(hdr->top_proxy) {
-        if(H5AC_proxy_entry_add_child(hdr->top_proxy, hdr->f, dblock) < 0)
+        if(H5AC_proxy_entry_add_child(hdr->top_proxy, dblock) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTSET, FAIL, "unable to add fractal heap entry as child of heap 'top' proxy")
         dblock->top_proxy = hdr->top_proxy;
     } /* end if */
@@ -520,7 +520,7 @@ H5HF__man_dblock_protect(H5HF_hdr_t *hdr, haddr_t dblock_addr,
     /* Add to 'top' proxy, if not already there */
     if(hdr->top_proxy && NULL == dblock->top_proxy) {
         /* Add direct block as child of 'top' proxy */
-        if(H5AC_proxy_entry_add_child(hdr->top_proxy, hdr->f, dblock) < 0)
+        if(H5AC_proxy_entry_add_child(hdr->top_proxy, dblock) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTSET, NULL, "unable to add fractal heap entry as child of heap 'top' proxy")
         dblock->top_proxy = hdr->top_proxy;
     } /* end if */

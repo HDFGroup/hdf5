@@ -315,13 +315,13 @@ H5B2__hdr_create(H5F_t *f, const H5B2_create_t *cparam, void *ctx_udata)
     /* Create proxies for v2 B-tree entries */
     if(hdr->swmr_write) {
         /* Create 'top' proxy for v2 B-tree entries and add header as child */
-        if(NULL == (hdr->top_proxy = H5AC_proxy_entry_create()))
+        if(NULL == (hdr->top_proxy = H5AC_proxy_entry_create(f)))
             HGOTO_ERROR(H5E_BTREE, H5E_CANTCREATE, HADDR_UNDEF, "can't create v2 B-tree 'top' proxy")
-        if(H5AC_proxy_entry_add_child(hdr->top_proxy, f, hdr) < 0)
+        if(H5AC_proxy_entry_add_child(hdr->top_proxy, hdr) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTSET, HADDR_UNDEF, "unable to add v2 B-tree header as child of B-tree proxy")
 
         /* Create 'bottom' proxy for v2 B-tree entries and add header as parent */
-        if(NULL == (hdr->bot_proxy = H5AC_proxy_entry_create()))
+        if(NULL == (hdr->bot_proxy = H5AC_proxy_entry_create(f)))
             HGOTO_ERROR(H5E_BTREE, H5E_CANTCREATE, HADDR_UNDEF, "can't create v2 B-tree 'bottom' proxy")
         if(H5AC_proxy_entry_add_parent(hdr->bot_proxy, hdr) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTSET, HADDR_UNDEF, "unable to add v2 B-tree header as parent of B-tree proxy")
@@ -557,15 +557,15 @@ H5B2__hdr_protect(H5F_t *f, haddr_t hdr_addr, void *ctx_udata,
     if(hdr->swmr_write && (NULL == hdr->top_proxy || NULL == hdr->bot_proxy)) {
         /* Create 'top' proxy for v2 B-tree entries, and add header as child */
         if(NULL == hdr->top_proxy) {
-            if(NULL == (hdr->top_proxy = H5AC_proxy_entry_create()))
+            if(NULL == (hdr->top_proxy = H5AC_proxy_entry_create(f)))
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTCREATE, NULL, "can't create v2 B-tree 'top' proxy")
-            if(H5AC_proxy_entry_add_child(hdr->top_proxy, f, hdr) < 0)
+            if(H5AC_proxy_entry_add_child(hdr->top_proxy, hdr) < 0)
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTSET, NULL, "unable to add v2 B-tree header as child of 'top' proxy")
         } /* end if */
 
         /* Create 'bottom' proxy for v2 B-tree entries, and add header as parent */
         if(NULL == hdr->bot_proxy) {
-            if(NULL == (hdr->bot_proxy = H5AC_proxy_entry_create()))
+            if(NULL == (hdr->bot_proxy = H5AC_proxy_entry_create(f)))
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTCREATE, NULL, "can't create v2 B-tree 'bottom' proxy")
             if(H5AC_proxy_entry_add_parent(hdr->bot_proxy, hdr) < 0)
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTSET, NULL, "unable to add v2 B-tree header as parent of 'bottom' proxy")

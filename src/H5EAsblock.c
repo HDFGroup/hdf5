@@ -224,7 +224,7 @@ H5EA__sblock_create(H5EA_hdr_t *hdr, H5EA_iblock_t *parent, hbool_t *stats_chang
 
     /* Add super block as child of 'top' proxy */
     if(hdr->top_proxy) {
-        if(H5AC_proxy_entry_add_child(hdr->top_proxy, hdr->f, sblock) < 0)
+        if(H5AC_proxy_entry_add_child(hdr->top_proxy, sblock) < 0)
             H5E_THROW(H5E_CANTSET, "unable to add extensible array entry as child of array proxy")
         sblock->top_proxy = hdr->top_proxy;
     } /* end if */
@@ -301,7 +301,7 @@ H5EA__sblock_protect(H5EA_hdr_t *hdr, H5EA_iblock_t *parent,
     /* Create top proxy, if it doesn't exist */
     if(hdr->top_proxy && NULL == sblock->top_proxy) {
         /* Add super block as child of 'top' proxy */
-        if(H5AC_proxy_entry_add_child(hdr->top_proxy, hdr->f, sblock) < 0)
+        if(H5AC_proxy_entry_add_child(hdr->top_proxy, sblock) < 0)
             H5E_THROW(H5E_CANTSET, "unable to add extensible array entry as child of array proxy")
         sblock->top_proxy = hdr->top_proxy;
     } /* end if */

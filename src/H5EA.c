@@ -813,11 +813,8 @@ H5EA_depend(H5EA_t *ea, H5AC_proxy_entry_t *parent))
         /* Sanity check */
         HDassert(hdr->top_proxy);
 
-        /* Set the shared array header's file context for this operation */
-        hdr->f = ea->f;
-
         /* Add the extensible array as a child of the parent (proxy) */
-        if(H5AC_proxy_entry_add_child(parent, hdr->f, hdr->top_proxy) < 0)
+        if(H5AC_proxy_entry_add_child(parent, hdr->top_proxy) < 0)
             H5E_THROW(H5E_CANTSET, "unable to add extensible array as child of proxy")
         hdr->parent = parent;
     } /* end if */

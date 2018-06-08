@@ -439,13 +439,13 @@ H5O_create(H5F_t *f, size_t size_hint, size_t initial_rc, hid_t ocpl_id,
     /* Create object header proxies if doing SWMR writes */
     if(oh->swmr_write) {
         /* Create 'top' proxy for object header entries and add header as child */
-        if(NULL == (oh->top_proxy = H5AC_proxy_entry_create()))
+        if(NULL == (oh->top_proxy = H5AC_proxy_entry_create(f)))
             HGOTO_ERROR(H5E_OHDR, H5E_CANTCREATE, FAIL, "can't create object header 'top' proxy")
-        if(H5AC_proxy_entry_add_child(oh->top_proxy, f, oh) < 0)
+        if(H5AC_proxy_entry_add_child(oh->top_proxy, oh) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't add object header as child of 'top' proxy")
 
         /* Create 'bottom' proxy for object header entries and add header as parent */
-        if(NULL == (oh->bot_proxy = H5AC_proxy_entry_create()))
+        if(NULL == (oh->bot_proxy = H5AC_proxy_entry_create(f)))
             HGOTO_ERROR(H5E_OHDR, H5E_CANTCREATE, FAIL, "can't create object header 'bottom' proxy")
         if(H5AC_proxy_entry_add_parent(oh->bot_proxy, oh) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't add object header as parent of 'bottom' proxy")
@@ -1109,15 +1109,15 @@ H5O_protect(const H5O_loc_t *loc, unsigned prot_flags, hbool_t pin_all_chunks)
     if(oh->swmr_write && (NULL == oh->top_proxy || NULL == oh->bot_proxy)) {
         /* Create 'top' proxy for object header entries, and add header as child */
         if(NULL == oh->top_proxy) {
-            if(NULL == (oh->top_proxy = H5AC_proxy_entry_create()))
+            if(NULL == (oh->top_proxy = H5AC_proxy_entry_create(loc->file)))
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTCREATE, NULL, "can't create object header entry 'top' proxy")
-            if(H5AC_proxy_entry_add_child(oh->top_proxy, loc->file, oh) < 0)
+            if(H5AC_proxy_entry_add_child(oh->top_proxy, oh) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, NULL, "unable to add object header entry as child of 'top' proxy")
         } /* end if */
 
         /* Create 'bottom' proxy for object header entries, and add header as parent */
         if(NULL == oh->bot_proxy) {
-            if(NULL == (oh->bot_proxy = H5AC_proxy_entry_create()))
+            if(NULL == (oh->bot_proxy = H5AC_proxy_entry_create(loc->file)))
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTCREATE, NULL, "can't create object header entry 'bottom' proxy")
             if(H5AC_proxy_entry_add_parent(oh->bot_proxy, oh) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, NULL, "unable to add object header entry as parent of 'bottom' proxy")

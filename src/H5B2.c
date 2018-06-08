@@ -1416,11 +1416,8 @@ H5B2_depend(H5B2_t *bt2, H5AC_proxy_entry_t *parent)
         /* Sanity check */
         HDassert(hdr->top_proxy);
 
-        /* Set the shared v2 B-tree header's file context for this operation */
-        hdr->f = bt2->f;
-
         /* Add the v2 B-tree's 'top' proxy as a child of the parent */
-        if(H5AC_proxy_entry_add_child(parent, hdr->f, hdr->top_proxy) < 0)
+        if(H5AC_proxy_entry_add_child(parent, hdr->top_proxy) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTSET, FAIL, "unable to add v2 B-tree as child of proxy")
 	hdr->parent = parent;
     } /* end if */

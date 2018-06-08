@@ -220,7 +220,7 @@ H5FA__dblock_create(H5FA_hdr_t *hdr, hbool_t *hdr_dirty))
 
     /* Add data block as child of 'top' proxy */
     if(hdr->top_proxy) {
-        if(H5AC_proxy_entry_add_child(hdr->top_proxy, hdr->f, dblock) < 0)
+        if(H5AC_proxy_entry_add_child(hdr->top_proxy, dblock) < 0)
             H5E_THROW(H5E_CANTSET, "unable to add fixed array entry as child of array proxy")
         dblock->top_proxy = hdr->top_proxy;
     } /* end if */
@@ -290,7 +290,7 @@ H5FA__dblock_protect(H5FA_hdr_t *hdr, haddr_t dblk_addr, unsigned flags))
     /* Create top proxy, if it doesn't exist */
     if(hdr->top_proxy && NULL == dblock->top_proxy) {
         /* Add data block as child of 'top' proxy */
-        if(H5AC_proxy_entry_add_child(hdr->top_proxy, hdr->f, dblock) < 0)
+        if(H5AC_proxy_entry_add_child(hdr->top_proxy, dblock) < 0)
             H5E_THROW(H5E_CANTSET, "unable to add fixed array entry as child of array proxy")
         dblock->top_proxy = hdr->top_proxy;
     } /* end if */
