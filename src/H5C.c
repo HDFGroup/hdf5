@@ -6729,39 +6729,40 @@ static herr_t
 H5C__verify_len_eoa(H5F_t *f, const H5C_class_t *type, haddr_t addr,
     size_t *len, hbool_t actual)
 {
-    H5FD_mem_t cooked_type;             /* Modified type, accounting for switching global heaps */
-    haddr_t eoa;                	/* End-of-allocation in the file */
     herr_t ret_value = SUCCEED;      	/* Return value */
 
     FUNC_ENTER_STATIC
 
-    /* if type == H5FD_MEM_GHEAP, H5F_block_read() forces 
-     * type to H5FD_MEM_DRAW via its call to H5F__accum_read().
-     * Thus we do the same for purposes of computing the EOA
-     * for sanity checks.
-     */
-    cooked_type = (type->mem_type == H5FD_MEM_GHEAP) ? H5FD_MEM_DRAW : type->mem_type;
+    /* Can't check EOA with SWMR reader when SWMR writer is modifying the file */
+    if(!((H5F_INTENT(f) & H5F_ACC_SWMR_READ) && H5F_SWMR_DELTAT(f) > 0)) {
+        H5FD_mem_t cooked_type;         /* Modified type, accounting for switching global heaps */
+        haddr_t eoa;                	/* End-of-allocation in the file */
 
-    /* Get the file's end-of-allocation value */
-    eoa = H5F_get_eoa(f, cooked_type);
-    if(!H5F_addr_defined(eoa))
-	HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "invalid EOA address for file")
+        /* if type == H5FD_MEM_GHEAP, H5F_block_read() forces 
+         * type to H5FD_MEM_DRAW via its call to H5F__accum_read().
+         * Thus we do the same for purposes of computing the EOA
+         * for sanity checks.
+         */
+        cooked_type = (type->mem_type == H5FD_MEM_GHEAP) ? H5FD_MEM_DRAW : type->mem_type;
 
-    /* Check for bad address in general */
-    if(H5F_addr_gt(addr, eoa))
-	HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "address of object past end of allocation")
+        /* Get the file's end-of-allocation value */
+        eoa = H5F_get_eoa(f, cooked_type);
+        if(!H5F_addr_defined(eoa))
+            HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "invalid EOA address for file")
 
-    /* Check if the amount of data to read will be past the EOA */
-    if(H5F_addr_gt((addr + *len), eoa)) {
-	if(actual)
-	    HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "actual len exceeds EOA")
-	else
-	    /* Trim down the length of the metadata */
-	    *len = (size_t)(eoa - addr);
+        /* Check for address at or past EOA */
+        if(H5F_addr_ge(addr, eoa))
+            HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "address of object past end of allocation")
+
+        /* Check if the amount of data to read will be past the EOA */
+        if(H5F_addr_gt((addr + *len), eoa)) {
+            if(actual)
+                HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "actual len exceeds EOA")
+            else
+                /* Trim down the length of the metadata */
+                *len = (size_t)(eoa - addr);
+        } /* end if */
     } /* end if */
-
-    if(*len <= 0)
-	HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "len not positive after adjustment for EOA")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
