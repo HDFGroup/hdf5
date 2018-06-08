@@ -2393,7 +2393,7 @@ H5C_protect(H5F_t *		f,
     /* FULLSWMR should invoked H5C__flush_by_timestamp() when the SWMR-reader flag is set 
      * on the file, before the entry being protected is looked up in the cache
      */
-    if(H5F_INTENT(f) & H5F_ACC_SWMR_READ ) {
+    if(H5F_INTENT(f) & H5F_ACC_SWMR_READ) {
         unsigned deltat;        /* SWMR delta-t set by SWMR writer */
 
         /* Check for a file that has a SWMR delta-t value set by a SWMR writer */
@@ -6979,7 +6979,7 @@ H5C_load_entry(H5F_t *              f,
 
         /* Check for too many tries */
         if(tries == 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_READERROR, NULL, "incorrect metadatda checksum after all read attempts")
+            HGOTO_ERROR(H5E_CACHE, H5E_READERROR, NULL, "incorrect metadata checksum after all read attempts")
 
         /* Calculate and track the # of retries */
         retries = max_tries - tries;
