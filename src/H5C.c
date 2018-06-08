@@ -2185,8 +2185,8 @@ H5C__flush_recursive_by_dep(H5F_t *f, H5C_cache_entry_t *entry_ptr,
 
     FUNC_ENTER_STATIC
 
-    /* Recursively flush and evict flush dependency children of the entry. */
-    if(entry_ptr->flush_dep_ndirty_children > 0)
+    /* Recursively flush flush-dependency children of the entry. */
+    if(entry_ptr->flush_dep_nchildren > 0)
         /* Flush from the end so there is less memory movement. */
         for(i = (int)(entry_ptr->flush_dep_nchildren - 1); i >= 0; i--)
             if(H5C__flush_recursive_by_dep(f, entry_ptr->flush_dep_children[i], flags) < 0)
