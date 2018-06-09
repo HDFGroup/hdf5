@@ -110,6 +110,7 @@ static int test_swmr_deltat_file_create(hid_t fapl);
 static int test_swmr_deltat_file_create_without_swmr_write(hid_t fapl);
 static int test_swmr_deltat_read_concur(hid_t in_fapl);
 static int test_swmr_reader_timeout(hid_t in_fapl);
+
 /*
  * Tests for H5Pget/set_metadata_read_attemps(), H5Fget_metadata_read_retry_info()
  */
@@ -1187,11 +1188,11 @@ test_metadata_read_retry_info(hid_t in_fapl)
      *   c) File's superblock--retries[20][0]
      */
 
-    /* v2 B-tree leaf node: log retry 99 for 500 times */
-    for(i = 0; i < 500; i++) {
-        if(H5F_track_metadata_read_retries(f, H5AC_BT2_LEAF_ID, 99) < 0)
+    /* v2 B-tree leaf node: log retry (H5F_SWMR_METADATA_READ_ATTEMPTS - 1)
+     * for 500 times */
+    for(i = 0; i < 500; i++)
+        if(H5F_track_metadata_read_retries(f, H5AC_BT2_LEAF_ID, (H5F_SWMR_METADATA_READ_ATTEMPTS - 1)) < 0)
             FAIL_STACK_ERROR
-    }
 
     /* Extensive array data block: log retry 10 for 1000 times */
     for(i = 0; i < 1000; i++)
@@ -1225,10 +1226,9 @@ test_metadata_read_retry_info(hid_t in_fapl)
         TEST_ERROR
 
     /* Free memory for info.retries */
-    for(i = 0; i < H5F_NUM_METADATA_READ_RETRY_TYPES; i++)  {
+    for(i = 0; i < H5F_NUM_METADATA_READ_RETRY_TYPES; i++) 
         if(info.retries[i] != NULL)
             H5free_memory(info.retries[i]);
-    }
 
     /*
      * Increment 2nd set of retries for metadata items:
@@ -1239,20 +1239,18 @@ test_metadata_read_retry_info(hid_t in_fapl)
      */
 
     /* Object header: log retry 5 for 5 times */
-    for(i = 0; i < 5; i++) {
+    for(i = 0; i < 5; i++)
         if(H5F_track_metadata_read_retries(f, H5AC_OHDR_ID, 5) < 0)
             TEST_ERROR
-    }
 
     /* Extensive array data block: log retry 4 for 1 time */
     if(H5F_track_metadata_read_retries(f, H5AC_EARRAY_DBLOCK_ID, 4) < 0)
         TEST_ERROR
 
-    /* Fixed array header : log retry 50 for 10000 times */
-    for(i = 0; i < 10000; i++) {
-        if(H5F_track_metadata_read_retries(f, H5AC_FARRAY_HDR_ID, 50) < 0)
+    /* Fixed array header : log retry 20 for 10000 times */
+    for(i = 0; i < 10000; i++)
+        if(H5F_track_metadata_read_retries(f, H5AC_FARRAY_HDR_ID, 20) < 0)
             TEST_ERROR
-    }
 
     /* File's superblock: log retry 1 for 1 more time */
     if(H5F_track_metadata_read_retries(f, H5AC_SUPERBLOCK_ID, 1) < 0)
@@ -1456,11 +1454,11 @@ test_metadata_read_retry_info(hid_t in_fapl)
             FAIL_STACK_ERROR
     }
 
-    /* For fid1: free-space sections--log retry 99 for 1000 times */
-    for(i = 0; i < 1000; i++) {
-        if(H5F_track_metadata_read_retries(f1, H5AC_FSPACE_SINFO_ID, 99) < 0)
+    /* For fid1: free-space sections--log retry (H5F_SWMR_METADATA_READ_ATTEMPTS - 1)
+     * for 1000 times */
+    for(i = 0; i < 1000; i++)
+        if(H5F_track_metadata_read_retries(f1, H5AC_FSPACE_SINFO_ID, (H5F_SWMR_METADATA_READ_ATTEMPTS - 1)) < 0)
             FAIL_STACK_ERROR
-    }
 
     /* Retrieve the collection of metadata read retries for fid */
     if(H5Fget_metadata_read_retry_info(fid, &info) < 0)
