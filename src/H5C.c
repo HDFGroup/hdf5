@@ -178,10 +178,10 @@ static herr_t H5C_validate_pinned_entry_list(H5C_t * cache_ptr);
 static herr_t H5C_validate_protected_entry_list(H5C_t * cache_ptr);
 #endif /* H5C_DO_EXTREME_SANITY_CHECKS */
 
-#ifndef NDEBUG
+#if H5C_DO_EXTREME_SANITY_CHECKS
 static void H5C__assert_flush_dep_nocycle(const H5C_cache_entry_t * entry,
                                           const H5C_cache_entry_t * base_entry);
-#endif /* NDEBUG */
+#endif /* H5C_DO_EXTREME_SANITY_CHECKS */
 
 
 /*********************/
@@ -3895,9 +3895,9 @@ H5C_create_flush_dependency(void * parent_thing, void * child_thing)
     /* FULLSWMR */
     HDassert(parent_entry->flush_dep_children);
     HDassert(parent_entry->flush_dep_children_nalloc > 0);
-#ifndef NDEBUG
+#if H5C_DO_EXTREME_SANITY_CHECKS
     H5C__assert_flush_dep_nocycle(parent_entry, child_entry);
-#endif /* NDEBUG */
+#endif /* H5C_DO_EXTREME_SANITY_CHECKS */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -8229,7 +8229,7 @@ done:
 } /* H5C__mark_flush_dep_unserialized() */
 
 
-#ifndef NDEBUG
+#if H5C_DO_EXTREME_SANITY_CHECKS
 /*-------------------------------------------------------------------------
  * Function:    H5C__assert_flush_dep_nocycle()
  *
@@ -8266,7 +8266,7 @@ H5C__assert_flush_dep_nocycle(const H5C_cache_entry_t * entry,
 
     FUNC_LEAVE_NOAPI_VOID
 } /* H5C__assert_flush_dep_nocycle() */
-#endif /* NDEBUG */
+#endif /* H5C_DO_EXTREME_SANITY_CHECKS */
 
 
 /*-------------------------------------------------------------------------
