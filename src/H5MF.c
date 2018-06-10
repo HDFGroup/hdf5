@@ -824,7 +824,7 @@ HDfprintf(stderr, "%s: Check 1.0\n", FUNC);
         hbool_t is_fs_queue_empty = FALSE;
 
         if(H5MF__freedspace_queue_is_empty(f->shared->freedspace_head, &is_fs_queue_empty) < 0) 
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTGETSIZE, HADDR_UNDEF, "check freedspace queue failed")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGETSIZE, HADDR_UNDEF, "check freedspace queue failed")
                                             
         /* Freedspace queue is not empty */
         if(FALSE == is_fs_queue_empty) {
@@ -837,11 +837,18 @@ HDfprintf(stderr, "%s: Check 1.0\n", FUNC);
             do {
                 fs = NULL;
                 if(H5MF__freedspace_dequeue_time_limit(f, &fs, time_limit) < 0)
-                    HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, HADDR_UNDEF, "dequeue freedspace queue failed")
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, HADDR_UNDEF, "dequeue freedspace queue failed")
 
-                if(NULL != fs)
+                /* Check for finding an entry that's older than 2 * deltat */
+                if(NULL != fs) {
+                    /* Release space in file now */
                     if(H5MF__xfree_real(fs->f, fs->alloc_type, fs->addr, fs->size) < 0)
-                        HGOTO_ERROR(H5E_CACHE, H5E_CANTFREE, HADDR_UNDEF, "unable to free data")
+                        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, HADDR_UNDEF, "unable to free data")
+
+                    /* Release freed space object */
+                    if(H5MF__freedspace_dest(fs) < 0)
+                        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, HADDR_UNDEF, "can't destroy freedspace")
+                } /* end if */
             } while(NULL != fs);
         } /* end if */
     } /* end if */
@@ -1750,6 +1757,35 @@ HDfprintf(stderr, "%s: Entering\n", FUNC);
     /* check args */
     HDassert(f);
     HDassert(f->shared);
+
+    /* 
+     * Full SWMR: Proceed through the holding tank queue, dequeueing all blocks
+     * whether they have been on the queue for longer than 2t or not.
+     */
+    if(H5F_INTENT(f) & H5F_ACC_SWMR_WRITE) {
+        H5MF_freedspace_t *fs; 
+
+        /* Loop over dequeuing freedspace nodes on the list */
+        fs = f->shared->freedspace_head;
+        if(fs) {
+            while(fs) {
+                /* Release space in file now */
+                if(H5MF__xfree_real(f, fs->alloc_type, fs->addr, fs->size) < 0)
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "unable to free data")
+
+                /* Release freed space object */
+                if(H5MF__freedspace_dest(fs) < 0)
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "can't destroy freedspace")
+
+                /* Advance to next node */
+                fs = fs->next;
+            } /* end while */
+
+            /* Reset head & tail pointers */
+            f->shared->freedspace_head = NULL;
+            f->shared->freedspace_tail = NULL;
+        } /* end if */
+    } /* end if */
 
     if(H5F_PAGED_AGGR(f)) {
         if((ret_value = H5MF__close_pagefs(f)) < 0)

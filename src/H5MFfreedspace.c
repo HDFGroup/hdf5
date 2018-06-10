@@ -320,12 +320,17 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5MF__freedspace_push(H5MF_freedspace_t **head, H5MF_freedspace_t **tail, H5MF_freedspace_t *freedspace)
+H5MF__freedspace_push(H5MF_freedspace_t **head, H5MF_freedspace_t **tail,
+    H5MF_freedspace_t *freedspace)
 {
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
     HDassert(freedspace);
+    HDassert(freedspace->f);
+    HDassert(H5F_addr_defined(freedspace->addr));
+    HDassert(freedspace->addr > 0);
+    HDassert(freedspace->size);
 
     if(NULL == *head) {
         /* Add the first node */

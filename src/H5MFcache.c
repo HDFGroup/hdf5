@@ -208,7 +208,7 @@ H5MF__freedspace_notify(H5AC_notify_action_t action, void *_thing, ...)
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "can't get cache entry nchildren")
 
                 /* If the # of children drops to zero, invoke the callback and delete the freedspace entry */
-                if(0 == nchildren ) {
+                if(0 == nchildren) {
                     /* Remove freed space object from metadata cache */
                     if(H5AC_mark_entry_clean(pentry) < 0)
                         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTMARKCLEAN, FAIL, "can't mark entry clean")
@@ -218,12 +218,9 @@ H5MF__freedspace_notify(H5AC_notify_action_t action, void *_thing, ...)
                         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTREMOVE, FAIL, "can't remove entry")
 
                     /* Invoke routine to release freed space */
+                    /* (Takes ownership of freed space entry) */
                     if(H5MF__xfree_freedspace(pentry) < 0)
                         HGOTO_ERROR(H5E_RESOURCE, H5E_CALLBACK, FAIL, "can't release freed space")
-
-                    /* Release freed space object */
-                    if(H5MF__freedspace_dest(pentry) < 0)
-                        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTDELETE, FAIL, "can't destroy freedspace")
                 } /* end if */
             } /* end case */
             break;
