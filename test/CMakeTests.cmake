@@ -531,6 +531,7 @@ set (test_CLEANFILES
     cache_logging.out
     vds_swmr.h5
     vds_swmr_src_*.h5
+    swmr*.h5
     tmp/vds_src_2.h5
 )
 

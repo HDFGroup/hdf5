@@ -591,6 +591,325 @@ H5G_obj_insert(const H5O_loc_t *grp_oloc, const char *name, H5O_link_t *obj_lnk,
             HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "unable to insert entry into symbol table")
     } /* end if */
     else {
+hbool_t swmr_write = !!(H5F_INTENT(grp_oloc->file) & H5F_ACC_SWMR_WRITE);
+
+if(swmr_write) {
+    H5AC_shadow_entry_t *shadow;    /* Shadow entry for object */
+    haddr_t shadow_addr;            /* Address for group's shadow entry */
+    unsigned status = 0;            /* Cache entry status for address being freed */
+    hbool_t inserted = FALSE;       /* Whether the shadow entry was inserted into the cache */
+
+    /* Compute address for group's shadow entry */
+    shadow_addr = H5MF_get_shadow_addr(grp_oloc->file, grp_oloc->addr);
+    if(!H5F_addr_defined(shadow_addr))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTCOMPUTE, FAIL, "unable to get shadow entry address")
+
+// HDfprintf(stderr, "%s: grp_oloc->addr = %a (%a)\n", FUNC, grp_oloc->addr, shadow_addr);
+
+/*
+<find group's shadow ohdr entry>
+    <if it doesn't exist>
+        <create it>
+        <make it a parent of group's ohdr?>
+            <make ohdr a parent of group's fractal heap and B-tree?>
+        <make it a parent of group's fractal heap & B-tree?>
+    <else>
+        <update / repair the proxy entries>
+*/
+
+    /* Check cache status of shadow address */
+    if(H5AC_get_entry_status(grp_oloc->file, shadow_addr, &status) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to get shadow entry status")
+
+// HDfprintf(stderr, "%s: status = %0x\n", FUNC, status);
+
+    if((status & H5AC_ES__IN_CACHE) != 0) {
+// HDfprintf(stderr, "%s: shadow entry in cache - use_new_dense = %t\n", FUNC, use_new_dense);
+
+        /* Get the pointer to the shadow entry */
+        if(NULL == (shadow = H5AC_shadow_entry_protect(grp_oloc->file, shadow_addr, H5AC__NO_FLAGS_SET)))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTPROTECT, FAIL, "unable to protect group's shadow entry")
+// HDfprintf(stderr, "%s: shadow->ohdr_proxy = %p\n", FUNC, shadow->ohdr_proxy);
+// HDfprintf(stderr, "%s: shadow->obj_heap_proxy = %p\n", FUNC, shadow->obj_heap_proxy);
+// HDfprintf(stderr, "%s: shadow->obj_idx_proxy = %p\n", FUNC, shadow->obj_idx_proxy);
+// HDfprintf(stderr, "%s: shadow->obj_aux_idx_proxy = %p\n", FUNC, shadow->obj_aux_idx_proxy);
+// HDfprintf(stderr, "%s: shadow->attr_heap_proxy = %p\n", FUNC, shadow->attr_heap_proxy);
+// HDfprintf(stderr, "%s: shadow->attr_idx_proxy = %p\n", FUNC, shadow->attr_idx_proxy);
+
+        /* Check for repairing missing object header 'top' proxy */
+        if(NULL == shadow->ohdr_proxy) {
+            H5O_t *oh;                  /* Object header */
+            H5AC_proxy_entry_t *proxy;  /* 'Top' proxy for data structures */
+
+// HDfprintf(stderr, "%s: repairing object header 'top' proxy for shadow entry\n", FUNC);
+            /* Get group's object header */
+            if(NULL == (oh = H5O_protect(grp_oloc, H5AC__NO_FLAGS_SET, FALSE)))
+                HGOTO_ERROR(H5E_SYM, H5E_CANTPROTECT, FAIL, "unable to protect group's object header")
+
+            /* Get top proxy for group's object header */
+            if(NULL == (proxy = H5O_get_top_proxy(oh)))
+                HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to get group object header 'top' proxy")
+
+            /* Add object header 'top' proxy as component of shadow entry */
+            if(H5AC_shadow_entry_add_component(shadow, H5AC_SHADOW_OHDR, proxy) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "unable to set component of shadow entry")
+
+            /* Release the object header from the cache */
+            if(H5O_unprotect(grp_oloc, oh, H5AC__NO_FLAGS_SET) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTUNPROTECT, FAIL, "unable to release group's object header")
+        } /* end if */
+
+        if(use_new_dense) {
+// HDfprintf(stderr, "%s: linfo = {%a, %a}\n", FUNC, linfo.fheap_addr, linfo.name_bt2_addr);
+
+            /* Check for adding / repairing missing object heap 'top' proxy */
+            if(NULL == shadow->obj_heap_proxy) {
+                H5HF_t *fheap;              /* Fractal heap handle */
+                H5AC_proxy_entry_t *proxy;  /* 'Top' proxy for data structures */
+
+// HDfprintf(stderr, "%s: repairing object heap 'top' proxy for shadow entry\n", FUNC);
+
+                /* Open the fractal heap */
+                if(NULL == (fheap = H5HF_open(grp_oloc->file, linfo.fheap_addr)))
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open fractal heap")
+
+                /* Get the 'top' proxy for the fractal heap */
+                if(NULL == (proxy = H5HF_get_top_proxy(fheap)))
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to get fractal heap 'top' proxy")
+
+                /* Add fractal heap 'top' proxy as component of shadow entry */
+                if(H5AC_shadow_entry_add_component(shadow, H5AC_SHADOW_OBJ_HEAP, proxy) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "unable to set component of shadow entry")
+
+                /* Close the fractal heap */
+                if(H5HF_close(fheap) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close fractal heap")
+            } /* end if */
+
+            /* Check for adding / repairing missing object primary index 'top' proxy */
+            if(NULL == shadow->obj_idx_proxy) {
+                H5B2_t *bt2;                /* v2 B-tree for group's name index */
+                H5AC_proxy_entry_t *proxy;  /* 'Top' proxy for data structures */
+
+// HDfprintf(stderr, "%s: repairing object index 'top' proxy for shadow entry\n", FUNC);
+
+                /* Open the v2 B-tree for the group */
+                if(NULL == (bt2 = H5B2_open(grp_oloc->file, linfo.name_bt2_addr, NULL)))
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for name index")
+
+                /* Get the 'top' proxy for the v2 B-tree */
+                if(NULL == (proxy = H5B2_get_top_proxy(bt2)))
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to get v2 B-tree 'top' proxy")
+
+                /* Add v2 B-tree 'top' proxy as component of shadow entry */
+                if(H5AC_shadow_entry_add_component(shadow, H5AC_SHADOW_OBJ_IDX, proxy) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "unable to set component of shadow entry")
+
+                /* Close the v2 B-tree */
+                if(H5B2_close(bt2) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close v2 B-tree for name index")
+            } /* end if */
+        } /* end if */
+
+        /* Unprotect the shadow entry */
+        if(H5AC_shadow_entry_unprotect(shadow, H5AC__NO_FLAGS_SET) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTUNPROTECT, FAIL, "can't unprotect shadow entry")
+    } /* end if */
+    else {
+        H5O_t *oh = NULL;               /* Object header */
+        H5AC_proxy_entry_t *proxy;      /* 'Top' proxy for data structures */
+
+// HDfprintf(stderr, "%s: Creating new shadow entry for group\n", FUNC);
+        /* Create a shadow entry for the group */
+        if(NULL == (shadow = H5AC_shadow_entry_create(grp_oloc->file, shadow_addr)))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTCREATE, FAIL, "unable to create shadow entry for group")
+        inserted = TRUE;
+
+        /* Get group's object header */
+        if(NULL == (oh = H5O_protect(grp_oloc, H5AC__NO_FLAGS_SET, FALSE)))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTPROTECT, FAIL, "unable to protect group's object header")
+
+        /* Get top proxy for group's object header */
+        if(NULL == (proxy = H5O_get_top_proxy(oh)))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to get group object header 'top' proxy")
+
+        /* Add object header 'top' proxy as component of shadow entry */
+        if(H5AC_shadow_entry_add_component(shadow, H5AC_SHADOW_OHDR, proxy) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "unable to set component of shadow entry")
+
+        /* Release the object header from the cache */
+        if(H5O_unprotect(grp_oloc, oh, H5AC__NO_FLAGS_SET) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTUNPROTECT, FAIL, "unable to release group's object header")
+
+// HDfprintf(stderr, "%s: use_new_dense = %t\n", FUNC, use_new_dense);
+        if(use_new_dense) {
+            H5HF_t *fheap;              /* Fractal heap handle */
+            H5B2_t *bt2;                /* v2 B-tree for group's name index */
+
+// HDfprintf(stderr, "%s: linfo = {%a, %a}\n", FUNC, linfo.fheap_addr, linfo.name_bt2_addr);
+            /* Open the v2 B-tree for the group */
+            if(NULL == (bt2 = H5B2_open(grp_oloc->file, linfo.name_bt2_addr, NULL)))
+                HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for name index")
+
+            /* Get the 'top' proxy for the v2 B-tree */
+            if(NULL == (proxy = H5B2_get_top_proxy(bt2)))
+                HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to get v2 B-tree 'top' proxy")
+
+            /* Add v2 B-tree 'top' proxy as component of shadow entry */
+            if(H5AC_shadow_entry_add_component(shadow, H5AC_SHADOW_OBJ_IDX, proxy) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "unable to set component of shadow entry")
+
+
+            /* Open the fractal heap */
+            if(NULL == (fheap = H5HF_open(grp_oloc->file, linfo.fheap_addr)))
+                HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open fractal heap")
+
+            /* Get the 'top' proxy for the fractal heap */
+            if(NULL == (proxy = H5HF_get_top_proxy(fheap)))
+                HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to get fractal heap 'top' proxy")
+
+            /* Add fractal heap 'top' proxy as component of shadow entry */
+            if(H5AC_shadow_entry_add_component(shadow, H5AC_SHADOW_OBJ_HEAP, proxy) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "unable to set component of shadow entry")
+
+
+            /* Release resources */
+            if(H5B2_close(bt2) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close v2 B-tree for name index")
+            if(H5HF_close(fheap) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close fractal heap")
+        } /* end if */
+    } /* end else */
+
+/*
+<if dense>
+    <check previous operation>
+    <if (insert)>
+        <do nothing>
+    <else>
+        <if (remove)>
+            <remove meta-dependency between B-tree and fractal heap>
+            <flush B-tree>
+        <set up meta-dependency between fractal heap and B-tree>
+        <set to (insert)>
+*/
+    if(use_new_dense) {
+        /* Get the pointer to the shadow entry */
+        if(NULL == (shadow = H5AC_shadow_entry_protect(grp_oloc->file, shadow_addr, H5AC__NO_FLAGS_SET)))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTPROTECT, FAIL, "unable to protect group's shadow entry")
+
+// HDfprintf(stderr, "%s: shadow->last_op = %u\n", FUNC, (unsigned)shadow->last_op);
+        /* Check for "non-insert" as last operation */
+        if(H5AC_SHADOW_LAST_OP_INSERT != shadow->last_op) {
+            H5HF_t *fheap;              /* Fractal heap handle */
+            H5B2_t *bt2;                /* v2 B-tree for group's name index */
+            H5AC_proxy_entry_t *proxy;  /* Proxy for data structures */
+
+// HDfprintf(stderr, "%s: Switching to insert op\n", FUNC);
+            /* Check if last operation on the group was a remove (unlink) */
+            if(H5AC_SHADOW_LAST_OP_REMOVE == shadow->last_op) {
+                /* Check if v2 B-tree is still available */
+                if(shadow->obj_idx_proxy) {
+// HDfprintf(stderr, "%s: Unlinking v2 B-tree and flushing it\n", FUNC);
+                    /* Remove meta-flush dependency between v2 B-tree (child) and
+                     *      fractal heap (parent)
+                     */
+                    if(H5B2_undepend(grp_oloc->file, linfo.name_bt2_addr) < 0)
+                        HGOTO_ERROR(H5E_SYM, H5E_CANTUNDEPEND, FAIL, "unable to destroy meta-flush dependency between v2 B-tree and fractal heap")
+
+                    /* Flush v2 B-tree */
+                    /* Note: When the "flush pinned entries" code is finished,
+                     *          switch this to just flushing, instead of flush
+                     *          and invalidate (evict).  QAK - 05/30/2018
+                     */
+                    if(H5B2_flush(grp_oloc->file, linfo.name_bt2_addr, H5AC__FLUSH_INVALIDATE_FLAG) < 0)
+                        HGOTO_ERROR(H5E_SYM, H5E_CANTFLUSH, FAIL, "unable to flush v2 B-tree for group")
+                } /* end if */
+            } /* end if */
+
+// HDfprintf(stderr, "%s: linfo = {%a, %a}\n", FUNC, linfo.fheap_addr, linfo.name_bt2_addr);
+            /* Open the v2 B-tree for the group */
+            if(NULL == (bt2 = H5B2_open(grp_oloc->file, linfo.name_bt2_addr, NULL)))
+                HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for name index")
+
+            /* Get the 'bottom' proxy for the v2 B-tree */
+            if(NULL == (proxy = H5B2_get_bot_proxy(bt2)))
+                HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to get v2 B-tree 'top' proxy")
+
+            /* Open the fractal heap */
+            if(NULL == (fheap = H5HF_open(grp_oloc->file, linfo.fheap_addr)))
+                HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open fractal heap")
+
+            /* Set meta-flush dependency between fractal heap (child) and
+             *  v2 B-tree (parent)
+             */
+            if(H5HF_depend(fheap, proxy) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTDEPEND, FAIL, "unable to create meta-flush dependency between fractal heap and v2 B-tree")
+
+            /* Release resources */
+            if(H5B2_close(bt2) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close v2 B-tree for name index")
+            if(H5HF_close(fheap) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close fractal heap")
+
+
+            /* Set last operation to insertion */
+            shadow->last_op = H5AC_SHADOW_LAST_OP_INSERT;
+        } /* end if */
+
+// HDfprintf(stderr, "%s: obj_lnk->type = %u\n", FUNC, obj_lnk->type);
+        /* If inserting a hard link (to a "real" object), create a "temporary"
+         *      flush dependency between the object's object header (child) and
+         *      the group's heap (parent).  (To make certain that the object
+         *      header is written to the file before the link in the heap is)
+         */
+        if(H5L_TYPE_HARD == obj_lnk->type) {
+            H5HF_t *fheap;              /* Fractal heap handle */
+            H5O_t *oh;                  /* Object's object header */
+            H5O_loc_t obj_oloc;         /* Object location for newly created object */
+            H5AC_proxy_entry_t *obj_top_proxy;  /* 'Top' proxy for object's object header */
+            H5AC_proxy_entry_t *heap_bot_proxy; /* 'Bottom' proxy for group's heap */
+
+// HDfprintf(stderr, "%s: obj_lnk->u.hard.addr = %a\n", FUNC, obj_lnk->u.hard.addr);
+            /* Compose object location */
+            obj_oloc.file = grp_oloc->file;
+            obj_oloc.addr = obj_lnk->u.hard.addr;
+
+            /* Get new object's object header */
+            if(NULL == (oh = H5O_protect(&obj_oloc, H5AC__NO_FLAGS_SET, FALSE)))
+                HGOTO_ERROR(H5E_SYM, H5E_CANTPROTECT, FAIL, "unable to protect object's object header")
+
+            /* Get top proxy for group's object header */
+            if(NULL == (obj_top_proxy = H5O_get_top_proxy(oh)))
+                HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to get object's object header 'top' proxy")
+
+            /* Open the group's fractal heap */
+            if(NULL == (fheap = H5HF_open(grp_oloc->file, linfo.fheap_addr)))
+                HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open fractal heap")
+
+            /* Get the 'bottom' proxy for the fractal heap */
+            if(NULL == (heap_bot_proxy = H5HF_get_bot_proxy(fheap)))
+                HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to get v2 B-tree 'top' proxy")
+
+            /* Add object as "temporary" child of heap's 'bottom' proxy */
+            if(H5AC_proxy_entry_add_tmp_child(heap_bot_proxy, obj_top_proxy) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "unable to set object as temp. child flush dependency on group's heap")
+
+            /* Close fractal heap */
+            if(H5HF_close(fheap) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close fractal heap")
+
+            /* Release the object header from the cache */
+            if(H5O_unprotect(&obj_oloc, oh, H5AC__NO_FLAGS_SET) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTUNPROTECT, FAIL, "unable to release object's object header")
+        } /* end if */
+
+        /* Unprotect the shadow entry */
+        if(H5AC_shadow_entry_unprotect(shadow, H5AC__NO_FLAGS_SET) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTUNPROTECT, FAIL, "can't unprotect shadow entry")
+    } /* end if */
+}
+
         if(use_new_dense) {
             /* Insert into dense link storage */
             if(H5G__dense_insert(grp_oloc->file, &linfo, obj_lnk) < 0)

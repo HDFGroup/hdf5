@@ -56,6 +56,10 @@ const char *FILENAME[] = {
     "swmr2",        /* 2 */
     "swmr3",        /* 3 */
     "swmr4",        /* 4 */
+    "swmr5",        /* 5 */
+    "swmr6",        /* 6 */
+    "swmr7",        /* 7 */
+    "swmr8",        /* 8 */
     NULL
 };
 
@@ -110,6 +114,14 @@ static int test_swmr_deltat_file_create(hid_t fapl);
 static int test_swmr_deltat_file_create_without_swmr_write(hid_t fapl);
 static int test_swmr_deltat_read_concur(hid_t in_fapl);
 static int test_swmr_reader_timeout(hid_t in_fapl);
+
+/* Tests for concurrent "full SWMR" modifications */
+static int test_swmr_create_del_grp_dset(hid_t in_fapl);
+#ifdef NOT_YET
+static int test_swmr_create_del_attr(hid_t in_fapl);
+static int test_swmr_rename_grp_dset(hid_t in_fapl);
+static int test_swmr_rename_attr(hid_t in_fapl);
+#endif /* NOT_YET */
 
 /*
  * Tests for H5Pget/set_metadata_read_attemps(), H5Fget_metadata_read_retry_info()
@@ -6723,6 +6735,1410 @@ error:
 
 /****************************************************************
 **
+**  test_swmr_count_ndset():
+**    Iterate function to count the number of datasets
+**
+*****************************************************************/
+static herr_t test_swmr_count_ndset(hid_t H5_ATTR_UNUSED o_id, const char *name,
+    const H5O_info_t *info, void *op_data)
+{
+    int *n_found_dset = (int*)op_data;
+
+    if(name[0] == '.')
+        return 0;
+
+    if(info->type == H5O_TYPE_DATASET)
+        (*n_found_dset)++;
+
+    return 0;
+}
+
+/****************************************************************
+**
+**  test_swmr_create_del_grp_dset():
+**    Test for the SWMR writer to create and delete groups and
+**    datasets, and reader can see them correctly.
+**
+*****************************************************************/
+static int
+test_swmr_create_del_grp_dset(hid_t in_fapl)
+{
+    hid_t fid  = -1;                            /* File ID */
+    hid_t grp  = -1;                            /* Group ID */
+    hid_t dset = -1;                            /* Dataset ID */
+    hid_t fapl = -1;                            /* File access property list */
+    hid_t dcpl = -1;                            /* Dataset creation property list */
+    hid_t sid  = -1;                            /* Data space ID */
+    char filename[NAME_BUF_SIZE];               /* File name */
+    pid_t childpid=0;                           /* Child process ID */
+    int child_status;                           /* Status passed to waitpid */
+    int child_wait_option=0;                    /* Options passed to waitpid */
+    int out_pdf[2];
+    int notify = 0;
+    int i, j;
+    int ngroup = 1000, ntotal_dset = 14500, ndset = 0;
+    unsigned deltat = 1 * 1024 * 1024;
+    char grp_name[NAME_BUF_SIZE];
+    char dset_name[NAME_BUF_SIZE];
+    hsize_t dims[1] = {1};                       /* Dimension sizes */
+    hsize_t max_dims[1] = {H5S_UNLIMITED};       /* Maximum dimension sizes */
+    hsize_t chunk_dims[1] = {2};                 /* Chunk dimension sizes */
+    herr_t ret_val;
+    hid_t child_fid;                             /* File ID */
+    int child_notify = 0;
+    int n_found_dset = 0;
+    int max_retry = 10;
+
+
+    /* Output message about test being performed */
+    TESTING("SWMR create/delete group and dataset");
+
+    if((fapl = H5Pcopy(in_fapl)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Set the filename to use for this test (dependent on fapl) */
+    h5_fixname(FILENAME[5], fapl, filename, sizeof(filename));
+
+    /* Create a file. */
+    if((fid = H5Fcreate(filename, H5F_ACC_TRUNC | H5F_ACC_SWMR_WRITE, H5P_DEFAULT, fapl)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Close the file */
+    if(H5Fclose(fid) < 0)
+        FAIL_STACK_ERROR
+
+    /*
+     * Test 1, writer opens a file, notify child, then creates 1000 groups and
+     * 1 to 2000 datasets within each group, reader keeps refresh and iterate
+     * and in the end it should see all groups and datasets
+     */
+
+    /* Create 1 pipe */
+    if(HDpipe(out_pdf) < 0)
+        FAIL_STACK_ERROR
+
+    /* Fork child process */
+    if((childpid = HDfork()) < 0)
+        TEST_ERROR
+
+    /* Parent process open with SWMR_WRITE, child process open with SWMR_READ */
+    if(childpid == 0) {         /* Child process */
+
+        /* Close unused write end for out_pdf */
+        if(HDclose(out_pdf[1]) < 0)
+            HDexit(EXIT_FAILURE);
+
+        /* Wait for notification from parent process */
+        while(child_notify != 1)
+            if(HDread(out_pdf[0], &child_notify, sizeof(int)) < 0)
+                HDexit(EXIT_FAILURE);
+
+        /* Open the test file */
+        H5E_BEGIN_TRY {
+            child_fid = H5Fopen(filename, H5F_ACC_RDONLY|H5F_ACC_SWMR_READ, fapl);
+        } H5E_END_TRY;
+
+        if(child_fid >= 0) {
+            int last_found_dset;
+
+            /* Keep trying to find all the datasets, with a retry limit */
+            n_found_dset = 0;
+            do {
+                last_found_dset = n_found_dset;
+
+                for(i = 0; i < max_retry; i++) {
+                    /* Iterate all objects recursively, should see all the groups and datasets
+                     * the writer created eventually, verify number of datasets */
+                    n_found_dset = 0;
+                    H5E_BEGIN_TRY {
+                        ret_val = H5Ovisit(child_fid,H5_INDEX_NAME,H5_ITER_INC,test_swmr_count_ndset,&n_found_dset);
+                    } H5E_END_TRY;
+                    if (ret_val < 0)
+                        HDexit(EXIT_FAILURE);
+/* usleep(500*1000); */
+                    if(n_found_dset > last_found_dset)
+                        break;
+                } /* end for */
+
+                if(i >= max_retry)
+                    HDexit(EXIT_FAILURE);
+
+                if(n_found_dset == ntotal_dset)
+                    break;      /* Success! */
+                else if(n_found_dset > ntotal_dset)
+                    HDexit(EXIT_FAILURE);
+                else {
+H5Fclose(child_fid);
+child_fid = H5Fopen(filename, H5F_ACC_RDONLY|H5F_ACC_SWMR_READ, fapl);
+                }
+            } while(n_found_dset > last_found_dset);
+
+            if(H5Fclose(child_fid) < 0)
+                FAIL_STACK_ERROR
+
+            HDexit(EXIT_SUCCESS);
+        } /* end if */
+
+        /* Close the pipe */
+        if(HDclose(out_pdf[0]) < 0)
+            HDexit(EXIT_FAILURE);
+
+        HDexit(EXIT_FAILURE);
+    } /* end if childpid */
+
+    /* Close unused read end for out_pdf */
+    if(HDclose(out_pdf[0]) < 0)
+        FAIL_STACK_ERROR
+
+    /* set delta t value */
+    if(H5Pset_swmr_deltat(fapl, deltat) < 0)
+        FAIL_STACK_ERROR
+
+    /* Open the test file */
+    if((fid = H5Fopen(filename, H5F_ACC_RDWR|H5F_ACC_SWMR_WRITE, fapl)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Notify child process after opening the file */
+    notify = 1;
+    if(HDwrite(out_pdf[1], &notify, sizeof(int)) < 0)
+        TEST_ERROR;
+
+    /* Close the pipe */
+    if(HDclose(out_pdf[1]) < 0)
+        TEST_ERROR;
+
+    /* Create a chunked dataset with 1 extendible dimension for all created dsets */
+    if((sid = H5Screate_simple(1, dims, max_dims)) < 0)
+        FAIL_STACK_ERROR;
+    if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        FAIL_STACK_ERROR
+    if(H5Pset_chunk(dcpl, 1, chunk_dims) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Create 1000 groups, and different number of datasets in each group */
+    for (i = 0; i < ngroup; i++) {
+        sprintf(grp_name, "Group%d", i);
+        if((grp = H5Gcreate(fid, grp_name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+            FAIL_STACK_ERROR
+
+        /* Every 100th group has 2 times its idx plus 1 datasets, and the others
+         * have idx % 2 plus 1 datasets. */
+        if (i % 100 == 0)
+            ndset = i * 2 + 1;
+        else
+            ndset = i % 10 + 1;
+
+        for (j = 0; j < ndset; j++) {
+            sprintf(dset_name, "Dset%d", j);
+            if((dset = H5Dcreate(grp, dset_name, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+                FAIL_STACK_ERROR
+
+            if(H5Dclose(dset) < 0)
+                FAIL_STACK_ERROR
+        }
+
+        /* Flush the newly created group and dataset to disk */
+//        H5Gflush(grp);
+        if(H5Gclose(grp) < 0)
+            FAIL_STACK_ERROR
+H5Fflush(fid, H5F_SCOPE_GLOBAL);
+    }
+
+    /* Close data space and dcpl */
+    if(H5Sclose(sid) < 0)
+        FAIL_STACK_ERROR
+    if(H5Pclose(dcpl) < 0)
+        FAIL_STACK_ERROR
+
+    /* Close the file */
+    if(H5Fclose(fid) < 0)
+        FAIL_STACK_ERROR
+
+    /* Wait for child process to complete */
+    if(HDwaitpid(childpid, &child_status, child_wait_option) < 0)
+        TEST_ERROR
+
+    /* Check if child terminated normally */
+    if(WIFEXITED(child_status)) {
+        /* Check exit status of the child */
+        if(WEXITSTATUS(child_status) != 0)
+            TEST_ERROR
+    } /* end if */
+    else
+        FAIL_STACK_ERROR
+
+#ifdef NOT_YET
+    /*
+     * Test 2, writer opens previous file, deletes the all datasets as well as the group
+     * for every 50th group, every other datasets in other groups, reader keeps iterate,
+     * in the end it should see the correct number of datasets.
+     */
+
+    if(HDpipe(out_pdf) < 0)
+        TEST_ERROR
+
+    /* Fork child process */
+    if((childpid = HDfork()) < 0)
+        TEST_ERROR
+
+    /* Parent process open with SWMR_WRITE, child process open with SWMR_READ */
+    if(childpid == 0) {         /* Child process */
+
+        /* Close unused write end for out_pdf */
+        if(HDclose(out_pdf[1]) < 0)
+            HDexit(EXIT_FAILURE);
+
+        /* Wait for notification from parent process */
+        while(child_notify != 2)
+            if(HDread(out_pdf[0], &child_notify, sizeof(int)) < 0)
+                HDexit(EXIT_FAILURE);
+
+        /* Open the test file */
+        H5E_BEGIN_TRY {
+            child_fid = H5Fopen(filename, H5F_ACC_RDONLY|H5F_ACC_SWMR_READ, fapl);
+        } H5E_END_TRY;
+
+        /* Should succeed */
+        if(child_fid >= 0) {
+/* QAK: Update this code to be similar to Test 1 code */
+            for (i = 0; i < max_retry; i++) {
+
+                /* Iterate all objects recursively, should see all the groups and datasets
+                 * the writer created eventually, verify number of datasets */
+                n_found_dset = 0;
+                H5E_BEGIN_TRY {
+                    ret_val = H5Ovisit(child_fid,H5_INDEX_NAME,H5_ITER_INC,test_swmr_count_ndset,&n_found_dset);
+                } H5E_END_TRY;
+                if (ret_val < 0)
+                    HDexit(EXIT_FAILURE);
+
+                HDfprintf(stderr, "Found %d datasets\n", n_found_dset);
+                fflush(stderr);
+
+                /* FULLSWMR TODO: enable check when doing actual testing */
+                /* if (n_found_dset == 40) */
+                /*     break; */
+                /* else */
+                /*     HDexit(EXIT_FAILURE); */
+            } /* end for */;
+
+            /* FULLSWMR TODO: enable check when doing actual testing */
+            /* if (i >= max_retry) { */
+            /*     HDfprintf(stderr, "Exceeds max number of retries to discover all objects\n"); */
+            /*     HDexit(EXIT_FAILURE); */
+            /* } */
+
+            if(H5Fclose(child_fid) < 0)
+                FAIL_STACK_ERROR
+
+            HDexit(EXIT_SUCCESS);
+        } /* end if */
+
+        /* Close the pipe */
+        if(HDclose(out_pdf[0]) < 0)
+            HDexit(EXIT_FAILURE);
+
+        HDexit(EXIT_FAILURE);
+    } /* end if childpid */
+
+    /* Close unused read end for out_pdf */
+    if(HDclose(out_pdf[0]) < 0)
+        FAIL_STACK_ERROR
+
+    /* set delta t value */
+    if(H5Pset_swmr_deltat(fapl, deltat) < 0)
+        FAIL_STACK_ERROR
+
+    /* Open the test file */
+    if((fid = H5Fopen(filename, H5F_ACC_RDWR|H5F_ACC_SWMR_WRITE, fapl)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Notify child process after opening the file */
+    notify = 2;
+    if(HDwrite(out_pdf[1], &notify, sizeof(int)) < 0)
+        TEST_ERROR;
+
+    /* Close the pipe */
+    if(HDclose(out_pdf[1]) < 0)
+        TEST_ERROR;
+
+    /* Delete the entire group for every 50 groups, and every other dataset in other groups */
+    for (i = 0; i < ngroup; i++) {
+        sprintf(grp_name, "Group%d", i);
+        if((grp = H5Gopen(fid, grp_name, H5P_DEFAULT)) < 0)
+            FAIL_STACK_ERROR
+
+        if (i % 100 == 0)
+            ndset = i * 2 + 1;
+        else
+            ndset = i % 10 + 1;
+
+        if (i % 50 == 0) {
+            /* Delete entire group */
+            for (j = 0; j < ndset; j++) {
+                sprintf(dset_name, "Dset%d", j);
+                if((H5Ldelete(grp, dset_name, H5P_DEFAULT)) < 0)
+                    FAIL_STACK_ERROR
+            }
+
+            /* Flush the newly created group and dataset to disk */
+            H5Gflush(grp);
+            if(H5Gclose(grp) < 0)
+                FAIL_STACK_ERROR
+
+            /* Delete the group */
+            if((H5Ldelete(fid, grp_name, H5P_DEFAULT)) < 0)
+                FAIL_STACK_ERROR
+        }
+        else {
+            for (j = 0; j < ndset; j+=2) {
+                sprintf(dset_name, "Dset%d", j);
+                if((H5Ldelete(grp, dset_name, H5P_DEFAULT)) < 0)
+                    FAIL_STACK_ERROR
+
+            }
+            /* Flush the newly created group and dataset to disk */
+            H5Gflush(grp);
+            if(H5Gclose(grp) < 0)
+                FAIL_STACK_ERROR
+        }
+
+    }
+
+    H5Fflush(fid, H5F_SCOPE_GLOBAL);
+
+    /* Wait for child process to complete */
+    if(HDwaitpid(childpid, &child_status, child_wait_option) < 0)
+        TEST_ERROR
+
+    /* Check if child terminated normally */
+    if(WIFEXITED(child_status)) {
+        /* Check exit status of the child */
+        if(WEXITSTATUS(child_status) != 0)
+            TEST_ERROR
+    } /* end if */
+    else
+        FAIL_STACK_ERROR
+
+    /* Close the file */
+    if(H5Fclose(fid) < 0)
+        FAIL_STACK_ERROR
+#endif /* NOT_YET */
+
+    PASSED();
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Pclose(fapl);
+        H5Pclose(fid);
+    } H5E_END_TRY;
+
+    return -1;
+} /* end test_swmr_create_del_grp_dset() */
+
+#ifdef NOT_YET
+/****************************************************************
+**
+**  test_swmr_count_attr():
+**    Iterate function to count the number of datasets
+**
+*****************************************************************/
+static herr_t test_swmr_count_attr(hid_t o_id,
+        const char *name, const H5A_info_t *info, void *op_data)
+{
+    int *n_found= (int*)op_data;
+    (*n_found)++;
+
+    return 0;
+}
+
+/****************************************************************
+**
+**  test_swmr_create_del_attr():
+**    Test for the SWMR writer to create and delete attributes,
+**    and reader can see them correctly.
+**
+*****************************************************************/
+static int
+test_swmr_create_del_attr(hid_t in_fapl)
+{
+    hid_t fid  = -1;                            /* File ID */
+    hid_t dset = -1;                            /* Dataset ID */
+    hid_t fapl = -1;                            /* File access property list */
+    hid_t dcpl = -1;                            /* Dataset creation property list */
+    hid_t sid  = -1;                            /* Data space ID */
+    hid_t attr_sid = -1;                        /* Data space ID */
+    hid_t attr_id = -1;                         /* Attribute ID */
+    char filename[NAME_BUF_SIZE];               /* File name */
+    pid_t childpid=0;                           /* Child process ID */
+    int child_status;                           /* Status passed to waitpid */
+    int child_wait_option=0;                    /* Options passed to waitpid */
+    int out_pdf[2];
+    int notify = 0;
+    int i, j;
+    int ndset = 1000;
+    unsigned deltat = 64 * 1024;
+    char dset_name[NAME_BUF_SIZE];
+    char attr_name[NAME_BUF_SIZE];
+    hsize_t dims[1] = {1};                       /* Dimension sizes */
+    hsize_t max_dims[1] = {H5S_UNLIMITED};       /* Maximum dimension sizes */
+    hsize_t chunk_dims[1] = {2};                 /* Chunk dimension sizes */
+    herr_t ret_val;
+    hid_t child_fid;                             /* File ID */
+    hid_t child_dset = -1;                       /* Dataset ID */
+    int child_notify = 0;
+    int n_found_attr = 0;
+    hsize_t attr_dims[1] = {1};
+    int nattr, ntotalattr = 14500;
+    hsize_t idx;
+    int max_retry = 10;
+
+
+    /* Output message about test being performed */
+    TESTING("SWMR create/delete attributes");
+
+    if((fapl = H5Pcopy(in_fapl)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Set the filename to use for this test (dependent on fapl) */
+    h5_fixname(FILENAME[6], fapl, filename, sizeof(filename));
+
+    /*
+     * Test 1, writer creates a file, 1000 datasets, notify child, then creates
+     * 1 to 2000 attributes to each dataset, reader keeps iterate and in the end
+     * it should see all attributes
+     */
+
+    /* Create a file. */
+    if((fid = H5Fcreate(filename, H5F_ACC_TRUNC | H5F_ACC_SWMR_WRITE, H5P_DEFAULT, fapl)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Create a chunked dataset with 1 extendible dimension for all created dsets */
+    if((sid = H5Screate_simple(1, dims, max_dims)) < 0)
+        FAIL_STACK_ERROR;
+    if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        FAIL_STACK_ERROR
+    if(H5Pset_chunk(dcpl, 1, chunk_dims) < 0)
+        FAIL_STACK_ERROR;
+
+    ndset = 1000;
+    for (i = 0; i < ndset; i++) {
+        sprintf(dset_name, "Dset%d", i);
+        if((dset = H5Dcreate(fid, dset_name, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+            FAIL_STACK_ERROR
+
+        if(H5Dclose(dset) < 0)
+            FAIL_STACK_ERROR
+    }
+
+    /* close everything */
+    if(H5Sclose(sid) < 0)
+        FAIL_STACK_ERROR
+    if(H5Pclose(dcpl) < 0)
+        FAIL_STACK_ERROR
+    if(H5Fclose(fid) < 0)
+        FAIL_STACK_ERROR
+
+    /* Create 1 pipe */
+    if(HDpipe(out_pdf) < 0)
+        FAIL_STACK_ERROR
+
+    /* Fork child process */
+    if((childpid = HDfork()) < 0)
+        TEST_ERROR
+
+    /* Parent process open with SWMR_WRITE, child process open with SWMR_READ */
+    if(childpid == 0) {         /* Child process */
+
+        /* Close unused write end for out_pdf */
+        if(HDclose(out_pdf[1]) < 0)
+            HDexit(EXIT_FAILURE);
+
+        /* Wait for notification from parent process */
+        while(child_notify != 1)
+            if(HDread(out_pdf[0], &child_notify, sizeof(int)) < 0)
+                HDexit(EXIT_FAILURE);
+
+        /* Open the test file */
+        H5E_BEGIN_TRY {
+            child_fid = H5Fopen(filename, H5F_ACC_RDONLY|H5F_ACC_SWMR_READ, fapl);
+        } H5E_END_TRY;
+
+        if(child_fid >= 0) {
+            for (i = 0; i < max_retry; i++) {
+
+                n_found_attr = 0;
+                for (j = 0; j < ndset; j++) {
+
+                    sprintf(dset_name, "Dset%d", j);
+                    H5E_BEGIN_TRY {
+                        child_dset = H5Dopen(child_fid, dset_name, H5P_DEFAULT);
+                    } H5E_END_TRY;
+                    if (child_dset < 0)
+                        HDexit(EXIT_FAILURE);
+
+                    /* Iterate all attributes and count the total number */
+                    idx = 0;
+                    H5E_BEGIN_TRY {
+                      ret_val=H5Aiterate(child_dset,H5_INDEX_NAME,H5_ITER_INC,&idx,test_swmr_count_attr,&n_found_attr);
+                    } H5E_END_TRY;
+                    if (ret_val < 0)
+                        HDexit(EXIT_FAILURE);
+
+                    if(H5Dclose(child_dset) < 0)
+                        HDexit(EXIT_FAILURE);
+
+                } /* end for ndset */
+
+                HDfprintf(stderr, "Found %d attributes\n", n_found_attr);
+                fflush(stderr);
+
+                /* FULLSWMR TODO: enable check when doing actual testing */
+                if (n_found_attr == ntotalattr)
+                    break;
+                else if (n_found_attr > ntotalattr)
+                    HDexit(EXIT_FAILURE);
+                /* sleep(1); */
+            } /* end for max_retry */;
+
+            /* FULLSWMR TODO: enable check when doing actual testing */
+            /* if (i >= max_retry) { */
+            /*     HDfprintf(stderr, "Exceeds max number of retries to discover all objects\n"); */
+            /*     HDexit(EXIT_FAILURE); */
+            /* } */
+
+            if(H5Fclose(child_fid) < 0)
+                HDexit(EXIT_FAILURE);
+                /* FAIL_STACK_ERROR */
+
+            HDexit(EXIT_SUCCESS);
+        } /* end if */
+
+        /* Close the pipe */
+        if(HDclose(out_pdf[0]) < 0)
+            HDexit(EXIT_FAILURE);
+
+        HDexit(EXIT_FAILURE);
+    } /* end if childpid */
+
+    /* Close unused read end for out_pdf */
+    if(HDclose(out_pdf[0]) < 0)
+        FAIL_STACK_ERROR
+
+    /* set delta t value */
+    if(H5Pset_swmr_deltat(fapl, deltat) < 0)
+        FAIL_STACK_ERROR
+
+    /* Open the test file */
+    if((fid = H5Fopen(filename, H5F_ACC_RDWR|H5F_ACC_SWMR_WRITE, fapl)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Notify child process after opening the file */
+    notify = 1;
+    if(HDwrite(out_pdf[1], &notify, sizeof(int)) < 0)
+        TEST_ERROR;
+
+    /* Close the pipe */
+    if(HDclose(out_pdf[1]) < 0)
+        TEST_ERROR;
+
+    /* Create the data space for the attribute. */
+    attr_sid = H5Screate_simple(1, attr_dims, NULL);
+
+    /* Create 1 to 2000 attributes in each dataset */
+    for (i = 0; i < ndset; i++) {
+
+        sprintf(dset_name, "Dset%d", i);
+        if((dset = H5Dopen(fid, dset_name, H5P_DEFAULT)) < 0)
+            FAIL_STACK_ERROR
+
+        if (i % 100 == 0)
+            nattr = i * 2 + 1;
+        else
+            nattr = i % 10 + 1;
+
+        for (j = 0; j < nattr; j++) {
+            sprintf(attr_name, "Attr%d", j);
+            attr_id = H5Acreate2(dset, attr_name, H5T_STD_I32BE, attr_sid, H5P_DEFAULT, H5P_DEFAULT);
+            if(H5Aclose(attr_id) < 0)
+                FAIL_STACK_ERROR
+        }
+
+        /* Flush the newly created group and dataset to disk */
+        H5Dflush(dset);
+        if(H5Dclose(dset) < 0)
+            FAIL_STACK_ERROR
+    }
+
+    H5Fflush(fid, H5F_SCOPE_GLOBAL);
+
+    /* Wait for child process to complete */
+    if(HDwaitpid(childpid, &child_status, child_wait_option) < 0)
+        TEST_ERROR
+
+    /* Check if child terminated normally */
+    if(WIFEXITED(child_status)) {
+        /* Check exit status of the child */
+        if(WEXITSTATUS(child_status) != 0)
+            TEST_ERROR
+    } /* end if */
+    else
+        FAIL_STACK_ERROR
+
+    /* Close the file */
+    if(H5Fclose(fid) < 0)
+        FAIL_STACK_ERROR
+
+    HDfprintf(stderr, "\nFinished creating attributes\n");
+    fflush(stderr);
+
+    /*
+     * Test 2, writer deletes first group and every other datasets in alternate groups,
+     * reader keeps refresh and iterate, in the end it should see the changes.
+     */
+
+    if(HDpipe(out_pdf) < 0)
+        TEST_ERROR
+
+    /* Fork child process */
+    if((childpid = HDfork()) < 0)
+        TEST_ERROR
+
+    /* Parent process open with SWMR_WRITE, child process open with SWMR_READ */
+    if(childpid == 0) {         /* Child process */
+
+        /* Close unused write end for out_pdf */
+        if(HDclose(out_pdf[1]) < 0)
+            HDexit(EXIT_FAILURE);
+
+        /* Wait for notification from parent process */
+        while(child_notify != 2)
+            if(HDread(out_pdf[0], &child_notify, sizeof(int)) < 0)
+                HDexit(EXIT_FAILURE);
+
+        /* Open the test file */
+        H5E_BEGIN_TRY {
+            child_fid = H5Fopen(filename, H5F_ACC_RDONLY|H5F_ACC_SWMR_READ, fapl);
+        } H5E_END_TRY;
+
+        if(child_fid >= 0) {
+            for (i = 0; i < max_retry; i++) {
+                n_found_attr = 0;
+                for (j = 0; j < ndset; j++) {
+
+                    sprintf(dset_name, "Dset%d", j);
+                    H5E_BEGIN_TRY {
+                        child_dset = H5Dopen(child_fid, dset_name, H5P_DEFAULT);
+                    } H5E_END_TRY;
+                    if (child_dset < 0)
+                        HDexit(EXIT_FAILURE);
+
+                    /* Iterate all attributes and count the total number */
+                    idx = 0;
+                    H5E_BEGIN_TRY {
+                      ret_val=H5Aiterate(child_dset,H5_INDEX_NAME,H5_ITER_INC,&idx,test_swmr_count_attr,&n_found_attr);
+                    } H5E_END_TRY;
+                    if (ret_val < 0)
+                        HDexit(EXIT_FAILURE);
+
+                    if(H5Dclose(child_dset) < 0)
+                        HDexit(EXIT_FAILURE);
+
+                } /* end for ndset */
+
+                HDfprintf(stderr, "Found %d attributes\n", n_found_attr);
+                fflush(stderr);
+
+                /* FULLSWMR TODO: enable check when doing actual testing */
+                /* if (n_found_attr == 40) */
+                /*     break; */
+                /* else */
+                /*     HDexit(EXIT_FAILURE); */
+                sleep(1);
+            } /* end for max_retry */;
+
+            /* FULLSWMR TODO: enable check when doing actual testing */
+            /* if (i >= max_retry) { */
+            /*     HDfprintf(stderr, "Exceeds max number of retries to discover all attributes\n"); */
+            /*     HDexit(EXIT_FAILURE); */
+            /* } */
+
+            if(H5Fclose(child_fid) < 0)
+                HDexit(EXIT_FAILURE);
+                /* FAIL_STACK_ERROR */
+
+            HDexit(EXIT_SUCCESS);
+        } /* end if */
+
+        /* Close the pipe */
+        if(HDclose(out_pdf[0]) < 0)
+            HDexit(EXIT_FAILURE);
+
+        HDexit(EXIT_FAILURE);
+    } /* end if childpid */
+
+    /* Close unused read end for out_pdf */
+    if(HDclose(out_pdf[0]) < 0)
+        FAIL_STACK_ERROR
+
+    /* set delta t value */
+    if(H5Pset_swmr_deltat(fapl, deltat) < 0)
+        FAIL_STACK_ERROR
+
+    /* Open the test file */
+    if((fid = H5Fopen(filename, H5F_ACC_RDWR|H5F_ACC_SWMR_WRITE, fapl)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Notify child process after opening the file */
+    notify = 2;
+    if(HDwrite(out_pdf[1], &notify, sizeof(int)) < 0)
+        TEST_ERROR;
+
+    /* Close the pipe */
+    if(HDclose(out_pdf[1]) < 0)
+        TEST_ERROR;
+
+    for (i = 0; i < ndset; i++) {
+        sprintf(dset_name, "Dset%d", i);
+        if((dset = H5Dopen(fid, dset_name, H5P_DEFAULT)) < 0)
+            FAIL_STACK_ERROR
+
+        if (i % 100 == 0)
+            nattr = i * 2 + 1;
+        else
+            nattr = i % 10 + 1;
+
+        if (i % 100 == 0) {
+            /* Delete all attributes for every 100th dataset */
+            for (j = 0; j < nattr; j++) {
+                sprintf(attr_name, "Attr%d", j);
+                if((H5Adelete(dset, attr_name)) < 0)
+                    FAIL_STACK_ERROR
+            }
+        }
+        else if (i % 101 == 0) {
+            /* Delete every other attributes for every 101th dataset */
+            for (j = 0; j < nattr; j+=2) {
+                sprintf(attr_name, "Attr%d", j);
+                if((H5Adelete(dset, attr_name)) < 0)
+                    FAIL_STACK_ERROR
+            }
+        }
+
+        /* Flush the file to disk */
+        H5Dflush(dset);
+
+        if(H5Dclose(dset) < 0)
+            FAIL_STACK_ERROR
+    }
+
+    /* Wait for child process to complete */
+    if(HDwaitpid(childpid, &child_status, child_wait_option) < 0)
+        TEST_ERROR
+
+    /* Check if child terminated normally */
+    if(WIFEXITED(child_status)) {
+        /* Check exit status of the child */
+        if(WEXITSTATUS(child_status) != 0)
+            TEST_ERROR
+    } /* end if */
+    else
+        FAIL_STACK_ERROR
+
+    /* Close the file */
+    if(H5Fclose(fid) < 0)
+        FAIL_STACK_ERROR
+
+    PASSED();
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Pclose(fapl);
+        H5Pclose(fid);
+    } H5E_END_TRY;
+
+    return -1;
+} /* end test_swmr_create_del_attr() */
+
+/****************************************************************
+**
+**  test_swmr_count_renamed_ndset():
+**    Iterate function to count the number of datasets
+**
+*****************************************************************/
+static herr_t test_swmr_count_renamed_ndset(hid_t o_id,
+        const char *name, const H5O_info_t *info, void *op_data)
+{
+    int *n_found_dset = (int*)op_data;
+    if (name[0] == '.')
+        return 0;
+
+    if (info->type == H5O_TYPE_DATASET) {
+        if (NULL != strstr("New", name))
+            (*n_found_dset)++;
+    }
+
+    return 0;
+}
+
+/****************************************************************
+**
+**  test_swmr_rename_grp_dset():
+**    Test for the SWMR writer to rename groups and datasets,
+**    and reader can see them correctly.
+**
+*****************************************************************/
+static int
+test_swmr_rename_grp_dset(hid_t in_fapl)
+{
+    hid_t fid  = -1;                            /* File ID */
+    hid_t grp  = -1;                            /* Group ID */
+    hid_t dset = -1;                            /* Dataset ID */
+    hid_t fapl = -1;                            /* File access property list */
+    hid_t dcpl = -1;                            /* Dataset creation property list */
+    hid_t sid  = -1;                            /* Data space ID */
+    char filename[NAME_BUF_SIZE];               /* File name */
+    pid_t childpid=0;                           /* Child process ID */
+    int child_status;                           /* Status passed to waitpid */
+    int child_wait_option=0;                    /* Options passed to waitpid */
+    int out_pdf[2];
+    int notify = 0;
+    int i, j;
+    int ngroup = 1000, ntotal_dset = 14500, ndset = 0;
+    unsigned deltat = 64 * 1024;
+    char grp_name[NAME_BUF_SIZE];
+    char new_grp_name[NAME_BUF_SIZE];
+    char dset_name[NAME_BUF_SIZE];
+    char new_dset_name[NAME_BUF_SIZE];
+    hsize_t dims[1] = {1};                       /* Dimension sizes */
+    hsize_t max_dims[1] = {H5S_UNLIMITED};       /* Maximum dimension sizes */
+    hsize_t chunk_dims[1] = {2};                 /* Chunk dimension sizes */
+    herr_t ret_val;
+    hid_t child_fid;                             /* File ID */
+    int child_notify = 0;
+    int n_found_dset = 0;
+    hid_t lapl;
+    hid_t lcpl;
+    int max_retry = 10;
+
+    /* Output message about test being performed */
+    TESTING("SWMR rename group and dataset");
+
+    if((fapl = H5Pcopy(in_fapl)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Set the filename to use for this test (dependent on fapl) */
+    h5_fixname(FILENAME[7], fapl, filename, sizeof(filename));
+
+    /* Create a file. */
+    if((fid = H5Fcreate(filename, H5F_ACC_TRUNC | H5F_ACC_SWMR_WRITE, H5P_DEFAULT, fapl)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Create a chunked dataset with 1 extendible dimension for all created dsets */
+    if((sid = H5Screate_simple(1, dims, max_dims)) < 0)
+        FAIL_STACK_ERROR;
+    if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        FAIL_STACK_ERROR
+    if(H5Pset_chunk(dcpl, 1, chunk_dims) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Create 10 groups, and 1 to 10 datasets in each group */
+    for (i = 0; i < ngroup; i++) {
+        sprintf(grp_name, "Group%d", i);
+        if((grp = H5Gcreate(fid, grp_name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+            FAIL_STACK_ERROR
+
+        if (i % 100 == 0)
+            ndset = i * 2 + 1;
+        else
+            ndset = i % 10 + 1;
+
+        for (j = 0; j < ndset; j++) {
+            sprintf(dset_name, "Group%dDset%d", i, j);
+            if((dset = H5Dcreate(grp, dset_name, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+                FAIL_STACK_ERROR
+
+            if(H5Dclose(dset) < 0)
+                FAIL_STACK_ERROR
+        }
+
+        if(H5Gclose(grp) < 0)
+            FAIL_STACK_ERROR
+    }
+
+    /* Close data space and dcpl */
+    if(H5Sclose(sid) < 0)
+        FAIL_STACK_ERROR
+    if(H5Pclose(dcpl) < 0)
+        FAIL_STACK_ERROR
+
+
+    /* Close the file */
+    if(H5Fclose(fid) < 0)
+        FAIL_STACK_ERROR
+
+    /*
+     * Test 1, writer opens a file, notify child, then creates 1000 groups and
+     * 1 to 2000 datasets within each group, reader keeps refresh and iterate
+     * and in the end it should see all groups and datasets
+     */
+
+    /* Create 1 pipe */
+    if(HDpipe(out_pdf) < 0)
+        FAIL_STACK_ERROR
+
+    /* Fork child process */
+    if((childpid = HDfork()) < 0)
+        TEST_ERROR
+
+    /* Parent process open with SWMR_WRITE, child process open with SWMR_READ */
+    if(childpid == 0) {         /* Child process */
+
+        /* Close unused write end for out_pdf */
+        if(HDclose(out_pdf[1]) < 0)
+            HDexit(EXIT_FAILURE);
+
+        /* Wait for notification from parent process */
+        while(child_notify != 1)
+            if(HDread(out_pdf[0], &child_notify, sizeof(int)) < 0)
+                HDexit(EXIT_FAILURE);
+
+        /* Open the test file */
+        H5E_BEGIN_TRY {
+            child_fid = H5Fopen(filename, H5F_ACC_RDONLY|H5F_ACC_SWMR_READ, fapl);
+        } H5E_END_TRY;
+
+        if(child_fid >= 0) {
+            for (i = 0; i < max_retry; i++) {
+
+                /* Iterate all objects recursively, should see all the groups and datasets
+                 * the writer created eventually, verify number of datasets */
+                n_found_dset = 0;
+                H5E_BEGIN_TRY {
+                    ret_val = H5Ovisit(child_fid, H5_INDEX_NAME, H5_ITER_INC, test_swmr_count_renamed_ndset, &n_found_dset);
+                } H5E_END_TRY;
+                if (ret_val < 0)
+                    HDexit(EXIT_FAILURE);
+
+                /* FULLSWMR TODO: enable check when doing actual testing */
+                /* if (n_found_dset == ntotal_dset) */
+                /*     break; */
+                /* else if (n_found_dset > ntotal_dset) */
+                /*     HDexit(EXIT_FAILURE); */
+                /* sleep(1); */
+            } /* end for */;
+
+            /* FULLSWMR TODO: enable check when doing actual testing */
+            /* if (i >= max_retry) { */
+            /*     HDfprintf(stderr, "Exceeds max number of retries to discover all objects\n"); */
+            /*     HDexit(EXIT_FAILURE); */
+            /* } */
+
+            if(H5Fclose(child_fid) < 0)
+                FAIL_STACK_ERROR
+
+            HDexit(EXIT_SUCCESS);
+        } /* end if */
+
+        /* Close the pipe */
+        if(HDclose(out_pdf[0]) < 0)
+            HDexit(EXIT_FAILURE);
+
+        HDexit(EXIT_FAILURE);
+    } /* end if childpid */
+
+    /* Close unused read end for out_pdf */
+    if(HDclose(out_pdf[0]) < 0)
+        FAIL_STACK_ERROR
+
+    /* set delta t value */
+    if(H5Pset_swmr_deltat(fapl, deltat) < 0)
+        FAIL_STACK_ERROR
+
+    /* Open the test file */
+    if((fid = H5Fopen(filename, H5F_ACC_RDWR|H5F_ACC_SWMR_WRITE, fapl)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Notify child process after opening the file */
+    notify = 1;
+    if(HDwrite(out_pdf[1], &notify, sizeof(int)) < 0)
+        TEST_ERROR;
+
+    /* Close the pipe */
+    if(HDclose(out_pdf[1]) < 0)
+        TEST_ERROR;
+
+    lcpl = H5Pcreate(H5P_LINK_CREATE);
+    lapl = H5Pcreate(H5P_LINK_ACCESS);
+
+    /* Rename every other dset in alternate groups */
+    for (i = 0; i < ngroup; i+=2) {
+        sprintf(grp_name, "Group%d", i);
+        if((grp = H5Gopen(fid, grp_name, H5P_DEFAULT)) < 0)
+            FAIL_STACK_ERROR
+
+        if (i % 100 == 0)
+            ndset = i * 2 + 1;
+        else
+            ndset = i % 10 + 1;
+
+        for (j = 0; j < ndset; j+=2) {
+            sprintf(dset_name, "Group%dDset%d", i, j);
+            sprintf(new_dset_name, "NewGroup%dDset%d", i, j);
+            if(H5Lmove(grp, dset_name, grp, new_dset_name, lcpl, lapl) < 0)
+                FAIL_STACK_ERROR
+        }
+
+        /* Flush the newly created group and dataset to disk */
+        H5Gflush(grp);
+        if(H5Gclose(grp) < 0)
+            FAIL_STACK_ERROR
+    }
+
+    /* Rename every other group */
+    for (i = 1; i < ngroup; i+=2) {
+        sprintf(grp_name, "Group%d", i);
+        sprintf(new_grp_name, "NewGroup%d", i);
+
+        if(H5Lmove(fid, grp_name, fid, new_grp_name, lcpl, lapl) < 0)
+            FAIL_STACK_ERROR
+
+        /* Flush the newly created group and dataset to disk */
+        H5Fflush(fid, H5F_SCOPE_GLOBAL);
+    }
+
+    if(H5Pclose(lcpl) < 0)
+        FAIL_STACK_ERROR
+    if(H5Pclose(lapl) < 0)
+        FAIL_STACK_ERROR
+
+    /* Wait for child process to complete */
+    if(HDwaitpid(childpid, &child_status, child_wait_option) < 0)
+        TEST_ERROR
+
+    /* Check if child terminated normally */
+    if(WIFEXITED(child_status)) {
+        /* Check exit status of the child */
+        if(WEXITSTATUS(child_status) != 0)
+            TEST_ERROR
+    } /* end if */
+    else
+        FAIL_STACK_ERROR
+
+    /* Close the file */
+    if(H5Fclose(fid) < 0)
+        FAIL_STACK_ERROR
+
+    PASSED();
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Pclose(fapl);
+        H5Pclose(fid);
+    } H5E_END_TRY;
+
+} /* end test_swmr_rename_grp_dset() */
+
+/****************************************************************
+**
+**  test_swmr_count_renamed_attr():
+**    Iterate function to count the number of datasets
+**
+*****************************************************************/
+static herr_t test_swmr_count_renamed_attr(hid_t o_id,
+        const char *name, const H5A_info_t *info, void *op_data)
+{
+    int *n_found = (int*)op_data;
+    if (NULL != strstr("New", name))
+        (*n_found)++;
+
+    return 0;
+}
+
+/****************************************************************
+**
+**  test_swmr_rename_attr():
+**    Test for the SWMR writer to rename attributes,
+**    and reader can see them correctly.
+**
+*****************************************************************/
+static int
+test_swmr_rename_attr(hid_t in_fapl)
+{
+    hid_t fid  = -1;                            /* File ID */
+    /* hid_t grp  = -1;                            /1* Group ID *1/ */
+    hid_t dset = -1;                            /* Dataset ID */
+    hid_t fapl = -1;                            /* File access property list */
+    hid_t dcpl = -1;                            /* Dataset creation property list */
+    hid_t sid  = -1;                            /* Data space ID */
+    hid_t attr_sid = -1;                        /* Data space ID */
+    hid_t attr_id = -1;                         /* Attribute ID */
+    char filename[NAME_BUF_SIZE];               /* File name */
+    pid_t childpid=0;                           /* Child process ID */
+    int child_status;                           /* Status passed to waitpid */
+    int child_wait_option=0;                    /* Options passed to waitpid */
+    int out_pdf[2];
+    int notify = 0;
+    int i, j;
+    int ndset = 10;
+    unsigned deltat = 64 * 1024;
+    /* char grp_name[NAME_BUF_SIZE]; */
+    char dset_name[NAME_BUF_SIZE];
+    char attr_name[NAME_BUF_SIZE];
+    char new_attr_name[NAME_BUF_SIZE];
+    hsize_t dims[1] = {1};                       /* Dimension sizes */
+    hsize_t max_dims[1] = {H5S_UNLIMITED};       /* Maximum dimension sizes */
+    hsize_t chunk_dims[1] = {2};                 /* Chunk dimension sizes */
+    herr_t ret_val;
+    hid_t child_fid;                             /* File ID */
+    hid_t child_dset = -1;                       /* Dataset ID */
+    int child_notify = 0;
+    int n_found_attr = 0;
+    hsize_t attr_dims[1] = {1};
+    int nattr, ntotalattr;
+    hsize_t idx;
+    int max_retry = 10;
+
+
+    /* Output message about test being performed */
+    TESTING("SWMR create/delete attributes");
+
+    if((fapl = H5Pcopy(in_fapl)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Set the filename to use for this test (dependent on fapl) */
+    h5_fixname(FILENAME[8], fapl, filename, sizeof(filename));
+
+    /*
+     * Test 1, writer creates a file, 1000 datasets, notify child, then creates
+     * 1 to 1000 attributes to each dataset, reader keeps iterate and in the end
+     * it should see all attributes
+     */
+
+    /* Create a file. */
+    if((fid = H5Fcreate(filename, H5F_ACC_TRUNC | H5F_ACC_SWMR_WRITE, H5P_DEFAULT, fapl)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Create a chunked dataset with 1 extendible dimension for all created dsets */
+    if((sid = H5Screate_simple(1, dims, max_dims)) < 0)
+        FAIL_STACK_ERROR;
+    if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        FAIL_STACK_ERROR
+    if(H5Pset_chunk(dcpl, 1, chunk_dims) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Create the data space for the attribute. */
+    attr_sid = H5Screate_simple(1, attr_dims, NULL);
+
+    ndset = 1000;
+    for (i = 0; i < ndset; i++) {
+        sprintf(dset_name, "Dset%d", i);
+        if((dset = H5Dcreate(fid, dset_name, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+            FAIL_STACK_ERROR
+
+        if (i % 100 == 0)
+            nattr = i * 2 + 1;
+        else
+            nattr = i % 10 + 1;
+
+        for (j = 0; j < nattr; j++) {
+            sprintf(attr_name, "Attr%d", j);
+            attr_id = H5Acreate2(dset, attr_name, H5T_STD_I32BE, attr_sid, H5P_DEFAULT, H5P_DEFAULT);
+            if(H5Aclose(attr_id) < 0)
+                FAIL_STACK_ERROR
+        }
+
+        if(H5Dclose(dset) < 0)
+            FAIL_STACK_ERROR
+    }
+
+    /* close everything */
+    if(H5Sclose(sid) < 0)
+        FAIL_STACK_ERROR
+    if(H5Pclose(dcpl) < 0)
+        FAIL_STACK_ERROR
+    if(H5Fclose(fid) < 0)
+        FAIL_STACK_ERROR
+
+    /* Create 1 pipe */
+    if(HDpipe(out_pdf) < 0)
+        FAIL_STACK_ERROR
+
+    /* Fork child process */
+    if((childpid = HDfork()) < 0)
+        TEST_ERROR
+
+    /* Parent process open with SWMR_WRITE, child process open with SWMR_READ */
+    if(childpid == 0) {         /* Child process */
+
+        /* Close unused write end for out_pdf */
+        if(HDclose(out_pdf[1]) < 0)
+            HDexit(EXIT_FAILURE);
+
+        /* Wait for notification from parent process */
+        while(child_notify != 1)
+            if(HDread(out_pdf[0], &child_notify, sizeof(int)) < 0)
+                HDexit(EXIT_FAILURE);
+
+        /* Open the test file */
+        H5E_BEGIN_TRY {
+            child_fid = H5Fopen(filename, H5F_ACC_RDONLY|H5F_ACC_SWMR_READ, fapl);
+        } H5E_END_TRY;
+
+        if(child_fid >= 0) {
+            for (i = 0; i < max_retry; i++) {
+
+                n_found_attr = 0;
+                for (j = 0; j < ndset; j++) {
+
+                    sprintf(dset_name, "Dset%d", j);
+                    H5E_BEGIN_TRY {
+                        child_dset = H5Dopen(child_fid, dset_name, H5P_DEFAULT);
+                    } H5E_END_TRY;
+                    if (child_dset < 0)
+                        HDexit(EXIT_FAILURE);
+
+                    /* Iterate all attributes and count the total number */
+                    idx = 0;
+                    H5E_BEGIN_TRY {
+                      ret_val=H5Aiterate(child_dset,H5_INDEX_NAME,H5_ITER_INC,&idx,test_swmr_count_renamed_attr,&n_found_attr);
+                    } H5E_END_TRY;
+                    if (ret_val < 0)
+                        HDexit(EXIT_FAILURE);
+
+                    if(H5Dclose(child_dset) < 0)
+                        HDexit(EXIT_FAILURE);
+
+                } /* end for ndset */
+
+                HDfprintf(stderr, "Found %d attributes\n", n_found_attr);
+                fflush(stderr);
+
+                /* FULLSWMR TODO: enable check when doing actual testing */
+                if (n_found_attr == ntotalattr)
+                    break;
+                /* else if (n_found_attr > ntotalattr) */
+                /*     HDexit(EXIT_FAILURE); */
+                /* sleep(1); */
+            } /* end for max_retry */;
+
+            /* FULLSWMR TODO: enable check when doing actual testing */
+            /* if (i >= max_retry) { */
+            /*     HDfprintf(stderr, "Exceeds max number of retries to discover all objects\n"); */
+            /*     HDexit(EXIT_FAILURE); */
+            /* } */
+
+            if(H5Fclose(child_fid) < 0)
+                HDexit(EXIT_FAILURE);
+                /* FAIL_STACK_ERROR */
+
+            HDexit(EXIT_SUCCESS);
+        } /* end if */
+
+        /* Close the pipe */
+        if(HDclose(out_pdf[0]) < 0)
+            HDexit(EXIT_FAILURE);
+
+        HDexit(EXIT_FAILURE);
+    } /* end if childpid */
+
+    /* Close unused read end for out_pdf */
+    if(HDclose(out_pdf[0]) < 0)
+        FAIL_STACK_ERROR
+
+    /* set delta t value */
+    if(H5Pset_swmr_deltat(fapl, deltat) < 0)
+        FAIL_STACK_ERROR
+
+    /* Open the test file */
+    if((fid = H5Fopen(filename, H5F_ACC_RDWR|H5F_ACC_SWMR_WRITE, fapl)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Notify child process after opening the file */
+    notify = 1;
+    if(HDwrite(out_pdf[1], &notify, sizeof(int)) < 0)
+        TEST_ERROR;
+
+    /* Close the pipe */
+    if(HDclose(out_pdf[1]) < 0)
+        TEST_ERROR;
+
+    /* Rename every other attributes in each dataset */
+    for (i = 0; i < ndset; i++) {
+        sprintf(dset_name, "Dset%d", i);
+        if((dset = H5Dopen(fid, dset_name, H5P_DEFAULT)) < 0)
+            FAIL_STACK_ERROR
+
+        if (i % 100 == 0)
+            nattr = i * 2 + 1;
+        else
+            nattr = i % 10 + 1;
+
+        if (i % 100 == 0) {
+            /* Rename every attributes for every 100th dataset */
+            for (j = 0; j < nattr; j++) {
+                sprintf(attr_name, "Attr%d", j);
+                sprintf(new_attr_name, "newAttr%d", j);
+                if(H5Arename(dset, attr_name, new_attr_name) < 0)
+                    FAIL_STACK_ERROR
+            }
+        }
+        else if (i % 101 == 0) {
+            /* Rename every other attributes for every 101th dataset */
+            for (j = 0; j < nattr; j+=2) {
+                sprintf(attr_name, "Attr%d", j);
+                sprintf(new_attr_name, "newAttr%d", j);
+                if(H5Arename(dset, attr_name, new_attr_name) < 0)
+                    FAIL_STACK_ERROR
+            }
+        }
+
+        /* Flush the newly created group and dataset to disk */
+        H5Dflush(dset);
+
+        if(H5Dclose(dset) < 0)
+            FAIL_STACK_ERROR
+    }
+
+    /* Wait for child process to complete */
+    if(HDwaitpid(childpid, &child_status, child_wait_option) < 0)
+        TEST_ERROR
+
+    /* Check if child terminated normally */
+    if(WIFEXITED(child_status)) {
+        /* Check exit status of the child */
+        if(WEXITSTATUS(child_status) != 0)
+            TEST_ERROR
+    } /* end if */
+    else
+        FAIL_STACK_ERROR
+
+    /* Close the file */
+    if(H5Fclose(fid) < 0)
+        FAIL_STACK_ERROR
+
+    PASSED();
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Pclose(fapl);
+        H5Pclose(fid);
+    } H5E_END_TRY;
+
+    return -1;
+} /* end test_swmr_rename_attr() */
+#endif /* NOT_YET */
+
+/****************************************************************
+**
 **  test_file_lock_swmr_concur(): low-level file test routine.
 **    With the implementation of file locking, this test checks file
 **    open with different combinations of flags + SWMR flags.
@@ -7802,6 +9218,12 @@ main(void)
         nerrors += test_swmr_deltat_delete_on_file_close(fapl);
         nerrors += test_swmr_deltat_with_start_swmr_write(fapl);
         nerrors += test_swmr_reader_timeout(fapl);
+        nerrors += test_swmr_create_del_grp_dset(fapl);
+#ifdef NOT_YET
+        nerrors += test_swmr_create_del_attr(fapl);
+        nerrors += test_swmr_rename_grp_dset(fapl);
+        nerrors += test_swmr_rename_attr(fapl);
+#endif /* NOT_YET */
     } /* end if */
 
     /* Tests SWMR VFD compatibility flag.
