@@ -817,7 +817,7 @@ HDfprintf(stderr, "%s: Check 1.0\n", FUNC);
     /* 
      * Full SWMR: check the current time, then proceed through the holding tank queue, 
      * dequeueing blocks that have been on the queue for longer than 2t and 
-     * calling H5MF_xfree_real() with their address and length (finally 
+     * calling H5MF__xfree_real() with their address and length (finally 
      * returning them to be recycled for use in file space allocations). 
      */
     if(H5F_INTENT(f) & H5F_ACC_SWMR_WRITE) {
@@ -1421,8 +1421,9 @@ HDfprintf(stderr, "%s: Entering - alloc_type = %u, addr = %a, size = %Hu\n", FUN
         HGOTO_DONE(SUCCEED)
     HDassert(addr != 0);        /* Can't deallocate the superblock :-) */
 
-    /* Create a freed space entry for metadata (i.e. non-raw, non-"default" types) */
-    if((H5F_INTENT(f) & H5F_ACC_SWMR_WRITE) ) {
+    /* Create a freed space entry when SWMR-writing is in force */
+    /* (for non-"default" type blocks) */
+    if((H5F_INTENT(f) & H5F_ACC_SWMR_WRITE) && alloc_type != H5FD_MEM_DEFAULT) {
         H5MF_freedspace_t *fs = NULL;   /* Freed space object for space freed */
 
         /* Attempt to create freedspace object */
@@ -1438,7 +1439,7 @@ HDfprintf(stderr, "%s: Entering - alloc_type = %u, addr = %a, size = %Hu\n", FUN
             if(H5MF__xfree_real(f, alloc_type, addr, size) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTFREE, FAIL, "unable to free raw data")
     } /* end if */
-    else        /* Raw data, call the normal xfree */
+    else        /* Non-SWMR, call the normal xfree */
         if(H5MF__xfree_real(f, alloc_type, addr, size) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTFREE, FAIL, "unable to free raw data")
 
