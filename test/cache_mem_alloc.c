@@ -66,7 +66,7 @@ fullswmr_free_entry(H5F_t *file_ptr, unsigned idx)
     addr = allocated_base_addr_array_g + (haddr_t)(idx*entry_array_size_g);
     size = entry_array_size_g;
 
-    if (H5MF_xfree(file_ptr, H5FD_MEM_DEFAULT, addr, size) < 0) 
+    if (H5MF_xfree(file_ptr, H5FD_MEM_SUPER, addr, size) < 0) 
         CACHE_ERROR("H5MF_xfree failed")
 
     fullswmr_expunge_entry(file_ptr, idx);
@@ -97,7 +97,7 @@ static unsigned
 check_freedspace_without_swmr_write(void)
 {
     H5F_t * file_ptr = NULL;            /* File for this test */
-    int    n_entry, n_free_entry;
+    int    n_entry;
     unsigned    u;
     hsize_t entry_size;
     hsize_t freedspace_size = 0, meta_size = 0;
@@ -115,13 +115,12 @@ check_freedspace_without_swmr_write(void)
         CACHE_ERROR("setup_cache failed")
 
     /* 
-     * Free the allocated space then verify that the freed space is immediately returned 
-     * to use for future allocations.
+     * Free some allocated space then verify that the freed space is immediately
+     * returned to use for future allocations.
      */
     if(pass_g) {
 
-        n_free_entry = 2;
-        for(u = 0; u < n_free_entry; u++) {
+        for(u = 0; u < 2; u++) {
 
             fullswmr_free_entry(file_ptr, u);
             if (!pass_g)
@@ -183,7 +182,7 @@ check_holding_tank_with_swmr_write(void)
     TESTING("holding tank with swmr write")
 
     /* Setup cache */
-    file_ptr    = fullswmr_setup_cache(entry_size, n_entry, H5F_ACC_TRUNC|H5F_ACC_SWMR_WRITE);
+    file_ptr = fullswmr_setup_cache(entry_size, n_entry, H5F_ACC_TRUNC|H5F_ACC_SWMR_WRITE);
 
     if(!pass_g) 
         CACHE_ERROR("setup_cache failed")
@@ -195,29 +194,27 @@ check_holding_tank_with_swmr_write(void)
 
         /* Free an entry and check the holding tank */
         fullswmr_free_entry(file_ptr, 0);
-        if (!pass_g)
+        if(!pass_g)
             CACHE_ERROR("Free entry failed")
 
-        if (H5MF_get_freespace(file_ptr, &freedspace_size, &meta_size) < 0)
+        if(H5MF_get_freespace(file_ptr, &freedspace_size, &meta_size) < 0)
             CACHE_ERROR("H5MF_get_freespace failed")
 
         /* NOTE: the H5MF_get_freespace includes size of deferred space, so freedspace_size 
          *       will be the freed size. */
-        if (freedspace_size != entry_array_size_g) 
+        if(freedspace_size != entry_array_size_g) 
             CACHE_ERROR("Total free space size is not correct with SMWR write!")
  
         /* Each cache entry should have no parent (freedspace entry) */
-        for (u = 1; u < n_entry; u++) {
+        for(u = 1; u < n_entry; u++) {
             entry_ptr = &entry_array_g[u];
-            if ( entry_ptr->header.flush_dep_nparents != 0 || entry_ptr->header.flush_dep_parent != NULL )
+            if(entry_ptr->header.flush_dep_nparents != 0 || entry_ptr->header.flush_dep_parent != NULL )
                 CACHE_ERROR("Error with freedspace flush dependency!")
-        }
+        } /* end for */
        
         /* Check the holding tank, should be empty */
-        if (file_ptr->shared->freedspace_head != NULL) {
+        if(file_ptr->shared->freedspace_head != NULL)
             CACHE_ERROR("Holding tank is not empty!")
-        }
-
     } /* end of if */
 
 
@@ -362,8 +359,6 @@ check_freedspace_flush_dependency(void)
                 CACHE_ERROR("Error with holding tank entries!")
             }
         }
-
-
     }
 
 done:
@@ -378,11 +373,7 @@ done:
     } /* end else */
 
     return (unsigned)!pass_g;
-
-
 } /* end check_freedspace_flush_dependency() */
-
-
 
 
 /*-------------------------------------------------------------------------
@@ -434,34 +425,32 @@ check_freedspace_reuse_2deltat(void)
             flush_flags = H5C__FLUSH_CLEAR_ONLY_FLAG;
             if(H5C__flush_single_entry(file_ptr, &entry_ptr->header, flush_flags) < 0)
                 CACHE_ERROR("Error with flush single entry!")
-        }
+        } /* end for */
         
-        new_alloc_addr1 = H5MF_alloc(file_ptr, H5FD_MEM_DEFAULT, (hsize_t)(entry_size));
+        new_alloc_addr1 = H5MF_alloc(file_ptr, H5FD_MEM_EARRAY_DBLK_PAGE, (hsize_t)(entry_size));
         if (new_alloc_addr1 == HADDR_UNDEF) 
             CACHE_ERROR("H5MF_alloc failed")
         else if (new_alloc_addr1 == allocated_base_addr_array_g)
             CACHE_ERROR("Freed space is reused before 2 delta t time")
 
         /* Delta t is set to be FULLSWMR_DELTAT_SECONDS (1s) in setup_cache */
-        sleep(2*FULLSWMR_DELTAT_SECONDS);
+        HDsleep(2 * FULLSWMR_DELTAT_SECONDS);
 
-        new_alloc_addr2 = H5MF_alloc(file_ptr, H5FD_MEM_DEFAULT, (hsize_t)(entry_size));
-        if (new_alloc_addr2 == HADDR_UNDEF) 
+        new_alloc_addr2 = H5MF_alloc(file_ptr, H5FD_MEM_EARRAY_DBLK_PAGE, (hsize_t)(entry_size));
+        if(new_alloc_addr2 == HADDR_UNDEF) 
             CACHE_ERROR("H5MF_alloc failed")
         else if (new_alloc_addr2 != allocated_base_addr_array_g)
             CACHE_ERROR("Freed space is not reused after 2 delta t time");
-    }
+    } /* end if */
 
 done:
-    if (new_alloc_addr1 != HADDR_UNDEF) {
-        if (H5MF_xfree(file_ptr, H5FD_MEM_DEFAULT, new_alloc_addr1, entry_size) < 0) 
+    if(new_alloc_addr1 != HADDR_UNDEF)
+        if (H5MF_xfree(file_ptr, H5FD_MEM_EARRAY_DBLK_PAGE, new_alloc_addr1, entry_size) < 0) 
             CACHE_ERROR("H5MF_xfree failed")
-    }
 
-    if (new_alloc_addr2 != HADDR_UNDEF) {
-        if (H5MF_xfree(file_ptr, H5FD_MEM_DEFAULT, new_alloc_addr2, entry_size) < 0) 
+    if(new_alloc_addr2 != HADDR_UNDEF)
+        if (H5MF_xfree(file_ptr, H5FD_MEM_EARRAY_DBLK_PAGE, new_alloc_addr2, entry_size) < 0) 
             CACHE_ERROR("H5MF_xfree failed")
-    }
 
     if(file_ptr)
         fullswmr_takedown_cache(file_ptr, FALSE, FALSE);
@@ -474,9 +463,7 @@ done:
     } /* end else */
 
     return (unsigned)!pass_g;
-
 }
-
 
 
 /*-------------------------------------------------------------------------
@@ -510,9 +497,9 @@ main(void)
 
     H5open();
 
-    printf("================================================\n");
-    printf("Internal full SWMR cache memory allocation tests\n");
-    printf("================================================\n");
+    printf("===========================================\n");
+    printf("Internal SWMR cache memory allocation tests\n");
+    printf("===========================================\n");
 
     /* Each test will call setup_cache() which set up the file space */
     nerrs += check_freedspace_without_swmr_write();
@@ -520,10 +507,14 @@ main(void)
     nerrs += check_freedspace_flush_dependency();
     nerrs += check_freedspace_reuse_2deltat();
 
-    if(nerrs > 0)
+    if(nerrs > 0) {
+        puts("*** TESTS FAILED ***");
         return EXIT_FAILURE;
-    else
+    } /* end if */
+    else {
+        puts("All SWMR cache memory allocation tests passed.");
         return EXIT_SUCCESS;
+    } /* end else */
 
 } /* main() */
 
