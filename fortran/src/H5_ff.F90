@@ -169,8 +169,10 @@ CONTAINS
 ! October 13, 2011
 ! Fortran90 Interface:
   SUBROUTINE h5open_f(error)
+    USE H5F, ONLY : h5fget_obj_count_f, H5OPEN_NUM_OBJ 
     IMPLICIT NONE
     INTEGER, INTENT(OUT) :: error
+    INTEGER(SIZE_T) :: H5OPEN_NUM_OBJ_LOC = 0
 !*****
     INTERFACE
 
@@ -611,6 +613,10 @@ CONTAINS
     !
     H5_SZIP_EC_OM_F = H5LIB_flags(1)
     H5_SZIP_NN_OM_F = H5LIB_flags(2)
+
+    CALL h5fget_obj_count_f(INT(H5F_OBJ_ALL_F,HID_T), H5F_OBJ_ALL_F, H5OPEN_NUM_OBJ_LOC,  error)
+
+    H5OPEN_NUM_OBJ = H5OPEN_NUM_OBJ_LOC
 
   END SUBROUTINE h5open_f
 

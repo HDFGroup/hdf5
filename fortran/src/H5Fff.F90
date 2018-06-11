@@ -42,6 +42,9 @@ MODULE H5F
   USE H5GLOBAL
   IMPLICIT NONE
 
+  ! Number of objects opened in H5open_f
+  INTEGER(SIZE_T) :: H5OPEN_NUM_OBJ
+
 CONTAINS
 !****s* H5F/h5fcreate_f
 !
@@ -616,8 +619,13 @@ CONTAINS
          INTEGER(SIZE_T), INTENT(OUT) :: obj_count
        END FUNCTION h5fget_obj_count_c
     END INTERFACE
-
+    
     hdferr = h5fget_obj_count_c(file_id, obj_type, obj_count)
+
+    ! Don't include objects created by H5open in the H5F_OBJ_ALL_F count
+    IF(file_id.EQ.INT(H5F_OBJ_ALL_F,HID_T))THEN
+       obj_count = obj_count - H5OPEN_NUM_OBJ
+    ENDIF
 
   END SUBROUTINE h5fget_obj_count_f
 
