@@ -35,7 +35,8 @@ CMake version
 
 Note:
    To change the install prefix from the platform defaults initialize
-   the CMake variable, CMAKE_INSTALL_PREFIX.
+   the CMake variable, CMAKE_INSTALL_PREFIX. Users of build scripts
+   will use the INSTALLDIR option.
 
 
 ========================================================================
@@ -89,14 +90,14 @@ To build HDF5 with the SZIP and ZLIB external libraries you will need to:
    5. From the "myhdfstuff" directory execute the CTest Script with the
       following options:
 
+      On 32-bit Windows with Visual Studio 2017, execute:
+         ctest -S HDF5config.cmake,BUILD_GENERATOR=VS2017 -C Release -VV -O hdf5.log
+      On 64-bit Windows with Visual Studio 2017, execute:
+         ctest -S HDF5config.cmake,BUILD_GENERATOR=VS201764 -C Release -VV -O hdf5.log
       On 32-bit Windows with Visual Studio 2015, execute:
          ctest -S HDF5config.cmake,BUILD_GENERATOR=VS2015 -C Release -VV -O hdf5.log
       On 64-bit Windows with Visual Studio 2015, execute:
          ctest -S HDF5config.cmake,BUILD_GENERATOR=VS201564 -C Release -VV -O hdf5.log
-      On 32-bit Windows with Visual Studio 2013, execute:
-         ctest -S HDF5config.cmake,BUILD_GENERATOR=VS2013 -C Release -VV -O hdf5.log
-      On 64-bit Windows with Visual Studio 2013, execute:
-         ctest -S HDF5config.cmake,BUILD_GENERATOR=VS201364 -C Release -VV -O hdf5.log
       On Linux and Mac, execute:
          ctest -S HDF5config.cmake,BUILD_GENERATOR=Unix -C Release -VV -O hdf5.log
       The supplied build scripts are versions of the above.
@@ -167,6 +168,14 @@ To build HDF5 with the SZIP and ZLIB external libraries you will need to:
 
       By default the installation will create the bin, include, lib and cmake
       folders in the <install destination directory>/HDF_Group/HDF5/1.10."X"
+      The <install destination directory> depends on the build platform;
+        Windows will set the default to:
+          C:/Program Files/HDF_Group/HDF5/1.10."X"
+        Linux will set the default to:
+          "myhdfstuff/HDF_Group/HDF5/1.10."X"
+      The default can be changed by adding ",INSTALLDIR=<my new dir>" to the
+          "ctest -S HDF5config.cmake..." command. For example on linux:
+         ctest -S HDF5config.cmake,INSTALLDIR=/usr/local/myhdf5,BUILD_GENERATOR=Unix -C Release -VV -O hdf5.log
 
 
 ========================================================================
