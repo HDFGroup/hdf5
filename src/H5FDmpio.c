@@ -1126,9 +1126,6 @@ H5FD_mpio_open(const char *name, unsigned flags, hid_t fapl_id,
     file->eof = H5FD_mpi_MPIOff_to_haddr(size);
     file->local_eof = file->eof;
 
-    /* Mark initial barriers in H5FD_mpio_truncate() as necessary */
-    // file->do_pre_trunc_barrier = TRUE;
-
     if (mpi_rank == 0) {
         /* Gather some file info for future comparisons */
         H5FD_mpio_fileinfo_get( name, flags, file );
