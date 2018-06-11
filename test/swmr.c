@@ -6851,7 +6851,7 @@ test_swmr_create_del_grp_dset(hid_t in_fapl)
                      * the writer created eventually, verify number of datasets */
                     n_found_dset = 0;
                     H5E_BEGIN_TRY {
-                        ret_val = H5Ovisit(child_fid,H5_INDEX_NAME,H5_ITER_INC,test_swmr_count_ndset,&n_found_dset);
+                        ret_val = H5Ovisit(child_fid, H5_INDEX_NAME, H5_ITER_INC, test_swmr_count_ndset, &n_found_dset, H5O_INFO_BASIC);
                     } H5E_END_TRY;
                     if (ret_val < 0)
                         HDexit(EXIT_FAILURE);
@@ -7007,7 +7007,7 @@ H5Fflush(fid, H5F_SCOPE_GLOBAL);
                  * the writer created eventually, verify number of datasets */
                 n_found_dset = 0;
                 H5E_BEGIN_TRY {
-                    ret_val = H5Ovisit(child_fid,H5_INDEX_NAME,H5_ITER_INC,test_swmr_count_ndset,&n_found_dset);
+                    ret_val = H5Ovisit(child_fid, H5_INDEX_NAME, H5_ITER_INC, test_swmr_count_ndset, &n_found_dset, H5O_INFO_BASIC);
                 } H5E_END_TRY;
                 if (ret_val < 0)
                     HDexit(EXIT_FAILURE);
@@ -7719,7 +7719,7 @@ test_swmr_rename_grp_dset(hid_t in_fapl)
                  * the writer created eventually, verify number of datasets */
                 n_found_dset = 0;
                 H5E_BEGIN_TRY {
-                    ret_val = H5Ovisit(child_fid, H5_INDEX_NAME, H5_ITER_INC, test_swmr_count_renamed_ndset, &n_found_dset);
+                    ret_val = H5Ovisit(child_fid, H5_INDEX_NAME, H5_ITER_INC, test_swmr_count_renamed_ndset, &n_found_dset, H5O_INFO_BASIC);
                 } H5E_END_TRY;
                 if (ret_val < 0)
                     HDexit(EXIT_FAILURE);
