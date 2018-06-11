@@ -575,15 +575,15 @@ H5_DLL int H5O__link_oh(H5F_t *f, int adjust, H5O_t *oh, hbool_t *deleted);
 H5_DLL herr_t H5O__link(const H5O_loc_t *loc, int adjust);
 H5_DLL htri_t H5O__exists_by_name(const H5G_loc_t *loc, const char *name);
 H5_DLL herr_t H5O__get_info_by_name(const H5G_loc_t *loc, const char *name,
-    H5O_info_t *oinfo);
+    H5O_info_t *oinfo, unsigned fields);
 H5_DLL herr_t H5O__get_info_by_idx(const H5G_loc_t *loc, const char *group_name,
-    H5_index_t idx_type, H5_iter_order_t order, hsize_t n, H5O_info_t *oinfo);
+    H5_index_t idx_type, H5_iter_order_t order, hsize_t n, H5O_info_t *oinfo, unsigned fields);
 H5_DLL herr_t H5O__set_comment_by_name(const H5G_loc_t *loc, const char *name,
     const char *comment);
 H5_DLL ssize_t H5O__get_comment_by_name(const H5G_loc_t *loc, const char *name,
     char *comment, size_t bufsize);
 H5_DLL herr_t H5O__visit(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
-    H5_iter_order_t order, H5O_iterate_t op, void *op_data);
+    H5_iter_order_t order, H5O_iterate_t op, void *op_data, unsigned fields);
 H5_DLL herr_t H5O__inc_rc(H5O_t *oh);
 H5_DLL herr_t H5O__dec_rc(H5O_t *oh);
 H5_DLL herr_t H5O__free(H5O_t *oh);

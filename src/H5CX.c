@@ -237,24 +237,10 @@ typedef struct H5CX_t {
     hbool_t data_transform_valid; /* Whether data transform info is valid */
     H5T_vlen_alloc_info_t vl_alloc_info; /* VL datatype alloc info (H5D_XFER_VLEN_*_NAME) */
     hbool_t vl_alloc_info_valid; /* Whether VL datatype alloc info is valid */
-    hbool_t dcr_flag;           /* Direct chunk read flag (H5D_XFER_DIRECT_CHUNK_READ_FLAG_NAME) */
-    hbool_t dcr_flag_valid;     /* Whether direct chunk read flag is valid */
-    hsize_t *dcr_offset;        /* Direct chunk read offset (H5D_XFER_DIRECT_CHUNK_READ_OFFSET_NAME) */
-    hbool_t dcr_offset_valid;   /* Whether direct chunk read offset is valid */
-    hbool_t dcw_flag;           /* Direct chunk write flag (H5D_XFER_DIRECT_CHUNK_WRITE_FLAG_NAME) */
-    hbool_t dcw_flag_valid;     /* Whether direct chunk write flag is valid */
-    uint32_t dcw_filters;       /* Direct chunk write filter flags (H5D_XFER_DIRECT_CHUNK_WRITE_FILTERS_NAME) */
-    hbool_t dcw_filters_valid;  /* Whether direct chunk write filter flags is valid */
-    hsize_t *dcw_offset;        /* Direct chunk write offset (H5D_XFER_DIRECT_CHUNK_WRITE_OFFSET_NAME) */
-    hbool_t dcw_offset_valid;   /* Whether direct chunk write offset is valid */
-    uint32_t dcw_datasize;      /* Direct chunk write data size (H5D_XFER_DIRECT_CHUNK_WRITE_DATASIZE_NAME) */
-    hbool_t dcw_datasize_valid; /* Whether direct chunk write data size is valid */
     H5T_conv_cb_t dt_conv_cb;   /* Datatype conversion struct (H5D_XFER_CONV_CB_NAME) */
     hbool_t dt_conv_cb_valid;   /* Whether datatype conversion struct is valid */
 
     /* Return-only DXPL properties to return to application */
-    uint32_t dcr_filters;       /* Direct chunk read filter flags (H5D_XFER_DIRECT_CHUNK_READ_FILTERS_NAME) */
-    hbool_t dcr_filters_set;    /* Whether direct chunk read filter flags are set */
 #ifdef H5_HAVE_PARALLEL
     H5D_mpio_actual_chunk_opt_mode_t mpio_actual_chunk_opt; /* Chunk optimization mode used for parallel I/O (H5D_MPIO_ACTUAL_CHUNK_OPT_MODE_NAME) */
     hbool_t mpio_actual_chunk_opt_set; /* Whether chunk optimization mode used for parallel I/O is set */
@@ -325,12 +311,6 @@ typedef struct H5CX_dxpl_cache_t {
     H5Z_cb_t filter_cb;             /* Filter callback function (H5D_XFER_FILTER_CB_NAME) */
     H5Z_data_xform_t *data_transform; /* Data transform info (H5D_XFER_XFORM_NAME) */
     H5T_vlen_alloc_info_t vl_alloc_info; /* VL datatype alloc info (H5D_XFER_VLEN_*_NAME) */
-    hbool_t dcr_flag;               /* Direct chunk read flag (H5D_XFER_DIRECT_CHUNK_READ_FLAG_NAME) */
-    hsize_t *dcr_offset;            /* Direct chunk read offset (H5D_XFER_DIRECT_CHUNK_READ_OFFSET_NAME) */
-    hbool_t dcw_flag;               /* Direct chunk write flag (H5D_XFER_DIRECT_CHUNK_WRITE_FLAG_NAME) */
-    uint32_t dcw_datasize;          /* Direct chunk write data size (H5D_XFER_DIRECT_CHUNK_WRITE_DATASIZE_NAME) */
-    hsize_t *dcw_offset;            /* Direct chunk write offset (H5D_XFER_DIRECT_CHUNK_WRITE_OFFSET_NAME) */
-    uint32_t dcw_filters;           /* Direct chunk write filter flags (H5D_XFER_DIRECT_CHUNK_WRITE_FILTERS_NAME) */
     H5T_conv_cb_t dt_conv_cb;       /* Datatype conversion struct (H5D_XFER_CONV_CB_NAME) */
 } H5CX_dxpl_cache_t;
 
@@ -473,26 +453,9 @@ H5CX__init_package(void)
     if(H5P_get(dx_plist, H5D_XFER_VLEN_FREE_INFO_NAME, &H5CX_def_dxpl_cache.vl_alloc_info.free_info) < 0)
         HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve VL datatype alloc info")
 
-    /* Get direct chunk read info */
-    if(H5P_get(dx_plist, H5D_XFER_DIRECT_CHUNK_READ_FLAG_NAME, &H5CX_def_dxpl_cache.dcr_flag) < 0)
-        HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve direct chunk read flag")
-    if(H5P_get(dx_plist, H5D_XFER_DIRECT_CHUNK_READ_OFFSET_NAME, &H5CX_def_dxpl_cache.dcr_offset) < 0)
-        HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve direct chunk read offset")
-
-    /* Get direct chunk write info */
-    if(H5P_get(dx_plist, H5D_XFER_DIRECT_CHUNK_WRITE_FLAG_NAME, &H5CX_def_dxpl_cache.dcw_flag) < 0)
-        HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve direct chunk write flag")
-    if(H5P_get(dx_plist, H5D_XFER_DIRECT_CHUNK_WRITE_FILTERS_NAME, &H5CX_def_dxpl_cache.dcw_filters) < 0)
-        HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve direct chunk write filter mask")
-    if(H5P_get(dx_plist, H5D_XFER_DIRECT_CHUNK_WRITE_OFFSET_NAME, &H5CX_def_dxpl_cache.dcw_offset) < 0)
-        HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve direct chunk write offset")
-    if(H5P_get(dx_plist, H5D_XFER_DIRECT_CHUNK_WRITE_DATASIZE_NAME, &H5CX_def_dxpl_cache.dcw_datasize) < 0)
-        HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve direct chunk write data size")
-
     /* Get datatype conversion struct */
     if(H5P_get(dx_plist, H5D_XFER_CONV_CB_NAME, &H5CX_def_dxpl_cache.dt_conv_cb) < 0)
         HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve datatype conversion exception callback")
-
 
     /* Reset the "default LAPL cache" information */
     HDmemset(&H5CX_def_lapl_cache, 0, sizeof(H5CX_lapl_cache_t));
@@ -1848,216 +1811,6 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5CX_get_dcr_flag
- *
- * Purpose:     Retrieves the direct chunk read flag for the current API call context.
- *
- * Return:      Non-negative on success / Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              March 6, 2018
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5CX_get_dcr_flag(hbool_t *dcr_flag)
-{
-    H5CX_node_t **head = H5CX_get_my_context();  /* Get the pointer to the head of the API context, for this thread */
-    herr_t ret_value = SUCCEED;         /* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    /* Sanity check */
-    HDassert(dcr_flag);
-    HDassert(head && *head);
-    HDassert(H5P_DEFAULT != (*head)->ctx.dxpl_id);
-
-    H5CX_RETRIEVE_PROP_VALID(dxpl, H5P_DATASET_XFER_DEFAULT, H5D_XFER_DIRECT_CHUNK_READ_FLAG_NAME, dcr_flag)
-
-    /* Get the value */
-    *dcr_flag = (*head)->ctx.dcr_flag;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5CX_get_dcr_flag() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5CX_get_dcr_offset
- *
- * Purpose:     Retrieves the direct chunk read offset for the current API call context.
- *
- * Return:      Non-negative on success / Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              March 6, 2018
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5CX_get_dcr_offset(hsize_t **dcr_offset)
-{
-    H5CX_node_t **head = H5CX_get_my_context();  /* Get the pointer to the head of the API context, for this thread */
-    herr_t ret_value = SUCCEED;         /* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    /* Sanity check */
-    HDassert(dcr_offset);
-    HDassert(head && *head);
-    HDassert(H5P_DEFAULT != (*head)->ctx.dxpl_id);
-
-    H5CX_RETRIEVE_PROP_VALID(dxpl, H5P_DATASET_XFER_DEFAULT, H5D_XFER_DIRECT_CHUNK_READ_OFFSET_NAME, dcr_offset)
-
-    /* Get the value */
-    *dcr_offset = (*head)->ctx.dcr_offset;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5CX_get_dcr_offset() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5CX_get_dcw_flag
- *
- * Purpose:     Retrieves the direct chunk write flag for the current API call context.
- *
- * Return:      Non-negative on success / Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              March 6, 2018
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5CX_get_dcw_flag(hbool_t *dcw_flag)
-{
-    H5CX_node_t **head = H5CX_get_my_context();  /* Get the pointer to the head of the API context, for this thread */
-    herr_t ret_value = SUCCEED;         /* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    /* Sanity check */
-    HDassert(dcw_flag);
-    HDassert(head && *head);
-    HDassert(H5P_DEFAULT != (*head)->ctx.dxpl_id);
-
-    H5CX_RETRIEVE_PROP_VALID(dxpl, H5P_DATASET_XFER_DEFAULT, H5D_XFER_DIRECT_CHUNK_WRITE_FLAG_NAME, dcw_flag)
-
-    /* Get the value */
-    *dcw_flag = (*head)->ctx.dcw_flag;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5CX_get_dcw_flag() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5CX_get_dcw_filters
- *
- * Purpose:     Retrieves the direct chunk write filter mask for the current API call context.
- *
- * Return:      Non-negative on success / Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              March 6, 2018
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5CX_get_dcw_filters(uint32_t *dcw_filters)
-{
-    H5CX_node_t **head = H5CX_get_my_context();  /* Get the pointer to the head of the API context, for this thread */
-    herr_t ret_value = SUCCEED;         /* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    /* Sanity check */
-    HDassert(dcw_filters);
-    HDassert(head && *head);
-    HDassert(H5P_DEFAULT != (*head)->ctx.dxpl_id);
-
-    H5CX_RETRIEVE_PROP_VALID(dxpl, H5P_DATASET_XFER_DEFAULT, H5D_XFER_DIRECT_CHUNK_WRITE_FILTERS_NAME, dcw_filters)
-
-    /* Get the value */
-    *dcw_filters = (*head)->ctx.dcw_filters;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5CX_get_dcw_filters() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5CX_get_dcw_offset
- *
- * Purpose:     Retrieves the direct chunk write offset for the current API call context.
- *
- * Return:      Non-negative on success / Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              March 6, 2018
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5CX_get_dcw_offset(hsize_t **dcw_offset)
-{
-    H5CX_node_t **head = H5CX_get_my_context();  /* Get the pointer to the head of the API context, for this thread */
-    herr_t ret_value = SUCCEED;         /* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    /* Sanity check */
-    HDassert(dcw_offset);
-    HDassert(head && *head);
-    HDassert(H5P_DEFAULT != (*head)->ctx.dxpl_id);
-
-    H5CX_RETRIEVE_PROP_VALID(dxpl, H5P_DATASET_XFER_DEFAULT, H5D_XFER_DIRECT_CHUNK_WRITE_OFFSET_NAME, dcw_offset)
-
-    /* Get the value */
-    *dcw_offset = (*head)->ctx.dcw_offset;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5CX_get_dcw_offset() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5CX_get_dcw_datasize
- *
- * Purpose:     Retrieves the direct chunk write data size for the current API call context.
- *
- * Return:      Non-negative on success / Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              March 6, 2018
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5CX_get_dcw_datasize(uint32_t *dcw_datasize)
-{
-    H5CX_node_t **head = H5CX_get_my_context();  /* Get the pointer to the head of the API context, for this thread */
-    herr_t ret_value = SUCCEED;         /* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    /* Sanity check */
-    HDassert(dcw_datasize);
-    HDassert(head && *head);
-    HDassert(H5P_DEFAULT != (*head)->ctx.dxpl_id);
-
-    H5CX_RETRIEVE_PROP_VALID(dxpl, H5P_DATASET_XFER_DEFAULT, H5D_XFER_DIRECT_CHUNK_WRITE_DATASIZE_NAME, dcw_datasize)
-
-    /* Get the value */
-    *dcw_datasize = (*head)->ctx.dcw_datasize;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5CX_get_dcw_datasize() */
-
-
-/*-------------------------------------------------------------------------
  * Function:    H5CX_get_dt_conv_cb
  *
  * Purpose:     Retrieves the datatype conversion exception callback for the current API call context.
@@ -2471,38 +2224,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5CX_set_nlinks() */
 
-
-/*-------------------------------------------------------------------------
- * Function:    H5CX_set_dcr_filters
- *
- * Purpose:     Sets the direct chunk read filter flags for the current API call context.
- *
- * Return:      <none>
- *
- * Programmer:  Quincey Koziol
- *              March 6, 2018
- *
- *-------------------------------------------------------------------------
- */
-void
-H5CX_set_dcr_filters(uint32_t direct_filters)
-{
-    H5CX_node_t **head = H5CX_get_my_context();  /* Get the pointer to the head of the API context, for this thread */
-
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    /* Sanity checks */
-    HDassert(head && *head);
-    HDassert(!((*head)->ctx.dxpl_id == H5P_DEFAULT || 
-            (*head)->ctx.dxpl_id == H5P_DATASET_XFER_DEFAULT));
-
-    /* Cache the filter mask for later, marking it to set in DXPL when context popped */
-    (*head)->ctx.dcr_filters = direct_filters;
-    (*head)->ctx.dcr_filters_set = TRUE;
-
-    FUNC_LEAVE_NOAPI_VOID
-} /* end H5CX_set_dcr_filters() */
-
 #ifdef H5_HAVE_PARALLEL
 
 /*-------------------------------------------------------------------------
@@ -2868,7 +2589,6 @@ H5CX__pop_common(void)
     HDassert(head && *head);
 
     /* Check for cached DXPL properties to return to application */
-    H5CX_SET_PROP(H5D_XFER_DIRECT_CHUNK_READ_FILTERS_NAME, dcr_filters)
 #ifdef H5_HAVE_PARALLEL
     H5CX_SET_PROP(H5D_MPIO_ACTUAL_CHUNK_OPT_MODE_NAME, mpio_actual_chunk_opt)
     H5CX_SET_PROP(H5D_MPIO_ACTUAL_IO_MODE_NAME, mpio_actual_io_mode)

@@ -97,12 +97,6 @@ H5_DLL herr_t H5CX_get_err_detect(H5Z_EDC_t *err_detect);
 H5_DLL herr_t H5CX_get_filter_cb(H5Z_cb_t *filter_cb);
 H5_DLL herr_t H5CX_get_data_transform(H5Z_data_xform_t **data_transform);
 H5_DLL herr_t H5CX_get_vlen_alloc_info(H5T_vlen_alloc_info_t *vl_alloc_info);
-H5_DLL herr_t H5CX_get_dcr_flag(hbool_t *direct_read);
-H5_DLL herr_t H5CX_get_dcr_offset(hsize_t **direct_offset);
-H5_DLL herr_t H5CX_get_dcw_flag(hbool_t *direct_write);
-H5_DLL herr_t H5CX_get_dcw_filters(uint32_t *direct_filters);
-H5_DLL herr_t H5CX_get_dcw_offset(hsize_t **direct_offset);
-H5_DLL herr_t H5CX_get_dcw_datasize(uint32_t *direct_datasize);
 H5_DLL herr_t H5CX_get_dt_conv_cb(H5T_conv_cb_t *cb_struct);
 
 /* "Getter" routines for LAPL properties cached in API context */
@@ -131,7 +125,6 @@ H5_DLL herr_t H5CX_set_vlen_alloc_info(H5MM_allocate_t alloc_func,
 H5_DLL herr_t H5CX_set_nlinks(size_t nlinks);
 
 /* "Setter" routines for cached DXPL properties that must be returned to application */
-H5_DLL void H5CX_set_dcr_filters(uint32_t direct_filters);
 #ifdef H5_HAVE_PARALLEL
 H5_DLL void H5CX_set_mpio_actual_chunk_opt(H5D_mpio_actual_chunk_opt_mode_t chunk_opt);
 H5_DLL void H5CX_set_mpio_actual_io_mode(H5D_mpio_actual_io_mode_t actual_io_mode);

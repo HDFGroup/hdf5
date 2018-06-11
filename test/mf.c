@@ -258,13 +258,13 @@ test_mf_eoa(const char *env_h5_drvr, hid_t fapl)
         if(NULL == (f = (H5F_t *)H5I_object(file)))
             FAIL_STACK_ERROR
 
-        H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
+        H5MF__aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
 
         type = H5FD_MEM_SUPER;
         addr1 = H5MF_alloc(f, type, (hsize_t)TBLOCK_SIZE30);
 
         /* nothing should be changed in meta_aggr */
-        H5MF_aggr_query(f, &(f->shared->meta_aggr), &new_ma_addr, &ma_size);
+        H5MF__aggr_query(f, &(f->shared->meta_aggr), &new_ma_addr, &ma_size);
         if (new_ma_addr != ma_addr)
             TEST_ERROR
 
@@ -274,7 +274,7 @@ test_mf_eoa(const char *env_h5_drvr, hid_t fapl)
         addr2 = H5MF_alloc(f, type, (hsize_t)TBLOCK_SIZE50);
 
         /* nothing should be changed in meta_aggr */
-        H5MF_aggr_query(f, &(f->shared->meta_aggr), &new_ma_addr, &ma_size);
+        H5MF__aggr_query(f, &(f->shared->meta_aggr), &new_ma_addr, &ma_size);
         if (new_ma_addr != ma_addr)
             TEST_ERROR
 
@@ -403,7 +403,7 @@ test_mf_eoa_shrink(const char *env_h5_drvr, hid_t fapl)
         if(NULL == (f = (H5F_t *)H5I_object(file)))
             FAIL_STACK_ERROR
 
-        H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
+        H5MF__aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
 
         type = H5FD_MEM_SUPER;
         addr = H5MF_alloc(f, type, (hsize_t)TBLOCK_SIZE30);
@@ -412,7 +412,7 @@ test_mf_eoa_shrink(const char *env_h5_drvr, hid_t fapl)
             TEST_ERROR
 
         /* nothing should be changed in meta_aggr */
-        H5MF_aggr_query(f, &(f->shared->meta_aggr), &new_ma_addr, &new_ma_size);
+        H5MF__aggr_query(f, &(f->shared->meta_aggr), &new_ma_addr, &new_ma_size);
         if (new_ma_addr != ma_addr) TEST_ERROR
         if (new_ma_size != ma_size) TEST_ERROR
 
@@ -435,14 +435,14 @@ test_mf_eoa_shrink(const char *env_h5_drvr, hid_t fapl)
         if(NULL == (f = (H5F_t *)H5I_object(file)))
             FAIL_STACK_ERROR
 
-        H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
+        H5MF__aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
 
         /* should succeed */
         if(H5MF_try_shrink(f, type, addr, (hsize_t)TBLOCK_SIZE30) <= 0)
             TEST_ERROR
 
         /* nothing should be changed in meta_aggr */
-        H5MF_aggr_query(f, &(f->shared->meta_aggr), &new_ma_addr, &ma_size);
+        H5MF__aggr_query(f, &(f->shared->meta_aggr), &new_ma_addr, &ma_size);
         if(new_ma_addr != ma_addr)
             TEST_ERROR
         if(new_ma_size != ma_size)
@@ -480,7 +480,7 @@ test_mf_eoa_shrink(const char *env_h5_drvr, hid_t fapl)
         if(NULL == (f = (H5F_t *)H5I_object(file)))
             FAIL_STACK_ERROR
 
-        H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
+        H5MF__aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
 
         addr = H5MF_alloc(f, type, (hsize_t)TBLOCK_SIZE30);
 
@@ -492,7 +492,7 @@ test_mf_eoa_shrink(const char *env_h5_drvr, hid_t fapl)
             TEST_ERROR
 
         /* nothing should be changed in meta_aggr */
-        H5MF_aggr_query(f, &(f->shared->meta_aggr), &new_ma_addr, &ma_size);
+        H5MF__aggr_query(f, &(f->shared->meta_aggr), &new_ma_addr, &ma_size);
         if (new_ma_addr != ma_addr) TEST_ERROR
         if (new_ma_size != ma_size) TEST_ERROR
 
@@ -529,14 +529,14 @@ test_mf_eoa_shrink(const char *env_h5_drvr, hid_t fapl)
         if(NULL == (f = (H5F_t *)H5I_object(file)))
             FAIL_STACK_ERROR
 
-        H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
+        H5MF__aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
 
         /* should not succeed in shrinking */
         if(H5MF_try_shrink(f, type, addr, (hsize_t)TBLOCK_SIZE30 + 10) > 0)
             TEST_ERROR
 
         /* nothing should be changed in meta_aggr */
-        H5MF_aggr_query(f, &(f->shared->meta_aggr), &new_ma_addr, &ma_size);
+        H5MF__aggr_query(f, &(f->shared->meta_aggr), &new_ma_addr, &ma_size);
         if (new_ma_addr != ma_addr) TEST_ERROR
         if (new_ma_size != ma_size) TEST_ERROR
 
@@ -572,14 +572,14 @@ test_mf_eoa_shrink(const char *env_h5_drvr, hid_t fapl)
         if(NULL == (f = (H5F_t *)H5I_object(file)))
             FAIL_STACK_ERROR
 
-        H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
+        H5MF__aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
 
         /* should succeed in shrinking */
         if(H5MF_try_shrink(f, type, addr+10, (hsize_t)(TBLOCK_SIZE30 - 10)) <= 0)
             TEST_ERROR
 
         /* nothing should be changed in meta_aggr */
-        H5MF_aggr_query(f, &(f->shared->meta_aggr), &new_ma_addr, &ma_size);
+        H5MF__aggr_query(f, &(f->shared->meta_aggr), &new_ma_addr, &ma_size);
         if(new_ma_addr != ma_addr)
             TEST_ERROR
         if(new_ma_size != ma_size)
@@ -684,7 +684,7 @@ test_mf_eoa_extend(const char *env_h5_drvr, hid_t fapl)
         if(NULL == (f = (H5F_t *)H5I_object(file)))
             FAIL_STACK_ERROR
 
-        H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
+        H5MF__aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
 
         type = H5FD_MEM_SUPER;
         addr = H5MF_alloc(f, type, (hsize_t)TBLOCK_SIZE30);
@@ -692,7 +692,7 @@ test_mf_eoa_extend(const char *env_h5_drvr, hid_t fapl)
             TEST_ERROR
 
         /* nothing should be changed in meta_aggr */
-        H5MF_aggr_query(f, &(f->shared->meta_aggr), &new_ma_addr, &new_ma_size);
+        H5MF__aggr_query(f, &(f->shared->meta_aggr), &new_ma_addr, &new_ma_size);
         if (new_ma_addr != ma_addr)
             TEST_ERROR
 
@@ -722,7 +722,7 @@ test_mf_eoa_extend(const char *env_h5_drvr, hid_t fapl)
             TEST_ERROR
 
         /* nothing should be changed in meta_aggr */
-        H5MF_aggr_query(f, &(f->shared->meta_aggr), &new_ma_addr, &new_ma_size);
+        H5MF__aggr_query(f, &(f->shared->meta_aggr), &new_ma_addr, &new_ma_size);
         if (new_ma_addr != ma_addr)
             TEST_ERROR
 
@@ -762,7 +762,7 @@ test_mf_eoa_extend(const char *env_h5_drvr, hid_t fapl)
         if(NULL == (f = (H5F_t *)H5I_object(file)))
             FAIL_STACK_ERROR
 
-        H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
+        H5MF__aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
 
         type = H5FD_MEM_SUPER;
         addr = H5MF_alloc(f, type, (hsize_t)TBLOCK_SIZE30);
@@ -771,7 +771,7 @@ test_mf_eoa_extend(const char *env_h5_drvr, hid_t fapl)
             TEST_ERROR
 
         /* nothing should be changed in meta_aggr */
-        H5MF_aggr_query(f, &(f->shared->meta_aggr), &new_ma_addr, &new_ma_size);
+        H5MF__aggr_query(f, &(f->shared->meta_aggr), &new_ma_addr, &new_ma_size);
         if(new_ma_addr != ma_addr)
             TEST_ERROR
 
@@ -782,7 +782,7 @@ test_mf_eoa_extend(const char *env_h5_drvr, hid_t fapl)
             TEST_ERROR
 
         /* nothing should be changed in meta_aggr */
-        H5MF_aggr_query(f, &(f->shared->meta_aggr), &new_ma_addr, &new_ma_size);
+        H5MF__aggr_query(f, &(f->shared->meta_aggr), &new_ma_addr, &new_ma_size);
         if (new_ma_addr != ma_addr)
             TEST_ERROR
 
@@ -1186,7 +1186,7 @@ test_mf_fs_alloc_free(hid_t fapl)
         TEST_ERROR
 
     /* Create section A */
-    sect_node = H5MF_sect_new(H5MF_FSPACE_SECT_SIMPLE, (haddr_t)TBLOCK_ADDR70, (hsize_t)TBLOCK_SIZE30);
+    sect_node = H5MF__sect_new(H5MF_FSPACE_SECT_SIMPLE, (haddr_t)TBLOCK_ADDR70, (hsize_t)TBLOCK_SIZE30);
 
     /* Add section A to free-space manager */
     if(H5MF__add_sect(f, H5FD_MEM_SUPER, f->shared->fs_man[H5FD_MEM_SUPER], sect_node))
@@ -1263,7 +1263,7 @@ test_mf_fs_alloc_free(hid_t fapl)
         TEST_ERROR
 
     /* Create section A */
-    sect_node = H5MF_sect_new(H5MF_FSPACE_SECT_SIMPLE, (haddr_t)TBLOCK_ADDR70, (hsize_t)TBLOCK_SIZE30);
+    sect_node = H5MF__sect_new(H5MF_FSPACE_SECT_SIMPLE, (haddr_t)TBLOCK_ADDR70, (hsize_t)TBLOCK_SIZE30);
 
      /* Add section A to free-space manager */
     if(H5MF__add_sect(f, H5FD_MEM_SUPER, f->shared->fs_man[H5FD_MEM_SUPER], sect_node))
@@ -1338,7 +1338,7 @@ test_mf_fs_alloc_free(hid_t fapl)
         TEST_ERROR
 
     /* Create section A */
-    sect_node = H5MF_sect_new(H5MF_FSPACE_SECT_SIMPLE, (haddr_t)TBLOCK_ADDR70, (hsize_t)TBLOCK_SIZE30);
+    sect_node = H5MF__sect_new(H5MF_FSPACE_SECT_SIMPLE, (haddr_t)TBLOCK_ADDR70, (hsize_t)TBLOCK_SIZE30);
 
     /* Add section A to free-space manager */
     if(H5MF__add_sect(f, H5FD_MEM_SUPER, f->shared->fs_man[H5FD_MEM_SUPER], sect_node))
@@ -1511,7 +1511,7 @@ test_mf_fs_extend(hid_t fapl)
         TEST_ERROR
 
     /* Create section A */
-    sect_node1 = H5MF_sect_new(H5MF_FSPACE_SECT_SIMPLE, (haddr_t)TBLOCK_ADDR70, (hsize_t)TBLOCK_SIZE30);
+    sect_node1 = H5MF__sect_new(H5MF_FSPACE_SECT_SIMPLE, (haddr_t)TBLOCK_ADDR70, (hsize_t)TBLOCK_SIZE30);
 
     /* Add section A to free-space manager */
     if(H5MF__add_sect(f, H5FD_MEM_SUPER, f->shared->fs_man[H5FD_MEM_SUPER], sect_node1))
@@ -1540,7 +1540,7 @@ test_mf_fs_extend(hid_t fapl)
         TEST_ERROR
 
     /* Create section B */
-    sect_node2 = H5MF_sect_new(H5MF_FSPACE_SECT_SIMPLE, (haddr_t)TBLOCK_ADDR100, (hsize_t)TBLOCK_SIZE50);
+    sect_node2 = H5MF__sect_new(H5MF_FSPACE_SECT_SIMPLE, (haddr_t)TBLOCK_ADDR100, (hsize_t)TBLOCK_SIZE50);
 
     /* Add section B to free-space manager */
     if(H5MF__add_sect(f, H5FD_MEM_SUPER, f->shared->fs_man[H5FD_MEM_SUPER], sect_node2))
@@ -1619,7 +1619,7 @@ test_mf_fs_extend(hid_t fapl)
         TEST_ERROR
 
     /* Create section A */
-    sect_node1 = H5MF_sect_new(H5MF_FSPACE_SECT_SIMPLE, (haddr_t)TBLOCK_ADDR70, (hsize_t)TBLOCK_SIZE30);
+    sect_node1 = H5MF__sect_new(H5MF_FSPACE_SECT_SIMPLE, (haddr_t)TBLOCK_ADDR70, (hsize_t)TBLOCK_SIZE30);
 
     /* Add section A to free-space manager */
     if(H5MF__add_sect(f, H5FD_MEM_SUPER, f->shared->fs_man[H5FD_MEM_SUPER], sect_node1))
@@ -1648,7 +1648,7 @@ test_mf_fs_extend(hid_t fapl)
         TEST_ERROR
 
     /* Create section B */
-    sect_node2 = H5MF_sect_new(H5MF_FSPACE_SECT_SIMPLE, (haddr_t)TBLOCK_ADDR100, (hsize_t)TBLOCK_SIZE50);
+    sect_node2 = H5MF__sect_new(H5MF_FSPACE_SECT_SIMPLE, (haddr_t)TBLOCK_ADDR100, (hsize_t)TBLOCK_SIZE50);
 
     /* Add section B to free-space manager */
     if(H5MF__add_sect(f, H5FD_MEM_SUPER, f->shared->fs_man[H5FD_MEM_SUPER], sect_node2))
@@ -1721,7 +1721,7 @@ test_mf_fs_extend(hid_t fapl)
         TEST_ERROR
 
     /* Create section A */
-    sect_node1 = H5MF_sect_new(H5MF_FSPACE_SECT_SIMPLE, (haddr_t)TBLOCK_ADDR70, (hsize_t)TBLOCK_SIZE30);
+    sect_node1 = H5MF__sect_new(H5MF_FSPACE_SECT_SIMPLE, (haddr_t)TBLOCK_ADDR70, (hsize_t)TBLOCK_SIZE30);
 
     /* Add section A to free-space manager */
     if(H5MF__add_sect(f, H5FD_MEM_SUPER, f->shared->fs_man[H5FD_MEM_SUPER], sect_node1))
@@ -1750,7 +1750,7 @@ test_mf_fs_extend(hid_t fapl)
         TEST_ERROR
 
     /* Create section B */
-    sect_node2 = H5MF_sect_new(H5MF_FSPACE_SECT_SIMPLE, (haddr_t)TBLOCK_ADDR100, (hsize_t)TBLOCK_SIZE50);
+    sect_node2 = H5MF__sect_new(H5MF_FSPACE_SECT_SIMPLE, (haddr_t)TBLOCK_ADDR100, (hsize_t)TBLOCK_SIZE50);
 
     /* Add section B to free-space manager */
     if(H5MF__add_sect(f, H5FD_MEM_SUPER, f->shared->fs_man[H5FD_MEM_SUPER], sect_node2))
@@ -1823,7 +1823,7 @@ test_mf_fs_extend(hid_t fapl)
         TEST_ERROR
 
     /* Create section A */
-    sect_node1 = H5MF_sect_new(H5MF_FSPACE_SECT_SIMPLE, (haddr_t)TBLOCK_ADDR70, (hsize_t)(TBLOCK_SIZE30-10));
+    sect_node1 = H5MF__sect_new(H5MF_FSPACE_SECT_SIMPLE, (haddr_t)TBLOCK_ADDR70, (hsize_t)(TBLOCK_SIZE30-10));
 
     /* Add section A of size=20 to free-space */
     if(H5MF__add_sect(f, H5FD_MEM_SUPER, f->shared->fs_man[H5FD_MEM_SUPER], sect_node1))
@@ -1852,7 +1852,7 @@ test_mf_fs_extend(hid_t fapl)
         TEST_ERROR
 
     /* Create section B */
-    sect_node2 = H5MF_sect_new(H5MF_FSPACE_SECT_SIMPLE, (haddr_t)TBLOCK_ADDR100, (hsize_t)TBLOCK_SIZE50);
+    sect_node2 = H5MF__sect_new(H5MF_FSPACE_SECT_SIMPLE, (haddr_t)TBLOCK_ADDR100, (hsize_t)TBLOCK_SIZE50);
 
     /* Add section B to free-space manager */
     if(H5MF__add_sect(f, H5FD_MEM_SUPER, f->shared->fs_man[H5FD_MEM_SUPER], sect_node2))
@@ -1997,10 +1997,10 @@ test_mf_fs_absorb(const char *env_h5_drvr, hid_t fapl)
         /* Allocate a section from meta_aggr */
         addr = H5MF_alloc(f, H5FD_MEM_SUPER, (hsize_t)TBLOCK_SIZE30);
 
-        H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
+        H5MF__aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
 
     /* Create a section */
-    sect_node = H5MF_sect_new(H5MF_FSPACE_SECT_SIMPLE, (haddr_t)(ma_addr+ma_size), (hsize_t)TBLOCK_SIZE2048);
+    sect_node = H5MF__sect_new(H5MF_FSPACE_SECT_SIMPLE, (haddr_t)(ma_addr+ma_size), (hsize_t)TBLOCK_SIZE2048);
 
         /* Add a section to free-space that adjoins end of the aggregator */
     if(H5MF__add_sect(f, H5FD_MEM_SUPER, f->shared->fs_man[H5FD_MEM_SUPER], sect_node))
@@ -2052,13 +2052,13 @@ test_mf_fs_absorb(const char *env_h5_drvr, hid_t fapl)
 
         /* Allocate a section from meta_aggr */
         addr = H5MF_alloc(f, H5FD_MEM_SUPER, (hsize_t)TBLOCK_SIZE30);
-        H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
+        H5MF__aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
 
         /* Allocate a section from sdata_aggr */
         saddr = H5MF_alloc(f, H5FD_MEM_DRAW, (hsize_t)TBLOCK_SIZE50);
 
         /* Add a section to free-space that adjoins the beginning of meta_aggr */
-        sect_node = H5MF_sect_new(H5MF_FSPACE_SECT_SIMPLE, (haddr_t)addr, (hsize_t)TBLOCK_SIZE30);
+        sect_node = H5MF__sect_new(H5MF_FSPACE_SECT_SIMPLE, (haddr_t)addr, (hsize_t)TBLOCK_SIZE30);
 
         /* When adding, meta_aggr is absorbed onto the end of the section */
         if(H5MF__add_sect(f, H5FD_MEM_SUPER, f->shared->fs_man[H5FD_MEM_SUPER], sect_node))
@@ -2172,7 +2172,7 @@ test_mf_aggr_alloc1(const char *env_h5_drvr, hid_t fapl)
         if((addr1 = H5MF_alloc(f, type, (hsize_t)TBLOCK_SIZE30)) == HADDR_UNDEF)
             TEST_ERROR
 
-        H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
+        H5MF__aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
         if((addr1+TBLOCK_SIZE30) != ma_addr)
             TEST_ERROR
 
@@ -2180,7 +2180,7 @@ test_mf_aggr_alloc1(const char *env_h5_drvr, hid_t fapl)
         if((addr2 = H5MF_alloc(f, type, (hsize_t)TBLOCK_SIZE50)) == HADDR_UNDEF)
             TEST_ERROR
 
-        H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
+        H5MF__aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
         if((addr2+TBLOCK_SIZE50) != ma_addr)
             TEST_ERROR
         if(ma_size != (TBLOCK_SIZE2048 - (TBLOCK_SIZE30 + TBLOCK_SIZE50)))
@@ -2311,13 +2311,13 @@ test_mf_aggr_alloc2(const char *env_h5_drvr, hid_t fapl)
         type = H5FD_MEM_SUPER;
         addr1 = H5MF_alloc(f, type, (hsize_t)TBLOCK_SIZE30);
 
-        H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
+        H5MF__aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
         if((addr1+TBLOCK_SIZE30) != ma_addr)
             TEST_ERROR
 
         addr2 = H5MF_alloc(f, type, (hsize_t)TBLOCK_SIZE50);
 
-        H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
+        H5MF__aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
         if((addr2+TBLOCK_SIZE50) != ma_addr)
             TEST_ERROR
 
@@ -2326,7 +2326,7 @@ test_mf_aggr_alloc2(const char *env_h5_drvr, hid_t fapl)
 
         addr3 = H5MF_alloc(f, type, (hsize_t)TBLOCK_SIZE2058);
 
-        H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
+        H5MF__aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
 
         if((addr3+TBLOCK_SIZE2058) != ma_addr)
             TEST_ERROR
@@ -2468,14 +2468,14 @@ test_mf_aggr_alloc3(const char *env_h5_drvr, hid_t fapl)
         type = H5FD_MEM_SUPER;
         addr1 = H5MF_alloc(f, type, (hsize_t)TBLOCK_SIZE30);
 
-        H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
+        H5MF__aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
         if ((addr1+TBLOCK_SIZE30) != ma_addr)
             TEST_ERROR
 
         /* Allocate second block from meta_aggr */
         addr2 = H5MF_alloc(f, type, (hsize_t)TBLOCK_SIZE50);
 
-        H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
+        H5MF__aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
 
         if((addr2+TBLOCK_SIZE50) != ma_addr)
             TEST_ERROR
@@ -2485,7 +2485,7 @@ test_mf_aggr_alloc3(const char *env_h5_drvr, hid_t fapl)
         /* Allocate first block from sdata_aggr */
         stype = H5FD_MEM_DRAW;
         saddr1 = H5MF_alloc(f, stype, (hsize_t)TBLOCK_SIZE30);
-        H5MF_aggr_query(f, &(f->shared->sdata_aggr), &sdata_addr, &sdata_size);
+        H5MF__aggr_query(f, &(f->shared->sdata_aggr), &sdata_addr, &sdata_size);
         if((saddr1+TBLOCK_SIZE30) != sdata_addr)
             TEST_ERROR
         if(sdata_size != (TBLOCK_SIZE2048 - TBLOCK_SIZE30)) TEST_ERROR
@@ -2493,7 +2493,7 @@ test_mf_aggr_alloc3(const char *env_h5_drvr, hid_t fapl)
         /* Allocate third block, which is from  file allocation not from meta_aggr */
         addr3 = H5MF_alloc(f, type, (hsize_t)(TBLOCK_SIZE2058));
 
-        H5MF_aggr_query(f, &(f->shared->meta_aggr), &new_ma_addr, &new_ma_size);
+        H5MF__aggr_query(f, &(f->shared->meta_aggr), &new_ma_addr, &new_ma_size);
 
         /* info for meta_aggr shouldn't be changed */
         if(addr3 != (sdata_addr+sdata_size)) TEST_ERROR
@@ -2502,7 +2502,7 @@ test_mf_aggr_alloc3(const char *env_h5_drvr, hid_t fapl)
 
         /* Allocate fourth block, which should be from meta_aggr */
         addr4 = H5MF_alloc(f, type, (hsize_t)TBLOCK_SIZE50);
-        H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
+        H5MF__aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
 
         if((addr4+TBLOCK_SIZE50) != ma_addr)
             TEST_ERROR
@@ -2631,7 +2631,7 @@ test_mf_aggr_alloc4(const char *env_h5_drvr, hid_t fapl)
         type = H5FD_MEM_SUPER;
         addr1 = H5MF_alloc(f, type, (hsize_t)TBLOCK_SIZE30);
 
-        H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
+        H5MF__aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
 
         if((addr1+TBLOCK_SIZE30) != ma_addr)
             TEST_ERROR
@@ -2641,19 +2641,19 @@ test_mf_aggr_alloc4(const char *env_h5_drvr, hid_t fapl)
         /* Allocate first block from sdata_aggr */
         stype = H5FD_MEM_DRAW;
         saddr1 = H5MF_alloc(f, stype, (hsize_t)TBLOCK_SIZE30);
-        H5MF_aggr_query(f, &(f->shared->sdata_aggr), &sdata_addr, &sdata_size);
+        H5MF__aggr_query(f, &(f->shared->sdata_aggr), &sdata_addr, &sdata_size);
         if((saddr1+TBLOCK_SIZE30) != sdata_addr)
             TEST_ERROR
 
         /* Allocate second block from sdata_aggr */
         saddr2 = H5MF_alloc(f, stype, (hsize_t)(TBLOCK_SIZE2048 - TBLOCK_SIZE30));
-        H5MF_aggr_query(f, &(f->shared->sdata_aggr), &sdata_addr, &sdata_size);
+        H5MF__aggr_query(f, &(f->shared->sdata_aggr), &sdata_addr, &sdata_size);
         if(saddr2+(TBLOCK_SIZE2048 - TBLOCK_SIZE30) != sdata_addr)
             TEST_ERROR
 
         /* Allocate third block from sdata_aggr */
         saddr3 = H5MF_alloc(f, stype, (hsize_t)TBLOCK_SIZE50);
-        H5MF_aggr_query(f, &(f->shared->sdata_aggr), &sdata_addr, &sdata_size);
+        H5MF__aggr_query(f, &(f->shared->sdata_aggr), &sdata_addr, &sdata_size);
 
         if((saddr3+TBLOCK_SIZE50) != sdata_addr)
             TEST_ERROR
@@ -2667,12 +2667,12 @@ test_mf_aggr_alloc4(const char *env_h5_drvr, hid_t fapl)
             TEST_ERROR
 
         /* sdata_aggr is reset 0 */
-        H5MF_aggr_query(f, &(f->shared->sdata_aggr), &sdata_addr, &sdata_size);
+        H5MF__aggr_query(f, &(f->shared->sdata_aggr), &sdata_addr, &sdata_size);
         if((sdata_addr != 0) && (sdata_size != 0))
             TEST_ERROR
 
         /* info is unchanged in meta_aggr */
-        H5MF_aggr_query(f, &(f->shared->meta_aggr), &new_ma_addr, &new_ma_size);
+        H5MF__aggr_query(f, &(f->shared->meta_aggr), &new_ma_addr, &new_ma_size);
         if((new_ma_addr != ma_addr) && (new_ma_size != ma_size))
             TEST_ERROR
 
@@ -2779,13 +2779,13 @@ test_mf_aggr_alloc5(const char *env_h5_drvr, hid_t fapl)
         type = H5FD_MEM_SUPER;
         addr1 = H5MF_alloc(f, type, (hsize_t)TBLOCK_SIZE30);
 
-        H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
+        H5MF__aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
         if((addr1+TBLOCK_SIZE30) != ma_addr)
             TEST_ERROR
 
         /* Allocate second block from meta_aggr */
         addr2 = H5MF_alloc(f, type, (hsize_t)TBLOCK_SIZE50);
-        H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
+        H5MF__aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
 
         if(addr2+TBLOCK_SIZE50 != ma_addr)
             TEST_ERROR
@@ -2794,7 +2794,7 @@ test_mf_aggr_alloc5(const char *env_h5_drvr, hid_t fapl)
 
         /* Allocate third block from meta_aggr */
         addr3 = H5MF_alloc(f, type, (hsize_t)TBLOCK_SIZE1970);
-        H5MF_aggr_query(f, &(f->shared->meta_aggr), &new_ma_addr, &new_ma_size);
+        H5MF__aggr_query(f, &(f->shared->meta_aggr), &new_ma_addr, &new_ma_size);
 
         if(addr3 != ma_addr) TEST_ERROR
         if((addr3+TBLOCK_SIZE1970) != new_ma_addr) TEST_ERROR
@@ -2914,13 +2914,13 @@ test_mf_aggr_alloc6(const char *env_h5_drvr, hid_t fapl)
         /* Allocate first block from meta_aggr */
         addr1 = H5MF_alloc(f, type, (hsize_t)TBLOCK_SIZE30);
 
-        H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
+        H5MF__aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
         if((addr1+TBLOCK_SIZE30) != ma_addr)
             TEST_ERROR
 
         /* Allocate second block from meta_aggr */
         addr2 = H5MF_alloc(f, type, (hsize_t)TBLOCK_SIZE50);
-        H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
+        H5MF__aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
 
         if(addr2+TBLOCK_SIZE50 != ma_addr)
             TEST_ERROR
@@ -2931,14 +2931,14 @@ test_mf_aggr_alloc6(const char *env_h5_drvr, hid_t fapl)
         stype = H5FD_MEM_DRAW;
         saddr1 = H5MF_alloc(f, stype, (hsize_t)TBLOCK_SIZE30);
 
-        H5MF_aggr_query(f, &(f->shared->sdata_aggr), &sdata_addr, &sdata_size);
+        H5MF__aggr_query(f, &(f->shared->sdata_aggr), &sdata_addr, &sdata_size);
         if((saddr1+TBLOCK_SIZE30) != sdata_addr) TEST_ERROR
         if(sdata_size != (TBLOCK_SIZE2048 - TBLOCK_SIZE30)) TEST_ERROR
 
         /* Allocate third block from meta_aggr */
         addr3 = H5MF_alloc(f, type, (hsize_t)TBLOCK_SIZE1970);
 
-        H5MF_aggr_query(f, &(f->shared->meta_aggr), &new_ma_addr, &new_ma_size);
+        H5MF__aggr_query(f, &(f->shared->meta_aggr), &new_ma_addr, &new_ma_size);
 
         if((addr3+TBLOCK_SIZE1970) != new_ma_addr) TEST_ERROR
         if(addr3 != (sdata_addr+sdata_size)) TEST_ERROR
@@ -3079,13 +3079,13 @@ test_mf_aggr_alloc7(const char *env_h5_drvr, hid_t fapl)
         /* Allocate the first block from meta_aggr */
         type = H5FD_MEM_SUPER;
         addr1 = H5MF_alloc(f, type, (hsize_t)TBLOCK_SIZE30);
-        H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
+        H5MF__aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
         if ((addr1+TBLOCK_SIZE30) != ma_addr)
             TEST_ERROR
 
         /* Allocate the second block from meta_aggr */
         addr2 = H5MF_alloc(f, type, (hsize_t)TBLOCK_SIZE50);
-        H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
+        H5MF__aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
 
         if (addr2+TBLOCK_SIZE50 != ma_addr)
             TEST_ERROR
@@ -3095,14 +3095,14 @@ test_mf_aggr_alloc7(const char *env_h5_drvr, hid_t fapl)
         /* Allocate the first block from sdata_aggr */
         stype = H5FD_MEM_DRAW;
         saddr1 = H5MF_alloc(f, stype, (hsize_t)TBLOCK_SIZE30);
-        H5MF_aggr_query(f, &(f->shared->sdata_aggr), &sdata_addr, &sdata_size);
+        H5MF__aggr_query(f, &(f->shared->sdata_aggr), &sdata_addr, &sdata_size);
         if ((saddr1+TBLOCK_SIZE30) != sdata_addr)
             TEST_ERROR
 
         /* Allocate the second block from sdata_aggr */
         saddr2 = H5MF_alloc(f, stype, (hsize_t)TBLOCK_SIZE2048 - TBLOCK_SIZE30);
 
-        H5MF_aggr_query(f, &(f->shared->sdata_aggr), &sdata_addr, &sdata_size);
+        H5MF__aggr_query(f, &(f->shared->sdata_aggr), &sdata_addr, &sdata_size);
         if ((saddr2+(TBLOCK_SIZE2048 - TBLOCK_SIZE30)) != sdata_addr)
             TEST_ERROR
         if (sdata_size != 0) TEST_ERROR
@@ -3110,7 +3110,7 @@ test_mf_aggr_alloc7(const char *env_h5_drvr, hid_t fapl)
         /* Allocate the third block from sdata_aggr */
         saddr3 = H5MF_alloc(f, stype, (hsize_t)TBLOCK_SIZE50);
 
-        H5MF_aggr_query(f, &(f->shared->sdata_aggr), &sdata_addr, &sdata_size);
+        H5MF__aggr_query(f, &(f->shared->sdata_aggr), &sdata_addr, &sdata_size);
         if ((saddr3+TBLOCK_SIZE50) != sdata_addr)
             TEST_ERROR
         if (sdata_size != (TBLOCK_SIZE2048 - TBLOCK_SIZE50))
@@ -3118,14 +3118,14 @@ test_mf_aggr_alloc7(const char *env_h5_drvr, hid_t fapl)
 
         /* Allocate the third block from meta_aggr */
         addr3 = H5MF_alloc(f, type, (hsize_t)TBLOCK_SIZE1970);
-        H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
+        H5MF__aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
 
         if (addr3 != sdata_addr) TEST_ERROR
         if ((addr3 + TBLOCK_SIZE1970) != ma_addr) TEST_ERROR
         if (ma_size != (TBLOCK_SIZE2048 - TBLOCK_SIZE1970)) TEST_ERROR
 
         /* sdata_aggr info is reset to 0 */
-        H5MF_aggr_query(f, &(f->shared->sdata_aggr), &sdata_addr, &sdata_size);
+        H5MF__aggr_query(f, &(f->shared->sdata_aggr), &sdata_addr, &sdata_size);
         if (sdata_addr != HADDR_UNDEF) TEST_ERROR
         if (sdata_size != 0) TEST_ERROR
 
@@ -3242,7 +3242,7 @@ test_mf_aggr_extend(const char *env_h5_drvr, hid_t fapl)
         /* Allocate the first block from meta_aggr */
         type = H5FD_MEM_SUPER;
         addr = H5MF_alloc(f, type, (hsize_t)TBLOCK_SIZE30);
-        H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
+        H5MF__aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
         if((addr+TBLOCK_SIZE30) != ma_addr)
             TEST_ERROR
 
@@ -3259,7 +3259,7 @@ test_mf_aggr_extend(const char *env_h5_drvr, hid_t fapl)
         if(!was_extended)
             TEST_ERROR
 
-        H5MF_aggr_query(f, &(f->shared->meta_aggr), &new_ma_addr, &new_ma_size);
+        H5MF__aggr_query(f, &(f->shared->meta_aggr), &new_ma_addr, &new_ma_size);
 
         if(new_ma_addr != (addr+TBLOCK_SIZE50))
             TEST_ERROR
@@ -3275,7 +3275,7 @@ test_mf_aggr_extend(const char *env_h5_drvr, hid_t fapl)
         if(!was_extended)
             TEST_ERROR
 
-        H5MF_aggr_query(f, &(f->shared->meta_aggr), &new_ma_addr, &new_ma_size);
+        H5MF__aggr_query(f, &(f->shared->meta_aggr), &new_ma_addr, &new_ma_size);
 
         if(new_ma_addr != (addr + TBLOCK_SIZE700))
             TEST_ERROR
@@ -3291,7 +3291,7 @@ test_mf_aggr_extend(const char *env_h5_drvr, hid_t fapl)
         if(!was_extended)
             TEST_ERROR
 
-        H5MF_aggr_query(f, &(f->shared->meta_aggr), &new_ma_addr, &new_ma_size);
+        H5MF__aggr_query(f, &(f->shared->meta_aggr), &new_ma_addr, &new_ma_size);
 
         if (new_ma_addr != (addr + TBLOCK_SIZE2058))
             TEST_ERROR
@@ -3333,14 +3333,14 @@ test_mf_aggr_extend(const char *env_h5_drvr, hid_t fapl)
         /* Allocate the first block from meta_aggr */
         type = H5FD_MEM_SUPER;
         addr = H5MF_alloc(f, type, (hsize_t)TBLOCK_SIZE30);
-        H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
+        H5MF__aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
         if((addr+TBLOCK_SIZE30) != ma_addr)
             TEST_ERROR
 
         /* Allocate the first block from sdata_aggr */
         stype = H5FD_MEM_DRAW;
         saddr = H5MF_alloc(f, stype, (hsize_t)TBLOCK_SIZE50);
-        H5MF_aggr_query(f, &(f->shared->sdata_aggr), &sdata_addr, &sdata_size);
+        H5MF__aggr_query(f, &(f->shared->sdata_aggr), &sdata_addr, &sdata_size);
         if((saddr+TBLOCK_SIZE50) != sdata_addr)
             TEST_ERROR
 
@@ -3356,7 +3356,7 @@ test_mf_aggr_extend(const char *env_h5_drvr, hid_t fapl)
         if(!was_extended)
             TEST_ERROR
 
-        H5MF_aggr_query(f, &(f->shared->meta_aggr), &new_ma_addr, &new_ma_size);
+        H5MF__aggr_query(f, &(f->shared->meta_aggr), &new_ma_addr, &new_ma_size);
 
         if(new_ma_addr != (addr+TBLOCK_SIZE50))
             TEST_ERROR
@@ -3403,14 +3403,14 @@ test_mf_aggr_extend(const char *env_h5_drvr, hid_t fapl)
         /* Allocate first block from meta_aggr */
         type = H5FD_MEM_SUPER;
         addr = H5MF_alloc(f, type, (hsize_t)TBLOCK_SIZE30);
-        H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
+        H5MF__aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
         if ((addr+TBLOCK_SIZE30) != ma_addr)
             TEST_ERROR
 
         /* Allocate first block from sdata_aggr */
         stype = H5FD_MEM_DRAW;
         saddr = H5MF_alloc(f, stype, (hsize_t)TBLOCK_SIZE50);
-        H5MF_aggr_query(f, &(f->shared->sdata_aggr), &sdata_addr, &sdata_size);
+        H5MF__aggr_query(f, &(f->shared->sdata_aggr), &sdata_addr, &sdata_size);
         if((saddr+TBLOCK_SIZE50) != sdata_addr)
             TEST_ERROR
 
@@ -3426,7 +3426,7 @@ test_mf_aggr_extend(const char *env_h5_drvr, hid_t fapl)
         if(was_extended)
             TEST_ERROR
 
-        H5MF_aggr_query(f, &(f->shared->meta_aggr), &new_ma_addr, &new_ma_size);
+        H5MF__aggr_query(f, &(f->shared->meta_aggr), &new_ma_addr, &new_ma_size);
 
         if (new_ma_addr != addr) TEST_ERROR
         if (new_ma_size != 0) TEST_ERROR
@@ -3533,7 +3533,7 @@ test_mf_aggr_absorb(const char *env_h5_drvr, hid_t fapl)
         /* Allocate block A from meta_aggr */
         type = H5FD_MEM_SUPER;
         addr1 = H5MF_alloc(f, type, (hsize_t)TBLOCK_SIZE30);
-        H5MF_aggr_query(f, &(f->shared->meta_aggr), &new_ma_addr, &new_ma_size);
+        H5MF__aggr_query(f, &(f->shared->meta_aggr), &new_ma_addr, &new_ma_size);
         ma_addr = new_ma_addr - TBLOCK_SIZE30;
 
         if((addr1 + TBLOCK_SIZE30) != new_ma_addr)
@@ -3543,7 +3543,7 @@ test_mf_aggr_absorb(const char *env_h5_drvr, hid_t fapl)
         if(H5MF_try_shrink(f, type, addr1, (hsize_t)TBLOCK_SIZE30) <= 0)
             TEST_ERROR
 
-        H5MF_aggr_query(f, &(f->shared->meta_aggr), &new_ma_addr, &new_ma_size);
+        H5MF__aggr_query(f, &(f->shared->meta_aggr), &new_ma_addr, &new_ma_size);
 
         if(new_ma_addr != ma_addr) TEST_ERROR
 
@@ -3580,7 +3580,7 @@ test_mf_aggr_absorb(const char *env_h5_drvr, hid_t fapl)
         /* Allocate block A from meta_aggr */
         type = H5FD_MEM_SUPER;
         addr1 = H5MF_alloc(f, type, (hsize_t)TBLOCK_SIZE30);
-        H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
+        H5MF__aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
 
         if((addr1+TBLOCK_SIZE30) != ma_addr) TEST_ERROR
         if(ma_size != (TBLOCK_SIZE2048 - TBLOCK_SIZE30)) TEST_ERROR
@@ -3589,18 +3589,18 @@ test_mf_aggr_absorb(const char *env_h5_drvr, hid_t fapl)
         stype = H5FD_MEM_DRAW;
         saddr1 = H5MF_alloc(f, stype, (hsize_t)TBLOCK_SIZE50);
 
-        H5MF_aggr_query(f, &(f->shared->sdata_aggr), NULL, &sdata_size);
+        H5MF__aggr_query(f, &(f->shared->sdata_aggr), NULL, &sdata_size);
 
         /* should succeed */
         if(H5MF_try_shrink(f, stype, saddr1, (hsize_t)TBLOCK_SIZE50) <= 0)
             TEST_ERROR
 
-        H5MF_aggr_query(f, &(f->shared->sdata_aggr), &new_sdata_addr, &new_sdata_size);
+        H5MF__aggr_query(f, &(f->shared->sdata_aggr), &new_sdata_addr, &new_sdata_size);
         if(new_sdata_addr != saddr1) TEST_ERROR
         if(new_sdata_size != sdata_size + TBLOCK_SIZE50) TEST_ERROR
 
         /* meta_aggr info should be updated because the block is absorbed into the meta_aggr */
-        H5MF_aggr_query(f, &(f->shared->meta_aggr), &new_ma_addr, &new_ma_size);
+        H5MF__aggr_query(f, &(f->shared->meta_aggr), &new_ma_addr, &new_ma_size);
         if (new_ma_addr != ma_addr) TEST_ERROR
         if (new_ma_size != (ma_size)) TEST_ERROR
 
@@ -3639,20 +3639,20 @@ test_mf_aggr_absorb(const char *env_h5_drvr, hid_t fapl)
         /* Allocate block A from meta_aggr */
         type = H5FD_MEM_SUPER;
         addr1 = H5MF_alloc(f, type, (hsize_t)TBLOCK_SIZE30);
-        H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
+        H5MF__aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
 
         if((addr1+TBLOCK_SIZE30) != ma_addr)
             TEST_ERROR
 
         /* Allocate block B from meta_aggr */
         addr2 = H5MF_alloc(f, type, (hsize_t)TBLOCK_SIZE50);
-        H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
+        H5MF__aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
         if((addr2+TBLOCK_SIZE50) != ma_addr)
             TEST_ERROR
 
         /* Allocate block C from meta_aggr */
         addr3 = H5MF_alloc(f, type, (hsize_t)(TBLOCK_SIZE30+TBLOCK_SIZE50));
-        H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
+        H5MF__aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
         if((addr3+TBLOCK_SIZE30+TBLOCK_SIZE50) != ma_addr)
             TEST_ERROR
 
@@ -3661,7 +3661,7 @@ test_mf_aggr_absorb(const char *env_h5_drvr, hid_t fapl)
             TEST_ERROR
 
         /* aggregator info should be the same as before */
-        H5MF_aggr_query(f, &(f->shared->meta_aggr), &new_ma_addr, &new_ma_size);
+        H5MF__aggr_query(f, &(f->shared->meta_aggr), &new_ma_addr, &new_ma_size);
         if(new_ma_addr != ma_addr) TEST_ERROR
 
         H5MF_xfree(f, type, addr1, (hsize_t)TBLOCK_SIZE30);
@@ -3799,7 +3799,7 @@ test_mf_align_eoa(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
         if(addr1 % alignment) TEST_ERROR
 
         /* there should be nothing in the aggregator */
-        H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
+        H5MF__aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
         if(ma_addr || ma_size) TEST_ERROR
 
         HDmemset(&state, 0, sizeof(H5FS_stat_t));
@@ -3823,7 +3823,7 @@ test_mf_align_eoa(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
         if (addr2 % alignment) TEST_ERROR
 
         /* there should be nothing in the aggregator */
-        H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
+        H5MF__aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
         if(ma_addr || ma_size) TEST_ERROR
 
         if(mis_align) {
@@ -4054,7 +4054,7 @@ test_mf_align_fs(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
     TEST_ERROR
 
     /* Create section A */
-    sect_node = H5MF_sect_new(H5MF_FSPACE_SECT_SIMPLE, (haddr_t)alignment, (hsize_t)TBLOCK_SIZE50);
+    sect_node = H5MF__sect_new(H5MF_FSPACE_SECT_SIMPLE, (haddr_t)alignment, (hsize_t)TBLOCK_SIZE50);
 
     /* Add section A to free-space manager */
     if(H5MF__add_sect(f, H5FD_MEM_SUPER, f->shared->fs_man[H5FD_MEM_SUPER], sect_node))
@@ -4117,7 +4117,7 @@ test_mf_align_fs(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
         TEST_ERROR
 
     /* Create section A */
-    sect_node = H5MF_sect_new(H5MF_FSPACE_SECT_SIMPLE, (haddr_t)TBLOCK_ADDR70, (hsize_t)TBLOCK_SIZE8000);
+    sect_node = H5MF__sect_new(H5MF_FSPACE_SECT_SIMPLE, (haddr_t)TBLOCK_ADDR70, (hsize_t)TBLOCK_SIZE8000);
 
     /* Add section A to free-space manager */
     if(H5MF__add_sect(f, H5FD_MEM_SUPER, f->shared->fs_man[H5FD_MEM_SUPER], sect_node))
@@ -4200,7 +4200,7 @@ test_mf_align_fs(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
             TEST_ERROR
 
         /* Create section A */
-        sect_node = H5MF_sect_new(H5MF_FSPACE_SECT_SIMPLE, (haddr_t)TBLOCK_ADDR70, (hsize_t)TBLOCK_SIZE700);
+        sect_node = H5MF__sect_new(H5MF_FSPACE_SECT_SIMPLE, (haddr_t)TBLOCK_ADDR70, (hsize_t)TBLOCK_SIZE700);
 
         /* Add section A to free-space manager */
         if(H5MF__add_sect(f, H5FD_MEM_SUPER, f->shared->fs_man[H5FD_MEM_SUPER], sect_node))
@@ -4429,7 +4429,7 @@ test_mf_align_alloc1(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
             state.serial_sect_count += 1;
         }
 
-        H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
+        H5MF__aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
 
         if ((addr1 + TBLOCK_SIZE30) != ma_addr)
             TEST_ERROR
@@ -4452,7 +4452,7 @@ test_mf_align_alloc1(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
             state.serial_sect_count += 1;
         }
 
-        H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
+        H5MF__aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
 
         if((addr2 + TBLOCK_SIZE50) != ma_addr)
             TEST_ERROR
@@ -4474,7 +4474,7 @@ test_mf_align_alloc1(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
             state.serial_sect_count += 1;
         }
 
-        H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
+        H5MF__aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
 
         if((addr3 + TBLOCK_SIZE80) != ma_addr)
             TEST_ERROR
@@ -4497,7 +4497,7 @@ test_mf_align_alloc1(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
             state.serial_sect_count += 1;
         }
 
-        H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
+        H5MF__aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
 
         if((addr4 + TBLOCK_SIZE1970) != ma_addr)
             TEST_ERROR
@@ -4685,7 +4685,7 @@ test_mf_align_alloc2(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
             state[type].serial_sect_count += 1;
         }
 
-        H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
+        H5MF__aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
 
         if((addr1 + TBLOCK_SIZE30) != ma_addr)
             TEST_ERROR
@@ -4707,7 +4707,7 @@ test_mf_align_alloc2(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
             state[type].serial_sect_count += 1;
         }
 
-        H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
+        H5MF__aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
 
         if((addr2 + TBLOCK_SIZE50) != ma_addr)
             TEST_ERROR
@@ -4743,8 +4743,8 @@ test_mf_align_alloc2(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
         /* Verify that the allocated block is aligned */
         if (saddr1 % alignment) TEST_ERROR
 
-        H5MF_aggr_query(f, &(f->shared->sdata_aggr), &sdata_addr, &sdata_size);
-        H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
+        H5MF__aggr_query(f, &(f->shared->sdata_aggr), &sdata_addr, &sdata_size);
+        H5MF__aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
 
         if(sdata_addr != (saddr1 + TBLOCK_SIZE30)) TEST_ERROR
 
@@ -4776,7 +4776,7 @@ test_mf_align_alloc2(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
             state[type].serial_sect_count += 1;
         }
 
-        H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
+        H5MF__aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
 
         if((addr3 + TBLOCK_SIZE80) != ma_addr)
             TEST_ERROR
@@ -5024,7 +5024,7 @@ test_mf_align_alloc3(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
             state[type].serial_sect_count += 1;
         }
 
-        H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
+        H5MF__aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
         if ((addr1 + TBLOCK_SIZE30) != ma_addr)
             TEST_ERROR
 
@@ -5046,7 +5046,7 @@ test_mf_align_alloc3(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
             state[type].serial_sect_count += 1;
         }
 
-        H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
+        H5MF__aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
         if((addr2 + TBLOCK_SIZE50) != ma_addr)
             TEST_ERROR
 
@@ -5081,7 +5081,7 @@ test_mf_align_alloc3(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
             state[stype].serial_sect_count += 1;
         }
 
-        H5MF_aggr_query(f, &(f->shared->sdata_aggr), &sdata_addr, &sdata_size);
+        H5MF__aggr_query(f, &(f->shared->sdata_aggr), &sdata_addr, &sdata_size);
         if(sdata_addr != (saddr1+TBLOCK_SIZE30)) TEST_ERROR
 
         /* calculate fragment for alignment of block 50 in sdata_aggr */
@@ -5102,7 +5102,7 @@ test_mf_align_alloc3(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
             state[stype].serial_sect_count += 1;
         }
 
-        H5MF_aggr_query(f, &(f->shared->sdata_aggr), &sdata_addr, &sdata_size);
+        H5MF__aggr_query(f, &(f->shared->sdata_aggr), &sdata_addr, &sdata_size);
         if(sdata_addr != (saddr2 + TBLOCK_SIZE50)) TEST_ERROR
 
         /* calculate fragment for alignment of block 80 in sdata_aggr */
@@ -5123,7 +5123,7 @@ test_mf_align_alloc3(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
             state[stype].serial_sect_count += 1;
         }
 
-        H5MF_aggr_query(f, &(f->shared->sdata_aggr), &sdata_addr, &sdata_size);
+        H5MF__aggr_query(f, &(f->shared->sdata_aggr), &sdata_addr, &sdata_size);
         if ((saddr3 + TBLOCK_SIZE80) != sdata_addr)
             TEST_ERROR
 
@@ -5157,7 +5157,7 @@ test_mf_align_alloc3(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
             state[type].serial_sect_count += 1;
         }
 
-        H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
+        H5MF__aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
 
         if((addr3 + TBLOCK_SIZE1034) != ma_addr)
             TEST_ERROR
@@ -5329,7 +5329,7 @@ test_mf_align_alloc4(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
             state.serial_sect_count += 1;
         }
 
-        H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
+        H5MF__aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
         saved_ma_size = ma_size;
         if((addr1+TBLOCK_SIZE30) != ma_addr) TEST_ERROR
 
@@ -5351,7 +5351,7 @@ test_mf_align_alloc4(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
             state.serial_sect_count += 1;
         }
 
-        H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
+        H5MF__aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
 
         if((addr2 + TBLOCK_SIZE2058) != ma_addr) TEST_ERROR
 
@@ -5532,7 +5532,7 @@ test_mf_align_alloc5(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
         /* Verify that the allocated block is aligned */
         if(addr1 % alignment) TEST_ERROR
 
-        H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
+        H5MF__aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
 
         if((addr1 + TBLOCK_SIZE30) != ma_addr) TEST_ERROR
 
@@ -5563,7 +5563,7 @@ test_mf_align_alloc5(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
             state[stype].serial_sect_count += 1;
         }
 
-        H5MF_aggr_query(f, &(f->shared->sdata_aggr), &sdata_addr, &sdata_size);
+        H5MF__aggr_query(f, &(f->shared->sdata_aggr), &sdata_addr, &sdata_size);
         if((saddr1+TBLOCK_SIZE30) != sdata_addr) TEST_ERROR
 
         /* calculate fragment for alignment of block 2058 from meta_aggr */
@@ -5596,12 +5596,12 @@ test_mf_align_alloc5(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
 	}
 
         /* nothing is changed in meta_aggr */
-        H5MF_aggr_query(f, &(f->shared->meta_aggr), &new_ma_addr, &new_ma_size);
+        H5MF__aggr_query(f, &(f->shared->meta_aggr), &new_ma_addr, &new_ma_size);
         if (new_ma_addr != ma_addr || new_ma_size != ma_size)
             TEST_ERROR
 
         /* nothing is changed in sdata_aggr */
-        H5MF_aggr_query(f, &(f->shared->sdata_aggr), &new_sdata_addr, &new_sdata_size);
+        H5MF__aggr_query(f, &(f->shared->sdata_aggr), &new_sdata_addr, &new_sdata_size);
         if (new_sdata_addr != sdata_addr || new_sdata_size != sdata_size)
             TEST_ERROR
 
@@ -5804,7 +5804,7 @@ test_mf_align_alloc6(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
             state[type].serial_sect_count += 1;
         }
 
-        H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
+        H5MF__aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
         if ((addr1+TBLOCK_SIZE30) != ma_addr)
             TEST_ERROR
 
@@ -5827,7 +5827,7 @@ test_mf_align_alloc6(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
             state[stype].serial_sect_count += 1;
         }
 
-        H5MF_aggr_query(f, &(f->shared->sdata_aggr), &sdata_addr, &sdata_size);
+        H5MF__aggr_query(f, &(f->shared->sdata_aggr), &sdata_addr, &sdata_size);
         if (sdata_addr != (saddr1+TBLOCK_SIZE30)) TEST_ERROR
 
         /* calculate fragment for alignment of block 50 in sdata_aggr */
@@ -5848,7 +5848,7 @@ test_mf_align_alloc6(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
             state[stype].serial_sect_count += 1;
         }
 
-        H5MF_aggr_query(f, &(f->shared->sdata_aggr), &sdata_addr, &sdata_size);
+        H5MF__aggr_query(f, &(f->shared->sdata_aggr), &sdata_addr, &sdata_size);
         if (sdata_addr != (saddr2+TBLOCK_SIZE50)) TEST_ERROR
 
         /* calculate fragment for alignment of block 80 in sdata_aggr */
@@ -5869,7 +5869,7 @@ test_mf_align_alloc6(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
             state[stype].serial_sect_count += 1;
         }
 
-        H5MF_aggr_query(f, &(f->shared->sdata_aggr), &sdata_addr, &sdata_size);
+        H5MF__aggr_query(f, &(f->shared->sdata_aggr), &sdata_addr, &sdata_size);
         if (sdata_addr != (saddr3+TBLOCK_SIZE80)) TEST_ERROR
 
         /* calculate fragment for alignment of block 2058 */
@@ -5891,8 +5891,8 @@ test_mf_align_alloc6(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
             state[type].serial_sect_count += 1;
         }
 
-        H5MF_aggr_query(f, &(f->shared->meta_aggr), &new_ma_addr, &new_ma_size);
-        H5MF_aggr_query(f, &(f->shared->sdata_aggr), &sdata_addr, &sdata_size);
+        H5MF__aggr_query(f, &(f->shared->meta_aggr), &new_ma_addr, &new_ma_size);
+        H5MF__aggr_query(f, &(f->shared->sdata_aggr), &sdata_addr, &sdata_size);
 
         if (new_ma_addr != ma_addr && new_ma_size != ma_size)
             TEST_ERROR
@@ -6815,7 +6815,7 @@ test_mf_fs_persist(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
         if(NULL == (f = (H5F_t *)H5I_object(file)))
             FAIL_STACK_ERROR
 
-        H5MF_alloc_to_fs_type(f, type, TBLOCK_SIZE6, (H5F_mem_page_t *)&tt);
+        H5MF__alloc_to_fs_type(f, type, TBLOCK_SIZE6, (H5F_mem_page_t *)&tt);
 
         /* Verify that H5FD_MEM_SUPER free-space manager is there */
         if(!H5F_addr_defined(f->shared->fs_addr[tt]))
@@ -6996,7 +6996,7 @@ test_mf_fs_gone(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
         if(NULL == (f = (H5F_t *)H5I_object(file)))
             FAIL_STACK_ERROR
 
-        H5MF_alloc_to_fs_type(f, type, TBLOCK_SIZE4, (H5F_mem_page_t *)&fs_type);
+        H5MF__alloc_to_fs_type(f, type, TBLOCK_SIZE4, (H5F_mem_page_t *)&fs_type);
 
         /* Verify that the H5FD_MEM_SUPER free-space manager is not there */
         if(H5F_addr_defined(f->shared->fs_addr[fs_type]))
@@ -7208,7 +7208,7 @@ test_mf_strat_thres_persist(const char *env_h5_drvr, hid_t fapl, hbool_t new_for
                 if(NULL == (f = (H5F_t *)H5I_object(file)))
                     FAIL_STACK_ERROR
 
-                H5MF_alloc_to_fs_type(f, type, TBLOCK_SIZE6, (H5F_mem_page_t *)&tt);
+                H5MF__alloc_to_fs_type(f, type, TBLOCK_SIZE6, (H5F_mem_page_t *)&tt);
 
                 /* Get a pointer to the internal file object */
                 if(NULL == (f = (H5F_t *)H5I_object(file)))
@@ -7359,7 +7359,7 @@ test_mf_strat_thres_gone(const char *env_h5_drvr, hid_t fapl, hbool_t new_format
             if(HADDR_UNDEF == (addr6 = H5MF_alloc(f, type, (hsize_t)TBLOCK_SIZE6)))
                 FAIL_STACK_ERROR
 
-            H5MF_alloc_to_fs_type(f, type, TBLOCK_SIZE6, (H5F_mem_page_t *)&tt);
+            H5MF__alloc_to_fs_type(f, type, TBLOCK_SIZE6, (H5F_mem_page_t *)&tt);
 
             /* For paged aggregation, the section in the page at EOF for small meta fs is not shrunk away */
             if(fs_type == H5F_FSPACE_STRATEGY_PAGE) {
@@ -7671,7 +7671,7 @@ test_page_alloc_xfree(const char *env_h5_drvr, hid_t fapl)
 
             if(!fs_persist) {
 
-                H5MF_alloc_to_fs_type(f, H5FD_MEM_OHDR, TBLOCK_SIZE1034, (H5F_mem_page_t *)&fs_type);
+                H5MF__alloc_to_fs_type(f, H5FD_MEM_OHDR, TBLOCK_SIZE1034, (H5F_mem_page_t *)&fs_type);
 
                 /* Verify that the freed block with addr2 is found from the small meta data manager */
                 if(H5MF__find_sect(f, H5FD_MEM_OHDR, (hsize_t)TBLOCK_SIZE1034, f->shared->fs_man[fs_type], &found_addr) < 0)
@@ -7704,7 +7704,7 @@ test_page_alloc_xfree(const char *env_h5_drvr, hid_t fapl)
 
             if(!fs_persist) {
 
-                H5MF_alloc_to_fs_type(f, H5FD_MEM_DRAW, TBLOCK_SIZE5000, (H5F_mem_page_t *)&fs_type);
+                H5MF__alloc_to_fs_type(f, H5FD_MEM_DRAW, TBLOCK_SIZE5000, (H5F_mem_page_t *)&fs_type);
 
                 /* Verify that the freed block with gaddr1 is found from the large data manager */
                 if(H5MF__find_sect(f, H5FD_MEM_DRAW, (hsize_t)TBLOCK_SIZE8192, f->shared->fs_man[fs_type], &found_addr) < 0)
@@ -7731,12 +7731,12 @@ test_page_alloc_xfree(const char *env_h5_drvr, hid_t fapl)
                     TEST_ERROR
 
                 /* Verify that the large generic manager is there */
-                H5MF_alloc_to_fs_type(f, H5FD_MEM_DRAW, TBLOCK_SIZE5000, (H5F_mem_page_t *)&fs_type);
+                H5MF__alloc_to_fs_type(f, H5FD_MEM_DRAW, TBLOCK_SIZE5000, (H5F_mem_page_t *)&fs_type);
                 if(!H5F_addr_defined(f->shared->fs_addr[fs_type]))
                     TEST_ERROR
 
                 /* Verify that the small meta data manager is there */
-                H5MF_alloc_to_fs_type(f, H5FD_MEM_OHDR, f->shared->fs_page_size - 1, (H5F_mem_page_t *)&fs_type);
+                H5MF__alloc_to_fs_type(f, H5FD_MEM_OHDR, f->shared->fs_page_size - 1, (H5F_mem_page_t *)&fs_type);
                 if(!H5F_addr_defined(f->shared->fs_addr[fs_type]))
                     TEST_ERROR
 
@@ -7777,7 +7777,7 @@ test_page_alloc_xfree(const char *env_h5_drvr, hid_t fapl)
                 if(found_addr != saddr1)
                     TEST_ERROR
 
-                H5MF_alloc_to_fs_type(f, H5FD_MEM_DRAW, TBLOCK_SIZE5000, (H5F_mem_page_t *)&fs_type);
+                H5MF__alloc_to_fs_type(f, H5FD_MEM_DRAW, TBLOCK_SIZE5000, (H5F_mem_page_t *)&fs_type);
 
                 if(!(f->shared->fs_man[fs_type]))
                     /* Set up to use the large data manager */

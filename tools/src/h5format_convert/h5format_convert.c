@@ -430,7 +430,7 @@ main(int argc, const char *argv[])
     } else { /* Convert all datasets in the file */
 	if(verbose_g)
 	    HDfprintf(stdout, "Processing all datasets in the file...\n");
-	if(h5trav_visit(fid, "/", TRUE, TRUE, convert_dsets_cb, NULL, &fid) < 0)
+	if(h5trav_visit(fid, "/", TRUE, TRUE, convert_dsets_cb, NULL, &fid, H5O_INFO_BASIC) < 0)
 	    goto done;
     } /* end else */
 

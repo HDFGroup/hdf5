@@ -141,7 +141,7 @@ done:
         void *ref;      IN: Reference to open.
 
  RETURNS
-    Valid ID on success, Negative on failure
+    Valid ID on success, H5I_INVALID_HID on failure
  DESCRIPTION
     Given a reference to some object, open that object and return an ID for
     that object.
@@ -203,7 +203,7 @@ done:
         void *ref;        IN: Reference to open.
 
  RETURNS
-    Valid ID on success, Negative on failure
+    Valid ID on success, H5I_INVALID_HID on failure
  DESCRIPTION
     Given a reference to some object, creates a copy of the dataset pointed
     to's dataspace and defines a selection in the copy which is the region
@@ -311,7 +311,7 @@ done:
                             when passing in the size)
 
  RETURNS
-    Non-negative length of the path on success, Negative on failure
+    Non-negative length of the path on success, -1 on failure
  DESCRIPTION
     Given a reference to some object, determine a path to the object
     referenced in the file.
@@ -335,23 +335,23 @@ H5Rget_name(hid_t id, H5R_type_t ref_type, const void *_ref, char *name,
     H5F_t *file;        /* File object */
     ssize_t ret_value;  /* Return value */
 
-    FUNC_ENTER_API(FAIL)
+    FUNC_ENTER_API((-1))
     H5TRACE5("Zs", "iRt*x*sz", id, ref_type, _ref, name, size);
 
     /* Check args */
     if (H5G_loc(id, &loc) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, (-1), "not a location")
     if (ref_type <= H5R_BADTYPE || ref_type >= H5R_MAXTYPE)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid reference type")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, (-1), "invalid reference type")
     if (_ref == NULL)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid reference pointer")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, (-1), "invalid reference pointer")
 
     /* Get the file pointer from the entry */
     file = loc.oloc->file;
 
     /* Get name */
     if((ret_value = H5R__get_name(file, id, ref_type, _ref, name, size)) < 0)
-        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL, "unable to determine object path")
+        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, (-1), "unable to determine object path")
 
 done:
     FUNC_LEAVE_API(ret_value)

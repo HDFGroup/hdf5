@@ -31,8 +31,8 @@
 #include "H5private.h"          /* Generic Functions                        */
 #include "H5ACprivate.h"        /* Metadata cache                           */
 #include "H5CXprivate.h"        /* API Contexts                             */
-#include "H5Eprivate.h"		/* Error handling                           */
-#include "H5FLprivate.h"	/* Free Lists                               */
+#include "H5Eprivate.h"		    /* Error handling                           */
+#include "H5FLprivate.h"	    /* Free Lists                               */
 #include "H5Ipkg.h"             /* IDs                                      */
 #include "H5MMprivate.h"        /* Memory management                        */
 #include "H5Oprivate.h"         /* Object headers                           */
@@ -738,10 +738,10 @@ H5I_register(H5I_type_t type, const void *object, hbool_t app_ref)
 
     /* Create the struct & its ID */
     new_id = H5I_MAKE(type, type_ptr->nextid);
-    id_ptr->id = new_id;
-    id_ptr->count = 1; /* initial reference count */
-    id_ptr->app_count = !!app_ref;
-    id_ptr->obj_ptr = object;
+    id_ptr->id          = new_id;
+    id_ptr->count       = 1; /* initial reference count */
+    id_ptr->app_count   = !!app_ref;
+    id_ptr->obj_ptr     = object;
 
     /* Insert into the type */
     if (H5SL_insert(type_ptr->ids, id_ptr, &id_ptr->id) < 0)
@@ -784,6 +784,7 @@ H5I_register_with_id(H5I_type_t type, const void *object, hbool_t app_ref, hid_t
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check arguments */
+    HDassert(object);
 
     /* Make sure ID is not already in use */
     if(NULL != (id_ptr = H5I__find_id(id)))
@@ -808,10 +809,10 @@ H5I_register_with_id(H5I_type_t type, const void *object, hbool_t app_ref, hid_t
         HGOTO_ERROR(H5E_ATOM, H5E_NOSPACE, FAIL, "memory allocation failed")
 
     /* Create the struct & insert requested ID */
-    id_ptr->id = id;
-    id_ptr->count = 1; /*initial reference count*/
-    id_ptr->app_count = !!app_ref;
-    id_ptr->obj_ptr = object;
+    id_ptr->id          = id;
+    id_ptr->count       = 1; /* initial reference count*/
+    id_ptr->app_count   = !!app_ref;
+    id_ptr->obj_ptr     = object;
 
     /* Insert into the type */
     if(H5SL_insert(type_ptr->ids, id_ptr, &id_ptr->id) < 0)
@@ -862,51 +863,45 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5I_object
+ * Function:    H5I_object
  *
- * Purpose:	Find an object pointer for the specified ID.
+ * Purpose:     Find an object pointer for the specified ID.
  *
- * Return:	Success:	Non-null object pointer associated with the
- *				specified ID.
- *		Failure:	NULL
+ * Return:      Success:    Non-null object pointer associated with the
+ *                          specified ID
  *
- * Programmer:	Unknown
+ *              Failure:    NULL
  *
  *-------------------------------------------------------------------------
  */
 void *
 H5I_object(hid_t id)
 {
-    H5I_id_info_t	*id_ptr;		/*ptr to the new atom	*/
-    void		*ret_value = NULL;	/*return value		*/
+    H5I_id_info_t	*id_ptr;            /* Pointer to the new atom  */
+    void		    *ret_value = NULL;  /* Return value             */
 
     FUNC_ENTER_NOAPI_NOERR
 
     /* General lookup of the ID */
     if(NULL != (id_ptr = H5I__find_id(id))) {
         /* Get the object pointer to return */
-        /* (Casting away const OK -QAK) */
-        ret_value = (void *)id_ptr->obj_ptr;
-    } /* end if */
+        ret_value = (void *)id_ptr->obj_ptr;        /* (Casting away const OK -QAK) */
+    }
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I_object() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Iobject_verify
+ * Function:    H5Iobject_verify
  *
- * Purpose:	Find an object pointer for the specified ID, verifying that
- *                  its in a particular type.  Public interface to
- *					H5I_object_verify.
+ * Purpose:     Find an object pointer for the specified ID, verifying that
+ *              its in a particular type.  Public interface to
+ *              H5I_object_verify.
  *
- * Return:	Success:	Non-null object pointer associated with the
- *				specified ID.
- *		Failure:	NULL
- *
- * Programmer:	Nathaniel Furrer
- *		James Laird
- *		Friday, April 23, 2004
+ * Return:      Success:    Non-null object pointer associated with the
+ *                          specified ID.
+ *              Failure:    NULL
  *
  *-------------------------------------------------------------------------
  */
@@ -932,14 +927,14 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5I_object_verify
+ * Function:    H5I_object_verify
  *
- * Purpose:	Find an object pointer for the specified ID, verifying that
- *                  its in a particular type.
+ * Purpose:     Find an object pointer for the specified ID, verifying that
+ *              its in a particular type.
  *
- * Return:	Success:	Non-null object pointer associated with the
- *				specified ID.
- *		Failure:	NULL
+ * Return:      Success:    Non-null object pointer associated with the
+ *                          specified ID.
+ *              Failure:    NULL
  *
  * Programmer:	Quincey Koziol
  *		Wednesday, July 31, 2002
@@ -949,8 +944,8 @@ done:
 void *
 H5I_object_verify(hid_t id, H5I_type_t id_type)
 {
-    H5I_id_info_t	*id_ptr = NULL;		/*ptr to the new atom	*/
-    void		*ret_value = NULL;	/*return value		*/
+    H5I_id_info_t  *id_ptr      = NULL;     /* Pointer to the new atom  */
+    void           *ret_value   = NULL;     /* Return value             */
 
     FUNC_ENTER_NOAPI_NOERR
 
@@ -959,9 +954,8 @@ H5I_object_verify(hid_t id, H5I_type_t id_type)
     /* Verify that the type of the ID is correct & lookup the ID */
     if(id_type == H5I_TYPE(id) && NULL != (id_ptr = H5I__find_id(id))) {
         /* Get the object pointer to return */
-        /* (Casting away const OK -QAK) */
-        ret_value = (void *)id_ptr->obj_ptr;
-    } /* end if */
+        ret_value = (void *)id_ptr->obj_ptr;        /* (Casting away const OK -QAK) */
+    }
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5I_object_verify() */
@@ -1867,8 +1861,8 @@ done:
  *              function, and then sets return value, based on the result of
  *              that callback.
  *
- * Return:      Success:    Non-negative on success
- *              Failure:    Negative
+ * Return:      Success:    H5_ITER_CONT (0) or H5_ITER_STOP (1)
+ *              Failure:    H5_ITER_ERROR (-1)
  *
  *-------------------------------------------------------------------------
  */
@@ -1925,8 +1919,8 @@ H5I__iterate_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
 herr_t
 H5I_iterate(H5I_type_t type, H5I_search_func_t func, void *udata, hbool_t app_ref)
 {
-    H5I_id_type_t *type_ptr;		/*ptr to the type	*/
-    herr_t	   ret_value = SUCCEED;	/*return value		*/
+    H5I_id_type_t *type_ptr;            /* Pointer to the type  */
+    herr_t	   ret_value = SUCCEED;     /* Return value         */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -1941,9 +1935,9 @@ H5I_iterate(H5I_type_t type, H5I_search_func_t func, void *udata, hbool_t app_re
         herr_t iter_status;             /* Iteration status */
 
         /* Set up iterator user data */
-        iter_udata.user_func = func;
-        iter_udata.user_udata = udata;
-        iter_udata.app_ref = app_ref;
+        iter_udata.user_func    = func;
+        iter_udata.user_udata   = udata;
+        iter_udata.app_ref      = app_ref;
 
         /* Iterate over IDs */
         if ((iter_status = H5SL_iterate(type_ptr->ids, H5I__iterate_cb, &iter_udata)) < 0)
@@ -2020,16 +2014,16 @@ H5Iget_name(hid_t id, char *name/*out*/, size_t size)
     H5G_loc_t     loc;          /* Object location */
     ssize_t       ret_value;    /* Return value */
 
-    FUNC_ENTER_API(FAIL)
+    FUNC_ENTER_API((-1))
     H5TRACE3("Zs", "ixz", id, name, size);
 
     /* Get object location */
     if(H5G_loc(id, &loc) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't retrieve object location")
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, (-1), "can't retrieve object location")
 
     /* Call internal routine to retrieve object's name */
     if((ret_value = H5I__get_name(&loc, name, size)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't retrieve object name")
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, (-1), "can't retrieve object name")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -2047,15 +2041,15 @@ done:
  * Return:      Success:    The length of the name
  *              Failure:    -1
  *
- * Programmer:	Quincey Koziol
- *		January 9, 2018
+ * Programmer:  Quincey Koziol
+ *              January 9, 2018
  *
  *-------------------------------------------------------------------------
  */
 static ssize_t
 H5I__get_name(const H5G_loc_t *loc, char *name, size_t size)
 {
-    ssize_t ret_value = FAIL;   /* Return value */
+    ssize_t ret_value = -1;     /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -2064,7 +2058,7 @@ H5I__get_name(const H5G_loc_t *loc, char *name, size_t size)
 
     /* Retrieve object's name */
     if((ret_value = H5G_get_name(loc, name, size, NULL)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't retrieve object name")
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, (-1), "can't retrieve object name")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2086,7 +2080,7 @@ done:
 hid_t
 H5Iget_file_id(hid_t obj_id)
 {
-    hid_t ret_value = H5I_INVALID_HID;          /* Return value */
+    hid_t           ret_value   = H5I_INVALID_HID;  /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("i", "i", obj_id);

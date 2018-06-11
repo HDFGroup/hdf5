@@ -453,6 +453,7 @@ set (H5O_SOURCES
     ${HDF5_SRC_DIR}/H5Ocont.c
     ${HDF5_SRC_DIR}/H5Ocopy.c
     ${HDF5_SRC_DIR}/H5Odbg.c
+    ${HDF5_SRC_DIR}/H5Odeprec.c
     ${HDF5_SRC_DIR}/H5Odrvinfo.c
     ${HDF5_SRC_DIR}/H5Odtype.c
     ${HDF5_SRC_DIR}/H5Oefl.c
