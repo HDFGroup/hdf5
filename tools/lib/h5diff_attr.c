@@ -154,9 +154,9 @@ static herr_t build_match_list_attrs(hid_t loc1_id, hid_t loc2_id, table_attrs_t
 
     h5difftrace("build_match_list_attrs start\n");
 
-    if(H5Oget_info(loc1_id, &oinfo1) < 0)
+    if(H5Oget_info2(loc1_id, &oinfo1, H5O_INFO_NUM_ATTRS) < 0)
         HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Oget_info first object failed");
-    if(H5Oget_info(loc2_id, &oinfo2) < 0)
+    if(H5Oget_info2(loc2_id, &oinfo2, H5O_INFO_NUM_ATTRS) < 0)
         HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Oget_info second object failed");
 
     table_attrs_init(&table_lp);

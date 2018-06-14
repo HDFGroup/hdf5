@@ -160,6 +160,19 @@ Bug Fixes since HDF5-1.10.2 release
 
       (ADB 2018/05/08)
 
+    - The --enable-debug/production configure flags are listed as 'deprecated'
+      when they should really be listed as 'removed'.
+
+      In the autotools overhaul several years ago, we removed these flags and
+      implemented a new --enable-build-mode= flag. This was done because we
+      changed the semantics of the modes and didn't want users to silently
+      be exposed to them. The newer system is also more flexible and us to
+      add other modes (like 'clean').
+
+      The --enable-debug/production flags are now listed as removed.
+
+      (DER - 2018/05/31, HDFFV-10505)
+
     Performance
     -------------
     -

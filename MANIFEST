@@ -752,6 +752,7 @@
 ./src/H5Ocont.c
 ./src/H5Ocopy.c
 ./src/H5Odbg.c
+./src/H5Odeprec.c
 ./src/H5Odrvinfo.c
 ./src/H5Odtype.c
 ./src/H5Oefl.c
@@ -940,6 +941,7 @@
 ./test/cross_read.c
 ./test/dangle.c
 ./test/deflate.h5
+./test/direct_chunk.c
 ./test/dsets.c
 ./test/dt_arith.c
 ./test/dtypes.c
@@ -2589,6 +2591,7 @@
 ./tools/test/perform/build_h5perf_alone.sh
 ./tools/test/perform/build_h5perf_serial_alone.sh
 ./tools/test/perform/chunk.c
+./tools/test/perform/direct_write_perf.c
 ./tools/test/perform/gen_report.pl
 ./tools/test/perform/iopipe.c
 ./tools/test/perform/overhead.c
@@ -2666,7 +2669,6 @@
 ./hl/test/COPYING
 ./hl/test/H5srcdir_str.h.in
 ./hl/test/Makefile.am
-./hl/test/dectris_hl_perf.c
 ./hl/test/dsdata.txt
 ./hl/test/dslat.txt
 ./hl/test/dslon.txt
@@ -2685,8 +2687,8 @@
 ./hl/test/test_ds_be.h5
 ./hl/test/test_ds_le.h5
 ./hl/test/test_dset_append.c
-./hl/test/test_dset_opt.c
 ./hl/test/test_file_image.c
+./hl/test/test_h5do_compat.c
 ./hl/test/test_image.c
 ./hl/test/test_ld.c
 ./hl/test/test_ld.h5

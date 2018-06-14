@@ -383,7 +383,7 @@ test_ohdr_swmr(hbool_t new_format)
         FAIL_STACK_ERROR
 
     /* Get the object information */
-    if(H5Oget_info(did, &obj_info) < 0)
+    if(H5Oget_info2(did, &obj_info, H5O_INFO_HDR) < 0)
         FAIL_STACK_ERROR
 
     if(new_format)

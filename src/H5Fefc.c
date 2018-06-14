@@ -73,7 +73,7 @@ H5FL_DEFINE_STATIC(H5F_efc_t);
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5F_efc_create
+ * Function:    H5F__efc_create
  *
  * Purpose:     Allocate and initialize a new external file cache object,
  *              which can the be used to cache open external files.
@@ -88,12 +88,12 @@ H5FL_DEFINE_STATIC(H5F_efc_t);
  *-------------------------------------------------------------------------
  */
 H5F_efc_t *
-H5F_efc_create(unsigned max_nfiles)
+H5F__efc_create(unsigned max_nfiles)
 {
     H5F_efc_t   *efc = NULL;            /* EFC object */
     H5F_efc_t   *ret_value = NULL;      /* Return value */
 
-    FUNC_ENTER_NOAPI(NULL)
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(max_nfiles > 0);
@@ -116,7 +116,7 @@ done:
         efc = H5FL_FREE(H5F_efc_t, efc);
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5F_efc_create() */
+} /* end H5F__efc_create() */
 
 
 /*-------------------------------------------------------------------------
@@ -139,8 +139,7 @@ done:
  *-------------------------------------------------------------------------
  */
 H5F_t *
-H5F__efc_open(H5F_t *parent, const char *name, unsigned flags, hid_t fcpl_id,
-    hid_t fapl_id)
+H5F__efc_open(H5F_t *parent, const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 {
     H5F_efc_t   *efc = NULL;    /* External file cache for parent file */
     H5F_efc_ent_t *ent = NULL;  /* Entry for target file in efc */
@@ -376,7 +375,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5F_efc_max_nfiles
+ * Function:    H5F__efc_max_nfiles
  *
  * Purpose:     Returns the maximum number of files in the provided
  *              external file cache.
@@ -389,15 +388,15 @@ done:
  *-------------------------------------------------------------------------
  */
 unsigned
-H5F_efc_max_nfiles(H5F_efc_t *efc)
+H5F__efc_max_nfiles(H5F_efc_t *efc)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(efc);
     HDassert(efc->max_nfiles > 0);
 
     FUNC_LEAVE_NOAPI(efc->max_nfiles)
-} /* end H5F_efc_max_nfiles */
+} /* end H5F__efc_max_nfiles */
 
 
 /*-------------------------------------------------------------------------
@@ -793,7 +792,7 @@ H5F__efc_try_close_tag2(H5F_file_t *sf, H5F_file_t **tail)
  *              uncloseable file would be closed.
  *
  *              The final pass exploits the H5F__efc_release_real()->
- *              H5F_efc_remove_ent()->H5F_try_close()->H5F__efc_try_close()
+ *              H5F__efc_remove_ent()->H5F_try_close()->H5F__efc_try_close()
  *              calling chain to recursively close the tree, but only the
  *              files that are still marked as closeable.  All files
  *              marked as closeable have their EFCs released, and will
@@ -819,7 +818,7 @@ H5F__efc_try_close(H5F_t *f)
     H5F_file_t  *next;                  /* Temporary file pointer */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(f);
@@ -852,7 +851,7 @@ H5F__efc_try_close(H5F_t *f)
     /* If there are references that are not from an EFC or f, it will never
      * be possible to close the file.  Just return.  Note that this holds true
      * for the case that this file is being closed through H5F__efc_release_real()
-     * because that function (through H5F_efc_remove_ent()) decrements the EFC
+     * because that function (through H5F__efc_remove_ent()) decrements the EFC
      * reference count before it calls H5F_try_close(). This may occur if this
      * function is reentered. */
     /* If the tag is H5F_EFC_TAG_DONTCLOSE, then we have definitely reentered

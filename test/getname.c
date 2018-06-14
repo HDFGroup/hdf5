@@ -2390,7 +2390,7 @@ test_main(hid_t file_id, hid_t fapl)
     if((size = H5Iget_name(dtype_anon, NULL,0)) != 0) TEST_ERROR
 
     /* Store the address of the datatype for later use */
-    if(H5Oget_info(dtype_anon, &oinfo) < 0) TEST_ERROR
+    if(H5Oget_info2(dtype_anon, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
 
     /* Update the reference count to dtype_anon to preserve the datatype */
     if(H5Oincr_refcount(dtype_anon) < 0) TEST_ERROR

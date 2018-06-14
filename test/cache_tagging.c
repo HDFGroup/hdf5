@@ -377,7 +377,7 @@ get_object_header_tag(hid_t loc_id, haddr_t *tag)
     H5O_info_t oinfo;           /* Object info */
 
     /* Retrieve the info for the object */
-    if(H5Oget_info(loc_id, &oinfo) < 0)
+    if(H5Oget_info2(loc_id, &oinfo, H5O_INFO_ALL) < 0)
         TEST_ERROR;
 
     /* Set the tag to return */
@@ -2937,7 +2937,7 @@ check_object_info_tags(void)
     /* Get information on an object by name  */
     /* ===================================== */
 
-    if ( H5Oget_info_by_name(fid, GROUPNAME, &oinfo, H5P_DEFAULT) < 0 ) TEST_ERROR;
+    if ( H5Oget_info_by_name2(fid, GROUPNAME, &oinfo, H5O_INFO_ALL, H5P_DEFAULT) < 0 ) TEST_ERROR;
 
     /* =================================== */
     /* Verification of Metadata Tag Values */

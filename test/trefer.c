@@ -1411,7 +1411,7 @@ test_reference_group(void)
     CHECK(size, FAIL, "H5Lget_name_by_idx");
     VERIFY_STR(objname, DSETNAME2, "H5Lget_name_by_idx");
 
-    ret = H5Oget_info_by_idx(gid, ".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)0, &oinfo, H5P_DEFAULT);
+    ret = H5Oget_info_by_idx2(gid, ".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)0, &oinfo, H5O_INFO_BASIC, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Oget_info_by_idx");
     VERIFY(oinfo.type, H5O_TYPE_DATASET, "H5Oget_info_by_idx");
 
