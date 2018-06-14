@@ -751,8 +751,8 @@ H5R__get_name(H5F_t *f, hid_t id, H5R_type_t ref_type, const void *_ref,
     } /* end switch */
 
     /* Retrieve file ID for name search */
-    if ((file_id = H5I_get_file_id(id, FALSE)) < 0)
-        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, (-1), "can't retrieve file ID")
+    if ((file_id = H5F_get_id(f, FALSE)) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, (-1), "can't get file ID")
 
     /* Get name, length, etc. */
     if ((ret_value = H5G_get_name_by_addr(file_id, &oloc, name, size)) < 0)
