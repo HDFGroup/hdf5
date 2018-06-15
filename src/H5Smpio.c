@@ -829,7 +829,6 @@ H5S_mpio_hyper_type(const H5S_t *space, size_t elmt_size,
           * the total number of bytes in a transfer could be :
           *   (2GB-1)number_of_blocks * the_datatype_extent.
           */
-
             MPI_Aint stride_in_bytes, inner_extent;
             MPI_Datatype block_type;
 
@@ -850,7 +849,7 @@ H5S_mpio_hyper_type(const H5S_t *space, size_t elmt_size,
                     HMPI_GOTO_ERROR(FAIL, "MPI_Type_contiguous failed", mpi_code)
             }
 
-            MPI_Type_extent (inner_type, &inner_extent);
+            MPI_Type_get_extent (inner_type, &lb, &inner_extent);
             stride_in_bytes = inner_extent * (MPI_Aint)d[i].strid;
 
             /* If the element count is larger than what a 32 bit integer can hold,
@@ -1396,6 +1395,7 @@ static herr_t H5S_mpio_create_large_type (hsize_t num_elements,
     int           block_len[2];
     int           mpi_code;               /* MPI return code */
     MPI_Datatype  inner_type, outer_type, leftover_type, type[2];
+    MPI_Aint      lb; /* Needed as an argument for MPI_Type_get_extent */
     MPI_Aint      disp[2], old_extent;
     herr_t        ret_value = SUCCEED;    /* Return value */
 
@@ -1472,7 +1472,7 @@ static herr_t H5S_mpio_create_large_type (hsize_t num_elements,
             }
         }
 
-        MPI_Type_extent (old_type, &old_extent);
+        MPI_Type_get_extent (old_type, &lb, &old_extent);
 
         /* Set up the arguments for MPI_Type_struct constructor */
         type[0] = outer_type;

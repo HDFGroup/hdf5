@@ -925,24 +925,34 @@ done:
  * Function:    H5FD_mpio_fileinfo_get
  *
  * Purpose:     Implements a normal file open for MPI rank 0.  This
- *              essentially a copy of the H5FD_sec2_open, where we
+ *              essentially is a copy of the H5FD_sec2_open. We
  *              open the file and cache a few key structures before
  *              closing.  These cached structures are those which
- *              are eventually utilized for file comparisons.
+ *              are eventually utilized for MPIO file comparisons.
  *
- * Return:      NONE.  Any failures that occur here should ultimately
- *              be reflected in the actual MPI_File_open call which
- *              occurs immediately following completion of this
- *              function.
+ * Return:      Success:        Non-negative
+ *
+ *              Failure:        Negative
+ *              Indicates too, that the information used for
+ *              MPIO file comparisons will most likely not
+ *              be initialized and this in turn can lead to
+ *              runtime issues, e.g. File comparison failures.
  */
-static void
+static herr_t
 H5FD_mpio_fileinfo_get(const char *name, unsigned flags, H5FD_mpio_t *file)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
+    int             status;
     int             fd          = -1;       /* File descriptor          */
     int             o_flags;                /* Flags for open() call    */
     h5_stat_t       sb;
+    herr_t          ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+#ifdef H5FDmpio_DEBUG
+    if (H5FD_mpio_Debug[(int)'t'])
+        fprintf(stdout, "Entering H5FD_mpio_fileinfo_get\n");
+#endif
 
 #ifdef H5_HAVE_WIN32_API
     struct _BY_HANDLE_FILE_INFORMATION fileinfo;
@@ -951,27 +961,19 @@ H5FD_mpio_fileinfo_get(const char *name, unsigned flags, H5FD_mpio_t *file)
     o_flags = (H5F_ACC_RDWR & flags) ? O_RDWR : O_RDONLY;
 
     /* Open the file */
-    if((fd = HDopen(name, o_flags, H5_POSIX_CREATE_MODE_RW)) < 0) {
-#ifdef H5FDmpio_DEBUG
-if (H5FD_mpio_Debug[(int)'t'])
-fprintf(stdout, "H5FD_mpio_fileinfo_get: HDopen failed!\n");
-#endif
-        goto done;
-    }
-    if(HDfstat(fd, &sb) < 0) {
-#ifdef H5FDmpio_DEBUG
-if (H5FD_mpio_Debug[(int)'t'])
-fprintf(stdout, "H5FD_mpio_fileinfo_get: HDfstat failed!\n");
-#endif
-        goto done;
-    }
+    if((fd = HDopen(name, o_flags, H5_POSIX_CREATE_MODE_RW)) < 0)
+        HMPI_GOTO_ERROR(FAIL, "HDopen failed", fd)
+
+    if((status = HDfstat(fd, &sb)) < 0)
+        HMPI_GOTO_ERROR(FAIL, "HDfstat failed", status)
+
 #ifdef H5_HAVE_WIN32_API
     hFile = (HANDLE)_get_osfhandle(fd);
     if(INVALID_HANDLE_VALUE == hFile)
-        goto done;
+        HMPI_GOTO_ERROR(FAIL, "_get_osfhandle failed", -1)
 
     if(!GetFileInformationByHandle((HANDLE)hFile, &fileinfo))
-        goto done;
+        HMPI_GOTO_ERROR(FAIL, "GetFileInformationByHandle failed", 0)
 
     file->nFileIndexHigh = fileinfo.nFileIndexHigh;
     file->nFileIndexLow = fileinfo.nFileIndexLow;
@@ -985,7 +987,11 @@ done:
     if(fd >= 0)
         HDclose(fd);
 
-    FUNC_LEAVE_NOAPI_VOID
+#ifdef H5FDmpio_DEBUG
+    if (H5FD_mpio_Debug[(int)'t'])
+        fprintf(stdout, "Leaving H5FD_mpio_fileinfo_get\n");
+#endif
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -1128,7 +1134,9 @@ H5FD_mpio_open(const char *name, unsigned flags, hid_t fapl_id,
 
     if (mpi_rank == 0) {
         /* Gather some file info for future comparisons */
-        H5FD_mpio_fileinfo_get( name, flags, file );
+      if (H5FD_mpio_fileinfo_get( name, flags, file ) < 0)
+	  /* FIXME: Should we instead abort here? */
+          fprintf(stderr, "H5FD_mpio_open: Unable to augment the MPIO file struct with additional info\n");
     }
 
     /* Set return value */
