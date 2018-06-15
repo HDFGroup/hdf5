@@ -200,6 +200,7 @@ set (H5_TESTS
     cmpd_dset
     filter_fail
     extend
+    direct_chunk # compression lib link
     external
     efc
     objcopy
@@ -251,6 +252,7 @@ macro (ADD_H5_EXE file)
 endmacro ()
 
 set (H5_TESTS_MULTIPLE
+    direct_chunk
     testhdf5
     cache_image
     ttsafe
@@ -265,7 +267,23 @@ endforeach ()
 ##############################################################################
 ###           M U L T I P L E  S O U R C E   T E S T S                     ###
 ##############################################################################
+######### Also special handling of link libs #############
+#-- Adding test for direct_chunk
+add_executable (direct_chunk ${HDF5_TEST_SOURCE_DIR}/direct_chunk.c)
+target_include_directories(direct_chunk PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};${HDF5_TEST_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+TARGET_C_PROPERTIES (direct_chunk STATIC)
+target_link_libraries (direct_chunk PRIVATE ${HDF5_TEST_LIB_TARGET} ${LINK_COMP_LIBS})
+set_target_properties (direct_chunk PROPERTIES FOLDER test)
+if (BUILD_SHARED_LIBS)
+  add_executable (direct_chunk-shared ${HDF5_TEST_SOURCE_DIR}/direct_chunk.c)
+  target_include_directories(direct_chunk-shared PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};${HDF5_TEST_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+  TARGET_C_PROPERTIES (direct_chunk-shared SHARED)
+  target_link_libraries (direct_chunk-shared PRIVATE ${HDF5_TEST_LIBSH_TARGET} ${LINK_COMP_LIBS})
+  set_target_properties (direct_chunk-shared PROPERTIES FOLDER test)
+endif ()
 
+
+######### Special handling for multiple sources #############
 #-- Adding test for testhdf5
 add_executable (testhdf5 ${testhdf5_SOURCES})
 target_include_directories(testhdf5 PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")

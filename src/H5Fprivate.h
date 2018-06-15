@@ -296,7 +296,7 @@ typedef struct H5F_t H5F_t;
 #define H5F_BASE_ADDR(F)        ((F)->shared->sblock->base_addr)
 #define H5F_SYM_LEAF_K(F)       ((F)->shared->sblock->sym_leaf_k)
 #define H5F_KVALUE(F,T)         ((F)->shared->sblock->btree_k[(T)->id])
-#define H5F_NREFS(F)        ((F)->shared->nrefs)
+#define H5F_NREFS(F)            ((F)->shared->nrefs)
 #define H5F_SIZEOF_ADDR(F)      ((F)->shared->sizeof_addr)
 #define H5F_SIZEOF_SIZE(F)      ((F)->shared->sizeof_size)
 #define H5F_SOHM_ADDR(F)        ((F)->shared->sohm_addr)
@@ -713,8 +713,7 @@ typedef enum H5F_prefix_open_t {
 /***************************************/
 
 /* Private functions */
-H5_DLL H5F_t *H5F_open(const char *name, unsigned flags, hid_t fcpl_id,
-    hid_t fapl_id);
+H5_DLL H5F_t *H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id);
 H5_DLL herr_t H5F_try_close(H5F_t *f, hbool_t *was_closed/*out*/);
 H5_DLL herr_t H5F_start_swmr_write(H5F_t *file);
 
@@ -795,10 +794,8 @@ H5_DLL herr_t H5F_traverse_mount(struct H5O_loc_t *oloc/*in,out*/);
 H5_DLL herr_t H5F_flush_mounts(H5F_t *f);
 
 /* Functions that operate on blocks of bytes wrt super block */
-H5_DLL herr_t H5F_block_read(H5F_t *f, H5FD_mem_t type, haddr_t addr,
-    size_t size, void *buf/*out*/);
-H5_DLL herr_t H5F_block_write(H5F_t *f, H5FD_mem_t type, haddr_t addr,
-    size_t size, const void *buf);
+H5_DLL herr_t H5F_block_read(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size, void *buf/*out*/);
+H5_DLL herr_t H5F_block_write(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size, const void *buf);
 
 /* Functions that flush or evict */
 H5_DLL herr_t H5F_flush_tagged_metadata(H5F_t *f, haddr_t tag);
@@ -851,8 +848,7 @@ H5_DLL H5F_t *H5F_prefix_open_file(H5F_t *primary_file, H5F_prefix_open_t prefix
 /* Global heap CWFS routines */
 H5_DLL herr_t H5F_cwfs_add(H5F_t *f, struct H5HG_heap_t *heap);
 H5_DLL herr_t H5F_cwfs_find_free_heap(H5F_t *f, size_t need, haddr_t *addr);
-H5_DLL herr_t H5F_cwfs_advance_heap(H5F_t *f, struct H5HG_heap_t *heap,
-    hbool_t add_heap);
+H5_DLL herr_t H5F_cwfs_advance_heap(H5F_t *f, struct H5HG_heap_t *heap, hbool_t add_heap);
 H5_DLL herr_t H5F_cwfs_remove_heap(H5F_file_t *shared, struct H5HG_heap_t *heap);
 
 /* Debugging functions */
