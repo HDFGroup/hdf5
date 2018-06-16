@@ -21,22 +21,22 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"         /* Generic Functions */
-#include "H5Aprivate.h"        /* Attributes */
-#include "H5ACprivate.h"       /* Metadata cache */
-#include "H5CXprivate.h"       /* API Contexts */
-#include "H5Dprivate.h"        /* Datasets */
-#include "H5Eprivate.h"        /* Error handling */
-#include "H5Fpkg.h"            /* File access */
-#include "H5FDprivate.h"       /* File drivers */
-#include "H5Gprivate.h"        /* Groups */
-#include "H5Iprivate.h"        /* IDs */
-#include "H5Lprivate.h"        /* Links */
-#include "H5MFprivate.h"       /* File memory management */
-#include "H5MMprivate.h"       /* Memory management */
-#include "H5Pprivate.h"        /* Property lists */
-#include "H5SMprivate.h"       /* Shared Object Header Messages */
-#include "H5Tprivate.h"        /* Datatypes */
+#include "H5private.h"          /* Generic Functions                        */
+#include "H5Aprivate.h"         /* Attributes                               */
+#include "H5ACprivate.h"        /* Metadata cache                           */
+#include "H5CXprivate.h"        /* API Contexts                             */
+#include "H5Dprivate.h"         /* Datasets                                 */
+#include "H5Eprivate.h"         /* Error handling                           */
+#include "H5Fpkg.h"             /* File access                              */
+#include "H5FDprivate.h"        /* File drivers                             */
+#include "H5Gprivate.h"         /* Groups                                   */
+#include "H5Iprivate.h"         /* IDs                                      */
+#include "H5Lprivate.h"         /* Links                                    */
+#include "H5MFprivate.h"        /* File memory management                   */
+#include "H5MMprivate.h"        /* Memory management                        */
+#include "H5Pprivate.h"         /* Property lists                           */
+#include "H5SMprivate.h"        /* Shared Object Header Messages            */
+#include "H5Tprivate.h"         /* Datatypes                                */
 
 
 /****************/
@@ -74,11 +74,9 @@ typedef struct H5F_olist_t {
 /********************/
 
 static int H5F_get_objects_cb(void *obj_ptr, hid_t obj_id, void *key);
-static herr_t H5F__build_name(const char *prefix, const char *file_name,
-    char **full_name/*out*/);
+static herr_t H5F__build_name(const char *prefix, const char *file_name, char **full_name/*out*/);
 static char *H5F__getenv_prefix_name(char **env_prefix/*in,out*/);
-static herr_t H5F_build_actual_name(const H5F_t *f, const H5P_genplist_t *fapl,
-    const char *name, char ** /*out*/ actual_name);/* Declare a free list to manage the H5F_t struct */
+static herr_t H5F_build_actual_name(const H5F_t *f, const H5P_genplist_t *fapl, const char *name, char ** /*out*/ actual_name);
 static herr_t H5F__flush_phase1(H5F_t *f);
 static herr_t H5F__flush_phase2(H5F_t *f, hbool_t closing);
 
@@ -175,7 +173,7 @@ H5F_get_access_plist(H5F_t *f, hbool_t app_ref)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set object flush callback")
 
     if(f->shared->efc)
-        efc_size = H5F_efc_max_nfiles(f->shared->efc);
+        efc_size = H5F__efc_max_nfiles(f->shared->efc);
     if(H5P_set(new_plist, H5F_ACS_EFC_SIZE_NAME, &efc_size) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set elink file cache size")
     if(f->shared->page_buf != NULL) {
@@ -486,11 +484,12 @@ done:
 
 
 /*--------------------------------------------------------------------------
- * Function: H5F__build_name
+ * Function:    H5F__build_name
  *
- * Purpose:  Prepend PREFIX to FILE_NAME and store in FULL_NAME
+ * Purpose:     Prepend PREFIX to FILE_NAME and store in FULL_NAME
  *
- * Return:   Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
+ *
  *--------------------------------------------------------------------------*/
 static herr_t
 H5F__build_name(const char *prefix, const char *file_name, char **full_name/*out*/)
@@ -818,34 +817,37 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function: H5F_new
+ * Function:    H5F__new
  *
- * Purpose:  Creates a new file object and initializes it.  The
- *           H5Fopen and H5Fcreate functions then fill in various fields.
- *           If SHARED is a non-null pointer then the shared info
- *           to which it points has the reference count incremented.
- *           Otherwise a new, empty shared info struct is created and
- *           initialized with the specified file access property list.
+ * Purpose:     Creates a new file object and initializes it. The
+ *              H5Fopen and H5Fcreate functions then fill in various fields.
+ *              If SHARED is a non-null pointer then the shared info
+ *              to which it points has the reference count incremented.
+ *              Otherwise a new, empty shared info struct is created and
+ *              initialized with the specified file access property list.
  *
- * Return:   Success:    Ptr to a new file struct.
- *           Failure:    NULL
+ * Return:      Success:    Pointer to a new file struct
+ *
+ *              Failure:    NULL
+ *
  *-------------------------------------------------------------------------
  */
 H5F_t *
-H5F_new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf)
+H5F__new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf)
 {
-    H5F_t    *f = NULL, *ret_value = NULL;
+    H5F_t       *f          = NULL;
+    H5F_t       *ret_value  = NULL;
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     if(NULL == (f = H5FL_CALLOC(H5F_t)))
         HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, NULL, "can't allocate top file structure")
-    f->file_id = -1;
+    f->file_id = H5I_INVALID_HID;
 
     if(shared) {
         HDassert(lf == NULL);
         f->shared = shared;
-    } /* end if */
+    }
     else {
         H5P_genplist_t *plist;          /* Property list */
         unsigned efc_size;              /* External file cache size */
@@ -866,7 +868,7 @@ H5F_new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_t
             f->shared->fs_state[u] = H5F_FS_STATE_CLOSED;
             f->shared->fs_addr[u] = HADDR_UNDEF;
             f->shared->fs_man[u] = NULL;
-        } /* end for */
+        }
         f->shared->first_alloc_dealloc = FALSE;
         f->shared->eoa_pre_fsm_fsalloc = HADDR_UNDEF;
         f->shared->eoa_post_fsm_fsalloc = HADDR_UNDEF;
@@ -878,9 +880,8 @@ H5F_new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_t
         /* intialize point of no return */
         f->shared->point_of_no_return = FALSE;
 
-        /*
-         * Copy the file creation and file access property lists into the
-         * new file handle.  We do this early because some values might need
+        /* Copy the file creation and file access property lists into the
+         * new file handle. We do this early because some values might need
          * to change as the file is being opened.
          */
         if(NULL == (plist = (H5P_genplist_t *)H5I_object(fcpl_id)))
@@ -906,7 +907,8 @@ H5F_new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_t
         HDassert(f->shared->fs_page_size >= H5F_FILE_SPACE_PAGE_SIZE_MIN);
 
         /* Temporary for multi/split drivers: fail file creation
-             when persisting free-space or using paged aggregation strategy */
+         * when persisting free-space or using paged aggregation strategy.
+         */
         if(H5F_HAS_FEATURE(f, H5FD_FEAT_PAGED_AGGR))
             if(f->shared->fs_strategy == H5F_FSPACE_STRATEGY_PAGE || f->shared->fs_persist)
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't open with this strategy or persistent fs")
@@ -947,7 +949,7 @@ H5F_new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_t
         if(H5P_get(plist, H5F_ACS_EFC_SIZE_NAME, &efc_size) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get elink file cache size")
         if(efc_size > 0)
-            if(NULL == (f->shared->efc = H5F_efc_create(efc_size)))
+            if(NULL == (f->shared->efc = H5F__efc_create(efc_size)))
                 HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't create external file cache")
 #ifdef H5_HAVE_PARALLEL
         if(H5P_get(plist, H5_COLL_MD_READ_FLAG_NAME, &(f->coll_md_read)) < 0)
@@ -1000,12 +1002,12 @@ H5F_new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_t
             f->shared->feature_flags &= ~(unsigned)H5FD_FEAT_ACCUMULATE_METADATA;
             if(H5FD_set_feature_flags(f->shared->lf, f->shared->feature_flags) < 0)
                  HGOTO_ERROR(H5E_FILE, H5E_CANTSET, NULL, "can't set feature_flags in VFD")
-        } /* end if */
+        }
         else {
             /* If no value for read attempts has been set, use the default */
             if(!f->shared->read_attempts)
                 f->shared->read_attempts = H5F_METADATA_READ_ATTEMPTS;
-        } /* end else */
+        }
 
         /* Determine the # of bins for metdata read retries */
         if(H5F_set_retries(f) < 0)
@@ -1031,8 +1033,7 @@ H5F_new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_t
         if(H5P_get(plist, H5F_ACS_OBJECT_FLUSH_CB_NAME, &(f->shared->object_flush)) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't get object flush cb info")
 
-        /*
-         * Create a metadata cache with the specified number of elements.
+        /* Create a metadata cache with the specified number of elements.
          * The cache might be created with a different number of elements and
          * the access property list should be updated to reflect that.
          */
@@ -1069,12 +1070,12 @@ done:
                     HDONE_ERROR(H5E_FILE, H5E_CANTDEC, NULL, "can't close property list")
 
             f->shared = H5FL_FREE(H5F_file_t, f->shared);
-        } /* end if */
+        }
         f = H5FL_FREE(H5F_t, f);
-    } /* end if */
+    }
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5F_new() */
+} /* end H5F__new() */
 
 
 /*-------------------------------------------------------------------------
@@ -1587,7 +1588,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "SWMR read access flag not the same for file that is already open")
 
         /* Allocate new "high-level" file struct */
-        if((file = H5F_new(shared, flags, fcpl_id, fapl_id, NULL)) == NULL)
+        if((file = H5F__new(shared, flags, fcpl_id, fapl_id, NULL)) == NULL)
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to create new file object")
     } /* end if */
     else {
@@ -1615,7 +1616,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
             } /* end if */
 
         /* Create the 'top' file structure */
-        if(NULL == (file = H5F_new(NULL, flags, fcpl_id, fapl_id, lf))) {
+        if(NULL == (file = H5F__new(NULL, flags, fcpl_id, fapl_id, lf))) {
             /* If this is the only time the file has been opened and the struct
              * returned is NULL, H5FD_close() will never be called via H5F_dest()
              * so we have to close lf here before heading to the error handling.
@@ -2085,7 +2086,7 @@ H5F__close_cb(H5F_t *f)
         unsigned nopen_objs = 0;        /* Number of open objects in file/mount hierarchy */
 
         /* Get the number of open objects and open files on this file/mount hierarchy */
-        if(H5F_mount_count_ids(f, &nopen_files, &nopen_objs) < 0)
+        if(H5F__mount_count_ids(f, &nopen_files, &nopen_objs) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_MOUNT, FAIL, "problem checking mount hierarchy")
 
         /* If there are no other file IDs open on this file/mount hier., but
@@ -2150,7 +2151,7 @@ H5F_try_close(H5F_t *f, hbool_t *was_closed /*out*/)
     } /* end if */
 
     /* Get the number of open objects and open files on this file/mount hierarchy */
-    if(H5F_mount_count_ids(f, &nopen_files, &nopen_objs) < 0)
+    if(H5F__mount_count_ids(f, &nopen_files, &nopen_objs) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_MOUNT, FAIL, "problem checking mount hierarchy")
 
     /*

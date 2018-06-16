@@ -73,6 +73,17 @@
 #define H5O_SHMESG_MAX_NINDEXES 8
 #define H5O_SHMESG_MAX_LIST_SIZE 5000
 
+/* Flags for H5Oget_info.
+ * Theses flags determine which fields will be filled in in the H5O_info_t
+ * struct.  
+ */
+#define H5O_INFO_BASIC          0x0001u         /* Fill in the fileno, addr, type, and rc fields */
+#define H5O_INFO_TIME           0x0002u         /* Fill in the atime, mtime, ctime, and btime fields */
+#define H5O_INFO_NUM_ATTRS      0x0004u         /* Fill in the num_attrs field */
+#define H5O_INFO_HDR            0x0008u         /* Fill in the hdr field */
+#define H5O_INFO_META_SIZE      0x0010u         /* Fill in the meta_size field */
+#define H5O_INFO_ALL            (H5O_INFO_BASIC | H5O_INFO_TIME | H5O_INFO_NUM_ATTRS | H5O_INFO_HDR | H5O_INFO_META_SIZE)
+
 /*******************/
 /* Public Typedefs */
 /*******************/
@@ -156,12 +167,12 @@ H5_DLL hid_t H5Oopen_by_addr(hid_t loc_id, haddr_t addr);
 H5_DLL hid_t H5Oopen_by_idx(hid_t loc_id, const char *group_name,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t n, hid_t lapl_id);
 H5_DLL htri_t H5Oexists_by_name(hid_t loc_id, const char *name, hid_t lapl_id);
-H5_DLL herr_t H5Oget_info(hid_t loc_id, H5O_info_t *oinfo);
-H5_DLL herr_t H5Oget_info_by_name(hid_t loc_id, const char *name, H5O_info_t *oinfo,
-    hid_t lapl_id);
-H5_DLL herr_t H5Oget_info_by_idx(hid_t loc_id, const char *group_name,
+H5_DLL herr_t H5Oget_info2(hid_t loc_id, H5O_info_t *oinfo, unsigned fields);
+H5_DLL herr_t H5Oget_info_by_name2(hid_t loc_id, const char *name, H5O_info_t *oinfo,
+    unsigned fields, hid_t lapl_id);
+H5_DLL herr_t H5Oget_info_by_idx2(hid_t loc_id, const char *group_name,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t n, H5O_info_t *oinfo,
-    hid_t lapl_id);
+    unsigned fields, hid_t lapl_id);
 H5_DLL herr_t H5Olink(hid_t obj_id, hid_t new_loc_id, const char *new_name,
     hid_t lcpl_id, hid_t lapl_id);
 H5_DLL herr_t H5Oincr_refcount(hid_t object_id);
@@ -174,11 +185,11 @@ H5_DLL herr_t H5Oset_comment_by_name(hid_t loc_id, const char *name,
 H5_DLL ssize_t H5Oget_comment(hid_t obj_id, char *comment, size_t bufsize);
 H5_DLL ssize_t H5Oget_comment_by_name(hid_t loc_id, const char *name,
     char *comment, size_t bufsize, hid_t lapl_id);
-H5_DLL herr_t H5Ovisit(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order,
-    H5O_iterate_t op, void *op_data);
-H5_DLL herr_t H5Ovisit_by_name(hid_t loc_id, const char *obj_name,
+H5_DLL herr_t H5Ovisit2(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order,
+    H5O_iterate_t op, void *op_data, unsigned fields);
+H5_DLL herr_t H5Ovisit_by_name2(hid_t loc_id, const char *obj_name,
     H5_index_t idx_type, H5_iter_order_t order, H5O_iterate_t op,
-    void *op_data, hid_t lapl_id);
+    void *op_data, unsigned fields, hid_t lapl_id);
 H5_DLL herr_t H5Oclose(hid_t object_id);
 H5_DLL herr_t H5Oflush(hid_t obj_id);
 H5_DLL herr_t H5Orefresh(hid_t oid);
@@ -205,7 +216,18 @@ typedef struct H5O_stat_t {
 } H5O_stat_t;
 
 /* Function prototypes */
+H5_DLL herr_t H5Oget_info1(hid_t loc_id, H5O_info_t *oinfo);
+H5_DLL herr_t H5Oget_info_by_name1(hid_t loc_id, const char *name, H5O_info_t *oinfo,
+    hid_t lapl_id);
+H5_DLL herr_t H5Oget_info_by_idx1(hid_t loc_id, const char *group_name,
+    H5_index_t idx_type, H5_iter_order_t order, hsize_t n, H5O_info_t *oinfo,
+    hid_t lapl_id);
 
+H5_DLL herr_t H5Ovisit1(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order,
+    H5O_iterate_t op, void *op_data);
+H5_DLL herr_t H5Ovisit_by_name1(hid_t loc_id, const char *obj_name,
+    H5_index_t idx_type, H5_iter_order_t order, H5O_iterate_t op,
+    void *op_data, hid_t lapl_id);
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 #ifdef __cplusplus

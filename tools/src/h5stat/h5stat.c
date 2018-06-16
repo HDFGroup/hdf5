@@ -1788,14 +1788,14 @@ main(int argc, const char *argv[])
             unsigned u;
 
             for(u = 0; u < hand->obj_count; u++) {
-                if(h5trav_visit(fid, hand->obj[u], TRUE, TRUE, obj_stats, lnk_stats, &iter) < 0)
+                if(h5trav_visit(fid, hand->obj[u], TRUE, TRUE, obj_stats, lnk_stats, &iter, H5O_INFO_ALL) < 0)
                     warn_msg("Unable to traverse object \"%s\"\n", hand->obj[u]);
                 else
                     print_statistics(hand->obj[u], &iter);
             } /* end for */
         } /* end if */
         else {
-            if(h5trav_visit(fid, "/", TRUE, TRUE, obj_stats, lnk_stats, &iter) < 0)
+            if(h5trav_visit(fid, "/", TRUE, TRUE, obj_stats, lnk_stats, &iter, H5O_INFO_ALL) < 0)
                 warn_msg("Unable to traverse objects/links in file \"%s\"\n", fname);
             else
                 print_statistics("/", &iter);

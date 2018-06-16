@@ -467,7 +467,7 @@ H5_DLL herr_t H5B2__assert_leaf2(const H5B2_hdr_t *hdr, const H5B2_leaf_t *leaf,
 
 /* Testing routines */
 #ifdef H5B2_TESTING
-H5_DLL herr_t H5B2_get_root_addr_test(H5B2_t *bt2, haddr_t *root_addr);
+H5_DLL herr_t H5B2__get_root_addr_test(H5B2_t *bt2, haddr_t *root_addr);
 H5_DLL int H5B2__get_node_depth_test(H5B2_t *bt2, void *udata);
 H5_DLL herr_t H5B2__get_node_info_test(H5B2_t *bt2, void *udata,
     H5B2_node_info_test_t *ninfo);

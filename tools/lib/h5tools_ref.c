@@ -113,7 +113,7 @@ init_ref_path_table(void)
             return (-1);
 
         /* Iterate over objects in this file */
-        if(h5trav_visit(thefile, "/", TRUE, TRUE, init_ref_path_cb, NULL, NULL) < 0) {
+        if(h5trav_visit(thefile, "/", TRUE, TRUE, init_ref_path_cb, NULL, NULL, H5O_INFO_BASIC) < 0) {
             error_msg("unable to construct reference path table\n");
             h5tools_setstatus(EXIT_FAILURE);
         } /* end if */
@@ -184,7 +184,7 @@ ref_path_table_lookup(const char *thepath)
 
     /* Get the object info now */
     /* (returns failure for dangling soft links) */
-    if(H5Oget_info_by_name(thefile, thepath, &oi, H5P_DEFAULT) < 0)
+    if(H5Oget_info_by_name2(thefile, thepath, &oi, H5O_INFO_BASIC, H5P_DEFAULT) < 0)
         return HADDR_UNDEF;
 
     /* Return OID */
