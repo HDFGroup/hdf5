@@ -1002,20 +1002,38 @@ Java_hdf_hdf5lib_H5_H5DreadVL
           jlong file_space_id, jlong xfer_plist_id, jobjectArray buf)
 {
     herr_t  status = -1;
-    htri_t  isVlenStr=0;
+    htri_t  isStr = 0;
+    htri_t  isVlenStr = 0;
+    htri_t  isComplex = 0;
 
     if (buf == NULL) {
         h5nullArgument(env, "H5DreadVL:  buf is NULL");
     } /* end if */
     else {
-        isVlenStr = H5Tdetect_class((hid_t)mem_type_id, H5T_STRING);
-
-        if (isVlenStr)
-            h5badArgument(env, "H5DreadVL: type is not variable length non-string");
-        else
+        isStr = H5Tdetect_class((hid_t)mem_type_id, H5T_STRING);
+        if (H5Tget_class((hid_t)mem_type_id) == H5T_COMPOUND) {
+                unsigned i;
+                int nm = H5Tget_nmembers(mem_type_id);
+                for(i = 0; i <nm; i++) {
+                    hid_t nested_tid = H5Tget_member_type((hid_t)mem_type_id, i);
+                    isComplex = H5Tdetect_class((hid_t)nested_tid, H5T_COMPOUND) ||
+                                H5Tdetect_class((hid_t)nested_tid, H5T_VLEN);
+                    H5Tclose(nested_tid);
+                }
+            }
+            else if (H5Tget_class((hid_t)mem_type_id) == H5T_VLEN) {
+              isVlenStr = 1; /* strings created by H5Tvlen_create( H5T_C_S1) */
+        }
+        if (isStr == 0 || isComplex>0 || isVlenStr) {
             status = H5DreadVL_asstr(env, (hid_t)dataset_id, (hid_t)mem_type_id,
                                         (hid_t)mem_space_id, (hid_t)file_space_id,
                                         (hid_t)xfer_plist_id, buf);
+        }
+        else if (isStr > 0) {
+            status = H5DreadVL_str(env, (hid_t)dataset_id, (hid_t)mem_type_id,
+                                        (hid_t)mem_space_id, (hid_t)file_space_id,
+                                        (hid_t)xfer_plist_id, buf);
+        }
     } /* end else */
 
     return (jint)status;
