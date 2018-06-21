@@ -1052,7 +1052,10 @@ H5DreadVL_asstr
     size_t  max_len = 0;
     herr_t  status = -1;
 
+    /* Get size of string array */
     n = ENVPTR->GetArrayLength(ENVPAR buf);
+fprintf(stderr, "\nH5DreadVL_asstr: n=%d\n", n);
+    /* we will need to read n number of hvl_t structures */
     rdata = (hvl_t*)HDcalloc((size_t)n, sizeof(hvl_t));
     if (rdata == NULL) {
         h5JNIFatalError(env, "H5DreadVL_notstr:  failed to allocate buff for read");
@@ -1066,13 +1069,16 @@ H5DreadVL_asstr
             h5JNIFatalError(env, "H5DreadVL_notstr: failed to read data");
         } /* end if */
         else {
+            /* calculate the largest size of all the hvl_t structures read */
             max_len = 1;
             for (i=0; i < n; i++) {
                 if ((rdata + i)->len > max_len)
                     max_len = (rdata + i)->len;
             }
 
+            /* create one malloc to hold largest element */
             size = H5Tget_size(tid) * max_len;
+fprintf(stderr, "\nH5DreadVL_asstr: size=%d - maxlen=%d\n", size, max_len);
             HDmemset(&h5str, 0, sizeof(h5str_t));
             h5str_new(&h5str, 4 * size);
 
@@ -1082,9 +1088,13 @@ H5DreadVL_asstr
                 h5JNIFatalError(env, "H5DreadVL_notstr:  failed to allocate buf");
             } /* end if */
             else {
+                H5T_class_t tclass = H5Tget_class(tid);
+                /* convert each element to char string */
                 for (i=0; i < n; i++) {
+fprintf(stderr, "\nH5DreadVL_asstr: h5str[%d]\n", i);
                     h5str.s[0] = '\0';
-                    h5str_sprintf(&h5str, did, tid, rdata+i, 0);
+                    h5str_vlsprintf(&h5str, did, tid, rdata+i, 0);
+fprintf(stderr, "\nH5DreadVL_asstr: h5str[%d]=%s\n", i, h5str.s);
                     jstr = ENVPTR->NewStringUTF(ENVPAR h5str.s);
                     ENVPTR->SetObjectArrayElement(ENVPAR buf, i, jstr);
                 } /* end for */
@@ -1095,6 +1105,7 @@ H5DreadVL_asstr
             } /* end else */
         } /* end else */
     } /* end else */
+fprintf(stderr, "\nH5DreadVL_asstr: status=%d\n", status);
 
     return status;
 }
@@ -1451,7 +1462,7 @@ Java_hdf_hdf5lib_H5_H5Dread_1reg_1ref
     h5str_new(&h5str, 1024);
     for (i=0; i<n; i++) {
         h5str.s[0] = '\0';
-        h5str_sprintf(&h5str, did, tid, ref_data[i], 0);
+        h5str_sprintf(&h5str, did, tid, ref_data[i], 0, 0);
         jstr = ENVPTR->NewStringUTF(ENVPAR h5str.s);
 
         ENVPTR->SetObjectArrayElement(ENVPAR buf, i, jstr);
