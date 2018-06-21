@@ -1054,7 +1054,6 @@ H5DreadVL_asstr
 
     /* Get size of string array */
     n = ENVPTR->GetArrayLength(ENVPAR buf);
-fprintf(stderr, "\nH5DreadVL_asstr: n=%d\n", n);
     /* we will need to read n number of hvl_t structures */
     rdata = (hvl_t*)HDcalloc((size_t)n, sizeof(hvl_t));
     if (rdata == NULL) {
@@ -1078,7 +1077,6 @@ fprintf(stderr, "\nH5DreadVL_asstr: n=%d\n", n);
 
             /* create one malloc to hold largest element */
             size = H5Tget_size(tid) * max_len;
-fprintf(stderr, "\nH5DreadVL_asstr: size=%d - maxlen=%d\n", size, max_len);
             HDmemset(&h5str, 0, sizeof(h5str_t));
             h5str_new(&h5str, 4 * size);
 
@@ -1091,10 +1089,8 @@ fprintf(stderr, "\nH5DreadVL_asstr: size=%d - maxlen=%d\n", size, max_len);
                 H5T_class_t tclass = H5Tget_class(tid);
                 /* convert each element to char string */
                 for (i=0; i < n; i++) {
-fprintf(stderr, "\nH5DreadVL_asstr: h5str[%d]\n", i);
                     h5str.s[0] = '\0';
                     h5str_vlsprintf(&h5str, did, tid, rdata+i, 0);
-fprintf(stderr, "\nH5DreadVL_asstr: h5str[%d]=%s\n", i, h5str.s);
                     jstr = ENVPTR->NewStringUTF(ENVPAR h5str.s);
                     ENVPTR->SetObjectArrayElement(ENVPAR buf, i, jstr);
                 } /* end for */
@@ -1105,7 +1101,6 @@ fprintf(stderr, "\nH5DreadVL_asstr: h5str[%d]=%s\n", i, h5str.s);
             } /* end else */
         } /* end else */
     } /* end else */
-fprintf(stderr, "\nH5DreadVL_asstr: status=%d\n", status);
 
     return status;
 }

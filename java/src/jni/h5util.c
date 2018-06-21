@@ -187,8 +187,6 @@ h5str_vlsprintf
     size_t          size = H5Tget_size(tid);
     H5T_sign_t      nsign = H5Tget_sign(tid);
     int bdata_print = 0;
-fprintf(stderr, "\nh5str_vlsprintf: tclass=%ld\n", tclass);
-fprintf(stderr, "\nh5str_vlsprintf: size=%ld\n", size);
 
     if (!str || !ptr)
         return 0;
@@ -209,7 +207,6 @@ fprintf(stderr, "\nh5str_vlsprintf: size=%ld\n", size);
             n = H5Tget_nmembers(tid);
             h5str_append(str, " {");
 
-fprintf(stderr, "\nh5str_vlsprintf: COMPOUND nmembers=%d\n", n);
             for (i = 0; i < n; i++) {
                 offset = H5Tget_member_offset(tid, i);
                 mtid = H5Tget_member_type(tid, i);
@@ -237,7 +234,6 @@ fprintf(stderr, "\nh5str_vlsprintf: COMPOUND nmembers=%d\n", n);
             for (i = 0; i < rank; i++)
                 total_elmts *= dims[i];
 
-fprintf(stderr, "\nh5str_vlsprintf: ARRAY total_elems=%lld of size=%lld\n", total_elmts, size);
             h5str_sprintf(str, container, mtid, ((char *) (ptr->p)), ptr->len, expand_data);
             H5Tclose(mtid);
             h5str_append(str, " ] ");
@@ -248,7 +244,6 @@ fprintf(stderr, "\nh5str_vlsprintf: ARRAY total_elems=%lld of size=%lld\n", tota
         break;
     } /* end switch */
 
-    fprintf(stderr, "\nh5str_vlsprintf: this_strlen=%ld\n", this_strlen);
     return this_strlen;
 } /* end h5str_vlsprintf */
 
@@ -288,8 +283,6 @@ h5str_sprintf
     size_t          size = H5Tget_size(tid);
     H5T_sign_t      nsign = H5Tget_sign(tid);
     int bdata_print = 0;
-fprintf(stderr, "\nh5str_sprintf: tclass=%ld\n", tclass);
-fprintf(stderr, "\nh5str_sprintf: size=%ld\n", size);
 
     if (!str || !ptr)
         return 0;
@@ -332,7 +325,6 @@ fprintf(stderr, "\nh5str_sprintf: size=%ld\n", size);
         size = 0;
 
         if (H5Tis_variable_str(tid)) {
-fprintf(stderr, "\nh5str_sprintf: H5Tis_variable_str\n");
             tmp_str = *(char**) ptr;
             if (tmp_str != NULL)
                 size = HDstrlen(tmp_str);
@@ -432,7 +424,6 @@ fprintf(stderr, "\nh5str_sprintf: H5Tis_variable_str\n");
         n = H5Tget_nmembers(tid);
         h5str_append(str, " {");
 
-fprintf(stderr, "\nh5str_sprintf: COMPOUND nmembers=%d\n", n);
         for (i = 0; i < n; i++) {
             offset = H5Tget_member_offset(tid, i);
             mtid = H5Tget_member_type(tid, i);
@@ -552,7 +543,6 @@ fprintf(stderr, "\nh5str_sprintf: COMPOUND nmembers=%d\n", n);
         for (i = 0; i < rank; i++)
             total_elmts *= dims[i];
 
-fprintf(stderr, "\nh5str_sprintf: ARRAY total_elems=%ld\n", total_elmts);
         for (i = 0; i < total_elmts; i++) {
             h5str_sprintf(str, container, mtid, cptr + i * size, ptr_len, expand_data);
             if (i < total_elmts - 1)
@@ -569,7 +559,6 @@ fprintf(stderr, "\nh5str_sprintf: ARRAY total_elems=%ld\n", total_elmts);
             size = H5Tget_size(mtid);
 
             h5str_append(str, "{");
-fprintf(stderr, "\nh5str_sprintf: VLEN ptr_len=%lld of size=%lld\n", ptr_len, size);
             for (i = 0; i < (int)ptr_len; i++) {
                 h5str_sprintf(str, container, mtid, cptr + i * size, ptr_len, expand_data);
                 if (i < (int)ptr_len - 1)
@@ -604,7 +593,6 @@ fprintf(stderr, "\nh5str_sprintf: VLEN ptr_len=%lld of size=%lld\n", ptr_len, si
         HDfree(this_str);
     } /* end if */
 
-    fprintf(stderr, "\nh5str_sprintf: this_strlen=%ld\n", this_strlen);
     return this_strlen;
 } /* end h5str_sprintf */
 
