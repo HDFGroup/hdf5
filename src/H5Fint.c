@@ -2762,7 +2762,7 @@ H5F_set_store_msg_crt_idx(H5F_t *f, hbool_t flag)
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5F_set_libver_bounds()
+ * Function:    H5F__set_libver_bounds()
  *
  * Purpose:     Set the file's low and high bound to the input parameters
  *              'low' and 'high' respectively.
@@ -2818,7 +2818,7 @@ H5F__set_libver_bounds(H5F_t *f, H5F_libver_t low, H5F_libver_t high)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5F_set_libver_bounds() */
+} /* H5F__set_libver_bounds() */
 
 
 /*-------------------------------------------------------------------------

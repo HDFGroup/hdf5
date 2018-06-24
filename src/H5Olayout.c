@@ -548,8 +548,10 @@ done:
 static herr_t
 H5O__layout_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, const void *_mesg)
 {
-    const H5O_layout_t     *mesg = (const H5O_layout_t *) _mesg;
-    unsigned               u;
+    const H5O_layout_t      *mesg = (const H5O_layout_t *) _mesg;
+    uint8_t                 *heap_block = NULL;
+    size_t                  *str_size = NULL;
+    unsigned                u;
     herr_t ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_STATIC
@@ -685,6 +687,10 @@ H5O__layout_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, 
     } /* end switch */
 
 done:
+
+    heap_block = (uint8_t *)H5MM_xfree(heap_block);
+    str_size = (size_t *)H5MM_xfree(str_size);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__layout_encode() */
 

@@ -840,6 +840,10 @@ herr_t
 H5Pencode(hid_t plist_id, void *buf, size_t *nalloc)
 {
     H5P_genplist_t	*plist;         /* Property list to query */
+    H5P_genplist_t *fapl_plist;
+    hid_t new_fapl_id;
+    H5F_libver_t low_bound = H5F_LIBVER_V110;
+    H5F_libver_t high_bound = H5F_LIBVER_V110;
     herr_t ret_value = SUCCEED;          /* return value */
 
     FUNC_ENTER_API(FAIL)
@@ -850,7 +854,7 @@ H5Pencode(hid_t plist_id, void *buf, size_t *nalloc)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
 
     /* Call the internal encode routine */
-    if((ret_value = H5P__encode(plist, TRUE, buf, nalloc)) < 0)
+    if((ret_value = H5P__encode(plist, TRUE, buf, nalloc, H5P_FILE_ACCESS_DEFAULT)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
 
 done:

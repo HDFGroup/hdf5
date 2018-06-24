@@ -1,4 +1,4 @@
-HDF5 version 1.11.2 currently under development
+HDF5 version 1.10.3-snap4 currently under development
 ================================================================================
 
 
@@ -60,6 +60,7 @@ New Features
     Fortran Library:
     ----------------
     -
+
 
     C++ Library:
     ------------
@@ -201,6 +202,7 @@ Bug Fixes since HDF5-1.10.2 release
 
     Testing
     -------
+    -
 
 Supported Platforms
 ===================
@@ -249,6 +251,9 @@ Supported Platforms
     64-bit                        gfortran GNU Fortran (GCC) 7.1.0
     (swallow/kite)                Intel icc/icpc/ifort version 17.0.2
 
+    Mac OS Sierra 10.12.6         Apple LLVM version 8.1.0 (clang/clang++-802.0.42)
+    64-bit                        gfortran GNU Fortran (GCC) 7.1.0
+    (swallow/kite)                Intel icc/icpc/ifort version 17.0.2
 
 Tested Configuration Features Summary
 =====================================
@@ -274,15 +279,13 @@ Windows 7 x64 Cygwin                    n        y/n    n        y    y     y
 Windows 10                              y        y/y    n        y    y     y
 Windows 10 x64                          y        y/y    n        y    y     y
 Mac OS X Mountain Lion 10.8.5 64-bit    n        y/y    n        y    y     y
-Mac OS X Mavericks 10.9.5 64-bit        n        y/y    n        y    y     ?
-Mac OS X Yosemite 10.10.5 64-bit        n        y/y    n        y    y     ?
-Mac OS X El Capitan 10.11.6 64-bit      n        y/y    n        y    y     ?
-CentOS 6.7 Linux 2.6.18 x86_64 GNU      n        y/y    n        y    y     y
-CentOS 6.7 Linux 2.6.18 x86_64 Intel    n        y/y    n        y    y     y
-CentOS 6.7 Linux 2.6.32 x86_64 PGI      n        y/y    n        y    y     y
+Mac OS X Mavericks 10.9.5 64-bit        n        y/y    n        y    y     y
+Mac OS X Yosemite 10.10.5 64-bit        n        y/y    n        y    y     y
+Mac OS X El Capitan 10.11.6 64-bit      n        y/y    n        y    y     y
+CentOS 7.2 Linux 2.6.32 x86_64 PGI      n        y/y    n        y    y     y
 CentOS 7.2 Linux 2.6.32 x86_64 GNU      y        y/y    y        y    y     y
 CentOS 7.2 Linux 2.6.32 x86_64 Intel    n        y/y    n        y    y     y
-Linux 2.6.32-573.18.1.el6.ppc64         n        y/n    n        y    y     y
+Linux 2.6.32-573.18.1.el6.ppc64         n        y/y    n        y    y     y
 
 
 Platform                                 Shared  Shared    Shared    Thread-
@@ -299,10 +302,8 @@ Mac OS X Mountain Lion 10.8.5 64-bit       y       n         y         y
 Mac OS X Mavericks 10.9.5 64-bit           y       n         y         y
 Mac OS X Yosemite 10.10.5 64-bit           y       n         y         y
 Mac OS X El Capitan 10.11.6 64-bit         y       n         y         y
-CentOS 6.7 Linux 2.6.18 x86_64 GNU         y       y         y         y
-CentOS 6.7 Linux 2.6.18 x86_64 Intel       y       y         y         n
-CentOS 6.7 Linux 2.6.32 x86_64 PGI         y       y         y         n
-CentOS 7.2 Linux 2.6.32 x86_64 GNU         y       y         y         n
+CentOS 7.2 Linux 2.6.32 x86_64 PGI         y       y         y         n
+CentOS 7.2 Linux 2.6.32 x86_64 GNU         y       y         y         y
 CentOS 7.2 Linux 2.6.32 x86_64 Intel       y       y         y         n
 Linux 2.6.32-573.18.1.el6.ppc64            y       y         y         n
 
@@ -370,6 +371,12 @@ Known Problems
     applications.  Parallel applications can read files with metadata cache
     images, but since this is a collective operation, a deadlock is possible
     if one or more processes do not participate.
+
+    Three tests fail with OpenMPI 3.0.0/GCC-7.2.0-2.29:
+        testphdf5 (ecdsetw, selnone, cchunk1, cchunk3, cchunk4, and actualio)
+        t_shapesame (sscontig2)
+        t_pflush1/fails on exit
+    The first two tests fail attempting collective writes.
 
     Known problems in previous releases can be found in the HISTORY*.txt files
     in the HDF5 source. Please report any new problems found to
