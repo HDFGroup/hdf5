@@ -213,18 +213,17 @@ tar2cmakezip()
 	return 1
     fi
 
-    # step 2: add batch files for building CMake on windows
-    cp /mnt/scr1/pre-release/hdf5/CMake/HDF5_1_10/build-VS2013-32.bat $cmziptmpdir
-    cp /mnt/scr1/pre-release/hdf5/CMake/HDF5_1_10/build-VS2013-64.bat $cmziptmpdir
-    cp /mnt/scr1/pre-release/hdf5/CMake/HDF5_1_10/build-VS2015-32.bat $cmziptmpdir
-    cp /mnt/scr1/pre-release/hdf5/CMake/HDF5_1_10/build-VS2015-64.bat $cmziptmpdir
-    cp /mnt/scr1/pre-release/hdf5/CMake/HDF5_1_10/build-VS2017-32.bat $cmziptmpdir
-    cp /mnt/scr1/pre-release/hdf5/CMake/HDF5_1_10/build-VS2017-64.bat $cmziptmpdir
+    # step 2: add batch file for building CMake on window
+    cp /mnt/scr1/pre-release/hdf5/CMake/build-VS2013-32.bat $cmziptmpdir
+    cp /mnt/scr1/pre-release/hdf5/CMake/build-VS2013-64.bat $cmziptmpdir
+    cp /mnt/scr1/pre-release/hdf5/CMake/build-VS2015-32.bat $cmziptmpdir
+    cp /mnt/scr1/pre-release/hdf5/CMake/build-VS2015-64.bat $cmziptmpdir
+    cp /mnt/scr1/pre-release/hdf5/CMake/build-VS2017-32.bat $cmziptmpdir
+    cp /mnt/scr1/pre-release/hdf5/CMake/build-VS2017-64.bat $cmziptmpdir
 
     # step 3: add SZIP.tar.gz, ZLib.tar.gz and cmake files
     cp /mnt/scr1/pre-release/hdf5/CMake/SZip.tar.gz $cmziptmpdir
     cp /mnt/scr1/pre-release/hdf5/CMake/ZLib.tar.gz $cmziptmpdir
-    cp /mnt/scr1/pre-release/hdf5/CMake/HDF5Examples-1.10.7-Source.tar.gz $cmziptmpdir
     cp $cmziptmpdir/$version/config/cmake/scripts/CTestScript.cmake $cmziptmpdir
     cp $cmziptmpdir/$version/config/cmake/scripts/HDF5config.cmake $cmziptmpdir
     cp $cmziptmpdir/$version/config/cmake/scripts/HDF5options.cmake $cmziptmpdir
@@ -241,10 +240,6 @@ tar2cmakezip()
 		unix2dos -q -k $inf; \
 	    fi\
 	done
-
-    
-    mkdir $cmziptmpdir/CMake-$HDF5_VERS
-    mv $cmziptmpdir/* $cmziptmpdir/CMake-$HDF5_VERS
     # step 3: make zipball
     # -9 maximum compression
     # -y Store symbolic links as such in the zip archive
@@ -321,12 +316,9 @@ tar2cmaketgz()
     # step 3: add SZIP.tar.gz, ZLib.tar.gz and cmake files
     cp /mnt/scr1/pre-release/hdf5/CMake/SZip.tar.gz $cmgztmpdir
     cp /mnt/scr1/pre-release/hdf5/CMake/ZLib.tar.gz $cmgztmpdir
-    cp /mnt/scr1/pre-release/hdf5/CMake/HDF5Examples-1.10.7-Source.tar.gz $cmgztmpdir
     cp $cmgztmpdir/$version/config/cmake/scripts/CTestScript.cmake $cmgztmpdir
     cp $cmgztmpdir/$version/config/cmake/scripts/HDF5config.cmake $cmgztmpdir
     cp $cmgztmpdir/$version/config/cmake/scripts/HDF5options.cmake $cmgztmpdir
-    mkdir $cmgztmpdir/CMake-$HDF5_VERS
-    mv $cmgztmpdir/* $cmgztmpdir/CMake-$HDF5_VERS
     tar czf $DEST/CMake-$HDF5_VERS.tar.gz -C $cmgztmpdir . || exit 1 
                  
     # cleanup
