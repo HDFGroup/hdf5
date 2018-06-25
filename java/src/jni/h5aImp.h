@@ -69,6 +69,24 @@ Java_hdf_hdf5lib_H5_H5Aread
 
 /*
  * Class:     hdf_hdf5lib_H5
+ * Method:    H5AwriteVL
+ * Signature: (JJ[Ljava/lang/String;)I
+ */
+JNIEXPORT jint JNICALL
+Java_hdf_hdf5lib_H5_H5AwriteVL
+  (JNIEnv *, jclass, jlong, jlong, jobjectArray);
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5AreadVL
+ * Signature: (JJ[Ljava/lang/String;)I
+ */
+JNIEXPORT jint JNICALL
+Java_hdf_hdf5lib_H5_H5AreadVL
+  (JNIEnv *, jclass, jlong, jlong, jobjectArray);
+
+/*
+ * Class:     hdf_hdf5lib_H5
  * Method:    H5Aget_space
  * Signature: (J)J
  */

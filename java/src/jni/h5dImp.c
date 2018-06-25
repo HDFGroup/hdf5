@@ -993,120 +993,6 @@ Java_hdf_hdf5lib_H5_H5Dwrite_1double
 
 /*
  * Class:     hdf_hdf5lib_H5
- * Method:    H5DreadVL
- * Signature: (JJJJJ[Ljava/lang/String;)I
- */
-JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5DreadVL
-    (JNIEnv *env, jclass clss, jlong dataset_id, jlong mem_type_id, jlong mem_space_id,
-          jlong file_space_id, jlong xfer_plist_id, jobjectArray buf)
-{
-    herr_t  status = -1;
-    htri_t  isStr = 0;
-    htri_t  isVlenStr = 0;
-    htri_t  isComplex = 0;
-
-    if (buf == NULL) {
-        h5nullArgument(env, "H5DreadVL:  buf is NULL");
-    } /* end if */
-    else {
-        isStr = H5Tdetect_class((hid_t)mem_type_id, H5T_STRING);
-        if (H5Tget_class((hid_t)mem_type_id) == H5T_COMPOUND) {
-            unsigned i;
-            int nm = H5Tget_nmembers(mem_type_id);
-            for(i = 0; i <nm; i++) {
-                hid_t nested_tid = H5Tget_member_type((hid_t)mem_type_id, i);
-                isComplex = H5Tdetect_class((hid_t)nested_tid, H5T_COMPOUND) ||
-                            H5Tdetect_class((hid_t)nested_tid, H5T_VLEN);
-                H5Tclose(nested_tid);
-            }
-        }
-        else if (H5Tget_class((hid_t)mem_type_id) == H5T_VLEN) {
-            isVlenStr = 1; /* strings created by H5Tvlen_create( H5T_C_S1) */
-        }
-        if (isStr == 0 || isComplex>0 || isVlenStr) {
-            status = H5DreadVL_asstr(env, (hid_t)dataset_id, (hid_t)mem_type_id,
-                                        (hid_t)mem_space_id, (hid_t)file_space_id,
-                                        (hid_t)xfer_plist_id, buf);
-        }
-        else if (isStr > 0) {
-            status = H5DreadVL_str(env, (hid_t)dataset_id, (hid_t)mem_type_id,
-                                        (hid_t)mem_space_id, (hid_t)file_space_id,
-                                        (hid_t)xfer_plist_id, buf);
-        }
-    } /* end else */
-
-    return (jint)status;
-} /* end Java_hdf_hdf5lib_H5_H5Dread_1VL */
-
-herr_t
-H5DreadVL_asstr
-    (JNIEnv *env, hid_t did, hid_t tid, hid_t mem_sid, hid_t file_sid, hid_t xfer_plist_id, jobjectArray buf)
-{
-    jint    i;
-    jint    n;
-    jstring jstr;
-    h5str_t h5str;
-    hvl_t  *rdata;
-    size_t  size;
-    size_t  max_len = 0;
-    herr_t  status = -1;
-
-    /* Get size of string array */
-    n = ENVPTR->GetArrayLength(ENVPAR buf);
-    /* we will need to read n number of hvl_t structures */
-    rdata = (hvl_t*)HDcalloc((size_t)n, sizeof(hvl_t));
-    if (rdata == NULL) {
-        h5JNIFatalError(env, "H5DreadVL_notstr:  failed to allocate buff for read");
-    } /* end if */
-    else {
-        status = H5Dread(did, tid, mem_sid, file_sid, xfer_plist_id, rdata);
-
-        if (status < 0) {
-            H5Dvlen_reclaim(tid, mem_sid, xfer_plist_id, rdata);
-            HDfree(rdata);
-            h5JNIFatalError(env, "H5DreadVL_notstr: failed to read data");
-        } /* end if */
-        else {
-            /* calculate the largest size of all the hvl_t structures read */
-            max_len = 1;
-            for (i=0; i < n; i++) {
-                if ((rdata + i)->len > max_len)
-                    max_len = (rdata + i)->len;
-            }
-
-            /* create one malloc to hold largest element */
-            size = H5Tget_size(tid) * max_len;
-            HDmemset(&h5str, 0, sizeof(h5str_t));
-            h5str_new(&h5str, 4 * size);
-
-            if (h5str.s == NULL) {
-                H5Dvlen_reclaim(tid, mem_sid, xfer_plist_id, rdata);
-                HDfree(rdata);
-                h5JNIFatalError(env, "H5DreadVL_notstr:  failed to allocate buf");
-            } /* end if */
-            else {
-                H5T_class_t tclass = H5Tget_class(tid);
-                /* convert each element to char string */
-                for (i=0; i < n; i++) {
-                    h5str.s[0] = '\0';
-                    h5str_vlsprintf(&h5str, did, tid, rdata+i, 0);
-                    jstr = ENVPTR->NewStringUTF(ENVPAR h5str.s);
-                    ENVPTR->SetObjectArrayElement(ENVPAR buf, i, jstr);
-                } /* end for */
-                h5str_free(&h5str);
-
-                H5Dvlen_reclaim(tid, mem_sid, xfer_plist_id, rdata);
-                HDfree(rdata);
-            } /* end else */
-        } /* end else */
-    } /* end else */
-
-    return status;
-}
-
-/*
- * Class:     hdf_hdf5lib_H5
  * Method:    H5Dread_string
  * Signature: (JJJJJ[Ljava/lang/String;)I
  */
@@ -1241,6 +1127,120 @@ Java_hdf_hdf5lib_H5_H5Dwrite_1string
 
     return (jint)status;
 } /* end Java_hdf_hdf5lib_H5_H5Dwrite_1string */
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5DreadVL
+ * Signature: (JJJJJ[Ljava/lang/String;)I
+ */
+JNIEXPORT jint JNICALL
+Java_hdf_hdf5lib_H5_H5DreadVL
+    (JNIEnv *env, jclass clss, jlong dataset_id, jlong mem_type_id, jlong mem_space_id,
+          jlong file_space_id, jlong xfer_plist_id, jobjectArray buf)
+{
+    herr_t  status = -1;
+    htri_t  isStr = 0;
+    htri_t  isVlenStr = 0;
+    htri_t  isComplex = 0;
+
+    if (buf == NULL) {
+        h5nullArgument(env, "H5DreadVL:  buf is NULL");
+    } /* end if */
+    else {
+        isStr = H5Tdetect_class((hid_t)mem_type_id, H5T_STRING);
+        if (H5Tget_class((hid_t)mem_type_id) == H5T_COMPOUND) {
+            unsigned i;
+            int nm = H5Tget_nmembers(mem_type_id);
+            for(i = 0; i <nm; i++) {
+                hid_t nested_tid = H5Tget_member_type((hid_t)mem_type_id, i);
+                isComplex = H5Tdetect_class((hid_t)nested_tid, H5T_COMPOUND) ||
+                            H5Tdetect_class((hid_t)nested_tid, H5T_VLEN);
+                H5Tclose(nested_tid);
+            }
+        }
+        else if (H5Tget_class((hid_t)mem_type_id) == H5T_VLEN) {
+            isVlenStr = 1; /* strings created by H5Tvlen_create(H5T_C_S1) */
+        }
+        if (isStr == 0 || isComplex>0 || isVlenStr) {
+            status = H5DreadVL_asstr(env, (hid_t)dataset_id, (hid_t)mem_type_id,
+                                        (hid_t)mem_space_id, (hid_t)file_space_id,
+                                        (hid_t)xfer_plist_id, buf);
+        }
+        else if (isStr > 0) {
+            status = H5DreadVL_str(env, (hid_t)dataset_id, (hid_t)mem_type_id,
+                                        (hid_t)mem_space_id, (hid_t)file_space_id,
+                                        (hid_t)xfer_plist_id, buf);
+        }
+    } /* end else */
+
+    return (jint)status;
+} /* end Java_hdf_hdf5lib_H5_H5Dread_1VL */
+
+herr_t
+H5DreadVL_asstr
+    (JNIEnv *env, hid_t did, hid_t tid, hid_t mem_sid, hid_t file_sid, hid_t xfer_plist_id, jobjectArray buf)
+{
+    jint    i;
+    jint    n;
+    jstring jstr;
+    h5str_t h5str;
+    hvl_t  *rdata;
+    size_t  size;
+    size_t  max_len = 0;
+    herr_t  status = -1;
+
+    /* Get size of string array */
+    n = ENVPTR->GetArrayLength(ENVPAR buf);
+    /* we will need to read n number of hvl_t structures */
+    rdata = (hvl_t*)HDcalloc((size_t)n, sizeof(hvl_t));
+    if (rdata == NULL) {
+        h5JNIFatalError(env, "H5DreadVL_notstr:  failed to allocate buff for read");
+    } /* end if */
+    else {
+        status = H5Dread(did, tid, mem_sid, file_sid, xfer_plist_id, rdata);
+
+        if (status < 0) {
+            H5Dvlen_reclaim(tid, mem_sid, xfer_plist_id, rdata);
+            HDfree(rdata);
+            h5JNIFatalError(env, "H5DreadVL_notstr: failed to read data");
+        } /* end if */
+        else {
+            /* calculate the largest size of all the hvl_t structures read */
+            max_len = 1;
+            for (i=0; i < n; i++) {
+                if ((rdata + i)->len > max_len)
+                    max_len = (rdata + i)->len;
+            }
+
+            /* create one malloc to hold largest element */
+            size = H5Tget_size(tid) * max_len;
+            HDmemset(&h5str, 0, sizeof(h5str_t));
+            h5str_new(&h5str, 4 * size);
+
+            if (h5str.s == NULL) {
+                H5Dvlen_reclaim(tid, mem_sid, xfer_plist_id, rdata);
+                HDfree(rdata);
+                h5JNIFatalError(env, "H5DreadVL_notstr:  failed to allocate buf");
+            } /* end if */
+            else {
+                H5T_class_t tclass = H5Tget_class(tid);
+                /* convert each element to char string */
+                for (i=0; i < n; i++) {
+                    h5str.s[0] = '\0';
+                    h5str_vlsprintf(&h5str, did, tid, rdata+i, 0);
+                    jstr = ENVPTR->NewStringUTF(ENVPAR h5str.s);
+                    ENVPTR->SetObjectArrayElement(ENVPAR buf, i, jstr);
+                } /* end for */
+                h5str_free(&h5str);
+
+                H5Dvlen_reclaim(tid, mem_sid, xfer_plist_id, rdata);
+                HDfree(rdata);
+            } /* end else */
+        } /* end else */
+    } /* end else */
+
+    return status;
+}
 
 /**
  *  Read VLEN data into array of arrays.
