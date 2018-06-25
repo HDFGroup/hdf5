@@ -211,7 +211,7 @@ h5str_vlsprintf
                 offset = H5Tget_member_offset(tid, i);
                 mtid = H5Tget_member_type(tid, i);
                 h5str_sprintf(str, container, mtid, ((char *) (ptr->p)) + offset, ptr->len, expand_data);
-                if (i < n - 1)
+                if ((i + 1) < n)
                     h5str_append(str, ", ");
                 H5Tclose(mtid);
             }
@@ -428,7 +428,7 @@ h5str_sprintf
             offset = H5Tget_member_offset(tid, i);
             mtid = H5Tget_member_type(tid, i);
             h5str_sprintf(str, container, mtid, cptr + offset, ptr_len, expand_data);
-            if (i < n - 1)
+            if ((i + 1) < n)
                 h5str_append(str, ", ");
             H5Tclose(mtid);
         }
@@ -545,7 +545,7 @@ h5str_sprintf
 
         for (i = 0; i < total_elmts; i++) {
             h5str_sprintf(str, container, mtid, cptr + i * size, ptr_len, expand_data);
-            if (i < total_elmts - 1)
+            if ((i + 1) < total_elmts)
                 h5str_append(str, ", ");
         }
         H5Tclose(mtid);
@@ -561,7 +561,7 @@ h5str_sprintf
             h5str_append(str, "{");
             for (i = 0; i < (int)ptr_len; i++) {
                 h5str_sprintf(str, container, mtid, cptr + i * size, ptr_len, expand_data);
-                if (i < (int)ptr_len - 1)
+                if ((i + 1) < (int)ptr_len)
                     h5str_append(str, ", ");
             }
             H5Tclose(mtid);
