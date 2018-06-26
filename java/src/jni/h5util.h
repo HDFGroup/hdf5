@@ -48,24 +48,6 @@ extern int     h5str_dump_region_points_data(h5str_t *str, hid_t region, hid_t r
 
 /*
  * Class:     hdf_hdf5lib_H5
- * Method:    H5AwriteVL
- * Signature: (JJ[Ljava/lang/String;)I
- */
-JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5AwriteVL
-  (JNIEnv *, jclass, jlong, jlong, jobjectArray);
-
-/*
- * Class:     hdf_hdf5lib_H5
- * Method:    H5AreadVL
- * Signature: (JJ[Ljava/lang/String;)I
- */
-JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5AreadVL
-  (JNIEnv *, jclass, jlong, jlong, jobjectArray);
-
-/*
- * Class:     hdf_hdf5lib_H5
  * Method:    H5AreadComplex
  * Signature: (JJ[Ljava/lang/String;)I
  */
