@@ -623,6 +623,7 @@ public class HDF5Constants {
     public static final long H5T_UNIX_D64LE = H5T_UNIX_D64LE();
     public static final long H5T_VARIABLE = H5T_VARIABLE();
     public static final int H5T_VLEN = H5T_VLEN();
+    public static final int H5T_VL_T = H5T_VL_T();
     public static final int H5Z_CB_CONT = H5Z_CB_CONT();
     public static final int H5Z_CB_ERROR = H5Z_CB_ERROR();
     public static final int H5Z_CB_FAIL = H5Z_CB_FAIL();
@@ -1824,6 +1825,8 @@ public class HDF5Constants {
     private static native final long H5T_VARIABLE();
 
     private static native final int H5T_VLEN();
+
+    private static native final int H5T_VL_T();
 
     private static native final int H5Z_CB_CONT();
 
