@@ -159,6 +159,428 @@ h5str_append
  On error, a negative number is returned.
  */
 size_t
+h5str_vlconvert
+    (char *str, hid_t container, hid_t tid, hvl_t *ptr, int expand_data)
+{
+    unsigned char   tmp_uchar = 0;
+    char            tmp_char = 0;
+    unsigned short  tmp_ushort = 0;
+    short           tmp_short = 0;
+    unsigned int    tmp_uint = 0;
+    int             tmp_int = 0;
+    unsigned long   tmp_ulong = 0;
+    long            tmp_long = 0;
+    unsigned long long tmp_ullong = 0;
+    long long       tmp_llong = 0;
+    float           tmp_float = 0.0;
+    double          tmp_double = 0.0;
+    long double     tmp_ldouble = 0.0;
+    static char     fmt_llong[8], fmt_ullong[8];
+
+    hid_t           mtid = -1;
+    size_t          offset;
+    size_t          nll;
+    char           *this_str;
+    size_t          this_strlen;
+    int             n;
+    H5T_class_t     tclass = H5Tget_class(tid);
+    size_t          size = H5Tget_size(tid);
+    H5T_sign_t      nsign = H5Tget_sign(tid);
+    int bdata_print = 0;
+
+    if (!str || !ptr)
+        return 0;
+
+    this_str = NULL;
+    this_strlen = 0;
+
+    switch (tclass) {
+    case H5T_COMPOUND:
+        {
+            unsigned i;
+            n = H5Tget_nmembers(tid);
+
+            /* remove compound indicators */
+            if (str[0] == ' ')
+                str++;
+            if (str[0] == '{')
+                str++;
+
+            ptr->p = HDcalloc((size_t)1, size);
+            ptr->len = size;
+            for (i = 0; i < n; i++) {
+                offset = H5Tget_member_offset(tid, i);
+                mtid = H5Tget_member_type(tid, i);
+                str += offset;
+                h5str_convert(&str, container, mtid, ptr, 0, expand_data);
+                /* remove compound indicators */
+                if (str[0] == ',')
+                    str++;
+                if (str[0] == ' ')
+                    str++;
+                H5Tclose(mtid);
+            }
+            /* remove compound indicators */
+            if (str[0] == '}')
+                str++;
+            if (str[0] == ' ')
+                str++;
+        }
+        break;
+    case H5T_ARRAY:
+        {
+            int rank = 0;
+            hsize_t i, dims[H5S_MAX_RANK], total_elmts;
+
+            /* remove array indicators */
+            if (str[0] == '[')
+                str++;
+            if (str[0] == ' ')
+                str++;
+
+            mtid = H5Tget_super(tid);
+            size = H5Tget_size(mtid);
+            rank = H5Tget_array_ndims(tid);
+
+            H5Tget_array_dims2(tid, dims);
+
+            total_elmts = 1;
+            for (i = 0; i < rank; i++)
+                total_elmts *= dims[i];
+
+            ptr->p = HDcalloc((size_t)total_elmts, size);
+            ptr->len = total_elmts;
+            h5str_convert(&str, container, mtid, ptr, 0, expand_data);
+            H5Tclose(mtid);
+            /* remove array indicators */
+            if (str[0] == ' ')
+                str++;
+            if (str[0] == ']')
+                str++;
+            if (str[0] == ' ')
+                str++;
+        }
+        break;
+    default:
+        ptr->len = size;
+        ptr->p = HDcalloc(1, size);
+        this_strlen = h5str_convert(&str, container, tid, ptr, 0, expand_data);
+        break;
+    } /* end switch */
+
+    return this_strlen;
+} /* end h5str_vlconvert */
+
+/** print value of a data point into string.
+ Return Value:
+ On success, the total number of characters printed is returned.
+ On error, a negative number is returned.
+ */
+size_t
+h5str_convert
+    (char **str, hid_t container, hid_t tid, hvl_t *ptr, int ptroffset, int expand_data)
+{
+    unsigned char   tmp_uchar = 0;
+    char            tmp_char = 0;
+    unsigned short  tmp_ushort = 0;
+    short           tmp_short = 0;
+    unsigned int    tmp_uint = 0;
+    int             tmp_int = 0;
+    unsigned long   tmp_ulong = 0;
+    long            tmp_long = 0;
+    unsigned long long tmp_ullong = 0;
+    long long       tmp_llong = 0;
+    float           tmp_float = 0.0;
+    double          tmp_double = 0.0;
+    long double     tmp_ldouble = 0.0;
+    static char     fmt_llong[8], fmt_ullong[8];
+    const char      delimiter[] = " ,}]";
+
+    char           *token;
+    hid_t           mtid = -1;
+    size_t          offset;
+    size_t          nll;
+    char           *this_str = *str;
+    size_t          this_strlen;
+    int             n;
+    char           *cptr = (char*) ((ptr->p) + ptroffset);
+    unsigned char  *ucptr = (unsigned char*) ((ptr->p) + ptroffset);
+    H5T_class_t     tclass = H5Tget_class(tid);
+    size_t          size = H5Tget_size(tid);
+    H5T_sign_t      nsign = H5Tget_sign(tid);
+    int bdata_print = 0;
+
+    if (!str || !ptr)
+        return 0;
+
+    /* Build default formats for long long types */
+    if (!fmt_llong[0]) {
+        sprintf(fmt_llong, "%%%sd", H5_PRINTF_LL_WIDTH);
+        sprintf(fmt_ullong, "%%%su", H5_PRINTF_LL_WIDTH);
+    } /* end if */
+
+    this_strlen = HDstrlen(this_str);
+
+    switch (tclass) {
+    case H5T_FLOAT:
+        if (sizeof(float) == size) {
+            /* if (H5Tequal(tid, H5T_NATIVE_FLOAT)) */
+            token = HDstrtok (this_str, delimiter);
+            tmp_float = 0;
+            sscanf(token, "%f", &tmp_float);
+            HDmemcpy(cptr, &tmp_float, sizeof(float));
+        }
+        else if (sizeof(double) == size) {
+            /* if (H5Tequal(tid, H5T_NATIVE_DOUBLE)) */
+            token = HDstrtok (this_str, delimiter);
+            tmp_double = 0;
+            sscanf(token, "%%lf", &tmp_double);
+            HDmemcpy(cptr, &tmp_double, sizeof(double));
+        }
+#if H5_SIZEOF_LONG_DOUBLE !=0
+        else if (sizeof(long double) == size) {
+            /* if (H5Tequal(tid, H5T_NATIVE_LDOUBLE)) */
+            token = HDstrtok (this_str, delimiter);
+            tmp_ldouble = 0;
+            sscanf(token, "%Lf", &tmp_ldouble);
+            HDmemcpy(cptr, &tmp_ldouble, sizeof(long double));
+        }
+#endif
+        break;
+    case H5T_STRING:
+    {
+        if (this_strlen > 0) {
+            HDstrncpy(cptr, this_str, size);
+        }
+        else {
+            cptr = NULL;
+        }
+    }
+    break;
+    case H5T_INTEGER:
+        if (sizeof(char) == size) {
+            if(H5T_SGN_NONE == nsign) {
+                /* if (H5Tequal(tid, H5T_NATIVE_UCHAR)) */
+                token = HDstrtok (this_str, delimiter);
+                tmp_uchar = 0;
+                sscanf(token, "%hu", &tmp_uchar);
+                HDmemcpy(cptr, &tmp_uchar, sizeof(unsigned char));
+            }
+            else {
+                /* if (H5Tequal(tid, H5T_NATIVE_SCHAR)) */
+                token = HDstrtok (this_str, delimiter);
+                tmp_char = 0;
+                sscanf(token, "%hd", &tmp_char);
+                HDmemcpy(cptr, &tmp_char, sizeof(char));
+            }
+        }
+        else if (sizeof(int) == size) {
+            if(H5T_SGN_NONE == nsign) {
+                /* if (H5Tequal(tid, H5T_NATIVE_UINT)) */
+                token = HDstrtok (this_str, delimiter);
+                tmp_uint = 0;
+                sscanf(token, "%u", &tmp_uint);
+                HDmemcpy(cptr, &tmp_uint, sizeof(unsigned int));
+            }
+            else {
+                /* if (H5Tequal(tid, H5T_NATIVE_INT)) */
+                token = HDstrtok (this_str, delimiter);
+                tmp_int = 0;
+                sscanf(token, "%d", &tmp_int);
+                HDmemcpy(cptr, &tmp_int, sizeof(int));
+            }
+        }
+        else if (sizeof(short) == size) {
+            if(H5T_SGN_NONE == nsign) {
+                /* if (H5Tequal(tid, H5T_NATIVE_USHORT)) */
+                token = HDstrtok (this_str, delimiter);
+                tmp_ushort = 0;
+                sscanf(token, "%u", &tmp_ushort);
+                HDmemcpy(&tmp_ushort, cptr, sizeof(unsigned short));
+            }
+            else {
+                /* if (H5Tequal(tid, H5T_NATIVE_SHORT)) */
+                token = HDstrtok (this_str, delimiter);
+                tmp_short = 0;
+                sscanf(token, "%d", &tmp_short);
+                HDmemcpy(&tmp_short, cptr, sizeof(short));
+            }
+        }
+        else if (sizeof(long) == size) {
+            if(H5T_SGN_NONE == nsign) {
+                /* if (H5Tequal(tid, H5T_NATIVE_ULONG)) */
+                token = HDstrtok (this_str, delimiter);
+                tmp_ulong = 0;
+                sscanf(token, "%lu", &tmp_ulong);
+                HDmemcpy(cptr, &tmp_ulong, sizeof(unsigned long));
+            }
+            else {
+                /* if (H5Tequal(tid, H5T_NATIVE_LONG)) */
+                token = HDstrtok (this_str, delimiter);
+                tmp_long = 0;
+                sscanf(token, "%ld", &tmp_long);
+                HDmemcpy(cptr, &tmp_long, sizeof(long));
+            }
+        }
+        else if (sizeof(long long) == size) {
+            if(H5T_SGN_NONE == nsign) {
+                /* if (H5Tequal(tid, H5T_NATIVE_ULLONG)) */
+                token = HDstrtok (this_str, delimiter);
+                tmp_ullong = 0;
+                sscanf(token, fmt_ullong, &tmp_ullong);
+                HDmemcpy(cptr, &tmp_ullong, sizeof(unsigned long long));
+            }
+            else {
+                /* if (H5Tequal(tid, H5T_NATIVE_LLONG)) */
+                token = HDstrtok (this_str, delimiter);
+                tmp_llong = 0;
+                sscanf(token, fmt_llong, &tmp_llong);
+                HDmemcpy(cptr, &tmp_llong, sizeof(long long));
+            }
+        }
+        break;
+    case H5T_COMPOUND:
+    {
+        unsigned i;
+        n = H5Tget_nmembers(tid);
+        /* remove compound indicators */
+        if (str[0] == ' ')
+            str++;
+        if (str[0] == '{')
+            str++;
+
+        for (i = 0; i < n; i++) {
+            offset = H5Tget_member_offset(tid, i);
+            mtid = H5Tget_member_type(tid, i);
+            h5str_convert(str, container, mtid, ptr, offset, expand_data);
+            /* remove compound indicators */
+            if (str[0] == ',')
+                str++;
+            if (str[0] == ' ')
+                str++;
+            H5Tclose(mtid);
+        }
+        /* remove compound indicators */
+        if (str[0] == '}')
+            str++;
+        if (str[0] == ' ')
+            str++;
+    }
+    break;
+    case H5T_ENUM:
+    {
+        char enum_name[1024];
+        void *value;
+        if (sizeof(char) == size) {
+            tmp_uchar = 0;
+            value = &tmp_uchar;
+        }
+        else if (sizeof(short) == size) {
+            tmp_ushort = 0;
+            value = &tmp_ushort;
+        }
+        else if (sizeof(long) == size) {
+            tmp_ulong = 0;
+            value = &tmp_ulong;
+        }
+        else if (sizeof(long long) == size) {
+            tmp_ullong = 0;
+            value = &tmp_ullong;
+        }
+        else {
+            tmp_uint = 0;
+            value = &tmp_uint;
+        }
+        token = HDstrtok (this_str, delimiter);
+        H5Tenum_valueof(tid, token, value);
+        HDmemcpy(ucptr, value, size);
+    }
+    break;
+    case H5T_REFERENCE:
+        /* TODO handle reference writing */
+        cptr = NULL;
+        break;
+    case H5T_ARRAY:
+    {
+        int rank = 0;
+        hsize_t i, dims[H5S_MAX_RANK], total_elmts;
+        /* remove array indicators */
+        if (str[0] == '[')
+            str++;
+        if (str[0] == ' ')
+            str++;
+
+        mtid = H5Tget_super(tid);
+        offset = H5Tget_size(mtid);
+        rank = H5Tget_array_ndims(tid);
+
+        H5Tget_array_dims2(tid, dims);
+
+        total_elmts = 1;
+        for (i = 0; i < rank; i++)
+            total_elmts *= dims[i];
+
+        cptr = HDcalloc((size_t)total_elmts, offset);
+        for (i = 0; i < total_elmts; i++) {
+            h5str_convert(str, container, mtid, cptr + (i*offset), offset, expand_data);
+            /* remove array indicators */
+            if (str[0] == ',')
+                str++;
+            if (str[0] == ' ')
+                str++;
+        }
+        H5Tclose(mtid);
+        /* remove array indicators */
+        if (str[0] == ' ')
+            str++;
+        if (str[0] == ']')
+            str++;
+        if (str[0] == ' ')
+            str++;
+    }
+    break;
+    case H5T_VLEN:
+        {
+            unsigned int i;
+            mtid = H5Tget_super(tid);
+            offset = H5Tget_size(mtid);
+
+            /* remove vlen indicators */
+            if (str[0] == '{')
+                str++;
+            cptr = HDcalloc(offset, sizeof(hvl_t));
+            for (i = 0; (i*offset) < (int)size; i++) {
+                h5str_sprintf(str, container, mtid, cptr + (i*offset), offset, expand_data);
+                /* remove vlen indicators */
+                if (str[0] == ',')
+                    str++;
+                if (str[0] == ' ')
+                    str++;
+            }
+            H5Tclose(mtid);
+            /* remove vlen indicators */
+            if (str[0] == '}')
+                str++;
+        }
+        break;
+
+    default:
+    {
+        /* All other types get copied raw */
+        HDmemcpy(ucptr, this_str, size);
+    }
+    break;
+    } /* end switch */
+
+    return this_strlen;
+} /* end h5str_convert */
+
+/** print value of a vlen data point into string.
+ Return Value:
+ On success, the total number of characters printed is returned.
+ On error, a negative number is returned.
+ */
+size_t
 h5str_vlsprintf
     (h5str_t *str, hid_t container, hid_t tid, hvl_t *ptr, int expand_data)
 {

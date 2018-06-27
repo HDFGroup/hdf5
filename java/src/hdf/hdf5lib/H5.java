@@ -1752,14 +1752,8 @@ public class H5 implements java.io.Serializable {
                     (String[]) obj);
         }
         else if (is1D && (dataClass.getComponentType() == String.class)) {
-            log.trace("H5Dread_string type");
-            if (H5.H5Tis_variable_str(mem_type_id)) {
-                status = H5Dread_VLStrings(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id, (Object[]) obj);
-            }
-            else {
-                status = H5Dread_string(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id,
-                        (String[]) obj);
-            }
+            log.trace("H5DreadVL type");
+            status = H5DreadVL(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id, (Object[]) obj);
         }
         else {
             // Create a data buffer to hold the data into a Java Array
@@ -1979,7 +1973,7 @@ public class H5 implements java.io.Serializable {
 
         Class dataClass = obj.getClass();
         if (!dataClass.isArray()) {
-            throw (new HDF5JavaException("H5Dread: data is not an array"));
+            throw (new HDF5JavaException("H5Dwrite: data is not an array"));
         }
 
         String cname = dataClass.getName();
@@ -2011,14 +2005,8 @@ public class H5 implements java.io.Serializable {
                     (double[]) obj, isCriticalPinning);
         }
         else if (is1D && (dataClass.getComponentType() == String.class)) {
-            log.trace("H5Dwrite_string type");
-            if (H5.H5Tis_variable_str(mem_type_id)) {
-                status = H5Dwrite_VLStrings(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id, (Object[]) obj);
-            }
-            else {
-                status = H5Dwrite_string(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id,
-                        (String[]) obj);
-            }
+            log.trace("H5DwriteVL type");
+            status = H5DwriteVL(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id, (Object[]) obj);
         }
         else {
             HDFArray theArray = new HDFArray(obj);
@@ -2083,6 +2071,9 @@ public class H5 implements java.io.Serializable {
 
     public synchronized static native int H5Dwrite_string(long dataset_id, long mem_type_id, long mem_space_id,
             long file_space_id, long xfer_plist_id, String[] buf) throws HDF5LibraryException, NullPointerException;
+
+    public synchronized static native int H5DwriteVL(long dataset_id, long mem_type_id, long mem_space_id,
+            long file_space_id, long xfer_plist_id, Object[] buf) throws HDF5LibraryException, NullPointerException;
 
     /**
      * H5Dwrite_VLStrings writes a (partial) variable length String dataset, specified by its identifier dataset_id, from
