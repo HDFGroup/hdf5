@@ -2006,8 +2006,9 @@ public class H5 implements java.io.Serializable {
                     (double[]) obj, isCriticalPinning);
         }
         else if (is1D && (dataClass.getComponentType() == String.class)) {
-            log.trace("H5DwriteVL type");
-            status = H5DwriteVL(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id, (Object[]) obj);
+            log.trace("H5Dwrite_string type");
+            status = H5Dwrite_string(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id,
+                        (String[]) obj);
         }
         else {
             HDFArray theArray = new HDFArray(obj);
