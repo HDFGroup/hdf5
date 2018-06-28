@@ -550,7 +550,7 @@ h5str_convert
                 str++;
             cptr = HDcalloc(offset, sizeof(hvl_t));
             for (i = 0; (i*offset) < (int)size; i++) {
-                h5str_sprintf(str, container, mtid, cptr + (i*offset), offset, expand_data);
+                h5str_convert(str, container, mtid, cptr + (i*offset), offset, expand_data);
                 /* remove vlen indicators */
                 if (str[0] == ',')
                     str++;
