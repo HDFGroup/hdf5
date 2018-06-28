@@ -303,8 +303,8 @@ h5str_convert
     char           *this_str = *str;
     size_t          this_strlen;
     int             n;
-    char           *cptr = (char*) (((hvl_t *) ptr)->p) + ptroffset);
-    unsigned char  *ucptr = (unsigned char*) (((hvl_t *) ptr)->p) + ptroffset);
+    char           *cptr = ((char*) ((hvl_t *) ptr)->p) + ptroffset;
+    unsigned char  *ucptr = ((unsigned char*) ((hvl_t *) ptr)->p) + ptroffset;
     H5T_class_t     tclass = H5Tget_class(tid);
     size_t          size = H5Tget_size(tid);
     H5T_sign_t      nsign = H5Tget_sign(tid);
