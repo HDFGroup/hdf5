@@ -1746,14 +1746,15 @@ public class H5 implements java.io.Serializable {
             status = H5Dread_double(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id,
                     (double[]) obj, isCriticalPinning);
         }
-        else if (H5.H5Tequal(mem_type_id, HDF5Constants.H5T_STD_REF_DSETREG)) {
+        else if ((H5.H5Tdetect_class(mem_type_id, HDF5Constants.H5T_REFERENCE) && (is1D && (dataClass.getComponentType() == String.class))) || H5.H5Tequal(mem_type_id, HDF5Constants.H5T_STD_REF_DSETREG)) {
             log.trace("H5Dread_reg_ref");
             status = H5Dread_reg_ref(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id,
                     (String[]) obj);
         }
         else if (is1D && (dataClass.getComponentType() == String.class)) {
-            log.trace("H5DreadVL type");
-            status = H5DreadVL(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id, (Object[]) obj);
+            log.trace("H5Dread_string type");
+            status = H5Dread_string(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id,
+                        (String[]) obj);
         }
         else {
             // Create a data buffer to hold the data into a Java Array
