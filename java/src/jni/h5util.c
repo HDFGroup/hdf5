@@ -323,16 +323,15 @@ h5str_convert
 
     switch (tclass) {
     case H5T_FLOAT:
+        token = HDstrtok (this_str, delimiter);
         if (sizeof(float) == size) {
             /* if (H5Tequal(tid, H5T_NATIVE_FLOAT)) */
-            token = HDstrtok (this_str, delimiter);
             tmp_float = 0;
             sscanf(token, "%f", &tmp_float);
             HDmemcpy(cptr, &tmp_float, sizeof(float));
         }
         else if (sizeof(double) == size) {
             /* if (H5Tequal(tid, H5T_NATIVE_DOUBLE)) */
-            token = HDstrtok (this_str, delimiter);
             tmp_double = 0;
             sscanf(token, "%%lf", &tmp_double);
             HDmemcpy(cptr, &tmp_double, sizeof(double));
@@ -340,7 +339,6 @@ h5str_convert
 #if H5_SIZEOF_LONG_DOUBLE !=0
         else if (sizeof(long double) == size) {
             /* if (H5Tequal(tid, H5T_NATIVE_LDOUBLE)) */
-            token = HDstrtok (this_str, delimiter);
             tmp_ldouble = 0;
             sscanf(token, "%Lf", &tmp_ldouble);
             HDmemcpy(cptr, &tmp_ldouble, sizeof(long double));
@@ -358,17 +356,16 @@ h5str_convert
     }
     break;
     case H5T_INTEGER:
+        token = HDstrtok (this_str, delimiter);
         if (sizeof(char) == size) {
             if(H5T_SGN_NONE == nsign) {
                 /* if (H5Tequal(tid, H5T_NATIVE_UCHAR)) */
-                token = HDstrtok (this_str, delimiter);
                 tmp_uchar = 0;
                 sscanf(token, "%hu", &tmp_uchar);
                 HDmemcpy(cptr, &tmp_uchar, sizeof(unsigned char));
             }
             else {
                 /* if (H5Tequal(tid, H5T_NATIVE_SCHAR)) */
-                token = HDstrtok (this_str, delimiter);
                 tmp_char = 0;
                 sscanf(token, "%hd", &tmp_char);
                 HDmemcpy(cptr, &tmp_char, sizeof(char));
@@ -377,14 +374,12 @@ h5str_convert
         else if (sizeof(int) == size) {
             if(H5T_SGN_NONE == nsign) {
                 /* if (H5Tequal(tid, H5T_NATIVE_UINT)) */
-                token = HDstrtok (this_str, delimiter);
                 tmp_uint = 0;
                 sscanf(token, "%u", &tmp_uint);
                 HDmemcpy(cptr, &tmp_uint, sizeof(unsigned int));
             }
             else {
                 /* if (H5Tequal(tid, H5T_NATIVE_INT)) */
-                token = HDstrtok (this_str, delimiter);
                 tmp_int = 0;
                 sscanf(token, "%d", &tmp_int);
                 HDmemcpy(cptr, &tmp_int, sizeof(int));
@@ -393,14 +388,12 @@ h5str_convert
         else if (sizeof(short) == size) {
             if(H5T_SGN_NONE == nsign) {
                 /* if (H5Tequal(tid, H5T_NATIVE_USHORT)) */
-                token = HDstrtok (this_str, delimiter);
                 tmp_ushort = 0;
                 sscanf(token, "%u", &tmp_ushort);
                 HDmemcpy(&tmp_ushort, cptr, sizeof(unsigned short));
             }
             else {
                 /* if (H5Tequal(tid, H5T_NATIVE_SHORT)) */
-                token = HDstrtok (this_str, delimiter);
                 tmp_short = 0;
                 sscanf(token, "%d", &tmp_short);
                 HDmemcpy(&tmp_short, cptr, sizeof(short));
@@ -409,14 +402,12 @@ h5str_convert
         else if (sizeof(long) == size) {
             if(H5T_SGN_NONE == nsign) {
                 /* if (H5Tequal(tid, H5T_NATIVE_ULONG)) */
-                token = HDstrtok (this_str, delimiter);
                 tmp_ulong = 0;
                 sscanf(token, "%lu", &tmp_ulong);
                 HDmemcpy(cptr, &tmp_ulong, sizeof(unsigned long));
             }
             else {
                 /* if (H5Tequal(tid, H5T_NATIVE_LONG)) */
-                token = HDstrtok (this_str, delimiter);
                 tmp_long = 0;
                 sscanf(token, "%ld", &tmp_long);
                 HDmemcpy(cptr, &tmp_long, sizeof(long));
@@ -425,14 +416,12 @@ h5str_convert
         else if (sizeof(long long) == size) {
             if(H5T_SGN_NONE == nsign) {
                 /* if (H5Tequal(tid, H5T_NATIVE_ULLONG)) */
-                token = HDstrtok (this_str, delimiter);
                 tmp_ullong = 0;
                 sscanf(token, fmt_ullong, &tmp_ullong);
                 HDmemcpy(cptr, &tmp_ullong, sizeof(unsigned long long));
             }
             else {
                 /* if (H5Tequal(tid, H5T_NATIVE_LLONG)) */
-                token = HDstrtok (this_str, delimiter);
                 tmp_llong = 0;
                 sscanf(token, fmt_llong, &tmp_llong);
                 HDmemcpy(cptr, &tmp_llong, sizeof(long long));
@@ -444,27 +433,27 @@ h5str_convert
         unsigned i;
         n = H5Tget_nmembers(tid);
         /* remove compound indicators */
-        if (str[0] == ' ')
-            str++;
-        if (str[0] == '{')
-            str++;
+        if ((*str)[0] == ' ')
+            (*str)++;
+        if ((*str)[0] == '{')
+            (*str)++;
 
         for (i = 0; i < n; i++) {
             offset = H5Tget_member_offset(tid, i);
             mtid = H5Tget_member_type(tid, i);
             h5str_convert(str, container, mtid, ptr, offset, expand_data);
             /* remove compound indicators */
-            if (str[0] == ',')
-                str++;
-            if (str[0] == ' ')
-                str++;
+            if ((*str)[0] == ',')
+                (*str)++;
+            if ((*str)[0] == ' ')
+                (*str)++;
             H5Tclose(mtid);
         }
         /* remove compound indicators */
-        if (str[0] == '}')
-            str++;
-        if (str[0] == ' ')
-            str++;
+        if ((*str)[0] == '}')
+            (*str)++;
+        if ((*str)[0] == ' ')
+            (*str)++;
     }
     break;
     case H5T_ENUM:
@@ -505,10 +494,10 @@ h5str_convert
         int rank = 0;
         hsize_t i, dims[H5S_MAX_RANK], total_elmts;
         /* remove array indicators */
-        if (str[0] == '[')
-            str++;
-        if (str[0] == ' ')
-            str++;
+        if ((*str)[0] == '[')
+            (*str)++;
+        if ((*str)[0] == ' ')
+            (*str)++;
 
         mtid = H5Tget_super(tid);
         offset = H5Tget_size(mtid);
@@ -524,19 +513,19 @@ h5str_convert
         for (i = 0; i < total_elmts; i++) {
             h5str_convert(str, container, mtid, cptr + (i*offset), offset, expand_data);
             /* remove array indicators */
-            if (str[0] == ',')
-                str++;
-            if (str[0] == ' ')
-                str++;
+            if ((*str)[0] == ',')
+                (*str)++;
+            if ((*str)[0] == ' ')
+                (*str)++;
         }
         H5Tclose(mtid);
         /* remove array indicators */
-        if (str[0] == ' ')
-            str++;
-        if (str[0] == ']')
-            str++;
-        if (str[0] == ' ')
-            str++;
+        if ((*str)[0] == ' ')
+            (*str)++;
+        if ((*str)[0] == ']')
+            (*str)++;
+        if ((*str)[0] == ' ')
+            (*str)++;
     }
     break;
     case H5T_VLEN:
@@ -546,21 +535,23 @@ h5str_convert
             offset = H5Tget_size(mtid);
 
             /* remove vlen indicators */
-            if (str[0] == '{')
-                str++;
+            if ((*str)[0] == '{')
+                (*str)++;
             cptr = HDcalloc(offset, sizeof(hvl_t));
             for (i = 0; (i*offset) < (int)size; i++) {
                 h5str_convert(str, container, mtid, cptr + (i*offset), offset, expand_data);
                 /* remove vlen indicators */
-                if (str[0] == ',')
-                    str++;
-                if (str[0] == ' ')
-                    str++;
+                if ((*str)[0] == ',')
+                    (*str)++;
+                if ((*str)[0] == ' ')
+                    (*str)++;
+                if ((*str)[0] == '}')
+                    break;
             }
             H5Tclose(mtid);
             /* remove vlen indicators */
-            if (str[0] == '}')
-                str++;
+            if ((*str)[0] == '}')
+                (*str)++;
         }
         break;
 

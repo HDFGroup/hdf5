@@ -1470,7 +1470,7 @@ H5DwriteVL_str
     wdata = (char**)HDmalloc((size_t)size * sizeof (char*));
 
     if (!wdata) {
-        h5JNIFatalError(env, "H5DwriteVL_string:  cannot allocate buffer");
+        h5JNIFatalError(env, "H5DwriteVL_str:  cannot allocate buffer");
     } /* end if */
     else {
         HDmemset(wdata, 0, (size_t)size * sizeof(char*));
