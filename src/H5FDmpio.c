@@ -1134,11 +1134,9 @@ H5FD_mpio_open(const char *name, unsigned flags, hid_t fapl_id,
 
     if (mpi_rank == 0) {
         /* Gather some file info for future comparisons */
-      if (H5FD_mpio_fileinfo_get( name, flags, file ) < 0)
-	  /* FIXME: Should we instead abort here? */
-          fprintf(stderr, "H5FD_mpio_open: Unable to augment the MPIO file struct with additional info\n");
+        if (H5FD_mpio_fileinfo_get( name, flags, file ) < 0)
+            HMPI_GOTO_ERROR(NULL, "H5FD_mpio_fileinfo_get failed", -1)
     }
-
     /* Set return value */
     ret_value=(H5FD_t*)file;
 
@@ -1165,15 +1163,34 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5FD_mpio_cmp
  *
- * Purpose:     Compares two files belonging to this driver using an
- *              arbitrary (but consistent) ordering.
+ * Purpose:     This version of the 'cmp' function is used to compare two
+ *              files which have been created and opened using the MPI-IO
+ *              driver.
+ *              The peculiarity of this is that unlike POSIX io, the
+ *              handle returned from an MPI_File_open operation may be
+ *              an abstract value and not have any relation to an actual
+ *              filestem handle.  The net result is that additional
+ *              filesystem information needs to be gathered to subsequently
+ *              utilize the stronger filesystem based methodology used in
+ *              other HDF5 drivers, e.g. H5FD_sec2_cmp()
+ *              The approach is two fold:
+ *              1.  The MPI communicators used to access parallel files
+ *                  will be compared.
+ *              2.  MPI rank 0 is tasked with collecting the additional
+ *                  POSIX or Windows NTFS information that is subsequently
+ *                  used here for comparison purposes.  The result is
+ *                  then broadcast to the participating MPI ranks to effect
+ *                  a global result.
  *
- * Return:      Success:    A value like strcmp()
- *              Failure:    never fails (arguments were checked by the
- *                          caller).
+ * Return:      An integer value similar to that returned by strcmp()
+
+ *              NOTE: This function can't FAIL.  In those cases where
+ *              where we would normally return FAILURE, e.g. when MPI
+ *              returns an error, we treat these as unequal comparisons.
  *
  * Programmer:  Richard Warren
- *              Borrowed from H5FD_sec2_cmp (Robb Matzke)
+ *              Originally borrowed from H5FD_sec2_cmp (Robb Matzke) and
+ *              modified as described above.
  *
  *-------------------------------------------------------------------------
  */
@@ -1191,13 +1208,13 @@ H5FD_mpio_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
     FUNC_ENTER_NOAPI_NOINIT
 
     if ((mpi_result = MPI_Comm_group(f1->comm, &f1_grp)) != MPI_SUCCESS)
-        HMPI_GOTO_ERROR(FAIL, "MPI_Comm_group(comm1) failed", mpi_result)
+        HMPI_GOTO_ERROR(-1, "MPI_Comm_group(comm1) failed", mpi_result)
 
     if ((mpi_result = MPI_Comm_group(f1->comm, &f2_grp)) != MPI_SUCCESS)
-        HMPI_GOTO_ERROR(FAIL, "MPI_Comm_group(comm2) failed", mpi_result)
+        HMPI_GOTO_ERROR(-1, "MPI_Comm_group(comm2) failed", mpi_result)
 
     if ((mpi_result = MPI_Group_compare(f1_grp,f2_grp,&cmp_value)) != MPI_SUCCESS)
-        HMPI_GOTO_ERROR(FAIL, "MPI_Group_compare failed", mpi_result)
+        HMPI_GOTO_ERROR(-1, "MPI_Group_compare failed", mpi_result)
 
     /*  The group compare return values can be one of the following:
      *   MPI_IDENT(0)     == two groups/communicators are identical
@@ -1211,7 +1228,7 @@ H5FD_mpio_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
      *   MPI_UNEQUAL(3)   == self descriptive (unequal)
      */
     if (cmp_value >= MPI_SIMILAR)
-        HMPI_GOTO_ERROR(FAIL, "MPI Comms are incompatable", cmp_value)
+        HMPI_GOTO_ERROR(-1, "MPI Comms are incompatable", cmp_value)
 
     if (f1->mpi_rank == 0) {
         /* Because MPI file handles may NOT have any relation to
@@ -1250,7 +1267,7 @@ H5FD_mpio_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
         }
     }
     if (MPI_SUCCESS != (mpi_result = MPI_Bcast(&cmp_value, 1, MPI_INT, 0, f1->comm)))
-        HMPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", mpi_result)
+        HMPI_GOTO_ERROR(-1, "MPI_Bcast failed", mpi_result)
 
     ret_value = cmp_value;
 done:
