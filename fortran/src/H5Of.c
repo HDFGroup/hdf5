@@ -248,9 +248,9 @@ h5ovisit_c(hid_t_f *group_id, int_f *index_type, int_f *order, H5O_iterate_t op,
   herr_t func_ret_value; /* H5Linterate return value */
 
   /*
-   * Call H5Ovisit
+   * Call H5Ovisit2
    */
-  func_ret_value = H5Ovisit( (hid_t)*group_id, (H5_index_t)*index_type, (H5_iter_order_t)*order, op, op_data);
+  func_ret_value = H5Ovisit2( (hid_t)*group_id, (H5_index_t)*index_type, (H5_iter_order_t)*order, op, op_data, H5O_INFO_ALL);
 
   ret_value = (int_f)func_ret_value;
 
@@ -330,8 +330,8 @@ h5oget_info_by_name_c (hid_t_f *loc_id, _fcd name, size_t_f *namelen, hid_t_f *l
   /*
    * Call H5Oinfo_by_name function.
    */
-  if(H5Oget_info_by_name((hid_t)*loc_id, c_name,
-			 &Oinfo, (hid_t)*lapl_id) < 0)
+  if(H5Oget_info_by_name2((hid_t)*loc_id, c_name,
+			 &Oinfo, H5O_INFO_ALL, (hid_t)*lapl_id) < 0)
     HGOTO_DONE(FAIL);
 
   ret_value = fill_h5o_info_t_f(Oinfo,object_info);
@@ -385,8 +385,8 @@ h5oget_info_by_idx_c (hid_t_f *loc_id, _fcd  group_name, size_t_f *namelen,
   /*
    * Call H5Oinfo_by_idx function.
    */
-  if(H5Oget_info_by_idx((hid_t)*loc_id, c_group_name, c_index_field, c_order, (hsize_t)*n,
-			 &Oinfo, (hid_t)*lapl_id) < 0)
+  if(H5Oget_info_by_idx2((hid_t)*loc_id, c_group_name, c_index_field, c_order, (hsize_t)*n,
+			 &Oinfo, H5O_INFO_ALL, (hid_t)*lapl_id) < 0)
     HGOTO_DONE(FAIL);
 
   ret_value = fill_h5o_info_t_f(Oinfo,object_info);
@@ -424,7 +424,7 @@ h5oget_info_c (hid_t_f *object_id, H5O_info_t_f *object_info)
   /*
    * Call H5Oinfo_by_name function.
    */
-  if(H5Oget_info((hid_t)*object_id, &Oinfo) < 0)
+  if(H5Oget_info2((hid_t)*object_id, &Oinfo, H5O_INFO_ALL) < 0)
     HGOTO_DONE(FAIL);
 
   ret_value = fill_h5o_info_t_f(Oinfo,object_info);
@@ -532,8 +532,8 @@ h5ovisit_by_name_c(hid_t_f *loc_id,  _fcd object_name, size_t_f *namelen, int_f 
   /*
    * Call H5Ovisit
    */
-  func_ret_value = H5Ovisit_by_name( (hid_t)*loc_id, c_object_name, (H5_index_t)*index_type, (H5_iter_order_t)*order,
-				     op, op_data, (hid_t)*lapl_id);
+  func_ret_value = H5Ovisit_by_name2( (hid_t)*loc_id, c_object_name, (H5_index_t)*index_type, (H5_iter_order_t)*order,
+				     op, op_data, H5O_INFO_ALL, (hid_t)*lapl_id);
   ret_value = (int_f)func_ret_value;
 
  done:

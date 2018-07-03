@@ -81,7 +81,7 @@ add_executable (H5match_types
     ${HDF5_F90_BINARY_DIR}/H5fort_type_defines.h
     ${HDF5_F90_SRC_SOURCE_DIR}/H5match_types.c
 )
-target_include_directories(H5match_types PRIVATE "${HDF5_BINARY_DIR};${HDF5_SRC_DIR};${HDF5_F90_BINARY_DIR}")
+target_include_directories(H5match_types PRIVATE "${HDF5_BINARY_DIR};${HDF5_SRC_DIR};${HDF5_F90_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
 add_custom_command (
     OUTPUT ${HDF5_F90_BINARY_DIR}/static/H5f90i_gen.h
            ${HDF5_F90_BINARY_DIR}/static/H5fortran_types.F90
@@ -137,7 +137,7 @@ set (f90CStub_C_SHHDRS
 
 add_library (${HDF5_F90_C_LIB_TARGET} STATIC ${f90CStub_C_SOURCES} ${f90CStub_C_HDRS})
 target_include_directories(${HDF5_F90_C_LIB_TARGET}
-    PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};${HDF5_F90_BINARY_DIR};${HDF5_F90_BINARY_DIR}/static"
+    PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};${HDF5_F90_BINARY_DIR};${HDF5_F90_BINARY_DIR}/static;$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>"
     INTERFACE "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
 )
 TARGET_C_PROPERTIES (${HDF5_F90_C_LIB_TARGET} STATIC)
@@ -153,7 +153,7 @@ set (install_targets ${HDF5_F90_C_LIB_TARGET})
 if (BUILD_SHARED_LIBS)
   add_library (${HDF5_F90_C_LIBSH_TARGET} SHARED ${f90CStub_C_SOURCES} ${f90CStub_C_SHHDRS})
   target_include_directories(${HDF5_F90_C_LIBSH_TARGET}
-      PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};${HDF5_F90_BINARY_DIR};${HDF5_F90_BINARY_DIR}/shared"
+      PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};${HDF5_F90_BINARY_DIR};${HDF5_F90_BINARY_DIR}/shared;$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>"
       INTERFACE "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
   )
   target_compile_definitions(${HDF5_F90_C_LIBSH_TARGET}
@@ -305,7 +305,6 @@ if (BUILD_SHARED_LIBS)
           "H5_BUILT_AS_DYNAMIC_LIB"
       PRIVATE
           $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:BUILD_HDF5_DLL;HDF5F90_WINDOWS>
-          $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:/dll>
           $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_COMPILE_FLAGS}>
   )
   target_link_libraries (${HDF5_F90_LIBSH_TARGET}

@@ -12,11 +12,11 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * This test is for the DECTRIS project to the H5DOwrite_chunk function
+ * This tests the performance of the H5Dwrite_chunk() function.
  *
  */
 
-#include "hdf5_hl.h"
+#include "hdf5.h"
 
 #ifdef H5_HAVE_FILTER_DEFLATE
 #include <zlib.h>
@@ -51,7 +51,7 @@
 #endif
 
 const char *FILENAME[] = {
-    "dectris_perf",
+    "direct_write",
     "unix.raw",
     NULL
 };
@@ -285,7 +285,7 @@ test_direct_write_uncompressed_data(hid_t fapl_id)
 
     struct timeval timeval_start;    
     
-    TESTING("H5DOwrite_chunk for uncompressed data");
+    TESTING("H5Dwrite_chunk for uncompressed data");
 
     if((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
         TEST_ERROR;
@@ -304,7 +304,7 @@ test_direct_write_uncompressed_data(hid_t fapl_id)
     /* Write the compressed chunk data repeatedly to cover all the chunks in the 
      * dataset, using the direct writing function.     */ 
     for(i=0; i<NX; i++) {
-        status = H5DOwrite_chunk(dataset, dxpl, filter_mask, offset, CHUNK_NY*CHUNK_NZ*sizeof(unsigned int), direct_buf[i]);
+        status = H5Dwrite_chunk(dataset, dxpl, filter_mask, offset, CHUNK_NY*CHUNK_NZ*sizeof(unsigned int), direct_buf[i]);
         (offset[0])++;
     }
 
@@ -369,7 +369,7 @@ test_direct_write_compressed_data(hid_t fapl_id)
     /* Write the compressed chunk data repeatedly to cover all the chunks in the 
      * dataset, using the direct writing function.     */ 
     for(i=0; i<NX; i++) {
-        status = H5DOwrite_chunk(dataset, dxpl, filter_mask, offset, data_size[i], outbuf[i]);
+        status = H5Dwrite_chunk(dataset, dxpl, filter_mask, offset, data_size[i], outbuf[i]);
         (offset[0])++;
     }
 
@@ -637,12 +637,6 @@ main (void)
     hid_t       fapl = H5P_DEFAULT;
     int         i;
 
-    /* Testing setup */
-/*    h5_reset();
-    fapl = h5_fileaccess();
-
-    h5_fixname(FILENAME[0], fapl, filename, sizeof filename);*/
-
     sprintf(filename, "%s.h5", FILENAME[0]);
 
     create_file(fapl);
@@ -657,7 +651,6 @@ main (void)
         free(direct_buf[i]);
     }
  
-/*    h5_cleanup(FILENAME, fapl);*/
     return 0;
 }
 

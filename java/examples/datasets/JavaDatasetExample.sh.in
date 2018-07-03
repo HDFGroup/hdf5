@@ -52,8 +52,8 @@ test -d $BLDLIBDIR || mkdir -p $BLDLIBDIR
 #       Comment '#' without space can be used.
 # --------------------------------------------------------------------
 LIST_LIBRARY_FILES="
-$HDFLIB_HOME/slf4j-api-1.7.5.jar
-$HDFLIB_HOME/ext/slf4j-simple-1.7.5.jar
+$HDFLIB_HOME/slf4j-api-1.7.25.jar
+$HDFLIB_HOME/ext/slf4j-simple-1.7.25.jar
 $top_builddir/src/.libs/libhdf5.*
 $top_builddir/java/src/jni/.libs/libhdf5_java.*
 $top_builddir/java/src/$JARFILE
@@ -117,7 +117,7 @@ CLEAN_LIBFILES_AND_BLDLIBDIR()
     # skip rm if srcdir is same as destdir
     # this occurs when build/test performed in source dir and
     # make cp fail
-    SDIR=`$DIRNAME $HDFLIB_HOME/slf4j-api-1.7.5.jar`
+    SDIR=`$DIRNAME $HDFLIB_HOME/slf4j-api-1.7.25.jar`
     INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
     INODE_DDIR=`$LS -i -d $BLDLIBDIR | $AWK -F' ' '{print $1}'`
     if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
@@ -183,7 +183,7 @@ JAVAEXEFLAGS=@H5_JAVAFLAGS@
 COPY_LIBFILES_TO_BLDLIBDIR
 COPY_DATAFILES_TO_BLDDIR
 
-CPATH=".:"$BLDLIBDIR"/"$JARFILE":"$BLDLIBDIR"/slf4j-api-1.7.5.jar:"$BLDLIBDIR"/slf4j-simple-1.7.5.jar:"$TESTJARFILE""
+CPATH=".:"$BLDLIBDIR"/"$JARFILE":"$BLDLIBDIR"/slf4j-api-1.7.25.jar:"$BLDLIBDIR"/slf4j-simple-1.7.25.jar:"$TESTJARFILE""
 
 TEST=/usr/bin/test
 if [ ! -x /usr/bin/test ]

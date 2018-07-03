@@ -532,6 +532,7 @@ set (test_CLEANFILES
     vds_swmr.h5
     vds_swmr_src_*.h5
     tmp/vds_src_2.h5
+    direct_chunk.h5
 )
 
 # Remove any output file left over from previous test run
@@ -1008,7 +1009,7 @@ endif ()
 if (HDF5_BUILD_GENERATORS)
   macro (ADD_H5_GENERATOR genfile)
     add_executable (${genfile} ${HDF5_TEST_SOURCE_DIR}/${genfile}.c)
-    target_include_directories(${genfile} PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR}")
+    target_include_directories(${genfile} PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
     TARGET_C_PROPERTIES (${genfile} STATIC)
     target_link_libraries (${genfile} PRIVATE ${HDF5_TEST_LIB_TARGET} ${HDF5_LIB_TARGET})
     set_target_properties (${genfile} PROPERTIES FOLDER generator/test)

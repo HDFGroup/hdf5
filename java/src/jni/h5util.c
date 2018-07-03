@@ -21,6 +21,7 @@
 extern "C" {
 #endif /* __cplusplus */
 
+#include <jni.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -152,14 +153,14 @@ h5str_append
     return HDstrcat(str->s, cstr);
 } /* end h5str_append */
 
-/** print value of a data point into string.
+/** print value of a vlen data point into string.
  Return Value:
  On success, the total number of characters printed is returned.
  On error, a negative number is returned.
  */
 size_t
-h5str_sprintf
-    (h5str_t *str, hid_t container, hid_t tid, void *ptr, int expand_data)
+h5str_vlconvert
+    (char *str, hid_t container, hid_t tid, hvl_t *ptr, int expand_data)
 {
     unsigned char   tmp_uchar = 0;
     char            tmp_char = 0;
@@ -182,9 +183,515 @@ h5str_sprintf
     char           *this_str;
     size_t          this_strlen;
     int             n;
-    hvl_t          *vlptr;
-    char           *cptr = (char*) ptr;
-    unsigned char  *ucptr = (unsigned char*) ptr;
+    H5T_class_t     tclass = H5Tget_class(tid);
+    size_t          size = H5Tget_size(tid);
+    H5T_sign_t      nsign = H5Tget_sign(tid);
+    int bdata_print = 0;
+
+    if (!str || !ptr)
+        return 0;
+
+    this_str = NULL;
+    this_strlen = 0;
+
+    switch (tclass) {
+    case H5T_COMPOUND:
+        {
+            unsigned i;
+            n = H5Tget_nmembers(tid);
+
+            /* remove compound indicators */
+            if (str[0] == ' ')
+                str++;
+            if (str[0] == '{')
+                str++;
+
+            ptr->p = HDcalloc((size_t)1, size);
+            ptr->len = size;
+            for (i = 0; i < n; i++) {
+                offset = H5Tget_member_offset(tid, i);
+                mtid = H5Tget_member_type(tid, i);
+                str += offset;
+                h5str_convert(&str, container, mtid, ptr, 0, expand_data);
+                /* remove compound indicators */
+                if (str[0] == ',')
+                    str++;
+                if (str[0] == ' ')
+                    str++;
+                H5Tclose(mtid);
+            }
+            /* remove compound indicators */
+            if (str[0] == '}')
+                str++;
+            if (str[0] == ' ')
+                str++;
+        }
+        break;
+    case H5T_ARRAY:
+        {
+            int rank = 0;
+            hsize_t i, dims[H5S_MAX_RANK], total_elmts;
+
+            /* remove array indicators */
+            if (str[0] == '[')
+                str++;
+            if (str[0] == ' ')
+                str++;
+
+            mtid = H5Tget_super(tid);
+            size = H5Tget_size(mtid);
+            rank = H5Tget_array_ndims(tid);
+
+            H5Tget_array_dims2(tid, dims);
+
+            total_elmts = 1;
+            for (i = 0; i < rank; i++)
+                total_elmts *= dims[i];
+
+            ptr->p = HDcalloc((size_t)total_elmts, size);
+            ptr->len = total_elmts;
+            h5str_convert(&str, container, mtid, ptr, 0, expand_data);
+            H5Tclose(mtid);
+            /* remove array indicators */
+            if (str[0] == ' ')
+                str++;
+            if (str[0] == ']')
+                str++;
+            if (str[0] == ' ')
+                str++;
+        }
+        break;
+    default:
+        ptr->len = size;
+        ptr->p = HDcalloc(1, size);
+        this_strlen = h5str_convert(&str, container, tid, ptr, 0, expand_data);
+        break;
+    } /* end switch */
+
+    return this_strlen;
+} /* end h5str_vlconvert */
+
+/** print value of a data point into string.
+ Return Value:
+ On success, the total number of characters printed is returned.
+ On error, a negative number is returned.
+ */
+size_t
+h5str_convert
+    (char **str, hid_t container, hid_t tid, hvl_t *ptr, int ptroffset, int expand_data)
+{
+    unsigned char   tmp_uchar = 0;
+    char            tmp_char = 0;
+    unsigned short  tmp_ushort = 0;
+    short           tmp_short = 0;
+    unsigned int    tmp_uint = 0;
+    int             tmp_int = 0;
+    unsigned long   tmp_ulong = 0;
+    long            tmp_long = 0;
+    unsigned long long tmp_ullong = 0;
+    long long       tmp_llong = 0;
+    float           tmp_float = 0.0;
+    double          tmp_double = 0.0;
+    long double     tmp_ldouble = 0.0;
+    static char     fmt_llong[8], fmt_ullong[8];
+    const char      delimiter[] = " ,}]";
+
+    char           *token;
+    hid_t           mtid = -1;
+    size_t          offset;
+    size_t          nll;
+    char           *this_str = *str;
+    size_t          this_strlen;
+    int             n;
+    char           *cptr = ((char*) ((hvl_t *) ptr)->p) + ptroffset;
+    unsigned char  *ucptr = ((unsigned char*) ((hvl_t *) ptr)->p) + ptroffset;
+    H5T_class_t     tclass = H5Tget_class(tid);
+    size_t          size = H5Tget_size(tid);
+    H5T_sign_t      nsign = H5Tget_sign(tid);
+    int bdata_print = 0;
+
+    if (!str || !ptr)
+        return 0;
+
+    /* Build default formats for long long types */
+    if (!fmt_llong[0]) {
+        sprintf(fmt_llong, "%%%sd", H5_PRINTF_LL_WIDTH);
+        sprintf(fmt_ullong, "%%%su", H5_PRINTF_LL_WIDTH);
+    } /* end if */
+
+    this_strlen = HDstrlen(this_str);
+
+    switch (tclass) {
+    case H5T_FLOAT:
+        token = HDstrtok (this_str, delimiter);
+        if (sizeof(float) == size) {
+            /* if (H5Tequal(tid, H5T_NATIVE_FLOAT)) */
+            tmp_float = 0;
+            sscanf(token, "%f", &tmp_float);
+            HDmemcpy(cptr, &tmp_float, sizeof(float));
+        }
+        else if (sizeof(double) == size) {
+            /* if (H5Tequal(tid, H5T_NATIVE_DOUBLE)) */
+            tmp_double = 0;
+            sscanf(token, "%%lf", &tmp_double);
+            HDmemcpy(cptr, &tmp_double, sizeof(double));
+        }
+#if H5_SIZEOF_LONG_DOUBLE !=0
+        else if (sizeof(long double) == size) {
+            /* if (H5Tequal(tid, H5T_NATIVE_LDOUBLE)) */
+            tmp_ldouble = 0;
+            sscanf(token, "%Lf", &tmp_ldouble);
+            HDmemcpy(cptr, &tmp_ldouble, sizeof(long double));
+        }
+#endif
+        break;
+    case H5T_STRING:
+    {
+        if (this_strlen > 0) {
+            HDstrncpy(cptr, this_str, size);
+        }
+        else {
+            cptr = NULL;
+        }
+    }
+    break;
+    case H5T_INTEGER:
+        token = HDstrtok (this_str, delimiter);
+        if (sizeof(char) == size) {
+            if(H5T_SGN_NONE == nsign) {
+                /* if (H5Tequal(tid, H5T_NATIVE_UCHAR)) */
+                tmp_uchar = 0;
+                sscanf(token, "%hu", &tmp_uchar);
+                HDmemcpy(cptr, &tmp_uchar, sizeof(unsigned char));
+            }
+            else {
+                /* if (H5Tequal(tid, H5T_NATIVE_SCHAR)) */
+                tmp_char = 0;
+                sscanf(token, "%hd", &tmp_char);
+                HDmemcpy(cptr, &tmp_char, sizeof(char));
+            }
+        }
+        else if (sizeof(int) == size) {
+            if(H5T_SGN_NONE == nsign) {
+                /* if (H5Tequal(tid, H5T_NATIVE_UINT)) */
+                tmp_uint = 0;
+                sscanf(token, "%u", &tmp_uint);
+                HDmemcpy(cptr, &tmp_uint, sizeof(unsigned int));
+            }
+            else {
+                /* if (H5Tequal(tid, H5T_NATIVE_INT)) */
+                tmp_int = 0;
+                sscanf(token, "%d", &tmp_int);
+                HDmemcpy(cptr, &tmp_int, sizeof(int));
+            }
+        }
+        else if (sizeof(short) == size) {
+            if(H5T_SGN_NONE == nsign) {
+                /* if (H5Tequal(tid, H5T_NATIVE_USHORT)) */
+                tmp_ushort = 0;
+                sscanf(token, "%u", &tmp_ushort);
+                HDmemcpy(&tmp_ushort, cptr, sizeof(unsigned short));
+            }
+            else {
+                /* if (H5Tequal(tid, H5T_NATIVE_SHORT)) */
+                tmp_short = 0;
+                sscanf(token, "%d", &tmp_short);
+                HDmemcpy(&tmp_short, cptr, sizeof(short));
+            }
+        }
+        else if (sizeof(long) == size) {
+            if(H5T_SGN_NONE == nsign) {
+                /* if (H5Tequal(tid, H5T_NATIVE_ULONG)) */
+                tmp_ulong = 0;
+                sscanf(token, "%lu", &tmp_ulong);
+                HDmemcpy(cptr, &tmp_ulong, sizeof(unsigned long));
+            }
+            else {
+                /* if (H5Tequal(tid, H5T_NATIVE_LONG)) */
+                tmp_long = 0;
+                sscanf(token, "%ld", &tmp_long);
+                HDmemcpy(cptr, &tmp_long, sizeof(long));
+            }
+        }
+        else if (sizeof(long long) == size) {
+            if(H5T_SGN_NONE == nsign) {
+                /* if (H5Tequal(tid, H5T_NATIVE_ULLONG)) */
+                tmp_ullong = 0;
+                sscanf(token, fmt_ullong, &tmp_ullong);
+                HDmemcpy(cptr, &tmp_ullong, sizeof(unsigned long long));
+            }
+            else {
+                /* if (H5Tequal(tid, H5T_NATIVE_LLONG)) */
+                tmp_llong = 0;
+                sscanf(token, fmt_llong, &tmp_llong);
+                HDmemcpy(cptr, &tmp_llong, sizeof(long long));
+            }
+        }
+        break;
+    case H5T_COMPOUND:
+    {
+        unsigned i;
+        n = H5Tget_nmembers(tid);
+        /* remove compound indicators */
+        if ((*str)[0] == ' ')
+            (*str)++;
+        if ((*str)[0] == '{')
+            (*str)++;
+
+        for (i = 0; i < n; i++) {
+            offset = H5Tget_member_offset(tid, i);
+            mtid = H5Tget_member_type(tid, i);
+            h5str_convert(str, container, mtid, ptr, offset, expand_data);
+            /* remove compound indicators */
+            if ((*str)[0] == ',')
+                (*str)++;
+            if ((*str)[0] == ' ')
+                (*str)++;
+            H5Tclose(mtid);
+        }
+        /* remove compound indicators */
+        if ((*str)[0] == '}')
+            (*str)++;
+        if ((*str)[0] == ' ')
+            (*str)++;
+    }
+    break;
+    case H5T_ENUM:
+    {
+        char enum_name[1024];
+        void *value;
+        if (sizeof(char) == size) {
+            tmp_uchar = 0;
+            value = &tmp_uchar;
+        }
+        else if (sizeof(short) == size) {
+            tmp_ushort = 0;
+            value = &tmp_ushort;
+        }
+        else if (sizeof(long) == size) {
+            tmp_ulong = 0;
+            value = &tmp_ulong;
+        }
+        else if (sizeof(long long) == size) {
+            tmp_ullong = 0;
+            value = &tmp_ullong;
+        }
+        else {
+            tmp_uint = 0;
+            value = &tmp_uint;
+        }
+        token = HDstrtok (this_str, delimiter);
+        H5Tenum_valueof(tid, token, value);
+        HDmemcpy(ucptr, value, size);
+    }
+    break;
+    case H5T_REFERENCE:
+        /* TODO handle reference writing */
+        cptr = NULL;
+        break;
+    case H5T_ARRAY:
+    {
+        int rank = 0;
+        hsize_t i, dims[H5S_MAX_RANK], total_elmts;
+        /* remove array indicators */
+        if ((*str)[0] == '[')
+            (*str)++;
+        if ((*str)[0] == ' ')
+            (*str)++;
+
+        mtid = H5Tget_super(tid);
+        offset = H5Tget_size(mtid);
+        rank = H5Tget_array_ndims(tid);
+
+        H5Tget_array_dims2(tid, dims);
+
+        total_elmts = 1;
+        for (i = 0; i < rank; i++)
+            total_elmts *= dims[i];
+
+        cptr = HDcalloc((size_t)total_elmts, offset);
+        for (i = 0; i < total_elmts; i++) {
+            h5str_convert(str, container, mtid, cptr + (i*offset), offset, expand_data);
+            /* remove array indicators */
+            if ((*str)[0] == ',')
+                (*str)++;
+            if ((*str)[0] == ' ')
+                (*str)++;
+        }
+        H5Tclose(mtid);
+        /* remove array indicators */
+        if ((*str)[0] == ' ')
+            (*str)++;
+        if ((*str)[0] == ']')
+            (*str)++;
+        if ((*str)[0] == ' ')
+            (*str)++;
+    }
+    break;
+    case H5T_VLEN:
+        {
+            unsigned int i;
+            mtid = H5Tget_super(tid);
+            offset = H5Tget_size(mtid);
+
+            /* remove vlen indicators */
+            if ((*str)[0] == '{')
+                (*str)++;
+            cptr = HDcalloc(offset, sizeof(hvl_t));
+            for (i = 0; (i*offset) < (int)size; i++) {
+                h5str_convert(str, container, mtid, cptr + (i*offset), offset, expand_data);
+                /* remove vlen indicators */
+                if ((*str)[0] == ',')
+                    (*str)++;
+                if ((*str)[0] == ' ')
+                    (*str)++;
+                if ((*str)[0] == '}')
+                    break;
+            }
+            H5Tclose(mtid);
+            /* remove vlen indicators */
+            if ((*str)[0] == '}')
+                (*str)++;
+        }
+        break;
+
+    default:
+    {
+        /* All other types get copied raw */
+        HDmemcpy(ucptr, this_str, size);
+    }
+    break;
+    } /* end switch */
+
+    return this_strlen;
+} /* end h5str_convert */
+
+/** print value of a vlen data point into string.
+ Return Value:
+ On success, the total number of characters printed is returned.
+ On error, a negative number is returned.
+ */
+size_t
+h5str_vlsprintf
+    (h5str_t *str, hid_t container, hid_t tid, hvl_t *ptr, int expand_data)
+{
+    unsigned char   tmp_uchar = 0;
+    char            tmp_char = 0;
+    unsigned short  tmp_ushort = 0;
+    short           tmp_short = 0;
+    unsigned int    tmp_uint = 0;
+    int             tmp_int = 0;
+    unsigned long   tmp_ulong = 0;
+    long            tmp_long = 0;
+    unsigned long long tmp_ullong = 0;
+    long long       tmp_llong = 0;
+    float           tmp_float = 0.0;
+    double          tmp_double = 0.0;
+    long double     tmp_ldouble = 0.0;
+    static char     fmt_llong[8], fmt_ullong[8];
+
+    hid_t           mtid = -1;
+    size_t          offset;
+    size_t          nll;
+    char           *this_str;
+    size_t          this_strlen;
+    int             n;
+    H5T_class_t     tclass = H5Tget_class(tid);
+    size_t          size = H5Tget_size(tid);
+    H5T_sign_t      nsign = H5Tget_sign(tid);
+    int bdata_print = 0;
+
+    if (!str || !ptr)
+        return 0;
+
+    /* Build default formats for long long types */
+    if (!fmt_llong[0]) {
+        sprintf(fmt_llong, "%%%sd", H5_PRINTF_LL_WIDTH);
+        sprintf(fmt_ullong, "%%%su", H5_PRINTF_LL_WIDTH);
+    } /* end if */
+
+    this_str = NULL;
+    this_strlen = 0;
+
+    switch (tclass) {
+    case H5T_COMPOUND:
+        {
+            unsigned i;
+            n = H5Tget_nmembers(tid);
+            h5str_append(str, " {");
+
+            for (i = 0; i < n; i++) {
+                offset = H5Tget_member_offset(tid, i);
+                mtid = H5Tget_member_type(tid, i);
+                h5str_sprintf(str, container, mtid, ((char *) (ptr->p)) + offset, ptr->len, expand_data);
+                if ((i + 1) < n)
+                    h5str_append(str, ", ");
+                H5Tclose(mtid);
+            }
+            h5str_append(str, "} ");
+        }
+        break;
+    case H5T_ARRAY:
+        {
+            int rank = 0;
+            hsize_t i, dims[H5S_MAX_RANK], total_elmts;
+            h5str_append(str, "[ ");
+
+            mtid = H5Tget_super(tid);
+            size = H5Tget_size(mtid);
+            rank = H5Tget_array_ndims(tid);
+
+            H5Tget_array_dims2(tid, dims);
+
+            total_elmts = 1;
+            for (i = 0; i < rank; i++)
+                total_elmts *= dims[i];
+
+            h5str_sprintf(str, container, mtid, ((char *) (ptr->p)), ptr->len, expand_data);
+            H5Tclose(mtid);
+            h5str_append(str, " ] ");
+        }
+        break;
+    default:
+        this_strlen = h5str_sprintf(str, container, tid, ((char *) (ptr->p)), ptr->len, expand_data);
+        break;
+    } /* end switch */
+
+    return this_strlen;
+} /* end h5str_vlsprintf */
+
+/** print value of a data point into string.
+ Return Value:
+ On success, the total number of characters printed is returned.
+ On error, a negative number is returned.
+ */
+size_t
+h5str_sprintf
+    (h5str_t *str, hid_t container, hid_t tid, void *ptr, int ptr_len, int expand_data)
+{
+    unsigned char   tmp_uchar = 0;
+    char            tmp_char = 0;
+    unsigned short  tmp_ushort = 0;
+    short           tmp_short = 0;
+    unsigned int    tmp_uint = 0;
+    int             tmp_int = 0;
+    unsigned long   tmp_ulong = 0;
+    long            tmp_long = 0;
+    unsigned long long tmp_ullong = 0;
+    long long       tmp_llong = 0;
+    float           tmp_float = 0.0;
+    double          tmp_double = 0.0;
+    long double     tmp_ldouble = 0.0;
+    static char     fmt_llong[8], fmt_ullong[8];
+
+    hid_t           mtid = -1;
+    size_t          offset;
+    size_t          nll;
+    char           *this_str;
+    size_t          this_strlen;
+    int             n;
+    char           *cptr = (char*) (ptr);
+    unsigned char  *ucptr = (unsigned char*) (ptr);
     H5T_class_t     tclass = H5Tget_class(tid);
     size_t          size = H5Tget_size(tid);
     H5T_sign_t      nsign = H5Tget_sign(tid);
@@ -206,20 +713,20 @@ h5str_sprintf
     case H5T_FLOAT:
         if (sizeof(float) == size) {
             /* if (H5Tequal(tid, H5T_NATIVE_FLOAT)) */
-            HDmemcpy(&tmp_float, ptr, sizeof(float));
+            HDmemcpy(&tmp_float, cptr, sizeof(float));
             this_str = (char*)HDmalloc(25);
             sprintf(this_str, "%g", tmp_float);
         }
         else if (sizeof(double) == size) {
             /* if (H5Tequal(tid, H5T_NATIVE_DOUBLE)) */
-            HDmemcpy(&tmp_double, ptr, sizeof(double));
+            HDmemcpy(&tmp_double, cptr, sizeof(double));
             this_str = (char*)HDmalloc(25);
             sprintf(this_str, "%g", tmp_double);
         }
 #if H5_SIZEOF_LONG_DOUBLE !=0
         else if (sizeof(long double) == size) {
             /* if (H5Tequal(tid, H5T_NATIVE_LDOUBLE)) */
-            HDmemcpy(&tmp_ldouble, ptr, sizeof(long double));
+            HDmemcpy(&tmp_ldouble, cptr, sizeof(long double));
             this_str = (char*)HDmalloc(27);
             sprintf(this_str, "%Lf", tmp_ldouble);
         }
@@ -256,13 +763,13 @@ h5str_sprintf
         if (sizeof(char) == size) {
             if(H5T_SGN_NONE == nsign) {
                 /* if (H5Tequal(tid, H5T_NATIVE_UCHAR)) */
-                HDmemcpy(&tmp_uchar, ptr, sizeof(unsigned char));
+                HDmemcpy(&tmp_uchar, cptr, sizeof(unsigned char));
                 this_str = (char*)HDmalloc(7);
                 sprintf(this_str, "%u", tmp_uchar);
             }
             else {
                 /* if (H5Tequal(tid, H5T_NATIVE_SCHAR)) */
-                HDmemcpy(&tmp_char, ptr, sizeof(char));
+                HDmemcpy(&tmp_char, cptr, sizeof(char));
                 this_str = (char*)HDmalloc(7);
                 sprintf(this_str, "%hhd", tmp_char);
             }
@@ -270,13 +777,13 @@ h5str_sprintf
         else if (sizeof(int) == size) {
             if(H5T_SGN_NONE == nsign) {
                 /* if (H5Tequal(tid, H5T_NATIVE_UINT)) */
-                HDmemcpy(&tmp_uint, ptr, sizeof(unsigned int));
+                HDmemcpy(&tmp_uint, cptr, sizeof(unsigned int));
                 this_str = (char*)HDmalloc(14);
                 sprintf(this_str, "%u", tmp_uint);
             }
             else {
                 /* if (H5Tequal(tid, H5T_NATIVE_INT)) */
-                HDmemcpy(&tmp_int, ptr, sizeof(int));
+                HDmemcpy(&tmp_int, cptr, sizeof(int));
                 this_str = (char*)HDmalloc(14);
                 sprintf(this_str, "%d", tmp_int);
             }
@@ -284,13 +791,13 @@ h5str_sprintf
         else if (sizeof(short) == size) {
             if(H5T_SGN_NONE == nsign) {
                 /* if (H5Tequal(tid, H5T_NATIVE_USHORT)) */
-                HDmemcpy(&tmp_ushort, ptr, sizeof(unsigned short));
+                HDmemcpy(&tmp_ushort, cptr, sizeof(unsigned short));
                 this_str = (char*)HDmalloc(9);
                 sprintf(this_str, "%u", tmp_ushort);
             }
             else {
                 /* if (H5Tequal(tid, H5T_NATIVE_SHORT)) */
-                HDmemcpy(&tmp_short, ptr, sizeof(short));
+                HDmemcpy(&tmp_short, cptr, sizeof(short));
                 this_str = (char*)HDmalloc(9);
                 sprintf(this_str, "%d", tmp_short);
             }
@@ -298,13 +805,13 @@ h5str_sprintf
         else if (sizeof(long) == size) {
             if(H5T_SGN_NONE == nsign) {
                 /* if (H5Tequal(tid, H5T_NATIVE_ULONG)) */
-                HDmemcpy(&tmp_ulong, ptr, sizeof(unsigned long));
+                HDmemcpy(&tmp_ulong, cptr, sizeof(unsigned long));
                 this_str = (char*)HDmalloc(23);
                 sprintf(this_str, "%lu", tmp_ulong);
             }
             else {
                 /* if (H5Tequal(tid, H5T_NATIVE_LONG)) */
-                HDmemcpy(&tmp_long, ptr, sizeof(long));
+                HDmemcpy(&tmp_long, cptr, sizeof(long));
                 this_str = (char*)HDmalloc(23);
                 sprintf(this_str, "%ld", tmp_long);
             }
@@ -312,13 +819,13 @@ h5str_sprintf
         else if (sizeof(long long) == size) {
             if(H5T_SGN_NONE == nsign) {
                 /* if (H5Tequal(tid, H5T_NATIVE_ULLONG)) */
-                HDmemcpy(&tmp_ullong, ptr, sizeof(unsigned long long));
+                HDmemcpy(&tmp_ullong, cptr, sizeof(unsigned long long));
                 this_str = (char*)HDmalloc(25);
                 sprintf(this_str, fmt_ullong, tmp_ullong);
             }
             else {
                 /* if (H5Tequal(tid, H5T_NATIVE_LLONG)) */
-                HDmemcpy(&tmp_llong, ptr, sizeof(long long));
+                HDmemcpy(&tmp_llong, cptr, sizeof(long long));
                 this_str = (char*)HDmalloc(25);
                 sprintf(this_str, fmt_llong, tmp_llong);
             }
@@ -333,8 +840,8 @@ h5str_sprintf
         for (i = 0; i < n; i++) {
             offset = H5Tget_member_offset(tid, i);
             mtid = H5Tget_member_type(tid, i);
-            h5str_sprintf(str, container, mtid, cptr + offset, expand_data);
-            if (i < n - 1)
+            h5str_sprintf(str, container, mtid, cptr + offset, ptr_len, expand_data);
+            if ((i + 1) < n)
                 h5str_append(str, ", ");
             H5Tclose(mtid);
         }
@@ -344,7 +851,7 @@ h5str_sprintf
     case H5T_ENUM:
     {
         char enum_name[1024];
-        if (H5Tenum_nameof(tid, ptr, enum_name, sizeof enum_name) >= 0) {
+        if (H5Tenum_nameof(tid, cptr, enum_name, sizeof enum_name) >= 0) {
             h5str_append(str, enum_name);
         }
         else {
@@ -363,7 +870,7 @@ h5str_sprintf
     }
     break;
     case H5T_REFERENCE:
-        if (h5str_is_zero(ptr, size)) {
+        if (h5str_is_zero(cptr, size)) {
             h5str_append(str, "NULL");
         }
         else {
@@ -379,9 +886,9 @@ h5str_sprintf
                 H5S_sel_type region_type;
 
                 /* get name of the dataset the region reference points to using H5Rget_name */
-                region_obj = H5Rdereference2(container, H5P_DEFAULT, H5R_DATASET_REGION, ptr);
+                region_obj = H5Rdereference2(container, H5P_DEFAULT, H5R_DATASET_REGION, cptr);
                 if (region_obj >= 0) {
-                    region = H5Rget_region(container, H5R_DATASET_REGION, ptr);
+                    region = H5Rget_region(container, H5R_DATASET_REGION, cptr);
                     if (region >= 0) {
                         if(expand_data) {
                             region_type = H5Sget_select_type(region);
@@ -393,7 +900,7 @@ h5str_sprintf
                             }
                         }
                         else {
-                            if(H5Rget_name(region_obj, H5R_DATASET_REGION, ptr, (char*)ref_name, 1024) >= 0) {
+                            if(H5Rget_name(region_obj, H5R_DATASET_REGION, cptr, (char*)ref_name, 1024) >= 0) {
                                 h5str_append(str, ref_name);
                             }
 
@@ -424,8 +931,8 @@ h5str_sprintf
                 hid_t       obj;
 
                 this_str = (char*)HDmalloc(64);
-                obj = H5Rdereference2(container, H5P_DEFAULT, H5R_OBJECT, ptr);
-                H5Oget_info(obj, &oi);
+                obj = H5Rdereference2(container, H5P_DEFAULT, H5R_OBJECT, cptr);
+                H5Oget_info2(obj, &oi, H5O_INFO_ALL);
 
                 /* Print object data and close object */
                 sprintf(this_str, "%u-%lu", (unsigned) oi.type, oi.addr);
@@ -450,31 +957,30 @@ h5str_sprintf
             total_elmts *= dims[i];
 
         for (i = 0; i < total_elmts; i++) {
-            h5str_sprintf(str, container, mtid, cptr + i * size, expand_data);
-            if (i < total_elmts - 1)
+            h5str_sprintf(str, container, mtid, cptr + i * size, ptr_len, expand_data);
+            if ((i + 1) < total_elmts)
                 h5str_append(str, ", ");
         }
         H5Tclose(mtid);
-        h5str_append(str, "] ");
+        h5str_append(str, " ] ");
     }
     break;
     case H5T_VLEN:
-    {
-        unsigned int i;
-        mtid = H5Tget_super(tid);
-        size = H5Tget_size(mtid);
+        {
+            unsigned int i;
+            mtid = H5Tget_super(tid);
+            size = H5Tget_size(mtid);
 
-        vlptr = (hvl_t *) cptr;
-
-        nll = vlptr->len;
-        for (i = 0; i < (int)nll; i++) {
-            h5str_sprintf(str, container, mtid, ((char *) (vlptr->p)) + i * size, expand_data);
-            if (i < (int)nll - 1)
-                h5str_append(str, ", ");
+            h5str_append(str, "{");
+            for (i = 0; i < (int)ptr_len; i++) {
+                h5str_sprintf(str, container, mtid, cptr + i * size, ptr_len, expand_data);
+                if ((i + 1) < (int)ptr_len)
+                    h5str_append(str, ", ");
+            }
+            H5Tclose(mtid);
+            h5str_append(str, "}");
         }
-        H5Tclose(mtid);
-    }
-    break;
+        break;
 
     default:
     {
@@ -563,7 +1069,7 @@ h5str_print_region_data_blocks
                                         if(H5Dread(region_id, type_id, mem_space, sid1, H5P_DEFAULT, region_buf) >= 0) {
                                             if(H5Sget_simple_extent_dims(mem_space, total_size, NULL) >= 0) {
                                                 for (numindex = 0; numindex < numelem; numindex++) {
-                                                    h5str_sprintf(str, region_id, type_id, ((char*)region_buf + numindex * type_size), 1);
+                                                    h5str_sprintf(str, region_id, type_id, ((char*)region_buf + numindex * type_size), 0, 1);
 
                                                     if (numindex + 1 < numelem)
                                                         h5str_append(str, ", ");
@@ -763,7 +1269,7 @@ h5str_print_region_data_points
                         for (jndx = 0; jndx < npoints; jndx++) {
                             if(H5Sget_simple_extent_dims(mem_space, total_size, NULL) >= 0) {
 
-                                h5str_sprintf(str, region_id, type_id, ((char*)region_buf + jndx * type_size), 1);
+                                h5str_sprintf(str, region_id, type_id, ((char*)region_buf + jndx * type_size), 0, 1);
 
                                 if (jndx + 1 < npoints)
                                     h5str_append(str, ", ");
@@ -1883,7 +2389,7 @@ h5tools_dump_simple_data
 
             /* Render the data element*/
             h5str_new(&buffer, 32 * size);
-            bytes_in = h5str_sprintf(&buffer, container, type, memref, 1);
+            bytes_in = h5str_sprintf(&buffer, container, type, memref, 0, 1);
             if(i > 0) {
                 HDfprintf(stream, ", ");
                 if (line_count >= H5TOOLS_TEXT_BLOCK) {
@@ -1906,116 +2412,6 @@ h5tools_dump_simple_data
  * Utility Java APIs
  * Functions designed to workaround issues with the Java-C interface
  */
-
-/*
- * Class:     hdf_hdf5lib_H5
- * Method:    H5AwriteVL
- * Signature: (JJ[Ljava/lang/String;)I
- */
-JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5AwriteVL
-    (JNIEnv *env, jclass clss, jlong attr_id, jlong mem_type_id, jobjectArray buf)
-{
-    herr_t  status = -1;
-    char  **wdata;
-    jsize   size;
-    jint    i;
-
-    size = ENVPTR->GetArrayLength(ENVPAR (jarray) buf);
-
-    wdata = (char**)HDcalloc((size_t)size + 1, sizeof(char*));
-    if (!wdata) {
-        h5JNIFatalError(env, "H5AwriteVL:  cannot allocate buffer");
-    } /* end if */
-    else {
-        HDmemset(wdata, 0, (size_t)size * sizeof(char*));
-        for (i = 0; i < size; ++i) {
-            jstring obj = (jstring) ENVPTR->GetObjectArrayElement(ENVPAR (jobjectArray) buf, i);
-            if (obj != 0) {
-                jsize length = ENVPTR->GetStringUTFLength(ENVPAR obj);
-                const char *utf8 = ENVPTR->GetStringUTFChars(ENVPAR obj, 0);
-
-                if (utf8) {
-                    wdata[i] = (char*)HDmalloc((size_t)length + 1);
-                    if (wdata[i]) {
-                        HDmemset(wdata[i], 0, ((size_t)length + 1));
-                        HDstrncpy(wdata[i], utf8, (size_t)length);
-                    } /* end if */
-                } /* end if */
-
-                ENVPTR->ReleaseStringUTFChars(ENVPAR obj, utf8);
-                ENVPTR->DeleteLocalRef(ENVPAR obj);
-            } /* end if */
-        } /* end for (i = 0; i < size; ++i) */
-
-        status = H5Awrite((hid_t)attr_id, (hid_t)mem_type_id, wdata);
-
-        for (i = 0; i < size; i++) {
-            if(wdata[i]) {
-                HDfree(wdata[i]);
-            } /* end if */
-        } /* end for */
-        HDfree(wdata);
-
-        if (status < 0)
-            h5libraryError(env);
-    } /* end else */
-
-    return (jint)status;
-} /* end Java_hdf_hdf5lib_H5_H5AwriteVL */
-
-/*
- * Class:     hdf_hdf5lib_H5
- * Method:    H5AreadVL
- * Signature: (JJ[Ljava/lang/String;)I
- */
-JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5AreadVL
-    (JNIEnv *env, jclass clss, jlong attr_id, jlong mem_type_id, jobjectArray buf)
-{
-    herr_t  status = -1;
-    jstring jstr;
-    char  **strs;
-    int     i, n;
-    hid_t   sid;
-    hsize_t dims[H5S_MAX_RANK];
-
-    n = ENVPTR->GetArrayLength(ENVPAR buf);
-
-    strs =(char **)HDmalloc((size_t)n * sizeof(char *));
-    if (strs == NULL) {
-        h5JNIFatalError( env, "H5AreadVL:  failed to allocate buff for read variable length strings");
-    } /* end if */
-    else {
-        status = H5Aread(attr_id, mem_type_id, strs);
-        if (status < 0) {
-            dims[0] = (hsize_t)n;
-            sid = H5Screate_simple(1, dims, NULL);
-            H5Dvlen_reclaim(mem_type_id, sid, H5P_DEFAULT, strs);
-            H5Sclose(sid);
-            HDfree(strs);
-            h5JNIFatalError(env, "H5AreadVL: failed to read variable length strings");
-        } /* end if */
-        else {
-            for (i=0; i<n; i++) {
-                jstr = ENVPTR->NewStringUTF(ENVPAR strs[i]);
-                ENVPTR->SetObjectArrayElement(ENVPAR buf, i, jstr);
-                HDfree (strs[i]);
-            } /* end for */
-
-            /*
-                for repeatedly reading an attribute with a large number of strs (e.g., 1,000,000 strings,
-                H5Dvlen_reclaim() may crash on Windows because the Java GC will not be able to collect
-                free space in time. Instead, use "free(strs[i])" to free individual strings
-                after it is done.
-                H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, strs);
-            */
-
-            HDfree(strs);
-        }  /* end else */
-    }  /* end else */
-    return status;
-} /* end Java_hdf_hdf5lib_H5_H5AreadVL */
 
 /*
  * Class:     hdf_hdf5lib_H5
@@ -2059,7 +2455,7 @@ Java_hdf_hdf5lib_H5_H5AreadComplex
             else {
                 for (i = 0; i < n; i++) {
                     h5str.s[0] = '\0';
-                    h5str_sprintf(&h5str, attr_id, mem_type_id, rdata + ((size_t)i * size), 0);
+                    h5str_sprintf(&h5str, attr_id, mem_type_id, rdata + ((size_t)i * size), 0, 0);
                     jstr = ENVPTR->NewStringUTF(ENVPAR h5str.s);
                     ENVPTR->SetObjectArrayElement(ENVPAR buf, i, jstr);
                 } /* end for */
@@ -2552,7 +2948,7 @@ obj_info_all
     info_all_t *datainfo = (info_all_t*)op_data;
     H5O_info_t  object_info;
 
-    retVal = H5Oget_info_by_name(loc_id, name, &object_info, H5P_DEFAULT);
+    retVal = H5Oget_info_by_name2(loc_id, name, &object_info, H5O_INFO_ALL, H5P_DEFAULT);
 
     if (retVal < 0) {
         *(datainfo->otype+datainfo->count) = -1;
@@ -2591,7 +2987,7 @@ obj_info_max
     info_all_t *datainfo = (info_all_t*)op_data;
     H5O_info_t  object_info;
 
-    retVal = H5Oget_info(loc_id, &object_info);
+    retVal = H5Oget_info2(loc_id, &object_info, H5O_INFO_ALL);
     if (retVal < 0) {
         *(datainfo->otype+datainfo->count) = -1;
         *(datainfo->ltype+datainfo->count) = -1;

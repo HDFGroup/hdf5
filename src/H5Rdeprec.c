@@ -141,7 +141,7 @@ done:
  *      ref         IN: Reference to open
  *
  * Return:      Success:	Valid HDF5 ID
- *              Failure:    Negative
+ *              Failure:    H5I_INVALID_HID
  *
  *-------------------------------------------------------------------------
  */

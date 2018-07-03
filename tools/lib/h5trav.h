@@ -134,7 +134,7 @@ extern "C" {
 H5TOOLS_DLL void h5trav_set_index(H5_index_t print_index_by, H5_iter_order_t print_index_order);
 H5TOOLS_DLL int h5trav_visit(hid_t file_id, const char *grp_name, 
     hbool_t visit_start, hbool_t recurse, h5trav_obj_func_t visit_obj, 
-    h5trav_lnk_func_t visit_lnk, void *udata);
+    h5trav_lnk_func_t visit_lnk, void *udata, unsigned fields);
 H5TOOLS_DLL herr_t symlink_visit_add(symlink_trav_t *visited, H5L_type_t type, const char *file, const char *path);
 H5TOOLS_DLL hbool_t symlink_is_visited(symlink_trav_t *visited, H5L_type_t type, const char *file, const char *path);
 

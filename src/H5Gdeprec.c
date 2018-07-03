@@ -1118,7 +1118,7 @@ H5G__get_objinfo_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc/*in*/, const char *name, c
             /* Go retrieve the object information */
             /* (don't need index & heap info) */
             HDassert(obj_loc);
-            if(H5O_get_info(obj_loc->oloc, FALSE, &oinfo) < 0)
+            if(H5O_get_info(obj_loc->oloc, &oinfo, H5O_INFO_BASIC|H5O_INFO_TIME|H5O_INFO_HDR) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to get object info")
 
             /* Get mapped object type */

@@ -244,7 +244,7 @@ unsigned H5Object::objVersion() const
     unsigned version = 0;
 
     // Use C API to get information of the object
-    herr_t ret_value = H5Oget_info(getId(), &objinfo);
+    herr_t ret_value = H5Oget_info2(getId(), &objinfo, H5O_INFO_HDR);
 
     // Throw exception if C API returns failure
     if (ret_value < 0)
@@ -270,7 +270,7 @@ int H5Object::getNumAttrs() const
 {
     H5O_info_t oinfo;    /* Object info */
 
-    if(H5Oget_info(getId(), &oinfo) < 0)
+    if(H5Oget_info2(getId(), &oinfo, H5O_INFO_NUM_ATTRS) < 0)
         throw AttributeIException(inMemFunc("getNumAttrs"), "H5Oget_info failed");
     else
         return(static_cast<int>(oinfo.num_attrs));

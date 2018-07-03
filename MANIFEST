@@ -752,6 +752,7 @@
 ./src/H5Ocont.c
 ./src/H5Ocopy.c
 ./src/H5Odbg.c
+./src/H5Odeprec.c
 ./src/H5Odrvinfo.c
 ./src/H5Odtype.c
 ./src/H5Oefl.c
@@ -940,6 +941,7 @@
 ./test/cross_read.c
 ./test/dangle.c
 ./test/deflate.h5
+./test/direct_chunk.c
 ./test/dsets.c
 ./test/dt_arith.c
 ./test/dtypes.c
@@ -2588,6 +2590,7 @@
 ./tools/test/perform/build_h5perf_alone.sh
 ./tools/test/perform/build_h5perf_serial_alone.sh
 ./tools/test/perform/chunk.c
+./tools/test/perform/direct_write_perf.c
 ./tools/test/perform/gen_report.pl
 ./tools/test/perform/iopipe.c
 ./tools/test/perform/overhead.c
@@ -2665,7 +2668,6 @@
 ./hl/test/COPYING
 ./hl/test/H5srcdir_str.h.in
 ./hl/test/Makefile.am
-./hl/test/dectris_hl_perf.c
 ./hl/test/dsdata.txt
 ./hl/test/dslat.txt
 ./hl/test/dslon.txt
@@ -2684,8 +2686,8 @@
 ./hl/test/test_ds_be.h5
 ./hl/test/test_ds_le.h5
 ./hl/test/test_dset_append.c
-./hl/test/test_dset_opt.c
 ./hl/test/test_file_image.c
+./hl/test/test_h5do_compat.c
 ./hl/test/test_image.c
 ./hl/test/test_ld.c
 ./hl/test/test_ld.h5
@@ -3048,9 +3050,42 @@
 ./java/test/Makefile.am
 ./java/test/CMakeLists.txt
 ./java/test/junit.sh.in
-./java/test/JUnit-interface.txt
-./java/test/JUnit-unit.txt
-./java/test/JUnit-interface.ert
+./java/test/testfiles/JUnit-TestH5.txt
+./java/test/testfiles/JUnit-TestH5A.txt
+./java/test/testfiles/JUnit-TestH5Dparams.txt
+./java/test/testfiles/JUnit-TestH5D.txt
+./java/test/testfiles/JUnit-TestH5Dplist.txt
+./java/test/testfiles/JUnit-TestH5E.txt
+./java/test/testfiles/JUnit-TestH5Edefault.txt
+./java/test/testfiles/JUnit-TestH5Eparams.txt
+./java/test/testfiles/JUnit-TestH5Eregister.txt
+./java/test/testfiles/JUnit-TestH5Fparams.txt
+./java/test/testfiles/JUnit-TestH5Fbasic.txt
+./java/test/testfiles/JUnit-TestH5F.txt
+./java/test/testfiles/JUnit-TestH5Fswmr.txt
+./java/test/testfiles/JUnit-TestH5Gbasic.txt
+./java/test/testfiles/JUnit-TestH5G.txt
+./java/test/testfiles/JUnit-TestH5Giterate.txt
+./java/test/testfiles/JUnit-TestH5Lparams.txt
+./java/test/testfiles/JUnit-TestH5Lbasic.txt
+./java/test/testfiles/JUnit-TestH5Lcreate.txt
+./java/test/testfiles/JUnit-TestH5Oparams.txt
+./java/test/testfiles/JUnit-TestH5Obasic.txt
+./java/test/testfiles/JUnit-TestH5Ocreate.txt
+./java/test/testfiles/JUnit-TestH5Ocopy.txt
+./java/test/testfiles/JUnit-TestH5P.txt
+./java/test/testfiles/JUnit-TestH5PData.txt
+./java/test/testfiles/JUnit-TestH5Pfapl.txt
+./java/test/testfiles/JUnit-TestH5Plist.txt
+./java/test/testfiles/JUnit-TestH5Pvirtual.txt
+./java/test/testfiles/JUnit-TestH5PL.txt
+./java/test/testfiles/JUnit-TestH5R.txt
+./java/test/testfiles/JUnit-TestH5Sbasic.txt
+./java/test/testfiles/JUnit-TestH5S.txt
+./java/test/testfiles/JUnit-TestH5Tparams.txt
+./java/test/testfiles/JUnit-TestH5Tbasic.txt
+./java/test/testfiles/JUnit-TestH5T.txt
+./java/test/testfiles/JUnit-TestH5Z.txt
 ./java/test/h5ex_g_iterate.orig
 ./java/test/TestH5.java
 ./java/test/TestH5A.java
@@ -3089,14 +3124,13 @@
 ./java/test/TestH5T.java
 ./java/test/TestH5Z.java
 ./java/test/TestAll.java
-./java/test/TestUnit.java
 
 ./java/lib/hamcrest-core.jar
 ./java/lib/junit.jar
 ./java/lib/simplelogger.properties
-./java/lib/slf4j-api-1.7.5.jar
-./java/lib/ext/slf4j-nop-1.7.5.jar
-./java/lib/ext/slf4j-simple-1.7.5.jar
+./java/lib/slf4j-api-1.7.25.jar
+./java/lib/ext/slf4j-nop-1.7.25.jar
+./java/lib/ext/slf4j-simple-1.7.25.jar
 
 # CMake-specific Files
 ./config/cmake/cacheinit.cmake

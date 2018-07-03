@@ -1,0 +1,22 @@
+JUnit version 4.11
+.testH5Sclose_invalid
+.testH5Screate_simple_max_default
+.testH5Screate_simple_dims_null
+.testH5Sdecode_null
+.testH5Screate_simple_dims_exceed
+.testH5Screate_simple_unlimted_1d
+.testH5Screate_simple_dims_invalid
+.testH5Screate_scalar
+.testH5Screate_simple
+.testH5Screate_simple_rank_invalid
+.testH5Sget_simple_extent_type_invalid
+.testH5Sencode_invalid
+.testH5Screate_null
+.testH5Screate_simple_extent
+.testH5Screate_invalid
+.testH5Screate_simple_unlimted
+
+Time:  XXXX
+
+OK (16 tests)
+

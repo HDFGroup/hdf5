@@ -1,0 +1,19 @@
+JUnit version 4.11
+.testH5Tvlen_create
+.testH5Tenum_create_functions
+.testH5Tenum_functions
+.testH5Tget_class
+.testH5Tget_array_ndims
+.testH5Tequal_type_error
+.testH5Tget_array_dims
+.testH5Tset_size
+.testH5Tis_variable_str
+.testH5Tcompound_functions
+.testH5Tget_size
+.testH5Tarray_create
+.testH5Topaque_functions
+
+Time:  XXXX
+
+OK (13 tests)
+

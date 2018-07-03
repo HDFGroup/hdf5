@@ -435,63 +435,70 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Oget_info
+ * Function:    H5Oget_info2
  *
- * Purpose:	Retrieve information about an object.
+ * Purpose:     Retrieve information about an object.
  *
- * Return:	Success:	Non-negative
- *		Failure:	Negative
+ *              NOTE: Add a parameter "fields" to indicate selection of object info.
  *
- * Programmer:	Quincey Koziol
- *		November 21 2006
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
+ *
+ * Programmer:  Neil Fortner
+ *              July 7 2010
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Oget_info(hid_t loc_id, H5O_info_t *oinfo)
+H5Oget_info2(hid_t loc_id, H5O_info_t *oinfo, unsigned fields)
 {
-    H5G_loc_t	loc;                    /* Location of group */
+    H5G_loc_t   loc;                    /* Location of group */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*x", loc_id, oinfo);
+    H5TRACE3("e", "i*xIu", loc_id, oinfo, fields);
 
     /* Check args */
     if(H5G_loc(loc_id, &loc) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
     if(!oinfo)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no info struct")
+    if(fields & ~H5O_INFO_ALL)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid fields")
 
     /* Retrieve the object's information */
-    if(H5O__get_info_by_name(&loc, ".", oinfo/*out*/) < 0)
+    if(H5O__get_info_by_name(&loc, ".", oinfo/*out*/, fields) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't get info for object")
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5Oget_info() */
+} /* end H5Oget_info2() */
 
 
-/*-------------------------------------------------------------------------
- * Function:	H5Oget_info_by_name
- *
- * Purpose:	Retrieve information about an object.
- *
- * Return:	Success:	Non-negative
- *		Failure:	Negative
- *
- * Programmer:	Quincey Koziol
- *		November 21 2006
- *
- *-------------------------------------------------------------------------
- */
+ /*-------------------------------------------------------------------------
+  * Function:   H5Oget_info_by_name2
+  *
+  * Purpose:    Retrieve information about an object.
+  *
+  *             NOTE: Add a parameter "fields" to indicate selection of object info.
+  *
+  * Return:     Success:        Non-negative
+  *             Failure:        Negative
+  *
+  * Programmer:  Neil Fortner
+  *              July 7 2010
+  *
+  *-------------------------------------------------------------------------
+  */
 herr_t
-H5Oget_info_by_name(hid_t loc_id, const char *name, H5O_info_t *oinfo, hid_t lapl_id)
+H5Oget_info_by_name2(hid_t loc_id, const char *name, H5O_info_t *oinfo,
+    unsigned fields, hid_t lapl_id)
 {
     H5G_loc_t	loc;                    /* Location of group */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "i*s*xi", loc_id, name, oinfo, lapl_id);
+    H5TRACE5("e", "i*s*xIui", loc_id, name, oinfo, fields, lapl_id);
 
     /* Check args */
     if(H5G_loc(loc_id, &loc) < 0)
@@ -500,44 +507,48 @@ H5Oget_info_by_name(hid_t loc_id, const char *name, H5O_info_t *oinfo, hid_t lap
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
     if(!oinfo)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no info struct")
+    if(fields & ~H5O_INFO_ALL)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid fields")
 
     /* Verify access property list and set up collective metadata if appropriate */
     if(H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, FALSE) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set access property list info")
 
     /* Retrieve the object's information */
-    if(H5O__get_info_by_name(&loc, name, oinfo/*out*/) < 0)
+    if(H5O__get_info_by_name(&loc, name, oinfo/*out*/, fields) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't get info for object: '%s'", name)
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5Oget_info_by_name() */
+} /* end H5Oget_info_by_name2() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Oget_info_by_idx
+ * Function:    H5Oget_info_by_idx2
  *
- * Purpose:	Retrieve information about an object, according to the order
+ * Purpose:     Retrieve information about an object, according to the order
  *              of an index.
  *
- * Return:	Success:	Non-negative
- *		Failure:	Negative
+ *              NOTE: Add a parameter "fields" to indicate selection of object info.
+ *
+ * Return:      Success:	Non-negative
+ *              Failure:	Negative
  *
  * Programmer:	Quincey Koziol
- *		November 26 2006
+ *              November 26 2006
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Oget_info_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
-    H5_iter_order_t order, hsize_t n, H5O_info_t *oinfo, hid_t lapl_id)
+H5Oget_info_by_idx2(hid_t loc_id, const char *group_name, H5_index_t idx_type,
+    H5_iter_order_t order, hsize_t n, H5O_info_t *oinfo, unsigned fields, hid_t lapl_id)
 {
     H5G_loc_t	loc;                    /* Location of group */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE7("e", "i*sIiIoh*xi", loc_id, group_name, idx_type, order, n, oinfo,
-             lapl_id);
+    H5TRACE8("e", "i*sIiIoh*xIui", loc_id, group_name, idx_type, order, n, oinfo,
+             fields, lapl_id);
 
     /* Check args */
     if(H5G_loc(loc_id, &loc) < 0)
@@ -550,18 +561,20 @@ H5Oget_info_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified")
     if(!oinfo)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no info struct")
+    if(fields & ~H5O_INFO_ALL)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid fields")
 
     /* Verify access property list and set up collective metadata if appropriate */
     if(H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, FALSE) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set access property list info")
 
     /* Retrieve the object's information */
-    if(H5O__get_info_by_idx(&loc, group_name, idx_type, order, n, oinfo) < 0)
+    if(H5O__get_info_by_idx(&loc, group_name, idx_type, order, n, oinfo, fields) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't get info for object")
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5Oget_info_by_idx() */
+} /* end H5Oget_info_by_idx2() */
 
 
 /*-------------------------------------------------------------------------
@@ -737,9 +750,9 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Ovisit
+ * Function:	H5Ovisit2
  *
- * Purpose:	Recursively visit an object and all the objects reachable
+ * Purpose:	    Recursively visit an object and all the objects reachable
  *              from it.  If the starting object is a group, all the objects
  *              linked to from that group will be visited.  Links within
  *              each group are visited according to the order within the
@@ -755,27 +768,30 @@ done:
  *              iteration index and iteration order given) will be used to in
  *              the callback about the object.
  *
- * Return:	Success:	The return value of the first operator that
+ *              NOTE: Add a a parameter "fields" to indicate selection of
+ *              object info to be retrieved to the callback "op".
+ *
+ * Return:      Success:    The return value of the first operator that
  *				returns non-zero, or zero if all members were
  *				processed with no operator returning non-zero.
  *
- *		Failure:	Negative if something goes wrong within the
+ *              Failure:    Negative if something goes wrong within the
  *				library, or the negative value returned by one
  *				of the operators.
  *
  * Programmer:	Quincey Koziol
- *		November 25 2007
+ *              November 25 2007
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Ovisit(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order,
-    H5O_iterate_t op, void *op_data)
+H5Ovisit2(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order,
+    H5O_iterate_t op, void *op_data, unsigned fields)
 {
     herr_t      ret_value;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "iIiIox*x", obj_id, idx_type, order, op, op_data);
+    H5TRACE6("e", "iIiIox*xIu", obj_id, idx_type, order, op, op_data, fields);
 
     /* Check args */
     if(idx_type <= H5_INDEX_UNKNOWN || idx_type >= H5_INDEX_N)
@@ -784,20 +800,22 @@ H5Ovisit(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order,
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified")
     if(!op)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no callback operator specified")
+    if(fields & ~H5O_INFO_ALL)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid fields")
 
     /* Call internal object visitation routine */
-    if((ret_value = H5O__visit(obj_id, ".", idx_type, order, op, op_data)) < 0)
+    if((ret_value = H5O__visit(obj_id, ".", idx_type, order, op, op_data, fields)) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_BADITER, FAIL, "object visitation failed")
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5Ovisit() */
+} /* end H5Ovisit2() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Ovisit_by_name
+ * Function:	H5Ovisit_by_name2
  *
- * Purpose:	Recursively visit an object and all the objects reachable
+ * Purpose:     Recursively visit an object and all the objects reachable
  *              from it.  If the starting object is a group, all the objects
  *              linked to from that group will be visited.  Links within
  *              each group are visited according to the order within the
@@ -813,28 +831,31 @@ done:
  *              iteration index and iteration order given) will be used to in
  *              the callback about the object.
  *
- * Return:	Success:	The return value of the first operator that
+ *              NOTE: Add a a parameter "fields" to indicate selection of
+ *              object info to be retrieved to the callback "op".
+ *
+ * Return:      Success:    The return value of the first operator that
  *				returns non-zero, or zero if all members were
  *				processed with no operator returning non-zero.
  *
- *		Failure:	Negative if something goes wrong within the
+ *	            Failure:    Negative if something goes wrong within the
  *				library, or the negative value returned by one
  *				of the operators.
  *
  * Programmer:	Quincey Koziol
- *		November 24 2007
+ *              November 24 2007
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Ovisit_by_name(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
-    H5_iter_order_t order, H5O_iterate_t op, void *op_data, hid_t lapl_id)
+H5Ovisit_by_name2(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
+    H5_iter_order_t order, H5O_iterate_t op, void *op_data, unsigned fields, hid_t lapl_id)
 {
     herr_t      ret_value;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE7("e", "i*sIiIox*xi", loc_id, obj_name, idx_type, order, op, op_data,
-             lapl_id);
+    H5TRACE8("e", "i*sIiIox*xIui", loc_id, obj_name, idx_type, order, op, op_data,
+             fields, lapl_id);
 
     /* Check args */
     if(!obj_name || !*obj_name)
@@ -845,18 +866,20 @@ H5Ovisit_by_name(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified")
     if(!op)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no callback operator specified")
+    if(fields & ~H5O_INFO_ALL)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid fields")
 
     /* Verify access property list and set up collective metadata if appropriate */
     if(H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, FALSE) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set access property list info")
 
     /* Call internal object visitation routine */
-    if((ret_value = H5O__visit(loc_id, obj_name, idx_type, order, op, op_data)) < 0)
+    if((ret_value = H5O__visit(loc_id, obj_name, idx_type, order, op, op_data, fields)) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_BADITER, FAIL, "object visitation failed")
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5Ovisit_by_name() */
+} /* end H5Ovisit_by_name2() */
 
 
 /*-------------------------------------------------------------------------

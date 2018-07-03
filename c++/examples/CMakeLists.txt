@@ -34,7 +34,7 @@ set (tutr_examples
 
 foreach (example ${examples})
   add_executable (cpp_ex_${example} ${HDF5_CPP_EXAMPLES_SOURCE_DIR}/${example}.cpp)
-  target_include_directories(cpp_ex_${example} PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR}")
+  target_include_directories(cpp_ex_${example} PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
   TARGET_C_PROPERTIES (cpp_ex_${example} STATIC)
   target_link_libraries (cpp_ex_${example} PRIVATE ${HDF5_CPP_LIB_TARGET} ${HDF5_LIB_TARGET})
   set_target_properties (cpp_ex_${example} PROPERTIES FOLDER examples/cpp)
@@ -42,7 +42,7 @@ endforeach ()
 
 foreach (example ${tutr_examples})
   add_executable (cpp_ex_${example} ${HDF5_CPP_EXAMPLES_SOURCE_DIR}/${example}.cpp)
-  target_include_directories(cpp_ex_${example} PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR}")
+  target_include_directories(cpp_ex_${example} PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
   TARGET_C_PROPERTIES (cpp_ex_${example} STATIC)
   target_link_libraries (cpp_ex_${example} PRIVATE ${HDF5_CPP_LIB_TARGET} ${HDF5_LIB_TARGET})
   set_target_properties (cpp_ex_${example} PROPERTIES FOLDER examples/cpp)

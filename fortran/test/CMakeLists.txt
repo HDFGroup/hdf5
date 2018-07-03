@@ -44,7 +44,7 @@ set (MOD_BUILD_DIR ${CMAKE_Fortran_MODULE_DIRECTORY}/static/${HDF_CFG_BUILD_TYPE
 add_library (${HDF5_F90_C_TEST_LIB_TARGET} STATIC t.c)
 set_source_files_properties (t.c PROPERTIES LANGUAGE C)
 target_include_directories(${HDF5_F90_C_TEST_LIB_TARGET}
-    PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};${HDF5_F90_BINARY_DIR};${HDF5_F90_BINARY_DIR}/static"
+    PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};${HDF5_F90_BINARY_DIR};${HDF5_F90_BINARY_DIR}/static;$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>"
     INTERFACE "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
 )
 TARGET_C_PROPERTIES (${HDF5_F90_C_TEST_LIB_TARGET} STATIC)
@@ -60,7 +60,7 @@ set_target_properties (${HDF5_F90_C_TEST_LIB_TARGET} PROPERTIES
 if (BUILD_SHARED_LIBS)
   add_library (${HDF5_F90_C_TEST_LIBSH_TARGET} SHARED t.c)
   target_include_directories(${HDF5_F90_C_TEST_LIBSH_TARGET}
-      PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};${HDF5_F90_BINARY_DIR};${HDF5_F90_BINARY_DIR}/shared"
+      PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};${HDF5_F90_BINARY_DIR};${HDF5_F90_BINARY_DIR}/shared;$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>"
       INTERFACE "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
   )
   target_compile_definitions(${HDF5_F90_C_TEST_LIBSH_TARGET}
@@ -169,7 +169,6 @@ if (BUILD_SHARED_LIBS)
           "H5_BUILT_AS_DYNAMIC_LIB"
       PRIVATE
           $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:BUILD_HDF5_TEST_DLL;HDF5F90_WINDOWS>
-          $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:/dll>
           $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_COMPILE_FLAGS}>
   )
   target_link_libraries (${HDF5_F90_TEST_LIBSH_TARGET}
@@ -271,7 +270,6 @@ if (BUILD_SHARED_LIBS)
   )
   target_compile_options(testhdf5_fortran-shared
       PRIVATE
-          $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:/dll>
           $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_COMPILE_FLAGS}>
   )
   target_link_libraries (testhdf5_fortran-shared
@@ -347,7 +345,6 @@ if (BUILD_SHARED_LIBS)
   )
   target_compile_options(testhdf5_fortran_1_8-shared
       PRIVATE
-          $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:/dll>
           $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_COMPILE_FLAGS}>
   )
   target_link_libraries (testhdf5_fortran_1_8-shared
@@ -427,7 +424,6 @@ if (BUILD_SHARED_LIBS)
   )
   target_compile_options(fortranlib_test_F03-shared
       PRIVATE
-          $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:/dll>
           $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_COMPILE_FLAGS}>
   )
   target_link_libraries (fortranlib_test_F03-shared
@@ -489,7 +485,6 @@ if (BUILD_SHARED_LIBS)
   )
   target_compile_options(fflush1-shared
       PRIVATE
-          $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:/dll>
           $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_COMPILE_FLAGS}>
   )
   target_link_libraries (fflush1-shared
@@ -551,7 +546,6 @@ if (BUILD_SHARED_LIBS)
   )
   target_compile_options(fflush2-shared
       PRIVATE
-          $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:/dll>
           $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_COMPILE_FLAGS}>
   )
   target_link_libraries (fflush2-shared

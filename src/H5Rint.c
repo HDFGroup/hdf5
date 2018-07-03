@@ -587,7 +587,7 @@ done:
         H5F_t *file;        IN: File the object being dereferenced is within
         H5R_type_t ref_type;    IN: Type of reference to query
         void *ref;          IN: Reference to query.
-	H5O_type_t *obj_type;	OUT: The type of the object, set on success
+        H5O_type_t *obj_type;	OUT: The type of the object, set on success
 
  RETURNS
     Non-negative on success/Negative on failure
@@ -678,12 +678,12 @@ done:
         hid_t lapl_id;  IN: LAPL to use for operation
         hid_t id;       IN: Location ID given for reference
         H5R_type_t ref_type;    IN: Type of reference
-        void *ref;      IN: Reference to query.
+        void *_ref;     IN: Reference to query.
         char *name;     OUT: Buffer to place name of object referenced
         size_t size;    IN: Size of name buffer
 
  RETURNS
-    Non-negative length of the path on success, Negative on failure
+    Non-negative length of the path on success, -1 on failure
  DESCRIPTION
     Given a reference to some object, determine a path to the object
     referenced in the file.
@@ -732,7 +732,7 @@ H5R__get_name(H5F_t *f, hid_t id, H5R_type_t ref_type, const void *_ref,
 
             /* Get the dataset region from the heap (allocate inside routine) */
             if ((buf = (uint8_t *)H5HG_read(oloc.file, &hobjid, NULL, NULL)) == NULL)
-                HGOTO_ERROR(H5E_REFERENCE, H5E_READERROR, FAIL, "Unable to read dataset region information")
+                HGOTO_ERROR(H5E_REFERENCE, H5E_READERROR, (-1), "Unable to read dataset region information")
 
             /* Get the object oid for the dataset */
             p = buf;
@@ -747,22 +747,21 @@ H5R__get_name(H5F_t *f, hid_t id, H5R_type_t ref_type, const void *_ref,
         case H5R_BADTYPE:
         case H5R_MAXTYPE:
         default:
-            HDassert("unknown reference type" && 0);
-            HGOTO_ERROR(H5E_REFERENCE, H5E_UNSUPPORTED, FAIL, "internal error (unknown reference type)")
+            HGOTO_ERROR(H5E_REFERENCE, H5E_UNSUPPORTED, (-1), "internal error (unknown reference type)")
     } /* end switch */
 
     /* Retrieve file ID for name search */
-    if ((file_id = H5I_get_file_id(id, FALSE)) < 0)
-        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL, "can't retrieve file ID")
+    if ((file_id = H5F_get_id(f, FALSE)) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, (-1), "can't get file ID")
 
     /* Get name, length, etc. */
     if ((ret_value = H5G_get_name_by_addr(file_id, &oloc, name, size)) < 0)
-        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL, "can't determine name")
+        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, (-1), "can't determine name")
 
 done:
     /* Close file ID used for search */
     if (file_id > 0 && H5I_dec_ref(file_id) < 0)
-        HDONE_ERROR(H5E_REFERENCE, H5E_CANTDEC, FAIL, "can't decrement ref count of temp ID")
+        HDONE_ERROR(H5E_REFERENCE, H5E_CANTDEC, (-1), "can't decrement ref count of temp ID")
 
     FUNC_LEAVE_NOAPI_VOL(ret_value)
 } /* end H5R__get_name() */

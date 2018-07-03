@@ -1954,12 +1954,12 @@ AC_DEFINE_UNQUOTED([PRINTF_LL_WIDTH], ["$hdf5_cv_printf_ll"],
 ## around to help people migrate to 1.10.x and newer versions.
 ##
 AC_ARG_ENABLE([debug],
-              [AS_HELP_STRING([--enable-debug], [DEPRECATED: use --enable-build-mode=debug])],
-              [AC_MSG_ERROR([--enable-debug is deprecated, use --enable-build-mode=debug instead.])])
+              [AS_HELP_STRING([--enable-debug], [OPTION CHANGE: use --enable-build-mode=debug])],
+              [AC_MSG_ERROR([--enable-debug is no longer supported, use --enable-build-mode=debug instead.])])
 
 AC_ARG_ENABLE([production],
-              [AS_HELP_STRING([--enable-production], [DEPRECATED: use --enable-build-mode=production])],
-              [AC_MSG_ERROR([--enable-production is deprecated, use --enable-build-mode=production instead.])])
+              [AS_HELP_STRING([--enable-production], [OPTION CHANGE: use --enable-build-mode=production])],
+              [AC_MSG_ERROR([--enable-production is no longer supported, use --enable-build-mode=production instead.])])
 
 
 ## ----------------------------------------------------------------------
