@@ -2933,8 +2933,21 @@ H5D__chunk_lookup(const H5D_t *dset, const hsize_t *scaled,
                 H5F_set_coll_md_read(idx_info.f, temp_cmr);
 #endif /* H5_HAVE_PARALLEL */
 
-            /* Cache the information retrieved */
-            H5D__chunk_cinfo_cache_update(&dset->shared->cache.chunk.last, udata);
+            /*
+             * Cache the information retrieved.
+             *
+             * Note that if we are writing to the dataset in parallel and filters
+             * are involved, we skip caching this information as it is highly likely
+             * that the chunk information will be invalidated as a result of the
+             * filter operation (e.g. the chunk gets re-allocated to a different
+             * address in the file and/or gets re-allocated with a different size).
+             * If we were to cache this information, subsequent reads/writes would
+             * retrieve the invalid information and cause a variety of issues.
+             */
+#ifdef H5_HAVE_PARALLEL
+            if ( !((H5F_INTENT(dset->oloc.file) & H5F_ACC_RDWR) && dset->shared->dcpl_cache.pline.nused) )
+#endif
+                H5D__chunk_cinfo_cache_update(&dset->shared->cache.chunk.last, udata);
         } /* end if */
     } /* end else */
 
