@@ -1218,17 +1218,24 @@ H5FD_mpio_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
 
     /*  The group compare return values can be one of the following:
      *   MPI_IDENT(0)     == two groups/communicators are identical
+     *  ----------------  Those below can lead to unexpected
+     *  ----------------  results, so we will return unequal
+     *                    for the file comparison.
      *   MPI_CONGRUENT(1) == two groups/communicators are equal but
      *                       are distinct communication domains
-     *  ----------------  for comparison purposes, the above are ok
-     *  ----------------  but those below can lead to unexpected
-     *  ----------------  results, so we will FAIL the comparison.
      *   MPI_SIMILAR(2)   == two groups have the same members but
      *                       ordering may be different
      *   MPI_UNEQUAL(3)   == self descriptive (unequal)
+     *
+     *  Note: Congruent groups would seem to satisfy the equality
+     *  condition from the file perspective, but there may be conditions
+     *  in which collective operations would cause an application to
+     *  hang if two different communicators are in use, e.g. any
+     *  sort of synchronization (Barrier, Bcast).
      */
-    if (cmp_value >= MPI_SIMILAR)
-        HMPI_GOTO_ERROR(-1, "MPI Comms are incompatable", cmp_value)
+
+    if (cmp_value >= MPI_CONGRUENT)
+        HGOTO_DONE(-1)
 
     if (f1->mpi_rank == 0) {
         /* Because MPI file handles may NOT have any relation to

@@ -1569,7 +1569,10 @@ H5D__virtual_set_extent_unlim(const H5D_t *dset)
             else {
                 /* printf mapping */
                 hsize_t first_missing = 0;  /* First missing dataset in the current block of missing datasets */
-
+#ifdef  H5_HAVE_PARALLEL
+                if (H5F_HAS_FEATURE(dset->oloc.file, H5FD_FEAT_HAS_MPI)) 
+                    HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "parallel operations on printf style datasets not supported")
+#endif
                 /* Search for source datasets */
                 HDassert(storage->printf_gap != HSIZE_UNDEF);
                 for(j = 0; j <= (storage->printf_gap + first_missing); j++) {
@@ -1984,7 +1987,10 @@ H5D__virtual_init_all(const H5D_t *dset)
                 /* printf mapping */
                 size_t sub_dset_max;
                 hbool_t partial_block;
-
+#ifdef  H5_HAVE_PARALLEL
+                if (H5F_HAS_FEATURE(dset->oloc.file, H5FD_FEAT_HAS_MPI)) 
+                    HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "parallel operations on printf style datasets not supported")
+#endif
                 /* Get number of sub-source datasets in current extent */
                 sub_dset_max = (size_t)H5S_hyper_get_first_inc_block(storage->list[i].source_dset.virtual_select, virtual_dims[storage->list[i].unlim_dim_virtual], &partial_block);
                 if(partial_block)
