@@ -175,6 +175,7 @@ $SRC_H5DUMP_TESTFILES/tvldtypes5.h5
 $SRC_H5DUMP_TESTFILES/tvlenstr_array.h5
 $SRC_H5DUMP_TESTFILES/tvlstr.h5
 $SRC_H5DUMP_TESTFILES/tvms.h5
+$SRC_H5DUMP_TESTFILES/err_attr_dspace.h5
 "
 
 LIST_OTHER_TEST_FILES="
@@ -360,6 +361,7 @@ $SRC_H5DUMP_TESTFILES/twithddlfile.exp
 $SRC_H5DUMP_TESTFILES/h5dump-help.txt
 $SRC_H5DUMP_TESTFILES/out3.h5import
 $SRC_H5DUMP_TESTFILES/tbinregR.exp
+$SRC_H5DUMP_TESTFILES/err_attr_dspace.ddl
 "
 
 LIST_ERROR_TEST_FILES="
@@ -1321,6 +1323,9 @@ TOOLTEST4 tdataregR.ddl --enable-error-stack -R tdatareg.h5
 TOOLTEST  tattrreg.ddl --enable-error-stack tattrreg.h5
 TOOLTEST4 tattrregR.ddl --enable-error-stack -R tattrreg.h5
 TOOLTEST2 tbinregR.exp --enable-error-stack -d /Dataset1 -s 0 -R -y -o tbinregR.txt    tdatareg.h5
+
+# test to verify HDFFV-10333: error similar to H5O_attr_decode in the jira issue
+TOOLTEST err_attr_dspace.ddl err_attr_dspace.h5
 
 # Clean up text output files
 if test -z "$HDF5_NOCLEANUP"; then

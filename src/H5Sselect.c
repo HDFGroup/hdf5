@@ -160,7 +160,7 @@ H5S_select_release(H5S_t *ds)
     HDassert(ds);
 
     /* Call the selection type's release function */
-    if((ret_value = (*ds->select.type->release)(ds)) < 0)
+    if((ds->select.type) && ((ret_value = (*ds->select.type->release)(ds)) < 0))
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection")
 
 done:

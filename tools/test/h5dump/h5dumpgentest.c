@@ -113,6 +113,7 @@
 #define FILE83  "tvlenstr_array.h5"
 #define FILE84  "tudfilter.h5"
 #define FILE85  "tgrpnullspace.h5"
+#define FILE86  "err_attr_dspace.h5"
 
 /*-------------------------------------------------------------------------
  * prototypes
@@ -10476,6 +10477,89 @@ static void gent_null_space_group(void)
     H5Fclose(fid);
 }
 
+/*-------------------------------------------------------------------------
+ * Function: gent_err_attr_dspace
+ *
+ * Purpose: Generate a file with shared dataspace message.
+ *          Then write an illegal version to the shared dataspace message
+ *          to trigger the error.
+ *          This is to verify HDFFV-10333 that h5dump will exit
+ *          gracefully when encountered error similar to 
+ *          H5O_attr_decode in the jira issue.
+ *
+ *-------------------------------------------------------------------------
+ */
+static void 
+gent_err_attr_dspace()
+{
+    hid_t fid = -1;         /* File identifier */
+    hid_t fcpl = -1;        /* File access property list */
+    hid_t sid;              /* Dataspace identifier */
+    hid_t aid;              /* Attribute identifier */
+    hsize_t dims = 2;       /* Dimensino size */
+    int wdata[2] = {7, 42}; /* The buffer to write */
+    int fd = -1;            /* The file descriptor */
+    char val = 6;           /* An invalid version */
+
+    /* Create an fcpl */
+    if((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
+        goto error;
+
+    /* Set up the dataspace message to be shared */
+    if(H5Pset_shared_mesg_nindexes(fcpl, 1) < 0)
+        goto error;
+    if(H5Pset_shared_mesg_index(fcpl, 0, H5O_SHMESG_SDSPACE_FLAG, 1) < 0)
+        goto error;
+
+    /* Create the file with the shared message setting */
+    if((fid = H5Fcreate(FILE86, H5F_ACC_TRUNC, fcpl, H5P_DEFAULT)) < 0)
+        goto error;
+
+    /* Create the dataspace */
+    if((sid = H5Screate_simple(1, &dims, &dims)) < 0)
+        goto error;
+
+    /* Create an attribute with shared dataspace  */
+    if((aid = H5Acreate2(fid, "attribute", H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        goto error;
+    if(H5Awrite(aid, H5T_NATIVE_INT, wdata) < 0)
+        goto error;
+
+    /* Closing */
+    if(H5Aclose(aid) < 0)
+        goto error;
+    if(H5Sclose(sid) < 0)
+        goto error;
+    if(H5Pclose(fcpl) < 0)
+        goto error;
+    if(H5Fclose(fid) < 0)
+        goto error;
+
+    /* This section of code will write an illegal version to the "version" field 
+       of the shared dataspace message */
+    if((fd = HDopen(FILE86, O_RDWR, 0633)) < 0)
+        goto error;
+
+    /* Offset of the "version" field to modify is as follows: */
+    /* 1916: offset of the object header containing the attribute message */
+    /* 32: offset of the attribute message in the object header */
+    /* 30: offset in the attribute message containing the version of the shared dataspace message */
+    if(HDlseek(fd, 1916+32+30, SEEK_SET) < 0)
+        goto error;
+    if(HDwrite(fd, &val, 1) < 0)
+        goto error;
+    if(HDclose(fd) < 0)
+        goto error;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Pclose(fcpl);
+        H5Aclose(aid);
+        H5Sclose(sid);
+        H5Fclose(fid);
+    } H5E_END_TRY;
+} /* gen_err_attr_dspace() */
+
 int main(void)
 {
     gent_group();
@@ -10568,6 +10652,8 @@ int main(void)
     gent_null_space_group();
 
     gent_udfilter();
+
+    gent_err_attr_dspace();
 
     return 0;
 }
