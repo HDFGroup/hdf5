@@ -1324,9 +1324,6 @@ TOOLTEST  tattrreg.ddl --enable-error-stack tattrreg.h5
 TOOLTEST4 tattrregR.ddl --enable-error-stack -R tattrreg.h5
 TOOLTEST2 tbinregR.exp --enable-error-stack -d /Dataset1 -s 0 -R -y -o tbinregR.txt    tdatareg.h5
 
-# test to verify HDFFV-10333: error similar to H5O_attr_decode in the jira issue
-TOOLTEST err_attr_dspace.ddl err_attr_dspace.h5
-
 # Clean up text output files
 if test -z "$HDF5_NOCLEANUP"; then
  rm -f tbinregR.txt
@@ -1368,6 +1365,9 @@ TOOLTEST2 tall-6.exp --enable-error-stack -y -o tall-6.txt -d /g1/g1.1/dset1.1.1
 
 # test for non-existing file
 TOOLTEST3 non_existing.ddl --enable-error-stack tgroup.h5 non_existing.h5
+
+# test to verify HDFFV-10333: error similar to H5O_attr_decode in the jira issue
+TOOLTEST err_attr_dspace.ddl err_attr_dspace.h5
 
 # Clean up temporary files/directories
 CLEAN_TESTFILES_AND_TESTDIR

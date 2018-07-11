@@ -21,6 +21,7 @@
   # --------------------------------------------------------------------
   set (HDF5_REFERENCE_FILES
       ${HDF5_TOOLS_DIR}/testfiles/charsets.ddl
+      ${HDF5_TOOLS_DIR}/testfiles/err_attr_dspace.ddl
       ${HDF5_TOOLS_DIR}/testfiles/file_space.ddl
       ${HDF5_TOOLS_DIR}/testfiles/filter_fail.ddl
       ${HDF5_TOOLS_DIR}/testfiles/non_existing.ddl
@@ -217,6 +218,7 @@
   )
   set (HDF5_REFERENCE_TEST_FILES
       ${HDF5_TOOLS_DIR}/testfiles/charsets.h5
+      ${HDF5_TOOLS_DIR}/testfiles/err_attr_dspace.h5
       ${HDF5_TOOLS_DIR}/testfiles/file_space.h5
       ${HDF5_TOOLS_DIR}/testfiles/filter_fail.h5
       ${HDF5_TOOLS_DIR}/testfiles/packedbits.h5
@@ -1532,6 +1534,9 @@
 
   # test for non-existing file
   ADD_H5_TEST (non_existing 1 --enable-error-stack tgroup.h5 non_existing.h5)
+
+  # test to verify HDFFV-10333: error similar to H5O_attr_decode in the jira issue
+  ADD_H5_TEST (err_attr_dspace 1 err_attr_dspace.h5)
 
 ##############################################################################
 ###    P L U G I N  T E S T S
