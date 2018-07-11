@@ -21,6 +21,7 @@
  * of the expected output and update the corresponding *.ddl files.
  */
 #include "hdf5.h"
+#include "H5private.h"
 
 /* For gen_newgrat_file() */
 #define NEWGRAT_FILE 	"h5stat_newgrat.h5"
@@ -42,6 +43,9 @@
 #define THRES_DSET_NAME 	"dset"
 #define THRES_NUM		10
 #define THRES_NUM_25		25
+
+/* For gen_err_refcount() */
+#define ERR_REFCOUNT_FILE   "h5stat_err_refcount.h5"
 
 /*
  * Generate HDF5 file with latest format with
@@ -434,6 +438,141 @@ error:
 
 } /* gen_idx_file() */
 
+/*
+ * Function: gen_err_refcount_file
+ *
+ * Purpose: Create a file with a refcount message ID.
+ *          Then a refcount message ID is written to a
+ *          message in a version 1 object header.
+ *          This will trigger the error as a version 1
+ *          object header does not support a refcount message.
+ *          This is to verify HDFFV-10333 that h5stat will exit
+ *          gracefully when encountered error similar to
+ *          H5O_refcount_decode in the jira issue.
+ *
+ */
+static void 
+gen_err_refcount(const char *fname)
+{
+    hid_t fid = -1;     /* File identifier */
+    hid_t fapl = -1;    /* File access property list */
+    hid_t sid = -1;     /* Dataspace message */
+    hid_t did = -1;     /* Dataset identifier */
+    hid_t gid = -1;     /* Group identifier */
+    hid_t aid1 = -1, aid2 = -1;     /* Attribute identifier */
+    hid_t tid = -1;     /* Datatype identifier */
+    int i, n;           /* Local index variables */
+    int buf[10];        /* Data buffer */
+    hsize_t dims[1];    /* Dimension size */
+    int fd = -1;        /* File descriptor */
+    unsigned short val = 22;        /* The refcount message ID */
+
+    /* Initialize data buffer */
+    n = 0;
+    for(i = 0; i < 10; i++)
+        buf[i] = n++;
+
+    /* Create the file */
+    if((fid = H5Fcreate(fname, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        goto error;
+
+    /* Create a group */
+    if((gid = H5Gcreate2(fid, "group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        goto error;
+
+    /* Create a committed datatype in the group */
+    if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0)
+        goto error;
+    if(H5Tcommit2(gid, "dtype", tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0)
+        goto error;
+
+    /* Create the dataspace */
+    dims[0] = 10;
+    if((sid = H5Screate_simple(1, dims, NULL)) < 0)
+        goto error;
+
+    /* Create a dataset with the committed datatype in the file */
+    if((did = H5Dcreate2(fid, "dset", tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        goto error;
+    /* Write to the dataset */
+    if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
+        goto error;
+
+    /* Attach an attribute with the committed datatype to the group */
+    if((aid1 = H5Acreate2(gid, "attr", tid, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        goto error;
+    /* Attach an attribute with the committed datatype to the dataset */
+    if((aid2 = H5Acreate2(did, "attr", tid, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        goto error;
+
+    /* Closing */
+    if(H5Aclose(aid1) < 0)
+        goto error;
+    if(H5Aclose(aid2) < 0)
+        goto error;
+    if(H5Sclose(sid) < 0)
+        goto error;
+    if(H5Dclose(did) < 0)
+        goto error;
+    if(H5Gclose(gid) < 0)
+        goto error;
+    if(H5Tclose(tid) < 0)
+        goto error;
+    if(H5Fclose(fid) < 0)
+        goto error;
+
+    /* This section of code will write a refcount message ID to a message in the
+       version 1 object header which does not support a refcount message */
+    /* Offset of the message ID to modify is as follows: */
+    /* 4520: the offset of the object header containing the attribute message
+             with the committed datatype */
+    /* 24: the offset in the object header containing the version of the 
+           attribute message */
+    if((fd = HDopen(fname, O_RDWR, 0633)) < 0)
+        goto error;
+    if(HDlseek(fd, 4520+24, SEEK_SET) < 0)
+        goto error;
+    if(HDwrite(fd, &val, 2) < 0)
+        goto error;
+    if(HDclose(fd) < 0)
+        goto error;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Gclose(gid);
+        H5Dclose(did);
+        H5Tclose(tid);
+        H5Sclose(sid);
+        H5Aclose(aid1);
+        H5Aclose(aid2);
+        H5Fclose(fid);
+    } H5E_END_TRY;
+} /* gen_err_refcount() */
+
+/* 
+ * The following two test files are generated with older versions 
+ * of the library for HDFFV-10333.  They are used for testing in
+ * testh5stat.sh.in.
+ *
+ * (1) h5stat_err_old_layout.h5
+ *     This file is generated with the 1.6 library so that a file
+ *     with a version 2 layout message is created.
+ *     Then a "0" is written to the "dimension" field in the layout
+ *     message to trigger the error.
+ *     This is to verify HDFFV-10333 that h5stat will exit gracefully
+ *     when encountered error similar to H5O__layout_decode in the 
+ *     jira issue.
+ *
+ * (2) h5stat_err_old_fill.h5
+ *     This file is generated with the 1.4 library so that a file
+ *     with an old fill value message is created.
+ *     Then an illegal size is written to the "size" fild in the
+ *     fill value message to trigger the error.
+ *     This is to verify HDFFV-10333 that h5stat will exit gracefully
+ *     when encountered error similar to H5O_fill_old_decode in the 
+ *     jira issue.
+ */
+
 int main(void)
 {
     gen_newgrat_file(NEWGRAT_FILE);
@@ -441,6 +580,9 @@ int main(void)
 
     /* Generate an HDF file to test for datasets with Fixed Array indexing */
     gen_idx_file(IDX_FILE);
+
+    /* Generate a file with a refcount message ID */
+    gen_err_refcount(ERR_REFCOUNT_FILE);
 
     return 0;
 }
