@@ -455,7 +455,6 @@ static void
 gen_err_refcount(const char *fname)
 {
     hid_t fid = -1;     /* File identifier */
-    hid_t fapl = -1;    /* File access property list */
     hid_t sid = -1;     /* Dataspace message */
     hid_t did = -1;     /* Dataset identifier */
     hid_t gid = -1;     /* Group identifier */
