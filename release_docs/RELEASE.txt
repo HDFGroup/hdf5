@@ -67,7 +67,13 @@ New Features
 
     Java Library:
     ----------------
-    -
+    - JNI Read and Write
+
+      Refactored variable-length functions, H5DreadVL and H5AreadVL,
+      to correct dataset and attribute reads. New write functions,
+      H5DwriteVL and H5AwriteVL, are under construction.
+
+      (ADB - 2018/06/02, HDFFV10519)
 
     Tools:
     ------
