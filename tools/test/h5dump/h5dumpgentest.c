@@ -10494,8 +10494,8 @@ gent_err_attr_dspace()
 {
     hid_t fid = -1;         /* File identifier */
     hid_t fcpl = -1;        /* File access property list */
-    hid_t sid;              /* Dataspace identifier */
-    hid_t aid;              /* Attribute identifier */
+    hid_t sid = -1;         /* Dataspace identifier */
+    hid_t aid = -1;         /* Attribute identifier */
     hsize_t dims = 2;       /* Dimensino size */
     int wdata[2] = {7, 42}; /* The buffer to write */
     int fd = -1;            /* The file descriptor */

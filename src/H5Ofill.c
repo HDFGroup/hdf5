@@ -19,7 +19,6 @@
  */
 
 #include "H5Omodule.h"          /* This source code file is part of the H5O module */
-#define H5T_FRIEND      /*prevent warning from including H5Tpkg   */
 
 
 #include "H5private.h"      /* Generic Functions    */
@@ -32,7 +31,6 @@
 #include "H5Pprivate.h"     /* Property lists       */
 #include "H5Sprivate.h"     /* Dataspaces           */
 
-#include "H5Tpkg.h"         /* Datatypes            */
 
 static void  *H5O_fill_old_decode(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags,
     unsigned *ioflags, size_t p_size, const uint8_t *p);
@@ -345,7 +343,7 @@ H5O_fill_old_decode(H5F_t *f, H5O_t *open_oh,
             if((dt = H5O_msg_read_oh(f, open_oh, H5O_DTYPE_ID, NULL)) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTGET, NULL, "can't read DTYPE message")
             /* Verify size */
-            if(fill->size != dt->shared->size)
+            if(fill->size != H5T_GET_SIZE(dt))
                 HGOTO_ERROR(H5E_SYM, H5E_CANTGET, NULL, "inconsistent fill value size")
         }
 
