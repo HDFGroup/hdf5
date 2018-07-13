@@ -526,7 +526,7 @@ H5D__mpio_array_gatherv(void *local_array, size_t local_array_num_entries,
         else {
             if (MPI_SUCCESS != (mpi_code = MPI_Gatherv(local_array, sendcount, MPI_BYTE,
                     gathered_array, receive_counts_array, displacements_array, MPI_BYTE, root, comm)))
-                HMPI_GOTO_ERROR(FAIL, "MPI_Allgatherv failed", mpi_code)
+                HMPI_GOTO_ERROR(FAIL, "MPI_Gatherv failed", mpi_code)
         } /* end else */
 
         if (sort_func && (allgather || (mpi_rank == root)))
