@@ -1332,7 +1332,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5P__dcrt_ext_file_list_get
  *
- * Purpose:     Copies an external file lsit property when it's retrieved from a property list
+ * Purpose:     Copies an external file list property when it's retrieved from a property list
  *
  * Return:      Success:        Non-negative
  *              Failure:        Negative
@@ -2245,7 +2245,7 @@ H5Pset_virtual(hid_t dcpl_id, hid_t vspace_id, const char *src_file_name,
 
 done:
     /* Set VDS layout information in property list */
-    /* (Even on faliure, so there's not a mangled layout struct in the list) */
+    /* (Even on failure, so there's not a mangled layout struct in the list) */
     if(retrieved_layout) {
         if(H5P_poke(plist, H5D_CRT_LAYOUT_NAME, &virtual_layout) < 0) {
             HDONE_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set layout")

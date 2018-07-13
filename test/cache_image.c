@@ -511,7 +511,7 @@ delete_datasets(hid_t file_id, int min_dset, int max_dset)
  *		FAPL entry when opening the file, and verify that the 
  *		metadata cache is notified.
  *
- *		If config_fsm is TRUE, setup the persistant free space 
+ *		If config_fsm is TRUE, setup the persistent free space 
  *		manager.  Note that this flag may only be set if 
  *		create_file is also TRUE.
  *
@@ -654,7 +654,7 @@ open_hdf5_file(hbool_t create_file, hbool_t mdci_sbem_expected,
 
     if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
-    /* setup the persistant free space manager if indicated */
+    /* setup the persistent free space manager if indicated */
     if ( ( pass ) && ( config_fsm ) ) {
 
 	fcpl_id = H5Pcreate(H5P_FILE_CREATE);
@@ -5149,9 +5149,9 @@ cache_image_smoke_check_5(void)
  *	       13) Close the file.
  *
  *             14) Get the size of the file.  Verify that it is less 
- *		   than 20 KB.  Without deletions and persistant free 
+ *		   than 20 KB.  Without deletions and persistent free 
  *		   space managers, size size is about 167 MB, so this 
- *		   is sufficient to verify that the persistant free 
+ *		   is sufficient to verify that the persistent free 
  *		   space managers are more or less doing their job.
  *
  *                 Note that in the absence of paged allocation, file
@@ -5473,9 +5473,9 @@ cache_image_smoke_check_6(void)
 
 
     /* 14) Get the size of the file.  Verify that it is less
-     *     than 20 KB.  Without deletions and persistant free
+     *     than 20 KB.  Without deletions and persistent free
      *     space managers, size size is about 167 MB, so this
-     *     is sufficient to verify that the persistant free
+     *     is sufficient to verify that the persistent free
      *     space managers are more or less doing their job.
      *
      *     Note that in the absence of paged allocation, file
@@ -7160,7 +7160,7 @@ cache_image_api_error_check_4(void)
  *		called before any activity on the metadata cache.
  *              This is a potential problem, as satisfying the 
  *              H5Fget_free_sections() call requires access to all 
- *              free space managers.  When persistant free space 
+ *              free space managers.  When persistent free space 
  *              managers are enabled, this will require calling
  *              H5MF_tidy_self_referential_fsm_hack().  This is a 
  *              non issue in the absence of a cache image.  However,
@@ -7179,7 +7179,7 @@ cache_image_api_error_check_4(void)
  *		The test is set up as follows:
  *
  *		 1) Create a HDF5 file with a cache image requested
- *                  and persistant free space managers enabled.  
+ *                  and persistent free space managers enabled.  
  *
  *		 2) Create some data sets, and then delete some of 
  *                  of those near the beginning of the file.
@@ -7273,7 +7273,7 @@ get_free_sections_test(void)
 
 
     /* 1) Create a HDF5 file with a cache image requested
-     *    and persistant free space managers enabled.  
+     *    and persistent free space managers enabled.  
      */
 
     if ( pass ) {
@@ -7666,13 +7666,13 @@ get_free_sections_test(void)
  *              the dirty metadata, the second scan will fail, as valid 
  *              versions of the dirty metadata will not be available.
  *
- *              To make the test more useful, enable persistant free 
+ *              To make the test more useful, enable persistent free 
  *              space managers.
  *
  *		The test is set up as follows:
  *
  *		 1) Create a HDF5 file without a cache image requested
- *                  and persistant free space managers enabled.  
+ *                  and persistent free space managers enabled.  
  *
  *		 2) Create some data sets and verify them.
  *
@@ -7753,7 +7753,7 @@ evict_on_close_test(void)
 
 
     /* 1) Create a HDF5 file without a cache image requested
-     *    and persistant free space managers enabled.  
+     *    and persistent free space managers enabled.  
      */
     if ( pass ) {
 

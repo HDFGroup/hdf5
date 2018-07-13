@@ -46,13 +46,13 @@
 /* Limit on the size of the max. direct block size */
 /* (This is limited to 32-bits currently, because I think it's unlikely to
  *      need to be larger, the 32-bit limit for H5VM_log2_of2(n), and
- *      some offsets/sizes are encoded with a maxiumum of 32-bits  - QAK)
+ *      some offsets/sizes are encoded with a maximum of 32-bits  - QAK)
  */
 #define H5HF_MAX_DIRECT_SIZE_LIMIT ((hsize_t)2 * 1024 * 1024 * 1024)
 
 /* Limit on the width of the doubling table */
 /* (This is limited to 16-bits currently, because I think it's unlikely to
- *      need to be larger, and its encoded with a maxiumum of 16-bits  - QAK)
+ *      need to be larger, and its encoded with a maximum of 16-bits  - QAK)
  */
 #define H5HF_WIDTH_LIMIT (64 * 1024)
 #endif /* NDEBUG */

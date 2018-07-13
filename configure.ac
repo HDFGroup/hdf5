@@ -411,7 +411,7 @@ AC_CHECK_SIZEOF([double])
 AC_CHECK_SIZEOF([long double])
 
 ## ----------------------------------------------------------------------
-## Check for non-standard extenstion __FLOAT128
+## Check for non-standard extension __FLOAT128
 ##
 HAVE_FLOAT128=0
 HAVE_QUADMATH=0

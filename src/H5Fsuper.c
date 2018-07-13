@@ -823,13 +823,13 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, hbool_t initial_read)
                     f->shared->eoa_pre_fsm_fsalloc = fsinfo.eoa_pre_fsm_fsalloc;
 
                /* f->shared->eoa_pre_fsm_fsalloc must always be HADDR_UNDEF
-                * in the absence of persistant free space managers.
+                * in the absence of persistent free space managers.
                 */
                 /* If the following two conditions are true:
                  *       (1) skipping EOF check (skip_eof_check)
                  *       (2) dropping free-space to the floor (null_fsm_addr)
                  *  skip the asserts as "eoa_pre_fsm_fsalloc" may be undefined
-                 *  for a crashed file with persistant free space managers.
+                 *  for a crashed file with persistent free space managers.
                  *  #1 and #2 are enabled when the tool h5clear --increment
                  *  option is used.
                  */
@@ -839,7 +839,7 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, hbool_t initial_read)
                 } /* end if */
 
                 /* As "eoa_pre_fsm_fsalloc" may be undefined for a crashed file
-                 * with persistant free space managers, therefore, set
+                 * with persistent free space managers, therefore, set
                  * "first_alloc_dealloc" when the condition 
                  * "dropping free-space to the floor is true.
                  * This will ensure that no action is done to settle things on file

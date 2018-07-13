@@ -239,7 +239,7 @@ done:
  * Purpose:	Modifies an existing message or creates a new message.
  *
  *              The UPDATE_FLAGS argument are flags that allow the caller
- *              to skip updating the modification time or reseting the message
+ *              to skip updating the modification time or resetting the message
  *              data.  This is useful when several calls to H5O_msg_write will be
  *              made in a sequence.
  *
@@ -296,7 +296,7 @@ done:
  * Purpose:	Modifies an existing message or creates a new message.
  *
  *              The UPDATE_FLAGS argument are flags that allow the caller
- *              to skip updating the modification time or reseting the message
+ *              to skip updating the modification time or resetting the message
  *              data.  This is useful when several calls to H5O_msg_write will be
  *              made in a sequence.
  *
@@ -343,7 +343,7 @@ done:
  * Purpose:	Modifies an existing message or creates a new message.
  *
  *              The UPDATE_FLAGS argument are flags that allow the caller
- *              to skip updating the modification time or reseting the message
+ *              to skip updating the modification time or resetting the message
  *              data.  This is useful when several calls to H5O_msg_write will be
  *              made in a sequence.
  *
