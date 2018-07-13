@@ -2944,6 +2944,12 @@ H5D__chunk_lookup(const H5D_t *dset, const hsize_t *scaled,
              * If we were to cache this information, subsequent reads/writes would
              * retrieve the invalid information and cause a variety of issues.
              *
+             * It has been verified that in the serial library, when writing to chunks
+             * with the real chunk cache disabled and with filters involved, the
+             * functions within this file are correctly called in such a manner that
+             * this single chunk cache is always updated correctly. Therefore, this
+             * check is not needed for the serial library.
+             *
              * This is an ugly and potentially frail check, but the
              * H5D__chunk_cinfo_cache_reset() function is not currently available
              * to functions outside of this file, so outside functions can not
@@ -2952,7 +2958,7 @@ H5D__chunk_lookup(const H5D_t *dset, const hsize_t *scaled,
              * each chunk in the write operation, when we're only going to invalidate
              * the cache at the end of a parallel write anyway.
              *
-             *  - JTH
+             *  - JTH (7/13/2018)
              */
 #ifdef H5_HAVE_PARALLEL
             if ( !(    (H5F_HAS_FEATURE(idx_info.f, H5FD_FEAT_HAS_MPI))
