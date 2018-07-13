@@ -532,7 +532,7 @@ H5T_conv_t DataType::find(const DataType& dest, H5T_cdata_t **pcdata) const
 ///\param       nelmts     - IN: Size of array \a buf
 ///\param       buf        - IN/OUT: Array containing pre- and post-conversion
 ///                            values
-///\param       background - IN: Optional backgroud buffer
+///\param       background - IN: Optional background buffer
 ///\param       plist - IN: Property list - default to PropList::DEFAULT
 ///\return      Pointer to a suitable conversion function
 ///\exception   H5::DataTypeIException
@@ -558,7 +558,7 @@ void DataType::convert(const DataType& dest, size_t nelmts, void *buf, void *bac
 ///\brief       Locks a datatype, making it read-only and non-destructible.
 ///
 ///\exception   H5::DataTypeIException
-///\par Descrition
+///\par Description
 ///             This is normally done by the library for predefined data
 ///             types so the application doesn't inadvertently change or
 ///             delete a predefined type.

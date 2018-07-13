@@ -43,7 +43,7 @@ static const char *FileHeader = "\n\
  *        system or configure has detected those Unix
  *        features which aren't available.  We're not
  *        running on a Vax or other machine with mixed
- *        endianess.
+ *        endianness.
  *
  * Modifications:
  *
@@ -691,7 +691,7 @@ H5T__init_native(void)\n\
     FUNC_ENTER_PACKAGE\n");
 
     for(i = 0; i < nd; i++) {
-        /* The native endianess of this machine */
+        /* The native endianness of this machine */
         /* The INFO.perm now contains `-1' for bytes that aren't used and
          * are always zero.  This happens on the Cray for `short' where
          * sizeof(short) is 8, but only the low-order 4 bytes are ever used.
@@ -1075,8 +1075,8 @@ fix_order(int n, int last, int *perm, const char **mesg)
     } else {
         /*
         * Bi-endian machines like VAX.
-             * (NOTE: This is not an actual determination of the VAX-endianess.
-             *          It could have some other endianess and fall into this
+             * (NOTE: This is not an actual determination of the VAX-endianness.
+             *          It could have some other endianness and fall into this
              *          case - JKM & QAK)
         */
         HDassert(0 == n % 2);
@@ -1107,7 +1107,7 @@ fix_order(int n, int last, int *perm, const char **mesg)
  *
  *        This function assumes that the exponent occupies higher
  *        order bits than the mantissa and that the most significant
- *        bit of the mantissa is next to the least signficant bit
+ *        bit of the mantissa is next to the least significant bit
  *        of the exponent.
  *
  *
@@ -1267,7 +1267,7 @@ mark.  Bits of integer types are printed as\n\
 If the most significant bit of the normalized\n\
 mantissa (always a `1' except for `0.0') is\n\
 not stored then an `implicit=yes' appears\n\
-under the field description.  In thie case,\n\
+under the field description.  In this case,\n\
 the radix point is still assumed to be\n\
 before the first `M' but after the implicit\n\
 bit.\n";

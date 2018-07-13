@@ -695,7 +695,7 @@ H5D__chunk_set_info_real(H5O_layout_chunk_t *layout, unsigned ndims,
 
     /* Compute the # of chunks in dataset dimensions */
     for(u = 0, layout->nchunks = 1, layout->max_nchunks = 1; u < ndims; u++) {
-        /* Round up to the next integer # of chunks, to accomodate partial chunks */
+        /* Round up to the next integer # of chunks, to accommodate partial chunks */
         layout->chunks[u] = ((curr_dims[u] + layout->dim[u]) - 1) / layout->dim[u];
         if(H5S_UNLIMITED == max_dims[u])
             layout->max_chunks[u] = H5S_UNLIMITED;
@@ -3049,7 +3049,7 @@ H5D__chunk_flush_entry(const H5D_t *dset, H5D_rdcc_ent_t *ent, hbool_t reset)
             } /* end if */
             else {
                 /*
-                 * If we are reseting and something goes wrong after this
+                 * If we are resetting and something goes wrong after this
                  * point then it's too late to recover because we may have
                  * destroyed the original data by calling H5Z_pipeline().
                  * The only safe option is to continue with the reset
@@ -4482,7 +4482,7 @@ H5D__chunk_update_old_edge_chunks(H5D_t *dset, hsize_t old_dim[])
         /* Start off with this dimension marked as not needing to be modified */
         new_full_dim[op_dim] = FALSE;
 
-        /* Calulate offset of first previously incomplete chunk in this
+        /* Calculate offset of first previously incomplete chunk in this
          * dimension */
 	old_edge_chunk_sc[op_dim] = (old_dim[op_dim] / chunk_dim[op_dim]);
 
@@ -5003,7 +5003,7 @@ H5D__chunk_prune_by_extent(H5D_t *dset, const hsize_t *old_dim)
             HGOTO_DONE(SUCCEED)
         } /* end if */
 
-    /* Round up to the next integer # of chunks, to accomodate partial chunks */
+    /* Round up to the next integer # of chunks, to accommodate partial chunks */
     /* Use current dims because the indices have already been updated! -NAF */
     /* (also compute the number of elements per chunk) */
     /* (also copy the chunk dimensions into 'hsize_t' array for creating dataspace) */

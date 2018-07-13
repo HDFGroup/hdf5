@@ -1692,7 +1692,7 @@ HDfprintf(stderr, "%s: Entering\n", FUNC);
     } /* end if */
 
     /* Set the ring type in the API context.  In most cases, we will
-     * need H5AC_RING_RDFSM, so initialy set the ring in
+     * need H5AC_RING_RDFSM, so initially set the ring in
      * the context to that value.  We will alter this later if needed.
      */
     H5AC_set_ring(H5AC_RING_RDFSM, &orig_ring);
@@ -1788,7 +1788,7 @@ HDfprintf(stderr, "%s: Entering\n", FUNC);
     HDassert(f->shared->sblock);
 
     /* Set the ring type in the API context.  In most cases, we will
-     * need H5AC_RING_RDFSM, so initialy set the ring in
+     * need H5AC_RING_RDFSM, so initially set the ring in
      * the context to that value.  We will alter this later if needed.
      */
     H5AC_set_ring(H5AC_RING_RDFSM, &orig_ring);
@@ -1956,7 +1956,7 @@ HDfprintf(stderr, "%s: Entering\n", FUNC);
     HDassert(f->shared->sblock->super_vers >= HDF5_SUPERBLOCK_VERSION_2);
 
     /* Set the ring type in the API context.  In most cases, we will
-     * need H5AC_RING_RDFSM, so initialy set the ring in
+     * need H5AC_RING_RDFSM, so initially set the ring in
      * the context to that value.  We will alter this later if needed.
      */
     H5AC_set_ring(H5AC_RING_RDFSM, &orig_ring);
@@ -2244,7 +2244,7 @@ H5MF_get_freespace(H5F_t *f, hsize_t *tot_space, hsize_t *meta_size)
     HDassert(f->shared->lf);
 
     /* Set the ring type in the API context.  In most cases, we will
-     * need H5AC_RING_RDFSM, so initialy set the ring in
+     * need H5AC_RING_RDFSM, so initially set the ring in
      * the context to that value.  We will alter this later if needed.
      */
     H5AC_set_ring(H5AC_RING_RDFSM, &orig_ring);
@@ -2419,7 +2419,7 @@ H5MF_get_free_sections(H5F_t *f, H5FD_mem_t type, size_t nsects, H5F_sect_info_t
     sect_udata.sect_idx = 0;
 
     /* Set the ring type in the API context.  In most cases, we will
-     * need H5AC_RING_RDFSM, so initialy set the ring in
+     * need H5AC_RING_RDFSM, so initially set the ring in
      * the context to that value.  We will alter this later if needed.
      */
     H5AC_set_ring(H5AC_RING_RDFSM, &orig_ring);
@@ -2712,7 +2712,7 @@ H5MF_settle_raw_data_fsm(H5F_t *f, hbool_t *fsm_settled)
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "can't free aggregators")
 
         /* Set the ring type in the DXPL.  In most cases, we will
-         * need H5AC_RING_MDFSM first, so initialy set the ring in
+         * need H5AC_RING_MDFSM first, so initially set the ring in
          * the DXPL to that value.  We will alter this later if
          * needed.
          */
@@ -2829,7 +2829,7 @@ H5MF_settle_raw_data_fsm(H5F_t *f, hbool_t *fsm_settled)
          *    extension messages will choke if the target message is
          *    unexpectedly either absent or present.
          *
-         *    Update: This is probably unecessary, as I gather that the 
+         *    Update: This is probably unnecessary, as I gather that the 
          *            file space manager info message is guaranteed to exist.
          *            Leave it in for now, but consider removing it.
          */
@@ -3083,7 +3083,7 @@ done:
  *		   of these free space manager(s) only to have the allocation 
  *		   result in the free space manager being empty and thus 
  *		   obliging us to free the space again.  Thus there is the
- *		   potential for an infinte loop if we want to avoid saving
+ *		   potential for an infinite loop if we want to avoid saving
  *		   empty free space managers.
  *
  *		   Similarly, it is possible that we could allocate space 
@@ -3280,7 +3280,7 @@ H5MF_settle_meta_data_fsm(H5F_t *f, hbool_t *fsm_settled)
          *           extension message.  
          *
          *           As of this writing, we are solving this problem by 
-         *           simply not supporting persistant FSMs with the split 
+         *           simply not supporting persistent FSMs with the split 
          *           and multi file drivers.
          *
          *           Current plans are to do away with the multi file 
@@ -3296,7 +3296,7 @@ H5MF_settle_meta_data_fsm(H5F_t *f, hbool_t *fsm_settled)
 
         /* ******************* PROBLEM: ********************
          *
-         * If the file has an alignement other than 1, and if
+         * If the file has an alignment other than 1, and if
          * the EOA is not a multiple of this alignment, allocating sapce
          * for the section via the VFD info has the potential of generating
          * a fragment that will be added to the free space manager.  This
@@ -3433,7 +3433,7 @@ H5MF__fsm_type_is_self_referential(H5F_t *f, H5F_mem_page_t fsm_type)
         /* In principle, fsm_type should always be less than 
          * H5F_MEM_PAGE_LARGE_SUPER whenever paged aggregation
          * is not enabled.  However, since there is code that does
-         * not observe this prinicple, force the result to FALSE if
+         * not observe this principle, force the result to FALSE if
          * fsm_type is greater than or equal to H5F_MEM_PAGE_LARGE_SUPER.
          */
         if(fsm_type >= H5F_MEM_PAGE_LARGE_SUPER)
