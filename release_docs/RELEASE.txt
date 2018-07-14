@@ -73,7 +73,13 @@ New Features
 
     Java Library:
     ----------------
-    -
+    - JNI Read and Write
+
+      Refactored variable-length functions, H5DreadVL and H5AreadVL,
+      to correct dataset and attribute reads. New write functions,
+      H5DwriteVL and H5AwriteVL, are under construction.
+
+      (ADB - 2018/06/02, HDFFV10519)
 
     Tools:
     ------
@@ -104,6 +110,17 @@ Bug Fixes since HDF5-1.10.2 release
 
     Library
     -------
+    - Error checks in h5stat and when decoding messages
+
+      h5stat exited with seg fault/core dumped when
+      errors are encountered in the internal library.
+
+      Add error checks and --enable-error-stack option to h5stat.
+      Add range checks when decoding messages: old fill value, old
+      layout and refcount.
+
+      (VC - 2018/07/11, HDFFV-10333)
+
     - If an HDF5 file contains a malformed compound datatype with a
       suitably large offset, the type conversion code can run off
       the end of the type conversion buffer, causing a segmentation

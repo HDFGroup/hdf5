@@ -307,11 +307,13 @@ done:
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_fill_old_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh,
+H5O_fill_old_decode(H5F_t *f, H5O_t *open_oh,
     unsigned H5_ATTR_UNUSED mesg_flags, unsigned H5_ATTR_UNUSED *ioflags,
     size_t H5_ATTR_UNUSED p_size, const uint8_t *p)
 {
     H5O_fill_t *fill = NULL;	/* Decoded fill value message */
+    htri_t exists = FALSE;
+    H5T_t *dt = NULL;
     void *ret_value = NULL;     /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -332,6 +334,19 @@ H5O_fill_old_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh,
 
     /* Only decode the fill value itself if there is one */
     if(fill->size > 0) {
+        H5_CHECK_OVERFLOW(fill->size, ssize_t, size_t);
+
+        /* Get the datatype message  */
+        if((exists = H5O_msg_exists_oh(open_oh, H5O_DTYPE_ID)) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, NULL, "unable to read object header")
+        if(exists) {
+            if((dt = H5O_msg_read_oh(f, open_oh, H5O_DTYPE_ID, NULL)) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTGET, NULL, "can't read DTYPE message")
+            /* Verify size */
+            if(fill->size != H5T_GET_SIZE(dt))
+                HGOTO_ERROR(H5E_SYM, H5E_CANTGET, NULL, "inconsistent fill value size")
+        }
+
         if(NULL == (fill->buf = H5MM_malloc((size_t)fill->size)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for fill value")
         HDmemcpy(fill->buf, p, (size_t)fill->size);
@@ -344,6 +359,9 @@ H5O_fill_old_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh,
     ret_value = (void*)fill;
 
 done:
+    if(dt)
+        H5O_msg_free(H5O_DTYPE_ID, dt);
+
     if(!ret_value && fill) {
         if(fill->buf)
             H5MM_xfree(fill->buf);
