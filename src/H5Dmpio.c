@@ -706,7 +706,7 @@ H5D__chunk_collective_io(H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
         io_option = H5D_MULTI_CHUNK_IO;         
     /* via default path. branch by num threshold */
     else {
-        unsigned one_link_chunk_io_threshold;   /* Threshhold to use single collective I/O for all chunks */
+        unsigned one_link_chunk_io_threshold;   /* Threshold to use single collective I/O for all chunks */
         int mpi_size;                   /* Number of processes in MPI job */
 
         if(H5D__mpio_get_sum_chunk(io_info, fm, &sum_chunk) < 0)
@@ -2765,7 +2765,7 @@ H5D__chunk_redistribute_shared_chunks(const H5D_io_info_t *io_info, const H5D_ty
             if (H5S_encode(chunk_info->fspace, &mod_data_p, &mod_data_size) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTENCODE, FAIL, "unable to encode dataspace")
 
-            /* Intialize iterator for memory selection */
+            /* Initialize iterator for memory selection */
             if (H5S_select_iter_init(mem_iter, chunk_info->mspace, type_info->src_type_size) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize memory selection information")
             mem_iter_init = TRUE;

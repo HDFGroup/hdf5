@@ -604,7 +604,7 @@ H5D__cache_dataspace_info(const H5D_t *dset)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't cache dataspace dimensions")
     dset->shared->ndims = (unsigned)sndims;
 
-    /* Compute the inital 'power2up' values */
+    /* Compute the initial 'power2up' values */
     for(u = 0; u < dset->shared->ndims; u++) {
         hsize_t scaled_power2up;    /* Scaled value, rounded to next power of 2 */
 
@@ -782,7 +782,7 @@ H5D__update_oh_info(H5F_t *file, H5D_t *dset, hid_t dapl_id)
         H5O_fill_t old_fill_prop;       /* Copy of fill value property, for writing as "old" fill value */
 
         /* Shallow copy the fill value property */
-        /* (we only want to make certain that the shared component isnt' modified) */
+        /* (we only want to make certain that the shared component isn't modified) */
         HDmemcpy(&old_fill_prop, fill_prop, sizeof(old_fill_prop));
 
         /* Reset shared component info */

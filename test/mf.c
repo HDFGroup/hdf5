@@ -6114,21 +6114,21 @@ test_mf_fs_persist_split(void)
 
     TESTING("File's free-space managers are persistent for split-file");
 
-    /* for now, we don't support persistant free space managers 
+    /* for now, we don't support persistent free space managers 
      * with the split file driver.
      */
     SKIPPED();
-    HDfprintf(stdout, " Persistant FSMs disabled in multi file driver.\n");
+    HDfprintf(stdout, " Persistent FSMs disabled in multi file driver.\n");
     return 0;  /* <========== note return */
 
     /* File creation property list template */
     if((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
 
-    /* for now, we don't support persistant free space managers 
+    /* for now, we don't support persistent free space managers 
      * with the split file driver.
      */
     SKIPPED();
-    HDfprintf(stdout, " Persistant FSMs disabled in multi file driver.\n");
+    HDfprintf(stdout, " Persistent FSMs disabled in multi file driver.\n");
     return 0;  /* <========== note return */
 
     /* File creation property list template */
@@ -6436,18 +6436,18 @@ test_mf_fs_persist_multi(void)
 
     TESTING("File's free-space managers are persistent for multi-file");
 
-    /* for now, we don't support persistant free space managers 
+    /* for now, we don't support persistent free space managers 
      * with the multi file driver.
      */
     SKIPPED();
-    HDfprintf(stdout, " Persistant FSMs disabled in multi file driver.\n");
+    HDfprintf(stdout, " Persistent FSMs disabled in multi file driver.\n");
     return 0;  /* <========== note return */
 
-    /* for now, we don't support persistant free space managers 
+    /* for now, we don't support persistent free space managers 
      * with the multi file driver.
      */
     SKIPPED();
-    HDfprintf(stdout, " Persistant FSMs disabled in multi file driver.\n");
+    HDfprintf(stdout, " Persistent FSMs disabled in multi file driver.\n");
     return 0;  /* <========== note return */
 
     /* File creation property list template */
