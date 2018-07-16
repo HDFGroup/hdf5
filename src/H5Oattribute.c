@@ -1093,7 +1093,7 @@ H5O_attr_rename_mod_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
                 mesg->native = NULL;
 
                 /* Delete old attribute */
-                /* (doesn't decrement the link count on shared components becuase
+                /* (doesn't decrement the link count on shared components because
                  *      the "native" pointer has been reset)
                  */
                 if(H5O_release_mesg(udata->f, oh, mesg, FALSE) < 0)

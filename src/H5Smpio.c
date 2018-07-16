@@ -908,10 +908,9 @@ H5S_mpio_hyper_type(const H5S_t *space, size_t elmt_size,
         else
             inner_type = outer_type;
     } /* end for */
-/***************************
-*  End of loop, walking
-*  thru dimensions.
-***************************/
+/******************************************
+*  End of loop, walking through dimensions.
+*******************************************/
 
     /* At this point inner_type is actually the outermost type, even for 0-trip loop */
     *new_type = inner_type;

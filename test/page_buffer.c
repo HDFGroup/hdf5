@@ -619,7 +619,7 @@ test_raw_data_handling(hid_t orig_fapl, const char *env_h5_drvr)
     if(HADDR_UNDEF == (addr = H5MF_alloc(f, H5FD_MEM_DRAW, sizeof(int)*(size_t)num_elements)))
         FAIL_STACK_ERROR;
 
-    /* intialize all the elements to have a value of -1 */
+    /* initialize all the elements to have a value of -1 */
     for(i=0 ; i<num_elements ; i++)
         data[i] = -1;
     if(H5F_block_write(f, H5FD_MEM_DRAW, addr, sizeof(int)*(size_t)num_elements, data) < 0)
@@ -902,7 +902,7 @@ test_lru_processing(hid_t orig_fapl, const char *env_h5_drvr)
     if(HADDR_UNDEF == (addr = H5MF_alloc(f, H5FD_MEM_DRAW, sizeof(int)*(size_t)num_elements)))
         FAIL_STACK_ERROR;
 
-    /* intialize all the elements to have a value of -1 */
+    /* initialize all the elements to have a value of -1 */
     for(i=0 ; i<num_elements ; i++)
         data[i] = -1;
 
@@ -1440,7 +1440,7 @@ test_min_threshold(hid_t orig_fapl, const char *env_h5_drvr)
     if(HADDR_UNDEF == (raw_addr = H5MF_alloc(f, H5FD_MEM_DRAW, sizeof(int)*(size_t)num_elements)))
         FAIL_STACK_ERROR;
 
-    /* intialize all the elements to have a value of -1 */
+    /* initialize all the elements to have a value of -1 */
     for(i=0 ; i<num_elements ; i++)
         data[i] = -1;
 
@@ -1567,7 +1567,7 @@ test_min_threshold(hid_t orig_fapl, const char *env_h5_drvr)
     if(HADDR_UNDEF == (raw_addr = H5MF_alloc(f, H5FD_MEM_DRAW, sizeof(int)*(size_t)num_elements)))
         FAIL_STACK_ERROR;
 
-    /* intialize all the elements to have a value of -1 */
+    /* initialize all the elements to have a value of -1 */
     for(i=0 ; i<num_elements ; i++)
         data[i] = -1;
 
@@ -1807,7 +1807,7 @@ test_stats_collection(hid_t orig_fapl, const char *env_h5_drvr)
         FAIL_STACK_ERROR;
 
 
-    /* intialize all the elements to have a value of -1 */
+    /* initialize all the elements to have a value of -1 */
     for(i=0 ; i<num_elements ; i++)
         data[i] = -1;
 

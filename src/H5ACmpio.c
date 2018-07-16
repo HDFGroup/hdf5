@@ -933,7 +933,7 @@ done:
  *
  * Purpose:     Update the dirty_bytes count for a newly inserted entry.
  *
- *		If mpi_rank isnt 0, this simply means adding the size
+ *		If mpi_rank isn't 0, this simply means adding the size
  *		of the entry to the dirty_bytes count.
  *
  *		If mpi_rank is 0, we must also add the entry to the
@@ -1332,7 +1332,7 @@ done:
  *		clean.
  *
  *		This function is the main routine for handling this 
- *		notification proceedure.  It must be called 
+ *		notification procedure.  It must be called 
  *		simultaniously on all processes that have the relevant 
  *		file open.  To this end, it is called only during a 
  *		sync point, with a barrier prior to the call.
@@ -1340,7 +1340,7 @@ done:
  *		Note that any metadata entry writes by process 0 will
  *		occur after the barrier and just before this call.
  *
- *		Typicaly, calls to this function will be triggered in
+ *		Typically, calls to this function will be triggered in
  *		one of two ways:
  *
  *		1) Dirty byte creation exceeds some user specified value.
@@ -2128,7 +2128,7 @@ HDfprintf(stdout, "%d:H5AC_propagate...:%u: (u/uu/i/iu/r/ru) = %zu/%u/%zu/%u/%zu
 
     /* clear collective access flag on half of the entries in the
        cache and mark them as independent in case they need to be
-       evicted later. All ranks are guranteed to mark the same entries
+       evicted later. All ranks are guaranteed to mark the same entries
        since we don't modify the order of the collectively accessed
        entries except through collective access. */
     if(H5C_clear_coll_entries(cache_ptr, TRUE) < 0)

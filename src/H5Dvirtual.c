@@ -799,7 +799,7 @@ H5D__virtual_copy(H5F_t *f_dst, H5O_layout_t *layout_dst)
     if(f_dst == f_src) {
         /* Increase reference count on global heap object */
         if((heap_rc = H5HG_link(f_dst, (H5HG_t *)&(layout_dst->u.virt.serial_list_hobjid), 1)) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTMODIFY, FAIL, "unable to adjust global heap refence count")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTMODIFY, FAIL, "unable to adjust global heap reference count")
     } /* end if */
     else
 #endif /* NOT_YET */
@@ -851,7 +851,7 @@ H5D__virtual_delete(H5F_t *f, H5O_storage_t *storage)
 #ifdef NOT_YET
         /* Unlink the global heap block */
         if((heap_rc = H5HG_link(f, (H5HG_t *)&(storage->u.virt.serial_list_hobjid), -1)) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTMODIFY, FAIL, "unable to adjust global heap refence count")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTMODIFY, FAIL, "unable to adjust global heap reference count")
         if(heap_rc == 0)
 #endif /* NOT_YET */
             /* Delete the global heap block */
