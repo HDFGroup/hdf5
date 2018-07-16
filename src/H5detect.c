@@ -54,10 +54,14 @@ static const char *FileHeader = "\n\
 #include "H5Tpublic.h"
 #include "H5Rpublic.h"
 
-#if defined(__has_attribute) && __has_attribute(no_sanitize_address)
-#define HDF_NO_UBSAN __attribute__((no_sanitize_address))
+#if defined(__has_attribute)
+# if __has_attribute(no_sanitize_address)
+#  define HDF_NO_UBSAN __attribute__((no_sanitize_address))
+# else
+#  define HDF_NO_UBSAN
+# endif
 #else
-#define HDF_NO_UBSAN
+# define HDF_NO_UBSAN
 #endif
 
 #define MAXDETECT 64
