@@ -2580,10 +2580,11 @@ done:
 herr_t
 H5D__set_extent(H5D_t *dset, const hsize_t *size)
 {
-    hsize_t curr_dims[H5S_MAX_RANK];    /* Current dimension sizes */
-    htri_t  changed;                    /* Whether the dataspace changed size */
-    size_t  u, v;                       /* Local index variable */
-    herr_t  ret_value = SUCCEED;        /* Return value */
+    hsize_t  curr_dims[H5S_MAX_RANK];   /* Current dimension sizes */
+    htri_t   changed;                   /* Whether the dataspace changed size */
+    size_t   u, v;                      /* Local index variable */
+    unsigned dim_idx;                   /* Dimension index */
+    herr_t   ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_PACKAGE_VOL_TAG(dset->oloc.addr)
 
@@ -2620,11 +2621,11 @@ H5D__set_extent(H5D_t *dset, const hsize_t *size)
         hbool_t update_chunks = FALSE;  /* Flag to indicate chunk cache update is needed */
 
         /* Determine if we are shrinking and/or expanding any dimensions */
-        for(u = 0; u < (size_t)dset->shared->ndims; u++) {
+        for(dim_idx = 0; dim_idx < dset->shared->ndims; dim_idx++) {
             /* Check for various status changes */
-            if(size[u] < curr_dims[u])
+            if(size[dim_idx] < curr_dims[dim_idx])
                 shrink = TRUE;
-            if(size[u] > curr_dims[u])
+            if(size[dim_idx] > curr_dims[dim_idx])
                 expand = TRUE;
 
             /* Chunked storage specific checks */
@@ -2632,30 +2633,34 @@ H5D__set_extent(H5D_t *dset, const hsize_t *size)
                 hsize_t scaled;             /* Scaled value */
 
                 /* Compute the scaled dimension size value */
-                scaled = size[u] / dset->shared->layout.u.chunk.dim[u];
+                if(dset->shared->layout.u.chunk.dim[dim_idx] == 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL,
+                                    "chunk size must be > 0, dim = %u ", dim_idx)
+
+                scaled = size[dim_idx] / dset->shared->layout.u.chunk.dim[dim_idx];
 
                 /* Check if scaled dimension size changed */
-                if(scaled != dset->shared->cache.chunk.scaled_dims[u]) {
+                if(scaled != dset->shared->cache.chunk.scaled_dims[dim_idx]) {
                     hsize_t scaled_power2up;    /* Scaled value, rounded to next power of 2 */
 
                     /* Update the scaled dimension size value for the current dimension */
-                    dset->shared->cache.chunk.scaled_dims[u] = scaled;
+                    dset->shared->cache.chunk.scaled_dims[dim_idx] = scaled;
 
                     /* Check if algorithm for computing hash values will change */
                     if((scaled > dset->shared->cache.chunk.nslots &&
-                                dset->shared->cache.chunk.scaled_dims[u] <= dset->shared->cache.chunk.nslots)
+                                dset->shared->cache.chunk.scaled_dims[dim_idx] <= dset->shared->cache.chunk.nslots)
                             || (scaled <= dset->shared->cache.chunk.nslots &&
-                                dset->shared->cache.chunk.scaled_dims[u] > dset->shared->cache.chunk.nslots))
+                                dset->shared->cache.chunk.scaled_dims[dim_idx] > dset->shared->cache.chunk.nslots))
                         update_chunks = TRUE;
 
                     if(!(scaled_power2up = H5VM_power2up(scaled)))
                         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to get the next power of 2")
 
                     /* Check if the number of bits required to encode the scaled size value changed */
-                    if(dset->shared->cache.chunk.scaled_power2up[u] != scaled_power2up) {
+                    if(dset->shared->cache.chunk.scaled_power2up[dim_idx] != scaled_power2up) {
                         /* Update the 'power2up' & 'encode_bits' values for the current dimension */
-                        dset->shared->cache.chunk.scaled_power2up[u] = scaled_power2up;
-                        dset->shared->cache.chunk.scaled_encode_bits[u] = H5VM_log2_gen(scaled_power2up);
+                        dset->shared->cache.chunk.scaled_power2up[dim_idx] = scaled_power2up;
+                        dset->shared->cache.chunk.scaled_encode_bits[dim_idx] = H5VM_log2_gen(scaled_power2up);
 
                         /* Indicate that the cached chunk indices need to be updated */
                         update_chunks = TRUE;
@@ -2664,7 +2669,7 @@ H5D__set_extent(H5D_t *dset, const hsize_t *size)
             } /* end if */
 
             /* Update the cached copy of the dataset's dimensions */
-            dset->shared->curr_dims[u] = size[u];
+            dset->shared->curr_dims[dim_idx] = size[dim_idx];
         } /* end for */
 
         /*-------------------------------------------------------------------------
