@@ -688,8 +688,7 @@ H5D__btree_decode_key(const H5B_shared_t *shared, const uint8_t *raw, void *_key
     for(u = 0; u < layout->ndims; u++)
     {
         if (layout->dim[u] == 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL,
-                                        "chunk size must be > 0, dim = %u ", u)
+            HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "chunk size must be > 0, dim = %u ", u)
 
         /* Retrieve coordinate offset */
 	    UINT64DECODE(raw, tmp_offset);

@@ -2634,8 +2634,7 @@ H5D__set_extent(H5D_t *dset, const hsize_t *size)
 
                 /* Compute the scaled dimension size value */
                 if(dset->shared->layout.u.chunk.dim[dim_idx] == 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL,
-                                    "chunk size must be > 0, dim = %u ", dim_idx)
+                    HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "chunk size must be > 0, dim = %u ", dim_idx)
 
                 scaled = size[dim_idx] / dset->shared->layout.u.chunk.dim[dim_idx];
 
