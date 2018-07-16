@@ -947,6 +947,8 @@ H5D__chunk_init(H5F_t *f, const H5D_t *dset, hid_t dapl_id)
             hsize_t scaled_power2up;    /* Scaled value, rounded to next power of 2 */
 
             /* Initial scaled dimension sizes */
+            if(dset->shared->layout.u.chunk.dim[u] == 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "chunk size must be > 0, dim = %u ", u)
             rdcc->scaled_dims[u] = dset->shared->curr_dims[u] / dset->shared->layout.u.chunk.dim[u];
 
             if( !(scaled_power2up = H5VM_power2up(rdcc->scaled_dims[u])) )
