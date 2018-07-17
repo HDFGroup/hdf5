@@ -229,8 +229,9 @@ int H5Object::iterateAttrs(attr_operator_t user_op, unsigned *_idx, void *op_dat
 //--------------------------------------------------------------------------
 // Function:    H5Object::getInfo
 ///\brief       Returns information about an HDF5 object.
-///\return      Struct containing the object info
-///\exception
+///\param       objinfo - OUT: Struct containing the object info
+///\param       fields  - IN: Indicates the group of information to be retrieved
+///                           - default to H5O_INFO_BASIC
 // July, 2018
 //--------------------------------------------------------------------------
 void H5Object::getInfo(H5O_info_t& objinfo, unsigned fields) const
@@ -247,8 +248,11 @@ void H5Object::getInfo(H5O_info_t& objinfo, unsigned fields) const
 //--------------------------------------------------------------------------
 // Function:    H5Object::getInfo
 ///\brief       Returns information about an HDF5 object given its name.
-///\return      Struct containing the object info
-///\exception
+///\param       name    - IN: Name of the object to be queried - \c char *
+///\param       objinfo - OUT: Struct containing the object info
+///\param       fields  - IN: Indicates the group of information to be retrieved
+///                           - default to H5O_INFO_BASIC
+///\param       lapl - IN: Link access property list
 // July, 2018
 //--------------------------------------------------------------------------
 void H5Object::getInfo(const char* name, H5O_info_t& objinfo, unsigned fields, const LinkAccPropList& lapl) const
@@ -266,8 +270,11 @@ void H5Object::getInfo(const char* name, H5O_info_t& objinfo, unsigned fields, c
 ///\brief       This is an overloaded member function, provided for convenience.
 ///             It differs from the above function in that it takes
 ///             a reference to an \c H5std_string for \a name.
-///\return      Struct containing the object info
-///\exception
+///\param       name    - IN: Name of the object to be queried - \c H5std_string
+///\param       objinfo - OUT: Struct containing the object info
+///\param       fields  - IN: Indicates the group of information to be retrieved
+///                           - default to H5O_INFO_BASIC
+///\param       lapl - IN: Link access property list
 // July, 2018
 //--------------------------------------------------------------------------
 void H5Object::getInfo(const H5std_string& name, H5O_info_t& objinfo, unsigned fields, const LinkAccPropList& lapl) const

@@ -94,6 +94,7 @@ class H5_DLLCPP H5Object : public H5Location {
 
         // Returns information about an HDF5 object.
         void getInfo(H5O_info_t& objinfo, unsigned fields = H5O_INFO_BASIC) const;
+        // Returns information about an HDF5 object, given its name.
         void getInfo(const char* name, H5O_info_t& objinfo, unsigned fields = H5O_INFO_BASIC, const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
         void getInfo(const H5std_string& name, H5O_info_t& objinfo, unsigned fields = H5O_INFO_BASIC, const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
 
