@@ -1261,6 +1261,7 @@
 ./testpar/t_shapesame.c
 ./testpar/t_pshutdown.c
 ./testpar/t_prestart.c
+./testpar/t_psubfile.c
 ./testpar/t_pvds.c
 ./testpar/t_span_tree.c
 ./testpar/t_init_term.c

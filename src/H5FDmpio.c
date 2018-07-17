@@ -924,11 +924,19 @@ done:
 /*
  * Function:    H5FD_mpio_fileinfo_get
  *
- * Purpose:     Implements a normal file open for MPI rank 0.  This
- *              essentially is a copy of the H5FD_sec2_open. We
+ * Purpose:     Implements a normal (posix) file open for MPI rank 0.
+ *              Replicates the functionality of H5FD_sec2_open. We
  *              open the file and cache a few key structures before
  *              closing.  These cached structures are those which
  *              are eventually utilized for MPIO file comparisons.
+ *
+ *              N.B. The file handles returned by the collective MPI
+ *              File open function are not guaranteed to have a relation to
+ *              an actual posix file handle.  This then, provides the
+ *              requirement that we do a "normal" file open to provide
+ *              an actual file handle with which we can gather more
+ *              detailed information to eventually implement file
+ *              comparisons (see: H5FD_mpio_cmp)
  *
  * Return:      Success:        Non-negative
  *
