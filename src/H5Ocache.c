@@ -1553,6 +1553,8 @@ H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t len, const uint8_t *image
 
                 /* Set object header values */
                 oh->has_refcount_msg = TRUE;
+                if(!refcount)
+                    HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't decode refcount")
                 oh->nlink = *refcount;
             } /* end if */
             /* Check if message is a link message */
