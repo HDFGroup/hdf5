@@ -227,6 +227,60 @@ int H5Object::iterateAttrs(attr_operator_t user_op, unsigned *_idx, void *op_dat
 }
 
 //--------------------------------------------------------------------------
+// Function:    H5Object::getInfo
+///\brief       Returns information about an HDF5 object.
+///\return      Struct containing the object info
+///\exception
+// July, 2018
+//--------------------------------------------------------------------------
+void H5Object::getInfo(H5O_info_t& objinfo, unsigned fields) const
+{
+
+    // Use C API to get information of the object
+    herr_t ret_value = H5Oget_info2(getId(), &objinfo, fields);
+
+    // Throw exception if C API returns failure
+    if (ret_value < 0)
+        throwException(inMemFunc("getObjinfo"), "H5Oget_info2 failed");
+}
+
+//--------------------------------------------------------------------------
+// Function:    H5Object::getInfo
+///\brief       Returns information about an HDF5 object given its name.
+///\return      Struct containing the object info
+///\exception
+// July, 2018
+//--------------------------------------------------------------------------
+void H5Object::getInfo(const char* name, H5O_info_t& objinfo, unsigned fields, const LinkAccPropList& lapl) const
+{
+    // Use C API to get information of the object
+    herr_t ret_value = H5Oget_info_by_name2(getId(), name, &objinfo, fields, lapl.getId());
+
+    // Throw exception if C API returns failure
+    if (ret_value < 0)
+        throwException(inMemFunc("getObjinfo"), "H5Oget_info_by_name2 failed");
+}
+
+//--------------------------------------------------------------------------
+// Function:    H5Object::getInfo
+///\brief       This is an overloaded member function, provided for convenience.
+///             It differs from the above function in that it takes
+///             a reference to an \c H5std_string for \a name.
+///\return      Struct containing the object info
+///\exception
+// July, 2018
+//--------------------------------------------------------------------------
+void H5Object::getInfo(const H5std_string& name, H5O_info_t& objinfo, unsigned fields, const LinkAccPropList& lapl) const
+{
+    // Use C API to get information of the object
+    herr_t ret_value = H5Oget_info_by_name2(getId(), name.c_str(), &objinfo, fields, lapl.getId());
+
+    // Throw exception if C API returns failure
+    if (ret_value < 0)
+        throwException(inMemFunc("getObjinfo"), "H5Oget_info_by_name2 failed");
+}
+
+//--------------------------------------------------------------------------
 // Function:    H5Object::objVersion
 ///\brief       Returns the header version of this HDF5 object.
 ///\return      Object version, which can have the following values:
