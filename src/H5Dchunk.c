@@ -947,6 +947,8 @@ H5D__chunk_init(H5F_t *f, const H5D_t *dset, hid_t dapl_id)
             hsize_t scaled_power2up;    /* Scaled value, rounded to next power of 2 */
 
             /* Initial scaled dimension sizes */
+            if(dset->shared->layout.u.chunk.dim[u] == 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "chunk size must be > 0, dim = %u ", u)
             rdcc->scaled_dims[u] = dset->shared->curr_dims[u] / dset->shared->layout.u.chunk.dim[u];
 
             if( !(scaled_power2up = H5VM_power2up(rdcc->scaled_dims[u])) )
@@ -2933,8 +2935,41 @@ H5D__chunk_lookup(const H5D_t *dset, const hsize_t *scaled,
                 H5F_set_coll_md_read(idx_info.f, temp_cmr);
 #endif /* H5_HAVE_PARALLEL */
 
-            /* Cache the information retrieved */
-            H5D__chunk_cinfo_cache_update(&dset->shared->cache.chunk.last, udata);
+            /*
+             * Cache the information retrieved.
+             *
+             * Note that if we are writing to the dataset in parallel and filters
+             * are involved, we skip caching this information as it is highly likely
+             * that the chunk information will be invalidated as a result of the
+             * filter operation (e.g. the chunk gets re-allocated to a different
+             * address in the file and/or gets re-allocated with a different size).
+             * If we were to cache this information, subsequent reads/writes would
+             * retrieve the invalid information and cause a variety of issues.
+             *
+             * It has been verified that in the serial library, when writing to chunks
+             * with the real chunk cache disabled and with filters involved, the
+             * functions within this file are correctly called in such a manner that
+             * this single chunk cache is always updated correctly. Therefore, this
+             * check is not needed for the serial library.
+             *
+             * This is an ugly and potentially frail check, but the
+             * H5D__chunk_cinfo_cache_reset() function is not currently available
+             * to functions outside of this file, so outside functions can not
+             * invalidate this single chunk cache. Even if the function were available,
+             * this check prevents us from doing the work of going through and caching
+             * each chunk in the write operation, when we're only going to invalidate
+             * the cache at the end of a parallel write anyway.
+             *
+             *  - JTH (7/13/2018)
+             */
+#ifdef H5_HAVE_PARALLEL
+            if ( !(    (H5F_HAS_FEATURE(idx_info.f, H5FD_FEAT_HAS_MPI))
+                    && (H5F_INTENT(dset->oloc.file) & H5F_ACC_RDWR)
+                    && dset->shared->dcpl_cache.pline.nused
+                  )
+               )
+#endif
+                H5D__chunk_cinfo_cache_update(&dset->shared->cache.chunk.last, udata);
         } /* end if */
     } /* end else */
 

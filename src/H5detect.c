@@ -55,13 +55,13 @@ static const char *FileHeader = "\n\
 #include "H5Rpublic.h"
 
 #if defined(__has_attribute)
-#if __has_attribute(no_sanitize)
-#define HDF_NO_UBSAN __attribute__((no_sanitize("undefined")))
+# if __has_attribute(no_sanitize_address)
+#  define HDF_NO_UBSAN __attribute__((no_sanitize_address))
+# else
+#  define HDF_NO_UBSAN
+# endif
 #else
-#define HDF_NO_UBSAN
-#endif
-#else
-#define HDF_NO_UBSAN
+# define HDF_NO_UBSAN
 #endif
 
 #define MAXDETECT 64
@@ -1675,11 +1675,13 @@ detect_alignments(void)
  */
 static int verify_signal_handlers(int signum, void (*handler)(int))
 {
-#if defined(__has_feature)
+#if defined(__has_feature) /* Clang */
 #if __has_feature(address_sanitizer) || __has_feature(thread_sanitizer)
     /* Under the address and thread sanitizers, don't raise any signals. */
     return 0;
 #endif
+#elif defined(__SANITIZE_ADDRESS__) || defined(__SANITIZE_THREAD__) /* GCC */
+    return 0;
 #endif
     void    (*save_handler)(int) = HDsignal(signum, handler);
     volatile int i, val;
