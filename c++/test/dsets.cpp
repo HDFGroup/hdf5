@@ -1116,6 +1116,67 @@ static herr_t test_types(H5File& file)
 
 
 /*-------------------------------------------------------------------------
+ * Function:    test_getinfo
+ *
+ * Purpose      Tests getInfo()
+ *
+ * Return       Success: 0
+ *
+ *              Failure: -1
+ *
+ * July, 2018
+ *-------------------------------------------------------------------------
+ */
+static herr_t test_getinfo(H5File& file)
+{
+    SUBTEST("Getting object information");
+
+    try {
+        // Create a data space
+        hsize_t     dims[2];
+        dims[0] = 256;
+        dims[1] = 512;
+        DataSpace space (2, dims, NULL);
+
+        // Create a dataset using the default dataset creation properties.
+        // We're not sure what they are, so we won't check.
+        DataSet dataset(file.openDataSet(DSET_CHUNKED_NAME));
+
+        // Get dataset header info
+        H5O_info_t oinfo;
+        HDmemset(&oinfo, 0, sizeof(oinfo));
+        dataset.getInfo(oinfo, H5O_INFO_HDR);
+        verify_val(oinfo.hdr.nchunks, 1, "DataSet::getInfo", __LINE__, __FILE__);
+        dataset.close();
+
+        // Open the dataset we created above and then close it.  This is one
+        // way to open an existing dataset for accessing.
+        dataset = file.openDataSet(DSET_DEFAULT_NAME);
+        HDmemset(&oinfo, 0, sizeof(oinfo));
+        dataset.getInfo(oinfo, H5O_INFO_ALL);
+        verify_val(oinfo.hdr.nchunks, 1, "DataSet::getInfo", __LINE__, __FILE__);
+        dataset.close();
+
+        PASSED();
+        return 0;
+    }   // outer most try block
+
+    catch (InvalidActionException& E)
+    {
+        cerr << " FAILED" << endl;
+        cerr << "    <<<  " << E.getDetailMsg() << "  >>>" << endl << endl;
+        return -1;
+    }
+    // catch all other exceptions
+    catch (Exception& E)
+    {
+        issue_fail_msg("test_getinfo", __LINE__, __FILE__);
+        return -1;
+    }
+}   // test_getinfo
+
+
+/*-------------------------------------------------------------------------
  * Function:    test_virtual
  *
  * Purpose      Tests fixed, unlimited, and printf selections in the same
@@ -1237,6 +1298,7 @@ void test_dset()
 
         nerrors += test_create(file) < 0 ? 1:0;
         nerrors += test_simple_io(file) < 0 ? 1:0;
+        nerrors += test_getinfo(file) < 0 ? 1:0;
         nerrors += test_tconv(file) < 0 ? 1:0;
         nerrors += test_compression(file) < 0 ? 1:0;
         nerrors += test_nbit_compression(file) < 0 ? 1:0;
