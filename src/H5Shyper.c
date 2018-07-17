@@ -6082,7 +6082,8 @@ H5S__hyper_make_spans(unsigned rank, const hsize_t *start, const hsize_t *stride
         last_span = NULL;
 
         /* Generate all the span segments for this dimension */
-        for(u = 0, stride_iter = 0; u < count[i]; u++, stride_iter += stride[i])        {
+        for(u = 0, stride_iter = 0; u < count[i]; u++, stride_iter += stride[i])
+        {
             H5S_hyper_span_t      *span;            /* New hyperslab span */
 
             /* Allocate a span node */
