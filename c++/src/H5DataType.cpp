@@ -396,6 +396,20 @@ bool DataType::operator==(const DataType& compared_type) const
 }
 
 //--------------------------------------------------------------------------
+// Function:    DataType::operator!=
+///\brief       Compares this DataType against the given one to determines
+///             whether the two objects refer to different actual datatypes.
+///\param       compared_type - IN: Reference to the datatype to compare
+///\return      true if the datatypes are not equal, and false, otherwise.
+///\exception   H5::DataTypeIException
+// July, 2018
+//--------------------------------------------------------------------------
+bool DataType::operator!=(const DataType& compared_type) const
+{
+    return !operator==(compared_type);
+}
+
+//--------------------------------------------------------------------------
 // Function:    DataType::p_commit (private)
 //\brief        Commits a transient datatype to a file, creating a new
 //              named datatype
