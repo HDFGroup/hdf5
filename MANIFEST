@@ -85,6 +85,7 @@
 ./bin/release
 ./bin/restore.sh
 ./bin/runtest        _DO_NOT_DISTRIBUTE_
+./bin/runbkgprog        _DO_NOT_DISTRIBUTE_
 ./bin/snapshot
 ./bin/snapshot_version      _DO_NOT_DISTRIBUTE_
 ./bin/switch_maint_mode      _DO_NOT_DISTRIBUTE_
@@ -3248,6 +3249,8 @@
 ./test/CMakeLists.txt
 ./test/CMakeTests.cmake
 ./test/CMakeVFDTests.cmake
+./test/flushrefreshTest.cmake
+./test/ShellTests.cmake
 ./testpar/CMakeLists.txt
 ./testpar/CMakeTests.cmake
 ./tools/CMakeLists.txt
