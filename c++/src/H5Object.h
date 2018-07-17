@@ -95,8 +95,22 @@ class H5_DLLCPP H5Object : public H5Location {
         // Returns information about an HDF5 object.
         void getInfo(H5O_info_t& objinfo, unsigned fields = H5O_INFO_BASIC) const;
         // Returns information about an HDF5 object, given its name.
-        void getInfo(const char* name, H5O_info_t& objinfo, unsigned fields = H5O_INFO_BASIC, const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
-        void getInfo(const H5std_string& name, H5O_info_t& objinfo, unsigned fields = H5O_INFO_BASIC, const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
+        void getInfo(const char* name, H5O_info_t& objinfo,
+                unsigned fields = H5O_INFO_BASIC,
+                const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
+        void getInfo(const H5std_string& name, H5O_info_t& objinfo,
+                unsigned fields = H5O_INFO_BASIC,
+                const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
+
+        // Retrieves information about an HDF5 object, given its index.
+        void getInfo(const char* grp_name, H5_index_t idx_type,
+                H5_iter_order_t order, hsize_t idx, H5O_info_t& objinfo,
+                unsigned fields = H5O_INFO_BASIC,
+                const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
+        void getInfo(const H5std_string& grp_name, H5_index_t idx_type,
+                H5_iter_order_t order, hsize_t idx, H5O_info_t& objinfo,
+                unsigned fields = H5O_INFO_BASIC,
+                const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
 
         // Gets the name of this HDF5 object, i.e., Group, DataSet, or
         // DataType.
