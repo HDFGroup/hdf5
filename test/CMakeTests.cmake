@@ -720,6 +720,23 @@ if (BUILD_SHARED_LIBS)
   endif ()
 endif ()
 
+#-- Adding test for tcheck_version
+add_test (NAME H5TEST-tcheck_version-major COMMAND $<TARGET_FILE:tcheck_version> "-tM")
+set_tests_properties (H5TEST-tcheck_version-major PROPERTIES
+    WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
+    WILL_FAIL "true"
+)
+add_test (NAME H5TEST-tcheck_version-minor COMMAND $<TARGET_FILE:tcheck_version> "-tm")
+set_tests_properties (H5TEST-tcheck_version-minor PROPERTIES
+    WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
+    WILL_FAIL "true"
+)
+add_test (NAME H5TEST-tcheck_version-release COMMAND $<TARGET_FILE:tcheck_version> "-tr")
+set_tests_properties (H5TEST-tcheck_version-release PROPERTIES
+    WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
+    WILL_FAIL "true"
+)
+
 
 ##############################################################################
 ##############################################################################
@@ -730,7 +747,6 @@ endif ()
 #---------------
 #    error_test
 #    err_compat
-#    tcheck_version
 #    testmeta
 #    atomic_writer
 #    atomic_reader
@@ -740,7 +756,6 @@ endif ()
 ##############################################################################
 # autotools script tests
 # error_test and err_compat are built at the same time as the other tests, but executed by testerror.sh.
-# NOT CONVERTED tcheck_version is used by testcheck_version.sh.
 # NOT CONVERTED accum_swmr_reader is used by accum.c.
 # NOT CONVERTED atomic_writer and atomic_reader are standalone programs.
 # links_env is used by testlinks_env.sh
