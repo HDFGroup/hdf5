@@ -37,7 +37,7 @@
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fpkg.h"             /* File access				*/
-#include "H5FSpkg.h"            /* File access              */
+#include "H5FSpkg.h"            /* File free space                      */
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MFpkg.h"		/* File memory management		*/
 #include "H5VMprivate.h"	/* Vectors and arrays 			*/
@@ -322,7 +322,7 @@ H5MF__open_fstype(H5F_t *f, H5F_mem_page_t type)
     HDassert(H5F_addr_defined(f->shared->fs_addr[type]));
     HDassert(f->shared->fs_state[type] == H5F_FS_STATE_CLOSED);
 
-    /* Set up the aligment and threshold to use depending on the manager type */
+    /* Set up the alignment and threshold to use depending on the manager type */
     if(H5F_PAGED_AGGR(f)) {
         alignment = (type == H5F_MEM_PAGE_GENERIC) ? f->shared->fs_page_size : (hsize_t)H5F_ALIGN_DEF;
         threshold = H5F_ALIGN_THRHD_DEF;
@@ -896,7 +896,7 @@ H5MF__sects_dump(f, stderr);
 static haddr_t
 H5MF__alloc_pagefs(H5F_t *f, H5FD_mem_t alloc_type, hsize_t size)
 {
-    H5F_mem_page_t ptype;		        /* Free-space mananger type */
+    H5F_mem_page_t ptype;		        /* Free-space manager type */
     H5MF_free_section_t *node = NULL;  	/* Free space section pointer */
     haddr_t ret_value = HADDR_UNDEF; 	/* Return value */
 
@@ -3049,7 +3049,7 @@ done:
  *		   further space allocations involving them should take 
  *		   place during file close.
  *
- *		On entry to this routine. the free space manager(s) involved
+ *		On entry to this routine, the free space manager(s) involved
  *		in allocation of file space for free space managers should
  *		still be floating. (i.e. should not have any file space 
  *		allocated to them.)
@@ -3265,7 +3265,7 @@ H5MF_settle_meta_data_fsm(H5F_t *f, hbool_t *fsm_settled)
          * everything other than the self referential FSMs (and possibly the
          * cache image) has been allocated at this point, this allows us to 
          * to float the self referential FSMs on the first file space allocation / 
-         * deallocaiton and then set the EOA to this value before we handle
+         * deallocation and then set the EOA to this value before we handle
          * the allocation / deallocation. (If a cache image exists, the 
          * first allocation / deallocation will be the deallocation of space
          * for the cache image).   
@@ -3296,8 +3296,8 @@ H5MF_settle_meta_data_fsm(H5F_t *f, hbool_t *fsm_settled)
 
         /* ******************* PROBLEM: ********************
          *
-         * If the file has an alignment other than 1, and if
-         * the EOA is not a multiple of this alignment, allocating sapce
+         * If the file has an alignement other than 1, and if
+         * the EOA is not a multiple of this alignment, allocating space
          * for the section via the VFD info has the potential of generating
          * a fragment that will be added to the free space manager.  This
          * of course undoes everything we have been doing here.
@@ -3324,7 +3324,7 @@ H5MF_settle_meta_data_fsm(H5F_t *f, hbool_t *fsm_settled)
          * end of file via H5FD_alloc().
          *
          * In the past, this issue of allocating space without touching the
-         * free space managers has been deal with by calling
+         * free space managers has been dealt with by calling
          * H5MF_aggr_vfd_alloc(), which in turn calls H5MF_aggr_alloc().
          * This is problematic since (if I read the code correctly) it will
          * re-constitute the metadata aggregator, which will add any leftover
@@ -3369,7 +3369,7 @@ H5MF_settle_meta_data_fsm(H5F_t *f, hbool_t *fsm_settled)
 
         /* All free space managers should have file space allocated for them
          * now, and should see no further allocations / deallocations.  Store
-         * the pre and post file space allocaton for self referential FSMs EOA
+         * the pre and post file space allocation for self referential FSMs EOA
          * for use when we actually write the free space manager superblock 
          * extension message.
          */
@@ -3532,7 +3532,7 @@ H5MF__fsm_is_self_referential(H5F_t *f, H5FS_t *fspace)
  *
  *              3) Load the self referential FSMs.  In passing verify that
  *                 the lowest address of a FSM header is equal to 
- *                 f->shared->eoa_pre_fsm_fsalloc.'
+ *                 f->shared->eoa_pre_fsm_fsalloc.
  *
  *                 Note that we don't have to use any special I/O for 
  *                 this -- we can use the regular I/O methods even if 
