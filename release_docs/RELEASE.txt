@@ -65,7 +65,7 @@ New Features
       The creation, along with reading and writing of Virtual Data Sets (VDS)
       is now supported. 
       
-      The VDS functionality is substantially that of the seral VDS version
+      The VDS functionality is substantially that of the serial VDS version
       with a major exception being that we don't support "printf" style
       source file selections for parallel VDS.  The rationale for this
       restriction is that we require all file operations to be
