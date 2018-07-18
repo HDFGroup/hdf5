@@ -28,7 +28,6 @@ if (UNIX)
       configure_file(${HDF5_TEST_SOURCE_DIR}/testflushrefresh.sh.in ${HDF5_TEST_BINARY_DIR}/H5TEST/testflushrefresh.sh @ONLY)
     endif ()
     configure_file(${HDF5_TEST_SOURCE_DIR}/test_usecases.sh.in ${HDF5_TEST_BINARY_DIR}/H5TEST/test_usecases.sh @ONLY)
-    configure_file(${HDF5_TEST_SOURCE_DIR}/testcheck_version.sh.in ${HDF5_TEST_BINARY_DIR}/H5TEST/testcheck_version.sh @ONLY)
     configure_file(${HDF5_TEST_SOURCE_DIR}/testswmr.sh.in ${HDF5_TEST_BINARY_DIR}/H5TEST/testswmr.sh @ONLY)
     configure_file(${HDF5_TEST_SOURCE_DIR}/testvdsswmr.sh.in ${HDF5_TEST_BINARY_DIR}/H5TEST/testvdsswmr.sh @ONLY)
 
@@ -47,27 +46,6 @@ if (UNIX)
         POST_BUILD
         COMMAND    ${CMAKE_COMMAND}
         ARGS       -E copy_if_different "${HDF5_SOURCE_DIR}/bin/output_filter.sh" "${HDF5_TEST_BINARY_DIR}/H5TEST/bin/output_filter.sh"
-    )
-
-    add_custom_command (
-        TARGET     tcheck_version
-        POST_BUILD
-        COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different "${HDF5_BINARY_DIR}/H5pubconf.h" "${HDF5_TEST_BINARY_DIR}/src/H5pubconf.h"
-    )
-
-    add_custom_command (
-        TARGET     tcheck_version
-        POST_BUILD
-        COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different "${HDF5_BINARY_DIR}/libhdf5.settings" "${HDF5_TEST_BINARY_DIR}/src/libhdf5.settings"
-    )
-
-    add_custom_command (
-        TARGET     tcheck_version
-        POST_BUILD
-        COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different "${HDF5_SOURCE_DIR}/src/H5public.h" "${HDF5_TEST_BINARY_DIR}/src/H5public.h"
     )
 
     file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/H5TEST/flushrefresh_test")
@@ -190,7 +168,6 @@ if (UNIX)
     ##############################################################################
     # H5_CHECK_TESTS
     #---------------
-    #    tcheck_version
     #    atomic_writer
     #    atomic_reader
     #    filenotclosed
@@ -198,7 +175,6 @@ if (UNIX)
     ##############################################################################
     # autotools script tests
     # error_test and err_compat are built at the same time as the other tests, but executed by testerror.sh.
-    # NOT CONVERTED tcheck_version is used by testcheck_version.sh.
     # NOT CONVERTED accum_swmr_reader is used by accum.c.
     # NOT CONVERTED atomic_writer and atomic_reader are standalone programs.
     # links_env is used by testlinks_env.sh
@@ -233,10 +209,6 @@ if (UNIX)
     )
     add_test (H5SHELL-testvdsswmr ${SH_PROGRAM} ${HDF5_TEST_BINARY_DIR}/H5TEST/testvdsswmr.sh)
     set_tests_properties (H5SHELL-testvdsswmr PROPERTIES
-            WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
-    )
-    add_test (H5SHELL-testcheck_version ${SH_PROGRAM} ${HDF5_TEST_BINARY_DIR}/H5TEST/testcheck_version.sh)
-    set_tests_properties (H5SHELL-testcheck_version PROPERTIES
             WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
     )
 
