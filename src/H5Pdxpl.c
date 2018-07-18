@@ -1035,7 +1035,7 @@ done:
  *		for the type conversion buffer and background buffer and
  *		optionally supply pointers to application-allocated buffers.
  *		If the buffer size is smaller than the entire amount of data
- *		being transfered between application and file, and a type
+ *		being transferred between application and file, and a type
  *		conversion buffer or background buffer is required then
  *		strip mining will be used.
  *

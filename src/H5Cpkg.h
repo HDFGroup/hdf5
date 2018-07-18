@@ -58,7 +58,7 @@
  * We maintain doubly linked lists of instances of H5C_cache_entry_t for a
  * variety of reasons -- protected list, LRU list, and the clean and dirty
  * LRU lists at present.  The following macros support linking and unlinking
- * of instances of H5C_cache_entry_t by both their regular and auxilary next
+ * of instances of H5C_cache_entry_t by both their regular and auxiliary next
  * and previous pointers.
  *
  * The size and length fields are also maintained.
@@ -2006,7 +2006,7 @@ if ( ( (cache_ptr)->index_size !=                                           \
  *		a bit more performance out of the cache.
  *
  *		At least for the first cut, I am leaving the comments and
- *		white space in the macro.  If they cause dificulties with
+ *		white space in the macro.  If they cause difficulties with
  *		the pre-processor, I'll have to remove them.
  *
  *		JRM - 7/28/04
@@ -2117,7 +2117,7 @@ if ( ( (cache_ptr)->index_size !=                                           \
  *		a bit more performance out of the cache.
  *
  *		At least for the first cut, I am leaving the comments and
- *		white space in the macro.  If they cause dificulties with
+ *		white space in the macro.  If they cause difficulties with
  *		pre-processor, I'll have to remove them.
  *
  *		JRM - 7/28/04
@@ -2375,7 +2375,7 @@ if ( ( (cache_ptr)->index_size !=                                           \
  *		a bit more performance out of the cache.
  *
  *		At least for the first cut, I am leaving the comments and
- *		white space in the macro.  If they cause dificulties with
+ *		white space in the macro.  If they cause difficulties with
  *		pre-processor, I'll have to remove them.
  *
  *		JRM - 7/28/04
@@ -2513,7 +2513,7 @@ if ( ( (cache_ptr)->index_size !=                                           \
  *		a bit more performance out of the cache.
  *
  *		At least for the first cut, I am leaving the comments and
- *		white space in the macro.  If they cause dificulties with
+ *		white space in the macro.  If they cause difficulties with
  *		pre-processor, I'll have to remove them.
  *
  *		JRM - 7/28/04
@@ -3057,7 +3057,7 @@ if ( ( (cache_ptr)->index_size !=                                           \
  *		squeeze a bit more performance out of the cache.
  *
  *		At least for the first cut, I am leaving the comments and
- *		white space in the macro.  If they cause dificulties with
+ *		white space in the macro.  If they cause difficulties with
  *		pre-processor, I'll have to remove them.
  *
  *		JRM - 7/28/04
@@ -3892,7 +3892,7 @@ typedef struct H5C_tag_info_t {
  *      2) A pinned entry can be accessed or modified at any time.
  *         This places an additional burden on the associated pre-serialize
  *	   and serialize callbacks, which must ensure the the entry is in 
- *	   a consistant state before creating an image of it.
+ *	   a consistent state before creating an image of it.
  *
  *      3) A pinned entry can be marked as dirty (and possibly
  *         change size) while it is unprotected.
@@ -4604,7 +4604,7 @@ typedef struct H5C_tag_info_t {
  * improper behavior if the next entry in the list is the target of one on 
  * these operations.
  *
- * The following fields are use to count such occurances.  They are used 
+ * The following fields are use to count such occurrences.  They are used 
  * both in tests (to verify that the scan has been restarted), and to 
  * obtain estimates of how frequently these restarts occur.
  *
@@ -4624,7 +4624,7 @@ typedef struct H5C_tag_info_t {
  *		than the target entry as the result of call(s) to the
  *		pre_serialize or serialize callbacks.
  *
- *		Note that at present, this condition can only be triggerd
+ *		Note that at present, this condition can only be triggered
  *		by a call to H5C_serialize_single_entry().
  *
  * The remaining stats are collected only when both H5C_COLLECT_CACHE_STATS

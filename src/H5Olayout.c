@@ -125,8 +125,8 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh,
 
         /* Dimensionality */
         ndims = *p++;
-        if(ndims > H5O_LAYOUT_NDIMS)
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "dimensionality is too large")
+        if(!ndims || ndims > H5O_LAYOUT_NDIMS)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "dimensionality is out of range")
 
         /* Layout class */
         mesg->type = (H5D_layout_t)*p++;

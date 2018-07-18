@@ -853,7 +853,7 @@ H5S__hyper_iter_next(H5S_sel_iter_t *iter, size_t nelem)
 
             /* Check if we are finished with the spans in the tree */
             if(curr_dim >= 0) {
-                /* Walk back down the iterator positions, reseting them */
+                /* Walk back down the iterator positions, resetting them */
                 while(curr_dim < fast_dim) {
                     HDassert(curr_span);
                     HDassert(curr_span->down);
@@ -1037,7 +1037,7 @@ H5S__hyper_iter_next_block(H5S_sel_iter_t *iter)
 
         /* Check if we are finished with the spans in the tree */
         if(curr_dim >= 0) {
-            /* Walk back down the iterator positions, reseting them */
+            /* Walk back down the iterator positions, resetting them */
             while(curr_dim < fast_dim) {
                 HDassert(curr_span);
                 HDassert(curr_span->down);
@@ -1704,7 +1704,7 @@ done:
  RETURNS
     TRUE if the selection fits within the extent, FALSE if it does not
  DESCRIPTION
-    Determines if the current selection at the current offet fits within the
+    Determines if the current selection at the current offset fits within the
     extent for the dataspace.
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
@@ -1762,7 +1762,7 @@ done:
     TRUE if the selection fits within the extent, FALSE if it does not and
         Negative on an error.
  DESCRIPTION
-    Determines if the current selection at the current offet fits within the
+    Determines if the current selection at the current offset fits within the
     extent for the dataspace.
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
@@ -2052,7 +2052,7 @@ H5S__hyper_serialize_helper(const H5S_hyper_span_info_t *spans,
     HDassert(rank < H5O_LAYOUT_NDIMS);
     HDassert(p && pp);
 
-    /* Walk through the list of spans, recursing or outputing them */
+    /* Walk through the list of spans, recursing or outputting them */
     curr = spans->head;
     while(curr != NULL) {
         /* Recurse if this node has down spans */
@@ -2458,7 +2458,7 @@ H5S__hyper_span_blocklist(const H5S_hyper_span_info_t *spans, hsize_t start[],
     HDassert(numblocks && *numblocks > 0);
     HDassert(buf && *buf);
 
-    /* Walk through the list of spans, recursing or outputing them */
+    /* Walk through the list of spans, recursing or outputting them */
     curr = spans->head;
     while(curr != NULL && *numblocks > 0) {
         /* Recurse if this node has down spans */
@@ -3509,7 +3509,7 @@ done:
  NAME
     H5S__hyper_add_span_element_helper
  PURPOSE
-    Add a single elment to a span tree
+    Add a single element to a span tree
  USAGE
     herr_t H5S_hyper_add_span_element_helper(prev_span, span_tree, rank, coords)
         H5S_hyper_span_info_t *span_tree;  IN/OUT: Pointer to span tree to append to
@@ -3713,7 +3713,7 @@ done:
  NAME
     H5S_hyper_add_span_element
  PURPOSE
-    Add a single elment to a span tree
+    Add a single element to a span tree
  USAGE
     herr_t H5S_hyper_add_span_element(space, span_tree, rank, coords)
         H5S_t *space;           IN/OUT: Pointer to dataspace to add coordinate to
@@ -5903,7 +5903,8 @@ H5S__hyper_make_spans(unsigned rank, const hsize_t *start, const hsize_t *stride
         last_span = NULL;
 
         /* Generate all the span segments for this dimension */
-        for(u = 0, stride_iter = 0; u < count[i]; u++, stride_iter += stride[i]) {
+        for(u = 0, stride_iter = 0; u < count[i]; u++, stride_iter += stride[i])
+        {
             H5S_hyper_span_t      *span;            /* New hyperslab span */
 
             /* Allocate a span node */
@@ -5945,7 +5946,8 @@ H5S__hyper_make_spans(unsigned rank, const hsize_t *start, const hsize_t *stride
     } /* end for */
 
     /* Indicate that there is a pointer to this tree */
-    down->count = 1;
+    if(down)
+        down->count = 1;
 
     /* Success!  Return the head of the list in the slowest changing dimension */
     ret_value = down;
@@ -8101,7 +8103,7 @@ H5S__hyper_get_seq_list_gen(const H5S_t *space, H5S_sel_iter_t *iter,
 
             /* Check if we have more spans in the tree */
             if(curr_dim >= 0) {
-                /* Walk back down the iterator positions, reseting them */
+                /* Walk back down the iterator positions, resetting them */
                 while((unsigned)curr_dim < fast_dim) {
                     HDassert(curr_span);
                     HDassert(curr_span->down);
@@ -8280,7 +8282,7 @@ H5S__hyper_get_seq_list_gen(const H5S_t *space, H5S_sel_iter_t *iter,
             break;
         } /* end if */
         else {
-            /* Walk back down the iterator positions, reseting them */
+            /* Walk back down the iterator positions, resetting them */
             while((unsigned)curr_dim < fast_dim) {
                 HDassert(curr_span);
                 HDassert(curr_span->down);

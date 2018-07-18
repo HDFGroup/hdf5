@@ -85,6 +85,7 @@
 ./bin/release
 ./bin/restore.sh
 ./bin/runtest        _DO_NOT_DISTRIBUTE_
+./bin/runbkgprog        _DO_NOT_DISTRIBUTE_
 ./bin/snapshot
 ./bin/snapshot_version      _DO_NOT_DISTRIBUTE_
 ./bin/switch_maint_mode      _DO_NOT_DISTRIBUTE_
@@ -1562,6 +1563,12 @@
 ./tools/test/h5stat/testfiles/h5stat_err1_links.ddl
 ./tools/test/h5stat/testfiles/h5stat_err1_numattrs.ddl
 ./tools/test/h5stat/testfiles/h5stat_err2_numattrs.ddl
+./tools/test/h5stat/testfiles/h5stat_err_old_fill.h5
+./tools/test/h5stat/testfiles/h5stat_err_old_fill.ddl
+./tools/test/h5stat/testfiles/h5stat_err_old_layout.h5
+./tools/test/h5stat/testfiles/h5stat_err_old_layout.ddl
+./tools/test/h5stat/testfiles/h5stat_err_refcount.h5
+./tools/test/h5stat/testfiles/h5stat_err_refcount.ddl
 ./tools/test/h5stat/testfiles/h5stat_filters.ddl
 ./tools/test/h5stat/testfiles/h5stat_filters-d.ddl
 ./tools/test/h5stat/testfiles/h5stat_filters-dT.ddl
@@ -1597,6 +1604,8 @@
 # h5dump test files
 ./tools/testfiles/charsets.h5
 ./tools/testfiles/charsets.ddl
+./tools/testfiles/err_attr_dspace.h5
+./tools/testfiles/err_attr_dspace.ddl
 ./tools/testfiles/family_file00000.h5
 ./tools/testfiles/family_file00001.h5
 ./tools/testfiles/family_file00002.h5
@@ -3240,6 +3249,8 @@
 ./test/CMakeLists.txt
 ./test/CMakeTests.cmake
 ./test/CMakeVFDTests.cmake
+./test/flushrefreshTest.cmake
+./test/ShellTests.cmake
 ./testpar/CMakeLists.txt
 ./testpar/CMakeTests.cmake
 ./tools/CMakeLists.txt
