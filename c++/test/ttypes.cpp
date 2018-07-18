@@ -1070,7 +1070,7 @@ static void test_operators()
         // Test with EnumType
         //
 
-        // Create a enumerate datatype
+        // Create an enumerate datatype
         EnumType enumtyp(sizeof(short));
 
         enumtyp.insert("RED", (enum_val=0,&enum_val));
@@ -1085,16 +1085,25 @@ static void test_operators()
         // Test with compound datatype's member
         //
 
-        // Create a variable-length string type
+        // Create random atomic datatypes
         IntType inttyp(PredType::NATIVE_INT);
         FloatType flttyp(PredType::NATIVE_FLOAT);
 
-        // Get NATIVE_INT member from the compound datatype above
+        // Get the NATIVE_INT member from the compound datatype above
         IntType member_inttyp = cmptyp.getMemberIntType(0);
 
+        // Test various combinations
         verify_val(inttyp == member_inttyp, true, "DataType::operator==", __LINE__, __FILE__);
         verify_val(flttyp == member_inttyp, false, "DataType::operator==", __LINE__, __FILE__);
         verify_val(flttyp != member_inttyp, true, "DataType::operator==", __LINE__, __FILE__);
+
+        // Get the NATIVE_LONG member from the compound datatype above
+        IntType member_longtyp = cmptyp.getMemberIntType(2);
+
+        // Test various combinations
+        verify_val(inttyp == member_longtyp, false, "DataType::operator==", __LINE__, __FILE__);
+        verify_val(flttyp == member_longtyp, false, "DataType::operator==", __LINE__, __FILE__);
+        verify_val(flttyp != member_longtyp, true, "DataType::operator==", __LINE__, __FILE__);
 
         PASSED();
     }
