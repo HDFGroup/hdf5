@@ -46,20 +46,18 @@ int mpi_global_size = 1;
 
 #include "testpar.h"
 
-#define NFILENAMES 5
+#define NFILENAMES 4
 
-const char *FILENAMES[NFILENAMES + 1]={"a",
-                                       "b",
-                                       "c",
-                                       "d",
-                                       "vds",
+const char *FILENAMES[NFILENAMES + 1]={"subfile_a",
+                                       "subfile_b",
+                                       "subfile_c",
+                                       "subfile_d",
                                        NULL};
 
 const char *DSETNAMES[NFILENAMES + 1]={"A",
                                        "B",
                                        "C",
                                        "D",
-                                       "VDS",
                                        NULL};
 
 
@@ -68,7 +66,7 @@ const char *DSETNAMES[NFILENAMES + 1]={"A",
 #define RANK_ELEMENTS   100
 #define SUBFILE_ELEMENTS (RANK_ELEMENTS * 2)
 
-#define FILE         "vds.h5"
+#define FILE         "subfile_vds.h5"
 #define DATASET      "VDS"
 #define HALFGROUP       100
 #define VDSDIM1         200
@@ -77,12 +75,15 @@ const char *DSETNAMES[NFILENAMES + 1]={"A",
 #define RANK1           1
 #define RANK2           2
 
+/* The following can be used for file cleanup
+ * after running the test.
+ */
 const char *SRC_FILE[] = {
-    "a.h5",
-    "b.h5",
-    "c.h5",
-    "d.h5",
-    "vds.h5"
+    "subfile_a.h5",
+    "subfile_b.h5",
+    "subfile_c.h5",
+    "subfile_d.h5",
+    "subfile_vds.h5"
 };
 
 const char *SRC_DATASET[] = {

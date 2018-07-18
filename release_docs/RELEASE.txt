@@ -65,7 +65,14 @@ New Features
       The creation, along with reading and writing of Virtual Data Sets (VDS)
       is now supported. 
       
-      (HDFFV-10287, RAW, 2018/05/30)
+      The VDS functionality is substantially that of the seral VDS version
+      with a major exception being that we don't support "printf" style
+      source file selections for parallel VDS.  The rationale for this
+      restriction is that we require all file operations to be
+      collective and printf VDS support may break that particular
+      requirement.
+
+      (HDFFV-10287, RAW, 2018/07/18)
 
     -
 
