@@ -46,8 +46,9 @@ cacheinit=$srcdir/config/cmake/cacheinit.cmake
 build_cpp_lib=-DHDF5_BUILD_CPP_LIB:BOOL=OFF	# C++ interface default off
 build_fortran=-DHDF5_BUILD_FORTRAN:BOOL=OFF	# Fortran interface default off
 build_hl_lib=-DHDF5_BUILD_HL_LIB:BOOL=ON	# High Level interface default on
-build_threadsafe=-DHDF5_ENABLE_THREADSAFE:BOOL=OFF	# Threadsafe feature default off
+build_threadsafe=-DHDF5_ENABLE_THREADSAFE:BOOL=OFF  # Threadsafe feature default off
 build_testing=-DBUILD_TESTING:BOOL=ON		# Build tests default on
+build_test_shell=-DTEST_SHELL_SCRIPTS:BOOL=ON   # Run shell script tests default on
 build_tools=-DHDF5_BUILD_TOOLS:BOOL=ON		# Build tools default on
 with_zlib=-DHDF5_ENABLE_Z_LIB_SUPPORT=ON	# enable zlib filter default on
 with_szlib=-DHDF5_ENABLE_SZIP_SUPPORT=OFF	# enables szip filter default off
@@ -256,6 +257,12 @@ while [ $# -gt 0 ]; do
 	--disable-testing)
 	    build_testing=-DBUILD_TESTING:BOOL=OFF
 	    ;;
+	--enable-shell-testing)
+	    build_test_shell=-DTEST_SHELL_SCRIPTS:BOOL=ON
+	    ;;
+	--disable-shell-testing)
+	    build_test_shell=-DTEST_SHELL_SCRIPTS:BOOL=OFF
+	    ;;
 	--with-zlib)
 	    with_zlib=-DHDF5_ENABLE_Z_LIB_SUPPORT:BOOL=ON
 	    ;;
@@ -342,6 +349,7 @@ STEP "Configure..." \
     $build_threadsafe \
     $shared_lib \
     $build_testing \
+    $build_test_shell \
     $build_tools \
     $with_zlib \
     $with_szlib \
