@@ -136,6 +136,13 @@ float attr_data5=-5.123F;        /* Test data for 5th attribute */
 #define BUG3_DT_NAME    "dt"
 #define BUG3_ATTR_NAME  "attr"
 
+/* Used by test_attr_delete_last_dense() */
+#define GRPNAME "grp"
+#define ATTRNAME "attr"
+#define DIM0 100
+#define DIM1 100
+#define RANK 2
+
 /* Attribute iteration struct */
 typedef struct {
     H5_iter_order_t order;      /* Direction of iteration */
@@ -10672,6 +10679,92 @@ test_attr_bug9(hid_t fcpl, hid_t fapl)
 
 /****************************************************************
 **
+**  test_attr_delete_dense(): 
+**      This is to verify the error as described in HDFFV-9277
+**      is fixed when deleting the last "large" attribute that
+**      is stored densely.
+**
+****************************************************************/
+static void
+test_attr_delete_last_dense(hid_t fcpl, hid_t fapl)
+{
+    hid_t fid;      /* File ID */
+    hid_t gid;      /* Group ID */
+    hid_t aid;      /* Attribute ID */
+    hid_t sid;      /* Dataspace ID */
+    hsize_t dim2[2] = {DIM0, DIM1}; /* Dimension sizes */
+    int i, j;       /* Local index variables */
+    double *data = NULL;    /* Pointer to the data buffer */
+    herr_t ret;     /* Generic return status */
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing Deleting the last large attribute stored densely\n"));
+
+    /* Create the file */
+    fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, fapl);
+    CHECK(fid, FAIL, "H5Fcreate");
+
+    /* Create the group */
+    gid = H5Gcreate2(fid, GRPNAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(gid, FAIL, "H5Gcreate");
+
+    /* Create the dataspace */
+    sid = H5Screate_simple(RANK, dim2, NULL);
+    CHECK(sid, FAIL, "H5Screate_simple");
+
+    /* Attach the attribute to the group */
+    aid = H5Acreate2(gid, ATTRNAME, H5T_IEEE_F64LE, sid, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(aid, FAIL, "H5Acreate2");
+
+    /* Allocate the data buffer */
+    data = (double *)HDmalloc((size_t)(DIM0 * DIM1) * sizeof(double));
+    CHECK_PTR(data, "HDmalloc");
+
+    /* Initialize the data */
+    for(i = 0; i < DIM0; i++)
+        for(j = 0; j < DIM1; j++)
+            *(data + i * DIM1 + j) = i + j;
+
+    /* Write to the attribute */
+    ret = H5Awrite(aid, H5T_NATIVE_DOUBLE, data);
+    CHECK(ret, FAIL, "H5Awrite");
+
+    /* Closing */
+    ret = H5Aclose(aid);
+    CHECK(ret, FAIL, "H5Aclose");
+    ret = H5Sclose(sid);
+    CHECK(ret, FAIL, "H5Sclose");
+    ret = H5Gclose(gid);
+    CHECK(ret, FAIL, "H5Gclose");
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Re-open the file */
+    fid = H5Fopen(FILENAME, H5F_ACC_RDWR, fapl);
+    CHECK(fid, FAIL, "H5Fopen");
+
+    /* Open the group */
+    gid = H5Gopen2(fid, GRPNAME, H5P_DEFAULT);
+    CHECK(gid, FAIL, "H5Gopen");
+
+    /* Delete the attribute */
+    ret = H5Adelete(gid, ATTRNAME);
+    CHECK(ret, FAIL, "H5Adelete");
+
+    /* Closing */
+    ret = H5Gclose(gid);
+    CHECK(ret, FAIL, "H5Gclose");
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Free the data buffer */
+    if(data)
+        HDfree(data);
+
+}   /* test_attr_delete_last_dense() */
+
+/****************************************************************
+**
 **  test_attr(): Main H5A (attribute) testing routine.
 **
 ****************************************************************/
@@ -10819,6 +10912,7 @@ test_attr(void)
                 test_attr_bug7(my_fcpl, my_fapl);               /* Test creating and deleting large attributes in ohdr chunk 0 */
                 test_attr_bug8(my_fcpl, my_fapl);               /* Test attribute expanding object header with undecoded messages */
                 test_attr_bug9(my_fcpl, my_fapl);               /* Test large attributes converting to dense storage */
+                test_attr_delete_last_dense(my_fcpl, my_fapl);  /* Test */
             } /* end for */
         } /* end if */
         else {
