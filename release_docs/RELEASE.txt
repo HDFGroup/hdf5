@@ -99,6 +99,16 @@ Bug Fixes since HDF5-1.10.2 release
 
     Library
     -------
+    - H5Adelete
+
+      H5Adelete failed when deleting the last "large" attribute that
+      is stored densely via fractal heap/v2 b-tree.
+      
+      After removing the attribute, update the ainfo message.  If the
+      number of attributes goes to zero, remove the message.
+
+      (VC - 2018/07/20, HDFFV-9277)
+
     - Error checks in h5stat and when decoding messages
 
       h5stat exited with seg fault/core dumped when
