@@ -545,7 +545,7 @@ static void test_getobjectinfo_same_file()
     H5O_info_t	oinfo1, oinfo2;         /* Object info structs */
 
     // Output message about test being performed
-    SUBTEST("Group::getInfo");
+    SUBTEST("Group::getObjinfo");
 
     try {
         // Create a new HDF5 file
@@ -561,9 +561,9 @@ static void test_getobjectinfo_same_file()
 
         // Query the info of two groups and verify that they have the same
         // file number
-        grp1.getInfo(oinfo1);
-        grp2.getInfo(oinfo2);
-        verify_val(oinfo1.fileno, oinfo2.fileno, "file number from getInfo", __LINE__, __FILE__);
+        grp1.getObjinfo(oinfo1);
+        grp2.getObjinfo(oinfo2);
+        verify_val(oinfo1.fileno, oinfo2.fileno, "file number from getObjinfo", __LINE__, __FILE__);
 
         // Close groups and file
         grp1.close();
@@ -584,17 +584,17 @@ static void test_getobjectinfo_same_file()
 
         // Query the info of two groups and verify that they have the same
         // file number
-        grp1.getInfo(oinfo1);
-        grp2.getInfo(oinfo2);
-        verify_val(oinfo1.fileno, oinfo2.fileno, "file number from getInfo", __LINE__, __FILE__);
+        grp1.getObjinfo(oinfo1);
+        grp2.getObjinfo(oinfo2);
+        verify_val(oinfo1.fileno, oinfo2.fileno, "file number from getObjinfo", __LINE__, __FILE__);
 
 
         // Reset object info
         HDmemset(&oinfo1, 0, sizeof(oinfo1));
         HDmemset(&oinfo2, 0, sizeof(oinfo2));
 
-        file1.getInfo(GROUP1NAME, oinfo1);
-        file1.getInfo(GROUP2NAME, oinfo2);
+        file1.getObjinfo(GROUP1NAME, oinfo1);
+        file1.getObjinfo(GROUP2NAME, oinfo2);
         verify_val(oinfo1.fileno, oinfo2.fileno, "file number from getObjectInfo", __LINE__, __FILE__);
 
         // Close groups and files

@@ -660,8 +660,8 @@ static void test_libver_bounds_real(
     // Verify object header version another way
     H5O_info_t oinfo;
     HDmemset(&oinfo, 0, sizeof(oinfo));
-    file.getInfo(oinfo, H5O_INFO_HDR);
-    verify_val(oinfo.hdr.version, oh_vers_create, "H5File::getInfo", __LINE__, __FILE__);
+    file.getObjinfo(oinfo, H5O_INFO_HDR);
+    verify_val(oinfo.hdr.version, oh_vers_create, "H5File::getObjinfo", __LINE__, __FILE__);
 
     /*
      * Reopen the file and make sure the root group still has the correct
@@ -687,8 +687,8 @@ static void test_libver_bounds_real(
 
     // Verify object header version another way
     HDmemset(&oinfo, 0, sizeof(oinfo));
-    group.getInfo(oinfo, H5O_INFO_HDR);
-    verify_val(oinfo.hdr.version, oh_vers_mod, "Group::getInfo", __LINE__, __FILE__);
+    group.getObjinfo(oinfo, H5O_INFO_HDR);
+    verify_val(oinfo.hdr.version, oh_vers_mod, "Group::getObjinfo", __LINE__, __FILE__);
 
     group.close(); // close "/G1"
 

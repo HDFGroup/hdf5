@@ -1116,9 +1116,9 @@ static herr_t test_types(H5File& file)
 
 
 /*-------------------------------------------------------------------------
- * Function:    test_getinfo
+ * Function:    test_getObjinfo
  *
- * Purpose      Tests getInfo()
+ * Purpose      Tests getObjinfo()
  *
  * Return       Success: 0
  *
@@ -1145,16 +1145,16 @@ static herr_t test_getinfo(H5File& file)
         // Get dataset header info
         H5O_info_t oinfo;
         HDmemset(&oinfo, 0, sizeof(oinfo));
-        dataset.getInfo(oinfo, H5O_INFO_HDR);
-        verify_val(oinfo.hdr.nchunks, 1, "DataSet::getInfo", __LINE__, __FILE__);
+        dataset.getObjinfo(oinfo, H5O_INFO_HDR);
+        verify_val(oinfo.hdr.nchunks, 1, "DataSet::getObjinfo", __LINE__, __FILE__);
         dataset.close();
 
         // Open the dataset we created above and then close it.  This is one
         // way to open an existing dataset for accessing.
         dataset = file.openDataSet(DSET_DEFAULT_NAME);
         HDmemset(&oinfo, 0, sizeof(oinfo));
-        dataset.getInfo(oinfo, H5O_INFO_ALL);
-        verify_val(oinfo.hdr.nchunks, 1, "DataSet::getInfo", __LINE__, __FILE__);
+        dataset.getObjinfo(oinfo, H5O_INFO_ALL);
+        verify_val(oinfo.hdr.nchunks, 1, "DataSet::getObjinfo", __LINE__, __FILE__);
         dataset.close();
 
         PASSED();

@@ -141,6 +141,27 @@ class H5_DLLCPP H5Location : public IdComponent {
         unsigned childObjVersion(const char* objname) const;
         unsigned childObjVersion(const H5std_string& objname) const;
 
+        // Retrieves information about an HDF5 object.
+        void getObjinfo(H5O_info_t& objinfo, unsigned fields = H5O_INFO_BASIC) const;
+
+        // Retrieves information about an HDF5 object, given its name.
+        void getObjinfo(const char* name, H5O_info_t& objinfo,
+                unsigned fields = H5O_INFO_BASIC,
+                const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
+        void getObjinfo(const H5std_string& name, H5O_info_t& objinfo,
+                unsigned fields = H5O_INFO_BASIC,
+                const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
+
+        // Retrieves information about an HDF5 object, given its index.
+        void getObjinfo(const char* grp_name, H5_index_t idx_type,
+                H5_iter_order_t order, hsize_t idx, H5O_info_t& objinfo,
+                unsigned fields = H5O_INFO_BASIC,
+                const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
+        void getObjinfo(const H5std_string& grp_name, H5_index_t idx_type,
+                H5_iter_order_t order, hsize_t idx, H5O_info_t& objinfo,
+                unsigned fields = H5O_INFO_BASIC,
+                const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
+
 #ifndef H5_NO_DEPRECATED_SYMBOLS
         // Returns the type of an object in this group, given the
         // object's index.
@@ -149,7 +170,7 @@ class H5_DLLCPP H5Location : public IdComponent {
         H5G_obj_t getObjTypeByIdx(hsize_t idx, H5std_string& type_name) const;
 
         // Returns information about an HDF5 object, given by its name,
-        // at this location.
+        // at this location. - Deprecated dues to performance issues
         void getObjinfo(const char* name, hbool_t follow_link, H5G_stat_t& statbuf) const;
         void getObjinfo(const H5std_string& name, hbool_t follow_link, H5G_stat_t& statbuf) const;
         void getObjinfo(const char* name, H5G_stat_t& statbuf) const;
