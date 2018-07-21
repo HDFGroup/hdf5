@@ -1356,34 +1356,6 @@ void H5Location::move(const H5std_string& src, const H5std_string& dst) const
     moveLink(src.c_str(), dst.c_str(), LinkCreatPropList::DEFAULT, LinkAccPropList::DEFAULT);
 }
 
-#if 0
-//--------------------------------------------------------------------------
-// Function:    H5Location::deleteLink
-///\brief       Removes the specified link from this group.
-///\param       name  - IN: Name of the object to be removed
-///\exception   H5::FileIException/H5::GroupIException/H5::LocationException
-// March, 2018
-//--------------------------------------------------------------------------
-void H5Location::deleteLink(const char* name, const LinkAccPropList& lapl) const
-{
-    herr_t ret_value = H5Ldelete(getId(), name, H5P_DEFAULT);
-    if (ret_value < 0)
-        throwException("deleteLink", "H5Ldelete failed");
-}
-
-//--------------------------------------------------------------------------
-// Function:    H5Location::deleteLink
-///\brief       This is an overloaded member function, provided for convenience.
-///             It differs from the above function in that it takes an
-///             \c H5std_string for \a name.
-// March, 2018
-//--------------------------------------------------------------------------
-void H5Location::deleteLink(const H5std_string& name, const LinkAccPropList& lapl) const
-{
-    deleteLink(name.c_str());
-}
-
-#endif
 //--------------------------------------------------------------------------
 // Function:    H5Location::unlink
 ///\brief       Removes the specified link from this group.
@@ -1408,6 +1380,130 @@ void H5Location::unlink(const char* name, const LinkAccPropList& lapl) const
 void H5Location::unlink(const H5std_string& name, const LinkAccPropList& lapl) const
 {
     unlink(name.c_str(), lapl);
+}
+
+//--------------------------------------------------------------------------
+// Function:    H5Location::getObjinfo
+///\brief       Retrieves information about an HDF5 object.
+///\param       objinfo - OUT: Struct containing the object info
+///\param       fields  - IN: Indicates the group of information to be retrieved
+///\par Description
+///             Valid values of \a fields are as follows:
+///             \li \c H5O_INFO_BASIC (default)
+///             \li \c H5O_INFO_TIME
+///             \li \c H5O_INFO_NUM_ATTRS
+///             \li \c H5O_INFO_HDR
+///             \li \c H5O_INFO_META_SIZE
+///             \li \c H5O_INFO_ALL
+// July, 2018
+//--------------------------------------------------------------------------
+void H5Location::getObjinfo(H5O_info_t& objinfo, unsigned fields) const
+{
+
+    // Use C API to get information of the object
+    herr_t ret_value = H5Oget_info2(getId(), &objinfo, fields);
+
+    // Throw exception if C API returns failure
+    if (ret_value < 0)
+        throwException(inMemFunc("getObjinfo"), "H5Oget_info2 failed");
+}
+
+//--------------------------------------------------------------------------
+// Function:    H5Location::getObjinfo
+///\brief       Retrieves information about an HDF5 object given its name.
+///\param       name    - IN: Name of the object to be queried - \c char *
+///\param       objinfo - OUT: Struct containing the object info
+///\param       fields  - IN: Indicates the group of information to be retrieved
+///                           - default to H5O_INFO_BASIC
+///\param       lapl - IN: Link access property list
+///\par Description
+///             Valid values of \a fields are as follows:
+///             \li \c H5O_INFO_BASIC (default)
+///             \li \c H5O_INFO_TIME
+///             \li \c H5O_INFO_NUM_ATTRS
+///             \li \c H5O_INFO_HDR
+///             \li \c H5O_INFO_META_SIZE
+///             \li \c H5O_INFO_ALL
+// July, 2018
+//--------------------------------------------------------------------------
+void H5Location::getObjinfo(const char* name, H5O_info_t& objinfo, unsigned fields, const LinkAccPropList& lapl) const
+{
+    // Use C API to get information of the object
+    herr_t ret_value = H5Oget_info_by_name2(getId(), name, &objinfo, fields, lapl.getId());
+
+    // Throw exception if C API returns failure
+    if (ret_value < 0)
+        throwException(inMemFunc("getObjinfo"), "H5Oget_info_by_name2 failed");
+}
+
+//--------------------------------------------------------------------------
+// Function:    H5Location::getObjinfo
+///\brief       This is an overloaded member function, provided for convenience.
+///             It differs from the above function in that it takes
+///             a reference to an \c H5std_string for \a name.
+///\param       name    - IN: Name of the object to be queried - \c H5std_string
+///\param       objinfo - OUT: Struct containing the object info
+///\param       fields  - IN: Indicates the group of information to be retrieved
+///                           - default to H5O_INFO_BASIC
+///\param       lapl - IN: Link access property list
+// July, 2018
+//--------------------------------------------------------------------------
+void H5Location::getObjinfo(const H5std_string& name, H5O_info_t& objinfo, unsigned fields, const LinkAccPropList& lapl) const
+{
+    getObjinfo(name.c_str(), objinfo, fields, lapl);
+}
+
+//--------------------------------------------------------------------------
+// Function:    H5Location::getObjinfo
+///\brief       Retrieves information about an HDF5 object given its index.
+///\param       grp_name - IN: Group name where the object belongs - \c char *
+///\param       idx_type - IN: Type of index
+///\param       order   - IN: Order to traverse
+///\param       idx     - IN: Object position
+///\param       objinfo - OUT: Struct containing the object info
+///\param       fields  - IN: Indicates the group of information to be retrieved
+///                           - default to H5O_INFO_BASIC
+///\param       lapl    - IN: Link access property list
+///\par Description
+///             Valid values of \a fields are as follows:
+///             \li \c H5O_INFO_BASIC (default)
+///             \li \c H5O_INFO_TIME
+///             \li \c H5O_INFO_NUM_ATTRS
+///             \li \c H5O_INFO_HDR
+///             \li \c H5O_INFO_META_SIZE
+///             \li \c H5O_INFO_ALL
+// July, 2018
+//--------------------------------------------------------------------------
+void H5Location::getObjinfo(const char* grp_name, H5_index_t idx_type,
+     H5_iter_order_t order, hsize_t idx, H5O_info_t& objinfo, unsigned fields,
+     const LinkAccPropList& lapl) const
+{
+    // Use C API to get information of the object
+    herr_t ret_value = H5Oget_info_by_idx2(getId(), grp_name, idx_type, order,
+                       idx, &objinfo, fields, lapl.getId());
+
+    // Throw exception if C API returns failure
+    if (ret_value < 0)
+        throwException(inMemFunc("getObjinfo"), "H5Oget_info_by_idx2 failed");
+}
+
+//--------------------------------------------------------------------------
+// Function:    H5Location::getObjinfo
+///\brief       This is an overloaded member function, provided for convenience.
+///             It differs from the above function in that it takes
+///             a reference to an \c H5std_string for \a name.
+///\param       name    - IN: Name of the object to be queried - \c H5std_string
+///\param       objinfo - OUT: Struct containing the object info
+///\param       fields  - IN: Indicates a group of information to be retrieved
+///                           - default to H5O_INFO_BASIC
+///\param       lapl - IN: Link access property list
+// July, 2018
+//--------------------------------------------------------------------------
+void H5Location::getObjinfo(const H5std_string& grp_name, H5_index_t idx_type,
+     H5_iter_order_t order, hsize_t idx, H5O_info_t& objinfo, unsigned fields,
+     const LinkAccPropList& lapl) const
+{
+    getObjinfo(grp_name.c_str(), idx_type, order, idx, objinfo, fields, lapl);
 }
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS
@@ -1467,6 +1563,7 @@ void H5Location::getObjinfo(const H5std_string& name, H5G_stat_t& statbuf) const
 {
     getObjinfo(name.c_str(), statbuf);
 }
+
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 //--------------------------------------------------------------------------
