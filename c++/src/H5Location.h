@@ -105,13 +105,18 @@ class H5_DLLCPP H5Location : public IdComponent {
         Group openGroup(const char* name) const;
         Group openGroup(const H5std_string& name) const;
 
-        // Creates a new dataset in this group.
-        DataSet createDataSet(const char* name, const DataType& data_type, const DataSpace& data_space, const DSetCreatPropList& create_plist = DSetCreatPropList::DEFAULT) const;
-        DataSet createDataSet(const H5std_string& name, const DataType& data_type, const DataSpace& data_space, const DSetCreatPropList& create_plist = DSetCreatPropList::DEFAULT) const;
+        // Creates a new dataset in this location.
+        DataSet createDataSet(const char* name, const DataType& data_type, const DataSpace& data_space, const DSetCreatPropList& create_plist = DSetCreatPropList::DEFAULT, const DSetAccPropList& dapl = DSetAccPropList::DEFAULT, const LinkCreatPropList& lcpl = LinkCreatPropList::DEFAULT) const;
+        DataSet createDataSet(const H5std_string& name, const DataType& data_type, const DataSpace& data_space, const DSetCreatPropList& create_plist = DSetCreatPropList::DEFAULT, const DSetAccPropList& dapl = DSetAccPropList::DEFAULT, const LinkCreatPropList& lcpl = LinkCreatPropList::DEFAULT) const;
+
+        // Deprecated to add LinkCreatPropList and DSetAccPropList - 1.10.3
+        // DataSet createDataSet(const char* name, const DataType& data_type, const DataSpace& data_space, const DSetCreatPropList& create_plist = DSetCreatPropList::DEFAULT) const;
+        // DataSet createDataSet(const H5std_string& name, const DataType& data_type, const DataSpace& data_space, const DSetCreatPropList& create_plist = DSetCreatPropList::DEFAULT) const;
 
         // Opens an existing dataset at this location.
-        DataSet openDataSet(const char* name) const;
-        DataSet openDataSet(const H5std_string& name) const;
+        // DSetAccPropList is added - 1.10.3
+        DataSet openDataSet(const char* name, const DSetAccPropList& dapl = DSetAccPropList::DEFAULT) const;
+        DataSet openDataSet(const H5std_string& name, const DSetAccPropList& dapl = DSetAccPropList::DEFAULT) const;
 
         H5L_info_t getLinkInfo(const char* link_name, const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
         H5L_info_t getLinkInfo(const H5std_string& link_name, const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
