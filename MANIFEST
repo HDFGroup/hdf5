@@ -350,6 +350,8 @@
 ./c++/src/H5DataSpace.h
 ./c++/src/H5DataType.cpp
 ./c++/src/H5DataType.h
+./c++/src/H5DaccProp.cpp
+./c++/src/H5DaccProp.h
 ./c++/src/H5DcreatProp.cpp
 ./c++/src/H5DcreatProp.h
 ./c++/src/H5DxferProp.cpp

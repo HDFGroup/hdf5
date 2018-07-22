@@ -28,6 +28,7 @@ using namespace std;
 #include "H5DxferProp.h"
 #include "H5LcreatProp.h"
 #include "H5LaccProp.h"
+#include "H5DaccProp.h"
 #include "H5Location.h"
 #include "H5Object.h"
 #include "H5DataType.h"
@@ -903,23 +904,32 @@ Group H5Location::openGroup(const H5std_string& name) const
 //--------------------------------------------------------------------------
 // Function:    H5Location::createDataSet
 ///\brief       Creates a new dataset at this location.
-///\param       name  - IN: Name of the dataset to create
-///\param       data_type - IN: Datatype of the dataset
+///\param       name       - IN: Name of the dataset to create
+///\param       data_type  - IN: Datatype of the dataset
 ///\param       data_space - IN: Dataspace for the dataset
-///\param       create_plist - IN: Creation properly list for the dataset
+///\param       dcpl       - IN: Dataset creation properly list
+///\param       lcpl       - IN: Link creation properly list
+///\param       dapl       - IN: Dataset access properly list
 ///\return      DataSet instance
 ///\exception   H5::FileIException/H5::GroupIException/H5::LocationException
-// Programmer   Binh-Minh Ribler - 2000
+// 2000
+// Modification:
+//      Jul 2018
+//              Added LinkCreatPropList and DSetAccPropList but did not
+//              follow the order in the C function: lcpl, dcpl, dapl, to
+//              accommodate the existing createDataSet calls.
 //--------------------------------------------------------------------------
-DataSet H5Location::createDataSet(const char* name, const DataType& data_type, const DataSpace& data_space, const DSetCreatPropList& create_plist) const
+DataSet H5Location::createDataSet(const char* name, const DataType& data_type, const DataSpace& data_space, const DSetCreatPropList& dcpl, const DSetAccPropList& dapl, const LinkCreatPropList& lcpl) const
 {
    // Obtain identifiers for C API
     hid_t type_id = data_type.getId();
     hid_t space_id = data_space.getId();
-    hid_t create_plist_id = create_plist.getId();
+    hid_t dcpl_id = dcpl.getId();
+    hid_t lcpl_id = lcpl.getId();
+    hid_t dapl_id = dapl.getId();
 
     // Call C routine H5Dcreate2 to create the named dataset
-    hid_t dataset_id = H5Dcreate2(getId(), name, type_id, space_id, H5P_DEFAULT, create_plist_id, H5P_DEFAULT);
+    hid_t dataset_id = H5Dcreate2(getId(), name, type_id, space_id, lcpl_id, dcpl_id, dapl_id);
 
     // If the creation of the dataset failed, throw an exception
     if (dataset_id < 0)
@@ -936,11 +946,16 @@ DataSet H5Location::createDataSet(const char* name, const DataType& data_type, c
 ///\brief       This is an overloaded member function, provided for convenience.
 ///             It differs from the above function in that it takes an
 ///             \c H5std_string for \a name.
-// Programmer   Binh-Minh Ribler - 2000
+// 2000
+// Modification:
+//      Jul 2018
+//              Added LinkCreatPropList and DSetAccPropList but did not
+//              follow the order in the C function: lcpl, dcpl, dapl, to
+//              accommodate the existing createDataSet calls.
 //--------------------------------------------------------------------------
-DataSet H5Location::createDataSet(const H5std_string& name, const DataType& data_type, const DataSpace& data_space, const DSetCreatPropList& create_plist) const
+DataSet H5Location::createDataSet(const H5std_string& name, const DataType& data_type, const DataSpace& data_space, const DSetCreatPropList& dcpl, const DSetAccPropList& dapl, const LinkCreatPropList& lcpl) const
 {
-    return(createDataSet(name.c_str(), data_type, data_space, create_plist));
+    return(createDataSet(name.c_str(), data_type, data_space, dcpl, dapl, lcpl));
 }
 
 //--------------------------------------------------------------------------
@@ -949,13 +964,17 @@ DataSet H5Location::createDataSet(const H5std_string& name, const DataType& data
 ///\param       name  - IN: Name of the dataset to open
 ///\return      DataSet instance
 ///\exception   H5::FileIException/H5::GroupIException/H5::LocationException
-// Programmer   Binh-Minh Ribler - 2000
+// 2000
+// Modification:
+//      Jul 2018
+//              Added DSetAccPropList argument
 //--------------------------------------------------------------------------
-DataSet H5Location::openDataSet(const char* name) const
+DataSet H5Location::openDataSet(const char* name, const DSetAccPropList& dapl) const
 {
     // Call C function H5Dopen2 to open the specified dataset, giving
     // the location id and the dataset's name
-    hid_t dataset_id = H5Dopen2(getId(), name, H5P_DEFAULT);
+    hid_t dapl_id = dapl.getId();
+    hid_t dataset_id = H5Dopen2(getId(), name, dapl_id);
 
     // If the dataset's opening failed, throw an exception
     if(dataset_id < 0)
@@ -972,11 +991,14 @@ DataSet H5Location::openDataSet(const char* name) const
 ///\brief       This is an overloaded member function, provided for convenience.
 ///             It differs from the above function in that it takes an
 ///             \c H5std_string for \a name.
-// Programmer   Binh-Minh Ribler - 2000
+// 2000
+// Modification:
+//      Jul 2018
+//              Added DSetAccPropList argument
 //--------------------------------------------------------------------------
-DataSet H5Location::openDataSet(const H5std_string& name) const
+DataSet H5Location::openDataSet(const H5std_string& name, const DSetAccPropList& dapl) const
 {
-    return(openDataSet( name.c_str()));
+    return(openDataSet(name.c_str(), dapl));
 }
 
 //--------------------------------------------------------------------------
