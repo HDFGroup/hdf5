@@ -175,7 +175,7 @@ class H5_DLLCPP H5Location : public IdComponent {
         H5G_obj_t getObjTypeByIdx(hsize_t idx, H5std_string& type_name) const;
 
         // Returns information about an HDF5 object, given by its name,
-        // at this location. - Deprecated dues to performance issues
+        // at this location. - Deprecated
         void getObjinfo(const char* name, hbool_t follow_link, H5G_stat_t& statbuf) const;
         void getObjinfo(const H5std_string& name, hbool_t follow_link, H5G_stat_t& statbuf) const;
         void getObjinfo(const char* name, H5G_stat_t& statbuf) const;
