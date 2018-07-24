@@ -744,7 +744,7 @@ test_getset(const hid_t dxpl_id_c_to_f)
     HDfree(ptrgetTest);
     ptrgetTest = NULL;
 
-    TESTING("data transform, read after reseting of transform property")
+    TESTING("data transform, read after resetting of transform property")
 
     if(H5Pset_data_transform(dxpl_id_c_to_f, simple) < 0)
         TEST_ERROR

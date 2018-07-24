@@ -417,11 +417,6 @@ H5D__virtual_store_layout(H5F_t *f, H5O_layout_t *layout)
     hsize_t tmp_nentries;               /* Temp. variable for # of VDS entries */
     uint32_t chksum;                    /* Checksum for heap data */
     size_t i;                           /* Local index variable */
-    H5P_genplist_t *fapl_plist;         /* The file access property list */
-    hid_t new_fapl_id;                  /* The file access property list ID */
-    H5F_libver_t low_bound = H5F_LIBVER_V110;   /* Set the low bound in fapl to latest */
-    H5F_libver_t high_bound = H5F_LIBVER_V110;  /* Set the high bound in fapl to latest */
-    H5F_t *tmp_f = NULL;                /* Pointer to faked file structure */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -433,24 +428,6 @@ H5D__virtual_store_layout(H5F_t *f, H5O_layout_t *layout)
 
     /* Create block if # of used entries > 0 */
     if(layout->storage.u.virt.list_nused > 0) {
-
-        /* Make a copy of the default file access property list */
-        if(NULL == (fapl_plist = (H5P_genplist_t *)H5I_object(H5P_LST_FILE_ACCESS_ID_g)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
-
-        /* Set latest format in fapl_plist for virtual layout encoding */
-        if(H5P_set(fapl_plist, H5F_ACS_LIBVER_LOW_BOUND_NAME, &low_bound) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set 'low' bound for library format versions")
-        if(H5P_set(fapl_plist, H5F_ACS_LIBVER_HIGH_BOUND_NAME, &high_bound) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set 'high' bound for library format versions")
-        /* Copy and return the fapl id */
-        if((new_fapl_id = H5P_copy_plist(fapl_plist, FALSE)) < 0)
-            HGOTO_ERROR(H5E_INTERNAL, H5E_CANTINIT, FAIL, "can't copy file access property list")
-
-        /* Allocate "fake" file structure with the fapl setting */
-        if(NULL == (tmp_f = H5F_fake_alloc((uint8_t)0, new_fapl_id)))
-            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate fake file struct")
-
         /* Allocate array for caching results of strlen */
         if(NULL == (str_size = (size_t *)H5MM_malloc(2 * layout->storage.u.virt.list_nused * sizeof(size_t))))
             HGOTO_ERROR(H5E_OHDR, H5E_RESOURCE, FAIL, "unable to allocate string length array")
@@ -480,12 +457,12 @@ H5D__virtual_store_layout(H5F_t *f, H5O_layout_t *layout)
             block_size += str_size[(2 * i) + 1];
 
             /* Source selection */
-            if((select_serial_size = H5S_SELECT_SERIAL_SIZE(layout->storage.u.virt.list[i].source_select, tmp_f)) < 0)
+            if((select_serial_size = H5S_SELECT_SERIAL_SIZE(layout->storage.u.virt.list[i].source_select)) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTENCODE, FAIL, "unable to check dataspace selection size")
             block_size += (size_t)select_serial_size;
 
             /* Virtual dataset selection */
-            if((select_serial_size = H5S_SELECT_SERIAL_SIZE(layout->storage.u.virt.list[i].source_dset.virtual_select, tmp_f)) < 0)
+            if((select_serial_size = H5S_SELECT_SERIAL_SIZE(layout->storage.u.virt.list[i].source_dset.virtual_select)) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTENCODE, FAIL, "unable to check dataspace selection size")
             block_size += (size_t)select_serial_size;
         } /* end for */
@@ -522,11 +499,11 @@ H5D__virtual_store_layout(H5F_t *f, H5O_layout_t *layout)
             heap_block_p += str_size[(2 * i) + 1];
 
             /* Source selection */
-            if(H5S_SELECT_SERIALIZE(layout->storage.u.virt.list[i].source_select, &heap_block_p, tmp_f) < 0)
+            if(H5S_SELECT_SERIALIZE(layout->storage.u.virt.list[i].source_select, &heap_block_p) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to serialize source selection")
 
             /* Virtual selection */
-		  if(H5S_SELECT_SERIALIZE(layout->storage.u.virt.list[i].source_dset.virtual_select, &heap_block_p, tmp_f) < 0)
+            if(H5S_SELECT_SERIALIZE(layout->storage.u.virt.list[i].source_dset.virtual_select, &heap_block_p) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to serialize virtual selection")
         } /* end for */
 
@@ -540,13 +517,8 @@ H5D__virtual_store_layout(H5F_t *f, H5O_layout_t *layout)
     } /* end if */
 
 done:
-    /* Release fake file structure */
-    if(tmp_f && H5F_fake_free(tmp_f) < 0)
-        HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release fake file struct")
-
     heap_block = (uint8_t *)H5MM_xfree(heap_block);
     str_size = (size_t *)H5MM_xfree(str_size);
-
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__virtual_store_layout() */
@@ -824,7 +796,7 @@ H5D__virtual_copy(H5F_t *f_dst, H5O_layout_t *layout_dst)
     if(f_dst == f_src) {
         /* Increase reference count on global heap object */
         if((heap_rc = H5HG_link(f_dst, (H5HG_t *)&(layout_dst->u.virt.serial_list_hobjid), 1)) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTMODIFY, FAIL, "unable to adjust global heap refence count")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTMODIFY, FAIL, "unable to adjust global heap reference count")
     } /* end if */
     else
 #endif /* NOT_YET */
@@ -875,7 +847,7 @@ H5D__virtual_delete(H5F_t *f, H5O_storage_t *storage)
 #ifdef NOT_YET
         /* Unlink the global heap block */
         if((heap_rc = H5HG_link(f, (H5HG_t *)&(storage->u.virt.serial_list_hobjid), -1)) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTMODIFY, FAIL, "unable to adjust global heap refence count")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTMODIFY, FAIL, "unable to adjust global heap reference count")
         if(heap_rc == 0)
 #endif /* NOT_YET */
             /* Delete the global heap block */

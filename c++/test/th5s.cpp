@@ -98,7 +98,7 @@ int space5_data = 7;
  *              cases.  Since there are no operator<< for 'long long'
  *              or int64 in VS C++ ostream, I casted the hssize_t values
  *              passed to verify_val to 'long' as well.  If problems
- *              arises later, this will have to be specificly handled
+ *              arises later, this will have to be specifically handled
  *              with a special routine.
  *     April 12, 2011: Raymond Lu
  *              Starting from the 1.8.7 release, we allow dimension
@@ -230,7 +230,7 @@ static void test_h5s_basic()
  *              cases.  Since there are no operator<< for 'long long'
  *              or int64 in VS C++ ostream, I casted the hssize_t values
  *              passed to verify_val to 'long' as well.  If problems
- *              arises later, this will have to be specificly handled
+ *              arises later, this will have to be specifically handled
  *              with a special routine.
  *-------------------------------------------------------------------------
  */
@@ -294,7 +294,7 @@ static void test_h5s_scalar_write()
  *              cases.  Since there are no operator<< for 'long long'
  *              or int64 in VS C++ ostream, I casted the hssize_t values
  *              passed to verify_val to 'long' as well.  If problems
- *              arises later, this will have to be specificly handled
+ *              arises later, this will have to be specifically handled
  *              with a special routine.
  *-------------------------------------------------------------------------
  */
@@ -356,7 +356,7 @@ static void test_h5s_scalar_read()
  *              cases.  Since there are no operator<< for 'long long'
  *              or int64 in VS C++ ostream, I casted the hssize_t values
  *              passed to verify_val to 'long' as well.  If problems
- *              arises later, this will have to be specificly handled
+ *              arises later, this will have to be specifically handled
  *              with a special routine.
  *-------------------------------------------------------------------------
  */
@@ -411,7 +411,7 @@ static void test_h5s_null()
  *              cases.  Since there are no operator<< for 'long long'
  *              or int64 in VS C++ ostream, I casted the hssize_t values
  *              passed to verify_val to 'long' as well.  If problems
- *              arises later, this will have to be specificly handled
+ *              arises later, this will have to be specifically handled
  *              with a special routine.
  *-------------------------------------------------------------------------
  */
@@ -484,7 +484,7 @@ static void test_h5s_compound_scalar_write()
  *              cases.  Since there are no operator<< for 'long long'
  *              or int64 in VS C++ ostream, I casted the hssize_t values
  *              passed to verify_val to 'long' as well.  If problems
- *              arises later, this will have to be specificly handled
+ *              arises later, this will have to be specifically handled
  *              with a special routine.
  *-------------------------------------------------------------------------
  */

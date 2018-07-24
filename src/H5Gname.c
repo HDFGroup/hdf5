@@ -1058,7 +1058,7 @@ done:
  * Function: H5G_name_replace
  *
  * Purpose: Search the list of open IDs and replace names according to a
- *              particular operation.  The operation occured on the
+ *              particular operation.  The operation occurred on the
  *              SRC_FILE/SRC_FULL_PATH_R object.  The new name (if there is
  *              one) is NEW_NAME_R.  Additional entry location information
  *              (currently only needed for the 'move' operation) is passed in

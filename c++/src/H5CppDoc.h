@@ -48,7 +48,7 @@
     Datatype Interface (H5T)          DataType and subclasses
   \endverbatim
  *
- * This <a href="./C2Cppfunction_map.mht">
+ * This <a href="./C2Cppfunction_map.htm">
  * table </a> provides a map from the C APIs to the C++ member functions.
  * <br />
  * \section install_sec Installation
