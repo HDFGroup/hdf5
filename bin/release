@@ -190,7 +190,7 @@ tar2zip()
  # need function to create another temporary directory, extract the
             # $tmpdir/$HDF5_VERS.tar into it, create build-VS*.bat files,
             # add CTestScript.cmake, HDF5config.cmake, SZIP.tar.gz
-            # and ZLib.tar.gz, and then zip it.
+            # ZLib.tar.gz, HDF5 examples, and then zip it.
 tar2cmakezip()
 {
     if [ $# -ne 3 ]; then
@@ -220,7 +220,7 @@ tar2cmakezip()
     (cd $cmziptmpsubdir; echo "ctest -S HDF5config.cmake,BUILD_GENERATOR=VS2015 -C Release -V -O hdf5.log" > build-VS2015-32.bat; chmod 755 build-VS2015-32.bat)
     (cd $cmziptmpsubdir; echo "ctest -S HDF5config.cmake,BUILD_GENERATOR=VS201564 -C Release -V -O hdf5.log" > build-VS2015-64.bat; chmod 755 build-VS2015-64.bat)
     (cd $cmziptmpsubdir; echo "ctest -S HDF5config.cmake,BUILD_GENERATOR=VS2017 -C Release -V -O hdf5.log" > build-VS2017-32.bat; chmod 755 build-VS2017-32.bat)
-    (cd $cmziptmpsubdir; echo "ctest -S HDF5config.cmake,BUILD_GENERATOR=VS201764 -C Release -V -O hdf5.log" > build-VS2017-64.bat; chmod 755 build-VS2017-32.bat)
+    (cd $cmziptmpsubdir; echo "ctest -S HDF5config.cmake,BUILD_GENERATOR=VS201764 -C Release -V -O hdf5.log" > build-VS2017-64.bat; chmod 755 build-VS2017-64.bat)
 
     # step 3: add SZIP.tar.gz, ZLib.tar.gz and cmake files
     cp /mnt/scr1/pre-release/hdf5/CMake/SZip.tar.gz $cmziptmpsubdir
@@ -289,7 +289,7 @@ tar2cmakezip()
  # need function to create another temporary directory, extract the
             # $tmpdir/$HDF5_VERS.tar into it, create build-unix.sh,
             # add CTestScript.cmake, HDF5config.cmake, SZIP.tar.gz
-            # and ZLib.tar.gz, and then tar.gz it.
+            # ZLib.tar.gz, HDF5 examples, and then tar.gz it.
 tar2cmaketgz()
 {
     if [ $# -ne 3 ]; then
