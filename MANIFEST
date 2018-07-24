@@ -351,6 +351,8 @@
 ./c++/src/H5DataSpace.h
 ./c++/src/H5DataType.cpp
 ./c++/src/H5DataType.h
+./c++/src/H5DaccProp.cpp
+./c++/src/H5DaccProp.h
 ./c++/src/H5DcreatProp.cpp
 ./c++/src/H5DcreatProp.h
 ./c++/src/H5DxferProp.cpp
@@ -396,7 +398,7 @@
 ./c++/src/H5VarLenType.h
 ./c++/src/Makefile.am
 ./c++/src/RM_stylesheet.css
-./c++/src/C2Cppfunction_map.mht
+./c++/src/C2Cppfunction_map.htm
 ./c++/src/cpp_doc_config
 ./c++/src/h5c++.in
 ./c++/src/footer.html

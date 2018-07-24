@@ -21,6 +21,7 @@ set (CPP_SOURCES
     ${HDF5_CPP_SRC_SOURCE_DIR}/H5DataSet.cpp
     ${HDF5_CPP_SRC_SOURCE_DIR}/H5DataSpace.cpp
     ${HDF5_CPP_SRC_SOURCE_DIR}/H5DataType.cpp
+    ${HDF5_CPP_SRC_SOURCE_DIR}/H5DaccProp.cpp
     ${HDF5_CPP_SRC_SOURCE_DIR}/H5DcreatProp.cpp
     ${HDF5_CPP_SRC_SOURCE_DIR}/H5DxferProp.cpp
     ${HDF5_CPP_SRC_SOURCE_DIR}/H5EnumType.cpp
@@ -58,6 +59,7 @@ set (CPP_HDRS
     ${HDF5_CPP_SRC_SOURCE_DIR}/H5DataSet.h
     ${HDF5_CPP_SRC_SOURCE_DIR}/H5DataSpace.h
     ${HDF5_CPP_SRC_SOURCE_DIR}/H5DataType.h
+    ${HDF5_CPP_SRC_SOURCE_DIR}/H5DaccProp.h
     ${HDF5_CPP_SRC_SOURCE_DIR}/H5DcreatProp.h
     ${HDF5_CPP_SRC_SOURCE_DIR}/H5DxferProp.h
     ${HDF5_CPP_SRC_SOURCE_DIR}/H5EnumType.h
