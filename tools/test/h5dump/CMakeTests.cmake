@@ -125,6 +125,7 @@
       ${HDF5_TOOLS_DIR}/testfiles/tints4dimsCountEq.ddl
       ${HDF5_TOOLS_DIR}/testfiles/tints4dimsStride2.ddl
       ${HDF5_TOOLS_DIR}/testfiles/tintsattrs.ddl
+      ${HDF5_TOOLS_DIR}/testfiles/tintsnodata.ddl
       ${HDF5_TOOLS_DIR}/testfiles/tlarge_objname.ddl
       #${HDF5_TOOLS_DIR}/testfiles/tldouble.ddl
       ${HDF5_TOOLS_DIR}/testfiles/tlonglinks.ddl
@@ -280,6 +281,7 @@
       ${HDF5_TOOLS_DIR}/testfiles/thyperslab.h5
       ${HDF5_TOOLS_DIR}/testfiles/tints4dims.h5
       ${HDF5_TOOLS_DIR}/testfiles/tintsattrs.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tintsnodata.h5
       ${HDF5_TOOLS_DIR}/testfiles/tlarge_objname.h5
       #${HDF5_TOOLS_DIR}/testfiles/tldouble.h5
       ${HDF5_TOOLS_DIR}/testfiles/tlonglinks.h5
@@ -998,6 +1000,8 @@
           tints4dimsStride2.out.err
           tintsattrs.out
           tintsattrs.out.err
+          tintsnodata.out
+          tintsnodata.out.err
           tlarge_objname.out
           tlarge_objname.out.err
           tldouble.out
@@ -1167,6 +1171,9 @@
 
   # test for maximum display datasets
   ADD_H5_TEST (twidedisplay 0 --enable-error-stack -w0 packedbits.h5)
+
+  # test for unwritten datasets
+  ADD_H5_TEST (tintsnodata 0 --enable-error-stack tintsnodata.h5)
 
   # test for signed/unsigned datasets
   ADD_H5_TEST (packedbits 0 --enable-error-stack packedbits.h5)
