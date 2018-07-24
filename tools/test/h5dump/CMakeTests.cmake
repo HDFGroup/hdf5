@@ -1173,7 +1173,7 @@
   ADD_H5_TEST (twidedisplay 0 --enable-error-stack -w0 packedbits.h5)
 
   # test for unwritten datasets
-  ADD_H5_TEST (tintsnodata 0 --enable-error-stack tintsnodata.h5)
+  ADD_H5_TEST (tintsnodata 0 --enable-error-stack -p tintsnodata.h5)
 
   # test for signed/unsigned datasets
   ADD_H5_TEST (packedbits 0 --enable-error-stack packedbits.h5)
