@@ -380,7 +380,7 @@ H5C_apply_candidate_list(H5F_t * f,
      * Note that we are doing things in this round about manner so as
      * to preserve the order of the LRU list to the best of our ability.
      * If we don't do this, my experiments indicate that we will have a
-     * noticably poorer hit ratio as a result.
+     * noticeably poorer hit ratio as a result.
      */
      if(H5C__flush_candidate_entries(f, entries_to_flush, entries_to_clear) < 0)
          HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "flush candidates failed")

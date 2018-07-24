@@ -175,6 +175,7 @@ $SRC_H5DUMP_TESTFILES/tvldtypes5.h5
 $SRC_H5DUMP_TESTFILES/tvlenstr_array.h5
 $SRC_H5DUMP_TESTFILES/tvlstr.h5
 $SRC_H5DUMP_TESTFILES/tvms.h5
+$SRC_H5DUMP_TESTFILES/err_attr_dspace.h5
 "
 
 LIST_OTHER_TEST_FILES="
@@ -360,6 +361,7 @@ $SRC_H5DUMP_TESTFILES/twithddlfile.exp
 $SRC_H5DUMP_TESTFILES/h5dump-help.txt
 $SRC_H5DUMP_TESTFILES/out3.h5import
 $SRC_H5DUMP_TESTFILES/tbinregR.exp
+$SRC_H5DUMP_TESTFILES/err_attr_dspace.ddl
 "
 
 LIST_ERROR_TEST_FILES="
@@ -1363,6 +1365,9 @@ TOOLTEST2 tall-6.exp --enable-error-stack -y -o tall-6.txt -d /g1/g1.1/dset1.1.1
 
 # test for non-existing file
 TOOLTEST3 non_existing.ddl --enable-error-stack tgroup.h5 non_existing.h5
+
+# test to verify HDFFV-10333: error similar to H5O_attr_decode in the jira issue
+TOOLTEST err_attr_dspace.ddl err_attr_dspace.h5
 
 # Clean up temporary files/directories
 CLEAN_TESTFILES_AND_TESTDIR

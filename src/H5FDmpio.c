@@ -1462,7 +1462,7 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type,
 
     /* Only look for MPI views for raw data transfers */
     if(type == H5FD_MEM_DRAW) {
-        H5FD_mpio_xfer_t            xfer_mode;   /* I/O tranfer mode */
+        H5FD_mpio_xfer_t            xfer_mode;   /* I/O transfer mode */
 
         /* Get the transfer mode from the API context */
         if(H5CX_get_io_xfer_mode(&xfer_mode) < 0)
@@ -1717,7 +1717,7 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id,
 #endif
     int                         size_i;
     hbool_t			use_view_this_time = FALSE;
-    H5FD_mpio_xfer_t            xfer_mode;   /* I/O tranfer mode */
+    H5FD_mpio_xfer_t            xfer_mode;   /* I/O transfer mode */
     herr_t              	ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT

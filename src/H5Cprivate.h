@@ -87,7 +87,7 @@
 #define H5C__MIN_MAX_CACHE_SIZE		((size_t)(1024))
 
 /* Default max cache size and min clean size are give here to make
- * them generally accessable.
+ * them generally accessible.
  */
 #define H5C__DEFAULT_MAX_CACHE_SIZE     ((size_t)(4 * 1024 * 1024))
 #define H5C__DEFAULT_MIN_CLEAN_SIZE     ((size_t)(2 * 1024 * 1024))
@@ -901,7 +901,7 @@ typedef struct H5C_class_t {
     H5C_get_fsf_size_t		fsf_size;
 } H5C_class_t;
 
-/* Type defintions of callback functions used by the cache as a whole */
+/* Type definitions of callback functions used by the cache as a whole */
 typedef herr_t (*H5C_write_permitted_func_t)(const H5F_t *f,
     hbool_t *write_permitted_ptr);
 typedef herr_t (*H5C_log_flush_func_t)(H5C_t *cache_ptr, haddr_t addr,
@@ -925,7 +925,7 @@ typedef herr_t (*H5C_log_flush_func_t)(H5C_t *cache_ptr, haddr_t addr,
  * flush dependency -- with the implied setup and takedown overhead and 
  * added complexity.  Further, the flush ordering between rings need only 
  * be enforced on flush operations, and thus the use of flush dependencies 
- * instead would apply unecessary constraints on flushes under normal 
+ * instead would apply unnecessary constraints on flushes under normal 
  * operating circumstances.
  *
  * As of this writing, all metadata entries pretaining to data sets and 
@@ -1092,7 +1092,7 @@ typedef int H5C_ring_t;
  * 		2) A pinned entry can be accessed or modified at any time.
  * 		   This places an extra burden on the pre-serialize and 
  *		   serialize callbacks, which must ensure that a pinned 
- *		   entry is consistant and ready to write to disk before 
+ *		   entry is consistent and ready to write to disk before 
  *		   generating an image.
  *
  * 		3) A pinned entry can be marked as dirty (and possibly
@@ -1152,7 +1152,7 @@ typedef int H5C_ring_t;
  * flush_immediately:  Boolean flag used only in Phdf5 -- and then only 
  *		for H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED.
  *
- *		When a destributed metadata write is triggered at a 
+ *		When a distributed metadata write is triggered at a 
  *		sync point, this field is used to mark entries that 
  *		must be flushed before leaving the sync point.  At all
  *		other times, this field should be set to FALSE.
@@ -1430,7 +1430,7 @@ typedef int H5C_ring_t;
  *		The flush dependency height of any entry involved in a 
  *		flush dependency relationship is defined to be the 
  *		longest flush dependency path from that entry to an entry
- *		with no flush depenency children.  
+ *		with no flush dependency children.  
  *
  *		Since the image_fd_height is used to order entries in the 
  *		cache image so that fd parents preceed fd children, for 
@@ -1468,8 +1468,8 @@ typedef int H5C_ring_t;
  *
  *		Further, if the prefetched entry is a flush dependency parent, 
  *		all its flush dependency children (which must also be 
- *		prefetched entries), must be tranfered to the new cache 
- *		entry returned by the deserailization callback.
+ *		prefetched entries), must be transferred to the new cache 
+ *		entry returned by the deserialization callback.
  *
  *		Finally, if the prefetched entry is a flush dependency child, 
  *		this flush dependency must be destroyed prior to the 
@@ -1737,7 +1737,7 @@ typedef struct H5C_cache_entry_t {
  *              The flush dependency height of any entry involved in a
  *              flush dependency relationship is defined to be the
  *              longest flush dependency path from that entry to an entry
- *              with no flush depenency children.
+ *              with no flush dependency children.
  *
  *              Since the image_fd_height is used to order entries in the
  *              cache image so that fd parents preceed fd children, for
@@ -1946,7 +1946,7 @@ typedef struct H5C_image_entry_t {
  *
  * flash_incr_mode:  Instance of the H5C_cache_flash_incr_mode enumerated
  *      type whose value indicates whether and by what algorithm we should
- *      make flash increases in the size of the cache to accomodate insertion
+ *      make flash increases in the size of the cache to accommodate insertion
  *      of large entries and large increases in the size of a single entry.
  *
  *      The addition of the flash increment mode was occasioned by performance
@@ -2182,9 +2182,9 @@ typedef struct H5C_auto_size_ctl_t {
  *      current value, any value in excess of 255 will be the functional 
  *      equivalent of H5AC__CACHE_IMAGE__ENTRY_AGEOUT__NONE.
  *
- * flags: Unsigned integer containing flags controling which aspects of the
+ * flags: Unsigned integer containing flags controlling which aspects of the
  *	cache image functinality is actually executed.  The primary impetus 
- *	behind this field is to allow developement of tests for partial 
+ *	behind this field is to allow development of tests for partial 
  *	implementations that will require little if any modification to run 
  *	with the full implementation.  In normal operation, all flags should 
  *	be set.

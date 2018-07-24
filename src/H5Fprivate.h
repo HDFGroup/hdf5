@@ -557,7 +557,7 @@ typedef struct H5F_t H5F_t;
 #define H5F_FILE_SPACE_PAGE_SIZE_DEF         4096
 /* For paged aggregation: minimum value for file space page size */
 #define H5F_FILE_SPACE_PAGE_SIZE_MIN         512
-/* For paged aggregation: maxiumum value for file space page size: 1 gigabyte */
+/* For paged aggregation: maximum value for file space page size: 1 gigabyte */
 #define H5F_FILE_SPACE_PAGE_SIZE_MAX         1024*1024*1024
 
 /* For paged aggregation: drop free-space with size <= this threshold for small meta section */
@@ -821,7 +821,7 @@ H5_DLL void H5F_addr_decode_len(size_t addr_len, const uint8_t **pp, haddr_t *ad
 H5_DLL void H5F_sfile_assert_num(unsigned n);
 
 /* Routines for creating & destroying "fake" file structures */
-H5_DLL H5F_t *H5F_fake_alloc(uint8_t sizeof_size, hid_t fapl_id);
+H5_DLL H5F_t *H5F_fake_alloc(uint8_t sizeof_size);
 H5_DLL herr_t H5F_fake_free(H5F_t *f);
 
 /* Superblock related routines */

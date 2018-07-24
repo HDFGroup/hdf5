@@ -36,8 +36,8 @@ static herr_t H5S__all_get_seq_list(const H5S_t *space, unsigned flags,
     size_t *nseq, size_t *nbytes, hsize_t *off, size_t *len);
 static herr_t H5S__all_release(H5S_t *space);
 static htri_t H5S__all_is_valid(const H5S_t *space);
-static hssize_t H5S__all_serial_size(const H5S_t *space, H5F_t *f);
-static herr_t H5S__all_serialize(const H5S_t *space, uint8_t **p, H5F_t *f);
+static hssize_t H5S__all_serial_size(const H5S_t *space);
+static herr_t H5S__all_serialize(const H5S_t *space, uint8_t **p);
 static herr_t H5S__all_deserialize(H5S_t *space, uint32_t version, uint8_t flags,
     const uint8_t **p);
 static herr_t H5S__all_bounds(const H5S_t *space, hsize_t *start, hsize_t *end);
@@ -56,7 +56,7 @@ static herr_t H5S__all_iter_coords(const H5S_sel_iter_t *iter, hsize_t *coords);
 static herr_t H5S__all_iter_block(const H5S_sel_iter_t *iter, hsize_t *start, hsize_t *end);
 static hsize_t H5S__all_iter_nelmts(const H5S_sel_iter_t *iter);
 static htri_t H5S__all_iter_has_next_block(const H5S_sel_iter_t *iter);
-static herr_t H5S__all_iter_next(H5S_sel_iter_t *sel_iter, hsize_t nelem);
+static herr_t H5S__all_iter_next(H5S_sel_iter_t *sel_iter, size_t nelem);
 static herr_t H5S__all_iter_next_block(H5S_sel_iter_t *sel_iter);
 static herr_t H5S__all_iter_release(H5S_sel_iter_t *sel_iter);
 
@@ -268,7 +268,7 @@ H5S__all_iter_has_next_block(const H5S_sel_iter_t H5_ATTR_UNUSED *iter)
  USAGE
     herr_t H5S__all_iter_next(iter, nelem)
         H5S_sel_iter_t *iter;       IN: Pointer to selection iterator
-        hsize_t nelem;              IN: Number of elements to advance by
+        size_t nelem;               IN: Number of elements to advance by
  RETURNS
     Non-negative on success/Negative on failure
  DESCRIPTION
@@ -279,7 +279,7 @@ H5S__all_iter_has_next_block(const H5S_sel_iter_t H5_ATTR_UNUSED *iter)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S__all_iter_next(H5S_sel_iter_t *iter, hsize_t nelem)
+H5S__all_iter_next(H5S_sel_iter_t *iter, size_t nelem)
 {
     FUNC_ENTER_STATIC_NOERR
 
@@ -432,7 +432,7 @@ H5S__all_copy(H5S_t *dst, const H5S_t H5_ATTR_UNUSED *src, hbool_t H5_ATTR_UNUSE
     TRUE if the selection fits within the extent, FALSE if it does not and
         Negative on an error.
  DESCRIPTION
-    Determines if the current selection at the current offet fits within the
+    Determines if the current selection at the current offset fits within the
     extent for the dataspace.  Offset is irrelevant for this type of selection.
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
@@ -457,9 +457,8 @@ H5S__all_is_valid(const H5S_t H5_ATTR_UNUSED *space)
     Determine the number of bytes needed to store the serialized "all"
         selection information.
  USAGE
-    hssize_t H5S_all_serial_size(space, f)
+    hssize_t H5S__all_serial_size(space)
         H5S_t *space;             IN: Dataspace pointer to query
-        H5F_t *f;                 IN: File pointer
  RETURNS
     The number of bytes required on success, negative on an error.
  DESCRIPTION
@@ -471,7 +470,7 @@ H5S__all_is_valid(const H5S_t H5_ATTR_UNUSED *space)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static hssize_t
-H5S__all_serial_size (const H5S_t H5_ATTR_UNUSED *space, H5F_t H5_ATTR_UNUSED *f)
+H5S__all_serial_size(const H5S_t H5_ATTR_UNUSED *space)
 {
     FUNC_ENTER_STATIC_NOERR
 
@@ -491,12 +490,11 @@ H5S__all_serial_size (const H5S_t H5_ATTR_UNUSED *space, H5F_t H5_ATTR_UNUSED *f
  PURPOSE
     Serialize the current selection into a user-provided buffer.
  USAGE
-    herr_t H5S__all_serialize(space, p, f)
+    herr_t H5S_all_serialize(space, p)
         const H5S_t *space;     IN: Dataspace with selection to serialize
         uint8_t **p;            OUT: Pointer to buffer to put serialized
                                 selection.  Will be advanced to end of
                                 serialized selection.
-        H5F_t *f;               IN: File pointer
  RETURNS
     Non-negative on success/Negative on failure
  DESCRIPTION
@@ -508,7 +506,7 @@ H5S__all_serial_size (const H5S_t H5_ATTR_UNUSED *space, H5F_t H5_ATTR_UNUSED *f
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S__all_serialize(const H5S_t *space, uint8_t **p, H5F_t H5_ATTR_UNUSED *f)
+H5S__all_serialize(const H5S_t *space, uint8_t **p)
 {
     uint8_t *pp = (*p);         /* Local pointer for decoding */
 
@@ -520,8 +518,8 @@ H5S__all_serialize(const H5S_t *space, uint8_t **p, H5F_t H5_ATTR_UNUSED *f)
     HDassert(pp);
 
     /* Store the preamble information */
-    UINT32ENCODE(pp, (uint32_t)H5S_GET_SELECT_TYPE(space)); /* Store the type of selection */
-    UINT32ENCODE(pp, (uint32_t)H5S_ALL_VERSION_1);          /* Store the version number */
+    UINT32ENCODE(pp, (uint32_t)H5S_GET_SELECT_TYPE(space));  /* Store the type of selection */
+    UINT32ENCODE(pp, (uint32_t)1);  /* Store the version number */
     UINT32ENCODE(pp, (uint32_t)0);  /* Store the un-used padding */
     UINT32ENCODE(pp, (uint32_t)0);  /* Store the additional information length */
 

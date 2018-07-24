@@ -30,6 +30,7 @@
 #include "H5DxferProp.h"
 #include "H5LcreatProp.h"
 #include "H5LaccProp.h"
+#include "H5DaccProp.h"
 #include "H5Location.h"
 #include "H5Object.h"
 #include "H5DataType.h"
@@ -396,6 +397,20 @@ bool DataType::operator==(const DataType& compared_type) const
 }
 
 //--------------------------------------------------------------------------
+// Function:    DataType::operator!=
+///\brief       Compares this DataType against the given one to determines
+///             whether the two objects refer to different actual datatypes.
+///\param       compared_type - IN: Reference to the datatype to compare
+///\return      true if the datatypes are not equal, and false, otherwise.
+///\exception   H5::DataTypeIException
+// July, 2018
+//--------------------------------------------------------------------------
+bool DataType::operator!=(const DataType& compared_type) const
+{
+    return !operator==(compared_type);
+}
+
+//--------------------------------------------------------------------------
 // Function:    DataType::p_commit (private)
 //\brief        Commits a transient datatype to a file, creating a new
 //              named datatype
@@ -532,7 +547,7 @@ H5T_conv_t DataType::find(const DataType& dest, H5T_cdata_t **pcdata) const
 ///\param       nelmts     - IN: Size of array \a buf
 ///\param       buf        - IN/OUT: Array containing pre- and post-conversion
 ///                            values
-///\param       background - IN: Optional backgroud buffer
+///\param       background - IN: Optional background buffer
 ///\param       plist - IN: Property list - default to PropList::DEFAULT
 ///\return      Pointer to a suitable conversion function
 ///\exception   H5::DataTypeIException
@@ -558,7 +573,7 @@ void DataType::convert(const DataType& dest, size_t nelmts, void *buf, void *bac
 ///\brief       Locks a datatype, making it read-only and non-destructible.
 ///
 ///\exception   H5::DataTypeIException
-///\par Descrition
+///\par Description
 ///             This is normally done by the library for predefined data
 ///             types so the application doesn't inadvertently change or
 ///             delete a predefined type.

@@ -17,8 +17,8 @@
 ## After making changes, run bin/reconfigure to update other configure related
 ## files like Makefile.in.
 LT_VERS_INTERFACE = 102
-LT_VERS_REVISION = 0
-LT_VERS_AGE = 1
+LT_VERS_AGE = 0
+LT_VERS_REVISION = 1
 
 ## If the API changes *at all*, increment LT_VERS_INTERFACE and
 ## reset LT_VERS_REVISION to 0.
@@ -66,4 +66,3 @@ LT_JAVA_VERS_AGE = 2
 LT_TOOLS_VERS_INTERFACE = 101
 LT_TOOLS_VERS_REVISION = 0
 LT_TOOLS_VERS_AGE = 1
-

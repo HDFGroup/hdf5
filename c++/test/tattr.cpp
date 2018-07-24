@@ -518,6 +518,12 @@ static void test_attr_basic_read()
         int num_attrs = dataset.getNumAttrs();
         verify_val(num_attrs, 3, "DataSet::getNumAttrs", __LINE__, __FILE__);
 
+        // Verify the correct number of attributes another way
+        H5O_info_t oinfo;
+        HDmemset(&oinfo, 0, sizeof(oinfo));
+        dataset.getObjinfo(oinfo, H5O_INFO_NUM_ATTRS);
+        verify_val(oinfo.num_attrs, 3, "DataSet::getObjinfo", __LINE__, __FILE__);
+
         // Open an attribute for the dataset
         Attribute ds_attr=dataset.openAttribute(ATTR1_NAME);
 
@@ -538,7 +544,12 @@ static void test_attr_basic_read()
 
         // Verify the correct number of attributes
         num_attrs = group.getNumAttrs();
-        verify_val(num_attrs, 1, "H5Group::getNumAttrs", __LINE__, __FILE__);
+        verify_val(num_attrs, 1, "Group::getNumAttrs", __LINE__, __FILE__);
+
+        // Verify the correct number of attributes another way
+        HDmemset(&oinfo, 0, sizeof(oinfo));
+        group.getObjinfo(oinfo, H5O_INFO_NUM_ATTRS);
+        verify_val(oinfo.num_attrs, 1, "Group::getObjinfo", __LINE__, __FILE__);
 
         // Open an attribute for the group
         Attribute gr_attr = group.openAttribute(ATTR2_NAME);
@@ -657,6 +668,12 @@ static void test_attr_compound_read()
         // Verify the correct number of attributes
         int num_attrs = dataset.getNumAttrs();
         verify_val(num_attrs, 1, "DataSet::getNumAttrs", __LINE__, __FILE__);
+
+        // Verify the correct number of attributes another way
+        H5O_info_t oinfo;
+        HDmemset(&oinfo, 0, sizeof(oinfo));
+        dataset.getObjinfo(oinfo, H5O_INFO_NUM_ATTRS);
+        verify_val(oinfo.num_attrs, 1, "DataSet::getObjinfo", __LINE__, __FILE__);
 
         // Open 1st attribute for the dataset
         Attribute attr = dataset.openAttribute((unsigned)0);
