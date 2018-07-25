@@ -186,6 +186,44 @@ Bug Fixes since HDF5-1.10.2 release
 
       (DER - 2018/02/26, HDFFV-10356)
 
+    - A bug was discovered in the parallel library which caused partial
+      parallel reads of filtered datasets to return incorrect data. The
+      library used the incorrect dataspace for each chunk read, causing
+      the selection used in each chunk to be wrong.
+
+      The bug was not caught during testing because all of the current
+      tests which do parallel reads of filtered data read all of the data
+      using an H5S_ALL selection. Several tests were added which exercise
+      partial parallel reads.
+
+      (JTH - 2018/07/16, HDFFV-10467)
+
+    - A bug was discovered in the parallel library which caused parallel
+      writes of filtered datasets to trigger an assertion failure in the
+      file free space manager.
+
+      This occurred when the filter used caused chunks to repeatedly shrink
+      and grow over the course of several dataset writes. The previous chunk
+      information, such as the size of the chunk and the offset in the file,
+      was being cached and not updated after each write, causing the next write
+      to the chunk to retrieve the incorrect cached information and run into
+      issues when reallocating space in the file for the chunk.
+
+      (JTH - 2018/07/16, HDFFV-10509)
+
+    - A bug was discovered in the parallel library which caused the
+      H5D__mpio_array_gatherv() function to allocate too much memory.
+
+      When the function is called with the 'allgather' parameter set
+      to a non-true value, the function will receive data from all MPI
+      ranks and gather it to the single rank specied by the 'root'
+      parameter. However, the bug in the function caused memory for
+      the received data to be allocated on all MPI ranks, not just the
+      singular rank specified as the receiver. In some circumstances,
+      this would cause an application to fail due to the large amounts
+      of memory being allocated.
+
+      (JTH - 2018/07/16, HDFFV-10467)
 
     Configuration
     -------------
