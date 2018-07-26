@@ -6413,7 +6413,7 @@ validate_mdc_config(hid_t file_id,
          * the supplied external configuration.
          *
          * The cache also sets the initial_size field to the current
-         * cache max size instead of the value initially supplied.
+         * cache max size instead of the value initialy supplied.
          * Depending on circumstances, this may or may not match
          * the original.  Hence the compare_init parameter.
          */

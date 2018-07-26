@@ -122,7 +122,7 @@ typedef struct H5B_class_t {
     H5B_ins_t	(*insert)(H5F_t*, haddr_t, void*, hbool_t*, void*, void*,
 			  void*, hbool_t*, haddr_t*);
 
-    /* min insert uses min leaf, not new(), similarly for max insert */
+    /* min insert uses min leaf, not new(), similarily for max insert */
     hbool_t	follow_min;
     hbool_t	follow_max;
 

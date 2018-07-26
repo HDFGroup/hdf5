@@ -321,7 +321,7 @@ struct H5F_file_t {
     haddr_t fs_addr[H5F_MEM_PAGE_NTYPES];   /* Address of free space manager info for each type */
     H5FS_t *fs_man[H5F_MEM_PAGE_NTYPES];    /* Free space manager for each file space type */
     hbool_t first_alloc_dealloc;            /* TRUE iff free space managers   */
-                                            /* are persistent and have not    */
+                                            /* are persistant and have not    */
                                             /* been used accessed for either  */
                                             /* allocation or deallocation     */
                                             /* since file open.               */

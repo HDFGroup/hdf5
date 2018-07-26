@@ -470,7 +470,7 @@ H5dont_atexit(void)
  *		library, which are supposed to free any unused memory they have
  *		allocated.
  *
- *      These should probably be registered dynamically in a linked list of
+ *      These should probably be registered dynamicly in a linked list of
  *          functions to call, but there aren't that many right now, so we
  *          hard-wire them...
  *
@@ -785,7 +785,7 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
 	    HDfprintf (stderr, "%s", H5libhdf5_settings);
 	    break;
 	default:
-	    /* 2 or higher: continue silently */
+	    /* 2 or higer: continue silently */
 	    break;
         } /* end switch */
 

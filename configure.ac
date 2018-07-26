@@ -411,7 +411,7 @@ AC_CHECK_SIZEOF([double])
 AC_CHECK_SIZEOF([long double])
 
 ## ----------------------------------------------------------------------
-## Check for non-standard extension __FLOAT128
+## Check for non-standard extenstion __FLOAT128
 ##
 HAVE_FLOAT128=0
 HAVE_QUADMATH=0
@@ -846,6 +846,19 @@ AC_SUBST([PARALLEL])
 AC_SUBST([RUNSERIAL])
 AC_SUBST([RUNPARALLEL])
 AC_SUBST([TESTPARALLEL])
+
+## ----------------------------------------------------------------------
+## Disable shared libraries on CYGWIN. (LK - 04/16/15)
+## A number of tests run by "make check" fail on CYGWIN, so for HDF5 v1.8.15
+## we will change the default for shared libraries to disabled.
+
+
+case "`uname`" in
+  CYGWIN*)
+    enable_shared="no"
+    CHECK_WARN="Shared libraries are not currently supported on CYGWIN."
+    ;;
+esac
 
 ## ----------------------------------------------------------------------
 ## Check if they would like the Java native interface (JNI) compiled

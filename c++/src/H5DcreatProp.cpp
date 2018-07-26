@@ -22,7 +22,6 @@
 #include "H5DcreatProp.h"
 #include "H5LcreatProp.h"
 #include "H5LaccProp.h"
-#include "H5DaccProp.h"
 #include "H5Location.h"
 #include "H5Object.h"
 #include "H5DataType.h"
@@ -667,7 +666,7 @@ void DSetCreatPropList::setFletcher32() const
 ///\param       size   - IN: Number of bytes reserved in the file for the data
 ///\exception   H5::PropListIException
 ///\par Description
-///             If a dataset is split across multiple files then the files
+///             If a dataset is splitted across multiple files then the files
 ///             should be defined in order. The total size of the dataset is
 ///             the sum of the \a size arguments for all the external files.  If
 ///             the total size is larger than the size of a dataset then the

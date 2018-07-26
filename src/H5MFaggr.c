@@ -407,7 +407,7 @@ H5MF__aggr_try_extend(H5F_t *f, H5F_blk_aggr_t *aggr,
     if(f->shared->feature_flags & aggr->feature_flag) {
         /* 
          * If the block being tested adjoins the beginning of the aggregator
-         *      block, check if the aggregator can accommodate the extension.
+         *      block, check if the aggregator can accomodate the extension.
          */
         if(H5F_addr_eq(blk_end, aggr->addr)) {
             haddr_t eoa;      /* EOA for the file */

@@ -139,7 +139,7 @@ main(void)
             if(oi1.ctime != MTIME1) {
                 H5_FAILED();
                    /* If this fails, examine H5Omtime.c.  Modification time is very
-                    * system dependent (e.g., on Windows DST must be hardcoded). */
+                    * system dependant (e.g., on Windows DST must be hardcoded). */
                 puts("    Old modification time incorrect");
                 goto error;
             }

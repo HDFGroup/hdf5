@@ -383,7 +383,7 @@
 # Create C header files from java classes. These files provide the connective glue
 # that allow your Java and C code to interact.
 #
-# This command will no longer be supported starting with version 10 of the JDK due
+# This command will no longer be supported starting with version 1.10 of the JDK due
 # to the `suppression of javah tool <http://openjdk.java.net/jeps/313>`_.
 # Command ``add_jar(GENERATE_NATIVE_HEADERS)`` must be used instead.
 #
@@ -447,7 +447,7 @@ endfunction ()
 
 function(__java_lcat VAR)
     foreach(_line ${ARGN})
-        string(APPEND ${VAR} "${_line}\n")
+        set(${VAR} "${${VAR}}${_line}\n")
     endforeach()
 
     set(${VAR} "${${VAR}}" PARENT_SCOPE)
@@ -528,7 +528,7 @@ function(add_jar _TARGET_NAME)
     if (_add_jar_GENERATE_NATIVE_HEADERS)
       # Raise an error if JDK version is less than 1.8 because javac -h is not supported
       # by earlier versions.
-      if (Java_VERSION VERSION_LESS 1.8)
+      if ("${Java_VERSION}" VERSION_LESS 1.8)
         message (FATAL_ERROR "ADD_JAR: GENERATE_NATIVE_HEADERS is not supported with this version of Java.")
       endif()
       cmake_parse_arguments (_add_jar_GENERATE_NATIVE_HEADERS "" "DESTINATION" "" ${_add_jar_GENERATE_NATIVE_HEADERS})
@@ -569,7 +569,7 @@ function(add_jar _TARGET_NAME)
     endif()
 
     foreach (JAVA_INCLUDE_DIR ${CMAKE_JAVA_INCLUDE_PATH})
-       string(APPEND CMAKE_JAVA_INCLUDE_PATH_FINAL "${CMAKE_JAVA_INCLUDE_FLAG_SEP}${JAVA_INCLUDE_DIR}")
+       set(CMAKE_JAVA_INCLUDE_PATH_FINAL "${CMAKE_JAVA_INCLUDE_PATH_FINAL}${CMAKE_JAVA_INCLUDE_FLAG_SEP}${JAVA_INCLUDE_DIR}")
     endforeach()
 
     set(CMAKE_JAVA_CLASS_OUTPUT_PATH "${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${_TARGET_NAME}.dir")
@@ -641,7 +641,7 @@ function(add_jar _TARGET_NAME)
         if (TARGET ${_JAVA_INCLUDE_JAR})
             get_target_property(_JAVA_JAR_PATH ${_JAVA_INCLUDE_JAR} JAR_FILE)
             if (_JAVA_JAR_PATH)
-                string(APPEND CMAKE_JAVA_INCLUDE_PATH_FINAL "${CMAKE_JAVA_INCLUDE_FLAG_SEP}${_JAVA_JAR_PATH}")
+                set(CMAKE_JAVA_INCLUDE_PATH_FINAL "${CMAKE_JAVA_INCLUDE_PATH_FINAL}${CMAKE_JAVA_INCLUDE_FLAG_SEP}${_JAVA_JAR_PATH}")
                 list(APPEND CMAKE_JAVA_INCLUDE_PATH ${_JAVA_JAR_PATH})
                 list(APPEND _JAVA_DEPENDS ${_JAVA_INCLUDE_JAR})
                 list(APPEND _JAVA_COMPILE_DEPENDS ${_JAVA_INCLUDE_JAR})
@@ -649,7 +649,7 @@ function(add_jar _TARGET_NAME)
                 message(SEND_ERROR "add_jar: INCLUDE_JARS target ${_JAVA_INCLUDE_JAR} is not a jar")
             endif ()
         else ()
-            string(APPEND CMAKE_JAVA_INCLUDE_PATH_FINAL "${CMAKE_JAVA_INCLUDE_FLAG_SEP}${_JAVA_INCLUDE_JAR}")
+            set(CMAKE_JAVA_INCLUDE_PATH_FINAL "${CMAKE_JAVA_INCLUDE_PATH_FINAL}${CMAKE_JAVA_INCLUDE_FLAG_SEP}${_JAVA_INCLUDE_JAR}")
             list(APPEND CMAKE_JAVA_INCLUDE_PATH "${_JAVA_INCLUDE_JAR}")
             list(APPEND _JAVA_DEPENDS "${_JAVA_INCLUDE_JAR}")
             list(APPEND _JAVA_COMPILE_DEPENDS "${_JAVA_INCLUDE_JAR}")
@@ -794,9 +794,11 @@ function(add_jar _TARGET_NAME)
   if (_GENERATE_NATIVE_HEADERS)
     # create an INTERFACE library encapsulating include directory for generated headers
     add_library (${_GENERATE_NATIVE_HEADERS_TARGET} INTERFACE)
-    target_include_directories (${_GENERATE_NATIVE_HEADERS_TARGET} INTERFACE
-      "${_GENERATE_NATIVE_HEADERS_OUTPUT_DIR}"
-      ${JNI_INCLUDE_DIRS})
+    target_include_directories (${_GENERATE_NATIVE_HEADERS_TARGET}
+        INTERFACE
+            "${_GENERATE_NATIVE_HEADERS_OUTPUT_DIR}"
+            ${JNI_INCLUDE_DIRS}
+    )
     # this INTERFACE library depends on jar generation
     add_dependencies (${_GENERATE_NATIVE_HEADERS_TARGET} ${_TARGET_NAME})
 
@@ -1373,10 +1375,10 @@ function(create_javadoc _target)
 endfunction()
 
 function (create_javah)
-  if (Java_VERSION VERSION_GREATER_EQUAL 10)
+  if ("${Java_VERSION}" VERSION_GREATER_EQUAL 1.10)
     message (FATAL_ERROR "create_javah: not supported with this Java version. Use add_jar(GENERATE_NATIVE_HEADERS) instead.")
-  elseif (Java_VERSION VERSION_GREATER_EQUAL 1.8)
-    message (DEPRECATION "create_javah: this command will no longer be supported starting with version 10 of JDK. Update your project by using command add_jar(GENERATE_NATIVE_HEADERS) instead.")
+  elseif ("${Java_VERSION}" VERSION_GREATER_EQUAL 1.8)
+    message (DEPRECATION "create_javah: this command will no longer be supported starting with version 1.10 of JDK. Update your project by using command add_jar(GENERATE_NATIVE_HEADERS) instead.")
   endif()
 
     cmake_parse_arguments(_create_javah

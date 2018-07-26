@@ -115,7 +115,7 @@ vds_select_equal(hid_t space1, hid_t space2)
                 if(npoints1 != npoints2)
                     return FALSE;
 
-                /* Allocate point lists.  Do not return directly after
+                /* Allocate point lists.  Do not return directly afer
                  * allocating, to make sure buffers are freed. */
                 if(NULL == (buf1 = (hsize_t *)HDmalloc((size_t)rank1 * (size_t)npoints1 * sizeof(hsize_t))))
                     TEST_ERROR
@@ -618,7 +618,10 @@ test_api(test_api_config_t config, hid_t fapl)
         TEST_ERROR
 
     /* Get examination DCPL */
-    if(test_api_get_ex_dcpl(config, fapl, dcpl, &ex_dcpl, vspace[0], filename, (hsize_t)213) < 0)
+
+    
+    /* Should be a value of 174, not 213. HDFFV-10469 */
+    if(test_api_get_ex_dcpl(config, fapl, dcpl, &ex_dcpl, vspace[0], filename, (hsize_t)174) < 0)
         TEST_ERROR
 
     /* Test H5Pget_virtual_count */

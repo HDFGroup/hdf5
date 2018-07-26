@@ -457,7 +457,7 @@ H5FS__cache_hdr_pre_serialize(H5F_t *f, void *_thing,
          *        H5F_addr_defined(fspace->addr)
          *
          *    will both be TRUE.  If this contition does not hold, then
-         *    either the free space info is not persistent 
+         *    either the free space info is not persistant 
          *    (!H5F_addr_defined(fspace->addr)???) or the section info 
          *    contains no free space data that must be written to file 
          *    ( fspace->serial_sect_count == 0 ).
@@ -487,7 +487,7 @@ H5FS__cache_hdr_pre_serialize(H5F_t *f, void *_thing,
          *
          * Case 1) If either fspace->serial_sect_count == 0 or 
          *         ! H5F_addr_defined(fspace->addr) do nothing as either 
-         *         the free space manager data is not persistent, or the 
+         *         the free space manager data is not persistant, or the 
          *         section info is empty.
          *
          *         Otherwise, allocate space for the section info in real
@@ -1454,7 +1454,7 @@ H5FS__sinfo_serialize_sect_cb(void *_item, void H5_ATTR_UNUSED *key, void *_udat
         /* Call 'serialize' callback for this section */
         if(sect_cls->serialize) {
             if((*sect_cls->serialize)(sect_cls, sect, *udata->image) < 0)
-                HGOTO_ERROR(H5E_FSPACE, H5E_CANTSERIALIZE, FAIL, "can't synchronize section")
+                HGOTO_ERROR(H5E_FSPACE, H5E_CANTSERIALIZE, FAIL, "can't syncronize section")
 
             /* Update offset in serialization buffer */
             (*udata->image) += sect_cls->serial_size;

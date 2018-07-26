@@ -86,7 +86,7 @@ typedef struct H5A_shared_t {
     void        *data;      /* Attribute data (on a temporary basis) */
     size_t      data_size;  /* Size of data on disk */
     H5O_msg_crt_idx_t crt_idx;  /* Attribute's creation index in the object header */
-    unsigned	nrefs;		/* Ref count for times this object is referred	*/
+    unsigned	nrefs;		/* Ref count for times this object is refered	*/
 } H5A_shared_t;
 
 /* Define the main attribute structure */

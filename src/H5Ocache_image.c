@@ -313,7 +313,7 @@ H5O__mdci_delete(H5F_t *f, H5O_t *open_oh, void *_mesg)
          * space allocations / deallocations prior to the free of the
          * cache image.  Verify this to the extent possible.
          *
-         * If the hack to work around the persistent self referential
+         * If the hack to work around the persistant self referential
          * free space manager issue is NOT in use, just call H5MF_xfree()
          * to release the cache iamge.  In principle, we should be able
          * to just reduce the EOA to the base address of the cache

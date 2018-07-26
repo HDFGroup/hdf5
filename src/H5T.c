@@ -309,7 +309,7 @@ static H5T_path_t *H5T__path_find_real(const H5T_t *src, const H5T_t *dst,
 /* Library Private Variables */
 /*****************************/
 
-/* The native endianness of the platform */
+/* The native endianess of the platform */
 H5T_order_t H5T_native_order_g = H5T_ORDER_ERROR;
 
 
@@ -2961,7 +2961,7 @@ H5T_encode(H5T_t *obj, unsigned char *buf, size_t *nalloc)
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Allocate "fake" file structure */
-    if(NULL == (f = H5F_fake_alloc((uint8_t)0)))
+    if(NULL == (f = H5F_fake_alloc((uint8_t)0, H5P_FILE_ACCESS_DEFAULT)))
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL, "can't allocate fake file struct")
 
     /* Find out the size of buffer needed */
@@ -3016,7 +3016,7 @@ H5T_decode(size_t buf_size, const unsigned char *buf)
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Allocate "fake" file structure */
-    if(NULL == (f = H5F_fake_alloc((uint8_t)0)))
+    if(NULL == (f = H5F_fake_alloc((uint8_t)0, H5P_FILE_ACCESS_DEFAULT)))
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, NULL, "can't allocate fake file struct")
 
     /* Decode the type of the information */
