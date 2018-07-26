@@ -2532,6 +2532,7 @@ esac
 AC_SUBST([ADD_PARALLEL_FILES]) ADD_PARALLEL_FILES="no"
 AC_SUBST([MPE]) MPE=no
 AC_SUBST([INSTRUMENT_LIBRARY]) INSTRUMENT_LIBRARY=no
+AC_SUBST([PARALLEL_FILTERED_WRITES])
 
 if test -n "$PARALLEL"; then
   ## The 'testpar' directory should participate in the build
@@ -2687,6 +2688,33 @@ if test -n "$PARALLEL"; then
   if test "X-$MPE" = "X-yes"; then
     AC_DEFINE([HAVE_MPE], [1], [Define if we have MPE support])
   fi
+
+  ## ----------------------------------------------------------------------
+  ## Check for the MPI-3 functions necessary for the Parallel Compression
+  ## feature. If these are not present, issue a warning that Parallel
+  ## Compression will be disabled.
+  ##
+  AC_MSG_CHECKING([for MPI_Mprobe and MPI_Imrecv functions])
+
+  AC_LINK_IFELSE(
+      [AC_LANG_PROGRAM(
+          [[
+              #include <mpi.h>
+          ]],
+          [[
+              MPI_Message message;
+              MPI_Init(0, (void *) 0);
+              MPI_Mprobe(0, 0, 0, &message, (void *) 0);
+              MPI_Imrecv((void *) 0, 0, 0, (void *) 0, (void *) 0);
+          ]]
+      )],
+      [AC_MSG_RESULT([yes])
+       PARALLEL_FILTERED_WRITES=yes],
+      [AC_MSG_RESULT([no])
+       AC_MSG_WARN([A simple MPI program using the MPI_Mprobe and MPI_Imrecv functions could not be compiled and linked.
+                    Parallel writes of filtered data will be disabled.])
+       PARALLEL_FILTERED_WRITES=no]
+  )
 fi
 
 ## ----------------------------------------------------------------------
@@ -2976,6 +3004,9 @@ AC_SUBST([WORDS_BIGENDIAN])
 
 ## Parallel support? (set above except empty if none)
 PARALLEL=${PARALLEL:-no}
+
+## Parallel writes to filtered datasets support?
+PARALLEL_FILTERED_WRITES=${PARALLEL_FILTERED_WRITES:-no}
 
 ## Compiler with version information. This consists of the full path
 ## name of the compiler and the reported version number.
