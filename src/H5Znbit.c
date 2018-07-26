@@ -558,7 +558,7 @@ H5Z_set_parms_array(const H5T_t *type, unsigned *cd_values_index,
     H5T_t *dtype_base = NULL;      /* Array datatype's base datatype */
     H5T_class_t dtype_base_class;  /* Array datatype's base datatype's class */
     size_t dtype_size;             /* Array datatype's size (in bytes) */
-    htri_t is_vlstring;            /* flag indicating if datatype is variable-length string */
+    htri_t is_vlstring;            /* flag indicating if datatype is varible-length string */
     herr_t ret_value=SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -667,7 +667,7 @@ H5Z_set_parms_compound(const H5T_t *type, unsigned *cd_values_index,
     size_t dtype_member_offset;     /* Compound datatype's current member datatype's offset (in bytes) */
     size_t dtype_next_member_offset;/* Compound datatype's next member datatype's offset (in bytes) */
     size_t dtype_size;              /* Compound datatype's size (in bytes) */
-    htri_t is_vlstring;             /* flag indicating if datatype is variable-length string */
+    htri_t is_vlstring;             /* flag indicating if datatype is varible-length string */
     unsigned u;                     /* Local index variable */
     herr_t ret_value = SUCCEED;     /* Return value */
 

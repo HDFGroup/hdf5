@@ -385,7 +385,7 @@ H5T__commit(H5F_t *file, H5T_t *type, hid_t tcpl_id)
     if(H5T_set_version(file, type) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set version of datatype")
 
-    /* Calculate message size information, for creating object header */
+    /* Calculate message size infomation, for creating object header */
     dtype_size = H5O_msg_size_f(file, tcpl_id, H5O_DTYPE_ID, type, (size_t)0);
     HDassert(dtype_size);
 

@@ -1093,7 +1093,7 @@ H5O_attr_rename_mod_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
                 mesg->native = NULL;
 
                 /* Delete old attribute */
-                /* (doesn't decrement the link count on shared components because
+                /* (doesn't decrement the link count on shared components becuase
                  *      the "native" pointer has been reset)
                  */
                 if(H5O_release_mesg(udata->f, oh, mesg, FALSE) < 0)
@@ -1448,12 +1448,6 @@ H5O_attr_remove_update(const H5O_loc_t *loc, H5O_t *oh, H5O_ainfo_t *ainfo)
         } /* end if */
     } /* end if */
 
-    /* Update the message after removing the attribute */
-    /* This is particularly needed when removing the last attribute that is
-       accessed via fractal heap/v2 B-tree (HDFFV-9277) */
-    if(H5O__msg_write_real(loc->file, oh, H5O_MSG_AINFO, H5O_MSG_FLAG_DONTSHARE, 0, ainfo) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTUPDATE, FAIL, "unable to update attribute info message")
-
     /* Check if we have deleted all the attributes and the attribute info
      *  message should be deleted itself.
      */
@@ -1461,6 +1455,9 @@ H5O_attr_remove_update(const H5O_loc_t *loc, H5O_t *oh, H5O_ainfo_t *ainfo)
         if(H5O__msg_remove_real(loc->file, oh, H5O_MSG_AINFO, H5O_ALL, NULL, NULL, TRUE) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, FAIL, "unable to delete attribute info")
     } /* end if */
+    else
+        if(H5O__msg_write_real(loc->file, oh, H5O_MSG_AINFO, H5O_MSG_FLAG_DONTSHARE, 0, ainfo) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTUPDATE, FAIL, "unable to update attribute info message")
 
 done:
     /* Release resources */

@@ -227,7 +227,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5Eclear1
  *
- * Purpose:	This function is for backward compatibility.
+ * Purpose:	This function is for backward compatbility.
  *              Clears the error stack for the specified error stack.
  *
  * Return:	Non-negative on success/Negative on failure
@@ -258,7 +258,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5Eprint1
  *
- * Purpose:	This function is for backward compatibility.
+ * Purpose:	This function is for backward compatbility.
  *              Prints the error stack in some default way.  This is just a
  *		convenience function for H5Ewalk() with a function that
  *		prints error messages.  Users are encouraged to write there
@@ -296,7 +296,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5Ewalk1
  *
- * Purpose:	This function is for backward compatibility.
+ * Purpose:	This function is for backward compatbility.
  *              Walks the error stack for the current thread and calls some
  *		function for each error along the way.
  *
@@ -335,7 +335,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5Eget_auto1
  *
- * Purpose:	This function is for backward compatibility.
+ * Purpose:	This function is for backward compatbility.
  *              Returns the current settings for the automatic error stack
  *		traversal function and its data for specific error stack.
  *		Either (or both) arguments may be null in which case the
@@ -386,7 +386,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5Eset_auto1
  *
- * Purpose:	This function is for backward compatibility.
+ * Purpose:	This function is for backward compatbility.
  *              Turns on or off automatic printing of errors for certain
  *              error stack.  When turned on (non-null FUNC pointer) any
  *              API function which returns an error indication will first

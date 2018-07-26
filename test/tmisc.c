@@ -5499,7 +5499,7 @@ test_misc33(void)
     MESSAGE(5, ("Testing that bad offset into the heap returns error"));
 
     /* Open the test file */
-    fid = H5Fopen(testfile, H5F_ACC_RDONLY, H5P_DEFAULT);
+    fid = H5Fopen(testfile, H5F_ACC_RDWR, H5P_DEFAULT);
     CHECK(fid, FAIL, "H5Fopen");
 
     /* Case (1) */

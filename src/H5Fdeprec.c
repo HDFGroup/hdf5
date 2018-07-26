@@ -149,7 +149,7 @@ done:
  * Purpose:     Enable switching between latest or non-latest format while
  *              a file is open.
  *              This is deprecated starting release 1.10.2 and is modified
- *              to call the private H5F_set_libver_bounds() to set the
+ *              to call the private H5F__set_libver_bounds() to set the
  *              bounds.
  *
  *              Before release 1.10.2, the library supports only two

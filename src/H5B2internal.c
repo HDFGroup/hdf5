@@ -1192,7 +1192,7 @@ H5B2__remove_internal_by_idx(H5B2_hdr_t *hdr, hbool_t *depth_decreased,
             if(swap_loc)
                 idx = 0;
             else {
-                /* Count from the original index value again */
+                /* Count from the orginal index value again */
                 n = orig_n;
 
                 /* Reset "found" flag - the record may have shifted during the

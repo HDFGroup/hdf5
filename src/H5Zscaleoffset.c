@@ -988,7 +988,7 @@ H5Z_set_local_scaleoffset(hid_t dcpl_id, hid_t type_id, hid_t space_id)
     if(status == H5D_FILL_VALUE_UNDEFINED)
         cd_values[H5Z_SCALEOFFSET_PARM_FILAVAIL] = H5Z_SCALEOFFSET_FILL_UNDEFINED;
     else {
-        int need_convert = FALSE;       /* Flag indicating conversion of byte order */
+        int need_convert = FALSE;       /* Flag indicating convertion of byte order */
 
         cd_values[H5Z_SCALEOFFSET_PARM_FILAVAIL] = H5Z_SCALEOFFSET_FILL_DEFINED;
 
@@ -1047,7 +1047,7 @@ H5Z_filter_scaleoffset(unsigned flags, size_t cd_nelmts, const unsigned cd_value
     uint32_t minbits = 0;           /* minimum number of bits to store values */
     unsigned long long minval= 0;   /* minimum value of input buffer */
     enum H5Z_scaleoffset_t type; /* memory type corresponding to dataset datatype */
-    int need_convert = FALSE;       /* flag indicating conversion of byte order */
+    int need_convert = FALSE;       /* flag indicating convertion of byte order */
     unsigned char *outbuf = NULL;   /* pointer to new output buffer */
     unsigned buf_offset = 21;       /* buffer offset because of parameters stored in file */
     unsigned i;                     /* index */

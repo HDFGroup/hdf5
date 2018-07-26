@@ -90,9 +90,6 @@ class H5_DLLCPP DataType : public H5Object {
         // Determines whether two datatypes are the same.
         bool operator==(const DataType& compared_type) const;
 
-        // Determines whether two datatypes are not the same.
-        bool operator!=(const DataType& compared_type) const;
-
         // Locks a datatype.
         void lock() const;
 

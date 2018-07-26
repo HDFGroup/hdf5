@@ -11,17 +11,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifdef OLD_HEADER_FILENAME
-#include <iostream.h>
-#else
-#include <iostream>
-#endif
 #include <string>
-
-using std::cerr;
-using std::endl;
-
-//#include <string>
 
 #include "H5Include.h"
 #include "H5Exception.h"
