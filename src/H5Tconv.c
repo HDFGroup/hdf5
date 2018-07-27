@@ -109,7 +109,7 @@
  *		least as large as the destination.  Overflows can occur when
  *		the destination is narrower than the source.
  *
- * xF:          Integers to float-point(float or double) values where the desination
+ * xF:          Integers to float-point(float or double) values where the destination
  *              is at least as wide as the source.  This case cannot generate
  *              overflows.
  *
@@ -2102,7 +2102,7 @@ H5T__conv_struct_subset(const H5T_cdata_t *cdata)
  *
  * 		For each element do
  *		  For I=1..NELMTS do
- *		    If sizeof detination type <= sizeof source type then
+ *		    If sizeof destination type <= sizeof source type then
  *		      Convert member to destination type;
  *		    Move member as far left as possible;
  *
@@ -2314,7 +2314,7 @@ done:
  *		function.  The algorithm is basically:
  *
  * 		For each member of the struct
- *		  If sizeof detination type <= sizeof source type then
+ *		  If sizeof destination type <= sizeof source type then
  *		    Convert member to destination type for all elements
  *		    Move memb to BKG buffer for all elements
  *		  Else
@@ -2421,7 +2421,7 @@ H5T__conv_struct_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                         offset -= src_memb->size;
                         if(dst_memb->size > src->shared->size-offset) {
                             cdata->priv = H5T_conv_struct_free(priv);
-                            HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "convertion is unsupported by this function")
+                            HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "conversion is unsupported by this function")
                         } /* end if */
                     } /* end if */
                 } /* end for */
@@ -4250,7 +4250,7 @@ H5T__conv_f_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                     /*
                      * The exponent is too small to fit in the exponent field,
                      * but by shifting the mantissa to the right we can
-                     * accomodate that value.  The mantissa of course is no
+                     * accommodate that value.  The mantissa of course is no
                      * longer normalized.
                      */
                     mrsh += (size_t)(1 - expo);

@@ -76,7 +76,7 @@ const H5std_string    FILE4("tfile4.h5");
  *                     cases.  Since there are no operator<< for 'long long'
  *                     or int64 in VS C++ ostream, I casted the hsize_t values
  *                     passed to verify_val to 'long' as well.  If problems
- *                     arises later, this will have to be specificly handled
+ *                     arises later, this will have to be specifically handled
  *                     with a special routine.
  *-------------------------------------------------------------------------
  */
@@ -282,7 +282,7 @@ static void test_file_create()
  *                     cases.  Since there are no operator<< for 'long long'
  *                     or int64 in VS C++ ostream, I casted the hsize_t values
  *                     passed to verify_val to 'long' as well.  If problems
- *                     arises later, this will have to be specificly handled
+ *                     arises later, this will have to be specifically handled
  *                     with a special routine.
  *-------------------------------------------------------------------------
  */
@@ -657,8 +657,15 @@ static void test_libver_bounds_real(
     unsigned obj_version = file.childObjVersion(ROOTGROUP);
     verify_val(obj_version, oh_vers_create, "H5File::childObjVersion", __LINE__, __FILE__);
 
+    // Verify object header version another way
+    H5O_info_t oinfo;
+    HDmemset(&oinfo, 0, sizeof(oinfo));
+    file.getObjinfo(oinfo, H5O_INFO_HDR);
+    verify_val(oinfo.hdr.version, oh_vers_create, "H5File::getObjinfo", __LINE__, __FILE__);
+
     /*
-     * Reopen the file and make sure the root group still has the correct version
+     * Reopen the file and make sure the root group still has the correct
+     * version
      */
     file.close();
 
@@ -677,6 +684,11 @@ static void test_libver_bounds_real(
 
     obj_version = group.objVersion();
     verify_val(obj_version, oh_vers_mod, "Group::objVersion", __LINE__, __FILE__);
+
+    // Verify object header version another way
+    HDmemset(&oinfo, 0, sizeof(oinfo));
+    group.getObjinfo(oinfo, H5O_INFO_HDR);
+    verify_val(oinfo.hdr.version, oh_vers_mod, "Group::getObjinfo", __LINE__, __FILE__);
 
     group.close(); // close "/G1"
 

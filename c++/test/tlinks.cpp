@@ -515,7 +515,7 @@ test_lcpl(hid_t fapl_id, hbool_t new_format)
     } // end of try block
     catch (Exception& E)
     {
-        issue_fail_msg("test_num_links()", __LINE__, __FILE__, E.getCDetailMsg());
+        issue_fail_msg("test_lcpl()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 } // end test_lcpl()
 
@@ -657,7 +657,7 @@ test_move(hid_t fapl_id, hbool_t new_format)
     } // end of try block
     catch (Exception& E)
     {
-        issue_fail_msg("test_num_links()", __LINE__, __FILE__, E.getCDetailMsg());
+        issue_fail_msg("test_move()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 } // test_move
 
@@ -792,7 +792,7 @@ static void test_copy(hid_t fapl_id, hbool_t new_format)
     } // end of try block
     catch (Exception& E)
     {
-        issue_fail_msg("test_num_links()", __LINE__, __FILE__, E.getCDetailMsg());
+        issue_fail_msg("test_copy()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 } // test_copy
 
@@ -892,6 +892,7 @@ void test_links()
             /* General tests... (on both old & new format groups */
             // FileAccPropList may be passed in instead of fapl id
             test_basic_links(my_fapl_id, new_format);
+            test_num_links(my_fapl_id, new_format);
             test_move(my_fapl_id, new_format);
             test_copy(my_fapl_id, new_format);
             test_lcpl(my_fapl_id, new_format);

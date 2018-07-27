@@ -46,7 +46,13 @@ New Features
 
     Configuration:
     -------------
-    -
+    - Add option to execute swmr shell scripts from CMake.
+
+      Option TEST_SHELL_SCRIPTS redirects processing into a
+      separate ShellTests.cmake file for UNIX types. The tests
+      execute the shell scripts if a SH program is found.
+
+      (ADB - 2018/07/16)
 
     Library:
     --------
@@ -64,11 +70,63 @@ New Features
 
     C++ Library:
     ------------
-    -
+    - New wrappers
+
+      Added the following items:
+
+      + Class DSetAccPropList for the dataset access property list.
+
+      + Wrapper for H5Dget_access_plist to class DataSet
+        // Gets the access property list of this dataset.
+        DSetAccPropList getAccessPlist() const;
+
+      + Wrappers for H5Pset_chunk_cache and H5Pget_chunk_cache to class DSetAccPropList
+        // Sets the raw data chunk cache parameters.
+        void setChunkCache(size_t rdcc_nslots, size_t rdcc_nbytes, double rdcc_w0)
+
+        // Retrieves the raw data chunk cache parameters.
+        void getChunkCache(size_t &rdcc_nslots, size_t &rdcc_nbytes, double &rdcc_w0)
+
+      + New operator!= to class DataType (HDFFV-10472)
+        // Determines whether two datatypes are not the same.
+        bool operator!=(const DataType& compared_type)
+
+      + Wrappers for H5Oget_info2, H5Oget_info_by_name2, and H5Oget_info_by_idx2
+        (HDFFV-10458)
+
+        // Retrieves information about an HDF5 object.
+        void getObjinfo(H5O_info_t& objinfo, unsigned fields = H5O_INFO_BASIC) const;
+
+        // Retrieves information about an HDF5 object, given its name.
+        void getObjinfo(const char* name, H5O_info_t& objinfo,
+                unsigned fields = H5O_INFO_BASIC,
+                const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
+        void getObjinfo(const H5std_string& name, H5O_info_t& objinfo,
+                unsigned fields = H5O_INFO_BASIC,
+                const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
+
+        // Retrieves information about an HDF5 object, given its index.
+        void getObjinfo(const char* grp_name, H5_index_t idx_type,
+                H5_iter_order_t order, hsize_t idx, H5O_info_t& objinfo,
+                unsigned fields = H5O_INFO_BASIC,
+                const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
+        void getObjinfo(const H5std_string& grp_name, H5_index_t idx_type,
+                H5_iter_order_t order, hsize_t idx, H5O_info_t& objinfo,
+                unsigned fields = H5O_INFO_BASIC,
+                const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
+
+      (BMR - 2018/07/22, HDFFV-10150, HDFFV-10458, HDFFV-1047)
+
 
     Java Library:
     ----------------
-    -
+    - JNI Read and Write
+
+      Refactored variable-length functions, H5DreadVL and H5AreadVL,
+      to correct dataset and attribute reads. New write functions,
+      H5DwriteVL and H5AwriteVL, are under construction.
+
+      (ADB - 2018/06/02, HDFFV10519)
 
     Tools:
     ------
@@ -99,6 +157,27 @@ Bug Fixes since HDF5-1.10.2 release
 
     Library
     -------
+    - H5Adelete
+
+      H5Adelete failed when deleting the last "large" attribute that
+      is stored densely via fractal heap/v2 b-tree.
+      
+      After removing the attribute, update the ainfo message.  If the
+      number of attributes goes to zero, remove the message.
+
+      (VC - 2018/07/20, HDFFV-9277)
+
+    - Error checks in h5stat and when decoding messages
+
+      h5stat exited with seg fault/core dumped when
+      errors are encountered in the internal library.
+
+      Add error checks and --enable-error-stack option to h5stat.
+      Add range checks when decoding messages: old fill value, old
+      layout and refcount.
+
+      (VC - 2018/07/11, HDFFV-10333)
+
     - If an HDF5 file contains a malformed compound datatype with a
       suitably large offset, the type conversion code can run off
       the end of the type conversion buffer, causing a segmentation
@@ -119,6 +198,44 @@ Bug Fixes since HDF5-1.10.2 release
 
       (DER - 2018/02/26, HDFFV-10356)
 
+    - A bug was discovered in the parallel library which caused partial
+      parallel reads of filtered datasets to return incorrect data. The
+      library used the incorrect dataspace for each chunk read, causing
+      the selection used in each chunk to be wrong.
+
+      The bug was not caught during testing because all of the current
+      tests which do parallel reads of filtered data read all of the data
+      using an H5S_ALL selection. Several tests were added which exercise
+      partial parallel reads.
+
+      (JTH - 2018/07/16, HDFFV-10467)
+
+    - A bug was discovered in the parallel library which caused parallel
+      writes of filtered datasets to trigger an assertion failure in the
+      file free space manager.
+
+      This occurred when the filter used caused chunks to repeatedly shrink
+      and grow over the course of several dataset writes. The previous chunk
+      information, such as the size of the chunk and the offset in the file,
+      was being cached and not updated after each write, causing the next write
+      to the chunk to retrieve the incorrect cached information and run into
+      issues when reallocating space in the file for the chunk.
+
+      (JTH - 2018/07/16, HDFFV-10509)
+
+    - A bug was discovered in the parallel library which caused the
+      H5D__mpio_array_gatherv() function to allocate too much memory.
+
+      When the function is called with the 'allgather' parameter set
+      to a non-true value, the function will receive data from all MPI
+      ranks and gather it to the single rank specied by the 'root'
+      parameter. However, the bug in the function caused memory for
+      the received data to be allocated on all MPI ranks, not just the
+      singular rank specified as the receiver. In some circumstances,
+      this would cause an application to fail due to the large amounts
+      of memory being allocated.
+
+      (JTH - 2018/07/16, HDFFV-10467)
 
     Configuration
     -------------
@@ -198,7 +315,20 @@ Bug Fixes since HDF5-1.10.2 release
 
     C++ APIs
     --------
-    -
+    - Adding default arguments to existing functions
+
+      Added the following items:
+      + Two more property list arguments are added to H5Location::createDataSet:
+        const DSetAccPropList& dapl = DSetAccPropList::DEFAULT
+        const LinkCreatPropList& lcpl = LinkCreatPropList::DEFAULT
+
+      + One more property list argument is added to H5Location::openDataSet:
+        const DSetAccPropList& dapl = DSetAccPropList::DEFAULT
+
+    - Improvement C++ documentation
+
+      Replaced the table in main page of the C++ documentation from mht to htm format
+      for portability.
 
     Testing
     -------

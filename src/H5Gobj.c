@@ -222,7 +222,7 @@ H5G__obj_create_real(H5F_t *f, const H5O_ginfo_t *ginfo,
         size_t pline_size = 0;              /* Size of the pipeline message */
         size_t link_size;                   /* Size of a link message */
 
-        /* Calculate message size infomation, for creating group's object header */
+        /* Calculate message size information, for creating group's object header */
         linfo_size = H5O_msg_size_f(f, gcpl_id, H5O_LINFO_ID, linfo, (size_t)0);
         HDassert(linfo_size);
 
