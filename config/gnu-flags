@@ -85,7 +85,7 @@ case "$cc_vendor-$cc_version" in
     esac
 
     case "$host_os-$host_cpu" in
-        # cygwin needs the "-std=c99" flag removed, so make
+        # cygwin needs the "-std-c99" flag removed, so make
         # a specific case for Cygwin without the flag and a default
         # case to add the flag everywhere else   
         cygwin-*)
