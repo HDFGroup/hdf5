@@ -21,7 +21,6 @@
   # --------------------------------------------------------------------
   set (HDF5_REFERENCE_FILES
       ${HDF5_TOOLS_DIR}/testfiles/charsets.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/err_attr_dspace.ddl
       ${HDF5_TOOLS_DIR}/testfiles/file_space.ddl
       ${HDF5_TOOLS_DIR}/testfiles/filter_fail.ddl
       ${HDF5_TOOLS_DIR}/testfiles/non_existing.ddl
@@ -125,6 +124,7 @@
       ${HDF5_TOOLS_DIR}/testfiles/tints4dimsCountEq.ddl
       ${HDF5_TOOLS_DIR}/testfiles/tints4dimsStride2.ddl
       ${HDF5_TOOLS_DIR}/testfiles/tintsattrs.ddl
+      ${HDF5_TOOLS_DIR}/testfiles/tintsnodata.ddl
       ${HDF5_TOOLS_DIR}/testfiles/tlarge_objname.ddl
       #${HDF5_TOOLS_DIR}/testfiles/tldouble.ddl
       ${HDF5_TOOLS_DIR}/testfiles/tlonglinks.ddl
@@ -218,7 +218,6 @@
   )
   set (HDF5_REFERENCE_TEST_FILES
       ${HDF5_TOOLS_DIR}/testfiles/charsets.h5
-      ${HDF5_TOOLS_DIR}/testfiles/err_attr_dspace.h5
       ${HDF5_TOOLS_DIR}/testfiles/file_space.h5
       ${HDF5_TOOLS_DIR}/testfiles/filter_fail.h5
       ${HDF5_TOOLS_DIR}/testfiles/packedbits.h5
@@ -280,6 +279,7 @@
       ${HDF5_TOOLS_DIR}/testfiles/thyperslab.h5
       ${HDF5_TOOLS_DIR}/testfiles/tints4dims.h5
       ${HDF5_TOOLS_DIR}/testfiles/tintsattrs.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tintsnodata.h5
       ${HDF5_TOOLS_DIR}/testfiles/tlarge_objname.h5
       #${HDF5_TOOLS_DIR}/testfiles/tldouble.h5
       ${HDF5_TOOLS_DIR}/testfiles/tlonglinks.h5
@@ -998,6 +998,8 @@
           tints4dimsStride2.out.err
           tintsattrs.out
           tintsattrs.out.err
+          tintsnodata.out
+          tintsnodata.out.err
           tlarge_objname.out
           tlarge_objname.out.err
           tldouble.out
@@ -1167,6 +1169,9 @@
 
   # test for maximum display datasets
   ADD_H5_TEST (twidedisplay 0 --enable-error-stack -w0 packedbits.h5)
+
+  # test for unwritten datasets
+  ADD_H5_TEST (tintsnodata 0 --enable-error-stack -p tintsnodata.h5)
 
   # test for signed/unsigned datasets
   ADD_H5_TEST (packedbits 0 --enable-error-stack packedbits.h5)
@@ -1534,9 +1539,6 @@
 
   # test for non-existing file
   ADD_H5_TEST (non_existing 1 --enable-error-stack tgroup.h5 non_existing.h5)
-
-  # test to verify HDFFV-10333: error similar to H5O_attr_decode in the jira issue
-  ADD_H5_TEST (err_attr_dspace 1 err_attr_dspace.h5)
 
 ##############################################################################
 ###    P L U G I N  T E S T S
