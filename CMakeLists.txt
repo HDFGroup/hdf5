@@ -561,8 +561,8 @@ if (HDF5_ENABLE_PARALLEL)
     CHECK_SYMBOL_EXISTS (MPI_Info_c2f "${MPI_C_INCLUDE_DIRS}/mpi.h"  H5_HAVE_MPI_MULTI_LANG_Info)
 
     # Used by Parallel Compression feature
-    CHECK_FUNCTION_EXISTS (MPI_Mprobe "${MPI_C_INCLUDE_DIRS}/mpi.h" H5_HAVE_MPI_Mprobe)
-    CHECK_FUNCTION_EXISTS (MPI_Imrecv "${MPI_C_INCLUDE_DIRS}/mpi.h" H5_HAVE_MPI_Imrecv)
+    CHECK_SYMBOL_EXISTS (MPI_Mprobe "${MPI_C_INCLUDE_DIRS}/mpi.h" H5_HAVE_MPI_Mprobe)
+    CHECK_SYMBOL_EXISTS (MPI_Imrecv "${MPI_C_INCLUDE_DIRS}/mpi.h" H5_HAVE_MPI_Imrecv)
     if (NOT H5_HAVE_MPI_Mprobe OR NOT H5_HAVE_MPI_Imrecv)
       message (WARNING "The MPI_Mprobe and/or MPI_Imrecv functions could not be located.
                Parallel writes of filtered data will be disabled.")
