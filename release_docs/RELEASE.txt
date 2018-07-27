@@ -46,7 +46,13 @@ New Features
 
     Configuration:
     -------------
-    -
+    - Add option to execute swmr shell scripts from CMake.
+
+      Option TEST_SHELL_SCRIPTS redirects processing into a
+      separate ShellTests.cmake file for UNIX types. The tests
+      execute the shell scripts if a SH program is found.
+
+      (ADB - 2018/07/16)
 
     Library:
     --------
@@ -114,7 +120,13 @@ New Features
 
     Java Library:
     ----------------
-    -
+    - JNI Read and Write
+
+      Refactored variable-length functions, H5DreadVL and H5AreadVL,
+      to correct dataset and attribute reads. New write functions,
+      H5DwriteVL and H5AwriteVL, are under construction.
+
+      (ADB - 2018/06/02, HDFFV10519)
 
     Tools:
     ------
