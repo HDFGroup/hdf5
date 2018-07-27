@@ -1606,8 +1606,6 @@
 # h5dump test files
 ./tools/testfiles/charsets.h5
 ./tools/testfiles/charsets.ddl
-./tools/testfiles/err_attr_dspace.h5
-./tools/testfiles/err_attr_dspace.ddl
 ./tools/testfiles/family_file00000.h5
 ./tools/testfiles/family_file00001.h5
 ./tools/testfiles/family_file00002.h5
