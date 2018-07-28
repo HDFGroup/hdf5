@@ -143,6 +143,7 @@ ArrayType& ArrayType::operator=(const ArrayType& rhs)
 // Function:    ArrayType::decode
 ///\brief       Returns an ArrayType object via DataType* by decoding the
 ///             binary object description of this type.
+///
 ///\exception   H5::DataTypeIException
 // Programmer   Binh-Minh Ribler - Aug 2017
 //--------------------------------------------------------------------------
