@@ -253,6 +253,7 @@ void DSetCreatPropList::setSzip(unsigned int options_mask, unsigned int pixels_p
 // Function:    DSetCreatPropList::setNbit
 ///\brief       Sets up for the use of the Nbit compression filter.
 ///\exception   H5::PropListIException
+///
 ///\par Description
 ///             The associate C function sets an Nbit compression filter,
 ///             H5Z_FILTER_NBIT, for a dataset.  For more information about
