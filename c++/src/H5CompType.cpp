@@ -129,6 +129,7 @@ CompType::CompType(const H5Location& loc, const H5std_string& dtype_name) : Data
 // Function:    CompType::decode
 ///\brief       Returns a CompType object via DataType* by decoding the
 ///             binary object description of this datatype.
+///
 ///\exception   H5::DataTypeIException
 // Programmer   Binh-Minh Ribler - Aug 2017
 //--------------------------------------------------------------------------
