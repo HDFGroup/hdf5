@@ -643,6 +643,11 @@ else ()
     H5_DEFAULT_PLUGINDIR    "/usr/local/hdf5/lib/plugin"
 endif ()
 
+NOTE:
+  The BUILD_STATIC_EXECS ("Build Static Executables") option is only valid
+  on some unix operating system. It adds the "-static" flag to cflags. This
+  flag is not available on windows and some modern linux systems will
+  ignore the flag.
 
 
 ========================================================================
