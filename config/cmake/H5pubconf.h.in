@@ -30,7 +30,7 @@
 #cmakedefine H5_AC_APPLE_UNIVERSAL_BUILD @H5_AC_APPLE_UNIVERSAL_BUILD@
 
 /* Define if C++ compiler recognizes offsetof */
-#cmakedefine H5_CXX_HAVE_OFFSETOF @H5_CXX_HAVE_OFFSETOF@
+#cmakedefine H5_CXX_HAVE_OFFSETOF @CXX_HAVE_OFFSETOF@
 
 /* Define the default plugins path to compile */
 #cmakedefine H5_DEFAULT_PLUGINDIR "@H5_DEFAULT_PLUGINDIR@"
@@ -402,7 +402,7 @@
 /* Define to 1 if you have the `tmpfile' function. */
 #cmakedefine H5_HAVE_TMPFILE @H5_HAVE_TMPFILE@
 
-/* Define if tm_gmtoff is a member of `struct tm' */
+/* Define if tm_gmtoff is a member of struct tm */
 #cmakedefine H5_HAVE_TM_GMTOFF @H5_HAVE_TM_GMTOFF@
 
 /* Define to 1 if you have the <unistd.h> header file. */

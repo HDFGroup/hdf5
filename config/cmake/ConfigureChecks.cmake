@@ -176,6 +176,9 @@ else ()
 endif ()
 
 CHECK_TYPE_SIZE("_Quad" ${HDF_PREFIX}_SIZEOF__QUAD)
+if (NOT ${${HDF_PREFIX}_SIZEOF__QUAD})
+  set (${HDF_PREFIX}_SIZEOF__QUAD 0)
+endif ()
 
 #-----------------------------------------------------------------------------
 # Macro to determine the various conversion capabilities
