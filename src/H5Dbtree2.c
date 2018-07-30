@@ -378,7 +378,7 @@ H5D__bt2_unfilt_encode(uint8_t *raw, const void *_record, void *_ctx)
 {
     H5D_bt2_ctx_t *ctx = (H5D_bt2_ctx_t *)_ctx;	/* Callback context structure */
     const H5D_chunk_rec_t *record = (const H5D_chunk_rec_t *)_record; /* The native record */
-    unsigned u;			/* Local index varible */
+    unsigned u;			/* Local index variable */
 
     FUNC_ENTER_STATIC_NOERR
 

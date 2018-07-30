@@ -703,12 +703,12 @@ H5HF__cache_hdr_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t len,
      *
      * Do this with a call to H5HF__cache_verify_hdr_descendants_clean().
      *
-     * Note that decendants need not be clean if the pre_serialize call
+     * Note that descendants need not be clean if the pre_serialize call
      * is made during a cache serialization instead of an entry or cache
      * flush.
      *
      * Note also that with the recent change in the definition of flush 
-     * dependency, not all decendants need be clean -- only direct flush 
+     * dependency, not all descendants need be clean -- only direct flush 
      * dependency children.
      *
      * Finally, observe that the H5HF__cache_verify_hdr_descendants_clean()
@@ -2785,11 +2785,11 @@ H5HF__cache_dblock_fsf_size(const void *_thing, hsize_t *fsf_size)
  *
  *		The implementation of flush dependencies has been changed.
  *		Prior to this change, a flush dependency parent could be 
- *		flushed if and only if all its flush dependency decendants
+ *		flushed if and only if all its flush dependency descendants
  *		were clean.  In the new definition, a flush dependency 
  *		parent can be flushed if all its immediate flush dependency
  *		children are clean, regardless of any other dirty 
- *		decendants.  
+ *		descendants.  
  *
  *		Further, metadata cache entries are now allowed to have 
  *		multiple flush dependency parents.  
@@ -2957,7 +2957,7 @@ H5HF__cache_verify_hdr_descendants_clean(H5F_t *f, H5HF_hdr_t *hdr,
                     H5_BEGIN_TAG(hdr->heap_addr)
 
                     if(NULL == (root_iblock = (H5HF_indirect_t *)H5AC_protect(f, H5AC_FHEAP_IBLOCK, root_iblock_addr, NULL, H5AC__READ_ONLY_FLAG)))
-                        HGOTO_ERROR_TAG(H5E_HEAP, H5E_CANTPROTECT, FAIL, "H5AC_protect() faild.")
+                        HGOTO_ERROR_TAG(H5E_HEAP, H5E_CANTPROTECT, FAIL, "H5AC_protect() failed.")
 
                     H5_END_TAG
 
@@ -3027,7 +3027,7 @@ H5HF__cache_verify_hdr_descendants_clean(H5F_t *f, H5HF_hdr_t *hdr,
                     H5_BEGIN_TAG(hdr->heap_addr)
 
                     if(NULL == (iblock = (H5HF_indirect_t *)H5AC_protect(f, H5AC_FHEAP_IBLOCK, root_iblock_addr, NULL, H5AC__READ_ONLY_FLAG)))
-                        HGOTO_ERROR_TAG(H5E_HEAP, H5E_CANTPROTECT, FAIL, "H5AC_protect() faild.")
+                        HGOTO_ERROR_TAG(H5E_HEAP, H5E_CANTPROTECT, FAIL, "H5AC_protect() failed.")
 
                     H5_END_TAG
 
@@ -3050,7 +3050,7 @@ H5HF__cache_verify_hdr_descendants_clean(H5F_t *f, H5HF_hdr_t *hdr,
              if(unprotect_root_iblock) {
                 HDassert(root_iblock);
                 if(H5AC_unprotect(f, H5AC_FHEAP_IBLOCK, root_iblock_addr, root_iblock, H5AC__NO_FLAGS_SET) < 0)
-                    HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "H5AC_unprotect() faild.")
+                    HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "H5AC_unprotect() failed.")
             } /* end if */
         } /* end else */
     } /* end if */
@@ -3120,7 +3120,7 @@ done:
  * Function:	H5HF__cache_verify_iblock_descendants_clean
  *
  * Purpose:	Sanity checking routine that verifies that all indirect 
- *		and direct blocks that are decendents of the supplied 
+ *		and direct blocks that are descendants of the supplied 
  *		instance of H5HF_indirect_t are clean.  Set *clean 
  *		to TRUE if this is the case, and to FALSE otherwise.
  *
@@ -3147,11 +3147,11 @@ done:
  *
  *		The implementation of flush dependencies has been changed.
  *		Prior to this change, a flush dependency parent could be 
- *		flushed if and only if all its flush dependency decendants
+ *		flushed if and only if all its flush dependency descendants
  *		were clean.  In the new definition, a flush dependency 
  *		parent can be flushed if all its immediate flush dependency
  *		children are clean, regardless of any other dirty 
- *		decendants.  
+ *		descendants.  
  *
  *		Further, metadata cache entries are now allowed to have 
  *		multiple flush dependency parents.  
@@ -3264,11 +3264,11 @@ done:
  *
  *		The implementation of flush dependencies has been changed.
  *		Prior to this change, a flush dependency parent could be 
- *		flushed if and only if all its flush dependency decendants
+ *		flushed if and only if all its flush dependency descendants
  *		were clean.  In the new definition, a flush dependency 
  *		parent can be flushed if all its immediate flush dependency
  *		children are clean, regardless of any other dirty 
- *		decendants.  
+ *		descendants.  
  *
  *		Further, metadata cache entries are now allowed to have 
  *		multiple flush dependency parents.  
@@ -3428,11 +3428,11 @@ done:
  *
  *		The implementation of flush dependencies has been changed.
  *		Prior to this change, a flush dependency parent could be 
- *		flushed if and only if all its flush dependency decendants
+ *		flushed if and only if all its flush dependency descendants
  *		were clean.  In the new definition, a flush dependency 
  *		parent can be flushed if all its immediate flush dependency
  *		children are clean, regardless of any other dirty 
- *		decendants.  
+ *		descendants.  
  *
  *		Further, metadata cache entries are now allowed to have 
  *		multiple flush dependency parents.
@@ -3606,7 +3606,7 @@ H5HF__cache_verify_descendant_iblocks_clean(H5F_t *f, haddr_t fd_parent_addr,
                             H5_BEGIN_TAG(iblock->hdr->heap_addr)
 
                             if(NULL == (child_iblock = (H5HF_indirect_t *) H5AC_protect(f, H5AC_FHEAP_IBLOCK, child_iblock_addr, NULL, H5AC__READ_ONLY_FLAG)))
-                                HGOTO_ERROR_TAG(H5E_HEAP, H5E_CANTPROTECT, FAIL, "H5AC_protect() faild.")
+                                HGOTO_ERROR_TAG(H5E_HEAP, H5E_CANTPROTECT, FAIL, "H5AC_protect() failed.")
 
                             H5_END_TAG
 
@@ -3618,7 +3618,7 @@ H5HF__cache_verify_descendant_iblocks_clean(H5F_t *f, haddr_t fd_parent_addr,
                             /* pointer to the entry.  This is very slimy -- */
                             /* come up with a better solution.              */
                             if(H5AC_get_entry_from_addr(f, child_iblock_addr, (void **)(&child_iblock)) < 0)
-                                HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "H5AC_get_entry_from_addr() faild.")
+                                HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "H5AC_get_entry_from_addr() failed.")
                             HDassert(child_iblock);
                         } /* end else */
                     } /* end if */
@@ -3657,7 +3657,7 @@ H5HF__cache_verify_descendant_iblocks_clean(H5F_t *f, haddr_t fd_parent_addr,
                     /* if we protected the child iblock, unprotect it now */
                     if(unprotect_child_iblock) {
                         if(H5AC_unprotect(f, H5AC_FHEAP_IBLOCK, child_iblock_addr, child_iblock, H5AC__NO_FLAGS_SET) < 0)
-                            HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "H5AC_unprotect() faild.")
+                            HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "H5AC_unprotect() failed.")
                     } /* end if */
                 } /* end if */
             } /* end if */

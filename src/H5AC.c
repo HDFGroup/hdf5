@@ -320,7 +320,7 @@ H5AC_create(const H5F_t *f, H5AC_cache_config_t *config_ptr, H5AC_cache_image_co
             HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get mpi size")
 
         if(NULL == (aux_ptr = H5FL_CALLOC(H5AC_aux_t)))
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL, "Can't allocate H5AC auxilary structure")
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL, "Can't allocate H5AC auxiliary structure")
 
         aux_ptr->magic = H5AC__H5AC_AUX_T_MAGIC;
         aux_ptr->mpi_comm = mpi_comm;
@@ -434,7 +434,7 @@ H5AC_create(const H5F_t *f, H5AC_cache_config_t *config_ptr, H5AC_cache_image_co
 
 done:
 #ifdef H5_HAVE_PARALLEL
-    /* if there is a failure, try to tidy up the auxilary structure */
+    /* if there is a failure, try to tidy up the auxiliary structure */
     if(ret_value < 0) {
         if(aux_ptr != NULL) {
             if(aux_ptr->d_slist_ptr != NULL)
@@ -1880,7 +1880,7 @@ done:
  *		from the cache, clear it, and free it without writing it to
  *		disk.
  *
- *		This verion of the function is a complete re-write to
+ *		This version of the function is a complete re-write to
  *		use the new metadata cache.  While there isn't all that
  *		much difference between the old and new Purpose sections,
  *		the original version is given below.

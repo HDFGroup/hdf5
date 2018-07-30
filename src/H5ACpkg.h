@@ -193,7 +193,7 @@ H5FL_EXTERN(H5AC_aux_t);
  *		is permitted to write to file.
  *
  * dirty_bytes_threshold: Integer field containing the dirty bytes
- *		generation threashold.  Whenever dirty byte creation
+ *		generation threshold.  Whenever dirty byte creation
  *		exceeds this value, the metadata cache on process 0
  *		broadcasts a list of the entries it has flushed since
  *		the last broadcast (or since the beginning of execution)

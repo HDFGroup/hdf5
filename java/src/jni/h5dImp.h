@@ -213,6 +213,15 @@ Java_hdf_hdf5lib_H5_H5DreadVL
 
 /*
  * Class:     hdf_hdf5lib_H5
+ * Method:    H5DwriteVL
+ * Signature: (JJJJJ[Ljava/lang/String;)I
+ */
+JNIEXPORT jint JNICALL
+Java_hdf_hdf5lib_H5_H5DwriteVL
+(JNIEnv*, jclass, jlong, jlong, jlong, jlong, jlong, jobjectArray);
+
+/*
+ * Class:     hdf_hdf5lib_H5
  * Method:    H5Dread_string
  * Signature: (JJJJJ[Ljava/lang/String;)I
  */

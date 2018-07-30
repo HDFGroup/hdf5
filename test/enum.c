@@ -374,7 +374,7 @@ test_tr2(hid_t file)
 			   E1_WHITE, E1_BLACK, E1_GREEN, E1_BLUE,  E1_RED};
     c_e1	data2[10];
 
-    TESTING("O(log N) converions");
+    TESTING("O(log N) conversions");
 
     if((cwg = H5Gcreate2(file, "test_tr2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 

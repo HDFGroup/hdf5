@@ -1025,8 +1025,11 @@ class ArrayDescriptor {
             NTsize = 8;
         }
         else if (css.startsWith("Ljava.lang.String")) {
+            NT = 'L';
+            className = "java.lang.String";
+            NTsize = 1;
             throw new HDF5JavaException(new String(
-                    "ArrayDesciptor: Error:  String array not supported yet"));
+                    "ArrayDesciptor: Warning:  String array not fully supported yet"));
         }
         else {
             /*

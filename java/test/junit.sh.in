@@ -62,8 +62,8 @@ $top_builddir/java/src/jni/.libs/libhdf5_java.*
 LIST_JAR_FILES="
 $HDFLIB_HOME/hamcrest-core.jar
 $HDFLIB_HOME/junit.jar
-$HDFLIB_HOME/slf4j-api-1.7.5.jar
-$HDFLIB_HOME/ext/slf4j-simple-1.7.5.jar
+$HDFLIB_HOME/slf4j-api-1.7.25.jar
+$HDFLIB_HOME/ext/slf4j-simple-1.7.25.jar
 $top_builddir/java/src/$JARFILE
 "
 LIST_DATA_FILES="
@@ -249,7 +249,7 @@ JAVAEXEFLAGS=@H5_JAVAFLAGS@
 COPY_LIBFILES_TO_BLDLIBDIR
 COPY_DATAFILES_TO_BLDDIR
 
-CPATH=".:"$BLDLIBDIR"/"$JARFILE":"$BLDLIBDIR"/junit.jar:"$BLDLIBDIR"/hamcrest-core.jar:"$BLDLIBDIR"/slf4j-api-1.7.5.jar:"$BLDLIBDIR"/slf4j-simple-1.7.5.jar:"$TESTJARFILE""
+CPATH=".:"$BLDLIBDIR"/"$JARFILE":"$BLDLIBDIR"/junit.jar:"$BLDLIBDIR"/hamcrest-core.jar:"$BLDLIBDIR"/slf4j-api-1.7.25.jar:"$BLDLIBDIR"/slf4j-simple-1.7.25.jar:"$TESTJARFILE""
 
 TEST=/usr/bin/test
 if [ ! -x /usr/bin/test ]
@@ -309,7 +309,9 @@ if diff JUnit-TestH5.out JUnit-TestH5.txt > /dev/null; then
     echo "  PASSED      JUnit-TestH5"
 else
     echo "**FAILED**    JUnit-TestH5"
+    echo "    Expected result differs from actual result"
     nerrors="`expr $nerrors + 1`"
+    test yes = "$verbose" && $DIFF JUnit-TestH5.txt JUnit-TestH5.out |sed 's/^/    /'
 fi
 
 echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH -ea org.junit.runner.JUnitCore test.TestH5Eparams"
@@ -328,7 +330,9 @@ if diff JUnit-TestH5Eparams.out JUnit-TestH5Eparams.txt > /dev/null; then
     echo "  PASSED      JUnit-TestH5Eparams"
 else
     echo "**FAILED**    JUnit-TestH5Eparams"
+    echo "    Expected result differs from actual result"
     nerrors="`expr $nerrors + 1`"
+    test yes = "$verbose" && $DIFF JUnit-TestH5Eparams.txt JUnit-TestH5Eparams.out |sed 's/^/    /'
 fi
 
 echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH -ea org.junit.runner.JUnitCore test.TestH5Eregister"
@@ -347,7 +351,9 @@ if diff JUnit-TestH5Eregister.out JUnit-TestH5Eregister.txt > /dev/null; then
     echo "  PASSED      JUnit-TestH5Eregister"
 else
     echo "**FAILED**    JUnit-TestH5Eregister"
+    echo "    Expected result differs from actual result"
     nerrors="`expr $nerrors + 1`"
+    test yes = "$verbose" && $DIFF JUnit-TestH5Eregister.txt JUnit-TestH5Eregister.out |sed 's/^/    /'
 fi
 
 echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH -ea org.junit.runner.JUnitCore test.TestH5Fparams"
@@ -366,7 +372,9 @@ if diff JUnit-TestH5Fparams.out JUnit-TestH5Fparams.txt > /dev/null; then
     echo "  PASSED      JUnit-TestH5Fparams"
 else
     echo "**FAILED**    JUnit-TestH5Fparams"
+    echo "    Expected result differs from actual result"
     nerrors="`expr $nerrors + 1`"
+    test yes = "$verbose" && $DIFF JUnit-TestH5Fparams.txt JUnit-TestH5Fparams.out |sed 's/^/    /'
 fi
 
 echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH -ea org.junit.runner.JUnitCore test.TestH5Fbasic"
@@ -385,7 +393,9 @@ if diff JUnit-TestH5Fbasic.out JUnit-TestH5Fbasic.txt > /dev/null; then
     echo "  PASSED      JUnit-TestH5Fbasic"
 else
     echo "**FAILED**    JUnit-TestH5Fbasic"
+    echo "    Expected result differs from actual result"
     nerrors="`expr $nerrors + 1`"
+    test yes = "$verbose" && $DIFF JUnit-TestH5Fbasic.txt JUnit-TestH5Fbasic.out |sed 's/^/    /'
 fi
 
 echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH -ea org.junit.runner.JUnitCore test.TestH5F"
@@ -404,7 +414,9 @@ if diff JUnit-TestH5F.out JUnit-TestH5F.txt > /dev/null; then
     echo "  PASSED      JUnit-TestH5F"
 else
     echo "**FAILED**    JUnit-TestH5F"
+    echo "    Expected result differs from actual result"
     nerrors="`expr $nerrors + 1`"
+    test yes = "$verbose" && $DIFF JUnit-TestH5F.txt JUnit-TestH5F.out |sed 's/^/    /'
 fi
 
 echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH -ea org.junit.runner.JUnitCore test.TestH5Fswmr"
@@ -423,7 +435,9 @@ if diff JUnit-TestH5Fswmr.out JUnit-TestH5Fswmr.txt > /dev/null; then
     echo "  PASSED      JUnit-TestH5Fswmr"
 else
     echo "**FAILED**    JUnit-TestH5Fswmr"
+    echo "    Expected result differs from actual result"
     nerrors="`expr $nerrors + 1`"
+    test yes = "$verbose" && $DIFF JUnit-TestH5Fswmr.txt JUnit-TestH5Fswmr.out |sed 's/^/    /'
 fi
 
 echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH -ea org.junit.runner.JUnitCore test.TestH5Gbasic"
@@ -442,7 +456,9 @@ if diff JUnit-TestH5Gbasic.out JUnit-TestH5Gbasic.txt > /dev/null; then
     echo "  PASSED      JUnit-TestH5Gbasic"
 else
     echo "**FAILED**    JUnit-TestH5Gbasic"
+    echo "    Expected result differs from actual result"
     nerrors="`expr $nerrors + 1`"
+    test yes = "$verbose" && $DIFF JUnit-TestH5Gbasic.txt JUnit-TestH5Gbasic.out |sed 's/^/    /'
 fi
 
 echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH -ea org.junit.runner.JUnitCore test.TestH5G"
@@ -461,7 +477,9 @@ if diff JUnit-TestH5G.out JUnit-TestH5G.txt > /dev/null; then
     echo "  PASSED      JUnit-TestH5G"
 else
     echo "**FAILED**    JUnit-TestH5G"
+    echo "    Expected result differs from actual result"
     nerrors="`expr $nerrors + 1`"
+    test yes = "$verbose" && $DIFF JUnit-TestH5G.txt JUnit-TestH5G.out |sed 's/^/    /'
 fi
 
 echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH -ea org.junit.runner.JUnitCore test.TestH5Sbasic"
@@ -480,7 +498,9 @@ if diff JUnit-TestH5Sbasic.out JUnit-TestH5Sbasic.txt > /dev/null; then
     echo "  PASSED      JUnit-TestH5Sbasic"
 else
     echo "**FAILED**    JUnit-TestH5Sbasic"
+    echo "    Expected result differs from actual result"
     nerrors="`expr $nerrors + 1`"
+    test yes = "$verbose" && $DIFF JUnit-TestH5Sbasic.txt JUnit-TestH5Sbasic.out |sed 's/^/    /'
 fi
 
 echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH -ea org.junit.runner.JUnitCore test.TestH5S"
@@ -499,7 +519,9 @@ if diff JUnit-TestH5S.out JUnit-TestH5S.txt > /dev/null; then
     echo "  PASSED      JUnit-TestH5S"
 else
     echo "**FAILED**    JUnit-TestH5S"
+    echo "    Expected result differs from actual result"
     nerrors="`expr $nerrors + 1`"
+    test yes = "$verbose" && $DIFF JUnit-TestH5S.txt JUnit-TestH5S.out |sed 's/^/    /'
 fi
 
 echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH -ea org.junit.runner.JUnitCore test.TestH5Tparams"
@@ -518,7 +540,9 @@ if diff JUnit-TestH5Tparams.out JUnit-TestH5Tparams.txt > /dev/null; then
     echo "  PASSED      JUnit-TestH5Tparams"
 else
     echo "**FAILED**    JUnit-TestH5Tparams"
+    echo "    Expected result differs from actual result"
     nerrors="`expr $nerrors + 1`"
+    test yes = "$verbose" && $DIFF JUnit-TestH5Tparams.txt JUnit-TestH5Tparams.out |sed 's/^/    /'
 fi
 
 echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH -ea org.junit.runner.JUnitCore test.TestH5Tbasic"
@@ -537,7 +561,9 @@ if diff JUnit-TestH5Tbasic.out JUnit-TestH5Tbasic.txt > /dev/null; then
     echo "  PASSED      JUnit-TestH5Tbasic"
 else
     echo "**FAILED**    JUnit-TestH5Tbasic"
+    echo "    Expected result differs from actual result"
     nerrors="`expr $nerrors + 1`"
+    test yes = "$verbose" && $DIFF JUnit-TestH5Tbasic.txt JUnit-TestH5Tbasic.out |sed 's/^/    /'
 fi
 
 echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH -ea org.junit.runner.JUnitCore test.TestH5T"
@@ -556,7 +582,9 @@ if diff JUnit-TestH5T.out JUnit-TestH5T.txt > /dev/null; then
     echo "  PASSED      JUnit-TestH5T"
 else
     echo "**FAILED**    JUnit-TestH5T"
+    echo "    Expected result differs from actual result"
     nerrors="`expr $nerrors + 1`"
+    test yes = "$verbose" && $DIFF JUnit-TestH5T.txt JUnit-TestH5T.out |sed 's/^/    /'
 fi
 
 echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH -ea org.junit.runner.JUnitCore test.TestH5Dparams"
@@ -575,7 +603,9 @@ if diff JUnit-TestH5Dparams.out JUnit-TestH5Dparams.txt > /dev/null; then
     echo "  PASSED      JUnit-TestH5Dparams"
 else
     echo "**FAILED**    JUnit-TestH5Dparams"
+    echo "    Expected result differs from actual result"
     nerrors="`expr $nerrors + 1`"
+    test yes = "$verbose" && $DIFF JUnit-TestH5Dparams.txt JUnit-TestH5Dparams.out |sed 's/^/    /'
 fi
 
 echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH -ea org.junit.runner.JUnitCore test.TestH5D"
@@ -594,7 +624,9 @@ if diff JUnit-TestH5D.out JUnit-TestH5D.txt > /dev/null; then
     echo "  PASSED      JUnit-TestH5D"
 else
     echo "**FAILED**    JUnit-TestH5D"
+    echo "    Expected result differs from actual result"
     nerrors="`expr $nerrors + 1`"
+    test yes = "$verbose" && $DIFF JUnit-TestH5D.txt JUnit-TestH5D.out |sed 's/^/    /'
 fi
 
 echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH -ea org.junit.runner.JUnitCore test.TestH5Dplist"
@@ -613,7 +645,9 @@ if diff JUnit-TestH5Dplist.out JUnit-TestH5Dplist.txt > /dev/null; then
     echo "  PASSED      JUnit-TestH5Dplist"
 else
     echo "**FAILED**    JUnit-TestH5Dplist"
+    echo "    Expected result differs from actual result"
     nerrors="`expr $nerrors + 1`"
+    test yes = "$verbose" && $DIFF JUnit-TestH5Dplist.txt JUnit-TestH5Dplist.out |sed 's/^/    /'
 fi
 
 echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH -ea org.junit.runner.JUnitCore test.TestH5Lparams"
@@ -632,7 +666,9 @@ if diff JUnit-TestH5Lparams.out JUnit-TestH5Lparams.txt > /dev/null; then
     echo "  PASSED      JUnit-TestH5Lparams"
 else
     echo "**FAILED**    JUnit-TestH5Lparams"
+    echo "    Expected result differs from actual result"
     nerrors="`expr $nerrors + 1`"
+    test yes = "$verbose" && $DIFF JUnit-TestH5Lparams.txt JUnit-TestH5Lparams.out |sed 's/^/    /'
 fi
 
 echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH -ea org.junit.runner.JUnitCore test.TestH5Lbasic"
@@ -651,7 +687,9 @@ if diff JUnit-TestH5Lbasic.out JUnit-TestH5Lbasic.txt > /dev/null; then
     echo "  PASSED      JUnit-TestH5Lbasic"
 else
     echo "**FAILED**    JUnit-TestH5Lbasic"
+    echo "    Expected result differs from actual result"
     nerrors="`expr $nerrors + 1`"
+    test yes = "$verbose" && $DIFF JUnit-TestH5Lbasic.txt JUnit-TestH5Lbasic.out |sed 's/^/    /'
 fi
 
 echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH -ea org.junit.runner.JUnitCore test.TestH5Lcreate"
@@ -670,7 +708,9 @@ if diff JUnit-TestH5Lcreate.out JUnit-TestH5Lcreate.txt > /dev/null; then
     echo "  PASSED      JUnit-TestH5Lcreate"
 else
     echo "**FAILED**    JUnit-TestH5Lcreate"
+    echo "    Expected result differs from actual result"
     nerrors="`expr $nerrors + 1`"
+    test yes = "$verbose" && $DIFF JUnit-TestH5Lcreate.txt JUnit-TestH5Lcreate.out |sed 's/^/    /'
 fi
 
 echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH -ea org.junit.runner.JUnitCore test.TestH5R"
@@ -689,7 +729,9 @@ if diff JUnit-TestH5R.out JUnit-TestH5R.txt > /dev/null; then
     echo "  PASSED      JUnit-TestH5R"
 else
     echo "**FAILED**    JUnit-TestH5R"
+    echo "    Expected result differs from actual result"
     nerrors="`expr $nerrors + 1`"
+    test yes = "$verbose" && $DIFF JUnit-TestH5R.txt JUnit-TestH5R.out |sed 's/^/    /'
 fi
 
 echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH -ea org.junit.runner.JUnitCore test.TestH5P"
@@ -708,7 +750,9 @@ if diff JUnit-TestH5P.out JUnit-TestH5P.txt > /dev/null; then
     echo "  PASSED      JUnit-TestH5P"
 else
     echo "**FAILED**    JUnit-TestH5P"
+    echo "    Expected result differs from actual result"
     nerrors="`expr $nerrors + 1`"
+    test yes = "$verbose" && $DIFF JUnit-TestH5P.txt JUnit-TestH5P.out |sed 's/^/    /'
 fi
 
 echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH -ea org.junit.runner.JUnitCore test.TestH5PData"
@@ -727,7 +771,9 @@ if diff JUnit-TestH5PData.out JUnit-TestH5PData.txt > /dev/null; then
     echo "  PASSED      JUnit-TestH5PData"
 else
     echo "**FAILED**    JUnit-TestH5PData"
+    echo "    Expected result differs from actual result"
     nerrors="`expr $nerrors + 1`"
+    test yes = "$verbose" && $DIFF JUnit-TestH5PData.txt JUnit-TestH5PData.out |sed 's/^/    /'
 fi
 
 echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH -ea org.junit.runner.JUnitCore test.TestH5Pfapl"
@@ -746,7 +792,9 @@ if diff JUnit-TestH5Pfapl.out JUnit-TestH5Pfapl.txt > /dev/null; then
     echo "  PASSED      JUnit-TestH5Pfapl"
 else
     echo "**FAILED**    JUnit-TestH5Pfapl"
+    echo "    Expected result differs from actual result"
     nerrors="`expr $nerrors + 1`"
+    test yes = "$verbose" && $DIFF JUnit-TestH5Pfapl.txt JUnit-TestH5Pfapl.out |sed 's/^/    /'
 fi
 
 echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH -ea org.junit.runner.JUnitCore test.TestH5Pvirtual"
@@ -765,7 +813,9 @@ if diff JUnit-TestH5Pvirtual.out JUnit-TestH5Pvirtual.txt > /dev/null; then
     echo "  PASSED      JUnit-TestH5Pvirtual"
 else
     echo "**FAILED**    JUnit-TestH5Pvirtual"
+    echo "    Expected result differs from actual result"
     nerrors="`expr $nerrors + 1`"
+    test yes = "$verbose" && $DIFF JUnit-TestH5Pvirtual.txt JUnit-TestH5Pvirtual.out |sed 's/^/    /'
 fi
 
 echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH -ea org.junit.runner.JUnitCore test.TestH5Plist"
@@ -784,7 +834,9 @@ if diff JUnit-TestH5Plist.out JUnit-TestH5Plist.txt > /dev/null; then
     echo "  PASSED      JUnit-TestH5Plist"
 else
     echo "**FAILED**    JUnit-TestH5Plist"
+    echo "    Expected result differs from actual result"
     nerrors="`expr $nerrors + 1`"
+    test yes = "$verbose" && $DIFF JUnit-TestH5Plist.txt JUnit-TestH5Plist.out |sed 's/^/    /'
 fi
 
 echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH -ea org.junit.runner.JUnitCore test.TestH5A"
@@ -803,7 +855,9 @@ if diff JUnit-TestH5A.out JUnit-TestH5A.txt > /dev/null; then
     echo "  PASSED      JUnit-TestH5A"
 else
     echo "**FAILED**    JUnit-TestH5A"
+    echo "    Expected result differs from actual result"
     nerrors="`expr $nerrors + 1`"
+    test yes = "$verbose" && $DIFF JUnit-TestH5A.txt JUnit-TestH5A.out |sed 's/^/    /'
 fi
 
 echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH -ea org.junit.runner.JUnitCore test.TestH5Oparams"
@@ -822,7 +876,9 @@ if diff JUnit-TestH5Oparams.out JUnit-TestH5Oparams.txt > /dev/null; then
     echo "  PASSED      JUnit-TestH5Oparams"
 else
     echo "**FAILED**    JUnit-TestH5Oparams"
+    echo "    Expected result differs from actual result"
     nerrors="`expr $nerrors + 1`"
+    test yes = "$verbose" && $DIFF JUnit-TestH5Oparams.txt JUnit-TestH5Oparams.out |sed 's/^/    /'
 fi
 
 echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH -ea org.junit.runner.JUnitCore test.TestH5Obasic"
@@ -841,7 +897,9 @@ if diff JUnit-TestH5Obasic.out JUnit-TestH5Obasic.txt > /dev/null; then
     echo "  PASSED      JUnit-TestH5Obasic"
 else
     echo "**FAILED**    JUnit-TestH5Obasic"
+    echo "    Expected result differs from actual result"
     nerrors="`expr $nerrors + 1`"
+    test yes = "$verbose" && $DIFF JUnit-TestH5Obasic.txt JUnit-TestH5Obasic.out |sed 's/^/    /'
 fi
 
 echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH -ea org.junit.runner.JUnitCore test.TestH5Ocreate"
@@ -860,7 +918,9 @@ if diff JUnit-TestH5Ocreate.out JUnit-TestH5Ocreate.txt > /dev/null; then
     echo "  PASSED      JUnit-TestH5Ocreate"
 else
     echo "**FAILED**    JUnit-TestH5Ocreate"
+    echo "    Expected result differs from actual result"
     nerrors="`expr $nerrors + 1`"
+    test yes = "$verbose" && $DIFF JUnit-TestH5Ocreate.txt JUnit-TestH5Ocreate.out |sed 's/^/    /'
 fi
 
 echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH -ea org.junit.runner.JUnitCore test.TestH5Ocopy"
@@ -879,7 +939,9 @@ if diff JUnit-TestH5Ocopy.out JUnit-TestH5Ocopy.txt > /dev/null; then
     echo "  PASSED      JUnit-TestH5Ocopy"
 else
     echo "**FAILED**    JUnit-TestH5Ocopy"
+    echo "    Expected result differs from actual result"
     nerrors="`expr $nerrors + 1`"
+    test yes = "$verbose" && $DIFF JUnit-TestH5Ocopy.txt JUnit-TestH5Ocopy.out |sed 's/^/    /'
 fi
 
 echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH -ea org.junit.runner.JUnitCore test.TestH5PL"
@@ -898,7 +960,9 @@ if diff JUnit-TestH5PL.out JUnit-TestH5PL.txt > /dev/null; then
     echo "  PASSED      JUnit-TestH5PL"
 else
     echo "**FAILED**    JUnit-TestH5PL"
+    echo "    Expected result differs from actual result"
     nerrors="`expr $nerrors + 1`"
+    test yes = "$verbose" && $DIFF JUnit-TestH5PL.txt JUnit-TestH5PL.out |sed 's/^/    /'
 fi
 
 echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH -ea org.junit.runner.JUnitCore test.TestH5Z"
@@ -917,7 +981,9 @@ if diff JUnit-TestH5Z.out JUnit-TestH5Z.txt > /dev/null; then
     echo "  PASSED      JUnit-TestH5Z"
 else
     echo "**FAILED**    JUnit-TestH5Z"
+    echo "    Expected result differs from actual result"
     nerrors="`expr $nerrors + 1`"
+    test yes = "$verbose" && $DIFF JUnit-TestH5Z.txt JUnit-TestH5Z.out |sed 's/^/    /'
 fi
 
 if test "X-$BUILD_MODE" = "X-production" ; then
@@ -938,7 +1004,9 @@ if test "X-$BUILD_MODE" = "X-production" ; then
             echo "  PASSED      JUnit-TestH5E"
         else
             echo "**FAILED**    JUnit-TestH5E"
+            echo "    Expected result differs from actual result"
             nerrors="`expr $nerrors + 1`"
+            test yes = "$verbose" && $DIFF JUnit-TestH5E.txt JUnit-TestH5E.out |sed 's/^/    /'
         fi
     fi
 
@@ -959,7 +1027,9 @@ if test "X-$BUILD_MODE" = "X-production" ; then
             echo "  PASSED      JUnit-TestH5Edefault"
         else
             echo "**FAILED**    JUnit-TestH5Edefault"
+            echo "    Expected result differs from actual result"
             nerrors="`expr $nerrors + 1`"
+            test yes = "$verbose" && $DIFF JUnit-TestH5Edefault.txt JUnit-TestH5Edefault.out |sed 's/^/    /'
         fi
     fi
 fi
@@ -980,7 +1050,9 @@ if test $USE_FILTER_SZIP = "yes"; then
         echo "  PASSED      JUnit-TestH5Giterate"
     else
         echo "**FAILED**    JUnit-TestH5Giterate"
+        echo "    Expected result differs from actual result"
         nerrors="`expr $nerrors + 1`"
+        test yes = "$verbose" && $DIFF JUnit-TestH5Giterate.txt JUnit-TestH5Giterate.out |sed 's/^/    /'
     fi
 fi
 

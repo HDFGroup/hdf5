@@ -1398,7 +1398,7 @@ H5P_free_del_name_cb(void *item, void H5_ATTR_UNUSED *key, void H5_ATTR_UNUSED *
  NAME
     H5P_access_class
  PURPOSE
-    Internal routine to increment or decrement list & class dependancies on a
+    Internal routine to increment or decrement list & class dependencies on a
         property list class
  USAGE
     herr_t H5P_access_class(pclass,mod)
@@ -1407,7 +1407,7 @@ H5P_free_del_name_cb(void *item, void H5_ATTR_UNUSED *key, void H5_ATTR_UNUSED *
  RETURNS
     Returns non-negative on success, negative on failure.
  DESCRIPTION
-        Increment/Decrement the class or list dependancies for a given class.
+        Increment/Decrement the class or list dependencies for a given class.
     This routine is the final arbiter on decisions about actually releasing a
     class in memory, such action is only taken when the reference counts for
     both dependent classes & lists reach zero.
@@ -1425,19 +1425,19 @@ H5P_access_class(H5P_genclass_t *pclass, H5P_class_mod_t mod)
     HDassert(mod > H5P_MOD_ERR && mod < H5P_MOD_MAX);
 
     switch(mod) {
-        case H5P_MOD_INC_CLS:        /* Increment the dependant class count*/
+        case H5P_MOD_INC_CLS:        /* Increment the dependent class count*/
             pclass->classes++;
             break;
 
-        case H5P_MOD_DEC_CLS:        /* Decrement the dependant class count*/
+        case H5P_MOD_DEC_CLS:        /* Decrement the dependent class count*/
             pclass->classes--;
             break;
 
-        case H5P_MOD_INC_LST:        /* Increment the dependant list count*/
+        case H5P_MOD_INC_LST:        /* Increment the dependent list count*/
             pclass->plists++;
             break;
 
-        case H5P_MOD_DEC_LST:        /* Decrement the dependant list count*/
+        case H5P_MOD_DEC_LST:        /* Decrement the dependent list count*/
             pclass->plists--;
             break;
 
@@ -1586,12 +1586,12 @@ H5P_create_class(H5P_genclass_t *par_class, const char *name, H5P_plist_type_t t
 
     /* Allocate room for the class */
     if(NULL == (pclass = H5FL_CALLOC(H5P_genclass_t)))
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, NULL, "propery list class allocation failed")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, NULL, "property list class allocation failed")
 
     /* Set class state */
     pclass->parent = par_class;
     if(NULL == (pclass->name = H5MM_xstrdup(name)))
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, NULL, "propery list class name allocation failed")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, NULL, "property list class name allocation failed")
     pclass->type = type;
     pclass->nprops = 0;     /* Classes are created without properties initially */
     pclass->plists = 0;     /* No properties lists of this class yet */
@@ -2026,7 +2026,7 @@ done:
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
         The 'set' callback function may be useful to range check the value being
-    set for the property or may perform some tranformation/translation of the
+    set for the property or may perform some transformation/translation of the
     value set.  The 'get' callback would then [probably] reverse the
     transformation, etc.  A single 'get' or 'set' callback could handle
     multiple properties by performing different actions based on the property
@@ -2258,7 +2258,7 @@ done:
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
         The 'set' callback function may be useful to range check the value being
-    set for the property or may perform some tranformation/translation of the
+    set for the property or may perform some transformation/translation of the
     value set.  The 'get' callback would then [probably] reverse the
     transformation, etc.  A single 'get' or 'set' callback could handle
     multiple properties by performing different actions based on the property
@@ -2499,7 +2499,7 @@ done:
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
         The 'set' callback function may be useful to range check the value being
-    set for the property or may perform some tranformation/translation of the
+    set for the property or may perform some transformation/translation of the
     value set.  The 'get' callback would then [probably] reverse the
     transformation, etc.  A single 'get' or 'set' callback could handle
     multiple properties by performing different actions based on the property
@@ -2636,7 +2636,7 @@ H5P__do_prop(H5P_genplist_t *plist, const char *name, H5P_do_plist_op_t plist_op
 
     /* Find property in changed list */
     if(NULL != (prop = (H5P_genprop_t *)H5SL_search(plist->props, name))) {
-        /* Call the 'found in propery list' callback */
+        /* Call the 'found in property list' callback */
         if((*plist_op)(plist, name, prop, udata) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTOPERATE, FAIL, "can't operate on property")
     } /* end if */
@@ -4020,7 +4020,7 @@ H5P_iterate_plist(const H5P_genplist_t *plist, hbool_t iter_all_prop, int *idx,
 
     /* Check for iterating over all properties, or just non-default ones */
     if(iter_all_prop) {
-        /* Walk up the class hiearchy */
+        /* Walk up the class hierarchy */
         tclass = plist->pclass;
         while(tclass != NULL) {
             /* Iterate over properties in property list class */
@@ -4737,7 +4737,7 @@ H5P_copy_prop_pclass(hid_t dst_id, hid_t src_id, const char *name)
     /* Sanity check */
     HDassert(name);
 
-    /* Get propery list classes */
+    /* Get property list classes */
     if(NULL == (src_pclass = (H5P_genclass_t *)H5I_object(src_id)))
         HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, FAIL, "source property class object doesn't exist")
     if(NULL == (dst_pclass = (H5P_genclass_t *)H5I_object(dst_id)))
@@ -4854,8 +4854,8 @@ done:
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
         The property list class 'close' callback routine is not called from
-    here, it must have been check for and called properly prior to this routine
-    being called
+    here, it must have been checked for and called properly prior to this routine
+    being called.
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
@@ -4981,7 +4981,7 @@ H5P_close(void *_plist)
         tclass=tclass->parent;
     } /* end while */
 
-    /* Decrement class's dependant property list value! */
+    /* Decrement class's dependent property list value! */
     if(H5P_access_class(plist->pclass,H5P_MOD_DEC_LST) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "Can't decrement class ref count")
 

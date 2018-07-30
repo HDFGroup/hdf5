@@ -116,7 +116,7 @@
 #endif
 
 /*
- * flock() in sys/file.h is used for the implemention of file locking.
+ * flock() in sys/file.h is used for the implementation of file locking.
  */
 #if defined(H5_HAVE_FLOCK) && defined(H5_HAVE_SYS_FILE_H)
 #   include <sys/file.h>
@@ -132,7 +132,7 @@
 
 /*
  * Unix ioctls.   These are used by h5ls (and perhaps others) to determine a
- * resonable output width.
+ * reasonable output width.
  */
 #ifdef H5_HAVE_SYS_IOCTL_H
 #   include <sys/ioctl.h>

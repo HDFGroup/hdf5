@@ -309,7 +309,7 @@ static H5T_path_t *H5T__path_find_real(const H5T_t *src, const H5T_t *dst,
 /* Library Private Variables */
 /*****************************/
 
-/* The native endianess of the platform */
+/* The native endianness of the platform */
 H5T_order_t H5T_native_order_g = H5T_ORDER_ERROR;
 
 

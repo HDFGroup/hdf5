@@ -135,7 +135,7 @@ HDfprintf(stderr, "%s: Creating free space manager, nclasses = %Zu\n", FUNC, ncl
     fspace->alignment = alignment;
     fspace->align_thres = threshold;
 
-    /* Check if the free space tracker is supposed to be persistant */
+    /* Check if the free space tracker is supposed to be persistent */
     if(fs_addr) {
         /* Allocate space for the free space header */
         if(HADDR_UNDEF == (fspace->addr = H5MF_alloc(f, H5FD_MEM_FSPACE_HDR, (hsize_t)fspace->hdr_size)))
@@ -423,7 +423,7 @@ HDfprintf(stderr, "%s: fspace->tot_sect_count = %Hu, fspace->serial_sect_count =
 HDfprintf(stderr, "%s: fspace->alloc_sect_size = %Hu, fspace->sect_size = %Hu\n", FUNC, fspace->alloc_sect_size, fspace->sect_size);
 #endif /* H5FS_DEBUG */
         /* If there are sections to serialize, update them */
-        /* (if the free space manager is persistant) */
+        /* (if the free space manager is persistent) */
         if(fspace->serial_sect_count > 0 && H5F_addr_defined(fspace->addr)) {
 #ifdef H5FS_DEBUG
 HDfprintf(stderr, "%s: Real sections to store in file\n", FUNC);
@@ -794,7 +794,7 @@ HDfprintf(stderr, "%s: Marking free space header as dirty\n", FUNC);
     /* Sanity check */
     HDassert(fspace);
 
-    /* Check if the free space manager is persistant */
+    /* Check if the free space manager is persistent */
     if(H5F_addr_defined(fspace->addr))
         /* Mark header as dirty in cache */
         if(H5AC_mark_entry_dirty(fspace) < 0)
@@ -883,7 +883,7 @@ H5FS_alloc_sect(H5F_t *f, H5FS_t *fspace)
             HGOTO_ERROR(H5E_FSPACE, H5E_CANTINIT, FAIL, "can't add free space sections to cache")
 
         /* Since space has been allocated for the section info and the sinfo
-         * has been inserted into the cache, relinquish owership (i.e. float)
+         * has been inserted into the cache, relinquish ownership (i.e. float)
          * the section info.
          */
         fspace->sinfo = NULL;

@@ -1496,7 +1496,7 @@ H5C__prep_image_for_file_close(H5F_t *f, hbool_t *image_generated)
          * if the underlying file alignment is greater than 1.
          *
          * Clean this up eventually by extending the size of the cache
-         * image block to the next alignement boundary, and then setting
+         * image block to the next alignment boundary, and then setting
          * the image_data_len to the actual size of the cache_image.
          *
          * On the off chance that there is some other way to get a 
@@ -1556,7 +1556,7 @@ H5C__prep_image_for_file_close(H5F_t *f, hbool_t *image_generated)
          * metadata cache image superblock extension message, set 
          * cache_ptr->image_ctl.generate_image to FALSE.  This will
          * allow the file close to continue normally without the 
-         * unecessary generation of the metadata cache image.
+         * unnecessary generation of the metadata cache image.
          */
         if(cache_ptr->num_entries_in_image > 0) {
             if(H5C__prep_for_file_close__setup_image_entries_array(cache_ptr) < 0)
