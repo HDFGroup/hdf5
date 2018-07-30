@@ -167,13 +167,15 @@ endif ()
 # Check if C has __float128 extension
 #-----------------------------------------------------------------------------
 
-CHECK_TYPE_SIZE("__float128" SIZEOF___FLOAT128)
-if (${HAVE_SIZEOF___FLOAT128})
+CHECK_TYPE_SIZE("__float128" ${HDF_PREFIX}_SIZEOF___FLOAT128)
+if (${${HDF_PREFIX}_SIZEOF___FLOAT128})
   set (${HDF_PREFIX}_HAVE_FLOAT128 1)
 else ()
   set (${HDF_PREFIX}_HAVE_FLOAT128 0)
-  set (SIZEOF___FLOAT128 0)
+  set (${HDF_PREFIX}_SIZEOF___FLOAT128 0)
 endif ()
+
+CHECK_TYPE_SIZE("_Quad" ${HDF_PREFIX}_SIZEOF__QUAD)
 
 #-----------------------------------------------------------------------------
 # Macro to determine the various conversion capabilities

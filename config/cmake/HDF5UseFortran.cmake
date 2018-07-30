@@ -341,8 +341,8 @@ endif ()
 set (${HDF_PREFIX}_FORTRAN_SIZEOF_LONG_DOUBLE ${${HDF_PREFIX}_SIZEOF_LONG_DOUBLE})
 
 # remove the invalid kind from the list
-if (NOT(${SIZEOF___FLOAT128} EQUAL 0))
-   if (NOT(${SIZEOF___FLOAT128} EQUAL ${max_real_fortran_sizeof})
+if (NOT(${${HDF_PREFIX}_SIZEOF___FLOAT128} EQUAL 0))
+   if (NOT(${${HDF_PREFIX}_SIZEOF___FLOAT128} EQUAL ${max_real_fortran_sizeof})
        AND NOT(${${HDF_PREFIX}_FORTRAN_SIZEOF_LONG_DOUBLE} EQUAL ${max_real_fortran_sizeof})
        # account for the fact that the C compiler can have 16-byte __float128 and the fortran compiler only has 8-byte doubles,
        # so we don't want to remove the 8-byte fortran doubles.
@@ -423,7 +423,7 @@ set (PROG_SRC
     "
 #include <float.h>
 #include <stdio.h>
-#define CHECK_FLOAT128 ${SIZEOF___FLOAT128}
+#define CHECK_FLOAT128 ${${HDF_PREFIX}_SIZEOF___FLOAT128}
 #if CHECK_FLOAT128!=0
 # if ${${HDF_PREFIX}_HAVE_QUADMATH_H}!=0
 #include <quadmath.h>
@@ -462,7 +462,7 @@ list (GET PROG_OUTPUT 1 FLT128_DIG)
 
 if (SIZEOF___FLOAT128 EQUAL 0 OR FLT128_DIG EQUAL 0)
   set (${HDF_PREFIX}_HAVE_FLOAT128 0)
-  set (SIZEOF___FLOAT128 0)
+  set (${HDF_PREFIX}_SIZEOF___FLOAT128 0)
   set (${HDF_PREFIX}_PAC_C_MAX_REAL_PRECISION ${LDBL_DIG})
 else ()
   set(${HDF_PREFIX}_PAC_C_MAX_REAL_PRECISION ${FLT128_DIG})
