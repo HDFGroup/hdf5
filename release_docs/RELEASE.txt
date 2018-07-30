@@ -119,6 +119,12 @@ New Features
 
     Java Library:
     ----------------
+    - Java HDFLibraryException class
+
+      Change parent class from Exception to RuntimeException.
+
+      (ADB - 2018/07/30, HDFFV10534)
+
     - JNI Read and Write
 
       Refactored variable-length functions, H5DreadVL and H5AreadVL,
@@ -160,7 +166,7 @@ Bug Fixes since HDF5-1.10.2 release
 
       H5Adelete failed when deleting the last "large" attribute that
       is stored densely via fractal heap/v2 b-tree.
-      
+
       After removing the attribute, update the ainfo message.  If the
       number of attributes goes to zero, remove the message.
 

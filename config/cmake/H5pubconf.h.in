@@ -74,7 +74,7 @@
 #define H5_Fortran_COMPILER_ID @CMAKE_Fortran_COMPILER_ID@
 
 /* Define valid Fortran INTEGER KINDs */
-#cmakedefine H5_H5CONFIG_F_IKIND @H5_HH5_H5CONFIG_F_NUM_RKIND5CONFIG_F_IKIND@
+#cmakedefine H5_H5CONFIG_F_IKIND @H5_H5CONFIG_F_IKIND@
 
 /* Define number of valid Fortran INTEGER KINDs */
 #cmakedefine H5_H5CONFIG_F_NUM_IKIND @H5_H5CONFIG_F_NUM_IKIND@

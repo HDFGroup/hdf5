@@ -1804,6 +1804,8 @@
 ./tools/testfiles/tints4dims.h5
 ./tools/testfiles/tintsattrs.ddl
 ./tools/testfiles/tintsattrs.h5
+./tools/testfiles/tintsnodata.ddl
+./tools/testfiles/tintsnodata.h5
 ./tools/testfiles/tlarge_objname.ddl
 ./tools/testfiles/tlarge_objname.h5
 ./tools/testfiles/tldouble.h5

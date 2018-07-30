@@ -281,6 +281,7 @@ hid_t DataType::p_decode() const
 // Function:    DataType::decode
 ///\brief       Returns a DataType instance by decoding the binary object
 ///             description of this datatype.
+///
 ///\exception   H5::DataTypeIException
 // Programmer   Binh-Minh Ribler - Aug 2017
 //--------------------------------------------------------------------------
@@ -301,6 +302,7 @@ DataType* DataType::decode() const
 //--------------------------------------------------------------------------
 // Function:    DataType::encode
 ///\brief       Creates a binary object description of this datatype.
+///
 ///\exception   H5::DataTypeIException
 // Programmer   Binh-Minh Ribler - Aug 2017
 //--------------------------------------------------------------------------
@@ -333,6 +335,7 @@ void DataType::encode()
 // Function:    DataType::hasBinaryDesc
 ///\brief       Determines whether this datatype has a binary object
 ///             description.
+///
 ///\exception   H5::DataTypeIException
 // Programmer   Binh-Minh Ribler - Aug 2017
 //--------------------------------------------------------------------------

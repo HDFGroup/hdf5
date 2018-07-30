@@ -66,6 +66,7 @@ Group::Group(const Group& original) : H5Object(), CommonFG(), id(original.id)
 //--------------------------------------------------------------------------
 // Function:    Group::closeObjId
 ///\brief       Closes an object, which was opened with Group::getObjId
+///
 ///\exception   H5::FileIException or H5::GroupIException
 // Programmer   Binh-Minh Ribler - March, 2017
 //--------------------------------------------------------------------------
