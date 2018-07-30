@@ -23,9 +23,9 @@ include (CheckFortranFunctionExists)
 CHECK_INCLUDE_FILES(quadmath.h C_HAVE_QUADMATH)
 
 if (${C_HAVE_QUADMATH})
-  set(${HDF_PREFIX}_HAVE_QUADMATH 1)
+  set(${HDF_PREFIX}_HAVE_QUADMATH_H 1)
 else ()
-  set(${HDF_PREFIX}_HAVE_QUADMATH 0)
+  set(${HDF_PREFIX}_HAVE_QUADMATH_H 0)
 endif ()
 
 # The provided CMake Fortran macros don't provide a general compile/run function
@@ -425,7 +425,7 @@ set (PROG_SRC
 #include <stdio.h>
 #define CHECK_FLOAT128 ${SIZEOF___FLOAT128}
 #if CHECK_FLOAT128!=0
-# if ${${HDF_PREFIX}_HAVE_QUADMATH}!=0
+# if ${${HDF_PREFIX}_HAVE_QUADMATH_H}!=0
 #include <quadmath.h>
 # endif
 # ifdef FLT128_DIG
