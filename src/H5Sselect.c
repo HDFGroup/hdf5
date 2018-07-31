@@ -160,7 +160,7 @@ H5S_select_release(H5S_t *ds)
     HDassert(ds);
 
     /* Call the selection type's release function */
-    if((ret_value = (*ds->select.type->release)(ds)) < 0)
+    if((ds->select.type) && ((ret_value = (*ds->select.type->release)(ds)) < 0))
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection")
 
 done:
@@ -362,7 +362,7 @@ H5S_get_select_npoints(const H5S_t *space)
     TRUE if the selection fits within the extent, FALSE if it does not and
         Negative on an error.
  DESCRIPTION
-    Determines if the current selection at the current offet fits within the
+    Determines if the current selection at the current offset fits within the
     extent for the dataspace.
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
@@ -404,7 +404,7 @@ done:
     TRUE if the selection fits within the extent, FALSE if it does not and
         Negative on an error.
  DESCRIPTION
-    Determines if the current selection at the current offet fits within the
+    Determines if the current selection at the current offset fits within the
     extent for the dataspace.
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS

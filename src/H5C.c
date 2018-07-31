@@ -793,8 +793,8 @@ H5C_prep_for_file_close(H5F_t *f)
          *    close, and since the close warning is issued after all
          *    non FSM related space allocations and just before the
          *    first sync point on close, this call will leave the caches
-         *    in a consistant state across the processes if they were
-         *    consistant before.
+         *    in a consistent state across the processes if they were
+         *    consistent before.
          *
          * 2) Since the FSM settle routines are only invoked once during
          *    file close, invoking them now will prevent their invocation
@@ -2255,7 +2255,7 @@ H5C_protect(H5F_t *		f,
 
     if(entry_ptr != NULL) {
         if(entry_ptr->ring != ring)
-            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, NULL, "ring type mismatch occured for cache entry")
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, NULL, "ring type mismatch occurred for cache entry")
 
         HDassert(entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
 
@@ -3095,7 +3095,7 @@ H5C_unprotect(H5F_t *f, haddr_t	addr, void *thing, unsigned flags)
          *
          * All this is a bit awkward, but until the metadata cache entries
          * are contiguous, with only one dirty flag, we have to let the supplied
-         * functions deal with the reseting the is_dirty flag.
+         * functions deal with the resetting the is_dirty flag.
          */
         if(entry_ptr->clear_on_unprotect) {
             /* Sanity check */
@@ -5029,7 +5029,7 @@ H5C__flash_increase_cache_size(H5C_t * cache_ptr,
         if ( (cache_ptr->resize_ctl).rpt_fcn != NULL ) {
 
             /* get the hit rate for the reporting function.  Should still
-             * be good as we havent reset the hit rate statistics.
+             * be good as we haven't reset the hit rate statistics.
              */
             if(H5C_get_cache_hit_rate(cache_ptr, &hit_rate) != SUCCEED)
                 HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Can't get hit rate")
@@ -5272,7 +5272,7 @@ H5C_flush_invalidate_ring(H5F_t * f, H5C_ring_t ring, unsigned flags)
     cooked_flags = flags & H5C__FLUSH_CLEAR_ONLY_FLAG;
     evict_flags = flags & H5C__EVICT_ALLOW_LAST_PINS_FLAG;
 
-    /* The flush proceedure here is a bit strange.
+    /* The flush procedure here is a bit strange.
      *
      * In the outer while loop we make at least one pass through the
      * cache, and then repeat until either all the pinned entries in 
@@ -5421,7 +5421,7 @@ H5C_flush_invalidate_ring(H5F_t * f, H5C_ring_t ring, unsigned flags)
              *
              * While this optimization used to be easy, with the possibility
              * of new entries being added to the slist in the midst of the
-             * flush, we must keep the slist in cannonical form at all
+             * flush, we must keep the slist in canonical form at all
              * times.
              */
             if(((!entry_ptr->flush_me_last) ||
@@ -6280,7 +6280,7 @@ H5C__flush_single_entry(H5F_t *f, H5C_cache_entry_t *entry_ptr, unsigned flags)
     entry_addr = entry_ptr->addr;
 
     /* Internal cache data structures should now be up to date, and 
-     * consistant with the status of the entry.  
+     * consistent with the status of the entry.  
      *
      * Now discard the entry if appropriate.
      */
@@ -6301,10 +6301,10 @@ H5C__flush_single_entry(H5F_t *f, H5C_cache_entry_t *entry_ptr, unsigned flags)
             entry_ptr->image_ptr = H5MM_xfree(entry_ptr->image_ptr);
 
         /* If the entry is not a prefetched entry, verify that the flush 
-         * dependency parents addresses array has been transfered.
+         * dependency parents addresses array has been transferred.
          *
          * If the entry is prefetched, the free_isr routine will dispose of
-         * the flush dependency parents adresses array if necessary.
+         * the flush dependency parents addresses array if necessary.
          */
         if(!entry_ptr->prefetched) {
             HDassert(0 == entry_ptr->fd_parent_count);
@@ -8587,7 +8587,7 @@ H5C__generate_image(H5F_t *f, H5C_t *cache_ptr, H5C_cache_entry_t *entry_ptr)
          *     tests will be necessary.
          */
         if(cache_ptr->aux_ptr != NULL)
-            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "resize/move in serialize occured in parallel case")
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "resize/move in serialize occurred in parallel case")
 #endif
 
         /* If required, resize the buffer and update the entry and the cache
@@ -8787,7 +8787,7 @@ H5C_remove_entry(void *_entry)
         cache->entry_watched_for_removal = NULL;
 
     /* Internal cache data structures should now be up to date, and 
-     * consistant with the status of the entry.  
+     * consistent with the status of the entry.  
      *
      * Now clean up internal cache fields if appropriate.
      */

@@ -115,6 +115,8 @@ if HAVE_SHARED_CONDITIONAL
   libfilter_plugin2_dsets_la_LDFLAGS=$(AM_LDFLAGS) -avoid-version -module -shared -export-dynamic -rpath /nowhere
   libfilter_plugin3_dsets_la_LDFLAGS=$(AM_LDFLAGS) -avoid-version -module -shared -export-dynamic -rpath /nowhere
   libfilter_plugin4_groups_la_LDFLAGS=$(AM_LDFLAGS) -avoid-version -module -shared -export-dynamic -rpath /nowhere
+  libfilter_plugin3_dsets_la_LIBADD=$(LIBHDF5)
+  libfilter_plugin4_groups_la_LIBADD=$(LIBHDF5)
 else
   # The libh5test library provides common support code for the tests.
   noinst_LTLIBRARIES=libh5test.la

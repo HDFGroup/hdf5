@@ -2432,7 +2432,7 @@ done:
  *                         returns to 1) above.
  *
  *              Similarly, if it allocates space for its own header, it
- *              can go into an infinte loop as it:
+ *              can go into an infinite loop as it:
  *
  *                      1) allocates space for the header
  *
@@ -2479,7 +2479,7 @@ done:
  *		enabled when the free space managers are read.  To allow
  *		for this, we must ensure that space allocated for the 
  *		free space manager header and section info is either larger
- *		than a page, or resides completely withing a page.
+ *		than a page, or resides completely within a page.
  *
  *		Do this by allocating space for the free space header and 
  *		section info starting at page boundaries, and extending 
@@ -2532,7 +2532,7 @@ H5FS_vfd_alloc_hdr_and_section_info_if_needed(H5F_t *f, H5FS_t *fspace,
     HDassert(fspace->sect_addr == HADDR_UNDEF);
     HDassert(fspace->alloc_sect_size == 0);
 
-    /* persistant free space managers must be enabled */
+    /* persistent free space managers must be enabled */
     HDassert(f->shared->fs_persist);
 
     /* At present, all free space strategies enable the free space managers.
@@ -2576,7 +2576,7 @@ H5FS_vfd_alloc_hdr_and_section_info_if_needed(H5F_t *f, H5FS_t *fspace,
                 f, hdr_alloc_size, &eoa_frag_addr, &eoa_frag_size)))
             HGOTO_ERROR(H5E_FSPACE, H5E_CANTALLOC, FAIL, "can't allocate file space for hdr")
 
-        /* if the file alignement is 1, there should be no
+        /* if the file alignment is 1, there should be no
          * eoa fragment.  Otherwise, drop any fragment on the floor.
          */
         HDassert((eoa_frag_size == 0) || (f->shared->alignment != 1));
@@ -2616,7 +2616,7 @@ H5FS_vfd_alloc_hdr_and_section_info_if_needed(H5F_t *f, H5FS_t *fspace,
                 f, sinfo_alloc_size, &eoa_frag_addr, &eoa_frag_size)))
             HGOTO_ERROR(H5E_FSPACE, H5E_CANTALLOC, FAIL, "can't allocate file space")
 
-        /* if the file alignement is 1, there should be no
+        /* if the file alignment is 1, there should be no
          * eoa fragment.  Otherwise, drop the fragment on the floor.
          */
         HDassert((eoa_frag_size == 0) || (f->shared->alignment != 1));
@@ -2637,7 +2637,7 @@ H5FS_vfd_alloc_hdr_and_section_info_if_needed(H5F_t *f, H5FS_t *fspace,
          * On reflection, no.
          *
          * On a regular file close, any eviction will not change the
-         * the contents of the free space manger(s), as all entries
+         * the contents of the free space manager(s), as all entries
          * should have correct file space allocated by the time this
          * function is called.
          *
@@ -2658,7 +2658,7 @@ H5FS_vfd_alloc_hdr_and_section_info_if_needed(H5F_t *f, H5FS_t *fspace,
             HGOTO_ERROR(H5E_FSPACE, H5E_CANTMARKDIRTY, FAIL, "unable to mark free space header as dirty")
 
         /* since space has been allocated for the section info and the sinfo
-         * has been inserted into the cache, relinquish owership (i.e. float)
+         * has been inserted into the cache, relinquish ownership (i.e. float)
          * the section info.
          */
         fspace->sinfo = NULL;

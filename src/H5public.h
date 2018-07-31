@@ -115,7 +115,7 @@ extern "C" {
 /*
  * Status return values.  Failed integer functions in HDF5 result almost
  * always in a negative value (unsigned failing functions sometimes return
- * zero for failure) while successfull return is non-negative (often zero).
+ * zero for failure) while successful return is non-negative (often zero).
  * The negative failure value is most commonly -1, but don't bet on it.  The
  * proper way to detect failure is something like:
  *
@@ -298,7 +298,7 @@ typedef enum {
 } H5_iter_order_t;
 
 /* Iteration callback values */
-/* (Actually, any postive value will cause the iterator to stop and pass back
+/* (Actually, any positive value will cause the iterator to stop and pass back
  *      that positive value to the function that called the iterator)
  */
 #define H5_ITER_ERROR   (-1)

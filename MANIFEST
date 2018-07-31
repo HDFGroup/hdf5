@@ -85,6 +85,7 @@
 ./bin/release
 ./bin/restore.sh
 ./bin/runtest        _DO_NOT_DISTRIBUTE_
+./bin/runbkgprog        _DO_NOT_DISTRIBUTE_
 ./bin/snapshot
 ./bin/snapshot_version      _DO_NOT_DISTRIBUTE_
 ./bin/switch_maint_mode      _DO_NOT_DISTRIBUTE_
@@ -350,6 +351,8 @@
 ./c++/src/H5DataSpace.h
 ./c++/src/H5DataType.cpp
 ./c++/src/H5DataType.h
+./c++/src/H5DaccProp.cpp
+./c++/src/H5DaccProp.h
 ./c++/src/H5DcreatProp.cpp
 ./c++/src/H5DcreatProp.h
 ./c++/src/H5DxferProp.cpp
@@ -395,7 +398,7 @@
 ./c++/src/H5VarLenType.h
 ./c++/src/Makefile.am
 ./c++/src/RM_stylesheet.css
-./c++/src/C2Cppfunction_map.mht
+./c++/src/C2Cppfunction_map.htm
 ./c++/src/cpp_doc_config
 ./c++/src/h5c++.in
 ./c++/src/footer.html
@@ -1562,6 +1565,12 @@
 ./tools/test/h5stat/testfiles/h5stat_err1_links.ddl
 ./tools/test/h5stat/testfiles/h5stat_err1_numattrs.ddl
 ./tools/test/h5stat/testfiles/h5stat_err2_numattrs.ddl
+./tools/test/h5stat/testfiles/h5stat_err_old_fill.h5
+./tools/test/h5stat/testfiles/h5stat_err_old_fill.ddl
+./tools/test/h5stat/testfiles/h5stat_err_old_layout.h5
+./tools/test/h5stat/testfiles/h5stat_err_old_layout.ddl
+./tools/test/h5stat/testfiles/h5stat_err_refcount.h5
+./tools/test/h5stat/testfiles/h5stat_err_refcount.ddl
 ./tools/test/h5stat/testfiles/h5stat_filters.ddl
 ./tools/test/h5stat/testfiles/h5stat_filters-d.ddl
 ./tools/test/h5stat/testfiles/h5stat_filters-dT.ddl
@@ -1786,6 +1795,8 @@
 ./tools/testfiles/tints4dims.h5
 ./tools/testfiles/tintsattrs.ddl
 ./tools/testfiles/tintsattrs.h5
+./tools/testfiles/tintsnodata.ddl
+./tools/testfiles/tintsnodata.h5
 ./tools/testfiles/tlarge_objname.ddl
 ./tools/testfiles/tlarge_objname.h5
 ./tools/testfiles/tldouble.h5
@@ -3240,6 +3251,8 @@
 ./test/CMakeLists.txt
 ./test/CMakeTests.cmake
 ./test/CMakeVFDTests.cmake
+./test/flushrefreshTest.cmake
+./test/ShellTests.cmake
 ./testpar/CMakeLists.txt
 ./testpar/CMakeTests.cmake
 ./tools/CMakeLists.txt

@@ -946,7 +946,7 @@ done:
  * Function:	H5Odisable_mdc_flushes
  *
  * Purpose:	To "cork" an object:
- *		--keep dirty entries assoicated with the object in the metadata cache
+ *		--keep dirty entries associated with the object in the metadata cache
  *
  * Return:	Success:	Non-negative
  *		Failure:	Negative

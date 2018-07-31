@@ -408,7 +408,7 @@ H5S_none_copy(H5S_t *dst, const H5S_t H5_ATTR_UNUSED *src, hbool_t H5_ATTR_UNUSE
     TRUE if the selection fits within the extent, FALSE if it does not and
         Negative on an error.
  DESCRIPTION
-    Determines if the current selection at the current offet fits within the
+    Determines if the current selection at the current offset fits within the
     extent for the dataspace.  Offset is irrelevant for this type of selection.
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
