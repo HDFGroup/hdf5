@@ -2533,6 +2533,7 @@ AC_SUBST([ADD_PARALLEL_FILES]) ADD_PARALLEL_FILES="no"
 AC_SUBST([MPE]) MPE=no
 AC_SUBST([INSTRUMENT_LIBRARY]) INSTRUMENT_LIBRARY=no
 AC_SUBST([PARALLEL_FILTERED_WRITES])
+AC_SUBST([LARGE_PARALLEL_IO])
 
 if test -n "$PARALLEL"; then
   ## The 'testpar' directory should participate in the build
@@ -2715,6 +2716,34 @@ if test -n "$PARALLEL"; then
                     Parallel writes of filtered data will be disabled.])
        PARALLEL_FILTERED_WRITES=no]
   )
+
+  ## ----------------------------------------------------------------------
+  ## Check for the MPI-3 functions necessary for the big I/O feature.
+  ## If these are not present, issue a warning that the big I/O feature
+  ## will be disabled.
+  ##
+  AC_MSG_CHECKING([for MPI_Get_elements_x and MPI_Type_size_x functions])
+
+  AC_LINK_IFELSE(
+      [AC_LANG_PROGRAM(
+          [[
+              #include <mpi.h>
+          ]],
+          [[
+              MPI_Count count;
+              MPI_Init(0, (void *) 0);
+              MPI_Get_elements_x(0, 0, &count);
+              MPI_Type_size_x(0, &count);
+          ]]
+      )],
+      [AC_MSG_RESULT([yes])
+       LARGE_PARALLEL_IO=yes],
+      [AC_MSG_RESULT([no])
+       AC_MSG_WARN([A simple MPI program using the MPI_Get_elements_x and MPI_Type_size_x functions could not be compiled and linked.
+                    Reading/Writing >2GB of data in a single parallel I/O operation will be disabled.])
+       LARGE_PARALLEL_IO=no]
+  )
+
 fi
 
 ## ----------------------------------------------------------------------
@@ -3007,6 +3036,9 @@ PARALLEL=${PARALLEL:-no}
 
 ## Parallel writes to filtered datasets support?
 PARALLEL_FILTERED_WRITES=${PARALLEL_FILTERED_WRITES:-no}
+
+## >2GB writes in parallel support?
+LARGE_PARALLEL_IO=${LARGE_PARALLEL_IO:-no}
 
 ## Compiler with version information. This consists of the full path
 ## name of the compiler and the reported version number.
