@@ -569,6 +569,16 @@ if (HDF5_ENABLE_PARALLEL)
                Parallel writes of filtered data will be disabled.")
       set (PARALLEL_FILTERED_WRITES OFF)
     endif ()
+
+    # Used by big I/O feature
+    set (LARGE_PARALLEL_IO ON)
+    CHECK_SYMBOL_EXISTS (MPI_Get_elements_x "${MPI_C_INCLUDE_DIRS}/mpi.h" H5_HAVE_MPI_Get_elements_x)
+    CHECK_SYMBOL_EXISTS (MPI_Type_size_x "${MPI_C_INCLUDE_DIRS}/mpi.h" H5_HAVE_MPI_Type_size_x)
+    if (NOT H5_HAVE_MPI_Get_elements_x OR NOT H5_HAVE_MPI_Type_size_x)
+      message (WARNING "The MPI_Get_elements_x and/or MPI_Type_size_x functions could not be located.
+               Reading/Writing >2GB of data in a single parallel I/O operation will be disabled.")
+      set (LARGE_PARALLEL_IO OFF)
+    endif ()
   else ()
     message (STATUS "Parallel libraries not found")
   endif ()

@@ -66,6 +66,7 @@ Features:
 ---------
                    Parallel HDF5: @HDF5_ENABLE_PARALLEL@
 Parallel Filtered Dataset Writes: @PARALLEL_FILTERED_WRITES@
+              Large Parallel I/O: @LARGE_PARALLEL_IO@
               High-level library: @HDF5_BUILD_HL_LIB@
                     Threadsafety: @HDF5_ENABLE_THREADSAFE@
              Default API mapping: @DEFAULT_API_VERSION@
