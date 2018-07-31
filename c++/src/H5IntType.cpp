@@ -132,6 +132,7 @@ IntType::IntType(const H5Location& loc, const H5std_string& dtype_name) : AtomTy
 // Function:    IntType::decode
 ///\brief       Returns an IntType object via DataType* by decoding the
 ///             binary object description of this type.
+///
 ///\exception   H5::DataTypeIException
 // Programmer   Binh-Minh Ribler - Aug 2017
 //--------------------------------------------------------------------------
