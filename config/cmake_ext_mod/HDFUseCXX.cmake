@@ -98,11 +98,11 @@ endmacro ()
 if (CMAKE_CXX_COMPILER_LOADED)
   foreach (test
       OLD_HEADER_FILENAME
-      ${HDF_PREFIX}_NO_NAMESPACE
-      ${HDF_PREFIX}_NO_STD
+      HDF_NO_NAMESPACE
+      HDF_NO_STD
       BOOL_NOTDEFINED
       NO_STATIC_CAST
-      ${HDF_PREFIX}_CXX_HAVE_OFFSETOF
+      CXX_HAVE_OFFSETOF
   )
     HDF_CXX_FUNCTION_TEST (${test})
   endforeach ()
