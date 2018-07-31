@@ -30,7 +30,7 @@ package hdf.hdf5lib.exceptions;
  * error code returned by the HDF5 library.
  *
  */
-public class HDF5Exception extends Exception {
+public class HDF5Exception extends RuntimeException {
     protected String detailMessage;
 
     /**

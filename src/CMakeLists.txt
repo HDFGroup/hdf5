@@ -858,7 +858,7 @@ target_include_directories(H5detect PRIVATE "${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_
 target_compile_definitions(H5detect PUBLIC ${HDF_EXTRA_C_FLAGS} ${HDF_EXTRA_FLAGS})
 TARGET_C_PROPERTIES (H5detect STATIC)
 target_link_libraries (H5detect
-    PRIVATE $<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_LIBRARIES}> $<$<PLATFORM_ID:Windows>:ws2_32.lib>
+    PRIVATE "$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_LIBRARIES}>" $<$<PLATFORM_ID:Windows>:ws2_32.lib>
     INTERFACE $<$<PLATFORM_ID:Emscripten>:"-O0">
 )
 
@@ -874,7 +874,7 @@ target_include_directories(H5make_libsettings PRIVATE "${HDF5_BINARY_DIR};$<$<BO
 target_compile_definitions(H5make_libsettings PUBLIC ${HDF_EXTRA_C_FLAGS} ${HDF_EXTRA_FLAGS})
 TARGET_C_PROPERTIES (H5make_libsettings STATIC)
 target_link_libraries (H5make_libsettings
-    PRIVATE $<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_LIBRARIES}> $<$<PLATFORM_ID:Windows>:ws2_32.lib>
+    PRIVATE "$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_LIBRARIES}>" $<$<PLATFORM_ID:Windows>:ws2_32.lib>
     INTERFACE $<$<PLATFORM_ID:Emscripten>:"-O0">
 )
 
@@ -911,7 +911,7 @@ target_compile_definitions(${HDF5_LIB_TARGET}
 )
 TARGET_C_PROPERTIES (${HDF5_LIB_TARGET} STATIC)
 target_link_libraries (${HDF5_LIB_TARGET}
-    PRIVATE ${LINK_LIBS} ${LINK_COMP_LIBS} $<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_LIBRARIES}>
+    PRIVATE ${LINK_LIBS} ${LINK_COMP_LIBS} "$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_LIBRARIES}>"
     PUBLIC $<$<NOT:$<PLATFORM_ID:Windows>>:${CMAKE_DL_LIBS}>
 )
 set_global_variable (HDF5_LIBRARIES_TO_EXPORT ${HDF5_LIB_TARGET})
@@ -955,7 +955,7 @@ if (BUILD_SHARED_LIBS)
   )
   TARGET_C_PROPERTIES (${HDF5_LIBSH_TARGET} SHARED)
   target_link_libraries (${HDF5_LIBSH_TARGET}
-      PRIVATE ${LINK_LIBS} ${LINK_COMP_LIBS} $<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_LIBRARIES}>
+      PRIVATE ${LINK_LIBS} ${LINK_COMP_LIBS} "$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_LIBRARIES}>"
       PUBLIC $<$<NOT:$<PLATFORM_ID:Windows>>:${CMAKE_DL_LIBS}> $<$<BOOL:${HDF5_ENABLE_THREADSAFE}>:Threads::Threads>
   )
   set_global_variable (HDF5_LIBRARIES_TO_EXPORT "${HDF5_LIBRARIES_TO_EXPORT};${HDF5_LIBSH_TARGET}")
