@@ -26,7 +26,7 @@ target_include_directories(testphdf5
 )
 TARGET_C_PROPERTIES (testphdf5 STATIC)
 target_link_libraries (testphdf5
-    PRIVATE ${HDF5_TEST_LIB_TARGET} ${HDF5_LIB_TARGET} $<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_LIBRARIES}>
+    PRIVATE ${HDF5_TEST_LIB_TARGET} ${HDF5_LIB_TARGET} "$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_LIBRARIES}>"
 )
 set_target_properties (testphdf5 PROPERTIES FOLDER test/par)
 
@@ -37,7 +37,7 @@ MACRO (ADD_H5P_EXE file)
   )
   TARGET_C_PROPERTIES (${file} STATIC)
   target_link_libraries (${file}
-      PRIVATE ${HDF5_TEST_LIB_TARGET} ${HDF5_LIB_TARGET} $<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_LIBRARIES}>
+      PRIVATE ${HDF5_TEST_LIB_TARGET} ${HDF5_LIB_TARGET} "$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_LIBRARIES}>"
   )
   set_target_properties (${file} PROPERTIES FOLDER test/par)
 ENDMACRO (ADD_H5P_EXE file)
