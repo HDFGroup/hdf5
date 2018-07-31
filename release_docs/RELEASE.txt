@@ -540,8 +540,8 @@ The lib folder contains the library files, and CMake adds the pkgconfig
 subfolder with the hdf5*.pc files used by the bin/build scripts created by
 the CMake build. CMake separates the C interface code from the fortran code by
 creating C-stub libraries for each Fortran library. In addition, only CMake
-creates the tools library and are present only for CMake builds. The names
-of the szip libraries are different between the build systems.
+installs the tools library. The names of the szip libraries are different
+between the build systems.
 
 The share folder will have the most differences because CMake builds include
 a number of CMake specific files for support of CMake's find_package and support
