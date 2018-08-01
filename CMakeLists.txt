@@ -430,7 +430,7 @@ set (CMAKE_POSITION_INDEPENDENT_CODE ON)
 #-----------------------------------------------------------------------------
 # Option to Build Static executables
 #-----------------------------------------------------------------------------
-option (BUILD_STATIC_EXECS "Build Static Executabless" OFF)
+option (BUILD_STATIC_EXECS "Build Static Executables" OFF)
 if (BUILD_STATIC_EXECS)
   if (NOT WIN32)
     set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -static")
