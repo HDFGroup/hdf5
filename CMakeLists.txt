@@ -563,7 +563,7 @@ if (HDF5_ENABLE_PARALLEL)
 
     # Used by Parallel Compression feature
     set (PARALLEL_FILTERED_WRITES ON)
-    CHECK_SYMBOL_EXISTS (MPI_Mprobe "/mpi.h" H5_HAVE_MPI_Mprobe)
+    CHECK_SYMBOL_EXISTS (MPI_Mprobe "mpi.h" H5_HAVE_MPI_Mprobe)
     CHECK_SYMBOL_EXISTS (MPI_Imrecv "mpi.h" H5_HAVE_MPI_Imrecv)
     if (NOT H5_HAVE_MPI_Mprobe OR NOT H5_HAVE_MPI_Imrecv)
       message (WARNING "The MPI_Mprobe and/or MPI_Imrecv functions could not be located.
