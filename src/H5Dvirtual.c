@@ -50,6 +50,7 @@
 #include "H5Dpkg.h"             /* Dataset functions                    */
 #include "H5Eprivate.h"         /* Error handling                       */
 #include "H5Fprivate.h"         /* Files                                */
+#include "H5FDsec2.h"           /* Posix unbuffered I/O    file driver  */
 #include "H5FLprivate.h"        /* Free Lists                           */
 #include "H5Gprivate.h"         /* Groups                               */
 #include "H5HGprivate.h"        /* Global Heaps                         */
@@ -906,19 +907,38 @@ H5D__virtual_open_source_dset(const H5D_t *vdset,
         src_file = source_dset->file;
     else {
         unsigned    intent;                 /* File access permissions */
+#ifdef H5_HAVE_PARALLEL
+        hbool_t prev_disable_file_locking;  /* Whether file locking was previously disabled */
+#endif /* H5_HAVE_PARALLEL */
 
         /* Get the virtual dataset's file open flags ("intent") */
         intent = H5F_INTENT(vdset->oloc.file);
 
+#ifdef H5_HAVE_PARALLEL
+        /* Since the parallel implementation currently uses one independent open
+         * per process on source files, we must disable file locking on source
+         * files if the VDS is opened in parallel */
+        if(H5F_HAS_FEATURE(vdset->oloc.file, H5FD_FEAT_HAS_MPI)) {
+            prev_disable_file_locking = H5CX_get_disable_file_locking();
+            H5CX_set_disable_file_locking(TRUE);
+        } /* end if */
+#endif /* H5_HAVE_PARALLEL */
+
         /* Try opening the file */
         src_file = H5F_prefix_open_file(vdset->oloc.file, H5F_PREFIX_VDS, vdset->shared->vds_prefix, source_dset->file_name, intent, vdset->shared->layout.storage.u.virt.source_fapl);
+
+#ifdef H5_HAVE_PARALLEL
+        /* Reset "disable file locking" flag */
+        if(H5F_HAS_FEATURE(vdset->oloc.file, H5FD_FEAT_HAS_MPI)) {
+            H5CX_set_disable_file_locking(prev_disable_file_locking);
+        } /* end if */
+#endif /* H5_HAVE_PARALLEL */
 
         /* Reset the error stack if we did not find the file */
         if(!src_file)
             H5E_clear_stack(NULL);
 
         source_dset->file = src_file;
-
     } /* end if */
 
     if(src_file) {
@@ -945,7 +965,7 @@ H5D__virtual_open_source_dset(const H5D_t *vdset,
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "can't copy source dataspace extent")
                 virtual_ent->source_space_status = H5O_VIRTUAL_STATUS_CORRECT;
             } /* end if */
-        }
+        } /* end else */
     } /* end if */
 
 done:
@@ -1569,10 +1589,13 @@ H5D__virtual_set_extent_unlim(const H5D_t *dset)
             else {
                 /* printf mapping */
                 hsize_t first_missing = 0;  /* First missing dataset in the current block of missing datasets */
-#ifdef  H5_HAVE_PARALLEL
-                if (H5F_HAS_FEATURE(dset->oloc.file, H5FD_FEAT_HAS_MPI)) 
+
+#ifdef H5_HAVE_PARALLEL
+                /* Parallel not yet supported with printf mappings */
+                if(H5F_HAS_FEATURE(dset->oloc.file, H5FD_FEAT_HAS_MPI)) 
                     HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "parallel operations on printf style datasets not supported")
-#endif
+#endif /* H5_HAVE_PARALLEL */
+
                 /* Search for source datasets */
                 HDassert(storage->printf_gap != HSIZE_UNDEF);
                 for(j = 0; j <= (storage->printf_gap + first_missing); j++) {
@@ -1987,10 +2010,13 @@ H5D__virtual_init_all(const H5D_t *dset)
                 /* printf mapping */
                 size_t sub_dset_max;
                 hbool_t partial_block;
-#ifdef  H5_HAVE_PARALLEL
-                if (H5F_HAS_FEATURE(dset->oloc.file, H5FD_FEAT_HAS_MPI)) 
+
+#ifdef H5_HAVE_PARALLEL
+                /* Parallel not yet supported with printf mappings */
+                if(H5F_HAS_FEATURE(dset->oloc.file, H5FD_FEAT_HAS_MPI)) 
                     HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "parallel operations on printf style datasets not supported")
-#endif
+#endif /* H5_HAVE_PARALLEL */
+
                 /* Get number of sub-source datasets in current extent */
                 sub_dset_max = (size_t)H5S_hyper_get_first_inc_block(storage->list[i].source_dset.virtual_select, virtual_dims[storage->list[i].unlim_dim_virtual], &partial_block);
                 if(partial_block)
@@ -2172,9 +2198,23 @@ H5D__virtual_init(H5F_t *f, const H5D_t *dset, hid_t dapl_id)
         storage->printf_gap = (hsize_t)0;
 
     /* Retrieve VDS file FAPL to layout */
-    if(storage->source_fapl <= 0)
+    if(storage->source_fapl <= 0) {
         if((storage->source_fapl = H5F_get_access_plist(f, FALSE)) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get fapl")
+
+#ifdef H5_HAVE_PARALLEL
+        /* For now, in the parallel case, open all source files with the sec2
+         * driver */
+        if(H5F_HAS_FEATURE(f, H5FD_FEAT_HAS_MPI)) {
+            H5P_genplist_t *source_fapl_ptr;
+            
+            if(NULL == (source_fapl_ptr = H5P_object_verify(storage->source_fapl, H5P_FILE_ACCESS)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
+            if(H5P_set_driver(source_fapl_ptr, H5FD_SEC2, NULL) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set sec2 driver on source fapl")
+        } /* end if */
+#endif /* H5_HAVE_PARALLEL */
+    } /* end if */
 
     /* Copy DAPL to layout */
     if(storage->source_dapl <= 0)

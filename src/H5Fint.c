@@ -1512,15 +1512,22 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     if(NULL == (drvr = H5FD_get_class(fapl_id)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "unable to retrieve VFL class")
 
-    /* Check the environment variable that determines if we care
-     * about file locking. File locking should be used unless explicitly
-     * disabled.
+    /* Check for file locking disabled internally, then check the environment
+     * variable that determines if we care about file locking. File locking
+     * should be used unless explicitly disabled.
      */
-    lock_env_var = HDgetenv("HDF5_USE_FILE_LOCKING");
-    if(lock_env_var && !HDstrcmp(lock_env_var, "FALSE"))
+#ifdef H5_HAVE_PARALLEL
+    if(H5CX_get_disable_file_locking())
         use_file_locking = FALSE;
     else
-        use_file_locking = TRUE;
+#endif /* H5_HAVE_PARALLEL */
+    {
+        lock_env_var = HDgetenv("HDF5_USE_FILE_LOCKING");
+        if(lock_env_var && !HDstrcmp(lock_env_var, "FALSE"))
+            use_file_locking = FALSE;
+        else
+            use_file_locking = TRUE;
+    } /* end block/else */
 
     /*
      * Opening a file is a two step process. First we try to open the

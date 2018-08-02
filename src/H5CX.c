@@ -198,6 +198,9 @@ typedef struct H5CX_t {
     MPI_Datatype btype;         /* MPI datatype for buffer, when using collective I/O */
     MPI_Datatype ftype;         /* MPI datatype for file, when using collective I/O */
     hbool_t mpi_file_flushing;  /* Whether an MPI-opened file is being flushed */
+
+    /* Internal: File open settings (not inherently related to parallel but currently only used in parallel) */
+    hbool_t disable_file_locking;
 #endif /* H5_HAVE_PARALLEL */
 
     /* Cached DXPL properties */
@@ -1106,6 +1109,32 @@ H5CX_get_mpi_file_flushing(void)
 
     FUNC_LEAVE_NOAPI((*head)->ctx.mpi_file_flushing)
 } /* end H5CX_get_mpi_file_flushing() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5CX_get_disable_file_locking
+ *
+ * Purpose:     Retrieves the "disable file locking" flag for the current API call context.
+ *
+ * Return:      TRUE / FALSE on success / <can't fail>
+ *
+ * Programmer:  Neil Fortner
+ *              August 2, 2018
+ *
+ *-------------------------------------------------------------------------
+ */
+hbool_t
+H5CX_get_disable_file_locking(void)
+{
+    H5CX_node_t **head = H5CX_get_my_context();  /* Get the pointer to the head of the API context, for this thread */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    /* Sanity check */
+    HDassert(head && *head);
+
+    FUNC_LEAVE_NOAPI((*head)->ctx.disable_file_locking)
+} /* end H5CX_get_disable_file_locking() */
 #endif /* H5_HAVE_PARALLEL */
 
 
@@ -2037,6 +2066,34 @@ H5CX_set_mpi_file_flushing(hbool_t flushing)
 
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5CX_set_mpi_file_flushing() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5CX_set_disable_file_locking
+ *
+ * Purpose:     Sets the "disable file locking" flag for the current API call context.
+ *
+ * Return:      <none>
+ *
+ * Programmer:  Neil Fortner
+ *              August 2, 2018
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+H5CX_set_disable_file_locking(hbool_t disable_file_locking)
+{
+    H5CX_node_t **head = H5CX_get_my_context();  /* Get the pointer to the head of the API context, for this thread */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    /* Sanity check */
+    HDassert(head && *head);
+
+    (*head)->ctx.disable_file_locking = disable_file_locking;
+
+    FUNC_LEAVE_NOAPI_VOID
+} /* end H5CX_set_disable_file_locking() */
 #endif /* H5_HAVE_PARALLEL */
 
 
