@@ -555,15 +555,16 @@ if (HDF5_ENABLE_PARALLEL)
     set (H5_HAVE_PARALLEL 1)
     # MPI checks, only do these if MPI_C_FOUND is true, otherwise they always fail
     # and once set, they are cached as false and not regenerated
-    set (CMAKE_REQUIRED_LIBRARIES "${MPI_C_LIBRARIES}" )
+    set (CMAKE_REQUIRED_LIBRARIES "${MPI_C_LIBRARIES}")
+    set (CMAKE_REQUIRED_INCLUDES "${MPI_C_INCLUDE_DIRS}")
     # Used by Fortran + MPI
-    CHECK_SYMBOL_EXISTS (MPI_Comm_c2f "${MPI_C_INCLUDE_DIRS}/mpi.h"  H5_HAVE_MPI_MULTI_LANG_Comm)
-    CHECK_SYMBOL_EXISTS (MPI_Info_c2f "${MPI_C_INCLUDE_DIRS}/mpi.h"  H5_HAVE_MPI_MULTI_LANG_Info)
+    CHECK_SYMBOL_EXISTS (MPI_Comm_c2f "mpi.h"  H5_HAVE_MPI_MULTI_LANG_Comm)
+    CHECK_SYMBOL_EXISTS (MPI_Info_c2f "mpi.h"  H5_HAVE_MPI_MULTI_LANG_Info)
 
     # Used by Parallel Compression feature
     set (PARALLEL_FILTERED_WRITES ON)
-    CHECK_SYMBOL_EXISTS (MPI_Mprobe "${MPI_C_INCLUDE_DIRS}/mpi.h" H5_HAVE_MPI_Mprobe)
-    CHECK_SYMBOL_EXISTS (MPI_Imrecv "${MPI_C_INCLUDE_DIRS}/mpi.h" H5_HAVE_MPI_Imrecv)
+    CHECK_SYMBOL_EXISTS (MPI_Mprobe "mpi.h" H5_HAVE_MPI_Mprobe)
+    CHECK_SYMBOL_EXISTS (MPI_Imrecv "mpi.h" H5_HAVE_MPI_Imrecv)
     if (NOT H5_HAVE_MPI_Mprobe OR NOT H5_HAVE_MPI_Imrecv)
       message (WARNING "The MPI_Mprobe and/or MPI_Imrecv functions could not be located.
                Parallel writes of filtered data will be disabled.")
@@ -572,8 +573,8 @@ if (HDF5_ENABLE_PARALLEL)
 
     # Used by big I/O feature
     set (LARGE_PARALLEL_IO ON)
-    CHECK_SYMBOL_EXISTS (MPI_Get_elements_x "${MPI_C_INCLUDE_DIRS}/mpi.h" H5_HAVE_MPI_Get_elements_x)
-    CHECK_SYMBOL_EXISTS (MPI_Type_size_x "${MPI_C_INCLUDE_DIRS}/mpi.h" H5_HAVE_MPI_Type_size_x)
+    CHECK_SYMBOL_EXISTS (MPI_Get_elements_x "mpi.h" H5_HAVE_MPI_Get_elements_x)
+    CHECK_SYMBOL_EXISTS (MPI_Type_size_x "mpi.h" H5_HAVE_MPI_Type_size_x)
     if (NOT H5_HAVE_MPI_Get_elements_x OR NOT H5_HAVE_MPI_Type_size_x)
       message (WARNING "The MPI_Get_elements_x and/or MPI_Type_size_x functions could not be located.
                Reading/Writing >2GB of data in a single parallel I/O operation will be disabled.")
