@@ -37,6 +37,7 @@ size_t cur_filter_idx = 0;
 
 static herr_t set_dcpl_filter(hid_t dcpl);
 
+#if MPI_VERSION >= 3
 /* Tests for writing data in parallel */
 static void test_write_one_chunk_filtered_dataset(void);
 static void test_write_filtered_dataset_no_overlap(void);
@@ -52,6 +53,7 @@ static void test_write_cmpd_filtered_dataset_no_conversion_unshared(void);
 static void test_write_cmpd_filtered_dataset_no_conversion_shared(void);
 static void test_write_cmpd_filtered_dataset_type_conversion_unshared(void);
 static void test_write_cmpd_filtered_dataset_type_conversion_shared(void);
+#endif
 
 /* Tests for reading data in parallel */
 static void test_read_one_chunk_filtered_dataset(void);
@@ -69,8 +71,10 @@ static void test_read_cmpd_filtered_dataset_no_conversion_shared(void);
 static void test_read_cmpd_filtered_dataset_type_conversion_unshared(void);
 static void test_read_cmpd_filtered_dataset_type_conversion_shared(void);
 
+#if MPI_VERSION >= 3
 /* Other miscellaneous tests */
 static void test_shrinking_growing_chunks(void);
+#endif
 
 /*
  * Tests for attempting to round-trip the data going from
@@ -82,7 +86,9 @@ static void test_shrinking_growing_chunks(void);
  * written in parallel -> read serially
  */
 static void test_write_serial_read_parallel(void);
+#if MPI_VERSION >= 3
 static void test_write_parallel_read_serial(void);
+#endif
 
 static MPI_Comm comm = MPI_COMM_WORLD;
 static MPI_Info info = MPI_INFO_NULL;
@@ -90,6 +96,7 @@ static int      mpi_rank;
 static int      mpi_size;
 
 static void (*tests[])(void) = {
+#if MPI_VERSION >= 3
     test_write_one_chunk_filtered_dataset,
     test_write_filtered_dataset_no_overlap,
     test_write_filtered_dataset_overlap,
@@ -104,6 +111,7 @@ static void (*tests[])(void) = {
     test_write_cmpd_filtered_dataset_no_conversion_shared,
     test_write_cmpd_filtered_dataset_type_conversion_unshared,
     test_write_cmpd_filtered_dataset_type_conversion_shared,
+#endif
     test_read_one_chunk_filtered_dataset,
     test_read_filtered_dataset_no_overlap,
     test_read_filtered_dataset_overlap,
@@ -119,8 +127,10 @@ static void (*tests[])(void) = {
     test_read_cmpd_filtered_dataset_type_conversion_unshared,
     test_read_cmpd_filtered_dataset_type_conversion_shared,
     test_write_serial_read_parallel,
+#if MPI_VERSION >= 3
     test_write_parallel_read_serial,
     test_shrinking_growing_chunks,
+#endif
 };
 
 /*
@@ -143,6 +153,7 @@ set_dcpl_filter(hid_t dcpl)
     }
 }
 
+#if MPI_VERSION >= 3
 /*
  * Tests parallel write of filtered data in the special
  * case where a dataset is composed of a single chunk.
@@ -2458,6 +2469,7 @@ test_write_cmpd_filtered_dataset_type_conversion_shared(void)
 
     return;
 }
+#endif
 
 /*
  * Tests parallel read of filtered data in the special
@@ -5528,6 +5540,7 @@ test_write_serial_read_parallel(void)
     return;
 }
 
+#if MPI_VERSION >= 3
 /*
  * Tests parallel write of filtered data
  * to a dataset. After the write has
@@ -5839,6 +5852,7 @@ test_shrinking_growing_chunks(void)
 
     return;
 }
+#endif
 
 int
 main(int argc, char** argv)
