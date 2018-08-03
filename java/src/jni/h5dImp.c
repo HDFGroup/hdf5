@@ -1343,9 +1343,6 @@ Java_hdf_hdf5lib_H5_H5DwriteVL
     htri_t  isVlenStr = 0;
     htri_t  isComplex = 0;
 
-    h5unimplemented(env, "H5DwriteVL:  not implemented");
-    return -1;
-#ifdef notdef
    if (buf == NULL) {
         h5nullArgument(env, "H5DwriteVL:  buf is NULL");
     } /* end if */
@@ -1365,10 +1362,14 @@ Java_hdf_hdf5lib_H5_H5DwriteVL
             isVlenStr = 1; /* strings created by H5Tvlen_create(H5T_C_S1) */
         }
         if (isStr == 0 || isComplex>0 || isVlenStr) {
+            h5unimplemented(env, "H5DwriteVL:  not implemented");
+            status = -1;
+#ifdef notdef
             status = H5DwriteVL_asstr(env, (hid_t)dataset_id, (hid_t)mem_type_id,
                                         (hid_t)mem_space_id, (hid_t)file_space_id,
                                         (hid_t)xfer_plist_id, buf);
-        }
+#endif
+       }
         else if (isStr > 0) {
             status = H5DwriteVL_str(env, (hid_t)dataset_id, (hid_t)mem_type_id,
                                         (hid_t)mem_space_id, (hid_t)file_space_id,
@@ -1377,7 +1378,6 @@ Java_hdf_hdf5lib_H5_H5DwriteVL
     } /* end else */
 
     return (jint)status;
-#endif
 } /* end Java_hdf_hdf5lib_H5_H5Dwrite_1VL */
 
 herr_t
