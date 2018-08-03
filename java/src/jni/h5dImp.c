@@ -1362,7 +1362,7 @@ Java_hdf_hdf5lib_H5_H5DwriteVL
             isVlenStr = 1; /* strings created by H5Tvlen_create(H5T_C_S1) */
         }
         if (isStr == 0 || isComplex>0 || isVlenStr) {
-            h5unimplemented(env, "H5DwriteVL:  not implemented");
+            h5unimplemented(env, "H5DwriteVL: VL types, which are not string type, not implemented");
             status = -1;
 #ifdef notdef
             status = H5DwriteVL_asstr(env, (hid_t)dataset_id, (hid_t)mem_type_id,
