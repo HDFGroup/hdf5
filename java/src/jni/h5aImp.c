@@ -966,7 +966,7 @@ Java_hdf_hdf5lib_H5_H5Aget_1info_1by_1idx
         UNPIN_JAVA_STRING(obj_name, aName);
 
         if (status < 0) {
-        h5libraryError(env);
+            h5libraryError(env);
         } /* end if */
         else {
             args[0].z = ainfo.corder_valid;
@@ -1002,7 +1002,7 @@ Java_hdf_hdf5lib_H5_H5Aget_1info_1by_1name
         UNPIN_JAVA_STRING_TWO(obj_name, aName, attr_name, attrName);
 
         if (status < 0) {
-        h5libraryError(env);
+            h5libraryError(env);
         } /* end if */
         else {
             args[0].z = ainfo.corder_valid;
@@ -1166,8 +1166,12 @@ H5A_iterate_cb
                     constructor = CBENVPTR->GetMethodID(CBENVPAR cls, "<init>", "(ZJIJ)V");
                     if (constructor != 0) {
                         cb_info_t = CBENVPTR->NewObjectA(CBENVPAR cls, constructor, args);
-
-                        status = CBENVPTR->CallIntMethod(CBENVPAR visit_callback, mid, g_id, str, cb_info_t, op_data);
+                        if (cb_info_t == NULL) {
+                            printf("FATAL ERROR:  Creation failed\n");
+                        }
+                        else {
+                            status = CBENVPTR->CallIntMethod(CBENVPAR visit_callback, mid, g_id, str, cb_info_t, op_data);
+                        }
                     } /* end if (constructor != 0) */
                 } /* end if (cls != 0) */
             } /* end if (mid != 0) */

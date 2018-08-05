@@ -83,9 +83,14 @@ typedef struct H5E_num_t {
     }                                                                       \
     jm = ENVPTR->GetMethodID(ENVPAR jc, "<init>", "(Ljava/lang/String;)V"); \
     if (jm == NULL) {                                                       \
+        printf("FATAL ERROR: GetMethodID failed\n");                        \
         return JNI_FALSE;                                                   \
     }                                                                       \
     ex = ENVPTR->NewObjectA (ENVPAR jc, jm, (jvalue*)(args));               \
+    if (ex == NULL) {                                                       \
+        printf("FATAL ERROR:  Creation failed\n");                          \
+        return JNI_FALSE;                                                   \
+    }                                                                       \
     if (ENVPTR->Throw(ENVPAR (jthrowable)ex) < 0) {                         \
         printf("FATAL ERROR:  %s: Throw failed\n", (className));            \
         return JNI_FALSE;                                                   \

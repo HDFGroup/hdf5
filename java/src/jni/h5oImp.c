@@ -372,41 +372,58 @@ H5O_iterate_cb
                 constructor = CBENVPTR->GetMethodID(CBENVPAR cls, "<init>", "(IIIIJJJJJJ)V");
                 if (constructor != 0) {
                     hdrinfobuf = CBENVPTR->NewObjectA(CBENVPAR cls, constructor, args);
-
-                    args[0].j = (jlong)info->meta_size.obj.index_size;
-                    args[1].j = (jlong)info->meta_size.obj.heap_size;
-                    // get a reference to the H5_ih_info_t class
-                    cls = CBENVPTR->FindClass(CBENVPAR "hdf/hdf5lib/structs/H5_ih_info_t");
-                    if (cls != 0) {
-                        // get a reference to the constructor; the name is <init>
-                        constructor = CBENVPTR->GetMethodID(CBENVPAR cls, "<init>", "(JJ)V");
-                        if (constructor != 0) {
-                            ihinfobuf1 = CBENVPTR->NewObjectA(CBENVPAR cls, constructor, args);
-                            args[0].j = (jlong)info->meta_size.attr.index_size;
-                            args[1].j = (jlong)info->meta_size.attr.heap_size;
-                            ihinfobuf2 = CBENVPTR->NewObjectA(CBENVPAR cls, constructor, args);
-
-                            args[0].j = (jlong)info->fileno;
-                            args[1].j = (jlong)info->addr;
-                            args[2].i = info->type;
-                            args[3].i = (jint)info->rc;
-                            args[4].j = (jlong)info->num_attrs;
-                            args[5].j = info->atime;
-                            args[6].j = info->mtime;
-                            args[7].j = info->ctime;
-                            args[8].j = info->btime;
-                            args[9].l = hdrinfobuf;
-                            args[10].l = ihinfobuf1;
-                            args[11].l = ihinfobuf2;
-                            // get a reference to the H5O_info_t class
-                            cls = CBENVPTR->FindClass(CBENVPAR "hdf/hdf5lib/structs/H5O_info_t");
-                            if (cls != 0) {
-                                // get a reference to the constructor; the name is <init>
-                                constructor = CBENVPTR->GetMethodID(CBENVPAR cls, "<init>", "(JJIIJJJJJLhdf/hdf5lib/structs/H5O_hdr_info_t;Lhdf/hdf5lib/structs/H5_ih_info_t;Lhdf/hdf5lib/structs/H5_ih_info_t;)V");
-                                if (constructor != 0) {
-                                    cb_info_t = CBENVPTR->NewObjectA(CBENVPAR cls, constructor, args);
-
-                                    status = CBENVPTR->CallIntMethod(CBENVPAR visit_callback, mid, g_id, str, cb_info_t, op_data);
+                    if (ihinfobuf2 == NULL) {
+                        printf("FATAL ERROR:  Creation failed\n");
+                    }
+                    else {
+                        args[0].j = (jlong)info->meta_size.obj.index_size;
+                        args[1].j = (jlong)info->meta_size.obj.heap_size;
+                        // get a reference to the H5_ih_info_t class
+                        cls = CBENVPTR->FindClass(CBENVPAR "hdf/hdf5lib/structs/H5_ih_info_t");
+                        if (cls != 0) {
+                            // get a reference to the constructor; the name is <init>
+                            constructor = CBENVPTR->GetMethodID(CBENVPAR cls, "<init>", "(JJ)V");
+                            if (constructor != 0) {
+                                ihinfobuf1 = CBENVPTR->NewObjectA(CBENVPAR cls, constructor, args);
+                                if (ihinfobuf1 == NULL) {
+                                    printf("FATAL ERROR:  Creation failed\n");
+                                }
+                                else {
+                                    args[0].j = (jlong)info->meta_size.attr.index_size;
+                                    args[1].j = (jlong)info->meta_size.attr.heap_size;
+                                    ihinfobuf2 = CBENVPTR->NewObjectA(CBENVPAR cls, constructor, args);
+                                    if (ihinfobuf2 == NULL) {
+                                        printf("FATAL ERROR:  Creation failed\n");
+                                    }
+                                    else {
+                                        args[0].j = (jlong)info->fileno;
+                                        args[1].j = (jlong)info->addr;
+                                        args[2].i = info->type;
+                                        args[3].i = (jint)info->rc;
+                                        args[4].j = (jlong)info->num_attrs;
+                                        args[5].j = info->atime;
+                                        args[6].j = info->mtime;
+                                        args[7].j = info->ctime;
+                                        args[8].j = info->btime;
+                                        args[9].l = hdrinfobuf;
+                                        args[10].l = ihinfobuf1;
+                                        args[11].l = ihinfobuf2;
+                                        // get a reference to the H5O_info_t class
+                                        cls = CBENVPTR->FindClass(CBENVPAR "hdf/hdf5lib/structs/H5O_info_t");
+                                        if (cls != 0) {
+                                            // get a reference to the constructor; the name is <init>
+                                            constructor = CBENVPTR->GetMethodID(CBENVPAR cls, "<init>", "(JJIIJJJJJLhdf/hdf5lib/structs/H5O_hdr_info_t;Lhdf/hdf5lib/structs/H5_ih_info_t;Lhdf/hdf5lib/structs/H5_ih_info_t;)V");
+                                            if (constructor != 0) {
+                                                cb_info_t = CBENVPTR->NewObjectA(CBENVPAR cls, constructor, args);
+                                                if (cb_info_t == NULL) {
+                                                    printf("FATAL ERROR:  Creation failed\n");
+                                                }
+                                                else {
+                                                    status = CBENVPTR->CallIntMethod(CBENVPAR visit_callback, mid, g_id, str, cb_info_t, op_data);
+                                                }
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }

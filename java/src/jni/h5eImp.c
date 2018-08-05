@@ -508,8 +508,12 @@ H5E_walk_cb
                     constructor = CBENVPTR->GetMethodID(CBENVPAR cls, "<init>", "(JJJILjava/lang/String;Ljava/lang/String;Ljava/lang/String;)V");
                     if (constructor != 0) {
                         cb_info_t = CBENVPTR->NewObjectA(CBENVPAR cls, constructor, args);
-
-                        status = CBENVPTR->CallIntMethod(CBENVPAR visit_callback, mid, nindx, cb_info_t, op_data);
+                        if (cb_info_t == NULL) {
+                            printf("FATAL ERROR:  Creation failed\n");
+                        }
+                        else {
+                            status = CBENVPTR->CallIntMethod(CBENVPAR visit_callback, mid, nindx, cb_info_t, op_data);
+                        }
                     } /* end if (constructor != 0) */
                 } /* end if(cls != 0) */
             } /* end if (mid != 0) */
