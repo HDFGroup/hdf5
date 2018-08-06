@@ -79,7 +79,7 @@ public class HDF5LibraryException extends HDF5Exception {
      *
      * @return the major error number
      */
-    public native long getMajorErrorNumber()
+    public long getMajorErrorNumber()
     {
         return majorErrorNumber;
     }
@@ -91,7 +91,7 @@ public class HDF5LibraryException extends HDF5Exception {
      *
      * @return the minor error number
      */
-    public native long getMinorErrorNumber()
+    public long getMinorErrorNumber()
     {
         return minorErrorNumber;
     }
