@@ -88,7 +88,7 @@ typedef struct H5E_num_t {
     }                                                                       \
     ex = ENVPTR->NewObjectA (ENVPAR jc, jm, (jvalue*)(args));               \
     if (ex == NULL) {                                                       \
-        printf("FATAL ERROR:  Creation failed\n");                          \
+        printf("FATAL ERROR:  %s: Creation failed\n", (className));         \
         return JNI_FALSE;                                                   \
     }                                                                       \
     if (ENVPTR->Throw(ENVPAR (jthrowable)ex) < 0) {                         \

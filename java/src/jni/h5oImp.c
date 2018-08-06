@@ -373,7 +373,7 @@ H5O_iterate_cb
                 if (constructor != 0) {
                     hdrinfobuf = CBENVPTR->NewObjectA(CBENVPAR cls, constructor, args);
                     if (ihinfobuf2 == NULL) {
-                        printf("FATAL ERROR:  Creation failed\n");
+                        printf("FATAL ERROR: hdf/hdf5lib/structs/H5O_hdr_info_t: Creation failed\n");
                     }
                     else {
                         args[0].j = (jlong)info->meta_size.obj.index_size;
@@ -386,14 +386,14 @@ H5O_iterate_cb
                             if (constructor != 0) {
                                 ihinfobuf1 = CBENVPTR->NewObjectA(CBENVPAR cls, constructor, args);
                                 if (ihinfobuf1 == NULL) {
-                                    printf("FATAL ERROR:  Creation failed\n");
+                                    printf("FATAL ERROR: hdf/hdf5lib/structs/H5_ih_info_t: Creation failed\n");
                                 }
                                 else {
                                     args[0].j = (jlong)info->meta_size.attr.index_size;
                                     args[1].j = (jlong)info->meta_size.attr.heap_size;
                                     ihinfobuf2 = CBENVPTR->NewObjectA(CBENVPAR cls, constructor, args);
                                     if (ihinfobuf2 == NULL) {
-                                        printf("FATAL ERROR:  Creation failed\n");
+                                        printf("FATAL ERROR: hdf/hdf5lib/structs/H5_ih_info_t: Creation failed\n");
                                     }
                                     else {
                                         args[0].j = (jlong)info->fileno;
@@ -416,7 +416,7 @@ H5O_iterate_cb
                                             if (constructor != 0) {
                                                 cb_info_t = CBENVPTR->NewObjectA(CBENVPAR cls, constructor, args);
                                                 if (cb_info_t == NULL) {
-                                                    printf("FATAL ERROR:  Creation failed\n");
+                                                    printf("FATAL ERROR: hdf/hdf5lib/structs/H5O_info_t: Creation failed\n");
                                                 }
                                                 else {
                                                     status = CBENVPTR->CallIntMethod(CBENVPAR visit_callback, mid, g_id, str, cb_info_t, op_data);

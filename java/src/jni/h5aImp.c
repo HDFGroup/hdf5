@@ -1167,7 +1167,7 @@ H5A_iterate_cb
                     if (constructor != 0) {
                         cb_info_t = CBENVPTR->NewObjectA(CBENVPAR cls, constructor, args);
                         if (cb_info_t == NULL) {
-                            printf("FATAL ERROR:  Creation failed\n");
+                            printf("FATAL ERROR:  hdf/hdf5lib/structs/H5A_info_t: Creation failed\n");
                         }
                         else {
                             status = CBENVPTR->CallIntMethod(CBENVPAR visit_callback, mid, g_id, str, cb_info_t, op_data);
