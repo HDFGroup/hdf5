@@ -163,6 +163,20 @@ Bug Fixes since HDF5-1.10.2 release
 
     Library
     -------
+    - Java HDF5LibraryException class
+
+      The error minor and major values would be lost after the
+      constructor executed.
+
+      Created two local class variables to hold the values obtained during
+      execution of the constructor. Refactored the class functions to retrieve
+      the class values rather then calling the native functions.
+      The native functions were renamed and called only during execution
+      of the constructor.
+      Added error checking to calling class constructors in JNI classes.
+
+      (ADB - 2018/08/06, HDFFV-10544)
+
     - H5Adelete
 
       H5Adelete failed when deleting the last "large" attribute that
