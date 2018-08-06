@@ -50,7 +50,7 @@ public class HDF5LibraryException extends HDF5Exception {
 
         this.majorErrorNumber = _getMajorErrorNumber();
         this.minorErrorNumber = _getMinorErrorNumber();
-        detailMessage = getMinorError(minorErrorNumber());
+        detailMessage = getMinorError(minorErrorNumber);
     }
 
     /**
