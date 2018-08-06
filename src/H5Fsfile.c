@@ -154,7 +154,7 @@ H5F_sfile_search(H5FD_t *lf)
     curr = H5F_sfile_head_g;
     while(curr) {
         /* Check for match */
-        if(0==H5FD_cmp(curr->shared->lf, lf))
+        if(0==H5FD_cmp(lf, curr->shared->lf))
             HGOTO_DONE(curr->shared)
 
         /* Advance to next shared file node */

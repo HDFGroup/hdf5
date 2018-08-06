@@ -1328,7 +1328,7 @@ test_basic_io(unsigned config, hid_t fapl)
 
     if((H5Pset_dxpl_mpio(dxpl_id, H5FD_MPIO_COLLECTIVE)) < 0 )
         TEST_ERROR
-	  
+ 
     /* Create DCPL */
     if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         TEST_ERROR
@@ -1387,10 +1387,6 @@ test_basic_io(unsigned config, hid_t fapl)
             buf[i][j] = (i * (int)(sizeof(buf[0]) / sizeof(buf[0][0]))) + j;
 
     /* Write data directly to source dataset */
-    /*
-    if(H5Dwrite(srcdset[0], H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf[0]) < 0)
-        TEST_ERROR
-    */
     if(H5Dwrite(srcdset[0], H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl_id, buf[0]) < 0)
         TEST_ERROR
 
@@ -1423,10 +1419,6 @@ test_basic_io(unsigned config, hid_t fapl)
 
     /* Read data through virtual dataset */
     HDmemset(rbuf[0], 0, sizeof(rbuf));
-    /*
-    if(H5Dread(vdset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf[0]) < 0)
-        TEST_ERROR
-    */
     if(H5Dread(vdset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl_id, rbuf[0]) < 0)
         TEST_ERROR
 
@@ -1448,28 +1440,28 @@ test_basic_io(unsigned config, hid_t fapl)
         for(j = 0; j < (int)(sizeof(buf[0]) / sizeof(buf[0][0])); j++)
             buf[i][j] += (int)(sizeof(buf) / sizeof(buf[0][0]));
 
-    /*
-    if(H5Dwrite(vdset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf[0]) < 0)
-        TEST_ERROR
-    */
     if(H5Dwrite(vdset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl_id, buf[0]) < 0)
         TEST_ERROR
 
     /* Reopen srcdset and srcfile if config option specified */
     if(config & TEST_IO_CLOSE_SRC) {
-        if(config & TEST_IO_DIFFERENT_FILE)
+        if(config & TEST_IO_DIFFERENT_FILE) {
+            /* Flush virtual file.  This is necessary since the parallel VDS
+             * implementation currently always opens source files independently
+             * with the sec2 driver, so HDF5 does not "match" the two and cannot
+             * share cached data. */
+            if(H5Fflush(vfile, H5F_SCOPE_GLOBAL) < 0)
+                TEST_ERROR
+
             if((srcfile[0] = H5Fopen(srcfilename, H5F_ACC_RDONLY, fapl)) < 0)
                 TEST_ERROR
+        } /* end if */
         if((srcdset[0] = H5Dopen2(srcfile[0], "src_dset", H5P_DEFAULT)) < 0)
             TEST_ERROR
     } /* end if */
 
     /* Read data directly from source dataset */
     HDmemset(rbuf[0], 0, sizeof(rbuf));
-    /*
-    if(H5Dread(srcdset[0], H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf[0]) < 0)
-        TEST_ERROR
-    */
     if(H5Dread(srcdset[0], H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl_id, rbuf[0]) < 0)
         TEST_ERROR
 
@@ -1573,12 +1565,6 @@ test_basic_io(unsigned config, hid_t fapl)
             buf[i][j] = (i * (int)(sizeof(buf[0]) / sizeof(buf[0][0]))) + j;
 
     /* Write data directly to source datasets */
-    /*
-    if(H5Dwrite(srcdset[0], H5T_NATIVE_INT, vspace[0], H5S_ALL, H5P_DEFAULT, buf[0]) < 0)
-        TEST_ERROR
-    if(H5Dwrite(srcdset[1], H5T_NATIVE_INT, vspace[1], H5S_ALL, H5P_DEFAULT, buf[0]) < 0)
-        TEST_ERROR
-    */
     if(H5Dwrite(srcdset[0], H5T_NATIVE_INT, vspace[0], H5S_ALL, dxpl_id, buf[0]) < 0)
         TEST_ERROR
     if(H5Dwrite(srcdset[1], H5T_NATIVE_INT, vspace[1], H5S_ALL, dxpl_id, buf[0]) < 0)
@@ -1616,10 +1602,6 @@ test_basic_io(unsigned config, hid_t fapl)
 
     /* Read data through virtual dataset */
     HDmemset(rbuf[0], 0, sizeof(rbuf));
-    /*
-    if(H5Dread(vdset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf[0]) < 0)
-        TEST_ERROR
-    */
     if(H5Dread(vdset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl_id, rbuf[0]) < 0)
         TEST_ERROR
 
@@ -1642,18 +1624,22 @@ test_basic_io(unsigned config, hid_t fapl)
             buf[i][j] += (int)(sizeof(buf) / sizeof(buf[0][0]));
 
     /* Write data through virtual dataset */
-    /*
-    if(H5Dwrite(vdset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf[0]) < 0)
-        TEST_ERROR
-    */
     if(H5Dwrite(vdset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl_id, buf[0]) < 0)
         TEST_ERROR
 
     /* Reopen srcdsets and srcfile if config option specified */
     if(config & TEST_IO_CLOSE_SRC) {
-        if(config & TEST_IO_DIFFERENT_FILE)
+        if(config & TEST_IO_DIFFERENT_FILE) {
+            /* Flush virtual file.  This is necessary since the parallel VDS
+             * implementation currently always opens source files independently
+             * with the sec2 driver, so HDF5 does not "match" the two and cannot
+             * share cached data. */
+            if(H5Fflush(vfile, H5F_SCOPE_GLOBAL) < 0)
+                TEST_ERROR
+
             if((srcfile[0] = H5Fopen(srcfilename, H5F_ACC_RDWR, fapl)) < 0)
                 TEST_ERROR
+        } /* end if */
         if((srcdset[0] = H5Dopen2(srcfile[0], "%src_dset1", H5P_DEFAULT)) < 0)
             TEST_ERROR
         if((srcdset[1] = H5Dopen2(srcfile[0], "src_dset2%", H5P_DEFAULT)) < 0)
@@ -1662,12 +1648,6 @@ test_basic_io(unsigned config, hid_t fapl)
 
     /* Read data directly from source datasets */
     HDmemset(rbuf[0], 0, sizeof(rbuf));
-    /*
-    if(H5Dread(srcdset[0], H5T_NATIVE_INT, vspace[0], H5S_ALL, H5P_DEFAULT, rbuf[0]) < 0)
-        TEST_ERROR
-    if(H5Dread(srcdset[1], H5T_NATIVE_INT, vspace[1], H5S_ALL, H5P_DEFAULT, rbuf[0]) < 0)
-        TEST_ERROR
-    */
     if(H5Dread(srcdset[0], H5T_NATIVE_INT, vspace[0], H5S_ALL, dxpl_id, rbuf[0]) < 0)
         TEST_ERROR
     if(H5Dread(srcdset[1], H5T_NATIVE_INT, vspace[1], H5S_ALL, dxpl_id, rbuf[0]) < 0)
@@ -1701,12 +1681,6 @@ test_basic_io(unsigned config, hid_t fapl)
             buf[i][j] += (int)(sizeof(buf) / sizeof(buf[0][0]));
 
     /* Write data directly to source datasets */
-    /*
-    if(H5Dwrite(srcdset[0], H5T_NATIVE_INT, vspace[0], H5S_ALL, H5P_DEFAULT, buf[0]) < 0)
-        TEST_ERROR
-    if(H5Dwrite(srcdset[1], H5T_NATIVE_INT, vspace[1], H5S_ALL, H5P_DEFAULT, buf[0]) < 0)
-        TEST_ERROR
-    */
     if(H5Dwrite(srcdset[0], H5T_NATIVE_INT, vspace[0], H5S_ALL, dxpl_id, buf[0]) < 0)
         TEST_ERROR
     if(H5Dwrite(srcdset[1], H5T_NATIVE_INT, vspace[1], H5S_ALL, dxpl_id, buf[0]) < 0)
@@ -2033,9 +2007,17 @@ test_basic_io(unsigned config, hid_t fapl)
 
     /* Reopen srcdsets and srcfile if config option specified */
     if(config & TEST_IO_CLOSE_SRC) {
-        if(config & TEST_IO_DIFFERENT_FILE)
+        if(config & TEST_IO_DIFFERENT_FILE) {
+            /* Flush virtual file.  This is necessary since the parallel VDS
+             * implementation currently always opens source files independently
+             * with the sec2 driver, so HDF5 does not "match" the two and cannot
+             * share cached data. */
+            if(H5Fflush(vfile, H5F_SCOPE_GLOBAL) < 0)
+                TEST_ERROR
+
             if((srcfile[0] = H5Fopen(srcfilename, H5F_ACC_RDONLY, fapl)) < 0)
                 TEST_ERROR
+        } /* end if */
         if((srcdset[0] = H5Dopen2(srcfile[0], "%src_dset1", H5P_DEFAULT)) < 0)
             TEST_ERROR
         if((srcdset[1] = H5Dopen2(srcfile[0], "src_dset2%", H5P_DEFAULT)) < 0)
@@ -2237,9 +2219,17 @@ test_basic_io(unsigned config, hid_t fapl)
 
     /* Reopen srcdsets and srcfile if config option specified */
     if(config & TEST_IO_CLOSE_SRC) {
-        if(config & TEST_IO_DIFFERENT_FILE)
+        if(config & TEST_IO_DIFFERENT_FILE) {
+            /* Flush virtual file.  This is necessary since the parallel VDS
+             * implementation currently always opens source files independently
+             * with the sec2 driver, so HDF5 does not "match" the two and cannot
+             * share cached data. */
+            if(H5Fflush(vfile, H5F_SCOPE_GLOBAL) < 0)
+                TEST_ERROR
+
             if((srcfile[0] = H5Fopen(srcfilenamepct, H5F_ACC_RDONLY, fapl)) < 0)
                 TEST_ERROR
+        } /* end if */
         if((srcdset[0] = H5Dopen2(srcfile[0], "src_dset1", H5P_DEFAULT)) < 0)
             TEST_ERROR
         if((srcdset[1] = H5Dopen2(srcfile[0], "src_dset2", H5P_DEFAULT)) < 0)
@@ -2496,9 +2486,17 @@ test_basic_io(unsigned config, hid_t fapl)
 
     /* Reopen srcdsets and srcfile if config option specified */
     if(config & TEST_IO_CLOSE_SRC) {
-        if(config & TEST_IO_DIFFERENT_FILE)
+        if(config & TEST_IO_DIFFERENT_FILE) {
+            /* Flush virtual file.  This is necessary since the parallel VDS
+             * implementation currently always opens source files independently
+             * with the sec2 driver, so HDF5 does not "match" the two and cannot
+             * share cached data. */
+            if(H5Fflush(vfile, H5F_SCOPE_GLOBAL) < 0)
+                TEST_ERROR
+
             if((srcfile[0] = H5Fopen(srcfilename, H5F_ACC_RDONLY, fapl)) < 0)
                 TEST_ERROR
+        } /* end if */
         if((srcdset[0] = H5Dopen2(srcfile[0], "src_dset1", H5P_DEFAULT)) < 0)
             TEST_ERROR
         if((srcdset[1] = H5Dopen2(srcfile[0], "src_dset2", H5P_DEFAULT)) < 0)
@@ -2789,9 +2787,17 @@ test_basic_io(unsigned config, hid_t fapl)
 
     /* Reopen srcdsets and srcfile if config option specified */
     if(config & TEST_IO_CLOSE_SRC) {
-        if(config & TEST_IO_DIFFERENT_FILE)
+        if(config & TEST_IO_DIFFERENT_FILE) {
+            /* Flush virtual file.  This is necessary since the parallel VDS
+             * implementation currently always opens source files independently
+             * with the sec2 driver, so HDF5 does not "match" the two and cannot
+             * share cached data. */
+            if(H5Fflush(vfile, H5F_SCOPE_GLOBAL) < 0)
+                TEST_ERROR
+
             if((srcfile[0] = H5Fopen(srcfilename, H5F_ACC_RDONLY, fapl)) < 0)
                 TEST_ERROR
+        } /* end if */
         if((srcdset[0] = H5Dopen2(srcfile[0], "src_dset1", H5P_DEFAULT)) < 0)
             TEST_ERROR
         if((srcdset[1] = H5Dopen2(srcfile[0], "src_dset2", H5P_DEFAULT)) < 0)
@@ -3421,9 +3427,17 @@ test_basic_io(unsigned config, hid_t fapl)
 
     /* Reopen srcdset and srcfile if config option specified */
     if(config & TEST_IO_CLOSE_SRC) {
-        if(config & TEST_IO_DIFFERENT_FILE)
+        if(config & TEST_IO_DIFFERENT_FILE) {
+            /* Flush virtual file.  This is necessary since the parallel VDS
+             * implementation currently always opens source files independently
+             * with the sec2 driver, so HDF5 does not "match" the two and cannot
+             * share cached data. */
+            if(H5Fflush(vfile, H5F_SCOPE_GLOBAL) < 0)
+                TEST_ERROR
+
             if((srcfile[0] = H5Fopen(srcfilename, H5F_ACC_RDONLY, fapl)) < 0)
                 TEST_ERROR
+        } /* end if */
         if((srcdset[0] = H5Dopen2(srcfile[0], "src_dset1", H5P_DEFAULT)) < 0)
             TEST_ERROR
     } /* end if */
@@ -3756,15 +3770,16 @@ test_unlim(unsigned config, hid_t fapl)
     MPI_Barrier(MPI_COMM_WORLD);
 #endif
 
-    /* Reopen virtual dataset and file if config option specified */
-    if(config & TEST_IO_REOPEN_VIRT) {
+    /* Reopen virtual dataset and file if config option specified.  Also do this
+     * if we're using a separate source file to switch to read only. */
+    if((config & TEST_IO_REOPEN_VIRT) || (config & TEST_IO_DIFFERENT_FILE)) {
         if(H5Dclose(vdset) < 0)
             TEST_ERROR
         vdset = -1;
         if(H5Fclose(vfile) < 0)
             TEST_ERROR
         vfile = -1;
-        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
+        if((vfile = H5Fopen(vfilename, H5F_ACC_RDONLY, fapl)) < 0)
             TEST_ERROR
         if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
             TEST_ERROR
@@ -3834,7 +3849,7 @@ test_unlim(unsigned config, hid_t fapl)
         if(H5Fclose(vfile) < 0)
             TEST_ERROR
         vfile = -1;
-        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
+        if((vfile = H5Fopen(vfilename, H5F_ACC_RDONLY, fapl)) < 0)
             TEST_ERROR
     } /* end if */
     if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
@@ -4011,7 +4026,7 @@ test_unlim(unsigned config, hid_t fapl)
         if(H5Fclose(vfile) < 0)
             TEST_ERROR
         vfile = -1;
-        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
+        if((vfile = H5Fopen(vfilename, H5F_ACC_RDONLY, fapl)) < 0)
             TEST_ERROR
     } /* end if */
     if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
@@ -4124,7 +4139,9 @@ test_unlim(unsigned config, hid_t fapl)
         } /* end if */
     } /* end if */
 
-    /* Reopen virtual dataset and file if config option specified */
+    /* Reopen virtual dataset and file if config option specified.  Switch back
+     * to RDWR here to make sure the extent gets written.  It won't cause
+     * problems since the source dataset isn't extended. */
     if(config & TEST_IO_REOPEN_VIRT) {
         if(H5Dclose(vdset) < 0)
             TEST_ERROR
@@ -4311,7 +4328,7 @@ test_unlim(unsigned config, hid_t fapl)
         if(H5Fclose(vfile) < 0)
             TEST_ERROR
         vfile = -1;
-        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
+        if((vfile = H5Fopen(vfilename, H5F_ACC_RDONLY, fapl)) < 0)
             TEST_ERROR
     } /* end if */
     if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
@@ -4628,15 +4645,16 @@ test_unlim(unsigned config, hid_t fapl)
         } /* end if */
     } /* end if */
 
-    /* Reopen virtual dataset and file if config option specified */
-    if(config & TEST_IO_REOPEN_VIRT) {
+    /* Reopen virtual dataset and file if config option specified.  Also do this
+     * if we're using a separate source file to switch to read only. */
+    if((config & TEST_IO_REOPEN_VIRT) || (config & TEST_IO_DIFFERENT_FILE)) {
         if(H5Dclose(vdset) < 0)
             TEST_ERROR
         vdset = -1;
         if(H5Fclose(vfile) < 0)
             TEST_ERROR
         vfile = -1;
-        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
+        if((vfile = H5Fopen(vfilename, H5F_ACC_RDONLY, fapl)) < 0)
             TEST_ERROR
         if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
             TEST_ERROR
@@ -4700,7 +4718,7 @@ test_unlim(unsigned config, hid_t fapl)
         if(H5Fclose(vfile) < 0)
             TEST_ERROR
         vfile = -1;
-        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
+        if((vfile = H5Fopen(vfilename, H5F_ACC_RDONLY, fapl)) < 0)
             TEST_ERROR
     } /* end if */
     if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
@@ -4810,7 +4828,7 @@ test_unlim(unsigned config, hid_t fapl)
         if(H5Fclose(vfile) < 0)
             TEST_ERROR
         vfile = -1;
-        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
+        if((vfile = H5Fopen(vfilename, H5F_ACC_RDONLY, fapl)) < 0)
             TEST_ERROR
         if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
             TEST_ERROR
@@ -4876,7 +4894,7 @@ test_unlim(unsigned config, hid_t fapl)
         if(H5Fclose(vfile) < 0)
             TEST_ERROR
         vfile = -1;
-        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
+        if((vfile = H5Fopen(vfilename, H5F_ACC_RDONLY, fapl)) < 0)
             TEST_ERROR
     } /* end if */
     if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
@@ -4995,7 +5013,7 @@ test_unlim(unsigned config, hid_t fapl)
         if(H5Fclose(vfile) < 0)
             TEST_ERROR
         vfile = -1;
-        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
+        if((vfile = H5Fopen(vfilename, H5F_ACC_RDONLY, fapl)) < 0)
             TEST_ERROR
         if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
             TEST_ERROR
@@ -5076,7 +5094,7 @@ test_unlim(unsigned config, hid_t fapl)
         if(H5Fclose(vfile) < 0)
             TEST_ERROR
         vfile = -1;
-        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
+        if((vfile = H5Fopen(vfilename, H5F_ACC_RDONLY, fapl)) < 0)
             TEST_ERROR
     } /* end if */
     if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
@@ -5350,15 +5368,16 @@ test_unlim(unsigned config, hid_t fapl)
         } /* end if */
     } /* end if */
 
-    /* Reopen virtual dataset and file if config option specified */
-    if(config & TEST_IO_REOPEN_VIRT) {
+    /* Reopen virtual dataset and file if config option specified.  Also do this
+     * if we're using a separate source file to switch to read only. */
+    if((config & TEST_IO_REOPEN_VIRT) || (config & TEST_IO_DIFFERENT_FILE)) {
         if(H5Dclose(vdset) < 0)
             TEST_ERROR
         vdset = -1;
         if(H5Fclose(vfile) < 0)
             TEST_ERROR
         vfile = -1;
-        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
+        if((vfile = H5Fopen(vfilename, H5F_ACC_RDONLY, fapl)) < 0)
             TEST_ERROR
         if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
             TEST_ERROR
@@ -5422,7 +5441,7 @@ test_unlim(unsigned config, hid_t fapl)
         if(H5Fclose(vfile) < 0)
             TEST_ERROR
         vfile = -1;
-        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
+        if((vfile = H5Fopen(vfilename, H5F_ACC_RDONLY, fapl)) < 0)
             TEST_ERROR
     } /* end if */
     if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
@@ -5527,7 +5546,7 @@ test_unlim(unsigned config, hid_t fapl)
         if(H5Fclose(vfile) < 0)
             TEST_ERROR
         vfile = -1;
-        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
+        if((vfile = H5Fopen(vfilename, H5F_ACC_RDONLY, fapl)) < 0)
             TEST_ERROR
         if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
             TEST_ERROR
@@ -5592,7 +5611,7 @@ test_unlim(unsigned config, hid_t fapl)
         if(H5Fclose(vfile) < 0)
             TEST_ERROR
         vfile = -1;
-        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
+        if((vfile = H5Fopen(vfilename, H5F_ACC_RDONLY, fapl)) < 0)
             TEST_ERROR
     } /* end if */
     if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
@@ -5716,7 +5735,7 @@ test_unlim(unsigned config, hid_t fapl)
         if(H5Fclose(vfile) < 0)
             TEST_ERROR
         vfile = -1;
-        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
+        if((vfile = H5Fopen(vfilename, H5F_ACC_RDONLY, fapl)) < 0)
             TEST_ERROR
         if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
             TEST_ERROR
@@ -5781,7 +5800,7 @@ test_unlim(unsigned config, hid_t fapl)
         if(H5Fclose(vfile) < 0)
             TEST_ERROR
         vfile = -1;
-        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
+        if((vfile = H5Fopen(vfilename, H5F_ACC_RDONLY, fapl)) < 0)
             TEST_ERROR
     } /* end if */
     if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
@@ -5896,7 +5915,7 @@ test_unlim(unsigned config, hid_t fapl)
         if(H5Fclose(vfile) < 0)
             TEST_ERROR
         vfile = -1;
-        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
+        if((vfile = H5Fopen(vfilename, H5F_ACC_RDONLY, fapl)) < 0)
             TEST_ERROR
         if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
             TEST_ERROR
@@ -5960,7 +5979,7 @@ test_unlim(unsigned config, hid_t fapl)
         if(H5Fclose(vfile) < 0)
             TEST_ERROR
         vfile = -1;
-        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
+        if((vfile = H5Fopen(vfilename, H5F_ACC_RDONLY, fapl)) < 0)
             TEST_ERROR
     } /* end if */
     if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
@@ -6204,15 +6223,16 @@ test_unlim(unsigned config, hid_t fapl)
         } /* end if */
     } /* end if */
 
-    /* Reopen virtual dataset and file if config option specified */
-    if(config & TEST_IO_REOPEN_VIRT) {
+    /* Reopen virtual dataset and file if config option specified.  Also do this
+     * if we're using a separate source file to switch to read only. */
+    if((config & TEST_IO_REOPEN_VIRT) || (config & TEST_IO_DIFFERENT_FILE)) {
         if(H5Dclose(vdset) < 0)
             TEST_ERROR
         vdset = -1;
         if(H5Fclose(vfile) < 0)
             TEST_ERROR
         vfile = -1;
-        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
+        if((vfile = H5Fopen(vfilename, H5F_ACC_RDONLY, fapl)) < 0)
             TEST_ERROR
         if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
             TEST_ERROR
@@ -6278,7 +6298,7 @@ test_unlim(unsigned config, hid_t fapl)
         if(H5Fclose(vfile) < 0)
             TEST_ERROR
         vfile = -1;
-        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
+        if((vfile = H5Fopen(vfilename, H5F_ACC_RDONLY, fapl)) < 0)
             TEST_ERROR
     } /* end if */
     if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
@@ -6384,7 +6404,7 @@ test_unlim(unsigned config, hid_t fapl)
         if(H5Fclose(vfile) < 0)
             TEST_ERROR
         vfile = -1;
-        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
+        if((vfile = H5Fopen(vfilename, H5F_ACC_RDONLY, fapl)) < 0)
             TEST_ERROR
         if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
             TEST_ERROR
@@ -6450,7 +6470,7 @@ test_unlim(unsigned config, hid_t fapl)
         if(H5Fclose(vfile) < 0)
             TEST_ERROR
         vfile = -1;
-        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
+        if((vfile = H5Fopen(vfilename, H5F_ACC_RDONLY, fapl)) < 0)
             TEST_ERROR
     } /* end if */
     if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
@@ -6814,14 +6834,18 @@ main(int argc, char **argv)
         nerrors += test_api((test_api_config_t)test_api_config, fapl);
 
     for(bit_config = 0; bit_config < TEST_IO_NTESTS; bit_config++) {
+        /* Check for configurations currently unsupported by VDS */
+        if((bit_config & TEST_IO_DIFFERENT_FILE) && !((bit_config & TEST_IO_CLOSE_SRC) && (bit_config & TEST_IO_REOPEN_VIRT)))
+            continue;
+
         if ( mpi_rank == 0 ) {
              HDprintf("Config: %s%s%s\n", 
                  bit_config & TEST_IO_CLOSE_SRC ? "closed source dataset, " 
                                                 : "", 
                  bit_config & TEST_IO_DIFFERENT_FILE ? "different source file"
-		                                : "same source file",
-		 bit_config & TEST_IO_REOPEN_VIRT ? ", reopen virtual file"
-		                                : "");
+                                                : "same source file",
+                 bit_config & TEST_IO_REOPEN_VIRT ? ", reopen virtual file"
+                                                : "");
         }
         nerrors += test_basic_io(bit_config, fapl);
         nerrors += test_unlim(bit_config, fapl);

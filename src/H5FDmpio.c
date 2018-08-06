@@ -1218,10 +1218,10 @@ H5FD_mpio_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
     if ((mpi_result = MPI_Comm_group(f1->comm, &f1_grp)) != MPI_SUCCESS)
         HMPI_GOTO_ERROR(-1, "MPI_Comm_group(comm1) failed", mpi_result)
 
-    if ((mpi_result = MPI_Comm_group(f1->comm, &f2_grp)) != MPI_SUCCESS)
+    if ((mpi_result = MPI_Comm_group(f2->comm, &f2_grp)) != MPI_SUCCESS)
         HMPI_GOTO_ERROR(-1, "MPI_Comm_group(comm2) failed", mpi_result)
 
-    if ((mpi_result = MPI_Group_compare(f1_grp,f2_grp,&cmp_value)) != MPI_SUCCESS)
+    if ((mpi_result = MPI_Group_compare(f1_grp, f2_grp, &cmp_value)) != MPI_SUCCESS)
         HMPI_GOTO_ERROR(-1, "MPI_Group_compare failed", mpi_result)
 
     /*  The group compare return values can be one of the following:
@@ -1272,7 +1272,7 @@ H5FD_mpio_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
          * determine if the values are the same or not.  The actual return value
          * shouldn't really matter...
          */
-        cmp_value = HDmemcmp(&(f1->device),&(f2->device),sizeof(dev_t));
+        cmp_value = HDmemcmp(&(f1->device), &(f2->device), sizeof(dev_t));
 #endif /* H5_DEV_T_IS_SCALAR */
         /* Continue checking ONLY if we haven't failed yet */
         if (!cmp_value) {

@@ -775,7 +775,6 @@ independent_read_vds(MPI_Comm comm)
     hid_t        vfile = -1;                       /* File with virtual dset */
     hid_t        vdset = -1;                       /* Virtual dataset */
     hid_t        fapl;
-    hid_t        xfer_plist;                       /* Dataset transfer properties list */
     hid_t        file_dataspace;                   /* File dataspace ID */
     hid_t        mem_dataspace;                    /* memory dataspace ID */
 
@@ -839,11 +838,7 @@ independent_read_vds(MPI_Comm comm)
 #ifdef SERIAL_ACCESS
     ret = H5Dread(vdset, H5T_NATIVE_INT, mem_dataspace, file_dataspace, H5P_DEFAULT, rdata[0]);
 #else    
-    xfer_plist = H5Pcreate (H5P_DATASET_XFER);
-    VRFY((xfer_plist >= 0),"");
-    ret = H5Pset_dxpl_mpio_collective_opt(xfer_plist,H5FD_MPIO_INDIVIDUAL_IO);
-    VRFY((ret >= 0), "H5Pset_dxpl_mpio_collective_opt succeeded");
-    ret = H5Dread(vdset, H5T_NATIVE_INT, mem_dataspace, file_dataspace, xfer_plist, rdata[0]);
+    ret = H5Dread(vdset, H5T_NATIVE_INT, mem_dataspace, file_dataspace, H5P_DEFAULT, rdata[0]);
 #endif
     VRFY((ret >= 0), "H5Dread succeeded");
     ret = H5Dclose(vdset);
