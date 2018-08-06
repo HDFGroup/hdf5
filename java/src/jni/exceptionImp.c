@@ -179,13 +179,13 @@ Java_hdf_hdf5lib_exceptions_HDF5LibraryException_printStackTrace0
 
 /*
  * Class:     hdf_hdf5lib_exceptions_HDFLibraryException
- * Method:    getMajorErrorNumber
+ * Method:    _getMajorErrorNumber
  * Signature: ()J
  *
  *  Extract the HDF-5 major error number from the HDF-5 error stack.
  */
 JNIEXPORT jlong JNICALL
-Java_hdf_hdf5lib_exceptions_HDF5LibraryException_getMajorErrorNumber
+Java_hdf_hdf5lib_exceptions_HDF5LibraryException__1getMajorErrorNumber
     (JNIEnv *env, jobject obj)
 {
     H5E_num_t err_nums;
@@ -195,17 +195,17 @@ Java_hdf_hdf5lib_exceptions_HDF5LibraryException_getMajorErrorNumber
     H5Ewalk2(H5E_DEFAULT, H5E_WALK_DOWNWARD, walk_error_callback, &err_nums);
 
     return err_nums.maj_num;
-} /* end Java_hdf_hdf5lib_exceptions_HDF5LibraryException_getMajorErrorNumber() */
+} /* end Java_hdf_hdf5lib_exceptions_HDF5LibraryException__1getMajorErrorNumber() */
 
 /*
  * Class:     hdf_hdf5lib_exceptions_HDFLibraryException
- * Method:    getMinorErrorNumber
+ * Method:    _getMinorErrorNumber
  * Signature: ()J
  *
  *  Extract the HDF-5 minor error number from the HDF-5 error stack.
  */
 JNIEXPORT jlong JNICALL
-Java_hdf_hdf5lib_exceptions_HDF5LibraryException_getMinorErrorNumber
+Java_hdf_hdf5lib_exceptions_HDF5LibraryException__1getMinorErrorNumber
     (JNIEnv *env, jobject obj)
 {
     H5E_num_t err_nums;
@@ -215,7 +215,7 @@ Java_hdf_hdf5lib_exceptions_HDF5LibraryException_getMinorErrorNumber
     H5Ewalk2(H5E_DEFAULT, H5E_WALK_DOWNWARD, walk_error_callback, &err_nums);
 
     return err_nums.min_num;
-} /* end Java_hdf_hdf5lib_exceptions_HDF5LibraryException_getMinorErrorNumber() */
+} /* end Java_hdf_hdf5lib_exceptions_HDF5LibraryException__1getMinorErrorNumber() */
 
 /*
  *  Routine to raise particular Java exceptions from C
