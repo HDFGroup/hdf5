@@ -3952,15 +3952,17 @@ test_unlim(unsigned config, hid_t fapl)
         } /* end if */
     } /* end if */
 
-    /* Reopen virtual dataset and file if config option specified */
-    if(config & TEST_IO_REOPEN_VIRT) {
+    /* Reopen virtual dataset and file if config option specified.  Always
+     * reopen if using a different file so the VDS gets an updated view of the
+     * source datasets. */
+    if((config & TEST_IO_REOPEN_VIRT) || (config & TEST_IO_DIFFERENT_FILE)) {
         if(H5Dclose(vdset) < 0)
             TEST_ERROR
         vdset = -1;
         if(H5Fclose(vfile) < 0)
             TEST_ERROR
         vfile = -1;
-        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
+        if((vfile = H5Fopen(vfilename, H5F_ACC_RDONLY, fapl)) < 0)
             TEST_ERROR
         if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
             TEST_ERROR
@@ -4017,7 +4019,7 @@ test_unlim(unsigned config, hid_t fapl)
         } /* end for */
 
     /* Close VDS and reopen with view set to H5D_VDS_LAST_AVAILABLE, reopen file
-     * as well if config option specified */
+     * as well if config option specified. */
     if(H5Dclose(vdset) < 0)
         TEST_ERROR
     if(H5Pset_virtual_view(dapl, H5D_VDS_LAST_AVAILABLE) < 0)
@@ -4140,9 +4142,10 @@ test_unlim(unsigned config, hid_t fapl)
     } /* end if */
 
     /* Reopen virtual dataset and file if config option specified.  Switch back
-     * to RDWR here to make sure the extent gets written.  It won't cause
-     * problems since the source dataset isn't extended. */
-    if(config & TEST_IO_REOPEN_VIRT) {
+     * to RDWR here to make sure the extent gets written.  Always reopen if
+     * using a different file so the VDS gets an updated view of the source
+     * datasets. */
+    if((config & TEST_IO_REOPEN_VIRT) || (config & TEST_IO_DIFFERENT_FILE)) {
         if(H5Dclose(vdset) < 0)
             TEST_ERROR
         vdset = -1;
@@ -4820,8 +4823,10 @@ test_unlim(unsigned config, hid_t fapl)
         } /* end if */
     } /* end if */
 
-    /* Reopen virtual dataset and file if config option specified */
-    if(config & TEST_IO_REOPEN_VIRT) {
+    /* Reopen virtual dataset and file if config option specified.  Always
+     * reopen if using a different file so the VDS gets an updated view of the
+     * source datasets. */
+    if((config & TEST_IO_REOPEN_VIRT) || (config & TEST_IO_DIFFERENT_FILE)) {
         if(H5Dclose(vdset) < 0)
             TEST_ERROR
         vdset = -1;
@@ -5005,8 +5010,10 @@ test_unlim(unsigned config, hid_t fapl)
         } /* end if */
     } /* end if */
 
-    /* Reopen virtual dataset and file if config option specified */
-    if(config & TEST_IO_REOPEN_VIRT) {
+    /* Reopen virtual dataset and file if config option specified.  Always
+     * reopen if using a different file so the VDS gets an updated view of the
+     * source datasets. */
+    if((config & TEST_IO_REOPEN_VIRT) || (config & TEST_IO_DIFFERENT_FILE)) {
         if(H5Dclose(vdset) < 0)
             TEST_ERROR
         vdset = -1;
@@ -5538,8 +5545,10 @@ test_unlim(unsigned config, hid_t fapl)
         } /* end if */
     } /* end if */
 
-    /* Reopen virtual dataset and file if config option specified */
-    if(config & TEST_IO_REOPEN_VIRT) {
+    /* Reopen virtual dataset and file if config option specified.  Always
+     * reopen if using a different file so the VDS gets an updated view of the
+     * source datasets. */
+    if((config & TEST_IO_REOPEN_VIRT) || (config & TEST_IO_DIFFERENT_FILE)) {
         if(H5Dclose(vdset) < 0)
             TEST_ERROR
         vdset = -1;
@@ -5727,8 +5736,10 @@ test_unlim(unsigned config, hid_t fapl)
         } /* end if */
     } /* end if */
 
-    /* Reopen virtual dataset and file if config option specified */
-    if(config & TEST_IO_REOPEN_VIRT) {
+    /* Reopen virtual dataset and file if config option specified.  Always
+     * reopen if using a different file so the VDS gets an updated view of the
+     * source datasets. */
+    if((config & TEST_IO_REOPEN_VIRT) || (config & TEST_IO_DIFFERENT_FILE)) {
         if(H5Dclose(vdset) < 0)
             TEST_ERROR
         vdset = -1;
@@ -5907,8 +5918,10 @@ test_unlim(unsigned config, hid_t fapl)
         } /* end if */
     } /* end if */
 
-    /* Reopen virtual dataset and file if config option specified */
-    if(config & TEST_IO_REOPEN_VIRT) {
+    /* Reopen virtual dataset and file if config option specified.  Always
+     * reopen if using a different file so the VDS gets an updated view of the
+     * source datasets. */
+    if((config & TEST_IO_REOPEN_VIRT) || (config & TEST_IO_DIFFERENT_FILE)) {
         if(H5Dclose(vdset) < 0)
             TEST_ERROR
         vdset = -1;
@@ -6396,8 +6409,10 @@ test_unlim(unsigned config, hid_t fapl)
         } /* end if */
     } /* end if */
 
-    /* Reopen virtual dataset and file if config option specified */
-    if(config & TEST_IO_REOPEN_VIRT) {
+    /* Reopen virtual dataset and file if config option specified.  Always
+     * reopen if using a different file so the VDS gets an updated view of the
+     * source datasets. */
+    if((config & TEST_IO_REOPEN_VIRT) || (config & TEST_IO_DIFFERENT_FILE)) {
         if(H5Dclose(vdset) < 0)
             TEST_ERROR
         vdset = -1;
@@ -6835,7 +6850,7 @@ main(int argc, char **argv)
 
     for(bit_config = 0; bit_config < TEST_IO_NTESTS; bit_config++) {
         /* Check for configurations currently unsupported by VDS */
-        if((bit_config & TEST_IO_DIFFERENT_FILE) && !((bit_config & TEST_IO_CLOSE_SRC) && (bit_config & TEST_IO_REOPEN_VIRT)))
+        if((bit_config & TEST_IO_DIFFERENT_FILE) && !((bit_config & TEST_IO_CLOSE_SRC)/* && (bit_config & TEST_IO_REOPEN_VIRT)*/))
             continue;
 
         if ( mpi_rank == 0 ) {

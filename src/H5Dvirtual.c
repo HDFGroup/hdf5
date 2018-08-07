@@ -908,7 +908,7 @@ H5D__virtual_open_source_dset(const H5D_t *vdset,
     else {
         unsigned    intent;                 /* File access permissions */
 #ifdef H5_HAVE_PARALLEL
-        hbool_t prev_disable_file_locking;  /* Whether file locking was previously disabled */
+        hbool_t prev_disable_file_locking = FALSE; /* Whether file locking was previously disabled */
 #endif /* H5_HAVE_PARALLEL */
 
         /* Get the virtual dataset's file open flags ("intent") */
