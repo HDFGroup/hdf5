@@ -266,7 +266,7 @@ Bug Fixes since HDF5-1.10.2 release
       indicate any problem, but GCC 8 issued errors. Moved the
       attribute before the function name, as required.
 
-      (ADB 2018/05/22, HDFFV-10473)
+      (ADB - 2018/05/22, HDFFV-10473)
 
     - Reworked java test suite into individual JUnit tests.
 
@@ -276,7 +276,7 @@ Bug Fixes since HDF5-1.10.2 release
       to be diagnosed easier. A side benefit is that tests for optional components
       of the library can be disabled if not configured.
 
-      (ADB 2018/05/16, HDFFV-9739)
+      (ADB - 2018/05/16, HDFFV-9739)
 
     - Converted CMake global commands ADD_DEFINITIONS and INCLUDE_DIRECTORIES
       to use target_* type commands. This change modernizes the CMake usage
@@ -290,7 +290,7 @@ Bug Fixes since HDF5-1.10.2 release
       The additional language (C++ and Fortran) checks have also been localized
       to only be checked when that language is enabled.
 
-      (ADB 2018/05/08)
+      (ADB - 2018/05/08)
 
     - The --enable-debug/production configure flags are listed as 'deprecated'
       when they should really be listed as 'removed'.
@@ -304,6 +304,17 @@ Bug Fixes since HDF5-1.10.2 release
       The --enable-debug/production flags are now listed as removed.
 
       (DER - 2018/05/31, HDFFV-10505)
+
+    - Applied patches to address Cywin build issues
+
+      There were three issues for Cygwin builds:
+      - Shared libs were not built.
+      - The -std=c99 flag caused a SIG_SETMASK undeclared error.
+      - Undefined errors when buildbing test shared libraries.
+
+      Patches to address these issues were received and incorporated in this version.
+
+      (LRK - 2018/07/18, HDFFV-10475)
 
     Performance
     -------------
