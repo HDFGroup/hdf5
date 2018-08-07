@@ -187,37 +187,6 @@ Bug Fixes since HDF5-1.10.2 release
 
       (VC - 2018/07/20, HDFFV-9277)
 
-    - Error checks in h5stat and when decoding messages
-
-      h5stat exited with seg fault/core dumped when
-      errors are encountered in the internal library.
-
-      Add error checks and --enable-error-stack option to h5stat.
-      Add range checks when decoding messages: old fill value, old
-      layout and refcount.
-
-      (VC - 2018/07/11, HDFFV-10333)
-
-    - If an HDF5 file contains a malformed compound datatype with a
-      suitably large offset, the type conversion code can run off
-      the end of the type conversion buffer, causing a segmentation
-      fault.
-
-      This issue was reported to The HDF Group as issue #CVE-2017-17507.
-
-      NOTE: The HDF5 C library cannot produce such a file. This condition
-            should only occur in a corrupt (or deliberately altered) file
-            or a file created by third-party software.
-
-      THE HDF GROUP WILL NOT FIX THIS BUG AT THIS TIME
-
-      Fixing this problem would involve updating the publicly visible
-      H5T_conv_t function pointer typedef and versioning the API calls
-      which use it. We normally only modify the public API during
-      major releases, so this bug will not be fixed at this time.
-
-      (DER - 2018/02/26, HDFFV-10356)
-
     - A bug was discovered in the parallel library which caused partial
       parallel reads of filtered datasets to return incorrect data. The
       library used the incorrect dataspace for each chunk read, causing
@@ -257,8 +226,63 @@ Bug Fixes since HDF5-1.10.2 release
 
       (JTH - 2018/07/16, HDFFV-10467)
 
+    - Error checks in h5stat and when decoding messages
+
+      h5stat exited with seg fault/core dumped when
+      errors are encountered in the internal library.
+
+      Add error checks and --enable-error-stack option to h5stat.
+      Add range checks when decoding messages: old fill value, old
+      layout and refcount.
+
+      (VC - 2018/07/11, HDFFV-10333)
+
+    - If an HDF5 file contains a malformed compound datatype with a
+      suitably large offset, the type conversion code can run off
+      the end of the type conversion buffer, causing a segmentation
+      fault.
+
+      This issue was reported to The HDF Group as issue #CVE-2017-17507.
+
+      NOTE: The HDF5 C library cannot produce such a file. This condition
+            should only occur in a corrupt (or deliberately altered) file
+            or a file created by third-party software.
+
+      THE HDF GROUP WILL NOT FIX THIS BUG AT THIS TIME
+
+      Fixing this problem would involve updating the publicly visible
+      H5T_conv_t function pointer typedef and versioning the API calls
+      which use it. We normally only modify the public API during
+      major releases, so this bug will not be fixed at this time.
+
+      (DER - 2018/02/26, HDFFV-10356)
+
     Configuration
     -------------
+    - Applied patches to address Cywin build issues
+
+      There were three issues for Cygwin builds:
+      - Shared libs were not built.
+      - The -std=c99 flag caused a SIG_SETMASK undeclared error.
+      - Undefined errors when buildbing test shared libraries.
+
+      Patches to address these issues were received and incorporated in this version.
+
+      (LRK - 2018/07/18, HDFFV-10475)
+
+    - The --enable-debug/production configure flags are listed as 'deprecated'
+      when they should really be listed as 'removed'.
+
+      In the autotools overhaul several years ago, we removed these flags and
+      implemented a new --enable-build-mode= flag. This was done because we
+      changed the semantics of the modes and didn't want users to silently
+      be exposed to them. The newer system is also more flexible and us to
+      add other modes (like 'clean').
+
+      The --enable-debug/production flags are now listed as removed.
+
+      (DER - 2018/05/31, HDFFV-10505)
+
     - Moved the location of gcc attribute.
 
       The gcc attribute(no_sanitize), named as the macro HDF_NO_UBSAN,
@@ -291,30 +315,6 @@ Bug Fixes since HDF5-1.10.2 release
       to only be checked when that language is enabled.
 
       (ADB - 2018/05/08)
-
-    - The --enable-debug/production configure flags are listed as 'deprecated'
-      when they should really be listed as 'removed'.
-
-      In the autotools overhaul several years ago, we removed these flags and
-      implemented a new --enable-build-mode= flag. This was done because we
-      changed the semantics of the modes and didn't want users to silently
-      be exposed to them. The newer system is also more flexible and us to
-      add other modes (like 'clean').
-
-      The --enable-debug/production flags are now listed as removed.
-
-      (DER - 2018/05/31, HDFFV-10505)
-
-    - Applied patches to address Cywin build issues
-
-      There were three issues for Cygwin builds:
-      - Shared libs were not built.
-      - The -std=c99 flag caused a SIG_SETMASK undeclared error.
-      - Undefined errors when buildbing test shared libraries.
-
-      Patches to address these issues were received and incorporated in this version.
-
-      (LRK - 2018/07/18, HDFFV-10475)
 
     Performance
     -------------
@@ -356,10 +356,14 @@ Bug Fixes since HDF5-1.10.2 release
       + One more property list argument is added to H5Location::openDataSet:
         const DSetAccPropList& dapl = DSetAccPropList::DEFAULT
 
+      (BMR - 2018/07/21, PR# 1146)
+
     - Improvement C++ documentation
 
       Replaced the table in main page of the C++ documentation from mht to htm format
       for portability.
+
+      (BMR - 2018/07/17, PR# 1141)
 
     Testing
     -------
