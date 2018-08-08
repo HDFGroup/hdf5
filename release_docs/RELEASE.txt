@@ -1,4 +1,4 @@
-HDF5 version 1.10.3-pre1 released on 2018-07-31
+HDF5 version 1.10.3-pre2 currently under development
 ================================================================================
 
 
@@ -174,37 +174,6 @@ Bug Fixes since HDF5-1.10.2 release
 
       (VC - 2018/07/20, HDFFV-9277)
 
-    - Error checks in h5stat and when decoding messages
-
-      h5stat exited with seg fault/core dumped when
-      errors are encountered in the internal library.
-
-      Add error checks and --enable-error-stack option to h5stat.
-      Add range checks when decoding messages: old fill value, old
-      layout and refcount.
-
-      (VC - 2018/07/11, HDFFV-10333)
-
-    - If an HDF5 file contains a malformed compound datatype with a
-      suitably large offset, the type conversion code can run off
-      the end of the type conversion buffer, causing a segmentation
-      fault.
-
-      This issue was reported to The HDF Group as issue #CVE-2017-17507.
-
-      NOTE: The HDF5 C library cannot produce such a file. This condition
-            should only occur in a corrupt (or deliberately altered) file
-            or a file created by third-party software.
-
-      THE HDF GROUP WILL NOT FIX THIS BUG AT THIS TIME
-
-      Fixing this problem would involve updating the publicly visible
-      H5T_conv_t function pointer typedef and versioning the API calls
-      which use it. We normally only modify the public API during
-      major releases, so this bug will not be fixed at this time.
-
-      (DER - 2018/02/26, HDFFV-10356)
-
     - A bug was discovered in the parallel library which caused partial
       parallel reads of filtered datasets to return incorrect data. The
       library used the incorrect dataspace for each chunk read, causing
@@ -244,40 +213,49 @@ Bug Fixes since HDF5-1.10.2 release
 
       (JTH - 2018/07/16, HDFFV-10467)
 
+    - Error checks in h5stat and when decoding messages
+
+      h5stat exited with seg fault/core dumped when
+      errors are encountered in the internal library.
+
+      Add error checks and --enable-error-stack option to h5stat.
+      Add range checks when decoding messages: old fill value, old
+      layout and refcount.
+
+      (VC - 2018/07/11, HDFFV-10333)
+
+    - If an HDF5 file contains a malformed compound datatype with a
+      suitably large offset, the type conversion code can run off
+      the end of the type conversion buffer, causing a segmentation
+      fault.
+
+      This issue was reported to The HDF Group as issue #CVE-2017-17507.
+
+      NOTE: The HDF5 C library cannot produce such a file. This condition
+            should only occur in a corrupt (or deliberately altered) file
+            or a file created by third-party software.
+
+      THE HDF GROUP WILL NOT FIX THIS BUG AT THIS TIME
+
+      Fixing this problem would involve updating the publicly visible
+      H5T_conv_t function pointer typedef and versioning the API calls
+      which use it. We normally only modify the public API during
+      major releases, so this bug will not be fixed at this time.
+
+      (DER - 2018/02/26, HDFFV-10356)
+
     Configuration
     -------------
-    - Moved the location of gcc attribute.
+    - Applied patches to address Cywin build issues
 
-      The gcc attribute(no_sanitize), named as the macro HDF_NO_UBSAN,
-      was located after the function name. Builds with GCC 7 did not
-      indicate any problem, but GCC 8 issued errors. Moved the
-      attribute before the function name, as required.
+      There were three issues for Cygwin builds:
+      - Shared libs were not built.
+      - The -std=c99 flag caused a SIG_SETMASK undeclared error.
+      - Undefined errors when buildbing test shared libraries.
 
-      (ADB 2018/05/22, HDFFV-10473)
+      Patches to address these issues were received and incorporated in this version.
 
-    - Reworked java test suite into individual JUnit tests.
-
-      Testing the whole suite of java unit tests in a single JUnit run
-      made it difficult to determine actual failures when tests would fail.
-      Running each file set of tests individually, allows individual failures
-      to be diagnosed easier. A side benefit is that tests for optional components
-      of the library can be disabled if not configured.
-
-      (ADB 2018/05/16, HDFFV-9739)
-
-    - Converted CMake global commands ADD_DEFINITIONS and INCLUDE_DIRECTORIES
-      to use target_* type commands. This change modernizes the CMake usage
-      in the HDF5 library.
-
-      In addition, there is the intention to convert to generator expressions,
-      where possible. The exception is Fortran FLAGS on Windows Visual Studio.
-      The HDF macros TARGET_C_PROPERTIES and TARGET_FORTRAN_PROPERTIES have
-      been removed with this change in usage.
-
-      The additional language (C++ and Fortran) checks have also been localized
-      to only be checked when that language is enabled.
-
-      (ADB 2018/05/08)
+      (LRK - 2018/07/18, HDFFV-10475)
 
     - The --enable-debug/production configure flags are listed as 'deprecated'
       when they should really be listed as 'removed'.
@@ -291,6 +269,39 @@ Bug Fixes since HDF5-1.10.2 release
       The --enable-debug/production flags are now listed as removed.
 
       (DER - 2018/05/31, HDFFV-10505)
+
+    - Moved the location of gcc attribute.
+
+      The gcc attribute(no_sanitize), named as the macro HDF_NO_UBSAN,
+      was located after the function name. Builds with GCC 7 did not
+      indicate any problem, but GCC 8 issued errors. Moved the
+      attribute before the function name, as required.
+
+      (ADB - 2018/05/22, HDFFV-10473)
+
+    - Reworked java test suite into individual JUnit tests.
+
+      Testing the whole suite of java unit tests in a single JUnit run
+      made it difficult to determine actual failures when tests would fail.
+      Running each file set of tests individually, allows individual failures
+      to be diagnosed easier. A side benefit is that tests for optional components
+      of the library can be disabled if not configured.
+
+      (ADB - 2018/05/16, HDFFV-9739)
+
+    - Converted CMake global commands ADD_DEFINITIONS and INCLUDE_DIRECTORIES
+      to use target_* type commands. This change modernizes the CMake usage
+      in the HDF5 library.
+
+      In addition, there is the intention to convert to generator expressions,
+      where possible. The exception is Fortran FLAGS on Windows Visual Studio.
+      The HDF macros TARGET_C_PROPERTIES and TARGET_FORTRAN_PROPERTIES have
+      been removed with this change in usage.
+
+      The additional language (C++ and Fortran) checks have also been localized
+      to only be checked when that language is enabled.
+
+      (ADB - 2018/05/08)
 
     Performance
     -------------
@@ -332,10 +343,14 @@ Bug Fixes since HDF5-1.10.2 release
       + One more property list argument is added to H5Location::openDataSet:
         const DSetAccPropList& dapl = DSetAccPropList::DEFAULT
 
+      (BMR - 2018/07/21, PR# 1146)
+
     - Improvement C++ documentation
 
       Replaced the table in main page of the C++ documentation from mht to htm format
       for portability.
+
+      (BMR - 2018/07/17, PR# 1141)
 
     Testing
     -------
