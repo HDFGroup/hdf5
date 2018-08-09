@@ -1,4 +1,4 @@
-HDF5 version 1.10.3-snap4 currently under development
+HDF5 version 1.10.4-snap0 currently under development
 ================================================================================
 
 
@@ -47,6 +47,22 @@ New Features
 
     Configuration:
     -------------
+    - Added configuration checks for the following MPI functions:
+
+      MPI_Mprobe - Used for the Parallel Compression feature
+      MPI_Imrecv - Used for the Parallel Compression feature
+
+      MPI_Get_elements_x - Used for the "big Parallel I/O" feature
+      MPI_Type_size_x - Used for the "big Parallel I/O" feature
+
+      (JTH - 2018/08/02, HDFFV-10512)
+
+    - Added section to the libhdf5.settings file to indicate
+      the status of the Parallel Compression and "big Parallel I/O"
+      features.
+
+      (JTH - 2018/08/02, HDFFV-10512)
+
     - Add option to execute swmr shell scripts from CMake.
 
       Option TEST_SHELL_SCRIPTS redirects processing into a
@@ -177,6 +193,18 @@ Bug Fixes since HDF5-1.10.2 release
       Added error checking to calling class constructors in JNI classes.
 
       (ADB - 2018/08/06, HDFFV-10544)
+
+    - Added checks of the defined MPI_VERSION to guard against usage of
+      MPI-3 functions in the Parallel Compression and "big Parallel I/O"
+      features when HDF5 is built with MPI-2. Previously, the configure
+      step would pass but the build itself would fail when it could not
+      locate the MPI-3 functions used.
+
+      As a result of these new checks, HDF5 can again be built with MPI-2,
+      but the Parallel Compression feature will be disabled as it relies
+      on the MPI-3 functions used.
+
+      (JTH - 2018/08/02, HDFFV-10512)
 
     - H5Adelete
 
@@ -382,7 +410,7 @@ Supported Platforms
     Linux 3.10.0-327.10.1.el7   GNU C (gcc), Fortran (gfortran), C++ (g++)
     #1 SMP x86_64 GNU/Linux       compilers:
     (kituo/moohan)                Version 4.8.5 20150623 (Red Hat 4.8.5-4)
-                                    Version 4.9.3, Version 5.2.0,
+                                    Version 4.9.3, Version 5.2.0
                                   Intel(R) C (icc), C++ (icpc), Fortran (icc)
                                   compilers:
                                      Version 17.0.0.098 Build 20160721
@@ -417,10 +445,6 @@ Supported Platforms
     64-bit                        gfortran GNU Fortran (GCC) 7.1.0
     (swallow/kite)                Intel icc/icpc/ifort version 17.0.2
 
-    Mac OS Sierra 10.12.6         Apple LLVM version 8.1.0 (clang/clang++-802.0.42)
-    64-bit                        gfortran GNU Fortran (GCC) 7.1.0
-    (swallow/kite)                Intel icc/icpc/ifort version 17.0.2
-
 Tested Configuration Features Summary
 =====================================
 
@@ -444,10 +468,10 @@ Windows 7 Cygwin                        n        y/n    n        y    y     y
 Windows 7 x64 Cygwin                    n        y/n    n        y    y     y
 Windows 10                              y        y/y    n        y    y     y
 Windows 10 x64                          y        y/y    n        y    y     y
-Mac OS X Mountain Lion 10.8.5 64-bit    n        y/y    n        y    y     y
 Mac OS X Mavericks 10.9.5 64-bit        n        y/y    n        y    y     y
 Mac OS X Yosemite 10.10.5 64-bit        n        y/y    n        y    y     y
 Mac OS X El Capitan 10.11.6 64-bit      n        y/y    n        y    y     y
+Mac OS Sierra 10.12.6 64-bit            n        y/y    n        y    y     y
 CentOS 7.2 Linux 2.6.32 x86_64 PGI      n        y/y    n        y    y     y
 CentOS 7.2 Linux 2.6.32 x86_64 GNU      y        y/y    y        y    y     y
 CentOS 7.2 Linux 2.6.32 x86_64 Intel    n        y/y    n        y    y     y
@@ -464,10 +488,10 @@ Windows 7 Cygwin                           n       n         n         y
 Windows 7 x64 Cygwin                       n       n         n         y
 Windows 10                                 y       y         y         y
 Windows 10 x64                             y       y         y         y
-Mac OS X Mountain Lion 10.8.5 64-bit       y       n         y         y
 Mac OS X Mavericks 10.9.5 64-bit           y       n         y         y
 Mac OS X Yosemite 10.10.5 64-bit           y       n         y         y
 Mac OS X El Capitan 10.11.6 64-bit         y       n         y         y
+Mac OS Sierra 10.12.6 64-bit               y       n         y         y
 CentOS 7.2 Linux 2.6.32 x86_64 PGI         y       y         y         n
 CentOS 7.2 Linux 2.6.32 x86_64 GNU         y       y         y         y
 CentOS 7.2 Linux 2.6.32 x86_64 Intel       y       y         y         n
@@ -487,7 +511,7 @@ The following platforms are not supported but have been tested for this release.
                                      Version 4.9.3, 5.3.0, 6.2.0
                                   PGI C, Fortran, C++ for 64-bit target on
                                   x86-64;
-                                      Version 17.10-0
+                                     Version 17.10-0
                                   Intel(R) C (icc), C++ (icpc), Fortran (icc)
                                   compilers:
                                      Version 17.0.4.196 Build 20170411
@@ -497,7 +521,8 @@ The following platforms are not supported but have been tested for this release.
     #1 SMP x86_64 GNU/Linux          Version 4.8.5 20150623 (Red Hat 4.8.5-4)
     (jelly)                       with NAG Fortran Compiler Release 6.1(Tozai)
                                   GCC Version 7.1.0
-                                  OpenMPI 3.0.0-GCC-7.2.0-2.29
+                                  OpenMPI 3.0.0-GCC-7.2.0-2.29, 
+                                     3.1.0-GCC-7.2.0-2.29
                                   Intel(R) C (icc) and C++ (icpc) compilers
                                      Version 17.0.0.098 Build 20160721
                                   with NAG Fortran Compiler Release 6.1(Tozai)
