@@ -47,6 +47,22 @@ New Features
 
     Configuration:
     -------------
+    - Added configuration checks for the following MPI functions:
+
+      MPI_Mprobe - Used for the Parallel Compression feature
+      MPI_Imrecv - Used for the Parallel Compression feature
+
+      MPI_Get_elements_x - Used for the "big Parallel I/O" feature
+      MPI_Type_size_x - Used for the "big Parallel I/O" feature
+
+      (JTH - 2018/08/02, HDFFV-10512)
+
+    - Added section to the libhdf5.settings file to indicate
+      the status of the Parallel Compression and "big Parallel I/O"
+      features.
+
+      (JTH - 2018/08/02, HDFFV-10512)
+
     - Add option to execute swmr shell scripts from CMake.
 
       Option TEST_SHELL_SCRIPTS redirects processing into a
@@ -176,6 +192,18 @@ Bug Fixes since HDF5-1.10.2 release
       Added error checking to calling class constructors in JNI classes.
 
       (ADB - 2018/08/06, HDFFV-10544)
+
+    - Added checks of the defined MPI_VERSION to guard against usage of
+      MPI-3 functions in the Parallel Compression and "big Parallel I/O"
+      features when HDF5 is built with MPI-2. Previously, the configure
+      step would pass but the build itself would fail when it could not
+      locate the MPI-3 functions used.
+
+      As a result of these new checks, HDF5 can again be built with MPI-2,
+      but the Parallel Compression feature will be disabled as it relies
+      on the MPI-3 functions used.
+
+      (JTH - 2018/08/02, HDFFV-10512)
 
     - H5Adelete
 
