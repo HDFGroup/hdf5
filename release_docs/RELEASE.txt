@@ -351,7 +351,11 @@ Bug Fixes since HDF5-1.10.2 release
 
     Fortran
     --------
-    -
+    - Fixed issue with h5fget_obj_count_f and using a file id of H5F_OBJ_ALL_F not
+      returning the correct count.
+
+      (MSB - 2018/5/15, HDFFV-10405)
+
 
     Tools
     -----
