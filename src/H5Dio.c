@@ -1192,7 +1192,8 @@ H5D__ioinfo_adjust(H5D_io_info_t *io_info, const H5D_t *dset,
                                                                     "data transforms needed to be applied",
                                                                     "optimized MPI types flag wasn't set",
                                                                     "one of the dataspaces was neither simple nor scalar",
-                                                                    "dataset was not contiguous or chunked" };
+                                                                    "dataset was not contiguous or chunked",
+                                                                    "parallel writes to filtered datasets are disabled" };
 
                 if(H5CX_get_mpio_local_no_coll_cause(&local_no_collective_cause) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to get local no collective cause value")
