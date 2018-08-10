@@ -674,6 +674,8 @@ H5_VERSION
 DIRECT_VFD_CONDITIONAL_FALSE
 DIRECT_VFD_CONDITIONAL_TRUE
 DIRECT_VFD
+LARGE_PARALLEL_IO
+PARALLEL_FILTERED_WRITES
 INSTRUMENT_LIBRARY
 MPE
 ADD_PARALLEL_FILES
@@ -1618,7 +1620,7 @@ Optional Features:
                           Clean turns nothing on and disables optimization
                           (i.e.: a 'clean slate' configuration). All these
                           settings can be overridden by using specific
-                          configure flags. [default=debug]
+                          configure flags. [default=production]
   --enable-dependency-tracking
                           do not reject slow dependency extractors
   --disable-dependency-tracking
@@ -4132,7 +4134,7 @@ fi
 ## Set the default
 ## Depends on branch, set via script at branch creation time
 if test "X-$BUILD_MODE" = X- ; then
-    BUILD_MODE=debug
+    BUILD_MODE=production
 fi
 
 ## Allow this variable to be substituted in
@@ -9561,7 +9563,7 @@ else
 JAVA_TEST=Test.java
 CLASS_TEST=Test.class
 cat << \EOF > $JAVA_TEST
-/* #line 9564 "configure" */
+/* #line 9566 "configure" */
 public class Test {
 }
 EOF
@@ -9736,7 +9738,7 @@ EOF
 if $UUDECODE Test.uue; then
         ac_cv_prog_uudecode_base64=yes
 else
-        echo "configure: 9739: uudecode had trouble decoding base 64 file 'Test.uue'" >&5
+        echo "configure: 9741: uudecode had trouble decoding base 64 file 'Test.uue'" >&5
         echo "configure: failed file was:" >&5
         cat Test.uue >&5
         ac_cv_prog_uudecode_base64=no
@@ -9853,7 +9855,7 @@ else
 JAVA_TEST=Test.java
 CLASS_TEST=Test.class
 cat << \EOF > $JAVA_TEST
-/* #line 9856 "configure" */
+/* #line 9858 "configure" */
 public class Test {
 }
 EOF
@@ -9888,7 +9890,7 @@ JAVA_TEST=Test.java
 CLASS_TEST=Test.class
 TEST=Test
 cat << \EOF > $JAVA_TEST
-/* [#]line 9891 "configure" */
+/* [#]line 9893 "configure" */
 public class Test {
 public static void main (String args[]) {
         System.exit (0);
@@ -10318,7 +10320,7 @@ EOF
                 if $UUDECODE Test.uue; then
                         :
                 else
-                        echo "configure: 10321: uudecode had trouble decoding base 64 file 'Test.uue'" >&5
+                        echo "configure: 10323: uudecode had trouble decoding base 64 file 'Test.uue'" >&5
                         echo "configure: failed file was:" >&5
                         cat Test.uue >&5
                         ac_cv_prog_uudecode_base64=no
@@ -10338,7 +10340,7 @@ EOF
 else
 
 cat << \EOF > Test.java
-/* #line 10341 "configure" */
+/* #line 10343 "configure" */
 import junit.textui.TestRunner;
 public class Test {
 
@@ -29537,6 +29539,8 @@ esac
  MPE=no
  INSTRUMENT_LIBRARY=no
 
+
+
 if test -n "$PARALLEL"; then
   ## The 'testpar' directory should participate in the build
   TESTPARALLEL=testpar
@@ -29959,6 +29963,111 @@ fi
 $as_echo "#define HAVE_MPE 1" >>confdefs.h
 
   fi
+
+  ## ----------------------------------------------------------------------
+  ## Check for the MPI-3 functions necessary for the Parallel Compression
+  ## feature. If these are not present, issue a warning that Parallel
+  ## Compression will be disabled.
+  ##
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for MPI_Mprobe and MPI_Imrecv functions" >&5
+$as_echo_n "checking for MPI_Mprobe and MPI_Imrecv functions... " >&6; }
+
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+              #include <mpi.h>
+
+#ifdef FC_DUMMY_MAIN
+#ifndef FC_DUMMY_MAIN_EQ_F77
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int FC_DUMMY_MAIN() { return 1; }
+#endif
+#endif
+int
+main ()
+{
+
+              MPI_Message message;
+              MPI_Init(0, (void *) 0);
+              MPI_Mprobe(0, 0, 0, &message, (void *) 0);
+              MPI_Imrecv((void *) 0, 0, 0, (void *) 0, (void *) 0);
+
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+       PARALLEL_FILTERED_WRITES=yes
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+       { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: A simple MPI program using the MPI_Mprobe and MPI_Imrecv functions could not be compiled and linked.
+                    Parallel writes of filtered data will be disabled." >&5
+$as_echo "$as_me: WARNING: A simple MPI program using the MPI_Mprobe and MPI_Imrecv functions could not be compiled and linked.
+                    Parallel writes of filtered data will be disabled." >&2;}
+       PARALLEL_FILTERED_WRITES=no
+
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+
+  ## ----------------------------------------------------------------------
+  ## Check for the MPI-3 functions necessary for the big I/O feature.
+  ## If these are not present, issue a warning that the big I/O feature
+  ## will be disabled.
+  ##
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for MPI_Get_elements_x and MPI_Type_size_x functions" >&5
+$as_echo_n "checking for MPI_Get_elements_x and MPI_Type_size_x functions... " >&6; }
+
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+              #include <mpi.h>
+
+#ifdef FC_DUMMY_MAIN
+#ifndef FC_DUMMY_MAIN_EQ_F77
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int FC_DUMMY_MAIN() { return 1; }
+#endif
+#endif
+int
+main ()
+{
+
+              MPI_Count count;
+              MPI_Init(0, (void *) 0);
+              MPI_Get_elements_x(0, 0, &count);
+              MPI_Type_size_x(0, &count);
+
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+       LARGE_PARALLEL_IO=yes
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+       { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: A simple MPI program using the MPI_Get_elements_x and MPI_Type_size_x functions could not be compiled and linked.
+                    Reading/Writing >2GB of data in a single parallel I/O operation will be disabled." >&5
+$as_echo "$as_me: WARNING: A simple MPI program using the MPI_Get_elements_x and MPI_Type_size_x functions could not be compiled and linked.
+                    Reading/Writing >2GB of data in a single parallel I/O operation will be disabled." >&2;}
+       LARGE_PARALLEL_IO=no
+
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+
 fi
 
 ## ----------------------------------------------------------------------
@@ -30406,6 +30515,12 @@ fi
 
 ## Parallel support? (set above except empty if none)
 PARALLEL=${PARALLEL:-no}
+
+## Parallel writes to filtered datasets support?
+PARALLEL_FILTERED_WRITES=${PARALLEL_FILTERED_WRITES:-no}
+
+## >2GB writes in parallel support?
+LARGE_PARALLEL_IO=${LARGE_PARALLEL_IO:-no}
 
 ## Compiler with version information. This consists of the full path
 ## name of the compiler and the reported version number.
