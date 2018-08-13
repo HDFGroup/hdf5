@@ -33,7 +33,6 @@ If you have any questions or comments, please send them to the HDF Help Desk:
 CONTENTS
 
 - New Features
-- Support for new platforms and languages
 - Bug Fixes since HDF5-1.10.2
 - Supported Platforms
 - Tested Configuration Features Summary
@@ -70,19 +69,6 @@ New Features
       execute the shell scripts if a SH program is found.
 
       (ADB - 2018/07/16)
-
-    Library:
-    --------
-    -
-
-
-    Parallel Library:
-    -----------------
-    -
-
-    Fortran Library:
-    ----------------
-    -
 
 
     C++ Library:
@@ -151,29 +137,7 @@ New Features
 
       (ADB - 2018/06/02, HDFFV10519)
 
-    Tools:
-    ------
-    -
 
-    High-Level APIs:
-    ---------------
-    -
-
-    C Packet Table API
-    ------------------
-    -
-
-    Internal header file
-    --------------------
-    -
-
-    Documentation
-    -------------
-    -
-
-Support for new platforms, languages and compilers.
-=======================================
-    -
 
 Bug Fixes since HDF5-1.10.2 release
 ==================================
@@ -345,9 +309,11 @@ Bug Fixes since HDF5-1.10.2 release
 
       (ADB - 2018/05/08)
 
+
     Performance
     -------------
-    -
+    - optimized DXPL to improve performance
+
 
     Fortran
     --------
@@ -356,26 +322,6 @@ Bug Fixes since HDF5-1.10.2 release
 
       (MSB - 2018/5/15, HDFFV-10405)
 
-
-    Tools
-    -----
-    -
-
-    High-Level APIs:
-    ------
-    -
-
-    Fortran High-Level APIs:
-    ------
-    -
-
-    Documentation
-    -------------
-    -
-
-    F90 APIs
-    --------
-    -
 
     C++ APIs
     --------
@@ -398,9 +344,6 @@ Bug Fixes since HDF5-1.10.2 release
 
       (BMR - 2018/07/17, PR# 1141)
 
-    Testing
-    -------
-    -
 
 Supported Platforms
 ===================
