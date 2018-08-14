@@ -286,6 +286,24 @@ Bug Fixes since HDF5-1.10.2 release
 
       (DER - 2018/02/26, HDFFV-10356)
 
+    - User's patches CVEs
+
+      The following patches have been applied:
+
+      CVE-2018-11202 - NULL pointer dereference was discovered in
+                       H5S_hyper_make_spans in H5Shyper.c (HDFFV-10476)
+      CVE-2018-11203 - A division by zero was discovered in
+                       H5D__btree_decode_key in H5Dbtree.c (HDFFV-10477)
+      CVE-2018-11204 - A NULL pointer dereference was discovered in
+                       H5O__chunk_deserialize in H5Ocache.c (HDFFV-10478)
+      CVE-2018-11206 - An out of bound read was discovered in
+                       H5O_fill_new_decode and H5O_fill_old_decode in H5Ofill.c
+                       (HDFFV-10480)
+      CVE-2018-11207 - A division by zero was discovered in
+                       H5D__chunk_init in H5Dchunk.c  (HDFFV-10481)
+      (BMR - 2018/7/22, PR#s: 1134 and 1139,
+       HDFFV-10476, HDFFV-10477, HDFFV-10478, HDFFV-10480, HDFFV-10481)
+
     Configuration
     -------------
     - Applied patches to address Cywin build issues
