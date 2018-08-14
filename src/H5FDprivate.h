@@ -38,6 +38,45 @@
 /* Length of filename buffer */
 #define H5FD_MAX_FILENAME_LEN      1024
 
+/* 
+ * VFD SWMR 
+ */
+/* Metadata file header */
+#define H5FD_MD_HEADER_MAGIC            "VHDR"          /* Header magic */
+#define H5FD_SIZEOF_CHKSUM              4               /* Size of checksum */
+
+/* Size of the header in the metadata file */
+#define H5FD_MD_HEADER_SIZE                                                 \
+    (                                                                       \
+    H5_SIZEOF_MAGIC                 /* Signature */                         \
+    + 4                             /* Page size */                         \
+    + 8                             /* Tick number */                       \
+    + 8                             /* Index offset */                      \
+    + 8                             /* Index length number */               \
+    + H5FD_SIZEOF_CHKSUM            /* Metadata header checksum */          \
+    )
+
+/* Size of an index entry in the metadata file */
+#define H5FD_MD_INDEX_ENTRY_SIZE                                            \
+    (                                                                       \
+    4                               /* HDF5 file page offset */             \
+    + 4                             /* Metadata file page offset */         \
+    + 4                             /* Length */                            \
+    )
+
+/* Metadata file index magic */
+#define H5FD_MD_INDEX_MAGIC            "VIDX"          /* Index magic */
+
+/* Size of the metadata file index */
+#define H5FD_MD_INDEX_SIZE(N)           /* N is number of entries in index */   \
+    (                                                                           \
+    H5_SIZEOF_MAGIC                     /* Signature */                         \   
+    + 8                                 /* Tick num */                          \
+    + 4                                 /* Number of entries */                 \
+    + (N * H5FD_MD_INDEX_ENTRY_SIZE)    /* Index entries */                     \
+    + H5FD_SIZEOF_CHKSUM                /* Metadata header checksum */          \
+    )
+
 #ifdef H5_HAVE_PARALLEL
 /* ======== Temporary data transfer properties ======== */
 /* Definitions for memory MPI type property */
@@ -156,6 +195,10 @@ H5_DLL herr_t H5FD_get_vfd_handle(H5FD_t *file, hid_t fapl, void** file_handle);
 H5_DLL herr_t H5FD_set_base_addr(H5FD_t *file, haddr_t base_addr);
 H5_DLL haddr_t H5FD_get_base_addr(const H5FD_t *file);
 H5_DLL herr_t H5FD_set_paged_aggr(H5FD_t *file, hbool_t paged);
+
+/* Function prototypes for VFD SWMR */
+H5_DLL herr_t H5FD_writer_end_of_tick();
+H5_DLL herr_t H5FD_reader_end_of_tick();
 
 /* Function prototypes for MPI based VFDs*/
 #ifdef H5_HAVE_PARALLEL

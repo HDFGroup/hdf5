@@ -2760,7 +2760,7 @@ done:
  *------------------------------------------------------------------------------
  */
 herr_t
-H5AC_expunge_tag_type_metadata(H5F_t *f, haddr_t tag, int type_id, unsigned flags)
+H5AC_expunge_tag_type_metadata(H5F_t *f, haddr_t tag, int type_id, unsigned flags, hbool_t type_match)
 {
     /* Variable Declarations */
     herr_t ret_value = SUCCEED;
@@ -2773,7 +2773,7 @@ H5AC_expunge_tag_type_metadata(H5F_t *f, haddr_t tag, int type_id, unsigned flag
     HDassert(f->shared);
 
     /* Call cache level function to expunge entries with specified tag and type id */
-    if(H5C_expunge_tag_type_metadata(f, tag, type_id, flags)<0)
+    if(H5C_expunge_tag_type_metadata(f, tag, type_id, flags, type_match)<0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Cannot expunge tagged type entries")
 
 done:

@@ -982,6 +982,9 @@ typedef off_t               h5_stat_size_t;
 #ifndef HDgettimeofday
     #define HDgettimeofday(S,P)  gettimeofday(S,P)
 #endif /* HDgettimeofday */
+#ifndef HDclock_gettime
+    #define HDclock_gettime(C,T)  clock_gettime(C,T)
+#endif /* HDclock_gettime */
 #ifndef HDgetuid
     #define HDgetuid()    getuid()
 #endif /* HDgetuid */
@@ -1942,6 +1945,12 @@ extern hbool_t H5_libterm_g;    /* Is the library being shutdown? */
 #define H5_INIT_GLOBAL (H5_libinit_g)
 #define H5_TERM_GLOBAL (H5_libterm_g)
 
+/* Temporary Gobals for VFD SWMR */
+extern hbool_t vfd_swmr_g;
+extern hbool_t vfd_swmr_writer_g;
+extern uint64_t tick_num_g;
+extern struct timespec end_of_tick_g;
+
 #endif /* H5_HAVE_THREADSAFE */
 
 #ifdef H5_HAVE_CODESTACK
@@ -2058,12 +2067,32 @@ H5_DLL herr_t H5CX_pop(void);
                                                                               \
     BEGIN_MPE_LOG
 
+#define VFD_SWMR_TEST_FOR_END_OF_TICK(swmr_reader_exit, err)                                            \
+    /* Initialize the library */                                                                        \
+    if(vfd_swmr_g) {                                                                                    \
+        struct timespec curr_time;                                                                      \
+        if(HDclock_gettime(CLOCK_MONOTONIC, &curr_time) < 0)                                            \
+            HGOTO_ERROR(H5E_FUNC, H5E_CANTGET, err, "can't get time via clock_gettime")                 \
+        if( (curr_time.tv_sec >= end_of_tick_g.tv_sec) &&                                               \
+            (curr_time.tv_nsec >= end_of_tick_g.tv_nsec) ) {                                            \
+            if(vfd_swmr_writer_g) {                                                                     \
+                if(H5FD_writer_end_of_tick() < 0)                                                       \
+                    HGOTO_ERROR(H5E_FUNC, H5E_CANTSET, err, "end of tick error for VFD SWMR writer")    \
+            }                                                                                           \
+            else if(!swmr_reader_exit) {                                                                \
+                if(H5FD_reader_end_of_tick() < 0)                                                       \
+                    HGOTO_ERROR(H5E_FUNC, H5E_CANTSET, err, "end of tick error for VFD SWMR reader")    \
+            }                                                                                           \
+        }                                                                                               \
+    }
+
 /* Use this macro for all "normal" API functions */
 #define FUNC_ENTER_API(err) {{                                                \
     FUNC_ENTER_API_COMMON                                                     \
     FUNC_ENTER_API_INIT(err);                                                 \
     /* Clear thread error stack entering public functions */                  \
     H5E_clear_stack(NULL);                                                    \
+    VFD_SWMR_TEST_FOR_END_OF_TICK(FALSE, err);                                \
     {
 
 /*
@@ -2298,6 +2327,7 @@ H5_DLL herr_t H5CX_pop(void);
     H5TRACE_RETURN(ret_value);
 
 #define FUNC_LEAVE_API(ret_value)                                             \
+    VFD_SWMR_TEST_FOR_END_OF_TICK(!vfd_swmr_writer_g, ret_value);               \
     FUNC_LEAVE_API_COMMON(ret_value);                                         \
     (void)H5CX_pop();                                                         \
     H5_POP_FUNC                                                               \

@@ -444,7 +444,7 @@ H5_DLL void H5AC_set_ring(H5AC_ring_t ring, H5AC_ring_t *orig_ring);
 H5_DLL herr_t H5AC_unsettle_entry_ring(void *entry);
 H5_DLL herr_t H5AC_unsettle_ring(H5F_t * f, H5AC_ring_t ring);
 H5_DLL herr_t H5AC_expunge_tag_type_metadata(H5F_t *f, haddr_t tag, int type_id,
-    unsigned flags);
+    unsigned flags, hbool_t type_match);
 H5_DLL herr_t H5AC_get_tag(const void *thing, /*OUT*/ haddr_t *tag);
 
 /* Virtual entry routines */

@@ -217,6 +217,19 @@ typedef struct H5F_retry_info_t {
 /* Callback for H5Pset_object_flush_cb() in a file access property list */
 typedef herr_t (*H5F_flush_cb_t)(hid_t object_id, void *udata);
 
+/* VFD SWMR configuration data used by H5Pset/get_vfd_swmr_config */
+#define H5F__CURR_VFD_SWMR_CONFIG_VERSION 1
+#define H5F__MAX_VFD_SWMR_FILE_NAME_LEN   1024
+typedef struct H5F_vfd_swmr_config_t {
+    int32_t     version;
+    int32_t     tick_len;
+    int32_t     max_lag;
+    hbool_t     vfd_swmr_writer;
+    hbool_t     flush_raw_data;
+    int32_t     md_pages_reserved;
+    char        md_file_path[H5F__MAX_VFD_SWMR_FILE_NAME_LEN + 1];
+    char        log_file_path[H5F__MAX_VFD_SWMR_FILE_NAME_LEN + 1];
+} H5F_vfd_swmr_config_t;
 
 #ifdef __cplusplus
 extern "C" {
@@ -273,6 +286,9 @@ H5_DLL herr_t H5Freset_page_buffering_stats(hid_t file_id);
 H5_DLL herr_t H5Fget_page_buffering_stats(hid_t file_id, unsigned accesses[2],
     unsigned hits[2], unsigned misses[2], unsigned evictions[2], unsigned bypasses[2]);
 H5_DLL herr_t H5Fget_mdc_image_info(hid_t file_id, haddr_t *image_addr, hsize_t *image_size);
+
+/* VFD SWMR */
+H5_DLL herr_t H5Fvfd_swmr_end_tick(hid_t file_id);
 
 #ifdef H5_HAVE_PARALLEL
 H5_DLL herr_t H5Fset_mpi_atomicity(hid_t file_id, hbool_t flag);

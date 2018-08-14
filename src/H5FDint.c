@@ -418,3 +418,111 @@ H5FD_driver_query(const H5FD_class_t *driver, unsigned long *flags/*out*/)
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_driver_query() */
 
+
+/*-------------------------------------------------------------------------
+* Function:    H5FD_writer_end_of_tick
+*
+* Purpose: 
+*
+* Return:  SUCCEED/FAIL
+*
+* Programmer:  
+*
+*-------------------------------------------------------------------------
+*/
+herr_t
+H5FD_writer_end_of_tick(void)
+{
+    herr_t ret_value = SUCCEED;          /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD_writer_end_of_tick() */
+
+
+/*-------------------------------------------------------------------------
+* Function:    H5FD_reader_end_of_tick
+*
+* Purpose: 
+*
+* Return:  SUCCEED/FAIL
+*
+* Programmer:  
+*
+*-------------------------------------------------------------------------
+*/
+herr_t
+H5FD_reader_end_of_tick(void)
+{
+    herr_t ret_value = SUCCEED;          /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD_reader_end_of_tick() */
+
+#ifdef OUT
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD_vfd_swmr_md_read
+ *
+ * Purpose: 	??
+ *
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
+ *
+ * Programmer:  
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FD_vfd_swmr_md_read(int md_fd, haddr_t addr, size_t size, const void *buf)
+{
+
+    HDlseek(fd, (HDoff_t)addr, SEEK_SET);
+    bytes_read = HDread(md_fd, buf, size);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5FD_vfd_swmr_read() */
+
+herr_t
+H5FD_vfd_swmr_hdr_deserialize(int md_fd, size_t len)
+{
+    uint8_t image[H5FD_MD_HEADER_SIZE];   /* Buffer for element data */
+    uint8_t *p = NULL;
+    uint32_t fs_page_size;
+    uint64_t tick_num;
+    uint64_t index_offset;
+    uint64_t index_length;
+    uint32_t stored_chksum;  /* Stored metadata checksum value */
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    p = &image[0];
+
+    HDlseek(md_fd, (HDoff_t)0, SEEK_SET);
+    HDread(md_fd, image, H5FD_MD_HEADER_SIZE);
+
+    /* Magic number */
+    if(HDmemcmp(p, H5FD_MD_HEADER_MAGIC, (size_t)H5_SIZEOF_MAGIC))
+        HGOTO_ERROR(H5E_VFL, H5E_CANTLOAD, NULL, "wrong metadata file header signature")
+    p += H5_SIZEOF_MAGIC;
+
+    UINT32DECODE(p, fs_page_size);
+    UINT64DECODE(p, tick_num);
+    UINT64DECODE(p, index_offset);
+    UINT64DECODE(p, index_length);
+
+    /* NEED to verify checksum/retry ?? */
+    /* Metadata checksum */
+    UINT32DECODE(p, stored_chksum);
+
+    /* Sanity check */
+    HDassert((size_t)(p - (const uint8_t *)&image[0]) <= len);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}  /* H5FD_vfd_swmr_hdr_deserialize() */
+#endif

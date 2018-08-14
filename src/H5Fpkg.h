@@ -353,6 +353,15 @@ struct H5F_file_t {
 
     /* Object flush info */
     H5F_object_flush_t 	object_flush;	    /* Information for object flush callback */
+
+    /* VFD SWMR configuration info */
+    H5F_vfd_swmr_config_t vfd_swmr_config;  /* Copy of the VFD SWMR configuration from the
+                                               FAPL used to open the file */
+    hbool_t vfd_swmr;                       /* The file is opened with VFD SWMR configured or not*/
+    hbool_t vfd_swmr_writer;                /* This is the VFD SWMR writer or not */
+    uint64_t tick_num;                      /* Number of the current tick */
+    struct timespec end_of_tick;            /* End time of the current tick */
+    int vfd_swmr_md_fd;                     /* POSIX: file descriptor of the metadata file */
 };
 
 /*

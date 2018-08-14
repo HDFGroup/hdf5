@@ -75,6 +75,7 @@ typedef struct {
     H5F_t *f;                           /* File pointer for evicting entry */
     int type_id;                        /* Cache entry type to expunge */
     unsigned flags;                     /* Flags for expunging entry */
+    hbool_t type_match;
 } H5C_tag_iter_ettm_ctx_t;
 
 /* Typedef for tagged entry iterator callback context - mark corked */
@@ -811,7 +812,7 @@ H5C__expunge_tag_type_metadata_cb(H5C_cache_entry_t *entry, void *_ctx)
     HDassert(ctx);
 
     /* Found one with the same tag and type id */
-    if(entry->type->id == ctx->type_id)
+    if(entry->type->id == ctx->type_id || !ctx->type_match)
         if(H5C_expunge_entry(ctx->f, entry->type, entry->addr, ctx->flags) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTEXPUNGE, H5_ITER_ERROR, "can't expunge entry")
 
@@ -835,7 +836,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t 
-H5C_expunge_tag_type_metadata(H5F_t *f, haddr_t tag, int type_id, unsigned flags)
+H5C_expunge_tag_type_metadata(H5F_t *f, haddr_t tag, int type_id, unsigned flags, hbool_t type_match)
 {
     H5C_t *cache;                       /* Pointer to cache structure */
     H5C_tag_iter_ettm_ctx_t ctx;        /* Context for iterator callback */
@@ -855,6 +856,7 @@ H5C_expunge_tag_type_metadata(H5F_t *f, haddr_t tag, int type_id, unsigned flags
     ctx.f = f;
     ctx.type_id = type_id;
     ctx.flags = flags;
+    ctx.type_match = type_match;
 
     /* Iterate through hash table entries, expunge those with specified tag and type id */
     if(H5C__iter_tagged_entries(cache, tag, FALSE, H5C__expunge_tag_type_metadata_cb, &ctx) < 0)

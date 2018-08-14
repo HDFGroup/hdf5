@@ -331,6 +331,7 @@ typedef struct H5F_t H5F_t;
 #define H5F_POINT_OF_NO_RETURN(F) ((F)->shared->fs.point_of_no_return)
 #define H5F_FIRST_ALLOC_DEALLOC(F) ((F)->shared->first_alloc_dealloc)
 #define H5F_EOA_PRE_FSM_FSALLOC(F) ((F)->shared->eoa_pre_fsm_fsalloc)
+#define H5F_USE_VFD_SWMR(F)  ((F)->shared->vfd_swmr)
 #else /* H5F_MODULE */
 #define H5F_LOW_BOUND(F)        (H5F_get_low_bound(F))
 #define H5F_HIGH_BOUND(F)       (H5F_get_high_bound(F))
@@ -388,6 +389,7 @@ typedef struct H5F_t H5F_t;
 #define H5F_POINT_OF_NO_RETURN(F) (H5F_get_point_of_no_return(F))
 #define H5F_FIRST_ALLOC_DEALLOC(F) (H5F_get_first_alloc_dealloc(F))
 #define H5F_EOA_PRE_FSM_FSALLOC(F) (H5F_get_eoa_pre_fsm_fsalloc(F))
+#define H5F_USE_VFD_SWMR(F)     (H5F_use_vfd_swmr(F))
 #endif /* H5F_MODULE */
 
 
@@ -508,6 +510,20 @@ typedef struct H5F_t H5F_t;
 #define H5F_ACS_PAGE_BUFFER_MIN_META_PERC_NAME  "page_buffer_min_meta_perc" /* the min metadata percentage for the page buffer cache */
 #define H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_NAME   "page_buffer_min_raw_perc" /* the min raw data percentage for the page buffer cache */
 
+/* Default configuration for VFD SWMR: not configured */
+#define H5F_ACS_VFD_SWMR_CONFIG_NAME    "vfd_swmr_config" /* VFD SWMR configuration */
+#define H5F__DEFAULT_VFD_SWMR_CONFIG                                                \
+{                                                                                   \
+  /* int32_t    version                 = */ 0,                                     \
+  /* int32_t    tick_len                = */ 0,                                     \
+  /* int32_t    max_lag                 = */ 0,                                     \
+  /* hbool_t    vfd_swmr_writer         = */ FALSE,                                 \
+  /* hbool_t    flush_raw_data          = */ FALSE,                                 \
+  /* int32_t    md_pages_reserved       = */ 0,                                     \
+  /* char       md_file_path[]          = */ "",                                    \
+  /* char       log_file_path[]         = */ ""                                     \
+}
+
 /* ======================== File Mount properties ====================*/
 #define H5F_MNT_SYM_LOCAL_NAME         "local"                 /* Whether absolute symlinks local to file. */
 
@@ -574,6 +590,9 @@ typedef struct H5F_t H5F_t;
 
 /* Check for file using paged aggregation */
 #define H5F_PAGED_AGGR(F) (F->shared->fs_strategy == H5F_FSPACE_STRATEGY_PAGE && F->shared->fs_page_size)
+
+/* Check for file configured with VFD SWMR */
+#define H5F_VFD_SWMR_CONFIG(F)  (F->shared->vfd_swmr_config.version >= H5F__CURR_VFD_SWMR_CONFIG_VERSION)
 
 /* Metadata read attempt values */
 #define H5F_METADATA_READ_ATTEMPTS        1    /* Default # of read attempts for non-SWMR access */
@@ -650,6 +669,8 @@ struct H5P_genplist_t;
 
 /* Main file structures */
 typedef struct H5F_file_t H5F_file_t;
+
+extern H5F_file_t *vfd_swmr_file_g;
 
 /* Block aggregation structure */
 typedef struct H5F_blk_aggr_t H5F_blk_aggr_t;
@@ -741,6 +762,7 @@ H5_DLL hsize_t H5F_get_pgend_meta_thres(const H5F_t *f);
 H5_DLL hbool_t H5F_get_point_of_no_return(const H5F_t *f);
 H5_DLL hbool_t H5F_get_first_alloc_dealloc(const H5F_t *f);
 H5_DLL haddr_t H5F_get_eoa_pre_fsm_fsalloc(const H5F_t *f);
+H5_DLL hbool_t H5F_use_vfd_swmr(const H5F_t *f);
 
 /* Functions than retrieve values set/cached from the superblock/FCPL */
 H5_DLL haddr_t H5F_get_base_addr(const H5F_t *f);

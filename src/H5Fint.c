@@ -79,6 +79,9 @@ static char *H5F__getenv_prefix_name(char **env_prefix/*in,out*/);
 static herr_t H5F_build_actual_name(const H5F_t *f, const H5P_genplist_t *fapl, const char *name, char ** /*out*/ actual_name);
 static herr_t H5F__flush_phase1(H5F_t *f);
 static herr_t H5F__flush_phase2(H5F_t *f, hbool_t closing);
+static herr_t H5F__init_vfd_swmr(H5F_t *f, hbool_t file_create);
+static herr_t H5F__init_vfd_swmr_info(H5F_t *f);
+static herr_t H5F__init_vfd_swmr_md(H5F_t *f, hbool_t file_create);
 
 
 /*********************/
@@ -184,6 +187,10 @@ H5F_get_access_plist(H5F_t *f, hbool_t app_ref)
         if(H5P_set(new_plist, H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_NAME, &(f->shared->page_buf->min_raw_perc)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set minimum raw data fraction of page buffer")
     } /* end if */
+
+    if(H5P_set(new_plist, H5F_ACS_VFD_SWMR_CONFIG_NAME, &(f->shared->vfd_swmr_config)) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set initial metadata cache resize config.")
+
 #ifdef H5_HAVE_PARALLEL
     if(H5P_set(new_plist, H5_COLL_MD_READ_FLAG_NAME, &(f->coll_md_read)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set collective metadata read flag")
@@ -1033,6 +1040,10 @@ H5F__new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_
         if(H5P_get(plist, H5F_ACS_OBJECT_FLUSH_CB_NAME, &(f->shared->object_flush)) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't get object flush cb info")
 
+        /* Get VFD SWMR configuration */
+        if(H5P_get(plist, H5F_ACS_VFD_SWMR_CONFIG_NAME, &(f->shared->vfd_swmr_config)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get VFD SWMR config info")
+
         /* Create a metadata cache with the specified number of elements.
          * The cache might be created with a different number of elements and
          * the access property list should be updated to reflect that.
@@ -1497,7 +1508,8 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     hbool_t             use_file_locking;   /*read from env var             */
     hbool_t             ci_load = FALSE;    /* whether MDC ci load requested */
     hbool_t             ci_write = FALSE;   /* whether MDC CI write requested */
-    H5F_t              *ret_value = NULL;   /*actual return value           */
+    hbool_t             file_create = FALSE;    /* creating a new file or not */
+    H5F_t              *ret_value = NULL;       /*actual return value           */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -1667,6 +1679,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't get minimum raw data fraction of page buffer")
     } /* end if */
 
+
     /*
      * Read or write the file superblock, depending on whether the file is
      * empty or not.
@@ -1693,6 +1706,9 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
          */
         if(H5G_mkroot(file, TRUE) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to create/open root group")
+
+        file_create = TRUE;
+
     } /* end if */
     else if (1 == shared->nrefs) {
         /* Read the superblock if it hasn't been read before. */
@@ -1707,7 +1723,18 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
         /* Open the root group */
         if(H5G_mkroot(file, FALSE) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to read root group")
+
     } /* end if */
+
+    if(H5F_VFD_SWMR_CONFIG(file)) {
+        /* Page buffering and page allocation strategy have to be enabled */
+        if(!page_buf_size || !H5F_PAGED_AGGR(file))
+            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "file open fail with VFD SWMR writer")
+        if(1 == shared->nrefs && H5F_INTENT(file) & H5F_ACC_RDWR) {
+            if(H5F__init_vfd_swmr(file, file_create) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTSET, NULL, "file open fail with initialization for VFD SWMR writer")
+        }
+    }
 
     /*
      * Decide the file close degree.  If it's the first time to open the
@@ -1812,9 +1839,15 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     ret_value = file;
 
 done:
-    if((NULL == ret_value) && file)
+    if((NULL == ret_value) && file) {
+        if(file->shared->root_grp && file->shared->nrefs == 1) {
+            if(H5AC_expunge_tag_type_metadata(file, H5G_oloc(file->shared->root_grp)->addr, H5AC_OHDR_ID, H5AC__NO_FLAGS_SET, FALSE) < 0)
+                HDONE_ERROR(H5E_FILE, H5E_CANTEXPUNGE, NULL, "unable to expunge root group tagged entries")
+        }
+
         if(H5F__dest(file, FALSE) < 0)
             HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, NULL, "problems closing file")
+    }
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_open() */
@@ -3685,3 +3718,173 @@ done:
     FUNC_LEAVE_NOAPI_VOL(ret_value)
 } /* H5F__format_convert() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F__init_vfd_swmr
+ *
+ * Purpose:     Intitialize info and the metadata file for VFD SWMR writer.
+ *
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5F__init_vfd_swmr(H5F_t *f, hbool_t file_create)
+{
+    herr_t ret_value = SUCCEED;     /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Initialize info */
+    if(H5F__init_vfd_swmr_info(f) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "error in initializing info for VFD SWMR writer")
+
+    /* Initialize the metadata file */
+    if(H5F__init_vfd_swmr_md(f, file_create) < 0)
+       HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "error in creating metadata file for VFD SWMR writer")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5F__init_vfd_swmr() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F__init_vfd_swmr_info
+ *
+ * Purpose:     Initialize globals and the corresponding fields in f 
+ *              for VFD SWMR writer:
+ *              --set vfd_swmr_g to TRUE
+ *              --set vfd_swmr_writer_g to TRUE
+ *              --set tick_num_g to 0
+ *              --set end_of_tick_g to the current time + tick length
+ *              --set vfd_swmr_file_g to f->shared
+ *
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5F__init_vfd_swmr_info(H5F_t *f)
+{
+    struct timespec tmp_end_of_tick;
+    herr_t ret_value = SUCCEED;     /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    HDassert(f->shared->vfd_swmr_config.vfd_swmr_writer);
+
+    vfd_swmr_g = f->shared->vfd_swmr = TRUE;
+    vfd_swmr_writer_g = f->shared->vfd_swmr_writer = TRUE;
+    tick_num_g = f->shared->tick_num = 0;
+
+    /* Get current time */
+    if(HDclock_gettime(CLOCK_MONOTONIC, &tmp_end_of_tick) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get time via clock_gettime")
+
+    /* Increment by tick length */
+    tmp_end_of_tick.tv_nsec += f->shared->vfd_swmr_config.tick_len * 100000000;
+    tmp_end_of_tick.tv_sec += tmp_end_of_tick.tv_nsec / 1000000000;
+    tmp_end_of_tick.tv_nsec = tmp_end_of_tick.tv_nsec % 1000000000;
+    HDmemcpy(&end_of_tick_g, &tmp_end_of_tick, sizeof(struct timespec));
+    HDmemcpy(&f->shared->end_of_tick, &tmp_end_of_tick, sizeof(struct timespec));
+
+    vfd_swmr_file_g = f->shared;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5F__init_vfd_swmr_info() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F__init_vfd_swmr_md
+ *
+ * Purpose:     Open the metadata file for VFD SMWR and allocate md_pages_reserved
+ *              in the file.  
+ *              If not creating a new file, write header and an empty index
+ *              to the file.
+ *
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5F__init_vfd_swmr_md(H5F_t *f, hbool_t file_create)
+{
+    uint8_t     image[H5FD_MD_HEADER_SIZE];                 /* Buffer for element data */
+    uint8_t     image_empty_idx[H5FD_MD_INDEX_SIZE(0)];  /* Buffer for element data */
+    uint8_t     *p = NULL;              /* Pointer to buffer */
+    uint32_t    metadata_chksum;        /* Computed metadata checksum value */
+    int         fd;                     /* File descriptor */
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Open the metadata file */
+    if((fd = HDopen(f->shared->vfd_swmr_config.md_file_path, O_CREAT|O_RDWR, H5_POSIX_CREATE_MODE_RW)) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to open metadata file")
+
+    /* Set the file to md_pages_reserved */
+    if(HDftruncate(fd, (HDoff_t)f->shared->vfd_swmr_config.md_pages_reserved * f->shared->fs_page_size) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_SEEKERROR, FAIL, "unable to extend file properly")
+
+    if(!file_create) {
+        /*
+         * Encode metadata file header
+         */
+        p = &image[0];
+
+        /* Magic for header */
+        HDmemcpy(p, H5FD_MD_HEADER_MAGIC, (size_t)H5_SIZEOF_MAGIC);
+        p += H5_SIZEOF_MAGIC;
+
+        UINT32ENCODE(p, f->shared->fs_page_size);
+        UINT64ENCODE(p, f->shared->tick_num);
+        UINT64ENCODE(p, H5FD_MD_HEADER_SIZE);
+        UINT64ENCODE(p, H5FD_MD_INDEX_SIZE(0));
+
+        metadata_chksum = H5_checksum_metadata((uint8_t *)p, (size_t)(p - &image[0]), 0);
+
+        /* Checksum for header */
+        UINT32ENCODE(p, metadata_chksum);
+
+        /* Sanity checks */
+        HDassert((size_t)(p - &image[0] == H5FD_MD_HEADER_SIZE));
+
+        /* Write header to the metadata file */
+        if(HDwrite(fd, &image[0], H5FD_MD_HEADER_SIZE) != H5FD_MD_HEADER_SIZE)
+            HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "error in writing header to metadata file")
+
+        /*
+         * Encode metadata file index
+         */
+        p = &image_empty_idx[0];
+
+        /* Magic for index */
+        HDmemcpy(p, H5FD_MD_INDEX_MAGIC, (size_t)H5_SIZEOF_MAGIC);
+        p += H5_SIZEOF_MAGIC;
+
+        UINT64ENCODE(p, f->shared->tick_num);
+
+        /* No entry in index */
+        UINT32ENCODE(p, 0);
+
+        metadata_chksum = H5_checksum_metadata((uint8_t *)p, (size_t)(p - &image_empty_idx[0]), 0);
+
+        /* Checksum for index */
+        UINT32ENCODE(p, metadata_chksum);
+
+        /* sanity checks */
+        HDassert((size_t)(p - &image_empty_idx[0] ==  H5FD_MD_INDEX_SIZE(0)));
+
+        /* Write index to the metadata file */
+        if(HDwrite(fd, &image_empty_idx[0],  H5FD_MD_INDEX_SIZE(0)) !=  H5FD_MD_INDEX_SIZE(0))
+             HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "error in writing index to metadata file")
+    }
+    f->shared->vfd_swmr_md_fd = fd;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5F__init_vfd_swmr_md() */

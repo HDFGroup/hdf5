@@ -1713,3 +1713,35 @@ H5Fincrement_filesize(hid_t file_id, hsize_t increment)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Fincrement_filesize() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Fvfd_swmr_end_tick()
+ *
+ * Purpose:     To allow user to trigger end of tick processing
+ *
+ * Return:      Non-negative on success/Negative on errors
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Fvfd_swmr_end_tick(hid_t file_id)
+{
+    H5F_t *file;                /* File object for file ID */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE1("e", "i", file_id);
+
+    /* Check args */
+    if(NULL == (file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "hid_t identifier is not a file ID")
+
+    /* This will work only if the file is opened with VFD SWMR configured.*/
+    if(!(H5F_USE_VFD_SWMR(file)))
+        HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "must have VFD SWMR configured for this public routine")
+
+    /* ??Trigger end of tick processing later */
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Fvfd_swmr_end_tick() */

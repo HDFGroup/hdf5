@@ -1215,3 +1215,26 @@ H5F_get_eoa_pre_fsm_fsalloc(const H5F_t *f)
     FUNC_LEAVE_NOAPI(f->shared->eoa_pre_fsm_fsalloc)
 } /* end H5F_get_eoa_pre_fsm_fsalloc() */
 
+
+/*-------------------------------------------------------------------------
+ * Function: H5F_use_vfd_swmr
+ *
+ * Purpose:  Quick and dirty routine to determine if VFD SWMR is
+ *           enabled for this file.
+ *           (Mainly added to stop non-file routines from poking about in the
+ *           H5F_t data structure)
+ *
+ * Return:   TRUE/FALSE on success/abort on failure (shouldn't fail)
+ *-------------------------------------------------------------------------
+ */
+hbool_t
+H5F_use_vfd_swmr(const H5F_t *f)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDassert(f);
+    HDassert(f->shared);
+
+    FUNC_LEAVE_NOAPI(f->shared->vfd_swmr)
+} /* end H5F_use_vfd_swmr() */
