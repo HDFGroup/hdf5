@@ -180,6 +180,16 @@ Bug Fixes since HDF5-1.10.2 release
 
     Library
     -------
+    - Test failure due to metadata size in test/vds.c
+
+      The size of metadata from test_api_get_ex_dcpl() in test/vds.c is not as expected
+      because the latest format should be used when encoding the layout for VDS.
+
+      Set the latest format in a temporary fapl and pass the setting to the routines that 
+      encode the dataset selection for VDS.
+
+      (VC - 2018/08/14 HDFFV-10469)
+
     - Java HDF5LibraryException class
 
       The error minor and major values would be lost after the
