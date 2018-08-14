@@ -1097,13 +1097,12 @@ static void test_operators()
         verify_val(flttyp == member_inttyp, false, "DataType::operator==", __LINE__, __FILE__);
         verify_val(flttyp != member_inttyp, true, "DataType::operator==", __LINE__, __FILE__);
 
-        // Get the NATIVE_LONG member from the compound datatype above
-        IntType member_longtyp = cmptyp.getMemberIntType(2);
+        // Get the NATIVE_FLOAT member from the compound datatype above
+        IntType member_flttyp = cmptyp.getMemberIntType(1);
 
         // Test various combinations
-        verify_val(inttyp == member_longtyp, false, "DataType::operator==", __LINE__, __FILE__);
-        verify_val(flttyp == member_longtyp, false, "DataType::operator==", __LINE__, __FILE__);
-        verify_val(flttyp != member_longtyp, true, "DataType::operator==", __LINE__, __FILE__);
+        verify_val(inttyp == member_flttyp, false, "DataType::operator==", __LINE__, __FILE__);
+        verify_val(flttyp != member_flttyp, false, "DataType::operator==", __LINE__, __FILE__);
 
         PASSED();
     }

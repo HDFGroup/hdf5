@@ -39,6 +39,7 @@ CONTENTS
 - Tested Configuration Features Summary
 - More Tested Platforms
 - Known Problems
+- CMake vs. Autotools installations
 
 
 New Features
@@ -46,6 +47,22 @@ New Features
 
     Configuration:
     -------------
+    - Added configuration checks for the following MPI functions:
+
+      MPI_Mprobe - Used for the Parallel Compression feature
+      MPI_Imrecv - Used for the Parallel Compression feature
+
+      MPI_Get_elements_x - Used for the "big Parallel I/O" feature
+      MPI_Type_size_x - Used for the "big Parallel I/O" feature
+
+      (JTH - 2018/08/02, HDFFV-10512)
+
+    - Added section to the libhdf5.settings file to indicate
+      the status of the Parallel Compression and "big Parallel I/O"
+      features.
+
+      (JTH - 2018/08/02, HDFFV-10512)
+
     - Add option to execute swmr shell scripts from CMake.
 
       Option TEST_SHELL_SCRIPTS redirects processing into a
@@ -69,10 +86,62 @@ New Features
 
     C++ Library:
     ------------
-    -
+    - New wrappers
+
+      Added the following items:
+
+      + Class DSetAccPropList for the dataset access property list.
+
+      + Wrapper for H5Dget_access_plist to class DataSet
+        // Gets the access property list of this dataset.
+        DSetAccPropList getAccessPlist() const;
+
+      + Wrappers for H5Pset_chunk_cache and H5Pget_chunk_cache to class DSetAccPropList
+        // Sets the raw data chunk cache parameters.
+        void setChunkCache(size_t rdcc_nslots, size_t rdcc_nbytes, double rdcc_w0)
+
+        // Retrieves the raw data chunk cache parameters.
+        void getChunkCache(size_t &rdcc_nslots, size_t &rdcc_nbytes, double &rdcc_w0)
+
+      + New operator!= to class DataType (HDFFV-10472)
+        // Determines whether two datatypes are not the same.
+        bool operator!=(const DataType& compared_type)
+
+      + Wrappers for H5Oget_info2, H5Oget_info_by_name2, and H5Oget_info_by_idx2
+        (HDFFV-10458)
+
+        // Retrieves information about an HDF5 object.
+        void getObjinfo(H5O_info_t& objinfo, unsigned fields = H5O_INFO_BASIC) const;
+
+        // Retrieves information about an HDF5 object, given its name.
+        void getObjinfo(const char* name, H5O_info_t& objinfo,
+                unsigned fields = H5O_INFO_BASIC,
+                const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
+        void getObjinfo(const H5std_string& name, H5O_info_t& objinfo,
+                unsigned fields = H5O_INFO_BASIC,
+                const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
+
+        // Retrieves information about an HDF5 object, given its index.
+        void getObjinfo(const char* grp_name, H5_index_t idx_type,
+                H5_iter_order_t order, hsize_t idx, H5O_info_t& objinfo,
+                unsigned fields = H5O_INFO_BASIC,
+                const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
+        void getObjinfo(const H5std_string& grp_name, H5_index_t idx_type,
+                H5_iter_order_t order, hsize_t idx, H5O_info_t& objinfo,
+                unsigned fields = H5O_INFO_BASIC,
+                const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
+
+      (BMR - 2018/07/22, HDFFV-10150, HDFFV-10458, HDFFV-1047)
+
 
     Java Library:
     ----------------
+    - Java HDFLibraryException class
+
+      Change parent class from Exception to RuntimeException.
+
+      (ADB - 2018/07/30, HDFFV10534)
+
     - JNI Read and Write
 
       Refactored variable-length functions, H5DreadVL and H5AreadVL,
@@ -110,15 +179,80 @@ Bug Fixes since HDF5-1.10.2 release
 
     Library
     -------
+    - Java HDF5LibraryException class
+
+      The error minor and major values would be lost after the
+      constructor executed.
+
+      Created two local class variables to hold the values obtained during
+      execution of the constructor. Refactored the class functions to retrieve
+      the class values rather then calling the native functions.
+      The native functions were renamed and called only during execution
+      of the constructor.
+      Added error checking to calling class constructors in JNI classes.
+
+      (ADB - 2018/08/06, HDFFV-10544)
+
+    - Added checks of the defined MPI_VERSION to guard against usage of
+      MPI-3 functions in the Parallel Compression and "big Parallel I/O"
+      features when HDF5 is built with MPI-2. Previously, the configure
+      step would pass but the build itself would fail when it could not
+      locate the MPI-3 functions used.
+
+      As a result of these new checks, HDF5 can again be built with MPI-2,
+      but the Parallel Compression feature will be disabled as it relies
+      on the MPI-3 functions used.
+
+      (JTH - 2018/08/02, HDFFV-10512)
+
     - H5Adelete
 
       H5Adelete failed when deleting the last "large" attribute that
       is stored densely via fractal heap/v2 b-tree.
-      
+
       After removing the attribute, update the ainfo message.  If the
       number of attributes goes to zero, remove the message.
 
       (VC - 2018/07/20, HDFFV-9277)
+
+    - A bug was discovered in the parallel library which caused partial
+      parallel reads of filtered datasets to return incorrect data. The
+      library used the incorrect dataspace for each chunk read, causing
+      the selection used in each chunk to be wrong.
+
+      The bug was not caught during testing because all of the current
+      tests which do parallel reads of filtered data read all of the data
+      using an H5S_ALL selection. Several tests were added which exercise
+      partial parallel reads.
+
+      (JTH - 2018/07/16, HDFFV-10467)
+
+    - A bug was discovered in the parallel library which caused parallel
+      writes of filtered datasets to trigger an assertion failure in the
+      file free space manager.
+
+      This occurred when the filter used caused chunks to repeatedly shrink
+      and grow over the course of several dataset writes. The previous chunk
+      information, such as the size of the chunk and the offset in the file,
+      was being cached and not updated after each write, causing the next write
+      to the chunk to retrieve the incorrect cached information and run into
+      issues when reallocating space in the file for the chunk.
+
+      (JTH - 2018/07/16, HDFFV-10509)
+
+    - A bug was discovered in the parallel library which caused the
+      H5D__mpio_array_gatherv() function to allocate too much memory.
+
+      When the function is called with the 'allgather' parameter set
+      to a non-true value, the function will receive data from all MPI
+      ranks and gather it to the single rank specied by the 'root'
+      parameter. However, the bug in the function caused memory for
+      the received data to be allocated on all MPI ranks, not just the
+      singular rank specified as the receiver. In some circumstances,
+      this would cause an application to fail due to the large amounts
+      of memory being allocated.
+
+      (JTH - 2018/07/16, HDFFV-10467)
 
     - Error checks in h5stat and when decoding messages
 
@@ -151,41 +285,18 @@ Bug Fixes since HDF5-1.10.2 release
 
       (DER - 2018/02/26, HDFFV-10356)
 
-
     Configuration
     -------------
-    - Moved the location of gcc attribute.
+    - Applied patches to address Cywin build issues
 
-      The gcc attribute(no_sanitize), named as the macro HDF_NO_UBSAN,
-      was located after the function name. Builds with GCC 7 did not
-      indicate any problem, but GCC 8 issued errors. Moved the
-      attribute before the function name, as required.
+      There were three issues for Cygwin builds:
+      - Shared libs were not built.
+      - The -std=c99 flag caused a SIG_SETMASK undeclared error.
+      - Undefined errors when buildbing test shared libraries.
 
-      (ADB 2018/05/22, HDFFV-10473)
+      Patches to address these issues were received and incorporated in this version.
 
-    - Reworked java test suite into individual JUnit tests.
-
-      Testing the whole suite of java unit tests in a single JUnit run
-      made it difficult to determine actual failures when tests would fail.
-      Running each file set of tests individually, allows individual failures
-      to be diagnosed easier. A side benefit is that tests for optional components
-      of the library can be disabled if not configured.
-
-      (ADB 2018/05/16, HDFFV-9739)
-
-    - Converted CMake global commands ADD_DEFINITIONS and INCLUDE_DIRECTORIES
-      to use target_* type commands. This change modernizes the CMake usage
-      in the HDF5 library.
-
-      In addition, there is the intention to convert to generator expressions,
-      where possible. The exception is Fortran FLAGS on Windows Visual Studio.
-      The HDF macros TARGET_C_PROPERTIES and TARGET_FORTRAN_PROPERTIES have
-      been removed with this change in usage.
-
-      The additional language (C++ and Fortran) checks have also been localized
-      to only be checked when that language is enabled.
-
-      (ADB 2018/05/08)
+      (LRK - 2018/07/18, HDFFV-10475)
 
     - The --enable-debug/production configure flags are listed as 'deprecated'
       when they should really be listed as 'removed'.
@@ -199,6 +310,39 @@ Bug Fixes since HDF5-1.10.2 release
       The --enable-debug/production flags are now listed as removed.
 
       (DER - 2018/05/31, HDFFV-10505)
+
+    - Moved the location of gcc attribute.
+
+      The gcc attribute(no_sanitize), named as the macro HDF_NO_UBSAN,
+      was located after the function name. Builds with GCC 7 did not
+      indicate any problem, but GCC 8 issued errors. Moved the
+      attribute before the function name, as required.
+
+      (ADB - 2018/05/22, HDFFV-10473)
+
+    - Reworked java test suite into individual JUnit tests.
+
+      Testing the whole suite of java unit tests in a single JUnit run
+      made it difficult to determine actual failures when tests would fail.
+      Running each file set of tests individually, allows individual failures
+      to be diagnosed easier. A side benefit is that tests for optional components
+      of the library can be disabled if not configured.
+
+      (ADB - 2018/05/16, HDFFV-9739)
+
+    - Converted CMake global commands ADD_DEFINITIONS and INCLUDE_DIRECTORIES
+      to use target_* type commands. This change modernizes the CMake usage
+      in the HDF5 library.
+
+      In addition, there is the intention to convert to generator expressions,
+      where possible. The exception is Fortran FLAGS on Windows Visual Studio.
+      The HDF macros TARGET_C_PROPERTIES and TARGET_FORTRAN_PROPERTIES have
+      been removed with this change in usage.
+
+      The additional language (C++ and Fortran) checks have also been localized
+      to only be checked when that language is enabled.
+
+      (ADB - 2018/05/08)
 
     Performance
     -------------
@@ -230,7 +374,24 @@ Bug Fixes since HDF5-1.10.2 release
 
     C++ APIs
     --------
-    -
+    - Adding default arguments to existing functions
+
+      Added the following items:
+      + Two more property list arguments are added to H5Location::createDataSet:
+        const DSetAccPropList& dapl = DSetAccPropList::DEFAULT
+        const LinkCreatPropList& lcpl = LinkCreatPropList::DEFAULT
+
+      + One more property list argument is added to H5Location::openDataSet:
+        const DSetAccPropList& dapl = DSetAccPropList::DEFAULT
+
+      (BMR - 2018/07/21, PR# 1146)
+
+    - Improvement C++ documentation
+
+      Replaced the table in main page of the C++ documentation from mht to htm format
+      for portability.
+
+      (BMR - 2018/07/17, PR# 1141)
 
     Testing
     -------
@@ -407,4 +568,39 @@ Known Problems
     Known problems in previous releases can be found in the HISTORY*.txt files
     in the HDF5 source. Please report any new problems found to
     help@hdfgroup.org.
+
+
+CMake vs. Autotools installations
+=================================
+While both build systems produce similar results, there are differences.
+Each system produces the same set of folders on linux (only CMake works
+on standard Windows); bin, include, lib and share. Autotools places the
+COPYING and RELEASE.txt file in the root folder, CMake places them in
+the share folder.
+
+The bin folder contains the tools and the build scripts. Additionally, CMake
+creates dynamic versions of the tools with the suffix "-shared". Autotools
+installs one set of tools depending on the "--enable-shared" configuration
+option.
+  build scripts
+  -------------
+  Autotools: h5c++, h5cc, h5fc
+  CMake: h5c++, h5cc, h5hlc++, h5hlcc
+
+The include folder holds the header files and the fortran mod files. CMake
+places the fortran mod files into separate shared and static subfolders,
+while Autotools places one set of mod files into the include folder. Because
+CMake produces a tools library, the header files for tools will appear in
+the include folder.
+
+The lib folder contains the library files, and CMake adds the pkgconfig
+subfolder with the hdf5*.pc files used by the bin/build scripts created by
+the CMake build. CMake separates the C interface code from the fortran code by
+creating C-stub libraries for each Fortran library. In addition, only CMake
+installs the tools library. The names of the szip libraries are different
+between the build systems.
+
+The share folder will have the most differences because CMake builds include
+a number of CMake specific files for support of CMake's find_package and support
+for the HDF5 Examples CMake project.
 
