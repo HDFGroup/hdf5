@@ -1772,6 +1772,11 @@ HDfprintf(stderr, "%s: Entering\n", FUNC);
         fs = f->shared->freedspace_head;
         if(fs) {
             while(fs) {
+                H5MF_freedspace_t *next;        /* Next freedspace entry */
+
+                /* Get pointer to next freedspace entry, before destroying current one */
+                next = fs->next;
+
                 /* Release space in file now */
                 if(H5MF__xfree_real(f, fs->alloc_type, fs->addr, fs->size) < 0)
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "unable to free data")
@@ -1781,7 +1786,7 @@ HDfprintf(stderr, "%s: Entering\n", FUNC);
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "can't destroy freedspace")
 
                 /* Advance to next node */
-                fs = fs->next;
+                fs = next;
             } /* end while */
 
             /* Reset head & tail pointers */
