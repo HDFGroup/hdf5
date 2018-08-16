@@ -46,7 +46,6 @@ New Features
 
     Library
     -------
-
     - Moved the H5DOread/write_chunk() API calls to H5Dread/write_chunk()
 
       The functionality of the direct chunk I/O calls in the high-level
@@ -172,12 +171,40 @@ New Features
       (ADB - 2018/06/02, HDFFV-10519)
 
 
-
 Bug Fixes since HDF5-1.10.2 release
 ==================================
 
     Library
     -------
+    - Performance issue with H5Oget_info
+
+      H5Oget_info family of routines retrieves information for an object such
+      as object type, access time, number of attributes, and storage space etc.
+      Retrieving all such information regardless is an overkill and causes 
+      performance issue when doing so for many objects.
+
+      Add an additional parameter "fields" to the the H5Oget_info family of routines
+      indicating the type of information to be retrieved.  The same is done to
+      the H5Ovisit family of routines which recursively visits an object 
+      returning object information in a callback function.  Both sets of routines
+      are versioned and the corresponding compatibility macros are added.
+
+      The version 2 names of the two sets of routines are:
+        (1) H5Oget_info2, H5Oget_info_by_idx2, H5Oget_info_by_name2
+        (2) H5Ovisit2, H5Ovisit_by_name2
+
+      (VC - 2018/08/15, HDFFV-10180)
+
+    - Test failure due to metadata size in test/vds.c
+
+      The size of metadata from test_api_get_ex_dcpl() in test/vds.c is not as expected
+      because the latest format should be used when encoding the layout for VDS.
+
+      Set the latest format in a temporary fapl and pass the setting to the routines that 
+      encode the dataset selection for VDS.
+
+      (VC - 2018/08/14 HDFFV-10469)
+
     - Java HDF5LibraryException class
 
       The error minor and major values would be lost after the
