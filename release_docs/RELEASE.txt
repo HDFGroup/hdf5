@@ -52,13 +52,29 @@ New Features
       The functionality of the direct chunk I/O calls in the high-level
       library has been moved to the H5D package in the main library. This
       will allow using those functions without building the high-level
-      library. New code should use the H5D functions instead of the H5DO
-      versions.
+      library. The parameters and functionality of the H5D calls are
+      identical to the H5DO calls.
 
       The original H5DO high-level API calls have been retained, though
       they are now just wrappers for the H5D calls. They are marked as
       deprecated and are only available when the library is built with
-      deprecated functions.
+      deprecated functions. New code should use the H5D calls for this
+      reason.
+
+      As a part of this work, the following symbols from H5Dpublic.h are no
+      longer used:
+
+        H5D_XFER_DIRECT_CHUNK_WRITE_FLAG_NAME
+        H5D_XFER_DIRECT_CHUNK_WRITE_FILTERS_NAME
+        H5D_XFER_DIRECT_CHUNK_WRITE_OFFSET_NAME
+        H5D_XFER_DIRECT_CHUNK_WRITE_DATASIZE_NAME
+        H5D_XFER_DIRECT_CHUNK_READ_FLAG_NAME
+        H5D_XFER_DIRECT_CHUNK_READ_OFFSET_NAME
+        H5D_XFER_DIRECT_CHUNK_READ_FILTERS_NAME
+
+      And properties with these names are no longer stored in the dataset
+      transfer property lists. The symbols are still defined in H5Dpublic.h,
+      but only when the library is built with deprecated symbols.
 
       (DER - 2018/05/04)
 
