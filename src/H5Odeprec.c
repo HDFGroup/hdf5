@@ -332,5 +332,5 @@ done:
 
 /* Future function prototypes to be deprecated in next major version
  * see HDFFV-10552
-#endif /* H5_NO_DEPRECATED_SYMBOLS */
+#endif (* H5_NO_DEPRECATED_SYMBOLS *)
  */
