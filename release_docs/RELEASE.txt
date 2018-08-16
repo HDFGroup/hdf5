@@ -44,6 +44,24 @@ CONTENTS
 New Features
 ============
 
+    Library
+    -------
+
+    - Moved the H5DOread/write_chunk() API calls to H5Dread/write_chunk()
+
+      The functionality of the direct chunk I/O calls in the high-level
+      library has been moved to the H5D package in the main library. This
+      will allow using those functions without building the high-level
+      library. New code should use the H5D functions instead of the H5DO
+      versions.
+
+      The original H5DO high-level API calls have been retained, though
+      they are now just wrappers for the H5D calls. They are marked as
+      deprecated and are only available when the library is built with
+      deprecated functions.
+
+      (DER - 2018/05/04)
+
     Configuration:
     -------------
     - Added configuration checks for the following MPI functions:
