@@ -71,7 +71,8 @@
 /*******************/
 
 
-/* Future function prototypes to be deprecated in next version
+/* Future function prototypes to be deprecated in next major version
+ * see HDFFV-10552
 #ifndef H5_NO_DEPRECATED_SYMBOLS
  */
 
@@ -329,6 +330,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Ovisit_by_name1() */
 
-/* Future function prototypes to be deprecated in next version
+/* Future function prototypes to be deprecated in next major version
+ * see HDFFV-10552
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
  */
