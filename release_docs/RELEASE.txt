@@ -187,11 +187,21 @@ Bug Fixes since HDF5-1.10.2 release
       Retrieving all such information regardless is an overkill and causes 
       performance issue when doing so for many objects.
 
-      Add an additional parameter to the the H5Oget_info family of routines
-      indicating the type of information to be retrieved.  The same is done
-      to the H5Ovisit family of routines which recursively visits an object 
+      Add an additional parameter "fields" to the the H5Oget_info family of routines
+      indicating the type of information to be retrieved.  The same is done to
+      the H5Ovisit family of routines which recursively visits an object 
       returning object information in a callback function.  Both sets of routines
       are versioned and the corresponding compatibility macros are added.
+
+      The two sets of routines are:
+        (1) H5Oget_info2, H5Oget_info_by_idx2, H5Oget_info_by_name2
+        (2) H5Ovisit2, H5Ovisit_by_name2
+
+      Existing applications that use the H5Oget_info family of routines should either
+      (a) add the new parameter "fields" or (b) add version 1 to the
+      H5Oget_info calls.  For example:
+        (a) H5Oget_info(object_id, object_info, fields)
+        (b) H5Oget_info1(object_id, object_info) 
 
       (VC - 2018/08/15, HDFFV-10180)
 
