@@ -46,7 +46,6 @@ New Features
 
     Library
     -------
-
     - Moved the H5DOread/write_chunk() API calls to H5Dread/write_chunk()
 
       The functionality of the direct chunk I/O calls in the high-level
@@ -170,7 +169,6 @@ New Features
       H5DwriteVL and H5AwriteVL, are under construction.
 
       (ADB - 2018/06/02, HDFFV-10519)
-
 
 
 Bug Fixes since HDF5-1.10.2 release
