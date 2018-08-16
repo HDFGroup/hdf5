@@ -180,6 +180,21 @@ Bug Fixes since HDF5-1.10.2 release
 
     Library
     -------
+    - Performance issue with H5Oget_info
+
+      H5Oget_info family of routines retrieves information for an object such
+      as object type, access time, number of attributes, and storage space etc.
+      Retrieving all such information regardless is an overkill and causes 
+      performance issue when doing so for many objects.
+
+      Add an additional parameter to the the H5Oget_info family of routines
+      indicating the type of information to be retrieved.  The same is done
+      to the H5Ovisit family of routines which recursively visits an object 
+      returning object information in a callback function.  Both sets of routines
+      are versioned and the corresponding compatibility macros are added.
+
+      (VC - 2018/08/15, HDFFV-10180)
+
     - Test failure due to metadata size in test/vds.c
 
       The size of metadata from test_api_get_ex_dcpl() in test/vds.c is not as expected
