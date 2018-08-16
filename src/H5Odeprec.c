@@ -13,7 +13,7 @@
 
 /*-------------------------------------------------------------------------
  *
- * Purpose:	Deprecated functions from the H5O interface.  These
+ * Purpose:    Deprecated functions from the H5O interface.  These
  *              functions are here for compatibility purposes and may be
  *              removed in the future.  Applications should switch to the
  *              newer APIs.
@@ -71,9 +71,11 @@
 /*******************/
 
 
+/* Future function prototypes to be deprecated in next major version
+ * see HDFFV-10552
 #ifndef H5_NO_DEPRECATED_SYMBOLS
+ */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Oget_info1
  *
@@ -107,7 +109,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Oget_info1() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Oget_info_by_name1
  *
@@ -147,7 +149,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Oget_info_by_name1() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Oget_info_by_idx1
  *
@@ -205,9 +207,9 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Oget_info_by_idx1() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5Ovisit1
+ * Function:    H5Ovisit1
  *
  * Purpose:     Recursively visit an object and all the objects reachable
  *              from it.  If the starting object is a group, all the objects
@@ -226,14 +228,14 @@ done:
  *              the callback about the object.
  *
  * Return:      Success:    The return value of the first operator that
- *				returns non-zero, or zero if all members were
- *				processed with no operator returning non-zero.
+ *                returns non-zero, or zero if all members were
+ *                processed with no operator returning non-zero.
  *
  *              Failure:    Negative if something goes wrong within the
- *				library, or the negative value returned by one
- *				of the operators.
+ *                library, or the negative value returned by one
+ *                of the operators.
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              November 25 2007
  *
  *-------------------------------------------------------------------------
@@ -263,7 +265,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Ovisit1() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Ovisit_by_name1
  *
@@ -284,14 +286,14 @@ done:
  *              the callback about the object.
  *
  * Return:      Success:    The return value of the first operator that
- *				returns non-zero, or zero if all members were
- *				processed with no operator returning non-zero.
+ *                returns non-zero, or zero if all members were
+ *                processed with no operator returning non-zero.
  *
  *              Failure:    Negative if something goes wrong within the
- *				library, or the negative value returned by one
- *				of the operators.
+ *                library, or the negative value returned by one
+ *                of the operators.
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              November 24 2007
  *
  *-------------------------------------------------------------------------
@@ -328,5 +330,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Ovisit_by_name1() */
 
+/* Future function prototypes to be deprecated in next major version
+ * see HDFFV-10552
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
-
+ */
