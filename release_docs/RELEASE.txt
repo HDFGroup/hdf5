@@ -140,7 +140,7 @@ New Features
 
       Change parent class from Exception to RuntimeException.
 
-      (ADB - 2018/07/30, HDFFV10534)
+      (ADB - 2018/07/30, HDFFV-10534)
 
     - JNI Read and Write
 
@@ -148,7 +148,7 @@ New Features
       to correct dataset and attribute reads. New write functions,
       H5DwriteVL and H5AwriteVL, are under construction.
 
-      (ADB - 2018/06/02, HDFFV10519)
+      (ADB - 2018/06/02, HDFFV-10519)
 
     Tools:
     ------
