@@ -47,6 +47,16 @@ New Features
 
     Configuration:
     -------------
+    - Add missing USE_110_API_DEFAULT option.
+
+      Option USE_110_API_DEFAULT sets the default version of
+      versioned APIs. The bin/makevers perl script did not set
+      the maxidx variable correctly when the 1.10 branch was
+      created. This caused the versioning process to always use
+      the latest version of any API.
+
+      (ADB - 2018/08/17, HDFFV-10552)
+
     - Added configuration checks for the following MPI functions:
 
       MPI_Mprobe - Used for the Parallel Compression feature
