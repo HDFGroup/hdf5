@@ -30714,6 +30714,9 @@ elif test "X$withval" = "Xv110"; then
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: v110" >&5
 $as_echo "v110" >&6; }
     DEFAULT_API_VERSION=v110
+
+$as_echo "#define USE_110_API_DEFAULT 1" >>confdefs.h
+
 else
     as_fn_error $? "invalid version of public symbols given" "$LINENO" 5
 fi

@@ -443,9 +443,14 @@ endif ()
 #-----------------------------------------------------------------------------
 option (HDF5_ENABLE_COVERAGE "Enable code coverage for Libraries and Programs" OFF)
 if (HDF5_ENABLE_COVERAGE)
-  set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O0 -fprofile-arcs -ftest-coverage")
-  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0 -fprofile-arcs -ftest-coverage")
-  set (LDFLAGS "${LDFLAGS} -fprofile-arcs -ftest-coverage")
+  set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O0 --coverage -fprofile-arcs -ftest-coverage")
+  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g --coverage -O0 -fprofile-arcs -ftest-coverage")
+  if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
+    set (LDFLAGS "${LDFLAGS} -fprofile-arcs -ftest-coverage")
+    link_libraries (gcov)
+  else ()
+    set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --coverage")
+  endif ()
 endif ()
 
 #-----------------------------------------------------------------------------
@@ -612,6 +617,16 @@ set (H5_USE_18_API_DEFAULT 0)
 if (HDF5_USE_18_API_DEFAULT)
   set (H5_USE_18_API_DEFAULT 1)
   set (DEFAULT_API_VERSION "v18")
+endif ()
+
+#-----------------------------------------------------------------------------
+# Option to use 1.10.x API
+#-----------------------------------------------------------------------------
+option (HDF5_USE_110_API_DEFAULT "Use the HDF5 1.10.x API by default" ON)
+set (H5_USE_110_API_DEFAULT 0)
+if (HDF5_USE_110_API_DEFAULT)
+  set (H5_USE_110_API_DEFAULT 1)
+  set (DEFAULT_API_VERSION "v110")
 endif ()
 
 #-----------------------------------------------------------------------------
