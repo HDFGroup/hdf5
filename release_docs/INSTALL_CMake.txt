@@ -12,6 +12,7 @@ Section IV:   Further considerations
 Section V:    Options for building HDF5 Libraries with CMake command line
 Section VI:   CMake option defaults for HDF5
 Section VII:  User Defined Options for HDF5 Libraries with CMake
+Section VIII: User Defined Compile Flags for HDF5 Libraries with CMake
 
 ************************************************************************
 
@@ -662,6 +663,30 @@ users for linking libraries to the static CRT - Windows_MT.cmake.
 Copy the contents of the file, both macro and option, into the
 UserMacros.cmake file. Then enable the option to the CMake configuration,
 build and test process.
+
+
+========================================================================
+VIII. User Defined Compile Flags for HDF5 Libraries with CMake
+========================================================================
+
+Custom compiler flags can be added by defining the CMAKE_C_FLAGS and
+CMAKE_CXX_FLAGS variables.
+Using a cmake script:
+    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2")
+Defined on the configure line:
+    cmake -G "Visual Studio 12 2013" -DCMAKE_C_FLAGS:STRING=-O2 ..
+
+Debug symbols are enabled with configuration selections Debug or RelWithDebInfo.
+The difference between Debug and RelWithDebInfo configurations is that
+RelWithDebInfo optimizes the code similar to Release. It produces fully optimized
+code, but also creates the symbol table and the debug metadata to give the
+debugger input to map the execution back to the original code.
+RelwithDebInfo configuration should not affect the performance when the code
+is run without a debugger attached.
+
+The HDF5_ENABLE_COVERAGE option will add "-g -O0 -fprofile-arcs -ftest-coverage"
+to CMAKE_C_FLAGS.
+
 
 ========================================================================
 For further assistance, send email to help@hdfgroup.org
