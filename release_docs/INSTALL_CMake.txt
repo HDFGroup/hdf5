@@ -618,6 +618,7 @@ HDF_TEST_EXPRESS               "Control testing framework (0-3)"                
 HDF5_TEST_VFD                  "Execute tests with different VFDs"                            OFF
 HDF5_USE_16_API_DEFAULT        "Use the HDF5 1.6.x API by default"                            OFF
 HDF5_USE_18_API_DEFAULT        "Use the HDF5 1.8.x API by default"                            OFF
+HDF5_USE_110_API_DEFAULT       "Use the HDF5 1.10.x API by default"                           ON
 HDF5_USE_FOLDERS               "Enable folder grouping of projects in IDEs."                  ON
 HDF5_WANT_DATA_ACCURACY        "IF data accuracy is guaranteed during data conversions"       ON
 HDF5_WANT_DCONV_EXCEPTION      "exception handling functions is checked during data conversions" ON
