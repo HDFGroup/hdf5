@@ -45,6 +45,40 @@ CONTENTS
 New Features
 ============
 
+    Library
+    -------
+
+    - Moved the H5DOread/write_chunk() API calls to H5Dread/write_chunk()
+
+      The functionality of the direct chunk I/O calls in the high-level
+      library has been moved to the H5D package in the main library. This
+      will allow using those functions without building the high-level
+      library. The parameters and functionality of the H5D calls are
+      identical to the H5DO calls.
+
+      The original H5DO high-level API calls have been retained, though
+      they are now just wrappers for the H5D calls. They are marked as
+      deprecated and are only available when the library is built with
+      deprecated functions. New code should use the H5D calls for this
+      reason.
+
+      As a part of this work, the following symbols from H5Dpublic.h are no
+      longer used:
+
+        H5D_XFER_DIRECT_CHUNK_WRITE_FLAG_NAME
+        H5D_XFER_DIRECT_CHUNK_WRITE_FILTERS_NAME
+        H5D_XFER_DIRECT_CHUNK_WRITE_OFFSET_NAME
+        H5D_XFER_DIRECT_CHUNK_WRITE_DATASIZE_NAME
+        H5D_XFER_DIRECT_CHUNK_READ_FLAG_NAME
+        H5D_XFER_DIRECT_CHUNK_READ_OFFSET_NAME
+        H5D_XFER_DIRECT_CHUNK_READ_FILTERS_NAME
+
+      And properties with these names are no longer stored in the dataset
+      transfer property lists. The symbols are still defined in H5Dpublic.h,
+      but only when the library is built with deprecated symbols.
+
+      (DER - 2018/05/04)
+
     Configuration:
     -------------
     - Added configuration checks for the following MPI functions:
@@ -235,6 +269,39 @@ Bug Fixes since HDF5-1.10.2 release
 
       (JTH - 2018/08/02, HDFFV-10512)
 
+    - User's patches: CVEs
+
+      The following patches have been applied:
+
+      CVE-2018-11202 - NULL pointer dereference was discovered in
+                       H5S_hyper_make_spans in H5Shyper.c (HDFFV-10476)
+        https://security-tracker.debian.org/tracker/CVE-2018-11202
+        https://cve.mitre.org/cgi-bin/cvename.cgi?name=3DCVE-2018-11202
+
+      CVE-2018-11203 - A division by zero was discovered in
+                       H5D__btree_decode_key in H5Dbtree.c (HDFFV-10477)
+        https://security-tracker.debian.org/tracker/CVE-2018-11203
+        https://cve.mitre.org/cgi-bin/cvename.cgi?name=3DCVE-2018-11203
+
+      CVE-2018-11204 - A NULL pointer dereference was discovered in
+                       H5O__chunk_deserialize in H5Ocache.c (HDFFV-10478)
+        https://security-tracker.debian.org/tracker/CVE-2018-11204
+        https://cve.mitre.org/cgi-bin/cvename.cgi?name=3DCVE-2018-11204
+
+      CVE-2018-11206 - An out of bound read was discovered in
+                       H5O_fill_new_decode and H5O_fill_old_decode in H5Ofill.c
+                       (HDFFV-10480)
+        https://security-tracker.debian.org/tracker/CVE-2018-11206
+        https://cve.mitre.org/cgi-bin/cvename.cgi?name=3DCVE-2018-11206
+
+      CVE-2018-11207 - A division by zero was discovered in
+                       H5D__chunk_init in H5Dchunk.c  (HDFFV-10481)
+        https://security-tracker.debian.org/tracker/CVE-2018-11207
+        https://cve.mitre.org/cgi-bin/cvename.cgi?name=3DCVE-2018-11207
+
+      (BMR - 2018/7/22, PR#s: 1134 and 1139,
+       HDFFV-10476, HDFFV-10477, HDFFV-10478, HDFFV-10480, HDFFV-10481)
+
     - H5Adelete
 
       H5Adelete failed when deleting the last "large" attribute that
@@ -315,6 +382,7 @@ Bug Fixes since HDF5-1.10.2 release
 
       (DER - 2018/02/26, HDFFV-10356)
 
+
     Configuration
     -------------
     - Applied patches to address Cywin build issues
@@ -376,11 +444,17 @@ Bug Fixes since HDF5-1.10.2 release
 
     Performance
     -------------
-    -
+    - Revamped internal use of DXPLs, improving performance
+
+      (QAK - 2018/05/20)
 
     Fortran
     --------
-    -
+    - Fixed issue with h5fget_obj_count_f and using a file id of H5F_OBJ_ALL_F not
+      returning the correct count.
+
+      (MSB - 2018/5/15, HDFFV-10405)
+
 
     Tools
     -----
@@ -457,9 +531,9 @@ Supported Platforms
                                   Visual Studio 2015 w/ Intel C, Fortran 2017 (cmake)
                                   Visual Studio 2015 w/ MSMPI 8 (cmake)
 
-    Windows 10                    Visual Studio 2015 w/ Intel Fortran 16 (cmake)
+    Windows 10                    Visual Studio 2015 w/ Intel Fortran 18 (cmake)
 
-    Windows 10 x64                Visual Studio 2015 w/ Intel Fortran 16 (cmake)
+    Windows 10 x64                Visual Studio 2015 w/ Intel Fortran 18 (cmake)
                                   Visual Studio 2017 w/ Intel Fortran 18 (cmake)
 
     Mac OS X Yosemite 10.10.5     Apple clang/clang++ version 6.1 from Xcode 7.0
