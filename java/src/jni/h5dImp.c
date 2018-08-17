@@ -30,7 +30,11 @@ extern "C" {
 #include "h5dImp.h"
 
 extern JavaVM *jvm;
-extern jobject visit_callback;
+
+typedef struct _cb_wrapper {
+    jobject visit_callback;
+    jobject op_data;
+} cb_wrapper;
 
 #ifdef __cplusplus
   #ifdef _WINDOWS
@@ -1888,7 +1892,7 @@ Java_hdf_hdf5lib_H5_H5Dset_1extent
 
 static herr_t
 H5D_iterate_cb
-    (void* elem, hid_t elem_id, unsigned ndim, const hsize_t *point, void *op_data) {
+    (void* elem, hid_t elem_id, unsigned ndim, const hsize_t *point, void *cb_data) {
     JNIEnv    *cbenv;
     jint       status;
     jclass     cls;
@@ -1896,6 +1900,9 @@ H5D_iterate_cb
     jbyteArray elemArray;
     jlongArray pointArray;
     jsize      size;
+    cb_wrapper *wrapper = (cb_wrapper *)cb_data;
+    void *op_data = (void *)wrapper->op_data;
+    jobject visit_callback = wrapper->visit_callback;
 
     if(JVMPTR->AttachCurrentThread(JVMPAR2 (void**)&cbenv, NULL) != 0) {
         JVMPTR->DetachCurrentThread(JVMPAR);
@@ -1958,9 +1965,9 @@ Java_hdf_hdf5lib_H5_H5Diterate
     herr_t        status = -1;
     jboolean      isCopy;
     jbyte        *buffP;
+    cb_wrapper wrapper = {callback_op, op_data};
 
     ENVPTR->GetJavaVM(ENVPAR &jvm);
-    visit_callback = callback_op;
 
     if (op_data == NULL) {
         h5nullArgument(env,  "H5Diterate:  op_data is NULL");
@@ -1977,7 +1984,7 @@ Java_hdf_hdf5lib_H5_H5Diterate
             h5JNIFatalError(env, "H5Diterate:  buf not pinned");
         } /* end if */
         else {
-            status = H5Diterate((void*)buffP, (hid_t)buf_type, (hid_t)space, (H5D_operator_t)H5D_iterate_cb, (void*)op_data);
+            status = H5Diterate((void*)buffP, (hid_t)buf_type, (hid_t)space, (H5D_operator_t)H5D_iterate_cb, (void*)&wrapper);
 
             if (status < 0) {
             ENVPTR->ReleaseByteArrayElements(ENVPAR buf, buffP, JNI_ABORT);

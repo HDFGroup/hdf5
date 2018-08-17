@@ -27,7 +27,6 @@ extern "C" {
 #include "h5rImp.h"
 
 extern JavaVM *jvm;
-extern jobject visit_callback;
 
 
 /*

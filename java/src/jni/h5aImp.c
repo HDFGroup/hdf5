@@ -29,7 +29,11 @@ extern "C" {
 #include "h5aImp.h"
 
 extern JavaVM *jvm;
-extern jobject visit_callback;
+
+typedef struct _cb_wrapper {
+    jobject visit_callback;
+    jobject op_data;
+} cb_wrapper;
 
 #ifdef __cplusplus
 #define CBENVPTR (cbenv)
@@ -53,7 +57,8 @@ static herr_t H5AwriteVL_asstr (JNIEnv *env, hid_t attr_id, hid_t mem_id, jobjec
 static herr_t H5AwriteVL_str (JNIEnv *env, hid_t attr_id, hid_t mem_id, jobjectArray buf);
 static herr_t H5AreadVL_asstr (JNIEnv *env, hid_t attr_id, hid_t mem_id, jobjectArray buf);
 static herr_t H5AreadVL_str (JNIEnv *env, hid_t attr_id, hid_t mem_id, jobjectArray buf);
-static herr_t H5A_iterate_cb(hid_t g_id, const char *name, const H5A_info_t *info, void *op_data);
+
+static herr_t H5A_iterate_cb(hid_t g_id, const char *name, const H5A_info_t *info, void *cb_data);
 
 
 /*
@@ -1138,7 +1143,7 @@ Java_hdf_hdf5lib_H5__1H5Aget_1create_1plist
 
 static herr_t
 H5A_iterate_cb
-    (hid_t g_id, const char *name, const H5A_info_t *info, void *op_data) {
+    (hid_t g_id, const char *name, const H5A_info_t *info, void *cb_data) {
     JNIEnv    *cbenv;
     jint       status = -1;
     jclass     cls;
@@ -1147,6 +1152,9 @@ H5A_iterate_cb
     jmethodID  constructor;
     jvalue     args[4];
     jobject    cb_info_t = NULL;
+    cb_wrapper *wrapper = (cb_wrapper *)cb_data;
+    void *op_data = (void *)wrapper->op_data;
+    jobject visit_callback = wrapper->visit_callback;
 
     if(JVMPTR->AttachCurrentThread(JVMPAR2 (void**)&cbenv, NULL) == 0) {
         cls = CBENVPTR->GetObjectClass(CBENVPAR visit_callback);
@@ -1195,14 +1203,14 @@ Java_hdf_hdf5lib_H5_H5Aiterate
     hsize_t       start_idx = (hsize_t)idx;
     herr_t        status = -1;
 
+    cb_wrapper wrapper = {callback_op, op_data};
     ENVPTR->GetJavaVM(ENVPAR &jvm);
-    visit_callback = callback_op;
 
     if ((op_data == NULL) || (callback_op == NULL)) {
         h5nullArgument(env,  "H5Literate_by_name:  op_data or callback_op is NULL");
     } /* end if */
     else {
-        status = H5Aiterate2((hid_t)grp_id, (H5_index_t)idx_type, (H5_iter_order_t)order, (hsize_t*)&start_idx, (H5A_operator2_t)H5A_iterate_cb, (void*)op_data);
+        status = H5Aiterate2((hid_t)grp_id, (H5_index_t)idx_type, (H5_iter_order_t)order, (hsize_t*)&start_idx, (H5A_operator2_t)H5A_iterate_cb, (void*)&wrapper);
 
         if (status < 0)
             h5libraryError(env);
@@ -1224,9 +1232,9 @@ Java_hdf_hdf5lib_H5_H5Aiterate_1by_1name
     const char   *lName;
     hsize_t       start_idx = (hsize_t)idx;
     herr_t        status = -1;
+    cb_wrapper wrapper = {callback_op, op_data};
 
     ENVPTR->GetJavaVM(ENVPAR &jvm);
-    visit_callback = callback_op;
 
     if ((op_data == NULL) || (callback_op == NULL)) {
         h5nullArgument(env,  "H5Literate_by_name:  op_data or callback_op is NULL");
@@ -1234,7 +1242,7 @@ Java_hdf_hdf5lib_H5_H5Aiterate_1by_1name
     else {
         PIN_JAVA_STRING(name, lName);
         if (lName != NULL) {
-            status = H5Aiterate_by_name((hid_t)grp_id, lName, (H5_index_t)idx_type, (H5_iter_order_t)order, (hsize_t*)&start_idx, (H5A_operator2_t)H5A_iterate_cb, (void*)op_data, (hid_t)access_id);
+            status = H5Aiterate_by_name((hid_t)grp_id, lName, (H5_index_t)idx_type, (H5_iter_order_t)order, (hsize_t*)&start_idx, (H5A_operator2_t)H5A_iterate_cb, (void*)&wrapper, (hid_t)access_id);
 
             UNPIN_JAVA_STRING(name, lName);
 
