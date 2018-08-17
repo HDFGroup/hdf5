@@ -3210,6 +3210,8 @@ elif test "X$withval" = "Xv18"; then
 elif test "X$withval" = "Xv110"; then
     AC_MSG_RESULT([v110])
     DEFAULT_API_VERSION=v110
+    AC_DEFINE([USE_110_API_DEFAULT], [1],
+              [Define using v1.10 public API symbols by default])
 else
     AC_MSG_ERROR([invalid version of public symbols given])
 fi
