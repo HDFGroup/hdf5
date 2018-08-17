@@ -33,7 +33,6 @@ hsize_t H5TOOLS_BUFSIZE = (32 * 1024 * 1024);  /* 32 MB */
 int     H5TOOLS_TEXT_BLOCK = 16;  /* Number of elements on a line in a text export file */
 
 JavaVM *jvm;
-jobject visit_callback;
 jobject copy_callback;
 jobject close_callback;
 jobject create_callback;
