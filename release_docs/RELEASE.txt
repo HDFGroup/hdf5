@@ -181,6 +181,16 @@ New Features
 
     Java Library:
     ----------------
+    - Java iterator callbacks
+
+      Change global callback object to a small stack structure in order
+      to fix a runtime crash. This crash was discovered when iterating
+      through a file with nested group members. The global variable
+      visit_callback is overwritten when recursion starts. When recursion
+      completes, visit_callback will be pointing to the wrong callback method.
+
+      (ADB - 2018/08/15, HDFFV-10536)
+
     - Java HDFLibraryException class
 
       Change parent class from Exception to RuntimeException.
