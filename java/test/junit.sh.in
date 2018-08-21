@@ -41,6 +41,7 @@ myos=`uname -s`
 # where the libs exist
 HDFLIB_HOME="$top_srcdir/java/lib"
 BLDLIBDIR="$top_builddir/hdf5/lib"
+BLDINSDIR="$top_builddir/../hdf5/lib"
 BLDDIR="."
 HDFTEST_HOME="$top_srcdir/java/test"
 JARFILE=jar@PACKAGE_TARNAME@-@PACKAGE_VERSION@.jar
@@ -125,9 +126,9 @@ COPY_LIBFILES_TO_BLDLIBDIR()
             # make cp fail
             SDIR=`$DIRNAME $tstfile`
             INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
-            INODE_DDIR=`$LS -i -d $BLDLIBDIR | $AWK -F' ' '{print $1}'`
+            INODE_DDIR=`$LS -i -d $BLDINSDIR | $AWK -F' ' '{print $1}'`
             if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
-                $CP -f $tstfile $BLDLIBDIR
+                $CP -f $tstfile $BLDINSDIR
                 if [ $? -ne 0 ]; then
                     echo "Error: FAILED to copy $tstfile ."
 
@@ -281,13 +282,8 @@ if $TEST -z "$LD_LIBRARY_PATH" ; then
 fi
 
 case  $os_name in
-    Darwin)
-    DYLD_LIBRARY_PATH=$BLDLIBDIR:$DYLD_LIBRARY_PATH
-    export DYLD_LIBRARY_PATH
-    LD_LIBRARY_PATH=$DYLD_LIBRARY_PATH
-    ;;
     *)
-    LD_LIBRARY_PATH=$BLDLIBDIR:$LD_LIBRARY_PATH
+    LD_LIBRARY_PATH=$BLDLIBDIR:$BLDINSDIR:$LD_LIBRARY_PATH
     ;;
 esac
 
