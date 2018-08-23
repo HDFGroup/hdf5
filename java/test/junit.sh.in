@@ -282,7 +282,7 @@ fi
 
 case  $os_name in
     *)
-    LD_LIBRARY_PATH=$BLDLIBDIR:$BLDINSDIR:$LD_LIBRARY_PATH
+    LD_LIBRARY_PATH=$BLDLIBDIR:$LD_LIBRARY_PATH
     ;;
 esac
 
