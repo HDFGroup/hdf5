@@ -62,8 +62,8 @@ $top_builddir/java/src/jni/.libs/libhdf5_java.*
 LIST_JAR_TESTFILES="
 $HDFLIB_HOME/hamcrest-core.jar
 $HDFLIB_HOME/junit.jar
-$HDFLIB_HOME/slf4j-api-1.7.5.jar
-$HDFLIB_HOME/ext/slf4j-simple-1.7.5.jar
+$HDFLIB_HOME/slf4j-api-1.7.25.jar
+$HDFLIB_HOME/ext/slf4j-simple-1.7.25.jar
 "
 LIST_JAR_FILES="
 $top_builddir/java/src/$JARFILE
