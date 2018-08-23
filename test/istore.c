@@ -215,9 +215,9 @@ test_create(hid_t f, const char *prefix)
         dims[u] = my_chunk_dims[u] = 2;
 
         /* Create chunked dataset of this dimensionality */
-    HDsnprintf(name, sizeof name, "%s_%02u", prefix, u);
-    if ((dataset=new_object(f, name, (int)u, dims, my_chunk_dims)) < 0)
-        return FAIL;
+        HDsnprintf(name, sizeof name, "%s_%02u", prefix, u);
+        if ((dataset=new_object(f, name, (int)u, dims, my_chunk_dims)) < 0)
+            return FAIL;
 
         /* Close dataset created */
         if(H5Dclose(dataset) < 0)

@@ -87,7 +87,8 @@ typedef struct s1_t {
 
 /* A UD link traversal function.  Shouldn't actually be called. */
 static hid_t UD_traverse(const char H5_ATTR_UNUSED * link_name, hid_t H5_ATTR_UNUSED cur_group,
-    const void H5_ATTR_UNUSED * udata, size_t H5_ATTR_UNUSED udata_size, hid_t H5_ATTR_UNUSED lapl_id)
+    const void H5_ATTR_UNUSED * udata, size_t H5_ATTR_UNUSED udata_size, hid_t H5_ATTR_UNUSED lapl_id,
+    hid_t H5_ATTR_UNUSED dxpl_id)
 {
     return -1;
 }
@@ -269,10 +270,7 @@ gent_ub(const char * filename, size_t ub_size, size_t ub_fill)
   H5Fclose(fid);
 
   /* If a user block is being used, write to it here */
-  if(ub_size > 0)
-  {
-    ssize_t nbytes;
-
+  if(ub_size > 0) {
     HDassert(ub_size <= BUF_SIZE);
 
     fd = HDopen(filename, O_RDWR);
@@ -284,8 +282,7 @@ gent_ub(const char * filename, size_t ub_size, size_t ub_fill)
     for (u = 0; u < ub_fill; u++)
       *bp++ = pattern[u % 10];
 
-    nbytes = HDwrite(fd, buf, ub_size);
-    HDassert(nbytes >= 0);
+    HDwrite(fd, buf, ub_size);
 
     HDclose(fd);
   }
@@ -298,7 +295,6 @@ create_textfile(const char *name, size_t size)
     int fd;
     size_t i;
     char *bp;
-    ssize_t nbytes;
 
     fd = HDcreat(name,0777);
     HDassert(fd >= 0);
@@ -310,8 +306,7 @@ create_textfile(const char *name, size_t size)
     for(i = 0; i < size; i++)
         *bp++ = pattern[i % 10];
 
-    nbytes = HDwrite(fd, buf, size);
-    HDassert(nbytes >= 0);
+    HDwrite(fd, buf, size);
 
     HDfree(buf);
 

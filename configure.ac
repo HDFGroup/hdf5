@@ -24,7 +24,7 @@ AC_PREREQ([2.69])
 ## NOTE: Do not forget to change the version number here when we do a
 ## release!!!
 ##
-AC_INIT([HDF5], [1.10.2], [help@hdfgroup.org])
+AC_INIT([HDF5], [1.10.3], [help@hdfgroup.org])
 
 AC_CONFIG_SRCDIR([src/H5.c])
 AC_CONFIG_HEADERS([src/H5config.h])
@@ -411,7 +411,7 @@ AC_CHECK_SIZEOF([double])
 AC_CHECK_SIZEOF([long double])
 
 ## ----------------------------------------------------------------------
-## Check for non-standard extenstion __FLOAT128
+## Check for non-standard extension __FLOAT128
 ##
 HAVE_FLOAT128=0
 HAVE_QUADMATH=0
@@ -846,19 +846,6 @@ AC_SUBST([PARALLEL])
 AC_SUBST([RUNSERIAL])
 AC_SUBST([RUNPARALLEL])
 AC_SUBST([TESTPARALLEL])
-
-## ----------------------------------------------------------------------
-## Disable shared libraries on CYGWIN. (LK - 04/16/15)
-## A number of tests run by "make check" fail on CYGWIN, so for HDF5 v1.8.15
-## we will change the default for shared libraries to disabled.
-
-
-case "`uname`" in
-  CYGWIN*)
-    enable_shared="no"
-    CHECK_WARN="Shared libraries are not currently supported on CYGWIN."
-    ;;
-esac
 
 ## ----------------------------------------------------------------------
 ## Check if they would like the Java native interface (JNI) compiled
@@ -1954,12 +1941,12 @@ AC_DEFINE_UNQUOTED([PRINTF_LL_WIDTH], ["$hdf5_cv_printf_ll"],
 ## around to help people migrate to 1.10.x and newer versions.
 ##
 AC_ARG_ENABLE([debug],
-              [AS_HELP_STRING([--enable-debug], [DEPRECATED: use --enable-build-mode=debug])],
-              [AC_MSG_ERROR([--enable-debug is deprecated, use --enable-build-mode=debug instead.])])
+              [AS_HELP_STRING([--enable-debug], [OPTION CHANGE: use --enable-build-mode=debug])],
+              [AC_MSG_ERROR([--enable-debug is no longer supported, use --enable-build-mode=debug instead.])])
 
 AC_ARG_ENABLE([production],
-              [AS_HELP_STRING([--enable-production], [DEPRECATED: use --enable-build-mode=production])],
-              [AC_MSG_ERROR([--enable-production is deprecated, use --enable-build-mode=production instead.])])
+              [AS_HELP_STRING([--enable-production], [OPTION CHANGE: use --enable-build-mode=production])],
+              [AC_MSG_ERROR([--enable-production is no longer supported, use --enable-build-mode=production instead.])])
 
 
 ## ----------------------------------------------------------------------
@@ -2243,7 +2230,7 @@ AC_SUBST([INTERNAL_DEBUG_OUTPUT])
 ## are not listed in the "all" packages list.
 ##
 ## all_packages="AC,B,B2,D,F,FA,FL,FS,HL,I,O,S,ST,T,Z"
-all_packages="AC,B2,D,F,HL,I,O,S,ST,T,Z"
+all_packages="AC,B2,CX,D,F,HL,I,O,S,ST,T,Z"
 
 case "X-$INTERNAL_DEBUG_OUTPUT" in
   X-yes|X-all)
@@ -2545,6 +2532,8 @@ esac
 AC_SUBST([ADD_PARALLEL_FILES]) ADD_PARALLEL_FILES="no"
 AC_SUBST([MPE]) MPE=no
 AC_SUBST([INSTRUMENT_LIBRARY]) INSTRUMENT_LIBRARY=no
+AC_SUBST([PARALLEL_FILTERED_WRITES])
+AC_SUBST([LARGE_PARALLEL_IO])
 
 if test -n "$PARALLEL"; then
   ## The 'testpar' directory should participate in the build
@@ -2700,6 +2689,61 @@ if test -n "$PARALLEL"; then
   if test "X-$MPE" = "X-yes"; then
     AC_DEFINE([HAVE_MPE], [1], [Define if we have MPE support])
   fi
+
+  ## ----------------------------------------------------------------------
+  ## Check for the MPI-3 functions necessary for the Parallel Compression
+  ## feature. If these are not present, issue a warning that Parallel
+  ## Compression will be disabled.
+  ##
+  AC_MSG_CHECKING([for MPI_Mprobe and MPI_Imrecv functions])
+
+  AC_LINK_IFELSE(
+      [AC_LANG_PROGRAM(
+          [[
+              #include <mpi.h>
+          ]],
+          [[
+              MPI_Message message;
+              MPI_Init(0, (void *) 0);
+              MPI_Mprobe(0, 0, 0, &message, (void *) 0);
+              MPI_Imrecv((void *) 0, 0, 0, (void *) 0, (void *) 0);
+          ]]
+      )],
+      [AC_MSG_RESULT([yes])
+       PARALLEL_FILTERED_WRITES=yes],
+      [AC_MSG_RESULT([no])
+       AC_MSG_WARN([A simple MPI program using the MPI_Mprobe and MPI_Imrecv functions could not be compiled and linked.
+                    Parallel writes of filtered data will be disabled.])
+       PARALLEL_FILTERED_WRITES=no]
+  )
+
+  ## ----------------------------------------------------------------------
+  ## Check for the MPI-3 functions necessary for the big I/O feature.
+  ## If these are not present, issue a warning that the big I/O feature
+  ## will be disabled.
+  ##
+  AC_MSG_CHECKING([for MPI_Get_elements_x and MPI_Type_size_x functions])
+
+  AC_LINK_IFELSE(
+      [AC_LANG_PROGRAM(
+          [[
+              #include <mpi.h>
+          ]],
+          [[
+              MPI_Count count;
+              MPI_Init(0, (void *) 0);
+              MPI_Get_elements_x(0, 0, &count);
+              MPI_Type_size_x(0, &count);
+          ]]
+      )],
+      [AC_MSG_RESULT([yes])
+       LARGE_PARALLEL_IO=yes],
+      [AC_MSG_RESULT([no])
+       AC_MSG_WARN([A simple MPI program using the MPI_Get_elements_x and MPI_Type_size_x functions could not be compiled and linked.
+                    Reading/Writing >2GB of data in a single parallel I/O operation will be disabled.])
+       LARGE_PARALLEL_IO=no]
+  )
+
 fi
 
 ## ----------------------------------------------------------------------
@@ -2990,6 +3034,12 @@ AC_SUBST([WORDS_BIGENDIAN])
 ## Parallel support? (set above except empty if none)
 PARALLEL=${PARALLEL:-no}
 
+## Parallel writes to filtered datasets support?
+PARALLEL_FILTERED_WRITES=${PARALLEL_FILTERED_WRITES:-no}
+
+## >2GB writes in parallel support?
+LARGE_PARALLEL_IO=${LARGE_PARALLEL_IO:-no}
+
 ## Compiler with version information. This consists of the full path
 ## name of the compiler and the reported version number.
 AC_SUBST([CC_VERSION])
@@ -3160,6 +3210,8 @@ elif test "X$withval" = "Xv18"; then
 elif test "X$withval" = "Xv110"; then
     AC_MSG_RESULT([v110])
     DEFAULT_API_VERSION=v110
+    AC_DEFINE([USE_110_API_DEFAULT], [1],
+              [Define using v1.10 public API symbols by default])
 else
     AC_MSG_ERROR([invalid version of public symbols given])
 fi

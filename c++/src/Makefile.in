@@ -168,12 +168,12 @@ LTLIBRARIES = $(lib_LTLIBRARIES)
 libhdf5_cpp_la_DEPENDENCIES = $(LIBHDF5)
 am_libhdf5_cpp_la_OBJECTS = H5Exception.lo H5IdComponent.lo \
 	H5DataSpace.lo H5PropList.lo H5Library.lo H5FaccProp.lo \
-	H5FcreatProp.lo H5LcreatProp.lo H5LaccProp.lo H5DxferProp.lo \
-	H5DcreatProp.lo H5Location.lo H5AbstractDs.lo H5Attribute.lo \
-	H5Object.lo H5OcreatProp.lo H5DataType.lo H5AtomType.lo \
-	H5PredType.lo H5EnumType.lo H5IntType.lo H5FloatType.lo \
-	H5StrType.lo H5ArrayType.lo H5VarLenType.lo H5CompType.lo \
-	H5DataSet.lo H5CommonFG.lo H5Group.lo H5File.lo
+	H5FcreatProp.lo H5LcreatProp.lo H5LaccProp.lo H5DaccProp.lo \
+	H5DxferProp.lo H5DcreatProp.lo H5Location.lo H5AbstractDs.lo \
+	H5Attribute.lo H5Object.lo H5OcreatProp.lo H5DataType.lo \
+	H5AtomType.lo H5PredType.lo H5EnumType.lo H5IntType.lo \
+	H5FloatType.lo H5StrType.lo H5ArrayType.lo H5VarLenType.lo \
+	H5CompType.lo H5DataSet.lo H5CommonFG.lo H5Group.lo H5File.lo
 libhdf5_cpp_la_OBJECTS = $(am_libhdf5_cpp_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -550,6 +550,7 @@ JAVA_PATH_NAME = @JAVA_PATH_NAME@
 JAVA_VERSION = @JAVA_VERSION@
 JNIFLAGS = @JNIFLAGS@
 JUNIT = @JUNIT@
+LARGE_PARALLEL_IO = @LARGE_PARALLEL_IO@
 LD = @LD@
 LDFLAGS = @LDFLAGS@
 LIBOBJS = @LIBOBJS@
@@ -597,6 +598,7 @@ PAC_FORTRAN_NATIVE_REAL_KIND = @PAC_FORTRAN_NATIVE_REAL_KIND@
 PAC_FORTRAN_NATIVE_REAL_SIZEOF = @PAC_FORTRAN_NATIVE_REAL_SIZEOF@
 PAC_FORTRAN_NUM_INTEGER_KINDS = @PAC_FORTRAN_NUM_INTEGER_KINDS@
 PARALLEL = @PARALLEL@
+PARALLEL_FILTERED_WRITES = @PARALLEL_FILTERED_WRITES@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 PROFILING = @PROFILING@
 RANLIB = @RANLIB@
@@ -742,29 +744,29 @@ TRACE = perl $(top_srcdir)/bin/trace
 # .chklog files are output from those tests.
 # *.clog and *.clog2 are from the MPE option.
 CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.clog2
-LT_VERS_INTERFACE = 102
+LT_VERS_INTERFACE = 103
 LT_VERS_REVISION = 0
-LT_VERS_AGE = 1
-LT_CXX_VERS_INTERFACE = 102
+LT_VERS_AGE = 0
+LT_CXX_VERS_INTERFACE = 103
 LT_CXX_VERS_REVISION = 0
 LT_CXX_VERS_AGE = 0
 LT_F_VERS_INTERFACE = 101
-LT_F_VERS_REVISION = 1
+LT_F_VERS_REVISION = 2
 LT_F_VERS_AGE = 1
 LT_HL_VERS_INTERFACE = 101
-LT_HL_VERS_REVISION = 0
+LT_HL_VERS_REVISION = 1
 LT_HL_VERS_AGE = 1
 LT_HL_CXX_VERS_INTERFACE = 101
-LT_HL_CXX_VERS_REVISION = 1
+LT_HL_CXX_VERS_REVISION = 2
 LT_HL_CXX_VERS_AGE = 1
 LT_HL_F_VERS_INTERFACE = 100
-LT_HL_F_VERS_REVISION = 2
+LT_HL_F_VERS_REVISION = 3
 LT_HL_F_VERS_AGE = 0
-LT_JAVA_VERS_INTERFACE = 102
+LT_JAVA_VERS_INTERFACE = 103
 LT_JAVA_VERS_REVISION = 0
-LT_JAVA_VERS_AGE = 2
+LT_JAVA_VERS_AGE = 3
 LT_TOOLS_VERS_INTERFACE = 101
-LT_TOOLS_VERS_REVISION = 0
+LT_TOOLS_VERS_REVISION = 1
 LT_TOOLS_VERS_AGE = 1
 
 # This is our main target
@@ -778,25 +780,27 @@ bin_SCRIPTS = h5c++
 libhdf5_cpp_la_SOURCES = H5Exception.cpp H5IdComponent.cpp	\
 	H5DataSpace.cpp H5PropList.cpp H5Library.cpp			\
 	H5FaccProp.cpp H5FcreatProp.cpp H5LcreatProp.cpp		\
-	H5LaccProp.cpp H5DxferProp.cpp H5DcreatProp.cpp			\
-	H5Location.cpp H5AbstractDs.cpp H5Attribute.cpp			\
-	H5Object.cpp H5OcreatProp.cpp H5DataType.cpp			\
-	H5AtomType.cpp H5PredType.cpp H5EnumType.cpp			\
-	H5IntType.cpp H5FloatType.cpp H5StrType.cpp				\
-	H5ArrayType.cpp H5VarLenType.cpp H5CompType.cpp			\
-	H5DataSet.cpp H5CommonFG.cpp H5Group.cpp H5File.cpp
+	H5LaccProp.cpp H5DaccProp.cpp H5DxferProp.cpp			\
+    H5DcreatProp.cpp H5Location.cpp H5AbstractDs.cpp		\
+    H5Attribute.cpp H5Object.cpp H5OcreatProp.cpp			\
+	H5DataType.cpp H5AtomType.cpp H5PredType.cpp			\
+    H5EnumType.cpp H5IntType.cpp H5FloatType.cpp			\
+    H5StrType.cpp H5ArrayType.cpp H5VarLenType.cpp			\
+	H5CompType.cpp H5DataSet.cpp H5CommonFG.cpp H5Group.cpp	\
+    H5File.cpp
 
 
 # HDF5 C++ library depends on HDF5 Library.
 libhdf5_cpp_la_LIBADD = $(LIBHDF5)
 
 # Public headers
-include_HEADERS = H5Cpp.h H5AbstractDs.h H5AtomType.h H5Attribute.h	\
-	H5Classes.h H5CommonFG.h H5CompType.h H5DataSet.h		\
-	H5DataSpace.h H5DataType.h H5OcreatProp.h H5DcreatProp.h\
-	H5DxferProp.h H5EnumType.h H5Exception.h H5FaccProp.h	\
+include_HEADERS = H5Cpp.h H5AbstractDs.h H5AtomType.h			\
+	H5Attribute.h H5Classes.h H5CommonFG.h H5CompType.h		\
+	H5DataSet.h H5DataSpace.h H5DataType.h H5OcreatProp.h		\
+	H5DaccProp.h H5DcreatProp.h					\
+	H5DxferProp.h H5EnumType.h H5Exception.h H5FaccProp.h		\
 	H5FcreatProp.h H5File.h H5FloatType.h H5Group.h			\
-	H5IdComponent.h H5Include.h H5IntType.h H5LcreatProp.h	\
+	H5IdComponent.h H5Include.h H5IntType.h H5LcreatProp.h		\
 	H5LaccProp.h H5Library.h H5Location.h H5Object.h		\
 	H5PredType.h H5PropList.h H5StrType.h H5CppDoc.h		\
 	H5ArrayType.h H5VarLenType.h
@@ -951,6 +955,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Attribute.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5CommonFG.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5CompType.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5DaccProp.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5DataSet.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5DataSpace.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5DataType.Plo@am__quote@

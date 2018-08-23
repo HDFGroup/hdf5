@@ -674,11 +674,11 @@ test_misc4(void)
     CHECK(group3, FAIL, "H5Gcreate2");
 
     /* Get the stat information for each group */
-    ret = H5Oget_info_by_name(file1, MISC4_GROUP_1, &oinfo1, H5P_DEFAULT);
+    ret = H5Oget_info_by_name2(file1, MISC4_GROUP_1, &oinfo1, H5O_INFO_BASIC, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Oget_info_by_name");
-    ret = H5Oget_info_by_name(file1, MISC4_GROUP_2, &oinfo2, H5P_DEFAULT);
+    ret = H5Oget_info_by_name2(file1, MISC4_GROUP_2, &oinfo2, H5O_INFO_BASIC, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Oget_info_by_name");
-    ret = H5Oget_info_by_name(file2, MISC4_GROUP_1, &oinfo3, H5P_DEFAULT);
+    ret = H5Oget_info_by_name2(file2, MISC4_GROUP_1, &oinfo3, H5O_INFO_BASIC, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Oget_info_by_name");
 
     /* Verify that the fileno values are the same for groups from file1 */
@@ -2929,7 +2929,7 @@ test_misc18(void)
     CHECK(did1, FAIL, "H5Dcreate2");
 
     /* Get object information */
-    ret = H5Oget_info_by_name(fid, MISC18_DSET1_NAME, &oinfo, H5P_DEFAULT);
+    ret = H5Oget_info_by_name2(fid, MISC18_DSET1_NAME, &oinfo, H5O_INFO_HDR|H5O_INFO_NUM_ATTRS, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Oget_info_by_name");
     VERIFY(oinfo.hdr.nmesgs, 6, "H5Oget_info_by_name");
     VERIFY(oinfo.hdr.nchunks, 1, "H5Oget_info_by_name");
@@ -2942,7 +2942,7 @@ test_misc18(void)
     CHECK(did2, FAIL, "H5Dcreate2");
 
     /* Get object information */
-    ret = H5Oget_info_by_name(fid, MISC18_DSET2_NAME, &oinfo, H5P_DEFAULT);
+    ret = H5Oget_info_by_name2(fid, MISC18_DSET2_NAME, &oinfo, H5O_INFO_HDR|H5O_INFO_NUM_ATTRS, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Oget_info_by_name");
     VERIFY(oinfo.hdr.nmesgs, 6, "H5Oget_info_by_name");
     VERIFY(oinfo.hdr.nchunks, 1, "H5Oget_info_by_name");
@@ -2975,7 +2975,7 @@ test_misc18(void)
     } /* end for */
 
     /* Get object information for dataset #1 now */
-    ret = H5Oget_info_by_name(fid, MISC18_DSET1_NAME, &oinfo, H5P_DEFAULT);
+    ret = H5Oget_info_by_name2(fid, MISC18_DSET1_NAME, &oinfo, H5O_INFO_HDR|H5O_INFO_NUM_ATTRS, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Oget_info_by_name");
     VERIFY(oinfo.hdr.nmesgs, 24, "H5Oget_info_by_name");
     VERIFY(oinfo.hdr.nchunks, 9, "H5Oget_info_by_name");
@@ -2984,7 +2984,7 @@ test_misc18(void)
     VERIFY(oinfo.num_attrs, 10, "H5Oget_info_by_name");
 
     /* Get object information for dataset #2 now */
-    ret = H5Oget_info_by_name(fid, MISC18_DSET2_NAME, &oinfo, H5P_DEFAULT);
+    ret = H5Oget_info_by_name2(fid, MISC18_DSET2_NAME, &oinfo, H5O_INFO_HDR|H5O_INFO_NUM_ATTRS, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Oget_info_by_name");
     VERIFY(oinfo.hdr.nmesgs, 24, "H5Oget_info_by_name");
     VERIFY(oinfo.hdr.nchunks, 9, "H5Oget_info_by_name");
@@ -3958,7 +3958,7 @@ test_misc23(void)
     tmp_id = H5Gopen2(file_id, "/A/B01", H5P_DEFAULT);
     CHECK(tmp_id, FAIL, "H5Gopen2");
 
-    status = H5Oget_info(tmp_id, &oinfo);
+    status = H5Oget_info2(tmp_id, &oinfo, H5O_INFO_BASIC);
     CHECK(status, FAIL, "H5Oget_info");
     VERIFY(oinfo.rc, 1, "H5Oget_info");
 
@@ -5238,7 +5238,7 @@ test_misc30_get_info_cb(hid_t loc_id, const char *name, const H5L_info_t H5_ATTR
 {
     H5O_info_t object_info;
 
-    return H5Oget_info_by_name(loc_id, name, &object_info, H5P_DEFAULT);
+    return H5Oget_info_by_name2(loc_id, name, &object_info, H5O_INFO_BASIC, H5P_DEFAULT);
 }
 
 static int
@@ -5499,24 +5499,24 @@ test_misc33(void)
     MESSAGE(5, ("Testing that bad offset into the heap returns error"));
 
     /* Open the test file */
-    fid = H5Fopen(testfile, H5F_ACC_RDWR, H5P_DEFAULT);
+    fid = H5Fopen(testfile, H5F_ACC_RDONLY, H5P_DEFAULT);
     CHECK(fid, FAIL, "H5Fopen");
 
     /* Case (1) */
     H5E_BEGIN_TRY {
-        ret = H5Oget_info_by_name(fid, "/soft_two", &oinfo, H5P_DEFAULT);
+        ret = H5Oget_info_by_name2(fid, "/soft_two", &oinfo, H5O_INFO_BASIC, H5P_DEFAULT);
     } H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Oget_info_by_name");
 
     /* Case (2) */
     H5E_BEGIN_TRY {
-        ret = H5Oget_info_by_name(fid, "/dsetA", &oinfo, H5P_DEFAULT);
+        ret = H5Oget_info_by_name2(fid, "/dsetA", &oinfo, H5O_INFO_BASIC, H5P_DEFAULT);
     } H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Oget_info_by_name");
 
     /* Case (3) */
     H5E_BEGIN_TRY {
-        ret = H5Oget_info_by_name(fid, "/soft_one", &oinfo, H5P_DEFAULT);
+        ret = H5Oget_info_by_name2(fid, "/soft_one", &oinfo, H5O_INFO_BASIC, H5P_DEFAULT);
     } H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Oget_info_by_name");
 

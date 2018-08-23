@@ -12,7 +12,7 @@
 #
 
 # A script to reconfigure autotools for HDF5, and to recreate other
-# generated files specifc to HDF5.
+# generated files specific to HDF5.
 #
 # IMPORTANT OS X NOTE
 #

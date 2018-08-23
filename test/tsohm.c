@@ -839,7 +839,7 @@ static void test_sohm_size1(void)
     CHECK_I(file, "size1_helper");
 
     /* Get the size of a dataset object header */
-    ret = H5Oget_info_by_name(file, DSETNAME[0], &oinfo, H5P_DEFAULT);
+    ret = H5Oget_info_by_name2(file, DSETNAME[0], &oinfo, H5O_INFO_HDR, H5P_DEFAULT);
     CHECK_I(ret, "H5Oget_info_by_name");
     ret = H5Fclose(file);
     CHECK_I(ret, "H5Fclose");
@@ -894,7 +894,7 @@ static void test_sohm_size1(void)
     CHECK_I(file, "size1_helper");
 
     /* Get the size of a dataset object header */
-    ret = H5Oget_info_by_name(file, DSETNAME[0], &oinfo, H5P_DEFAULT);
+    ret = H5Oget_info_by_name2(file, DSETNAME[0], &oinfo, H5O_INFO_HDR, H5P_DEFAULT);
     CHECK_I(ret, "H5Oget_info_by_name");
     ret = H5Fclose(file);
     CHECK_I(ret, "H5Fclose");

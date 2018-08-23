@@ -136,6 +136,13 @@ float attr_data5=-5.123F;        /* Test data for 5th attribute */
 #define BUG3_DT_NAME    "dt"
 #define BUG3_ATTR_NAME  "attr"
 
+/* Used by test_attr_delete_last_dense() */
+#define GRPNAME "grp"
+#define ATTRNAME "attr"
+#define DIM0 100
+#define DIM1 100
+#define RANK 2
+
 /* Attribute iteration struct */
 typedef struct {
     H5_iter_order_t order;      /* Direction of iteration */
@@ -422,7 +429,7 @@ test_attr_basic_read(hid_t fapl)
     CHECK(dataset, FAIL, "H5Dopen2");
 
     /* Verify the correct number of attributes */
-    ret = H5Oget_info(dataset, &oinfo);
+    ret = H5Oget_info2(dataset, &oinfo, H5O_INFO_NUM_ATTRS);
     CHECK(ret, FAIL, "H5Oget_info");
     VERIFY(oinfo.num_attrs, 2, "H5Oget_info");
 
@@ -451,7 +458,7 @@ test_attr_basic_read(hid_t fapl)
     CHECK(group, FAIL, "H5Gopen2");
 
     /* Verify the correct number of attributes */
-    ret = H5Oget_info(group, &oinfo);
+    ret = H5Oget_info2(group, &oinfo, H5O_INFO_NUM_ATTRS);
     CHECK(ret, FAIL, "H5Oget_info");
     VERIFY(oinfo.num_attrs, 1, "H5Oget_info");
 
@@ -793,7 +800,7 @@ test_attr_compound_read(hid_t fapl)
     CHECK(dataset, FAIL, "H5Dopen2");
 
     /* Verify the correct number of attributes */
-    ret = H5Oget_info(dataset, &oinfo);
+    ret = H5Oget_info2(dataset, &oinfo, H5O_INFO_NUM_ATTRS);
     CHECK(ret, FAIL, "H5Oget_info");
     VERIFY(oinfo.num_attrs, 1, "H5Oget_info");
 
@@ -997,7 +1004,7 @@ test_attr_scalar_read(hid_t fapl)
     CHECK(dataset, FAIL, "H5Dopen2");
 
     /* Verify the correct number of attributes */
-    ret = H5Oget_info(dataset, &oinfo);
+    ret = H5Oget_info2(dataset, &oinfo, H5O_INFO_NUM_ATTRS);
     CHECK(ret, FAIL, "H5Oget_info");
     VERIFY(oinfo.num_attrs, 1, "H5Oget_info");
 
@@ -1200,7 +1207,7 @@ test_attr_mult_read(hid_t fapl)
     CHECK(dataset, FAIL, "H5Dopen2");
 
     /* Verify the correct number of attributes */
-    ret = H5Oget_info(dataset, &oinfo);
+    ret = H5Oget_info2(dataset, &oinfo, H5O_INFO_NUM_ATTRS);
     CHECK(ret, FAIL, "H5Oget_info");
     VERIFY(oinfo.num_attrs, 3, "H5Oget_info");
 
@@ -1457,7 +1464,7 @@ test_attr_iterate(hid_t fapl)
     CHECK(ret, FAIL, "H5Sclose");
 
     /* Verify the correct number of attributes */
-    ret = H5Oget_info(dataset, &oinfo);
+    ret = H5Oget_info2(dataset, &oinfo, H5O_INFO_NUM_ATTRS);
     CHECK(ret, FAIL, "H5Oget_info");
     VERIFY(oinfo.num_attrs, 0, "H5Oget_info");
 
@@ -1475,7 +1482,7 @@ test_attr_iterate(hid_t fapl)
     CHECK(dataset, FAIL, "H5Dopen2");
 
     /* Verify the correct number of attributes */
-    ret = H5Oget_info(dataset, &oinfo);
+    ret = H5Oget_info2(dataset, &oinfo, H5O_INFO_NUM_ATTRS);
     CHECK(ret, FAIL, "H5Oget_info");
     VERIFY(oinfo.num_attrs, 3, "H5Oget_info");
 
@@ -1522,7 +1529,7 @@ test_attr_delete(hid_t fapl)
     CHECK(dataset, FAIL, "H5Dopen2");
 
     /* Verify the correct number of attributes */
-    ret = H5Oget_info(dataset, &oinfo);
+    ret = H5Oget_info2(dataset, &oinfo, H5O_INFO_NUM_ATTRS);
     CHECK(ret, FAIL, "H5Oget_info");
     VERIFY(oinfo.num_attrs, 3, "H5Oget_info");
 
@@ -1531,7 +1538,7 @@ test_attr_delete(hid_t fapl)
     VERIFY(ret, FAIL, "H5Adelete");
 
     /* Verify the correct number of attributes */
-    ret = H5Oget_info(dataset, &oinfo);
+    ret = H5Oget_info2(dataset, &oinfo, H5O_INFO_NUM_ATTRS);
     CHECK(ret, FAIL, "H5Oget_info");
     VERIFY(oinfo.num_attrs, 3, "H5Oget_info");
 
@@ -1540,7 +1547,7 @@ test_attr_delete(hid_t fapl)
     CHECK(ret, FAIL, "H5Adelete");
 
     /* Verify the correct number of attributes */
-    ret = H5Oget_info(dataset, &oinfo);
+    ret = H5Oget_info2(dataset, &oinfo, H5O_INFO_NUM_ATTRS);
     CHECK(ret, FAIL, "H5Oget_info");
     VERIFY(oinfo.num_attrs, 2, "H5Oget_info");
 
@@ -1577,7 +1584,7 @@ test_attr_delete(hid_t fapl)
     CHECK(ret, FAIL, "H5Adelete");
 
     /* Verify the correct number of attributes */
-    ret = H5Oget_info(dataset, &oinfo);
+    ret = H5Oget_info2(dataset, &oinfo, H5O_INFO_NUM_ATTRS);
     CHECK(ret, FAIL, "H5Oget_info");
     VERIFY(oinfo.num_attrs, 1, "H5Oget_info");
 
@@ -1600,7 +1607,7 @@ test_attr_delete(hid_t fapl)
     CHECK(ret, FAIL, "H5Adelete");
 
     /* Verify the correct number of attributes */
-    ret = H5Oget_info(dataset, &oinfo);
+    ret = H5Oget_info2(dataset, &oinfo, H5O_INFO_NUM_ATTRS);
     CHECK(ret, FAIL, "H5Oget_info");
     VERIFY(oinfo.num_attrs, 0, "H5Oget_info");
 
@@ -1665,7 +1672,7 @@ test_attr_dtype_shared(hid_t fapl)
     CHECK(ret, FAIL, "H5Tcommit2");
 
     /* Check reference count on named datatype */
-    ret = H5Oget_info_by_name(file_id, TYPE1_NAME, &oinfo, H5P_DEFAULT);
+    ret = H5Oget_info_by_name2(file_id, TYPE1_NAME, &oinfo, H5O_INFO_BASIC, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Oget_info_by_name");
     VERIFY(oinfo.rc, 1, "H5Oget_info_by_name");
 
@@ -1678,7 +1685,7 @@ test_attr_dtype_shared(hid_t fapl)
     CHECK(dset_id, FAIL, "H5Dcreate2");
 
     /* Check reference count on named datatype */
-    ret = H5Oget_info_by_name(file_id, TYPE1_NAME, &oinfo, H5P_DEFAULT);
+    ret = H5Oget_info_by_name2(file_id, TYPE1_NAME, &oinfo, H5O_INFO_BASIC, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Oget_info_by_name");
     VERIFY(oinfo.rc, 2, "H5Oget_info_by_name");
 
@@ -1687,7 +1694,7 @@ test_attr_dtype_shared(hid_t fapl)
     CHECK(attr_id, FAIL, "H5Acreate2");
 
     /* Check reference count on named datatype */
-    ret = H5Oget_info_by_name(file_id, TYPE1_NAME, &oinfo, H5P_DEFAULT);
+    ret = H5Oget_info_by_name2(file_id, TYPE1_NAME, &oinfo, H5O_INFO_BASIC, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Oget_info_by_name");
     VERIFY(oinfo.rc, 3, "H5Oget_info_by_name");
 
@@ -1700,7 +1707,7 @@ test_attr_dtype_shared(hid_t fapl)
     CHECK(ret, FAIL, "H5Adelete");
 
     /* Check reference count on named datatype */
-    ret = H5Oget_info_by_name(file_id, TYPE1_NAME, &oinfo, H5P_DEFAULT);
+    ret = H5Oget_info_by_name2(file_id, TYPE1_NAME, &oinfo, H5O_INFO_BASIC, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Oget_info_by_name");
     VERIFY(oinfo.rc, 2, "H5Oget_info_by_name");
 
@@ -1709,7 +1716,7 @@ test_attr_dtype_shared(hid_t fapl)
     CHECK(attr_id, FAIL, "H5Acreate2");
 
     /* Check reference count on named datatype */
-    ret = H5Oget_info_by_name(file_id, TYPE1_NAME, &oinfo, H5P_DEFAULT);
+    ret = H5Oget_info_by_name2(file_id, TYPE1_NAME, &oinfo, H5O_INFO_BASIC, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Oget_info_by_name");
     VERIFY(oinfo.rc, 3, "H5Oget_info_by_name");
 
@@ -1764,7 +1771,7 @@ test_attr_dtype_shared(hid_t fapl)
     CHECK(ret, FAIL, "H5Dclose");
 
     /* Check reference count on named datatype */
-    ret = H5Oget_info_by_name(file_id, TYPE1_NAME, &oinfo, H5P_DEFAULT);
+    ret = H5Oget_info_by_name2(file_id, TYPE1_NAME, &oinfo, H5O_INFO_BASIC, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Oget_info_by_name");
     VERIFY(oinfo.rc, 3, "H5Oget_info_by_name");
 
@@ -1773,7 +1780,7 @@ test_attr_dtype_shared(hid_t fapl)
     CHECK(ret, FAIL, "H5Ldelete");
 
     /* Check reference count on named datatype */
-    ret = H5Oget_info_by_name(file_id, TYPE1_NAME, &oinfo, H5P_DEFAULT);
+    ret = H5Oget_info_by_name2(file_id, TYPE1_NAME, &oinfo, H5O_INFO_BASIC, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Oget_info_by_name");
     VERIFY(oinfo.rc, 1, "H5Oget_info_by_name");
 
@@ -2464,7 +2471,7 @@ test_attr_dense_delete(hid_t fcpl, hid_t fapl)
         CHECK(ret, FAIL, "H5Aclose");
 
         /* Check # of attributes */
-        ret = H5Oget_info(dataset, &oinfo);
+        ret = H5Oget_info2(dataset, &oinfo, H5O_INFO_NUM_ATTRS);
         CHECK(ret, FAIL, "H5Oget_info");
         VERIFY(oinfo.num_attrs, (u + 1), "H5Oget_info");
     } /* end for */
@@ -2646,7 +2653,7 @@ test_attr_dense_rename(hid_t fcpl, hid_t fapl)
         CHECK(ret, FAIL, "H5Arename_by_name");
 
         /* Check # of attributes */
-        ret = H5Oget_info(dataset, &oinfo);
+        ret = H5Oget_info2(dataset, &oinfo, H5O_INFO_NUM_ATTRS);
         CHECK(ret, FAIL, "H5Oget_info");
         VERIFY(oinfo.num_attrs, (u + 1), "H5Oget_info");
     } /* end for */
@@ -2798,7 +2805,7 @@ test_attr_dense_unlink(hid_t fcpl, hid_t fapl)
         CHECK(ret, FAIL, "H5Aclose");
 
         /* Check # of attributes */
-        ret = H5Oget_info(dataset, &oinfo);
+        ret = H5Oget_info2(dataset, &oinfo, H5O_INFO_NUM_ATTRS);
         CHECK(ret, FAIL, "H5Oget_info");
         VERIFY(oinfo.num_attrs, (u + 1), "H5Oget_info");
     } /* end for */
@@ -8161,8 +8168,8 @@ test_attr_shared_write(hid_t fcpl, hid_t fapl)
                 CHECK(attr, FAIL, "H5Acreate2");
 
                 /* Check that attribute is not shared */
-                is_shared = H5A_is_shared_test(attr);
-                VERIFY(is_shared, FALSE, "H5A_is_shared_test");
+                is_shared = H5A__is_shared_test(attr);
+                VERIFY(is_shared, FALSE, "H5A__is_shared_test");
 
                 /* Write data into the attribute */
                 attr_value = u + 1;
@@ -8175,13 +8182,13 @@ test_attr_shared_write(hid_t fcpl, hid_t fapl)
                 CHECK(attr, FAIL, "H5Acreate2");
 
                 /* Check that attribute is shared */
-                is_shared = H5A_is_shared_test(attr);
-                VERIFY(is_shared, TRUE, "H5A_is_shared_test");
+                is_shared = H5A__is_shared_test(attr);
+                VERIFY(is_shared, TRUE, "H5A__is_shared_test");
 
                 /* Check refcount for attribute */
-                ret = H5A_get_shared_rc_test(attr, &shared_refcount);
-                CHECK(ret, FAIL, "H5A_get_shared_rc_test");
-                VERIFY(shared_refcount, 1, "H5A_get_shared_rc_test");
+                ret = H5A__get_shared_rc_test(attr, &shared_refcount);
+                CHECK(ret, FAIL, "H5A__get_shared_rc_test");
+                VERIFY(shared_refcount, 1, "H5A__get_shared_rc_test");
 
                 /* Write data into the attribute */
                 big_value[0] = u + 1;
@@ -8189,9 +8196,9 @@ test_attr_shared_write(hid_t fcpl, hid_t fapl)
                 CHECK(ret, FAIL, "H5Awrite");
 
                 /* Check refcount for attribute */
-                ret = H5A_get_shared_rc_test(attr, &shared_refcount);
-                CHECK(ret, FAIL, "H5A_get_shared_rc_test");
-                VERIFY(shared_refcount, 1, "H5A_get_shared_rc_test");
+                ret = H5A__get_shared_rc_test(attr, &shared_refcount);
+                CHECK(ret, FAIL, "H5A__get_shared_rc_test");
+                VERIFY(shared_refcount, 1, "H5A__get_shared_rc_test");
             } /* end else */
 
             /* Close attribute */
@@ -8213,8 +8220,8 @@ test_attr_shared_write(hid_t fcpl, hid_t fapl)
                 CHECK(attr, FAIL, "H5Acreate2");
 
                 /* Check that attribute is not shared */
-                is_shared = H5A_is_shared_test(attr);
-                VERIFY(is_shared, FALSE, "H5A_is_shared_test");
+                is_shared = H5A__is_shared_test(attr);
+                VERIFY(is_shared, FALSE, "H5A__is_shared_test");
 
                 /* Write data into the attribute */
                 attr_value = u + 1;
@@ -8227,13 +8234,13 @@ test_attr_shared_write(hid_t fcpl, hid_t fapl)
                 CHECK(attr, FAIL, "H5Acreate2");
 
                 /* Check that attribute is shared */
-                is_shared = H5A_is_shared_test(attr);
-                VERIFY(is_shared, TRUE, "H5A_is_shared_test");
+                is_shared = H5A__is_shared_test(attr);
+                VERIFY(is_shared, TRUE, "H5A__is_shared_test");
 
                 /* Check refcount for attribute */
-                ret = H5A_get_shared_rc_test(attr, &shared_refcount);
-                CHECK(ret, FAIL, "H5A_get_shared_rc_test");
-                VERIFY(shared_refcount, 1, "H5A_get_shared_rc_test");
+                ret = H5A__get_shared_rc_test(attr, &shared_refcount);
+                CHECK(ret, FAIL, "H5A__get_shared_rc_test");
+                VERIFY(shared_refcount, 1, "H5A__get_shared_rc_test");
 
                 /* Write data into the attribute */
                 big_value[0] = u + 1;
@@ -8241,9 +8248,9 @@ test_attr_shared_write(hid_t fcpl, hid_t fapl)
                 CHECK(ret, FAIL, "H5Awrite");
 
                 /* Check refcount for attribute */
-                ret = H5A_get_shared_rc_test(attr, &shared_refcount);
-                CHECK(ret, FAIL, "H5A_get_shared_rc_test");
-                VERIFY(shared_refcount, 2, "H5A_get_shared_rc_test");
+                ret = H5A__get_shared_rc_test(attr, &shared_refcount);
+                CHECK(ret, FAIL, "H5A__get_shared_rc_test");
+                VERIFY(shared_refcount, 2, "H5A__get_shared_rc_test");
             } /* end else */
 
             /* Close attribute */
@@ -8492,8 +8499,8 @@ test_attr_shared_rename(hid_t fcpl, hid_t fapl)
                 CHECK(attr, FAIL, "H5Acreate2");
 
                 /* Check that attribute is not shared */
-                is_shared = H5A_is_shared_test(attr);
-                VERIFY(is_shared, FALSE, "H5A_is_shared_test");
+                is_shared = H5A__is_shared_test(attr);
+                VERIFY(is_shared, FALSE, "H5A__is_shared_test");
 
                 /* Write data into the attribute */
                 attr_value = u + 1;
@@ -8506,13 +8513,13 @@ test_attr_shared_rename(hid_t fcpl, hid_t fapl)
                 CHECK(attr, FAIL, "H5Acreate2");
 
                 /* Check that attribute is shared */
-                is_shared = H5A_is_shared_test(attr);
-                VERIFY(is_shared, TRUE, "H5A_is_shared_test");
+                is_shared = H5A__is_shared_test(attr);
+                VERIFY(is_shared, TRUE, "H5A__is_shared_test");
 
                 /* Check refcount for attribute */
-                ret = H5A_get_shared_rc_test(attr, &shared_refcount);
-                CHECK(ret, FAIL, "H5A_get_shared_rc_test");
-                VERIFY(shared_refcount, 1, "H5A_get_shared_rc_test");
+                ret = H5A__get_shared_rc_test(attr, &shared_refcount);
+                CHECK(ret, FAIL, "H5A__get_shared_rc_test");
+                VERIFY(shared_refcount, 1, "H5A__get_shared_rc_test");
 
                 /* Write data into the attribute */
                 big_value[0] = u + 1;
@@ -8520,9 +8527,9 @@ test_attr_shared_rename(hid_t fcpl, hid_t fapl)
                 CHECK(ret, FAIL, "H5Awrite");
 
                 /* Check refcount for attribute */
-                ret = H5A_get_shared_rc_test(attr, &shared_refcount);
-                CHECK(ret, FAIL, "H5A_get_shared_rc_test");
-                VERIFY(shared_refcount, 1, "H5A_get_shared_rc_test");
+                ret = H5A__get_shared_rc_test(attr, &shared_refcount);
+                CHECK(ret, FAIL, "H5A__get_shared_rc_test");
+                VERIFY(shared_refcount, 1, "H5A__get_shared_rc_test");
             } /* end else */
 
             /* Close attribute */
@@ -8544,8 +8551,8 @@ test_attr_shared_rename(hid_t fcpl, hid_t fapl)
                 CHECK(attr, FAIL, "H5Acreate2");
 
                 /* Check that attribute is not shared */
-                is_shared = H5A_is_shared_test(attr);
-                VERIFY(is_shared, FALSE, "H5A_is_shared_test");
+                is_shared = H5A__is_shared_test(attr);
+                VERIFY(is_shared, FALSE, "H5A__is_shared_test");
 
                 /* Write data into the attribute */
                 attr_value = u + 1;
@@ -8558,13 +8565,13 @@ test_attr_shared_rename(hid_t fcpl, hid_t fapl)
                 CHECK(attr, FAIL, "H5Acreate2");
 
                 /* Check that attribute is shared */
-                is_shared = H5A_is_shared_test(attr);
-                VERIFY(is_shared, TRUE, "H5A_is_shared_test");
+                is_shared = H5A__is_shared_test(attr);
+                VERIFY(is_shared, TRUE, "H5A__is_shared_test");
 
                 /* Check refcount for attribute */
-                ret = H5A_get_shared_rc_test(attr, &shared_refcount);
-                CHECK(ret, FAIL, "H5A_get_shared_rc_test");
-                VERIFY(shared_refcount, 1, "H5A_get_shared_rc_test");
+                ret = H5A__get_shared_rc_test(attr, &shared_refcount);
+                CHECK(ret, FAIL, "H5A__get_shared_rc_test");
+                VERIFY(shared_refcount, 1, "H5A__get_shared_rc_test");
 
                 /* Write data into the attribute */
                 big_value[0] = u + 1;
@@ -8572,9 +8579,9 @@ test_attr_shared_rename(hid_t fcpl, hid_t fapl)
                 CHECK(ret, FAIL, "H5Awrite");
 
                 /* Check refcount for attribute */
-                ret = H5A_get_shared_rc_test(attr, &shared_refcount);
-                CHECK(ret, FAIL, "H5A_get_shared_rc_test");
-                VERIFY(shared_refcount, 2, "H5A_get_shared_rc_test");
+                ret = H5A__get_shared_rc_test(attr, &shared_refcount);
+                CHECK(ret, FAIL, "H5A__get_shared_rc_test");
+                VERIFY(shared_refcount, 2, "H5A__get_shared_rc_test");
             } /* end else */
 
             /* Close attribute */
@@ -8605,18 +8612,18 @@ test_attr_shared_rename(hid_t fcpl, hid_t fapl)
 
             if(u % 2) {
                 /* Check that attribute is not shared */
-                is_shared = H5A_is_shared_test(attr);
-                VERIFY(is_shared, FALSE, "H5A_is_shared_test");
+                is_shared = H5A__is_shared_test(attr);
+                VERIFY(is_shared, FALSE, "H5A__is_shared_test");
             } /* end if */
             else {
                 /* Check that attribute is shared */
-                is_shared = H5A_is_shared_test(attr);
-                VERIFY(is_shared, TRUE, "H5A_is_shared_test");
+                is_shared = H5A__is_shared_test(attr);
+                VERIFY(is_shared, TRUE, "H5A__is_shared_test");
 
                 /* Check refcount for attribute */
-                ret = H5A_get_shared_rc_test(attr, &shared_refcount);
-                CHECK(ret, FAIL, "H5A_get_shared_rc_test");
-                VERIFY(shared_refcount, 1, "H5A_get_shared_rc_test");
+                ret = H5A__get_shared_rc_test(attr, &shared_refcount);
+                CHECK(ret, FAIL, "H5A__get_shared_rc_test");
+                VERIFY(shared_refcount, 1, "H5A__get_shared_rc_test");
             } /* end else */
 
             /* Close attribute */
@@ -8629,18 +8636,18 @@ test_attr_shared_rename(hid_t fcpl, hid_t fapl)
 
             if(u % 2) {
                 /* Check that attribute is not shared */
-                is_shared = H5A_is_shared_test(attr);
-                VERIFY(is_shared, FALSE, "H5A_is_shared_test");
+                is_shared = H5A__is_shared_test(attr);
+                VERIFY(is_shared, FALSE, "H5A__is_shared_test");
             } /* end if */
             else {
                 /* Check that attribute is shared */
-                is_shared = H5A_is_shared_test(attr);
-                VERIFY(is_shared, TRUE, "H5A_is_shared_test");
+                is_shared = H5A__is_shared_test(attr);
+                VERIFY(is_shared, TRUE, "H5A__is_shared_test");
 
                 /* Check refcount for attribute */
-                ret = H5A_get_shared_rc_test(attr, &shared_refcount);
-                CHECK(ret, FAIL, "H5A_get_shared_rc_test");
-                VERIFY(shared_refcount, 1, "H5A_get_shared_rc_test");
+                ret = H5A__get_shared_rc_test(attr, &shared_refcount);
+                CHECK(ret, FAIL, "H5A__get_shared_rc_test");
+                VERIFY(shared_refcount, 1, "H5A__get_shared_rc_test");
             } /* end else */
 
             /* Close attribute */
@@ -8661,18 +8668,18 @@ test_attr_shared_rename(hid_t fcpl, hid_t fapl)
 
             if(u % 2) {
                 /* Check that attribute is not shared */
-                is_shared = H5A_is_shared_test(attr);
-                VERIFY(is_shared, FALSE, "H5A_is_shared_test");
+                is_shared = H5A__is_shared_test(attr);
+                VERIFY(is_shared, FALSE, "H5A__is_shared_test");
             } /* end if */
             else {
                 /* Check that attribute is shared */
-                is_shared = H5A_is_shared_test(attr);
-                VERIFY(is_shared, TRUE, "H5A_is_shared_test");
+                is_shared = H5A__is_shared_test(attr);
+                VERIFY(is_shared, TRUE, "H5A__is_shared_test");
 
                 /* Check refcount for attribute */
-                ret = H5A_get_shared_rc_test(attr, &shared_refcount);
-                CHECK(ret, FAIL, "H5A_get_shared_rc_test");
-                VERIFY(shared_refcount, 2, "H5A_get_shared_rc_test");
+                ret = H5A__get_shared_rc_test(attr, &shared_refcount);
+                CHECK(ret, FAIL, "H5A__get_shared_rc_test");
+                VERIFY(shared_refcount, 2, "H5A__get_shared_rc_test");
             } /* end else */
 
             /* Close attribute */
@@ -8685,18 +8692,18 @@ test_attr_shared_rename(hid_t fcpl, hid_t fapl)
 
             if(u % 2) {
                 /* Check that attribute is not shared */
-                is_shared = H5A_is_shared_test(attr);
-                VERIFY(is_shared, FALSE, "H5A_is_shared_test");
+                is_shared = H5A__is_shared_test(attr);
+                VERIFY(is_shared, FALSE, "H5A__is_shared_test");
             } /* end if */
             else {
                 /* Check that attribute is shared */
-                is_shared = H5A_is_shared_test(attr);
-                VERIFY(is_shared, TRUE, "H5A_is_shared_test");
+                is_shared = H5A__is_shared_test(attr);
+                VERIFY(is_shared, TRUE, "H5A__is_shared_test");
 
                 /* Check refcount for attribute */
-                ret = H5A_get_shared_rc_test(attr, &shared_refcount);
-                CHECK(ret, FAIL, "H5A_get_shared_rc_test");
-                VERIFY(shared_refcount, 2, "H5A_get_shared_rc_test");
+                ret = H5A__get_shared_rc_test(attr, &shared_refcount);
+                CHECK(ret, FAIL, "H5A__get_shared_rc_test");
+                VERIFY(shared_refcount, 2, "H5A__get_shared_rc_test");
             } /* end else */
 
             /* Close attribute */
@@ -8938,8 +8945,8 @@ test_attr_shared_delete(hid_t fcpl, hid_t fapl)
                 CHECK(attr, FAIL, "H5Acreate2");
 
                 /* Check that attribute is not shared */
-                is_shared = H5A_is_shared_test(attr);
-                VERIFY(is_shared, FALSE, "H5A_is_shared_test");
+                is_shared = H5A__is_shared_test(attr);
+                VERIFY(is_shared, FALSE, "H5A__is_shared_test");
 
                 /* Write data into the attribute */
                 attr_value = u + 1;
@@ -8952,13 +8959,13 @@ test_attr_shared_delete(hid_t fcpl, hid_t fapl)
                 CHECK(attr, FAIL, "H5Acreate2");
 
                 /* Check that attribute is shared */
-                is_shared = H5A_is_shared_test(attr);
-                VERIFY(is_shared, TRUE, "H5A_is_shared_test");
+                is_shared = H5A__is_shared_test(attr);
+                VERIFY(is_shared, TRUE, "H5A__is_shared_test");
 
                 /* Check refcount for attribute */
-                ret = H5A_get_shared_rc_test(attr, &shared_refcount);
-                CHECK(ret, FAIL, "H5A_get_shared_rc_test");
-                VERIFY(shared_refcount, 1, "H5A_get_shared_rc_test");
+                ret = H5A__get_shared_rc_test(attr, &shared_refcount);
+                CHECK(ret, FAIL, "H5A__get_shared_rc_test");
+                VERIFY(shared_refcount, 1, "H5A__get_shared_rc_test");
 
                 /* Write data into the attribute */
                 big_value[0] = u + 1;
@@ -8966,9 +8973,9 @@ test_attr_shared_delete(hid_t fcpl, hid_t fapl)
                 CHECK(ret, FAIL, "H5Awrite");
 
                 /* Check refcount for attribute */
-                ret = H5A_get_shared_rc_test(attr, &shared_refcount);
-                CHECK(ret, FAIL, "H5A_get_shared_rc_test");
-                VERIFY(shared_refcount, 1, "H5A_get_shared_rc_test");
+                ret = H5A__get_shared_rc_test(attr, &shared_refcount);
+                CHECK(ret, FAIL, "H5A__get_shared_rc_test");
+                VERIFY(shared_refcount, 1, "H5A__get_shared_rc_test");
             } /* end else */
 
             /* Close attribute */
@@ -8990,8 +8997,8 @@ test_attr_shared_delete(hid_t fcpl, hid_t fapl)
                 CHECK(attr, FAIL, "H5Acreate2");
 
                 /* Check that attribute is not shared */
-                is_shared = H5A_is_shared_test(attr);
-                VERIFY(is_shared, FALSE, "H5A_is_shared_test");
+                is_shared = H5A__is_shared_test(attr);
+                VERIFY(is_shared, FALSE, "H5A__is_shared_test");
 
                 /* Write data into the attribute */
                 attr_value = u + 1;
@@ -9004,13 +9011,13 @@ test_attr_shared_delete(hid_t fcpl, hid_t fapl)
                 CHECK(attr, FAIL, "H5Acreate2");
 
                 /* Check that attribute is shared */
-                is_shared = H5A_is_shared_test(attr);
-                VERIFY(is_shared, TRUE, "H5A_is_shared_test");
+                is_shared = H5A__is_shared_test(attr);
+                VERIFY(is_shared, TRUE, "H5A__is_shared_test");
 
                 /* Check refcount for attribute */
-                ret = H5A_get_shared_rc_test(attr, &shared_refcount);
-                CHECK(ret, FAIL, "H5A_get_shared_rc_test");
-                VERIFY(shared_refcount, 1, "H5A_get_shared_rc_test");
+                ret = H5A__get_shared_rc_test(attr, &shared_refcount);
+                CHECK(ret, FAIL, "H5A__get_shared_rc_test");
+                VERIFY(shared_refcount, 1, "H5A__get_shared_rc_test");
 
                 /* Write data into the attribute */
                 big_value[0] = u + 1;
@@ -9018,8 +9025,8 @@ test_attr_shared_delete(hid_t fcpl, hid_t fapl)
                 CHECK(ret, FAIL, "H5Awrite");
 
                 /* Check refcount for attribute */
-                ret = H5A_get_shared_rc_test(attr, &shared_refcount);
-                CHECK(ret, FAIL, "H5A_get_shared_rc_test");
+                ret = H5A__get_shared_rc_test(attr, &shared_refcount);
+                CHECK(ret, FAIL, "H5A__get_shared_rc_test");
                 VERIFY(shared_refcount, 2, "H5A_get_shared_rc_test");
             } /* end else */
 
@@ -9054,18 +9061,18 @@ test_attr_shared_delete(hid_t fcpl, hid_t fapl)
 
             if(u % 2) {
                 /* Check that attribute is not shared */
-                is_shared = H5A_is_shared_test(attr);
-                VERIFY(is_shared, FALSE, "H5A_is_shared_test");
+                is_shared = H5A__is_shared_test(attr);
+                VERIFY(is_shared, FALSE, "H5A__is_shared_test");
             } /* end if */
             else {
                 /* Check that attribute is shared */
-                is_shared = H5A_is_shared_test(attr);
-                VERIFY(is_shared, TRUE, "H5A_is_shared_test");
+                is_shared = H5A__is_shared_test(attr);
+                VERIFY(is_shared, TRUE, "H5A__is_shared_test");
 
                 /* Check refcount for attribute */
-                ret = H5A_get_shared_rc_test(attr, &shared_refcount);
-                CHECK(ret, FAIL, "H5A_get_shared_rc_test");
-                VERIFY(shared_refcount, 1, "H5A_get_shared_rc_test");
+                ret = H5A__get_shared_rc_test(attr, &shared_refcount);
+                CHECK(ret, FAIL, "H5A__get_shared_rc_test");
+                VERIFY(shared_refcount, 1, "H5A__get_shared_rc_test");
             } /* end else */
 
             /* Close attribute */
@@ -9307,8 +9314,8 @@ test_attr_shared_unlink(hid_t fcpl, hid_t fapl)
                 CHECK(attr, FAIL, "H5Acreate2");
 
                 /* Check that attribute is not shared */
-                is_shared = H5A_is_shared_test(attr);
-                VERIFY(is_shared, FALSE, "H5A_is_shared_test");
+                is_shared = H5A__is_shared_test(attr);
+                VERIFY(is_shared, FALSE, "H5A__is_shared_test");
 
                 /* Write data into the attribute */
                 attr_value = u + 1;
@@ -9321,13 +9328,13 @@ test_attr_shared_unlink(hid_t fcpl, hid_t fapl)
                 CHECK(attr, FAIL, "H5Acreate2");
 
                 /* ChecFk that attribute is shared */
-                is_shared = H5A_is_shared_test(attr);
-                VERIFY(is_shared, TRUE, "H5A_is_shared_test");
+                is_shared = H5A__is_shared_test(attr);
+                VERIFY(is_shared, TRUE, "H5A__is_shared_test");
 
                 /* Check refcount for attribute */
-                ret = H5A_get_shared_rc_test(attr, &shared_refcount);
-                CHECK(ret, FAIL, "H5A_get_shared_rc_test");
-                VERIFY(shared_refcount, 1, "H5A_get_shared_rc_test");
+                ret = H5A__get_shared_rc_test(attr, &shared_refcount);
+                CHECK(ret, FAIL, "H5A__get_shared_rc_test");
+                VERIFY(shared_refcount, 1, "H5A__get_shared_rc_test");
 
                 /* Write data into the attribute */
                 big_value[0] = u + 1;
@@ -9335,9 +9342,9 @@ test_attr_shared_unlink(hid_t fcpl, hid_t fapl)
                 CHECK(ret, FAIL, "H5Awrite");
 
                 /* Check refcount for attribute */
-                ret = H5A_get_shared_rc_test(attr, &shared_refcount);
-                CHECK(ret, FAIL, "H5A_get_shared_rc_test");
-                VERIFY(shared_refcount, 1, "H5A_get_shared_rc_test");
+                ret = H5A__get_shared_rc_test(attr, &shared_refcount);
+                CHECK(ret, FAIL, "H5A__get_shared_rc_test");
+                VERIFY(shared_refcount, 1, "H5A__get_shared_rc_test");
             } /* end else */
 
             /* Close attribute */
@@ -9359,8 +9366,8 @@ test_attr_shared_unlink(hid_t fcpl, hid_t fapl)
                 CHECK(attr, FAIL, "H5Acreate2");
 
                 /* Check that attribute is not shared */
-                is_shared = H5A_is_shared_test(attr);
-                VERIFY(is_shared, FALSE, "H5A_is_shared_test");
+                is_shared = H5A__is_shared_test(attr);
+                VERIFY(is_shared, FALSE, "H5A__is_shared_test");
 
                 /* Write data into the attribute */
                 attr_value = u + 1;
@@ -9373,13 +9380,13 @@ test_attr_shared_unlink(hid_t fcpl, hid_t fapl)
                 CHECK(attr, FAIL, "H5Acreate2");
 
                 /* Check that attribute is shared */
-                is_shared = H5A_is_shared_test(attr);
-                VERIFY(is_shared, TRUE, "H5A_is_shared_test");
+                is_shared = H5A__is_shared_test(attr);
+                VERIFY(is_shared, TRUE, "H5A__is_shared_test");
 
                 /* Check refcount for attribute */
-                ret = H5A_get_shared_rc_test(attr, &shared_refcount);
-                CHECK(ret, FAIL, "H5A_get_shared_rc_test");
-                VERIFY(shared_refcount, 1, "H5A_get_shared_rc_test");
+                ret = H5A__get_shared_rc_test(attr, &shared_refcount);
+                CHECK(ret, FAIL, "H5A__get_shared_rc_test");
+                VERIFY(shared_refcount, 1, "H5A__get_shared_rc_test");
 
                 /* Write data into the attribute */
                 big_value[0] = u + 1;
@@ -9387,9 +9394,9 @@ test_attr_shared_unlink(hid_t fcpl, hid_t fapl)
                 CHECK(ret, FAIL, "H5Awrite");
 
                 /* Check refcount for attribute */
-                ret = H5A_get_shared_rc_test(attr, &shared_refcount);
-                CHECK(ret, FAIL, "H5A_get_shared_rc_test");
-                VERIFY(shared_refcount, 2, "H5A_get_shared_rc_test");
+                ret = H5A__get_shared_rc_test(attr, &shared_refcount);
+                CHECK(ret, FAIL, "H5A__get_shared_rc_test");
+                VERIFY(shared_refcount, 2, "H5A__get_shared_rc_test");
             } /* end else */
 
             /* Close attribute */
@@ -9433,18 +9440,18 @@ test_attr_shared_unlink(hid_t fcpl, hid_t fapl)
 
             if(u % 2) {
                 /* Check that attribute is not shared */
-                is_shared = H5A_is_shared_test(attr);
-                VERIFY(is_shared, FALSE, "H5A_is_shared_test");
+                is_shared = H5A__is_shared_test(attr);
+                VERIFY(is_shared, FALSE, "H5A__is_shared_test");
             } /* end if */
             else {
                 /* Check that attribute is shared */
-                is_shared = H5A_is_shared_test(attr);
-                VERIFY(is_shared, TRUE, "H5A_is_shared_test");
+                is_shared = H5A__is_shared_test(attr);
+                VERIFY(is_shared, TRUE, "H5A__is_shared_test");
 
                 /* Check refcount for attribute */
-                ret = H5A_get_shared_rc_test(attr, &shared_refcount);
-                CHECK(ret, FAIL, "H5A_get_shared_rc_test");
-                VERIFY(shared_refcount, 1, "H5A_get_shared_rc_test");
+                ret = H5A__get_shared_rc_test(attr, &shared_refcount);
+                CHECK(ret, FAIL, "H5A__get_shared_rc_test");
+                VERIFY(shared_refcount, 1, "H5A__get_shared_rc_test");
             } /* end else */
 
             /* Close attribute */
@@ -10484,7 +10491,7 @@ test_attr_bug8(hid_t fcpl, hid_t fapl)
     CHECK(gid, FAIL, "H5Gcreate2");
 
     /* Get root group address */
-    ret = H5Oget_info(fid, &oinfo);
+    ret = H5Oget_info2(fid, &oinfo, H5O_INFO_BASIC);
     CHECK(ret, FAIL, "H5Oget_info");
     root_addr = oinfo.addr;
 
@@ -10509,7 +10516,7 @@ test_attr_bug8(hid_t fcpl, hid_t fapl)
     CHECK(gid, FAIL, "H5Gopen2");
     oid = H5Oopen(gid, LINK1_NAME, H5P_DEFAULT);
     CHECK(oid, FAIL, "H5Oopen");
-    ret = H5Oget_info(oid, &oinfo);
+    ret = H5Oget_info2(oid, &oinfo, H5O_INFO_BASIC);
     CHECK(ret, FAIL, "H5Oget_info");
     if(oinfo.addr != root_addr)
         TestErrPrintf("incorrect link target address: addr: %llu, expected: %llu\n", (long long unsigned)oinfo.addr, (long long unsigned)root_addr);
@@ -10554,7 +10561,7 @@ test_attr_bug8(hid_t fcpl, hid_t fapl)
     CHECK(gid, FAIL, "H5Gopen2");
     oid = H5Oopen(gid, LINK1_NAME, H5P_DEFAULT);
     CHECK(oid, FAIL, "H5Oopen");
-    ret = H5Oget_info(oid, &oinfo);
+    ret = H5Oget_info2(oid, &oinfo, H5O_INFO_BASIC);
     CHECK(ret, FAIL, "H5Oget_info");
     if(oinfo.addr != root_addr)
         TestErrPrintf("incorrect link target address: addr: %llu, expected: %llu\n", (long long unsigned)oinfo.addr, (long long unsigned)root_addr);
@@ -10669,6 +10676,92 @@ test_attr_bug9(hid_t fcpl, hid_t fapl)
     ret = H5Sclose(sid);
     CHECK(ret, FAIL, "H5Sclose");
 }   /* test_attr_bug9() */
+
+/****************************************************************
+**
+**  test_attr_delete_dense(): 
+**      This is to verify the error as described in HDFFV-9277
+**      is fixed when deleting the last "large" attribute that
+**      is stored densely.
+**
+****************************************************************/
+static void
+test_attr_delete_last_dense(hid_t fcpl, hid_t fapl)
+{
+    hid_t fid;      /* File ID */
+    hid_t gid;      /* Group ID */
+    hid_t aid;      /* Attribute ID */
+    hid_t sid;      /* Dataspace ID */
+    hsize_t dim2[2] = {DIM0, DIM1}; /* Dimension sizes */
+    int i, j;       /* Local index variables */
+    double *data = NULL;    /* Pointer to the data buffer */
+    herr_t ret;     /* Generic return status */
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing Deleting the last large attribute stored densely\n"));
+
+    /* Create the file */
+    fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, fapl);
+    CHECK(fid, FAIL, "H5Fcreate");
+
+    /* Create the group */
+    gid = H5Gcreate2(fid, GRPNAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(gid, FAIL, "H5Gcreate");
+
+    /* Create the dataspace */
+    sid = H5Screate_simple(RANK, dim2, NULL);
+    CHECK(sid, FAIL, "H5Screate_simple");
+
+    /* Attach the attribute to the group */
+    aid = H5Acreate2(gid, ATTRNAME, H5T_IEEE_F64LE, sid, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(aid, FAIL, "H5Acreate2");
+
+    /* Allocate the data buffer */
+    data = (double *)HDmalloc((size_t)(DIM0 * DIM1) * sizeof(double));
+    CHECK_PTR(data, "HDmalloc");
+
+    /* Initialize the data */
+    for(i = 0; i < DIM0; i++)
+        for(j = 0; j < DIM1; j++)
+            *(data + i * DIM1 + j) = i + j;
+
+    /* Write to the attribute */
+    ret = H5Awrite(aid, H5T_NATIVE_DOUBLE, data);
+    CHECK(ret, FAIL, "H5Awrite");
+
+    /* Closing */
+    ret = H5Aclose(aid);
+    CHECK(ret, FAIL, "H5Aclose");
+    ret = H5Sclose(sid);
+    CHECK(ret, FAIL, "H5Sclose");
+    ret = H5Gclose(gid);
+    CHECK(ret, FAIL, "H5Gclose");
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Re-open the file */
+    fid = H5Fopen(FILENAME, H5F_ACC_RDWR, fapl);
+    CHECK(fid, FAIL, "H5Fopen");
+
+    /* Open the group */
+    gid = H5Gopen2(fid, GRPNAME, H5P_DEFAULT);
+    CHECK(gid, FAIL, "H5Gopen");
+
+    /* Delete the attribute */
+    ret = H5Adelete(gid, ATTRNAME);
+    CHECK(ret, FAIL, "H5Adelete");
+
+    /* Closing */
+    ret = H5Gclose(gid);
+    CHECK(ret, FAIL, "H5Gclose");
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Free the data buffer */
+    if(data)
+        HDfree(data);
+
+}   /* test_attr_delete_last_dense() */
 
 /****************************************************************
 **
@@ -10819,6 +10912,7 @@ test_attr(void)
                 test_attr_bug7(my_fcpl, my_fapl);               /* Test creating and deleting large attributes in ohdr chunk 0 */
                 test_attr_bug8(my_fcpl, my_fapl);               /* Test attribute expanding object header with undecoded messages */
                 test_attr_bug9(my_fcpl, my_fapl);               /* Test large attributes converting to dense storage */
+                test_attr_delete_last_dense(my_fcpl, my_fapl);  /* Test */
             } /* end for */
         } /* end if */
         else {

@@ -20,6 +20,7 @@
 #include "h5test.h"
 #include "H5srcdir.h"
 #include "H5ACprivate.h"
+#include "H5CXprivate.h"        /* API Contexts                         */
 #include "H5HLprivate.h"
 #include "H5Iprivate.h"
 
@@ -62,11 +63,15 @@ main(void)
     int         i, j;               /* miscellaneous counters   */
     char        buf[1024];          /* the value to store       */
     const char  *s;                 /* value to read            */
+    hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
 
     /* Reset library */
     h5_reset();
     fapl = h5_fileaccess();
 
+    /* Push API context */
+    if(H5CX_push() < 0) FAIL_STACK_ERROR
+    api_ctx_pushed = TRUE;
 
     /*
      * Test writing to the heap...
@@ -85,12 +90,12 @@ main(void)
         H5Eprint2(H5E_DEFAULT, stdout);
         goto error;
     }
-    if(FAIL == H5HL_create(f, H5AC_ind_read_dxpl_id, (size_t)0, &heap_addr/*out*/)) {
+    if(FAIL == H5HL_create(f, (size_t)0, &heap_addr/*out*/)) {
         H5_FAILED();
         H5Eprint2(H5E_DEFAULT, stdout);
         goto error;
     }
-    if (NULL == (heap = H5HL_protect(f, H5AC_ind_read_dxpl_id, heap_addr, H5AC__NO_FLAGS_SET))) {
+    if (NULL == (heap = H5HL_protect(f, heap_addr, H5AC__NO_FLAGS_SET))) {
         H5_FAILED();
         H5Eprint2(H5E_DEFAULT, stdout);
         goto error;
@@ -102,7 +107,7 @@ main(void)
         if(j > 4)
             buf[j] = '\0';
 
-        if(UFAIL == (obj[i] = H5HL_insert(f, H5AC_ind_read_dxpl_id, heap, strlen(buf) + 1, buf))) {
+        if(UFAIL == (obj[i] = H5HL_insert(f, heap, strlen(buf) + 1, buf))) {
             H5_FAILED();
             H5Eprint2(H5E_DEFAULT, stdout);
             goto error;
@@ -142,7 +147,7 @@ main(void)
         if(j > 4)
             buf[j] = '\0';
 
-        if (NULL == (heap = H5HL_protect(f, H5AC_ind_read_dxpl_id, heap_addr, H5AC__READ_ONLY_FLAG))) {
+        if (NULL == (heap = H5HL_protect(f, heap_addr, H5AC__READ_ONLY_FLAG))) {
             H5_FAILED();
             H5Eprint2(H5E_DEFAULT, stdout);
             goto error;
@@ -199,6 +204,10 @@ main(void)
     /* Verify symbol table messages are cached */
     if(h5_verify_cached_stabs(FILENAME, fapl) < 0) TEST_ERROR
 
+    /* Pop API context */
+    if(api_ctx_pushed && H5CX_pop() < 0) FAIL_STACK_ERROR
+    api_ctx_pushed = FALSE;
+
     HDputs("All local heap tests passed.");
     h5_cleanup(FILENAME, fapl);
 
@@ -209,6 +218,9 @@ main(void)
     H5E_BEGIN_TRY {
         H5Fclose(file);
     } H5E_END_TRY;
+
+    if(api_ctx_pushed) H5CX_pop();
+
     return 1;
 }
 

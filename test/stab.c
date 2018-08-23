@@ -419,7 +419,7 @@ lifecycle(hid_t fcpl, hid_t fapl2)
     if(H5G__is_new_dense_test(gid) != FALSE) TEST_ERROR
 
     /* Check that the object header is only one chunk and the space has been allocated correctly */
-    if(H5Oget_info(gid, &oinfo) < 0) TEST_ERROR
+    if(H5Oget_info2(gid, &oinfo, H5O_INFO_HDR) < 0) TEST_ERROR
     if(oinfo.hdr.space.total != 151) TEST_ERROR
     if(oinfo.hdr.space.free != 0) TEST_ERROR
     if(oinfo.hdr.nmesgs != 6) TEST_ERROR
@@ -441,7 +441,7 @@ lifecycle(hid_t fcpl, hid_t fapl2)
     if(H5G__is_new_dense_test(gid) != TRUE) TEST_ERROR
 
     /* Check that the object header is still one chunk and the space has been allocated correctly */
-    if(H5Oget_info(gid, &oinfo) < 0) TEST_ERROR
+    if(H5Oget_info2(gid, &oinfo, H5O_INFO_HDR) < 0) TEST_ERROR
     if(oinfo.hdr.space.total != 151) TEST_ERROR
     if(oinfo.hdr.space.free != 92) TEST_ERROR
     if(oinfo.hdr.nmesgs != 3) TEST_ERROR
@@ -1141,7 +1141,7 @@ error:
     } H5E_END_TRY;
 
     return 1;
-} /* end old_api() */
+} /* end corrupt_stab_msg() */
 
 
 /*-------------------------------------------------------------------------

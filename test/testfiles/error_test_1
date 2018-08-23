@@ -21,7 +21,7 @@ Error Test-DIAG: Error detected in Error Program (1.0) thread (IDs):
 
 Testing error API based on data I/O
 HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
-  #000: (file name) line (number) in H5Dwrite(): not a dataset
+  #000: (file name) line (number) in H5Dwrite(): dset_id is not a dataset ID
     major: Invalid arguments to routine
     minor: Inappropriate type
 Error Test-DIAG: Error detected in Error Program (1.0) thread (IDs):
@@ -32,7 +32,7 @@ Error Test-DIAG: Error detected in Error Program (1.0) thread (IDs):
     major: Error in IO
     minor: Error in H5Dwrite
 HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
-  #002: (file name) line (number) in H5Dwrite(): not a dataset
+  #002: (file name) line (number) in H5Dwrite(): dset_id is not a dataset ID
     major: Invalid arguments to routine
     minor: Inappropriate type
 
@@ -48,7 +48,7 @@ HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
     major: Low-level I/O
     minor: Read failed
   #003: (file name) line (number) in H5D__chunk_lock(): data pipeline read failed
-    major: Data filters
+    major: Dataset
     minor: Filter operation failed
   #004: (file name) line (number) in H5Z_pipeline(): required filter 'bogus' is not registered
     major: Data filters

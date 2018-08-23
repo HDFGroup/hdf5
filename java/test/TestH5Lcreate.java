@@ -37,8 +37,8 @@ import org.junit.rules.TestName;
 
 public class TestH5Lcreate {
     @Rule public TestName testname = new TestName();
-    private static final String H5_EXTFILE = "h5ex_g_iterate.hdf";
-    private static final String H5_FILE = "test.h5";
+    private static final String H5_EXTFILE = "h5ex_g_iterateL2.hdf";
+    private static final String H5_FILE = "testL.h5";
     private static final int DIM_X = 4;
     private static final int DIM_Y = 6;
     long H5fcpl = -1;
@@ -147,6 +147,13 @@ public class TestH5Lcreate {
             H5.H5Pset_link_creation_order(H5fcpl, HDF5Constants.H5P_CRT_ORDER_TRACKED+HDF5Constants.H5P_CRT_ORDER_INDEXED);
             H5fid = H5.H5Fcreate(H5_FILE, HDF5Constants.H5F_ACC_TRUNC,
                     H5fcpl, HDF5Constants.H5P_DEFAULT);
+        }
+        catch (Throwable err) {
+            err.printStackTrace();
+            fail("TestH5L.createH5file: " + err);
+        }
+        assertTrue("TestH5L.createH5file: H5.H5Fcreate: ",H5fid > 0);
+        try {
             H5dsid = H5.H5Screate_simple(2, H5dims, null);
             H5did1 = _createDataset(H5fid, H5dsid, "DS1", HDF5Constants.H5P_DEFAULT);
             H5gid = _createGroup(H5fid, "/G1");
@@ -154,9 +161,8 @@ public class TestH5Lcreate {
         }
         catch (Throwable err) {
             err.printStackTrace();
-            fail("TestH5L.createH5file: " + err);
+            fail("TestH5L.createH5objs: " + err);
         }
-        assertTrue("TestH5L.createH5file: H5.H5Fcreate: ",H5fid > 0);
         assertTrue("TestH5L.createH5file: H5.H5Screate_simple: ",H5dsid > 0);
         assertTrue("TestH5L.createH5file: H5.H5Gcreate: ",H5gid > 0);
 

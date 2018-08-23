@@ -550,6 +550,7 @@ JAVA_PATH_NAME = @JAVA_PATH_NAME@
 JAVA_VERSION = @JAVA_VERSION@
 JNIFLAGS = @JNIFLAGS@
 JUNIT = @JUNIT@
+LARGE_PARALLEL_IO = @LARGE_PARALLEL_IO@
 LD = @LD@
 LDFLAGS = @LDFLAGS@
 LIBOBJS = @LIBOBJS@
@@ -597,6 +598,7 @@ PAC_FORTRAN_NATIVE_REAL_KIND = @PAC_FORTRAN_NATIVE_REAL_KIND@
 PAC_FORTRAN_NATIVE_REAL_SIZEOF = @PAC_FORTRAN_NATIVE_REAL_SIZEOF@
 PAC_FORTRAN_NUM_INTEGER_KINDS = @PAC_FORTRAN_NUM_INTEGER_KINDS@
 PARALLEL = @PARALLEL@
+PARALLEL_FILTERED_WRITES = @PARALLEL_FILTERED_WRITES@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 PROFILING = @PROFILING@
 RANLIB = @RANLIB@
@@ -756,8 +758,9 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.clog2 *.h5 expect_sorted \
 TEST_PROG = h5diffgentest
 TEST_SCRIPT = testh5diff.sh $(am__append_1)
 check_SCRIPTS = $(TEST_SCRIPT) $(TEST_SCRIPT_PARA)
+@BUILD_PARALLEL_CONDITIONAL_FALSE@SCRIPT_DEPEND = ../../src/h5diff/h5diff$(EXEEXT) $(H5PDIFF)
 # The parallel test script testph5diff.sh actually depends on testh5diff.sh.
-SCRIPT_DEPEND = ../../src/h5diff/h5diff$(EXEEXT) $(H5PDIFF) ../../src/h5diff/testh5diff.sh
+@BUILD_PARALLEL_CONDITIONAL_TRUE@SCRIPT_DEPEND = ../../src/h5diff/h5diff$(EXEEXT) $(H5PDIFF) $(TEST_SCRIPT)
 
 # Source files for the program
 h5diffgentest_SOURCES = h5diffgentest.c
@@ -767,7 +770,7 @@ LDADD = $(LIBH5TOOLS) $(LIBHDF5)
 @HAVE_SHARED_CONDITIONAL_TRUE@noinst_LTLIBRARIES = libdynlibdiff.la
 @HAVE_SHARED_CONDITIONAL_TRUE@libdynlibdiff_la_SOURCES = dynlib_diff.c
 @HAVE_SHARED_CONDITIONAL_TRUE@libdynlibdiff_la_LDFLAGS = $(AM_LDFLAGS) -avoid-version -module -shared -export-dynamic -rpath /nowhere
-DISTCLEANFILES = h5diff_plugin.sh
+DISTCLEANFILES = testh5diff.sh h5diff_plugin.sh
 
 # Automake needs to be taught how to build lib, progs and tests targets.
 # These will be filled in automatically for the most part (e.g.,

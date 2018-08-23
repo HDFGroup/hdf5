@@ -1,10 +1,5 @@
 cmake_minimum_required (VERSION 3.10)
-PROJECT (HDF5_EXAMPLES)
-
-#-----------------------------------------------------------------------------
-# Apply Definitions to compiler in this directory and below
-#-----------------------------------------------------------------------------
-add_definitions (${HDF_EXTRA_C_FLAGS})
+project (HDF5_EXAMPLES C)
 
 #-----------------------------------------------------------------------------
 # Define Sources
@@ -46,26 +41,30 @@ set (examples
 
 foreach (example ${examples})
   add_executable (${example} ${HDF5_EXAMPLES_SOURCE_DIR}/${example}.c)
-  TARGET_C_PROPERTIES (${example} STATIC " " " ")
-  target_link_libraries (${example} ${HDF5_LIB_TARGET})
+  target_include_directories(${example} PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+  TARGET_C_PROPERTIES (${example} STATIC)
+  target_link_libraries (${example} PRIVATE ${HDF5_LIB_TARGET})
   set_target_properties (${example} PROPERTIES FOLDER examples)
   if (BUILD_SHARED_LIBS)
     add_executable (${example}-shared ${HDF5_EXAMPLES_SOURCE_DIR}/${example}.c)
-    TARGET_C_PROPERTIES (${example}-shared SHARED " " " ")
-    target_link_libraries (${example}-shared ${HDF5_LIBSH_TARGET})
+    target_include_directories(${example}-shared PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+    TARGET_C_PROPERTIES (${example}-shared SHARED)
+    target_link_libraries (${example}-shared PRIVATE ${HDF5_LIBSH_TARGET})
     set_target_properties (${example}-shared PROPERTIES FOLDER examples)
   endif ()
 endforeach ()
 
 if (H5_HAVE_PARALLEL)
   add_executable (ph5example ${HDF5_EXAMPLES_SOURCE_DIR}/ph5example.c)
-  TARGET_C_PROPERTIES (ph5example STATIC " " " ")
-  target_link_libraries (ph5example ${HDF5_LIB_TARGET} ${MPI_C_LIBRARIES})
+  target_include_directories(ph5example PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+  TARGET_C_PROPERTIES (ph5example STATIC)
+  target_link_libraries (ph5example PRIVATE ${HDF5_LIB_TARGET} ${MPI_C_LIBRARIES})
   set_target_properties (ph5example PROPERTIES FOLDER examples)
   if (BUILD_SHARED_LIBS)
     add_executable (ph5example-shared ${HDF5_EXAMPLES_SOURCE_DIR}/ph5example.c)
-    TARGET_C_PROPERTIES (ph5example-shared SHARED " " " ")
-    target_link_libraries (ph5example-shared ${HDF5_LIBSH_TARGET} ${MPI_C_LIBRARIES})
+    target_include_directories(ph5example-shared PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+    TARGET_C_PROPERTIES (ph5example-shared SHARED)
+    target_link_libraries (ph5example-shared PRIVATE ${HDF5_LIBSH_TARGET} ${MPI_C_LIBRARIES})
     set_target_properties (ph5example-shared PROPERTIES FOLDER examples)
   endif ()
 endif ()

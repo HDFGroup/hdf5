@@ -32,8 +32,8 @@ import org.junit.rules.TestName;
 
 public class TestH5Fbasic {
     @Rule public TestName testname = new TestName();
-    private static final String H5_FILE = "test.h5";
-    private static final String TXT_FILE = "test.txt";
+    private static final String H5_FILE = "testFb.h5";
+    private static final String TXT_FILE = "testFb.txt";
     long H5fid = -1;
 
     private final void _deleteFile(String filename) {

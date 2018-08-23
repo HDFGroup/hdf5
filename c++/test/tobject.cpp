@@ -523,19 +523,106 @@ static void test_open_object_header()
         cerr << " in Exception" << endl;
         issue_fail_msg("test_file_name()", __LINE__, __FILE__, E.getCDetailMsg());
     }
-} /* test_open_object_header() */
+}   // test_open_object_header
 
 
 /*-------------------------------------------------------------------------
- * Function:    test_objects
+ * Function:    test_getobjectinfo_same_file
+ *
+ * Purpose      Test that querying the object info for objects in the same
+ *              file will return the same file "number".
+ *
+ * Return       None
+ *
+ * July, 2018
+ *-------------------------------------------------------------------------
+ */
+const H5std_string FILE_OBJINFO("tobject_getinfo.h5");
+const H5std_string GROUP1NAME("group1");
+const H5std_string GROUP2NAME("group2");
+static void test_getobjectinfo_same_file()
+{
+    H5O_info_t	oinfo1, oinfo2;         /* Object info structs */
+
+    // Output message about test being performed
+    SUBTEST("Group::getObjinfo");
+
+    try {
+        // Create a new HDF5 file
+        H5File file1(FILE_OBJINFO, H5F_ACC_TRUNC);
+
+        // Create two groups in the file
+        Group grp1(file1.createGroup(GROUP1NAME));
+        Group grp2(file1.createGroup(GROUP2NAME));
+
+        // Reset object info
+        HDmemset(&oinfo1, 0, sizeof(oinfo1));
+        HDmemset(&oinfo2, 0, sizeof(oinfo2));
+
+        // Query the info of two groups and verify that they have the same
+        // file number
+        grp1.getObjinfo(oinfo1);
+        grp2.getObjinfo(oinfo2);
+        verify_val(oinfo1.fileno, oinfo2.fileno, "file number from getObjinfo", __LINE__, __FILE__);
+
+        // Close groups and file
+        grp1.close();
+        grp2.close();
+        file1.close();
+
+        // Open the file twice
+        file1.openFile(FILE_OBJINFO, H5F_ACC_RDWR);
+        H5File file2(FILE_OBJINFO, H5F_ACC_RDWR);
+
+        // Create two groups in the file
+        grp1 = file1.openGroup(GROUP1NAME);
+        grp2 = file2.openGroup(GROUP2NAME);
+
+        // Reset object info
+        HDmemset(&oinfo1, 0, sizeof(oinfo1));
+        HDmemset(&oinfo2, 0, sizeof(oinfo2));
+
+        // Query the info of two groups and verify that they have the same
+        // file number
+        grp1.getObjinfo(oinfo1);
+        grp2.getObjinfo(oinfo2);
+        verify_val(oinfo1.fileno, oinfo2.fileno, "file number from getObjinfo", __LINE__, __FILE__);
+
+
+        // Reset object info
+        HDmemset(&oinfo1, 0, sizeof(oinfo1));
+        HDmemset(&oinfo2, 0, sizeof(oinfo2));
+
+        file1.getObjinfo(GROUP1NAME, oinfo1);
+        file1.getObjinfo(GROUP2NAME, oinfo2);
+        verify_val(oinfo1.fileno, oinfo2.fileno, "file number from getObjectInfo", __LINE__, __FILE__);
+
+        // Close groups and files
+        grp1.close();
+        grp2.close();
+        file1.close();
+        file2.close();
+
+        PASSED();
+    }   // end of try block
+    // catch all other exceptions
+    catch (Exception& E)
+    {
+        cerr << " in Exception " << E.getCFuncName() << "detail: " << E.getCDetailMsg() << endl;
+        issue_fail_msg("test_file_name()", __LINE__, __FILE__, E.getCDetailMsg());
+    }
+
+}   // test_h5o_getinfo_same_file
+
+/*-------------------------------------------------------------------------
+ * Function:    test_object
  *
  * Purpose      Tests HDF5 object related functionality
  *
  * Return       Success: 0
  *              Failure: -1
  *
- * Programmer   Binh-Minh Ribler
- *              Friday, Mar 4, 2014
+ * March 4, 2014
  *-------------------------------------------------------------------------
  */
 extern "C"
@@ -549,8 +636,9 @@ void test_object()
     test_get_objname_ontypes();        // Test get object name from types
     test_get_objtype();    // Test get object type
     test_open_object_header();    // Test object header functions (H5O)
+    test_getobjectinfo_same_file();    // Test object info in same file
 
-}   // test_objects
+}   // test_object
 
 
 /*-------------------------------------------------------------------------

@@ -115,7 +115,7 @@ vds_select_equal(hid_t space1, hid_t space2)
                 if(npoints1 != npoints2)
                     return FALSE;
 
-                /* Allocate point lists.  Do not return directly afer
+                /* Allocate point lists.  Do not return directly after
                  * allocating, to make sure buffers are freed. */
                 if(NULL == (buf1 = (hsize_t *)HDmalloc((size_t)rank1 * (size_t)npoints1 * sizeof(hsize_t))))
                     TEST_ERROR
@@ -372,7 +372,7 @@ test_api_get_ex_dcpl(test_api_config_t config, hid_t fapl, hid_t dcpl,
             TEST_ERROR
 
         /* Test H5Oget_info returns correct metadata size */
-        if(H5Oget_info(dset, &oinfo) < 0)
+        if(H5Oget_info2(dset, &oinfo, H5O_INFO_META_SIZE) < 0)
             TEST_ERROR
         if(oinfo.meta_size.obj.index_size != (hsize_t)0)
             TEST_ERROR
@@ -618,6 +618,9 @@ test_api(test_api_config_t config, hid_t fapl)
         TEST_ERROR
 
     /* Get examination DCPL */
+
+    
+    /* Should be a value of 174, not 213. HDFFV-10469 */
     if(test_api_get_ex_dcpl(config, fapl, dcpl, &ex_dcpl, vspace[0], filename, (hsize_t)174) < 0)
         TEST_ERROR
 
@@ -1150,18 +1153,9 @@ test_vds_prefix(unsigned config, hid_t fapl)
     hid_t       srcdset[4] = {-1, -1, -1, -1}; /* Source datsets */
     hid_t       vdset = -1;     /* Virtual dataset */
     hsize_t     dims[4] = {10, 26, 0, 0}; /* Data space current size */
-    hsize_t     start[4];       /* Hyperslab start */
-    hsize_t     stride[4];      /* Hyperslab stride */
-    hsize_t     count[4];       /* Hyperslab count */
-    hsize_t     block[4];       /* Hyperslab block */
-    hssize_t    offset[2] = {0, 0}; /* Selection offset */
     int         buf[10][26];    /* Write and expected read buffer */
     int         rbuf[10][26];   /* Read buffer */
-    int         rbuf99[9][9];   /* 9x9 Read buffer */
-    int         evbuf[10][26];  /* Expected VDS "buffer" */
-    int         erbuf[10][26];  /* Expected read buffer */
     int         fill = -1;      /* Fill value */
-    herr_t      ret;            /* Generic return value */
     int         i, j;
     char        buffer[1024];   /* buffer to read vds_prefix       */
 

@@ -481,6 +481,21 @@ static void test_reference_group()
         fname = group.getFileName();
         verify_val(fname, FILE1, "H5Group::getFileName",__LINE__,__FILE__);
 
+        // Check object type using Group::getObjinfo()
+        H5O_info_t oinfo;
+        HDmemset(&oinfo, 0, sizeof(oinfo));
+        group.getObjinfo(".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)0, oinfo);
+        verify_val(oinfo.type, H5O_TYPE_DATASET, "Group::getObjinfo",__LINE__,__FILE__);
+
+        // Check for out of bound query by index
+        try {
+            HDmemset(&oinfo, 0, sizeof(oinfo));
+            group.getObjinfo(".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)9, oinfo);
+
+            // Should FAIL but didn't, so throw an invalid action exception
+            throw InvalidActionException("Group::getObjinfo", "Out of bound index.");
+        } catch (Exception& err) {} // do nothing, failure expected
+
         // Unlink one of the objects in the dereferenced group, and re-check
         refgroup.unlink(GROUPNAME2);
         nobjs = refgroup.getNumObjs();
