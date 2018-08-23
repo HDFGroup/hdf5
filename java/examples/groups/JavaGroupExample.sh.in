@@ -60,6 +60,8 @@ $HDFLIB_HOME/slf4j-api-1.7.25.jar
 $HDFLIB_HOME/ext/slf4j-simple-1.7.25.jar
 "
 LIST_DATA_FILES="
+$HDFTEST_HOME/h5ex_g_iterate.h5
+$HDFTEST_HOME/h5ex_g_visit.h5
 $HDFTEST_HOME/../testfiles/examples.groups.H5Ex_G_Create.txt
 $HDFTEST_HOME/../testfiles/examples.groups.H5Ex_G_Iterate.txt
 $HDFTEST_HOME/../testfiles/examples.groups.H5Ex_G_Compact.txt
@@ -178,6 +180,7 @@ CLEAN_DATAFILES_AND_BLDDIR()
         $RM $BLDDIR/examples.groups.H5Ex_G_*.txt
         $RM $BLDDIR/H5Ex_G_*.out
         $RM $BLDDIR/H5Ex_G_*.h5
+        $RM $BLDDIR/h5ex_g_*.h5
         SDIR=`$DIRNAME $tstfile`
         INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
         INODE_DDIR=`$LS -i -d $BLDDIR | $AWK -F' ' '{print $1}'`
