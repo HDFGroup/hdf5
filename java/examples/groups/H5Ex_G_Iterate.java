@@ -25,7 +25,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class H5Ex_G_Iterate {
-    private static String FILENAME = "groups/h5ex_g_iterate.h5";
+    private static String FILENAME = "./h5ex_g_iterate.h5";
     private static String DATASETNAME = "/";
 
     enum H5O_type {
