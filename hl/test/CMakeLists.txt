@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.10)
-PROJECT (HDF5_HL_TEST)
+project (HDF5_HL_TEST C)
 # --------------------------------------------------------------------
 # Notes: When creating unit test executables they should be prefixed
 # with "hl_". This allows for easier filtering of the test suite when
@@ -14,16 +14,14 @@ PROJECT (HDF5_HL_TEST)
 set (srcdir ${CMAKE_CURRENT_SOURCE_DIR})
 configure_file (${HDF5_HL_TEST_SOURCE_DIR}/H5srcdir_str.h.in H5srcdir_str.h  @ONLY)
 
-include_directories (${CMAKE_CURRENT_BINARY_DIR})
-include_directories (${HDF5_TEST_SRC_DIR})
-
 # --------------------------------------------------------------------
 #  Macro used to add a unit test
 # --------------------------------------------------------------------
 MACRO (HL_ADD_EXE hl_name)
   add_executable (hl_${hl_name} ${hl_name}.c)
-  TARGET_C_PROPERTIES (hl_${hl_name} STATIC " " " ")
-  target_link_libraries (hl_${hl_name}
+  target_include_directories(hl_${hl_name} PRIVATE "${HDF5_TEST_SRC_DIR};${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+  TARGET_C_PROPERTIES (hl_${hl_name} STATIC)
+  target_link_libraries (hl_${hl_name} PRIVATE
       ${HDF5_HL_LIB_TARGET}
       ${HDF5_TEST_LIB_TARGET}
       ${HDF5_LIB_TARGET}
@@ -33,8 +31,9 @@ ENDMACRO ()
 
 MACRO (HL_ADD_SHEXE hl_name)
   add_executable (hl_${hl_name} ${hl_name}.c)
-  TARGET_C_PROPERTIES (hl_${hl_name} SHARED " " " ")
-  target_link_libraries (hl_${hl_name}
+  target_include_directories(hl_${hl_name} PRIVATE "${HDF5_TEST_SRC_DIR};${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+  TARGET_C_PROPERTIES (hl_${hl_name} SHARED)
+  target_link_libraries (hl_${hl_name} PRIVATE
       ${HDF5_HL_LIBSH_TARGET}
       ${HDF5_TEST_LIBSH_TARGET}
       ${HDF5_LIBSH_TARGET}
@@ -47,14 +46,15 @@ HL_ADD_EXE (test_image)
 HL_ADD_EXE (test_file_image)
 HL_ADD_EXE (test_table)
 HL_ADD_EXE (test_ds)
-HL_ADD_EXE (test_dset_opt)
 HL_ADD_EXE (test_ld)
 HL_ADD_EXE (test_dset_append)
+HL_ADD_EXE (test_h5do_compat)
 
 # test_packet has two source files
 add_executable (hl_test_packet test_packet.c test_packet_vlen.c)
-TARGET_C_PROPERTIES (hl_test_packet STATIC " " " ")
-target_link_libraries (hl_test_packet
+target_include_directories(hl_test_packet PRIVATE "${HDF5_TEST_SRC_DIR};${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+TARGET_C_PROPERTIES (hl_test_packet STATIC)
+target_link_libraries (hl_test_packet PRIVATE
     ${HDF5_HL_LIB_TARGET}
     ${HDF5_TEST_LIB_TARGET}
     ${HDF5_LIB_TARGET}
@@ -67,8 +67,9 @@ set_target_properties (hl_test_packet PROPERTIES FOLDER test/hl)
 # --------------------------------------------------------------------
 if (HDF5_BUILD_GENERATORS)
   add_executable (hl_gen_test_ds gen_test_ds.c)
-  TARGET_C_PROPERTIES (hl_gen_test_ds STATIC " " " ")
-  target_link_libraries (hl_gen_test_ds
+  target_include_directories(hl_gen_test_ds PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+  TARGET_C_PROPERTIES (hl_gen_test_ds STATIC)
+  target_link_libraries (hl_gen_test_ds PRIVATE
       ${HDF5_HL_LIB_TARGET}
       ${HDF5_TEST_LIB_TARGET}
       ${HDF5_LIB_TARGET}
@@ -76,8 +77,9 @@ if (HDF5_BUILD_GENERATORS)
   set_target_properties (hl_gen_test_ds PROPERTIES FOLDER test/hl/gen)
 
   add_executable (hl_gen_test_ld gen_test_ld.c)
-  TARGET_C_PROPERTIES (hl_gen_test_ld STATIC " " " ")
-  target_link_libraries (hl_gen_test_ld
+  target_include_directories(hl_gen_test_ld PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+  TARGET_C_PROPERTIES (hl_gen_test_ld STATIC)
+  target_link_libraries (hl_gen_test_ld PRIVATE
       ${HDF5_HL_LIB_TARGET}
       ${HDF5_TEST_LIB_TARGET}
       ${HDF5_LIB_TARGET}

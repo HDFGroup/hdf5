@@ -137,8 +137,8 @@ CONFIG_CLEAN_FILES = H5srcdir_str.h
 CONFIG_CLEAN_VPATH_FILES =
 am__EXEEXT_1 = test_lite$(EXEEXT) test_image$(EXEEXT) \
 	test_file_image$(EXEEXT) test_table$(EXEEXT) test_ds$(EXEEXT) \
-	test_packet$(EXEEXT) test_dset_opt$(EXEEXT) test_ld$(EXEEXT) \
-	test_dset_append$(EXEEXT)
+	test_packet$(EXEEXT) test_ld$(EXEEXT) \
+	test_dset_append$(EXEEXT) test_h5do_compat$(EXEEXT)
 am__EXEEXT_2 = gen_test_ds$(EXEEXT) gen_test_ld$(EXEEXT)
 PROGRAMS = $(noinst_PROGRAMS)
 gen_test_ds_SOURCES = gen_test_ds.c
@@ -161,14 +161,14 @@ test_dset_append_SOURCES = test_dset_append.c
 test_dset_append_OBJECTS = test_dset_append.$(OBJEXT)
 test_dset_append_LDADD = $(LDADD)
 test_dset_append_DEPENDENCIES = $(LIBH5_HL) $(LIBH5TEST) $(LIBHDF5)
-test_dset_opt_SOURCES = test_dset_opt.c
-test_dset_opt_OBJECTS = test_dset_opt.$(OBJEXT)
-test_dset_opt_LDADD = $(LDADD)
-test_dset_opt_DEPENDENCIES = $(LIBH5_HL) $(LIBH5TEST) $(LIBHDF5)
 test_file_image_SOURCES = test_file_image.c
 test_file_image_OBJECTS = test_file_image.$(OBJEXT)
 test_file_image_LDADD = $(LDADD)
 test_file_image_DEPENDENCIES = $(LIBH5_HL) $(LIBH5TEST) $(LIBHDF5)
+test_h5do_compat_SOURCES = test_h5do_compat.c
+test_h5do_compat_OBJECTS = test_h5do_compat.$(OBJEXT)
+test_h5do_compat_LDADD = $(LDADD)
+test_h5do_compat_DEPENDENCIES = $(LIBH5_HL) $(LIBH5TEST) $(LIBHDF5)
 test_image_SOURCES = test_image.c
 test_image_OBJECTS = test_image.$(OBJEXT)
 test_image_LDADD = $(LDADD)
@@ -225,10 +225,10 @@ am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
 SOURCES = gen_test_ds.c gen_test_ld.c test_ds.c test_dset_append.c \
-	test_dset_opt.c test_file_image.c test_image.c test_ld.c \
+	test_file_image.c test_h5do_compat.c test_image.c test_ld.c \
 	test_lite.c $(test_packet_SOURCES) test_table.c
 DIST_SOURCES = gen_test_ds.c gen_test_ld.c test_ds.c \
-	test_dset_append.c test_dset_opt.c test_file_image.c \
+	test_dset_append.c test_file_image.c test_h5do_compat.c \
 	test_image.c test_ld.c test_lite.c $(test_packet_SOURCES) \
 	test_table.c
 am__can_run_installinfo = \
@@ -591,6 +591,7 @@ JAVA_PATH_NAME = @JAVA_PATH_NAME@
 JAVA_VERSION = @JAVA_VERSION@
 JNIFLAGS = @JNIFLAGS@
 JUNIT = @JUNIT@
+LARGE_PARALLEL_IO = @LARGE_PARALLEL_IO@
 LD = @LD@
 LDFLAGS = @LDFLAGS@
 LIBOBJS = @LIBOBJS@
@@ -638,6 +639,7 @@ PAC_FORTRAN_NATIVE_REAL_KIND = @PAC_FORTRAN_NATIVE_REAL_KIND@
 PAC_FORTRAN_NATIVE_REAL_SIZEOF = @PAC_FORTRAN_NATIVE_REAL_SIZEOF@
 PAC_FORTRAN_NUM_INTEGER_KINDS = @PAC_FORTRAN_NUM_INTEGER_KINDS@
 PARALLEL = @PARALLEL@
+PARALLEL_FILTERED_WRITES = @PARALLEL_FILTERED_WRITES@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 PROFILING = @PROFILING@
 RANLIB = @RANLIB@
@@ -789,15 +791,15 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.clog2 \
 	test_image[1-3].h5 file_img[1-2].h5 test_lite[1-4].h5 \
 	test_table.h5 test_packet_table.h5 test_packet_compress.h5 \
 	test_detach.h5 test_packet_table_vlen.h5 \
-	testfl_packet_table_vlen.h5 test_dectris.h5 test_append.h5
+	testfl_packet_table_vlen.h5 test_append.h5 h5do_compat.h5
 
 # The tests depend on the hdf5, hdf5 test,  and hdf5_hl libraries
 LDADD = $(LIBH5_HL) $(LIBH5TEST) $(LIBHDF5)
 
 # Test programs.  These are our main targets.  They should be listed in the
 # order to be executed, generally most specific tests to least specific tests.
-TEST_PROG = test_lite test_image test_file_image test_table test_ds test_packet test_dset_opt \
-	test_ld test_dset_append
+TEST_PROG = test_lite test_image test_file_image test_table test_ds test_packet \
+	test_ld test_dset_append test_h5do_compat
 
 
 # These programs generate test files for the tests.  They don't need to be
@@ -901,13 +903,13 @@ test_dset_append$(EXEEXT): $(test_dset_append_OBJECTS) $(test_dset_append_DEPEND
 	@rm -f test_dset_append$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(test_dset_append_OBJECTS) $(test_dset_append_LDADD) $(LIBS)
 
-test_dset_opt$(EXEEXT): $(test_dset_opt_OBJECTS) $(test_dset_opt_DEPENDENCIES) $(EXTRA_test_dset_opt_DEPENDENCIES) 
-	@rm -f test_dset_opt$(EXEEXT)
-	$(AM_V_CCLD)$(LINK) $(test_dset_opt_OBJECTS) $(test_dset_opt_LDADD) $(LIBS)
-
 test_file_image$(EXEEXT): $(test_file_image_OBJECTS) $(test_file_image_DEPENDENCIES) $(EXTRA_test_file_image_DEPENDENCIES) 
 	@rm -f test_file_image$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(test_file_image_OBJECTS) $(test_file_image_LDADD) $(LIBS)
+
+test_h5do_compat$(EXEEXT): $(test_h5do_compat_OBJECTS) $(test_h5do_compat_DEPENDENCIES) $(EXTRA_test_h5do_compat_DEPENDENCIES) 
+	@rm -f test_h5do_compat$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(test_h5do_compat_OBJECTS) $(test_h5do_compat_LDADD) $(LIBS)
 
 test_image$(EXEEXT): $(test_image_OBJECTS) $(test_image_DEPENDENCIES) $(EXTRA_test_image_DEPENDENCIES) 
 	@rm -f test_image$(EXEEXT)
@@ -939,8 +941,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gen_test_ld.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_ds.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_dset_append.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_dset_opt.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_file_image.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_h5do_compat.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_image.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_ld.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_lite.Po@am__quote@
@@ -1202,13 +1204,6 @@ test_packet.log: test_packet$(EXEEXT)
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-test_dset_opt.log: test_dset_opt$(EXEEXT)
-	@p='test_dset_opt$(EXEEXT)'; \
-	b='test_dset_opt'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
 test_ld.log: test_ld$(EXEEXT)
 	@p='test_ld$(EXEEXT)'; \
 	b='test_ld'; \
@@ -1219,6 +1214,13 @@ test_ld.log: test_ld$(EXEEXT)
 test_dset_append.log: test_dset_append$(EXEEXT)
 	@p='test_dset_append$(EXEEXT)'; \
 	b='test_dset_append'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+test_h5do_compat.log: test_h5do_compat$(EXEEXT)
+	@p='test_h5do_compat$(EXEEXT)'; \
+	b='test_h5do_compat'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \

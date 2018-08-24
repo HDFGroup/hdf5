@@ -650,7 +650,7 @@ vrfy_ns_grp_c(hid_t fid, const char *group_name, unsigned nlinks)
             HDassert(H5L_TYPE_HARD == lnk_info.type);
 
             memset(&root_oinfo, 0, sizeof(root_oinfo));
-            ret = H5Oget_info(fid, &root_oinfo);
+            ret = H5Oget_info2(fid, &root_oinfo, H5O_INFO_BASIC);
 
 	    if ( ret < 0 ) {
 
@@ -1130,7 +1130,7 @@ vrfy_ns_grp_d(hid_t fid, const char *group_name, unsigned nlinks)
             HDassert(H5L_TYPE_HARD == lnk_info.type);
 
             memset(&root_oinfo, 0, sizeof(root_oinfo));
-            ret = H5Oget_info(fid, &root_oinfo);
+            ret = H5Oget_info2(fid, &root_oinfo, H5O_INFO_BASIC);
 	    if ( ret < 0 ) {
 
 	        pass = FALSE;
@@ -1825,7 +1825,7 @@ vrfy_os_grp_n(hid_t fid, const char *group_name, int proc_num, unsigned nlinks)
             HDassert(H5L_TYPE_HARD == lnk_info.type);
 
             memset(&root_oinfo, 0, sizeof(root_oinfo));
-            ret = H5Oget_info(fid, &root_oinfo);
+            ret = H5Oget_info2(fid, &root_oinfo, H5O_INFO_BASIC);
 
 	    if ( ret < 0 ) {
 

@@ -35,7 +35,11 @@ TEST_SCRIPT=testh5diff.sh
 check_PROGRAMS=$(TEST_PROG)
 check_SCRIPTS=$(TEST_SCRIPT) $(TEST_SCRIPT_PARA)
 # The parallel test script testph5diff.sh actually depends on testh5diff.sh.
-SCRIPT_DEPEND=../../src/h5diff/h5diff$(EXEEXT) $(H5PDIFF) ../../src/h5diff/testh5diff.sh
+if BUILD_PARALLEL_CONDITIONAL
+   SCRIPT_DEPEND=../../src/h5diff/h5diff$(EXEEXT) $(H5PDIFF) $(TEST_SCRIPT)
+else
+   SCRIPT_DEPEND=../../src/h5diff/h5diff$(EXEEXT) $(H5PDIFF)
+endif
 if HAVE_SHARED_CONDITIONAL
 if USE_PLUGINS_CONDITIONAL
    TEST_SCRIPT += h5diff_plugin.sh
@@ -59,7 +63,7 @@ endif
 # be copied to the testfiles/ directory if update is required
 CHECK_CLEANFILES+=*.h5 expect_sorted actual_sorted
 
-DISTCLEANFILES=h5diff_plugin.sh
+DISTCLEANFILES=testh5diff.sh h5diff_plugin.sh
 
 include $(top_srcdir)/config/conclude.am
 

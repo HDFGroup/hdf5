@@ -7,8 +7,8 @@ require 5.003;
 #       is added (like support for 1.4, etc), the min_sup_idx parameter will
 #       need to be decremented. - QAK)
 
-# Max. library "index" (0 = v1.0, 1 = 1.2, etc)
-$max_idx = 5;
+# Max. library "index" (0 = v1.0, 1 = 1.2, 2 = 1.4, 3 = 1.6, 4 = 1.8, 5 = 1.10, 6 = 1.12, etc)
+$max_idx = 6;
 
 # Min. supported previous library version "index" (0 = v1.0, 1 = 1.2, etc)
 $min_sup_idx = 3;
@@ -478,7 +478,7 @@ for $file (@ARGV) {
         }
     }
     close SOURCE;
-  
+
     # Create header files
     print "Generating '", $prefix, "H5version.h'\n";
     create_public($prefix);

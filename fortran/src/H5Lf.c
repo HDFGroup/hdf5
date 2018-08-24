@@ -1068,6 +1068,3 @@ h5literate_by_name_c(hid_t_f *loc_id, _fcd name, size_t_f *namelen, int_f *index
   return ret_value;
 }
 
-
-
-

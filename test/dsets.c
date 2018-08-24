@@ -28,6 +28,7 @@
 #include "H5srcdir.h"
 
 #include "H5Bprivate.h"
+#include "H5CXprivate.h"        /* API Contexts                         */
 #include "H5Iprivate.h"
 #include "H5Pprivate.h"
 
@@ -2036,6 +2037,7 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
     if(H5Dclose (dataset) < 0) goto error;
     if(H5Sclose (sid) < 0) goto error;
     if(H5Pclose (dxpl) < 0) goto error;
+    if(H5Pclose (write_dxpl) < 0) goto error;
     HDfree (tconv_buf);
 
     return(0);
@@ -2532,6 +2534,7 @@ test_missing_filter(hid_t file)
     size_t      i,j;            /* Local index variables */
     herr_t      ret;            /* Generic return value */
     const char *testfile = H5_get_srcdir_filename(FILE_DEFLATE_NAME); /* Corrected test file name */
+    hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
 
     TESTING("dataset access with missing filter");
 
@@ -2544,8 +2547,13 @@ test_missing_filter(hid_t file)
             goto error;
         } /* end if */
 
-        /* Unregister deflate filter (use internal function) */
-        if(H5Z_unregister(H5Z_FILTER_DEFLATE) < 0) {
+        /* Push API context */
+        if(H5CX_push() < 0) FAIL_STACK_ERROR
+        api_ctx_pushed = TRUE;
+
+        /* Unregister deflate filter */
+        /* (Use private routine, to avoid range checking on filter ID) */
+        if(H5Z__unregister(H5Z_FILTER_DEFLATE) < 0) {
             H5_FAILED();
             printf("    Line %d: Can't unregister deflate filter\n",__LINE__);
             goto error;
@@ -2738,10 +2746,16 @@ test_missing_filter(hid_t file)
         } /* end if */
 #endif /* H5_HAVE_FILTER_DEFLATE */
 
+    /* Pop API context */
+    if(api_ctx_pushed && H5CX_pop() < 0) FAIL_STACK_ERROR
+    api_ctx_pushed = FALSE;
+
     PASSED();
     return 0;
 
 error:
+    if(api_ctx_pushed) H5CX_pop();
+
     return -1;
 }
 
@@ -10705,9 +10719,9 @@ test_earray_hdr_fd(const char *env_h5_driver, hid_t fapl)
         FAIL_STACK_ERROR;
 
     /* The second call triggered a bug in the library (JIRA issue: SWMR-95) */
-    if(H5Oget_info_by_name(fid, DSET_EARRAY_HDR_FD, &info, H5P_DEFAULT) < 0)
+    if(H5Oget_info_by_name2(fid, DSET_EARRAY_HDR_FD, &info, H5O_INFO_BASIC, H5P_DEFAULT) < 0)
         FAIL_STACK_ERROR;
-    if(H5Oget_info_by_name(fid, DSET_EARRAY_HDR_FD, &info, H5P_DEFAULT) < 0)
+    if(H5Oget_info_by_name2(fid, DSET_EARRAY_HDR_FD, &info, H5O_INFO_BASIC, H5P_DEFAULT) < 0)
         FAIL_STACK_ERROR;
 
     if(H5Pclose(fapl) < 0)
@@ -10825,9 +10839,9 @@ test_farray_hdr_fd(const char *env_h5_driver, hid_t fapl)
         FAIL_STACK_ERROR;
 
     /* The second call triggered a bug in the library (JIRA issue: SWMR-95) */
-    if(H5Oget_info_by_name(fid, DSET_FARRAY_HDR_FD, &info, H5P_DEFAULT) < 0)
+    if(H5Oget_info_by_name2(fid, DSET_FARRAY_HDR_FD, &info, H5O_INFO_BASIC, H5P_DEFAULT) < 0)
         FAIL_STACK_ERROR;
-    if(H5Oget_info_by_name(fid, DSET_FARRAY_HDR_FD, &info, H5P_DEFAULT) < 0)
+    if(H5Oget_info_by_name2(fid, DSET_FARRAY_HDR_FD, &info, H5O_INFO_BASIC, H5P_DEFAULT) < 0)
         FAIL_STACK_ERROR;
 
     if(H5Pclose(fapl) < 0)
@@ -10945,9 +10959,9 @@ test_bt2_hdr_fd(const char *env_h5_driver, hid_t fapl)
         FAIL_STACK_ERROR;
 
     /* The second call triggered a bug in the library (JIRA issue: SWMR-95) */
-    if(H5Oget_info_by_name(fid, DSET_BT2_HDR_FD, &info, H5P_DEFAULT) < 0)
+    if(H5Oget_info_by_name2(fid, DSET_BT2_HDR_FD, &info, H5O_INFO_BASIC, H5P_DEFAULT) < 0)
         FAIL_STACK_ERROR;
-    if(H5Oget_info_by_name(fid, DSET_BT2_HDR_FD, &info, H5P_DEFAULT) < 0)
+    if(H5Oget_info_by_name2(fid, DSET_BT2_HDR_FD, &info, H5O_INFO_BASIC, H5P_DEFAULT) < 0)
         FAIL_STACK_ERROR;
 
     if(H5Pclose(fapl) < 0)
@@ -12666,7 +12680,7 @@ dls_01_read_stuff( hid_t fid ) {
     did = H5Dopen2( fid, DLS_01_DATASET, H5P_DEFAULT );
     if ( did <= 0 ) TEST_ERROR
 
-    status = H5Oget_info( did, &info );
+    status = H5Oget_info2( did, &info, H5O_INFO_BASIC );
     if ( status != 0 ) TEST_ERROR
 
     status = H5Dclose( did );

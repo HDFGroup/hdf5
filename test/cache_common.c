@@ -17,6 +17,7 @@
  *		This file contains common code for tests of the cache
  *		implemented in H5C.c
  */
+#include "H5CXprivate.h"        /* API Contexts                         */
 #include "H5MFprivate.h"
 #include "H5MMprivate.h"
 #include "cache_common.h"
@@ -129,37 +130,37 @@ static herr_t monster_image_len(const void *thing, size_t *image_len_ptr);
 static herr_t variable_image_len(const void *thing, size_t *image_len_ptr);
 static herr_t notify_image_len(const void *thing, size_t *image_len_ptr);
 
-static herr_t pico_pre_serialize(H5F_t *f, hid_t dxpl_id, void *thing,
+static herr_t pico_pre_serialize(H5F_t *f, void *thing,
     haddr_t addr, size_t len, haddr_t *new_addr_ptr, 
     size_t *new_len_ptr, unsigned *flags_ptr);
-static herr_t nano_pre_serialize(H5F_t *f, hid_t dxpl_id, void *thing,
+static herr_t nano_pre_serialize(H5F_t *f, void *thing,
     haddr_t addr, size_t len, haddr_t *new_addr_ptr, 
     size_t *new_len_ptr, unsigned *flags_ptr);
-static herr_t micro_pre_serialize(H5F_t *f, hid_t dxpl_id, void *thing,
+static herr_t micro_pre_serialize(H5F_t *f, void *thing,
     haddr_t addr, size_t len, haddr_t *new_addr_ptr, 
     size_t *new_len_ptr, unsigned *flags_ptr);
-static herr_t tiny_pre_serialize(H5F_t *f, hid_t dxpl_id, void *thing,
+static herr_t tiny_pre_serialize(H5F_t *f, void *thing,
     haddr_t addr, size_t len, haddr_t *new_addr_ptr, 
     size_t *new_len_ptr, unsigned *flags_ptr);
-static herr_t small_pre_serialize(H5F_t *f, hid_t dxpl_id, void *thing,
+static herr_t small_pre_serialize(H5F_t *f, void *thing,
     haddr_t addr, size_t len, haddr_t *new_addr_ptr, 
     size_t *new_len_ptr, unsigned *flags_ptr);
-static herr_t medium_pre_serialize(H5F_t *f, hid_t dxpl_id, void *thing,
+static herr_t medium_pre_serialize(H5F_t *f, void *thing,
     haddr_t addr, size_t len, haddr_t *new_addr_ptr, 
     size_t *new_len_ptr, unsigned *flags_ptr);
-static herr_t large_pre_serialize(H5F_t *f, hid_t dxpl_id, void *thing,
+static herr_t large_pre_serialize(H5F_t *f, void *thing,
     haddr_t addr, size_t len, haddr_t *new_addr_ptr, 
     size_t *new_len_ptr, unsigned *flags_ptr);
-static herr_t huge_pre_serialize(H5F_t *f, hid_t dxpl_id, void *thing,
+static herr_t huge_pre_serialize(H5F_t *f, void *thing,
     haddr_t addr, size_t len, haddr_t *new_addr_ptr, 
     size_t *new_len_ptr, unsigned *flags_ptr);
-static herr_t monster_pre_serialize(H5F_t *f, hid_t dxpl_id, void *thing,
+static herr_t monster_pre_serialize(H5F_t *f, void *thing,
     haddr_t addr, size_t len, haddr_t *new_addr_ptr, 
     size_t *new_len_ptr, unsigned *flags_ptr);
-static herr_t variable_pre_serialize(H5F_t *f, hid_t dxpl_id, void *thing,
+static herr_t variable_pre_serialize(H5F_t *f, void *thing,
     haddr_t addr, size_t len, haddr_t *new_addr_ptr, 
     size_t *new_len_ptr, unsigned *flags_ptr);
-static herr_t notify_pre_serialize(H5F_t *f, hid_t dxpl_id, void *thing,
+static herr_t notify_pre_serialize(H5F_t *f, void *thing,
     haddr_t addr, size_t len, haddr_t *new_addr_ptr, 
     size_t *new_len_ptr, unsigned *flags_ptr);
 
@@ -212,7 +213,7 @@ static herr_t get_final_load_size(const void *image, size_t image_len,
 static void *deserialize(const void *image_ptr, size_t len, void *udata_ptr,
     hbool_t *dirty_ptr, int32_t entry_type);
 static herr_t image_len(const void *thing, size_t *image_len_ptr, int32_t entry_type);
-static herr_t pre_serialize(H5F_t *f, hid_t dxpl_id, void *thing,
+static herr_t pre_serialize(H5F_t *f, void *thing,
     haddr_t addr, size_t len, haddr_t *new_addr_ptr, size_t *new_len_ptr, 
     unsigned *flags_ptr);
 static herr_t serialize(const H5F_t *f, void *image_ptr, size_t len, 
@@ -1123,7 +1124,6 @@ notify_image_len(const void *thing, size_t *image_length)
  */
 herr_t
 pre_serialize(H5F_t *f,
-              hid_t H5_ATTR_UNUSED dxpl_id,
               void *thing,
               haddr_t addr,
               size_t len,
@@ -1208,7 +1208,6 @@ pre_serialize(H5F_t *f,
 
 herr_t
 pico_pre_serialize(H5F_t *f,
-                   hid_t dxpl_id,
                    void *thing,
                    haddr_t addr,
                    size_t len,
@@ -1216,13 +1215,12 @@ pico_pre_serialize(H5F_t *f,
                    size_t *new_len_ptr,
                    unsigned *flags_ptr)
 {
-    return pre_serialize(f, dxpl_id, thing, addr, len, 
+    return pre_serialize(f, thing, addr, len, 
                          new_addr_ptr, new_len_ptr, flags_ptr);
 }
 
 herr_t
 nano_pre_serialize(H5F_t *f,
-                   hid_t dxpl_id,
                    void *thing,
                    haddr_t addr,
                    size_t len,
@@ -1230,13 +1228,12 @@ nano_pre_serialize(H5F_t *f,
                    size_t *new_len_ptr,
                    unsigned *flags_ptr)
 {
-    return pre_serialize(f, dxpl_id, thing, addr, len, 
+    return pre_serialize(f, thing, addr, len, 
                          new_addr_ptr, new_len_ptr, flags_ptr);
 }
 
 herr_t
 micro_pre_serialize(H5F_t *f,
-                    hid_t dxpl_id,
                     void *thing,
                     haddr_t addr,
                     size_t len,
@@ -1244,13 +1241,12 @@ micro_pre_serialize(H5F_t *f,
                     size_t *new_len_ptr,
                     unsigned *flags_ptr)
 {
-    return pre_serialize(f, dxpl_id, thing, addr, len, 
+    return pre_serialize(f, thing, addr, len, 
                          new_addr_ptr, new_len_ptr, flags_ptr);
 }
 
 herr_t
 tiny_pre_serialize(H5F_t *f,
-                   hid_t dxpl_id,
                    void *thing,
                    haddr_t addr,
                    size_t len,
@@ -1258,13 +1254,12 @@ tiny_pre_serialize(H5F_t *f,
                    size_t *new_len_ptr,
                    unsigned *flags_ptr)
 {
-    return pre_serialize(f, dxpl_id, thing, addr, len, 
+    return pre_serialize(f, thing, addr, len, 
                          new_addr_ptr, new_len_ptr, flags_ptr);
 }
 
 herr_t
 small_pre_serialize(H5F_t *f,
-                    hid_t dxpl_id,
                     void *thing,
                     haddr_t addr,
                     size_t len,
@@ -1272,13 +1267,12 @@ small_pre_serialize(H5F_t *f,
                     size_t *new_len_ptr,
                     unsigned *flags_ptr)
 {
-    return pre_serialize(f, dxpl_id, thing, addr, len, 
+    return pre_serialize(f, thing, addr, len, 
                          new_addr_ptr, new_len_ptr, flags_ptr);
 }
 
 herr_t
 medium_pre_serialize(H5F_t *f,
-                     hid_t dxpl_id,
                      void *thing,
                      haddr_t addr,
                      size_t len,
@@ -1286,13 +1280,12 @@ medium_pre_serialize(H5F_t *f,
                      size_t *new_len_ptr,
                      unsigned *flags_ptr)
 {
-    return pre_serialize(f, dxpl_id, thing, addr, len, 
+    return pre_serialize(f, thing, addr, len, 
                          new_addr_ptr, new_len_ptr, flags_ptr);
 }
 
 herr_t
 large_pre_serialize(H5F_t *f,
-                    hid_t dxpl_id,
                     void *thing,
                     haddr_t addr,
                     size_t len,
@@ -1300,13 +1293,12 @@ large_pre_serialize(H5F_t *f,
                     size_t *new_len_ptr,
                     unsigned *flags_ptr)
 {
-    return pre_serialize(f, dxpl_id, thing, addr, len, 
+    return pre_serialize(f, thing, addr, len, 
                          new_addr_ptr, new_len_ptr, flags_ptr);
 }
 
 herr_t
 huge_pre_serialize(H5F_t *f,
-                   hid_t dxpl_id,
                    void *thing,
                    haddr_t addr,
                    size_t len,
@@ -1314,13 +1306,12 @@ huge_pre_serialize(H5F_t *f,
                    size_t *new_len_ptr,
                    unsigned *flags_ptr)
 {
-    return pre_serialize(f, dxpl_id, thing, addr, len, 
+    return pre_serialize(f, thing, addr, len, 
                          new_addr_ptr, new_len_ptr, flags_ptr);
 }
 
 herr_t
 monster_pre_serialize(H5F_t *f,
-                      hid_t dxpl_id,
                       void *thing,
                       haddr_t addr,
                       size_t len,
@@ -1328,13 +1319,12 @@ monster_pre_serialize(H5F_t *f,
                       size_t *new_len_ptr,
                       unsigned *flags_ptr)
 {
-    return pre_serialize(f, dxpl_id, thing, addr, len, 
+    return pre_serialize(f, thing, addr, len, 
                          new_addr_ptr, new_len_ptr, flags_ptr);
 }
 
 herr_t
 variable_pre_serialize(H5F_t *f,
-                       hid_t dxpl_id,
                        void *thing,
                        haddr_t addr,
                        size_t len,
@@ -1342,13 +1332,12 @@ variable_pre_serialize(H5F_t *f,
                        size_t *new_len_ptr,
                        unsigned *flags_ptr)
 {
-    return pre_serialize(f, dxpl_id, thing, addr, len, 
+    return pre_serialize(f, thing, addr, len, 
                          new_addr_ptr, new_len_ptr, flags_ptr);
 }
 
 herr_t
 notify_pre_serialize(H5F_t *f,
-                     hid_t dxpl_id,
                      void *thing,
                      haddr_t addr,
                      size_t len,
@@ -1356,7 +1345,7 @@ notify_pre_serialize(H5F_t *f,
                      size_t *new_len_ptr,
                      unsigned *flags_ptr)
 {
-    return pre_serialize(f, dxpl_id, thing, addr, len, 
+    return pre_serialize(f, thing, addr, len, 
                          new_addr_ptr, new_len_ptr, flags_ptr);
 }
 
@@ -3279,6 +3268,9 @@ setup_cache(size_t max_cache_size,
         } /* end if */
     } /* end if */
 
+    /* Push API context */
+    H5CX_push();
+
     if(show_progress) /* 4 */
         HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   FUNC, mile_stone++, (int)pass);
@@ -3379,8 +3371,7 @@ setup_cache(size_t max_cache_size,
                   FUNC, mile_stone++, (int)pass);
 
     if(pass) { /* allocate space for test entries */
-        actual_base_addr = H5MF_alloc(file_ptr, H5FD_MEM_DEFAULT, H5AC_ind_read_dxpl_id,
-			              (hsize_t)(ADDR_SPACE_SIZE + BASE_ADDR));
+        actual_base_addr = H5MF_alloc(file_ptr, H5FD_MEM_DEFAULT, (hsize_t)(ADDR_SPACE_SIZE + BASE_ADDR));
 
 	if(actual_base_addr == HADDR_UNDEF) {
             pass = FALSE;
@@ -3455,7 +3446,7 @@ takedown_cache(H5F_t * file_ptr,
             H5C_stats(cache_ptr, "test cache", dump_detailed_stats);
         }
 
-	if ( H5C_prep_for_file_close(file_ptr, H5P_DATASET_XFER_DEFAULT) < 0 ) {
+	if ( H5C_prep_for_file_close(file_ptr) < 0 ) {
 
             pass = FALSE;
             failure_mssg = "unexpected failure of prep for file close.\n";
@@ -3463,7 +3454,7 @@ takedown_cache(H5F_t * file_ptr,
 
         flush_cache(file_ptr, TRUE, FALSE, FALSE);
 
-        H5C_dest(file_ptr, H5AC_ind_read_dxpl_id);
+        H5C_dest(file_ptr);
 
 	if ( saved_cache != NULL ) {
 
@@ -3493,7 +3484,7 @@ takedown_cache(H5F_t * file_ptr,
                 HDassert ( file_ptr );
             }
 
-            H5MF_xfree(file_ptr, H5FD_MEM_DEFAULT, H5AC_ind_read_dxpl_id, saved_actual_base_addr,
+            H5MF_xfree(file_ptr, H5FD_MEM_DEFAULT, saved_actual_base_addr,
                                           (hsize_t)(ADDR_SPACE_SIZE + BASE_ADDR));
             saved_actual_base_addr = HADDR_UNDEF;
         }
@@ -3508,6 +3499,9 @@ takedown_cache(H5F_t * file_ptr,
 	    saved_fid = -1;
 
         }
+
+        /* Pop API context */
+        H5CX_pop();
 
 	if ( ( ! try_core_file_driver ) || ( core_file_driver_failed ) ) {
 
@@ -3582,8 +3576,7 @@ expunge_entry(H5F_t * file_ptr,
         HDassert( ! ( entry_ptr->header.is_pinned ) );
 	HDassert( ! ( entry_ptr->is_pinned ) );
 
-        result = H5C_expunge_entry(file_ptr, H5AC_ind_read_dxpl_id,
-                types[type], entry_ptr->addr, H5C__NO_FLAGS_SET);
+        result = H5C_expunge_entry(file_ptr, types[type], entry_ptr->addr, H5C__NO_FLAGS_SET);
 
         if ( result < 0 ) {
 
@@ -3634,12 +3627,10 @@ flush_cache(H5F_t * file_ptr,
         cache_ptr = file_ptr->shared->cache;
 
         if(destroy_entries)
-            result = H5C_flush_cache(file_ptr, H5AC_ind_read_dxpl_id,
-                                     H5C__FLUSH_INVALIDATE_FLAG);
+            result = H5C_flush_cache(file_ptr, H5C__FLUSH_INVALIDATE_FLAG);
 
         else
-            result = H5C_flush_cache(file_ptr, H5AC_ind_read_dxpl_id,
-                                     H5C__NO_FLAGS_SET);
+            result = H5C_flush_cache(file_ptr, H5C__NO_FLAGS_SET);
 
         if(dump_stats)
             H5C_stats(cache_ptr, "test cache", dump_detailed_stats);
@@ -3767,7 +3758,6 @@ insert_entry(H5F_t * file_ptr,
 {
     H5C_t * cache_ptr;
     herr_t result;
-    hid_t xfer = H5AC_ind_read_dxpl_id;
     hbool_t insert_pinned;
     test_entry_t * base_addr;
     test_entry_t * entry_ptr;
@@ -3798,13 +3788,9 @@ insert_entry(H5F_t * file_ptr,
 
         /* Set the base address of the entry type into the property list as tag */
         /* Use to cork entries for the object */
-        if(H5AC_tag(xfer, baddrs, NULL) < 0) {
-            pass = FALSE;
-            failure_mssg = "error in H5P_set().";
-        }
+        H5AC_tag(baddrs, NULL);
 
-        result = H5C_insert_entry(file_ptr, xfer,
-	        types[type], entry_ptr->addr, (void *)entry_ptr, flags);
+        result = H5C_insert_entry(file_ptr, types[type], entry_ptr->addr, (void *)entry_ptr, flags);
 
         if ( ( result < 0 ) ||
              ( entry_ptr->header.is_protected ) ||
@@ -4050,7 +4036,6 @@ protect_entry(H5F_t * file_ptr, int32_t type, int32_t idx)
     test_entry_t * base_addr;
     test_entry_t * entry_ptr;
     haddr_t baddrs;
-    hid_t xfer = H5AC_ind_read_dxpl_id;
     H5C_cache_entry_t * cache_entry_ptr;
 
     if(pass) {
@@ -4071,12 +4056,9 @@ protect_entry(H5F_t * file_ptr, int32_t type, int32_t idx)
 
         /* Set the base address of the entry type into the property list as tag */
         /* Use to cork entries for the object */
-        if(H5AC_tag(xfer, baddrs, NULL) < 0) {
-            pass = FALSE;
-            failure_mssg = "error in H5P_set().";
-        } /* end if */
+        H5AC_tag(baddrs, NULL);
 
-        cache_entry_ptr = (H5C_cache_entry_t *)H5C_protect(file_ptr, xfer,
+        cache_entry_ptr = (H5C_cache_entry_t *)H5C_protect(file_ptr, 
                 types[type], entry_ptr->addr, &entry_ptr->addr, 
                 H5C__NO_FLAGS_SET);
 
@@ -4180,7 +4162,7 @@ protect_entry_ro(H5F_t * file_ptr,
 		  ( ( entry_ptr->is_read_only ) &&
 		    ( entry_ptr->ro_ref_count > 0 ) ) );
 
-        cache_entry_ptr = (H5C_cache_entry_t *)H5C_protect(file_ptr, H5AC_ind_read_dxpl_id,
+        cache_entry_ptr = (H5C_cache_entry_t *)H5C_protect(file_ptr,
                 types[type], entry_ptr->addr, &entry_ptr->addr, H5C__READ_ONLY_FLAG);
 
         if ( ( cache_entry_ptr != (void *)entry_ptr ) ||
@@ -4396,8 +4378,7 @@ unprotect_entry(H5F_t * file_ptr,
                 mark_flush_dep_dirty(entry_ptr);
         } /* end if */
 
-        result = H5C_unprotect(file_ptr, H5AC_ind_read_dxpl_id,
-                    entry_ptr->addr, (void *)entry_ptr, flags);
+        result = H5C_unprotect(file_ptr, entry_ptr->addr, (void *)entry_ptr, flags);
 
         if ( ( result < 0 ) ||
              ( ( entry_ptr->header.is_protected ) &&
@@ -6432,7 +6413,7 @@ validate_mdc_config(hid_t file_id,
          * the supplied external configuration.
          *
          * The cache also sets the initial_size field to the current
-         * cache max size instead of the value initialy supplied.
+         * cache max size instead of the value initially supplied.
          * Depending on circumstances, this may or may not match
          * the original.  Hence the compare_init parameter.
          */

@@ -52,29 +52,29 @@ Java_hdf_hdf5lib_H5_H5Ocopy
 /*
  * Class:     hdf_hdf5lib_H5
  * Method:    H5Oget_info
- * Signature: (J)Lhdf/hdf5lib/structs/H5O_info_t;
+ * Signature: (JI)Lhdf/hdf5lib/structs/H5O_info_t;
  */
 JNIEXPORT jobject JNICALL
 Java_hdf_hdf5lib_H5_H5Oget_1info
-(JNIEnv*, jclass, jlong);
+(JNIEnv*, jclass, jlong, jint fields);
 
 /*
  * Class:     hdf_hdf5lib_H5
  * Method:    H5Oget_info_by_name
- * Signature: (JLjava/lang/String;J)Lhdf/hdf5lib/structs/H5O_info_t;
+ * Signature: (JLjava/lang/String;IJ)Lhdf/hdf5lib/structs/H5O_info_t;
  */
 JNIEXPORT jobject JNICALL
 Java_hdf_hdf5lib_H5_H5Oget_1info_1by_1name
-(JNIEnv*, jclass, jlong, jstring, jlong);
+(JNIEnv*, jclass, jlong, jstring, jint fields, jlong);
 
 /*
  * Class:     hdf_hdf5lib_H5
  * Method:    H5Oget_info_by_idx
- * Signature: (JLjava/lang/String;IIJJ)Lhdf/hdf5lib/structs/H5O_info_t;
+ * Signature: (JLjava/lang/String;IIJIJ)Lhdf/hdf5lib/structs/H5O_info_t;
  */
 JNIEXPORT jobject JNICALL
 Java_hdf_hdf5lib_H5_H5Oget_1info_1by_1idx
-(JNIEnv*, jclass, jlong, jstring, jint, jint, jlong, jlong);
+(JNIEnv*, jclass, jlong, jstring, jint, jint, jlong, jint fields, jlong);
 
 /*
  * Class:     hdf_hdf5lib_H5
@@ -88,20 +88,20 @@ Java_hdf_hdf5lib_H5_H5Olink
 /*
  * Class:     hdf_hdf5lib_H5
  * Method:    H5Ovisit
- * Signature: (JIILjava/lang/Object;Ljava/lang/Object;)I
+ * Signature: (JIILjava/lang/Object;Ljava/lang/Object;I)I
  */
 JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_H5_H5Ovisit
-  (JNIEnv*, jclass, jlong, jint, jint, jobject, jobject);
+  (JNIEnv*, jclass, jlong, jint, jint, jobject, jobject, jint);
 
 /*
  * Class:     hdf_hdf5lib_H5
  * Method:    H5Ovisit_by_name
- * Signature: (JLjava/lang/String;IILjava/lang/Object;Ljava/lang/Object;J)I
+ * Signature: (JLjava/lang/String;IILjava/lang/Object;Ljava/lang/Object;IJ)I
  */
 JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_H5_H5Ovisit_1by_1name
-  (JNIEnv*, jclass, jlong, jstring, jint, jint, jobject, jobject, jlong);
+  (JNIEnv*, jclass, jlong, jstring, jint, jint, jobject, jobject, jint, jlong);
 
 /*
  * Class:     hdf_hdf5lib_H5

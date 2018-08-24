@@ -28,15 +28,17 @@ classes:
 
 pkgpath = test
 hdfjarfile = jar$(PACKAGE_TARNAME)-$(PACKAGE_VERSION).jar
+CLASSPATH_ENV=CLASSPATH=.:$(JAVAROOT):$(top_builddir)/java/src/$(hdfjarfile):$(top_srcdir)/java/lib/junit.jar:$(top_srcdir)/java/lib/hamcrest-core.jar:$(top_srcdir)/java/lib/slf4j-api-1.7.25.jar:$(top_srcdir)/java/lib/ext/slf4j-simple-1.7.25.jar:$$CLASSPATH
+
 jarfile = jar$(PACKAGE_TARNAME)test.jar
 
-CLASSPATH_ENV=CLASSPATH=.:$(JAVAROOT):$(top_builddir)/java/src/$(hdfjarfile):$(top_srcdir)/java/lib/junit.jar:$(top_srcdir)/java/lib/hamcrest-core.jar:$(top_srcdir)/java/lib/slf4j-api-1.7.5.jar:$(top_srcdir)/java/lib/ext/slf4j-simple-1.7.5.jar:$$CLASSPATH
 AM_JAVACFLAGS = $(H5_JAVACFLAGS) -deprecation
+
+TESTPACKAGE = 
 
 noinst_JAVA = \
 	TestH5.java \
-    TestH5E.java \
-    TestH5Edefault.java \
+    TestH5Eparams.java \
     TestH5Eregister.java \
     TestH5Fparams.java \
     TestH5Fbasic.java \
@@ -44,7 +46,6 @@ noinst_JAVA = \
     TestH5Fswmr.java \
     TestH5Gbasic.java \
     TestH5G.java \
-    TestH5Giterate.java \
     TestH5Sbasic.java \
     TestH5S.java \
     TestH5Tparams.java \
@@ -69,7 +70,9 @@ noinst_JAVA = \
     TestH5Ocopy.java \
     TestH5PL.java \
     TestH5Z.java \
-    TestAll.java
+    TestH5E.java \
+    TestH5Edefault.java \
+    TestH5Giterate.java
 
 $(jarfile): classnoinst.stamp classes
 	$(JAR) cvf $@ -C $(JAVAROOT)/ $(pkgpath)
@@ -82,17 +85,6 @@ check_SCRIPTS = junit.sh
 TEST_SCRIPT = $(check_SCRIPTS)
 
 CLEANFILES = classnoinst.stamp $(jarfile) $(JAVAROOT)/$(pkgpath)/*.class junit.sh
-
-#JAVA_JUNIT  = $(JAVA_SRCS)
-#noinst_JAVA = @JAVA_JUNIT@
-#EXTRA_JAVA  = $(JAVA_JUNIT)
-TESTS_JUNIT = AllJunitTests
-#EXTRA_TEST  = $(TESTS_JUNIT)
-
-AllJunitTests :
-	echo "#! /bin/sh" > $@
-	echo "exec @JUNIT@ test.TestAll" >> $@
-	chmod +x $@
 
 clean:
 	rm -rf $(JAVAROOT)/*

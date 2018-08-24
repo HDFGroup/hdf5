@@ -1,0 +1,44 @@
+JUnit version 4.11
+.testH5Lcopy_invalid
+.testH5Lget_value_by_idx_null
+.testH5Lcreate_external_invalid
+.testH5Lexists_null
+.testH5Lget_info_invalid
+.testH5Lget_name_by_idx_invalid
+.testH5Lmove_null_current
+.testH5Literate_by_name_nullname
+.testH5Lvisit_by_name_nullname
+.testH5Lvisit_null
+.testH5Lget_name_by_idx_null
+.testH5Lcreate_hard_null_dest
+.testH5Lget_value_null
+.testH5Lcreate_external_null_dest
+.testH5Lcreate_external_null_file
+.testH5Lcreate_external_null_current
+.testH5Ldelete_null
+.testH5Lexists_invalid
+.testH5Lmove_invalid
+.testH5Lcreate_hard_invalid
+.testH5Lcopy_null_dest
+.testH5Lcreate_soft_null_current
+.testH5Lcopy_null_current
+.testH5Lget_info_by_idx_null
+.testH5Literate_null
+.testH5Ldelete_invalid
+.testH5Lvisit_by_name_null
+.testH5Ldelete_by_idx_invalid
+.testH5Lget_info_by_idx_invalid
+.testH5Ldelete_by_idx_null
+.testH5Lcreate_soft_invalid
+.testH5Lcreate_hard_null_current
+.testH5Lget_value_by_idx_invalid
+.testH5Lmove_null_dest
+.testH5Lget_info_null
+.testH5Literate_by_name_null
+.testH5Lcreate_soft_null_dest
+.testH5Lget_value_invalid
+
+Time:  XXXX
+
+OK (38 tests)
+

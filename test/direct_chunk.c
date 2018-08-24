@@ -11,11 +11,7 @@
  * help@hdfgroup.org.                                                        *
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <stdlib.h>
-#include <string.h>
-#include "h5hltest.h"
-#include "H5DOpublic.h"
-#include <math.h>
+#include "h5test.h"
 
 #if defined(H5_HAVE_ZLIB_H) && !defined(H5_ZLIB_HEADER) 
 # define H5_ZLIB_HEADER "zlib.h"
@@ -24,7 +20,7 @@
 # include H5_ZLIB_HEADER /* "zlib.h" */
 #endif
 
-#define FILE_NAME "test_dectris.h5"
+#define FILE_NAME "direct_chunk.h5"
 
 /* Datasets for Direct Write tests */
 #define DATASETNAME1        "direct_write"
@@ -100,7 +96,7 @@ const H5Z_class2_t H5Z_BOGUS2[1] = {{
 /*-------------------------------------------------------------------------
  * Function:	test_direct_chunk_write
  *
- * Purpose:	    Test the basic functionality of H5DOwrite_chunk
+ * Purpose:	    Test the basic functionality of H5Dwrite_chunk
  *
  * Return:	    Success:	0
  *		        Failure:	1
@@ -143,7 +139,7 @@ test_direct_chunk_write (hid_t file)
     hsize_t count[2];  /* Block count */
     hsize_t block[2];  /* Block sizes */
 
-    TESTING("basic functionality of H5DOwrite_chunk");
+    TESTING("basic functionality of H5Dwrite_chunk");
 
     /*
      * Create the data space with unlimited dimensions.
@@ -184,7 +180,7 @@ test_direct_chunk_write (hid_t file)
 
     /*
      * Write the data for the dataset.  It should stay in the chunk cache.
-     * It will be evicted from the cache by the H5DOwrite_chunk calls. 
+     * It will be evicted from the cache by the H5Dwrite_chunk calls. 
      */
     if((status = H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
 		      dxpl, data)) < 0)
@@ -218,7 +214,7 @@ test_direct_chunk_write (hid_t file)
      * dataset, using the direct writing function.     */ 
     for(i=0; i<NX/CHUNK_NX; i++) {
         for(j=0; j<NY/CHUNK_NY; j++) {
-            status = H5DOwrite_chunk(dataset, dxpl, filter_mask, offset, z_dst_nbytes, outbuf);
+            status = H5Dwrite_chunk(dataset, dxpl, filter_mask, offset, z_dst_nbytes, outbuf);
             offset[1] += CHUNK_NY;
         }
         offset[0] += CHUNK_NX;
@@ -292,7 +288,7 @@ test_direct_chunk_write (hid_t file)
     offset[0] = offset[1] = 0;
     for(i=0; i<NX/CHUNK_NX; i++) {
         for(j=0; j<NY/CHUNK_NY; j++) {
-            status = H5DOwrite_chunk(dataset, dxpl, filter_mask, offset, z_dst_nbytes, outbuf);
+            status = H5Dwrite_chunk(dataset, dxpl, filter_mask, offset, z_dst_nbytes, outbuf);
             offset[1] += CHUNK_NY;
         }
         offset[0] += CHUNK_NX;
@@ -389,7 +385,7 @@ test_direct_chunk_overwrite_data(hid_t fid)
     int16_t     n;
     int16_t     read_buf[OVERWRITE_CHUNK_NY][OVERWRITE_CHUNK_2NX];
 
-    TESTING("overwriting existing data with H5DOwrite_chunk");
+    TESTING("overwriting existing data with H5Dwrite_chunk");
 
     /* Create the dataset's data space */
     if ((sid = H5Screate_simple(OVERWRITE_NDIMS, dset_dims, dset_max_dims)) < 0)
@@ -417,17 +413,17 @@ test_direct_chunk_overwrite_data(hid_t fid)
     }
 
     /* Write chunk data using the direct write function. */
-    if (H5DOwrite_chunk(did, H5P_DEFAULT, filter_mask, offset, buf_size, data_buf) < 0)
+    if (H5Dwrite_chunk(did, H5P_DEFAULT, filter_mask, offset, buf_size, data_buf) < 0)
         FAIL_STACK_ERROR
 
     /* Write second chunk. */
     offset[2] = OVERWRITE_CHUNK_NX;
-    if (H5DOwrite_chunk(did, H5P_DEFAULT, filter_mask, offset, buf_size, data_buf) < 0)
+    if (H5Dwrite_chunk(did, H5P_DEFAULT, filter_mask, offset, buf_size, data_buf) < 0)
         FAIL_STACK_ERROR
 
     /* Overwrite first chunk. */
     offset[2] = 0;
-    if (H5DOwrite_chunk(did, H5P_DEFAULT, filter_mask, offset, buf_size, overwrite_buf) < 0)
+    if (H5Dwrite_chunk(did, H5P_DEFAULT, filter_mask, offset, buf_size, overwrite_buf) < 0)
         FAIL_STACK_ERROR
 
     /* Read the data back out */
@@ -504,7 +500,7 @@ test_skip_compress_write1(hid_t file)
     hsize_t count[2];  /* Block count */
     hsize_t block[2];  /* Block sizes */
 
-    TESTING("skipping compression filter for H5DOwrite_chunk/H5DOread_chunk");
+    TESTING("skipping compression filter for H5Dwrite_chunk/H5Dread_chunk");
 
     /*
      * Create the data space with unlimited dimensions.
@@ -551,7 +547,7 @@ test_skip_compress_write1(hid_t file)
 
     filter_mask = 0x00000001;
 
-    if((status = H5DOwrite_chunk(dataset, dxpl, filter_mask, offset, buf_size, direct_buf)) < 0)
+    if((status = H5Dwrite_chunk(dataset, dxpl, filter_mask, offset, buf_size, direct_buf)) < 0)
         goto error;
 
     if(H5Fflush(dataset, H5F_SCOPE_LOCAL) < 0)
@@ -597,7 +593,7 @@ test_skip_compress_write1(hid_t file)
 
     /* Read the raw chunk back */
     HDmemset(&read_direct_buf, 0, sizeof(read_direct_buf));
-    if((status = H5DOread_chunk(dataset, H5P_DEFAULT, offset, &read_filter_mask, read_direct_buf)) < 0)
+    if((status = H5Dread_chunk(dataset, H5P_DEFAULT, offset, &read_filter_mask, read_direct_buf)) < 0)
         goto error;
     if(read_filter_mask != filter_mask)
         goto error;
@@ -822,7 +818,7 @@ test_skip_compress_write2(hid_t file)
     /* compression filter is the middle one to be skipped */
     filter_mask = 0x00000002;
 
-    if((status = H5DOwrite_chunk(dataset, dxpl, filter_mask, offset, buf_size, direct_buf)) < 0)
+    if((status = H5Dwrite_chunk(dataset, dxpl, filter_mask, offset, buf_size, direct_buf)) < 0)
         goto error;
 
     if(H5Fflush(dataset, H5F_SCOPE_LOCAL) < 0)
@@ -868,7 +864,7 @@ test_skip_compress_write2(hid_t file)
 
     /* Read the raw chunk back */
     HDmemset(&read_direct_buf, 0, sizeof(read_direct_buf));
-    if((status = H5DOread_chunk(dataset, H5P_DEFAULT, offset, &read_filter_mask, read_direct_buf)) < 0)
+    if((status = H5Dread_chunk(dataset, H5P_DEFAULT, offset, &read_filter_mask, read_direct_buf)) < 0)
         goto error;
     if(read_filter_mask != filter_mask)
         goto error;
@@ -948,7 +944,7 @@ test_data_conv(hid_t file)
     unsigned    filter_mask = 0;
     src_type_t  direct_buf[CHUNK_NX][CHUNK_NY];
     dst_type_t  check_chunk[CHUNK_NX][CHUNK_NY];
-    src_type_t  read_chunk[CHUNK_NX][CHUNK_NY];       /* For H5DOread_chunk */
+    src_type_t  read_chunk[CHUNK_NX][CHUNK_NY];       /* For H5Dread_chunk */
 
     hsize_t     offset[2] = {0, 0};
     size_t      buf_size = CHUNK_NX*CHUNK_NY*sizeof(src_type_t);
@@ -958,7 +954,7 @@ test_data_conv(hid_t file)
     hsize_t count[2];  /* Block count */
     hsize_t block[2];  /* Block sizes */
 
-    TESTING("data conversion for H5DOwrite_chunk/H5DOread_chunk");
+    TESTING("data conversion for H5Dwrite_chunk/H5Dread_chunk");
 
     /*
      * Create the data space with unlimited dimensions.
@@ -1031,7 +1027,7 @@ test_data_conv(hid_t file)
     offset[0] = CHUNK_NX;
     offset[1] = CHUNK_NY;
 
-    if((status = H5DOwrite_chunk(dataset, dxpl, filter_mask, offset, buf_size, direct_buf)) < 0)
+    if((status = H5Dwrite_chunk(dataset, dxpl, filter_mask, offset, buf_size, direct_buf)) < 0)
         goto error;
 
     if(H5Fflush(dataset, H5F_SCOPE_LOCAL) < 0) 
@@ -1043,8 +1039,8 @@ test_data_conv(hid_t file)
     if((dataset = H5Dopen2(file, DATASETNAME4, H5P_DEFAULT)) < 0)
         goto error;
 
-    /* Use H5DOread_chunk() to read the uncompressed data */
-    if((status = H5DOread_chunk(dataset, dxpl, offset, &filter_mask, read_chunk)) < 0)
+    /* Use H5Dread_chunk() to read the uncompressed data */
+    if((status = H5Dread_chunk(dataset, dxpl, offset, &filter_mask, read_chunk)) < 0)
         goto error;
 
     /* Check that the values read are the same as the values written */
@@ -1141,7 +1137,7 @@ error:
 /*-------------------------------------------------------------------------
  * Function:	test_invalid_parameters
  *
- * Purpose:     Test invalid parameters for H5DOwrite_chunk and H5DOread_chunk
+ * Purpose:     Test invalid parameters for H5Dwrite_chunk and H5Dread_chunk
  *
  * Return:      Success:	0
  *              Failure:	1
@@ -1170,7 +1166,7 @@ test_invalid_parameters(hid_t file)
 
     hsize_t     chunk_nbytes;       /* Chunk size */
 
-    TESTING("invalid parameters for H5DOwrite_chunk/H5DOread_chunk");
+    TESTING("invalid parameters for H5Dwrite_chunk/H5Dread_chunk");
 
     /*
      * Create the data space with unlimited dimensions.
@@ -1188,7 +1184,7 @@ test_invalid_parameters(hid_t file)
         goto error;
 
     /*
-     * Create a new contiguous dataset to verify H5DOwrite_chunk/H5DOread_chunk doesn't work
+     * Create a new contiguous dataset to verify H5Dwrite_chunk/H5Dread_chunk doesn't work
      */
     if((dataset = H5Dcreate2(file, DATASETNAME5, H5T_NATIVE_INT, dataspace, H5P_DEFAULT,
 			cparms, H5P_DEFAULT)) < 0)
@@ -1208,7 +1204,7 @@ test_invalid_parameters(hid_t file)
     offset[1] = CHUNK_NY;
 
     H5E_BEGIN_TRY {
-        if((status = H5DOwrite_chunk(dataset, dxpl, filter_mask, offset, buf_size, direct_buf)) != FAIL)
+        if((status = H5Dwrite_chunk(dataset, dxpl, filter_mask, offset, buf_size, direct_buf)) != FAIL)
             goto error;
     } H5E_END_TRY;
 
@@ -1218,9 +1214,9 @@ test_invalid_parameters(hid_t file)
             goto error;
     } H5E_END_TRY;
 
-    /* Try to H5DOread_chunk from the contiguous dataset.  It should fail */
+    /* Try to H5Dread_chunk from the contiguous dataset.  It should fail */
     H5E_BEGIN_TRY {
-        if((status = H5DOread_chunk(dataset, dxpl, offset, &filter_mask, direct_buf)) != FAIL)
+        if((status = H5Dread_chunk(dataset, dxpl, offset, &filter_mask, direct_buf)) != FAIL)
             goto error;
     } H5E_END_TRY;
 
@@ -1243,83 +1239,83 @@ test_invalid_parameters(hid_t file)
 			cparms, H5P_DEFAULT)) < 0)
         goto error;
 
-    /* Check invalid dataset ID for H5DOwrite_chunk and H5DOread_chunk */ 
+    /* Check invalid dataset ID for H5Dwrite_chunk and H5Dread_chunk */ 
     H5E_BEGIN_TRY {
-        if((status = H5DOwrite_chunk((hid_t)-1, dxpl, filter_mask, offset, buf_size, direct_buf)) != FAIL)
+        if((status = H5Dwrite_chunk((hid_t)-1, dxpl, filter_mask, offset, buf_size, direct_buf)) != FAIL)
             goto error;
     } H5E_END_TRY;
 
     H5E_BEGIN_TRY {
-        if((status = H5DOread_chunk((hid_t)-1, dxpl, offset, &filter_mask, direct_buf)) != FAIL)
+        if((status = H5Dread_chunk((hid_t)-1, dxpl, offset, &filter_mask, direct_buf)) != FAIL)
             goto error;
     } H5E_END_TRY;
 
-    /* Check invalid DXPL ID for H5DOwrite_chunk and H5DOread_chunk */
+    /* Check invalid DXPL ID for H5Dwrite_chunk and H5Dread_chunk */
     H5E_BEGIN_TRY {
-        if((status = H5DOwrite_chunk(dataset, (hid_t)-1, filter_mask, offset, buf_size, direct_buf)) != FAIL)
-            goto error;
-    } H5E_END_TRY;
-
-    H5E_BEGIN_TRY {
-        if((status = H5DOread_chunk(dataset, (hid_t)-1, offset, &filter_mask, direct_buf)) != FAIL)
-            goto error;
-    } H5E_END_TRY;
-
-    /* Check invalid OFFSET for H5DOwrite_chunk and H5DOread_chunk */
-    H5E_BEGIN_TRY {
-        if((status = H5DOwrite_chunk(dataset, dxpl, filter_mask, NULL, buf_size, direct_buf)) != FAIL)
+        if((status = H5Dwrite_chunk(dataset, (hid_t)-1, filter_mask, offset, buf_size, direct_buf)) != FAIL)
             goto error;
     } H5E_END_TRY;
 
     H5E_BEGIN_TRY {
-        if((status = H5DOread_chunk(dataset, dxpl, NULL, &filter_mask, direct_buf)) != FAIL)
+        if((status = H5Dread_chunk(dataset, (hid_t)-1, offset, &filter_mask, direct_buf)) != FAIL)
             goto error;
     } H5E_END_TRY;
 
-    /* Check when OFFSET is out of dataset range for H5DOwrite_chunk and H5DOread_chunk */
+    /* Check invalid OFFSET for H5Dwrite_chunk and H5Dread_chunk */
+    H5E_BEGIN_TRY {
+        if((status = H5Dwrite_chunk(dataset, dxpl, filter_mask, NULL, buf_size, direct_buf)) != FAIL)
+            goto error;
+    } H5E_END_TRY;
+
+    H5E_BEGIN_TRY {
+        if((status = H5Dread_chunk(dataset, dxpl, NULL, &filter_mask, direct_buf)) != FAIL)
+            goto error;
+    } H5E_END_TRY;
+
+    /* Check when OFFSET is out of dataset range for H5Dwrite_chunk and H5Dread_chunk */
     offset[0] = NX + 1;
     offset[1] = NY;
     H5E_BEGIN_TRY {
-        if((status = H5DOwrite_chunk(dataset, dxpl, filter_mask, offset, buf_size, direct_buf)) != FAIL)
+        if((status = H5Dwrite_chunk(dataset, dxpl, filter_mask, offset, buf_size, direct_buf)) != FAIL)
             goto error;
     } H5E_END_TRY;
 
     H5E_BEGIN_TRY {
-        if((status = H5DOread_chunk(dataset, dxpl, offset, &filter_mask, direct_buf)) != FAIL)
+        if((status = H5Dread_chunk(dataset, dxpl, offset, &filter_mask, direct_buf)) != FAIL)
             goto error;
     } H5E_END_TRY;
 
-    /* Check when OFFSET is not on chunk boundary for H5DOwrite_chunk and H5DOread_chunk */
+    /* Check when OFFSET is not on chunk boundary for H5Dwrite_chunk and H5Dread_chunk */
     offset[0] = CHUNK_NX;
     offset[1] = CHUNK_NY + 1;
     H5E_BEGIN_TRY {
-        if((status = H5DOwrite_chunk(dataset, dxpl, filter_mask, offset, buf_size, direct_buf)) != FAIL)
+        if((status = H5Dwrite_chunk(dataset, dxpl, filter_mask, offset, buf_size, direct_buf)) != FAIL)
             goto error;
     } H5E_END_TRY;
 
     H5E_BEGIN_TRY {
-        if((status = H5DOread_chunk(dataset, dxpl, offset, &filter_mask, direct_buf)) != FAIL)
+        if((status = H5Dread_chunk(dataset, dxpl, offset, &filter_mask, direct_buf)) != FAIL)
             goto error;
     } H5E_END_TRY;
 
-    /* Check invalid buffer size for H5DOwrite_chunk only */
+    /* Check invalid buffer size for H5Dwrite_chunk only */
     offset[0] = CHUNK_NX;
     offset[1] = CHUNK_NY;
     buf_size = 0; 
     H5E_BEGIN_TRY {
-        if((status = H5DOwrite_chunk(dataset, dxpl, filter_mask, offset, buf_size, direct_buf)) != FAIL)
+        if((status = H5Dwrite_chunk(dataset, dxpl, filter_mask, offset, buf_size, direct_buf)) != FAIL)
             goto error;
     } H5E_END_TRY;
 
-    /* Check invalid data buffer for H5DOwrite_chunk and H5DOread_chunk */
+    /* Check invalid data buffer for H5Dwrite_chunk and H5Dread_chunk */
     buf_size = CHUNK_NX*CHUNK_NY*sizeof(int);
     H5E_BEGIN_TRY {
-        if((status = H5DOwrite_chunk(dataset, dxpl, filter_mask, offset, buf_size, NULL)) != FAIL)
+        if((status = H5Dwrite_chunk(dataset, dxpl, filter_mask, offset, buf_size, NULL)) != FAIL)
             goto error;
     } H5E_END_TRY;
 
     H5E_BEGIN_TRY {
-        if((status = H5DOread_chunk(dataset, dxpl, offset, &filter_mask, NULL)) != FAIL)
+        if((status = H5Dread_chunk(dataset, dxpl, offset, &filter_mask, NULL)) != FAIL)
             goto error;
     } H5E_END_TRY;
 
@@ -1353,7 +1349,7 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    test_direct_chunk_read_no_cache
  *
- * Purpose:     Test the basic functionality of H5DOread_chunk with the
+ * Purpose:     Test the basic functionality of H5Dread_chunk with the
  *              chunk cache diabled.
  *
  * Return:      Success:        0
@@ -1379,10 +1375,10 @@ test_direct_chunk_read_no_cache (hid_t file)
     int         data[NX][NY];
     int         i, j, k, l, n;      /* local index variables */
 
-    unsigned    filter_mask = 0;    /* filter mask returned from H5DOread_chunk */
-    int         direct_buf[CHUNK_NX][CHUNK_NY];  /* chunk read with H5DOread and manually decompressed */
+    unsigned    filter_mask = 0;    /* filter mask returned from H5Dread_chunk */
+    int         direct_buf[CHUNK_NX][CHUNK_NY];  /* chunk read with H5Dread and manually decompressed */
     int         check_chunk[CHUNK_NX][CHUNK_NY]; /* chunk read with H5Dread */
-    hsize_t     offset[2]; /* chunk offset used for H5DOread_chunk */
+    hsize_t     offset[2]; /* chunk offset used for H5Dread_chunk */
     size_t      buf_size = CHUNK_NX*CHUNK_NY*sizeof(int);
 
     Bytef       *z_src = NULL;      /* source buffer        */
@@ -1397,7 +1393,7 @@ test_direct_chunk_read_no_cache (hid_t file)
     hsize_t count[2];  /* Block count */
     hsize_t block[2];  /* Block sizes */
 
-    TESTING("basic functionality of H5DOread_chunk (chunk cache disabled)");
+    TESTING("basic functionality of H5Dread_chunk (chunk cache disabled)");
 
     /* Create the data space with unlimited dimensions. */
     if((dataspace = H5Screate_simple(RANK, dims, maxdims)) < 0)
@@ -1442,7 +1438,7 @@ test_direct_chunk_read_no_cache (hid_t file)
     outbuf = HDmalloc(z_src_nbytes);
     z_src = (Bytef *)outbuf;
 
-    /* For each chunk in the dataset, compare the result of H5Dread and H5DOread_chunk. */
+    /* For each chunk in the dataset, compare the result of H5Dread and H5Dread_chunk. */
     for(i=0; i<NX/CHUNK_NX; i++) {
         for(j=0; j<NY/CHUNK_NY; j++) {
             /* Select hyperslab for one chunk in the file */
@@ -1461,7 +1457,7 @@ test_direct_chunk_read_no_cache (hid_t file)
 
             offset[0] = (hsize_t)i * CHUNK_NX; offset[1] = (hsize_t)j * CHUNK_NY;
             /* Read the compressed chunk back using the direct read function. */
-            if((status = H5DOread_chunk(dataset, dxpl, offset, &filter_mask, outbuf)) < 0)
+            if((status = H5Dread_chunk(dataset, dxpl, offset, &filter_mask, outbuf)) < 0)
                 goto error;
 
             /* Check filter mask return value */
@@ -1547,10 +1543,10 @@ test_direct_chunk_read_cache (hid_t file, hbool_t flush)
     int         data[NX][NY];
     int         i, j, k, l, n;      /* local index variables */
 
-    unsigned    filter_mask = 0;    /* filter mask returned from H5DOread_chunk */
-    int         direct_buf[CHUNK_NX][CHUNK_NY];  /* chunk read with H5DOread and manually decompressed */
+    unsigned    filter_mask = 0;    /* filter mask returned from H5Dread_chunk */
+    int         direct_buf[CHUNK_NX][CHUNK_NY];  /* chunk read with H5Dread and manually decompressed */
     int         check_chunk[CHUNK_NX][CHUNK_NY]; /* chunk read with H5Dread */
-    hsize_t     offset[2]; /* chunk offset used for H5DOread_chunk */
+    hsize_t     offset[2]; /* chunk offset used for H5Dread_chunk */
     size_t      buf_size = CHUNK_NX*CHUNK_NY*sizeof(int);
 
     Bytef       *z_src = NULL;      /* source buffer        */
@@ -1567,9 +1563,9 @@ test_direct_chunk_read_cache (hid_t file, hbool_t flush)
     hsize_t block[2];  /* Block sizes */
 
     if(flush) {
-        TESTING("basic functionality of H5DOread_chunk (flush chunk cache)");
+        TESTING("basic functionality of H5Dread_chunk (flush chunk cache)");
     } else {
-        TESTING("basic functionality of H5DOread_chunk (does not flush chunk cache)");
+        TESTING("basic functionality of H5Dread_chunk (does not flush chunk cache)");
     }
 
     /* Create the data space with unlimited dimensions. */
@@ -1615,7 +1611,7 @@ test_direct_chunk_read_cache (hid_t file, hbool_t flush)
     outbuf = HDmalloc(z_src_nbytes);
     z_src = (Bytef *)outbuf;
 
-    /* For each chunk in the dataset, compare the result of H5Dread and H5DOread_chunk. */
+    /* For each chunk in the dataset, compare the result of H5Dread and H5Dread_chunk. */
     for(i=0; i<NX/CHUNK_NX; i++) {
         for(j=0; j<NY/CHUNK_NY; j++) {
             /* Select hyperslab for one chunk in the file */
@@ -1641,7 +1637,7 @@ test_direct_chunk_read_cache (hid_t file, hbool_t flush)
                 goto error;
         
             /* Read the compressed chunk back using the direct read function. */
-            if((status = H5DOread_chunk(dataset, dxpl, offset, &filter_mask, outbuf)) < 0)
+            if((status = H5Dread_chunk(dataset, dxpl, offset, &filter_mask, outbuf)) < 0)
                 goto error;
 
             /* Check filter mask return value */
@@ -1713,7 +1709,7 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    test_read_unfiltered_dset
  *
- * Purpose:     Test the basic functionality of H5DOread_chunk on a dataset
+ * Purpose:     Test the basic functionality of H5Dread_chunk on a dataset
  *              without no filters applied.
  *
  * Return:      Success:        0
@@ -1749,7 +1745,7 @@ test_read_unfiltered_dset(hid_t file)
     hsize_t count[2];  /* Block count */
     hsize_t block[2];  /* Block sizes */
 
-    TESTING("basic functionality of H5DOread_chunk on unfiltered datasets");
+    TESTING("basic functionality of H5Dread_chunk on unfiltered datasets");
 
     /* Create the data space with unlimited dimensions. */
     if((dataspace = H5Screate_simple(RANK, dims, maxdims)) < 0)
@@ -1778,7 +1774,7 @@ test_read_unfiltered_dset(hid_t file)
 
     /* Write the data for the dataset.
      * It should stay in the chunk cache and will be evicted/flushed by
-     * the H5DOread_chunk function call. */
+     * the H5Dread_chunk function call. */
     if((status = H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
               dxpl, data)) < 0)
         goto error;
@@ -1786,7 +1782,7 @@ test_read_unfiltered_dset(hid_t file)
     if(H5Fflush(dataset, H5F_SCOPE_LOCAL) < 0)
         goto error;
 
-    /* For each chunk in the dataset, compare the result of H5Dread and H5DOread_chunk. */
+    /* For each chunk in the dataset, compare the result of H5Dread and H5Dread_chunk. */
     for(i=0; i<NX/CHUNK_NX; i++) {
         for(j=0; j<NY/CHUNK_NY; j++) {
             /* Select hyperslab for one chunk in the file */
@@ -1814,7 +1810,7 @@ test_read_unfiltered_dset(hid_t file)
             /* Read the raw chunk back */
             HDmemset(&direct_buf, 0, sizeof(direct_buf));
             filter_mask = UINT_MAX;
-            if((status = H5DOread_chunk(dataset, dxpl, offset, &filter_mask, direct_buf)) < 0)
+            if((status = H5Dread_chunk(dataset, dxpl, offset, &filter_mask, direct_buf)) < 0)
                 goto error;
 
             /* Check filter mask return value */
@@ -1861,7 +1857,7 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    test_read_unallocated_chunk
  *
- * Purpose:     Tests the H5DOread_chunk and H5Dget_chunk_storage_size with valid
+ * Purpose:     Tests the H5Dread_chunk and H5Dget_chunk_storage_size with valid
  *              offets to chunks that have not been written to the dataset and are
  *              not allocated in the chunk storage on disk.
  *
@@ -1887,11 +1883,11 @@ test_read_unallocated_chunk (hid_t file)
     herr_t      status;     /* status from H5 function calls */
     hsize_t     i, j;       /* local index variables */
 
-    unsigned    filter_mask = 0;    /* filter mask returned from H5DOread_chunk */
-    int         direct_buf[CHUNK_NX][CHUNK_NY]; /* chunk read with H5DOread and manually decompressed */
-    hsize_t     offset[2];  /* chunk offset used for H5DOread_chunk */
+    unsigned    filter_mask = 0;    /* filter mask returned from H5Dread_chunk */
+    int         direct_buf[CHUNK_NX][CHUNK_NY]; /* chunk read with H5Dread and manually decompressed */
+    hsize_t     offset[2];  /* chunk offset used for H5Dread_chunk */
 
-    TESTING("H5DOread_chunk with unallocated chunks");
+    TESTING("H5Dread_chunk with unallocated chunks");
 
     /* Create the data space with unlimited dimensions. */
     if((dataspace = H5Screate_simple(RANK, dims, maxdims)) < 0)
@@ -1917,11 +1913,11 @@ test_read_unallocated_chunk (hid_t file)
     HDmemset(&chunk_dims, 0, sizeof(chunk_dims));
     offset[0] = 0; offset[1] = 0;
 
-    if(H5DOwrite_chunk(dataset, dxpl, filter_mask, offset, chunk_nbytes, &chunk_dims) < 0)
+    if(H5Dwrite_chunk(dataset, dxpl, filter_mask, offset, chunk_nbytes, &chunk_dims) < 0)
         goto error;
 
     /* Attempt to read each chunk in the dataset. Chunks are not allocated,
-     * therefore we expect the result of H5DOread_chunk to fail. Chunk idx starts
+     * therefore we expect the result of H5Dread_chunk to fail. Chunk idx starts
      * at 1, since one chunk was written to init the chunk storage. */
     for(i=1; i<NX/CHUNK_NX; i++) {
         for(j=0; j<NY/CHUNK_NY; j++) {
@@ -1931,7 +1927,7 @@ test_read_unallocated_chunk (hid_t file)
 
             /* Read a non-existant chunk using the direct read function. */
             H5E_BEGIN_TRY {
-                status = H5DOread_chunk(dataset, dxpl, offset, &filter_mask, &direct_buf);
+                status = H5Dread_chunk(dataset, dxpl, offset, &filter_mask, &direct_buf);
             } H5E_END_TRY;
 
             /* Check that the chunk read call does not succeed. */
@@ -2013,7 +2009,7 @@ test_single_chunk_latest(void)
     int rdata[DIM0][DIM1];  /* Read buffer */
     int i, j;               /* Local index variable */
 
-    TESTING("H5DOwrite_chunk with single chunk and latest format");
+    TESTING("H5Dwrite_chunk with single chunk and latest format");
 
     /* Initialize data */
     for (i=0; i<DIM0; i++) {
@@ -2044,7 +2040,7 @@ test_single_chunk_latest(void)
         goto error;
 
     /* Write the data directly to the dataset */
-    if(H5DOwrite_chunk(did, H5P_DEFAULT, 0, offset, CHUNK0*CHUNK1*4, (void *)wdata) < 0)
+    if(H5Dwrite_chunk(did, H5P_DEFAULT, 0, offset, CHUNK0*CHUNK1*4, (void *)wdata) < 0)
         goto error;
 
     /*
@@ -2112,8 +2108,8 @@ error:
 /*-------------------------------------------------------------------------
  * Function:	Main function
  *
- * Purpose:	    Test direct chunk write function H5DOwrite_chunk and
- *              chunk direct read function H5DOread_chunk
+ * Purpose:	    Test direct chunk write function H5Dwrite_chunk and
+ *              chunk direct read function H5Dread_chunk
  *
  * Return:	    Success:	0
  *		        Failure:	1

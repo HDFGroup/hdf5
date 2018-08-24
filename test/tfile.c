@@ -181,8 +181,6 @@ static void test_libver_bounds_datatype(hid_t fapl);
 static void test_libver_bounds_datatype_check(hid_t fapl, hid_t tid);
 static void test_libver_bounds_attributes(hid_t fapl);
 
-#define FILE8            "tfile8.h5"    /* Test file */
-
 #define DSET_NULL    "DSET_NULL"
 #define DSET        "DSET"
 #define DSETA        "DSETA"
@@ -4893,7 +4891,7 @@ test_libver_bounds_real(H5F_libver_t libver_create, unsigned oh_vers_create,
     /*
      * Make sure the root group has the correct object header version
      */
-    ret = H5Oget_info_by_name(file, "/", &oinfo, H5P_DEFAULT);
+    ret = H5Oget_info_by_name2(file, "/", &oinfo, H5O_INFO_HDR, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Oget_info_by_name");
     VERIFY(oinfo.hdr.version, oh_vers_create, "H5Oget_info_by_name");
 
@@ -4909,7 +4907,7 @@ test_libver_bounds_real(H5F_libver_t libver_create, unsigned oh_vers_create,
     file = H5Fopen("tfile5.h5", H5F_ACC_RDWR, fapl);
     CHECK(file, FAIL, "H5Fopen");
 
-    ret = H5Oget_info_by_name(file, "/", &oinfo, H5P_DEFAULT);
+    ret = H5Oget_info_by_name2(file, "/", &oinfo, H5O_INFO_HDR, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Oget_info_by_name");
     VERIFY(oinfo.hdr.version, oh_vers_create, "H5Oget_info_by_name");
 
@@ -4920,7 +4918,7 @@ test_libver_bounds_real(H5F_libver_t libver_create, unsigned oh_vers_create,
     group = H5Gcreate2(file, "/G1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(group, FAIL, "H5Gcreate");
 
-    ret = H5Oget_info(group, &oinfo);
+    ret = H5Oget_info2(group, &oinfo, H5O_INFO_HDR);
     CHECK(ret, FAIL, "H5Oget_info");
     VERIFY(oinfo.hdr.version, oh_vers_mod, "H5Oget_info");
 
@@ -4934,7 +4932,7 @@ test_libver_bounds_real(H5F_libver_t libver_create, unsigned oh_vers_create,
     group = H5Gcreate2(file, "/G1/G3", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(group, FAIL, "H5Gcreate");
 
-    ret = H5Oget_info(group, &oinfo);
+    ret = H5Oget_info2(group, &oinfo, H5O_INFO_HDR);
     CHECK(ret, FAIL, "H5Oget_info_by_name");
     VERIFY(oinfo.hdr.version, oh_vers_mod, "H5Oget_info_by_name");
 
@@ -4944,7 +4942,7 @@ test_libver_bounds_real(H5F_libver_t libver_create, unsigned oh_vers_create,
     /*
      * Make sure the root group still has the correct object header version
      */
-    ret = H5Oget_info_by_name(file, "/", &oinfo, H5P_DEFAULT);
+    ret = H5Oget_info_by_name2(file, "/", &oinfo, H5O_INFO_HDR, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Oget_info_by_name");
     VERIFY(oinfo.hdr.version, oh_vers_create, "H5Oget_info_by_name");
 
@@ -5642,7 +5640,7 @@ test_libver_bounds_obj(hid_t fapl)
     CHECK(fid, FAIL, "H5Fcreate");
 
     /* Get root group's object info */
-    ret = H5Oget_info_by_name(fid, "/", &oinfo, H5P_DEFAULT);
+    ret = H5Oget_info_by_name2(fid, "/", &oinfo, H5O_INFO_HDR, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Oget_info_by_name");
 
     /* Verify object header version is 2 because shared message is enabled */
@@ -5661,7 +5659,7 @@ test_libver_bounds_obj(hid_t fapl)
     CHECK(fid, FAIL, "H5Fcreate");
 
     /* Get root group's object info */
-    ret = H5Oget_info_by_name(fid, "/", &oinfo, H5P_DEFAULT);
+    ret = H5Oget_info_by_name2(fid, "/", &oinfo, H5O_INFO_HDR, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Oget_info_by_name");
 
     /* Verify object header version is as indicated by low_bound */
@@ -5716,7 +5714,7 @@ test_libver_bounds_obj(hid_t fapl)
                     VERIFY(ginfo.storage_type, H5G_STORAGE_TYPE_SYMBOL_TABLE, "H5Gget_info");
 
                 /* Get object header information */
-                ret = H5Oget_info_by_name(gid, GRP_NAME, &oinfo, H5P_DEFAULT);
+                ret = H5Oget_info_by_name2(gid, GRP_NAME, &oinfo, H5O_INFO_HDR, H5P_DEFAULT);
                 CHECK(ret, FAIL, "H5Oget_info_by_name");
 
                 /* Verify object header version as indicated by low_bound */
@@ -6935,7 +6933,7 @@ test_libver_macros2(void)
 **
 ****************************************************************/
 static void
-test_incr_filesize(const char *env_h5_drvr)
+test_incr_filesize(void)
 {
     hid_t    fid;                       /* File opened with read-write permission */
     h5_stat_size_t filesize;            /* Size of file when empty */
@@ -7337,7 +7335,7 @@ test_file(void)
     test_libver_bounds_low_high();
     test_libver_macros();                       /* Test the macros for library version comparison */
     test_libver_macros2();                      /* Test the macros for library version comparison */
-    test_incr_filesize(env_h5_drvr);            /* Test H5Fincrement_filesize() and H5Fget_eoa() */
+    test_incr_filesize();                       /* Test H5Fincrement_filesize() and H5Fget_eoa() */
 #ifndef H5_NO_DEPRECATED_SYMBOLS
     test_deprec();                              /* Test deprecated routines */
 #endif /* H5_NO_DEPRECATED_SYMBOLS */

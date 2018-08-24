@@ -50,6 +50,8 @@ if HAVE_SHARED_CONDITIONAL
   libdynlibvers_la_SOURCES=dynlib_vrpk.c
   libdynlibadd_la_LDFLAGS=$(AM_LDFLAGS) -avoid-version -module -shared -export-dynamic -rpath /nowhere
   libdynlibvers_la_LDFLAGS=$(AM_LDFLAGS) -avoid-version -module -shared -export-dynamic -rpath /nowhere
+  libdynlibadd_la_LIBADD=$(LIBH5TOOLS) $(LIBH5TEST) $(LIBHDF5)
+  libdynlibvers_la_LIBADD=$(LIBH5TOOLS) $(LIBH5TEST) $(LIBHDF5)
 endif
 
 

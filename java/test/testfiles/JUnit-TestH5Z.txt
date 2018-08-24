@@ -1,0 +1,9 @@
+JUnit version 4.11
+.testH5Zfilter_avail
+.testH5Zunregister_predefined
+.testH5Zget_filter_info
+
+Time:  XXXX
+
+OK (3 tests)
+

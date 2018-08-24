@@ -145,7 +145,6 @@ const char *FILENAME[] = {
 #define NAME_LINK_EXTERN_DANGLE "/g_links/external_link_to_nowhere"
 #define NAME_LINK_EXTERN_DANGLE2        "/g_links2/external_link_to_nowhere"
 #define NAME_OLD_FORMAT        "/dset1"
-#define NAME_DSET_NULL      "DSET_NULL"
 
 #define NAME_BUF_SIZE   1024
 #define ATTR_NAME_LEN 80
@@ -878,10 +877,10 @@ compare_std_attributes(hid_t oid, hid_t oid2, hid_t pid)
         cpy_flags = 0;
 
     /* Check the number of attributes on source dataset */
-    if(H5Oget_info(oid, &oinfo1) < 0) TEST_ERROR
+    if(H5Oget_info2(oid, &oinfo1, H5O_INFO_NUM_ATTRS) < 0) TEST_ERROR
 
     /* Check the number of attributes on destination dataset */
-    if(H5Oget_info(oid2, &oinfo2) < 0) TEST_ERROR
+    if(H5Oget_info2(oid2, &oinfo2, H5O_INFO_NUM_ATTRS) < 0) TEST_ERROR
 
     if(cpy_flags & H5O_COPY_WITHOUT_ATTR_FLAG) {
         /* Check that the destination has no attributes */
@@ -1072,8 +1071,8 @@ compare_data(hid_t parent1, hid_t parent2, hid_t pid, hid_t tid, size_t nelmts,
                 if(obj_owner > 0) {
                     H5O_info_t oinfo1, oinfo2;
 
-                    if(H5Oget_info(obj_owner, &oinfo1) < 0) TEST_ERROR
-                    if(H5Oget_info(obj1_id, &oinfo2) < 0) TEST_ERROR
+                    if(H5Oget_info2(obj_owner, &oinfo1, H5O_INFO_BASIC) < 0) TEST_ERROR
+                    if(H5Oget_info2(obj1_id, &oinfo2, H5O_INFO_BASIC) < 0) TEST_ERROR
                     if(H5F_addr_eq(oinfo1.addr, oinfo2.addr)) {
                         if(H5Oclose(obj1_id) < 0) TEST_ERROR
                         if(H5Oclose(obj2_id) < 0) TEST_ERROR
@@ -1130,8 +1129,8 @@ compare_data(hid_t parent1, hid_t parent2, hid_t pid, hid_t tid, size_t nelmts,
                 if(obj_owner > 0) {
                     H5O_info_t oinfo1, oinfo2;
 
-                    if(H5Oget_info(obj_owner, &oinfo1) < 0) TEST_ERROR
-                    if(H5Oget_info(obj1_id, &oinfo2) < 0) TEST_ERROR
+                    if(H5Oget_info2(obj_owner, &oinfo1, H5O_INFO_BASIC) < 0) TEST_ERROR
+                    if(H5Oget_info2(obj1_id, &oinfo2, H5O_INFO_BASIC) < 0) TEST_ERROR
                     if(H5F_addr_eq(oinfo1.addr, oinfo2.addr)) {
                         if(H5Oclose(obj1_id) < 0) TEST_ERROR
                         if(H5Oclose(obj2_id) < 0) TEST_ERROR
@@ -1424,8 +1423,8 @@ compare_groups(hid_t gid, hid_t gid2, hid_t pid, int depth, unsigned copy_flags)
                 H5O_info_t oinfo, oinfo2;       /* Object info */
 
                 /* Compare some pieces of the object info */
-                if(H5Oget_info_by_name(gid, objname, &oinfo, H5P_DEFAULT) < 0) TEST_ERROR
-                if(H5Oget_info_by_name(gid2, objname2, &oinfo2, H5P_DEFAULT) < 0) TEST_ERROR
+                if(H5Oget_info_by_name2(gid, objname, &oinfo, H5O_INFO_BASIC|H5O_INFO_HDR, H5P_DEFAULT) < 0) TEST_ERROR
+                if(H5Oget_info_by_name2(gid2, objname2, &oinfo2, H5O_INFO_BASIC|H5O_INFO_HDR, H5P_DEFAULT) < 0) TEST_ERROR
 
                 if(oinfo.type != oinfo2.type) TEST_ERROR
                 if(oinfo.rc != oinfo2.rc) TEST_ERROR
@@ -1950,8 +1949,8 @@ test_copy_named_datatype_attr_self(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fap
     if(H5Tcommitted(tid) != TRUE) TEST_ERROR
 
     /* verify that the addresses of the datatypes are the same */
-    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
-    if(H5Oget_info(tid2, &oinfo2) < 0) TEST_ERROR
+    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
+    if(H5Oget_info2(tid2, &oinfo2, H5O_INFO_BASIC) < 0) TEST_ERROR
     if(oinfo.fileno != oinfo2.fileno || oinfo.addr != oinfo2.addr)
         FAIL_PUTS_ERROR("destination attribute does not use the same committed datatype")
 
@@ -10332,28 +10331,28 @@ test_copy_committed_datatype_merge(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fap
 
     /* Open SRC1 committed dtype, get address */
     if((tid = H5Topen2(fid_dst, NAME_GROUP_TOP "/" NAME_DATATYPE_SIMPLE, H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
     exp_addr = oinfo.addr;
     if(H5Tclose(tid) < 0) TEST_ERROR
 
     /* Open SRC1 dset dtype, check address */
     if((did = H5Dopen2(fid_dst, NAME_GROUP_TOP "/" NAME_DATASET_SIMPLE, H5P_DEFAULT)) < 0) TEST_ERROR
     if((tid = H5Dget_type(did)) < 0) TEST_ERROR
-    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
     if(oinfo.addr != exp_addr) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
     if(H5Dclose(did) < 0) TEST_ERROR
 
     /* Open SRC2 committed dtype, check address */
     if((tid = H5Topen2(fid_dst, NAME_GROUP_TOP2 "/" NAME_DATATYPE_SIMPLE, H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
     if(oinfo.addr != exp_addr) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
 
     /* Open SRC2 dset dtype, check address */
     if((did = H5Dopen2(fid_dst, NAME_GROUP_TOP2 "/" NAME_DATASET_SIMPLE, H5P_DEFAULT)) < 0) TEST_ERROR
     if((tid = H5Dget_type(did)) < 0) TEST_ERROR
-    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
     if(oinfo.addr != exp_addr) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
     if(H5Dclose(did) < 0) TEST_ERROR
@@ -10386,7 +10385,7 @@ test_copy_committed_datatype_merge(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fap
     /* Open SRC1 dset dtype, get address */
     if((did = H5Dopen2(fid_dst, NAME_DATASET_SIMPLE, H5P_DEFAULT)) < 0) TEST_ERROR
     if((tid = H5Dget_type(did)) < 0) TEST_ERROR
-    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
     exp_addr = oinfo.addr;
     if(H5Tclose(tid) < 0) TEST_ERROR
     if(H5Dclose(did) < 0) TEST_ERROR
@@ -10394,7 +10393,7 @@ test_copy_committed_datatype_merge(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fap
     /* Open SRC2 dset dtype, check address */
     if((did = H5Dopen2(fid_dst, NAME_DATASET_SIMPLE2, H5P_DEFAULT)) < 0) TEST_ERROR
     if((tid = H5Dget_type(did)) < 0) TEST_ERROR
-    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
     if(oinfo.addr != exp_addr) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
     if(H5Dclose(did) < 0) TEST_ERROR
@@ -10566,28 +10565,28 @@ test_copy_committed_datatype_merge_same_file(hid_t fcpl, hid_t fapl, hbool_t reo
 
     /* Open group 1 source committed dtype, get address */
     if((tid = H5Topen2(fid, NAME_GROUP_TOP "/" NAME_DATATYPE_SIMPLE, H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
     exp_addr = oinfo.addr;
     if(H5Tclose(tid) < 0) TEST_ERROR
 
     /* Open group 1 source dset dtype, check address */
     if((did = H5Dopen2(fid, NAME_GROUP_TOP "/" NAME_DATASET_SIMPLE, H5P_DEFAULT)) < 0) TEST_ERROR
     if((tid = H5Dget_type(did)) < 0) TEST_ERROR
-    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
     if(oinfo.addr != exp_addr) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
     if(H5Dclose(did) < 0) TEST_ERROR
 
     /* Open group 1 committed dtype, check address */
     if((tid = H5Topen2(fid, NAME_GROUP_TOP3 "/" NAME_GROUP_TOP "/" NAME_DATATYPE_SIMPLE, H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
     if(oinfo.addr != exp_addr) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
 
     /* Open group 1 dset dtype, check address */
     if((did = H5Dopen2(fid, NAME_GROUP_TOP3 "/" NAME_GROUP_TOP "/" NAME_DATASET_SIMPLE, H5P_DEFAULT)) < 0) TEST_ERROR
     if((tid = H5Dget_type(did)) < 0) TEST_ERROR
-    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
     if(oinfo.addr != exp_addr) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
     if(H5Dclose(did) < 0) TEST_ERROR
@@ -10595,7 +10594,7 @@ test_copy_committed_datatype_merge_same_file(hid_t fcpl, hid_t fapl, hbool_t reo
     /* Open group 2 source committed dtype, get address and make sure it is
      * different from group 1 source committed dtype */
     if((tid = H5Topen2(fid, NAME_GROUP_TOP2 "/" NAME_DATATYPE_SIMPLE, H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
     if(oinfo.addr == exp_addr) TEST_ERROR
     exp_addr = oinfo.addr;
     if(H5Tclose(tid) < 0) TEST_ERROR
@@ -10603,21 +10602,21 @@ test_copy_committed_datatype_merge_same_file(hid_t fcpl, hid_t fapl, hbool_t reo
     /* Open group 2 source dset dtype, check address */
     if((did = H5Dopen2(fid, NAME_GROUP_TOP2 "/" NAME_DATASET_SIMPLE, H5P_DEFAULT)) < 0) TEST_ERROR
     if((tid = H5Dget_type(did)) < 0) TEST_ERROR
-    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
     if(oinfo.addr != exp_addr) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
     if(H5Dclose(did) < 0) TEST_ERROR
 
     /* Open group 2 committed dtype, check address */
     if((tid = H5Topen2(fid, NAME_GROUP_TOP3 "/" NAME_GROUP_TOP2 "/" NAME_DATATYPE_SIMPLE, H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
     if(oinfo.addr != exp_addr) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
 
     /* Open group 2 dset dtype, check address */
     if((did = H5Dopen2(fid, NAME_GROUP_TOP3 "/" NAME_GROUP_TOP2 "/" NAME_DATASET_SIMPLE, H5P_DEFAULT)) < 0) TEST_ERROR
     if((tid = H5Dget_type(did)) < 0) TEST_ERROR
-    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
     if(oinfo.addr != exp_addr) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
     if(H5Dclose(did) < 0) TEST_ERROR
@@ -10645,7 +10644,7 @@ test_copy_committed_datatype_merge_same_file(hid_t fcpl, hid_t fapl, hbool_t reo
     /* Open group 1 source dset dtype, get address */
     if((did = H5Dopen2(fid, NAME_GROUP_TOP "/" NAME_DATASET_SIMPLE, H5P_DEFAULT)) < 0) TEST_ERROR
     if((tid = H5Dget_type(did)) < 0) TEST_ERROR
-    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
     exp_addr = oinfo.addr;
     if(H5Tclose(tid) < 0) TEST_ERROR
     if(H5Dclose(did) < 0) TEST_ERROR
@@ -10653,7 +10652,7 @@ test_copy_committed_datatype_merge_same_file(hid_t fcpl, hid_t fapl, hbool_t reo
     /* Open group 1 dset dtype, check address */
     if((did = H5Dopen2(fid, NAME_GROUP_TOP4 "/" NAME_DATASET_SIMPLE, H5P_DEFAULT)) < 0) TEST_ERROR
     if((tid = H5Dget_type(did)) < 0) TEST_ERROR
-    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
     if(oinfo.addr != exp_addr) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
     if(H5Dclose(did) < 0) TEST_ERROR
@@ -10662,7 +10661,7 @@ test_copy_committed_datatype_merge_same_file(hid_t fcpl, hid_t fapl, hbool_t reo
      * different from group 1 source dset dtype */
     if((did = H5Dopen2(fid, NAME_GROUP_TOP2 "/" NAME_DATASET_SIMPLE, H5P_DEFAULT)) < 0) TEST_ERROR
     if((tid = H5Dget_type(did)) < 0) TEST_ERROR
-    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
     if(oinfo.addr == exp_addr) TEST_ERROR
     exp_addr = oinfo.addr;
     if(H5Tclose(tid) < 0) TEST_ERROR
@@ -10671,7 +10670,7 @@ test_copy_committed_datatype_merge_same_file(hid_t fcpl, hid_t fapl, hbool_t reo
     /* Open group 2 dset dtype, check address */
     if((did = H5Dopen2(fid, NAME_GROUP_TOP4 "/" NAME_DATASET_SIMPLE2, H5P_DEFAULT)) < 0) TEST_ERROR
     if((tid = H5Dget_type(did)) < 0) TEST_ERROR
-    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
     if(oinfo.addr != exp_addr) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
     if(H5Dclose(did) < 0) TEST_ERROR
@@ -10838,14 +10837,14 @@ test_copy_committed_dt_merge_sugg(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl
 
     /* Open committed dtype "b", get address */
     if((tid = H5Topen2(fid_dst, "/b", H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
     exp_addr = oinfo.addr;
     if(H5Tclose(tid) < 0) TEST_ERROR
 
     /* Open dset dtype, check address */
     if((did = H5Dopen2(fid_dst, NAME_DATASET_SIMPLE, H5P_DEFAULT)) < 0) TEST_ERROR
     if((tid = H5Dget_type(did)) < 0) TEST_ERROR
-    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
     if(oinfo.addr != exp_addr) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
     if(H5Dclose(did) < 0) TEST_ERROR
@@ -10876,28 +10875,28 @@ test_copy_committed_dt_merge_sugg(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl
 
     /* Open committed dtype "a", get address */
     if((tid = H5Topen2(fid_dst, "/a", H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
     exp_addr = oinfo.addr;
     if(H5Tclose(tid) < 0) TEST_ERROR
 
     /* Open dset 2 dtype, check address */
     if((did = H5Dopen2(fid_dst, NAME_DATASET_SIMPLE2, H5P_DEFAULT)) < 0) TEST_ERROR
     if((tid = H5Dget_type(did)) < 0) TEST_ERROR
-    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
     if(oinfo.addr != exp_addr) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
     if(H5Dclose(did) < 0) TEST_ERROR
 
     /* Open committed dtype "b", get address */
     if((tid = H5Topen2(fid_dst, "/b", H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
     exp_addr = oinfo.addr;
     if(H5Tclose(tid) < 0) TEST_ERROR
 
     /* Open dset dtype, check address */
     if((did = H5Dopen2(fid_dst, NAME_DATASET_SIMPLE, H5P_DEFAULT)) < 0) TEST_ERROR
     if((tid = H5Dget_type(did)) < 0) TEST_ERROR
-    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
     if(oinfo.addr != exp_addr) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
     if(H5Dclose(did) < 0) TEST_ERROR
@@ -11073,7 +11072,7 @@ test_copy_committed_dt_merge_attr(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl
     /* Open attribute dtype, get address */
     if((aid = H5Aopen_by_name(fid_dst, NAME_GROUP_TOP, "attr", H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
     if((tid = H5Aget_type(aid)) < 0) TEST_ERROR
-    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
     exp_addr = oinfo.addr;
     if(H5Tclose(tid) < 0) TEST_ERROR
     if(H5Aclose(aid) < 0) TEST_ERROR
@@ -11081,7 +11080,7 @@ test_copy_committed_dt_merge_attr(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl
     /* Open dset dtype, check address */
     if((did = H5Dopen2(fid_dst, NAME_DATASET_SIMPLE, H5P_DEFAULT)) < 0) TEST_ERROR
     if((tid = H5Dget_type(did)) < 0) TEST_ERROR
-    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
     if(oinfo.addr != exp_addr) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
     if(H5Dclose(did) < 0) TEST_ERROR
@@ -11332,13 +11331,13 @@ test_copy_cdt_hier_merge(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t d
 
     /* get address of committed datatype at root group */
     if((tid = H5Topen2(fid_dst, SRC_ROOT_GROUP "/" ROOT_NDT_INT, H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
     exp_addr_int = oinfo.addr;
     if(H5Tclose(tid) < 0) TEST_ERROR
 
     /* get address of committed datatype at /g0 */
     if((tid = H5Topen2(fid_dst, SRC_ROOT_GROUP NAME_GROUP_TOP "/" GROUP_NDT_SHORT, H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
     exp_addr_short = oinfo.addr;
     if(H5Tclose(tid) < 0) TEST_ERROR
 
@@ -11352,7 +11351,7 @@ test_copy_cdt_hier_merge(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t d
     /* check address of datatype for second dataset */
     if((did = H5Dopen2(fid_dst, SRC_ROOT_GROUP NAME_GROUP_TOP "/" SRC_NDT_DSET2, H5P_DEFAULT)) < 0) TEST_ERROR
     if((tid = H5Dget_type(did)) < 0) TEST_ERROR
-    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
     if(oinfo.addr != exp_addr_short) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
     if(H5Dclose(did) < 0) TEST_ERROR
@@ -11360,7 +11359,7 @@ test_copy_cdt_hier_merge(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t d
     /* check address of datatype for third dataset */
     if((did = H5Dopen2(fid_dst, SRC_ROOT_GROUP NAME_GROUP_TOP "/" SRC_NDT_DSET3, H5P_DEFAULT)) < 0) TEST_ERROR
     if((tid = H5Dget_type(did)) < 0) TEST_ERROR
-    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
     if(oinfo.addr != exp_addr_int) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
     if(H5Dclose(did) < 0) TEST_ERROR
@@ -11372,7 +11371,7 @@ test_copy_cdt_hier_merge(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t d
 
     /* get address of committed datatype at /g0 */
     if((tid = H5Topen2(fid_dst, NAME_GROUP_TOP "/" GROUP_NDT_SHORT, H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
     if(oinfo.addr != exp_addr_short) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
 
@@ -11386,7 +11385,7 @@ test_copy_cdt_hier_merge(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t d
     /* check address of datatype for second dataset */
     if((did = H5Dopen2(fid_dst, NAME_GROUP_TOP "/" SRC_NDT_DSET2, H5P_DEFAULT)) < 0) TEST_ERROR
     if((tid = H5Dget_type(did)) < 0) TEST_ERROR
-    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
     if(oinfo.addr != exp_addr_short) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
     if(H5Dclose(did) < 0) TEST_ERROR
@@ -11394,7 +11393,7 @@ test_copy_cdt_hier_merge(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t d
     /* check address of datatype for third dataset */
     if((did = H5Dopen2(fid_dst, NAME_GROUP_TOP "/" SRC_NDT_DSET3, H5P_DEFAULT)) < 0) TEST_ERROR
     if((tid = H5Dget_type(did)) < 0) TEST_ERROR
-    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
     if(oinfo.addr != exp_addr_int) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
     if(H5Dclose(did) < 0) TEST_ERROR
@@ -11409,7 +11408,7 @@ test_copy_cdt_hier_merge(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t d
     /* Open attribute with anon ndt (short), get address */
     if((aid = H5Aopen_by_name(fid_dst, NAME_GROUP_UNCOPIED, DST_ATTR_ANON_SHORT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
     if((tid = H5Aget_type(aid)) < 0) TEST_ERROR
-    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
     if(oinfo.addr != exp_addr_short) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
     if(H5Aclose(aid) < 0) TEST_ERROR
@@ -11417,7 +11416,7 @@ test_copy_cdt_hier_merge(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t d
     /* Open attribute with anon ndt (int), get address */
     if((aid = H5Aopen_by_name(fid_dst, NAME_GROUP_UNCOPIED, DST_ATTR_ANON_INT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
     if((tid = H5Aget_type(aid)) < 0) TEST_ERROR
-    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
     if(oinfo.addr != exp_addr_int) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
     if(H5Aclose(aid) < 0) TEST_ERROR
@@ -11432,7 +11431,7 @@ test_copy_cdt_hier_merge(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t d
     /* check address of datatype for second dataset */
     if((did = H5Dopen2(fid_dst, NAME_GROUP_UNCOPIED "/" SRC_NDT_DSET2, H5P_DEFAULT)) < 0) TEST_ERROR
     if((tid = H5Dget_type(did)) < 0) TEST_ERROR
-    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
     if(oinfo.addr != exp_addr_short) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
     if(H5Dclose(did) < 0) TEST_ERROR
@@ -11440,7 +11439,7 @@ test_copy_cdt_hier_merge(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t d
     /* check address of datatype for third dataset */
     if((did = H5Dopen2(fid_dst, NAME_GROUP_UNCOPIED "/" SRC_NDT_DSET3, H5P_DEFAULT)) < 0) TEST_ERROR
     if((tid = H5Dget_type(did)) < 0) TEST_ERROR
-    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
     if(oinfo.addr != exp_addr_int) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
     if(H5Dclose(did) < 0) TEST_ERROR
@@ -11643,50 +11642,50 @@ test_copy_cdt_merge_cdt(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t ds
      */
     /* get address of committed datatype: /src_root/src_ndt_double */
     if((tid = H5Topen2(fid_dst, "/" SRC_ROOT_GROUP "/" SRC_NDT_DOUBLE, H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
     exp_addr = oinfo.addr;
     if(H5Tclose(tid) < 0) TEST_ERROR
 
     /* get address of committed datatype: /dst_ndt_double */
     if((tid = H5Topen2(fid_dst, "/" DST_NDT_DOUBLE, H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
     if(oinfo.addr != exp_addr) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
 
     /* get address of committed datatype: /src_root/src_ndt_float */
     if((tid = H5Topen2(fid_dst, "/" SRC_ROOT_GROUP "/" SRC_NDT_FLOAT, H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
     exp_addr = oinfo.addr;
     if(H5Tclose(tid) < 0) TEST_ERROR
 
     /* get address of committed datatype: /dst_ndt_float */
     if((tid = H5Topen2(fid_dst, "/" DST_NDT_FLOAT, H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
     if(oinfo.addr != exp_addr) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
 
     /* get address of committed datatype: /src_root/src_ndt_int */
     if((tid = H5Topen2(fid_dst, "/" SRC_ROOT_GROUP "/" SRC_NDT_INT, H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
     exp_addr = oinfo.addr;
     if(H5Tclose(tid) < 0) TEST_ERROR
 
     /* get address of committed datatype: /dst_ndt_int */
     if((tid = H5Topen2(fid_dst, "/" DST_NDT_INT, H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
     if(oinfo.addr != exp_addr) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
 
     /* get address of committed datatype: /src_root/src_ndt_short */
     if((tid = H5Topen2(fid_dst, "/" SRC_ROOT_GROUP "/" SRC_NDT_SHORT, H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
     exp_addr = oinfo.addr;
     if(H5Tclose(tid) < 0) TEST_ERROR
 
     /* open attribute; get its dtype; get dtype's address: /src_root/src_ndt_double/dst_attr */
     if((aid = H5Aopen_by_name(fid_dst, "/" SRC_ROOT_GROUP "/" SRC_NDT_DOUBLE, DST_ATTR, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
     if((tid = H5Aget_type(aid)) < 0) TEST_ERROR
-    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
     if(oinfo.addr != exp_addr) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
     if(H5Aclose(aid) < 0) TEST_ERROR
@@ -11817,13 +11816,13 @@ test_copy_cdt_merge_suggs(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
 
     /* open committed dtype "/dst_ndt_int", get its address */
     if((tid = H5Topen2(fid_dst, DST_NDT_INT, H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
     exp_addr = oinfo.addr;
     if(H5Tclose(tid) < 0) TEST_ERROR
 
     /* check address of "/uncopied/src_ndt_int" */
     if((tid = H5Topen2(fid_dst, NAME_GROUP_UNCOPIED "/" SRC_NDT_INT, H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
     if(oinfo.addr != exp_addr) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
 
@@ -11850,13 +11849,13 @@ test_copy_cdt_merge_suggs(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
 
     /* open committed dtype "/uncopied/src_ndt_int", get its address */
     if((tid = H5Topen2(fid_dst, NAME_GROUP_UNCOPIED "/" SRC_NDT_INT, H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
     exp_addr = oinfo.addr;
     if(H5Tclose(tid) < 0) TEST_ERROR
 
     /* check address of "/src_ndt_int" */
     if((tid = H5Topen2(fid_dst, SRC_NDT_INT, H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
     if(oinfo.addr != exp_addr) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
 
@@ -11888,13 +11887,13 @@ test_copy_cdt_merge_suggs(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
 
     /* Open committed dtype "/uncopied/src_ndt_int", get its address */
     if((tid = H5Topen2(fid_dst, NAME_GROUP_UNCOPIED "/" SRC_NDT_INT, H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
     exp_addr = oinfo.addr;
     if(H5Tclose(tid) < 0) TEST_ERROR
 
     /* check address of "/src_ndt_int2" */
     if((tid = H5Topen2(fid_dst, SRC_NDT_INT2, H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
     if(oinfo.addr != exp_addr) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
 
@@ -11922,13 +11921,13 @@ test_copy_cdt_merge_suggs(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
 
     /* Open committed dtype "/dst_dt_int", get its address */
     if((tid = H5Topen2(fid_dst, DST_NDT_INT, H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
     exp_addr = oinfo.addr;
     if(H5Tclose(tid) < 0) TEST_ERROR
 
     /* check address of "/uncopied/src_ndt_int2" */
     if((tid = H5Topen2(fid_dst, NAME_GROUP_UNCOPIED "/" SRC_NDT_INT2, H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
     if(oinfo.addr != exp_addr) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
 
@@ -12078,14 +12077,14 @@ test_copy_cdt_merge_dset_suggs(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
 
     /* Open committed dtype "/dst_ndt_int", get its address */
     if((tid = H5Topen2(fid_dst, DST_NDT_INT, H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
     exp_addr = oinfo.addr;
     if(H5Tclose(tid) < 0) TEST_ERROR
 
     /* check address of datatype for the copied dataset: "/uncopied/src_ndt_dset"  */
     if((did = H5Dopen2(fid_dst, NAME_GROUP_UNCOPIED "/" SRC_NDT_DSET, H5P_DEFAULT)) < 0) TEST_ERROR
     if((tid = H5Dget_type(did)) < 0) TEST_ERROR
-    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
     if(oinfo.addr != exp_addr) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
     if(H5Dclose(did) < 0) TEST_ERROR
@@ -12114,7 +12113,7 @@ test_copy_cdt_merge_dset_suggs(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
     /* Open committed dtype dataset "/uncopied/src_ndt_dset", get its datatype address */
     if((did = H5Dopen2(fid_dst, NAME_GROUP_UNCOPIED "/" SRC_NDT_DSET, H5P_DEFAULT)) < 0) TEST_ERROR
     if((tid = H5Dget_type(did)) < 0) TEST_ERROR
-    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
     exp_addr = oinfo.addr;
     if(H5Tclose(tid) < 0) TEST_ERROR
     if(H5Dclose(did) < 0) TEST_ERROR
@@ -12122,7 +12121,7 @@ test_copy_cdt_merge_dset_suggs(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
     /* check address of datatype for the copied dataset: "/src_ndt_dset" */
     if((did = H5Dopen2(fid_dst, SRC_NDT_DSET, H5P_DEFAULT)) < 0) TEST_ERROR
     if((tid = H5Dget_type(did)) < 0) TEST_ERROR
-    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
     if(oinfo.addr != exp_addr) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
     if(H5Dclose(did) < 0) TEST_ERROR
@@ -12156,7 +12155,7 @@ test_copy_cdt_merge_dset_suggs(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
     /* open the copied dataset: /uncopied/src_ndt_dset", get its address  */
     if((did = H5Dopen2(fid_dst, NAME_GROUP_UNCOPIED "/" SRC_NDT_DSET, H5P_DEFAULT)) < 0) TEST_ERROR
     if((tid = H5Dget_type(did)) < 0) TEST_ERROR
-    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
     exp_addr = oinfo.addr;
     if(H5Tclose(tid) < 0) TEST_ERROR
     if(H5Dclose(did) < 0) TEST_ERROR
@@ -12164,7 +12163,7 @@ test_copy_cdt_merge_dset_suggs(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
     /* check address of datatype for the copied dataset: "/src_ndt_dset2" */
     if((did = H5Dopen2(fid_dst, SRC_NDT_DSET2, H5P_DEFAULT)) < 0) TEST_ERROR
     if((tid = H5Dget_type(did)) < 0) TEST_ERROR
-    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
     if(oinfo.addr != exp_addr) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
     if(H5Dclose(did) < 0) TEST_ERROR
@@ -12194,7 +12193,7 @@ test_copy_cdt_merge_dset_suggs(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
     /* open the copied dataset: "/src_ndt_dset", get its datatype address */
     if((did = H5Dopen2(fid_dst, SRC_NDT_DSET, H5P_DEFAULT)) < 0) TEST_ERROR
     if((tid = H5Dget_type(did)) < 0) TEST_ERROR
-    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
     exp_addr = oinfo.addr;
     if(H5Tclose(tid) < 0) TEST_ERROR
     if(H5Dclose(did) < 0) TEST_ERROR
@@ -12202,7 +12201,7 @@ test_copy_cdt_merge_dset_suggs(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
     /* check address of datatype for the copied dataset: /uncopied/src_ndt_dset2 */
     if((did = H5Dopen2(fid_dst, NAME_GROUP_UNCOPIED "/" SRC_NDT_DSET2, H5P_DEFAULT)) < 0) TEST_ERROR
     if((tid = H5Dget_type(did)) < 0) TEST_ERROR
-    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
     if(oinfo.addr != exp_addr) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
     if(H5Dclose(did) < 0) TEST_ERROR
@@ -12862,14 +12861,14 @@ test_copy_set_mcdt_search_cb(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
 
     /* Open committed dtype "b", get address */
     if((tid = H5Topen2(fid_dst, "/b", H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
     exp_addr = oinfo.addr;
     if(H5Tclose(tid) < 0) TEST_ERROR
 
     /* Open dset dtype, check address */
     if((did = H5Dopen2(fid_dst, NAME_DATASET_SIMPLE, H5P_DEFAULT)) < 0) TEST_ERROR
     if((tid = H5Dget_type(did)) < 0) TEST_ERROR
-    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
     if(oinfo.addr != exp_addr) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
     if(H5Dclose(did) < 0) TEST_ERROR
@@ -12910,14 +12909,14 @@ test_copy_set_mcdt_search_cb(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
 
     /* Open committed dtype "a", get address */
     if((tid = H5Topen2(fid_dst, "/a", H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
     exp_addr = oinfo.addr;
     if(H5Tclose(tid) < 0) TEST_ERROR
 
     /* Open copied dataset and its dtype, check address */
     if((did = H5Dopen2(fid_dst, NAME_DATASET_SIMPLE2, H5P_DEFAULT)) < 0) TEST_ERROR
     if((tid = H5Dget_type(did)) < 0) TEST_ERROR
-    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
     if(oinfo.addr != exp_addr) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
     if(H5Dclose(did) < 0) TEST_ERROR
@@ -12949,28 +12948,28 @@ test_copy_set_mcdt_search_cb(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
 
     /* Open committed dtype "a", get address */
     if((tid = H5Topen2(fid_dst, "/a", H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
     exp_addr = oinfo.addr;
     if(H5Tclose(tid) < 0) TEST_ERROR
 
     /* Open the copied dataset and get its dtype, addresses should not be equal */
     if((did = H5Dopen2(fid_dst, NAME_DATASET_SIMPLE3, H5P_DEFAULT)) < 0) TEST_ERROR
     if((tid = H5Dget_type(did)) < 0) TEST_ERROR
-    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
     if(oinfo.addr == exp_addr) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
     if(H5Dclose(did) < 0) TEST_ERROR
 
     /* Open committed dtype "b", get address */
     if((tid = H5Topen2(fid_dst, "/b", H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
     exp_addr = oinfo.addr;
     if(H5Tclose(tid) < 0) TEST_ERROR
 
     /* Open the copied dataset and get its dtype, addresses should not be equal */
     if((did = H5Dopen2(fid_dst, NAME_DATASET_SIMPLE3, H5P_DEFAULT)) < 0) TEST_ERROR
     if((tid = H5Dget_type(did)) < 0) TEST_ERROR
-    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
     if(oinfo.addr == exp_addr) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
     if(H5Dclose(did) < 0) TEST_ERROR
@@ -13009,28 +13008,28 @@ test_copy_set_mcdt_search_cb(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
 
     /* Open committed dtype "a", get address */
     if((tid = H5Topen2(fid_dst, "/a", H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
     exp_addr = oinfo.addr;
     if(H5Tclose(tid) < 0) TEST_ERROR
 
     /* Open the copied dataset and get its dtype, addresses should not be equal */
     if((did = H5Dopen2(fid_dst, NAME_DATASET_SIMPLE3, H5P_DEFAULT)) < 0) TEST_ERROR
     if((tid = H5Dget_type(did)) < 0) TEST_ERROR
-    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
     if(oinfo.addr == exp_addr) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
     if(H5Dclose(did) < 0) TEST_ERROR
 
     /* Open committed dtype "b", get address */
     if((tid = H5Topen2(fid_dst, "/b", H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
     exp_addr = oinfo.addr;
     if(H5Tclose(tid) < 0) TEST_ERROR
 
     /* Open the copied dataset and get its dtype, addresses should not be equal */
     if((did = H5Dopen2(fid_dst, NAME_DATASET_SIMPLE3, H5P_DEFAULT)) < 0) TEST_ERROR
     if((tid = H5Dget_type(did)) < 0) TEST_ERROR
-    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
     if(oinfo.addr == exp_addr) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
     if(H5Dclose(did) < 0) TEST_ERROR

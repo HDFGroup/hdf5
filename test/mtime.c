@@ -90,9 +90,9 @@ main(void)
      */
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
     if((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR;
-    if(H5Oget_info_by_name(file, "dset", &oi1, H5P_DEFAULT) < 0) TEST_ERROR;
+    if(H5Oget_info_by_name2(file, "dset", &oi1, H5O_INFO_BASIC|H5O_INFO_TIME, H5P_DEFAULT) < 0) TEST_ERROR;
     if((dset = H5Dopen2(file, "dset", H5P_DEFAULT)) < 0) TEST_ERROR;
-    if(H5Oget_info(dset, &oi2) < 0) TEST_ERROR;
+    if(H5Oget_info2(dset, &oi2, H5O_INFO_BASIC|H5O_INFO_TIME) < 0) TEST_ERROR;
     if(H5Dclose(dset) < 0) TEST_ERROR;
     if(H5Fclose(file) < 0) TEST_ERROR;
 
@@ -134,12 +134,12 @@ main(void)
 
         file = H5Fopen(testfile, H5F_ACC_RDONLY, H5P_DEFAULT);
         if(file >= 0){
-            if(H5Oget_info_by_name(file, "/Dataset1", &oi1, H5P_DEFAULT) < 0)
+            if(H5Oget_info_by_name2(file, "/Dataset1", &oi1, H5O_INFO_TIME, H5P_DEFAULT) < 0)
                 TEST_ERROR;
             if(oi1.ctime != MTIME1) {
                 H5_FAILED();
                    /* If this fails, examine H5Omtime.c.  Modification time is very
-                    * system dependant (e.g., on Windows DST must be hardcoded). */
+                    * system dependent (e.g., on Windows DST must be hardcoded). */
                 puts("    Old modification time incorrect");
                 goto error;
             }
@@ -164,7 +164,7 @@ main(void)
 
         file = H5Fopen(testfile, H5F_ACC_RDONLY, H5P_DEFAULT);
         if(file >= 0){
-            if(H5Oget_info_by_name(file, "/Dataset1", &oi2, H5P_DEFAULT) < 0)
+            if(H5Oget_info_by_name2(file, "/Dataset1", &oi2, H5O_INFO_TIME, H5P_DEFAULT) < 0)
                 TEST_ERROR;
             if(oi2.ctime != MTIME2) {
                H5_FAILED();

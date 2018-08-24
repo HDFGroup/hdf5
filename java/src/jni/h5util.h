@@ -39,29 +39,14 @@ extern void    h5str_new (h5str_t *str, size_t len);
 extern void    h5str_free (h5str_t *str);
 extern void    h5str_resize (h5str_t *str, size_t new_len);
 extern char*   h5str_append (h5str_t *str, const char* cstr);
-extern size_t  h5str_sprintf(h5str_t *str, hid_t container, hid_t tid, void *buf, int expand_data);
+extern size_t  h5str_vlsprintf(h5str_t *str, hid_t container, hid_t tid, hvl_t *buf, int expand_data);
+extern size_t  h5str_sprintf(h5str_t *str, hid_t container, hid_t tid, void *buf, int ptrlen, int expand_data);
+extern size_t  h5str_vlsconvert(char *str, hid_t container, hid_t tid, hvl_t *buf, int expand_data);
+extern size_t  h5str_convert(char **str, hid_t container, hid_t tid, hvl_t *buf, int ptroffset, int expand_data);
 extern void    h5str_array_free(char **strs, size_t len);
 extern int     h5str_dump_simple_dset(FILE *stream, hid_t dset, int binary_order);
 extern int     h5str_dump_region_blocks_data(h5str_t *str, hid_t region, hid_t region_obj);
 extern int     h5str_dump_region_points_data(h5str_t *str, hid_t region, hid_t region_obj);
-
-/*
- * Class:     hdf_hdf5lib_H5
- * Method:    H5AwriteVL
- * Signature: (JJ[Ljava/lang/String;)I
- */
-JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5AwriteVL
-  (JNIEnv *, jclass, jlong, jlong, jobjectArray);
-
-/*
- * Class:     hdf_hdf5lib_H5
- * Method:    H5AreadVL
- * Signature: (JJ[Ljava/lang/String;)I
- */
-JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5AreadVL
-  (JNIEnv *, jclass, jlong, jlong, jobjectArray);
 
 /*
  * Class:     hdf_hdf5lib_H5

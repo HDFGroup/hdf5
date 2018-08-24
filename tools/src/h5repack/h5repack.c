@@ -222,7 +222,7 @@ hid_t copy_named_datatype(hid_t type_in, hid_t fidout,
     H5O_info_t  oinfo;                 /* Object info of input dtype */
     hid_t       ret_value = -1;        /* The identifier of the named dtype in the out file */
 
-    if (H5Oget_info(type_in, &oinfo) < 0)
+    if (H5Oget_info2(type_in, &oinfo, H5O_INFO_BASIC) < 0)
         HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Oget_info failed");
 
     if (*named_dt_head_p) {
@@ -352,7 +352,7 @@ copy_attr(hid_t loc_in, hid_t loc_out, named_dt_t **named_dt_head_p,
     hbool_t     is_ref = 0;
     H5T_class_t type_class = -1;
 
-    if (H5Oget_info(loc_in, &oinfo) < 0)
+    if (H5Oget_info2(loc_in, &oinfo, H5O_INFO_NUM_ATTRS) < 0)
         HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Oget_info failed");
 
     /*-------------------------------------------------------------------------

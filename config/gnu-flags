@@ -84,6 +84,18 @@ case "$cc_vendor-$cc_version" in
             ;;
     esac
 
+    case "$host_os-$host_cpu" in
+        # cygwin needs the "-std=c99" flag removed, so make
+        # a specific case for Cygwin without the flag and a default
+        # case to add the flag everywhere else   
+        cygwin-*)
+            ;;
+
+        *)
+            H5_CFLAGS="$H5_CFLAGS -std=c99"
+            ;;
+    esac
+
     # Host-specific flags
     case "`hostname`" in
         sleipnir.ncsa.uiuc.edu)
@@ -101,7 +113,7 @@ case "$cc_vendor-$cc_version" in
     # NOTE: Don't add -Wpadded here since we can't/won't fix the (many)
     # warnings that are emitted. If you need it, add it from the 
     # environment variable at configure time.
-    H5_CFLAGS="$H5_CFLAGS $arch -std=c99 -pedantic -Wall -Wextra -Wbad-function-cast -Wc++-compat -Wcast-align"
+    H5_CFLAGS="$H5_CFLAGS $arch -pedantic -Wall -Wextra -Wbad-function-cast -Wc++-compat -Wcast-align"
     H5_CFLAGS="$H5_CFLAGS -Wcast-qual -Wconversion -Wdeclaration-after-statement -Wdisabled-optimization -Wfloat-equal"
     H5_CFLAGS="$H5_CFLAGS -Wformat=2 -Winit-self -Winvalid-pch -Wmissing-declarations -Wmissing-include-dirs"
     H5_CFLAGS="$H5_CFLAGS -Wmissing-prototypes -Wnested-externs -Wold-style-definition -Wpacked -Wpointer-arith"

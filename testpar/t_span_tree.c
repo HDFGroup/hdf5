@@ -32,6 +32,14 @@
 
  */
 
+#define H5S_FRIEND             /*suppress error about including H5Spkg   */
+
+/* Define this macro to indicate that the testing APIs should be available */
+#define H5S_TESTING
+
+#include "hdf5.h"
+#include "H5private.h"
+#include "H5Spkg.h"             /* Dataspaces                           */
 #include "testphdf5.h"
 
 

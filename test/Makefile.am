@@ -34,7 +34,7 @@ AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_builddir)/src
 #       test_usecases.sh: use_append_chunk, use_append_mchunks, use_disable_mdc_flushes
 TEST_SCRIPT = testerror.sh testlibinfo.sh testcheck_version.sh testlinks_env.sh test_filenotclosed.sh\
     testswmr.sh testvdsswmr.sh testflushrefresh.sh test_usecases.sh
-SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT) links_env$(EXEEXT) test_filenotclosed$(EXEEXT) \
+SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT) links_env$(EXEEXT) filenotclosed$(EXEEXT) \
     flushrefresh$(EXEEXT) use_append_chunk$(EXEEXT) use_append_mchunks$(EXEEXT) use_disable_mdc_flushes$(EXEEXT) \
     swmr_generator$(EXEEXT) swmr_reader$(EXEEXT) swmr_writer$(EXEEXT) \
     swmr_remove_reader$(EXEEXT) swmr_remove_writer$(EXEEXT) swmr_addrem_writer$(EXEEXT) \
@@ -55,11 +55,12 @@ TEST_PROG= testhdf5 \
            cache cache_api cache_image cache_tagging lheap ohdr stab gheap \
            evict_on_close farray earray btree2 fheap \
            pool accum hyperslab istore bittests dt_arith page_buffer \
-           dtypes dsets cmpd_dset filter_fail extend external efc objcopy links unlink \
-           twriteorder big mtime fillval mount flush1 flush2 app_ref enum \
-           set_extent ttsafe enc_dec_plist enc_dec_plist_cross_platform\
-           getname vfd ntypes dangle dtransform reserved cross_read \
-           freespace mf vds file_image unregister cache_logging cork swmr
+           dtypes dsets cmpd_dset filter_fail extend direct_chunk external efc \
+		   objcopy links unlink twriteorder big mtime fillval mount \
+		   flush1 flush2 app_ref enum set_extent ttsafe enc_dec_plist \
+		   enc_dec_plist_cross_platform getname vfd ntypes dangle dtransform \
+		   reserved cross_read freespace mf vds file_image unregister \
+		   cache_logging cork swmr
 
 # List programs to be built when testing here.
 # error_test and err_compat are built at the same time as the other tests, but executed by testerror.sh.
@@ -114,6 +115,8 @@ if HAVE_SHARED_CONDITIONAL
   libfilter_plugin2_dsets_la_LDFLAGS=$(AM_LDFLAGS) -avoid-version -module -shared -export-dynamic -rpath /nowhere
   libfilter_plugin3_dsets_la_LDFLAGS=$(AM_LDFLAGS) -avoid-version -module -shared -export-dynamic -rpath /nowhere
   libfilter_plugin4_groups_la_LDFLAGS=$(AM_LDFLAGS) -avoid-version -module -shared -export-dynamic -rpath /nowhere
+  libfilter_plugin3_dsets_la_LIBADD=$(LIBHDF5)
+  libfilter_plugin4_groups_la_LIBADD=$(LIBHDF5)
 else
   # The libh5test library provides common support code for the tests.
   noinst_LTLIBRARIES=libh5test.la
@@ -190,7 +193,7 @@ CHECK_CLEANFILES+=accum.h5 cmpd_dset.h5 compact_dataset.h5 dataset.h5 dset_offse
     flushrefresh_VERIFICATION_DONE atomic_data accum_swmr_big.h5 ohdr_swmr.h5 \
     test_swmr*.h5 cache_logging.h5 cache_logging.out vds_swmr.h5 vds_swmr_src_*.h5 \
     swmr[0-2].h5 swmr_writer.out swmr_writer.log.* swmr_reader.out.* swmr_reader.log.* \
-    tbogus.h5.copy cache_image_test.h5
+    tbogus.h5.copy cache_image_test.h5 direct_chunk.h5
 
 # Sources for testhdf5 executable
 testhdf5_SOURCES=testhdf5.c tarray.c tattr.c tchecksum.c tconfig.c tfile.c \

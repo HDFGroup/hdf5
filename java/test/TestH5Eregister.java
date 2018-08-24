@@ -60,8 +60,7 @@ public class TestH5Eregister {
     public void testH5Eregister_class() {
         long hdf_java_classid = -1;
         try {
-            hdf_java_classid = H5.H5Eregister_class("HDF-Java-Error",
-                    "hdf-java", "2.5");
+            hdf_java_classid = H5.H5Eregister_class("HDF-Java-Error", "hdf-java", "2.5");
         }
         catch (Throwable err) {
             fail("H5.H5Eregister_class: " + err);
