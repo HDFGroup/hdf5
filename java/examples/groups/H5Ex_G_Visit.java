@@ -34,7 +34,7 @@ import java.util.ArrayList;
 
 public class H5Ex_G_Visit {
 
-    private static String FILE = "./h5ex_g_visit.h5";
+    private static String FILE = "groups/h5ex_g_visit.h5";
 
     public static void main(String[] args) {
         try {
