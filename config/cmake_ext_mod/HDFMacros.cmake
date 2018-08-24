@@ -280,7 +280,7 @@ macro (HDF_README_PROPERTIES target_fortran)
     endif ()
   elseif (APPLE)
     set (BINARY_EXAMPLE_ENDING "tar.gz")
-    set (BINARY_INSTALL_ENDING "dmg")
+    set (BINARY_INSTALL_ENDING "sh") # if packaging changes - use dmg
     set (BINARY_PLATFORM "${BINARY_PLATFORM} ${CMAKE_SYSTEM_VERSION} ${CMAKE_SYSTEM_PROCESSOR}")
     set (BINARY_PLATFORM "${BINARY_PLATFORM}, using ${CMAKE_C_COMPILER_ID} C ${CMAKE_C_COMPILER_VERSION}")
   else ()
