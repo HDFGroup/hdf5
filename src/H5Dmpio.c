@@ -1146,20 +1146,7 @@ if(H5DEBUG(D))
             mpi_buf_count  = (hsize_t)1;
         } /* end if */
         else {      /* no selection at all for this process */
-            /* Allocate chunking information */
-            if(NULL == (total_chunk_addr_array = (haddr_t *)H5MM_malloc(sizeof(haddr_t) * total_chunks)))
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate total chunk address arraybuffer")
-
-            /* Retrieve chunk address map */
-            if(H5D__chunk_addrmap(io_info, total_chunk_addr_array) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get chunk address")
-
-            /* Get chunk with lowest address */
-            ctg_store.contig.dset_addr = HADDR_MAX;
-            for(u = 0; u < total_chunks; u++)
-                if(total_chunk_addr_array[u] < ctg_store.contig.dset_addr)
-                    ctg_store.contig.dset_addr = total_chunk_addr_array[u];
-            HDassert(ctg_store.contig.dset_addr != HADDR_MAX);
+            ctg_store.contig.dset_addr = 0;
 
             /* Set the MPI datatype */
             chunk_final_ftype = MPI_BYTE;

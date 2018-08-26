@@ -199,6 +199,24 @@ Bug Fixes since HDF5-1.10.2 release
 
     Library
     -------
+    - A bug was discovered in the parallel library where an application
+      would hang if a collective read/write of a chunked dataset occurred
+      when collective metadata reads were enabled and some of the ranks
+      had no selection in the dataset's dataspace. The ranks which had no
+      selection in the dataset's dataspace called H5D__chunk_addrmap() to
+      retrieve the lowest chunk address in the dataset. This is because we
+      require reads/writes to be performed in strictly non-decreasing order
+      of chunk address in the file.
+
+      When the chunk index used was a version 1 or 2 B-tree, these
+      non-participating ranks would issue a collective MPI_Bcast() call
+      that the participating ranks would not issue, causing the hang. Since
+      the non-participating ranks are not actually reading/writing anything,
+      the H5D__chunk_addrmap() call can be safely removed and the address used
+      for the read/write can be set to an arbitrary number (0 was chosen).
+
+      (JTH - 2018/08/25, HDFFV-10501)
+
     - Java HDF5LibraryException class
 
       The error minor and major values would be lost after the
