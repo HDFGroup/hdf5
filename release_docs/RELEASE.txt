@@ -47,6 +47,16 @@ New Features
 
     Configuration:
     -------------
+    - Add missing USE_110_API_DEFAULT option.
+
+      Option USE_110_API_DEFAULT sets the default version of
+      versioned APIs. The bin/makevers perl script did not set
+      the maxidx variable correctly when the 1.10 branch was
+      created. This caused the versioning process to always use
+      the latest version of any API.
+
+      (ADB - 2018/08/17, HDFFV-10552)
+
     - Added configuration checks for the following MPI functions:
 
       MPI_Mprobe - Used for the Parallel Compression feature
@@ -136,11 +146,21 @@ New Features
 
     Java Library:
     ----------------
+    - Java iterator callbacks
+
+      Change global callback object to a small stack structure in order
+      to fix a runtime crash. This crash was discovered when iterating
+      through a file with nested group members. The global variable
+      visit_callback is overwritten when recursion starts. When recursion
+      completes, visit_callback will be pointing to the wrong callback method.
+
+      (ADB - 2018/08/15, HDFFV-10536)
+
     - Java HDFLibraryException class
 
       Change parent class from Exception to RuntimeException.
 
-      (ADB - 2018/07/30, HDFFV10534)
+      (ADB - 2018/07/30, HDFFV-10534)
 
     - JNI Read and Write
 
@@ -148,7 +168,7 @@ New Features
       to correct dataset and attribute reads. New write functions,
       H5DwriteVL and H5AwriteVL, are under construction.
 
-      (ADB - 2018/06/02, HDFFV10519)
+      (ADB - 2018/06/02, HDFFV-10519)
 
     Tools:
     ------
@@ -204,6 +224,39 @@ Bug Fixes since HDF5-1.10.2 release
       on the MPI-3 functions used.
 
       (JTH - 2018/08/02, HDFFV-10512)
+
+    - User's patches: CVEs
+
+      The following patches have been applied:
+
+      CVE-2018-11202 - NULL pointer dereference was discovered in
+                       H5S_hyper_make_spans in H5Shyper.c (HDFFV-10476)
+        https://security-tracker.debian.org/tracker/CVE-2018-11202
+        https://cve.mitre.org/cgi-bin/cvename.cgi?name=3DCVE-2018-11202
+
+      CVE-2018-11203 - A division by zero was discovered in
+                       H5D__btree_decode_key in H5Dbtree.c (HDFFV-10477)
+        https://security-tracker.debian.org/tracker/CVE-2018-11203
+        https://cve.mitre.org/cgi-bin/cvename.cgi?name=3DCVE-2018-11203
+
+      CVE-2018-11204 - A NULL pointer dereference was discovered in
+                       H5O__chunk_deserialize in H5Ocache.c (HDFFV-10478)
+        https://security-tracker.debian.org/tracker/CVE-2018-11204
+        https://cve.mitre.org/cgi-bin/cvename.cgi?name=3DCVE-2018-11204
+
+      CVE-2018-11206 - An out of bound read was discovered in
+                       H5O_fill_new_decode and H5O_fill_old_decode in H5Ofill.c
+                       (HDFFV-10480)
+        https://security-tracker.debian.org/tracker/CVE-2018-11206
+        https://cve.mitre.org/cgi-bin/cvename.cgi?name=3DCVE-2018-11206
+
+      CVE-2018-11207 - A division by zero was discovered in
+                       H5D__chunk_init in H5Dchunk.c  (HDFFV-10481)
+        https://security-tracker.debian.org/tracker/CVE-2018-11207
+        https://cve.mitre.org/cgi-bin/cvename.cgi?name=3DCVE-2018-11207
+
+      (BMR - 2018/7/22, PR#s: 1134 and 1139,
+       HDFFV-10476, HDFFV-10477, HDFFV-10478, HDFFV-10480, HDFFV-10481)
 
     - H5Adelete
 
@@ -426,9 +479,9 @@ Supported Platforms
                                   Visual Studio 2015 w/ Intel C, Fortran 2017 (cmake)
                                   Visual Studio 2015 w/ MSMPI 8 (cmake)
 
-    Windows 10                    Visual Studio 2015 w/ Intel Fortran 16 (cmake)
+    Windows 10                    Visual Studio 2015 w/ Intel Fortran 18 (cmake)
 
-    Windows 10 x64                Visual Studio 2015 w/ Intel Fortran 16 (cmake)
+    Windows 10 x64                Visual Studio 2015 w/ Intel Fortran 18 (cmake)
                                   Visual Studio 2017 w/ Intel Fortran 18 (cmake)
 
     Mac OS X Yosemite 10.10.5     Apple clang/clang++ version 6.1 from Xcode 7.0

@@ -3191,10 +3191,10 @@ esac
 AC_SUBST([DEFAULT_API_VERSION])
 AC_MSG_CHECKING([which version of public symbols to use by default])
 AC_ARG_WITH([default-api-version],
-            [AS_HELP_STRING([--with-default-api-version=(v16|v18|v110)],
+            [AS_HELP_STRING([--with-default-api-version=(v16|v18|v110|v112)],
                             [Specify default release version of public symbols
-                             [default=v110]])],,
-            [withval=v110])
+                             [default=v112]])],,
+            [withval=v112])
 
 if test "X$withval" = "Xv16"; then
     AC_MSG_RESULT([v16])
@@ -3209,6 +3209,13 @@ elif test "X$withval" = "Xv18"; then
 elif test "X$withval" = "Xv110"; then
     AC_MSG_RESULT([v110])
     DEFAULT_API_VERSION=v110
+    AC_DEFINE([USE_110_API_DEFAULT], [1],
+              [Define using v1.10 public API symbols by default])
+elif test "X$withval" = "Xv112"; then
+    AC_MSG_RESULT([v112])
+    DEFAULT_API_VERSION=v112
+    AC_DEFINE([USE_112_API_DEFAULT], [1],
+              [Define using v1.12 public API symbols by default])
 else
     AC_MSG_ERROR([invalid version of public symbols given])
 fi
