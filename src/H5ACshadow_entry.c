@@ -499,7 +499,6 @@ H5AC__shadow_entry_notify(H5AC_notify_action_t action, void *_thing, ...)
         case H5AC_NOTIFY_ACTION_ENTRY_CLEANED:
         case H5AC_NOTIFY_ACTION_CHILD_DIRTIED:
         case H5AC_NOTIFY_ACTION_CHILD_CLEANED:
-        case H5AC_NOTIFY_ACTION_CHILD_UNDEPEND_DIRTY:
         case H5AC_NOTIFY_ACTION_CHILD_UNSERIALIZED:
         case H5AC_NOTIFY_ACTION_CHILD_SERIALIZED:
             /* No action */
@@ -508,20 +507,17 @@ H5AC__shadow_entry_notify(H5AC_notify_action_t action, void *_thing, ...)
         case H5AC_NOTIFY_ACTION_CHILD_BEFORE_EVICT:
             {
                 void *child_entry = NULL;       /* Child entry */
-                haddr_t child_addr;             /* Address of child entry */
+                H5AC_flush_dep_t *flush_dep;    /* Flush dependency object */
                 unsigned nchildren;             /* # of flush dependency children for freedspace entry */
 
                 /* Initialize the argument list */
                 va_start(ap, _thing);
                 va_started = TRUE;
 
-                /* The child entry address in the varg */
-                child_addr = va_arg(ap, haddr_t);
-                HDassert(H5F_addr_defined(child_addr));
+                /* The child entry in the varg */
+                child_entry = va_arg(ap, void *);
 
-                /* Get the cache entry for the child */
-                if(H5AC_get_entry_from_addr(shadow->f, child_addr, &child_entry) < 0)
-                    HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "can't lookup cache entry at address")
+                /* Check the cache entry for the child */
                 if(NULL == child_entry)
                     HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "no cache entry at address")
 
@@ -541,8 +537,12 @@ H5AC__shadow_entry_notify(H5AC_notify_action_t action, void *_thing, ...)
                 else
                     HGOTO_ERROR(H5E_CACHE, H5E_NOTFOUND, FAIL, "proxy entry not a component of shadow entry?")
 
+                /* The flush dependency object, in the vararg */
+                flush_dep = va_arg(ap, H5AC_flush_dep_t *);
+                HDassert(flush_dep);
+
                 /* Remove flush dependency on evicted component */
-                if(H5AC_destroy_flush_dependency(shadow, child_entry) < 0)
+                if(H5AC_destroy_flush_dep(flush_dep) < 0)
                     HGOTO_ERROR(H5E_CACHE, H5E_CANTUNDEPEND, FAIL, "unable to remove flush dependency on shadow entry")
 
                 /* Get # of flush dependency children on shadow entry now */

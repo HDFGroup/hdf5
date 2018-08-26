@@ -70,8 +70,14 @@ typedef struct H5AC_proxy_tmp_child_t {
 /********************/
 
 /* Temporary child helper routine */
+static H5AC_proxy_tmp_child_t *H5AC__proxy_entry_find_tmp_child(const H5AC_proxy_entry_t *pentry,
+    const H5AC_info_t *child_entry);
+static void H5AC__proxy_entry_remove_tmp_child(H5AC_proxy_entry_t *pentry, 
+    H5AC_proxy_tmp_child_t *proxy_tmp_child);
 static herr_t H5AC__proxy_entry_tmp_child_check(H5AC_proxy_entry_t *pentry,
-    haddr_t child_addr, hbool_t err_on_non_tmp_child);
+    H5AC_info_t *child_entry, hbool_t err_on_non_tmp_child);
+static herr_t H5AC__proxy_entry_remove_child(H5AC_proxy_entry_t *pentry,
+    void *child);
 
 /* Metadata cache (H5AC) callbacks */
 static herr_t H5AC__proxy_entry_image_len(const void *thing, size_t *image_len);
@@ -444,6 +450,95 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5AC__proxy_entry_find_tmp_child
+ *
+ * Purpose:     Find the temporary child node, if there is one
+ *
+ * Return:      NULL / Non-NULL, can't "fail"
+ *
+ * Programmer:  Quincey Koziol
+ *              August 18, 2018
+ *
+ *-------------------------------------------------------------------------
+ */
+static H5AC_proxy_tmp_child_t *
+H5AC__proxy_entry_find_tmp_child(const H5AC_proxy_entry_t *pentry,
+    const H5AC_info_t *child_entry)
+{
+    H5AC_proxy_tmp_child_t *proxy_tmp_child = NULL;   /* Proxy temp. child node for new temp. child */
+
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Sanity check */
+    HDassert(pentry);
+    HDassert(child_entry);
+
+    /* Find a temporary child, if there is one */
+    /* (Linear search, but these lists probably aren't huge) */
+    proxy_tmp_child = pentry->tmp_children;
+    while(proxy_tmp_child) {
+        /* Check for entry being removed */
+        if(proxy_tmp_child->tmp_child == child_entry)
+            break;
+
+        /* Advance to next proxy temp. child node */
+        proxy_tmp_child = proxy_tmp_child->next;
+    } /* end while */
+
+    FUNC_LEAVE_NOAPI(proxy_tmp_child)
+} /* end H5AC__proxy_entry_find_tmp_child() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5AC__proxy_entry_remove_tmp_child
+ *
+ * Purpose:     Remove a temporary child from a proxy
+ *
+ * Return:      None (can't fail)
+ *
+ * Programmer:  Quincey Koziol
+ *              August 18, 2018
+ *
+ *-------------------------------------------------------------------------
+ */
+static void
+H5AC__proxy_entry_remove_tmp_child(H5AC_proxy_entry_t *pentry, 
+    H5AC_proxy_tmp_child_t *proxy_tmp_child)
+{
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Sanity check */
+    HDassert(pentry);
+    HDassert(proxy_tmp_child);
+
+    /* Remove proxy temp. child from list */
+    if(pentry->tmp_children == proxy_tmp_child) {
+        /* Sanity check */
+        HDassert(NULL == proxy_tmp_child->prev);
+
+        /* Detech from head of list */
+        if(proxy_tmp_child->next)
+            proxy_tmp_child->next->prev = NULL;
+        pentry->tmp_children = proxy_tmp_child->next;
+    } /* end if */
+    else {
+        /* Sanity check */
+        HDassert(proxy_tmp_child->prev);
+
+        /* Detach from middle or end of list */
+        proxy_tmp_child->prev->next = proxy_tmp_child->next;
+        if(proxy_tmp_child->next)
+            proxy_tmp_child->next->prev = proxy_tmp_child->prev;
+    } /* end else */
+
+    /* Free the proxy temp. child node */
+    proxy_tmp_child = H5FL_FREE(H5AC_proxy_tmp_child_t, proxy_tmp_child);
+
+    FUNC_LEAVE_NOAPI_VOID
+} /* end H5AC__proxy_entry_remove_tmp_child() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5AC__proxy_entry_tmp_child_check
  *
  * Purpose:     Check if child being cleaned / evicted is a temporary child
@@ -456,36 +551,20 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5AC__proxy_entry_tmp_child_check(H5AC_proxy_entry_t *pentry, haddr_t child_addr,
+H5AC__proxy_entry_tmp_child_check(H5AC_proxy_entry_t *pentry, H5AC_info_t *child_entry,
     hbool_t err_on_non_tmp_child)
 {
-    H5AC_proxy_tmp_child_t *proxy_tmp_child;   /* Proxy temp. child node for new temp. child */
-    void *child_entry;                  /* Child entry */
+    H5AC_proxy_tmp_child_t *proxy_tmp_child;    /* Proxy temp. child node for new temp. child */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
 
     /* Sanity check */
     HDassert(pentry);
-    HDassert(H5F_addr_defined(child_addr));
-
-    /* Get the cache entry for the child address */
-    if(H5AC_get_entry_from_addr(pentry->f, child_addr, &child_entry) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "can't lookup cache entry at address")
-    if(NULL == child_entry)
-        HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "no cache entry at address")
+    HDassert(child_entry);
 
     /* Check if this is a temporary child */
-    /* (Linear search, but these lists probably aren't huge) */
-    proxy_tmp_child = pentry->tmp_children;
-    while(proxy_tmp_child) {
-        /* Check for entry being removed */
-        if(proxy_tmp_child->tmp_child == child_entry)
-            break;
-
-        /* Advance to next proxy temp. child node */
-        proxy_tmp_child = proxy_tmp_child->next;
-    } /* end while */
+    proxy_tmp_child = H5AC__proxy_entry_find_tmp_child(pentry, child_entry);
 
     /* Error if not temp. child, else remove from proxy */
     if(NULL == proxy_tmp_child) {
@@ -493,31 +572,11 @@ H5AC__proxy_entry_tmp_child_check(H5AC_proxy_entry_t *pentry, haddr_t child_addr
             HGOTO_ERROR(H5E_CACHE, H5E_CANTREMOVE, FAIL, "can't remove non-temporary child")
     } /* end if */
     else {
-        /* Remove proxy temp. child from list */
-        if(pentry->tmp_children == proxy_tmp_child) {
-            /* Sanity check */
-            HDassert(NULL == proxy_tmp_child->prev);
-
-            /* Detech from head of list */
-            if(proxy_tmp_child->next)
-                proxy_tmp_child->next->prev = NULL;
-            pentry->tmp_children = proxy_tmp_child->next;
-        } /* end if */
-        else {
-            /* Sanity check */
-            HDassert(proxy_tmp_child->prev);
-
-            /* Detach from middle or end of list */
-            proxy_tmp_child->prev->next = proxy_tmp_child->next;
-            if(proxy_tmp_child->next)
-                proxy_tmp_child->next->prev = proxy_tmp_child->prev;
-        } /* end else */
-
-        /* Free the proxy temp. child node */
-        proxy_tmp_child = H5FL_FREE(H5AC_proxy_tmp_child_t, proxy_tmp_child);
+        /* Remove the temp. child from the list */
+        H5AC__proxy_entry_remove_tmp_child(pentry, proxy_tmp_child);
 
         /* Remove child from proxy */
-        if(H5AC_proxy_entry_remove_child(pentry, child_entry) < 0)
+        if(H5AC__proxy_entry_remove_child(pentry, child_entry) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTREMOVE, FAIL, "can't remove temporary child")
     } /* end else */
 
@@ -527,23 +586,23 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5AC_proxy_entry_remove_child
+ * Function:    H5AC__proxy_entry_remove_child
  *
  * Purpose:     Remove a child a proxy entry
  *
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              September 17, 2016
+ *              August 18, 2018
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5AC_proxy_entry_remove_child(H5AC_proxy_entry_t *pentry, void *child)
+static herr_t
+H5AC__proxy_entry_remove_child(H5AC_proxy_entry_t *pentry, void *child)
 {
     herr_t ret_value = SUCCEED;         	/* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_STATIC
 
     /* Sanity checks */
     HDassert(pentry);
@@ -582,6 +641,43 @@ H5AC_proxy_entry_remove_child(H5AC_proxy_entry_t *pentry, void *child)
         if(H5AC_remove_entry(pentry) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTREMOVE, FAIL, "unable to remove proxy entry")
     } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5AC__proxy_entry_remove_child() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5AC_proxy_entry_remove_child
+ *
+ * Purpose:     Remove a child a proxy entry
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              September 17, 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5AC_proxy_entry_remove_child(H5AC_proxy_entry_t *pentry, void *child)
+{
+    H5AC_proxy_tmp_child_t *proxy_tmp_child;    /* Proxy temp. child node for new temp. child */
+    herr_t ret_value = SUCCEED;         	/* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity checks */
+    HDassert(pentry);
+    HDassert(child);
+
+    /* Remove child from temp. list, if child is one */
+    if((proxy_tmp_child = H5AC__proxy_entry_find_tmp_child(pentry, (const H5AC_info_t *)child)))
+        H5AC__proxy_entry_remove_tmp_child(pentry, proxy_tmp_child);
+
+    /* Remove child from proxy */
+    if(H5AC__proxy_entry_remove_child(pentry, child) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTREMOVE, FAIL, "unable to remove child from proxy entry")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -756,9 +852,8 @@ H5AC__proxy_entry_notify(H5AC_notify_action_t action, void *_thing, ...)
             break;
 
         case H5AC_NOTIFY_ACTION_CHILD_CLEANED:
-        case H5AC_NOTIFY_ACTION_CHILD_UNDEPEND_DIRTY:
             {
-                haddr_t child_addr;             /* Address of child entry */
+                H5AC_info_t *child_entry;       /* Child entry */
 
                 /* Sanity check */
                 HDassert(pentry->ndirty_children > 0);
@@ -775,12 +870,15 @@ H5AC__proxy_entry_notify(H5AC_notify_action_t action, void *_thing, ...)
                 va_start(ap, _thing);
                 va_started = TRUE;
 
-                /* The child entry address in the varg */
-                child_addr = va_arg(ap, haddr_t);
-                HDassert(H5F_addr_defined(child_addr));
+                /* The child entry in the varg */
+                child_entry = va_arg(ap, H5AC_info_t *);
+
+                /* Check the cache entry for the child */
+                if(NULL == child_entry)
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_BADVALUE, FAIL, "no cache entry at address")
 
                 /* Check if this is a temporary child */
-                if(H5AC__proxy_entry_tmp_child_check(pentry, child_addr, FALSE) < 0)
+                if(H5AC__proxy_entry_tmp_child_check(pentry, child_entry, FALSE) < 0)
                     HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "check for temporary child failed")
             } /* end case */
             break;
@@ -810,19 +908,39 @@ H5AC__proxy_entry_notify(H5AC_notify_action_t action, void *_thing, ...)
 
         case H5AC_NOTIFY_ACTION_CHILD_BEFORE_EVICT:
             {
-                haddr_t child_addr;             /* Address of child entry */
+                H5AC_info_t *child_entry;       /* Child entry */
+                htri_t child_dirty;             /* Whether child entry is dirty */
 
                 /* Initialize the argument list */
                 va_start(ap, _thing);
                 va_started = TRUE;
 
-                /* The child entry address in the varg */
-                child_addr = va_arg(ap, haddr_t);
-                HDassert(H5F_addr_defined(child_addr));
+                /* The child entry in the varg */
+                child_entry = va_arg(ap, H5AC_info_t *);
 
-                /* Check if this is a temporary child */
-                if(H5AC__proxy_entry_tmp_child_check(pentry, child_addr, TRUE) < 0)
-                    HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "check for temporary child failed")
+                /* Check the cache entry for the child */
+                if(NULL == child_entry)
+                    HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "no cache entry at address")
+
+                /* Check 'dirty' status of child entry */
+                if((child_dirty = H5AC_entry_is_dirty(child_entry)) < 0)
+                    HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "can't get 'dirty' status for child entry")
+                else if(child_dirty) {
+                    /* Sanity check */
+                    HDassert(pentry->ndirty_children > 0);
+
+                    /* Decrement # of dirty children */
+                    pentry->ndirty_children--;
+
+                    /* Check for last dirty child */
+                    if(0 == pentry->ndirty_children)
+                        if(H5AC_mark_entry_clean(pentry) < 0)
+                            HGOTO_ERROR(H5E_CACHE, H5E_CANTCLEAN, FAIL, "can't mark proxy entry clean")
+                } /* end if */
+
+                /* Remove child from proxy */
+                if(H5AC__proxy_entry_remove_child(pentry, child_entry) < 0)
+                    HGOTO_ERROR(H5E_CACHE, H5E_CANTREMOVE, FAIL, "unable to remove child from proxy entry")
             } /* end case */
 	    break;
 

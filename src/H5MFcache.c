@@ -178,29 +178,31 @@ H5MF__freedspace_notify(H5AC_notify_action_t action, void *_thing, ...)
     HDassert(pentry);
 
     switch(action) {
-        case H5AC_NOTIFY_ACTION_CHILD_BEFORE_EVICT:
         case H5AC_NOTIFY_ACTION_CHILD_CLEANED:
+        case H5AC_NOTIFY_ACTION_CHILD_BEFORE_EVICT:
             {
-                void *child_entry = NULL;       /* Child entry */
-                haddr_t child_addr;             /* Address of child entry */
+                H5AC_info_t *child_entry;       /* Child entry */
+                H5AC_flush_dep_t *flush_dep;    /* Flush dependency object */
                 unsigned nchildren;             /* # of flush dependency children for freedspace entry */
 
                 /* Initialize the argument list */
                 va_start(ap, _thing);
                 va_started = TRUE;
 
-                /* The child freedspace entry address in the varg */
-                child_addr = va_arg(ap, haddr_t);
-                HDassert(H5F_addr_defined(child_addr));
+                /* The child entry in the varg */
+                /* (Unused in this case, but must be retrieved to get the flush dependency) */
+                child_entry = va_arg(ap, H5AC_info_t *);
 
-                /* Get the cache entry for the child */
-                if(H5AC_get_entry_from_addr(pentry->f, child_addr, &child_entry) < 0)
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "can't lookup cache entry at address")
+                /* Check the cache entry for the child */
                 if(NULL == child_entry)
                     HGOTO_ERROR(H5E_RESOURCE, H5E_BADVALUE, FAIL, "no cache entry at address")
 
+                /* The flush dependency object, in the vararg */
+                flush_dep = va_arg(ap, H5AC_flush_dep_t *);
+                HDassert(flush_dep);
+
                 /* Remove flush dependency on cleaned or evicted child */
-                if(H5AC_destroy_flush_dependency(pentry, child_entry) < 0)
+                if(H5AC_destroy_flush_dep(flush_dep) < 0)
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTUNDEPEND, FAIL, "unable to remove flush dependency on freedspace entry")
 
                 /* Get # of flush dependency children now */
@@ -223,13 +225,6 @@ H5MF__freedspace_notify(H5AC_notify_action_t action, void *_thing, ...)
                         HGOTO_ERROR(H5E_RESOURCE, H5E_CALLBACK, FAIL, "can't release freed space")
                 } /* end if */
             } /* end case */
-            break;
-
-        case H5AC_NOTIFY_ACTION_CHILD_UNDEPEND_DIRTY:
-            /* Ignore notification about undepending a dirty child, since it's
-             *  the result of removing the dependency from the "child before evict"
-             *  case above.  QAK - 2017/08/05
-             */
             break;
 
         case H5AC_NOTIFY_ACTION_AFTER_INSERT:

@@ -289,6 +289,37 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ *
+ * Function:    H5C_entry_is_dirty
+ *
+ * Purpose:     Retrieve the 'dirty' status for an entry.
+ *
+ * Return:      TRUE / FALSE / FAIL
+ *
+ * Programmer:  Quincey Koziol
+ *              August 18, 2018
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5C_entry_is_dirty(const H5C_cache_entry_t *entry)
+{
+    htri_t ret_value = FAIL;    /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity checks */
+    HDassert(entry);
+
+    /* Set entry 'dirty' status */
+    ret_value = entry->is_dirty;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5C_entry_is_dirty() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5C_get_evictions_enabled()
  *
  * Purpose:     Copy the current value of cache_ptr->evictions_enabled into

@@ -479,7 +479,6 @@ H5B2__cache_hdr_notify(H5AC_notify_action_t action, void *_thing, ...)
             case H5AC_NOTIFY_ACTION_CHILD_CLEANED:
             case H5AC_NOTIFY_ACTION_CHILD_UNSERIALIZED:
             case H5AC_NOTIFY_ACTION_CHILD_SERIALIZED:
-            case H5AC_NOTIFY_ACTION_CHILD_UNDEPEND_DIRTY:
 		/* do nothing */
                 break;
 
@@ -492,16 +491,15 @@ H5B2__cache_hdr_notify(H5AC_notify_action_t action, void *_thing, ...)
                     /* Sanity check */
                     HDassert(hdr->top_proxy);
 
-		    /* Destroy flush dependency on parent meta-proxy */
-		    if(H5AC_proxy_entry_remove_child((H5AC_proxy_entry_t *)hdr->parent, (void *)hdr->top_proxy) < 0)
-                        HGOTO_ERROR(H5E_BTREE, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency between v2 B-tree and proxy")
+                    /* (Flush dependency on parent meta-proxy will be removed when the B-tree's top proxy is removed from the cache) */
+
+                    /* Reset parent pointer */
                     hdr->parent = NULL;
 		} /* end if */
 
                 /* Detach from 'top' proxy for v2 B-tree */
                 if(hdr->top_proxy) {
-                    if(H5AC_proxy_entry_remove_child(hdr->top_proxy, hdr) < 0)
-                        HGOTO_ERROR(H5E_BTREE, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency between header and v2 B-tree 'top' proxy")
+                    /* (Entry will be removed from top proxy via proxy's callback) */
                     /* Don't reset hdr->top_proxy here, it's destroyed when the header is freed -QAK */
                 } /* end if */
 
@@ -927,7 +925,6 @@ H5B2__cache_int_notify(H5AC_notify_action_t action, void *_thing, ...)
             case H5AC_NOTIFY_ACTION_CHILD_CLEANED:
             case H5AC_NOTIFY_ACTION_CHILD_UNSERIALIZED:
             case H5AC_NOTIFY_ACTION_CHILD_SERIALIZED:
-            case H5AC_NOTIFY_ACTION_CHILD_UNDEPEND_DIRTY:
 		/* do nothing */
 		break;
 
@@ -938,9 +935,8 @@ H5B2__cache_int_notify(H5AC_notify_action_t action, void *_thing, ...)
 
                 /* Detach from 'top' proxy for v2 B-tree */
                 if(internal->top_proxy) {
-                    if(H5AC_proxy_entry_remove_child(internal->top_proxy, internal) < 0)
-                        HGOTO_ERROR(H5E_BTREE, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency between internal node and v2 B-tree 'top' proxy")
                     internal->top_proxy = NULL;
+                    /* (Entry will be removed from top proxy via proxy's callback) */
                 } /* end if */
 
                 /* Detach from 'bottom' proxy for v2 B-tree */
@@ -1333,7 +1329,6 @@ H5B2__cache_leaf_notify(H5AC_notify_action_t action, void *_thing, ...)
             case H5AC_NOTIFY_ACTION_CHILD_CLEANED:
             case H5AC_NOTIFY_ACTION_CHILD_UNSERIALIZED:
             case H5AC_NOTIFY_ACTION_CHILD_SERIALIZED:
-            case H5AC_NOTIFY_ACTION_CHILD_UNDEPEND_DIRTY:
                 /* do nothing */
                 break;
 
@@ -1344,9 +1339,8 @@ H5B2__cache_leaf_notify(H5AC_notify_action_t action, void *_thing, ...)
 
                 /* Detach from 'top' proxy for v2 B-tree */
                 if(leaf->top_proxy) {
-                    if(H5AC_proxy_entry_remove_child(leaf->top_proxy, leaf) < 0)
-                        HGOTO_ERROR(H5E_BTREE, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency between leaf node and v2 B-tree 'top' proxy")
                     leaf->top_proxy = NULL;
+                    /* (Entry will be removed from top proxy via proxy's callback) */
                 } /* end if */
 
                 /* Detach from 'bottom' proxy for v2 B-tree */

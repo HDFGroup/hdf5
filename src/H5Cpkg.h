@@ -50,12 +50,6 @@
 #define H5C__HASH_TABLE_LEN     (64 * 1024) /* must be a power of 2 */
 #define H5C__H5C_T_MAGIC	0x005CAC0E
 
-/* Initial allocated size of the "flush_dep_parent" array */
-#define H5C_FLUSH_DEP_PARENT_INIT 8
-
-/* Initial allocated size of the "flush_dep_children" array */
-#define H5C_FLUSH_DEP_CHILDREN_INIT 8
-
 /***************************************************************************
  *
  * We maintain doubly linked lists of instances of H5C_cache_entry_t for a
@@ -3626,6 +3620,7 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
 /* Package Private Typedefs */
 /****************************/
 
+
 /****************************************************************************
  *
  * structure H5C_tag_info_t
@@ -4489,13 +4484,6 @@ typedef struct H5C_tag_info_t {
  * listed below have been implemented to allow these conditions to be 
  * detected and dealt with by restarting the scan.
  *
- * The serialization operation is further complicated by the fact that 
- * the flush dependency height of a given entry may increase (as the 
- * result of an entry load or insert) or decrease (as the result of an 
- * entry removal -- via either eviction or the take ownership flag).  The
- * entry_fd_height_change_counter field is maintained to allow detection
- * of this condition, and a restart of the scan when it occurs.
- *
  * Note that all these new fields would work just as well as booleans.
  *
  * entries_loaded_counter: Number of entries loaded into the cache 
@@ -4504,11 +4492,8 @@ typedef struct H5C_tag_info_t {
  * entries_inserted_counter: Number of entries inserted into the cache 
  *		since the last time this field was reset.
  *
- * entries relocated_counter: Number of entries whose base address has
+ * entries_relocated_counter: Number of entries whose base address has
  *		been changed since the last time this field was reset.
- *
- * entry_fd_height_change_counter: Number of entries whose flush dependency
- *		height has changed since the last time this field was reset.
  *
  * The following fields are used assemble the cache image prior to 
  * writing it to disk.
@@ -5028,7 +5013,6 @@ struct H5C_t {
     int64_t			entries_loaded_counter;
     int64_t			entries_inserted_counter;
     int64_t			entries_relocated_counter;
-    int64_t			entry_fd_height_change_counter;
     uint32_t			num_entries_in_image;
     H5C_image_entry_t *		image_entries;
     void *                      image_buffer;

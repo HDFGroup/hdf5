@@ -23,11 +23,19 @@
  */
 
 
+/****************/
+/* Module Setup */
+/****************/
+
+#include "H5Cmodule.h"          /* This source code file is part of the H5C module */
+
+
 /***********/
 /* Headers */
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5ACprivate.h"        /* Metadata cache                       */
+#include "H5Cpkg.h"		/* Cache				*/
 #include "H5FLprivate.h"        /* Free Lists                           */
 #include "H5MMprivate.h"	/* Memory management			*/
 
@@ -229,7 +237,6 @@ static herr_t
 H5C__prefetched_entry_notify(H5C_notify_action_t action, void *_thing, ...)
 {
     H5C_cache_entry_t * entry_ptr = (H5C_cache_entry_t *)_thing;
-    unsigned 		u;
     herr_t              ret_value = SUCCEED;
 
     FUNC_ENTER_STATIC
@@ -250,35 +257,52 @@ H5C__prefetched_entry_notify(H5C_notify_action_t action, void *_thing, ...)
         case H5C_NOTIFY_ACTION_CHILD_UNSERIALIZED: 
         case H5C_NOTIFY_ACTION_CHILD_SERIALIZED: 
         case H5C_NOTIFY_ACTION_CHILD_BEFORE_EVICT:
-        case H5C_NOTIFY_ACTION_CHILD_UNDEPEND_DIRTY:
             /* do nothing */
             break;
 
         case H5C_NOTIFY_ACTION_BEFORE_EVICT:
-            for(u = 0; u < entry_ptr->flush_dep_nparents; u++) {
-                H5C_cache_entry_t * parent_ptr; 
+            if(entry_ptr->flush_dep_nparents > 0) {
+                H5C_flush_dep_t *curr;      /* Current flush dependency */
 
-                /* Sanity checks */
-                HDassert(entry_ptr->flush_dep_parent);
-                parent_ptr = entry_ptr->flush_dep_parent[u];
-                HDassert(parent_ptr);
-                HDassert(parent_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
-                HDassert(parent_ptr->flush_dep_nchildren > 0);
+                /* Sanity check */
+                HDassert(entry_ptr->flush_dep_parents);
 
-                /* Destroy flush dependency with flush dependency parent */
-                if(H5C_destroy_flush_dependency(parent_ptr, entry_ptr) < 0)
-                    HGOTO_ERROR(H5E_CACHE, H5E_CANTUNDEPEND, FAIL, "unable to destroy prefetched entry flush dependency")
+                /* Iterate the parent entries */
+                /* (Safely, since the current dependency is removed) */
+                curr = entry_ptr->flush_dep_parents;
+                while(curr) {
+                    H5C_flush_dep_t *next;      /* Next flush dependency */
+                    H5C_cache_entry_t *parent_ptr; 
 
-                if(parent_ptr->prefetched) {
-                    /* In prefetched entries, the fd_child_count field is 
-                     * used in sanity checks elsewhere.  Thus update this 
-                     * field to reflect the destruction of the flush 
-                     * dependency relationship.
+                    /* Get pointer to next parent, since the current flush
+                     * dependency is destroyed.
                      */
-                    HDassert(parent_ptr->fd_child_count > 0);
-                    (parent_ptr->fd_child_count)--;
-                } /* end if */
-            } /* end for */
+                    next = curr->next_parent;
+
+                    /* Sanity checks */
+                    parent_ptr = curr->parent;
+                    HDassert(parent_ptr);
+                    HDassert(parent_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
+                    HDassert(parent_ptr->flush_dep_nchildren > 0);
+
+                    /* Destroy flush dependency with flush dependency parent */
+                    if(H5C_destroy_flush_dependency(parent_ptr, entry_ptr) < 0)
+                        HGOTO_ERROR(H5E_CACHE, H5E_CANTUNDEPEND, FAIL, "unable to destroy prefetched entry flush dependency")
+
+                    if(parent_ptr->prefetched) {
+                        /* In prefetched entries, the fd_child_count field is 
+                         * used in sanity checks elsewhere.  Thus update this 
+                         * field to reflect the destruction of the flush 
+                         * dependency relationship.
+                         */
+                        HDassert(parent_ptr->fd_child_count > 0);
+                        (parent_ptr->fd_child_count)--;
+                    } /* end if */
+
+                    /* Advance to the next flush dependency parent */
+                    curr = next;
+                } /* end while */
+            } /* end if */
             break;
 
         default:

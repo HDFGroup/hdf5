@@ -1474,7 +1474,7 @@ done:
         HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release v2 B-tree header")
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5B2_depend() */
+} /* end H5B2_undepend() */
 
 
 /*-------------------------------------------------------------------------

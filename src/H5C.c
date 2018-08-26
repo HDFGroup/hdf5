@@ -207,9 +207,8 @@ H5FL_DEFINE(H5C_tag_info_t);
 /* Declare a free list to manage the H5C_t struct */
 H5FL_DEFINE_STATIC(H5C_t);
 
-/* Declare a free list to manage flush dependency arrays */
-H5FL_BLK_DEFINE_STATIC(parent);
-H5FL_BLK_DEFINE_STATIC(children);
+/* Declare a free list to manage the flush dependency struct */
+H5FL_DEFINE_STATIC(H5C_flush_dep_t);
 
 
 
@@ -466,7 +465,6 @@ H5C_create(size_t		      max_cache_size,
     cache_ptr->entries_loaded_counter		= 0;
     cache_ptr->entries_inserted_counter		= 0;
     cache_ptr->entries_relocated_counter	= 0;
-    cache_ptr->entry_fd_height_change_counter	= 0;
 
     cache_ptr->num_entries_in_image	= 0;
     cache_ptr->image_entries		= NULL;
@@ -1342,9 +1340,8 @@ H5C_insert_entry(H5F_t *             f,
     entry_ptr->ring = ring;
 
     /* Initialize flush dependency fields */
-    entry_ptr->flush_dep_parent             = NULL;
+    entry_ptr->flush_dep_parents            = NULL;
     entry_ptr->flush_dep_nparents           = 0;
-    entry_ptr->flush_dep_parent_nalloc      = 0;
     entry_ptr->flush_dep_children           = NULL;
     entry_ptr->flush_dep_nchildren          = 0;
     entry_ptr->flush_dep_ndirty_children    = 0;
@@ -2180,17 +2177,39 @@ static herr_t
 H5C__flush_recursive_by_dep(H5F_t *f, H5C_cache_entry_t *entry_ptr,
     unsigned flags)
 {
-    int i;                              /* Local index variable */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
 
+    /* Sanity check */
+    HDassert(entry_ptr);
+
     /* Recursively flush flush-dependency children of the entry. */
-    if(entry_ptr->flush_dep_nchildren > 0)
-        /* Flush from the end so there is less memory movement. */
-        for(i = (int)(entry_ptr->flush_dep_nchildren - 1); i >= 0; i--)
-            if(H5C__flush_recursive_by_dep(f, entry_ptr->flush_dep_children[i], flags) < 0)
+    if(entry_ptr->flush_dep_nchildren > 0) {
+        H5C_flush_dep_t *curr;          /* Current flush dependency child */
+
+        /* Sanity check */
+        HDassert(entry_ptr->flush_dep_children);
+
+        /* Iterate the child flush dependencies */
+        /* (Safely, in case the current dependency is removed) */
+        curr = entry_ptr->flush_dep_children;
+        while(curr) {
+            H5C_flush_dep_t *next;      /* Next flush dependency child */
+
+            /* Get pointer to next child now, before flushing current one, in case
+             * the current flush dependency is destroyed.
+             */
+            next = curr->next_child;
+
+            /* Flush the child entry */
+            if(H5C__flush_recursive_by_dep(f, curr->child, flags) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "can't flush child entry")
+
+            /* Advance to the next flush dependency child */
+            curr = next;
+        } /* end while */
+    } /* end if */
 
     /* Reach the end of recursive process, do the actual entry flush */
     if(H5C__flush_single_entry(f, entry_ptr, flags) < 0)
@@ -3761,6 +3780,7 @@ H5C_create_flush_dependency(void * parent_thing, void * child_thing)
     H5C_t             * cache_ptr;
     H5C_cache_entry_t *	parent_entry = (H5C_cache_entry_t *)parent_thing;   /* Ptr to parent thing's entry */
     H5C_cache_entry_t * child_entry = (H5C_cache_entry_t *)child_thing;    /* Ptr to child thing's entry */
+    H5C_flush_dep_t   * flush_dep;      /* Flush dependency created */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -3776,15 +3796,22 @@ H5C_create_flush_dependency(void * parent_thing, void * child_thing)
     HDassert(cache_ptr);
     HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
     HDassert(cache_ptr == child_entry->cache_ptr);
-#ifndef NDEBUG
+#if H5C_DO_EXTREME_SANITY_CHECKS
     /* Make sure the parent is not already a parent */
-    {
-        unsigned u;
+    if(child_entry->flush_dep_nparents > 0) {
+        H5C_flush_dep_t *curr;          /* Current flush dependency parent */
 
-        for(u = 0; u < child_entry->flush_dep_nparents; u++)
-            HDassert(child_entry->flush_dep_parent[u] != parent_entry);
-    } /* end block */
-#endif /* NDEBUG */
+        /* Sanity check */
+        HDassert(child_entry->flush_dep_parents);
+
+        /* Iterate the parent flush dependencies */
+        curr = child_entry->flush_dep_parents;
+        while(curr) {
+            HDassert(curr->parent != parent_entry);
+            curr = curr->next_parent;
+        } /* end while */
+    } /* end if */
+#endif /* H5C_DO_EXTREME_SANITY_CHECKS */
 
     /* More sanity checks */
     if(child_entry == parent_entry)
@@ -3809,54 +3836,26 @@ H5C_create_flush_dependency(void * parent_thing, void * child_thing)
     /* Mark the entry as pinned from the cache's action (possibly redundantly) */
     parent_entry->pinned_from_cache = TRUE;
 
-    /* FULLSWMR: Check if we need to resize the entry's children array */
-    if(parent_entry->flush_dep_nchildren >= parent_entry->flush_dep_children_nalloc) {
-        if(parent_entry->flush_dep_children_nalloc == 0) {
-            /* Array does not exist yet, allocate it */
-            HDassert(!parent_entry->flush_dep_children);
+    /* Allocate new flush dependency struct */
+    if(NULL == (flush_dep = H5FL_MALLOC(H5C_flush_dep_t)))
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL, "can't allocate flush dependency struct")
+    flush_dep->parent = parent_entry;
+    flush_dep->child = child_entry;
 
-            if(NULL == (parent_entry->flush_dep_children = (H5C_cache_entry_t **)H5FL_BLK_MALLOC(children, H5C_FLUSH_DEP_CHILDREN_INIT * sizeof(H5C_cache_entry_t *))))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for flush dependency children list")
-            parent_entry->flush_dep_children_nalloc = H5C_FLUSH_DEP_CHILDREN_INIT;
-        } /* end if */
-        else {
-            /* Resize existing array */
-            HDassert(parent_entry->flush_dep_children);
-
-            if(NULL == (parent_entry->flush_dep_children = (H5C_cache_entry_t **)H5FL_BLK_REALLOC(children, parent_entry->flush_dep_children, 2 * parent_entry->flush_dep_children_nalloc * sizeof(H5C_cache_entry_t *))))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for flush dependency children list")
-            parent_entry->flush_dep_children_nalloc *= 2;
-        } /* end else */
-        cache_ptr->entry_fd_height_change_counter++;
-    } /* end if */
-
-    /* Check if we need to resize the child's parent array */
-    if(child_entry->flush_dep_nparents >= child_entry->flush_dep_parent_nalloc) {
-        if(child_entry->flush_dep_parent_nalloc == 0) {
-            /* Array does not exist yet, allocate it */
-            HDassert(!child_entry->flush_dep_parent);
-
-            if(NULL == (child_entry->flush_dep_parent = (H5C_cache_entry_t **)H5FL_BLK_MALLOC(parent, H5C_FLUSH_DEP_PARENT_INIT * sizeof(H5C_cache_entry_t *))))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for flush dependency parent list")
-            child_entry->flush_dep_parent_nalloc = H5C_FLUSH_DEP_PARENT_INIT;
-        } /* end if */
-        else {
-            /* Resize existing array */
-            HDassert(child_entry->flush_dep_parent);
-
-            if(NULL == (child_entry->flush_dep_parent = (H5C_cache_entry_t **)H5FL_BLK_REALLOC(parent, child_entry->flush_dep_parent, 2 * child_entry->flush_dep_parent_nalloc * sizeof(H5C_cache_entry_t *))))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for flush dependency parent list")
-            child_entry->flush_dep_parent_nalloc *= 2;
-        } /* end else */
-        cache_ptr->entry_fd_height_change_counter++;
-    } /* end if */
-
-    /* Add the dependency to the child's parent array */
-    child_entry->flush_dep_parent[child_entry->flush_dep_nparents] = parent_entry;
+    /* Add the dependency to the child's parent list */
+    flush_dep->prev_parent = NULL;
+    flush_dep->next_parent = child_entry->flush_dep_parents;
+    if(child_entry->flush_dep_parents)
+        child_entry->flush_dep_parents->prev_parent = flush_dep;
+    child_entry->flush_dep_parents = flush_dep;
     child_entry->flush_dep_nparents++;
 
-    /* FULLSWMR: Add the dependency to the parent's children array */
-    parent_entry->flush_dep_children[parent_entry->flush_dep_nchildren] = child_entry;
+    /* FULLSWMR: Add the dependency to the parent's children list */
+    flush_dep->prev_child = NULL;
+    flush_dep->next_child = parent_entry->flush_dep_children;
+    if(parent_entry->flush_dep_children)
+        parent_entry->flush_dep_children->prev_child = flush_dep;
+    parent_entry->flush_dep_children = flush_dep;
     parent_entry->flush_dep_nchildren++;
 
     /* Adjust the number of dirty children */
@@ -3888,13 +3887,11 @@ H5C_create_flush_dependency(void * parent_thing, void * child_thing)
 
     /* Post-conditions, for successful operation */
     HDassert(parent_entry->is_pinned);
-    HDassert(parent_entry->flush_dep_nchildren > 0);
-    HDassert(child_entry->flush_dep_parent);
+    HDassert(child_entry->flush_dep_parents);
     HDassert(child_entry->flush_dep_nparents > 0);
-    HDassert(child_entry->flush_dep_parent_nalloc > 0);
     /* FULLSWMR */
     HDassert(parent_entry->flush_dep_children);
-    HDassert(parent_entry->flush_dep_children_nalloc > 0);
+    HDassert(parent_entry->flush_dep_nchildren > 0);
 #if H5C_DO_EXTREME_SANITY_CHECKS
     H5C__assert_flush_dep_nocycle(parent_entry, child_entry);
 #endif /* H5C_DO_EXTREME_SANITY_CHECKS */
@@ -3923,7 +3920,7 @@ H5C_destroy_flush_dependency(void *parent_thing, void * child_thing)
     H5C_t             * cache_ptr;
     H5C_cache_entry_t *	parent_entry = (H5C_cache_entry_t *)parent_thing; /* Ptr to parent entry */
     H5C_cache_entry_t *	child_entry = (H5C_cache_entry_t *)child_thing; /* Ptr to child entry */
-    unsigned            u;                      /* Local index variable */
+    H5C_flush_dep_t   * flush_dep;              /* Current flush dependency */
     herr_t              ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -3943,103 +3940,44 @@ H5C_destroy_flush_dependency(void *parent_thing, void * child_thing)
     /* Usage checks */
     if(!parent_entry->is_pinned)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTUNDEPEND, FAIL, "Parent entry isn't pinned")
-    if(NULL == child_entry->flush_dep_parent)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTUNDEPEND, FAIL, "Child entry doesn't have a flush dependency parent array")
-    if(0 == parent_entry->flush_dep_nchildren)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTUNDEPEND, FAIL, "Parent entry flush dependency ref. count has no child dependencies")
+    if(NULL == child_entry->flush_dep_parents)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTUNDEPEND, FAIL, "Child entry doesn't have a flush dependency parent list")
+    if(NULL == parent_entry->flush_dep_children)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTUNDEPEND, FAIL, "Parent entry doesn't have a flush dependency child list")
 
-    /* Search for parent in child's parent array.  This is a linear search
-     * because we do not expect large numbers of parents.  If this changes, we
-     * may wish to change the parent array to a skip list */
-    for(u = 0; u < child_entry->flush_dep_nparents; u++)
-        if(child_entry->flush_dep_parent[u] == parent_entry)
-            break;
-    if(u == child_entry->flush_dep_nparents)
+    /* Search for flush dependency in shortest list (parent's children or
+     * child's parents).  This is a linear search because we do not expect
+     * large numbers of dependencies.  If this changes, we may wish to change
+     * the linear list to a skip list */
+    if(child_entry->flush_dep_nparents <= parent_entry->flush_dep_nchildren) {
+        flush_dep = child_entry->flush_dep_parents;
+        while(flush_dep) {
+            if(flush_dep->parent == parent_entry)
+                break;
+            flush_dep = flush_dep->next_parent;
+        } /* end while */
+    } /* end if */
+    else {
+        flush_dep = parent_entry->flush_dep_children;
+        while(flush_dep) {
+            if(flush_dep->child == child_entry)
+                break;
+            flush_dep = flush_dep->next_child;
+        } /* end while */
+    } /* end else */
+    if(NULL == flush_dep)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTUNDEPEND, FAIL, "Parent entry isn't a flush dependency parent for child entry")
 
-    /* Remove parent entry from child's parent array */
-    if(u < (child_entry->flush_dep_nparents - 1))
-        HDmemmove(&child_entry->flush_dep_parent[u],
-                &child_entry->flush_dep_parent[u + 1],
-                (child_entry->flush_dep_nparents - u - 1) * sizeof(child_entry->flush_dep_parent[0]));
-    child_entry->flush_dep_nparents--;
+    /* Destroy flush dependency, disconnecting it from parent and child entries */
+    if(H5C_destroy_flush_dep(flush_dep) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTRELEASE, FAIL, "can't destroy flush dependency object")
 
-    /* FULLSWMR: Search for child in parent's children array.  
-     * This is a linear search because we do not expect large numbers of children.  
-     * If this changes, we may wish to change the children array to a skip list */
-    for(u = 0; u < parent_entry->flush_dep_nchildren; u++)
-        if(parent_entry->flush_dep_children[u] == child_entry)
-            break;
-    if(u == parent_entry->flush_dep_nchildren)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTUNDEPEND, FAIL, "Child entry isn't a flush dependency child for parent entry")
-
-    /* Remove child entry from parent's children array */
-    if(u < (parent_entry->flush_dep_nchildren - 1))
-        HDmemmove(&parent_entry->flush_dep_children[u],
-                &parent_entry->flush_dep_children[u + 1],
-                (parent_entry->flush_dep_nchildren - u - 1) * sizeof(parent_entry->flush_dep_children[0]));
-
-    /* Adjust parent entry's nchildren and unpin parent if it goes to zero */
-    parent_entry->flush_dep_nchildren--;
-    if(0 == parent_entry->flush_dep_nchildren) {
-        /* Sanity check */
-        HDassert(parent_entry->pinned_from_cache);
-
-        /* FULLSWMR */
-        parent_entry->flush_dep_children = (H5C_cache_entry_t **)
-                                            H5FL_BLK_FREE(children, parent_entry->flush_dep_children);
-        parent_entry->flush_dep_children_nalloc = 0;
-
-        /* Check if we should unpin parent entry now */
-        if(!parent_entry->pinned_from_client)
-            if(H5C__unpin_entry_real(cache_ptr, parent_entry, TRUE) < 0)
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPIN, FAIL, "Can't unpin entry")
-
-        /* Mark the entry as unpinned from the cache's action */
-        parent_entry->pinned_from_cache = FALSE;
-    } /* end if */
-    else if(parent_entry->flush_dep_children_nalloc > H5C_FLUSH_DEP_CHILDREN_INIT
-            && parent_entry->flush_dep_nchildren <= (parent_entry->flush_dep_children_nalloc / 4)) {
-        /* FULLSWMR shrink the children array if possible */
-        if(NULL == (parent_entry->flush_dep_children = (H5C_cache_entry_t **)H5FL_BLK_REALLOC(children, parent_entry->flush_dep_children, (parent_entry->flush_dep_children_nalloc / 4) * sizeof(H5C_cache_entry_t *))))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for flush dependency children list")
-        parent_entry->flush_dep_children_nalloc /= 4;
-    } /* end if */
-
-    /* Adjust parent entry's ndirty_children */
-    if(child_entry->is_dirty) {
-        /* Sanity check */
-        HDassert(parent_entry->flush_dep_ndirty_children > 0);
-
-        parent_entry->flush_dep_ndirty_children--;
-
-        if(parent_entry->type->notify &&
-                (parent_entry->type->notify)(H5C_NOTIFY_ACTION_CHILD_UNDEPEND_DIRTY, parent_entry, child_entry->addr) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, FAIL, "can't notify parent about child entry dirty flag reset")
-    } /* end if */
-
-    /* adjust parent entry's number of unserialized children */
+    /* Adjust parent entry's number of unserialized children */
     if(!child_entry->image_up_to_date) {
-        HDassert(parent_entry->flush_dep_nunser_children > 0);
-
-        parent_entry->flush_dep_nunser_children--;
-
         /* If the parent has a 'notify' callback, send a 'child entry serialized' notice */
         if(parent_entry->type->notify &&
                 (parent_entry->type->notify)(H5C_NOTIFY_ACTION_CHILD_SERIALIZED, parent_entry) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, FAIL, "can't notify parent about child entry serialized flag set")
-    } /* end if */
-
-    /* Shrink or free the parent array if apporpriate */
-    if(child_entry->flush_dep_nparents == 0) {
-        child_entry->flush_dep_parent = (H5C_cache_entry_t **)H5FL_BLK_FREE(parent, child_entry->flush_dep_parent);
-        child_entry->flush_dep_parent_nalloc = 0;
-    } /* end if */
-    else if(child_entry->flush_dep_parent_nalloc > H5C_FLUSH_DEP_PARENT_INIT
-            && child_entry->flush_dep_nparents <= (child_entry->flush_dep_parent_nalloc / 4)) {
-        if(NULL == (child_entry->flush_dep_parent = (H5C_cache_entry_t **)H5FL_BLK_REALLOC(parent, child_entry->flush_dep_parent, (child_entry->flush_dep_parent_nalloc / 4) * sizeof(H5C_cache_entry_t *))))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for flush dependency parent list")
-        child_entry->flush_dep_parent_nalloc /= 4;
     } /* end if */
 
 done:
@@ -6438,22 +6376,30 @@ H5C__flush_single_entry(H5F_t *f, H5C_cache_entry_t *entry_ptr, unsigned flags)
          *      being evicted. QAK - 2017/08/03 (added 'shadow', 2018/05/30)
          */
         if(entry_ptr->flush_dep_nparents > 0) {
-            int i;              /* Local index variable */
+            H5C_flush_dep_t *curr;      /* Current flush dependency */
 
-            /* Iterate over the parent entries */
-            /* (Extract this loop into a function if it's used in more locations) */
-            /* (Note that the iteration from high to low compensates for notify
-             *  callbacks that remove the current flush dependency - QAK, 2017/08/05)
-             */
-            for(i = (int)(entry_ptr->flush_dep_nparents - 1); i >= 0; i--) {
-                /* Sanity check */
-                HDassert(entry_ptr->flush_dep_parent[i]->flush_dep_ndirty_children > 0);
+            /* Sanity check */
+            HDassert(entry_ptr->flush_dep_parents);
 
-                /* If the parent has a 'notify' callback, send a 'child entry cleaned' notice */
-                if(entry_ptr->flush_dep_parent[i]->type->notify &&
-                        (entry_ptr->flush_dep_parent[i]->type->notify)(H5C_NOTIFY_ACTION_CHILD_BEFORE_EVICT, entry_ptr->flush_dep_parent[i], entry_ptr->addr) < 0)
+            /* Iterate the parent entries */
+            /* (Safely, in case the current dependency is removed) */
+            curr = entry_ptr->flush_dep_parents;
+            while(curr) {
+                H5C_flush_dep_t *next;      /* Next flush dependency */
+
+                /* Get pointer to next parent, before flushing current one, in case
+                 * the current flush dependency is destroyed.
+                 */
+                next = curr->next_parent;
+
+                /* If the parent has a 'notify' callback, send a 'child entry before evict' notice */
+                if(curr->parent->type->notify &&
+                        (curr->parent->type->notify)(H5C_NOTIFY_ACTION_CHILD_BEFORE_EVICT, curr->parent, entry_ptr, curr) < 0)
                     HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, FAIL, "can't notify parent about child entry being evicted")
-            } /* end for */
+
+                /* Advance to the next flush dependency parent */
+                curr = next;
+            } /* end while */
         } /* end if */
 
         /* Update the cache internal data structures as appropriate
@@ -7045,9 +6991,8 @@ H5C_load_entry(H5F_t *              f,
     entry->ring                         = H5C_RING_UNDEFINED;
 
     /* Initialize flush dependency fields */
-    entry->flush_dep_parent             = NULL;
+    entry->flush_dep_parents            = NULL;
     entry->flush_dep_nparents           = 0;
-    entry->flush_dep_parent_nalloc      = 0;
     entry->flush_dep_children           = NULL;
     entry->flush_dep_nchildren          = 0;
     entry->flush_dep_ndirty_children    = 0;
@@ -8058,8 +8003,7 @@ done:
 static herr_t
 H5C__mark_flush_dep_dirty(H5C_cache_entry_t * entry)
 {
-    unsigned u;                         /* Local index variable */
-    herr_t ret_value = SUCCEED;         /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -8067,18 +8011,38 @@ H5C__mark_flush_dep_dirty(H5C_cache_entry_t * entry)
     HDassert(entry);
 
     /* Iterate over the parent entries, if any */
-    for(u = 0; u < entry->flush_dep_nparents; u++) {
-	/* Sanity check */
-	HDassert(entry->flush_dep_parent[u]->flush_dep_ndirty_children < entry->flush_dep_parent[u]->flush_dep_nchildren);
+    if(entry->flush_dep_nparents > 0) {
+        H5C_flush_dep_t *curr;      /* Current flush dependency */
 
-	/* Adjust the parent's number of dirty children */
-	entry->flush_dep_parent[u]->flush_dep_ndirty_children++;
+        /* Sanity check */
+        HDassert(entry->flush_dep_parents);
 
-        /* If the parent has a 'notify' callback, send a 'child entry dirtied' notice */
-        if(entry->flush_dep_parent[u]->type->notify &&
-                (entry->flush_dep_parent[u]->type->notify)(H5C_NOTIFY_ACTION_CHILD_DIRTIED, entry->flush_dep_parent[u]) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, FAIL, "can't notify parent about child entry dirty flag set")
-    } /* end for */
+        /* Iterate the parent entries */
+        /* (Safely, in case the current dependency is removed) */
+        curr = entry->flush_dep_parents;
+        while(curr) {
+            H5C_flush_dep_t *next;      /* Next flush dependency */
+
+            /* Get pointer to next parent, before flushing current one, in case
+             * the current flush dependency is destroyed.
+             */
+            next = curr->next_parent;
+
+            /* Sanity check */
+            HDassert(curr->parent->flush_dep_ndirty_children < curr->parent->flush_dep_nchildren);
+
+            /* Adjust the parent's number of dirty children */
+            curr->parent->flush_dep_ndirty_children++;
+
+            /* If the parent has a 'notify' callback, send a 'child entry dirtied' notice */
+            if(curr->parent->type->notify &&
+                    (curr->parent->type->notify)(H5C_NOTIFY_ACTION_CHILD_DIRTIED, curr->parent) < 0)
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, FAIL, "can't notify parent about child entry dirty flag set")
+
+            /* Advance to the next flush dependency parent */
+            curr = next;
+        } /* end while */
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -8103,30 +8067,50 @@ done:
 static herr_t
 H5C__mark_flush_dep_clean(H5C_cache_entry_t * entry)
 {
-    int i;                              /* Local index variable */
+    H5C_t *cache;               /* Cache for file */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
 
     /* Sanity checks */
     HDassert(entry);
+    cache = entry->cache_ptr;
+    HDassert(cache);
+    HDassert(cache->magic == H5C__H5C_T_MAGIC);
 
     /* Iterate over the parent entries, if any */
-    /* Note reverse iteration order, in case the callback removes the flush
-     *  dependency - QAK, 2017/08/12
-     */
-    for(i = ((int)entry->flush_dep_nparents) - 1; i >= 0; i--) {
-	/* Sanity check */
-	HDassert(entry->flush_dep_parent[i]->flush_dep_ndirty_children > 0);
+    if(entry->flush_dep_nparents > 0) {
+        H5C_flush_dep_t *curr;      /* Current flush dependency */
 
-	/* Adjust the parent's number of dirty children */
-	entry->flush_dep_parent[i]->flush_dep_ndirty_children--;
+        /* Sanity check */
+        HDassert(entry->flush_dep_parents);
 
-        /* If the parent has a 'notify' callback, send a 'child entry cleaned' notice */
-        if(entry->flush_dep_parent[i]->type->notify &&
-                (entry->flush_dep_parent[i]->type->notify)(H5C_NOTIFY_ACTION_CHILD_CLEANED, entry->flush_dep_parent[i], entry->addr) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, FAIL, "can't notify parent about child entry dirty flag reset")
-    } /* end for */
+        /* Iterate the parent entries */
+        /* (Safely, in case the current dependency is removed) */
+        curr = entry->flush_dep_parents;
+        while(curr) {
+            H5C_flush_dep_t *next;      /* Next flush dependency */
+
+            /* Get pointer to next parent, before flushing current one, in case
+             * the current flush dependency is destroyed.
+             */
+            next = curr->next_parent;
+
+            /* Sanity check */
+            HDassert(curr->parent->flush_dep_ndirty_children > 0);
+
+            /* Adjust the parent's number of dirty children */
+            curr->parent->flush_dep_ndirty_children--;
+
+            /* If the parent has a 'notify' callback, send a 'child entry cleaned' notice */
+            if(curr->parent->type->notify &&
+                    (curr->parent->type->notify)(H5C_NOTIFY_ACTION_CHILD_CLEANED, curr->parent, entry, curr) < 0)
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, FAIL, "can't notify parent about child entry dirty flag reset")
+
+            /* Advance to the next flush dependency parent */
+            curr = next;
+        } /* end while */
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -8148,34 +8132,48 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C__mark_flush_dep_serialized(H5C_cache_entry_t * entry_ptr)
+H5C__mark_flush_dep_serialized(H5C_cache_entry_t * entry)
 {
-    int i;                              /* Local index variable */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
 
     /* Sanity checks */
-    HDassert(entry_ptr);
+    HDassert(entry);
 
     /* Iterate over the parent entries, if any */
-    /* Note reverse iteration order, in case the callback removes the flush
-     *  dependency - QAK, 2017/08/12
-     */
-    for(i = ((int)entry_ptr->flush_dep_nparents) - 1; i >= 0; i--) {
-	/* Sanity checks */
-        HDassert(entry_ptr->flush_dep_parent);
-        HDassert(entry_ptr->flush_dep_parent[i]->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
-        HDassert(entry_ptr->flush_dep_parent[i]->flush_dep_nunser_children > 0);
+    if(entry->flush_dep_nparents > 0) {
+        H5C_flush_dep_t *curr;      /* Current flush dependency */
 
-        /* decrement the parents number of unserialized children */
-        entry_ptr->flush_dep_parent[i]->flush_dep_nunser_children--;
+        /* Sanity check */
+        HDassert(entry->flush_dep_parents);
 
-        /* If the parent has a 'notify' callback, send a 'child entry serialized' notice */
-        if(entry_ptr->flush_dep_parent[i]->type->notify &&
-                (entry_ptr->flush_dep_parent[i]->type->notify)(H5C_NOTIFY_ACTION_CHILD_SERIALIZED, entry_ptr->flush_dep_parent[i]) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, FAIL, "can't notify parent about child entry serialized flag set")
-    } /* end for */
+        /* Iterate the parent entries */
+        /* (Safely, in case the current dependency is removed) */
+        curr = entry->flush_dep_parents;
+        while(curr) {
+            H5C_flush_dep_t *next;      /* Next flush dependency */
+
+            /* Get pointer to next parent, before flushing current one, in case
+             * the current flush dependency is destroyed.
+             */
+            next = curr->next_parent;
+
+            /* Sanity check */
+            HDassert(curr->parent->flush_dep_nunser_children > 0);
+
+            /* Decrement the parents number of unserialized children */
+            curr->parent->flush_dep_nunser_children--;
+
+            /* If the parent has a 'notify' callback, send a 'child entry serialized' notice */
+            if(curr->parent->type->notify &&
+                    (curr->parent->type->notify)(H5C_NOTIFY_ACTION_CHILD_SERIALIZED, curr->parent) < 0)
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, FAIL, "can't notify parent about child entry serialized flag set")
+
+            /* Advance to the next flush dependency parent */
+            curr = next;
+        } /* end while */
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -8197,32 +8195,48 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C__mark_flush_dep_unserialized(H5C_cache_entry_t * entry_ptr)
+H5C__mark_flush_dep_unserialized(H5C_cache_entry_t * entry)
 {
-    unsigned u;                         /* Local index variable */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
 
     /* Sanity checks */
-    HDassert(entry_ptr);
+    HDassert(entry);
 
     /* Iterate over the parent entries, if any */
-    for(u = 0; u < entry_ptr->flush_dep_nparents; u++) {
+    if(entry->flush_dep_nparents > 0) {
+        H5C_flush_dep_t *curr;      /* Current flush dependency */
+
         /* Sanity check */
-        HDassert(entry_ptr->flush_dep_parent);
-        HDassert(entry_ptr->flush_dep_parent[u]->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
-        HDassert(entry_ptr->flush_dep_parent[u]->flush_dep_nunser_children < 
-                 entry_ptr->flush_dep_parent[u]->flush_dep_nchildren);
+        HDassert(entry->flush_dep_parents);
 
-        /* increment parents number of usserialized children */
-        entry_ptr->flush_dep_parent[u]->flush_dep_nunser_children++;
+        /* Iterate the parent entries */
+        /* (Safely, in case the current dependency is removed) */
+        curr = entry->flush_dep_parents;
+        while(curr) {
+            H5C_flush_dep_t *next;      /* Next flush dependency */
 
-        /* If the parent has a 'notify' callback, send a 'child entry unserialized' notice */
-        if(entry_ptr->flush_dep_parent[u]->type->notify &&
-                (entry_ptr->flush_dep_parent[u]->type->notify)(H5C_NOTIFY_ACTION_CHILD_UNSERIALIZED, entry_ptr->flush_dep_parent[u]) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, FAIL, "can't notify parent about child entry serialized flag reset")
-    } /* end for */
+            /* Get pointer to next parent, before flushing current one, in case
+             * the current flush dependency is destroyed.
+             */
+            next = curr->next_parent;
+
+            /* Sanity check */
+            HDassert(curr->parent->flush_dep_nunser_children < curr->parent->flush_dep_nchildren);
+
+            /* Increment parent's number of unserialized children */
+            curr->parent->flush_dep_nunser_children++;
+
+            /* If the parent has a 'notify' callback, send a 'child entry unserialized' notice */
+            if(curr->parent->type->notify &&
+                    (curr->parent->type->notify)(H5C_NOTIFY_ACTION_CHILD_UNSERIALIZED, curr->parent) < 0)
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, FAIL, "can't notify parent about child entry serialized flag reset")
+
+            /* Advance to the next flush dependency parent */
+            curr = next;
+        } /* end while */
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -9017,22 +9031,33 @@ H5C_remove_entry(void *_entry)
      *      being evicted. QAK - 2018/05/30
      */
     if(entry->flush_dep_nparents > 0) {
-        int i;              /* Local index variable */
+        H5C_flush_dep_t *curr;      /* Current flush dependency */
 
-        /* Iterate over the parent entries */
-        /* (Extract this loop into a function if it's used in more locations) */
-        /* (Note that the iteration from high to low compensates for notify
-         *  callbacks that remove the current flush dependency - QAK, 2017/08/05)
-         */
-        for(i = (int)(entry->flush_dep_nparents - 1); i >= 0; i--) {
+        /* Sanity check */
+        HDassert(entry->flush_dep_parents);
+
+        /* Iterate the parent entries */
+        /* (Safely, in case the current dependency is removed) */
+        curr = entry->flush_dep_parents;
+        while(curr) {
+            H5C_flush_dep_t *next;      /* Next flush dependency */
+
+            /* Get pointer to next parent, before flushing current one, in case
+             * the current flush dependency is destroyed.
+             */
+            next = curr->next_parent;
+
             /* Sanity check */
-            HDassert(entry->flush_dep_parent[i]->flush_dep_nchildren > 0);
+            HDassert(curr->parent->flush_dep_nchildren > 0);
 
-            /* If the parent has a 'notify' callback, send a 'child entry cleaned' notice */
-            if(entry->flush_dep_parent[i]->type->notify &&
-                    (entry->flush_dep_parent[i]->type->notify)(H5C_NOTIFY_ACTION_CHILD_BEFORE_EVICT, entry->flush_dep_parent[i], entry->addr) < 0)
+            /* If the parent has a 'notify' callback, send a 'child entry before evict' notice */
+            if(curr->parent->type->notify &&
+                    (curr->parent->type->notify)(H5C_NOTIFY_ACTION_CHILD_BEFORE_EVICT, curr->parent, entry, curr) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, FAIL, "can't notify parent about child entry being evicted")
-        } /* end for */
+
+            /* Advance to the next flush dependency parent */
+            curr = next;
+        } /* end while */
     } /* end if */
 
     /* If the entry's type has a 'notify' callback, send a 'before eviction'
@@ -9150,4 +9175,99 @@ H5C_iterate(H5C_t *cache_ptr, H5AC_cache_iter_cb_t cb, void *cb_ctx)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5C_iterate() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5C_destroy_flush_dep()
+ *
+ * Purpose:	Destroys a parent <-> child entry flush dependency object.
+ *
+ * Return:      Non-negative on success / Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              8/15/18
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5C_destroy_flush_dep(H5C_flush_dep_t *flush_dep)
+{
+    H5C_t             * cache;                  /* Cache for file */
+    H5C_cache_entry_t *	parent_entry;           /* Pointer to parent entry */
+    H5C_cache_entry_t *	child_entry;            /* Pointer to child entry */
+    herr_t              ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity checks */
+    HDassert(flush_dep);
+
+    /* Set convenience pointers */
+    child_entry = flush_dep->child;
+    parent_entry = flush_dep->parent;
+    HDassert(child_entry);
+    HDassert(parent_entry);
+    HDassert(child_entry->cache_ptr == parent_entry->cache_ptr);
+    cache = child_entry->cache_ptr;
+    HDassert(cache);
+    HDassert(cache->magic == H5C__H5C_T_MAGIC);
+
+    /* Remove flush dependency from child's parent list */
+    if(flush_dep == child_entry->flush_dep_parents) {
+        child_entry->flush_dep_parents = flush_dep->next_parent;
+        if(flush_dep->next_parent)
+            flush_dep->next_parent->prev_parent = NULL;
+    } /* end if */
+    else {
+        flush_dep->prev_parent->next_parent = flush_dep->next_parent;
+        if(flush_dep->next_parent)
+            flush_dep->next_parent->prev_parent = flush_dep->prev_parent;
+    } /* end else */
+    child_entry->flush_dep_nparents--;
+
+    /* Remove flush dependency from parent's child list */
+    if(flush_dep == parent_entry->flush_dep_children) {
+        parent_entry->flush_dep_children = flush_dep->next_child;
+        if(flush_dep->next_child)
+            flush_dep->next_child->prev_child = NULL;
+    } /* end if */
+    else {
+        flush_dep->prev_child->next_child = flush_dep->next_child;
+        if(flush_dep->next_child)
+            flush_dep->next_child->prev_child = flush_dep->prev_child;
+    } /* end else */
+    parent_entry->flush_dep_nchildren--;
+
+    /* Free flush dependency */
+    flush_dep = H5FL_FREE(H5C_flush_dep_t, flush_dep);
+
+    /* Unpin parent if # of children goes to zero */
+    if(0 == parent_entry->flush_dep_nchildren) {
+        /* Sanity check */
+        HDassert(parent_entry->pinned_from_cache);
+
+        /* Check if we should unpin parent entry now */
+        if(!parent_entry->pinned_from_client)
+            if(H5C__unpin_entry_real(cache, parent_entry, TRUE) < 0)
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPIN, FAIL, "can't unpin entry")
+
+        /* Mark the entry as unpinned from the cache's action */
+        parent_entry->pinned_from_cache = FALSE;
+    } /* end if */
+
+    /* Adjust parent entry's number of dirty children */
+    if(child_entry->is_dirty) {
+        HDassert(parent_entry->flush_dep_ndirty_children > 0);
+        parent_entry->flush_dep_ndirty_children--;
+    } /* end if */
+
+    /* Adjust parent entry's number of unserialized children */
+    if(!child_entry->image_up_to_date) {
+        HDassert(parent_entry->flush_dep_nunser_children > 0);
+        parent_entry->flush_dep_nunser_children--;
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5C_destroy_flush_dep() */
 

@@ -857,6 +857,38 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ *
+ * Function:    H5AC_entry_is_dirty
+ *
+ * Purpose:     Query whether an entry is dirty
+ *
+ * Return:      TRUE / FALSE / FAIL
+ *
+ * Programmer:  Quincey Koziol
+ *              August 18, 2018
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5AC_entry_is_dirty(const H5AC_info_t *entry)
+{
+    htri_t ret_value = FAIL;    /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity checks */
+    HDassert(entry);
+
+    /* Call cache-level function to query the entry's status */
+    if((ret_value = H5C_entry_is_dirty((const H5C_cache_entry_t *)entry)) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "can't get entry 'dirty' status")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5AC_entry_is_dirty() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5AC_insert_entry
  *
  * Purpose:     Adds the specified thing to the cache.  The thing need not
@@ -3337,4 +3369,35 @@ H5AC_flush_by_dep(H5F_t *f, haddr_t addr, unsigned flags)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC_flush_by_dep */
+
+
+/*------------------------------------------------------------------------------
+ * Function:    H5AC_destroy_flush_dep()
+ *
+ * Purpose:     Wrapper for destroying a flush dependency object
+ *
+ * Return:      SUCCEED on success, FAIL otherwise.
+ *
+ * Programmer:  Quincey Koziol
+ *              August 18, 2018
+ *
+ *------------------------------------------------------------------------------
+ */
+herr_t
+H5AC_destroy_flush_dep(H5AC_flush_dep_t *flush_dep)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity checks */
+    HDassert(flush_dep);
+
+    /* Call cache level function to destroy the flush dependency object */
+    if(H5C_destroy_flush_dep(flush_dep) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTRELEASE, FAIL, "can't destroy flush dependency object")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5AC_destroy_flush_dep */
 

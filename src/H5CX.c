@@ -125,7 +125,6 @@
         (*head)->ctx.H5_GLUE(PROP_FIELD,_set) = TRUE;                         \
     } /* end if */                                                            \
 }
-#endif /* H5_HAVE_PARALLEL */
 
 /* Macro for the duplicated code to test and set properties for a property list */
 #define H5CX_SET_PROP(PROP_NAME, PROP_FIELD)                                  \
@@ -140,6 +139,7 @@
         if(H5P_set((*head)->ctx.dxpl, PROP_NAME, &(*head)->ctx.PROP_FIELD) < 0) \
             HGOTO_ERROR(H5E_CONTEXT, H5E_CANTSET, NULL, "error setting filter mask xfer property") \
     } /* end if */
+#endif /* H5_HAVE_PARALLEL */
 
 
 /******************/
@@ -2583,7 +2583,11 @@ H5CX__pop_common(void)
     H5CX_node_t **head = H5CX_get_my_context();  /* Get the pointer to the head of the API context, for this thread */
     H5CX_node_t *ret_value = NULL;      /* Return value */
 
+#ifdef H5_HAVE_PARALLEL
     FUNC_ENTER_STATIC
+#else /* H5_HAVE_PARALLEL */
+    FUNC_ENTER_STATIC_NOERR
+#endif /* H5_HAVE_PARALLEL */
 
     /* Sanity check */
     HDassert(head && *head);
@@ -2608,7 +2612,9 @@ H5CX__pop_common(void)
     ret_value = (*head);
     (*head) = (*head)->next;
 
+#ifdef H5_HAVE_PARALLEL
 done:
+#endif /* H5_HAVE_PARALLEL */
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5CX__pop_common() */
 

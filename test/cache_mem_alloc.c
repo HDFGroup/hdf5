@@ -208,7 +208,7 @@ check_holding_tank_with_swmr_write(void)
         /* Each cache entry should have no parent (freedspace entry) */
         for(u = 1; u < n_entry; u++) {
             entry_ptr = &entry_array_g[u];
-            if(entry_ptr->header.flush_dep_nparents != 0 || entry_ptr->header.flush_dep_parent != NULL )
+            if(entry_ptr->header.flush_dep_nparents != 0 || entry_ptr->header.flush_dep_parents != NULL )
                 CACHE_ERROR("Error with freedspace flush dependency!")
         } /* end for */
        
@@ -285,8 +285,8 @@ check_freedspace_flush_dependency(void)
         /* Each cache entry should have exactly one parent (freedspace entry) */
         for (u = 1; u < n_entry; u++) {
             entry_ptr = &entry_array_g[u];
-            if ( entry_ptr->header.flush_dep_nparents != 1 || entry_ptr->header.flush_dep_parent == NULL || 
-                 entry_ptr->header.flush_dep_parent[0]->type != H5AC_FREEDSPACE) 
+            if ( entry_ptr->header.flush_dep_nparents != 1 || entry_ptr->header.flush_dep_parents == NULL || 
+                 entry_ptr->header.flush_dep_parents->parent->type != H5AC_FREEDSPACE) 
                 CACHE_ERROR("Error with freedspace flush dependency!")
         }
 
@@ -310,8 +310,8 @@ check_freedspace_flush_dependency(void)
         /* Each cache entry should have exactly one parent (freedspace entry) */
         for (u = 0; u < n_entry; u++) {
             entry_ptr = &entry_array_g[u];
-            if ( entry_ptr->header.flush_dep_nparents != 1 || entry_ptr->header.flush_dep_parent == NULL || 
-                 entry_ptr->header.flush_dep_parent[0]->type != H5AC_FREEDSPACE) 
+            if ( entry_ptr->header.flush_dep_nparents != 1 || entry_ptr->header.flush_dep_parents == NULL || 
+                 entry_ptr->header.flush_dep_parents->parent->type != H5AC_FREEDSPACE) 
                 CACHE_ERROR("Error with freedspace flush dependency!")
         }
     }

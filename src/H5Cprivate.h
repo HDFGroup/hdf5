@@ -865,8 +865,7 @@ typedef enum H5C_notify_action_t {
     H5C_NOTIFY_ACTION_CHILD_CLEANED,    /* Dependent child has been marked clean. */
     H5C_NOTIFY_ACTION_CHILD_UNSERIALIZED, /* Dependent child has been marked unserialized. */
     H5C_NOTIFY_ACTION_CHILD_SERIALIZED, /* Dependent child has been marked serialized. */
-    H5C_NOTIFY_ACTION_CHILD_BEFORE_EVICT, /* Dependent child is about to be evicted. */
-    H5C_NOTIFY_ACTION_CHILD_UNDEPEND_DIRTY /* Dirty dependent child is being removed from a flush dependency. */
+    H5C_NOTIFY_ACTION_CHILD_BEFORE_EVICT /* Dependent child is about to be evicted. */
 } H5C_notify_action_t;
 
 /* Cache client callback function pointers */
@@ -964,6 +963,42 @@ typedef herr_t (*H5C_log_flush_func_t)(H5C_t *cache_ptr, haddr_t addr,
 #define H5C_RING_NTYPES     6
 
 typedef int H5C_ring_t;
+
+/****************************************************************************
+ *
+ * structure H5C_flush_dep_t
+ *
+ * Structure about a flush dependency between entries.
+ *
+ * Each H5C_flush_dep_t struct corresponds to a flush dependency between
+ *      a parent and a child entry.
+ *
+ *
+ * The fields of this structure are discussed individually below:
+ *
+ *      parent: Pointer to the parent entry for the flush dependency.
+ *
+ *      child: Pointer to the child entry for the flush dependency.
+ *
+ *      next_child, prev_child: Pointers to the next and previous flush dependencies
+ *              for the parent entry.
+ *
+ *      next_parent, prev_parent: Pointers to the next and previous flush dependencies
+ *              for the child entry.
+ *
+ ****************************************************************************/
+typedef struct H5C_flush_dep_t {
+    struct H5C_cache_entry_t *parent;  /* Pointer to the parent entry for the dependency */
+    struct H5C_cache_entry_t *child;   /* Pointer to the child entry for the dependency */
+    struct H5C_flush_dep_t *next_child, *prev_child;    /* Pointers to the next
+                                 * and previous children in the list of children
+                                 * for the parent entry.
+                                 */
+    struct H5C_flush_dep_t *next_parent, *prev_parent;  /* Pointers to the next
+                                 * and previous parents in the list of parents
+                                 * for the child entry.
+                                 */
+} H5C_flush_dep_t;
 
 
 /****************************************************************************
@@ -1192,20 +1227,14 @@ typedef int H5C_ring_t;
  * structures that allow Single-Writer/Multiple-Reader (SWMR) access for the
  * data structure.
  *
- * flush_dep_parent:    Pointer to the array of flush dependency parent entries
+ * flush_dep_parent:    Pointer to the list of flush dependency parent entries
  *              for this entry.
  *
  * flush_dep_nparents:  Number of flush dependency parent entries for this
  *              entry, i.e. the number of valid elements in flush_dep_parent.
  *
- * flush_dep_parent_nalloc: The number of allocated elements in
- *              flush_dep_parent.
- *
- * flush_dep_children: Pointer to the array of flush dependency children entries
+ * flush_dep_children: Pointer to the list of flush dependency children entries
  *              for this entry.
- *
- * flush_dep_children_nalloc: The number of allocated elements in
- *              flush_dep_children.
  *
  * flush_dep_nchildren: Number of flush dependency children for this entry.  If
  *              this field is nonzero, then this entry must be pinned and
@@ -1627,12 +1656,10 @@ typedef struct H5C_cache_entry_t {
     H5C_ring_t                  ring;
 
     /* fields supporting the 'flush dependency' feature: */
-    struct H5C_cache_entry_t ** flush_dep_parent;
+    struct H5C_flush_dep_t *    flush_dep_parents;
     unsigned                    flush_dep_nparents;
-    unsigned                    flush_dep_parent_nalloc;
     /* FULLSWMR children pointers*/
-    struct H5C_cache_entry_t ** flush_dep_children;
-    unsigned                    flush_dep_children_nalloc;
+    struct H5C_flush_dep_t *    flush_dep_children;
     unsigned                    flush_dep_nchildren;
     unsigned                    flush_dep_ndirty_children;
     unsigned                    flush_dep_nunser_children;
@@ -2277,6 +2304,7 @@ H5_DLL herr_t H5C_get_entry_status(const H5F_t *f, haddr_t addr,
     hbool_t *is_protected_ptr, hbool_t *is_pinned_ptr, hbool_t *is_corked_ptr,
     hbool_t *is_flush_dep_parent_ptr, hbool_t *is_flush_dep_child_ptr,
     hbool_t *image_up_to_date_ptr);
+H5_DLL htri_t H5C_entry_is_dirty(const H5C_cache_entry_t *entry);
 H5_DLL herr_t H5C_get_evictions_enabled(const H5C_t *cache_ptr, hbool_t *evictions_enabled_ptr);
 H5_DLL void * H5C_get_aux_ptr(const H5C_t *cache_ptr);
 H5_DLL FILE *H5C_get_trace_file_ptr(const H5C_t *cache_ptr);
@@ -2310,6 +2338,8 @@ H5_DLL herr_t H5C_stats(H5C_t *cache_ptr, const char *cache_name,
 H5_DLL void H5C_stats__reset(H5C_t *cache_ptr);
 H5_DLL herr_t H5C_unpin_entry(void *thing);
 H5_DLL herr_t H5C_destroy_flush_dependency(void *parent_thing, void *child_thing);
+H5_DLL herr_t H5C_destroy_flush_dep(H5C_flush_dep_t *flush_dep);
+
 H5_DLL herr_t H5C_unprotect(H5F_t *f, haddr_t addr, void *thing,
     unsigned int flags);
 H5_DLL herr_t H5C_validate_cache_image_config(H5C_cache_image_ctl_t * ctl_ptr);

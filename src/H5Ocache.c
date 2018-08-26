@@ -593,7 +593,6 @@ H5O__cache_notify(H5AC_notify_action_t action, void *_thing, ...)
         case H5AC_NOTIFY_ACTION_CHILD_CLEANED:
 	case H5AC_NOTIFY_ACTION_CHILD_UNSERIALIZED:
 	case H5AC_NOTIFY_ACTION_CHILD_SERIALIZED:
-        case H5AC_NOTIFY_ACTION_CHILD_UNDEPEND_DIRTY:
             /* do nothing */
             break;
 
@@ -601,8 +600,7 @@ H5O__cache_notify(H5AC_notify_action_t action, void *_thing, ...)
             if(oh->swmr_write) {
                 /* Detach from 'top' proxy for object header */
                 if(oh->top_proxy) {
-                    if(H5AC_proxy_entry_remove_child(oh->top_proxy, oh) < 0)
-                        HGOTO_ERROR(H5E_OHDR, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency between object header and 'top' proxy")
+                    /* (Entry will be removed from top proxy via proxy's callback) */
                     /* Don't reset oh->top_proxy here, it's destroyed when the header is freed -QAK */
                 } /* end if */
 
@@ -981,7 +979,6 @@ H5O__cache_chk_notify(H5AC_notify_action_t action, void *_thing, ...)
         case H5AC_NOTIFY_ACTION_CHILD_CLEANED:
 	case H5AC_NOTIFY_ACTION_CHILD_UNSERIALIZED:
 	case H5AC_NOTIFY_ACTION_CHILD_SERIALIZED:
-        case H5AC_NOTIFY_ACTION_CHILD_UNDEPEND_DIRTY:
             /* do nothing */
             break;
 
@@ -1005,9 +1002,8 @@ H5O__cache_chk_notify(H5AC_notify_action_t action, void *_thing, ...)
 
                 /* Detach from 'top' proxy for object header */
                 if(chk_proxy->top_proxy) {
-                    if(H5AC_proxy_entry_remove_child(chk_proxy->top_proxy, chk_proxy) < 0)
-                        HGOTO_ERROR(H5E_OHDR, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency between object header chunk and object header 'top' proxy")
                     chk_proxy->top_proxy = NULL;
+                    /* (Entry will be removed from top proxy via proxy's callback) */
                 } /* end if */
 
                 /* Detach from 'bottom' proxy for object header */

@@ -554,7 +554,6 @@ H5EA__cache_hdr_notify(H5AC_notify_action_t action, void *_thing, ...))
             case H5AC_NOTIFY_ACTION_CHILD_CLEANED:
             case H5AC_NOTIFY_ACTION_CHILD_UNSERIALIZED:
             case H5AC_NOTIFY_ACTION_CHILD_SERIALIZED:
-            case H5AC_NOTIFY_ACTION_CHILD_UNDEPEND_DIRTY:
 		/* do nothing */
 		break;
 
@@ -566,16 +565,15 @@ H5EA__cache_hdr_notify(H5AC_notify_action_t action, void *_thing, ...))
                     /* Sanity check */
                     HDassert(hdr->top_proxy);
 
-		    /* Destroy flush dependency on object header proxy */
-		    if(H5AC_proxy_entry_remove_child((H5AC_proxy_entry_t *)hdr->parent, (void *)hdr->top_proxy) < 0)
-		        H5E_THROW(H5E_CANTUNDEPEND, "unable to destroy flush dependency between extensible array and proxy")
+                    /* (Flush dependency on parent meta-proxy will be removed when the extendible array's top proxy is removed from the cache) */
+
+                    /* Reset parent pointer */
                     hdr->parent = NULL;
 		} /* end if */
 
                 /* Detach from 'top' proxy for extensible array */
                 if(hdr->top_proxy) {
-                    if(H5AC_proxy_entry_remove_child(hdr->top_proxy, hdr) < 0)
-                        H5E_THROW(H5E_CANTUNDEPEND, "unable to destroy flush dependency between header and extensible array 'top' proxy")
+                    /* (Entry will be removed from top proxy via proxy's callback) */
                     /* Don't reset hdr->top_proxy here, it's destroyed when the header is freed -QAK */
                 } /* end if */
 		break;
@@ -969,7 +967,6 @@ H5EA__cache_iblock_notify(H5AC_notify_action_t action, void *_thing, ...))
         case H5AC_NOTIFY_ACTION_CHILD_CLEANED:
         case H5AC_NOTIFY_ACTION_CHILD_UNSERIALIZED:
         case H5AC_NOTIFY_ACTION_CHILD_SERIALIZED:
-        case H5AC_NOTIFY_ACTION_CHILD_UNDEPEND_DIRTY:
             /* do nothing */
             break;
 
@@ -980,9 +977,8 @@ H5EA__cache_iblock_notify(H5AC_notify_action_t action, void *_thing, ...))
 
             /* Detach from 'top' proxy for extensible array */
             if(iblock->top_proxy) {
-                if(H5AC_proxy_entry_remove_child(iblock->top_proxy, iblock) < 0)
-                    H5E_THROW(H5E_CANTUNDEPEND, "unable to destroy flush dependency between index block and extensible array 'top' proxy")
                 iblock->top_proxy = NULL;
+                /* (Entry will be removed from top proxy via proxy's callback) */
             } /* end if */
             break;
 
@@ -1391,9 +1387,8 @@ H5EA__cache_sblock_notify(H5AC_notify_action_t action, void *_thing, ...))
 
             /* Detach from 'top' proxy for extensible array */
             if(sblock->top_proxy) {
-                if(H5AC_proxy_entry_remove_child(sblock->top_proxy, sblock) < 0)
-                    H5E_THROW(H5E_CANTUNDEPEND, "unable to destroy flush dependency between super block and extensible array 'top' proxy")
                 sblock->top_proxy = NULL;
+                /* (Entry will be removed from top proxy via proxy's callback) */
             } /* end if */
             break;
 
@@ -1403,7 +1398,6 @@ H5EA__cache_sblock_notify(H5AC_notify_action_t action, void *_thing, ...))
         case H5AC_NOTIFY_ACTION_CHILD_CLEANED:
         case H5AC_NOTIFY_ACTION_CHILD_UNSERIALIZED:
         case H5AC_NOTIFY_ACTION_CHILD_SERIALIZED:
-        case H5AC_NOTIFY_ACTION_CHILD_UNDEPEND_DIRTY:
             /* do nothing */
             break;
 
@@ -1813,9 +1807,8 @@ H5EA__cache_dblock_notify(H5AC_notify_action_t action, void *_thing, ...))
 
             /* Detach from 'top' proxy for extensible array */
             if(dblock->top_proxy) {
-                if(H5AC_proxy_entry_remove_child(dblock->top_proxy, dblock) < 0)
-                    H5E_THROW(H5E_CANTUNDEPEND, "unable to destroy flush dependency between data block and extensible array 'top' proxy")
                 dblock->top_proxy = NULL;
+                /* (Entry will be removed from top proxy via proxy's callback) */
             } /* end if */
             break;
 
@@ -1825,7 +1818,6 @@ H5EA__cache_dblock_notify(H5AC_notify_action_t action, void *_thing, ...))
         case H5AC_NOTIFY_ACTION_CHILD_CLEANED:
         case H5AC_NOTIFY_ACTION_CHILD_UNSERIALIZED:
         case H5AC_NOTIFY_ACTION_CHILD_SERIALIZED:
-        case H5AC_NOTIFY_ACTION_CHILD_UNDEPEND_DIRTY:
             /* do nothing */
             break;
 
@@ -2203,9 +2195,8 @@ H5EA__cache_dblk_page_notify(H5AC_notify_action_t action, void *_thing, ...))
 
             /* Detach from 'top' proxy for extensible array */
             if(dblk_page->top_proxy) {
-                if(H5AC_proxy_entry_remove_child(dblk_page->top_proxy, dblk_page) < 0)
-                    H5E_THROW(H5E_CANTUNDEPEND, "unable to destroy flush dependency between data block page and extensible array 'top' proxy")
                 dblk_page->top_proxy = NULL;
+                /* (Entry will be removed from top proxy via proxy's callback) */
             } /* end if */
             break;
 
@@ -2215,7 +2206,6 @@ H5EA__cache_dblk_page_notify(H5AC_notify_action_t action, void *_thing, ...))
         case H5AC_NOTIFY_ACTION_CHILD_CLEANED:
         case H5AC_NOTIFY_ACTION_CHILD_UNSERIALIZED:
         case H5AC_NOTIFY_ACTION_CHILD_SERIALIZED:
-        case H5AC_NOTIFY_ACTION_CHILD_UNDEPEND_DIRTY:
             /* do nothing */
             break;
 

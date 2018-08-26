@@ -1135,10 +1135,19 @@ H5C__dump_entry(H5C_t *cache_ptr, const H5C_cache_entry_t *entry_ptr,
 static void
 H5C__dump_parents(H5C_t *cache_ptr, const H5C_cache_entry_t *entry_ptr, const char *prefix, int indent)
 {
-    unsigned u;
+    H5C_flush_dep_t *curr;      /* Current flush dependency */
 
-    for(u = 0; u < entry_ptr->flush_dep_nparents; u++)
-        H5C__dump_entry(cache_ptr, entry_ptr->flush_dep_parent[u], TRUE, prefix, indent + 2);
+    /* Sanity check */
+    HDassert(entry_ptr->flush_dep_parents);
+
+    /* Iterate the parent entries */
+    curr = entry_ptr->flush_dep_parents;
+    while(curr) {
+        H5C__dump_entry(cache_ptr, curr->parent, TRUE, prefix, indent + 2);
+
+        /* Advance to the next flush dependency parent */
+        curr = curr->next_parent;
+    } /* end while */
 }
 
 typedef struct H5C__dump_child_ctx_t {
@@ -1155,12 +1164,20 @@ H5C__dump_children_cb(H5C_cache_entry_t *entry_ptr, void *_ctx)
     H5C__dump_child_ctx_t *ctx = (H5C__dump_child_ctx_t *)_ctx;
 
     if(entry_ptr->tag_info->tag != entry_ptr->addr) {
-        unsigned u;
+        H5C_flush_dep_t *curr;      /* Current flush dependency */
 
-        HDassert(entry_ptr->flush_dep_nparents);
-        for(u = 0; u < entry_ptr->flush_dep_nparents; u++)
-            if(ctx->parent == entry_ptr->flush_dep_parent[u])
+        /* Sanity check */
+        HDassert(entry_ptr->flush_dep_parents);
+
+        /* Iterate the parent entries */
+        curr = entry_ptr->flush_dep_parents;
+        while(curr) {
+            if(ctx->parent == curr->parent)
                 H5C__dump_entry(ctx->cache_ptr, entry_ptr, ctx->dump_parents, ctx->prefix, ctx->indent + 2);
+
+            /* Advance to the next flush dependency parent */
+            curr = curr->next_parent;
+        } /* end while */
     } /* end if */
 
     return(H5_ITER_CONT);
@@ -1249,18 +1266,23 @@ H5C_flush_dependency_exists(H5C_t *cache_ptr, haddr_t parent_addr, haddr_t child
         HDassert(child_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
 
         if(child_ptr->flush_dep_nparents > 0) {
-            unsigned u;         /* Local index variable */
+            H5C_flush_dep_t *curr;      /* Current flush dependency */
 
-            HDassert(child_ptr->flush_dep_parent);
-            HDassert(child_ptr->flush_dep_parent_nalloc >= child_ptr->flush_dep_nparents);
+            /* Sanity check */
+            HDassert(child_ptr->flush_dep_parents);
 
-            for(u = 0; u < child_ptr->flush_dep_nparents; u++) {
-                if(child_ptr->flush_dep_parent[u] == parent_ptr) {
+            /* Iterate the parent entries */
+            curr = child_ptr->flush_dep_parents;
+            while(curr) {
+                if(curr->parent == parent_ptr) {
                     fd_exists = TRUE;
                     HDassert(parent_ptr->flush_dep_nchildren > 0);
                     break;
                 } /* end if */
-            } /* end for */
+
+                /* Advance to the next flush dependency parent */
+                curr = curr->next_parent;
+            } /* end while */
         } /* end if */
     } /* end if */
 

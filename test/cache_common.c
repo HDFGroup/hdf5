@@ -1564,7 +1564,7 @@ notify(H5C_notify_action_t action, void *thing, int32_t entry_type)
         case H5C_NOTIFY_ACTION_CHILD_CLEANED:
         case H5C_NOTIFY_ACTION_CHILD_UNSERIALIZED:
         case H5C_NOTIFY_ACTION_CHILD_SERIALIZED:
-        case H5C_NOTIFY_ACTION_CHILD_UNDEPEND_DIRTY:
+        case H5C_NOTIFY_ACTION_CHILD_BEFORE_EVICT:
 	    /* do nothing */
 	    break;
 
@@ -1572,7 +1572,6 @@ notify(H5C_notify_action_t action, void *thing, int32_t entry_type)
             entry->notify_before_evict_count++;
             break;
 
-        case H5C_NOTIFY_ACTION_CHILD_BEFORE_EVICT:
         default:
             HDassert(0 && "Unknown notify action!?!");
     } /* end switch */

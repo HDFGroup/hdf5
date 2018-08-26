@@ -175,7 +175,6 @@ typedef H5C_notify_action_t     H5AC_notify_action_t;
 #define H5AC_NOTIFY_ACTION_CHILD_UNSERIALIZED H5C_NOTIFY_ACTION_CHILD_UNSERIALIZED
 #define H5AC_NOTIFY_ACTION_CHILD_SERIALIZED H5C_NOTIFY_ACTION_CHILD_SERIALIZED
 #define H5AC_NOTIFY_ACTION_CHILD_BEFORE_EVICT H5C_NOTIFY_ACTION_CHILD_BEFORE_EVICT
-#define H5AC_NOTIFY_ACTION_CHILD_UNDEPEND_DIRTY H5C_NOTIFY_ACTION_CHILD_UNDEPEND_DIRTY
 
 #define H5AC__CLASS_NO_FLAGS_SET 	H5C__CLASS_NO_FLAGS_SET
 #define H5AC__CLASS_SPECULATIVE_LOAD_FLAG H5C__CLASS_SPECULATIVE_LOAD_FLAG
@@ -205,6 +204,9 @@ typedef H5C_class_t			H5AC_class_t;
 
 /* Cache entry iteration callback */
 typedef H5C_cache_iter_cb_t		H5AC_cache_iter_cb_t;
+
+/* Flush dependency info */
+typedef H5C_flush_dep_t		        H5AC_flush_dep_t;
 
 /* Cache entry info */
 typedef H5C_cache_entry_t		H5AC_info_t;
@@ -443,16 +445,15 @@ H5_DLL herr_t H5AC_create(const H5F_t *f, H5AC_cache_config_t *config_ptr,
     H5AC_cache_image_config_t * image_config_ptr);
 H5_DLL herr_t H5AC_get_entry_status(const H5F_t *f, haddr_t addr,
     unsigned *status_ptr);
+H5_DLL htri_t H5AC_entry_is_dirty(const H5AC_info_t *entry);
 H5_DLL herr_t H5AC_insert_entry(H5F_t *f, const H5AC_class_t *type,
     haddr_t addr, void *thing, unsigned int flags);
 H5_DLL herr_t H5AC_pin_protected_entry(void *thing);
 H5_DLL herr_t H5AC_prep_for_file_close(H5F_t *f);
-H5_DLL herr_t H5AC_create_flush_dependency(void *parent_thing, void *child_thing);
 H5_DLL void * H5AC_protect(H5F_t *f, const H5AC_class_t *type, haddr_t addr,
     void *udata, unsigned flags);
 H5_DLL herr_t H5AC_resize_entry(void *thing, size_t new_size);
 H5_DLL herr_t H5AC_unpin_entry(void *thing);
-H5_DLL herr_t H5AC_destroy_flush_dependency(void *parent_thing, void *child_thing);
 H5_DLL herr_t H5AC_unprotect(H5F_t *f, const H5AC_class_t *type, haddr_t addr,
     void *thing, unsigned flags);
 H5_DLL herr_t H5AC_flush(H5F_t *f);
@@ -477,12 +478,22 @@ H5_DLL herr_t H5AC_set_cache_auto_resize_config(H5AC_t *cache_ptr,
     H5AC_cache_config_t *config_ptr);
 H5_DLL herr_t H5AC_validate_config(H5AC_cache_config_t *config_ptr);
 H5_DLL herr_t H5AC_get_entry_type(const H5AC_info_t *entry);
-H5_DLL herr_t H5AC_get_flush_dep_nchildren(const H5AC_info_t *entry,
-    unsigned *nchildren);
-H5_DLL herr_t H5AC_flush_by_dep(H5F_t *f, haddr_t addr, unsigned flags);
 H5_DLL herr_t H5AC_get_entry_from_addr(const H5F_t *f, haddr_t addr,
     void **entry_ptr_ptr);
 H5_DLL htri_t H5AC_cache_is_clean(const H5F_t *f, H5AC_ring_t inner_ring);
+H5_DLL herr_t H5AC_iterate(H5F_t *f, H5AC_cache_iter_cb_t cb, void *cb_ctx);
+
+/* Flush dependencies */
+H5_DLL herr_t H5AC_create_flush_dependency(void *parent_thing, void *child_thing);
+H5_DLL herr_t H5AC_destroy_flush_dependency(void *parent_thing, void *child_thing);
+H5_DLL herr_t H5AC_get_flush_dep_nchildren(const H5AC_info_t *entry,
+    unsigned *nchildren);
+H5_DLL herr_t H5AC_flush_by_dep(H5F_t *f, haddr_t addr, unsigned flags);
+H5_DLL herr_t H5AC_destroy_flush_dep(H5AC_flush_dep_t *flush_dep);
+#ifndef NDEBUG
+H5_DLL herr_t H5AC_flush_dependency_exists(H5F_t *f, haddr_t parent_addr,
+    haddr_t child_addr, hbool_t *fd_exists_ptr);
+#endif /* NDEBUG */ /* end debugging functions */
 
 /* Cache image routines */
 H5_DLL herr_t H5AC_load_cache_image_on_next_protect(H5F_t *f, haddr_t addr, 
@@ -536,16 +547,11 @@ H5_DLL herr_t H5AC_add_candidate(H5AC_t * cache_ptr, haddr_t addr);
 H5_DLL herr_t H5AC_stats(const H5F_t *f);
 #ifndef NDEBUG
 H5_DLL herr_t H5AC_dump_cache(const H5F_t *f);
-H5_DLL herr_t H5AC_flush_dependency_exists(H5F_t *f, haddr_t parent_addr,
-    haddr_t child_addr, hbool_t *fd_exists_ptr);
 H5_DLL herr_t H5AC_verify_entry_type(const H5F_t *f, haddr_t addr,
     const H5AC_class_t *expected_type, hbool_t *in_cache_ptr,
     hbool_t *type_ok_ptr);
 H5_DLL hbool_t H5AC_get_serialization_in_progress(H5F_t *f);
 #endif /* NDEBUG */ /* end debugging functions */
-
-/* FULLSWMR: cache iteration callback */
-H5_DLL herr_t H5AC_iterate(H5F_t *f, H5AC_cache_iter_cb_t cb, void *cb_ctx);
 
 #endif /* !_H5ACprivate_H */
 
