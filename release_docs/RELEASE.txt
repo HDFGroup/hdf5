@@ -34,6 +34,7 @@ CONTENTS
 
 - New Features
 - Support for new platforms and languages
+- Bug Fixes since HDF5-1.10.3
 - Bug Fixes since HDF5-1.10.2
 - Supported Platforms
 - Tested Configuration Features Summary
@@ -194,7 +195,7 @@ Support for new platforms, languages and compilers.
 =======================================
     -
 
-Bug Fixes since HDF5-1.10.2 release
+Bug Fixes since HDF5-1.10.3 release
 ==================================
 
     Library
@@ -217,6 +218,50 @@ Bug Fixes since HDF5-1.10.2 release
 
       (JTH - 2018/08/25, HDFFV-10501)
 
+    Configuration
+    -------------
+    -
+
+    Performance
+    -------------
+    -
+
+    Fortran
+    --------
+    -
+
+    Tools
+    -----
+    -
+
+    High-Level APIs:
+    ------
+    -
+
+    Fortran High-Level APIs:
+    ------
+    -
+
+    Documentation
+    -------------
+    -
+
+    F90 APIs
+    --------
+    -
+
+    C++ APIs
+    --------
+    -
+
+    Testing
+    -------
+
+Bug Fixes since HDF5-1.10.2 release
+==================================
+
+    Library
+    -------
     - Java HDF5LibraryException class
 
       The error minor and major values would be lost after the
