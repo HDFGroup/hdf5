@@ -369,7 +369,7 @@ fi
 # Clean up temporary files/directories
 CLEAN_LIBFILES_AND_BLDLIBDIR
 CLEAN_DATAFILES_AND_BLDDIR
-CLEAN_REFFILES_AND_BLDITERDIR
+CLEAN_ITERFILES_AND_BLDITERDIR
 
 # Report test results and exit
 if test $nerrors -eq 0 ; then
