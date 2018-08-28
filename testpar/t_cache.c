@@ -7134,7 +7134,7 @@ trace_file_check(int metadata_write_strategy)
 
         if ( HDfgets(buffer, 255, trace_file_ptr) != NULL ) {
 
-            actual_line_len = strlen(buffer);
+            actual_line_len = HDstrlen(buffer);
 
         } else {
 

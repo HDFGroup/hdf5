@@ -350,7 +350,7 @@ check_n_input( const char *str )
     unsigned i;
     char c;
 
-    for (i = 0; i < strlen(str); i++) {
+    for (i = 0; i < HDstrlen(str); i++) {
         c = str[i];
         if (i == 0) {
             if (c < 49 || c > 57) /* ascii values between 1 and 9 */
@@ -387,7 +387,7 @@ check_p_input( const char *str )
     the atof return value on a hexadecimal input is different
     on some systems; we do a character check for this
     */
-    if (strlen(str) > 2 && str[0] == '0' && str[1] == 'x')
+    if (HDstrlen(str) > 2 && str[0] == '0' && str[1] == 'x')
         return -1;
 
     x = atof(str);
@@ -421,7 +421,7 @@ check_d_input( const char *str )
     the atof return value on a hexadecimal input is different
     on some systems; we do a character check for this
     */
-    if (strlen(str) > 2 && str[0] == '0' && str[1] == 'x')
+    if (HDstrlen(str) > 2 && str[0] == '0' && str[1] == 'x')
         return -1;
 
     x = atof(str);

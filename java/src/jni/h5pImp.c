@@ -3881,7 +3881,7 @@ Java_hdf_hdf5lib_H5_H5Pset_1fapl_1multi
                 const char *utf8 = ENVPTR->GetStringUTFChars(ENVPAR obj, 0);
 
                 if (utf8) {
-                    member_name[i] = (char*)HDmalloc(strlen(utf8) + 1);
+                    member_name[i] = (char*)HDmalloc(HDstrlen(utf8) + 1);
                     if (member_name[i]) {
                         strcpy(member_name[i], utf8);
                     } /* end if */
@@ -4189,7 +4189,7 @@ Java_hdf_hdf5lib_H5_H5Pset_1mdc_1config
         h5JNIFatalError(env, "H5Pset_mdc_config: out of memory trace_file_name");
         return;
     } /* end if */
-    strncpy(cacheinfo.trace_file_name, str, 1025);
+    HDstrncpy(cacheinfo.trace_file_name, str, 1025);
     ENVPTR->ReleaseStringUTFChars(ENVPAR j_str, str);
     if(ENVPTR->ExceptionOccurred(ENVONLY)) {
         h5JNIFatalError(env, "H5Pset_mdc_config: loading trace_file_name failed");

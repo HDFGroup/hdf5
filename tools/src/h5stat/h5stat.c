@@ -24,11 +24,11 @@
 /* Parameters to control statistics gathered */
 
 /* Default threshold for small groups/datasets/attributes */
-#define DEF_SIZE_SMALL_GROUPS       	10
-#define DEF_SIZE_SMALL_DSETS        	10
-#define DEF_SIZE_SMALL_ATTRS  		10
+#define DEF_SIZE_SMALL_GROUPS           10
+#define DEF_SIZE_SMALL_DSETS            10
+#define DEF_SIZE_SMALL_ATTRS            10
 
-#define SIZE_SMALL_SECTS        	10
+#define SIZE_SMALL_SECTS            10
 
 #define  H5_NFILTERS_IMPL        8     /* Number of currently implemented filters + one to
                                           accommodate for user-define filters + one
@@ -74,7 +74,7 @@ typedef struct iter_t {
     ohdr_info_t group_ohdr_info;        /* Object header information for groups */
 
     hsize_t  max_attrs;                 /* Maximum attributes from a group */
-    unsigned long *num_small_attrs;    	/* Size of small attributes tracked */
+    unsigned long *num_small_attrs;        /* Size of small attributes tracked */
     unsigned attr_nbins;                /* Number of bins for attribute counts */
     unsigned long *attr_bins;           /* Pointer to array of bins for attribute counts */
 
@@ -83,7 +83,7 @@ typedef struct iter_t {
     hsize_t max_dset_dims;              /* Maximum dimension size of dataset */
     unsigned long *small_dset_dims;    /* Size of dimensions of small datasets tracked */
     unsigned long dset_layouts[H5D_NLAYOUTS];           /* Type of storage for each dataset */
-    unsigned long dset_comptype[H5_NFILTERS_IMPL]; 	/* Number of currently implemented filters */
+    unsigned long dset_comptype[H5_NFILTERS_IMPL];     /* Number of currently implemented filters */
     unsigned long dset_ntypes;          /* Number of diff. dataset datatypes found */
     dtype_info_t *dset_type_info;       /* Pointer to dataset datatype information found */
     unsigned dset_dim_nbins;            /* Number of bins for dataset dimensions */
@@ -103,9 +103,9 @@ typedef struct iter_t {
     hsize_t super_ext_size;             /* superblock extension size */
     hsize_t ublk_size;                  /* user block size (if exists) */
     H5F_fspace_strategy_t fs_strategy;  /* File space management strategy */
-    hbool_t fs_persist;               	/* Free-space persist or not */
+    hbool_t fs_persist;                 /* Free-space persist or not */
     hsize_t fs_threshold;               /* Free-space section threshold */
-    hsize_t fsp_size;               	/* File space page size */
+    hsize_t fsp_size;                   /* File space page size */
     hsize_t free_space;                 /* Amount of freespace in the file */
     hsize_t free_hdr;                   /* Size of free space manager metadata in the file */
     unsigned long num_small_sects[SIZE_SMALL_SECTS];   /* Size of small free-space sections */
@@ -136,9 +136,9 @@ static int        display_dset_metadata = FALSE;    /* display file space info f
 static int        display_object = FALSE;  /* not implemented yet */
 
 /* Initialize threshold for small groups/datasets/attributes */
-static int	  sgroups_threshold = DEF_SIZE_SMALL_GROUPS;
-static int	  sdsets_threshold = DEF_SIZE_SMALL_DSETS;
-static int	  sattrs_threshold = DEF_SIZE_SMALL_ATTRS;
+static int      sgroups_threshold = DEF_SIZE_SMALL_GROUPS;
+static int      sdsets_threshold = DEF_SIZE_SMALL_DSETS;
+static int      sattrs_threshold = DEF_SIZE_SMALL_ATTRS;
 
 /* a structure for handling the order command-line parameters come in */
 struct handler_t {
@@ -257,7 +257,7 @@ leave(int ret)
 }
 
 
-
+
 /*-------------------------------------------------------------------------
  * Function: usage
  *
@@ -297,7 +297,7 @@ static void usage(const char *prog)
      HDfprintf(stdout, "     --enable-error-stack  Prints messages from the HDF5 error stack as they occur\n");
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function: ceil_log10
  *
@@ -324,7 +324,7 @@ ceil_log10(unsigned long x)
     return ret;
 } /* ceil_log10() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: attribute_stats
  *
@@ -374,7 +374,7 @@ attribute_stats(iter_t *iter, const H5O_info_t *oi)
      return 0;
 } /* end attribute_stats() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: group_stats
  *
@@ -456,7 +456,7 @@ done:
     return ret_value;
 } /* end group_stats() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: dataset_stats
  *
@@ -648,7 +648,7 @@ done:
      return ret_value;
 }  /* end dataset_stats() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: datatype_stats
  *
@@ -680,7 +680,7 @@ done:
      return ret_value;
 }  /* end datatype_stats() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: obj_stats
  *
@@ -736,7 +736,7 @@ done:
     return ret_value;
 } /* end obj_stats() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: lnk_stats
  *
@@ -834,7 +834,7 @@ freespace_stats(hid_t fid, iter_t *iter)
     return 0;
 } /* end freespace_stats() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: hand_free
  *
@@ -863,7 +863,7 @@ hand_free(struct handler_t *hand)
     } /* end if */
 } /* end hand_free() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: parse_command_line
  *
@@ -1041,7 +1041,7 @@ error:
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function: iter_free
  *
@@ -1106,7 +1106,7 @@ iter_free(iter_t *iter)
     } /* end if */
 } /* end iter_free() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: print_file_info
  *
@@ -1138,7 +1138,7 @@ print_file_info(const iter_t *iter)
     return 0;
 } /* print_file_info() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: print_file_metadata
  *
@@ -1198,7 +1198,7 @@ print_file_metadata(const iter_t *iter)
     return 0;
 } /* print_file_metadata() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: print_group_info
  *
@@ -1255,7 +1255,7 @@ print_group_info(const iter_t *iter)
     return 0;
 } /* print_group_info() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: print_group_metadata
  *
@@ -1282,7 +1282,7 @@ print_group_metadata(const iter_t *iter)
     return 0;
 } /* print_group_metadata() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: print_dataset_info
  *
@@ -1369,7 +1369,7 @@ print_dataset_info(const iter_t *iter)
     return 0;
 } /* print_dataset_info() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: print_dataset_metadata
  *
@@ -1398,7 +1398,7 @@ print_dset_metadata(const iter_t *iter)
     return 0;
 } /* print_dset_metadata() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: print_dset_dtype_meta
  *
@@ -1439,7 +1439,7 @@ print_dset_dtype_meta(const iter_t *iter)
     return 0;
 } /* print_dset_dtype_meta() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: print_attr_info
  *
@@ -1488,7 +1488,7 @@ print_attr_info(const iter_t *iter)
     return 0;
 } /* print_attr_info() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: print_freespace_info
  *
@@ -1538,7 +1538,7 @@ print_freespace_info(const iter_t *iter)
     return 0;
 } /* print_freespace_info() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: print_storage_summary
  *
@@ -1602,7 +1602,7 @@ print_storage_summary(const iter_t *iter)
     return 0;
 } /* print_storage_summary() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: print_file_statistics
  *
@@ -1649,7 +1649,7 @@ print_file_statistics(const iter_t *iter)
     if(display_summary)         print_storage_summary(iter);
 } /* print_file_statistics() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: print_object_statistics
  *
@@ -1672,7 +1672,7 @@ print_object_statistics(const char *name)
     printf("Object name %s\n", name);
 } /* print_object_statistics() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: print_statistics
  *
@@ -1698,7 +1698,7 @@ print_statistics(const char *name, const iter_t *iter)
         print_file_statistics(iter);
 } /* print_statistics() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: main
  *
@@ -1733,7 +1733,7 @@ main(int argc, const char *argv[])
     /* Disable tools error reporting */
     H5Eget_auto2(H5tools_ERR_STACK_g, &tools_func, &tools_edata);
     H5Eset_auto2(H5tools_ERR_STACK_g, NULL, NULL);
-    
+
     HDmemset(&iter, 0, sizeof(iter));
 
     if(parse_command_line(argc, argv, &hand) < 0)
@@ -1780,15 +1780,15 @@ main(int argc, const char *argv[])
             iter.free_hdr = finfo.free.meta_size;
         } /* end else */
 
-	iter.num_small_groups = (unsigned long *)HDcalloc((size_t)sgroups_threshold, sizeof(unsigned long));
-	iter.num_small_attrs = (unsigned long *)HDcalloc((size_t)(sattrs_threshold+1), sizeof(unsigned long));
-	iter.small_dset_dims = (unsigned long *)HDcalloc((size_t)sdsets_threshold, sizeof(unsigned long));
+    iter.num_small_groups = (unsigned long *)HDcalloc((size_t)sgroups_threshold, sizeof(unsigned long));
+    iter.num_small_attrs = (unsigned long *)HDcalloc((size_t)(sattrs_threshold+1), sizeof(unsigned long));
+    iter.small_dset_dims = (unsigned long *)HDcalloc((size_t)sdsets_threshold, sizeof(unsigned long));
 
-	if(iter.num_small_groups == NULL || iter.num_small_attrs == NULL || iter.small_dset_dims == NULL) {
-	    error_msg("Unable to allocate memory for tracking small groups/datasets/attributes\n");
+    if(iter.num_small_groups == NULL || iter.num_small_attrs == NULL || iter.small_dset_dims == NULL) {
+        error_msg("Unable to allocate memory for tracking small groups/datasets/attributes\n");
             h5tools_setstatus(EXIT_FAILURE);
-	    goto done;
-	}
+        goto done;
+    }
 
         if((fcpl = H5Fget_create_plist(fid)) < 0)
             warn_msg("Unable to retrieve file creation property\n");
