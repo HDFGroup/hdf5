@@ -66,7 +66,7 @@ MACRO (ADD_H5_TEST resultfile resultcode)
           -D "TEST_PROGRAM=examples.intro.${resultfile}"
           -D "TEST_ARGS:STRING=${CMD_ARGS}${ARGN}"
           -D "TEST_CLASSPATH:STRING=${CMAKE_JAVA_CLASSPATH}${CMAKE_JAVA_INCLUDE_FLAG_SEP}${${resultfile}_JAR_FILE}"
-          -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}"
+          -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}/${HDF_CFG_NAME}"
           -D "TEST_FOLDER=${HDFJAVA_EXAMPLES_BINARY_DIR}"
           -D "TEST_OUTPUT=intro/${resultfile}.out"
           -D "TEST_EXPECT=${resultcode}"
