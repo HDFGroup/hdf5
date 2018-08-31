@@ -111,7 +111,7 @@ foreach (test_file ${HDF5_JAVA_TEST_SOURCES})
           -D "TEST_CLASSPATH:STRING=${CMAKE_JAVA_CLASSPATH}"
           -D "TEST_ARGS:STRING=${CMD_ARGS}-ea;org.junit.runner.JUnitCore"
           -D "TEST_PROGRAM=test.${test_file}"
-          -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}/${HDF_CFG_NAME}"
+          -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}/${HDF_CFG_BUILD_TYPE}"
           -D "TEST_FOLDER=${HDF5_BINARY_DIR}/java/test"
           -D "TEST_OUTPUT=JUnit-${test_file}.out"
 #          -D "TEST_LOG_LEVEL=trace"
