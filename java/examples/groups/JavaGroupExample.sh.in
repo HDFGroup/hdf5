@@ -148,7 +148,6 @@ CLEAN_LIBFILES_AND_BLDLIBDIR()
 }
 
 COPY_DATAFILES="$LIST_DATA_FILES"
-COPY_ITERFILES="$LIST_ITER_FILES"
 
 COPY_DATAFILES_TO_BLDDIR()
 {
@@ -255,7 +254,7 @@ JAVAEXEFLAGS=@H5_JAVAFLAGS@
 # prepare for test
 COPY_LIBFILES_TO_BLDLIBDIR
 COPY_DATAFILES_TO_BLDDIR
-COPY_REFFILES_TO_BLDITERDIR
+COPY_ITERFILES_TO_BLDITERDIR
 
 CPATH=".:"$BLDLIBDIR"/"$JARFILE":"$BLDLIBDIR"/slf4j-api-1.7.25.jar:"$BLDLIBDIR"/slf4j-simple-1.7.25.jar:"$TESTJARFILE""
 
@@ -306,16 +305,15 @@ else
     nerrors="`expr $nerrors + 1`"
 fi
 
-# Disabled
-# echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.groups.H5Ex_G_Iterate"
-# TESTING examples.groups.H5Ex_G_Iterate
-# ($RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.groups.H5Ex_G_Iterate > H5Ex_G_Iterate.out)
-# if diff H5Ex_G_Iterate.out examples.groups.H5Ex_G_Iterate.txt > /dev/null; then
-#     echo "  PASSED      groups.H5Ex_G_Iterate"
-# else
-#     echo "**FAILED**    groups.H5Ex_G_Iterate"
-#     nerrors="`expr $nerrors + 1`"
-# fi
+echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.groups.H5Ex_G_Iterate"
+TESTING examples.groups.H5Ex_G_Iterate
+($RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.groups.H5Ex_G_Iterate > H5Ex_G_Iterate.out)
+if diff H5Ex_G_Iterate.out examples.groups.H5Ex_G_Iterate.txt > /dev/null; then
+    echo "  PASSED      groups.H5Ex_G_Iterate"
+else
+    echo "**FAILED**    groups.H5Ex_G_Iterate"
+    nerrors="`expr $nerrors + 1`"
+fi
 
 echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.groups.H5Ex_G_Compact"
 TESTING examples.groups.H5Ex_G_Compact
@@ -357,21 +355,20 @@ else
     nerrors="`expr $nerrors + 1`"
 fi
 
-# Disabled
-# echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.groups.H5Ex_G_Visit"
-# TESTING examples.groups.H5Ex_G_Visit
-# ($RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.groups.H5Ex_G_Visit > H5Ex_G_Visit.out)
-# if diff H5Ex_G_Visit.out examples.groups.H5Ex_G_Visit.txt > /dev/null; then
-#     echo "  PASSED      groups.H5Ex_G_Visit"
-# else
-#     echo "**FAILED**    groups.H5Ex_G_Visit"
-#     nerrors="`expr $nerrors + 1`"
-# fi
+echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.groups.H5Ex_G_Visit"
+TESTING examples.groups.H5Ex_G_Visit
+($RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.groups.H5Ex_G_Visit > H5Ex_G_Visit.out)
+if diff H5Ex_G_Visit.out examples.groups.H5Ex_G_Visit.txt > /dev/null; then
+    echo "  PASSED      groups.H5Ex_G_Visit"
+else
+    echo "**FAILED**    groups.H5Ex_G_Visit"
+    nerrors="`expr $nerrors + 1`"
+fi
 
 # Clean up temporary files/directories
+CLEAN_ITERFILES_AND_BLDITERDIR
 CLEAN_LIBFILES_AND_BLDLIBDIR
 CLEAN_DATAFILES_AND_BLDDIR
-CLEAN_ITERFILES_AND_BLDITERDIR
 
 # Report test results and exit
 if test $nerrors -eq 0 ; then
