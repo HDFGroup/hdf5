@@ -380,13 +380,14 @@ macro (HDF_DIR_PATHS package_prefix)
     set (CMAKE_Fortran_MODULE_DIRECTORY
         ${PROJECT_BINARY_DIR}/bin CACHE PATH "Single Directory for all fortran modules."
     )
-    if (WIN32)
-      set (CMAKE_TEST_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CTEST_CONFIGURATION_TYPE})
+    get_property(_isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+    if(_isMultiConfig)
+      set (CMAKE_TEST_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_BUILD_TYPE})
       set (CMAKE_PDB_OUTPUT_DIRECTORY
           ${PROJECT_BINARY_DIR}/bin CACHE PATH "Single Directory for all pdb files."
       )
     else ()
-      set (CMAKE_TEST_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CTEST_CONFIGURATION_TYPE})
+      set (CMAKE_TEST_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
     endif ()
   else ()
     # if we are externally configured, but the project uses old cmake scripts
