@@ -1754,7 +1754,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
                     HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to create the metadata file")
 
                 /* Create header and empty index in the metadata file */
-                if(file_create) {
+                if(!file_create) {
                     if(H5F__vfd_swmr_init_md(file) < 0)
                         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, NULL, "fail to initialize md for VFD SWMR writer")
                 }
@@ -3783,7 +3783,7 @@ H5F__vfd_swmr_init_info(H5F_t *f)
         vfd_swmr_writer_g = f->shared->vfd_swmr_writer = FALSE;
 
         /* Set tick_num_g to the current tick read from the metadata file */
-        if(H5FD_vfd_swmr_get_tick_and_idx(f->shared->lf, FALSE, FALSE, &tick_num_g, NULL, NULL) < 0)
+        if(H5FD_vfd_swmr_get_tick_and_idx(f->shared->lf, FALSE, &tick_num_g, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTLOAD, FAIL, "unable to load/decode metadata file")
         f->shared->tick_num = tick_num_g;
     }

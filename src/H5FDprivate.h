@@ -87,9 +87,9 @@
     )
 
 /* Retries for metadata file */
-#define H5FD_VFD_SWMR_MD_FILE_RETRY_MAX     200 /* Maximum retries when opening the MD file */
-#define H5FD_VFD_SWMR_MD_LOAD_RETRY_MAX     50  /* Maximum retries when trying to load the MD file header and index */
-#define H5FD_VFD_SWMR_MD_HEADER_RETRY_MAX   200 /* Maximum retries when deserializing the MD file header */
+#define H5FD_VFD_SWMR_MD_FILE_RETRY_MAX     50 /* Maximum retries when opening the MD file */
+#define H5FD_VFD_SWMR_MD_LOAD_RETRY_MAX     20  /* Maximum retries when trying to load the MD file header and index */
+#define H5FD_VFD_SWMR_MD_HEADER_RETRY_MAX   40  /* Maximum retries when deserializing the MD file header */
 #define H5FD_VFD_SWMR_MD_INDEX_RETRY_MAX    5   /* Maximum retries when deserializing the MD file index */
 
 
@@ -274,7 +274,7 @@ H5_DLL herr_t H5FD_set_paged_aggr(H5FD_t *file, hbool_t paged);
 /* Function prototypes for VFD SWMR */
 H5_DLL herr_t H5FD_vfd_swmr_writer_end_of_tick();
 H5_DLL herr_t H5FD_vfd_swmr_reader_end_of_tick();
-H5_DLL herr_t H5FD_vfd_swmr_get_tick_and_idx(H5FD_t *_file, hbool_t open, hbool_t read_index,
+H5_DLL herr_t H5FD_vfd_swmr_get_tick_and_idx(H5FD_t *_file, hbool_t read_index,
     uint64_t *tick_ptr, uint32_t *num_entries_ptr, H5FD_vfd_swmr_idx_entry_t index[]);
 
 /* Function prototypes for MPI based VFDs*/

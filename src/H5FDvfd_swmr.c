@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
+
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -69,6 +69,7 @@ static herr_t H5FD_vfd_swmr_unlock(H5FD_t *_file);
 /* VFD SWMR */
 static herr_t H5FD_vfd_swmr_header_deserialize(H5FD_t *_file, H5FD_vfd_swmr_md_header *md_header);
 static herr_t H5FD_vfd_swmr_index_deserialize(H5FD_t *_file, H5FD_vfd_swmr_md_index *md_index, H5FD_vfd_swmr_md_header *md_header);
+static herr_t H5FD_vfd_swmr_load_hdr_and_idx(H5FD_t *_file, hbool_t open);
 
 static const H5FD_class_t H5FD_vfd_swmr_g = {
     "swmr",                     /* name                 */
@@ -289,7 +290,7 @@ H5FD_vfd_swmr_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxa
         HGOTO_ERROR(H5E_VFL, H5E_OPENERROR, NULL, "unable to open the metadata file after all retry attempts")
 
     /* Retry on loading and decoding the header and index in the metadata file */
-    if(H5FD_vfd_swmr_get_tick_and_idx(file, TRUE, TRUE, NULL, NULL, NULL) < 0)
+    if(H5FD_vfd_swmr_load_hdr_and_idx(file, TRUE) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "unable to load/decode the md file header/index")
 
     /* Hard-wired to open the underlying HDF5 file with SEC2 */
@@ -559,6 +560,7 @@ H5FD_vfd_swmr_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id,
     haddr_t addr, size_t size, void *buf /*out*/)
 {
     H5FD_vfd_swmr_t *file = (H5FD_vfd_swmr_t *)_file;
+H5FD_vfd_swmr_idx_entry_t *index;
     herr_t          ret_value = SUCCEED;                  /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -567,9 +569,26 @@ H5FD_vfd_swmr_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id,
     HDassert(buf);
 
 #ifdef TEMP
-H5FD_vfd_swmr_get_tick_and_idx(file, FALSE, TRUE, &tick_num, NULL, NULL);
-if(tick_num == tick_num_g)
-H5FD_vfd_swmr_get_tick_and_idx(file, FALSE, &tick_num, &num_entries, index);
+tick_num
+num_entries
+H5FD_vfd_swmr_idx_entry_t *index;
+    if(H5FD_vfd_swmr_get_tick_and_idx(file, TRUE, &tick_num, &num_entries, NULL) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FALSE, "unable to retrieve tick and entries from the md file")
+
+    if(num_entries) {
+
+        /* Allocate memory for index entries */
+        if(NULL == (index = H5FL_SEQ_MALLOC(H5FD_vfd_swmr_idx_entry_t, num_entries)))
+            HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FALSE, "memory allocation failed for index entries")
+
+        /* Get the entries for the index */
+        if(H5FD_vfd_swmr_get_tick_and_idx(file, FALSE, FALSE, &tick_num, &num_entries, index) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "unable to load/decode the md file header/index")
+    }
+
+search for addr from the index
+if found, read the page into buf based on the offset/size found in the index and return
+otherwise read from the underlying HDF5 file
 #endif
 
     if(H5FD_read(file->hdf5_file_lf, type, addr, size, buf) < 0)
@@ -710,24 +729,10 @@ done:
  * Function:    H5FD_vfd_swmr_get_tick_and_idx()
  *
  * Purpose:     Retrieve tick_num, num_entries and index from the metadata file
- *              If the parameter "reload_hdr_index" is false:
- *              --return tick_num, num_entries and index from the VFD's local copies
- *              If "reload_hdr_index" is true:
- *              --try to load and decode the header:
- *                  --if the size of header and index does not fit within md_pages_reserved: 
- *                    return error
- *                  --if tick_num read equals the VFD's local copy of tick_num,
- *                    there is no further action, just return
- *                  --if tick_num read is less than the VFD's local copy of tick_num, 
- *                    return error
- *                  --if tick_num read is greater than the VFD's local copy of tick_num:
- *                      --Try to load and decode the index:
- *                          --if tick_num in header matches that in index
- *                            replace the VFD's local copy with the info just read
- *                          --if tick_num in header is 1 greater than that in index,
- *                            retry
- *                          --otherwise, return error
- *                      --return tick_num, num_entries and index from the VFD's local copies
+ *              --If the parameter "reload_hdr_and_index" is true, load and decode the header
+ *                and index via H5FD_vfd_swmr_load_hdr_and_idx(), which may replace the VFD's
+ *                local copies of header and index with the latest info read.
+ *              --Return tick_num, num_entries and index from the VFD's local copies.
  *
  * Return:      Success:    SUCCEED
  *              Failure:    FAIL
@@ -735,80 +740,26 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FD_vfd_swmr_get_tick_and_idx(H5FD_t *_file, hbool_t open, hbool_t reload_hdr_and_index,
+H5FD_vfd_swmr_get_tick_and_idx(H5FD_t *_file, hbool_t reload_hdr_and_index,
     uint64_t *tick_ptr, uint32_t *num_entries_ptr, H5FD_vfd_swmr_idx_entry_t index[])
 {
-    H5FD_vfd_swmr_t *file = (H5FD_vfd_swmr_t *)_file;           /* VFD SWMR file struct */
-    unsigned load_retries = H5FD_VFD_SWMR_MD_LOAD_RETRY_MAX;    /* Retries for loading header and index */
-    struct stat stat_buf;               /* Buffer for stat info */
-    uint64_t nanosec = 1;               /* # of nanoseconds to sleep between retries */
-    H5FD_vfd_swmr_md_header md_header;  /* Metadata file header */
-    H5FD_vfd_swmr_md_index md_index;    /* Metadata file index */
-    H5FD_t *ret_value  = NULL;          /* Return value  */
+    H5FD_vfd_swmr_t *file = (H5FD_vfd_swmr_t *)_file;   /* VFD SWMR file struct */
+    H5FD_t *ret_value  = FALSE;                         /* Return value  */
 
     FUNC_ENTER_NOAPI_NOINIT
 
     if(reload_hdr_and_index) {
-
-        do {
-            HDmemset(&md_header, 0, sizeof(H5FD_vfd_swmr_md_header));
-            HDmemset(&md_index, 0, sizeof(H5FD_vfd_swmr_md_index));
-
-            /* Load and decode the header */
-            if(H5FD_vfd_swmr_header_deserialize(file, &md_header) >= 0) {
-
-                /* Error if header + index fit does not within md_pages_reserved */
-                if((H5FD_MD_HEADER_SIZE + md_header.index_length) > 
-                   (file->md_pages_reserved * md_header.fs_page_size))
-                    HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "header + index does not fit within md_pages_reserved")
-
-                if(!open && md_header.tick_num == file->md_header.tick_num)
-                    break; 
-                else if(!open && md_header.tick_num < file->md_header.tick_num)
-                    HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "tick number read is less than local copy")
-                else  {
-                    HDassert(md_header.tick_num > file->md_header.tick_num || open);
-
-                    /* Load and decode the index */
-                    if(H5FD_vfd_swmr_index_deserialize(file, &md_index, &md_header) >= 0) {
-
-                        /* tick_num is the same in both header and index */
-                        if(md_header.tick_num == md_index.tick_num) {
-                            HDmemcpy(&file->md_header, &md_header, sizeof(H5FD_vfd_swmr_md_header));
-                            HDmemcpy(&file->md_index, &md_index, sizeof(H5FD_vfd_swmr_md_index));
-                            break;
-                        }
-                        /* Error when tick_num in header is more than one greater that in the index */
-                        else if(md_header.tick_num > (md_index.tick_num + 1))
-                            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "tick number mis-match in header and index")
-
-                    } /* end if index ok */
-                } /* end else */
-            } /* end if header ok */
-
-            /* Sleep and double the sleep time next time */
-            H5_nanosleep(nanosec);
-            nanosec *= 2;
-
-        } while(--load_retries);
-
-        /* Exhaust all retries for loading and decoding the md file header and index */
-        if(load_retries == 0)
-            HGOTO_ERROR(H5E_VFL, H5E_CANTLOAD, FAIL, "error in loading/decoding the metadata file header and index")
-
-    } /* end if reload_hdr_and_index */
+        if(H5FD_vfd_swmr_load_hdr_and_idx(file, FALSE) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTLOAD, FAIL, "unable to load/decode md header and index")
+    }
 
     /* Return tick_num */
     if(tick_ptr != NULL)
         *tick_ptr = file->md_header.tick_num;
 
     if(num_entries_ptr != NULL) {
-        if(*num_entries_ptr < file->md_index.num_entries)
-            *num_entries_ptr = file->md_index.num_entries;
-        else if(index != NULL) {
-            HDassert(*num_entries_ptr >= file->md_index.num_entries);
+        if(*num_entries_ptr >= file->md_index.num_entries && index != NULL)
             HDmemcpy(index, file->md_index.entries, (file->md_index.num_entries * sizeof(H5FD_vfd_swmr_idx_entry_t)));
-        }
 
         *num_entries_ptr = file->md_index.num_entries;
     }
@@ -816,6 +767,95 @@ H5FD_vfd_swmr_get_tick_and_idx(H5FD_t *_file, hbool_t open, hbool_t reload_hdr_a
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 }  /* H5FD_vfd_swmr_get_tick_and_idx() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD_vfd_swmr_load_hdr_and_idx()
+ *
+ * Purpose:     Load and decode the header and index in the metadata file
+ *              Try to load and decode the header:
+ *              --If fail, RETRY
+ *              --If succeed:
+ *                  --If the size of header and index does not fit within md_pages_reserved, return error
+ *                  --If NOT an initial open call:
+ *                      --If tick_num just read is the same as the VFD's local copy, just return
+ *                      --If tick_num just read is less than the VFD's local copy, return error
+ *                  --If tick_num just read is greater than the VFD's local copy or an initial open call:
+ *                      --Try to load and decode the index:
+ *                          --If fail, RETRY
+ *                          --If succeed:
+ *                              --If tick_num in header matches that in index, replace the VFD's
+ *                                local copy with the header and index just read
+ *                              --If tick_num in header is 1 greater than that in index, RETRY
+ *                              --Otherwise, return error
+ *
+ * Return:      Success:    SUCCEED
+ *              Failure:    FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD_vfd_swmr_load_hdr_and_idx(H5FD_t *_file, hbool_t open)
+{
+    H5FD_vfd_swmr_t *file = (H5FD_vfd_swmr_t *)_file;           /* VFD SWMR file struct */
+    unsigned load_retries = H5FD_VFD_SWMR_MD_LOAD_RETRY_MAX;    /* Retries for loading header and index */
+    uint64_t nanosec = 1;               /* # of nanoseconds to sleep between retries */
+    H5FD_vfd_swmr_md_header md_header;  /* Metadata file header */
+    H5FD_vfd_swmr_md_index md_index;    /* Metadata file index */
+    H5FD_t *ret_value  = FALSE;         /* Return value  */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    do {
+        HDmemset(&md_header, 0, sizeof(H5FD_vfd_swmr_md_header));
+        HDmemset(&md_index, 0, sizeof(H5FD_vfd_swmr_md_index));
+
+        /* Load and decode the header */
+        if(H5FD_vfd_swmr_header_deserialize(file, &md_header) >= 0) {
+
+            /* Error if header + index fit does not within md_pages_reserved */
+            if((H5FD_MD_HEADER_SIZE + md_header.index_length) > 
+               (file->md_pages_reserved * md_header.fs_page_size))
+                HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "header + index does not fit within md_pages_reserved")
+
+            if(!open) {
+                if(md_header.tick_num == file->md_header.tick_num)
+                    break; 
+                else if(md_header.tick_num < file->md_header.tick_num)
+                    HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "tick number read is less than local copy")
+            }
+
+            HDassert(md_header.tick_num > file->md_header.tick_num || open);
+
+            /* Load and decode the index */
+            if(H5FD_vfd_swmr_index_deserialize(file, &md_index, &md_header) >= 0) {
+
+                /* tick_num is the same in both header and index */
+                if(md_header.tick_num == md_index.tick_num) {
+                    HDmemcpy(&file->md_header, &md_header, sizeof(H5FD_vfd_swmr_md_header));
+                    HDmemcpy(&file->md_index, &md_index, sizeof(H5FD_vfd_swmr_md_index));
+                    break;
+                }
+                /* Error when tick_num in header is more than one greater that in the index */
+                else if(md_header.tick_num > (md_index.tick_num + 1))
+                    HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "tick number mis-match in header and index")
+
+            } /* end if index ok */
+        } /* end if header ok */
+
+        /* Sleep and double the sleep time next time */
+        H5_nanosleep(nanosec);
+        nanosec *= 2;
+
+    } while(--load_retries);
+
+    /* Exhaust all retries for loading and decoding the md file header and index */
+    if(load_retries == 0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTLOAD, FAIL, "error in loading/decoding the metadata file header and index")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}  /* H5FD_vfd_swmr_load_hdr_and_idx() */
 
 
 /*-------------------------------------------------------------------------
