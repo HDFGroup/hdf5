@@ -2076,11 +2076,11 @@ H5_DLL herr_t H5CX_pop(void);
         if( (curr_time.tv_sec >= end_of_tick_g.tv_sec) &&                                               \
             (curr_time.tv_nsec >= end_of_tick_g.tv_nsec) ) {                                            \
             if(vfd_swmr_writer_g) {                                                                     \
-                if(H5FD_writer_end_of_tick() < 0)                                                       \
+                if(H5FD_vfd_swmr_writer_end_of_tick() < 0)                                                       \
                     HGOTO_ERROR(H5E_FUNC, H5E_CANTSET, err, "end of tick error for VFD SWMR writer")    \
             }                                                                                           \
             else if(!swmr_reader_exit) {                                                                \
-                if(H5FD_reader_end_of_tick() < 0)                                                       \
+                if(H5FD_vfd_swmr_reader_end_of_tick() < 0)                                              \
                     HGOTO_ERROR(H5E_FUNC, H5E_CANTSET, err, "end of tick error for VFD SWMR reader")    \
             }                                                                                           \
         }                                                                                               \

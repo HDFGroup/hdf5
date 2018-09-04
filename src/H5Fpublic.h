@@ -224,7 +224,7 @@ typedef struct H5F_vfd_swmr_config_t {
     int32_t     version;
     int32_t     tick_len;
     int32_t     max_lag;
-    hbool_t     vfd_swmr_writer;
+    hbool_t     vfd_swmr_writer;/****/
     hbool_t     flush_raw_data;
     int32_t     md_pages_reserved;
     char        md_file_path[H5F__MAX_VFD_SWMR_FILE_NAME_LEN + 1];

@@ -709,9 +709,9 @@ H5FD_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 
     /* Get driver info */
     if(NULL == (driver = (H5FD_class_t *)H5I_object(driver_prop.driver_id)))
-	HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "invalid driver ID in file access property list")
+        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "invalid driver ID in file access property list")
     if(NULL == driver->open)
-	HGOTO_ERROR(H5E_VFL, H5E_UNSUPPORTED, NULL, "file driver has no `open' method")
+        HGOTO_ERROR(H5E_VFL, H5E_UNSUPPORTED, NULL, "file driver has no `open' method")
 
     /* Query driver flag */
     if(H5FD_driver_query(driver, &driver_flags) < 0)
@@ -731,7 +731,7 @@ H5FD_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     if(HADDR_UNDEF == maxaddr)
         maxaddr = driver->maxaddr;
     if(NULL == (file = (driver->open)(name, flags, fapl_id, maxaddr)))
-	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, NULL, "open failed")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, NULL, "open failed")
 
     /* Set the file access flags */
     file->access_flags = flags;

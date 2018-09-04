@@ -150,6 +150,7 @@ test_fapl()
 
     /* Set md_file_path */
     HDstrcpy(my_config->md_file_path, "my_md_file");
+    my_config->vfd_swmr_writer = TRUE;
 
     /* Should succeed in setting the configuration info */
     if(H5Pset_vfd_swmr_config(fapl, my_config) < 0)
@@ -301,50 +302,15 @@ hid_t did = -1;
     if(HDmemcmp(config1, config2, sizeof(H5F_vfd_swmr_config_t)) != 0)
         TEST_ERROR;
 
-    if((fid_read = H5Fopen("myfile", H5F_ACC_RDONLY, fapl1)) < 0)
-        TEST_ERROR;
-    if((sid = H5Screate(H5S_SCALAR)) < 0) 
-        TEST_ERROR;
-    if((did = H5Dcreate2(fid_read, "dset", H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        TEST_ERROR;
-    if(H5Dclose(did) < 0)
-        FAIL_STACK_ERROR;
-    if(H5Fclose(fid_read) < 0)
-        FAIL_STACK_ERROR;
-
     /* Closing */
     if(H5Fclose(fid) < 0)
         FAIL_STACK_ERROR;
     if(H5Pclose(file_fapl) < 0)
         FAIL_STACK_ERROR;
+
 
     /* Should succeed: VFD SWMR writer */
     if((fid = H5Fopen("myfile", H5F_ACC_RDWR, fapl1)) < 0)
-        TEST_ERROR;
-
-    /* Get the file's file access property list */
-    if((file_fapl = H5Fget_access_plist(fid)) < 0)
-        FAIL_STACK_ERROR;
-
-    /* Clear info in config2 */
-    HDmemset(config2, 0, sizeof(H5F_vfd_swmr_config_t));
-
-    /* Retrieve the VFD SWMR configuration from file_fapl */
-    if(H5Pget_vfd_swmr_config(file_fapl, config2) < 0)
-        TEST_ERROR;
-
-    /* Verify the retrieved info is the same as config1 */
-    if(HDmemcmp(config1, config2, sizeof(H5F_vfd_swmr_config_t)) != 0)
-        TEST_ERROR;
-
-    /* Closing */
-    if(H5Fclose(fid) < 0)
-        FAIL_STACK_ERROR;
-    if(H5Pclose(file_fapl) < 0)
-        FAIL_STACK_ERROR;
-
-    /* Should succeed: VFD SWMR reader */
-    if((fid = H5Fopen("myfile", H5F_ACC_RDONLY, fapl1)) < 0)
         TEST_ERROR;
 
     /* Get the file's file access property list */
@@ -416,6 +382,36 @@ hid_t did = -1;
         FAIL_STACK_ERROR;
     if(H5Pclose(file_fapl) < 0)
         FAIL_STACK_ERROR;
+
+    /* 
+     * VDF SWMR READER
+     */
+    /* Create a copy of the file access property list */
+    if((fapl2 = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        TEST_ERROR;
+
+    config3->version = H5F__CURR_VFD_SWMR_CONFIG_VERSION;
+    config3->tick_len = 4; 
+    config3->max_lag = 10;
+    config3->vfd_swmr_writer = FALSE;
+    config3->md_pages_reserved = 2;
+    HDstrcpy(config3->md_file_path, "my_md_file");
+
+    /* Should succeed in setting the VFD SWMR configuration */
+    if(H5Pset_vfd_swmr_config(fapl2, config3) < 0)
+        TEST_ERROR;
+
+    /* Enable page buffering */
+    if(H5Pset_page_buffer_size(fapl2, 4096, 0, 0) < 0)
+        FAIL_STACK_ERROR;
+
+
+    /* Open the file for reading only */
+    H5E_BEGIN_TRY {
+        fid_read = H5Fopen("myfile", H5F_ACC_RDONLY, fapl2);
+    } H5E_END_TRY;
+    if(fid_read >= 0)
+        TEST_ERROR;
 
     if(H5Pclose(fapl1) < 0)
         FAIL_STACK_ERROR;

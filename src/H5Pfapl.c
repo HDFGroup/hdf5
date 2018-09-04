@@ -41,11 +41,12 @@
 #include "H5Ppkg.h"             /* Property lists                       */
 
 /* Includes needed to set as default file driver */
-#include "H5FDsec2.h"           /* Posix unbuffered I/O    file driver     */
+#include "H5FDsec2.h"           /* Posix unbuffered I/O    file driver  */
 #include "H5FDstdio.h"          /* Standard C buffered I/O              */
 #ifdef H5_HAVE_WINDOWS
 #include "H5FDwindows.h"        /* Win32 I/O                            */
 #endif
+#include "H5FDvfd_swmr.h"       /* Posix unbuffered I/O    file driver  */
 
 
 /****************/
@@ -5058,6 +5059,9 @@ done:
  * Function:    H5Pset_vfd_swmr_config
  *
  * Purpose:     Set VFD SWMR configuration in the target FAPL.
+ *              Note: Hard-wired to set the driver in the fapl
+ *                    to use the SWMR VFD driver; this will be changed
+ *                    later
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -5111,6 +5115,12 @@ H5Pset_vfd_swmr_config(hid_t plist_id, H5F_vfd_swmr_config_t *config_ptr)
     /* Set the modified config */
     if(H5P_set(plist, H5F_ACS_VFD_SWMR_CONFIG_NAME, config_ptr) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set metadata cache initial config")
+
+    /* Hard-wired to use SWMR VFD */
+    if(!config_ptr->vfd_swmr_writer) {
+        if(H5P_set_driver(plist, H5FD_VFD_SWMR, NULL) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set VFD SWMR driver info")
+    }
 
 done:
     FUNC_LEAVE_API(ret_value)

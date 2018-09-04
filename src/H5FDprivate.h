@@ -36,7 +36,7 @@
 /**************************/
 
 /* Length of filename buffer */
-#define H5FD_MAX_FILENAME_LEN      1024
+#define H5FD_MAX_FILENAME_LEN       1024
 
 /* 
  * VFD SWMR 
@@ -62,6 +62,7 @@
     4                               /* HDF5 file page offset */             \
     + 4                             /* Metadata file page offset */         \
     + 4                             /* Length */                            \
+    + H5FD_SIZEOF_CHKSUM            /* Index entry checksum */              \
     )
 
 /* Metadata file index magic */
@@ -76,6 +77,80 @@
     + (N * H5FD_MD_INDEX_ENTRY_SIZE)    /* Index entries */                     \
     + H5FD_SIZEOF_CHKSUM                /* Metadata header checksum */          \
     )
+
+#define H5FD_MD_EMPTY_INDEX_SIZE                                                \
+    (                                                                           \
+    H5_SIZEOF_MAGIC                     /* Signature */                         \   
+    + 8                                 /* Tick num */                          \
+    + 4                                 /* Number of entries */                 \
+    + H5FD_SIZEOF_CHKSUM                /* Metadata header checksum */          \
+    )
+
+/* Retries for metadata file */
+#define H5FD_VFD_SWMR_MD_FILE_RETRY_MAX     200 /* Maximum retries when opening the MD file */
+#define H5FD_VFD_SWMR_MD_LOAD_RETRY_MAX     50  /* Maximum retries when trying to load the MD file header and index */
+#define H5FD_VFD_SWMR_MD_HEADER_RETRY_MAX   200 /* Maximum retries when deserializing the MD file header */
+#define H5FD_VFD_SWMR_MD_INDEX_RETRY_MAX    5   /* Maximum retries when deserializing the MD file index */
+
+
+/*
+ *  fs_page_size:   Size of pages in both the HDF5 file and the metadata file IN BYTES
+ *  tick_num:       Sequence number of the current tick.
+ *                  Initialized to zero on file creation/open, and incremented by the 
+ *                  VFD SWMR writer at the end of each tick.
+ *  index_offset:   The offset of the current metadata file index in the metadata file
+ *                  IN BYTES.
+ *  index_length:   The length of the current metadata file index IN BYTES.
+ */
+typedef struct H5FD_vfd_swmr_md_header {
+        uint32_t fs_page_size;
+        uint64_t tick_num;
+        uint64_t index_offset;
+        uint64_t index_length;
+} H5FD_vfd_swmr_md_header;
+
+/*  Internal representation of metadata file index entry */
+/*  
+ *  hdf5_page_offset:       Unsigned 64-bit value containing the base address of the
+ *                          metadata page, or multi page metadata entry in the HDF5
+ *                          file IN PAGES.
+ *                          To obtain byte offset, multiply this value by the page size.
+ *  md_file_page_offset:    Unsigned 64-bit value containing the base address of the 
+ *                          metadata page, or multi page metadata entry in the metadata
+ *                          file IN PAGES.
+ *                          To obtain byte offset, multiply this value by the page size.
+ *  length:                 The length of the metadata page or multi page metadata entry
+ *                          in BYTES.
+ *  chksum:                 Checksum for the metadata page or multi page metadata entry
+ *  tick_of_last_change:    Number of the last tick in which this index entry was changed.
+ *                          This field is only used by the VFD SWMR writer.  
+ *                          For readers, it will always be set to 0.
+ *  is_moved_to_hdf5_file:  Set to TRUE iff the entry referenced is in the HDF5 file and
+ *                          is therefore about to be removed from the metadata file
+ */
+typedef struct H5FD_vfd_swmr_idx_entry_t {
+    uint64_t hdf5_page_offset;  
+    uint64_t md_file_page_offset; 
+    uint32_t length;              
+    uint32_t chksum;
+    uint64_t tick_of_last_change; 
+    hbool_t is_moved_to_hdf5_file; 
+} H5FD_vfd_swmr_idx_entry_t;
+
+/*
+ *  tick_num:       Sequence number of the current tick.
+ *                  Initialized to zero on file creation/open, and incremented by the 
+ *                  VFD SWMR writer at the end of each tick.
+ *  num_entries:    The number of entires in the index.
+ *  entries:        The array of index entries
+ */
+typedef struct H5FD_vfd_swmr_md_index {
+        uint64_t tick_num;
+        uint32_t num_entries;
+        H5FD_vfd_swmr_idx_entry_t *entries; 
+} H5FD_vfd_swmr_md_index;
+
+
 
 #ifdef H5_HAVE_PARALLEL
 /* ======== Temporary data transfer properties ======== */
@@ -197,8 +272,10 @@ H5_DLL haddr_t H5FD_get_base_addr(const H5FD_t *file);
 H5_DLL herr_t H5FD_set_paged_aggr(H5FD_t *file, hbool_t paged);
 
 /* Function prototypes for VFD SWMR */
-H5_DLL herr_t H5FD_writer_end_of_tick();
-H5_DLL herr_t H5FD_reader_end_of_tick();
+H5_DLL herr_t H5FD_vfd_swmr_writer_end_of_tick();
+H5_DLL herr_t H5FD_vfd_swmr_reader_end_of_tick();
+H5_DLL herr_t H5FD_vfd_swmr_get_tick_and_idx(H5FD_t *_file, hbool_t open, hbool_t read_index,
+    uint64_t *tick_ptr, uint32_t *num_entries_ptr, H5FD_vfd_swmr_idx_entry_t index[]);
 
 /* Function prototypes for MPI based VFDs*/
 #ifdef H5_HAVE_PARALLEL
