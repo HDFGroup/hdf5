@@ -652,6 +652,20 @@ NOTE:
   flag is not available on windows and some modern linux systems will
   ignore the flag.
 
+  ---------------- Unsupported Library Options ---------------------
+    The threadsafe, C++ and Java interfaces are not compatible
+    with the HDF5_ENABLE_PARALLEL option.
+    Unless ALLOW_UNSUPPORTED has been specified,
+    the following options must be disabled:
+        HDF5_ENABLE_THREADSAFE, HDF5_BUILD_CPP_LIB, HDF5_BUILD_JAVA
+
+    The high-level, C++, Fortran and Java interfaces are not compatible
+    with the HDF5_ENABLE_THREADSAFE option because the lock is not hoisted
+    into the higher-level API calls.
+    Unless ALLOW_UNSUPPORTED has been specified,
+    the following options must be disabled:
+       HDF5_BUILD_HL_LIB, HDF5_BUILD_CPP_LIB, HDF5_BUILD_FORTRAN, HDF5_BUILD_JAVA
+
 
 ========================================================================
 VII. User Defined Options for HDF5 Libraries with CMake
