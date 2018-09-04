@@ -28,7 +28,6 @@ extern "C" {
 #include "h5iImp.h"
 
 extern JavaVM *jvm;
-extern jobject visit_callback;
 
 /*
  * Class:     hdf_hdf5lib_H5

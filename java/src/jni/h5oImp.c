@@ -27,13 +27,17 @@ extern "C" {
 #include "h5oImp.h"
 
 extern JavaVM *jvm;
-extern jobject visit_callback;
+
+typedef struct _cb_wrapper {
+    jobject visit_callback;
+    jobject op_data;
+} cb_wrapper;
 
 /********************/
 /* Local Prototypes */
 /********************/
 
-static herr_t H5O_iterate_cb(hid_t g_id, const char *name, const H5O_info_t *info, void *op_data);
+static herr_t H5O_iterate_cb(hid_t g_id, const char *name, const H5O_info_t *info, void *cb_data);
 
 /*
  * Class:     hdf_hdf5lib_H5
@@ -330,7 +334,7 @@ Java_hdf_hdf5lib_H5_H5Olink
 
 static herr_t
 H5O_iterate_cb
-    (hid_t g_id, const char *name, const H5O_info_t *info, void *op_data)
+    (hid_t g_id, const char *name, const H5O_info_t *info, void *cb_data)
 {
     JNIEnv    *cbenv;
     jint       status = -1;
@@ -343,6 +347,9 @@ H5O_iterate_cb
     jobject    ihinfobuf1;
     jobject    ihinfobuf2;
     jobject    cb_info_t = NULL;
+    cb_wrapper *wrapper = (cb_wrapper *)cb_data;
+    void *op_data = (void *)wrapper->op_data;
+    jobject visit_callback = wrapper->visit_callback;
 
     if(JVMPTR->AttachCurrentThread(JVMPAR2 (void**)&cbenv, NULL) != 0) {
         /* printf("JNI H5O_iterate_cb error: AttachCurrentThread failed\n"); */
@@ -448,9 +455,9 @@ Java_hdf_hdf5lib_H5_H5Ovisit
         jobject callback_op, jobject op_data, jint fields)
 {
     herr_t   status = -1;
+    cb_wrapper wrapper = {callback_op, op_data};
 
     ENVPTR->GetJavaVM(ENVPAR &jvm);
-    visit_callback = callback_op;
 
     if (op_data == NULL) {
         h5nullArgument(env, "H5Ovisit:  op_data is NULL");
@@ -459,7 +466,7 @@ Java_hdf_hdf5lib_H5_H5Ovisit
         h5nullArgument(env, "H5Ovisit:  callback_op is NULL");
     } /* end if */
     else {
-        status = H5Ovisit2((hid_t)grp_id, (H5_index_t)idx_type, (H5_iter_order_t)order, (H5O_iterate_t)H5O_iterate_cb, (void*)op_data, (unsigned)fields);
+        status = H5Ovisit2((hid_t)grp_id, (H5_index_t)idx_type, (H5_iter_order_t)order, (H5O_iterate_t)H5O_iterate_cb, (void*)&wrapper, (unsigned)fields);
 
         if (status < 0)
             h5libraryError(env);
@@ -480,9 +487,9 @@ Java_hdf_hdf5lib_H5_H5Ovisit_1by_1name
 {
     herr_t        status = -1;
     const char   *lName;
+    cb_wrapper wrapper = {callback_op, op_data};
 
     ENVPTR->GetJavaVM(ENVPAR &jvm);
-    visit_callback = callback_op;
 
     if (op_data == NULL) {
         h5nullArgument(env, "H5Ovisit_by_name:  op_data is NULL");
@@ -495,7 +502,7 @@ Java_hdf_hdf5lib_H5_H5Ovisit_1by_1name
     else {
         PIN_JAVA_STRING(name, lName);
         if (lName != NULL) {
-            status = H5Ovisit_by_name2((hid_t)grp_id, lName, (H5_index_t)idx_type, (H5_iter_order_t)order, (H5O_iterate_t)H5O_iterate_cb, (void*)op_data, (unsigned)fields, (hid_t)access_id);
+            status = H5Ovisit_by_name2((hid_t)grp_id, lName, (H5_index_t)idx_type, (H5_iter_order_t)order, (H5O_iterate_t)H5O_iterate_cb, (void*)&wrapper, (unsigned)fields, (hid_t)access_id);
 
             UNPIN_JAVA_STRING(name, lName);
 

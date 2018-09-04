@@ -548,11 +548,11 @@ else ()
 endif ()
 
 include (${HDF_RESOURCES_DIR}/HDFCompilerFlags.cmake)
+set (CMAKE_MODULE_PATH ${HDF_RESOURCES_DIR} ${HDF_RESOURCES_EXT_DIR} ${CMAKE_MODULE_PATH})
 
 #-----------------------------------------------------------------------------
 # Option to Enable MPI Parallel
 #-----------------------------------------------------------------------------
-set (CMAKE_MODULE_PATH ${HDF_RESOURCES_DIR} ${HDF_RESOURCES_EXT_DIR} ${CMAKE_MODULE_PATH})
 option (HDF5_ENABLE_PARALLEL "Enable parallel build (requires MPI)" OFF)
 if (HDF5_ENABLE_PARALLEL)
   find_package(MPI REQUIRED)
@@ -586,7 +586,7 @@ if (HDF5_ENABLE_PARALLEL)
       set (LARGE_PARALLEL_IO OFF)
     endif ()
   else ()
-    message (STATUS "Parallel libraries not found")
+    message (FATAL_ERROR "Parallel libraries not found")
   endif ()
 endif ()
 
@@ -617,6 +617,26 @@ set (H5_USE_18_API_DEFAULT 0)
 if (HDF5_USE_18_API_DEFAULT)
   set (H5_USE_18_API_DEFAULT 1)
   set (DEFAULT_API_VERSION "v18")
+endif ()
+
+#-----------------------------------------------------------------------------
+# Option to use 1.10.x API
+#-----------------------------------------------------------------------------
+option (HDF5_USE_110_API_DEFAULT "Use the HDF5 1.10.x API by default" OFF)
+set (H5_USE_110_API_DEFAULT 0)
+if (HDF5_USE_110_API_DEFAULT)
+  set (H5_USE_110_API_DEFAULT 1)
+  set (DEFAULT_API_VERSION "v110")
+endif ()
+
+#-----------------------------------------------------------------------------
+# Option to use 1.12.x API
+#-----------------------------------------------------------------------------
+option (HDF5_USE_112_API_DEFAULT "Use the HDF5 1.12.x API by default" ON)
+set (H5_USE_112_API_DEFAULT 0)
+if (HDF5_USE_112_API_DEFAULT)
+  set (H5_USE_112_API_DEFAULT 1)
+  set (DEFAULT_API_VERSION "v112")
 endif ()
 
 #-----------------------------------------------------------------------------
