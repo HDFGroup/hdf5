@@ -492,7 +492,7 @@ These five steps are described in detail below.
            Release and build the solution.
 
       3.2.1  The external libraries (zlib and szip) can be configured
-           to allow building the libraries by downloading from an GIT repository.
+           to allow building the libraries by downloading from a GIT repository.
            The option is 'HDF5_ALLOW_EXTERNAL_SUPPORT'; by adding the following
            configuration option:
                -DHDF5_ALLOW_EXTERNAL_SUPPORT:STRING="GIT"
@@ -509,7 +509,7 @@ These five steps are described in detail below.
            adding the following configuration option:
                -DHDF5_ALLOW_EXTERNAL_SUPPORT:STRING="TGZ"
 
-           The options to control the SVN URL (config/cmake/cacheinit.cmake
+           The options to control the TGZ URL (config/cmake/cacheinit.cmake
            file) are:
                ZLIB_TGZ_NAME:STRING="zlib_src.ext"
                SZIP_TGZ_NAME:STRING="szip_src.ext"
