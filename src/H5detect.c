@@ -45,8 +45,6 @@ static const char *FileHeader = "\n\
  *        running on a Vax or other machine with mixed
  *        endianness.
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 #undef NDEBUG
@@ -117,6 +115,8 @@ typedef struct malign_t {
     unsigned int         comp_align;    /* alignment for structure          */
 } malign_t;
 
+FILE       *rawoutstream = NULL;
+
 /* global variables types detection code */
 H5_GCC_DIAG_OFF(larger-than=)
 static detected_t d_g[MAXDETECT];
@@ -143,9 +143,9 @@ static void detect_C99_integers32(void);
 static void detect_C99_integers64(void);
 static void detect_alignments(void);
 static unsigned int align_g[] = {1, 2, 4, 8, 16};
-static int align_status_g = 0;        /* ALIGNMENT Signal Status */
+static int align_status_g = 0;             /* ALIGNMENT Signal Status */
 static int sigbus_handler_called_g = 0;    /* how many times called */
-static int sigsegv_handler_called_g = 0;/* how many times called */
+static int sigsegv_handler_called_g = 0;   /* how many times called */
 static int sigill_handler_called_g = 0;    /* how many times called */
 static int signal_handler_tested_g = 0;    /* how many times tested */
 #if defined(H5SETJMP) && defined(H5_HAVE_SIGNAL)
@@ -157,16 +157,11 @@ static H5JMP_BUF jbuf_g;
 
 
 /*-------------------------------------------------------------------------
- * Function:    precision
+ * Function:   precision
  *
  * Purpose:    Determine the precision and offset.
  *
- * Return:    void
- *
- * Programmer:    Robb Matzke
- *        Thursday, June 18, 1998
- *
- * Modifications:
+ * Return:     void
  *
  *-------------------------------------------------------------------------
  */
@@ -189,7 +184,8 @@ precision (detected_t *d)
                 /*void*/;
             d->precision = 8 * (d->size - n);
             d->offset = 0;
-        } else if (d->perm[d->size - 1] < 0) {
+        }
+        else if (d->perm[d->size - 1] < 0) {
             /*
              * Higher addresses are padded.
              */
@@ -197,14 +193,16 @@ precision (detected_t *d)
                 /*void*/;
             d->precision = 8 * (d->size - n);
             d->offset = 8 * n;
-        } else {
+        }
+        else {
             /*
              * No padding.
              */
             d->precision = 8 * d->size;
             d->offset = 0;
         }
-    } else {
+    }
+    else {
         /* A floating point */
         d->offset = MIN3(d->mpos, d->epos, d->sign);
         d->precision = d->msize + d->esize + 1;
@@ -213,20 +211,16 @@ precision (detected_t *d)
 
 
 /*-------------------------------------------------------------------------
- * Function:    DETECT_I/DETECT_BYTE
+ * Function:   DETECT_I/DETECT_BYTE
  *
  * Purpose:    These macro takes a type like `int' and a base name like
- *        `nati' and detects the byte order.  The VAR is used to
- *        construct the names of the C variables defined.
+ *             `nati' and detects the byte order.  The VAR is used to
+ *             construct the names of the C variables defined.
  *
- *              DETECT_I is used for types that are larger than one byte,
- *              DETECT_BYTE is used for types that are exactly one byte.
+ *             DETECT_I is used for types that are larger than one byte,
+ *             DETECT_BYTE is used for types that are exactly one byte.
  *
- * Return:    void
- *
- * Programmer:    Robb Matzke
- *        matzke@llnl.gov
- *        Jun 12 1996
+ * Return:     void
  *
  * Modifications:
  *
@@ -244,7 +238,7 @@ precision (detected_t *d)
  *
  *      Neil Fortner, 6 Sep 2013
  *      Split macro into DETECT_I and DETECT_BYTE macros, extracted
- *      common cod einto DETECT_I_BYTE_CORE.  This was done to remove
+ *      common code into DETECT_I_BYTE_CORE.  This was done to remove
  *      "will never be executed" warnings.
  *
  *-------------------------------------------------------------------------
@@ -291,19 +285,15 @@ precision (detected_t *d)
 
 
 /*-------------------------------------------------------------------------
- * Function:    DETECT_F
+ * Function:   DETECT_F
  *
  * Purpose:    This macro takes a floating point type like `double' and
- *        a base name like `natd' and detects byte order, mantissa
- *        location, exponent location, sign bit location, presence or
- *        absence of implicit mantissa bit, and exponent bias and
- *        initializes a detected_t structure with those properties.
+ *             a base name like `natd' and detects byte order, mantissa
+ *             location, exponent location, sign bit location, presence or
+ *             absence of implicit mantissa bit, and exponent bias and
+ *             initializes a detected_t structure with those properties.
  *
- * Return:    void
- *
- * Programmer:    Robb Matzke
- *        matzke@llnl.gov
- *        Jun 12 1996
+ * Return:     void
  *
  *-------------------------------------------------------------------------
  */
@@ -395,19 +385,13 @@ precision (detected_t *d)
 
 
 /*-------------------------------------------------------------------------
- * Function:    DETECT_M
+ * Function:   DETECT_M
  *
  * Purpose:    This macro takes only miscellaneous structures or pointer
- *              (pointer, hvl_t, hobj_ref_t, hdset_reg_ref_t).  It
- *        constructs the names and decides the alignment in structure.
+ *             (pointer, hvl_t, hobj_ref_t, hdset_reg_ref_t).  It
+ *             constructs the names and decides the alignment in structure.
  *
- * Return:    void
- *
- * Programmer:    Raymond Lu
- *        slu@ncsa.uiuc.edu
- *        Dec 9, 2002
- *
- * Modifications:
+ * Return:     void
  *
  *-------------------------------------------------------------------------
  */
@@ -477,19 +461,14 @@ precision (detected_t *d)
 
 #if defined(H5LONGJMP) && defined(H5_HAVE_SIGNAL)
 /*-------------------------------------------------------------------------
- * Function:    sigsegv_handler
+ * Function:   sigsegv_handler
  *
  * Purpose:    Handler for SIGSEGV. We use signal() instead of sigaction()
- *        because it's more portable to non-Posix systems. Although
- *        it's not nearly as nice to work with, it does the job for
- *        this simple stuff.
+ *             because it's more portable to non-Posix systems. Although
+ *             it's not nearly as nice to work with, it does the job for
+ *             this simple stuff.
  *
- * Return:    Returns via H5LONGJMP to jbuf_g.
- *
- * Programmer:    Robb Matzke
- *        Thursday, March 18, 1999
- *
- * Modifications:
+ * Return:     Returns via H5LONGJMP to jbuf_g.
  *
  *-------------------------------------------------------------------------
  */
@@ -553,17 +532,14 @@ sigbus_handler(int H5_ATTR_UNUSED signo)
 
 #if defined(H5LONGJMP) && defined(H5_HAVE_SIGNAL)
 /*-------------------------------------------------------------------------
- * Function:    sigill_handler
+ * Function:   sigill_handler
  *
  * Purpose:    Handler for SIGILL. We use signal() instead of sigaction()
- *        because it's more portable to non-Posix systems. Although
- *        it's not nearly as nice to work with, it does the job for
- *        this simple stuff.
+ *             because it's more portable to non-Posix systems. Although
+ *             it's not nearly as nice to work with, it does the job for
+ *             this simple stuff.
  *
- * Return:    Returns via H5LONGJMP to jbuf_g.
- *
- * Programmer:    Raymond Lu
- *        28 October 2013
+ * Return:     Returns via H5LONGJMP to jbuf_g.
  *
  *-------------------------------------------------------------------------
  */
@@ -588,17 +564,11 @@ sigill_handler(int H5_ATTR_UNUSED signo)
 
 
 /*-------------------------------------------------------------------------
- * Function:    print_results
+ * Function:   print_results
  *
  * Purpose:    Prints information about the detected data types.
  *
- * Return:    void
- *
- * Programmer:    Robb Matzke
- *        matzke@llnl.gov
- *        Jun 14, 1996
- *
- * Modifications:
+ * Return:     void
  *
  *-------------------------------------------------------------------------
  */
@@ -609,7 +579,7 @@ print_results(int nd, detected_t *d, int na, malign_t *misc_align)
     int        i, j;
 
     /* Include files */
-    printf("\
+    fprintf(rawoutstream, "\
 /****************/\n\
 /* Module Setup */\n\
 /****************/\n\
@@ -662,7 +632,7 @@ print_results(int nd, detected_t *d, int na, malign_t *misc_align)
 /*********************/\n\
 \n\
 \n");
-    printf("\n\
+    fprintf(rawoutstream, "\n\
 /*******************/\n\
 /* Local Variables */\n\
 /*******************/\n\
@@ -670,7 +640,7 @@ print_results(int nd, detected_t *d, int na, malign_t *misc_align)
 
 
     /* The interface initialization function */
-    printf("\n\
+    fprintf(rawoutstream, "\n\
 \n\
 /*-------------------------------------------------------------------------\n\
  * Function:    H5T__init_native\n\
@@ -713,12 +683,12 @@ H5T__init_native(void)\n\
         }
 
     /* Print a comment to describe this section of definitions. */
-    printf("\n   /*\n");
+    fprintf(rawoutstream, "\n   /*\n");
     iprint(d+i);
-    printf("    */\n");
+    fprintf(rawoutstream, "    */\n");
 
     /* The part common to fixed and floating types */
-    printf("\
+    fprintf(rawoutstream, "\
     if(NULL == (dt = H5T__alloc()))\n\
         HGOTO_ERROR(H5E_DATATYPE, H5E_NOSPACE, FAIL, \"datatype allocation failed\")\n\
     dt->shared->state = H5T_STATE_IMMUTABLE;\n\
@@ -728,16 +698,16 @@ H5T__init_native(void)\n\
         d[i].size);            /*size            */
 
         if(byte_order==-1)
-            printf("\
+            fprintf(rawoutstream, "\
     dt->shared->u.atomic.order = H5T_ORDER_VAX;\n");
         else if(byte_order==0)
-            printf("\
+            fprintf(rawoutstream, "\
     dt->shared->u.atomic.order = H5T_ORDER_LE;\n");
         else
-            printf("\
+            fprintf(rawoutstream, "\
     dt->shared->u.atomic.order = H5T_ORDER_BE;\n");
 
-        printf("\
+        fprintf(rawoutstream, "\
     dt->shared->u.atomic.offset = %d;\n\
     dt->shared->u.atomic.prec = %d;\n\
     dt->shared->u.atomic.lsb_pad = H5T_PAD_ZERO;\n\
@@ -748,12 +718,13 @@ H5T__init_native(void)\n\
 
     if (0 == d[i].msize) {
         /* The part unique to fixed point types */
-        printf("\
+        fprintf(rawoutstream, "\
     dt->shared->u.atomic.u.i.sign = H5T_SGN_%s;\n",
         d[i].sign ? "2" : "NONE");
-    } else {
+    }
+    else {
         /* The part unique to floating point types */
-        printf("\
+        fprintf(rawoutstream, "\
     dt->shared->u.atomic.u.f.sign = %d;\n\
     dt->shared->u.atomic.u.f.epos = %d;\n\
     dt->shared->u.atomic.u.f.esize = %d;\n\
@@ -772,11 +743,11 @@ H5T__init_native(void)\n\
     }
 
     /* Atomize the type */
-    printf("\
+    fprintf(rawoutstream, "\
     if((H5T_NATIVE_%s_g = H5I_register(H5I_DATATYPE, dt, FALSE)) < 0)\n\
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, \"can't register ID for built-in datatype\")\n",
         d[i].varname);
-    printf("    H5T_NATIVE_%s_ALIGN_g = %lu;\n",
+    fprintf(rawoutstream, "    H5T_NATIVE_%s_ALIGN_g = %lu;\n",
         d[i].varname, (unsigned long)(d[i].align));
 
         /* Variables for alignment of compound datatype */
@@ -784,28 +755,29 @@ H5T__init_native(void)\n\
             !HDstrcmp(d[i].varname, "INT")   || !HDstrcmp(d[i].varname, "LONG")  ||
             !HDstrcmp(d[i].varname, "LLONG") || !HDstrcmp(d[i].varname, "FLOAT") ||
             !HDstrcmp(d[i].varname, "DOUBLE") || !HDstrcmp(d[i].varname, "LDOUBLE")) {
-            printf("    H5T_NATIVE_%s_COMP_ALIGN_g = %lu;\n",
+            fprintf(rawoutstream, "    H5T_NATIVE_%s_COMP_ALIGN_g = %lu;\n",
                     d[i].varname, (unsigned long)(d[i].comp_align));
         }
     }
 
     /* Consider VAX a little-endian machine */
     if(byte_order==0 || byte_order==-1) {
-        printf("\n\
+        fprintf(rawoutstream, "\n\
     /* Set the native order for this machine */\n\
     H5T_native_order_g = H5T_ORDER_%s;\n", "LE");
-    } else {
-        printf("\n\
+    }
+    else {
+        fprintf(rawoutstream, "\n\
     /* Set the native order for this machine */\n\
     H5T_native_order_g = H5T_ORDER_%s;\n", "BE");
     }
 
     /* Structure alignment for pointers, hvl_t, hobj_ref_t, hdset_reg_ref_t */
-    printf("\n    /* Structure alignment for pointers, hvl_t, hobj_ref_t, hdset_reg_ref_t */\n");
+    fprintf(rawoutstream, "\n    /* Structure alignment for pointers, hvl_t, hobj_ref_t, hdset_reg_ref_t */\n");
     for(j=0; j<na; j++)
-        printf("    H5T_%s_COMP_ALIGN_g = %lu;\n", misc_align[j].name, (unsigned long)(misc_align[j].comp_align));
+        fprintf(rawoutstream, "    H5T_%s_COMP_ALIGN_g = %lu;\n", misc_align[j].name, (unsigned long)(misc_align[j].comp_align));
 
-    printf("\
+    fprintf(rawoutstream, "\
 \n\
 done:\n\
     if(ret_value < 0) {\n\
@@ -818,72 +790,65 @@ done:\n\
     FUNC_LEAVE_NOAPI(ret_value);\n} /* end H5T__init_native() */\n");
 
     /* Print the ALIGNMENT and signal-handling status as comments */
-    printf("\n"
+    fprintf(rawoutstream, "\n"
     "/****************************************/\n"
     "/* ALIGNMENT and signal-handling status */\n"
     "/****************************************/\n");
     if (align_status_g & STA_NoALIGNMENT)
-    printf("/* ALIGNAMENT test is not available */\n");
+    fprintf(rawoutstream, "/* ALIGNAMENT test is not available */\n");
     if (align_status_g & STA_NoHandlerVerify)
-    printf("/* Signal handlers verify test is not available */\n");
+    fprintf(rawoutstream, "/* Signal handlers verify test is not available */\n");
     /* The following is available in H5pubconf.h. Printing them here for */
     /* convenience. */
 #ifdef H5_HAVE_SIGNAL
-    printf("/* Signal() support: yes */\n");
+    fprintf(rawoutstream, "/* Signal() support: yes */\n");
 #else
-    printf("/* Signal() support: no */\n");
+    fprintf(rawoutstream, "/* Signal() support: no */\n");
 #endif
 #ifdef H5_HAVE_SETJMP
-    printf("/* setjmp() support: yes */\n");
+    fprintf(rawoutstream, "/* setjmp() support: yes */\n");
 #else
-    printf("/* setjmp() support: no */\n");
+    fprintf(rawoutstream, "/* setjmp() support: no */\n");
 #endif
 #ifdef H5_HAVE_LONGJMP
-    printf("/* longjmp() support: yes */\n");
+    fprintf(rawoutstream, "/* longjmp() support: yes */\n");
 #else
-    printf("/* longjmp() support: no */\n");
+    fprintf(rawoutstream, "/* longjmp() support: no */\n");
 #endif
 #ifdef H5_HAVE_SIGSETJMP
-    printf("/* sigsetjmp() support: yes */\n");
+    fprintf(rawoutstream, "/* sigsetjmp() support: yes */\n");
 #else
-    printf("/* sigsetjmp() support: no */\n");
+    fprintf(rawoutstream, "/* sigsetjmp() support: no */\n");
 #endif
 #ifdef H5_HAVE_SIGLONGJMP
-    printf("/* siglongjmp() support: yes */\n");
+    fprintf(rawoutstream, "/* siglongjmp() support: yes */\n");
 #else
-    printf("/* siglongjmp() support: no */\n");
+    fprintf(rawoutstream, "/* siglongjmp() support: no */\n");
 #endif
 #ifdef H5_HAVE_SIGPROCMASK
-    printf("/* sigprocmask() support: yes */\n");
+    fprintf(rawoutstream, "/* sigprocmask() support: yes */\n");
 #else
-    printf("/* sigprocmask() support: no */\n");
+    fprintf(rawoutstream, "/* sigprocmask() support: no */\n");
 #endif
 
     /* Print the statics of signal handlers called for debugging */
-    printf("\n"
+    fprintf(rawoutstream, "\n"
     "/******************************/\n"
     "/* signal handlers statistics */\n"
     "/******************************/\n");
-    printf("/* signal_handlers tested: %d times */\n", signal_handler_tested_g);
-    printf("/* sigbus_handler called: %d times */\n", sigbus_handler_called_g);
-    printf("/* sigsegv_handler called: %d times */\n", sigsegv_handler_called_g);
-    printf("/* sigill_handler called: %d times */\n", sigill_handler_called_g);
+    fprintf(rawoutstream, "/* signal_handlers tested: %d times */\n", signal_handler_tested_g);
+    fprintf(rawoutstream, "/* sigbus_handler called: %d times */\n", sigbus_handler_called_g);
+    fprintf(rawoutstream, "/* sigsegv_handler called: %d times */\n", sigsegv_handler_called_g);
+    fprintf(rawoutstream, "/* sigill_handler called: %d times */\n", sigill_handler_called_g);
 } /* end print_results() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    iprint
+ * Function:   iprint
  *
- * Purpose:    Prints information about the fields of a floating point
- *        format.
+ * Purpose:    Prints information about the fields of a floating point format.
  *
- * Return:    void
- *
- * Programmer:    Robb Matzke
- *        matzke@llnl.gov
- *        Jun 13, 1996
- *
- * Modifications:
+ * Return:     void
  *
  *-------------------------------------------------------------------------
  */
@@ -897,41 +862,48 @@ iprint(detected_t *d)
         /*
          * Print the byte ordering above the bit fields.
          */
-        printf("    * ");
+        fprintf(rawoutstream, "    * ");
         for (i = MIN(pass * 4 + 3, d->size - 1); i >= pass * 4; --i) {
-            printf("%4d", d->perm[i]);
-            if (i > pass * 4) HDfputs("     ", stdout);
-            if (!i) break;
+            fprintf(rawoutstream, "%4d", d->perm[i]);
+            if (i > pass * 4)
+                HDfputs("     ", stdout);
+            if (!i)
+                break;
         }
 
         /*
          * Print the bit fields
          */
-        printf("\n    * ");
+        fprintf(rawoutstream, "\n    * ");
         for (i = MIN(pass * 4 + 3, d->size - 1), k = MIN(pass * 32 + 31,
                 8 * d->size - 1); i >= pass * 4; --i) {
             unsigned int j;
 
             for (j = 8; j > 0; --j) {
                 if (k == d->sign && d->msize) {
-                    HDputchar('S');
-                } else if (k >= d->epos && k < d->epos + d->esize) {
-                    HDputchar('E');
-                } else if (k >= d->mpos && k < d->mpos + d->msize) {
-                    HDputchar('M');
-                } else if (d->msize) {
-                    HDputchar('?'); /*unknown floating point bit */
-                } else if (d->sign) {
-                    HDputchar('I');
-                } else {
-                    HDputchar('U');
+                    HDfputc('S', rawoutstream);
+                }
+                else if (k >= d->epos && k < d->epos + d->esize) {
+                    HDfputc('E', rawoutstream);
+                }
+                else if (k >= d->mpos && k < d->mpos + d->msize) {
+                    HDfputc('M', rawoutstream);
+                }
+                else if (d->msize) {
+                    HDfputc('?', rawoutstream); /*unknown floating point bit */
+                }
+                else if (d->sign) {
+                    HDfputc('I', rawoutstream);
+                }
+                else {
+                    HDfputc('U', rawoutstream);
                 }
                 --k;
             }
-            if (i > pass * 4) HDputchar(' ');
+            if (i > pass * 4) HDfputc(' ', rawoutstream);
             if (!i) break;
         }
-        HDputchar('\n');
+        HDfputc('\n', rawoutstream);
         if (!pass) break;
     }
 
@@ -939,40 +911,35 @@ iprint(detected_t *d)
      * Is there an implicit bit in the mantissa.
      */
     if (d->msize) {
-        printf("    * Implicit bit? %s\n", d->imp ? "yes" : "no");
+        fprintf(rawoutstream, "    * Implicit bit? %s\n", d->imp ? "yes" : "no");
     }
 
     /*
      * Alignment
      */
     if (0 == d->align) {
-        printf("    * Alignment: NOT CALCULATED\n");
-    } else if (1 == d->align) {
-        printf("    * Alignment: none\n");
-    } else {
-        printf("    * Alignment: %lu\n", (unsigned long) (d->align));
+        fprintf(rawoutstream, "    * Alignment: NOT CALCULATED\n");
+    }
+    else if (1 == d->align) {
+        fprintf(rawoutstream, "    * Alignment: none\n");
+    }
+    else {
+        fprintf(rawoutstream, "    * Alignment: %lu\n", (unsigned long) (d->align));
     }
 
 }
 
 
 /*-------------------------------------------------------------------------
- * Function:    byte_cmp
+ * Function:   byte_cmp
  *
  * Purpose:    Compares two chunks of memory A and B and returns the
- *        byte index into those arrays of the first byte that
- *        differs between A and B.  Ignores differences where the
- *              corresponding bit in pad_mask is set to 0.
+ *             byte index into those arrays of the first byte that
+ *             differs between A and B.  Ignores differences where the
+ *             corresponding bit in pad_mask is set to 0.
  *
- * Return:    Success:    Index of differing byte.
- *
- *        Failure:    -1 if all bytes are the same.
- *
- * Programmer:    Robb Matzke
- *        matzke@llnl.gov
- *        Jun 12, 1996
- *
- * Modifications:
+ * Return:     Success:    Index of differing byte.
+ *             Failure:    -1 if all bytes are the same.
  *
  *-------------------------------------------------------------------------
  */
@@ -992,15 +959,15 @@ byte_cmp(int n, const void *_a, const void *_b, const unsigned char *pad_mask)
 
 
 /*-------------------------------------------------------------------------
- * Function:    bit_cmp
+ * Function:   bit_cmp
  *
  * Purpose:    Compares two bit vectors and returns the index for the
- *        first bit that differs between the two vectors.     The
- *        size of the vector is NBYTES.  PERM is a mapping from
- *        actual order to little endian.  Ignores differences where
- *              the corresponding bit in pad_mask is set to 0.
+ *             first bit that differs between the two vectors.     The
+ *             size of the vector is NBYTES.  PERM is a mapping from
+ *             actual order to little endian.  Ignores differences where
+ *             the corresponding bit in pad_mask is set to 0.
  *
- * Return:    Index of first differing bit.
+ * Return:     Index of first differing bit.
  *
  *-------------------------------------------------------------------------
  */
@@ -1033,99 +1000,97 @@ bit_cmp(unsigned int nbytes, int *perm, void *_a, void *_b,
 
 
 /*-------------------------------------------------------------------------
- * Function:    fix_order
+ * Function:   fix_order
  *
  * Purpose:    Given an array PERM with elements FIRST through LAST
- *        initialized with zero origin byte numbers, this function
- *        creates a permutation vector that maps the actual order
- *        of a floating point number to little-endian.
+ *             initialized with zero origin byte numbers, this function
+ *             creates a permutation vector that maps the actual order
+ *             of a floating point number to little-endian.
  *
- *        This function assumes that the mantissa byte ordering
- *        implies the total ordering.
+ *             This function assumes that the mantissa byte ordering
+ *             implies the total ordering.
  *
- * Return:    void
- *
- * Programmer:    Robb Matzke
- *        matzke@llnl.gov
- *        Jun 13, 1996
- *
- * Modifications:
+ * Return:     void
  *
  *-------------------------------------------------------------------------
  */
 static void
 fix_order(int n, int last, int *perm, const char **mesg)
 {
-    int        i;
+    int i;
 
     if (last > 1) {
-    /*
-    * We have at least three points to consider.
-    */
-    if (perm[last] < perm[last - 1] && perm[last - 1] < perm[last - 2]) {
         /*
-        * Little endian.
+        * We have at least three points to consider.
         */
-        if (mesg) *mesg = "Little-endian";
-        for (i = 0; i < n; i++) perm[i] = i;
+        if (perm[last] < perm[last - 1] && perm[last - 1] < perm[last - 2]) {
+            /*
+            * Little endian.
+            */
+            if (mesg)
+                *mesg = "Little-endian";
+            for (i = 0; i < n; i++)
+                perm[i] = i;
 
-    } else if (perm[last] > perm[last-1] && perm[last-1] > perm[last-2]) {
-        /*
-        * Big endian.
-        */
-        if (mesg) *mesg = "Big-endian";
-        for (i = 0; i < n; i++) perm[i] = (n - 1) - i;
+        }
+        else if (perm[last] > perm[last - 1]
+                && perm[last - 1] > perm[last - 2]) {
+            /*
+            * Big endian.
+            */
+            if (mesg)
+                *mesg = "Big-endian";
+            for (i = 0; i < n; i++)
+                perm[i] = (n - 1) - i;
 
-    } else {
-        /*
-        * Bi-endian machines like VAX.
-             * (NOTE: This is not an actual determination of the VAX-endianness.
-             *          It could have some other endianness and fall into this
-             *          case - JKM & QAK)
-        */
-        HDassert(0 == n % 2);
-        if (mesg) *mesg = "VAX";
-        for (i = 0; i < n; i += 2) {
-        perm[i] = (n - 2) - i;
-        perm[i + 1] = (n - 1) - i;
+        }
+        else {
+            /*
+            * Bi-endian machines like VAX.
+            * (NOTE: This is not an actual determination of the VAX-endianness.
+            *          It could have some other endianness and fall into this
+            *          case - JKM & QAK)
+            */
+            HDassert(0 == n % 2);
+            if (mesg)
+                *mesg = "VAX";
+            for (i = 0; i < n; i += 2) {
+                perm[i] = (n - 2) - i;
+                perm[i + 1] = (n - 1) - i;
+            }
         }
     }
-    } else {
-    fprintf(stderr,
-        "Failed to detect byte order of %d-byte floating point.\n", n);
-    HDexit(1);
+    else {
+        fprintf(stderr,
+                "Failed to detect byte order of %d-byte floating point.\n", n);
+        HDexit(1);
     }
 }
 
 
 /*-------------------------------------------------------------------------
- * Function:    imp_bit
+ * Function:   imp_bit
  *
  * Purpose:    Looks for an implicit bit in the mantissa.  The value
- *        of _A should be 1.0 and the value of _B should be 0.5.
- *        Some floating-point formats discard the most significant
- *        bit of the mantissa after normalizing since it will always
- *        be a one (except for 0.0).  If this is true for the native
- *        floating point values stored in _A and _B then the function
- *        returns non-zero.
+ *             of _A should be 1.0 and the value of _B should be 0.5.
+ *             Some floating-point formats discard the most significant
+ *             bit of the mantissa after normalizing since it will always
+ *             be a one (except for 0.0).  If this is true for the native
+ *             floating point values stored in _A and _B then the function
+ *             returns non-zero.
  *
- *        This function assumes that the exponent occupies higher
- *        order bits than the mantissa and that the most significant
- *        bit of the mantissa is next to the least significant bit
- *        of the exponent.
+ *             This function assumes that the exponent occupies higher
+ *             order bits than the mantissa and that the most significant
+ *             bit of the mantissa is next to the least significant bit
+ *             of the exponent.
  *
  *
- * Return:    Success:    Non-zero if the most significant bit
+ * Return:     Success:    Non-zero if the most significant bit
  *                of the mantissa is discarded (ie, the
  *                mantissa has an implicit `one' as the
  *                most significant bit).    Otherwise,
  *                returns zero.
- *
- *        Failure:    exit(1)
- *
- * Programmer:    Robb Matzke
- *        matzke@llnl.gov
- *        Jun 13, 1996
+ *             Failure:    exit(1)
  *
  * Modifications:
  *
@@ -1162,18 +1127,13 @@ imp_bit(unsigned int n, int *perm, void *_a, void *_b, const unsigned char *pad_
 
 
 /*-------------------------------------------------------------------------
- * Function:    find_bias
+ * Function:   find_bias
  *
  * Purpose:    Determines the bias of the exponent.  This function should
- *        be called with _A having a value of `1'.
+ *             be called with _A having a value of `1'.
  *
- * Return:    Success:    The exponent bias.
- *
- *        Failure:
- *
- * Programmer:    Robb Matzke
- *        matzke@llnl.gov
- *        Jun 13, 1996
+ * Return:     Success:    The exponent bias.
+ *             Failure:
  *
  * Modifications:
  *
@@ -1205,17 +1165,11 @@ find_bias(unsigned int epos, unsigned int esize, int *perm, void *_a)
 
 
 /*-------------------------------------------------------------------------
- * Function:    print_header
+ * Function:   print_header
  *
  * Purpose:    Prints the C file header for the generated file.
  *
- * Return:    void
- *
- * Programmer:    Robb Matzke
- *        matzke@llnl.gov
- *        Mar 12 1997
- *
- * Modifications:
+ * Return:     void
  *
  *-------------------------------------------------------------------------
  */
@@ -1224,15 +1178,15 @@ print_header(void)
 {
 
     time_t        now = HDtime(NULL);
-    struct tm        *tm = HDlocaltime(&now);
-    char        real_name[30];
-    char        host_name[256];
-    int            i;
-    const char        *s;
+    struct tm    *tm = HDlocaltime(&now);
+    char          real_name[30];
+    char          host_name[256];
+    int           i;
+    const char   *s;
 #ifdef H5_HAVE_GETPWUID
     struct passwd    *pwd = NULL;
 #else
-    int            pwd = 1;
+    int           pwd = 1;
 #endif
     static const char    *month_name[] =
     {
@@ -1281,20 +1235,22 @@ bit.\n";
      */
 #ifdef H5_HAVE_GETPWUID
     {
-    size_t n;
-    char *comma;
-    if ((pwd = HDgetpwuid(HDgetuid()))) {
-        if ((comma = HDstrchr(pwd->pw_gecos, ','))) {
-        n = MIN(sizeof(real_name)-1, (unsigned)(comma-pwd->pw_gecos));
-        HDstrncpy(real_name, pwd->pw_gecos, n);
-        real_name[n] = '\0';
-        } else {
-        HDstrncpy(real_name, pwd->pw_gecos, sizeof(real_name));
-        real_name[sizeof(real_name) - 1] = '\0';
+        size_t n;
+        char *comma;
+        if ((pwd = HDgetpwuid(HDgetuid()))) {
+            if ((comma = HDstrchr(pwd->pw_gecos, ','))) {
+                n = MIN(sizeof(real_name)-1, (unsigned)(comma-pwd->pw_gecos));
+                HDstrncpy(real_name, pwd->pw_gecos, n);
+                real_name[n] = '\0';
+            }
+            else {
+                HDstrncpy(real_name, pwd->pw_gecos, sizeof(real_name));
+                real_name[sizeof(real_name) - 1] = '\0';
+            }
         }
-    } else {
-        real_name[0] = '\0';
-    }
+        else {
+            real_name[0] = '\0';
+        }
     }
 #else
     real_name[0] = '\0';
@@ -1305,7 +1261,7 @@ bit.\n";
      */
 #ifdef H5_HAVE_GETHOSTNAME
     if (HDgethostname(host_name, sizeof(host_name)) < 0) {
-    host_name[0] = '\0';
+        host_name[0] = '\0';
     }
 #else
     host_name[0] = '\0';
@@ -1314,49 +1270,49 @@ bit.\n";
     /*
      * The file header: warning, copyright notice, build information.
      */
-    printf("/* Generated automatically by H5detect -- do not edit */\n\n\n");
-    HDputs(FileHeader);        /*the copyright notice--see top of this file */
+    fprintf(rawoutstream, "/* Generated automatically by H5detect -- do not edit */\n\n\n");
+    HDfputs(FileHeader, rawoutstream);        /*the copyright notice--see top of this file */
 
-    printf(" *\n * Created:\t\t%s %2d, %4d\n",
+    fprintf(rawoutstream, " *\n * Created:\t\t%s %2d, %4d\n",
     month_name[tm->tm_mon], tm->tm_mday, 1900 + tm->tm_year);
     if (pwd || real_name[0] || host_name[0]) {
-    printf(" *\t\t\t");
-    if (real_name[0]) printf("%s <", real_name);
+        fprintf(rawoutstream, " *\t\t\t");
+        if (real_name[0])
+            fprintf(rawoutstream, "%s <", real_name);
 #ifdef H5_HAVE_GETPWUID
-    if (pwd) HDfputs(pwd->pw_name, stdout);
+    if (pwd) HDfputs(pwd->pw_name, rawoutstream);
 #endif
-    if (host_name[0]) printf("@%s", host_name);
-    if (real_name[0]) printf(">");
-    HDputchar('\n');
+        if (host_name[0])
+            fprintf(rawoutstream, "@%s", host_name);
+        if (real_name[0])
+            fprintf(rawoutstream, ">");
+        HDfputc('\n', rawoutstream);
     }
-    printf(" *\n * Purpose:\t\t");
+    fprintf(rawoutstream, " *\n * Purpose:\t\t");
     for (s = purpose; *s; s++) {
-    HDputchar(*s);
-    if ('\n' == *s && s[1]) printf(" *\t\t\t");
+        HDfputc(*s, rawoutstream);
+        if ('\n' == *s && s[1])
+            fprintf(rawoutstream, " *\t\t\t");
     }
 
-    printf(" *\n * Modifications:\n *\n");
-    printf(" *\tDO NOT MAKE MODIFICATIONS TO THIS FILE!\n");
-    printf(" *\tIt was generated by code in `H5detect.c'.\n");
+    fprintf(rawoutstream, " *\n * Modifications:\n *\n");
+    fprintf(rawoutstream, " *\tDO NOT MAKE MODIFICATIONS TO THIS FILE!\n");
+    fprintf(rawoutstream, " *\tIt was generated by code in `H5detect.c'.\n");
 
-    printf(" *\n *");
-    for (i = 0; i < 73; i++) HDputchar('-');
-    printf("\n */\n\n");
+    fprintf(rawoutstream, " *\n *");
+    for (i = 0; i < 73; i++)
+        HDfputc('-', rawoutstream);
+    fprintf(rawoutstream, "\n */\n\n");
 
 }
 
 
 /*-------------------------------------------------------------------------
- * Function:    detect_C89_integers
+ * Function:   detect_C89_integers
  *
  * Purpose:    Detect C89 integer types
  *
- * Return:    void
- *
- * Programmer:    Albert Cheng
- *        2004/05/20
- *
- * Modifications:
+ * Return:     void
  *
  *-------------------------------------------------------------------------
  */
@@ -1375,16 +1331,11 @@ detect_C89_integers(void)
 
 
 /*-------------------------------------------------------------------------
- * Function:    detect_C89_floats
+ * Function:   detect_C89_floats
  *
  * Purpose:    Detect C89 floating point types
  *
- * Return:    void
- *
- * Programmer:    Albert Cheng
- *        2004/05/20
- *
- * Modifications:
+ * Return:     void
  *
  *-------------------------------------------------------------------------
  */
@@ -1397,16 +1348,11 @@ detect_C89_floats(void)
 
 
 /*-------------------------------------------------------------------------
- * Function:    detect_C99_integers8
+ * Function:   detect_C99_integers8
  *
  * Purpose:    Detect C99 8 bit integer types
  *
- * Return:    void
- *
- * Programmer:    Albert Cheng
- *        2004/05/20
- *
- * Modifications:
+ * Return:     void
  *
  *-------------------------------------------------------------------------
  */
@@ -1459,16 +1405,11 @@ detect_C99_integers8(void)
 
 
 /*-------------------------------------------------------------------------
- * Function:    detect_C99_integers16
+ * Function:   detect_C99_integers16
  *
  * Purpose:    Detect C99 16 bit integer types
  *
- * Return:    void
- *
- * Programmer:    Albert Cheng
- *        2004/05/20
- *
- * Modifications:
+ * Return:     void
  *
  *-------------------------------------------------------------------------
  */
@@ -1497,16 +1438,11 @@ detect_C99_integers16(void)
 
 
 /*-------------------------------------------------------------------------
- * Function:    detect_C99_integers32
+ * Function:   detect_C99_integers32
  *
  * Purpose:    Detect C99 32 bit integer types
  *
- * Return:    void
- *
- * Programmer:    Albert Cheng
- *        2004/05/20
- *
- * Modifications:
+ * Return:     void
  *
  *-------------------------------------------------------------------------
  */
@@ -1535,16 +1471,11 @@ detect_C99_integers32(void)
 
 
 /*-------------------------------------------------------------------------
- * Function:    detect_C99_integers64
+ * Function:   detect_C99_integers64
  *
  * Purpose:    Detect C99 64 bit integer types
  *
- * Return:    void
- *
- * Programmer:    Albert Cheng
- *        2004/05/20
- *
- * Modifications:
+ * Return:     void
  *
  *-------------------------------------------------------------------------
  */
@@ -1586,16 +1517,11 @@ detect_C99_integers64(void)
 
 
 /*-------------------------------------------------------------------------
- * Function:    detect_C99_integers
+ * Function:   detect_C99_integers
  *
  * Purpose:    Detect C99 integer types
  *
- * Return:    void
- *
- * Programmer:    Albert Cheng
- *        2004/05/20
- *
- * Modifications:
+ * Return:     void
  *
  *-------------------------------------------------------------------------
  */
@@ -1612,16 +1538,11 @@ detect_C99_integers(void)
 
 
 /*-------------------------------------------------------------------------
- * Function:    detect_C99_floats
+ * Function:   detect_C99_floats
  *
  * Purpose:    Detect C99 floating point types
  *
- * Return:    void
- *
- * Programmer:    Albert Cheng
- *        2004/05/20
- *
- * Modifications:
+ * Return:     void
  *
  *-------------------------------------------------------------------------
  */
@@ -1643,16 +1564,11 @@ detect_C99_floats(void)
 
 
 /*-------------------------------------------------------------------------
- * Function:    detect_alignments
+ * Function:   detect_alignments
  *
  * Purpose:    Detect structure alignments
  *
- * Return:    void
- *
- * Programmer:    Albert Cheng
- *        2004/05/20
- *
- * Modifications:
+ * Return:     void
  *
  *-------------------------------------------------------------------------
  */
@@ -1685,61 +1601,57 @@ static int verify_signal_handlers(int signum, void (*handler)(int))
 #endif
     void    (*save_handler)(int) = HDsignal(signum, handler);
     volatile int i, val;
-    int ntries=5;
-    volatile int nfailures=0;
-    volatile int nsuccesses=0;
+    int          ntries = 5;
+    volatile int nfailures = 0;
+    volatile int nsuccesses = 0;
 
-    for (i=0;i<ntries; i++){
-    val=H5SETJMP(jbuf_g);
-    if (val==0)
-    {
-        /* send self the signal to trigger the handler */
-        signal_handler_tested_g++;
-        HDraise(signum);
-        /* Should not reach here. Record error. */
-        nfailures++;
-    }else{
-        if (val==signum){
-        /* return from signum handler. Record a sucess. */
-        nsuccesses++;
-        }else{
-        fprintf(stderr, "Unknown return value (%d) from H5SETJMP",
-            val);
-        nfailures++;
+    for (i=0;i<ntries; i++) {
+        val=H5SETJMP(jbuf_g);
+        if (val==0) {
+            /* send self the signal to trigger the handler */
+            signal_handler_tested_g++;
+            HDraise(signum);
+            /* Should not reach here. Record error. */
+            nfailures++;
         }
-    }
+        else {
+            if (val==signum){
+                /* return from signum handler. Record a sucess. */
+                nsuccesses++;
+            }
+            else{
+                fprintf(stderr, "Unknown return value (%d) from H5SETJMP", val);
+                nfailures++;
+            }
+        }
     }
     /* restore save handler, check results and report failures */
     HDsignal(signum, save_handler);
-    if (nfailures>0 || nsuccesses != ntries){
-    fprintf(stderr, "verify_signal_handlers for signal %d did %d tries. "
-        "Found %d failures and %d successes\n",
-        signum, ntries, nfailures, nsuccesses);
-    return(-1);
-    }else{
-    /* all succeeded */
-    return(0);
+    if (nfailures>0 || nsuccesses != ntries) {
+        fprintf(stderr, "verify_signal_handlers for signal %d did %d tries. "
+                "Found %d failures and %d successes\n",
+                signum, ntries, nfailures, nsuccesses);
+        return(-1);
+    }
+    else {
+        /* all succeeded */
+        return(0);
     }
 }
 #endif
 
 
 /*-------------------------------------------------------------------------
- * Function:    main
+ * Function:  main
  *
- * Purpose:    Main entry point.
+ * Purpose:   Main entry point.
  *
  * Return:    Success:    exit(0)
  *
- *        Failure:    exit(1)
- *
- * Programmer:    Robb Matzke
- *        matzke@llnl.gov
- *        Jun 12, 1996
+ *            Failure:    exit(1)
  *
  * Modifications:
- *    Albert Cheng, 2004/05/20
- *    Some compilers, e.g., Intel C v7.0, took a long time to compile
+ *      Some compilers, e.g., Intel C v7.0, took a long time to compile
  *      with optimization when a module routine contains many code lines.
  *      Divide up all those types detections macros into subroutines, both
  *      to avoid the compiler optimization error and cleaner codes.
@@ -1747,8 +1659,24 @@ static int verify_signal_handlers(int signum, void (*handler)(int))
  *-------------------------------------------------------------------------
  */
 int HDF_NO_UBSAN
-main(void)
+main(int argc, char *argv[])
 {
+    char    *fname = NULL;
+    FILE    *f;    /* temporary holding place for the stream pointer
+                    * so that rawoutstream is changed only when succeeded */
+
+    if (argc > 1) {
+        fname = argv[1];
+    }
+    /* First check if filename is string "NULL" */
+    if (fname != NULL) {
+        /* binary output */
+        if ((f = HDfopen(fname, "w")) != NULL) {
+            rawoutstream = f;
+        }
+    }
+    if (!rawoutstream)
+        rawoutstream = stdout;
 
 #if defined(H5_HAVE_SETSYSINFO) && defined(SSI_NVPAIRS)
 #if defined(UAC_NOPRINT) && defined(UAC_SIGBUS)
@@ -1760,7 +1688,7 @@ main(void)
     nvpairs[0] = SSIN_UACPROC;
     nvpairs[1] = UAC_NOPRINT | UAC_SIGBUS;
     if (setsysinfo(SSI_NVPAIRS, nvpairs, 1, 0, 0)<0) {
-    fprintf(stderr, "H5detect: unable to turn off UAC handling: %s\n",
+        fprintf(stderr, "H5detect: unable to turn off UAC handling: %s\n",
         HDstrerror(errno));
     }
 #endif
@@ -1802,6 +1730,13 @@ main(void)
     detect_alignments();
 
     print_results (nd_g, d_g, na_g, m_g);
+
+    if (rawoutstream && rawoutstream != stdout) {
+        if (HDfclose(rawoutstream))
+            fprintf(stderr, "closing rawoutstream");
+        else
+            rawoutstream = NULL;
+    }
 
     return 0;
 }
