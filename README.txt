@@ -1,4 +1,4 @@
-HDF5 version 1.10.4-snap0 currently under development
+HDF5 version 1.10.4 released on 2018-09-07
 
 ------------------------------------------------------------------------------
 Please refer to the release_docs/INSTALL file for installation instructions.
