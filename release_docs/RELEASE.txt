@@ -32,8 +32,6 @@ If you have any questions or comments, please send them to the HDF Help Desk:
 
 CONTENTS
 
-- New Features
-- Support for new platforms and languages
 - Bug Fixes since HDF5-1.10.3
 - Supported Platforms
 - Tested Configuration Features Summary
@@ -41,57 +39,6 @@ CONTENTS
 - Known Problems
 - CMake vs. Autotools installations
 
-
-New Features
-============
-
-    Configuration:
-    -------------
-    -
-
-    Library:
-    --------
-    -
-
-    Parallel Library:
-    -----------------
-    -
-
-    Fortran Library:
-    ----------------
-    -
-
-    C++ Library:
-    ------------
-    - 
-
-    Java Library:
-    ----------------
-    - 
-
-    Tools:
-    ------
-    -
-
-    High-Level APIs:
-    ---------------
-    -
-
-    C Packet Table API
-    ------------------
-    -
-
-    Internal header file
-    --------------------
-    -
-
-    Documentation
-    -------------
-    -
-
-Support for new platforms, languages and compilers.
-=======================================
-    -
 
 Bug Fixes since HDF5-1.10.3 release
 ==================================
@@ -173,7 +120,7 @@ Supported Platforms
 
     Mac OS Sierra 10.12.6         Apple LLVM version 8.1.0 (clang/clang++-802.0.42)
     64-bit                        gfortran GNU Fortran (GCC) 7.1.0
-    (swallow/kite)                Intel icc/icpc/ifort version 17.0.2
+    (kite)                        Intel icc/icpc/ifort version 17.0.2
 
 Tested Configuration Features Summary
 =====================================
@@ -202,9 +149,9 @@ Mac OS X Mavericks 10.9.5 64-bit        n        y/y    n        y    y     y
 Mac OS X Yosemite 10.10.5 64-bit        n        y/y    n        y    y     y
 Mac OS X El Capitan 10.11.6 64-bit      n        y/y    n        y    y     y
 Mac OS Sierra 10.12.6 64-bit            n        y/y    n        y    y     y
-CentOS 7.2 Linux 2.6.32 x86_64 PGI      n        y/y    n        y    y     y
-CentOS 7.2 Linux 2.6.32 x86_64 GNU      y        y/y    y        y    y     y
-CentOS 7.2 Linux 2.6.32 x86_64 Intel    n        y/y    n        y    y     y
+CentOS 7.2 Linux 3.10.0 x86_64 PGI      n        y/y    n        y    y     y
+CentOS 7.2 Linux 3.10.0 x86_64 GNU      y        y/y    y        y    y     y
+CentOS 7.2 Linux 3.10.0 x86_64 Intel    n        y/y    n        y    y     y
 Linux 2.6.32-573.18.1.el6.ppc64         n        y/y    n        y    y     y
 
 
@@ -222,9 +169,9 @@ Mac OS X Mavericks 10.9.5 64-bit           y       n         y         y
 Mac OS X Yosemite 10.10.5 64-bit           y       n         y         y
 Mac OS X El Capitan 10.11.6 64-bit         y       n         y         y
 Mac OS Sierra 10.12.6 64-bit               y       n         y         y
-CentOS 7.2 Linux 2.6.32 x86_64 PGI         y       y         y         n
-CentOS 7.2 Linux 2.6.32 x86_64 GNU         y       y         y         y
-CentOS 7.2 Linux 2.6.32 x86_64 Intel       y       y         y         n
+CentOS 7.2 Linux 3.10.0 x86_64 PGI         y       y         y         n
+CentOS 7.2 Linux 3.10.0 x86_64 GNU         y       y         y         y
+CentOS 7.2 Linux 3.10.0 x86_64 Intel       y       y         y         n
 Linux 2.6.32-573.18.1.el6.ppc64            y       y         y         n
 
 Compiler versions for each platform are listed in the preceding
