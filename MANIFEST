@@ -1041,6 +1041,7 @@
 ./test/none.h5
 ./test/ntypes.c
 ./test/ohdr.c
+./test/ohdr_min.c
 ./test/objcopy.c
 ./test/page_buffer.c
 ./test/paged_nopersist.h5

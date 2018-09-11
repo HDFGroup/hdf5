@@ -880,6 +880,9 @@ H5F__new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_
         /* intialize point of no return */
         f->shared->point_of_no_return = FALSE;
 
+        /* set default value for minimizing dataset object headers */
+        f->shared->crt_dset_min_ohdr_flag = FALSE;
+
         /* Copy the file creation and file access property lists into the
          * new file handle. We do this early because some values might need
          * to change as the file is being opened.

@@ -1713,3 +1713,97 @@ H5Fincrement_filesize(hid_t file_id, hsize_t increment)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Fincrement_filesize() */
+
+
+/*-------------------------------------------------------------------------
+ * Function: H5Fget_dset_no_attrs_hint
+ *
+ * Purpose:
+ *
+ *     Get the file-level setting to create minimized dataset object headers.
+ *     Result is stored at pointer `minimize`.
+ *
+ * Return:
+ *
+ *     Success: SUCCEED (0) (non-negative value)
+ *     Failure: FAIL (-1) (negative value)
+ *
+ * Programmer:
+ *
+ *     Jacob Smith
+ *     15 August 2018
+ *
+ * Changes: None.
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Fget_dset_no_attrs_hint(hid_t    file_id,
+                          hbool_t *minimize)
+{
+    H5F_t  *f         = NULL;
+    herr_t  ret_value = SUCCEED;
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "i*b", file_id, minimize);
+
+    if (NULL == minimize)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, 
+                    "out pointer 'minimize' cannot be NULL")
+
+    f = (H5F_t *)H5I_object_verify(file_id, H5I_FILE);
+    if (NULL == f)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, 
+                    "can't get file from id")
+
+    HDassert(f->shared);
+
+    *minimize = f->shared->crt_dset_min_ohdr_flag;
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Fget_dset_no_attrs_hint */
+
+
+/*-------------------------------------------------------------------------
+ * Function: H5Fset_dset_no_attrs_hint
+ *
+ * Purpose:
+ *
+ *     Set the file-level setting to create minimized dataset object headers.
+ *
+ * Return:
+ *
+ *     Success: SUCCEED (0) (non-negative value)
+ *     Failure: FAIL (-1) (negative value)
+ *
+ * Programmer:
+ *
+ *     Jacob Smith
+ *     15 August 2018
+ *
+ * Changes: None.
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Fset_dset_no_attrs_hint(hid_t   file_id,   
+                          hbool_t minimize)
+{
+    H5F_t  *f         = NULL;
+    herr_t  ret_value = SUCCEED;
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "ib", file_id, minimize);
+
+    f = (H5F_t *)H5I_object_verify(file_id, H5I_FILE);
+    if (NULL == f)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+                    "can't get file from id")
+
+    HDassert(f->shared);
+
+    f->shared->crt_dset_min_ohdr_flag = minimize;
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Fset_dset_no_attrs_hint */
+
