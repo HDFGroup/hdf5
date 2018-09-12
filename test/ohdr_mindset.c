@@ -345,6 +345,10 @@ if (strcmp((actual), (expected)) != 0) {       \
 
 #endif /* JSMITH_TESTING */
 
+/* basenames of test files created in this test suite */
+#define OHMIN_FILENAME_A "ohdr_min_a"
+#define OHMIN_FILENAME_B "ohdr_min_b"
+
 /* used for object header size comparison */
 #define EQ 1
 #define LT 2
@@ -441,7 +445,7 @@ if (strcmp((actual), (expected)) != 0) {       \
  *
  * ---------------------------------------------------------------------------
  */
-static int
+static herr_t
 make_file(                    \
         const char *filename, \
         hid_t      *fid)
@@ -469,7 +473,7 @@ make_file(                    \
  *
  * ---------------------------------------------------------------------------
  */
-static int
+static herr_t
 make_dataset(                     \
         hid_t       loc_id,       \
         const char *name,         \
@@ -509,7 +513,7 @@ make_dataset(                     \
  *
  * ---------------------------------------------------------------------------
  */
-static int
+static herr_t
 put_attribute(                      \
         hid_t       loc_id,         \
         const char *attrname,       \
@@ -560,6 +564,27 @@ count_attributes(hid_t dset_id)
 
 
 /* ---------------------------------------------------------------------------
+ * Function:  _oh_getsize()
+ *
+ * Purpose: Get the total space used by the object header
+ *
+ *
+ * Return: SUCCEED/FAIL. On success, stores size in `size_out` pointer.
+ *
+ * ---------------------------------------------------------------------------
+ */
+static herr_t
+_oh_getsize(hid_t did, hsize_t *size_out)
+{
+    H5O_info_t info;
+    if (FAIL == H5Oget_info2(did, &info, H5O_INFO_HDR))
+        return FAIL;
+    *size_out = info.hdr.space.total;
+    return SUCCEED;
+} /* _oh_getsize */
+
+
+/* ---------------------------------------------------------------------------
  * Function:  oh_compare()
  *
  * Purpose: Compare the TOTAL space used by datasets' object headers.
@@ -574,17 +599,14 @@ oh_compare(         \
         hid_t did1, \
         hid_t did2)
 {
-    H5O_info_t info;
-    hsize_t    space1 = 0;
-    hsize_t    space2 = 0;
+    hsize_t space1 = 0;
+    hsize_t space2 = 0;
 
-    if (FAIL == H5Oget_info2(did1, &info, H5O_INFO_HDR))
+    if (FAIL == _oh_getsize(did1, &space1))
         return -1;
-    space1 = info.hdr.space.total;
 
-    if (FAIL == H5Oget_info2(did2, &info, H5O_INFO_HDR))
+    if (FAIL == _oh_getsize(did2, &space2))
         return -2;
-    space2 = info.hdr.space.total;
 
     if (space1 < space2)
         return LT;
@@ -628,12 +650,19 @@ test_attribute_addition(void)
     hsize_t array_10[1]   = {10}; /* dataspace extent */
     char    buffer[10]    = "";   /* to inspect string attribute */
     int     a_out         = 0;
+    char    filename[512] = "";
 
     TESTING("attribute additions to [un]minimized dataset")
 
     /*********
      * SETUP *
      *********/
+
+    FAIL_IF( NULL == h5_fixname(
+            OHMIN_FILENAME_A,
+            H5P_DEFAULT,
+            filename,
+            sizeof(filename)) )
 
     dspace_id = H5Screate_simple(
             1,        /* rank */
@@ -658,7 +687,7 @@ test_attribute_addition(void)
 
     JSVERIFY( SUCCEED,           \
               make_file(         \
-                    "ohdr_min_a.h5", \
+                    filename,    \
                     &file_id),   \
              "unable to create file")
 
@@ -951,11 +980,26 @@ test_size_comparisons(void)
     hid_t dset_F_N_id = -1; /* 'N' for explcit non-minimized dset */
     hid_t dset_F_Y_id = -1; /* 'Y' for minimzed dset */
 
-    TESTING("size comparisons");
+    char filename_a[512] = "";
+    char filename_b[512] = "";
+
+    TESTING("default size comparisons");
 
     /*********
      * SETUP *
      *********/
+
+    FAIL_IF( NULL == h5_fixname(
+            OHMIN_FILENAME_A,
+            H5P_DEFAULT,
+            filename_a,
+            sizeof(filename_a)) )
+
+    FAIL_IF( NULL == h5_fixname(
+            OHMIN_FILENAME_B,
+            H5P_DEFAULT,
+            filename_b,
+            sizeof(filename_b)) )
 
     dcpl_minimize = H5Pcreate(H5P_DATASET_CREATE);
     FAIL_IF( 0 > dcpl_minimize )
@@ -980,7 +1024,7 @@ test_size_comparisons(void)
 
     JSVERIFY( SUCCEED,                  \
               make_file(                \
-                    "ohdr_min_a.h5",   \
+                    filename_a,         \
                     &file_f_id),        \
              "unable to create file 'ohdr_min_a.h5'")
 
@@ -1016,7 +1060,7 @@ test_size_comparisons(void)
 
     JSVERIFY( SUCCEED,              \
               make_file(            \
-                    "ohdr_min_b.h5", \
+                    filename_b,     \
                     &file_F_id),    \
              "unable to create file 'ohdr_min_b.h5'")
     FAIL_IF( 0 > H5Fset_dset_no_attrs_hint(file_F_id, TRUE) )
@@ -1131,9 +1175,12 @@ test_minimized_with_filter(void)
     hid_t   mindset_id  = -1;
     hid_t   minfdset_id = -1;
     hid_t   file_id     = -1;
-    hsize_t extents[1]  = {10};
-    unsigned filter_values[] = {0};
-    const hsize_t chunk_dim[] = {2};
+
+    char           filename[512]   = "";
+    const hsize_t  extents[1]      = {10}; /* extents of dataspace */
+    const unsigned filter_values[] = {0};  /* TBD */
+    const hsize_t  chunk_dim[]     = {2};  /* needed for filter */
+    const int      ndims           = 1;
 
 /*           | default | minimize
  * ----------+---------+---------
@@ -1142,11 +1189,17 @@ test_minimized_with_filter(void)
  * filter    |   fdset | minfdset
  */
 
-    TESTING("minimized header with filter message");
+    TESTING("with filter message");
 
     /*********
      * SETUP *
      *********/
+
+    FAIL_IF( NULL == h5_fixname(
+            OHMIN_FILENAME_A,
+            H5P_DEFAULT,
+            filename,
+            sizeof(filename)) )
 
     mindcpl_id = H5Pcreate(H5P_DATASET_CREATE);
     FAIL_IF( 0 > mindcpl_id )
@@ -1157,7 +1210,7 @@ test_minimized_with_filter(void)
     fdcpl_id = H5Pcreate(H5P_DATASET_CREATE);
     FAIL_IF( 0 > fdcpl_id )
     JSVERIFY( SUCCEED,
-              H5Pset_chunk(fdcpl_id, 1, chunk_dim),
+              H5Pset_chunk(fdcpl_id, ndims, chunk_dim),
              "unable to chunk dataset")
     JSVERIFY( SUCCEED, 
               H5Pset_filter(
@@ -1174,7 +1227,7 @@ test_minimized_with_filter(void)
               H5Pset_dset_no_attrs_hint(minfdcpl_id, TRUE),
              "unable to minimize to-be-filtered dataset header")
     JSVERIFY( SUCCEED,
-              H5Pset_chunk(minfdcpl_id, 1, chunk_dim),
+              H5Pset_chunk(minfdcpl_id, ndims, chunk_dim),
              "unable to chunk minimized dataset")
     JSVERIFY( SUCCEED, 
               H5Pset_filter(
@@ -1191,16 +1244,16 @@ test_minimized_with_filter(void)
     dtype_id = H5Tcopy(H5T_NATIVE_INT);
     FAIL_IF( 0 > dtype_id )
 
-    JSVERIFY( SUCCEED,                \
-              make_file(              \
-                    "ohdr_min_a.h5", \
-                    &file_id),        \
+    JSVERIFY( SUCCEED,           \
+              make_file(         \
+                    filename,    \
+                    &file_id),   \
              "unable to create file 'ohdr_min_a.h5'")
 
     JSVERIFY( SUCCEED,           \
               make_dataset(      \
                     file_id,     \
-                    "dset",      \
+                    "xx",      \
                     dtype_id,    \
                     dspace_id,   \
                     H5P_DEFAULT, \
@@ -1210,7 +1263,7 @@ test_minimized_with_filter(void)
     JSVERIFY( SUCCEED,            \
               make_dataset(       \
                     file_id,      \
-                    "mindset",    \
+                    "Mx",    \
                     dtype_id,     \
                     dspace_id,    \
                     mindcpl_id,   \
@@ -1220,7 +1273,7 @@ test_minimized_with_filter(void)
     JSVERIFY( SUCCEED,            \
               make_dataset(       \
                     file_id,      \
-                    "gzipdset",   \
+                    "xZ",   \
                     dtype_id,     \
                     dspace_id,    \
                     fdcpl_id,     \
@@ -1230,10 +1283,10 @@ test_minimized_with_filter(void)
     JSVERIFY( SUCCEED,             \
               make_dataset(        \
                     file_id,       \
-                    "mingzipdset", \
+                    "MZ", \
                     dtype_id,      \
                     dspace_id,     \
-                    fdcpl_id,      \
+                    minfdcpl_id,      \
                     &minfdset_id), \
              "unable to create dataset (minimized, gzip)")
 
@@ -1244,12 +1297,10 @@ test_minimized_with_filter(void)
     JSVERIFY( LT, oh_compare(mindset_id, dset_id),  NULL )
     JSVERIFY( LT, oh_compare(mindset_id, fdset_id), NULL )
     JSVERIFY( GT, oh_compare(minfdset_id, mindset_id), NULL )
-    JSVERIFY( EQ, oh_compare(minfdset_id, fdset_id),   NULL ) /* TODO: why are these equal? */
+    JSVERIFY( LT, oh_compare(minfdset_id, fdset_id),   NULL )
 
-#if 1
     if (DEBUG_OH_SIZE)
         PRINT_DSET_OH_COMPARISON(fdset_id, minfdset_id)
-#endif
 
     /************
      * TEARDOWN *
@@ -1285,6 +1336,312 @@ error:
     return 1;
 } /* test_minimized_with_filter */
 
+
+/* ---------------------------------------------------------------------------
+ * Test minimized and recording modification times.
+ * ---------------------------------------------------------------------------
+ */
+static int
+test_modification_times(void)
+{
+    hid_t   dspace_id   = -1;
+    hid_t   dtype_id    = -1;
+    hid_t   dcpl_xM_id  = -1; /* Modtime */
+    hid_t   dcpl_mx_id  = -1; /* minimized */
+    hid_t   dcpl_mM_id  = -1; /* minimized, Modtime */
+    hid_t   dset_xx_id  = -1;
+    hid_t   dset_xM_id  = -1;
+    hid_t   dset_mx_id  = -1;
+    hid_t   dset_mM_id  = -1;
+    hid_t   file_id     = -1;
+
+    char          filename[512] = "";
+    const hsize_t extents[1]    = {128}; /* extents of dataspace */
+
+    TESTING("with modification times");
+
+    /*********
+     * SETUP *
+     *********/
+
+    FAIL_IF( NULL == h5_fixname(
+            OHMIN_FILENAME_A,
+            H5P_DEFAULT,
+            filename,
+            sizeof(filename)) )
+
+    dcpl_mx_id = H5Pcreate(H5P_DATASET_CREATE);
+    FAIL_IF( 0 > dcpl_mx_id )
+    JSVERIFY( SUCCEED,
+              H5Pset_dset_no_attrs_hint(dcpl_mx_id, TRUE),
+              NULL )
+
+    dcpl_xM_id = H5Pcreate(H5P_DATASET_CREATE);
+    FAIL_IF( 0 > dcpl_xM_id )
+    /* TODO: set OH VERSION to > 1 and to store modtimes? */
+
+    dcpl_mM_id = H5Pcreate(H5P_DATASET_CREATE);
+    FAIL_IF( 0 > dcpl_mM_id )
+    JSVERIFY( SUCCEED,
+              H5Pset_dset_no_attrs_hint(dcpl_mM_id, TRUE),
+             "unable to minimize to-be-filtered dataset header")
+    /* TODO: set OH VERSION to > 1 and to store modtimes? */
+
+    dspace_id = H5Screate_simple(1, extents, extents);
+    FAIL_IF( 0 > dspace_id )
+
+    dtype_id = H5Tcopy(H5T_NATIVE_INT);
+    FAIL_IF( 0 > dtype_id )
+
+    JSVERIFY( SUCCEED,           \
+              make_file(         \
+                    filename,    \
+                    &file_id),   \
+             "unable to create file 'ohdr_min_a.h5'")
+
+    JSVERIFY( SUCCEED,            \
+              make_dataset(       \
+                    file_id,      \
+                    "xx",         \
+                    dtype_id,     \
+                    dspace_id,    \
+                    H5P_DEFAULT,  \
+                    &dset_xx_id), \
+             "unable to create dataset fx")
+
+    JSVERIFY( SUCCEED,            \
+              make_dataset(       \
+                    file_id,      \
+                    "mx",         \
+                    dtype_id,     \
+                    dspace_id,    \
+                    dcpl_mx_id,   \
+                    &dset_mx_id), \
+             "unable to create dataset (minoh)")
+
+    JSVERIFY( SUCCEED,            \
+              make_dataset(       \
+                    file_id,      \
+                    "xM",         \
+                    dtype_id,     \
+                    dspace_id,    \
+                    dcpl_xM_id,   \
+                    &dset_xM_id), \
+             "unable to create dataset (gzip)")
+
+    JSVERIFY( SUCCEED,             \
+              make_dataset(        \
+                    file_id,       \
+                    "mM",          \
+                    dtype_id,      \
+                    dspace_id,     \
+                    dcpl_mM_id,    \
+                    &dset_mM_id),  \
+             "unable to create dataset (minimized, gzip)")
+
+    /*********
+     * TESTS *
+     *********/
+
+    /* sanity check */
+    FAIL_IF ( LT != oh_compare(dset_mx_id, dset_xx_id) )
+    FAIL_IF ( LT != oh_compare(dset_mx_id, dset_xM_id) )
+
+#define TODO_MINOH_MODTIME 1
+#if TODO_MINOH_MODTIME
+    SKIPPED();
+    puts("    modtime details not yet implemented");
+#else
+    JSVERIFY( GT, oh_compare(dset_mM_id, dset_mx_id), NULL )
+    JSVERIFY( LT, oh_compare(dset_mM_id, dset_xM_id), NULL )
+
+    if (DEBUG_OH_SIZE)
+        PRINT_DSET_OH_COMPARISON(dset_xM_id, dset_mM_id)
+#endif
+
+    /************
+     * TEARDOWN *
+     ************/
+
+    MUST_CLOSE(dspace_id,  CLOSE_DATASPACE)
+    MUST_CLOSE(dtype_id,   CLOSE_DATATYPE)
+    MUST_CLOSE(dcpl_xM_id, CLOSE_PLIST)
+    MUST_CLOSE(dcpl_mx_id, CLOSE_PLIST)
+    MUST_CLOSE(dcpl_mM_id, CLOSE_PLIST)
+    MUST_CLOSE(dset_xx_id, CLOSE_DATASET)
+    MUST_CLOSE(dset_xM_id, CLOSE_DATASET)
+    MUST_CLOSE(dset_mx_id, CLOSE_DATASET)
+    MUST_CLOSE(dset_mM_id, CLOSE_DATASET)
+    MUST_CLOSE(file_id,    CLOSE_FILE)
+
+#if TODO_MINOH_MODTIME
+#else
+    PASSED()
+#endif
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        (void)H5Sclose(dspace_id);
+        (void)H5Tclose(dtype_id);
+        (void)H5Pclose(dcpl_xM_id);
+        (void)H5Pclose(dcpl_mx_id);
+        (void)H5Pclose(dcpl_mM_id);
+        (void)H5Dclose(dset_xx_id);
+        (void)H5Dclose(dset_xM_id);
+        (void)H5Dclose(dset_mx_id);
+        (void)H5Dclose(dset_mM_id);
+        (void)H5Fclose(file_id);
+    } H5E_END_TRY;
+    return 1;
+} /* test_modification_times */
+
+
+/* ---------------------------------------------------------------------------
+ * Test minimized dataset header with a fill value set.
+ * ---------------------------------------------------------------------------
+ */
+static int
+test_fillvalue_backwards_compatability(void)
+{
+    hid_t file_id   = -1;
+    hid_t dtype_id  = -1;
+    hid_t dspace_id = -1;
+    hid_t dcpl_id   = -1;
+    hid_t fapl_id   = -1;
+    hid_t dset_0_id = -1;
+    hid_t dset_1_id = -1;
+
+    char          filename[512] = "";
+    const hsize_t extents[1]    = {64}; /* extents of dataspace */
+    const int     fill[1]       = {343}; /* fill value of dataset */
+
+    hsize_t size0 = 0;
+    hsize_t size1 = 0;
+
+    /*********
+     * SETUP *
+     *********/
+
+    TESTING("with fill values and different libver support");
+
+    FAIL_IF( NULL == h5_fixname(
+            OHMIN_FILENAME_A,
+            H5P_DEFAULT,
+            filename,
+            sizeof(filename)) )
+
+    dspace_id = H5Screate_simple(1, extents, extents);
+    FAIL_IF( 0 > dspace_id )
+
+    dtype_id = H5Tcopy(H5T_NATIVE_INT);
+    FAIL_IF( 0 > dtype_id )
+
+    dcpl_id = H5Pcreate(H5P_DATASET_CREATE);
+    FAIL_IF( 0 > dcpl_id )
+    FAIL_IF( FAIL == H5Pset_dset_no_attrs_hint(dcpl_id, TRUE) )
+    FAIL_IF( FAIL == H5Pset_fill_value(dcpl_id, dtype_id, fill) )
+
+    fapl_id = H5Pcreate(H5P_FILE_ACCESS);
+    FAIL_IF( 0 > fapl_id )
+    FAIL_IF( FAIL == H5Pset_libver_bounds(
+            fapl_id,
+            H5F_LIBVER_EARLIEST,
+            H5F_LIBVER_LATEST) )
+
+    file_id = H5Fcreate(
+            filename,
+            H5F_ACC_TRUNC,
+            H5P_DEFAULT,
+            fapl_id);
+    FAIL_IF( 0 > file_id )
+
+    JSVERIFY( SUCCEED,            \
+              make_dataset(       \
+                    file_id,      \
+                    "fullrange",  \
+                    dtype_id,     \
+                    dspace_id,    \
+                    dcpl_id,      \
+                    &dset_0_id), \
+             "unable to create dataset supporting full library range")
+
+#if 0
+    JSVERIFY( SUCCEED, _oh_getsize(dset_0_id, &size0), "can't get dset0 size" )
+#endif
+
+    /* Close file and re-open with different libver bounds
+     */
+    H5Fclose(file_id);
+    file_id = -1;
+
+    FAIL_IF( FAIL == H5Pset_libver_bounds(
+            fapl_id,
+            H5F_LIBVER_V18,
+            H5F_LIBVER_LATEST) )
+
+    file_id = H5Fopen(
+            filename,
+            H5F_ACC_RDWR,
+            fapl_id);
+    FAIL_IF( 0 > file_id )
+
+    JSVERIFY( SUCCEED,            \
+              make_dataset(       \
+                    file_id,      \
+                    "upperrange", \
+                    dtype_id,     \
+                    dspace_id,    \
+                    dcpl_id,      \
+                    &dset_1_id),  \
+             "unable to create dataset supporting upper library range")
+
+#if 0
+    JSVERIFY( SUCCEED, _oh_getsize(dset_1_id, &size1), "can't get dset0 size" )
+#endif
+
+    /*********
+     * TESTS *
+     *********/
+
+#if 0
+    printf("0::%llu 1::%llu\n", size0, size1); fflush(stdout);
+#endif
+
+    if (DEBUG_OH_SIZE)
+        PRINT_DSET_OH_COMPARISON(dset_1_id, dset_0_id)
+
+    JSVERIFY( LT, oh_compare(dset_1_id, dset_0_id),
+             "dset not supporting pre-1.08 should be smaller?")
+
+    /************
+     * TEARDOWN *
+     ************/
+
+    MUST_CLOSE(dspace_id, CLOSE_DATASPACE)
+    MUST_CLOSE(dtype_id,  CLOSE_DATATYPE)
+    MUST_CLOSE(dcpl_id,   CLOSE_PLIST)
+    MUST_CLOSE(fapl_id,   CLOSE_PLIST)
+    MUST_CLOSE(dset_0_id, CLOSE_DATASET)
+    MUST_CLOSE(dset_1_id, CLOSE_DATASET)
+    MUST_CLOSE(file_id,   CLOSE_FILE)
+
+    PASSED()
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        (void)H5Sclose(dspace_id);
+        (void)H5Tclose(dtype_id);
+        (void)H5Pclose(dcpl_id);
+        (void)H5Pclose(fapl_id);
+        (void)H5Dclose(dset_0_id);
+        (void)H5Dclose(dset_1_id);
+        (void)H5Fclose(file_id);
+    } H5E_END_TRY;
+    return 1;
+} /* test_fillvalue_backwards_compatability */
+
 /********
  * MAIN *
  ********/
@@ -1292,6 +1649,8 @@ error:
 
 /* ---------------------------------------------------------------------------
  * Main function is main. Runs tests.
+ *
+ * Returns number of failed tests.
  * ---------------------------------------------------------------------------
  */
 int
@@ -1304,9 +1663,9 @@ main(void)
     nerrors += test_attribute_addition();
     nerrors += test_size_comparisons();
     nerrors += test_minimized_with_filter();
-/* TODO: external file links */
-/* TODO: modification times */
-/* TODO: fill value + "backwards compatability" */
+    nerrors += test_modification_times(); /* is this valid for datasets? */
+    nerrors += test_fillvalue_backwards_compatability();
+    /* nerrors += test_external_file_links() */ /* TOOD */
 
     if (nerrors > 0) {
         HDprintf("***** %d MINIMIZED DATASET OHDR TEST%s FAILED! *****\n",

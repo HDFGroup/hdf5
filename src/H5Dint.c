@@ -809,12 +809,15 @@ H5D__calculate_minimum_header_size( \
             NULL);
 #else
     {
-    char tmp[1] = "\0";
+    /* message pointer "tmp" is unused by raw get function, however, a null 
+     * pointer is intercepted by an assert in H5O_msg_size_oh().
+     */
+    char tmp[1] = "";
     ret_value += H5O_msg_size_oh(
             file,
             ohdr,
             H5O_CONT_ID,
-            tmp, /* NULL, */ /* UNUSED? */ /*intercepted by assert before passed through */
+            tmp,
             0);
     }
 #endif
