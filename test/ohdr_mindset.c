@@ -1642,6 +1642,126 @@ error:
     return 1;
 } /* test_fillvalue_backwards_compatability */
 
+
+/* ---------------------------------------------------------------------------
+ * Test creation of minimized datset through an external link
+ * ---------------------------------------------------------------------------
+ */
+static int
+test_external_creation(void)
+{
+    hid_t mooch_fid = -1;
+    hid_t target_fid = -1;
+    hid_t dspace_id = -1;
+    hid_t dtype_id = -1;
+    hid_t dcpl_id = -1;
+    hid_t dset_id = -1;
+
+    char          moochname[512] = "";
+    char          targetname[512] = "";
+    const hsize_t extents[2]    = {5,5};
+
+    /*********
+     * SETUP *
+     *********/
+
+    TESTING("creation through external links")
+
+    FAIL_IF( NULL == h5_fixname(
+            OHMIN_FILENAME_A,
+            H5P_DEFAULT,
+            moochname,
+            sizeof(moochname)) )
+
+    FAIL_IF( NULL == h5_fixname(
+            OHMIN_FILENAME_B,
+            H5P_DEFAULT,
+            targetname,
+            sizeof(targetname)) )
+
+    dspace_id = H5Screate_simple(2, extents, extents);
+    FAIL_IF( 0 > dspace_id )
+
+    dtype_id = H5Tcopy(H5T_NATIVE_INT);
+    FAIL_IF( 0 > dtype_id )
+
+    dcpl_id = H5Pcreate(H5P_DATASET_CREATE);
+    FAIL_IF( 0 > dcpl_id )
+    FAIL_IF( FAIL == H5Pset_dset_no_attrs_hint(dcpl_id, TRUE) )
+
+    JSVERIFY( SUCCEED,
+              make_file(moochname, &mooch_fid),
+             "can't create 'mooch' file" )
+
+    JSVERIFY( SUCCEED,
+              H5Lcreate_external(
+                    targetname,   /* path to target file */
+                    "/",          /* absolute path in target file */
+                    mooch_fid,    /* loc-id where to create link */
+                    "ext_root",   /* name of link, relative to loc above */
+                    H5P_DEFAULT,  /* lcpl */
+                    H5P_DEFAULT), /* lapl */
+             "unable to create external link to target" )
+
+    /*********
+     * TESTS *
+     *********/
+
+#if 0
+    H5E_BEGIN_TRY {
+        JSVERIFY( -1,
+                  H5Dcreate(
+                        mooch_fid,
+                        "ext_root/dataset",
+                        dtype_id,
+                        dspace_id,
+                        H5P_DEFAULT, /* lcpl id */
+                        dcpl_id,
+                        H5P_DEFAULT), /* dapl id */
+                 "creating dataset in nonexistent file should fail")
+    } H5E_END_TRY;
+#endif
+
+    JSVERIFY( SUCCEED,
+              make_file(targetname, &target_fid),
+             "can't create 'target' file" )
+    
+    JSVERIFY( SUCCEED,
+              make_dataset(
+                    mooch_fid,
+                    "ext_root/dataset",
+                    dtype_id,
+                    dspace_id,
+                    dcpl_id,
+                    &dset_id),
+             "unable to create dataset through link" )
+
+    /************
+     * TEARDOWN *
+     ************/
+
+    MUST_CLOSE(dspace_id,  CLOSE_DATASPACE)
+    MUST_CLOSE(dtype_id,   CLOSE_DATATYPE)
+    MUST_CLOSE(dcpl_id,    CLOSE_PLIST)
+    MUST_CLOSE(dset_id,    CLOSE_DATASET)
+    MUST_CLOSE(mooch_fid,  CLOSE_FILE)
+    MUST_CLOSE(target_fid, CLOSE_FILE)
+
+    PASSED()
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        (void)H5Sclose(dspace_id);
+        (void)H5Tclose(dtype_id);
+        (void)H5Pclose(dcpl_id);
+        (void)H5Dclose(dset_id);
+        (void)H5Fclose(mooch_fid);
+        (void)H5Fclose(target_fid);
+    } H5E_END_TRY;
+    return 1;
+} /* test_external_creation */
+
 /********
  * MAIN *
  ********/
@@ -1663,9 +1783,9 @@ main(void)
     nerrors += test_attribute_addition();
     nerrors += test_size_comparisons();
     nerrors += test_minimized_with_filter();
-    nerrors += test_modification_times(); /* is this valid for datasets? */
+    nerrors += test_modification_times(); /* TODO: valid for datasets? */
     nerrors += test_fillvalue_backwards_compatability();
-    /* nerrors += test_external_file_links() */ /* TOOD */
+    nerrors += test_external_creation();
 
     if (nerrors > 0) {
         HDprintf("***** %d MINIMIZED DATASET OHDR TEST%s FAILED! *****\n",

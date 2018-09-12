@@ -234,7 +234,7 @@ set (H5_TESTS
     cache_logging
     cork
     swmr
-    ohdr_min
+    ohdr_mindset
 )
 
 macro (ADD_H5_EXE file)
