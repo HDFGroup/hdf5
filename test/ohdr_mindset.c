@@ -1459,6 +1459,8 @@ test_modification_times(void)
         PRINT_DSET_OH_COMPARISON(dset_mM_id, dset_mN_id)
     }
 
+/* TODO: header versions currently 1... need to be >1 to enable? */
+
     /* TODO: do dataset headers support modification time tracking?
      * If not, this equality makes more sense?
      */

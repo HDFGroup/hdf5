@@ -31,6 +31,10 @@
 #include "H5Lprivate.h"       /* Links */
 #include "H5MMprivate.h"      /* Memory management */
 
+/* to inspect dataset object header minimization setting in external link */
+#define H5F_FRIEND
+#include "H5Fpkg.h" /* File private variables */
+
 
 /****************/
 /* Local Macros */
@@ -683,7 +687,8 @@ H5D__use_minimized_dset_headers( \
         H5D_t   *dset,           \
         hbool_t *minimize)
 {
-    herr_t ret_value = SUCCEED;
+    H5P_genplist_t *plist     = NULL;
+    herr_t          ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT;
 
@@ -691,41 +696,19 @@ H5D__use_minimized_dset_headers( \
     HDassert(dset);
     HDassert(minimize);
 
-    if (FAIL == H5Pget_dset_no_attrs_hint(dset->shared->dcpl_id, minimize))
+    plist = H5P_object_verify(dset->shared->dcpl_id, H5P_DATASET_CREATE);
+    if (NULL == plist)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL,
+                    "problem getting dcpl")
+    if (FAIL == H5P_get(plist, H5D_CRT_MIN_DSET_HDR_SIZE_NAME, minimize))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL,
                     "can't get minimize value from dcpl")
 
-#if 1 /* TODO: problem getting file id? */
-    /* error kicks in when tring to create dset through external link */
     if (FALSE == *minimize) {
-#if 1 /* API or direct */
-        /* problems getting/verifying object id */
-        hid_t file_id = -1;
-        file_id = H5F_get_file_id((const H5F_t *)file);
-        if (0 > file_id)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL,
-                        "can't get file id")
-
-#if 1 /* which file-id verification */
-        if (NULL == H5I_object(file_id))
-            HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL,
-                        "file id seems to be invalid")
-#else
-        if (NULL == H5I_object_verify(file_id, H5I_FILE))
-            HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL,
-                        "file id seems to be invalid")
-#endif /* which file-id verification */
-
-        if (FAIL == H5Fget_dset_no_attrs_hint(file_id, minimize))
-            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL,
-                        "can't get minimize value from file")
-#else
-        /* direct access -- "incomplete type" */
+        /* direct access -- "incomplete type" if H5Fpkg.h not included */
         HDassert(file->shared);
-        minimize = file->shared->crt_dset_min_ohdr_flag;
-#endif /* API or direct */
-    } /* if to look in file for flag */
-#endif /* TODO */
+        *minimize = file->shared->crt_dset_min_ohdr_flag;
+    }
 
 done:
     if (FAIL == ret_value)
