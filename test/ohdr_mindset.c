@@ -1347,10 +1347,12 @@ test_modification_times(void)
     hid_t         dcpl_xM_id    = -1; /* Modtime */
     hid_t         dcpl_mx_id    = -1; /* minimized */
     hid_t         dcpl_mM_id    = -1; /* minimized, Modtime */
+    hid_t         dcpl_mN_id    = -1; /* minimized, do not track */
     hid_t         dset_xx_id    = -1;
     hid_t         dset_xM_id    = -1;
     hid_t         dset_mx_id    = -1;
     hid_t         dset_mM_id    = -1;
+    hid_t         dset_mN_id    = -1;
     hid_t         file_id       = -1;
 
     TESTING("with modification times");
@@ -1385,6 +1387,15 @@ test_modification_times(void)
     JSVERIFY( SUCCEED,
               H5Pset_obj_track_times(dcpl_mM_id, TRUE),
              "unable to set minimized dcpl to track modtime" )
+
+    dcpl_mN_id = H5Pcreate(H5P_DATASET_CREATE);
+    FAIL_IF( 0 > dcpl_mN_id )
+    JSVERIFY( SUCCEED,
+              H5Pset_dset_no_attrs_hint(dcpl_mN_id, TRUE),
+             "unable to minimize to-be-filtered dataset header")
+    JSVERIFY( SUCCEED,
+              H5Pset_obj_track_times(dcpl_mN_id, FALSE),
+             "unable to set minimized dcpl to NOT track modtime" )
 
     dspace_id = H5Screate_simple(1, extents, extents);
     FAIL_IF( 0 > dspace_id )
@@ -1426,6 +1437,14 @@ test_modification_times(void)
             dcpl_mM_id, \
             &dset_mM_id)
 
+    CREATE_DATASET(     \
+            file_id,    \
+            "mN",       \
+            dtype_id,   \
+            dspace_id,  \
+            dcpl_mN_id, \
+            &dset_mN_id)
+
     /*********
      * TESTS *
      *********/
@@ -1437,6 +1456,7 @@ test_modification_times(void)
     if (DEBUG_OH_SIZE) {
         PRINT_DSET_OH_COMPARISON(dset_xx_id, dset_mx_id)
         PRINT_DSET_OH_COMPARISON(dset_xM_id, dset_mM_id)
+        PRINT_DSET_OH_COMPARISON(dset_mM_id, dset_mN_id)
     }
 
     /* TODO: do dataset headers support modification time tracking?
@@ -1444,6 +1464,7 @@ test_modification_times(void)
      */
     JSVERIFY( EQ, oh_compare(dset_xx_id, dset_xM_id), NULL )
     JSVERIFY( EQ, oh_compare(dset_mx_id, dset_mM_id), NULL )
+    JSVERIFY( EQ, oh_compare(dset_mN_id, dset_mM_id), NULL )
 
     JSVERIFY( LT, oh_compare(dset_mM_id, dset_xM_id),
               "minimized should still be smaller than unminimized" )
@@ -1457,10 +1478,12 @@ test_modification_times(void)
     MUST_CLOSE(dcpl_xM_id, CLOSE_PLIST)
     MUST_CLOSE(dcpl_mx_id, CLOSE_PLIST)
     MUST_CLOSE(dcpl_mM_id, CLOSE_PLIST)
+    MUST_CLOSE(dcpl_mN_id, CLOSE_PLIST)
     MUST_CLOSE(dset_xx_id, CLOSE_DATASET)
     MUST_CLOSE(dset_xM_id, CLOSE_DATASET)
     MUST_CLOSE(dset_mx_id, CLOSE_DATASET)
     MUST_CLOSE(dset_mM_id, CLOSE_DATASET)
+    MUST_CLOSE(dset_mN_id, CLOSE_DATASET)
     MUST_CLOSE(file_id,    CLOSE_FILE)
 
     PASSED()
@@ -1473,10 +1496,12 @@ error:
         (void)H5Pclose(dcpl_xM_id);
         (void)H5Pclose(dcpl_mx_id);
         (void)H5Pclose(dcpl_mM_id);
+        (void)H5Pclose(dcpl_mN_id);
         (void)H5Dclose(dset_xx_id);
         (void)H5Dclose(dset_xM_id);
         (void)H5Dclose(dset_mx_id);
         (void)H5Dclose(dset_mM_id);
+        (void)H5Dclose(dset_mN_id);
         (void)H5Fclose(file_id);
     } H5E_END_TRY;
     return 1;
