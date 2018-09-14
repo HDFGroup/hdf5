@@ -1471,6 +1471,8 @@ test_modification_times(void)
     JSVERIFY( LT, oh_compare(dset_mM_id, dset_xM_id),
               "minimized should still be smaller than unminimized" )
 
+    JSVERIFY(1,0, "TODO: verify expected behavior; header versions")
+
     /************
      * TEARDOWN *
      ************/
@@ -1776,6 +1778,8 @@ test_external_creation(void)
             dcpl_id,
             &dset_id)
 */
+
+    JSVERIFY(1,0, "TODO: close and re-open?")
 
     /************
      * TEARDOWN *
