@@ -25,15 +25,12 @@
 #include "H5Dpkg.h"           /* Datasets */
 #include "H5CXprivate.h"      /* API Contexts */
 #include "H5Eprivate.h"       /* Error handling */
+#include "H5Fprivate.h"       /* Files */
 #include "H5FLprivate.h"      /* Free Lists */
 #include "H5FOprivate.h"      /* File objects */
 #include "H5Iprivate.h"       /* IDs */
 #include "H5Lprivate.h"       /* Links */
 #include "H5MMprivate.h"      /* Memory management */
-
-/* to inspect dataset object header minimization setting in external link */
-#define H5F_FRIEND
-#include "H5Fpkg.h" /* File private variables */
 
 
 /****************/
@@ -705,9 +702,7 @@ H5D__use_minimized_dset_headers( \
                     "can't get minimize value from dcpl")
 
     if (FALSE == *minimize) {
-        /* direct access -- "incomplete type" if H5Fpkg.h not included */
-        HDassert(file->shared);
-        *minimize = file->shared->crt_dset_min_ohdr_flag;
+        *minimize = H5F_get_min_dset_ohdr(file);
     }
 
 done:

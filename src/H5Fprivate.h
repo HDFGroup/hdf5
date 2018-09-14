@@ -331,6 +331,7 @@ typedef struct H5F_t H5F_t;
 #define H5F_POINT_OF_NO_RETURN(F) ((F)->shared->fs.point_of_no_return)
 #define H5F_FIRST_ALLOC_DEALLOC(F) ((F)->shared->first_alloc_dealloc)
 #define H5F_EOA_PRE_FSM_FSALLOC(F) ((F)->shared->eoa_pre_fsm_fsalloc)
+#define H5F_MIN_DSET_OHDR(F) ((F)->shared->crt_dset_min_ohdr_flag)
 #else /* H5F_MODULE */
 #define H5F_LOW_BOUND(F)        (H5F_get_low_bound(F))
 #define H5F_HIGH_BOUND(F)       (H5F_get_high_bound(F))
@@ -388,6 +389,7 @@ typedef struct H5F_t H5F_t;
 #define H5F_POINT_OF_NO_RETURN(F) (H5F_get_point_of_no_return(F))
 #define H5F_FIRST_ALLOC_DEALLOC(F) (H5F_get_first_alloc_dealloc(F))
 #define H5F_EOA_PRE_FSM_FSALLOC(F) (H5F_get_eoa_pre_fsm_fsalloc(F))
+#define H5F_MIN_DSET_OHDR(F) (H5F_get_min_dset_ohdr(F))
 #endif /* H5F_MODULE */
 
 
@@ -741,6 +743,7 @@ H5_DLL hsize_t H5F_get_pgend_meta_thres(const H5F_t *f);
 H5_DLL hbool_t H5F_get_point_of_no_return(const H5F_t *f);
 H5_DLL hbool_t H5F_get_first_alloc_dealloc(const H5F_t *f);
 H5_DLL haddr_t H5F_get_eoa_pre_fsm_fsalloc(const H5F_t *f);
+H5_DLL hbool_t H5F_get_min_dset_ohdr(const H5F_t *f);
 
 /* Functions than retrieve values set/cached from the superblock/FCPL */
 H5_DLL haddr_t H5F_get_base_addr(const H5F_t *f);
