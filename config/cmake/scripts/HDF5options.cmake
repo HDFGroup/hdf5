@@ -57,6 +57,25 @@ set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ALLOW_EXTERNAL_SUPPORT:STRING
 #set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF")
 #set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_SZIP_ENCODING:BOOL=OFF")
 
+####      package examples       ####
+#set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_PACK_EXAMPLES:BOOL=ON -DHDF5_EXAMPLES_COMPRESSED:STRING=HDF5Examples-1.10.9-Source.tar.gz -DHDF5_EXAMPLES_COMPRESSED_DIR:PATH=${CTEST_SCRIPT_DIRECTORY}")
+
+#############################################################################################
+### enable parallel builds
+
+#set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_PARALLEL:BOOL=ON")
+#set(ADD_BUILD_OPTIONS “${ADD_BUILD_OPTIONS} -DHDF5_BUILD_CPP_LIB:BOOL=OFF”)
+#set(ADD_BUILD_OPTIONS “${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_THREADSAFE:BOOL=OFF”)
+
+#############################################################################################
+### enable thread-safety builds
+
+#set(ADD_BUILD_OPTIONS “${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_THREADSAFE:BOOL=ON”)
+#set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_PARALLEL:BOOL=OFF")
+#set(ADD_BUILD_OPTIONS “${ADD_BUILD_OPTIONS} -DHDF5_BUILD_CPP_LIB:BOOL=OFF”)
+#set(ADD_BUILD_OPTIONS “${ADD_BUILD_OPTIONS} -DHDF5_BUILD_FORTRAN:BOOL=OFF”)
+#set(ADD_BUILD_OPTIONS “${ADD_BUILD_OPTIONS} -DHDF5_BUILD_HL_LIB:BOOL=OFF”)
+
 #############################################################################################
 ### disable test program builds
 

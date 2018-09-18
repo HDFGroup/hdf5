@@ -12,7 +12,7 @@ be found in the USING_HDF5_CMake.txt file found in this folder.
 NOTE: Building applications with the dynamic/shared hdf5 libraries requires
       that the "H5_BUILT_AS_DYNAMIC_LIB" compile definition be used.
 
-The following two sections are helpful if you choose to not use CMake to build
+The following two sections are helpful if you do not use CMake to build
 your applications. Consult the Microsoft documentation for your product
 for more information.
 
@@ -58,7 +58,7 @@ Using Visual Studio with HDF5 Libraries
 
     For all other general questions, you can look in the general FAQ:
 
-        http://support.hdfgroup.org/HDF5/HDF5-FAQ.html
+       https://portal.hdfgroup.org/display/knowledge/HDF+Knowledge+Base
 
 ************************************************************************
  Please send email to help@hdfgroup.org for further assistance.
