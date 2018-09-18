@@ -46,8 +46,10 @@ Default installation process:
        Copy HDF5_Examples.cmake to this directory.
        The default source folder is defined as "HDF5Examples". It can be changed
            with the CTEST_SOURCE_NAME script option.
-       The default installation folder is defined as "@CMAKE_INSTALL_PREFIX@".
+       The default installation folder is defined for the platform.
            It can be changed with the INSTALLDIR script option.
+           (Note: Windows has issues with spaces and paths -The path will need to
+            be set correctly.)
        The default ctest configuration is defined as "Release". It can be changed
            with the CTEST_CONFIGURATION_TYPE script option. Note that this must
            be the same as the value used with the -C command line option.

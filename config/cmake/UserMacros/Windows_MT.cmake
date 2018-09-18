@@ -14,7 +14,8 @@
 ########################################################
 
 # To use this option, copy both the macro and option code
-# into the root UserMacros.cmake file.
+# into the root UserMacros.cmake file. Then enable the option,
+# using the command line add "-DBUILD_STATIC_CRT_LIBS:BOOL=ON"
 # OR add an include to the root UserMacros.cmake file:
 # INCLUDE(path_to_file/WINDOWS_MT.cmake)
 
@@ -30,6 +31,9 @@ macro (TARGET_STATIC_CRT_FLAGS)
         CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO)
       if (${flag_var} MATCHES "/MD")
         string (REGEX REPLACE "/MD" "/MT" ${flag_var} "${${flag_var}}")
+      endif ()
+      if (${flag_var} MATCHES "/MDd")
+        string (REGEX REPLACE "/MDd" "/MTd" ${flag_var} "${${flag_var}}")
       endif ()
     endforeach ()
     foreach (flag_var
