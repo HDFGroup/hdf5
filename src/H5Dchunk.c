@@ -495,7 +495,7 @@ H5D__chunk_direct_read(const H5D_t *dset, hsize_t *offset, uint32_t* filters,
     hsize_t scaled[H5S_MAX_RANK];       /* Scaled coordinates for this chunk */
     herr_t             ret_value = SUCCEED;        /* Return value */
 
-    FUNC_ENTER_PACKAGE_VOL_TAG(dset->oloc.addr)
+    FUNC_ENTER_PACKAGE_TAG(dset->oloc.addr)
 
     /* Check args */
     HDassert(dset && H5D_CHUNKED == layout->type);
@@ -565,7 +565,7 @@ H5D__chunk_direct_read(const H5D_t *dset, hsize_t *offset, uint32_t* filters,
     *filters = udata.filter_mask;
 
 done:
-    FUNC_LEAVE_NOAPI_VOL_TAG(ret_value)
+    FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5D__chunk_direct_read() */
 
 
@@ -590,7 +590,7 @@ H5D__get_chunk_storage_size(H5D_t *dset, const hsize_t *offset, hsize_t *storage
     H5D_chunk_ud_t     udata;           /* User data for querying chunk info */
     herr_t             ret_value = SUCCEED;        /* Return value */
 
-    FUNC_ENTER_PACKAGE_VOL_TAG(dset->oloc.addr)
+    FUNC_ENTER_PACKAGE_TAG(dset->oloc.addr)
 
     /* Check args */
     HDassert(dset && H5D_CHUNKED == layout->type);
@@ -663,7 +663,7 @@ H5D__get_chunk_storage_size(H5D_t *dset, const hsize_t *offset, hsize_t *storage
         *storage_size = dset->shared->layout.u.chunk.size;
 
 done:
-    FUNC_LEAVE_NOAPI_VOL_TAG(ret_value)
+    FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* H5D__get_chunk_storage_size */
 
 

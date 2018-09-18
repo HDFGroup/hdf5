@@ -128,7 +128,6 @@ static int H5I__inc_type_ref(H5I_type_t type);
 static int H5I__get_type_ref(H5I_type_t type);
 static int H5I__search_cb(void *obj, hid_t id, void *_udata);
 static H5I_id_info_t *H5I__find_id(hid_t id);
-static ssize_t H5I__get_name(const H5G_loc_t *loc, char *name, size_t size);
 #ifdef H5I_DEBUG_OUTPUT
 static int H5I__debug_cb(void *_item, void *_key, void *_udata);
 static herr_t H5I__debug(H5I_type_t type);
@@ -2021,48 +2020,13 @@ H5Iget_name(hid_t id, char *name/*out*/, size_t size)
     if(H5G_loc(id, &loc) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, (-1), "can't retrieve object location")
 
-    /* Call internal routine to retrieve object's name */
-    if((ret_value = H5I__get_name(&loc, name, size)) < 0)
+    /* Retrieve object's name */
+    if((ret_value = H5G_get_name(&loc, name, size, NULL)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, (-1), "can't retrieve object name")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Iget_name() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5I__get_name
- *
- * Purpose:     Internal routine to retrieve the name for an object
- *
- * Note:        This routine is needed so that there's a non-API routine
- *              that can set up VOL / SWMR info (which need a DXPL).
- *
- * Return:      Success:    The length of the name
- *              Failure:    -1
- *
- * Programmer:  Quincey Koziol
- *              January 9, 2018
- *
- *-------------------------------------------------------------------------
- */
-static ssize_t
-H5I__get_name(const H5G_loc_t *loc, char *name, size_t size)
-{
-    ssize_t ret_value = -1;     /* Return value */
-
-    FUNC_ENTER_STATIC_VOL
-
-    /* Check arguments */
-    HDassert(loc);
-
-    /* Retrieve object's name */
-    if((ret_value = H5G_get_name(loc, name, size, NULL)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, (-1), "can't retrieve object name")
-
-done:
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
-} /* end H5I__get_name() */
 
 
 /*-------------------------------------------------------------------------
