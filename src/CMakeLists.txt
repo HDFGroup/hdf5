@@ -854,7 +854,7 @@ endif ()
 # specific type checks inside
 #-----------------------------------------------------------------------------
 add_executable (H5detect ${HDF5_SRC_DIR}/H5detect.c)
-target_include_directories(H5detect PRIVATE "${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+target_include_directories(H5detect PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
 target_compile_definitions(H5detect PUBLIC ${HDF_EXTRA_C_FLAGS} ${HDF_EXTRA_FLAGS})
 TARGET_C_PROPERTIES (H5detect STATIC)
 target_link_libraries (H5detect
@@ -865,12 +865,12 @@ target_link_libraries (H5detect
 add_custom_command (
     OUTPUT ${HDF5_BINARY_DIR}/H5Tinit.c
     COMMAND $<TARGET_FILE:H5detect>
-    ARGS > ${HDF5_BINARY_DIR}/H5Tinit.c
+    ARGS ${HDF5_BINARY_DIR}/H5Tinit.c
     DEPENDS H5detect
 )
 
 add_executable (H5make_libsettings ${HDF5_SRC_DIR}/H5make_libsettings.c)
-target_include_directories(H5make_libsettings PRIVATE "${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+target_include_directories(H5make_libsettings PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
 target_compile_definitions(H5make_libsettings PUBLIC ${HDF_EXTRA_C_FLAGS} ${HDF_EXTRA_FLAGS})
 TARGET_C_PROPERTIES (H5make_libsettings STATIC)
 target_link_libraries (H5make_libsettings
@@ -881,7 +881,7 @@ target_link_libraries (H5make_libsettings
 add_custom_command (
     OUTPUT ${HDF5_BINARY_DIR}/H5lib_settings.c
     COMMAND $<TARGET_FILE:H5make_libsettings>
-    ARGS > ${HDF5_BINARY_DIR}/H5lib_settings.c
+    ARGS ${HDF5_BINARY_DIR}/H5lib_settings.c
     DEPENDS H5make_libsettings
     WORKING_DIRECTORY ${HDF5_BINARY_DIR}
 )
@@ -925,14 +925,14 @@ if (BUILD_SHARED_LIBS)
   add_custom_command (
       OUTPUT ${HDF5_BINARY_DIR}/shared/H5Tinit.c
       COMMAND $<TARGET_FILE:H5detect>
-      ARGS > ${HDF5_BINARY_DIR}/shared/H5Tinit.c
+      ARGS ${HDF5_BINARY_DIR}/shared/H5Tinit.c
       DEPENDS H5detect
       WORKING_DIRECTORY ${HDF5_BINARY_DIR}/shared
   )
   add_custom_command (
       OUTPUT ${HDF5_BINARY_DIR}/shared/H5lib_settings.c
       COMMAND $<TARGET_FILE:H5make_libsettings>
-      ARGS > ${HDF5_BINARY_DIR}/shared/H5lib_settings.c
+      ARGS ${HDF5_BINARY_DIR}/shared/H5lib_settings.c
       DEPENDS H5make_libsettings
       WORKING_DIRECTORY ${HDF5_BINARY_DIR}
   )

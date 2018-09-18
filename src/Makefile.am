@@ -153,7 +153,7 @@ settings_DATA=libhdf5.settings
 H5Tinit.c: H5detect$(EXEEXT)
 	LD_LIBRARY_PATH="$$LD_LIBRARY_PATH`echo $(LDFLAGS) |                  \
 		sed -e 's/-L/:/g' -e 's/ //g'`"                               \
-	$(RUNSERIAL) ./H5detect$(EXEEXT) > $@  ||                               \
+	$(RUNSERIAL) ./H5detect$(EXEEXT)  $@  ||                               \
 	    (test $$HDF5_Make_Ignore && echo "*** Error ignored") ||          \
 	    ($(RM) $@ ; exit 1)
 
@@ -165,7 +165,7 @@ H5Tinit.c: H5detect$(EXEEXT)
 H5lib_settings.c: H5make_libsettings$(EXEEXT) libhdf5.settings
 	LD_LIBRARY_PATH="$$LD_LIBRARY_PATH`echo $(LDFLAGS) |                  \
 		sed -e 's/-L/:/g' -e 's/ //g'`"                               \
-	$(RUNSERIAL) ./H5make_libsettings$(EXEEXT) > $@  ||                               \
+	$(RUNSERIAL) ./H5make_libsettings$(EXEEXT)  $@  ||                               \
 	    (test $$HDF5_Make_Ignore && echo "*** Error ignored") ||          \
 	    ($(RM) $@ ; exit 1)
 
