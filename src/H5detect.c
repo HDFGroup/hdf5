@@ -26,11 +26,6 @@ static const char *FileHeader = "\n\
  * help@hdfgroup.org.                                                        *\n\
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *";
 /*
- *
- * Created:    H5detect.c
- *        10 Aug 1997
- *        Robb Matzke
- *
  * Purpose:    This code was borrowed heavily from the `detect.c'
  *        program in the AIO distribution from Lawrence
  *        Livermore National Laboratory.
@@ -44,7 +39,6 @@ static const char *FileHeader = "\n\
  *        features which aren't available.  We're not
  *        running on a Vax or other machine with mixed
  *        endianness.
- *
  *-------------------------------------------------------------------------
  */
 #undef NDEBUG
@@ -157,12 +151,11 @@ static H5JMP_BUF jbuf_g;
 
 
 /*-------------------------------------------------------------------------
- * Function:   precision
+ * Function:  precision
  *
- * Purpose:    Determine the precision and offset.
+ * Purpose:   Determine the precision and offset.
  *
- * Return:     void
- *
+ * Return:    void
  *-------------------------------------------------------------------------
  */
 static void
@@ -211,16 +204,16 @@ precision (detected_t *d)
 
 
 /*-------------------------------------------------------------------------
- * Function:   DETECT_I/DETECT_BYTE
+ * Function:  DETECT_I/DETECT_BYTE
  *
- * Purpose:    These macro takes a type like `int' and a base name like
- *             `nati' and detects the byte order.  The VAR is used to
- *             construct the names of the C variables defined.
+ * Purpose:   These macro takes a type like `int' and a base name like
+ *            `nati' and detects the byte order.  The VAR is used to
+ *            construct the names of the C variables defined.
  *
- *             DETECT_I is used for types that are larger than one byte,
- *             DETECT_BYTE is used for types that are exactly one byte.
+ *            DETECT_I is used for types that are larger than one byte,
+ *            DETECT_BYTE is used for types that are exactly one byte.
  *
- * Return:     void
+ * Return:    void
  *
  * Modifications:
  *
@@ -285,16 +278,13 @@ precision (detected_t *d)
 
 
 /*-------------------------------------------------------------------------
- * Function:   DETECT_F
+ * Function:  DETECT_F
  *
- * Purpose:    This macro takes a floating point type like `double' and
- *             a base name like `natd' and detects byte order, mantissa
- *             location, exponent location, sign bit location, presence or
- *             absence of implicit mantissa bit, and exponent bias and
- *             initializes a detected_t structure with those properties.
- *
- * Return:     void
- *
+ * Purpose:   This macro takes a floating point type like `double' and
+ *            a base name like `natd' and detects byte order, mantissa
+ *            location, exponent location, sign bit location, presence or
+ *            absence of implicit mantissa bit, and exponent bias and
+ *            initializes a detected_t structure with those properties.
  *-------------------------------------------------------------------------
  */
 #define DETECT_F(TYPE,VAR,INFO) {                                             \
@@ -385,14 +375,13 @@ precision (detected_t *d)
 
 
 /*-------------------------------------------------------------------------
- * Function:   DETECT_M
+ * Function:  DETECT_M
  *
- * Purpose:    This macro takes only miscellaneous structures or pointer
- *             (pointer, hvl_t, hobj_ref_t, hdset_reg_ref_t).  It
- *             constructs the names and decides the alignment in structure.
+ * Purpose:   This macro takes only miscellaneous structures or pointer
+ *            (pointer, hvl_t, hobj_ref_t, hdset_reg_ref_t).  It
+ *            constructs the names and decides the alignment in structure.
  *
- * Return:     void
- *
+ * Return:    void
  *-------------------------------------------------------------------------
  */
 #define DETECT_M(TYPE,VAR,INFO) {                          \
@@ -422,29 +411,29 @@ precision (detected_t *d)
     _buf = (char*)HDmalloc(sizeof(TYPE) + align_g[NELMTS(align_g) - 1]);          \
     if(H5SETJMP(jbuf_g)) _ano++;                          \
     if(_ano < NELMTS(align_g)) {                          \
-    *((TYPE*)(_buf+align_g[_ano])) = _val; /*possible SIGBUS or SEGSEGV*/ \
-    _val2 = *((TYPE*)(_buf+align_g[_ano]));    /*possible SIGBUS or SEGSEGV*/\
-    /* Cray Check: This section helps detect alignment on Cray's */          \
+        *((TYPE*)(_buf+align_g[_ano])) = _val; /*possible SIGBUS or SEGSEGV*/ \
+        _val2 = *((TYPE*)(_buf+align_g[_ano]));    /*possible SIGBUS or SEGSEGV*/\
+        /* Cray Check: This section helps detect alignment on Cray's */          \
         /*              vector machines (like the SV1) which mask off */      \
-    /*              pointer values when pointing to non-word aligned */   \
-    /*              locations with pointers that are supposed to be */    \
-    /*              word aligned. -QAK */                                 \
-    HDmemset(_buf, 0xff, sizeof(TYPE)+align_g[NELMTS(align_g)-1]);          \
-        /*How to handle VAX types?*/                                          \
-    if(INFO.perm[0]) /* Big-Endian */                      \
-        HDmemcpy(_buf+align_g[_ano]+(INFO.size-((INFO.offset+INFO.precision)/8)),((char *)&_val)+(INFO.size-((INFO.offset+INFO.precision)/8)),(size_t)(INFO.precision/8)); \
-    else /* Little-Endian */                          \
-        HDmemcpy(_buf+align_g[_ano]+(INFO.offset/8),((char *)&_val)+(INFO.offset/8),(size_t)(INFO.precision/8)); \
-    _val2 = *((TYPE*)(_buf+align_g[_ano]));                      \
-    H5_GCC_DIAG_OFF(float-equal)                          \
-    if(_val!=_val2)                                  \
-        H5LONGJMP(jbuf_g, 1);                              \
-    H5_GCC_DIAG_ON(float-equal)                           \
-    /* End Cray Check */                              \
-    (INFO.align)=align_g[_ano];                          \
+        /*              pointer values when pointing to non-word aligned */   \
+        /*              locations with pointers that are supposed to be */    \
+        /*              word aligned. -QAK */                                 \
+        HDmemset(_buf, 0xff, sizeof(TYPE)+align_g[NELMTS(align_g)-1]);          \
+            /*How to handle VAX types?*/                                          \
+        if(INFO.perm[0]) /* Big-Endian */                      \
+            HDmemcpy(_buf+align_g[_ano]+(INFO.size-((INFO.offset+INFO.precision)/8)),((char *)&_val)+(INFO.size-((INFO.offset+INFO.precision)/8)),(size_t)(INFO.precision/8)); \
+        else /* Little-Endian */                          \
+            HDmemcpy(_buf+align_g[_ano]+(INFO.offset/8),((char *)&_val)+(INFO.offset/8),(size_t)(INFO.precision/8)); \
+        _val2 = *((TYPE*)(_buf+align_g[_ano]));                      \
+        H5_GCC_DIAG_OFF(float-equal)                          \
+        if(_val!=_val2)                                  \
+            H5LONGJMP(jbuf_g, 1);                              \
+        H5_GCC_DIAG_ON(float-equal)                           \
+        /* End Cray Check */                              \
+        (INFO.align)=align_g[_ano];                          \
     } else {                                      \
     (INFO.align)=0;                                  \
-    fprintf(stderr, "unable to calculate alignment for %s\n", #TYPE);     \
+        fprintf(stderr, "unable to calculate alignment for %s\n", #TYPE);     \
     }                                          \
     HDfree(_buf);                                      \
     HDsignal(SIGBUS, _handler); /*restore original handler*/              \
@@ -461,15 +450,14 @@ precision (detected_t *d)
 
 #if defined(H5LONGJMP) && defined(H5_HAVE_SIGNAL)
 /*-------------------------------------------------------------------------
- * Function:   sigsegv_handler
+ * Function:  sigsegv_handler
  *
- * Purpose:    Handler for SIGSEGV. We use signal() instead of sigaction()
- *             because it's more portable to non-Posix systems. Although
- *             it's not nearly as nice to work with, it does the job for
- *             this simple stuff.
+ * Purpose:   Handler for SIGSEGV. We use signal() instead of sigaction()
+ *            because it's more portable to non-Posix systems. Although
+ *            it's not nearly as nice to work with, it does the job for
+ *            this simple stuff.
  *
- * Return:     Returns via H5LONGJMP to jbuf_g.
- *
+ * Return:    Returns via H5LONGJMP to jbuf_g.
  *-------------------------------------------------------------------------
  */
 static void
@@ -494,20 +482,14 @@ sigsegv_handler(int H5_ATTR_UNUSED signo)
 
 #if defined(H5LONGJMP) && defined(H5_HAVE_SIGNAL)
 /*-------------------------------------------------------------------------
- * Function:    sigbus_handler
+ * Function:  sigbus_handler
  *
- * Purpose:    Handler for SIGBUS. We use signal() instead of sigaction()
- *        because it's more portable to non-Posix systems. Although
- *        it's not nearly as nice to work with, it does the job for
- *        this simple stuff.
+ * Purpose:   Handler for SIGBUS. We use signal() instead of sigaction()
+ *            because it's more portable to non-Posix systems. Although
+ *            it's not nearly as nice to work with, it does the job for
+ *            this simple stuff.
  *
  * Return:    Returns via H5LONGJMP to jbuf_g.
- *
- * Programmer:    Robb Matzke
- *        Thursday, March 18, 1999
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -532,15 +514,14 @@ sigbus_handler(int H5_ATTR_UNUSED signo)
 
 #if defined(H5LONGJMP) && defined(H5_HAVE_SIGNAL)
 /*-------------------------------------------------------------------------
- * Function:   sigill_handler
+ * Function:  sigill_handler
  *
- * Purpose:    Handler for SIGILL. We use signal() instead of sigaction()
- *             because it's more portable to non-Posix systems. Although
- *             it's not nearly as nice to work with, it does the job for
- *             this simple stuff.
+ * Purpose:   Handler for SIGILL. We use signal() instead of sigaction()
+ *            because it's more portable to non-Posix systems. Although
+ *            it's not nearly as nice to work with, it does the job for
+ *            this simple stuff.
  *
- * Return:     Returns via H5LONGJMP to jbuf_g.
- *
+ * Return:    Returns via H5LONGJMP to jbuf_g.
  *-------------------------------------------------------------------------
  */
 static void
@@ -564,12 +545,11 @@ sigill_handler(int H5_ATTR_UNUSED signo)
 
 
 /*-------------------------------------------------------------------------
- * Function:   print_results
+ * Function:  print_results
  *
- * Purpose:    Prints information about the detected data types.
+ * Purpose:   Prints information about the detected data types.
  *
- * Return:     void
- *
+ * Return:    void
  *-------------------------------------------------------------------------
  */
 static void
@@ -844,12 +824,12 @@ done:\n\
 
 
 /*-------------------------------------------------------------------------
- * Function:   iprint
+ * Function:  iprint
  *
- * Purpose:    Prints information about the fields of a floating point format.
+ * Purpose:   Prints information about the fields of a floating point format.
  *
- * Return:     void
- *
+ * Return:    void
+
  *-------------------------------------------------------------------------
  */
 static void
@@ -931,16 +911,15 @@ iprint(detected_t *d)
 
 
 /*-------------------------------------------------------------------------
- * Function:   byte_cmp
+ * Function:  byte_cmp
  *
- * Purpose:    Compares two chunks of memory A and B and returns the
- *             byte index into those arrays of the first byte that
- *             differs between A and B.  Ignores differences where the
- *             corresponding bit in pad_mask is set to 0.
+ * Purpose:   Compares two chunks of memory A and B and returns the
+ *            byte index into those arrays of the first byte that
+ *            differs between A and B.  Ignores differences where the
+ *            corresponding bit in pad_mask is set to 0.
  *
- * Return:     Success:    Index of differing byte.
- *             Failure:    -1 if all bytes are the same.
- *
+ * Return:    Success:    Index of differing byte.
+ *            Failure:    -1 if all bytes are the same.
  *-------------------------------------------------------------------------
  */
 static int
@@ -959,15 +938,15 @@ byte_cmp(int n, const void *_a, const void *_b, const unsigned char *pad_mask)
 
 
 /*-------------------------------------------------------------------------
- * Function:   bit_cmp
+ * Function:  bit_cmp
  *
- * Purpose:    Compares two bit vectors and returns the index for the
- *             first bit that differs between the two vectors.     The
- *             size of the vector is NBYTES.  PERM is a mapping from
- *             actual order to little endian.  Ignores differences where
- *             the corresponding bit in pad_mask is set to 0.
+ * Purpose:   Compares two bit vectors and returns the index for the
+ *            first bit that differs between the two vectors.     The
+ *            size of the vector is NBYTES.  PERM is a mapping from
+ *            actual order to little endian.  Ignores differences where
+ *            the corresponding bit in pad_mask is set to 0.
  *
- * Return:     Index of first differing bit.
+ * Return:    Index of first differing bit.
  *
  *-------------------------------------------------------------------------
  */
@@ -1000,33 +979,32 @@ bit_cmp(unsigned int nbytes, int *perm, void *_a, void *_b,
 
 
 /*-------------------------------------------------------------------------
- * Function:   fix_order
+ * Function:  fix_order
  *
- * Purpose:    Given an array PERM with elements FIRST through LAST
- *             initialized with zero origin byte numbers, this function
- *             creates a permutation vector that maps the actual order
- *             of a floating point number to little-endian.
+ * Purpose:   Given an array PERM with elements FIRST through LAST
+ *            initialized with zero origin byte numbers, this function
+ *            creates a permutation vector that maps the actual order
+ *            of a floating point number to little-endian.
  *
- *             This function assumes that the mantissa byte ordering
- *             implies the total ordering.
+ *            This function assumes that the mantissa byte ordering
+ *            implies the total ordering.
  *
- * Return:     void
- *
+ * Return:    void
  *-------------------------------------------------------------------------
  */
 static void
 fix_order(int n, int last, int *perm, const char **mesg)
 {
-    int i;
+    int        i;
 
     if (last > 1) {
         /*
-        * We have at least three points to consider.
-        */
+         * We have at least three points to consider.
+         */
         if (perm[last] < perm[last - 1] && perm[last - 1] < perm[last - 2]) {
             /*
-            * Little endian.
-            */
+             * Little endian.
+             */
             if (mesg)
                 *mesg = "Little-endian";
             for (i = 0; i < n; i++)
@@ -1036,8 +1014,8 @@ fix_order(int n, int last, int *perm, const char **mesg)
         else if (perm[last] > perm[last - 1]
                 && perm[last - 1] > perm[last - 2]) {
             /*
-            * Big endian.
-            */
+             * Big endian.
+             */
             if (mesg)
                 *mesg = "Big-endian";
             for (i = 0; i < n; i++)
@@ -1046,11 +1024,11 @@ fix_order(int n, int last, int *perm, const char **mesg)
         }
         else {
             /*
-            * Bi-endian machines like VAX.
-            * (NOTE: This is not an actual determination of the VAX-endianness.
-            *          It could have some other endianness and fall into this
-            *          case - JKM & QAK)
-            */
+             * Bi-endian machines like VAX.
+             * (NOTE: This is not an actual determination of the VAX-endianness.
+             *          It could have some other endianness and fall into this
+             *          case - JKM & QAK)
+             */
             HDassert(0 == n % 2);
             if (mesg)
                 *mesg = "VAX";
@@ -1062,39 +1040,38 @@ fix_order(int n, int last, int *perm, const char **mesg)
     }
     else {
         fprintf(stderr,
-                "Failed to detect byte order of %d-byte floating point.\n", n);
+            "Failed to detect byte order of %d-byte floating point.\n", n);
         HDexit(1);
     }
 }
 
 
 /*-------------------------------------------------------------------------
- * Function:   imp_bit
+ * Function:  imp_bit
  *
- * Purpose:    Looks for an implicit bit in the mantissa.  The value
- *             of _A should be 1.0 and the value of _B should be 0.5.
- *             Some floating-point formats discard the most significant
- *             bit of the mantissa after normalizing since it will always
- *             be a one (except for 0.0).  If this is true for the native
- *             floating point values stored in _A and _B then the function
- *             returns non-zero.
+ * Purpose:   Looks for an implicit bit in the mantissa.  The value
+ *            of _A should be 1.0 and the value of _B should be 0.5.
+ *            Some floating-point formats discard the most significant
+ *            bit of the mantissa after normalizing since it will always
+ *            be a one (except for 0.0).  If this is true for the native
+ *            floating point values stored in _A and _B then the function
+ *            returns non-zero.
  *
- *             This function assumes that the exponent occupies higher
- *             order bits than the mantissa and that the most significant
- *             bit of the mantissa is next to the least significant bit
- *             of the exponent.
+ *            This function assumes that the exponent occupies higher
+ *            order bits than the mantissa and that the most significant
+ *            bit of the mantissa is next to the least significant bit
+ *            of the exponent.
  *
  *
- * Return:     Success:    Non-zero if the most significant bit
+ * Return:    Success:    Non-zero if the most significant bit
  *                of the mantissa is discarded (ie, the
  *                mantissa has an implicit `one' as the
  *                most significant bit).    Otherwise,
  *                returns zero.
- *             Failure:    exit(1)
+ *
+ *            Failure:    1
  *
  * Modifications:
- *
- *    Robb Matzke, 6 Nov 1996
  *    Fixed a bug that occurs with non-implicit architectures.
  *
  *-------------------------------------------------------------------------
@@ -1127,17 +1104,14 @@ imp_bit(unsigned int n, int *perm, void *_a, void *_b, const unsigned char *pad_
 
 
 /*-------------------------------------------------------------------------
- * Function:   find_bias
+ * Function:  find_bias
  *
- * Purpose:    Determines the bias of the exponent.  This function should
- *             be called with _A having a value of `1'.
+ * Purpose:   Determines the bias of the exponent.  This function should
+ *            be called with _A having a value of `1'.
  *
- * Return:     Success:    The exponent bias.
- *             Failure:
+ * Return:    The exponent bias.
  *
  * Modifications:
- *
- *    Robb Matzke, 6 Nov 1996
  *    Fixed a bug with non-implicit architectures returning the
  *    wrong exponent bias.
  *
@@ -1165,28 +1139,27 @@ find_bias(unsigned int epos, unsigned int esize, int *perm, void *_a)
 
 
 /*-------------------------------------------------------------------------
- * Function:   print_header
+ * Function:  print_header
  *
- * Purpose:    Prints the C file header for the generated file.
+ * Purpose:   Prints the C file header for the generated file.
  *
- * Return:     void
- *
+ * Return:    void
  *-------------------------------------------------------------------------
  */
 static void
 print_header(void)
 {
 
-    time_t        now = HDtime(NULL);
-    struct tm    *tm = HDlocaltime(&now);
-    char          real_name[30];
-    char          host_name[256];
-    int           i;
-    const char   *s;
+    time_t         now = HDtime(NULL);
+    struct tm     *tm = HDlocaltime(&now);
+    char           real_name[30];
+    char           host_name[256];
+    int            i;
+    const char    *s;
 #ifdef H5_HAVE_GETPWUID
-    struct passwd    *pwd = NULL;
+    struct passwd *pwd = NULL;
 #else
-    int           pwd = 1;
+    int            pwd = 1;
 #endif
     static const char    *month_name[] =
     {
@@ -1280,7 +1253,7 @@ bit.\n";
         if (real_name[0])
             fprintf(rawoutstream, "%s <", real_name);
 #ifdef H5_HAVE_GETPWUID
-    if (pwd) HDfputs(pwd->pw_name, rawoutstream);
+        if (pwd) HDfputs(pwd->pw_name, rawoutstream);
 #endif
         if (host_name[0])
             fprintf(rawoutstream, "@%s", host_name);
@@ -1308,35 +1281,33 @@ bit.\n";
 
 
 /*-------------------------------------------------------------------------
- * Function:   detect_C89_integers
+ * Function:  detect_C89_integers
  *
- * Purpose:    Detect C89 integer types
+ * Purpose:   Detect C89 integer types
  *
- * Return:     void
- *
+ * Return:    void
  *-------------------------------------------------------------------------
  */
 static void HDF_NO_UBSAN
 detect_C89_integers(void)
 {
-    DETECT_BYTE(signed char,      SCHAR,        d_g[nd_g]); nd_g++;
-    DETECT_BYTE(unsigned char,      UCHAR,        d_g[nd_g]); nd_g++;
-    DETECT_I(short,          SHORT,        d_g[nd_g]); nd_g++;
-    DETECT_I(unsigned short,      USHORT,       d_g[nd_g]); nd_g++;
-    DETECT_I(int,          INT,            d_g[nd_g]); nd_g++;
-    DETECT_I(unsigned int,      UINT,            d_g[nd_g]); nd_g++;
-    DETECT_I(long,          LONG,            d_g[nd_g]); nd_g++;
-    DETECT_I(unsigned long,      ULONG,        d_g[nd_g]); nd_g++;
+    DETECT_BYTE(signed char,   SCHAR,        d_g[nd_g]); nd_g++;
+    DETECT_BYTE(unsigned char, UCHAR,        d_g[nd_g]); nd_g++;
+    DETECT_I(short,            SHORT,        d_g[nd_g]); nd_g++;
+    DETECT_I(unsigned short,   USHORT,       d_g[nd_g]); nd_g++;
+    DETECT_I(int,              INT,          d_g[nd_g]); nd_g++;
+    DETECT_I(unsigned int,     UINT,         d_g[nd_g]); nd_g++;
+    DETECT_I(long,             LONG,         d_g[nd_g]); nd_g++;
+    DETECT_I(unsigned long,    ULONG,        d_g[nd_g]); nd_g++;
 }
 
 
 /*-------------------------------------------------------------------------
- * Function:   detect_C89_floats
+ * Function:  detect_C89_floats
  *
- * Purpose:    Detect C89 floating point types
+ * Purpose:   Detect C89 floating point types
  *
- * Return:     void
- *
+ * Return:    void
  *-------------------------------------------------------------------------
  */
 static void HDF_NO_UBSAN
@@ -1348,12 +1319,11 @@ detect_C89_floats(void)
 
 
 /*-------------------------------------------------------------------------
- * Function:   detect_C99_integers8
+ * Function:  detect_C99_integers8
  *
- * Purpose:    Detect C99 8 bit integer types
+ * Purpose:   Detect C99 8 bit integer types
  *
- * Return:     void
- *
+ * Return:    void
  *-------------------------------------------------------------------------
  */
 static void HDF_NO_UBSAN
@@ -1361,56 +1331,55 @@ detect_C99_integers8(void)
 {
 #if H5_SIZEOF_INT8_T>0
   #if H5_SIZEOF_INT8_T==1
-    DETECT_BYTE(int8_t,           INT8,         d_g[nd_g]); nd_g++;
+    DETECT_BYTE(int8_t,         INT8,         d_g[nd_g]); nd_g++;
   #else
-    DETECT_I(int8_t,           INT8,         d_g[nd_g]); nd_g++;
+    DETECT_I(int8_t,            INT8,         d_g[nd_g]); nd_g++;
   #endif
 #endif
 #if H5_SIZEOF_UINT8_T>0
   #if H5_SIZEOF_UINT8_T==1
-    DETECT_BYTE(uint8_t,       UINT8,        d_g[nd_g]); nd_g++;
+    DETECT_BYTE(uint8_t,        UINT8,        d_g[nd_g]); nd_g++;
   #else
-    DETECT_I(uint8_t,             UINT8,        d_g[nd_g]); nd_g++;
+    DETECT_I(uint8_t,           UINT8,        d_g[nd_g]); nd_g++;
   #endif
 #endif
 #if H5_SIZEOF_INT_LEAST8_T>0
   #if H5_SIZEOF_INT_LEAST8_T==1
-    DETECT_BYTE(int_least8_t,     INT_LEAST8,   d_g[nd_g]); nd_g++;
+    DETECT_BYTE(int_least8_t,   INT_LEAST8,   d_g[nd_g]); nd_g++;
   #else
-    DETECT_I(int_least8_t,       INT_LEAST8,   d_g[nd_g]); nd_g++;
+    DETECT_I(int_least8_t,      INT_LEAST8,   d_g[nd_g]); nd_g++;
   #endif
 #endif
 #if H5_SIZEOF_UINT_LEAST8_T>0
   #if H5_SIZEOF_UINT_LEAST8_T==1
-    DETECT_BYTE(uint_least8_t,    UINT_LEAST8,  d_g[nd_g]); nd_g++;
+    DETECT_BYTE(uint_least8_t,  UINT_LEAST8,  d_g[nd_g]); nd_g++;
   #else
-    DETECT_I(uint_least8_t,       UINT_LEAST8,  d_g[nd_g]); nd_g++;
+    DETECT_I(uint_least8_t,     UINT_LEAST8,  d_g[nd_g]); nd_g++;
   #endif
 #endif
 #if H5_SIZEOF_INT_FAST8_T>0
   #if H5_SIZEOF_INT_FAST8_T==1
-    DETECT_BYTE(int_fast8_t,      INT_FAST8,    d_g[nd_g]); nd_g++;
+    DETECT_BYTE(int_fast8_t,    INT_FAST8,    d_g[nd_g]); nd_g++;
   #else
     DETECT_I(int_fast8_t,       INT_FAST8,    d_g[nd_g]); nd_g++;
   #endif
 #endif
 #if H5_SIZEOF_UINT_FAST8_T>0
   #if H5_SIZEOF_UINT_FAST8_T==1
-    DETECT_BYTE(uint_fast8_t,       UINT_FAST8,   d_g[nd_g]); nd_g++;
+    DETECT_BYTE(uint_fast8_t,   UINT_FAST8,   d_g[nd_g]); nd_g++;
   #else
-    DETECT_I(uint_fast8_t,     UINT_FAST8,   d_g[nd_g]); nd_g++;
+    DETECT_I(uint_fast8_t,      UINT_FAST8,   d_g[nd_g]); nd_g++;
   #endif
 #endif
 }
 
 
 /*-------------------------------------------------------------------------
- * Function:   detect_C99_integers16
+ * Function:  detect_C99_integers16
  *
- * Purpose:    Detect C99 16 bit integer types
+ * Purpose:   Detect C99 16 bit integer types
  *
- * Return:     void
- *
+ * Return:    void
  *-------------------------------------------------------------------------
  */
 static void HDF_NO_UBSAN
@@ -1420,30 +1389,29 @@ detect_C99_integers16(void)
     DETECT_I(int16_t,           INT16,        d_g[nd_g]); nd_g++;
 #endif
 #if H5_SIZEOF_UINT16_T>0
-    DETECT_I(uint16_t,           UINT16,       d_g[nd_g]); nd_g++;
+    DETECT_I(uint16_t,          UINT16,       d_g[nd_g]); nd_g++;
 #endif
 #if H5_SIZEOF_INT_LEAST16_T>0
-    DETECT_I(int_least16_t,       INT_LEAST16,  d_g[nd_g]); nd_g++;
+    DETECT_I(int_least16_t,     INT_LEAST16,  d_g[nd_g]); nd_g++;
 #endif
 #if H5_SIZEOF_UINT_LEAST16_T>0
-    DETECT_I(uint_least16_t,       UINT_LEAST16, d_g[nd_g]); nd_g++;
+    DETECT_I(uint_least16_t,    UINT_LEAST16, d_g[nd_g]); nd_g++;
 #endif
 #if H5_SIZEOF_INT_FAST16_T>0
-    DETECT_I(int_fast16_t,       INT_FAST16,   d_g[nd_g]); nd_g++;
+    DETECT_I(int_fast16_t,      INT_FAST16,   d_g[nd_g]); nd_g++;
 #endif
 #if H5_SIZEOF_UINT_FAST16_T>0
-    DETECT_I(uint_fast16_t,       UINT_FAST16,  d_g[nd_g]); nd_g++;
+    DETECT_I(uint_fast16_t,     UINT_FAST16,  d_g[nd_g]); nd_g++;
 #endif
 }
 
 
 /*-------------------------------------------------------------------------
- * Function:   detect_C99_integers32
+ * Function:  detect_C99_integers32
  *
- * Purpose:    Detect C99 32 bit integer types
+ * Purpose:   Detect C99 32 bit integer types
  *
- * Return:     void
- *
+ * Return:    void
  *-------------------------------------------------------------------------
  */
 static void HDF_NO_UBSAN
@@ -1453,29 +1421,29 @@ detect_C99_integers32(void)
     DETECT_I(int32_t,           INT32,        d_g[nd_g]); nd_g++;
 #endif
 #if H5_SIZEOF_UINT32_T>0
-    DETECT_I(uint32_t,           UINT32,       d_g[nd_g]); nd_g++;
+    DETECT_I(uint32_t,          UINT32,       d_g[nd_g]); nd_g++;
 #endif
 #if H5_SIZEOF_INT_LEAST32_T>0
-    DETECT_I(int_least32_t,       INT_LEAST32,  d_g[nd_g]); nd_g++;
+    DETECT_I(int_least32_t,     INT_LEAST32,  d_g[nd_g]); nd_g++;
 #endif
 #if H5_SIZEOF_UINT_LEAST32_T>0
-    DETECT_I(uint_least32_t,       UINT_LEAST32, d_g[nd_g]); nd_g++;
+    DETECT_I(uint_least32_t,    UINT_LEAST32, d_g[nd_g]); nd_g++;
 #endif
 #if H5_SIZEOF_INT_FAST32_T>0
-    DETECT_I(int_fast32_t,       INT_FAST32,   d_g[nd_g]); nd_g++;
+    DETECT_I(int_fast32_t,      INT_FAST32,   d_g[nd_g]); nd_g++;
 #endif
 #if H5_SIZEOF_UINT_FAST32_T>0
-    DETECT_I(uint_fast32_t,       UINT_FAST32,  d_g[nd_g]); nd_g++;
+    DETECT_I(uint_fast32_t,     UINT_FAST32,  d_g[nd_g]); nd_g++;
 #endif
 }
 
 
 /*-------------------------------------------------------------------------
- * Function:   detect_C99_integers64
+ * Function:  detect_C99_integers64
  *
- * Purpose:    Detect C99 64 bit integer types
+ * Purpose:   Detect C99 64 bit integer types
  *
- * Return:     void
+ * Return:    void
  *
  *-------------------------------------------------------------------------
  */
@@ -1486,24 +1454,24 @@ detect_C99_integers64(void)
     DETECT_I(int64_t,           INT64,        d_g[nd_g]); nd_g++;
 #endif
 #if H5_SIZEOF_UINT64_T>0
-    DETECT_I(uint64_t,           UINT64,       d_g[nd_g]); nd_g++;
+    DETECT_I(uint64_t,          UINT64,       d_g[nd_g]); nd_g++;
 #endif
 #if H5_SIZEOF_INT_LEAST64_T>0
-    DETECT_I(int_least64_t,       INT_LEAST64,  d_g[nd_g]); nd_g++;
+    DETECT_I(int_least64_t,     INT_LEAST64,  d_g[nd_g]); nd_g++;
 #endif
 #if H5_SIZEOF_UINT_LEAST64_T>0
-    DETECT_I(uint_least64_t,       UINT_LEAST64, d_g[nd_g]); nd_g++;
+    DETECT_I(uint_least64_t,    UINT_LEAST64, d_g[nd_g]); nd_g++;
 #endif
 #if H5_SIZEOF_INT_FAST64_T>0
-    DETECT_I(int_fast64_t,       INT_FAST64,   d_g[nd_g]); nd_g++;
+    DETECT_I(int_fast64_t,      INT_FAST64,   d_g[nd_g]); nd_g++;
 #endif
 #if H5_SIZEOF_UINT_FAST64_T>0
-    DETECT_I(uint_fast64_t,       UINT_FAST64,  d_g[nd_g]); nd_g++;
+    DETECT_I(uint_fast64_t,     UINT_FAST64,  d_g[nd_g]); nd_g++;
 #endif
 
 #if H5_SIZEOF_LONG_LONG>0
     DETECT_I(long long,          LLONG,        d_g[nd_g]); nd_g++;
-    DETECT_I(unsigned long long,  ULLONG,       d_g[nd_g]); nd_g++;
+    DETECT_I(unsigned long long, ULLONG,       d_g[nd_g]); nd_g++;
 #else
     /*
      * This architecture doesn't support an integer type larger than `long'
@@ -1511,18 +1479,17 @@ detect_C99_integers64(void)
      * `long long' is probably equivalent to `long' here anyway.
      */
     DETECT_I(long,          LLONG,        d_g[nd_g]); nd_g++;
-    DETECT_I(unsigned long,      ULLONG,       d_g[nd_g]); nd_g++;
+    DETECT_I(unsigned long, ULLONG,       d_g[nd_g]); nd_g++;
 #endif
 }
 
 
 /*-------------------------------------------------------------------------
- * Function:   detect_C99_integers
+ * Function:  detect_C99_integers
  *
- * Purpose:    Detect C99 integer types
+ * Purpose:   Detect C99 integer types
  *
- * Return:     void
- *
+ * Return:    void
  *-------------------------------------------------------------------------
  */
 static void HDF_NO_UBSAN
@@ -1538,12 +1505,11 @@ detect_C99_integers(void)
 
 
 /*-------------------------------------------------------------------------
- * Function:   detect_C99_floats
+ * Function:  detect_C99_floats
  *
- * Purpose:    Detect C99 floating point types
+ * Purpose:   Detect C99 floating point types
  *
- * Return:     void
- *
+ * Return:    void
  *-------------------------------------------------------------------------
  */
 static void HDF_NO_UBSAN
@@ -1564,12 +1530,11 @@ detect_C99_floats(void)
 
 
 /*-------------------------------------------------------------------------
- * Function:   detect_alignments
+ * Function:  detect_alignments
  *
- * Purpose:    Detect structure alignments
+ * Purpose:   Detect structure alignments
  *
- * Return:     void
- *
+ * Return:    void
  *-------------------------------------------------------------------------
  */
 static void HDF_NO_UBSAN
@@ -1615,11 +1580,11 @@ static int verify_signal_handlers(int signum, void (*handler)(int))
             nfailures++;
         }
         else {
-            if (val==signum){
+            if (val==signum) {
                 /* return from signum handler. Record a sucess. */
                 nsuccesses++;
             }
-            else{
+            else {
                 fprintf(stderr, "Unknown return value (%d) from H5SETJMP", val);
                 nfailures++;
             }
@@ -1629,13 +1594,13 @@ static int verify_signal_handlers(int signum, void (*handler)(int))
     HDsignal(signum, save_handler);
     if (nfailures>0 || nsuccesses != ntries) {
         fprintf(stderr, "verify_signal_handlers for signal %d did %d tries. "
-                "Found %d failures and %d successes\n",
-                signum, ntries, nfailures, nsuccesses);
-        return(-1);
+            "Found %d failures and %d successes\n",
+            signum, ntries, nfailures, nsuccesses);
+        return -1;
     }
     else {
         /* all succeeded */
-        return(0);
+        return 0;
     }
 }
 #endif
@@ -1646,12 +1611,10 @@ static int verify_signal_handlers(int signum, void (*handler)(int))
  *
  * Purpose:   Main entry point.
  *
- * Return:    Success:    exit(0)
- *
- *            Failure:    exit(1)
+ * Return:    Success:    0
  *
  * Modifications:
- *      Some compilers, e.g., Intel C v7.0, took a long time to compile
+ *    Some compilers, e.g., Intel C v7.0, took a long time to compile
  *      with optimization when a module routine contains many code lines.
  *      Divide up all those types detections macros into subroutines, both
  *      to avoid the compiler optimization error and cleaner codes.
@@ -1738,5 +1701,5 @@ main(int argc, char *argv[])
             rawoutstream = NULL;
     }
 
-    return 0;
+    return EXIT_SUCCESS;
 }

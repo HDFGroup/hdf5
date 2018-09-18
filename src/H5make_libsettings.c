@@ -26,11 +26,6 @@ static const char *FileHeader = "\n\
  * help@hdfgroup.org.                                                        *\n\
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *";
 /*
- *
- * Created:    H5make_libsettings.c
- *        17 Mar 2010
- *        Quincey Koziol
- *
  * Purpose:    Generate the H5libsettings.c file from the
  *             libhdf5.settings file.
  *
@@ -45,17 +40,15 @@ static const char *FileHeader = "\n\
 
 FILE       *rawoutstream = NULL;
 
-
 /*-------------------------------------------------------------------------
- * Function:   insert_libhdf5_settings
+ * Function:  insert_libhdf5_settings
  *
- * Purpose:    insert the contents of libhdf5.settings into a file
- *             represented by flibinfo.
- *             Make it an empty string if H5_HAVE_EMBEDDED_LIBINFO is not
- *             defined, i.e., not enabled.
+ * Purpose:   insert the contents of libhdf5.settings into a file
+ *            represented by flibinfo.
+ *            Make it an empty string if H5_HAVE_EMBEDDED_LIBINFO is not
+ *            defined, i.e., not enabled.
  *
- * Return:     void
- *
+ * Return:    void
  *-------------------------------------------------------------------------
  */
 static void
@@ -68,7 +61,7 @@ insert_libhdf5_settings(FILE *flibinfo)
 
     if(NULL == (fsettings = HDfopen(LIBSETTINGSFNAME, "r"))) {
         HDperror(LIBSETTINGSFNAME);
-        HDexit(1);
+        HDexit(EXIT_FAILURE);
     } /* end if */
 
     /* print variable definition and the string */
@@ -98,11 +91,11 @@ insert_libhdf5_settings(FILE *flibinfo)
     } /* end if */
     else {
         fprintf(stderr, "Read errors encountered with %s\n", LIBSETTINGSFNAME);
-        HDexit(1);
+        HDexit(EXIT_FAILURE);
     } /* end else */
     if(0 != HDfclose(fsettings)) {
         HDperror(LIBSETTINGSFNAME);
-        HDexit(1);
+        HDexit(EXIT_FAILURE);
     } /* end if */
 #else
     /* print variable definition and an empty string */
@@ -113,14 +106,13 @@ insert_libhdf5_settings(FILE *flibinfo)
 
 
 /*-------------------------------------------------------------------------
- * Function:   make_libinfo
+ * Function:  make_libinfo
  *
- * Purpose:    Create the embedded library information definition.
- *             This sets up for a potential extension that the declaration
- *             is printed to a file different from stdout.
+ * Purpose:   Create the embedded library information definition.
+ *            This sets up for a potential extension that the declaration
+ *            is printed to a file different from stdout.
  *
- * Return:     void
- *
+ * Return:    void
  *-------------------------------------------------------------------------
  */
 static void
@@ -132,12 +124,11 @@ make_libinfo(void)
 
 
 /*-------------------------------------------------------------------------
- * Function:   print_header
+ * Function:  print_header
  *
- * Purpose:    Prints the header for the generated file.
+ * Purpose:   Prints the header for the generated file.
  *
- * Return:     void
- *
+ * Return:    void
  *-------------------------------------------------------------------------
  */
 static void
@@ -239,12 +230,11 @@ information about the library build configuration\n";
 
 
 /*-------------------------------------------------------------------------
- * Function:   print_footer
+ * Function:  print_footer
  *
- * Purpose:    Prints the file footer for the generated file.
+ * Purpose:   Prints the file footer for the generated file.
  *
- * Return:     void
- *
+ * Return:    void
  *-------------------------------------------------------------------------
  */
 static void
@@ -255,13 +245,11 @@ print_footer(void)
 
 
 /*-------------------------------------------------------------------------
- * Function:   main
+ * Function:  main
  *
- * Purpose:    Main entry point.
+ * Purpose:   Main entry point.
  *
- * Return:     Success:    exit(0)
- *             Failure:    exit(1)
- *
+ * Return:    Success:    0
  *-------------------------------------------------------------------------
  */
 int
@@ -298,5 +286,5 @@ main(int argc, char *argv[])
             rawoutstream = NULL;
     }
 
-    HDexit(0);
+    HDexit(EXIT_SUCCESS);
 }
