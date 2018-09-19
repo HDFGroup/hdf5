@@ -860,6 +860,10 @@ else ()
   set (HDF5_GENERATED_SOURCE_DIR ${HDF5_BINARY_DIR})
 endif ()
 
+if (BUILD_SHARED_LIBS)
+  file (MAKE_DIRECTORY "${HDF5_BINARY_DIR}/shared")
+endif ()
+
 if (NOT EXISTS ${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c)
   add_executable (H5detect ${HDF5_SRC_DIR}/H5detect.c)
   target_include_directories(H5detect PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
@@ -877,6 +881,30 @@ if (NOT EXISTS ${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c)
       DEPENDS H5detect
       WORKING_DIRECTORY ${HDF5_GENERATED_SOURCE_DIR}
   )
+  if (BUILD_SHARED_LIBS)
+    if (NOT EXISTS ${HDF5_GENERATED_SOURCE_DIR}/shared/H5Tinit.c)
+      add_custom_command (
+          OUTPUT ${HDF5_GENERATED_SOURCE_DIR}/shared/H5Tinit.c
+          COMMAND $<TARGET_FILE:H5detect>
+          ARGS ${HDF5_GENERATED_SOURCE_DIR}/shared/H5Tinit.c
+          DEPENDS H5detect
+          WORKING_DIRECTORY ${HDF5_GENERATED_SOURCE_DIR}/shared
+      )
+    else ()
+      set_source_files_properties (${HDF5_GENERATED_SOURCE_DIR}/shared/H5Tinit.c PROPERTIES GENERATED TRUE)
+    endif ()
+  endif ()
+else ()
+  set_source_files_properties (${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c PROPERTIES GENERATED TRUE)
+  if (BUILD_SHARED_LIBS)
+    add_custom_command (
+        OUTPUT     ${HDF5_GENERATED_SOURCE_DIR}/shared/H5Tinit.c
+        COMMAND    ${CMAKE_COMMAND}
+        ARGS       -E copy_if_different "${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c" "${HDF5_GENERATED_SOURCE_DIR}/shared/H5Tinit.c"
+        DEPENDS    ${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c
+    )
+    set_source_files_properties (${HDF5_GENERATED_SOURCE_DIR}/shared/H5Tinit.c PROPERTIES GENERATED TRUE)
+  endif ()
 endif ()
 
 if (NOT EXISTS ${HDF5_GENERATED_SOURCE_DIR}/H5lib_settings.c)
@@ -896,6 +924,30 @@ if (NOT EXISTS ${HDF5_GENERATED_SOURCE_DIR}/H5lib_settings.c)
       DEPENDS H5make_libsettings
       WORKING_DIRECTORY ${HDF5_GENERATED_SOURCE_DIR}
   )
+  if (BUILD_SHARED_LIBS)
+    if (NOT EXISTS ${HDF5_GENERATED_SOURCE_DIR}/shared/H5lib_settings.c)
+      add_custom_command (
+          OUTPUT ${HDF5_GENERATED_SOURCE_DIR}/shared/H5lib_settings.c
+          COMMAND $<TARGET_FILE:H5make_libsettings>
+          ARGS ${HDF5_GENERATED_SOURCE_DIR}/shared/H5lib_settings.c
+          DEPENDS H5make_libsettings
+          WORKING_DIRECTORY ${HDF5_GENERATED_SOURCE_DIR}
+      )
+    else ()
+      set_source_files_properties (${HDF5_GENERATED_SOURCE_DIR}/shared/H5lib_settings.c PROPERTIES GENERATED TRUE)
+    endif ()
+  endif ()
+else ()
+  set_source_files_properties (${HDF5_GENERATED_SOURCE_DIR}/H5lib_settings.c PROPERTIES GENERATED TRUE)
+  if (BUILD_SHARED_LIBS)
+    add_custom_command (
+        OUTPUT     ${HDF5_GENERATED_SOURCE_DIR}/shared/H5lib_settings.c
+        COMMAND    ${CMAKE_COMMAND}
+        ARGS       -E copy_if_different "${HDF5_GENERATED_SOURCE_DIR}/H5lib_settings.c" "${HDF5_GENERATED_SOURCE_DIR}/shared/H5lib_settings.c"
+        DEPENDS    ${HDF5_GENERATED_SOURCE_DIR}/H5lib_settings.c
+    )
+    set_source_files_properties (${HDF5_GENERATED_SOURCE_DIR}/shared/H5lib_settings.c PROPERTIES GENERATED TRUE)
+  endif ()
 endif ()
 
 ## all_packages="AC,B,B2,D,F,FA,FL,FS,HL,I,O,S,ST,T,Z"
@@ -933,27 +985,6 @@ set_target_properties (${HDF5_LIB_TARGET} PROPERTIES FOLDER libraries)
 set (install_targets ${HDF5_LIB_TARGET})
 
 if (BUILD_SHARED_LIBS)
-  file (MAKE_DIRECTORY "${HDF5_BINARY_DIR}/shared")
-  if (NOT EXISTS ${HDF5_GENERATED_SOURCE_DIR}/shared/H5Tinit.c)
-    add_custom_command (
-        OUTPUT ${HDF5_GENERATED_SOURCE_DIR}/shared/H5Tinit.c
-        COMMAND $<TARGET_FILE:H5detect>
-        ARGS ${HDF5_GENERATED_SOURCE_DIR}/shared/H5Tinit.c
-        DEPENDS H5detect
-        WORKING_DIRECTORY ${HDF5_GENERATED_SOURCE_DIR}/shared
-    )
-  endif ()
-
-  if (NOT EXISTS ${HDF5_GENERATED_SOURCE_DIR}/shared/H5lib_settings.c)
-    add_custom_command (
-        OUTPUT ${HDF5_GENERATED_SOURCE_DIR}/shared/H5lib_settings.c
-        COMMAND $<TARGET_FILE:H5make_libsettings>
-        ARGS ${HDF5_GENERATED_SOURCE_DIR}/shared/H5lib_settings.c
-        DEPENDS H5make_libsettings
-        WORKING_DIRECTORY ${HDF5_GENERATED_SOURCE_DIR}
-    )
-  endif ()
-
   set (shared_gen_SRCS ${HDF5_GENERATED_SOURCE_DIR}/shared/H5Tinit.c ${HDF5_GENERATED_SOURCE_DIR}/shared/H5lib_settings.c)
 
   add_library (${HDF5_LIBSH_TARGET} SHARED ${common_SRCS} ${shared_gen_SRCS} ${H5_PUBLIC_HEADERS} ${H5_PRIVATE_HEADERS} ${H5_GENERATED_HEADERS})
