@@ -387,9 +387,9 @@ H5Z__unregister(H5Z_filter_t filter_id)
     H5Z_object_t object;                /* Object to pass to callbacks */
     herr_t       ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_PACKAGE_VOL
+    FUNC_ENTER_PACKAGE
 
-    HDassert(filter_id>=0 && filter_id<=H5Z_FILTER_MAX);
+    HDassert(filter_id >= 0 && filter_id <= H5Z_FILTER_MAX);
 
     /* Is the filter already registered? */
     for (filter_index = 0; filter_index < H5Z_table_used_g; filter_index++)
@@ -434,7 +434,7 @@ H5Z__unregister(H5Z_filter_t filter_id)
     H5Z_table_used_g--;
 
 done:
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5Z__unregister() */
 
 
