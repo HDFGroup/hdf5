@@ -31,7 +31,6 @@ public class TestH5Edefault {
 
     public static final int ERRSTACK_CNT = 3;
     public static final int ERRSTACK_MTY_CNT = 0;
-    public static final int ERRSTACK_POP_CNT = 2;
 
     @Before
     public void H5Eset_default_stack() {
@@ -217,7 +216,7 @@ public class TestH5Edefault {
             err.printStackTrace();
             fail("H5.H5Eget_current_stack: " + err);
         }
-        assertTrue("H5.H5Eget_current_stack: pop #:" + num_msg_default, num_msg_default == TestH5Edefault.ERRSTACK_POP_CNT);
+        assertTrue("H5.H5Eget_current_stack: pop #:" + num_msg_default, num_msg_default == TestH5Edefault.ERRSTACK_CNT - 1);
 
         //Verify the copy still has the correct number of messages
         try {
@@ -347,7 +346,7 @@ public class TestH5Edefault {
             err.printStackTrace();
             fail("H5.H5Eset_current_stack: " + err);
         }
-        assertTrue("H5.H5Eset_current_stack: pop #:" + num_msg, num_msg == TestH5Edefault.ERRSTACK_POP_CNT);
+        assertTrue("H5.H5Eset_current_stack: pop #:" + num_msg, num_msg == TestH5Edefault.ERRSTACK_CNT - 1);
 
         //Verify the copy still has the correct number of messages
         try {
@@ -399,7 +398,7 @@ public class TestH5Edefault {
             err.printStackTrace();
             fail("H5.H5Epop: " + err);
         }
-        assertTrue("H5.H5Epop after #:" + num_msg, num_msg == TestH5Edefault.ERRSTACK_POP_CNT);
+        assertTrue("H5.H5Epop after #:" + num_msg, num_msg == TestH5Edefault.ERRSTACK_CNT - 1);
     }
 
     @Test(expected = IllegalArgumentException.class)
