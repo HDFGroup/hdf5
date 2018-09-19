@@ -27,11 +27,11 @@ import org.junit.Test;
 import org.junit.rules.TestName;
 
 public class TestH5Edefault {
+    @Rule public TestName testname = new TestName();
+
     public static final int ERRSTACK_CNT = 3;
     public static final int ERRSTACK_MTY_CNT = 0;
     public static final int ERRSTACK_POP_CNT = 2;
-
-    @Rule public TestName testname = new TestName();
 
     @Before
     public void H5Eset_default_stack() {
