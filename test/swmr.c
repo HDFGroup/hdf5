@@ -6484,106 +6484,106 @@ test_refresh_concur(hid_t in_fapl, hbool_t new_format)
     if(childpid == 0) { /* Child process */
         hid_t child_fid1 = -1;    /* File ID */
         hid_t child_fid2 = -1;    /* File ID */
-    hid_t child_did1 = -1, child_did2 = -1;
-    hid_t child_sid = -1;
-    hsize_t tdims[1];
-    int rbuf[2] = {0, 0};
-    int child_notify = 0;
+        hid_t child_did1 = -1, child_did2 = -1;
+        hid_t child_sid = -1;
+        hsize_t tdims[1];
+        int rbuf[2] = {0, 0};
+        int child_notify = 0;
 
-    /* Close unused write end for out_pdf */
-    if(HDclose(out_pdf[1]) < 0)
-        HDexit(EXIT_FAILURE);
+        /* Close unused write end for out_pdf */
+        if(HDclose(out_pdf[1]) < 0)
+            HDexit(EXIT_FAILURE);
 
-    /* close unused read end for in_pdf */
-    if(HDclose(in_pdf[0]) < 0)
-        HDexit(EXIT_FAILURE);
+        /* close unused read end for in_pdf */
+        if(HDclose(in_pdf[0]) < 0)
+            HDexit(EXIT_FAILURE);
 
-    /* Wait for notification from parent process */
-    while(child_notify != 1) {
-        if(HDread(out_pdf[0], &child_notify, sizeof(int)) < 0)
-        HDexit(EXIT_FAILURE);
-    }
+        /* Wait for notification from parent process */
+        while(child_notify != 1) {
+            if(HDread(out_pdf[0], &child_notify, sizeof(int)) < 0)
+                HDexit(EXIT_FAILURE);
+        }
 
-    /* Open the file 2 times */
-    if((child_fid1 = H5Fopen(filename, H5F_ACC_RDONLY|H5F_ACC_SWMR_READ, fapl)) < 0)
-        HDexit(EXIT_FAILURE);
+        /* Open the file 2 times */
+        if((child_fid1 = H5Fopen(filename, H5F_ACC_RDONLY|H5F_ACC_SWMR_READ, fapl)) < 0)
+            HDexit(EXIT_FAILURE);
 
-    if((child_fid2 = H5Fopen(filename, H5F_ACC_RDONLY|H5F_ACC_SWMR_READ, fapl)) < 0)
-        HDexit(EXIT_FAILURE);
+        if((child_fid2 = H5Fopen(filename, H5F_ACC_RDONLY|H5F_ACC_SWMR_READ, fapl)) < 0)
+            HDexit(EXIT_FAILURE);
 
-    /* Open the dataset 2 times */
-    if((child_did1 = H5Dopen2(child_fid1, "dataset", H5P_DEFAULT)) < 0)
-        HDexit(EXIT_FAILURE);
-    if((child_did2 = H5Dopen2(child_fid2, "dataset", H5P_DEFAULT)) < 0)
-        HDexit(EXIT_FAILURE);
+        /* Open the dataset 2 times */
+        if((child_did1 = H5Dopen2(child_fid1, "dataset", H5P_DEFAULT)) < 0)
+            HDexit(EXIT_FAILURE);
+        if((child_did2 = H5Dopen2(child_fid2, "dataset", H5P_DEFAULT)) < 0)
+            HDexit(EXIT_FAILURE);
 
-    /* Get the dataset's dataspace via did1 */
-    if((child_sid = H5Dget_space(child_did1)) < 0)
-        HDexit(EXIT_FAILURE);
-    if(H5Sget_simple_extent_dims(child_sid, tdims, NULL) < 0)
-        HDexit(EXIT_FAILURE);
-    if(tdims[0] != 1)
-        HDexit(EXIT_FAILURE);
+        /* Get the dataset's dataspace via did1 */
+        if((child_sid = H5Dget_space(child_did1)) < 0)
+            HDexit(EXIT_FAILURE);
+        if(H5Sget_simple_extent_dims(child_sid, tdims, NULL) < 0)
+            HDexit(EXIT_FAILURE);
+        if(tdims[0] != 1)
+            HDexit(EXIT_FAILURE);
 
-    /* Read from the dataset via did2 */
-    if(H5Dread(child_did2, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf) < 0)
-        HDexit(EXIT_FAILURE);
+        /* Read from the dataset via did2 */
+        if(H5Dread(child_did2, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf) < 0)
+            HDexit(EXIT_FAILURE);
 
-    /* Verify the data is correct */
-    if(rbuf[0] != 99)
-        HDexit(EXIT_FAILURE);
+        /* Verify the data is correct */
+        if(rbuf[0] != 99)
+            HDexit(EXIT_FAILURE);
 
-    /* Notify parent process */
-    child_notify = 2;
-    if(HDwrite(in_pdf[1], &child_notify, sizeof(int)) < 0)
-        HDexit(EXIT_FAILURE);
+        /* Notify parent process */
+        child_notify = 2;
+        if(HDwrite(in_pdf[1], &child_notify, sizeof(int)) < 0)
+            HDexit(EXIT_FAILURE);
 
-    /* Wait for notification from parent process */
-    while(child_notify != 3) {
-        if(HDread(out_pdf[0], &child_notify, sizeof(int)) < 0)
-        HDexit(EXIT_FAILURE);
-    }
+        /* Wait for notification from parent process */
+        while(child_notify != 3) {
+            if(HDread(out_pdf[0], &child_notify, sizeof(int)) < 0)
+                HDexit(EXIT_FAILURE);
+        }
 
-    /* Refresh dataset via did1 */
-    if(H5Drefresh(child_did1) < 0)
-        HDexit(EXIT_FAILURE);
+        /* Refresh dataset via did1 */
+        if(H5Drefresh(child_did1) < 0)
+            HDexit(EXIT_FAILURE);
 
-    /* Get the dataset's dataspace and verify */
-    if((child_sid = H5Dget_space(child_did1)) < 0)
-        HDexit(EXIT_FAILURE);
-    if(H5Sget_simple_extent_dims(child_sid, tdims, NULL) < 0)
-        HDexit(EXIT_FAILURE);
+        /* Get the dataset's dataspace and verify */
+        if((child_sid = H5Dget_space(child_did1)) < 0)
+            HDexit(EXIT_FAILURE);
+        if(H5Sget_simple_extent_dims(child_sid, tdims, NULL) < 0)
+            HDexit(EXIT_FAILURE);
 
-    if(tdims[0] != 2)
-        HDexit(EXIT_FAILURE);
+        if(tdims[0] != 2)
+            HDexit(EXIT_FAILURE);
 
-    /* Read from the dataset */
-    if(H5Dread(child_did2, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf) < 0)
-        HDexit(EXIT_FAILURE);
+        /* Read from the dataset */
+        if(H5Dread(child_did2, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf) < 0)
+            HDexit(EXIT_FAILURE);
 
-    /* Verify the data is correct */
-    if(rbuf[0] != 100 || rbuf[1] != 100)
-        HDexit(EXIT_FAILURE);
+        /* Verify the data is correct */
+        if(rbuf[0] != 100 || rbuf[1] != 100)
+            HDexit(EXIT_FAILURE);
 
-    /* Close the 2 datasets */
-    if(H5Dclose(child_did1) < 0)
-        HDexit(EXIT_FAILURE);
-    if(H5Dclose(child_did2) < 0)
-        HDexit(EXIT_FAILURE);
+        /* Close the 2 datasets */
+        if(H5Dclose(child_did1) < 0)
+            HDexit(EXIT_FAILURE);
+        if(H5Dclose(child_did2) < 0)
+            HDexit(EXIT_FAILURE);
 
-    /* Close the 2 files */
-    if(H5Fclose(child_fid1) < 0)
-        HDexit(EXIT_FAILURE);
-    if(H5Fclose(child_fid2) < 0)
-        HDexit(EXIT_FAILURE);
+        /* Close the 2 files */
+        if(H5Fclose(child_fid1) < 0)
+            HDexit(EXIT_FAILURE);
+        if(H5Fclose(child_fid2) < 0)
+            HDexit(EXIT_FAILURE);
 
-    /* Close the pipes */
-    if(HDclose(out_pdf[0]) < 0)
-        HDexit(EXIT_FAILURE);
-    if(HDclose(in_pdf[1]) < 0)
-        HDexit(EXIT_FAILURE);
+        /* Close the pipes */
+        if(HDclose(out_pdf[0]) < 0)
+            HDexit(EXIT_FAILURE);
+        if(HDclose(in_pdf[1]) < 0)
+            HDexit(EXIT_FAILURE);
 
-    HDexit(EXIT_SUCCESS);
+        HDexit(EXIT_SUCCESS);
     }
 
     /* Close unused read end for out_pdf */
@@ -7042,7 +7042,7 @@ main(void)
      * by the environment variable.
      */
     driver = HDgetenv("HDF5_DRIVER");
-    if(!H5FD_supports_swmr_test(driver)) {
+    if(!H5FD__supports_swmr_test(driver)) {
         printf("This VFD does not support SWMR I/O\n");
         return EXIT_SUCCESS;
     } /* end if */

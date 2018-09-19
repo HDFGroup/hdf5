@@ -1992,7 +1992,6 @@ extern hbool_t H5_MPEinit_g;   /* Has the MPE Library been initialized? */
 H5_DLL herr_t H5CX_push(void);
 H5_DLL herr_t H5CX_pop(void);
 
-
 #ifndef NDEBUG
 #define FUNC_ENTER_CHECK_NAME(asrt)                                           \
     {                                                                         \
@@ -2031,7 +2030,7 @@ H5_DLL herr_t H5CX_pop(void);
 /* Local variables for API routines */
 #define FUNC_ENTER_API_VARS                                                   \
     MPE_LOG_VARS                                                              \
-    H5TRACE_DECL                                                              \
+    H5TRACE_DECL
 
 #define FUNC_ENTER_API_COMMON                                                 \
     FUNC_ENTER_API_VARS                                                       \

@@ -4052,7 +4052,7 @@ external_set_elink_acc_flags(const char *env_h5_drvr, hid_t fapl, hbool_t new_fo
     if(H5Fclose(file1) < 0) TEST_ERROR
 
     /* Only run this part with VFDs that support SWMR */
-    if(H5FD_supports_swmr_test(env_h5_drvr)) {
+    if(H5FD__supports_swmr_test(env_h5_drvr)) {
 
         /* Reopen file1, with read-write and SWMR-write access */
         /* Only supported under the latest file format */
@@ -8354,9 +8354,9 @@ ud_callbacks(hid_t fapl, hbool_t new_format)
     if (H5Lget_info(fid, UD_CB_LINK_NAME, &li, H5P_DEFAULT) < 0) TEST_ERROR
     if(li.u.val_size != 16) TEST_ERROR
     if (UD_CB_TYPE != li.type) {
-	H5_FAILED();
-	HDputs("    Unexpected link class - should have been a UD hard link");
-	goto error;
+        H5_FAILED();
+        HDputs("    Unexpected link class - should have been a UD hard link");
+        goto error;
     }
 
     /* Fill the query buffer */
@@ -9004,9 +9004,9 @@ lapl_nlinks(hid_t fapl, hbool_t new_format)
         gid = H5Oopen(fid, "soft5", plist);
     } H5E_END_TRY;
     if (gid >= 0) {
-	H5_FAILED();
-	HDputs("    Should have failed for sequence of too many nested links.");
-	goto error;
+        H5_FAILED();
+        HDputs("    Should have failed for sequence of too many nested links.");
+        goto error;
     }
 
     /* Open object through lesser soft link */
@@ -15003,7 +15003,7 @@ main(void)
             nerrors += external_copy_invalid_object(my_fapl, new_format) < 0 ? 1 : 0;
             nerrors += external_dont_fail_to_source(my_fapl, new_format) < 0 ? 1 : 0;
             nerrors += external_open_twice(my_fapl, new_format) < 0 ? 1 : 0;
-	    nerrors += external_link_with_committed_datatype(my_fapl, new_format) < 0 ? 1 : 0;
+            nerrors += external_link_with_committed_datatype(my_fapl, new_format) < 0 ? 1 : 0;
         } /* end for */
 
         /* These tests assume that external links are a form of UD links,

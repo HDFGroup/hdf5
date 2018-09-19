@@ -71,7 +71,7 @@
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_supports_swmr_test()
+ * Function:	H5FD__supports_swmr_test()
  *
  * Purpose:	    Determines if a VFD supports SWMR.
  *
@@ -98,7 +98,7 @@
  *-------------------------------------------------------------------------
  */
 hbool_t
-H5FD_supports_swmr_test(const char *vfd_name)
+H5FD__supports_swmr_test(const char *vfd_name)
 {
     hbool_t ret_value = FALSE;
 
@@ -112,5 +112,5 @@ H5FD_supports_swmr_test(const char *vfd_name)
 
     FUNC_LEAVE_NOAPI(ret_value)
     
-} /* end H5FD_supports_swmr_test() */
+} /* end H5FD__supports_swmr_test() */
 

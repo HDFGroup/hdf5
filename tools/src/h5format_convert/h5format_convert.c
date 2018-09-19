@@ -226,81 +226,84 @@ convert(hid_t fid, const char *dname)
 
     /* Open the dataset */
     if((did = H5Dopen2(fid, dname, H5P_DEFAULT)) < 0) {
-	error_msg("unable to open dataset \"%s\"\n", dname);
-	h5tools_setstatus(EXIT_FAILURE);
-	goto error;
-
-    } else if(verbose_g)
-	HDfprintf(stdout, "Open the dataset\n");
+        error_msg("unable to open dataset \"%s\"\n", dname);
+        h5tools_setstatus(EXIT_FAILURE);
+        goto error;
+    }
+    else if(verbose_g)
+        HDfprintf(stdout, "Open the dataset\n");
 
     /* Get the dataset's creation property list */
     if((dcpl = H5Dget_create_plist(did)) < 0) {
-	error_msg("unable to get the dataset creation property list\n");
-	h5tools_setstatus(EXIT_FAILURE);
-	goto error;
+        error_msg("unable to get the dataset creation property list\n");
+        h5tools_setstatus(EXIT_FAILURE);
+        goto error;
     }
 
     /* Get the dataset's layout */
     if((layout_type = H5Pget_layout(dcpl)) < 0) {
-	error_msg("unable to get the dataset layout type\n");
-	h5tools_setstatus(EXIT_FAILURE);
-	goto error;
-
-    } else if(verbose_g)
-	HDfprintf(stdout, "Retrieve the dataset's layout\n");
+        error_msg("unable to get the dataset layout type\n");
+        h5tools_setstatus(EXIT_FAILURE);
+        goto error;
+    }
+    else if(verbose_g)
+        HDfprintf(stdout, "Retrieve the dataset's layout\n");
 
     switch(layout_type) {
-	case H5D_CHUNKED:
-	    if(verbose_g)
-		HDfprintf(stdout, "Dataset is a chunked dataset\n");
+    case H5D_CHUNKED:
+        if(verbose_g)
+            HDfprintf(stdout, "Dataset is a chunked dataset\n");
 
-	    /* Get the dataset's chunk indexing type */
-	    if(H5Dget_chunk_index_type(did, &idx_type) < 0) {
-		error_msg("unable to get the chunk indexing type for \"%s\"\n", dname);
-		h5tools_setstatus(EXIT_FAILURE);
-		goto error;
-	    } else if(verbose_g)
-		HDfprintf(stdout, "Retrieve the dataset's chunk indexing type\n");
+        /* Get the dataset's chunk indexing type */
+        if(H5Dget_chunk_index_type(did, &idx_type) < 0) {
+            error_msg("unable to get the chunk indexing type for \"%s\"\n", dname);
+            h5tools_setstatus(EXIT_FAILURE);
+            goto error;
+	    }
+        else if(verbose_g)
+            HDfprintf(stdout, "Retrieve the dataset's chunk indexing type\n");
 
-	    if(idx_type == H5D_CHUNK_IDX_BTREE) {
-		if(verbose_g)
-		    HDfprintf(stdout, "Dataset's chunk indexing type is already version 1 B-tree: no further action\n");
-		h5tools_setstatus(EXIT_SUCCESS);
-		goto done;
-	    } else if (verbose_g)
-		HDfprintf(stdout, "Dataset's chunk indexing type is not version 1 B-tree\n");
+        if(idx_type == H5D_CHUNK_IDX_BTREE) {
+            if(verbose_g)
+                HDfprintf(stdout, "Dataset's chunk indexing type is already version 1 B-tree: no further action\n");
+            h5tools_setstatus(EXIT_SUCCESS);
+            goto done;
+	    }
+        else if (verbose_g)
+            HDfprintf(stdout, "Dataset's chunk indexing type is not version 1 B-tree\n");
+
 	    break;
 
-	case H5D_CONTIGUOUS:
-	    if(verbose_g)
-		HDfprintf(stdout, "Dataset is a contiguous dataset: downgrade layout version as needed\n");
-	    break;
+    case H5D_CONTIGUOUS:
+        if(verbose_g)
+            HDfprintf(stdout, "Dataset is a contiguous dataset: downgrade layout version as needed\n");
+        break;
 
-        case H5D_COMPACT:
-	    if(verbose_g)
-		HDfprintf(stdout, "Dataset is a compact dataset: downgrade layout version as needed\n");
-	    break;
+    case H5D_COMPACT:
+        if(verbose_g)
+            HDfprintf(stdout, "Dataset is a compact dataset: downgrade layout version as needed\n");
+        break;
 
-        case H5D_VIRTUAL:
-	    if(verbose_g)
-		HDfprintf(stdout, "No further action for virtual dataset\n");
-	    goto done;
+    case H5D_VIRTUAL:
+        if(verbose_g)
+            HDfprintf(stdout, "No further action for virtual dataset\n");
+        goto done;
 
-        case H5D_NLAYOUTS:
-        case H5D_LAYOUT_ERROR:
-	default:
-	    error_msg("unknown layout type for \"%s\"\n", dname);
-	    h5tools_setstatus(EXIT_FAILURE);
-	    goto error;
+    case H5D_NLAYOUTS:
+    case H5D_LAYOUT_ERROR:
+    default:
+        error_msg("unknown layout type for \"%s\"\n", dname);
+        h5tools_setstatus(EXIT_FAILURE);
+        goto error;
 
     } /* end switch */
 
     /* No further action if it is a noop */
     if(noop_g) {
-	if(verbose_g)
-	    HDfprintf(stdout, "Not converting the dataset\n");
-	h5tools_setstatus(EXIT_SUCCESS);
-	goto done;
+        if(verbose_g)
+            HDfprintf(stdout, "Not converting the dataset\n");
+            h5tools_setstatus(EXIT_SUCCESS);
+            goto done;
     }
 
     if(verbose_g)
@@ -308,51 +311,54 @@ convert(hid_t fid, const char *dname)
 
     /* Downgrade the dataset */
     if(H5Dformat_convert(did) < 0) {
-	error_msg("unable to downgrade dataset \"%s\"\n", dname);
-	h5tools_setstatus(EXIT_FAILURE);
-	goto error;
-    } else if(verbose_g)
-	HDfprintf(stdout, "Done\n");
+        error_msg("unable to downgrade dataset \"%s\"\n", dname);
+        h5tools_setstatus(EXIT_FAILURE);
+        goto error;
+    }
+    else if(verbose_g)
+        HDfprintf(stdout, "Done\n");
 
 done:
     /* Close the dataset */
     if(H5Dclose(did) < 0) {
         error_msg("unable to close dataset \"%s\"\n", dname);
         h5tools_setstatus(EXIT_FAILURE);
-	goto error;
-    } else if(verbose_g)
-	HDfprintf(stdout, "Close the dataset\n");
+        goto error;
+    }
+    else if(verbose_g)
+        HDfprintf(stdout, "Close the dataset\n");
     
     /* Close the dataset creation property list */
     if(H5Pclose(dcpl) < 0) {
         error_msg("unable to close dataset creation property list\n");
         h5tools_setstatus(EXIT_FAILURE);
-	goto error;
-    } else if(verbose_g)
-	printf("Close the dataset creation property list\n");
+        goto error;
+    }
+    else if(verbose_g)
+        HDprintf("Close the dataset creation property list\n");
 
-    return(0);
+    return 0;
 
 error:
     if(verbose_g)
-	HDfprintf(stdout, "Error encountered\n");
+        HDfprintf(stdout, "Error encountered\n");
 
     H5E_BEGIN_TRY {
         H5Pclose(dcpl);
         H5Dclose(did);
     } H5E_END_TRY;
 
-    return(-1);
+    return -1;
 } /* convert() */
 
 /*-------------------------------------------------------------------------
- * Function: convert_dsets_cb()
+ * Function:    convert_dsets_cb()
  *
- * Purpose:  The callback routine from the traversal to convert the
- *	     chunk indexing type of the dataset object.
+ * Purpose:     The callback routine from the traversal to convert the
+ *              chunk indexing type of the dataset object.
  *
- * Return: Success: 0
- *  	   Failure: 1
+ * Return:      Success:    0
+ *              Failure:    -1
  *-------------------------------------------------------------------------
  */
 static int
@@ -363,11 +369,11 @@ convert_dsets_cb(const char *path, const H5O_info_t *oi, const char *already_vis
     /* If the object has already been seen then just return */
     if(NULL == already_visited) {
         if(oi->type == H5O_TYPE_DATASET) {
-	    if(verbose_g)
-		HDfprintf(stdout, "Going to process dataset:%s...\n", path);
-	    if(convert(fid, path) < 0)
-		goto error;
-	} /* end if */
+            if(verbose_g)
+                HDfprintf(stdout, "Going to process dataset:%s...\n", path);
+            if(convert(fid, path) < 0)
+            goto error;
+        } /* end if */
     } /* end if */
 
     return 0;
