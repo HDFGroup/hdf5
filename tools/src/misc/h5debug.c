@@ -346,7 +346,7 @@ main(int argc, char *argv[])
 	/*
 	 * Debug a global heap collection.
 	 */
-	status = H5HG_debug (f, addr, stdout, 0, VCOL);
+	status = H5HG_debug(f, addr, stdout, 0, VCOL);
 
     } else if(!HDmemcmp(sig, H5G_NODE_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
