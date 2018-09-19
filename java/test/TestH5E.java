@@ -242,7 +242,7 @@ public class TestH5E {
 
             try {
                 num_msg = H5.H5Eget_num(estack_id);
-                assertTrue("testH5Epush #:" + num_msg, num_msg == TestH5E.ERRSTACK_CNT + 1);
+                assertTrue("testH5Epush #:" + num_msg, num_msg == TestH5E.ERRSTACK_MTY_CNT + 1);
             }
             catch (Throwable err) {
                 err.printStackTrace();
