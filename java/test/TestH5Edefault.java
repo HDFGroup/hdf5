@@ -27,6 +27,10 @@ import org.junit.Test;
 import org.junit.rules.TestName;
 
 public class TestH5Edefault {
+    public static final int ERRSTACK_CNT = 3;
+    public static final int ERRSTACK_MTY_CNT = 0;
+    public static final int ERRSTACK_POP_CNT = 2;
+
     @Rule public TestName testname = new TestName();
 
     @Before
@@ -91,7 +95,7 @@ public class TestH5Edefault {
             err.printStackTrace();
             fail("H5.H5Eget_current_stack: " + err);
         }
-        assertTrue("H5.H5Eget_current_stack: get_num #:" + num_msg_default, num_msg_default == 4);
+        assertTrue("H5.H5Eget_current_stack: get_num #:" + num_msg_default, num_msg_default == TestH5Edefault.ERRSTACK_CNT);
 
         //Save a copy of the current stack and clears the current stack
         try {
@@ -122,7 +126,7 @@ public class TestH5Edefault {
             err.printStackTrace();
             fail("H5.H5Eget_current_stack: " + err);
         }
-        assertTrue("H5.H5Eget_current_stack: get_num #:" + num_msg, num_msg == 4);
+        assertTrue("H5.H5Eget_current_stack: get_num #:" + num_msg, num_msg == TestH5Edefault.ERRSTACK_CNT);
 
         try {
             H5.H5Eclose_stack(stack_id);
@@ -153,7 +157,7 @@ public class TestH5Edefault {
             err.printStackTrace();
             fail("H5.H5Eget_current_stack: " + err);
         }
-        assertTrue("H5.H5Eget_current_stack: get_num #:" + num_msg_default, num_msg_default == 4);
+        assertTrue("H5.H5Eget_current_stack: get_num #:" + num_msg_default, num_msg_default == TestH5Edefault.ERRSTACK_CNT);
 
         //Save a copy of the current stack and clears the current stack
         try {
@@ -174,7 +178,7 @@ public class TestH5Edefault {
             err.printStackTrace();
             fail("H5.H5Eget_current_stack: " + err);
         }
-        assertTrue("H5.H5Eget_current_stack: get_num #:" + num_msg_default, num_msg_default == 0);
+        assertTrue("H5.H5Eget_current_stack: get_num #:" + num_msg_default, num_msg_default == TestH5Edefault.ERRSTACK_MTY_CNT);
 
         //Verify the copy has the correct number of messages
         try {
@@ -184,7 +188,7 @@ public class TestH5Edefault {
             err.printStackTrace();
             fail("H5.H5Eget_current_stack: " + err);
         }
-        assertTrue("H5.H5Eget_current_stack: get_num #:" + num_msg, num_msg == 4);
+        assertTrue("H5.H5Eget_current_stack: get_num #:" + num_msg, num_msg == TestH5Edefault.ERRSTACK_CNT);
 
         //Generate errors on default stack
         try {
@@ -202,7 +206,7 @@ public class TestH5Edefault {
             err.printStackTrace();
             fail("H5.H5Eget_current_stack: " + err);
         }
-        assertTrue("H5.H5Eget_current_stack: get_num #:" + num_msg_default, num_msg_default == 4);
+        assertTrue("H5.H5Eget_current_stack: get_num #:" + num_msg_default, num_msg_default == TestH5Edefault.ERRSTACK_CNT);
 
         //Remove one message from the current stack
         try {
@@ -213,7 +217,7 @@ public class TestH5Edefault {
             err.printStackTrace();
             fail("H5.H5Eget_current_stack: " + err);
         }
-        assertTrue("H5.H5Eget_current_stack: pop #:" + num_msg_default, num_msg_default == 3);
+        assertTrue("H5.H5Eget_current_stack: pop #:" + num_msg_default, num_msg_default == TestH5Edefault.ERRSTACK_POP_CNT);
 
         //Verify the copy still has the correct number of messages
         try {
@@ -223,7 +227,7 @@ public class TestH5Edefault {
             err.printStackTrace();
             fail("H5.H5Eget_current_stack: " + err);
         }
-        assertTrue("H5.H5Eget_current_stack: get_num #:" + num_msg, num_msg == 4);
+        assertTrue("H5.H5Eget_current_stack: get_num #:" + num_msg, num_msg == TestH5Edefault.ERRSTACK_CNT);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -293,7 +297,7 @@ public class TestH5Edefault {
             err.printStackTrace();
             fail("H5.H5Eset_current_stack: " + err);
         }
-        assertTrue("H5.H5Eset_current_stack: get_num #:" + num_msg, num_msg == 4);
+        assertTrue("H5.H5Eset_current_stack: get_num #:" + num_msg, num_msg == TestH5Edefault.ERRSTACK_CNT);
 
         //Save a copy of the current stack
         try {
@@ -314,7 +318,7 @@ public class TestH5Edefault {
             err.printStackTrace();
             fail("H5.H5Eset_current_stack: " + err);
         }
-        assertTrue("H5.H5Eset_current_stack: get_num #:" + num_msg, num_msg == 4);
+        assertTrue("H5.H5Eset_current_stack: get_num #:" + num_msg, num_msg == TestH5Edefault.ERRSTACK_CNT);
 
         //Generate errors on default stack
         try {
@@ -332,7 +336,7 @@ public class TestH5Edefault {
             err.printStackTrace();
             fail("H5.H5Eget_current_stack: " + err);
         }
-        assertTrue("H5.H5Eset_current_stack: get_num #:" + num_msg, num_msg == 4);
+        assertTrue("H5.H5Eset_current_stack: get_num #:" + num_msg, num_msg == TestH5Edefault.ERRSTACK_CNT);
 
         //Remove one message from the current stack
         try {
@@ -343,7 +347,7 @@ public class TestH5Edefault {
             err.printStackTrace();
             fail("H5.H5Eset_current_stack: " + err);
         }
-        assertTrue("H5.H5Eset_current_stack: pop #:" + num_msg, num_msg == 3);
+        assertTrue("H5.H5Eset_current_stack: pop #:" + num_msg, num_msg == TestH5Edefault.ERRSTACK_POP_CNT);
 
         //Verify the copy still has the correct number of messages
         try {
@@ -353,7 +357,7 @@ public class TestH5Edefault {
             err.printStackTrace();
             fail("H5.H5Eset_current_stack: " + err);
         }
-        assertTrue("H5.H5Eset_current_stack: get_num #:" + num_msg, num_msg == 4);
+        assertTrue("H5.H5Eset_current_stack: get_num #:" + num_msg, num_msg == TestH5Edefault.ERRSTACK_CNT);
 
         try {
             H5.H5Eset_current_stack(stack_id);
@@ -363,7 +367,7 @@ public class TestH5Edefault {
             err.printStackTrace();
             fail("H5.H5Eset_current_stack: " + err);
         }
-        assertTrue("H5.H5Eset_current_stack: get_num - " + num_msg, num_msg == 4);
+        assertTrue("H5.H5Eset_current_stack: get_num - " + num_msg, num_msg == TestH5Edefault.ERRSTACK_CNT);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -386,7 +390,7 @@ public class TestH5Edefault {
             err.printStackTrace();
             fail("H5.H5Epop: " + err);
         }
-        assertTrue("H5.H5Epop before #:" + num_msg, num_msg == 4);
+        assertTrue("H5.H5Epop before #:" + num_msg, num_msg == TestH5Edefault.ERRSTACK_CNT);
         try {
             H5.H5Epop(HDF5Constants.H5E_DEFAULT, 1);
             num_msg = H5.H5Eget_num(HDF5Constants.H5E_DEFAULT);
@@ -395,7 +399,7 @@ public class TestH5Edefault {
             err.printStackTrace();
             fail("H5.H5Epop: " + err);
         }
-        assertTrue("H5.H5Epop after #:" + num_msg, num_msg == 3);
+        assertTrue("H5.H5Epop after #:" + num_msg, num_msg == TestH5Edefault.ERRSTACK_POP_CNT);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -471,7 +475,7 @@ public class TestH5Edefault {
             err.printStackTrace();
             fail("H5.H5Eclear2_with_msg: " + err);
         }
-        assertTrue("H5.H5Eclear2_with_msg before #:" + num_msg, num_msg == 4);
+        assertTrue("H5.H5Eclear2_with_msg before #:" + num_msg, num_msg == TestH5Edefault.ERRSTACK_CNT);
         try {
             H5.H5Eclear2(HDF5Constants.H5E_DEFAULT);
             num_msg = H5.H5Eget_num(HDF5Constants.H5E_DEFAULT);
@@ -480,7 +484,7 @@ public class TestH5Edefault {
             err.printStackTrace();
             fail("H5.H5Eclear2_with_msg: " + err);
         }
-        assertTrue("H5.H5Eclear2_with_msg after #:" + num_msg, num_msg == 0);
+        assertTrue("H5.H5Eclear2_with_msg after #:" + num_msg, num_msg == TestH5Edefault.ERRSTACK_MTY_CNT);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -516,7 +520,7 @@ public class TestH5Edefault {
             err.printStackTrace();
             fail("H5.H5Eget_num: " + err);
         }
-        assertTrue("H5.H5Eget_num #:" + num_msg, num_msg == 0);
+        assertTrue("H5.H5Eget_num #:" + num_msg, num_msg == TestH5Edefault.ERRSTACK_MTY_CNT);
     }
 
     @Test
@@ -534,7 +538,7 @@ public class TestH5Edefault {
             err.printStackTrace();
             fail("H5.H5Eget_num_with_msg: " + err);
         }
-        assertTrue("H5.H5Eget_num_with_msg #:" + num_msg, num_msg > 0);
+        assertTrue("H5.H5Eget_num_with_msg #:" + num_msg, num_msg > TestH5Edefault.ERRSTACK_MTY_CNT);
     }
 
 }

@@ -168,7 +168,7 @@ public class TestH5E {
             fail("H5.H5Epop: " + err);
         }
 
-        assertTrue("H5.H5Epop #:" + num_msg, num_msg == 4);
+        assertTrue("H5.H5Epop #:" + num_msg, num_msg == 3);
 
         try {
             H5.H5Epop(current_stackid, 1);
@@ -186,7 +186,7 @@ public class TestH5E {
             fail("H5.H5Epop: " + err);
         }
 
-        assertTrue("H5.H5Epop", num_msg == 3);
+        assertTrue("H5.H5Epop", num_msg == 2);
     }
 
     @Test
@@ -314,7 +314,7 @@ public class TestH5E {
             err.printStackTrace();
             fail("testH5Ewalk:H5Eget_num " + err);
         }
-        assertTrue("testH5Ewalk #:" + num_msg, num_msg == 4);
+        assertTrue("testH5Ewalk #:" + num_msg, num_msg == 3);
 
         try {
             H5.H5Ewalk2(current_stackid, HDF5Constants.H5E_WALK_UPWARD, walk_cb, walk_data);
