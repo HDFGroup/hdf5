@@ -2848,8 +2848,7 @@ H5O_get_oh_flags(const H5O_t *oh)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
     HDassert(oh);
-    HDassert(oh->flags);
-    FUNC_LEAVE_NOAPI(oh->flags);
+    FUNC_LEAVE_NOAPI(oh->flags); /* flags can be 0 */
 }
 
 

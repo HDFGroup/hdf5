@@ -846,7 +846,7 @@ H5D__calculate_minimum_header_size( \
     if ((H5O_OH_GET_VERSION(ohdr) > 1) && /* TODO: H5O_VERSION_1 in H5Opkg.h */
         (H5O_HDR_STORE_TIMES & H5O_OH_GET_FLAGS(ohdr)))
     {
-        time_t mtime = H5O_OH_GET_MTIME(ohdr);
+        time_t mtime = H5_now();
         ret_value += H5O_msg_size_oh(
                 file,
                 ohdr,
