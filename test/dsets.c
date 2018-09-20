@@ -27,7 +27,6 @@
 #include "testhdf5.h"
 #include "H5srcdir.h"
 
-#include "H5Bprivate.h"
 #include "H5CXprivate.h"        /* API Contexts                         */
 #include "H5Iprivate.h"
 #include "H5Pprivate.h"
@@ -2517,8 +2516,7 @@ error:
  *
  * Purpose:   Tests library behavior when filter is missing
  *
- * Return:    Success:    0
- *            Failure:    -1
+ * Return:    SUCCEED/FAIL
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2543,7 +2541,7 @@ test_missing_filter(hid_t file)
         /* Verify deflate filter is registered currently */
         if(H5Zfilter_avail(H5Z_FILTER_DEFLATE)!=TRUE) {
             H5_FAILED();
-            printf("    Line %d: Deflate filter not available\n",__LINE__);
+            HDprintf("    Line %d: Deflate filter not available\n",__LINE__);
             goto error;
         } /* end if */
 
@@ -2555,31 +2553,31 @@ test_missing_filter(hid_t file)
         /* (Use private routine, to avoid range checking on filter ID) */
         if(H5Z__unregister(H5Z_FILTER_DEFLATE) < 0) {
             H5_FAILED();
-            printf("    Line %d: Can't unregister deflate filter\n",__LINE__);
+            HDprintf("    Line %d: Can't unregister deflate filter\n",__LINE__);
             goto error;
         } /* end if */
 #endif /* H5_HAVE_FILTER_DEFLATE */
         /* Verify deflate filter is not registered currently */
         if(H5Zfilter_avail(H5Z_FILTER_DEFLATE)!=FALSE) {
             H5_FAILED();
-            printf("    Line %d: Deflate filter available\n",__LINE__);
+            HDprintf("    Line %d: Deflate filter available\n",__LINE__);
             goto error;
         } /* end if */
 
     /* Create dcpl with deflate filter */
     if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) {
         H5_FAILED();
-        printf("    Line %d: Can't create dcpl\n",__LINE__);
+        HDprintf("    Line %d: Can't create dcpl\n",__LINE__);
         goto error;
     } /* end if */
     if(H5Pset_chunk(dcpl, 2, chunk_dims) < 0) {
         H5_FAILED();
-        printf("    Line %d: Can't set chunk sizes\n",__LINE__);
+        HDprintf("    Line %d: Can't set chunk sizes\n",__LINE__);
         goto error;
     } /* end if */
     if(H5Pset_deflate(dcpl, 9) < 0) {
         H5_FAILED();
-        printf("    Line %d: Can't set deflate filter\n",__LINE__);
+        HDprintf("    Line %d: Can't set deflate filter\n",__LINE__);
         goto error;
     } /* end if */
 
@@ -2587,47 +2585,47 @@ test_missing_filter(hid_t file)
     ret=H5Pall_filters_avail(dcpl);
     if(ret<0) {
         H5_FAILED();
-        printf("    Line %d: Can't check filter availability\n",__LINE__);
+        HDprintf("    Line %d: Can't check filter availability\n",__LINE__);
         goto error;
     } /* end if */
     if(ret!=FALSE) {
         H5_FAILED();
-        printf("    Line %d: Filter shouldn't be available\n",__LINE__);
+        HDprintf("    Line %d: Filter shouldn't be available\n",__LINE__);
         goto error;
     } /* end if */
 
     /* Create the data space */
     if((sid = H5Screate_simple(2, dims, NULL)) < 0) {
         H5_FAILED();
-        printf("    Line %d: Can't open dataspace\n",__LINE__);
+        HDprintf("    Line %d: Can't open dataspace\n",__LINE__);
         goto error;
     } /* end if */
 
     /* Create new dataset */
     if((dsid = H5Dcreate2(file, DSET_MISSING_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0) {
         H5_FAILED();
-        printf("    Line %d: Can't create dataset\n",__LINE__);
+        HDprintf("    Line %d: Can't create dataset\n",__LINE__);
         goto error;
     } /* end if */
 
     /* Write data */
     if(H5Dwrite(dsid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, points) < 0) {
         H5_FAILED();
-        printf("    Line %d: Error writing dataset data\n",__LINE__);
+        HDprintf("    Line %d: Error writing dataset data\n",__LINE__);
         goto error;
     } /* end if */
 
     /* Flush the file (to clear the cache) */
     if(H5Fflush(file, H5F_SCOPE_GLOBAL) < 0) {
         H5_FAILED();
-        printf("    Line %d: Error flushing file\n",__LINE__);
+        HDprintf("    Line %d: Error flushing file\n",__LINE__);
         goto error;
     } /* end if */
 
     /* Query the dataset's size on disk */
     if(0 == (dset_size = H5Dget_storage_size(dsid))) {
         H5_FAILED();
-        printf("    Line %d: Error querying dataset size, dset_size=%lu\n",__LINE__,(unsigned long)dset_size);
+        HDprintf("    Line %d: Error querying dataset size, dset_size=%lu\n",__LINE__,(unsigned long)dset_size);
         goto error;
     } /* end if */
 
@@ -2635,14 +2633,14 @@ test_missing_filter(hid_t file)
     /* (i.e. the deflation filter we asked for was silently ignored) */
     if((H5Tget_size(H5T_NATIVE_INT) * DSET_DIM1 * DSET_DIM2) != dset_size) {
         H5_FAILED();
-        printf("    Line %d: Incorrect dataset size: %lu\n",__LINE__,(unsigned long)dset_size);
+        HDprintf("    Line %d: Incorrect dataset size: %lu\n",__LINE__,(unsigned long)dset_size);
         goto error;
     } /* end if */
 
     /* Read data */
     if(H5Dread(dsid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, check) < 0) {
         H5_FAILED();
-        printf("    Line %d: Error reading dataset data\n",__LINE__);
+        HDprintf("    Line %d: Error reading dataset data\n",__LINE__);
         goto error;
     } /* end if */
 
@@ -2652,10 +2650,10 @@ test_missing_filter(hid_t file)
         for(j=0; j<(size_t)dims[1]; j++) {
             if(points[i][j] != check[i][j]) {
                 H5_FAILED();
-                printf("    Line %d: Read different values than written.\n",__LINE__);
-                printf("    At index %lu,%lu\n", (unsigned long)(i), (unsigned long)(j));
-                printf("    At original: %d\n",points[i][j]);
-                printf("    At returned: %d\n",check[i][j]);
+                HDprintf("    Line %d: Read different values than written.\n",__LINE__);
+                HDprintf("    At index %lu,%lu\n", (unsigned long)(i), (unsigned long)(j));
+                HDprintf("    At original: %d\n",points[i][j]);
+                HDprintf("    At returned: %d\n",check[i][j]);
                 goto error;
             } /* end if */
         } /* end for */
@@ -2664,21 +2662,21 @@ test_missing_filter(hid_t file)
     /* Close dataset */
     if(H5Dclose(dsid) < 0) {
         H5_FAILED();
-        printf("    Line %d: Can't close dataset\n",__LINE__);
+        HDprintf("    Line %d: Can't close dataset\n",__LINE__);
         goto error;
     } /* end if */
 
     /* Close dataspace */
     if(H5Sclose(sid) < 0) {
         H5_FAILED();
-        printf("    Line %d: Can't close dataspace\n",__LINE__);
+        HDprintf("    Line %d: Can't close dataspace\n",__LINE__);
         goto error;
     } /* end if */
 
     /* Close dataset creation property list */
     if(H5Pclose(dcpl) < 0) {
         H5_FAILED();
-        printf("    Line %d: Can't close dcpl\n",__LINE__);
+        HDprintf("    Line %d: Can't close dcpl\n",__LINE__);
         goto error;
     } /* end if */
 
@@ -2688,14 +2686,14 @@ test_missing_filter(hid_t file)
     /* Open existing file */
     if((fid = H5Fopen(testfile, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0) {
         H5_FAILED();
-        printf("    Line %d: Can't open existing deflated file\n", __LINE__);
+        HDprintf("    Line %d: Can't open existing deflated file\n", __LINE__);
         goto error;
     } /* end if */
 
     /* Open dataset */
     if((dsid = H5Dopen2(fid, "Dataset1", H5P_DEFAULT)) < 0) {
         H5_FAILED();
-        printf("    Line %d: Can't open dataset\n", __LINE__);
+        HDprintf("    Line %d: Can't open dataset\n", __LINE__);
         goto error;
     } /* end if */
 
@@ -2705,21 +2703,21 @@ test_missing_filter(hid_t file)
     } H5E_END_TRY;
     if(ret>=0) {
         H5_FAILED();
-        printf("    Line %d: Should not be able to read dataset data\n", __LINE__);
+        HDprintf("    Line %d: Should not be able to read dataset data\n", __LINE__);
         goto error;
     } /* end if */
 
     /* Close dataset */
     if(H5Dclose(dsid) < 0) {
         H5_FAILED();
-        printf("    Line %d: Can't close dataset\n", __LINE__);
+        HDprintf("    Line %d: Can't close dataset\n", __LINE__);
         goto error;
     } /* end if */
 
     /* Close existing file */
     if(H5Fclose(fid) < 0) {
         H5_FAILED();
-        printf("    Line %d: Can't close file\n", __LINE__);
+        HDprintf("    Line %d: Can't close file\n", __LINE__);
         goto error;
     } /* end if */
 
@@ -2727,21 +2725,21 @@ test_missing_filter(hid_t file)
         /* Verify deflate filter is not registered currently */
         if(H5Zfilter_avail(H5Z_FILTER_DEFLATE)!=FALSE) {
             H5_FAILED();
-            printf("    Line %d: Deflate filter available\n",__LINE__);
+            HDprintf("    Line %d: Deflate filter available\n",__LINE__);
             goto error;
         } /* end if */
 #ifdef H5_HAVE_FILTER_DEFLATE
         /* Register deflate filter (use internal function to avoid range checks) */
         if(H5Z_register(H5Z_DEFLATE) < 0) {
             H5_FAILED();
-            printf("    Line %d: Can't unregister deflate filter\n",__LINE__);
+            HDprintf("    Line %d: Can't unregister deflate filter\n",__LINE__);
             goto error;
         } /* end if */
 
         /* Verify deflate filter is registered currently */
         if(H5Zfilter_avail(H5Z_FILTER_DEFLATE)!=TRUE) {
             H5_FAILED();
-            printf("    Line %d: Deflate filter not available\n",__LINE__);
+            HDprintf("    Line %d: Deflate filter not available\n",__LINE__);
             goto error;
         } /* end if */
 #endif /* H5_HAVE_FILTER_DEFLATE */
@@ -2751,13 +2749,13 @@ test_missing_filter(hid_t file)
     api_ctx_pushed = FALSE;
 
     PASSED();
-    return 0;
+    return SUCCEED;
 
 error:
     if(api_ctx_pushed) H5CX_pop();
 
-    return -1;
-}
+    return FAIL;
+} /* end test_missing_filter() */
 
 
 /*-------------------------------------------------------------------------
@@ -8301,25 +8299,25 @@ test_chunk_fast(const char *env_h5_driver, hid_t fapl)
 
     /* Loop over using SWMR access to write */
     for(swmr = 0; swmr <= 1; swmr++) {
-    int     compress;       /* Whether chunks should be compressed */
+        int     compress;       /* Whether chunks should be compressed */
 
         /* SWMR is now supported with/without latest format:  */
-    /* (1) write+latest-format (2) SWMR-write+non-latest-format */
+        /* (1) write+latest-format (2) SWMR-write+non-latest-format */
 
         /* Skip this iteration if SWMR I/O is not supported for the VFD specified
          * by the environment variable.
          */
-        if(swmr && !H5FD_supports_swmr_test(env_h5_driver))
+        if(swmr && !H5FD__supports_swmr_test(env_h5_driver))
             continue;
 
 #ifdef H5_HAVE_FILTER_DEFLATE
         /* Loop over compressing chunks */
         for(compress = 0; compress <= 1; compress++)
 #else
-    /* Loop over without compression */
+        /* Loop over without compression */
         for(compress = 0; compress <= 0; compress++)
 #endif /* H5_HAVE_FILTER_DEFLATE */
-    {
+        {
             H5D_alloc_time_t alloc_time;        /* Storage allocation time */
 
             /* Loop over storage allocation time */
@@ -10412,11 +10410,11 @@ test_swmr_non_latest(const char *env_h5_driver, hid_t fapl)
     /* Skip this test if SWMR I/O is not supported for the VFD specified
      * by the environment variable.
      */
-    if(!H5FD_supports_swmr_test(env_h5_driver)) {
+    if(!H5FD__supports_swmr_test(env_h5_driver)) {
         SKIPPED();
         HDputs("    Test skipped due to VFD not supporting SWMR I/O.");
         return 0;
-    } /* end if */
+    }
 
     /* Check if we are using the latest version of the format */
     if(H5Pget_libver_bounds(fapl, &low, NULL) < 0)
@@ -10428,7 +10426,8 @@ test_swmr_non_latest(const char *env_h5_driver, hid_t fapl)
         /* Create file with write+latest-format */
         if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
             FAIL_STACK_ERROR
-    } else {
+    }
+    else {
         /* Create file with SWMR-write+non-latest-format */
         if((fid = H5Fcreate(filename, H5F_ACC_TRUNC|H5F_ACC_SWMR_WRITE, H5P_DEFAULT, fapl)) < 0)
             FAIL_STACK_ERROR
@@ -10661,11 +10660,11 @@ test_earray_hdr_fd(const char *env_h5_driver, hid_t fapl)
     /* Skip this test if SWMR I/O is not supported for the VFD specified
      * by the environment variable.
      */
-    if(!H5FD_supports_swmr_test(env_h5_driver)) {
+    if(!H5FD__supports_swmr_test(env_h5_driver)) {
         SKIPPED();
         HDputs("    Test skipped due to VFD not supporting SWMR I/O.");
         return 0;
-    } /* end if */
+    }
 
     if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
         FAIL_STACK_ERROR;
@@ -10781,11 +10780,11 @@ test_farray_hdr_fd(const char *env_h5_driver, hid_t fapl)
     /* Skip this test if SWMR I/O is not supported for the VFD specified
      * by the environment variable.
      */
-    if(!H5FD_supports_swmr_test(env_h5_driver)) {
+    if(!H5FD__supports_swmr_test(env_h5_driver)) {
         SKIPPED();
         HDputs("    Test skipped due to VFD not supporting SWMR I/O.");
         return 0;
-    } /* end if */
+    }
 
     if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
         FAIL_STACK_ERROR;
@@ -10901,11 +10900,11 @@ test_bt2_hdr_fd(const char *env_h5_driver, hid_t fapl)
     /* Skip this test if SWMR I/O is not supported for the VFD specified
      * by the environment variable.
      */
-    if(!H5FD_supports_swmr_test(env_h5_driver)) {
+    if(!H5FD__supports_swmr_test(env_h5_driver)) {
         SKIPPED();
         HDputs("    Test skipped due to VFD not supporting SWMR I/O.");
         return 0;
-    } /* end if */
+    }
 
     if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
         FAIL_STACK_ERROR;
@@ -12904,7 +12903,7 @@ error:
 #define SRC_DSET    "src_dset"
 #define V_DSET      "v_dset"
 static herr_t
-test_versionbounds()
+test_versionbounds(void)
 {
     hid_t fapl = -1;
     hid_t srcfile = -1;   /* Files with source dsets */
