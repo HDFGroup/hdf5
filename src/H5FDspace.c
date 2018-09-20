@@ -38,6 +38,7 @@
 #include "H5Fprivate.h"         /* File access				*/
 #include "H5FDpkg.h"		/* File Drivers				*/
 #include "H5FDmulti.h"		/* Usage-partitioned file family	*/
+#include "H5FLprivate.h"        /* Free lists                               */
 
 
 /****************/

@@ -143,7 +143,7 @@ H5C__verify_cork_tag_test(hid_t fid, haddr_t tag, hbool_t status)
 
     /* Get file pointer */
     if(NULL == (f = (H5F_t *)H5I_object_verify(fid, H5I_FILE)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
 
     /* Get cache pointer */
     cache = f->shared->cache;

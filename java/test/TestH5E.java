@@ -328,7 +328,7 @@ public class TestH5E {
             fail("testH5Ewalk:H5Ewalk2 " + err);
         }
         assertFalse("testH5Ewalk:H5Ewalk2 ",((H5E_walk_data)walk_data).walkdata.isEmpty());
-        assertTrue("testH5Ewalk:H5Ewalk2 "+((H5E_walk_data)walk_data).walkdata.size(),((H5E_walk_data)walk_data).walkdata.size()==4);
+        assertTrue("testH5Ewalk:H5Ewalk2 "+((H5E_walk_data)walk_data).walkdata.size(),((H5E_walk_data)walk_data).walkdata.size()==TestH5E.ERRSTACK_CNT);
     }
 
 }
