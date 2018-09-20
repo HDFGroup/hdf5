@@ -733,6 +733,7 @@ H5D__calculate_minimum_header_size( \
     H5T_t      *type             = NULL;
     H5O_fill_t *fill_prop        = NULL;
     hbool_t     use_at_least_v18 = FALSE;
+    const char  continuation[1]  = ""; /* requred for work-around */
     size_t      ret_value        = 0;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR;
@@ -777,29 +778,16 @@ H5D__calculate_minimum_header_size( \
             fill_prop,
             0);
 
-#if 1 /* DEBUG H5Omessage */
     /* "Continuation" message size */
-#if 0
-    ret_value += H5O_msg_raw_size(
-            file,
-            H5O_CONT_ID,
-            FALSE,
-            NULL);
-#else
-    {
-    /* message pointer "tmp" is unused by raw get function, however, a null 
-     * pointer is intercepted by an assert in H5O_msg_size_oh().
+    /* message pointer "continuation" is unused by raw get function, however,
+     * a null pointer would be intercepted by an assert in H5O_msg_size_oh().
      */
-    char tmp[1] = "";
     ret_value += H5O_msg_size_oh(
             file,
             ohdr,
             H5O_CONT_ID,
-            tmp,
+            continuation,
             0);
-    }
-#endif
-#endif /* DEBUG H5Omessage */
 
     /* Fill Value (backwards compatability) message size */
     if (fill_prop->buf && !use_at_least_v18) {
@@ -843,16 +831,24 @@ H5D__calculate_minimum_header_size( \
     }
 
     /* Modification Time message size */
-    if ((H5O_OH_GET_VERSION(ohdr) > 1) && /* TODO: H5O_VERSION_1 in H5Opkg.h */
-        (H5O_HDR_STORE_TIMES & H5O_OH_GET_FLAGS(ohdr)))
-    {
-        time_t mtime = H5_now();
-        ret_value += H5O_msg_size_oh(
-                file,
-                ohdr,
-                H5O_MTIME_NEW_ID,
-                &mtime,
-                0);
+    if (H5O_HDR_STORE_TIMES & H5O_OH_GET_FLAGS(ohdr)) {
+        /* TODO: 1 -> H5O_VERSION_1 in H5Opkg.h */
+        HDassert(H5O_OH_GET_VERSION(ohdr) >= 1);
+
+        if (H5O_OH_GET_VERSION(ohdr) == 1) {
+            /* v1 object headers store modification time as a message */
+            time_t mtime = H5_now();
+            ret_value += H5O_msg_size_oh(
+                    file,
+                    ohdr,
+                    H5O_MTIME_NEW_ID,
+                    &mtime,
+                    0);
+        } else { /* "version 2" */
+           /* TODO: is this backwards? reduce space if _not_ set? */
+           /* 4 4-byte (32-bit) fields: atime, mtime, ctime, btime */
+           ret_value += 16;
+        }
     }
 
     FUNC_LEAVE_NOAPI(ret_value);

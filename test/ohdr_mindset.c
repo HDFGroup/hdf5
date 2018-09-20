@@ -1,5 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Tests to verify behavior of minimized object headers.
+ * Tests to verify behavior of minimized dataset object headers.
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include "hdf5.h"
@@ -406,6 +406,7 @@ if (strcmp((actual), (expected)) != 0) {       \
  * Macro: PRINT_DSET_OH_COMPARISON(...)
  *
  * Pretty-print metadata information about two dataset object headers.
+ * Please use only at "top level" of test function.
  * ---------------------------------------------------------------------------
  */
 #define PRINT_DSET_OH_COMPARISON(did1, did2)                         \
@@ -477,7 +478,7 @@ if (strcmp((actual), (expected)) != 0) {       \
 /* ---------------------------------------------------------------------------
  * Function:  _create_file()
  *
- * Purpose: Create a file with the name, and record its hid in out parameter.
+ * Purpose: Create a file with the name, and record its ID in out parameter.
  *
  * Return: 0 (success) or -1 (failure)
  *
@@ -505,7 +506,7 @@ _create_file(                 \
 /* ---------------------------------------------------------------------------
  * Function:  _make_dataset()
  *
- * Purpose: Create a dataset and record its hid in out parameter `dset_id`.
+ * Purpose: Create a dataset and record its ID in out parameter `dset_id`.
  *
  * Return: 0 (success) or -1 (failure)
  *
@@ -628,7 +629,8 @@ _oh_getsize(hid_t did, hsize_t *size_out)
  * Purpose: Compare the TOTAL space used by datasets' object headers.
  *
  *
- * Return: -1 if an error occurred, else positive #defined indicator value.
+ * Return: negative value if an error occurred,
+ *         else positive #defined indicator value EQ, LT, GT.
  *
  * ---------------------------------------------------------------------------
  */
@@ -642,7 +644,6 @@ oh_compare(         \
 
     if (FAIL == _oh_getsize(did1, &space1))
         return -1;
-
     if (FAIL == _oh_getsize(did2, &space2))
         return -2;
 
@@ -1276,7 +1277,7 @@ test_minimized_with_filter(void)
             file_id,    \
             "xZ",       \
             dtype_id,   \
-            dspace_id,   \
+            dspace_id,  \
             dcpl_xZ_id, \
             &dset_xZ_id)
 
@@ -1422,7 +1423,7 @@ test_modification_times(void)
     for (i = 0; i < n_cases; i++) {
 
         /* -------------- *
-         * per-test setup *
+         * per-case setup *
          * -------------- */
 
         fapl_id = H5P_DEFAULT;
@@ -1499,25 +1500,15 @@ test_modification_times(void)
             PRINT_DSET_OH_COMPARISON(dset_mT_id, dset_mN_id)
         }
 
-        if (cases[i].oh_version == 1) {
-            /* V1 dataset headers do not support modtime tracking; are equal
-             */
-            JSVERIFY( EQ, oh_compare(dset_xx_id, dset_xT_id), NULL )
-            JSVERIFY( EQ, oh_compare(dset_mx_id, dset_mT_id), NULL )
-            JSVERIFY( EQ, oh_compare(dset_mN_id, dset_mT_id), NULL )
-        } else {
-            /* V2 dataset headers should support modtime tracking
-             */
-            JSVERIFY( EQ, oh_compare(dset_xx_id, dset_xT_id), NULL )
-            JSVERIFY( EQ, oh_compare(dset_mx_id, dset_mT_id), NULL )
-            JSVERIFY( LT, oh_compare(dset_mN_id, dset_mT_id), NULL )
-        }
+        JSVERIFY( EQ, oh_compare(dset_xx_id, dset_xT_id), NULL )
+        JSVERIFY( EQ, oh_compare(dset_mx_id, dset_mT_id), NULL )
+        JSVERIFY( LT, oh_compare(dset_mN_id, dset_mT_id), NULL )
 
         JSVERIFY( LT, oh_compare(dset_mT_id, dset_xT_id),
                   "minimized should always be smaller than unminimized" )
 
         /* ----------------- *
-         * per-test teardown *
+         * per-case teardown *
          * ----------------- */
 
         MUST_CLOSE(dset_xx_id, CLOSE_DATASET)
