@@ -204,7 +204,7 @@ H5T__vlen_set_loc(const H5T_t *dt, H5F_t *f, H5T_loc_t loc)
                     dt->shared->u.vlen.read = H5T_vlen_seq_mem_read;
                     dt->shared->u.vlen.write = H5T_vlen_seq_mem_write;
                     dt->shared->u.vlen.setnull = H5T_vlen_seq_mem_setnull;
-                } /* end if */
+                }
                 else if(dt->shared->u.vlen.type == H5T_VLEN_STRING) {
                     /* size in memory, disk size is different */
                     dt->shared->size = sizeof(char *);
@@ -216,9 +216,10 @@ H5T__vlen_set_loc(const H5T_t *dt, H5F_t *f, H5T_loc_t loc)
                     dt->shared->u.vlen.read = H5T_vlen_str_mem_read;
                     dt->shared->u.vlen.write = H5T_vlen_str_mem_write;
                     dt->shared->u.vlen.setnull = H5T_vlen_str_mem_setnull;
-                } /* end else-if */
-                else
+                }
+                else {
                     HDassert(0 && "Invalid VL type");
+                }
 
                 /* Reset file ID (since this VL is in memory) */
                 dt->shared->u.vlen.f = NULL;
@@ -667,8 +668,7 @@ H5T_vlen_str_mem_read(H5F_t H5_ATTR_UNUSED *f, void *_vl, void *buf, size_t len)
  */
 static herr_t
 H5T_vlen_str_mem_write(H5F_t H5_ATTR_UNUSED *f, const H5T_vlen_alloc_info_t *vl_alloc_info,
-    void *_vl, void *buf, void H5_ATTR_UNUSED *_bg, size_t seq_len,
-    size_t base_size)
+    void *_vl, void *buf, void H5_ATTR_UNUSED *_bg, size_t seq_len, size_t base_size)
 {
     char *t;                        /* Pointer to temporary buffer allocated */
     size_t len;                     /* Maximum length of the string to copy */
@@ -847,10 +847,11 @@ H5T_vlen_disk_read(H5F_t *f, void *_vl, void *buf, size_t H5_ATTR_UNUSED len)
     UINT32DECODE(vl, hobjid.idx);
 
     /* Check if this sequence actually has any data */
-    if(hobjid.addr > 0)
+    if(hobjid.addr > 0) {
         /* Read the VL information from disk */
         if(NULL == H5HG_read(f, &hobjid, buf, NULL))
             HGOTO_ERROR(H5E_DATATYPE, H5E_READERROR, FAIL, "Unable to read VL information")
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -898,10 +899,11 @@ H5T_vlen_disk_write(H5F_t *f, const H5T_vlen_alloc_info_t H5_ATTR_UNUSED *vl_all
         UINT32DECODE(bg, bg_hobjid.idx);
 
         /* Free heap object for old data */
-        if(bg_hobjid.addr > 0)
+        if(bg_hobjid.addr > 0) {
             /* Free heap object */
             if(H5HG_remove(f, &bg_hobjid) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_WRITEERROR, FAIL, "Unable to remove heap object")
+        }
     } /* end if */
 
     /* Set the length of the sequence */
@@ -1159,6 +1161,10 @@ done:
  *
  * Purpose: Alternative method to reclaim any VL data for a buffer element.
  * 
+ *          Use this function when the datatype is already available, but 
+ *          the allocation info is needed from the context before jumping
+ *          into recursion.
+ *
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Mike McGreevy
@@ -1169,8 +1175,8 @@ done:
 herr_t
 H5T_vlen_reclaim_elmt(void *elem, H5T_t *dt)
 {
-    H5T_vlen_alloc_info_t vl_alloc_info;   /* VL allocation info */
-    herr_t ret_value = SUCCEED;            /* return value */
+    H5T_vlen_alloc_info_t   vl_alloc_info;              /* VL allocation info */
+    herr_t                  ret_value = SUCCEED;        /* return value */
 
     HDassert(dt);
     HDassert(elem);

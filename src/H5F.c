@@ -21,20 +21,20 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"          /* Generic Functions                    */
-#include "H5Aprivate.h"         /* Attributes                           */
-#include "H5ACprivate.h"        /* Metadata cache                       */
-#include "H5CXprivate.h"        /* API Contexts                         */
-#include "H5Dprivate.h"         /* Datasets                             */
-#include "H5Eprivate.h"         /* Error handling                       */
-#include "H5Fpkg.h"             /* File access                          */
-#include "H5FDprivate.h"        /* File drivers                         */
-#include "H5Gprivate.h"         /* Groups                               */
-#include "H5Iprivate.h"         /* IDs                                  */
-#include "H5MFprivate.h"        /* File memory management               */
-#include "H5MMprivate.h"        /* Memory management                    */
-#include "H5Pprivate.h"         /* Property lists                       */
-#include "H5Tprivate.h"         /* Datatypes                            */
+#include "H5private.h"          /* Generic Functions                        */
+#include "H5Aprivate.h"         /* Attributes                               */
+#include "H5ACprivate.h"        /* Metadata cache                           */
+#include "H5CXprivate.h"        /* API Contexts                             */
+#include "H5Dprivate.h"         /* Datasets                                 */
+#include "H5Eprivate.h"         /* Error handling                           */
+#include "H5Fpkg.h"             /* File access                              */
+#include "H5FDprivate.h"        /* File drivers                             */
+#include "H5Gprivate.h"         /* Groups                                   */
+#include "H5Iprivate.h"         /* IDs                                      */
+#include "H5MFprivate.h"        /* File memory management                   */
+#include "H5MMprivate.h"        /* Memory management                        */
+#include "H5Pprivate.h"         /* Property lists                           */
+#include "H5Tprivate.h"         /* Datatypes                                */
 
 
 /****************/
@@ -76,10 +76,10 @@ hbool_t H5_PKG_INIT_VAR = FALSE;
 
 /* File ID class */
 static const H5I_class_t H5I_FILE_CLS[1] = {{
-    H5I_FILE,            /* ID class value */
-    0,                   /* Class flags */
-    0,                   /* # of reserved IDs for class */
-    (H5I_free_t)H5F__close_cb  /* Callback routine for closing objects of this class */
+    H5I_FILE,                   /* ID class value */
+    0,                          /* Class flags */
+    0,                          /* # of reserved IDs for class */
+    (H5I_free_t)H5F__close_cb   /* Callback routine for closing objects of this class */
 }};
 
 
@@ -113,16 +113,18 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function: H5F_term_package
+ * Function:    H5F_term_package
  *
- * Purpose:  Terminate this interface: free all memory and reset global
- *           variables to their initial values.  Release all ID groups
- *           associated with this interface.
+ * Purpose:     Terminate this interface: free all memory and reset global
+ *              variables to their initial values.  Release all ID groups
+ *              associated with this interface.
  *
- * Return:   Success:   Positive if anything was done that might
- *                      have affected other interfaces;
- *                      zero otherwise.
- *           Failure:   Never fails.
+ * Return:      Success:    Positive if anything was done that might
+ *                          have affected other interfaces;
+ *                          zero otherwise.
+ *
+ *              Failure:    Never fails
+ *
  *-------------------------------------------------------------------------
  */
 int
@@ -155,35 +157,38 @@ H5F_term_package(void)
 
 
 /*-------------------------------------------------------------------------
- * Function: H5Fget_create_plist
+ * Function:    H5Fget_create_plist
  *
- * Purpose:  Get an atom for a copy of the file-creation property list for
- *           this file. This function returns an atom with a copy of the
- *           properties used to create a file.
+ * Purpose:     Get an atom for a copy of the file-creation property list for
+ *              this file. This function returns an atom with a copy of the
+ *              properties used to create a file.
  *
- * Return:   Success:    template ID
- *           Failure:    FAIL
+ * Return:      Success:    Object ID for a copy of the file creation
+ *                          property list.
+ *
+ *              Failure:    H5I_INVALID_HID
+ *
  *-------------------------------------------------------------------------
  */
 hid_t
 H5Fget_create_plist(hid_t file_id)
 {
-    H5F_t *file;                /* File info */
-    H5P_genplist_t *plist;      /* Property list */
-    hid_t ret_value;            /* Return value */
+    H5F_t          *file;                           /* File info */
+    H5P_genplist_t *plist;                          /* Property list */
+    hid_t           ret_value = H5I_INVALID_HID;    /* Return value */
 
-    FUNC_ENTER_API(FAIL)
+    FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE1("i", "i", file_id);
 
     /* check args */
     if(NULL == (file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid file identifier")
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(file->shared->fcpl_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a property list")
 
-    /* Create the property list object to return */
+    /* Retrieve the file creation property list */
     if((ret_value = H5P_copy_plist(plist, TRUE)) < 0)
-        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTINIT, FAIL, "unable to copy file creation properties")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, H5I_INVALID_HID, "unable to retrieve file creation properties")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -191,37 +196,39 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function: H5Fget_access_plist
+ * Function:    H5Fget_access_plist
  *
- * Purpose:  Returns a copy of the file access property list of the
- *           specified file.
+ * Purpose:     Returns a copy of the file access property list of the
+ *              specified file.
  *
  *              NOTE: Make sure that, if you are going to overwrite
  *              information in the copied property list that was
  *              previously opened and assigned to the property list, then
  *              you must close it before overwriting the values.
  *
- * Return:   Success:    Object ID for a copy of the file access
- *                       property list.
- *           Failure:    FAIL
+ * Return:      Success:    Object ID for a copy of the file access
+ *                          property list.
+ *
+ *              Failure:    H5I_INVALID_HID
+ *
  *-------------------------------------------------------------------------
  */
 hid_t
 H5Fget_access_plist(hid_t file_id)
 {
-    H5F_t *f;           /* File info */
-    hid_t ret_value;    /* Return value */
+    H5F_t *file;                                    /* File info */
+    hid_t           ret_value = H5I_INVALID_HID;    /* Return value */
 
-    FUNC_ENTER_API(FAIL)
+    FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE1("i", "i", file_id);
 
     /* Check args */
-    if(NULL == (f = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
+    if(NULL == (file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid file identifier")
 
     /* Retrieve the file's access property list */
-    if((ret_value = H5F_get_access_plist(f, TRUE)) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get file access property list")
+    if((ret_value = H5F_get_access_plist(file, TRUE)) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, H5I_INVALID_HID, "can't get file access property list")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -309,30 +316,30 @@ done:
  * Purpose:     Returns a pointer to the file handle of the low-level file
  *              driver.
  *
- * Return:      Success:        non-negative value.
- *              Failure:        negative.
+ * Return:      SUCCEED/FAIL
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Fget_vfd_handle(hid_t file_id, hid_t fapl, void **file_handle)
+H5Fget_vfd_handle(hid_t file_id, hid_t fapl_id, void **file_handle)
 {
-    H5F_t               *file;          /* File to query */
-    herr_t              ret_value = SUCCEED;      /* Return value */
+    H5F_t          *file;                           /* File info */
+    herr_t          ret_value = SUCCEED;            /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "ii**x", file_id, fapl, file_handle);
+    H5TRACE3("e", "ii**x", file_id, fapl_id, file_handle);
 
     /* Check args */
     if(!file_handle)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file handle pointer")
 
-    /* Get the file */
+    /* Get the file object */
     if(NULL == (file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file id")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
 
     /* Retrieve the VFD handle for the file */
-    if(H5F_get_vfd_handle(file, fapl, file_handle) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't retrieve VFD handle")
+    if(H5F_get_vfd_handle(file, fapl_id, file_handle) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to get VFD handle")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -340,16 +347,16 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function: H5Fis_hdf5
+ * Function:    H5Fis_hdf5
  *
- * Purpose:  Check the file signature to detect an HDF5 file.
+ * Purpose:     Check the file signature to detect an HDF5 file.
  *
- * Bugs:     This function is not robust: it only uses the default file
- *           driver when attempting to open the file when in fact it
- *           should use all known file drivers.
+ * Bugs:        This function is not robust: it only uses the default file
+ *              driver when attempting to open the file when in fact it
+ *              should use all known file drivers.
  *
- * Return:   Success:    TRUE/FALSE
- *           Failure:    Negative
+ * Return:      TRUE/FALSE/FAIL
+ *
  *-------------------------------------------------------------------------
  */
 htri_t
@@ -360,7 +367,7 @@ H5Fis_hdf5(const char *name)
     FUNC_ENTER_API(FAIL)
     H5TRACE1("t", "*s", name);
 
-    /* Check args and all the boring stuff. */
+    /* Check args */
     if(!name || !*name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "no file name specified")
 
@@ -394,37 +401,39 @@ done:
  *              the list of file creation and file access properties.
  *
  * Return:      Success:    A file ID
- *              Failure:    FAIL
+ *
+ *              Failure:    H5I_INVALID_HID
+ *
  *-------------------------------------------------------------------------
  */
 hid_t
 H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 {
-    H5F_t   *new_file = NULL;               /* file struct for new file                 */
-    hid_t   ret_value;                      /* return value                             */
+    H5F_t              *new_file = NULL;    /* file struct for new file                 */
+    hid_t               ret_value;          /* return value                             */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE4("i", "*sIuii", filename, flags, fcpl_id, fapl_id);
 
     /* Check/fix arguments */
-    if (!filename || !*filename)
+    if(!filename || !*filename)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "invalid file name")
 
     /* In this routine, we only accept the following flags:
      *          H5F_ACC_EXCL, H5F_ACC_TRUNC and H5F_ACC_SWMR_WRITE
      */
-    if (flags & ~(H5F_ACC_EXCL | H5F_ACC_TRUNC | H5F_ACC_SWMR_WRITE))
+    if(flags & ~(H5F_ACC_EXCL | H5F_ACC_TRUNC | H5F_ACC_SWMR_WRITE))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "invalid flags")
 
     /* The H5F_ACC_EXCL and H5F_ACC_TRUNC flags are mutually exclusive */
-    if ((flags & H5F_ACC_EXCL) && (flags & H5F_ACC_TRUNC))
+    if((flags & H5F_ACC_EXCL) && (flags & H5F_ACC_TRUNC))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "mutually exclusive flags for file creation")
 
     /* Check file creation property list */
-    if (H5P_DEFAULT == fcpl_id)
+    if(H5P_DEFAULT == fcpl_id)
         fcpl_id = H5P_FILE_CREATE_DEFAULT;
     else
-        if (TRUE != H5P_isa_class(fcpl_id, H5P_FILE_CREATE))
+        if(TRUE != H5P_isa_class(fcpl_id, H5P_FILE_CREATE))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not file create property list")
 
     /* Verify access property list and set up collective metadata if appropriate */
@@ -435,7 +444,7 @@ H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
      * the EXCL or TRUNC bit is set.  All newly-created files are opened for
      * reading and writing.
      */
-    if (0 == (flags & (H5F_ACC_EXCL | H5F_ACC_TRUNC)))
+    if(0 == (flags & (H5F_ACC_EXCL | H5F_ACC_TRUNC)))
         flags |= H5F_ACC_EXCL;	 /*default*/
     flags |= H5F_ACC_RDWR | H5F_ACC_CREAT;
 
@@ -444,7 +453,7 @@ H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, H5I_INVALID_HID, "unable to create file")
 
     /* Get an atom for the file */
-    if ((ret_value = H5I_register(H5I_FILE, new_file, TRUE)) < 0)
+    if((ret_value = H5I_register(H5I_FILE, new_file, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize file")
 
     /* Keep this ID in file object structure */

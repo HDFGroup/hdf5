@@ -37,12 +37,12 @@
 #include "H5Ppublic.h"          /* Property lists                           */
 
 /* Private headers needed by this file */
-#include "H5private.h"		/* Generic Functions                        */
-#include "H5ACprivate.h"	/* Metadata cache                           */
+#include "H5private.h"		    /* Generic Functions                        */
+#include "H5ACprivate.h"	    /* Metadata cache                           */
 #include "H5CXprivate.h"        /* API Contexts                             */
-#include "H5Eprivate.h"		/* Error handling                           */
-#include "H5Gprivate.h"		/* Groups                                   */
-#include "H5Oprivate.h"		/* Object headers                           */
+#include "H5Eprivate.h"		    /* Error handling                           */
+#include "H5Gprivate.h"		    /* Groups                                   */
+#include "H5Oprivate.h"		    /* Object headers                           */
 #include "H5Rpkg.h"             /* References                               */
 
 
@@ -119,7 +119,7 @@ H5Rget_obj_type1(hid_t id, H5R_type_t ref_type, const void *ref)
 
     /* Get the object information */
     if(H5R__get_obj_type(loc.oloc->file, ref_type, ref, &obj_type) < 0)
-        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINIT, H5G_UNKNOWN, "unable to determine object type")
+        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, H5G_UNKNOWN, "unable to determine object type")
 
     /* Set return value */
     ret_value = H5G_map_obj_type(obj_type);
@@ -166,9 +166,9 @@ H5Rdereference1(hid_t obj_id, H5R_type_t ref_type, const void *_ref)
     /* Get the file pointer from the entry */
     file = loc.oloc->file;
 
-    /* Create reference */
+    /* Dereference */
     if((ret_value = H5R__dereference(file, H5P_DATASET_ACCESS_DEFAULT, ref_type, _ref)) < 0)
-        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINIT, H5I_INVALID_HID, "unable dereference object")
+        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to dereference object")
 
 done:
     FUNC_LEAVE_API(ret_value)

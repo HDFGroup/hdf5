@@ -167,7 +167,7 @@ struct H5T_path_t {
     char	name[H5T_NAMELEN];	/*name for debugging only	     */
     H5T_t	*src;			/*source datatype 		     */
     H5T_t	*dst;			/*destination datatype		     */
-    H5T_conv_func_t conv;               /* Conversion funcion                */
+    H5T_conv_func_t conv;               /* Conversion function  */
     hbool_t	is_hard;		/*is it a hard function?	     */
     hbool_t	is_noop;		/*is it the noop conversion?	     */
     hbool_t	are_compounds;		/*are source and dest both compounds?*/
@@ -447,10 +447,12 @@ H5_DLL herr_t H5T__visit(H5T_t *dt, unsigned visit_flags, H5T_operator_t op,
 H5_DLL herr_t H5T__upgrade_version(H5T_t *dt, unsigned new_version);
 
 /* Committed / named datatype routines */
+H5_DLL herr_t H5T__commit_anon(H5F_t *file, H5T_t *type, hid_t tcpl_id);
 H5_DLL herr_t H5T__commit(H5F_t *file, H5T_t *type, hid_t tcpl_id);
 H5_DLL herr_t H5T__commit_named(const H5G_loc_t *loc, const char *name,
     H5T_t *dt, hid_t lcpl_id, hid_t tcpl_id);
 H5_DLL H5T_t *H5T__open_name(const H5G_loc_t *loc, const char *name);
+H5_DLL hid_t H5T__get_create_plist(const H5T_t *type);
 
 /* Conversion functions */
 H5_DLL herr_t H5T__conv_noop(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,

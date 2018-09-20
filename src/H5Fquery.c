@@ -277,11 +277,11 @@ H5F_get_nopen_objs(const H5F_t *f)
 
 
 /*-------------------------------------------------------------------------
- * Function: H5F_get_file_id
+ * Function:    H5F_get_file_id
  *
- * Purpose:  Retrieve the file's 'file_id' value
+ * Purpose:     Retrieve the file's 'file_id' value
  *
- * Return:   'file_id' on success/abort on failure (shouldn't fail)
+ * Return:      'file_id' on success/abort on failure (shouldn't fail)
  *-------------------------------------------------------------------------
  */
 hid_t

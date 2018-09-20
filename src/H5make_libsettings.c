@@ -40,6 +40,7 @@ static const char *FileHeader = "\n\
 
 FILE       *rawoutstream = NULL;
 
+
 /*-------------------------------------------------------------------------
  * Function:  insert_libhdf5_settings
  *
@@ -104,7 +105,7 @@ insert_libhdf5_settings(FILE *flibinfo)
 #endif
 } /* insert_libhdf5_settings() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:  make_libinfo
  *
@@ -122,7 +123,7 @@ make_libinfo(void)
     insert_libhdf5_settings(rawoutstream);
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:  print_header
  *
@@ -228,7 +229,7 @@ information about the library build configuration\n";
     fprintf(rawoutstream, "\n */\n\n");
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:  print_footer
  *
@@ -243,13 +244,13 @@ print_footer(void)
     /* nothing */
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:  main
  *
  * Purpose:   Main entry point.
  *
- * Return:    Success:    0
+ * Return:    Success:    EXIT_SUCCESS
  *-------------------------------------------------------------------------
  */
 int
@@ -257,19 +258,19 @@ main(int argc, char *argv[])
 {
     char    *fname = NULL;
     FILE    *f;    /* temporary holding place for the stream pointer
-                    * so that rawoutstream is changed only when succeeded */
+                    * so that rawoutstream is changed only when succeeded
+                    */
 
-    if (argc > 1) {
+    if(argc > 1)
         fname = argv[1];
-    }
+
     /* First check if filename is string "NULL" */
-    if (fname != NULL) {
+    if(fname != NULL) {
         /* binary output */
-        if ((f = HDfopen(fname, "w")) != NULL) {
+        if((f = HDfopen(fname, "w")) != NULL)
             rawoutstream = f;
-        }
     }
-    if (!rawoutstream)
+    if(!rawoutstream)
         rawoutstream = stdout;
 
     print_header();
@@ -279,8 +280,8 @@ main(int argc, char *argv[])
 
     print_footer();
 
-    if (rawoutstream && rawoutstream != stdout) {
-        if (HDfclose(rawoutstream))
+    if(rawoutstream && rawoutstream != stdout) {
+        if(HDfclose(rawoutstream))
             fprintf(stderr, "closing rawoutstream");
         else
             rawoutstream = NULL;
@@ -288,3 +289,4 @@ main(int argc, char *argv[])
 
     HDexit(EXIT_SUCCESS);
 }
+

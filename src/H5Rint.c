@@ -221,8 +221,7 @@ H5R_term_package(void)
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5R__create(void *_ref, H5G_loc_t *loc, const char *name, H5R_type_t ref_type,
-    H5S_t *space)
+H5R__create(void *_ref, H5G_loc_t *loc, const char *name, H5R_type_t ref_type, H5S_t *space)
 {
     H5G_loc_t	obj_loc;		/* Group hier. location of object */
     H5G_name_t  path;            	/* Object group hier. path */
@@ -371,8 +370,7 @@ done:
     Added a check for undefined reference pointer.
 --------------------------------------------------------------------------*/
 hid_t
-H5R__dereference(H5F_t *file, hid_t oapl_id, H5R_type_t ref_type,
-    const void *_ref)
+H5R__dereference(H5F_t *file, hid_t oapl_id, H5R_type_t ref_type, const void *_ref)
 {
     H5O_loc_t oloc;             /* Object location */
     H5G_name_t path;            /* Path of object */
@@ -459,7 +457,7 @@ H5R__dereference(H5F_t *file, hid_t oapl_id, H5R_type_t ref_type,
             if((ret_value = H5I_register(H5I_GROUP, group, TRUE)) < 0) {
                 H5G_close(group);
                 HGOTO_ERROR(H5E_SYM, H5E_CANTREGISTER, H5I_INVALID_HID, "can't register group")
-            } /* end if */
+            }
 
             break;
         }
@@ -475,7 +473,7 @@ H5R__dereference(H5F_t *file, hid_t oapl_id, H5R_type_t ref_type,
             if((ret_value = H5I_register(H5I_DATATYPE, type, TRUE)) < 0) {
                 H5T_close(type);
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, H5I_INVALID_HID, "can't register datatype")
-            } /* end if */
+            }
 
             break;
         }
@@ -492,7 +490,7 @@ H5R__dereference(H5F_t *file, hid_t oapl_id, H5R_type_t ref_type,
             if((ret_value = H5I_register(H5I_DATASET, dset, TRUE)) < 0) {
                 H5D_close(dset);
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, H5I_INVALID_HID, "can't register dataset")
-            } /* end if */
+            }
 
             break;
         }
@@ -536,7 +534,7 @@ H5R__get_region(H5F_t *file, const void *_ref)
     const uint8_t *p;           /* Pointer to OID to store */
     H5HG_t hobjid;              /* Heap object ID */
     uint8_t *buf = NULL;        /* Buffer to store serialized selection in */
-    H5S_t *ret_value;		/* Return value */
+    H5S_t *ret_value;           /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -574,7 +572,7 @@ done:
         H5MM_xfree(buf);
 
     FUNC_LEAVE_NOAPI(ret_value)
-}  /* end H5R__get_region() */
+}   /* end H5R__get_region() */
 
 
 /*--------------------------------------------------------------------------
