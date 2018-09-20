@@ -10,8 +10,6 @@
  ******************/
 
 #define DEBUG_OH_SIZE 0 /* toggle some debug printing (0 off, 1 on)*/
-#define MDOH_TEST_EXTERNAL 0 /* toggle external file/link test */
-                             /* disabled as it repeats previous library tests */
 
 #ifndef JSMITH_TESTING
 
@@ -1688,152 +1686,6 @@ error:
     return 1;
 } /* test_fillvalue_backwards_compatability */
 
-#if MDOH_TEST_EXTERNAL
-
-/* ---------------------------------------------------------------------------
- * Test creation of minimized datset through an external link
- * ---------------------------------------------------------------------------
- */
-static int
-test_external_creation(void)
-{
-    char          moochname[512]  = "";
-    char          targetname[512] = "";
-    const hsize_t extents[2]      = {5, 5};
-    hid_t         mooch_fid       = -1;
-    hid_t         target_fid      = -1;
-    hid_t         dspace_id       = -1;
-    hid_t         dtype_id        = -1;
-    hid_t         dcpl_id         = -1;
-    hid_t         dset_id         = -1;
-
-    /*********
-     * SETUP *
-     *********/
-
-    TESTING("creation through external links")
-
-    FAIL_IF( NULL == h5_fixname(
-            OHMIN_FILENAME_A,
-            H5P_DEFAULT,
-            moochname,
-            sizeof(moochname)) )
-
-    FAIL_IF( NULL == h5_fixname(
-            OHMIN_FILENAME_B,
-            H5P_DEFAULT,
-            targetname,
-            sizeof(targetname)) )
-
-    dspace_id = H5Screate_simple(2, extents, extents);
-    FAIL_IF( 0 > dspace_id )
-
-    dtype_id = H5Tcopy(H5T_NATIVE_INT);
-    FAIL_IF( 0 > dtype_id )
-
-    dcpl_id = H5Pcreate(H5P_DATASET_CREATE);
-    FAIL_IF( 0 > dcpl_id )
-    FAIL_IF( FAIL == H5Pset_dset_no_attrs_hint(dcpl_id, TRUE) )
-
-    CREATE_FILE(moochname, &mooch_fid)
-
-    JSVERIFY( SUCCEED,
-              H5Lcreate_external(
-                    targetname,   /* path to target file */
-                    "/",          /* absolute path in target file */
-                    mooch_fid,    /* loc-id where to create link */
-                    "ext_root",   /* name of link, relative to loc above */
-                    H5P_DEFAULT,  /* lcpl */
-                    H5P_DEFAULT), /* lapl */
-             "unable to create external link to target" )
-
-    /* delete target file from system, if it exists
-     */
-    H5E_BEGIN_TRY {
-        target_fid = H5Fopen(
-                targetname,
-                H5F_ACC_RDONLY,
-                H5P_DEFAULT);
-        if (-1 < target_fid) {
-            /* file found; close and delete */
-            MUST_CLOSE(target_fid, CLOSE_FILE)
-            h5_delete_test_file(OHMIN_FILENAME_B, H5P_DEFAULT);
-
-            /* verify that file was deleted */
-            target_fid = H5Fopen(
-                    targetname,
-                    H5F_ACC_RDONLY,
-                    H5P_DEFAULT);
-            JSVERIFY( -1, target_fid, "target file still exists" )
-        }
-    } H5E_END_TRY;
-
-    /*********
-     * TESTS *
-     *********/
-
-    /*----------------
-     * Demonstrate that we cannot create a dataset through a dangling link
-     */
-
-    H5E_BEGIN_TRY {
-        JSVERIFY( -1,
-                  H5Dcreate(
-                        mooch_fid,
-                        "ext_root/dataset",
-                        dtype_id,
-                        dspace_id,
-                        H5P_DEFAULT, /* lcpl id */
-                        dcpl_id,
-                        H5P_DEFAULT), /* dapl id */
-                 "creating dataset in nonexistent file should fail")
-    } H5E_END_TRY;
-
-    /*----------------
-     * Create dataset through valid external link
-     */
-
-    CREATE_FILE(targetname, &target_fid)
-
-    dset_id = H5Dcreate(
-            mooch_fid,
-            "ext_root/dataset",
-            dtype_id,
-            dspace_id,
-            H5P_DEFAULT, /* LAPL */
-            dcpl_id,
-            H5P_DEFAULT); /* DAPL */
-    FAIL_IF( 0 > dset_id )
-
-    JSVERIFY(1,0, "TODO: close and re-open?")
-
-    /************
-     * TEARDOWN *
-     ************/
-
-    MUST_CLOSE(dspace_id,  CLOSE_DATASPACE)
-    MUST_CLOSE(dtype_id,   CLOSE_DATATYPE)
-    MUST_CLOSE(dcpl_id,    CLOSE_PLIST)
-    MUST_CLOSE(dset_id,    CLOSE_DATASET)
-    MUST_CLOSE(mooch_fid,  CLOSE_FILE)
-    MUST_CLOSE(target_fid, CLOSE_FILE)
-
-    PASSED()
-    return 0;
-
-error:
-    H5E_BEGIN_TRY {
-        (void)H5Sclose(dspace_id);
-        (void)H5Tclose(dtype_id);
-        (void)H5Pclose(dcpl_id);
-        (void)H5Dclose(dset_id);
-        (void)H5Fclose(mooch_fid);
-        (void)H5Fclose(target_fid);
-    } H5E_END_TRY;
-    return 1;
-} /* test_external_creation */
-#endif /* MDOH_TEST_EXTERNAL */
-
 /********
  * MAIN *
  ********/
@@ -1857,9 +1709,6 @@ main(void)
     nerrors += test_minimized_with_filter();
     nerrors += test_modification_times();
     nerrors += test_fillvalue_backwards_compatability();
-#if MDOH_TEST_EXTERNAL
-    nerrors += test_external_creation();
-#endif /* MDOH_TEST_EXTERNAL */
 
     if (nerrors > 0) {
         HDprintf("***** %d MINIMIZED DATASET OHDR TEST%s FAILED! *****\n",
