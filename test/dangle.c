@@ -602,7 +602,8 @@ test_dangle_force(void)
         TEST_ERROR;
 
     /* Allocate the array of object IDs */
-    objs = (hid_t*)HDmalloc(sizeof(hid_t) * (size_t)count);
+    if(NULL == (objs = (hid_t *)HDcalloc((size_t)count, sizeof(hid_t))))
+        TEST_ERROR;
 
     /* Get the list of open IDs */
     if(H5Fget_obj_ids((hid_t)H5F_OBJ_ALL, H5F_OBJ_ALL, (size_t)count, objs) < 0)

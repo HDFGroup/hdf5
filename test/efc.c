@@ -2885,8 +2885,7 @@ error:
  *
  * Purpose:     Test the external file cache code
  *
- * Return:      Success: SUCCEED
- *              Failure: FAIL
+ * Return:      EXIT_SUCCESS/EXIT_FAILURE
  *
  * Programmer:  Neil Fortner
  *              December 16, 2010
@@ -2900,7 +2899,7 @@ main(void)
     hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
 
     /* Test Setup */
-    puts("Testing the external file cache");
+    HDputs("Testing the external file cache");
 
     /* Create property lists */
     fcpl_id = H5Pcreate(H5P_FILE_CREATE);
@@ -2937,14 +2936,14 @@ main(void)
     if(nerrors)
         goto error;
 
-    puts("All external file cache tests passed.");
+    HDputs("All external file cache tests passed.");
 
     h5_clean_files(FILENAME, fapl_id);
 
-    return 0;
+    return EXIT_SUCCESS;
 
 error:
-    puts("*** TESTS FAILED ***");
+    HDputs("*** TESTS FAILED ***");
 
     H5E_BEGIN_TRY {
         H5Pclose(fapl_id);
@@ -2952,6 +2951,6 @@ error:
 
     if(api_ctx_pushed) H5CX_pop();
 
-    return 1;
+    return EXIT_FAILURE;
 } /* end main() */
 

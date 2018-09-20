@@ -648,16 +648,15 @@ H5_DLLVAR const unsigned H5O_pline_ver_bounds[H5F_LIBVER_NBOUNDS];
 
 /* Testing functions */
 #ifdef H5O_TESTING
-H5_DLL htri_t H5O_is_attr_empty_test(hid_t oid);
-H5_DLL htri_t H5O_is_attr_dense_test(hid_t oid);
-H5_DLL herr_t H5O_num_attrs_test(hid_t oid, hsize_t *nattrs);
-H5_DLL herr_t H5O_attr_dense_info_test(hid_t oid, hsize_t *name_count, hsize_t *corder_count);
-H5_DLL herr_t H5O_check_msg_marked_test(hid_t oid, hbool_t flag_val);
-H5_DLL herr_t H5O_expunge_chunks_test(const H5O_loc_t *oloc);
-H5_DLL herr_t H5O_get_rc(const H5O_loc_t *oloc, unsigned *rc);
-H5_DLL herr_t H5O_msg_get_chunkno_test(hid_t oid, unsigned msg_type,
-    unsigned *chunk_num);
-H5_DLL herr_t H5O_msg_move_to_new_chunk_test(hid_t oid, unsigned msg_type);
+H5_DLL htri_t H5O__is_attr_empty_test(hid_t oid);
+H5_DLL htri_t H5O__is_attr_dense_test(hid_t oid);
+H5_DLL herr_t H5O__num_attrs_test(hid_t oid, hsize_t *nattrs);
+H5_DLL herr_t H5O__attr_dense_info_test(hid_t oid, hsize_t *name_count, hsize_t *corder_count);
+H5_DLL herr_t H5O__check_msg_marked_test(hid_t oid, hbool_t flag_val);
+H5_DLL herr_t H5O__expunge_chunks_test(const H5O_loc_t *oloc);
+H5_DLL herr_t H5O__get_rc_test(const H5O_loc_t *oloc, unsigned *rc);
+H5_DLL herr_t H5O__msg_get_chunkno_test(hid_t oid, unsigned msg_type, unsigned *chunk_num);
+H5_DLL herr_t H5O__msg_move_to_new_chunk_test(hid_t oid, unsigned msg_type);
 #endif /* H5O_TESTING */
 
 /* Object header debugging routines */

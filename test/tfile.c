@@ -22,7 +22,6 @@
 #include "testhdf5.h"
 #include "H5srcdir.h"
 
-#include "H5Bprivate.h"
 #include "H5Iprivate.h"
 #include "H5Pprivate.h"
 
@@ -896,15 +895,15 @@ test_file_close(void)
     CHECK(ret, FAIL, "H5Pget_fclose_degree");
 
     switch(fc_degree) {
-    case H5F_CLOSE_STRONG:
+        case H5F_CLOSE_STRONG:
             /* Close first open */
             ret = H5Fclose(fid1);
             CHECK(ret, FAIL, "H5Fclose");
             /* Close second open */
             ret = H5Fclose(fid2);
             CHECK(ret, FAIL, "H5Fclose");
-        break;
-    case H5F_CLOSE_SEMI:
+            break;
+        case H5F_CLOSE_SEMI:
             /* Close first open */
             ret = H5Fclose(fid1);
             CHECK(ret, FAIL, "H5Fclose");
@@ -919,8 +918,8 @@ test_file_close(void)
             /* Close second open */
             ret = H5Fclose(fid2);
             CHECK(ret, FAIL, "H5Fclose");
-        break;
-    case H5F_CLOSE_WEAK:
+            break;
+        case H5F_CLOSE_WEAK:
             /* Close first open */
             ret = H5Fclose(fid1);
             CHECK(ret, FAIL, "H5Fclose");
@@ -935,7 +934,7 @@ test_file_close(void)
             CHECK(ret, FAIL, "H5Gclose");
             ret = H5Gclose(group_id3);
             CHECK(ret, FAIL, "H5Gclose");
-        break;
+            break;
         case H5F_CLOSE_DEFAULT:
         default:
             CHECK(fc_degree, H5F_CLOSE_DEFAULT, "H5Pget_fclose_degree");
@@ -957,7 +956,7 @@ test_file_close(void)
 ****************************************************************/
 static void
 create_objects(hid_t fid1, hid_t fid2, hid_t *ret_did, hid_t *ret_gid1,
-        hid_t *ret_gid2, hid_t *ret_gid3)
+    hid_t *ret_gid2, hid_t *ret_gid3)
 {
     ssize_t    oid_count;
     herr_t    ret;
@@ -1109,9 +1108,10 @@ test_get_obj_ids(void)
     oid_list = (hid_t *)HDcalloc((size_t)oid_list_size, sizeof(hid_t));
     CHECK_PTR(oid_list, "HDcalloc");
 
-    /* Call the public function H5F_get_obj_ids to use H5F_get_objects.  User reported having problem here.
+    /* Call the public function H5F_get_obj_ids to use H5F__get_objects.  User reported having problem here.
      * that the returned size (ret_count) from H5Fget_obj_ids is one greater than the size passed in
-     * (oid_list_size) */
+     * (oid_list_size).
+     */
     ret_count = H5Fget_obj_ids(fid, H5F_OBJ_ALL, (size_t)oid_list_size, oid_list);
     CHECK(ret_count, FAIL, "H5Fget_obj_ids");
     VERIFY(ret_count, oid_list_size, "H5Fget_obj_count");
@@ -2670,8 +2670,8 @@ test_cached_stab_info(void)
     CHECK(file_id, FAIL, "H5Fopen");
 
     /* Verify the cached symbol table information */
-    ret = H5F_check_cached_stab_test(file_id);
-    CHECK(ret, FAIL, "H5F_check_cached_stab_test");
+    ret = H5F__check_cached_stab_test(file_id);
+    CHECK(ret, FAIL, "H5F__check_cached_stab_test");
 
     /* Close file */
     ret = H5Fclose(file_id);
@@ -3941,14 +3941,6 @@ error:
 **      This routine checks the free space available in a file as
 **      returned by the public routine H5Fget_freespace().
 **
-**  Modifications:
-**    Vailin Choi; July 2012
-**    Remove datasets in reverse order so that all file spaces are shrunk.
-**    (A change due to H5FD_FLMAP_DICHOTOMY.)
-**
-**    Vailin Choi; Dec 2012
-**    Add changes due to paged aggregation via new format:
-**    the amount of freespace is different.
 **
 *****************************************************************/
 static void
@@ -5360,7 +5352,8 @@ test_libver_bounds_super_create(hid_t fapl, hid_t fcpl, htri_t is_swmr)
         } else /* Should fail */
             VERIFY(ok, FALSE, "H5Fcreate");
 
-    } else { /* Should succeed */
+    }
+    else { /* Should succeed */
         VERIFY(ok, TRUE, "H5Fcreate");
         VERIFY(low, f->shared->low_bound, "HDF5_superblock_ver_bounds");
 
@@ -7341,7 +7334,7 @@ test_file(void)
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 } /* test_file() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    cleanup_file
  *

@@ -307,8 +307,8 @@ H5_DLL herr_t H5FA__dblock_debug(H5F_t *f, haddr_t addr, FILE *stream,
 
 /* Testing routines */
 #ifdef H5FA_TESTING
-H5_DLL herr_t H5FA_get_cparam_test(const H5FA_t *ea, H5FA_create_t *cparam);
-H5_DLL int H5FA_cmp_cparam_test(const H5FA_create_t *cparam1, const H5FA_create_t *cparam2);
+H5_DLL herr_t H5FA__get_cparam_test(const H5FA_t *ea, H5FA_create_t *cparam);
+H5_DLL int H5FA__cmp_cparam_test(const H5FA_create_t *cparam1, const H5FA_create_t *cparam2);
 #endif /* H5FA_TESTING */
 
 #endif /* _H5FApkg_H */
