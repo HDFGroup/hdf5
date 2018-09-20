@@ -30,7 +30,7 @@
 #include "H5Fprivate.h"
 
 /* Other public headers needed by this file */
-#include "H5Bpublic.h"          /* B-tree header, for H5B_NUM_BTREE_ID      */
+#include "H5Bpublic.h"          /* B-tree header (for H5B_NUM_BTREE_ID)     */
 
 /* Other private headers needed by this file */
 #include "H5private.h"		    /* Generic Functions                        */
@@ -462,10 +462,10 @@ H5_DLL herr_t H5F__evict_cache_entries(H5F_t *f);
 
 /* Testing functions */
 #ifdef H5F_TESTING
-H5_DLL herr_t H5F_get_sohm_mesg_count_test(hid_t fid, unsigned type_id, size_t *mesg_count);
-H5_DLL herr_t H5F_check_cached_stab_test(hid_t file_id);
-H5_DLL herr_t H5F_get_maxaddr_test(hid_t file_id, haddr_t *maxaddr);
-H5_DLL herr_t H5F_get_sbe_addr_test(hid_t file_id, haddr_t *sbe_addr);
+H5_DLL herr_t H5F__get_sohm_mesg_count_test(hid_t fid, unsigned type_id, size_t *mesg_count);
+H5_DLL herr_t H5F__check_cached_stab_test(hid_t file_id);
+H5_DLL herr_t H5F__get_maxaddr_test(hid_t file_id, haddr_t *maxaddr);
+H5_DLL herr_t H5F__get_sbe_addr_test(hid_t file_id, haddr_t *sbe_addr);
 #endif /* H5F_TESTING */
 
 #endif /* _H5Fpkg_H */

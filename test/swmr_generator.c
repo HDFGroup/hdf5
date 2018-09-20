@@ -230,12 +230,12 @@ gen_skeleton(const char *filename, hbool_t verbose, hbool_t swmr_write,
                 unsigned chunk_num;        /* Object header chunk # for dataspace message */
 
                 /* Move the dataspace message to a new object header chunk */
-                if(H5O_msg_move_to_new_chunk_test(dsid, H5O_SDSPACE_ID) < 0)
+                if(H5O__msg_move_to_new_chunk_test(dsid, H5O_SDSPACE_ID) < 0)
                     return -1;
 
                 /* Retrieve the chunk # for the dataspace message */
                 chunk_num = UINT_MAX;
-                if(H5O_msg_get_chunkno_test(dsid, H5O_SDSPACE_ID, &chunk_num) < 0)
+                if(H5O__msg_get_chunkno_test(dsid, H5O_SDSPACE_ID, &chunk_num) < 0)
                     return -1;
                 /* Should not be in chunk #0 for now */
                 if(0 == chunk_num)
