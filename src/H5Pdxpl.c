@@ -271,131 +271,131 @@ H5P__dxfr_reg_prop(H5P_genclass_t *pclass)
     FUNC_ENTER_STATIC
 
     /* Register the max. temp buffer size property */
-    if(H5P_register_real(pclass, H5D_XFER_MAX_TEMP_BUF_NAME, H5D_XFER_MAX_TEMP_BUF_SIZE, &H5D_def_max_temp_buf_g, 
+    if(H5P__register_real(pclass, H5D_XFER_MAX_TEMP_BUF_NAME, H5D_XFER_MAX_TEMP_BUF_SIZE, &H5D_def_max_temp_buf_g, 
             NULL, NULL, NULL, H5D_XFER_MAX_TEMP_BUF_ENC, H5D_XFER_MAX_TEMP_BUF_DEC,
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the type conversion buffer property */
     /* (Note: this property should not have an encode/decode callback -QAK) */
-    if(H5P_register_real(pclass, H5D_XFER_TCONV_BUF_NAME, H5D_XFER_TCONV_BUF_SIZE, &H5D_def_tconv_buf_g, 
+    if(H5P__register_real(pclass, H5D_XFER_TCONV_BUF_NAME, H5D_XFER_TCONV_BUF_SIZE, &H5D_def_tconv_buf_g, 
             NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the background buffer property */
     /* (Note: this property should not have an encode/decode callback -QAK) */
-    if(H5P_register_real(pclass, H5D_XFER_BKGR_BUF_NAME, H5D_XFER_BKGR_BUF_SIZE, &H5D_def_bkgr_buf_g, 
+    if(H5P__register_real(pclass, H5D_XFER_BKGR_BUF_NAME, H5D_XFER_BKGR_BUF_SIZE, &H5D_def_bkgr_buf_g, 
             NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the background buffer type property */
-    if(H5P_register_real(pclass, H5D_XFER_BKGR_BUF_TYPE_NAME, H5D_XFER_BKGR_BUF_TYPE_SIZE, &H5D_def_bkgr_buf_type_g, 
+    if(H5P__register_real(pclass, H5D_XFER_BKGR_BUF_TYPE_NAME, H5D_XFER_BKGR_BUF_TYPE_SIZE, &H5D_def_bkgr_buf_type_g, 
              NULL, NULL, NULL, H5D_XFER_BKGR_BUF_TYPE_ENC, H5D_XFER_BKGR_BUF_TYPE_DEC,
              NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the B-Tree node splitting ratios property */
-    if(H5P_register_real(pclass, H5D_XFER_BTREE_SPLIT_RATIO_NAME, H5D_XFER_BTREE_SPLIT_RATIO_SIZE, H5D_def_btree_split_ratio_g, 
+    if(H5P__register_real(pclass, H5D_XFER_BTREE_SPLIT_RATIO_NAME, H5D_XFER_BTREE_SPLIT_RATIO_SIZE, H5D_def_btree_split_ratio_g, 
             NULL, NULL, NULL, H5D_XFER_BTREE_SPLIT_RATIO_ENC, H5D_XFER_BTREE_SPLIT_RATIO_DEC,
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the vlen allocation function property */
     /* (Note: this property should not have an encode/decode callback -QAK) */
-    if(H5P_register_real(pclass, H5D_XFER_VLEN_ALLOC_NAME, H5D_XFER_VLEN_ALLOC_SIZE, &H5D_def_vlen_alloc_g, 
+    if(H5P__register_real(pclass, H5D_XFER_VLEN_ALLOC_NAME, H5D_XFER_VLEN_ALLOC_SIZE, &H5D_def_vlen_alloc_g, 
             NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the vlen allocation information property */
     /* (Note: this property should not have an encode/decode callback -QAK) */
-    if(H5P_register_real(pclass, H5D_XFER_VLEN_ALLOC_INFO_NAME, H5D_XFER_VLEN_ALLOC_INFO_SIZE, &H5D_def_vlen_alloc_info_g, 
+    if(H5P__register_real(pclass, H5D_XFER_VLEN_ALLOC_INFO_NAME, H5D_XFER_VLEN_ALLOC_INFO_SIZE, &H5D_def_vlen_alloc_info_g, 
             NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the vlen free function property */
     /* (Note: this property should not have an encode/decode callback -QAK) */
-    if(H5P_register_real(pclass, H5D_XFER_VLEN_FREE_NAME, H5D_XFER_VLEN_FREE_SIZE, &H5D_def_vlen_free_g, 
+    if(H5P__register_real(pclass, H5D_XFER_VLEN_FREE_NAME, H5D_XFER_VLEN_FREE_SIZE, &H5D_def_vlen_free_g, 
             NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the vlen free information property */
     /* (Note: this property should not have an encode/decode callback -QAK) */
-    if(H5P_register_real(pclass, H5D_XFER_VLEN_FREE_INFO_NAME, H5D_XFER_VLEN_FREE_INFO_SIZE, &H5D_def_vlen_free_info_g, 
+    if(H5P__register_real(pclass, H5D_XFER_VLEN_FREE_INFO_NAME, H5D_XFER_VLEN_FREE_INFO_SIZE, &H5D_def_vlen_free_info_g, 
             NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the vector size property */
-    if(H5P_register_real(pclass, H5D_XFER_HYPER_VECTOR_SIZE_NAME, H5D_XFER_HYPER_VECTOR_SIZE_SIZE, &H5D_def_hyp_vec_size_g, 
+    if(H5P__register_real(pclass, H5D_XFER_HYPER_VECTOR_SIZE_NAME, H5D_XFER_HYPER_VECTOR_SIZE_SIZE, &H5D_def_hyp_vec_size_g, 
             NULL, NULL, NULL, H5D_XFER_HYPER_VECTOR_SIZE_ENC, H5D_XFER_HYPER_VECTOR_SIZE_DEC,
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the I/O transfer mode properties */
-    if(H5P_register_real(pclass, H5D_XFER_IO_XFER_MODE_NAME, H5D_XFER_IO_XFER_MODE_SIZE, &H5D_def_io_xfer_mode_g, 
+    if(H5P__register_real(pclass, H5D_XFER_IO_XFER_MODE_NAME, H5D_XFER_IO_XFER_MODE_SIZE, &H5D_def_io_xfer_mode_g, 
             NULL, NULL, NULL, H5D_XFER_IO_XFER_MODE_ENC, H5D_XFER_IO_XFER_MODE_DEC,
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
-    if(H5P_register_real(pclass, H5D_XFER_MPIO_COLLECTIVE_OPT_NAME, H5D_XFER_MPIO_COLLECTIVE_OPT_SIZE, &H5D_def_mpio_collective_opt_mode_g, 
+    if(H5P__register_real(pclass, H5D_XFER_MPIO_COLLECTIVE_OPT_NAME, H5D_XFER_MPIO_COLLECTIVE_OPT_SIZE, &H5D_def_mpio_collective_opt_mode_g, 
             NULL, NULL, NULL, H5D_XFER_MPIO_COLLECTIVE_OPT_ENC, H5D_XFER_MPIO_COLLECTIVE_OPT_DEC,
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
-    if(H5P_register_real(pclass, H5D_XFER_MPIO_CHUNK_OPT_HARD_NAME, H5D_XFER_MPIO_CHUNK_OPT_HARD_SIZE, &H5D_def_mpio_chunk_opt_mode_g, 
+    if(H5P__register_real(pclass, H5D_XFER_MPIO_CHUNK_OPT_HARD_NAME, H5D_XFER_MPIO_CHUNK_OPT_HARD_SIZE, &H5D_def_mpio_chunk_opt_mode_g, 
             NULL, NULL, NULL, H5D_XFER_MPIO_CHUNK_OPT_HARD_ENC, H5D_XFER_MPIO_CHUNK_OPT_HARD_DEC,
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
-    if(H5P_register_real(pclass, H5D_XFER_MPIO_CHUNK_OPT_NUM_NAME, H5D_XFER_MPIO_CHUNK_OPT_NUM_SIZE, &H5D_def_mpio_chunk_opt_num_g, 
+    if(H5P__register_real(pclass, H5D_XFER_MPIO_CHUNK_OPT_NUM_NAME, H5D_XFER_MPIO_CHUNK_OPT_NUM_SIZE, &H5D_def_mpio_chunk_opt_num_g, 
             NULL, NULL, NULL, H5D_XFER_MPIO_CHUNK_OPT_NUM_ENC, H5D_XFER_MPIO_CHUNK_OPT_NUM_DEC,
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
-    if(H5P_register_real(pclass, H5D_XFER_MPIO_CHUNK_OPT_RATIO_NAME, H5D_XFER_MPIO_CHUNK_OPT_RATIO_SIZE, &H5D_def_mpio_chunk_opt_ratio_g, 
+    if(H5P__register_real(pclass, H5D_XFER_MPIO_CHUNK_OPT_RATIO_NAME, H5D_XFER_MPIO_CHUNK_OPT_RATIO_SIZE, &H5D_def_mpio_chunk_opt_ratio_g, 
             NULL, NULL, NULL, H5D_XFER_MPIO_CHUNK_OPT_RATIO_ENC, H5D_XFER_MPIO_CHUNK_OPT_RATIO_DEC,
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the chunk optimization mode property. */
     /* (Note: this property should not have an encode/decode callback -QAK) */
-    if(H5P_register_real(pclass, H5D_MPIO_ACTUAL_CHUNK_OPT_MODE_NAME, H5D_MPIO_ACTUAL_CHUNK_OPT_MODE_SIZE, &H5D_def_mpio_actual_chunk_opt_mode_g, 
+    if(H5P__register_real(pclass, H5D_MPIO_ACTUAL_CHUNK_OPT_MODE_NAME, H5D_MPIO_ACTUAL_CHUNK_OPT_MODE_SIZE, &H5D_def_mpio_actual_chunk_opt_mode_g, 
             NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the actual I/O mode property. */
     /* (Note: this property should not have an encode/decode callback -QAK) */
-    if(H5P_register_real(pclass, H5D_MPIO_ACTUAL_IO_MODE_NAME, H5D_MPIO_ACTUAL_IO_MODE_SIZE, &H5D_def_mpio_actual_io_mode_g, 
+    if(H5P__register_real(pclass, H5D_MPIO_ACTUAL_IO_MODE_NAME, H5D_MPIO_ACTUAL_IO_MODE_SIZE, &H5D_def_mpio_actual_io_mode_g, 
             NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the local cause of broken collective I/O */
     /* (Note: this property should not have an encode/decode callback -QAK) */
-    if(H5P_register_real(pclass, H5D_MPIO_LOCAL_NO_COLLECTIVE_CAUSE_NAME, H5D_MPIO_NO_COLLECTIVE_CAUSE_SIZE, &H5D_def_mpio_no_collective_cause_g,
+    if(H5P__register_real(pclass, H5D_MPIO_LOCAL_NO_COLLECTIVE_CAUSE_NAME, H5D_MPIO_NO_COLLECTIVE_CAUSE_SIZE, &H5D_def_mpio_no_collective_cause_g,
             NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the global cause of broken collective I/O */
     /* (Note: this property should not have an encode/decode callback -QAK) */
-    if(H5P_register_real(pclass, H5D_MPIO_GLOBAL_NO_COLLECTIVE_CAUSE_NAME, H5D_MPIO_NO_COLLECTIVE_CAUSE_SIZE, &H5D_def_mpio_no_collective_cause_g,
+    if(H5P__register_real(pclass, H5D_MPIO_GLOBAL_NO_COLLECTIVE_CAUSE_NAME, H5D_MPIO_NO_COLLECTIVE_CAUSE_SIZE, &H5D_def_mpio_no_collective_cause_g,
             NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the EDC property */
-    if(H5P_register_real(pclass, H5D_XFER_EDC_NAME, H5D_XFER_EDC_SIZE, &H5D_def_enable_edc_g,
+    if(H5P__register_real(pclass, H5D_XFER_EDC_NAME, H5D_XFER_EDC_SIZE, &H5D_def_enable_edc_g,
             NULL, NULL, NULL, H5D_XFER_EDC_ENC, H5D_XFER_EDC_DEC,
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the filter callback property */
     /* (Note: this property should not have an encode/decode callback -QAK) */
-    if(H5P_register_real(pclass, H5D_XFER_FILTER_CB_NAME, H5D_XFER_FILTER_CB_SIZE, &H5D_def_filter_cb_g,
+    if(H5P__register_real(pclass, H5D_XFER_FILTER_CB_NAME, H5D_XFER_FILTER_CB_SIZE, &H5D_def_filter_cb_g,
             NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the type conversion callback property */
     /* (Note: this property should not have an encode/decode callback -QAK) */
-    if(H5P_register_real(pclass, H5D_XFER_CONV_CB_NAME, H5D_XFER_CONV_CB_SIZE, &H5D_def_conv_cb_g,
+    if(H5P__register_real(pclass, H5D_XFER_CONV_CB_NAME, H5D_XFER_CONV_CB_SIZE, &H5D_def_conv_cb_g,
             NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the data transform property */
-    if(H5P_register_real(pclass, H5D_XFER_XFORM_NAME, H5D_XFER_XFORM_SIZE, &H5D_def_xfer_xform_g,
+    if(H5P__register_real(pclass, H5D_XFER_XFORM_NAME, H5D_XFER_XFORM_SIZE, &H5D_def_xfer_xform_g,
             NULL, H5D_XFER_XFORM_SET, H5D_XFER_XFORM_GET, H5D_XFER_XFORM_ENC, H5D_XFER_XFORM_DEC, 
             H5D_XFER_XFORM_DEL, H5D_XFER_XFORM_COPY, H5D_XFER_XFORM_CMP, H5D_XFER_XFORM_CLOSE) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
