@@ -3037,7 +3037,7 @@ error:
     H5E_BEGIN_TRY {
         if(fh)
             H5HF_close(fh);
-	H5Fclose(file);
+        H5Fclose(file);
     } H5E_END_TRY;
     return(1);
 } /* test_size() */

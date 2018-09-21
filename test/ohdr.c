@@ -15,23 +15,23 @@
  *              Tuesday, November 24, 1998
  */
 #include "h5test.h"
-#include "H5Iprivate.h"
+
+#include "H5CXprivate.h"        /* API Contexts                             */
+#include "H5Iprivate.h"         /* Identifiers                              */
 
 /*
  * This file needs to access private datatypes from the H5O package.
  * This file also needs to access the object header testing code.
  */
-#define H5O_FRIEND        /*suppress error about including H5Opkg      */
+#define H5O_FRIEND              /* suppress error about including H5Opkg */
 #define H5O_TESTING
 #include "H5Opkg.h"
 
 /*
  * This file needs to access private datatypes from the H5G package.
  */
-#define H5G_FRIEND        /*suppress error about including H5Gpkg      */
+#define H5G_FRIEND              /* suppress error about including H5Gpkg */
 #include "H5Gpkg.h"
-
-#include "H5CXprivate.h"        /* API Contexts                         */
 
 const char *FILENAME[] = {
     "ohdr",
@@ -119,7 +119,7 @@ test_cont(char *filename, hid_t fapl)
         FAIL_STACK_ERROR
     if(H5AC_flush(f) < 0)
         FAIL_STACK_ERROR
-    if(H5O_expunge_chunks_test(&oh_locA) < 0)
+    if(H5O__expunge_chunks_test(&oh_locA) < 0)
         FAIL_STACK_ERROR
 
     if(H5O_get_hdr_info(&oh_locA, &hdr_info) < 0)
@@ -220,7 +220,7 @@ test_ohdr_cache(char *filename, hid_t fapl)
 
     /* Query object header information */
     rc = 0;
-    if(H5O_get_rc(&oh_loc, &rc) < 0)
+    if(H5O__get_rc_test(&oh_loc, &rc) < 0)
         FAIL_STACK_ERROR
     if(0 != rc)
         TEST_ERROR
@@ -261,7 +261,7 @@ test_ohdr_cache(char *filename, hid_t fapl)
      *  a non-invasive way -QAK)
      */
     rc = 0;
-    if(H5O_get_rc(&oh_loc, &rc) < 0)
+    if(H5O__get_rc_test(&oh_loc, &rc) < 0)
         FAIL_STACK_ERROR
     if(0 != rc)
         TEST_ERROR
@@ -567,7 +567,7 @@ test_unknown(unsigned bogus_id, char *filename, hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Check that the "unknown" message was _NOT_ marked */
-    if(H5O_check_msg_marked_test(did, FALSE) < 0)
+    if(H5O__check_msg_marked_test(did, FALSE) < 0)
         FAIL_STACK_ERROR
 
     /* Close the dataset */
@@ -647,7 +647,7 @@ test_unknown(unsigned bogus_id, char *filename, hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Check that the "unknown" message was marked */
-    if(H5O_check_msg_marked_test(did, TRUE) < 0)
+    if(H5O__check_msg_marked_test(did, TRUE) < 0)
         FAIL_STACK_ERROR
 
     /* Close the dataset */
@@ -769,9 +769,9 @@ version_string(H5F_libver_t libver)
 
     /* Return the formed version bound string */
     return str;
-} /* end of version_string */
+} /* end version_string() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    main
  *
@@ -780,12 +780,8 @@ version_string(H5F_libver_t libver)
  * Return:      Success: 0
  *              Failure: 1
  *
- * Programmer:    Robb Matzke
+ * Programmer:  Robb Matzke
  *              Tuesday, November 24, 1998
- *
- * Modification:
- *              - Added loop of combinations of low/high library format bounds
- *                (BMR, Feb 2018)
  *
  *-------------------------------------------------------------------------
  */
