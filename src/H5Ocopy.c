@@ -1541,7 +1541,7 @@ H5O_copy_search_comm_dt_attr_cb(const H5A_t *attr, void *_udata)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't get attribute datatype")
 
     /* Check if the datatype is committed and search the skip list if so */
-    if(H5T_committed(dt)) {
+    if(H5T_is_named(dt)) {
         /* Allocate key */
         if(NULL == (key = H5FL_MALLOC(H5O_copy_search_comm_dt_key_t)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
@@ -1658,9 +1658,8 @@ H5O_copy_search_comm_dt_check(H5O_loc_t *obj_oloc,
         if(NULL == (key->dt = (H5T_t *)H5O_msg_read(obj_oloc, H5O_DTYPE_ID, NULL)))
             HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't read DTYPE message")
 
-        /* Check if the datatype is committed and search the skip list if so
-            */
-        if(H5T_committed(key->dt)) {
+        /* Check if the datatype is committed and search the skip list if so */
+        if(H5T_is_named(key->dt)) {
             /* Get datatype object fileno */
             H5F_GET_FILENO(obj_oloc->file, key->fileno);
 

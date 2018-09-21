@@ -53,7 +53,7 @@
  * each thread individually. The association of contexts to threads will
  * be handled by the pthread library.
  *
- * In order for this macro to work, H5E_get_my_stack() must be preceeded
+ * In order for this macro to work, H5E__get_my_stack() must be preceeded
  * by "H5CX_node_t *ctx =".
  */
 #define H5CX_get_my_context()  H5CX__get_context()
@@ -320,7 +320,9 @@ typedef struct H5CX_lapl_cache_t {
 /********************/
 /* Local Prototypes */
 /********************/
+#ifdef H5_HAVE_THREADSAFE
 static H5CX_node_t **H5CX__get_context(void);
+#endif /* H5_HAVE_THREADSAFE */
 static void H5CX__push_common(H5CX_node_t *cnode);
 static H5CX_node_t *H5CX__pop_common(void);
 
@@ -862,7 +864,7 @@ done:
  *
  * Purpose:     Sanity checks and sets up collective operations.
  *
- * Note:	Should be called for all API routines that modify file
+ * Note:        Should be called for all API routines that modify file
  *              file metadata but don't pass in an access property list.
  *
  * Return:      Non-negative on success / Negative on failure
