@@ -275,9 +275,14 @@ IV. Further considerations
          packages there. Add the following CMake options:
             -DZLIB_LIBRARY:FILEPATH=some_location/lib/zlib.lib
             -DZLIB_INCLUDE_DIR:PATH=some_location/include
+            -DZLIB_USE_EXTERNAL:BOOL=OFF
             -DSZIP_LIBRARY:FILEPATH=some_location/lib/szlib.lib
             -DSZIP_INCLUDE_DIR:PATH=some_location/include
+            -DSZIP_USE_EXTERNAL:BOOL=OFF
          where "some_location" is the full path to the extlibs folder.
+         Also the appropriate environment variable must be set;
+            set(ENV{ZLIB_ROOT} "some_location")
+            set(ENV{SZIP_ROOT} "some_location")
 
       B. Use source packages from an GIT server by adding the following CMake
          options:
