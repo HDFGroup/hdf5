@@ -224,7 +224,7 @@ set (H5_TESTS
     ntypes
     dangle
     dtransform
-    reserved
+    # reserved disabled
     cross_read
     freespace
     mf

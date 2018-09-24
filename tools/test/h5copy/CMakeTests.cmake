@@ -128,9 +128,10 @@
   macro (ADD_SKIP_H5_TEST testname skipresultfile)
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
       add_test (
-          NAME H5COPY-${testname}-${skipresultfile}-SKIPPED
+          NAME H5COPY-${testname}-${skipresultfile}
           COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${testname}-${skipresultfile} ${ARGN}"
       )
+      set_property(TEST H5COPY-${testname}-${skipresultfile} PROPERTY DISABLED)
     endif ()
   endmacro ()
 
