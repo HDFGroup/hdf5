@@ -32,13 +32,13 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5FOprivate.h"        /* File objects                         */
-#include "H5Gpkg.h"		/* Groups		  		*/
-#include "H5Iprivate.h"		/* IDs			  		*/
-#include "H5Lprivate.h"         /* Links                                */
-#include "H5MMprivate.h"	/* Memory management			*/
+#include "H5private.h"          /* Generic Functions                        */
+#include "H5Eprivate.h"         /* Error handling                           */
+#include "H5FOprivate.h"        /* File objects                             */
+#include "H5Gpkg.h"             /* Groups                                   */
+#include "H5Iprivate.h"         /* IDs                                      */
+#include "H5Lprivate.h"         /* Links                                    */
+#include "H5MMprivate.h"        /* Memory management                        */
 
 
 /****************/
@@ -805,12 +805,11 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_iterate
+ * Function:    H5G_iterate
  *
  * Purpose:     Private function for iterating over links in a group
  *
- * Return:	Success:        Non-negative
- *		Failure:	Negative
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
  *	        Oct  3, 2005
@@ -860,7 +859,7 @@ done:
     if(gid > 0) {
         if(H5I_dec_app_ref(gid) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to close group")
-    } /* end if */
+    }
     else if(grp && H5G_close(grp) < 0)
         HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "unable to release group")
 
@@ -1054,9 +1053,9 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_visit
+ * Function:    H5G_visit
  *
- * Purpose:	Recursively visit all the links in a group and all
+ * Purpose:     Recursively visit all the links in a group and all
  *              the groups that are linked to from that group.  Links within
  *              each group are visited according to the order within the
  *              specified index (unless the specified index does not exist for
@@ -1068,18 +1067,13 @@ done:
  *              callback with more than one link that points to a particular
  *              _object_.
  *
- * Return:	Success:	The return value of the first operator that
- *				returns non-zero, or zero if all members were
- *				processed with no operator returning non-zero.
+ * Return:      Success:    The return value of the first operator that
+ *                          returns non-zero, or zero if all members were
+ *                          processed with no operator returning non-zero.
  *
- *		Failure:	Negative if something goes wrong within the
- *				library, or the negative value returned by one
- *				of the operators.
- *
- *
- *
- * Programmer:	Quincey Koziol
- *		November 4 2007
+ *              Failure:    Negative if something goes wrong within the
+ *                          library, or the negative value returned by one
+ *                          of the operators.
  *
  *-------------------------------------------------------------------------
  */
@@ -1193,7 +1187,7 @@ done:
     if(gid > 0) {
         if(H5I_dec_app_ref(gid) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to close group")
-    } /* end if */
+    }
     else if(grp && H5G_close(grp) < 0)
         HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "unable to release group")
 

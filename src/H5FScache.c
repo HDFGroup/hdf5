@@ -926,7 +926,7 @@ H5FS__cache_sinfo_verify_chksum(const void *_image, size_t len, void H5_ATTR_UNU
     uint32_t computed_chksum;   /* Computed metadata checksum value */
     htri_t ret_value = TRUE;	/* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
     HDassert(image);
@@ -981,7 +981,7 @@ H5FS__cache_sinfo_deserialize(const void *_image, size_t len, void *_udata,
     HDassert(dirty);
 
     /* Allocate a new free space section info */
-    if(NULL == (sinfo = H5FS_sinfo_new(udata->f, fspace)))
+    if(NULL == (sinfo = H5FS__sinfo_new(udata->f, fspace)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* initialize old_sect_size */
@@ -1087,7 +1087,7 @@ H5FS__cache_sinfo_deserialize(const void *_image, size_t len, void *_udata,
 
 done:
     if(!ret_value && sinfo)
-        if(H5FS_sinfo_dest(sinfo) < 0)
+        if(H5FS__sinfo_dest(sinfo) < 0)
             HDONE_ERROR(H5E_FSPACE, H5E_CANTFREE, NULL, "unable to destroy free space info")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1321,7 +1321,7 @@ H5FS__cache_sinfo_notify(H5AC_notify_action_t action, void *_thing)
     H5FS_sinfo_t *sinfo = (H5FS_sinfo_t *)_thing;
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
     
     /* Sanity check */
     HDassert(sinfo);
@@ -1404,7 +1404,7 @@ H5FS__cache_sinfo_free_icr(void *_thing)
     HDassert(fspace->cache_info.is_pinned);
 
     /* Destroy free space info */
-    if(H5FS_sinfo_dest(sinfo) < 0)
+    if(H5FS__sinfo_dest(sinfo) < 0)
         HGOTO_ERROR(H5E_FSPACE, H5E_CANTFREE, FAIL, "unable to destroy free space info")
 
 done:
@@ -1512,3 +1512,4 @@ H5FS__sinfo_serialize_node_cb(void *_item, void H5_ATTR_UNUSED *key, void *_udat
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5FS__sinfo_serialize_node_cb() */
+

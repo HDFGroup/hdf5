@@ -591,6 +591,7 @@ HDF5_BUILD_TOOLS    "Build HDF5 Tools"               ON
 
 ---------------- HDF5 Advanced Options ---------------------
 ALLOW_UNSUPPORTED              "Allow unsupported combinations of configure options"          OFF
+HDF5_EXTERNAL_LIB_PREFIX       "Use prefix for custom library naming."                        ""
 HDF5_DISABLE_COMPILER_WARNINGS "Disable compiler warnings"                                    OFF
 HDF5_ENABLE_ALL_WARNINGS       "Enable all warnings"                                          OFF
 HDF5_ENABLE_CODESTACK          "Enable the function stack tracing (for developer debugging)." OFF

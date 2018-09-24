@@ -165,25 +165,25 @@ H5P__ocrt_reg_prop(H5P_genclass_t *pclass)
     FUNC_ENTER_STATIC
 
     /* Register max. compact attribute storage property */
-    if(H5P_register_real(pclass, H5O_CRT_ATTR_MAX_COMPACT_NAME, H5O_CRT_ATTR_MAX_COMPACT_SIZE, &H5O_def_attr_max_compact_g,
+    if(H5P__register_real(pclass, H5O_CRT_ATTR_MAX_COMPACT_NAME, H5O_CRT_ATTR_MAX_COMPACT_SIZE, &H5O_def_attr_max_compact_g,
             NULL, NULL, NULL, H5O_CRT_ATTR_MAX_COMPACT_ENC, H5O_CRT_ATTR_MAX_COMPACT_DEC,
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register min. dense attribute storage property */
-    if(H5P_register_real(pclass, H5O_CRT_ATTR_MIN_DENSE_NAME, H5O_CRT_ATTR_MIN_DENSE_SIZE, &H5O_def_attr_min_dense_g,
+    if(H5P__register_real(pclass, H5O_CRT_ATTR_MIN_DENSE_NAME, H5O_CRT_ATTR_MIN_DENSE_SIZE, &H5O_def_attr_min_dense_g,
             NULL, NULL, NULL, H5O_CRT_ATTR_MIN_DENSE_ENC, H5O_CRT_ATTR_MIN_DENSE_DEC,
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register object header flags property */
-    if(H5P_register_real(pclass, H5O_CRT_OHDR_FLAGS_NAME, H5O_CRT_OHDR_FLAGS_SIZE, &H5O_def_ohdr_flags_g,
+    if(H5P__register_real(pclass, H5O_CRT_OHDR_FLAGS_NAME, H5O_CRT_OHDR_FLAGS_SIZE, &H5O_def_ohdr_flags_g,
             NULL, NULL, NULL, H5O_CRT_OHDR_FLAGS_ENC, H5O_CRT_OHDR_FLAGS_DEC,
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the pipeline property */
-    if(H5P_register_real(pclass, H5O_CRT_PIPELINE_NAME, H5O_CRT_PIPELINE_SIZE, &H5O_def_pline_g,
+    if(H5P__register_real(pclass, H5O_CRT_PIPELINE_NAME, H5O_CRT_PIPELINE_SIZE, &H5O_def_pline_g,
             NULL, H5O_CRT_PIPELINE_SET, H5O_CRT_PIPELINE_GET, H5O_CRT_PIPELINE_ENC, H5O_CRT_PIPELINE_DEC,
             H5O_CRT_PIPELINE_DEL, H5O_CRT_PIPELINE_COPY, H5O_CRT_PIPELINE_CMP, H5O_CRT_PIPELINE_CLOSE) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
@@ -899,7 +899,7 @@ H5Pget_filter2(hid_t plist_id, unsigned idx, unsigned int *flags/*out*/,
     filter = &pline.filter[idx];
 
     /* Get filter information */
-    if(H5P_get_filter(filter, flags, cd_nelmts, cd_values, namelen, name, filter_config) < 0)
+    if(H5P__get_filter(filter, flags, cd_nelmts, cd_values, namelen, name, filter_config) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, H5Z_FILTER_ERROR, "can't get filter info")
 
     /* Set return value */
@@ -952,7 +952,7 @@ H5P_get_filter_by_id(H5P_genplist_t *plist, H5Z_filter_t id, unsigned int *flags
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "filter ID is invalid")
 
     /* Get filter information */
-    if(H5P_get_filter(filter, flags, cd_nelmts, cd_values, namelen, name, filter_config) < 0)
+    if(H5P__get_filter(filter, flags, cd_nelmts, cd_values, namelen, name, filter_config) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get filter info")
 
 done:
@@ -1118,7 +1118,7 @@ H5P_filter_in_pline(H5P_genplist_t *plist, H5Z_filter_t id)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5P_get_filter_by_id() */
+} /* end H5P_filter_in_pline() */
 
 
 /*-------------------------------------------------------------------------
@@ -1292,7 +1292,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5P_get_filter
+ * Function:    H5P__get_filter
  *
  * Purpose:    Internal component of H5Pget_filter & H5Pget_filter_id
  *
@@ -1304,12 +1304,12 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5P_get_filter(const H5Z_filter_info_t *filter, unsigned int *flags/*out*/,
+H5P__get_filter(const H5Z_filter_info_t *filter, unsigned int *flags/*out*/,
     size_t *cd_nelmts/*in_out*/, unsigned cd_values[]/*out*/,
     size_t namelen, char name[]/*out*/,
     unsigned *filter_config /*out*/)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
     HDassert(filter);
@@ -1364,7 +1364,7 @@ H5P_get_filter(const H5Z_filter_info_t *filter, unsigned int *flags/*out*/,
         H5Z_get_filter_info(filter->id, filter_config);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5P_get_filter() */
+} /* end H5P__get_filter() */
 
 
 /*-------------------------------------------------------------------------
@@ -1893,7 +1893,7 @@ H5Pget_filter1(hid_t plist_id, unsigned idx, unsigned int *flags/*out*/,
     filter = &pline.filter[idx];
 
     /* Get filter information */
-    if(H5P_get_filter(filter, flags, cd_nelmts, cd_values, namelen, name, NULL) < 0)
+    if(H5P__get_filter(filter, flags, cd_nelmts, cd_values, namelen, name, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, H5Z_FILTER_ERROR, "can't get filter info")
 
     /* Set return value */

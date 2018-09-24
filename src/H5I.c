@@ -128,6 +128,7 @@ static int H5I__inc_type_ref(H5I_type_t type);
 static int H5I__get_type_ref(H5I_type_t type);
 static int H5I__search_cb(void *obj, hid_t id, void *_udata);
 static H5I_id_info_t *H5I__find_id(hid_t id);
+static hid_t H5I__get_file_id(hid_t obj_id, H5I_type_t id_type);
 #ifdef H5I_DEBUG_OUTPUT
 static int H5I__debug_cb(void *_item, void *_key, void *_udata);
 static herr_t H5I__debug(H5I_type_t type);
@@ -2055,7 +2056,7 @@ H5Iget_file_id(hid_t obj_id)
 
     /* Call internal function */
     if (H5I_FILE == type || H5I_DATATYPE == type || H5I_GROUP == type || H5I_DATASET == type || H5I_ATTR == type) {
-        if ((ret_value = H5I_get_file_id(obj_id, type)) < 0)
+        if ((ret_value = H5I__get_file_id(obj_id, type)) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, H5I_INVALID_HID, "can't retrieve file ID")
     }
     else
@@ -2067,7 +2068,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5I_get_file_id
+ * Function:    H5I__get_file_id
  *
  * Purpose:     The private version of H5Iget_file_id(), obtains the file
  *              ID given an object ID.
@@ -2077,12 +2078,12 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-hid_t
-H5I_get_file_id(hid_t obj_id, H5I_type_t type)
+static hid_t
+H5I__get_file_id(hid_t obj_id, H5I_type_t type)
 {
     hid_t           ret_value   = H5I_INVALID_HID;  /* Return value             */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Process based on object type */
     if (type == H5I_FILE) {
@@ -2107,7 +2108,7 @@ H5I_get_file_id(hid_t obj_id, H5I_type_t type)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5I_get_file_id() */
+} /* end H5I__get_file_id() */
 
 #ifdef H5I_DEBUG_OUTPUT
 
