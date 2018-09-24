@@ -924,17 +924,13 @@ add_custom_command (
     WORKING_DIRECTORY ${HDF5_BINARY_DIR}
 )
 if (BUILD_SHARED_LIBS)
-  if (NOT EXISTS ${HDF5_BINARY_DIR}/shared/H5lib_settings.c)
-    add_custom_command (
-        OUTPUT ${HDF5_BINARY_DIR}/shared/H5lib_settings.c
-        COMMAND $<TARGET_FILE:H5make_libsettings>
-        ARGS ${HDF5_BINARY_DIR}/shared/H5lib_settings.c
-        DEPENDS H5make_libsettings
-        WORKING_DIRECTORY ${HDF5_BINARY_DIR}
-    )
-  else ()
-    set_source_files_properties (${HDF5_BINARY_DIR}/shared/H5lib_settings.c PROPERTIES GENERATED TRUE)
-  endif ()
+  add_custom_command (
+      OUTPUT ${HDF5_BINARY_DIR}/shared/H5lib_settings.c
+      COMMAND $<TARGET_FILE:H5make_libsettings>
+      ARGS ${HDF5_BINARY_DIR}/shared/H5lib_settings.c
+      DEPENDS H5make_libsettings
+      WORKING_DIRECTORY ${HDF5_BINARY_DIR}
+  )
 endif ()
 
 ## all_packages="AC,B,B2,D,F,FA,FL,FS,HL,I,O,S,ST,T,Z"
