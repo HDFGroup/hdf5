@@ -84,7 +84,12 @@ New Features
 
     Library:
     --------
-    -
+    - Allow pre-generated H5Tinit.c and H5make_libsettings.c to be used.
+
+      Rather than always running H5detect and generating H5Tinit.c and
+      H5make_libsettings.c, supply a location for those files.
+
+      (ADB - 2018/09/18, HDFFV-10332)
 
 
     Parallel Library:
