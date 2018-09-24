@@ -389,6 +389,13 @@ set (mod_files
     ${MOD_BUILD_DIR}/h5t_provisional.mod
     ${MOD_BUILD_DIR}/h5_dble_interface.mod
 )
+if (H5_HAVE_PARALLEL AND MPI_Fortran_FOUND)
+  set (mod_files
+      ${mod_files}
+      ${MOD_BUILD_DIR}/HDF5mpio.mod
+      ${MOD_BUILD_DIR}/H5FDmpioff.mod
+  )
+endif ()
 install (
     FILES
         ${mod_files}
@@ -429,6 +436,13 @@ if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
       ${MODSH_BUILD_DIR}/h5t_provisional.mod
       ${MODSH_BUILD_DIR}/h5_dble_interface.mod
   )
+  if (H5_HAVE_PARALLEL AND MPI_Fortran_FOUND)
+    set (modsh_files
+        ${modsh_files}
+        ${MODSH_BUILD_DIR}/HDF5mpio.mod
+        ${MODSH_BUILD_DIR}/H5FDmpioff.mod
+    )
+  endif ()
   install (
       FILES
           ${modsh_files}
