@@ -161,7 +161,7 @@ typedef htri_t (*H5S_sel_is_single_func_t)(const H5S_t *space);
 /* Method to determine if current selection is "regular" */
 typedef htri_t (*H5S_sel_is_regular_func_t)(const H5S_t *space);
 /* Method to adjust a selection by an offset */
-typedef void (*H5S_sel_adjust_u_func_t)(H5S_t *space, const hsize_t *offset);
+typedef herr_t (*H5S_sel_adjust_u_func_t)(H5S_t *space, const hsize_t *offset);
 /* Method to construct single element projection onto scalar dataspace */
 typedef herr_t (*H5S_sel_project_scalar)(const H5S_t *space, hsize_t *offset);
 /* Method to construct selection projection onto/into simple dataspace */
