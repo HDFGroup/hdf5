@@ -195,10 +195,7 @@ H5FL_DEFINE(haddr_t);
  *             hid_t lcpl_id            IN: Properties which apply to the new hard link
  *
  *
- * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Peter Cao
- *              June 4, 2005
+ * Return:      SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
  */
@@ -216,19 +213,33 @@ H5Ocopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
 
     /* Check arguments */
     if(H5G_loc(src_loc_id, &loc) < 0)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
     if(H5G_loc(dst_loc_id, &dst_loc) < 0)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
     if(!src_name || !*src_name)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no source name specified")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no source name specified")
     if(!dst_name || !*dst_name)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no destination name specified")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no destination name specified")
+
+    /* Get correct property lists */
+    if(H5P_DEFAULT == lcpl_id)
+        lcpl_id = H5P_LINK_CREATE_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(lcpl_id, H5P_LINK_CREATE))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link creation property list")
+
+    /* Get object copy property list */
+    if (H5P_DEFAULT == ocpypl_id)
+        ocpypl_id = H5P_OBJECT_COPY_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(ocpypl_id, H5P_OBJECT_COPY))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not object copy property list")
 
     /* Set up collective metadata if appropriate */
     if(H5CX_set_loc(src_loc_id) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set collective metadata read info")
 
-    /* Call internal routine to copy object */
+    /* Copy the object */
     if(H5O__copy(&loc, src_name, &dst_loc, dst_name, ocpypl_id, lcpl_id) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy object")
 
@@ -240,10 +251,9 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5O__copy
  *
- * Purpose:     Internal routine to copy an object
+ * Purpose:     Private version of H5Ocopy
  *
- * Return:	Success:	Non-negative
- *		Failure:	Negative
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
  *		December 29, 2017
@@ -260,7 +270,7 @@ H5O__copy(const H5G_loc_t *loc, const char *src_name, H5G_loc_t *dst_loc,
     htri_t      dst_exists;             /* Does destination name exist already? */
     hbool_t     loc_found = FALSE;      /* Location at 'name' found */
     hbool_t     obj_open = FALSE;       /* Entry at 'name' found */
-    herr_t      ret_value = SUCCEED;	/* Return value */
+    herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -272,7 +282,7 @@ H5O__copy(const H5G_loc_t *loc, const char *src_name, H5G_loc_t *dst_loc,
 
     /* Check if destination name already exists */
     if((dst_exists = H5L_exists_tolerant(dst_loc, dst_name)) < 0)
-	HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to check if destination name exists")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to check if destination name exists")
     if(TRUE == dst_exists)
         HGOTO_ERROR(H5E_OHDR, H5E_EXISTS, FAIL, "destination object already exists")
 
@@ -290,24 +300,6 @@ H5O__copy(const H5G_loc_t *loc, const char *src_name, H5G_loc_t *dst_loc,
     if(H5O_open(&src_oloc) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, FAIL, "unable to open object")
     obj_open = TRUE;
-
-    /* Get correct property lists */
-    if(H5P_DEFAULT == lcpl_id) {
-        if((lcpl_id = H5P_get_default(H5P_CLS_LCRT)) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "unable to get default lcpl")
-    } /* end if */
-    else
-        if(TRUE != H5P_isa_class(lcpl_id, H5P_LINK_CREATE))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link creation property list")
-
-    /* Get object copy property list */
-    if(H5P_DEFAULT == ocpypl_id) {
-        if((ocpypl_id = H5P_get_default(H5P_CLS_OCPY)) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "unable to get default ocpypl")
-    } /* end if */
-    else
-        if(TRUE != H5P_isa_class(ocpypl_id, H5P_OBJECT_COPY))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not object copy property list")
 
     /* Do the actual copying of the object */
     if(H5O__copy_obj(&src_loc, dst_loc, dst_name, ocpypl_id, lcpl_id) < 0)
