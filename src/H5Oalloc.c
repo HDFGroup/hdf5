@@ -57,9 +57,9 @@
 /* Local Prototypes */
 /********************/
 
-static herr_t H5O_add_gap(H5F_t *f, H5O_t *oh, unsigned chunkno,
+static herr_t H5O__add_gap(H5F_t *f, H5O_t *oh, unsigned chunkno,
     hbool_t *chk_dirtied, size_t idx, uint8_t *new_gap_loc, size_t new_gap_size);
-static herr_t H5O_eliminate_gap(H5O_t *oh, hbool_t *chk_dirtied,
+static herr_t H5O__eliminate_gap(H5O_t *oh, hbool_t *chk_dirtied,
     H5O_mesg_t *mesg, uint8_t *new_gap_loc, size_t new_gap_size);
 static herr_t H5O__alloc_null(H5F_t *f, H5O_t *oh, size_t null_idx,
     const H5O_msg_class_t *new_type, void *new_native, size_t new_size);
@@ -70,10 +70,10 @@ static herr_t H5O__alloc_find_best_nonnull(const H5F_t *f, const H5O_t *oh, size
 static herr_t H5O__alloc_new_chunk(H5F_t *f, H5O_t *oh, size_t size,
     size_t *new_idx);
 static herr_t H5O__alloc_find_best_null(const H5O_t *oh, size_t size, size_t *mesg_idx);
-static htri_t H5O_move_cont(H5F_t *f, H5O_t *oh, unsigned cont_u);
-static htri_t H5O_move_msgs_forward(H5F_t *f, H5O_t *oh);
-static htri_t H5O_merge_null(H5F_t *f, H5O_t *oh);
-static htri_t H5O_remove_empty_chunks(H5F_t *f, H5O_t *oh);
+static htri_t H5O__move_cont(H5F_t *f, H5O_t *oh, unsigned cont_u);
+static htri_t H5O__move_msgs_forward(H5F_t *f, H5O_t *oh);
+static htri_t H5O__merge_null(H5F_t *f, H5O_t *oh);
+static htri_t H5O__remove_empty_chunks(H5F_t *f, H5O_t *oh);
 static herr_t H5O__alloc_shrink_chunk(H5F_t *f, H5O_t *oh, unsigned chunkno);
 
 
@@ -97,7 +97,7 @@ H5FL_EXTERN(H5O_cont_t);
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5O_add_gap
+ * Function:    H5O__add_gap
  *
  * Purpose:     Add a gap to a chunk
  *
@@ -110,14 +110,14 @@ H5FL_EXTERN(H5O_cont_t);
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_add_gap(H5F_t *f, H5O_t *oh, unsigned chunkno, hbool_t *chk_dirtied,
+H5O__add_gap(H5F_t *f, H5O_t *oh, unsigned chunkno, hbool_t *chk_dirtied,
     size_t idx, uint8_t *new_gap_loc, size_t new_gap_size)
 {
     hbool_t merged_with_null;           /* Whether the gap was merged with a null message */
     size_t u;                           /* Local index variable */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* check args */
     HDassert(oh);
@@ -150,7 +150,7 @@ if(chunkno > 0) {
             HDassert(oh->chunk[chunkno].gap == 0);
 
             /* Eliminate the gap in the chunk */
-            if(H5O_eliminate_gap(oh, chk_dirtied, &oh->mesg[u], new_gap_loc, new_gap_size) < 0)
+            if(H5O__eliminate_gap(oh, chk_dirtied, &oh->mesg[u], new_gap_loc, new_gap_size) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, FAIL, "can't eliminate gap in chunk")
 
             /* Set flag to indicate that the gap was handled */
@@ -178,7 +178,7 @@ if(chunkno > 0) {
 
             /* Check if we need to extend message table to hold the new null message */
             if(oh->nmesgs >= oh->alloc_nmesgs)
-                if(H5O_alloc_msgs(oh, (size_t)1) < 0)
+                if(H5O__alloc_msgs(oh, (size_t)1) < 0)
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate more space for messages")
 
             /* Increment new gap size */
@@ -212,11 +212,11 @@ if(chunkno > 0) {
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5O_add_gap() */
+} /* H5O__add_gap() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5O_eliminate_gap
+ * Function:    H5O__eliminate_gap
  *
  * Purpose:     Eliminate a gap in a chunk with a null message.
  *
@@ -236,13 +236,13 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_eliminate_gap(H5O_t *oh, hbool_t *chk_dirtied, H5O_mesg_t *mesg,
+H5O__eliminate_gap(H5O_t *oh, hbool_t *chk_dirtied, H5O_mesg_t *mesg,
     uint8_t *gap_loc, size_t gap_size)
 {
     uint8_t *move_start, *move_end;     /* Pointers to area of messages to move */
     hbool_t null_before_gap;            /* Flag whether the null message is before the gap or not */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* check args */
     HDassert(oh);
@@ -319,7 +319,7 @@ H5O_eliminate_gap(H5O_t *oh, hbool_t *chk_dirtied, H5O_mesg_t *mesg,
     *chk_dirtied = TRUE;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* H5O_eliminate_gap() */
+} /* H5O__eliminate_gap() */
 
 
 /*-------------------------------------------------------------------------
@@ -369,7 +369,7 @@ H5O__alloc_null(H5F_t *f, H5O_t *oh, size_t null_idx,
             alloc_msg->raw_size = new_size;
 
             /* Add the gap to the chunk */
-            if(H5O_add_gap(f, oh, alloc_msg->chunkno, &chk_dirtied, null_idx, alloc_msg->raw + alloc_msg->raw_size, gap_size) < 0)
+            if(H5O__add_gap(f, oh, alloc_msg->chunkno, &chk_dirtied, null_idx, alloc_msg->raw + alloc_msg->raw_size, gap_size) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, FAIL, "can't insert gap in chunk")
         } /* end if */
         else {
@@ -378,7 +378,7 @@ H5O__alloc_null(H5F_t *f, H5O_t *oh, size_t null_idx,
 
             /* Check if we need to extend message table to hold the new null message */
             if(oh->nmesgs >= oh->alloc_nmesgs) {
-                if(H5O_alloc_msgs(oh, (size_t)1) < 0)
+                if(H5O__alloc_msgs(oh, (size_t)1) < 0)
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate more space for messages")
 
                 /* "Retarget" 'alloc_msg' pointer into newly re-allocated array of messages */
@@ -402,7 +402,7 @@ H5O__alloc_null(H5F_t *f, H5O_t *oh, size_t null_idx,
                 unsigned null_chunkno = null_msg->chunkno;   /* Chunk w/gap */
 
                 /* Eliminate the gap in the chunk */
-                if(H5O_eliminate_gap(oh, &chk_dirtied, null_msg,
+                if(H5O__eliminate_gap(oh, &chk_dirtied, null_msg,
                         ((oh->chunk[null_chunkno].image + oh->chunk[null_chunkno].size) - (H5O_SIZEOF_CHKSUM_OH(oh) + oh->chunk[null_chunkno].gap)),
                         oh->chunk[null_chunkno].gap) < 0)
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTREMOVE, FAIL, "can't eliminate gap in chunk")
@@ -432,7 +432,7 @@ done:
 
 /*-------------------------------------------------------------------------
  *
- * Function:    H5O_alloc_msgs
+ * Function:    H5O__alloc_msgs
  *
  * Purpose:     Allocate more messages for a header
  *
@@ -445,14 +445,14 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_alloc_msgs(H5O_t *oh, size_t min_alloc)
+H5O__alloc_msgs(H5O_t *oh, size_t min_alloc)
 {
     size_t old_alloc;                   /* Old number of messages allocated */
     size_t na;                          /* New number of messages allocated */
     H5O_mesg_t *new_mesg;               /* Pointer to new message array */
     herr_t ret_value = SUCCEED; 	/* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     /* check args */
     HDassert(oh);
@@ -474,7 +474,7 @@ H5O_alloc_msgs(H5O_t *oh, size_t min_alloc)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5O_alloc_msgs() */
+} /* H5O__alloc_msgs() */
 
 
 /*-------------------------------------------------------------------------
@@ -590,7 +590,7 @@ H5O__alloc_extend_chunk(H5F_t *f, H5O_t *oh, unsigned chunkno, size_t size,
 
     /* Protect chunk */
     if(NULL == (chk_proxy = H5O__chunk_protect(f, oh, chunkno)))
-	HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header chunk")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header chunk")
 
     /* Determine whether the chunk can be extended */
     was_extended = H5MF_try_extend(f, H5FD_MEM_OHDR, oh->chunk[chunkno].addr, (hsize_t)(oh->chunk[chunkno].size), (hsize_t)(delta + extra_prfx_size));
@@ -618,7 +618,7 @@ H5O__alloc_extend_chunk(H5F_t *f, H5O_t *oh, unsigned chunkno, size_t size,
     else {
         /* Create a new null message */
         if(oh->nmesgs >= oh->alloc_nmesgs)
-            if(H5O_alloc_msgs(oh, (size_t)1) < 0)
+            if(H5O__alloc_msgs(oh, (size_t)1) < 0)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate more space for messages")
 
         /* Set extension message */
@@ -690,7 +690,7 @@ H5O__alloc_extend_chunk(H5F_t *f, H5O_t *oh, unsigned chunkno, size_t size,
     } /* end for */
 
     /* Resize the chunk in the cache */
-    if(H5O_chunk_resize(oh, chk_proxy) < 0)
+    if(H5O__chunk_resize(oh, chk_proxy) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTRESIZE, FAIL, "unable to resize object header chunk")
 
     /* Set new message index */
@@ -958,7 +958,7 @@ H5O__alloc_chunk(H5F_t *f, H5O_t *oh, size_t size, size_t found_null,
      * that could be generated below.
      */
     if(oh->nmesgs + 3 > oh->alloc_nmesgs)
-        if(H5O_alloc_msgs(oh, (size_t)3) < 0)
+        if(H5O__alloc_msgs(oh, (size_t)3) < 0)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate more space for messages")
 
     /* Check if we need to move multiple messages, in order to make room for the new message */
@@ -1361,7 +1361,7 @@ done:
 
 /*-------------------------------------------------------------------------
  *
- * Function:    H5O_release_mesg
+ * Function:    H5O__release_mesg
  *
  * Purpose:     Convert a message into a null message
  *
@@ -1374,13 +1374,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_release_mesg(H5F_t *f, H5O_t *oh, H5O_mesg_t *mesg, hbool_t adj_link)
+H5O__release_mesg(H5F_t *f, H5O_t *oh, H5O_mesg_t *mesg, hbool_t adj_link)
 {
     H5O_chunk_proxy_t *chk_proxy = NULL;    /* Chunk that message is in */
     hbool_t chk_dirtied = FALSE;            /* Flag for unprotecting chunk */
     herr_t ret_value = SUCCEED; 	    /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_PACKAGE
 
     /* check args */
     HDassert(f);
@@ -1395,7 +1395,7 @@ H5O_release_mesg(H5F_t *f, H5O_t *oh, H5O_mesg_t *mesg, hbool_t adj_link)
 
     /* Protect chunk */
     if(NULL == (chk_proxy = H5O__chunk_protect(f, oh, mesg->chunkno)))
-	HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to protect object header chunk")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to protect object header chunk")
 
     /* Free any native information */
     H5O__msg_free_mesg(mesg);
@@ -1415,7 +1415,7 @@ H5O_release_mesg(H5F_t *f, H5O_t *oh, H5O_mesg_t *mesg, hbool_t adj_link)
     /* Check if chunk has a gap currently */
     if(oh->chunk[mesg->chunkno].gap) {
         /* Eliminate the gap in the chunk */
-        if(H5O_eliminate_gap(oh, &chk_dirtied, mesg,
+        if(H5O__eliminate_gap(oh, &chk_dirtied, mesg,
                 ((oh->chunk[mesg->chunkno].image + oh->chunk[mesg->chunkno].size) - (H5O_SIZEOF_CHKSUM_OH(oh) + oh->chunk[mesg->chunkno].gap)),
                 oh->chunk[mesg->chunkno].gap) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTREMOVE, FAIL, "can't eliminate gap in chunk")
@@ -1427,11 +1427,11 @@ done:
         HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to unprotect object header chunk")
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5O_release_mesg() */
+} /* H5O__release_mesg() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5O_move_cont
+ * Function:    H5O__move_cont
  *
  * Purpose:     Check and move message(s) forward into a continuation message
  *
@@ -1444,7 +1444,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static htri_t
-H5O_move_cont(H5F_t *f, H5O_t *oh, unsigned cont_u)
+H5O__move_cont(H5F_t *f, H5O_t *oh, unsigned cont_u)
 {
     H5O_chunk_proxy_t *chk_proxy = NULL;        /* Chunk that continuation message is in */
     H5O_mesg_t 	*cont_msg;	/* Pointer to the continuation message */
@@ -1452,7 +1452,7 @@ H5O_move_cont(H5F_t *f, H5O_t *oh, unsigned cont_u)
     hbool_t     chk_dirtied = FALSE;    /* Flags for unprotecting chunk */
     htri_t 	ret_value = TRUE;       /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Check arguments. */
     HDassert(f);
@@ -1500,7 +1500,7 @@ H5O_move_cont(H5F_t *f, H5O_t *oh, unsigned cont_u)
 
             /* Convert continuation message into a null message.  Do not delete
              * the target chunk yet, so we can still copy messages from it. */
-            if(H5O_release_mesg(f, oh, cont_msg, FALSE) < 0)
+            if(H5O__release_mesg(f, oh, cont_msg, FALSE) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL, "unable to convert into null message")
 
             /* Protect chunk */
@@ -1549,7 +1549,7 @@ H5O_move_cont(H5F_t *f, H5O_t *oh, unsigned cont_u)
                 /* Check if there is space that should be a gap */
                 if(gap_size > 0) {
                     /* Convert remnant into gap in chunk */
-                    if(H5O_add_gap(f, oh, cont_chunkno, &chk_dirtied, cont_u, move_start, gap_size) < 0)
+                    if(H5O__add_gap(f, oh, cont_chunkno, &chk_dirtied, cont_u, move_start, gap_size) < 0)
                         HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, FAIL, "can't insert gap in chunk")
                 } /* end if */
 
@@ -1594,12 +1594,12 @@ done:
         HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to unprotect object header chunk")
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5O_move_cont() */
+} /* H5O__move_cont() */
 
 
 /*-------------------------------------------------------------------------
  *
- * Function:    H5O_move_msgs_forward
+ * Function:    H5O__move_msgs_forward
  *
  * Purpose:     Move messages toward first chunk
  *
@@ -1612,7 +1612,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static htri_t
-H5O_move_msgs_forward(H5F_t *f, H5O_t *oh)
+H5O__move_msgs_forward(H5F_t *f, H5O_t *oh)
 {
     H5O_chunk_proxy_t *null_chk_proxy = NULL;  /* Chunk that null message is in */
     H5O_chunk_proxy_t *curr_chk_proxy = NULL;  /* Chunk that message is in */
@@ -1623,7 +1623,7 @@ H5O_move_msgs_forward(H5F_t *f, H5O_t *oh)
     hbool_t did_packing = FALSE;        /* Whether any messages were packed */
     htri_t ret_value = FAIL; 	        /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* check args */
     HDassert(oh);
@@ -1706,7 +1706,7 @@ H5O_move_msgs_forward(H5F_t *f, H5O_t *oh)
                 if(H5O_CONT_ID == curr_msg->type->id) {
                     htri_t status;      /* Status from moving messages */
 
-                    if((status = H5O_move_cont(f, oh, u)) < 0)
+                    if((status = H5O__move_cont(f, oh, u)) < 0)
                         HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL, "Error in moving messages into cont message")
                     else if(status > 0) { /* Message(s) got moved into "continuation" message */
                         packed_msg = TRUE;
@@ -1818,7 +1818,7 @@ H5O_move_msgs_forward(H5F_t *f, H5O_t *oh)
                             /* Check for gap in null message's chunk */
                             if(oh->chunk[old_chunkno].gap > 0) {
                                 /* Eliminate the gap in the chunk */
-                                if(H5O_eliminate_gap(oh, &null_chk_dirtied, null_msg,
+                                if(H5O__eliminate_gap(oh, &null_chk_dirtied, null_msg,
                                         ((oh->chunk[old_chunkno].image + oh->chunk[old_chunkno].size) - (H5O_SIZEOF_CHKSUM_OH(oh) + oh->chunk[old_chunkno].gap)),
                                         oh->chunk[old_chunkno].gap) < 0)
                                     HGOTO_ERROR(H5E_OHDR, H5E_CANTREMOVE, FAIL, "can't eliminate gap in chunk")
@@ -1845,7 +1845,7 @@ H5O_move_msgs_forward(H5F_t *f, H5O_t *oh)
                                 null_chk_dirtied = TRUE;
 
                                 /* Add the gap to the chunk */
-                                if(H5O_add_gap(f, oh, null_msg->chunkno, &null_chk_dirtied, v, null_msg->raw + null_msg->raw_size, gap_size) < 0)
+                                if(H5O__add_gap(f, oh, null_msg->chunkno, &null_chk_dirtied, v, null_msg->raw + null_msg->raw_size, gap_size) < 0)
                                     HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, FAIL, "can't insert gap in chunk")
 
                                 /* Re-use message # for new null message taking place of non-null message */
@@ -1862,7 +1862,7 @@ H5O_move_msgs_forward(H5F_t *f, H5O_t *oh)
 
                                 /* Create new null message for previous location of non-null message */
                                 if(oh->nmesgs >= oh->alloc_nmesgs) {
-                                    if(H5O_alloc_msgs(oh, (size_t)1) < 0)
+                                    if(H5O__alloc_msgs(oh, (size_t)1) < 0)
                                         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate more space for messages")
 
                                     /* "Retarget" 'curr_msg' pointer into newly re-allocated array of messages */
@@ -1893,7 +1893,7 @@ H5O_move_msgs_forward(H5F_t *f, H5O_t *oh)
                             /* Check for gap in new null message's chunk */
                             if(oh->chunk[old_chunkno].gap > 0) {
                                 /* Eliminate the gap in the chunk */
-                                if(H5O_eliminate_gap(oh, &curr_chk_dirtied, &oh->mesg[new_null_msg],
+                                if(H5O__eliminate_gap(oh, &curr_chk_dirtied, &oh->mesg[new_null_msg],
                                         ((oh->chunk[old_chunkno].image + oh->chunk[old_chunkno].size) - (H5O_SIZEOF_CHKSUM_OH(oh) + oh->chunk[old_chunkno].gap)),
                                         oh->chunk[old_chunkno].gap) < 0)
                                     HGOTO_ERROR(H5E_OHDR, H5E_CANTREMOVE, FAIL, "can't eliminate gap in chunk")
@@ -1945,12 +1945,12 @@ done:
         HDassert(!null_chk_proxy && !curr_chk_proxy && !cont_targ_chk_proxy);
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5O_move_msgs_forward() */
+} /* H5O__move_msgs_forward() */
 
 
 /*-------------------------------------------------------------------------
  *
- * Function:    H5O_merge_null
+ * Function:    H5O__merge_null
  *
  * Purpose:     Merge neighboring null messages in an object header
  *
@@ -1963,13 +1963,13 @@ done:
  *-------------------------------------------------------------------------
  */
 static htri_t
-H5O_merge_null(H5F_t *f, H5O_t *oh)
+H5O__merge_null(H5F_t *f, H5O_t *oh)
 {
     hbool_t merged_msg;                 /* Flag to indicate that messages were merged */
     hbool_t did_merging = FALSE;        /* Whether any messages were merged */
     htri_t ret_value = FAIL; 	        /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* check args */
     HDassert(oh != NULL);
@@ -2051,7 +2051,7 @@ H5O_merge_null(H5F_t *f, H5O_t *oh)
                             oh->nmesgs--;
 
                             /* The merge null message might span the entire chunk: scan for empty chunk to remove */
-                            if((result = H5O_remove_empty_chunks(f, oh)) < 0)
+                            if((result = H5O__remove_empty_chunks(f, oh)) < 0)
                                 HGOTO_ERROR(H5E_OHDR, H5E_CANTPACK, FAIL, "can't remove empty chunk")
                             else if(result > 0)
                                 /* Get out of loop */
@@ -2084,12 +2084,12 @@ H5O_merge_null(H5F_t *f, H5O_t *oh)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5O_merge_null() */
+} /* H5O__merge_null() */
 
 
 /*-------------------------------------------------------------------------
  *
- * Function:    H5O_remove_empty_chunks
+ * Function:    H5O__remove_empty_chunks
  *
  * Purpose:     Attempt to eliminate empty chunks from object header.
  *
@@ -2106,13 +2106,13 @@ done:
  *-------------------------------------------------------------------------
  */
 static htri_t
-H5O_remove_empty_chunks(H5F_t *f, H5O_t *oh)
+H5O__remove_empty_chunks(H5F_t *f, H5O_t *oh)
 {
     hbool_t deleted_chunk;              /* Whether to a chunk was deleted */
     hbool_t did_deleting = FALSE;       /* Whether any chunks were deleted */
     htri_t ret_value = FAIL; 	        /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* check args */
     HDassert(oh != NULL);
@@ -2173,7 +2173,7 @@ H5O_remove_empty_chunks(H5F_t *f, H5O_t *oh)
                 deleted_chunkno = null_msg->chunkno;
 
                 /* Convert continuation message into a null message */
-                if(H5O_release_mesg(f, oh, cont_msg, TRUE) < 0)
+                if(H5O__release_mesg(f, oh, cont_msg, TRUE) < 0)
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL, "unable to convert into null message")
 
                 /*
@@ -2273,12 +2273,12 @@ H5O_remove_empty_chunks(H5F_t *f, H5O_t *oh)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5O_remove_empty_chunks() */
+} /* H5O__remove_empty_chunks() */
 
 
 /*-------------------------------------------------------------------------
  *
- * Function:    H5O_condense_header
+ * Function:    H5O__condense_header
  *
  * Purpose:     Attempt to eliminate empty chunks from object header.
  *
@@ -2291,13 +2291,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_condense_header(H5F_t *f, H5O_t *oh)
+H5O__condense_header(H5F_t *f, H5O_t *oh)
 {
     hbool_t rescan_header;              /* Whether to rescan header */
     htri_t result;                      /* Result from packing/merging/etc */
     herr_t ret_value = SUCCEED; 	/* return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_PACKAGE
 
     /* check args */
     HDassert(oh != NULL);
@@ -2308,33 +2308,33 @@ H5O_condense_header(H5F_t *f, H5O_t *oh)
         rescan_header = FALSE;
 
         /* Scan for messages that can be moved earlier in chunks */
-        result = H5O_move_msgs_forward(f, oh);
+        result = H5O__move_msgs_forward(f, oh);
         if(result < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTPACK, FAIL, "can't move header messages forward")
         if(result > 0)
             rescan_header = TRUE;
 
         /* Scan for adjacent null messages & merge them */
-        result = H5O_merge_null(f, oh);
+        result = H5O__merge_null(f, oh);
         if(result < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTPACK, FAIL, "can't pack null header messages")
         if(result > 0)
             rescan_header = TRUE;
 
         /* Scan for empty chunks to remove */
-        result = H5O_remove_empty_chunks(f, oh);
+        result = H5O__remove_empty_chunks(f, oh);
         if(result < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTPACK, FAIL, "can't remove empty chunk")
         if(result > 0)
             rescan_header = TRUE;
     } while(rescan_header);
 #ifdef H5O_DEBUG
-H5O_assert(oh);
+H5O__assert(oh);
 #endif /* H5O_DEBUG */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5O_condense_header() */
+} /* H5O__condense_header() */
 
 
 /*-------------------------------------------------------------------------
@@ -2523,7 +2523,7 @@ H5O__alloc_shrink_chunk(H5F_t *f, H5O_t *oh, unsigned chunkno)
     HDassert(new_size <= old_size);
 
     /* Resize the chunk in the cache */
-    if(H5O_chunk_resize(oh, chk_proxy) < 0)
+    if(H5O__chunk_resize(oh, chk_proxy) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTRESIZE, FAIL, "unable to resize object header chunk")
 
     /* Free the unused space in the file */

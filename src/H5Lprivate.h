@@ -122,12 +122,27 @@ H5_DLL herr_t H5L_move(const H5G_loc_t *src_loc, const char *src_name,
     const H5G_loc_t *dst_loc, const char *dst_name, hbool_t copy_flag,
     hid_t lcpl_id);
 H5_DLL htri_t H5L_exists_tolerant(const H5G_loc_t *loc, const char *name);
+H5_DLL htri_t H5L_exists(const H5G_loc_t *loc, const char *name);
 H5_DLL herr_t H5L_get_info(const H5G_loc_t *loc, const char *name,
     H5L_info_t *linkbuf/*out*/);
 H5_DLL herr_t H5L_delete(const H5G_loc_t *loc, const char *name);
+H5_DLL herr_t H5L_delete_by_idx(const H5G_loc_t *loc, const char *name,
+    H5_index_t idx_type, H5_iter_order_t order, hsize_t n);
+H5_DLL herr_t H5L_get_info_by_idx(const H5G_loc_t *loc, const char *name,
+    H5_index_t idx_type, H5_iter_order_t order, hsize_t n,
+    H5L_info_t *linfo /*out*/);
+H5_DLL ssize_t H5L_get_name_by_idx(const H5G_loc_t *loc, const char *group_name,
+    H5_index_t idx_type, H5_iter_order_t order, hsize_t n,
+    char *name /*out*/, size_t size);
 H5_DLL herr_t H5L_get_val(const H5G_loc_t *loc, const char *name, void *buf/*out*/,
     size_t size);
+H5_DLL herr_t H5L_get_val_by_idx(const H5G_loc_t *loc, const char *name,
+    H5_index_t idx_type, H5_iter_order_t order, hsize_t n,
+    void *buf/*out*/, size_t size);
 H5_DLL herr_t H5L_register_external(void);
+H5_DLL herr_t H5L_iterate(H5G_loc_t *loc, const char *group_name,
+    H5_index_t idx_type, H5_iter_order_t order, hsize_t *idx_p,
+    H5L_iterate_t op, void *op_data);
 
 /* User-defined link functions */
 H5_DLL herr_t H5L_register(const H5L_class_t *cls);

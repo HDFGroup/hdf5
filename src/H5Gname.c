@@ -1311,7 +1311,7 @@ H5G_get_name_by_addr(hid_t file, const H5O_loc_t *loc,
         udata.path = NULL;
 
         /* Visit all the links in the file */
-        if((status = H5G_visit(file, "/", H5_INDEX_NAME, H5_ITER_NATIVE, H5G_get_name_by_addr_cb, &udata)) < 0)
+        if((status = H5G_visit(&root_loc, "/", H5_INDEX_NAME, H5_ITER_NATIVE, H5G_get_name_by_addr_cb, &udata)) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_BADITER, (-1), "group traversal failed while looking for object name")
         else if(status > 0)
             found_obj = TRUE;

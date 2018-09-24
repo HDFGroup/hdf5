@@ -189,15 +189,15 @@ H5O__dset_isa(const H5O_t *oh)
 
     /* Datatype */
     if((exists = H5O_msg_exists_oh(oh, H5O_DTYPE_ID)) < 0)
-	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to read object header")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to read object header")
     else if(!exists)
-	HGOTO_DONE(FALSE)
+        HGOTO_DONE(FALSE)
 
     /* Layout */
     if((exists = H5O_msg_exists_oh(oh, H5O_SDSPACE_ID)) < 0)
-	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to read object header")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to read object header")
     else if(!exists)
-	HGOTO_DONE(FALSE)
+        HGOTO_DONE(FALSE)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -260,7 +260,7 @@ H5O__dset_open(const H5G_loc_t *obj_loc, hbool_t app_ref)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register dataset")
 
 done:
-    if(ret_value < 0)
+    if(H5I_INVALID_HID == ret_value)
         if(dset && H5D_close(dset) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release dataset")
 

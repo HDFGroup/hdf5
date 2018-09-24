@@ -336,7 +336,6 @@ H5_DLL herr_t H5G__get_info_by_name(const H5G_loc_t *loc, const char *name,
     H5G_info_t *grp_info);
 H5_DLL herr_t H5G__get_info_by_idx(const H5G_loc_t *loc, const char *group_name,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t n, H5G_info_t *grp_info);
-H5_DLL herr_t H5G__close_cb(H5G_t *grp);
 
 /*
  * Group hierarchy traversal routines

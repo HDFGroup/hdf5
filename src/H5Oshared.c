@@ -69,6 +69,10 @@
 /********************/
 /* Local Prototypes */
 /********************/
+static void *H5O__shared_read(H5F_t *f, H5O_t *open_oh, unsigned *ioflags,
+    const H5O_shared_t *shared, const H5O_msg_class_t *type);
+static herr_t H5O__shared_link_adj(H5F_t *f, H5O_t *open_oh,
+    const H5O_msg_class_t *type, H5O_shared_t *shared, int adjust);
 
 
 /*********************/
@@ -88,14 +92,14 @@
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_shared_read
+ * Function:    H5O__shared_read
  *
- * Purpose:	Reads a message referred to by a shared message.
+ * Purpose:     Reads a message referred to by a shared message.
  *
- * Return:	Success:	Ptr to message in native format.  The message
- *				should be freed by calling H5O_msg_reset().
+ * Return:      Success:    Ptr to message in native format. The message
+ *                          should be freed by calling H5O_msg_reset().
  *
- *		Failure:	NULL
+ *              Failure:    NULL
  *
  * Programmer:	Quincey Koziol
  *		koziol@ncsa.uiuc.edu
@@ -104,7 +108,7 @@
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_shared_read(H5F_t *f, H5O_t *open_oh, unsigned *ioflags,
+H5O__shared_read(H5F_t *f, H5O_t *open_oh, unsigned *ioflags,
     const H5O_shared_t *shared, const H5O_msg_class_t *type)
 {
     H5HF_t *fheap = NULL;
@@ -112,7 +116,7 @@ H5O_shared_read(H5F_t *f, H5O_t *open_oh, unsigned *ioflags,
     uint8_t mesg_buf[H5O_MESG_BUF_SIZE]; /* Buffer for deserializing messages */
     void *ret_value = NULL;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* check args */
     HDassert(f);
@@ -194,13 +198,13 @@ done:
         HDONE_ERROR(H5E_OHDR, H5E_CLOSEERROR, NULL, "can't close wrapped buffer")
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_shared_read() */
+} /* end H5O__shared_read() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O__shared_link_adj
+ * Function:    H5O__shared_link_adj
  *
- * Purpose:	Changes the link count for the object referenced by a shared
+ * Purpose:     Changes the link count for the object referenced by a shared
  *              message.
  *
  *              This function changes the object header link count and is
@@ -209,8 +213,7 @@ done:
  *              reference count is stored in the file-wide shared message
  *              index and is changed in a different place in the code.
  *
- * Return:	Success:	Non-negative
- *		Failure:	Negative
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
  *		koziol@ncsa.uiuc.edu
@@ -294,11 +297,12 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_shared_decode
+ * Function:    H5O__shared_decode
  *
- * Purpose:	Decodes a shared object message
+ * Purpose:     Decodes a shared object message
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Success:    A buffer containing the decoded shared object
+ *              Failure:    NULL
  *
  * Programmer:	Quincey Koziol
  *              Monday, January 22, 2007
@@ -306,14 +310,14 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5O_shared_decode(H5F_t *f, H5O_t *open_oh, unsigned *ioflags, const uint8_t *buf,
+H5O__shared_decode(H5F_t *f, H5O_t *open_oh, unsigned *ioflags, const uint8_t *buf,
     const H5O_msg_class_t *type)
 {
     H5O_shared_t sh_mesg;       /* Shared message info */
     unsigned version;           /* Shared message version */
     void *ret_value = NULL;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(f);
@@ -373,20 +377,20 @@ H5O_shared_decode(H5F_t *f, H5O_t *open_oh, unsigned *ioflags, const uint8_t *bu
     sh_mesg.msg_type_id = type->id;
 
     /* Retrieve actual message, through decoded shared message info */
-    if(NULL == (ret_value = H5O_shared_read(f, open_oh, ioflags, &sh_mesg, type)))
+    if(NULL == (ret_value = H5O__shared_read(f, open_oh, ioflags, &sh_mesg, type)))
         HGOTO_ERROR(H5E_OHDR, H5E_READERROR, NULL, "unable to retrieve native message")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_shared_decode() */
+} /* end H5O__shared_decode() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_shared_encode
+ * Function:    H5O__shared_encode
  *
- * Purpose:	Encodes message _MESG into buffer BUF.
+ * Purpose:     Encodes message _MESG into buffer BUF.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:	Robb Matzke
  *              Thursday, April  2, 1998
@@ -394,11 +398,11 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_shared_encode(const H5F_t *f, uint8_t *buf/*out*/, const H5O_shared_t *sh_mesg)
+H5O__shared_encode(const H5F_t *f, uint8_t *buf/*out*/, const H5O_shared_t *sh_mesg)
 {
     unsigned    version;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args */
     HDassert(f);
@@ -427,15 +431,15 @@ H5O_shared_encode(const H5F_t *f, uint8_t *buf/*out*/, const H5O_shared_t *sh_me
         H5F_addr_encode(f, &buf, sh_mesg->u.loc.oh_addr);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5O_shared_encode() */
+} /* end H5O__shared_encode() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_set_shared
+ * Function:    H5O_set_shared
  *
- * Purpose:	Sets the shared component for a message.
+ * Purpose:     Sets the shared component for a message.
  *
- * Return:      Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
  *		koziol@ncsa.uiuc.edu
@@ -460,12 +464,12 @@ H5O_set_shared(H5O_shared_t *dst, const H5O_shared_t *src)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_shared_size
+ * Function:    H5O__shared_size
  *
- * Purpose:	Returns the length of a shared object message.
+ * Purpose:     Returns the length of a shared object message.
  *
- * Return:	Success:	Length
- *		Failure:	0
+ * Return:      Success:    Length
+ *              Failure:    0
  *
  * Programmer:	Robb Matzke
  *              Thursday, April  2, 1998
@@ -473,26 +477,26 @@ H5O_set_shared(H5O_shared_t *dst, const H5O_shared_t *src)
  *-------------------------------------------------------------------------
  */
 size_t
-H5O_shared_size(const H5F_t *f, const H5O_shared_t *sh_mesg)
+H5O__shared_size(const H5F_t *f, const H5O_shared_t *sh_mesg)
 {
     size_t ret_value = 0;       /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     if(sh_mesg->type == H5O_SHARE_TYPE_COMMITTED) {
-        ret_value = (size_t)1 +		/*version			*/
-            (size_t)1 +			/*the type field		*/
-            (size_t)H5F_SIZEOF_ADDR(f);	/*sharing by another obj hdr	*/
+        ret_value = (size_t)1 +             /* Version                      */
+            (size_t)1 +                     /* Type field                   */
+            (size_t)H5F_SIZEOF_ADDR(f);     /* Sharing by another obj hdr   */
     } /* end if */
     else {
         HDassert(sh_mesg->type == H5O_SHARE_TYPE_SOHM);
-        ret_value = 1 +			/*version			*/
-            1 +				/*the type field		*/
-            H5O_FHEAP_ID_LEN;		/* Shared in the heap		*/
+        ret_value = 1 +             /* Version              */
+            1 +                     /* Type field           */
+            H5O_FHEAP_ID_LEN;       /* Shared in the heap   */
     } /* end else */
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_shared_size() */
+} /* end H5O__shared_size() */
 
 
 /*-------------------------------------------------------------------------
@@ -500,7 +504,7 @@ H5O_shared_size(const H5F_t *f, const H5O_shared_t *sh_mesg)
  *
  * Purpose:     Free file space referenced by message
  *
- * Return:      Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:  Quincey Koziol
  *              Friday, September 26, 2003
@@ -521,7 +525,7 @@ H5O__shared_delete(H5F_t *f, H5O_t *open_oh, const H5O_msg_class_t *type,
 
     /*
      * Committed datatypes increment the OH of the original message when they
-     * are written (in H5O__shared_link) and decrement it here.
+     * are written (in H5O_shared_link) and decrement it here.
      * SOHMs in the heap behave differently; their refcount is incremented
      * during H5SM_share when they are going to be written (in H5O_msg_append
      * or H5O_msg_write). Their refcount in the SOHM indexes still needs to
@@ -543,7 +547,7 @@ done:
  * Purpose:     Increment reference count on any objects referenced by
  *              message
  *
- * Return:      Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:  Quincey Koziol
  *              Friday, September 26, 2003
@@ -558,7 +562,7 @@ H5O__shared_link(H5F_t *f, H5O_t *open_oh, const H5O_msg_class_t *type,
 
     FUNC_ENTER_PACKAGE
 
-    /* check args */
+    /* Check args */
     HDassert(f);
     HDassert(sh_mesg);
 
@@ -576,8 +580,7 @@ done:
  *
  * Purpose:     Copies a message from _MESG to _DEST in file
  *
- * Return:      Success:        Non-negative
- *              Failure:        Negative
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:  Quincey Koziol
  *              January 22, 2007
@@ -647,7 +650,7 @@ done:
  *              to complish that is to delete the old message and write the
  *              new message with the correct values.
  *
- * Return:      Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:  Peter Cao
  *              xcao@hdfgroup.org
@@ -696,7 +699,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_shared_debug
+ * Function:	H5O__shared_debug
  *
  * Purpose:	Prints debugging info for the message
  *
@@ -708,9 +711,9 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_shared_debug(const H5O_shared_t *mesg, FILE *stream, int indent, int fwidth)
+H5O__shared_debug(const H5O_shared_t *mesg, FILE *stream, int indent, int fwidth)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args */
     HDassert(mesg);
@@ -756,5 +759,5 @@ H5O_shared_debug(const H5O_shared_t *mesg, FILE *stream, int indent, int fwidth)
     } /* end switch */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5O_shared_debug() */
+} /* end H5O__shared_debug() */
 

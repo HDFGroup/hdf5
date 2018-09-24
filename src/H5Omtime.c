@@ -442,8 +442,6 @@ H5O__mtime_free(void *mesg)
  *		matzke@llnl.gov
  *		Jul 24 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -454,7 +452,7 @@ H5O__mtime_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream,
     struct tm		*tm;
     char		buf[128];
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* check args */
     HDassert(f);
