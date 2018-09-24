@@ -144,7 +144,7 @@ static herr_t H5I__debug(H5I_type_t type);
  * Return:      Success:    Positive if any action was taken that might
  *                          affect some other interface; zero otherwise.
  *
- *              Failure:	Negative.
+ *              Failure:	Negative
  *
  *-------------------------------------------------------------------------
  */
@@ -2032,8 +2032,8 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Iget_file_id
  *
- * Purpose:     The public version of H5I_get_file_id(), obtains the file
- *              ID given an object ID.  User has to close this ID.
+ * Purpose:     Obtains the file ID given an object ID.  The user has to
+ *              close this ID.
  *
  * Return:      Success:    The file ID associated with the object
  *

@@ -150,12 +150,13 @@ static H5JMP_BUF jbuf_g;
 #endif
 
 
+
 /*-------------------------------------------------------------------------
- * Function:  precision
+ * Function:    precision
  *
- * Purpose:   Determine the precision and offset.
+ * Purpose:     Determine the precision and offset.
  *
- * Return:    void
+ * Return:      void
  *-------------------------------------------------------------------------
  */
 static void
@@ -163,22 +164,22 @@ precision (detected_t *d)
 {
     unsigned int n;
 
-    if (0 == d->msize) {
+    if(0 == d->msize) {
         /*
          * An integer.    The permutation can have negative values at the
          * beginning or end which represent padding of bytes.  We must adjust
          * the precision and offset accordingly.
          */
-        if (d->perm[0] < 0) {
+        if(d->perm[0] < 0) {
             /*
              * Lower addresses are padded.
              */
-            for (n = 0; n < d->size && d->perm[n] < 0; n++)
+            for(n = 0; n < d->size && d->perm[n] < 0; n++)
                 /*void*/;
             d->precision = 8 * (d->size - n);
             d->offset = 0;
         }
-        else if (d->perm[d->size - 1] < 0) {
+        else if(d->perm[d->size - 1] < 0) {
             /*
              * Higher addresses are padded.
              */
@@ -202,18 +203,18 @@ precision (detected_t *d)
     }
 }
 
-
+
 /*-------------------------------------------------------------------------
- * Function:  DETECT_I/DETECT_BYTE
+ * Function:    DETECT_I/DETECT_BYTE
  *
- * Purpose:   These macro takes a type like `int' and a base name like
- *            `nati' and detects the byte order.  The VAR is used to
- *            construct the names of the C variables defined.
+ * Purpose:     These macro takes a type like `int' and a base name like
+ *              `nati' and detects the byte order.  The VAR is used to
+ *              construct the names of the C variables defined.
  *
- *            DETECT_I is used for types that are larger than one byte,
- *            DETECT_BYTE is used for types that are exactly one byte.
+ *              DETECT_I is used for types that are larger than one byte,
+ *              DETECT_BYTE is used for types that are exactly one byte.
  *
- * Return:    void
+ * Return:      void
  *
  * Modifications:
  *
@@ -276,15 +277,15 @@ precision (detected_t *d)
     DETECT_I_BYTE_CORE(TYPE,VAR,INFO,TYPE)                                    \
 }
 
-
+
 /*-------------------------------------------------------------------------
- * Function:  DETECT_F
+ * Function:    DETECT_F
  *
- * Purpose:   This macro takes a floating point type like `double' and
- *            a base name like `natd' and detects byte order, mantissa
- *            location, exponent location, sign bit location, presence or
- *            absence of implicit mantissa bit, and exponent bias and
- *            initializes a detected_t structure with those properties.
+ * Purpose:     This macro takes a floating point type like `double' and
+ *              a base name like `natd' and detects byte order, mantissa
+ *              location, exponent location, sign bit location, presence or
+ *              absence of implicit mantissa bit, and exponent bias and
+ *              initializes a detected_t structure with those properties.
  *-------------------------------------------------------------------------
  */
 #define DETECT_F(TYPE,VAR,INFO) {                                             \
@@ -373,15 +374,15 @@ precision (detected_t *d)
     }                                                                         \
 }
 
-
+
 /*-------------------------------------------------------------------------
- * Function:  DETECT_M
+ * Function:    DETECT_M
  *
- * Purpose:   This macro takes only miscellaneous structures or pointer
- *            (pointer, hvl_t, hobj_ref_t, hdset_reg_ref_t).  It
- *            constructs the names and decides the alignment in structure.
+ * Purpose:     This macro takes only miscellaneous structures or pointer
+ *              (pointer, hvl_t, hobj_ref_t, hdset_reg_ref_t).  It
+ *              constructs the names and decides the alignment in structure.
  *
- * Return:    void
+ * Return:      void
  *-------------------------------------------------------------------------
  */
 #define DETECT_M(TYPE,VAR,INFO) {                          \
@@ -449,15 +450,16 @@ precision (detected_t *d)
 
 
 #if defined(H5LONGJMP) && defined(H5_HAVE_SIGNAL)
+
 /*-------------------------------------------------------------------------
- * Function:  sigsegv_handler
+ * Function:    sigsegv_handler
  *
- * Purpose:   Handler for SIGSEGV. We use signal() instead of sigaction()
- *            because it's more portable to non-Posix systems. Although
- *            it's not nearly as nice to work with, it does the job for
- *            this simple stuff.
+ * Purpose:     Handler for SIGSEGV. We use signal() instead of sigaction()
+ *              because it's more portable to non-Posix systems. Although
+ *              it's not nearly as nice to work with, it does the job for
+ *              this simple stuff.
  *
- * Return:    Returns via H5LONGJMP to jbuf_g.
+ * Return:      Returns via H5LONGJMP to jbuf_g.
  *-------------------------------------------------------------------------
  */
 static void
@@ -481,15 +483,16 @@ sigsegv_handler(int H5_ATTR_UNUSED signo)
 
 
 #if defined(H5LONGJMP) && defined(H5_HAVE_SIGNAL)
+
 /*-------------------------------------------------------------------------
- * Function:  sigbus_handler
+ * Function:    sigbus_handler
  *
- * Purpose:   Handler for SIGBUS. We use signal() instead of sigaction()
- *            because it's more portable to non-Posix systems. Although
- *            it's not nearly as nice to work with, it does the job for
- *            this simple stuff.
+ * Purpose:     Handler for SIGBUS. We use signal() instead of sigaction()
+ *              because it's more portable to non-Posix systems. Although
+ *              it's not nearly as nice to work with, it does the job for
+ *              this simple stuff.
  *
- * Return:    Returns via H5LONGJMP to jbuf_g.
+ * Return:      Returns via H5LONGJMP to jbuf_g.
  *-------------------------------------------------------------------------
  */
 static void
@@ -513,15 +516,16 @@ sigbus_handler(int H5_ATTR_UNUSED signo)
 
 
 #if defined(H5LONGJMP) && defined(H5_HAVE_SIGNAL)
+
 /*-------------------------------------------------------------------------
- * Function:  sigill_handler
+ * Function:    sigill_handler
  *
- * Purpose:   Handler for SIGILL. We use signal() instead of sigaction()
- *            because it's more portable to non-Posix systems. Although
- *            it's not nearly as nice to work with, it does the job for
- *            this simple stuff.
+ * Purpose:     Handler for SIGILL. We use signal() instead of sigaction()
+ *              because it's more portable to non-Posix systems. Although
+ *              it's not nearly as nice to work with, it does the job for
+ *              this simple stuff.
  *
- * Return:    Returns via H5LONGJMP to jbuf_g.
+ * Return:      Returns via H5LONGJMP to jbuf_g.
  *-------------------------------------------------------------------------
  */
 static void
@@ -543,13 +547,13 @@ sigill_handler(int H5_ATTR_UNUSED signo)
 }
 #endif
 
-
+
 /*-------------------------------------------------------------------------
- * Function:  print_results
+ * Function:    print_results
  *
- * Purpose:   Prints information about the detected data types.
+ * Purpose:     Prints information about the detected data types.
  *
- * Return:    void
+ * Return:      void
  *-------------------------------------------------------------------------
  */
 static void
@@ -696,7 +700,7 @@ H5T__init_native(void)\n\
         d[i].precision);            /*precision        */
     /*HDassert((d[i].perm[0]>0)==(byte_order>0));*/   /* Double-check that byte-order doesn't change */
 
-    if (0 == d[i].msize) {
+    if(0 == d[i].msize) {
         /* The part unique to fixed point types */
         fprintf(rawoutstream, "\
     dt->shared->u.atomic.u.i.sign = H5T_SGN_%s;\n",
@@ -822,13 +826,13 @@ done:\n\
     fprintf(rawoutstream, "/* sigill_handler called: %d times */\n", sigill_handler_called_g);
 } /* end print_results() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:  iprint
+ * Function:    iprint
  *
- * Purpose:   Prints information about the fields of a floating point format.
+ * Purpose:     Prints information about the fields of a floating point format.
  *
- * Return:    void
+ * Return:      void
 
  *-------------------------------------------------------------------------
  */
@@ -837,17 +841,17 @@ iprint(detected_t *d)
 {
     unsigned int pass;
 
-    for (pass = (d->size - 1) / 4; ; --pass) {
+    for(pass = (d->size - 1) / 4; ; --pass) {
         unsigned int i, k;
         /*
          * Print the byte ordering above the bit fields.
          */
         fprintf(rawoutstream, "    * ");
-        for (i = MIN(pass * 4 + 3, d->size - 1); i >= pass * 4; --i) {
+        for(i = MIN(pass * 4 + 3, d->size - 1); i >= pass * 4; --i) {
             fprintf(rawoutstream, "%4d", d->perm[i]);
-            if (i > pass * 4)
+            if(i > pass * 4)
                 HDfputs("     ", stdout);
-            if (!i)
+            if(!i)
                 break;
         }
 
@@ -855,24 +859,24 @@ iprint(detected_t *d)
          * Print the bit fields
          */
         fprintf(rawoutstream, "\n    * ");
-        for (i = MIN(pass * 4 + 3, d->size - 1), k = MIN(pass * 32 + 31,
+        for(i = MIN(pass * 4 + 3, d->size - 1), k = MIN(pass * 32 + 31,
                 8 * d->size - 1); i >= pass * 4; --i) {
             unsigned int j;
 
-            for (j = 8; j > 0; --j) {
-                if (k == d->sign && d->msize) {
+            for(j = 8; j > 0; --j) {
+                if(k == d->sign && d->msize) {
                     HDfputc('S', rawoutstream);
                 }
-                else if (k >= d->epos && k < d->epos + d->esize) {
+                else if(k >= d->epos && k < d->epos + d->esize) {
                     HDfputc('E', rawoutstream);
                 }
-                else if (k >= d->mpos && k < d->mpos + d->msize) {
+                else if(k >= d->mpos && k < d->mpos + d->msize) {
                     HDfputc('M', rawoutstream);
                 }
-                else if (d->msize) {
+                else if(d->msize) {
                     HDfputc('?', rawoutstream); /*unknown floating point bit */
                 }
-                else if (d->sign) {
+                else if(d->sign) {
                     HDfputc('I', rawoutstream);
                 }
                 else {
@@ -880,27 +884,30 @@ iprint(detected_t *d)
                 }
                 --k;
             }
-            if (i > pass * 4) HDfputc(' ', rawoutstream);
-            if (!i) break;
+            if(i > pass * 4)
+                HDfputc(' ', rawoutstream);
+            if(!i)
+                break;
         }
         HDfputc('\n', rawoutstream);
-        if (!pass) break;
+        if(!pass)
+            break;
     }
 
     /*
      * Is there an implicit bit in the mantissa.
      */
-    if (d->msize) {
+    if(d->msize) {
         fprintf(rawoutstream, "    * Implicit bit? %s\n", d->imp ? "yes" : "no");
     }
 
     /*
      * Alignment
      */
-    if (0 == d->align) {
+    if(0 == d->align) {
         fprintf(rawoutstream, "    * Alignment: NOT CALCULATED\n");
     }
-    else if (1 == d->align) {
+    else if(1 == d->align) {
         fprintf(rawoutstream, "    * Alignment: none\n");
     }
     else {
@@ -909,17 +916,17 @@ iprint(detected_t *d)
 
 }
 
-
+
 /*-------------------------------------------------------------------------
- * Function:  byte_cmp
+ * Function:    byte_cmp
  *
- * Purpose:   Compares two chunks of memory A and B and returns the
- *            byte index into those arrays of the first byte that
- *            differs between A and B.  Ignores differences where the
- *            corresponding bit in pad_mask is set to 0.
+ * Purpose:     Compares two chunks of memory A and B and returns the
+ *              byte index into those arrays of the first byte that
+ *              differs between A and B.  Ignores differences where the
+ *              corresponding bit in pad_mask is set to 0.
  *
- * Return:    Success:    Index of differing byte.
- *            Failure:    -1 if all bytes are the same.
+ * Return:      Success:    Index of differing byte.
+ *              Failure:    -1 if all bytes are the same.
  *-------------------------------------------------------------------------
  */
 static int
@@ -936,17 +943,17 @@ byte_cmp(int n, const void *_a, const void *_b, const unsigned char *pad_mask)
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
- * Function:  bit_cmp
+ * Function:    bit_cmp
  *
- * Purpose:   Compares two bit vectors and returns the index for the
- *            first bit that differs between the two vectors.     The
- *            size of the vector is NBYTES.  PERM is a mapping from
- *            actual order to little endian.  Ignores differences where
- *            the corresponding bit in pad_mask is set to 0.
+ * Purpose:     Compares two bit vectors and returns the index for the
+ *              first bit that differs between the two vectors.     The
+ *              size of the vector is NBYTES.  PERM is a mapping from
+ *              actual order to little endian.  Ignores differences where
+ *              the corresponding bit in pad_mask is set to 0.
  *
- * Return:    Index of first differing bit.
+ * Return:      Index of first differing bit.
  *
  *-------------------------------------------------------------------------
  */
@@ -959,14 +966,14 @@ bit_cmp(unsigned int nbytes, int *perm, void *_a, void *_b,
     unsigned char *b = (unsigned char *) _b;
     unsigned char aa, bb;
 
-    for (i = 0; i < nbytes; i++) {
+    for(i = 0; i < nbytes; i++) {
         HDassert(perm[i] < (int) nbytes);
-        if ((aa = (unsigned char) (a[perm[i]] & pad_mask[perm[i]]))
+        if((aa = (unsigned char) (a[perm[i]] & pad_mask[perm[i]]))
                 != (bb = (unsigned char) (b[perm[i]] & pad_mask[perm[i]]))) {
             unsigned int j;
 
-            for (j = 0; j < 8; j++, aa >>= 1, bb >>= 1) {
-                if ((aa & 1) != (bb & 1)) return i * 8 + j;
+            for(j = 0; j < 8; j++, aa >>= 1, bb >>= 1) {
+                if((aa & 1) != (bb & 1)) return i * 8 + j;
             }
             fprintf(stderr, "INTERNAL ERROR");
             HDabort();
@@ -977,19 +984,19 @@ bit_cmp(unsigned int nbytes, int *perm, void *_a, void *_b,
     return 0;
 }
 
-
+
 /*-------------------------------------------------------------------------
- * Function:  fix_order
+ * Function:    fix_order
  *
- * Purpose:   Given an array PERM with elements FIRST through LAST
- *            initialized with zero origin byte numbers, this function
- *            creates a permutation vector that maps the actual order
- *            of a floating point number to little-endian.
+ * Purpose:      Given an array PERM with elements FIRST through LAST
+ *              initialized with zero origin byte numbers, this function
+ *              creates a permutation vector that maps the actual order
+ *              of a floating point number to little-endian.
  *
- *            This function assumes that the mantissa byte ordering
- *            implies the total ordering.
+ *              This function assumes that the mantissa byte ordering
+ *              implies the total ordering.
  *
- * Return:    void
+ * Return:      void
  *-------------------------------------------------------------------------
  */
 static void
@@ -997,28 +1004,28 @@ fix_order(int n, int last, int *perm, const char **mesg)
 {
     int        i;
 
-    if (last > 1) {
+    if(last > 1) {
         /*
          * We have at least three points to consider.
          */
-        if (perm[last] < perm[last - 1] && perm[last - 1] < perm[last - 2]) {
+        if(perm[last] < perm[last - 1] && perm[last - 1] < perm[last - 2]) {
             /*
              * Little endian.
              */
-            if (mesg)
+            if(mesg)
                 *mesg = "Little-endian";
-            for (i = 0; i < n; i++)
+            for(i = 0; i < n; i++)
                 perm[i] = i;
 
         }
-        else if (perm[last] > perm[last - 1]
+        else if(perm[last] > perm[last - 1]
                 && perm[last - 1] > perm[last - 2]) {
             /*
              * Big endian.
              */
-            if (mesg)
+            if(mesg)
                 *mesg = "Big-endian";
-            for (i = 0; i < n; i++)
+            for(i = 0; i < n; i++)
                 perm[i] = (n - 1) - i;
 
         }
@@ -1030,9 +1037,9 @@ fix_order(int n, int last, int *perm, const char **mesg)
              *          case - JKM & QAK)
              */
             HDassert(0 == n % 2);
-            if (mesg)
+            if(mesg)
                 *mesg = "VAX";
-            for (i = 0; i < n; i += 2) {
+            for(i = 0; i < n; i += 2) {
                 perm[i] = (n - 2) - i;
                 perm[i + 1] = (n - 1) - i;
             }
@@ -1045,34 +1052,31 @@ fix_order(int n, int last, int *perm, const char **mesg)
     }
 }
 
-
+
 /*-------------------------------------------------------------------------
- * Function:  imp_bit
+ * Function:    imp_bit
  *
- * Purpose:   Looks for an implicit bit in the mantissa.  The value
- *            of _A should be 1.0 and the value of _B should be 0.5.
- *            Some floating-point formats discard the most significant
- *            bit of the mantissa after normalizing since it will always
- *            be a one (except for 0.0).  If this is true for the native
- *            floating point values stored in _A and _B then the function
- *            returns non-zero.
+ * Purpose:     Looks for an implicit bit in the mantissa.  The value
+ *              of _A should be 1.0 and the value of _B should be 0.5.
+ *              Some floating-point formats discard the most significant
+ *              bit of the mantissa after normalizing since it will always
+ *              be a one (except for 0.0).  If this is true for the native
+ *              floating point values stored in _A and _B then the function
+ *              returns non-zero.
  *
- *            This function assumes that the exponent occupies higher
- *            order bits than the mantissa and that the most significant
- *            bit of the mantissa is next to the least significant bit
- *            of the exponent.
+ *              This function assumes that the exponent occupies higher
+ *              order bits than the mantissa and that the most significant
+ *              bit of the mantissa is next to the least significant bit
+ *              of the exponent.
  *
  *
- * Return:    Success:    Non-zero if the most significant bit
- *                of the mantissa is discarded (ie, the
- *                mantissa has an implicit `one' as the
- *                most significant bit).    Otherwise,
- *                returns zero.
+ * Return:      Success:    Non-zero if the most significant bit
+ *                          of the mantissa is discarded (ie, the
+ *                          mantissa has an implicit `one' as the
+ *                          most significant bit).    Otherwise,
+ *                          returns zero.
  *
- *            Failure:    1
- *
- * Modifications:
- *    Fixed a bug that occurs with non-implicit architectures.
+ *              Failure:    1
  *
  *-------------------------------------------------------------------------
  */
@@ -1102,7 +1106,7 @@ imp_bit(unsigned int n, int *perm, void *_a, void *_b, const unsigned char *pad_
     return (a[perm[major]] >> minor) & 0x01 ? 0 : 1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:  find_bias
  *
@@ -1110,10 +1114,6 @@ imp_bit(unsigned int n, int *perm, void *_a, void *_b, const unsigned char *pad_
  *            be called with _A having a value of `1'.
  *
  * Return:    The exponent bias.
- *
- * Modifications:
- *    Fixed a bug with non-implicit architectures returning the
- *    wrong exponent bias.
  *
  *-------------------------------------------------------------------------
  */
@@ -1124,7 +1124,7 @@ find_bias(unsigned int epos, unsigned int esize, int *perm, void *_a)
     unsigned char mask;
     unsigned int b, shift = 0, nbits, bias = 0;
 
-    while (esize > 0) {
+    while(esize > 0) {
         nbits = MIN(esize, (8 - epos % 8));
         mask = (unsigned char) ((1 << nbits) - 1);
         b = (unsigned int) (a[perm[epos / 8]] >> (epos % 8)) & mask;
@@ -1137,13 +1137,13 @@ find_bias(unsigned int epos, unsigned int esize, int *perm, void *_a)
     return bias;
 }
 
-
+
 /*-------------------------------------------------------------------------
- * Function:  print_header
+ * Function:    print_header
  *
- * Purpose:   Prints the C file header for the generated file.
+ * Purpose:     Prints the C file header for the generated file.
  *
- * Return:    void
+ * Return:      void
  *-------------------------------------------------------------------------
  */
 static void
@@ -1210,8 +1210,8 @@ bit.\n";
     {
         size_t n;
         char *comma;
-        if ((pwd = HDgetpwuid(HDgetuid()))) {
-            if ((comma = HDstrchr(pwd->pw_gecos, ','))) {
+        if((pwd = HDgetpwuid(HDgetuid()))) {
+            if((comma = HDstrchr(pwd->pw_gecos, ','))) {
                 n = MIN(sizeof(real_name)-1, (unsigned)(comma-pwd->pw_gecos));
                 HDstrncpy(real_name, pwd->pw_gecos, n);
                 real_name[n] = '\0';
@@ -1221,9 +1221,8 @@ bit.\n";
                 real_name[sizeof(real_name) - 1] = '\0';
             }
         }
-        else {
+        else
             real_name[0] = '\0';
-        }
     }
 #else
     real_name[0] = '\0';
@@ -1233,7 +1232,7 @@ bit.\n";
      * The FQDM of this host or the empty string.
      */
 #ifdef H5_HAVE_GETHOSTNAME
-    if (HDgethostname(host_name, sizeof(host_name)) < 0) {
+    if(HDgethostname(host_name, sizeof(host_name)) < 0) {
         host_name[0] = '\0';
     }
 #else
@@ -1248,23 +1247,23 @@ bit.\n";
 
     fprintf(rawoutstream, " *\n * Created:\t\t%s %2d, %4d\n",
     month_name[tm->tm_mon], tm->tm_mday, 1900 + tm->tm_year);
-    if (pwd || real_name[0] || host_name[0]) {
+    if(pwd || real_name[0] || host_name[0]) {
         fprintf(rawoutstream, " *\t\t\t");
-        if (real_name[0])
+        if(real_name[0])
             fprintf(rawoutstream, "%s <", real_name);
 #ifdef H5_HAVE_GETPWUID
-        if (pwd) HDfputs(pwd->pw_name, rawoutstream);
+        if(pwd) HDfputs(pwd->pw_name, rawoutstream);
 #endif
-        if (host_name[0])
+        if(host_name[0])
             fprintf(rawoutstream, "@%s", host_name);
-        if (real_name[0])
+        if(real_name[0])
             fprintf(rawoutstream, ">");
         HDfputc('\n', rawoutstream);
     }
     fprintf(rawoutstream, " *\n * Purpose:\t\t");
-    for (s = purpose; *s; s++) {
+    for(s = purpose; *s; s++) {
         HDfputc(*s, rawoutstream);
-        if ('\n' == *s && s[1])
+        if('\n' == *s && s[1])
             fprintf(rawoutstream, " *\t\t\t");
     }
 
@@ -1273,19 +1272,19 @@ bit.\n";
     fprintf(rawoutstream, " *\tIt was generated by code in `H5detect.c'.\n");
 
     fprintf(rawoutstream, " *\n *");
-    for (i = 0; i < 73; i++)
+    for(i = 0; i < 73; i++)
         HDfputc('-', rawoutstream);
     fprintf(rawoutstream, "\n */\n\n");
 
 }
 
-
+
 /*-------------------------------------------------------------------------
- * Function:  detect_C89_integers
+ * Function:    detect_C89_integers
  *
- * Purpose:   Detect C89 integer types
+ * Purpose:     Detect C89 integer types
  *
- * Return:    void
+ * Return:      void
  *-------------------------------------------------------------------------
  */
 static void HDF_NO_UBSAN
@@ -1301,13 +1300,13 @@ detect_C89_integers(void)
     DETECT_I(unsigned long,    ULONG,        d_g[nd_g]); nd_g++;
 }
 
-
+
 /*-------------------------------------------------------------------------
- * Function:  detect_C89_floats
+ * Function:    detect_C89_floats
  *
- * Purpose:   Detect C89 floating point types
+ * Purpose:     Detect C89 floating point types
  *
- * Return:    void
+ * Return:      void
  *-------------------------------------------------------------------------
  */
 static void HDF_NO_UBSAN
@@ -1317,13 +1316,13 @@ detect_C89_floats(void)
     DETECT_F(double,    DOUBLE,     d_g[nd_g]); nd_g++;
 }
 
-
+
 /*-------------------------------------------------------------------------
- * Function:  detect_C99_integers8
+ * Function:    detect_C99_integers8
  *
- * Purpose:   Detect C99 8 bit integer types
+ * Purpose:     Detect C99 8 bit integer types
  *
- * Return:    void
+ * Return:      void
  *-------------------------------------------------------------------------
  */
 static void HDF_NO_UBSAN
@@ -1373,13 +1372,13 @@ detect_C99_integers8(void)
 #endif
 }
 
-
+
 /*-------------------------------------------------------------------------
- * Function:  detect_C99_integers16
+ * Function:    detect_C99_integers16
  *
- * Purpose:   Detect C99 16 bit integer types
+ * Purpose:     Detect C99 16 bit integer types
  *
- * Return:    void
+ * Return:      void
  *-------------------------------------------------------------------------
  */
 static void HDF_NO_UBSAN
@@ -1405,13 +1404,13 @@ detect_C99_integers16(void)
 #endif
 }
 
-
+
 /*-------------------------------------------------------------------------
- * Function:  detect_C99_integers32
+ * Function:    detect_C99_integers32
  *
- * Purpose:   Detect C99 32 bit integer types
+ * Purpose:     Detect C99 32 bit integer types
  *
- * Return:    void
+ * Return:      void
  *-------------------------------------------------------------------------
  */
 static void HDF_NO_UBSAN
@@ -1437,13 +1436,13 @@ detect_C99_integers32(void)
 #endif
 }
 
-
+
 /*-------------------------------------------------------------------------
- * Function:  detect_C99_integers64
+ * Function:    detect_C99_integers64
  *
- * Purpose:   Detect C99 64 bit integer types
+ * Purpose:     Detect C99 64 bit integer types
  *
- * Return:    void
+ * Return:      void
  *
  *-------------------------------------------------------------------------
  */
@@ -1483,13 +1482,13 @@ detect_C99_integers64(void)
 #endif
 }
 
-
+
 /*-------------------------------------------------------------------------
- * Function:  detect_C99_integers
+ * Function:    detect_C99_integers
  *
- * Purpose:   Detect C99 integer types
+ * Purpose:     Detect C99 integer types
  *
- * Return:    void
+ * Return:      void
  *-------------------------------------------------------------------------
  */
 static void HDF_NO_UBSAN
@@ -1503,13 +1502,13 @@ detect_C99_integers(void)
     detect_C99_integers64();
 }
 
-
+
 /*-------------------------------------------------------------------------
- * Function:  detect_C99_floats
+ * Function:    detect_C99_floats
  *
- * Purpose:   Detect C99 floating point types
+ * Purpose:     Detect C99 floating point types
  *
- * Return:    void
+ * Return:      void
  *-------------------------------------------------------------------------
  */
 static void HDF_NO_UBSAN
@@ -1528,13 +1527,13 @@ detect_C99_floats(void)
 #endif
 }
 
-
+
 /*-------------------------------------------------------------------------
- * Function:  detect_alignments
+ * Function:    detect_alignments
  *
- * Purpose:   Detect structure alignments
+ * Purpose:     Detect structure alignments
  *
- * Return:    void
+ * Return:      void
  *-------------------------------------------------------------------------
  */
 static void HDF_NO_UBSAN
@@ -1570,9 +1569,9 @@ static int verify_signal_handlers(int signum, void (*handler)(int))
     volatile int nfailures = 0;
     volatile int nsuccesses = 0;
 
-    for (i=0;i<ntries; i++) {
+    for(i=0;i<ntries; i++) {
         val=H5SETJMP(jbuf_g);
-        if (val==0) {
+        if(val==0) {
             /* send self the signal to trigger the handler */
             signal_handler_tested_g++;
             HDraise(signum);
@@ -1580,7 +1579,7 @@ static int verify_signal_handlers(int signum, void (*handler)(int))
             nfailures++;
         }
         else {
-            if (val==signum) {
+            if(val==signum) {
                 /* return from signum handler. Record a sucess. */
                 nsuccesses++;
             }
@@ -1592,7 +1591,7 @@ static int verify_signal_handlers(int signum, void (*handler)(int))
     }
     /* restore save handler, check results and report failures */
     HDsignal(signum, save_handler);
-    if (nfailures>0 || nsuccesses != ntries) {
+    if(nfailures>0 || nsuccesses != ntries) {
         fprintf(stderr, "verify_signal_handlers for signal %d did %d tries. "
             "Found %d failures and %d successes\n",
             signum, ntries, nfailures, nsuccesses);
@@ -1605,13 +1604,13 @@ static int verify_signal_handlers(int signum, void (*handler)(int))
 }
 #endif
 
-
+
 /*-------------------------------------------------------------------------
- * Function:  main
+ * Function:    main
  *
- * Purpose:   Main entry point.
+ * Purpose:     Main entry point.
  *
- * Return:    Success:    0
+ * Return:      Success:    EXIT_SUCCESS
  *
  * Modifications:
  *    Some compilers, e.g., Intel C v7.0, took a long time to compile
@@ -1628,17 +1627,16 @@ main(int argc, char *argv[])
     FILE    *f;    /* temporary holding place for the stream pointer
                     * so that rawoutstream is changed only when succeeded */
 
-    if (argc > 1) {
+    if(argc > 1)
         fname = argv[1];
-    }
+
     /* First check if filename is string "NULL" */
-    if (fname != NULL) {
+    if(fname != NULL) {
         /* binary output */
-        if ((f = HDfopen(fname, "w")) != NULL) {
+        if((f = HDfopen(fname, "w")) != NULL)
             rawoutstream = f;
-        }
     }
-    if (!rawoutstream)
+    if(!rawoutstream)
         rawoutstream = stdout;
 
 #if defined(H5_HAVE_SETSYSINFO) && defined(SSI_NVPAIRS)
@@ -1650,7 +1648,7 @@ main(int argc, char *argv[])
     int            nvpairs[2];
     nvpairs[0] = SSIN_UACPROC;
     nvpairs[1] = UAC_NOPRINT | UAC_SIGBUS;
-    if (setsysinfo(SSI_NVPAIRS, nvpairs, 1, 0, 0)<0) {
+    if(setsysinfo(SSI_NVPAIRS, nvpairs, 1, 0, 0)<0) {
         fprintf(stderr, "H5detect: unable to turn off UAC handling: %s\n",
         HDstrerror(errno));
     }
@@ -1659,15 +1657,15 @@ main(int argc, char *argv[])
 
 #if defined(H5SETJMP) && defined(H5_HAVE_SIGNAL)
     /* verify the SIGBUS and SIGSEGV handlers work properly */
-    if (verify_signal_handlers(SIGBUS, sigbus_handler) != 0) {
+    if(verify_signal_handlers(SIGBUS, sigbus_handler) != 0) {
         fprintf(stderr, "Signal handler %s for signal %d failed\n",
                 "sigbus_handler", SIGBUS);
     }
-    if (verify_signal_handlers(SIGSEGV, sigsegv_handler) != 0) {
+    if(verify_signal_handlers(SIGSEGV, sigsegv_handler) != 0) {
         fprintf(stderr, "Signal handler %s for signal %d failed\n",
                 "sigsegv_handler", SIGSEGV);
     }
-    if (verify_signal_handlers(SIGILL, sigill_handler) != 0) {
+    if(verify_signal_handlers(SIGILL, sigill_handler) != 0) {
         fprintf(stderr, "Signal handler %s for signal %d failed\n",
                 "sigill_handler", SIGILL);
     }
@@ -1694,8 +1692,8 @@ main(int argc, char *argv[])
 
     print_results (nd_g, d_g, na_g, m_g);
 
-    if (rawoutstream && rawoutstream != stdout) {
-        if (HDfclose(rawoutstream))
+    if(rawoutstream && rawoutstream != stdout) {
+        if(HDfclose(rawoutstream))
             fprintf(stderr, "closing rawoutstream");
         else
             rawoutstream = NULL;
@@ -1703,3 +1701,4 @@ main(int argc, char *argv[])
 
     return EXIT_SUCCESS;
 }
+
