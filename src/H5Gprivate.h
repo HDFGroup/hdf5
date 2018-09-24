@@ -209,10 +209,10 @@ H5_DLL char *H5G_normalize(const char *name);
  */
 H5_DLL herr_t H5G_traverse(const H5G_loc_t *loc, const char *name,
     unsigned target, H5G_traverse_t op, void *op_data);
-H5_DLL herr_t H5G_iterate(hid_t loc_id, const char *group_name,
+H5_DLL herr_t H5G_iterate(H5G_loc_t *loc, const char *group_name,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t skip, hsize_t *last_lnk,
     const H5G_link_iterate_t *lnk_op, void *op_data);
-H5_DLL herr_t H5G_visit(hid_t loc_id, const char *group_name,
+H5_DLL herr_t H5G_visit(H5G_loc_t *loc, const char *group_name,
     H5_index_t idx_type, H5_iter_order_t order, H5L_iterate_t op, void *op_data);
 
 /* 
@@ -262,7 +262,7 @@ H5_DLL herr_t H5G_name_free(H5G_name_t *name);
 H5_DLL ssize_t H5G_get_name(const H5G_loc_t *loc, char *name/*out*/, size_t size,
     hbool_t *cached);
 H5_DLL ssize_t H5G_get_name_by_addr(hid_t fid, const struct H5O_loc_t *loc,
-        char* name, size_t size);
+    char* name, size_t size);
 H5_DLL H5RS_str_t *H5G_build_fullpath_refstr_str(H5RS_str_t *path_r, const char *name);
 
 /*

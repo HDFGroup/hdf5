@@ -21,14 +21,14 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5CXprivate.h"        /* API Contexts                         */
-#include "H5Dpkg.h"		/* Dataset functions			*/
-#include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5FLprivate.h"	/* Free Lists                           */
-#include "H5Iprivate.h"		/* IDs			  		*/
-#include "H5MMprivate.h"        /* Memory management                    */
-#include "H5Sprivate.h"		/* Dataspace			  	*/
+#include "H5private.h"          /* Generic Functions                        */
+#include "H5CXprivate.h"        /* API Contexts                             */
+#include "H5Dpkg.h"             /* Dataset functions                        */
+#include "H5Eprivate.h"         /* Error handling                           */
+#include "H5FLprivate.h"        /* Free Lists                               */
+#include "H5Iprivate.h"         /* IDs                                      */
+#include "H5MMprivate.h"        /* Memory management                        */
+#include "H5Sprivate.h"         /* Dataspace                                */
 
 #ifdef H5_HAVE_PARALLEL
 /* Remove this if H5R_DATASET_REGION is no longer used in this file */
@@ -50,8 +50,7 @@
 /* Local Prototypes */
 /********************/
 
-static herr_t H5D__get_offset_copy(const H5D_t *dset, const hsize_t *offset,
-        hsize_t *offset_copy/*out*/);
+/* Setup/teardown routines */
 static herr_t H5D__ioinfo_init(H5D_t *dset, const H5D_type_info_t *type_info,
     H5D_storage_t *store, H5D_io_info_t *io_info);
 static herr_t H5D__typeinfo_init(const H5D_t *dset, hid_t mem_type_id,
@@ -83,14 +82,17 @@ H5FL_DEFINE(H5D_chunk_map_t);
 /*-------------------------------------------------------------------------
  * Function:    H5D__get_offset_copy
  *
- * Purpose:     Gets a copy of the user's offset array that is guaraneteed
- *              to be suitable for use by the library.
+ * Purpose:     Copies an offset buffer and performs bounds checks on the
+ *              values.
+ *
+ *              This helper function ensures that the offset buffer given
+ *              by the user is suitable for use with the rest of the library.
  *
  * Return:      SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+herr_t
 H5D__get_offset_copy(const H5D_t *dset, const hsize_t *offset, hsize_t *offset_copy)
 {
     unsigned u;
@@ -101,7 +103,6 @@ H5D__get_offset_copy(const H5D_t *dset, const hsize_t *offset, hsize_t *offset_c
     HDassert(dset);
     HDassert(offset);
     HDassert(offset_copy);
-
 
     /* The library's chunking code requires the offset to terminate with a zero.
      * So transfer the offset array to an internal offset array that we
@@ -127,14 +128,13 @@ done:
 
 } /* end H5D__get_offset_copy() */
 
-
 
 /*-------------------------------------------------------------------------
- * Function:	H5Dread
+ * Function:    H5Dread
  *
  * Purpose:     Reads (part of) a DSET from the file into application
  *              memory BUF. The part of the dataset to read is defined with
- *              MEM_SPACE_ID and FILE_SPACE_ID.	 The data points are
+ *              MEM_SPACE_ID and FILE_SPACE_ID. The data points are
  *              converted from their file type to the MEM_TYPE_ID specified.
  *              Additional miscellaneous data transfer properties can be
  *              passed to this function with the PLIST_ID argument.
@@ -152,7 +152,7 @@ done:
  *              The PLIST_ID can be the constant H5P_DEFAULT in which
  *              case the default data transfer properties are used.
  *
- * Return:      Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:  Robb Matzke
  *              Thursday, December 4, 1997
@@ -194,7 +194,7 @@ H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
     /* Set DXPL for operation */
     H5CX_set_dxpl(dxpl_id);
 
-    /* Read raw data */
+    /* Read the data */
     if (H5D__read(dset, mem_type_id, mem_space, file_space, buf/*out*/) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data")
 
@@ -219,9 +219,9 @@ herr_t
 H5Dread_chunk(hid_t dset_id, hid_t dxpl_id, const hsize_t *offset, uint32_t *filters,
          void *buf)
 {
-    H5D_t      *dset = NULL;
+    H5D_t          *dset = NULL;
     hsize_t     offset_copy[H5O_LAYOUT_NDIMS];  /* Internal copy of chunk offset */
-    herr_t      ret_value = SUCCEED;            /* Return value */
+    herr_t          ret_value = SUCCEED;            /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE5("e", "ii*h*Iu*x", dset_id, dxpl_id, offset, filters, buf);
@@ -289,7 +289,7 @@ done:
  *              The PLIST_ID can be the constant H5P_DEFAULT in which
  *              case the default data transfer properties are used.
  *
- * Return:      Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:  Robb Matzke
  *              Thursday, December 4, 1997
@@ -303,13 +303,13 @@ H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
     H5D_t                  *dset = NULL;
     const H5S_t            *mem_space = NULL;
     const H5S_t            *file_space = NULL;
-    herr_t                  ret_value = SUCCEED;  /* Return value */
+    herr_t                  ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE6("e", "iiiii*x", dset_id, mem_type_id, mem_space_id, file_space_id,
              dxpl_id, buf);
 
-    /* Get dataset pointer and ensure it's associated with a file */
+    /* Get dataset pointer */
     if (NULL == (dset = (H5D_t *)H5I_object_verify(dset_id, H5I_DATASET)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dset_id is not a dataset ID")
     if (NULL == dset->oloc.file)
@@ -356,10 +356,10 @@ herr_t
 H5Dwrite_chunk(hid_t dset_id, hid_t dxpl_id, uint32_t filters, const hsize_t *offset, 
          size_t data_size, const void *buf)
 {
-    H5D_t      *dset = NULL;
+    H5D_t          *dset = NULL;
     hsize_t     offset_copy[H5O_LAYOUT_NDIMS];  /* Internal copy of chunk offset */
-    uint32_t    data_size_32;                   /* Chunk data size (limited to 32-bits currently) */
-    herr_t      ret_value = SUCCEED;            /* Return value */
+    uint32_t        data_size_32;                   /* Chunk data size (limited to 32-bits currently) */
+    herr_t          ret_value = SUCCEED;            /* Return value */
     
     FUNC_ENTER_API(FAIL)
     H5TRACE6("e", "iiIu*hz*x", dset_id, dxpl_id, filters, offset, data_size, buf);
@@ -981,8 +981,7 @@ H5D__typeinfo_init(const H5D_t *dset, hid_t mem_type_id, hbool_t do_write,
         type_info->dst_type_id = mem_type_id;
     } /* end else */
 
-    /*
-     * Locate the type conversion function and dataspace conversion
+    /* Locate the type conversion function and dataspace conversion
      * functions, and set up the element numbering information. If a data
      * type conversion is necessary then register datatype atoms. Data type
      * conversion is necessary if the user has set the `need_bkg' to a high
@@ -1249,7 +1248,7 @@ H5D__ioinfo_adjust(H5D_io_info_t *io_info, const H5D_t *dset,
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__ioinfo_adjust() */
-#endif /*H5_HAVE_PARALLEL*/
+#endif /* H5_HAVE_PARALLEL */
 
 
 /*-------------------------------------------------------------------------

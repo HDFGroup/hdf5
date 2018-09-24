@@ -75,7 +75,7 @@ const H5O_msg_class_t H5O_MSG_BOGUS_INVALID[1] = {{
     0,                          /*native message size           */
     0,                          /* messages are sharable?       */
     H5O__bogus_decode,          /*decode message                */
-    H5O__bogus_encode,          /*encode message                */
+    H5O_bogus_encode,           /*encode message                */
     NULL,                       /*copy the native value         */
     H5O_bogus_size,             /*raw message size              */
     NULL,                       /*free internal memory          */

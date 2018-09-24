@@ -35,12 +35,12 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5CXprivate.h"        /* API Contexts                         */
-#include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5Fpkg.h"             /* File access				*/
-#include "H5Iprivate.h"		/* IDs			  		*/
-#include "H5SMprivate.h"        /* Shared object header messages        */
+#include "H5private.h"          /* Generic Functions                        */
+#include "H5CXprivate.h"        /* API Contexts                             */
+#include "H5Eprivate.h"         /* Error handling                           */
+#include "H5Fpkg.h"             /* File access                              */
+#include "H5Iprivate.h"         /* IDs                                      */
+#include "H5SMprivate.h"        /* Shared object header messages            */
 
 
 /****************/
@@ -84,16 +84,12 @@
  * Function:    H5Fget_info1
  *
  * Purpose:     Gets general information about the file, including:
- *		1. Get storage size for superblock extension if there is one.
+ *              1. Get storage size for superblock extension if there is one.
  *              2. Get the amount of btree and heap storage for entries
  *                 in the SOHM table if there is one.
- *		3. The amount of free space tracked in the file.
+ *              3. The amount of free space tracked in the file.
  *
- * Return:      Success:        non-negative on success
- *              Failure:        Negative
- *
- * Programmer:  Vailin Choi
- *              July 11, 2007
+ * Return:      SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
  */
@@ -111,14 +107,15 @@ H5Fget_info1(hid_t obj_id, H5F_info1_t *finfo)
     if(!finfo)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no info struct")
 
-    /* For file IDs, get the file object directly */
-    /* (This prevents the H5G_loc() call from returning the file pointer for
+    /* For file IDs, get the file object directly
+     *
+     * (This prevents the H5G_loc() call from returning the file pointer for
      * the top file in a mount hierarchy)
      */
     if(H5I_get_type(obj_id) == H5I_FILE ) {
         if(NULL == (f = (H5F_t *)H5I_object(obj_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
-    } /* end if */
+    }
     else {
         H5G_loc_t     loc;        /* Object location */
 
@@ -126,7 +123,7 @@ H5Fget_info1(hid_t obj_id, H5F_info1_t *finfo)
         if(H5G_loc(obj_id, &loc) < 0)
              HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a valid object ID")
         f = loc.oloc->file;
-    } /* end else */
+    }
     HDassert(f->shared);
 
     /* Get the current file info */
@@ -193,7 +190,8 @@ H5Fset_latest_format(hid_t file_id, hbool_t latest_format)
         HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "not a file ID")
 
     /* 'low' and 'high' are both initialized to LATEST.
-       If latest format is not expected, set 'low' to EARLIEST */
+     * If latest format is not expected, set 'low' to EARLIEST
+	 */
     if(!latest_format)
         low = H5F_LIBVER_EARLIEST;
 

@@ -41,11 +41,9 @@
 #include "H5Iprivate.h"     /* IDs      */
 #include "H5Opkg.h"         /* Objects  */
 
-
 /********************/
 /* Local Prototypes */
 /********************/
-static herr_t H5O__flush(hid_t obj_id);
 static herr_t H5O__oh_tag(const H5O_loc_t *oloc, haddr_t *tag);
 static herr_t H5O__refresh_metadata_close(hid_t oid, H5O_loc_t oloc,
 	H5G_loc_t *obj_loc);
@@ -58,11 +56,11 @@ static herr_t H5O__refresh_metadata_close(hid_t oid, H5O_loc_t oloc,
 
 
 /*-------------------------------------------------------------------------
- * Function:   H5Oflush
+ * Function:    H5Oflush
  *
- * Purpose:    Flushes all buffers associated with an object to disk.
+ * Purpose:     Flushes all buffers associated with an object to disk.
  *
- * Return:    Non-negative on success, negative on failure
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:  Mike McGreevy
  *              May 19, 2010
@@ -72,22 +70,70 @@ static herr_t H5O__refresh_metadata_close(hid_t oid, H5O_loc_t oloc,
 herr_t
 H5Oflush(hid_t obj_id)
 {
-    herr_t ret_value = SUCCEED;         /* Return value */
+    H5O_loc_t *oloc;            /* Object location */
+    herr_t              ret_value   = SUCCEED;  /* Return value     */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", obj_id);
+
+    /* Check args */
+    if(NULL == (oloc = H5O_get_loc(obj_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
 
     /* Set up collective metadata if appropriate */
     if(H5CX_set_loc(obj_id) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "can't set access property list info")
 
-    /* Call internal routine */
-    if(H5O__flush(obj_id) < 0)
+    /* Flush the object */
+    if(H5O_flush(oloc, obj_id) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTFLUSH, FAIL, "unable to flush object")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Oflush() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5O_flush
+ *
+ * Purpose:     Internal routine to flush an object
+ *
+ * Return:	Success:	Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *		December 29, 2017
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5O_flush(H5O_loc_t *oloc, hid_t obj_id)
+{
+    void                   *obj_ptr;                /* Pointer to object */
+    const H5O_obj_class_t  *obj_class;              /* Class of object */
+    herr_t                  ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Get the object pointer */
+    if(NULL == (obj_ptr = H5I_object(obj_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
+
+    /* Get the object class */
+    if(NULL == (obj_class = H5O__obj_class(oloc)))
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to determine object class")
+
+    /* Flush the object of this class */
+    if(obj_class->flush && obj_class->flush(obj_ptr) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTFLUSH, FAIL, "unable to flush object")
+
+    /* Flush the object metadata and invoke flush callback */
+    if(H5O_flush_common(oloc, obj_id) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTFLUSH, FAIL, "unable to flush object and object flush callback")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_flush() */
 
 
 /*-------------------------------------------------------------------------
@@ -120,59 +166,11 @@ H5O_flush_common(H5O_loc_t *oloc, hid_t obj_id)
 
     /* Check to invoke callback */
     if(H5F_object_flush_cb(oloc->file, obj_id) < 0)
-	HGOTO_ERROR(H5E_OHDR, H5E_CANTFLUSH, FAIL, "unable to do object flush callback")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTFLUSH, FAIL, "unable to do object flush callback")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_flush_common() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5O__flush
- *
- * Purpose:     Internal routine to flush an object
- *
- * Return:	Success:	Non-negative
- *		Failure:	Negative
- *
- * Programmer:	Quincey Koziol
- *		December 29, 2017
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5O__flush(hid_t obj_id)
-{
-    H5O_loc_t *oloc;            /* Object location */
-    void *obj_ptr;		/* Pointer to object */
-    const H5O_obj_class_t  *obj_class;	/* Class of object */
-    herr_t ret_value = SUCCEED;	/* Return value */
-
-    FUNC_ENTER_STATIC
-
-    /* Check args */
-    if(NULL == (oloc = H5O_get_loc(obj_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an object")
-
-    /* Get the object pointer */
-    if(NULL == (obj_ptr = H5I_object(obj_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
-
-    /* Get the object class */
-    if(NULL == (obj_class = H5O__obj_class(oloc)))
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to determine object class")
-
-    /* Flush the object of this class */
-    if(obj_class->flush && obj_class->flush(obj_ptr) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTFLUSH, FAIL, "unable to flush object")
-
-    /* Flush the object metadata and invoke flush callback */
-    if(H5O_flush_common(oloc, obj_id) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTFLUSH, FAIL, "unable to flush object and object flush callback")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O__flush() */
 
 
 /*-------------------------------------------------------------------------
@@ -219,9 +217,9 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Orefresh
  *
- * Purpose:    Refreshes all buffers associated with an object.
+ * Purpose:     Refreshes all buffers associated with an object.
  *
- * Return:    Non-negative on success, negative on failure
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:  Mike McGreevy
  *              July 28, 2010
@@ -239,13 +237,13 @@ H5Orefresh(hid_t oid)
 
     /* Check args */
     if(NULL == (oloc = H5O_get_loc(oid)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an object")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
 
     /* Set up collective metadata if appropriate */
     if(H5CX_set_loc(oid) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "can't set access property list info")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set access property list info")
 
-    /* Call internal routine */
+    /* Refresh the object */
     if(H5O_refresh_metadata(oid, *oloc) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to refresh object")
 
@@ -354,8 +352,8 @@ H5O__refresh_metadata_close(hid_t oid, H5O_loc_t oloc, H5G_loc_t *obj_loc)
 
     /* Get object's type */
     if(H5I_get_type(oid) == H5I_DATASET)
-	if(H5D_mult_refresh_close(oid) < 0)
-	    HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "unable to prepare refresh for dataset")
+        if(H5D_mult_refresh_close(oid) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "unable to prepare refresh for dataset")
 
     /* Retrieve tag for object */
     if(H5O__oh_tag(&oloc, &tag) < 0)
@@ -379,8 +377,8 @@ H5O__refresh_metadata_close(hid_t oid, H5O_loc_t oloc, H5G_loc_t *obj_loc)
 
     /* Re-cork object with tag */
     if(corked)
-	if(H5AC_cork(oloc.file, tag, H5AC__SET_CORK, &corked) < 0)
-	    HGOTO_ERROR(H5E_ATOM, H5E_SYSTEM, FAIL, "unable to cork the object")
+        if(H5AC_cork(oloc.file, tag, H5AC__SET_CORK, &corked) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_SYSTEM, FAIL, "unable to cork the object")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -404,11 +402,14 @@ done:
 herr_t
 H5O_refresh_metadata_reopen(hid_t oid, H5G_loc_t *obj_loc, hbool_t start_swmr)
 {
-    void *object = NULL;        /* Dataset for this operation */
+    void *object = NULL;        /* Object for this operation */
     H5I_type_t type;            /* Type of object for the ID */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(obj_loc);
 
     /* Get object's type */
     type = H5I_get_type(oid);
@@ -455,7 +456,7 @@ H5O_refresh_metadata_reopen(hid_t oid, H5G_loc_t *obj_loc, hbool_t start_swmr)
 
     /* Re-register ID for the object */
     if((H5I_register_with_id(type, object, TRUE, oid)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to re-register object atom")
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to re-register object ID after refresh")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);

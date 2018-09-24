@@ -479,8 +479,7 @@ H5D__mpio_array_gatherv(void *local_array, size_t local_array_num_entries,
     MPI_Comm_size(comm, &mpi_size);
     MPI_Comm_rank(comm, &mpi_rank);
 
-    /*
-     * Determine the size of the end result array by collecting the number
+    /* Determine the size of the end result array by collecting the number
      * of entries contributed by each processor into a single total.
      */
     if (MPI_SUCCESS != (mpi_code = MPI_Allreduce(&local_array_num_entries, &gathered_array_num_entries, 1, MPI_INT, MPI_SUM, comm)))
