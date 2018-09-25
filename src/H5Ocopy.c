@@ -13,11 +13,9 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:		H5Ocopy.c
- *			Nov  6 2006
- *			Quincey Koziol <koziol@hdfgroup.org>
+ * Created:     H5Ocopy.c
  *
- * Purpose:		Object copying routines.
+ * Purpose:     Object copying routines.
  *
  *-------------------------------------------------------------------------
  */
@@ -32,19 +30,19 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5Aprivate.h"         /* Attributes                           */
-#include "H5CXprivate.h"        /* API Contexts                         */
-#include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5FLprivate.h"	/* Free lists                           */
-#include "H5Iprivate.h"		/* IDs			  		*/
-#include "H5HGprivate.h"        /* Global Heaps                         */
-#include "H5FOprivate.h"        /* File objects                         */
-#include "H5Lprivate.h"         /* Links			  	*/
-#include "H5MFprivate.h"	/* File memory management		*/
-#include "H5MMprivate.h"	/* Memory management			*/
-#include "H5Opkg.h"             /* Object headers			*/
-#include "H5Pprivate.h"         /* Property lists                       */
+#include "H5private.h"          /* Generic Functions                        */
+#include "H5Aprivate.h"         /* Attributes                               */
+#include "H5CXprivate.h"        /* API Contexts                             */
+#include "H5Eprivate.h"         /* Error handling                           */
+#include "H5FLprivate.h"        /* Free lists                               */
+#include "H5Iprivate.h"         /* IDs                                      */
+#include "H5HGprivate.h"        /* Global Heaps                             */
+#include "H5FOprivate.h"        /* File objects                             */
+#include "H5Lprivate.h"         /* Links                                    */
+#include "H5MFprivate.h"        /* File memory management                   */
+#include "H5MMprivate.h"        /* Memory management                        */
+#include "H5Opkg.h"             /* Object headers                           */
+#include "H5Pprivate.h"         /* Property lists                           */
 
 
 /****************/
@@ -79,8 +77,6 @@ typedef struct H5O_copy_search_comm_dt_ud_t {
 /* Local Prototypes */
 /********************/
 
-static herr_t H5O__copy(const H5G_loc_t *loc, const char *src_name,
-    H5G_loc_t *dst_loc, const char *dst_name, hid_t ocpypl_id, hid_t lcpl_id);
 static herr_t H5O__copy_free_addrmap_cb(void *item, void *key, void *op_data);
 static herr_t H5O__copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/,
     H5O_copy_t *cpy_info, H5O_type_t *obj_type, void **udata);
@@ -240,7 +236,7 @@ H5Ocopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
         HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set collective metadata read info")
 
     /* Copy the object */
-    if(H5O__copy(&loc, src_name, &dst_loc, dst_name, ocpypl_id, lcpl_id) < 0)
+    if(H5O_copy(&loc, src_name, &dst_loc, dst_name, ocpypl_id, lcpl_id) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy object")
 
 done:
@@ -249,7 +245,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5O__copy
+ * Function:    H5O_copy
  *
  * Purpose:     Private version of H5Ocopy
  *
@@ -260,8 +256,8 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
-H5O__copy(const H5G_loc_t *loc, const char *src_name, H5G_loc_t *dst_loc,
+herr_t
+H5O_copy(const H5G_loc_t *loc, const char *src_name, H5G_loc_t *dst_loc,
     const char *dst_name, hid_t ocpypl_id, hid_t lcpl_id)
 {
     H5G_loc_t	src_loc;                /* Source object group location */
@@ -272,7 +268,7 @@ H5O__copy(const H5G_loc_t *loc, const char *src_name, H5G_loc_t *dst_loc,
     hbool_t     obj_open = FALSE;       /* Entry at 'name' found */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check arguments */
     HDassert(loc);
@@ -312,7 +308,7 @@ done:
         HDONE_ERROR(H5E_OHDR, H5E_CLOSEERROR, FAIL, "unable to release object header")
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O__copy() */
+} /* end H5O_copy() */
 
 
 /*-------------------------------------------------------------------------
@@ -431,7 +427,7 @@ H5O__copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/,
     } /* end if */
 
     /* Flush any dirty messages in source object header to update the header chunks */
-    if(H5O_flush_msgs(oloc_src->file, oh_src) < 0)
+    if(H5O__flush_msgs(oloc_src->file, oh_src) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTFLUSH, FAIL, "unable to flush object header messages")
 
     /* Allocate the destination object header and fill in header fields */
@@ -766,7 +762,7 @@ H5O__copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/,
 
         /* Make sure we have enough space for new NULL message */
         if(oh_dst->nmesgs + 1 > oh_dst->alloc_nmesgs)
-            if(H5O_alloc_msgs(oh_dst, (size_t)1) < 0)
+            if(H5O__alloc_msgs(oh_dst, (size_t)1) < 0)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate more space for messages")
 
         /* Create null message for [rest of] space in new chunk */
@@ -1215,7 +1211,7 @@ H5O__copy_obj(H5G_loc_t *src_loc, H5G_loc_t *dst_loc, const char *dst_name,
 
     /* Insert the new object in the destination file's group */
     if(H5L_link(dst_loc, dst_name, &new_loc, lcpl_id) < 0)
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to insert link")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to insert link")
     entry_inserted = TRUE;
 
 done:
@@ -1898,7 +1894,7 @@ H5O__copy_search_comm_dt(H5F_t *file_src, H5O_t *oh_src,
 
                 /* Traverse the destination file, adding committed datatypes to the skip
                 * list */
-                if(H5G_visit(H5F_FILE_ID(oloc_dst->file), "/", H5_INDEX_NAME, H5_ITER_NATIVE, H5O__copy_search_comm_dt_cb, &udata) < 0)
+                if(H5G_visit(&dst_root_loc, "/", H5_INDEX_NAME, H5_ITER_NATIVE, H5O__copy_search_comm_dt_cb, &udata) < 0)
                     HGOTO_ERROR(H5E_OHDR, H5E_BADITER, FAIL, "object visitation failed")
                 cpy_info->dst_dt_list_complete = TRUE;
             } /* end if */

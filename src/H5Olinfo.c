@@ -44,13 +44,13 @@ static size_t H5O_linfo_size(const H5F_t *f, hbool_t disable_shared, const void 
 static herr_t H5O__linfo_free(void *_mesg);
 static herr_t H5O__linfo_delete(H5F_t *f, H5O_t *open_oh, void *_mesg);
 static void *H5O__linfo_copy_file(H5F_t *file_src, void *native_src,
-        H5F_t *file_dst, hbool_t *recompute_size, unsigned *mesg_flags,
-        H5O_copy_t *cpy_info, void *udata);
+    H5F_t *file_dst, hbool_t *recompute_size, unsigned *mesg_flags,
+    H5O_copy_t *cpy_info, void *udata);
 static herr_t H5O__linfo_post_copy_file(const H5O_loc_t *parent_src_oloc,
-        const void *mesg_src, H5O_loc_t *dst_oloc, void *mesg_dst,
-        unsigned *mesg_flags, H5O_copy_t *cpy_info);
-static herr_t H5O__linfo_debug(H5F_t *f, const void *_mesg,
-        FILE * stream, int indent, int fwidth);
+    const void *mesg_src, H5O_loc_t *dst_oloc, void *mesg_dst,
+    unsigned *mesg_flags, H5O_copy_t *cpy_info);
+static herr_t H5O__linfo_debug(H5F_t *f, const void *_mesg, FILE * stream,
+    int indent, int fwidth);
 
 /* This message derives from H5O message class */
 const H5O_msg_class_t H5O_MSG_LINFO[1] = {{

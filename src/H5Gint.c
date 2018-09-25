@@ -449,38 +449,6 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5G__close_cb
- *
- * Purpose:	Closes the specified group.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Sunday, February 18, 2018
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5G__close_cb(H5G_t *grp)
-{
-    herr_t ret_value = SUCCEED;                 /* Return value */
-
-    FUNC_ENTER_PACKAGE
-
-    /* Check args */
-    HDassert(grp && grp->shared);
-    HDassert(grp->shared->fo_count > 0);
-
-    /* Call actual group close routine */
-    if(H5G_close(grp) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEOBJ, FAIL, "problem closing group")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G__close_cb() */
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5G_close
  *
  * Purpose:	Closes the specified group.
@@ -817,30 +785,27 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_iterate(hid_t loc_id, const char *group_name,
+H5G_iterate(H5G_loc_t *loc, const char *group_name,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t skip, hsize_t *last_lnk,
     const H5G_link_iterate_t *lnk_op, void *op_data)
 {
-    H5G_loc_t	loc;            /* Location of parent for group */
-    hid_t gid = -1;             /* ID of group to iterate over */
-    H5G_t *grp = NULL;          /* Pointer to group data structure to iterate over */
-    H5G_iter_appcall_ud_t udata; /* User data for callback */
-    herr_t ret_value = FAIL;    /* Return value */
+    hid_t gid = H5I_INVALID_HID;    /* ID of group to iterate over */
+    H5G_t *grp = NULL;              /* Pointer to group data structure to iterate over */
+    H5G_iter_appcall_ud_t udata;    /* User data for callback */
+    herr_t ret_value = FAIL;        /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
+    HDassert(loc);
     HDassert(group_name);
     HDassert(last_lnk);
     HDassert(lnk_op && lnk_op->op_func.op_new);
 
-    /*
-     * Open the group on which to operate.  We also create a group ID which
+    /* Open the group on which to operate.  We also create a group ID which
      * we can pass to the application-defined operator.
      */
-    if(H5G_loc(loc_id, &loc) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
-    if(NULL == (grp = H5G__open_name(&loc, group_name)))
+    if(NULL == (grp = H5G__open_name(loc, group_name)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open group")
     if((gid = H5I_register(H5I_GROUP, grp, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register group")
@@ -856,7 +821,7 @@ H5G_iterate(hid_t loc_id, const char *group_name,
 
 done:
     /* Release the group opened */
-    if(gid > 0) {
+    if(gid != H5I_INVALID_HID) {
         if(H5I_dec_app_ref(gid) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to close group")
     }
@@ -1078,15 +1043,14 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_visit(hid_t loc_id, const char *group_name, H5_index_t idx_type,
+H5G_visit(H5G_loc_t *loc, const char *group_name, H5_index_t idx_type,
     H5_iter_order_t order, H5L_iterate_t op, void *op_data)
 {
     H5G_iter_visit_ud_t udata;      /* User data for callback */
     H5O_linfo_t	linfo;		    /* Link info message */
     htri_t linfo_exists;            /* Whether the link info message exists */
-    hid_t       gid = (-1);         /* Group ID */
+    hid_t       gid = H5I_INVALID_HID;         /* Group ID */
     H5G_t      *grp = NULL;         /* Group opened */
-    H5G_loc_t	loc;                /* Location of group passed in */
     H5G_loc_t	start_loc;          /* Location of starting group */
     unsigned    rc;		    /* Reference count of object    */
     herr_t ret_value = FAIL;        /* Return value */
@@ -1097,11 +1061,11 @@ H5G_visit(hid_t loc_id, const char *group_name, H5_index_t idx_type,
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
-    if(H5G_loc(loc_id, &loc) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+    if(!loc)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "loc parameter cannot be NULL")
 
     /* Open the group to begin visiting within */
-    if(NULL == (grp = H5G__open_name(&loc, group_name)))
+    if(NULL == (grp = H5G__open_name(loc, group_name)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open group")
 
     /* Register an ID for the starting group */
@@ -1184,7 +1148,7 @@ done:
         H5SL_destroy(udata.visited, H5G_free_visit_visited, NULL);
 
     /* Release the group opened */
-    if(gid > 0) {
+    if(gid != H5I_INVALID_HID) {
         if(H5I_dec_app_ref(gid) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to close group")
     }
@@ -1254,7 +1218,7 @@ H5G_get_create_plist(const H5G_t *grp)
 
     /* Check for the group having a link info message */
     if((linfo_exists = H5G__obj_get_linfo(&(grp->oloc), &linfo)) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, H5I_INVALID_HID, "unable to read object header")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, H5I_INVALID_HID, "unable to read object header")
     if(linfo_exists) {
         /* Set the link info for the property list */
         if(H5P_set(new_plist, H5G_CRT_LINK_INFO_NAME, &linfo) < 0)

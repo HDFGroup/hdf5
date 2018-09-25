@@ -754,8 +754,8 @@ H5O_fill_reset_dyn(H5O_fill_t *fill)
     } /* end if */
     fill->size = 0;
     if(fill->type) {
-	(void)H5T_close_real(fill->type);
-	fill->type = NULL;
+        (void)H5T_close_real(fill->type);
+        fill->type = NULL;
     } /* end if */
 
 done:
@@ -1008,7 +1008,7 @@ H5O_fill_convert(H5O_fill_t *fill, H5T_t *dset_type, hbool_t *fill_changed)
      * Can we convert between source and destination data types?
      */
     if(NULL == (tpath = H5T_path_find(fill->type, dset_type)))
-	HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to convert between src and dst datatypes")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to convert between src and dst datatypes")
 
     /* Don't bother doing anything if there will be no actual conversion */
     if(!H5T_path_noop(tpath)) {

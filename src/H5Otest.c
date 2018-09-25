@@ -127,7 +127,7 @@ H5O__is_attr_dense_test(hid_t oid)
     /* Check if dense storage is being used */
     if(H5F_addr_defined(ainfo.fheap_addr)) {
         /* Check for any messages in object header */
-        HDassert(H5O_msg_count_real(oh, H5O_MSG_ATTR) == 0);
+        HDassert(H5O__msg_count_real(oh, H5O_MSG_ATTR) == 0);
 
         ret_value = TRUE;
     } /* end if */
@@ -197,7 +197,7 @@ H5O__is_attr_empty_test(hid_t oid)
     } /* end if */
 
     /* Retrieve the number of attribute messages in header */
-    nattrs = H5O_msg_count_real(oh, H5O_MSG_ATTR);
+    nattrs = H5O__msg_count_real(oh, H5O_MSG_ATTR);
 
     /* Check for later version of object header format & attribute info available */
     if(oh->version > H5O_VERSION_1) {
@@ -299,7 +299,7 @@ H5O__num_attrs_test(hid_t oid, hsize_t *nattrs)
     } /* end if */
 
     /* Retrieve the number of attribute messages in header */
-    obj_nattrs = H5O_msg_count_real(oh, H5O_MSG_ATTR);
+    obj_nattrs = H5O__msg_count_real(oh, H5O_MSG_ATTR);
 
     /* Check for later version of object header format */
     if(oh->version > H5O_VERSION_1) {
