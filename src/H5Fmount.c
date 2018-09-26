@@ -112,7 +112,7 @@ H5F__mount(H5G_loc_t *loc, const char *name, H5F_t *child, hid_t H5_ATTR_UNUSED 
     H5G_loc_t   root_loc;               /* Group location of root of file to mount */
     herr_t      ret_value = SUCCEED;        /* Return value */
 
-    FUNC_ENTER_PACKAGE_VOL
+    FUNC_ENTER_PACKAGE
 
     HDassert(loc);
     HDassert(name && *name);
@@ -132,7 +132,7 @@ H5F__mount(H5G_loc_t *loc, const char *name, H5F_t *child, hid_t H5_ATTR_UNUSED 
      */
     if(child->parent)
         HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "file is already mounted")
-    if(H5G_loc_find(loc, name, &mp_loc/*out*/) < 0)
+    if(H5G_loc_find(loc, name, &mp_loc) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "group not found")
     /* If the mount location is holding its file open, that file will close
      * and remove the mount as soon as we exit this function.  Prevent the
@@ -240,7 +240,7 @@ done:
         }
     }
 
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__mount() */
 
 
@@ -277,7 +277,7 @@ H5F__unmount(H5G_loc_t *loc, const char *name)
     int         child_idx;              /* Index of child in parent's mtab */
     herr_t	ret_value = SUCCEED;	/*return value			*/
 
-    FUNC_ENTER_PACKAGE_VOL
+    FUNC_ENTER_PACKAGE
 
     HDassert(loc);
     HDassert(name && *name);
@@ -390,7 +390,7 @@ done:
     if(mp_loc_setup)
         H5G_loc_free(&mp_loc);
 
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__unmount() */
 
 
@@ -462,7 +462,7 @@ H5Fmount(hid_t loc_id, const char *name, hid_t child_id, hid_t plist_id)
         plist_id = H5P_FILE_MOUNT_DEFAULT;
     else
         if(TRUE != H5P_isa_class(plist_id, H5P_FILE_MOUNT))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "plist_id is not a property list ID")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "plist_id is not a file mount property list ID")
 
     /* Set up collective metadata if appropriate */
     if(H5CX_set_loc(loc_id) < 0)
@@ -651,7 +651,7 @@ H5F_flush_mounts_recurse(H5F_t *f)
             nerrors++;
 
     /* Call the "real" flush routine, for this file */
-    if(H5F__flush_real(f) < 0)
+    if(H5F__flush(f) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush file's cached information")
 
     /* Check flush errors for children - errors are already on the stack */

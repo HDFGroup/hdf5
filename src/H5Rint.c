@@ -221,8 +221,7 @@ H5R_term_package(void)
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5R__create(void *_ref, H5G_loc_t *loc, const char *name, H5R_type_t ref_type,
-    H5S_t *space)
+H5R__create(void *_ref, H5G_loc_t *loc, const char *name, H5R_type_t ref_type, H5S_t *space)
 {
     H5G_loc_t	obj_loc;		/* Group hier. location of object */
     H5G_name_t  path;            	/* Object group hier. path */
@@ -230,7 +229,7 @@ H5R__create(void *_ref, H5G_loc_t *loc, const char *name, H5R_type_t ref_type,
     hbool_t     obj_found = FALSE;      /* Object location found */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_PACKAGE_VOL
+    FUNC_ENTER_PACKAGE
 
     HDassert(_ref);
     HDassert(loc);
@@ -335,7 +334,7 @@ done:
     if (obj_found)
         H5G_loc_free(&obj_loc);
 
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 }   /* end H5R__create() */
 
 
@@ -371,8 +370,7 @@ done:
     Added a check for undefined reference pointer.
 --------------------------------------------------------------------------*/
 hid_t
-H5R__dereference(H5F_t *file, hid_t oapl_id, H5R_type_t ref_type,
-    const void *_ref)
+H5R__dereference(H5F_t *file, hid_t oapl_id, H5R_type_t ref_type, const void *_ref)
 {
     H5O_loc_t oloc;             /* Object location */
     H5G_name_t path;            /* Path of object */
@@ -381,7 +379,7 @@ H5R__dereference(H5F_t *file, hid_t oapl_id, H5R_type_t ref_type,
     H5O_type_t obj_type;        /* Type of object */
     hid_t ret_value = H5I_INVALID_HID;  /* Return value */
 
-    FUNC_ENTER_PACKAGE_VOL
+    FUNC_ENTER_PACKAGE
 
     HDassert(_ref);
     HDassert(ref_type > H5R_BADTYPE && ref_type < H5R_MAXTYPE);
@@ -459,7 +457,7 @@ H5R__dereference(H5F_t *file, hid_t oapl_id, H5R_type_t ref_type,
             if((ret_value = H5I_register(H5I_GROUP, group, TRUE)) < 0) {
                 H5G_close(group);
                 HGOTO_ERROR(H5E_SYM, H5E_CANTREGISTER, H5I_INVALID_HID, "can't register group")
-            } /* end if */
+            }
 
             break;
         }
@@ -475,7 +473,7 @@ H5R__dereference(H5F_t *file, hid_t oapl_id, H5R_type_t ref_type,
             if((ret_value = H5I_register(H5I_DATATYPE, type, TRUE)) < 0) {
                 H5T_close(type);
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, H5I_INVALID_HID, "can't register datatype")
-            } /* end if */
+            }
 
             break;
         }
@@ -492,7 +490,7 @@ H5R__dereference(H5F_t *file, hid_t oapl_id, H5R_type_t ref_type,
             if((ret_value = H5I_register(H5I_DATASET, dset, TRUE)) < 0) {
                 H5D_close(dset);
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, H5I_INVALID_HID, "can't register dataset")
-            } /* end if */
+            }
 
             break;
         }
@@ -504,7 +502,7 @@ H5R__dereference(H5F_t *file, hid_t oapl_id, H5R_type_t ref_type,
      } /* end switch */
 
 done:
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 }   /* end H5R__dereference() */
 
 
@@ -536,9 +534,9 @@ H5R__get_region(H5F_t *file, const void *_ref)
     const uint8_t *p;           /* Pointer to OID to store */
     H5HG_t hobjid;              /* Heap object ID */
     uint8_t *buf = NULL;        /* Buffer to store serialized selection in */
-    H5S_t *ret_value;		/* Return value */
+    H5S_t *ret_value;           /* Return value */
 
-    FUNC_ENTER_PACKAGE_VOL
+    FUNC_ENTER_PACKAGE
 
     HDassert(_ref);
     HDassert(file);
@@ -573,8 +571,8 @@ done:
     if(buf)
         H5MM_xfree(buf);
 
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
-}  /* end H5R__get_region() */
+    FUNC_LEAVE_NOAPI(ret_value)
+}   /* end H5R__get_region() */
 
 
 /*--------------------------------------------------------------------------
@@ -607,7 +605,7 @@ H5R__get_obj_type(H5F_t *file, H5R_type_t ref_type, const void *_ref,
     unsigned rc;		/* Reference count of object    */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_PACKAGE_VOL
+    FUNC_ENTER_PACKAGE
 
     HDassert(file);
     HDassert(_ref);
@@ -662,7 +660,7 @@ H5R__get_obj_type(H5F_t *file, H5R_type_t ref_type, const void *_ref,
         HGOTO_ERROR(H5E_REFERENCE, H5E_LINKCOUNT, FAIL, "dereferencing deleted object")
 
 done:
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 }   /* end H5R__get_obj_type() */
 
 
@@ -701,7 +699,7 @@ H5R__get_name(H5F_t *f, hid_t id, H5R_type_t ref_type, const void *_ref,
     H5O_loc_t oloc;             /* Object location describing object for reference */
     ssize_t ret_value = -1;     /* Return value */
 
-    FUNC_ENTER_PACKAGE_VOL
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(f);
@@ -763,6 +761,6 @@ done:
     if (file_id > 0 && H5I_dec_ref(file_id) < 0)
         HDONE_ERROR(H5E_REFERENCE, H5E_CANTDEC, (-1), "can't decrement ref count of temp ID")
 
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5R__get_name() */
 

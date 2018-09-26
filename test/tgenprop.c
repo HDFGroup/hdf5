@@ -1774,8 +1774,8 @@ test_genprop_path(void)
     CHECK_I(ret, "H5Pregister2");
 
     /* Get full path for first class */
-    path=H5P_get_class_path_test(cid1);
-    CHECK_PTR(path, "H5P_get_class_path_test");
+    path = H5P__get_class_path_test(cid1);
+    CHECK_PTR(path, "H5P__get_class_path_test");
     if(HDstrcmp(path,CLASS1_PATH)!=0)
         TestErrPrintf("Class names don't match!, path=%s, CLASS1_PATH=%s\n",path,CLASS1_PATH);
     H5free_memory(path);
@@ -1789,14 +1789,14 @@ test_genprop_path(void)
     CHECK_I(ret, "H5Pregister2");
 
     /* Get full path for second class */
-    path=H5P_get_class_path_test(cid2);
-    CHECK_PTR(path, "H5P_get_class_path_test");
+    path = H5P__get_class_path_test(cid2);
+    CHECK_PTR(path, "H5P__get_class_path_test");
     if(HDstrcmp(path,CLASS2_PATH)!=0)
         TestErrPrintf("Class names don't match!, path=%s, CLASS2_PATH=%s\n",path,CLASS2_PATH);
 
     /* Open a copy of the class with the path name */
-    cid3 = H5P_open_class_path_test(path);
-    CHECK_I(cid3, "H5Popen_class_path");
+    cid3 = H5P__open_class_path_test(path);
+    CHECK_I(cid3, "H5P__open_class_path_test");
 
     /* Check that the classes are equal */
     ret = H5Pequal(cid2,cid3);

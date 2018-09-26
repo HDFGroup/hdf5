@@ -2620,7 +2620,7 @@ done:
  *
  * Purpose:     Sets the metadata tag property in the provided property list.
  * 
- * Return:      SUCCEED on success, FAIL otherwise.
+ * Return:      void
  *
  * Programmer:  Mike McGreevy
  *              December 1, 2009
@@ -2924,16 +2924,15 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:       H5AC_set_ring
+ * Function:    H5AC_set_ring
  *
- * Purpose:        Routine to set the ring on a DXPL (for passing through
- *                 to the metadata cache).
+ * Purpose:     Routine to set the ring on a DXPL (for passing through
+ *              to the metadata cache).
  *
- * Return:	   Success:	Non-negative
- *		   Failure:	Negative
+ * Return:      void
  *
- * Programmer:     Quincey Koziol
- *                 Tuesday, September 8, 2015
+ * Programmer:  Quincey Koziol
+ *              Tuesday, September 8, 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -2941,6 +2940,8 @@ void
 H5AC_set_ring(H5AC_ring_t ring, H5AC_ring_t *orig_ring)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    /* Note: orig_ring can be NULL so don't check it with HDassert() */
 
     /* Get the current ring value and return that (if orig_ring is NOT null) */
     if(orig_ring)

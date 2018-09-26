@@ -56,9 +56,8 @@ main(void)
      * by the environment variable.
      */
     driver = HDgetenv("HDF5_DRIVER");
-    if(!H5FD_supports_swmr_test(driver)) {
+    if(!H5FD__supports_swmr_test(driver))
         return EXIT_SUCCESS;
-    }
 
     /* Initialize buffers */
     for(u = 0; u < 1024; u++) {
@@ -101,8 +100,11 @@ main(void)
 
     return EXIT_SUCCESS;
 
-error: 
-    H5Fclose(fid);
+error:
+    H5E_BEGIN_TRY {
+        H5Pclose(fapl);
+        H5Fclose(fid);
+    } H5E_END_TRY;
 
     if(api_ctx_pushed) H5CX_pop();
 

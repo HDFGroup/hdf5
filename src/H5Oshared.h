@@ -66,7 +66,7 @@ H5O_SHARED_DECODE(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags,
     /* Check for shared message */
     if(mesg_flags & H5O_MSG_FLAG_SHARED) {
         /* Retrieve native message info indirectly through shared message */
-        if(NULL == (ret_value = H5O_shared_decode(f, open_oh, ioflags, p, H5O_SHARED_TYPE)))
+        if(NULL == (ret_value = H5O__shared_decode(f, open_oh, ioflags, p, H5O_SHARED_TYPE)))
             HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, NULL, "unable to decode shared message")
 
         /* We currently do not support automatically fixing shared messages */
@@ -129,13 +129,13 @@ H5O_SHARED_ENCODE(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mes
     /* Check for message stored elsewhere */
     if(H5O_IS_STORED_SHARED(sh_mesg->type) && !disable_shared) {
         /* Encode shared message into buffer */
-        if(H5O_shared_encode(f, p, sh_mesg) < 0)
-	    HGOTO_ERROR(H5E_OHDR, H5E_CANTENCODE, FAIL, "unable to encode shared message")
+        if(H5O__shared_encode(f, p, sh_mesg) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTENCODE, FAIL, "unable to encode shared message")
     } /* end if */
     else {
         /* Encode native message directly */
         if(H5O_SHARED_ENCODE_REAL(f, p, _mesg) < 0)
-	    HGOTO_ERROR(H5E_OHDR, H5E_CANTENCODE, FAIL, "unable to encode native message")
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTENCODE, FAIL, "unable to encode native message")
     } /* end else */
 
 done:
@@ -181,13 +181,13 @@ H5O_SHARED_SIZE(const H5F_t *f, hbool_t disable_shared, const void *_mesg)
     /* Check for message stored elsewhere */
     if(H5O_IS_STORED_SHARED(sh_mesg->type) && !disable_shared) {
         /* Retrieve encoded size of shared message */
-        if(0 == (ret_value = H5O_shared_size(f, sh_mesg)))
-	    HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, 0, "unable to retrieve encoded size of shared message")
+        if(0 == (ret_value = H5O__shared_size(f, sh_mesg)))
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, 0, "unable to retrieve encoded size of shared message")
     } /* end if */
     else {
         /* Retrieve size of native message directly */
         if(0 == (ret_value = H5O_SHARED_SIZE_REAL(f, _mesg)))
-	    HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, 0, "unable to retrieve encoded size of native message")
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, 0, "unable to retrieve encoded size of native message")
     } /* end else */
 
 done:
@@ -232,13 +232,13 @@ H5O_SHARED_DELETE(H5F_t *f, H5O_t *open_oh, void *_mesg)
     if(H5O_IS_TRACKED_SHARED(sh_mesg->type)) {
         /* Decrement the reference count on the shared message/object */
         if(H5O__shared_delete(f, open_oh, H5O_SHARED_TYPE, sh_mesg) < 0)
-	    HGOTO_ERROR(H5E_OHDR, H5E_CANTDEC, FAIL, "unable to decrement ref count for shared message")
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTDEC, FAIL, "unable to decrement ref count for shared message")
     } /* end if */
 #ifdef H5O_SHARED_DELETE_REAL
     else {
         /* Decrement the reference count on the native message directly */
         if(H5O_SHARED_DELETE_REAL(f, open_oh, _mesg) < 0)
-	    HGOTO_ERROR(H5E_OHDR, H5E_CANTDEC, FAIL, "unable to decrement ref count for native message")
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTDEC, FAIL, "unable to decrement ref count for native message")
     } /* end else */
 #endif /* H5O_SHARED_DELETE_REAL */
 
@@ -284,13 +284,13 @@ H5O_SHARED_LINK(H5F_t *f, H5O_t *open_oh, void *_mesg)
     if(H5O_IS_TRACKED_SHARED(sh_mesg->type)) {
         /* Increment the reference count on the shared message/object */
         if(H5O__shared_link(f, open_oh, H5O_SHARED_TYPE, sh_mesg) < 0)
-	    HGOTO_ERROR(H5E_OHDR, H5E_CANTINC, FAIL, "unable to increment ref count for shared message")
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTINC, FAIL, "unable to increment ref count for shared message")
     } /* end if */
 #ifdef H5O_SHARED_LINK_REAL
     else {
         /* Increment the reference count on the native message directly */
         if(H5O_SHARED_LINK_REAL(f, open_oh, _mesg) < 0)
-	    HGOTO_ERROR(H5E_OHDR, H5E_CANTINC, FAIL, "unable to increment ref count for native message")
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTINC, FAIL, "unable to increment ref count for native message")
     } /* end else */
 #endif /* H5O_SHARED_LINK_REAL */
 
@@ -473,7 +473,7 @@ H5O_SHARED_DEBUG(H5F_t *f, const void *_mesg, FILE *stream, int indent,
     /* Check for message stored elsewhere */
     if(H5O_IS_STORED_SHARED(sh_mesg->type)) {
         /* Print shared message information */
-        if(H5O_shared_debug(sh_mesg, stream, indent, fwidth) < 0)
+        if(H5O__shared_debug(sh_mesg, stream, indent, fwidth) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL, "unable to display shared message info")
     } /* end if */
 

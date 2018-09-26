@@ -394,7 +394,7 @@ error:
  * Function:    get_sbe_tag()
  *
  * Purpose:     This function retrieves the tag associated with the superblock
- *		extension (the object header address stored in the superblock)
+ *              extension (the object header address stored in the superblock)
  *
  * Return:      0 on Success; 1 on Failure
  *
@@ -407,7 +407,7 @@ static int
 get_sbe_tag(hid_t fid, haddr_t *tag)
 {
     /* Retrieve the superblock extension's object header address for the file */
-    if(H5F_get_sbe_addr_test(fid, tag) < 0)
+    if(H5F__get_sbe_addr_test(fid, tag) < 0)
         TEST_ERROR;
 
     return 0;
@@ -3599,7 +3599,7 @@ check_external_link_open_tags(void)
     /* =========================== */
     /* Close open objects and file */
     /* =========================== */
-    if ( (H5Gclose(xid)) < 0 ) TEST_ERROR;
+    if ( H5Gclose(xid) < 0 ) TEST_ERROR;
     if ( H5Fclose(fid) < 0 ) TEST_ERROR;
     if ( H5Fclose(fid2) < 0 ) TEST_ERROR;
 
@@ -3672,7 +3672,7 @@ check_invalid_tag_application(void)
     /* This should fail as no tag is set up during the protect call */
     if (( lheap = H5HL_protect(f, addr, H5AC__NO_FLAGS_SET)) != NULL ) TEST_ERROR;
 
-    /* Again, set up a valid tag in the DXPL */
+    /* Again, set up a valid tag in the API context */
     H5AC_tag((haddr_t)25, NULL);
 
     /* Call H5HL_protect again to protect the local heap. This should succeed. */
@@ -3711,9 +3711,7 @@ error:
  *
  * Purpose:     Run tests on library's ability to tag metadata entries.
  *
- * Return:      Success:
- *
- *              Failure:
+ * Return:      EXIT_SUCCESS/EXIT_FAILURE
  *
  * Programmer:  Mike McGreevy
  *              January 15, 2009
@@ -3755,12 +3753,12 @@ main(void)
         /* Run tests on each fcpl set up above. */
         if (test_type == TEST_DEFAULT) {
 
-            if (!nerrs) printf("Testing standard tag application cases w/ default fcpl:\n");
+            if (!nerrs) HDprintf("Testing standard tag application cases w/ default fcpl:\n");
             fcpl = fcpl_default;
         
         } else if (test_type == TEST_SHMESG) {
 
-            if (!nerrs) printf("Testing standard tag application cases w/ shared messages:\n");
+            if (!nerrs) HDprintf("Testing standard tag application cases w/ shared messages:\n");
             fcpl = fcpl_shmesg_all;
 
         } else {
@@ -3780,7 +3778,7 @@ main(void)
         if (!nerrs) nerrs += check_link_removal_tags(fcpl, test_type);
     } /* end for */
 
-    if (!nerrs) printf("Testing other specific tag application cases:\n");
+    if (!nerrs) HDprintf("Testing other specific tag application cases:\n");
     if (!nerrs) nerrs += check_group_creation_tags();
     if (!nerrs) nerrs += check_multi_group_creation_tags();
     if (!nerrs) nerrs += check_group_open_tags();
@@ -3804,10 +3802,13 @@ main(void)
     HDremove(FILENAME2);
 
     /* Return Errors */
-    return nerrs > 0;
+    if (nerrs > 0)
+        return EXIT_FAILURE;
+    else
+        return EXIT_SUCCESS;
 
 error:
     /* Return with Error */
-    return 1;
+    return EXIT_FAILURE;
 
 } /* main */

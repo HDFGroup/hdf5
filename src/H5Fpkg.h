@@ -30,7 +30,7 @@
 #include "H5Fprivate.h"
 
 /* Other public headers needed by this file */
-#include "H5Bpublic.h"          /* B-tree header, for H5B_NUM_BTREE_ID      */
+#include "H5Bpublic.h"          /* B-tree header (for H5B_NUM_BTREE_ID)     */
 
 /* Other private headers needed by this file */
 #include "H5private.h"		    /* Generic Functions                        */
@@ -325,7 +325,7 @@ struct H5F_file_t {
                                             /* been used accessed for either  */
                                             /* allocation or deallocation     */
                                             /* since file open.               */
-    haddr_t eoa_pre_fsm_fsalloc;	    /* eoa pre file space allocation  */
+    haddr_t eoa_pre_fsm_fsalloc;            /* eoa pre file space allocation  */
                                             /* for self referential FSMs      */
     haddr_t eoa_post_fsm_fsalloc;           /* eoa post file space allocation */
                                             /* for self referential FSMs      */
@@ -386,6 +386,19 @@ struct H5F_t {
 #endif /* H5_HAVE_PARALLEL */
 };
 
+/* User data for traversal routine to get ID counts */
+typedef struct {
+    ssize_t *obj_count;   /* number of objects counted so far */
+    unsigned types;      /* types of objects to be counted */
+} H5F_trav_obj_cnt_t;
+
+/* User data for traversal routine to get ID lists */
+typedef struct {
+    size_t max_objs;
+    hid_t *oid_list;
+    ssize_t *obj_count;   /* number of objects counted so far */
+    unsigned types;      /* types of objects to be counted */
+} H5F_trav_obj_ids_t;
 
 /*****************************/
 /* Package Private Variables */
@@ -403,23 +416,16 @@ H5FL_EXTERN(H5F_file_t);
 /******************************/
 
 /* General routines */
+H5_DLL H5F_t *H5F__reopen(H5F_t *f);
 H5_DLL H5F_t *H5F__new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf);
 H5_DLL herr_t H5F__dest(H5F_t *f, hbool_t flush);
-H5_DLL H5F_t *H5F__create(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id);
-H5_DLL H5F_t *H5F__open(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id);
-H5_DLL herr_t H5F__flush(H5F_t *f, H5F_scope_t scope);
-H5_DLL herr_t H5F__flush_real(H5F_t *f);
+H5_DLL herr_t H5F__flush(H5F_t *f);
 H5_DLL htri_t H5F__is_hdf5(const char *name);
-H5_DLL herr_t H5F_get_objects(const H5F_t *f, unsigned types, size_t max_index, hid_t *obj_id_list, hbool_t app_ref, size_t *obj_id_count_ptr);
-H5_DLL herr_t H5F__get_freespace(H5F_t *f, hsize_t *tot_space);
 H5_DLL ssize_t H5F__get_file_image(H5F_t *f, void *buf_ptr, size_t buf_len);
 H5_DLL herr_t H5F__get_info(H5F_t *f, H5F_info2_t *finfo);
-H5_DLL ssize_t H5F__get_free_sections(H5F_t *f, H5FD_mem_t type, size_t nsects, H5F_sect_info_t *sect_info);
-H5_DLL herr_t H5F__get_metadata_read_retry_info(H5F_t *file, H5F_retry_info_t *info);
 H5_DLL herr_t H5F__format_convert(H5F_t *f);
 H5_DLL herr_t H5F__start_swmr_write(H5F_t *f);
 H5_DLL herr_t H5F__close(hid_t file_id);
-H5_DLL herr_t H5F__close_cb(H5F_t *f);
 H5_DLL herr_t H5F__set_libver_bounds(H5F_t *f, H5F_libver_t low, H5F_libver_t high);
 
 /* File mount related routines */
@@ -435,7 +441,7 @@ H5_DLL herr_t H5F__super_size(H5F_t *f, hsize_t *super_size, hsize_t *super_ext_
 H5_DLL herr_t H5F__super_free(H5F_super_t *sblock);
 
 /* Superblock extension related routines */
-H5_DLL herr_t H5F_super_ext_open(H5F_t *f, haddr_t ext_addr, H5O_loc_t *ext_ptr);
+H5_DLL herr_t H5F__super_ext_open(H5F_t *f, haddr_t ext_addr, H5O_loc_t *ext_ptr);
 H5_DLL herr_t H5F__super_ext_write_msg(H5F_t *f, unsigned id, void *mesg, hbool_t may_create, unsigned mesg_flags);
 H5_DLL herr_t H5F__super_ext_remove_msg(H5F_t *f, unsigned id);
 H5_DLL herr_t H5F__super_ext_close(H5F_t *f, H5O_loc_t *ext_ptr, hbool_t was_created);
@@ -448,9 +454,9 @@ H5_DLL herr_t H5F__accum_flush(H5F_t *f);
 H5_DLL herr_t H5F__accum_reset(H5F_t *f, hbool_t flush);
 
 /* Shared file list related routines */
-H5_DLL herr_t H5F_sfile_add(H5F_file_t *shared);
-H5_DLL H5F_file_t * H5F_sfile_search(H5FD_t *lf);
-H5_DLL herr_t H5F_sfile_remove(H5F_file_t *shared);
+H5_DLL herr_t H5F__sfile_add(H5F_file_t *shared);
+H5_DLL H5F_file_t *H5F__sfile_search(H5FD_t *lf);
+H5_DLL herr_t H5F__sfile_remove(H5F_file_t *shared);
 
 /* External file cache routines */
 H5_DLL H5F_efc_t *H5F__efc_create(unsigned max_nfiles);
@@ -476,10 +482,10 @@ H5_DLL herr_t H5F__evict_cache_entries(H5F_t *f);
 
 /* Testing functions */
 #ifdef H5F_TESTING
-H5_DLL herr_t H5F_get_sohm_mesg_count_test(hid_t fid, unsigned type_id, size_t *mesg_count);
-H5_DLL herr_t H5F_check_cached_stab_test(hid_t file_id);
-H5_DLL herr_t H5F_get_maxaddr_test(hid_t file_id, haddr_t *maxaddr);
-H5_DLL herr_t H5F_get_sbe_addr_test(hid_t file_id, haddr_t *sbe_addr);
+H5_DLL herr_t H5F__get_sohm_mesg_count_test(hid_t fid, unsigned type_id, size_t *mesg_count);
+H5_DLL herr_t H5F__check_cached_stab_test(hid_t file_id);
+H5_DLL herr_t H5F__get_maxaddr_test(hid_t file_id, haddr_t *maxaddr);
+H5_DLL herr_t H5F__get_sbe_addr_test(hid_t file_id, haddr_t *sbe_addr);
 #endif /* H5F_TESTING */
 
 #endif /* _H5Fpkg_H */

@@ -893,11 +893,11 @@ H5S_select_is_regular(const H5S_t *space)
  PURPOSE
     Adjust a selection by subtracting an offset
  USAGE
-    void H5S_select_adjust_u(space, offset)
+    herr_t H5S_select_adjust_u(space, offset)
         H5S_t *space;           IN/OUT: Pointer to dataspace to adjust
         const hsize_t *offset; IN: Offset to subtract
  RETURNS
-    None
+    Non-negative on success, negative on failure
  DESCRIPTION
     Moves a selection by subtracting an offset from it.
  GLOBAL VARIABLES
@@ -908,18 +908,20 @@ H5S_select_is_regular(const H5S_t *space)
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-void
+herr_t
 H5S_select_adjust_u(H5S_t *space, const hsize_t *offset)
 {
+    herr_t ret_value = FAIL;    /* Return value */
+
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check args */
     HDassert(space);
     HDassert(offset);
 
-    (*space->select.type->adjust_u)(space, offset);
+    ret_value = (*space->select.type->adjust_u)(space, offset);
 
-    FUNC_LEAVE_NOAPI_VOID
+    FUNC_LEAVE_NOAPI(ret_value)
 }   /* H5S_select_adjust_u() */
 
 

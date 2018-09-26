@@ -2,11 +2,11 @@
 Instructions for the Installation of HDF5 Software
 ==================================================
 
-This file provides instructions for installing the HDF5 software.  
+This file provides instructions for installing the HDF5 software.
 
 For help with installing, questions can be posted to the HDF Forum or sent to the HDF Helpdesk:
 
-   HDF Forum:     https://forum.hdfgroup.org/ 
+   HDF Forum:     https://forum.hdfgroup.org/
    HDF Helpdesk:  https://portal.hdfgroup.org/display/support/The+HDF+Help+Desk
 
 CONTENTS
@@ -52,8 +52,8 @@ CONTENTS
 
 1. Obtaining HDF5
         The latest supported public release of HDF5 is available from
-        https://www.hdfgroup.org/downloads/hdf5/.  For Unix and UNIX-like 
-        platforms, it is available in tar format compressed with gzip.  
+        https://www.hdfgroup.org/downloads/hdf5/.  For Unix and UNIX-like
+        platforms, it is available in tar format compressed with gzip.
         For Microsoft Windows, it is in ZIP format.
 
 
@@ -77,14 +77,14 @@ CONTENTS
             $ tar zxf hdf5-X.Y.Z.tar.gz
 
         <configure_flags> above refers to the configure flags appropriate
-        to your installation.  For example, to install HDF5 with the 
-        Fortran and C++ interfaces and with SZIP compression, the 
+        to your installation.  For example, to install HDF5 with the
+        Fortran and C++ interfaces and with SZIP compression, the
         configure line might read as follows:
-        
+
             $ ./configure --prefix=/usr/local/hdf5 --enable-fortran \
                           --enable-cxx --with-szlib=PATH_TO_SZIP
 
-        In this case, PATH_TO_SZIP would be replaced with the path to the 
+        In this case, PATH_TO_SZIP would be replaced with the path to the
         installed location of the SZIP library.
 
 2.1. Windows
@@ -101,7 +101,7 @@ CONTENTS
 
 3. HDF5 dependencies
 3.1. Zlib
-        The HDF5 library includes a predefined compression filter that 
+        The HDF5 library includes a predefined compression filter that
         uses the "deflate" method for chunked datasets. If zlib-1.1.2 or
         later is found, HDF5 will use it.  Otherwise, HDF5's predefined
         compression method will degenerate to a no-op; the compression
@@ -122,17 +122,17 @@ CONTENTS
         include the Szip library with the encoder enabled. These can be found
         here:
 
-           https://www.hdfgroup.org/downloads/hdf5/ 
+           https://www.hdfgroup.org/downloads/hdf5/
 
         To configure the HDF5 library with the Szip compression filter, use
         the '--with-szlib=/PATH_TO_SZIP' flag. For more information, see
         section 4.3.7, "Specifying other libraries and headers."
 
         Please notice that if HDF5 configure cannot find a valid Szip library,
-        configure will not fail; in this case, the compression filter will 
+        configure will not fail; in this case, the compression filter will
         not be available to the applications.
 
-        To check if Szip compression was successfully configured in, 
+        To check if Szip compression was successfully configured in,
         check the "I/O filters (external):" line in the configure output,
         summary section, printed to the standard output.
 
@@ -188,7 +188,7 @@ CONTENTS
         detects various features of the host system and creates the
         Makefiles. On most systems it should be sufficient to say:
 
-            $ ./configure        
+            $ ./configure
             Or
             $ sh configure
 
@@ -218,15 +218,15 @@ CONTENTS
         before the library and executables are built.
 
         HDF5 can be installed into a different location than the prefix
-        specified at configure time; see section 4.6, "Installing HDF5," 
+        specified at configure time; see section 4.6, "Installing HDF5,"
         for more details.
 
 4.3.2. Using an alternate C compiler
         By default, configure will look for the C compiler by trying
         `gcc' and `cc'. However, if the environment variable "CC" is set
-        then its value is used as the C compiler.  For instance, one would 
-        use the following line to specify the native C compiler on a system 
-        that also has the GNU gcc compiler (users of csh and derivatives 
+        then its value is used as the C compiler.  For instance, one would
+        use the following line to specify the native C compiler on a system
+        that also has the GNU gcc compiler (users of csh and derivatives
         will need to prefix the commands below with `env'):
 
             $ CC=cc ./configure
@@ -257,7 +257,7 @@ CONTENTS
             $ ./configure --enable-fortran
             $ ./configure --enable-cxx
             $ ./configure --enable-java
-        
+
         Configuration will halt if a working Fortran 90 or 95 compiler or
         C++ compiler is not found. Currently, the Fortran configure tests
         for these compilers in order: f90, pgf90, f95. To use an
@@ -267,7 +267,7 @@ CONTENTS
 
 
 4.3.5. Specifying other programs
-        The build system has been tuned for use with GNU make but also 
+        The build system has been tuned for use with GNU make but also
         works with other versions of make.  If the `make' command runs a
         non-GNU version but a GNU version is available under a different
         name (perhaps `gmake'), then HDF5 can be configured to use it by
@@ -286,8 +286,8 @@ CONTENTS
         during `make install' (described below) with a BSD-compatible
         install program detected automatically by configure. If none is
         found, the shell script bin/install-sh is used. Configure does not
-        check that the install script actually works; if a bad install is 
-        detected on your system (e.g., on the ASCI blue machine as of 
+        check that the install script actually works; if a bad install is
+        detected on your system (e.g., on the ASCI blue machine as of
         March 2, 1999) you have two choices:
 
             1. Copy the bin/install-sh program to your $HOME/bin
@@ -310,11 +310,11 @@ CONTENTS
               LDFLAGS=-L/home/robb/lib \
               ./configure
 
-        HDF5 uses the zlib library to support the HDF5 deflate 
-        data compression filter.  Configure searches the standard places 
-        (plus those specified above with the CPPFLAGS and LDFLAGS variables) 
-        for the zlib headers and library. The search can be disabled by 
-        specifying `--without-zlib' or alternate directories can be specified 
+        HDF5 uses the zlib library to support the HDF5 deflate
+        data compression filter.  Configure searches the standard places
+        (plus those specified above with the CPPFLAGS and LDFLAGS variables)
+        for the zlib headers and library. The search can be disabled by
+        specifying `--without-zlib' or alternate directories can be specified
         with `--with-zlib=INCDIR,LIBDIR' or through the CPPFLAGS and LDFLAGS
         variables:
 
@@ -324,8 +324,8 @@ CONTENTS
               LDFLAGS=-L/usr/unsup/lib \
               ./configure
 
-        HDF5 includes Szip as a predefined compression method (see 3.2).  
-        To enable Szip compression, the HDF5 library must be configured 
+        HDF5 includes Szip as a predefined compression method (see 3.2).
+        To enable Szip compression, the HDF5 library must be configured
         and built using the Szip library:
 
             $ ./configure --with-szlib=/Szip_Install_Directory
@@ -350,10 +350,10 @@ CONTENTS
         The library can be compiled to provide symbolic debugging support
         so it can be debugged with gdb, dbx, ddd, etc., or it can be
         compiled with various optimizations. To compile for symbolic
-        debugging (the default for snapshots), say 
-        `--enable-build-mode=production'; to compile with optimizations 
-        (the default for supported public releases), 
-        say `--enable-build-mode=production'. On some systems the 
+        debugging (the default for snapshots), say
+        `--enable-build-mode=production'; to compile with optimizations
+        (the default for supported public releases),
+        say `--enable-build-mode=production'. On some systems the
         library can also be compiled for profiling with gprof by saying
         `--enable-production=profile'.
 
@@ -362,13 +362,13 @@ CONTENTS
             $ ./configure --enable-production=profile     #for use with gprof
 
         Regardless of whether support for symbolic debugging is enabled,
-        the library can also perform runtime debugging of certain packages 
-        (such as type conversion execution times and extensive invariant 
-        condition checking). To enable this debugging, supply a 
-        comma-separated list of package names to the `--enable-internal-debug' 
-        switch.  
+        the library can also perform runtime debugging of certain packages
+        (such as type conversion execution times and extensive invariant
+        condition checking). To enable this debugging, supply a
+        comma-separated list of package names to the `--enable-internal-debug'
+        switch.
 
-        Debugging can be disabled by saying `--disable-internal-debug'. 
+        Debugging can be disabled by saying `--disable-internal-debug'.
         The default debugging level for snapshots is a subset of the
         available packages; the default for supported releases is no
         debugging (debugging can incur a significant runtime penalty).
@@ -378,10 +378,10 @@ CONTENTS
             $ ./configure --enable-internal-debug=all  #debug all packages
             $ ./configure --disable-internal-debug     #no debugging
 
-        HDF5 can also print a trace of all API function calls, their 
+        HDF5 can also print a trace of all API function calls, their
         arguments, and the return values. To enable or disable the
         ability to trace the API say `--enable-trace' (the default for
-        snapthots) or `--disable-trace' (the default for public releases). 
+        snapthots) or `--disable-trace' (the default for public releases).
         The tracing must also be enabled at runtime to see any output.
 
 4.3.9. Parallel versus serial library
@@ -389,25 +389,39 @@ CONTENTS
         parallelism on a distributed multi-processor system.  Read the
         file INSTALL_parallel for detailed information.
 
+        The threadsafe, C++ and Java interfaces are not compatible
+        with the parallel option.
+        Unless --enable-unsupported has been specified on the configure line,
+        the following options must be disabled:
+            --enable-threadsafe, --enable-cxx, --enable-java
+
+
 4.3.10. Threadsafe capability
         The HDF5 library can be configured to be thread-safe (on a very
         large scale) with the `--enable-threadsafe' flag to the configure
         script.  Some platforms may also require the '-with-pthread=INC,LIB'
         (or '--with-pthread=DIR') flag to the configure script.
-        For further information, see: 
+        For further information, see:
 
            https://portal.hdfgroup.org/display/knowledge/Questions+about+thread-safety+and+concurrent+access
+
+        The high-level, C++, Fortran and Java interfaces are not compatible
+        with the thread-safety option because the lock is not hoisted
+        into the higher-level API calls.
+        Unless --enable-unsupported has been specified on the configure line,
+        the following options must be disabled:
+            --enable-hl, --enable-cxx, --enable-fortran, --enable-java
 
 
 4.3.11. Backward compatibility
         The 1.10 version of the HDF5 library can be configured to operate
-        identically to the v1.8 library with the 
+        identically to the v1.8 library with the
             --with-default-api-version=v18
-        configure flag, or identically to the v1.6 library with the 
+        configure flag, or identically to the v1.6 library with the
             --with-default-api-version=v16
         configure flag. This allows existing code to be compiled with the
-        v1.10 library without requiring immediate changes to the application 
-        source code.  For additional configuration options and other details, 
+        v1.10 library without requiring immediate changes to the application
+        source code.  For additional configuration options and other details,
         see "API Compatibility Macros":
 
             https://portal.hdfgroup.org/display/HDF5/API+Compatibility+Macros
@@ -487,7 +501,7 @@ CONTENTS
 
             $ make install prefix=NEW_DIR
 
-        where NEW_DIR is the new directory where you wish to install HDF5. 
+        where NEW_DIR is the new directory where you wish to install HDF5.
         If you do not use the deploy script, you should run h5redeploy in
         NEW_DIR/bin directory.  This utility will fix the h5cc, h5fc and
         h5c++ scripts to reflect the new NEW_DIR location.
@@ -510,7 +524,7 @@ CONTENTS
 
             The configuration information:
                 ./src/H5pubconf.h
-        
+
             The support programs that are useful are:
             ./tools/h5ls/h5ls               (list file contents)
             ./tools/h5dump/h5dump           (dump file contents)
@@ -518,12 +532,12 @@ CONTENTS
             ./tools/misc/h5debug            (low-level file debugging)
             ./tools/h5import/h5import       (imports data to HDF5 file)
             ./tools/h5diff/h5diff           (compares two HDF5 files)
-            ./tools/gifconv/h52gif          (HDF5 to GIF converter) 
+            ./tools/gifconv/h52gif          (HDF5 to GIF converter)
             ./tools/gifconv/gif2h5          (GIF to HDF5 converter)
 
 
 5. Using the Library
-        
+
         For information on using HDF5 see the documentation, tutorials and examples
         found here:
 

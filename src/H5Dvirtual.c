@@ -2961,7 +2961,7 @@ done:
 static herr_t
 H5D__virtual_refresh_source_dset(H5D_t **dset)
 {
-    hid_t       dset_id;                /* Temporary dataset identifier */
+    hid_t       temp_id;                /* Temporary dataset identifier */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_STATIC
@@ -2970,15 +2970,15 @@ H5D__virtual_refresh_source_dset(H5D_t **dset)
     HDassert(dset && *dset);
 
     /* Get a temporary identifier for this source dataset */
-    if((dset_id = H5I_register(H5I_DATASET, *dset, FALSE)) < 0)
+    if((temp_id = H5I_register(H5I_DATASET, *dset, FALSE)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL, "can't register source dataset ID")
 
     /* Refresh source dataset */
-    if(H5D__refresh(dset_id, *dset) < 0)
+    if(H5D__refresh(temp_id, *dset) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTFLUSH, FAIL, "unable to refresh source dataset")
 
     /* Discard the identifier & replace the dataset */
-    if(NULL == (*dset = (H5D_t *)H5I_remove(dset_id)))
+    if(NULL == (*dset = (H5D_t *)H5I_remove(temp_id)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTREMOVE, FAIL, "can't unregister source dataset ID")
 
 done:

@@ -2713,15 +2713,15 @@ test_misc15(void)
     fapl = H5Fget_access_plist(file);
     CHECK(fapl, FAIL, "H5Fget_access_plist");
 
-    ret = H5Pclose(fapl);
-    CHECK(ret, FAIL, "H5Pclose");
-
     ret = H5Fclose(file);
     CHECK(ret, FAIL, "H5Fclose");
 
     /* Verify that the file is still OK */
     ret = H5Fis_hdf5(MISC15_FILE);
     CHECK(ret, FAIL, "H5Fis_hdf5");
+
+    ret = H5Pclose(fapl);
+    CHECK(ret, FAIL, "H5Pclose");
 
     file = H5Fopen(MISC15_FILE, H5F_ACC_RDONLY, H5P_DEFAULT);
     CHECK(file, FAIL, "H5Fopen");
@@ -4721,6 +4721,7 @@ test_misc25a(void)
     CHECK(ret, FAIL, "H5Fclose");
 } /* end test_misc25a() */
 
+
 /****************************************************************
 **
 **  test_misc25b(): Exercise null object header message merge bug
@@ -4756,7 +4757,7 @@ test_misc25b(void)
     CHECK(ret, FAIL, "H5Fclose");
 } /* end test_misc25b() */
 
-
+
 /****************************************************************
 **
 **  test_misc25c(): Exercise another null object header message merge bug.
@@ -4890,7 +4891,7 @@ test_misc25c(void)
     CHECK(ret, FAIL, "H5Fclose");
 } /* end test_misc25c() */
 
-
+
 /****************************************************************
 **
 **  test_misc26(): Regression test: ensure that copying filter
@@ -4976,7 +4977,7 @@ test_misc26(void)
     CHECK_I(ret, "H5Pclose");
 }
 
-
+
 /****************************************************************
 **
 **  test_misc27(): Ensure that objects with incorrect # of object
@@ -5021,7 +5022,7 @@ test_misc27(void)
     CHECK(ret, FAIL, "H5Fclose");
 } /* end test_misc27() */
 
-
+
 /****************************************************************
 **
 **  test_misc28(): Ensure that the dataset chunk cache will hold
@@ -5198,7 +5199,7 @@ test_misc28(void)
     CHECK_I(ret, "H5Pclose");
 } /* end test_misc28() */
 
-
+
 /****************************************************************
 **
 **  test_misc29(): Ensure that speculative metadata reads don't
@@ -5247,7 +5248,7 @@ test_misc30_get_info(hid_t loc_id)
     return H5Literate(loc_id, H5_INDEX_NAME, H5_ITER_INC, NULL, test_misc30_get_info_cb, NULL);
 }
 
-
+
 /****************************************************************
 **
 **  test_misc30(): Exercise local heap code that loads prefix
@@ -5312,7 +5313,7 @@ test_misc30(void)
     VERIFY(file_size[0], file_size[1], "test_misc30");
 } /* end test_misc30() */
 
-
+
 /****************************************************************
 **
 **  test_misc31(): Test reentering library through deprecated
@@ -5410,7 +5411,7 @@ test_misc31(void)
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 } /* end test_misc31() */
 
-
+
 /****************************************************************
  *
  *  test_misc32(): Simple test of filter memory allocation
@@ -5584,7 +5585,7 @@ test_misc34(void)
 
 } /* end test_misc34() */
 
-
+
 /****************************************************************
 **
 **  test_misc(): Main misc. test routine.
@@ -5637,7 +5638,7 @@ test_misc(void)
 
 } /* test_misc() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    cleanup_misc
  *
@@ -5647,9 +5648,6 @@ test_misc(void)
  *
  * Programmer:    Albert Cheng
  *              July 2, 1998
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 void

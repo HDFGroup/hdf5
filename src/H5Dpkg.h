@@ -510,12 +510,12 @@ typedef struct H5D_fill_buf_info_t {
 
 /* Internal data structure for computing variable-length dataset's total size */
 typedef struct {
-    H5D_t *dset;        /* Dataset for operation */
-    H5S_t *fspace;      /* Dataset's dataspace for operation */
-    H5S_t *mspace;      /* Memory dataspace for operation */
-    void *fl_tbuf;      /* Ptr to the temporary buffer we are using for fixed-length data */
-    void *vl_tbuf;      /* Ptr to the temporary buffer we are using for VL data */
-    hsize_t size;       /* Accumulated number of bytes for the selection */
+    H5D_t *dset;                    /* Dataset for operation */
+    hid_t fspace_id;                /* File dataspace ID of the dataset we are working on */
+    hid_t mspace_id;                /* Memory dataspace ID of the dataset we are working on */
+    void *fl_tbuf;                  /* Ptr to the temporary buffer we are using for fixed-length data */
+    void *vl_tbuf;                  /* Ptr to the temporary buffer we are using for VL data */
+    hsize_t size;                   /* Accumulated number of bytes for the selection */
 } H5D_vlen_bufsize_t;
 
 
@@ -555,27 +555,21 @@ H5_DLL H5D_t *H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space,
 H5_DLL H5D_t *H5D__create_named(const H5G_loc_t *loc, const char *name,
     hid_t type_id, const H5S_t *space, hid_t lcpl_id, hid_t dcpl_id,
     hid_t dapl_id);
-H5_DLL H5D_t *H5D__create_anon(H5F_t *file, hid_t type_id, const H5S_t *space,
-    hid_t dcpl_id, hid_t dapl_id);
 H5_DLL H5D_t *H5D__open_name(const H5G_loc_t *loc, const char *name, hid_t dapl_id);
 H5_DLL hid_t H5D__get_space(const H5D_t *dset);
 H5_DLL hid_t H5D__get_type(const H5D_t *dset);
 H5_DLL herr_t H5D__get_space_status(const H5D_t *dset, H5D_space_status_t *allocation);
-H5_DLL herr_t H5D__alloc_storage(const H5D_io_info_t *io_info, H5D_time_alloc_t time_alloc,
-    hbool_t full_overwrite, hsize_t old_dim[]);
+H5_DLL herr_t H5D__alloc_storage(const H5D_io_info_t *io_info, H5D_time_alloc_t time_alloc, hbool_t full_overwrite, hsize_t old_dim[]);
 H5_DLL herr_t H5D__get_storage_size(const H5D_t *dset, hsize_t *storage_size);
-H5_DLL herr_t H5D__get_chunk_storage_size(H5D_t *dset, const hsize_t *offset,
-    hsize_t *storage_size);
+H5_DLL herr_t H5D__get_chunk_storage_size(H5D_t *dset, const hsize_t *offset, hsize_t *storage_size);
 H5_DLL haddr_t H5D__get_offset(const H5D_t *dset);
 H5_DLL void *H5D__vlen_get_buf_size_alloc(size_t size, void *info);
-H5_DLL herr_t H5D__vlen_get_buf_size(void *elem, hid_t type_id, unsigned ndim,
-    const hsize_t *point, void *op_data);
+H5_DLL herr_t H5D__vlen_get_buf_size(void *elem, hid_t type_id, unsigned ndim, const hsize_t *point, void *op_data);
 H5_DLL herr_t H5D__check_filters(H5D_t *dataset);
 H5_DLL herr_t H5D__set_extent(H5D_t *dataset, const hsize_t *size);
 H5_DLL herr_t H5D__flush_sieve_buf(H5D_t *dataset);
 H5_DLL herr_t H5D__flush_real(H5D_t *dataset);
 H5_DLL herr_t H5D__flush(H5D_t *dset, hid_t dset_id);
-H5_DLL hid_t H5D__get_create_plist(const H5D_t *dset);
 H5_DLL herr_t H5D__mark(const H5D_t *dataset, unsigned flags);
 H5_DLL herr_t H5D__refresh(hid_t dset_id, H5D_t *dataset);
 
@@ -663,6 +657,7 @@ H5_DLL herr_t H5D__chunk_bh_info(const H5O_loc_t *loc, H5O_t *oh,
     H5O_layout_t *layout, hsize_t *btree_size);
 H5_DLL herr_t H5D__chunk_dump_index(H5D_t *dset, FILE *stream);
 H5_DLL herr_t H5D__chunk_delete(H5F_t *f, H5O_t *oh, H5O_storage_t *store);
+H5_DLL herr_t H5D__get_offset_copy(const H5D_t *dset, const hsize_t *offset, hsize_t *offset_copy);
 H5_DLL herr_t H5D__chunk_direct_write(const H5D_t *dset, uint32_t filters,
          hsize_t *offset, uint32_t data_size, const void *buf);
 H5_DLL herr_t H5D__chunk_direct_read(const H5D_t *dset, hsize_t *offset,

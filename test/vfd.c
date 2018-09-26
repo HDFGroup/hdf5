@@ -1118,8 +1118,7 @@ error:
  * Purpose:     Private function for test_multi() to tests wrong ways of
  *              reopening multi file.
  *
- * Return:      Success:        0
- *              Failure:        -1
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:  Raymond Lu
  *              Thursday, May 19, 2005
@@ -1129,7 +1128,7 @@ error:
 static herr_t
 test_multi_opens(char *fname)
 {
-    hid_t file=-1;
+    hid_t fid = H5I_INVALID_HID;
     char  super_name[1024];     /*name string "%%s-s.h5"*/
     char  sf_name[1024];        /*name string "multi_file-s.h5"*/
 
@@ -1138,11 +1137,11 @@ test_multi_opens(char *fname)
     HDsnprintf(sf_name, sizeof(sf_name), super_name, fname);
 
     H5E_BEGIN_TRY {
-        file = H5Fopen(sf_name, H5F_ACC_RDWR, H5P_DEFAULT);
+        fid = H5Fopen(sf_name, H5F_ACC_RDWR, H5P_DEFAULT);
     } H5E_END_TRY;
 
-    return(file >= 0 ? -1 : 0);
-}
+    return(fid >= 0 ? FAIL : SUCCEED);
+} /* end test_multi_opens() */
 
 
 /*-------------------------------------------------------------------------
@@ -1150,8 +1149,7 @@ test_multi_opens(char *fname)
  *
  * Purpose:     Tests the file handle interface for MUTLI driver
  *
- * Return:      Success:        0
- *              Failure:        -1
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:  Raymond Lu
  *              Tuesday, Sept 24, 2002
@@ -1365,7 +1363,7 @@ test_multi(void)
 
     PASSED();
 
-    return 0;
+    return SUCCEED;
 
 error:
     H5E_BEGIN_TRY {
@@ -1374,9 +1372,10 @@ error:
         H5Pclose(fapl);
         H5Pclose(fapl2);
         H5Fclose(file);
+        H5Aclose(attr);
     } H5E_END_TRY;
-    return -1;
-}
+    return FAIL;
+} /* end test_multi() */
 
 
 /*-------------------------------------------------------------------------

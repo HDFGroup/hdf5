@@ -64,7 +64,7 @@ HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
   #002: (file name) line (number) in H5G_traverse(): internal path traversal failed
     major: Symbol table
     minor: Object not found
-  #003: (file name) line (number) in H5G_traverse_real(): traversal operator failed
+  #003: (file name) line (number) in H5G__traverse_real(): traversal operator failed
     major: Symbol table
     minor: Callback failed
   #004: (file name) line (number) in H5G_loc_find_cb(): object 'Dataset1' doesn't exist
@@ -80,7 +80,7 @@ HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
   #002: (file name) line (number) in H5G_traverse(): internal path traversal failed
     major: Symbol table
     minor: Object not found
-  #003: (file name) line (number) in H5G_traverse_real(): traversal operator failed
+  #003: (file name) line (number) in H5G__traverse_real(): traversal operator failed
     major: Symbol table
     minor: Callback failed
   #004: (file name) line (number) in H5L_get_info_cb(): name doesn't exist

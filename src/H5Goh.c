@@ -193,9 +193,9 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O__group_open
+ * Function:    H5O__group_open
  *
- * Purpose:	Open a group at a particular location
+ * Purpose:     Open a group at a particular location
  *
  * Return:	Success:	Open object identifier
  *		Failure:	Negative

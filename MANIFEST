@@ -526,8 +526,8 @@
 ./src/H5CS.c
 ./src/H5CSprivate.h
 ./src/H5CX.c
-./src/H5CXprivate.h
 ./src/H5CXmodule.h
+./src/H5CXprivate.h
 ./src/H5D.c
 ./src/H5Dbtree.c
 ./src/H5Dbtree2.c

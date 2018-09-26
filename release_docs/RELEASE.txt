@@ -1,4 +1,4 @@
-HDF5 version 1.11.2 currently under development
+HDF5 version 1.11.3 currently under development
 ================================================================================
 
 
@@ -84,7 +84,12 @@ New Features
 
     Library:
     --------
-    -
+    - Allow pre-generated H5Tinit.c and H5make_libsettings.c to be used.
+
+      Rather than always running H5detect and generating H5Tinit.c and
+      H5make_libsettings.c, supply a location for those files.
+
+      (ADB - 2018/09/18, HDFFV-10332)
 
 
     Parallel Library:
@@ -148,7 +153,7 @@ New Features
     Java Library:
     ----------------
     - JNI native library dependencies
-    
+
       The build for the hdf5_java native library used the wrong
       hdf5 target library for CMake builds. Correcting the hdf5_java
       library to build with the shared hdf5 library required testing
@@ -209,6 +214,15 @@ Bug Fixes since HDF5-1.10.3 release
 
     Library
     -------
+    - Allow H5detect and H5make_libsettings to take a file as an argument.
+
+      Rather than only writing to stdout, add a command argument to name
+      the file that H5detect and H5make_libsettings will use for output.
+      Without an argument, stdout is still used, so backwards compatibility
+      is maintained.
+
+      (ADB - 2018/09/05, HDFFV-9059)
+
     - A bug was discovered in the parallel library where an application
       would hang if a collective read/write of a chunked dataset occurred
       when collective metadata reads were enabled and some of the ranks

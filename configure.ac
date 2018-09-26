@@ -24,7 +24,7 @@ AC_PREREQ([2.69])
 ## NOTE: Do not forget to change the version number here when we do a
 ## release!!!
 ##
-AC_INIT([HDF5], [1.11.2], [help@hdfgroup.org])
+AC_INIT([HDF5], [1.11.3], [help@hdfgroup.org])
 
 AC_CONFIG_SRCDIR([src/H5.c])
 AC_CONFIG_HEADERS([src/H5config.h])
@@ -1261,8 +1261,8 @@ AC_ARG_WITH([dmalloc],
                             [Use dmalloc memory debugging aid [default=no]])],,
             [withval=no])
 
-case $withval in
-  yes)
+case "X-$withval" in
+  X-yes)
     HAVE_DMALLOC="yes"
     AC_CHECK_HEADERS([dmalloc.h],, [unset HAVE_DMALLOC])
     if test "x$HAVE_DMALLOC" = "xyes"; then
@@ -1272,7 +1272,7 @@ case $withval in
       AC_MSG_ERROR([couldn't find dmalloc library])
     fi
     ;;
-  no)
+  X-|X-no|X-none)
     HAVE_DMALLOC="no"
     AC_MSG_CHECKING([for dmalloc library])
     AC_MSG_RESULT([suppressed])
@@ -1340,8 +1340,8 @@ AC_ARG_WITH([zlib],
                              filter [default=yes]])],,
             [withval=yes])
 
-case $withval in
-  yes)
+case "X-$withval" in
+  X-yes)
     HAVE_ZLIB="yes"
     AC_CHECK_HEADERS([zlib.h], [HAVE_ZLIB_H="yes"], [unset HAVE_ZLIB])
     if test "x$HAVE_ZLIB" = "xyes" -a "x$HAVE_ZLIB_H" = "xyes"; then
@@ -1355,7 +1355,7 @@ case $withval in
       AC_CHECK_FUNC([compress2], [HAVE_COMPRESS2="yes"])
     fi
     ;;
-  no)
+  X-|X-no|X-none)
     HAVE_ZLIB="no"
     AC_MSG_CHECKING([for zlib])
     AC_MSG_RESULT([suppressed])
@@ -1434,8 +1434,8 @@ AC_ARG_WITH([szlib],
                              filter [default=no]])],,
             [withval=no])
 
-case $withval in
-  yes)
+case "X-$withval" in
+  X-yes)
     HAVE_SZLIB="yes"
     AC_CHECK_HEADERS([szlib.h], [HAVE_SZLIB_H="yes"], [unset HAVE_SZLIB])
     if test "x$HAVE_SZLIB" = "xyes" -a "x$HAVE_SZLIB_H" = "xyes"; then
@@ -1445,7 +1445,7 @@ case $withval in
       AC_MSG_ERROR([couldn't find szlib library])
     fi
     ;;
-  no)
+  X-|X-no|X-none)
     HAVE_SZLIB="no"
     AC_MSG_CHECKING([for szlib])
     AC_MSG_RESULT([suppressed])

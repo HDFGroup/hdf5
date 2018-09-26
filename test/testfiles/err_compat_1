@@ -1,5 +1,5 @@
 Testing error API H5Eset/get_auto                                     Testing error API based on data I/O                                   All error API tests passed.
-   This program tests the Error API compatible with HDF5 version (number).  There're supposed to be some error messages
+   This program tests the Error API compatible with HDF5 version (number).  There are supposed to be some error messages
 ********* Print error stack in HDF5 default way *********
 HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
   #000: (file name) line (number) in main(): Error test failed
@@ -15,7 +15,7 @@ HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
   #000: (file name) line (number) in H5Dcreate2(): not a location ID
     major: Invalid arguments to routine
     minor: Inappropriate type
-  #001: (file name) line (number) in H5G_loc(): invalid object ID
+  #001: (file name) line (number) in H5G_loc(): invalid location ID
     major: Invalid arguments to routine
     minor: Bad value
 
@@ -43,7 +43,7 @@ HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
   #000: (file name) line (number) in H5Dcreate2(): not a location ID
     major: Invalid arguments to routine
     minor: Inappropriate type
-  #001: (file name) line (number) in H5G_loc(): invalid object ID
+  #001: (file name) line (number) in H5G_loc(): invalid location ID
     major: Invalid arguments to routine
     minor: Bad value
 

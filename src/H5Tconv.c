@@ -2962,7 +2962,7 @@ H5T__conv_enum_numeric(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
             src_parent = src->shared->parent;
 
             if(NULL == (tpath = H5T_path_find(src_parent, dst))) {
-	        HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unable to convert between src and dest datatype")
+                HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unable to convert between src and dest datatype")
             } else if(!H5T_path_noop(tpath)) {
                 if((src_parent_id = H5I_register(H5I_DATATYPE, H5T_copy(src_parent, H5T_COPY_ALL), FALSE)) < 0) 
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL, "unable to register types for conversion")
@@ -8295,14 +8295,6 @@ H5_GCC_DIAG_ON(float-equal)
  * Programmer:	Raymond Lu
  *		Wednesday, Jan 21, 2004
  *
- *              Raymond Lu
- *              Wednesday, April 21, 2004
- *              There is a new design for exception handling like overflow,
- *              which is passed in as a transfer property.
- *
- *              Raymond Lu
- *              Monday, March 13, 2006
- *              Added support for VAX floating-point types.
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -9008,8 +9000,7 @@ H5T__conv_i_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 }
 #endif
 
-                /*
-                 * Put the data in little endian order so our loops aren't so
+                /* Put the data in little endian order so our loops aren't so
                  * complicated.  We'll do all the conversion stuff assuming
                  * little endian and then we'll fix the order at the end.
                  */
@@ -9022,26 +9013,23 @@ H5T__conv_i_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                     }
                 }
 
-                /*zero-set all destination bits*/
+                /* Zero-set all destination bits*/
                 H5T__bit_set (d, dst.offset, dst.prec, FALSE);
 
                 /* Copy source into a temporary buffer */
                 H5T__bit_copy(int_buf, (size_t)0, s, src.offset, src.prec);
 
-                /*
-                 * Find the sign bit value of the source.
-                 */
+                /* Find the sign bit value of the source */
                 if(H5T_SGN_2 == src.u.i.sign)
                     sign = (size_t)H5T__bit_get_d(int_buf, src.prec - 1, (size_t)1);
 
-                /*
-                 * What is the bit position(starting from 0 as first one) for the most significant
-		 * bit(MSB) of S which is set?
+                /* What is the bit position(starting from 0 as first one) for the most significant
+                 * bit(MSB) of S which is set?
                  */
                 if(H5T_SGN_2 == src.u.i.sign) {
                     sfirst = H5T__bit_find(int_buf, (size_t)0, src.prec - 1, H5T_BIT_MSB, TRUE);
                     if(sign && sfirst < 0)
-			/* The case 0x80...00, which is negative with maximal value */
+                        /* The case 0x80...00, which is negative with maximal value */
                         is_max_neg = 1;
                 } else if(H5T_SGN_NONE == src.u.i.sign)
                     sfirst = H5T__bit_find(int_buf, (size_t)0, src.prec, H5T_BIT_MSB, TRUE);
@@ -9050,9 +9038,7 @@ H5T__conv_i_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 if(!sign && sfirst < 0)
                     goto padding;
 
-                /*
-                 * Convert source integer if it's negative
-                 */
+                /* Convert source integer if it's negative */
                 if(H5T_SGN_2 == src.u.i.sign && sign) {
                     if(!is_max_neg) {
                         /* Equivalent to ~(i - 1) */
@@ -9060,10 +9046,10 @@ H5T__conv_i_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                         H5T__bit_neg(int_buf, (size_t)0, buf_size * 8);
                         sfirst = H5T__bit_find(int_buf, (size_t)0, src.prec - 1, H5T_BIT_MSB, TRUE);
                     } else {
-			/* If it's maximal negative number 0x80...000, treat it as if it overflowed
-			 * (create a carry) to help conversion.  i.e. a character type number 0x80
-			 * is treated as 0x100.
-			 */
+                        /* If it's maximal negative number 0x80...000, treat it as if it overflowed
+                         * (create a carry) to help conversion.  i.e. a character type number 0x80
+                         * is treated as 0x100.
+                         */
                         sfirst = (ssize_t)(src.prec - 1);
                         is_max_neg = 0;
                     }
@@ -9072,7 +9058,8 @@ H5T__conv_i_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 
                     /* Sign bit has been negated if bit vector isn't 0x80...00.  Set all bits in front of
                      * sign bit to 0 in the temporary buffer because they're all negated from the previous
-		     * step. */
+                     * step.
+                     */
                     H5T__bit_set(int_buf, src.prec, (buf_size * 8) - src.prec, 0);
 
                     /* Set sign bit in destination */
@@ -9081,14 +9068,14 @@ H5T__conv_i_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 
                 first = (size_t)sfirst;
 
-                /*
-                 * Calculate the true destination exponent by adjusting according to
+                /* Calculate the true destination exponent by adjusting according to
                  * the destination exponent bias.  Implied and non-implied normalization
                  * should be the same.
                  */
                 if (H5T_NORM_NONE==dst.u.f.norm || H5T_NORM_IMPLIED==dst.u.f.norm) {
                     expo = first + dst.u.f.ebias;
-                } else {
+                }
+                else {
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "normalization method not implemented yet")
                 }
 
@@ -9096,13 +9083,14 @@ H5T__conv_i_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 if (H5T_NORM_IMPLIED==dst.u.f.norm) {
                     /* Imply first bit */
                     H5T__bit_set(int_buf, first, (size_t)1, 0);
-       		} else if (H5T_NORM_NONE==dst.u.f.norm) {
-		    first++;
+       		}
+            else if (H5T_NORM_NONE==dst.u.f.norm) {
+                first++;
 		}
 
                 /* Roundup for mantissa */
                 if(first > dst.u.f.msize) {
-		    /* If the bit sequence is bigger than the mantissa part, there'll be some
+                    /* If the bit sequence is bigger than the mantissa part, there'll be some
                      * precision loss.  Let user's handler deal with the case if it's present
                      */
                     if(cb_struct.func) {
@@ -9114,14 +9102,15 @@ H5T__conv_i_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                     if(except_ret == H5T_CONV_HANDLED) {
                         reverse = FALSE;
                         goto padding;
-                    } else if(except_ret == H5T_CONV_ABORT)
+                    }
+                    else if(except_ret == H5T_CONV_ABORT)
                         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception")
 
-		    /* If user's exception handler does deal with it, we do it by dropping off the
-		     * extra bits at the end and do rounding.  If we have .50...0(decimal) after radix
-		     * point, we do roundup when the least significant digit before radix is odd, we do
-		     * rounddown if it's even.
-		     */
+                    /* If user's exception handler does deal with it, we do it by dropping off the
+                     * extra bits at the end and do rounding.  If we have .50...0(decimal) after radix
+                     * point, we do roundup when the least significant digit before radix is odd, we do
+                     * rounddown if it's even.
+                     */
 
                     /* Check 1st dropoff bit, see if it's set. */
                     if(H5T__bit_get_d(int_buf, ((first - dst.u.f.msize) - 1), (size_t)1)) {

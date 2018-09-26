@@ -77,12 +77,11 @@ H5FL_DEFINE(H5O_chunk_proxy_t);
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O__chunk_add
+ * Function:    H5O__chunk_add
  *
- * Purpose:	Add new chunk for object header to metadata cache
+ * Purpose:     Add new chunk for object header to metadata cache
  *
- * Return:	Success:	Non-negative
- *		Failure:	Negative
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
  *		koziol@hdfgroup.org
@@ -107,7 +106,7 @@ H5O__chunk_add(H5F_t *f, H5O_t *oh, unsigned idx, unsigned cont_chunkno)
 
     /* Allocate space for the object header data structure */
     if(NULL == (chk_proxy = H5FL_CALLOC(H5O_chunk_proxy_t)))
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
     /* Increment reference count on object header */
     if(H5O__inc_rc(oh) < 0)
@@ -128,6 +127,7 @@ H5O__chunk_add(H5F_t *f, H5O_t *oh, unsigned idx, unsigned cont_chunkno)
     /* Insert the chunk proxy into the cache */
     if(H5AC_insert_entry(f, H5AC_OHDR_CHK, oh->chunk[idx].addr, chk_proxy, H5AC__NO_FLAGS_SET) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, FAIL, "unable to cache object header chunk")
+
     chk_proxy = NULL;
 
 done:
@@ -146,12 +146,11 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O__chunk_protect
+ * Function:    H5O_chunk_protect
  *
- * Purpose:	Protect an object header chunk for modifications
+ * Purpose:     Protect an object header chunk for modifications
  *
- * Return:	Success:	Non-negative
- *		Failure:	Negative
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
  *		koziol@hdfgroup.org
@@ -221,12 +220,11 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O__chunk_unprotect
+ * Function:    H5O__chunk_unprotect
  *
- * Purpose:	Unprotect an object header chunk after modifications
+ * Purpose:     Unprotect an object header chunk after modifications
  *
- * Return:	Success:	Non-negative
- *		Failure:	Negative
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
  *		koziol@hdfgroup.org
@@ -273,12 +271,11 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_chunk_resize
+ * Function:    H5O__chunk_resize
  *
- * Purpose:	Resize an object header chunk
+ * Purpose:     Resize an object header chunk
  *
- * Return:	Success:	Non-negative
- *		Failure:	Negative
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
  *		koziol@hdfgroup.org
@@ -287,11 +284,11 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_chunk_resize(H5O_t *oh, H5O_chunk_proxy_t *chk_proxy)
+H5O__chunk_resize(H5O_t *oh, H5O_chunk_proxy_t *chk_proxy)
 {
     herr_t ret_value = SUCCEED;        /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_PACKAGE
 
     /* check args */
     HDassert(oh);
@@ -311,16 +308,15 @@ H5O_chunk_resize(H5O_t *oh, H5O_chunk_proxy_t *chk_proxy)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_chunk_resize() */
+} /* end H5O__chunk_resize() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O__chunk_update_idx
+ * Function:    H5O__chunk_update_idx
  *
- * Purpose:	Update the chunk index for a chunk proxy
+ * Purpose:     Update the chunk index for a chunk proxy
  *
- * Return:	Success:	Non-negative
- *		Failure:	Negative
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
  *		koziol@hdfgroup.org
@@ -367,12 +363,11 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O__chunk_delete
+ * Function:    H5O__chunk_delete
  *
- * Purpose:	Notify metadata cache that a chunk has been deleted
+ * Purpose:     Notify metadata cache that a chunk has been deleted
  *
- * Return:	Success:	Non-negative
- *		Failure:	Negative
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
  *		koziol@hdfgroup.org
@@ -413,12 +408,11 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O__chunk_dest
+ * Function:    H5O__chunk_dest
  *
- * Purpose:	Destroy a chunk proxy object
+ * Purpose:     Destroy a chunk proxy object
  *
- * Return:	Success: SUCCEED
- *              Failure: FAIL
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
  *              koziol@hdfgroup.org

@@ -41,9 +41,7 @@ const char *FILENAME[] = {
  *              heap, close the file, open the file, read data out of the
  *              local heap, close the file.
  *
- * Return:      Success:    zero
- *
- *              Failure:    non-zero
+ * Return:      EXIT_SUCCESS/EXIT_FAILURE
  *
  * Programmer:  Robb Matzke
  *              Tuesday, November 24, 1998
@@ -95,7 +93,7 @@ main(void)
         H5Eprint2(H5E_DEFAULT, stdout);
         goto error;
     }
-    if (NULL == (heap = H5HL_protect(f, heap_addr, H5AC__NO_FLAGS_SET))) {
+    if(NULL == (heap = H5HL_protect(f, heap_addr, H5AC__NO_FLAGS_SET))) {
         H5_FAILED();
         H5Eprint2(H5E_DEFAULT, stdout);
         goto error;
@@ -147,7 +145,7 @@ main(void)
         if(j > 4)
             buf[j] = '\0';
 
-        if (NULL == (heap = H5HL_protect(f, heap_addr, H5AC__READ_ONLY_FLAG))) {
+        if(NULL == (heap = H5HL_protect(f, heap_addr, H5AC__READ_ONLY_FLAG))) {
             H5_FAILED();
             H5Eprint2(H5E_DEFAULT, stdout);
             goto error;
@@ -211,7 +209,7 @@ main(void)
     HDputs("All local heap tests passed.");
     h5_cleanup(FILENAME, fapl);
 
-    return 0;
+    return EXIT_SUCCESS;
 
  error:
     HDputs("*** TESTS FAILED ***");
@@ -221,6 +219,6 @@ main(void)
 
     if(api_ctx_pushed) H5CX_pop();
 
-    return 1;
+    return EXIT_FAILURE;
 }
 
