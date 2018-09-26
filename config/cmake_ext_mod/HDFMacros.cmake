@@ -363,7 +363,12 @@ macro (HDF_DIR_PATHS package_prefix)
   set (CMAKE_BUILD_WITH_INSTALL_RPATH ON)
   if (APPLE)
     set (CMAKE_INSTALL_NAME_DIR "@rpath")
-    set (CMAKE_INSTALL_RPATH "@executable_path/../${${package_prefix}_INSTALL_LIB_DIR}:@executable_path/")
+    set (CMAKE_INSTALL_RPATH
+        "@executable_path/../${${package_prefix}_INSTALL_LIB_DIR}"
+        "@executable_path/"
+        "@loader_path/../${${package_prefix}_INSTALL_LIB_DIR}"
+        "@loader_path/"
+    )
   else ()
     set (CMAKE_INSTALL_RPATH "\$ORIGIN/../${${package_prefix}_INSTALL_LIB_DIR}:\$ORIGIN/")
   endif ()
