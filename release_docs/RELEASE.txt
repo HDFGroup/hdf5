@@ -48,6 +48,16 @@ New Features
 
     Configuration:
     -------------
+    - Add default rpath to targets
+
+      Default rpaths should be set in shared executables and
+      libraries to allow the use of loading dependent libraries
+      without requiring LD_LIBRARY_PATH to be set. The default
+      path should be relative using @rpath on osx and $ORIGIN
+      on linux. Windows is not affected.
+
+      (ADB - 2018/09/26, HDFFV-10594)
+
     - Add missing USE_110_API_DEFAULT option.
 
       Option USE_110_API_DEFAULT sets the default version of
