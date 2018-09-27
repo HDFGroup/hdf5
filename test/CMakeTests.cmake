@@ -439,14 +439,6 @@ set (test_CLEANFILES
     tvlstr.h5
     tvlstr2.h5
     twriteorder.dat
-    flush.h5
-    flush-swmr.h5
-    noflush.h5
-    noflush-swmr.h5
-    flush_extend.h5
-    flush_extend-swmr.h5
-    noflush_extend.h5
-    noflush_extend-swmr.h5
     enum1.h5
     titerate.h5
     ttsafe.h5
@@ -551,6 +543,8 @@ set (H5TEST_SEPARATE_TESTS
     testhdf5
     cache
     cache_image
+    flush1
+    flush2
 )
 foreach (test ${H5_TESTS})
   if (NOT ${test} IN_LIST H5TEST_SEPARATE_TESTS)
@@ -587,7 +581,6 @@ foreach (test ${H5_TESTS})
   endif ()
 endforeach ()
 
-set_tests_properties (H5TEST-flush2 PROPERTIES DEPENDS H5TEST-flush1)
 set_tests_properties (H5TEST-fheap PROPERTIES TIMEOUT 1800)
 set_tests_properties (H5TEST-big PROPERTIES TIMEOUT 1800)
 set_tests_properties (H5TEST-btree2 PROPERTIES TIMEOUT 1800)
@@ -630,7 +623,6 @@ if (BUILD_SHARED_LIBS)
     endif ()
   endforeach ()
 
-  set_tests_properties (H5TEST-shared-flush2 PROPERTIES DEPENDS H5TEST-shared-flush1)
   set_tests_properties (H5TEST-shared-fheap PROPERTIES TIMEOUT 1800)
   set_tests_properties (H5TEST-shared-big PROPERTIES TIMEOUT 1800)
   set_tests_properties (H5TEST-shared-btree2 PROPERTIES TIMEOUT 1800)
@@ -719,6 +711,54 @@ if (BUILD_SHARED_LIBS)
     set_tests_properties (H5TEST-shared-cache PROPERTIES TIMEOUT 1800)
   endif ()
 endif ()
+
+#-- Adding test for flush1/2
+add_test (NAME H5TEST-clear-flush-objects
+    COMMAND    ${CMAKE_COMMAND}
+        -E remove
+        flush.h5
+        flush-swmr.h5
+        noflush.h5
+        noflush-swmr.h5
+        flush_extend.h5
+        flush_extend-swmr.h5
+        noflush_extend.h5
+        noflush_extend-swmr.h5
+    WORKING_DIRECTORY
+        ${HDF5_TEST_BINARY_DIR}/H5TEST
+)
+if (HDF5_ENABLE_USING_MEMCHECKER)
+  add_test (NAME H5TEST-flush1 COMMAND $<TARGET_FILE:flush1>)
+else ()
+  add_test (NAME H5TEST-flush1 COMMAND "${CMAKE_COMMAND}"
+      -D "TEST_PROGRAM=$<TARGET_FILE:flush1>"
+      -D "TEST_ARGS:STRING="
+      -D "TEST_EXPECT=0"
+      -D "TEST_SKIP_COMPARE=TRUE"
+      -D "TEST_OUTPUT=flush1.txt"
+      -D "TEST_FOLDER=${HDF5_TEST_BINARY_DIR}/H5TEST"
+      -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+  )
+endif ()
+set_tests_properties (H5TEST-flush1 PROPERTIES
+    DEPENDS H5TEST-clear-flush-objects
+    ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST;HDF5TestExpress=${HDF_TEST_EXPRESS}"
+    WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
+)
+if (HDF5_ENABLE_USING_MEMCHECKER)
+  add_test (NAME H5TEST-flush2 COMMAND $<TARGET_FILE:flush2>)
+else ()
+  add_test (NAME H5TEST-flush2 COMMAND "${CMAKE_COMMAND}"
+      -D "TEST_PROGRAM=$<TARGET_FILE:flush2>"
+      -D "TEST_ARGS:STRING="
+      -D "TEST_EXPECT=0"
+      -D "TEST_SKIP_COMPARE=TRUE"
+      -D "TEST_OUTPUT=flush2.txt"
+      -D "TEST_FOLDER=${HDF5_TEST_BINARY_DIR}/H5TEST"
+      -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+  )
+endif ()
+set_tests_properties (H5TEST-flush2 PROPERTIES DEPENDS H5TEST-flush1)
 
 #-- Adding test for tcheck_version
 add_test (NAME H5TEST-tcheck_version-major COMMAND $<TARGET_FILE:tcheck_version> "-tM")
@@ -826,9 +866,10 @@ add_test (NAME H5TEST-clear-error_test-objects
 set_tests_properties (H5TEST-clear-error_test-objects PROPERTIES FIXTURES_SETUP error_test_clear_objects)
 if (HDF5_USE_16_API_DEFAULT)
   add_test (
-      NAME H5TEST-error_test-SKIPPED
+      NAME H5TEST-error_test
       COMMAND ${CMAKE_COMMAND} -E echo "SKIP $<TARGET_FILE:error_test>"
   )
+  set_property(TEST H5TEST-error_test PROPERTY DISABLED)
 else ()
   add_test (NAME H5TEST-error_test COMMAND "${CMAKE_COMMAND}"
       -D "TEST_PROGRAM=$<TARGET_FILE:error_test>"
@@ -925,9 +966,10 @@ if (BUILD_SHARED_LIBS)
   set_tests_properties (H5TEST-shared-clear-error_test-objects PROPERTIES FIXTURES_SETUP shared_error_test_clear_objects)
   if (HDF5_USE_16_API_DEFAULT)
     add_test (
-        NAME H5TEST-shared-error_test-SKIPPED
+        NAME H5TEST-shared-error_test
         COMMAND ${CMAKE_COMMAND} -E echo "SKIP $<TARGET_FILE:error_test-shared>"
     )
+    set_property(TEST H5TEST-shared-error_test PROPERTY DISABLED)
   else ()
     add_test (NAME H5TEST-shared-error_test COMMAND "${CMAKE_COMMAND}"
         -D "TEST_PROGRAM=$<TARGET_FILE:error_test-shared>"
