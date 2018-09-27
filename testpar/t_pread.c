@@ -104,7 +104,7 @@ generate_test_file( MPI_Comm comm, int mpi_rank, int group_id )
     hid_t file_id   = -1;
     hid_t memspace  = -1;
     hid_t filespace = -1;
-	hid_t fctmpl    = -1;
+    hid_t fctmpl    = -1;
     hid_t fapl_id   = -1;
     hid_t dxpl_id   = -1;
     hid_t dset_id   = -1;
@@ -180,17 +180,17 @@ generate_test_file( MPI_Comm comm, int mpi_rank, int group_id )
         }
     }
 
-	/* Initialize a file creation template */
-	if (pass) {
-		if ((fctmpl = H5Pcreate(H5P_FILE_CREATE)) < 0) {
-			pass = FALSE;
-			failure_mssg = "H5Pcreate(H5P_FILE_CREATE) failed.\n";
-		}
-		else if (H5Pset_userblock(fctmpl, 512) != SUCCEED) {
-			pass = FALSE;
-			failure_mssg = "H5Pset_userblock(,size) failed.\n";
-		}
-	}
+    /* Initialize a file creation template */
+    if (pass) {
+        if ((fctmpl = H5Pcreate(H5P_FILE_CREATE)) < 0) {
+            pass = FALSE;
+            failure_mssg = "H5Pcreate(H5P_FILE_CREATE) failed.\n";
+        }
+        else if (H5Pset_userblock(fctmpl, 512) != SUCCEED) {
+            pass = FALSE;
+            failure_mssg = "H5Pset_userblock(,size) failed.\n";
+        }
+    }
     /* setup FAPL */
     if ( pass ) {
         if ( (fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0 ) {
@@ -347,7 +347,7 @@ generate_test_file( MPI_Comm comm, int mpi_rank, int group_id )
         bytes_to_write = HDstrlen(text_to_write);
 
         if (pass) {
-	    if ((header = HDopen(data_filename, O_WRONLY)) < 0) {
+        if ((header = HDopen(data_filename, O_WRONLY)) < 0) {
                 pass = FALSE;
                 failure_mssg = "HDopen(data_filename, O_WRONLY) failed.\n";
             }
@@ -358,7 +358,7 @@ generate_test_file( MPI_Comm comm, int mpi_rank, int group_id )
             if (HDwrite(header, text_to_write, bytes_to_write) < 0) {
                 pass = FALSE;
                 failure_mssg = "Unable to write user text into file.\n";
-		}
+        }
         }
 
         if (pass || (header > 0)) {
@@ -699,18 +699,11 @@ test_parallel_read(MPI_Comm comm, int mpi_rank, int group_id)
  *              with the opening and validation of the data contained
  *              therein.
  *
- *              WARNING: This test uses fork() and execve(), and
- *                       therefore will not run on Windows.
- *
  * Return:      Success: 0
- *
  *              Failure: 1
  *
  * Programmer:  Richard Warren
  *              10/1/17
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
