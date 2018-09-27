@@ -50,7 +50,7 @@ static int test_parallel_read(MPI_Comm comm, int mpi_rank, int group);
 
 static char *test_argv0 = NULL;
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    generate_test_file
  *
@@ -408,7 +408,7 @@ generate_test_file( MPI_Comm comm, int mpi_rank, int group_id )
 
 } /* generate_test_file() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_parallel_read
  *
@@ -683,7 +683,7 @@ test_parallel_read(MPI_Comm comm, int mpi_rank, int group_id)
 
 } /* test_parallel_read() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    main
  *
