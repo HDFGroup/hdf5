@@ -1945,7 +1945,7 @@ extern hbool_t H5_libterm_g;    /* Is the library being shutdown? */
 #define H5_INIT_GLOBAL (H5_libinit_g)
 #define H5_TERM_GLOBAL (H5_libterm_g)
 
-/* Temporary Gobals for VFD SWMR */
+/* Temporary globals for VFD SWMR */
 extern hbool_t vfd_swmr_g;
 extern hbool_t vfd_swmr_writer_g;
 extern uint64_t tick_num_g;
@@ -2075,11 +2075,11 @@ H5_DLL herr_t H5CX_pop(void);
         if( (curr_time.tv_sec >= end_of_tick_g.tv_sec) &&                                               \
             (curr_time.tv_nsec >= end_of_tick_g.tv_nsec) ) {                                            \
             if(vfd_swmr_writer_g) {                                                                     \
-                if(H5FD_vfd_swmr_writer_end_of_tick() < 0)                                                       \
+                if(H5F_vfd_swmr_writer_end_of_tick() < 0)                                                       \
                     HGOTO_ERROR(H5E_FUNC, H5E_CANTSET, err, "end of tick error for VFD SWMR writer")    \
             }                                                                                           \
             else if(!swmr_reader_exit) {                                                                \
-                if(H5FD_vfd_swmr_reader_end_of_tick() < 0)                                              \
+                if(H5F_vfd_swmr_reader_end_of_tick() < 0)                                              \
                     HGOTO_ERROR(H5E_FUNC, H5E_CANTSET, err, "end of tick error for VFD SWMR reader")    \
             }                                                                                           \
         }                                                                                               \
@@ -2089,9 +2089,9 @@ H5_DLL herr_t H5CX_pop(void);
 #define FUNC_ENTER_API(err) {{                                                \
     FUNC_ENTER_API_COMMON                                                     \
     FUNC_ENTER_API_INIT(err);                                                 \
+    VFD_SWMR_TEST_FOR_END_OF_TICK(FALSE, err);                                \
     /* Clear thread error stack entering public functions */                  \
     H5E_clear_stack(NULL);                                                    \
-    VFD_SWMR_TEST_FOR_END_OF_TICK(FALSE, err);                                \
     {
 
 /*
@@ -2291,15 +2291,16 @@ H5_DLL herr_t H5CX_pop(void);
     FINISH_MPE_LOG                                                            \
     H5TRACE_RETURN(ret_value);
 
-#define FUNC_LEAVE_API(ret_value)                                             \
-    VFD_SWMR_TEST_FOR_END_OF_TICK(!vfd_swmr_writer_g, ret_value);               \
-    FUNC_LEAVE_API_COMMON(ret_value);                                         \
-    (void)H5CX_pop();                                                         \
-    H5_POP_FUNC                                                               \
-    if(err_occurred)                                                          \
-       (void)H5E_dump_api_stack(TRUE);                                        \
-    FUNC_LEAVE_API_THREADSAFE                                                 \
-    return(ret_value);                                                        \
+#define FUNC_LEAVE_API(ret_value)                                               \
+    if(!err_occurred)                                                           \
+        VFD_SWMR_TEST_FOR_END_OF_TICK(!vfd_swmr_writer_g, ret_value);           \
+    FUNC_LEAVE_API_COMMON(ret_value);                                           \
+    (void)H5CX_pop();                                                           \
+    H5_POP_FUNC                                                                 \
+    if(err_occurred)                                                            \
+       (void)H5E_dump_api_stack(TRUE);                                          \
+    FUNC_LEAVE_API_THREADSAFE                                                   \
+    return(ret_value);                                                          \
 }} /*end scope from beginning of FUNC_ENTER*/
 
 /* Use this macro to match the FUNC_ENTER_API_NOINIT macro */

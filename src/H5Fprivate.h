@@ -331,7 +331,8 @@ typedef struct H5F_t H5F_t;
 #define H5F_POINT_OF_NO_RETURN(F) ((F)->shared->fs.point_of_no_return)
 #define H5F_FIRST_ALLOC_DEALLOC(F) ((F)->shared->first_alloc_dealloc)
 #define H5F_EOA_PRE_FSM_FSALLOC(F) ((F)->shared->eoa_pre_fsm_fsalloc)
-#define H5F_USE_VFD_SWMR(F)  ((F)->shared->vfd_swmr)
+#define H5F_USE_VFD_SWMR(F)         ((F)->shared->vfd_swmr)
+#define H5F_VFD_SWMR_MD_EOA(F)      ((F)->shared->vfd_swmr_md_eoa)
 #else /* H5F_MODULE */
 #define H5F_LOW_BOUND(F)        (H5F_get_low_bound(F))
 #define H5F_HIGH_BOUND(F)       (H5F_get_high_bound(F))
@@ -390,6 +391,7 @@ typedef struct H5F_t H5F_t;
 #define H5F_FIRST_ALLOC_DEALLOC(F) (H5F_get_first_alloc_dealloc(F))
 #define H5F_EOA_PRE_FSM_FSALLOC(F) (H5F_get_eoa_pre_fsm_fsalloc(F))
 #define H5F_USE_VFD_SWMR(F)     (H5F_use_vfd_swmr(F))
+#define H5F_VFD_SWMR_MD_EOA(F)  (H5F_get_vfd_swmr_md_eoa(F))
 #endif /* H5F_MODULE */
 
 
@@ -511,7 +513,7 @@ typedef struct H5F_t H5F_t;
 #define H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_NAME   "page_buffer_min_raw_perc" /* the min raw data percentage for the page buffer cache */
 
 /* Default configuration for VFD SWMR: not configured */
-#define H5F_ACS_VFD_SWMR_CONFIG_NAME    "vfd_swmr_config" /* VFD SWMR configuration */
+#define H5F_ACS_VFD_SWMR_CONFIG_NAME    "vfd_swmr_config" 
 #define H5F__DEFAULT_VFD_SWMR_CONFIG                                                \
 {                                                                                   \
   /* int32_t    version                 = */ 0,                                     \
@@ -665,12 +667,14 @@ struct H5HG_heap_t;
 struct H5VL_class_t;
 struct H5P_genplist_t;
 
+/* VFD SWMR  */
+/* Forward declaration */
+struct H5FD_vfd_swmr_idx_entry_t;
+
 /* Forward declarations for anonymous H5F objects */
 
 /* Main file structures */
 typedef struct H5F_file_t H5F_file_t;
-
-extern H5F_file_t *vfd_swmr_file_g;
 
 /* Block aggregation structure */
 typedef struct H5F_blk_aggr_t H5F_blk_aggr_t;
@@ -761,7 +765,6 @@ H5_DLL hsize_t H5F_get_pgend_meta_thres(const H5F_t *f);
 H5_DLL hbool_t H5F_get_point_of_no_return(const H5F_t *f);
 H5_DLL hbool_t H5F_get_first_alloc_dealloc(const H5F_t *f);
 H5_DLL haddr_t H5F_get_eoa_pre_fsm_fsalloc(const H5F_t *f);
-H5_DLL hbool_t H5F_use_vfd_swmr(const H5F_t *f);
 
 /* Functions than retrieve values set/cached from the superblock/FCPL */
 H5_DLL haddr_t H5F_get_base_addr(const H5F_t *f);
@@ -874,6 +877,13 @@ H5_DLL herr_t H5F_cwfs_remove_heap(H5F_file_t *shared, struct H5HG_heap_t *heap)
 
 /* Debugging functions */
 H5_DLL herr_t H5F_debug(H5F_t *f, FILE * stream, int indent, int fwidth);
+
+/* VFD SWMR */
+H5_DLL herr_t H5F_vfd_swmr_writer_end_of_tick(void);
+H5_DLL herr_t H5F_vfd_swmr_reader_end_of_tick(void);
+H5_DLL herr_t H5F_update_vfd_swmr_metadata_file(H5F_t *f, uint32_t index_len, struct H5FD_vfd_swmr_idx_entry_t *index);
+H5_DLL hbool_t H5F_use_vfd_swmr(const H5F_t *f);
+H5_DLL haddr_t H5F_get_vfd_swmr_md_eoa(const H5F_t *f);
 
 #endif /* _H5Fprivate_H */
 

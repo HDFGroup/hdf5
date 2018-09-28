@@ -406,7 +406,7 @@ static const size_t H5F_def_page_buf_size_g = H5F_ACS_PAGE_BUFFER_SIZE_DEF;     
 static const unsigned H5F_def_page_buf_min_meta_perc_g = H5F_ACS_PAGE_BUFFER_MIN_META_PERC_DEF;      /* Default page buffer minimum metadata size */
 static const unsigned H5F_def_page_buf_min_raw_perc_g = H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_DEF;      /* Default page buffer mininum raw data size */
 
-static const H5F_vfd_swmr_config_t *H5F_def_vfd_swmr_config_g = H5F_ACS_VFD_SWMR_CONFIG_DEF;  /* Default vfd swmr configuration */
+static const H5F_vfd_swmr_config_t H5F_def_vfd_swmr_config_g = H5F_ACS_VFD_SWMR_CONFIG_DEF;     /* Default vfd swmr configuration */
 
 
 /*-------------------------------------------------------------------------
@@ -655,7 +655,7 @@ H5P__facc_reg_prop(H5P_genclass_t *pclass)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the default VFD SWMR configuration */
-    if(H5P_register_real(pclass, H5F_ACS_VFD_SWMR_CONFIG_NAME, H5F_ACS_VFD_SWMR_CONFIG_SIZE, &H5F_def_vfd_swmr_config_g,
+    if(H5P__register_real(pclass, H5F_ACS_VFD_SWMR_CONFIG_NAME, H5F_ACS_VFD_SWMR_CONFIG_SIZE, &H5F_def_vfd_swmr_config_g,
             NULL, NULL, NULL, H5F_ACS_VFD_SWMR_CONFIG_ENC, H5F_ACS_VFD_SWMR_CONFIG_DEC,
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")

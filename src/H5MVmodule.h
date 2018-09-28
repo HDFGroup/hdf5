@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -12,26 +11,23 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke <matzke@llnl.gov>
- *              Monday, August  2, 1999
+ * Programmer:	Quincey Koziol <koziol@hdfgroup.org>
+ *		Saturday, September 12, 2015
  *
- * Purpose:	The public header file for the VFD SWMR driver.
+ * Purpose:	This file contains declarations which define macros for the
+ *		H5MV package.  Including this header means that the source file
+ *		is part of the H5MV package.
  */
-#ifndef H5FDswmr_H
-#define H5FDswmr_H
+#ifndef _H5MVmodule_H
+#define _H5MVmodule_H
 
-#define H5FD_VFD_SWMR   (H5FD_vfd_swmr_init())
+/* Define the proper control macros for the generic FUNC_ENTER/LEAVE and error
+ *      reporting macros.
+ */
+#define H5MV_MODULE
+#define H5_MY_PKG       H5MV
+#define H5_MY_PKG_ERR   H5E_RESOURCE
+#define H5_MY_PKG_INIT  NO
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-H5_DLL hid_t H5FD_vfd_swmr_init(void);
-H5_DLL herr_t H5Pset_fapl_vfd_swmr(hid_t fapl_id);
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif
+#endif /* _H5MVmodule_H */
 

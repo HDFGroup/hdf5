@@ -636,6 +636,8 @@
 ./src/H5FDstdio.c
 ./src/H5FDstdio.h
 ./src/H5FDtest.c
+./src/H5FDvfd_swmr.c
+./src/H5FDvfd_swmr.h
 ./src/H5FDwindows.c
 ./src/H5FDwindows.h
 ./src/H5FL.c
@@ -743,6 +745,11 @@
 ./src/H5MPpkg.h
 ./src/H5MPprivate.h
 ./src/H5MPtest.c
+./src/H5MV.c
+./src/H5MVmodule.h
+./src/H5MVsection.c
+./src/H5MVpkg.h
+./src/H5MVprivate.h
 ./src/H5O.c
 ./src/H5Oainfo.c
 ./src/H5Oalloc.c
@@ -1090,6 +1097,7 @@
 ./test/testmeta.c
 ./test/testswmr.sh.in
 ./test/testvdsswmr.sh.in
+./test/testvfdswmr.sh.in
 ./test/tfile.c
 ./test/tgenprop.c
 ./test/th5o.c
@@ -1138,7 +1146,12 @@
 ./test/vds_swmr_gen.c
 ./test/vds_swmr_reader.c
 ./test/vds_swmr_writer.c
-
+./test/vfd_swmr.c
+./test/vfd_swmr_common.c
+./test/vfd_swmr_common.h
+./test/vfd_swmr_generator.c
+./test/vfd_swmr_reader.c
+./test/vfd_swmr_writer.c
 ./test/testfiles/err_compat_1
 ./test/testfiles/err_compat_2
 ./test/testfiles/error_test_1

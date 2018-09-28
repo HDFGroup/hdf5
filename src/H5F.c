@@ -2016,6 +2016,7 @@ H5Fvfd_swmr_end_tick(hid_t file_id)
         HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "must have VFD SWMR configured for this public routine")
 
     /* ??Trigger end of tick processing later */
+    H5F_vfd_swmr_writer_end_of_tick();
 
 done:
     FUNC_LEAVE_API(ret_value)

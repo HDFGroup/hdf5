@@ -215,6 +215,28 @@ typedef struct H5F_mtab_t {
     H5F_mount_t		*child;	/* An array of mount records		*/
 } H5F_mtab_t;
 
+/* 
+ *  VFD SWMR: Entry for the delayed free space release doubly linked list 
+ *
+ *  md_file_page_offset:    Unsigned 64-bit value containing the base address of the
+ *                          metadata page, or multi page metadata entry in the metadata
+ *                          file IN PAGES.
+ *                          To obtain byte offset, multiply this value by the page size.
+ *  length:                 The length of the metadata page or multi page metadata entry
+ *                          in BYTES.
+ *  tick_num:               Sequence # of the current tick
+ *  next:                   Pointer to the next entry in the the list
+ *  prev:                   Pointer to the previous entry in the list
+ */
+typedef struct H5F_vfd_swmr_dl_entry_t {
+    uint64_t hdf5_page_offset;
+    uint64_t md_file_page_offset;
+    uint32_t length;
+    uint64_t tick_num;                     
+    struct H5F_vfd_swmr_dl_entry_t *next;
+    struct H5F_vfd_swmr_dl_entry_t *prev; 
+} H5F_vfd_swmr_dl_entry_t;
+
 /* Structure specifically to store superblock. This was originally
  * maintained entirely within H5F_file_t, but is now extracted
  * here because the superblock is now handled by the cache */
@@ -354,15 +376,31 @@ struct H5F_file_t {
     /* Object flush info */
     H5F_object_flush_t 	object_flush;	    /* Information for object flush callback */
 
-    /* VFD SWMR configuration info */
+    /* VFD SWMR */
+
+    /* Configuration info */
     H5F_vfd_swmr_config_t vfd_swmr_config;  /* Copy of the VFD SWMR configuration from the
                                                FAPL used to open the file */
     hbool_t vfd_swmr;                       /* The file is opened with VFD SWMR configured or not*/
     hbool_t vfd_swmr_writer;                /* This is the VFD SWMR writer or not */
     uint64_t tick_num;                      /* Number of the current tick */
     struct timespec end_of_tick;            /* End time of the current tick */
+
+    /* Metadata file */
     int vfd_swmr_md_fd;                     /* POSIX: file descriptor of the metadata file */
+    haddr_t vfd_swmr_md_eoa;                /* POSIX: eoa for the metadata file */
+
+    /* Free space manager for the metadata file */
+    H5FS_t *fs_man_md;                      /* Free-space manager */
+    H5F_fs_state_t fs_state_md;             /* State of the free space manager */
+
+    /* Delayed free space release doubly linked list */
+    uint32_t dl_len;                        /* # of entries in the list */
+    H5F_vfd_swmr_dl_entry_t *dl_head_ptr;   /* Points to the beginning of the list */
+    H5F_vfd_swmr_dl_entry_t *dl_tail_ptr;   /* Points to the end of the list */
+
 };
+
 
 /*
  * This is the top-level file descriptor.  One of these structures is
@@ -470,6 +508,12 @@ H5_DLL herr_t H5F__efc_try_close(H5F_t *f);
 H5_DLL haddr_t H5F__alloc(H5F_t *f, H5F_mem_t type, hsize_t size, haddr_t *frag_addr, hsize_t *frag_size);
 H5_DLL herr_t H5F__free(H5F_t *f, H5F_mem_t type, haddr_t addr, hsize_t size);
 H5_DLL htri_t H5F__try_extend(H5F_t *f, H5FD_mem_t type, haddr_t blk_end, hsize_t extra_requested);
+
+/* VFD SWMR */
+/* Space allocation routines */
+H5_DLL haddr_t H5F__alloc_md(H5F_t *f, hsize_t size);
+H5_DLL herr_t H5F__free_md(H5F_t *f, haddr_t addr, hsize_t size);
+H5_DLL htri_t H5F__try_extend_md(H5F_t *f, haddr_t blk_end, hsize_t extra_requested);
 
 /* Functions that get/retrieve values from VFD layer */
 H5_DLL herr_t H5F__set_eoa(const H5F_t *f, H5F_mem_t type, haddr_t addr);

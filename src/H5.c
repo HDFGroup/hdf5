@@ -85,13 +85,6 @@ char                    H5_lib_vers_info_g[] = H5_VERS_INFO;
 static hbool_t          H5_dont_atexit_g = FALSE;
 H5_debug_t              H5_debug_g; /* debugging info */
 
-hbool_t vfd_swmr_g = FALSE;
-hbool_t vfd_swmr_writer_g = FALSE;
-uint64_t tick_num_g = 0;
-struct timespec end_of_tick_g;
-H5F_file_t *vfd_swmr_file_g;
-
-
 /*******************/
 /* Local Variables */
 /*******************/
