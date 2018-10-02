@@ -837,17 +837,13 @@ H5D__calculate_minimum_header_size( \
 
         if (H5O_OH_GET_VERSION(ohdr) == 1) {
             /* v1 object headers store modification time as a message */
-            time_t mtime = H5_now();
+            time_t mtime;
             ret_value += H5O_msg_size_oh(
                     file,
                     ohdr,
                     H5O_MTIME_NEW_ID,
                     &mtime,
                     0);
-        } else { /* "version 2" */
-           /* TODO: is this backwards? reduce space if _not_ set? */
-           /* 4 4-byte (32-bit) fields: atime, mtime, ctime, btime */
-           ret_value += 16;
         }
     }
 
