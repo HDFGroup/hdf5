@@ -30,7 +30,7 @@ Obtaining HDF5 source code
 
 CMake version
    1. We suggest you obtain the latest CMake from the Kitware web site.
-      The HDF5 1.8."X" product requires a minimum CMake version 3.2.2,
+      The HDF5 1.8."X" product requires a minimum CMake version 3.10,
       where "X" is the current HDF5 release version.
 
 Note:
@@ -617,6 +617,7 @@ HDF5_STRICT_FORMAT_CHECKS      "Whether to perform strict file format checks"   
 HDF_TEST_EXPRESS               "Control testing framework (0-3)"                              "0"
 HDF5_TEST_VFD                  "Execute tests with different VFDs"                            OFF
 HDF5_USE_16_API_DEFAULT        "Use the HDF5 1.6.x API by default"                            OFF
+HDF5_USE_18_API_DEFAULT        "Use the HDF5 1.8.x API by default"                            ON
 HDF5_USE_FOLDERS               "Enable folder grouping of projects in IDEs."                  OFF
 HDF5_WANT_DATA_ACCURACY        "IF data accuracy is guaranteed during data conversions"       ON
 HDF5_WANT_DCONV_EXCEPTION      "exception handling functions is checked during data conversions" ON

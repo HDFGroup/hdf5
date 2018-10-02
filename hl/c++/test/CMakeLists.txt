@@ -1,24 +1,10 @@
 cmake_minimum_required (VERSION 3.10)
-PROJECT (HDF5_HL_CPP_TEST)
-
-#-----------------------------------------------------------------------------
-# Setup include Directories
-#-----------------------------------------------------------------------------
-INCLUDE_DIRECTORIES (${HDF5_HL_SRC_DIR}/src)
-INCLUDE_DIRECTORIES (${HDF5_HL_SRC_DIR}/c++/src)
-
-# --------------------------------------------------------------------
-# Add in the unit tests for the packet table c++ wrapper
-# --------------------------------------------------------------------
-
-INCLUDE_DIRECTORIES (${HDF5_TEST_SRC_DIR})
-INCLUDE_DIRECTORIES (${HDF5_HL_SRC_DIR}/test)
-INCLUDE_DIRECTORIES (${HDF5_CPP_SRC_DIR}/src)
+project (HDF5_HL_CPP_TEST CXX)
 
 add_executable (hl_ptableTest ${HDF5_HL_CPP_TEST_SOURCE_DIR}/ptableTest.cpp)
-TARGET_C_PROPERTIES (hl_ptableTest STATIC " " " ")
-target_link_libraries (
-    hl_ptableTest
+target_include_directories(hl_ptableTest PRIVATE "${HDF5_HL_SRC_DIR}/test;${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+TARGET_C_PROPERTIES (hl_ptableTest STATIC)
+target_link_libraries (hl_ptableTest PRIVATE
     ${HDF5_LIB_TARGET}
     ${HDF5_TEST_LIB_TARGET}
     ${HDF5_CPP_LIB_TARGET}

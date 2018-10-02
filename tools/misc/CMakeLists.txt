@@ -1,30 +1,28 @@
 cmake_minimum_required (VERSION 3.10)
-PROJECT (HDF5_TOOLS_MISC)
-
-#-----------------------------------------------------------------------------
-# Setup include Directories
-#-----------------------------------------------------------------------------
-INCLUDE_DIRECTORIES (${HDF5_TOOLS_SRC_DIR}/lib)
+project (HDF5_TOOLS_MISC C)
 
 # --------------------------------------------------------------------
 # Add the misc executables
 # --------------------------------------------------------------------
 #-- Misc Executables
 add_executable (h5debug ${HDF5_TOOLS_MISC_SOURCE_DIR}/h5debug.c)
-TARGET_C_PROPERTIES (h5debug STATIC " " " ")
-target_link_libraries (h5debug ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
+target_include_directories(h5debug PRIVATE "${HDF5_TOOLS_DIR}/lib;${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+TARGET_C_PROPERTIES (h5debug STATIC)
+target_link_libraries (h5debug PRIVATE ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
 set_target_properties (h5debug PROPERTIES FOLDER tools)
 set_global_variable (HDF5_UTILS_TO_EXPORT "${HDF5_UTILS_TO_EXPORT};h5debug")
 
 add_executable (h5repart ${HDF5_TOOLS_MISC_SOURCE_DIR}/h5repart.c)
-TARGET_C_PROPERTIES (h5repart STATIC " " " ")
-target_link_libraries (h5repart ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
+target_include_directories(h5repart PRIVATE "${HDF5_TOOLS_DIR}/lib;${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+TARGET_C_PROPERTIES (h5repart STATIC)
+target_link_libraries (h5repart PRIVATE ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
 set_target_properties (h5repart PROPERTIES FOLDER tools)
 set_global_variable (HDF5_UTILS_TO_EXPORT "${HDF5_UTILS_TO_EXPORT};h5repart")
 
 add_executable (h5mkgrp ${HDF5_TOOLS_MISC_SOURCE_DIR}/h5mkgrp.c)
-TARGET_C_PROPERTIES (h5mkgrp STATIC " " " ")
-target_link_libraries (h5mkgrp  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
+target_include_directories(h5mkgrp PRIVATE "${HDF5_TOOLS_DIR}/lib;${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+TARGET_C_PROPERTIES (h5mkgrp STATIC)
+target_link_libraries (h5mkgrp PRIVATE ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
 set_target_properties (h5mkgrp PROPERTIES FOLDER tools)
 set_global_variable (HDF5_UTILS_TO_EXPORT "${HDF5_UTILS_TO_EXPORT};h5mkgrp")
 
@@ -47,18 +45,21 @@ if (BUILD_TESTING)
   # --------------------------------------------------------------------
   if (HDF5_BUILD_GENERATORS)
     add_executable (h5repart_gentest ${HDF5_TOOLS_MISC_SOURCE_DIR}/h5repart_gentest.c)
-    TARGET_C_PROPERTIES (h5repart_gentest STATIC " " " ")
-    target_link_libraries (h5repart_gentest ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
+    target_include_directories(h5repart_gentest PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+    TARGET_C_PROPERTIES (h5repart_gentest STATIC)
+    target_link_libraries (h5repart_gentest PRIVATE ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
     set_target_properties (h5repart_gentest PROPERTIES FOLDER generator/tools)
     #add_test (NAME h5repart_gentest COMMAND $<TARGET_FILE:h5repart_gentest>)
   endif ()
 
   add_executable (h5repart_test ${HDF5_TOOLS_MISC_SOURCE_DIR}/repart_test.c)
-  TARGET_C_PROPERTIES (h5repart_test STATIC " " " ")
-  target_link_libraries (h5repart_test ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
+  target_include_directories(h5repart_test PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+  TARGET_C_PROPERTIES (h5repart_test STATIC)
+  target_link_libraries (h5repart_test PRIVATE ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
   set_target_properties (h5repart_test PROPERTIES FOLDER tools)
 
-  include (CMakeTests.cmake)
+  include (CMakeTestsRepart.cmake)
+  include (CMakeTestsMkgrp.cmake)
 endif ()
 
 ##############################################################################

@@ -32,9 +32,6 @@ macro (TARGET_STATIC_CRT_FLAGS)
       if (${flag_var} MATCHES "/MD")
         string (REGEX REPLACE "/MD" "/MT" ${flag_var} "${${flag_var}}")
       endif ()
-      if (${flag_var} MATCHES "/MDd")
-        string (REGEX REPLACE "/MDd" "/MTd" ${flag_var} "${${flag_var}}")
-      endif ()
     endforeach ()
     foreach (flag_var
         CMAKE_Fortran_FLAGS CMAKE_Fortran_FLAGS_DEBUG CMAKE_Fortran_FLAGS_RELEASE

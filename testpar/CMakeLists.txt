@@ -1,18 +1,11 @@
 cmake_minimum_required (VERSION 3.10)
-PROJECT (HDF5_TEST_PAR)
+project (HDF5_TEST_PAR C)
 
-#-----------------------------------------------------------------------------
-# Apply Definitions to compiler in this directory and below
-#-----------------------------------------------------------------------------
-add_definitions (${HDF_EXTRA_C_FLAGS})
-
-INCLUDE_DIRECTORIES (${HDF5_TEST_SRC_DIR})
-INCLUDE_DIRECTORIES (${HDF5_TOOLS_SRC_DIR}/lib )
 #-----------------------------------------------------------------------------
 # Define Tests
 #-----------------------------------------------------------------------------
 
-set (testphdf5_SRCS
+set (testphdf5_SOURCES
     ${HDF5_TEST_PAR_SOURCE_DIR}/testphdf5.c
     ${HDF5_TEST_PAR_SOURCE_DIR}/t_dset.c
     ${HDF5_TEST_PAR_SOURCE_DIR}/t_file.c
@@ -26,21 +19,25 @@ set (testphdf5_SRCS
 )
 
 #-- Adding test for testhdf5
-add_executable (testphdf5 ${testphdf5_SRCS})
-TARGET_C_PROPERTIES (testphdf5 STATIC " " " ")
-target_link_libraries (testphdf5 PUBLIC ${HDF5_TEST_LIB_TARGET} ${HDF5_LIB_TARGET})
-if (HDF5_ENABLE_PARALLEL AND MPI_C_FOUND)
-  target_link_libraries (testphdf5 PRIVATE ${MPI_C_LIBRARIES})
-endif ()
+add_executable (testphdf5 ${testphdf5_SOURCES})
+target_include_directories(testphdf5
+    PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>"
+)
+TARGET_C_PROPERTIES (testphdf5 STATIC)
+target_link_libraries (testphdf5
+    PRIVATE ${HDF5_TEST_LIB_TARGET} ${HDF5_LIB_TARGET} "$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_LIBRARIES}>"
+)
 set_target_properties (testphdf5 PROPERTIES FOLDER test/par)
 
 MACRO (ADD_H5P_EXE file)
   add_executable (${file} ${HDF5_TEST_PAR_SOURCE_DIR}/${file}.c)
-  TARGET_C_PROPERTIES (${file} STATIC " " " ")
-  target_link_libraries (${file} PUBLIC ${HDF5_TEST_LIB_TARGET} ${HDF5_LIB_TARGET})
-  if (HDF5_ENABLE_PARALLEL AND MPI_C_FOUND)
-    target_link_libraries (${file} PRIVATE ${MPI_C_LIBRARIES})
-  endif ()
+  target_include_directories(${file}
+      PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>"
+  )
+  TARGET_C_PROPERTIES (${file} STATIC)
+  target_link_libraries (${file}
+      PRIVATE ${HDF5_TEST_LIB_TARGET} ${HDF5_LIB_TARGET} "$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_LIBRARIES}>"
+  )
   set_target_properties (${file} PROPERTIES FOLDER test/par)
 ENDMACRO (ADD_H5P_EXE file)
 
