@@ -24,7 +24,7 @@ if (CMAKE_COMPILER_IS_GNUCC)
       set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Og -ftrapv -fno-common")
     endif ()
   else ()
-    if (NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 5.0)
+    if (CMAKE_C_COMPILER_ID STREQUAL "GNU" AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 5.0)
       set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fstdarg-opt")
     endif ()
   endif ()
@@ -36,7 +36,7 @@ if (CMAKE_COMPILER_IS_GNUCXX AND CMAKE_CXX_COMPILER_LOADED)
       set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Og -ftrapv -fno-common")
     endif ()
   else ()
-    if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.0)
+    if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.0)
       set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fstdarg-opt")
     endif ()
   endif ()
@@ -94,16 +94,29 @@ if (NOT MSVC AND CMAKE_COMPILER_IS_GNUCC)
     #
     # NOTE: Don't add -Wpadded here since we can't/won't fix the (many)
     # warnings that are emitted. If you need it, add it at configure time.
-    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pedantic -Wall -Wextra")
-    set (H5_CFLAGS0 "${H5_CFLAGS0} -Wbad-function-cast -Wc++-compat -Wcast-align")
-    set (H5_CFLAGS0 "${H5_CFLAGS0} -Wcast-qual -Wconversion -Wdeclaration-after-statement -Wdisabled-optimization -Wfloat-equal")
-    set (H5_CFLAGS0 "${H5_CFLAGS0} -Wformat=2 -Winit-self -Winvalid-pch -Wmissing-declarations -Wmissing-include-dirs")
-    set (H5_CFLAGS0 "${H5_CFLAGS0} -Wmissing-prototypes -Wnested-externs -Wold-style-definition -Wpacked -Wpointer-arith")
-    set (H5_CFLAGS0 "${H5_CFLAGS0} -Wredundant-decls -Wshadow -Wstrict-prototypes -Wswitch-default -Wswitch-enum")
-    set (H5_CFLAGS0 "${H5_CFLAGS0} -Wundef -Wunused-macros -Wunsafe-loop-optimizations -Wwrite-strings")
-    # gcc automatically inlines based on the optimization level
-    # this is just a failsafe
-    set (H5_CFLAGS0 "${H5_CFLAGS0} -finline-functions")
+    if (CMAKE_C_COMPILER_ID STREQUAL "Intel")
+      set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wcheck -Wall")
+      set (H5_CFLAGS0 "${H5_CFLAGS0} -Wcomment -Wdeprecated -Wmain -Wmissing-declarations -Wmissing-prototypes -Wp64 -Wpointer-arith")
+      set (H5_CFLAGS0 "${H5_CFLAGS0} -Wreturn-type -Wstrict-prototypes -Wuninitialized")
+      set (H5_CFLAGS0 "${H5_CFLAGS0} -Wunknown-pragmas -Wunused-function -Wunused-variable")
+      # this is just a failsafe
+      set (H5_CFLAGS0 "${H5_CFLAGS0} -finline-functions")
+      if(NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 18.0)
+        set (H5_CFLAGS0 "${H5_CFLAGS0} -Wextra-tokens -Wformat -Wformat-security -Wic-pointer -Wshadow")
+        set (H5_CFLAGS0 "${H5_CFLAGS0} -Wsign-compare -Wtrigraphs -Wwrite-strings")
+      endif()
+    elseif (CMAKE_C_COMPILER_ID STREQUAL "GNU")
+      set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pedantic -Wall -Wextra")
+      set (H5_CFLAGS0 "${H5_CFLAGS0} -Wbad-function-cast -Wc++-compat -Wcast-align")
+      set (H5_CFLAGS0 "${H5_CFLAGS0} -Wcast-qual -Wconversion -Wdeclaration-after-statement -Wdisabled-optimization -Wfloat-equal")
+      set (H5_CFLAGS0 "${H5_CFLAGS0} -Wformat=2 -Winit-self -Winvalid-pch -Wmissing-declarations -Wmissing-include-dirs")
+      set (H5_CFLAGS0 "${H5_CFLAGS0} -Wmissing-prototypes -Wnested-externs -Wold-style-definition -Wpacked -Wpointer-arith")
+      set (H5_CFLAGS0 "${H5_CFLAGS0} -Wredundant-decls -Wshadow -Wstrict-prototypes -Wswitch-default -Wswitch-enum")
+      set (H5_CFLAGS0 "${H5_CFLAGS0} -Wundef -Wunused-macros -Wunsafe-loop-optimizations -Wwrite-strings")
+      # gcc automatically inlines based on the optimization level
+      # this is just a failsafe
+      set (H5_CFLAGS0 "${H5_CFLAGS0} -finline-functions")
+    endif ()
   endif ()
 
     #-----------------------------------------------------------------------------
@@ -113,28 +126,36 @@ if (NOT MSVC AND CMAKE_COMPILER_IS_GNUCC)
     option (HDF5_ENABLE_DEV_WARNINGS "Enable HDF5 developer group warnings" OFF)
     if (HDF5_ENABLE_DEV_WARNINGS)
       message (STATUS "....HDF5 developer group warnings are enabled")
-      set (H5_CFLAGS0 "${H5_CFLAGS0} -Winline -Waggregate-return -Wmissing-format-attribute -Wmissing-noreturn")
+      if (CMAKE_C_COMPILER_ID STREQUAL "Intel")
+        set (H5_CFLAGS0 "${H5_CFLAGS0} -Winline -Wreorder -Wport -Wstrict-aliasing")
+      elseif (CMAKE_C_COMPILER_ID STREQUAL "GNU")
+        set (H5_CFLAGS0 "${H5_CFLAGS0} -Winline -Waggregate-return -Wmissing-format-attribute -Wmissing-noreturn")
+      endif ()
     else ()
-      set (H5_CFLAGS0 "${H5_CFLAGS0} -Wno-inline -Wno-aggregate-return -Wno-missing-format-attribute -Wno-missing-noreturn")
+      if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
+        set (H5_CFLAGS0 "${H5_CFLAGS0} -Wno-inline -Wno-aggregate-return -Wno-missing-format-attribute -Wno-missing-noreturn")
+      endif ()
     endif ()
 
 
-    # Append warning flags that only gcc 4.3+ knows about
-    #
-    # Technically, variable-length arrays are part of the C99 standard, but
-    #   we should approach them a bit cautiously... -QAK
-    set (H5_CFLAGS1 "${H5_CFLAGS1} -Wlogical-op -Wlarger-than=2048 -Wvla")
+    if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
+      # Append warning flags that only gcc 4.3+ knows about
+      #
+      # Technically, variable-length arrays are part of the C99 standard, but
+      #   we should approach them a bit cautiously... -QAK
+      set (H5_CFLAGS1 "${H5_CFLAGS1} -Wlogical-op -Wlarger-than=2048 -Wvla")
 
-    # Append more extra warning flags that only gcc 4.4+ know about
-    set (H5_CFLAGS1 "${H5_CFLAGS1} -Wsync-nand -Wframe-larger-than=16384 -Wpacked-bitfield-compat")
+      # Append more extra warning flags that only gcc 4.4+ know about
+      set (H5_CFLAGS1 "${H5_CFLAGS1} -Wsync-nand -Wframe-larger-than=16384 -Wpacked-bitfield-compat")
+    endif ()
 
     # Append more extra warning flags that only gcc 4.5+ know about
-    if (NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 4.5)
+    if (CMAKE_C_COMPILER_ID STREQUAL "GNU" AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 4.5)
       set (H5_CFLAGS1 "${H5_CFLAGS1} -Wstrict-overflow=5 -Wjump-misses-init -Wunsuffixed-float-constants")
     endif ()
 
     # Append more extra warning flags that only gcc 4.6+ know about
-    if (NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 4.6)
+    if (CMAKE_C_COMPILER_ID STREQUAL "GNU" AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 4.6)
       set (H5_CFLAGS2 "${H5_CFLAGS2} -Wdouble-promotion -Wtrampolines")
       if (HDF5_ENABLE_DEV_WARNINGS)
         set (H5_CFLAGS2 "${H5_CFLAGS2} -Wsuggest-attribute=const")
@@ -144,7 +165,7 @@ if (NOT MSVC AND CMAKE_COMPILER_IS_GNUCC)
     endif ()
 
     # Append more extra warning flags that only gcc 4.7+ know about
-    if (NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 4.7)
+    if (CMAKE_C_COMPILER_ID STREQUAL "GNU" AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 4.7)
       set (H5_CFLAGS2 "${H5_CFLAGS2} -Wstack-usage=8192 -Wvector-operation-performance")
       if (HDF5_ENABLE_DEV_WARNINGS)
         set (H5_CFLAGS2 "${H5_CFLAGS2} -Wsuggest-attribute=pure -Wsuggest-attribute=noreturn")
@@ -154,7 +175,7 @@ if (NOT MSVC AND CMAKE_COMPILER_IS_GNUCC)
     endif ()
 
     # Append more extra warning flags that only gcc 4.8+ know about
-    if (NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 4.8)
+    if (CMAKE_C_COMPILER_ID STREQUAL "GNU" AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 4.8)
       if (HDF5_ENABLE_DEV_WARNINGS)
         set (H5_CFLAGS2 "${H5_CFLAGS2} -Wsuggest-attribute=format")
       else ()
@@ -163,17 +184,17 @@ if (NOT MSVC AND CMAKE_COMPILER_IS_GNUCC)
     endif ()
 
     # Append more extra warning flags that only gcc 4.9+ know about
-    if (NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 4.9)
+    if (CMAKE_C_COMPILER_ID STREQUAL "GNU" AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 4.9)
       set (H5_CFLAGS2 "${H5_CFLAGS2} -Wdate-time")
     endif ()
 
     # Append more extra warning flags that only gcc 5.1+ know about
-    if (NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 5.1)
+    if (CMAKE_C_COMPILER_ID STREQUAL "GNU" AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 5.1)
       set (H5_CFLAGS3 "${H5_CFLAGS3} -Warray-bounds=2 -Wc99-c11-compat")
     endif ()
 
     # Append more extra warning flags that only gcc 6.x+ know about
-    if (NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 6.0)
+    if (CMAKE_C_COMPILER_ID STREQUAL "GNU" AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 6.0)
       set (H5_CFLAGS4 "${H5_CFLAGS4} -Wnull-dereference -Wunused-const-variable -Wduplicated-cond -Whsa")
     endif ()
 
