@@ -1,4 +1,4 @@
-HDF5 version 1.10.4 released on 2018-09-10
+HDF5 version 1.10.4 currently under development
 ================================================================================
 
 
@@ -40,11 +40,47 @@ CONTENTS
 - CMake vs. Autotools installations
 
 
+=======
+New Features
+============
+
+    Configuration:
+    -------------
+    - Add default rpath to targets
+
+      Default rpaths should be set in shared executables and
+      libraries to allow the use of loading dependent libraries
+      without requiring LD_LIBRARY_PATH to be set. The default
+      path should be relative using @rpath on osx and $ORIGIN
+      on linux. Windows is not affected.
+
+      (ADB - 2018/09/26, HDFFV-10594)
+
+
+    Library:
+    --------
+    - Allow pre-generated H5Tinit.c and H5make_libsettings.c to be used.
+
+      Rather than always running H5detect and generating H5Tinit.c and
+      H5make_libsettings.c, supply a location for those files.
+
+      (ADB - 2018/09/18, HDFFV-10332)
+
+
 Bug Fixes since HDF5-1.10.3 release
 ==================================
 
     Library
     -------
+    - Allow H5detect and H5make_libsettings to take a file as an argument.
+
+      Rather than only writing to stdout, add a command argument to name
+      the file that H5detect and H5make_libsettings will use for output.
+      Without an argument, stdout is still used, so backwards compatibility
+      is maintained.
+
+      (ADB - 2018/09/05, HDFFV-9059)
+
     - A bug was discovered in the parallel library where an application
       would hang if a collective read/write of a chunked dataset occurred
       when collective metadata reads were enabled and some of the ranks
