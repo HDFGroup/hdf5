@@ -7,4 +7,4 @@ set(CMAKE_CXX_COMPILER icpc)
 set(CMAKE_Fortran_COMPILER ifort)
 
 # the following is used if cross-compiling
-set(PRESET_PRINTF_LL "l")
+set(CMAKE_CROSSCOMPILING_EMULATOR "")
