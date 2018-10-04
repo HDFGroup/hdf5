@@ -33,7 +33,11 @@ endif ()
 #-----------------------------------------------------------------------------
 macro (FORTRAN_RUN FUNCTION_NAME SOURCE_CODE RUN_RESULT_VAR1 COMPILE_RESULT_VAR RETURN_VAR)
 #
-#  if (NOT DEFINED ${RUN_RESULT_VAR})
+#   if (CMAKE_CROSSCOMPILING)
+#      set (${OUTPUT_VAR} ${PRESET_${FUNCTION_NAME}})
+#      message (STATUS "Detecting Fortran ${FUNCTION_NAME}: force ${OUTPUT_VAR}")
+#      set(${RETURN_VAR} ${OUTPUT_VAR})
+#  else ()
     message (STATUS "Detecting Fortran ${FUNCTION_NAME}")
     if (CMAKE_REQUIRED_LIBRARIES)
       set (CHECK_FUNCTION_EXISTS_ADD_LIBRARIES

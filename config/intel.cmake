@@ -1,0 +1,8 @@
+#set(CMAKE_SYSTEM_NAME Linux)
+set(CMAKE_COMPILER_VENDOR "intel")
+
+set(CMAKE_C_COMPILER icc)
+set(CMAKE_CXX_COMPILER icpc)
+set(CMAKE_Fortran_COMPILER ifort)
+ 
+set(PRESET_PRINTF_LL "ll")
