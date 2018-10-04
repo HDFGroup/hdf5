@@ -275,9 +275,14 @@ IV. Further considerations
          packages there. Add the following CMake options:
             -DZLIB_LIBRARY:FILEPATH=some_location/lib/zlib.lib
             -DZLIB_INCLUDE_DIR:PATH=some_location/include
+            -DZLIB_USE_EXTERNAL:BOOL=OFF
             -DSZIP_LIBRARY:FILEPATH=some_location/lib/szlib.lib
             -DSZIP_INCLUDE_DIR:PATH=some_location/include
+            -DSZIP_USE_EXTERNAL:BOOL=OFF
          where "some_location" is the full path to the extlibs folder.
+         Also the appropriate environment variable must be set;
+            set(ENV{ZLIB_ROOT} "some_location")
+            set(ENV{SZIP_ROOT} "some_location")
 
       B. Use source packages from an GIT server by adding the following CMake
          options:
@@ -318,6 +323,34 @@ IV. Further considerations
            cmake -C ../config/cmake/cacheinit.cmake -G "Visual Studio 12 2013" \
                -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF -DHDF5_ENABLE_Z_LIB_SUPPORT:BOOL=OFF \
                -DCMAKE_BUILD_TYPE:STRING=Release ..
+
+   6. CMake uses a toolchain of utilities to compile, link libraries and
+      create archives, and other tasks to drive the build. The toolchain
+      utilities available are determined by the languages enabled. In normal
+      builds, CMake automatically determines the toolchain for host builds
+      based on system introspection and defaults. In cross-compiling
+      scenarios, a toolchain file may be specified with information about
+      compiler and utility paths.
+                Variables and Properties
+      Several variables relate to the language components of a toolchain which
+      are enabled. CMAKE_<LANG>_COMPILER is the full path to the compiler used
+      for <LANG>. CMAKE_<LANG>_COMPILER_ID is the identifier used by CMake for
+      the compiler and CMAKE_<LANG>_COMPILER_VERSION is the version of the compiler.
+
+      The CMAKE_<LANG>_FLAGS variables and the configuration-specific equivalents
+      contain flags that will be added to the compile command when compiling a
+      file of a particular language.
+
+      As the linker is invoked by the compiler driver, CMake needs a way to
+      determine which compiler to use to invoke the linker. This is calculated
+      by the LANGUAGE of source files in the target, and in the case of static
+      libraries, the language of the dependent libraries. The choice CMake makes
+      may be overridden with the LINKER_LANGUAGE target property.
+
+      See the CMake help for more information on using toolchain files.
+
+      To use a toolchain file with the supplied cmake scripts, see the
+      HDF5options.cmake file under the toolchain section.
 
 Notes: CMake and HDF5
 
@@ -591,6 +624,7 @@ HDF5_BUILD_TOOLS    "Build HDF5 Tools"               ON
 
 ---------------- HDF5 Advanced Options ---------------------
 ALLOW_UNSUPPORTED              "Allow unsupported combinations of configure options"          OFF
+HDF5_EXTERNAL_LIB_PREFIX       "Use prefix for custom library naming."                        ""
 HDF5_DISABLE_COMPILER_WARNINGS "Disable compiler warnings"                                    OFF
 HDF5_ENABLE_ALL_WARNINGS       "Enable all warnings"                                          OFF
 HDF5_ENABLE_CODESTACK          "Enable the function stack tracing (for developer debugging)." OFF
@@ -619,7 +653,8 @@ HDF_TEST_EXPRESS               "Control testing framework (0-3)"                
 HDF5_TEST_VFD                  "Execute tests with different VFDs"                            OFF
 HDF5_USE_16_API_DEFAULT        "Use the HDF5 1.6.x API by default"                            OFF
 HDF5_USE_18_API_DEFAULT        "Use the HDF5 1.8.x API by default"                            OFF
-HDF5_USE_110_API_DEFAULT       "Use the HDF5 1.10.x API by default"                           ON
+HDF5_USE_110_API_DEFAULT       "Use the HDF5 1.10.x API by default"                           OFF
+HDF5_USE_112_API_DEFAULT       "Use the HDF5 1.12.x API by default"                           ON
 HDF5_USE_FOLDERS               "Enable folder grouping of projects in IDEs."                  ON
 HDF5_WANT_DATA_ACCURACY        "IF data accuracy is guaranteed during data conversions"       ON
 HDF5_WANT_DCONV_EXCEPTION      "exception handling functions is checked during data conversions" ON
