@@ -279,36 +279,42 @@ if (NOT WINDOWS)
   option (HDF_ENABLE_LARGE_FILE "Enable support for large (64-bit) files on Linux." ON)
   if (HDF_ENABLE_LARGE_FILE)
     set (msg "Performing TEST_LFS_WORKS")
-    TRY_RUN (TEST_LFS_WORKS_RUN   TEST_LFS_WORKS_COMPILE
-        ${CMAKE_BINARY_DIR}
-        ${HDF_RESOURCES_EXT_DIR}/HDFTests.c
-        CMAKE_FLAGS -DCOMPILE_DEFINITIONS:STRING=-DTEST_LFS_WORKS
-        OUTPUT_VARIABLE OUTPUT
-    )
+    if (CMAKE_CROSSCOMPILING)
+      set (TEST_LFS_WORKS 1 CACHE INTERNAL ${msg})
+      set (LARGEFILE 1)
+      set (HDF_EXTRA_FLAGS ${HDF_EXTRA_FLAGS} -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -D_LARGEFILE_SOURCE)
+      message (STATUS "${msg} with presets... yes")
+    else ()
+      TRY_RUN (TEST_LFS_WORKS_RUN   TEST_LFS_WORKS_COMPILE
+          ${CMAKE_BINARY_DIR}
+          ${HDF_RESOURCES_EXT_DIR}/HDFTests.c
+          CMAKE_FLAGS -DCOMPILE_DEFINITIONS:STRING=-DTEST_LFS_WORKS
+      )
 
-    # The LARGEFILE definitions were from the transition period
-    # and are probably no longer needed. The FILE_OFFSET_BITS
-    # check should be generalized for all POSIX systems as it
-    # is in the Autotools.
-    if (TEST_LFS_WORKS_COMPILE)
-      if (TEST_LFS_WORKS_RUN MATCHES 0)
-        set (TEST_LFS_WORKS 1 CACHE INTERNAL ${msg})
-        set (LARGEFILE 1)
-        set (HDF_EXTRA_FLAGS ${HDF_EXTRA_FLAGS} -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -D_LARGEFILE_SOURCE)
-        message (STATUS "${msg}... yes")
+      # The LARGEFILE definitions were from the transition period
+      # and are probably no longer needed. The FILE_OFFSET_BITS
+      # check should be generalized for all POSIX systems as it
+      # is in the Autotools.
+      if (TEST_LFS_WORKS_COMPILE)
+        if (TEST_LFS_WORKS_RUN MATCHES 0)
+          set (TEST_LFS_WORKS 1 CACHE INTERNAL ${msg})
+          set (LARGEFILE 1)
+          set (HDF_EXTRA_FLAGS ${HDF_EXTRA_FLAGS} -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -D_LARGEFILE_SOURCE)
+          message (STATUS "${msg}... yes")
+        else ()
+          set (TEST_LFS_WORKS "" CACHE INTERNAL ${msg})
+          message (STATUS "${msg}... no")
+          file (APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
+                "Test TEST_LFS_WORKS Run failed with the following exit code:\n ${TEST_LFS_WORKS_RUN}\n"
+          )
+        endif ()
       else ()
         set (TEST_LFS_WORKS "" CACHE INTERNAL ${msg})
         message (STATUS "${msg}... no")
         file (APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
-              "Test TEST_LFS_WORKS Run failed with the following output and exit code:\n ${OUTPUT}\n"
+            "Test TEST_LFS_WORKS Compile failed\n"
         )
       endif ()
-    else ()
-      set (TEST_LFS_WORKS "" CACHE INTERNAL ${msg})
-      message (STATUS "${msg}... no")
-      file (APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
-          "Test TEST_LFS_WORKS Compile failed with the following output:\n ${OUTPUT}\n"
-      )
     endif ()
   endif ()
   set (CMAKE_REQUIRED_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS} ${HDF_EXTRA_FLAGS})
@@ -641,37 +647,42 @@ endforeach ()
 if (NOT ${HDF_PREFIX}_PRINTF_LL_WIDTH OR ${HDF_PREFIX}_PRINTF_LL_WIDTH MATCHES "unknown")
   set (PRINT_LL_FOUND 0)
   message (STATUS "Checking for appropriate format for 64 bit long:")
-  set (CURRENT_TEST_DEFINITIONS "-DPRINTF_LL_WIDTH")
-  if (${HDF_PREFIX}_SIZEOF_LONG_LONG)
-    set (CURRENT_TEST_DEFINITIONS "${CURRENT_TEST_DEFINITIONS} -DHAVE_LONG_LONG")
-  endif ()
-  TRY_RUN (${HDF_PREFIX}_PRINTF_LL_TEST_RUN   ${HDF_PREFIX}_PRINTF_LL_TEST_COMPILE
-      ${CMAKE_BINARY_DIR}
-      ${HDF_RESOURCES_EXT_DIR}/HDFTests.c
-      CMAKE_FLAGS -DCOMPILE_DEFINITIONS:STRING=${CURRENT_TEST_DEFINITIONS}
-      OUTPUT_VARIABLE OUTPUT
-  )
-  if (${HDF_PREFIX}_PRINTF_LL_TEST_COMPILE)
-    if (${HDF_PREFIX}_PRINTF_LL_TEST_RUN MATCHES 0)
-      string(REGEX REPLACE ".*PRINTF_LL_WIDTH=\\[(.*)\\].*" "\\1" ${HDF_PREFIX}_PRINTF_LL "${OUTPUT}")
-      set (${HDF_PREFIX}_PRINTF_LL_WIDTH "\"${${HDF_PREFIX}_PRINTF_LL}\"" CACHE INTERNAL "Width for printf for type `long long' or `__int64', us. `ll")
-      set (PRINT_LL_FOUND 1)
-    else ()
-      message ("Width test failed with result: ${${HDF_PREFIX}_PRINTF_LL_TEST_RUN}")
+  if (CMAKE_CROSSCOMPILING)
+      set (${HDF_PREFIX}_PRINTF_LL_WIDTH ${PRESET_PRINTF_LL})
+      message (STATUS "Checking for appropriate format for 64 bit long: force ${${HDF_PREFIX}_PRINTF_LL_WIDTH}")
+  else ()
+    set (CURRENT_TEST_DEFINITIONS "-DPRINTF_LL_WIDTH")
+    if (${HDF_PREFIX}_SIZEOF_LONG_LONG)
+      set (CURRENT_TEST_DEFINITIONS "${CURRENT_TEST_DEFINITIONS} -DHAVE_LONG_LONG")
     endif ()
-  else ()
-    file (APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log
-        "Test ${HDF_PREFIX}_PRINTF_LL_WIDTH failed with the following output:\n ${OUTPUT}\n"
+    TRY_RUN (${HDF_PREFIX}_PRINTF_LL_TEST_RUN   ${HDF_PREFIX}_PRINTF_LL_TEST_COMPILE
+        ${CMAKE_BINARY_DIR}
+        ${HDF_RESOURCES_EXT_DIR}/HDFTests.c
+        CMAKE_FLAGS -DCOMPILE_DEFINITIONS:STRING=${CURRENT_TEST_DEFINITIONS}
+        RUN_OUTPUT_VARIABLE OUTPUT
     )
-  endif ()
+    if (${HDF_PREFIX}_PRINTF_LL_TEST_COMPILE)
+      if (${HDF_PREFIX}_PRINTF_LL_TEST_RUN MATCHES 0)
+        string(REGEX REPLACE ".*PRINTF_LL_WIDTH=\\[(.*)\\].*" "\\1" ${HDF_PREFIX}_PRINTF_LL "${OUTPUT}")
+        set (${HDF_PREFIX}_PRINTF_LL_WIDTH "\"${${HDF_PREFIX}_PRINTF_LL}\"" CACHE INTERNAL "Width for printf for type `long long' or `__int64', us. `ll")
+        set (PRINT_LL_FOUND 1)
+      else ()
+        message ("Width test failed with result: ${${HDF_PREFIX}_PRINTF_LL_TEST_RUN}")
+      endif ()
+    else ()
+      file (APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log
+          "Test ${HDF_PREFIX}_PRINTF_LL_WIDTH failed\n"
+      )
+    endif ()
 
-  if (PRINT_LL_FOUND)
-    message (STATUS "Checking for appropriate format for 64 bit long: found ${${HDF_PREFIX}_PRINTF_LL_WIDTH}")
-  else ()
-    message (STATUS "Checking for appropriate format for 64 bit long: not found")
-    set (${HDF_PREFIX}_PRINTF_LL_WIDTH "\"unknown\"" CACHE INTERNAL
-        "Width for printf for type `long long' or `__int64', us. `ll"
-    )
+    if (PRINT_LL_FOUND)
+      message (STATUS "Checking for appropriate format for 64 bit long: found ${${HDF_PREFIX}_PRINTF_LL_WIDTH}")
+    else ()
+      message (STATUS "Checking for appropriate format for 64 bit long: not found")
+      set (${HDF_PREFIX}_PRINTF_LL_WIDTH "\"unknown\"" CACHE INTERNAL
+          "Width for printf for type `long long' or `__int64', us. `ll"
+      )
+    endif ()
   endif ()
 endif ()
 

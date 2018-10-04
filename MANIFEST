@@ -3148,6 +3148,8 @@
 ./java/lib/ext/slf4j-simple-1.7.25.jar
 
 # CMake-specific Files
+./config/intel.cmake
+
 ./config/cmake/cacheinit.cmake
 ./config/cmake/CMakeFindJavaCommon.cmake
 ./config/cmake/ConversionTests.c
