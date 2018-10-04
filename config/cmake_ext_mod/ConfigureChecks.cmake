@@ -648,7 +648,7 @@ if (NOT ${HDF_PREFIX}_PRINTF_LL_WIDTH OR ${HDF_PREFIX}_PRINTF_LL_WIDTH MATCHES "
   set (PRINT_LL_FOUND 0)
   message (STATUS "Checking for appropriate format for 64 bit long:")
   if (CMAKE_CROSSCOMPILING)
-      set (${HDF_PREFIX}_PRINTF_LL_WIDTH ${PRESET_PRINTF_LL})
+      set (${HDF_PREFIX}_PRINTF_LL_WIDTH "${PRESET_PRINTF_LL}")
       message (STATUS "Checking for appropriate format for 64 bit long: force ${${HDF_PREFIX}_PRINTF_LL_WIDTH}")
   else ()
     set (CURRENT_TEST_DEFINITIONS "-DPRINTF_LL_WIDTH")
