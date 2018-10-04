@@ -55,7 +55,7 @@ New Features
       CMAKE_CROSSCOMPILING_EMULATOR to be set. To help with cross-compiling
       the fortran configure process, the HDF5UseFortran.cmake file macros
       were improved. Fixed a Fortran configure file issue that incorrectly
-      used #cmakdefine instead of #define.
+      used #cmakedefine instead of #define.
 
       (ADB - 2018/10/04, HDFFV-10594)
 
@@ -240,7 +240,7 @@ Bug Fixes since HDF5-1.10.3 release
     Java Library:
     ----------------
     - JNI native library dependencies
-    
+
       The build for the hdf5_java native library used the wrong
       hdf5 target library for CMake builds. Correcting the hdf5_java
       library to build with the shared hdf5 library required testing
