@@ -31,7 +31,7 @@ endif ()
 # The provided CMake Fortran macros don't provide a general compile/run function
 # so this one is used.
 #-----------------------------------------------------------------------------
-macro (FORTRAN_RUN FUNCTION_NAME SOURCE_CODE RUN_RESULT_VAR1 COMPILE_RESULT_VAR RETURN_VAR)
+macro (FORTRAN_RUN FUNCTION_NAME SOURCE_CODE RUN_RESULT_VAR1 COMPILE_RESULT_VAR1 RETURN_VAR)
 #
 #   if (CMAKE_CROSSCOMPILING)
 #      set (${OUTPUT_VAR} ${PRESET_${FUNCTION_NAME}})
@@ -53,34 +53,27 @@ macro (FORTRAN_RUN FUNCTION_NAME SOURCE_CODE RUN_RESULT_VAR1 COMPILE_RESULT_VAR 
         ${CMAKE_BINARY_DIR}
         ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testFortranCompiler1.f90
         CMAKE_FLAGS "${CHECK_FUNCTION_EXISTS_ADD_LIBRARIES}"
-        RUN_OUTPUT_VARIABLE OUTPUT_VAR
     )
 
-    set(${RETURN_VAR} ${OUTPUT_VAR})
-
-    #message ( "Test result1 ${RETURN_VAR} ")
-    #message ( "Test result3 ${RESULT} ")
-    #message ( "Test result2 ${CMAKE_MATCH_0} ")
-    #message ( "Test result4 ${CMAKE_MATCH_1} ")
-    #message ( "* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ")
-    #message ( "Test result2 ${COMPILE_RESULT_VAR} ")
-    #message ( "* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ")
-    #message ( "Test result1 ${RUN_RESULT_VAR} ")
-    #message ( "* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ")
-
     if (${COMPILE_RESULT_VAR})
+      set(${RETURN_VAR} ${RUN_RESULT_VAR})
       if (${RUN_RESULT_VAR} MATCHES 0)
         message (STATUS "Testing Fortran ${FUNCTION_NAME} - OK")
         file (APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
-          "Determining if the Fortran ${FUNCTION_NAME} exists passed with the following output:\n"
-          "${OUTPUT_VAR}\n\n"
+            "Determining if the Fortran ${FUNCTION_NAME} exists passed\n"
         )
       else ()
         message (STATUS "Testing Fortran ${FUNCTION_NAME} - Fail")
         file (APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
-          "Determining if the Fortran ${FUNCTION_NAME} exists failed with the following output:\n"
-          "${OUTPUT_VAR}\n\n")
+            "Determining if the Fortran ${FUNCTION_NAME} exists failed: ${RUN_RESULT_VAR}\n"
+        )
       endif ()
+    else ()
+        message (STATUS "Compiling Fortran ${FUNCTION_NAME} - Fail")
+        file (APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
+            "Determining if the Fortran ${FUNCTION_NAME} compiles failed: ${COMPILE_RESULT_VAR}\n"
+        )
+        set(${RETURN_VAR} ${COMPILE_RESULT_VAR})
     endif ()
 #  endif ()
 endmacro ()
@@ -139,10 +132,10 @@ endif ()
 
 READ_SOURCE ("PROGRAM FC_AVAIL_KINDS" "END PROGRAM FC_AVAIL_KINDS" SOURCE_CODE)
 FORTRAN_RUN ("REAL and INTEGER KINDs"
-  "${SOURCE_CODE}"
-  XX
-  YY
-  PROG_OUTPUT
+    "${SOURCE_CODE}"
+    XX
+    YY
+    PROG_RESULT
 )
 # dnl The output from the above program will be:
 # dnl    -- LINE 1 --  valid integer kinds (comma seperated list)
@@ -201,15 +194,18 @@ foreach (KIND ${VAR} )
         USE ISO_C_BINDING
         IMPLICIT NONE
         INTEGER (KIND=${KIND}) a
-        WRITE(*,'(I0)') ${FC_SIZEOF_A}
+        OPEN(8,FILE='pac_validIntKinds.out',FORM='formatted')
+        WRITE(8,'(I0)') ${FC_SIZEOF_A}
+        CLOSE(8)
         END
      "
   )
   FORTRAN_RUN("INTEGER KIND SIZEOF" ${PROG_SRC}
-  XX
-  YY
-  PROG_OUTPUT1
+      XX
+      YY
+      PROG_RESULT1
   )
+  file (READ "${CMAKE_BINARY_DIR}/pac_validIntKinds.out" PROG_OUTPUT1)
   string (REGEX REPLACE "\n" "" PROG_OUTPUT1 "${PROG_OUTPUT1}")
   set (pack_int_sizeof "${pack_int_sizeof} ${PROG_OUTPUT1},")
 endforeach ()
@@ -245,15 +241,18 @@ foreach (KIND ${VAR} )
         USE ISO_C_BINDING
         IMPLICIT NONE
         REAL (KIND=${KIND}) a
-        WRITE(*,'(I0)') ${FC_SIZEOF_A}
+        OPEN(8,FILE='pac_validRealKinds.out',FORM='formatted')
+        WRITE(8,'(I0)') ${FC_SIZEOF_A}
+        CLOSE(8)
         END
      "
   )
   FORTRAN_RUN ("REAL KIND SIZEOF" ${PROG_SRC}
-  XX
-  YY
-  PROG_OUTPUT1
+      XX
+      YY
+      PROG_RESULT1
   )
+  file (READ "${CMAKE_BINARY_DIR}/pac_validRealKinds.out" PROG_OUTPUT1)
   string (REGEX REPLACE "\n" "" PROG_OUTPUT1 "${PROG_OUTPUT1}")
   set (pack_real_sizeof "${pack_real_sizeof} ${PROG_OUTPUT1},")
 endforeach ()
@@ -292,18 +291,21 @@ FORTRAN_RUN ("SIZEOF NATIVE KINDs"
           INTEGER a
           REAL b
           DOUBLE PRECISION c
-          WRITE(*,*) ${FC_SIZEOF_A}
-    WRITE(*,*) kind(a)
-    WRITE(*,*) ${FC_SIZEOF_B}
-    WRITE(*,*) kind(b)
-          WRITE(*,*) ${FC_SIZEOF_C}
-          WRITE(*,*) kind(c)
+          OPEN(8,FILE='pac_sizeof_native_kinds.out',FORM='formatted')
+          WRITE(8,*) ${FC_SIZEOF_A}
+          WRITE(8,*) kind(a)
+          WRITE(8,*) ${FC_SIZEOF_B}
+          WRITE(8,*) kind(b)
+          WRITE(8,*) ${FC_SIZEOF_C}
+          WRITE(8,*) kind(c)
+          CLOSE(8)
        END
   "
-  XX
-  YY
-  PROG_OUTPUT
-)
+      XX
+      YY
+      PROG_RESULT
+  )
+  file (READ "${CMAKE_BINARY_DIR}/pac_sizeof_native_kinds.out" PROG_OUTPUT)
 # dnl The output from the above program will be:
 # dnl    -- LINE 1 --  sizeof INTEGER
 # dnl    -- LINE 2 --  kind of INTEGER
