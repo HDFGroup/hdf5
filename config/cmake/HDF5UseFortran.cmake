@@ -32,12 +32,6 @@ endif ()
 # so this one is used.
 #-----------------------------------------------------------------------------
 macro (FORTRAN_RUN FUNCTION_NAME SOURCE_CODE RUN_RESULT_VAR1 COMPILE_RESULT_VAR1 RETURN_VAR)
-#
-#   if (CMAKE_CROSSCOMPILING)
-#      set (${OUTPUT_VAR} ${PRESET_${FUNCTION_NAME}})
-#      message (STATUS "Detecting Fortran ${FUNCTION_NAME}: force ${OUTPUT_VAR}")
-#      set(${RETURN_VAR} ${OUTPUT_VAR})
-#  else ()
     message (STATUS "Detecting Fortran ${FUNCTION_NAME}")
     file (WRITE
         ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testFortranCompiler1.f90
@@ -69,7 +63,6 @@ macro (FORTRAN_RUN FUNCTION_NAME SOURCE_CODE RUN_RESULT_VAR1 COMPILE_RESULT_VAR1
         )
         set(${RETURN_VAR} ${COMPILE_RESULT_VAR})
     endif ()
-#  endif ()
 endmacro ()
 
 # Read source line beginning at the line matching Input:"START" and ending at the line matching Input:"END"
