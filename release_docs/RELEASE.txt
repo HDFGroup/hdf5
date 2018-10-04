@@ -54,7 +54,7 @@ New Features
       CMAKE_CROSSCOMPILING_EMULATOR to be set. To help with cross-compiling
       the fortran configure process, the HDF5UseFortran.cmake file macros
       were improved. Fixed a Fortran configure file issue that incorrectly
-      used #cmakdefine instead of #define.
+      used #cmakedefine instead of #define.
 
       (ADB - 2018/10/04, HDFFV-10594)
 
