@@ -30,8 +30,6 @@
 !  access the dataset from the second file as a member of a group 
 !  in the first file. 
 
-
-
 MODULE TH5F
 
 CONTAINS

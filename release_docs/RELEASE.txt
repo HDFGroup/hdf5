@@ -1,4 +1,4 @@
-HDF5 version 1.10.4 released on 2018-09-10
+HDF5 version 1.10.4 currently under development
 ================================================================================
 
 
@@ -40,11 +40,63 @@ CONTENTS
 - CMake vs. Autotools installations
 
 
+New Features
+============
+
+    Configuration:
+    -------------
+    - Add toolchain and cross-compile support
+
+      Added info on using a toolchain file to INSTALL_CMAKE.txt. A
+      toolchain file is also used in cross-compiling, which requires
+      CMAKE_CROSSCOMPILING_EMULATOR to be set. To help with cross-compiling
+      the fortran configure process, the HDF5UseFortran.cmake file macros
+      were improved. Fixed a Fortran configure file issue that incorrectly
+      used #cmakedefine instead of #define.
+
+      (ADB - 2018/10/04, HDFFV-10594)
+
+    - Add warning flags for Intel compilers
+
+      Identified Intel compiler specific warnings flags that should be used
+      instead of GNU flags.
+
+      (ADB - 2018/10/04, TRILABS-21)
+
+    - Add default rpath to targets
+
+      Default rpaths should be set in shared executables and
+      libraries to allow the use of loading dependent libraries
+      without requiring LD_LIBRARY_PATH to be set. The default
+      path should be relative using @rpath on osx and $ORIGIN
+      on linux. Windows is not affected.
+
+      (ADB - 2018/09/26, HDFFV-10594)
+
+    Library:
+    --------
+    - Allow pre-generated H5Tinit.c and H5make_libsettings.c to be used.
+
+      Rather than always running H5detect and generating H5Tinit.c and
+      H5make_libsettings.c, supply a location for those files.
+
+      (ADB - 2018/09/18, HDFFV-10332)
+
+
 Bug Fixes since HDF5-1.10.3 release
 ==================================
 
     Library
     -------
+    - Allow H5detect and H5make_libsettings to take a file as an argument.
+
+      Rather than only writing to stdout, add a command argument to name
+      the file that H5detect and H5make_libsettings will use for output.
+      Without an argument, stdout is still used, so backwards compatibility
+      is maintained.
+
+      (ADB - 2018/09/05, HDFFV-9059)
+
     - A bug was discovered in the parallel library where an application
       would hang if a collective read/write of a chunked dataset occurred
       when collective metadata reads were enabled and some of the ranks
@@ -73,6 +125,30 @@ Bug Fixes since HDF5-1.10.3 release
       paths to change also.
 
       (ADB - 2018/08/31, HDFFV-10568)
+
+    - Java iterator callbacks
+
+      Change global callback object to a small stack structure in order
+      to fix a runtime crash. This crash was discovered when iterating
+      through a file with nested group members. The global variable
+      visit_callback is overwritten when recursion starts. When recursion
+      completes, visit_callback will be pointing to the wrong callback method.
+
+      (ADB - 2018/08/15, HDFFV-10536)
+
+    - Java HDFLibraryException class
+
+      Change parent class from Exception to RuntimeException.
+
+      (ADB - 2018/07/30, HDFFV-10534)
+
+    - JNI Read and Write
+
+      Refactored variable-length functions, H5DreadVL and H5AreadVL,
+      to correct dataset and attribute reads. New write functions,
+      H5DwriteVL and H5AwriteVL, are under construction.
+
+      (ADB - 2018/06/02, HDFFV-10519)
 
 
 Supported Platforms
@@ -121,6 +197,7 @@ Supported Platforms
     Mac OS Sierra 10.12.6         Apple LLVM version 8.1.0 (clang/clang++-802.0.42)
     64-bit                        gfortran GNU Fortran (GCC) 7.1.0
     (kite)                        Intel icc/icpc/ifort version 17.0.2
+
 
 Tested Configuration Features Summary
 =====================================

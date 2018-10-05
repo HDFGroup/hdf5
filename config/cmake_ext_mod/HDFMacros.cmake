@@ -358,6 +358,21 @@ macro (HDF_DIR_PATHS package_prefix)
     endif ()
   endif ()
 
+  set (CMAKE_SKIP_BUILD_RPATH  FALSE)
+  set (CMAKE_INSTALL_RPATH_USE_LINK_PATH  FALSE)
+  set (CMAKE_BUILD_WITH_INSTALL_RPATH ON)
+  if (APPLE)
+    set (CMAKE_INSTALL_NAME_DIR "@rpath")
+    set (CMAKE_INSTALL_RPATH
+        "@executable_path/../${${package_prefix}_INSTALL_LIB_DIR}"
+        "@executable_path/"
+        "@loader_path/../${${package_prefix}_INSTALL_LIB_DIR}"
+        "@loader_path/"
+    )
+  else ()
+    set (CMAKE_INSTALL_RPATH "\$ORIGIN/../${${package_prefix}_INSTALL_LIB_DIR}:\$ORIGIN/")
+  endif ()
+
   if (DEFINED ADDITIONAL_CMAKE_PREFIX_PATH AND EXISTS "${ADDITIONAL_CMAKE_PREFIX_PATH}")
     set (CMAKE_PREFIX_PATH ${ADDITIONAL_CMAKE_PREFIX_PATH} ${CMAKE_PREFIX_PATH})
   endif ()
