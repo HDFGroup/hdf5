@@ -2188,15 +2188,22 @@ H5I_dump_ids_for_type(H5I_type_t type)
     HDfprintf(stderr, "Dumping ID type %d\n", (int)type);
     type_ptr = H5I_id_type_list_g[type];
 
-    /* Header */
-    HDfprintf(stderr, "	 init_count = %u\n", type_ptr->init_count);
-    HDfprintf(stderr, "	 reserved   = %u\n", type_ptr->cls->reserved);
-    HDfprintf(stderr, "	 id_count   = %llu\n", (unsigned long long)type_ptr->id_count);
-    HDfprintf(stderr, "	 nextid	    = %llu\n", (unsigned long long)type_ptr->nextid);
+    if(type_ptr) {
 
-    /* List */
-    HDfprintf(stderr, "	 List:\n");
-    H5SL_iterate(type_ptr->ids, H5I__id_dump_cb, &type);
+        /* Header */
+        HDfprintf(stderr, "	 init_count = %u\n", type_ptr->init_count);
+        HDfprintf(stderr, "	 reserved   = %u\n", type_ptr->cls->reserved);
+        HDfprintf(stderr, "	 id_count   = %llu\n", (unsigned long long)type_ptr->id_count);
+        HDfprintf(stderr, "	 nextid	    = %llu\n", (unsigned long long)type_ptr->nextid);
+
+        /* List */
+        if(type_ptr->id_count > 0) {
+            HDfprintf(stderr, "	 List:\n");
+            H5SL_iterate(type_ptr->ids, H5I__id_dump_cb, &type);
+        }
+    }
+    else
+        HDfprintf(stderr, "Global type info/tracking pointer for that type is NULL\n");
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5I_dump_ids_for_type() */
