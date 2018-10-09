@@ -3728,7 +3728,7 @@ out:
         H5Pclose(fcpl);
         H5Fclose(fid);
     } H5E_END_TRY;
-    if(fd > 0)
+    if(fd >= 0)
         HDclose(fd);
 
     return -1;
@@ -3797,7 +3797,7 @@ out:
         H5Pclose(fcpl);
         H5Fclose(fid);
     } H5E_END_TRY;
-    if(fd > 0)
+    if(fd >= 0)
         HDclose(fd);
 
     return -1;
@@ -3838,7 +3838,7 @@ make_userblock_file(void)
 
 out:
 
-    if(fd > 0)
+    if(fd >= 0)
         HDclose(fd);
 
     return -1;
@@ -4134,13 +4134,19 @@ int write_dset_in(hid_t loc_id,
         }
 
         /* create a type larger than TEST_BUFSIZE */
-        if ((tid = H5Tarray_create2(H5T_NATIVE_DOUBLE, 1, tdims)) < 0)
+        if ((tid = H5Tarray_create2(H5T_NATIVE_DOUBLE, 1, tdims)) < 0) {
+            HDfree(dbuf);
             goto out;
+        }
         size = H5Tget_size(tid);
-        if ((sid = H5Screate_simple(1, sdims, NULL)) < 0)
+        if ((sid = H5Screate_simple(1, sdims, NULL)) < 0) {
+            HDfree(dbuf);
             goto out;
-        if ((did = H5Dcreate2(loc_id, "arrayd", tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        }
+        if ((did = H5Dcreate2(loc_id, "arrayd", tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
+            HDfree(dbuf);
             goto out;
+        }
 #if defined(WRITE_ARRAY)
         H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, dbuf);
 #endif
@@ -4149,7 +4155,7 @@ int write_dset_in(hid_t loc_id,
         H5Dclose(did);
         H5Tclose(tid);
         H5Sclose(sid);
-        HDfree( dbuf );
+        HDfree(dbuf);
     }
 
     /*-------------------------------------------------------------------------

@@ -98,6 +98,9 @@ int main(int argc, char *argv[])
     (void) HDsetvbuf(stderr, (char *) NULL, _IOLBF, 0);
     (void) HDsetvbuf(stdout, (char *) NULL, _IOLBF, 0);
 
+    /* Initialize the file structure to 0 */
+    HDmemset(&opt, 0, sizeof(struct Options));
+
     if (argv[1] && (HDstrcmp("-V", argv[1]) == 0)) {
         print_version(PROGRAMNAME);
         HDexit(EXIT_SUCCESS);
@@ -111,9 +114,6 @@ int main(int argc, char *argv[])
         usage(argv[0]);
         goto err;
     }
-
-    /* Initialize the file structure to 0 */
-    HDmemset(&opt, 0, sizeof(struct Options));
 
     /*
      * parse the command line
@@ -1665,7 +1665,7 @@ static int processConfigurationFile(char *infile, struct Input *in)
                             }
                             else { /* Dimension */
                                 icount++;
-                                if (icount > MAX_NUM_DIMENSION) {
+                                if (icount >+ MAX_NUM_DIMENSION) {
                                     (void) HDfprintf(stderr, "Invalid value for rank.\n");
                                     goto error;
                                 }
@@ -1750,7 +1750,7 @@ static int processConfigurationFile(char *infile, struct Input *in)
                                 }
                                 else { /* comma */
                                     i++;
-                                    if (i > MAX_NUM_DIMENSION) {
+                                    if (i >= MAX_NUM_DIMENSION) {
                                         (void) HDfprintf(stderr, "Invalid value for rank.\n");
                                         goto error;
                                     }
@@ -2023,7 +2023,7 @@ static int processConfigurationFile(char *infile, struct Input *in)
                                 }
                                 else { /* Dimension */
                                     icount++;
-                                    if (icount > MAX_NUM_DIMENSION) {
+                                    if (icount >= MAX_NUM_DIMENSION) {
                                         (void) HDfprintf(stderr, "Invalid value for rank.\n");
                                         goto error;
                                     }
