@@ -32,6 +32,7 @@
 #include "H5Fpkg.h"
 #include "H5Gpkg.h"
 #include "H5Ipkg.h"
+#include "H5VLprivate.h"        /* Virtual Object Layer                     */
 
 /* Evict on close is not supported under parallel at this time.
  * In the meantime, we just run a simple check that EoC can't be
@@ -598,7 +599,7 @@ check_group_layout(hid_t fid, const char *group_name)
     /* NOTE: The TESTING() macro is called in main() */
 
     /* Get a pointer to the file struct */
-    if(NULL == (file_ptr = (H5F_t *)H5I_object_verify(fid, H5I_FILE)))
+    if(NULL == (file_ptr = (H5F_t *)H5VL_object_verify(fid, H5I_FILE)))
         TEST_ERROR;
 
     /* Record the number of cache entries */
@@ -614,7 +615,7 @@ check_group_layout(hid_t fid, const char *group_name)
     /* Open the main group and get its tag */
     if((gid1 = H5Gopen2(fid, group_name, H5P_DEFAULT)) < 0)
         TEST_ERROR;
-    if(NULL == (grp_ptr = (H5G_t *)H5I_object_verify(gid1, H5I_GROUP)))
+    if(NULL == (grp_ptr = (H5G_t *)H5VL_object_verify(gid1, H5I_GROUP)))
         TEST_ERROR;
     tag1 = grp_ptr->oloc.addr;
 
@@ -631,7 +632,7 @@ check_group_layout(hid_t fid, const char *group_name)
         if((gid2 = H5Gopen2(gid1, subgroup_name, H5P_DEFAULT)) < 0)
             TEST_ERROR;
 
-        if(NULL == (grp_ptr = (H5G_t *)H5I_object_verify(gid2, H5I_GROUP)))
+        if(NULL == (grp_ptr = (H5G_t *)H5VL_object_verify(gid2, H5I_GROUP)))
             TEST_ERROR;
         tag2 = grp_ptr->oloc.addr;
 
@@ -712,7 +713,7 @@ check_dset_scheme(hid_t fid, const char *dset_name)
     /* NOTE: The TESTING() macro is called in main() */
 
     /* Get a pointer to the file struct */
-    if(NULL == (file_ptr = (H5F_t *)H5I_object_verify(fid, H5I_FILE)))
+    if(NULL == (file_ptr = (H5F_t *)H5VL_object_verify(fid, H5I_FILE)))
         TEST_ERROR;
 
     /* Create the data buffer */
@@ -732,7 +733,7 @@ check_dset_scheme(hid_t fid, const char *dset_name)
     /* Open dataset and get the metadata tag */
     if((did = H5Dopen2(fid, dset_name, H5P_DEFAULT)) < 0)
         TEST_ERROR;
-    if(NULL == (dset_ptr = (H5D_t *)H5I_object_verify(did, H5I_DATASET)))
+    if(NULL == (dset_ptr = (H5D_t *)H5VL_object_verify(did, H5I_DATASET)))
         TEST_ERROR;
     tag = dset_ptr->oloc.addr;
 

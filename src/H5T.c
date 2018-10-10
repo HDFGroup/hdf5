@@ -41,6 +41,7 @@
 #include "H5MMprivate.h"        /* Memory management                        */
 #include "H5Pprivate.h"         /* Property lists                           */
 #include "H5Tpkg.h"             /* Datatypes                                */
+#include "H5VLprivate.h"        /* Virtual Object Layer                     */
 
 
 /****************/
@@ -1607,6 +1608,21 @@ H5T__close_cb(H5T_t *dt)
     HDassert(dt);
     HDassert(dt->shared);
 
+    /* If this datatype is VOL-managed (i.e.: has a VOL object),
+     * close it through the VOL driver.
+     */
+    if(NULL != dt->vol_obj) {
+
+        /* Close the driver-managed datatype data */
+        if(H5VL_datatype_close(dt->vol_obj->data, dt->vol_obj->driver->cls, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, FAIL, "unable to close datatype");
+
+        /* Free the VOL object */
+        if(H5VL_free_object(dt->vol_obj) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTDEC, FAIL, "unable to free VOL object");
+        dt->vol_obj = NULL;
+    }
+
     /* Close the datatype */
     if(H5T_close(dt) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, FAIL, "unable to close datatype");
@@ -1650,11 +1666,11 @@ H5Tcreate(H5T_class_t type, size_t size)
 
     /* create the type */
     if(NULL == (dt = H5T__create(type, size)))
-    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to create type")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to create type")
 
     /* Get an ID for the datatype */
     if((ret_value = H5I_register(H5I_DATATYPE, dt, TRUE)) < 0)
-    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype ID")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype ID")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1701,7 +1717,7 @@ H5Tcopy(hid_t type_id)
                 H5D_t    *dset;          /* Dataset for datatype */
 
                 /* The argument is a dataset handle */
-                if(NULL == (dset = (H5D_t *)H5I_object(type_id)))
+                if(NULL == (dset = (H5D_t *)H5VL_object(type_id)))
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a dataset")
                 if(NULL == (dt = H5D_typeof(dset)))
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, H5I_INVALID_HID, "unable to get the dataset datatype")
@@ -1716,6 +1732,7 @@ H5Tcopy(hid_t type_id)
         case H5I_ATTR:
         case H5I_REFERENCE:
         case H5I_VFL:
+        case H5I_VOL:
         case H5I_GENPROP_CLS:
         case H5I_GENPROP_LST:
         case H5I_ERROR_CLASS:
@@ -3039,6 +3056,8 @@ H5T_decode(size_t buf_size, const unsigned char *buf)
     if(H5T_set_loc(ret_value, NULL, H5T_LOC_MEMORY) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "invalid datatype location")
 
+    /* No VOL object */
+    ret_value->vol_obj = NULL;
 done:
     /* Release fake file structure */
     if(f && H5F_fake_free(f) < 0)
@@ -3162,6 +3181,9 @@ H5T__create(H5T_class_t type, size_t size)
     if(H5T_STRING != type || H5T_VARIABLE != size)
         dt->shared->size = size;
 
+    /* No VOL object */
+    dt->vol_obj = NULL;
+
     /* Set return value */
     ret_value = dt;
 
@@ -3214,6 +3236,9 @@ H5T_copy(H5T_t *old_dt, H5T_copy_t method)
 
     /* Copy shared information (entry information is copied last) */
     *(new_dt->shared) = *(old_dt->shared);
+
+    /* No VOL object */
+    new_dt->vol_obj = NULL;
 
     /* Check what sort of copy we are making */
     switch (method) {
@@ -3543,6 +3568,9 @@ H5T__alloc(void)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
     dt->shared->version = H5O_DTYPE_VERSION_1;
 
+    /* No VOL object initially */
+    dt->vol_obj = NULL;
+
     /* Assign return value */
     ret_value = dt;
 
@@ -3643,7 +3671,8 @@ done:
  *
  * Purpose:   Frees a datatype and all associated memory.
  *
- * Hote:      Does _not_ deal with open named datatypes, etc.
+ * Note:      Does _not_ deal with open named datatypes, etc. so this
+ *            should never see a type managed by a VOL driver.
  *
  * Return:    Non-negative on success/Negative on failure
  *
@@ -5115,8 +5144,10 @@ H5T_is_named(const H5T_t *dt)
 
     HDassert(dt);
 
-    if(dt->shared->state == H5T_STATE_OPEN || dt->shared->state == H5T_STATE_NAMED)
+    if(dt->vol_obj)
         ret_value = TRUE;
+    else
+        ret_value = (H5T_STATE_OPEN == dt->shared->state || H5T_STATE_NAMED == dt->shared->state);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -5157,6 +5188,20 @@ H5T_convert_committed_datatype(H5T_t *dt, H5F_t *f)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTRESET, FAIL, "unable to initialize location")
         if(H5G_name_free(&dt->path) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTOPENOBJ, FAIL, "unable to reset path")
+
+        /* If the datatype is committed through the VOL, close it */
+        if (NULL != dt->vol_obj) {
+            H5VL_object_t *vol_obj = dt->vol_obj;
+
+            /* Close the datatype through the VOL*/
+            if ((ret_value = H5VL_datatype_close(vol_obj->data, vol_obj->driver->cls, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)) < 0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, FAIL, "unable to close datatype");
+
+            /* Free the datatype and set the VOL object pointer to NULL */
+            if (H5VL_free_object(vol_obj) < 0)
+                HGOTO_ERROR(H5E_ATTR, H5E_CANTDEC, FAIL, "unable to free VOL object");
+            dt->vol_obj = NULL;
+        }
 
         dt->shared->state = H5T_STATE_TRANSIENT;
     }

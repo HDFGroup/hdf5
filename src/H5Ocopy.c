@@ -43,6 +43,7 @@
 #include "H5MMprivate.h"        /* Memory management                        */
 #include "H5Opkg.h"             /* Object headers                           */
 #include "H5Pprivate.h"         /* Property lists                           */
+#include "H5VLprivate.h"        /* Virtual Object Layer                     */
 
 
 /****************/
@@ -197,10 +198,12 @@ H5FL_DEFINE(haddr_t);
  */
 herr_t
 H5Ocopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
-    const char *dst_name, hid_t ocpypl_id, hid_t lcpl_id)
+        const char *dst_name, hid_t ocpypl_id, hid_t lcpl_id)
 {
-    H5G_loc_t	loc;                    /* Source group group location */
-    H5G_loc_t	dst_loc;                /* Destination group location */
+    H5VL_object_t    *vol_obj1 = NULL;        /* object token of src_id */
+    H5VL_loc_params_t loc_params1;
+    H5VL_object_t    *vol_obj2 = NULL;        /* object token of dst_id */
+    H5VL_loc_params_t loc_params2;
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -208,10 +211,6 @@ H5Ocopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
              ocpypl_id, lcpl_id);
 
     /* Check arguments */
-    if(H5G_loc(src_loc_id, &loc) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
-    if(H5G_loc(dst_loc_id, &dst_loc) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
     if(!src_name || !*src_name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no source name specified")
     if(!dst_name || !*dst_name)
@@ -235,8 +234,22 @@ H5Ocopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
     if(H5CX_set_loc(src_loc_id) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set collective metadata read info")
 
+    /* get the object */
+    if(NULL == (vol_obj1 = (H5VL_object_t *)H5I_object(src_loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
+    loc_params1.type        = H5VL_OBJECT_BY_SELF;
+    loc_params1.obj_type    = H5I_get_type(src_loc_id);
+
+    /* get the object */
+    if(NULL == (vol_obj2 = (H5VL_object_t *)H5I_object(dst_loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
+    loc_params2.type        = H5VL_OBJECT_BY_SELF;
+    loc_params2.obj_type    = H5I_get_type(dst_loc_id);
+
     /* Copy the object */
-    if(H5O_copy(&loc, src_name, &dst_loc, dst_name, ocpypl_id, lcpl_id) < 0)
+    if((ret_value = H5VL_object_copy(vol_obj1->data, loc_params1, vol_obj1->driver->cls, src_name,
+                                     vol_obj2->data, loc_params2, vol_obj2->driver->cls, dst_name,
+                                     ocpypl_id, lcpl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy object")
 
 done:
@@ -1784,7 +1797,7 @@ H5O__copy_search_comm_dt(H5F_t *file_src, H5O_t *oh_src,
     HDassert(oh_src);
     HDassert(oloc_dst);
     HDassert(oloc_dst->file);
-    HDassert(H5F_FILE_ID(oloc_dst->file) >= 0);
+    HDassert(H5F_ID_EXISTS(oloc_dst->file));
     HDassert(cpy_info);
 
     /* Allocate key */

@@ -37,6 +37,9 @@
 #include "H5Pprivate.h"         /* Property lists                           */
 #include "H5SMprivate.h"        /* Shared Object Header Messages            */
 #include "H5Tprivate.h"         /* Datatypes                                */
+#include "H5VLprivate.h"        /* VOL drivers                              */
+
+#include "H5VLnative.h"         /* Native VOL driver                        */
 
 
 /****************/
@@ -438,6 +441,7 @@ H5F__get_objects_cb(void *obj_ptr, hid_t obj_id, void *key)
             case H5I_DATASPACE:
             case H5I_REFERENCE:
             case H5I_VFL:
+            case H5I_VOL:
             case H5I_GENPROP_CLS:
             case H5I_GENPROP_LST:
             case H5I_ERROR_CLASS:
@@ -782,15 +786,11 @@ done:
  *
  * Purpose:     Check the file signature to detect an HDF5 file.
  *
- * Bugs:        This function is not robust: it only uses the default file
- *              driver when attempting to open the file when in fact it
- *              should use all known file drivers.
- *
  * Return:      TRUE/FALSE/FAIL
  *-------------------------------------------------------------------------
  */
 htri_t
-H5F__is_hdf5(const char *name)
+H5F__is_hdf5(const char *name, hid_t fapl_id)
 {
     H5FD_t         *file = NULL;            /* Low-level file struct                    */
     haddr_t         sig_addr;               /* Addess of hdf5 file signature            */
@@ -799,7 +799,10 @@ H5F__is_hdf5(const char *name)
     FUNC_ENTER_PACKAGE
 
     /* Open the file */
-    if(NULL == (file = H5FD_open(name, H5F_ACC_RDONLY, H5P_FILE_ACCESS_DEFAULT, HADDR_UNDEF)))
+    /* NOTE:    This now uses the fapl_id that was passed in, so H5Fis_accessible()
+     *          should work with arbitrary VFDs, unlike H5Fis_hdf5().
+     */
+    if(NULL == (file = H5FD_open(name, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF)))
         HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "unable to open file")
 
     /* The file is an hdf5 file if the hdf5 file signature can be found */
@@ -843,7 +846,7 @@ H5F__new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_
 
     if(NULL == (f = H5FL_CALLOC(H5F_t)))
         HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, NULL, "can't allocate top file structure")
-    f->file_id = H5I_INVALID_HID;
+    f->id_exists = FALSE;
 
     if(shared) {
         HDassert(lf == NULL);
@@ -1468,26 +1471,12 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
         tent_flags = flags;
 
     if(NULL == (lf = H5FD_open(name, tent_flags, fapl_id, HADDR_UNDEF))) {
-        if(tent_flags == flags) {
-#ifndef H5_USING_MEMCHECKER
-            time_t mytime = HDtime(NULL);
-
-            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file: time = %s, name = '%s', tent_flags = %x", HDctime(&mytime), name, tent_flags)
-#else /* H5_USING_MEMCHECKER */
+        if(tent_flags == flags)
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file: name = '%s', tent_flags = %x", name, tent_flags)
-#endif /* H5_USING_MEMCHECKER */
-        } /* end if */
         H5E_clear_stack(NULL);
         tent_flags = flags;
-        if(NULL == (lf = H5FD_open(name, tent_flags, fapl_id, HADDR_UNDEF))) {
-#ifndef H5_USING_MEMCHECKER
-            time_t mytime = HDtime(NULL);
-
-            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file: time = %s, name = '%s', tent_flags = %x", HDctime(&mytime), name, tent_flags)
-#else /* H5_USING_MEMCHECKER */
+        if(NULL == (lf = H5FD_open(name, tent_flags, fapl_id, HADDR_UNDEF)))
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file: name = '%s', tent_flags = %x", name, tent_flags)
-#endif /* H5_USING_MEMCHECKER */
-        } /* end if */
     } /* end if */
 
     /* Is the file already open? */
@@ -1893,41 +1882,60 @@ H5F__flush(H5F_t *f)
 /*-------------------------------------------------------------------------
  * Function:    H5F__close
  *
- * Purpose:     Internal routine to close a file.
+ * Purpose:     Closes a file or causes the close operation to be pended.
+ *              This function is called two ways: from the API it gets called
+ *              by H5Fclose->H5I_dec_ref->H5F__close when H5I_dec_ref()
+ *              decrements the file ID reference count to zero.  The file ID
+ *              is removed from the H5I_FILE group by H5I_dec_ref() just
+ *              before H5F__close() is called. If there are open object
+ *              headers then the close is pended by moving the file to the
+ *              H5I_FILE_CLOSING ID group (the f->closing contains the ID
+ *              assigned to file).
+ *
+ *              This function is also called directly from H5O_close() when
+ *              the last object header is closed for the file and the file
+ *              has a pending close.
  *
  * Return:      SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F__close(hid_t file_id)
+H5F__close(H5F_t *f)
 {
-    H5F_t       *f;                     /* File pointer */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_PACKAGE
 
-    /* Flush file if this is the last reference to this id and we have write
-     * intent, unless it will be flushed by the "shared" file being closed.
-     * This is only necessary to replicate previous behaviour, and could be
-     * disabled by an option/property to improve performance.
+    /* Sanity check */
+    HDassert(f);
+
+    /* Perform checks for "semi" file close degree here, since closing the
+     * file is not allowed if there are objects still open.
      */
-    if(NULL == (f = (H5F_t *)H5I_object(file_id)))
-        HGOTO_ERROR(H5E_FILE, H5E_BADTYPE, FAIL, "invalid file identifier")
-    if((f->shared->nrefs > 1) && (H5F_INTENT(f) & H5F_ACC_RDWR)) {
-        int nref;       /* Number of references to file ID */
+    if(f->shared->fc_degree == H5F_CLOSE_SEMI) {
+        unsigned nopen_files = 0;       /* Number of open files in file/mount hierarchy */
+        unsigned nopen_objs = 0;        /* Number of open objects in file/mount hierarchy */
 
-        if((nref = H5I_get_ref(file_id, FALSE)) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get ID ref count")
-        if(nref == 1)
-            if(H5F__flush(f) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
-    } /* end if */
+        /* Get the number of open objects and open files on this file/mount hierarchy */
+        if(H5F__mount_count_ids(f, &nopen_files, &nopen_objs) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_MOUNT, FAIL, "problem checking mount hierarchy")
 
-    /* Decrement reference count on file ID */
-    /* (When it reaches zero the file will be closed) */
-    if(H5I_dec_app_ref(file_id) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "decrementing file ID failed")
+        /* If there are no other file IDs open on this file/mount hier., but
+         * there are still open objects, issue an error and bail out now,
+         * without decrementing the file ID's reference count and triggering
+         * a "real" attempt at closing the file.
+         */
+        if(nopen_files == 1 && nopen_objs > 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close file, there are objects still open")
+    }
+
+    /* Reset the file ID for this file */
+    f->id_exists = FALSE;
+
+    /* Attempt to close the file/mount hierarchy */
+    if(H5F_try_close(f, NULL) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close file")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2167,18 +2175,17 @@ H5F_get_id(H5F_t *file, hbool_t app_ref)
 
     HDassert(file);
 
-    if(file->file_id == -1) {
-        /* Get an atom for the file */
-        if((file->file_id = H5I_register(H5I_FILE, file, app_ref)) < 0)
-            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize file")
+    if(H5I_find_id(file, H5I_FILE, &ret_value) < 0 || H5I_INVALID_HID == ret_value) {
+        /* resurrect the ID - Register an ID with the native driver */
+        if((ret_value = H5VL_native_register(H5I_FILE, file, app_ref)) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register group")
+        file->id_exists = TRUE;
     }
     else {
         /* Increment reference count on existing ID */
-        if(H5I_inc_ref(file->file_id, app_ref) < 0)
+        if(H5I_inc_ref(ret_value, app_ref) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTSET, H5I_INVALID_HID, "incrementing file ID failed")
     }
-
-    ret_value = file->file_id;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3228,6 +3235,7 @@ H5F__start_swmr_write(H5F_t *f)
     H5G_name_t *obj_paths = NULL;   /* Group hierarchy path */
     size_t u;                       /* Local index variable */
     hbool_t setup = FALSE;          /* Boolean flag to indicate whether SWMR setting is enabled */
+    H5VL_t *vol_driver = NULL;      /* VOL driver for the file */
     herr_t ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -3291,6 +3299,16 @@ H5F__start_swmr_write(H5F_t *f)
         if(H5F_get_obj_ids(f, H5F_OBJ_GROUP|H5F_OBJ_DATASET, grp_dset_count, obj_ids, FALSE, &grp_dset_count) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "H5F_get_obj_ids failed")
 
+        /* Save the VOL driver for the refresh step */
+        if(grp_dset_count > 0) {
+            H5VL_object_t *vol_obj = NULL;
+
+            if(NULL == (vol_obj = H5VL_get_object(obj_ids[0])))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
+
+            vol_driver = vol_obj->driver;
+        }
+
         /* Refresh opened objects (groups, datasets) in the file */
         for(u = 0; u < grp_dset_count; u++) {
             H5O_loc_t *oloc;            /* object location */
@@ -3353,7 +3371,7 @@ H5F__start_swmr_write(H5F_t *f)
 
     /* Refresh (reopen) the objects (groups & datasets) in the file */
     for(u = 0; u < grp_dset_count; u++) {
-        if(H5O_refresh_metadata_reopen(obj_ids[u], &obj_glocs[u], TRUE) < 0)
+        if(H5O_refresh_metadata_reopen(obj_ids[u], &obj_glocs[u], vol_driver, TRUE) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CLOSEERROR, FAIL, "can't refresh-close object")
     }
 

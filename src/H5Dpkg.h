@@ -110,6 +110,15 @@ typedef struct H5D_type_info_t {
     hbool_t  bkg_buf_allocated;          /* Whether the background buffer was allocated */
 } H5D_type_info_t;
 
+/* types for dataset optional VOL operations */
+typedef enum H5VL_dataset_optional_t {
+    H5VL_DATASET_FORMAT_CONVERT,            /* H5Dformat_convert (internal) */
+    H5VL_DATASET_GET_CHUNK_INDEX_TYPE,      /* H5Dget_chunk_index_type      */
+    H5VL_DATASET_GET_CHUNK_STORAGE_SIZE,    /* H5Dget_chunk_storage_size    */
+    H5VL_DATASET_CHUNK_READ,                /* H5Dchunk_read                */
+    H5VL_DATASET_CHUNK_WRITE,               /* H5Dchunk_write               */
+} H5VL_dataset_optional_t;
+
 /* Forward declaration of structs used below */
 struct H5D_io_info_t;
 struct H5D_chunk_map_t;
@@ -510,7 +519,7 @@ typedef struct H5D_fill_buf_info_t {
 
 /* Internal data structure for computing variable-length dataset's total size */
 typedef struct {
-    H5D_t *dset;                    /* Dataset for operation */
+    H5VL_object_t *dset_vol_obj;    /* VOL object for the dataset */
     hid_t fspace_id;                /* File dataspace ID of the dataset we are working on */
     hid_t mspace_id;                /* Memory dataspace ID of the dataset we are working on */
     void *fl_tbuf;                  /* Ptr to the temporary buffer we are using for fixed-length data */

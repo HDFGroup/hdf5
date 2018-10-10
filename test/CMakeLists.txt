@@ -128,6 +128,38 @@ endif ()
     )
   endforeach ()
 
+  #-----------------------------------------------------------------------------
+  # Define VOL Plugin Test Sources
+  #-----------------------------------------------------------------------------
+  set (VOL_PLUGIN_LIBS
+      echo_vol
+  )
+
+  foreach (vol_lib ${VOL_PLUGIN_LIBS})
+    set (HDF5_VOL_PLUGIN_LIB_CORENAME           "${vol_lib}")
+    set (HDF5_VOL_PLUGIN_LIB_NAME               "${HDF5_EXTERNAL_LIB_PREFIX}${HDF5_VOL_PLUGIN_LIB_CORENAME}")
+    set (HDF5_VOL_PLUGIN_LIB_TARGET             ${HDF5_VOL_PLUGIN_LIB_CORENAME})
+
+    add_library (${HDF5_VOL_PLUGIN_LIB_TARGET} SHARED ${HDF5_TEST_SOURCE_DIR}/${vol_lib}.c)
+    target_include_directories(${HDF5_VOL_PLUGIN_LIB_TARGET} PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+    TARGET_C_PROPERTIES (${HDF5_VOL_PLUGIN_LIB_TARGET} SHARED)
+    target_link_libraries (${HDF5_VOL_PLUGIN_LIB_TARGET} PUBLIC ${HDF5_TEST_LIB_TARGET})
+    H5_SET_LIB_OPTIONS (${HDF5_VOL_PLUGIN_LIB_TARGET} ${HDF5_VOL_PLUGIN_LIB_NAME} SHARED "LIB")
+    set_target_properties (${HDF5_VOL_PLUGIN_LIB_TARGET} PROPERTIES FOLDER libraries/TEST_PLUGIN)
+
+    #-----------------------------------------------------------------------------
+    # Copy VOL plugin to a plugins folder
+    #-----------------------------------------------------------------------------
+    add_custom_command (
+        TARGET     ${HDF5_VOL_PLUGIN_LIB_TARGET}
+        POST_BUILD
+        COMMAND    ${CMAKE_COMMAND}
+        ARGS       -E copy_if_different
+          "$<TARGET_FILE:${HDF5_VOL_PLUGIN_LIB_TARGET}>"
+          "${CMAKE_BINARY_DIR}/vol/$<TARGET_FILE_NAME:${HDF5_VOL_PLUGIN_LIB_TARGET}>"
+    )
+  endforeach ()
+
 #################################################################################
 #  Test program sources
 #################################################################################
@@ -234,6 +266,7 @@ set (H5_TESTS
     cache_logging
     cork
     swmr
+    vol
 )
 
 macro (ADD_H5_EXE file)

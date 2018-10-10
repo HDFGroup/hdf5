@@ -527,6 +527,7 @@ set (test_CLEANFILES
     vds_swmr_src_*.h5
     tmp/vds_src_2.h5
     direct_chunk.h5
+    native_vol_test.h5
 )
 
 # Remove any output file left over from previous test run
@@ -1058,13 +1059,13 @@ if (TEST_SHELL_SCRIPTS)
 endif()
 
 if (ENABLE_EXTENDED_TESTS)
-    ##############################################################################
-    ###    S W M R  T E S T S
-    ##############################################################################
-    #       testflushrefresh.sh: flushrefresh
-    #       test_usecases.sh: use_append_chunk, use_append_mchunks, use_disable_mdc_flushes
-    #       testswmr.sh: swmr*
-    #       testvdsswmr.sh: vds_swmr*
+##############################################################################
+###    S W M R  T E S T S
+##############################################################################
+#       testflushrefresh.sh: flushrefresh
+#       test_usecases.sh: use_append_chunk, use_append_mchunks, use_disable_mdc_flushes
+#       testswmr.sh: swmr*
+#       testvdsswmr.sh: vds_swmr*
 
 #  add_test (NAME H5Test-swmr_check_compat_vfd COMMAND $<TARGET_FILE:swmr_check_compat_vfd>)
 

@@ -23,6 +23,7 @@
 #include "H5CXprivate.h"        /* API Contexts                         */
 #include "H5HLprivate.h"
 #include "H5Iprivate.h"
+#include "H5VLprivate.h"        /* Virtual Object Layer                     */
 
 const char *FILENAME[] = {
     "lheap",
@@ -78,7 +79,7 @@ main(void)
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
     if(FAIL == (file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)))
         goto error;
-    if(NULL == (f = (H5F_t *)H5I_object(file))) {
+    if(NULL == (f = (H5F_t *)H5VL_object(file))) {
         H5_FAILED();
         H5Eprint2(H5E_DEFAULT, stdout);
         goto error;
@@ -128,7 +129,7 @@ main(void)
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
     if(FAIL == (file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)))
         goto error;
-    if(NULL == (f = (H5F_t *)H5I_object(file))) {
+    if(NULL == (f = (H5F_t *)H5VL_object(file))) {
         H5_FAILED();
         H5Eprint2(H5E_DEFAULT, stdout);
         goto error;

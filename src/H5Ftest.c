@@ -44,6 +44,7 @@
 #include "H5Gpkg.h"             /* Groups                                   */
 #include "H5Iprivate.h"         /* IDs                                      */
 #include "H5SMpkg.h"            /* Shared object header messages            */
+#include "H5VLprivate.h"        /* Virtual Object Layer                     */
 
 
 /****************/
@@ -103,7 +104,7 @@ H5F__get_sohm_mesg_count_test(hid_t file_id, unsigned type_id, size_t *mesg_coun
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    if(NULL == (file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
+    if(NULL == (file = (H5F_t *)H5VL_object_verify(file_id, H5I_FILE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
 
     /* Push API context */
@@ -148,7 +149,7 @@ H5F__check_cached_stab_test(hid_t file_id)
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    if(NULL == (file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
+    if(NULL == (file = (H5F_t *)H5VL_object_verify(file_id, H5I_FILE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
 
     /* Push API context */
@@ -189,7 +190,7 @@ H5F__get_maxaddr_test(hid_t file_id, haddr_t *maxaddr)
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    if(NULL == (file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
+    if(NULL == (file = (H5F_t *)H5VL_object_verify(file_id, H5I_FILE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
 
     /* Retrieve maxaddr for file */
@@ -222,7 +223,7 @@ H5F__get_sbe_addr_test(hid_t file_id, haddr_t *sbe_addr)
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    if(NULL == (file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
+    if(NULL == (file = (H5F_t *)H5VL_object_verify(file_id, H5I_FILE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
 
     /* Retrieve maxaddr for file */

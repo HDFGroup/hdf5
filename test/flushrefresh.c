@@ -698,7 +698,6 @@ herr_t test_refresh(void)
     /* ================= */
     /* Refresh Datatypes */
     /* ================= */
-
     TESTING("to ensure that H5Trefresh correctly refreshes single datatypes");
 
     /* Verify First Committed Datatype can be refreshed with H5Trefresh */
@@ -718,7 +717,6 @@ herr_t test_refresh(void)
     if(H5Oflush(tid2) < 0) TEST_ERROR;
 
     if(end_refresh_verification_process() != 0) TEST_ERROR;
-
     PASSED();
 
     /* =============== */
@@ -998,7 +996,7 @@ herr_t refresh_verification(const char * obj_pathname)
         check to ensure we didn't erroneously flush the attribute before
         starting the verification. */
     if(flushed_oinfo.num_attrs != 0)
-	PROCESS_ERROR;
+        PROCESS_ERROR;
 
     /* Send Signal to MAIN PROCESS indicating that it can go ahead and modify the 
         object. */

@@ -37,6 +37,7 @@ set (examples
     h5_vds-percival
     h5_vds-percival-unlim
     h5_vds-percival-unlim-maxmin
+    h5_vol_external_log_native
 )
 
 foreach (example ${examples})

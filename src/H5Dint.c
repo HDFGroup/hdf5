@@ -30,6 +30,8 @@
 #include "H5Iprivate.h"       /* IDs */
 #include "H5Lprivate.h"       /* Links */
 #include "H5MMprivate.h"      /* Memory management */
+#include "H5VLprivate.h"	/* Virtual Object Layer                 */
+#include "H5VLnative.h"     /* Native VOL driver */
 
 
 /****************/
@@ -57,7 +59,7 @@ static herr_t H5D__open_oid(H5D_t *dataset, hid_t dapl_id);
 static herr_t H5D__init_storage(const H5D_io_info_t *io_info, hbool_t full_overwrite,
         hsize_t old_dim[]);
 static herr_t H5D__append_flush_setup(H5D_t *dset, hid_t dapl_id);
-static herr_t H5D__close_cb(H5D_t *dset);
+static herr_t H5D__close_cb(H5VL_object_t *dset_vol_obj);
 
 
 /*********************/
@@ -289,23 +291,29 @@ H5D_term_package(void)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__close_cb(H5D_t *dset)
+H5D__close_cb(H5VL_object_t *dset_vol_obj)
 {
     herr_t              ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_STATIC
 
     /* Sanity check */
-    HDassert(dset);
-    HDassert(dset->oloc.file);
-    HDassert(dset->shared);
-    HDassert(dset->shared->fo_count > 0);
+    HDassert(dset_vol_obj);
 
     /* Close the dataset */
-    if(H5D_close(dset) < 0)
+    if(H5VL_dataset_close(dset_vol_obj->data, dset_vol_obj->driver->cls, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to close dataset");
 
 done:
+    /* XXX: (MSC) Weird thing for datasets and filters:
+     * Always decrement the ref count on the VOL for datasets, since
+     * the ID is removed even if the close fails.
+     */
+
+    /* Free the VOL object */
+    if(H5VL_free_object(dset_vol_obj) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "unable to free VOL object");
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__close_cb() */
 
@@ -943,7 +951,8 @@ H5D_t *
 H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id,
     hid_t dapl_id)
 {
-    const H5T_t        *type;                   /* Datatype for dataset */
+    const H5T_t        *type = NULL;            /* Datatype for dataset (VOL pointer) */
+    H5T_t              *dt = NULL;              /* Datatype for dataset (non-VOL pointer) */
     H5D_t              *new_dset = NULL;
     H5P_genplist_t     *dc_plist = NULL;        /* New Property list */
     hbool_t             has_vl_type = FALSE;    /* Flag to indicate a VL-type for dataset */
@@ -964,8 +973,10 @@ H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id,
     HDassert(H5I_GENPROP_LST == H5I_get_type(dcpl_id));
 
     /* Get the dataset's datatype */
-    if(NULL == (type = (const H5T_t *)H5I_object(type_id)))
+    if(NULL == (dt = (const H5T_t *)H5I_object(type_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a datatype")
+    /* If this is a named datatype, get the pointer via the VOL driver */
+    type = (const H5T_t *)H5T_get_actual_type(dt);
 
     /* Check if the datatype is "sensible" for use in a dataset */
     if(H5T_is_sensible(type) != TRUE)
@@ -1812,11 +1823,13 @@ H5D_mult_refresh_close(hid_t dset_id)
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    if(NULL == (dataset = (H5D_t *)H5I_object_verify(dset_id, H5I_DATASET)))
+    if(NULL == (dataset = (H5D_t *)H5VL_object_verify(dset_id, H5I_DATASET)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
 
     /* check args */
-    HDassert(dataset && dataset->oloc.file && dataset->shared);
+    HDassert(dataset);
+    HDassert(dataset->oloc.file);
+    HDassert(dataset->shared);
     HDassert(dataset->shared->fo_count > 0);
 
     if(dataset->shared->fo_count > 1) {
@@ -2422,8 +2435,8 @@ H5D__vlen_get_buf_size(void H5_ATTR_UNUSED *elem, hid_t type_id,
     unsigned H5_ATTR_UNUSED ndim, const hsize_t *point, void *op_data)
 {
     H5D_vlen_bufsize_t *vlen_bufsize = (H5D_vlen_bufsize_t *)op_data;
+    H5VL_object_t *vol_obj = vlen_bufsize->dset_vol_obj;
     H5T_t *dt;                          /* Datatype for operation */
-    H5S_t *mspace;                      /* Memory dataspace for operation */
     H5S_t *fspace;                      /* File dataspace for operation */
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -2440,10 +2453,6 @@ H5D__vlen_get_buf_size(void H5_ATTR_UNUSED *elem, hid_t type_id,
     if(NULL == (vlen_bufsize->fl_tbuf = H5FL_BLK_REALLOC(vlen_fl_buf, vlen_bufsize->fl_tbuf, H5T_get_size(dt))))
         HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, FAIL, "can't resize tbuf")
 
-    /* Get the memory dataspace from the ID */
-    if(NULL == (mspace = (H5S_t *)H5I_object_verify(vlen_bufsize->mspace_id, H5I_DATASPACE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
-
     /* Select point to read in */
     if(NULL == (fspace = (H5S_t *)H5I_object_verify(vlen_bufsize->fspace_id, H5I_DATASPACE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
@@ -2451,7 +2460,10 @@ H5D__vlen_get_buf_size(void H5_ATTR_UNUSED *elem, hid_t type_id,
         HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "can't select point")
 
     /* Read in the point (with the custom VL memory allocator) */
-    if(H5D__read(vlen_bufsize->dset, type_id, mspace, fspace, vlen_bufsize->fl_tbuf) < 0)
+    if(H5VL_dataset_read(vol_obj->data, vol_obj->driver->cls, 
+                         type_id, vlen_bufsize->mspace_id, 
+                         vlen_bufsize->fspace_id, H5P_DATASET_XFER_DEFAULT, 
+                         vlen_bufsize->fl_tbuf, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read point")
 
 done:
@@ -3384,8 +3396,19 @@ H5D__get_type(const H5D_t *dset)
     if(H5T_lock(dt, FALSE) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to lock transient datatype")
 
-    if((ret_value = H5I_register(H5I_DATATYPE, dt, TRUE)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register datatype")
+    /* Create an atom */
+    if(H5T_is_named(dt)) {
+        /* If this is a committed datatype, we need to recreate the
+         * two-level IDs, where the VOL object is a copy of the
+         * returned datatype.
+         */
+        if((ret_value = H5VL_native_register(H5I_DATATYPE, dt, TRUE)) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register datatype")
+    }
+    else {
+        if((ret_value = H5I_register(H5I_DATATYPE, dt, TRUE)) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register datatype")
+    }
 
 done:
     if(ret_value < 0)

@@ -42,6 +42,8 @@
 #include "H5MMprivate.h"        /* Memory management                        */
 #include "H5Opkg.h"             /* Object headers                           */
 #include "H5SMprivate.h"        /* Shared Object Header Messages            */
+#include "H5VLprivate.h"        /* Virtual Object Layer                     */
+#include "H5VLnative.h"         /* Native VOL driver                        */
 
 
 /****************/
@@ -404,11 +406,11 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5A__open
+ * Function:    H5A__open
  *
- * Purpose:	Open an attribute in an object header
+ * Purpose:     Open an attribute in an object header
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
  *		December 9, 2017
@@ -917,8 +919,18 @@ H5A__get_type(H5A_t *attr)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5I_INVALID_HID, "unable to lock transient datatype")
 
     /* Atomize */
-    if ((ret_value = H5I_register(H5I_DATATYPE, dt, TRUE)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register datatype")
+    if (H5T_is_named(dt)) {
+        /* If this is a committed datatype, we need to recreate the
+         * two level IDs, where the VOL object is a copy of the
+         * returned datatype
+         */
+        if ((ret_value = H5VL_native_register(H5I_DATATYPE, dt, TRUE)) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize file handle")
+    }
+    else {
+        if ((ret_value = H5I_register(H5I_DATATYPE, dt, TRUE)) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register datatype")
+    }
 
 done:
     if(H5I_INVALID_HID == ret_value)
@@ -1134,19 +1146,22 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5A__close_cb(H5A_t *attr)
+H5A__close_cb(H5VL_object_t *attr_vol_obj)
 {
     herr_t          ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(attr);
-    HDassert(attr->shared);
+    HDassert(attr_vol_obj);
 
     /* Close the attribute */
-    if(H5A__close(attr) < 0)
+    if((ret_value = H5VL_attr_close(attr_vol_obj->data, attr_vol_obj->driver->cls, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CLOSEERROR, FAIL, "problem closing attribute")
+
+    /* Free the VOL object */
+    if(H5VL_free_object(attr_vol_obj) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTDEC, FAIL, "unable to free VOL object")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2339,7 +2354,7 @@ H5A__attr_post_copy_file(const H5O_loc_t *src_oloc, const H5A_t *attr_src,
     HDassert(file_src);
     HDassert(file_dst);
 
-    if(H5T_is_named(attr_src->shared->dt)) {
+    if (H5T_is_named(attr_src->shared->dt)) {
         H5O_loc_t         *src_oloc_dt;           /* Pointer to source datatype's object location */
         H5O_loc_t         *dst_oloc_dt;           /* Pointer to dest. datatype's object location */
 
@@ -2596,16 +2611,20 @@ H5A__iterate_common(hid_t loc_id, H5_index_t idx_type, H5_iter_order_t order,
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *              December 6, 2017
- *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5A__iterate(hid_t loc_id, H5_index_t idx_type, H5_iter_order_t order,
+H5A__iterate(const H5G_loc_t *loc, const char *obj_name, H5_index_t idx_type, H5_iter_order_t order,
     hsize_t *idx, H5A_operator2_t op, void *op_data)
 {
+    H5G_loc_t   obj_loc;        /* Location used to open group */
+    H5G_name_t  obj_path;       /* Opened object group hier. path */
+    H5O_loc_t   obj_oloc;       /* Opened object object location */
+    hbool_t     loc_found = FALSE;      /* Entry at 'obj_name' found */
+    hid_t       obj_loc_id = (-1);      /* ID for object located */
     H5A_attr_iter_op_t  attr_op;        /* Attribute operator */
+    void        *temp_obj = NULL;
+    H5I_type_t  obj_type;
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -2614,11 +2633,37 @@ H5A__iterate(hid_t loc_id, H5_index_t idx_type, H5_iter_order_t order,
     attr_op.op_type = H5A_ATTR_OP_APP2;
     attr_op.u.app_op2 = op;
 
+    /* Set up opened group location to fill in */
+    obj_loc.oloc = &obj_oloc;
+    obj_loc.path = &obj_path;
+    H5G_loc_reset(&obj_loc);
+
+    /* Find the object's location */
+    if(H5G_loc_find(loc, obj_name, &obj_loc) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_NOTFOUND, FAIL, "object not found");
+    loc_found = TRUE;
+
+    /* Open the object */
+    if(NULL == (temp_obj = H5O_open_by_loc(&obj_loc, &obj_type)))
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to open object");
+
+    /* Get an ID for the object */
+    if((obj_loc_id = H5VL_native_register(obj_type, temp_obj, TRUE)) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register datatype");
+
     /* Call internal attribute iteration routine */
-    if((ret_value = H5A__iterate_common(loc_id, idx_type, order, idx, &attr_op, op_data)) < 0)
+    if((ret_value = H5A__iterate_common(obj_loc_id, idx_type, order, idx, &attr_op, op_data)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_BADITER, FAIL, "error iterating over attributes")
 
 done:
+    /* Release resources */
+    if(obj_loc_id != H5I_INVALID_HID) {
+        if(H5I_dec_app_ref(obj_loc_id) < 0)
+            HDONE_ERROR(H5E_ATTR, H5E_CANTDEC, FAIL, "unable to close temporary object");
+    }
+    else if(loc_found && H5G_loc_free(&obj_loc) < 0)
+        HDONE_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't free location");
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5A__iterate() */
 
@@ -2665,67 +2710,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5A__iterate_old() */
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5A__iterate_by_name
- *
- * Purpose:     Private version of H5Aiterate_by_name
- *
- * Return:      SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *              December 6, 2017
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5A__iterate_by_name(const H5G_loc_t *loc, const char *obj_name, H5_index_t idx_type, H5_iter_order_t order, hsize_t *idx, H5A_operator2_t op,
-    void *op_data)
-{
-    H5G_loc_t   obj_loc;                /* Location used to open group */
-    H5G_name_t  obj_path;               /* Opened object group hier. path */
-    H5O_loc_t   obj_oloc;               /* Opened object object location */
-    hbool_t     loc_found = FALSE;      /* Entry at 'obj_name' found */
-    hid_t       obj_loc_id = (-1);      /* ID for object located */
-    H5A_attr_iter_op_t  attr_op;        /* Attribute operator */
-    herr_t ret_value = SUCCEED;         /* Return value */
-
-    FUNC_ENTER_PACKAGE
-
-    /* Set up opened group location to fill in */
-    obj_loc.oloc = &obj_oloc;
-    obj_loc.path = &obj_path;
-    H5G_loc_reset(&obj_loc);
-
-    /* Find the object's location */
-    if(H5G_loc_find(loc, obj_name, &obj_loc/*out*/) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_NOTFOUND, FAIL, "object not found")
-    loc_found = TRUE;
-
-    /* Open the object */
-    if((obj_loc_id = H5O_open_by_loc(&obj_loc, TRUE)) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to open object")
-
-    /* Build attribute operator info */
-    attr_op.op_type     = H5A_ATTR_OP_APP2;
-    attr_op.u.app_op2   = op;
-
-    /* Call attribute iteration routine */
-    if((ret_value = H5A__iterate_common(obj_loc_id, idx_type, order, idx, &attr_op, op_data)) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_BADITER, FAIL, "error iterating over attributes")
-
-done:
-    /* Release resources */
-    if(obj_loc_id > 0) {
-        if(H5I_dec_app_ref(obj_loc_id) < 0)
-            HDONE_ERROR(H5E_ATTR, H5E_CANTDEC, FAIL, "unable to close temporary object")
-    }
-    else if(loc_found && H5G_loc_free(&obj_loc) < 0)
-        HDONE_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't free location")
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5A__iterate_by_name() */
 
 
 /*-------------------------------------------------------------------------

@@ -232,7 +232,24 @@ CONTAINS
               CALL check("h5fclose_f",error,total_error)
 
           !
-          !test whether files are in hdf5 format
+          !test whether files are accessible as HDF5 (new, VOL-safe, way)
+          !
+          CALL h5fis_accessible_f(fix_filename1, status, error)
+               CALL check("h5fis_accessible_f",error,total_error)
+          IF ( .NOT. status ) THEN
+              write(*,*) "File ", fix_filename1, " is not accessible as hdf5"
+              stop
+          END IF
+
+          CALL h5fis_accessible_f(fix_filename2, status, error)
+               CALL check("h5fis_accessible_f",error,total_error)
+          IF ( .NOT. status ) THEN
+              write(*,*) "File ", fix_filename2, " is not accessible as hdf5"
+              stop
+          END IF
+
+          !
+          !test whether files are in hdf5 format (old way)
           !
           CALL h5fis_hdf5_f(fix_filename1, status, error)
                CALL check("h5fis_hdf5_f",error,total_error)

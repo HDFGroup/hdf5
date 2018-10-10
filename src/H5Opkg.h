@@ -339,7 +339,7 @@ typedef struct H5O_obj_class_t {
     void       *(*get_copy_file_udata)(void);	/*retrieve user data for 'copy file' operation */
     void	(*free_copy_file_udata)(void *); /*free user data for 'copy file' operation */
     htri_t	(*isa)(const H5O_t *);		/*if a header matches an object class */
-    hid_t	(*open)(const H5G_loc_t *, hbool_t );	/*open an object of this class */
+    void	*(*open)(const H5G_loc_t *, H5I_type_t *);	/*open an object of this class */
     void	*(*create)(H5F_t *, void *, H5G_loc_t *);	/*create an object of this class */
     H5O_loc_t	*(*get_oloc)(hid_t );		/*get the object header location for an object */
     herr_t      (*bh_info)(const H5O_loc_t *loc, H5O_t *oh, H5_ih_info_t *bh_info); /*get the index & heap info for an object */
@@ -414,6 +414,12 @@ typedef struct H5O_chk_cache_ud_t {
     H5O_common_cache_ud_t common;       /* Common object header cache callback info */
 } H5O_chk_cache_ud_t;
 
+/* types for object optional VOL operations */
+typedef enum H5VL_object_optional_t {
+    H5VL_OBJECT_GET_COMMENT,            /* get object comment                   */
+    H5VL_OBJECT_GET_INFO,               /* get object info                      */
+    H5VL_OBJECT_SET_COMMENT             /* set object comment                   */
+} H5VL_object_optional_t;
 
 /* Header message ID to class mapping */
 H5_DLLVAR const H5O_msg_class_t *const H5O_msg_class_g[H5O_MSG_TYPES];

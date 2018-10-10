@@ -24,6 +24,7 @@
 #include "H5CXprivate.h"        /* API Contexts                         */
 #include "H5Iprivate.h"
 #include "H5PBprivate.h"
+#include "H5VLprivate.h"        /* Virtual Object Layer                     */
 
 /*
  * This file needs to access private information from the H5F package.
@@ -241,7 +242,7 @@ open_file(char *filename, hid_t fapl, hsize_t page_size,
         FAIL_STACK_ERROR;
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object(file_id)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file_id)))
         FAIL_STACK_ERROR;
 
     if(f->shared->page_buf == NULL)
@@ -604,7 +605,7 @@ test_raw_data_handling(hid_t orig_fapl, const char *env_h5_drvr)
         FAIL_STACK_ERROR;
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object(file_id)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file_id)))
         FAIL_STACK_ERROR;
 
     /* opening the file inserts one or more pages into the page buffer.
@@ -887,7 +888,7 @@ test_lru_processing(hid_t orig_fapl, const char *env_h5_drvr)
         FAIL_STACK_ERROR;
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object(file_id)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file_id)))
         FAIL_STACK_ERROR;
 
     /* opening the file inserts one or more pages into the page buffer.
@@ -1146,7 +1147,7 @@ test_min_threshold(hid_t orig_fapl, const char *env_h5_drvr)
         FAIL_STACK_ERROR;
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object(file_id)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file_id)))
         FAIL_STACK_ERROR;
 
     /* opening the file inserts one or more pages into the page buffer.
@@ -1281,7 +1282,7 @@ test_min_threshold(hid_t orig_fapl, const char *env_h5_drvr)
         FAIL_STACK_ERROR;
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object(file_id)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file_id)))
         FAIL_STACK_ERROR;
 
     /* opening the file inserts one or more pages into the page buffer.
@@ -1411,7 +1412,7 @@ test_min_threshold(hid_t orig_fapl, const char *env_h5_drvr)
         FAIL_STACK_ERROR;
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object(file_id)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file_id)))
         FAIL_STACK_ERROR;
 
     /* opening the file inserts one or more pages into the page buffer.
@@ -1552,7 +1553,7 @@ test_min_threshold(hid_t orig_fapl, const char *env_h5_drvr)
     if((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl)) < 0)
         FAIL_STACK_ERROR;
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object(file_id)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file_id)))
         FAIL_STACK_ERROR;
     page_buf = f->shared->page_buf;
 
@@ -1776,7 +1777,7 @@ test_stats_collection(hid_t orig_fapl, const char *env_h5_drvr)
         FAIL_STACK_ERROR;
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object(file_id)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file_id)))
         FAIL_STACK_ERROR;
 
     /* opening the file inserts one or more pages into the page buffer.

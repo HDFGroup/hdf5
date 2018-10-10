@@ -28,6 +28,7 @@
 #include "H5HGprivate.h"
 #include "H5Iprivate.h"
 #include "H5Pprivate.h"
+#include "H5VLprivate.h"
 
 /* Macros for printing error messages in loops.  These print up to
  * GHEAP_REPEATED_ERR_LIM errors, and suppress the rest */
@@ -96,7 +97,7 @@ test_1 (hid_t fapl)
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
     if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         goto error;
-    if(NULL == (f = (H5F_t *)H5I_object(file))) {
+    if(NULL == (f = (H5F_t *)H5VL_object(file))) {
         H5_FAILED();
         HDputs("    Unable to create file");
         goto error;
@@ -203,7 +204,7 @@ test_2 (hid_t fapl)
     h5_fixname(FILENAME[1], fapl, filename, sizeof filename);
     if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         goto error;
-    if(NULL == (f = (H5F_t *)H5I_object(file))) {
+    if(NULL == (f = (H5F_t *)H5VL_object(file))) {
         H5_FAILED();
         HDputs("    Unable to create file");
         goto error;
@@ -302,7 +303,7 @@ test_3 (hid_t fapl)
     h5_fixname(FILENAME[2], fapl, filename, sizeof filename);
     if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         goto error;
-    if(NULL == (f = (H5F_t *)H5I_object(file))) {
+    if(NULL == (f = (H5F_t *)H5VL_object(file))) {
         H5_FAILED();
         HDputs("    Unable to create file");
         goto error;
@@ -392,7 +393,7 @@ test_4 (hid_t fapl)
     h5_fixname(FILENAME[3], fapl, filename, sizeof filename);
     if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         goto error;
-    if(NULL == (f = (H5F_t *)H5I_object(file))) {
+    if(NULL == (f = (H5F_t *)H5VL_object(file))) {
         H5_FAILED();
         HDputs("    Unable to create file");
         goto error;
@@ -485,7 +486,7 @@ test_ooo_indices(hid_t fapl)
     h5_fixname(FILENAME[4], fapl, filename, sizeof filename);
     if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         goto error;
-    if(NULL == (f = (H5F_t *)H5I_object(file))) {
+    if(NULL == (f = (H5F_t *)H5VL_object(file))) {
         H5_FAILED();
         HDputs("    Unable to create file");
         goto error;
@@ -529,7 +530,7 @@ test_ooo_indices(hid_t fapl)
         goto error;
     if((file = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
         goto error;
-    if(NULL == (f = (H5F_t *)H5I_object(file))) {
+    if(NULL == (f = (H5F_t *)H5VL_object(file))) {
         H5_FAILED();
         HDputs("    Unable to open file");
         goto error;

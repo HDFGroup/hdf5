@@ -40,6 +40,7 @@
 #include "H5Dpkg.h"		/* Datasets 				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Iprivate.h"		/* IDs			  		*/
+#include "H5VLprivate.h"	/* VOL plugins				*/
 
 
 /****************/
@@ -112,9 +113,11 @@ hid_t
 H5Dcreate1(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
 	  hid_t dcpl_id)
 {
-    H5G_loc_t	    loc;                                /* Object location to insert dataset into */
-    H5D_t          *dset = NULL;                        /* New dataset's info */
-    const H5S_t    *space;                              /* Dataspace for dataset */
+    void           *dset = NULL;                        /* dset token from VOL plugin */
+    H5VL_object_t  *vol_obj = NULL;                     /* object token of loc_id */
+    H5VL_loc_params_t loc_params;
+    H5P_genplist_t *plist;                              /* Property list pointer */
+    hid_t           lcpl_id = H5P_LINK_CREATE_DEFAULT;
     hid_t           dapl_id = H5P_DEFAULT;              /* DAPL used by library */
     hid_t           ret_value = H5I_INVALID_HID;        /* Return value */
 
@@ -126,12 +129,7 @@ H5Dcreate1(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "name parameter cannot be NULL")
     if(!*name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "name parameter cannot be an empty string")
-    if(H5G_loc(loc_id, &loc) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a location ID")
-    if(H5I_DATATYPE != H5I_get_type(type_id))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a datatype ID")
-    if(NULL == (space = (const H5S_t *)H5I_object_verify(space_id,H5I_DATASPACE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a dataspace ID")
+
     if(H5P_DEFAULT == dcpl_id)
         dcpl_id = H5P_DATASET_CREATE_DEFAULT;
     else
@@ -142,17 +140,38 @@ H5Dcreate1(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
     if(H5CX_set_apl(&dapl_id, H5P_CLS_DACC, loc_id, TRUE) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, H5I_INVALID_HID, "can't set access property list info")
 
-    /* Build and open the new dataset */
-    if(NULL == (dset = H5D__create_named(&loc, name, type_id, space, H5P_LINK_CREATE_DEFAULT, dcpl_id, dapl_id)))
+    /* Get the plist structure */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dcpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, H5I_INVALID_HID, "can't find object for ID")
+
+    /* set creation properties */
+    if(H5P_set(plist, H5VL_PROP_DSET_TYPE_ID, &type_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, H5I_INVALID_HID, "can't set property value for datatype id")
+    if(H5P_set(plist, H5VL_PROP_DSET_SPACE_ID, &space_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, H5I_INVALID_HID, "can't set property value for space id")
+    if(H5P_set(plist, H5VL_PROP_DSET_LCPL_ID, &lcpl_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, H5I_INVALID_HID, "can't set property value for lcpl id")
+
+    /* Set location parameters */
+    loc_params.type = H5VL_OBJECT_BY_SELF;
+    loc_params.obj_type = H5I_get_type(loc_id);
+
+    /* get the location object */
+    if(NULL == (vol_obj = H5VL_get_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier")
+
+    /* Create the dataset through the VOL */
+    if(NULL == (dset = H5VL_dataset_create(vol_obj->data, loc_params, vol_obj->driver->cls, name, dcpl_id, 
+                                           H5P_DATASET_ACCESS_DEFAULT, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, H5I_INVALID_HID, "unable to create dataset")
 
     /* Get an atom for the dataset */
-    if((ret_value = H5I_register(H5I_DATASET, dset, TRUE)) < 0)
+    if((ret_value = H5VL_register_id(H5I_DATASET, dset, vol_obj->driver, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register dataset")
 
 done:
     if (H5I_INVALID_HID == ret_value)
-        if(dset && H5D_close(dset) < 0)
+        if(dset && H5VL_dataset_close(dset, vol_obj->driver->cls, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release dataset")
 
     FUNC_LEAVE_API(ret_value)
@@ -179,8 +198,9 @@ done:
 hid_t
 H5Dopen1(hid_t loc_id, const char *name)
 {
-    H5D_t       *dset = NULL;
-    H5G_loc_t   loc;                    /* Object location of group */
+    void         *dset = NULL;      /* dset token from VOL plugin */
+    H5VL_object_t *vol_obj = NULL;      /* object token of loc_id */
+    H5VL_loc_params_t loc_params;
     hid_t        ret_value = H5I_INVALID_HID;         /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
@@ -191,20 +211,27 @@ H5Dopen1(hid_t loc_id, const char *name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "name parameter cannot be NULL")
     if (!*name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "name parameter cannot be an empty string")
-    if(H5G_loc(loc_id, &loc) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a location")
+
+    /* Set location parameters */
+    loc_params.type = H5VL_OBJECT_BY_SELF;
+    loc_params.obj_type = H5I_get_type(loc_id);
+
+    /* get the location object */
+    if(NULL == (vol_obj = H5VL_get_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier")
 
     /* Open the dataset */
-    if(NULL == (dset = H5D__open_name(&loc, name, H5P_DATASET_ACCESS_DEFAULT)))
+    if(NULL == (dset = H5VL_dataset_open(vol_obj->data, loc_params, vol_obj->driver->cls, name, 
+                                         H5P_DATASET_ACCESS_DEFAULT, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open dataset")
 
     /* Get an atom for the dataset */
-    if((ret_value = H5I_register(H5I_DATASET, dset, TRUE)) < 0)
+    if((ret_value = H5VL_register_id(H5I_DATASET, dset, vol_obj->driver, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "can't register dataset atom")
 
 done:
     if(H5I_INVALID_HID == ret_value)
-        if(dset && H5D_close(dset) < 0)
+        if(dset && H5VL_dataset_close(dset, vol_obj->driver->cls, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release dataset")
 
     FUNC_LEAVE_API(ret_value)
@@ -230,37 +257,64 @@ done:
 herr_t
 H5Dextend(hid_t dset_id, const hsize_t size[])
 {
-    H5D_t	*dset;                          /* Pointer to dataset to modify */
-    hsize_t     dset_dims[H5S_MAX_RANK];    /* Current dataset dimensions */
-    unsigned    u;                          /* Local index variable */
-    herr_t      ret_value = SUCCEED;        /* Return value */
+    H5VL_object_t  *vol_obj = NULL;             /* Dataset structure */
+    hid_t           sid = H5I_INVALID_HID;      /* Dataspace ID */
+    H5S_t          *ds = NULL;                  /* Dataspace struct */
+    int             ndims;                      /* Dataset/space rank */
+    hsize_t         dset_dims[H5S_MAX_RANK];    /* Current dataset dimensions */
+    int             i;                          /* Local index variable */
+    herr_t          ret_value = SUCCEED;        /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*h", dset_id, size);
 
     /* Check args */
-    if(NULL == (dset = (H5D_t *)H5I_object_verify(dset_id, H5I_DATASET)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
+    if(NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset identifier")
     if(!size)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no size specified")
 
-    /* Make certain that the dataset dimensions don't decrease */
-    /* (Shrinking dimensions is possible with H5Dset_extent, but not H5Dextend) */
-    if(H5S_get_simple_extent_dims(dset->shared->space, dset_dims, NULL) < 0)
+    /* Get the dataspace pointer for the dataset */
+    if(H5VL_dataset_get(vol_obj->data, vol_obj->driver->cls, H5VL_DATASET_GET_SPACE, 
+                        H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &sid) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to get dataspace")
+    if(H5I_INVALID_HID == sid)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "received an invalid dataspace from the dataset")
+    if(NULL == (ds = (H5S_t *)H5I_object_verify(sid, H5I_DATASPACE)))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "couldn't get dataspace structure from ID")
+
+    /* Get the dataset's current extent */
+    if(H5S_get_simple_extent_dims(ds, dset_dims, NULL) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get dataset dimensions")
-    for(u = 0; u < dset->shared->ndims; u++)
-        if(size[u] > dset_dims[u])
-            dset_dims[u] = size[u];
+
+    /* Get the dataset dimensions */
+    ndims = H5S_GET_EXTENT_NDIMS(ds);
+
+    /* Make certain that the dataset dimensions don't decrease in any dimension.
+     *
+     * (Shrinking dimensions is possible with H5Dset_extent, but not H5Dextend)
+     *
+     * XXX (VOL_MERGE): I feel like we should fail here instead of just silently
+     *                  not doing what we're supposed to do.
+     */
+    for(i = 0; i < ndims; i++)
+        if(size[i] > dset_dims[i])
+            dset_dims[i] = size[i];
 
     /* Set up collective metadata if appropriate */
     if(H5CX_set_loc(dset_id) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set collective metadata read info")
 
     /* Increase size */
-    if(H5D__set_extent(dset, dset_dims) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to extend dataset")
+    if ((ret_value = H5VL_dataset_specific(vol_obj->data, vol_obj->driver->cls, H5VL_DATASET_SET_EXTENT, 
+                                          H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, dset_dims)) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "unable to extend dataset")
 
 done:
+    /* Close the dataspace */
+    if(sid != H5I_INVALID_HID && H5I_dec_app_ref(sid) < 0)
+        HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "can't close dataspace")
+
     FUNC_LEAVE_API(ret_value)
 } /* end H5Dextend() */
 #endif /* H5_NO_DEPRECATED_SYMBOLS */

@@ -29,7 +29,7 @@ import org.junit.rules.TestName;
 public class TestH5Edefault {
     @Rule public TestName testname = new TestName();
 
-    public static final int ERRSTACK_CNT = 3;
+    public static final int ERRSTACK_CNT = 6;
     public static final int ERRSTACK_MTY_CNT = 0;
 
     @Before
@@ -59,7 +59,7 @@ public class TestH5Edefault {
     @Test
     public void testH5Eprint() {
         try {
-            H5.H5Fopen("test", 0, 1);
+            H5.H5Fopen("test", HDF5Constants.H5F_ACC_RDWR, HDF5Constants.H5P_DEFAULT);
         }
         catch (Throwable err) {
         }
@@ -79,7 +79,7 @@ public class TestH5Edefault {
         long stack_id = -1;
         long stack_id_default = HDF5Constants.H5E_DEFAULT;
         try {
-            H5.H5Fopen("test", 0, 1);
+            H5.H5Fopen("test", HDF5Constants.H5F_ACC_RDWR, HDF5Constants.H5P_DEFAULT);
         }
         catch (Throwable err) {
             //default stack id will be different after exception
@@ -142,7 +142,7 @@ public class TestH5Edefault {
         long num_msg_default = -1;
         long stack_id = -1;
         try {
-            H5.H5Fopen("test", 0, 1);
+            H5.H5Fopen("test", HDF5Constants.H5F_ACC_RDWR, HDF5Constants.H5P_DEFAULT);
         }
         catch (Throwable err) {
             //err.printStackTrace(); //This will clear the error stack
@@ -191,7 +191,7 @@ public class TestH5Edefault {
 
         //Generate errors on default stack
         try {
-            H5.H5Fopen("test", 0, 1);
+            H5.H5Fopen("test", HDF5Constants.H5F_ACC_RDWR, HDF5Constants.H5P_DEFAULT);
         }
         catch (Throwable err) {
             //err.printStackTrace(); //This will clear the error stack
@@ -282,7 +282,7 @@ public class TestH5Edefault {
         long num_msg = -1;
         long stack_id = -1;
         try {
-            H5.H5Fopen("test", 0, 1);
+            H5.H5Fopen("test", HDF5Constants.H5F_ACC_RDWR, HDF5Constants.H5P_DEFAULT);
         }
         catch (Throwable err) {
             //err.printStackTrace(); //This will clear the error stack
@@ -321,7 +321,7 @@ public class TestH5Edefault {
 
         //Generate errors on default stack
         try {
-            H5.H5Fopen("test", 0, 1);
+            H5.H5Fopen("test", HDF5Constants.H5F_ACC_RDWR, HDF5Constants.H5P_DEFAULT);
         }
         catch (Throwable err) {
             //err.printStackTrace(); //This will clear the error stack
@@ -378,7 +378,7 @@ public class TestH5Edefault {
     public void testH5Epop() throws Throwable {
         long num_msg = -1;
         try {
-            H5.H5Fopen("test", 0, 1);
+            H5.H5Fopen("test", HDF5Constants.H5F_ACC_RDWR, HDF5Constants.H5P_DEFAULT);
         }
         catch (Throwable err) {
         }
@@ -419,7 +419,7 @@ public class TestH5Edefault {
     @Test
     public void testH5EprintInt() {
         try {
-            H5.H5Fopen("test", 0, 1);
+            H5.H5Fopen("test", HDF5Constants.H5F_ACC_RDWR, HDF5Constants.H5P_DEFAULT);
         }
         catch (Throwable err) {
         }
@@ -463,7 +463,7 @@ public class TestH5Edefault {
     public void testH5Eclear2_with_msg() {
         long num_msg = -1;
         try {
-            H5.H5Fopen("test", 0, 1);
+            H5.H5Fopen("test", HDF5Constants.H5F_ACC_RDWR, HDF5Constants.H5P_DEFAULT);
         }
         catch (Throwable err) {
         }
@@ -526,7 +526,7 @@ public class TestH5Edefault {
     public void testH5Eget_num_with_msg() {
         long num_msg = -1;
         try {
-            H5.H5Fopen("test", 0, 1);
+            H5.H5Fopen("test", HDF5Constants.H5F_ACC_RDWR, HDF5Constants.H5P_DEFAULT);
         }
         catch (Throwable err) {
         }
