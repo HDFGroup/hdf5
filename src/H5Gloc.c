@@ -137,29 +137,25 @@ static herr_t H5G__loc_get_comment_cb(H5G_loc_t *grp_loc, const char *name,
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5G_loc
+ * Function:    H5G_loc_real
  *
- * Purpose:     Given an object ID return a location for the object.
+ * Purpose:     Utility routine to get object location
  *
  * Returns:     SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_loc(hid_t loc_id, H5G_loc_t *loc)
+H5G_loc_real(void *obj, H5I_type_t type, H5G_loc_t *loc)
 {
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    switch(H5I_get_type(loc_id)) {
+    switch(type) {
         case H5I_FILE:
         {
-            H5F_t   *f = NULL;
-
-            /* Get the file struct */
-            if(NULL == (f = (H5F_t *)H5I_object(loc_id)))
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file ID")
+            H5F_t   *f = (H5F_t *)obj;
 
             /* Construct a group location for root group of the file */
             if(H5G_root_loc(f, loc) < 0)
@@ -169,10 +165,8 @@ H5G_loc(hid_t loc_id, H5G_loc_t *loc)
 
         case H5I_GROUP:
         {
-            H5G_t	*group = NULL;
+            H5G_t	*group = (H5G_t *)obj;
 
-            if(NULL == (group = (H5G_t *)H5I_object(loc_id)))
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid group ID")
             if(NULL == (loc->oloc = H5G_oloc(group)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get object location of group")
             if(NULL == (loc->path = H5G_nameof(group)))
@@ -184,8 +178,9 @@ H5G_loc(hid_t loc_id, H5G_loc_t *loc)
         {
             H5T_t   *dt = NULL;
 
-            if(NULL == (dt = (H5T_t *)H5I_object(loc_id)))
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid type ID")
+            /* Get the actual datatype object if the VOL object is set */
+            dt = H5T_get_actual_type((H5T_t *)obj);
+
             if(NULL == (loc->oloc = H5T_oloc(dt)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get object location of datatype")
             if(NULL == (loc->path = H5T_nameof(dt)))
@@ -195,10 +190,8 @@ H5G_loc(hid_t loc_id, H5G_loc_t *loc)
 
         case H5I_DATASET:
         {
-            H5D_t   *dset = NULL;
+            H5D_t   *dset = (H5D_t *)obj;
 
-            if(NULL == (dset = (H5D_t *)H5I_object(loc_id)))
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid data ID")
             if(NULL == (loc->oloc = H5D_oloc(dset)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get object location of dataset")
             if(NULL == (loc->path = H5D_nameof(dset)))
@@ -208,10 +201,8 @@ H5G_loc(hid_t loc_id, H5G_loc_t *loc)
 
         case H5I_ATTR:
         {
-            H5A_t   *attr = NULL;
+            H5A_t   *attr = (H5A_t *)obj;
 
-            if(NULL == (attr = (H5A_t *)H5I_object(loc_id)))
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid attribute ID")
             if(NULL == (loc->oloc = H5A_oloc(attr)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get object location of attribute")
             if(NULL == (loc->path = H5A_nameof(attr)))
@@ -237,12 +228,45 @@ H5G_loc(hid_t loc_id, H5G_loc_t *loc)
         case H5I_VFL:
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get group location of a virtual file driver (VFD)")
 
+        case H5I_VOL:
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get group location of a virtual object layer (VOL) driver")
+
         case H5I_UNINIT:
         case H5I_BADID:
         case H5I_NTYPES:
         default:
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid location ID")
     } /* end switch */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5G_loc_real() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5G_loc
+ *
+ * Purpose:     Given an object ID return a location for the object.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5G_loc(hid_t loc_id, H5G_loc_t *loc)
+{
+    void       *obj         = NULL;         /* VOL object   */
+    herr_t      ret_value   = SUCCEED;      /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Get the object from the VOL */
+    if(NULL == (obj = H5VL_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
+
+    /* Fill in the struct */
+    if(H5G_loc_real(obj, H5I_get_type(loc_id), loc) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "unable to fill in location struct")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

@@ -402,52 +402,6 @@ h5fget_access_plist_c (hid_t_f *file_id, hid_t_f *access_id)
      return ret_value;
 }
 
-/****if* H5Ff/h5fis_hdf5_c
- * NAME
- *  h5fis_hdf5_c
- * PURPOSE
- *  Call H5Fis_hdf5 to determone if the file is an HDF5 file
- * INPUTS
- *  name - name of the file
- *  namelen - name length
- * OUTPUTS
- *  flag - 0 if file is not HDF5 file , positive if a file
- *  is an HDF5 file, and negative on failure.
- * RETURNS
- *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Tuesday, August 3, 1999
- * HISTORY
- *
- * SOURCE
-*/
-int_f
-h5fis_hdf5_c (_fcd name, int_f *namelen, int_f *flag)
-/******/
-{
-     int ret_value = -1;
-     char *c_name;
-     int_f c_namelen;
-     htri_t status;
-
-     /*
-      * Convert FORTRAN name to C name
-      */
-     c_namelen = *namelen;
-     c_name = (char *)HD5f2cstring(name, (size_t)c_namelen);
-     if (c_name == NULL) return ret_value;
-
-     /*
-      * Call H5Fopen function.
-      */
-     status = H5Fis_hdf5(c_name);
-     *flag = (int_f)status;
-     if (status >= 0) ret_value = 0;
-
-     HDfree(c_name);
-     return ret_value;
-}
 /****if* H5Ff/h5fclose_c
  * NAME
  *  h5fclose_c

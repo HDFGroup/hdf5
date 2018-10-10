@@ -30,6 +30,7 @@
 #include "H5Eprivate.h"     /* Error handling               */
 #include "H5MMprivate.h"    /* Memory management            */
 #include "H5PLpkg.h"        /* Plugin                       */
+#include "H5VLprivate.h"    /* Virtual Object Layer         */
 #include "H5Zprivate.h"     /* Filter pipeline              */
 
 
@@ -250,6 +251,10 @@ H5PL_load(H5PL_type_t type, H5PL_key_t key)
             if ((H5PL_plugin_control_mask_g & H5PL_FILTER_PLUGIN) == 0)
                 HGOTO_ERROR(H5E_PLUGIN, H5E_CANTLOAD, NULL, "filter plugins disabled")
             break;
+        case H5PL_TYPE_VOL:
+            if((H5PL_plugin_control_mask_g & H5PL_VOL_PLUGIN) == 0)
+                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTLOAD, NULL, "Virtual Object Layer (VOL) driver plugins disabled")
+            break;
         case H5PL_TYPE_ERROR:
         case H5PL_TYPE_NONE:
         default:
@@ -347,6 +352,22 @@ H5PL__open(const char *path, H5PL_type_t type, H5PL_key_t key, hbool_t *success,
             /* If the filter IDs match, we're done. Set the output parameters. */
             if (filter_info->id == key.id) {
                 *plugin_info = (const void *)filter_info;
+                *success = TRUE;
+            }
+
+            break;
+        }
+        case H5PL_TYPE_VOL:
+        {
+            const H5VL_class_t *cls = NULL;
+
+            /* Get the plugin info */
+            if (NULL == (cls = (const H5VL_class_t *)(*get_plugin_info)()))
+                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "can't get VOL driver info from plugin")
+
+            /* If the plugin names match, we're done. Set the output parameters. */
+            if (cls->name && !HDstrcmp(cls->name, key.name)) {
+                *plugin_info = (const void *)cls;
                 *success = TRUE;
             }
 

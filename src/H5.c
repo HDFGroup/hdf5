@@ -173,6 +173,7 @@ H5_init_library(void)
     H5_debug_g.pkg[H5_PKG_S].name = "s";
     H5_debug_g.pkg[H5_PKG_T].name = "t";
     H5_debug_g.pkg[H5_PKG_V].name = "v";
+    H5_debug_g.pkg[H5_PKG_VL].name = "vl";
     H5_debug_g.pkg[H5_PKG_Z].name = "z";
 
     /*
@@ -213,6 +214,8 @@ H5_init_library(void)
      */
     if(H5E_init() < 0)
         HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize error interface")
+    if(H5VL_init() < 0)
+        HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize vol interface")
     if(H5P_init() < 0)
         HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize property list interface")
     if(H5T_init() < 0)
@@ -344,6 +347,7 @@ H5_term_library(void)
             pending += DOWN(AC);
             pending += DOWN(Z);
             pending += DOWN(FD);
+            pending += DOWN(VL);
             pending += DOWN(PL);
             /* Don't shut down the error code until other APIs which use it are shut down */
             if(pending == 0)

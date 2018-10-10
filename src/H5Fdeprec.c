@@ -113,7 +113,7 @@ H5Fget_info1(hid_t obj_id, H5F_info1_t *finfo)
      * the top file in a mount hierarchy)
      */
     if(H5I_get_type(obj_id) == H5I_FILE ) {
-        if(NULL == (f = (H5F_t *)H5I_object(obj_id)))
+        if(NULL == (f = (H5F_t *)H5VL_object(obj_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
     }
     else {
@@ -138,6 +138,41 @@ H5Fget_info1(hid_t obj_id, H5F_info1_t *finfo)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fget_info1() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Fis_hdf5
+ *
+ * Purpose:     Check the file signature to detect an HDF5 file.
+ *
+ * Bugs:        This function is not robust: it only uses the default file
+ *              driver when attempting to open the file when in fact it
+ *              should use all known file drivers.
+ *
+ * Return:      TRUE/FALSE/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5Fis_hdf5(const char *name)
+{
+    htri_t      ret_value;              /* Return value */
+
+    FUNC_ENTER_API((-1))
+    H5TRACE1("t", "*s", name);
+
+    /* Check args and all the boring stuff. */
+    if(!name || !*name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, (-1), "no file name specified")
+
+    /* call the private is_HDF5 function */
+    if((ret_value = H5F__is_hdf5(name, H5P_FILE_ACCESS_DEFAULT)) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_NOTHDF5, (-1), "unable open file")
+
+done:
+
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Fis_hdf5() */
 
 
 /*-------------------------------------------------------------------------
@@ -174,20 +209,24 @@ done:
  *             
  *-------------------------------------------------------------------------
  */
+/* XXX (VOL MERGE): This could go in the native VOL driver under 'optional'.
+ */
 herr_t
 H5Fset_latest_format(hid_t file_id, hbool_t latest_format)
 {
-    H5F_t *f;                               /* File */
-    H5F_libver_t low  = H5F_LIBVER_LATEST;  /* Low bound */
-    H5F_libver_t high = H5F_LIBVER_LATEST;  /* High bound */
-    herr_t ret_value = SUCCEED;             /* Return value */
+    H5VL_object_t *vol_obj;                 /* File as VOL object           */
+    H5F_t *f;                           	/* File                         */
+    H5F_libver_t low  = H5F_LIBVER_LATEST;  /* Low bound 					*/
+    H5F_libver_t high = H5F_LIBVER_LATEST;  /* High bound 					*/
+    herr_t ret_value = SUCCEED;         	/* Return value                 */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "ib", file_id, latest_format);
 
     /* Check args */
-    if(NULL == (f = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
+    if(NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
         HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "not a file ID")
+    f = (H5F_t *)(vol_obj->data);
 
     /* 'low' and 'high' are both initialized to LATEST.
      * If latest format is not expected, set 'low' to EARLIEST

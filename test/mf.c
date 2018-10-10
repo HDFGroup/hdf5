@@ -36,6 +36,7 @@
 #include "H5CXprivate.h"        /* API Contexts                         */
 #include "H5FLprivate.h"
 #include "H5Iprivate.h"
+#include "H5VLprivate.h"        /* Virtual Object Layer                     */
 #include "H5VMprivate.h"
 
 #define FILENAME_LEN        1024
@@ -255,7 +256,7 @@ test_mf_eoa(const char *env_h5_drvr, hid_t fapl)
             FAIL_STACK_ERROR
 
         /* Get a pointer to the internal file object */
-        if(NULL == (f = (H5F_t *)H5I_object(file)))
+        if(NULL == (f = (H5F_t *)H5VL_object(file)))
             FAIL_STACK_ERROR
 
         H5MF__aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
@@ -297,7 +298,7 @@ test_mf_eoa(const char *env_h5_drvr, hid_t fapl)
             FAIL_STACK_ERROR
 
         /* Get a pointer to the internal file object */
-        if(NULL == (f = (H5F_t *)H5I_object(file)))
+        if(NULL == (f = (H5F_t *)H5VL_object(file)))
             FAIL_STACK_ERROR
 
         H5MF_xfree(f, type, addr1, (hsize_t)TBLOCK_SIZE30);
@@ -400,7 +401,7 @@ test_mf_eoa_shrink(const char *env_h5_drvr, hid_t fapl)
             FAIL_STACK_ERROR
 
         /* Get a pointer to the internal file object */
-        if(NULL == (f = (H5F_t *)H5I_object(file)))
+        if(NULL == (f = (H5F_t *)H5VL_object(file)))
             FAIL_STACK_ERROR
 
         H5MF__aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
@@ -432,7 +433,7 @@ test_mf_eoa_shrink(const char *env_h5_drvr, hid_t fapl)
             FAIL_STACK_ERROR
 
         /* Get a pointer to the internal file object */
-        if(NULL == (f = (H5F_t *)H5I_object(file)))
+        if(NULL == (f = (H5F_t *)H5VL_object(file)))
             FAIL_STACK_ERROR
 
         H5MF__aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
@@ -477,7 +478,7 @@ test_mf_eoa_shrink(const char *env_h5_drvr, hid_t fapl)
             FAIL_STACK_ERROR
 
         /* Get a pointer to the internal file object */
-        if(NULL == (f = (H5F_t *)H5I_object(file)))
+        if(NULL == (f = (H5F_t *)H5VL_object(file)))
             FAIL_STACK_ERROR
 
         H5MF__aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
@@ -526,7 +527,7 @@ test_mf_eoa_shrink(const char *env_h5_drvr, hid_t fapl)
             FAIL_STACK_ERROR
 
         /* Get a pointer to the internal file object */
-        if(NULL == (f = (H5F_t *)H5I_object(file)))
+        if(NULL == (f = (H5F_t *)H5VL_object(file)))
             FAIL_STACK_ERROR
 
         H5MF__aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
@@ -569,7 +570,7 @@ test_mf_eoa_shrink(const char *env_h5_drvr, hid_t fapl)
             FAIL_STACK_ERROR
 
         /* Get a pointer to the internal file object */
-        if(NULL == (f = (H5F_t *)H5I_object(file)))
+        if(NULL == (f = (H5F_t *)H5VL_object(file)))
             FAIL_STACK_ERROR
 
         H5MF__aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
@@ -681,7 +682,7 @@ test_mf_eoa_extend(const char *env_h5_drvr, hid_t fapl)
             FAIL_STACK_ERROR
 
         /* Get a pointer to the internal file object */
-        if(NULL == (f = (H5F_t *)H5I_object(file)))
+        if(NULL == (f = (H5F_t *)H5VL_object(file)))
             FAIL_STACK_ERROR
 
         H5MF__aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
@@ -712,7 +713,7 @@ test_mf_eoa_extend(const char *env_h5_drvr, hid_t fapl)
             FAIL_STACK_ERROR
 
         /* Get a pointer to the internal file object */
-        if(NULL == (f = (H5F_t *)H5I_object(file)))
+        if(NULL == (f = (H5F_t *)H5VL_object(file)))
             FAIL_STACK_ERROR
 
         /* should succeed */
@@ -759,7 +760,7 @@ test_mf_eoa_extend(const char *env_h5_drvr, hid_t fapl)
             TEST_ERROR
 
         /* Get a pointer to the internal file object */
-        if(NULL == (f = (H5F_t *)H5I_object(file)))
+        if(NULL == (f = (H5F_t *)H5VL_object(file)))
             FAIL_STACK_ERROR
 
         H5MF__aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
@@ -899,7 +900,7 @@ test_mf_tmp(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
             FAIL_STACK_ERROR
 
         /* Get a pointer to the internal file object */
-        if(NULL == (f = (H5F_t *)H5I_object(file)))
+        if(NULL == (f = (H5F_t *)H5VL_object(file)))
             FAIL_STACK_ERROR
 
         /* Retrieve the file's maxaddr */
@@ -953,7 +954,7 @@ test_mf_tmp(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
             FAIL_STACK_ERROR
 
         /* Get a pointer to the internal file object */
-        if(NULL == (f = (H5F_t *)H5I_object(file)))
+        if(NULL == (f = (H5F_t *)H5VL_object(file)))
             FAIL_STACK_ERROR
 
         /* Allocate 1/3 of the file as temporary address space */
@@ -1061,7 +1062,7 @@ test_mf_fs_start(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         FAIL_STACK_ERROR
 
     /* Start up H5FD_MEM_SUPER free-space manager */
@@ -1173,7 +1174,7 @@ test_mf_fs_alloc_free(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         FAIL_STACK_ERROR
 
     /* Start up H5FD_MEM_SUPER free-space manager */
@@ -1250,7 +1251,7 @@ test_mf_fs_alloc_free(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         FAIL_STACK_ERROR
 
     /* Start up H5FD_MEM_SUPER free-space manager */
@@ -1325,7 +1326,7 @@ test_mf_fs_alloc_free(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         FAIL_STACK_ERROR
 
     /* Start up H5FD_MEM_SUPER free-space manager */
@@ -1498,7 +1499,7 @@ test_mf_fs_extend(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         FAIL_STACK_ERROR
 
     /* Start up H5FD_MEM_SUPER free-space manager */
@@ -1606,7 +1607,7 @@ test_mf_fs_extend(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         FAIL_STACK_ERROR
 
     /* Start up H5FD_MEM_SUPER free-space manager */
@@ -1708,7 +1709,7 @@ test_mf_fs_extend(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         FAIL_STACK_ERROR
 
     /* Start up H5FD_MEM_SUPER free-space manager */
@@ -1810,7 +1811,7 @@ test_mf_fs_extend(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         FAIL_STACK_ERROR
 
     /* Start up H5FD_MEM_SUPER free-space manager */
@@ -1982,7 +1983,7 @@ test_mf_fs_absorb(const char *env_h5_drvr, hid_t fapl)
             FAIL_STACK_ERROR
 
         /* Get a pointer to the internal file object */
-        if(NULL == (f = (H5F_t *)H5I_object(file)))
+        if(NULL == (f = (H5F_t *)H5VL_object(file)))
             FAIL_STACK_ERROR
 
         /* Start up H5FD_MEM_SUPER free-space manager */
@@ -2038,7 +2039,7 @@ test_mf_fs_absorb(const char *env_h5_drvr, hid_t fapl)
             FAIL_STACK_ERROR
 
         /* Get a pointer to the internal file object */
-        if(NULL == (f = (H5F_t *)H5I_object(file)))
+        if(NULL == (f = (H5F_t *)H5VL_object(file)))
             FAIL_STACK_ERROR
 
         /* Start up H5FD_MEM_SUPER free-space manager */
@@ -2164,7 +2165,7 @@ test_mf_aggr_alloc1(const char *env_h5_drvr, hid_t fapl)
             TEST_ERROR
 
         /* Get a pointer to the internal file object */
-        if(NULL == (f = (H5F_t *)H5I_object(file)))
+        if(NULL == (f = (H5F_t *)H5VL_object(file)))
             TEST_ERROR
 
         /* Allocate first block from meta_aggr */
@@ -2202,7 +2203,7 @@ test_mf_aggr_alloc1(const char *env_h5_drvr, hid_t fapl)
             TEST_ERROR
 
         /* Get a pointer to the internal file object */
-        if(NULL == (f = (H5F_t *)H5I_object(file)))
+        if(NULL == (f = (H5F_t *)H5VL_object(file)))
             TEST_ERROR
 
         /* Free the two blocks: order matters because of H5F_FSPACE_STRATEGY_AGGR strategy */
@@ -2305,7 +2306,7 @@ test_mf_aggr_alloc2(const char *env_h5_drvr, hid_t fapl)
             FAIL_STACK_ERROR
 
         /* Get a pointer to the internal file object */
-        if(NULL == (f = (H5F_t *)H5I_object(file)))
+        if(NULL == (f = (H5F_t *)H5VL_object(file)))
             FAIL_STACK_ERROR
 
         type = H5FD_MEM_SUPER;
@@ -2351,7 +2352,7 @@ test_mf_aggr_alloc2(const char *env_h5_drvr, hid_t fapl)
             FAIL_STACK_ERROR
 
         /* Get a pointer to the internal file object */
-        if(NULL == (f = (H5F_t *)H5I_object(file)))
+        if(NULL == (f = (H5F_t *)H5VL_object(file)))
             FAIL_STACK_ERROR
 
         H5MF_xfree(f, type, addr1, (hsize_t)TBLOCK_SIZE30+TBLOCK_SIZE50+TBLOCK_SIZE2058);
@@ -2461,7 +2462,7 @@ test_mf_aggr_alloc3(const char *env_h5_drvr, hid_t fapl)
             FAIL_STACK_ERROR
 
         /* Get a pointer to the internal file object */
-        if(NULL == (f = (H5F_t *)H5I_object(file)))
+        if(NULL == (f = (H5F_t *)H5VL_object(file)))
             FAIL_STACK_ERROR
 
         /* Allocate first block from meta_aggr */
@@ -2624,7 +2625,7 @@ test_mf_aggr_alloc4(const char *env_h5_drvr, hid_t fapl)
             FAIL_STACK_ERROR
 
         /* Get a pointer to the internal file object */
-        if(NULL == (f = (H5F_t *)H5I_object(file)))
+        if(NULL == (f = (H5F_t *)H5VL_object(file)))
             FAIL_STACK_ERROR
 
         /* Allocate first block from meta_aggr */
@@ -2772,7 +2773,7 @@ test_mf_aggr_alloc5(const char *env_h5_drvr, hid_t fapl)
             FAIL_STACK_ERROR
 
         /* Get a pointer to the internal file object */
-        if(NULL == (f = (H5F_t *)H5I_object(file)))
+        if(NULL == (f = (H5F_t *)H5VL_object(file)))
             FAIL_STACK_ERROR
 
         /* Allocate first block from meta_aggr */
@@ -2906,7 +2907,7 @@ test_mf_aggr_alloc6(const char *env_h5_drvr, hid_t fapl)
             FAIL_STACK_ERROR
 
         /* Get a pointer to the internal file object */
-        if(NULL == (f = (H5F_t *)H5I_object(file)))
+        if(NULL == (f = (H5F_t *)H5VL_object(file)))
             FAIL_STACK_ERROR
 
         type = H5FD_MEM_SUPER;
@@ -3073,7 +3074,7 @@ test_mf_aggr_alloc7(const char *env_h5_drvr, hid_t fapl)
             FAIL_STACK_ERROR
 
         /* Get a pointer to the internal file object */
-        if(NULL == (f = (H5F_t *)H5I_object(file)))
+        if(NULL == (f = (H5F_t *)H5VL_object(file)))
             FAIL_STACK_ERROR
 
         /* Allocate the first block from meta_aggr */
@@ -3236,7 +3237,7 @@ test_mf_aggr_extend(const char *env_h5_drvr, hid_t fapl)
             FAIL_STACK_ERROR
 
         /* Get a pointer to the internal file object */
-        if(NULL == (f = (H5F_t *)H5I_object(file)))
+        if(NULL == (f = (H5F_t *)H5VL_object(file)))
             FAIL_STACK_ERROR
 
         /* Allocate the first block from meta_aggr */
@@ -3327,7 +3328,7 @@ test_mf_aggr_extend(const char *env_h5_drvr, hid_t fapl)
             FAIL_STACK_ERROR
 
         /* Get a pointer to the internal file object */
-        if(NULL == (f = (H5F_t *)H5I_object(file)))
+        if(NULL == (f = (H5F_t *)H5VL_object(file)))
             FAIL_STACK_ERROR
 
         /* Allocate the first block from meta_aggr */
@@ -3397,7 +3398,7 @@ test_mf_aggr_extend(const char *env_h5_drvr, hid_t fapl)
             FAIL_STACK_ERROR
 
         /* Get a pointer to the internal file object */
-        if(NULL == (f = (H5F_t *)H5I_object(file)))
+        if(NULL == (f = (H5F_t *)H5VL_object(file)))
             FAIL_STACK_ERROR
 
         /* Allocate first block from meta_aggr */
@@ -3527,7 +3528,7 @@ test_mf_aggr_absorb(const char *env_h5_drvr, hid_t fapl)
             FAIL_STACK_ERROR
 
         /* Get a pointer to the internal file object */
-        if(NULL == (f = (H5F_t *)H5I_object(file)))
+        if(NULL == (f = (H5F_t *)H5VL_object(file)))
             FAIL_STACK_ERROR
 
         /* Allocate block A from meta_aggr */
@@ -3574,7 +3575,7 @@ test_mf_aggr_absorb(const char *env_h5_drvr, hid_t fapl)
             FAIL_STACK_ERROR
 
         /* Get a pointer to the internal file object */
-        if(NULL == (f = (H5F_t *)H5I_object(file)))
+        if(NULL == (f = (H5F_t *)H5VL_object(file)))
             FAIL_STACK_ERROR
 
         /* Allocate block A from meta_aggr */
@@ -3633,7 +3634,7 @@ test_mf_aggr_absorb(const char *env_h5_drvr, hid_t fapl)
             FAIL_STACK_ERROR
 
         /* Get a pointer to the internal file object */
-        if(NULL == (f = (H5F_t *)H5I_object(file)))
+        if(NULL == (f = (H5F_t *)H5VL_object(file)))
             FAIL_STACK_ERROR
 
         /* Allocate block A from meta_aggr */
@@ -3782,7 +3783,7 @@ test_mf_align_eoa(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
             FAIL_STACK_ERROR
 
         /* Get a pointer to the internal file object */
-        if(NULL == (f = (H5F_t *)H5I_object(file)))
+        if(NULL == (f = (H5F_t *)H5VL_object(file)))
             FAIL_STACK_ERROR
 
         /* calculate fragment for alignment of block 30 */
@@ -3864,7 +3865,7 @@ test_mf_align_eoa(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
             FAIL_STACK_ERROR
 
         /* Get a pointer to the internal file object */
-        if(NULL == (f = (H5F_t *)H5I_object(file)))
+        if(NULL == (f = (H5F_t *)H5VL_object(file)))
             FAIL_STACK_ERROR
 
         /* allocate a block of 50 from meta_aggr */
@@ -3886,7 +3887,7 @@ test_mf_align_eoa(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
             FAIL_STACK_ERROR
 
         /* Get a pointer to the internal file object */
-        if(NULL == (f = (H5F_t *)H5I_object(file)))
+        if(NULL == (f = (H5F_t *)H5VL_object(file)))
             FAIL_STACK_ERROR
 
         /* shrink the block */
@@ -3919,7 +3920,7 @@ test_mf_align_eoa(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
             FAIL_STACK_ERROR
 
         /* Get a pointer to the internal file object */
-        if(NULL == (f = (H5F_t *)H5I_object(file)))
+        if(NULL == (f = (H5F_t *)H5VL_object(file)))
             FAIL_STACK_ERROR
 
         /* allocate a block of 50 */
@@ -3941,7 +3942,7 @@ test_mf_align_eoa(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
             FAIL_STACK_ERROR
 
         /* Get a pointer to the internal file object */
-        if(NULL == (f = (H5F_t *)H5I_object(file)))
+        if(NULL == (f = (H5F_t *)H5VL_object(file)))
             FAIL_STACK_ERROR
 
         /* try to extend the block */
@@ -4041,7 +4042,7 @@ test_mf_align_fs(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         FAIL_STACK_ERROR
 
     /* Start up H5FD_MEM_SUPER free-space manager */
@@ -4104,7 +4105,7 @@ test_mf_align_fs(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         FAIL_STACK_ERROR
 
     /* Start up H5FD_MEM_SUPER free-space manager */
@@ -4187,7 +4188,7 @@ test_mf_align_fs(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
             FAIL_STACK_ERROR
 
         /* Get a pointer to the internal file object */
-        if(NULL == (f = (H5F_t *)H5I_object(file)))
+        if(NULL == (f = (H5F_t *)H5VL_object(file)))
             FAIL_STACK_ERROR
 
         /* Start up H5FD_MEM_SUPER free-space manager */
@@ -4407,7 +4408,7 @@ test_mf_align_alloc1(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
             FAIL_STACK_ERROR
 
         /* Get a pointer to the internal file object */
-        if(NULL == (f = (H5F_t *)H5I_object(file)))
+        if(NULL == (f = (H5F_t *)H5VL_object(file)))
             FAIL_STACK_ERROR
 
         /* calculate fragment for alignment of block 30 */
@@ -4663,7 +4664,7 @@ test_mf_align_alloc2(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
             FAIL_STACK_ERROR
 
         /* Get a pointer to the internal file object */
-        if(NULL == (f = (H5F_t *)H5I_object(file)))
+        if(NULL == (f = (H5F_t *)H5VL_object(file)))
             FAIL_STACK_ERROR
 
         /* calculate fragment for alignment of block 30 */
@@ -5002,7 +5003,7 @@ test_mf_align_alloc3(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
             FAIL_STACK_ERROR
 
         /* Get a pointer to the internal file object */
-        if(NULL == (f = (H5F_t *)H5I_object(file)))
+        if(NULL == (f = (H5F_t *)H5VL_object(file)))
             FAIL_STACK_ERROR
 
         /* calculate fragment for alignment of block 30 */
@@ -5303,7 +5304,7 @@ test_mf_align_alloc4(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
             FAIL_STACK_ERROR
 
         /* Get a pointer to the internal file object */
-        if(NULL == (f = (H5F_t *)H5I_object(file)))
+        if(NULL == (f = (H5F_t *)H5VL_object(file)))
             FAIL_STACK_ERROR
 
         /* get alignment setting */
@@ -5514,7 +5515,7 @@ test_mf_align_alloc5(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
             FAIL_STACK_ERROR
 
         /* Get a pointer to the internal file object */
-        if(NULL == (f = (H5F_t *)H5I_object(file)))
+        if(NULL == (f = (H5F_t *)H5VL_object(file)))
             FAIL_STACK_ERROR
 
         /* get alignment setting */
@@ -5778,7 +5779,7 @@ test_mf_align_alloc6(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
             FAIL_STACK_ERROR
 
         /* Get a pointer to the internal file object */
-        if(NULL == (f = (H5F_t *)H5I_object(file)))
+        if(NULL == (f = (H5F_t *)H5VL_object(file)))
             FAIL_STACK_ERROR
 
         /* get alignment setting */
@@ -6028,7 +6029,7 @@ test_mf_bug1(const char *env_h5_drvr, hid_t fapl)
         TEST_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         TEST_ERROR
 
     /* Allocate a block of size align from meta_aggr.  This should create an
@@ -6114,7 +6115,7 @@ test_mf_fs_persist_split(void)
 
     TESTING("File's free-space managers are persistent for split-file");
 
-    /* for now, we don't support persistent free space managers 
+    /* for now, we don't support persistent free space managers
      * with the split file driver.
      */
     SKIPPED();
@@ -6124,7 +6125,7 @@ test_mf_fs_persist_split(void)
     /* File creation property list template */
     if((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
 
-    /* for now, we don't support persistent free space managers 
+    /* for now, we don't support persistent free space managers
      * with the split file driver.
      */
     SKIPPED();
@@ -6156,7 +6157,7 @@ test_mf_fs_persist_split(void)
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         FAIL_STACK_ERROR
 
     /* Allocate 4 blocks of type H5FD_MEM_SUPER */
@@ -6201,7 +6202,7 @@ test_mf_fs_persist_split(void)
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         FAIL_STACK_ERROR
 
     /* Verify that the H5FD_MEM_SUPER free-space manager is there */
@@ -6286,7 +6287,7 @@ test_mf_fs_persist_split(void)
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         FAIL_STACK_ERROR
 
     /* Verify that the free-space manager for H5FD_MEM_DRAW is not there */
@@ -6330,7 +6331,7 @@ test_mf_fs_persist_split(void)
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         FAIL_STACK_ERROR
 
     /* Verify that the H5FD_MEM_SUPER free-space manager is there */
@@ -6436,14 +6437,14 @@ test_mf_fs_persist_multi(void)
 
     TESTING("File's free-space managers are persistent for multi-file");
 
-    /* for now, we don't support persistent free space managers 
+    /* for now, we don't support persistent free space managers
      * with the multi file driver.
      */
     SKIPPED();
     HDfprintf(stdout, " Persistent FSMs disabled in multi file driver.\n");
     return 0;  /* <========== note return */
 
-    /* for now, we don't support persistent free space managers 
+    /* for now, we don't support persistent free space managers
      * with the multi file driver.
      */
     SKIPPED();
@@ -6473,7 +6474,7 @@ test_mf_fs_persist_multi(void)
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         FAIL_STACK_ERROR
 
     /* Allocate 4 blocks of type H5FD_MEM_SUPER */
@@ -6518,7 +6519,7 @@ test_mf_fs_persist_multi(void)
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         FAIL_STACK_ERROR
 
     /* Verify that the H5FD_MEM_SUPER free-space manager is there */
@@ -6600,7 +6601,7 @@ test_mf_fs_persist_multi(void)
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         FAIL_STACK_ERROR
 
     /* Verify that the free-space manager for H5FD_MEM_SUPER is there */
@@ -6666,7 +6667,7 @@ test_mf_fs_persist_multi(void)
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         FAIL_STACK_ERROR
 
     /* If H5FD_MEM_SUPER is there, should not find block #1 & #3 */
@@ -6778,7 +6779,7 @@ test_mf_fs_persist(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
             FAIL_STACK_ERROR
 
         /* Get a pointer to the internal file object */
-        if(NULL == (f = (H5F_t *)H5I_object(file)))
+        if(NULL == (f = (H5F_t *)H5VL_object(file)))
             FAIL_STACK_ERROR
 
         /* Allocate 6 blocks */
@@ -6812,7 +6813,7 @@ test_mf_fs_persist(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
             FAIL_STACK_ERROR
 
         /* Get a pointer to the internal file object */
-        if(NULL == (f = (H5F_t *)H5I_object(file)))
+        if(NULL == (f = (H5F_t *)H5VL_object(file)))
             FAIL_STACK_ERROR
 
         H5MF__alloc_to_fs_type(f, type, TBLOCK_SIZE6, (H5F_mem_page_t *)&tt);
@@ -6867,7 +6868,7 @@ test_mf_fs_persist(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
             FAIL_STACK_ERROR
 
         /* Get a pointer to the internal file object */
-        if(NULL == (f = (H5F_t *)H5I_object(file)))
+        if(NULL == (f = (H5F_t *)H5VL_object(file)))
             FAIL_STACK_ERROR
 
         /* Verify that H5FD_MEM_SUPER free-space manager is there */
@@ -6959,7 +6960,7 @@ test_mf_fs_gone(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
             FAIL_STACK_ERROR
 
         /* Get a pointer to the internal file object */
-        if(NULL == (f = (H5F_t *)H5I_object(file)))
+        if(NULL == (f = (H5F_t *)H5VL_object(file)))
             FAIL_STACK_ERROR
 
         /* Allocate 4 blocks */
@@ -6993,7 +6994,7 @@ test_mf_fs_gone(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
             FAIL_STACK_ERROR
 
         /* Get a pointer to the internal file object */
-        if(NULL == (f = (H5F_t *)H5I_object(file)))
+        if(NULL == (f = (H5F_t *)H5VL_object(file)))
             FAIL_STACK_ERROR
 
         H5MF__alloc_to_fs_type(f, type, TBLOCK_SIZE4, (H5F_mem_page_t *)&fs_type);
@@ -7014,7 +7015,7 @@ test_mf_fs_gone(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
             FAIL_STACK_ERROR
 
         /* Get a pointer to the internal file object */
-        if(NULL == (f = (H5F_t *)H5I_object(file)))
+        if(NULL == (f = (H5F_t *)H5VL_object(file)))
             FAIL_STACK_ERROR
 
         /* Verify that H5FD_MEM_SUPER free-space manager is there */
@@ -7071,7 +7072,7 @@ test_mf_fs_gone(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
             FAIL_STACK_ERROR
 
         /* Get a pointer to the internal file object */
-        if(NULL == (f = (H5F_t *)H5I_object(file)))
+        if(NULL == (f = (H5F_t *)H5VL_object(file)))
             FAIL_STACK_ERROR
         /* Verify that the H5FD_MEM_SUPER free-space manager is not there */
         if(H5F_addr_defined(f->shared->fs_addr[fs_type]))
@@ -7169,7 +7170,7 @@ test_mf_strat_thres_persist(const char *env_h5_drvr, hid_t fapl, hbool_t new_for
                     FAIL_STACK_ERROR
 
                 /* Get a pointer to the internal file object */
-                if(NULL == (f = (H5F_t *)H5I_object(file)))
+                if(NULL == (f = (H5F_t *)H5VL_object(file)))
                     FAIL_STACK_ERROR
 
                 /* Allocate 6 blocks */
@@ -7205,13 +7206,13 @@ test_mf_strat_thres_persist(const char *env_h5_drvr, hid_t fapl, hbool_t new_for
                     FAIL_STACK_ERROR
 
                 /* Get a pointer to the internal file object */
-                if(NULL == (f = (H5F_t *)H5I_object(file)))
+                if(NULL == (f = (H5F_t *)H5VL_object(file)))
                     FAIL_STACK_ERROR
 
                 H5MF__alloc_to_fs_type(f, type, TBLOCK_SIZE6, (H5F_mem_page_t *)&tt);
 
                 /* Get a pointer to the internal file object */
-                if(NULL == (f = (H5F_t *)H5I_object(file)))
+                if(NULL == (f = (H5F_t *)H5VL_object(file)))
                     FAIL_STACK_ERROR
 
                 if(f->shared->fs_persist) {
@@ -7341,7 +7342,7 @@ test_mf_strat_thres_gone(const char *env_h5_drvr, hid_t fapl, hbool_t new_format
                 FAIL_STACK_ERROR
 
             /* Get a pointer to the internal file object */
-            if(NULL == (f = (H5F_t *)H5I_object(file)))
+            if(NULL == (f = (H5F_t *)H5VL_object(file)))
                 FAIL_STACK_ERROR
 
             /* Allocate 6 blocks */
@@ -7424,7 +7425,7 @@ test_mf_strat_thres_gone(const char *env_h5_drvr, hid_t fapl, hbool_t new_format
                 FAIL_STACK_ERROR
     
             /* Get a pointer to the internal file object */
-            if(NULL == (f = (H5F_t *)H5I_object(file)))
+            if(NULL == (f = (H5F_t *)H5VL_object(file)))
                 FAIL_STACK_ERROR
 
             /* Free-space manager should be empty */
@@ -7498,7 +7499,7 @@ test_dichotomy(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         FAIL_STACK_ERROR
 
     /* Allocate the first block of type H5FD_MEM_SUPER */
@@ -7658,7 +7659,7 @@ test_page_alloc_xfree(const char *env_h5_drvr, hid_t fapl)
                 TEST_ERROR
 
             /* Get a pointer to the internal file object */
-            if(NULL == (f = (H5F_t *)H5I_object(fid)))
+            if(NULL == (f = (H5F_t *)H5VL_object(fid)))
                 TEST_ERROR
     
             /* Allocate 3 small metadata blocks: addr1, addr2, addr3 */
@@ -7727,7 +7728,7 @@ test_page_alloc_xfree(const char *env_h5_drvr, hid_t fapl)
                     TEST_ERROR
         
                 /* Get a pointer to the internal file object */
-                if(NULL == (f = (H5F_t *)H5I_object(fid)))
+                if(NULL == (f = (H5F_t *)H5VL_object(fid)))
                     TEST_ERROR
 
                 /* Verify that the large generic manager is there */
@@ -7869,7 +7870,7 @@ test_page_try_shrink(const char *env_h5_drvr, hid_t fapl)
             FAIL_STACK_ERROR
 
         /* Get a pointer to the internal file object */
-        if(NULL == (f = (H5F_t *)H5I_object(fid)))
+        if(NULL == (f = (H5F_t *)H5VL_object(fid)))
             FAIL_STACK_ERROR
 
         /* Allocate a small metadata block with addr1 */
@@ -7990,7 +7991,7 @@ test_page_small_try_extend(const char *env_h5_drvr, hid_t fapl)
             FAIL_STACK_ERROR
 
         /* Get a pointer to the internal file object */
-        if(NULL == (f = (H5F_t *)H5I_object(fid)))
+        if(NULL == (f = (H5F_t *)H5VL_object(fid)))
             FAIL_STACK_ERROR
 
         /* Allocate a small metadata block with addr1 */
@@ -8144,7 +8145,7 @@ test_page_large_try_extend(const char *env_h5_drvr, hid_t fapl)
             FAIL_STACK_ERROR
 
         /* Get a pointer to the internal file object */
-        if(NULL == (f = (H5F_t *)H5I_object(fid)))
+        if(NULL == (f = (H5F_t *)H5VL_object(fid)))
             FAIL_STACK_ERROR
 
         /* Allocate a large data block with gaddr1 */
@@ -8286,7 +8287,7 @@ test_page_large(const char *env_h5_drvr, hid_t fapl)
             FAIL_STACK_ERROR
 
         /* Get a pointer to the internal file object */
-        if(NULL == (f = (H5F_t *)H5I_object(fid)))
+        if(NULL == (f = (H5F_t *)H5VL_object(fid)))
             FAIL_STACK_ERROR
 
         /* Allocate a large data block with gaddr1 */
@@ -8442,7 +8443,7 @@ test_page_small(const char *env_h5_drvr, hid_t fapl)
             FAIL_STACK_ERROR
 
         /* Get a pointer to the internal file object */
-        if(NULL == (f = (H5F_t *)H5I_object(fid)))
+        if(NULL == (f = (H5F_t *)H5VL_object(fid)))
             FAIL_STACK_ERROR
 
         /* Allocate 2 small metadata blocks: addr1, addr2 */
@@ -8686,7 +8687,7 @@ test_page_alignment(const char *env_h5_drvr, hid_t fapl)
             TEST_ERROR
 
         /* Get a pointer to the internal file object */
-        if(NULL == (f = (H5F_t *)H5I_object(fid)))
+        if(NULL == (f = (H5F_t *)H5VL_object(fid)))
             TEST_ERROR
 
         /* Allocate 2 small raw data blocks */
@@ -8738,7 +8739,7 @@ test_page_alignment(const char *env_h5_drvr, hid_t fapl)
             TEST_ERROR
 
         /* Get a pointer to the internal file object */
-        if(NULL == (f = (H5F_t *)H5I_object(fid)))
+        if(NULL == (f = (H5F_t *)H5VL_object(fid)))
             TEST_ERROR
 
         /* Allocate 2 small metadata blocks */
@@ -8799,7 +8800,7 @@ test_page_alignment(const char *env_h5_drvr, hid_t fapl)
             TEST_ERROR
 
         /* Get a pointer to the internal file object */
-        if(NULL == (f = (H5F_t *)H5I_object(fid)))
+        if(NULL == (f = (H5F_t *)H5VL_object(fid)))
             TEST_ERROR
     
         /* Allocate 2 small raw data blocks */

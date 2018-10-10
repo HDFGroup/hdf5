@@ -163,26 +163,22 @@ herr_t
 H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
     hid_t file_space_id, hid_t dxpl_id, void *buf/*out*/)
 {
-    H5D_t	       *dset        = NULL;
-    const H5S_t	   *mem_space   = NULL;
-    const H5S_t	   *file_space  = NULL;
+    H5VL_object_t  *vol_obj     = NULL;
     herr_t          ret_value   = SUCCEED;      /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE6("e", "iiiiix", dset_id, mem_type_id, mem_space_id, file_space_id,
              dxpl_id, buf);
 
-    /* Get dataset pointer */
-    if (NULL == (dset = (H5D_t *)H5I_object_verify(dset_id, H5I_DATASET)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dset_id is not a dataset ID")
-    if (NULL == dset->oloc.file)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dataset is not associated with a file")
+    /* Check arguments */
+    if (mem_space_id < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid memory dataspace ID")
+    if (file_space_id < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file dataspace ID")
 
-    /* Get validated dataspace pointers */
-    if (H5S_get_validated_dataspace(mem_space_id, &mem_space) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "could not get a validated dataspace from mem_space_id")
-    if (H5S_get_validated_dataspace(file_space_id, &file_space) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "could not get a validated dataspace from file_space_id")
+    /* Get dataset pointer */
+    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dset_id is not a dataset ID")
 
     /* Get the default dataset transfer property list if the user didn't provide one */
     if (H5P_DEFAULT == dxpl_id)
@@ -195,7 +191,8 @@ H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
     H5CX_set_dxpl(dxpl_id);
 
     /* Read the data */
-    if (H5D__read(dset, mem_type_id, mem_space, file_space, buf/*out*/) < 0)
+    if ((ret_value = H5VL_dataset_read(vol_obj->data, vol_obj->driver->cls, mem_type_id, mem_space_id, 
+                                      file_space_id, dxpl_id, buf, H5_REQUEST_NULL)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data")
 
 done:
@@ -219,20 +216,15 @@ herr_t
 H5Dread_chunk(hid_t dset_id, hid_t dxpl_id, const hsize_t *offset, uint32_t *filters,
          void *buf)
 {
-    H5D_t          *dset = NULL;
-    hsize_t     offset_copy[H5O_LAYOUT_NDIMS];  /* Internal copy of chunk offset */
+    H5VL_object_t  *vol_obj = NULL;
     herr_t          ret_value = SUCCEED;            /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE5("e", "ii*h*Iu*x", dset_id, dxpl_id, offset, filters, buf);
 
     /* Check arguments */
-    if (NULL == (dset = (H5D_t *)H5I_object_verify(dset_id, H5I_DATASET)))
+    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dset_id is not a dataset ID")
-    if (NULL == dset->oloc.file)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dataset is not associated with a file")
-    if (H5D_CHUNKED != dset->shared->layout.type)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a chunked dataset")
     if (!buf)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "buf cannot be NULL")
     if (!offset)
@@ -250,14 +242,9 @@ H5Dread_chunk(hid_t dset_id, hid_t dxpl_id, const hsize_t *offset, uint32_t *fil
     /* Set DXPL for operation */
     H5CX_set_dxpl(dxpl_id);
 
-    /* Copy the user's offset array so we can be sure it's terminated properly.
-     * (we don't want to mess with the user's buffer).
-     */
-    if (H5D__get_offset_copy(dset, offset, offset_copy) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "failure to copy offset array")
-
     /* Read the raw chunk */
-    if (H5D__chunk_direct_read(dset, offset_copy, filters, buf) < 0)
+    if (H5VL_dataset_optional(vol_obj->data, vol_obj->driver->cls, dxpl_id,
+            H5_REQUEST_NULL, H5VL_DATASET_CHUNK_READ, offset, filters, buf) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read unprocessed chunk data")
 
 done:
@@ -298,28 +285,24 @@ done:
  */
 herr_t
 H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
-    hid_t file_space_id, hid_t dxpl_id, const void *buf)
+	 hid_t file_space_id, hid_t dxpl_id, const void *buf)
 {
-    H5D_t                  *dset = NULL;
-    const H5S_t            *mem_space = NULL;
-    const H5S_t            *file_space = NULL;
+    H5VL_object_t          *vol_obj = NULL;
     herr_t                  ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE6("e", "iiiii*x", dset_id, mem_type_id, mem_space_id, file_space_id,
              dxpl_id, buf);
 
-    /* Get dataset pointer */
-    if (NULL == (dset = (H5D_t *)H5I_object_verify(dset_id, H5I_DATASET)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dset_id is not a dataset ID")
-    if (NULL == dset->oloc.file)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dataset is not associated with a file")
+    /* Check arguments */
+    if (mem_space_id < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid memory dataspace ID")
+    if (file_space_id < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file dataspace ID")
 
-    /* Get validated dataspace pointers */
-    if (H5S_get_validated_dataspace(mem_space_id, &mem_space) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "could not get a validated dataspace from mem_space_id")
-    if (H5S_get_validated_dataspace(file_space_id, &file_space) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "could not get a validated dataspace from file_space_id")
+    /* Get dataset pointer */
+    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dset_id is not a dataset ID")
 
     /* Get the default dataset transfer property list if the user didn't provide one */
     if (H5P_DEFAULT == dxpl_id)
@@ -332,7 +315,8 @@ H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
     H5CX_set_dxpl(dxpl_id);
 
     /* Write the data */
-    if (H5D__write(dset, mem_type_id, mem_space, file_space, buf) < 0)
+    if ((ret_value = H5VL_dataset_write(vol_obj->data, vol_obj->driver->cls, mem_type_id, mem_space_id, 
+                                       file_space_id, dxpl_id, buf, H5_REQUEST_NULL)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
 
 done:
@@ -356,8 +340,7 @@ herr_t
 H5Dwrite_chunk(hid_t dset_id, hid_t dxpl_id, uint32_t filters, const hsize_t *offset, 
          size_t data_size, const void *buf)
 {
-    H5D_t          *dset = NULL;
-    hsize_t     offset_copy[H5O_LAYOUT_NDIMS];  /* Internal copy of chunk offset */
+    H5VL_object_t  *vol_obj = NULL;
     uint32_t        data_size_32;                   /* Chunk data size (limited to 32-bits currently) */
     herr_t          ret_value = SUCCEED;            /* Return value */
     
@@ -365,12 +348,8 @@ H5Dwrite_chunk(hid_t dset_id, hid_t dxpl_id, uint32_t filters, const hsize_t *of
     H5TRACE6("e", "iiIu*hz*x", dset_id, dxpl_id, filters, offset, data_size, buf);
 
     /* Check arguments */
-    if (NULL == (dset = (H5D_t *)H5I_object_verify(dset_id, H5I_DATASET)))
+    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset ID")
-    if (NULL == dset->oloc.file)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dataset is not associated with a file")
-    if (H5D_CHUNKED != dset->shared->layout.type)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a chunked dataset")
     if (!buf)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "buf cannot be NULL")
     if (!offset)
@@ -393,14 +372,9 @@ H5Dwrite_chunk(hid_t dset_id, hid_t dxpl_id, uint32_t filters, const hsize_t *of
     /* Set DXPL for operation */
     H5CX_set_dxpl(dxpl_id);
 
-    /* Copy the user's offset array so we can be sure it's terminated properly.
-     * (we don't want to mess with the user's buffer).
-     */
-    if (H5D__get_offset_copy(dset, offset, offset_copy) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "failure to copy offset array")
-
     /* Write chunk */
-    if (H5D__chunk_direct_write(dset, filters, offset_copy, data_size_32, buf) < 0)
+    if (H5VL_dataset_optional(vol_obj->data, vol_obj->driver->cls, dxpl_id,
+            H5_REQUEST_NULL, H5VL_DATASET_CHUNK_WRITE, filters, offset, data_size_32, buf) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write unprocessed chunk data")
 
 done:

@@ -18,6 +18,7 @@
 
 #include "H5CXprivate.h"        /* API Contexts                             */
 #include "H5Iprivate.h"         /* Identifiers                              */
+#include "H5VLprivate.h"        /* Virtual Object Layer                     */
 
 /*
  * This file needs to access private datatypes from the H5O package.
@@ -78,7 +79,7 @@ test_cont(char *filename, hid_t fapl)
     /* Create the file to operate on */
     if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         FAIL_STACK_ERROR
-    if(NULL == (f = (H5F_t *)H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         FAIL_STACK_ERROR
     if (H5AC_ignore_tags(f) < 0) {
         H5_FAILED();
@@ -200,7 +201,7 @@ test_ohdr_cache(char *filename, hid_t fapl)
         FAIL_STACK_ERROR
     if(H5Pclose(my_fapl) < 0)
         FAIL_STACK_ERROR
-    if(NULL == (f = (H5F_t *)H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         FAIL_STACK_ERROR
     if(H5AC_ignore_tags(f) < 0)
         FAIL_STACK_ERROR
@@ -303,17 +304,17 @@ error:
 static herr_t
 test_ohdr_swmr(hbool_t new_format)
 {
-    hid_t fid = -1;                /* File ID */
-    hid_t fapl = -1;            /* File access property list */
-    hid_t did = -1;                /* Dataset ID */
-    hid_t sid = -1;             /* Dataspace ID */
-    hid_t plist = -1;            /* Dataset creation property list */
-    size_t compact_size = 1024;    /* The size of compact dataset */
-    int *wbuf = NULL;            /* Buffer for writing */
-    hsize_t dims[1];            /* Dimension sizes */
-    size_t u;                    /* Iterator */
-    int n;                      /* Data variable */
-    H5O_info_t obj_info;        /* Information for the object */
+    hid_t fid = -1;                 /* File ID */
+    hid_t fapl = -1;                /* File access property list */
+    hid_t did = -1;                 /* Dataset ID */
+    hid_t sid = -1;                 /* Dataspace ID */
+    hid_t plist = -1;               /* Dataset creation property list */
+    size_t compact_size = 1024;     /* The size of compact dataset */
+    int *wbuf = NULL;               /* Buffer for writing */
+    hsize_t dims[1];                /* Dimension sizes */
+    size_t u;                       /* Iterator */
+    int n;                          /* Data variable */
+    H5O_info_t obj_info;            /* Information for the object */
 
     if(new_format) {
         TESTING("exercise the coding for the re-read of the object header for SWMR access: latest-format");
@@ -840,7 +841,7 @@ main(void)
         /* Create the file to operate on */
         if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
             FAIL_STACK_ERROR
-        if(NULL == (f = (H5F_t *)H5I_object(file)))
+        if(NULL == (f = (H5F_t *)H5VL_object(file)))
             FAIL_STACK_ERROR
         if(H5AC_ignore_tags(f) < 0) {
             H5_FAILED();
@@ -938,7 +939,7 @@ main(void)
             FAIL_STACK_ERROR
         if((file = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
             FAIL_STACK_ERROR
-        if(NULL == (f = (H5F_t *)H5I_object(file)))
+        if(NULL == (f = (H5F_t *)H5VL_object(file)))
             FAIL_STACK_ERROR
         if (H5AC_ignore_tags(f) < 0)
             FAIL_STACK_ERROR

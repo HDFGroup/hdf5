@@ -877,10 +877,10 @@ test_compact_io(hid_t fapl)
                     } /* end  */
 
             /* Get the internal file pointer */
-            if((fp = (H5F_t *)H5I_object(verfile)) == NULL) TEST_ERROR
+            if((fp = (H5F_t *)H5VL_object(verfile)) == NULL) TEST_ERROR
 
             /* Get the internal dataset pointer */
-            if((dsetp = (H5D_t *)H5I_object(dataset)) == NULL) TEST_ERROR
+            if((dsetp = (H5D_t *)H5VL_object(dataset)) == NULL) TEST_ERROR
 
             /* Verify the dataset's layout and fill message versions */
             if(fp->shared->low_bound == H5F_LIBVER_EARLIEST) {

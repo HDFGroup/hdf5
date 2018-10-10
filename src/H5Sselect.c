@@ -89,6 +89,52 @@ H5S_select_offset(H5S_t *space, const hssize_t *offset)
 
 /*--------------------------------------------------------------------------
  NAME
+    H5Sselect_copy
+ PURPOSE
+    Copy a selection from one dataspace to another
+ USAGE
+    herr_t H5Sselect_copy(dst, src)
+        hid_t   dst;              OUT: ID of the destination dataspace
+        hid_t   src;              IN:  ID of the source dataspace
+
+ RETURNS
+    Non-negative on success/Negative on failure
+ DESCRIPTION
+    Copies all the selection information (including offset) from the source
+    dataspace to the destination dataspace.
+
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5Sselect_copy(hid_t dst_id, hid_t src_id)
+{
+    H5S_t  *src;
+    H5S_t  *dst;
+    herr_t  ret_value = SUCCEED;
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "ii", dst_id, src_id);
+
+    /* Check args */
+    if(NULL == (src = (H5S_t *)H5I_object_verify(src_id, H5I_DATASPACE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
+    if(NULL == (dst = (H5S_t *)H5I_object_verify(dst_id, H5I_DATASPACE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
+
+    /* Copy */
+    if(H5S_select_copy(dst, src, FALSE) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "can't copy selection")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Sselect_copy() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
     H5S_select_copy
  PURPOSE
     Copy a selection from one dataspace to another

@@ -4091,7 +4091,7 @@ setup_cache_for_test(hid_t * fid_ptr,
                       world_mpi_rank, FUNC);
         }
     } else {
-        file_ptr = (H5F_t *)H5I_object_verify(fid, H5I_FILE);
+        file_ptr = (H5F_t *)H5VL_object_verify(fid, H5I_FILE);
     }
 
     if ( file_ptr == NULL ) {

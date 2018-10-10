@@ -2717,7 +2717,7 @@ test_misc15(void)
     CHECK(ret, FAIL, "H5Fclose");
 
     /* Verify that the file is still OK */
-    ret = H5Fis_hdf5(MISC15_FILE);
+    ret = H5Fis_accessible(MISC15_FILE, fapl);
     CHECK(ret, FAIL, "H5Fis_hdf5");
 
     ret = H5Pclose(fapl);
@@ -3028,7 +3028,9 @@ test_misc19(void)
     hid_t emid = -1;                /* Error Message ID         */
     hid_t esid = -1;                /* Error Stack ID           */
     hid_t vfdid = -1;               /* Virtual File Driver ID   */
+    hid_t volid = -1;               /* Virtual Object Layer ID  */
     H5FD_class_t *vfd_cls = NULL;   /* VFD class                */
+    H5VL_class_t *vol_cls = NULL;   /* VOL class                */
     int rc;                         /* Reference count          */
     herr_t ret;                     /* Generic return value     */
 
@@ -3478,6 +3480,44 @@ test_misc19(void)
     VERIFY(ret, FAIL, "H5FDunregister");
 
     HDfree(vfd_cls);
+
+/* Check H5I operations on virtual object drivers */
+
+    /* Get a VOL class to register */
+    vol_cls = h5_get_dummy_vol_class();
+    CHECK(vol_cls, NULL, "h5_get_dummy_vol_class");
+
+    /* Register a virtual object driver */
+    volid = H5VLregister(vol_cls);
+    CHECK(volid, FAIL, "H5VLregister");
+
+    /* Check the reference count */
+    rc = H5Iget_ref(volid);
+    VERIFY(rc, 1, "H5Iget_ref");
+
+    /* Increment the reference count */
+    rc = H5Iinc_ref(volid);
+    VERIFY(rc, 2, "H5Iinc_ref");
+
+    /* Unregister the VOL driver normally */
+    ret = H5VLunregister(volid);
+    CHECK(ret, FAIL, "H5VLunregister");
+
+    /* Check the reference count */
+    rc = H5Iget_ref(volid);
+    VERIFY(rc, 1, "H5Iget_ref");
+
+    /* Unregister the VOL driver by decrementing the reference count */
+    rc = H5Idec_ref(volid);
+    VERIFY(rc, 0, "H5Idec_ref");
+
+    /* Try unregistering the VOL driver again (should fail) */
+    H5E_BEGIN_TRY {
+        ret = H5VLunregister(volid);
+    } H5E_END_TRY;
+    VERIFY(ret, FAIL, "H5VLunregister");
+
+    HDfree(vol_cls);
 
 } /* end test_misc19() */
 

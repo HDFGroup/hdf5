@@ -97,7 +97,6 @@ main(void)
             TEST_ERROR
         if(H5Dread(did, H5T_NATIVE_INT, msid, fsid, H5P_DEFAULT, buffer) < 0)
             TEST_ERROR
-
         if(H5Sclose(fsid) < 0)
             TEST_ERROR
 

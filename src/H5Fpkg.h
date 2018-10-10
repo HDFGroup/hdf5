@@ -31,6 +31,7 @@
 
 /* Other public headers needed by this file */
 #include "H5Bpublic.h"          /* B-tree header (for H5B_NUM_BTREE_ID)     */
+#include "H5VLpublic.h"         /* Virtual Object Layer                     */
 
 /* Other private headers needed by this file */
 #include "H5private.h"		    /* Generic Functions                        */
@@ -367,7 +368,7 @@ struct H5F_t {
     H5F_file_t		   *shared;         /* The shared file info                                         */
     unsigned		    nopen_objs;     /* Number of open object headers                                */
     H5FO_t             *obj_count;      /* # of time each object is opened through top file structure   */
-    hid_t               file_id;        /* ID of this file                                              */
+    hbool_t             id_exists;      /* Whether an ID for this struct exists                         */
     hbool_t             closing;        /* File is in the process of being closed                       */
     struct H5F_t       *parent;         /* Parent file that this file is mounted to                     */
     unsigned            nmounts;        /* Number of children mounted to this file                      */
@@ -377,6 +378,34 @@ struct H5F_t {
 #endif /* H5_HAVE_PARALLEL */
 };
 
+/* types for file optional VOL operations */
+typedef enum H5VL_file_optional_t {
+    H5VL_FILE_CLEAR_ELINK_CACHE,        /* Clear external link cache            */
+    H5VL_FILE_GET_FILE_IMAGE,           /* file image                           */
+    H5VL_FILE_GET_FREE_SECTIONS,        /* file free selections                 */
+    H5VL_FILE_GET_FREE_SPACE,	        /* file freespace         		        */
+    H5VL_FILE_GET_INFO,	                /* file info             		        */
+    H5VL_FILE_GET_MDC_CONF,	            /* file metadata cache configuration	*/
+    H5VL_FILE_GET_MDC_HR,	            /* file metadata cache hit rate		    */
+    H5VL_FILE_GET_MDC_SIZE,             /* file metadata cache size		        */
+    H5VL_FILE_GET_SIZE,	                /* file size             		        */
+    H5VL_FILE_GET_VFD_HANDLE,	        /* file VFD handle       		        */
+    H5VL_FILE_REOPEN,                   /* reopen the file                      */
+    H5VL_FILE_RESET_MDC_HIT_RATE,       /* get metadata cache hit rate          */
+    H5VL_FILE_SET_MDC_CONFIG,           /* set metadata cache configuration     */
+    H5VL_FILE_GET_METADATA_READ_RETRY_INFO,
+    H5VL_FILE_START_SWMR_WRITE,
+    H5VL_FILE_START_MDC_LOGGING,
+    H5VL_FILE_STOP_MDC_LOGGING,
+    H5VL_FILE_GET_MDC_LOGGING_STATUS,
+    H5VL_FILE_SET_LATEST_FORMAT,
+    H5VL_FILE_FORMAT_CONVERT,
+    H5VL_FILE_RESET_PAGE_BUFFERING_STATS,
+    H5VL_FILE_GET_PAGE_BUFFERING_STATS,
+    H5VL_FILE_GET_MDC_IMAGE_INFO
+
+} H5VL_file_optional_t;
+
 /* User data for traversal routine to get ID counts */
 typedef struct {
     ssize_t *obj_count;   /* number of objects counted so far */
@@ -384,6 +413,7 @@ typedef struct {
 } H5F_trav_obj_cnt_t;
 
 /* User data for traversal routine to get ID lists */
+/* XXX (VOL MERGE): Should the type of obj_count and max_objs be identical? */
 typedef struct {
     size_t max_objs;
     hid_t *oid_list;
@@ -411,12 +441,12 @@ H5_DLL H5F_t *H5F__reopen(H5F_t *f);
 H5_DLL H5F_t *H5F__new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf);
 H5_DLL herr_t H5F__dest(H5F_t *f, hbool_t flush);
 H5_DLL herr_t H5F__flush(H5F_t *f);
-H5_DLL htri_t H5F__is_hdf5(const char *name);
+H5_DLL htri_t H5F__is_hdf5(const char *name, hid_t fapl_id);
 H5_DLL ssize_t H5F__get_file_image(H5F_t *f, void *buf_ptr, size_t buf_len);
 H5_DLL herr_t H5F__get_info(H5F_t *f, H5F_info2_t *finfo);
 H5_DLL herr_t H5F__format_convert(H5F_t *f);
 H5_DLL herr_t H5F__start_swmr_write(H5F_t *f);
-H5_DLL herr_t H5F__close(hid_t file_id);
+H5_DLL herr_t H5F__close(H5F_t *f);
 H5_DLL herr_t H5F__set_libver_bounds(H5F_t *f, H5F_libver_t low, H5F_libver_t high);
 
 /* File mount related routines */

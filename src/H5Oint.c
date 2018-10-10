@@ -42,6 +42,8 @@
 #include "H5MMprivate.h"        /* Memory management                        */
 #endif /* H5O_ENABLE_BOGUS */
 #include "H5Opkg.h"             /* Object headers                           */
+#include "H5VLprivate.h"        /* Virtual Object Layer                     */
+#include "H5VLnative.h"         /* Virtual Object Layer (native)            */
 
 
 /****************/
@@ -515,26 +517,26 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5O_open_name
  *
- * Purpose:     Opens an object within an HDF5 file.
+ * Purpose:     Opens an object by name
  *
- * Return:      Success:    Open object identifier
- *              Failure:    H5I_INVALID_HID
+ * Return:      Success:    Pointer to object data
+ *              Failure:    NULL
  *
  * Programmer:	Quincey Koziol
  *		March  5 2007
  *
  *-------------------------------------------------------------------------
  */
-hid_t
-H5O_open_name(const H5G_loc_t *loc, const char *name, hbool_t app_ref)
+void *
+H5O_open_name(const H5G_loc_t *loc, const char *name, H5I_type_t *opened_type)
 {
     H5G_loc_t   obj_loc;                /* Location used to open group */
     H5G_name_t  obj_path;            	/* Opened object group hier. path */
     H5O_loc_t   obj_oloc;            	/* Opened object object location */
     hbool_t     loc_found = FALSE;      /* Entry at 'name' found */
-    hid_t       ret_value = H5I_INVALID_HID;
+    void *ret_value = NULL;             /* Return value */
 
-    FUNC_ENTER_NOAPI(H5I_INVALID_HID)
+    FUNC_ENTER_NOAPI(NULL)
 
     /* Check args */
     HDassert(loc);
@@ -547,17 +549,17 @@ H5O_open_name(const H5G_loc_t *loc, const char *name, hbool_t app_ref)
 
     /* Find the object's location */
     if(H5G_loc_find(loc, name, &obj_loc/*out*/) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, H5I_INVALID_HID, "object not found")
+        HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, NULL, "object not found")
     loc_found = TRUE;
 
     /* Open the object */
-    if((ret_value = H5O_open_by_loc(&obj_loc, app_ref)) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open object")
+    if(NULL == (ret_value = H5O_open_by_loc(&obj_loc, opened_type)))
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, NULL, "unable to open object")
 
 done:
-    if(ret_value < 0 && loc_found)
-        if(H5G_loc_free(&obj_loc) < 0)
-            HDONE_ERROR(H5E_OHDR, H5E_CANTRELEASE, H5I_INVALID_HID, "can't free location")
+    if(NULL == ret_value)
+        if(loc_found && H5G_loc_free(&obj_loc) < 0)
+            HDONE_ERROR(H5E_OHDR, H5E_CANTRELEASE, NULL, "can't free location")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_open_name() */
@@ -568,25 +570,25 @@ done:
  *
  * Purpose:     Internal routine to open an object by index within group
  *
- * Return:      Success:    Open object identifier
- *              Failure:    H5I_INVALID_HID
+ * Return:      Success:    Pointer to object data
+ *              Failure:    NULL
  *
  * Programmer:	Quincey Koziol
  *		December 28, 2017
  *
  *-------------------------------------------------------------------------
  */
-hid_t
+void *
 H5O_open_by_idx(const H5G_loc_t *loc, const char *name, H5_index_t idx_type,
-    H5_iter_order_t order, hsize_t n)
+    H5_iter_order_t order, hsize_t n, H5I_type_t *opened_type)
 {
     H5G_loc_t   obj_loc;                /* Location used to open group */
     H5G_name_t  obj_path;            	/* Opened object group hier. path */
     H5O_loc_t   obj_oloc;            	/* Opened object object location */
     hbool_t     loc_found = FALSE;      /* Entry at 'name' found */
-    hid_t ret_value = H5I_INVALID_HID;	/* Return value */
+    void *ret_value = NULL;             /* Return value */
 
-    FUNC_ENTER_NOAPI(H5I_INVALID_HID)
+    FUNC_ENTER_NOAPI(NULL)
 
     /* Check arguments */
     HDassert(loc);
@@ -598,18 +600,18 @@ H5O_open_by_idx(const H5G_loc_t *loc, const char *name, H5_index_t idx_type,
 
     /* Find the object's location, according to the order in the index */
     if(H5G_loc_find_by_idx(loc, name, idx_type, order, n, &obj_loc/*out*/) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, H5I_INVALID_HID, "group not found")
+        HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, NULL, "group not found")
     loc_found = TRUE;
 
     /* Open the object */
-    if((ret_value = H5O_open_by_loc(&obj_loc, TRUE)) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open object")
+    if(NULL == (ret_value = H5O_open_by_loc(&obj_loc, opened_type)))
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, NULL, "unable to open object")
 
 done:
     /* Release the object location if we failed after copying it */
-    if(ret_value < 0 && loc_found)
-        if(H5G_loc_free(&obj_loc) < 0)
-            HDONE_ERROR(H5E_OHDR, H5E_CANTRELEASE, H5I_INVALID_HID, "can't free location")
+    if(NULL == ret_value)
+        if(loc_found && H5G_loc_free(&obj_loc) < 0)
+            HDONE_ERROR(H5E_OHDR, H5E_CANTRELEASE, NULL, "can't free location")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_open_by_idx() */
@@ -620,23 +622,23 @@ done:
  *
  * Purpose:     Internal routine to open an object by its address
  *
- * Return:      Success:    Open object identifier
- *              Failure:    H5I_INVALID_HID
+ * Return:      Success:    Pointer to object data
+ *              Failure:    NULL
  *
  * Programmer:	Quincey Koziol
  *		December 28, 2017
  *
  *-------------------------------------------------------------------------
  */
-hid_t
-H5O_open_by_addr(const H5G_loc_t *loc, haddr_t addr)
+void *
+H5O_open_by_addr(const H5G_loc_t *loc, haddr_t addr, H5I_type_t *opened_type)
 {
     H5G_loc_t   obj_loc;                /* Location used to open group */
     H5G_name_t  obj_path;            	/* Opened object group hier. path */
     H5O_loc_t   obj_oloc;            	/* Opened object object location */
-    hid_t ret_value = H5I_INVALID_HID;	/* Return value */
+    void *ret_value = NULL;             /* Return value */
 
-    FUNC_ENTER_NOAPI(H5I_INVALID_HID)
+    FUNC_ENTER_NOAPI(NULL)
 
     /* Check arguments */
     HDassert(loc);
@@ -650,8 +652,8 @@ H5O_open_by_addr(const H5G_loc_t *loc, haddr_t addr)
     H5G_name_reset(obj_loc.path);       /* objects opened through this routine don't have a path name */
 
     /* Open the object */
-    if((ret_value = H5O_open_by_loc(&obj_loc, TRUE)) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open object")
+    if(NULL == (ret_value = H5O_open_by_loc(&obj_loc, opened_type)))
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, NULL, "unable to open object")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -661,34 +663,34 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5O_open_by_loc
  *
- * Purpose:     Opens an object and returns an ID given its group loction.
+ * Purpose:     Opens an object
  *
- * Return:      Success:    Open object identifier
- *              Failure:    H5I_INVALID_HID
+ * Return:      Success:    Pointer to object data
+ *              Failure:    NULL
  *
  * Programmer:	James Laird
  *		July 25 2006
  *
  *-------------------------------------------------------------------------
  */
-hid_t
-H5O_open_by_loc(const H5G_loc_t *obj_loc, hbool_t app_ref)
+void *
+H5O_open_by_loc(const H5G_loc_t *obj_loc, H5I_type_t *opened_type)
 {
     const H5O_obj_class_t *obj_class;   /* Class of object for location */
-    hid_t ret_value = H5I_INVALID_HID;	/* Return value */
+    void *ret_value = NULL;             /* Return value */
 
-    FUNC_ENTER_NOAPI(H5I_INVALID_HID)
+    FUNC_ENTER_NOAPI(NULL)
 
     HDassert(obj_loc);
 
     /* Get the object class for this location */
     if(NULL == (obj_class = H5O__obj_class(obj_loc->oloc)))
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, H5I_INVALID_HID, "unable to determine object class")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, NULL, "unable to determine object class")
 
     /* Call the object class's 'open' routine */
     HDassert(obj_class->open);
-    if((ret_value = obj_class->open(obj_loc, app_ref)) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open object")
+    if(NULL == (ret_value = obj_class->open(obj_loc, opened_type)))
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, NULL, "unable to open object")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -733,7 +735,7 @@ H5O_close(H5O_loc_t *loc, hbool_t *file_closed /*out*/)
 
 #ifdef H5O_DEBUG
     if(H5DEBUG(O)) {
-        if(H5F_FILE_ID(loc->file)< 0 && 1 == H5F_NREFS(loc->file))
+        if(FALSE == H5F_ID_EXISTS(loc->file) && 1 == H5F_NREFS(loc->file))
             HDfprintf(H5DEBUG(O), "< %a auto %lu remaining\n", loc->addr, (unsigned long)H5F_NOPEN_OBJS(loc->file));
         else
             HDfprintf(H5DEBUG(O), "< %a\n", loc->addr);
@@ -1766,6 +1768,7 @@ H5O_get_loc(hid_t object_id)
         case H5I_ATTR:
         case H5I_REFERENCE:
         case H5I_VFL:
+        case H5I_VOL:
         case H5I_GENPROP_CLS:
         case H5I_GENPROP_LST:
         case H5I_ERROR_CLASS:
@@ -2622,6 +2625,8 @@ H5O__visit(H5G_loc_t *loc, const char *obj_name, H5_index_t idx_type,
     H5O_loc_t   obj_oloc;       /* Opened object object location */
     hbool_t     loc_found = FALSE;      /* Entry at 'name' found */
     H5O_info_t  oinfo;          /* Object info struct */
+    void       *obj = NULL;     /* Object */
+    H5I_type_t  opened_type;    /* ID type of object */
     hid_t       obj_id = H5I_INVALID_HID;  /* ID of object */
     herr_t      ret_value = FAIL;       /* Return value */
 
@@ -2649,8 +2654,12 @@ H5O__visit(H5G_loc_t *loc, const char *obj_name, H5_index_t idx_type,
 
     /* Open the object */
     /* (Takes ownership of the obj_loc information) */
-    if((obj_id = H5O_open_by_loc(&obj_loc, TRUE)) < 0)
+    if(NULL == (obj = H5O_open_by_loc(&obj_loc, &opened_type)))
         HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, FAIL, "unable to open object")
+
+    /* Get an ID for the visited object */
+    if((obj_id = H5VL_native_register(opened_type, obj, TRUE)) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register visited object")
 
     /* Make callback for starting object */
     if((ret_value = op(obj_id, ".", &oinfo, op_data)) < 0)
@@ -2663,6 +2672,7 @@ H5O__visit(H5G_loc_t *loc, const char *obj_name, H5_index_t idx_type,
     /* Check for object being a group */
     if(oinfo.type == H5O_TYPE_GROUP) {
         H5G_loc_t	start_loc;          /* Location of starting group */
+        H5G_loc_t	vis_loc;            /* Location of visited group */
 
         /* Get the location of the starting group */
         if(H5G_loc(obj_id, &start_loc) < 0)
@@ -2697,12 +2707,17 @@ H5O__visit(H5G_loc_t *loc, const char *obj_name, H5_index_t idx_type,
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, FAIL, "can't insert object node into visited list")
         }
 
+        /* Get the location of the visited group */
+        if(H5G_loc(obj_id, &vis_loc) < 0)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+
         /* Call internal group visitation routine */
-        if((ret_value = H5G_visit(&start_loc, ".", idx_type, order, H5O__visit_cb, &udata)) < 0)
+        if((ret_value = H5G_visit(&vis_loc, ".", idx_type, order, H5O__visit_cb, &udata)) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_BADITER, FAIL, "object visitation failed")
     } /* end if */
 
 done:
+/* XXX (VOL MERGE): Probably also want to consider closing obj here on failures */
     if(obj_id != H5I_INVALID_HID) {
         if(H5I_dec_app_ref(obj_id) < 0)
             HDONE_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "unable to close object")

@@ -7745,6 +7745,7 @@ done:
             case H5I_ATTR:
             case H5I_REFERENCE:
             case H5I_VFL:
+            case H5I_VOL:
             case H5I_GENPROP_CLS:
             case H5I_GENPROP_LST:
             case H5I_ERROR_CLASS:
@@ -7833,6 +7834,7 @@ done:
             case H5I_ATTR:
             case H5I_REFERENCE:
             case H5I_VFL:
+            case H5I_VOL:
             case H5I_GENPROP_CLS:
             case H5I_GENPROP_LST:
             case H5I_ERROR_CLASS:

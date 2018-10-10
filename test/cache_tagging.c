@@ -119,7 +119,7 @@ static int dump_cache(hid_t fid)
     H5F_t *f;           /* File Pointer */
 
     /* Get Internal File / Cache Pointers */
-    if(NULL == (f = (H5F_t *)H5I_object(fid)))
+    if(NULL == (f = (H5F_t *)H5VL_object(fid)))
         TEST_ERROR;
 
     /* Dump the cache */
@@ -159,7 +159,7 @@ verify_no_unknown_tags(hid_t fid)
     int i;              /* Iterator */
 
     /* Get Internal File / Cache Pointers */
-    if(NULL == (f = (H5F_t *)H5I_object(fid)))
+    if(NULL == (f = (H5F_t *)H5VL_object(fid)))
         TEST_ERROR;
     cache_ptr = f->shared->cache;
 
@@ -207,7 +207,7 @@ mark_all_entries_investigated(hid_t fid)
     int i;              /* Iterator */
 
     /* Get Internal File / Cache Pointers */
-    if(NULL == (f = (H5F_t *)H5I_object(fid)))
+    if(NULL == (f = (H5F_t *)H5VL_object(fid)))
         TEST_ERROR;
     cache_ptr = f->shared->cache;
 
@@ -253,7 +253,7 @@ reset_all_entries_investigated(hid_t fid)
     int i;              /* Iterator */
 
     /* Get Internal File / Cache Pointers */
-    if(NULL == (f = (H5F_t *)H5I_object(fid)))
+    if(NULL == (f = (H5F_t *)H5VL_object(fid)))
         TEST_ERROR;
     cache_ptr = f->shared->cache;
 
@@ -301,7 +301,7 @@ verify_tag(hid_t fid, int id, haddr_t tag)
     int i;                      /* Iterator */
 
     /* Get Internal File / Cache Pointers */
-    if(NULL == (f = (H5F_t *)H5I_object(fid)))
+    if(NULL == (f = (H5F_t *)H5VL_object(fid)))
         TEST_ERROR;
     cache_ptr = f->shared->cache;
 
@@ -341,7 +341,7 @@ evict_entries(hid_t fid)
     H5F_t *f;         /* File Pointer */
 
     /* Get Internal File / Cache Pointers */
-    if(NULL == (f = (H5F_t *)H5I_object(fid)))
+    if(NULL == (f = (H5F_t *)H5VL_object(fid)))
         TEST_ERROR;
 
     /* Mark all entries investigated */
@@ -3653,7 +3653,7 @@ check_invalid_tag_application(void)
     api_ctx_pushed = TRUE;
 
     /* Get internal file pointer*/
-    if ( NULL == (f = (H5F_t *)H5I_object(fid)) ) TEST_ERROR;
+    if ( NULL == (f = (H5F_t *)H5VL_object(fid)) ) TEST_ERROR;
 
     /* Call H5HL_create, an internal function that calls H5AC_insert_entry without setting up a tag */
     /* Ensure this returns FAILURE, as a tag has not been set up. */

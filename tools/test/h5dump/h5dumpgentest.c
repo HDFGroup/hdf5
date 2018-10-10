@@ -10574,7 +10574,7 @@ static void gent_null_space_group(void)
  *-------------------------------------------------------------------------
  */
 static void
-gent_err_attr_dspace()
+gent_err_attr_dspace(void)
 {
     hid_t fid = -1;         /* File identifier */
     hid_t fcpl = -1;        /* File access property list */

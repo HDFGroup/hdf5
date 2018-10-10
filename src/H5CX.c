@@ -2472,7 +2472,11 @@ H5CX__pop_common(void)
     H5CX_node_t **head = H5CX_get_my_context();  /* Get the pointer to the head of the API context, for this thread */
     H5CX_node_t *ret_value = NULL;      /* Return value */
 
+#ifdef H5_HAVE_PARALLEL
     FUNC_ENTER_STATIC
+#else
+    FUNC_ENTER_STATIC_NOERR
+#endif
 
     /* Sanity check */
     HDassert(head && *head);

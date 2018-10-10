@@ -27,6 +27,7 @@
 /****************/
 
 #include "H5Omodule.h"          /* This source code file is part of the H5O module */
+#define H5T_FRIEND              /* Suppress error about including H5Tpkg */
 
 /***********/
 /* Headers */
@@ -40,6 +41,7 @@
 #include "H5Gprivate.h"     /* Groups   */
 #include "H5Iprivate.h"     /* IDs      */
 #include "H5Opkg.h"         /* Objects  */
+#include "H5Tpkg.h"         /* Datatypes */
 
 /********************/
 /* Local Prototypes */
@@ -70,22 +72,28 @@ static herr_t H5O__refresh_metadata_close(hid_t oid, H5O_loc_t oloc,
 herr_t
 H5Oflush(hid_t obj_id)
 {
-    H5O_loc_t *oloc;            /* Object location */
+    H5VL_object_t      *vol_obj     = NULL;     /* Object token     */
+    H5VL_loc_params_t   loc_params;
     herr_t              ret_value   = SUCCEED;  /* Return value     */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", obj_id);
 
     /* Check args */
-    if(NULL == (oloc = H5O_get_loc(obj_id)))
+    if(NULL == (vol_obj = H5VL_get_object(obj_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
 
     /* Set up collective metadata if appropriate */
     if(H5CX_set_loc(obj_id) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "can't set access property list info")
 
+    /* Set location parameters */
+    loc_params.type         = H5VL_OBJECT_BY_SELF;
+    loc_params.obj_type     = H5I_get_type(obj_id);
+
     /* Flush the object */
-    if(H5O_flush(oloc, obj_id) < 0)
+    if((ret_value = H5VL_object_specific(vol_obj->data, loc_params, vol_obj->driver->cls, 
+                                         H5VL_OBJECT_FLUSH, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, obj_id)) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTFLUSH, FAIL, "unable to flush object")
 
 done:
@@ -116,7 +124,7 @@ H5O_flush(H5O_loc_t *oloc, hid_t obj_id)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Get the object pointer */
-    if(NULL == (obj_ptr = H5I_object(obj_id)))
+    if(NULL == (obj_ptr = H5VL_object(obj_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
 
     /* Get the object class */
@@ -229,22 +237,28 @@ done:
 herr_t
 H5Orefresh(hid_t oid)
 {
-    H5O_loc_t *oloc;            /* object location */
-    herr_t ret_value = SUCCEED; /* return value */
-    
+    H5VL_object_t      *vol_obj     = NULL;     /* Object token     */
+    H5VL_loc_params_t   loc_params;
+    herr_t              ret_value   = SUCCEED;  /* Return value     */
+
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", oid);
 
     /* Check args */
-    if(NULL == (oloc = H5O_get_loc(oid)))
+    if(NULL == (vol_obj = H5VL_get_object(oid)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
 
     /* Set up collective metadata if appropriate */
     if(H5CX_set_loc(oid) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set access property list info")
 
+    /* Set location parameters */
+    loc_params.type         = H5VL_OBJECT_BY_SELF;
+    loc_params.obj_type     = H5I_get_type(oid);
+
     /* Refresh the object */
-    if(H5O_refresh_metadata(oid, *oloc) < 0)
+    if((ret_value = H5VL_object_specific(vol_obj->data, loc_params, vol_obj->driver->cls, 
+                                         H5VL_OBJECT_REFRESH, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, oid)) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to refresh object")
 
 done:
@@ -275,6 +289,7 @@ done:
 herr_t
 H5O_refresh_metadata(hid_t oid, H5O_loc_t oloc)
 {
+    H5VL_object_t *vol_obj = NULL;      /* VOL object associated with the ID */
     hbool_t objs_incr = FALSE;          /* Whether the object count in the file was incremented */
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -285,6 +300,7 @@ H5O_refresh_metadata(hid_t oid, H5O_loc_t oloc)
         H5G_loc_t obj_loc;
         H5O_loc_t obj_oloc;
         H5G_name_t obj_path;
+        H5O_shared_t cached_H5O_shared;
 
         /* Create empty object location */
         obj_loc.oloc = &obj_oloc;
@@ -297,13 +313,36 @@ H5O_refresh_metadata(hid_t oid, H5O_loc_t oloc)
         H5F_incr_nopen_objs(oloc.file);
         objs_incr = TRUE;
 
+        /* Save important datatype state */
+        if(H5I_get_type(oid) == H5I_DATATYPE)
+            if(H5T_save_refresh_state(oid, &cached_H5O_shared) < 0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTOPENOBJ, FAIL, "unable to save datatype state")
+
+        /* Get the VOL object from the ID */
+        if(NULL == (vol_obj = H5VL_get_object(oid)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
+
+        /* Bump the number of references on the VOL driver.
+         * If you don't do this, VDS refreshes can accidentally close the driver.
+         */
+        vol_obj->driver->nrefs++;
+
         /* Close object & evict its metadata */
         if((H5O__refresh_metadata_close(oid, oloc, &obj_loc)) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to refresh object")
 
         /* Re-open the object, re-fetching its metadata */
-        if((H5O_refresh_metadata_reopen(oid, &obj_loc, FALSE)) < 0)
+        if((H5O_refresh_metadata_reopen(oid, &obj_loc, vol_obj->driver, FALSE)) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to refresh object")
+
+        /* Restore the number of references on the VOL driver */
+        vol_obj->driver->nrefs--;
+
+        /* Restore important datatype state */
+        if(H5I_get_type(oid) == H5I_DATATYPE)
+            if(H5T_restore_refresh_state(oid, &cached_H5O_shared) < 0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTOPENOBJ, FAIL, "unable to restore datatype state")
+
     } /* end if */
 
 done:
@@ -350,7 +389,7 @@ H5O__refresh_metadata_close(hid_t oid, H5O_loc_t oloc, H5G_loc_t *obj_loc)
         H5G_loc_copy(obj_loc, &tmp_loc, H5_COPY_DEEP);
     } /* end if */
 
-    /* Get object's type */
+    /* Handle close for multiple dataset opens */
     if(H5I_get_type(oid) == H5I_DATASET)
         if(H5D_mult_refresh_close(oid) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "unable to prepare refresh for dataset")
@@ -400,7 +439,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_refresh_metadata_reopen(hid_t oid, H5G_loc_t *obj_loc, hbool_t start_swmr)
+H5O_refresh_metadata_reopen(hid_t oid, H5G_loc_t *obj_loc, H5VL_t *vol_driver, hbool_t start_swmr)
 {
     void *object = NULL;        /* Object for this operation */
     H5I_type_t type;            /* Type of object for the ID */
@@ -410,6 +449,7 @@ H5O_refresh_metadata_reopen(hid_t oid, H5G_loc_t *obj_loc, hbool_t start_swmr)
 
     /* Sanity check */
     HDassert(obj_loc);
+    HDassert(vol_driver);
 
     /* Get object's type */
     type = H5I_get_type(oid);
@@ -443,6 +483,7 @@ H5O_refresh_metadata_reopen(hid_t oid, H5G_loc_t *obj_loc, hbool_t start_swmr)
         case H5I_ATTR:
         case H5I_REFERENCE:
         case H5I_VFL:
+        case H5I_VOL:
         case H5I_GENPROP_CLS:
         case H5I_GENPROP_LST:
         case H5I_ERROR_CLASS:
@@ -455,7 +496,7 @@ H5O_refresh_metadata_reopen(hid_t oid, H5G_loc_t *obj_loc, hbool_t start_swmr)
     } /* end switch */
 
     /* Re-register ID for the object */
-    if((H5I_register_with_id(type, object, TRUE, oid)) < 0)
+    if((H5I_register_with_id(type, object, vol_driver, TRUE, oid)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to re-register object ID after refresh")
 
 done:

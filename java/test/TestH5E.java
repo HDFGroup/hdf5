@@ -38,7 +38,7 @@ import org.junit.rules.TestName;
 public class TestH5E {
     @Rule public TestName testname = new TestName();
 
-    public static final int ERRSTACK_CNT = 3;
+    public static final int ERRSTACK_CNT = 6;
     public static final int ERRSTACK_MTY_CNT = 0;
 
     long hdf_java_classid = -1;
@@ -79,7 +79,7 @@ public class TestH5E {
     public void testH5Eget_msg_major() {
 
         try {
-            H5.H5Fopen("test", 0, 1);
+            H5.H5Fopen("test", HDF5Constants.H5F_ACC_RDWR, HDF5Constants.H5P_DEFAULT);
         }
         catch (HDF5LibraryException hdferr) {
             long errnum = hdferr.getMajorErrorNumber();
@@ -93,7 +93,7 @@ public class TestH5E {
                 fail("H5.H5Eget_msg(Throwable): " + err);
             }
             assertNotNull("H5.H5Eget_msg: " + msg, msg);
-            assertEquals("H5.H5Eget_msg: ", "Object atom", msg);
+            assertEquals("H5.H5Eget_msg: ", "File accessibility", msg);
             assertEquals("H5.H5Eget_msg: ", HDF5Constants.H5E_MAJOR, error_msg_type[0]);
         }
         catch (Throwable err) {
@@ -105,7 +105,7 @@ public class TestH5E {
     @Test
     public void testH5Eget_msg_minor() {
         try {
-            H5.H5Fopen("test", 0, 1);
+            H5.H5Fopen("test", HDF5Constants.H5F_ACC_RDWR, HDF5Constants.H5P_DEFAULT);
         }
         catch (HDF5LibraryException hdferr) {
             long errnum = hdferr.getMinorErrorNumber();
@@ -119,7 +119,7 @@ public class TestH5E {
                 fail("H5.H5Eget_msg: " + err);
             }
             assertNotNull("H5.H5Eget_msg: " + msg, msg);
-            assertEquals("H5.H5Eget_msg: ", "Unable to find atom information (already closed?)", msg);
+            assertEquals("H5.H5Eget_msg: ", "Unable to open file", msg);
             assertEquals("H5.H5Eget_msg: ", HDF5Constants.H5E_MINOR, error_msg_type[0]);
         }
         catch (Throwable err) {
@@ -139,7 +139,7 @@ public class TestH5E {
         }
 
         try {
-            H5.H5Fopen("test", 0, 1);
+            H5.H5Fopen("test", HDF5Constants.H5F_ACC_RDWR, HDF5Constants.H5P_DEFAULT);
         }
         catch (Throwable err) {
         }
@@ -297,7 +297,7 @@ public class TestH5E {
             fail("testH5Ewalk:H5Eset_current_stack " + err);
         }
         try {
-            H5.H5Fopen("test", 0, 1);
+            H5.H5Fopen("test", HDF5Constants.H5F_ACC_RDWR, HDF5Constants.H5P_DEFAULT);
         }
         catch (Throwable err) {
         }

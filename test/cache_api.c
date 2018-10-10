@@ -230,7 +230,7 @@ check_fapl_mdc_api_calls(unsigned paged, hid_t fcpl_id)
     /* get a pointer to the files internal data structure */
     if ( pass ) {
 
-        file_ptr = (H5F_t *)H5I_object_verify(file_id, H5I_FILE);
+        file_ptr = (H5F_t *)H5VL_object_verify(file_id, H5I_FILE);
 
         if ( file_ptr == NULL ) {
 
@@ -378,7 +378,7 @@ check_fapl_mdc_api_calls(unsigned paged, hid_t fcpl_id)
     /* get a pointer to the files internal data structure */
     if ( pass ) {
 
-        file_ptr = (H5F_t *)H5I_object_verify(file_id, H5I_FILE);
+        file_ptr = (H5F_t *)H5VL_object_verify(file_id, H5I_FILE);
 
         if ( file_ptr == NULL ) {
 
