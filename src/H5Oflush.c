@@ -301,6 +301,7 @@ H5O_refresh_metadata(hid_t oid, H5O_loc_t oloc)
         H5O_loc_t obj_oloc;
         H5G_name_t obj_path;
         H5O_shared_t cached_H5O_shared;
+        H5VL_t *driver = NULL;
 
         /* Create empty object location */
         obj_loc.oloc = &obj_oloc;
@@ -318,25 +319,29 @@ H5O_refresh_metadata(hid_t oid, H5O_loc_t oloc)
             if(H5T_save_refresh_state(oid, &cached_H5O_shared) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTOPENOBJ, FAIL, "unable to save datatype state")
 
-        /* Get the VOL object from the ID */
+        /* Get the VOL object from the ID and cache a pointer to the driver.
+         * The vol_obj will disappear when the underlying object is closed, so
+         * we can't use that directly.
+         */
         if(NULL == (vol_obj = H5VL_get_object(oid)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
+        driver = vol_obj->driver;
 
         /* Bump the number of references on the VOL driver.
          * If you don't do this, VDS refreshes can accidentally close the driver.
          */
-        vol_obj->driver->nrefs++;
+        driver->nrefs++;
 
         /* Close object & evict its metadata */
         if((H5O__refresh_metadata_close(oid, oloc, &obj_loc)) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to refresh object")
 
         /* Re-open the object, re-fetching its metadata */
-        if((H5O_refresh_metadata_reopen(oid, &obj_loc, vol_obj->driver, FALSE)) < 0)
+        if((H5O_refresh_metadata_reopen(oid, &obj_loc, driver, FALSE)) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to refresh object")
 
         /* Restore the number of references on the VOL driver */
-        vol_obj->driver->nrefs--;
+        driver->nrefs--;
 
         /* Restore important datatype state */
         if(H5I_get_type(oid) == H5I_DATATYPE)
