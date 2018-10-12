@@ -898,12 +898,11 @@ if (NOT EXISTS ${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c)
       PRIVATE $<$<PLATFORM_ID:Emscripten>:"-O0">
   )
 
-  option (HDF5_BATCH_H5DETECT "Use batch file to execute H5detect" OFF)
   if (HDF5_BATCH_H5DETECT)
     add_custom_command (
         OUTPUT ${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c
-        COMMAND ${HDF5_BATCH_H5DETECT_CMD}
-        ARGS ${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c
+        COMMAND ${HDF5_BATCH_CMD}
+        ARGS ${HDF5_BATCH_H5DETECT_SCRIPT} ${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c
         DEPENDS H5detect
         WORKING_DIRECTORY ${HDF5_GENERATED_SOURCE_DIR}
     )
