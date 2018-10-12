@@ -477,8 +477,6 @@ H5Fget_obj_ids(hid_t file_id, unsigned types, size_t max_objs, hid_t *oid_list)
     else {
         H5F_trav_obj_ids_t udata;
 
-        /* XXX (VOL MERGE): Unclear why this is commented out */
-        //udata.types = types | H5F_OBJ_LOCAL;
         udata.max_objs = max_objs;
         udata.oid_list = oid_list;
         udata.obj_count = &ret_value;
