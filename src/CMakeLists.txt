@@ -965,6 +965,7 @@ add_custom_command (
     DEPENDS H5make_libsettings
     WORKING_DIRECTORY ${HDF5_BINARY_DIR}
 )
+set_source_files_properties (${HDF5_BINARY_DIR}/H5lib_settings.c PROPERTIES GENERATED TRUE)
 if (BUILD_SHARED_LIBS)
   add_custom_command (
       OUTPUT ${HDF5_BINARY_DIR}/shared/H5lib_settings.c
@@ -973,6 +974,7 @@ if (BUILD_SHARED_LIBS)
       DEPENDS H5make_libsettings
       WORKING_DIRECTORY ${HDF5_BINARY_DIR}
   )
+  set_source_files_properties (${HDF5_BINARY_DIR}/shared/H5lib_settings.c PROPERTIES GENERATED TRUE)
 endif ()
 
 ## all_packages="AC,B,B2,D,F,FA,FL,FS,HL,I,O,S,ST,T,Z"
