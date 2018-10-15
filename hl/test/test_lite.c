@@ -1050,7 +1050,7 @@ static herr_t make_attributes( hid_t loc_id, const char* obj_name )
         HDfree( dims_out );
         return -1;
     }
-    
+
     for (i = 0; i < rank_out; i++) {
         if ( dims_out[i] != 5 ) {
             HDfree( dims_out );
@@ -1152,7 +1152,7 @@ static int test_fps(void)
 
     if(H5LTdtype_to_text(dtype, NULL, H5LT_DDL, &str_len)<0)
         goto out;
-    
+
     if(NULL==(dt_str = (char*)HDcalloc(str_len, sizeof(char))))
         goto out;
     if(H5LTdtype_to_text(dtype, dt_str, H5LT_DDL, &str_len)<0) {
@@ -1228,7 +1228,7 @@ static int test_strings(void)
         goto out;
     }
     if(HDstrcmp(dt_str, "H5T_STRING {\n      STRSIZE 13;\n      STRPAD H5T_STR_NULLTERM;\n      CSET H5T_CSET_ASCII;\n      CTYPE H5T_C_S1;\n   }")) {
-        printf("dt=\n%s\n", dt_str);
+        HDprintf("dt=\n%s\n", dt_str);
         HDfree(dt_str);
         goto out;
     }
@@ -1260,7 +1260,7 @@ static int test_strings(void)
         goto out;
     }
     if(HDstrcmp(dt_str, "H5T_STRING {\n      STRSIZE H5T_VARIABLE;\n      STRPAD H5T_STR_NULLPAD;\n      CSET H5T_CSET_ASCII;\n      CTYPE H5T_C_S1;\n   }")) {
-        printf("dt=\n%s\n", dt_str);
+        HDprintf("dt=\n%s\n", dt_str);
         HDfree(dt_str);
         goto out;
     }
@@ -1270,13 +1270,13 @@ static int test_strings(void)
     str_len = str_len + 10;
     if(NULL==(dt_str = (char*)HDcalloc(str_len, sizeof(char))))
       goto out;
-    
+
     if(H5LTdtype_to_text(dtype, dt_str, H5LT_DDL, &str_len)<0) {
       HDfree(dt_str);
       goto out;
     }
     if(HDstrncmp(dt_str, "H5T_STRING {\n      STRSIZE H5T_VARIABLE;\n      STRPAD H5T_STR_NULLPAD;\n      CSET H5T_CSET_ASCII;\n      CTYPE H5T_C_S1;\n   }", str_len-1)) {
-      printf("dt=\n%s\n", dt_str);
+      HDprintf("dt=\n%s\n", dt_str);
       HDfree(dt_str);
       goto out;
     }
@@ -1292,10 +1292,10 @@ static int test_strings(void)
       goto out;
     }
     /* check the truncated string */
-    if(strlen(dt_str) != str_len-1) goto out;
-    str_len = strlen(dt_str);
+    if(HDstrlen(dt_str) != str_len-1) goto out;
+    str_len = HDstrlen(dt_str);
     if(HDstrncmp(dt_str, "H5T_STRING {\n      STRSIZE H5T_VARIABLE;\n      STRPAD H5T_STR_NULLPAD;\n      CSET H5T_CSET_ASCII;\n      CTYPE H5T_C_S1;\n   }", str_len)) {
-      printf("dt=\n%s\n", dt_str);
+      HDprintf("dt=\n%s\n", dt_str);
       HDfree(dt_str);
       goto out;
     }
@@ -1352,7 +1352,7 @@ static int test_opaques(void)
         goto out;
     }
     if(HDstrcmp(dt_str, "H5T_OPAQUE {\n      OPQ_SIZE 19;\n      OPQ_TAG \"This is a tag for opaque type\";\n   }")) {
-        printf("dt=\n%s\n", dt_str);
+        HDprintf("dt=\n%s\n", dt_str);
         HDfree(dt_str);
         goto out;
     }
@@ -1428,7 +1428,7 @@ static int test_enums(void)
     }
     if(HDstrcmp(dt_str, "H5T_ENUM {\n      H5T_STD_I32LE;\n      \"RED\"              5;\n      \"GREEN\"            6;\n      \"BLUE\"             7;\n      \"WHITE\"            8;\n   }")) {
 
-        printf("dt=\n%s\n", dt_str);
+        HDprintf("dt=\n%s\n", dt_str);
         HDfree(dt_str);
         goto out;
     }
@@ -1469,16 +1469,16 @@ static int test_variables(void)
 
     if(H5Tis_variable_str(dtype))
         goto out;
-    
+
     if(H5Tclose(dtype)<0)
         goto out;
-    
+
     if((dtype = H5LTtext_to_dtype("H5T_VLEN { H5T_VLEN { H5T_STD_I32BE } }", H5LT_DDL))<0)
         goto out;
-    
+
     if(H5Tis_variable_str(dtype))
         goto out;
-    
+
     if(H5LTdtype_to_text(dtype, NULL, H5LT_DDL, &str_len)<0)
         goto out;
     if(NULL==(dt_str = (char*)HDcalloc(str_len, sizeof(char))))
@@ -1488,15 +1488,15 @@ static int test_variables(void)
         goto out;
     }
     if(HDstrcmp(dt_str, "H5T_VLEN {\n      H5T_VLEN {\n         H5T_STD_I32BE\n      }\n   }")) {
-        printf("dt=\n%s\n", dt_str);
+        HDprintf("dt=\n%s\n", dt_str);
         HDfree(dt_str);
         goto out;
     }
     HDfree(dt_str);
-    
+
     if(H5Tclose(dtype)<0)
         goto out;
-    
+
     PASSED();
     return 0;
 
@@ -1547,7 +1547,7 @@ static int test_arrays(void)
         goto out;
     }
     if(HDstrcmp(dt_str, "H5T_ARRAY {\n      [5][7][13] H5T_ARRAY {\n         [17][19] H5T_COMPOUND {\n            H5T_STD_I8BE \"arr_compound_1\" : 0;\n            H5T_STD_I32BE \"arr_compound_2\" : 1;\n         }\n      }\n   }")) {
-        printf("dt=\n%s\n", dt_str);
+        HDprintf("dt=\n%s\n", dt_str);
         HDfree(dt_str);
         goto out;
     }
@@ -1603,7 +1603,7 @@ static int test_compounds(void)
         goto out;
     }
     if(HDstrcmp(dt_str, "H5T_COMPOUND {\n      H5T_STD_I16BE \"one_field\" : 2;\n      H5T_STD_U8LE \"two_field\" : 6;\n   }")) {
-        printf("dt=\n%s\n", dt_str);
+        HDprintf("dt=\n%s\n", dt_str);
         HDfree(dt_str);
         goto out;
     }
@@ -1637,7 +1637,7 @@ out:
 }
 
 /*-------------------------------------------------------------------------
-* subroutine for test_text_dtype(): test_compound_bug(). Test case for 
+* subroutine for test_text_dtype(): test_compound_bug(). Test case for
 * issue 7701.
 *-------------------------------------------------------------------------
 */
@@ -1770,7 +1770,7 @@ static int test_complicated_compound(void)
     /* Open input file */
     fp = HDfopen(filename, "r");
     if(fp == NULL) {
-        printf( "Could not find file %s. Try set $srcdir \n", filename);
+        HDprintf( "Could not find file %s. Try set $srcdir \n", filename);
         goto out;
     }
 
@@ -1881,9 +1881,9 @@ static int test_valid_path(void)
   hid_t file_id, group;
   htri_t path_valid;
   const char *data_string_in = "test";
-   
+
   TESTING("H5LTpath_valid");
-    
+
   /* Create a new file using default properties. */
 
   /**************************************************************
@@ -1908,11 +1908,11 @@ static int test_valid_path(void)
    *         |
    *         |
    *         | --- Gcyc (soft link to /G1)
-   *        /  \    			     
-   *       /    \       
-   *     G5      \    
+   *        /  \
+   *       /    \
+   *     G5      \
    *  (soft link  G6 (external link /G1 in FILENAME4)
-   *  to /G2)   
+   *  to /G2)
    *
    ****************************************************************/
 
@@ -1941,7 +1941,7 @@ static int test_valid_path(void)
    */
   if(H5LTmake_dataset_string(group, "/G2/DS4", data_string_in)<0)
     goto out;
-  
+
   /*
    * Create a soft link
    */
@@ -2023,9 +2023,9 @@ static int test_valid_path(void)
    *                 |
    *                 |
    *                 |
-   *                 G1 
+   *                 G1
    *                /  \
-   *               /	\
+   *               /    \
    *            DS1      G2
    *                    (dangled soft link to /G1/G20)
    *
@@ -2056,13 +2056,13 @@ static int test_valid_path(void)
     goto out;
 
   H5Fclose(file_id);
- 
+
   /* Open input file */
   if((file_id = H5Fopen(FILE_NAME3,H5F_ACC_RDONLY, H5P_DEFAULT))<0)
     goto out;
 
   /**************************************
-   * CHECK ABSOLUTE PATHS 
+   * CHECK ABSOLUTE PATHS
    **************************************/
 
   if( (path_valid = H5LTpath_valid(file_id, "/", TRUE)) != TRUE) {
@@ -2076,7 +2076,7 @@ static int test_valid_path(void)
   if( (path_valid = H5LTpath_valid(file_id, "/G1", TRUE)) != TRUE) {
     goto out;
   }
-  
+
   if((path_valid = H5LTpath_valid(file_id, "/G1/DS1", TRUE)) != TRUE)
     goto out;
 
@@ -2094,7 +2094,7 @@ static int test_valid_path(void)
 
   if( (path_valid = H5LTpath_valid(file_id, "/G1/G2/Gcyc/DS1", TRUE)) != TRUE)
     goto out;
-  
+
   if( (path_valid = H5LTpath_valid(file_id, "/G2", TRUE)) != TRUE)
     goto out;
 
@@ -2114,14 +2114,14 @@ static int test_valid_path(void)
   /* check soft links */
   if( (path_valid = H5LTpath_valid(file_id, "/G1/G2/G5/DS4", TRUE)) != TRUE)
     goto out;
-    
+
   /**************************************
-   * CHECK RELATIVE PATHS 
+   * CHECK RELATIVE PATHS
    ***************************************/
 
   if( (group = H5Gopen2(file_id, "/", H5P_DEFAULT)) < 0)
     goto out;
-  
+
   if( (path_valid = H5LTpath_valid(group, "/", TRUE)) != TRUE) {
     goto out;
   }
@@ -2156,22 +2156,22 @@ static int test_valid_path(void)
     goto out;
 
   if( (path_valid = H5LTpath_valid(group, "G2/G5", TRUE)) != TRUE)
-    goto out; 
+    goto out;
 
   /* Check the "./" case */
   if( (path_valid = H5LTpath_valid(group, "./DS3", TRUE)) != TRUE)
     goto out;
 
   if( (path_valid = H5LTpath_valid(group, "./G2/G5", TRUE)) != TRUE)
-    goto out; 
+    goto out;
 
   /* Should fail, does not exist */
   if( (path_valid = H5LTpath_valid(group, "./G2/G20", FALSE)) == TRUE)
-    goto out; 
+    goto out;
 
   /* Should fail, does not exist */
   if( (path_valid = H5LTpath_valid(group, "./G2/G20", TRUE)) == TRUE)
-    goto out; 
+    goto out;
 
   if(H5Gclose(group)<0)
     goto out;
@@ -2220,7 +2220,7 @@ static int test_valid_path(void)
   PASSED();
   return 0;
 
- out: 
+ out:
   H5_FAILED();
   return -1;
 }

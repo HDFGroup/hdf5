@@ -33,7 +33,6 @@ hsize_t H5TOOLS_BUFSIZE = (32 * 1024 * 1024);  /* 32 MB */
 int     H5TOOLS_TEXT_BLOCK = 16;  /* Number of elements on a line in a text export file */
 
 JavaVM *jvm;
-jobject visit_callback;
 jobject copy_callback;
 jobject close_callback;
 jobject create_callback;
@@ -1769,7 +1768,7 @@ h5str_render_bin_output
                         if (H5Tis_variable_str(tid)) {
                             s = *(char**) mem;
                             if (s != NULL)
-                                size = strlen(s);
+                                size = HDstrlen(s);
                         }
                         else {
                             s = (char *) mem;
@@ -2130,11 +2129,11 @@ render_bin_output_region_data_points
                     ret_value = -1;
 
                 HDfree(dims1);
-            } /* end if((dims1 = (hsize_t *) malloc(sizeof(hsize_t) * ndims)) != NULL) */
+            } /* end if((dims1 = (hsize_t *) HDmalloc(sizeof(hsize_t) * ndims)) != NULL) */
             else
                 ret_value = -1;
             HDfree(region_buf);
-        } /* end if((region_buf = malloc(type_size * (size_t)npoints)) != NULL) */
+        } /* end if((region_buf = HDmalloc(type_size * (size_t)npoints)) != NULL) */
         else
             ret_value = -1;
 
@@ -2437,7 +2436,7 @@ Java_hdf_hdf5lib_H5_H5AreadComplex
     H5Tclose(p_type);
 
     n = ENVPTR->GetArrayLength(ENVPAR buf);
-    rdata = (char *)malloc((size_t)n * size);
+    rdata = (char *)HDmalloc((size_t)n * size);
     if (rdata == NULL) {
         h5JNIFatalError(env, "H5AreadComplex:  failed to allocate buff for read");
     } /* end if */
@@ -2953,7 +2952,7 @@ obj_info_all
     if (retVal < 0) {
         *(datainfo->otype+datainfo->count) = -1;
         *(datainfo->ltype+datainfo->count) = -1;
-        *(datainfo->objname+datainfo->count) = (char *)HDmalloc(strlen(name)+1);
+        *(datainfo->objname+datainfo->count) = (char *)HDmalloc(HDstrlen(name)+1);
         HDstrcpy(*(datainfo->objname+datainfo->count), name);
         *(datainfo->objno+datainfo->count) = (unsigned long)-1;
     } /* end if */

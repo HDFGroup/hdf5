@@ -164,7 +164,7 @@ void test_strpad(hid_t H5_ATTR_UNUSED fid, const char *string)
     /* Fill the buffer with two copies of the UTF-8 string, each with a
      * terminating NULL.  It will look like "abcdefg\0abcdefg\0". */
     strncpy(buf, new_string, big_len);
-    strncpy(&buf[big_len], new_string, big_len);
+    HDstrncpy(&buf[big_len], new_string, big_len);
 
     ret = H5Tconvert(src_type, dst_type, (size_t)2, buf, NULL, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Tconvert");
@@ -226,8 +226,8 @@ void test_strpad(hid_t H5_ATTR_UNUSED fid, const char *string)
 
     /* Fill the buffer with two copies of the UTF-8 string.
      * It will look like "abcdefghabcdefgh". */
-    strncpy(buf, new_string, big_len);
-    strncpy(&buf[big_len], new_string, big_len);
+    HDstrncpy(buf, new_string, big_len);
+    HDstrncpy(&buf[big_len], new_string, big_len);
 
     ret = H5Tconvert(src_type, dst_type, (size_t)2, buf, NULL, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Tconvert");

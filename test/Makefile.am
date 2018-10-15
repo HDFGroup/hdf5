@@ -56,11 +56,11 @@ TEST_PROG= testhdf5 \
            evict_on_close farray earray btree2 fheap \
            pool accum hyperslab istore bittests dt_arith page_buffer \
            dtypes dsets cmpd_dset filter_fail extend direct_chunk external efc \
-		   objcopy links unlink twriteorder big mtime fillval mount \
-		   flush1 flush2 app_ref enum set_extent ttsafe enc_dec_plist \
-		   enc_dec_plist_cross_platform getname vfd ntypes dangle dtransform \
-		   reserved cross_read freespace mf vds file_image unregister \
-		   cache_logging cork swmr
+           objcopy links unlink twriteorder big mtime fillval mount \
+           flush1 flush2 app_ref enum set_extent ttsafe enc_dec_plist \
+           enc_dec_plist_cross_platform getname vfd ntypes dangle dtransform \
+           reserved cross_read freespace mf vds file_image unregister \
+           cache_logging cork swmr
 
 # List programs to be built when testing here.
 # error_test and err_compat are built at the same time as the other tests, but executed by testerror.sh.

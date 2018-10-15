@@ -34,13 +34,13 @@ nerrors=0
 # where the libs exist
 HDFLIB_HOME="$top_srcdir/java/lib"
 BLDLIBDIR="$top_builddir/hdf5/lib"
-BLDREFDIR="./groups"
+BLDITERDIR="./groups"
 BLDDIR="."
 HDFTEST_HOME="$top_srcdir/java/examples/groups"
 JARFILE=jar@PACKAGE_TARNAME@-@PACKAGE_VERSION@.jar
 TESTJARFILE=jar@PACKAGE_TARNAME@groups.jar
 test -d $BLDLIBDIR || mkdir -p $BLDLIBDIR
-test -d $BLDREFDIR || mkdir -p $BLDREFDIR
+test -d $BLDITERDIR || mkdir -p $BLDITERDIR
 
 ######################################################################
 # library files
@@ -51,13 +51,15 @@ test -d $BLDREFDIR || mkdir -p $BLDREFDIR
 #       Comment '#' without space can be used.
 # --------------------------------------------------------------------
 LIST_LIBRARY_FILES="
-$HDFLIB_HOME/slf4j-api-1.7.25.jar
-$HDFLIB_HOME/ext/slf4j-simple-1.7.25.jar
 $top_builddir/src/.libs/libhdf5.*
 $top_builddir/java/src/jni/.libs/libhdf5_java.*
 $top_builddir/java/src/$JARFILE
 "
-LIST_REF_FILES="
+LIST_JAR_TESTFILES="
+$HDFLIB_HOME/slf4j-api-1.7.25.jar
+$HDFLIB_HOME/ext/slf4j-simple-1.7.25.jar
+"
+LIST_ITER_FILES="
 $HDFTEST_HOME/h5ex_g_iterate.h5
 $HDFTEST_HOME/h5ex_g_visit.h5
 "
@@ -75,11 +77,36 @@ $HDFTEST_HOME/../testfiles/examples.groups.H5Ex_G_Visit.txt
 # copy files from source dirs to test dir
 #
 COPY_LIBFILES="$LIST_LIBRARY_FILES"
+COPY_JARTESTFILES="$LIST_JAR_TESTFILES"
 
 COPY_LIBFILES_TO_BLDLIBDIR()
 {
     # copy test files. Used -f to make sure get a new copy
     for tstfile in $COPY_LIBFILES
+    do
+        # ignore '#' comment
+        echo $tstfile | tr -d ' ' | grep '^#' > /dev/null
+        RET=$?
+        if [ $RET -eq 1 ]; then
+            # skip cp if srcdir is same as destdir
+            # this occurs when build/test performed in source dir and
+            # make cp fail
+            SDIR=`$DIRNAME $tstfile`
+            INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
+            INODE_DDIR=`$LS -i -d $BLDLIBDIR | $AWK -F' ' '{print $1}'`
+            if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
+                $CP -f $tstfile $BLDLIBDIR
+                if [ $? -ne 0 ]; then
+                    echo "Error: FAILED to copy $tstfile ."
+
+                    # Comment out this to CREATE expected file
+                    exit $EXIT_FAILURE
+                fi
+            fi
+        fi
+    done
+    # copy jar files. Used -f to make sure get a new copy
+    for tstfile in $COPY_JARTESTFILES
     do
         # ignore '#' comment
         echo $tstfile | tr -d ' ' | grep '^#' > /dev/null
@@ -109,11 +136,14 @@ CLEAN_LIBFILES_AND_BLDLIBDIR()
     # skip rm if srcdir is same as destdir
     # this occurs when build/test performed in source dir and
     # make cp fail
-    SDIR=`$DIRNAME $HDFLIB_HOME/slf4j-api-1.7.25.jar`
+    SDIR=$HDFLIB_HOME
     INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
     INODE_DDIR=`$LS -i -d $BLDLIBDIR | $AWK -F' ' '{print $1}'`
     if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
-        $RM $BLDLIBDIR
+        for tstfile in $COPY_JARTESTFILES
+        do
+            $RM $BLDLIBDIR/tstfile
+        done
     fi
 }
 
@@ -152,6 +182,7 @@ CLEAN_DATAFILES_AND_BLDDIR()
         $RM $BLDDIR/examples.groups.H5Ex_G_*.txt
         $RM $BLDDIR/H5Ex_G_*.out
         $RM $BLDDIR/H5Ex_G_*.h5
+        $RM $BLDDIR/h5ex_g_*.h5
         SDIR=`$DIRNAME $tstfile`
         INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
         INODE_DDIR=`$LS -i -d $BLDDIR | $AWK -F' ' '{print $1}'`
@@ -161,12 +192,12 @@ CLEAN_DATAFILES_AND_BLDDIR()
         fi
 }
 
-COPY_REFFILES="$LIST_REF_FILES"
+COPY_ITERFILES="$LIST_ITER_FILES"
 
-COPY_REFFILES_TO_BLDREFDIR()
+COPY_ITERFILES_TO_BLDITERDIR()
 {
     # copy test files. Used -f to make sure get a new copy
-    for tstfile in $COPY_REFFILES
+    for tstfile in $COPY_ITERFILES
     do
         # ignore '#' comment
         echo $tstfile | tr -d ' ' | grep '^#' > /dev/null
@@ -177,9 +208,9 @@ COPY_REFFILES_TO_BLDREFDIR()
             # make cp fail
             SDIR=`$DIRNAME $tstfile`
             INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
-            INODE_DDIR=`$LS -i -d $BLDREFDIR | $AWK -F' ' '{print $1}'`
+            INODE_DDIR=`$LS -i -d $BLDITERDIR | $AWK -F' ' '{print $1}'`
             if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
-                $CP -f $tstfile $BLDREFDIR
+                $CP -f $tstfile $BLDITERDIR
                 if [ $? -ne 0 ]; then
                     echo "Error: FAILED to copy $tstfile ."
 
@@ -191,16 +222,16 @@ COPY_REFFILES_TO_BLDREFDIR()
     done
 }
 
-CLEAN_REFFILES_AND_BLDREFDIR()
+CLEAN_ITERFILES_AND_BLDITERDIR()
 {
     # skip rm if srcdir is same as destdir
     # this occurs when build/test performed in source dir and
     # make cp fail
     SDIR=`$DIRNAME $HDFTEST_HOME/h5ex_g_iterate.h5`
     INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
-    INODE_DDIR=`$LS -i -d $BLDREFDIR | $AWK -F' ' '{print $1}'`
+    INODE_DDIR=`$LS -i -d $BLDITERDIR | $AWK -F' ' '{print $1}'`
     if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
-        $RM $BLDREFDIR
+        $RM $BLDITERDIR
     fi
 }
 
@@ -223,7 +254,7 @@ JAVAEXEFLAGS=@H5_JAVAFLAGS@
 # prepare for test
 COPY_LIBFILES_TO_BLDLIBDIR
 COPY_DATAFILES_TO_BLDDIR
-COPY_REFFILES_TO_BLDREFDIR
+COPY_ITERFILES_TO_BLDITERDIR
 
 CPATH=".:"$BLDLIBDIR"/"$JARFILE":"$BLDLIBDIR"/slf4j-api-1.7.25.jar:"$BLDLIBDIR"/slf4j-simple-1.7.25.jar:"$TESTJARFILE""
 
@@ -257,11 +288,6 @@ if $TEST -z "$LD_LIBRARY_PATH" ; then
 fi
 
 case  $os_name in
-    Darwin)
-    DYLD_LIBRARY_PATH=$BLDLIBDIR:$DYLD_LIBRARY_PATH
-    export DYLD_LIBRARY_PATH
-    LD_LIBRARY_PATH=$DYLD_LIBRARY_PATH
-    ;;
     *)
     LD_LIBRARY_PATH=$BLDLIBDIR:$LD_LIBRARY_PATH
     ;;
@@ -340,9 +366,9 @@ else
 fi
 
 # Clean up temporary files/directories
+CLEAN_ITERFILES_AND_BLDITERDIR
 CLEAN_LIBFILES_AND_BLDLIBDIR
 CLEAN_DATAFILES_AND_BLDDIR
-CLEAN_REFFILES_AND_BLDREFDIR
 
 # Report test results and exit
 if test $nerrors -eq 0 ; then

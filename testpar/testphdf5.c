@@ -547,6 +547,9 @@ int main(int argc, char **argv)
     AddTest("denseattr", test_dense_attr, NULL,
 	    "Store Dense Attributes", PARATESTFILE);
 
+    AddTest("noselcollmdread", test_partial_no_selection_coll_md_read, NULL,
+            "Collective Metadata read with some ranks having no selection", PARATESTFILE);
+
 
     /* Display testing information */
     TestInfo(argv[0]);

@@ -29,7 +29,6 @@ extern "C" {
 #include "h5util.h"
 
 extern JavaVM *jvm;
-extern jobject visit_callback;
 
 /*
  * Class:     hdf_hdf5lib_H5
@@ -541,7 +540,7 @@ Java_hdf_hdf5lib_H5_H5Fclear_1elink_1file_1cache
  */
 JNIEXPORT void JNICALL
 Java_hdf_hdf5lib_H5_H5Fstart_1swmr_1write
-	(JNIEnv *env, jclass cls, jlong file_id)
+    (JNIEnv *env, jclass cls, jlong file_id)
 {
     if (H5Fstart_swmr_write((hid_t)file_id) < 0)
         h5libraryError(env);
@@ -554,7 +553,7 @@ Java_hdf_hdf5lib_H5_H5Fstart_1swmr_1write
  */
 JNIEXPORT void JNICALL
 Java_hdf_hdf5lib_H5_H5Fstart_1mdc_1logging
-	(JNIEnv *env, jclass cls, jlong file_id)
+    (JNIEnv *env, jclass cls, jlong file_id)
 {
     if (H5Fstart_mdc_logging((hid_t)file_id) < 0)
         h5libraryError(env);
@@ -580,7 +579,7 @@ Java_hdf_hdf5lib_H5_H5Fstop_1mdc_1logging
  */
 JNIEXPORT void JNICALL
 Java_hdf_hdf5lib_H5_H5Fget_1mdc_1logging_1status
-	(JNIEnv *env, jclass cls, jlong file_id, jbooleanArray mdc_logging_status)
+    (JNIEnv *env, jclass cls, jlong file_id, jbooleanArray mdc_logging_status)
 {
     hbool_t    is_enabled;
     hbool_t    is_currently_logging;

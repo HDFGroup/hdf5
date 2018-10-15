@@ -149,7 +149,7 @@ test_sec2(void)
 
     /* There is no garantee the size of metadata in file is constant.
      * Just try to check if it's reasonable.
-     * 
+     *
      * Currently it should be around 2 KB.
      */
     if(H5Fget_filesize(fid, &file_size) < 0)
@@ -258,7 +258,7 @@ test_core(void)
                         | H5FD_FEAT_ACCUMULATE_METADATA
                         | H5FD_FEAT_DATA_SIEVE
                         | H5FD_FEAT_AGGREGATE_SMALLDATA
-                        | H5FD_FEAT_ALLOW_FILE_IMAGE 
+                        | H5FD_FEAT_ALLOW_FILE_IMAGE
                         | H5FD_FEAT_CAN_USE_FILE_IMAGE_CALLBACKS))
         TEST_ERROR
 
@@ -341,7 +341,7 @@ test_core(void)
 
     /* There is no garantee the size of metadata in file is constant.
      * Just try to check if it's reasonable.
-     * 
+     *
      * TODO: Needs justification of why is this is a reasonable size.
      */
     if(H5Fget_filesize(fid, &file_size) < 0)
@@ -379,7 +379,7 @@ test_core(void)
     for(i = 0; i < CORE_DSET_DIM1; i++)
         for(j = 0; j < CORE_DSET_DIM2; j++)
             *pw++ = val++;
-    HDmemset(data_r, 0, DSET1_DIM1 * DSET1_DIM2 * sizeof(int)); 
+    HDmemset(data_r, 0, DSET1_DIM1 * DSET1_DIM2 * sizeof(int));
 
     /* Create the dataspace */
     dims[0] = CORE_DSET_DIM1;
@@ -469,7 +469,7 @@ test_core(void)
         TEST_ERROR;
 
     /* Read the data back from the dataset */
-    HDmemset(data_r, 0, DSET1_DIM1 * DSET1_DIM2 * sizeof(int)); 
+    HDmemset(data_r, 0, DSET1_DIM1 * DSET1_DIM2 * sizeof(int));
     if(H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data_r) < 0)
         TEST_ERROR;
 
@@ -488,7 +488,7 @@ test_core(void)
     /* Check file size API.
      * There is no garantee the size of metadata in file is constant.
      * Just try to check if it's reasonable.
-     * 
+     *
      * TODO: Needs justification of why is this is a reasonable size.
      */
     if(H5Fget_filesize(fid, &file_size) < 0)
@@ -1330,7 +1330,7 @@ test_multi(void)
     if((atype = H5Tcopy(H5T_C_S1)) < 0)
         TEST_ERROR;
 
-    if(H5Tset_size(atype, strlen(meta) + 1) < 0)
+    if(H5Tset_size(atype, HDstrlen(meta) + 1) < 0)
         TEST_ERROR;
 
     if(H5Tset_strpad(atype, H5T_STR_NULLTERM) < 0)
@@ -1385,7 +1385,7 @@ error:
  * Purpose:     Tests the backward compatibility for MULTI driver.
  *              See if we can open files created with v1.6 library.
  *              The source file was created by the test/file_handle.c
- *              of the v1.6 library.  This test verifies the fix for 
+ *              of the v1.6 library.  This test verifies the fix for
  *              Issue 2598. In v1.6 library, there was EOA for the whole
  *              MULTI file saved in the super block.  We took it out in
  *              v1.8 library because it's meaningless for the MULTI file.
@@ -1446,7 +1446,7 @@ test_multi_compat(void)
 
     h5_fixname(FILENAME[9], fapl, newname, sizeof newname);
 
-    /* Make copy for the data file in the build directory, to protect the 
+    /* Make copy for the data file in the build directory, to protect the
      * original file in the source directory */
     sprintf(filename_s, "%s-%c.h5", MULTI_COMPAT_BASENAME, 's');
     sprintf(newname_s, "%s-%c.h5", FILENAME[9], 's');
@@ -1483,7 +1483,7 @@ test_multi_compat(void)
     if(H5Fclose(file) < 0)
         TEST_ERROR;
 
-    /* Reopen the file for adding another dataset. The new EOA for metadata file 
+    /* Reopen the file for adding another dataset. The new EOA for metadata file
      * should be written to the file */
     if((file=H5Fopen(newname, H5F_ACC_RDWR, fapl)) < 0)
         TEST_ERROR;
@@ -1510,7 +1510,7 @@ test_multi_compat(void)
     if(H5Fclose(file) < 0)
         TEST_ERROR;
 
-    /* Reopen the file for read only again. Verify the library can handle 
+    /* Reopen the file for read only again. Verify the library can handle
      * the EOA correctly */
     if((file=H5Fopen(newname, H5F_ACC_RDONLY, fapl)) < 0)
         TEST_ERROR;

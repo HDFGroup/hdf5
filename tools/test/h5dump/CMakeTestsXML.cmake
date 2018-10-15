@@ -164,9 +164,10 @@
     if ("${testtype}" STREQUAL "SKIP")
       if (NOT HDF5_ENABLE_USING_MEMCHECKER)
         add_test (
-            NAME H5DUMP_XML-${skipresultfile}-SKIPPED
+            NAME H5DUMP_XML-${skipresultfile}
             COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${skipresultfile}.xml --xml ${ARGN}"
         )
+        set_property(TEST H5DUMP_XML-${skipresultfile} PROPERTY DISABLED)
       endif ()
     else ()
       ADD_XML_H5_TEST (${skipresultfile} ${skipresultcode} ${ARGN})

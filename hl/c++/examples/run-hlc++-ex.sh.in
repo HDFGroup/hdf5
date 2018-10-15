@@ -31,7 +31,7 @@ EXIT_SUCCESS=0
 EXIT_FAILURE=1
 # Where the tool is installed.
 # default is relative path to installed location of the tools
-prefix="${prefix:-@prefix@}"
+prefix="${prefix:-../../../..}"
 AR="@AR@"
 RANLIB="@RANLIB@"
 H5TOOL="h5c++"                  # The tool name
