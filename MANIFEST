@@ -445,6 +445,7 @@
 ./release_docs/INSTALL_CMake.txt
 ./release_docs/INSTALL_Cygwin.txt
 ./release_docs/INSTALL_parallel
+./release_docs/INSTALL_Warnings.txt
 ./release_docs/INSTALL_Windows.txt
 ./release_docs/RELEASE.txt
 ./release_docs/USING_HDF5_CMake.txt
@@ -1247,6 +1248,7 @@
 ./testpar/t_cache_image.c
 ./testpar/t_chunk_alloc.c
 ./testpar/t_coll_chunk.c
+./testpar/t_coll_md_read.c
 ./testpar/t_dset.c
 ./testpar/t_file.c
 ./testpar/t_file_image.c
@@ -3144,6 +3146,8 @@
 ./java/lib/ext/slf4j-simple-1.7.25.jar
 
 # CMake-specific Files
+./config/intel.cmake
+
 ./config/cmake/cacheinit.cmake
 ./config/cmake/CMakeFindJavaCommon.cmake
 ./config/cmake/ConversionTests.c

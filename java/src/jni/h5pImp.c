@@ -27,7 +27,6 @@ extern "C" {
 #include "h5pImp.h"
 
 extern JavaVM *jvm;
-extern jobject visit_callback;
 extern jobject copy_callback;
 extern jobject close_callback;
 extern jobject create_callback;
@@ -35,6 +34,11 @@ extern jobject compare_callback;
 extern jobject get_callback;
 extern jobject set_callback;
 extern jobject delete_callback;
+
+typedef struct _cb_wrapper {
+    jobject visit_callback;
+    jobject op_data;
+} cb_wrapper;
 
 /********************/
 /* Local Prototypes */
@@ -52,7 +56,7 @@ static herr_t H5P_prp_get_func_cb(hid_t prop_id, const char *name, size_t size, 
 static herr_t H5P_prp_set_func_cb(hid_t prop_id, const char *name, size_t size, void *value);
 static herr_t H5P_prp_delete_func_cb(hid_t prop_id, const char *name, size_t size, void *value);
 
-static herr_t H5P_iterate_cb(hid_t prop_id, const char *name, void *op_data);
+static herr_t H5P_iterate_cb(hid_t prop_id, const char *name, void *cb_data);
 
 /*
  * Class:     hdf_hdf5lib_H5
@@ -3877,7 +3881,7 @@ Java_hdf_hdf5lib_H5_H5Pset_1fapl_1multi
                 const char *utf8 = ENVPTR->GetStringUTFChars(ENVPAR obj, 0);
 
                 if (utf8) {
-                    member_name[i] = (char*)HDmalloc(strlen(utf8) + 1);
+                    member_name[i] = (char*)HDmalloc(HDstrlen(utf8) + 1);
                     if (member_name[i]) {
                         strcpy(member_name[i], utf8);
                     } /* end if */
@@ -4185,7 +4189,7 @@ Java_hdf_hdf5lib_H5_H5Pset_1mdc_1config
         h5JNIFatalError(env, "H5Pset_mdc_config: out of memory trace_file_name");
         return;
     } /* end if */
-    strncpy(cacheinfo.trace_file_name, str, 1025);
+    HDstrncpy(cacheinfo.trace_file_name, str, 1025);
     ENVPTR->ReleaseStringUTFChars(ENVPAR j_str, str);
     if(ENVPTR->ExceptionOccurred(ENVONLY)) {
         h5JNIFatalError(env, "H5Pset_mdc_config: loading trace_file_name failed");
@@ -5042,7 +5046,7 @@ H5P_cls_copy_cb
     } /* end if */
     JVMPTR->DetachCurrentThread(JVMPAR);
     return (herr_t)status;
-} /* end H5P_cls_ccopy_cb */
+} /* end H5P_cls_copy_cb */
 
 static herr_t
 H5P_cls_close_cb
@@ -5158,13 +5162,16 @@ Java_hdf_hdf5lib_H5_H5Pget_1mdc_1log_1options
 
 static herr_t
 H5D_append_cb
-    (hid_t dataset_id, hsize_t *cur_dims, void *op_data)
+    (hid_t dataset_id, hsize_t *cur_dims, void *cb_data)
 {
     JNIEnv    *cbenv;
     jint       status = -1;
     jclass     cls;
     jmethodID  mid;
     jlongArray cur_dimsArray;
+    cb_wrapper *wrapper = (cb_wrapper *)cb_data;
+    void *op_data = (void *)wrapper->op_data;
+    jobject visit_callback = wrapper->visit_callback;
 
     if(JVMPTR->AttachCurrentThread(JVMPAR2 (void**)&cbenv, NULL) != 0) {
         JVMPTR->DetachCurrentThread(JVMPAR);
@@ -5199,9 +5206,9 @@ Java_hdf_hdf5lib_H5_H5Pset_1append_1flush
     (JNIEnv *env, jclass clss, jlong plist_id, jint ndims, jlongArray boundary, jobject callback_op, jobject op_data)
 {
     herr_t   status = -1;
+    cb_wrapper wrapper = {callback_op, op_data};
 
     ENVPTR->GetJavaVM(ENVPAR &jvm);
-    visit_callback = callback_op;
 
     if (op_data == NULL) {
         h5nullArgument(env, "H5Pset_append_flush:  op_data is NULL");
@@ -5210,7 +5217,7 @@ Java_hdf_hdf5lib_H5_H5Pset_1append_1flush
         h5nullArgument(env, "H5Pset_append_flush:  callback_op is NULL");
     } /* end if */
     else {
-        status = H5Pset_append_flush((hid_t)plist_id, (unsigned)ndims, (const hsize_t*)boundary, (H5D_append_cb_t)H5D_append_cb, (void*)op_data);
+        status = H5Pset_append_flush((hid_t)plist_id, (unsigned)ndims, (const hsize_t*)boundary, (H5D_append_cb_t)H5D_append_cb, (void*)&wrapper);
 
         if (status < 0)
             h5libraryError(env);
@@ -5603,13 +5610,16 @@ Java_hdf_hdf5lib_H5_H5Pinsert2
 
 static herr_t
 H5P_iterate_cb
-    (hid_t prop_id, const char *name, void *op_data)
+    (hid_t prop_id, const char *name, void *cb_data)
 {
     JNIEnv    *cbenv;
     jint       status = -1;
     jclass     cls;
     jmethodID  mid;
     jstring    str;
+    cb_wrapper *wrapper = (cb_wrapper *)cb_data;
+    void *op_data = (void *)wrapper->op_data;
+    jobject visit_callback = wrapper->visit_callback;
 
     /* fprintf(stderr, "\nJNI H5P_iterate_cb entered\n"); fflush(stderr); */
     if(JVMPTR->AttachCurrentThread(JVMPAR2 (void**)&cbenv, NULL) != 0) {
@@ -5656,9 +5666,9 @@ Java_hdf_hdf5lib_H5_H5Piterate
     herr_t   status = -1;
     jint    *theArray = NULL;
     jboolean isCopy;
+    cb_wrapper wrapper = {callback_op, op_data};
 
     ENVPTR->GetJavaVM(ENVPAR &jvm);
-    visit_callback = callback_op;
 
     if (op_data == NULL) {
         h5nullArgument(env, "H5Piterate:  op_data is NULL");
@@ -5668,7 +5678,7 @@ Java_hdf_hdf5lib_H5_H5Piterate
     } /* end else if */
     else {
         if (idx == NULL) {
-            status = H5Piterate((hid_t)prop_id, NULL, (H5P_iterate_t)H5P_iterate_cb, (void*)op_data);
+            status = H5Piterate((hid_t)prop_id, NULL, (H5P_iterate_t)H5P_iterate_cb, (void*)&wrapper);
         } /* end if */
         else {
             theArray = (jint *)ENVPTR->GetIntArrayElements(ENVPAR idx, &isCopy);
@@ -5676,7 +5686,7 @@ Java_hdf_hdf5lib_H5_H5Piterate
                 h5JNIFatalError(env, "H5Piterate:  idx not pinned");
             } /* end if */
             else
-                status = H5Piterate((hid_t)prop_id, (int*)&theArray[0], (H5P_iterate_t)H5P_iterate_cb, (void*)op_data);
+                status = H5Piterate((hid_t)prop_id, (int*)&theArray[0], (H5P_iterate_t)H5P_iterate_cb, (void*)&wrapper);
         } /* end else */
 
         if (status < 0) {

@@ -157,7 +157,7 @@ typedef struct {
 /* obtain link info from H5tools_get_symlink_info() */
 typedef struct {
     H5O_type_t  trg_type;  /* OUT: target type */
-    char *trg_path;        /* OUT: target obj path. This must be freed 
+    char *trg_path;        /* OUT: target obj path. This must be freed
                             *      when used with H5tools_get_symlink_info() */
     haddr_t     objno;     /* OUT: target object address */
     unsigned long  fileno; /* OUT: File number that target object is located in */

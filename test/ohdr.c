@@ -470,8 +470,8 @@ test_unknown(unsigned bogus_id, char *filename, hid_t fapl)
     /* create a different name for a local copy of the data file to be
        opened with rd/wr file permissions in case build and test are
        done in the source directory. */
-    HDstrncpy(testfile, FILE_BOGUS, strlen(FILE_BOGUS));
-    testfile[strlen(FILE_BOGUS)]='\0';
+    HDstrncpy(testfile, FILE_BOGUS, HDstrlen(FILE_BOGUS));
+    testfile[HDstrlen(FILE_BOGUS)]='\0';
     HDstrncat(testfile, ".copy", 5);
 
     /* Make a copy of the data file from svn. */

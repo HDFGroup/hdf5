@@ -193,7 +193,8 @@ am_testphdf5_OBJECTS = testphdf5.$(OBJEXT) t_dset.$(OBJEXT) \
 	t_file.$(OBJEXT) t_file_image.$(OBJEXT) t_mdset.$(OBJEXT) \
 	t_ph5basic.$(OBJEXT) t_coll_chunk.$(OBJEXT) \
 	t_span_tree.$(OBJEXT) t_chunk_alloc.$(OBJEXT) \
-	t_filter_read.$(OBJEXT) t_prop.$(OBJEXT)
+	t_filter_read.$(OBJEXT) t_prop.$(OBJEXT) \
+	t_coll_md_read.$(OBJEXT)
 testphdf5_OBJECTS = $(am_testphdf5_OBJECTS)
 testphdf5_LDADD = $(LDADD)
 testphdf5_DEPENDENCIES = $(LIBH5TEST) $(LIBHDF5)
@@ -802,7 +803,7 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.clog2 MPItest.h5 \
 TEST_PROG_PARA = t_mpi t_bigio testphdf5 t_cache t_cache_image t_pflush1 t_pflush2 t_pread t_pshutdown t_prestart t_init_term t_shapesame t_filters_parallel
 testphdf5_SOURCES = testphdf5.c t_dset.c t_file.c t_file_image.c t_mdset.c \
 	t_ph5basic.c t_coll_chunk.c t_span_tree.c t_chunk_alloc.c t_filter_read.c \
-	t_prop.c
+	t_prop.c t_coll_md_read.c
 
 
 # The tests all depend on the hdf5 library and the test library
@@ -935,6 +936,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t_cache_image.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t_chunk_alloc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t_coll_chunk.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t_coll_md_read.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t_dset.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t_file.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t_file_image.Po@am__quote@

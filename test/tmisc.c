@@ -2272,7 +2272,7 @@ misc13_insert_user_block(const char *old_name, const char *new_name, const char 
     CHECK_PTR(user_block, "HDcalloc");
 
     /* Copy in the user block data */
-    HDmemcpy(user_block, str, strlen(str));
+    HDmemcpy(user_block, str, HDstrlen(str));
 
     /* Open the new file */
     new_fp = HDfopen(new_name,"wb");
