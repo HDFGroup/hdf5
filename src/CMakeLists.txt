@@ -906,6 +906,7 @@ if (NOT EXISTS ${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c)
         DEPENDS H5detect
         WORKING_DIRECTORY ${HDF5_GENERATED_SOURCE_DIR}
     )
+    set_source_files_properties (${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c PROPERTIES GENERATED TRUE)
     if (BUILD_SHARED_LIBS)
       add_custom_command (
           OUTPUT     ${HDF5_GENERATED_SOURCE_DIR}/shared/H5Tinit.c
@@ -913,31 +914,31 @@ if (NOT EXISTS ${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c)
           ARGS       -E copy_if_different "${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c" "${HDF5_GENERATED_SOURCE_DIR}/shared/H5Tinit.c"
           DEPENDS    ${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c
       )
+      set_source_files_properties (${HDF5_GENERATED_SOURCE_DIR}/shared/H5Tinit.c PROPERTIES GENERATED TRUE)
     endif ()
   else ()
     add_custom_command (
         OUTPUT ${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c
-        COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR}H5detect
+        COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR}$<TARGET_FILE:H5detect>
         ARGS ${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c
         DEPENDS H5detect
         WORKING_DIRECTORY ${HDF5_GENERATED_SOURCE_DIR}
     )
+    set_source_files_properties (${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c PROPERTIES GENERATED TRUE)
     if (BUILD_SHARED_LIBS)
       if (NOT EXISTS ${HDF5_GENERATED_SOURCE_DIR}/shared/H5Tinit.c)
         add_custom_command (
             OUTPUT ${HDF5_GENERATED_SOURCE_DIR}/shared/H5Tinit.c
-            COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR}H5detect
+            COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR}$<TARGET_FILE:H5detect>
             ARGS ${HDF5_GENERATED_SOURCE_DIR}/shared/H5Tinit.c
             DEPENDS H5detect
             WORKING_DIRECTORY ${HDF5_GENERATED_SOURCE_DIR}/shared
         )
-      else ()
         set_source_files_properties (${HDF5_GENERATED_SOURCE_DIR}/shared/H5Tinit.c PROPERTIES GENERATED TRUE)
       endif ()
     endif ()
   endif ()
 else ()
-  set_source_files_properties (${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c PROPERTIES GENERATED TRUE)
   if (BUILD_SHARED_LIBS)
     add_custom_command (
         OUTPUT     ${HDF5_GENERATED_SOURCE_DIR}/shared/H5Tinit.c
@@ -960,7 +961,7 @@ target_link_libraries (H5make_libsettings
 
 add_custom_command (
     OUTPUT ${HDF5_BINARY_DIR}/H5lib_settings.c
-    COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR}H5make_libsettings
+    COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR}$<TARGET_FILE:H5make_libsettings>
     ARGS ${HDF5_BINARY_DIR}/H5lib_settings.c
     DEPENDS H5make_libsettings
     WORKING_DIRECTORY ${HDF5_BINARY_DIR}
@@ -969,7 +970,7 @@ set_source_files_properties (${HDF5_BINARY_DIR}/H5lib_settings.c PROPERTIES GENE
 if (BUILD_SHARED_LIBS)
   add_custom_command (
       OUTPUT ${HDF5_BINARY_DIR}/shared/H5lib_settings.c
-      COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR}H5make_libsettings
+      COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR}$<TARGET_FILE:H5make_libsettings>
       ARGS ${HDF5_BINARY_DIR}/shared/H5lib_settings.c
       DEPENDS H5make_libsettings
       WORKING_DIRECTORY ${HDF5_BINARY_DIR}
