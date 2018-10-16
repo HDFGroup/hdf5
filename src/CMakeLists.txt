@@ -899,6 +899,10 @@ if (NOT EXISTS ${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c)
   )
 
   if (HDF5_BATCH_H5DETECT)
+    configure_file (
+        ${HDF5_SOURCE_DIR}/bin/batch/${HDF5_DETECT_BATCH_SCRIPT}.in
+        ${HDF5_BINARY_DIR}/${HDF5_DETECT_BATCH_SCRIPT} ESCAPE_QUOTES @ONLY
+    )
     add_custom_command (
         OUTPUT ${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c
         COMMAND ${HDF5_BATCH_CMD}
