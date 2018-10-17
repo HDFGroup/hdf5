@@ -3303,7 +3303,7 @@ H5F__start_swmr_write(H5F_t *f)
         if(grp_dset_count > 0) {
             H5VL_object_t *vol_obj = NULL;
 
-            if(NULL == (vol_obj = H5VL_get_object(obj_ids[0])))
+            if(NULL == (vol_obj = H5VL_vol_object(obj_ids[0])))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
 
             vol_driver = vol_obj->driver;

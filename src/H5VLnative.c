@@ -215,7 +215,7 @@ H5VL_native_init(void)
 
     /* Register the native VOL driver, if it isn't already */
     if(NULL == H5I_object_verify(H5VL_NATIVE_ID_g, H5I_VOL)) {
-        if((H5VL_NATIVE_ID_g = H5VL_register((const H5VL_class_t *)&H5VL_native_cls_g, 
+        if((H5VL_NATIVE_ID_g = H5VL_register_driver((const H5VL_class_t *)&H5VL_native_cls_g, 
                                           sizeof(H5VL_class_t), TRUE)) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTINSERT, H5I_INVALID_HID, "can't create ID for native VOL driver")
     }
@@ -379,7 +379,7 @@ done:
  *---------------------------------------------------------------------------
  */
 hid_t
-H5VL_native_register(H5I_type_t type, void *obj, hbool_t app_ref)
+H5VL_native_register(H5I_type_t type, const void *obj, hbool_t app_ref)
 {
     hid_t    ret_value = H5I_INVALID_HID;
 
@@ -395,7 +395,7 @@ H5VL_native_register(H5I_type_t type, void *obj, hbool_t app_ref)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "can only get an ID for an uncommitted datatype")
 
     /* Get an ID for the object */
-    if((ret_value = H5VL_object_register(obj, type, H5VL_NATIVE_ID_g, app_ref)) < 0)
+    if((ret_value = H5VL_register_using_vol_id(type, obj, H5VL_NATIVE_ID_g, app_ref)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to get an ID for the object")
 
 done:
@@ -422,7 +422,7 @@ H5VL_native_unregister(hid_t obj_id)
     FUNC_ENTER_NOAPI_NOINIT
 
     /* get the driver pointer */
-    if(NULL == (vol_obj = (H5VL_object_t *)H5VL_get_object(obj_id)))
+    if(NULL == (vol_obj = (H5VL_object_t *)H5VL_vol_object(obj_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid ID")
 
     /* free object */

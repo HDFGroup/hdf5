@@ -135,17 +135,17 @@ test_vol_registration(void)
     TESTING("VOL registration");
 
     /* The test/fake VOL driver should not be registered at the start of the test */
-    if ((is_registered = H5VLis_registered(FAKE_VOL_NAME)) < 0)
+    if ((is_registered = H5VLis_driver_registered(FAKE_VOL_NAME)) < 0)
         FAIL_STACK_ERROR;
     if (is_registered > 0)
         FAIL_PUTS_ERROR("native VOL driver is inappropriately registered");
 
     /* Load a VOL interface */
-    if ((vol_id = H5VLregister(&fake_vol_g)) < 0)
+    if ((vol_id = H5VLregister_driver(&fake_vol_g)) < 0)
         FAIL_STACK_ERROR;
 
     /* The test/fake VOL driver should be registered now */
-    if ((is_registered = H5VLis_registered(FAKE_VOL_NAME)) < 0)
+    if ((is_registered = H5VLis_driver_registered(FAKE_VOL_NAME)) < 0)
         FAIL_STACK_ERROR;
     if (0 == is_registered)
         FAIL_PUTS_ERROR("native VOL driver is un-registered");
@@ -183,7 +183,7 @@ test_native_vol_init(void)
     TESTING("Native VOL driver initialization");
 
     /* The native VOL driver should always be registered */
-    if ((is_registered = H5VLis_registered(H5VL_NATIVE_NAME)) < 0)
+    if ((is_registered = H5VLis_driver_registered(H5VL_NATIVE_NAME)) < 0)
         FAIL_STACK_ERROR;
     if (0 == is_registered)
         FAIL_PUTS_ERROR("native VOL driver is un-registered");

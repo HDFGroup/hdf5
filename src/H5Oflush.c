@@ -80,7 +80,7 @@ H5Oflush(hid_t obj_id)
     H5TRACE1("e", "i", obj_id);
 
     /* Check args */
-    if(NULL == (vol_obj = H5VL_get_object(obj_id)))
+    if(NULL == (vol_obj = H5VL_vol_object(obj_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
 
     /* Set up collective metadata if appropriate */
@@ -245,7 +245,7 @@ H5Orefresh(hid_t oid)
     H5TRACE1("e", "i", oid);
 
     /* Check args */
-    if(NULL == (vol_obj = H5VL_get_object(oid)))
+    if(NULL == (vol_obj = H5VL_vol_object(oid)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
 
     /* Set up collective metadata if appropriate */
@@ -323,7 +323,7 @@ H5O_refresh_metadata(hid_t oid, H5O_loc_t oloc)
          * The vol_obj will disappear when the underlying object is closed, so
          * we can't use that directly.
          */
-        if(NULL == (vol_obj = H5VL_get_object(oid)))
+        if(NULL == (vol_obj = H5VL_vol_object(oid)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
         driver = vol_obj->driver;
 
@@ -501,7 +501,7 @@ H5O_refresh_metadata_reopen(hid_t oid, H5G_loc_t *obj_loc, H5VL_t *vol_driver, h
     } /* end switch */
 
     /* Re-register ID for the object */
-    if((H5I_register_with_id(type, object, vol_driver, TRUE, oid)) < 0)
+    if((H5VL_register_using_existing_id(type, object, vol_driver, TRUE, oid)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to re-register object ID after refresh")
 
 done:

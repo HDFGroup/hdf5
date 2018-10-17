@@ -1915,7 +1915,7 @@ error:
  *              them (e.g.: for testing VOL driver ID handling).
  *
  *              This API call will return a pointer to a VOL class that
- *              can be used to construct a test VOL using H5VLregister().
+ *              can be used to construct a test VOL using H5VLregister_driver().
  *
  * Return:      Success:    A pointer to a VOL class struct
  *              Failure:    NULL

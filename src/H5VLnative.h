@@ -34,7 +34,7 @@ extern "C" {
 H5_DLL herr_t H5Pset_fapl_native(hid_t fapl_id);
 H5_DLL hid_t H5VL_native_get_driver_id(void);
 H5_DLL hid_t H5VL_native_init(void);
-H5_DLL hid_t H5VL_native_register(H5I_type_t type, void *obj, hbool_t app_ref);
+H5_DLL hid_t H5VL_native_register(H5I_type_t type, const void *obj, hbool_t app_ref);
 H5_DLL herr_t H5VL_native_unregister(hid_t obj_id);
 
 #ifdef __cplusplus
