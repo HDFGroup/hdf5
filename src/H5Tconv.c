@@ -8353,7 +8353,7 @@ H5T__conv_ldouble_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t n
  *
  *-------------------------------------------------------------------------
  */
-#if H5T_CONV_INTERNAL_LDOUBLE_ULLONG
+#ifdef H5T_CONV_INTERNAL_LDOUBLE_ULLONG
 herr_t
 H5T__conv_ldouble_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, size_t buf_stride,
                          size_t H5_ATTR_UNUSED bkg_stride, void *buf, void H5_ATTR_UNUSED *bkg)
