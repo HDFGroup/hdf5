@@ -771,7 +771,7 @@ H5G__stab_get_name_by_idx(const H5O_loc_t *oloc, H5_iter_order_t order, hsize_t 
 
     /* Copy the name into the user's buffer, if given */
     if (name) {
-        HDstrncpy(name, udata.name, MIN((*name_len + 1), name_size));
+        HDstrncpy(name, udata.name, name_size);
         if (*name_len >= name_size)
             name[name_size - 1] = '\0';
     } /* end if */

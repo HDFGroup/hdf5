@@ -233,7 +233,7 @@ H5G__compact_get_name_by_idx(const H5O_loc_t *oloc, const H5O_linfo_t *linfo, H5
 
     /* Copy the name into the user's buffer, if given */
     if (name) {
-        HDstrncpy(name, ltable.lnks[idx].name, MIN((*name_len + 1), name_size));
+        HDstrncpy(name, ltable.lnks[idx].name, name_size);
         if (*name_len >= name_size)
             name[name_size - 1] = '\0';
     } /* end if */
