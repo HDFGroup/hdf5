@@ -370,7 +370,7 @@ H5Gcreate2(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gcpl_id,
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, H5I_INVALID_HID, "unable to create group")
 
     /* Get an atom for the group */
-    if((ret_value = H5VL_register_id(H5I_GROUP, grp, vol_obj->driver, TRUE)) < 0)
+    if((ret_value = H5VL_register(H5I_GROUP, grp, vol_obj->driver, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize group handle")
 
 done:
@@ -450,7 +450,7 @@ H5Gcreate_anon(hid_t loc_id, hid_t gcpl_id, hid_t gapl_id)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, H5I_INVALID_HID, "unable to create group")
 
     /* Get an atom for the group */
-    if((ret_value = H5VL_register_id(H5I_GROUP, grp, vol_obj->driver, TRUE)) < 0)
+    if((ret_value = H5VL_register(H5I_GROUP, grp, vol_obj->driver, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize group handle")
 
 done:
@@ -511,7 +511,7 @@ H5Gopen2(hid_t loc_id, const char *name, hid_t gapl_id)
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open group")
 
     /* Register an ID for the group */
-    if((ret_value = H5VL_register_id(H5I_GROUP, grp, vol_obj->driver, TRUE)) < 0)
+    if((ret_value = H5VL_register(H5I_GROUP, grp, vol_obj->driver, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register group")
 
 done:

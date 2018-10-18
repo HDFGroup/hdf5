@@ -152,7 +152,7 @@ H5Acreate1(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
     loc_params.obj_type     = H5I_get_type(loc_id);
 
     /* Get the location object */
-    if(NULL == (vol_obj = H5VL_get_object(loc_id)))
+    if(NULL == (vol_obj = H5VL_vol_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier")
 
     /* Create the attribute */
@@ -161,7 +161,7 @@ H5Acreate1(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, H5I_INVALID_HID, "unable to create attribute")
 
     /* Register the new attribute and get an ID for it */
-    if((ret_value = H5VL_register_id(H5I_ATTR, attr, vol_obj->driver, TRUE)) < 0)
+    if((ret_value = H5VL_register(H5I_ATTR, attr, vol_obj->driver, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register attribute for ID")
 
 done:
@@ -218,7 +218,7 @@ H5Aopen_name(hid_t loc_id, const char *name)
     loc_params.obj_type     = H5I_get_type(loc_id);
 
     /* Get the location object */
-    if (NULL == (vol_obj = H5VL_get_object(loc_id)))
+    if (NULL == (vol_obj = H5VL_vol_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier")
 
     /* Open the attribute */
@@ -227,7 +227,7 @@ H5Aopen_name(hid_t loc_id, const char *name)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open attribute")
 
     /* Register the attribute and get an ID for it */
-    if ((ret_value = H5VL_register_id(H5I_ATTR, attr, vol_obj->driver, TRUE)) < 0)
+    if ((ret_value = H5VL_register(H5I_ATTR, attr, vol_obj->driver, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize attribute handle")
 
 done:
@@ -287,7 +287,7 @@ H5Aopen_idx(hid_t loc_id, unsigned idx)
     loc_params.obj_type                         = H5I_get_type(loc_id);
 
     /* Get the location object */
-    if(NULL == (vol_obj = H5VL_get_object(loc_id)))
+    if(NULL == (vol_obj = H5VL_vol_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier")
 
     /* Open the attribute */
@@ -296,7 +296,7 @@ H5Aopen_idx(hid_t loc_id, unsigned idx)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open attribute")
 
     /* Register the attribute and get an ID for it */
-    if((ret_value = H5VL_register_id(H5I_ATTR, attr, vol_obj->driver, TRUE)) < 0)
+    if((ret_value = H5VL_register(H5I_ATTR, attr, vol_obj->driver, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize attribute handle")
 
 done:
@@ -342,7 +342,7 @@ H5Aget_num_attrs(hid_t loc_id)
     loc_params.obj_type = H5I_get_type(loc_id);
 
     /* get the location object */
-    if(NULL == (vol_obj = H5VL_get_object(loc_id)))
+    if(NULL == (vol_obj = H5VL_vol_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, (-1), "invalid location identifier")
 
     /* Get the number of attributes for the object */

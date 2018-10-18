@@ -201,7 +201,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5VLregister
+ * Function:    H5VLregister_driver
  *
  * Purpose:     Registers a new VOL driver as a member of the virtual object
  *              layer class.
@@ -210,17 +210,17 @@ done:
  *                          library is closed or the driver is
  *                          unregistered.
  *
- *              Failure:    A negative value (H5I_INVALID_HID).
+ *              Failure:    H5I_INVALID_HID
  *
  *-------------------------------------------------------------------------
  */
 hid_t
-H5VLregister(const H5VL_class_t *cls)
+H5VLregister_driver(const H5VL_class_t *cls)
 {
     H5VL_get_driver_ud_t op_data;
     hid_t ret_value = H5I_INVALID_HID;
 
-    FUNC_ENTER_API(FAIL)
+    FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE1("i", "*x", cls);
 
     /* Check arguments */
@@ -246,16 +246,16 @@ H5VLregister(const H5VL_class_t *cls)
         HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID, "VOL driver with the same name is already registered.")
 
     /* Create the new class ID */
-    if ((ret_value = H5VL_register(cls, sizeof(H5VL_class_t), TRUE)) < 0)
+    if ((ret_value = H5VL_register_driver(cls, sizeof(H5VL_class_t), TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register VOL driver")
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5VLregister() */
+} /* end H5VLregister_driver() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5VLregister_by_name
+ * Function:    H5VLregister_driver_by_name
  *
  * Purpose:     Registers a new VOL driver as a member of the virtual object
  *              layer class.
@@ -264,17 +264,17 @@ done:
  *                          library is closed or the driver is
  *                          unregistered.
  *
- *              Failure:    A negative value.
+ *              Failure:    H5I_INVALID_HID
  *
  *-------------------------------------------------------------------------
  */
 hid_t
-H5VLregister_by_name(const char *name)
+H5VLregister_driver_by_name(const char *name)
 {
     H5VL_get_driver_ud_t    op_data;
     hid_t                   ret_value = H5I_INVALID_HID;
 
-    FUNC_ENTER_API(FAIL)
+    FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE1("i", "*s", name);
 
     /* Check arguments */
@@ -306,21 +306,21 @@ H5VLregister_by_name(const char *name)
             HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, H5I_INVALID_HID, "unable to load VOL driver")
 
         /* Register the driver we loaded */
-        if ((ret_value = H5VL_register(cls, sizeof(H5VL_class_t), TRUE)) < 0)
+        if ((ret_value = H5VL_register_driver(cls, sizeof(H5VL_class_t), TRUE)) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register VOL driver ID")
     }
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5VLregister_by_name() */
+} /* end H5VLregister_driver_by_name() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5VLunregister
+ * Function:    H5VLunregister_driver
  *
- * Purpose:     Removes a vol driver ID from the library. This in no way affects
+ * Purpose:     Removes a VOL driver ID from the library. This in no way affects
  *              file access property lists which have been defined to use
- *              this vol driver or files which are already opened under with
+ *              this VOL driver or files which are already opened under with
  *              this driver.
  *
  * Return:      Success:    Non-negative
@@ -330,7 +330,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLunregister(hid_t vol_id)
+H5VLunregister_driver(hid_t vol_id)
 {
     H5VL_class_t *cls = NULL;
     herr_t ret_value = SUCCEED;       /* Return value */
@@ -348,11 +348,11 @@ H5VLunregister(hid_t vol_id)
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5VLunregister() */
+} /* end H5VLunregister_driver() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5VLis_registered
+ * Function:    H5VLis_driver_registered
  *
  * Purpose:     Tests whether a VOL class has been registered or not
  *
@@ -365,7 +365,7 @@ done:
  *-------------------------------------------------------------------------
  */
 htri_t
-H5VLis_registered(const char *name)
+H5VLis_driver_registered(const char *name)
 {
     H5VL_get_driver_ud_t op_data;
     htri_t ret_value = FALSE;     /* Return value */
@@ -385,7 +385,7 @@ H5VLis_registered(const char *name)
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5VLis_registered() */
+} /* end H5VLis_driver_registered() */
 
 
 /*-------------------------------------------------------------------------
@@ -455,34 +455,39 @@ done:
 
 
 /*---------------------------------------------------------------------------
- * Function:	H5VLobject_register
+ * Function:	H5VLregister
  *
- * Purpose:     Public routine to create an HDF5 hid_t with library
- *              specific types, bypassing the limitation of H5Iregister.
+ * Purpose:     Public routine to register an object and get an ID given a
+ *              VOL driver ID.
  *
- * Return:      Success:    Non-negative
+ *              Unlike H5Iregister(), this API call can register library
+ *              types (e.g.; H5I_DATASET).
  *
- *              Failure:    Negative
+ * NOTE:        This API call is mainly intended for VOL driver authors.
+ *
+ * Return:      Success:    A valid HDF5 ID
+ *
+ *              Failure:    H5I_INVALID_HID
  *
  *---------------------------------------------------------------------------
  */
 hid_t
-H5VLobject_register(void *obj, H5I_type_t obj_type, hid_t driver_id)
+H5VLregister(H5I_type_t type, const void *obj, hid_t driver_id)
 {
-    hid_t ret_value = FAIL;
+    hid_t ret_value = H5I_INVALID_HID;
 
-    FUNC_ENTER_API(FAIL)
-    H5TRACE3("i", "*xIti", obj, obj_type, driver_id);
+    FUNC_ENTER_API(H5I_INVALID_HID)
+    H5TRACE3("i", "It*xi", type, obj, driver_id);
 
     if (NULL == obj)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object to register")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "obj pointer can't be NULL")
 
-    if ((ret_value = H5VL_object_register(obj, obj_type, driver_id, TRUE)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register object")
+    if ((ret_value = H5VL_register_using_vol_id(type, obj, driver_id, TRUE)) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register object")
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* H5VLobject_register */
+} /* H5VLregister */
 
 
 /*-------------------------------------------------------------------------
@@ -540,7 +545,7 @@ H5VLget_object(hid_t obj_id, void **obj)
     if (!obj)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object pointer")
 
-    if (NULL == (*obj = H5VL_get_object(obj_id)))
+    if (NULL == (*obj = H5VL_vol_object(obj_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain a valid object")
 
 done:
