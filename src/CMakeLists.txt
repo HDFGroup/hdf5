@@ -877,7 +877,6 @@ endif ()
 # Setup the H5detect utility which generates H5Tinit with platform
 # specific type checks inside
 #-----------------------------------------------------------------------------
-option (HDF5_USE_PREGEN "Use pre-generated Files" OFF)
 if (HDF5_USE_PREGEN)
   set (HDF5_GENERATED_SOURCE_DIR ${HDF5_USE_PREGEN_DIR})
 else ()
