@@ -88,6 +88,7 @@ int main(int argc, char *argv[])
     const char     *err7 = "Invalid type of data - %s.\n";
     const char     *err8 = "Invalid size of data - %s.\n";
     const char     *err9 = "Cannot specify more than 30 input files in one call to h5import.\n";
+    const char     *err10 = "Length of output file name limited to 255 chars.\n";
 
     h5tools_setprogname(PROGRAMNAME);
     h5tools_setstatus(EXIT_SUCCESS);
@@ -155,6 +156,10 @@ int main(int argc, char *argv[])
             break;
 
         case 5: /* get outfile found */
+            if (HDstrlen(argv[i]) > 255) {
+                (void) HDfprintf(stderr, err10, argv[i]);
+                goto err;
+            }
             (void) HDstrcpy(opt.outfile, argv[i]);
             outfile_named = TRUE;
             break;
