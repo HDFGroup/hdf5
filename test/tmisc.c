@@ -3487,9 +3487,9 @@ test_misc19(void)
     vol_cls = h5_get_dummy_vol_class();
     CHECK(vol_cls, NULL, "h5_get_dummy_vol_class");
 
-    /* Register a virtual object driver */
-    volid = H5VLregister(vol_cls);
-    CHECK(volid, FAIL, "H5VLregister");
+    /* Register a VOL driver */
+    volid = H5VLregister_driver(vol_cls);
+    CHECK(volid, FAIL, "H5VLregister_driver");
 
     /* Check the reference count */
     rc = H5Iget_ref(volid);
@@ -3500,8 +3500,8 @@ test_misc19(void)
     VERIFY(rc, 2, "H5Iinc_ref");
 
     /* Unregister the VOL driver normally */
-    ret = H5VLunregister(volid);
-    CHECK(ret, FAIL, "H5VLunregister");
+    ret = H5VLunregister_driver(volid);
+    CHECK(ret, FAIL, "H5VLunregister_driver");
 
     /* Check the reference count */
     rc = H5Iget_ref(volid);
@@ -3513,9 +3513,9 @@ test_misc19(void)
 
     /* Try unregistering the VOL driver again (should fail) */
     H5E_BEGIN_TRY {
-        ret = H5VLunregister(volid);
+        ret = H5VLunregister_driver(volid);
     } H5E_END_TRY;
-    VERIFY(ret, FAIL, "H5VLunregister");
+    VERIFY(ret, FAIL, "H5VLunregister_driver");
 
     HDfree(vol_cls);
 

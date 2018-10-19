@@ -764,7 +764,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5I_register_with_id
+ * Function:    H5I_register_using_existing_id
  *
  * Purpose:     Registers an OBJECT in a TYPE with the supplied ID for it.
  *              This routine will check to ensure the supplied ID is not already
@@ -773,14 +773,17 @@ done:
  *              registered (thus, it is possible to register one object under
  *              multiple IDs).
  *
+ * NOTE:        Intended for use in refresh calls, where we have to close
+ *              and re-open the underlying data, then hook the object back
+ *              up to the original ID.
+ *
  * Return:      SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5I_register_with_id(H5I_type_t type, void *object, H5VL_t *vol_driver, hbool_t app_ref, hid_t id)
+H5I_register_using_existing_id(H5I_type_t type, void *object, hbool_t app_ref, hid_t existing_id)
 {
-    H5VL_object_t  *new_vol_obj = NULL;     /* pointer to new VOL object        */
     H5I_id_type_t  *type_ptr;               /* ptr to the type                  */
     H5I_id_info_t  *id_ptr;                 /* ptr to the new ID information    */
     herr_t          ret_value = SUCCEED;    /* return value                     */
@@ -789,10 +792,9 @@ H5I_register_with_id(H5I_type_t type, void *object, H5VL_t *vol_driver, hbool_t 
 
     /* Check arguments */
     HDassert(object);
-    HDassert(vol_driver);
 
     /* Make sure ID is not already in use */
-    if(NULL != (id_ptr = H5I__find_id(id)))
+    if(NULL != (id_ptr = H5I__find_id(existing_id)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADRANGE, FAIL, "ID already in use")
 
     /* Make sure type number is valid */
@@ -806,36 +808,18 @@ H5I_register_with_id(H5I_type_t type, void *object, H5VL_t *vol_driver, hbool_t 
         HGOTO_ERROR(H5E_ATOM, H5E_BADGROUP, FAIL, "invalid type")
 
     /* Make sure requested ID belongs to object's type */
-    if(H5I_TYPE(id) != type)
+    if(H5I_TYPE(existing_id) != type)
         HGOTO_ERROR(H5E_ATOM, H5E_BADRANGE, FAIL, "invalid type for provided ID")
 
     /* Allocate new structure to house this ID */
     if(NULL == (id_ptr = H5FL_MALLOC(H5I_id_info_t)))
         HGOTO_ERROR(H5E_ATOM, H5E_NOSPACE, FAIL, "memory allocation failed")
 
-    /* Set up the new VOL object */
-    if(NULL == (new_vol_obj = H5FL_CALLOC(H5VL_object_t)))
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTALLOC, FAIL, "can't allocate memory for VOL object");
-    new_vol_obj->driver = vol_driver;
-    new_vol_obj->data = object;
-
-    /* Bump the reference count on the VOL driver */
-    vol_driver->nrefs++;
-
     /* Create the struct & insert requested ID */
-    id_ptr->id          = id;
+    id_ptr->id          = existing_id;
     id_ptr->count       = 1; /* initial reference count*/
     id_ptr->app_count   = !!app_ref;
-    if(H5I_DATATYPE == type) {
-        void *dt = NULL;
-
-        if(NULL == (dt = (void *)H5T_construct_datatype(new_vol_obj)))
-            HGOTO_ERROR(H5E_ATOM, H5E_CANTINIT, FAIL, "can't construct datatype object");
-
-        id_ptr->obj_ptr     = dt;
-    }
-    else
-        id_ptr->obj_ptr     = new_vol_obj;
+    id_ptr->obj_ptr     = object;
 
     /* Insert into the type */
     if(H5SL_insert(type_ptr->ids, id_ptr, &id_ptr->id) < 0)
@@ -844,7 +828,7 @@ H5I_register_with_id(H5I_type_t type, void *object, H5VL_t *vol_driver, hbool_t 
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5I_register_with_id() */
+} /* end H5I_register_using_existing_id() */
 
 
 /*-------------------------------------------------------------------------
@@ -2222,7 +2206,7 @@ H5I__get_file_id(hid_t obj_id, H5I_type_t type)
     FUNC_ENTER_STATIC
 
     /* Get the object pointer */
-    if (NULL == (vol_obj = H5VL_get_object(obj_id)))
+    if (NULL == (vol_obj = H5VL_vol_object(obj_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid identifier")
 
     /* Get the file through the VOL */
@@ -2237,7 +2221,7 @@ H5I__get_file_id(hid_t obj_id, H5I_type_t type)
 
     /* If the ID does not exist, register it with the VOL driver */
     if (H5I_INVALID_HID == ret_value) {
-        if ((ret_value = H5VL_register_id(H5I_FILE, file, vol_obj->driver, TRUE)) < 0)
+        if ((ret_value = H5VL_register(H5I_FILE, file, vol_obj->driver, TRUE)) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize file handle")
     }
     else {

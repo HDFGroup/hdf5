@@ -53,17 +53,34 @@ typedef struct H5VL_driver_prop_t {
 /* Library Private Prototypes */
 /******************************/
 
-/* Common functions */
+/* Utility functions */
 H5_DLL herr_t H5VL_init(void);
-H5_DLL hid_t H5VL_register_id(H5I_type_t type, void *object, H5VL_t *vol_driver, hbool_t app_ref);
-H5_DLL herr_t H5VL_free_object(H5VL_object_t *obj);
-H5_DLL hid_t H5VL_register(const void *cls, size_t size, hbool_t app_ref);
-H5_DLL hid_t H5VL_object_register(void *obj, H5I_type_t obj_type, hid_t driver_id, hbool_t app_ref);
+
+/* Functions that deal with VOL drivers */
+H5_DLL hid_t H5VL_register_driver(const void *cls, size_t size, hbool_t app_ref);
 H5_DLL ssize_t H5VL_get_driver_name(hid_t id, char *name/*out*/, size_t size);
-H5_DLL H5VL_object_t *H5VL_get_object(hid_t id);
+
+/* NOTE:    The object and ID functions below deal in VOL objects (i.e.;
+ *          H5VL_object_t). Similar non-VOL calls exist in H5Iprivate.h. Use
+ *          the H5VL calls with objects that go through the VOL, such as
+ *          datasets and groups, and the H5I calls with objects
+ *          that do not, such as property lists and dataspaces. Datatypes
+ *          are can be either named, where they will use the VOL, or not,
+ *          and thus require special treatment. See the datatype docs for
+ *          how to handle this.
+ */
+
+/* Functions that manipulate VOL objects */
 H5_DLL void *H5VL_object(hid_t id);
 H5_DLL void *H5VL_object_verify(hid_t id, H5I_type_t obj_type);
-H5_DLL void *H5VL_driver_object(H5VL_object_t *obj);
+H5_DLL void *H5VL_driver_data(H5VL_object_t *obj);
+H5_DLL H5VL_object_t *H5VL_vol_object(hid_t id);
+H5_DLL herr_t H5VL_free_object(H5VL_object_t *obj);
+
+/* ID registration functions */
+H5_DLL hid_t H5VL_register(H5I_type_t type, const void *object, H5VL_t *vol_driver, hbool_t app_ref);
+H5_DLL hid_t H5VL_register_using_vol_id(H5I_type_t type, const void *obj, hid_t driver_id, hbool_t app_ref);
+H5_DLL herr_t H5VL_register_using_existing_id(H5I_type_t type, void *object, H5VL_t *vol_driver, hbool_t app_ref, hid_t existing_id);
 
 /* Attribute functions */
 H5_DLL void *H5VL_attr_create(void *obj, H5VL_loc_params_t loc_params, const H5VL_class_t *cls, const char *attr_name, hid_t acpl_id, hid_t aapl_id, hid_t dxpl_id, void **req);
