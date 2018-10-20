@@ -835,6 +835,7 @@ set (H5_PRIVATE_HEADERS
     ${HDF5_SRC_DIR}/H5STprivate.h
     ${HDF5_SRC_DIR}/H5Tprivate.h
     ${HDF5_SRC_DIR}/H5TSprivate.h
+    ${HDF5_SRC_DIR}/H5VLnative_private.h
     ${HDF5_SRC_DIR}/H5VLprivate.h
     ${HDF5_SRC_DIR}/H5VMprivate.h
     ${HDF5_SRC_DIR}/H5WBprivate.h

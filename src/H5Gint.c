@@ -39,7 +39,7 @@
 #include "H5Iprivate.h"         /* IDs                                      */
 #include "H5Lprivate.h"         /* Links                                    */
 #include "H5MMprivate.h"        /* Memory management                        */
-#include "H5VLnative.h"         /* Virtual Object Layer (native)            */
+#include "H5VLnative_private.h" /* Native VOL driver                        */
 
 
 /****************/
