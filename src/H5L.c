@@ -34,7 +34,7 @@
 #include "H5Oprivate.h"         /* File objects                             */
 #include "H5Pprivate.h"         /* Property lists                           */
 #include "H5VLprivate.h"        /* Virtual Object Layer                     */
-#include "H5VLnative.h"         /* Virtual Object Layer (native)            */
+#include "H5VLnative_private.h" /* Native VOL driver                        */
 
 
 /****************/
