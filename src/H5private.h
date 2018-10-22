@@ -374,6 +374,10 @@
 /* Raise an integer to a power of 2 */
 #  define H5_EXP2(n)    (1 << (n))
 
+/* VFD SWMR */
+#define SECOND_TO_NANOSECS          1000000000      /* Second to nanoseconds */
+#define TENTH_SEC_TO_NANOSECS       100000000       /* Tenth of a second to nanoseconds */
+
 /*
  * HDF Boolean type.
  */
@@ -2070,16 +2074,18 @@ H5_DLL herr_t H5CX_pop(void);
     /* Initialize the library */                                                                        \
     if(vfd_swmr_g) {                                                                                    \
         struct timespec curr_time;                                                                      \
+        long curr_nsecs, end_nsecs;                                                                     \
         if(HDclock_gettime(CLOCK_MONOTONIC, &curr_time) < 0)                                            \
             HGOTO_ERROR(H5E_FUNC, H5E_CANTGET, err, "can't get time via clock_gettime")                 \
-        if( (curr_time.tv_sec >= end_of_tick_g.tv_sec) &&                                               \
-            (curr_time.tv_nsec >= end_of_tick_g.tv_nsec) ) {                                            \
+        curr_nsecs = curr_time.tv_sec * 1000000000 + curr_time.tv_nsec;                                 \
+        end_nsecs = end_of_tick_g.tv_sec * 1000000000 + end_of_tick_g.tv_nsec;                          \
+        if(curr_nsecs > end_nsecs) {                                                                    \
             if(vfd_swmr_writer_g) {                                                                     \
-                if(H5F_vfd_swmr_writer_end_of_tick() < 0)                                                       \
+                if(H5F_vfd_swmr_writer_end_of_tick() < 0)                                               \
                     HGOTO_ERROR(H5E_FUNC, H5E_CANTSET, err, "end of tick error for VFD SWMR writer")    \
             }                                                                                           \
             else if(!swmr_reader_exit) {                                                                \
-                if(H5F_vfd_swmr_reader_end_of_tick() < 0)                                              \
+                if(H5F_vfd_swmr_reader_end_of_tick() < 0)                                               \
                     HGOTO_ERROR(H5E_FUNC, H5E_CANTSET, err, "end of tick error for VFD SWMR reader")    \
             }                                                                                           \
         }                                                                                               \

@@ -38,12 +38,14 @@
 /* Headers */
 /***********/
 #include "H5private.h"          /* Generic Functions                        */
+#include "H5FDprivate.h"        /* File Drivers                             */
 #include "H5CXprivate.h"        /* API Contexts                             */
 #include "H5Eprivate.h"         /* Error handling                           */
 #include "H5Fpkg.h"             /* File access                              */
 #include "H5Gpkg.h"             /* Groups                                   */
 #include "H5Iprivate.h"         /* IDs                                      */
 #include "H5SMpkg.h"            /* Shared object header messages            */
+#include "H5MMprivate.h"        /* Memory management                        */
 
 
 /****************/
@@ -64,6 +66,11 @@
 /********************/
 /* Local Prototypes */
 /********************/
+static herr_t H5F__vfd_swmr_decode_md_hdr(int md_fd, H5FD_vfd_swmr_md_header *md_hdr);
+static herr_t H5F__vfd_swmr_decode_md_idx(int md_fd, H5FD_vfd_swmr_md_header *md_hdr, H5FD_vfd_swmr_md_index *md_idx);
+static herr_t H5F__vfd_swmr_verify_md_hdr_and_idx(H5F_t *f,
+    H5FD_vfd_swmr_md_header *md_hdr, H5FD_vfd_swmr_md_index *md_idx,
+    unsigned num_entries, H5FD_vfd_swmr_idx_entry_t *index);
 
 
 /*********************/
@@ -74,6 +81,8 @@
 /*****************************/
 /* Library Private Variables */
 /*****************************/
+/* Declare external the free list for H5FD_vfd_swmr_idx_entry_t */
+H5FL_SEQ_EXTERN(H5FD_vfd_swmr_idx_entry_t);
 
 
 /*******************/
@@ -232,3 +241,355 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__get_sbe_addr_test() */
 
+
+/* 
+ * VFD SWMR tests 
+ */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F__vfd_swmr_writer_md_test
+ *
+ * Purpose:     Verify info in the header and index when:
+ *              (1) creating an HDF5 file
+ *              (2) opening an existing HDF5 file
+ *              (3) flushing an HDF5 file
+ *
+ *              Open the metadata file
+ *              Verify the file size is as expected (md_pages_reserved)
+ *              For file create:
+ *                  --No header magic is found
+ *              For file open or file flush:
+ *                  --Read and decode the header and index in the metadata file
+ *                  --Verify info in the header and index read from
+ *                    the metadata file is as expected (empty index)
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F__vfd_swmr_writer_md_test(hid_t file_id, hbool_t file_create)
+{
+    H5F_t *f;                           /* File pointer */
+    h5_stat_t stat_buf;                 /* Buffer for stat info */
+    H5FD_vfd_swmr_md_header md_hdr;     /* Header for the metadata file */
+    H5FD_vfd_swmr_md_index md_idx;      /* Indedx for the metadata file */
+    int md_fd = -1;                     /* The metadata file descriptor */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* Check arguments */
+    if(NULL == (f = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
+
+    /* Open the metadata file */
+    if((md_fd = HDopen(f->shared->vfd_swmr_config.md_file_path, O_RDONLY)) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "error opening metadata file")
+
+    /* Verify the minimum size for the metadata file */
+    if(HDstat(f->shared->vfd_swmr_config.md_file_path, &stat_buf) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_BADFILE, FAIL, "unable to stat the metadata file")
+    if(stat_buf.st_size < (HDoff_t)((hsize_t)f->shared->vfd_swmr_config.md_pages_reserved * f->shared->fs_page_size))
+        HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "incorrect metadata file size")
+
+    if(file_create) { /* Creating file */
+        uint32_t hdr_magic;
+
+        /* Seek to the beginning of the file */
+        if(HDlseek(md_fd, (HDoff_t)0, SEEK_SET) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_SEEKERROR, FAIL, "error seeking metadata file")
+
+        /* Try to read the magic for header */
+        if(HDread(md_fd, &hdr_magic, H5_SIZEOF_MAGIC) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_READERROR, FAIL, "error reading metadata file")
+
+        /* Verify that there is no header magic in the metadata file */
+        if(HDmemcmp(&hdr_magic, H5FD_MD_HEADER_MAGIC, (size_t)H5_SIZEOF_MAGIC) == 0)
+            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "error finding header magic in the metadata file")
+
+    } else { /* Opening or flushing the file */
+        
+        HDmemset(&md_hdr, 0, sizeof(H5FD_vfd_swmr_md_header));
+        HDmemset(&md_idx, 0, sizeof(H5FD_vfd_swmr_md_index));
+
+        /* Decode the header */
+        if(H5F__vfd_swmr_decode_md_hdr(md_fd, &md_hdr) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTDECODE, FAIL, "error decoding header in the metadata file")
+
+        /* Decode the index */
+        if(H5F__vfd_swmr_decode_md_idx(md_fd, &md_hdr, &md_idx) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTDECODE, FAIL, "error decoding index in the metadata file")
+
+        /* Verify info in header and index read from the metadata file */
+        if(H5F__vfd_swmr_verify_md_hdr_and_idx(f, &md_hdr, &md_idx, 0, NULL) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "incorrect info found in header and index of the metadata file")
+    }
+
+done:
+    /* Free the index entries */
+    if(!file_create && md_idx.entries) {
+        HDassert(md_idx.num_entries);
+        H5MM_free(md_idx.entries);
+    }
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F__vfd_swmr_writer_md_test() */
+
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F__vfd_swmr_decode_md_hdr
+ *
+ * Purpose:     Decode header and verify header magic
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5F__vfd_swmr_decode_md_hdr(int md_fd, H5FD_vfd_swmr_md_header *md_hdr)
+{
+    uint8_t image[H5FD_MD_HEADER_SIZE];     /* Buffer for the header image */
+    uint8_t *p = NULL;                      /* Points to the image */
+    herr_t  ret_value = SUCCEED;            /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    p = image;
+
+    /* Seek to the beginning of the file */
+    if(HDlseek(md_fd, (HDoff_t)0, SEEK_SET) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_SEEKERROR, FAIL, "error seeking metadata file")
+
+    /* Read the header */
+    if(HDread(md_fd, image, H5FD_MD_HEADER_SIZE) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_READERROR, FAIL, "error reading metadata file")
+
+    /* Verify magic for header */
+    if(HDmemcmp(p, H5FD_MD_HEADER_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
+        HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "does not find header magic in the metadata file")
+
+    p += H5_SIZEOF_MAGIC;
+
+    /* Deserialize fs_page_size, tick_num, index_offset, index_length */
+    UINT32DECODE(p, md_hdr->fs_page_size);
+    UINT64DECODE(p, md_hdr->tick_num);
+    UINT64DECODE(p, md_hdr->index_offset);
+    UINT64DECODE(p, md_hdr->index_length);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5F__vfd_swmr_decode_md_hdr() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F__vfd_swmr_decode_md_idx
+ *
+ * Purpose:     Decode index and verify index magic
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5F__vfd_swmr_decode_md_idx(int md_fd, H5FD_vfd_swmr_md_header *md_hdr, H5FD_vfd_swmr_md_index *md_idx)
+{
+    uint8_t *image = NULL;          /* Points to the buffer for the index image */
+    uint8_t *p = NULL;              /* Points to the image */
+    unsigned i;                     /* Local index variable */
+    herr_t  ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* Allocate buffer for the index image */
+    if(NULL == (image = (uint8_t *)H5MM_malloc(md_hdr->index_length)))
+        HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL, "memory allocation failed for index on disk buffer")
+
+    p = image;
+
+    /* Seek to the position of the index */
+    if(HDlseek(md_fd, (HDoff_t)md_hdr->index_offset, SEEK_SET) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_SEEKERROR, FAIL, "unable to seek in metadata file")
+
+    /* Read the index */
+    if(HDread(md_fd, image, md_hdr->index_length) < (int64_t)md_hdr->index_length)
+        HGOTO_ERROR(H5E_FILE, H5E_READERROR, FAIL, "error in reading the header in metadata file")
+
+    /* Verify magic for index */
+    if(HDmemcmp(p, H5FD_MD_INDEX_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
+        HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "no header magic in the metadata file")
+
+    p += H5_SIZEOF_MAGIC;
+
+    /* Deserialize tick_num and num_entries */
+    UINT64DECODE(p, md_idx->tick_num);
+    UINT32DECODE(p, md_idx->num_entries);
+
+    /* Deserialize index entries */
+    if(md_idx->num_entries) {
+
+        /* Allocate memory for the index entries */
+        if(NULL == (md_idx->entries = (H5FD_vfd_swmr_idx_entry_t *)H5MM_calloc(md_idx->num_entries * sizeof(H5FD_vfd_swmr_idx_entry_t))))
+            HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL, "memory allocation failed for index entries")
+
+         /* Decode index entries */
+         for(i = 0; i < md_idx->num_entries; i++) {
+            UINT32DECODE(p, md_idx->entries[i].hdf5_page_offset);
+            UINT32DECODE(p, md_idx->entries[i].md_file_page_offset);
+            UINT32DECODE(p, md_idx->entries[i].length);
+            UINT32DECODE(p, md_idx->entries[i].chksum);
+         } /* end for */
+
+     } /* end if */
+
+done:
+    /* Free the buffer */
+    if(image)
+        H5MM_free(image);
+    if(ret_value < 0) {
+        /* Free the index entries */
+        if(md_idx->entries) {
+            HDassert(md_idx->num_entries);
+            H5MM_free(md_idx->entries);
+        }
+    }
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5F__vfd_swmr_decode_md_idx() */
+
+
+
+/*-------------------------------------------------------------------------
+ * Function: H5F__vfd_swmr_verify_md_hdr_idx_test
+ *
+ * Purpose: Verify the header and index in the metadata file:
+ *          --fs_page_size in md header is the same as that stored in "f"
+ *          --index_length in md header is as indicated by num_entries
+ *          --index_offset in md header is right after the header 
+ *          --number of entries in md index is num_entries
+ *          --entries in md index is as indicated by num_entries and index
+ *
+ * Return:  SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5F__vfd_swmr_verify_md_hdr_and_idx(H5F_t *f, 
+    H5FD_vfd_swmr_md_header *md_hdr, H5FD_vfd_swmr_md_index *md_idx,
+    unsigned num_entries, H5FD_vfd_swmr_idx_entry_t *index)
+{
+    unsigned i;                     /* Local index variable */
+    herr_t ret_value = SUCCEED;     /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* Verify fs_page_size read from header in the metadata file is fs_page_size in f */
+    if(md_hdr->fs_page_size != f->shared->fs_page_size)
+        HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "incorrect fs_page_size read from metadata file")
+
+    /* Verify index_length read from header in the metadata file is the size of num_entries index */
+    if(md_hdr->index_length != H5FD_MD_INDEX_SIZE(num_entries))
+        HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "incorrect index_length read from metadata file")
+
+    /* Verify index_offset read from header in the metadata file is the size of md header */
+    if(md_hdr->index_offset != H5FD_MD_HEADER_SIZE)
+        HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "incorrect index_offset read from metadata file")
+
+    /* Verify num_entries read from index in the metadata file is num_entries */
+    if(md_idx->num_entries != num_entries)
+        HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "incorrect num_entries read from metadata file")
+
+    /* Verify empty/non-empty index entries */
+    if(num_entries == 0) {
+        /* Verify the index is empty */
+        if(md_idx->entries != NULL)
+            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "incorrect entries in index")
+    } else {
+        /* Verify entries */
+        for(i = 0; i < num_entries; i++) {
+            if(md_idx->entries[i].length != index[i].length)
+                HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "incorrect length read from metadata file")
+
+            if(md_idx->entries[i].hdf5_page_offset != index[i].hdf5_page_offset)
+                HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "incorrect md_file_page_offset read from metadata file")
+
+            if(md_idx->entries[i].md_file_page_offset != index[i].md_file_page_offset)
+                HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "incorrect md_file_page_offset read from metadata file")
+
+            if(md_idx->entries[i].chksum != index[i].chksum)
+                HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "incorrect chksum read from metadata file")
+        }
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5F__vfd_swmr_verify_md_hdr_and_idx() */
+
+
+
+/*-------------------------------------------------------------------------
+ * Function: H5F__vfd_swmr_update_md_test
+ *
+ * Purpose: Update the metadata file with the input index
+ *          Verify the info read from the metadata file is as indicated by
+ *          the input: num_entries and index
+ *
+ * Return:  SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F__vfd_swmr_writer_update_md_test(hid_t file_id, unsigned num_entries, H5FD_vfd_swmr_idx_entry_t *index,
+    unsigned num_insert_dl, unsigned num_remove_dl)
+{
+    H5F_t *f;                       /* File pointer */
+    int md_fd = -1;                 /* The metadata file descriptor */
+    H5FD_vfd_swmr_md_header md_hdr; /* Header for the metadata file */
+    H5FD_vfd_swmr_md_index md_idx;  /* Indedx for the metadata file */
+    unsigned save_dl_len = 0;       /* # of entries in the delayed list */
+    herr_t ret_value = SUCCEED;     /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    HDmemset(&md_hdr, 0, sizeof(H5FD_vfd_swmr_md_header));
+    HDmemset(&md_idx, 0, sizeof(H5FD_vfd_swmr_md_index));
+
+    /* Check arguments */
+    if(NULL == (f = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
+
+    /* Save the number of entries in the delayed list */
+    save_dl_len = f->shared->dl_len;
+
+    /* Update the metadata file with the input index */
+    if(H5F_update_vfd_swmr_metadata_file(f, num_entries, index) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL, "error updating the md file with the index")
+
+    /* Verify the number of entries in the delayed list is as expected */
+    if(f->shared->dl_len != (save_dl_len + num_insert_dl - num_remove_dl))
+        HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "incorrect # of entries in the delayed list")
+
+    /* Open the metadata file */
+    if((md_fd = HDopen(f->shared->vfd_swmr_config.md_file_path, O_RDONLY)) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "error opening metadata file")
+
+    /* Decode the header in the metadata file */
+    if(H5F__vfd_swmr_decode_md_hdr(md_fd, &md_hdr) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTDECODE, FAIL, "error decoding header in the metadata file")
+
+    /* Decode the index in the metadata file */
+    if(H5F__vfd_swmr_decode_md_idx(md_fd, &md_hdr, &md_idx) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "error decoding index in the metadata file")
+
+    /* Verify info read from the metadata file is the same as the input index */
+    if(H5F__vfd_swmr_verify_md_hdr_and_idx(f, &md_hdr, &md_idx, num_entries, index) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "incorrect info found in header and index of the metadata file")
+
+done:
+    /* Free index entries */
+    if(md_idx.entries) {
+        HDassert(md_idx.num_entries);
+        H5MM_free(md_idx.entries);
+    }
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5F__vfd_swmr_writer_update_md_test() */

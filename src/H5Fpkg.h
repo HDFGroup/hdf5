@@ -386,8 +386,8 @@ struct H5F_file_t {
     uint64_t tick_num;                      /* Number of the current tick */
     struct timespec end_of_tick;            /* End time of the current tick */
 
-    /* Metadata file */
-    int vfd_swmr_md_fd;                     /* POSIX: file descriptor of the metadata file */
+    /* Metadata file for VFD SWMR writer */
+    int vfd_swmr_md_fd;                     /* POSIX: file descriptor for the metadata file */
     haddr_t vfd_swmr_md_eoa;                /* POSIX: eoa for the metadata file */
 
     /* Free space manager for the metadata file */
@@ -530,6 +530,12 @@ H5_DLL herr_t H5F__get_sohm_mesg_count_test(hid_t fid, unsigned type_id, size_t 
 H5_DLL herr_t H5F__check_cached_stab_test(hid_t file_id);
 H5_DLL herr_t H5F__get_maxaddr_test(hid_t file_id, haddr_t *maxaddr);
 H5_DLL herr_t H5F__get_sbe_addr_test(hid_t file_id, haddr_t *sbe_addr);
+
+/* VFD SWMR testing routines */
+
+H5_DLL herr_t H5F__vfd_swmr_writer_md_test(hid_t file_id, hbool_t create);
+H5_DLL herr_t H5F__vfd_swmr_writer_update_md_test(hid_t file_id, unsigned in_num_entries, 
+    struct H5FD_vfd_swmr_idx_entry_t *in_index, unsigned num_insert_dl, unsigned num_remove_dl);
 #endif /* H5F_TESTING */
 
 #endif /* _H5Fpkg_H */

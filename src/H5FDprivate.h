@@ -85,21 +85,6 @@
 #define H5FD_VFD_SWMR_MD_INDEX_RETRY_MAX    5   /* Maximum retries when deserializing the MD file index */
 
 
-/*
- *  fs_page_size:   Size of pages in both the HDF5 file and the metadata file IN BYTES
- *  tick_num:       Sequence number of the current tick.
- *                  Initialized to zero on file creation/open, and incremented by the 
- *                  VFD SWMR writer at the end of each tick.
- *  index_offset:   The offset of the current metadata file index in the metadata file
- *                  IN BYTES.
- *  index_length:   The length of the current metadata file index IN BYTES.
- */
-typedef struct H5FD_vfd_swmr_md_header {
-        uint32_t fs_page_size;
-        uint64_t tick_num;
-        uint64_t index_offset;
-        uint64_t index_length;
-} H5FD_vfd_swmr_md_header;
 
 /*  Internal representation of metadata file index entry */
 /*  
@@ -179,6 +164,21 @@ typedef struct H5FD_vfd_swmr_md_index {
 } H5FD_vfd_swmr_md_index;
 
 
+/*
+ *  fs_page_size:   Size of pages in both the HDF5 file and the metadata file IN BYTES
+ *  tick_num:       Sequence number of the current tick.
+ *                  Initialized to zero on file creation/open, and incremented by the 
+ *                  VFD SWMR writer at the end of each tick.
+ *  index_offset:   The offset of the current metadata file index in the metadata file
+ *                  IN BYTES.
+ *  index_length:   The length of the current metadata file index IN BYTES.
+ */
+typedef struct H5FD_vfd_swmr_md_header {
+        uint32_t fs_page_size;
+        uint64_t tick_num;
+        uint64_t index_offset;
+        uint64_t index_length;
+} H5FD_vfd_swmr_md_header;
 
 #ifdef H5_HAVE_PARALLEL
 /* ======== Temporary data transfer properties ======== */
@@ -296,10 +296,13 @@ H5_DLL herr_t H5FD_get_vfd_handle(H5FD_t *file, hid_t fapl, void** file_handle);
 H5_DLL herr_t H5FD_set_base_addr(H5FD_t *file, haddr_t base_addr);
 H5_DLL haddr_t H5FD_get_base_addr(const H5FD_t *file);
 H5_DLL herr_t H5FD_set_paged_aggr(H5FD_t *file, hbool_t paged);
+H5_DLL herr_t H5FD_get_driver_name(const H5FD_t *file, char **driver_name);
 
 /* Function prototypes for VFD SWMR */
 H5_DLL herr_t H5FD_vfd_swmr_get_tick_and_idx(H5FD_t *_file, hbool_t read_index,
     uint64_t *tick_ptr, uint32_t *num_entries_ptr, H5FD_vfd_swmr_idx_entry_t index[]);
+H5_DLL hbool_t H5FD_is_vfd_swmr_driver(H5FD_t *_file);
+H5_DLL H5FD_t *H5FD_vfd_swmr_get_underlying_vfd(H5FD_t *_file);
 
 /* Function prototypes for MPI based VFDs*/
 #ifdef H5_HAVE_PARALLEL
