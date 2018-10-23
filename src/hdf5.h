@@ -52,4 +52,7 @@
 #include "H5FDwindows.h"        /* Win32 I/O                                    */
 #endif
 
+/* Virtual object layer drivers */
+#include "H5VLnative.h"         /* Native VOL driver                        */
+
 #endif

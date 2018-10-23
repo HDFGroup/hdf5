@@ -43,7 +43,7 @@
 #include "H5Opkg.h"             /* Object headers                           */
 #include "H5SMprivate.h"        /* Shared Object Header Messages            */
 #include "H5VLprivate.h"        /* Virtual Object Layer                     */
-#include "H5VLnative.h"         /* Native VOL driver                        */
+#include "H5VLnative_private.h" /* Native VOL driver                        */
 
 
 /****************/

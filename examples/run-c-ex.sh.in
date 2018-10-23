@@ -139,7 +139,9 @@ then
         RunTest h5_vds-percival-unlim-maxmin&&\
         rm h5_vds-percival-unlim-maxmin &&\
         RunTest h5_vds &&\
-        rm h5_vds); then
+        rm h5_vds &&\
+        RunTest h5_vol_external_log_native &&\
+        rm h5_vol_external_log_native); then
         EXIT_VALUE=${EXIT_SUCCESS}
     else
         EXIT_VALUE=${EXIT_FAILURE}

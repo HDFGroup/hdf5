@@ -58,7 +58,7 @@
 #include "H5Oprivate.h"         /* Object headers                       */
 #include "H5Pprivate.h"         /* Property Lists                       */
 #include "H5Sprivate.h"         /* Dataspaces                           */
-#include "H5VLnative.h"         /* Native VOL driver                    */
+#include "H5VLnative_private.h" /* Native VOL driver                        */
 #include "H5VLprivate.h"        /* Virtual Object Layer                 */
 
 /****************/

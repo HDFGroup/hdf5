@@ -49,7 +49,7 @@
 #endif
 
 /* Includes needed to set the default VOL driver */
-#include "H5VLnative.h"         /* Native HDF5 file VOL driver          */
+#include "H5VLnative_private.h" /* Native VOL driver                        */
 
 
 /****************/
