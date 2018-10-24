@@ -1670,7 +1670,7 @@ static int processConfigurationFile(char *infile, struct Input *in)
                             }
                             else { /* Dimension */
                                 icount++;
-                                if (icount >+ MAX_NUM_DIMENSION) {
+                                if (icount > MAX_NUM_DIMENSION) {
                                     (void) HDfprintf(stderr, "Invalid value for rank.\n");
                                     goto error;
                                 }
