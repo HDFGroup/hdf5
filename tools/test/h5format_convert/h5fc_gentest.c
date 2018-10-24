@@ -440,6 +440,8 @@ gen_err_level(const char *fname)
         goto error;
 
     /* Closing */
+    if(H5Pclose(fcpl) < 0)
+        goto error;
     if(H5Pclose(dcpl) < 0)
         goto error;
     if(H5Sclose(sid) < 0)
