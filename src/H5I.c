@@ -33,8 +33,9 @@
 #include "H5ACprivate.h"        /* Metadata cache                           */
 #include "H5CXprivate.h"        /* API Contexts                             */
 #include "H5Dprivate.h"         /* Datasets                                 */
-#include "H5Eprivate.h"		    /* Error handling                           */
-#include "H5FLprivate.h"	    /* Free Lists                               */
+#include "H5Eprivate.h"		/* Error handling                           */
+#include "H5Fprivate.h"		/* File access				    */
+#include "H5FLprivate.h"	/* Free Lists                               */
 #include "H5Gprivate.h"         /* Groups                                   */
 #include "H5Ipkg.h"             /* IDs                                      */
 #include "H5MMprivate.h"        /* Memory management                        */
@@ -130,6 +131,7 @@ H5FL_DEFINE_STATIC(H5I_class_t);
 H5FL_EXTERN(H5VL_object_t);
 
 /*--------------------- Local function prototypes ---------------------------*/
+static void *H5I__unwrap(void *obj_ptr, H5I_type_t type);
 static htri_t H5I__clear_type_cb(void *_id, void *key, void *udata);
 static int H5I__destroy_type(H5I_type_t type);
 static void *H5I__remove_verify(hid_t id, H5I_type_t id_type);
@@ -139,7 +141,6 @@ static int H5I__get_type_ref(H5I_type_t type);
 static int H5I__search_cb(void *obj, hid_t id, void *_udata);
 static H5I_id_info_t *H5I__find_id(hid_t id);
 static int H5I__iterate_pub_cb(void *obj, hid_t id, void *udata);
-static hid_t H5I__get_file_id(hid_t obj_id, H5I_type_t id_type);
 static int H5I__find_id_cb(void *_item, void *_key, void *_udata);
 static int H5I__id_dump_cb(void *_item, void *_key, void *_udata);
 
@@ -452,6 +453,51 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5I__unwrap
+ *
+ * Purpose:     Unwraps the object pointer for the 'item' that corresponds
+ *              to an ID.
+ *
+ * Return:      Pointer to the unwrapped pointer (can't fail)
+ *
+ * Programmer:  Quincey Koziol
+ *              Friday, October 19, 2018
+ *
+ *-------------------------------------------------------------------------
+ */
+static void *
+H5I__unwrap(void *obj_ptr, H5I_type_t type)
+{
+    void *ret_value = NULL;     /* Return value */
+
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Sanity checks */
+    HDassert(obj_ptr);
+
+    /* The stored object pointer might be an H5VL_object_t, in which
+     * case we'll need to get the wrapped object struct (H5F_t *, etc.).
+     */
+    if(H5I_FILE == type || H5I_GROUP == type || H5I_DATASET == type || H5I_ATTR == type) {
+        const H5VL_object_t *vol_obj;
+
+        vol_obj = (const H5VL_object_t *)obj_ptr;
+        ret_value = H5VL_object_data(vol_obj);
+    } /* end if */
+    else if(H5I_DATATYPE == type) {
+        const H5T_t *dt;
+
+        dt = (const H5T_t *)obj_ptr;
+        ret_value = (void *)H5T_get_actual_type(dt);
+    } /* end if */
+    else
+        ret_value = obj_ptr;
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5I__unwrap() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5Iclear_type
  *
  * Purpose:     Removes all objects from the type, calling the free
@@ -547,6 +593,7 @@ H5I__clear_type_cb(void *_id, void H5_ATTR_UNUSED *key, void *_udata)
 
     FUNC_ENTER_STATIC_NOERR
 
+    /* Sanity checks */
     HDassert(id);
     HDassert(udata);
     HDassert(udata->type_ptr);
@@ -556,8 +603,7 @@ H5I__clear_type_cb(void *_id, void H5_ATTR_UNUSED *key, void *_udata)
      */
     if(udata->force || (id->count - (!udata->app_ref * id->app_count)) <= 1) {
         /* Check for a 'free' function and call it, if it exists */
-        /* (Casting away const OK -QAK) */
-        if(udata->type_ptr->cls->free_func && (udata->type_ptr->cls->free_func)((void *)id->obj_ptr) < 0) {
+        if(udata->type_ptr->cls->free_func && (udata->type_ptr->cls->free_func)((void *)id->obj_ptr) < 0) { /* (Casting away const OK -QAK) */
             if(udata->force) {
 #ifdef H5I_DEBUG
                 if(H5DEBUG(I)) {
@@ -778,7 +824,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5I_register_with_id(H5I_type_t type, void *object, H5VL_t *vol_driver, hbool_t app_ref, hid_t id)
+H5I_register_with_id(H5I_type_t type, void *object, H5VL_t *vol_plugin, hbool_t app_ref, hid_t id)
 {
     H5VL_object_t  *new_vol_obj = NULL;     /* pointer to new VOL object        */
     H5I_id_type_t  *type_ptr;               /* ptr to the type                  */
@@ -789,7 +835,7 @@ H5I_register_with_id(H5I_type_t type, void *object, H5VL_t *vol_driver, hbool_t 
 
     /* Check arguments */
     HDassert(object);
-    HDassert(vol_driver);
+    HDassert(vol_plugin);
 
     /* Make sure ID is not already in use */
     if(NULL != (id_ptr = H5I__find_id(id)))
@@ -816,11 +862,11 @@ H5I_register_with_id(H5I_type_t type, void *object, H5VL_t *vol_driver, hbool_t 
     /* Set up the new VOL object */
     if(NULL == (new_vol_obj = H5FL_CALLOC(H5VL_object_t)))
         HGOTO_ERROR(H5E_ATOM, H5E_CANTALLOC, FAIL, "can't allocate memory for VOL object");
-    new_vol_obj->driver = vol_driver;
+    new_vol_obj->plugin = vol_plugin;
     new_vol_obj->data = object;
 
-    /* Bump the reference count on the VOL driver */
-    vol_driver->nrefs++;
+    /* Bump the reference count on the VOL plugin */
+    vol_plugin->nrefs++;
 
     /* Create the struct & insert requested ID */
     id_ptr->id          = id;
@@ -1996,16 +2042,7 @@ H5I__iterate_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
         /* The stored object pointer might be an H5VL_object_t, in which
          * case we'll need to get the wrapped object struct (H5F_t *, etc.).
          */
-        if(H5I_FILE == type || H5I_GROUP == type || H5I_DATASET == type || H5I_ATTR == type) {
-            const H5VL_object_t *vol_obj = (const H5VL_object_t *)item->obj_ptr;
-            obj_ptr = vol_obj->data;
-        }
-        else if(H5I_DATATYPE == type) {
-            const H5T_t *dt = (const H5T_t *)item->obj_ptr;
-            obj_ptr = (void *)H5T_get_actual_type(dt);
-        }
-        else
-            obj_ptr = item->obj_ptr;
+        obj_ptr = H5I__unwrap(item->obj_ptr, type);
 
         /* Invoke callback function */
         cb_ret_val = (*udata->user_func)((void *)obj_ptr, item->id, udata->user_udata);     /* (Casting away const OK) */
@@ -2127,7 +2164,7 @@ done:
  *
  *              Failure:    -1
  *
- * NOTE:        Not safe for arbitrary VOL drivers as it relies on
+ * NOTE:        Not safe for arbitrary VOL plugins as it relies on
  *              private H5G calls.
  *
  * Comments: Public function
@@ -2145,7 +2182,9 @@ done:
 ssize_t
 H5Iget_name(hid_t id, char *name/*out*/, size_t size)
 {
+    H5VL_object_t  *vol_obj;
     H5G_loc_t     loc;          /* Object location */
+    hbool_t         vol_wrapper_set = FALSE;            /* Whether the VOL object wrapping context was set up */
     ssize_t       ret_value;    /* Return value */
 
     FUNC_ENTER_API((-1))
@@ -2155,11 +2194,24 @@ H5Iget_name(hid_t id, char *name/*out*/, size_t size)
     if(H5G_loc(id, &loc) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, (-1), "can't retrieve object location")
 
+    /* Get the object pointer */
+    if(NULL == (vol_obj = H5VL_get_object(id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADTYPE, (-1), "invalid identifier")
+
+    /* Set wrapper info in API context */
+    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTSET, (-1), "can't set VOL wrapper info")
+    vol_wrapper_set = TRUE;
+
     /* Retrieve object's name */
     if((ret_value = H5G_get_name(&loc, name, size, NULL)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, (-1), "can't retrieve object name")
 
 done:
+    /* Reset object wrapping info in API context */
+    if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
+        HDONE_ERROR(H5E_ATOM, H5E_CANTSET, (-1), "can't reset VOL wrapper info")
+
     FUNC_LEAVE_API(ret_value)
 } /* end H5Iget_name() */
 
@@ -2190,65 +2242,15 @@ H5Iget_file_id(hid_t obj_id)
 
     /* Call internal function */
     if (H5I_FILE == type || H5I_DATATYPE == type || H5I_GROUP == type || H5I_DATASET == type || H5I_ATTR == type) {
-        if ((ret_value = H5I__get_file_id(obj_id, type)) < 0)
+        if ((ret_value = H5F_get_file_id(obj_id, type)) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, H5I_INVALID_HID, "can't retrieve file ID")
-    }
+    } /* end if */
     else
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, H5I_INVALID_HID, "not an ID of a file object")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Iget_file_id() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5I__get_file_id
- *
- * Purpose:     The private version of H5Iget_file_id(), obtains the file
- *              ID given an object ID.
- *
- * Return:      Success:    The file ID associated with the object
- *              Failure:	H5I_INVALID_HID
- *
- *-------------------------------------------------------------------------
- */
-static hid_t
-H5I__get_file_id(hid_t obj_id, H5I_type_t type)
-{
-    H5VL_object_t  *vol_obj     = NULL;
-    void           *file        = NULL;
-    hid_t           ret_value   = H5I_INVALID_HID;  /* Return value             */
-
-    FUNC_ENTER_STATIC
-
-    /* Get the object pointer */
-    if (NULL == (vol_obj = H5VL_get_object(obj_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid identifier")
-
-    /* Get the file through the VOL */
-    if (H5VL_file_get(vol_obj->data, vol_obj->driver->cls, H5VL_OBJECT_GET_FILE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, type, &file) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, H5I_INVALID_HID, "unable to get file")
-    if (NULL == file)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, H5I_INVALID_HID, "unable to get the file through the VOL")
-
-    /* Check if the file's ID already exists */
-    if (H5I_find_id(file, H5I_FILE, &ret_value) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, H5I_INVALID_HID, "getting file ID failed")
-
-    /* If the ID does not exist, register it with the VOL driver */
-    if (H5I_INVALID_HID == ret_value) {
-        if ((ret_value = H5VL_register_id(H5I_FILE, file, vol_obj->driver, TRUE)) < 0)
-            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize file handle")
-    }
-    else {
-        /* Increment ref count on existing ID */
-        if (H5I_inc_ref(ret_value, TRUE) < 0)
-            HGOTO_ERROR(H5E_ATOM, H5E_CANTSET, H5I_INVALID_HID, "incrementing file ID failed")
-    }
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5I__get_file_id() */
 
 
 /*-------------------------------------------------------------------------
@@ -2276,23 +2278,14 @@ H5I__find_id_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
     HDassert(item);
     HDassert(udata);
 
-    /* Get a pointer to the VOL driver's data */
-    if (H5I_FILE == type || H5I_GROUP == type || H5I_DATASET == type || H5I_ATTR == type) {
-        const H5VL_object_t *vol_obj = (const H5VL_object_t *)item->obj_ptr;
-        obj_ptr = vol_obj->data;
-    }
-    else if (H5I_DATATYPE == type) {
-        const H5T_t *dt = (const H5T_t *)item->obj_ptr;
-        obj_ptr = (void *)H5T_get_actual_type(dt);
-    }
-    else
-        obj_ptr = item->obj_ptr;
+    /* Get a pointer to the VOL plugin's data */
+    obj_ptr = H5I__unwrap(item->obj_ptr, type);
 
     /* Check for a match */
     if (obj_ptr == udata->object) {
         udata->ret_id = item->id;
         ret_value = H5_ITER_STOP;
-    }
+    } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I__find_id_cb() */
@@ -2340,7 +2333,7 @@ H5I_find_id(const void *object, H5I_type_t type, hid_t *id)
             HGOTO_ERROR(H5E_ATOM, H5E_BADITER, FAIL, "iteration failed")
 
         *id = udata.ret_id;
-    }
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2362,7 +2355,7 @@ H5I__id_dump_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
     H5I_id_info_t  *item    = (H5I_id_info_t *)_item;       /* Pointer to the ID node */
     H5I_type_t      type    = *(H5I_type_t *)_udata;        /* User data */
     H5G_name_t     *path    = NULL;                         /* Path to file object */
-    const void     *obj_ptr = NULL;                         /* Pointer to VOL driver object */
+    const void     *obj_ptr = NULL;                         /* Pointer to VOL plugin object */
 
     FUNC_ENTER_STATIC_NOERR
 
@@ -2376,22 +2369,24 @@ H5I__id_dump_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
         {
             const H5VL_object_t *vol_obj = (const H5VL_object_t *)item->obj_ptr;
 
-            obj_ptr = vol_obj->data;
+            obj_ptr = H5VL_object_data(vol_obj);
 
-            if(H5_VOL_NATIVE == vol_obj->driver->cls->value)
+            if(H5_VOL_NATIVE == vol_obj->plugin->cls->value)
                 path = H5G_nameof((H5G_t *)obj_ptr);
             break;
         }
+
         case H5I_DATASET:
         {
             const H5VL_object_t *vol_obj = (const H5VL_object_t *)item->obj_ptr;
 
-            obj_ptr = vol_obj->data;
+            obj_ptr = H5VL_object_data(vol_obj);
 
-            if(H5_VOL_NATIVE == vol_obj->driver->cls->value)
+            if(H5_VOL_NATIVE == vol_obj->plugin->cls->value)
                 path = H5D_nameof((H5D_t *)obj_ptr);
             break;
         }
+
         case H5I_DATATYPE:
         {
             const H5T_t *dt = (const H5T_t *)item->obj_ptr;
@@ -2401,6 +2396,7 @@ H5I__id_dump_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
             path = H5T_nameof((H5T_t *)obj_ptr);
             break;
         }
+
         case H5I_UNINIT:
         case H5I_BADID:
         case H5I_FILE:

@@ -808,7 +808,15 @@ H5G_iterate(H5G_loc_t *loc, const char *group_name,
      */
     if(NULL == (grp = H5G__open_name(loc, group_name)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open group")
-    if((gid = H5VL_native_register(H5I_GROUP, grp, TRUE)) < 0)
+{
+void *vol_wrap_ctx = NULL;       /* Object wrapping context */
+
+/* Retrieve the VOL object wrap context */
+if(H5CX_get_vol_wrap_ctx((void **)&vol_wrap_ctx) < 0)
+    HGOTO_ERROR(H5E_VOL, H5E_CANTGET, H5I_INVALID_HID, "can't get VOL object wrap context")
+HDassert(vol_wrap_ctx);
+}
+    if((gid = H5VL_wrap_register(H5I_GROUP, grp, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register group")
 
     /* Set up user data for callback */
@@ -1069,8 +1077,16 @@ H5G_visit(H5G_loc_t *loc, const char *group_name, H5_index_t idx_type,
     if(NULL == (grp = H5G__open_name(loc, group_name)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open group")
 
+{
+void *vol_wrap_ctx = NULL;       /* Object wrapping context */
+
+/* Retrieve the VOL object wrap context */
+if(H5CX_get_vol_wrap_ctx((void **)&vol_wrap_ctx) < 0)
+    HGOTO_ERROR(H5E_VOL, H5E_CANTGET, H5I_INVALID_HID, "can't get VOL object wrap context")
+HDassert(vol_wrap_ctx);
+}
     /* Register an ID for the starting group */
-    if((gid = H5VL_native_register(H5I_GROUP, grp, TRUE)) < 0)
+    if((gid = H5VL_wrap_register(H5I_GROUP, grp, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register group")
 
     /* Get the location of the starting group */

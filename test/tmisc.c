@@ -3488,7 +3488,7 @@ test_misc19(void)
     CHECK(vol_cls, NULL, "h5_get_dummy_vol_class");
 
     /* Register a virtual object driver */
-    volid = H5VLregister(vol_cls);
+    volid = H5VLregister(vol_cls, H5P_DEFAULT);
     CHECK(volid, FAIL, "H5VLregister");
 
     /* Check the reference count */

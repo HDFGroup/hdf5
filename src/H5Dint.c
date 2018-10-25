@@ -21,17 +21,17 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"        /* Generic Functions */
-#include "H5CXprivate.h"      /* API Contexts */
-#include "H5Dpkg.h"           /* Datasets */
-#include "H5Eprivate.h"       /* Error handling */
-#include "H5FLprivate.h"      /* Free Lists */
-#include "H5FOprivate.h"      /* File objects */
-#include "H5Iprivate.h"       /* IDs */
-#include "H5Lprivate.h"       /* Links */
-#include "H5MMprivate.h"      /* Memory management */
-#include "H5VLprivate.h"	/* Virtual Object Layer                 */
-#include "H5VLnative.h"     /* Native VOL driver */
+#include "H5private.h"          /* Generic Functions                        */
+#include "H5CXprivate.h"        /* API Contexts                             */
+#include "H5Dpkg.h"             /* Datasets                                 */
+#include "H5Eprivate.h"         /* Error handling                           */
+#include "H5FLprivate.h"        /* Free Lists                               */
+#include "H5FOprivate.h"        /* File objects                             */
+#include "H5Iprivate.h"         /* IDs                                      */
+#include "H5Lprivate.h"         /* Links                                    */
+#include "H5MMprivate.h"        /* Memory management                        */
+#include "H5VLprivate.h"        /* Virtual Object Layer                     */
+#include "H5VLnative.h"         /* Native VOL plugin                        */
 
 
 /****************/
@@ -301,7 +301,7 @@ H5D__close_cb(H5VL_object_t *dset_vol_obj)
     HDassert(dset_vol_obj);
 
     /* Close the dataset */
-    if(H5VL_dataset_close(dset_vol_obj->data, dset_vol_obj->driver->cls, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+    if(H5VL_dataset_close(dset_vol_obj->data, dset_vol_obj->plugin->cls, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to close dataset");
 
 done:
@@ -975,7 +975,7 @@ H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id,
     /* Get the dataset's datatype */
     if(NULL == (dt = (const H5T_t *)H5I_object(type_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a datatype")
-    /* If this is a named datatype, get the pointer via the VOL driver */
+    /* If this is a named datatype, get the pointer via the VOL plugin */
     type = (const H5T_t *)H5T_get_actual_type(dt);
 
     /* Check if the datatype is "sensible" for use in a dataset */
@@ -2460,7 +2460,7 @@ H5D__vlen_get_buf_size(void H5_ATTR_UNUSED *elem, hid_t type_id,
         HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "can't select point")
 
     /* Read in the point (with the custom VL memory allocator) */
-    if(H5VL_dataset_read(vol_obj->data, vol_obj->driver->cls, 
+    if(H5VL_dataset_read(vol_obj->data, vol_obj->plugin->cls, 
                          type_id, vlen_bufsize->mspace_id, 
                          vlen_bufsize->fspace_id, H5P_DATASET_XFER_DEFAULT, 
                          vlen_bufsize->fl_tbuf, H5_REQUEST_NULL) < 0)
@@ -3402,13 +3402,20 @@ H5D__get_type(const H5D_t *dset)
          * two-level IDs, where the VOL object is a copy of the
          * returned datatype.
          */
-        if((ret_value = H5VL_native_register(H5I_DATATYPE, dt, TRUE)) < 0)
+{
+void *vol_wrap_ctx = NULL;       /* Object wrapping context */
+
+/* Retrieve the VOL object wrap context */
+if(H5CX_get_vol_wrap_ctx((void **)&vol_wrap_ctx) < 0)
+    HGOTO_ERROR(H5E_VOL, H5E_CANTGET, H5I_INVALID_HID, "can't get VOL object wrap context")
+HDassert(vol_wrap_ctx);
+}
+        if((ret_value = H5VL_wrap_register(H5I_DATATYPE, dt, TRUE)) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register datatype")
-    }
-    else {
+    } /* end if */
+    else
         if((ret_value = H5I_register(H5I_DATATYPE, dt, TRUE)) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register datatype")
-    }
 
 done:
     if(ret_value < 0)

@@ -385,12 +385,12 @@ typedef enum H5VL_file_optional_t {
     H5VL_FILE_GET_FREE_SECTIONS,        /* file free selections                 */
     H5VL_FILE_GET_FREE_SPACE,	        /* file freespace         		        */
     H5VL_FILE_GET_INFO,	                /* file info             		        */
-    H5VL_FILE_GET_MDC_CONF,	            /* file metadata cache configuration	*/
-    H5VL_FILE_GET_MDC_HR,	            /* file metadata cache hit rate		    */
+    H5VL_FILE_GET_MDC_CONF,	        /* file metadata cache configuration	*/
+    H5VL_FILE_GET_MDC_HR,	        /* file metadata cache hit rate		    */
     H5VL_FILE_GET_MDC_SIZE,             /* file metadata cache size		        */
     H5VL_FILE_GET_SIZE,	                /* file size             		        */
     H5VL_FILE_GET_VFD_HANDLE,	        /* file VFD handle       		        */
-    H5VL_FILE_REOPEN,                   /* reopen the file                      */
+    H5VL_FILE_GET_FILE,                 /* retrieve or resurrect file of object */
     H5VL_FILE_RESET_MDC_HIT_RATE,       /* get metadata cache hit rate          */
     H5VL_FILE_SET_MDC_CONFIG,           /* set metadata cache configuration     */
     H5VL_FILE_GET_METADATA_READ_RETRY_INFO,
@@ -398,12 +398,13 @@ typedef enum H5VL_file_optional_t {
     H5VL_FILE_START_MDC_LOGGING,
     H5VL_FILE_STOP_MDC_LOGGING,
     H5VL_FILE_GET_MDC_LOGGING_STATUS,
-    H5VL_FILE_SET_LATEST_FORMAT,
     H5VL_FILE_FORMAT_CONVERT,
     H5VL_FILE_RESET_PAGE_BUFFERING_STATS,
     H5VL_FILE_GET_PAGE_BUFFERING_STATS,
-    H5VL_FILE_GET_MDC_IMAGE_INFO
-
+    H5VL_FILE_GET_MDC_IMAGE_INFO,
+    H5VL_FILE_GET_EOA,
+    H5VL_FILE_INCR_FILESIZE,
+    H5VL_FILE_SET_LIBVER_BOUNDS
 } H5VL_file_optional_t;
 
 /* User data for traversal routine to get ID counts */
@@ -506,6 +507,7 @@ H5_DLL herr_t H5F__get_sohm_mesg_count_test(hid_t fid, unsigned type_id, size_t 
 H5_DLL herr_t H5F__check_cached_stab_test(hid_t file_id);
 H5_DLL herr_t H5F__get_maxaddr_test(hid_t file_id, haddr_t *maxaddr);
 H5_DLL herr_t H5F__get_sbe_addr_test(hid_t file_id, haddr_t *sbe_addr);
+H5_DLL htri_t H5F__same_file_test(hid_t file_id1, hid_t file_id2);
 #endif /* H5F_TESTING */
 
 #endif /* _H5Fpkg_H */

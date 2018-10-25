@@ -531,7 +531,7 @@ H5T_vlen_str_mem_getlen(const void *_vl)
 #ifdef H5_NO_ALIGNMENT_RESTRICTIONS
     const char *s=*(const char * const *)_vl;   /* Pointer to the user's string information */
 #else
-    const char *s;      /* Pointer to the user's string information */
+    const char *s = NULL;       /* Pointer to the user's string information */
 #endif
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
@@ -566,7 +566,7 @@ H5T_vlen_str_mem_getptr(void *_vl)
 #ifdef H5_NO_ALIGNMENT_RESTRICTIONS
     char *s=*(char **)_vl;   /* Pointer to the user's string information */
 #else
-    char *s;      /* Pointer to the user's string information */
+    char *s = NULL;     /* Pointer to the user's string information */
 #endif
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
@@ -601,7 +601,7 @@ H5T_vlen_str_mem_isnull(const H5F_t H5_ATTR_UNUSED *f, void *_vl)
 #ifdef H5_NO_ALIGNMENT_RESTRICTIONS
     char *s=*(char **)_vl;   /* Pointer to the user's string information */
 #else
-    char *s;      /* Pointer to the user's string information */
+    char *s = NULL;     /* Pointer to the user's string information */
 #endif
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR

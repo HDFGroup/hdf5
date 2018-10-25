@@ -826,7 +826,7 @@ test_compact_io(hid_t fapl)
      **************************************/
 
     /* Create a copy of file access property list */
-    if((new_fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0) TEST_ERROR
+    if((new_fapl = new_fapl = h5_fileaccess()) < 0) TEST_ERROR
 
     /* Loop through all the combinations of low/high library format bounds,
        skipping invalid combinations.
@@ -1334,6 +1334,19 @@ test_conv_buffer(hid_t fid)
   return 0;
 
 error:
+    H5E_BEGIN_TRY {
+        H5Pclose(xfer_list);
+        H5Sclose(space);
+        H5Tclose(arr_type1);
+        H5Tclose(arr_type2);
+        H5Tclose(arr_type3);
+        H5Tclose(ctype1);
+        H5Tclose(ctype2);
+        H5Tclose(arr_type4);
+        H5Tclose(arr_type5);
+        H5Dclose(dataset);
+    } H5E_END_TRY;
+
   return -1;
 }
 

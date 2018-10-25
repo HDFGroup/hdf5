@@ -2973,6 +2973,7 @@ H5D__virtual_refresh_source_dset(H5D_t **dset)
     HDassert(dset && *dset);
 
     /* Get the native VOL driver's ID */
+/* XXX (VOL MERGE): Need a better solution than this */
     if((native_vol_id = H5VL_native_get_driver_id()) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get native VOL driver ID")
 

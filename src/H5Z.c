@@ -586,7 +586,9 @@ static int
 H5Z__flush_file_cb(void *obj_ptr, hid_t H5_ATTR_UNUSED obj_id, void *key)
 {
     H5F_t          *f           = (H5F_t *)obj_ptr;     /* File object for operations */
+#ifdef H5_HAVE_PARALLEL
     H5Z_object_t   *object      = (H5Z_object_t *)key;
+#endif /* H5_HAVE_PARALLEL */
     int             ret_value   = FALSE;                /* Return value */
 
     FUNC_ENTER_STATIC

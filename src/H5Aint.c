@@ -43,7 +43,7 @@
 #include "H5Opkg.h"             /* Object headers                           */
 #include "H5SMprivate.h"        /* Shared Object Header Messages            */
 #include "H5VLprivate.h"        /* Virtual Object Layer                     */
-#include "H5VLnative.h"         /* Native VOL driver                        */
+#include "H5VLnative.h"         /* Native VOL plugin                        */
 
 
 /****************/
@@ -924,7 +924,15 @@ H5A__get_type(H5A_t *attr)
          * two level IDs, where the VOL object is a copy of the
          * returned datatype
          */
-        if ((ret_value = H5VL_native_register(H5I_DATATYPE, dt, TRUE)) < 0)
+{
+void *vol_wrap_ctx = NULL;       /* Object wrapping context */
+
+/* Retrieve the VOL object wrap context */
+if(H5CX_get_vol_wrap_ctx((void **)&vol_wrap_ctx) < 0)
+    HGOTO_ERROR(H5E_VOL, H5E_CANTGET, H5I_INVALID_HID, "can't get VOL object wrap context")
+HDassert(vol_wrap_ctx);
+}
+        if ((ret_value = H5VL_wrap_register(H5I_DATATYPE, dt, TRUE)) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize file handle")
     }
     else {
@@ -1156,7 +1164,7 @@ H5A__close_cb(H5VL_object_t *attr_vol_obj)
     HDassert(attr_vol_obj);
 
     /* Close the attribute */
-    if((ret_value = H5VL_attr_close(attr_vol_obj->data, attr_vol_obj->driver->cls, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)) < 0)
+    if((ret_value = H5VL_attr_close(attr_vol_obj->data, attr_vol_obj->plugin->cls, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CLOSEERROR, FAIL, "problem closing attribute")
 
     /* Free the VOL object */
@@ -2648,7 +2656,15 @@ H5A__iterate(const H5G_loc_t *loc, const char *obj_name, H5_index_t idx_type, H5
         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to open object");
 
     /* Get an ID for the object */
-    if((obj_loc_id = H5VL_native_register(obj_type, temp_obj, TRUE)) < 0)
+{
+void *vol_wrap_ctx = NULL;       /* Object wrapping context */
+
+/* Retrieve the VOL object wrap context */
+if(H5CX_get_vol_wrap_ctx((void **)&vol_wrap_ctx) < 0)
+    HGOTO_ERROR(H5E_VOL, H5E_CANTGET, H5I_INVALID_HID, "can't get VOL object wrap context")
+HDassert(vol_wrap_ctx);
+}
+    if((obj_loc_id = H5VL_wrap_register(obj_type, temp_obj, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register datatype");
 
     /* Call internal attribute iteration routine */

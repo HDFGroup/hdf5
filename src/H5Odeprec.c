@@ -109,7 +109,7 @@ H5Oget_info1(hid_t loc_id, H5O_info_t *oinfo)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
     /* Retrieve the object's information */
-    if(H5VL_object_optional(vol_obj->data, vol_obj->driver->cls, H5P_DATASET_XFER_DEFAULT, 
+    if(H5VL_object_optional(vol_obj->data, vol_obj->plugin->cls, H5P_DATASET_XFER_DEFAULT, 
                             H5_REQUEST_NULL, H5VL_OBJECT_GET_INFO, loc_params, oinfo, H5O_INFO_ALL) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't get info for object")
 
@@ -161,7 +161,7 @@ H5Oget_info_by_name1(hid_t loc_id, const char *name, H5O_info_t *oinfo, hid_t la
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
     /* Retrieve the object's information */
-    if(H5VL_object_optional(vol_obj->data, vol_obj->driver->cls, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL,
+    if(H5VL_object_optional(vol_obj->data, vol_obj->plugin->cls, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL,
                             H5VL_OBJECT_GET_INFO, loc_params, oinfo, H5O_INFO_ALL) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't get info for object: '%s'", name)
 
@@ -223,7 +223,7 @@ H5Oget_info_by_idx1(hid_t loc_id, const char *group_name, H5_index_t idx_type,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
     /* Retrieve the object's information */
-    if(H5VL_object_optional(vol_obj->data, vol_obj->driver->cls, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, 
+    if(H5VL_object_optional(vol_obj->data, vol_obj->plugin->cls, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, 
                             H5VL_OBJECT_GET_INFO, loc_params, oinfo, H5O_INFO_ALL) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't get info for object")
 
@@ -270,6 +270,7 @@ H5Ovisit1(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order,
 {
     H5VL_object_t      *vol_obj     = NULL;     /* Object token of loc_id */
     H5VL_loc_params_t   loc_params;
+    hbool_t             vol_wrapper_set = FALSE;        /* Whether the VOL object wrapping context was set up */
     herr_t              ret_value;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -291,13 +292,22 @@ H5Ovisit1(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order,
     loc_params.type         = H5VL_OBJECT_BY_SELF;
     loc_params.obj_type     = H5I_get_type(obj_id);
 
+    /* Set wrapper info in API context */
+    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
+    vol_wrapper_set = TRUE;
+
     /* Visit the objects */
-    if((ret_value = H5VL_object_specific(vol_obj->data, loc_params, vol_obj->driver->cls, 
+    if((ret_value = H5VL_object_specific(vol_obj->data, loc_params, vol_obj->plugin->cls, 
                                          H5VL_OBJECT_VISIT, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, 
                                          idx_type, order, op, op_data, H5O_INFO_ALL)) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_BADITER, FAIL, "object visitation failed")
 
 done:
+    /* Reset object wrapping info in API context */
+    if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
+        HDONE_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't reset VOL wrapper info")
+
     FUNC_LEAVE_API(ret_value)
 } /* end H5Ovisit1() */
 
@@ -373,7 +383,7 @@ H5Ovisit_by_name1(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
     loc_params.obj_type                     = H5I_get_type(loc_id);
 
     /* Visit the objects */
-    if((ret_value = H5VL_object_specific(vol_obj->data, loc_params, vol_obj->driver->cls, 
+    if((ret_value = H5VL_object_specific(vol_obj->data, loc_params, vol_obj->plugin->cls, 
                                          H5VL_OBJECT_VISIT, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, 
                                          idx_type, order, op, op_data, H5O_INFO_ALL)) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_BADITER, FAIL, "object visitation failed")

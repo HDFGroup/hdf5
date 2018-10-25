@@ -108,6 +108,7 @@ H5Tcommit2(hid_t loc_id, const char *name, hid_t type_id, hid_t lcpl_id,
     H5T_t *dt = NULL;                   /* High level datatype object that wraps the VOL object */
     H5VL_object_t *vol_obj = NULL;          /* object token of loc_id */
     H5VL_loc_params_t loc_params;
+    hbool_t         vol_wrapper_set = FALSE;            /* Whether the VOL object wrapping context was set up */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -149,8 +150,13 @@ H5Tcommit2(hid_t loc_id, const char *name, hid_t type_id, hid_t lcpl_id,
     if(NULL == (vol_obj = (H5VL_object_t *)H5I_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
 
+    /* Set wrapper info in API context */
+    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, H5I_INVALID_HID, "can't set VOL wrapper info")
+    vol_wrapper_set = TRUE;
+
     /* Commit the type */
-    if(NULL == (data = H5VL_datatype_commit(vol_obj->data, loc_params, vol_obj->driver->cls, 
+    if(NULL == (data = H5VL_datatype_commit(vol_obj->data, loc_params, vol_obj->plugin->cls, 
                                            name, type_id, lcpl_id, tcpl_id, tapl_id, 
                                            H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to commit datatype")
@@ -158,14 +164,18 @@ H5Tcommit2(hid_t loc_id, const char *name, hid_t type_id, hid_t lcpl_id,
     /* Set up VOL object */
     if(NULL == (new_obj = H5FL_CALLOC(H5VL_object_t)))
         HGOTO_ERROR(H5E_VOL, H5E_NOSPACE, FAIL, "can't allocate top object structure")
-    new_obj->driver = vol_obj->driver;
-    new_obj->driver->nrefs ++;
+    new_obj->plugin = vol_obj->plugin;
+    new_obj->plugin->nrefs ++;
     new_obj->data = data;
 
-    /* Set the committed type object to the VOL driver pointer in the H5T_t struct */
+    /* Set the committed type object to the VOL plugin pointer in the H5T_t struct */
     dt->vol_obj = new_obj;
 
 done:
+    /* Reset object wrapping info in API context */
+    if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
+        HDONE_ERROR(H5E_OHDR, H5E_CANTSET, H5I_INVALID_HID, "can't reset VOL wrapper info")
+
     FUNC_LEAVE_API(ret_value)
 } /* end H5Tcommit2() */
 
@@ -305,7 +315,7 @@ H5Tcommit_anon(hid_t loc_id, hid_t type_id, hid_t tcpl_id, hid_t tapl_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
 
     /* Commit the datatype */
-    if(NULL == (dt = H5VL_datatype_commit(vol_obj->data, loc_params, vol_obj->driver->cls, 
+    if(NULL == (dt = H5VL_datatype_commit(vol_obj->data, loc_params, vol_obj->plugin->cls, 
                                            NULL, type_id, H5P_DEFAULT, tcpl_id, tapl_id, 
                                            H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to commit datatype")
@@ -313,11 +323,11 @@ H5Tcommit_anon(hid_t loc_id, hid_t type_id, hid_t tcpl_id, hid_t tapl_id)
     /* Setup VOL object */
     if(NULL == (new_obj = H5FL_CALLOC(H5VL_object_t)))
         HGOTO_ERROR(H5E_VOL, H5E_NOSPACE, FAIL, "can't allocate top object structure")
-    new_obj->driver = vol_obj->driver;
-    new_obj->driver->nrefs ++;
+    new_obj->plugin = vol_obj->plugin;
+    new_obj->plugin->nrefs ++;
     new_obj->data = dt;
 
-    /* Set the committed type object to the VOL pluging pointer in the H5T_t struct */
+    /* Set the committed type object to the VOL plugin pointer in the H5T_t struct */
     type->vol_obj = new_obj;
 
 done:
@@ -568,9 +578,10 @@ done:
 hid_t
 H5Topen2(hid_t loc_id, const char *name, hid_t tapl_id)
 {
-    void *dt = NULL;           /* datatype token created by VOL driver */
+    void *dt = NULL;           /* datatype token created by VOL plugin */
     H5VL_object_t *vol_obj = NULL;     /* object token of loc_id */
     H5VL_loc_params_t loc_params;
+    hbool_t         vol_wrapper_set = FALSE;            /* Whether the VOL object wrapping context was set up */
     hid_t        ret_value = H5I_INVALID_HID;      /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
@@ -594,19 +605,28 @@ H5Topen2(hid_t loc_id, const char *name, hid_t tapl_id)
     if(NULL == (vol_obj = (H5VL_object_t *)H5I_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid file identifier")
 
+    /* Set wrapper info in API context */
+    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, H5I_INVALID_HID, "can't set VOL wrapper info")
+    vol_wrapper_set = TRUE;
+
     /* Open the datatype */
-    if(NULL == (dt = H5VL_datatype_open(vol_obj->data, loc_params, vol_obj->driver->cls, 
+    if(NULL == (dt = H5VL_datatype_open(vol_obj->data, loc_params, vol_obj->plugin->cls, 
                                             name, tapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open named datatype")
 
     /* Register the type and return the ID */
-    if((ret_value = H5VL_register_id(H5I_DATATYPE, dt, vol_obj->driver, TRUE)) < 0)
+    if((ret_value = H5VL_register_id(H5I_DATATYPE, dt, vol_obj->plugin, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register named datatype")
 
 done:
+    /* Reset object wrapping info in API context */
+    if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
+        HDONE_ERROR(H5E_OHDR, H5E_CANTSET, H5I_INVALID_HID, "can't reset VOL wrapper info")
+
     /* Cleanup on error */
     if(H5I_INVALID_HID == ret_value)
-        if(dt && H5VL_datatype_close(dt, vol_obj->driver->cls, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+        if(dt && H5VL_datatype_close(dt, vol_obj->plugin->cls, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
             HDONE_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release datatype")
 
     FUNC_LEAVE_API(ret_value)
@@ -664,7 +684,7 @@ H5Tget_create_plist(hid_t dtype_id)
         H5VL_object_t *vol_obj = type->vol_obj;
 
         /* Get the property list through the VOL */
-        if(H5VL_datatype_get(vol_obj->data, vol_obj->driver->cls, H5VL_DATATYPE_GET_TCPL, 
+        if(H5VL_datatype_get(vol_obj->data, vol_obj->plugin->cls, H5VL_DATATYPE_GET_TCPL, 
                              H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &ret_value) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, H5I_INVALID_HID, "can't get object creation info")
     }
@@ -707,7 +727,7 @@ H5Tflush(hid_t type_id)
 
     /* Flush metadata for named datatype */
     if(dt->vol_obj)
-        if((ret_value = H5VL_datatype_specific(dt->vol_obj->data, dt->vol_obj->driver->cls, H5VL_DATATYPE_FLUSH, 
+        if((ret_value = H5VL_datatype_specific(dt->vol_obj->data, dt->vol_obj->plugin->cls, H5VL_DATATYPE_FLUSH, 
                                           H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, type_id)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTFLUSH, FAIL, "unable to flush datatype")
 
@@ -749,7 +769,7 @@ H5Trefresh(hid_t type_id)
 
     /* Refresh the datatype's metadata */
     if(dt->vol_obj)
-        if((ret_value = H5VL_datatype_specific(dt->vol_obj->data, dt->vol_obj->driver->cls, H5VL_DATATYPE_REFRESH, 
+        if((ret_value = H5VL_datatype_specific(dt->vol_obj->data, dt->vol_obj->plugin->cls, H5VL_DATATYPE_REFRESH, 
                                           H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, type_id)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTLOAD, FAIL, "unable to refresh datatype")
 
@@ -1106,7 +1126,7 @@ H5T_construct_datatype(H5VL_object_t *vol_obj)
     FUNC_ENTER_NOAPI(NULL)
 
     /* get required buf size for encoding the datatype */
-    if(H5VL_datatype_get(vol_obj->data, vol_obj->driver->cls, H5VL_DATATYPE_GET_BINARY, 
+    if(H5VL_datatype_get(vol_obj->data, vol_obj->plugin->cls, H5VL_DATATYPE_GET_BINARY, 
                          H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &nalloc, NULL, 0) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to get datatype serialized size")
 
@@ -1115,7 +1135,7 @@ H5T_construct_datatype(H5VL_object_t *vol_obj)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate space for datatype")
 
     /* get binary description of the datatype */
-    if(H5VL_datatype_get(vol_obj->data, vol_obj->driver->cls, H5VL_DATATYPE_GET_BINARY, 
+    if(H5VL_datatype_get(vol_obj->data, vol_obj->plugin->cls, H5VL_DATATYPE_GET_BINARY, 
                          H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &nalloc, buf, (size_t)nalloc) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to get serialized datatype")
 
@@ -1161,7 +1181,7 @@ H5T_get_named_type(const H5T_t *dt)
 /*-------------------------------------------------------------------------
  * Function:    H5T_get_actual_type
  *
- * Purpose:     Returns underlying native datatype created by native driver
+ * Purpose:     Returns underlying native datatype created by native plugin
  *              if datatype is committed, otherwise return the datatype 
  *              object associate with the ID.
  *
@@ -1181,7 +1201,7 @@ H5T_get_actual_type(H5T_t *dt)
     if(NULL == dt->vol_obj)
         ret_value = dt;
     else
-        ret_value = (H5T_t *)dt->vol_obj->data;
+        ret_value = (H5T_t *)H5VL_object_data(dt->vol_obj);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T_get_actual_type() */
@@ -1267,4 +1287,25 @@ H5T_restore_refresh_state(hid_t tid, H5O_shared_t *cached_H5O_shared)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T_restore_refresh_state() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5T_already_vol_managed
+ *
+ * Purpose:     Check if the committed datatype is already VOL managed
+ *
+ * Return:      TRUE / FALSE
+ *
+ *-------------------------------------------------------------------------
+ */
+hbool_t
+H5T_already_vol_managed(const H5T_t *dt)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    /* Sanity check */
+    HDassert(dt);
+
+    FUNC_LEAVE_NOAPI( dt->vol_obj != NULL )
+} /* end H5T_already_vol_managed() */
 

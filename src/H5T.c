@@ -1609,12 +1609,12 @@ H5T__close_cb(H5T_t *dt)
     HDassert(dt->shared);
 
     /* If this datatype is VOL-managed (i.e.: has a VOL object),
-     * close it through the VOL driver.
+     * close it through the VOL plugin.
      */
     if(NULL != dt->vol_obj) {
 
-        /* Close the driver-managed datatype data */
-        if(H5VL_datatype_close(dt->vol_obj->data, dt->vol_obj->driver->cls, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+        /* Close the plugin-managed datatype data */
+        if(H5VL_datatype_close(dt->vol_obj->data, dt->vol_obj->plugin->cls, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, FAIL, "unable to close datatype");
 
         /* Free the VOL object */
@@ -3672,7 +3672,7 @@ done:
  * Purpose:   Frees a datatype and all associated memory.
  *
  * Note:      Does _not_ deal with open named datatypes, etc. so this
- *            should never see a type managed by a VOL driver.
+ *            should never see a type managed by a VOL plugin.
  *
  * Return:    Non-negative on success/Negative on failure
  *
@@ -5194,7 +5194,7 @@ H5T_convert_committed_datatype(H5T_t *dt, H5F_t *f)
             H5VL_object_t *vol_obj = dt->vol_obj;
 
             /* Close the datatype through the VOL*/
-            if ((ret_value = H5VL_datatype_close(vol_obj->data, vol_obj->driver->cls, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)) < 0)
+            if ((ret_value = H5VL_datatype_close(vol_obj->data, vol_obj->plugin->cls, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, FAIL, "unable to close datatype");
 
             /* Free the datatype and set the VOL object pointer to NULL */

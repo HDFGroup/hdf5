@@ -144,6 +144,7 @@ H5_DLL H5VL_object_t *H5T_get_named_type(const H5T_t *dt);
 H5_DLL H5T_t *H5T_get_actual_type(H5T_t *dt);
 H5_DLL herr_t H5T_save_refresh_state(hid_t tid, struct H5O_shared_t *cached_H5O_shared);
 H5_DLL herr_t H5T_restore_refresh_state(hid_t tid, struct H5O_shared_t *cached_H5O_shared);
+H5_DLL hbool_t H5T_already_vol_managed(const H5T_t *dt);
 
 /* Reference specific functions */
 H5_DLL H5R_type_t H5T_get_ref_type(const H5T_t *dt);

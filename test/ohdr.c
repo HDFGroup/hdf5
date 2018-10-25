@@ -486,7 +486,7 @@ test_unknown(unsigned bogus_id, char *filename, hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Open FILE_BOGUS */
-    if((fid_bogus = H5Fopen(testfile, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+    if((fid_bogus = H5Fopen(testfile, H5F_ACC_RDONLY, fapl)) < 0)
         FAIL_STACK_ERROR
 
     /* Set up location ID depending on bogus_id */

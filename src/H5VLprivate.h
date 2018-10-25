@@ -26,24 +26,24 @@
 /* Library Private Typedefs */
 /****************************/
 
-/* Internal struct to track VOL driver information for objects */
+/* Internal struct to track VOL plugin information for objects */
 typedef struct H5VL_t {
-    const H5VL_class_t *cls;            /* Pointer to driver class struct                       */
+    const H5VL_class_t *cls;            /* Pointer to plugin class struct                       */
     int64_t             nrefs;          /* Number of references by objects using this struct    */
-    hid_t               id;             /* Identifier for the VOL driver                        */
+    hid_t               id;             /* Identifier for the VOL plugin                        */
 } H5VL_t;
 
 /* Internal vol object structure returned to the API */
 typedef struct H5VL_object_t {
-    void               *data;           /* Pointer to driver-managed data for this object       */
-    H5VL_t             *driver;         /* Pointer to VOL driver struct                         */
+    void               *data;           /* Pointer to plugin-managed data for this object       */
+    H5VL_t             *plugin;         /* Pointer to VOL plugin struct                         */
 } H5VL_object_t;
 
-/* Internal structure to hold the driver ID & info for FAPLs */
-typedef struct H5VL_driver_prop_t {
-    hid_t               driver_id;      /* VOL driver's ID                                      */
-    const void         *driver_info;    /* VOL driver info, for open callbacks                  */
-} H5VL_driver_prop_t;
+/* Internal structure to hold the plugin ID & info for FAPLs */
+typedef struct H5VL_plugin_prop_t {
+    hid_t               plugin_id;      /* VOL plugin's ID                                      */
+    const void         *plugin_info;    /* VOL plugin info, for open callbacks                  */
+} H5VL_plugin_prop_t;
 
 /*****************************/
 /* Library Private Variables */
@@ -55,15 +55,34 @@ typedef struct H5VL_driver_prop_t {
 
 /* Common functions */
 H5_DLL herr_t H5VL_init(void);
-H5_DLL hid_t H5VL_register_id(H5I_type_t type, void *object, H5VL_t *vol_driver, hbool_t app_ref);
+H5_DLL hid_t H5VL_register_id(H5I_type_t type, void *object, H5VL_t *vol_plugin, hbool_t app_ref);
 H5_DLL herr_t H5VL_free_object(H5VL_object_t *obj);
-H5_DLL hid_t H5VL_register(const void *cls, size_t size, hbool_t app_ref);
-H5_DLL hid_t H5VL_object_register(void *obj, H5I_type_t obj_type, hid_t driver_id, hbool_t app_ref);
-H5_DLL ssize_t H5VL_get_driver_name(hid_t id, char *name/*out*/, size_t size);
+H5_DLL hid_t H5VL_register(const void *cls, hbool_t app_ref, hid_t vipl_id);
+H5_DLL hid_t H5VL_object_register(void *obj, H5I_type_t obj_type, hid_t plugin_id, hbool_t app_ref);
+H5_DLL hid_t H5VL_wrap_register(H5I_type_t type, void *obj, hbool_t app_ref);
+H5_DLL ssize_t H5VL_get_plugin_name(hid_t id, char *name/*out*/, size_t size);
 H5_DLL H5VL_object_t *H5VL_get_object(hid_t id);
 H5_DLL void *H5VL_object(hid_t id);
+H5_DLL void *H5VL_object_data(const H5VL_object_t *vol_obj);
 H5_DLL void *H5VL_object_verify(hid_t id, H5I_type_t obj_type);
-H5_DLL void *H5VL_driver_object(H5VL_object_t *obj);
+H5_DLL void *H5VL_plugin_object(H5VL_object_t *obj);
+H5_DLL int H5VL_cmp_plugin_cls(const H5VL_class_t *cls1, const H5VL_class_t *cls);
+H5_DLL int H5VL_copy_plugin_info(const H5VL_class_t *plugin, void **dst_info,
+    const void *src_info);
+H5_DLL int H5VL_cmp_plugin_info(const H5VL_class_t *plugin, const void *info1,
+    const void *info2);
+H5_DLL herr_t H5VL_free_plugin_info(const H5VL_class_t *plugin, void *info);
+H5_DLL herr_t H5VL_get_wrap_ctx(const H5VL_class_t *plugin, void *obj,
+    void **wrap_ctx);
+H5_DLL herr_t H5VL_free_wrap_ctx(const H5VL_class_t *plugin, void *wrap_ctx);
+H5_DLL herr_t H5VL_set_vol_wrapper(void *obj, const H5VL_t *vol_plugin);
+H5_DLL herr_t H5VL_reset_vol_wrapper(void);
+H5_DLL void * H5VL_wrap_object(const H5VL_class_t *plugin, void *wrap_ctx,
+    void *obj);
+
+/******************************
+ * VOL plugin callback wrappers
+ *****************************/
 
 /* Attribute functions */
 H5_DLL void *H5VL_attr_create(void *obj, H5VL_loc_params_t loc_params, const H5VL_class_t *cls, const char *attr_name, hid_t acpl_id, hid_t aapl_id, hid_t dxpl_id, void **req);
@@ -128,5 +147,6 @@ H5_DLL herr_t H5VL_datatype_close(void *dt, const H5VL_class_t *cls, hid_t dxpl_
 H5_DLL herr_t H5VL_request_cancel(void **req, const H5VL_class_t *cls, H5ES_status_t *status);
 H5_DLL herr_t H5VL_request_test(void **req, const H5VL_class_t *cls, H5ES_status_t *status);
 H5_DLL herr_t H5VL_request_wait(void **req, const H5VL_class_t *cls, H5ES_status_t *status);
+
 #endif /* _H5VLprivate_H */
 

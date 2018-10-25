@@ -37,9 +37,8 @@
 #include "H5Pprivate.h"         /* Property lists                           */
 #include "H5SMprivate.h"        /* Shared Object Header Messages            */
 #include "H5Tprivate.h"         /* Datatypes                                */
-#include "H5VLprivate.h"        /* VOL drivers                              */
-
-#include "H5VLnative.h"         /* Native VOL driver                        */
+#include "H5VLprivate.h"        /* VOL plugins                              */
+#include "H5VLnative.h"         /* Native VOL plugin                        */
 
 
 /****************/
@@ -2167,7 +2166,7 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5F_get_id(H5F_t *file, hbool_t app_ref)
+H5F_get_id(H5F_t *file)
 {
     hid_t ret_value = H5I_INVALID_HID;  /* Return value */
 
@@ -2177,15 +2176,15 @@ H5F_get_id(H5F_t *file, hbool_t app_ref)
 
     if(H5I_find_id(file, H5I_FILE, &ret_value) < 0 || H5I_INVALID_HID == ret_value) {
         /* resurrect the ID - Register an ID with the native driver */
-        if((ret_value = H5VL_native_register(H5I_FILE, file, app_ref)) < 0)
+        if((ret_value = H5VL_native_register(H5I_FILE, file, FALSE)) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register group")
         file->id_exists = TRUE;
-    }
+    } /* end if */
     else {
         /* Increment reference count on existing ID */
-        if(H5I_inc_ref(ret_value, app_ref) < 0)
+        if(H5I_inc_ref(ret_value, FALSE) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTSET, H5I_INVALID_HID, "incrementing file ID failed")
-    }
+    } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3000,6 +2999,7 @@ H5F__set_eoa(const H5F_t *f, H5F_mem_t type, haddr_t addr)
     HDassert(f->shared);
 
     /* Dispatch to driver */
+    /* (H5FD_set_eoa() will add base_addr to addr) */
     if(H5FD_set_eoa(f->shared->lf, type, addr) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "driver set_eoa request failed")
 
@@ -3235,7 +3235,7 @@ H5F__start_swmr_write(H5F_t *f)
     H5G_name_t *obj_paths = NULL;   /* Group hierarchy path */
     size_t u;                       /* Local index variable */
     hbool_t setup = FALSE;          /* Boolean flag to indicate whether SWMR setting is enabled */
-    H5VL_t *vol_driver = NULL;      /* VOL driver for the file */
+    H5VL_t *vol_plugin = NULL;      /* VOL plugin for the file */
     herr_t ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -3299,15 +3299,15 @@ H5F__start_swmr_write(H5F_t *f)
         if(H5F_get_obj_ids(f, H5F_OBJ_GROUP|H5F_OBJ_DATASET, grp_dset_count, obj_ids, FALSE, &grp_dset_count) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "H5F_get_obj_ids failed")
 
-        /* Save the VOL driver for the refresh step */
+        /* Save the VOL plugin for the refresh step */
         if(grp_dset_count > 0) {
             H5VL_object_t *vol_obj = NULL;
 
             if(NULL == (vol_obj = H5VL_get_object(obj_ids[0])))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
 
-            vol_driver = vol_obj->driver;
-        }
+            vol_plugin = vol_obj->plugin;
+        } /* end if */
 
         /* Refresh opened objects (groups, datasets) in the file */
         for(u = 0; u < grp_dset_count; u++) {
@@ -3370,10 +3370,9 @@ H5F__start_swmr_write(H5F_t *f)
         HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to evict file's cached information")
 
     /* Refresh (reopen) the objects (groups & datasets) in the file */
-    for(u = 0; u < grp_dset_count; u++) {
-        if(H5O_refresh_metadata_reopen(obj_ids[u], &obj_glocs[u], vol_driver, TRUE) < 0)
+    for(u = 0; u < grp_dset_count; u++)
+        if(H5O_refresh_metadata_reopen(obj_ids[u], &obj_glocs[u], vol_plugin, TRUE) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CLOSEERROR, FAIL, "can't refresh-close object")
-    }
 
     /* Unlock the file */
     if(H5FD_unlock(f->shared->lf) < 0)
@@ -3482,4 +3481,73 @@ H5F__format_convert(H5F_t *f)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5F__format_convert() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F_get_file_id
+ *
+ * Purpose:     The private version of H5Iget_file_id(), obtains the file
+ *              ID given an object ID.
+ *
+ * Return:      Success:    The file ID associated with the object
+ *              Failure:    H5I_INVALID_HID
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5F_get_file_id(hid_t obj_id, H5I_type_t type)
+{
+    H5VL_object_t  *vol_obj;
+    void           *file        = NULL;
+    hbool_t         vol_wrapper_set = FALSE;            /* Whether the VOL object wrapping context was set up */
+    hid_t           ret_value   = H5I_INVALID_HID;  /* Return value             */
+
+    FUNC_ENTER_NOAPI(H5I_INVALID_HID)
+
+    /* Get the object pointer */
+    if(NULL == (vol_obj = H5VL_get_object(obj_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid identifier")
+
+    /* Set wrapper info in API context */
+    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, H5I_INVALID_HID, "can't set VOL wrapper info")
+    vol_wrapper_set = TRUE;
+
+    /* Get the file through the VOL */
+    if(H5VL_file_optional(vol_obj->data, vol_obj->plugin->cls, H5P_DATASET_XFER_DEFAULT,
+            H5_REQUEST_NULL, H5VL_FILE_GET_FILE, type, &file) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, H5I_INVALID_HID, "unable to get file")
+    if(NULL == file)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, H5I_INVALID_HID, "unable to get the file through the VOL")
+
+    /* Check if the file's ID already exists */
+    if(H5I_find_id(file, H5I_FILE, &ret_value) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, H5I_INVALID_HID, "getting file ID failed")
+
+    /* If the ID does not exist, register it with the VOL plugin */
+    if(H5I_INVALID_HID == ret_value) {
+{
+void *vol_wrap_ctx = NULL;       /* Object wrapping context */
+
+/* Retrieve the VOL object wrap context */
+if(H5CX_get_vol_wrap_ctx((void **)&vol_wrap_ctx) < 0)
+    HGOTO_ERROR(H5E_VOL, H5E_CANTGET, H5I_INVALID_HID, "can't get VOL object wrap context")
+HDassert(vol_wrap_ctx);
+}
+        if ((ret_value = H5VL_wrap_register(H5I_FILE, file, TRUE)) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize file handle")
+    } /* end if */
+    else {
+        /* Increment ref count on existing ID */
+        if(H5I_inc_ref(ret_value, TRUE) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTSET, H5I_INVALID_HID, "incrementing file ID failed")
+    } /* end else */
+
+done:
+    /* Reset object wrapping info in API context */
+    if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
+        HDONE_ERROR(H5E_OHDR, H5E_CANTSET, H5I_INVALID_HID, "can't reset VOL wrapper info")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F_get_file_id() */
 

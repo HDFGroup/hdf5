@@ -648,7 +648,7 @@ H5O_link_delete(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, void *_mesg)
             hid_t file_id;           /* ID for the file the link is located in (passed to user callback) */
 
             /* Get a file ID for the file the link is in */
-            if((file_id = H5F_get_id(f, FALSE)) < 0)
+            if((file_id = H5F_get_id(f)) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to get file ID")
 
             /* Call user-defined link's 'delete' callback */

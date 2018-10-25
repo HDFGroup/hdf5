@@ -242,8 +242,16 @@ H5L__extern_traverse(const char H5_ATTR_UNUSED *link_name, hid_t cur_group,
     if(NULL == (ext_obj = H5O_open_name(&root_loc, obj_name, &opened_type)))
         HGOTO_ERROR(H5E_LINK, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open object")
 
+{
+void *vol_wrap_ctx = NULL;       /* Object wrapping context */
+
+/* Retrieve the VOL object wrap context */
+if(H5CX_get_vol_wrap_ctx((void **)&vol_wrap_ctx) < 0)
+    HGOTO_ERROR(H5E_VOL, H5E_CANTGET, H5I_INVALID_HID, "can't get VOL object wrap context")
+HDassert(vol_wrap_ctx);
+}
     /* Get an ID for the external link's object */
-    if((ext_obj_id = H5VL_native_register(opened_type, ext_obj, TRUE)) < 0)
+    if((ext_obj_id = H5VL_wrap_register(opened_type, ext_obj, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register external link object")
 
     /* Set return value */
@@ -414,7 +422,7 @@ H5Lcreate_external(const char *file_name, const char *obj_name,
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value from plist")
 
     /* Create an external link */
-    if((ret_value = H5VL_link_create(H5VL_LINK_CREATE_UD, vol_obj->data, loc_params, vol_obj->driver->cls,
+    if((ret_value = H5VL_link_create(H5VL_LINK_CREATE_UD, vol_obj->data, loc_params, vol_obj->plugin->cls,
                                      lcpl_id, lapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to create external link")
 

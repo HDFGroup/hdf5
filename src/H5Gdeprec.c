@@ -235,12 +235,12 @@ H5Gcreate1(hid_t loc_id, const char *name, size_t size_hint)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier")
 
     /* Create the group */
-    if(NULL == (grp = H5VL_group_create(vol_obj->data, loc_params, vol_obj->driver->cls, name, tmp_gcpl, 
+    if(NULL == (grp = H5VL_group_create(vol_obj->data, loc_params, vol_obj->plugin->cls, name, tmp_gcpl, 
                                         H5P_GROUP_ACCESS_DEFAULT, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, H5I_INVALID_HID, "unable to create group")
 
     /* Get an atom for the group */
-    if((ret_value = H5VL_register_id(H5I_GROUP, grp, vol_obj->driver, TRUE)) < 0)
+    if((ret_value = H5VL_register_id(H5I_GROUP, grp, vol_obj->plugin, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register group")
 
 done:
@@ -249,7 +249,7 @@ done:
             HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release property list")
 
     if(H5I_INVALID_HID == ret_value)
-        if(grp && H5VL_group_close(grp, vol_obj->driver->cls, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+        if(grp && H5VL_group_close(grp, vol_obj->plugin->cls, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release group")
 
     FUNC_LEAVE_API(ret_value)
@@ -297,17 +297,17 @@ H5Gopen1(hid_t loc_id, const char *name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier")
 
     /* Open the group */
-    if(NULL == (grp = H5VL_group_open(vol_obj->data, loc_params, vol_obj->driver->cls, name, H5P_DEFAULT, 
+    if(NULL == (grp = H5VL_group_open(vol_obj->data, loc_params, vol_obj->plugin->cls, name, H5P_DEFAULT, 
                                       H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open group")
 
     /* Get an atom for the group */
-    if((ret_value = H5VL_register_id(H5I_GROUP, grp, vol_obj->driver, TRUE)) < 0)
+    if((ret_value = H5VL_register_id(H5I_GROUP, grp, vol_obj->plugin, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register group")
 
 done:
     if(H5I_INVALID_HID == ret_value)
-        if(grp && H5VL_group_close(grp, vol_obj->driver->cls, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+        if(grp && H5VL_group_close(grp, vol_obj->plugin->cls, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release group")
 
     FUNC_LEAVE_API(ret_value)
@@ -372,7 +372,7 @@ H5Glink(hid_t cur_loc_id, H5G_link_t type, const char *cur_name, const char *new
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for target loc params")
 
         /* Create the link through the VOL */
-        if((ret_value = H5VL_link_create(H5VL_LINK_CREATE_HARD, NULL, loc_params2, vol_obj->driver->cls,
+        if((ret_value = H5VL_link_create(H5VL_LINK_CREATE_HARD, NULL, loc_params2, vol_obj->plugin->cls,
                                          lcpl_id, H5P_DEFAULT, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
     }
@@ -394,7 +394,7 @@ H5Glink(hid_t cur_loc_id, H5G_link_t type, const char *cur_name, const char *new
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for target name")
 
         /* Create the link through the VOL */
-        if((ret_value = H5VL_link_create(H5VL_LINK_CREATE_SOFT, vol_obj->data, loc_params, vol_obj->driver->cls, 
+        if((ret_value = H5VL_link_create(H5VL_LINK_CREATE_SOFT, vol_obj->data, loc_params, vol_obj->plugin->cls, 
                                          lcpl_id, H5P_DEFAULT, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
     }
@@ -469,7 +469,7 @@ H5Glink2(hid_t cur_loc_id, const char *cur_name, H5G_link_t type,
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for target name")
 
         /* Create the link through the VOL */
-        if((ret_value = H5VL_link_create(H5VL_LINK_CREATE_HARD, vol_obj2->data, loc_params2, vol_obj2->driver->cls,
+        if((ret_value = H5VL_link_create(H5VL_LINK_CREATE_HARD, vol_obj2->data, loc_params2, vol_obj2->plugin->cls,
                                          lcpl_id, H5P_DEFAULT, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
     }
@@ -496,7 +496,7 @@ H5Glink2(hid_t cur_loc_id, const char *cur_name, H5G_link_t type,
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for target name")
 
         /* Create the link through the VOL */
-        if((ret_value = H5VL_link_create(H5VL_LINK_CREATE_SOFT, vol_obj->data, loc_params, vol_obj->driver->cls,
+        if((ret_value = H5VL_link_create(H5VL_LINK_CREATE_SOFT, vol_obj->data, loc_params, vol_obj->plugin->cls,
                                          lcpl_id, H5P_DEFAULT, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
     }
@@ -544,7 +544,7 @@ H5Gmove(hid_t src_loc_id, const char *src_name, const char *dst_name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
     /* Move the link */
-    if((ret_value = H5VL_link_move(vol_obj->data, loc_params1, NULL, loc_params2, vol_obj->driver->cls,
+    if((ret_value = H5VL_link_move(vol_obj->data, loc_params1, NULL, loc_params2, vol_obj->plugin->cls,
                                    H5P_DEFAULT, H5P_DEFAULT, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTMOVE, FAIL, "couldn't move link")
 
@@ -601,7 +601,7 @@ H5Gmove2(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
 
     /* Move the link */
     if((ret_value = H5VL_link_move(vol_obj1->data, loc_params1, vol_obj2->data, loc_params2, 
-                                   vol_obj1->driver->cls, H5P_DEFAULT, H5P_DEFAULT, 
+                                   vol_obj1->plugin->cls, H5P_DEFAULT, H5P_DEFAULT, 
                                    H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTMOVE, FAIL, "unable to move link")
 
@@ -645,7 +645,7 @@ H5Gunlink(hid_t loc_id, const char *name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
     /* Delete the link */
-    if(H5VL_link_specific(vol_obj->data, loc_params, vol_obj->driver->cls, H5VL_LINK_DELETE, 
+    if(H5VL_link_specific(vol_obj->data, loc_params, vol_obj->plugin->cls, H5VL_LINK_DELETE, 
                           H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "couldn't delete link")
 
@@ -690,7 +690,7 @@ H5Gget_linkval(hid_t loc_id, const char *name, size_t size, char *buf/*out*/)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
     /* Get the link value */
-    if((ret_value = H5VL_link_get(vol_obj->data, loc_params, vol_obj->driver->cls, H5VL_LINK_GET_VAL, 
+    if((ret_value = H5VL_link_get(vol_obj->data, loc_params, vol_obj->plugin->cls, H5VL_LINK_GET_VAL, 
                                   H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, buf, size)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to get link value")
 
@@ -825,8 +825,10 @@ H5Giterate(hid_t loc_id, const char *name, int *idx_p, H5G_iterate_t op,
 {
     H5G_loc_t           loc;            /* Location of object               */
     H5G_link_iterate_t  lnk_op;         /* Link operator                    */
+    H5VL_object_t  *vol_obj;
     hsize_t             last_obj;       /* Index of last object looked at   */
     hsize_t	            idx;            /* Internal location to hold index  */
+    hbool_t         vol_wrapper_set = FALSE;            /* Whether the VOL object wrapping context was set up */
     herr_t              ret_value;      /* Return value                     */
 
     FUNC_ENTER_API(FAIL)
@@ -850,6 +852,15 @@ H5Giterate(hid_t loc_id, const char *name, int *idx_p, H5G_iterate_t op,
     lnk_op.op_type = H5G_LINK_OP_OLD;
     lnk_op.op_func.op_old = op;
 
+    /* Get the object pointer */
+    if(NULL == (vol_obj = H5VL_get_object(loc_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADTYPE, (-1), "invalid identifier")
+
+    /* Set wrapper info in API context */
+    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTSET, (-1), "can't set VOL wrapper info")
+    vol_wrapper_set = TRUE;
+
     /* Call private function */
     if((ret_value = H5G_iterate(&loc, name, H5_INDEX_NAME, H5_ITER_INC, idx, &last_obj, &lnk_op, op_data)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "group iteration failed")
@@ -859,6 +870,10 @@ H5Giterate(hid_t loc_id, const char *name, int *idx_p, H5G_iterate_t op,
         *idx_p = (int)last_obj;
 
 done:
+    /* Reset object wrapping info in API context */
+    if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
+        HDONE_ERROR(H5E_SYM, H5E_CANTSET, H5I_INVALID_HID, "can't reset VOL wrapper info")
+
     FUNC_LEAVE_API(ret_value)
 } /* end H5Giterate() */
 

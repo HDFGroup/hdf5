@@ -126,7 +126,7 @@ H5Rget_obj_type1(hid_t id, H5R_type_t ref_type, const void *ref)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5G_UNKNOWN, "invalid file identifier")
 
     /* Get the object information */
-    if (H5VL_object_get(vol_obj->data, loc_params, vol_obj->driver->cls, H5VL_REF_GET_TYPE,
+    if (H5VL_object_get(vol_obj->data, loc_params, vol_obj->plugin->cls, H5VL_REF_GET_TYPE,
                                     H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &obj_type, ref_type, ref) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, H5G_UNKNOWN, "unable to determine object type")
 
@@ -183,12 +183,12 @@ H5Rdereference1(hid_t obj_id, H5R_type_t ref_type, const void *_ref)
     loc_params.obj_type = H5I_get_type(obj_id);
 
     /* Dereference */
-    if (NULL == (opened_obj = H5VL_object_open(vol_obj->data, loc_params, vol_obj->driver->cls, &opened_type, 
+    if (NULL == (opened_obj = H5VL_object_open(vol_obj->data, loc_params, vol_obj->plugin->cls, &opened_type, 
                                               H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to dereference object")
 
     /* Get an atom for the object */
-    if ((ret_value = H5VL_register_id(opened_type, opened_obj, vol_obj->driver, TRUE)) < 0)
+    if ((ret_value = H5VL_register_id(opened_type, opened_obj, vol_obj->plugin, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize object handle")
 
 done:

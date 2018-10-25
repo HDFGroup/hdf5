@@ -233,3 +233,37 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__get_sbe_addr_test() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F__same_file_test
+ *
+ * Purpose:     Check if two file IDs refer to the same underlying file.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *	        Oct 13, 2018
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5F__same_file_test(hid_t file_id1, hid_t file_id2)
+{
+    H5F_t      *file1, *file2;          /* File info */
+    htri_t      ret_value = FAIL;       /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* Check arguments */
+    if(NULL == (file1 = (H5F_t *)H5VL_object_verify(file_id1, H5I_FILE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
+    if(NULL == (file2 = (H5F_t *)H5VL_object_verify(file_id2, H5I_FILE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
+
+    /* If they are using the same underlying "shared" file struct, they are the same file */
+    ret_value = (file1->shared == file2->shared);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F__same_file_test() */
+

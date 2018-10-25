@@ -4165,10 +4165,7 @@ test_file_freespace(const char *env_h5_drvr)
             /* Check that there is the right amount of free space in the file */
             free_space = H5Fget_freespace(file);
             CHECK(free_space, FAIL, "H5Fget_freespace");
-            if(new_format)
-                VERIFY(free_space, expected_fs_del, "H5Fget_freespace");
-            else
-                VERIFY(free_space, expected_fs_del, "H5Fget_freespace");
+            VERIFY(free_space, expected_fs_del, "H5Fget_freespace");
 
             /* Close file */
             ret = H5Fclose(file);

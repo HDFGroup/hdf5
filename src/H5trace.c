@@ -2711,9 +2711,6 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                                 case H5VL_FILE_GET_OBJ_IDS:
                                     HDfprintf(out, "H5VL_FILE_GET_OBJ_IDS");
                                     break;
-                                case H5VL_OBJECT_GET_FILE:
-                                    HDfprintf(out, "H5VL_OBJECT_GET_FILE");
-                                    break;
                                 default:
                                     HDfprintf(out, "%ld", (long)get);
                                     break;
@@ -2733,6 +2730,9 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                             switch(specific) {
                                 case H5VL_FILE_FLUSH:
                                     HDfprintf(out, "H5VL_FILE_FLUSH");
+                                    break;
+                                case H5VL_FILE_REOPEN:
+                                    HDfprintf(out, "H5VL_FILE_REOPEN");
                                     break;
                                 case H5VL_FILE_MOUNT:
                                     HDfprintf(out, "H5VL_FILE_MOUNT");

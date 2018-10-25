@@ -662,6 +662,7 @@ IDE_GENERATED_PROPERTIES ("H5UC" "${H5UC_HDRS}" "${H5UC_SOURCES}" )
 
 set (H5VL_SOURCES
     ${HDF5_SRC_DIR}/H5VL.c
+    ${HDF5_SRC_DIR}/H5VLcallback.c
     ${HDF5_SRC_DIR}/H5VLint.c
     ${HDF5_SRC_DIR}/H5VLnative.c
 )

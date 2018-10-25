@@ -43,11 +43,17 @@ static const H5VL_class_t fake_vol_g = {
     0,                                              /* version      */
     (H5VL_class_value_t)999,                        /* value        */
     FAKE_VOL_NAME,                                  /* name         */
+    0,                                              /* capability flags */
     NULL,                                           /* initialize   */
     NULL,                                           /* terminate    */
-    (size_t)0,                                      /* fapl size    */
-    NULL,                                           /* fapl copy    */
-    NULL,                                           /* fapl free    */
+    (size_t)0,                                      /* info size    */
+    NULL,                                           /* info copy    */
+    NULL,                                           /* info compare */
+    NULL,                                           /* info free    */
+    NULL,                                           /* get_object   */
+    NULL,                                           /* get_wrap_ctx */
+    NULL,                                           /* free_wrap_ctx */
+    NULL,                                           /* wrap_object  */
     {   /* attribute_cls */
         NULL,                                       /* create       */
         NULL,                                       /* open         */
@@ -120,7 +126,7 @@ static const H5VL_class_t fake_vol_g = {
  * Function:    test_vol_registration()
  *
  * Purpose:     Tests if we can load, register, and close a simple
- *              VOL driver.
+ *              VOL plugin.
  *
  * Return:      SUCCEED/FAIL
  *
@@ -130,28 +136,48 @@ static herr_t
 test_vol_registration(void)
 {
     htri_t is_registered;
-    hid_t vol_id = -1;
+    hid_t vol_id = -1, vol_id2 = -1;
 
     TESTING("VOL registration");
 
-    /* The test/fake VOL driver should not be registered at the start of the test */
+    /* The test/fake VOL plugin should not be registered at the start of the test */
     if ((is_registered = H5VLis_registered(FAKE_VOL_NAME)) < 0)
         FAIL_STACK_ERROR;
     if (is_registered > 0)
-        FAIL_PUTS_ERROR("native VOL driver is inappropriately registered");
+        FAIL_PUTS_ERROR("native VOL plugin is inappropriately registered");
 
-    /* Load a VOL interface */
-    if ((vol_id = H5VLregister(&fake_vol_g)) < 0)
+    /* Register a VOL plugin */
+    if ((vol_id = H5VLregister(&fake_vol_g, H5P_DEFAULT)) < 0)
         FAIL_STACK_ERROR;
 
-    /* The test/fake VOL driver should be registered now */
+    /* The test/fake VOL plugin should be registered now */
     if ((is_registered = H5VLis_registered(FAKE_VOL_NAME)) < 0)
         FAIL_STACK_ERROR;
     if (0 == is_registered)
-        FAIL_PUTS_ERROR("native VOL driver is un-registered");
+        FAIL_PUTS_ERROR("native VOL plugin is un-registered");
 
-    /* Close the VOL interface */
-    if (H5VLclose(vol_id) < 0)
+    /* Re-register a VOL plugin */
+    if ((vol_id2 = H5VLregister(&fake_vol_g, H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR;
+
+    /* The test/fake VOL plugin should still be registered now */
+    if ((is_registered = H5VLis_registered(FAKE_VOL_NAME)) < 0)
+        FAIL_STACK_ERROR;
+    if (0 == is_registered)
+        FAIL_PUTS_ERROR("native VOL plugin is un-registered");
+
+    /* Unregister the second test/fake VOL ID */
+    if (H5VLunregister(vol_id2) < 0)
+        FAIL_STACK_ERROR;
+
+    /* The test/fake VOL plugin should still be registered now */
+    if ((is_registered = H5VLis_registered(FAKE_VOL_NAME)) < 0)
+        FAIL_STACK_ERROR;
+    if (0 == is_registered)
+        FAIL_PUTS_ERROR("native VOL plugin is un-registered");
+
+    /* Unregister the original test/fake VOL ID */
+    if (H5VLunregister(vol_id) < 0)
         FAIL_STACK_ERROR;
 
     PASSED();
@@ -159,7 +185,7 @@ test_vol_registration(void)
 
 error:
     H5E_BEGIN_TRY {
-        H5VLclose(vol_id);
+        H5VLunregister(vol_id);
     } H5E_END_TRY;
     return FAIL;
 

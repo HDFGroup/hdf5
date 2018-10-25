@@ -443,6 +443,7 @@ H5Fmount(hid_t loc_id, const char *name, hid_t child_id, hid_t plist_id)
     H5VL_object_t  *child_vol_obj = NULL;       /* Child object         */
     H5I_type_t      loc_type;                   /* ID type of location  */
     H5I_type_t      child_type;                 /* ID type of child     */
+    hbool_t         vol_wrapper_set = FALSE;            /* Whether the VOL object wrapping context was set up */
     herr_t          ret_value = SUCCEED;        /* Return value         */
 
     FUNC_ENTER_API(FAIL)
@@ -478,15 +479,24 @@ H5Fmount(hid_t loc_id, const char *name, hid_t child_id, hid_t plist_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "could not get child object")
 
     /* Check if both objects are associated with the same VOL plugin */
-    if(loc_vol_obj->driver->cls->value != child_vol_obj->driver->cls->value)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "Can't mount file onto object from different VOL driver")
+    if(loc_vol_obj->plugin->cls->value != child_vol_obj->plugin->cls->value)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "Can't mount file onto object from different VOL plugin")
+
+    /* Set wrapper info in API context */
+    if(H5VL_set_vol_wrapper(loc_vol_obj->data, loc_vol_obj->plugin) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, H5I_INVALID_HID, "can't set VOL wrapper info")
+    vol_wrapper_set = TRUE;
 
     /* Perform the mount operation */
-    if(H5VL_file_specific(loc_vol_obj->data, loc_vol_obj->driver->cls, H5VL_FILE_MOUNT, H5P_DATASET_XFER_DEFAULT, 
+    if(H5VL_file_specific(loc_vol_obj->data, loc_vol_obj->plugin->cls, H5VL_FILE_MOUNT, H5P_DATASET_XFER_DEFAULT, 
                           H5_REQUEST_NULL, loc_type, name, child_vol_obj->data, plist_id) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "unable to mount file")
 
 done:
+    /* Reset object wrapping info in API context */
+    if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
+        HDONE_ERROR(H5E_OHDR, H5E_CANTSET, H5I_INVALID_HID, "can't reset VOL wrapper info")
+
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fmount() */
 
@@ -512,6 +522,7 @@ H5Funmount(hid_t loc_id, const char *name)
 {
     H5VL_object_t  *vol_obj = NULL;             /* Parent object        */
     H5I_type_t      loc_type;                   /* ID type of location  */
+    hbool_t         vol_wrapper_set = FALSE;        /* Whether the VOL object wrapping context was set up */
     herr_t          ret_value = SUCCEED;        /* Return value         */
 
     FUNC_ENTER_API(FAIL)
@@ -534,12 +545,21 @@ H5Funmount(hid_t loc_id, const char *name)
     if(NULL == (vol_obj = (H5VL_object_t *)H5I_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "could not get location object")
 
+    /* Set wrapper info in API context */
+    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, H5I_INVALID_HID, "can't set VOL wrapper info")
+    vol_wrapper_set = TRUE;
+
     /* Perform the unmount operation */
-    if(H5VL_file_specific(vol_obj->data, vol_obj->driver->cls, H5VL_FILE_UNMOUNT, 
+    if(H5VL_file_specific(vol_obj->data, vol_obj->plugin->cls, H5VL_FILE_UNMOUNT, 
                           H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, loc_type, name) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "unable to unmount file")
 
 done:
+    /* Reset object wrapping info in API context */
+    if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
+        HDONE_ERROR(H5E_OHDR, H5E_CANTSET, H5I_INVALID_HID, "can't reset VOL wrapper info")
+
     FUNC_LEAVE_API(ret_value)
 } /* end H5Funmount() */
 

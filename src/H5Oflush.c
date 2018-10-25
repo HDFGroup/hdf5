@@ -92,7 +92,7 @@ H5Oflush(hid_t obj_id)
     loc_params.obj_type     = H5I_get_type(obj_id);
 
     /* Flush the object */
-    if((ret_value = H5VL_object_specific(vol_obj->data, loc_params, vol_obj->driver->cls, 
+    if((ret_value = H5VL_object_specific(vol_obj->data, loc_params, vol_obj->plugin->cls, 
                                          H5VL_OBJECT_FLUSH, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, obj_id)) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTFLUSH, FAIL, "unable to flush object")
 
@@ -257,7 +257,7 @@ H5Orefresh(hid_t oid)
     loc_params.obj_type     = H5I_get_type(oid);
 
     /* Refresh the object */
-    if((ret_value = H5VL_object_specific(vol_obj->data, loc_params, vol_obj->driver->cls, 
+    if((ret_value = H5VL_object_specific(vol_obj->data, loc_params, vol_obj->plugin->cls, 
                                          H5VL_OBJECT_REFRESH, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, oid)) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to refresh object")
 
@@ -301,7 +301,7 @@ H5O_refresh_metadata(hid_t oid, H5O_loc_t oloc)
         H5O_loc_t obj_oloc;
         H5G_name_t obj_path;
         H5O_shared_t cached_H5O_shared;
-        H5VL_t *driver = NULL;
+        H5VL_t *plugin = NULL;
 
         /* Create empty object location */
         obj_loc.oloc = &obj_oloc;
@@ -319,29 +319,29 @@ H5O_refresh_metadata(hid_t oid, H5O_loc_t oloc)
             if(H5T_save_refresh_state(oid, &cached_H5O_shared) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTOPENOBJ, FAIL, "unable to save datatype state")
 
-        /* Get the VOL object from the ID and cache a pointer to the driver.
+        /* Get the VOL object from the ID and cache a pointer to the plugin.
          * The vol_obj will disappear when the underlying object is closed, so
          * we can't use that directly.
          */
         if(NULL == (vol_obj = H5VL_get_object(oid)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
-        driver = vol_obj->driver;
+        plugin = vol_obj->plugin;
 
-        /* Bump the number of references on the VOL driver.
-         * If you don't do this, VDS refreshes can accidentally close the driver.
+        /* Bump the number of references on the VOL plugin.
+         * If you don't do this, VDS refreshes can accidentally close the plugin.
          */
-        driver->nrefs++;
+        plugin->nrefs++;
 
         /* Close object & evict its metadata */
         if((H5O__refresh_metadata_close(oid, oloc, &obj_loc)) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to refresh object")
 
         /* Re-open the object, re-fetching its metadata */
-        if((H5O_refresh_metadata_reopen(oid, &obj_loc, driver, FALSE)) < 0)
+        if((H5O_refresh_metadata_reopen(oid, &obj_loc, plugin, FALSE)) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to refresh object")
 
-        /* Restore the number of references on the VOL driver */
-        driver->nrefs--;
+        /* Restore the number of references on the VOL plugin */
+        plugin->nrefs--;
 
         /* Restore important datatype state */
         if(H5I_get_type(oid) == H5I_DATATYPE)
@@ -444,7 +444,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_refresh_metadata_reopen(hid_t oid, H5G_loc_t *obj_loc, H5VL_t *vol_driver, hbool_t start_swmr)
+H5O_refresh_metadata_reopen(hid_t oid, H5G_loc_t *obj_loc, H5VL_t *vol_plugin, hbool_t start_swmr)
 {
     void *object = NULL;        /* Object for this operation */
     H5I_type_t type;            /* Type of object for the ID */
@@ -454,7 +454,7 @@ H5O_refresh_metadata_reopen(hid_t oid, H5G_loc_t *obj_loc, H5VL_t *vol_driver, h
 
     /* Sanity check */
     HDassert(obj_loc);
-    HDassert(vol_driver);
+    HDassert(vol_plugin);
 
     /* Get object's type */
     type = H5I_get_type(oid);
@@ -501,7 +501,7 @@ H5O_refresh_metadata_reopen(hid_t oid, H5G_loc_t *obj_loc, H5VL_t *vol_driver, h
     } /* end switch */
 
     /* Re-register ID for the object */
-    if((H5I_register_with_id(type, object, vol_driver, TRUE, oid)) < 0)
+    if((H5I_register_with_id(type, object, vol_plugin, TRUE, oid)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to re-register object ID after refresh")
 
 done:
