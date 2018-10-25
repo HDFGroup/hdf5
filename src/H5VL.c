@@ -105,7 +105,7 @@ H5VL__get_plugin_cb(void *obj, hid_t id, void *_op_data)
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5VLregister
+ * Function:    H5VLregister_plugin
  *
  * Purpose:     Registers a new VOL plugin as a member of the virtual object
  *              layer class.
@@ -114,17 +114,17 @@ H5VL__get_plugin_cb(void *obj, hid_t id, void *_op_data)
  *                          library is closed or the plugin is
  *                          unregistered.
  *
- *              Failure:    A negative value (H5I_INVALID_HID).
+ *              Failure:    H5I_INVALID_HID
  *
  *-------------------------------------------------------------------------
  */
 hid_t
-H5VLregister(const H5VL_class_t *cls, hid_t vipl_id)
+H5VLregister_plugin(const H5VL_class_t *cls, hid_t vipl_id)
 {
     H5VL_get_plugin_ud_t op_data;       /* Callback info for plugin search */
     hid_t ret_value = H5I_INVALID_HID;
 
-    FUNC_ENTER_API(FAIL)
+    FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE2("i", "*xi", cls, vipl_id);
 
     /* Check arguments */
@@ -154,17 +154,17 @@ H5VLregister(const H5VL_class_t *cls, hid_t vipl_id)
     } /* end if */
     else {
         /* Create a new class ID */
-        if ((ret_value = H5VL_register(cls, TRUE, vipl_id)) < 0)
+        if ((ret_value = H5VL_register_plugin(cls, TRUE, vipl_id)) < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register VOL plugin")
     } /* end else */
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5VLregister() */
+} /* end H5VLregister_driver() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5VLregister_by_name
+ * Function:    H5VLregister_plugin_by_name
  *
  * Purpose:     Registers a new VOL plugin as a member of the virtual object
  *              layer class.
@@ -173,17 +173,17 @@ done:
  *                          library is closed or the plugin is
  *                          unregistered.
  *
- *              Failure:    A negative value.
+ *              Failure:    H5I_INVALID_HID
  *
  *-------------------------------------------------------------------------
  */
 hid_t
-H5VLregister_by_name(const char *name, hid_t vipl_id)
+H5VLregister_plugin_by_name(const char *name, hid_t vipl_id)
 {
     H5VL_get_plugin_ud_t op_data;       /* Callback info for plugin search */
     hid_t ret_value = H5I_INVALID_HID;
 
-    FUNC_ENTER_API(FAIL)
+    FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE2("i", "*si", name, vipl_id);
 
     /* Check arguments */
@@ -215,13 +215,13 @@ H5VLregister_by_name(const char *name, hid_t vipl_id)
             HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, H5I_INVALID_HID, "unable to load VOL plugin")
 
         /* Register the plugin we loaded */
-        if ((ret_value = H5VL_register(cls, TRUE, vipl_id)) < 0)
+        if ((ret_value = H5VL_register_plugin(cls, TRUE, vipl_id)) < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register VOL plugin ID")
     } /* end else */
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5VLregister_by_name() */
+} /* end H5VLregister_driver_by_name() */
 
 
 /*-------------------------------------------------------------------------
@@ -259,7 +259,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5VLunregister
+ * Function:    H5VLunregister_plugin
  *
  * Purpose:     Removes a VOL plugin ID from the library. This in no way affects
  *              file access property lists which have been defined to use
@@ -273,7 +273,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLunregister(hid_t vol_id)
+H5VLunregister_driver(hid_t vol_id)
 {
     herr_t ret_value = SUCCEED;       /* Return value */
 
@@ -290,11 +290,11 @@ H5VLunregister(hid_t vol_id)
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5VLunregister() */
+} /* end H5VLunregister_driver() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5VLis_registered
+ * Function:    H5VLis_driver_registered
  *
  * Purpose:     Tests whether a VOL class has been registered or not
  *
@@ -307,7 +307,7 @@ done:
  *-------------------------------------------------------------------------
  */
 htri_t
-H5VLis_registered(const char *name)
+H5VLis_driver_registered(const char *name)
 {
     H5VL_get_plugin_ud_t op_data;       /* Callback info for plugin search */
     htri_t ret_value = FALSE;           /* Return value */
@@ -327,7 +327,7 @@ H5VLis_registered(const char *name)
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5VLis_registered() */
+} /* end H5VLis_driver_registered() */
 
 
 /*-------------------------------------------------------------------------
@@ -467,67 +467,6 @@ H5VLcmp_plugin_info(int *cmp, hid_t plugin_id, const void *info1, const void *in
 done:
     FUNC_LEAVE_API(ret_value)
 } /* H5VLcmp_plugin_info() */
-
-
-/*---------------------------------------------------------------------------
- * Function:	H5VLobject_register
- *
- * Purpose:     Public routine to create an HDF5 hid_t with library
- *              specific types, bypassing the limitation of H5Iregister.
- *
- * Return:      Success:    Non-negative
- *
- *              Failure:    Negative
- *
- *---------------------------------------------------------------------------
- */
-hid_t
-H5VLobject_register(void *obj, H5I_type_t obj_type, hid_t plugin_id)
-{
-    hid_t ret_value = FAIL;
-
-    FUNC_ENTER_API(FAIL)
-    H5TRACE3("i", "*xIti", obj, obj_type, plugin_id);
-
-    if (NULL == obj)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object to register")
-
-    if ((ret_value = H5VL_object_register(obj, obj_type, plugin_id, TRUE)) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, FAIL, "unable to register object")
-
-done:
-    FUNC_LEAVE_API(ret_value)
-} /* H5VLobject_register */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5VLobject
- *
- * Purpose:     Public utility function to return the VOL object pointer
- *              associated with an hid_t.
- *
- * Return:      Success:        object pointer
- *              Failure:        NULL
- *
- * Programmer:  Jordan Henderson
- *              January, 2018
- *
- *-------------------------------------------------------------------------
- */
-void *
-H5VLobject(hid_t id)
-{
-    void *ret_value = NULL;
-
-    FUNC_ENTER_API(NULL)
-    H5TRACE1("*x", "i", id);
-
-    if (NULL == (ret_value = H5VL_object(id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "invalid identifier")
-
-done:
-    FUNC_LEAVE_API(ret_value)
-} /* end H5VLobject() */
 
 /*-------------------------------------------------------------------------
  * Routines below this are public wrappers for stackable VOL plugins, and
@@ -708,12 +647,13 @@ done:
 void *
 H5VLget_object(void *obj, hid_t plugin_id)
 {
-    H5VL_class_t *cls = NULL;
+    H5VL_class_t *cls;
     void *ret_value = NULL;
 
     FUNC_ENTER_API_NOINIT
 
     H5TRACE2("*x", "*xi", obj, plugin_id);
+
     /* Check args */
     if(NULL == obj)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid object")

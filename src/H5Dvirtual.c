@@ -58,7 +58,7 @@
 #include "H5Oprivate.h"         /* Object headers                       */
 #include "H5Pprivate.h"         /* Property Lists                       */
 #include "H5Sprivate.h"         /* Dataspaces                           */
-#include "H5VLnative.h"         /* Native VOL driver                    */
+#include "H5VLnative_private.h" /* Native VOL driver                        */
 #include "H5VLprivate.h"        /* Virtual Object Layer                 */
 
 /****************/
@@ -2978,7 +2978,7 @@ H5D__virtual_refresh_source_dset(H5D_t **dset)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get native VOL driver ID")
 
     /* Get a temporary identifier for this source dataset */
-    if((temp_id = H5VL_object_register(*dset, H5I_DATASET, native_vol_id, FALSE)) < 0)
+    if((temp_id = H5VL_register_using_vol_id(H5I_DATASET, *dset, native_vol_id, FALSE)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL, "can't register (temporary) source dataset ID")
 
     /* Refresh source dataset */

@@ -225,20 +225,21 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:   H5VL_register_id
+ * Function:    H5VL_register
  *
- * Purpose:    Wrapper to register an object ID with a VOL aux struct 
- *             and increment ref count on VOL plugin ID
+ * Purpose:     VOL-aware version of H5I_register. Constructs an H5VL_object_t
+ *              from the passed-in object and registers that. Does the right
+ *              thing with datatypes, which are complicated under the VOL.
  *
- * Return:     Success:     A valid HDF5 ID
+ * Return:      Success:    A valid HDF5 ID
  *              Failure:    H5I_INVALID_HID
  *
  *-------------------------------------------------------------------------
  */
 hid_t
-H5VL_register_id(H5I_type_t type, void *object, H5VL_t *vol_plugin, hbool_t app_ref)
+H5VL_register(H5I_type_t type, const void *object, H5VL_t *vol_plugin, hbool_t app_ref)
 {
-    H5VL_object_t  *new_obj     = NULL;
+    H5VL_object_t  *vol_obj     = NULL;
     hid_t           ret_value   = H5I_INVALID_HID;
 
     FUNC_ENTER_NOAPI(H5I_INVALID_HID)
@@ -247,35 +248,138 @@ H5VL_register_id(H5I_type_t type, void *object, H5VL_t *vol_plugin, hbool_t app_
     HDassert(object);
     HDassert(vol_plugin);
 
-    /* Setup VOL object */
-    if (NULL == (new_obj = H5FL_CALLOC(H5VL_object_t)))
+    /* Set up VOL object to wrap the passed-in data */
+    if (NULL == (vol_obj = H5FL_CALLOC(H5VL_object_t)))
         HGOTO_ERROR(H5E_VOL, H5E_CANTALLOC, H5I_INVALID_HID, "can't allocate top object structure")
-    new_obj->plugin = vol_plugin;
-    new_obj->data = object;
+    vol_obj->plugin = vol_plugin;
+    vol_obj->data = object;
 
     /* Increment ref count, for new object */
     vol_plugin->nrefs++;
 
-    /* Special wrapper for named datatypes */
+    /* Datatypes need special handling under the VOL, since they have a non-VOL aspect */
     if (H5I_DATATYPE == type) {
         H5T_t *dt;
 
         /* Wrap "real" (non-named) datatype around VOL object, so it's compatible with H5T interface */
-        if (NULL == (dt = H5T_construct_datatype(new_obj)))
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5I_INVALID_HID, "can't construct datatype object")
+        if (NULL == (dt = H5T_construct_datatype(vol_obj)))
+            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, H5I_INVALID_HID, "can't construct datatype object")
 
         /* New object is _actually_ the datatype */
-        new_obj = (H5VL_object_t *)dt;
+        vol_obj = (H5VL_object_t *)dt;
     } /* end if */
     
     /* Register VOL object as _object_ type, for future object API calls */
     /* (Except for named datatypes, as above) */
-    if ((ret_value = H5I_register(type, new_obj, app_ref)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize handle")
+    if ((ret_value = H5I_register(type, vol_obj, app_ref)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize handle")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_register_id() */
+} /* end H5VL_register() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_register_using_existing_id
+ *
+ * Purpose:     Registers an OBJECT in a TYPE with the supplied ID for it.
+ *              This routine will check to ensure the supplied ID is not already
+ *              in use, and ensure that it is a valid ID for the given type, 
+ *              but will NOT check to ensure the OBJECT is not already
+ *              registered (thus, it is possible to register one object under
+ *              multiple IDs).
+ *
+ * NOTE:        Intended for use in refresh calls, where we have to close
+ *              and re-open the underlying data, then hook the VOL object back
+ *              up to the original ID.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_register_using_existing_id(H5I_type_t type, void *object, H5VL_t *vol_driver, hbool_t app_ref, hid_t existing_id)
+{
+    H5VL_object_t  *new_vol_obj = NULL;     /* Pointer to new VOL object                    */
+    void           *stored_obj = NULL;      /* Pointer to the object that will be stored    */
+    herr_t          ret_value = SUCCEED;    /* Return value                                 */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Check arguments */
+    HDassert(object);
+    HDassert(vol_driver);
+
+    /* Make sure type number is valid */
+    if(type != H5I_ATTR && type != H5I_DATASET && type != H5I_DATATYPE && type != H5I_FILE && type != H5I_GROUP)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid type number")
+
+    /* Set up the new VOL object */
+    if(NULL == (new_vol_obj = H5FL_CALLOC(H5VL_object_t)))
+        HGOTO_ERROR(H5E_VOL, H5E_CANTALLOC, FAIL, "can't allocate memory for VOL object");
+    new_vol_obj->driver = vol_driver;
+    new_vol_obj->data = object;
+
+    /* Bump the reference count on the VOL driver */
+    vol_driver->nrefs++;
+
+    /* If this is a datatype, we have to hide the VOL object under the H5T_t pointer */
+    if(H5I_DATATYPE == type) {
+        if(NULL == (stored_obj = (void *)H5T_construct_datatype(new_vol_obj)))
+            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't construct datatype object");
+    }
+    else
+        stored_obj = (void *)new_vol_obj;
+
+    /* Call the underlying H5I function to complete the registration */
+    if(H5I_register_using_existing_id(type, stored_obj, app_ref, existing_id) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, FAIL, "can't register object under existing ID")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_register_using_existing_id() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_register_using_vol_id
+ *
+ * Purpose:     Utility function to create a user ID for an object created
+ *              or opened through the VOL. Uses the VOL plugin's ID to
+ *              get the plugin information instead of it being passed in.
+ *
+ * Return:      Success:    A valid HDF5 ID
+ *              Failure:    H5I_INVALID_HID 
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5VL_register_using_vol_id(H5I_type_t type, const void *obj, hid_t plugin_id, hbool_t app_ref)
+{
+    H5VL_class_t    *cls = NULL;
+    H5VL_t          *plugin = NULL;       /* VOL plugin struct */
+    hid_t           ret_value = H5I_INVALID_HID;
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Get the VOL class object from the plugin's ID */
+    if (NULL == (cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_VOL, H5E_BADTYPE, H5I_INVALID_HID, "not a VOL plugin ID")
+
+    /* Setup VOL info struct */
+    if (NULL == (plugin = H5FL_CALLOC(H5VL_t)))
+        HGOTO_ERROR(H5E_VOL, H5E_CANTALLOC, H5I_INVALID_HID, "can't allocate VOL info struct")
+    plugin->cls = cls;
+    plugin->id = plugin_id;
+    if (H5I_inc_ref(plugin->id, FALSE) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTINC, H5I_INVALID_HID, "unable to increment ref count on VOL plugin")
+
+    /* Get an ID for the VOL object */
+    if ((ret_value = H5VL_register(type, obj, plugin, app_ref)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register object handle")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_register_using_vol_id() */
 
 
 /*-------------------------------------------------------------------------
@@ -314,7 +418,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5VL_register
+ * Function:    H5VL_register_plugin
  *
  * Purpose:     Registers a new VOL plugin as a member of the virtual object
  *              layer class.
@@ -327,7 +431,7 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5VL_register(const void *_cls, hbool_t app_ref, hid_t vipl_id)
+H5VL_register_plugin(const void *_cls, hbool_t app_ref, hid_t vipl_id)
 {
     const H5VL_class_t	*cls = (const H5VL_class_t *)_cls;
     H5VL_class_t	*saved = NULL;
@@ -340,16 +444,16 @@ H5VL_register(const void *_cls, hbool_t app_ref, hid_t vipl_id)
 
     /* Copy the class structure so the caller can reuse or free it */
     if (NULL == (saved = H5FL_CALLOC(H5VL_class_t)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, H5I_INVALID_HID, "memory allocation failed for VOL plugin class struct")
+        HGOTO_ERROR(H5E_VOL, H5E_NOSPACE, H5I_INVALID_HID, "memory allocation failed for VOL plugin class struct")
     HDmemcpy(saved, cls, sizeof(H5VL_class_t));
 
     /* Initialize the VOL plugin */
     if(cls->initialize && cls->initialize(vipl_id) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTINIT, H5I_INVALID_HID, "unable to init VOL plugin")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, H5I_INVALID_HID, "unable to init VOL plugin")
 
     /* Create the new class ID */
     if ((ret_value = H5I_register(H5I_VOL, saved, app_ref)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register VOL plugin ID")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register VOL plugin ID")
 
 done:
     if (ret_value < 0)
@@ -357,47 +461,7 @@ done:
             H5FL_FREE(H5VL_class_t, saved);
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_register() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5VL_object_register
- *
- * Purpose:     Utility function to create a user ID for an object created
- *              or opened through the VOL
- *
- * Return:      Success:    A valid HDF5 ID
- *              Failure:    H5I_INVALID_HID 
- *
- *-------------------------------------------------------------------------
- */
-hid_t
-H5VL_object_register(void *obj, H5I_type_t obj_type, hid_t plugin_id, hbool_t app_ref)
-{
-    H5VL_class_t    *cls = NULL;
-    H5VL_t          *plugin = NULL;       /* VOL plugin struct */
-    hid_t           ret_value = H5I_INVALID_HID;
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    if (NULL == (cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a VOL plugin ID")
-
-    /* Setup VOL info struct */
-    if (NULL == (plugin = H5FL_CALLOC(H5VL_t)))
-        HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, H5I_INVALID_HID, "can't allocate VOL info struct")
-    plugin->cls = cls;
-    plugin->id = plugin_id;
-    if (H5I_inc_ref(plugin->id, FALSE) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTINC, H5I_INVALID_HID, "unable to increment ref count on VOL plugin")
-
-    /* Get an ID for the VOL object */
-    if ((ret_value = H5VL_register_id(obj_type, obj, plugin, app_ref)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register object handle")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_object_register() */
+} /* end H5VL_register_plugin() */
 
 
 /*-------------------------------------------------------------------------
@@ -413,16 +477,16 @@ done:
 ssize_t
 H5VL_get_plugin_name(hid_t id, char *name /*out*/, size_t size)
 {
-    H5VL_object_t       *vol_obj = NULL;
-    const H5VL_class_t  *cls = NULL;
+    H5VL_object_t       *vol_obj;
+    const H5VL_class_t  *cls;
     size_t              len;
-    ssize_t             ret_value = -1;
+    ssize_t             ret_value;
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* get the object pointer */
-    if (NULL == (vol_obj = H5VL_get_object(id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+    if (NULL == (vol_obj = H5VL_vol_object(id)))
+        HGOTO_ERROR(H5E_VOL, H5E_BADTYPE, FAIL, "invalid VOL identifier")
 
     cls = vol_obj->plugin->cls;
 
@@ -442,7 +506,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5VL_get_object
+ * Function:    H5VL_vol_object
  *
  * Purpose:     Utility function to return the object pointer associated with
  *              a hid_t. This routine is the same as H5I_object for all types
@@ -455,7 +519,7 @@ done:
  *-------------------------------------------------------------------------
  */
 H5VL_object_t *
-H5VL_get_object(hid_t id)
+H5VL_vol_object(hid_t id)
 {
     void            *obj = NULL;
     H5I_type_t      obj_type;
@@ -482,7 +546,7 @@ H5VL_get_object(hid_t id)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_get_object() */
+} /* end H5VL_vol_object() */
 
 
 /*-------------------------------------------------------------------------
@@ -637,16 +701,6 @@ H5VL_object_verify(hid_t id, H5I_type_t obj_type)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_object_verify() */
-
-
-/* XXX (VOL MERGE): This could be a macro like in H5F */
-void *
-H5VL_plugin_object(H5VL_object_t *vol_obj)
-{
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    FUNC_LEAVE_NOAPI(vol_obj->data)
-} /* end H5VL_plugin_object() */
 
 
 /*-------------------------------------------------------------------------

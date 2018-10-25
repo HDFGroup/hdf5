@@ -42,14 +42,14 @@
 #include "H5VLprivate.h"        /* VOL plugins                          */
 
 /* Includes needed to set as default file driver */
-#include "H5FDsec2.h"           /* Posix unbuffered I/O    file driver     */
+#include "H5FDsec2.h"           /* POSIX unbuffered I/O                 */
 #include "H5FDstdio.h"          /* Standard C buffered I/O              */
 #ifdef H5_HAVE_WINDOWS
 #include "H5FDwindows.h"        /* Win32 I/O                            */
 #endif
 
 /* Includes needed to set the default VOL plugin */
-#include "H5VLnative.h"         /* Native HDF5 file VOL plugin          */
+#include "H5VLnative_private.h" /* Native VOL plugin                    */
 
 
 /****************/

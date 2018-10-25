@@ -19,7 +19,7 @@
  */
 
 #include "h5test.h"
-#include "H5VLnative.h"
+#include "H5VLnative_private.h"
 
 
 #define NATIVE_VOL_TEST_FILENAME        "native_vol_test"
@@ -141,17 +141,17 @@ test_vol_registration(void)
     TESTING("VOL registration");
 
     /* The test/fake VOL plugin should not be registered at the start of the test */
-    if ((is_registered = H5VLis_registered(FAKE_VOL_NAME)) < 0)
+    if ((is_registered = H5VLis_plugin_registered(FAKE_VOL_NAME)) < 0)
         FAIL_STACK_ERROR;
     if (is_registered > 0)
         FAIL_PUTS_ERROR("native VOL plugin is inappropriately registered");
 
-    /* Register a VOL plugin */
-    if ((vol_id = H5VLregister(&fake_vol_g, H5P_DEFAULT)) < 0)
+    /* Load a VOL interface */
+    if ((vol_id = H5VLregister_plugin(&fake_vol_g)) < 0)
         FAIL_STACK_ERROR;
 
     /* The test/fake VOL plugin should be registered now */
-    if ((is_registered = H5VLis_registered(FAKE_VOL_NAME)) < 0)
+    if ((is_registered = H5VLis_plugin_registered(FAKE_VOL_NAME)) < 0)
         FAIL_STACK_ERROR;
     if (0 == is_registered)
         FAIL_PUTS_ERROR("native VOL plugin is un-registered");
@@ -195,7 +195,7 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    test_native_vol_init()
  *
- * Purpose:     Tests if the native VOL driver gets initialized.
+ * Purpose:     Tests if the native VOL plugin gets initialized.
  *
  * Return:      SUCCEED/FAIL
  *
@@ -206,13 +206,13 @@ test_native_vol_init(void)
 {
     htri_t is_registered;
 
-    TESTING("Native VOL driver initialization");
+    TESTING("Native VOL plugin initialization");
 
-    /* The native VOL driver should always be registered */
-    if ((is_registered = H5VLis_registered(H5VL_NATIVE_NAME)) < 0)
+    /* The native VOL plugin should always be registered */
+    if ((is_registered = H5VLis_plugin_registered(H5VL_NATIVE_NAME)) < 0)
         FAIL_STACK_ERROR;
     if (0 == is_registered)
-        FAIL_PUTS_ERROR("native VOL driver is un-registered");
+        FAIL_PUTS_ERROR("native VOL plugin is un-registered");
 
     PASSED();
     return SUCCEED;
@@ -226,7 +226,7 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    test_basic_file_operation()
  *
- * Purpose:     Uses the native VOL driver to test basic VOL file operations
+ * Purpose:     Uses the native VOL plugin to test basic VOL file operations
  *
  * Return:      SUCCEED/FAIL
  *
@@ -347,7 +347,7 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    test_basic_group_operation()
  *
- * Purpose:     Uses the native VOL driver to test basic VOL group operations
+ * Purpose:     Uses the native VOL plugin to test basic VOL group operations
  *
  * Return:      SUCCEED/FAIL
  *
@@ -438,7 +438,7 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    test_basic_dataset_operation()
  *
- * Purpose:     Uses the native VOL driver to test basic VOL dataset operations
+ * Purpose:     Uses the native VOL plugin to test basic VOL dataset operations
  *
  * Return:      SUCCEED/FAIL
  *
@@ -607,7 +607,7 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    test_basic_attribute_operation()
  *
- * Purpose:     Uses the native VOL driver to test basic VOL attribute operations
+ * Purpose:     Uses the native VOL plugin to test basic VOL attribute operations
  *
  * Return:      SUCCEED/FAIL
  *
@@ -705,7 +705,7 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    test_basic_object_operation()
  *
- * Purpose:     Uses the native VOL driver to test basic VOL object operations
+ * Purpose:     Uses the native VOL plugin to test basic VOL object operations
  *
  * Return:      SUCCEED/FAIL
  *
@@ -769,7 +769,7 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    test_basic_link_operation()
  *
- * Purpose:     Uses the native VOL driver to test basic VOL link operations
+ * Purpose:     Uses the native VOL plugin to test basic VOL link operations
  *
  * Return:      SUCCEED/FAIL
  *
@@ -834,7 +834,7 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    test_basic_datatype_operation()
  *
- * Purpose:     Uses the native VOL driver to test basic VOL datatype operations
+ * Purpose:     Uses the native VOL plugin to test basic VOL datatype operations
  *
  * Return:      SUCCEED/FAIL
  *
@@ -916,7 +916,7 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    test_echo_vol_operation()
  *
- * Purpose:     Uses the echo VOL driver to test basic VOL operations
+ * Purpose:     Uses the echo VOL plugin to test basic VOL operations
  *              via the H5VL public API.
  *
  * Return:      SUCCEED/FAIL

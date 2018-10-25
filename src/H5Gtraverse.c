@@ -43,7 +43,7 @@
 #include "H5MMprivate.h"        /* Memory management                        */
 #include "H5Ppublic.h"          /* Property Lists                           */
 #include "H5WBprivate.h"        /* Wrapped Buffers                          */
-#include "H5VLnative.h"         /* Virtual Object Layer (native)            */
+#include "H5VLnative_private.h" /* Native VOL driver                        */
 
 
 /****************/

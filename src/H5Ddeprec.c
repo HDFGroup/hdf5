@@ -157,7 +157,7 @@ H5Dcreate1(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
     loc_params.obj_type = H5I_get_type(loc_id);
 
     /* get the location object */
-    if(NULL == (vol_obj = H5VL_get_object(loc_id)))
+    if(NULL == (vol_obj = H5VL_vol_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier")
 
     /* Create the dataset through the VOL */
@@ -166,8 +166,8 @@ H5Dcreate1(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, H5I_INVALID_HID, "unable to create dataset")
 
     /* Get an atom for the dataset */
-    if((ret_value = H5VL_register_id(H5I_DATASET, dset, vol_obj->plugin, TRUE)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register dataset")
+    if((ret_value = H5VL_register(H5I_DATASET, dset, vol_obj->plugin, TRUE)) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register dataset")
 
 done:
     if (H5I_INVALID_HID == ret_value)
@@ -217,7 +217,7 @@ H5Dopen1(hid_t loc_id, const char *name)
     loc_params.obj_type = H5I_get_type(loc_id);
 
     /* get the location object */
-    if(NULL == (vol_obj = H5VL_get_object(loc_id)))
+    if(NULL == (vol_obj = H5VL_vol_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier")
 
     /* Open the dataset */
@@ -226,8 +226,8 @@ H5Dopen1(hid_t loc_id, const char *name)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open dataset")
 
     /* Get an atom for the dataset */
-    if((ret_value = H5VL_register_id(H5I_DATASET, dset, vol_obj->plugin, TRUE)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "can't register dataset atom")
+    if((ret_value = H5VL_register(H5I_DATASET, dset, vol_obj->plugin, TRUE)) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, H5I_INVALID_HID, "can't register dataset atom")
 
 done:
     if(H5I_INVALID_HID == ret_value)

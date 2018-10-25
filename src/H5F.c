@@ -677,8 +677,8 @@ H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTINC, H5I_INVALID_HID, "unable to increment ref count on VOL plugin")
 
     /* Get an atom for the file */
-    if((ret_value = H5VL_register_id(H5I_FILE, new_file, plugin, TRUE)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize file handle")
+    if((ret_value = H5VL_register(H5I_FILE, new_file, plugin, TRUE)) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize file handle")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -757,8 +757,8 @@ H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTINC, H5I_INVALID_HID, "unable to increment ref count on VOL plugin")
 
     /* Get an ID for the file */
-    if((ret_value = H5VL_register_id(H5I_FILE, new_file, plugin, TRUE)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize file handle")
+    if((ret_value = H5VL_register(H5I_FILE, new_file, plugin, TRUE)) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize file handle")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -794,7 +794,7 @@ H5Fflush(hid_t object_id, H5F_scope_t scope)
     }
 
     /* get the file object */
-    if(NULL == (vol_obj = H5VL_get_object(object_id)))
+    if(NULL == (vol_obj = H5VL_vol_object(object_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
 
     /* Flush the object */
@@ -883,8 +883,8 @@ H5Freopen(hid_t file_id)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, H5I_INVALID_HID, "unable to reopen file")
 
     /* Get an atom for the file */
-    if((ret_value = H5VL_register_id(H5I_FILE, file, vol_obj->plugin, TRUE)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize file handle")
+    if((ret_value = H5VL_register(H5I_FILE, file, vol_obj->plugin, TRUE)) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize file handle")
 
 done:
     /* XXX (VOL MERGE): If registration fails, file will not be closed */
@@ -1288,7 +1288,7 @@ H5Fget_name(hid_t obj_id, char *name/*out*/, size_t size)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, (-1), "not a file or file object")
 
     /* Get the file object */
-    if(NULL == (vol_obj = H5VL_get_object(obj_id)))
+    if(NULL == (vol_obj = H5VL_vol_object(obj_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, (-1), "invalid file identifier")
 
     /* Get the filename via the VOL */
@@ -1334,7 +1334,7 @@ H5Fget_info2(hid_t obj_id, H5F_info2_t *finfo)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
 
     /* Get the file object */
-    if(NULL == (vol_obj = H5VL_get_object(obj_id)))
+    if(NULL == (vol_obj = H5VL_vol_object(obj_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
 
     /* Get the file information */

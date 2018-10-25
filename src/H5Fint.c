@@ -38,7 +38,7 @@
 #include "H5SMprivate.h"        /* Shared Object Header Messages            */
 #include "H5Tprivate.h"         /* Datatypes                                */
 #include "H5VLprivate.h"        /* VOL plugins                              */
-#include "H5VLnative.h"         /* Native VOL plugin                        */
+#include "H5VLnative_private.h" /* Native VOL plugin                        */
 
 
 /****************/
@@ -3303,7 +3303,7 @@ H5F__start_swmr_write(H5F_t *f)
         if(grp_dset_count > 0) {
             H5VL_object_t *vol_obj = NULL;
 
-            if(NULL == (vol_obj = H5VL_get_object(obj_ids[0])))
+            if(NULL == (vol_obj = H5VL_vol_object(obj_ids[0])))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
 
             vol_plugin = vol_obj->plugin;
@@ -3505,12 +3505,12 @@ H5F_get_file_id(hid_t obj_id, H5I_type_t type)
     FUNC_ENTER_NOAPI(H5I_INVALID_HID)
 
     /* Get the object pointer */
-    if(NULL == (vol_obj = H5VL_get_object(obj_id)))
+    if(NULL == (vol_obj = H5VL_vol_object(obj_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid identifier")
 
     /* Set wrapper info in API context */
     if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, H5I_INVALID_HID, "can't set VOL wrapper info")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID, "can't set VOL wrapper info")
     vol_wrapper_set = TRUE;
 
     /* Get the file through the VOL */
@@ -3522,7 +3522,7 @@ H5F_get_file_id(hid_t obj_id, H5I_type_t type)
 
     /* Check if the file's ID already exists */
     if(H5I_find_id(file, H5I_FILE, &ret_value) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, H5I_INVALID_HID, "getting file ID failed")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, H5I_INVALID_HID, "getting file ID failed")
 
     /* If the ID does not exist, register it with the VOL plugin */
     if(H5I_INVALID_HID == ret_value) {
@@ -3535,18 +3535,18 @@ if(H5CX_get_vol_wrap_ctx((void **)&vol_wrap_ctx) < 0)
 HDassert(vol_wrap_ctx);
 }
         if ((ret_value = H5VL_wrap_register(H5I_FILE, file, TRUE)) < 0)
-            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize file handle")
+            HGOTO_ERROR(H5E_FILE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize file handle")
     } /* end if */
     else {
         /* Increment ref count on existing ID */
         if(H5I_inc_ref(ret_value, TRUE) < 0)
-            HGOTO_ERROR(H5E_ATOM, H5E_CANTSET, H5I_INVALID_HID, "incrementing file ID failed")
+            HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID, "incrementing file ID failed")
     } /* end else */
 
 done:
     /* Reset object wrapping info in API context */
     if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTSET, H5I_INVALID_HID, "can't reset VOL wrapper info")
+        HDONE_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID, "can't reset VOL wrapper info")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_get_file_id() */

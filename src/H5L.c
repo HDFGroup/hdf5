@@ -34,7 +34,7 @@
 #include "H5Oprivate.h"         /* File objects                             */
 #include "H5Pprivate.h"         /* Property lists                           */
 #include "H5VLprivate.h"        /* Virtual Object Layer                     */
-#include "H5VLnative.h"         /* Virtual Object Layer (native)            */
+#include "H5VLnative_private.h" /* Native VOL driver                        */
 
 
 /****************/
@@ -514,7 +514,7 @@ H5Lcreate_soft(const char *link_target, hid_t link_loc_id, const char *link_name
     loc_params.obj_type                     = H5I_get_type(link_loc_id);
 
     /* get the location object */
-    if(NULL == (vol_obj = (H5VL_object_t *)H5VL_get_object(link_loc_id)))
+    if(NULL == (vol_obj = (H5VL_object_t *)H5VL_vol_object(link_loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
     /* Get the plist structure */
@@ -614,11 +614,11 @@ H5Lcreate_hard(hid_t cur_loc_id, const char *cur_name,
 
     if(H5L_SAME_LOC != cur_loc_id)
         /* Get the current location object */
-        if (NULL == (vol_obj1 = (H5VL_object_t *)H5VL_get_object(cur_loc_id)))
+        if (NULL == (vol_obj1 = (H5VL_object_t *)H5VL_vol_object(cur_loc_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
     if(H5L_SAME_LOC != new_loc_id)
         /* Get the new location object */
-        if(NULL == (vol_obj2 = (H5VL_object_t *)H5VL_get_object(new_loc_id)))
+        if(NULL == (vol_obj2 = (H5VL_object_t *)H5VL_vol_object(new_loc_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
     /* Make sure that the VOL plugins are the same */

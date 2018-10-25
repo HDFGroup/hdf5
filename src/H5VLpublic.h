@@ -409,23 +409,21 @@ extern "C" {
 #endif
 
 /* VOL Plugin Functionality */
-H5_DLL hid_t H5VLregister(const H5VL_class_t *cls, hid_t vipl_id);
-H5_DLL hid_t H5VLregister_by_name(const char *plugin_name, hid_t vipl_id);
-H5_DLL htri_t H5VLis_registered(const char *name);
+H5_DLL hid_t H5VLregister_plugin(const H5VL_class_t *cls, hid_t vipl_id);
+H5_DLL hid_t H5VLregister_plugin_by_name(const char *plugin_name, hid_t vipl_id);
+H5_DLL htri_t H5VLis_plugin_registered(const char *name);
 H5_DLL hid_t H5VLget_plugin_id(const char *name);
 H5_DLL ssize_t H5VLget_plugin_name(hid_t id, char *name/*out*/, size_t size);
 H5_DLL herr_t H5VLclose(hid_t plugin_id);
-H5_DLL herr_t H5VLunregister(hid_t plugin_id);
+H5_DLL herr_t H5VLunregister_plugin(hid_t plugin_id);
 
 
-/**************************************************************************
- * VOL callback wrappers and helper routines, for VOL plugin authors only *
- * (Not part of the public API for application developers)                *
- **************************************************************************/
+/*****************************************************************************
+ * VOL callback wrappers and helper routines, for _VOL_plugin_ authors only! *
+ * (Not part of the public API for _application_ developers)                 *
+ *****************************************************************************/
 
 /* Helper routines for VOL plugin authors */
-H5_DLL hid_t H5VLobject_register(void *obj, H5I_type_t obj_type, hid_t plugin_id);
-H5_DLL void *H5VLobject(hid_t id);
 H5_DLL herr_t H5VLcmp_plugin_cls(int *cmp, hid_t plugin_id1, hid_t plugin_id2);
 H5_DLL herr_t H5VLcmp_plugin_info(int *cmp, hid_t plugin_id, const void *info1,
     const void *info2);

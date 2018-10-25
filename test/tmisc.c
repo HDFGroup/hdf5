@@ -3481,15 +3481,15 @@ test_misc19(void)
 
     HDfree(vfd_cls);
 
-/* Check H5I operations on virtual object drivers */
+/* Check H5I operations on virtual object plugins */
 
     /* Get a VOL class to register */
     vol_cls = h5_get_dummy_vol_class();
     CHECK(vol_cls, NULL, "h5_get_dummy_vol_class");
 
-    /* Register a virtual object driver */
-    volid = H5VLregister(vol_cls, H5P_DEFAULT);
-    CHECK(volid, FAIL, "H5VLregister");
+    /* Register a VOL plugin */
+    volid = H5VLregister_plugin(vol_cls, H5P_DEFAULT);
+    CHECK(volid, FAIL, "H5VLregister_plugin");
 
     /* Check the reference count */
     rc = H5Iget_ref(volid);
@@ -3499,23 +3499,23 @@ test_misc19(void)
     rc = H5Iinc_ref(volid);
     VERIFY(rc, 2, "H5Iinc_ref");
 
-    /* Unregister the VOL driver normally */
-    ret = H5VLunregister(volid);
-    CHECK(ret, FAIL, "H5VLunregister");
+    /* Unregister the VOL plugin normally */
+    ret = H5VLunregister_plugin(volid);
+    CHECK(ret, FAIL, "H5VLunregister_plugin");
 
     /* Check the reference count */
     rc = H5Iget_ref(volid);
     VERIFY(rc, 1, "H5Iget_ref");
 
-    /* Unregister the VOL driver by decrementing the reference count */
+    /* Unregister the VOL plugin by decrementing the reference count */
     rc = H5Idec_ref(volid);
     VERIFY(rc, 0, "H5Idec_ref");
 
-    /* Try unregistering the VOL driver again (should fail) */
+    /* Try unregistering the VOL plugin again (should fail) */
     H5E_BEGIN_TRY {
-        ret = H5VLunregister(volid);
+        ret = H5VLunregister_plugin(volid);
     } H5E_END_TRY;
-    VERIFY(ret, FAIL, "H5VLunregister");
+    VERIFY(ret, FAIL, "H5VLunregister_plugin");
 
     HDfree(vol_cls);
 

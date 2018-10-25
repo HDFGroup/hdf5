@@ -80,7 +80,7 @@ H5Oflush(hid_t obj_id)
     H5TRACE1("e", "i", obj_id);
 
     /* Check args */
-    if(NULL == (vol_obj = H5VL_get_object(obj_id)))
+    if(NULL == (vol_obj = H5VL_vol_object(obj_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
 
     /* Set up collective metadata if appropriate */
@@ -245,7 +245,7 @@ H5Orefresh(hid_t oid)
     H5TRACE1("e", "i", oid);
 
     /* Check args */
-    if(NULL == (vol_obj = H5VL_get_object(oid)))
+    if(NULL == (vol_obj = H5VL_vol_object(oid)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
 
     /* Set up collective metadata if appropriate */
@@ -323,7 +323,7 @@ H5O_refresh_metadata(hid_t oid, H5O_loc_t oloc)
          * The vol_obj will disappear when the underlying object is closed, so
          * we can't use that directly.
          */
-        if(NULL == (vol_obj = H5VL_get_object(oid)))
+        if(NULL == (vol_obj = H5VL_vol_object(oid)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
         plugin = vol_obj->plugin;
 
@@ -463,13 +463,13 @@ H5O_refresh_metadata_reopen(hid_t oid, H5G_loc_t *obj_loc, H5VL_t *vol_plugin, h
         case H5I_GROUP:
             /* Re-open the group */
             if(NULL == (object = H5G_open(obj_loc)))
-                HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open group")
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, FAIL, "unable to open group")
             break;
 
         case H5I_DATATYPE:
             /* Re-open the named datatype */
             if(NULL == (object = H5T_open(obj_loc)))
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTOPENOBJ, FAIL, "unable to open named datatype")
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, FAIL, "unable to open named datatype")
             break;
 
         case H5I_DATASET:
@@ -478,7 +478,7 @@ H5O_refresh_metadata_reopen(hid_t oid, H5G_loc_t *obj_loc, H5VL_t *vol_plugin, h
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "unable to open dataset")
             if(!start_swmr) /* No need to handle multiple opens when H5Fstart_swmr_write() */
                 if(H5D_mult_refresh_reopen((H5D_t *)object) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "unable to finish refresh for dataset")
+                    HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, FAIL, "unable to finish refresh for dataset")
             break;
 
         case H5I_UNINIT:
@@ -496,13 +496,13 @@ H5O_refresh_metadata_reopen(hid_t oid, H5G_loc_t *obj_loc, H5VL_t *vol_plugin, h
         case H5I_ERROR_STACK:
         case H5I_NTYPES:
         default:
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a valid file object ID (dataset, group, or datatype)")
+            HGOTO_ERROR(H5E_OHDR, H5E_BADTYPE, FAIL, "not a valid file object ID (dataset, group, or datatype)")
         break;
     } /* end switch */
 
     /* Re-register ID for the object */
-    if((H5I_register_with_id(type, object, vol_plugin, TRUE, oid)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to re-register object ID after refresh")
+    if((H5VL_register_using_existing_id(type, object, vol_plugin, TRUE, oid)) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTREGISTER, FAIL, "unable to re-register object ID after refresh")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
