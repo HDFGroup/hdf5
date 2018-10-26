@@ -307,11 +307,11 @@ H5F__get_objects(const H5F_t *f, unsigned types, size_t max_nobjs, hid_t *obj_id
     if(types & H5F_OBJ_LOCAL) {
         olist.file_info.local = TRUE;
         olist.file_info.ptr.file = f;
-    }
+    } /* end if */
     else {
         olist.file_info.local = FALSE;
         olist.file_info.ptr.shared = f ? f->shared : NULL;
-    }
+    } /* end else */
 
     /* Iterate through file IDs to count the number, and put their
      * IDs on the object list.  */
@@ -319,7 +319,7 @@ H5F__get_objects(const H5F_t *f, unsigned types, size_t max_nobjs, hid_t *obj_id
         olist.obj_type = H5I_FILE;
         if(H5I_iterate(H5I_FILE, H5F__get_objects_cb, &olist, app_ref) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_BADITER, FAIL, "iteration failed(1)")
-    }
+    } /* end if */
 
     /* If the caller just wants to count the number of objects (OLIST.MAX_NOBJS is zero),
      * or the caller wants to get the list of IDs and the list isn't full,
@@ -330,8 +330,8 @@ H5F__get_objects(const H5F_t *f, unsigned types, size_t max_nobjs, hid_t *obj_id
             olist.obj_type = H5I_DATASET;
             if(H5I_iterate(H5I_DATASET, H5F__get_objects_cb, &olist, app_ref) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_BADITER, FAIL, "iteration failed(2)")
-        }
-    }
+        } /* end if */
+    } /* end if */
 
     /* If the caller just wants to count the number of objects (OLIST.MAX_NOBJS is zero),
      * or the caller wants to get the list of IDs and the list isn't full,
@@ -342,8 +342,8 @@ H5F__get_objects(const H5F_t *f, unsigned types, size_t max_nobjs, hid_t *obj_id
             olist.obj_type = H5I_GROUP;
             if(H5I_iterate(H5I_GROUP, H5F__get_objects_cb, &olist, app_ref) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_BADITER, FAIL, "iteration failed(3)")
-        }
-    }
+        } /* end if */
+    } /* end if */
 
     /* If the caller just wants to count the number of objects (OLIST.MAX_NOBJS is zero),
      * or the caller wants to get the list of IDs and the list isn't full,
@@ -354,8 +354,8 @@ H5F__get_objects(const H5F_t *f, unsigned types, size_t max_nobjs, hid_t *obj_id
             olist.obj_type = H5I_DATATYPE;
             if(H5I_iterate(H5I_DATATYPE, H5F__get_objects_cb, &olist, app_ref) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_BADITER, FAIL, "iteration failed(4)")
-        }
-    }
+        } /* end if */
+    } /* end if */
 
     /* If the caller just wants to count the number of objects (OLIST.MAX_NOBJS is zero),
      * or the caller wants to get the list of IDs and the list isn't full,
@@ -366,8 +366,8 @@ H5F__get_objects(const H5F_t *f, unsigned types, size_t max_nobjs, hid_t *obj_id
             olist.obj_type = H5I_ATTR;
             if(H5I_iterate(H5I_ATTR, H5F__get_objects_cb, &olist, app_ref) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_BADITER, FAIL, "iteration failed(5)")
-        }
-    }
+        } /* end if */
+    } /* end if */
 
     /* Set the number of objects currently open */
     *obj_id_count_ptr = obj_id_count;
@@ -409,8 +409,8 @@ H5F__get_objects_cb(void *obj_ptr, hid_t obj_id, void *key)
                 (!olist->file_info.ptr.shared ||
                 (olist->file_info.ptr.shared && ((H5F_t*)obj_ptr)->shared == olist->file_info.ptr.shared)))) {
             add_obj = TRUE;
-        }
-    }
+        } /* end if */
+    } /* end if */
     else { /* Either count opened object IDs or put the IDs on the list */
         H5O_loc_t *oloc;        /* Group entry info for object */
 
@@ -460,7 +460,7 @@ H5F__get_objects_cb(void *obj_ptr, hid_t obj_id, void *key)
                     (!olist->file_info.ptr.shared && olist->obj_type != H5I_DATATYPE) ||
                     (oloc && oloc->file && oloc->file->shared == olist->file_info.ptr.shared)))) {
             add_obj = TRUE;
-        }
+        } /* end if */
     } /* end else */
 
     if(add_obj) {
@@ -468,7 +468,7 @@ H5F__get_objects_cb(void *obj_ptr, hid_t obj_id, void *key)
         if(olist->obj_id_list) {
             olist->obj_id_list[olist->list_index] = obj_id;
             olist->list_index++;
-        }
+        } /* end if */
 
         /* Increment the number of open objects */
         if(olist->obj_id_count)
@@ -481,7 +481,7 @@ H5F__get_objects_cb(void *obj_ptr, hid_t obj_id, void *key)
          */
         if(olist->max_nobjs > 0 && olist->list_index >= olist->max_nobjs)
             HGOTO_DONE(H5_ITER_STOP)  /* Indicate that the iterator should stop */
-    }
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3236,6 +3236,7 @@ H5F__start_swmr_write(H5F_t *f)
     size_t u;                       /* Local index variable */
     hbool_t setup = FALSE;          /* Boolean flag to indicate whether SWMR setting is enabled */
     H5VL_t *vol_plugin = NULL;      /* VOL plugin for the file */
+    hbool_t vol_wrapper_set = FALSE; /* Whether the VOL object wrapping context was set up */
     herr_t ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -3275,16 +3276,16 @@ H5F__start_swmr_write(H5F_t *f)
         HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush file's cached information")
 
     /* Get the # of opened named datatypes and attributes */
-    if(H5F_get_obj_count(f, H5F_OBJ_DATATYPE|H5F_OBJ_ATTR, FALSE, &nt_attr_count) < 0)
+    if(H5F_get_obj_count(f, H5F_OBJ_DATATYPE | H5F_OBJ_ATTR, FALSE, &nt_attr_count) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_BADITER, FAIL, "H5F_get_obj_count failed")
-    if(nt_attr_count)
+    if(nt_attr_count > 0)
         HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "named datatypes and/or attributes opened in the file")
 
     /* Get the # of opened datasets and groups */
-    if(H5F_get_obj_count(f, H5F_OBJ_GROUP|H5F_OBJ_DATASET, FALSE, &grp_dset_count) < 0)
+    if(H5F_get_obj_count(f, H5F_OBJ_GROUP | H5F_OBJ_DATASET, FALSE, &grp_dset_count) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_BADITER, FAIL, "H5F_get_obj_count failed")
 
-    if(grp_dset_count) {
+    if(grp_dset_count > 0) {
         /* Allocate space for group and object locations */
         if((obj_ids = (hid_t *) H5MM_malloc(grp_dset_count * sizeof(hid_t))) == NULL)
             HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate buffer for hid_t")
@@ -3299,17 +3300,25 @@ H5F__start_swmr_write(H5F_t *f)
         if(H5F_get_obj_ids(f, H5F_OBJ_GROUP|H5F_OBJ_DATASET, grp_dset_count, obj_ids, FALSE, &grp_dset_count) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "H5F_get_obj_ids failed")
 
-        /* Save the VOL plugin for the refresh step */
+        /* Save the VOL plugin and the object wrapping context for the refresh step */
         if(grp_dset_count > 0) {
-            H5VL_object_t *vol_obj = NULL;
+            H5VL_object_t *vol_obj;
 
+            /* Get the VOL object for one of the IDs */
             if(NULL == (vol_obj = H5VL_vol_object(obj_ids[0])))
-                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
+                HGOTO_ERROR(H5E_FILE, H5E_BADTYPE, FAIL, "invalid object identifier")
 
+            /* Set wrapper info in API context */
+            if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
+            vol_wrapper_set = TRUE;
+
+            /* Get the (top) plugin for the ID */
             vol_plugin = vol_obj->plugin;
         } /* end if */
 
-        /* Refresh opened objects (groups, datasets) in the file */
+        /* Gather information about opened objects (groups, datasets) in the file */
+        /* (For refresh later on) */
         for(u = 0; u < grp_dset_count; u++) {
             H5O_loc_t *oloc;            /* object location */
             H5G_loc_t tmp_loc;
@@ -3379,6 +3388,10 @@ H5F__start_swmr_write(H5F_t *f)
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to unlock the file")
 
 done:
+    /* Reset object wrapping info in API context */
+    if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
+        HDONE_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't reset VOL wrapper info")
+
     if(ret_value < 0 && setup) {
 
         /* Re-enable accumulator */

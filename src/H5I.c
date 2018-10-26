@@ -2034,7 +2034,7 @@ H5I__iterate_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
             ret_value = H5_ITER_STOP;	/* terminate iteration early */
         else if(cb_ret_val < 0)
             ret_value = H5_ITER_ERROR;  /* indicate failure (which terminates iteration) */
-    }
+    } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I__iterate_cb() */
@@ -2092,7 +2092,7 @@ H5I_iterate(H5I_type_t type, H5I_search_func_t func, void *udata, hbool_t app_re
         /* Iterate over IDs */
         if ((iter_status = H5SL_iterate(type_ptr->ids, H5I__iterate_cb, &iter_udata)) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_BADITER, FAIL, "iteration failed")
-    }
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2352,9 +2352,8 @@ H5I__id_dump_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
             const H5VL_object_t *vol_obj = (const H5VL_object_t *)item->obj_ptr;
 
             obj_ptr = H5VL_object_data(vol_obj);
-
             if(H5_VOL_NATIVE == vol_obj->plugin->cls->value)
-                path = H5G_nameof(obj_ptr);
+                path = H5G_nameof((const H5G_t *)obj_ptr);
             break;
         }
 
@@ -2363,9 +2362,8 @@ H5I__id_dump_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
             const H5VL_object_t *vol_obj = (const H5VL_object_t *)item->obj_ptr;
 
             obj_ptr = H5VL_object_data(vol_obj);
-
             if(H5_VOL_NATIVE == vol_obj->plugin->cls->value)
-                path = H5D_nameof(obj_ptr);
+                path = H5D_nameof((const H5D_t *)obj_ptr);
             break;
         }
 
@@ -2373,9 +2371,8 @@ H5I__id_dump_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
         {
             const H5T_t *dt = (const H5T_t *)item->obj_ptr;
 
-            obj_ptr = (void *)H5T_get_actual_type(dt);
-
-            path = H5T_nameof(obj_ptr);
+            obj_ptr = (void *)H5T_get_actual_type((H5T_t *)dt); /* Casting away const OK - QAK */
+            path = H5T_nameof((const H5T_t *)obj_ptr);
             break;
         }
 

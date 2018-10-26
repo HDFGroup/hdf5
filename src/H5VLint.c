@@ -43,6 +43,7 @@
 /* Local Macros */
 /****************/
 
+
 /******************/
 /* Local Typedefs */
 /******************/
@@ -58,11 +59,16 @@ typedef struct H5VL_wrap_ctx_t {
 /* Package Typedefs */
 /********************/
 
+
 /********************/
 /* Local Prototypes */
 /********************/
 static herr_t H5VL__free_cls(H5VL_class_t *cls);
+static void *H5VL__wrap_obj(void *obj);
+static H5VL_object_t *H5VL__new_vol_obj(H5I_type_t type, void *object,
+    H5VL_t *vol_plugin, hbool_t wrap_obj);
 static void *H5VL__object(hid_t id, H5I_type_t obj_type);
+
 
 /*********************/
 /* Package Variables */
@@ -70,6 +76,7 @@ static void *H5VL__object(hid_t id, H5I_type_t obj_type);
 
 /* Package initialization variable */
 hbool_t H5_PKG_INIT_VAR = FALSE;
+
 
 /*****************************/
 /* Library Private Variables */
@@ -225,6 +232,105 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5VL__wrap_obj
+ *
+ * Purpose:     Wraps a library object with possible VOL plugin wrappers, to
+ *		match the VOL plugin stack for the file.
+ *
+ * Return:      Success:        Wrapped object pointer
+ *              Failure:        NULL
+ *
+ * Programmer:	Quincey Koziol
+ *		Friday, October  7, 2018
+ *
+ *-------------------------------------------------------------------------
+ */
+static void *
+H5VL__wrap_obj(void *obj)
+{
+    H5VL_wrap_ctx_t *vol_wrap_ctx = NULL;   /* Object wrapping context */
+    void *ret_value = NULL;                 /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Check arguments */
+    HDassert(obj);
+
+    /* Retrieve the VOL object wrapping context */
+    if(H5CX_get_vol_wrap_ctx((void **)&vol_wrap_ctx) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, NULL, "can't get VOL object wrap context")
+
+    /* If there is a VOL object wrapping context, wrap the object */
+    if(vol_wrap_ctx) {
+        /* Wrap object, using the VOL callback */
+        if(NULL == (ret_value = H5VL_wrap_object(vol_wrap_ctx->plugin->cls, vol_wrap_ctx->obj_wrap_ctx, obj)))
+            HGOTO_ERROR(H5E_VOL, H5E_CANTGET, NULL, "can't wrap object")
+    } /* end if */
+    else
+        ret_value = obj;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__wrap_obj() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL__new_vol_obj
+ *
+ * Purpose:     Creates a new VOL object, to use when registering an ID.
+ *
+ * Return:      Success:        VOL object pointer
+ *              Failure:        NULL
+ *
+ * Programmer:	Quincey Koziol
+ *		Friday, October  7, 2018
+ *
+ *-------------------------------------------------------------------------
+ */
+static H5VL_object_t *
+H5VL__new_vol_obj(H5I_type_t type, void *object, H5VL_t *vol_plugin, hbool_t wrap_obj)
+{
+    H5VL_object_t  *new_vol_obj = NULL;     /* Pointer to new VOL object                    */
+    H5VL_object_t  *ret_value = NULL;       /* Return value                                 */
+
+    FUNC_ENTER_STATIC
+
+    /* Check arguments */
+    HDassert(object);
+    HDassert(vol_plugin);
+
+    /* Make sure type number is valid */
+    if(type != H5I_ATTR && type != H5I_DATASET && type != H5I_DATATYPE && type != H5I_FILE && type != H5I_GROUP)
+        HGOTO_ERROR(H5E_VOL, H5E_BADVALUE, NULL, "invalid type number")
+
+    /* Create the new VOL object */
+    if(NULL == (new_vol_obj = H5FL_CALLOC(H5VL_object_t)))
+        HGOTO_ERROR(H5E_VOL, H5E_CANTALLOC, NULL, "can't allocate memory for VOL object")
+    new_vol_obj->plugin = vol_plugin;
+    if(wrap_obj) {
+        if(NULL == (new_vol_obj->data = H5VL__wrap_obj(object)))
+            HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, NULL, "can't wrap library object")
+    } /* end if */
+    else
+        new_vol_obj->data = object;
+
+    /* Bump the reference count on the VOL plugin */
+    vol_plugin->nrefs++;
+
+    /* If this is a datatype, we have to hide the VOL object under the H5T_t pointer */
+    if(H5I_DATATYPE == type) {
+        if(NULL == (ret_value = (H5VL_object_t *)H5T_construct_datatype(new_vol_obj)))
+            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "can't construct datatype object")
+    } /* end if */
+    else
+        ret_value = (H5VL_object_t *)new_vol_obj;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__new_vol_obj() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5VL_register
  *
  * Purpose:     VOL-aware version of H5I_register. Constructs an H5VL_object_t
@@ -239,8 +345,8 @@ done:
 hid_t
 H5VL_register(H5I_type_t type, void *object, H5VL_t *vol_plugin, hbool_t app_ref)
 {
-    H5VL_object_t  *vol_obj     = NULL;
-    hid_t           ret_value   = H5I_INVALID_HID;
+    H5VL_object_t  *vol_obj     = NULL;         /* VOL object wrapper for library object */
+    hid_t           ret_value   = H5I_INVALID_HID;      /* Return value */
 
     FUNC_ENTER_NOAPI(H5I_INVALID_HID)
 
@@ -248,30 +354,13 @@ H5VL_register(H5I_type_t type, void *object, H5VL_t *vol_plugin, hbool_t app_ref
     HDassert(object);
     HDassert(vol_plugin);
 
-    /* Set up VOL object to wrap the passed-in data */
-    if (NULL == (vol_obj = H5FL_CALLOC(H5VL_object_t)))
-        HGOTO_ERROR(H5E_VOL, H5E_CANTALLOC, H5I_INVALID_HID, "can't allocate top object structure")
-    vol_obj->plugin = vol_plugin;
-    vol_obj->data = object;
-
-    /* Increment ref count, for new object */
-    vol_plugin->nrefs++;
-
-    /* Datatypes need special handling under the VOL, since they have a non-VOL aspect */
-    if (H5I_DATATYPE == type) {
-        H5T_t *dt;
-
-        /* Wrap "real" (non-named) datatype around VOL object, so it's compatible with H5T interface */
-        if (NULL == (dt = H5T_construct_datatype(vol_obj)))
-            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, H5I_INVALID_HID, "can't construct datatype object")
-
-        /* New object is _actually_ the datatype */
-        vol_obj = (H5VL_object_t *)dt;
-    } /* end if */
+    /* Set up VOL object for the passed-in data */
+    /* (Does not wrap object, since it's from a VOL callback) */
+    if(NULL == (vol_obj = H5VL__new_vol_obj(type, object, vol_plugin, FALSE)))
+        HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, FAIL, "can't create VOL object")
     
     /* Register VOL object as _object_ type, for future object API calls */
-    /* (Except for named datatypes, as above) */
-    if ((ret_value = H5I_register(type, vol_obj, app_ref)) < 0)
+    if((ret_value = H5I_register(type, vol_obj, app_ref)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize handle")
 
 done:
@@ -301,7 +390,6 @@ herr_t
 H5VL_register_using_existing_id(H5I_type_t type, void *object, H5VL_t *vol_plugin, hbool_t app_ref, hid_t existing_id)
 {
     H5VL_object_t  *new_vol_obj = NULL;     /* Pointer to new VOL object                    */
-    void           *stored_obj = NULL;      /* Pointer to the object that will be stored    */
     herr_t          ret_value = SUCCEED;    /* Return value                                 */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -310,29 +398,13 @@ H5VL_register_using_existing_id(H5I_type_t type, void *object, H5VL_t *vol_plugi
     HDassert(object);
     HDassert(vol_plugin);
 
-    /* Make sure type number is valid */
-    if(type != H5I_ATTR && type != H5I_DATASET && type != H5I_DATATYPE && type != H5I_FILE && type != H5I_GROUP)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid type number")
-
-    /* Set up the new VOL object */
-    if(NULL == (new_vol_obj = H5FL_CALLOC(H5VL_object_t)))
-        HGOTO_ERROR(H5E_VOL, H5E_CANTALLOC, FAIL, "can't allocate memory for VOL object");
-    new_vol_obj->plugin = vol_plugin;
-    new_vol_obj->data = object;
-
-    /* Bump the reference count on the VOL plugin */
-    vol_plugin->nrefs++;
-
-    /* If this is a datatype, we have to hide the VOL object under the H5T_t pointer */
-    if(H5I_DATATYPE == type) {
-        if(NULL == (stored_obj = (void *)H5T_construct_datatype(new_vol_obj)))
-            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't construct datatype object");
-    }
-    else
-        stored_obj = (void *)new_vol_obj;
+    /* Set up VOL object for the passed-in data */
+    /* (Wraps object, since it's a library object) */
+    if(NULL == (new_vol_obj = H5VL__new_vol_obj(type, object, vol_plugin, TRUE)))
+        HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, FAIL, "can't create VOL object")
 
     /* Call the underlying H5I function to complete the registration */
-    if(H5I_register_using_existing_id(type, stored_obj, app_ref, existing_id) < 0)
+    if(H5I_register_using_existing_id(type, new_vol_obj, app_ref, existing_id) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, FAIL, "can't register object under existing ID")
 
 done:
@@ -875,20 +947,17 @@ H5VL_wrap_register(H5I_type_t type, void *obj, hbool_t app_ref)
      */
     if(type == H5I_DATATYPE)
         if(TRUE == H5T_already_vol_managed((const H5T_t *)obj))
-            HGOTO_ERROR(H5E_VOL, H5E_BADTYPE, H5I_INVALID_HID, "can only get an ID for an uncommitted datatype")
+            HGOTO_ERROR(H5E_VOL, H5E_BADTYPE, H5I_INVALID_HID, "can't wrap an uncommitted datatype")
 
-    /* Retrieve the VOL object wrap context */
+    /* Wrap the object with VOL plugin info */
+    if(NULL == (new_obj = H5VL__wrap_obj(obj)))
+        HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, H5I_INVALID_HID, "can't wrap library object")
+
+    /* Retrieve the VOL object wrapping context */
     if(H5CX_get_vol_wrap_ctx((void **)&vol_wrap_ctx) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, H5I_INVALID_HID, "can't get VOL object wrap context")
-
-    /* If there is a VOL object wrapping context, wrap the object */
-    if(vol_wrap_ctx) {
-        /* Wrap object */
-        if(NULL == (new_obj = H5VL_wrap_object(vol_wrap_ctx->plugin->cls, vol_wrap_ctx->obj_wrap_ctx, obj)))
-            HGOTO_ERROR(H5E_VOL, H5E_CANTGET, H5I_INVALID_HID, "can't wrap object")
-    } /* end if */
-    else
-        new_obj = obj;
+    if(NULL == vol_wrap_ctx || NULL == vol_wrap_ctx->plugin)
+        HGOTO_ERROR(H5E_VOL, H5E_BADVALUE, H5I_INVALID_HID, "VOL object wrap context or its plugin is NULL???")
 
     /* Get an ID for the object */
     if((ret_value = H5VL_register_using_vol_id(type, new_obj, vol_wrap_ctx->plugin->id, app_ref)) < 0)
