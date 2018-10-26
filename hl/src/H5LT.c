@@ -3058,11 +3058,11 @@ next:
             HDsnprintf(dt_str, *slen, "H5T_NO_CLASS");
             break;
         case H5T_REFERENCE:
-	    if (H5Tequal(dtype, H5T_STD_REF_DSETREG) == TRUE) {
-	      HDsnprintf(dt_str, *slen, " H5T_REFERENCE { H5T_STD_REF_DSETREG }");
+	    if (H5Tequal(dtype, H5T_STD_REF_REG) == TRUE) {
+	      HDsnprintf(dt_str, *slen, " H5T_REFERENCE { H5T_STD_REF_REG }");
 	    }
 	    else {
-	      HDsnprintf(dt_str, *slen, " H5T_REFERENCE { H5T_STD_REF_OBJECT }");
+	      HDsnprintf(dt_str, *slen, " H5T_REFERENCE { H5T_STD_REF_OBJ }");
 	    }
 	    break;
         case H5T_NCLASSES:

@@ -3411,6 +3411,7 @@ static H5S_t *
 H5D__query(H5D_t *dset, const H5S_t *file_space, const H5Q_t *query, hid_t xapl_id,
         hid_t xxpl_id)
 {
+    H5X_class_t *idx_class = NULL;
     H5Q_combine_op_t combine_op;
     H5S_t *(*query_func)(H5D_t *dset, const H5S_t *file_space, const H5Q_t *query, hid_t xapl_id, hid_t xxpl_id);
     H5S_t *ret_value = NULL;
@@ -3426,10 +3427,35 @@ H5D__query(H5D_t *dset, const H5S_t *file_space, const H5Q_t *query, hid_t xapl_
 
     /* TODO might want to fix that to give the combined query to the plugin,
      * add something to check whether the plugin supports it or not */
-    query_func = (combine_op == H5Q_SINGLETON) ? H5D__query_singleton : H5D__query_combined;
-    if (NULL == (ret_value = query_func(dset, file_space, query, xapl_id, xxpl_id)))
-        HGOTO_ERROR(H5E_QUERY, H5E_CANTGET, NULL, "unable to get combine operator");
+    /* RAW: Can we call the plugin directly at this point? */
+    idx_class = dset->shared->idx_class;
+    if (idx_class && query->is_combined &&
+	(idx_class->query_types & H5X_COMPOUND_QUERY)) {
+        hid_t file_space_id = H5S_ALL;
+        hid_t space_id = FAIL;
+        /* Index associated to dataset so use it */
+        if (NULL == idx_class->idx_class->data_class.query)
+            HGOTO_ERROR(H5E_INDEX, H5E_BADVALUE, NULL, "plugin query callback not defined");
 
+        /* Open index if not opened yet */
+        if (!dset->shared->idx_handle && (FAIL == H5D_open_index(dset, xapl_id)))
+            HGOTO_ERROR(H5E_INDEX, H5E_CANTOPENOBJ, NULL, "cannot open index");
+
+        /* Create ID for file_space */
+        if (file_space && (FAIL == (file_space_id = H5I_register(H5I_DATASPACE, file_space, FALSE))))
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, NULL, "unable to register dataspace");
+        /* Call plugin query */
+        if (FAIL == (space_id = idx_class->idx_class->data_class.query(dset->shared->idx_handle, file_space_id, query->query_id, xxpl_id)))
+            HGOTO_ERROR(H5E_INDEX, H5E_CANTSELECT, NULL, "cannot query index");
+
+        if (NULL == (ret_value = (H5S_t *) H5I_object_verify(space_id, H5I_DATASPACE)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a dataspace");
+    }
+    else {
+        query_func = (combine_op == H5Q_SINGLETON) ? H5D__query_singleton : H5D__query_combined;
+        if (NULL == (ret_value = query_func(dset, file_space, query, xapl_id, xxpl_id)))
+            HGOTO_ERROR(H5E_QUERY, H5E_CANTGET, NULL, "unable to get combine operator");
+    }
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__query */
@@ -3557,6 +3583,9 @@ H5D__query_force(H5D_t *dset, const H5S_t *file_space, const H5Q_t *query)
     iter_op.op_type = H5S_SEL_ITER_OP_LIB;
     iter_op.u.lib_op = H5D__query_force_iterate;
 
+    /* Jerome suggests change here to avoid iterations */
+
+    
     if (FAIL == H5S_select_iterate(buf, dset->shared->type, space, &iter_op, &iter_args))
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOMPARE, NULL, "unable to compare attribute elements");
 

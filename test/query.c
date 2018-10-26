@@ -848,6 +848,7 @@ main(int argc, char *argv[])
 
     puts("All query tests passed.");
     h5_cleanup(FILENAME, fapl);
+
 //    for (i = 0; i < MULTI_NFILES; i++)
 //        HDfree(filename_multi[i]);
 //    HDfree(filename_multi);

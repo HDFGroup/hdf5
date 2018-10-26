@@ -207,12 +207,7 @@ extern _Bool findBinRange1C(const ALMetadata *meta, ALUnivariateQuery *query,
 /* Local Variables */
 /*******************/
 
-/* Alacrity index class */
-const H5X_class_t H5X_ALACRITY[1] = {{
-    H5X_CLASS_T_VERS,           /* (From the H5Xpublic.h header file) */
-    H5X_PLUGIN_ALACRITY,        /* (Or whatever number is assigned) */
-    "ALACRITY index plugin",    /* Whatever name desired */
-    H5X_TYPE_DATA_ELEM,         /* This plugin operates on dataset elements */
+static H5X_idx_class_t idx_class = {.data_class = {
     H5X_alacrity_create,        /* create */
     H5X_alacrity_remove,        /* remove */
     H5X_alacrity_open,          /* open */
@@ -223,6 +218,16 @@ const H5X_class_t H5X_ALACRITY[1] = {{
     H5X_alacrity_refresh,       /* refresh */
     NULL,                       /* copy */
     NULL                        /* get_size */
+}};
+
+/* Alacrity index class */
+const H5X_class_t H5X_ALACRITY[1] = {{
+    H5X_CLASS_T_VERS,           /* (From the H5Xpublic.h header file) */
+    H5X_PLUGIN_ALACRITY,        /* (Or whatever number is assigned) */
+    "ALACRITY index plugin",    /* Whatever name desired */
+    H5X_TYPE_DATA_ELEM,         /* This plugin operates on dataset elements */
+    FALSE,                      /* plugin doesn't support multiple condition queries */
+    &idx_class                  /* Index class */
 }};
 
 /*-------------------------------------------------------------------------

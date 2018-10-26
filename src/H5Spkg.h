@@ -91,6 +91,18 @@ typedef struct {
     H5S_pnt_node_t *tail;   /* Pointer to tail of point list */
 } H5S_pnt_list_t;
 
+/*  */
+struct H5S_index_group_t {
+    hsize_t n_elems;	      /* Number of index elements in the group */
+    hsize_t *group;           /* Pointer to a collection of indices */
+    struct H5S_index_group_t *next;  /* pointer to next group in list */
+};
+
+typedef struct {
+    struct H5S_index_group_t *head;   /* Pointer to head of point list */
+    struct H5S_index_group_t *tail;   /* Pointer to tail of point list */
+} H5S_indexgrp_list_t;
+
 /* Information about new-style hyperslab spans */
 
 /* Information a particular hyperslab span */
@@ -219,6 +231,7 @@ typedef struct {
     union {
         H5S_pnt_list_t *pnt_lst; /* List of selected points (order is important) */
         H5S_hyper_sel_t *hslab;  /* Info about hyperslab selections */
+        H5S_indexgrp_list_t *index_grp;	/* List of local index groups */
     } sel_info;
 } H5S_select_t;
 

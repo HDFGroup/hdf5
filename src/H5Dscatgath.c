@@ -333,7 +333,6 @@ H5D__scatter_mem (const void *_tscat_buf, const H5S_t *space,
         for(curr_seq = 0; curr_seq < nseq; curr_seq++) {
             /* Get the number of bytes in sequence */
             curr_len = len[curr_seq];
-
             HDmemcpy(buf + off[curr_seq], tscat_buf, curr_len);
 
             /* Advance offset in destination buffer */

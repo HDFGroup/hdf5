@@ -18,12 +18,15 @@
 
 /* Public HDF5 header */
 #include "hdf5.h"
+#include "H5Rpublic.h"
 
 /* Public High-Level header */
 #include "hdf5_hl.h"
 
 /* HDF5 private functions */
 #include "H5private.h"
+
+typedef href_t hobj_ref_t;
 
 #endif /* _H5HLprivate2_H */
 

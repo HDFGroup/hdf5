@@ -459,7 +459,7 @@ H5Xcreate(hid_t loc_id, unsigned plugin_id, hid_t xcpl_id)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "iIui", scope_id, plugin_id, xcpl_id);
+    H5TRACE3("e", "iIui", loc_id, plugin_id, xcpl_id);
 
     /* Check args */
     if (plugin_id > H5X_PLUGIN_MAX)
@@ -631,7 +631,7 @@ H5Xremove(hid_t loc_id, unsigned plugin_id)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "iIu", scope_id, plugin_id);
+    H5TRACE2("e", "iIu", loc_id, plugin_id);
 
     /* Check args */
     if (plugin_id > H5X_PLUGIN_MAX)
@@ -716,7 +716,7 @@ H5Xget_count(hid_t loc_id, hsize_t *idx_count)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*h", scope_id, idx_count);
+    H5TRACE2("e", "i*h", loc_id, idx_count);
 
     if (FAIL == loc_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
@@ -801,7 +801,7 @@ H5Xget_size(hid_t loc_id)
     hsize_t ret_value = 0; /* Return value */
 
     FUNC_ENTER_API(0)
-    H5TRACE1("h", "i", scope_id);
+    H5TRACE1("h", "i", loc_id);
 
     if (FAIL == loc_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a location")
@@ -867,3 +867,424 @@ H5X_get_size(hid_t loc_id, hsize_t *idx_size)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5X_get_size() */
+
+#ifdef H5_HAVE_PARALLEL
+/*-------------------------------------------------------------------------
+ * Function:    H5Xinitialize_parallel_query
+ *              (and support functions)
+ *
+ * Purpose:     The intent of this collection of functions is two-fold:
+ *              1) provide a mechanism to define parallel access to the
+ *                 requested HDF file and datasets.
+ *              2) provide the functions to define MPI groups which contain
+ *                 all processes allocated to the same 'node'. 
+ *                 On a machine such as 'cori' at LBNL, the MAX number of
+ *                 processes on a single node will be 64 if no additional
+ *                 action is taken.  
+ *
+ *                 Once an MPI group is defined, all non-rank-0 processes
+ *                 will send their query results to the group-rank-0 process
+ *                 for writing to a file.
+ *
+ *-------------------------------------------------------------------------
+ */
+#define HR_RANK(R) ((int)hr_view[(R)].rank & 0x3FFFFFFF)
+#define HR_ID(R)  (hr_view[(R)].hostid)
+
+typedef struct {
+  int hostid;
+  int rank;
+} hr_tuple;
+
+static int enable_parallel_queries = 0;
+static int g_mpi_rank = -1;
+static int g_mpi_size = -1;
+
+static int g_local_peer_count = -1;
+static int g_local_peer_rank = -1;
+
+static int g_group_peer_count = -1;
+static int g_group_peer_rank = -1;
+static int g_group_id = -1;
+
+static int  *layout=0;
+static int  *_ranks=0;
+static int  *_nodes=0;
+static int  *_peercounts=0;
+
+static MPI_Comm query_group_comm = MPI_COMM_NULL;
+
+static int
+cmphostid(const void *h1, const void *h2)
+{
+  return (*(int *)h1 > *(int *)h2);
+}
+
+static int
+_get_nodecount(void)
+{
+    static int nodecount = 0;
+    if (nodecount) return nodecount;
+
+    if (_ranks && _nodes && _peercounts && layout) {
+       int i, basei=0;
+       hr_tuple *hr_view = (hr_tuple *)layout;
+       int checkid = HR_ID(0);
+       _nodes[0] = 0;
+
+       for(i=0; i < g_mpi_size; i++) {
+          _ranks[i] = HR_RANK(i);
+          if (HR_ID(i) != checkid) {
+             checkid = HR_ID(i);
+             _peercounts[nodecount] = i - basei;
+             basei = i;
+            _nodes[nodecount++] = i;
+          }
+       }
+
+    // We're done looking at every node, so
+    // now we just fill in the peercount for the last node.                                                                                              
+    if (nodecount) {
+      _peercounts[nodecount] = g_mpi_size - basei;
+    }
+    else _peercounts[nodecount] = g_mpi_size;
+  }
+  return  ++nodecount;
+}
+
+static int
+_get_local_peer_count(int hostid)
+{
+  int peercount = 0;
+  if (g_mpi_size > 1) {
+     int i, nodecount = _get_nodecount();
+     hr_tuple *hr_view = (hr_tuple *)layout;
+     for(i=0; i < nodecount; i++) {
+        int sindex = _nodes[i];
+        if (HR_ID(sindex) == hostid) {
+	   g_group_id = i;
+           return peercount = _peercounts[i];
+	}
+     }
+  }
+  return peercount = g_mpi_size;
+}
+
+static int
+_get_local_peer_rank(int hostid)
+{
+  if (g_mpi_size > 1) {
+     int i, nodecount = _get_nodecount();
+     hr_tuple *hr_view = (hr_tuple *)layout;
+     for(i=0; i < nodecount; i++) {
+        int k, sindex = _nodes[i];
+        if (HR_ID(sindex) == hostid) {
+	  for(k=0; i<_peercounts[i]; k++) {
+	    if (HR_RANK(sindex+k) == g_mpi_rank)
+	      return k;
+	  }
+	}
+     }
+  }
+  return g_mpi_rank;
+}
+
+static 
+int getLocalInfo(int hostid)
+{
+    int rank = g_mpi_rank;
+    int size = g_mpi_size;
+    int localinfo[2] = {hostid, rank};
+    if (size > 1) {
+      /* Max number of nodes is the same as the number of ranks */
+      _nodes = (int *)calloc(size,sizeof(int));
+      _ranks = (int *)calloc(size,sizeof(int));
+      _peercounts = (int *)calloc(size,sizeof(int));
+      layout = (int *)calloc(size*2,sizeof(int));
+
+      /* Exchange host/rank info */
+      if( MPI_Allgather(localinfo,2, MPI_INT,layout,2,MPI_INT,MPI_COMM_WORLD) != MPI_SUCCESS) {
+	printf("ERROR! MPI_Allgather failure\n");
+        return -1;
+      }
+      /* Possibly sort to get the info about local peers */
+      if (size > 2) qsort(layout,size,sizeof(int)*2,cmphostid);
+      g_group_peer_count = _get_nodecount();
+      g_local_peer_count = _get_local_peer_count(hostid);
+      g_local_peer_rank  = _get_local_peer_rank(hostid);
+    }
+    return 1;
+}
+
+static
+void gather_topology_info(void)
+{
+    int isInitialized = 0;
+    int hostid = gethostid();
+    MPI_Initialized(&isInitialized);
+    if (!isInitialized) {
+       enable_parallel_queries = 0;
+       return;
+    }
+    MPI_Comm_rank(MPI_COMM_WORLD, &g_mpi_rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &g_mpi_size);
+    if (g_mpi_size == 1) {
+      g_group_peer_count = 1;
+      g_local_peer_count = 1;
+      g_local_peer_rank  = 0;
+      enable_parallel_queries =	0;
+      return;
+    }
+
+    g_local_peer_count = getLocalInfo(hostid);
+    enable_parallel_queries = 1;
+}
+
+static 
+herr_t create_group_comms(void)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+    int query_rank = -1;
+    int query_size = -1;
+
+    /* The enable flag is set via the gather_topolgy_info() function above.
+     * NOTE: We won't initialize MPI, nor enable parallel queries if the user 
+     * hasn't already initialized MPI themselves...
+     */
+    if (!enable_parallel_queries)
+        return SUCCEED;
+
+    if (g_group_peer_count == 1) {
+        if (MPI_Comm_dup(MPI_COMM_WORLD,&query_group_comm) != MPI_SUCCESS)
+            return FAIL;
+        return SUCCEED;
+    }
+
+    if (g_group_id < 0) {
+      printf("ERROR: group ids have not been set!\n");
+      return FAIL;
+    }
+    if (MPI_Comm_split(MPI_COMM_WORLD, g_group_id, g_group_peer_rank, &query_group_comm) != MPI_SUCCESS) {
+      printf("ERROR! MPI_Comm_split failed\n");
+      return FAIL;
+    }
+    if (MPI_Comm_rank(query_group_comm,&query_rank) != MPI_SUCCESS) {
+       printf("ERROR: Query comm is non-functional!\n");
+       return FAIL;
+    }
+    if (MPI_Comm_size(query_group_comm,&query_size) != MPI_SUCCESS) {
+       printf("ERROR: Query comm is non-functional!\n");
+       return FAIL;
+    }
+    return ret_value;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Xinitialize_parallel_query
+ *
+ * Return:  Non-negative on success/Negative on failure
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Xinitialize_parallel_query(void)
+{
+    static int initialized = 0;
+    gather_topology_info();
+    return create_group_comms();
+}
+
+int
+H5Xparallel_queries_enabled(void)
+{
+    return enable_parallel_queries;
+}
+
+int
+H5Xparallel_rank(void)
+{
+    return g_mpi_rank;
+}
+
+int
+H5Xparallel_size(void)
+{
+    return g_mpi_size;
+}
+
+herr_t
+H5Xallgather_by_size(void *alldata, int nelems, int typesize)
+{
+    /* Exchange */
+    int i, size;
+    if (typesize == 8) {
+        int64_t *longdata = (int64_t *)alldata;
+        int64_t *src = &longdata[g_mpi_rank * nelems];
+	/* Copy nelems (allgather doesn't like aliasing between input and output) */
+        int64_t *my_longdata = (int64_t *)malloc(nelems * sizeof(int64_t));
+	for(i=0; i< nelems; i++) my_longdata[i] = src[i];
+	MPI_Allgather(my_longdata, nelems, MPI_LONG, longdata, nelems, MPI_LONG, MPI_COMM_WORLD);
+        free(my_longdata);
+    }
+    else if (typesize == 4) {
+        int *intdata = (int *)alldata;
+        int *src = &intdata[g_mpi_rank * nelems];
+        int *my_intdata = (int *)malloc(nelems * sizeof(int));
+	for(i=0; i< nelems; i++) my_intdata[i] = src[i];
+	MPI_Allgather(my_intdata, nelems, MPI_INT, intdata, nelems, MPI_INT, MPI_COMM_WORLD);
+	free(my_intdata);
+    }
+    else if (typesize == 2) {
+        short *shortdata = (short *)alldata;
+        int *src = &shortdata[g_mpi_rank * nelems];
+        short *my_shortdata = (short *)malloc(nelems * sizeof(short));
+	for(i=0; i< nelems; i++) my_shortdata[i] = src[i];
+	MPI_Allgather(my_shortdata, 1, MPI_SHORT, shortdata, 1, MPI_SHORT, MPI_COMM_WORLD);
+	free(my_shortdata);
+    }
+    else if (typesize == 1) {
+        char *bytedata = (char *)alldata;
+        char *src = &bytedata[g_mpi_rank * nelems];
+        char *my_bytedata = (short *)malloc(nelems * sizeof(char));
+	for(i=0; i< nelems; i++) my_bytedata[i] = src[i];
+	MPI_Allgather(my_bytedata, 1, MPI_BYTE, bytedata, 1, MPI_BYTE, MPI_COMM_WORLD);
+	free(my_bytedata);
+    }
+    else return FAIL;	/* All non-supported lengths will fail */
+    return SUCCEED;
+}
+
+/* 
+ * Helper function for H5Xslab_set
+ */
+#define BYROW                1       /* divide into slabs of rows */
+#define BYCOL                2       /* divide into blocks of columns */
+#define BYLASTDIM            3       /* For 3D and higher, we get contiguous blocks */
+#define ZROW                 4       /* same as BYCOL except process 0 gets 0 rows */
+#define ZCOL                 5       /* same as BYCOL except process 0 gets 0 columns */
+
+static void
+slab_set(int mpi_rank, int mpi_size, int ndims, hsize_t dims[], hsize_t start[], hsize_t count[],
+	 hsize_t stride[], hsize_t block[], int mode)
+{
+    int i, lastdim = ndims-1;
+    switch (mode){
+    case BYROW:
+	/* Each process takes a slabs of rows. */
+	block[0] = dims[0]/mpi_size;
+	start[0] = mpi_rank*block[0];
+        for(i=1; i < ndims; i++) {
+            block[i]  = dims[i];
+            stride[i] = block[i];
+	    count[i]  = 1;
+	    start[i]  = 0;
+	}
+	break;
+    case BYCOL:
+	/* Each process takes a block of columns. */
+        for(i=0; i < ndims; i++) {
+            if (i == 1) {
+                block[1] = dims[1]/mpi_size;
+                start[1] = mpi_rank * block[1];
+            } 
+            else {
+                block[i]  = dims[i];
+                start[i]  = 0;
+            }
+            stride[i] = block[i];
+	    count[i]  = 1;
+	}
+	break;
+    case BYLASTDIM:
+        for(i=0; i < lastdim; i++) {
+            block[i]  = dims[i];
+            stride[i] = block[i];
+	    count[i]  = 1;
+	    start[i]  = 0;
+	}
+	block[lastdim]  = dims[lastdim]/mpi_size;
+	stride[lastdim] = block[lastdim];
+	count[lastdim]  = 1;
+	start[lastdim]  = mpi_rank*block[lastdim];
+        break;	
+    case ZROW:
+	/* Similar to BYROW except process 0 gets 0 row */
+	/* Each process takes a slabs of rows. */
+        block[0] = (mpi_rank ? dims[0]/mpi_size  : 0);
+	start[0] = (mpi_rank ? mpi_rank*block[0] : 1);
+        for(i=1; i < ndims; i++) {
+            block[i]  = dims[i];
+            stride[i] = block[i];
+	    count[i]  = 1;
+	    start[i]  = 0;
+	}
+	break;
+    case ZCOL:
+	/* Similar to BYCOL except process 0 gets 0 column */
+	/* Each process takes a block of columns. */
+        for(i=0; i < ndims; i++) {
+            if (i == 1) {
+                block[1] = (mpi_rank ? dims[1]/mpi_size : 0);
+                start[1] = (mpi_rank ? mpi_rank * block[1] : 1);
+            } 
+            else {
+                block[i]  = dims[i];
+                start[i]  = 0;
+            }
+            stride[i] = block[i];
+	    count[i]  = 1;
+	}
+	break;
+    default:
+	/* Unknown mode.  Set it to cover the whole dataset. */
+	printf("unknown slab_set mode (%d)\n", mode);
+        for(i=0; i < ndims; i++) {
+            block[i]  = dims[i];
+            stride[i] = block[i];
+	    count[i]  = 1;
+	    start[i]  = 0;
+	}
+	break;
+    }
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Xslab_set
+ *
+ * Purpose:     Prepare to call H5Sselect_hyperslab().
+ * Returns:     The number of dimensions of each container, i.e. all
+ *              output arguments have 'ndims' number of initialized
+ *              values.
+ *-------------------------------------------------------------------------
+ */
+int
+H5Xslab_set(hid_t filespace_id, hsize_t **start, hsize_t **count, hsize_t **stride, hsize_t **block)
+{
+    int ds_ndims;
+    hsize_t *temp, *dims;
+
+    HDassert(start);
+    HDassert(count);
+    HDassert(count);
+    HDassert(block);
+
+    ds_ndims = H5Sget_simple_extent_ndims(filespace_id);
+    if (ds_ndims > 0) {
+        dims = (hsize_t *)calloc(ds_ndims, sizeof(hsize_t));
+	temp = (hsize_t *)calloc(ds_ndims * 4, sizeof(hsize_t));
+	if (dims && temp) {
+            *start         = temp;
+            *count         = *start + ds_ndims;
+	    *stride        = *count + ds_ndims;
+            *block         = *stride + ds_ndims;
+
+            H5Sget_simple_extent_dims(filespace_id, dims, NULL);
+            slab_set(g_mpi_rank, g_mpi_size, ds_ndims, dims, *start, *count, *stride, *block, BYLASTDIM);
+            free(dims);
+	}
+	else return -1;
+    }
+    return ds_ndims;
+}
+
+#endif	/* H5_HAVE_PARALLEL */

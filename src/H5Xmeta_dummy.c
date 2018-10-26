@@ -275,6 +275,7 @@ const H5X_class_t H5X_META_DUMMY[1] = {{
     H5X_PLUGIN_META_DUMMY,      /* (Or whatever number is assigned) */
     "dummy index plugin",       /* Whatever name desired */
     H5X_TYPE_METADATA,          /* This plugin operates on metadata */
+    H5X_SIMPLE_QUERY,
     &idx_class                  /* Index class */
 }};
 

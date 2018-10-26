@@ -18,6 +18,9 @@
 #ifndef _H5Xprivate_H
 #define _H5Xprivate_H
 
+/* Include configuration info */
+#include "H5pubconf.h"
+
 /* Include package's public header */
 #include "H5Xpublic.h"
 
@@ -60,5 +63,7 @@ H5_DLL herr_t H5X_can_create_data(hid_t dset_id, hid_t dcpl_id);
 H5_DLL herr_t H5X_get_count(hid_t loc_id, hsize_t *idx_count);
 
 H5_DLL herr_t H5X_get_size(hid_t loc_id, hsize_t *idx_size);
+
+H5_DLL herr_t H5Xgather_local_indices(void *buf, hid_t type_id, hid_t space_id, void *op, void *operator_data);
 
 #endif /* _H5Xprivate_H */

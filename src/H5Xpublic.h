@@ -53,8 +53,8 @@
 
 /* Index type */
 typedef enum {
-    H5X_TYPE_DATA,        /* Data index */
-    H5X_TYPE_METADATA     /* Metadata index */
+    H5X_TYPE_DATA,               /* Data index */
+    H5X_TYPE_METADATA            /* Metadata index */
 } H5X_type_t;
 
 typedef struct {
@@ -105,6 +105,10 @@ typedef union {
     H5X_metadata_class_t metadata_class;
 } H5X_idx_class_t;
 
+#define H5X_SIMPLE_QUERY 1
+#define H5X_COMPOUND_QUERY  2
+#define H5X_DERIVED_VALUE_QUERY 4
+
 typedef struct {
     unsigned version;     /* Version number of the index plugin class struct */
                           /* (Should always be set to H5X_CLASS_VERSION, which
@@ -112,7 +116,8 @@ typedef struct {
     unsigned id;          /* Index ID (assigned by The HDF Group, for now) */
     const char *idx_name; /* Index name (for debugging only, currently) */
     H5X_type_t type;      /* Type of data indexed by this plugin */
-
+    int query_types;      /* Plugin supports multiple (compound) query conditions */
+                          /* (see H5X_query_types - above) */
     /* Callbacks */
     H5X_idx_class_t *idx_class; /* Callback index class */
 } H5X_class_t;
@@ -141,6 +146,14 @@ H5_DLL hsize_t H5Xget_size(hid_t loc_id);
 H5_DLL herr_t H5Xget_type(hid_t object_id, hsize_t index_idx,
         unsigned *plugin_id);
 */
+#ifdef H5_HAVE_PARALLEL
+H5_DLL herr_t H5Xinitialize_parallel_query(void);
+H5_DLL int H5Xparallel_queries_enabled(void);
+H5_DLL int H5Xslab_set(hid_t filespace_id, hsize_t **start, hsize_t **count, hsize_t **stride, hsize_t **block);
+H5_DLL int H5Xparallel_rank(void);
+H5_DLL int H5Xparallel_size(void);
+H5_DLL herr_t H5Xallgather_by_size(void *xdata, int nelems, int typesize);
+#endif
 
 #ifdef __cplusplus
 }

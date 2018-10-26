@@ -50,6 +50,8 @@ set (H5P_TESTS
     t_prestart
     t_init_term
     t_shapesame
+    t_pquery
+    t_pread
 )
 
 foreach (testp ${H5P_TESTS})
