@@ -376,43 +376,6 @@ done:
 } /* H5VL__native_get_file */
 
 
-/*---------------------------------------------------------------------------
- * Function:    H5VL_native_register
- *
- * Purpose:     Utility routine to register an ID with the native VOL plugin
- *              as an auxilary object.
- *
- * Returns:     Success:    An ID for the object
- *              Failure:    H5I_INVALID_HID
- *
- *---------------------------------------------------------------------------
- */
-hid_t
-H5VL_native_register(H5I_type_t type, const void *obj, hbool_t app_ref)
-{
-    hid_t    ret_value = H5I_INVALID_HID;
-
-    FUNC_ENTER_NOAPI(H5I_INVALID_HID)
-
-    HDassert(obj);
-
-    /* If the datatype is already VOL-managed, the datatype's vol_obj
-     * field will get clobbered later, so disallow this.
-     */
-    if(type == H5I_DATATYPE)
-        if(((const H5T_t *)obj)->vol_obj != NULL)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "can only get an ID for an uncommitted datatype")
-
-HDassert(0 && "H5VL_native_register");
-    /* Get an ID for the object */
-    if((ret_value = H5VL_register_using_vol_id(type, obj, H5VL_NATIVE_ID_g, app_ref)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to get an ID for the object")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_native_register() */
-
-
 /*-------------------------------------------------------------------------
  * Function:	H5VL__native_attr_create
  *

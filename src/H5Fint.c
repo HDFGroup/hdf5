@@ -2176,7 +2176,15 @@ H5F_get_id(H5F_t *file)
 
     if(H5I_find_id(file, H5I_FILE, &ret_value) < 0 || H5I_INVALID_HID == ret_value) {
         /* resurrect the ID - Register an ID with the native driver */
-        if((ret_value = H5VL_native_register(H5I_FILE, file, FALSE)) < 0)
+{
+void *vol_wrap_ctx = NULL;       /* Object wrapping context */
+
+/* Retrieve the VOL object wrap context */
+if(H5CX_get_vol_wrap_ctx((void **)&vol_wrap_ctx) < 0)
+    HGOTO_ERROR(H5E_VOL, H5E_CANTGET, H5I_INVALID_HID, "can't get VOL object wrap context")
+HDassert(vol_wrap_ctx);
+}
+        if((ret_value = H5VL_wrap_register(H5I_FILE, file, FALSE)) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register group")
         file->id_exists = TRUE;
     } /* end if */
