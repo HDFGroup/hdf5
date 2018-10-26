@@ -1908,14 +1908,14 @@ error:
  * Purpose:     Returns a disposable, generally non-functional,
  *              VOL class struct.
  *
- *              In some of the test code, we need a disposable VOL driver
+ *              In some of the test code, we need a disposable VOL plugin
  *              but we don't want to mess with the real VFDs and we also
- *              don't have access to the internals of the real VOL drivers
+ *              don't have access to the internals of the real VOL plugins
  *              (which use static globals and functions) to easily duplicate
- *              them (e.g.: for testing VOL driver ID handling).
+ *              them (e.g.: for testing VOL plugin ID handling).
  *
  *              This API call will return a pointer to a VOL class that
- *              can be used to construct a test VOL using H5VLregister_driver().
+ *              can be used to construct a test VOL using H5VLregister_plugin().
  *
  * Return:      Success:    A pointer to a VOL class struct
  *              Failure:    NULL
@@ -1931,7 +1931,7 @@ h5_get_dummy_vol_class(void)
     if(NULL == (vol_class = (H5VL_class_t *)HDcalloc((size_t)1, sizeof(H5VL_class_t))))
         TEST_ERROR;
 
-    /* Fill in the minimum parameters to make a VOL driver class that
+    /* Fill in the minimum parameters to make a VOL plugin class that
      * can be registered.
      */
     vol_class->name = "dummy";

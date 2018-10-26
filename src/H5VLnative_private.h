@@ -29,7 +29,7 @@ extern "C" {
 #endif
 
 H5_DLL hid_t H5VL_native_get_driver_id(void);
-H5_DLL hid_t H5VL_native_init(void);
+H5_DLL hid_t H5VL_native_init(hid_t vipl_id);
 H5_DLL hid_t H5VL_native_register(H5I_type_t type, const void *obj, hbool_t app_ref);
 
 #ifdef __cplusplus

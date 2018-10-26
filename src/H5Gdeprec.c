@@ -853,7 +853,7 @@ H5Giterate(hid_t loc_id, const char *name, int *idx_p, H5G_iterate_t op,
     lnk_op.op_func.op_old = op;
 
     /* Get the object pointer */
-    if(NULL == (vol_obj = H5VL_get_object(loc_id)))
+    if(NULL == (vol_obj = H5VL_vol_object(loc_id)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADTYPE, (-1), "invalid identifier")
 
     /* Set wrapper info in API context */

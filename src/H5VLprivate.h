@@ -78,6 +78,7 @@ H5_DLL ssize_t H5VL_get_plugin_name(hid_t id, char *name/*out*/, size_t size);
 
 /* Functions that manipulate VOL objects */
 H5_DLL void *H5VL_object(hid_t id);
+H5_DLL void *H5VL_object_data(const H5VL_object_t *vol_obj);
 H5_DLL void *H5VL_object_verify(hid_t id, H5I_type_t obj_type);
 H5_DLL H5VL_object_t *H5VL_vol_object(hid_t id);
 H5_DLL herr_t H5VL_free_object(H5VL_object_t *obj);
@@ -92,9 +93,9 @@ H5_DLL void * H5VL_wrap_object(const H5VL_class_t *plugin, void *wrap_ctx,
     void *obj);
 
 /* ID registration functions */
-H5_DLL hid_t H5VL_register(H5I_type_t type, const void *object, H5VL_t *vol_plugin, hbool_t app_ref);
+H5_DLL hid_t H5VL_register(H5I_type_t type, void *object, H5VL_t *vol_plugin, hbool_t app_ref);
 H5_DLL hid_t H5VL_wrap_register(H5I_type_t type, void *obj, hbool_t app_ref);
-H5_DLL hid_t H5VL_register_using_vol_id(H5I_type_t type, const void *obj, hid_t driver_id, hbool_t app_ref);
+H5_DLL hid_t H5VL_register_using_vol_id(H5I_type_t type, void *obj, hid_t driver_id, hbool_t app_ref);
 H5_DLL herr_t H5VL_register_using_existing_id(H5I_type_t type, void *object, H5VL_t *vol_driver, hbool_t app_ref, hid_t existing_id);
 
 /******************************

@@ -160,7 +160,7 @@ H5VLregister_plugin(const H5VL_class_t *cls, hid_t vipl_id)
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5VLregister_driver() */
+} /* end H5VLregister_plugin() */
 
 
 /*-------------------------------------------------------------------------
@@ -221,7 +221,7 @@ H5VLregister_plugin_by_name(const char *name, hid_t vipl_id)
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5VLregister_driver_by_name() */
+} /* end H5VLregister_plugin_by_name() */
 
 
 /*-------------------------------------------------------------------------
@@ -273,7 +273,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLunregister_driver(hid_t vol_id)
+H5VLunregister_plugin(hid_t vol_id)
 {
     herr_t ret_value = SUCCEED;       /* Return value */
 
@@ -290,11 +290,11 @@ H5VLunregister_driver(hid_t vol_id)
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5VLunregister_driver() */
+} /* end H5VLunregister_plugin() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5VLis_driver_registered
+ * Function:    H5VLis_plugin_registered
  *
  * Purpose:     Tests whether a VOL class has been registered or not
  *
@@ -307,7 +307,7 @@ done:
  *-------------------------------------------------------------------------
  */
 htri_t
-H5VLis_driver_registered(const char *name)
+H5VLis_plugin_registered(const char *name)
 {
     H5VL_get_plugin_ud_t op_data;       /* Callback info for plugin search */
     htri_t ret_value = FALSE;           /* Return value */
@@ -327,7 +327,7 @@ H5VLis_driver_registered(const char *name)
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5VLis_driver_registered() */
+} /* end H5VLis_plugin_registered() */
 
 
 /*-------------------------------------------------------------------------

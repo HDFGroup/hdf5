@@ -485,9 +485,8 @@ H5I__unwrap(void *obj_ptr, H5I_type_t type)
         ret_value = H5VL_object_data(vol_obj);
     } /* end if */
     else if(H5I_DATATYPE == type) {
-        const H5T_t *dt;
+        H5T_t *dt = (H5T_t *)obj_ptr;
 
-        dt = (const H5T_t *)obj_ptr;
         ret_value = (void *)H5T_get_actual_type(dt);
     } /* end if */
     else
@@ -904,8 +903,7 @@ H5I_subst(hid_t id, const void *new_object)
         HGOTO_ERROR(H5E_ATOM, H5E_NOTFOUND, NULL, "can't get ID ref count")
 
     /* Get the old object pointer to return */
-    /* (Casting away const OK -QAK) */
-    ret_value = (void *)id_ptr->obj_ptr;
+    ret_value = (void *)id_ptr->obj_ptr;        /* (Casting away const OK -QAK) */
 
     /* Set the new object pointer for the ID */
     id_ptr->obj_ptr = new_object;
@@ -2026,7 +2024,7 @@ H5I__iterate_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
         /* The stored object pointer might be an H5VL_object_t, in which
          * case we'll need to get the wrapped object struct (H5F_t *, etc.).
          */
-        obj_ptr = H5I__unwrap(item->obj_ptr, type);
+        obj_ptr = H5I__unwrap((void *)item->obj_ptr, type);
 
         /* Invoke callback function */
         cb_ret_val = (*udata->user_func)((void *)obj_ptr, item->id, udata->user_udata);     /* (Casting away const OK) */
@@ -2179,7 +2177,7 @@ H5Iget_name(hid_t id, char *name/*out*/, size_t size)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, (-1), "can't retrieve object location")
 
     /* Get the object pointer */
-    if(NULL == (vol_obj = H5VL_get_object(id)))
+    if(NULL == (vol_obj = H5VL_vol_object(id)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADTYPE, (-1), "invalid identifier")
 
     /* Set wrapper info in API context */
@@ -2356,7 +2354,7 @@ H5I__id_dump_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
             obj_ptr = H5VL_object_data(vol_obj);
 
             if(H5_VOL_NATIVE == vol_obj->plugin->cls->value)
-                path = H5G_nameof((H5G_t *)obj_ptr);
+                path = H5G_nameof(obj_ptr);
             break;
         }
 
@@ -2367,7 +2365,7 @@ H5I__id_dump_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
             obj_ptr = H5VL_object_data(vol_obj);
 
             if(H5_VOL_NATIVE == vol_obj->plugin->cls->value)
-                path = H5D_nameof((H5D_t *)obj_ptr);
+                path = H5D_nameof(obj_ptr);
             break;
         }
 
@@ -2377,7 +2375,7 @@ H5I__id_dump_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
 
             obj_ptr = (void *)H5T_get_actual_type(dt);
 
-            path = H5T_nameof((H5T_t *)obj_ptr);
+            path = H5T_nameof(obj_ptr);
             break;
         }
 

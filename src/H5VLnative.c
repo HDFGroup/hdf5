@@ -400,7 +400,7 @@ H5VL_native_register(H5I_type_t type, const void *obj, hbool_t app_ref)
      * field will get clobbered later, so disallow this.
      */
     if(type == H5I_DATATYPE)
-        if(((H5T_t *)obj)->vol_obj != NULL)
+        if(((const H5T_t *)obj)->vol_obj != NULL)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "can only get an ID for an uncommitted datatype")
 
 HDassert(0 && "H5VL_native_register");

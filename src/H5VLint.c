@@ -237,7 +237,7 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5VL_register(H5I_type_t type, const void *object, H5VL_t *vol_plugin, hbool_t app_ref)
+H5VL_register(H5I_type_t type, void *object, H5VL_t *vol_plugin, hbool_t app_ref)
 {
     H5VL_object_t  *vol_obj     = NULL;
     hid_t           ret_value   = H5I_INVALID_HID;
@@ -298,7 +298,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_register_using_existing_id(H5I_type_t type, void *object, H5VL_t *vol_driver, hbool_t app_ref, hid_t existing_id)
+H5VL_register_using_existing_id(H5I_type_t type, void *object, H5VL_t *vol_plugin, hbool_t app_ref, hid_t existing_id)
 {
     H5VL_object_t  *new_vol_obj = NULL;     /* Pointer to new VOL object                    */
     void           *stored_obj = NULL;      /* Pointer to the object that will be stored    */
@@ -308,7 +308,7 @@ H5VL_register_using_existing_id(H5I_type_t type, void *object, H5VL_t *vol_drive
 
     /* Check arguments */
     HDassert(object);
-    HDassert(vol_driver);
+    HDassert(vol_plugin);
 
     /* Make sure type number is valid */
     if(type != H5I_ATTR && type != H5I_DATASET && type != H5I_DATATYPE && type != H5I_FILE && type != H5I_GROUP)
@@ -317,11 +317,11 @@ H5VL_register_using_existing_id(H5I_type_t type, void *object, H5VL_t *vol_drive
     /* Set up the new VOL object */
     if(NULL == (new_vol_obj = H5FL_CALLOC(H5VL_object_t)))
         HGOTO_ERROR(H5E_VOL, H5E_CANTALLOC, FAIL, "can't allocate memory for VOL object");
-    new_vol_obj->driver = vol_driver;
+    new_vol_obj->plugin = vol_plugin;
     new_vol_obj->data = object;
 
-    /* Bump the reference count on the VOL driver */
-    vol_driver->nrefs++;
+    /* Bump the reference count on the VOL plugin */
+    vol_plugin->nrefs++;
 
     /* If this is a datatype, we have to hide the VOL object under the H5T_t pointer */
     if(H5I_DATATYPE == type) {
@@ -353,7 +353,7 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5VL_register_using_vol_id(H5I_type_t type, const void *obj, hid_t plugin_id, hbool_t app_ref)
+H5VL_register_using_vol_id(H5I_type_t type, void *obj, hid_t plugin_id, hbool_t app_ref)
 {
     H5VL_class_t    *cls = NULL;
     H5VL_t          *plugin = NULL;       /* VOL plugin struct */
@@ -480,7 +480,7 @@ H5VL_get_plugin_name(hid_t id, char *name /*out*/, size_t size)
     H5VL_object_t       *vol_obj;
     const H5VL_class_t  *cls;
     size_t              len;
-    ssize_t             ret_value;
+    ssize_t             ret_value = -1;
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -891,7 +891,7 @@ H5VL_wrap_register(H5I_type_t type, void *obj, hbool_t app_ref)
         new_obj = obj;
 
     /* Get an ID for the object */
-    if((ret_value = H5VL_object_register(new_obj, type, vol_wrap_ctx->plugin->id, app_ref)) < 0)
+    if((ret_value = H5VL_register_using_vol_id(type, new_obj, vol_wrap_ctx->plugin->id, app_ref)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to get an ID for the object")
 
 done:
