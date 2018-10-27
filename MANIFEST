@@ -3156,8 +3156,8 @@
 ./java/lib/ext/slf4j-simple-1.7.25.jar
 
 # CMake-specific Files
-./config/GCC.cmake
-./config/intel.cmake
+./config/toolchain/GCC.cmake
+./config/toolchain/intel.cmake
 
 ./config/cmake/cacheinit.cmake
 ./config/cmake/CMakeFindJavaCommon.cmake
