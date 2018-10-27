@@ -752,6 +752,7 @@ herr_t
 H5Trefresh(hid_t type_id)
 {
     H5T_t *dt;                          /* Datatype for this operation */
+    hbool_t             vol_wrapper_set = FALSE;        /* Whether the VOL object wrapping context was set up */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -768,12 +769,22 @@ H5Trefresh(hid_t type_id)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "can't set access property list info")
 
     /* Refresh the datatype's metadata */
-    if(dt->vol_obj)
+    if(dt->vol_obj) {
+        /* Set wrapper info in API context */
+        if(H5VL_set_vol_wrapper(dt->vol_obj->data, dt->vol_obj->plugin) < 0)
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
+        vol_wrapper_set = TRUE;
+
         if((ret_value = H5VL_datatype_specific(dt->vol_obj->data, dt->vol_obj->plugin->cls, H5VL_DATATYPE_REFRESH, 
                                           H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, type_id)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTLOAD, FAIL, "unable to refresh datatype")
+    } /* end if */
 
 done:
+    /* Reset object wrapping info in API context */
+    if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
+        HDONE_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't reset VOL wrapper info")
+
     FUNC_LEAVE_API(ret_value)
 } /* H5Trefresh */
 

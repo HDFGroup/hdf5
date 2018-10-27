@@ -1029,7 +1029,7 @@ H5Drefresh(hid_t dset_id)
 
     /* Set wrapper info in API context */
     if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, H5I_INVALID_HID, "can't set VOL wrapper info")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
     vol_wrapper_set = TRUE;
 
     /* Refresh the dataset object */
@@ -1040,7 +1040,7 @@ H5Drefresh(hid_t dset_id)
 done:
     /* Reset object wrapping info in API context */
     if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTSET, H5I_INVALID_HID, "can't reset VOL wrapper info")
+        HDONE_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't reset VOL wrapper info")
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Drefresh() */

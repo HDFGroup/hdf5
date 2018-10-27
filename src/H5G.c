@@ -825,6 +825,7 @@ herr_t
 H5Grefresh(hid_t group_id)
 {
     H5VL_object_t  *vol_obj;                    /* Group for this operation     */
+    hbool_t             vol_wrapper_set = FALSE;        /* Whether the VOL object wrapping context was set up */
     herr_t          ret_value = SUCCEED;    /* Return value                 */
 
     FUNC_ENTER_API(FAIL)
@@ -838,12 +839,21 @@ H5Grefresh(hid_t group_id)
     if(H5CX_set_loc(group_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set collective metadata read info")
 
+    /* Set wrapper info in API context */
+    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
+    vol_wrapper_set = TRUE;
+
     /* Refresh group's metadata */
     if((ret_value = H5VL_group_specific(vol_obj->data, vol_obj->plugin->cls, H5VL_GROUP_REFRESH, 
                                           H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, group_id)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, FAIL, "unable to refresh group")
 
 done:
+    /* Reset object wrapping info in API context */
+    if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
+        HDONE_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't reset VOL wrapper info")
+
     FUNC_LEAVE_API(ret_value)
 } /* H5Grefresh */
 
