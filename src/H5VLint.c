@@ -178,11 +178,11 @@ H5VL_term_package(void)
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    if (H5_PKG_INIT_VAR) {
+    if(H5_PKG_INIT_VAR) {
         if (H5I_nmembers(H5I_VOL) > 0) {
             (void)H5I_clear_type(H5I_VOL, FALSE, FALSE);
             n++;
-        }
+        } /* end if */
         else {
             /* Destroy the VOL plugin ID group */
             n += (H5I_dec_type_ref(H5I_VOL) > 0);
@@ -190,8 +190,8 @@ H5VL_term_package(void)
             /* Mark interface as closed */
             if (0 == n)
                 H5_PKG_INIT_VAR = FALSE;
-        }
-    }
+        } /* end else */
+    } /* end if */
 
     FUNC_LEAVE_NOAPI(n)
 } /* end H5VL_term_package() */
@@ -223,7 +223,8 @@ H5VL__free_cls(H5VL_class_t *cls)
     if(cls->terminate && cls->terminate() < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTCLOSEOBJ, FAIL, "VOL plugin did not terminate cleanly")
 
-    /* XXX (VOL MERGE): We'll leak memory if the name string was dynamically allocated. */
+    /* Release the class */
+    H5MM_xfree(cls->name);
     H5FL_FREE(H5VL_class_t, cls);
 
 done:
@@ -516,8 +517,10 @@ H5VL_register_plugin(const void *_cls, hbool_t app_ref, hid_t vipl_id)
 
     /* Copy the class structure so the caller can reuse or free it */
     if (NULL == (saved = H5FL_CALLOC(H5VL_class_t)))
-        HGOTO_ERROR(H5E_VOL, H5E_NOSPACE, H5I_INVALID_HID, "memory allocation failed for VOL plugin class struct")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTALLOC, H5I_INVALID_HID, "memory allocation failed for VOL plugin class struct")
     HDmemcpy(saved, cls, sizeof(H5VL_class_t));
+    if(NULL == (saved->name = H5MM_strdup(cls->name)))
+        HGOTO_ERROR(H5E_VOL, H5E_CANTALLOC, H5I_INVALID_HID, "memory allocation failed for VOL plugin name")
 
     /* Initialize the VOL plugin */
     if(cls->initialize && cls->initialize(vipl_id) < 0)
