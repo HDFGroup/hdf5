@@ -231,14 +231,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_native_init() */
 
-/* XXX (VOL_MERGE): TEMPORARY */
-hid_t
-H5VL_native_get_driver_id(void)
-{
-HDassert(0 && "H5VL_native_get_driver_id");
-    return H5VL_NATIVE_ID_g;
-}
-
 
 /*---------------------------------------------------------------------------
  * Function:    H5VL__native_term

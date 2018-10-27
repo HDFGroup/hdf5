@@ -28,7 +28,6 @@
 extern "C" {
 #endif
 
-H5_DLL hid_t H5VL_native_get_driver_id(void);
 H5_DLL hid_t H5VL_native_init(hid_t vipl_id);
 
 #ifdef __cplusplus
