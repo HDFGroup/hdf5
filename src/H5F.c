@@ -615,7 +615,6 @@ H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 
     H5P_genplist_t     *plist;              /* Property list pointer                    */
     H5VL_class_t       *cls = NULL;         /* VOL Class structure for callback info    */
-    H5VL_t             *plugin = NULL;      /* VOL plugin struct                          */
     H5VL_plugin_prop_t  plugin_prop;        /* Property for VOL plugin ID & info        */
     hid_t               ret_value;          /* return value                             */
 
@@ -668,16 +667,8 @@ H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
                                         H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, H5I_INVALID_HID, "unable to create file")
 
-    /* Setup VOL plugin struct */
-    if(NULL == (plugin = H5FL_CALLOC(H5VL_t)))
-        HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, H5I_INVALID_HID, "can't allocate VL info struct")
-    plugin->cls = cls;
-    plugin->id = plugin_prop.plugin_id;
-    if(H5I_inc_ref(plugin->id, FALSE) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTINC, H5I_INVALID_HID, "unable to increment ref count on VOL plugin")
-
     /* Get an atom for the file */
-    if((ret_value = H5VL_register(H5I_FILE, new_file, plugin, TRUE)) < 0)
+    if((ret_value = H5VL_register_using_vol_id(H5I_FILE, new_file, plugin_prop.plugin_id, TRUE)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize file handle")
 
 done:
@@ -711,7 +702,6 @@ H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
     H5P_genplist_t     *plist;                      /* Property list pointer                    */
     H5VL_plugin_prop_t  plugin_prop;                /* Property for VOL plugin ID & info        */
     H5VL_class_t       *cls = NULL;             /* VOL class structure for callback info    */
-    H5VL_t             *plugin = NULL;            /* VOL plugin struct                          */
     hid_t               ret_value;                  /* return value                             */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
@@ -748,16 +738,8 @@ H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
     if(NULL == (new_file = H5VL_file_open(cls, filename, flags, fapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, H5I_INVALID_HID, "unable to open file")
 
-    /* Setup VOL plugin struct */
-    if(NULL == (plugin = H5FL_CALLOC(H5VL_t)))
-        HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, H5I_INVALID_HID, "can't allocate VL info struct")
-    plugin->cls = cls;
-    plugin->id = plugin_prop.plugin_id;
-    if(H5I_inc_ref(plugin->id, FALSE) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTINC, H5I_INVALID_HID, "unable to increment ref count on VOL plugin")
-
     /* Get an ID for the file */
-    if((ret_value = H5VL_register(H5I_FILE, new_file, plugin, TRUE)) < 0)
+    if((ret_value = H5VL_register_using_vol_id(H5I_FILE, new_file, plugin_prop.plugin_id, TRUE)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize file handle")
 
 done:
