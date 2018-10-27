@@ -174,7 +174,7 @@ int main(int argc, char **argv) {
     H5Pset_fapl_native(under_fapl);
     assert(H5VLis_plugin_registered("native") == 1);
 
-    vol_id = H5VLregister_plugin(&H5VL_log_g);
+    vol_id = H5VLregister_plugin(&H5VL_log_g, H5P_DEFAULT);
     assert(vol_id > 0);
     assert(H5VLis_plugin_registered("log") == 1);
 
@@ -242,7 +242,7 @@ int main(int argc, char **argv) {
     H5Pclose(under_fapl);
 
     H5VLclose(native_plugin_id);
-    H5VLunregister_driver(vol_id);
+    H5VLunregister_plugin(vol_id);
     assert(H5VLis_plugin_registered("log") == 0);
     return 0;
 }
