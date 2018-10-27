@@ -1765,21 +1765,19 @@ done:
 herr_t
 H5Fget_mdc_image_info(hid_t file_id, haddr_t *image_addr, hsize_t *image_len)
 {
-    H5F_t      *file;                   /* File object for file ID */
+    H5VL_object_t  *vol_obj;            /* File info */
     herr_t     ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "i*a*h", file_id, image_addr, image_len);
 
     /* Check args */
-    if(NULL == (file = (H5F_t *)H5VL_object_verify(file_id, H5I_FILE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
-    if(NULL == image_addr || NULL == image_len)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL image addr or image len")
+    if(NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "hid_t identifier is not a file ID")
 
     /* Go get the address and size of the cache image */
-    if(H5AC_get_mdc_image_info(file->shared->cache, image_addr, image_len) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "can't retrieve cache image info")
+    if(H5VL_file_optional(vol_obj->data, vol_obj->plugin->cls, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, H5VL_FILE_GET_MDC_IMAGE_INFO, image_addr, image_len) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't retrieve cache image info")
 
 done:
     FUNC_LEAVE_API(ret_value)

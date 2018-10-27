@@ -472,11 +472,11 @@ H5C_get_mdc_image_info(H5C_t * cache_ptr, haddr_t *image_addr, hsize_t *image_le
 
     if((cache_ptr == NULL) || (cache_ptr->magic != H5C__H5C_T_MAGIC))
         HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "bad cache_ptr on entry")
-    if(image_addr == NULL || image_len == NULL)
-        HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "bad image_addr or image_len on entry")
 
-    *image_addr = cache_ptr->image_addr;
-    *image_len = cache_ptr->image_len;
+    if(image_addr)
+        *image_addr = cache_ptr->image_addr;
+    if(image_len)
+        *image_len = cache_ptr->image_len;
     
 done:
     FUNC_LEAVE_NOAPI(ret_value)

@@ -2088,7 +2088,13 @@ H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR
 
         case H5VL_FILE_GET_MDC_IMAGE_INFO:
             {
-                HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "invalid optional operation")
+                haddr_t *image_addr = va_arg(arguments, haddr_t *);
+                hsize_t *image_len = va_arg(arguments, hsize_t *);
+
+                /* Go get the address and size of the cache image */
+                if(H5AC_get_mdc_image_info(f->shared->cache, image_addr, image_len) < 0)
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't retrieve cache image info")
+
                 break;
             }
 
