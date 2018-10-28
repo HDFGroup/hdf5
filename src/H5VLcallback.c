@@ -918,6 +918,7 @@ H5VL_attr_get(void *obj, const H5VL_class_t *cls, H5VL_attr_get_t get_type,
     hid_t dxpl_id, void **req, ...)
 {
     va_list arguments;                  /* Argument list passed from the API call */
+    hbool_t arg_started = FALSE;        /* Whether the va_list has been started */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -928,11 +929,15 @@ H5VL_attr_get(void *obj, const H5VL_class_t *cls, H5VL_attr_get_t get_type,
 
     /* Call the corresponding VOL callback */
     va_start(arguments, req);
+    arg_started = TRUE;
     if((cls->attr_cls.get)(obj, get_type, dxpl_id, req, arguments) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "get failed")
-    va_end(arguments);
 
 done:
+    /* End access to the va_list, if we started it */
+    if(arg_started)
+        va_end(arguments);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_attr_get() */
 
@@ -991,6 +996,7 @@ H5VL_attr_specific(void *obj, H5VL_loc_params_t loc_params, const H5VL_class_t *
     H5VL_attr_specific_t specific_type, hid_t dxpl_id, void **req, ...)
 {
     va_list arguments;                  /* Argument list passed from the API call */
+    hbool_t arg_started = FALSE;        /* Whether the va_list has been started */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -1001,11 +1007,15 @@ H5VL_attr_specific(void *obj, H5VL_loc_params_t loc_params, const H5VL_class_t *
 
     /* Call the corresponding VOL callback */
     va_start(arguments, req);
-    if((cls->attr_cls.specific)(obj, loc_params, specific_type, dxpl_id, req, arguments) < 0)
+    arg_started = TRUE;
+    if((ret_value = (cls->attr_cls.specific)(obj, loc_params, specific_type, dxpl_id, req, arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute attribute specific callback")
-    va_end(arguments);
 
 done:
+    /* End access to the va_list, if we started it */
+    if(arg_started)
+        va_end(arguments);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_attr_specific() */
 
@@ -1043,7 +1053,7 @@ H5VLattr_specific(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id,
         HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL plugin has no `attr specific' method")
 
     /* Bypass the H5VLint layer, calling the VOL callback directly */
-    if((cls->attr_cls.specific)(obj, loc_params, specific_type, dxpl_id, req, arguments) < 0)
+    if((ret_value = (cls->attr_cls.specific)(obj, loc_params, specific_type, dxpl_id, req, arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute attribute specific callback")
 
 done:
@@ -1065,6 +1075,7 @@ herr_t
 H5VL_attr_optional(void *obj, const H5VL_class_t *cls, hid_t dxpl_id, void **req, ...)
 {
     va_list arguments;                  /* Argument list passed from the API call */
+    hbool_t arg_started = FALSE;        /* Whether the va_list has been started */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -1075,11 +1086,15 @@ H5VL_attr_optional(void *obj, const H5VL_class_t *cls, hid_t dxpl_id, void **req
 
     /* Call the corresponding VOL callback */
     va_start(arguments, req);
+    arg_started = TRUE;
     if((cls->attr_cls.optional)(obj, dxpl_id, req, arguments) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute attribute optional callback")
-    va_end(arguments);
 
 done:
+    /* End access to the va_list, if we started it */
+    if(arg_started)
+        va_end(arguments);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_attr_optional() */
 
@@ -1403,8 +1418,9 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t 
-H5VL_dataset_write(void *dset, const H5VL_class_t *cls, hid_t mem_type_id, hid_t mem_space_id, 
-                   hid_t file_space_id, hid_t plist_id, const void *buf, void **req)
+H5VL_dataset_write(void *dset, const H5VL_class_t *cls, hid_t mem_type_id,
+    hid_t mem_space_id, hid_t file_space_id, hid_t plist_id, const void *buf,
+    void **req)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -1474,6 +1490,7 @@ H5VL_dataset_get(void *dset, const H5VL_class_t *cls, H5VL_dataset_get_t get_typ
     hid_t dxpl_id, void **req, ...)
 {
     va_list arguments;                  /* Argument list passed from the API call */
+    hbool_t arg_started = FALSE;        /* Whether the va_list has been started */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -1484,11 +1501,15 @@ H5VL_dataset_get(void *dset, const H5VL_class_t *cls, H5VL_dataset_get_t get_typ
 
     /* Call the corresponding VOL callback */
     va_start(arguments, req);
+    arg_started = TRUE;
     if((cls->dataset_cls.get)(dset, get_type, dxpl_id, req, arguments) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "get failed")
-    va_end(arguments);
 
 done:
+    /* End access to the va_list, if we started it */
+    if(arg_started)
+        va_end(arguments);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_dataset_get() */
 
@@ -1547,6 +1568,7 @@ H5VL_dataset_specific(void *obj, const H5VL_class_t *cls, H5VL_dataset_specific_
     hid_t dxpl_id, void **req, ...)
 {
     va_list arguments;                  /* Argument list passed from the API call */
+    hbool_t arg_started = FALSE;        /* Whether the va_list has been started */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -1557,11 +1579,15 @@ H5VL_dataset_specific(void *obj, const H5VL_class_t *cls, H5VL_dataset_specific_
 
     /* Call the corresponding VOL callback */
     va_start(arguments, req);
+    arg_started = TRUE;
     if((cls->dataset_cls.specific)(obj, specific_type, dxpl_id, req, arguments) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute dataset specific callback")
-    va_end(arguments);
 
 done:
+    /* End access to the va_list, if we started it */
+    if(arg_started)
+        va_end(arguments);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_dataset_specific() */
 
@@ -1621,6 +1647,7 @@ H5VL_dataset_optional(void *obj, const H5VL_class_t *cls, hid_t dxpl_id,
     void **req, ...)
 {
     va_list arguments;                  /* Argument list passed from the API call */
+    hbool_t arg_started = FALSE;        /* Whether the va_list has been started */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -1631,11 +1658,15 @@ H5VL_dataset_optional(void *obj, const H5VL_class_t *cls, hid_t dxpl_id,
 
     /* Call the corresponding VOL callback */
     va_start(arguments, req);
+    arg_started = TRUE;
     if((cls->dataset_cls.optional)(obj, dxpl_id, req, arguments) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute dataset optional callback")
-    va_end(arguments);
 
 done:
+    /* End access to the va_list, if we started it */
+    if(arg_started)
+        va_end(arguments);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_dataset_optional() */
 
@@ -1906,6 +1937,7 @@ H5VL_file_get(void *file, const H5VL_class_t *cls, H5VL_file_get_t get_type,
     hid_t dxpl_id, void **req, ...)
 {
     va_list arguments;                  /* Argument list passed from the API call */
+    hbool_t arg_started = FALSE;        /* Whether the va_list has been started */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -1916,11 +1948,15 @@ H5VL_file_get(void *file, const H5VL_class_t *cls, H5VL_file_get_t get_type,
 
     /* Call the corresponding VOL callback */
     va_start(arguments, req);
+    arg_started = TRUE;
     if((cls->file_cls.get)(file, get_type, dxpl_id, req, arguments) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "get failed")
-    va_end(arguments);
 
 done:
+    /* End access to the va_list, if we started it */
+    if(arg_started)
+        va_end(arguments);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_file_get() */
 
@@ -1979,6 +2015,7 @@ H5VL_file_specific(void *file, const H5VL_class_t *cls, H5VL_file_specific_t spe
     hid_t dxpl_id, void **req, ...)
 {
     va_list arguments;                  /* Argument list passed from the API call */
+    hbool_t arg_started = FALSE;        /* Whether the va_list has been started */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -2007,9 +2044,9 @@ H5VL_file_specific(void *file, const H5VL_class_t *cls, H5VL_file_specific_t spe
 
         /* Call the corresponding VOL callback */
         va_start(arguments, req);
+        arg_started = TRUE;
         if((cls->file_cls.specific)(file, specific_type, dxpl_id, req, arguments) < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "file specific failed")
-        va_end(arguments);
     } /* end if */
     else {
         /* Check if the corresponding VOL callback exists */
@@ -2018,12 +2055,16 @@ H5VL_file_specific(void *file, const H5VL_class_t *cls, H5VL_file_specific_t spe
 
         /* Call the corresponding VOL callback */
         va_start(arguments, req);
+        arg_started = TRUE;
         if((cls->file_cls.specific)(file, specific_type, dxpl_id, req, arguments) < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "file specific failed")
-        va_end(arguments);
     } /* end else */
 
 done:
+    /* End access to the va_list, if we started it */
+    if(arg_started)
+        va_end(arguments);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_file_specific() */
 
@@ -2107,6 +2148,7 @@ H5VL_file_optional(void *file, const H5VL_class_t *cls, hid_t dxpl_id,
     void **req, ...)
 {
     va_list arguments;                  /* Argument list passed from the API call */
+    hbool_t arg_started = FALSE;        /* Whether the va_list has been started */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -2117,11 +2159,15 @@ H5VL_file_optional(void *file, const H5VL_class_t *cls, hid_t dxpl_id,
 
     /* Call the corresponding VOL callback */
     va_start(arguments, req);
+    arg_started = TRUE;
     if((cls->file_cls.optional)(file, dxpl_id, req, arguments) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "file optional failed")
-    va_end(arguments);
 
 done:
+    /* End access to the va_list, if we started it */
+    if(arg_started)
+        va_end(arguments);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_file_optional() */
 
@@ -2381,6 +2427,7 @@ H5VL_group_get(void *obj, const H5VL_class_t *cls, H5VL_group_get_t get_type,
     hid_t dxpl_id, void **req, ...)
 {
     va_list arguments;                  /* Argument list passed from the API call */
+    hbool_t arg_started = FALSE;        /* Whether the va_list has been started */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -2391,11 +2438,15 @@ H5VL_group_get(void *obj, const H5VL_class_t *cls, H5VL_group_get_t get_type,
 
     /* Call the corresponding VOL callback */
     va_start(arguments, req);
+    arg_started = TRUE;
     if((cls->group_cls.get)(obj, get_type, dxpl_id, req, arguments) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "group get failed")
-    va_end(arguments);
 
 done:
+    /* End access to the va_list, if we started it */
+    if(arg_started)
+        va_end(arguments);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_group_get() */
 
@@ -2454,6 +2505,7 @@ H5VL_group_specific(void *obj, const H5VL_class_t *cls, H5VL_group_specific_t sp
     hid_t dxpl_id, void **req, ...)
 {
     va_list arguments;                  /* Argument list passed from the API call */
+    hbool_t arg_started = FALSE;        /* Whether the va_list has been started */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -2464,11 +2516,15 @@ H5VL_group_specific(void *obj, const H5VL_class_t *cls, H5VL_group_specific_t sp
 
     /* Call the corresponding VOL callback */
     va_start(arguments, req);
+    arg_started = TRUE;
     if((cls->group_cls.specific)(obj, specific_type, dxpl_id, req, arguments) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute group specific callback")
-    va_end(arguments);
 
 done:
+    /* End access to the va_list, if we started it */
+    if(arg_started)
+        va_end(arguments);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_group_specific() */
 
@@ -2528,6 +2584,7 @@ H5VL_group_optional(void *obj, const H5VL_class_t *cls, hid_t dxpl_id,
     void **req, ...)
 {
     va_list arguments;                  /* Argument list passed from the API call */
+    hbool_t arg_started = FALSE;        /* Whether the va_list has been started */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -2538,11 +2595,15 @@ H5VL_group_optional(void *obj, const H5VL_class_t *cls, hid_t dxpl_id,
 
     /* Call the corresponding VOL callback */
     va_start(arguments, req);
+    arg_started = TRUE;
     if((cls->group_cls.optional)(obj, dxpl_id, req, arguments) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute group optional callback")
-    va_end(arguments);
 
 done:
+    /* End access to the va_list, if we started it */
+    if(arg_started)
+        va_end(arguments);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_group_optional() */
 
@@ -2873,6 +2934,7 @@ H5VL_link_get(void *obj, H5VL_loc_params_t loc_params, const H5VL_class_t *cls, 
     hid_t dxpl_id, void **req, ...)
 {
     va_list arguments;                  /* Argument list passed from the API call */
+    hbool_t arg_started = FALSE;        /* Whether the va_list has been started */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -2883,11 +2945,15 @@ H5VL_link_get(void *obj, H5VL_loc_params_t loc_params, const H5VL_class_t *cls, 
 
     /* Call the corresponding VOL callback */
     va_start(arguments, req);
+    arg_started = TRUE;
     if((cls->link_cls.get)(obj, loc_params, get_type, dxpl_id, req, arguments) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "link get failed")
-    va_end(arguments);
 
 done:
+    /* End access to the va_list, if we started it */
+    if(arg_started)
+        va_end(arguments);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_link_get() */
 
@@ -2947,6 +3013,7 @@ H5VL_link_specific(void *obj, H5VL_loc_params_t loc_params, const H5VL_class_t *
     H5VL_link_specific_t specific_type, hid_t dxpl_id, void **req, ...)
 {
     va_list arguments;                  /* Argument list passed from the API call */
+    hbool_t arg_started = FALSE;        /* Whether the va_list has been started */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -2957,11 +3024,15 @@ H5VL_link_specific(void *obj, H5VL_loc_params_t loc_params, const H5VL_class_t *
 
     /* Call the corresponding VOL callback */
     va_start(arguments, req);
-    if((cls->link_cls.specific)(obj, loc_params, specific_type, dxpl_id, req, arguments) < 0)
+    arg_started = TRUE;
+    if((ret_value = (cls->link_cls.specific)(obj, loc_params, specific_type, dxpl_id, req, arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute link specific callback")
-    va_end(arguments);
 
 done:
+    /* End access to the va_list, if we started it */
+    if(arg_started)
+        va_end(arguments);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_link_specific() */
 
@@ -2998,7 +3069,7 @@ H5VLlink_specific(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id,
         HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL plugin has no `link specific' method")
 
     /* Bypass the H5VLint layer, calling the VOL callback directly */
-    if((cls->link_cls.specific)(obj, loc_params, specific_type, dxpl_id, req, arguments) < 0)
+    if((ret_value = (cls->link_cls.specific)(obj, loc_params, specific_type, dxpl_id, req, arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute link specific callback")
 
 done:
@@ -3021,6 +3092,7 @@ H5VL_link_optional(void *obj, const H5VL_class_t *cls, hid_t dxpl_id,
     void **req, ...)
 {
     va_list arguments;                  /* Argument list passed from the API call */
+    hbool_t arg_started = FALSE;        /* Whether the va_list has been started */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -3031,11 +3103,15 @@ H5VL_link_optional(void *obj, const H5VL_class_t *cls, hid_t dxpl_id,
 
     /* Call the corresponding VOL callback */
     va_start(arguments, req);
+    arg_started = TRUE;
     if((cls->link_cls.optional)(obj, dxpl_id, req, arguments) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute link optional callback")
-    va_end(arguments);
 
 done:
+    /* End access to the va_list, if we started it */
+    if(arg_started)
+        va_end(arguments);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_link_optional() */
 
@@ -3238,6 +3314,7 @@ H5VL_object_get(void *obj, H5VL_loc_params_t loc_params, const H5VL_class_t *cls
     H5VL_object_get_t get_type, hid_t dxpl_id, void **req, ...)
 {
     va_list arguments;                  /* Argument list passed from the API call */
+    hbool_t arg_started = FALSE;        /* Whether the va_list has been started */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -3248,11 +3325,15 @@ H5VL_object_get(void *obj, H5VL_loc_params_t loc_params, const H5VL_class_t *cls
 
     /* Call the corresponding VOL callback */
     va_start(arguments, req);
+    arg_started = TRUE;
     if((cls->object_cls.get)(obj, loc_params, get_type, dxpl_id, req, arguments) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "get failed")
-    va_end(arguments);
 
 done:
+    /* End access to the va_list, if we started it */
+    if(arg_started)
+        va_end(arguments);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_object_get() */
 
@@ -3312,6 +3393,7 @@ H5VL_object_specific(void *obj, H5VL_loc_params_t loc_params, const H5VL_class_t
     H5VL_object_specific_t specific_type, hid_t dxpl_id, void **req, ...)
 {
     va_list arguments;                  /* Argument list passed from the API call */
+    hbool_t arg_started = FALSE;        /* Whether the va_list has been started */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -3322,11 +3404,15 @@ H5VL_object_specific(void *obj, H5VL_loc_params_t loc_params, const H5VL_class_t
 
     /* Call the corresponding VOL callback */
     va_start(arguments, req);
-    if((cls->object_cls.specific)(obj, loc_params, specific_type, dxpl_id, req, arguments) < 0)
+    arg_started = TRUE;
+    if((ret_value = (cls->object_cls.specific)(obj, loc_params, specific_type, dxpl_id, req, arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "object specific failed")
-    va_end(arguments);
 
 done:
+    /* End access to the va_list, if we started it */
+    if(arg_started)
+        va_end(arguments);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_object_specific() */
 
@@ -3363,7 +3449,7 @@ H5VLobject_specific(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id,
         HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL plugin has no `object specific' method")
 
     /* Bypass the H5VLint layer, calling the VOL callback directly */
-    if((cls->object_cls.specific)(obj, loc_params, specific_type, dxpl_id, req, arguments) < 0)
+    if((ret_value = (cls->object_cls.specific)(obj, loc_params, specific_type, dxpl_id, req, arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute object specific callback")
 
 done:
@@ -3386,6 +3472,7 @@ H5VL_object_optional(void *obj, const H5VL_class_t *cls, hid_t dxpl_id,
     void **req, ...)
 {
     va_list arguments;                  /* Argument list passed from the API call */
+    hbool_t arg_started = FALSE;        /* Whether the va_list has been started */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -3396,11 +3483,15 @@ H5VL_object_optional(void *obj, const H5VL_class_t *cls, hid_t dxpl_id,
 
     /* Call the corresponding VOL callback */
     va_start(arguments, req);
+    arg_started = TRUE;
     if((cls->object_cls.optional)(obj, dxpl_id, req, arguments) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute object optional callback")
-    va_end(arguments);
 
 done:
+    /* End access to the va_list, if we started it */
+    if(arg_started)
+        va_end(arguments);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_object_optional() */
 
@@ -3594,6 +3685,7 @@ H5VL_datatype_get(void *obj, const H5VL_class_t *cls, H5VL_datatype_get_t get_ty
     hid_t dxpl_id, void **req, ...)
 {
     va_list arguments;                  /* Argument list passed from the API call */
+    hbool_t arg_started = FALSE;        /* Whether the va_list has been started */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -3604,11 +3696,15 @@ H5VL_datatype_get(void *obj, const H5VL_class_t *cls, H5VL_datatype_get_t get_ty
 
     /* Call the corresponding VOL callback */
     va_start(arguments, req);
+    arg_started = TRUE;
     if((cls->datatype_cls.get)(obj, get_type, dxpl_id, req, arguments) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "get failed")
-    va_end(arguments);
 
 done:
+    /* End access to the va_list, if we started it */
+    if(arg_started)
+        va_end(arguments);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_datatype_get() */
 
@@ -3667,6 +3763,7 @@ H5VL_datatype_specific(void *obj, const H5VL_class_t *cls, H5VL_datatype_specifi
     hid_t dxpl_id, void **req, ...)
 {
     va_list arguments;                  /* Argument list passed from the API call */
+    hbool_t arg_started = FALSE;        /* Whether the va_list has been started */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -3677,11 +3774,15 @@ H5VL_datatype_specific(void *obj, const H5VL_class_t *cls, H5VL_datatype_specifi
 
     /* Call the corresponding VOL callback */
     va_start(arguments, req);
+    arg_started = TRUE;
     if((cls->datatype_cls.specific)(obj, specific_type, dxpl_id, req, arguments) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute datatype specific callback")
-    va_end(arguments);
 
 done:
+    /* End access to the va_list, if we started it */
+    if(arg_started)
+        va_end(arguments);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_datatype_specific() */
 
@@ -3741,6 +3842,7 @@ H5VL_datatype_optional(void *obj, const H5VL_class_t *cls, hid_t dxpl_id,
     void **req, ...)
 {
     va_list arguments;                  /* Argument list passed from the API call */
+    hbool_t arg_started = FALSE;        /* Whether the va_list has been started */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -3751,11 +3853,15 @@ H5VL_datatype_optional(void *obj, const H5VL_class_t *cls, hid_t dxpl_id,
 
     /* Call the corresponding VOL callback */
     va_start(arguments, req);
+    arg_started = TRUE;
     if((cls->datatype_cls.optional)(obj, dxpl_id, req, arguments) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute datatype optional callback")
-    va_end(arguments);
 
 done:
+    /* End access to the va_list, if we started it */
+    if(arg_started)
+        va_end(arguments);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_datatype_optional() */
 
