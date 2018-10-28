@@ -164,8 +164,7 @@ H5Dcreate2(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
     vol_wrapper_set = TRUE;
 
     /* Create the dataset */
-    if(NULL == (dset = H5VL_dataset_create(vol_obj->data, loc_params, vol_obj->plugin->cls, 
-                                           name, dcpl_id, dapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
+    if(NULL == (dset = H5VL_dataset_create(vol_obj->data, loc_params, vol_obj->plugin->cls, name, dcpl_id, dapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, H5I_INVALID_HID, "unable to create dataset")
 
     /* Get an atom for the dataset */
@@ -260,9 +259,7 @@ H5Dcreate_anon(hid_t loc_id, hid_t type_id, hid_t space_id, hid_t dcpl_id,
     loc_params.obj_type = H5I_get_type(loc_id);
 
     /* Create the dataset */
-    if(NULL == (dset = H5VL_dataset_create(vol_obj->data, loc_params, vol_obj->plugin->cls, 
-                                           NULL, dcpl_id, dapl_id, 
-                                           H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
+    if(NULL == (dset = H5VL_dataset_create(vol_obj->data, loc_params, vol_obj->plugin->cls, NULL, dcpl_id, dapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, H5I_INVALID_HID, "unable to create dataset")
 
     /* Get an atom for the dataset */
@@ -330,8 +327,7 @@ H5Dopen2(hid_t loc_id, const char *name, hid_t dapl_id)
     vol_wrapper_set = TRUE;
 
     /* Open the dataset */
-    if(NULL == (dset = H5VL_dataset_open(vol_obj->data, loc_params, vol_obj->plugin->cls, name, 
-                                         dapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
+    if(NULL == (dset = H5VL_dataset_open(vol_obj->data, loc_params, vol_obj->plugin->cls, name, dapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open dataset")
 
     /* Register an atom for the dataset */
@@ -411,8 +407,7 @@ H5Dget_space(hid_t dset_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid dataset identifier")
 
     /* Get the dataspace */
-    if(H5VL_dataset_get(vol_obj->data, vol_obj->plugin->cls, H5VL_DATASET_GET_SPACE, 
-                        H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &ret_value) < 0)
+    if(H5VL_dataset_get(vol_obj->data, vol_obj->plugin->cls, H5VL_DATASET_GET_SPACE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &ret_value) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, H5I_INVALID_HID, "unable to get dataspace")
 
 done:
@@ -443,8 +438,7 @@ H5Dget_space_status(hid_t dset_id, H5D_space_status_t *allocation)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset identifier")
 
     /* Get dataspace status */
-    if((ret_value = H5VL_dataset_get(vol_obj->data, vol_obj->plugin->cls, H5VL_DATASET_GET_SPACE_STATUS, 
-                                     H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, allocation)) < 0)
+    if((ret_value = H5VL_dataset_get(vol_obj->data, vol_obj->plugin->cls, H5VL_DATASET_GET_SPACE_STATUS, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, allocation)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to get space status")
 
 done:
@@ -485,8 +479,7 @@ H5Dget_type(hid_t dset_id)
     vol_wrapper_set = TRUE;
 
     /* get the datatype */
-    if(H5VL_dataset_get(vol_obj->data, vol_obj->plugin->cls, H5VL_DATASET_GET_TYPE, 
-                        H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &ret_value) < 0)
+    if(H5VL_dataset_get(vol_obj->data, vol_obj->plugin->cls, H5VL_DATASET_GET_TYPE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &ret_value) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, H5I_INVALID_HID, "unable to get datatype")
 
 done:
@@ -528,8 +521,7 @@ H5Dget_create_plist(hid_t dset_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid dataset identifier")
 
     /* Get the dataset creation property list */
-    if(H5VL_dataset_get(vol_obj->data, vol_obj->plugin->cls, H5VL_DATASET_GET_DCPL, 
-                        H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &ret_value) < 0)
+    if(H5VL_dataset_get(vol_obj->data, vol_obj->plugin->cls, H5VL_DATASET_GET_DCPL, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &ret_value) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, H5I_INVALID_HID, "unable to get dataset creation properties")
 
 done:
@@ -584,8 +576,7 @@ H5Dget_access_plist(hid_t dset_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid dataset identifier")
 
     /* Get the dataset access property list */
-    if(H5VL_dataset_get(vol_obj->data, vol_obj->plugin->cls, H5VL_DATASET_GET_DAPL, 
-                        H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &ret_value) < 0)
+    if(H5VL_dataset_get(vol_obj->data, vol_obj->plugin->cls, H5VL_DATASET_GET_DAPL, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &ret_value) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, H5I_INVALID_HID, "unable to get dataset access properties")
 
 done:
@@ -622,8 +613,7 @@ H5Dget_storage_size(hid_t dset_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "invalid dataset identifier")
 
     /* Get the storage size */
-    if(H5VL_dataset_get(vol_obj->data, vol_obj->plugin->cls, H5VL_DATASET_GET_STORAGE_SIZE, 
-                        H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &ret_value) < 0)
+    if(H5VL_dataset_get(vol_obj->data, vol_obj->plugin->cls, H5VL_DATASET_GET_STORAGE_SIZE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &ret_value) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, 0, "unable to get storage size")
 
 done:
@@ -656,8 +646,7 @@ H5Dget_offset(hid_t dset_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, HADDR_UNDEF, "invalid dataset identifier")
 
     /* Get the offset */
-    if(H5VL_dataset_get(vol_obj->data, vol_obj->plugin->cls, H5VL_DATASET_GET_OFFSET, 
-                        H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &ret_value) < 0)
+    if(H5VL_dataset_get(vol_obj->data, vol_obj->plugin->cls, H5VL_DATASET_GET_OFFSET, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &ret_value) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, HADDR_UNDEF, "unable to get offset")
 
 done:
@@ -870,8 +859,7 @@ H5Dvlen_get_buf_size(hid_t dataset_id, hid_t type_id, hid_t space_id,
     vlen_bufsize.mspace_id = H5I_INVALID_HID;
 
     /* Get a copy of the dataset's dataspace */
-    if(H5VL_dataset_get(vol_obj->data, vol_obj->plugin->cls, H5VL_DATASET_GET_SPACE, 
-                        H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &vlen_bufsize.fspace_id) < 0)
+    if(H5VL_dataset_get(vol_obj->data, vol_obj->plugin->cls, H5VL_DATASET_GET_SPACE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &vlen_bufsize.fspace_id) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "can't copy dataspace")
 
     /* Create a scalar for the memory dataspace */
@@ -952,8 +940,7 @@ H5Dset_extent(hid_t dset_id, const hsize_t size[])
         HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set collective metadata read info")
 
     /* Set the extent */
-    if ((ret_value = H5VL_dataset_specific(vol_obj->data, vol_obj->plugin->cls, H5VL_DATASET_SET_EXTENT, 
-                                          H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, size)) < 0)
+    if ((ret_value = H5VL_dataset_specific(vol_obj->data, vol_obj->plugin->cls, H5VL_DATASET_SET_EXTENT, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, size)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "unable to set dataset extent")
 
 done:
@@ -991,8 +978,7 @@ H5Dflush(hid_t dset_id)
      * XXX: Note that we need to pass the ID to the VOL since the H5F_flush_cb_t
      *      callback needs it and that's in the public API.
      */
-    if((ret_value = H5VL_dataset_specific(vol_obj->data, vol_obj->plugin->cls, H5VL_DATASET_FLUSH, 
-                                          H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, dset_id)) < 0)
+    if((ret_value = H5VL_dataset_specific(vol_obj->data, vol_obj->plugin->cls, H5VL_DATASET_FLUSH, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, dset_id)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTFLUSH, FAIL, "unable to flush dataset")
 
 done:
@@ -1033,8 +1019,7 @@ H5Drefresh(hid_t dset_id)
     vol_wrapper_set = TRUE;
 
     /* Refresh the dataset object */
-    if((ret_value = H5VL_dataset_specific(vol_obj->data, vol_obj->plugin->cls, H5VL_DATASET_REFRESH, 
-                                          H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, dset_id)) < 0)
+    if((ret_value = H5VL_dataset_specific(vol_obj->data, vol_obj->plugin->cls, H5VL_DATASET_REFRESH, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, dset_id)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTLOAD, FAIL, "unable to refresh dataset")
 
 done:
@@ -1081,8 +1066,7 @@ H5Dformat_convert(hid_t dset_id)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set collective metadata read info")
 
     /* Convert the dataset */
-    if(H5VL_dataset_optional(vol_obj->data, vol_obj->plugin->cls, H5P_DATASET_XFER_DEFAULT,
-            H5_REQUEST_NULL, H5VL_DATASET_FORMAT_CONVERT) < 0)
+    if(H5VL_dataset_optional(vol_obj->data, vol_obj->plugin->cls, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, H5VL_DATASET_FORMAT_CONVERT) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_INTERNAL, FAIL, "can't convert dataset format")
 
 done:
@@ -1118,8 +1102,7 @@ H5Dget_chunk_index_type(hid_t dset_id, H5D_chunk_index_t *idx_type)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "idx_type parameter cannot be NULL")
 
     /* Get the chunk indexing type */
-    if(H5VL_dataset_optional(vol_obj->data, vol_obj->plugin->cls, H5P_DATASET_XFER_DEFAULT,
-            H5_REQUEST_NULL, H5VL_DATASET_GET_CHUNK_INDEX_TYPE, idx_type) < 0)
+    if(H5VL_dataset_optional(vol_obj->data, vol_obj->plugin->cls, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, H5VL_DATASET_GET_CHUNK_INDEX_TYPE, idx_type) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get chunk index type")
 
 done:
@@ -1160,8 +1143,7 @@ H5Dget_chunk_storage_size(hid_t dset_id, const hsize_t *offset, hsize_t *chunk_n
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "chunk_nbytes parameter cannot be NULL")
 
     /* Get the dataset creation property list */
-    if(H5VL_dataset_optional(vol_obj->data, vol_obj->plugin->cls, H5P_DATASET_XFER_DEFAULT,
-            H5_REQUEST_NULL, H5VL_DATASET_GET_CHUNK_STORAGE_SIZE, offset, chunk_nbytes) < 0)
+    if(H5VL_dataset_optional(vol_obj->data, vol_obj->plugin->cls, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, H5VL_DATASET_GET_CHUNK_STORAGE_SIZE, offset, chunk_nbytes) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get storage size of chunk")
 
 done:

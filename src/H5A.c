@@ -829,8 +829,7 @@ H5Aget_type(hid_t attr_id)
     vol_wrapper_set = TRUE;
 
     /* Get the datatype */
-    if(H5VL_attr_get(vol_obj->data, vol_obj->plugin->cls, H5VL_ATTR_GET_TYPE, 
-                     H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &ret_value) < 0)
+    if(H5VL_attr_get(vol_obj->data, vol_obj->plugin->cls, H5VL_ATTR_GET_TYPE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &ret_value) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, H5I_INVALID_HID, "unable to get datatype of attribute")
 
 done:
@@ -1393,9 +1392,7 @@ H5Aiterate2(hid_t loc_id, H5_index_t idx_type, H5_iter_order_t order,
     vol_wrapper_set = TRUE;
 
     /* Iterate over attributes */
-    if((ret_value = H5VL_attr_specific(vol_obj->data, loc_params, vol_obj->plugin->cls, H5VL_ATTR_ITER,
-                                       H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, 
-                                       idx_type, order, idx, op, op_data)) < 0)
+    if((ret_value = H5VL_attr_specific(vol_obj->data, loc_params, vol_obj->plugin->cls, H5VL_ATTR_ITER, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, idx_type, order, idx, op, op_data)) < 0)
         HERROR(H5E_ATTR, H5E_BADITER, "error iterating over attributes");
 
 done:
@@ -1493,9 +1490,7 @@ H5Aiterate_by_name(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
     vol_wrapper_set = TRUE;
 
     /* Iterate over attributes */
-    if((ret_value = H5VL_attr_specific(vol_obj->data, loc_params, vol_obj->plugin->cls, H5VL_ATTR_ITER,
-                                       H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, 
-                                       idx_type, order, idx, op, op_data)) < 0)
+    if((ret_value = H5VL_attr_specific(vol_obj->data, loc_params, vol_obj->plugin->cls, H5VL_ATTR_ITER, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, idx_type, order, idx, op, op_data)) < 0)
         HERROR(H5E_ATTR, H5E_BADITER, "attribute iteration failed");
 
 done:
