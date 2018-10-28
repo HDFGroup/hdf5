@@ -74,7 +74,7 @@ tts_error(void)
     expected_g[0].min_num = H5E_CANTINIT;
 
     expected_g[1].maj_num = H5E_VOL;
-    expected_g[1].min_num = H5E_CANTINIT;
+    expected_g[1].min_num = H5E_CANTCREATE;
 
     expected_g[2].maj_num = H5E_DATASET;
     expected_g[2].min_num = H5E_CANTINIT;
@@ -121,7 +121,7 @@ tts_error(void)
         H5TS_wait_for_thread(threads[i]);
 
     if (error_flag_g) {
-        TestErrPrintf("At least one thread reported a value that was different from the exected value\n");
+        TestErrPrintf("At least one thread reported a value that was different from the expected value\n");
         HDprintf("(Update this test if the error stack changed!)\n");
     }
 

@@ -425,8 +425,6 @@ H5_DLL herr_t H5VLunregister_plugin(hid_t plugin_id);
 
 /* Helper routines for VOL plugin authors */
 H5_DLL herr_t H5VLcmp_plugin_cls(int *cmp, hid_t plugin_id1, hid_t plugin_id2);
-H5_DLL herr_t H5VLcmp_plugin_info(int *cmp, hid_t plugin_id, const void *info1,
-    const void *info2);
 
 
 /* Public wrappers for generic callbacks */
@@ -434,6 +432,8 @@ H5_DLL herr_t H5VLinitialize(hid_t plugin_id, hid_t vipl_id);
 H5_DLL herr_t H5VLterminate(hid_t plugin_id);
 H5_DLL herr_t H5VLget_cap_flags(hid_t plugin_id, unsigned *cap_flags);
 H5_DLL herr_t H5VLcopy_plugin_info(hid_t plugin_id, void **dst_vol_info, void *src_vol_info);
+H5_DLL herr_t H5VLcmp_plugin_info(int *cmp, hid_t plugin_id, const void *info1,
+    const void *info2);
 H5_DLL herr_t H5VLfree_plugin_info(hid_t plugin_id, void *vol_info);
 H5_DLL void *H5VLget_object(void *obj, hid_t plugin_id);
 H5_DLL herr_t H5VLget_wrap_ctx(void *obj, hid_t plugin_id, void **wrap_ctx);
