@@ -570,6 +570,7 @@ H5FD_vfd_swmr_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id,
         HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "unable to load/decode the md file header/index")
 
     index = file->md_index.entries;
+    fs_page_size = file->md_header.fs_page_size;
 
     /* Try finding the addr from the index */
     cmp = -1;
@@ -577,7 +578,7 @@ H5FD_vfd_swmr_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id,
     hi = num_entries;
     while(lo < hi && cmp) {
         my_idx = (lo + hi) / 2;
-        cmp = H5F_addr_cmp(index[my_idx].hdf5_page_offset * file->md_header.fs_page_size, addr);
+        cmp = H5F_addr_cmp(index[my_idx].hdf5_page_offset * fs_page_size, addr);
         if(cmp < 0)
             hi = my_idx;
         else
@@ -800,7 +801,6 @@ H5FD__vfd_swmr_load_hdr_and_idx(H5FD_t *_file, hbool_t open)
     herr_t ret_value  = SUCCEED;        /* Return value  */
 
     FUNC_ENTER_STATIC
-
     do {
         HDmemset(&md_header, 0, sizeof(H5FD_vfd_swmr_md_header));
         HDmemset(&md_index, 0, sizeof(H5FD_vfd_swmr_md_index));
@@ -818,7 +818,7 @@ H5FD__vfd_swmr_load_hdr_and_idx(H5FD_t *_file, hbool_t open)
                     break; 
                 else if(md_header.tick_num < file->md_header.tick_num)
                     HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "tick number read is less than local copy")
-            }
+            } 
 
             HDassert(md_header.tick_num > file->md_header.tick_num || open);
 
@@ -827,8 +827,25 @@ H5FD__vfd_swmr_load_hdr_and_idx(H5FD_t *_file, hbool_t open)
 
                 /* tick_num is the same in both header and index */
                 if(md_header.tick_num == md_index.tick_num) {
+                    /* Copy header to VFD local copy */
                     HDmemcpy(&file->md_header, &md_header, sizeof(H5FD_vfd_swmr_md_header));
-                    HDmemcpy(&file->md_index, &md_index, sizeof(H5FD_vfd_swmr_md_index));
+
+                    /* Free VFD local entries */
+                    if(file->md_index.entries) {
+                        HDassert(file->md_index.num_entries);
+                        file->md_index.entries = (H5FD_vfd_swmr_idx_entry_t *)H5FL_SEQ_FREE(H5FD_vfd_swmr_idx_entry_t, file->md_index.entries);
+                    }
+
+                    /* Copy index info to VFD local copy */
+                    file->md_index.tick_num = md_index.tick_num;
+                    file->md_index.num_entries = md_index.num_entries;
+                    /* Allocate and copy index entries */
+                    if(md_index.num_entries) {
+                        if(NULL == (file->md_index.entries = H5FL_SEQ_MALLOC(H5FD_vfd_swmr_idx_entry_t, md_index.num_entries)))
+                            HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "memory allocation failed for index entries")
+
+                        HDmemcpy(file->md_index.entries, md_index.entries, md_index.num_entries * sizeof(H5FD_vfd_swmr_idx_entry_t));
+                    }
                     break;
                 }
                 /* Error when tick_num in header is more than one greater that in the index */
@@ -854,11 +871,10 @@ H5FD__vfd_swmr_load_hdr_and_idx(H5FD_t *_file, hbool_t open)
         HGOTO_ERROR(H5E_VFL, H5E_CANTLOAD, FAIL, "error in loading/decoding the metadata file header and index")
 
 done:
-    if(ret_value < 0) {
-       if(md_index.entries) {
-            HDassert(md_index.num_entries);
-            md_index.entries = (H5FD_vfd_swmr_idx_entry_t *)H5FL_SEQ_FREE(H5FD_vfd_swmr_idx_entry_t, md_index.entries);
-        }
+    /* Free index entries obtained from H5FD__vfd_swmr_index_deserialize() */
+    if(md_index.entries) {
+        HDassert(md_index.num_entries);
+        md_index.entries = (H5FD_vfd_swmr_idx_entry_t *)H5FL_SEQ_FREE(H5FD_vfd_swmr_idx_entry_t, md_index.entries);
     }
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1146,7 +1162,8 @@ H5FD_is_vfd_swmr_driver(H5FD_t *_file)
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-done:
+    HDassert(file);
+
     FUNC_LEAVE_NOAPI(file->pub.driver_id == H5FD_VFD_SWMR)
 }  /* H5FD_is_vfd_swmr_driver() */
 
@@ -1168,6 +1185,7 @@ H5FD_vfd_swmr_get_underlying_vfd(H5FD_t *_file)
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-done:
+    HDassert(file);
+
     FUNC_LEAVE_NOAPI(file->hdf5_file_lf)
 }  /* H5FD_vfd_swmr_get_underlying_vfd() */

@@ -29,8 +29,7 @@
 #define H5F_TESTING
 #include "H5FDprivate.h"
 #include "H5Fpkg.h"
-
-#include "H5CXprivate.h"    /* API Contexts                         */
+#include "H5Iprivate.h"
 
 #define FS_PAGE_SIZE    512
 #define FILENAME        "vfd_swmr_file.h5"
@@ -609,14 +608,14 @@ error:
 
 
 /*-------------------------------------------------------------------------
- * Function:    test_writer_md()
+ * Function:    test_writer_create_open_flush()
  *
  * Purpose:     Verify info in the metadata file when:
  *              --creating the HDF5 file
  *              --flushing the HDF5 file
  *              --opening an existing HDF5 file
  *              It will call the internal testing routine 
- *              H5F__vfd_swmr_writer_md_test() to do the following:
+ *              H5F__vfd_swmr_writer_create_open_flush_test() to do the following:
  *              --Open the metadata file
  *              --Verify the file size is as expected (md_pages_reserved)
  *              --For file create:
@@ -634,7 +633,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_writer_md(void)
+test_writer_create_open_flush(void)
 {
     hid_t fid = -1;     /* File ID */
     hid_t fapl = -1;    /* File access property list */
@@ -681,7 +680,7 @@ test_writer_md(void)
         FAIL_STACK_ERROR;
 
     /* Verify info in metadata file when creating the HDF5 file */
-    if(H5F__vfd_swmr_writer_md_test(fid, TRUE) < 0)
+    if(H5F__vfd_swmr_writer_create_open_flush_test(fid, TRUE) < 0)
         TEST_ERROR
 
     /* Flush the HDF5 file */
@@ -689,7 +688,7 @@ test_writer_md(void)
         FAIL_STACK_ERROR
 
     /* Verify info in metadata file when flushing the HDF5 file */
-    if(H5F__vfd_swmr_writer_md_test(fid, FALSE) < 0)
+    if(H5F__vfd_swmr_writer_create_open_flush_test(fid, FALSE) < 0)
         TEST_ERROR
 
     /* Close the file */
@@ -701,7 +700,7 @@ test_writer_md(void)
         TEST_ERROR;
 
     /* Verify info in metadata file when reopening the HDF5 file */
-    if(H5F__vfd_swmr_writer_md_test(fid, FALSE) < 0)
+    if(H5F__vfd_swmr_writer_create_open_flush_test(fid, FALSE) < 0)
         TEST_ERROR
 
     /* Closing */
@@ -729,23 +728,24 @@ error:
     } H5E_END_TRY;
 
     return 1;
-} /* test_writer_md() */
+} /* test_writer_create_open_flush() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    test_writer_update_md()
+ * Function:    test_writer_md()
  *
- * Purpose:     Verify info in the metadata file after update with the 
+ * Purpose:     Verify info in the metadata file after updating with the 
  *              constructed index: (A), (B), (C), (D)
  *              It will call the internal testing routine 
- *              H5F__vfd_swmr_writer_update_md_test() to do the following:
+ *              H5F__vfd_swmr_writer_md_test() to do the following:
  *              --Update the metadata file with the input index via the
  *                internal library routine H5F_update_vfd_swmr_metadata_file()
- *              --Verify the entries in the delayed list is as expected
- *                (input: num_insert_dl, num_remove_dl)
+ *              --Verify the entries in the delayed list is as expected: 
+ *                --num_dl_entries
  *              --Open the metadata file, read and decode the header and index
- *              --Verify info in the header and index just read from the
- *                metadatea file is as expected (input: num_entries and index)
+ *              --Verify header and index info just read from the metadata
+ *                file is as expected:
+ *                --num_entries and index
  *
  * Return:      0 if test is sucessful
  *              1 if test fails
@@ -755,14 +755,12 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_writer_update_md(void)
+test_writer_md(void)
 {
     hid_t fid = -1;             /* File ID */
-    hid_t fid_read = -1;        /* File ID for the reader */
     hid_t fapl = -1;            /* File access property list */
-    hid_t fapl2 = -1;           /* File access property list */
     hid_t fcpl = -1;            /* File creation property list */
-    unsigned num_entries = 10;  /* Number of entries in the index */
+    unsigned num_entries = 0;   /* Number of entries in the index */
     unsigned i = 0;             /* Local index variables */
     uint8_t *buf = NULL;        /* Data page from the page buffer */
     hid_t dcpl = -1;            /* Dataset creation property list */
@@ -770,14 +768,14 @@ test_writer_update_md(void)
     hid_t did = -1;             /* Dataset ID */
     int *rwbuf = NULL;          /* Data buffer for writing */
     H5O_info_t oinfo;           /* Object metadata information */
-    char dname[50];             /* Name of dataset */
+    char dname[100];            /* Name of dataset */
     hsize_t dims[2] = {50, 20}; /* Dataset dimension sizes */
     hsize_t max_dims[2] = {H5S_UNLIMITED, H5S_UNLIMITED}; /* Dataset maximum dimension sizes */
     hsize_t chunk_dims[2] = {2, 5};             /* Dataset chunked dimension sizes */
     H5FD_vfd_swmr_idx_entry_t *index = NULL;    /* Pointer to the index entries */
     H5F_vfd_swmr_config_t *my_config = NULL;    /* Configuration for VFD SWMR */
 
-    TESTING("Updating the metadata file for VFD SWMR writer");
+    TESTING("Verify the metadata file for VFD SWMR writer");
 
     /* Allocate memory for the configuration structure */
     if((my_config = (H5F_vfd_swmr_config_t *)HDmalloc(sizeof(H5F_vfd_swmr_config_t))) == NULL)
@@ -818,11 +816,8 @@ test_writer_update_md(void)
     if((fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, fapl)) < 0)
         FAIL_STACK_ERROR;
 
-    /* Verify info in the metadata file when creating an HDF5 file */
-    if(H5F__vfd_swmr_writer_md_test(fid, TRUE) < 0)
-        TEST_ERROR
-
     /* Allocate num_entries for the data buffer */
+    num_entries = 10;
     if((buf = (uint8_t *)HDmalloc((num_entries * FS_PAGE_SIZE * sizeof(uint8_t)))) == NULL)
         FAIL_STACK_ERROR;
 
@@ -839,8 +834,8 @@ test_writer_update_md(void)
     }
 
     /* Update with index and verify info in the metadata file */
-    /* Also verify that 0/0 entries are inserted/removed to/from the delayed list */
-    if(H5F__vfd_swmr_writer_update_md_test(fid, num_entries, index, 0, 0) < 0)
+    /* Also verify that 0 entries will be on the delayed list */
+    if(H5F__vfd_swmr_writer_md_test(fid, num_entries, index, 0) < 0)
         TEST_ERROR
 
     /* Create dataset creation property list */
@@ -856,7 +851,7 @@ test_writer_update_md(void)
         FAIL_STACK_ERROR
 
     /* Perform activities to ensure that max_lag ticks elapse */
-    for(i = 0; i < 500; i++) {
+    for(i = 0; i < 1000; i++) {
 
         /* Create a chunked dataset */
         sprintf(dname, "dset %d", i);
@@ -877,8 +872,8 @@ test_writer_update_md(void)
         index[i].entry_ptr = (void *)&buf[i];
 
     /* Update with index and verify info in the metadata file */
-    /* Also verify that 5/0 entries are inserted/removed to/from the delayed list */
-    if(H5F__vfd_swmr_writer_update_md_test(fid, num_entries, index, 5, 0) < 0)
+    /* Also verify that 5 entries will be on the delayed list */
+    if(H5F__vfd_swmr_writer_md_test(fid, num_entries, index, 5) < 0)
         TEST_ERROR
 
     /* Allocate memory for the read/write buffer */
@@ -888,7 +883,7 @@ test_writer_update_md(void)
         rwbuf[i] = (int)i;
 
     /* Perform activities to ensure that max_lag ticks elapse */
-    for(i = 0; i < 500; i++) {
+    for(i = 0; i < 1000; i++) {
         /* Open the dataset */
         sprintf(dname, "dset %d", i);
         if((did = H5Dopen2(fid, dname, H5P_DEFAULT)) < 0)
@@ -912,15 +907,15 @@ test_writer_update_md(void)
         index[i].entry_ptr = (void *)&buf[i];
 
     /* Update with index and verify info in the metadata file */
-    /* Also verify that 4/5 entries are inserted/removed to/from the delayed list */
-    if(H5F__vfd_swmr_writer_update_md_test(fid, num_entries, index, 4, 5) < 0)
+    /* Also verify that 4 entries will be on the delayed list */
+    if(H5F__vfd_swmr_writer_md_test(fid, num_entries, index, 4) < 0)
         TEST_ERROR
 
     /* Clear the read/write buffer */
     HDmemset(rwbuf, 0, sizeof(sizeof(int) * (50 * 20)));
 
     /* Perform activities to ensure that max_lag ticks elapse */
-    for(i = 0; i < 500; i++) {
+    for(i = 0; i < 1000; i++) {
         /* Open the dataset */
         sprintf(dname, "dset %d", i);
         if((did = H5Dopen2(fid, dname, H5P_DEFAULT)) < 0)
@@ -944,31 +939,31 @@ test_writer_update_md(void)
     index[5].entry_ptr = (void *)&buf[5];
 
     /* Update with index and verify info in the metadata file */
-    /* Also verify that 2/4 entries are inserted/removed to/from the delayed list */
-    if(H5F__vfd_swmr_writer_update_md_test(fid, num_entries, index, 2, 4) < 0)
+    /* Also verify that 2 entries will be on the delayed list */
+    if(H5F__vfd_swmr_writer_md_test(fid, num_entries, index, 2) < 0)
         TEST_ERROR
 
-    /* Close the file */
+    /* Closing */
     if(H5Fclose(fid) < 0)
         FAIL_STACK_ERROR;
-
     if(H5Sclose(sid) < 0)
         FAIL_STACK_ERROR;
     if(H5Pclose(dcpl) < 0)
         FAIL_STACK_ERROR;
-
     if(H5Pclose(fapl) < 0)
         FAIL_STACK_ERROR;
     if(H5Pclose(fcpl) < 0)
         FAIL_STACK_ERROR;
 
+    /* Free resources */
     if(my_config)
         HDfree(my_config);
-
     if(buf)
         HDfree(buf);
     if(rwbuf)
         HDfree(rwbuf);
+    if(index)
+        HDfree(index);
 
     PASSED()
     return 0;
@@ -993,7 +988,665 @@ error:
     } H5E_END_TRY;
 
     return 1;
-} /* test_writer_update_md() */
+} /* test_writer__md() */
+
+
+#if !(defined(H5_HAVE_FORK) && defined(H5_HAVE_WAITPID) && defined(H5_HAVE_FLOCK))
+
+static unsigned
+test_reader_md_concur(void)
+{
+    /* Output message about test being performed */
+    TESTING("Verify the metadata file for VFD SWMR reader");
+    SKIPPED();
+    HDputs("    Test skipped due to fork, waitpid, or flock not defined.");
+    return 0;
+
+} /* end test_reader_md_concur() */
+
+#else /* defined(H5_HAVE_FORK && defined(H5_HAVE_WAITPID) && defined(H5_HAVE_FLOCK) */
+
+/*-------------------------------------------------------------------------
+ * Function:    test_reader_md_concur()
+ *
+ * Purpose:     Verify metadata file info updated by the writer is 
+ *              what the reader obtained from the metadata file:
+ *              --Cases (A), (B), (C), (D), (E)
+ *              NOTE: Changes for page buffering/cache are not in place yet.
+ *                    Index entries are constructed at the front end by the
+ *                    writer and verified at the back end by the reader.
+ *
+ * Return:      0 if test is sucessful
+ *              1 if test fails
+ *
+ * Programmer:  Vailin Choi; October 2018
+ *
+ *-------------------------------------------------------------------------
+ */
+static unsigned
+test_reader_md_concur(void)
+{
+    unsigned i = 0;             /* Local index variables */
+    uint8_t *buf = NULL;        /* Data page from the page buffer */
+    hid_t dcpl = -1;            /* Dataset creation property list */
+    hid_t sid = -1;             /* Dataspace ID */
+    hid_t did = -1;             /* Dataset ID */
+    int *rwbuf = NULL;          /* Data buffer for writing */
+    H5O_info_t oinfo;           /* Object metadata information */
+    char dname[100];            /* Name of dataset */
+    hsize_t dims[2] = {50, 20}; /* Dataset dimension sizes */
+    hsize_t max_dims[2] = {H5S_UNLIMITED, H5S_UNLIMITED}; /* Dataset maximum dimension sizes */
+    hsize_t chunk_dims[2] = {2, 5};             /* Dataset chunked dimension sizes */
+    unsigned num_entries = 0 ;                  /* Number of entries in the index */
+    H5FD_vfd_swmr_idx_entry_t *index = NULL;    /* Pointer to the index entries */
+
+    hid_t fcpl = -1;            /* File creation property list */
+    hid_t fid_writer = -1;      /* File ID for writer */
+    hid_t fapl_writer = -1;     /* File access property list for writer */
+    H5F_vfd_swmr_config_t *config_writer = NULL;    /* VFD SWMR Configuration for writer */
+    pid_t tmppid;               /* Child process ID returned by waitpid */
+    pid_t childpid = 0;         /* Child process ID */
+    int child_status;           /* Status passed to waitpid */
+    int child_wait_option=0;    /* Options passed to waitpid */
+    int child_exit_val;         /* Exit status of the child */
+
+    int parent_pfd[2];          /* Pipe for parent process as writer */
+    int child_pfd[2];           /* Pipe for child process as reader */
+    int notify = 0;             /* Notification between parent and child */
+    H5F_t *file_writer;         /* File pointer for writer */
+
+    TESTING("Verify the metadata file for VFD SWMR reader");
+
+    /* Allocate memory for the configuration structure */
+    if((config_writer = (H5F_vfd_swmr_config_t *)HDmalloc(sizeof(H5F_vfd_swmr_config_t))) == NULL)
+        FAIL_STACK_ERROR;
+    HDmemset(config_writer, 0, sizeof(H5F_vfd_swmr_config_t));
+
+    /* Create a copy of the file access property list */
+    if((fapl_writer = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        FAIL_STACK_ERROR;
+    
+    /* Set up the VFD SWMR configuration */
+    config_writer->version = H5F__CURR_VFD_SWMR_CONFIG_VERSION;
+    config_writer->tick_len = 1; 
+    config_writer->max_lag = 3;
+    config_writer->vfd_swmr_writer = TRUE;
+    config_writer->md_pages_reserved = 2;
+    HDstrcpy(config_writer->md_file_path, MD_FILENAME);
+
+    /* Set the VFD SWMR configuration in fapl */
+    if(H5Pset_vfd_swmr_config(fapl_writer, config_writer) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Enable page buffering */
+    if(H5Pset_page_buffer_size(fapl_writer, FS_PAGE_SIZE, 0, 0) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Create a copy of the file creation property list */
+    if((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Set file space strategy */
+    if(H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, FALSE, (hsize_t)1) < 0)
+        FAIL_STACK_ERROR;
+    if(H5Pset_file_space_page_size(fcpl, FS_PAGE_SIZE) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Create an HDF5 file with VFD SWMR configured */
+    if((fid_writer = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, fapl_writer)) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Close the file */
+    if(H5Fclose(fid_writer) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Create 2 pipes */
+    if(HDpipe(parent_pfd) < 0)
+        FAIL_STACK_ERROR
+    if(HDpipe(child_pfd) < 0)
+        FAIL_STACK_ERROR
+
+    /* Fork child process */
+    if((childpid = HDfork()) < 0)
+        FAIL_STACK_ERROR
+
+    /*
+     * Child process as reader
+     */
+    if(childpid == 0) {
+        int child_notify = 0;       /* Notification between child and parent */
+        hid_t fid_reader = -1;      /* File ID for reader */
+        hid_t fapl_reader = -1;     /* File access property list for reader */
+        H5F_t *file_reader;         /* File pointer for reader */
+        H5F_vfd_swmr_config_t *config_reader = NULL;    /* VFD SWMR configuration for reader */
+        unsigned child_num_entries = 0;                 /* Number of entries passed to reader */
+        H5FD_vfd_swmr_idx_entry_t *child_index = NULL;  /* Index passed to reader */
+
+        /* Close unused write end for writer pipe */
+        if(HDclose(parent_pfd[1]) < 0)
+            HDexit(EXIT_FAILURE);
+
+        /* Close unused read end for reader pipe */
+        if(HDclose(child_pfd[0]) < 0)
+            HDexit(EXIT_FAILURE);
+
+        /* 
+         * Case A: reader
+         *  --verify an empty index 
+         */
+
+        /* Wait for notification 1 from parent to start verification */
+        while(child_notify != 1) {
+            if(HDread(parent_pfd[0], &child_notify, sizeof(int)) < 0)
+                HDexit(EXIT_FAILURE);
+        }
+
+        /* Allocate memory for the configuration structure */
+        if((config_reader = (H5F_vfd_swmr_config_t *)HDmalloc(sizeof(H5F_vfd_swmr_config_t))) == NULL)
+            HDexit(EXIT_FAILURE);
+        HDmemset(config_reader, 0, sizeof(H5F_vfd_swmr_config_t));
+
+        /* Set up the VFD SWMR configuration as reader */
+        config_reader->version = H5F__CURR_VFD_SWMR_CONFIG_VERSION;
+        config_reader->tick_len = 1;
+        config_reader->max_lag = 3;
+        config_reader->vfd_swmr_writer = FALSE;
+        config_reader->md_pages_reserved = 2;
+        HDstrcpy(config_reader->md_file_path, MD_FILENAME);
+
+        /* Create a copy of the file access property list */
+        if((fapl_reader = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+            HDexit(EXIT_FAILURE);
+
+        /* Set the VFD SWMR configuration in fapl_reader */
+        if(H5Pset_vfd_swmr_config(fapl_reader, config_reader) < 0)
+            HDexit(EXIT_FAILURE);
+
+        /* Enable page buffering */
+        if(H5Pset_page_buffer_size(fapl_reader, FS_PAGE_SIZE, 0, 0) < 0)
+            HDexit(EXIT_FAILURE);
+
+        /* Open the test file as reader */
+        if((fid_reader = H5Fopen(FILENAME, H5F_ACC_RDONLY, fapl_reader)) < 0)
+            HDexit(EXIT_FAILURE);
+
+        /* Get file pointer */
+        file_reader = (H5F_t *)H5I_object(fid_reader);
+
+        /* Read and verify header and an empty index in the metadata file */
+        if(H5FD__vfd_swmr_reader_md_test(file_reader->shared->lf, 0, NULL) < 0)
+            HDexit(EXIT_FAILURE);
+
+        /* Send notification 2 to parent that the verification is complete */
+        child_notify = 2;
+        if(HDwrite(child_pfd[1], &child_notify, sizeof(int)) < 0)
+            HDexit(EXIT_FAILURE);
+
+        /* 
+         * Case B: reader
+         * --verify index as sent from writer
+         */
+
+        /* Wait for notification 3 from parent to start verification */
+        while(child_notify != 3) {
+            if(HDread(parent_pfd[0], &child_notify, sizeof(int)) < 0)
+                HDexit(EXIT_FAILURE);
+        }
+
+        /* Read num_entries from writer pipe */
+        if(HDread(parent_pfd[0], &child_num_entries, sizeof(int)) < 0)
+            HDexit(EXIT_FAILURE);
+        
+        /* Free previous index */
+        if(child_index)
+            HDfree(child_index);
+
+        if(child_num_entries) {
+
+            /* Allocate memory for num_entries index */
+            if((child_index = (H5FD_vfd_swmr_idx_entry_t *)HDcalloc(child_num_entries, sizeof(H5FD_vfd_swmr_idx_entry_t))) == NULL)
+                HDexit(EXIT_FAILURE);
+
+            /* Read index from writer pipe */
+            if(HDread(parent_pfd[0], child_index, child_num_entries * sizeof(H5FD_vfd_swmr_idx_entry_t)) < 0)
+                HDexit(EXIT_FAILURE);
+        }
+
+        /* Read and verify the expected header and index info in the metadata file */
+        if(H5FD__vfd_swmr_reader_md_test(file_reader->shared->lf, child_num_entries, child_index) < 0)
+            HDexit(EXIT_FAILURE);
+
+        /* Send notification 4 to parent that the verification is complete */
+        child_notify = 4;
+        if(HDwrite(child_pfd[1], &child_notify, sizeof(int)) < 0)
+            HDexit(EXIT_FAILURE);
+
+        /* 
+         * Case C: reader
+         * --verify index as sent from writer
+         */
+
+        /* Wait for notification 5 from parent to start verification */
+        while(child_notify != 5) {
+            if(HDread(parent_pfd[0], &child_notify, sizeof(int)) < 0)
+                HDexit(EXIT_FAILURE);
+        }
+
+        /* Read num_entries from writer pipe */
+        if(HDread(parent_pfd[0], &child_num_entries, sizeof(int)) < 0)
+            HDexit(EXIT_FAILURE);
+        
+        /* Free previous index */
+        if(child_index)
+            HDfree(child_index);
+
+        if(child_num_entries) {
+            /* Allocate memory for num_entries index */
+            if((child_index = (H5FD_vfd_swmr_idx_entry_t *)HDcalloc(child_num_entries, sizeof(H5FD_vfd_swmr_idx_entry_t))) == NULL)
+                HDexit(EXIT_FAILURE);
+
+            /* Read index from writer pipe */
+            if(HDread(parent_pfd[0], child_index, child_num_entries * sizeof(H5FD_vfd_swmr_idx_entry_t)) < 0)
+                HDexit(EXIT_FAILURE);
+        }
+
+        /* Read and verify the expected header and index info in the metadata file */
+        if(H5FD__vfd_swmr_reader_md_test(file_reader->shared->lf, child_num_entries, child_index) < 0)
+            HDexit(EXIT_FAILURE);
+
+        /* Send notification 6 to parent that the verification is complete */
+        child_notify = 6;
+        if(HDwrite(child_pfd[1], &child_notify, sizeof(int)) < 0)
+            HDexit(EXIT_FAILURE);
+
+        /* 
+         * Case D: reader
+         * --verify index as sent from writer
+         */
+
+        /* Wait for notification 7 from parent to start verification */
+        while(child_notify != 7) {
+            if(HDread(parent_pfd[0], &child_notify, sizeof(int)) < 0)
+                HDexit(EXIT_FAILURE);
+        }
+        /* Read num_entries from writer pipe */
+        if(HDread(parent_pfd[0], &child_num_entries, sizeof(int)) < 0)
+            HDexit(EXIT_FAILURE);
+        
+        /* Free previous index */
+        if(child_index)
+            HDfree(child_index);
+
+        if(child_num_entries) {
+            /* Allocate memory for num_entries index */
+            if((child_index = (H5FD_vfd_swmr_idx_entry_t *)HDcalloc(child_num_entries, sizeof(H5FD_vfd_swmr_idx_entry_t))) == NULL)
+                HDexit(EXIT_FAILURE);
+
+            /* Read index from writer pipe */
+            if(HDread(parent_pfd[0], child_index, child_num_entries * sizeof(H5FD_vfd_swmr_idx_entry_t)) < 0)
+                HDexit(EXIT_FAILURE);
+        }
+
+        /* Read and verify the expected header and index info in the metadata file */
+        if(H5FD__vfd_swmr_reader_md_test(file_reader->shared->lf, child_num_entries, child_index) < 0)
+            HDexit(EXIT_FAILURE);
+
+        /* Send notification 8 to parent that the verification is complete */
+        child_notify = 8;
+        if(HDwrite(child_pfd[1], &child_notify, sizeof(int)) < 0)
+            HDexit(EXIT_FAILURE);
+
+        /* 
+         * Case E: reader
+         * --verify an empty index 
+         */
+
+        /* Wait for notification 9 from parent to start verification */
+        while(child_notify != 9) {
+            if(HDread(parent_pfd[0], &child_notify, sizeof(int)) < 0)
+                HDexit(EXIT_FAILURE);
+        }
+
+        /* Read and verify header and an empty index in the metadata file */
+        if(H5FD__vfd_swmr_reader_md_test(file_reader->shared->lf, 0, NULL) < 0)
+            HDexit(EXIT_FAILURE);
+
+        /* Free resources */
+        if(child_index)
+            HDfree(child_index);
+        if(config_reader)
+            HDfree(config_reader);
+
+        /* Closing */
+        if(H5Fclose(fid_reader) < 0)
+            HDexit(EXIT_FAILURE);
+        if(H5Pclose(fapl_reader) < 0)
+            HDexit(EXIT_FAILURE);
+
+        /* Close the pipes */
+        if(HDclose(parent_pfd[0]) < 0)
+            HDexit(EXIT_FAILURE);
+        if(HDclose(child_pfd[1]) < 0)
+            HDexit(EXIT_FAILURE);
+
+        HDexit(EXIT_SUCCESS);
+    } /* end child process */
+
+    /* 
+     * Parent process as writer
+     */
+
+    /* Close unused read end for writer pipe */
+    if(HDclose(parent_pfd[0]) < 0)
+        FAIL_STACK_ERROR
+
+    /* Close unused write end for reader pipe */
+    if(HDclose(child_pfd[1]) < 0)
+        FAIL_STACK_ERROR
+
+    /* 
+     * Case A: writer
+     * --open the file as VFD SWMR writer
+     */
+
+    /* Open as VFD SWMR writer */
+    if((fid_writer = H5Fopen(FILENAME, H5F_ACC_RDWR, fapl_writer)) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Send notification 1 to reader to start verfication */
+    notify = 1;
+    if(HDwrite(parent_pfd[1], &notify, sizeof(int)) < 0)
+        FAIL_STACK_ERROR;
+
+    /* 
+     * Case B: writer
+     *  --create datasets to ensure ticks elapse
+     *  --construct 12 entries in the index 
+     *  --update the metadata file with the index
+     */
+
+    /* Wait for notification 2 from reader that the verifcation is complete */
+    while(notify != 2) {
+        if(HDread(child_pfd[0], &notify, sizeof(int)) < 0)
+            FAIL_STACK_ERROR;
+    }
+
+    /* Create dataset creation property list */
+    if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Set to use chunked dataset */
+    if(H5Pset_chunk(dcpl, 2, chunk_dims) < 0)
+        FAIL_STACK_ERROR
+
+    /* Create dataspace */
+    if((sid = H5Screate_simple(2, dims, max_dims)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Perform activities to ensure that ticks elapse */
+    for(i = 0; i < 2000; i++) {
+
+        /* Create a chunked dataset */
+        sprintf(dname, "dset %d", i);
+        if((did = H5Dcreate2(fid_writer, dname, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+            FAIL_STACK_ERROR
+
+        /* Get dataset object header address */
+        if(H5Oget_info2(did, &oinfo, H5O_INFO_BASIC) < 0)
+            FAIL_STACK_ERROR
+
+        /* Close the dataset */
+        if(H5Dclose(did) < 0)
+            FAIL_STACK_ERROR
+    }
+
+    num_entries = 12;
+
+    /* Allocate num_entries for the data buffer */
+    if((buf = (uint8_t *)HDmalloc((num_entries * FS_PAGE_SIZE * sizeof(uint8_t)))) == NULL)
+        FAIL_STACK_ERROR;
+
+    /* Allocate memory for num_entries index */
+    if(NULL == (index = (H5FD_vfd_swmr_idx_entry_t *)HDcalloc(num_entries, sizeof(H5FD_vfd_swmr_idx_entry_t))))
+        FAIL_STACK_ERROR;
+
+    /* Construct index for updating the metadata file */
+    for(i = 0; i < num_entries; i++) {
+        index[i].hdf5_page_offset = (uint64_t)config_writer->md_pages_reserved;
+        index[i].md_file_page_offset = 0;
+        index[i].length = (uint32_t)FS_PAGE_SIZE;
+        index[i].entry_ptr = (void *)&buf[i];
+    }
+
+    /* Get the file pointer */
+    file_writer = (H5F_t *)H5I_object(fid_writer);
+
+    /* Update the metadata file with the index */
+    if(H5F_update_vfd_swmr_metadata_file(file_writer, num_entries, index) < 0)
+        TEST_ERROR;
+
+    /* Send notification 3 to child to start verification */
+    notify = 3;
+    if(HDwrite(parent_pfd[1], &notify, sizeof(int)) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Send num_entries to the reader */
+    if(HDwrite(parent_pfd[1], &num_entries, sizeof(int)) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Send index to the reader */
+    if(HDwrite(parent_pfd[1], index, num_entries * sizeof(H5FD_vfd_swmr_idx_entry_t)) < 0)
+        FAIL_STACK_ERROR;
+
+    /* 
+     * Case C: writer
+     *  --write to the datasets to ensure ticks elapse
+     *  --update 3 entries in the index 
+     *  --update the metadata file with the index
+     */
+
+    /* Wait for notification 4 from reader that the verifcation is complete */
+    while(notify != 4) {
+        if(HDread(child_pfd[0], &notify, sizeof(int)) < 0)
+            FAIL_STACK_ERROR;
+    }
+
+    /* Allocate memory for the read/write buffer */
+    if((rwbuf = (int *)HDmalloc(sizeof(int) * (50 * 20))) == NULL)
+        FAIL_STACK_ERROR;
+    for(i = 0; i < (50 * 20); i++)
+        rwbuf[i] = (int)i;
+
+    /* Perform activities to ensure that max_lag ticks elapse */
+    for(i = 0; i < 1000; i++) {
+        /* Open the dataset */
+        sprintf(dname, "dset %d", i);
+        if((did = H5Dopen2(fid_writer, dname, H5P_DEFAULT)) < 0)
+            FAIL_STACK_ERROR
+
+        /* Write to the dataset */
+        if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rwbuf) < 0)
+            FAIL_STACK_ERROR
+
+        /* Close the dataset */
+        if(H5Dclose(did) < 0)
+            FAIL_STACK_ERROR
+    }
+
+    /* Update 3 entries in the index */
+    num_entries = 3;
+    for(i = 0; i < num_entries; i++)
+        index[i].entry_ptr = (void *)&buf[i];
+    
+    /* Update the metadata file with the index */
+    if(H5F_update_vfd_swmr_metadata_file(file_writer, num_entries, index) < 0)
+        TEST_ERROR;
+
+    /* Send notification 5 to reader to start verification */
+    notify = 5;
+    if(HDwrite(parent_pfd[1], &notify, sizeof(int)) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Send num_entries to the reader */
+    if(HDwrite(parent_pfd[1], &num_entries, sizeof(int)) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Send index to the reader */
+    if(HDwrite(parent_pfd[1], index, num_entries * sizeof(H5FD_vfd_swmr_idx_entry_t)) < 0)
+        FAIL_STACK_ERROR;
+
+    /* 
+     * Case D: writer
+     *  --read from the datasets to ensure ticks elapse
+     *  --update 5 entries in the index 
+     *  --update the metadata file with the index
+     */
+
+    /* Wait for notification 6 from reader that the verifcation is complete */
+    while(notify != 6) {
+        if(HDread(child_pfd[0], &notify, sizeof(int)) < 0)
+            FAIL_STACK_ERROR;
+    }
+
+    /* Perform activities to ensure that max_lag ticks elapse */
+    for(i = 0; i < 1000; i++) {
+        /* Open the dataset */
+        sprintf(dname, "dset %d", i);
+        if((did = H5Dopen2(fid_writer, dname, H5P_DEFAULT)) < 0)
+            FAIL_STACK_ERROR
+
+        /* Read from the dataset */
+        if(H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rwbuf) < 0)
+            FAIL_STACK_ERROR
+
+        /* Close the dataset */
+        if(H5Dclose(did) < 0)
+            FAIL_STACK_ERROR
+    }
+
+    /* Update 5 entries in the index */
+    num_entries = 5;
+    for(i = 0; i < num_entries; i++)
+        index[i].entry_ptr = (void *)&buf[i];
+    
+    /* Update the metadata file with the index */
+    if(H5F_update_vfd_swmr_metadata_file(file_writer, num_entries, index) < 0)
+        TEST_ERROR;
+
+    /* Send notification 7 to reader to start verification */
+    notify = 7;
+    if(HDwrite(parent_pfd[1], &notify, sizeof(int)) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Send num_entries to the reader */
+    if(HDwrite(parent_pfd[1], &num_entries, sizeof(int)) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Send index to the reader */
+    if(HDwrite(parent_pfd[1], index, num_entries * sizeof(H5FD_vfd_swmr_idx_entry_t)) < 0)
+        FAIL_STACK_ERROR;
+
+    /* 
+     * Case E: writer
+     * --write to the datasets again to ensure ticks elapse
+     * --update the metadata file with an empty index
+     */
+
+    /* Wait for notification 8 from reader that the verifcation is complete */
+    while(notify != 8) {
+        if(HDread(child_pfd[0], &notify, sizeof(int)) < 0)
+            FAIL_STACK_ERROR;
+    }
+
+    /* Perform activities to ensure that ticks elapse */
+    for(i = 0; i < 1000; i++) {
+        /* Open the dataset */
+        sprintf(dname, "dset %d", i);
+        if((did = H5Dopen2(fid_writer, dname, H5P_DEFAULT)) < 0)
+            FAIL_STACK_ERROR
+
+        /* Write to the dataset */
+        if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rwbuf) < 0)
+            FAIL_STACK_ERROR
+
+        /* Close the dataset */
+        if(H5Dclose(did) < 0)
+            FAIL_STACK_ERROR
+    }
+
+    /* Update the metadata file with 0 entries and NULL index */
+    if(H5F_update_vfd_swmr_metadata_file(file_writer, 0, NULL) < 0)
+        TEST_ERROR;
+
+    /* Send notification 8 to reader to start verification */
+    notify = 9;
+    if(HDwrite(parent_pfd[1], &notify, sizeof(int)) < 0)
+        FAIL_STACK_ERROR;
+
+    /*
+     * Done
+     */
+
+    /* Close the pipes */
+    if(HDclose(parent_pfd[1]) < 0)
+        FAIL_STACK_ERROR;
+    if(HDclose(child_pfd[0]) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Wait for child process to complete */
+    if((tmppid = HDwaitpid(childpid, &child_status, child_wait_option)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Check exit status of child process */
+    if(WIFEXITED(child_status)) {
+        if((child_exit_val = WEXITSTATUS(child_status)) != 0)
+            TEST_ERROR
+    } else { /* child process terminated abnormally */
+        TEST_ERROR
+    }
+
+    /* Closing */
+    if(H5Fclose(fid_writer) < 0)
+        FAIL_STACK_ERROR
+    if(H5Pclose(fapl_writer) < 0)
+        FAIL_STACK_ERROR;
+    if(H5Pclose(fcpl) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Free resources */
+    if(config_writer)
+        HDfree(config_writer);
+     if(buf)
+        HDfree(buf);
+    if(rwbuf)
+        HDfree(rwbuf);
+    if(index)
+        HDfree(index);
+
+    PASSED()
+    return 0;
+
+error:
+    if(config_writer)
+        HDfree(config_writer);
+     if(buf)
+        HDfree(buf);
+    if(rwbuf)
+        HDfree(rwbuf);
+    if(index)
+        HDfree(index);
+
+    H5E_BEGIN_TRY {
+        H5Pclose(fapl_writer);
+        H5Fclose(fid_writer);
+        H5Pclose(fcpl);
+    } H5E_END_TRY;
+
+    return 1;
+} /* test_reader_md_concur() */
+
+#endif /* !(defined(H5_HAVE_FORK) && defined(H5_HAVE_WAITPID) && defined(H5_HAVE_FLOCK)) */
+
 
 
 /*-------------------------------------------------------------------------
@@ -1011,10 +1664,19 @@ main(void)
 {
     hid_t       fapl = -1;              /* File access property list for data files */
     unsigned    nerrors = 0;            /* Cumulative error count */
+    char *lock_env_var = NULL;          /* File locking env var pointer */
     const char  *env_h5_drvr = NULL;    /* File Driver value from environment */
-    hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
+    hbool_t use_file_locking;           /* Read from env var */
 
-    h5_reset();
+    /* Check the environment variable that determines if we care
+     * about file locking. File locking should be used unless explicitly
+     * disabled.
+     */
+    lock_env_var = HDgetenv("HDF5_USE_FILE_LOCKING");
+    if(lock_env_var && !HDstrcmp(lock_env_var, "FALSE"))
+        use_file_locking = FALSE;
+    else
+        use_file_locking = TRUE;
 
     /* Get the VFD to use */
     env_h5_drvr = HDgetenv("HDF5_DRIVER");
@@ -1033,28 +1695,30 @@ main(void)
         HDexit(EXIT_SUCCESS);
     } /* end if */
 
+    /* Set up */
+    h5_reset();
+
     if((fapl = h5_fileaccess()) < 0) {
         nerrors++;
         PUTS_ERROR("Can't get VFD-dependent fapl")
     } /* end if */
 
-    /* Push API context */
-    if(H5CX_push() < 0) FAIL_STACK_ERROR
-        api_ctx_pushed = TRUE;
-
     nerrors += test_fapl();
-    nerrors += test_file_fapl();
-    nerrors += test_file_end_tick();
 
-    nerrors += test_writer_md();
-    nerrors += test_writer_update_md();
+    if(use_file_locking) {
+
+        nerrors += test_file_fapl();
+        nerrors += test_file_end_tick();
+
+        nerrors += test_writer_create_open_flush();
+        nerrors += test_writer_md();
+
+        nerrors += test_reader_md_concur();
+
+    } /* end if */
 
     if(nerrors)
         goto error;
-
-    /* Pop API context */
-    if(api_ctx_pushed && H5CX_pop() < 0) FAIL_STACK_ERROR
-        api_ctx_pushed = FALSE;
 
     HDputs("All VFD SWMR tests passed.");
 
@@ -1068,8 +1732,5 @@ error:
         H5Pclose(fapl);
     } H5E_END_TRY;
 
-    if(api_ctx_pushed) H5CX_pop();
-
     HDexit(EXIT_FAILURE);
 } /* main() */
-

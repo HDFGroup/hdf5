@@ -55,6 +55,7 @@ H5_DLL herr_t H5FD__free_real(H5FD_t *file, H5FD_mem_t type, haddr_t addr, hsize
 /* Testing functions */
 #ifdef H5FD_TESTING
 H5_DLL hbool_t H5FD__supports_swmr_test(const char *vfd_name);
+H5_DLL herr_t H5FD__vfd_swmr_reader_md_test(H5FD_t *file, unsigned num_entries, H5FD_vfd_swmr_idx_entry_t index[]);
 #endif /* H5FD_TESTING */
 
 #endif /* _H5FDpkg_H */

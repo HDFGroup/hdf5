@@ -532,10 +532,9 @@ H5_DLL herr_t H5F__get_maxaddr_test(hid_t file_id, haddr_t *maxaddr);
 H5_DLL herr_t H5F__get_sbe_addr_test(hid_t file_id, haddr_t *sbe_addr);
 
 /* VFD SWMR testing routines */
-
-H5_DLL herr_t H5F__vfd_swmr_writer_md_test(hid_t file_id, hbool_t create);
-H5_DLL herr_t H5F__vfd_swmr_writer_update_md_test(hid_t file_id, unsigned in_num_entries, 
-    struct H5FD_vfd_swmr_idx_entry_t *in_index, unsigned num_insert_dl, unsigned num_remove_dl);
+H5_DLL herr_t H5F__vfd_swmr_writer_create_open_flush_test(hid_t file_id, hbool_t create);
+H5_DLL herr_t H5F__vfd_swmr_writer_md_test(hid_t file_id, unsigned num_entries, struct H5FD_vfd_swmr_idx_entry_t *index, 
+    unsigned num_dl_entries);
 #endif /* H5F_TESTING */
 
 #endif /* _H5Fpkg_H */

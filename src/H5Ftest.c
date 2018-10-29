@@ -247,7 +247,7 @@ done:
  */
 
 /*-------------------------------------------------------------------------
- * Function:    H5F__vfd_swmr_writer_md_test
+ * Function:    H5F__vfd_swmr_writer_create_open_flush_test
  *
  * Purpose:     Verify info in the header and index when:
  *              (1) creating an HDF5 file
@@ -268,7 +268,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F__vfd_swmr_writer_md_test(hid_t file_id, hbool_t file_create)
+H5F__vfd_swmr_writer_create_open_flush_test(hid_t file_id, hbool_t file_create)
 {
     H5F_t *f;                           /* File pointer */
     h5_stat_t stat_buf;                 /* Buffer for stat info */
@@ -333,7 +333,7 @@ done:
         H5MM_free(md_idx.entries);
     }
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5F__vfd_swmr_writer_md_test() */
+} /* end H5F__vfd_swmr_writer_create_open_flush_test() */
 
 
 
@@ -511,7 +511,7 @@ H5F__vfd_swmr_verify_md_hdr_and_idx(H5F_t *f,
                 HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "incorrect length read from metadata file")
 
             if(md_idx->entries[i].hdf5_page_offset != index[i].hdf5_page_offset)
-                HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "incorrect md_file_page_offset read from metadata file")
+                HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "incorrect hdf5_page_offset read from metadata file")
 
             if(md_idx->entries[i].md_file_page_offset != index[i].md_file_page_offset)
                 HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "incorrect md_file_page_offset read from metadata file")
@@ -528,25 +528,27 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function: H5F__vfd_swmr_update_md_test
+ * Function: H5F__vfd_swmr_writer_md_test
  *
- * Purpose: Update the metadata file with the input index
- *          Verify the info read from the metadata file is as indicated by
- *          the input: num_entries and index
+ * Purpose: Update the metadata file with the input index and verify
+ *          the following:
+ *          --info read from the metadata file is as indicated by
+ *          the input: num_entries, index
+ *          --# of entries on the delayed list is as indicated by 
+ *          the input: num_dl_entries
  *
  * Return:  SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F__vfd_swmr_writer_update_md_test(hid_t file_id, unsigned num_entries, H5FD_vfd_swmr_idx_entry_t *index,
-    unsigned num_insert_dl, unsigned num_remove_dl)
+H5F__vfd_swmr_writer_md_test(hid_t file_id, unsigned num_entries, H5FD_vfd_swmr_idx_entry_t *index,
+    unsigned num_dl_entries)
 {
     H5F_t *f;                       /* File pointer */
     int md_fd = -1;                 /* The metadata file descriptor */
     H5FD_vfd_swmr_md_header md_hdr; /* Header for the metadata file */
-    H5FD_vfd_swmr_md_index md_idx;  /* Indedx for the metadata file */
-    unsigned save_dl_len = 0;       /* # of entries in the delayed list */
+    H5FD_vfd_swmr_md_index md_idx;  /* Index for the metadata file */
     herr_t ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -558,15 +560,12 @@ H5F__vfd_swmr_writer_update_md_test(hid_t file_id, unsigned num_entries, H5FD_vf
     if(NULL == (f = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
 
-    /* Save the number of entries in the delayed list */
-    save_dl_len = f->shared->dl_len;
-
     /* Update the metadata file with the input index */
     if(H5F_update_vfd_swmr_metadata_file(f, num_entries, index) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL, "error updating the md file with the index")
 
     /* Verify the number of entries in the delayed list is as expected */
-    if(f->shared->dl_len != (save_dl_len + num_insert_dl - num_remove_dl))
+    if(f->shared->dl_len != num_dl_entries)
         HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "incorrect # of entries in the delayed list")
 
     /* Open the metadata file */
@@ -586,10 +585,10 @@ H5F__vfd_swmr_writer_update_md_test(hid_t file_id, unsigned num_entries, H5FD_vf
         HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "incorrect info found in header and index of the metadata file")
 
 done:
-    /* Free index entries */
+    /* Free the index entries */
     if(md_idx.entries) {
         HDassert(md_idx.num_entries);
         H5MM_free(md_idx.entries);
     }
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5F__vfd_swmr_writer_update_md_test() */
+} /* H5F__vfd_swmr_writer_md_test() */

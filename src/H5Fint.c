@@ -122,8 +122,8 @@ static herr_t H5F__flush_phase2(H5F_t *f, hbool_t closing);
 static herr_t H5F__vfd_swmr_init(H5F_t *f, hbool_t file_create);
 static herr_t H5F__vfd_swmr_close_or_flush(H5F_t *f, hbool_t closing);
 static herr_t H5F__vfd_swmr_update_end_of_tick_and_tick_num(H5F_t *f, hbool_t incr_tick_num);
-static herr_t H5F__vfd_swmr_construct_write_md_hdr(H5F_t *f, uint32_t index_len);
-static herr_t H5F__vfd_swmr_construct_write_md_idx(H5F_t *f, uint32_t index_len, struct H5FD_vfd_swmr_idx_entry_t index[]);
+static herr_t H5F__vfd_swmr_construct_write_md_hdr(H5F_t *f, uint32_t num_entries);
+static herr_t H5F__vfd_swmr_construct_write_md_idx(H5F_t *f, uint32_t num_entries, struct H5FD_vfd_swmr_idx_entry_t index[]);
 static herr_t H5F__idx_entry_cmp(const void *_entry1, const void *_entry2);
 
 
@@ -3683,7 +3683,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F__vfd_swmr_construct_write_md_hdr(H5F_t *f, uint32_t index_len)
+H5F__vfd_swmr_construct_write_md_hdr(H5F_t *f, uint32_t num_entries)
 {
     uint8_t image[H5FD_MD_HEADER_SIZE]; /* Buffer for header */
     uint8_t *p = NULL;                  /* Pointer to buffer */
@@ -3706,7 +3706,7 @@ H5F__vfd_swmr_construct_write_md_hdr(H5F_t *f, uint32_t index_len)
     UINT32ENCODE(p, f->shared->fs_page_size);
     UINT64ENCODE(p, f->shared->tick_num);
     UINT64ENCODE(p, hdr_size);
-    UINT64ENCODE(p, H5FD_MD_INDEX_SIZE(index_len));
+    UINT64ENCODE(p, H5FD_MD_INDEX_SIZE(num_entries));
 
     /* Calculate checksum for header */
     metadata_chksum = H5_checksum_metadata(image, (size_t)(p - image), 0);
@@ -3745,18 +3745,18 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F__vfd_swmr_construct_write_md_idx(H5F_t *f, uint32_t index_len, struct H5FD_vfd_swmr_idx_entry_t index[])
+H5F__vfd_swmr_construct_write_md_idx(H5F_t *f, uint32_t num_entries, struct H5FD_vfd_swmr_idx_entry_t index[])
 {
     uint8_t *image = NULL;      /* Pointer to buffer */
     uint8_t *p = NULL;          /* Pointer to buffer */
     uint32_t metadata_chksum;   /* Computed metadata checksum value */
-    unsigned idx_size = H5FD_MD_INDEX_SIZE(index_len);  /* Size of index */
+    unsigned idx_size = H5FD_MD_INDEX_SIZE(num_entries);  /* Size of index */
     unsigned i;                 /* Local index variable */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_STATIC
 
-    HDassert((index_len != 0 && index != NULL) || (index_len == 0 && index == NULL));
+    HDassert((num_entries!= 0 && index != NULL) || (num_entries == 0 && index == NULL));
 
     /* Allocate space for the buffer to hold the index */
     if((image = (uint8_t *)HDmalloc(idx_size)) == NULL)
@@ -3775,10 +3775,10 @@ H5F__vfd_swmr_construct_write_md_idx(H5F_t *f, uint32_t index_len, struct H5FD_v
     UINT64ENCODE(p, f->shared->tick_num);
 
     /* Encode number of entries in index */
-    UINT32ENCODE(p, index_len);
+    UINT32ENCODE(p, num_entries);
 
     /* Encode the index entries */
-    for(i = 0; i < index_len; i++) {
+    for(i = 0; i < num_entries; i++) {
         UINT32ENCODE(p, index[i].hdf5_page_offset); 
         UINT32ENCODE(p, index[i].md_file_page_offset);
         UINT32ENCODE(p, index[i].length); 
@@ -4009,7 +4009,7 @@ H5F__idx_entry_cmp(const void *_entry1, const void *_entry2)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_update_vfd_swmr_metadata_file(H5F_t *f, uint32_t index_len, struct H5FD_vfd_swmr_idx_entry_t index[])
+H5F_update_vfd_swmr_metadata_file(H5F_t *f, uint32_t num_entries, struct H5FD_vfd_swmr_idx_entry_t index[])
 {
     H5F_vfd_swmr_dl_entry_t *prev;          /* Points to the previous entry in the delayed list */
     H5F_vfd_swmr_dl_entry_t *dl_entry;      /* Points to an entry in the delayed list */
@@ -4020,7 +4020,8 @@ H5F_update_vfd_swmr_metadata_file(H5F_t *f, uint32_t index_len, struct H5FD_vfd_
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sort index entries by increasing offset in the HDF5 file */
-    HDqsort(index, index_len, sizeof(H5FD_vfd_swmr_idx_entry_t), H5F__idx_entry_cmp);
+    if(num_entries)
+        HDqsort(index, num_entries, sizeof(H5FD_vfd_swmr_idx_entry_t), H5F__idx_entry_cmp);
 
     /* For each non-null entry_ptr in the index:
      *  --Insert previous image of the entry (if exists) to the beginning of the delayed list
@@ -4028,7 +4029,7 @@ H5F_update_vfd_swmr_metadata_file(H5F_t *f, uint32_t index_len, struct H5FD_vfd_
      *  --Compute checksum, update the index entry, write entry to the metadata file
      *  --Set entry_ptr to NULL
      */
-    for(i = 0; i < index_len; i++) {
+    for(i = 0; i < num_entries; i++) {
         if(index[i].entry_ptr != NULL) {
             /* Prepend previous image of the entry to the delayed list */
             if(index[i].md_file_page_offset) {
@@ -4061,11 +4062,11 @@ H5F_update_vfd_swmr_metadata_file(H5F_t *f, uint32_t index_len, struct H5FD_vfd_
     } /* end for */
 
     /* Construct and write index to the metadata file */
-    if(H5F__vfd_swmr_construct_write_md_idx(f, index_len, index) < 0)
+    if(H5F__vfd_swmr_construct_write_md_idx(f, num_entries, index) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "fail to construct & write index to md")
 
     /* Construct and write header to the md file */
-    if(H5F__vfd_swmr_construct_write_md_hdr(f, index_len) < 0)
+    if(H5F__vfd_swmr_construct_write_md_hdr(f, num_entries) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "fail to construct & write header to md")
 
     /* 
