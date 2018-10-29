@@ -62,16 +62,38 @@ static void *H5VL__attr_create(void *obj, H5VL_loc_params_t loc_params,
 static void *H5VL__attr_open(void *obj, H5VL_loc_params_t loc_params,
     const H5VL_class_t *cls, const char *name, hid_t aapl_id, hid_t dxpl_id,
     void **req);
-static herr_tH5VL__attr_read(void *obj, const H5VL_class_t *cls, hid_t mem_type_id,
+static herr_t H5VL__attr_read(void *obj, const H5VL_class_t *cls, hid_t mem_type_id,
     void *buf, hid_t dxpl_id, void **req);
-static herr_t H5VL___attr_write(void *obj, const H5VL_class_t *cls, hid_t mem_type_id,
+static herr_t H5VL__attr_write(void *obj, const H5VL_class_t *cls, hid_t mem_type_id,
     const void *buf, hid_t dxpl_id, void **req);
+static herr_t H5VL__attr_get(void *obj, const H5VL_class_t *cls, H5VL_attr_get_t get_type, 
+    hid_t dxpl_id, void **req, va_list arguments);
 static herr_t H5VL__attr_specific(void *obj, H5VL_loc_params_t loc_params,
     const H5VL_class_t *cls, H5VL_attr_specific_t specific_type, hid_t dxpl_id,
     void **req, va_list arguments);
 static herr_t H5VL__attr_optional(void *obj, const H5VL_class_t *cls, hid_t dxpl_id,
     void **req, va_list arguments);
 static herr_t H5VL__attr_close(void *obj, const H5VL_class_t *cls, hid_t dxpl_id,
+    void **req);
+static void *H5VL__dataset_create(void *obj, H5VL_loc_params_t loc_params,
+    const H5VL_class_t *cls, const char *name, hid_t dcpl_id, hid_t dapl_id,
+    hid_t dxpl_id, void **req);
+static void *H5VL__dataset_open(void *obj, H5VL_loc_params_t loc_params,
+    const H5VL_class_t *cls, const char *name, hid_t dapl_id, hid_t dxpl_id,
+    void **req);
+static herr_t H5VL__dataset_read(void *dset, const H5VL_class_t *cls,
+    hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id, hid_t plist_id,
+    void *buf, void **req);
+static herr_t H5VL__dataset_write(void *obj, const H5VL_class_t *cls,
+    hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id, hid_t plist_id,
+    const void *buf, void **req);
+static herr_t H5VL__dataset_get(void *obj, const H5VL_class_t *cls, H5VL_dataset_get_t get_type, 
+    hid_t dxpl_id, void **req, va_list arguments);
+static herr_t H5VL__dataset_specific(void *obj, const H5VL_class_t *cls,
+    H5VL_dataset_specific_t specific_type, hid_t dxpl_id, void **req, va_list arguments);
+static herr_t H5VL__dataset_optional(void *obj, const H5VL_class_t *cls,
+    hid_t dxpl_id, void **req, va_list arguments);
+static herr_t H5VL__dataset_close(void *obj, const H5VL_class_t *cls, hid_t dxpl_id,
     void **req);
 
 
@@ -814,7 +836,7 @@ H5VL_attr_open(const H5VL_object_t *vol_obj, H5VL_loc_params_t loc_params,
 
     /* Set wrapper info in API context */
     if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, NULL, "can't set VOL wrapper info")
     vol_wrapper_set = TRUE;
 
     /* Call the corresponding internal VOL routine */
@@ -824,7 +846,7 @@ H5VL_attr_open(const H5VL_object_t *vol_obj, H5VL_loc_params_t loc_params,
 done:
     /* Reset object wrapping info in API context */
     if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, NULL, "can't reset VOL wrapper info")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_attr_open() */
@@ -978,7 +1000,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL___attr_write(void *obj, const H5VL_class_t *cls, hid_t mem_type_id, const void *buf, 
+H5VL__attr_write(void *obj, const H5VL_class_t *cls, hid_t mem_type_id, const void *buf, 
     hid_t dxpl_id, void **req)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -1070,6 +1092,37 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5VL__attr_get
+ *
+ * Purpose:	Get specific information about the attribute through the VOL
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL__attr_get(void *obj, const H5VL_class_t *cls, H5VL_attr_get_t get_type, 
+    hid_t dxpl_id, void **req, va_list arguments)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Check if the corresponding VOL callback exists */
+    if(NULL == cls->attr_cls.get)
+        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL plugin has no 'attr get' method")
+
+    /* Call the corresponding VOL callback */
+    if((cls->attr_cls.get)(obj, get_type, dxpl_id, req, arguments) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "attribute get failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__attr_get() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5VL_attr_get
  *
  * Purpose:	Get specific information about the attribute through the VOL
@@ -1080,29 +1133,35 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_attr_get(void *obj, const H5VL_class_t *cls, H5VL_attr_get_t get_type, 
+H5VL_attr_get(const H5VL_object_t *vol_obj, H5VL_attr_get_t get_type, 
     hid_t dxpl_id, void **req, ...)
 {
     va_list arguments;                  /* Argument list passed from the API call */
     hbool_t arg_started = FALSE;        /* Whether the va_list has been started */
+    hbool_t vol_wrapper_set = FALSE;    /* Whether the VOL object wrapping context was set up */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    /* Check if the corresponding VOL callback exists */
-    if(NULL == cls->attr_cls.get)
-        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL plugin has no 'attr get' method")
+    /* Set wrapper info in API context */
+    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
+    vol_wrapper_set = TRUE;
 
-    /* Call the corresponding VOL callback */
+    /* Call the corresponding internal VOL routine */
     va_start(arguments, req);
     arg_started = TRUE;
-    if((cls->attr_cls.get)(obj, get_type, dxpl_id, req, arguments) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "get failed")
+    if(H5VL__attr_get(vol_obj->data, vol_obj->plugin->cls, get_type, dxpl_id, req, arguments) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "attribute get failed")
 
 done:
     /* End access to the va_list, if we started it */
     if(arg_started)
         va_end(arguments);
+
+    /* Reset object wrapping info in API context */
+    if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_attr_get() */
@@ -1134,12 +1193,8 @@ H5VLattr_get(void *obj, hid_t plugin_id, H5VL_attr_get_t get_type, hid_t dxpl_id
     if(NULL == (cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
 
-    /* Check if the corresponding VOL callback exists */
-    if(NULL == cls->attr_cls.get)
-        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL plugin has no `attr get' method")
-
-    /* Bypass the H5VLint layer, calling the VOL callback directly */
-    if((cls->attr_cls.get)(obj, get_type, dxpl_id, req, arguments) < 0)
+    /* Call the corresponding internal VOL routine */
+    if(H5VL__attr_get(obj, cls, get_type, dxpl_id, req, arguments) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "Unable to get attribute information")
 
 done:
@@ -1270,7 +1325,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5VL__attr_optional(void *obj, const H5VL_class_t *cls, hid_t dxpl_id,
     void **req, va_list arguments)
 {
@@ -1302,8 +1357,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_attr_optional(const H5VL_object_t *vol_obj, const H5VL_class_t *cls,
-    hid_t dxpl_id, void **req, ...)
+H5VL_attr_optional(const H5VL_object_t *vol_obj, hid_t dxpl_id, void **req, ...)
 {
     va_list arguments;                  /* Argument list passed from the API call */
     hbool_t arg_started = FALSE;        /* Whether the va_list has been started */
@@ -1446,7 +1500,7 @@ H5VLattr_close(void *obj, hid_t plugin_id, hid_t dxpl_id, void **req)
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE4("e", "*xii**x", attr, plugin_id, dxpl_id, req);
+    H5TRACE4("e", "*xii**x", obj, plugin_id, dxpl_id, req);
 
     /* Check args and get class pointer */
     if(NULL == obj)
@@ -1464,7 +1518,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5VL_dataset_create
+ * Function:	H5VL__dataset_create
  *
  * Purpose:	Creates a dataset through the VOL
  *
@@ -1473,13 +1527,13 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-void *
-H5VL_dataset_create(void *obj, H5VL_loc_params_t loc_params, const H5VL_class_t *cls, const char *name, 
-    hid_t dcpl_id, hid_t dapl_id, hid_t dxpl_id, void **req)
+static void *
+H5VL__dataset_create(void *obj, H5VL_loc_params_t loc_params, const H5VL_class_t *cls,
+    const char *name, hid_t dcpl_id, hid_t dapl_id, hid_t dxpl_id, void **req)
 {
     void *ret_value = NULL;     /* Return value */
 
-    FUNC_ENTER_NOAPI(NULL)
+    FUNC_ENTER_STATIC
 
     /* Check if the corresponding VOL callback exists */
     if(NULL == cls->dataset_cls.create)
@@ -1490,6 +1544,43 @@ H5VL_dataset_create(void *obj, H5VL_loc_params_t loc_params, const H5VL_class_t 
         HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, NULL, "create failed")
 
 done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__dataset_create() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_dataset_create
+ *
+ * Purpose:	Creates a dataset through the VOL
+ *
+ * Return:      Success: Pointer to new dataset
+ *		Failure: NULL
+ *
+ *-------------------------------------------------------------------------
+ */
+void *
+H5VL_dataset_create(const H5VL_object_t *vol_obj, H5VL_loc_params_t loc_params,
+    const char *name, hid_t dcpl_id, hid_t dapl_id, hid_t dxpl_id, void **req)
+{
+    hbool_t vol_wrapper_set = FALSE;    /* Whether the VOL object wrapping context was set up */
+    void *ret_value = NULL;             /* Return value */
+
+    FUNC_ENTER_NOAPI(NULL)
+
+    /* Set wrapper info in API context */
+    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, NULL, "can't set VOL wrapper info")
+    vol_wrapper_set = TRUE;
+
+    /* Call the corresponding internal VOL routine */
+    if(NULL == (ret_value = H5VL__dataset_create(vol_obj->data, loc_params, vol_obj->plugin->cls, name, dcpl_id, dapl_id, dxpl_id, req)))
+        HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, NULL, "create failed")
+
+done:
+    /* Reset object wrapping info in API context */
+    if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, NULL, "can't reset VOL wrapper info")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_dataset_create() */
 
@@ -1505,8 +1596,8 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VLdataset_create(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id, const char *name,
-    hid_t dcpl_id, hid_t dapl_id, hid_t dxpl_id, void **req)
+H5VLdataset_create(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id,
+    const char *name, hid_t dcpl_id, hid_t dapl_id, hid_t dxpl_id, void **req)
 {
     H5VL_class_t *cls;                  /* VOL plugin's class struct */
     void *ret_value = NULL;             /* Return value */
@@ -1522,12 +1613,43 @@ H5VLdataset_create(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id, con
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a VOL plugin ID")
 
     /* Call the corresponding internal VOL routine */
-    if(NULL == (ret_value = H5VL_dataset_create(obj, loc_params, cls, name, dcpl_id, dapl_id, dxpl_id, req)))
+    if(NULL == (ret_value = H5VL__dataset_create(obj, loc_params, cls, name, dcpl_id, dapl_id, dxpl_id, req)))
         HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, NULL, "unable to create dataset")
 
 done:
     FUNC_LEAVE_API_NOINIT(ret_value)
 } /* end H5VLdataset_create() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL__dataset_open
+ *
+ * Purpose:	Opens a dataset through the VOL
+ *
+ * Return:      Success: Pointer to dataset 
+ *		Failure: NULL
+ *
+ *-------------------------------------------------------------------------
+ */
+static void *
+H5VL__dataset_open(void *obj, H5VL_loc_params_t loc_params, const H5VL_class_t *cls, const char *name, 
+    hid_t dapl_id, hid_t dxpl_id, void **req)
+{
+    void *ret_value = NULL;             /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Check if the corresponding VOL callback exists */
+    if(NULL == cls->dataset_cls.open)
+        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, NULL, "VOL plugin has no 'dataset open' method")
+
+    /* Call the corresponding VOL callback */
+    if(NULL == (ret_value = (cls->dataset_cls.open)(obj, loc_params, name, dapl_id, dxpl_id, req)))
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPENOBJ, NULL, "dataset open failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__dataset_open() */
 
 
 /*-------------------------------------------------------------------------
@@ -1541,22 +1663,28 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VL_dataset_open(void *obj, H5VL_loc_params_t loc_params, const H5VL_class_t *cls, const char *name, 
-    hid_t dapl_id, hid_t dxpl_id, void **req)
+H5VL_dataset_open(const H5VL_object_t *vol_obj, H5VL_loc_params_t loc_params,
+    const char *name, hid_t dapl_id, hid_t dxpl_id, void **req)
 {
-    void *ret_value = NULL; /* Return value */
+    hbool_t vol_wrapper_set = FALSE;    /* Whether the VOL object wrapping context was set up */
+    void *ret_value = NULL;             /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
-    /* Check if the corresponding VOL callback exists */
-    if(NULL == cls->dataset_cls.open)
-        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, NULL, "VOL plugin has no 'dataset open' method")
+    /* Set wrapper info in API context */
+    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, NULL, "can't set VOL wrapper info")
+    vol_wrapper_set = TRUE;
 
-    /* Call the corresponding VOL callback */
-    if(NULL == (ret_value = (cls->dataset_cls.open)(obj, loc_params, name, dapl_id, dxpl_id, req)))
+    /* Call the corresponding internal VOL routine */
+    if(NULL == (ret_value = H5VL__dataset_open(vol_obj->data, loc_params, vol_obj->plugin->cls, name, dapl_id, dxpl_id, req)))
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPENOBJ, NULL, "dataset open failed")
 
 done:
+    /* Reset object wrapping info in API context */
+    if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, NULL, "can't reset VOL wrapper info")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_dataset_open() */
 
@@ -1572,8 +1700,8 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VLdataset_open(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id, const char *name,
-    hid_t dapl_id, hid_t dxpl_id, void **req)
+H5VLdataset_open(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id,
+    const char *name, hid_t dapl_id, hid_t dxpl_id, void **req)
 {
     H5VL_class_t *cls;                  /* VOL plugin's class struct */
     void *ret_value = NULL;             /* Return value */
@@ -1589,12 +1717,44 @@ H5VLdataset_open(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id, const
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a VOL plugin ID")
 
     /* Call the corresponding internal VOL routine */
-    if(NULL == (ret_value = H5VL_dataset_open(obj, loc_params, cls, name, dapl_id, dxpl_id, req)))
+    if(NULL == (ret_value = H5VL__dataset_open(obj, loc_params, cls, name, dapl_id, dxpl_id, req)))
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPENOBJ, NULL, "unable to open dataset")
 
 done:
     FUNC_LEAVE_API_NOINIT(ret_value)
 } /* end H5VLdataset_open() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL__dataset_read
+ *
+ * Purpose:	Reads data from dataset through the VOL
+*
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t 
+H5VL__dataset_read(void *obj, const H5VL_class_t *cls, hid_t mem_type_id,
+    hid_t mem_space_id, hid_t file_space_id, hid_t plist_id, void *buf,
+    void **req)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Check if the corresponding VOL callback exists */
+    if(NULL == cls->dataset_cls.read)
+        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL plugin has no 'dataset read' method")
+
+    /* Call the corresponding VOL callback */
+    if((cls->dataset_cls.read)(obj, mem_type_id, mem_space_id, file_space_id, plist_id, buf, req) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_READERROR, FAIL, "dataset read failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__dataset_read() */
 
 
 /*-------------------------------------------------------------------------
@@ -1608,23 +1768,29 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t 
-H5VL_dataset_read(void *dset, const H5VL_class_t *cls, hid_t mem_type_id,
+H5VL_dataset_read(const H5VL_object_t *vol_obj, hid_t mem_type_id,
     hid_t mem_space_id, hid_t file_space_id, hid_t plist_id, void *buf,
     void **req)
 {
+    hbool_t vol_wrapper_set = FALSE;    /* Whether the VOL object wrapping context was set up */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    /* Check if the corresponding VOL callback exists */
-    if(NULL == cls->dataset_cls.read)
-        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL plugin has no 'dataset read' method")
+    /* Set wrapper info in API context */
+    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
+    vol_wrapper_set = TRUE;
 
-    /* Call the corresponding VOL callback */
-    if((cls->dataset_cls.read)(dset, mem_type_id, mem_space_id, file_space_id, plist_id, buf, req) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_READERROR, FAIL, "read failed")
+    /* Call the corresponding internal VOL routine */
+    if(H5VL__dataset_read(vol_obj->data, vol_obj->plugin->cls, mem_type_id, mem_space_id, file_space_id, plist_id, buf, req) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_READERROR, FAIL, "dataset read failed")
 
 done:
+    /* Reset object wrapping info in API context */
+    if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_dataset_read() */
 
@@ -1640,29 +1806,61 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLdataset_read(void *dset, hid_t plugin_id, hid_t mem_type_id, hid_t mem_space_id,
+H5VLdataset_read(void *obj, hid_t plugin_id, hid_t mem_type_id, hid_t mem_space_id,
     hid_t file_space_id, hid_t plist_id, void *buf, void **req)
 {
     H5VL_class_t *cls;                  /* VOL plugin's class struct */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE8("e", "*xiiiii*x**x", dset, plugin_id, mem_type_id, mem_space_id,
+    H5TRACE8("e", "*xiiiii*x**x", obj, plugin_id, mem_type_id, mem_space_id,
              file_space_id, plist_id, buf, req);
 
     /* Check args and get class pointer */
-    if(NULL == dset)
+    if(NULL == obj)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object")
     if(NULL == (cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
 
     /* Call the corresponding internal VOL routine */
-    if(H5VL_dataset_read(dset, cls, mem_type_id, mem_space_id, file_space_id, plist_id, buf, req) < 0)
+    if(H5VL__dataset_read(obj, cls, mem_type_id, mem_space_id, file_space_id, plist_id, buf, req) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to read dataset")
 
 done:
     FUNC_LEAVE_API_NOINIT(ret_value)
 } /* end H5VLdataset_read() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL__dataset_write
+ *
+ * Purpose:	Writes data from dataset through the VOL
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t 
+H5VL__dataset_write(void *obj, const H5VL_class_t *cls, hid_t mem_type_id,
+    hid_t mem_space_id, hid_t file_space_id, hid_t plist_id, const void *buf,
+    void **req)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Check if the corresponding VOL callback exists */
+    if(NULL == cls->dataset_cls.write)
+        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL plugin has no 'dataset write' method")
+
+    /* Call the corresponding VOL callback */
+    if((cls->dataset_cls.write)(obj, mem_type_id, mem_space_id, file_space_id, plist_id, buf, req) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_WRITEERROR, FAIL, "dataset write failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__dataset_write() */
 
 
 /*-------------------------------------------------------------------------
@@ -1676,23 +1874,29 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t 
-H5VL_dataset_write(void *dset, const H5VL_class_t *cls, hid_t mem_type_id,
+H5VL_dataset_write(const H5VL_object_t *vol_obj, hid_t mem_type_id,
     hid_t mem_space_id, hid_t file_space_id, hid_t plist_id, const void *buf,
     void **req)
 {
+    hbool_t vol_wrapper_set = FALSE;    /* Whether the VOL object wrapping context was set up */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    /* Check if the corresponding VOL callback exists */
-    if(NULL == cls->dataset_cls.write)
-        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL plugin has no 'dataset write' method")
+    /* Set wrapper info in API context */
+    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
+    vol_wrapper_set = TRUE;
 
-    /* Call the corresponding VOL callback */
-    if((cls->dataset_cls.write)(dset, mem_type_id, mem_space_id, file_space_id, plist_id, buf, req) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_WRITEERROR, FAIL, "write failed")
+    /* Call the corresponding internal VOL routine */
+    if(H5VL__dataset_write(vol_obj->data, vol_obj->plugin->cls, mem_type_id, mem_space_id, file_space_id, plist_id, buf, req) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_WRITEERROR, FAIL, "dataset write failed")
 
 done:
+    /* Reset object wrapping info in API context */
+    if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_dataset_write() */
 
@@ -1708,29 +1912,60 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLdataset_write(void *dset, hid_t plugin_id, hid_t mem_type_id, hid_t mem_space_id,
+H5VLdataset_write(void *obj, hid_t plugin_id, hid_t mem_type_id, hid_t mem_space_id,
     hid_t file_space_id, hid_t plist_id, const void *buf, void **req)
 {
     H5VL_class_t *cls;                  /* VOL plugin's class struct */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE8("e", "*xiiiii*x**x", dset, plugin_id, mem_type_id, mem_space_id,
+    H5TRACE8("e", "*xiiiii*x**x", obj, plugin_id, mem_type_id, mem_space_id,
              file_space_id, plist_id, buf, req);
 
     /* Check args and get class pointer */
-    if(NULL == dset)
+    if(NULL == obj)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object")
     if(NULL == (cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
 
     /* Call the corresponding internal VOL routine */
-    if(H5VL_dataset_write(dset, cls, mem_type_id, mem_space_id, file_space_id, plist_id, buf, req) < 0)
+    if(H5VL__dataset_write(obj, cls, mem_type_id, mem_space_id, file_space_id, plist_id, buf, req) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to write dataset")
 
 done:
     FUNC_LEAVE_API_NOINIT(ret_value)
 } /* end H5VLdataset_write() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL__dataset_get
+ *
+ * Purpose:	Get specific information about the dataset through the VOL
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL__dataset_get(void *obj, const H5VL_class_t *cls, H5VL_dataset_get_t get_type, 
+    hid_t dxpl_id, void **req, va_list arguments)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Check if the corresponding VOL callback exists */
+    if(NULL == cls->dataset_cls.get)
+        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL plugin has no 'dataset get' method")
+
+    /* Call the corresponding VOL callback */
+    if((cls->dataset_cls.get)(obj, get_type, dxpl_id, req, arguments) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "dataset get failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__dataset_get() */
 
 
 /*-------------------------------------------------------------------------
@@ -1744,29 +1979,35 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_dataset_get(void *dset, const H5VL_class_t *cls, H5VL_dataset_get_t get_type, 
+H5VL_dataset_get(const H5VL_object_t *vol_obj, H5VL_dataset_get_t get_type, 
     hid_t dxpl_id, void **req, ...)
 {
     va_list arguments;                  /* Argument list passed from the API call */
     hbool_t arg_started = FALSE;        /* Whether the va_list has been started */
+    hbool_t vol_wrapper_set = FALSE;    /* Whether the VOL object wrapping context was set up */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    /* Check if the corresponding VOL callback exists */
-    if(NULL == cls->dataset_cls.get)
-        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL plugin has no 'dataset get' method")
+    /* Set wrapper info in API context */
+    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
+    vol_wrapper_set = TRUE;
 
-    /* Call the corresponding VOL callback */
+    /* Call the corresponding internal VOL routine */
     va_start(arguments, req);
     arg_started = TRUE;
-    if((cls->dataset_cls.get)(dset, get_type, dxpl_id, req, arguments) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "get failed")
+    if(H5VL__dataset_get(vol_obj->data, vol_obj->plugin->cls, get_type, dxpl_id, req, arguments) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "dataset get failed")
 
 done:
     /* End access to the va_list, if we started it */
     if(arg_started)
         va_end(arguments);
+
+    /* Reset object wrapping info in API context */
+    if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_dataset_get() */
@@ -1783,27 +2024,23 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLdataset_get(void *dset, hid_t plugin_id, H5VL_dataset_get_t get_type,
+H5VLdataset_get(void *obj, hid_t plugin_id, H5VL_dataset_get_t get_type,
     hid_t dxpl_id, void **req, va_list arguments)
 {
     H5VL_class_t *cls;                  /* VOL plugin's class struct */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE6("e", "*xiVci**xx", dset, plugin_id, get_type, dxpl_id, req, arguments);
+    H5TRACE6("e", "*xiVci**xx", obj, plugin_id, get_type, dxpl_id, req, arguments);
 
     /* Check args and get class pointer */
-    if(NULL == dset)
+    if(NULL == obj)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object")
     if(NULL == (cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
 
-    /* Check if the corresponding VOL callback exists */
-    if(NULL == cls->dataset_cls.get)
-        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL plugin has no `dataset get' method")
-
-    /* Bypass the H5VLint layer, calling the VOL callback directly */
-    if((cls->dataset_cls.get)(dset, get_type, dxpl_id, req, arguments) < 0)
+    /* Call the corresponding internal VOL routine */
+    if(H5VL__dataset_get(obj, cls, get_type, dxpl_id, req, arguments) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "Unable to execute dataset get callback")
 
 done:
@@ -1812,9 +2049,40 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5VL__dataset_specific
+ *
+ * Purpose:	Specific operation on datasets through the VOL
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL__dataset_specific(void *obj, const H5VL_class_t *cls, H5VL_dataset_specific_t specific_type, 
+    hid_t dxpl_id, void **req, va_list arguments)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Check if the corresponding VOL callback exists */
+    if(NULL == cls->dataset_cls.specific)
+        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL plugin has no 'dataset specific' method")
+
+    /* Call the corresponding VOL callback */
+    if((cls->dataset_cls.specific)(obj, specific_type, dxpl_id, req, arguments) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute dataset specific callback")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__dataset_specific() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5VL_dataset_specific
  *
- * Purpose:	specific operation on datasets through the VOL
+ * Purpose:	Specific operation on datasets through the VOL
  *
  * Return:      Success:    Non-negative
  *              Failure:    Negative
@@ -1822,29 +2090,35 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_dataset_specific(void *obj, const H5VL_class_t *cls, H5VL_dataset_specific_t specific_type, 
+H5VL_dataset_specific(const H5VL_object_t *vol_obj, H5VL_dataset_specific_t specific_type, 
     hid_t dxpl_id, void **req, ...)
 {
     va_list arguments;                  /* Argument list passed from the API call */
     hbool_t arg_started = FALSE;        /* Whether the va_list has been started */
+    hbool_t vol_wrapper_set = FALSE;    /* Whether the VOL object wrapping context was set up */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    /* Check if the corresponding VOL callback exists */
-    if(NULL == cls->dataset_cls.specific)
-        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL plugin has no 'dataset specific' method")
+    /* Set wrapper info in API context */
+    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
+    vol_wrapper_set = TRUE;
 
-    /* Call the corresponding VOL callback */
+    /* Call the corresponding internal VOL routine */
     va_start(arguments, req);
     arg_started = TRUE;
-    if((cls->dataset_cls.specific)(obj, specific_type, dxpl_id, req, arguments) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute dataset specific callback")
+    if(H5VL__dataset_specific(vol_obj->data, vol_obj->plugin->cls, specific_type, dxpl_id, req, arguments) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute dataset specific callback")
 
 done:
     /* End access to the va_list, if we started it */
     if(arg_started)
         va_end(arguments);
+
+    /* Reset object wrapping info in API context */
+    if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_dataset_specific() */
@@ -1877,13 +2151,9 @@ H5VLdataset_specific(void *obj, hid_t plugin_id, H5VL_dataset_specific_t specifi
     if(NULL == (cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
 
-    /* Check if the corresponding VOL callback exists */
-    if(NULL == cls->dataset_cls.specific)
-        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL plugin has no `dataset specific' method")
-
-    /* Bypass the H5VLint layer, calling the VOL callback directly */
-    if((cls->dataset_cls.specific)(obj, specific_type, dxpl_id, req, arguments) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute dataset specific callback")
+    /* Call the corresponding internal VOL routine */
+    if(H5VL__dataset_specific(obj, cls, specific_type, dxpl_id, req, arguments) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute dataset specific callback")
 
 done:
     FUNC_LEAVE_API_NOINIT(ret_value)
@@ -1891,9 +2161,40 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5VL__dataset_optional
+ *
+ * Purpose:	Optional operation specific to plugins.
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL__dataset_optional(void *obj, const H5VL_class_t *cls, hid_t dxpl_id,
+    void **req, va_list arguments)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Check if the corresponding VOL callback exists */
+    if(NULL == cls->dataset_cls.optional)
+        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL plugin has no 'dataset optional' method")
+
+    /* Call the corresponding VOL callback */
+    if((cls->dataset_cls.optional)(obj, dxpl_id, req, arguments) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute dataset optional callback")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__dataset_optional() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5VL_dataset_optional
  *
- * Purpose:	optional operation specific to plugins.
+ * Purpose:	Optional operation specific to plugins.
  *
  * Return:      Success:    Non-negative
  *              Failure:    Negative
@@ -1901,29 +2202,36 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_dataset_optional(void *obj, const H5VL_class_t *cls, hid_t dxpl_id,
+H5VL_dataset_optional(const H5VL_object_t *vol_obj, hid_t dxpl_id,
     void **req, ...)
 {
     va_list arguments;                  /* Argument list passed from the API call */
     hbool_t arg_started = FALSE;        /* Whether the va_list has been started */
+    hbool_t vol_wrapper_set = FALSE;    /* Whether the VOL object wrapping context was set up */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    /* Check if the corresponding VOL callback exists */
-    if(NULL == cls->dataset_cls.optional)
-        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL plugin has no 'dataset optional' method")
-
     /* Call the corresponding VOL callback */
+    /* Set wrapper info in API context */
+    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 1)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
+    vol_wrapper_set = TRUE;
+
+    /* Call the corresponding internal VOL routine */
     va_start(arguments, req);
     arg_started = TRUE;
-    if((cls->dataset_cls.optional)(obj, dxpl_id, req, arguments) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute dataset optional callback")
+    if(H5VL__dataset_optional(vol_obj->data, vol_obj->plugin->cls, dxpl_id, req, arguments) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute dataset optional callback")
 
 done:
     /* End access to the va_list, if we started it */
     if(arg_started)
         va_end(arguments);
+
+    /* Reset object wrapping info in API context */
+    if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_dataset_optional() */
@@ -1955,17 +2263,47 @@ H5VLdataset_optional(void *obj, hid_t plugin_id, hid_t dxpl_id, void **req,
     if(NULL == (cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
 
-    /* Check if the corresponding VOL callback exists */
-    if(NULL == cls->dataset_cls.optional)
-        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL plugin has no `dataset optional' method")
-
-    /* Bypass the H5VLint layer, calling the VOL callback directly */
-    if((cls->dataset_cls.optional)(obj, dxpl_id, req, arguments) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute dataset optional callback")
+    /* Call the corresponding internal VOL routine */
+    if(H5VL__dataset_optional(obj, cls, dxpl_id, req, arguments) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute dataset optional callback")
 
 done:
     FUNC_LEAVE_API_NOINIT(ret_value)
 } /* end H5VLdataset_optional() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL__dataset_close
+ *
+ * Purpose:     Closes a dataset through the VOL
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL__dataset_close(void *obj, const H5VL_class_t *cls, hid_t dxpl_id, void **req)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity check */
+    HDassert(obj);
+    HDassert(cls);
+
+    /* Check if the corresponding VOL callback exists */
+    if(NULL == cls->dataset_cls.close)
+        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL plugin has no 'dataset close' method")
+
+    /* Call the corresponding VOL callback */
+    if((cls->dataset_cls.close)(obj, dxpl_id, req) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTCLOSEOBJ, FAIL, "dataset close failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__dataset_close() */
 
 
 /*-------------------------------------------------------------------------
@@ -1979,25 +2317,33 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_dataset_close(void *dset, const H5VL_class_t *cls, hid_t dxpl_id, void **req)
+H5VL_dataset_close(const H5VL_object_t *vol_obj, hid_t dxpl_id, void **req)
 {
+    hbool_t vol_wrapper_set = FALSE;    /* Whether the VOL object wrapping context was set up */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
-    HDassert(dset);
-    HDassert(cls);
+    HDassert(vol_obj);
+    HDassert(vol_obj->data);
+    HDassert(vol_obj->plugin);
+    HDassert(vol_obj->plugin->cls);
 
-    /* Check if the corresponding VOL callback exists */
-    if(NULL == cls->dataset_cls.close)
-        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL plugin has no 'dset close' method")
+    /* Set wrapper info in API context */
+    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
+    vol_wrapper_set = TRUE;
 
-    /* Call the corresponding VOL callback */
-    if((cls->dataset_cls.close)(dset, dxpl_id, req) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTCLOSEOBJ, FAIL, "close failed")
+    /* Call the corresponding internal VOL routine */
+    if(H5VL__dataset_close(vol_obj->data, vol_obj->plugin->cls, dxpl_id, req) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTCLOSEOBJ, FAIL, "dataset close failed")
 
 done:
+    /* Reset object wrapping info in API context */
+    if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_dataset_close() */
 
@@ -2013,22 +2359,22 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLdataset_close(void *dset, hid_t plugin_id, hid_t dxpl_id, void **req)
+H5VLdataset_close(void *obj, hid_t plugin_id, hid_t dxpl_id, void **req)
 {
     H5VL_class_t *cls;                  /* VOL plugin's class struct */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE4("e", "*xii**x", dset, plugin_id, dxpl_id, req);
+    H5TRACE4("e", "*xii**x", obj, plugin_id, dxpl_id, req);
 
     /* Check args and get class pointer */
-    if(NULL == dset)
+    if(NULL == obj)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object")
     if(NULL == (cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
 
     /* Call the corresponding internal VOL routine */
-    if(H5VL_dataset_close(dset, cls, dxpl_id, req) < 0)
+    if(H5VL__dataset_close(obj, cls, dxpl_id, req) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTCLOSEOBJ, FAIL, "unable to close dataset")
 
 done:

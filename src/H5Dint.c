@@ -300,7 +300,7 @@ H5D__close_cb(H5VL_object_t *dset_vol_obj)
     HDassert(dset_vol_obj);
 
     /* Close the dataset */
-    if(H5VL_dataset_close(dset_vol_obj->data, dset_vol_obj->plugin->cls, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+    if(H5VL_dataset_close(dset_vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to close dataset");
 
 done:
@@ -2459,10 +2459,7 @@ H5D__vlen_get_buf_size(void H5_ATTR_UNUSED *elem, hid_t type_id,
         HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "can't select point")
 
     /* Read in the point (with the custom VL memory allocator) */
-    if(H5VL_dataset_read(vol_obj->data, vol_obj->plugin->cls, 
-                         type_id, vlen_bufsize->mspace_id, 
-                         vlen_bufsize->fspace_id, H5P_DATASET_XFER_DEFAULT, 
-                         vlen_bufsize->fl_tbuf, H5_REQUEST_NULL) < 0)
+    if(H5VL_dataset_read(vol_obj, type_id, vlen_bufsize->mspace_id, vlen_bufsize->fspace_id, H5P_DATASET_XFER_DEFAULT, vlen_bufsize->fl_tbuf, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read point")
 
 done:

@@ -777,8 +777,7 @@ H5Aget_space(hid_t attr_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not an attribute")
 
     /* Get the dataspace */
-    if(H5VL_attr_get(vol_obj->data, vol_obj->plugin->cls, H5VL_ATTR_GET_SPACE, 
-                     H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &ret_value) < 0)
+    if(H5VL_attr_get(vol_obj, H5VL_ATTR_GET_SPACE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &ret_value) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, H5I_INVALID_HID, "unable to get dataspace of attribute")
 
 done:
@@ -806,7 +805,6 @@ hid_t
 H5Aget_type(hid_t attr_id)
 {
     H5VL_object_t  *vol_obj = NULL;                     /* Attribute object for ID */
-    hbool_t         vol_wrapper_set = FALSE;            /* Whether the VOL object wrapping context was set up */
     hid_t           ret_value   = H5I_INVALID_HID;      /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
@@ -816,20 +814,11 @@ H5Aget_type(hid_t attr_id)
     if(NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(attr_id, H5I_ATTR)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not an attribute")
 
-    /* Set wrapper info in API context */
-    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, H5I_INVALID_HID, "can't set VOL wrapper info")
-    vol_wrapper_set = TRUE;
-
     /* Get the datatype */
-    if(H5VL_attr_get(vol_obj->data, vol_obj->plugin->cls, H5VL_ATTR_GET_TYPE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &ret_value) < 0)
+    if(H5VL_attr_get(vol_obj, H5VL_ATTR_GET_TYPE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &ret_value) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, H5I_INVALID_HID, "unable to get datatype of attribute")
 
 done:
-    /* Reset object wrapping info in API context */
-    if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTSET, H5I_INVALID_HID, "can't reset VOL wrapper info")
-
     FUNC_LEAVE_API(ret_value)
 } /* H5Aget_type() */
 
@@ -869,8 +858,7 @@ H5Aget_create_plist(hid_t attr_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not an attribute")
 
     /* Get the acpl */
-    if(H5VL_attr_get(vol_obj->data, vol_obj->plugin->cls, H5VL_ATTR_GET_ACPL, 
-                     H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &ret_value) < 0)
+    if(H5VL_attr_get(vol_obj, H5VL_ATTR_GET_ACPL, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &ret_value) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, H5I_INVALID_HID, "unable to get creation property list for attribute")
 
 done:
@@ -920,9 +908,7 @@ H5Aget_name(hid_t attr_id, size_t buf_size, char *buf)
     loc_params.obj_type = H5I_get_type(attr_id);
 
     /* Get the attribute name */
-    if(H5VL_attr_get(vol_obj->data, vol_obj->plugin->cls, H5VL_ATTR_GET_NAME, 
-                     H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, 
-                     loc_params, buf_size, buf, &ret_value) < 0)
+    if(H5VL_attr_get(vol_obj, H5VL_ATTR_GET_NAME, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, loc_params, buf_size, buf, &ret_value) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, (-1), "unable to get attribute name")
 
 done:
@@ -987,8 +973,7 @@ H5Aget_name_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
     loc_params.obj_type = H5I_get_type(loc_id);
 
     /* Get the name */
-    if(H5VL_attr_get(vol_obj->data, vol_obj->plugin->cls, H5VL_ATTR_GET_NAME, 
-                     H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, loc_params, size, name, &ret_value) < 0)
+    if(H5VL_attr_get(vol_obj, H5VL_ATTR_GET_NAME, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, loc_params, size, name, &ret_value) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "unable to get name")
 
 done:
@@ -1027,8 +1012,7 @@ H5Aget_storage_size(hid_t attr_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not an attribute")
 
     /* Get the storage size */
-    if(H5VL_attr_get(vol_obj->data, vol_obj->plugin->cls, H5VL_ATTR_GET_STORAGE_SIZE, 
-                     H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &ret_value) < 0)
+    if(H5VL_attr_get(vol_obj, H5VL_ATTR_GET_STORAGE_SIZE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &ret_value) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, 0, "unable to get acpl")
 
 done:
@@ -1067,8 +1051,7 @@ H5Aget_info(hid_t attr_id, H5A_info_t *ainfo)
     loc_params.obj_type = H5I_get_type(attr_id);
 
     /* Get the attribute information */
-    if(H5VL_attr_get(vol_obj->data, vol_obj->plugin->cls, H5VL_ATTR_GET_INFO, 
-                     H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, loc_params, ainfo) < 0)
+    if(H5VL_attr_get(vol_obj, H5VL_ATTR_GET_INFO, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, loc_params, ainfo) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "unable to get attribute info")
 
 done:
@@ -1124,8 +1107,7 @@ H5Aget_info_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
 
     /* Get the attribute information */
-    if(H5VL_attr_get(vol_obj->data, vol_obj->plugin->cls, H5VL_ATTR_GET_INFO, 
-                     H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, loc_params, ainfo, attr_name) < 0)
+    if(H5VL_attr_get(vol_obj, H5VL_ATTR_GET_INFO, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, loc_params, ainfo, attr_name) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "unable to get attribute info")
 
 done:
@@ -1188,8 +1170,7 @@ H5Aget_info_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
 
     /* Get the attribute information */
-    if(H5VL_attr_get(vol_obj->data, vol_obj->plugin->cls, H5VL_ATTR_GET_INFO, 
-                     H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, loc_params, ainfo) < 0)
+    if(H5VL_attr_get(vol_obj, H5VL_ATTR_GET_INFO, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, loc_params, ainfo) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "unable to get attribute info")
 
 done:
