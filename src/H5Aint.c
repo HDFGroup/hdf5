@@ -2628,7 +2628,7 @@ H5A__iterate(const H5G_loc_t *loc, const char *obj_name, H5_index_t idx_type, H5
     H5G_name_t  obj_path;       /* Opened object group hier. path */
     H5O_loc_t   obj_oloc;       /* Opened object object location */
     hbool_t     loc_found = FALSE;      /* Entry at 'obj_name' found */
-    hid_t       obj_loc_id = (-1);      /* ID for object located */
+    hid_t       obj_loc_id = H5I_INVALID_HID;      /* ID for object located */
     H5A_attr_iter_op_t  attr_op;        /* Attribute operator */
     void        *temp_obj = NULL;
     H5I_type_t  obj_type;

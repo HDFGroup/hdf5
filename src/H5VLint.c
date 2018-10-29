@@ -50,6 +50,7 @@
 
 /* Object wrapping context info */
 typedef struct H5VL_wrap_ctx_t {
+    unsigned rc;                /* Ref. count for the # of times the context was set / reset */
     const H5VL_t *plugin;       /* VOL plugin for "outermost" class to start wrap */
     void *obj_wrap_ctx;         /* "wrap context" for outermost plugin */
 } H5VL_wrap_ctx_t;
@@ -857,23 +858,34 @@ H5VL_set_vol_wrapper(void *obj, const H5VL_t *plugin)
     HDassert(obj);
     HDassert(plugin);
 
-    /* Check if the plugin can create a wrap context */
-    if(plugin->cls->get_wrap_ctx) {
-        /* Sanity check */
-        HDassert(plugin->cls->free_wrap_ctx);
+    /* Retrieve the VOL object wrap context */
+    if(H5CX_get_vol_wrap_ctx((void **)&vol_wrap_ctx) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't get VOL object wrap context")
 
-        /* Get the wrap context from the plugin */
-        if((plugin->cls->get_wrap_ctx)(obj, &obj_wrap_ctx) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't retrieve VOL plugin's object wrap context")
+    /* Check for existing wrapping context */
+    if(NULL == vol_wrap_ctx) {
+        /* Check if the plugin can create a wrap context */
+        if(plugin->cls->get_wrap_ctx) {
+            /* Sanity check */
+            HDassert(plugin->cls->free_wrap_ctx);
+
+            /* Get the wrap context from the plugin */
+            if((plugin->cls->get_wrap_ctx)(obj, &obj_wrap_ctx) < 0)
+                HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't retrieve VOL plugin's object wrap context")
+        } /* end if */
+
+        /* Allocate VOL object wrapper context */
+        if(NULL == (vol_wrap_ctx = H5FL_MALLOC(H5VL_wrap_ctx_t)))
+            HGOTO_ERROR(H5E_VOL, H5E_CANTALLOC, FAIL, "can't allocate VOL wrap context")
+
+        /* Set up VOL object wrapper context */
+        vol_wrap_ctx->rc = 1;;
+        vol_wrap_ctx->plugin = plugin;
+        vol_wrap_ctx->obj_wrap_ctx = obj_wrap_ctx;
     } /* end if */
-
-    /* Allocate VOL object wrapper context */
-    if(NULL == (vol_wrap_ctx = H5FL_MALLOC(H5VL_wrap_ctx_t)))
-        HGOTO_ERROR(H5E_VOL, H5E_CANTALLOC, FAIL, "can't allocate VOL wrap context")
-
-    /* Set up VOL object wrapper context */
-    vol_wrap_ctx->plugin = plugin;
-    vol_wrap_ctx->obj_wrap_ctx = obj_wrap_ctx;
+    else
+        /* Incremeent ref count on existing wrapper context */
+        vol_wrap_ctx->rc++;
 
     /* Save the wrapper context */
     if(H5CX_set_vol_wrap_ctx(vol_wrap_ctx) < 0)
@@ -909,15 +921,34 @@ H5VL_reset_vol_wrapper(void)
     if(H5CX_get_vol_wrap_ctx((void **)&vol_wrap_ctx) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't get VOL object wrap context")
 
-    /* If there is a VOL plugin object wrapping context, release it */
-    if(vol_wrap_ctx->obj_wrap_ctx) {
-        /* Release the VOL plugin's object wrapping context */
-        if((*vol_wrap_ctx->plugin->cls->free_wrap_ctx)(vol_wrap_ctx->obj_wrap_ctx) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "unable to release plugin's object wrapping context")
-    } /* end if */
+    /* Check for VOL object wrap context */
+    if(NULL == vol_wrap_ctx)
+        HGOTO_ERROR(H5E_VOL, H5E_BADVALUE, FAIL, "no VOL object wrap context?")
 
-    /* Release object wrapping context */
-    H5FL_FREE(H5VL_wrap_ctx_t, vol_wrap_ctx);
+    /* Decrement ref count on wrapping context */
+    vol_wrap_ctx->rc--;
+
+    /* Release context if the ref count drops to zero */
+    if(0 == vol_wrap_ctx->rc) {
+        /* If there is a VOL plugin object wrapping context, release it */
+        if(vol_wrap_ctx->obj_wrap_ctx) {
+            /* Release the VOL plugin's object wrapping context */
+            if((*vol_wrap_ctx->plugin->cls->free_wrap_ctx)(vol_wrap_ctx->obj_wrap_ctx) < 0)
+                HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "unable to release plugin's object wrapping context")
+        } /* end if */
+
+        /* Release object wrapping context */
+        H5FL_FREE(H5VL_wrap_ctx_t, vol_wrap_ctx);
+
+        /* Reset the wrapper context */
+        if(H5CX_set_vol_wrap_ctx(NULL) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL object wrap context")
+    } /* end if */
+    else {
+        /* Save the updated wrapper context */
+        if(H5CX_set_vol_wrap_ctx(vol_wrap_ctx) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL object wrap context")
+    } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
