@@ -244,7 +244,7 @@ endif ()
 #-----------------------------------------------------------------------------
 # Fortran Real Size
 #-----------------------------------------------------------------------------
-if (FORTRAN_DEFAULT_REAL_NOT_DOUBLE)
+if (H5_FORTRAN_DEFAULT_REAL_NOT_DOUBLE)
   # default real is 4 bytes, so include double signatures
   set (F_DBLE "Include")
 else ()
@@ -255,10 +255,7 @@ endif ()
 #-----------------------------------------------------------------------------
 # Fortran Modules
 #-----------------------------------------------------------------------------
-set (f90_F_SRCS
-    # generated files
-    ${HDF5_F90_BINARY_DIR}/static/H5fortran_types.f90
-
+set (f90_F_BASE_SOURCES
     # normal distribution
     ${HDF5_F90_SRC_SOURCE_DIR}/H5f90global.f90
     ${HDF5_F90_SRC_SOURCE_DIR}/H5_ff${F_STATUS}.f90
@@ -292,18 +289,33 @@ set (f90_F_SRCS
 # Add H5FDMPIO if parallel
 #-----------------------------------------------------------------------------
 if (H5_HAVE_PARALLEL AND MPI_Fortran_FOUND)
-  set (f90_F_SRCS
-    ${f90_F_SRCS}
+  set (f90_F_BASE_SOURCES
+    ${f90_F_BASE_SOURCES}
     ${HDF5_F90_SRC_SOURCE_DIR}/HDF5mpio.f90
     ${HDF5_F90_SRC_SOURCE_DIR}/H5FDmpioff.f90
   )
 else ()
-  set (f90_F_SRCS
-    ${f90_F_SRCS}
+  set (f90_F_BASE_SOURCES
+    ${f90_F_BASE_SOURCES}
     ${HDF5_F90_SRC_SOURCE_DIR}/HDF5.f90
   )
 endif ()
+
+set (f90_F_SRCS
+    # generated files
+    ${HDF5_F90_BINARY_DIR}/static/H5fortran_types.f90
+
+    ${f90_F_BASE_SOURCES}
+)
 set_source_files_properties (${f90_F_SRCS} PROPERTIES LANGUAGE Fortran)
+
+set (f90_F_SRCS_SHARED
+    # generated files
+    ${HDF5_F90_BINARY_DIR}/shared/H5fortran_types.f90
+
+    ${f90_F_BASE_SOURCES}
+)
+set_source_files_properties (${f90_F_SRCS_SHARED} PROPERTIES LANGUAGE Fortran)
 
 #-----------------------------------------------------------------------------
 # Add Main fortran library
@@ -346,7 +358,7 @@ set_global_variable (HDF5_LIBRARIES_TO_EXPORT "${HDF5_LIBRARIES_TO_EXPORT};${HDF
 set (install_targets ${install_targets} ${HDF5_F90_LIB_TARGET})
 
 if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
-  add_library (${HDF5_F90_LIBSH_TARGET} SHARED ${f90_F_SRCS})
+  add_library (${HDF5_F90_LIBSH_TARGET} SHARED ${f90_F_SRCS_SHARED})
   target_include_directories (${HDF5_F90_LIBSH_TARGET}
       PRIVATE
           "${HDF5_F90_SRC_SOURCE_DIR};${CMAKE_Fortran_MODULE_DIRECTORY}/shared;${HDF5_F90_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_Fortran_INCLUDE_DIRS}>"
