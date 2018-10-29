@@ -1163,7 +1163,7 @@ H5A__close_cb(H5VL_object_t *attr_vol_obj)
     HDassert(attr_vol_obj);
 
     /* Close the attribute */
-    if((ret_value = H5VL_attr_close(attr_vol_obj->data, attr_vol_obj->plugin->cls, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)) < 0)
+    if((ret_value = H5VL_attr_close(attr_vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CLOSEERROR, FAIL, "problem closing attribute")
 
     /* Free the VOL object */

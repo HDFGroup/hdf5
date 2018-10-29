@@ -56,6 +56,23 @@
 /********************/
 /* Local Prototypes */
 /********************/
+static void *H5VL__attr_create(void *obj, H5VL_loc_params_t loc_params,
+    const H5VL_class_t *cls, const char *name, hid_t acpl_id, hid_t aapl_id,
+    hid_t dxpl_id, void **req);
+static void *H5VL__attr_open(void *obj, H5VL_loc_params_t loc_params,
+    const H5VL_class_t *cls, const char *name, hid_t aapl_id, hid_t dxpl_id,
+    void **req);
+static herr_tH5VL__attr_read(void *obj, const H5VL_class_t *cls, hid_t mem_type_id,
+    void *buf, hid_t dxpl_id, void **req);
+static herr_t H5VL___attr_write(void *obj, const H5VL_class_t *cls, hid_t mem_type_id,
+    const void *buf, hid_t dxpl_id, void **req);
+static herr_t H5VL__attr_specific(void *obj, H5VL_loc_params_t loc_params,
+    const H5VL_class_t *cls, H5VL_attr_specific_t specific_type, hid_t dxpl_id,
+    void **req, va_list arguments);
+static herr_t H5VL__attr_optional(void *obj, const H5VL_class_t *cls, hid_t dxpl_id,
+    void **req, va_list arguments);
+static herr_t H5VL__attr_close(void *obj, const H5VL_class_t *cls, hid_t dxpl_id,
+    void **req);
 
 
 /*********************/
@@ -642,6 +659,37 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5VL__attr_create
+ *
+ * Purpose:     Creates an attribute through the VOL
+ *
+ * Return:      Success: Pointer to the new attribute 
+ *              Failure: NULL
+ *
+ *-------------------------------------------------------------------------
+ */
+static void *
+H5VL__attr_create(void *obj, H5VL_loc_params_t loc_params, const H5VL_class_t *cls,
+    const char *name, hid_t acpl_id, hid_t aapl_id, hid_t dxpl_id, void **req)
+{
+    void *ret_value = NULL;     /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Check if the corresponding VOL callback exists */
+    if(NULL == cls->attr_cls.create)
+        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, NULL, "VOL plugin has no 'attr create' method")
+
+    /* Call the corresponding VOL callback */
+    if(NULL == (ret_value = (cls->attr_cls.create)(obj, loc_params, name, acpl_id, aapl_id, dxpl_id, req)))
+        HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, NULL, "attribute create failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_attr_create() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5VL_attr_create
  *
  * Purpose:     Creates an attribute through the VOL
@@ -652,22 +700,28 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VL_attr_create(void *obj, H5VL_loc_params_t loc_params, const H5VL_class_t *cls, const char *name, 
-                 hid_t acpl_id, hid_t aapl_id, hid_t dxpl_id, void **req)
+H5VL_attr_create(const H5VL_object_t *vol_obj, H5VL_loc_params_t loc_params, 
+    const char *name, hid_t acpl_id, hid_t aapl_id, hid_t dxpl_id, void **req)
 {
-    void *ret_value = NULL;  /* Return value */
+    hbool_t vol_wrapper_set = FALSE;    /* Whether the VOL object wrapping context was set up */
+    void *ret_value = NULL;             /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
-    /* check if the corresponding VOL create callback exists */
-    if(NULL == cls->attr_cls.create)
-        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, NULL, "VOL plugin has no 'attr create' method")
+    /* Set wrapper info in API context */
+    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, NULL, "can't set VOL wrapper info")
+    vol_wrapper_set = TRUE;
 
-    /* Call the corresponding VOL create callback */
-    if(NULL == (ret_value = (cls->attr_cls.create)(obj, loc_params, name, acpl_id, aapl_id, dxpl_id, req)))
-        HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, NULL, "create failed")
+    /* Call the corresponding internal VOL routine */
+    if(NULL == (ret_value = H5VL__attr_create(vol_obj->data, loc_params, vol_obj->plugin->cls, name, acpl_id, aapl_id, dxpl_id, req)))
+        HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, NULL, "attribute create failed")
 
 done:
+    /* Reset object wrapping info in API context */
+    if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, NULL, "can't reset VOL wrapper info")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_attr_create() */
 
@@ -683,8 +737,8 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VLattr_create(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id, const char *name,
-                hid_t acpl_id, hid_t aapl_id, hid_t dxpl_id, void **req)
+H5VLattr_create(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id,
+    const char *name, hid_t acpl_id, hid_t aapl_id, hid_t dxpl_id, void **req)
 {
     H5VL_class_t *cls;          /* VOL plugin's class struct */
     void *ret_value = NULL;     /* Return value */
@@ -700,12 +754,43 @@ H5VLattr_create(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id, const 
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a VOL plugin ID")
 
     /* Call the corresponding internal VOL routine */
-    if(NULL == (ret_value = H5VL_attr_create(obj, loc_params, cls, name, acpl_id, aapl_id, dxpl_id, req)))
+    if(NULL == (ret_value = H5VL__attr_create(obj, loc_params, cls, name, acpl_id, aapl_id, dxpl_id, req)))
         HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, NULL, "unable to create attribute")
 
 done:
     FUNC_LEAVE_API_NOINIT(ret_value)
 } /* end H5VLattr_create() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL__attr_open
+ *
+ * Purpose:	Opens an attribute through the VOL
+ *
+ * Return:      Success: Pointer to the attribute
+ *		Failure: NULL
+ *
+ *-------------------------------------------------------------------------
+ */
+static void *
+H5VL__attr_open(void *obj, H5VL_loc_params_t loc_params, const H5VL_class_t *cls, const char *name, 
+    hid_t aapl_id, hid_t dxpl_id, void **req)
+{
+    void *ret_value = NULL;     /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Check if the corresponding VOL callback exists */
+    if(NULL == cls->attr_cls.open)
+        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, NULL, "VOL plugin has no 'attr open' method")
+
+    /* Call the corresponding VOL open callback */
+    if(NULL == (ret_value = (cls->attr_cls.open)(obj, loc_params, name, aapl_id, dxpl_id, req)))
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPENOBJ, NULL, "attribute open failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__attr_open() */
 
 
 /*-------------------------------------------------------------------------
@@ -719,22 +804,28 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VL_attr_open(void *obj, H5VL_loc_params_t loc_params, const H5VL_class_t *cls, const char *name, 
-    hid_t aapl_id, hid_t dxpl_id, void **req)
+H5VL_attr_open(const H5VL_object_t *vol_obj, H5VL_loc_params_t loc_params,
+    const char *name, hid_t aapl_id, hid_t dxpl_id, void **req)
 {
-    void *ret_value = NULL;     /* Return value */
+    hbool_t vol_wrapper_set = FALSE;    /* Whether the VOL object wrapping context was set up */
+    void *ret_value = NULL;             /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
-    /* Check if the corresponding VOL callback exists */
-    if(NULL == cls->attr_cls.open)
-        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, NULL, "VOL plugin has no 'attr open' method")
+    /* Set wrapper info in API context */
+    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
+    vol_wrapper_set = TRUE;
 
-    /* Call the corresponding VOL open callback */
-    if(NULL == (ret_value = (cls->attr_cls.open) (obj, loc_params, name, aapl_id, dxpl_id, req)))
+    /* Call the corresponding internal VOL routine */
+    if(NULL == (ret_value = H5VL__attr_open(vol_obj->data, loc_params, vol_obj->plugin->cls, name, aapl_id, dxpl_id, req)))
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPENOBJ, NULL, "attribute open failed")
 
 done:
+    /* Reset object wrapping info in API context */
+    if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_attr_open() */
 
@@ -750,8 +841,8 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VLattr_open(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id, const char *name,
-              hid_t aapl_id, hid_t dxpl_id, void **req)
+H5VLattr_open(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id,
+    const char *name, hid_t aapl_id, hid_t dxpl_id, void **req)
 {
     H5VL_class_t *cls;          /* VOL plugin's class struct */
     void *ret_value = NULL;     /* Return value */
@@ -767,12 +858,43 @@ H5VLattr_open(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id, const ch
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a VOL plugin ID")
 
     /* Call the corresponding internal VOL routine */
-    if(NULL == (ret_value = H5VL_attr_open(obj, loc_params, cls, name, aapl_id, dxpl_id, req)))
+    if(NULL == (ret_value = H5VL__attr_open(obj, loc_params, cls, name, aapl_id, dxpl_id, req)))
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPENOBJ, NULL, "unable to open attribute")
 
 done:
     FUNC_LEAVE_API_NOINIT(ret_value)
 } /* end H5VLattr_open() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL__attr_read
+ *
+ * Purpose:	Reads data from attr through the VOL
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL__attr_read(void *obj, const H5VL_class_t *cls, hid_t mem_type_id, void *buf, 
+    hid_t dxpl_id, void **req)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Check if the corresponding VOL callback exists */
+    if(NULL == cls->attr_cls.read)
+        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL plugin has no 'attr read' method")
+
+    /* Call the corresponding VOL callback */
+    if((cls->attr_cls.read)(obj, mem_type_id, buf, dxpl_id, req) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_READERROR, FAIL, "attribute read failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__attr_read() */
 
 
 /*-------------------------------------------------------------------------
@@ -785,22 +907,29 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t H5VL_attr_read(void *attr, const H5VL_class_t *cls, hid_t mem_type_id, void *buf, 
+herr_t
+H5VL_attr_read(const H5VL_object_t *vol_obj, hid_t mem_type_id, void *buf, 
     hid_t dxpl_id, void **req)
 {
+    hbool_t vol_wrapper_set = FALSE;    /* Whether the VOL object wrapping context was set up */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    /* Check if the corresponding VOL callback exists */
-    if(NULL == cls->attr_cls.read)
-        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL plugin has no 'attr read' method")
+    /* Set wrapper info in API context */
+    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
+    vol_wrapper_set = TRUE;
 
-    /* Call the corresponding VOL callback */
-    if((cls->attr_cls.read)(attr, mem_type_id, buf, dxpl_id, req) < 0)
+    /* Call the corresponding internal VOL routine */
+    if(H5VL__attr_read(vol_obj->data, vol_obj->plugin->cls, mem_type_id, buf, dxpl_id, req) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_READERROR, FAIL, "attribute read failed")
 
 done:
+    /* Reset object wrapping info in API context */
+    if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_attr_read() */
 
@@ -816,7 +945,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLattr_read(void *attr, hid_t plugin_id, hid_t mem_type_id, void *buf, hid_t dxpl_id, void **req)
+H5VLattr_read(void *obj, hid_t plugin_id, hid_t mem_type_id, void *buf, hid_t dxpl_id, void **req)
 {
     H5VL_class_t *cls;                  /* VOL plugin's class struct */
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -824,18 +953,49 @@ H5VLattr_read(void *attr, hid_t plugin_id, hid_t mem_type_id, void *buf, hid_t d
     FUNC_ENTER_API_NOINIT
 
     /* Check args and get class pointer */
-    if(NULL == attr)
+    if(NULL == obj)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object")
     if(NULL == (cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
 
     /* Call the corresponding internal VOL routine */
-    if(H5VL_attr_read(attr, cls, mem_type_id, buf, dxpl_id, req) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to read attribute")
+    if(H5VL__attr_read(obj, cls, mem_type_id, buf, dxpl_id, req) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_READERROR, FAIL, "unable to read attribute")
 
 done:
     FUNC_LEAVE_API_NOINIT(ret_value)
 } /* end H5VLattr_read() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL__attr_write
+ *
+ * Purpose:	Writes data to attr through the VOL
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL___attr_write(void *obj, const H5VL_class_t *cls, hid_t mem_type_id, const void *buf, 
+    hid_t dxpl_id, void **req)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Check if the corresponding VOL callback exists */
+    if(NULL == cls->attr_cls.write)
+        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL plugin has no 'attr write' method")
+
+    /* Call the corresponding VOL callback */
+    if((cls->attr_cls.write)(obj, mem_type_id, buf, dxpl_id, req) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_WRITEERROR, FAIL, "write failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__attr_write() */
 
 
 /*-------------------------------------------------------------------------
@@ -849,22 +1009,28 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_attr_write(void *attr, const H5VL_class_t *cls, hid_t mem_type_id, const void *buf, 
+H5VL_attr_write(const H5VL_object_t *vol_obj, hid_t mem_type_id, const void *buf, 
     hid_t dxpl_id, void **req)
 {
+    hbool_t vol_wrapper_set = FALSE;    /* Whether the VOL object wrapping context was set up */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    /* Check if the corresponding VOL callback exists */
-    if(NULL == cls->attr_cls.write)
-        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL plugin has no 'attr write' method")
+    /* Set wrapper info in API context */
+    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
+    vol_wrapper_set = TRUE;
 
-    /* Call the corresponding VOL callback */
-    if((cls->attr_cls.write)(attr, mem_type_id, buf, dxpl_id, req) < 0)
+    /* Call the corresponding internal VOL routine */
+    if(H5VL__attr_write(vol_obj->data, vol_obj->plugin->cls, mem_type_id, buf, dxpl_id, req) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_WRITEERROR, FAIL, "write failed")
 
 done:
+    /* Reset object wrapping info in API context */
+    if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_attr_write() */
 
@@ -880,7 +1046,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLattr_write(void *attr, hid_t plugin_id, hid_t mem_type_id, const void *buf,
+H5VLattr_write(void *obj, hid_t plugin_id, hid_t mem_type_id, const void *buf,
     hid_t dxpl_id, void **req)
 {
     H5VL_class_t *cls;                  /* VOL plugin's class struct */
@@ -889,13 +1055,13 @@ H5VLattr_write(void *attr, hid_t plugin_id, hid_t mem_type_id, const void *buf,
     FUNC_ENTER_API_NOINIT
 
     /* Check args and get class pointer */
-    if(NULL == attr)
+    if(NULL == obj)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object")
     if(NULL == (cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
 
     /* Call the corresponding internal VOL routine */
-    if(H5VL_attr_write(attr, cls, mem_type_id, buf, dxpl_id, req) < 0)
+    if(H5VL__attr_write(obj, cls, mem_type_id, buf, dxpl_id, req) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_WRITEERROR, FAIL, "unable to write attribute")
 
 done:
@@ -982,9 +1148,41 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5VL__attr_specific
+ *
+ * Purpose:	Specific operation on attributes through the VOL
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL__attr_specific(void *obj, H5VL_loc_params_t loc_params, const H5VL_class_t *cls, 
+    H5VL_attr_specific_t specific_type, hid_t dxpl_id, void **req,
+    va_list arguments)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Check if the corresponding VOL callback exists */
+    if(NULL == cls->attr_cls.specific)
+        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL plugin has no 'attr specific' method")
+
+    /* Call the corresponding VOL callback */
+    if((ret_value = (cls->attr_cls.specific)(obj, loc_params, specific_type, dxpl_id, req, arguments)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute attribute specific callback")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__attr_specific() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5VL_attr_specific
  *
- * Purpose:	specific operation on attributes through the VOL
+ * Purpose:	Specific operation on attributes through the VOL
  *
  * Return:      Success:    Non-negative
  *              Failure:    Negative
@@ -992,29 +1190,35 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_attr_specific(void *obj, H5VL_loc_params_t loc_params, const H5VL_class_t *cls, 
+H5VL_attr_specific(const H5VL_object_t *vol_obj, H5VL_loc_params_t loc_params,
     H5VL_attr_specific_t specific_type, hid_t dxpl_id, void **req, ...)
 {
     va_list arguments;                  /* Argument list passed from the API call */
     hbool_t arg_started = FALSE;        /* Whether the va_list has been started */
+    hbool_t vol_wrapper_set = FALSE;    /* Whether the VOL object wrapping context was set up */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    /* Check if the corresponding VOL callback exists */
-    if(NULL == cls->attr_cls.specific)
-        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL plugin has no 'attr specific' method")
+    /* Set wrapper info in API context */
+    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
+    vol_wrapper_set = TRUE;
 
-    /* Call the corresponding VOL callback */
+    /* Call the corresponding internal VOL routine */
     va_start(arguments, req);
     arg_started = TRUE;
-    if((ret_value = (cls->attr_cls.specific)(obj, loc_params, specific_type, dxpl_id, req, arguments)) < 0)
+    if((ret_value = H5VL__attr_specific(vol_obj->data, loc_params, vol_obj->plugin->cls, specific_type, dxpl_id, req, arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute attribute specific callback")
 
 done:
     /* End access to the va_list, if we started it */
     if(arg_started)
         va_end(arguments);
+
+    /* Reset object wrapping info in API context */
+    if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_attr_specific() */
@@ -1047,13 +1251,8 @@ H5VLattr_specific(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id,
     if(NULL == (cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
 
-    /* Bypass the H5VLint layer */
-    /* Check if the corresponding VOL callback exists */
-    if(NULL == cls->attr_cls.specific)
-        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL plugin has no `attr specific' method")
-
-    /* Bypass the H5VLint layer, calling the VOL callback directly */
-    if((ret_value = (cls->attr_cls.specific)(obj, loc_params, specific_type, dxpl_id, req, arguments)) < 0)
+    /* Call the corresponding internal VOL routine */
+    if((ret_value = H5VL__attr_specific(obj, loc_params, cls, specific_type, dxpl_id, req, arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute attribute specific callback")
 
 done:
@@ -1062,9 +1261,9 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5VL_attr_optional
+ * Function:	H5VL__attr_optional
  *
- * Purpose:	optional operation specific to plugins.
+ * Purpose:	Optional operation specific to plugins.
  *
  * Return:      Success:    Non-negative
  *              Failure:    Negative
@@ -1072,28 +1271,66 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_attr_optional(void *obj, const H5VL_class_t *cls, hid_t dxpl_id, void **req, ...)
+H5VL__attr_optional(void *obj, const H5VL_class_t *cls, hid_t dxpl_id,
+    void **req, va_list arguments)
 {
-    va_list arguments;                  /* Argument list passed from the API call */
-    hbool_t arg_started = FALSE;        /* Whether the va_list has been started */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_STATIC
 
     /* Check if the corresponding VOL callback exists */
     if(NULL == cls->attr_cls.optional)
         HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL plugin has no 'attr optional' method")
 
     /* Call the corresponding VOL callback */
+    if((cls->attr_cls.optional)(obj, dxpl_id, req, arguments) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute attribute optional callback")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__attr_optional() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_attr_optional
+ *
+ * Purpose:	Optional operation specific to plugins.
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_attr_optional(const H5VL_object_t *vol_obj, const H5VL_class_t *cls,
+    hid_t dxpl_id, void **req, ...)
+{
+    va_list arguments;                  /* Argument list passed from the API call */
+    hbool_t arg_started = FALSE;        /* Whether the va_list has been started */
+    hbool_t vol_wrapper_set = FALSE;    /* Whether the VOL object wrapping context was set up */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Set wrapper info in API context */
+    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
+    vol_wrapper_set = TRUE;
+
+    /* Call the corresponding internal VOL routine */
     va_start(arguments, req);
     arg_started = TRUE;
-    if((cls->attr_cls.optional)(obj, dxpl_id, req, arguments) < 0)
+    if(H5VL__attr_optional(vol_obj->data, vol_obj->plugin->cls, dxpl_id, req, arguments) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute attribute optional callback")
 
 done:
     /* End access to the va_list, if we started it */
     if(arg_started)
         va_end(arguments);
+
+    /* Reset object wrapping info in API context */
+    if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_attr_optional() */
@@ -1124,17 +1361,43 @@ H5VLattr_optional(void *obj, hid_t plugin_id, hid_t dxpl_id, void **req, va_list
     if(NULL == (cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
 
-    /* Check if the corresponding VOL callback exists */
-    if(NULL == cls->attr_cls.optional)
-        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL plugin has no `attr optional' method")
-
-    /* Bypass the H5VLint layer, calling the VOL callback directly */
-    if((cls->attr_cls.optional)(obj, dxpl_id, req, arguments) < 0)
+    /* Call the corresponding internal VOL routine */
+    if(H5VL__attr_optional(obj, cls, dxpl_id, req, arguments) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute attribute optional callback")
 
 done:
     FUNC_LEAVE_API_NOINIT(ret_value)
 } /* end H5VLattr_optional() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL__attr_close
+ *
+ * Purpose:     Closes an attribute through the VOL
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL__attr_close(void *obj, const H5VL_class_t *cls, hid_t dxpl_id, void **req)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+            
+    /* Check if the corresponding VOL callback exists */
+    if(NULL == cls->attr_cls.close)
+        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL plugin has no 'attr close' method")
+
+    /* Call the corresponding VOL callback */
+    if((cls->attr_cls.close)(obj, dxpl_id, req) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTCLOSEOBJ, FAIL, "attribute close failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__attr_close() */
 
 
 /*-------------------------------------------------------------------------
@@ -1148,23 +1411,18 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_attr_close(void *attr, const H5VL_class_t *cls, hid_t dxpl_id, void **req)
+H5VL_attr_close(const H5VL_object_t *vol_obj, hid_t dxpl_id, void **req)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    /* Sanity check */
-    HDassert(attr);
-    HDassert(cls);
-
     FUNC_ENTER_NOAPI(FAIL)
             
-    /* Check if the corresponding VOL callback exists */
-    if(NULL == cls->attr_cls.close)
-        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL plugin has no 'attr close' method")
+    /* Sanity check */
+    HDassert(vol_obj);
 
-    /* Call the corresponding VOL callback */
-    if((cls->attr_cls.close)(attr, dxpl_id, req) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTCLOSEOBJ, FAIL, "close failed")
+    /* Call the corresponding internal VOL routine */
+    if(H5VL__attr_close(vol_obj->data, vol_obj->plugin->cls, dxpl_id, req) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTCLOSEOBJ, FAIL, "attribute close failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1182,7 +1440,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLattr_close(void *attr, hid_t plugin_id, hid_t dxpl_id, void **req)
+H5VLattr_close(void *obj, hid_t plugin_id, hid_t dxpl_id, void **req)
 {
     H5VL_class_t *cls;                  /* VOL plugin's class struct */
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -1191,13 +1449,13 @@ H5VLattr_close(void *attr, hid_t plugin_id, hid_t dxpl_id, void **req)
     H5TRACE4("e", "*xii**x", attr, plugin_id, dxpl_id, req);
 
     /* Check args and get class pointer */
-    if(NULL == attr)
+    if(NULL == obj)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object")
     if(NULL == (cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
 
     /* Call the corresponding internal VOL routine */
-    if(H5VL_attr_close(attr, cls, dxpl_id, req) < 0)
+    if(H5VL__attr_close(obj, cls, dxpl_id, req) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTCLOSEOBJ, FAIL, "unable to close attribute")
 
 done:
