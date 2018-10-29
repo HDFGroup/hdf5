@@ -637,7 +637,6 @@ endif ()
 # Setup the H5detect utility which generates H5Tinit with platform
 # specific type checks inside
 #-----------------------------------------------------------------------------
-option (HDF5_USE_PREGEN "Use pre-generated Files" OFF)
 if (HDF5_USE_PREGEN)
   set (HDF5_GENERATED_SOURCE_DIR ${HDF5_USE_PREGEN_DIR})
 else ()
@@ -655,31 +654,54 @@ if (NOT EXISTS ${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c)
   TARGET_C_PROPERTIES (H5detect STATIC)
   target_link_libraries (H5detect
       PRIVATE "$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_LIBRARIES}>" $<$<PLATFORM_ID:Windows>:ws2_32.lib>
-      INTERFACE $<$<PLATFORM_ID:Emscripten>:"-O0">
+      PRIVATE $<$<PLATFORM_ID:Emscripten>:"-O0">
   )
 
-  add_custom_command (
-      OUTPUT ${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c
-      COMMAND $<TARGET_FILE:H5detect>
-      ARGS ${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c
-      DEPENDS H5detect
-      WORKING_DIRECTORY ${HDF5_GENERATED_SOURCE_DIR}
-  )
-  if (BUILD_SHARED_LIBS)
-    if (NOT EXISTS ${HDF5_GENERATED_SOURCE_DIR}/shared/H5Tinit.c)
+  if (HDF5_BATCH_H5DETECT)
+    configure_file (
+        ${HDF5_SOURCE_DIR}/bin/batch/${HDF5_DETECT_BATCH_SCRIPT}.in
+        ${HDF5_BINARY_DIR}/${HDF5_DETECT_BATCH_SCRIPT} ESCAPE_QUOTES @ONLY
+    )
+    add_custom_command (
+        OUTPUT ${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c
+        COMMAND ${HDF5_BATCH_CMD}
+        ARGS ${HDF5_BATCH_H5DETECT_SCRIPT}
+        DEPENDS H5detect
+        WORKING_DIRECTORY ${HDF5_GENERATED_SOURCE_DIR}
+    )
+    set_source_files_properties (${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c PROPERTIES GENERATED TRUE)
+    if (BUILD_SHARED_LIBS)
       add_custom_command (
-          OUTPUT ${HDF5_GENERATED_SOURCE_DIR}/shared/H5Tinit.c
-          COMMAND $<TARGET_FILE:H5detect>
-          ARGS ${HDF5_GENERATED_SOURCE_DIR}/shared/H5Tinit.c
-          DEPENDS H5detect
-          WORKING_DIRECTORY ${HDF5_GENERATED_SOURCE_DIR}/shared
+          OUTPUT     ${HDF5_GENERATED_SOURCE_DIR}/shared/H5Tinit.c
+          COMMAND    ${CMAKE_COMMAND}
+          ARGS       -E copy_if_different "${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c" "${HDF5_GENERATED_SOURCE_DIR}/shared/H5Tinit.c"
+          DEPENDS    ${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c
       )
-    else ()
       set_source_files_properties (${HDF5_GENERATED_SOURCE_DIR}/shared/H5Tinit.c PROPERTIES GENERATED TRUE)
+    endif ()
+  else ()
+    add_custom_command (
+        OUTPUT ${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c
+        COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR}$<TARGET_FILE:H5detect>
+        ARGS ${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c
+        DEPENDS H5detect
+        WORKING_DIRECTORY ${HDF5_GENERATED_SOURCE_DIR}
+    )
+    set_source_files_properties (${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c PROPERTIES GENERATED TRUE)
+    if (BUILD_SHARED_LIBS)
+      if (NOT EXISTS ${HDF5_GENERATED_SOURCE_DIR}/shared/H5Tinit.c)
+        add_custom_command (
+            OUTPUT ${HDF5_GENERATED_SOURCE_DIR}/shared/H5Tinit.c
+            COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR}$<TARGET_FILE:H5detect>
+            ARGS ${HDF5_GENERATED_SOURCE_DIR}/shared/H5Tinit.c
+            DEPENDS H5detect
+            WORKING_DIRECTORY ${HDF5_GENERATED_SOURCE_DIR}/shared
+        )
+        set_source_files_properties (${HDF5_GENERATED_SOURCE_DIR}/shared/H5Tinit.c PROPERTIES GENERATED TRUE)
+      endif ()
     endif ()
   endif ()
 else ()
-  set_source_files_properties (${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c PROPERTIES GENERATED TRUE)
   if (BUILD_SHARED_LIBS)
     add_custom_command (
         OUTPUT     ${HDF5_GENERATED_SOURCE_DIR}/shared/H5Tinit.c
@@ -697,24 +719,26 @@ target_compile_definitions(H5make_libsettings PUBLIC ${HDF_EXTRA_C_FLAGS} ${HDF_
 TARGET_C_PROPERTIES (H5make_libsettings STATIC)
 target_link_libraries (H5make_libsettings
     PRIVATE "$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_LIBRARIES}>" $<$<PLATFORM_ID:Windows>:ws2_32.lib>
-    INTERFACE $<$<PLATFORM_ID:Emscripten>:"-O0">
+    PRIVATE $<$<PLATFORM_ID:Emscripten>:"-O0">
 )
 
 add_custom_command (
     OUTPUT ${HDF5_BINARY_DIR}/H5lib_settings.c
-    COMMAND $<TARGET_FILE:H5make_libsettings>
+    COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR}$<TARGET_FILE:H5make_libsettings>
     ARGS ${HDF5_BINARY_DIR}/H5lib_settings.c
     DEPENDS H5make_libsettings
     WORKING_DIRECTORY ${HDF5_BINARY_DIR}
 )
+set_source_files_properties (${HDF5_BINARY_DIR}/H5lib_settings.c PROPERTIES GENERATED TRUE)
 if (BUILD_SHARED_LIBS)
   add_custom_command (
       OUTPUT ${HDF5_BINARY_DIR}/shared/H5lib_settings.c
-      COMMAND $<TARGET_FILE:H5make_libsettings>
+      COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR}$<TARGET_FILE:H5make_libsettings>
       ARGS ${HDF5_BINARY_DIR}/shared/H5lib_settings.c
       DEPENDS H5make_libsettings
       WORKING_DIRECTORY ${HDF5_BINARY_DIR}
   )
+  set_source_files_properties (${HDF5_BINARY_DIR}/shared/H5lib_settings.c PROPERTIES GENERATED TRUE)
 endif ()
 
 ## all_packages="AC,B,B2,D,F,FA,FL,FS,HL,I,O,S,ST,T,Z"

@@ -56,12 +56,43 @@ New Features
 
     Configuration
     -------------
-    - None
+    - Add toolchain and cross-compile support
+
+      Added info on using a toolchain file to INSTALL_CMAKE.txt. A
+      toolchain file is also used in cross-compiling, which requires
+      CMAKE_CROSSCOMPILING_EMULATOR to be set. To help with cross-compiling
+      the fortran configure process, the HDF5UseFortran.cmake file macros
+      were improved. Fixed a Fortran configure file issue that incorrectly
+      used #cmakedefine instead of #define.
+
+      (ADB - 2018/10/04, HDFFV-10594)
+
+    - Add warning flags for Intel compilers
+
+      Identified Intel compiler specific warnings flags that should be used
+      instead of GNU flags.
+
+      (ADB - 2018/10/04, TRILABS-21)
+
+    - Add default rpath to targets
+
+      Default rpaths should be set in shared executables and
+      libraries to allow the use of loading dependent libraries
+      without requiring LD_LIBRARY_PATH to be set. The default
+      path should be relative using @rpath on osx and $ORIGIN
+      on linux. Windows is not affected.
+
+      (ADB - 2018/09/26, HDFFV-10594)
 
 
     Library
     -------
-    - None
+    - Allow pre-generated H5Tinit.c and H5make_libsettings.c to be used.
+
+      Rather than always running H5detect and generating H5Tinit.c and
+      H5make_libsettings.c, supply a location for those files.
+
+      (ADB - 2018/09/18, HDFFV-10332)
 
 
     Parallel Library
@@ -108,7 +139,14 @@ Bug Fixes since HDF5-1.8.20
 
     Library
     -------
-    - None
+    - Allow H5detect and H5make_libsettings to take a file as an argument.
+
+      Rather than only writing to stdout, add a command argument to name
+      the file that H5detect and H5make_libsettings will use for output.
+      Without an argument, stdout is still used, so backwards compatibility
+      is maintained.
+
+      (ADB - 2018/09/05, HDFFV-9059)
 
 
     Parallel Library
@@ -186,15 +224,14 @@ They are built with the configure process unless specified otherwise.
 
     Windows 7                     Visual Studio 2015 w/ Intel Fortran 16 (cmake)
 
-    Windows 7 x64                 Visual Studio 2012 w/ Intel Fortran 15 (cmake)
-                                  Visual Studio 2013 w/ Intel Fortran 15 (cmake)
+    Windows 7 x64                 Visual Studio 2013
                                   Visual Studio 2015 w/ Intel Fortran 16 (cmake)
-                                  Visual Studio 2015 w/ Intel C, Fortran 2017 (cmake)
+                                  Visual Studio 2015 w/ Intel C, Fortran 2018 (cmake)
                                   Visual Studio 2015 w/ MSMPI 8 (cmake)
 
-    Windows 10                    Visual Studio 2015 w/ Intel Fortran 16 (cmake)
+    Windows 10                    Visual Studio 2015 w/ Intel Fortran 18 (cmake)
 
-    Windows 10 x64                Visual Studio 2015 w/ Intel Fortran 16 (cmake)
+    Windows 10 x64                Visual Studio 2015 w/ Intel Fortran 18 (cmake)
                                   Visual Studio 2017 w/ Intel Fortran 18 (cmake)
 
     Mac OS X Mavericks 10.9.5     Apple LLVM version 6.0 (clang-600.0.57)
@@ -232,7 +269,7 @@ Platform                              C         F90/   F90      C++  zlib  SZIP
 SunOS 5.11 32-bit                       n        y/y    n        y    y     y
 SunOS 5.11 64-bit                       n        y/y    n        y    y     y
 Windows 7                               y        y/y    n        y    y     y
-Windows 7 x64                           y        y/y    n        y    y     y
+Windows 7 x64                           y        y/y    y        y    y     y
 Windows 7 Cygwin                        n        y/n    n        y    y     y
 Windows 7 x64 Cygwin                    n        y/n    n        y    y     y
 Windows 10                              y        y/y    n        y    y     y

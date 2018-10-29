@@ -60,26 +60,22 @@ else ()
     endif ()
 endif ()
 
-if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
-#    target_compile_definitions(H5test_FortranHavekind-shared
-#        PRIVATE
-#            $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:/MT>
-#    )
-  if (MSVC)
-    set_property(TARGET H5test_FortranHavekind-shared PROPERTY COMPILE_FLAGS "/MT")
-  endif ()
-endif ()
-#set_property(TARGET H5test_FortranHavekind APPEND PROPERTY
-#    LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">
-#)
-if (MSVC)
-  set_property(TARGET H5test_FortranHavekind PROPERTY LINK_FLAGS "/SUBSYSTEM:CONSOLE")
-endif ()
-
 set_target_properties (H5test_FortranHavekind PROPERTIES
     LINKER_LANGUAGE Fortran
     Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/static
 )
+#set_property(TARGET H5test_FortranHavekind APPEND PROPERTY
+#    LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">
+#)
+#target_compile_definitions(H5test_FortranHavekind-shared
+#    PRIVATE $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:/MT>
+#)
+if (MSVC)
+  set_target_properties (H5test_FortranHavekind PROPERTIES
+      LINK_FLAGS "/SUBSYSTEM:CONSOLE"
+      COMPILE_FLAGS "/MT"
+  )
+endif ()
 target_include_directories(H5test_FortranHavekind
     PRIVATE
         "${HDF5_BINARY_DIR};${HDF5_F90_BINARY_DIR}"
@@ -89,11 +85,28 @@ if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
       LINKER_LANGUAGE Fortran
       Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/shared
   )
+#    set_property(TARGET H5test_FortranHavekind APPEND PROPERTY
+#        LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">
+#    )
+#    target_compile_definitions(H5test_FortranHavekind-shared
+#        PRIVATE
+#            $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:/MT>
+#    )
+  if (MSVC)
+    set_target_properties (H5test_FortranHavekind-shared PROPERTIES
+      LINK_FLAGS "/SUBSYSTEM:CONSOLE"
+        COMPILE_FLAGS "/MT"
+    )
+  endif ()
+  target_include_directories(H5test_FortranHavekind-shared
+      PRIVATE
+          "${HDF5_BINARY_DIR};${HDF5_F90_BINARY_DIR}"
+  )
 endif ()
 
 add_custom_command (
     OUTPUT ${HDF5_F90_BINARY_DIR}/H5fortran_detect.f90
-    COMMAND $<TARGET_FILE:H5test_FortranHavekind>
+    COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR}$<TARGET_FILE:H5test_FortranHavekind>
     ARGS > ${HDF5_F90_BINARY_DIR}/H5fortran_detect.f90
     WORKING_DIRECTORY ${HDF5_F90_BINARY_DIR}
     DEPENDS H5test_FortranHavekind
@@ -127,7 +140,7 @@ set_target_properties (H5fortran_detect PROPERTIES
 
 add_custom_command (
     OUTPUT ${HDF5_F90_BINARY_DIR}/H5fort_type_defines.h
-    COMMAND $<TARGET_FILE:H5fortran_detect>
+    COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR}$<TARGET_FILE:H5fortran_detect>
     ARGS > ${HDF5_F90_BINARY_DIR}/H5fort_type_defines.h
     WORKING_DIRECTORY ${HDF5_F90_BINARY_DIR}
     DEPENDS H5fortran_detect

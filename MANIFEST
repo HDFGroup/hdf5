@@ -2327,6 +2327,9 @@
 ./hl/c++/test/Makefile.in
 
 # CMake-specific Files
+./config/toolchain/GCC.cmake
+./config/toolchain/intel.cmake
+
 ./config/cmake/cacheinit.cmake
 ./config/cmake/ConversionTests.c
 ./config/cmake/ConfigureChecks.cmake

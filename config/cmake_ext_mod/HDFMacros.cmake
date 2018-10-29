@@ -280,7 +280,7 @@ macro (HDF_README_PROPERTIES target_fortran)
     endif ()
   elseif (APPLE)
     set (BINARY_EXAMPLE_ENDING "tar.gz")
-    set (BINARY_INSTALL_ENDING "dmg")
+    set (BINARY_INSTALL_ENDING "sh") # if packaging changes - use dmg
     set (BINARY_PLATFORM "${BINARY_PLATFORM} ${CMAKE_SYSTEM_VERSION} ${CMAKE_SYSTEM_PROCESSOR}")
     set (BINARY_PLATFORM "${BINARY_PLATFORM}, using ${CMAKE_C_COMPILER_ID} C ${CMAKE_C_COMPILER_VERSION}")
   else ()
@@ -356,6 +356,21 @@ macro (HDF_DIR_PATHS package_prefix)
       set (${package_prefix}_INSTALL_DATA_DIR ".")
       set (${package_prefix}_INSTALL_CMAKE_DIR cmake)
     endif ()
+  endif ()
+
+  set (CMAKE_SKIP_BUILD_RPATH  FALSE)
+  set (CMAKE_INSTALL_RPATH_USE_LINK_PATH  FALSE)
+  set (CMAKE_BUILD_WITH_INSTALL_RPATH ON)
+  if (APPLE)
+    set (CMAKE_INSTALL_NAME_DIR "@rpath")
+    set (CMAKE_INSTALL_RPATH
+        "@executable_path/../${${package_prefix}_INSTALL_LIB_DIR}"
+        "@executable_path/"
+        "@loader_path/../${${package_prefix}_INSTALL_LIB_DIR}"
+        "@loader_path/"
+    )
+  else ()
+    set (CMAKE_INSTALL_RPATH "\$ORIGIN/../${${package_prefix}_INSTALL_LIB_DIR}:\$ORIGIN/")
   endif ()
 
   if (DEFINED ADDITIONAL_CMAKE_PREFIX_PATH AND EXISTS "${ADDITIONAL_CMAKE_PREFIX_PATH}")

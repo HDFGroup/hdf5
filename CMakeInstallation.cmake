@@ -135,7 +135,7 @@ else ()
 endif ()
 configure_file (
     ${HDF_RESOURCES_DIR}/libhdf5.settings.cmake.in
-    ${HDF5_BINARY_DIR}/libhdf5.settings @ONLY
+    ${HDF5_BINARY_DIR}/libhdf5.settings ESCAPE_QUOTES @ONLY
 )
 install (
     FILES ${HDF5_BINARY_DIR}/libhdf5.settings
