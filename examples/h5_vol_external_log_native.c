@@ -131,7 +131,7 @@ visit_cb(hid_t oid, const char *name,
 
     if(H5Iget_type(oid) == H5I_GROUP) {
         len = H5VLget_driver_name(oid, n, 50);
-        printf ("Visiting GROUP VOL name = %s  %zd\n", n, len);
+        printf ("Visiting GROUP VOL name = %s  %lu\n", n, (unsigned long)len);
     }
     if(H5Iget_type(oid) == H5I_DATASET) 
         printf("visiting dataset\n");
@@ -184,29 +184,29 @@ int main(int argc, char **argv) {
 
     file_id = H5Fcreate(file_name, H5F_ACC_TRUNC, H5P_DEFAULT, acc_tpl);
     len = H5VLget_driver_name(file_id, name, 25);
-    printf ("FILE VOL name = %s  %zd\n", name, len);
+    printf ("FILE VOL name = %s  %lu\n", name, (unsigned long)len);
 
     group_id = H5Gcreate2(file_id, group_name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     len = H5VLget_driver_name(group_id, name, 50);
-    printf ("GROUP VOL name = %s  %zd\n", name, len);
+    printf ("GROUP VOL name = %s  %lu\n", name, (unsigned long)len);
 
     int_id = H5Tcopy(H5T_NATIVE_INT);
     H5Tcommit2(file_id, "int", int_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     len = H5VLget_driver_name(int_id, name, 50);
-    printf ("DT COMMIT name = %s  %zd\n", name, len);
+    printf ("DT COMMIT name = %s  %lu\n", name, (unsigned long)len);
     H5Tclose(int_id);
 
     int_id = H5Topen2(file_id, "int", H5P_DEFAULT);
     len = H5VLget_driver_name(int_id, name, 50);
-    printf ("DT OPEN name = %s  %zd\n", name, len);
+    printf ("DT OPEN name = %s  %lu\n", name, (unsigned long)len);
     H5Tclose(int_id);
 
     int_id = H5Oopen(file_id,"int",H5P_DEFAULT);
     len = H5VLget_driver_name(int_id, name, 50);
-    printf ("DT OOPEN name = %s  %zd\n", name, len);
+    printf ("DT OOPEN name = %s  %lu\n", name, (unsigned long)len);
 
     len = H5Fget_name(file_id, name, 50);
-    printf("name = %zd  %s\n", len, name);
+    printf("name = %lu  %s\n", (unsigned long)len, name);
 
     data = malloc (sizeof(int)*nelem);
     for(i=0;i<nelem;++i)
@@ -221,7 +221,7 @@ int main(int argc, char **argv) {
     H5Sclose(dataspaceId);
 
     len = H5VLget_driver_name(datasetId, name, 50);
-    printf ("DSET name = %s  %zd\n", name, len);
+    printf ("DSET name = %s  %lu\n", name, (unsigned long)len);
 
     H5Dwrite(datasetId, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
     H5Dclose(datasetId);
