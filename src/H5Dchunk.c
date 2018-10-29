@@ -216,6 +216,17 @@ typedef struct H5D_chunk_readvv_ud_t {
     const H5D_t *dset;          /* Dataset to operate on */
 } H5D_chunk_readvv_ud_t;
 
+/* Typedef for chunk info iterator callback */
+typedef struct {
+    hsize_t  scaled[H5O_LAYOUT_NDIMS];    /* Logical offset of the chunk */
+    hsize_t  ndims;             /* Number of dimension in the dataset */
+    uint32_t nbytes;            /* Size of stored data in the chunk */
+    unsigned filter_mask;       /* Excluded filters */
+    haddr_t  chunk_addr;        /* Address of the chunk in file */
+    hsize_t  chunk_idx;         /* Chunk index, where the iteration needs to stop */
+    hsize_t  curr_idx;          /* Current index, where the iteration is */
+} H5D_chunk_info_iter_ud_t;
+
 /* Callback info for file selection iteration */
 typedef struct H5D_chunk_file_iter_ud_t {
     H5D_chunk_map_t *fm;                /* File->memory chunk mapping info */
@@ -6725,4 +6736,302 @@ H5D__chunk_format_convert(H5D_t *dset, H5D_chk_idx_info_t *idx_info, H5D_chk_idx
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__chunk_format_convert() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D__get_num_chunks_cb
+ *
+ * Purpose:     Callback function that increments the number of written
+ *              chunks in the dataset.
+ *
+ * Return:      Success:    H5_ITER_CONT or H5_ITER_STOP
+ *              Failure:    Negative (H5_ITER_ERROR)
+ *
+ * Programmer:  Binh-Minh Ribler
+ *              September 2018 (EED-343)
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5D__get_num_chunks_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
+{
+    int ret_value = H5_ITER_CONT;         /* Callback return value */
+
+    hsize_t *num_chunks = (hsize_t *)_udata;
+
+    FUNC_ENTER_STATIC_NOERR
+
+    (*num_chunks)++;
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5D__get_num_chunks_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D__get_num_chunks
+ *
+ * Purpose:     Gets the number of written chunks in a dataset.
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
+ *
+ * Programmer:  Binh-Minh Ribler
+ *              September 2018 (EED-343)
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5D__get_num_chunks(const H5D_t *dset, const H5S_t *space, hsize_t *nchunks)
+{
+    H5D_chk_idx_info_t idx_info;    /* Chunked index info */
+    hsize_t num_chunks = 0;         /* Number of written chunks */
+    H5D_rdcc_ent_t   *ent;          /* Cache entry  */
+    const H5D_rdcc_t *rdcc = &(dset->shared->cache.chunk);/* Raw data chunk cache */
+    herr_t ret_value = SUCCEED;     /* Return value */
+
+    FUNC_ENTER_PACKAGE_TAG(dset->oloc.addr)
+
+    HDassert(dset);
+    HDassert(dset->shared);
+
+    /* Search for cached chunks that haven't been written out */
+    for(ent = rdcc->head; ent; ent = ent->next)
+        /* Flush the chunk out to disk, to make certain the size is correct later */
+        if(H5D__chunk_flush_entry(dset, ent, FALSE) < 0)
+            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "cannot flush indexed storage buffer")
+
+    /* Compose chunked index info struct */
+    idx_info.f = dset->oloc.file;
+    idx_info.pline = &dset->shared->dcpl_cache.pline;
+    idx_info.layout = &dset->shared->layout.u.chunk;
+    idx_info.storage = &dset->shared->layout.storage.u.chunk;
+
+    /* Iterate over the allocated chunks */
+    if((dset->shared->layout.storage.u.chunk.ops->iterate)(&idx_info, H5D__get_num_chunks_cb, &num_chunks) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to retrieve allocated chunk information from index")
+    *nchunks = num_chunks;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D__get_num_chunks() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D__get_chunk_info_cb
+ *
+ * Purpose:     Get the chunk info of the desired chunk, given by its index.
+ *
+ * Return:      Success:    H5_ITER_CONT or H5_ITER_STOP
+ *              Failure:    Negative (H5_ITER_ERROR)
+ *
+ * Programmer:  Binh-Minh Ribler
+ *              September 2018 (EED-343)
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5D__get_chunk_info_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
+{
+    hsize_t ii;
+    int ret_value = H5_ITER_CONT;         /* Callback return value */
+
+    H5D_chunk_info_iter_ud_t *chunk_info = (H5D_chunk_info_iter_ud_t *)_udata;
+
+    FUNC_ENTER_STATIC_NOERR
+
+    /* If this is the desired chunk, retrieve its info and stop iterating */
+    if (chunk_info->curr_idx == chunk_info->chunk_idx)
+    {
+        chunk_info->filter_mask = chunk_rec->filter_mask;
+        chunk_info->chunk_addr = chunk_rec->chunk_addr;
+        chunk_info->nbytes = chunk_rec->nbytes;
+
+        for (ii = 0; ii < chunk_info->ndims; ii++)
+            chunk_info->scaled[ii] = chunk_rec->scaled[ii];
+
+        /* Stop iterating */
+        ret_value = H5_ITER_STOP;
+    }
+    /* Iterate the next chunk */
+    else
+        chunk_info->curr_idx++;
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5D__get_chunk_info_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D__get_chunk_info
+ *
+ * Purpose:     Iterate over the chunks in the dataset to get the info
+ *              of the desired chunk.
+ *
+ * Return:      Success: SUCCEED
+ *              Failure: FAIL
+ *
+ * Programmer:  Binh-Minh Ribler
+ *              September 2018 (EED-343)
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5D__get_chunk_info(const H5D_t *dset, const H5S_t *space, hsize_t index, hsize_t *offset, unsigned *filter_mask, haddr_t *addr, hsize_t *size)
+{
+    H5D_chk_idx_info_t       idx_info;  /* Chunked index info */
+    H5D_chunk_info_iter_ud_t udata;
+    const H5D_rdcc_t *rdcc = &(dset->shared->cache.chunk);/* Raw data chunk cache */
+    H5D_rdcc_ent_t   *ent;              /* Cache entry  */
+    hsize_t          ii = 0;            /* Dimension index */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_PACKAGE_TAG(dset->oloc.addr)
+
+    HDassert(dset);
+    HDassert(dset->shared);
+
+    /* Search for cached chunks that haven't been written out */
+    for(ent = rdcc->head; ent; ent = ent->next)
+        /* Flush the chunk out to disk, to make certain the size is correct later */
+        if(H5D__chunk_flush_entry(dset, ent, FALSE) < 0)
+            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "cannot flush indexed storage buffer")
+
+    /* Compose chunked index info struct */
+    idx_info.f = dset->oloc.file;
+    idx_info.pline = &dset->shared->dcpl_cache.pline;
+    idx_info.layout = &dset->shared->layout.u.chunk;
+    idx_info.storage = &dset->shared->layout.storage.u.chunk;
+
+    /* Initialize for iteration */
+    udata.chunk_idx = index;
+    udata.curr_idx = 0;
+    udata.ndims = dset->shared->ndims;
+
+    /* Iterate over the allocated chunks */
+    if((dset->shared->layout.storage.u.chunk.ops->iterate)(&idx_info, H5D__get_chunk_info_cb, &udata) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to retrieve allocated chunk information from index")
+
+    /* Obtain requested info */
+    if (filter_mask)
+        *filter_mask = udata.filter_mask;
+    if (addr)
+        *addr = udata.chunk_addr;
+    if (size)
+        *size = udata.nbytes;
+    if (offset)
+        for (ii = 0; ii < udata.ndims; ii++)
+            offset[ii] = udata.scaled[ii] * dset->shared->layout.u.chunk.dim[ii];
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D__get_chunk_info() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D__get_chunk_info_by_coord_cb
+ *
+ * Purpose:     Get the chunk info of the desired chunk, given its offset
+ *              coordinates.
+ *
+ * Return:      Success:    H5_ITER_CONT or H5_ITER_STOP
+ *              Failure:    Negative (H5_ITER_ERROR)
+ *
+ * Programmer:  Binh-Minh Ribler
+ *              September 2018 (EED-343)
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5D__get_chunk_info_by_coord_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
+{
+    hbool_t different = FALSE;
+int ii;
+    int ret_value = H5_ITER_CONT;         /* Callback return value */
+
+    H5D_chunk_info_iter_ud_t *chunk_info = (H5D_chunk_info_iter_ud_t *)_udata;
+
+    FUNC_ENTER_STATIC_NOERR
+
+    for (ii = 0; ii < chunk_info->ndims && !different; ii++)
+    {
+        if (chunk_info->scaled[ii] != chunk_rec->scaled[ii])
+            different = TRUE;
+    }
+    if (!different)
+    {
+        chunk_info->nbytes = chunk_rec->nbytes;
+        chunk_info->filter_mask = chunk_rec->filter_mask;
+        chunk_info->chunk_addr = chunk_rec->chunk_addr;
+
+        /* Stop iterating */
+        ret_value = H5_ITER_STOP;
+    }
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5D__get_chunk_info_by_coord_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D__get_chunk_info_by_coord
+ *
+ * Purpose:     Iterate over the chunks in the dataset to get the info
+ *              of the desired chunk, given by its offset coordinates.
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
+ *
+ * Programmer:  Binh-Minh Ribler
+ *              September 2018 (EED-343)
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5D__get_chunk_info_by_coord(const H5D_t *dset, const hsize_t *offset, unsigned* filter_mask, haddr_t *addr, hsize_t *size)
+{
+    const H5O_layout_t *layout = &(dset->shared->layout);  /* Dataset layout */
+    const H5D_rdcc_t   *rdcc = &(dset->shared->cache.chunk); /* Raw data chunk cache */
+    H5D_rdcc_ent_t   *ent;              /* Cache entry  */
+    H5D_chunk_info_iter_ud_t udata;
+    H5D_chk_idx_info_t       idx_info;  /* Chunked index info */
+    herr_t             ret_value = SUCCEED;     /* Return value */
+
+    FUNC_ENTER_PACKAGE_TAG(dset->oloc.addr)
+
+    /* Check args */
+    HDassert(dset && H5D_CHUNKED == layout->type);
+    HDassert(offset);
+    HDassert(filter_mask);
+    HDassert(addr);  /* Question: should some OUT args be allowed to be NULL? */
+    HDassert(size);
+
+    /* Search for cached chunks that haven't been written out */
+    for(ent = rdcc->head; ent; ent = ent->next)
+        /* Flush the chunk out to disk, to make certain the size is correct later */
+        if(H5D__chunk_flush_entry(dset, ent, FALSE) < 0)
+            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "cannot flush indexed storage buffer")
+
+    /* Calculate the scaled of this chunk */
+    H5VM_chunk_scaled(dset->shared->ndims, offset, layout->u.chunk.dim, udata.scaled);
+    udata.scaled[dset->shared->ndims] = 0;
+
+    /* Get the number of dimensions for use in callback function */
+    udata.ndims = dset->shared->ndims;
+
+    /* Compose chunked index info struct */
+    idx_info.f = dset->oloc.file;
+    idx_info.pline = &dset->shared->dcpl_cache.pline;
+    idx_info.layout = &dset->shared->layout.u.chunk;
+    idx_info.storage = &dset->shared->layout.storage.u.chunk;
+
+    /* Iterate over the allocated chunks */
+    if((dset->shared->layout.storage.u.chunk.ops->iterate)(&idx_info, H5D__get_chunk_info_by_coord_cb, &udata) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to retrieve allocated chunk information from scaled")
+
+    /* Return the filter mask and chunk address and size */
+    *filter_mask = udata.filter_mask;
+    *addr = udata.chunk_addr;
+    *size = udata.nbytes;
+
+done:
+    FUNC_LEAVE_NOAPI_TAG(ret_value)
+} /* end H5D__get_chunk_info_by_coord() */
 
