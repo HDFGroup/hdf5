@@ -179,6 +179,12 @@ set (f90CStub_C_SOURCES
     ${HDF5_F90_SRC_SOURCE_DIR}/H5Zf.c
 )
 set_source_files_properties (${f90CStub_C_SOURCES} PROPERTIES LANGUAGE C)
+if (H5_HAVE_PARALLEL AND MPI_Fortran_FOUND)
+  set (f90CStub_C_SOURCES
+    ${f90CStub_C_SOURCES}
+    ${HDF5_F90_SRC_SOURCE_DIR}/H5FDmpiof.c
+  )
+endif ()
 
 set (f90CStub_C_HDRS
     # generated files
@@ -305,7 +311,7 @@ set_source_files_properties (${f90_F_SRCS} PROPERTIES LANGUAGE Fortran)
 add_library (${HDF5_F90_LIB_TARGET} STATIC ${f90_F_SRCS})
 target_include_directories (${HDF5_F90_LIB_TARGET}
     PRIVATE
-        "${HDF5_F90_SRC_SOURCE_DIR};${HDF5_F90_BINARY_DIR};${CMAKE_Fortran_MODULE_DIRECTORY}/static;$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_Fortran_INCLUDE_DIRS}>"
+        "${HDF5_F90_SRC_SOURCE_DIR};${CMAKE_Fortran_MODULE_DIRECTORY}/static;${HDF5_F90_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_Fortran_INCLUDE_DIRS}>"
     INTERFACE
         "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
 )
@@ -343,7 +349,7 @@ if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
   add_library (${HDF5_F90_LIBSH_TARGET} SHARED ${f90_F_SRCS})
   target_include_directories (${HDF5_F90_LIBSH_TARGET}
       PRIVATE
-          "${HDF5_F90_SRC_SOURCE_DIR};${HDF5_F90_BINARY_DIR};${CMAKE_Fortran_MODULE_DIRECTORY}/shared;$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_Fortran_INCLUDE_DIRS}>"
+          "${HDF5_F90_SRC_SOURCE_DIR};${CMAKE_Fortran_MODULE_DIRECTORY}/shared;${HDF5_F90_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_Fortran_INCLUDE_DIRS}>"
       INTERFACE
           "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
   )
