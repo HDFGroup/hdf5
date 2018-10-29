@@ -118,6 +118,7 @@ New Features
       as public and installed them. They are private and will no longer be
       installed.
 
+        HDF5 library private package files (H5Xpkg.h)
         H5Edefin.h
         H5Einit.h
         H5Eterm.h
@@ -130,7 +131,7 @@ New Features
         h5tools_utils.h
         h5trav.h
 
-      (DER - 2018/10/26, HDFFV-10614)
+      (DER - 2018/10/26, HDFFV-10614, 10609)
       
     - Autotools installs now install H5FDwindows.h
 
