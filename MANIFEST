@@ -92,6 +92,9 @@
 ./bin/timekeeper      _DO_NOT_DISTRIBUTE_
 ./bin/trace
 ./bin/yodconfigure
+./bin/batch/knl_ctestSP.sl
+./bin/batch/knl_H5detect.sl.in.cmake
+./bin/batch/sbatch_ctestSP.sl
 ./bin/pkgscrpts/h5rmflags                  _DO_NOT_DISTRIBUTE_
 ./bin/pkgscrpts/makeHDF5BinaryTarfiles.pl  _DO_NOT_DISTRIBUTE_
 ./bin/pkgscrpts/makeInternalREADME.pl      _DO_NOT_DISTRIBUTE_
@@ -3156,6 +3159,7 @@
 ./java/lib/ext/slf4j-simple-1.7.25.jar
 
 # CMake-specific Files
+./config/toolchain/crayle.cmake
 ./config/toolchain/GCC.cmake
 ./config/toolchain/intel.cmake
 
