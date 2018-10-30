@@ -252,13 +252,10 @@ int create_uc_file(void)
  *
  * Return: 0 succeed; -1 fail.
  */
-int write_uc_file(hbool_t tosend)
+int write_uc_file(hbool_t tosend, hid_t fid)
 {
-    hid_t	fid;          /* File ID for new HDF5 file */
     hid_t	dsid;         /* dataset ID */
-    hid_t       fapl;         /* File access property list */
     hid_t	dcpl;         /* Dataset creation property list */
-    char	*name;
     UC_CTYPE	*buffer, *bufptr;	/* data buffer */
     hsize_t	cz=UC_opts.chunksize;		/* Chunk size */
     hid_t	f_sid;	    /* dataset file space id */
@@ -269,19 +266,6 @@ int write_uc_file(hbool_t tosend)
     hsize_t	memdims[3]; /* Memory space dimensions */
     hsize_t	start[3] = {0,0,0}, count[3];    /* Hyperslab selection values */
     hsize_t     i, j, k;
-
-    name = UC_opts.filename;
-
-    /* Open the file */
-    if((fapl = h5_fileaccess()) < 0)
-        return -1;
-    if(UC_opts.use_swmr)
-        if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
-            return -1;
-    if((fid = H5Fopen(name, H5F_ACC_RDWR | (UC_opts.use_swmr ? H5F_ACC_SWMR_WRITE : 0), fapl)) < 0){
-	fprintf(stderr, "H5Fopen failed\n");
-        return -1;
-    }
 
     if(tosend)
         /* Send a message that H5Fopen is complete--releasing the file lock */
@@ -425,14 +409,6 @@ int write_uc_file(hbool_t tosend)
     }
     if (H5Sclose(f_sid) < 0){
 	fprintf(stderr, "Failed to close file space\n");
-	return -1;
-    }
-    if (H5Pclose(fapl) < 0){
-	fprintf(stderr, "Failed to property list\n");
-	return -1;
-    }
-    if (H5Fclose(fid) < 0){
-	fprintf(stderr, "Failed to close file id\n");
 	return -1;
     }
 
@@ -643,6 +619,12 @@ int read_uc_file(hbool_t towait)
 	    fprintf(stderr, "H5Sget_simple_extent_dims got error\n");
 	    return -1;
 	}
+    }
+
+    /* Close the file */
+    if(H5Fclose(fid) < 0) {
+        fprintf(stderr, "H5Fclose failed\n");
+        return -1;
     }
 
     if (nreadererr)
