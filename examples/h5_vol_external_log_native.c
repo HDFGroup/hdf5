@@ -101,14 +101,14 @@ static const H5VL_class_t H5VL_log_g = {
         NULL, /* H5VL_log_link_move, */             /* move */
         NULL, /* H5VL_log_link_get, */              /* get */
         NULL, /* H5VL_log_link_specific, */         /* specific */
-        NULL, /* H5VL_log_link_optional, */         /* optional */
+        NULL  /* H5VL_log_link_optional, */         /* optional */
     },
     {                                           /* object_cls */
         H5VL_log_object_open,                       /* open */
         NULL, /* H5VL_log_object_copy, */           /* copy */
         NULL, /* H5VL_log_object_get, */            /* get */
         H5VL_log_object_specific,                   /* specific */
-        NULL, /* H5VL_log_object_optional, */       /* optional */
+        NULL  /* H5VL_log_object_optional, */       /* optional */
     },
     {
         NULL,
