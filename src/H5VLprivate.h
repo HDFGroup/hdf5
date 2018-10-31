@@ -125,10 +125,10 @@ H5_DLL herr_t H5VL_dataset_close(const H5VL_object_t *vol_obj, hid_t dxpl_id, vo
 /* File functions */
 H5_DLL void *H5VL_file_create(const H5VL_class_t *cls, const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t dxpl_id, void **req);
 H5_DLL void *H5VL_file_open(const H5VL_class_t *cls, const char *name, unsigned flags, hid_t fapl_id, hid_t dxpl_id, void **req);
-H5_DLL herr_t H5VL_file_get(void *file, const H5VL_class_t *cls, H5VL_file_get_t get_type, hid_t dxpl_id, void **req, ...);
-H5_DLL herr_t H5VL_file_specific(void *obj, const H5VL_class_t *cls, H5VL_file_specific_t specific_type, hid_t dxpl_id, void **req, ...);
-H5_DLL herr_t H5VL_file_optional(void *obj, const H5VL_class_t *cls, hid_t dxpl_id, void **req, ...);
-H5_DLL herr_t H5VL_file_close(void *file, const H5VL_class_t *cls, hid_t dxpl_id, void **req);
+H5_DLL herr_t H5VL_file_get(const H5VL_object_t *vol_obj, H5VL_file_get_t get_type, hid_t dxpl_id, void **req, ...);
+H5_DLL herr_t H5VL_file_specific(const H5VL_object_t *vol_obj, H5VL_file_specific_t specific_type, hid_t dxpl_id, void **req, ...);
+H5_DLL herr_t H5VL_file_optional(const H5VL_object_t *vol_obj, hid_t dxpl_id, void **req, ...);
+H5_DLL herr_t H5VL_file_close(const H5VL_object_t *vol_obj, hid_t dxpl_id, void **req);
 
 /* Group functions */
 H5_DLL void *H5VL_group_create(void *obj, H5VL_loc_params_t loc_params, const H5VL_class_t *cls, const char *name, hid_t gcpl_id, hid_t gapl_id, hid_t dxpl_id, void **req);

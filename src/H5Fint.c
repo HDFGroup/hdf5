@@ -3529,14 +3529,8 @@ H5F_get_file_id(hid_t obj_id, H5I_type_t type)
     if(NULL == (vol_obj = H5VL_vol_object(obj_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid identifier")
 
-    /* Set wrapper info in API context */
-    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID, "can't set VOL wrapper info")
-    vol_wrapper_set = TRUE;
-
     /* Get the file through the VOL */
-    if(H5VL_file_optional(vol_obj->data, vol_obj->plugin->cls, H5P_DATASET_XFER_DEFAULT,
-            H5_REQUEST_NULL, H5VL_FILE_GET_FILE, type, &file) < 0)
+    if(H5VL_file_optional(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, H5VL_FILE_GET_FILE, type, &file) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, H5I_INVALID_HID, "unable to get file")
     if(NULL == file)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, H5I_INVALID_HID, "unable to get the file through the VOL")
@@ -3547,6 +3541,11 @@ H5F_get_file_id(hid_t obj_id, H5I_type_t type)
 
     /* If the ID does not exist, register it with the VOL plugin */
     if(H5I_INVALID_HID == ret_value) {
+        /* Set wrapper info in API context */
+        if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID, "can't set VOL wrapper info")
+        vol_wrapper_set = TRUE;
+
 {
 void *vol_wrap_ctx = NULL;       /* Object wrapping context */
 

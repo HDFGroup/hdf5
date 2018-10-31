@@ -95,6 +95,14 @@ static herr_t H5VL__dataset_optional(void *obj, const H5VL_class_t *cls,
     hid_t dxpl_id, void **req, va_list arguments);
 static herr_t H5VL__dataset_close(void *obj, const H5VL_class_t *cls, hid_t dxpl_id,
     void **req);
+static herr_t H5VL__file_get(void *obj, const H5VL_class_t *cls, H5VL_file_get_t get_type, 
+    hid_t dxpl_id, void **req, va_list arguments);
+static herr_t H5VL__file_specific(void *obj, const H5VL_class_t *cls, H5VL_file_specific_t specific_type, 
+    hid_t dxpl_id, void **req, va_list arguments);
+static herr_t H5VL__file_optional(void *obj, const H5VL_class_t *cls, hid_t dxpl_id,
+    void **req, va_list arguments);
+static herr_t H5VL__file_close(void *obj, const H5VL_class_t *cls, hid_t dxpl_id,
+    void **req);
 
 
 /*********************/
@@ -1195,7 +1203,7 @@ H5VLattr_get(void *obj, hid_t plugin_id, H5VL_attr_get_t get_type, hid_t dxpl_id
 
     /* Call the corresponding internal VOL routine */
     if(H5VL__attr_get(obj, cls, get_type, dxpl_id, req, arguments) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "Unable to get attribute information")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "unable to get attribute information")
 
 done:
     FUNC_LEAVE_API_NOINIT(ret_value)
@@ -1227,7 +1235,7 @@ H5VL__attr_specific(void *obj, H5VL_loc_params_t loc_params, const H5VL_class_t 
 
     /* Call the corresponding VOL callback */
     if((ret_value = (cls->attr_cls.specific)(obj, loc_params, specific_type, dxpl_id, req, arguments)) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute attribute specific callback")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute attribute specific callback")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1264,7 +1272,7 @@ H5VL_attr_specific(const H5VL_object_t *vol_obj, H5VL_loc_params_t loc_params,
     va_start(arguments, req);
     arg_started = TRUE;
     if((ret_value = H5VL__attr_specific(vol_obj->data, loc_params, vol_obj->plugin->cls, specific_type, dxpl_id, req, arguments)) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute attribute specific callback")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute attribute specific callback")
 
 done:
     /* End access to the va_list, if we started it */
@@ -1308,7 +1316,7 @@ H5VLattr_specific(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id,
 
     /* Call the corresponding internal VOL routine */
     if((ret_value = H5VL__attr_specific(obj, loc_params, cls, specific_type, dxpl_id, req, arguments)) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute attribute specific callback")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute attribute specific callback")
 
 done:
     FUNC_LEAVE_API_NOINIT(ret_value)
@@ -1339,7 +1347,7 @@ H5VL__attr_optional(void *obj, const H5VL_class_t *cls, hid_t dxpl_id,
 
     /* Call the corresponding VOL callback */
     if((cls->attr_cls.optional)(obj, dxpl_id, req, arguments) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute attribute optional callback")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute attribute optional callback")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1375,7 +1383,7 @@ H5VL_attr_optional(const H5VL_object_t *vol_obj, hid_t dxpl_id, void **req, ...)
     va_start(arguments, req);
     arg_started = TRUE;
     if(H5VL__attr_optional(vol_obj->data, vol_obj->plugin->cls, dxpl_id, req, arguments) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute attribute optional callback")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute attribute optional callback")
 
 done:
     /* End access to the va_list, if we started it */
@@ -1417,7 +1425,7 @@ H5VLattr_optional(void *obj, hid_t plugin_id, hid_t dxpl_id, void **req, va_list
 
     /* Call the corresponding internal VOL routine */
     if(H5VL__attr_optional(obj, cls, dxpl_id, req, arguments) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute attribute optional callback")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute attribute optional callback")
 
 done:
     FUNC_LEAVE_API_NOINIT(ret_value)
@@ -2041,7 +2049,7 @@ H5VLdataset_get(void *obj, hid_t plugin_id, H5VL_dataset_get_t get_type,
 
     /* Call the corresponding internal VOL routine */
     if(H5VL__dataset_get(obj, cls, get_type, dxpl_id, req, arguments) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "Unable to execute dataset get callback")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "unable to execute dataset get callback")
 
 done:
     FUNC_LEAVE_API_NOINIT(ret_value)
@@ -2214,7 +2222,7 @@ H5VL_dataset_optional(const H5VL_object_t *vol_obj, hid_t dxpl_id,
 
     /* Call the corresponding VOL callback */
     /* Set wrapper info in API context */
-    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 1)
+    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
     vol_wrapper_set = TRUE;
 
@@ -2387,6 +2395,9 @@ done:
  *
  * Purpose:	Creates a file through the VOL
  *
+ * Note:	Does not have a 'static' version of the routine, since there's
+ *		no objects in the container before this operation completes.
+ *
  * Return:      Success: Pointer to new file
  *		Failure: NULL
  *
@@ -2459,6 +2470,9 @@ done:
  *
  * Purpose:	Opens a file through the VOL.
  *
+ * Note:	Does not have a 'static' version of the routine, since there's
+ *		no objects in the container before this operation completes.
+ *
  * Return:      Success: Pointer to file. 
  *		Failure: NULL
  *
@@ -2527,6 +2541,37 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5VL__file_get
+ *
+ * Purpose:	Get specific information about the file through the VOL
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL__file_get(void *obj, const H5VL_class_t *cls, H5VL_file_get_t get_type, 
+    hid_t dxpl_id, void **req, va_list arguments)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Check if the corresponding VOL callback exists */
+    if(NULL == cls->file_cls.get)
+        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL plugin has no 'file get' method")
+
+    /* Call the corresponding VOL callback */
+    if((cls->file_cls.get)(obj, get_type, dxpl_id, req, arguments) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "file get failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__file_get() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5VL_file_get
  *
  * Purpose:	Get specific information about the file through the VOL
@@ -2537,29 +2582,35 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_file_get(void *file, const H5VL_class_t *cls, H5VL_file_get_t get_type, 
+H5VL_file_get(const H5VL_object_t *vol_obj, H5VL_file_get_t get_type, 
     hid_t dxpl_id, void **req, ...)
 {
     va_list arguments;                  /* Argument list passed from the API call */
     hbool_t arg_started = FALSE;        /* Whether the va_list has been started */
+    hbool_t vol_wrapper_set = FALSE;    /* Whether the VOL object wrapping context was set up */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    /* Check if the corresponding VOL callback exists */
-    if(NULL == cls->file_cls.get)
-        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL plugin has no 'file get' method")
+    /* Set wrapper info in API context */
+    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
+    vol_wrapper_set = TRUE;
 
-    /* Call the corresponding VOL callback */
+    /* Call the corresponding internal VOL routine */
     va_start(arguments, req);
     arg_started = TRUE;
-    if((cls->file_cls.get)(file, get_type, dxpl_id, req, arguments) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "get failed")
+    if(H5VL__file_get(vol_obj->data, vol_obj->plugin->cls, get_type, dxpl_id, req, arguments) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "file get failed")
 
 done:
     /* End access to the va_list, if we started it */
     if(arg_started)
         va_end(arguments);
+
+    /* Reset object wrapping info in API context */
+    if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_file_get() */
@@ -2576,28 +2627,24 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLfile_get(void *file, hid_t plugin_id, H5VL_file_get_t get_type,
+H5VLfile_get(void *obj, hid_t plugin_id, H5VL_file_get_t get_type,
     hid_t dxpl_id, void **req, va_list arguments)
 {
     H5VL_class_t *cls;                  /* VOL plugin's class struct */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE6("e", "*xiVgi**xx", file, plugin_id, get_type, dxpl_id, req, arguments);
+    H5TRACE6("e", "*xiVgi**xx", obj, plugin_id, get_type, dxpl_id, req, arguments);
 
     /* Check args and get class pointer */
-    if(NULL == file)
+    if(NULL == obj)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object")
     if(NULL == (cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
 
-    /* Check if the corresponding VOL callback exists */
-    if(NULL == cls->file_cls.get)
-        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL plugin has no `file get' method")
-
-    /* Bypass the H5VLint layer, calling the VOL callback directly */
-    if((cls->file_cls.get)(file, get_type, dxpl_id, req, arguments) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "Unable to execute file get callback")
+    /* Call the corresponding internal VOL routine */
+    if(H5VL__file_get(obj, cls, get_type, dxpl_id, req, arguments) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "unable to execute file get callback")
 
 done:
     FUNC_LEAVE_API_NOINIT(ret_value)
@@ -2605,9 +2652,40 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5VL__file_specific
+ *
+ * Purpose:	Perform File specific operations through the VOL
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL__file_specific(void *obj, const H5VL_class_t *cls, H5VL_file_specific_t specific_type, 
+    hid_t dxpl_id, void **req, va_list arguments)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Check if the corresponding VOL callback exists */
+    if(NULL == cls->file_cls.specific)
+        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL plugin has no 'file specific' method")
+
+    /* Call the corresponding VOL callback */
+    if((cls->file_cls.specific)(obj, specific_type, dxpl_id, req, arguments) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "file specific failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__file_specific() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5VL_file_specific
  *
- * Purpose:	perform File specific operations through the VOL
+ * Purpose:	Perform File specific operations through the VOL
  *
  * Return:      Success:    Non-negative
  *              Failure:    Negative
@@ -2615,28 +2693,34 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_file_specific(void *file, const H5VL_class_t *cls, H5VL_file_specific_t specific_type, 
+H5VL_file_specific(const H5VL_object_t *vol_obj, H5VL_file_specific_t specific_type, 
     hid_t dxpl_id, void **req, ...)
 {
+    const H5VL_class_t *cls;            /* VOL plugin's class struct */
     va_list arguments;                  /* Argument list passed from the API call */
     hbool_t arg_started = FALSE;        /* Whether the va_list has been started */
+    hbool_t vol_wrapper_set = FALSE;    /* Whether the VOL object wrapping context was set up */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
+
+    /* Start access to the varargs, so they are available in all situations below */
+    va_start(arguments, req);
+    arg_started = TRUE;
 
     /* Special treatment of file access check */
     if(specific_type == H5VL_FILE_IS_ACCESSIBLE) {
         H5P_genplist_t     *plist;          /* Property list pointer */
         H5VL_plugin_prop_t  plugin_prop;    /* Property for VOL plugin ID & info */
         va_list             tmp_args;       /* argument list passed from the API call */
-        hid_t               fapl_id;
+        hid_t               fapl_id;        /* File access property list for accessing the file */
 
-        /* Get the file access property list */
-        va_start(tmp_args, req);
+        /* Get the file access property list to access the file */
+        va_copy(tmp_args, arguments);
         fapl_id = va_arg(tmp_args, hid_t);
         va_end(tmp_args);
 
-        /* Get the VOL info from the fapl */
+        /* Get the VOL info from the FAPL */
         if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
             HGOTO_ERROR(H5E_VOL, H5E_BADTYPE, FAIL, "not a file access property list")
         if(H5P_peek(plist, H5F_ACS_VOL_DRV_NAME, &plugin_prop) < 0)
@@ -2645,29 +2729,33 @@ H5VL_file_specific(void *file, const H5VL_class_t *cls, H5VL_file_specific_t spe
         /* Get class pointer */
         if(NULL == (cls = (H5VL_class_t *)H5I_object_verify(plugin_prop.plugin_id, H5I_VOL)))
             HGOTO_ERROR(H5E_VOL, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
-
-        /* Call the corresponding VOL callback */
-        va_start(arguments, req);
-        arg_started = TRUE;
-        if((cls->file_cls.specific)(file, specific_type, dxpl_id, req, arguments) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "file specific failed")
     } /* end if */
+    /* Set wrapper info in API context, for all other operations */
     else {
-        /* Check if the corresponding VOL callback exists */
-        if(NULL == cls->file_cls.specific)
-            HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL plugin has no 'file specific' method")
+        /* Sanity check */
+        HDassert(vol_obj);
 
-        /* Call the corresponding VOL callback */
-        va_start(arguments, req);
-        arg_started = TRUE;
-        if((cls->file_cls.specific)(file, specific_type, dxpl_id, req, arguments) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "file specific failed")
+        if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
+        vol_wrapper_set = TRUE;
+
+        /* Set the VOL plugin class pointer */
+        cls = vol_obj->plugin->cls;
     } /* end else */
+
+
+    /* Call the corresponding internal VOL routine */
+    if(H5VL__file_specific(vol_obj ? vol_obj->data : NULL, cls, specific_type, dxpl_id, req, arguments) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "file specific failed")
 
 done:
     /* End access to the va_list, if we started it */
     if(arg_started)
         va_end(arguments);
+
+    /* Reset object wrapping info in API context */
+    if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_file_specific() */
@@ -2678,59 +2766,31 @@ done:
  *
  * Purpose:     Performs a plugin-specific operation on a file
  *
+ * Note:	The 'obj' parameter is allowed to be NULL
+ *
  * Return:      Success:    Non-negative
  *              Failure:    Negative
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLfile_specific(void *file, hid_t plugin_id, H5VL_file_specific_t specific_type,
+H5VLfile_specific(void *obj, hid_t plugin_id, H5VL_file_specific_t specific_type,
     hid_t dxpl_id, void **req, va_list arguments)
 {
     H5VL_class_t *cls;                  /* VOL plugin's class struct */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE6("e", "*xiVhi**xx", file, plugin_id, specific_type, dxpl_id, req,
+    H5TRACE6("e", "*xiVhi**xx", obj, plugin_id, specific_type, dxpl_id, req,
              arguments);
 
-    /* Special treatment of file access check */
-    if(specific_type == H5VL_FILE_IS_ACCESSIBLE) {
-        H5P_genplist_t     *plist;          /* Property list pointer */
-        H5VL_plugin_prop_t  plugin_prop;            /* Property for VOL plugin ID & info */
-        hid_t               fapl_id;
+    /* Check args and get class pointer */
+    if(NULL == (cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
 
-        fapl_id = va_arg(arguments, hid_t);
-
-        /* Get the VOL info from the fapl */
-        if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
-        if(H5P_peek(plist, H5F_ACS_VOL_DRV_NAME, &plugin_prop) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get VOL plugin info")
-
-        /* Get class pointer */
-        if(NULL == (cls = (H5VL_class_t *)H5I_object_verify(plugin_prop.plugin_id, H5I_VOL)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
-
-        /* Bypass the H5VLint layer, calling the VOL callback directly */
-        if((cls->file_cls.specific)(file, specific_type, dxpl_id, req, arguments) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "file specific failed")
-    } /* end if */
-    else {
-        /* Check args and get class pointer */
-        if(NULL == file)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object")
-        if(NULL == (cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
-
-        /* Check if the corresponding VOL callback exists */
-        if(NULL == cls->file_cls.specific)
-            HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL plugin has no `file specific' method")
-
-        /* Bypass the H5VLint layer, calling the VOL callback directly */
-        if((cls->file_cls.specific)(file, specific_type, dxpl_id, req, arguments) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute file specific callback")
-    } /* end else */
+    /* Call the corresponding internal VOL routine */
+    if(H5VL__file_specific(obj, cls, specific_type, dxpl_id, req, arguments) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute file specific callback")
 
 done:
     FUNC_LEAVE_API_NOINIT(ret_value)
@@ -2738,9 +2798,40 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5VL__file_optional
+ *
+ * Purpose:	Perform a plugin specific operation
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL__file_optional(void *obj, const H5VL_class_t *cls, hid_t dxpl_id,
+    void **req, va_list arguments)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Check if the corresponding VOL callback exists */
+    if(NULL == cls->file_cls.optional)
+        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL plugin has no 'file optional' method")
+
+    /* Call the corresponding VOL callback */
+    if((cls->file_cls.optional)(obj, dxpl_id, req, arguments) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "file optional failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__file_optional() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5VL_file_optional
  *
- * Purpose:	perform a plugin specific operation
+ * Purpose:	Perform a plugin specific operation
  *
  * Return:      Success:    Non-negative
  *              Failure:    Negative
@@ -2748,29 +2839,34 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_file_optional(void *file, const H5VL_class_t *cls, hid_t dxpl_id,
-    void **req, ...)
+H5VL_file_optional(const H5VL_object_t *vol_obj, hid_t dxpl_id, void **req, ...)
 {
     va_list arguments;                  /* Argument list passed from the API call */
     hbool_t arg_started = FALSE;        /* Whether the va_list has been started */
+    hbool_t vol_wrapper_set = FALSE;    /* Whether the VOL object wrapping context was set up */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    /* Check if the corresponding VOL callback exists */
-    if(NULL == cls->file_cls.optional)
-        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL plugin has no 'file optional' method")
+    /* Set wrapper info in API context */
+    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
+    vol_wrapper_set = TRUE;
 
-    /* Call the corresponding VOL callback */
+    /* Call the corresponding internal VOL routine */
     va_start(arguments, req);
     arg_started = TRUE;
-    if((cls->file_cls.optional)(file, dxpl_id, req, arguments) < 0)
+    if(H5VL__file_optional(vol_obj->data, vol_obj->plugin->cls, dxpl_id, req, arguments) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "file optional failed")
 
 done:
     /* End access to the va_list, if we started it */
     if(arg_started)
         va_end(arguments);
+
+    /* Reset object wrapping info in API context */
+    if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_file_optional() */
@@ -2787,32 +2883,62 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLfile_optional(void *file, hid_t plugin_id, hid_t dxpl_id, void **req,
+H5VLfile_optional(void *obj, hid_t plugin_id, hid_t dxpl_id, void **req,
     va_list arguments)
 {
     H5VL_class_t *cls;                  /* VOL plugin's class struct */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE5("e", "*xii**xx", file, plugin_id, dxpl_id, req, arguments);
+    H5TRACE5("e", "*xii**xx", obj, plugin_id, dxpl_id, req, arguments);
 
     /* Check args and get class pointer */
-    if(NULL == file)
+    if(NULL == obj)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object")
     if(NULL == (cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
 
-    /* Check if the corresponding VOL callback exists */
-    if(NULL == cls->file_cls.optional)
-        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL plugin has no `file optional' method")
-
-    /* Bypass the H5VLint layer, calling the VOL callback directly */
-    if((cls->file_cls.optional)(file, dxpl_id, req, arguments) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute file optional callback")
+    /* Call the corresponding internal VOL routine */
+    if(H5VL__file_optional(obj, cls, dxpl_id, req, arguments) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute file optional callback")
 
 done:
     FUNC_LEAVE_API_NOINIT(ret_value)
 } /* end H5VLfile_optional() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL__file_close
+ *
+ * Purpose:     Closes a file through the VOL
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL__file_close(void *obj, const H5VL_class_t *cls, hid_t dxpl_id, void **req)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity check */
+    HDassert(obj);
+    HDassert(cls);
+
+    /* Check if the corresponding VOL callback exists */
+    if(NULL == cls->file_cls.close)
+        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL plugin has no 'file close' method")
+
+    /* Call the corresponding VOL callback */
+    if((cls->file_cls.close)(obj, dxpl_id, req) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTCLOSEFILE, FAIL, "file close failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__file_close() */
 
 
 /*-------------------------------------------------------------------------
@@ -2826,24 +2952,27 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_file_close(void *file, const H5VL_class_t *cls, hid_t dxpl_id, void **req)
+H5VL_file_close(const H5VL_object_t *vol_obj, hid_t dxpl_id, void **req)
 {
+    hbool_t vol_wrapper_set = FALSE;    /* Whether the VOL object wrapping context was set up */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    HDassert(file);
-    HDassert(cls);
+    /* Set wrapper info in API context */
+    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
+    vol_wrapper_set = TRUE;
 
-    /* Check if the corresponding VOL callback exists */
-    if(NULL == cls->file_cls.close)
-        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL plugin has no 'file close' method")
-
-    /* Call the corresponding VOL callback */
-    if((cls->file_cls.close)(file, dxpl_id, req) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTCLOSEFILE, FAIL, "close failed")
+    /* Call the corresponding internal VOL routine */
+    if(H5VL__file_close(vol_obj->data, vol_obj->plugin->cls, dxpl_id, req) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTCLOSEFILE, FAIL, "file close failed")
 
 done:
+    /* Reset object wrapping info in API context */
+    if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_file_close() */
 
@@ -2859,22 +2988,22 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLfile_close(void *file, hid_t plugin_id, hid_t dxpl_id, void **req)
+H5VLfile_close(void *obj, hid_t plugin_id, hid_t dxpl_id, void **req)
 {
     H5VL_class_t *cls;                  /* VOL plugin's class struct */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE4("e", "*xii**x", file, plugin_id, dxpl_id, req);
+    H5TRACE4("e", "*xii**x", obj, plugin_id, dxpl_id, req);
 
     /* Check args and get class pointer */
-    if(NULL == file)
+    if(NULL == obj)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object")
     if(NULL == (cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
 
     /* Call the corresponding internal VOL routine */
-    if(H5VL_file_close(file, cls, dxpl_id, req) < 0)
+    if(H5VL__file_close(obj, cls, dxpl_id, req) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTCLOSEFILE, FAIL, "unable to close file")
 
 done:
@@ -3087,7 +3216,7 @@ H5VLgroup_get(void *obj, hid_t plugin_id, H5VL_group_get_t get_type,
 
     /* Bypass the H5VLint layer, calling the VOL callback directly */
     if((cls->group_cls.get)(obj, get_type, dxpl_id, req, arguments) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "Unable to execute group get callback")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "unable to execute group get callback")
 
 done:
     FUNC_LEAVE_API_NOINIT(ret_value)
@@ -3122,7 +3251,7 @@ H5VL_group_specific(void *obj, const H5VL_class_t *cls, H5VL_group_specific_t sp
     va_start(arguments, req);
     arg_started = TRUE;
     if((cls->group_cls.specific)(obj, specific_type, dxpl_id, req, arguments) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute group specific callback")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute group specific callback")
 
 done:
     /* End access to the va_list, if we started it */
@@ -3166,7 +3295,7 @@ H5VLgroup_specific(void *obj, hid_t plugin_id, H5VL_group_specific_t specific_ty
 
     /* Bypass the H5VLint layer, calling the VOL callback directly */
     if((cls->group_cls.specific)(obj, specific_type, dxpl_id, req, arguments) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute group specific callback")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute group specific callback")
 
 done:
     FUNC_LEAVE_API_NOINIT(ret_value)
@@ -3201,7 +3330,7 @@ H5VL_group_optional(void *obj, const H5VL_class_t *cls, hid_t dxpl_id,
     va_start(arguments, req);
     arg_started = TRUE;
     if((cls->group_cls.optional)(obj, dxpl_id, req, arguments) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute group optional callback")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute group optional callback")
 
 done:
     /* End access to the va_list, if we started it */
@@ -3243,7 +3372,7 @@ H5VLgroup_optional(void *obj, hid_t plugin_id, hid_t dxpl_id, void **req, va_lis
 
     /* Bypass the H5VLint layer, calling the VOL callback directly */
     if((cls->group_cls.optional)(obj, dxpl_id, req, arguments) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute group optional callback")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute group optional callback")
 
 done:
     FUNC_LEAVE_API_NOINIT(ret_value)
@@ -3595,7 +3724,7 @@ H5VLlink_get(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id, H5VL_link
 
     /* Bypass the H5VLint layer, calling the VOL callback directly */
     if((cls->link_cls.get)(obj, loc_params, get_type, dxpl_id, req, arguments) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "Unable to execute link get callback")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "unable to execute link get callback")
 
 done:
     FUNC_LEAVE_API_NOINIT(ret_value)
@@ -3630,7 +3759,7 @@ H5VL_link_specific(void *obj, H5VL_loc_params_t loc_params, const H5VL_class_t *
     va_start(arguments, req);
     arg_started = TRUE;
     if((ret_value = (cls->link_cls.specific)(obj, loc_params, specific_type, dxpl_id, req, arguments)) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute link specific callback")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute link specific callback")
 
 done:
     /* End access to the va_list, if we started it */
@@ -3674,7 +3803,7 @@ H5VLlink_specific(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id,
 
     /* Bypass the H5VLint layer, calling the VOL callback directly */
     if((ret_value = (cls->link_cls.specific)(obj, loc_params, specific_type, dxpl_id, req, arguments)) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute link specific callback")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute link specific callback")
 
 done:
     FUNC_LEAVE_API_NOINIT(ret_value)
@@ -3709,7 +3838,7 @@ H5VL_link_optional(void *obj, const H5VL_class_t *cls, hid_t dxpl_id,
     va_start(arguments, req);
     arg_started = TRUE;
     if((cls->link_cls.optional)(obj, dxpl_id, req, arguments) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute link optional callback")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute link optional callback")
 
 done:
     /* End access to the va_list, if we started it */
@@ -3751,7 +3880,7 @@ H5VLlink_optional(void *obj, hid_t plugin_id, hid_t dxpl_id, void **req, va_list
 
     /* Bypass the H5VLint layer, calling the VOL callback directly */
     if((cls->link_cls.optional)(obj, dxpl_id, req, arguments) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute link optional callback")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute link optional callback")
 
 done:
     FUNC_LEAVE_API_NOINIT(ret_value)
@@ -3975,7 +4104,7 @@ H5VLobject_get(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id, H5VL_ob
 
     /* Bypass the H5VLint layer, calling the VOL callback directly */
     if((cls->object_cls.get)(obj, loc_params, get_type, dxpl_id, req, arguments) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "Unable to execute object get callback")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "unable to execute object get callback")
 
 done:
     FUNC_LEAVE_API_NOINIT(ret_value)
@@ -4054,7 +4183,7 @@ H5VLobject_specific(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id,
 
     /* Bypass the H5VLint layer, calling the VOL callback directly */
     if((ret_value = (cls->object_cls.specific)(obj, loc_params, specific_type, dxpl_id, req, arguments)) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute object specific callback")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute object specific callback")
 
 done:
     FUNC_LEAVE_API_NOINIT(ret_value)
@@ -4089,7 +4218,7 @@ H5VL_object_optional(void *obj, const H5VL_class_t *cls, hid_t dxpl_id,
     va_start(arguments, req);
     arg_started = TRUE;
     if((cls->object_cls.optional)(obj, dxpl_id, req, arguments) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute object optional callback")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute object optional callback")
 
 done:
     /* End access to the va_list, if we started it */
@@ -4131,7 +4260,7 @@ H5VLobject_optional(void *obj, hid_t plugin_id, hid_t dxpl_id, void **req, va_li
 
     /* Bypass the H5VLint layer, calling the VOL callback directly */
     if((cls->object_cls.optional)(obj, dxpl_id, req, arguments) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute object optional callback")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute object optional callback")
 
 done:
     FUNC_LEAVE_API_NOINIT(ret_value)
@@ -4345,7 +4474,7 @@ H5VLdatatype_get(void *obj, hid_t plugin_id, H5VL_datatype_get_t get_type,
 
     /* Bypass the H5VLint layer, calling the VOL callback directly */
     if((cls->datatype_cls.get)(obj, get_type, dxpl_id, req, arguments) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "Unable to execute datatype get callback")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "unable to execute datatype get callback")
 
 done:
     FUNC_LEAVE_API_NOINIT(ret_value)
@@ -4380,7 +4509,7 @@ H5VL_datatype_specific(void *obj, const H5VL_class_t *cls, H5VL_datatype_specifi
     va_start(arguments, req);
     arg_started = TRUE;
     if((cls->datatype_cls.specific)(obj, specific_type, dxpl_id, req, arguments) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute datatype specific callback")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute datatype specific callback")
 
 done:
     /* End access to the va_list, if we started it */
@@ -4424,7 +4553,7 @@ H5VLdatatype_specific(void *obj, hid_t plugin_id, H5VL_datatype_specific_t speci
 
     /* Bypass the H5VLint layer, calling the VOL callback directly */
     if((cls->datatype_cls.specific)(obj, specific_type, dxpl_id, req, arguments) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute datatype specific callback")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute datatype specific callback")
 
 done:
     FUNC_LEAVE_API_NOINIT(ret_value)
@@ -4459,7 +4588,7 @@ H5VL_datatype_optional(void *obj, const H5VL_class_t *cls, hid_t dxpl_id,
     va_start(arguments, req);
     arg_started = TRUE;
     if((cls->datatype_cls.optional)(obj, dxpl_id, req, arguments) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute datatype optional callback")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute datatype optional callback")
 
 done:
     /* End access to the va_list, if we started it */
@@ -4502,7 +4631,7 @@ H5VLdatatype_optional(void *obj, hid_t plugin_id, hid_t dxpl_id, void **req,
 
     /* Bypass the H5VLint layer, calling the VOL callback directly */
     if((cls->datatype_cls.optional)(obj, dxpl_id, req, arguments) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute datatype optional callback")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute datatype optional callback")
 
 done:
     FUNC_LEAVE_API_NOINIT(ret_value)
