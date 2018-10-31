@@ -653,7 +653,6 @@
 ./src/H5FSmodule.h
 ./src/H5FSpkg.h
 ./src/H5FSprivate.h
-./src/H5FSpublic.h
 ./src/H5FSsection.c
 ./src/H5FSstat.c
 ./src/H5FStest.c
