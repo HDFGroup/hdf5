@@ -17,9 +17,6 @@
 #ifndef _H5VLnative_H
 #define _H5VLnative_H
 
-/* Initializer function for native VOL driver */
-#define H5VL_NATIVE             (H5VL_native_init())
-
 /* Characteristics of the native VOL driver */
 #define H5VL_NATIVE_NAME        "native"
 #define H5VL_NATIVE_VALUE       H5_VOL_NATIVE   /* enum value */
@@ -30,12 +27,7 @@
 extern "C" {
 #endif
 
-/* XXX (VOL_MERGE): Poor separation of public and private functionality here */
 H5_DLL herr_t H5Pset_fapl_native(hid_t fapl_id);
-H5_DLL hid_t H5VL_native_get_driver_id(void);
-H5_DLL hid_t H5VL_native_init(void);
-H5_DLL hid_t H5VL_native_register(H5I_type_t type, const void *obj, hbool_t app_ref);
-H5_DLL herr_t H5VL_native_unregister(hid_t obj_id);
 
 #ifdef __cplusplus
 }

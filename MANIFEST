@@ -92,6 +92,9 @@
 ./bin/timekeeper      _DO_NOT_DISTRIBUTE_
 ./bin/trace
 ./bin/yodconfigure
+./bin/batch/knl_ctestSP.sl
+./bin/batch/knl_H5detect.sl.in.cmake
+./bin/batch/sbatch_ctestSP.sl
 ./bin/pkgscrpts/h5rmflags                  _DO_NOT_DISTRIBUTE_
 ./bin/pkgscrpts/makeHDF5BinaryTarfiles.pl  _DO_NOT_DISTRIBUTE_
 ./bin/pkgscrpts/makeInternalREADME.pl      _DO_NOT_DISTRIBUTE_
@@ -496,7 +499,6 @@
 ./src/H5Bmodule.h
 ./src/H5Bpkg.h
 ./src/H5Bprivate.h
-./src/H5Bpublic.h
 ./src/H5B2.c
 ./src/H5B2cache.c
 ./src/H5B2dbg.c
@@ -507,7 +509,6 @@
 ./src/H5B2module.h
 ./src/H5B2pkg.h
 ./src/H5B2private.h
-./src/H5B2public.h
 ./src/H5B2stat.c
 ./src/H5B2test.c
 ./src/H5C.c
@@ -652,7 +653,6 @@
 ./src/H5FSmodule.h
 ./src/H5FSpkg.h
 ./src/H5FSprivate.h
-./src/H5FSpublic.h
 ./src/H5FSsection.c
 ./src/H5FSstat.c
 ./src/H5FStest.c
@@ -692,7 +692,6 @@
 ./src/H5HFmodule.h
 ./src/H5HFpkg.h
 ./src/H5HFprivate.h
-./src/H5HFpublic.h
 ./src/H5HFsection.c
 ./src/H5HFspace.c
 ./src/H5HFstat.c
@@ -704,7 +703,6 @@
 ./src/H5HGmodule.h
 ./src/H5HGpkg.h
 ./src/H5HGprivate.h
-./src/H5HGpublic.h
 ./src/H5HGquery.c
 ./src/H5HL.c
 ./src/H5HLcache.c
@@ -715,7 +713,6 @@
 ./src/H5HLpkg.h
 ./src/H5HLprfx.c
 ./src/H5HLprivate.h
-./src/H5HLpublic.h
 ./src/H5HP.c
 ./src/H5HPprivate.h
 ./src/H5I.c
@@ -893,6 +890,7 @@
 ./src/H5VLmodule.h
 ./src/H5VLnative.c
 ./src/H5VLnative.h
+./src/H5VLnative_private.h
 ./src/H5VLpkg.h
 ./src/H5VLprivate.h
 ./src/H5VLpublic.h
@@ -3160,7 +3158,9 @@
 ./java/lib/ext/slf4j-simple-1.7.25.jar
 
 # CMake-specific Files
-./config/intel.cmake
+./config/toolchain/crayle.cmake
+./config/toolchain/GCC.cmake
+./config/toolchain/intel.cmake
 
 ./config/cmake/cacheinit.cmake
 ./config/cmake/CMakeFindJavaCommon.cmake

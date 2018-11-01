@@ -30,12 +30,12 @@
 #include "H5Fprivate.h"
 
 /* Other public headers needed by this file */
-#include "H5Bpublic.h"          /* B-tree header (for H5B_NUM_BTREE_ID)     */
 #include "H5VLpublic.h"         /* Virtual Object Layer                     */
 
 /* Other private headers needed by this file */
 #include "H5private.h"		    /* Generic Functions                        */
 #include "H5ACprivate.h"        /* Metadata cache                           */
+#include "H5Bprivate.h"         /* B-trees                                  */
 #include "H5FLprivate.h"        /* Free Lists                               */
 #include "H5FOprivate.h"        /* File objects                             */
 #include "H5FSprivate.h"        /* File free space                          */

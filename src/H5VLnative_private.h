@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -11,27 +10,31 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/*-------------------------------------------------------------------------
- *
- * Created:             H5HLpublic.h
- *                      Jul 16 1997
- *                      Robb Matzke <matzke@llnl.gov>
- *
- * Purpose:             Public declarations for the H5HL (local heap) package.
- *
- *-------------------------------------------------------------------------
+/*
+ * Purpose:	The private header file for the native VOL driver.
  */
-#ifndef _H5HLpublic_H
-#define _H5HLpublic_H
 
-/* Public headers needed by this file */
-#include "H5public.h"
+#ifndef _H5VLnative_private_H
+#define _H5VLnative_private_H
+
+/* Include driver's public header */
+#include "H5VLnative.h"
+
+/* Initializer function for native VOL driver */
+#define H5VL_NATIVE             (H5VL_native_init())
+
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+H5_DLL hid_t H5VL_native_get_driver_id(void);
+H5_DLL hid_t H5VL_native_init(void);
+H5_DLL hid_t H5VL_native_register(H5I_type_t type, const void *obj, hbool_t app_ref);
+H5_DLL herr_t H5VL_native_unregister(hid_t obj_id);
+
 #ifdef __cplusplus
 }
 #endif
-#endif
+
+#endif /* _H5VLnative_private_H */
