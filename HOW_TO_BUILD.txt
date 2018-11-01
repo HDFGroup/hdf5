@@ -1,0 +1,23 @@
+How to build this branch:
+
+1) Install RADOS
+
+Debian/Ubuntu
+sudo apt-get install librados-dev
+
+RHEL/CentOS
+sudo yum install librados2-devel
+
+
+2) Configure (autotools only)
+
+You will need to use --with-rados and set the include and library paths. You'll also need to build the parallel library.
+
+Using the default locations on Ubuntu:
+
+../develop/configure --enable-parallel --with-rados=/usr/include/rados,/usr/lib 2>&1 | tee configure.out
+
+
+3) Build and run tests
+
+The 'tests' are the RADOS examples which are run via 'make check-install'
