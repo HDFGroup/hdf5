@@ -349,6 +349,7 @@ H5Glink(hid_t cur_loc_id, H5G_link_t type, const char *cur_name, const char *new
         H5VL_object_t    *vol_obj = NULL;        /* object token of loc_id */
         H5VL_loc_params_t loc_params1;
         H5VL_loc_params_t loc_params2;
+        H5VL_object_t       tmp_vol_obj;            /* Temporary object token of */
 
         loc_params1.type = H5VL_OBJECT_BY_NAME;
         loc_params1.obj_type = H5I_get_type(cur_loc_id);
@@ -369,11 +370,14 @@ H5Glink(hid_t cur_loc_id, H5G_link_t type, const char *cur_name, const char *new
         if(H5P_set(plist, H5VL_PROP_LINK_TARGET_LOC_PARAMS, &loc_params1) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for target loc params")
 
+        /* Construct a temporary VOL object */
+        tmp_vol_obj.data = NULL;
+        tmp_vol_obj.plugin = vol_obj->plugin;
+
         /* Create the link through the VOL */
-        if((ret_value = H5VL_link_create(H5VL_LINK_CREATE_HARD, NULL, loc_params2, vol_obj->plugin->cls,
-                                         lcpl_id, H5P_DEFAULT, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)) < 0)
+        if(H5VL_link_create(H5VL_LINK_CREATE_HARD, &tmp_vol_obj, loc_params2, lcpl_id, H5P_DEFAULT, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
-    }
+    } /* end if */
     else if(type == H5L_TYPE_SOFT) {
         H5VL_object_t    *vol_obj = NULL;        /* object token of loc_id */
         H5VL_loc_params_t loc_params;
@@ -392,10 +396,9 @@ H5Glink(hid_t cur_loc_id, H5G_link_t type, const char *cur_name, const char *new
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for target name")
 
         /* Create the link through the VOL */
-        if((ret_value = H5VL_link_create(H5VL_LINK_CREATE_SOFT, vol_obj->data, loc_params, vol_obj->plugin->cls, 
-                                         lcpl_id, H5P_DEFAULT, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)) < 0)
+        if(H5VL_link_create(H5VL_LINK_CREATE_SOFT, vol_obj, loc_params, lcpl_id, H5P_DEFAULT, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
-    }
+    } /* end else-if */
     else
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Not a valid link type")
 
@@ -467,10 +470,9 @@ H5Glink2(hid_t cur_loc_id, const char *cur_name, H5G_link_t type,
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for target name")
 
         /* Create the link through the VOL */
-        if((ret_value = H5VL_link_create(H5VL_LINK_CREATE_HARD, vol_obj2->data, loc_params2, vol_obj2->plugin->cls,
-                                         lcpl_id, H5P_DEFAULT, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)) < 0)
+        if(H5VL_link_create(H5VL_LINK_CREATE_HARD, vol_obj2, loc_params2, lcpl_id, H5P_DEFAULT, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
-    }
+    } /* end if */
     else if(type == H5L_TYPE_SOFT) {
         H5VL_object_t    *vol_obj = NULL;        /* object token of loc_id */
         H5VL_loc_params_t loc_params;
@@ -494,10 +496,9 @@ H5Glink2(hid_t cur_loc_id, const char *cur_name, H5G_link_t type,
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for target name")
 
         /* Create the link through the VOL */
-        if((ret_value = H5VL_link_create(H5VL_LINK_CREATE_SOFT, vol_obj->data, loc_params, vol_obj->plugin->cls,
-                                         lcpl_id, H5P_DEFAULT, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)) < 0)
+        if(H5VL_link_create(H5VL_LINK_CREATE_SOFT, vol_obj, loc_params, lcpl_id, H5P_DEFAULT, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
-    }
+    } /* end else-if */
     else
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a valid link type")
 
@@ -542,8 +543,7 @@ H5Gmove(hid_t src_loc_id, const char *src_name, const char *dst_name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
     /* Move the link */
-    if((ret_value = H5VL_link_move(vol_obj->data, loc_params1, NULL, loc_params2, vol_obj->plugin->cls,
-                                   H5P_DEFAULT, H5P_DEFAULT, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)) < 0)
+    if(H5VL_link_move(vol_obj, loc_params1, NULL, loc_params2, H5P_DEFAULT, H5P_DEFAULT, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTMOVE, FAIL, "couldn't move link")
 
 done:
@@ -580,27 +580,24 @@ H5Gmove2(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
     loc_params1.loc_data.loc_by_name.name = src_name;
     loc_params1.loc_data.loc_by_name.lapl_id = H5P_DEFAULT;
     loc_params1.obj_type = H5I_get_type(src_loc_id);
+
     /* Set location parameter for destination object */
     loc_params2.type = H5VL_OBJECT_BY_NAME;
     loc_params2.loc_data.loc_by_name.name = dst_name;
     loc_params2.loc_data.loc_by_name.lapl_id = H5P_DEFAULT;
     loc_params2.obj_type = H5I_get_type(dst_loc_id);
 
-    if(H5L_SAME_LOC != src_loc_id) {
+    if(H5L_SAME_LOC != src_loc_id)
         /* get the location object */
         if(NULL == (vol_obj1 = (H5VL_object_t *)H5I_object(src_loc_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
-    }
-    if(H5L_SAME_LOC != dst_loc_id) {
+    if(H5L_SAME_LOC != dst_loc_id)
         /* get the location object */
         if(NULL == (vol_obj2 = (H5VL_object_t *)H5I_object(dst_loc_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
-    }
 
     /* Move the link */
-    if((ret_value = H5VL_link_move(vol_obj1->data, loc_params1, vol_obj2->data, loc_params2, 
-                                   vol_obj1->plugin->cls, H5P_DEFAULT, H5P_DEFAULT, 
-                                   H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)) < 0)
+    if(H5VL_link_move(vol_obj1, loc_params1, vol_obj2, loc_params2, H5P_DEFAULT, H5P_DEFAULT, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTMOVE, FAIL, "unable to move link")
 
 done:
@@ -643,8 +640,7 @@ H5Gunlink(hid_t loc_id, const char *name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
     /* Delete the link */
-    if(H5VL_link_specific(vol_obj->data, loc_params, vol_obj->plugin->cls, H5VL_LINK_DELETE, 
-                          H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+    if(H5VL_link_specific(vol_obj, loc_params, H5VL_LINK_DELETE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "couldn't delete link")
 
 done:
@@ -688,8 +684,7 @@ H5Gget_linkval(hid_t loc_id, const char *name, size_t size, char *buf/*out*/)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
     /* Get the link value */
-    if((ret_value = H5VL_link_get(vol_obj->data, loc_params, vol_obj->plugin->cls, H5VL_LINK_GET_VAL, 
-                                  H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, buf, size)) < 0)
+    if(H5VL_link_get(vol_obj, loc_params, H5VL_LINK_GET_VAL, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, buf, size) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to get link value")
 
 done:

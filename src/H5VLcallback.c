@@ -117,6 +117,23 @@ static herr_t H5VL__group_optional(void *obj, const H5VL_class_t *cls, hid_t dxp
     void **req, va_list arguments);
 static herr_t H5VL__group_close(void *obj, const H5VL_class_t *cls,
     hid_t dxpl_id, void **req);
+static herr_t H5VL__link_create(H5VL_link_create_type_t create_type, void *obj,
+    H5VL_loc_params_t loc_params, const H5VL_class_t *cls, hid_t lcpl_id,
+    hid_t lapl_id, hid_t dxpl_id, void **req);
+static herr_t H5VL__link_copy(void *src_obj, H5VL_loc_params_t loc_params1,
+    void *dst_obj, H5VL_loc_params_t loc_params2, const H5VL_class_t *cls,
+    hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req);
+static herr_t H5VL__link_move(void *src_obj, H5VL_loc_params_t loc_params1,
+    void *dst_obj, H5VL_loc_params_t loc_params2, const H5VL_class_t *cls,
+    hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req);
+static herr_t H5VL__link_get(void *obj, H5VL_loc_params_t loc_params,
+    const H5VL_class_t *cls, H5VL_link_get_t get_type, hid_t dxpl_id,
+    void **req, va_list arguments);
+static herr_t H5VL__link_specific(void *obj, H5VL_loc_params_t loc_params,
+    const H5VL_class_t *cls, H5VL_link_specific_t specific_type, hid_t dxpl_id,
+    void **req, va_list arguments);
+static herr_t H5VL__link_optional(void *obj, const H5VL_class_t *cls, hid_t dxpl_id,
+    void **req, va_list arguments);
 
 
 /*********************/
@@ -3671,22 +3688,24 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5VL_link_create
+ * Function:	H5VL__link_create
  *
- * Purpose:	Creates a hard link through the VOL
+ * Purpose:	Creates a link through the VOL
+ *
+ * Note:	The 'obj' parameter is allowed to be NULL
  *
  * Return:      Success:    Non-negative
  *              Failure:    Negative
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5VL_link_create(H5VL_link_create_type_t create_type, void *obj, H5VL_loc_params_t loc_params, 
+static herr_t
+H5VL__link_create(H5VL_link_create_type_t create_type, void *obj, H5VL_loc_params_t loc_params, 
     const H5VL_class_t *cls, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_STATIC
 
     /* Check if the corresponding VOL callback exists */
     if(NULL == cls->link_cls.create)
@@ -3698,13 +3717,67 @@ H5VL_link_create(H5VL_link_create_type_t create_type, void *obj, H5VL_loc_params
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__link_create() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_link_create
+ *
+ * Purpose:	Creates a link through the VOL
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_link_create(H5VL_link_create_type_t create_type, const H5VL_object_t *vol_obj,
+    H5VL_loc_params_t loc_params, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id,
+    void **req)
+{
+    H5VL_object_t tmp_vol_obj;          /* Temporary object token of */
+    hbool_t vol_wrapper_set = FALSE;    /* Whether the VOL object wrapping context was set up */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Special case for hard links */
+    if(H5VL_LINK_CREATE_HARD == create_type && NULL == vol_obj->data) {
+        H5P_genplist_t *plist;              /* Property list pointer */
+
+        /* Get the VOL data pointer from the fapl */
+        if(NULL == (plist = (H5P_genplist_t *)H5I_object(lcpl_id)))
+            HGOTO_ERROR(H5E_VOL, H5E_BADTYPE, FAIL, "not a file access property list")
+        if(H5P_peek(plist, H5VL_PROP_LINK_TARGET, &tmp_vol_obj.data) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't get VOL plugin info")
+    } /* end if */
+    else
+        /* Use the VOL object passed in */
+        tmp_vol_obj.data = vol_obj->data;
+    tmp_vol_obj.plugin = vol_obj->plugin;
+
+    /* Set wrapper info in API context */
+    if(H5VL_set_vol_wrapper(tmp_vol_obj.data, tmp_vol_obj.plugin) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
+    vol_wrapper_set = TRUE;
+
+    /* Call the corresponding internal VOL routine */
+    if(H5VL__link_create(create_type, vol_obj->data, loc_params, vol_obj->plugin->cls, lcpl_id, lapl_id, dxpl_id, req) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, FAIL, "link create failed")
+
+done:
+    /* Reset object wrapping info in API context */
+    if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
+
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_link_create() */
 
 
 /*-------------------------------------------------------------------------
  * Function:    H5VLlink_create
  *
- * Purpose:     Creates a hard link
+ * Purpose:     Creates a link
  *
  * Note:	The 'obj' parameter is allowed to be NULL
  *
@@ -3729,12 +3802,44 @@ H5VLlink_create(H5VL_link_create_type_t create_type, void *obj, H5VL_loc_params_
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
 
     /* Call the corresponding internal VOL routine */
-    if(H5VL_link_create(create_type, obj, loc_params, cls, lcpl_id, lapl_id, dxpl_id, req) < 0)
+    if(H5VL__link_create(create_type, obj, loc_params, cls, lcpl_id, lapl_id, dxpl_id, req) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, FAIL, "unable to create link")
 
 done:
     FUNC_LEAVE_API_NOINIT(ret_value)
 } /* end H5VLlink_create() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL__link_copy
+ *
+ * Purpose:	Copys a link from src to dst.
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t 
+H5VL__link_copy(void *src_obj, H5VL_loc_params_t loc_params1, void *dst_obj,
+    H5VL_loc_params_t loc_params2, const H5VL_class_t *cls, hid_t lcpl_id,
+    hid_t lapl_id, hid_t dxpl_id, void **req)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Check if the corresponding VOL callback exists */
+    if(NULL == cls->link_cls.copy)
+        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL plugin has no 'link copy' method")
+
+    /* Call the corresponding VOL callback */
+    if((cls->link_cls.copy)(src_obj, loc_params1, dst_obj, loc_params2, lcpl_id, lapl_id, dxpl_id, req) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTCOPY, FAIL, "link copy failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__link_copy() */
 
 
 /*-------------------------------------------------------------------------
@@ -3748,23 +3853,31 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t 
-H5VL_link_copy(void *src_obj, H5VL_loc_params_t loc_params1, void *dst_obj,
-    H5VL_loc_params_t loc_params2, const H5VL_class_t *cls, hid_t lcpl_id,
+H5VL_link_copy(const H5VL_object_t *src_vol_obj, H5VL_loc_params_t loc_params1,
+    const H5VL_object_t *dst_vol_obj, H5VL_loc_params_t loc_params2, hid_t lcpl_id,
     hid_t lapl_id, hid_t dxpl_id, void **req)
 {
+    const H5VL_object_t *vol_obj;       /* VOL object for object with data */
+    hbool_t vol_wrapper_set = FALSE;    /* Whether the VOL object wrapping context was set up */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    /* Check if the corresponding VOL callback exists */
-    if(NULL == cls->link_cls.copy)
-        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL plugin has no 'link copy' method")
+    /* Set wrapper info in API context */
+    vol_obj = (src_vol_obj->data ? src_vol_obj : dst_vol_obj);
+    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
+    vol_wrapper_set = TRUE;
 
-    /* Call the corresponding VOL callback */
-    if((cls->link_cls.copy)(src_obj, loc_params1, dst_obj, loc_params2, lcpl_id, lapl_id, dxpl_id, req) < 0)
+    /* Call the corresponding internal VOL routine */
+    if(H5VL__link_copy((src_vol_obj->data ? src_vol_obj->data : NULL), loc_params1, (dst_vol_obj ? dst_vol_obj->data : NULL), loc_params2, vol_obj->plugin->cls, lcpl_id, lapl_id, dxpl_id, req) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTCOPY, FAIL, "link copy failed")
 
 done:
+    /* Reset object wrapping info in API context */
+    if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_link_copy() */
 
@@ -3798,12 +3911,44 @@ H5VLlink_copy(void *src_obj, H5VL_loc_params_t loc_params1, void *dst_obj,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
 
     /* Call the corresponding internal VOL routine */
-    if(H5VL_link_copy(src_obj, loc_params1, dst_obj, loc_params2, cls, lcpl_id, lapl_id, dxpl_id, req) < 0)
+    if(H5VL__link_copy(src_obj, loc_params1, dst_obj, loc_params2, cls, lcpl_id, lapl_id, dxpl_id, req) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTCOPY, FAIL, "unable to copy object")
 
 done:
     FUNC_LEAVE_API_NOINIT(ret_value)
 } /* end H5VLlink_copy() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL__link_move
+ *
+ * Purpose:	Moves a link from src to dst.
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t 
+H5VL__link_move(void *src_obj, H5VL_loc_params_t loc_params1, void *dst_obj,
+    H5VL_loc_params_t loc_params2, const H5VL_class_t *cls, hid_t lcpl_id,
+    hid_t lapl_id, hid_t dxpl_id, void **req)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Check if the corresponding VOL callback exists */
+    if(NULL == cls->link_cls.move)
+        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL plugin has no 'link move' method")
+
+    /* Call the corresponding VOL callback */
+    if((cls->link_cls.move)(src_obj, loc_params1, dst_obj, loc_params2, lcpl_id, lapl_id, dxpl_id, req) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTMOVE, FAIL, "link move failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__link_move() */
 
 
 /*-------------------------------------------------------------------------
@@ -3817,23 +3962,31 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t 
-H5VL_link_move(void *src_obj, H5VL_loc_params_t loc_params1, void *dst_obj,
-    H5VL_loc_params_t loc_params2, const H5VL_class_t *cls, hid_t lcpl_id,
+H5VL_link_move(const H5VL_object_t *src_vol_obj, H5VL_loc_params_t loc_params1,
+    const H5VL_object_t *dst_vol_obj, H5VL_loc_params_t loc_params2, hid_t lcpl_id,
     hid_t lapl_id, hid_t dxpl_id, void **req)
 {
+    const H5VL_object_t *vol_obj;       /* VOL object for object with data */
+    hbool_t vol_wrapper_set = FALSE;    /* Whether the VOL object wrapping context was set up */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    /* Check if the corresponding VOL callback exists */
-    if(NULL == cls->link_cls.move)
-        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL plugin has no 'link move' method")
+    /* Set wrapper info in API context */
+    vol_obj = (src_vol_obj ? src_vol_obj : dst_vol_obj);
+    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
+    vol_wrapper_set = TRUE;
 
-    /* Call the corresponding VOL callback */
-    if((cls->link_cls.move)(src_obj, loc_params1, dst_obj, loc_params2, lcpl_id, lapl_id, dxpl_id, req) < 0)
+    /* Call the corresponding internal VOL routine */
+    if(H5VL__link_move((src_vol_obj ? src_vol_obj->data : NULL), loc_params1, (dst_vol_obj ? dst_vol_obj->data : NULL), loc_params2, vol_obj->plugin->cls, lcpl_id, lapl_id, dxpl_id, req) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTMOVE, FAIL, "link move failed")
 
 done:
+    /* Reset object wrapping info in API context */
+    if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_link_move() */
 
@@ -3867,12 +4020,43 @@ H5VLlink_move(void *src_obj, H5VL_loc_params_t loc_params1, void *dst_obj,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
 
     /* Call the corresponding internal VOL routine */
-    if(H5VL_link_move(src_obj, loc_params1, dst_obj, loc_params2, cls, lcpl_id, lapl_id, dxpl_id, req) < 0)
+    if(H5VL__link_move(src_obj, loc_params1, dst_obj, loc_params2, cls, lcpl_id, lapl_id, dxpl_id, req) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTMOVE, FAIL, "unable to move object")
 
 done:
     FUNC_LEAVE_API_NOINIT(ret_value)
 } /* end H5VLlink_move() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL__link_get
+ *
+ * Purpose:	Get specific information about the link through the VOL
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL__link_get(void *obj, H5VL_loc_params_t loc_params, const H5VL_class_t *cls,
+    H5VL_link_get_t get_type, hid_t dxpl_id, void **req, va_list arguments)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Check if the corresponding VOL callback exists */
+    if(NULL == cls->link_cls.get)
+        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL plugin has no 'link get' method")
+
+    /* Call the corresponding VOL callback */
+    if((cls->link_cls.get)(obj, loc_params, get_type, dxpl_id, req, arguments) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "link get failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__link_get() */
 
 
 /*-------------------------------------------------------------------------
@@ -3886,29 +4070,35 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_link_get(void *obj, H5VL_loc_params_t loc_params, const H5VL_class_t *cls, H5VL_link_get_t get_type, 
-    hid_t dxpl_id, void **req, ...)
+H5VL_link_get(const H5VL_object_t *vol_obj, H5VL_loc_params_t loc_params,
+    H5VL_link_get_t get_type, hid_t dxpl_id, void **req, ...)
 {
     va_list arguments;                  /* Argument list passed from the API call */
     hbool_t arg_started = FALSE;        /* Whether the va_list has been started */
+    hbool_t vol_wrapper_set = FALSE;    /* Whether the VOL object wrapping context was set up */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    /* Check if the corresponding VOL callback exists */
-    if(NULL == cls->link_cls.get)
-        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL plugin has no 'link get' method")
+    /* Set wrapper info in API context */
+    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
+    vol_wrapper_set = TRUE;
 
-    /* Call the corresponding VOL callback */
+    /* Call the corresponding internal VOL routine */
     va_start(arguments, req);
     arg_started = TRUE;
-    if((cls->link_cls.get)(obj, loc_params, get_type, dxpl_id, req, arguments) < 0)
+    if(H5VL__link_get(vol_obj->data, loc_params, vol_obj->plugin->cls, get_type, dxpl_id, req, arguments) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "link get failed")
 
 done:
     /* End access to the va_list, if we started it */
     if(arg_started)
         va_end(arguments);
+
+    /* Reset object wrapping info in API context */
+    if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_link_get() */
@@ -3941,12 +4131,8 @@ H5VLlink_get(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id, H5VL_link
     if(NULL == (cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
 
-    /* Check if the corresponding VOL callback exists */
-    if(NULL == cls->link_cls.get)
-        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL plugin has no `link get' method")
-
-    /* Bypass the H5VLint layer, calling the VOL callback directly */
-    if((cls->link_cls.get)(obj, loc_params, get_type, dxpl_id, req, arguments) < 0)
+    /* Call the corresponding internal VOL routine */
+    if(H5VL__link_get(obj, loc_params, cls, get_type, dxpl_id, req, arguments) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "unable to execute link get callback")
 
 done:
@@ -3955,9 +4141,40 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5VL__link_specific
+ *
+ * Purpose:	Specific operation on links through the VOL
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL__link_specific(void *obj, H5VL_loc_params_t loc_params, const H5VL_class_t *cls, 
+    H5VL_link_specific_t specific_type, hid_t dxpl_id, void **req, va_list arguments)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Check if the corresponding VOL callback exists */
+    if(NULL == cls->link_cls.specific)
+        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL plugin has no 'link specific' method")
+
+    /* Call the corresponding VOL callback */
+    if((ret_value = (cls->link_cls.specific)(obj, loc_params, specific_type, dxpl_id, req, arguments)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute link specific callback")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__link_specific() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5VL_link_specific
  *
- * Purpose:	specific operation on links through the VOL
+ * Purpose:	Specific operation on links through the VOL
  *
  * Return:      Success:    Non-negative
  *              Failure:    Negative
@@ -3965,29 +4182,35 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_link_specific(void *obj, H5VL_loc_params_t loc_params, const H5VL_class_t *cls, 
+H5VL_link_specific(const H5VL_object_t *vol_obj, H5VL_loc_params_t loc_params,
     H5VL_link_specific_t specific_type, hid_t dxpl_id, void **req, ...)
 {
     va_list arguments;                  /* Argument list passed from the API call */
     hbool_t arg_started = FALSE;        /* Whether the va_list has been started */
+    hbool_t vol_wrapper_set = FALSE;    /* Whether the VOL object wrapping context was set up */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    /* Check if the corresponding VOL callback exists */
-    if(NULL == cls->link_cls.specific)
-        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL plugin has no 'link specific' method")
+    /* Set wrapper info in API context */
+    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
+    vol_wrapper_set = TRUE;
 
-    /* Call the corresponding VOL callback */
+    /* Call the corresponding internal VOL routine */
     va_start(arguments, req);
     arg_started = TRUE;
-    if((ret_value = (cls->link_cls.specific)(obj, loc_params, specific_type, dxpl_id, req, arguments)) < 0)
+    if((ret_value = H5VL__link_specific(vol_obj->data, loc_params, vol_obj->plugin->cls, specific_type, dxpl_id, req, arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute link specific callback")
 
 done:
     /* End access to the va_list, if we started it */
     if(arg_started)
         va_end(arguments);
+
+    /* Reset object wrapping info in API context */
+    if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_link_specific() */
@@ -4020,12 +4243,8 @@ H5VLlink_specific(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id,
     if(NULL == (cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
 
-    /* Check if the corresponding VOL callback exists */
-    if(NULL == cls->link_cls.specific)
-        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL plugin has no `link specific' method")
-
-    /* Bypass the H5VLint layer, calling the VOL callback directly */
-    if((ret_value = (cls->link_cls.specific)(obj, loc_params, specific_type, dxpl_id, req, arguments)) < 0)
+    /* Call the corresponding internal VOL routine */
+    if((ret_value = H5VL__link_specific(obj, loc_params, cls, specific_type, dxpl_id, req, arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute link specific callback")
 
 done:
@@ -4034,9 +4253,40 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5VL__link_optional
+ *
+ * Purpose:	Optional operation specific to plugins.
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL__link_optional(void *obj, const H5VL_class_t *cls, hid_t dxpl_id,
+    void **req, va_list arguments)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Check if the corresponding VOL callback exists */
+    if(NULL == cls->link_cls.optional)
+        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL plugin has no 'link optional' method")
+
+    /* Call the corresponding VOL callback */
+    if((cls->link_cls.optional)(obj, dxpl_id, req, arguments) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute link optional callback")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__link_optional() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5VL_link_optional
  *
- * Purpose:	optional operation specific to plugins.
+ * Purpose:	Optional operation specific to plugins.
  *
  * Return:      Success:    Non-negative
  *              Failure:    Negative
@@ -4044,29 +4294,34 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_link_optional(void *obj, const H5VL_class_t *cls, hid_t dxpl_id,
-    void **req, ...)
+H5VL_link_optional(const H5VL_object_t *vol_obj, hid_t dxpl_id, void **req, ...)
 {
     va_list arguments;                  /* Argument list passed from the API call */
     hbool_t arg_started = FALSE;        /* Whether the va_list has been started */
+    hbool_t vol_wrapper_set = FALSE;    /* Whether the VOL object wrapping context was set up */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    /* Check if the corresponding VOL callback exists */
-    if(NULL == cls->link_cls.optional)
-        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL plugin has no 'link optional' method")
+    /* Set wrapper info in API context */
+    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
+    vol_wrapper_set = TRUE;
 
-    /* Call the corresponding VOL callback */
+    /* Call the corresponding internal VOL routine */
     va_start(arguments, req);
     arg_started = TRUE;
-    if((cls->link_cls.optional)(obj, dxpl_id, req, arguments) < 0)
+    if(H5VL__link_optional(vol_obj->data, vol_obj->plugin->cls, dxpl_id, req, arguments) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute link optional callback")
 
 done:
     /* End access to the va_list, if we started it */
     if(arg_started)
         va_end(arguments);
+
+    /* Reset object wrapping info in API context */
+    if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_link_optional() */
@@ -4097,12 +4352,8 @@ H5VLlink_optional(void *obj, hid_t plugin_id, hid_t dxpl_id, void **req, va_list
     if(NULL == (cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
 
-    /* Check if the corresponding VOL callback exists */
-    if(NULL == cls->link_cls.optional)
-        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL plugin has no `link optional' method")
-
-    /* Bypass the H5VLint layer, calling the VOL callback directly */
-    if((cls->link_cls.optional)(obj, dxpl_id, req, arguments) < 0)
+    /* Call the corresponding internal VOL routine */
+    if(H5VL__link_optional(obj, cls, dxpl_id, req, arguments) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute link optional callback")
 
 done:

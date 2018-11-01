@@ -279,7 +279,6 @@ H5Lmove(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
     H5VL_loc_params_t   loc_params1;
     H5VL_object_t      *vol_obj2            = NULL;         /* Object token of dst_id */
     H5VL_loc_params_t   loc_params2;
-    hbool_t         vol_wrapper_set = FALSE;            /* Whether the VOL object wrapping context was set up */
     herr_t              ret_value       = SUCCEED;      /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -331,28 +330,11 @@ H5Lmove(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
         if (vol_obj1->plugin->cls->value != vol_obj2->plugin->cls->value)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "Objects are accessed through different VOL plugins and can't be linked")
 
-    /* Set wrapper info in API context */
-    {
-        H5VL_object_t    *vol_obj = NULL;        /* object token of loc_id */
-
-        vol_obj = (vol_obj1 ? vol_obj1 : vol_obj2);
-        if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 0)
-            HGOTO_ERROR(H5E_LINK, H5E_CANTSET, H5I_INVALID_HID, "can't set VOL wrapper info")
-        vol_wrapper_set = TRUE;
-    }
-
     /* Move the link */
-    if (H5VL_link_move((vol_obj1 ? vol_obj1->data : NULL), loc_params1, 
-                      (vol_obj2 ? vol_obj2->data : NULL), loc_params2, 
-                      (vol_obj1 ? vol_obj1->plugin->cls : vol_obj2->plugin->cls),
-                      lcpl_id, lapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+    if(H5VL_link_move(vol_obj1, loc_params1, vol_obj2, loc_params2, lcpl_id, lapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTMOVE, FAIL, "unable to move link")
 
 done:
-    /* Reset object wrapping info in API context */
-    if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_LINK, H5E_CANTSET, H5I_INVALID_HID, "can't reset VOL wrapper info")
-
     FUNC_LEAVE_API(ret_value)
 } /* end H5Lmove() */
 
@@ -379,7 +361,7 @@ H5Lcopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
     H5VL_loc_params_t   loc_params1;
     H5VL_object_t      *vol_obj2            = NULL;         /* Object token of dst_id */
     H5VL_loc_params_t   loc_params2;
-    hbool_t         vol_wrapper_set = FALSE;            /* Whether the VOL object wrapping context was set up */
+    H5VL_object_t       tmp_vol_obj;                    /* Temporary object token of */
     herr_t              ret_value       = SUCCEED;      /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -404,7 +386,6 @@ H5Lcopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
     /* Check the link create property list */
     if(H5P_DEFAULT == lcpl_id)
         lcpl_id = H5P_LINK_CREATE_DEFAULT;
-
 
     /* Set location paramter for source object */
     loc_params1.type                            = H5VL_OBJECT_BY_NAME;
@@ -432,28 +413,15 @@ H5Lcopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
         if(vol_obj1->plugin->cls->value != vol_obj2->plugin->cls->value)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "Objects are accessed through different VOL plugins and can't be linked")
 
-    /* Set wrapper info in API context */
-    {
-        H5VL_object_t    *vol_obj = NULL;        /* object token of loc_id */
-
-        vol_obj = (vol_obj1 ? vol_obj1 : vol_obj2);
-        if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 0)
-            HGOTO_ERROR(H5E_LINK, H5E_CANTSET, H5I_INVALID_HID, "can't set VOL wrapper info")
-        vol_wrapper_set = TRUE;
-    }
+    /* Construct a temporary source VOL object */
+    tmp_vol_obj.data = (vol_obj1 ? vol_obj1->data : NULL);
+    tmp_vol_obj.plugin = (vol_obj1 ? vol_obj1->plugin : vol_obj2->plugin);
 
     /* Copy the link */
-    if(H5VL_link_copy((vol_obj1 ? vol_obj1->data : NULL), loc_params1, 
-                      (vol_obj2 ? vol_obj2->data : NULL), loc_params2, 
-                      (vol_obj1 ? vol_obj1->plugin->cls : vol_obj2->plugin->cls),
-                      lcpl_id, lapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+    if(H5VL_link_copy(&tmp_vol_obj, loc_params1, vol_obj2, loc_params2, lcpl_id, lapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTMOVE, FAIL, "unable to copy link")
 
 done:
-    /* Reset object wrapping info in API context */
-    if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_LINK, H5E_CANTSET, H5I_INVALID_HID, "can't reset VOL wrapper info")
-
     FUNC_LEAVE_API(ret_value)
 } /* end H5Lcopy() */
 
@@ -483,7 +451,6 @@ H5Lcreate_soft(const char *link_target, hid_t link_loc_id, const char *link_name
     H5VL_object_t      *vol_obj         = NULL;         /* object token of loc_id */
     H5VL_loc_params_t   loc_params;
     H5P_genplist_t     *plist       = NULL;         /* Property list pointer */
-    hbool_t         vol_wrapper_set = FALSE;            /* Whether the VOL object wrapping context was set up */
     herr_t              ret_value   = SUCCEED;      /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -529,21 +496,11 @@ H5Lcreate_soft(const char *link_target, hid_t link_loc_id, const char *link_name
     if(H5CX_set_apl(&lapl_id, H5P_CLS_LACC, link_loc_id, TRUE) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access property list info")
 
-    /* Set wrapper info in API context */
-    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 0)
-        HGOTO_ERROR(H5E_LINK, H5E_CANTSET, H5I_INVALID_HID, "can't set VOL wrapper info")
-    vol_wrapper_set = TRUE;
-
     /* Create the link */
-    if(H5VL_link_create(H5VL_LINK_CREATE_SOFT, vol_obj->data, loc_params, vol_obj->plugin->cls,
-                        lcpl_id, lapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+    if(H5VL_link_create(H5VL_LINK_CREATE_SOFT, vol_obj, loc_params, lcpl_id, lapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTCREATE, FAIL, "unable to create soft link")
 
 done:
-    /* Reset object wrapping info in API context */
-    if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_LINK, H5E_CANTSET, H5I_INVALID_HID, "can't reset VOL wrapper info")
-
     FUNC_LEAVE_API(ret_value)
 } /* end H5Lcreate_soft() */
 
@@ -568,8 +525,9 @@ herr_t
 H5Lcreate_hard(hid_t cur_loc_id, const char *cur_name,
     hid_t new_loc_id, const char *new_name, hid_t lcpl_id, hid_t lapl_id)
 {
-    H5VL_object_t      *vol_obj1 = NULL;            /* object token of cur_loc_id */
-    H5VL_object_t      *vol_obj2 = NULL;            /* object token of new_loc_id */
+    H5VL_object_t      *vol_obj1 = NULL;        /* Object token of cur_loc_id */
+    H5VL_object_t      *vol_obj2 = NULL;        /* Object token of new_loc_id */
+    H5VL_object_t       tmp_vol_obj;            /* Temporary object token of */
     H5VL_loc_params_t   loc_params1;
     H5VL_loc_params_t   loc_params2;
     H5P_genplist_t     *plist;                  /* Property list pointer */
@@ -636,10 +594,12 @@ H5Lcreate_hard(hid_t cur_loc_id, const char *cur_name,
     if(H5P_set(plist, H5VL_PROP_LINK_TARGET_LOC_PARAMS, &loc_params1) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't set property value for target name")
 
+    /* Construct a temporary VOL object */
+    tmp_vol_obj.data = (vol_obj2 ? (vol_obj2->data) : NULL);
+    tmp_vol_obj.plugin = (vol_obj1 != NULL ? vol_obj1->plugin : vol_obj2->plugin);
+
     /* Create the link */
-    if(H5VL_link_create(H5VL_LINK_CREATE_HARD, (vol_obj2 ? (vol_obj2->data) : NULL), loc_params2, 
-                        (vol_obj1 != NULL ? vol_obj1->plugin->cls : vol_obj2->plugin->cls),
-                        lcpl_id, lapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+    if(H5VL_link_create(H5VL_LINK_CREATE_HARD, &tmp_vol_obj, loc_params2, lcpl_id, lapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTCREATE, FAIL, "unable to create hard link")
 
 done:
@@ -675,11 +635,10 @@ herr_t
 H5Lcreate_ud(hid_t link_loc_id, const char *link_name, H5L_type_t link_type,
     const void *udata, size_t udata_size, hid_t lcpl_id, hid_t lapl_id)
 {
-    H5VL_object_t    *vol_obj = NULL;        /* object token of loc_id */
+    H5VL_object_t    *vol_obj = NULL;   /* Object token of loc_id */
     H5VL_loc_params_t loc_params;
-    H5P_genplist_t *plist;      /* Property list pointer */
-    hbool_t         vol_wrapper_set = FALSE;            /* Whether the VOL object wrapping context was set up */
-    herr_t      ret_value = SUCCEED;       /* Return value */
+    H5P_genplist_t *plist;              /* Property list pointer */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE7("e", "i*sLl*xzii", link_loc_id, link_name, link_type, udata,
@@ -720,21 +679,11 @@ H5Lcreate_ud(hid_t link_loc_id, const char *link_name, H5L_type_t link_type,
     if(H5P_set(plist, H5VL_PROP_LINK_UDATA_SIZE, &udata_size) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value from plist")
 
-    /* Set wrapper info in API context */
-    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 0)
-        HGOTO_ERROR(H5E_LINK, H5E_CANTSET, H5I_INVALID_HID, "can't set VOL wrapper info")
-    vol_wrapper_set = TRUE;
-
     /* Create external link */
-    if(H5VL_link_create(H5VL_LINK_CREATE_UD, vol_obj->data, loc_params, vol_obj->plugin->cls,
-                        lcpl_id, lapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+    if(H5VL_link_create(H5VL_LINK_CREATE_UD, vol_obj, loc_params, lcpl_id, lapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to create link")
 
 done:
-    /* Reset object wrapping info in API context */
-    if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_LINK, H5E_CANTSET, H5I_INVALID_HID, "can't reset VOL wrapper info")
-
     FUNC_LEAVE_API(ret_value)
 } /* end H5Lcreate_ud() */
 
@@ -791,8 +740,7 @@ H5Ldelete(hid_t loc_id, const char *name, hid_t lapl_id)
     vol_wrapper_set = TRUE;
 
     /* Unlink */
-    if(H5VL_link_specific(vol_obj->data, loc_params, vol_obj->plugin->cls, H5VL_LINK_DELETE, 
-                          H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+    if(H5VL_link_specific(vol_obj, loc_params, H5VL_LINK_DELETE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTDELETE, FAIL, "unable to delete link")
 
 done:
@@ -859,8 +807,7 @@ H5Ldelete_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
     /* Delete the link */
-    if(H5VL_link_specific(vol_obj->data, loc_params, vol_obj->plugin->cls, H5VL_LINK_DELETE, 
-                          H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+    if(H5VL_link_specific(vol_obj, loc_params, H5VL_LINK_DELETE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTDELETE, FAIL, "unable to delete link")
 
 done:
@@ -922,8 +869,7 @@ H5Lget_val(hid_t loc_id, const char *name, void *buf/*out*/, size_t size,
     vol_wrapper_set = TRUE;
 
     /* Get the link value */
-    if(H5VL_link_get(vol_obj->data, loc_params, vol_obj->plugin->cls, H5VL_LINK_GET_VAL, 
-                     H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, buf, size) < 0)
+    if(H5VL_link_get(vol_obj, loc_params, H5VL_LINK_GET_VAL, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, buf, size) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "unable to get link value for '%s'", name)
 
 done:
@@ -991,8 +937,7 @@ H5Lget_val_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
     /* Get the link value */
-    if(H5VL_link_get(vol_obj->data, loc_params, vol_obj->plugin->cls, H5VL_LINK_GET_VAL, 
-                     H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, buf, size) < 0)
+    if(H5VL_link_get(vol_obj, loc_params, H5VL_LINK_GET_VAL, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, buf, size) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "unable to get link value")
 
 done:
@@ -1049,8 +994,7 @@ H5Lexists(hid_t loc_id, const char *name, hid_t lapl_id)
     vol_wrapper_set = TRUE;
 
     /* Check for the existence of the link */
-    if(H5VL_link_specific(vol_obj->data, loc_params, vol_obj->plugin->cls, H5VL_LINK_EXISTS,
-                          H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &ret_value) < 0)
+    if(H5VL_link_specific(vol_obj, loc_params, H5VL_LINK_EXISTS, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &ret_value) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "unable to get link info")
 
 done:
@@ -1111,8 +1055,7 @@ H5Lget_info(hid_t loc_id, const char *name, H5L_info_t *linfo /*out*/,
     vol_wrapper_set = TRUE;
 
     /* Get the link information */
-    if(H5VL_link_get(vol_obj->data, loc_params, vol_obj->plugin->cls, H5VL_LINK_GET_INFO, 
-                     H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, linfo) < 0)
+    if(H5VL_link_get(vol_obj, loc_params, H5VL_LINK_GET_INFO, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, linfo) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "unable to get link info")
 
 done:
@@ -1182,8 +1125,7 @@ H5Lget_info_by_idx(hid_t loc_id, const char *group_name,
     vol_wrapper_set = TRUE;
 
     /* Get the link information */
-    if(H5VL_link_get(vol_obj->data, loc_params, vol_obj->plugin->cls, H5VL_LINK_GET_INFO,
-                     H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, linfo) < 0)
+    if(H5VL_link_get(vol_obj, loc_params, H5VL_LINK_GET_INFO, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, linfo) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "unable to get link info")
 
 done:
@@ -1383,8 +1325,7 @@ H5Lget_name_by_idx(hid_t loc_id, const char *group_name,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, (-1), "invalid location identifier")
 
     /* Get the link information */
-    if(H5VL_link_get(vol_obj->data, loc_params, vol_obj->plugin->cls, H5VL_LINK_GET_NAME, 
-                     H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, name, size, &ret_value) < 0)
+    if(H5VL_link_get(vol_obj, loc_params, H5VL_LINK_GET_NAME, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, name, size, &ret_value) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTGET, (-1), "unable to get link name")
 
 done:
@@ -1448,9 +1389,7 @@ H5Literate(hid_t group_id, H5_index_t idx_type, H5_iter_order_t order,
     vol_wrapper_set = TRUE;
 
     /* Iterate over the links */
-    if((ret_value = H5VL_link_specific(vol_obj->data, loc_params, vol_obj->plugin->cls, H5VL_LINK_ITER,
-                                       H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, 
-                                       FALSE, idx_type, order, idx_p, op, op_data)) < 0)
+    if((ret_value = H5VL_link_specific(vol_obj, loc_params, H5VL_LINK_ITER, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, FALSE, idx_type, order, idx_p, op, op_data)) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_BADITER, FAIL, "link iteration failed")
 
 done:
@@ -1530,8 +1469,7 @@ H5Literate_by_name(hid_t loc_id, const char *group_name,
     vol_wrapper_set = TRUE;
 
     /* Iterate over the links */
-    if((ret_value = H5VL_link_specific(vol_obj->data, loc_params, vol_obj->plugin->cls, H5VL_LINK_ITER,
-                                       H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, FALSE, idx_type, order, idx_p, op, op_data)) < 0)
+    if((ret_value = H5VL_link_specific(vol_obj, loc_params, H5VL_LINK_ITER, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, FALSE, idx_type, order, idx_p, op, op_data)) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_BADITER, FAIL, "link iteration failed")
 
 done:
@@ -1609,9 +1547,7 @@ H5Lvisit(hid_t group_id, H5_index_t idx_type, H5_iter_order_t order,
     vol_wrapper_set = TRUE;
 
     /* Iterate over the links */
-    if((ret_value = H5VL_link_specific(vol_obj->data, loc_params, vol_obj->plugin->cls, H5VL_LINK_ITER,
-                                       H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, 
-                                       TRUE, idx_type, order, NULL, op, op_data)) < 0)
+    if((ret_value = H5VL_link_specific(vol_obj, loc_params, H5VL_LINK_ITER, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, TRUE, idx_type, order, NULL, op, op_data)) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_BADITER, FAIL, "link visitation failed")
 
 done:
@@ -1696,9 +1632,7 @@ H5Lvisit_by_name(hid_t loc_id, const char *group_name, H5_index_t idx_type,
     vol_wrapper_set = TRUE;
 
     /* Visit the links */
-    if((ret_value = H5VL_link_specific(vol_obj->data, loc_params, vol_obj->plugin->cls, H5VL_LINK_ITER,
-                                       H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, 
-                                       TRUE, idx_type, order, NULL, op, op_data)) < 0)
+    if((ret_value = H5VL_link_specific(vol_obj, loc_params, H5VL_LINK_ITER, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, TRUE, idx_type, order, NULL, op, op_data)) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_BADITER, FAIL, "link visitation failed")
 
 done:

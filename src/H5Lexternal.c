@@ -422,8 +422,7 @@ H5Lcreate_external(const char *file_name, const char *obj_name,
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value from plist")
 
     /* Create an external link */
-    if((ret_value = H5VL_link_create(H5VL_LINK_CREATE_UD, vol_obj->data, loc_params, vol_obj->plugin->cls,
-                                     lcpl_id, lapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)) < 0)
+    if(H5VL_link_create(H5VL_LINK_CREATE_UD, vol_obj, loc_params, lcpl_id, lapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to create external link")
 
 done:
