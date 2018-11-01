@@ -1,17 +1,13 @@
 cmake_minimum_required (VERSION 3.10)
-PROJECT (HDF5_TOOLS_H5COPY)
-
-#-----------------------------------------------------------------------------
-# Setup include Directories
-#-----------------------------------------------------------------------------
-INCLUDE_DIRECTORIES (${HDF5_TOOLS_SRC_DIR}/lib)
+project (HDF5_TOOLS_H5COPY C)
 
 # --------------------------------------------------------------------
 # Add the h5copy and test executables
 # --------------------------------------------------------------------
 add_executable (h5copy ${HDF5_TOOLS_H5COPY_SOURCE_DIR}/h5copy.c)
-TARGET_C_PROPERTIES (h5copy STATIC " " " ")
-target_link_libraries (h5copy  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
+target_include_directories(h5copy PRIVATE "${HDF5_TOOLS_DIR}/lib;${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+TARGET_C_PROPERTIES (h5copy STATIC)
+target_link_libraries (h5copy PRIVATE ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
 set_target_properties (h5copy PROPERTIES FOLDER tools)
 set_global_variable (HDF5_UTILS_TO_EXPORT "${HDF5_UTILS_TO_EXPORT};h5copy")
 
@@ -19,8 +15,9 @@ set (H5_DEP_EXECUTABLES h5copy)
 
 if (BUILD_SHARED_LIBS)
   add_executable (h5copy-shared ${HDF5_TOOLS_H5COPY_SOURCE_DIR}/h5copy.c)
-  TARGET_C_PROPERTIES (h5copy-shared SHARED " " " ")
-  target_link_libraries (h5copy-shared  ${HDF5_TOOLS_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
+  target_include_directories(h5copy-shared PRIVATE "${HDF5_TOOLS_DIR}/lib;${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+  TARGET_C_PROPERTIES (h5copy-shared SHARED)
+  target_link_libraries (h5copy-shared PRIVATE ${HDF5_TOOLS_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
   set_target_properties (h5copy-shared PROPERTIES FOLDER tools)
   set_global_variable (HDF5_UTILS_TO_EXPORT "${HDF5_UTILS_TO_EXPORT};h5copy-shared")
 
@@ -30,8 +27,9 @@ endif ()
 if (BUILD_TESTING)
   if (HDF5_BUILD_GENERATORS)
     add_executable (h5copygentest ${HDF5_TOOLS_H5COPY_SOURCE_DIR}/h5copygentest.c)
-    TARGET_C_PROPERTIES (h5copygentest STATIC " " " ")
-    target_link_libraries (h5copygentest ${HDF5_LIB_TARGET})
+    target_include_directories(h5copygentest PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+    TARGET_C_PROPERTIES (h5copygentest STATIC)
+    target_link_libraries (h5copygentest PRIVATE ${HDF5_LIB_TARGET})
     set_target_properties (h5copygentest PROPERTIES FOLDER generator/tools)
 
     #add_test (NAME h5copygentest COMMAND $<TARGET_FILE:h5copygentest>)

@@ -182,9 +182,10 @@
     if ("${testtype}" STREQUAL "SKIP")
       if (NOT HDF5_ENABLE_USING_MEMCHECKER)
         add_test (
-            NAME H5REPACK_OLD-${testname}-SKIPPED
+            NAME H5REPACK_OLD-${testname}
             COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${ARGN} -i ${PROJECT_BINARY_DIR}/testfiles/${testfile} -o ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}"
         )
+        set_property(TEST H5REPACK_OLD-${testname} PROPERTY DISABLED)
       endif ()
     else ()
       add_test (
@@ -213,9 +214,10 @@
     if ("${testtype}" STREQUAL "SKIP")
       if (NOT HDF5_ENABLE_USING_MEMCHECKER)
         add_test (
-            NAME H5REPACK-${testname}-SKIPPED
+            NAME H5REPACK-${testname}
             COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}"
         )
+        set_property(TEST H5REPACK-${testname} PROPERTY DISABLED)
       endif ()
     else ()
       add_test (
@@ -244,9 +246,10 @@
     if ("${testtype}" STREQUAL "SKIP")
       if (NOT HDF5_ENABLE_USING_MEMCHECKER)
         add_test (
-            NAME H5REPACK_CMP-${testname}-SKIPPED
+            NAME H5REPACK_CMP-${testname}
             COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${resultfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${resultfile}"
         )
+        set_property(TEST H5REPACK_CMP-${testname} PROPERTY DISABLED)
       endif ()
     else ()
       # If using memchecker add tests without using scripts
@@ -291,9 +294,10 @@
     if ("${testtype}" STREQUAL "SKIP")
       if (NOT HDF5_ENABLE_USING_MEMCHECKER)
         add_test (
-            NAME H5REPACK_MASK-${testname}-SKIPPED
+            NAME H5REPACK_MASK-${testname}
             COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${resultfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${resultfile}"
         )
+        set_property(TEST H5REPACK_MASK-${testname} PROPERTY DISABLED)
       endif ()
     else ()
       # If using memchecker add tests without using scripts
@@ -338,9 +342,10 @@
     if ("${testtype}" STREQUAL "SKIP")
       if (NOT HDF5_ENABLE_USING_MEMCHECKER)
         add_test (
-            NAME H5REPACK_DMP-${testname}-SKIPPED
+            NAME H5REPACK_DMP-${testname}
             COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${resultfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${resultfile}"
         )
+        set_property(TEST H5REPACK_DMP-${testname} PROPERTY DISABLED)
       endif ()
     else ()
       add_test (
@@ -380,9 +385,10 @@
     if ("${testtype}" STREQUAL "SKIP")
       if (NOT HDF5_ENABLE_USING_MEMCHECKER)
         add_test (
-            NAME H5REPACK_STAT-${testname}-SKIPPED
+            NAME H5REPACK_STAT-${testname}
             COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${resultfile} ${PROJECT_BINARY_DIR}/testfiles/out-${statarg}.${resultfile}"
         )
+        set_property(TEST H5REPACK_STAT-${testname} PROPERTY DISABLED)
       endif ()
     else ()
       add_test (
@@ -422,9 +428,10 @@
     if ("${testtype}" STREQUAL "SKIP")
       if (NOT HDF5_ENABLE_USING_MEMCHECKER)
         add_test (
-            NAME H5REPACK_VERIFY_LAYOUT-${testname}-SKIPPED
+            NAME H5REPACK_VERIFY_LAYOUT-${testname}
             COMMAND ${CMAKE_COMMAND} -E echo "SKIP -d ${testdset} -pH ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${resultfile}"
         )
+        set_property(TEST H5REPACK_VERIFY_LAYOUT-${testname} PROPERTY DISABLED)
       endif ()
     else ()
       if (NOT HDF5_ENABLE_USING_MEMCHECKER)
