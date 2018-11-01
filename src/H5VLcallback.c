@@ -103,6 +103,20 @@ static herr_t H5VL__file_optional(void *obj, const H5VL_class_t *cls, hid_t dxpl
     void **req, va_list arguments);
 static herr_t H5VL__file_close(void *obj, const H5VL_class_t *cls, hid_t dxpl_id,
     void **req);
+static void *H5VL__group_create(void *obj, H5VL_loc_params_t loc_params,
+    const H5VL_class_t *cls, const char *name, hid_t gcpl_id, hid_t gapl_id,
+    hid_t dxpl_id, void **req);
+static void *H5VL__group_open(void *obj, H5VL_loc_params_t loc_params,
+    const H5VL_class_t *cls, const char *name, hid_t gapl_id, hid_t dxpl_id,
+    void **req);
+static herr_t H5VL__group_get(void *obj, const H5VL_class_t *cls, H5VL_group_get_t get_type, 
+    hid_t dxpl_id, void **req, va_list arguments);
+static herr_t H5VL__group_specific(void *obj, const H5VL_class_t *cls, H5VL_group_specific_t specific_type, 
+    hid_t dxpl_id, void **req, va_list arguments);
+static herr_t H5VL__group_optional(void *obj, const H5VL_class_t *cls, hid_t dxpl_id,
+    void **req, va_list arguments);
+static herr_t H5VL__group_close(void *obj, const H5VL_class_t *cls,
+    hid_t dxpl_id, void **req);
 
 
 /*********************/
@@ -3012,7 +3026,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5VL_group_create
+ * Function:	H5VL__group_create
  *
  * Purpose:	Creates a group through the VOL
  *
@@ -3021,13 +3035,13 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-void *
-H5VL_group_create(void *obj, H5VL_loc_params_t loc_params, const H5VL_class_t *cls,
+static void *
+H5VL__group_create(void *obj, H5VL_loc_params_t loc_params, const H5VL_class_t *cls,
     const char *name, hid_t gcpl_id, hid_t gapl_id, hid_t dxpl_id, void **req)
 {
     void *ret_value = NULL;     /* Return value */
 
-    FUNC_ENTER_NOAPI(NULL)
+    FUNC_ENTER_STATIC
 
     /* Check if the corresponding VOL callback exists */
     if(NULL == cls->group_cls.create)
@@ -3038,6 +3052,43 @@ H5VL_group_create(void *obj, H5VL_loc_params_t loc_params, const H5VL_class_t *c
         HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, NULL, "group create failed")
 
 done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__group_create() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_group_create
+ *
+ * Purpose:	Creates a group through the VOL
+ *
+ * Return:      Success: Pointer to new group
+ *		Failure: NULL
+ *
+ *-------------------------------------------------------------------------
+ */
+void *
+H5VL_group_create(const H5VL_object_t *vol_obj, H5VL_loc_params_t loc_params,
+    const char *name, hid_t gcpl_id, hid_t gapl_id, hid_t dxpl_id, void **req)
+{
+    hbool_t vol_wrapper_set = FALSE;    /* Whether the VOL object wrapping context was set up */
+    void *ret_value = NULL;     /* Return value */
+
+    FUNC_ENTER_NOAPI(NULL)
+
+    /* Set wrapper info in API context */
+    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, NULL, "can't set VOL wrapper info")
+    vol_wrapper_set = TRUE;
+
+    /* Call the corresponding internal VOL routine */
+    if(NULL == (ret_value = H5VL__group_create(vol_obj->data, loc_params, vol_obj->plugin->cls, name, gcpl_id, gapl_id, dxpl_id, req)))
+        HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, NULL, "group create failed")
+
+done:
+    /* Reset object wrapping info in API context */
+    if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, NULL, "can't reset VOL wrapper info")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_group_create() */
 
@@ -3070,12 +3121,43 @@ H5VLgroup_create(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id, const
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a VOL plugin ID")
 
     /* Call the corresponding internal VOL routine */
-    if(NULL == (ret_value = H5VL_group_create(obj, loc_params, cls, name, gcpl_id, gapl_id, dxpl_id, req)))
+    if(NULL == (ret_value = H5VL__group_create(obj, loc_params, cls, name, gcpl_id, gapl_id, dxpl_id, req)))
         HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, NULL, "unable to create group")
 
 done:
     FUNC_LEAVE_API_NOINIT(ret_value)
 } /* end H5VLgroup_create() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL__group_open
+ *
+ * Purpose:	Opens a group through the VOL
+ *
+ * Return:      Success: Pointer to group
+ *		Failure: NULL
+ *
+ *-------------------------------------------------------------------------
+ */
+static void *
+H5VL__group_open(void *obj, H5VL_loc_params_t loc_params, const H5VL_class_t *cls,
+    const char *name, hid_t gapl_id, hid_t dxpl_id, void **req)
+{
+    void *ret_value = NULL;             /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Check if the corresponding VOL callback exists */
+    if(NULL == cls->group_cls.open)
+        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, NULL, "VOL plugin has no 'group open' method")
+
+    /* Call the corresponding VOL callback */
+    if(NULL == (ret_value = (cls->group_cls.open)(obj, loc_params, name, gapl_id, dxpl_id, req)))
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPENOBJ, NULL, "group open failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__group_open() */
 
 
 /*-------------------------------------------------------------------------
@@ -3089,22 +3171,28 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VL_group_open(void *obj, H5VL_loc_params_t loc_params, const H5VL_class_t *cls,
+H5VL_group_open(const H5VL_object_t *vol_obj, H5VL_loc_params_t loc_params,
     const char *name, hid_t gapl_id, hid_t dxpl_id, void **req)
 {
-    void *ret_value = NULL;     /* Return value */
+    hbool_t vol_wrapper_set = FALSE;    /* Whether the VOL object wrapping context was set up */
+    void *ret_value = NULL;             /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
-    /* Check if the corresponding VOL callback exists */
-    if(NULL == cls->group_cls.open)
-        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, NULL, "VOL plugin has no 'group open' method")
+    /* Set wrapper info in API context */
+    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, NULL, "can't set VOL wrapper info")
+    vol_wrapper_set = TRUE;
 
-    /* Call the corresponding VOL callback */
-    if(NULL == (ret_value = (cls->group_cls.open)(obj, loc_params, name, gapl_id, dxpl_id, req)))
+    /* Call the corresponding internal VOL routine */
+    if(NULL == (ret_value = H5VL__group_open(vol_obj->data, loc_params, vol_obj->plugin->cls, name, gapl_id, dxpl_id, req)))
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPENOBJ, NULL, "group open failed")
 
 done:
+    /* Reset object wrapping info in API context */
+    if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, NULL, "can't reset VOL wrapper info")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_group_open() */
 
@@ -3137,12 +3225,43 @@ H5VLgroup_open(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id, const c
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a VOL plugin ID")
 
     /* Call the corresponding internal VOL routine */
-    if(NULL == (ret_value = H5VL_group_open(obj, loc_params, cls, name, gapl_id, dxpl_id, req)))
+    if(NULL == (ret_value = H5VL__group_open(obj, loc_params, cls, name, gapl_id, dxpl_id, req)))
         HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "unable to open group")
 
 done:
     FUNC_LEAVE_API_NOINIT(ret_value)
 } /* end H5VLgroup_open() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL__group_get
+ *
+ * Purpose:	Get specific information about the group through the VOL
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL__group_get(void *obj, const H5VL_class_t *cls, H5VL_group_get_t get_type, 
+    hid_t dxpl_id, void **req, va_list arguments)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Check if the corresponding VOL callback exists */
+    if(NULL == cls->group_cls.get)
+        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL plugin has no 'group get' method")
+
+    /* Call the corresponding VOL callback */
+    if((cls->group_cls.get)(obj, get_type, dxpl_id, req, arguments) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "group get failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__group_get() */
 
 
 /*-------------------------------------------------------------------------
@@ -3156,29 +3275,35 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_group_get(void *obj, const H5VL_class_t *cls, H5VL_group_get_t get_type, 
+H5VL_group_get(const H5VL_object_t *vol_obj, H5VL_group_get_t get_type, 
     hid_t dxpl_id, void **req, ...)
 {
     va_list arguments;                  /* Argument list passed from the API call */
     hbool_t arg_started = FALSE;        /* Whether the va_list has been started */
+    hbool_t vol_wrapper_set = FALSE;    /* Whether the VOL object wrapping context was set up */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    /* Check if the corresponding VOL callback exists */
-    if(NULL == cls->group_cls.get)
-        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL plugin has no 'group get' method")
+    /* Set wrapper info in API context */
+    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
+    vol_wrapper_set = TRUE;
 
-    /* Call the corresponding VOL callback */
+    /* Call the corresponding internal VOL routine */
     va_start(arguments, req);
     arg_started = TRUE;
-    if((cls->group_cls.get)(obj, get_type, dxpl_id, req, arguments) < 0)
+    if(H5VL__group_get(vol_obj->data, vol_obj->plugin->cls, get_type, dxpl_id, req, arguments) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "group get failed")
 
 done:
     /* End access to the va_list, if we started it */
     if(arg_started)
         va_end(arguments);
+
+    /* Reset object wrapping info in API context */
+    if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_group_get() */
@@ -3210,17 +3335,44 @@ H5VLgroup_get(void *obj, hid_t plugin_id, H5VL_group_get_t get_type,
     if(NULL == (cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
 
-    /* Check if the corresponding VOL callback exists */
-    if(NULL == cls->group_cls.get)
-        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL plugin has no `group get' method")
-
-    /* Bypass the H5VLint layer, calling the VOL callback directly */
-    if((cls->group_cls.get)(obj, get_type, dxpl_id, req, arguments) < 0)
+    /* Call the corresponding internal VOL routine */
+    if(H5VL__group_get(obj, cls, get_type, dxpl_id, req, arguments) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "unable to execute group get callback")
 
 done:
     FUNC_LEAVE_API_NOINIT(ret_value)
 } /* end H5VLgroup_get() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL__group_specific
+ *
+ * Purpose:	Specific operation on groups through the VOL
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL__group_specific(void *obj, const H5VL_class_t *cls, H5VL_group_specific_t specific_type, 
+    hid_t dxpl_id, void **req, va_list arguments)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Check if the corresponding VOL callback exists */
+    if(NULL == cls->group_cls.specific)
+        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL plugin has no 'group specific' method")
+
+    /* Call the corresponding VOL callback */
+    if((cls->group_cls.specific)(obj, specific_type, dxpl_id, req, arguments) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute group specific callback")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__group_specific() */
 
 
 /*-------------------------------------------------------------------------
@@ -3234,29 +3386,35 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_group_specific(void *obj, const H5VL_class_t *cls, H5VL_group_specific_t specific_type, 
+H5VL_group_specific(const H5VL_object_t *vol_obj, H5VL_group_specific_t specific_type, 
     hid_t dxpl_id, void **req, ...)
 {
     va_list arguments;                  /* Argument list passed from the API call */
     hbool_t arg_started = FALSE;        /* Whether the va_list has been started */
+    hbool_t vol_wrapper_set = FALSE;    /* Whether the VOL object wrapping context was set up */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    /* Check if the corresponding VOL callback exists */
-    if(NULL == cls->group_cls.specific)
-        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL plugin has no 'group specific' method")
+    /* Set wrapper info in API context */
+    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
+    vol_wrapper_set = TRUE;
 
-    /* Call the corresponding VOL callback */
+    /* Call the corresponding internal VOL routine */
     va_start(arguments, req);
     arg_started = TRUE;
-    if((cls->group_cls.specific)(obj, specific_type, dxpl_id, req, arguments) < 0)
+    if(H5VL__group_specific(vol_obj->data, vol_obj->plugin->cls, specific_type, dxpl_id, req, arguments) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute group specific callback")
 
 done:
     /* End access to the va_list, if we started it */
     if(arg_started)
         va_end(arguments);
+
+    /* Reset object wrapping info in API context */
+    if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_group_specific() */
@@ -3289,17 +3447,44 @@ H5VLgroup_specific(void *obj, hid_t plugin_id, H5VL_group_specific_t specific_ty
     if(NULL == (cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
 
-    /* Check if the corresponding VOL callback exists */
-    if(NULL == cls->group_cls.specific)
-        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL plugin has no `group specific' method")
-
-    /* Bypass the H5VLint layer, calling the VOL callback directly */
-    if((cls->group_cls.specific)(obj, specific_type, dxpl_id, req, arguments) < 0)
+    /* Call the corresponding internal VOL routine */
+    if(H5VL__group_specific(obj, cls, specific_type, dxpl_id, req, arguments) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute group specific callback")
 
 done:
     FUNC_LEAVE_API_NOINIT(ret_value)
 } /* end H5VLgroup_specific() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL__group_optional
+ *
+ * Purpose:	Optional operation specific to plugins.
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL__group_optional(void *obj, const H5VL_class_t *cls, hid_t dxpl_id,
+    void **req, va_list arguments)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Check if the corresponding VOL callback exists */
+    if(NULL == cls->group_cls.optional)
+        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL plugin has no 'group optional' method")
+
+    /* Call the corresponding VOL callback */
+    if((cls->group_cls.optional)(obj, dxpl_id, req, arguments) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute group optional callback")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__group_optional() */
 
 
 /*-------------------------------------------------------------------------
@@ -3313,29 +3498,34 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_group_optional(void *obj, const H5VL_class_t *cls, hid_t dxpl_id,
-    void **req, ...)
+H5VL_group_optional(const H5VL_object_t *vol_obj, hid_t dxpl_id, void **req, ...)
 {
     va_list arguments;                  /* Argument list passed from the API call */
     hbool_t arg_started = FALSE;        /* Whether the va_list has been started */
+    hbool_t vol_wrapper_set = FALSE;    /* Whether the VOL object wrapping context was set up */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    /* Check if the corresponding VOL callback exists */
-    if(NULL == cls->group_cls.optional)
-        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL plugin has no 'group optional' method")
+    /* Set wrapper info in API context */
+    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
+    vol_wrapper_set = TRUE;
 
-    /* Call the corresponding VOL callback */
+    /* Call the corresponding internal VOL routine */
     va_start(arguments, req);
     arg_started = TRUE;
-    if((cls->group_cls.optional)(obj, dxpl_id, req, arguments) < 0)
+    if(H5VL__group_optional(vol_obj->data, vol_obj->plugin->cls, dxpl_id, req, arguments) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute group optional callback")
 
 done:
     /* End access to the va_list, if we started it */
     if(arg_started)
         va_end(arguments);
+
+    /* Reset object wrapping info in API context */
+    if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_group_optional() */
@@ -3352,7 +3542,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLgroup_optional(void *obj, hid_t plugin_id, hid_t dxpl_id, void **req, va_list arguments)
+H5VLgroup_optional(void *obj, hid_t plugin_id, hid_t dxpl_id, void **req,
+    va_list arguments)
 {
     H5VL_class_t *cls;                  /* VOL plugin's class struct */
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -3366,17 +3557,47 @@ H5VLgroup_optional(void *obj, hid_t plugin_id, hid_t dxpl_id, void **req, va_lis
     if(NULL == (cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
 
-    /* Check if the corresponding VOL callback exists */
-    if(NULL == cls->group_cls.optional)
-        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL plugin has no `group optional' method")
-
-    /* Bypass the H5VLint layer, calling the VOL callback directly */
-    if((cls->group_cls.optional)(obj, dxpl_id, req, arguments) < 0)
+    /* Call the corresponding internal VOL routine */
+    if(H5VL__group_optional(obj, cls, dxpl_id, req, arguments) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute group optional callback")
 
 done:
     FUNC_LEAVE_API_NOINIT(ret_value)
 } /* end H5VLgroup_optional() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL__group_close
+ *
+ * Purpose:     Closes a group through the VOL
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL__group_close(void *obj, const H5VL_class_t *cls, hid_t dxpl_id, void **req)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    /* Sanity check */
+    HDassert(obj);
+    HDassert(cls);
+
+    FUNC_ENTER_STATIC
+
+    /* Check if the corresponding VOL callback exists */
+    if(NULL == cls->group_cls.close)
+        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL plugin has no 'group close' method")
+
+    /* Call the corresponding VOL callback */
+    if((cls->group_cls.close)(obj, dxpl_id, req) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTCLOSEOBJ, FAIL, "group close failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__group_close() */
 
 
 /*-------------------------------------------------------------------------
@@ -3390,25 +3611,27 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_group_close(void *grp, const H5VL_class_t *cls, hid_t dxpl_id, void **req)
+H5VL_group_close(const H5VL_object_t *vol_obj, hid_t dxpl_id, void **req)
 {
+    hbool_t vol_wrapper_set = FALSE;    /* Whether the VOL object wrapping context was set up */
     herr_t ret_value = SUCCEED;         /* Return value */
-
-    /* Sanity check */
-    HDassert(grp);
-    HDassert(cls);
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    /* Check if the corresponding VOL callback exists */
-    if(NULL == cls->group_cls.close)
-        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL plugin has no 'group close' method")
+    /* Set wrapper info in API context */
+    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
+    vol_wrapper_set = TRUE;
 
-    /* Call the corresponding VOL callback */
-    if((cls->group_cls.close)(grp, dxpl_id, req) < 0)
+    /* Call the corresponding internal VOL routine */
+    if(H5VL__group_close(vol_obj->data, vol_obj->plugin->cls, dxpl_id, req) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTCLOSEOBJ, FAIL, "group close failed")
 
 done:
+    /* Reset object wrapping info in API context */
+    if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_group_close() */
 
@@ -3424,22 +3647,22 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLgroup_close(void *grp, hid_t plugin_id, hid_t dxpl_id, void **req)
+H5VLgroup_close(void *obj, hid_t plugin_id, hid_t dxpl_id, void **req)
 {
     H5VL_class_t *cls;                  /* VOL plugin's class struct */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE4("e", "*xii**x", grp, plugin_id, dxpl_id, req);
+    H5TRACE4("e", "*xii**x", obj, plugin_id, dxpl_id, req);
 
     /* Check args and get class pointer */
-    if(NULL == grp)
+    if(NULL == obj)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object")
     if(NULL == (cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
 
     /* Call the corresponding internal VOL routine */
-    if(H5VL_group_close(grp, cls, dxpl_id, req) < 0)
+    if(H5VL__group_close(obj, cls, dxpl_id, req) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTCLOSEOBJ, FAIL, "unable to close group")
 
 done:

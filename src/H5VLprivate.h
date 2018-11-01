@@ -131,12 +131,12 @@ H5_DLL herr_t H5VL_file_optional(const H5VL_object_t *vol_obj, hid_t dxpl_id, vo
 H5_DLL herr_t H5VL_file_close(const H5VL_object_t *vol_obj, hid_t dxpl_id, void **req);
 
 /* Group functions */
-H5_DLL void *H5VL_group_create(void *obj, H5VL_loc_params_t loc_params, const H5VL_class_t *cls, const char *name, hid_t gcpl_id, hid_t gapl_id, hid_t dxpl_id, void **req);
-H5_DLL void *H5VL_group_open(void *obj, H5VL_loc_params_t loc_params, const H5VL_class_t *cls, const char *name, hid_t gapl_id, hid_t dxpl_id, void **req);
-H5_DLL herr_t H5VL_group_get(void *obj, const H5VL_class_t *cls, H5VL_group_get_t get_type, hid_t dxpl_id, void **req, ...);
-H5_DLL herr_t H5VL_group_specific(void *obj, const H5VL_class_t *cls, H5VL_group_specific_t specific_type, hid_t dxpl_id, void **req, ...);
-H5_DLL herr_t H5VL_group_optional(void *obj, const H5VL_class_t *cls, hid_t dxpl_id, void **req, ...);
-H5_DLL herr_t H5VL_group_close(void *grp, const H5VL_class_t *cls, hid_t dxpl_id, void **req);
+H5_DLL void *H5VL_group_create(const H5VL_object_t *vol_obj, H5VL_loc_params_t loc_params, const char *name, hid_t gcpl_id, hid_t gapl_id, hid_t dxpl_id, void **req);
+H5_DLL void * H5VL_group_open(const H5VL_object_t *vol_obj, H5VL_loc_params_t loc_params, const char *name, hid_t gapl_id, hid_t dxpl_id, void **req);
+H5_DLL herr_t H5VL_group_get(const H5VL_object_t *vol_obj, H5VL_group_get_t get_type, hid_t dxpl_id, void **req, ...);
+H5_DLL herr_t H5VL_group_specific(const H5VL_object_t *vol_obj, H5VL_group_specific_t specific_type, hid_t dxpl_id, void **req, ...);
+H5_DLL herr_t H5VL_group_optional(const H5VL_object_t *vol_obj, hid_t dxpl_id, void **req, ...);
+H5_DLL herr_t H5VL_group_close(const H5VL_object_t *vol_obj, hid_t dxpl_id, void **req);
 
 /* Link functions */
 H5_DLL herr_t H5VL_link_create(H5VL_link_create_type_t create_type, void *obj, H5VL_loc_params_t loc_params, const H5VL_class_t *cls, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req);
