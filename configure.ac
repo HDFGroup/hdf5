@@ -1324,6 +1324,85 @@ case $withval in
 esac
 
 ## ----------------------------------------------------------------------
+## Is RADOS present? It has a header file 'librados.h' and a library
+## '-lrados' and their locations might be specified with the '--with-rados'
+## command-line switch. The value is an include path and/or a library path.
+## If the library path is specified then it must be preceded by a comma.
+##
+AC_SUBST([HAVE_RADOS])
+
+## Default is not present
+HAVE_RADOS=no
+
+AC_ARG_WITH([rados],
+            [AS_HELP_STRING([--with-rados=DIR],
+                            [Use RADOS [default=no]])],,
+            [withval=no])
+
+case $withval in
+  yes)
+    HAVE_RADOS="yes"
+    AC_CHECK_HEADERS([librados.h],, [unset HAVE_RADOS])
+    if test "x$HAVE_RADOS" = "xyes"; then
+      AC_CHECK_LIB([rados], [rados_read],, [unset HAVE_RADOS])
+    fi
+    if test -z "$HAVE_RADOS" -a -n "$HDF5_CONFIG_ABORT"; then
+      AC_MSG_ERROR([couldn't find RADOS library])
+    fi
+    ;;
+  no)
+    HAVE_RADOS="no"
+    AC_MSG_CHECKING([for RADOS library])
+    AC_MSG_RESULT([suppressed])
+    ;;
+  *)
+    HAVE_RADOS="yes"
+    case "$withval" in
+      *,*)
+        rados_inc="`echo $withval |cut -f1 -d,`"
+        rados_lib="`echo $withval |cut -f2 -d, -s`"
+        ;;
+      *)
+        if test -n "$withval"; then
+          rados_inc="$withval/include"
+          rados_lib="$withval/lib"
+        fi
+        ;;
+    esac
+
+    saved_CPPFLAGS="$CPPFLAGS"
+    saved_AM_CPPFLAGS="$AM_CPPFLAGS"
+    saved_LDFLAGS="$LDFLAGS"
+    saved_AM_LDFLAGS="$AM_LDFLAGS"
+
+    if test -n "$rados_inc"; then
+      CPPFLAGS="$CPPFLAGS -I$rados_inc"
+      AM_CPPFLAGS="$AM_CPPFLAGS -I$rados_inc"
+    fi
+
+    AC_CHECK_HEADERS([librados.h],,[CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"] [unset HAVE_RADOS])
+
+    if test -n "$rados_lib"; then
+      LDFLAGS="$LDFLAGS -L$rados_lib"
+      AM_LDFLAGS="$AM_LDFLAGS -L$rados_lib"
+    fi
+
+    if test "x$HAVE_RADOS" = "xyes"; then
+      AC_CHECK_LIB([rados], [rados_read],, [LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_RADOS])
+    fi
+
+    if test -z "$HAVE_RADOS" -a -n "$HDF5_CONFIG_ABORT"; then
+      AC_MSG_ERROR([couldn't find RADOS library])
+    fi
+
+    ;;
+esac
+
+if test "x$HAVE_RADOS" = "xyes" ; then
+  AC_DEFINE([HAVE_RADOS], [1], [Define if RADOS is enabled])
+fi
+
+## ----------------------------------------------------------------------
 ## Make the external filters list available to *.in files
 ## At this point it's unset (no external filters by default) but it
 ## will be filled in during the deflate (zlib) and szip processing
