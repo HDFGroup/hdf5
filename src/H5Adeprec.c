@@ -343,8 +343,7 @@ H5Aget_num_attrs(hid_t loc_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, (-1), "invalid location identifier")
 
     /* Get the number of attributes for the object */
-    if(H5VL_object_optional(vol_obj->data, vol_obj->plugin->cls, H5P_DATASET_XFER_DEFAULT, 
-                            H5_REQUEST_NULL, H5VL_OBJECT_GET_INFO, loc_params, &oinfo, H5O_INFO_ALL) < 0)
+    if(H5VL_object_optional(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, H5VL_OBJECT_GET_INFO, loc_params, &oinfo, H5O_INFO_ALL) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, (-1), "unable to get attribute count for object")
 
     H5_CHECKED_ASSIGN(ret_value, int, oinfo.num_attrs, hsize_t);

@@ -134,6 +134,20 @@ static herr_t H5VL__link_specific(void *obj, H5VL_loc_params_t loc_params,
     void **req, va_list arguments);
 static herr_t H5VL__link_optional(void *obj, const H5VL_class_t *cls, hid_t dxpl_id,
     void **req, va_list arguments);
+static void *H5VL__object_open(void *obj, H5VL_loc_params_t params, const H5VL_class_t *cls,
+    H5I_type_t *opened_type, hid_t dxpl_id, void **req);
+static herr_t H5VL__object_copy(void *src_obj, H5VL_loc_params_t src_loc_params,
+    const char *src_name, void *dst_obj, H5VL_loc_params_t dst_loc_params,
+    const char *dst_name, const H5VL_class_t *cls, hid_t ocpypl_id,
+    hid_t lcpl_id, hid_t dxpl_id, void **req);
+static herr_t H5VL__object_get(void *obj, H5VL_loc_params_t loc_params,
+    const H5VL_class_t *cls, H5VL_object_get_t get_type, hid_t dxpl_id,
+    void **req, va_list arguments);
+static herr_t H5VL__object_specific(void *obj, H5VL_loc_params_t loc_params,
+    const H5VL_class_t *cls, H5VL_object_specific_t specific_type, hid_t dxpl_id,
+    void **req, va_list arguments);
+static herr_t H5VL__object_optional(void *obj, const H5VL_class_t *cls, hid_t dxpl_id,
+    void **req, va_list arguments);
 
 
 /*********************/
@@ -4362,7 +4376,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5VL_object_open
+ * Function:	H5VL__object_open
  *
  * Purpose:	Opens a object through the VOL
  *
@@ -4371,13 +4385,13 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-void *
-H5VL_object_open(void *obj, H5VL_loc_params_t params, const H5VL_class_t *cls, H5I_type_t *opened_type,
+static void *
+H5VL__object_open(void *obj, H5VL_loc_params_t params, const H5VL_class_t *cls, H5I_type_t *opened_type,
     hid_t dxpl_id, void **req)
 {
-    void *ret_value = NULL;              /* Return value */
+    void *ret_value = NULL;             /* Return value */
 
-    FUNC_ENTER_NOAPI(NULL)
+    FUNC_ENTER_STATIC
 
     /* Check if the corresponding VOL callback exists */
     if(NULL == cls->object_cls.open)
@@ -4388,6 +4402,43 @@ H5VL_object_open(void *obj, H5VL_loc_params_t params, const H5VL_class_t *cls, H
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPENOBJ, NULL, "object open failed")
 
 done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__object_open() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_object_open
+ *
+ * Purpose:	Opens a object through the VOL
+ *
+ * Return:      Success: Pointer to the object
+ *		Failure: NULL
+ *
+ *-------------------------------------------------------------------------
+ */
+void *
+H5VL_object_open(const H5VL_object_t *vol_obj, H5VL_loc_params_t params,
+    H5I_type_t *opened_type, hid_t dxpl_id, void **req)
+{
+    hbool_t vol_wrapper_set = FALSE;    /* Whether the VOL object wrapping context was set up */
+    void *ret_value = NULL;             /* Return value */
+
+    FUNC_ENTER_NOAPI(NULL)
+
+    /* Set wrapper info in API context */
+    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, NULL, "can't set VOL wrapper info")
+    vol_wrapper_set = TRUE;
+
+    /* Call the corresponding internal VOL routine */
+    if(NULL == (ret_value = H5VL__object_open(vol_obj->data, params, vol_obj->plugin->cls, opened_type, dxpl_id, req)))
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPENOBJ, NULL, "object open failed")
+
+done:
+    /* Reset object wrapping info in API context */
+    if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, NULL, "can't reset VOL wrapper info")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_object_open() */
 
@@ -4419,12 +4470,45 @@ H5VLobject_open(void *obj, H5VL_loc_params_t params, hid_t plugin_id, H5I_type_t
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a VOL plugin ID")
 
     /* Call the corresponding internal VOL routine */
-    if(NULL == (ret_value = H5VL_object_open(obj, params, cls, opened_type, dxpl_id, req)))
+    if(NULL == (ret_value = H5VL__object_open(obj, params, cls, opened_type, dxpl_id, req)))
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPENOBJ, NULL, "unable to open object")
 
 done:
     FUNC_LEAVE_API_NOINIT(ret_value)
 } /* end H5VLobject_open() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL__object_copy
+ *
+ * Purpose:	Copies an object to another destination through the VOL
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t 
+H5VL__object_copy(void *src_obj, H5VL_loc_params_t src_loc_params, const char *src_name,
+    void *dst_obj, H5VL_loc_params_t dst_loc_params, const char *dst_name,
+    const H5VL_class_t *cls, hid_t ocpypl_id, hid_t lcpl_id, hid_t dxpl_id,
+    void **req)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Check if the corresponding VOL callback exists */
+    if(NULL == cls->object_cls.copy)
+        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL plugin has no 'object copy' method")
+
+    /* Call the corresponding VOL callback */
+    if((cls->object_cls.copy)(src_obj, src_loc_params, src_name, dst_obj, dst_loc_params, dst_name, ocpypl_id, lcpl_id, dxpl_id, req) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTCOPY, FAIL, "object copy failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__object_copy() */
 
 
 /*-------------------------------------------------------------------------
@@ -4438,28 +4522,34 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t 
-H5VL_object_copy(void *src_obj, H5VL_loc_params_t loc_params1, const H5VL_class_t *cls1,
-    const char *src_name, void *dst_obj, H5VL_loc_params_t loc_params2,
-    const H5VL_class_t *cls2, const char *dst_name, hid_t ocpypl_id,
-    hid_t lcpl_id, hid_t dxpl_id, void **req)
+H5VL_object_copy(const H5VL_object_t *src_obj, H5VL_loc_params_t src_loc_params,
+    const char *src_name, const H5VL_object_t *dst_obj, H5VL_loc_params_t dst_loc_params,
+    const char *dst_name, hid_t ocpypl_id, hid_t lcpl_id, hid_t dxpl_id,
+    void **req)
 {
+    hbool_t vol_wrapper_set = FALSE;    /* Whether the VOL object wrapping context was set up */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Make sure that the VOL plugins are the same */
-    if(cls1->value != cls2->value)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "Objects are accessed through different VOL plugins and can't be linked")
+    if(src_obj->plugin->cls->value != dst_obj->plugin->cls->value)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "objects are accessed through different VOL plugins and can't be copied")
 
-    /* Check if the corresponding VOL callback exists */
-    if(NULL == cls1->object_cls.copy)
-        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL plugin has no 'object copy' method")
+    /* Set wrapper info in API context */
+    if(H5VL_set_vol_wrapper(src_obj->data, src_obj->plugin) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
+    vol_wrapper_set = TRUE;
 
-    /* Call the corresponding VOL callback */
-    if((cls1->object_cls.copy)(src_obj, loc_params1, src_name, dst_obj, loc_params2, dst_name, ocpypl_id, lcpl_id, dxpl_id, req) < 0)
+    /* Call the corresponding internal VOL routine */
+    if(H5VL__object_copy(src_obj->data, src_loc_params, src_name, dst_obj->data, dst_loc_params, dst_name, src_obj->plugin->cls, ocpypl_id, lcpl_id, dxpl_id, req) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTCOPY, FAIL, "object copy failed")
 
 done:
+    /* Reset object wrapping info in API context */
+    if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_object_copy() */
 
@@ -4475,35 +4565,60 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLobject_copy(void *src_obj, H5VL_loc_params_t loc_params1, hid_t plugin_id1,
-    const char *src_name, void *dst_obj, H5VL_loc_params_t loc_params2,
-    hid_t plugin_id2, const char *dst_name, hid_t ocpypl_id, hid_t lcpl_id,
+H5VLobject_copy(void *src_obj, H5VL_loc_params_t src_loc_params,
+    const char *src_name, void *dst_obj, H5VL_loc_params_t dst_loc_params,
+    const char *dst_name, hid_t plugin_id, hid_t ocpypl_id, hid_t lcpl_id,
     hid_t dxpl_id, void **req)
 {
-    H5VL_class_t *cls1;                 /* VOL plugin's class struct */
-    H5VL_class_t *cls2;                 /* VOL plugin's class struct */
+    H5VL_class_t *cls;                  /* VOL plugin's class struct */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE12("e", "*xxi*s*xxi*siii**x", src_obj, loc_params1, plugin_id1,
-             src_name, dst_obj, loc_params2, plugin_id2, dst_name, ocpypl_id,
-             lcpl_id, dxpl_id, req);
 
     /* Check args and get class pointers */
     if(NULL == src_obj || NULL == dst_obj)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object")
-    if(NULL == (cls1 = (H5VL_class_t *)H5I_object_verify(plugin_id1, H5I_VOL)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
-    if(NULL == (cls2 = (H5VL_class_t *)H5I_object_verify(plugin_id2, H5I_VOL)))
+    if(NULL == (cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
 
     /* Call the corresponding internal VOL routine */
-    if(H5VL_object_copy(src_obj, loc_params1, cls1, src_name, dst_obj, loc_params2, cls2, dst_name, ocpypl_id, lcpl_id, dxpl_id, req) < 0)
+    if(H5VL__object_copy(src_obj, src_loc_params, src_name, dst_obj, dst_loc_params, dst_name, cls, ocpypl_id, lcpl_id, dxpl_id, req) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTCOPY, FAIL, "unable to copy object")
 
 done:
     FUNC_LEAVE_API_NOINIT(ret_value)
 } /* end H5VLobject_copy() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL__object_get
+ *
+ * Purpose:	Get specific information about the object through the VOL
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL__object_get(void *obj, H5VL_loc_params_t loc_params, const H5VL_class_t *cls,
+    H5VL_object_get_t get_type, hid_t dxpl_id, void **req, va_list arguments)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Check if the corresponding VOL callback exists */
+    if(NULL == cls->object_cls.get)
+        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL plugin has no 'object get' method")
+
+    /* Call the corresponding VOL callback */
+    if((cls->object_cls.get)(obj, loc_params, get_type, dxpl_id, req, arguments) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "get failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__object_get() */
 
 
 /*-------------------------------------------------------------------------
@@ -4517,29 +4632,35 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_object_get(void *obj, H5VL_loc_params_t loc_params, const H5VL_class_t *cls,
+H5VL_object_get(const H5VL_object_t *vol_obj, H5VL_loc_params_t loc_params,
     H5VL_object_get_t get_type, hid_t dxpl_id, void **req, ...)
 {
     va_list arguments;                  /* Argument list passed from the API call */
     hbool_t arg_started = FALSE;        /* Whether the va_list has been started */
+    hbool_t vol_wrapper_set = FALSE;    /* Whether the VOL object wrapping context was set up */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    /* Check if the corresponding VOL callback exists */
-    if(NULL == cls->object_cls.get)
-        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL plugin has no 'object get' method")
+    /* Set wrapper info in API context */
+    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
+    vol_wrapper_set = TRUE;
 
-    /* Call the corresponding VOL callback */
+    /* Call the corresponding internal VOL routine */
     va_start(arguments, req);
     arg_started = TRUE;
-    if((cls->object_cls.get)(obj, loc_params, get_type, dxpl_id, req, arguments) < 0)
+    if(H5VL__object_get(vol_obj->data, loc_params, vol_obj->plugin->cls, get_type, dxpl_id, req, arguments) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "get failed")
 
 done:
     /* End access to the va_list, if we started it */
     if(arg_started)
         va_end(arguments);
+
+    /* Reset object wrapping info in API context */
+    if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_object_get() */
@@ -4572,12 +4693,8 @@ H5VLobject_get(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id, H5VL_ob
     if(NULL == (cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
 
-    /* Check if the corresponding VOL callback exists */
-    if(NULL == cls->object_cls.get)
-        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL plugin has no `object get' method")
-
-    /* Bypass the H5VLint layer, calling the VOL callback directly */
-    if((cls->object_cls.get)(obj, loc_params, get_type, dxpl_id, req, arguments) < 0)
+    /* Call the corresponding internal VOL routine */
+    if(H5VL__object_get(obj, loc_params, cls, get_type, dxpl_id, req, arguments) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "unable to execute object get callback")
 
 done:
@@ -4586,9 +4703,41 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5VL__object_specific
+ *
+ * Purpose:	Specific operation on objects through the VOL
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL__object_specific(void *obj, H5VL_loc_params_t loc_params, const H5VL_class_t *cls, 
+    H5VL_object_specific_t specific_type, hid_t dxpl_id, void **req,
+    va_list arguments)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Check if the corresponding VOL callback exists */
+    if(NULL == cls->object_cls.specific)
+        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL plugin has no 'object specific' method")
+
+    /* Call the corresponding VOL callback */
+    if((ret_value = (cls->object_cls.specific)(obj, loc_params, specific_type, dxpl_id, req, arguments)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "object specific failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__object_specific() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5VL_object_specific
  *
- * Purpose:	specific operation on objects through the VOL
+ * Purpose:	Specific operation on objects through the VOL
  *
  * Return:      Success:    Non-negative
  *              Failure:    Negative
@@ -4596,29 +4745,35 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_object_specific(void *obj, H5VL_loc_params_t loc_params, const H5VL_class_t *cls, 
+H5VL_object_specific(const H5VL_object_t *vol_obj, H5VL_loc_params_t loc_params,
     H5VL_object_specific_t specific_type, hid_t dxpl_id, void **req, ...)
 {
     va_list arguments;                  /* Argument list passed from the API call */
     hbool_t arg_started = FALSE;        /* Whether the va_list has been started */
+    hbool_t vol_wrapper_set = FALSE;    /* Whether the VOL object wrapping context was set up */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    /* Check if the corresponding VOL callback exists */
-    if(NULL == cls->object_cls.specific)
-        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL plugin has no 'object specific' method")
+    /* Set wrapper info in API context */
+    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
+    vol_wrapper_set = TRUE;
 
-    /* Call the corresponding VOL callback */
+    /* Call the corresponding internal VOL routine */
     va_start(arguments, req);
     arg_started = TRUE;
-    if((ret_value = (cls->object_cls.specific)(obj, loc_params, specific_type, dxpl_id, req, arguments)) < 0)
+    if((ret_value = H5VL__object_specific(vol_obj->data, loc_params, vol_obj->plugin->cls, specific_type, dxpl_id, req, arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "object specific failed")
 
 done:
     /* End access to the va_list, if we started it */
     if(arg_started)
         va_end(arguments);
+
+    /* Reset object wrapping info in API context */
+    if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_object_specific() */
@@ -4665,9 +4820,40 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5VL__object_optional
+ *
+ * Purpose:	Optional operation specific to plugins.
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL__object_optional(void *obj, const H5VL_class_t *cls, hid_t dxpl_id,
+    void **req, va_list arguments)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Check if the corresponding VOL callback exists */
+    if(NULL == cls->object_cls.optional)
+        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL plugin has no 'object optional' method")
+
+    /* Call the corresponding VOL callback */
+    if((cls->object_cls.optional)(obj, dxpl_id, req, arguments) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute object optional callback")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__object_optional() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5VL_object_optional
  *
- * Purpose:	optional operation specific to plugins.
+ * Purpose:	Optional operation specific to plugins.
  *
  * Return:      Success:    Non-negative
  *              Failure:    Negative
@@ -4675,29 +4861,34 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_object_optional(void *obj, const H5VL_class_t *cls, hid_t dxpl_id,
-    void **req, ...)
+H5VL_object_optional(const H5VL_object_t *vol_obj, hid_t dxpl_id, void **req, ...)
 {
     va_list arguments;                  /* Argument list passed from the API call */
     hbool_t arg_started = FALSE;        /* Whether the va_list has been started */
+    hbool_t vol_wrapper_set = FALSE;    /* Whether the VOL object wrapping context was set up */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    /* Check if the corresponding VOL callback exists */
-    if(NULL == cls->object_cls.optional)
-        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL plugin has no 'object optional' method")
+    /* Set wrapper info in API context */
+    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
+    vol_wrapper_set = TRUE;
 
-    /* Call the corresponding VOL callback */
+    /* Call the corresponding internal VOL routine */
     va_start(arguments, req);
     arg_started = TRUE;
-    if((cls->object_cls.optional)(obj, dxpl_id, req, arguments) < 0)
+    if(H5VL__object_optional(vol_obj->data, vol_obj->plugin->cls, dxpl_id, req, arguments) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute object optional callback")
 
 done:
     /* End access to the va_list, if we started it */
     if(arg_started)
         va_end(arguments);
+
+    /* Reset object wrapping info in API context */
+    if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_object_optional() */
@@ -4728,12 +4919,8 @@ H5VLobject_optional(void *obj, hid_t plugin_id, hid_t dxpl_id, void **req, va_li
     if(NULL == (cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
 
-    /* Check if the corresponding VOL callback exists */
-    if(NULL == cls->object_cls.optional)
-        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL plugin has no `object optional' method")
-
-    /* Bypass the H5VLint layer, calling the VOL callback directly */
-    if((cls->object_cls.optional)(obj, dxpl_id, req, arguments) < 0)
+    /* Call the corresponding internal VOL routine */
+    if(H5VL__object_optional(obj, cls, dxpl_id, req, arguments) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute object optional callback")
 
 done:

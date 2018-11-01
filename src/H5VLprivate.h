@@ -147,11 +147,11 @@ H5_DLL herr_t H5VL_link_specific(const H5VL_object_t *vol_obj, H5VL_loc_params_t
 H5_DLL herr_t H5VL_link_optional(const H5VL_object_t *vol_obj, hid_t dxpl_id, void **req, ...);
 
 /* Object functions */
-H5_DLL void *H5VL_object_open(void *obj, H5VL_loc_params_t loc_params, const H5VL_class_t *cls, H5I_type_t *opened_type, hid_t dxpl_id, void **req);
-H5_DLL herr_t H5VL_object_copy(void *src_obj, H5VL_loc_params_t loc_params1, const H5VL_class_t *cls1, const char *src_name, void *dst_obj, H5VL_loc_params_t loc_params2, const H5VL_class_t *cls2, const char *dst_name, hid_t ocpypl_id, hid_t lcpl_id, hid_t dxpl_id, void **req);
-H5_DLL herr_t H5VL_object_get(void *obj, H5VL_loc_params_t loc_params, const H5VL_class_t *cls, H5VL_object_get_t get_type, hid_t dxpl_id, void **req, ...);
-H5_DLL herr_t H5VL_object_specific(void *obj, H5VL_loc_params_t loc_params, const H5VL_class_t *cls, H5VL_object_specific_t specific_type, hid_t dxpl_id, void **req, ...);
-H5_DLL herr_t H5VL_object_optional(void *obj, const H5VL_class_t *cls, hid_t dxpl_id, void **req, ...);
+H5_DLL void * H5VL_object_open(const H5VL_object_t *vol_obj, H5VL_loc_params_t params, H5I_type_t *opened_type, hid_t dxpl_id, void **req);
+H5_DLL herr_t H5VL_object_copy(const H5VL_object_t *src_obj, H5VL_loc_params_t src_loc_params, const char *src_name, const H5VL_object_t *dst_obj, H5VL_loc_params_t dst_loc_params, const char *dst_name, hid_t ocpypl_id, hid_t lcpl_id, hid_t dxpl_id, void **req);
+H5_DLL herr_t H5VL_object_get(const H5VL_object_t *vol_obj, H5VL_loc_params_t loc_params, H5VL_object_get_t get_type, hid_t dxpl_id, void **req, ...);
+H5_DLL herr_t H5VL_object_specific(const H5VL_object_t *vol_obj, H5VL_loc_params_t loc_params, H5VL_object_specific_t specific_type, hid_t dxpl_id, void **req, ...);
+H5_DLL herr_t H5VL_object_optional(const H5VL_object_t *vol_obj, hid_t dxpl_id, void **req, ...);
 
 /* Datatype functions */
 H5_DLL void *H5VL_datatype_commit(void *obj, H5VL_loc_params_t loc_params, const H5VL_class_t *cls, const char *name, hid_t type_id, hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id, hid_t dxpl_id, void **req);

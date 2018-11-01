@@ -92,8 +92,7 @@ H5Oflush(hid_t obj_id)
     loc_params.obj_type     = H5I_get_type(obj_id);
 
     /* Flush the object */
-    if((ret_value = H5VL_object_specific(vol_obj->data, loc_params, vol_obj->plugin->cls, 
-                                         H5VL_OBJECT_FLUSH, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, obj_id)) < 0)
+    if(H5VL_object_specific(vol_obj, loc_params, H5VL_OBJECT_FLUSH, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, obj_id) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTFLUSH, FAIL, "unable to flush object")
 
 done:
@@ -239,7 +238,6 @@ H5Orefresh(hid_t oid)
 {
     H5VL_object_t      *vol_obj     = NULL;     /* Object token     */
     H5VL_loc_params_t   loc_params;
-    hbool_t             vol_wrapper_set = FALSE;        /* Whether the VOL object wrapping context was set up */
     herr_t              ret_value   = SUCCEED;  /* Return value     */
 
     FUNC_ENTER_API(FAIL)
@@ -257,21 +255,11 @@ H5Orefresh(hid_t oid)
     loc_params.type         = H5VL_OBJECT_BY_SELF;
     loc_params.obj_type     = H5I_get_type(oid);
 
-    /* Set wrapper info in API context */
-    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
-    vol_wrapper_set = TRUE;
-
     /* Refresh the object */
-    if((ret_value = H5VL_object_specific(vol_obj->data, loc_params, vol_obj->plugin->cls, 
-                                         H5VL_OBJECT_REFRESH, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, oid)) < 0)
+    if(H5VL_object_specific(vol_obj, loc_params, H5VL_OBJECT_REFRESH, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, oid) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to refresh object")
 
 done:
-    /* Reset object wrapping info in API context */
-    if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't reset VOL wrapper info")
-
     FUNC_LEAVE_API(ret_value)
 } /* end H5Orefresh() */
 

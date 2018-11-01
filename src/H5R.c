@@ -93,7 +93,6 @@ H5Rcreate(void *ref, hid_t loc_id, const char *name, H5R_type_t ref_type, hid_t 
 {
     H5VL_object_t      *vol_obj = NULL;         /* Object token of loc_id */
     H5VL_loc_params_t   loc_params;
-    hbool_t         vol_wrapper_set = FALSE;            /* Whether the VOL object wrapping context was set up */
     herr_t              ret_value;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -127,22 +126,11 @@ H5Rcreate(void *ref, hid_t loc_id, const char *name, H5R_type_t ref_type, hid_t 
     if(H5CX_set_loc(loc_id) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTSET, FAIL, "can't set access property list info")
 
-    /* Set wrapper info in API context */
-    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, H5I_INVALID_HID, "can't set VOL wrapper info")
-    vol_wrapper_set = TRUE;
-
     /* Create reference */
-    if((ret_value = H5VL_object_specific(vol_obj->data, loc_params, vol_obj->plugin->cls, H5VL_REF_CREATE, 
-                                         H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, 
-                                         ref, name, ref_type, space_id)) < 0)
+    if((ret_value = H5VL_object_specific(vol_obj, loc_params, H5VL_REF_CREATE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, ref, name, ref_type, space_id)) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTCREATE, FAIL, "unable to create reference")
 
 done:
-    /* Reset object wrapping info in API context */
-    if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTSET, H5I_INVALID_HID, "can't reset VOL wrapper info")
-
     FUNC_LEAVE_API(ret_value)
 }   /* end H5Rcreate() */
 
@@ -210,8 +198,7 @@ H5Rdereference2(hid_t obj_id, hid_t oapl_id, H5R_type_t ref_type, const void *_r
     loc_params.obj_type                         = H5I_get_type(obj_id);
 
     /* Dereference */
-    if(NULL == (opened_obj = H5VL_object_open(vol_obj->data, loc_params, vol_obj->plugin->cls, 
-                                              &opened_type, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
+    if(NULL == (opened_obj = H5VL_object_open(vol_obj, loc_params, &opened_type, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to dereference object")
 
     if((ret_value = H5VL_register(opened_type, opened_obj, vol_obj->plugin, TRUE)) < 0)
@@ -270,8 +257,7 @@ H5Rget_region(hid_t id, H5R_type_t ref_type, const void *ref)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid file identifier")
 
     /* Get the dataspace with the correct region selected */
-    if(H5VL_object_get(vol_obj->data, loc_params, vol_obj->plugin->cls, H5VL_REF_GET_REGION, 
-                       H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &ret_value, ref_type, ref) < 0)
+    if(H5VL_object_get(vol_obj, loc_params, H5VL_REF_GET_REGION, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &ret_value, ref_type, ref) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, H5I_INVALID_HID, "unable to retrieve dataspace")
 
 done:
@@ -328,9 +314,7 @@ H5Rget_obj_type2(hid_t id, H5R_type_t ref_type, const void *ref,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
 
     /* Get the object type */
-    if(H5VL_object_get(vol_obj->data, loc_params, vol_obj->plugin->cls, 
-                                    H5VL_REF_GET_TYPE, H5P_DATASET_XFER_DEFAULT, 
-                                    H5_REQUEST_NULL, obj_type, ref_type, ref) < 0)
+    if(H5VL_object_get(vol_obj, loc_params, H5VL_REF_GET_TYPE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, obj_type, ref_type, ref) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL, "unable to determine object type")
 
 done:
@@ -377,7 +361,6 @@ H5Rget_name(hid_t id, H5R_type_t ref_type, const void *_ref, char *name,
 {
     H5VL_object_t    *vol_obj = NULL;       /* object token of loc_id */
     H5VL_loc_params_t loc_params;
-    hbool_t         vol_wrapper_set = FALSE;            /* Whether the VOL object wrapping context was set up */
     ssize_t ret_value = -1;             /* Return value */
 
     FUNC_ENTER_API((-1))
@@ -397,22 +380,11 @@ H5Rget_name(hid_t id, H5R_type_t ref_type, const void *_ref, char *name,
     if(NULL == (vol_obj = (H5VL_object_t *)H5I_object(id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, (-1), "invalid file identifier")
 
-    /* Set wrapper info in API context */
-    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, H5I_INVALID_HID, "can't set VOL wrapper info")
-    vol_wrapper_set = TRUE;
-
     /* Get name */
-    if(H5VL_object_get(vol_obj->data, loc_params, vol_obj->plugin->cls, H5VL_REF_GET_NAME, 
-                       H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, 
-                       &ret_value, name, size, ref_type, _ref) < 0)
+    if(H5VL_object_get(vol_obj, loc_params, H5VL_REF_GET_NAME, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &ret_value, name, size, ref_type, _ref) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, (-1), "unable to determine object path")
 
 done:
-    /* Reset object wrapping info in API context */
-    if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTSET, H5I_INVALID_HID, "can't reset VOL wrapper info")
-
     FUNC_LEAVE_API(ret_value)
 } /* end H5Rget_name() */
 

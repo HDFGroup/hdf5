@@ -104,7 +104,6 @@ H5Oopen(hid_t loc_id, const char *name, hid_t lapl_id)
     H5I_type_t      opened_type;
     void           *opened_obj  = NULL;
     H5VL_loc_params_t loc_params;
-    hbool_t         vol_wrapper_set = FALSE;            /* Whether the VOL object wrapping context was set up */
     hid_t           ret_value   = H5I_INVALID_HID;
 
     FUNC_ENTER_API(H5I_INVALID_HID)
@@ -130,14 +129,8 @@ H5Oopen(hid_t loc_id, const char *name, hid_t lapl_id)
     loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
     loc_params.obj_type                     = H5I_get_type(loc_id);
 
-    /* Set wrapper info in API context */
-    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, H5I_INVALID_HID, "can't set VOL wrapper info")
-    vol_wrapper_set = TRUE;
-
     /* Open the object */
-    if(NULL == (opened_obj = H5VL_object_open(vol_obj->data, loc_params, vol_obj->plugin->cls, 
-                                              &opened_type, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
+    if(NULL == (opened_obj = H5VL_object_open(vol_obj, loc_params, &opened_type, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
         HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open object")
 
     /* Get an atom for the object */
@@ -145,10 +138,6 @@ H5Oopen(hid_t loc_id, const char *name, hid_t lapl_id)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize object handle")
 
 done:
-    /* Reset object wrapping info in API context */
-    if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTSET, H5I_INVALID_HID, "can't reset VOL wrapper info")
-
     FUNC_LEAVE_API(ret_value)
 } /* end H5Oopen() */
 
@@ -214,8 +203,7 @@ H5Oopen_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier")
 
     /* Open the object */
-    if(NULL == (opened_obj = H5VL_object_open(vol_obj->data, loc_params, vol_obj->plugin->cls, 
-                                              &opened_type, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
+    if(NULL == (opened_obj = H5VL_object_open(vol_obj, loc_params, &opened_type, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
         HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open object")
 
     if((ret_value = H5VL_register(opened_type, opened_obj, vol_obj->plugin, TRUE)) < 0)
@@ -282,8 +270,7 @@ H5Oopen_by_addr(hid_t loc_id, haddr_t addr)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier")
 
     /* Open the object */
-    if(NULL == (opened_obj = H5VL_object_open(vol_obj->data, loc_params, vol_obj->plugin->cls, &opened_type, 
-                                              H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
+    if(NULL == (opened_obj = H5VL_object_open(vol_obj, loc_params, &opened_type, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
         HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open object")
 
     /* Register the dataset ID */
@@ -439,8 +426,7 @@ H5Oincr_refcount(hid_t object_id)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set access property list info")
 
     /* Change the object's reference count */
-    if(H5VL_object_specific(vol_obj->data, loc_params, vol_obj->plugin->cls, H5VL_OBJECT_CHANGE_REF_COUNT, 
-                            H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, 1) < 0)
+    if(H5VL_object_specific(vol_obj, loc_params, H5VL_OBJECT_CHANGE_REF_COUNT, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, 1) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, FAIL, "modifying object link count failed")
 
 done:
@@ -490,8 +476,7 @@ H5Odecr_refcount(hid_t object_id)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set access property list info")
 
     /* Change the object's reference count */
-    if(H5VL_object_specific(vol_obj->data, loc_params, vol_obj->plugin->cls, H5VL_OBJECT_CHANGE_REF_COUNT, 
-                            H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, -1) < 0)
+    if(H5VL_object_specific(vol_obj, loc_params, H5VL_OBJECT_CHANGE_REF_COUNT, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, -1) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, FAIL, "modifying object link count failed")
 
 done:
@@ -517,7 +502,6 @@ H5Oexists_by_name(hid_t loc_id, const char *name, hid_t lapl_id)
 {
     H5VL_object_t  *vol_obj         = NULL;         /* Object token of loc_id */
     H5VL_loc_params_t loc_params;
-    hbool_t         vol_wrapper_set = FALSE;            /* Whether the VOL object wrapping context was set up */
     htri_t      ret_value = FAIL;       /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -543,21 +527,11 @@ H5Oexists_by_name(hid_t loc_id, const char *name, hid_t lapl_id)
     loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
     loc_params.obj_type                     = H5I_get_type(loc_id);
 
-    /* Set wrapper info in API context */
-    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, H5I_INVALID_HID, "can't set VOL wrapper info")
-    vol_wrapper_set = TRUE;
-
     /* Check if the object exists */
-    if(H5VL_object_specific(vol_obj->data, loc_params, vol_obj->plugin->cls, H5VL_OBJECT_EXISTS, 
-                            H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &ret_value) < 0)
+    if(H5VL_object_specific(vol_obj, loc_params, H5VL_OBJECT_EXISTS, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &ret_value) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to determine if '%s' exists", name)
 
 done:
-    /* Reset object wrapping info in API context */
-    if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTSET, H5I_INVALID_HID, "can't reset VOL wrapper info")
-
     FUNC_LEAVE_API(ret_value)
 } /* end H5Oexists_by_name() */
 
@@ -581,7 +555,6 @@ H5Oget_info2(hid_t loc_id, H5O_info_t *oinfo, unsigned fields)
 {
     H5VL_object_t      *vol_obj         = NULL;         /* Object token of loc_id */
     H5VL_loc_params_t   loc_params;
-    hbool_t         vol_wrapper_set = FALSE;            /* Whether the VOL object wrapping context was set up */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -601,21 +574,11 @@ H5Oget_info2(hid_t loc_id, H5O_info_t *oinfo, unsigned fields)
     if(NULL == (vol_obj = H5VL_vol_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
-    /* Set wrapper info in API context */
-    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, H5I_INVALID_HID, "can't set VOL wrapper info")
-    vol_wrapper_set = TRUE;
-
     /* Retrieve the object's information */
-    if(H5VL_object_optional(vol_obj->data, vol_obj->plugin->cls, H5P_DATASET_XFER_DEFAULT, 
-                            H5_REQUEST_NULL, H5VL_OBJECT_GET_INFO, loc_params, oinfo, fields) < 0)
+    if(H5VL_object_optional(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, H5VL_OBJECT_GET_INFO, loc_params, oinfo, fields) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't get info for object")
 
 done:
-    /* Reset object wrapping info in API context */
-    if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTSET, H5I_INVALID_HID, "can't reset VOL wrapper info")
-
     FUNC_LEAVE_API(ret_value)
 } /* end H5Oget_info2() */
 
@@ -640,7 +603,6 @@ H5Oget_info_by_name2(hid_t loc_id, const char *name, H5O_info_t *oinfo,
 {
     H5VL_object_t    *vol_obj = NULL;        /* object token of loc_id */
     H5VL_loc_params_t loc_params;
-    hbool_t         vol_wrapper_set = FALSE;            /* Whether the VOL object wrapping context was set up */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -670,21 +632,11 @@ H5Oget_info_by_name2(hid_t loc_id, const char *name, H5O_info_t *oinfo,
     if(NULL == (vol_obj = H5VL_vol_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
-    /* Set wrapper info in API context */
-    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, H5I_INVALID_HID, "can't set VOL wrapper info")
-    vol_wrapper_set = TRUE;
-
     /* Retrieve the object's information */
-    if(H5VL_object_optional(vol_obj->data, vol_obj->plugin->cls, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL,
-                            H5VL_OBJECT_GET_INFO, loc_params, oinfo, fields) < 0)
+    if(H5VL_object_optional(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, H5VL_OBJECT_GET_INFO, loc_params, oinfo, fields) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't get info for object: '%s'", name)
 
 done:
-    /* Reset object wrapping info in API context */
-    if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTSET, H5I_INVALID_HID, "can't reset VOL wrapper info")
-
     FUNC_LEAVE_API(ret_value)
 } /* end H5Oget_info_by_name2() */
 
@@ -711,7 +663,6 @@ H5Oget_info_by_idx2(hid_t loc_id, const char *group_name, H5_index_t idx_type,
 {
     H5VL_object_t    *vol_obj = NULL;        /* object token of loc_id */
     H5VL_loc_params_t loc_params;
-    hbool_t         vol_wrapper_set = FALSE;            /* Whether the VOL object wrapping context was set up */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -746,21 +697,11 @@ H5Oget_info_by_idx2(hid_t loc_id, const char *group_name, H5_index_t idx_type,
     if(NULL == (vol_obj = H5VL_vol_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
-    /* Set wrapper info in API context */
-    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, H5I_INVALID_HID, "can't set VOL wrapper info")
-    vol_wrapper_set = TRUE;
-
     /* Retrieve the object's information */
-    if(H5VL_object_optional(vol_obj->data, vol_obj->plugin->cls, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, 
-                            H5VL_OBJECT_GET_INFO, loc_params, oinfo, fields) < 0)
+    if(H5VL_object_optional(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, H5VL_OBJECT_GET_INFO, loc_params, oinfo, fields) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't get info for object")
 
 done:
-    /* Reset object wrapping info in API context */
-    if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTSET, H5I_INVALID_HID, "can't reset VOL wrapper info")
-
     FUNC_LEAVE_API(ret_value)
 } /* end H5Oget_info_by_idx2() */
 
@@ -787,7 +728,6 @@ H5Oset_comment(hid_t obj_id, const char *comment)
 {
     H5VL_object_t    *vol_obj = NULL;        /* object token of loc_id */
     H5VL_loc_params_t loc_params;
-    hbool_t         vol_wrapper_set = FALSE;            /* Whether the VOL object wrapping context was set up */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -805,21 +745,11 @@ H5Oset_comment(hid_t obj_id, const char *comment)
     loc_params.type = H5VL_OBJECT_BY_SELF;
     loc_params.obj_type = H5I_get_type(obj_id);
 
-    /* Set wrapper info in API context */
-    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, H5I_INVALID_HID, "can't set VOL wrapper info")
-    vol_wrapper_set = TRUE;
-
     /* (Re)set the object's comment */
-    if(H5VL_object_optional(vol_obj->data, vol_obj->plugin->cls, H5P_DATASET_XFER_DEFAULT, 
-                            H5_REQUEST_NULL, H5VL_OBJECT_SET_COMMENT, loc_params, comment) < 0)
+    if(H5VL_object_optional(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, H5VL_OBJECT_SET_COMMENT, loc_params, comment) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set comment for object")
 
 done:
-    /* Reset object wrapping info in API context */
-    if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTSET, H5I_INVALID_HID, "can't reset VOL wrapper info")
-
     FUNC_LEAVE_API(ret_value)
 } /* end H5Oset_comment() */
 
@@ -847,7 +777,6 @@ H5Oset_comment_by_name(hid_t loc_id, const char *name, const char *comment,
 {
     H5VL_object_t    *vol_obj = NULL;        /* object token of loc_id */
     H5VL_loc_params_t loc_params;
-    hbool_t         vol_wrapper_set = FALSE;            /* Whether the VOL object wrapping context was set up */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -871,21 +800,11 @@ H5Oset_comment_by_name(hid_t loc_id, const char *name, const char *comment,
     if(NULL == (vol_obj = H5VL_vol_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
-    /* Set wrapper info in API context */
-    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, H5I_INVALID_HID, "can't set VOL wrapper info")
-    vol_wrapper_set = TRUE;
-
     /* (Re)set the object's comment */
-    if(H5VL_object_optional(vol_obj->data, vol_obj->plugin->cls, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, 
-                            H5VL_OBJECT_SET_COMMENT, loc_params, comment) < 0)
+    if(H5VL_object_optional(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, H5VL_OBJECT_SET_COMMENT, loc_params, comment) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set comment for object: '%s'", name)
 
 done:
-    /* Reset object wrapping info in API context */
-    if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTSET, H5I_INVALID_HID, "can't reset VOL wrapper info")
-
     FUNC_LEAVE_API(ret_value)
 } /* end H5Oset_comment_by_name() */
 
@@ -911,35 +830,24 @@ H5Oget_comment(hid_t obj_id, char *comment, size_t bufsize)
 {
     H5VL_object_t    *vol_obj = NULL;        /* object token of loc_id */
     H5VL_loc_params_t loc_params;
-    hbool_t         vol_wrapper_set = FALSE;            /* Whether the VOL object wrapping context was set up */
     ssize_t     ret_value = -1;              /* Return value */
 
     FUNC_ENTER_API((-1))
     H5TRACE3("Zs", "i*sz", obj_id, comment, bufsize);
 
     /* Get the object */
-    if (NULL == (vol_obj = H5VL_vol_object(obj_id)))
+    if(NULL == (vol_obj = H5VL_vol_object(obj_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, (-1), "invalid location identifier")
 
     /* Set fields in the location struct */
     loc_params.type         = H5VL_OBJECT_BY_SELF;
     loc_params.obj_type     = H5I_get_type(obj_id);
 
-    /* Set wrapper info in API context */
-    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, H5I_INVALID_HID, "can't set VOL wrapper info")
-    vol_wrapper_set = TRUE;
-
     /* Retrieve the object's comment */
-    if (H5VL_object_optional(vol_obj->data, vol_obj->plugin->cls, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, 
-                            H5VL_OBJECT_GET_COMMENT, loc_params, comment, bufsize, &ret_value) < 0)
+    if(H5VL_object_optional(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, H5VL_OBJECT_GET_COMMENT, loc_params, comment, bufsize, &ret_value) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, (-1), "can't get comment for object")
 
 done:
-    /* Reset object wrapping info in API context */
-    if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTSET, H5I_INVALID_HID, "can't reset VOL wrapper info")
-
     FUNC_LEAVE_API(ret_value)
 } /* end H5Oget_comment() */
 
@@ -966,7 +874,6 @@ H5Oget_comment_by_name(hid_t loc_id, const char *name, char *comment, size_t buf
 {
     H5VL_object_t    *vol_obj = NULL;        /* object token of loc_id */
     H5VL_loc_params_t loc_params;
-    hbool_t         vol_wrapper_set = FALSE;            /* Whether the VOL object wrapping context was set up */
     ssize_t     ret_value = -1;              /* Return value */
 
     FUNC_ENTER_API((-1))
@@ -990,21 +897,11 @@ H5Oget_comment_by_name(hid_t loc_id, const char *name, char *comment, size_t buf
     if(NULL == (vol_obj = H5VL_vol_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, (-1), "invalid location identifier")
 
-    /* Set wrapper info in API context */
-    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, H5I_INVALID_HID, "can't set VOL wrapper info")
-    vol_wrapper_set = TRUE;
-
     /* Retrieve the object's comment */
-    if(H5VL_object_optional(vol_obj->data, vol_obj->plugin->cls, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, 
-                            H5VL_OBJECT_GET_COMMENT, loc_params, comment, bufsize, &ret_value) < 0)
+    if(H5VL_object_optional(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, H5VL_OBJECT_GET_COMMENT, loc_params, comment, bufsize, &ret_value) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, (-1), "can't get comment for object: '%s'", name)
 
 done:
-    /* Reset object wrapping info in API context */
-    if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTSET, H5I_INVALID_HID, "can't reset VOL wrapper info")
-
     FUNC_LEAVE_API(ret_value)
 } /* end H5Oget_comment_by_name() */
 
@@ -1050,7 +947,6 @@ H5Ovisit2(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order,
 {
     H5VL_object_t      *vol_obj         = NULL;     /* Object token of loc_id */
     H5VL_loc_params_t   loc_params;
-    hbool_t             vol_wrapper_set = FALSE;        /* Whether the VOL object wrapping context was set up */
     herr_t              ret_value;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1074,22 +970,11 @@ H5Ovisit2(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order,
     loc_params.type         = H5VL_OBJECT_BY_SELF;
     loc_params.obj_type     = H5I_get_type(obj_id);
 
-    /* Set wrapper info in API context */
-    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
-    vol_wrapper_set = TRUE;
-
     /* Visit the objects */
-    if((ret_value = H5VL_object_specific(vol_obj->data, loc_params, vol_obj->plugin->cls,
-                                         H5VL_OBJECT_VISIT, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, 
-                                         idx_type, order, op, op_data, fields)) < 0)
+    if((ret_value = H5VL_object_specific(vol_obj, loc_params, H5VL_OBJECT_VISIT, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, idx_type, order, op, op_data, fields)) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_BADITER, FAIL, "object iteration failed")
 
 done:
-    /* Reset object wrapping info in API context */
-    if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't reset VOL wrapper info")
-
     FUNC_LEAVE_API(ret_value)
 } /* end H5Ovisit2() */
 
@@ -1135,7 +1020,6 @@ H5Ovisit_by_name2(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
 {
     H5VL_object_t       *vol_obj        = NULL;     /* Object token of loc_id */
     H5VL_loc_params_t   loc_params; 
-    hbool_t             vol_wrapper_set = FALSE;        /* Whether the VOL object wrapping context was set up */
     herr_t              ret_value;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1170,22 +1054,11 @@ H5Ovisit_by_name2(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
     loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
     loc_params.obj_type                     = H5I_get_type(loc_id);
 
-    /* Set wrapper info in API context */
-    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
-    vol_wrapper_set = TRUE;
-
     /* Visit the objects */
-    if((ret_value = H5VL_object_specific(vol_obj->data, loc_params, vol_obj->plugin->cls, 
-                                         H5VL_OBJECT_VISIT, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, 
-                                         idx_type, order, op, op_data, fields)) < 0)
+    if((ret_value = H5VL_object_specific(vol_obj, loc_params, H5VL_OBJECT_VISIT, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, idx_type, order, op, op_data, fields)) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_BADITER, FAIL, "object iteration failed")
 
 done:
-    /* Reset object wrapping info in API context */
-    if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't reset VOL wrapper info")
-
     FUNC_LEAVE_API(ret_value)
 } /* end H5Ovisit_by_name2() */
 

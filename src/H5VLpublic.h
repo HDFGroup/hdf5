@@ -490,9 +490,9 @@ H5_DLL herr_t H5VLlink_optional(void *obj, hid_t plugin_id, hid_t dxpl_id, void 
 
 /* Public wrappers for object callbacks */
 H5_DLL void *H5VLobject_open(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id, H5I_type_t *opened_type, hid_t dxpl_id, void **req);
-H5_DLL herr_t H5VLobject_copy(void *src_obj, H5VL_loc_params_t loc_params1, hid_t plugin_id1, const char *src_name,
-                               void *dst_obj, H5VL_loc_params_t loc_params2, hid_t plugin_id2, const char *dst_name,
-                               hid_t ocpypl_id, hid_t lcpl_id, hid_t dxpl_id, void **req);
+H5_DLL herr_t H5VLobject_copy(void *src_obj, H5VL_loc_params_t loc_params1, const char *src_name,
+                               void *dst_obj, H5VL_loc_params_t loc_params2, const char *dst_name,
+                               hid_t plugin_id, hid_t ocpypl_id, hid_t lcpl_id, hid_t dxpl_id, void **req);
 H5_DLL herr_t H5VLobject_get(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id, H5VL_object_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
 H5_DLL herr_t H5VLobject_specific(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id, H5VL_object_specific_t specific_type, hid_t dxpl_id, void **req, va_list arguments);
 H5_DLL herr_t H5VLobject_optional(void *obj, hid_t plugin_id, hid_t dxpl_id, void **req, va_list arguments);
