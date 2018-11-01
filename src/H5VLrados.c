@@ -514,6 +514,7 @@ H5VLrados_init(rados_t rados_cluster, const char *rados_pool)
     herr_t ret_value = SUCCEED;            /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "x*s", rados_cluster, rados_pool);
 
     /* Check if already initialized */
     if(H5VL_RADOS_g >= 0)

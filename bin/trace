@@ -169,6 +169,7 @@ $Source = "";
                "H5VL_loc_params_t"          => "x",
                "H5Z_func_t"                 => "x",
                "H5Z_filter_func_t"          => "x",
+               "rados_t"                    => "x",
                "va_list"                    => "x",
                "size_t"                     => "z",
                "H5Z_SO_scale_type_t"        => "Za",
