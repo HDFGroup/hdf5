@@ -32,7 +32,7 @@ macro (ADD_H5_FORTRAN_TEST file)
     )
   endif ()
   set_tests_properties (HL_FORTRAN_f90_${file} PROPERTIES DEPENDS HL_FORTRAN_test-clear-objects)
-  if (BUILD_SHARED_LIBS)
+  if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
     if (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (NAME HL_FORTRAN_f90_${file}-shared COMMAND $<TARGET_FILE:hl_f90_${file}-shared>)
     else ()
@@ -66,7 +66,7 @@ add_test (
         tstds.h5
 )
 
-if (BUILD_SHARED_LIBS)
+if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
   add_test (
       NAME HL_FORTRAN_test-shared-clear-objects
       COMMAND    ${CMAKE_COMMAND}

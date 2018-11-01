@@ -39,7 +39,7 @@ macro (ADD_H5_FORTRAN_EXE file)
       FOLDER test/hl/fortran
       Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/static
   )
-  if (BUILD_SHARED_LIBS)
+  if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
     add_executable (hl_f90_${file}-shared ${file}.f90)
     target_include_directories (hl_f90_${file}-shared
         PRIVATE

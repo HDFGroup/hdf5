@@ -94,7 +94,7 @@ target_include_directories(H5fortran_detect
     PRIVATE
         "${HDF5_BINARY_DIR};${HDF5_F90_BINARY_DIR}"
 )
-#if (BUILD_SHARED_LIBS)
+#if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
 #  target_compile_definitions(H5fortran_detect
 #      PRIVATE
 #          $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:/MT>
