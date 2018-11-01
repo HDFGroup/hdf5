@@ -2425,6 +2425,7 @@
 ./src/CMakeLists.txt
 ./test/CMakeLists.txt
 ./test/CMakeTests.cmake
+./test/CMakeVFDTests.cmake
 ./testpar/CMakeLists.txt
 ./testpar/CMakeTests.cmake
 ./tools/CMakeLists.txt
