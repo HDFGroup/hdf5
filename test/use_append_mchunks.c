@@ -123,7 +123,7 @@ main(int argc, char *argv[])
 
     /* initialization */
     if (setup_parameters(argc, argv) < 0){
-	Hgoto_error(1);
+        Hgoto_error(1);
     }
 
     /* Determine the need to send/wait message file*/
@@ -141,20 +141,20 @@ main(int argc, char *argv[])
     /* Create file */
     /* ============*/
     if (UC_opts.launch != UC_READER){
-	printf("Creating skeleton data file for test...\n");
+        HDprintf("Creating skeleton data file for test...\n");
 	if (create_uc_file() < 0){
-	    fprintf(stderr, "***encounter error\n");
+	    HDfprintf(stderr, "***encounter error\n");
 	    Hgoto_error(1);
 	}else
-	    printf("File created.\n");
+	    HDprintf("File created.\n");
     }
 
     if (UC_opts.launch==UC_READWRITE){
-	/* fork process */
-	if((childpid = fork()) < 0) {
-	    perror("fork");
-	    Hgoto_error(1);
-	};
+        /* fork process */
+        if((childpid = fork()) < 0) {
+            perror("fork");
+            Hgoto_error(1);
+        };
     };
     mypid = getpid();
 
@@ -162,22 +162,22 @@ main(int argc, char *argv[])
     /* launch reader */
     /* ============= */
     if (UC_opts.launch != UC_WRITER){
-	/* child process launch the reader */
-	if(0 == childpid) {
-	    printf("%d: launch reader process\n", mypid);
-	    if (read_uc_file(send_wait) < 0){
-		fprintf(stderr, "read_uc_file encountered error\n");
-		exit(1);
-	    }
-	    exit(0);
-	}
+        /* child process launch the reader */
+        if(0 == childpid) {
+            HDprintf("%d: launch reader process\n", mypid);
+            if (read_uc_file(send_wait) < 0){
+                HDfprintf(stderr, "read_uc_file encountered error\n");
+                exit(1);
+            }
+            exit(0);
+        }
     }
 
     /* ============= */
     /* launch writer */
     /* ============= */
     /* this process continues to launch the writer */
-    printf("%d: continue as the writer process\n", mypid);
+    HDprintf("%d: continue as the writer process\n", mypid);
 
     name = UC_opts.filename;
 
@@ -191,12 +191,12 @@ main(int argc, char *argv[])
 
     /* Open the file */
     if((fid = H5Fopen(name, H5F_ACC_RDWR | (UC_opts.use_swmr ? H5F_ACC_SWMR_WRITE : 0), fapl)) < 0) {
-        fprintf(stderr, "H5Fopen failed\n");
+        HDfprintf(stderr, "H5Fopen failed\n");
         Hgoto_error(1);
     }
 
     if(write_uc_file(send_wait, fid) < 0) {
-        fprintf(stderr, "write_uc_file encountered error\n");
+        HDfprintf(stderr, "write_uc_file encountered error\n");
         Hgoto_error(1);
     }
 
@@ -212,24 +212,24 @@ main(int argc, char *argv[])
 
         /* Close the file  */
         if(H5Fclose(fid) < 0) {
-            fprintf(stderr, "Failed to close file id\n");
+            HDfprintf(stderr, "Failed to close file id\n");
             Hgoto_error(1);
         }
 
         /* Close the property list */
         if(H5Pclose(fapl) < 0) {
-            fprintf(stderr, "Failed to property list\n");
+            HDfprintf(stderr, "Failed to close the property list\n");
             Hgoto_error(1);
         }
 
         if (WIFEXITED(child_status)){
             if ((child_ret_value=WEXITSTATUS(child_status)) != 0){
-                printf("%d: child process exited with non-zero code (%d)\n",
+                HDprintf("%d: child process exited with non-zero code (%d)\n",
                     mypid, child_ret_value);
                 Hgoto_error(1);
             }
         } else {
-            printf("%d: child process terminated abnormally\n", mypid);
+            HDprintf("%d: child process terminated abnormally\n", mypid);
             Hgoto_error(2);
         }
     }
@@ -237,9 +237,9 @@ main(int argc, char *argv[])
 done:
     /* Print result and exit */
     if (ret_value != 0){
-	printf("Error(s) encountered\n");
+        HDprintf("Error(s) encountered\n");
     }else{
-	printf("All passed\n");
+        HDprintf("All passed\n");
     }
 
     return(ret_value);
