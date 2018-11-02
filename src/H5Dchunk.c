@@ -949,7 +949,12 @@ H5D__chunk_init(H5F_t *f, const H5D_t *dset, hid_t dapl_id)
             /* Initial scaled dimension sizes */
             if(dset->shared->layout.u.chunk.dim[u] == 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "chunk size must be > 0, dim = %u ", u)
-            rdcc->scaled_dims[u] = dset->shared->curr_dims[u] / dset->shared->layout.u.chunk.dim[u];
+
+            /* Make a special case when the dimension is 0 because (0 - 1) is a big number for unsigned integer */
+            if(dset->shared->curr_dims[u] == 0)
+                rdcc->scaled_dims[u] = 0;
+            else
+                rdcc->scaled_dims[u] = ((dset->shared->curr_dims[u] - 1) / dset->shared->layout.u.chunk.dim[u]) + 1;
 
             if( !(scaled_power2up = H5VM_power2up(rdcc->scaled_dims[u])) )
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to get the next power of 2")
@@ -2799,6 +2804,7 @@ H5D__chunk_hash_val(const H5D_shared_t *shared, const hsize_t *scaled)
     hsize_t val;        /* Intermediate value */
     unsigned ndims = shared->ndims;      /* Rank of dataset */
     unsigned ret = 0;   /* Value to return */
+    unsigned u;         /* Local index variable */
 
     FUNC_ENTER_STATIC_NOERR
 
@@ -2809,17 +2815,11 @@ H5D__chunk_hash_val(const H5D_shared_t *shared, const hsize_t *scaled)
     /* If the fastest changing dimension doesn't have enough entropy, use
      *  other dimensions too
      */
-    if(ndims > 1 && shared->cache.chunk.scaled_dims[ndims - 1] <= shared->cache.chunk.nslots) {
-        unsigned u;          /* Local index variable */
-
-        val = scaled[0];
-        for(u = 1; u < ndims; u++) {
-            val <<= shared->cache.chunk.scaled_encode_bits[u];
-            val ^= scaled[u];
-        } /* end for */
-    } /* end if */
-    else
-        val = scaled[ndims - 1];
+    val = scaled[0];
+    for(u = 1; u < ndims; u++) {
+        val <<= shared->cache.chunk.scaled_encode_bits[u];
+        val ^= scaled[u];
+    } /* end for */
 
     /* Modulo value against the number of array slots */
     ret = (unsigned)(val % shared->cache.chunk.nslots);
