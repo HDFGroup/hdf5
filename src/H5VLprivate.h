@@ -162,9 +162,11 @@ H5_DLL herr_t H5VL_datatype_optional(const H5VL_object_t *vol_obj, hid_t dxpl_id
 H5_DLL herr_t H5VL_datatype_close(const H5VL_object_t *vol_obj, hid_t dxpl_id, void **req);
 
 /* Asynchronous functions */
-H5_DLL herr_t H5VL_request_cancel(void **req, const H5VL_class_t *cls, H5ES_status_t *status);
-H5_DLL herr_t H5VL_request_test(void **req, const H5VL_class_t *cls, H5ES_status_t *status);
-H5_DLL herr_t H5VL_request_wait(void **req, const H5VL_class_t *cls, H5ES_status_t *status);
+H5_DLL herr_t H5VL_request_wait(const H5VL_object_t *vol_obj, uint64_t timeout, H5ES_status_t *status);
+H5_DLL herr_t H5VL_request_cancel(const H5VL_object_t *vol_obj);
+H5_DLL herr_t H5VL_request_specific(const H5VL_object_t *vol_obj, H5VL_request_specific_t specific_type, ...);
+H5_DLL herr_t H5VL_request_optional(const H5VL_object_t *vol_obj, ...);
+H5_DLL herr_t H5VL_request_free(const H5VL_object_t *vol_obj);
 
 #endif /* _H5VLprivate_H */
 

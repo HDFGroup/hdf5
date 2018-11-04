@@ -116,10 +116,12 @@ static const H5VL_class_t H5VL_log_g = {
         H5VL_log_object_specific,                    /* specific */
         NULL, //H5VL_log_object_optional,            /* optional */
     },
-    {
-        NULL,
-        NULL,
-        NULL
+    {                                           /* request_cls */
+        NULL,                                       /* wait         */
+        NULL,                                       /* cancel       */
+        NULL,                                       /* specific     */
+        NULL,                                       /* optional     */
+        NULL                                        /* free         */
     },
     NULL
 };

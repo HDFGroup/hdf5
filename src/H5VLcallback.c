@@ -163,6 +163,14 @@ static herr_t H5VL__datatype_optional(void *obj, const H5VL_class_t *cls,
     hid_t dxpl_id, void **req, va_list arguments);
 static herr_t H5VL__datatype_close(void *obj, const H5VL_class_t *cls, hid_t dxpl_id,
     void **req);
+static herr_t H5VL__request_wait(void *req, const H5VL_class_t *cls,
+    uint64_t timeout, H5ES_status_t *status);
+static herr_t H5VL__request_cancel(void *req, const H5VL_class_t *cls);
+static herr_t H5VL__request_specific(void *req, const H5VL_class_t *cls,
+    H5VL_request_specific_t specific_type, va_list arguments);
+static herr_t H5VL__request_optional(void *req, const H5VL_class_t *cls,
+    va_list arguments);
+static herr_t H5VL__request_free(void *req, const H5VL_class_t *cls);
 
 
 /*********************/
@@ -5594,88 +5602,22 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5VL_request_cancel
+ * Function:    H5VL__request_wait
  *
- * Purpose:     Cancels an asynchronous request through the VOL
- *
- * Return:      Success:    Non-negative
- *              Failure:    Negative
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5VL_request_cancel(void **req, const H5VL_class_t *cls, H5ES_status_t *status)
-{
-    herr_t ret_value = SUCCEED;         /* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    /* Sanity check */
-    HDassert(req);
-    HDassert(cls);
-    HDassert(status);
-
-    /* Check if the corresponding VOL callback exists */
-    if(NULL == cls->async_cls.cancel)
-        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL plugin has no 'async cancel' method")
-
-    /* Call the corresponding VOL callback */
-    if((cls->async_cls.cancel)(req, status) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "request cancel failed")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_request_cancel() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5VLrequest_cancel
- *
- * Purpose:     Cancels a request
+ * Purpose:     Waits on an asychronous request through the VOL
  *
  * Return:      Success:    Non-negative
  *              Failure:    Negative
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5VLrequest_cancel(void **req, hid_t plugin_id, H5ES_status_t *status)
-{
-    H5VL_class_t *cls;                  /* VOL plugin's class struct */
-    herr_t ret_value = SUCCEED;         /* Return value */
-
-    FUNC_ENTER_API_NOINIT
-    H5TRACE3("e", "**xi*Es", req, plugin_id, status);
-
-    /* Get class pointer */
-    if(NULL == (cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
-
-    /* Call the corresponding internal VOL routine */
-    if(H5VL_request_cancel(req, cls, status) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "unable to cancel request")
-
-done:
-    FUNC_LEAVE_API_NOINIT(ret_value)
-} /* end H5VLrequest_cancel() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5VL_request_test
- *
- * Purpose:     Tests an asynchronous request through the VOL
- *
- * Return:      Success:    Non-negative
- *              Failure:    Negative
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5VL_request_test(void **req, const H5VL_class_t *cls, H5ES_status_t *status)
+static herr_t
+H5VL__request_wait(void *req, const H5VL_class_t *cls, uint64_t timeout,
+    H5ES_status_t *status)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_STATIC
 
     /* Sanity checks */
     HDassert(req);
@@ -5683,48 +5625,16 @@ H5VL_request_test(void **req, const H5VL_class_t *cls, H5ES_status_t *status)
     HDassert(status);
 
     /* Check if the corresponding VOL callback exists */
-    if(NULL == cls->async_cls.test)
-        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL plugin has no 'async test' method")
+    if(NULL == cls->request_cls.wait)
+        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL plugin has no 'async wait' method")
 
     /* Call the corresponding VOL callback */
-    if((cls->async_cls.test)(req, status) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "request test failed")
+    if((cls->request_cls.wait)(req, timeout, status) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "request wait failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_request_test() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5VLrequest_test
- *
- * Purpose:     Tests a request
- *
- * Return:      Success:    Non-negative
- *              Failure:    Negative
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5VLrequest_test(void **req, hid_t plugin_id, H5ES_status_t *status)
-{
-    H5VL_class_t *cls;                  /* VOL plugin's class struct */
-    herr_t ret_value = SUCCEED;         /* Return value */
-
-    FUNC_ENTER_API_NOINIT
-    H5TRACE3("e", "**xi*Es", req, plugin_id, status);
-
-    /* Get class pointer */
-    if(NULL == (cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
-
-    /* Call the corresponding internal VOL routine */
-    if(H5VL_request_test(req, cls, status) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "unable to test request")
-
-done:
-    FUNC_LEAVE_API_NOINIT(ret_value)
-} /* end H5VLrequest_test() */
+} /* end H5VL__request_wait() */
 
 
 /*-------------------------------------------------------------------------
@@ -5738,26 +5648,31 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_request_wait(void **req, const H5VL_class_t *cls, H5ES_status_t *status)
+H5VL_request_wait(const H5VL_object_t *vol_obj, uint64_t timeout,
+    H5ES_status_t *status)
 {
+    hbool_t vol_wrapper_set = FALSE;    /* Whether the VOL object wrapping context was set up */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(req);
-    HDassert(cls);
-    HDassert(status);
+    HDassert(vol_obj);
 
-    /* Check if the corresponding VOL callback exists */
-    if(NULL == cls->async_cls.wait)
-        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL plugin has no 'async wait' method")
+    /* Set wrapper info in API context */
+    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
+    vol_wrapper_set = TRUE;
 
-    /* Call the corresponding VOL callback */
-    if((cls->async_cls.wait)(req, status) < 0)
+    /* Call the corresponding internal VOL routine */
+    if(H5VL__request_wait(vol_obj->data, vol_obj->plugin->cls, timeout, status) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "request wait failed")
 
 done:
+    /* Reset object wrapping info in API context */
+    if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_request_wait() */
 
@@ -5773,23 +5688,459 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLrequest_wait(void **req, hid_t plugin_id, H5ES_status_t *status)
+H5VLrequest_wait(void *req, hid_t plugin_id, uint64_t timeout, H5ES_status_t *status)
 {
     H5VL_class_t *cls;                  /* VOL plugin's class struct */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE3("e", "**xi*Es", req, plugin_id, status);
 
     /* Get class pointer */
     if(NULL == (cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
 
     /* Call the corresponding internal VOL routine */
-    if(H5VL_request_wait(req, cls, status) < 0)
+    if(H5VL__request_wait(req, cls, timeout, status) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "unable to wait on request")
 
 done:
     FUNC_LEAVE_API_NOINIT(ret_value)
 } /* end H5VLrequest_wait() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL__request_cancel
+ *
+ * Purpose:     Cancels an asynchronous request through the VOL
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL__request_cancel(void *req, const H5VL_class_t *cls)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity check */
+    HDassert(req);
+    HDassert(cls);
+
+    /* Check if the corresponding VOL callback exists */
+    if(NULL == cls->request_cls.cancel)
+        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL plugin has no 'async cancel' method")
+
+    /* Call the corresponding VOL callback */
+    if((cls->request_cls.cancel)(req) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "request cancel failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__request_cancel() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_request_cancel
+ *
+ * Purpose:     Cancels an asynchronous request through the VOL
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_request_cancel(const H5VL_object_t *vol_obj)
+{
+    hbool_t vol_wrapper_set = FALSE;    /* Whether the VOL object wrapping context was set up */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(vol_obj);
+
+    /* Set wrapper info in API context */
+    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
+    vol_wrapper_set = TRUE;
+
+    /* Call the corresponding internal VOL routine */
+    if(H5VL__request_cancel(vol_obj->data, vol_obj->plugin->cls) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "request cancel failed")
+
+done:
+    /* Reset object wrapping info in API context */
+    if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_request_cancel() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VLrequest_cancel
+ *
+ * Purpose:     Cancels a request
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VLrequest_cancel(void *req, hid_t plugin_id)
+{
+    H5VL_class_t *cls;                  /* VOL plugin's class struct */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_API_NOINIT
+    H5TRACE2("e", "*xi", req, plugin_id);
+
+    /* Get class pointer */
+    if(NULL == (cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
+
+    /* Call the corresponding internal VOL routine */
+    if(H5VL__request_cancel(req, cls) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "unable to cancel request")
+
+done:
+    FUNC_LEAVE_API_NOINIT(ret_value)
+} /* end H5VLrequest_cancel() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL__request_specific
+ *
+ * Purpose:	Specific operation on asynchronous request through the VOL
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL__request_specific(void *req, const H5VL_class_t *cls,
+    H5VL_request_specific_t specific_type, va_list arguments)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity check */
+    HDassert(req);
+    HDassert(cls);
+
+    /* Check if the corresponding VOL callback exists */
+    if(NULL == cls->request_cls.specific)
+        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL plugin has no 'async specific' method")
+
+    /* Call the corresponding VOL callback */
+    if((ret_value = (cls->request_cls.specific)(req, specific_type, arguments)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute asynchronous request specific callback")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__request_specific() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_request_specific
+ *
+ * Purpose:	Specific operation on asynchronous request through the VOL
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_request_specific(const H5VL_object_t *vol_obj,
+    H5VL_request_specific_t specific_type, ...)
+{
+    va_list arguments;                  /* Argument list passed from the API call */
+    hbool_t arg_started = FALSE;        /* Whether the va_list has been started */
+    hbool_t vol_wrapper_set = FALSE;    /* Whether the VOL object wrapping context was set up */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(vol_obj);
+
+    /* Set wrapper info in API context */
+    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
+    vol_wrapper_set = TRUE;
+
+    /* Call the corresponding internal VOL routine */
+    va_start(arguments, specific_type);
+    arg_started = TRUE;
+    if((ret_value = H5VL__request_specific(vol_obj->data, vol_obj->plugin->cls, specific_type, arguments)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute asynchronous request specific callback")
+
+done:
+    /* End access to the va_list, if we started it */
+    if(arg_started)
+        va_end(arguments);
+
+    /* Reset object wrapping info in API context */
+    if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_request_specific() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VLrequest_specific
+ *
+ * Purpose:     Performs a plugin-specific operation on an asynchronous request
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VLrequest_specific(void *req, hid_t plugin_id, H5VL_request_specific_t specific_type,
+    va_list arguments)
+{
+    H5VL_class_t *cls;                  /* VOL plugin's class struct */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_API_NOINIT
+
+    /* Get class pointer */
+    if(NULL == (cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
+
+    /* Call the corresponding internal VOL routine */
+    if((ret_value = H5VL__request_specific(req, cls, specific_type, arguments)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute asynchronous request specific callback")
+
+done:
+    FUNC_LEAVE_API_NOINIT(ret_value)
+} /* end H5VLrequest_specific() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL__request_optional
+ *
+ * Purpose:	Optional operation specific to plugins.
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL__request_optional(void *req, const H5VL_class_t *cls, va_list arguments)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity check */
+    HDassert(req);
+    HDassert(cls);
+
+    /* Check if the corresponding VOL callback exists */
+    if(NULL == cls->request_cls.optional)
+        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL plugin has no 'async optional' method")
+
+    /* Call the corresponding VOL callback */
+    if((ret_value = (cls->request_cls.optional)(req, arguments)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute asynchronous request optional callback")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__request_optional() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_request_optional
+ *
+ * Purpose:	Optional operation specific to plugins.
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_request_optional(const H5VL_object_t *vol_obj, ...)
+{
+    va_list arguments;                  /* Argument list passed from the API call */
+    hbool_t arg_started = FALSE;        /* Whether the va_list has been started */
+    hbool_t vol_wrapper_set = FALSE;    /* Whether the VOL object wrapping context was set up */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(vol_obj);
+
+    /* Set wrapper info in API context */
+    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
+    vol_wrapper_set = TRUE;
+
+    /* Call the corresponding internal VOL routine */
+    va_start(arguments, vol_obj);
+    arg_started = TRUE;
+    if((ret_value = H5VL__request_optional(vol_obj->data, vol_obj->plugin->cls, arguments)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute asynchronous request optional callback")
+
+done:
+    /* End access to the va_list, if we started it */
+    if(arg_started)
+        va_end(arguments);
+
+    /* Reset object wrapping info in API context */
+    if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_request_optional() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VLrequest_optional
+ *
+ * Purpose:     Performs an optional plugin-specific operation on an asynchronous request
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VLrequest_optional(void *req, hid_t plugin_id, va_list arguments)
+{
+    H5VL_class_t *cls;                  /* VOL plugin's class struct */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_API_NOINIT
+
+    /* Get class pointer */
+    if(NULL == (cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
+
+    /* Call the corresponding internal VOL routine */
+    if((ret_value = H5VL__request_optional(req, cls, arguments)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute asynchronous request optional callback")
+
+done:
+    FUNC_LEAVE_API_NOINIT(ret_value)
+} /* end H5VLrequest_optional() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL__request_free
+ *
+ * Purpose:     Frees an asynchronous request through the VOL
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL__request_free(void *req, const H5VL_class_t *cls)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity check */
+    HDassert(req);
+    HDassert(cls);
+
+    /* Check if the corresponding VOL callback exists */
+    if(NULL == cls->request_cls.free)
+        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL plugin has no 'async free' method")
+
+    /* Call the corresponding VOL callback */
+    if((cls->request_cls.free)(req) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "request free failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__request_free() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_request_free
+ *
+ * Purpose:     Frees an asynchronous request through the VOL
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_request_free(const H5VL_object_t *vol_obj)
+{
+    hbool_t vol_wrapper_set = FALSE;    /* Whether the VOL object wrapping context was set up */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(vol_obj);
+
+    /* Set wrapper info in API context */
+    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
+    vol_wrapper_set = TRUE;
+
+    /* Call the corresponding VOL callback */
+    if(H5VL__request_free(vol_obj->data, vol_obj->plugin->cls) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "request free failed")
+
+done:
+    /* Reset object wrapping info in API context */
+    if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_request_free() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VLrequest_free
+ *
+ * Purpose:     Frees a request
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VLrequest_free(void *req, hid_t plugin_id)
+{
+    H5VL_class_t *cls;                  /* VOL plugin's class struct */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_API_NOINIT
+    H5TRACE2("e", "*xi", req, plugin_id);
+
+    /* Get class pointer */
+    if(NULL == (cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
+
+    /* Call the corresponding internal VOL routine */
+    if(H5VL__request_free(req, cls) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "unable to free request")
+
+done:
+    FUNC_LEAVE_API_NOINIT(ret_value)
+} /* end H5VLrequest_free() */
 

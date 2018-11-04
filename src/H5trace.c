@@ -834,8 +834,8 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                                 case H5ES_STATUS_FAIL:
                                     HDfprintf(out, "H5ES_STATUS_FAIL");
                                     break;
-                                case H5ES_STATUS_CANCEL:
-                                    HDfprintf(out, "H5ES_STATUS_CANCEL");
+                                case H5ES_STATUS_CANCELLED:
+                                    HDfprintf(out, "H5ES_STATUS_CANCELLED");
                                     break;
 
                                 default:

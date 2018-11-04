@@ -169,13 +169,20 @@ typedef enum H5VL_object_get_t {
 
 /* types for object SPECIFIC callback */
 typedef enum H5VL_object_specific_t {
-    H5VL_OBJECT_CHANGE_REF_COUNT,      /* H5Oincr/decr_refcount              */
-    H5VL_OBJECT_EXISTS,                /* H5Oexists_by_name                  */
-    H5VL_OBJECT_VISIT,                 /* H5Ovisit(_by_name)                 */
-    H5VL_REF_CREATE,                   /* H5Rcreate                          */
-    H5VL_OBJECT_FLUSH,
-    H5VL_OBJECT_REFRESH
+    H5VL_OBJECT_CHANGE_REF_COUNT,       /* H5Oincr/decr_refcount             */
+    H5VL_OBJECT_EXISTS,                 /* H5Oexists_by_name                 */
+    H5VL_OBJECT_VISIT,                  /* H5Ovisit(_by_name)                */
+    H5VL_REF_CREATE,                    /* H5Rcreate                         */
+    H5VL_OBJECT_FLUSH,                  /* H5{D|G|O|T}flush                  */
+    H5VL_OBJECT_REFRESH                 /* H5{D|G|O|T}refresh                */
 } H5VL_object_specific_t;
+
+/* types for async request SPECIFIC callback */
+typedef enum H5VL_request_specific_t {
+    H5VL_REQUEST_WAITANY,               /* Wait until any request completes */
+    H5VL_REQUEST_WAITSOME,              /* Wait until at least one requesst completes */
+    H5VL_REQUEST_WAITALL                /* Wait until all requests complete */
+} H5VL_request_specific_t;
 
 /* types for different ways that objects are located in an HDF5 container */
 typedef enum H5VL_loc_type_t {
@@ -329,11 +336,13 @@ typedef struct H5VL_object_class_t {
 } H5VL_object_class_t;
 
 /* Async operation routines */
-typedef struct H5VL_async_class_t {
-    herr_t (*cancel)(void **, H5ES_status_t *);
-    herr_t (*test)  (void **, H5ES_status_t *);
-    herr_t (*wait)  (void **, H5ES_status_t *);
-} H5VL_async_class_t;
+typedef struct H5VL_request_class_t {
+    herr_t (*wait)(void *req, uint64_t timeout, H5ES_status_t *status);
+    herr_t (*cancel)(void *req);
+    herr_t (*specific)(void *req, H5VL_request_specific_t specific_type, va_list arguments);
+    herr_t (*optional)(void *req, va_list arguments);
+    herr_t (*free)(void *req);
+} H5VL_request_class_t;
 
 
 /* enum value to identify the class of a VOL plugin (mostly for comparison purposes) */
@@ -389,7 +398,7 @@ typedef struct H5VL_class_t {
     H5VL_object_class_t        object_cls;          /* object class callbacks       */
 
     /* Services */
-    H5VL_async_class_t         async_cls;           /* asynchronous class callbacks */
+    H5VL_request_class_t       request_cls;         /* asynchronous request class callbacks */
 
     /* Catch-all */
     herr_t (*optional)(void *obj, hid_t dxpl_id, void **req, va_list arguments); /* Optional callback */
@@ -506,9 +515,11 @@ H5_DLL herr_t H5VLdatatype_optional(void *obj, hid_t plugin_id, hid_t dxpl_id, v
 H5_DLL herr_t H5VLdatatype_close(void *dt, hid_t plugin_id, hid_t dxpl_id, void **req);
 
 /* Public wrappers for asynchronous request callbacks */
-H5_DLL herr_t H5VLrequest_cancel(void **req, hid_t plugin_id, H5ES_status_t *status);
-H5_DLL herr_t H5VLrequest_test(void **req, hid_t plugin_id, H5ES_status_t *status);
-H5_DLL herr_t H5VLrequest_wait(void **req, hid_t plugin_id, H5ES_status_t *status);
+H5_DLL herr_t H5VLrequest_wait(void *req, hid_t plugin_id, uint64_t timeout, H5ES_status_t *status);
+H5_DLL herr_t H5VLrequest_cancel(void *req, hid_t plugin_id);
+H5_DLL herr_t H5VLrequest_specific(void *req, hid_t plugin_id, H5VL_request_specific_t specific_type, va_list arguments);
+H5_DLL herr_t H5VLrequest_optional(void *req, hid_t plugin_id, va_list arguments);
+H5_DLL herr_t H5VLrequest_free(void *req, hid_t plugin_id);
 
 #ifdef __cplusplus
 }
