@@ -43,7 +43,7 @@
 #include "H5Iprivate.h"		/* IDs					*/
 #include "H5Ppublic.h"		/* Property Lists			*/
 #include "H5Tpkg.h"		/* Datatypes				*/
-#include "H5VLprivate.h"	/* VOL plugins				*/
+#include "H5VLprivate.h"        /* Virtual Object Layer                 */
 
 
 /****************/
@@ -143,11 +143,11 @@ H5Tcommit1(hid_t loc_id, const char *name, hid_t type_id)
     /* Set up VOL object */
     if(NULL == (new_obj = H5FL_CALLOC(H5VL_object_t)))
         HGOTO_ERROR(H5E_VOL, H5E_NOSPACE, FAIL, "can't allocate top object structure")
-    new_obj->plugin = vol_obj->plugin;
-    new_obj->plugin->nrefs ++;
+    new_obj->connector = vol_obj->connector;
+    new_obj->connector->nrefs ++;
     new_obj->data = data;
 
-    /* Set the committed type object to the VOL pluging pointer in the H5T_t struct */
+    /* Set the committed type object to the VOL connectorg pointer in the H5T_t struct */
     dt->vol_obj = new_obj;
 
 done:
@@ -174,7 +174,7 @@ done:
 hid_t
 H5Topen1(hid_t loc_id, const char *name)
 {
-    void *dt = NULL;                    /* Datatype token created by VOL plugin */
+    void *dt = NULL;                    /* Datatype token created by VOL connector */
     H5VL_object_t *vol_obj = NULL;      /* Object token of loc_id */
     H5VL_loc_params_t loc_params;
     hid_t       ret_value = H5I_INVALID_HID;    /* Return value */
@@ -198,7 +198,7 @@ H5Topen1(hid_t loc_id, const char *name)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open named datatype")
 
     /* Register the type and return the ID */
-    if((ret_value = H5VL_register(H5I_DATATYPE, dt, vol_obj->plugin, TRUE)) < 0)
+    if((ret_value = H5VL_register(H5I_DATATYPE, dt, vol_obj->connector, TRUE)) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register named datatype")
 
 done:

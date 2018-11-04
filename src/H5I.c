@@ -2146,7 +2146,7 @@ done:
  *
  *              Failure:    -1
  *
- * NOTE:        Not safe for arbitrary VOL plugins as it relies on
+ * NOTE:        Not safe for arbitrary VOL connectors as it relies on
  *              private H5G calls.
  *
  * Comments: Public function
@@ -2181,7 +2181,7 @@ H5Iget_name(hid_t id, char *name/*out*/, size_t size)
         HGOTO_ERROR(H5E_ATOM, H5E_BADTYPE, (-1), "invalid identifier")
 
     /* Set wrapper info in API context */
-    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 0)
+    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->connector) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTSET, (-1), "can't set VOL wrapper info")
     vol_wrapper_set = TRUE;
 
@@ -2260,7 +2260,7 @@ H5I__find_id_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
     HDassert(item);
     HDassert(udata);
 
-    /* Get a pointer to the VOL plugin's data */
+    /* Get a pointer to the VOL connector's data */
     obj_ptr = H5I__unwrap(item->obj_ptr, type);
 
     /* Check for a match */
@@ -2337,7 +2337,7 @@ H5I__id_dump_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
     H5I_id_info_t  *item    = (H5I_id_info_t *)_item;       /* Pointer to the ID node */
     H5I_type_t      type    = *(H5I_type_t *)_udata;        /* User data */
     H5G_name_t     *path    = NULL;                         /* Path to file object */
-    const void     *obj_ptr = NULL;                         /* Pointer to VOL plugin object */
+    const void     *obj_ptr = NULL;                         /* Pointer to VOL connector object */
 
     FUNC_ENTER_STATIC_NOERR
 
@@ -2352,7 +2352,7 @@ H5I__id_dump_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
             const H5VL_object_t *vol_obj = (const H5VL_object_t *)item->obj_ptr;
 
             obj_ptr = H5VL_object_data(vol_obj);
-            if(H5_VOL_NATIVE == vol_obj->plugin->cls->value)
+            if(H5_VOL_NATIVE == vol_obj->connector->cls->value)
                 path = H5G_nameof((const H5G_t *)obj_ptr);
             break;
         }
@@ -2362,7 +2362,7 @@ H5I__id_dump_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
             const H5VL_object_t *vol_obj = (const H5VL_object_t *)item->obj_ptr;
 
             obj_ptr = H5VL_object_data(vol_obj);
-            if(H5_VOL_NATIVE == vol_obj->plugin->cls->value)
+            if(H5_VOL_NATIVE == vol_obj->connector->cls->value)
                 path = H5D_nameof((const H5D_t *)obj_ptr);
             break;
         }

@@ -11,16 +11,16 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Purpose:	The private header file for the native VOL driver.
+ * Purpose:	The private header file for the native VOL connector.
  */
 
 #ifndef _H5VLnative_private_H
 #define _H5VLnative_private_H
 
-/* Include driver's public header */
+/* Include connector's public header */
 #include "H5VLnative.h"
 
-/* Initializer function for native VOL driver */
+/* Initializer function for native VOL connector */
 #define H5VL_NATIVE             (H5VL_native_init(H5P_DEFAULT))
 
 

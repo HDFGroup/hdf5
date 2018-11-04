@@ -37,13 +37,13 @@
 #include "H5Ppublic.h"          /* Property lists                           */
 
 /* Private headers needed by this file */
-#include "H5private.h"		    /* Generic Functions                        */
-#include "H5ACprivate.h"	    /* Metadata cache                           */
+#include "H5private.h"		/* Generic Functions                        */
+#include "H5ACprivate.h"	/* Metadata cache                           */
 #include "H5CXprivate.h"        /* API Contexts                             */
-#include "H5Eprivate.h"		    /* Error handling                           */
-#include "H5Gprivate.h"		    /* Groups                                   */
+#include "H5Eprivate.h"		/* Error handling                           */
+#include "H5Gprivate.h"		/* Groups                                   */
 #include "H5Iprivate.h"         /* IDs                                      */
-#include "H5Oprivate.h"		    /* Object headers                           */
+#include "H5Oprivate.h"		/* Object headers                           */
 #include "H5Rpkg.h"             /* References                               */
 
 
@@ -186,7 +186,7 @@ H5Rdereference1(hid_t obj_id, H5R_type_t ref_type, const void *_ref)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to dereference object")
 
     /* Get an atom for the object */
-    if ((ret_value = H5VL_register(opened_type, opened_obj, vol_obj->plugin, TRUE)) < 0)
+    if((ret_value = H5VL_register(opened_type, opened_obj, vol_obj->connector, TRUE)) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize object handle")
 
 done:

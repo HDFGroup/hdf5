@@ -134,7 +134,7 @@ H5Oopen(hid_t loc_id, const char *name, hid_t lapl_id)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open object")
 
     /* Get an atom for the object */
-    if((ret_value = H5VL_register(opened_type, opened_obj, vol_obj->plugin, TRUE)) < 0)
+    if((ret_value = H5VL_register(opened_type, opened_obj, vol_obj->connector, TRUE)) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize object handle")
 
 done:
@@ -206,7 +206,7 @@ H5Oopen_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
     if(NULL == (opened_obj = H5VL_object_open(vol_obj, loc_params, &opened_type, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
         HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open object")
 
-    if((ret_value = H5VL_register(opened_type, opened_obj, vol_obj->plugin, TRUE)) < 0)
+    if((ret_value = H5VL_register(opened_type, opened_obj, vol_obj->connector, TRUE)) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize object handle")
 
 done:
@@ -274,7 +274,7 @@ H5Oopen_by_addr(hid_t loc_id, haddr_t addr)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open object")
 
     /* Register the dataset ID */
-    if((ret_value = H5VL_register(opened_type, opened_obj, vol_obj->plugin, TRUE)) < 0)
+    if((ret_value = H5VL_register(opened_type, opened_obj, vol_obj->connector, TRUE)) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize object handle")
 
 done:
@@ -356,10 +356,10 @@ H5Olink(hid_t obj_id, hid_t new_loc_id, const char *new_name, hid_t lcpl_id,
         if(NULL == (vol_obj2 = H5VL_vol_object(new_loc_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
-    /* Make sure that the VOL plugins are the same */
+    /* Make sure that the VOL connectors are the same */
     if(vol_obj1 && vol_obj2)
-        if (vol_obj1->plugin->cls->value != vol_obj2->plugin->cls->value)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "Objects are accessed through different VOL plugins and can't be linked")
+        if (vol_obj1->connector->cls->value != vol_obj2->connector->cls->value)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "Objects are accessed through different VOL connectors and can't be linked")
 
     /* Get the plist structure */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(lcpl_id)))
@@ -373,7 +373,7 @@ H5Olink(hid_t obj_id, hid_t new_loc_id, const char *new_name, hid_t lcpl_id,
 
     /* Construct a temporary VOL object */
     tmp_vol_obj.data = vol_obj2->data;
-    tmp_vol_obj.plugin = (vol_obj1 != NULL ? vol_obj1->plugin : vol_obj2->plugin);
+    tmp_vol_obj.connector = (vol_obj1 != NULL ? vol_obj1->connector : vol_obj2->connector);
 
     /* Create a link to the object */
     if(H5VL_link_create(H5VL_LINK_CREATE_HARD, &tmp_vol_obj, loc_params2, lcpl_id, lapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)

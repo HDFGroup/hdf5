@@ -609,7 +609,7 @@ H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 
     H5P_genplist_t     *plist;              /* Property list pointer                    */
     H5VL_class_t       *cls = NULL;         /* VOL Class structure for callback info    */
-    H5VL_plugin_prop_t  plugin_prop;        /* Property for VOL plugin ID & info        */
+    H5VL_connector_prop_t  connector_prop;        /* Property for VOL connector ID & info        */
     hid_t               ret_value;          /* return value                             */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
@@ -643,10 +643,10 @@ H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     /* get the VOL info from the fapl */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a file access property list")
-    if(H5P_peek(plist, H5F_ACS_VOL_DRV_NAME, &plugin_prop) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, H5I_INVALID_HID, "can't get VOL plugin info")
-    if(NULL == (cls = (H5VL_class_t *)H5I_object_verify(plugin_prop.plugin_id, H5I_VOL)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a VOL plugin ID")
+    if(H5P_peek(plist, H5F_ACS_VOL_CONN_NAME, &connector_prop) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, H5I_INVALID_HID, "can't get VOL connector info")
+    if(NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_prop.connector_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a VOL connector ID")
 
     /* Adjust bit flags by turning on the creation bit and making sure that
      * the EXCL or TRUNC bit is set.  All newly-created files are opened for
@@ -661,7 +661,7 @@ H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, H5I_INVALID_HID, "unable to create file")
 
     /* Get an atom for the file */
-    if((ret_value = H5VL_register_using_vol_id(H5I_FILE, new_file, plugin_prop.plugin_id, TRUE)) < 0)
+    if((ret_value = H5VL_register_using_vol_id(H5I_FILE, new_file, connector_prop.connector_id, TRUE)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize file handle")
 
 done:
@@ -693,7 +693,7 @@ H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
 {
     void               *new_file = NULL;            /* file struct for new file                 */
     H5P_genplist_t     *plist;                      /* Property list pointer                    */
-    H5VL_plugin_prop_t  plugin_prop;                /* Property for VOL plugin ID & info        */
+    H5VL_connector_prop_t  connector_prop;                /* Property for VOL connector ID & info        */
     H5VL_class_t       *cls = NULL;             /* VOL class structure for callback info    */
     hid_t               ret_value;                  /* return value                             */
 
@@ -722,17 +722,17 @@ H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
     /* Get the VOL info from the fapl */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a file access property list")
-    if(H5P_peek(plist, H5F_ACS_VOL_DRV_NAME, &plugin_prop) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, H5I_INVALID_HID, "can't get VOL plugin info")
-    if(NULL == (cls = (H5VL_class_t *)H5I_object_verify(plugin_prop.plugin_id, H5I_VOL)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid VOL plugin ID")
+    if(H5P_peek(plist, H5F_ACS_VOL_CONN_NAME, &connector_prop) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, H5I_INVALID_HID, "can't get VOL connector info")
+    if(NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_prop.connector_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid VOL connector ID")
 
     /* Open the file through the VOL layer */
     if(NULL == (new_file = H5VL_file_open(cls, filename, flags, fapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, H5I_INVALID_HID, "unable to open file")
 
     /* Get an ID for the file */
-    if((ret_value = H5VL_register_using_vol_id(H5I_FILE, new_file, plugin_prop.plugin_id, TRUE)) < 0)
+    if((ret_value = H5VL_register_using_vol_id(H5I_FILE, new_file, connector_prop.connector_id, TRUE)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize file handle")
 
 done:
@@ -836,7 +836,7 @@ hid_t
 H5Freopen(hid_t file_id)
 {
     H5VL_object_t   *vol_obj = NULL;
-    void            *file;                          /* File token from VOL plugin */
+    void            *file;                          /* File token from VOL connector */
     hid_t           ret_value = H5I_INVALID_HID;    /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
@@ -848,14 +848,14 @@ H5Freopen(hid_t file_id)
 
     /* Reopen the file */
     if(H5VL_file_specific(vol_obj, H5VL_FILE_REOPEN, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &file) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, H5I_INVALID_HID, "unable to reopen file via the VOL plugin")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, H5I_INVALID_HID, "unable to reopen file via the VOL connector")
 
     /* Make sure that worked */
     if(NULL == file)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, H5I_INVALID_HID, "unable to reopen file")
 
     /* Get an atom for the file */
-    if((ret_value = H5VL_register(H5I_FILE, file, vol_obj->plugin, TRUE)) < 0)
+    if((ret_value = H5VL_register(H5I_FILE, file, vol_obj->connector, TRUE)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize file handle")
 
 done:

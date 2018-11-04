@@ -43,7 +43,7 @@
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5Lprivate.h"         /* Links                                */
 #include "H5Pprivate.h"         /* Property lists                       */
-#include "H5VLprivate.h"	/* VOL plugins				*/
+#include "H5VLprivate.h"        /* Virtual Object Layer                 */
 
 
 /****************/
@@ -239,7 +239,7 @@ H5Gcreate1(hid_t loc_id, const char *name, size_t size_hint)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, H5I_INVALID_HID, "unable to create group")
 
     /* Get an atom for the group */
-    if((ret_value = H5VL_register(H5I_GROUP, grp, vol_obj->plugin, TRUE)) < 0)
+    if((ret_value = H5VL_register(H5I_GROUP, grp, vol_obj->connector, TRUE)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register group")
 
 done:
@@ -300,7 +300,7 @@ H5Gopen1(hid_t loc_id, const char *name)
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open group")
 
     /* Get an atom for the group */
-    if((ret_value = H5VL_register(H5I_GROUP, grp, vol_obj->plugin, TRUE)) < 0)
+    if((ret_value = H5VL_register(H5I_GROUP, grp, vol_obj->connector, TRUE)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register group")
 
 done:
@@ -372,7 +372,7 @@ H5Glink(hid_t cur_loc_id, H5G_link_t type, const char *cur_name, const char *new
 
         /* Construct a temporary VOL object */
         tmp_vol_obj.data = NULL;
-        tmp_vol_obj.plugin = vol_obj->plugin;
+        tmp_vol_obj.connector = vol_obj->connector;
 
         /* Create the link through the VOL */
         if(H5VL_link_create(H5VL_LINK_CREATE_HARD, &tmp_vol_obj, loc_params2, lcpl_id, H5P_DEFAULT, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
@@ -850,7 +850,7 @@ H5Giterate(hid_t loc_id, const char *name, int *idx_p, H5G_iterate_t op,
         HGOTO_ERROR(H5E_ATOM, H5E_BADTYPE, (-1), "invalid identifier")
 
     /* Set wrapper info in API context */
-    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 0)
+    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->connector) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTSET, (-1), "can't set VOL wrapper info")
     vol_wrapper_set = TRUE;
 

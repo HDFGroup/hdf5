@@ -156,11 +156,11 @@ H5Tcommit2(hid_t loc_id, const char *name, hid_t type_id, hid_t lcpl_id,
     /* Set up VOL object */
     if(NULL == (new_obj = H5FL_CALLOC(H5VL_object_t)))
         HGOTO_ERROR(H5E_VOL, H5E_NOSPACE, FAIL, "can't allocate top object structure")
-    new_obj->plugin = vol_obj->plugin;
-    new_obj->plugin->nrefs ++;
+    new_obj->connector = vol_obj->connector;
+    new_obj->connector->nrefs ++;
     new_obj->data = data;
 
-    /* Set the committed type object to the VOL plugin pointer in the H5T_t struct */
+    /* Set the committed type object to the VOL connector pointer in the H5T_t struct */
     dt->vol_obj = new_obj;
 
 done:
@@ -267,7 +267,7 @@ done:
 herr_t
 H5Tcommit_anon(hid_t loc_id, hid_t type_id, hid_t tcpl_id, hid_t tapl_id)
 {
-    void *dt = NULL;                    /* datatype object created by VOL plugin */
+    void *dt = NULL;                    /* datatype object created by VOL connector */
     H5VL_object_t *new_obj = NULL;      /* VOL object that holds the datatype object and the VOL info */
     H5T_t       *type = NULL;           /* Datatype created */
     H5VL_object_t *vol_obj = NULL;          /* object token of loc_id */
@@ -309,11 +309,11 @@ H5Tcommit_anon(hid_t loc_id, hid_t type_id, hid_t tcpl_id, hid_t tapl_id)
     /* Setup VOL object */
     if(NULL == (new_obj = H5FL_CALLOC(H5VL_object_t)))
         HGOTO_ERROR(H5E_VOL, H5E_NOSPACE, FAIL, "can't allocate top object structure")
-    new_obj->plugin = vol_obj->plugin;
-    new_obj->plugin->nrefs ++;
+    new_obj->connector = vol_obj->connector;
+    new_obj->connector->nrefs ++;
     new_obj->data = dt;
 
-    /* Set the committed type object to the VOL plugin pointer in the H5T_t struct */
+    /* Set the committed type object to the VOL connector pointer in the H5T_t struct */
     type->vol_obj = new_obj;
 
 done:
@@ -564,7 +564,7 @@ done:
 hid_t
 H5Topen2(hid_t loc_id, const char *name, hid_t tapl_id)
 {
-    void *dt = NULL;           /* datatype token created by VOL plugin */
+    void *dt = NULL;           /* datatype token created by VOL connector */
     H5VL_object_t *vol_obj = NULL;     /* object token of loc_id */
     H5VL_loc_params_t loc_params;
     hid_t        ret_value = H5I_INVALID_HID;      /* Return value */
@@ -595,7 +595,7 @@ H5Topen2(hid_t loc_id, const char *name, hid_t tapl_id)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open named datatype")
 
     /* Register the type and return the ID */
-    if((ret_value = H5VL_register(H5I_DATATYPE, dt, vol_obj->plugin, TRUE)) < 0)
+    if((ret_value = H5VL_register(H5I_DATATYPE, dt, vol_obj->connector, TRUE)) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register named datatype")
 
 done:
@@ -1080,7 +1080,7 @@ H5T_update_shared(H5T_t *dt)
 /*-------------------------------------------------------------------------
  * Function:    H5T_construct_datatype
  *
- * Purpose:     Create a Library datatype with a plugin specific datatype object 
+ * Purpose:     Create a Library datatype with a connector specific datatype object 
  *
  * Return:      Success:    A type structure
  *              Failure:    NULL
@@ -1092,7 +1092,7 @@ H5T_construct_datatype(H5VL_object_t *vol_obj)
 {
     ssize_t        nalloc;
     void          *buf = NULL;
-    H5T_t         *dt = NULL;       /* datatype token from VOL plugin */
+    H5T_t         *dt = NULL;       /* datatype token from VOL connector */
     H5T_t         *ret_value = NULL;
 
     FUNC_ENTER_NOAPI(NULL)
@@ -1151,7 +1151,7 @@ H5T_get_named_type(const H5T_t *dt)
 /*-------------------------------------------------------------------------
  * Function:    H5T_get_actual_type
  *
- * Purpose:     Returns underlying native datatype created by native plugin
+ * Purpose:     Returns underlying native datatype created by native connector
  *              if datatype is committed, otherwise return the datatype 
  *              object associate with the ID.
  *

@@ -113,10 +113,12 @@ static const H5VL_class_t fake_vol_g = {
         NULL,                                       /* specific     */
         NULL                                        /* optional     */
     },
-    {   /* async_cls */
+    {   /* request_cls */
+        NULL,                                       /* wait         */
         NULL,                                       /* cancel       */
-        NULL,                                       /* test         */
-        NULL                                        /* wait         */
+        NULL,                                       /* specific     */
+        NULL,                                       /* optional     */
+        NULL                                        /* free         */
     },
     NULL                                            /* optional     */
 };
@@ -126,7 +128,7 @@ static const H5VL_class_t fake_vol_g = {
  * Function:    test_vol_registration()
  *
  * Purpose:     Tests if we can load, register, and close a simple
- *              VOL plugin.
+ *              VOL connector.
  *
  * Return:      SUCCEED/FAIL
  *
@@ -140,44 +142,44 @@ test_vol_registration(void)
 
     TESTING("VOL registration");
 
-    /* The test/fake VOL plugin should not be registered at the start of the test */
-    if ((is_registered = H5VLis_plugin_registered(FAKE_VOL_NAME)) < 0)
+    /* The test/fake VOL connector should not be registered at the start of the test */
+    if ((is_registered = H5VLis_connector_registered(FAKE_VOL_NAME)) < 0)
         FAIL_STACK_ERROR;
     if (is_registered > 0)
-        FAIL_PUTS_ERROR("native VOL plugin is inappropriately registered");
+        FAIL_PUTS_ERROR("native VOL connector is inappropriately registered");
 
     /* Load a VOL interface */
-    if ((vol_id = H5VLregister_plugin(&fake_vol_g, H5P_DEFAULT)) < 0)
+    if ((vol_id = H5VLregister_connector(&fake_vol_g, H5P_DEFAULT)) < 0)
         FAIL_STACK_ERROR;
 
-    /* The test/fake VOL plugin should be registered now */
-    if ((is_registered = H5VLis_plugin_registered(FAKE_VOL_NAME)) < 0)
+    /* The test/fake VOL connector should be registered now */
+    if ((is_registered = H5VLis_connector_registered(FAKE_VOL_NAME)) < 0)
         FAIL_STACK_ERROR;
     if (0 == is_registered)
-        FAIL_PUTS_ERROR("native VOL plugin is un-registered");
+        FAIL_PUTS_ERROR("native VOL connector is un-registered");
 
-    /* Re-register a VOL plugin */
-    if ((vol_id2 = H5VLregister_plugin(&fake_vol_g, H5P_DEFAULT)) < 0)
+    /* Re-register a VOL connector */
+    if ((vol_id2 = H5VLregister_connector(&fake_vol_g, H5P_DEFAULT)) < 0)
         FAIL_STACK_ERROR;
 
-    /* The test/fake VOL plugin should still be registered now */
-    if ((is_registered = H5VLis_plugin_registered(FAKE_VOL_NAME)) < 0)
+    /* The test/fake VOL connector should still be registered now */
+    if ((is_registered = H5VLis_connector_registered(FAKE_VOL_NAME)) < 0)
         FAIL_STACK_ERROR;
     if (0 == is_registered)
-        FAIL_PUTS_ERROR("native VOL plugin is un-registered");
+        FAIL_PUTS_ERROR("native VOL connector is un-registered");
 
     /* Unregister the second test/fake VOL ID */
-    if (H5VLunregister_plugin(vol_id2) < 0)
+    if (H5VLunregister_connector(vol_id2) < 0)
         FAIL_STACK_ERROR;
 
-    /* The test/fake VOL plugin should still be registered now */
-    if ((is_registered = H5VLis_plugin_registered(FAKE_VOL_NAME)) < 0)
+    /* The test/fake VOL connector should still be registered now */
+    if ((is_registered = H5VLis_connector_registered(FAKE_VOL_NAME)) < 0)
         FAIL_STACK_ERROR;
     if (0 == is_registered)
-        FAIL_PUTS_ERROR("native VOL plugin is un-registered");
+        FAIL_PUTS_ERROR("native VOL connector is un-registered");
 
     /* Unregister the original test/fake VOL ID */
-    if (H5VLunregister_plugin(vol_id) < 0)
+    if (H5VLunregister_connector(vol_id) < 0)
         FAIL_STACK_ERROR;
 
     PASSED();
@@ -185,7 +187,7 @@ test_vol_registration(void)
 
 error:
     H5E_BEGIN_TRY {
-        H5VLunregister_plugin(vol_id);
+        H5VLunregister_connector(vol_id);
     } H5E_END_TRY;
     return FAIL;
 
@@ -195,7 +197,7 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    test_native_vol_init()
  *
- * Purpose:     Tests if the native VOL plugin gets initialized.
+ * Purpose:     Tests if the native VOL connector gets initialized.
  *
  * Return:      SUCCEED/FAIL
  *
@@ -206,13 +208,13 @@ test_native_vol_init(void)
 {
     htri_t is_registered;
 
-    TESTING("Native VOL plugin initialization");
+    TESTING("Native VOL connector initialization");
 
-    /* The native VOL plugin should always be registered */
-    if ((is_registered = H5VLis_plugin_registered(H5VL_NATIVE_NAME)) < 0)
+    /* The native VOL connector should always be registered */
+    if ((is_registered = H5VLis_connector_registered(H5VL_NATIVE_NAME)) < 0)
         FAIL_STACK_ERROR;
     if (0 == is_registered)
-        FAIL_PUTS_ERROR("native VOL plugin is un-registered");
+        FAIL_PUTS_ERROR("native VOL connector is un-registered");
 
     PASSED();
     return SUCCEED;
@@ -226,7 +228,7 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    test_basic_file_operation()
  *
- * Purpose:     Uses the native VOL plugin to test basic VOL file operations
+ * Purpose:     Uses the native VOL connector to test basic VOL file operations
  *
  * Return:      SUCCEED/FAIL
  *
@@ -347,7 +349,7 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    test_basic_group_operation()
  *
- * Purpose:     Uses the native VOL plugin to test basic VOL group operations
+ * Purpose:     Uses the native VOL connector to test basic VOL group operations
  *
  * Return:      SUCCEED/FAIL
  *
@@ -438,7 +440,7 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    test_basic_dataset_operation()
  *
- * Purpose:     Uses the native VOL plugin to test basic VOL dataset operations
+ * Purpose:     Uses the native VOL connector to test basic VOL dataset operations
  *
  * Return:      SUCCEED/FAIL
  *
@@ -607,7 +609,7 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    test_basic_attribute_operation()
  *
- * Purpose:     Uses the native VOL plugin to test basic VOL attribute operations
+ * Purpose:     Uses the native VOL connector to test basic VOL attribute operations
  *
  * Return:      SUCCEED/FAIL
  *
@@ -705,7 +707,7 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    test_basic_object_operation()
  *
- * Purpose:     Uses the native VOL plugin to test basic VOL object operations
+ * Purpose:     Uses the native VOL connector to test basic VOL object operations
  *
  * Return:      SUCCEED/FAIL
  *
@@ -769,7 +771,7 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    test_basic_link_operation()
  *
- * Purpose:     Uses the native VOL plugin to test basic VOL link operations
+ * Purpose:     Uses the native VOL connector to test basic VOL link operations
  *
  * Return:      SUCCEED/FAIL
  *
@@ -834,7 +836,7 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    test_basic_datatype_operation()
  *
- * Purpose:     Uses the native VOL plugin to test basic VOL datatype operations
+ * Purpose:     Uses the native VOL connector to test basic VOL datatype operations
  *
  * Return:      SUCCEED/FAIL
  *
@@ -916,7 +918,7 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    test_echo_vol_operation()
  *
- * Purpose:     Uses the echo VOL plugin to test basic VOL operations
+ * Purpose:     Uses the echo VOL connector to test basic VOL operations
  *              via the H5VL public API.
  *
  * Return:      SUCCEED/FAIL

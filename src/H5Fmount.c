@@ -477,9 +477,9 @@ H5Fmount(hid_t loc_id, const char *name, hid_t child_id, hid_t plist_id)
     if(NULL == (child_vol_obj = (H5VL_object_t *)H5I_object(child_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "could not get child object")
 
-    /* Check if both objects are associated with the same VOL plugin */
-    if(loc_vol_obj->plugin->cls->value != child_vol_obj->plugin->cls->value)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "Can't mount file onto object from different VOL plugin")
+    /* Check if both objects are associated with the same VOL connector */
+    if(loc_vol_obj->connector->cls->value != child_vol_obj->connector->cls->value)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "Can't mount file onto object from different VOL connector")
 
     /* Perform the mount operation */
     if(H5VL_file_specific(loc_vol_obj, H5VL_FILE_MOUNT, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, loc_type, name, child_vol_obj->data, plist_id) < 0)

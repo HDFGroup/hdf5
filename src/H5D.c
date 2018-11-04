@@ -162,7 +162,7 @@ H5Dcreate2(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, H5I_INVALID_HID, "unable to create dataset")
 
     /* Get an atom for the dataset */
-    if((ret_value = H5VL_register(H5I_DATASET, dset, vol_obj->plugin, TRUE)) < 0)
+    if((ret_value = H5VL_register(H5I_DATASET, dset, vol_obj->connector, TRUE)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize dataset handle")
 
 done:
@@ -210,7 +210,7 @@ hid_t
 H5Dcreate_anon(hid_t loc_id, hid_t type_id, hid_t space_id, hid_t dcpl_id,
     hid_t dapl_id)
 {
-    void                *dset       = NULL;             /* dset token from VOL plugin */
+    void                *dset       = NULL;             /* dset token from VOL connector */
     H5VL_object_t       *vol_obj        = NULL;             /* object token of loc_id */
     H5VL_loc_params_t   loc_params;
     H5P_genplist_t      *plist;                         /* Property list pointer */
@@ -253,7 +253,7 @@ H5Dcreate_anon(hid_t loc_id, hid_t type_id, hid_t space_id, hid_t dcpl_id,
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, H5I_INVALID_HID, "unable to create dataset")
 
     /* Get an atom for the dataset */
-    if((ret_value = H5VL_register(H5I_DATASET, dset, vol_obj->plugin, TRUE)) < 0)
+    if((ret_value = H5VL_register(H5I_DATASET, dset, vol_obj->connector, TRUE)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register dataset")
 
 done:
@@ -284,7 +284,7 @@ done:
 hid_t
 H5Dopen2(hid_t loc_id, const char *name, hid_t dapl_id)
 {
-    void               *dset = NULL;        /* dset token from VOL plugin */
+    void               *dset = NULL;        /* dset token from VOL connector */
     H5VL_object_t      *vol_obj = NULL;         /* object token of loc_id */
     H5VL_loc_params_t   loc_params;
     hid_t               ret_value   = H5I_INVALID_HID;  /* Return value */
@@ -315,7 +315,7 @@ H5Dopen2(hid_t loc_id, const char *name, hid_t dapl_id)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open dataset")
 
     /* Register an atom for the dataset */
-    if((ret_value = H5VL_register(H5I_DATASET, dset, vol_obj->plugin, TRUE)) < 0)
+    if((ret_value = H5VL_register(H5I_DATASET, dset, vol_obj->connector, TRUE)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, H5I_INVALID_HID, "can't register dataset atom")
 
 done:

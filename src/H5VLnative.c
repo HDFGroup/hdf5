@@ -11,7 +11,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Purpose:	The native VOL plugin where access is to a single HDF5 file 
+ * Purpose:	The native VOL connector where access is to a single HDF5 file 
  *              using HDF5 VFDs. 
  */
 
@@ -40,11 +40,11 @@
 #include "H5Rpkg.h"             /* References                               */
 #include "H5SMprivate.h"        /* Shared Object Header Messages            */
 #include "H5Tpkg.h"             /* Datatypes                                */
-#include "H5VLprivate.h"        /* VOL drivers                              */
-#include "H5VLnative_private.h" /* Native VOL plugin                        */
+#include "H5VLprivate.h"        /* Virtual Object Layer                     */
+#include "H5VLnative_private.h" /* Native VOL connector                     */
 
 /*
- * The VOL plugin identification number.
+ * The VOL connector identification number.
  */
 static hid_t H5VL_NATIVE_ID_g = H5I_INVALID_HID;
 
@@ -117,7 +117,7 @@ static herr_t H5VL__native_datatype_get(void *dt, H5VL_datatype_get_t get_type, 
 static herr_t H5VL__native_datatype_specific(void *dt, H5VL_datatype_specific_t specific_type, hid_t dxpl_id, void **req, va_list arguments);
 static herr_t H5VL__native_datatype_close(void *dt, hid_t dxpl_id, void **req);
 
-/* Native VOL plugin class struct */
+/* Native VOL connector class struct */
 static H5VL_class_t H5VL_native_cls_g = {
     H5VL_NATIVE_VERSION,                            /* version      */
     H5VL_NATIVE_VALUE,                              /* value        */
@@ -206,10 +206,10 @@ static H5VL_class_t H5VL_native_cls_g = {
 /*-------------------------------------------------------------------------
  * Function:    H5VL_native_init
  *
- * Purpose:     Initialize this VOL plugin by registering it with the
+ * Purpose:     Initialize this VOL connector by registering it with the
  *              library.
  *
- * Return:      Success:    The ID for the native plugin
+ * Return:      Success:    The ID for the native connector
  *              Failure:    H5I_INVALID_HID
  *
  *-------------------------------------------------------------------------
@@ -221,10 +221,10 @@ H5VL_native_init(hid_t vipl_id)
 
     FUNC_ENTER_NOAPI(H5I_INVALID_HID)
 
-    /* Register the native VOL plugin, if it isn't already */
+    /* Register the native VOL connector, if it isn't already */
     if(NULL == H5I_object_verify(H5VL_NATIVE_ID_g, H5I_VOL))
-        if((H5VL_NATIVE_ID_g = H5VL_register_plugin((const H5VL_class_t *)&H5VL_native_cls_g, TRUE, vipl_id)) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTINSERT, H5I_INVALID_HID, "can't create ID for native VOL plugin")
+        if((H5VL_NATIVE_ID_g = H5VL_register_connector((const H5VL_class_t *)&H5VL_native_cls_g, TRUE, vipl_id)) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTINSERT, H5I_INVALID_HID, "can't create ID for native VOL connector")
 
     /* Set return value */
     ret_value = H5VL_NATIVE_ID_g;
@@ -259,7 +259,7 @@ H5VL__native_term(void)
  * Function:    H5Pset_fapl_native
  *
  * Purpose:     Modify the file access property list to use the H5VL_NATIVE
- *              plugin defined in this source file.
+ *              connector defined in this source file.
  *
  * Return:      SUCCEED/FAIL
  *
@@ -288,7 +288,7 @@ done:
  * Function:    H5VL__native_get_file
  *
  * Purpose:     Utility routine to get file struct for an object via the
- *              native VOL plugin.
+ *              native VOL connector.
  *
  * Returns:     SUCCESS:    A pointer to the H5F_t struct for the file
  *                          associated with the object.
@@ -414,7 +414,7 @@ H5VL__native_attr_create(void *obj, H5VL_loc_params_t loc_params, const char *at
 
     if(NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a datatype")
-    /* If this is a named datatype, get the plugin's pointer to the datatype */
+    /* If this is a named datatype, get the connector's pointer to the datatype */
     type = H5T_get_actual_type(dt);
 
     if(NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
@@ -1275,7 +1275,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5VL__native_dataset_optional
  *
- * Purpose:     Perform a plugin-specific operation on a native dataset
+ * Purpose:     Perform a connector-specific operation on a native dataset
  *
  * Return:      SUCCEED/FAIL
  *
@@ -1741,7 +1741,7 @@ H5VL__native_file_specific(void *obj, H5VL_file_specific_t specific_type,
                 void   **ret        = va_arg(arguments, void **);
                 H5F_t  *new_file    = NULL;
 
-                /* Reopen the file through the VOL plugin */
+                /* Reopen the file through the VOL connector */
                 if(NULL == (new_file = H5F__reopen((H5F_t *)obj)))
                     HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to reopen file")
                 new_file->id_exists = TRUE;
@@ -1810,7 +1810,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5VL__native_file_optional
  *
- * Purpose:     Perform a plugin-specific operation on a native file
+ * Purpose:     Perform a connector-specific operation on a native file
  *
  * Return:      SUCCEED/FAIL
  *
@@ -3116,7 +3116,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5VL__native_object_specific
  *
- * Purpose:     Perform a plugin-specific operation for an objectibute
+ * Purpose:     Perform a connector-specific operation for an objectibute
  *
  * Return:      SUCCEED/FAIL
  *
@@ -3239,7 +3239,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5VL__native_object_optional
  *
- * Purpose:	Perform a plugin-specific operation for an objectibute
+ * Purpose:	Perform a connector-specific operation for an objectibute
  *
  * Return:	Success:	0
  *		Failure:	-1

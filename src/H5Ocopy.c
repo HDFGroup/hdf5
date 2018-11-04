@@ -248,7 +248,7 @@ H5Ocopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
     loc_params2.obj_type    = H5I_get_type(dst_loc_id);
 
     /* Set wrapper info in API context */
-    if(H5VL_set_vol_wrapper(vol_obj1->data, vol_obj1->plugin) < 0)
+    if(H5VL_set_vol_wrapper(vol_obj1->data, vol_obj1->connector) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, H5I_INVALID_HID, "can't set VOL wrapper info")
     vol_wrapper_set = TRUE;
 

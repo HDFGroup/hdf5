@@ -39,7 +39,7 @@
 #include "H5Iprivate.h"         /* IDs                                  */
 #include "H5MMprivate.h"        /* Memory Management                    */
 #include "H5Ppkg.h"             /* Property lists                       */
-#include "H5VLprivate.h"        /* VOL plugins                          */
+#include "H5VLprivate.h"        /* Virtual Object Layer                 */
 
 /* Includes needed to set as default file driver */
 #include "H5FDsec2.h"           /* POSIX unbuffered I/O                 */
@@ -48,8 +48,8 @@
 #include "H5FDwindows.h"        /* Win32 I/O                            */
 #endif
 
-/* Includes needed to set the default VOL plugin */
-#include "H5VLnative_private.h" /* Native VOL plugin                    */
+/* Includes needed to set the default VOL connector */
+#include "H5VLnative_private.h" /* Native VOL connector                 */
 
 
 /****************/
@@ -262,16 +262,16 @@
 #define H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_DEF            0
 #define H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_ENC            H5P__encode_unsigned
 #define H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_DEC            H5P__decode_unsigned
-/* Definition for file VOL plugin properties (ID, etc.) */
-#define H5F_ACS_VOL_SIZE                        sizeof(H5VL_plugin_prop_t)
-#define H5F_ACS_VOL_DEF                         {H5_DEFAULT_VOL, NULL}
-#define H5F_ACS_VOL_CRT                         H5P__facc_vol_create
-#define H5F_ACS_VOL_SET                         H5P__facc_vol_set
-#define H5F_ACS_VOL_GET                         H5P__facc_vol_get
-#define H5F_ACS_VOL_DEL                         H5P__facc_vol_del
-#define H5F_ACS_VOL_COPY                        H5P__facc_vol_copy
-#define H5F_ACS_VOL_CMP                         H5P__facc_vol_cmp
-#define H5F_ACS_VOL_CLOSE                       H5P__facc_vol_close
+/* Definition for file VOL connector properties (ID, etc.) */
+#define H5F_ACS_VOL_CONN_SIZE                   sizeof(H5VL_connector_prop_t)
+#define H5F_ACS_VOL_CONN_DEF                    {H5_DEFAULT_VOL, NULL}
+#define H5F_ACS_VOL_CONN_CRT                    H5P__facc_vol_create
+#define H5F_ACS_VOL_CONN_SET                    H5P__facc_vol_set
+#define H5F_ACS_VOL_CONN_GET                    H5P__facc_vol_get
+#define H5F_ACS_VOL_CONN_DEL                    H5P__facc_vol_del
+#define H5F_ACS_VOL_CONN_COPY                   H5P__facc_vol_copy
+#define H5F_ACS_VOL_CONN_CMP                    H5P__facc_vol_cmp
+#define H5F_ACS_VOL_CONN_CLOSE                  H5P__facc_vol_close
 
 
 /******************/
@@ -334,7 +334,7 @@ static int H5P__facc_cache_image_config_cmp(const void *_config1, const void *_c
 static herr_t H5P__facc_cache_image_config_enc(const void *value, void **_pp, size_t *size);
 static herr_t H5P__facc_cache_image_config_dec(const void **_pp, void *_value);
 
-/* VOL plugin callbacks */
+/* VOL connector callbacks */
 static herr_t H5P__facc_vol_create(const char *name, size_t size, void *value);
 static herr_t H5P__facc_vol_set(hid_t prop_id, const char *name, size_t size, void *value);
 static herr_t H5P__facc_vol_get(hid_t prop_id, const char *name, size_t size, void *value);
@@ -437,7 +437,7 @@ static herr_t
 H5P__facc_reg_prop(H5P_genclass_t *pclass)
 {
     const H5FD_driver_prop_t def_driver_prop    = H5F_ACS_FILE_DRV_DEF;     /* Default VFL driver ID & info (initialized from a variable) */
-    const H5VL_plugin_prop_t def_vol_prop       = H5F_ACS_VOL_DEF;          /* Default VOL plugin ID & info (initialized from a variable) */
+    const H5VL_connector_prop_t def_vol_prop    = H5F_ACS_VOL_CONN_DEF;     /* Default VOL connector ID & info (initialized from a variable) */
     herr_t ret_value = SUCCEED;                                             /* Return value */
 
     FUNC_ENTER_STATIC
@@ -668,11 +668,11 @@ H5P__facc_reg_prop(H5P_genclass_t *pclass)
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
-    /* Register the file VOL plugin ID & info */
+    /* Register the file VOL connector ID & info */
     /* (Note: this property should not have an encode/decode callback -QAK) */
-    if(H5P__register_real(pclass, H5F_ACS_VOL_DRV_NAME, H5F_ACS_VOL_SIZE, &def_vol_prop,
-            H5F_ACS_VOL_CRT, H5F_ACS_VOL_SET, H5F_ACS_VOL_GET, NULL, NULL,
-            H5F_ACS_VOL_DEL, H5F_ACS_VOL_COPY, H5F_ACS_VOL_CMP, H5F_ACS_VOL_CLOSE) < 0)
+    if(H5P__register_real(pclass, H5F_ACS_VOL_CONN_NAME, H5F_ACS_VOL_CONN_SIZE, &def_vol_prop,
+            H5F_ACS_VOL_CONN_CRT, H5F_ACS_VOL_CONN_SET, H5F_ACS_VOL_CONN_GET, NULL, NULL,
+            H5F_ACS_VOL_CONN_DEL, H5F_ACS_VOL_CONN_COPY, H5F_ACS_VOL_CONN_CMP, H5F_ACS_VOL_CONN_CLOSE) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
 done:
@@ -4974,7 +4974,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5P_set_vol
  *
- * Purpose:     Set the VOL plugin for a file access property list
+ * Purpose:     Set the VOL connector for a file access property list
  *              (PLIST_ID).  The VOL properties will
  *              be copied into the property list and the reference count on
  *              the VOL will be incremented.
@@ -4991,18 +4991,18 @@ H5P_set_vol(H5P_genplist_t *plist, hid_t vol_id, const void *vol_info)
     FUNC_ENTER_NOAPI(FAIL)
 
     if(NULL == H5I_object_verify(vol_id, H5I_VOL))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID")
 
     if(TRUE == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS)) {
-        H5VL_plugin_prop_t vol_prop;         /* Property for VOL ID & info */
+        H5VL_connector_prop_t vol_prop;         /* Property for VOL ID & info */
 
-        /* Prepare the VOL plugin property */
-        vol_prop.plugin_id = vol_id;
-        vol_prop.plugin_info = vol_info;
+        /* Prepare the VOL connector property */
+        vol_prop.connector_id = vol_id;
+        vol_prop.connector_info = vol_info;
 
-        /* Set the plugin ID & info property */
-        if(H5P_set(plist, H5F_ACS_VOL_DRV_NAME, &vol_prop) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set VOL plugin ID & info")
+        /* Set the connector ID & info property */
+        if(H5P_set(plist, H5F_ACS_VOL_CONN_NAME, &vol_prop) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set VOL connector ID & info")
     } /* end if */
     else
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
@@ -5015,7 +5015,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_vol
  *
- * Purpose:     Set the file VOL plugin (VOL_ID) for a file access
+ * Purpose:     Set the file VOL connector (VOL_ID) for a file access
  *              property list (PLIST_ID)
  *
  * Return:      Success:    Non-negative
@@ -5050,7 +5050,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_vol_id
  *
- * Purpose:     Returns the ID of the current VOL plugin.
+ * Purpose:     Returns the ID of the current VOL connector.
  *              This ID should be closed with H5VLclose().
  *
  * Return:      Success:        Non-negative
@@ -5073,18 +5073,18 @@ H5Pget_vol_id(hid_t plist_id, hid_t *vol_id)
 
     /* Get the current VOL ID */
     if(TRUE == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS)) {
-        H5VL_plugin_prop_t plugin_prop;         /* Property for VOL plugin ID & info */
+        H5VL_connector_prop_t connector_prop;         /* Property for VOL connector ID & info */
 
-        /* Get the plugin property */
-        if(H5P_peek(plist, H5F_ACS_VOL_DRV_NAME, &plugin_prop) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get VOL plugin info")
+        /* Get the connector property */
+        if(H5P_peek(plist, H5F_ACS_VOL_CONN_NAME, &connector_prop) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get VOL connector info")
 
         /* Increment the VOL ID's ref count */
-        if(H5I_inc_ref(plugin_prop.plugin_id, TRUE) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTINC, FAIL, "unable to increment ref count on VOL plugin ID")
+        if(H5I_inc_ref(connector_prop.connector_id, TRUE) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTINC, FAIL, "unable to increment ref count on VOL connector ID")
 
-        /* Set the plugin ID to return */
-        *vol_id = plugin_prop.plugin_id;
+        /* Set the connector ID to return */
+        *vol_id = connector_prop.connector_id;
     } /* end if */
     else
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
@@ -5097,8 +5097,8 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_vol_info
  *
- * Purpose:     Returns a copy of the VOL info for a plugin.
- *              This information should be freed with H5VLfree_plugin_info.
+ * Purpose:     Returns a copy of the VOL info for a connector.
+ *              This information should be freed with H5VLfree_connector_info.
  *
  * Return:      Success:        Non-negative
  *              Failure:        Negative
@@ -5120,28 +5120,28 @@ H5Pget_vol_info(hid_t plist_id, void **vol_info)
 
     /* Get the current VOL info */
     if(TRUE == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS)) {
-        void *new_plugin_info = NULL;   /* Copy of plugin info */
-        H5VL_plugin_prop_t plugin_prop;         /* Property for VOL plugin ID & info */
+        void *new_connector_info = NULL;   /* Copy of connector info */
+        H5VL_connector_prop_t connector_prop;         /* Property for VOL connector ID & info */
 
-        /* Get the plugin property */
-        if(H5P_peek(plist, H5F_ACS_VOL_DRV_NAME, &plugin_prop) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get VOL plugin info")
+        /* Get the connector property */
+        if(H5P_peek(plist, H5F_ACS_VOL_CONN_NAME, &connector_prop) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get VOL connector info")
 
-        /* Copy plugin info, if it exists */
-        if(plugin_prop.plugin_info) {
-            H5VL_class_t *plugin;           /* Pointer to plugin */
+        /* Copy connector info, if it exists */
+        if(connector_prop.connector_info) {
+            H5VL_class_t *connector;           /* Pointer to connector */
 
-            /* Retrieve the plugin for the ID */
-            if(NULL == (plugin = (H5VL_class_t *)H5I_object(plugin_prop.plugin_id)))
-                HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
+            /* Retrieve the connector for the ID */
+            if(NULL == (connector = (H5VL_class_t *)H5I_object(connector_prop.connector_id)))
+                HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a VOL connector ID")
 
-            /* Allocate and copy plugin info */
-            if(H5VL_copy_plugin_info(plugin, &new_plugin_info, plugin_prop.plugin_info) < 0)
-                HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "plugin info copy failed")
+            /* Allocate and copy connector info */
+            if(H5VL_copy_connector_info(connector, &new_connector_info, connector_prop.connector_info) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "connector info copy failed")
         } /* end if */
 
-        /* Set the plugin info */
-        *vol_info = new_plugin_info;
+        /* Set the connector info */
+        *vol_info = new_connector_info;
     } /* end if */
     else
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
@@ -5154,7 +5154,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5P__vol_copy
  *
- * Purpose:     Copy VOL plugin ID & info.
+ * Purpose:     Copy VOL connector ID & info.
  *
  * Note:        This is an "in-place" copy, since this routine gets called
  *              after the top-level copy has been performed and this routine
@@ -5173,29 +5173,29 @@ H5P__vol_copy(void *value)
     FUNC_ENTER_STATIC
 
     if(value) {
-        H5VL_plugin_prop_t *plugin_prop = (H5VL_plugin_prop_t *)value; /* Driver ID & info struct */
+        H5VL_connector_prop_t *connector_prop = (H5VL_connector_prop_t *)value; /* connector ID & info struct */
 
-        /* Copy the plugin ID & info, if there is one */
-        if(plugin_prop->plugin_id > 0) {
-            /* Increment the reference count on plugin ID and copy plugin info */
-            if(H5I_inc_ref(plugin_prop->plugin_id, FALSE) < 0)
-                HGOTO_ERROR(H5E_PLIST, H5E_CANTINC, FAIL, "unable to increment ref count on VOL plugin ID")
+        /* Copy the connector ID & info, if there is one */
+        if(connector_prop->connector_id > 0) {
+            /* Increment the reference count on connector ID and copy connector info */
+            if(H5I_inc_ref(connector_prop->connector_id, FALSE) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTINC, FAIL, "unable to increment ref count on VOL connector ID")
 
-            /* Copy plugin info, if it exists */
-            if(plugin_prop->plugin_info) {
-                H5VL_class_t *plugin;           /* Pointer to plugin */
-                void *new_plugin_info = NULL;   /* Copy of plugin info */
+            /* Copy connector info, if it exists */
+            if(connector_prop->connector_info) {
+                H5VL_class_t *connector;           /* Pointer to connector */
+                void *new_connector_info = NULL;   /* Copy of connector info */
 
-                /* Retrieve the plugin for the ID */
-                if(NULL == (plugin = (H5VL_class_t *)H5I_object(plugin_prop->plugin_id)))
-                    HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
+                /* Retrieve the connector for the ID */
+                if(NULL == (connector = (H5VL_class_t *)H5I_object(connector_prop->connector_id)))
+                    HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a VOL connector ID")
 
-                /* Allocate and copy plugin info */
-                if(H5VL_copy_plugin_info(plugin, &new_plugin_info, plugin_prop->plugin_info) < 0)
-                    HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "plugin info copy failed")
+                /* Allocate and copy connector info */
+                if(H5VL_copy_connector_info(connector, &new_connector_info, connector_prop->connector_info) < 0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "connector info copy failed")
 
-                /* Set the plugin info to the copy */
-                plugin_prop->plugin_info = new_plugin_info;
+                /* Set the connector info to the copy */
+                connector_prop->connector_info = new_connector_info;
             } /* end if */
         } /* end if */
     } /* end if */
@@ -5208,7 +5208,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5P__vol_free
  *
- * Purpose:     Free VOL plugin ID & info.
+ * Purpose:     Free VOL connector ID & info.
  *
  * Return:      Success:        Non-negative
  *              Failure:        Negative
@@ -5223,25 +5223,25 @@ H5P__vol_free(void *value)
     FUNC_ENTER_STATIC
 
     if(value) {
-        H5VL_plugin_prop_t *info = (H5VL_plugin_prop_t *)value; /* Driver ID & info struct */
+        H5VL_connector_prop_t *info = (H5VL_connector_prop_t *)value; /* connector ID & info struct */
 
-        /* Free the plugin info (if it exists) and decrement the ID */
-        if(info->plugin_id > 0) {
-            if(info->plugin_info) {
-                H5VL_class_t *plugin;       /* Pointer to plugin */
+        /* Free the connector info (if it exists) and decrement the ID */
+        if(info->connector_id > 0) {
+            if(info->connector_info) {
+                H5VL_class_t *connector;       /* Pointer to connector */
 
-                /* Retrieve the plugin for the ID */
-                if(NULL == (plugin = (H5VL_class_t *)H5I_object(info->plugin_id)))
-                    HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
+                /* Retrieve the connector for the ID */
+                if(NULL == (connector = (H5VL_class_t *)H5I_object(info->connector_id)))
+                    HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a VOL connector ID")
 
-                /* Free the plugin info */
-                if(H5VL_free_plugin_info(plugin, (void *)info->plugin_info) < 0)        /* Casting away const OK - QAK */
-                    HGOTO_ERROR(H5E_PLIST, H5E_CANTRELEASE, FAIL, "unable to release VOL plugin info object")
+                /* Free the connector info */
+                if(H5VL_free_connector_info(connector, (void *)info->connector_info) < 0)        /* Casting away const OK - QAK */
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTRELEASE, FAIL, "unable to release VOL connector info object")
             } /* end if */
 
-            /* Decrement reference count for plugin ID */
-            if(H5I_dec_ref(info->plugin_id) < 0)
-                HGOTO_ERROR(H5E_PLIST, H5E_CANTDEC, FAIL, "can't decrement reference count for plugin ID")
+            /* Decrement reference count for connector ID */
+            if(H5I_dec_ref(info->connector_id) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTDEC, FAIL, "can't decrement reference count for connector ID")
         } /* end if */
     } /* end if */
 
@@ -5253,7 +5253,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5P__facc_vol_create
  *
- * Purpose:     Create callback for the VOL plugin ID & info property.
+ connectorose:     Create callback for the VOL connector ID & info property.
  *
  * Return:      Success:        Non-negative
  *              Failure:        Negative
@@ -5267,9 +5267,9 @@ H5P__facc_vol_create(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size
 
     FUNC_ENTER_STATIC
 
-    /* Make copy of the VOL plugin */
+    /* Make copy of the VOL connector */
     if(H5P__vol_copy(value) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy VOL plugin")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy VOL connector")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -5279,7 +5279,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5P__facc_vol_set
  *
- * Purpose:     Copies a VOL plugin property when it's set for a property list
+ * Purpose:     Copies a VOL connector property when it's set for a property list
  *
  * Return:      Success:        Non-negative
  *              Failure:        Negative
@@ -5297,9 +5297,9 @@ H5P__facc_vol_set(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name,
     /* Sanity check */
     HDassert(value);
 
-    /* Make copy of VOL plugin ID & info */
+    /* Make copy of VOL connector ID & info */
     if(H5P__vol_copy(value) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy VOL plugin")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy VOL connector")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -5309,7 +5309,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5P__facc_vol_get
  *
- * Purpose:     Copies a VOL plugin property when it's retrieved from a property list
+ * Purpose:     Copies a VOL connector property when it's retrieved from a property list
  *
  * Return:      Success:        Non-negative
  *              Failure:        Negative
@@ -5327,9 +5327,9 @@ H5P__facc_vol_get(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name,
     /* Sanity check */
     HDassert(value);
 
-    /* Make copy of VOL plugin */
+    /* Make copy of VOL connector */
     if(H5P__vol_copy(value) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy VOL plugin")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy VOL connector")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -5339,7 +5339,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5P__facc_vol_del
  *
- * Purpose:     Frees memory used to store the VOL plugin ID & info property
+ * Purpose:     Frees memory used to store the VOL connector ID & info property
  *
  * Return:      Success:        Non-negative
  *              Failure:        Negative
@@ -5353,9 +5353,9 @@ H5P__facc_vol_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name,
 
     FUNC_ENTER_STATIC
 
-    /* Free the VOL plugin ID & info */
+    /* Free the VOL connector ID & info */
     if(H5P__vol_free(value) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTRELEASE, FAIL, "can't release VOL plugin")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTRELEASE, FAIL, "can't release VOL connector")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -5365,7 +5365,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5P__facc_vol_copy
  *
- * Purpose:     Copy callback for the VOL plugin ID & info property.
+ * Purpose:     Copy callback for the VOL connector ID & info property.
  *
  * Return:      Success:        Non-negative
  *              Failure:        Negative
@@ -5379,9 +5379,9 @@ H5P__facc_vol_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, 
 
     FUNC_ENTER_STATIC
 
-    /* Make copy of VOL plugin */
+    /* Make copy of VOL connector */
     if(H5P__vol_copy(value) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy VOL plugin")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy VOL connector")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -5391,7 +5391,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:       H5P__facc_vol_cmp
  *
- * Purpose:        Callback routine which is called whenever the VOL plugin
+ * Purpose:        Callback routine which is called whenever the VOL connector
  *                 ID & info property in the file access property list
  *                 is compared.
  *
@@ -5404,9 +5404,9 @@ done:
 static int
 H5P__facc_vol_cmp(const void *_info1, const void *_info2, size_t H5_ATTR_UNUSED size)
 {
-    const H5VL_plugin_prop_t *info1 = (const H5VL_plugin_prop_t *)_info1; /* Create local aliases for values */
-    const H5VL_plugin_prop_t *info2 = (const H5VL_plugin_prop_t *)_info2;
-    H5VL_class_t *cls1, *cls2;  /* Driver class for each property */
+    const H5VL_connector_prop_t *info1 = (const H5VL_connector_prop_t *)_info1; /* Create local aliases for values */
+    const H5VL_connector_prop_t *info2 = (const H5VL_connector_prop_t *)_info2;
+    H5VL_class_t *cls1, *cls2;  /* connector class for each property */
     int cmp_value;              /* Value from comparison */
     int ret_value = 0;          /* Return value */
 
@@ -5415,18 +5415,18 @@ H5P__facc_vol_cmp(const void *_info1, const void *_info2, size_t H5_ATTR_UNUSED 
     /* Sanity check */
     HDassert(info1);
     HDassert(info2);
-    HDassert(size == sizeof(H5VL_plugin_prop_t));
+    HDassert(size == sizeof(H5VL_connector_prop_t));
 
-    /* Compare plugins */
-    if(NULL == (cls1 = (H5VL_class_t *)H5I_object(info1->plugin_id)))
+    /* Compare connectors */
+    if(NULL == (cls1 = (H5VL_class_t *)H5I_object(info1->connector_id)))
         HGOTO_DONE(-1)
-    if(NULL == (cls2 = (H5VL_class_t *)H5I_object(info2->plugin_id)))
+    if(NULL == (cls2 = (H5VL_class_t *)H5I_object(info2->connector_id)))
         HGOTO_DONE(1)
-    if(0 != (cmp_value = H5VL_cmp_plugin_cls(cls1, cls2)))
+    if(0 != (cmp_value = H5VL_cmp_connector_cls(cls1, cls2)))
         HGOTO_DONE(cmp_value);
 
     /* At this point, we should be able to assume that we are dealing with
-     * the same plugin class struct (or a copies of the same class struct)
+     * the same connector class struct (or a copies of the same class struct)
      */
 
 
@@ -5434,7 +5434,7 @@ H5P__facc_vol_cmp(const void *_info1, const void *_info2, size_t H5_ATTR_UNUSED 
      * info objects
      */
     HDassert(cls1->info_cmp == cls2->info_cmp);
-    if(0 != (cmp_value = H5VL_cmp_plugin_info(cls1, info1->plugin_info, info2->plugin_info)))
+    if(0 != (cmp_value = H5VL_cmp_connector_info(cls1, info1->connector_info, info2->connector_info)))
         HGOTO_DONE(cmp_value);
     
 done:
@@ -5445,7 +5445,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5P__facc_vol_close
  *
- * Purpose:     Close callback for the VOL plugin ID & info property.
+ * Purpose:     Close callback for the VOL connector ID & info property.
  *
  * Return:      Success:        Non-negative
  *              Failure:        Negative
@@ -5459,9 +5459,9 @@ H5P__facc_vol_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size,
 
     FUNC_ENTER_STATIC
 
-    /* Free the VOL plugin */
+    /* Free the VOL connector */
     if(H5P__vol_free(value) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTRELEASE, FAIL, "can't release VOL plugin")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTRELEASE, FAIL, "can't release VOL connector")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

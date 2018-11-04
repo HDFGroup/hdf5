@@ -37,8 +37,8 @@
 #include "H5Pprivate.h"         /* Property lists                           */
 #include "H5SMprivate.h"        /* Shared Object Header Messages            */
 #include "H5Tprivate.h"         /* Datatypes                                */
-#include "H5VLprivate.h"        /* VOL plugins                              */
-#include "H5VLnative_private.h" /* Native VOL plugin                        */
+#include "H5VLprivate.h"        /* Virtual Object Layer                     */
+#include "H5VLnative_private.h" /* Native VOL connector                     */
 
 
 /****************/
@@ -2175,7 +2175,7 @@ H5F_get_id(H5F_t *file)
     HDassert(file);
 
     if(H5I_find_id(file, H5I_FILE, &ret_value) < 0 || H5I_INVALID_HID == ret_value) {
-        /* resurrect the ID - Register an ID with the native driver */
+        /* resurrect the ID - Register an ID with the native connector */
 {
 void *vol_wrap_ctx = NULL;       /* Object wrapping context */
 
@@ -3243,7 +3243,7 @@ H5F__start_swmr_write(H5F_t *f)
     H5G_name_t *obj_paths = NULL;   /* Group hierarchy path */
     size_t u;                       /* Local index variable */
     hbool_t setup = FALSE;          /* Boolean flag to indicate whether SWMR setting is enabled */
-    H5VL_t *vol_plugin = NULL;      /* VOL plugin for the file */
+    H5VL_t *vol_connector = NULL;      /* VOL connector for the file */
     hbool_t vol_wrapper_set = FALSE; /* Whether the VOL object wrapping context was set up */
     herr_t ret_value = SUCCEED;     /* Return value */
 
@@ -3308,7 +3308,7 @@ H5F__start_swmr_write(H5F_t *f)
         if(H5F_get_obj_ids(f, H5F_OBJ_GROUP|H5F_OBJ_DATASET, grp_dset_count, obj_ids, FALSE, &grp_dset_count) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "H5F_get_obj_ids failed")
 
-        /* Save the VOL plugin and the object wrapping context for the refresh step */
+        /* Save the VOL connector and the object wrapping context for the refresh step */
         if(grp_dset_count > 0) {
             H5VL_object_t *vol_obj;
 
@@ -3317,12 +3317,12 @@ H5F__start_swmr_write(H5F_t *f)
                 HGOTO_ERROR(H5E_FILE, H5E_BADTYPE, FAIL, "invalid object identifier")
 
             /* Set wrapper info in API context */
-            if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 0)
+            if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->connector) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
             vol_wrapper_set = TRUE;
 
-            /* Get the (top) plugin for the ID */
-            vol_plugin = vol_obj->plugin;
+            /* Get the (top) connector for the ID */
+            vol_connector = vol_obj->connector;
         } /* end if */
 
         /* Gather information about opened objects (groups, datasets) in the file */
@@ -3388,7 +3388,7 @@ H5F__start_swmr_write(H5F_t *f)
 
     /* Refresh (reopen) the objects (groups & datasets) in the file */
     for(u = 0; u < grp_dset_count; u++)
-        if(H5O_refresh_metadata_reopen(obj_ids[u], &obj_glocs[u], vol_plugin, TRUE) < 0)
+        if(H5O_refresh_metadata_reopen(obj_ids[u], &obj_glocs[u], vol_connector, TRUE) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CLOSEERROR, FAIL, "can't refresh-close object")
 
     /* Unlock the file */
@@ -3539,10 +3539,10 @@ H5F_get_file_id(hid_t obj_id, H5I_type_t type)
     if(H5I_find_id(file, H5I_FILE, &ret_value) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, H5I_INVALID_HID, "getting file ID failed")
 
-    /* If the ID does not exist, register it with the VOL plugin */
+    /* If the ID does not exist, register it with the VOL connector */
     if(H5I_INVALID_HID == ret_value) {
         /* Set wrapper info in API context */
-        if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 0)
+        if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->connector) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID, "can't set VOL wrapper info")
         vol_wrapper_set = TRUE;
 

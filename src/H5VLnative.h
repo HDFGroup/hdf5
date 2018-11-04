@@ -11,13 +11,13 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Purpose:	The public header file for the native VOL driver.
+ * Purpose:	The public header file for the native VOL connector.
  */
 
 #ifndef _H5VLnative_H
 #define _H5VLnative_H
 
-/* Characteristics of the native VOL driver */
+/* Characteristics of the native VOL connector */
 #define H5VL_NATIVE_NAME        "native"
 #define H5VL_NATIVE_VALUE       H5_VOL_NATIVE   /* enum value */
 #define H5VL_NATIVE_VERSION     0

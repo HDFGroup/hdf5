@@ -34,7 +34,7 @@
 #include "H5Oprivate.h"         /* File objects                             */
 #include "H5Pprivate.h"         /* Property lists                           */
 #include "H5VLprivate.h"        /* Virtual Object Layer                     */
-#include "H5VLnative_private.h" /* Native VOL driver                        */
+#include "H5VLnative_private.h" /* Native VOL connector                     */
 
 
 /****************/
@@ -325,10 +325,10 @@ H5Lmove(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
         if (NULL == (vol_obj2 = (H5VL_object_t *)H5I_object(dst_loc_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
-    /* Make sure that the VOL plugins are the same */
+    /* Make sure that the VOL connectors are the same */
     if (vol_obj1 && vol_obj2)
-        if (vol_obj1->plugin->cls->value != vol_obj2->plugin->cls->value)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "Objects are accessed through different VOL plugins and can't be linked")
+        if (vol_obj1->connector->cls->value != vol_obj2->connector->cls->value)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "Objects are accessed through different VOL connectors and can't be linked")
 
     /* Move the link */
     if(H5VL_link_move(vol_obj1, loc_params1, vol_obj2, loc_params2, lcpl_id, lapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
@@ -408,14 +408,14 @@ H5Lcopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
         if(NULL == (vol_obj2 = (H5VL_object_t *)H5I_object(dst_loc_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
-    /* Make sure that the VOL plugins are the same */
+    /* Make sure that the VOL connectors are the same */
     if(vol_obj1 && vol_obj2)
-        if(vol_obj1->plugin->cls->value != vol_obj2->plugin->cls->value)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "Objects are accessed through different VOL plugins and can't be linked")
+        if(vol_obj1->connector->cls->value != vol_obj2->connector->cls->value)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "Objects are accessed through different VOL connectors and can't be linked")
 
     /* Construct a temporary source VOL object */
     tmp_vol_obj.data = (vol_obj1 ? vol_obj1->data : NULL);
-    tmp_vol_obj.plugin = (vol_obj1 ? vol_obj1->plugin : vol_obj2->plugin);
+    tmp_vol_obj.connector = (vol_obj1 ? vol_obj1->connector : vol_obj2->connector);
 
     /* Copy the link */
     if(H5VL_link_copy(&tmp_vol_obj, loc_params1, vol_obj2, loc_params2, lcpl_id, lapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
@@ -579,10 +579,10 @@ H5Lcreate_hard(hid_t cur_loc_id, const char *cur_name,
         if(NULL == (vol_obj2 = (H5VL_object_t *)H5VL_vol_object(new_loc_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
-    /* Make sure that the VOL plugins are the same */
+    /* Make sure that the VOL connectors are the same */
     if(vol_obj1 && vol_obj2)
-        if(vol_obj1->plugin->cls->value != vol_obj2->plugin->cls->value)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "Objects are accessed through different VOL plugins and can't be linked")
+        if(vol_obj1->connector->cls->value != vol_obj2->connector->cls->value)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "Objects are accessed through different VOL connectors and can't be linked")
 
     /* Get the link creation plist structure */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(lcpl_id)))
@@ -596,7 +596,7 @@ H5Lcreate_hard(hid_t cur_loc_id, const char *cur_name,
 
     /* Construct a temporary VOL object */
     tmp_vol_obj.data = (vol_obj2 ? (vol_obj2->data) : NULL);
-    tmp_vol_obj.plugin = (vol_obj1 != NULL ? vol_obj1->plugin : vol_obj2->plugin);
+    tmp_vol_obj.connector = (vol_obj1 != NULL ? vol_obj1->connector : vol_obj2->connector);
 
     /* Create the link */
     if(H5VL_link_create(H5VL_LINK_CREATE_HARD, &tmp_vol_obj, loc_params2, lcpl_id, lapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
@@ -735,7 +735,7 @@ H5Ldelete(hid_t loc_id, const char *name, hid_t lapl_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
     /* Set wrapper info in API context */
-    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 0)
+    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->connector) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTSET, H5I_INVALID_HID, "can't set VOL wrapper info")
     vol_wrapper_set = TRUE;
 
@@ -864,7 +864,7 @@ H5Lget_val(hid_t loc_id, const char *name, void *buf/*out*/, size_t size,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
     /* Set wrapper info in API context */
-    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 0)
+    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->connector) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTSET, H5I_INVALID_HID, "can't set VOL wrapper info")
     vol_wrapper_set = TRUE;
 
@@ -989,7 +989,7 @@ H5Lexists(hid_t loc_id, const char *name, hid_t lapl_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
     /* Set wrapper info in API context */
-    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 0)
+    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->connector) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTSET, H5I_INVALID_HID, "can't set VOL wrapper info")
     vol_wrapper_set = TRUE;
 
@@ -1050,7 +1050,7 @@ H5Lget_info(hid_t loc_id, const char *name, H5L_info_t *linfo /*out*/,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
     /* Set wrapper info in API context */
-    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 0)
+    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->connector) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTSET, H5I_INVALID_HID, "can't set VOL wrapper info")
     vol_wrapper_set = TRUE;
 
@@ -1120,7 +1120,7 @@ H5Lget_info_by_idx(hid_t loc_id, const char *group_name,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
     /* Set wrapper info in API context */
-    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 0)
+    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->connector) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTSET, H5I_INVALID_HID, "can't set VOL wrapper info")
     vol_wrapper_set = TRUE;
 
@@ -1384,7 +1384,7 @@ H5Literate(hid_t group_id, H5_index_t idx_type, H5_iter_order_t order,
     loc_params.obj_type = H5I_get_type(group_id);
 
     /* Set wrapper info in API context */
-    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 0)
+    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->connector) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTSET, H5I_INVALID_HID, "can't set VOL wrapper info")
     vol_wrapper_set = TRUE;
 
@@ -1464,7 +1464,7 @@ H5Literate_by_name(hid_t loc_id, const char *group_name,
     loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
 
     /* Set wrapper info in API context */
-    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 0)
+    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->connector) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTSET, H5I_INVALID_HID, "can't set VOL wrapper info")
     vol_wrapper_set = TRUE;
 
@@ -1542,7 +1542,7 @@ H5Lvisit(hid_t group_id, H5_index_t idx_type, H5_iter_order_t order,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
     /* Set wrapper info in API context */
-    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 0)
+    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->connector) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTSET, H5I_INVALID_HID, "can't set VOL wrapper info")
     vol_wrapper_set = TRUE;
 
@@ -1627,7 +1627,7 @@ H5Lvisit_by_name(hid_t loc_id, const char *group_name, H5_index_t idx_type,
     loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
 
     /* Set wrapper info in API context */
-    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->plugin) < 0)
+    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->connector) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTSET, H5I_INVALID_HID, "can't set VOL wrapper info")
     vol_wrapper_set = TRUE;
 

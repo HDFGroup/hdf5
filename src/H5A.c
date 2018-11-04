@@ -300,7 +300,7 @@ H5Acreate2(hid_t loc_id, const char *attr_name, hid_t type_id, hid_t space_id,
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, H5I_INVALID_HID, "unable to create attribute")
 
     /* Register the new attribute and get an ID for it */
-    if((ret_value = H5VL_register(H5I_ATTR, attr, vol_obj->plugin, TRUE)) < 0)
+    if((ret_value = H5VL_register(H5I_ATTR, attr, vol_obj->connector, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize attribute handle")
 
 done:
@@ -348,7 +348,7 @@ H5Acreate_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
     hid_t type_id, hid_t space_id, hid_t acpl_id, hid_t aapl_id,
     hid_t lapl_id)
 {
-    void               *attr = NULL;                /* attr token from VOL plugin */
+    void               *attr = NULL;                /* attr token from VOL connector */
     H5VL_object_t      *vol_obj = NULL;        /* object token of loc_id */
     H5P_genplist_t     *plist;       /* Property list pointer */
     H5VL_loc_params_t   loc_params;
@@ -405,7 +405,7 @@ H5Acreate_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, H5I_INVALID_HID, "unable to create attribute")
 
     /* Register the new attribute and get an ID for it */
-    if((ret_value = H5VL_register(H5I_ATTR, attr, vol_obj->plugin, TRUE)) < 0)
+    if((ret_value = H5VL_register(H5I_ATTR, attr, vol_obj->connector, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize attribute handle")
 
 done:
@@ -440,7 +440,7 @@ done:
 hid_t
 H5Aopen(hid_t loc_id, const char *attr_name, hid_t aapl_id)
 {
-    void *attr = NULL;                /* attr token from VOL plugin */
+    void *attr = NULL;                /* attr token from VOL connector */
     H5VL_object_t *vol_obj = NULL;        /* object token of loc_id */
     H5VL_loc_params_t loc_params; 
     hid_t ret_value = H5I_INVALID_HID;
@@ -473,7 +473,7 @@ H5Aopen(hid_t loc_id, const char *attr_name, hid_t aapl_id)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open attribute: '%s'", attr_name)
 
     /* Register the attribute and get an ID for it */
-    if((ret_value = H5VL_register(H5I_ATTR, attr, vol_obj->plugin, TRUE)) < 0)
+    if((ret_value = H5VL_register(H5I_ATTR, attr, vol_obj->connector, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize attribute handle")
 
 done:
@@ -511,7 +511,7 @@ hid_t
 H5Aopen_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
     hid_t aapl_id, hid_t lapl_id)
 {
-    void *attr = NULL;               /* attr token from VOL plugin */
+    void *attr = NULL;               /* attr token from VOL connector */
     H5VL_object_t *vol_obj = NULL;       /* object token of loc_id */
     H5VL_loc_params_t loc_params;
     hid_t ret_value = H5I_INVALID_HID;
@@ -555,7 +555,7 @@ H5Aopen_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, H5I_INVALID_HID, "can't open attribute")
 
     /* Register the attribute and get an ID for it */
-    if((ret_value = H5VL_register(H5I_ATTR, attr, vol_obj->plugin, TRUE)) < 0)
+    if((ret_value = H5VL_register(H5I_ATTR, attr, vol_obj->connector, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize attribute handle")
 
 done:
@@ -646,7 +646,7 @@ H5Aopen_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open attribute")
 
     /* Register the attribute and get an ID for it */
-    if((ret_value = H5VL_register(H5I_ATTR, attr, vol_obj->plugin, TRUE)) < 0)
+    if((ret_value = H5VL_register(H5I_ATTR, attr, vol_obj->connector, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize attribute handle")
 
 done:

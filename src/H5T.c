@@ -1609,10 +1609,10 @@ H5T__close_cb(H5T_t *dt)
     HDassert(dt->shared);
 
     /* If this datatype is VOL-managed (i.e.: has a VOL object),
-     * close it through the VOL plugin.
+     * close it through the VOL connector.
      */
     if(NULL != dt->vol_obj) {
-        /* Close the plugin-managed datatype data */
+        /* Close the connector-managed datatype data */
         if(H5VL_datatype_close(dt->vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, FAIL, "unable to close datatype")
 
@@ -3671,7 +3671,7 @@ done:
  * Purpose:   Frees a datatype and all associated memory.
  *
  * Note:      Does _not_ deal with open named datatypes, etc. so this
- *            should never see a type managed by a VOL plugin.
+ *            should never see a type managed by a VOL connector.
  *
  * Return:    Non-negative on success/Negative on failure
  *
