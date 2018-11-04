@@ -58,63 +58,63 @@ static const H5VL_class_t H5VL_log_g = {
     NULL,                                       /* free_wrap_ctx */
     NULL,                                       /* wrap_object  */
     {                                           /* attribute_cls */
-        NULL, //H5VL_log_attr_create,                /* create */
-        NULL, //H5VL_log_attr_open,                  /* open */
-        NULL, //H5VL_log_attr_read,                  /* read */
-        NULL, //H5VL_log_attr_write,                 /* write */
-        NULL, //H5VL_log_attr_get,                   /* get */
-        NULL, //H5VL_log_attr_specific,              /* specific */
-        NULL, //H5VL_log_attr_optional,              /* optional */
-        NULL  //H5VL_log_attr_close                  /* close */
+        NULL, /* H5VL_log_attr_create, */           /* create */
+        NULL, /* H5VL_log_attr_open, */             /* open */
+        NULL, /* H5VL_log_attr_read, */             /* read */
+        NULL, /* H5VL_log_attr_write, */            /* write */
+        NULL, /* H5VL_log_attr_get, */              /* get */
+        NULL, /* H5VL_log_attr_specific, */         /* specific */
+        NULL, /* H5VL_log_attr_optional, */         /* optional */
+        NULL  /* H5VL_log_attr_close */             /* close */
     },
     {                                           /* dataset_cls */
         H5VL_log_dataset_create,                    /* create */
         H5VL_log_dataset_open,                      /* open */
         H5VL_log_dataset_read,                      /* read */
         H5VL_log_dataset_write,                     /* write */
-        NULL, //H5VL_log_dataset_get,               /* get */
-        NULL, //H5VL_log_dataset_specific,          /* specific */
-        NULL, //H5VL_log_dataset_optional,          /* optional */
+        NULL, /* H5VL_log_dataset_get, */           /* get */
+        NULL, /* H5VL_log_dataset_specific, */      /* specific */
+        NULL, /* H5VL_log_dataset_optional, */      /* optional */
         H5VL_log_dataset_close                      /* close */
     },
     {                                               /* datatype_cls */
         H5VL_log_datatype_commit,                   /* commit */
         H5VL_log_datatype_open,                     /* open */
         H5VL_log_datatype_get,                      /* get_size */
-        NULL, //H5VL_log_datatype_specific,         /* specific */
-        NULL, //H5VL_log_datatype_optional,         /* optional */
+        NULL, /* H5VL_log_datatype_specific, */     /* specific */
+        NULL, /* H5VL_log_datatype_optional, */     /* optional */
         H5VL_log_datatype_close                     /* close */
     },
     {                                           /* file_cls */
-        H5VL_log_file_create,                      /* create */
-        H5VL_log_file_open,                        /* open */
-        H5VL_log_file_get,                         /* get */
-        NULL, //H5VL_log_file_specific,            /* specific */
-        NULL, //H5VL_log_file_optional,            /* optional */
-        H5VL_log_file_close                        /* close */
+        H5VL_log_file_create,                       /* create */
+        H5VL_log_file_open,                         /* open */
+        H5VL_log_file_get,                          /* get */
+        NULL, /* H5VL_log_file_specific, */         /* specific */
+        NULL, /* H5VL_log_file_optional, */         /* optional */
+        H5VL_log_file_close                         /* close */
     },
     {                                           /* group_cls */
-        H5VL_log_group_create,                     /* create */
-        NULL, //H5VL_log_group_open,               /* open */
-        NULL, //H5VL_log_group_get,                /* get */
-        NULL, //H5VL_log_group_specific,           /* specific */
-        NULL, //H5VL_log_group_optional,           /* optional */
-        H5VL_log_group_close                       /* close */
+        H5VL_log_group_create,                      /* create */
+        NULL, /* H5VL_log_group_open, */            /* open */
+        NULL, /* H5VL_log_group_get, */             /* get */
+        NULL, /* H5VL_log_group_specific, */        /* specific */
+        NULL, /* H5VL_log_group_optional, */        /* optional */
+        H5VL_log_group_close                        /* close */
     },
     {                                           /* link_cls */
-        NULL, //H5VL_log_link_create,                /* create */
-        NULL, //H5VL_log_link_copy,                  /* copy */
-        NULL, //H5VL_log_link_move,                  /* move */
-        NULL, //H5VL_log_link_get,                   /* get */
-        NULL, //H5VL_log_link_specific,              /* specific */
-        NULL, //H5VL_log_link_optional,              /* optional */
+        NULL, /* H5VL_log_link_create, */           /* create */
+        NULL, /* H5VL_log_link_copy, */             /* copy */
+        NULL, /* H5VL_log_link_move, */             /* move */
+        NULL, /* H5VL_log_link_get, */              /* get */
+        NULL, /* H5VL_log_link_specific, */         /* specific */
+        NULL  /* H5VL_log_link_optional, */         /* optional */
     },
     {                                           /* object_cls */
-        H5VL_log_object_open,                        /* open */
-        NULL, //H5VL_log_object_copy,                /* copy */
-        NULL, //H5VL_log_object_get,                 /* get */
-        H5VL_log_object_specific,                    /* specific */
-        NULL, //H5VL_log_object_optional,            /* optional */
+        H5VL_log_object_open,                       /* open */
+        NULL, /* H5VL_log_object_copy, */           /* copy */
+        NULL, /* H5VL_log_object_get, */            /* get */
+        H5VL_log_object_specific,                   /* specific */
+        NULL  /* H5VL_log_object_optional, */       /* optional */
     },
     {                                           /* request_cls */
         NULL,                                       /* wait         */
@@ -131,15 +131,14 @@ typedef struct H5VL_log_t {
 } H5VL_log_t;
 
 static herr_t
-visit_cb(hid_t oid, const char *name,
-         const H5O_info_t *oinfo, void *udata)
+visit_cb(hid_t oid, const char *name, const H5O_info_t *oinfo, void *udata)
 {
     ssize_t len;
     char n[25];
 
     if(H5Iget_type(oid) == H5I_GROUP) {
         len = H5VLget_plugin_name(oid, n, 50);
-        printf ("Visiting GROUP VOL name = %s  %zd\n", n, len);
+        printf("Visiting GROUP VOL name = %s  %zd\n", n, len);
     }
     if(H5Iget_type(oid) == H5I_DATASET) 
         printf("visiting dataset\n");
@@ -147,9 +146,11 @@ visit_cb(hid_t oid, const char *name,
         printf("visiting datatype\n");
 
     return 1;
-} /* end h5_verify_cached_stabs_cb() */
+}
 
-int main(int argc, char **argv) {
+int
+main(int argc, char **argv)
+{
     const char file_name[]="large_dataset.h5";
     const char group_name[]="/Group";
     const char dataset_name[]="Data";
@@ -191,33 +192,33 @@ int main(int argc, char **argv) {
 
     file_id = H5Fcreate(file_name, H5F_ACC_TRUNC, H5P_DEFAULT, acc_tpl);
     len = H5VLget_plugin_name(file_id, name, 25);
-    printf ("FILE VOL name = %s  %zd\n", name, len);
+    printf("FILE VOL name = %s  %zd\n", name, len);
 
     group_id = H5Gcreate2(file_id, group_name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     len = H5VLget_plugin_name(group_id, name, 50);
-    printf ("GROUP VOL name = %s  %zd\n", name, len);
+    printf("GROUP VOL name = %s  %zd\n", name, len);
 
     int_id = H5Tcopy(H5T_NATIVE_INT);
     H5Tcommit2(file_id, "int", int_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     len = H5VLget_plugin_name(int_id, name, 50);
-    printf ("DT COMMIT name = %s  %zd\n", name, len);
+    printf("DT COMMIT name = %s  %zd\n", name, len);
     H5Tclose(int_id);
 
     int_id = H5Topen2(file_id, "int", H5P_DEFAULT);
     len = H5VLget_plugin_name(int_id, name, 50);
-    printf ("DT OPEN name = %s  %zd\n", name, len);
+    printf("DT OPEN name = %s  %zd\n", name, len);
     H5Tclose(int_id);
 
     int_id = H5Oopen(file_id,"int",H5P_DEFAULT);
     len = H5VLget_plugin_name(int_id, name, 50);
-    printf ("DT OOPEN name = %s  %zd\n", name, len);
+    printf("DT OOPEN name = %s  %zd\n", name, len);
 
     len = H5Fget_name(file_id, name, 50);
-    printf("name = %zd  %s\n", len, name);
+    printf("name = %lu  %s\n", (unsigned long)len, name);
 
-    data = malloc (sizeof(int)*nelem);
-    for(i=0;i<nelem;++i)
-        data[i]=i;
+    data = malloc(sizeof(int)*nelem);
+    for(i = 0; i < nelem; ++i)
+        data[i] = i;
 
     dims [0] = 60;
     dataspaceId = H5Screate_simple(1, dims, NULL); 
@@ -228,14 +229,14 @@ int main(int argc, char **argv) {
     H5Sclose(dataspaceId);
 
     len = H5VLget_plugin_name(datasetId, name, 50);
-    printf ("DSET name = %s  %zd\n", name, len);
+    printf("DSET name = %s  %zd\n", name, len);
 
     H5Dwrite(datasetId, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
     H5Dclose(datasetId);
 
     H5Ovisit2(file_id, H5_INDEX_NAME, H5_ITER_NATIVE, visit_cb, NULL, H5O_INFO_ALL);
 
-    free (data);
+    free(data);
     H5Oclose(int_id);
     H5Sclose (space);
     H5Gclose(group_id);
@@ -246,19 +247,22 @@ int main(int argc, char **argv) {
     H5VLclose(native_plugin_id);
     H5VLunregister_plugin(vol_id);
     assert(H5VLis_plugin_registered("log") == 0);
-    return 0;
+
+    return EXIT_SUCCESS;
 }
 
-static herr_t H5VL_log_init(hid_t vipl_id)
+static herr_t
+H5VL_log_init(hid_t vipl_id)
 {
     printf("------- LOG INIT\n");
-    return 0;
+    return 1;
 }
 
-static herr_t H5VL_log_term(void)
+static herr_t
+H5VL_log_term(void)
 {
     printf("------- LOG TERM\n");
-    return 0;
+    return 1;
 }
 
 static void *
@@ -301,6 +305,7 @@ H5VL_log_file_get(void *file, H5VL_file_get_t get_type, hid_t dxpl_id, void **re
     printf("------- LOG H5Fget %d\n", get_type);
     return 1;
 }
+
 static herr_t 
 H5VL_log_file_close(void *file, hid_t dxpl_id, void **req)
 {
@@ -355,6 +360,7 @@ H5VL_log_datatype_commit(void *obj, H5VL_loc_params_t loc_params, const char *na
     printf("------- LOG H5Tcommit\n");
     return dt;
 }
+
 static void *
 H5VL_log_datatype_open(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t tapl_id, hid_t dxpl_id, void **req)
 {
@@ -461,6 +467,7 @@ H5VL_log_dataset_read(void *dset, hid_t mem_type_id, hid_t mem_space_id,
     printf("------- LOG H5Dread\n");
     return 1;
 }
+
 static herr_t 
 H5VL_log_dataset_write(void *dset, hid_t mem_type_id, hid_t mem_space_id,
                        hid_t file_space_id, hid_t plist_id, const void *buf, void **req)
@@ -473,6 +480,7 @@ H5VL_log_dataset_write(void *dset, hid_t mem_type_id, hid_t mem_space_id,
     printf("------- LOG H5Dwrite\n");
     return 1;
 }
+
 static herr_t 
 H5VL_log_dataset_close(void *dset, hid_t dxpl_id, void **req)
 {
@@ -485,32 +493,3 @@ H5VL_log_dataset_close(void *dset, hid_t dxpl_id, void **req)
     return 1;
 }
 
-#if 0
-static void *H5VL_log_attr_create(void *obj, H5VL_loc_params_t loc_params, const char *attr_name, hid_t acpl_id, hid_t aapl_id, hid_t dxpl_id, void **req){    
-static herr_t H5VL_log_attr_close(void *attr, hid_t dxpl_id, void **req){
-
-/* Datatype callbacks */
-
-
-/* Dataset callbacks */
-static void *H5VL_log_dataset_create(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t dcpl_id, hid_t dapl_id, hid_t dxpl_id, void **req){
-static herr_t H5VL_log_dataset_close(void *dset, hid_t dxpl_id, void **req){
-
-/* File callbacks */
-
-    
-static void *H5VL_log_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t dxpl_id, void **req){
-
-
-/* Group callbacks */
-
-static void *H5VL_log_group_open(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t gapl_id, hid_t dxpl_id, void **req){
-static herr_t H5VL_log_group_get(void *obj, H5VL_group_get_t get_type, hid_t dxpl_id, void **req, va_list arguments){
-
-
-/* Link callbacks */
-
-/* Object callbacks */
-
-
-#endif
