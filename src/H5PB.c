@@ -13,9 +13,11 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:             H5PB.c
- *
- * Purpose:             Page Buffer routines.
+ * Created:  H5PB2.c
+ * 
+ * Purpose:  Re-implementation of the page buffer with added features to 
+ *           support VFD SWMR.
+ *                                              JRM -- 10/11/18
  *
  *-------------------------------------------------------------------------
  */
@@ -24,8 +26,10 @@
 /* Module Setup */
 /****************/
 
-#define H5F_FRIEND		/*suppress error about including H5Fpkg	  */
-#include "H5PBmodule.h"         /* This source code file is part of the H5PB module */
+#define H5F_FRIEND		/* suppress error about including H5Fpkg */
+#include "H5PBmodule.h"         /* This source code file is part of the 
+                                 * H5PB module 
+                                 */
 
 
 /***********/
@@ -36,82 +40,29 @@
 #include "H5Fpkg.h"		/* Files				*/
 #include "H5FDprivate.h"	/* File drivers				*/
 #include "H5Iprivate.h"		/* IDs			  		*/
+#include "H5FLprivate.h"        /* Free lists                           */
+#include "H5MMprivate.h"        /* Memory management                    */
 #include "H5PBpkg.h"            /* File access				*/
-#include "H5SLprivate.h"	/* Skip List				*/
 
 
 /****************/
 /* Local Macros */
 /****************/
-#define H5PB__PREPEND(page_ptr, head_ptr, tail_ptr, len) {              \
-        if((head_ptr) == NULL) {                                        \
-            (head_ptr) = (page_ptr);                                    \
-            (tail_ptr) = (page_ptr);                                    \
-        } /* end if */                                                  \
-        else {                                                          \
-            (head_ptr)->prev = (page_ptr);                              \
-            (page_ptr)->next = (head_ptr);                              \
-            (head_ptr) = (page_ptr);                                    \
-        } /* end else */                                                \
-        (len)++;                                                        \
-} /* H5PB__PREPEND() */
 
-#define H5PB__REMOVE(page_ptr, head_ptr, tail_ptr, len) {               \
-        if((head_ptr) == (page_ptr)) {                                  \
-            (head_ptr) = (page_ptr)->next;                              \
-            if((head_ptr) != NULL)                                      \
-                (head_ptr)->prev = NULL;                                \
-        } /* end if */                                                  \
-        else                                                            \
-            (page_ptr)->prev->next = (page_ptr)->next;                  \
-        if((tail_ptr) == (page_ptr)) {                                  \
-            (tail_ptr) = (page_ptr)->prev;                              \
-            if((tail_ptr) != NULL)                                      \
-                (tail_ptr)->next = NULL;                                \
-        } /* end if */                                                  \
-        else                                                            \
-            (page_ptr)->next->prev = (page_ptr)->prev;                  \
-        page_ptr->next = NULL;                                          \
-        page_ptr->prev = NULL;                                          \
-        (len)--;                                                        \
-}
-
-#define H5PB__INSERT_LRU(page_buf, page_ptr) {                          \
-        HDassert(page_buf);                                             \
-        HDassert(page_ptr);                                             \
-        /* insert the entry at the head of the list. */                 \
-        H5PB__PREPEND((page_ptr), (page_buf)->LRU_head_ptr,             \
-                      (page_buf)->LRU_tail_ptr, (page_buf)->LRU_list_len) \
-}
-
-#define H5PB__REMOVE_LRU(page_buf, page_ptr) {                          \
-        HDassert(page_buf);                                             \
-        HDassert(page_ptr);                                             \
-        /* remove the entry from the list. */                           \
-        H5PB__REMOVE((page_ptr), (page_buf)->LRU_head_ptr,              \
-                     (page_buf)->LRU_tail_ptr, (page_buf)->LRU_list_len) \
-}
-
-#define H5PB__MOVE_TO_TOP_LRU(page_buf, page_ptr) {                     \
-        HDassert(page_buf);                                             \
-        HDassert(page_ptr);                                             \
-        /* Remove entry and insert at the head of the list. */          \
-        H5PB__REMOVE((page_ptr), (page_buf)->LRU_head_ptr,              \
-                     (page_buf)->LRU_tail_ptr, (page_buf)->LRU_list_len) \
-        H5PB__PREPEND((page_ptr), (page_buf)->LRU_head_ptr,             \
-                       (page_buf)->LRU_tail_ptr, (page_buf)->LRU_list_len) \
-}
+/* In principle, we should be able to run the page buffer with the 
+ * accumulator.  However, for whatever reason, the fheap test encounteres
+ * metadata corruption if the page buffer uses H5F__accum_read/write()
+ * for I/O.
+ *
+ * The following #define controls this.  Set VFD_IO to FALSE to reproduce
+ * the bug.
+ */
+#define VFD_IO TRUE
 
 
 /******************/
 /* Local Typedefs */
 /******************/
-
-/* Iteration context for destroying page buffer */
-typedef struct {
-    H5PB_t *page_buf;
-    hbool_t actual_slist;
-} H5PB_ud1_t;
 
 
 /********************/
@@ -122,9 +73,44 @@ typedef struct {
 /********************/
 /* Local Prototypes */
 /********************/
-static herr_t H5PB__insert_entry(H5PB_t *page_buf, H5PB_entry_t *page_entry);
-static htri_t H5PB__make_space(H5F_t *f, H5PB_t *page_buf, H5FD_mem_t inserted_type);
-static herr_t H5PB__write_entry(H5F_t *f, H5PB_entry_t *page_entry);
+
+static H5PB_entry_t * H5PB__allocate_page(H5PB_t *pb_ptr, size_t buf_size, 
+    hbool_t clean_image);
+
+static herr_t H5PB__create_new_page(H5PB_t *pb_ptr, haddr_t addr, size_t size,
+    H5FD_mem_t type, hbool_t clean_image, H5PB_entry_t **entry_ptr_ptr);
+
+static void H5PB__deallocate_page(H5PB_entry_t *entry_ptr);
+
+static herr_t H5PB__evict_entry(H5PB_t *pb_ptr, H5PB_entry_t *entry_ptr, 
+    hbool_t force);
+
+static herr_t H5PB__flush_entry(H5F_t *f, H5PB_t *pb_ptr, 
+    H5PB_entry_t *entry_ptr);
+
+static herr_t H5PB__load_page(H5F_t *f, H5PB_t *pb_ptr, haddr_t addr, 
+    H5FD_mem_t type, H5PB_entry_t **entry_ptr_ptr);
+
+static herr_t H5PB__make_space(H5F_t *f, H5PB_t *pb_ptr, 
+    H5FD_mem_t inserted_type);
+
+static herr_t H5PB__mark_entry_clean(H5PB_t *pb_ptr, 
+    H5PB_entry_t *entry_ptr);
+
+static herr_t H5PB__mark_entry_dirty(H5PB_t *pb_ptr, 
+    H5PB_entry_t *entry_ptr);
+
+static herr_t H5PB__read_meta(H5F_t *f, H5FD_mem_t type, haddr_t addr, 
+    size_t size, void *buf/*out*/);
+
+static herr_t H5PB__read_raw(H5F_t *f, H5FD_mem_t type, haddr_t addr, 
+    size_t size, void *buf/*out*/);
+
+static herr_t H5PB__write_meta(H5F_t *f, H5FD_mem_t type, haddr_t addr, 
+    size_t size, const void *buf/*out*/);
+
+static herr_t H5PB__write_raw(H5F_t *f, H5FD_mem_t type, haddr_t addr, 
+    size_t size, const void *buf/*out*/);
 
 
 /*********************/
@@ -143,6 +129,8 @@ hbool_t H5_PKG_INIT_VAR = FALSE;
 /*******************/
 /* Local Variables */
 /*******************/
+
+
 /* Declare a free list to manage the H5PB_t struct */
 H5FL_DEFINE_STATIC(H5PB_t);
 
@@ -152,39 +140,70 @@ H5FL_DEFINE_STATIC(H5PB_entry_t);
 
 
 /*-------------------------------------------------------------------------
+ *
  * Function:	H5PB_reset_stats
  *
- * Purpose:     This function was created without documentation.
- *              What follows is my best understanding of Mohamad's intent.
- *
- *              Reset statistics collected for the page buffer layer.
+ * Purpose:     Reset statistics collected for the page buffer layer.
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Mohamad Chaarawi
+ * Programmer:	John Mainzer -- 10/12/18
+ *
+ * Changes:     None.
  *
  *-------------------------------------------------------------------------
  */
 herr_t 
-H5PB_reset_stats(H5PB_t *page_buf)
+H5PB_reset_stats(H5PB_t *pb_ptr)
 {
+    int i;
+
     FUNC_ENTER_NOAPI_NOERR
 
     /* Sanity checks */
-    HDassert(page_buf);
+    HDassert(pb_ptr);
+    HDassert(pb_ptr->magic == H5PB__H5PB_T_MAGIC);
 
-    page_buf->accesses[0] = 0;
-    page_buf->accesses[1] = 0;
-    page_buf->hits[0] = 0;
-    page_buf->hits[1] = 0;
-    page_buf->misses[0] = 0;
-    page_buf->misses[1] = 0;
-    page_buf->evictions[0] = 0;
-    page_buf->evictions[1] = 0;
-    page_buf->bypasses[0] = 0;
-    page_buf->bypasses[1] = 0;
+    for ( i = 0; i < H5PB__NUM_STAT_TYPES; i++ ) {
+
+        pb_ptr->bypasses[i]   = 0;
+        pb_ptr->accesses[i]   = 0;
+        pb_ptr->hits[i]       = 0;
+        pb_ptr->misses[i]     = 0;
+        pb_ptr->loads[i]      = 0;
+        pb_ptr->insertions[i] = 0;
+        pb_ptr->flushes[i]    = 0;
+        pb_ptr->evictions[i]  = 0;
+        pb_ptr->clears[i]     = 0;
+    }
+    
+    pb_ptr->max_lru_len                      = 0;
+    pb_ptr->max_lru_size                     = 0;
+    pb_ptr->lru_md_skips                     = 0;
+    pb_ptr->lru_rd_skips                     = 0;
+    pb_ptr->total_ht_insertions              = 0;
+    pb_ptr->total_ht_deletions               = 0;
+    pb_ptr->successful_ht_searches           = 0;
+    pb_ptr->total_successful_ht_search_depth = 0;
+    pb_ptr->failed_ht_searches               = 0;
+    pb_ptr->total_failed_ht_search_depth     = 0;
+    pb_ptr->max_index_len                    = 0;
+    pb_ptr->max_index_size                   = 0;
+    pb_ptr->max_rd_pages                     = 0;
+    pb_ptr->max_md_pages                     = 0;
+    pb_ptr->max_mpmde_count                  = 0;
+    pb_ptr->lru_tl_skips                     = 0;
+    pb_ptr->lru_dwl_skips                    = 0;
+    pb_ptr->max_tl_len                       = 0;
+    pb_ptr->max_tl_size                      = 0;
+    pb_ptr->delayed_writes                   = 0;
+    pb_ptr->total_delay                      = 0;
+    pb_ptr->max_dwl_len                      = 0;
+    pb_ptr->max_dwl_size                     = 0;
+    pb_ptr->total_dwl_ins_depth              = 0;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
+
 }  /* H5PB_reset_stats() */
 
 
@@ -208,89 +227,194 @@ H5PB_reset_stats(H5PB_t *page_buf)
  *-------------------------------------------------------------------------
  */
 herr_t 
-H5PB_get_stats(const H5PB_t *page_buf, unsigned accesses[2], unsigned hits[2],
+H5PB_get_stats(const H5PB_t *pb_ptr, unsigned accesses[2], unsigned hits[2],
     unsigned misses[2], unsigned evictions[2], unsigned bypasses[2])
 {
     FUNC_ENTER_NOAPI_NOERR
 
     /* Sanity checks */
-    HDassert(page_buf);
+    HDassert(pb_ptr);
 
-    accesses[0] = page_buf->accesses[0];
-    accesses[1] = page_buf->accesses[1];
-    hits[0] = page_buf->hits[0];
-    hits[1] = page_buf->hits[1];
-    misses[0] = page_buf->misses[0];
-    misses[1] = page_buf->misses[1];
-    evictions[0] = page_buf->evictions[0];
-    evictions[1] = page_buf->evictions[1];
-    bypasses[0] = page_buf->bypasses[0];
-    bypasses[1] = page_buf->bypasses[1];
+    accesses[0] = (unsigned)pb_ptr->accesses[0];
+    accesses[1] = (unsigned)pb_ptr->accesses[1];
+    accesses[2] = (unsigned)pb_ptr->accesses[2];
+    hits[0] = (unsigned)pb_ptr->hits[0];
+    hits[1] = (unsigned)pb_ptr->hits[1];
+    hits[2] = (unsigned)pb_ptr->hits[2];
+    misses[0] = (unsigned)pb_ptr->misses[0];
+    misses[1] = (unsigned)pb_ptr->misses[1];
+    misses[2] = (unsigned)pb_ptr->misses[2];
+    evictions[0] = (unsigned)pb_ptr->evictions[0];
+    evictions[1] = (unsigned)pb_ptr->evictions[1];
+    evictions[2] = (unsigned)pb_ptr->evictions[2];
+    bypasses[0] = (unsigned)pb_ptr->bypasses[0];
+    bypasses[1] = (unsigned)pb_ptr->bypasses[1];
+    bypasses[2] = (unsigned)pb_ptr->bypasses[2];
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 }  /* H5PB_get_stats */
 
 
 /*-------------------------------------------------------------------------
+ *
  * Function:	H5PB_print_stats()
  *
- * Purpose:     This function was created without documentation.
- *              What follows is my best understanding of Mohamad's intent.
+ * Purpose:     Print out statistics collected for the page buffer layer.
  *
- *              Print out statistics collected for the page buffer layer.
+ * Return:	Non-negative on success/Negative on failure
  *
- * Return:	    Non-negative on success/Negative on failure
+ * Programmer:	John Mainzer -- 10/12/18
  *
- * Programmer:	Mohamad Chaarawi
+ * Changes:     None.
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5PB_print_stats(const H5PB_t *page_buf)
+H5PB_print_stats(const H5PB_t *pb_ptr)
 {
+    double ave_succ_search_depth = 0.0L;
+    double ave_failed_search_depth = 0.0L;
+    double ave_delayed_write = 0.0L;
+    double ave_delayed_write_ins_depth = 0.0L;
+
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    HDassert(page_buf);
+    HDassert(pb_ptr);
+    HDassert(pb_ptr->magic == H5PB__H5PB_T_MAGIC);
 
-    printf("PAGE BUFFER STATISTICS:\n");
+    HDfprintf(stdout, "\n\nPage Buffer Statistics (raw/meta/mpmde): \n\n");
 
-    HDprintf("******* METADATA\n");
-    HDprintf("\t Total Accesses: %u\n", page_buf->accesses[0]);
-    HDprintf("\t Hits: %u\n", page_buf->hits[0]);
-    HDprintf("\t Misses: %u\n", page_buf->misses[0]);
-    HDprintf("\t Evictions: %u\n", page_buf->evictions[0]);
-    HDprintf("\t Bypasses: %u\n", page_buf->bypasses[0]);
-    HDprintf("\t Hit Rate = %f%%\n", ((double)page_buf->hits[0]/(page_buf->accesses[0] - page_buf->bypasses[0]))*100);
-    HDprintf("*****************\n\n");
+    HDfprintf(stdout, "bypasses   = %lld (%lld/%lld/%lld)\n",
+              (pb_ptr->bypasses[0] + pb_ptr->bypasses[1] + pb_ptr->bypasses[2]),
+              pb_ptr->bypasses[0], pb_ptr->bypasses[1], pb_ptr->bypasses[2]);
 
-    HDprintf("******* RAWDATA\n");
-    HDprintf("\t Total Accesses: %u\n", page_buf->accesses[1]);
-    HDprintf("\t Hits: %u\n", page_buf->hits[1]);
-    HDprintf("\t Misses: %u\n", page_buf->misses[1]);
-    HDprintf("\t Evictions: %u\n", page_buf->evictions[1]);
-    HDprintf("\t Bypasses: %u\n", page_buf->bypasses[1]);
-    HDprintf("\t Hit Rate = %f%%\n", ((double)page_buf->hits[1]/(page_buf->accesses[1]-page_buf->bypasses[0]))*100);
-    HDprintf("*****************\n\n");
+    HDfprintf(stdout, "acesses    = %lld (%lld/%lld/%lld)\n",
+              (pb_ptr->accesses[0] + pb_ptr->accesses[1] + pb_ptr->accesses[2]),
+              pb_ptr->accesses[0], pb_ptr->accesses[1], pb_ptr->accesses[2]);
+
+    HDfprintf(stdout, "hits       = %lld (%lld/%lld/%lld)\n",
+              (pb_ptr->hits[0] + pb_ptr->hits[1] + pb_ptr->hits[2]),
+              pb_ptr->hits[0], pb_ptr->hits[1], pb_ptr->hits[2]);
+
+    HDfprintf(stdout, "misses     = %lld (%lld/%lld/%lld)\n",
+              (pb_ptr->misses[0] + pb_ptr->misses[1] + pb_ptr->misses[2]),
+              pb_ptr->misses[0], pb_ptr->misses[1], pb_ptr->misses[2]);
+
+    HDfprintf(stdout, "loads      = %lld (%lld/%lld/%lld)\n",
+              (pb_ptr->loads[0] + pb_ptr->loads[1] + pb_ptr->loads[2]),
+              pb_ptr->loads[0], pb_ptr->loads[1], pb_ptr->loads[2]);
+
+    HDfprintf(stdout, "insertions = %lld (%lld/%lld/%lld)\n",
+              (pb_ptr->insertions[0] + pb_ptr->insertions[1] + 
+               pb_ptr->insertions[2]),
+              pb_ptr->insertions[0], pb_ptr->insertions[1], 
+              pb_ptr->insertions[2]);
+
+    HDfprintf(stdout, "flushes    = %lld (%lld/%lld/%lld)\n",
+              (pb_ptr->flushes[0] + pb_ptr->flushes[1] + pb_ptr->flushes[2]),
+              pb_ptr->flushes[0], pb_ptr->flushes[1], pb_ptr->flushes[2]);
+
+    HDfprintf(stdout, "evictions  = %lld (%lld/%lld/%lld)\n",
+              (pb_ptr->evictions[0] + pb_ptr->evictions[1] + 
+               pb_ptr->evictions[2]),
+              pb_ptr->evictions[0], pb_ptr->evictions[1], pb_ptr->evictions[2]);
+
+    HDfprintf(stdout, "clears     = %lld (%lld/%lld/%lld)\n",
+              (pb_ptr->clears[0] + pb_ptr->clears[1] + pb_ptr->clears[2]),
+              pb_ptr->clears[0], pb_ptr->clears[1], pb_ptr->clears[2]);
+              
+    HDfprintf(stdout, "max LRU len / size = %lld / %lld\n",
+              pb_ptr->max_lru_len, pb_ptr->max_lru_size);
+
+    HDfprintf(stdout, 
+              "LRU make space md/rd/tl/dwl skips = %lld/%lld/%lld/%lld\n",
+              pb_ptr->lru_md_skips, pb_ptr->lru_rd_skips, 
+              pb_ptr->lru_tl_skips, pb_ptr->lru_dwl_skips);
+
+    HDfprintf(stdout, "hash table insertions / deletions = %lld / %lld\n",
+              pb_ptr->total_ht_insertions, pb_ptr->total_ht_deletions);
+
+    if ( pb_ptr->successful_ht_searches > 0 ) {
+
+        ave_succ_search_depth = 
+            (double)(pb_ptr->total_successful_ht_search_depth) / 
+            (double)(pb_ptr->successful_ht_searches);
+    }
+    HDfprintf(stdout, "successful ht searches / ave depth = %lld / %llf\n",
+              pb_ptr->successful_ht_searches, ave_succ_search_depth);
+
+    if ( pb_ptr->failed_ht_searches > 0 ) {
+
+        ave_failed_search_depth = 
+            (double)(pb_ptr->total_failed_ht_search_depth) / 
+            (double)(pb_ptr->failed_ht_searches);
+    }
+    HDfprintf(stdout, "failed ht searches / ave depth = %lld / %llf\n",
+              pb_ptr->failed_ht_searches, ave_failed_search_depth);
+
+    HDfprintf(stdout, "max index length / size = %lld / %lld\n",
+              pb_ptr->max_index_len, pb_ptr->max_index_size);
+
+    HDfprintf(stdout, "max rd / md / mpmde entries = %lld / %lld / %lld\n",
+              pb_ptr->max_rd_pages, pb_ptr->max_md_pages, 
+              pb_ptr->max_mpmde_count);
+
+    HDfprintf(stdout, "tick list max len / size = %lld / %lld\n",
+              pb_ptr->max_tl_len, pb_ptr->max_tl_size);
+
+    HDfprintf(stdout, "delayed write list max len / size = %lld / %lld\n",
+              pb_ptr->max_dwl_len, pb_ptr->max_dwl_size);
+
+    if ( pb_ptr->delayed_writes > 0 ) {
+
+        ave_delayed_write = (double)(pb_ptr->total_delay) / 
+                            (double)(pb_ptr->delayed_writes);
+        ave_delayed_write_ins_depth = (double)(pb_ptr->total_dwl_ins_depth) /
+                                      (double)(pb_ptr->delayed_writes);
+    }
+    HDfprintf(stdout, 
+        "delayed writes / ave delay / ave ins depth = %lld / %llf / %llf\n",
+        pb_ptr->delayed_writes, ave_delayed_write, ave_delayed_write_ins_depth);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
+
 } /* H5PB_print_stats */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5PB_create
  *
- * Purpose:	Create and setup the PB on the file.
+ * Function:	H5PB_add_new_page
+ *
+ * Purpose:	Insert a new blank page to the page buffer if the page 
+ *              buffer is configured to allow pages of the specified
+ *              type.
+ *
+ *              This function is called by the 
+ *              from the MF layer when a new page is allocated to 
+ *              indicate to the page buffer layer that a read of the page 
+ *              from the file is not necessary since it's an empty page.
+ *
+ *              Note that this function inserts the new page without 
+ *              attempting to make space.  This can result in the page 
+ *              buffer exceeding its maximum size.
+ *
+ *              Note also that it is possible that the page (marked clean)
+ *              will be evicted before its first use.
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Mohamad Chaarawi
+ * Programmer:	John Mainzer -- 10/12/18
+ *
+ * Changes:     None.
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5PB_create(H5F_t *f, size_t size, unsigned page_buf_min_meta_perc, unsigned page_buf_min_raw_perc)
+herr_t 
+H5PB_add_new_page(H5F_t *f, H5FD_mem_t type, haddr_t page_addr)
 {
-    H5PB_t *page_buf = NULL;
+    hbool_t can_insert = TRUE;
+    H5PB_t *pb_ptr = NULL;
+    H5PB_entry_t *entry_ptr = NULL;
     herr_t ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -298,402 +422,2383 @@ H5PB_create(H5F_t *f, size_t size, unsigned page_buf_min_meta_perc, unsigned pag
     /* Sanity checks */
     HDassert(f);
     HDassert(f->shared);
+    HDassert(f->shared->pb_ptr);
 
-    /* Check args */
-    if(f->shared->fs_strategy != H5F_FSPACE_STRATEGY_PAGE)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "Enabling Page Buffering requires PAGE file space strategy")
-    /* round down the size if it is larger than the page size */
-    else if(size > f->shared->fs_page_size) {
-        hsize_t temp_size;
+    pb_ptr = f->shared->pb_ptr;
 
-        temp_size = (size / f->shared->fs_page_size) * f->shared->fs_page_size;
-        H5_CHECKED_ASSIGN(size, size_t, temp_size, hsize_t);
-    } /* end if */
-    else if(0 != size % f->shared->fs_page_size)
-        HGOTO_ERROR(H5E_PAGEBUF, H5E_CANTINIT, FAIL, "Page Buffer size must be >= to the page size")
+    HDassert(pb_ptr->magic == H5PB__H5PB_T_MAGIC);
 
-    /* Allocate the new page buffering structure */
-    if(NULL == (page_buf = H5FL_CALLOC(H5PB_t)))
-	HGOTO_ERROR(H5E_PAGEBUF, H5E_NOSPACE, FAIL, "memory allocation failed")
+    if ( H5FD_MEM_DRAW == type ) { /* raw data page insertion */
 
-    page_buf->max_size = size;
-    H5_CHECKED_ASSIGN(page_buf->page_size, size_t, f->shared->fs_page_size, hsize_t);
-    page_buf->min_meta_perc = page_buf_min_meta_perc;
-    page_buf->min_raw_perc = page_buf_min_raw_perc;
+        if ( pb_ptr->min_md_pages == pb_ptr->max_pages ) {
 
-    /* Calculate the minimum page count for metadata and raw data
-     * based on the fractions provided 
-     */
-    page_buf->min_meta_count = (unsigned)((size * page_buf_min_meta_perc) / (f->shared->fs_page_size * 100));
-    page_buf->min_raw_count = (unsigned)((size * page_buf_min_raw_perc) / (f->shared->fs_page_size * 100));
+            can_insert = FALSE;
 
-    if(NULL == (page_buf->slist_ptr = H5SL_create(H5SL_TYPE_HADDR, NULL)))
-        HGOTO_ERROR(H5E_PAGEBUF, H5E_CANTCREATE, FAIL, "can't create skip list")
-    if(NULL == (page_buf->mf_slist_ptr = H5SL_create(H5SL_TYPE_HADDR, NULL)))
-        HGOTO_ERROR(H5E_PAGEBUF, H5E_CANTCREATE, FAIL, "can't create skip list")
+        }
+    } else { /* metadata page insertion */
 
-    if(NULL == (page_buf->page_fac = H5FL_fac_init(page_buf->page_size)))
-        HGOTO_ERROR(H5E_PAGEBUF, H5E_CANTINIT, FAIL, "can't create page factory")
+        if ( pb_ptr->min_rd_pages == pb_ptr->max_pages ) {
 
-    f->shared->page_buf = page_buf;
+            can_insert = FALSE;
+        }
+    }
+
+    if ( can_insert ) {
+
+        if ( H5PB__create_new_page(pb_ptr, page_addr, 
+                                   (size_t)(pb_ptr->page_size),
+                                   type, TRUE, &entry_ptr) < 0 )
+
+            HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
+                        "new page buffer page creation failed.")
+
+        /* updates stats */
+        H5PB__UPDATE_STATS_FOR_INSERTION(pb_ptr, entry_ptr);
+    }
 
 done:
-    if(ret_value < 0) {
-        if(page_buf != NULL) {
-            if(page_buf->slist_ptr != NULL)
-                H5SL_close(page_buf->slist_ptr);
-            if(page_buf->mf_slist_ptr != NULL)
-                H5SL_close(page_buf->mf_slist_ptr);
-            if(page_buf->page_fac != NULL)
-                H5FL_fac_term(page_buf->page_fac);
-            page_buf = H5FL_FREE(H5PB_t, page_buf);
-        } /* end if */
-    } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5PB_create */
+
+} /* H5PB_add_new_page */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5PB__flush_cb
  *
- * Purpose:	Callback to flush PB skiplist entries.
+ * Function:	H5PB_create
  *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Mohamad Chaarawi
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5PB__flush_cb(void *item, void H5_ATTR_UNUSED *key, void *_op_data)
-{
-    H5PB_entry_t *page_entry = (H5PB_entry_t *)item;    /* Pointer to page entry node */
-    H5F_t *f = (H5F_t *)_op_data;
-    herr_t  ret_value = SUCCEED;    /* Return value */
-
-    FUNC_ENTER_STATIC
-
-    /* Sanity checks */
-    HDassert(page_entry);
-    HDassert(f);
-
-    /* Flush the page if it's dirty */
-    if(page_entry->is_dirty)
-        if(H5PB__write_entry(f, page_entry) < 0)
-            HGOTO_ERROR(H5E_PAGEBUF, H5E_WRITEERROR, FAIL, "file write failed")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5PB__flush_cb() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5PB_flush
- *
- * Purpose:	Flush/Free all the PB entries to the file.
+ * Purpose:	Setup a page buffer for the supplied file.
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Mohamad Chaarawi
+ * Programmer:	John Mainzer -- 10/11/18
+ *
+ * Changes:     None.
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5PB_flush(H5F_t *f)
+H5PB_create(H5F_t *f, size_t size, unsigned page_buf_min_meta_perc, 
+            unsigned page_buf_min_raw_perc)
 {
-    herr_t  ret_value = SUCCEED;    /* Return value */
+    int i;
+    int32_t min_md_pages;
+    int32_t min_rd_pages;
+    H5PB_t *pb_ptr = NULL;
+    herr_t ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    /* Sanity check */
+    /* Sanity checks */
     HDassert(f);
+    HDassert(f->shared);
+    HDassert(page_buf_min_meta_perc <= 100);
+    HDassert(page_buf_min_raw_perc <= 100);
+    HDassert((page_buf_min_meta_perc + page_buf_min_raw_perc) <= 100);
 
-    /* Flush all the entries in the PB skiplist, if we have write access on the file */
-    if(f->shared->page_buf && (H5F_ACC_RDWR & H5F_INTENT(f))) {
-        H5PB_t *page_buf = f->shared->page_buf;
+    /* Check args */
+    if ( f->shared->fs_strategy != H5F_FSPACE_STRATEGY_PAGE )
 
-        /* Iterate over all entries in page buffer skip list */
-        if(H5SL_iterate(page_buf->slist_ptr, H5PB__flush_cb, (void *)f))
-            HGOTO_ERROR(H5E_PAGEBUF, H5E_BADITER, FAIL, "can't flush page buffer skip list")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, \
+                    "Enabling Page Buffering requires PAGE file space strategy")
+
+    else if ( size > f->shared->fs_page_size ) {
+
+        /* round size down to the next multiple of fs_page_size */
+
+        hsize_t temp_size;
+
+        temp_size = (size / f->shared->fs_page_size) * f->shared->fs_page_size;
+
+        H5_CHECKED_ASSIGN(size, size_t, temp_size, hsize_t);
+
     } /* end if */
+    else if ( 0 != size % f->shared->fs_page_size )
+
+        HGOTO_ERROR(H5E_PAGEBUF, H5E_CANTINIT, FAIL, \
+                    "Page Buffer size must be >= to the page size")
+
+    /* Calculate the minimum page count for metadata and raw data
+     * based on the fractions provided 
+     */
+    min_md_pages = (int32_t)((size * page_buf_min_meta_perc) / 
+                             (f->shared->fs_page_size * 100));
+    min_rd_pages = (int32_t)((size * page_buf_min_raw_perc) / 
+                             (f->shared->fs_page_size * 100));
+    HDassert(min_md_pages >= 0);
+    HDassert(min_rd_pages >= 0);
+    HDassert((min_md_pages + min_rd_pages) <= 
+             (int32_t)(size / f->shared->fs_page_size));
+
+
+    /* Allocate the new page buffering structure */
+    if(NULL == (pb_ptr = H5FL_MALLOC(H5PB_t)))
+
+	HGOTO_ERROR(H5E_PAGEBUF, H5E_NOSPACE, FAIL, "memory allocation failed")
+
+    /* initialize the new instance of H5PB_t */
+
+    pb_ptr->magic           = H5PB__H5PB_T_MAGIC;
+    pb_ptr->page_size       = f->shared->fs_page_size;
+    H5_CHECKED_ASSIGN(pb_ptr->page_size, size_t, \
+                      f->shared->fs_page_size, hsize_t);
+    pb_ptr->max_pages       = (int32_t)(size / f->shared->fs_page_size);
+    pb_ptr->curr_pages      = 0;
+    pb_ptr->curr_md_pages   = 0;
+    pb_ptr->curr_rd_pages   = 0;
+    pb_ptr->min_md_pages    = min_md_pages;
+    pb_ptr->min_rd_pages    = min_rd_pages;
+
+    pb_ptr->max_size        = size;
+    pb_ptr->min_meta_perc   = page_buf_min_meta_perc;
+    pb_ptr->min_raw_perc    = page_buf_min_raw_perc;
+
+    /* index */
+    for ( i = 0; i < H5PB__HASH_TABLE_LEN; i++ )
+        pb_ptr->ht[i]       = NULL;
+    pb_ptr->index_len       = 0;
+    pb_ptr->index_size      = 0;
+
+    /* LRU */
+    pb_ptr->LRU_len         = 0;
+    pb_ptr->LRU_size        = 0;
+    pb_ptr->LRU_head_ptr    = NULL;
+    pb_ptr->LRU_tail_ptr    = NULL;
+
+
+    /* VFD SWMR specific fields.  
+     * The following fields are defined iff vfd_swmr_writer is TRUE. 
+     */
+    pb_ptr->vfd_swmr_writer = FALSE;
+    pb_ptr->mpmde_count     = 0;
+    pb_ptr->cur_tick        = 0;
+
+    /* delayed write list */
+    pb_ptr->max_delay       = 0;
+    pb_ptr->dwl_len         = 0;
+    pb_ptr->dwl_size        = 0;
+    pb_ptr->dwl_head_ptr    = NULL;
+    pb_ptr->dwl_tail_ptr    = NULL;
+
+    /* tick list */
+    pb_ptr->tl_len          = 0;
+    pb_ptr->tl_size         = 0;
+    pb_ptr->tl_head_ptr     = NULL;
+    pb_ptr->tl_tail_ptr     = NULL;
+
+    H5PB_reset_stats(pb_ptr);
+
+    f->shared->pb_ptr = pb_ptr;
 
 done:
+
+    if ( ret_value < 0 ) {
+
+        if ( pb_ptr != NULL ) {
+
+            pb_ptr = H5FL_FREE(H5PB_t, pb_ptr);
+
+        } 
+    } 
+
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5PB_flush */
+
+} /* H5PB_create */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5PB__dest_cb
  *
- * Purpose:	Callback to free PB skiplist entries.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Mohamad Chaarawi
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5PB__dest_cb(void *item, void H5_ATTR_UNUSED *key, void *_op_data)
-{
-    H5PB_entry_t *page_entry = (H5PB_entry_t *)item;       /* Pointer to page entry node */
-    H5PB_ud1_t *op_data = (H5PB_ud1_t *)_op_data;
-
-    FUNC_ENTER_STATIC_NOERR
-
-    /* Sanity checking */
-    HDassert(page_entry);
-    HDassert(op_data);
-    HDassert(op_data->page_buf);
-
-    /* Remove entry from LRU list */
-    if(op_data->actual_slist) {
-        H5PB__REMOVE_LRU(op_data->page_buf, page_entry)
-        page_entry->page_buf_ptr = H5FL_FAC_FREE(op_data->page_buf->page_fac, page_entry->page_buf_ptr);
-    } /* end if */
-
-    /* Free page entry */
-    page_entry = H5FL_FREE(H5PB_entry_t, page_entry);
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* H5PB__dest_cb() */
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5PB_dest
  *
- * Purpose:	Flush and destroy the PB on the file if it exists.
+ * Purpose:	Flush (if necessary) and evict all entries in the page
+ *              buffer, and then discard the page buffer.
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Mohamad Chaarawi
+ * Programmer:	John Mainzer -- 10/22/18
+ *
+ * Changes:     None.
  *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5PB_dest(H5F_t *f)
 {
-    herr_t  ret_value = SUCCEED;        /* Return value */
+    int i;
+    H5PB_t *pb_ptr = NULL;
+    H5PB_entry_t *entry_ptr = NULL;
+    H5PB_entry_t *evict_ptr = NULL;
+    herr_t  ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(f);
+    HDassert(f->shared);
+
+    /* flush and destroy the page buffer, if it exists */
+    if ( f->shared->pb_ptr ) {
+
+        pb_ptr = f->shared->pb_ptr;
+
+        HDassert(pb_ptr->magic == H5PB__H5PB_T_MAGIC);
+
+        /* the current implementation if very inefficient, and will 
+         * fail if there are any outstanding delayed writes -- must fix this 
+         */
+        for ( i = 0; i < H5PB__HASH_TABLE_LEN; i++ ) {
+
+            entry_ptr = pb_ptr->ht[i];
+
+            while ( entry_ptr ) {
+
+                HDassert(entry_ptr->magic == H5PB__H5PB_ENTRY_T_MAGIC);
+
+                evict_ptr = entry_ptr;
+                entry_ptr = entry_ptr->ht_next;
+
+                if ( evict_ptr->is_dirty ) {
+
+                    if ( H5PB__flush_entry(f, pb_ptr, evict_ptr) < 0 )
+
+                        HGOTO_ERROR(H5E_PAGEBUF, H5E_WRITEERROR, FAIL, \
+                                    "Can't flush entry")
+                }
+
+                if ( H5PB__evict_entry(pb_ptr, evict_ptr, TRUE) < 0 )
+
+                    HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
+                                "forced eviction failed")
+
+                entry_ptr = pb_ptr->ht[i];
+            }
+        }
+
+        /* regular operations fields */
+        HDassert(pb_ptr->curr_pages == 0);
+        HDassert(pb_ptr->curr_md_pages == 0);
+        HDassert(pb_ptr->curr_rd_pages == 0);
+        HDassert(pb_ptr->index_len == 0);
+        HDassert(pb_ptr->index_size == 0);
+        HDassert(pb_ptr->LRU_len == 0);
+        HDassert(pb_ptr->LRU_size == 0);
+        HDassert(pb_ptr->LRU_head_ptr == NULL);
+        HDassert(pb_ptr->LRU_tail_ptr == NULL);
+
+        /* VFD SWMR fields */
+        HDassert(pb_ptr->dwl_len == 0);
+        HDassert(pb_ptr->dwl_size == 0);
+        HDassert(pb_ptr->dwl_head_ptr == NULL);
+        HDassert(pb_ptr->dwl_tail_ptr == NULL);
+
+        HDassert(pb_ptr->tl_len == 0);
+        HDassert(pb_ptr->tl_size == 0);
+        HDassert(pb_ptr->tl_head_ptr == NULL);
+        HDassert(pb_ptr->tl_tail_ptr == NULL);
+
+        pb_ptr->magic = 0;
+        f->shared->pb_ptr = H5FL_FREE(H5PB_t, pb_ptr);
+    }
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5PB_dest */
+
+
+/*-------------------------------------------------------------------------
+ *
+ * Function:	H5PB_flush
+ *
+ * Purpose:	If the page buffer is defined, flush all entries.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	John Mainzer -- 10/22/18
+ *
+ * Changes:     None.
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5PB_flush(H5F_t *f)
+{
+    int i;
+    H5PB_t *pb_ptr = NULL;
+    H5PB_entry_t *entry_ptr = NULL;
+    H5PB_entry_t *flush_ptr = NULL;
+    herr_t  ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(f);
+    HDassert(f->shared);
+
+    pb_ptr = f->shared->pb_ptr;
+
+    if ( pb_ptr ) {
+
+        HDassert(pb_ptr->magic == H5PB__H5PB_T_MAGIC);
+
+        /* the current implementation if very inefficient, and will 
+         * fail if there are any delayed writes -- must fix this 
+         */
+        for ( i = 0; i < H5PB__HASH_TABLE_LEN; i++ ) {
+
+            entry_ptr = pb_ptr->ht[i];
+
+            while ( entry_ptr ) {
+
+                HDassert(entry_ptr->magic == H5PB__H5PB_ENTRY_T_MAGIC);
+
+                flush_ptr = entry_ptr;
+                entry_ptr = entry_ptr->ht_next;
+
+                if ( flush_ptr->is_dirty ) {
+
+                    if ( H5PB__flush_entry(f, pb_ptr, flush_ptr) < 0 )
+
+                        HGOTO_ERROR(H5E_PAGEBUF, H5E_WRITEERROR, FAIL, \
+                                    "Can't flush entry")
+                }
+            }
+        }
+    }
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5PB_flush */
+
+
+/*-------------------------------------------------------------------------
+ *
+ * Function:	H5PB_page_exists
+ *
+ * Purpose:	Test to see if a page buffer page exists at the specified
+ *              address.  Set *page_exists_ptr to TRUE or FALSE accordingly.
+ *
+ *              This function exists for the convenience of the test 
+ *              code
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	John Mainzer -- 10/22/18
+ *
+ * Changes:     None.
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5PB_page_exists(H5F_t *f, haddr_t addr, hbool_t *page_exists_ptr)
+{
+    uint64_t page;
+    H5PB_t *pb_ptr = NULL;
+    H5PB_entry_t *entry_ptr = NULL;
+    herr_t  ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(f);
+    HDassert(f->shared);
+    HDassert(f->shared->pb_ptr);
+
+    pb_ptr = f->shared->pb_ptr;
+
+    HDassert(pb_ptr->magic == H5PB__H5PB_T_MAGIC);
+    HDassert(page_exists_ptr);
+
+    /* Calculate the page offset */
+    page = (addr / pb_ptr->page_size);
+
+    /* the supplied address should be page aligned */
+    HDassert(addr == page * pb_ptr->page_size);
+
+    /* Search for page in the hash table  */
+    H5PB__SEARCH_INDEX(pb_ptr, page, entry_ptr, FAIL)
+
+    HDassert((NULL == entry_ptr) || (entry_ptr->addr == addr));
+
+    *page_exists_ptr = ( entry_ptr != NULL );
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5PB_page_exists */
+
+
+/*-------------------------------------------------------------------------
+ *
+ * Function:	H5PB_read
+ *
+ * Purpose:	Satisfy the read from the page buffer if possible.
+ *
+ *              1) If the page buffer is disabled, simply read from the 
+ *                 HDF5 file and return.
+ *
+ *              2) If the read is for raw data, and the page buffer is 
+ *                 configured for metadata only (i.e. min_md_pages == 
+ *                 max_pages), simply read from the HDF5 file and return.
+ *
+ *              3) If the read is for raw data, and it of page size or 
+ *                 larger, read it directly from the HDF5 file.  
+ *
+ *                 It is possible that the page buffer contains dirty pages 
+ *                 that intersect with the read -- test for this and update
+ *                 the read buffer from the page buffer if any such pages 
+ *                 exist. 
+ *
+ *                 Note that no pages are inserted into the page buffer in 
+ *                 this case.
+ *
+ *              4) If the read is for raw data, and it is of size less 
+ *                 than the page size, satisfy the read from the page 
+ *                 buffer, loading and inserting pages into the 
+ *                 page buffer as necessary
+ *
+ *              5) If the read is for metadata, and the page buffer is 
+ *                 configured for raw data only (i.e. min_rd_pages == 
+ *                 max_pages), simply read from the HDF5 file and return.
+ *
+ *              The free space manager guarantees that allocations larger
+ *              than one page will be page alligned, and that allocations
+ *              of size less than or equal to page size will not cross page
+ *              boundaries.  Further, unlike raw data, metadata is always 
+ *              written and read atomically.
+ *
+ *              In principle, this should make it easy to discriminate 
+ *              between small and multi-page metadata entries so that 
+ *              pages containing the former will be buffered and the 
+ *              latter be read directly from file.
+ *  
+ *              Unfortunately, the metadata cache does not always know the 
+ *              size of metadata entries when it tries to read them.  In 
+ *              such cases, it issues speculative reads that may be either 
+ *              smaller or larger than the actual size of the piece of 
+ *              metadata that is finally read.
+ *
+ *              Since we are guaranteed that all metadata allocations larger
+ *              that one page are page aligned, we can safely clip at the 
+ *              page boundary any non page aligned metadata read that crosses
+ *              page boundaries.
+ *
+ *              However, page aligned reads could wind up being either
+ *              small or multi-page.  This results in two scenarios that
+ *              we must handle:
+ *
+ *                  a) A page aligned read of size less than one page 
+ *                     turns out to be mult-page.
+ *
+ *                     In this case, the initial speculative read will
+ *                     result in a page load and insertion into the page
+ *                     buffer.  This page must be evicted on the subsequent
+ *                     read of size greater than page size.
+ *
+ *                     In the context of VFD SWMR, it is also possible that 
+ *                     that the multi-page metadata entry is already in the 
+ *                     page buffer -- in which case the initial read should 
+ *                     be satisfied from the multi-page page buffer entry.
+ *
+ *                  b) A page aligned, larger than one page read turns out 
+ *                     to be small (less than one page).
+ *
+ *                     If there is already a page in the page buffer with 
+ *                     same address, we can safely clip the original 
+ *                     read to page size
+ *
+ *              The above considerations resolve into the following cases:
+ *
+ *              6) If the read is for metadata and not page aligned, clip
+ *                 the read to the end of the current page if necessary.
+ *                 Load the relevant page if necessary and satisfy the 
+ *                 read from the page buffer.  Note that it there is an
+ *                 existing page, it must not be a multi-page metadata 
+ *                 entry.  It it is, flag an error.
+ *
+ *              7) If the read is for metadata, is page aligned, is larger 
+ *                 than one page, and there is no entry in the page buffer,
+ *                 satisfy the read from the file
+ *
+ *              8) If the read is for metadata, is page aligned, is larger 
+ *                 than one page, and there is a regular entry at the target
+ *                 page address, test to see if the last read was for the 
+ *                 same address.
+ *
+ *                 If was, evict the page, and satisfy the read from file.
+ *                 Flag an error if the page was dirty.
+ *
+ *                 If the last read was for a different page, clip the read 
+ *                 to one page, and satisfy the read from the existing 
+ *                 regular entry.
+ *
+ *              9) If the read is for metadata, is page aligned, is larger
+ *                 than one page, and there is a multi-page metadata entry
+ *                 at the target page address, test to see if 
+ *                 pb_ptr->vfd_swmr_write is TRUE.
+ *
+ *                 If it is, satisfy the read from the multi-page metadata
+ *                 entry, clipping the read if necessary.
+ *
+ *                 if pb_ptr->vfd_swmr_write is FALSE, flag an error.
+ *
+ *             10) If the read is for metadata, is page aligned, is no 
+ *                 larger than a page, test to see if the page buffer 
+ *                 contains a page at the target address.
+ *
+ *                 If it doesn't, load the page and satisfy the read 
+ *                 from it.
+ *
+ *                 If it contains a regular page entry, satisfy the read 
+ *                 from it.
+ *
+ *                 If it contains a multipage metadata entry at the target
+ *                 address, satisfy the read from the multi-page metadata
+ *                 entry if pb_ptr->vfd_swmr_write is TRUE, and flag an 
+ *                 error otherwise.
+ *
+ *              Observe that this function handles casses 1, 2, and 5
+ *              directly, calls H5PB_read_raw() for cases 3 & 4, and 
+ *              calls H5PB_read_meta() for cases 6), 7, 8, 9), and 10).
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	John Mainzer -- 10/11/18
+ *
+ * Changes:     None.
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5PB_read(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size, 
+          void *buf/*out*/)
+{
+    H5PB_t *pb_ptr;                    /* Page buffer for this file */
+    hbool_t bypass_pb = FALSE;          /* Whether to bypass page buffering */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
     HDassert(f);
+    HDassert(f->shared);
+    HDassert(type != H5FD_MEM_GHEAP);
 
-    /* flush and destroy the page buffer, if it exists */
-    if(f->shared->page_buf) {
-        H5PB_t *page_buf = f->shared->page_buf;
-        H5PB_ud1_t op_data;                 /* Iteration context */
+    pb_ptr = f->shared->pb_ptr;
 
-        if(H5PB_flush(f) < 0)
-            HGOTO_ERROR(H5E_PAGEBUF, H5E_CANTFLUSH, FAIL, "can't flush page buffer")
+    if ( pb_ptr == NULL ) {
 
-        /* Set up context info */
-        op_data.page_buf = page_buf;
+        bypass_pb = TRUE; /* case 1) -- page buffer is disabled */
 
-        /* Destroy the skip list containing all the entries in the PB */
-        op_data.actual_slist = TRUE;
-        if(H5SL_destroy(page_buf->slist_ptr, H5PB__dest_cb, &op_data))
-            HGOTO_ERROR(H5E_PAGEBUF, H5E_CANTCLOSEOBJ, FAIL, "can't destroy page buffer skip list")
+    } else {
 
-        /* Destroy the skip list containing the new entries */
-        op_data.actual_slist = FALSE;
-        if(H5SL_destroy(page_buf->mf_slist_ptr, H5PB__dest_cb, &op_data))
-            HGOTO_ERROR(H5E_PAGEBUF, H5E_CANTCLOSEOBJ, FAIL, "can't destroy page buffer skip list")
+        HDassert(pb_ptr->magic == H5PB__H5PB_T_MAGIC);
 
-        /* Destroy the page factory */
-        if(H5FL_fac_term(page_buf->page_fac) < 0)
-            HGOTO_ERROR(H5E_PAGEBUF, H5E_CANTRELEASE, FAIL, "can't destroy page buffer page factory")
+        if ( H5FD_MEM_DRAW == type ) { /* raw data read */
 
-        f->shared->page_buf = H5FL_FREE(H5PB_t, page_buf);
+            if ( pb_ptr->min_md_pages == pb_ptr->max_pages ) {
+
+                /* case 2) -- page buffer configured for metadata only */
+                bypass_pb = TRUE;
+
+            }
+        } else { /* metadata read */
+
+            if ( pb_ptr->min_rd_pages == pb_ptr->max_pages ) {
+
+                /* case 5) -- page buffer configured for raw data only */
+                bypass_pb = TRUE;
+            }
+        }
+    }
+
+#ifdef H5_HAVE_PARALLEL
+    /* at present, the page buffer must be disabled in the parallel case.
+     * However, just in case ...
+     */
+    if(H5F_HAS_FEATURE(f, H5FD_FEAT_HAS_MPI)) {
+
+        bypass_pb = TRUE;
+
     } /* end if */
+#endif /* H5_HAVE_PARALLEL */
+
+    if ( bypass_pb ) { /* cases 1, 2. and 5 */
+
+#if VFD_IO
+        if ( H5FD_read(f->shared->lf, type, addr, size, buf) < 0 ) 
+#else /* VFD_IO */
+        if ( H5F__accum_read(f, type, addr, size, buf) < 0 )
+#endif /* VFD_IO */
+
+            HGOTO_ERROR(H5E_PAGEBUF, H5E_READERROR, FAIL, \
+                        "read through metadata accumulator failed")
+
+        /* Update statistics */
+        if ( pb_ptr ) {
+
+            H5PB__UPDATE_STATS_FOR_BYPASS(pb_ptr, type, size);
+        }
+    } else {
+
+        if ( H5FD_MEM_DRAW == type ) { /* cases 3 and 4 */
+
+            if ( H5PB__read_raw(f, type, addr, size, buf) < 0 )
+
+                HGOTO_ERROR(H5E_PAGEBUF, H5E_READERROR, FAIL, \
+                            "H5PB_read_raw() failed")
+
+        } else { /* cases 6, 7, 8, 9, and 10 */
+
+            if ( H5PB__read_meta(f, type, addr, size, buf) < 0 )
+
+                HGOTO_ERROR(H5E_PAGEBUF, H5E_READERROR, FAIL, \
+                            "H5PB_read_meta() failed")
+        }
+
+        H5PB__UPDATE_STATS_FOR_ACCESS(pb_ptr, type, size);
+    }
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5PB_dest */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5PB_add_new_page
- *
- * Purpose:	Add a new page to the new page skip list. This is called 
- *              from the MF layer when a new page is allocated to 
- *              indicate to the page buffer layer that a read of the page 
- *              from the file is not necessary since it's an empty page.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Mohamad Chaarawi
- *
- *-------------------------------------------------------------------------
- */
-herr_t 
-H5PB_add_new_page(H5F_t *f, H5FD_mem_t type, haddr_t page_addr)
-{
-    H5PB_t *page_buf = f->shared->page_buf;
-    H5PB_entry_t *page_entry = NULL;    /* pointer to the corresponding page entry */
-    herr_t ret_value = SUCCEED;    /* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    /* Sanity checks */
-    HDassert(page_buf);
-
-    /* If there is an existing page, this means that at some point the
-     * file free space manager freed and re-allocated a page at the same
-     * address.  No need to do anything here then...
-     */
-    /* MSC - to be safe, might want to dig in the MF layer and remove
-     * the page when it is freed from this list if it still exists and
-     * remove this check
-     */
-    if(NULL == H5SL_search(page_buf->mf_slist_ptr, &(page_addr))) {
-        /* Create the new PB entry */
-        if(NULL == (page_entry = H5FL_CALLOC(H5PB_entry_t)))
-            HGOTO_ERROR(H5E_PAGEBUF, H5E_NOSPACE, FAIL, "memory allocation failed")
-
-        /* Initialize page fields */
-        page_entry->addr = page_addr;
-        page_entry->type = (H5F_mem_page_t)type;
-        page_entry->is_dirty = FALSE;
-
-        /* Insert entry in skip list */
-        if(H5SL_insert(page_buf->mf_slist_ptr, page_entry, &(page_entry->addr)) < 0)
-            HGOTO_ERROR(H5E_PAGEBUF, H5E_BADVALUE, FAIL, "Can't insert entry in skip list")
-    } /* end if */
-
-done:
-    if(ret_value < 0)
-        if(page_entry)
-            page_entry = H5FL_FREE(H5PB_entry_t, page_entry);
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5PB_add_new_page */
+
+} /* end H5PB_read() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5PB_update_entry
  *
- * Purpose:	In PHDF5, entries that are written by other processes and just 
- *              marked clean by this process have to have their corresponding 
- *              pages updated if they exist in the page buffer. 
- *              This routine checks and update the pages.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Mohamad Chaarawi
- *
- *-------------------------------------------------------------------------
- */
-herr_t 
-H5PB_update_entry(H5PB_t *page_buf, haddr_t addr, size_t size, const void *buf)
-{
-    H5PB_entry_t *page_entry;   /* Pointer to the corresponding page entry */
-    haddr_t page_addr;
-
-    FUNC_ENTER_NOAPI_NOERR
-
-    /* Sanity checks */
-    HDassert(page_buf);
-    HDassert(size <= page_buf->page_size);
-    HDassert(buf);
-
-    /* calculate the aligned address of the first page */
-    page_addr = (addr / page_buf->page_size) * page_buf->page_size;
-
-    /* search for the page and update if found */
-    page_entry = (H5PB_entry_t *)H5SL_search(page_buf->slist_ptr, (void *)(&page_addr));
-    if(page_entry) {
-        haddr_t offset;
-
-        HDassert(addr + size <= page_addr + page_buf->page_size);
-        offset = addr - page_addr;
-        HDmemcpy((uint8_t *)page_entry->page_buf_ptr + offset, buf, size);
-
-        /* move to top of LRU list */
-        H5PB__MOVE_TO_TOP_LRU(page_buf, page_entry)
-    } /* end if */
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* H5PB_update_entry */
-
-
-/*-------------------------------------------------------------------------
  * Function:    H5PB_remove_entry
  *
  * Purpose:     Remove possible metadata entry with ADDR from the PB cache.
  *              This is in response to the data corruption bug from fheap.c 
  *              with page buffering + page strategy.
  *              Note: Large metadata page bypasses the PB cache.
- *              Note: Update of raw data page (large or small sized) is handled by the PB cache.
+ *              Note: Update of raw data page (large or small sized) is 
+ *                    handled by the PB cache.
  *
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Vailin Choi; Feb 2017
+ *
+ * Changes:     Reworked function for re-implementation of the page buffer.
+ *
+ *              Vailin: I think we need to do this for raw data as well.
+ *
+ *                                               JRM -- 10/23/18
  *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5PB_remove_entry(const H5F_t *f, haddr_t addr)
 {
-    H5PB_t *page_buf = f->shared->page_buf;
-    H5PB_entry_t *page_entry = NULL;        /* pointer to the page entry being searched */
+    uint64_t page;
+    H5PB_t *pb_ptr = NULL;
+    H5PB_entry_t *entry_ptr = NULL;
     herr_t ret_value = SUCCEED;             /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(page_buf);
+    HDassert(f);
+    HDassert(f->shared);
+    HDassert(f->shared->pb_ptr);
 
-    /* Search for address in the skip list */
-    page_entry = (H5PB_entry_t *)H5SL_search(page_buf->slist_ptr, (void *)(&addr));
+    pb_ptr = f->shared->pb_ptr;
 
-    /* If found, remove the entry from the PB cache */
-    if(page_entry) {
-        HDassert(page_entry->type != H5F_MEM_PAGE_DRAW);
-        if(NULL == H5SL_remove(page_buf->slist_ptr, &(page_entry->addr)))
-            HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "Page Entry is not in skip list")
+    /* Calculate the page offset */
+    page = (addr / pb_ptr->page_size);
 
-        /* Remove from LRU list */
-        H5PB__REMOVE_LRU(page_buf, page_entry)
-        HDassert(H5SL_count(page_buf->slist_ptr) == page_buf->LRU_list_len);
+    HDassert(addr == page * pb_ptr->page_size);
 
-        page_buf->meta_count--;
+    /* Search for page in the hash table */
+    H5PB__SEARCH_INDEX(pb_ptr, page, entry_ptr, FAIL)
 
-        page_entry->page_buf_ptr = H5FL_FAC_FREE(page_buf->page_fac, page_entry->page_buf_ptr);
-        page_entry = H5FL_FREE(H5PB_entry_t, page_entry);
-    } /* end if */
+    if ( entry_ptr ) {
+
+        HDassert(entry_ptr->addr == addr);
+        HDassert(entry_ptr->size == pb_ptr->page_size);
+
+        /* if the entry is dirty, mark it clean before we evict */
+        if ( ( entry_ptr->is_dirty ) && 
+             ( H5PB__mark_entry_clean(pb_ptr, entry_ptr) < 0 ) )
+
+            HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
+                        "mark entry clean failed")
+
+        if ( H5PB__evict_entry(pb_ptr, entry_ptr, TRUE) < 0 )
+
+            HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, "forced eviction failed")
+
+    }
 
 done:
+
     FUNC_LEAVE_NOAPI(ret_value)
+
 } /* H5PB_remove_entry */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5PB_read
  *
- * Purpose:	Reads in the data from the page containing it if it exists 
- *              in the PB cache; otherwise reads in the page through the VFD.
+ * Function:	H5PB_update_entry
+ *
+ * Purpose:	In PHDF5, metadata cache entries that are written by other 
+ *              processes are simply marked clean in the current process.
+ *              However, if the page buffer is enabled, entries marked
+ *              clean must still be written to the page buffer so as to 
+ *              keep the contents of metadata pages consistent on all 
+ *              processes.
+ *
+ *              Do this as follows:
+ *
+ *              1) Test to see if the page buffer is configured to accept
+ *                 metadata pages.  If it isn't, return.
+ *
+ *              2) Test to see if the page buffer contains the page that
+ *                 contains the supplied metadata cache entry.  If it 
+ *                 doesn't, return.
+ *
+ *              3) Write the supplied buffer to page at the appropriate 
+ *                 offset.
+ *
+ *              Note that at present, page buffering is disabled in the 
+ *              parallel case.  Thus this function has not been tested.
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Mohamad Chaarawi
+ * Programmer:	John Mainzer -- 10/23/18
+ *
+ * Changes:     None.
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t 
+H5PB_update_entry(H5PB_t *pb_ptr, haddr_t addr, size_t size, const void *buf)
+{
+    uint64_t page;
+    size_t offset;
+    H5PB_entry_t *entry_ptr = NULL;
+    haddr_t page_addr;
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity checks */
+    HDassert(pb_ptr);
+    HDassert(pb_ptr->magic == H5PB__H5PB_T_MAGIC);
+    HDassert(size > 0);
+    HDassert(size <= pb_ptr->page_size);
+    HDassert(buf);
+
+    if ( pb_ptr->min_rd_pages < pb_ptr->max_pages ) {
+
+        /* page buffer is configured to accept metadata pages */
+
+        /* Calculate the aligned address of the containing page */
+        page = (addr / pb_ptr->page_size);
+        page_addr = page * pb_ptr->page_size;
+
+        H5PB__SEARCH_INDEX(pb_ptr, page, entry_ptr, FAIL)
+
+        if ( entry_ptr ) {
+
+            HDassert( entry_ptr->is_metadata );
+            HDassert( ! (entry_ptr->is_mpmde) );
+            HDassert(addr + size <= page_addr + pb_ptr->page_size);
+
+            offset = addr - page_addr;
+
+            HDmemcpy(((uint8_t *)(entry_ptr->image_ptr) + offset), 
+                     buf, size);
+
+            /* should we mark the page dirty?  If so, replace the following
+             * with a call to H5PB__mark_entry_dirty()
+             */
+            H5PB__UPDATE_RP_FOR_ACCESS(pb_ptr, entry_ptr, FAIL)
+        }
+    }
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5PB_update_entry */
+
+
+/*-------------------------------------------------------------------------
+ *
+ * Function:	H5PB_write
+ *
+ * Purpose:	Write data into the Page Buffer if practical, and to file
+ *              otherwise.  Specifically:
+ *
+ *              1) If the page buffer is disabled, simply write to the 
+ *                 HDF5 file and return.
+ *
+ *              2) If the write is raw data, and the page buffer is 
+ *                 configured for metadata only (i.e. min_md_pages == 
+ *                 max_pages), simply write to the HDF5 file and return.
+ *
+ *              3) If the write is raw data, and it of page size or 
+ *                 larger, write directly from the HDF5 file.  
+ *
+ *                 It is possible that the write intersects one or more 
+ *                 pages in the page buffer -- test for this and update
+ *                 any partially written pages, and evict any pages 
+ *                 that are completely overwritten.
+ *
+ *                 Note that no pages are inserted into the page buffer in 
+ *                 this case.
+ *
+ *              4) If the write is of raw data, and it is of size less 
+ *                 than the page size, write the page into the page
+ *                 buffer, loading and inserting pages into the 
+ *                 page buffer as necessary
+ *
+ *              5) If the write is of metadata, and the page buffer is 
+ *                 configured for raw data only (i.e. min_rd_pages == 
+ *                 max_pages), simply write to the HDF5 file and return.
+ *
+ *              6) If the write is of metadata, the write is larger than
+ *                 one page, and vfd_swmr_writer is FALSE, simply read 
+ *                 from the HDF5 file.  There is no need to check the 
+ *                 page buffer, as metadata is always read atomically, 
+ *                 and entries of this size are not buffered in the page 
+ *                 buffer.
+ *
+ *              7) If the write is of metadata, the write is larger than
+ *                 one page, and vfd_swmr_writer is TRUE, the write must
+ *                 buffered in the page buffer until the end of the tick.
+ *
+ *                 Create a multi-page metadata entry in the page buffer
+ *                 and copy the write into it.  Insert the new entry in
+ *                 the tick list.
+ *
+ *                 Test to see if the write of the multi-page metadata 
+ *                 entry must be delayed.  If so, place the entry in 
+ *                 the delayed write list.  Otherwise, write the multi-page
+ *                 metadata entry to the HDF5 file.
+ *
+ *              8) If the write is of metadata, and the write is of size
+ *                 less than or equal to the page size, write the data
+ *                 into the page buffer, loading and inserting a page 
+ *                 if necessary.
+ *
+ *                 If, in addition, vfd_swmr_writer is TRUE, add the page
+ *                 touched by the write to the tick list.
+ *                 
+ *              Observe that this function handles casses 1, 2, 5, and 6 
+ *              directly, calls H5PB_write_raw() for cases 3 & 4, and 
+ *              calls H5PB_read_meta() for cases 7, and 8.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	John Mainzer -- 10/11/18
+ *
+ * Changes:     None.
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5PB_read(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size, void *buf/*out*/)
+H5PB_write(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size, 
+           const void *buf)
 {
-    H5PB_t *page_buf;                   /* Page buffering info for this file */
-    H5PB_entry_t *page_entry;           /* Pointer to the corresponding page entry */
+    H5PB_t *pb_ptr;                    /* Page buffer for this file */
+    hbool_t bypass_pb = FALSE;          /* Whether to bypass page buffering */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity checks */
+    HDassert(f);
+    HDassert(f->shared);
+    HDassert(type != H5FD_MEM_GHEAP);
+
+    pb_ptr = f->shared->pb_ptr;
+
+    if ( pb_ptr == NULL ) {
+
+        bypass_pb = TRUE; /* case 1) -- page buffer is disabled */
+
+    } else {
+
+        HDassert(pb_ptr->magic == H5PB__H5PB_T_MAGIC);
+
+        if ( H5FD_MEM_DRAW == type ) { /* raw data read */
+
+            if ( pb_ptr->min_md_pages == pb_ptr->max_pages ) {
+
+                /* case 2) -- page buffer configured for metadata only */
+                bypass_pb = TRUE;
+
+            }
+        } else { /* metadata read */
+
+            if ( pb_ptr->min_rd_pages == pb_ptr->max_pages ) {
+
+                /* case 5) -- page buffer configured for raw data only */
+                bypass_pb = TRUE;
+
+            } else if ( ( size > pb_ptr->page_size ) && 
+                        ( ! ( pb_ptr->vfd_swmr_writer ) ) ) {
+
+                /* case 6) -- md read larger than one page and 
+                 *            pb_ptr->vfd_swmr_writer is FALSE.
+                 */
+                bypass_pb = TRUE;
+            }
+        }
+    }
+
+#ifdef H5_HAVE_PARALLEL
+    /* at present, the page buffer must be disabled in the parallel case.
+     * However, just in case ...
+     */
+    if(H5F_HAS_FEATURE(f, H5FD_FEAT_HAS_MPI)) {
+
+        bypass_pb = TRUE;
+
+    } /* end if */
+#endif /* H5_HAVE_PARALLEL */
+
+    if ( bypass_pb ) { /* cases 1, 2. 5, and 6 */
+
+#if VFD_IO
+        if ( H5FD_write(f->shared->lf, type, addr, size, buf) < 0 )
+#else /* VFD_IO */
+        if ( H5F__accum_write(f, type, addr, size, buf) < 0 )
+#endif /* VFD_IO */
+
+            HGOTO_ERROR(H5E_PAGEBUF, H5E_WRITEERROR, FAIL, \
+                        "write through metadata accumulator failed")
+
+        /* Update statistics */
+        if ( pb_ptr ) {
+
+            H5PB__UPDATE_STATS_FOR_BYPASS(pb_ptr, type, size);
+        }
+    } else {
+
+        if ( H5FD_MEM_DRAW == type ) { /* cases 3 and 4 */
+
+            if ( H5PB__write_raw(f, type, addr, size, buf) < 0 )
+
+                HGOTO_ERROR(H5E_PAGEBUF, H5E_WRITEERROR, FAIL, \
+                            "H5PB_read_raw() failed")
+
+        } else { /* cases 7, and 8 */
+
+            if ( H5PB__write_meta(f, type, addr, size, buf) < 0 )
+
+                HGOTO_ERROR(H5E_PAGEBUF, H5E_WRITEERROR, FAIL, \
+                            "H5PB_read_meta() failed")
+        }
+
+        H5PB__UPDATE_STATS_FOR_ACCESS(pb_ptr, type, size);
+    }
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* end H5PB_write() */
+
+
+/**************************************************************************/
+/***************************** STATIC FUNCTIONS ***************************/
+/**************************************************************************/
+
+/*-------------------------------------------------------------------------
+ *
+ * Function:	H5PB__allocate_page
+ *
+ * Purpose:	Allocate an instance of H5PB_entry_t and its associated
+ *              buffer.  The supplied size must be greater than or 
+ *              equal to pb_ptr->page_size, and equal to that value if 
+ *              pb_ptr->vfd_swmr_writer is FALSE.
+ *
+ *              The associated buffer is zeroed if clean_image is TRUE.
+ *
+ * Return:	Pointer to the newly allocated instance of H5PB_entry_t
+ *              on success, and NULL on failure.
+ *
+ * Programmer:	John Mainzer -- 10/12/18
+ *
+ * Changes:     None.
+ *
+ *-------------------------------------------------------------------------
+ */
+static H5PB_entry_t *
+H5PB__allocate_page(H5PB_t *pb_ptr, size_t size, hbool_t clean_image)
+{
+    H5PB_entry_t *entry_ptr = NULL;
+    void * image_ptr = NULL; 
+    H5PB_entry_t *ret_value = NULL;    /* Return value */
+
+    FUNC_ENTER_NOAPI(NULL)
+
+    /* sanity checks */
+    HDassert(pb_ptr);
+    HDassert(pb_ptr->magic == H5PB__H5PB_T_MAGIC);
+    HDassert(size >= pb_ptr->page_size);
+    HDassert((size == pb_ptr->page_size) || (pb_ptr->vfd_swmr_writer));
+
+    /* allocate the entry and its associated image buffer */
+    if ( NULL == (entry_ptr = H5FL_MALLOC(H5PB_entry_t)))
+
+        HGOTO_ERROR(H5E_PAGEBUF, H5E_NOSPACE, NULL, \
+                    "memory allocation for H5PB_entry_t failed")
+
+    if ( clean_image ) {
+
+        image_ptr = H5MM_calloc(size);
+
+    } else {
+
+        image_ptr = H5MM_malloc(size);
+    }
+
+    if ( NULL == image_ptr )
+
+        HGOTO_ERROR(H5E_PAGEBUF, H5E_NOSPACE, NULL, \
+                    "memory allocation for page image failed")
+
+    /* initialize the new page buffer entry */
+    entry_ptr->magic              = H5PB__H5PB_ENTRY_T_MAGIC;
+    entry_ptr->pb_ptr             = pb_ptr;
+    entry_ptr->addr               = HADDR_UNDEF;
+    entry_ptr->page               = 0;
+    entry_ptr->size               = size;
+    entry_ptr->image_ptr          = image_ptr;
+    entry_ptr->mem_type           = H5FD_MEM_DEFAULT;
+    entry_ptr->is_metadata        = FALSE;
+    entry_ptr->is_mpmde           = FALSE;
+    entry_ptr->is_dirty           = FALSE;
+
+    /* fields supporting the hash table */
+    entry_ptr->ht_prev            = NULL;
+    entry_ptr->ht_next            = NULL;
+
+    /* fields supporting replacement policise */
+    entry_ptr->next               = NULL;
+    entry_ptr->prev               = NULL;
+
+    /* fields supporting VFD SWMR */
+    entry_ptr->is_mpmde           = FALSE;
+    entry_ptr->loaded             = FALSE;
+    entry_ptr->modified_this_tick = FALSE;
+    entry_ptr->delay_write_until  = 0;
+    entry_ptr->tl_next            = NULL;
+    entry_ptr->tl_prev            = NULL;
+
+    ret_value = entry_ptr;
+
+done:
+
+    if ( NULL == ret_value ) {
+
+        if ( entry_ptr ) {
+
+            entry_ptr->magic = 0;
+            entry_ptr = H5FL_FREE(H5PB_entry_t, entry_ptr);
+        }
+
+        if ( image_ptr ) {
+
+            image_ptr = H5MM_xfree(image_ptr);
+        }
+    } /* end if */
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5PB__allocate_page() */
+
+
+/*-------------------------------------------------------------------------
+ *
+ * Function:	H5PB__create_new_page
+ *
+ * Purpose:	Create a new page and insert it in the page buffer with 
+ *              the specified address and type.  If entry_ptr_ptr is not
+ *              NULL, return a pointer to the new entry in *entry_ptr_ptr.
+ *
+ *              Throw an error if a page already exists at the specified
+ *              address.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	John Mainzer -- 10/12/18
+ *
+ * Changes:     None.
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t 
+H5PB__create_new_page(H5PB_t *pb_ptr, haddr_t addr, size_t size, 
+    H5FD_mem_t type, hbool_t clean_image, H5PB_entry_t **entry_ptr_ptr)
+{
+    hbool_t inserted_in_index = FALSE;
+    hbool_t inserted_in_lru = FALSE;
+    uint64_t page;
+    H5PB_entry_t *entry_ptr = NULL;
+    herr_t ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity checks */
+    HDassert(pb_ptr->magic == H5PB__H5PB_T_MAGIC);
+
+    page = (uint64_t)addr / (uint64_t)(pb_ptr->page_size);
+
+    HDassert((uint64_t)(addr) == (page * (uint64_t)(pb_ptr->page_size)));
+
+    HDassert(size >= pb_ptr->page_size);
+    HDassert((size == pb_ptr->page_size) || 
+             ((pb_ptr->vfd_swmr_writer) && (type != H5FD_MEM_DRAW)));
+    HDassert((NULL == entry_ptr_ptr) || (NULL == *entry_ptr_ptr));
+
+    H5PB__SEARCH_INDEX(pb_ptr, page, entry_ptr, FAIL);
+
+    if ( entry_ptr != NULL ) {
+
+#if 0 /* JRM */
+        HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
+            "page buffer already contains a page at the specified address")
+#else /* JRM */
+        /* this should be an error, but until we update the page allocation
+         * code to tell the page buffer to discard the associated entry
+         * whenever a page is freed, this situation can occur.
+         *
+         * For now, just force the eviction of the existing page.
+         * Delete this code as soon as the paged allocation code is 
+         * updated accordingly
+         */
+        if ( H5PB__evict_entry(pb_ptr, entry_ptr, TRUE) < 0 )
+
+            HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, "forced eviction failed")
+
+#endif /* JRM */
+    } 
+
+    entry_ptr = H5PB__allocate_page(pb_ptr, size, clean_image);
+
+    if ( NULL == entry_ptr )
+        HGOTO_ERROR(H5E_PAGEBUF, H5E_NOSPACE, FAIL, \
+                    "Can't allocate new page buffer entry")
+
+    /* perform additional initialization */
+    HDassert(entry_ptr->magic == H5PB__H5PB_ENTRY_T_MAGIC);
+    HDassert(entry_ptr->pb_ptr == pb_ptr);
+    entry_ptr->addr        = addr;
+    entry_ptr->page        = page;
+    HDassert(entry_ptr->size == size);
+    HDassert(entry_ptr->image_ptr);
+    entry_ptr->mem_type    = type;
+    entry_ptr->is_metadata = (type != H5FD_MEM_DRAW);
+    entry_ptr->is_mpmde    = ((entry_ptr->is_metadata) &&
+                                  (size > pb_ptr->page_size));
+    entry_ptr->is_dirty    = FALSE;
+
+    /* insert in the hash table */
+    H5PB__INSERT_IN_INDEX(pb_ptr, entry_ptr, FAIL)
+    inserted_in_index = TRUE; 
+
+    /* insert at the head of the LRU */
+    H5PB__UPDATE_RP_FOR_INSERTION(pb_ptr, entry_ptr, FAIL)
+    inserted_in_lru = TRUE;
+
+    /* updates stats */
+    H5PB__UPDATE_STATS_FOR_INSERTION(pb_ptr, entry_ptr);
+
+    if ( entry_ptr_ptr ) {
+
+        *entry_ptr_ptr = entry_ptr;
+    }
+
+done:
+
+    if ( ret_value < 0 ) {
+
+        if ( entry_ptr ) {
+
+            if ( inserted_in_lru ) {
+
+                H5PB__UPDATE_RP_FOR_EVICTION(pb_ptr, entry_ptr, FAIL);
+            }
+
+            if ( inserted_in_index ) {
+
+                H5PB__DELETE_FROM_INDEX(pb_ptr, entry_ptr, FAIL)
+            }
+
+            H5PB__deallocate_page(entry_ptr);
+            entry_ptr = NULL;
+        }
+    }
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5PB_add_new_page */
+
+
+/*-------------------------------------------------------------------------
+ *
+ * Function:	H5PB__deallocate_page
+ *
+ * Purpose:	Free the supplied instance of H5PB_entry_t and its 
+ *              associated buffer.  The entry must be clean and removed 
+ *              from the page buffer before this function is called.
+ *
+ * Return:	void
+ *
+ * Programmer:	John Mainzer -- 10/12/18
+ *
+ * Changes:     None.
+ *
+ *-------------------------------------------------------------------------
+ */
+static void 
+H5PB__deallocate_page(H5PB_entry_t *entry_ptr)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    /* sanity checks */
+    HDassert(entry_ptr);
+    HDassert(entry_ptr->magic == H5PB__H5PB_ENTRY_T_MAGIC);
+    HDassert(entry_ptr->size > 0);
+    HDassert(entry_ptr->image_ptr);
+    HDassert(!(entry_ptr->is_dirty));
+    HDassert(entry_ptr->ht_next == NULL);
+    HDassert(entry_ptr->ht_prev == NULL);
+    HDassert(entry_ptr->next == NULL);
+    HDassert(entry_ptr->prev == NULL);
+    HDassert(entry_ptr->tl_next == NULL);
+    HDassert(entry_ptr->tl_prev == NULL);
+
+    entry_ptr->magic = 0;
+    entry_ptr->image_ptr = H5MM_xfree(entry_ptr->image_ptr);
+    entry_ptr = H5FL_FREE(H5PB_entry_t, entry_ptr);
+
+    FUNC_LEAVE_NOAPI_VOID
+
+} /* H5PB__deallocate_page() */
+
+
+/*-------------------------------------------------------------------------
+ *
+ * Function:	H5PB__evict_entry
+ *
+ * Purpose:	Evict the target entry from the from the page buffer, and 
+ *              de-allocate its associated image and instance of 
+ *              H5PB_entry_t..
+ *
+ *              In general, entries must be clean before they can be 
+ *              evicted, and the minimum metadata and raw data limits 
+ *              must be respected.  Attempts to evict an entry that 
+ *              that do not respect these constraints will generate 
+ *              and error unless the force parameter is TRUE, in which
+ *              case, these constraints are igmored.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	John Mainzer -- 10/14/18
+ *
+ * Changes:     None.
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5PB__evict_entry(H5PB_t *pb_ptr, H5PB_entry_t *entry_ptr, hbool_t force)
+{
+    herr_t ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* sanity checks */
+    HDassert(pb_ptr);
+    HDassert(pb_ptr->magic == H5PB__H5PB_T_MAGIC);
+    HDassert(entry_ptr);
+    HDassert(entry_ptr->magic == H5PB__H5PB_ENTRY_T_MAGIC);
+    HDassert(entry_ptr->size > 0);
+    HDassert(entry_ptr->image_ptr);
+    /* entries on either the tick list or the delayed write 
+     * list may not be evicted -- verify this.
+     */
+    HDassert(!(entry_ptr->modified_this_tick));
+    HDassert(entry_ptr->delay_write_until == 0);
+
+    if ( ( ! force ) && ( entry_ptr->is_dirty ) )
+
+        HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
+                    "Attempt to evict a dirty entry");
+
+    if ( ! force ) {
+
+        /* it is OK to evict an metadata page if pb_ptr->curr_md_pages ==
+         * pb_ptr->min_md_pages - 1 if we are about to replace it with another
+         * metadata page.  
+         *
+         * Similarly, it is OK to evict an raw data page if 
+         * pb_ptr->curr_rd_pages == pb_ptr->min_rd_pages - 1 if we are 
+         * about to replace it with another raw data page.  
+         * 
+         * Assume sanity checks have been made before this call, and 
+         * allow the above without testing the intended replacement.
+         */
+        if ( ( entry_ptr->is_metadata ) &&
+             ( pb_ptr->curr_md_pages < pb_ptr->min_md_pages ) ) {
+
+            HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
+                        "Attempt to violate min_md_pages");
+
+        } else if ( ( ! entry_ptr->is_metadata ) &&
+                    ( pb_ptr->curr_rd_pages < pb_ptr->min_rd_pages ) ) {
+
+            HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
+                        "Attempt to violate min_rd_pages");
+        } 
+    } else if ( ( entry_ptr->is_dirty ) && 
+                ( H5PB__mark_entry_clean(pb_ptr, entry_ptr) < 0 ) ) {
+
+        HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, "mark entry clean failed")
+    }
+
+    /* remove the entry from the LRU */
+    H5PB__UPDATE_RP_FOR_EVICTION(pb_ptr, entry_ptr, FAIL)
+
+    /* remove the entry from the hash table */
+    H5PB__DELETE_FROM_INDEX(pb_ptr, entry_ptr, FAIL)
+
+    /* update stats for eviction */
+    H5PB__UPDATE_STATS_FOR_EVICTION(pb_ptr, entry_ptr)
+
+    /* deallocate the page */
+    H5PB__deallocate_page(entry_ptr);
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5PB__evict_entry() */
+
+
+/*-------------------------------------------------------------------------
+ *
+ * Function:	H5PB__flush_entry
+ *
+ * Purpose:	Flush the target entry to file.
+ *
+ *              Under normal circumstances, the entry will be in the 
+ *              replacement policy.  In this, also update the replacement
+ *              policy for flush.
+ *
+ *              If pb_ptr->vfd_swmr_writer, it is possible that the target
+ *              is a multi-page metadata entry.  In this case, the entry
+ *              is not in the replacement policy, and thus the policy 
+ *              should not be updated.
+ *              
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	John Mainzer -- 10/14/18
+ *
+ * Changes:     None.
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5PB__flush_entry(H5F_t *f, H5PB_t *pb_ptr, H5PB_entry_t *entry_ptr)
+{
+    hbool_t skip_write = FALSE;
+    size_t write_size;
+    haddr_t eoa;                   /* Current EOA for the file */
+    H5FD_t *file;                  /* file driver */
+    herr_t ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* sanity checks */
+    HDassert(f);
+    HDassert(f->shared);
+    HDassert(f->shared->lf);
+    HDassert(pb_ptr);
+    HDassert(pb_ptr->magic == H5PB__H5PB_T_MAGIC);
+    HDassert(entry_ptr);
+    HDassert(entry_ptr->magic == H5PB__H5PB_ENTRY_T_MAGIC);
+    HDassert(entry_ptr->size > 0);
+    HDassert(entry_ptr->size >= pb_ptr->page_size);
+    HDassert((entry_ptr->size == pb_ptr->page_size) || (entry_ptr->is_mpmde));
+    HDassert(entry_ptr->image_ptr);
+    HDassert(entry_ptr->is_dirty);
+    HDassert((pb_ptr->vfd_swmr_writer) || (!(entry_ptr->is_mpmde)));
+    HDassert( ( ! (pb_ptr->vfd_swmr_writer) ) || 
+              ( (pb_ptr->cur_tick) >= (entry_ptr->delay_write_until) ) );
+
+    /* Retrieve the 'eoa' for the file */
+    if ( HADDR_UNDEF == (eoa = H5F_get_eoa(f, entry_ptr->mem_type)) )
+
+        HGOTO_ERROR(H5E_PAGEBUF, H5E_CANTGET, FAIL, \
+                    "driver get_eoa request failed")
+
+#if 0 /* JRM */
+    /* TODO: update the free space manager to inform the page buffer when 
+     *       space is de-allocated so that the following assertions will be
+     *       true in all cases.
+     */
+
+    /* Verify that the base addresss of the page is within the EOA.  If it 
+     * isn't, the associated page has been discarded and should have been 
+     * removed from the page buffer.  This is a bug in the HDF5 library, so 
+     * an assertion is adequate here.
+     */
+    HDassert( eoa > entry_ptr->addr );
+
+    /* Space at the end of the file should be allocate in increments of 
+     * pages.  Thus the entire page should be within the EOA.  Again,
+     * an assertion is adequate here.
+     */
+    HDassert( eoa >= entry_ptr->addr + entry_ptr->size );
+#else /* JRM */
+    if ( eoa < entry_ptr->addr ) {
+
+        skip_write = TRUE;
+
+    } else if ( eoa < entry_ptr->addr + entry_ptr->size ) {
+
+        /* adjust the size of the write so that the write 
+         * will not extend beyond EOA.
+         */
+        write_size = (size_t)(eoa - entry_ptr->addr);
+
+    } else {
+
+        write_size = entry_ptr->size;
+    }
+    
+#endif /* JRM */
+
+
+    /* flush the entry */
+    if ( ! skip_write ) {
+#if VFD_IO  /* JRM */
+        file = f->shared->lf;
+
+        if ( H5FD_write(file, entry_ptr->mem_type, entry_ptr->addr, 
+                        write_size, entry_ptr->image_ptr) < 0 )
+#else /* VFD_IO */ /* JRM */
+        if ( H5F__accum_write(f, entry_ptr->mem_type, entry_ptr->addr, 
+                              write_size, entry_ptr->image_ptr) < 0 )
+#endif /* VFD_IO */ /* JRM */
+
+            HGOTO_ERROR(H5E_PAGEBUF, H5E_WRITEERROR, FAIL, "file write failed")
+    }
+
+    /* mark the entry clean */
+    entry_ptr->is_dirty = FALSE;
+
+
+    /* if the entry is on the LRU, update the replacement policy */
+    if ( ! (entry_ptr->is_mpmde) ) {
+
+        H5PB__UPDATE_RP_FOR_FLUSH(pb_ptr, entry_ptr, FAIL)        
+    }
+
+    /* update stats for flush */
+    H5PB__UPDATE_STATS_FOR_FLUSH(pb_ptr, entry_ptr)
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5PB__flush_entry() */
+
+
+/*-------------------------------------------------------------------------
+ *
+ * Function:	H5PB__load_page
+ *
+ * Purpose:	Load the page with the specified base address and insert
+ *              it into the page buffer.  If necessary and possible, make 
+ *              space for the new page first.
+ *
+ *              Note that the size of the page is always pb_ptr->page_size,
+ *              even in the VFD SWMR case, as in this context, multi-page 
+ *              metadata entries are always written in full, and they 
+ *              may only enter the page buffer as the result of a write.
+ *              
+ * Return:	SUCCEED if no errors are encountered, and 
+ *              FAIL otherwise.
+ *
+ * Programmer:	John Mainzer -- 10/18/18
+ *
+ * Changes:     None.
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5PB__load_page(H5F_t *f, H5PB_t *pb_ptr, haddr_t addr, H5FD_mem_t type,
+    H5PB_entry_t **entry_ptr_ptr)
+{
+    hbool_t skip_read = FALSE;
+    haddr_t eoa;
+    haddr_t eof = HADDR_UNDEF;
+    H5PB_entry_t *entry_ptr = NULL;
+    void *image_ptr = NULL;
     H5FD_t *file;                       /* File driver pointer */
-    haddr_t first_page_addr, last_page_addr;    /* Addresses of the first and last pages covered by I/O */
-    haddr_t offset;
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* sanity checks */
+    HDassert(f);
+    HDassert(f->shared);
+    HDassert(f->shared->lf);
+
+    file = f->shared->lf;
+
+    HDassert(pb_ptr);
+    HDassert(pb_ptr->magic == H5PB__H5PB_T_MAGIC);
+    HDassert((entry_ptr_ptr == NULL) || (*entry_ptr_ptr == NULL));
+
+    /* Retrieve the 'eoa' for the file */
+    if ( HADDR_UNDEF == (eoa = H5F_get_eoa(f, type)))
+
+        HGOTO_ERROR(H5E_PAGEBUF, H5E_CANTGET, FAIL, \
+                    "driver get_eoa request failed")
+
+    if ( addr + ((haddr_t)(pb_ptr->page_size)) > eoa )
+
+        HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
+                    "Attempt to load page that extends past EOA")
+
+    if ( HADDR_UNDEF == (eof = H5FD_get_eof(f->shared->lf, H5FD_MEM_DEFAULT)) )
+
+        HGOTO_ERROR(H5E_PAGEBUF, H5E_CANTGET, FAIL, \
+                    "driver get_eof request failed")
+
+    /* It is possible that this page been allocated but not
+     * written.  Skip the read if addr > EOF.  In this case, tell 
+     * H5PB__create_new_page() to zero the page image.
+     */
+    skip_read = (addr >= eof);
+
+
+    /* make space in the page buffer if necessary */
+    if ( ( pb_ptr->curr_pages >= pb_ptr->max_pages ) &&
+         ( H5PB__make_space(f, pb_ptr, type) < 0 ) )
+
+        HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
+                    "H5PB__make_space() reports an error")
+
+
+    /* Create a new page buffer page and insert it into the page buffer */
+    if ( H5PB__create_new_page(pb_ptr, addr, (size_t)(pb_ptr->page_size), 
+                               type, skip_read, &entry_ptr) < 0 )
+
+        HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
+                    "can't create new page buffer page")
+
+    HDassert(entry_ptr);
+    HDassert(entry_ptr->magic == H5PB__H5PB_ENTRY_T_MAGIC);
+    HDassert(entry_ptr->addr == addr);
+
+    image_ptr = entry_ptr->image_ptr;
+
+    HDassert(image_ptr);
+
+    /* Read the contents of the page from file, and store it in the 
+     * image buffer associated with the new entry.
+     */
+#if VFD_IO /* JRM */
+    if ( ( ! skip_read ) &&
+         ( H5FD_read(file, type, addr, entry_ptr->size, image_ptr) < 0 ) )
+#else /* VFD_IO */ /* JRM */
+    if ( ( ! skip_read ) &&
+         ( H5F__accum_read(f, type, addr, entry_ptr->size, image_ptr) < 0 ) )
+#endif /* VFD_IO */ /* JRM */
+
+        HGOTO_ERROR(H5E_PAGEBUF, H5E_READERROR, FAIL, \
+                    "driver read request failed")
+
+    H5PB__UPDATE_STATS_FOR_LOAD(pb_ptr, entry_ptr)
+
+    if ( entry_ptr_ptr ) {
+
+        *entry_ptr_ptr = entry_ptr;
+    }
+
+done:
+
+    /* add cleanup in case of failure */
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5PB__load_page() */
+
+
+/*-------------------------------------------------------------------------
+ *
+ * Function:	H5PB__make_space
+ *
+ * Purpose:	Evict one or more pages from the page buffer so as to 
+ *              reduce the size of the page buffer to pb_ptr->max_pages - 1.
+ *              if possible.
+ *
+ *              Note that the function must not be called under 
+ *              non-sencicle conditions -- thus if either 
+ *
+ *                  1) the inserted type is metadata and min_rd_pages ==
+ *                     max_pages, or 
+ *
+ *                  2) the inserted type is raw data and min_md_pages ==
+ *                     max_pages
+ *              
+ *              holds, the function has been called in error, and an 
+ *              assertion failure is appropriate.
+ *
+ *              If the page buffer is below its maximum size, we are 
+ *              done, and the function simply returns.
+ *
+ *              Otherwise, scan upwards from the bottom of the LRU list, 
+ *              examining each entry in turn.
+ *
+ *              If the entry is dirty, flush it, move it to the top of the 
+ *              LRU, and continue with the scan.  Note in the VFD SWMR case,
+ *              we do not have to concern ourselves with delayed writes in 
+ *              this context, as all entries which are subject to delayed 
+ *              writes must reside on the delayed write list, not the LRU list.
+ *
+ *              If the entry is:
+ *
+ *                 1) clean
+ *
+ *                 2) either: 
+ *
+ *                    a) the target entry is metadata and 
+ *                       curr_md_pages > min_md_pages.
+ *
+ *                    b) the target entry is raw data and 
+ *                       curr_rd_pages > min_rd_pages.
+ *
+ *                    c) the target entry is metadata, the inserted_type
+ *                       is metadata, and curr_md_pages == min_md_pages.
+ *
+ *                    d) the target entry is raw data, the inserted_type
+ *                       is raw data, and curr_rd_pages == min_rd_pages.
+ *
+ *                 3) The entry is not on the tick list (which can only 
+ *                    happen if pb_ptr->vfd_swmr_writer is TRUE).
+ *
+ *              evict the entry and test to see if pb_ptr->curr_pages <
+ *              pb_ptr->max_pages.  If it is, return.  Otherwise, continue
+ *              the scan until either the above condidtion is fulfilled,
+ *              or the head of the LRU is reach.
+ *
+ *              Under normal circumstances, it should always be possible
+ *              to reduce the size of the page buffer below pb_ptr->max_pages.
+ *              However, due to prohibition on evicting entries on the 
+ *              tick list, and either flushing or evicting entries on the
+ *              delayed write list, this will not in general be the case
+ *              if pb_ptr->vfd_swmr_writer is TRUE.  In this case, the 
+ *              page buffer may exceed its maximum size by an arbitrary 
+ *              amount.
+ *
+ *              If this situation occurs with any regularity, we will 
+ *              need a mechanism to avoid attempts to make space when 
+ *              it is not possible to do so.
+ *
+ * Return:	SUCCEED if no errors are encountered, and 
+ *              FAIL otherwise.
+ *
+ * Programmer:	John Mainzer -- 10/14/18
+ *
+ * Changes:     None.
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5PB__make_space(H5F_t *f, H5PB_t *pb_ptr, H5FD_mem_t inserted_type)
+{
+    hbool_t inserting_md;
+    H5PB_entry_t *search_ptr;
+    H5PB_entry_t *flush_ptr;
+    H5PB_entry_t *evict_ptr;
+    herr_t ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* sanity checks */
+    HDassert(f);
+    HDassert(pb_ptr);
+    HDassert(pb_ptr->magic == H5PB__H5PB_T_MAGIC);
+    HDassert(pb_ptr->min_md_pages + pb_ptr->min_rd_pages <= pb_ptr->max_pages);
+
+    inserting_md = ( H5FD_MEM_DRAW != inserted_type );
+
+    if ( ( inserting_md ) && ( pb_ptr->min_rd_pages == pb_ptr->max_pages ) )
+
+        HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, 
+            "can't make space for metadata -- pb config for raw data only")
+
+    if ( ( ! inserting_md ) && ( pb_ptr->min_md_pages == pb_ptr->max_pages ) )
+
+        HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, 
+            "can't make space for raw data -- pb config for metadata only")
+
+    search_ptr = pb_ptr->LRU_tail_ptr;
+
+    while ( ( search_ptr ) && ( pb_ptr->curr_pages >= pb_ptr->max_pages ) ) { 
+
+        HDassert(search_ptr->magic == H5PB__H5PB_ENTRY_T_MAGIC);
+
+        if ( search_ptr->modified_this_tick ) { /* entry is on tick list */
+
+            search_ptr = search_ptr->prev;
+            H5PB__UPDATE_STATS_FOR_LRU_TL_SKIP(pb_ptr);
+
+        } else if ( ( inserting_md ) &&
+                    ( ! (search_ptr->is_metadata) ) &&
+                    ( pb_ptr->curr_rd_pages <= pb_ptr->min_rd_pages ) ) {
+
+            search_ptr = search_ptr->prev;
+            H5PB__UPDATE_STATS_FOR_LRU_RD_SKIP(pb_ptr);
+
+        } else if ( ( ! inserting_md ) &&
+                    ( search_ptr->is_metadata ) &&
+                    ( pb_ptr->curr_md_pages <= pb_ptr->min_md_pages ) ) {
+
+            search_ptr = search_ptr->prev;
+            H5PB__UPDATE_STATS_FOR_LRU_MD_SKIP(pb_ptr);
+
+        } else if ( search_ptr->is_dirty ) {
+
+            /* One can make the argument that we should test for dirty 
+             * entries first, instead of skipping potentially dirty 
+             * entries in the above clauses.  However, I suspect that 
+             * this would result in excessive flushes.  Lets try it 
+             * this way for now.
+             */
+
+            flush_ptr = search_ptr;
+
+            /* if the *search_ptr has a predecessor in the LRU, 
+             * set set search_ptr equal to search_ptr->prev.  Otherwise,
+             * leave search_ptr unchanged, so that it can be examined 
+             * on the next pass through the while loop after it has been
+             * flushed.
+             */
+            if ( search_ptr->prev ) {
+
+                search_ptr = search_ptr->prev;
+            }
+
+            if ( H5PB__flush_entry(f, pb_ptr, flush_ptr) < 0 )
+
+                HGOTO_ERROR(H5E_PAGEBUF, H5E_WRITEERROR, FAIL, \
+                            "Can't flush entry")
+
+        } else { /* evict the entry */
+
+            evict_ptr = search_ptr;
+            search_ptr = search_ptr->prev;
+            if ( H5PB__evict_entry(pb_ptr, evict_ptr, FALSE) < 0 )
+
+                HGOTO_ERROR(H5E_PAGEBUF, H5E_WRITEERROR, FAIL, \
+                            "Can't evict entry")
+        }
+    }
+
+    HDassert( ( search_ptr == NULL ) || 
+              ( pb_ptr->curr_pages < pb_ptr->max_pages ) );
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5PB__make_space() */
+
+
+/*-------------------------------------------------------------------------
+ *
+ * Function:	H5PB__mark_entry_clean
+ *
+ * Purpose:	Mark the target entry clean
+ *
+ *              This function is typically used when an entry has been
+ *              completely overwritten and is about to be evicted.  In
+ *              this case, the entry must be marked clean to avoid 
+ *              sanity check failures on evictions.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	John Mainzer -- 10/14/18
+ *
+ * Changes:     None.
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5PB__mark_entry_clean(H5PB_t *pb_ptr, H5PB_entry_t *entry_ptr)
+{
+    herr_t ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* sanity checks */
+    HDassert(pb_ptr);
+    HDassert(pb_ptr->magic == H5PB__H5PB_T_MAGIC);
+    HDassert(entry_ptr);
+    HDassert(entry_ptr->magic == H5PB__H5PB_ENTRY_T_MAGIC);
+    HDassert(entry_ptr->size > 0);
+    HDassert(entry_ptr->size >= pb_ptr->page_size);
+    HDassert((entry_ptr->size == pb_ptr->page_size) || (entry_ptr->is_mpmde));
+    HDassert(entry_ptr->image_ptr);
+    HDassert((pb_ptr->vfd_swmr_writer) || (!(entry_ptr->is_mpmde)));
+
+    /* mark the entry clean */
+    entry_ptr->is_dirty = FALSE;
+
+    /* delete this once we start tracking clean and dirty entry is the hash
+     * table.
+     */
+    if ( ! (entry_ptr->is_mpmde) ) {
+
+       H5PB__UPDATE_RP_FOR_ACCESS(pb_ptr, entry_ptr, FAIL)        
+    }
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5PB__mark_entry_clean() */
+
+
+/*-------------------------------------------------------------------------
+ *
+ * Function:	H5PB__mark_entry_dirty
+ *
+ * Purpose:	Mark the target entry as dirty.
+ *
+ *              Under normal circumstances, the entry will be in the 
+ *              replacement policy.  In this, also update the replacement
+ *              policy for and access.
+ *
+ *              If pb_ptr->vfd_swmr_writer, it is possible that the target
+ *              is a multi-page metadata entry.  In this case, the entry
+ *              is not in the replacement policy, and thus the policy 
+ *              should not be updated.
+ *              
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	John Mainzer -- 10/14/18
+ *
+ * Changes:     None.
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5PB__mark_entry_dirty(H5PB_t *pb_ptr, H5PB_entry_t *entry_ptr)
+{
+    herr_t ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* sanity checks */
+    HDassert(pb_ptr);
+    HDassert(pb_ptr->magic == H5PB__H5PB_T_MAGIC);
+    HDassert(entry_ptr);
+    HDassert(entry_ptr->magic == H5PB__H5PB_ENTRY_T_MAGIC);
+    HDassert(entry_ptr->size > 0);
+    HDassert(entry_ptr->size >= pb_ptr->page_size);
+    HDassert((entry_ptr->size == pb_ptr->page_size) || (entry_ptr->is_mpmde));
+    HDassert(entry_ptr->image_ptr);
+    HDassert((pb_ptr->vfd_swmr_writer) || (!(entry_ptr->is_mpmde)));
+
+    /* mark the entry dirty */
+    entry_ptr->is_dirty = TRUE;
+
+    /* if the entry is on the LRU, update the replacement policy */
+    if ( ( ! (entry_ptr->is_mpmde) ) && 
+         ( entry_ptr->delay_write_until == 0 ) ) {
+
+       H5PB__UPDATE_RP_FOR_ACCESS(pb_ptr, entry_ptr, FAIL)        
+    }
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5PB__mark_entry_dirty() */
+
+
+/*-------------------------------------------------------------------------
+ *
+ * Function:	H5PB__read_meta
+ *
+ * Purpose:	Satisfy a metadata read in cases 7, 8, 9, and 10) 
+ *              H5PB_read().  Specifically:
+ *
+ *              6) If the read is for metadata and not page aligned, clip
+ *                 the read to the end of the current page if necessary.
+ *                 Load the relevant page if necessary and satisfy the 
+ *                 read from the page buffer.  Note that it there is an
+ *                 existing page, it must not be a multi-page metadata 
+ *                 entry.  It it is, flag an error.
+ *
+ *              7) If the read is for metadata, is page aligned, is larger 
+ *                 than one page, and there is no entry in the page buffer,
+ *                 satisfy the read from the file
+ *
+ *              8) If the read is for metadata, is page aligned, is larger 
+ *                 than one page, and there is a regular entry at the target
+ *                 page address, test to see if the last read was for the 
+ *                 same address.
+ *
+ *                 If was, evict the page, and satisfy the read from file.
+ *                 Flag an error if the page was dirty.
+ *
+ *                 If the last read was for a different page, clip the read 
+ *                 to one page, and satisfy the read from the existing 
+ *                 regular entry.
+ *
+ *              9) If the read is for metadata, is page aligned, is larger
+ *                 than one page, and there is a multi-page metadata entry
+ *                 at the target page address, test to see if 
+ *                 pb_ptr->vfd_swmr_write is TRUE.
+ *
+ *                 If it is, satisfy the read from the multi-page metadata
+ *                 entry, clipping the read if necessary.
+ *
+ *                 if pb_ptr->vfd_swmr_write is FALSE, flag an error.
+ *
+ *             10) If the read is for metadata, is page aligned, is no 
+ *                 larger than a page, test to see if the page buffer 
+ *                 contains a page at the target address.
+ *
+ *                 If it doesn't, load the page and satisfy the read 
+ *                 from it.
+ *
+ *                 If it contains a regular page entry, satisfy the read 
+ *                 from it.
+ *
+ *                 If it contains a multipage metadata entry at the target
+ *                 address, satisfy the read from the multi-page metadata
+ *                 entry if pb_ptr->vfd_swmr_write is TRUE, and flag an 
+ *                 error otherwise.
+ *
+ *              The above case analysis may be a bit hard to read.  If so,
+ *              the table shown below may help to clarify.  Here:
+ *
+ *                P/A       == page aligned
+ *                size > PL == size > page length
+ *                PA        == previous address
+ *                A         == current address
+ *
+ *              In the entry exists column:
+ *
+ *                N         == no entry
+ *                R         == regular (1 page) entry
+ *                MPMDE     == multi-page metadata entry
+ *
+ *       | size | entry  | VFD  |         |
+ *  P/A: | > PL | exists | SWMR | PA == A | Comments:
+ * ------+------+--------+------+---------+-------------------------------------
+ *   N   |  X   | N || R |  X   |    X    | Clip read to page boundary if 
+ *       |      |        |      |         | necessary
+ *       |      |        |      |         | Load entry if necessary
+ *       |      |        |      |         | Satisfy read from entry (case 6)
+ * ------+------+--------+------+---------+-------------------------------------
+ *   N   |  X   | MPMDE  |  X   |    X    | Error (case 6)
+ * ------+------+--------+------+---------+-------------------------------------
+ *       |      |        |      |         |
+ * ------+------+--------+------+---------+-------------------------------------
+ *   Y   |  Y   |   N    |  X   |    X    | Satisfy read from file (case 7)
+ * ------+------+--------+------+---------+-------------------------------------
+ *   Y   |  Y   |   R    |  X   |    N    | Clip read to page boundary
+ *       |      |        |      |         | Satisfy read from entry  (case 8)
+ * ------+------+--------+------+---------+-------------------------------------
+ *   Y   |  Y   |   R    |  X   |    Y    | Evict entry 
+ *       |      |        |      |         | (must be clean -- flag error if not)
+ *       |      |        |      |         | Satisfy read from file (case 8)
+ * ------+------+--------+------+---------+-------------------------------------
+ *   Y   |  Y   | MPMDE  |  N   |    X    | Error (case 9)
+ * ------+------+--------+------+---------+-------------------------------------
+ *   Y   |  Y   | MPMDE  |  Y   |    X    | Clip read to MPE size if required.
+ *       |      |        |      |         | Satify read from MPE (case 9)
+ * ------+------+--------+------+---------+-------------------------------------
+ *       |      |        |      |         |
+ * ------+------+--------+------+---------+-------------------------------------
+ *   Y   |  N   |   N    |  X   |    X    | Load entry
+ *       |      |        |      |         | Satisfy read from entry (case 10)
+ * ------+------+--------+------+---------+-------------------------------------
+ *   Y   |  N   |   R    |  X   |    X    | Satisfy read from entry (case 10)
+ * ------+------+--------+------+---------+-------------------------------------
+ *   Y   |  N   | MPMDE  |  Y   |    X    | Satisfy read from entry (case 10)
+ * ------+------+--------+------+---------+-------------------------------------
+ *   Y   |  N   | MPMDE  |  N   |    X    | Error (case 10)
+ * ------+------+--------+------+---------+-------------------------------------
+ *                 
+ *              Observe that the above cases imply that:
+ *
+ *              1) The page buffer is defined.
+ *
+ *              2) The page buffer has been configured to accept at least
+ *                 one page of metadata.
+ *
+ *              3) This is a metadata read.
+ *
+ *              Note also that if the metadata read is of size 
+ *              no larger than page size, it may not cross page 
+ *              boundaries.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	John Mainzer -- 10/11/18
+ *
+ * Changes:     None.
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5PB__read_meta(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size, 
+                void *buf/*out*/)
+{
+    H5PB_t *pb_ptr;                         /* Page buffer for this file */
+    H5PB_entry_t *entry_ptr;                /* Pointer to page buffer entry */
+    H5FD_t *file;                           /* File driver pointer */
+    uint64_t page;		            /* page offset of addr */
+    haddr_t page_addr;                      /* page containg addr */
+    static haddr_t prev_addr = HADDR_UNDEF; /* addr of last call */
+    size_t offset;                          /* offset of read in page */
+    size_t clipped_size;                    /* possibley clipped size */
+    herr_t ret_value = SUCCEED;             /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity checks */
+    HDassert(f);
+    HDassert(f->shared);
+    HDassert(f->shared->pb_ptr);
+
+    pb_ptr = f->shared->pb_ptr;
+
+    HDassert(pb_ptr->magic == H5PB__H5PB_T_MAGIC);
+    HDassert(pb_ptr->min_rd_pages < pb_ptr->max_pages);
+    HDassert(f->shared->lf);
+
+    file = f->shared->lf;
+
+    HDassert(H5FD_MEM_DRAW != type);
+    HDassert(buf);
+
+    /* Calculate the aligned address of the first page */
+    page = (addr / pb_ptr->page_size);
+    page_addr = page * pb_ptr->page_size;
+
+    if ( page_addr != addr ) { /* case 6 */
+ 
+        /* If the read is for metadata and not page aligned, clip
+         * the read to the end of the current page if necessary.
+         * Load the relevant page if necessary and satisfy the 
+         * read from the page buffer.  Note that it there is an
+         * existing page, it must not be a multi-page metadata 
+         * entry.  It it is, flag an error.
+         */
+
+        offset = addr - page_addr;
+
+        if ( (offset + size) <= pb_ptr->page_size ) {
+
+            clipped_size = size;
+
+        } else {
+
+            clipped_size = size - ( (offset + size) - pb_ptr->page_size);
+        }
+
+        HDassert( clipped_size > 0 );
+        HDassert( clipped_size <= size );
+        HDassert( (offset + clipped_size) <= pb_ptr->page_size );
+
+        /* get the containing page */
+        H5PB__SEARCH_INDEX(pb_ptr, page, entry_ptr, FAIL)
+
+        /* update hit rate stats */
+        H5PB__UPDATE_PB_HIT_RATE_STATS(pb_ptr, ((entry_ptr) != NULL), \
+                                       TRUE, FALSE)
+
+        if ( ( NULL == entry_ptr ) &&
+             ( H5PB__load_page(f, pb_ptr, page_addr, type, &entry_ptr) < 0 ) )
+
+            HGOTO_ERROR(H5E_PAGEBUF, H5E_READERROR, FAIL, \
+                        "page buffer page load request failed (1)")
+
+        HDassert(entry_ptr);
+        HDassert(entry_ptr->magic == H5PB__H5PB_ENTRY_T_MAGIC);
+        HDassert(entry_ptr->addr == page_addr);
+        HDassert(entry_ptr->is_metadata);
+        HDassert(!(entry_ptr->is_mpmde));
+
+        /* copy data from the page into read buffer */
+        HDmemcpy((uint8_t *)buf, (uint8_t *)(entry_ptr->image_ptr) + offset, 
+                 clipped_size);
+
+        /* if the entry is on the LRU, update the replacement policy */
+        if ( ( ! (entry_ptr->is_mpmde) ) && 
+             ( entry_ptr->delay_write_until == 0 ) ) {
+
+           H5PB__UPDATE_RP_FOR_ACCESS(pb_ptr, entry_ptr, FAIL)        
+        }
+    } else {
+
+        HDassert( page_addr == addr );
+
+        if ( size > pb_ptr->page_size ) {
+
+            /* search the page buffer for an entry at page */
+            H5PB__SEARCH_INDEX(pb_ptr, page, entry_ptr, FAIL)
+
+
+            if ( entry_ptr == NULL ) { /* case 7 */
+
+                /* update hit rate stats */
+                H5PB__UPDATE_PB_HIT_RATE_STATS(pb_ptr, FALSE, TRUE, TRUE)
+
+                /* If the read is for metadata, is page aligned, is larger 
+                 * than one page, and there is no entry in the page buffer,
+                 * satisfy the read from the file
+                 */
+#if VFD_IO /* JRM */
+                if ( H5FD_read(file, type, addr, size, buf) < 0)
+#else /* VFD_IO */ /* JRM */
+                if ( H5F__accum_read(f, type, addr, size, buf) < 0 )
+#endif /* VFD_IO */ /* JRM */
+
+                    HGOTO_ERROR(H5E_PAGEBUF, H5E_READERROR, FAIL, \
+                                "driver read request failed (1)")
+            } else {
+
+                HDassert( entry_ptr );
+                HDassert( entry_ptr->magic == H5PB__H5PB_ENTRY_T_MAGIC );
+                HDassert( entry_ptr->is_metadata );
+
+                if ( ! ( entry_ptr->is_mpmde ) ) { /* case 8 */
+
+                    /* If the read is for metadata, is page aligned, is larger 
+                     * than one page, and there is a regular entry at the target
+                     * page address, test to see if the last read was for the 
+                     * same address.
+                     *
+                     * If was, evict the page, and satisfy the read from file.
+                     * Flag an error if the page was dirty.
+                     *
+                     * If the last read was for a different page, clip the read 
+                     * to one page, and satisfy the read from the existing 
+                     * regular entry.
+                     */
+
+                    HDassert( entry_ptr->size == pb_ptr->page_size );
+
+                    if ( addr == prev_addr ) {
+
+                        /* since this is a second try, don't update 
+                         * hit rate stats.
+                         */
+
+                        HDassert( ! ( entry_ptr->is_dirty ) );
+
+                        if ( H5PB__evict_entry(pb_ptr, entry_ptr, TRUE) < 0 )
+
+                            HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
+                                        "forced eviction failed (1)")
+#if VFD_IO  /* JRM */
+                        if ( H5FD_read(file, type, addr, size, buf) < 0)
+#else /* VFD_IO */ /* JRM */
+                        if ( H5F__accum_read(f, type, addr, size, buf) < 0 )
+#endif /* VFD_IO */ /* JRM */
+
+                            HGOTO_ERROR(H5E_PAGEBUF, H5E_READERROR, FAIL, \
+                                        "driver read request failed (2)")
+                    } else {
+
+                        HDassert( entry_ptr->image_ptr );
+
+                        /* copy data from the page into read buffer */
+                        HDmemcpy((uint8_t *)buf, 
+                                 (uint8_t *)(entry_ptr->image_ptr), 
+                                 entry_ptr->size);
+
+                        /* if the entry is on the LRU, update the replacement 
+                         * policy 
+                         */
+                        if ( ( ! (entry_ptr->is_mpmde) ) && 
+                             ( entry_ptr->delay_write_until == 0 ) ) {
+
+                           H5PB__UPDATE_RP_FOR_ACCESS(pb_ptr, entry_ptr, FAIL)
+                        }
+
+                        /* update hit rate stats */
+                        H5PB__UPDATE_PB_HIT_RATE_STATS(pb_ptr, TRUE, TRUE, TRUE)
+                    }
+                } else { /* case 9 */
+
+                    /* If the read is for metadata, is page aligned, is larger
+                     * than one page, and there is a multi-page metadata entry
+                     * at the target page address, test to see if 
+                     * pb_ptr->vfd_swmr_write is TRUE.
+                     *
+                     * If it is, satisfy the read from the multi-page metadata
+                     * entry, clipping the read if necessary.
+                     *
+                     * if pb_ptr->vfd_swmr_write is FALSE, flag an error.
+                     */
+                    HDassert( entry_ptr->is_mpmde );
+                    HDassert( pb_ptr->vfd_swmr_writer );
+
+                    if ( size > entry_ptr->size ) {
+
+                        clipped_size = entry_ptr->size;
+
+                    } else {
+
+                        clipped_size = size;
+                    }
+                    
+                    /* copy data from the page into read buffer */
+                    HDmemcpy((uint8_t *)buf, (uint8_t *)(entry_ptr->image_ptr), 
+                             clipped_size);
+
+                    /* if the entry is on the LRU, update the replacement 
+                     * policy 
+                     */
+                    if ( ( ! (entry_ptr->is_mpmde) ) && 
+                         ( entry_ptr->delay_write_until == 0 ) ) {
+
+                       H5PB__UPDATE_RP_FOR_ACCESS(pb_ptr, entry_ptr, FAIL)
+                    }
+
+                    /* update hit rate stats */
+                    H5PB__UPDATE_PB_HIT_RATE_STATS(pb_ptr, TRUE, TRUE, TRUE)
+                }
+            }
+        } else { /* case 10 */
+ 
+            /* If the read is for metadata, is page aligned, is no 
+             * larger than a page, test to see if the page buffer 
+             * contains a page at the target address.
+             *
+             * If it doesn't, load the page and satisfy the read 
+             * from it.
+             *
+             * If it contains a regular page entry, satisfy the read 
+             * from it.
+             *
+             * If it contains a multipage metadata entry at the target
+             * address, satisfy the read from the multi-page metadata
+             * entry if pb_ptr->vfd_swmr_write is TRUE, and flag an 
+             * error otherwise.
+             */
+            HDassert( size <= pb_ptr->page_size );
+
+            /* get the containing page */
+            H5PB__SEARCH_INDEX(pb_ptr, page, entry_ptr, FAIL)
+
+            /* update hit rate stats */
+            H5PB__UPDATE_PB_HIT_RATE_STATS(pb_ptr, (entry_ptr != NULL), \
+                                           TRUE, FALSE)
+
+            if ( ( NULL == entry_ptr ) &&
+                 ( H5PB__load_page(f, pb_ptr, page_addr, type, &entry_ptr) < 0))
+
+                HGOTO_ERROR(H5E_PAGEBUF, H5E_READERROR, FAIL, \
+                            "page buffer page load request failed (2)")
+
+            HDassert( entry_ptr );
+            HDassert( entry_ptr->magic == H5PB__H5PB_ENTRY_T_MAGIC );
+            HDassert( entry_ptr->is_metadata );
+            HDassert( ( ! ( entry_ptr->is_mpmde ) ) ||
+                      ( pb_ptr->vfd_swmr_writer) );
+
+            /* copy data from the page into read buffer */
+            HDmemcpy((uint8_t *)buf, (uint8_t *)(entry_ptr->image_ptr), size);
+
+            /* if the entry is on the LRU, update the replacement policy */
+            if ( ( ! (entry_ptr->is_mpmde) ) && 
+                 ( entry_ptr->delay_write_until == 0 ) ) {
+
+               H5PB__UPDATE_RP_FOR_ACCESS(pb_ptr, entry_ptr, FAIL)
+            }
+        }
+    }
+
+    prev_addr = addr;
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* end H5PB__read_meta() */
+
+
+/*-------------------------------------------------------------------------
+ *
+ * Function:	H5PB__read_raw
+ *
+ * Purpose:	Satisfy a raw data read in cases 3 and 4 from H5PB_read().
+ *              Specifically:
+ *
+ *              3) If the read is for raw data, and it is larger than the 
+ *                 page size, read it directly from the HDF5 file.  
+ *
+ *                 It is possible that the page buffer contains dirty pages 
+ *                 that intersect with the read -- test for this and update
+ *                 the read buffer from the page buffer if any such pages 
+ *                 exist. 
+ *
+ *                 Note that no pages are inserted into the page buffer in 
+ *                 this case.
+ *
+ *              4) If the read is for raw data, and it is of size less 
+ *                 than or equal to the page size, satisfy the read from 
+ *                 the page buffer, loading and inserting pages into the 
+ *                 page buffer as necessary
+ *
+ *              Observe that this implies that:
+ *
+ *              1) The page buffer is defined.
+ *
+ *              2) The page buffer has been configured to accept at least
+ *                 one page of raw data.
+ *
+ *              2) This is a raw data read.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	John Mainzer -- 10/11/18
+ *
+ * Changes:     None.
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5PB__read_raw(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size, 
+               void *buf/*out*/)
+{
+    H5PB_t *pb_ptr;                    /* Page buffer for this file */
+    H5PB_entry_t *entry_ptr;           /* Pointer to page buffer entry */
+    uint64_t first_page;		/* page offset of first I/O */
+    uint64_t last_page;                 /* page offset of last I/O */
+    uint64_t search_page;               /* page offset of current page */
+    haddr_t first_page_addr;            /* address of first page of I/O */
+    haddr_t last_page_addr;             /* address of last page of I/O */
     haddr_t search_addr;                /* Address of current page */
     hsize_t num_touched_pages;          /* Number of pages accessed */
-    size_t access_size;
-    hbool_t bypass_pb = FALSE;          /* Whether to bypass page buffering */
+    size_t offset;                      /* offset of read in page */
+    size_t length;                      /* length of read in page */
     hsize_t i;                          /* Local index variable */
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -701,818 +2806,820 @@ H5PB_read(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size, void *buf/*out*/
 
     /* Sanity checks */
     HDassert(f);
-    HDassert(type != H5FD_MEM_GHEAP);
+    HDassert(f->shared);
+    HDassert(f->shared->pb_ptr);
 
-    /* Get pointer to page buffer info for this file */
-    page_buf = f->shared->page_buf;
+    pb_ptr = f->shared->pb_ptr;
 
-#ifdef H5_HAVE_PARALLEL
-    if(H5F_HAS_FEATURE(f, H5FD_FEAT_HAS_MPI)) {
-#if 1
-        bypass_pb = TRUE;
-#else
-        /* MSC - why this stopped working ? */
-        int mpi_size;
+    HDassert(pb_ptr->magic == H5PB__H5PB_T_MAGIC);
+    HDassert(pb_ptr->min_md_pages < pb_ptr->max_pages);
+    HDassert(H5FD_MEM_DRAW == type);
 
-        if((mpi_size = H5F_mpi_get_size(f)) < 0)
-            HGOTO_ERROR(H5E_PAGEBUF, H5E_CANTGET, FAIL, "can't retrieve MPI communicator size")
-        if(1 != mpi_size)
-            bypass_pb = TRUE;
-#endif
-    } /* end if */
-#endif
-
-    /* If page buffering is disabled, or the I/O size is larger than that of a
-     * single page, or if this is a parallel raw data access, bypass page
-     * buffering.
-     */
-    if(NULL == page_buf || size >= page_buf->page_size ||
-           (bypass_pb && H5FD_MEM_DRAW == type)) {
-        if(H5F__accum_read(f, type, addr, size, buf) < 0)
-            HGOTO_ERROR(H5E_PAGEBUF, H5E_READERROR, FAIL, "read through metadata accumulator failed")
-
-        /* Update statistics */
-        if(page_buf) {
-            if(type == H5FD_MEM_DRAW)
-                page_buf->bypasses[1] ++;
-            else
-                page_buf->bypasses[0] ++;
-        } /* end if */
-
-        /* If page buffering is disabled, or if this is a large metadata access, 
-         * or if this is parallel raw data access, we are done here
-         */
-        if(NULL == page_buf || (size >= page_buf->page_size && H5FD_MEM_DRAW != type) ||
-                (bypass_pb && H5FD_MEM_DRAW == type))
-            HGOTO_DONE(SUCCEED)
-    } /* end if */
-
-    /* Update statistics */
-    if(page_buf) {
-        if(type == H5FD_MEM_DRAW)
-            page_buf->accesses[1]++;
-        else
-            page_buf->accesses[0]++;
-    } /* end if */
 
     /* Calculate the aligned address of the first page */
-    first_page_addr = (addr / page_buf->page_size) * page_buf->page_size;
+    first_page = (addr / pb_ptr->page_size);
+    first_page_addr = first_page * pb_ptr->page_size;
 
-    /* For Raw data calculate the aligned address of the last page and
-     * the number of pages accessed if more than 1 page is accessed
-     */
-    if(H5FD_MEM_DRAW == type) {
-        last_page_addr = ((addr + size - 1) / page_buf->page_size) * page_buf->page_size;
+    /* Calculate the aligned address of the last page */
+    last_page = ((addr + size - 1) / pb_ptr->page_size);
+    last_page_addr = last_page * pb_ptr->page_size;
 
-        /* How many pages does this write span */
-        num_touched_pages = (last_page_addr / page_buf->page_size + 1) - 
-                (first_page_addr / page_buf->page_size);
-        if(first_page_addr == last_page_addr) {
-            HDassert(1 == num_touched_pages);
-            last_page_addr = HADDR_UNDEF;
-        } /* end if */
-    } /* end if */
-    /* Otherwise set last page addr to HADDR_UNDEF */
-    else {
-        num_touched_pages = 1;
+    /* Calculate number of pages that this read spans. */
+    num_touched_pages = last_page - first_page + 1;
+
+    if ( first_page_addr == last_page_addr ) {
+
+        HDassert(1 == num_touched_pages);
         last_page_addr = HADDR_UNDEF;
-    } /* end else */
 
-    /* Translate to file driver I/O info object */
-    file = f->shared->lf;
+    }
 
-    /* Copy raw data from dirty pages into the read buffer if the read
-       request spans pages in the page buffer*/
-    if(H5FD_MEM_DRAW == type && size >= page_buf->page_size) {
-        H5SL_node_t *node;
+    /* case 3) raw data read of page size or greater. */
+    if ( size >= pb_ptr->page_size ) {
 
-        /* For each touched page in the page buffer, check if it
-         * exists in the page Buffer and is dirty. If it does, we
-         * update the buffer with what's in the page so we get the up
-         * to date data into the buffer after the big read from the file.
+#if VFD_IO
+        if ( H5FD_read(f->shared->lf, type, addr, size, buf) < 0)
+#else /* VFD_IO */
+        if ( H5F__accum_read(f, type, addr, size, buf) < 0 )
+#endif /* VFD_IO */
+
+            HGOTO_ERROR(H5E_PAGEBUF, H5E_READERROR, FAIL, \
+                        "read through metadata accumulator failed")
+
+
+        /* For each page that intersects with the above read, check to see 
+         * if it exists in the page buffer, and if so, if it is dirty.
+         *
+         * If it does and is, update the read buffer with the contents 
+         * of the page so we get the up to date data into the buffer 
+         * after the big read from the file.
          */
-        node = H5SL_find(page_buf->slist_ptr, (void *)(&first_page_addr));
+        search_page = first_page;
+        search_addr = first_page_addr;
+
         for(i = 0; i < num_touched_pages; i++) {
-            search_addr = i*page_buf->page_size + first_page_addr;
 
-            /* if we still haven't located a starting page, search again */
-            if(!node && i!=0)
-                node = H5SL_find(page_buf->slist_ptr, (void *)(&search_addr));
+            H5PB__SEARCH_INDEX(pb_ptr, search_page, entry_ptr, FAIL)
 
-            /* if the current page is in the Page Buffer, do the updates */
-            if(node) {
-                page_entry = (H5PB_entry_t *)H5SL_item(node);
+            /* update hit rate stats */
+            H5PB__UPDATE_PB_HIT_RATE_STATS(pb_ptr, (entry_ptr != NULL), \
+                                           FALSE, FALSE)
 
-                HDassert(page_entry);
+            if ( entry_ptr ) {
 
-                /* If the current page address falls out of the access
-                   block, then there are no more pages to go over */
-                if(page_entry->addr >= addr + size)
-                    break;
+                HDassert( entry_ptr->magic == H5PB__H5PB_ENTRY_T_MAGIC );
+                HDassert( ! ( entry_ptr->is_metadata ) );
+                HDassert( entry_ptr->page == search_page );
+                HDassert( entry_ptr->addr == search_addr );
+                HDassert( entry_ptr->size == pb_ptr->page_size );
+                HDassert( entry_ptr->delay_write_until == 0 );
+                HDassert( entry_ptr->addr <= addr + size );
+                HDassert( entry_ptr->addr + entry_ptr->size <= addr + size );
 
-                HDassert(page_entry->addr == search_addr);
+                if ( entry_ptr->is_dirty ) {
 
-                if(page_entry->is_dirty) {
-                    /* special handling for the first page if it is not a full page access */
-                    if(i == 0 && first_page_addr != addr) {
+                    if ( i == 0 ) {
+
+                        /* handle the possible partial access of the 
+                         * first page.
+                         */
+
+                        HDassert( search_addr == first_page_addr );
+                        HDassert( search_page == first_page );
+
                         offset = addr - first_page_addr;
-                        HDassert(page_buf->page_size > offset);
 
-                        HDmemcpy(buf, (uint8_t *)page_entry->page_buf_ptr + offset, 
-                                 page_buf->page_size - (size_t)offset);
+                        HDassert((( offset == 0 ) && (search_addr == addr )) ||
+                                 (( offset > 0 ) && ( search_addr < addr )));
 
-                        /* move to top of LRU list */
-                        H5PB__MOVE_TO_TOP_LRU(page_buf, page_entry)
-                    } /* end if */
-                    /* special handling for the last page if it is not a full page access */
-                    else if(num_touched_pages > 1 && i == num_touched_pages-1 && search_addr < addr+size) {
-                        offset = (num_touched_pages-2)*page_buf->page_size + 
-                            (page_buf->page_size - (addr - first_page_addr));
+                        HDassert(pb_ptr->page_size >= offset);
 
-                        HDmemcpy((uint8_t *)buf + offset, page_entry->page_buf_ptr,
+                        HDassert( size >=  pb_ptr->page_size - (size_t)offset );
+
+                        HDmemcpy(buf, (uint8_t *)entry_ptr->image_ptr + offset, 
+                                 pb_ptr->page_size - (size_t)offset);
+
+                    } else if ( i == num_touched_pages - 1 ) {
+
+                        /* handle the possible partial access of the 
+                         * last page.
+                         */
+                        HDassert( i > 0 );
+                        HDassert( search_addr == last_page_addr );
+                        HDassert( search_page == last_page );
+                        HDassert( addr < last_page_addr );
+                        HDassert( last_page_addr < addr + size ); 
+
+                        offset = (num_touched_pages - 2) * pb_ptr->page_size + 
+                                 (pb_ptr->page_size - (addr - first_page_addr));
+
+                        HDmemcpy((uint8_t *)buf + offset, entry_ptr->image_ptr,
                                  (size_t)((addr + size) - last_page_addr));
 
-                        /* move to top of LRU list */
-                        H5PB__MOVE_TO_TOP_LRU(page_buf, page_entry)
-                    } /* end else-if */
-                    /* copy the entire fully accessed pages */
-                    else {
-                        offset = i*page_buf->page_size;
+                    } else {
 
-                        HDmemcpy((uint8_t *)buf+(i*page_buf->page_size) , page_entry->page_buf_ptr, 
-                             page_buf->page_size);
-                    } /* end else */
-                } /* end if */
-                node = H5SL_next(node);
-            } /* end if */
+                        /* this is an internal page -- copy it in its 
+                         * entireity.
+                         */
+                    
+                        offset = (i - 1) * pb_ptr->page_size + 
+                                 (pb_ptr->page_size - (addr - first_page_addr));
+
+                        HDassert ( addr + offset == search_addr );
+                        HDassert ( offset + pb_ptr->page_size <= size );
+
+                        HDmemcpy(((uint8_t *)(buf) + offset), 
+                                 entry_ptr->image_ptr, 
+                                 pb_ptr->page_size);
+                    }
+
+                    /* we have touched the entry -- move it to the top
+                     * of the LRU if it resides there.
+                     *
+                     * The entry will be on the LRU if both it is not 
+                     * a multi-page metadata entry and it is not 
+                     * subject to a delayed write.
+                     *
+                     * As this is a raw data page buffer entry, both of 
+                     * these must be true, and are asserted above.
+                     *
+                     * Thus, just update the LRU.
+                     */
+                    H5PB__UPDATE_RP_FOR_ACCESS(pb_ptr, entry_ptr, FAIL)
+
+                } /* if ( entry_ptr->is_dirty ) */
+            } /* if ( entry_ptr ) */
+
+            search_page++;
+            search_addr += pb_ptr->page_size;
+
         } /* end for */
-    } /* end if */
-    else {
-        /* A raw data access could span 1 or 2 PB entries at this point so
-           we need to handle that */
-        HDassert(1 == num_touched_pages || 2 == num_touched_pages);
-        for(i = 0 ; i < num_touched_pages; i++) {
-            haddr_t buf_offset;
+    } else {
+        /* case 4: Raw data read of size less than page size. 
+         *
+         * In this case, read the desired data from the page buffer, loading
+         * pages if necessary.
+         */
+        HDassert(size < pb_ptr->page_size);
 
-            /* Calculate the aligned address of the page to search for it in the skip list */
-            search_addr = (0==i ? first_page_addr : last_page_addr);
+        /* first page */
+        offset = addr - first_page_addr;
 
-            /* Calculate the access size if the access spans more than 1 page */
-            if(1 == num_touched_pages)
-                access_size = size;
-            else
-                access_size = (0 == i ? (size_t)((first_page_addr + page_buf->page_size) - addr) : (size - access_size));
+        if ( (offset + size) < pb_ptr->page_size ) {
 
-            /* Lookup the page in the skip list */
-            page_entry = (H5PB_entry_t *)H5SL_search(page_buf->slist_ptr, (void *)(&search_addr));
+            HDassert(num_touched_pages == 1);
+            length = size;
 
-            /* if found */
-            if(page_entry) {
-                offset = (0 == i ? addr - page_entry->addr : 0);
-                buf_offset = (0 == i ? 0 : size - access_size);
+        } else {
 
-                /* copy the requested data from the page into the input buffer */
-                HDmemcpy((uint8_t *)buf + buf_offset, (uint8_t *)page_entry->page_buf_ptr + offset, access_size);
+            HDassert(num_touched_pages == 2);
+            length = size - (pb_ptr->page_size - offset);
+        }
 
-                /* Update LRU */
-                H5PB__MOVE_TO_TOP_LRU(page_buf, page_entry)
+        /* get the first page */
+        H5PB__SEARCH_INDEX(pb_ptr, first_page, entry_ptr, FAIL)
 
-                /* Update statistics */
-                if(type == H5FD_MEM_DRAW)
-                    page_buf->hits[1]++;
-                else
-                    page_buf->hits[0]++;
-            } /* end if */
-            /* if not found */ 
-            else {
-                void *new_page_buf = NULL;
-                size_t page_size = page_buf->page_size;
-                haddr_t eoa;
+        /* update hit rate stats */
+        H5PB__UPDATE_PB_HIT_RATE_STATS(pb_ptr, (entry_ptr != NULL), \
+                                       FALSE, FALSE)
 
-                /* make space for new entry */
-                if((H5SL_count(page_buf->slist_ptr) * page_buf->page_size) >= page_buf->max_size) {
-                    htri_t can_make_space;
+        if ( ( NULL == entry_ptr ) &&
+             ( H5PB__load_page(f, pb_ptr, first_page_addr, 
+                                type, &entry_ptr) < 0 ) )
 
-                    /* check if we can make space in page buffer */
-                    if((can_make_space = H5PB__make_space(f, page_buf, type)) < 0)
-                        HGOTO_ERROR(H5E_PAGEBUF, H5E_NOSPACE, FAIL, "make space in Page buffer Failed")
+            HGOTO_ERROR(H5E_PAGEBUF, H5E_READERROR, FAIL, \
+                        "page buffer page load request failed (1)")
 
-                    /* if make_space returns 0, then we can't use the page
-                       buffer for this I/O and we need to bypass */
-                    if(0 == can_make_space) {
-                        /* make space can't return FALSE on second touched page since the first is of the same type */
-                        HDassert(0 == i);
+        HDassert(entry_ptr);
+        HDassert(entry_ptr->magic == H5PB__H5PB_ENTRY_T_MAGIC);
+        HDassert(entry_ptr->addr == first_page_addr);
 
-                        /* read entire block from VFD and return */
-                        if(H5FD_read(file, type, addr, size, buf) < 0)
-                            HGOTO_ERROR(H5E_PAGEBUF, H5E_READERROR, FAIL, "driver read request failed")
 
-                        /* Break out of loop */
-                        break;
-                    } /* end if */
-                } /* end if */
+        /* copy data from first page into read buffer */
+        HDmemcpy((uint8_t *)buf, ((uint8_t *)(entry_ptr->image_ptr) + offset), 
+                 length);
 
-                /* Read page from VFD */
-                if(NULL == (new_page_buf = H5FL_FAC_MALLOC(page_buf->page_fac)))
-                    HGOTO_ERROR(H5E_PAGEBUF, H5E_CANTALLOC, FAIL, "memory allocation failed for page buffer entry")
+        H5PB__UPDATE_RP_FOR_ACCESS(pb_ptr, entry_ptr, FAIL)
 
-                /* Read page through the VFD layer, but make sure we don't read past the EOA. */
+        /* second page, if it exists */
+        if ( num_touched_pages == 2 ) {
 
-                /* Retrieve the 'eoa' for the file */
-                if(HADDR_UNDEF == (eoa = H5F_get_eoa(f, type)))
-                    HGOTO_ERROR(H5E_PAGEBUF, H5E_CANTGET, FAIL, "driver get_eoa request failed")
+            offset = length;
+            length = size - offset;
 
-                /* If the entire page falls outside the EOA, then fail */
-                if(search_addr > eoa)
-                    HGOTO_ERROR(H5E_PAGEBUF, H5E_BADVALUE, FAIL, "reading an entire page that is outside the file EOA")
+            HDassert(offset + length == size);
 
-                /* Adjust the read size to not go beyond the EOA */
-                if(search_addr + page_size > eoa)
-                    page_size = (size_t)(eoa - search_addr);
+            /* get the second page */
+            H5PB__SEARCH_INDEX(pb_ptr, last_page, entry_ptr, FAIL)
 
-                /* Read page from VFD */
-                if(H5FD_read(file, type, search_addr, page_size, new_page_buf) < 0)
-                    HGOTO_ERROR(H5E_PAGEBUF, H5E_READERROR, FAIL, "driver read request failed")
+            /* update hit rate stats */
+            H5PB__UPDATE_PB_HIT_RATE_STATS(pb_ptr, (entry_ptr != NULL), \
+                                           FALSE, FALSE)
 
-                /* Copy the requested data from the page into the input buffer */
-                offset = (0 == i ? addr - search_addr : 0);
-                buf_offset = (0 == i ? 0 : size - access_size);
-                HDmemcpy((uint8_t *)buf + buf_offset, (uint8_t *)new_page_buf + offset, access_size);
+            if ( ( NULL == entry_ptr ) &&
+                 ( H5PB__load_page(f, pb_ptr, last_page_addr, 
+                                    type, &entry_ptr) < 0 ) )
 
-                /* Create the new PB entry */
-                if(NULL == (page_entry = H5FL_CALLOC(H5PB_entry_t)))
-                    HGOTO_ERROR(H5E_PAGEBUF, H5E_NOSPACE, FAIL, "memory allocation failed")
+                HGOTO_ERROR(H5E_PAGEBUF, H5E_READERROR, FAIL, \
+                            "page buffer page load request failed (2)")
 
-                page_entry->page_buf_ptr = new_page_buf;
-                page_entry->addr = search_addr;
-                page_entry->type = (H5F_mem_page_t)type;
-                page_entry->is_dirty = FALSE;
+            HDassert(entry_ptr);
+            HDassert(entry_ptr->magic == H5PB__H5PB_ENTRY_T_MAGIC);
+            HDassert(entry_ptr->addr == last_page_addr);
+            HDassert(entry_ptr->page == last_page);
 
-                /* Insert page into PB */
-                if(H5PB__insert_entry(page_buf, page_entry) < 0)
-                    HGOTO_ERROR(H5E_PAGEBUF, H5E_CANTSET, FAIL, "error inserting new page in page buffer")
-
-                /* Update statistics */
-                if(type == H5FD_MEM_DRAW)
-                    page_buf->misses[1]++;
-                else
-                    page_buf->misses[0]++;
-            } /* end else */
-        } /* end for */
+            /* copy data from second page into read buffer */
+            HDmemcpy(((uint8_t *)(buf) + offset), 
+                     (uint8_t *)(entry_ptr->image_ptr), length);
+        
+            H5PB__UPDATE_RP_FOR_ACCESS(pb_ptr, entry_ptr, FAIL)
+        }
     } /* end else */
 
 done:
+
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5PB_read() */
+
+} /* end H5PB__read_raw() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5PB_write
  *
- * Purpose: Write data into the Page Buffer. If the page exists in the
- *          cache, update it; otherwise read it from disk, update it, and
- *          insert into cache.
+ * Function:	H5PB__write_meta
+ *
+ * Purpose:	Satisfy a metadata read in cases 7 and 8 from H5PB_write().
+ *              Specifically:
+ *
+ *              7) If the write is of metadata, the write is larger than
+ *                 one page, and vfd_swmr_writer is TRUE, the write must
+ *                 buffered in the page buffer until the end of the tick.
+ *
+ *                 Create a multi-page metadata entry in the page buffer
+ *                 and copy the write into it.  Insert the new entry in
+ *                 the tick list.
+ *
+ *                 Test to see if the write of the multi-page metadata 
+ *                 entry must be delayed.  If so, place the entry in 
+ *                 the delayed write list.  Otherwise, write the multi-page
+ *                 metadata entry to the HDF5 file.
+ *
+ *              8) If the write is of metadata, and the write is of size
+ *                 less than or equal to the page size, write the data
+ *                 into the page buffer, loading and inserting a page 
+ *                 if necessary.
+ *
+ *                 If, in addition, vfd_swmr_writer is TRUE, we must:
+ *
+ *                  * add the page touched by the write to the tick list
+ *                    so that it will be buffered until the end of the 
+ *                    tick.
+ *
+ *                  * test to see if the write must be delayed, and 
+ *                    add the page to the delayed write list if so.
+ *
+ *              Observe that this implies that:
+ *
+ *              1) The page buffer is defined.
+ *
+ *              2) The page buffer has been configured to accept at least
+ *                 one page of metadata.
+ *
+ *              3) This is a metadata read.
+ *
+ *              Note also that if the metadata read is of size 
+ *              no larger than page size, it may not cross page 
+ *              boundaries.
+ *
+ *              Further, for reads larger than page size (case 7 only), 
+ *              the base address must be page aligned.
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Mohamad Chaarawi
+ * Programmer:	John Mainzer -- 10/11/18
+ *
+ * Changes:     None.
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5PB_write(H5F_t *f, H5FD_mem_t type, haddr_t addr,
-    size_t size, const void *buf)
+static herr_t
+H5PB__write_meta(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size, 
+                 const void *buf/*out*/)
 {
-    H5PB_t *page_buf;                   /* Page buffering info for this file */
-    H5PB_entry_t *page_entry;           /* Pointer to the corresponding page entry */
-    H5FD_t *file;                       /* File driver pointer */
-    haddr_t first_page_addr, last_page_addr;    /* Addresses of the first and last pages covered by I/O */
-    haddr_t offset;
-    haddr_t search_addr;                /* Address of current page */
-    hsize_t num_touched_pages;          /* Number of pages accessed */
-    size_t access_size;
-    hbool_t bypass_pb = FALSE;          /* Whether to bypass page buffering */
-    hsize_t i;                          /* Local index variable */
-    herr_t  ret_value = SUCCEED;        /* Return value */
+    H5PB_t *pb_ptr;                    /* Page buffer for this file */
+    H5PB_entry_t *entry_ptr;           /* Pointer to page buffer entry */
+    uint64_t page;		        /* page offset of addr */
+    haddr_t page_addr;                  /* page containg addr */
+    size_t offset;                      /* offset of write in page */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
     HDassert(f);
+    HDassert(f->shared);
+    HDassert(f->shared->pb_ptr);
 
-    /* Get pointer to page buffer info for this file */
-    page_buf = f->shared->page_buf;
+    pb_ptr = f->shared->pb_ptr;
 
-#ifdef H5_HAVE_PARALLEL
-    if(H5F_HAS_FEATURE(f, H5FD_FEAT_HAS_MPI)) {
-#if 1
-        bypass_pb = TRUE;
-#else
-        /* MSC - why this stopped working ? */
-        int mpi_size;
-
-        if((mpi_size = H5F_mpi_get_size(f)) < 0)
-            HGOTO_ERROR(H5E_PAGEBUF, H5E_CANTGET, FAIL, "can't retrieve MPI communicator size")
-        if(1 != mpi_size)
-            bypass_pb = TRUE;
-#endif
-    } /* end if */
-#endif
-
-    /* If page buffering is disabled, or the I/O size is larger than that of a
-     * single page, or if this is a parallel raw data access, bypass page
-     * buffering.
-     */
-    if(NULL == page_buf || size >= page_buf->page_size || bypass_pb) {
-        if(H5F__accum_write(f, type, addr, size, buf) < 0)
-            HGOTO_ERROR(H5E_PAGEBUF, H5E_WRITEERROR, FAIL, "write through metadata accumulator failed")
-
-        /* Update statistics */
-        if(page_buf) {
-            if(type == H5FD_MEM_DRAW || type == H5FD_MEM_GHEAP)
-                page_buf->bypasses[1]++;
-            else
-                page_buf->bypasses[0]++;
-        } /* end if */
-
-        /* If page buffering is disabled, or if this is a large metadata access, 
-         * or if this is a parallel raw data access, we are done here
-         */
-        if(NULL == page_buf || (size >= page_buf->page_size && H5FD_MEM_DRAW != type) ||
-                (bypass_pb && H5FD_MEM_DRAW == type))
-            HGOTO_DONE(SUCCEED)
-
-#ifdef H5_HAVE_PARALLEL
-        if(bypass_pb) {
-            if(H5PB_update_entry(page_buf, addr, size, buf) > 0)
-                HGOTO_ERROR(H5E_PAGEBUF, H5E_CANTUPDATE, FAIL, "failed to update PB with metadata cache")
-            HGOTO_DONE(SUCCEED)
-        } /* end if */
-#endif
-    } /* end if */
-
-    /* Update statistics */
-    if(page_buf) {
-        if(type == H5FD_MEM_DRAW || type == H5FD_MEM_GHEAP)
-            page_buf->accesses[1]++;
-        else
-            page_buf->accesses[0]++;
-    } /* end if */
+    HDassert(pb_ptr->magic == H5PB__H5PB_T_MAGIC);
+    HDassert(pb_ptr->min_rd_pages < pb_ptr->max_pages);
+    HDassert(H5FD_MEM_DRAW != type);
+    HDassert(buf);
 
     /* Calculate the aligned address of the first page */
-    first_page_addr = (addr / page_buf->page_size) * page_buf->page_size;
+    page = (addr / pb_ptr->page_size);
+    page_addr = page * pb_ptr->page_size;
 
-    /* For raw data calculate the aligned address of the last page and
-     * the number of pages accessed if more than 1 page is accessed
-     */
-    if(H5FD_MEM_DRAW == type) {
-        last_page_addr = (addr + size - 1) / page_buf->page_size * page_buf->page_size;
+    /* if size > pb_ptr->page_size, addr must be page aligned */
+    HDassert((size <= pb_ptr->page_size) || (addr == page_addr));
 
-        /* how many pages does this write span */
-        num_touched_pages = (last_page_addr/page_buf->page_size + 1) - 
-            (first_page_addr / page_buf->page_size);
-        if(first_page_addr == last_page_addr) {
-            HDassert(1 == num_touched_pages);
-            last_page_addr = HADDR_UNDEF;
-        } /* end if */
-    } /* end if */
-    /* Otherwise set last page addr to HADDR_UNDEF */
-    else {
-        num_touched_pages = 1;
-        last_page_addr = HADDR_UNDEF;
-    } /* end else */
 
-    /* Translate to file driver I/O info object */
-    file = f->shared->lf;
+    /* case 7) metadata read of size greater than page size. */
+    if ( size > pb_ptr->page_size ) {
 
-    /* Check if existing pages for raw data need to be updated since raw data access is not atomic */
-    if(H5FD_MEM_DRAW == type && size >= page_buf->page_size) {
-        /* For each touched page, check if it exists in the page buffer, and
-         * update it with the data in the buffer to keep it up to date
+        /* The write must be for a multi-page metadata entry, and 
+         * we must be running as a VFD SWMR writer.
+         *
+         * This requires the following actions:
+         *
+         * 1) If the multi-page metadata entry is not alrady in the 
+         *    page buffer, create an entry for it.
+         *
+         * 2) Overwrite the image of the entry with the write buffer.
+         *
+         * 3) If the entry is not alread on the tick list, add it to 
+         *    the tick list.
+         * 
+         * 4) If the entry is not alread on the delayed write list,
+         *    test to see if it should be, and move it from the 
+         *    LRU to the delayed write list and set the delay_write_until
+         *    field appropriately.
          */
-        for(i = 0; i < num_touched_pages; i++) {
-            search_addr = i * page_buf->page_size + first_page_addr;
+        HDassert(pb_ptr->vfd_swmr_writer);
+        HDassert(addr == page_addr);
 
-            /* Special handling for the first page if it is not a full page update */
-            if(i == 0 && first_page_addr != addr) {
-                /* Lookup the page in the skip list */
-                page_entry = (H5PB_entry_t *)H5SL_search(page_buf->slist_ptr, (void *)(&search_addr));
-                if(page_entry) {
-                    offset = addr - first_page_addr;
-                    HDassert(page_buf->page_size > offset);
+        H5PB__SEARCH_INDEX(pb_ptr, page, entry_ptr, FAIL)
 
-                    /* Update page's data */
-                    HDmemcpy((uint8_t *)page_entry->page_buf_ptr + offset, buf, page_buf->page_size - (size_t)offset);
+        /* update hit rate stats */
+        H5PB__UPDATE_PB_HIT_RATE_STATS(pb_ptr, (entry_ptr != NULL), \
+                                      TRUE, TRUE)
 
-                    /* Mark page dirty and push to top of LRU */
-                    page_entry->is_dirty = TRUE;
-                    H5PB__MOVE_TO_TOP_LRU(page_buf, page_entry)
-                } /* end if */
-            } /* end if */
-            /* Special handling for the last page if it is not a full page update */
-            else if(num_touched_pages > 1 && i == (num_touched_pages - 1) && 
-                    (search_addr + page_buf->page_size) != (addr + size)) {
-                HDassert(search_addr+page_buf->page_size > addr+size);
+        if ( NULL == entry_ptr ) {
 
-                /* Lookup the page in the skip list */
-                page_entry = (H5PB_entry_t *)H5SL_search(page_buf->slist_ptr, (void *)(&search_addr));
-                if(page_entry) {
-                    offset = (num_touched_pages - 2) * page_buf->page_size + 
-                        (page_buf->page_size - (addr - first_page_addr));
+            /* the multi-page metadata entry is not currently in the page 
+             * buffer.  Create an entry for it, and insert it into the LRU.
+             *
+             * Don't bother to try to make space for it, as VFD SWMR 
+             * ignores the limits on page buffer size.
+             */
+            if ( H5PB__create_new_page(pb_ptr, addr, size, type, 
+                                       FALSE, &entry_ptr) < 0 )
 
-                    /* Update page's data */
-                    HDmemcpy(page_entry->page_buf_ptr, (const uint8_t *)buf + offset, 
-                             (size_t)((addr + size) - last_page_addr));
+                HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
+                            "can't create new page buffer page")
+        }
 
-                    /* Mark page dirty and push to top of LRU */
-                    page_entry->is_dirty = TRUE;
-                    H5PB__MOVE_TO_TOP_LRU(page_buf, page_entry)
-                } /* end if */
-            } /* end else-if */
-            /* Discard all fully written pages from the page buffer */
-            else {
-                page_entry = (H5PB_entry_t *)H5SL_remove(page_buf->slist_ptr, (void *)(&search_addr));
-                if(page_entry) {
-                    /* Remove from LRU list */
-                    H5PB__REMOVE_LRU(page_buf, page_entry)
+        /* at this point, one way or the other, the multi-page metadata 
+         * entry must be in the page buffer.
+         */
+        HDassert(entry_ptr->is_metadata);
+        HDassert(entry_ptr->is_mpmde);
+        HDassert(size == entry_ptr->size);
+        HDassert(type == entry_ptr->mem_type);
 
-                    /* Decrement page count of appropriate type */
-                    if(H5F_MEM_PAGE_DRAW == page_entry->type || H5F_MEM_PAGE_GHEAP == page_entry->type)
-                        page_buf->raw_count--;
-                    else
-                        page_buf->meta_count--;
+        /* overwrite the entry image with the write buffer */
+        HDmemcpy((uint8_t *)(entry_ptr->image_ptr), buf, size);
 
-                    /* Free page info */
-                    page_entry->page_buf_ptr = H5FL_FAC_FREE(page_buf->page_fac, page_entry->page_buf_ptr);
-                    page_entry = H5FL_FREE(H5PB_entry_t, page_entry);
-                } /* end if */
-            } /* end else */
-        } /* end for */
-    } /* end if */
-    else {
-        /* An access could span 1 or 2 PBs at this point so we need to handle that */
-        HDassert(1 == num_touched_pages || 2 == num_touched_pages);
-        for(i = 0; i < num_touched_pages; i++) {
-            haddr_t buf_offset;
+        /* mark the entry dirty */
+        if ( H5PB__mark_entry_dirty(pb_ptr, entry_ptr) < 0 )
 
-            /* Calculate the aligned address of the page to search for it in the skip list */
-            search_addr = (0 == i ? first_page_addr : last_page_addr);
+            HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
+                        "mark entry dirty failed (1)")
 
-            /* Calculate the access size if the access spans more than 1 page */
-            if(1 == num_touched_pages)
-                access_size = size;
-            else
-                access_size = (0 == i ? (size_t)(first_page_addr + page_buf->page_size - addr) : (size - access_size));
 
-            /* Lookup the page in the skip list */
-            page_entry = (H5PB_entry_t *)H5SL_search(page_buf->slist_ptr, (void *)(&search_addr));
+        /* insert in tick list if not there already */
+        if ( ! ( entry_ptr->modified_this_tick ) ) {
 
-            /* If found */
-            if(page_entry) {
-                offset = (0 == i ? addr - page_entry->addr : 0);
-                buf_offset = (0 == i ? 0 : size - access_size);
+            H5PB__INSERT_IN_TL(pb_ptr, entry_ptr, FAIL)
+        }
 
-                /* Copy the requested data from the input buffer into the page */
-                HDmemcpy((uint8_t *)page_entry->page_buf_ptr + offset, (const uint8_t *)buf + buf_offset, access_size);
+        /* Test to see if we must delay the write of the multi-page 
+         * metadata entry, and move it from the LRU to the delayed write
+         * list if so.
+         */
 
-                /* Mark page dirty and push to top of LRU */
-                page_entry->is_dirty = TRUE;
-                H5PB__MOVE_TO_TOP_LRU(page_buf, page_entry)
+        /* Write function for this -- assert false for now */
+        HDassert(FALSE);
 
-                /* Update statistics */
-                if(type == H5FD_MEM_DRAW || type == H5FD_MEM_GHEAP)
-                    page_buf->hits[1]++;
-                else
-                    page_buf->hits[0]++;
-            } /* end if */
-            /* If not found */ 
-            else {
-                void *new_page_buf;
-                size_t page_size = page_buf->page_size;
+    } else {
+        /* case 8) metadata write of size no larger than page size */
 
-                /* Make space for new entry */
-                if((H5SL_count(page_buf->slist_ptr) * page_buf->page_size) >= page_buf->max_size) {
-                    htri_t can_make_space;
+        offset = addr - page_addr;
 
-                    /* Check if we can make space in page buffer */
-                    if((can_make_space = H5PB__make_space(f, page_buf, type)) < 0)
-                        HGOTO_ERROR(H5E_PAGEBUF, H5E_NOSPACE, FAIL, "make space in Page buffer Failed")
+        /* write cannot cross page boundaries. */
+        HDassert((offset + size) <= pb_ptr->page_size);
 
-                    /* If make_space returns 0, then we can't use the page
-                     * buffer for this I/O and we need to bypass
-                     */
-                    if(0 == can_make_space) {
-                        HDassert(0 == i);
+        /* get the containing page */
+        H5PB__SEARCH_INDEX(pb_ptr, page, entry_ptr, FAIL)
 
-                        /* Write to VFD and return */
-                        if(H5FD_write(file, type, addr, size, buf) < 0)
-                            HGOTO_ERROR(H5E_PAGEBUF, H5E_WRITEERROR, FAIL, "driver write request failed")
-                        
-                        /* Break out of loop */
-                        break;
-                    } /* end if */
-                } /* end if */
+        /* update hit rate stats */
+        H5PB__UPDATE_PB_HIT_RATE_STATS(pb_ptr, (entry_ptr != NULL), \
+                                      TRUE, FALSE)
 
-                /* Don't bother searching if there is no write access */
-                if(H5F_ACC_RDWR & H5F_INTENT(f))
-                    /* Lookup & remove the page from the new skip list page if
-                     * it exists to see if this is a new page from the MF layer
-                     */
-                    page_entry = (H5PB_entry_t *)H5SL_remove(page_buf->mf_slist_ptr, (void *)(&search_addr));
+#if 1 /* JRM */
+        /* Since the space allocation code doesn't always tell the page
+         * buffer when a page is freed, it is possible that the page
+         * found by the index search is an ophaned raw data page.  
+         *
+         * Until this is fixed, test to see entry_ptr points to 
+         * a raw data page, and force its eviction if it does.
+         *
+         * Remove this code as soon as the space allocation code is 
+         * updated to tell the page buffer to discard pages when 
+         * they are freed.
+         */
+        if ( ( entry_ptr ) && ( ! ( entry_ptr->is_metadata ) ) ) {
 
-                /* Calculate offset into the buffer of the page and the user buffer */
-                offset = (0 == i ? addr - search_addr : 0);
-                buf_offset = (0 == i ? 0 : size - access_size);
+            if ( H5PB__evict_entry(pb_ptr, entry_ptr, TRUE) < 0 )
 
-                /* If found, then just update the buffer pointer to the newly allocate buffer */
-                if(page_entry) {
-                    /* Allocate space for the page buffer */
-                    if(NULL == (new_page_buf = H5FL_FAC_MALLOC(page_buf->page_fac)))
-                        HGOTO_ERROR(H5E_PAGEBUF, H5E_CANTALLOC, FAIL, "memory allocation failed for page buffer entry")
-                    HDmemset(new_page_buf, 0, (size_t)offset);
-                    HDmemset((uint8_t *)new_page_buf + offset + access_size, 0, page_size - ((size_t)offset + access_size));
+                HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
+                            "forced eviction failed")
 
-                    page_entry->page_buf_ptr = new_page_buf;
+            entry_ptr = NULL;
+        }
+#endif /* JRM */
 
-                    /* Update statistics */
-                    if(type == H5FD_MEM_DRAW || type == H5FD_MEM_GHEAP)
-                        page_buf->hits[1]++;
-                    else
-                        page_buf->hits[0]++;
-                } /* end if */
-                /* Otherwise read page through the VFD layer, but make sure we don't read past the EOA. */
-                else {
-                    haddr_t eoa, eof = HADDR_UNDEF;
+        if ( ( NULL == entry_ptr ) &&
+             ( H5PB__load_page(f, pb_ptr, page_addr, type, &entry_ptr) < 0 ) )
 
-                    /* Allocate space for the page buffer */
-                    if(NULL == (new_page_buf = H5FL_FAC_CALLOC(page_buf->page_fac)))
-                        HGOTO_ERROR(H5E_PAGEBUF, H5E_CANTALLOC, FAIL, "memory allocation failed for page buffer entry")
+            HGOTO_ERROR(H5E_PAGEBUF, H5E_READERROR, FAIL, \
+                        "page buffer page load request failed (1)")
 
-                    /* Create the new loaded PB entry */
-                    if(NULL == (page_entry = H5FL_CALLOC(H5PB_entry_t)))
-                        HGOTO_ERROR(H5E_PAGEBUF, H5E_CANTALLOC, FAIL, "memory allocation failed")
+        HDassert(entry_ptr);
+        HDassert(entry_ptr->magic == H5PB__H5PB_ENTRY_T_MAGIC);
+        HDassert(entry_ptr->addr == page_addr);
+        HDassert(entry_ptr->is_metadata);
+        HDassert(!(entry_ptr->is_mpmde));
+        HDassert(entry_ptr->size == pb_ptr->page_size);
+        HDassert(size <= entry_ptr->size);
 
-                    page_entry->page_buf_ptr = new_page_buf;
-                    page_entry->addr = search_addr;
-                    page_entry->type = (H5F_mem_page_t)type;
+        /* copy data from the write buffer into the page image */
+        HDmemcpy(((uint8_t *)(entry_ptr->image_ptr) + offset), 
+                 (const uint8_t *)buf, size);
 
-                    /* Retrieve the 'eoa' for the file */
-                    if(HADDR_UNDEF == (eoa = H5F_get_eoa(f, type)))
-                        HGOTO_ERROR(H5E_PAGEBUF, H5E_CANTGET, FAIL, "driver get_eoa request failed")
+        if ( H5PB__mark_entry_dirty(pb_ptr, entry_ptr) < 0 )
 
-                    /* If the entire page falls outside the EOA, then fail */
-                    if(search_addr > eoa)
-                        HGOTO_ERROR(H5E_PAGEBUF, H5E_BADVALUE, FAIL, "writing to a page that is outside the file EOA")
+            HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
+                        "mark entry dirty failed (2)")
 
-                    /* Retrieve the 'eof' for the file - The MPI-VFD EOF
-                     * returned will most likely be HADDR_UNDEF, so skip
-                     * that check.
-                     */
-                    if(!H5F_HAS_FEATURE(f, H5FD_FEAT_HAS_MPI))
-                        if(HADDR_UNDEF == (eof = H5FD_get_eof(f->shared->lf, H5FD_MEM_DEFAULT)))
-                            HGOTO_ERROR(H5E_PAGEBUF, H5E_CANTGET, FAIL, "driver get_eof request failed")
+        if ( pb_ptr->vfd_swmr_writer ) {
 
-                    /* Adjust the read size to not go beyond the EOA */
-                    if(search_addr + page_size > eoa)
-                        page_size = (size_t)(eoa - search_addr);
+            /* test to see if the entry is on the tick list, and insert 
+             * it if it is not. This will force the page buffer to retain 
+             * the page until the end of the tick.
+             */
+            if ( ! ( entry_ptr->modified_this_tick ) ) {
 
-                    if(search_addr < eof) {
-                        if(H5FD_read(file, type, search_addr, page_size, new_page_buf) < 0)
-                            HGOTO_ERROR(H5E_PAGEBUF, H5E_READERROR, FAIL, "driver read request failed")
+                H5PB__INSERT_IN_TL(pb_ptr, entry_ptr, FAIL)
+            }
 
-                        /* Update statistics */
-                        if(type == H5FD_MEM_DRAW || type == H5FD_MEM_GHEAP)
-                            page_buf->misses[1]++;
-                        else
-                            page_buf->misses[0]++;
-                    } /* end if */
-                } /* end else */
+            /* Test to see if we must delay the write of the multi-page 
+             * metadata entry, and move it from the LRU to the delayed write
+             * list if so.
+             */
 
-                /* Copy the requested data from the page into the input buffer */
-                HDmemcpy((uint8_t *)new_page_buf + offset, (const uint8_t *)buf+buf_offset, access_size);
-
-                /* Page is dirty now */
-                page_entry->is_dirty = TRUE;
-
-                /* Insert page into PB, evicting other pages as necessary */
-                if(H5PB__insert_entry(page_buf, page_entry) < 0)
-                    HGOTO_ERROR(H5E_PAGEBUF, H5E_CANTSET, FAIL, "error inserting new page in page buffer")
-            } /* end else */
-        } /* end for */
-    } /* end else */
+            /* Write function for this -- assert false for now */
+            HDassert(FALSE);
+        }
+    } 
 
 done:
+
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5PB_write() */
+
+} /* end H5PB__write_meta() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5PB__insert_entry()
  *
- * Purpose: ??? 
+ * Function:	H5PB__write_raw
  *
- *          This function was created without documentation.
- *          What follows is my best understanding of Mohamad's intent.
+ * Purpose:	Satisfy a raw data read in cases 3 and 4 from H5PB_write().
+ *              Specifically:
  *
- *	    Insert the supplied page into the page buffer, both the
- *          skip list and the LRU.
+ *              3) If the write is raw data, and it of page size or 
+ *                 larger, write directly from the HDF5 file.  
  *
- *          As best I can tell, this function imposes no limit on the
- *          number of entries in the page buffer beyond an assertion
- *          failure it the page count exceeds the limit.
+ *                 It is possible that the write intersects one or more 
+ *                 pages in the page buffer -- test for this and update
+ *                 any partially written pages, and evict any pages 
+ *                 that are completely overwritten.
  *
- *                                               JRM -- 12/22/16
+ *                 Note that no pages are inserted into the page buffer in 
+ *                 this case.
  *
+ *              4) If the write is of raw data, and it is of size less 
+ *                 than the page size, write the page into the page
+ *                 buffer, loading and inserting pages into the 
+ *                 page buffer as necessary
  *
- * Return:	Non-negative on success/Negative on failure
+ *              Observe that this implies that:
  *
- * Programmer:	Mohamad Chaarawi
+ *              1) The page buffer is defined.
  *
- *-------------------------------------------------------------------------
- */
-static herr_t 
-H5PB__insert_entry(H5PB_t *page_buf, H5PB_entry_t *page_entry)
-{
-    herr_t ret_value = SUCCEED;    /* Return value */
-
-    FUNC_ENTER_STATIC
-
-    /* Insert entry in skip list */
-    if(H5SL_insert(page_buf->slist_ptr, page_entry, &(page_entry->addr)) < 0)
-        HGOTO_ERROR(H5E_PAGEBUF, H5E_CANTINSERT, FAIL, "can't insert entry in skip list")
-    HDassert(H5SL_count(page_buf->slist_ptr) * page_buf->page_size <= page_buf->max_size);
-
-    /* Increment appropriate page count */
-    if(H5F_MEM_PAGE_DRAW == page_entry->type || H5F_MEM_PAGE_GHEAP == page_entry->type)
-        page_buf->raw_count++;
-    else
-        page_buf->meta_count++;
-
-    /* Insert entry in LRU */
-    H5PB__INSERT_LRU(page_buf, page_entry)
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5PB__insert_entry() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5PB__make_space()
+ *              2) The page buffer has been configured to accept at least
+ *                 one page of raw data.
  *
- * Purpose: ??? 
- *
- *          This function was created without documentation.
- *          What follows is my best understanding of Mohamad's intent.
- *
- *          If necessary and if possible, evict a page from the page 
- *          buffer to make space for the supplied page.  Depending on 
- *	    the page buffer configuration and contents, and the page 
- *          supplied this may or may not be possible.
- *
- *                                             JRM -- 12/22/16
+ *              2) This is a raw data write.
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Mohamad Chaarawi
+ * Programmer:	John Mainzer -- 10/11/18
  *
- *-------------------------------------------------------------------------
- */
-static htri_t 
-H5PB__make_space(H5F_t *f, H5PB_t *page_buf, H5FD_mem_t inserted_type)
-{
-    H5PB_entry_t *page_entry;   /* Pointer to page eviction candidate */
-    htri_t ret_value = TRUE;    /* Return value */
-
-    FUNC_ENTER_STATIC
-
-    /* Sanity check */
-    HDassert(f);
-    HDassert(page_buf);
-
-    /* Get oldest entry */
-    page_entry = page_buf->LRU_tail_ptr;
-
-    if(H5FD_MEM_DRAW == inserted_type) {
-        /* If threshould is 100% metadata and page buffer is full of
-           metadata, then we can't make space for raw data */
-        if(0 == page_buf->raw_count && page_buf->min_meta_count == page_buf->meta_count) {
-            HDassert(page_buf->meta_count * page_buf->page_size == page_buf->max_size);
-            HGOTO_DONE(FALSE)
-        } /* end if */
-
-        /* check the metadata threshold before evicting metadata items */
-        while(1) {
-            if(page_entry->prev && H5F_MEM_PAGE_META == page_entry->type && 
-                    page_buf->min_meta_count >= page_buf->meta_count)
-                page_entry = page_entry->prev;
-            else
-                break;
-        } /* end while */
-    } /* end if */
-    else {
-        /* If threshould is 100% raw data and page buffer is full of
-           raw data, then we can't make space for meta data */
-        if(0 == page_buf->meta_count && page_buf->min_raw_count == page_buf->raw_count) {
-            HDassert(page_buf->raw_count * page_buf->page_size == page_buf->max_size);
-            HGOTO_DONE(FALSE)
-        } /* end if */
-
-        /* check the raw data threshold before evicting raw data items */
-        while(1) {
-            if(page_entry->prev && (H5F_MEM_PAGE_DRAW == page_entry->type || H5F_MEM_PAGE_GHEAP == page_entry->type) && 
-                    page_buf->min_raw_count >= page_buf->raw_count)
-                page_entry = page_entry->prev;
-            else
-                break;
-        } /* end while */
-    } /* end else */
-
-    /* Remove from page index */
-    if(NULL == H5SL_remove(page_buf->slist_ptr, &(page_entry->addr)))
-        HGOTO_ERROR(H5E_PAGEBUF, H5E_BADVALUE, FAIL, "Tail Page Entry is not in skip list")
-
-    /* Remove entry from LRU list */
-    H5PB__REMOVE_LRU(page_buf, page_entry)
-    HDassert(H5SL_count(page_buf->slist_ptr) == page_buf->LRU_list_len);
-
-    /* Decrement appropriate page type counter */
-    if(H5F_MEM_PAGE_DRAW == page_entry->type || H5F_MEM_PAGE_GHEAP == page_entry->type)
-        page_buf->raw_count--;
-    else
-        page_buf->meta_count--;
-
-    /* Flush page if dirty */
-    if(page_entry->is_dirty)
-        if(H5PB__write_entry(f, page_entry) < 0)
-            HGOTO_ERROR(H5E_PAGEBUF, H5E_WRITEERROR, FAIL, "file write failed")
-
-    /* Update statistics */
-    if(page_entry->type == H5F_MEM_PAGE_DRAW || H5F_MEM_PAGE_GHEAP == page_entry->type)
-        page_buf->evictions[1]++;
-    else
-        page_buf->evictions[0]++;
-
-    /* Release page */
-    page_entry->page_buf_ptr = H5FL_FAC_FREE(page_buf->page_fac, page_entry->page_buf_ptr);
-    page_entry = H5FL_FREE(H5PB_entry_t, page_entry);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5PB__make_space() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5PB__write_entry()
- *
- * Purpose: ??? 
- *
- *          This function was created without documentation.
- *          What follows is my best understanding of Mohamad's intent.
- *
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Mohamad Chaarawi
+ * Changes:     None.
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5PB__write_entry(H5F_t *f, H5PB_entry_t *page_entry)
+H5PB__write_raw(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size, 
+                const void *buf/*out*/)
 {
-    haddr_t eoa;                    /* Current EOA for the file */
-    herr_t ret_value = SUCCEED;    /* Return value */
+    H5PB_t *pb_ptr;                    /* Page buffer for this file */
+    H5PB_entry_t *entry_ptr;           /* Pointer to page buffer entry */
+    uint64_t first_page;		/* page offset of first I/O */
+    uint64_t last_page;                 /* page offset of last I/O */
+    uint64_t search_page;               /* page offset of current page */
+    haddr_t first_page_addr;            /* address of first page of I/O */
+    haddr_t last_page_addr;             /* address of last page of I/O */
+    haddr_t search_addr;                /* Address of current page */
+    hsize_t num_touched_pages;          /* Number of pages accessed */
+    hsize_t i;                          /* Local index variable */
+    size_t length;                      /* length of write in a page */
+    size_t offset;                      /* offset of write in a page */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_NOAPI(FAIL)
 
-    /* Sanity check */
+    /* Sanity checks */
     HDassert(f);
-    HDassert(page_entry);
+    HDassert(f->shared);
+    HDassert(f->shared->pb_ptr);
 
-    /* Retrieve the 'eoa' for the file */
-    if(HADDR_UNDEF == (eoa = H5F_get_eoa(f, (H5FD_mem_t)page_entry->type)))
-        HGOTO_ERROR(H5E_PAGEBUF, H5E_CANTGET, FAIL, "driver get_eoa request failed")
+    pb_ptr = f->shared->pb_ptr;
 
-    /* If the starting address of the page is larger than
-     * the EOA, then the entire page is discarded without writing.
-     */
-    if(page_entry->addr <= eoa) {
-        H5FD_t *file;                   /* File driver I/O info */
-        size_t page_size = f->shared->page_buf->page_size;
+    HDassert(pb_ptr->magic == H5PB__H5PB_T_MAGIC);
+    HDassert(pb_ptr->min_md_pages < pb_ptr->max_pages);
+    HDassert(f->shared->lf);
 
-        /* Adjust the page length if it exceeds the EOA */
-        if((page_entry->addr + page_size) > eoa)
-            page_size = (size_t)(eoa - page_entry->addr);
+    HDassert(H5FD_MEM_DRAW == type);
 
-        /* Translate to file driver I/O info object */
-        file = f->shared->lf;
+    /* Calculate the aligned address of the first page */
+    first_page = (addr / pb_ptr->page_size);
+    first_page_addr = first_page * pb_ptr->page_size;
 
-        if(H5FD_write(file, (H5FD_mem_t)page_entry->type, page_entry->addr, page_size, page_entry->page_buf_ptr) < 0)
-            HGOTO_ERROR(H5E_PAGEBUF, H5E_WRITEERROR, FAIL, "file write failed")
-    } /* end if */
+    /* Calculate the aligned address of the last page */
+    last_page = ((addr + size - 1) / pb_ptr->page_size);
+    last_page_addr = last_page * pb_ptr->page_size;
 
-    page_entry->is_dirty = FALSE;
+    /* Calculate number of pages that this read spans. */
+    num_touched_pages = last_page - first_page + 1;
+
+    if ( first_page_addr == last_page_addr ) {
+
+        HDassert(1 == num_touched_pages);
+        last_page_addr = HADDR_UNDEF;
+
+    }
+
+    /* case 3) raw data write of page size or greater. */
+    if ( size >= pb_ptr->page_size ) {
+#if VFD_IO
+        if ( H5FD_write(f->shared->lf, type, addr, size, buf) < 0 )
+#else /* VFD_IO */
+        if ( H5F__accum_write(f, type, addr, size, buf) < 0 )
+#endif /* VFD_IO */
+
+            HGOTO_ERROR(H5E_PAGEBUF, H5E_WRITEERROR, FAIL, \
+                        "write through metadata accumulator failed")
+
+        /* For each page that intersects with the above write, check to see 
+         * if it exists in the page buffer.
+         *
+         * If it does and is, and if the write overwrites page fully,
+         * mark the page clean and evict it.
+         *
+         * If the write only partially intersects a page, update the 
+         * page and mark it dirty.
+         */
+        search_page = first_page;
+        search_addr = first_page_addr;
+
+        for(i = 0; i < num_touched_pages; i++) {
+
+            H5PB__SEARCH_INDEX(pb_ptr, search_page, entry_ptr, FAIL)
+
+            /* update hit rate stats */
+            H5PB__UPDATE_PB_HIT_RATE_STATS(pb_ptr, (entry_ptr != NULL), \
+                                           FALSE, FALSE)
+
+#if 1 /* JRM */
+            /* Since the space allocation code doesn't always tell the page
+             * buffer when a page is freed, it is possible that the page
+             * found by the index search is an ophaned metadata page.  
+             *
+             * Until this is fixed, test to see entry_ptr points to 
+             * a metadata page, and force its eviction if it does.
+             *
+             * Remove this code as soon as the space allocation code is 
+             * updated to tell the page buffer to discard pages when 
+             * they are freed.
+             */
+            if ( ( entry_ptr ) && ( entry_ptr->is_metadata ) ) {
+
+                if ( H5PB__evict_entry(pb_ptr, entry_ptr, TRUE) < 0 )
+
+                    HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
+                                "forced eviction failed")
+
+                entry_ptr = NULL;
+            }
+#endif /* JRM */
+
+            if ( entry_ptr ) {
+
+                HDassert( entry_ptr->magic == H5PB__H5PB_ENTRY_T_MAGIC );
+                HDassert( ! ( entry_ptr->is_metadata ) );
+                HDassert( entry_ptr->page == search_page );
+                HDassert( entry_ptr->addr == search_addr );
+                HDassert( entry_ptr->size == pb_ptr->page_size );
+                HDassert( entry_ptr->delay_write_until == 0 );
+                HDassert( entry_ptr->addr <= addr + size );
+
+                if ( ( addr <= entry_ptr->addr ) &&
+                     ( entry_ptr->addr + entry_ptr->size <= addr + size ) ) {
+
+                    /* the page is completely overwritten -- mark it clean
+                     * and evict it.
+                     */
+                    if ( ( entry_ptr->is_dirty ) && 
+                         ( H5PB__mark_entry_clean(pb_ptr, entry_ptr) < 0 ) )
+
+                        HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
+                                    "mark entry clean failed")
+
+                    if ( H5PB__evict_entry(pb_ptr, entry_ptr, TRUE) < 0 )
+
+                        HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
+                                    "forced eviction failed (1)")
+
+                } else if ( i == 0 ) {
+
+                    /* handle partial overwrite of the first page.  */
+
+                    HDassert( search_addr == first_page_addr );
+                    HDassert( search_page == first_page );
+                    HDassert( search_addr < addr );
+                    HDassert( entry_ptr->addr + entry_ptr->size <= 
+                              addr + size );
+
+                    offset = addr - first_page_addr;
+
+                    HDassert( offset > 0 );
+                    HDassert( pb_ptr->page_size >= offset );
+                    HDassert( size >=  pb_ptr->page_size - (size_t)offset );
+
+                    HDmemcpy((uint8_t *)entry_ptr->image_ptr + offset, buf, 
+                             pb_ptr->page_size - (size_t)offset);
+
+                    if ( H5PB__mark_entry_dirty(pb_ptr, entry_ptr) < 0 )
+
+                        HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
+                                    "mark entry dirty failed (1)")
+
+                } else if ( i == num_touched_pages - 1 ) {
+
+                    /* handle partial overwrite of the last page.  */
+                    HDassert( i > 0 );
+                    HDassert( search_addr == last_page_addr );
+                    HDassert( search_page == last_page );
+                    HDassert( addr < last_page_addr );
+                    HDassert( last_page_addr < addr + size ); 
+
+                    offset = (num_touched_pages - 2) * pb_ptr->page_size + 
+                             (pb_ptr->page_size - (addr - first_page_addr));
+
+                    HDmemcpy(entry_ptr->image_ptr, 
+                             (const uint8_t *)buf + offset,
+                             (size_t)((addr + size) - last_page_addr));
+
+                    if ( H5PB__mark_entry_dirty(pb_ptr, entry_ptr) < 0 )
+
+                        HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
+                                    "mark entry dirty failed (2)")
+                } else {
+
+                    /* this should be un-reachable */
+                    HDassert(FALSE);
+
+                }
+            } /* if ( entry_ptr ) */
+
+            search_page++;
+            search_addr += pb_ptr->page_size;
+
+        } /* end for */
+    } else {
+        /* case 4: Raw data write of size less than page size. 
+         *
+         * In this case, write the data to the page buffer, loading
+         * pages if necessary.
+         */
+        HDassert(size < pb_ptr->page_size);
+
+        /* first page */
+        offset = addr - first_page_addr;
+
+        if ( (offset + size) <= pb_ptr->page_size ) {
+
+            HDassert(num_touched_pages == 1);
+            length = size;
+
+        } else {
+
+            HDassert(num_touched_pages == 2);
+            length = pb_ptr->page_size - offset;
+            HDassert( offset + length == pb_ptr->page_size );
+        }
+
+        /* get the first page */
+        H5PB__SEARCH_INDEX(pb_ptr, first_page, entry_ptr, FAIL)
+
+        /* update hit rate stats */
+        H5PB__UPDATE_PB_HIT_RATE_STATS(pb_ptr, (entry_ptr != NULL), \
+                                       FALSE, FALSE)
+
+        if ( ( NULL == entry_ptr ) &&
+             ( H5PB__load_page(f, pb_ptr, first_page_addr, 
+                                type, &entry_ptr) < 0 ) )
+
+            HGOTO_ERROR(H5E_PAGEBUF, H5E_READERROR, FAIL, \
+                        "page buffer page load request failed (1)")
+
+        HDassert(entry_ptr);
+        HDassert(entry_ptr->magic == H5PB__H5PB_ENTRY_T_MAGIC);
+        HDassert(entry_ptr->addr == first_page_addr);
+
+
+        /* copy data from the write buffer into the first page */
+        HDmemcpy(((uint8_t *)(entry_ptr->image_ptr)) + offset, 
+                 (const uint8_t *)buf, length);
+
+        if ( H5PB__mark_entry_dirty(pb_ptr, entry_ptr) < 0 )
+
+            HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
+                        "mark entry dirty failed (3)")
+
+        /* second page, if it exists */
+        if ( num_touched_pages == 2 ) {
+
+            offset = length;
+            length = size - offset;
+
+            HDassert(offset + length == size);
+
+            /* get the first page */
+            H5PB__SEARCH_INDEX(pb_ptr, last_page, entry_ptr, FAIL)
+
+            /* update hit rate stats */
+            H5PB__UPDATE_PB_HIT_RATE_STATS(pb_ptr, (entry_ptr != NULL), \
+                                           FALSE, FALSE)
+
+            if ( ( NULL == entry_ptr ) &&
+                 ( H5PB__load_page(f, pb_ptr, last_page_addr, 
+                                    type, &entry_ptr) < 0 ) )
+
+                HGOTO_ERROR(H5E_PAGEBUF, H5E_READERROR, FAIL, \
+                            "page buffer page load request failed (2)")
+
+            HDassert(entry_ptr);
+            HDassert(entry_ptr->magic == H5PB__H5PB_ENTRY_T_MAGIC);
+            HDassert(entry_ptr->addr == last_page_addr);
+            HDassert(entry_ptr->page == last_page);
+
+            /* copy data from the write buffer into the first page */
+            HDmemcpy((uint8_t *)(entry_ptr->image_ptr), 
+                     ((const uint8_t *)(buf) + offset), length);
+
+            if ( H5PB__mark_entry_dirty(pb_ptr, entry_ptr) < 0 )
+
+                HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
+                            "mark entry dirty failed (3)")
+        }
+    }
 
 done:
+
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5PB__write_entry() */
+
+} /* end H5PB__write_raw() */
 

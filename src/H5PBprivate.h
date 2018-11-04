@@ -11,68 +11,530 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/*-------------------------------------------------------------------------
+/*
+ * File:        H5PBprivate.h
  *
- * Created:		H5PBprivate.h
- *			June 2014
- *			Mohamad Chaarawi
+ * Purpose:     This file contains declarations which are normally visible
+ *              within the HDF5 library, but are not visible at the user 
+ *              level
  *
- *-------------------------------------------------------------------------
+ * Programmer: John Mainzer -- 10/07/18
  */
 
 #ifndef _H5PBprivate_H
 #define _H5PBprivate_H
 
 /* Include package's public header */
-#ifdef NOT_YET
-#include "H5PBpublic.h"
-#endif /* NOT_YET */
+
+/* no H5PBpublic.h at present */
+
 
 /* Private headers needed by this header */
 #include "H5private.h"		/* Generic Functions			*/
-#include "H5Fprivate.h"		/* File access				*/
-#include "H5FLprivate.h"	/* Free Lists                           */
-#include "H5SLprivate.h"	/* Skip List				*/
 
 
 /**************************/
 /* Library Private Macros */
 /**************************/
 
+#define H5PB__HASH_TABLE_LEN                4096  /* must be a power of 2 */
+
 
 /****************************/
 /* Library Private Typedefs */
 /****************************/
 
-/* Forward declaration for a page buffer entry */
-struct H5PB_entry_t;
+/* Typedef for the page buffer entry structure (defined in H5PBpkg.h) */
+typedef struct H5PB_entry_t H5PB_entry_t;
 
-/* Typedef for the main structure for the page buffer */
+
+
+/******************************************************************************
+ * 
+ * structure H5PB_t
+ *
+ * Catchall structure for all variables specific to an instance of the page 
+ * buffer.
+ *
+ * At present, the page buffer serves two purposes in the HDF5 library.
+ *
+ * Under normal operating conditions, it serves as a normal page buffer whose
+ * purpose is to minimize and optimize file I/O by aggregating small metadata 
+ * and raw data writes into pages, and by caching frequently used pages.
+ *
+ * In addition, when a file is opened for VFD SWMR writing, the page buffer is 
+ * used to retain copies of all metadata pages and multi-page metadata entries
+ * that are written in a given tick, and under certain cases, to delay metadata 
+ * page and/or multi-page metadata entry writes for some number of ticks.  
+ * If the entry has not appeared in the VFD SWMR index for at least max_lag 
+ * ticks, this is necessary to avoid message from the future bugs.  See the 
+ * VFD SWMR RFC for further details.
+ *
+ * To reflect this, the fields of this structure are divided into three 
+ * sections.  Specifically fields needed for general operations, fields needed 
+ * for VFD SWMR, and statistics.
+ *
+ * FIELDS FOR GENERAL OPERATIONS:
+ *
+ * magic:       Unsigned 32 bit integer that must always be set to 
+ *              H5PB__H5PB_T_MAGIC.  This field is used to validate pointers to 
+ *              instances of H5PB_t.
+ *
+ * page_size:   size_t containing the page buffer page size in bytes.
+ *
+ * max_pages:   64 bit integer containing the nominal maximum number 
+ *              of pages in the page buffer.  Note that on creation, the page 
+ *              buffer is empty, and that under certain circumstances (mostly
+ *              related to VFD SWMR) this limit can be exceeded by large 
+ *              amounts.
+ * 
+ * curr_pages:  64 bit integer containing the current number of pages
+ *              in the page buffer.  curr_pages must always equal the sum of 
+ *              curr_md_pages + curr_rd_pages.
+ *
+ *              Note that in the context of VFD SWMR, this count does NOT 
+ *              include multi-page metadata entries.
+ *
+ * curr_md_pages: 64 bit integer containing the current number of 
+ *              metadata pages in the page buffer.
+ *
+ *              Note that in the context of VFD SWMR, this count does NOT 
+ *              include multi-page metadata entries.
+ *
+ * curr_rd_pages: 64 bit integer containing the current number of 
+ *              raw data pages in the page buffer.
+ * 
+ * min_md_pages: 64 bit integer containing the number of pages in the 
+ *              page buffer reserved for metadata.  No metadata page may be 
+ *              evicted from the page buffer if curr_md_pages is less than or
+ *              equal to this value.
+ * 
+ * min_rd_pages: 64 bin integer containing the number of pages in the 
+ *              page buffer reserved for raw data.  No page or raw data may be 
+ *              evicted from the page buffer if curr_rd_pages is less than or
+ *              equal to this value.
+ *
+ * The FAPL fields are used to store the page buffer configuration data 
+ * provided to the page buffer in the H5PB_create() call.
+ *
+ * max_size:    Maximum page buffer size supplied by the FAPL.
+ *
+ * min_meta_perc: Percent of the page buffer reserved for metadata as 
+ *              supplied in the FAPL.
+ *
+ * min_raw_perc: Percent of the page buffer reserved for metadata as 
+ *              supplied in the FAPL.
+ *
+ * The purpose of the index is to allow us to efficiently look up all pages
+ * (and multi-page metadata entries in the context of VFD SWMR) in the 
+ * page buffer.  
+ * 
+ * This function is provided by a hash table with chaining, albeit with one 
+ * un-unusual feature.
+ *
+ * Specifically hash table size must be a power of two, and the hash function
+ * simply clips the high order bits off the page offset of the entry.
+ * 
+ * This should work, as space is typically allocated sequentually, and thus 
+ * via a reverse principle of locality argument, hot pages are unlikely to 
+ * hash to the same bucket.  That said, we must collect statistics to alert 
+ * us should this not be the case.
+ *
+ * index        Array of pointer to H5PB_entry_t of size
+ *              H5PB__HASH_TABLE_LEN.  This size must ba a power of 2,
+ *              not the usual prime number.
+ *
+ * index_len:   Number of entries currently in the hash table used to index
+ *              the page buffer.
+ *
+ * index_size:  Number of bytes currently stored in the hash table used to 
+ *              index the page buffer.  Under normal circumstances, this 
+ *              value will be index_len * page size.  However, if
+ *              vfd_swmr_writer is TRUE, it may be larger.
+ *
+ * Fields supporting the modified LRU policy:
+ *
+ * See most any OS text for a discussion of the LRU replacement policy.
+ *
+ * Discussions of the individual fields used by the modified LRU replacement
+ * policy follow:
+ *
+ * LRU_len:     Number of page buffer entries currently on the LRU.
+ *
+ *              Observe that LRU_len + dwl_len must always equal 
+ *              index_len.
+ *
+ * LRU_size:    Number of bytes of page buffer entries currently residing 
+ *              on the LRU list.
+ *
+ *              Observe that LRU_size + dwl_size must always equal 
+ *              index_size.  
+ *
+ * LRU_head_ptr:  Pointer to the head of the doubly linked LRU list.  Page
+ *              buffer entries on this list are linked by their next and 
+ *              prev fields.
+ *
+ *              This field is NULL if the list is empty.
+ *
+ * LRU_tail_ptr:  Pointer to the tail of the doubly linked LRU list.  Page 
+ *              buffer entries on this list are linked by their next and 
+ *              prev fields.
+ *
+ *              This field is NULL if the list is empty.
+ *
+ *
+ * FIELDS FOR VFD SWMR:
+ *
+ * vfd_swmr_writer: Boolean flag that is set to TRUE iff the file is 
+ *              the file is opened in VFD SWMR mode.  The remaining 
+ *              VFD SWMR flags are defined iff vfd_swmr_writer is TRUE.
+ *
+ * mpmde_count: int64_t containing the number of multi-page metadata 
+ *              entries currently resident in the page buffer.  Observe 
+ *              that index_len should always equal curr_pages + mpmde_count.
+ *
+ * cur_tick:    uint64_t containing the current tick.  This is a copy of 
+ *              the same field in the associated instance of H5F_file_t,
+ *              and is maintained as a convenience.
+ *
+ * In the context of VFD SWMR the delayed write list allows us to delay 
+ * metadata writes to the HDF5 file until it appears in all indexes in the
+ * last max_lag ticks.  This is essential if a version of the page or 
+ * multi-page metadata entry already exists in the HDF5 file -- failure to 
+ * delay the write can result in a message from the future which will 
+ * likely be perciived as file corruption by the reader.
+ *
+ * To facilitate identification of entries that must be removed from the 
+ * DWL, the list always observes the following invarient for any entry
+ * on the list:
+ *
+ *    entry_ptr->next == NULL ||
+ *    entry_ptr->delay_write_until >= entry_ptr->next->delay_write_until
+ *
+ * Discussion of the fields used to implement the delayed write list follows:
+ *
+ * max_delay:   Maximum of the delay_write_until fields of the entries on 
+ *              the delayed write list.  This must never be more than max_lag
+ *              ticks in advance of the current tick, and should be set to 
+ *              zero if the delayed write list is empty.
+ *
+ * dwl_len:     Number of page buffer entries currently on the delayed
+ *              write list.
+ *
+ *              Observe that LRU_len + dwl_len must always equal 
+ *              index_len.
+ *
+ * dwl_size:    Number of bytes of page buffer entries currently residing 
+ *              on the LRU list.
+ *
+ *              Observe that LRU_size + dwl_size must always equal 
+ *              index_size.  
+ *
+ * dwl_head_ptr:  Pointer to the head of the doubly linked delayed write list.
+ *              Page buffer entries on this list are linked by their next and 
+ *              prev fields.
+ *
+ *              This field is NULL if the list is empty.
+ *
+ * dwl_tail_ptr:  Pointer to the tail of the doubly linked delayed write list.
+ *              Page buffer entries on this list are linked by their next and 
+ *              prev fields.
+ *
+ *              This field is NULL if the list is empty.
+ *
+ * For VFD SWMR to function, copies of all pages modified during a tick must
+ * be retained in the page buffer to allow correct updates to the index and
+ * metadata file at the end of tick.
+ *
+ * To implement this, all entries modified during the current tick are placed
+ * on the tick list.  Entries are removed from the tick list during end of 
+ * tick processing, so each tick starts with an empty tick list.
+ *
+ * Unless the entry also resides on the delayed write list, entries on the 
+ * tick list may be flushed, but they may not be evicted.
+ *
+ * Discussion of the fields used to implement the tick list follows:
+ *
+ * tl_len:      Number of page buffer entries currently on the tick list
+ *
+ * tl_size:     Number of bytes of page buffer entries currently residing 
+ *              on the tick list.
+ *
+ * tl_head_ptr:  Pointer to the head of the doubly linked tick list.
+ *              Page buffer entries on this list are linked by their tl_next 
+ *              and tl_prev fields.
+ *
+ *              This field is NULL if the list is empty.
+ *
+ * tl_tail_ptr:  Pointer to the tail of the doubly linked tick list.
+ *              Page buffer entries on this list are linked by their tl_next 
+ *              and tl_prev fields.
+ *
+ *              This field is NULL if the list is empty.
+ *
+ *
+ * STATISTICS:
+ *
+ * Multi-page metadata entries (which may only appear in VFD 
+ * SWMR mode) are NOT counted in the following statistics.
+ *
+ * Note that all statistics fields contain only data since the last time 
+ * that statistics were reset.
+ *
+ * bypasses:    Array of int64_t of length H5PB__NUM_STAT_TYPES containing
+ *              the number of times that the page buffer has been 
+ *              bypassed for raw data, metadata, and for multi-page 
+ *               metadata entries (VFD SWMR only) as indexed by 5PB__STATS_MD, 
+ *              H5PB__STATS_RD, and H5PB__STATS_MPMDE respectively.
+ *
+ * accesses:    Array of int64_t of length H5PB__NUM_STAT_TYPES containing 
+ *              the number of page buffer accesses for raw data, metadata,
+ *              and for multi-page metadata entries (VFD SWMR only) as 
+ *              indexed by 5PB__STATS_MD, H5PB__STATS_RD, and 
+ *              H5PB__STATS_MPMDE respectively.  
+ *
+ * hits:        Array of int64_t of length H5PB__NUM_STAT_TYPES containing 
+ *              the number of page buffer hits for raw data, metadata,
+ *              and for multi-page metadata entries (VFD SWMR only) as 
+ *              indexed by 5PB__STATS_MD, H5PB__STATS_RD, and 
+ *              H5PB__STATS_MPMDE respectively.
+ *
+ * misses:      Array of int64_t of length H5PB__NUM_STAT_TYPES containing 
+ *              the number of page buffer misses for raw data, metadata,
+ *              and for multi-page metadata entries (VFD SWMR only) as 
+ *              indexed by 5PB__STATS_MD, H5PB__STATS_RD, and 
+ *              H5PB__STATS_MPMDE respectively.
+ *
+ * loads:       Array of int64_t of length H5PB__NUM_STAT_TYPES containing 
+ *              the number of page buffer loads for raw data, metadata,
+ *              and for multi-page metadata entries (VFD SWMR only) as 
+ *              indexed by 5PB__STATS_MD, H5PB__STATS_RD, and 
+ *              H5PB__STATS_MPMDE respectively.
+ *
+ * insertions:  Array of int64_t of length H5PB__NUM_STAT_TYPES containing 
+ *              the number of page buffer insertions of raw data, metadata,
+ *              and for multi-page metadata entries (VFD SWMR only) as 
+ *              indexed by 5PB__STATS_MD, H5PB__STATS_RD, and 
+ *              H5PB__STATS_MPMDE respectively.
+ *
+ * flushes:     Array of int64_t of length H5PB__NUM_STAT_TYPES containing 
+ *              the number of page buffer flushes of raw data, metadata,
+ *              and for multi-page metadata entries (VFD SWMR only) as 
+ *              indexed by 5PB__STATS_MD, H5PB__STATS_RD, and 
+ *              H5PB__STATS_MPMDE respectively.
+ *
+ * evictions:   Array of int64_t of length H5PB__NUM_STAT_TYPES containing 
+ *              the number of page buffer evictions of raw data, metadata,
+ *              and for multi-page metadata entries (VFD SWMR only) as 
+ *              indexed by 5PB__STATS_MD, H5PB__STATS_RD, and 
+ *              H5PB__STATS_MPMDE respectively.
+ *
+ * clears:      Array of int64_t of length H5PB__NUM_STAT_TYPES containing 
+ *              the number of page buffer entry clears of raw data, metadata,
+ *              and for multi-page metadata entries (VFD SWMR only) as 
+ *              indexed by 5PB__STATS_MD, H5PB__STATS_RD, and 
+ *              H5PB__STATS_MPMDE respectively.
+ *
+ * max_lru_len: int64_t containing the maximum number of entries that 
+ *              have appeared in the LRU.
+ *
+ * max_lru_size: int64_t containing the maximum size of the LRU.
+ *
+ * lru_md_skips: When searching for an entry to evict, metadata entries on 
+ *              the LRU must be skipped if the number of metadata pages 
+ *              in the page buffer fails to exceed min_md_pages.
+ *
+ *              This int64_t is used to keep a count of these skips.
+ *
+ *              If this number becomes excessive, it will be necessary to 
+ *              add a holding tank for such entries.
+ *
+ * lru_rd_skips: When searching for an entry to evict, raw data entries on 
+ *              the LRU must be skipped if the number of raw data pages 
+ *              in the page buffer fails to exceed min_rd_pages.
+ *
+ *              This int64_t is used to keep a count of these skips.
+ *
+ *              If this number becomes excessive, it will be necessary to 
+ *              add a holding tank for such entries.
+ *
+ * Multi-page metadata entries (which appear only in VFD SWMR mode) are 
+ * listed in the hash take, and thus they are counted in the following 
+ * statistics.
+ *
+ * total_ht_insertions: Number of times entries have been inserted into the
+ *              hash table.
+ *
+ * total_ht_deletions: Number of times entries have been deleted from the
+ *              hash table.
+ *
+ * successful_ht_searches: int64 containing the total number of successful
+ *              searches of the hash table.
+ *
+ * total_successful_ht_search_depth: int64 containing the total number of
+ *              entries other than the targets examined in successful
+ *              searches of the hash table.
+ *
+ * failed_ht_searches: int64 containing the total number of unsuccessful
+ *              searches of the hash table.
+ *
+ * total_failed_ht_search_depth: int64 containing the total number of
+ *              entries examined in unsuccessful searches of the hash
+ *              table.
+ *
+ * max_index_len:  Largest value attained by the index_len field.
+ *
+ * max_index_size:  Largest value attained by the index_size field.
+ *
+ * max_rd_pages: Maximum number of raw data pages in the page buffer.
+ *
+ * max_md_pages: Maximum number of metadata pages in the page buffer.
+ *
+ *
+ * Statistics pretaining to VFD SWMR.
+ *
+ * max_mpmde_count: Maximum number of multi-page metadata entries in the 
+ *              page buffer.
+ *
+ * lru_tl_skips: When searching for an entry to evict, metadata entries on 
+ *              the LRU must be skipped if they also reside on the tick list.
+ *
+ *              This int64_t is used to keep a count of these skips.
+ *
+ *              If this number becomes excessive, it will be necessary to 
+ *              add a holding tank for such entries.
+ *
+ * lru_dwl_skips: When searching for an entry to evict, metadata entries on 
+ *              the LRU must be skipped if they also reside on the tick list.
+ *
+ *              This int64_t is used to keep a count of these skips.
+ *
+ *              If this number becomes excessive, it will be necessary to 
+ *              add a holding tank for such entries.
+ *
+ * max_tl_len:  int64_t containing the maximum value of tl_len.
+ *
+ * max_tl_size: int64_t containing the maximum value of tl_size.
+ *
+ * delayed_writes: int64_t containing the total number of delayed writes.
+ *
+ * total_delay: int64_t containing the total number of ticks by which 
+ *              entry writes have been delayed.
+ *
+ * max_dwl_len: int64_t containing the maximum value of dwl_len.
+ *
+ * max_dwl_size: int64_t containing the maximum value of dwl_size.
+ *
+ * total_dwl_ins_depth: int64_t containing the total insertion depth 
+ *              required to maintain the odering invarient on the 
+ *              delayed write list.
+ *    
+ ******************************************************************************/
+
+#define H5PB__H5PB_T_MAGIC  0x01020304
+
+#define H5PB__STATS_MD          0
+#define H5PB__STATS_RD          1
+#define H5PB__STATS_MPMDE       2
+#define H5PB__NUM_STAT_TYPES    3
+
 typedef struct H5PB_t {
-    size_t              max_size;           /* The total page buffer size */
-    size_t              page_size;          /* Size of a single page */
-    unsigned            min_meta_perc;      /* Minimum ratio of metadata entries required before evicting meta entries */
-    unsigned            min_raw_perc;       /* Minimum ratio of raw data entries required before evicting raw entries */
-    unsigned            meta_count;         /* Number of entries for metadata */
-    unsigned            raw_count;          /* Number of entries for raw data */
-    unsigned            min_meta_count;     /* Minimum # of entries for metadata */
-    unsigned            min_raw_count;      /* Minimum # of entries for raw data */
 
-    H5SL_t              *slist_ptr;         /* Skip list with all the active page entries */
-    H5SL_t              *mf_slist_ptr;      /* Skip list containing newly allocated page entries inserted from the MF layer */
+    /* Fields for general operations: */
 
-    size_t              LRU_list_len;       /* Number of entries in the LRU (identical to slist_ptr count) */
-    struct H5PB_entry_t *LRU_head_ptr;      /* Head pointer of the LRU */
-    struct H5PB_entry_t *LRU_tail_ptr;      /* Tail pointer of the LRU */
+    uint32_t magic;
+    size_t page_size;
+    int64_t max_pages;
+    int64_t curr_pages;
+    int64_t curr_md_pages;
+    int64_t curr_rd_pages;
+    int64_t min_md_pages;
+    int64_t min_rd_pages;
 
-    H5FL_fac_head_t     *page_fac;           /* Factory for allocating pages */
+    /* FAPL fields */
+    size_t max_size;
+    unsigned min_meta_perc; 
+    unsigned min_raw_perc;
 
-    /* Statistics */
-    unsigned            accesses[2];
-    unsigned            hits[2];
-    unsigned            misses[2];
-    unsigned            evictions[2];
-    unsigned            bypasses[2];
+    /* index */
+    H5PB_entry_t *(ht[H5PB__HASH_TABLE_LEN]);
+    int64_t index_len;
+    int64_t index_size;
+
+    /* LRU */
+    int64_t LRU_len;
+    int64_t LRU_size;
+    H5PB_entry_t * LRU_head_ptr;
+    H5PB_entry_t * LRU_tail_ptr;
+
+
+    /* Fields for VFD SWMR operations: */
+
+    hbool_t vfd_swmr_writer;
+    int64_t mpmde_count;
+    uint64_t cur_tick;
+
+    /* delayed write list */
+    uint64_t max_delay;
+    int64_t dwl_len;
+    int64_t dwl_size;
+    H5PB_entry_t * dwl_head_ptr;
+    H5PB_entry_t * dwl_tail_ptr;
+
+    /* tick list */
+    int64_t tl_len;
+    int64_t tl_size;
+    H5PB_entry_t * tl_head_ptr;
+    H5PB_entry_t * tl_tail_ptr;
+
+    /* Statistics: */
+
+    /* general operations statistics: */
+    /* these statistics count pages only, not multi-page metadata entries
+     * (that occur only in the VFD SWMR writer case).
+     */
+    int64_t bypasses[H5PB__NUM_STAT_TYPES];
+    int64_t accesses[H5PB__NUM_STAT_TYPES];
+    int64_t hits[H5PB__NUM_STAT_TYPES];
+    int64_t misses[H5PB__NUM_STAT_TYPES];
+    int64_t loads[H5PB__NUM_STAT_TYPES];
+    int64_t insertions[H5PB__NUM_STAT_TYPES];
+    int64_t flushes[H5PB__NUM_STAT_TYPES];
+    int64_t evictions[H5PB__NUM_STAT_TYPES];
+    int64_t clears[H5PB__NUM_STAT_TYPES];
+    int64_t max_lru_len;
+    int64_t max_lru_size;
+    int64_t lru_md_skips;
+    int64_t lru_rd_skips;
+
+    /* In the VFD SWMR case, both pages and multi-page metadata entries
+     * are stored in the index.  Thus mult-page metadata entries are 
+     * included in the index related statistics.
+     */
+    int64_t total_ht_insertions;
+    int64_t total_ht_deletions;
+    int64_t successful_ht_searches;
+    int64_t total_successful_ht_search_depth;
+    int64_t failed_ht_searches;
+    int64_t total_failed_ht_search_depth;
+    int64_t max_index_len;
+    int64_t max_index_size;
+    int64_t max_rd_pages;
+    int64_t max_md_pages;
+
+
+    /* vfd swmr statistics */
+    int64_t max_mpmde_count;
+    int64_t lru_tl_skips;
+    int64_t lru_dwl_skips;
+    int64_t max_tl_len;
+    int64_t max_tl_size;
+    int64_t delayed_writes;
+    int64_t total_delay;
+    int64_t max_dwl_len;
+    int64_t max_dwl_size;
+    int64_t total_dwl_ins_depth;
+
 } H5PB_t;
 
 /*****************************/
@@ -85,20 +547,38 @@ typedef struct H5PB_t {
 /***************************************/
 
 /* General routines */
-H5_DLL herr_t H5PB_create(H5F_t *file, size_t page_buffer_size, unsigned page_buf_min_meta_perc, unsigned page_buf_min_raw_perc);
+H5_DLL herr_t H5PB_create(H5F_t *file, size_t page_buffer_size, 
+    unsigned page_buf_min_meta_perc, unsigned page_buf_min_raw_perc);
+
 H5_DLL herr_t H5PB_flush(H5F_t *f);
+
 H5_DLL herr_t H5PB_dest(H5F_t *f);
+
 H5_DLL herr_t H5PB_add_new_page(H5F_t *f, H5FD_mem_t type, haddr_t page_addr);
-H5_DLL herr_t H5PB_update_entry(H5PB_t *page_buf, haddr_t addr, size_t size, const void *buf);
+
+H5_DLL herr_t H5PB_update_entry(H5PB_t *page_buf, haddr_t addr, size_t size, 
+    const void *buf);
+
 H5_DLL herr_t H5PB_remove_entry(const H5F_t *f, haddr_t addr);
-H5_DLL herr_t H5PB_read(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size, void *buf/*out*/);
-H5_DLL herr_t H5PB_write(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size, const void *buf);
+
+H5_DLL herr_t H5PB_read(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size, 
+    void *buf/*out*/);
+
+H5_DLL herr_t H5PB_write(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size, 
+    const void *buf);
 
 /* Statistics routines */
 H5_DLL herr_t H5PB_reset_stats(H5PB_t *page_buf);
+
 H5_DLL herr_t H5PB_get_stats(const H5PB_t *page_buf, unsigned accesses[2],
-    unsigned hits[2], unsigned misses[2], unsigned evictions[2], unsigned bypasses[2]);
+    unsigned hits[2], unsigned misses[2], unsigned evictions[2], 
+    unsigned bypasses[2]);
+
 H5_DLL herr_t H5PB_print_stats(const H5PB_t *page_buf);
+
+/* test & debug functions */
+H5_DLL herr_t H5PB_page_exists(H5F_t *f, haddr_t addr, 
+    hbool_t *page_exists_ptr);
 
 #endif /* !_H5PBprivate_H */
 

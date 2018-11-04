@@ -1822,11 +1822,11 @@ H5Freset_page_buffering_stats(hid_t file_id)
     /* Check args */
     if(NULL == (file = (H5F_t *)H5I_object(file_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
-    if(NULL == file->shared->page_buf)
+    if(NULL == file->shared->pb_ptr)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "page buffering not enabled on file")
 
     /* Reset the statistics */
-    if(H5PB_reset_stats(file->shared->page_buf) < 0)
+    if(H5PB_reset_stats(file->shared->pb_ptr) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't reset stats for page buffering")
 
 done:
@@ -1857,13 +1857,13 @@ H5Fget_page_buffering_stats(hid_t file_id, unsigned accesses[2], unsigned hits[2
     /* Check args */
     if(NULL == (file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
-    if(NULL == file->shared->page_buf)
+    if(NULL == file->shared->pb_ptr)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "page buffering not enabled on file")
     if(NULL == accesses || NULL == hits || NULL == misses || NULL == evictions || NULL == bypasses)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL input parameters for stats")
 
     /* Get the statistics */
-    if(H5PB_get_stats(file->shared->page_buf, accesses, hits, misses, evictions, bypasses) < 0)
+    if(H5PB_get_stats(file->shared->pb_ptr, accesses, hits, misses, evictions, bypasses) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't retrieve stats for page buffering")
 
 done:

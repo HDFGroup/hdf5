@@ -295,7 +295,9 @@ struct H5F_file_t {
     unsigned long feature_flags; /* VFL Driver feature Flags            */
     haddr_t	maxaddr;	/* Maximum address for file             */
 
-    H5PB_t      *page_buf;                  /* The page buffer cache                */
+    H5PB_t      *pb_ptr;        /* pointer to the page buffer, or NULL  */
+                                /* if the page buffer is disabled.      */
+
     H5AC_t      *cache;		/* The object cache	 		*/
     H5AC_cache_config_t
 		mdc_initCacheCfg; /* initial configuration for the      */
