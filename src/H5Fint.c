@@ -2176,14 +2176,6 @@ H5F_get_id(H5F_t *file)
 
     if(H5I_find_id(file, H5I_FILE, &ret_value) < 0 || H5I_INVALID_HID == ret_value) {
         /* resurrect the ID - Register an ID with the native connector */
-{
-void *vol_wrap_ctx = NULL;       /* Object wrapping context */
-
-/* Retrieve the VOL object wrap context */
-if(H5CX_get_vol_wrap_ctx((void **)&vol_wrap_ctx) < 0)
-    HGOTO_ERROR(H5E_VOL, H5E_CANTGET, H5I_INVALID_HID, "can't get VOL object wrap context")
-HDassert(vol_wrap_ctx);
-}
         if((ret_value = H5VL_wrap_register(H5I_FILE, file, FALSE)) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register group")
         file->id_exists = TRUE;
@@ -3244,7 +3236,6 @@ H5F__start_swmr_write(H5F_t *f)
     size_t u;                       /* Local index variable */
     hbool_t setup = FALSE;          /* Boolean flag to indicate whether SWMR setting is enabled */
     H5VL_t *vol_connector = NULL;      /* VOL connector for the file */
-    hbool_t vol_wrapper_set = FALSE; /* Whether the VOL object wrapping context was set up */
     herr_t ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -3315,11 +3306,6 @@ H5F__start_swmr_write(H5F_t *f)
             /* Get the VOL object for one of the IDs */
             if(NULL == (vol_obj = H5VL_vol_object(obj_ids[0])))
                 HGOTO_ERROR(H5E_FILE, H5E_BADTYPE, FAIL, "invalid object identifier")
-
-            /* Set wrapper info in API context */
-            if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->connector) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
-            vol_wrapper_set = TRUE;
 
             /* Get the (top) connector for the ID */
             vol_connector = vol_obj->connector;
@@ -3396,10 +3382,6 @@ H5F__start_swmr_write(H5F_t *f)
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to unlock the file")
 
 done:
-    /* Reset object wrapping info in API context */
-    if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't reset VOL wrapper info")
-
     if(ret_value < 0 && setup) {
 
         /* Re-enable accumulator */
@@ -3504,6 +3486,118 @@ done:
 } /* H5F__format_convert() */
 
 
+/*---------------------------------------------------------------------------
+ * Function:    H5F__get_file
+ *
+ * Purpose:     Utility routine to get file struct for an object
+ *
+ * Returns:     SUCCESS:    A pointer to the H5F_t struct for the file
+ *                          associated with the object.
+ *              FAILURE:    NULL
+ *
+ *---------------------------------------------------------------------------
+ */
+H5F_t *
+H5F__get_file(void *obj, H5I_type_t type)
+{
+    H5F_t      *ret_value  = NULL;         /* File pointer             */
+    H5O_loc_t  *oloc       = NULL;         /* Object location for ID   */
+
+    FUNC_ENTER_PACKAGE
+
+    switch(type) {
+        case H5I_FILE:
+            ret_value = (H5F_t *)obj;
+            break;
+
+        case H5I_GROUP:
+            oloc = H5G_oloc((H5G_t *)obj);
+            break;
+
+        case H5I_DATATYPE:
+            oloc = H5T_oloc((H5T_t *)obj);
+            break;
+
+        case H5I_DATASET:
+            oloc = H5D_oloc((H5D_t *)obj);
+            break;
+
+        case H5I_ATTR:
+            oloc = H5A_oloc((H5A_t *)obj);
+            break;
+
+        case H5I_UNINIT:
+        case H5I_BADID:
+        case H5I_DATASPACE:
+        case H5I_REFERENCE:
+        case H5I_VFL:
+        case H5I_VOL:
+        case H5I_GENPROP_CLS:
+        case H5I_GENPROP_LST:
+        case H5I_ERROR_CLASS:
+        case H5I_ERROR_MSG:
+        case H5I_ERROR_STACK:
+        case H5I_NTYPES:
+        default:
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file or file object")
+    } /* end switch */
+
+    /* Set return value for objects (not files) */
+    if(oloc)
+        ret_value = oloc->file;
+
+    /* Couldn't find a file struct */
+    if(!ret_value)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "object is not associated with a file")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5F__get_file */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F__get_file_id
+ *
+ * Purpose:     The package version of H5Iget_file_id(), obtains the file
+ *              ID given an object ID.
+ *
+ * Return:      Success:    The file ID associated with the object
+ *              Failure:    H5I_INVALID_HID
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5F__get_file_id(H5F_t *file)
+{
+    hid_t file_id = H5I_INVALID_HID;    /* File ID */
+    hid_t ret_value = H5I_INVALID_HID;  /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* Check if the file's ID already exists */
+    if(H5I_find_id(file, H5I_FILE, &file_id) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, H5I_INVALID_HID, "getting file ID failed")
+
+    /* If the ID does not exist, register it with the VOL connector */
+    if(H5I_INVALID_HID == file_id) {
+        if((file_id = H5VL_wrap_register(H5I_FILE, file, TRUE)) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize file handle")
+        file->id_exists = TRUE;
+    } /* end if */
+    else {
+        /* Increment ref count on existing ID */
+        if(H5I_inc_ref(file_id, TRUE) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID, "incrementing file ID failed")
+    } /* end else */
+
+    /* Set return value */
+    ret_value = file_id;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F__get_file_id() */
+
+
 /*-------------------------------------------------------------------------
  * Function:    H5F_get_file_id
  *
@@ -3518,10 +3612,9 @@ done:
 hid_t
 H5F_get_file_id(hid_t obj_id, H5I_type_t type)
 {
-    H5VL_object_t  *vol_obj;
-    void           *file        = NULL;
-    hbool_t         vol_wrapper_set = FALSE;            /* Whether the VOL object wrapping context was set up */
-    hid_t           ret_value   = H5I_INVALID_HID;  /* Return value             */
+    H5VL_object_t  *vol_obj;                    /* File info */
+    hid_t           file_id = H5I_INVALID_HID;  /* File ID for object */
+    hid_t           ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_NOAPI(H5I_INVALID_HID)
 
@@ -3530,44 +3623,15 @@ H5F_get_file_id(hid_t obj_id, H5I_type_t type)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid identifier")
 
     /* Get the file through the VOL */
-    if(H5VL_file_optional(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, H5VL_FILE_GET_FILE, type, &file) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, H5I_INVALID_HID, "unable to get file")
-    if(NULL == file)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, H5I_INVALID_HID, "unable to get the file through the VOL")
+    if(H5VL_file_optional(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, H5VL_FILE_GET_FILE_ID, type, &file_id) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, H5I_INVALID_HID, "unable to get file ID")
+    if(H5I_INVALID_HID == file_id)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, H5I_INVALID_HID, "unable to get the file ID through the VOL")
 
-    /* Check if the file's ID already exists */
-    if(H5I_find_id(file, H5I_FILE, &ret_value) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, H5I_INVALID_HID, "getting file ID failed")
-
-    /* If the ID does not exist, register it with the VOL connector */
-    if(H5I_INVALID_HID == ret_value) {
-        /* Set wrapper info in API context */
-        if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->connector) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID, "can't set VOL wrapper info")
-        vol_wrapper_set = TRUE;
-
-{
-void *vol_wrap_ctx = NULL;       /* Object wrapping context */
-
-/* Retrieve the VOL object wrap context */
-if(H5CX_get_vol_wrap_ctx((void **)&vol_wrap_ctx) < 0)
-    HGOTO_ERROR(H5E_VOL, H5E_CANTGET, H5I_INVALID_HID, "can't get VOL object wrap context")
-HDassert(vol_wrap_ctx);
-}
-        if ((ret_value = H5VL_wrap_register(H5I_FILE, file, TRUE)) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize file handle")
-    } /* end if */
-    else {
-        /* Increment ref count on existing ID */
-        if(H5I_inc_ref(ret_value, TRUE) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID, "incrementing file ID failed")
-    } /* end else */
+    /* Set return value */
+    ret_value = file_id;
 
 done:
-    /* Reset object wrapping info in API context */
-    if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID, "can't reset VOL wrapper info")
-
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_get_file_id() */
 

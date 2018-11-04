@@ -198,14 +198,6 @@ H5G__traverse_ud(const H5G_loc_t *grp_loc/*in,out*/, const H5O_link_t *lnk,
     /* Create a group ID to pass to the user-defined callback */
     if(NULL == (grp = H5G_open(&grp_loc_copy)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open group")
-{
-void *vol_wrap_ctx = NULL;       /* Object wrapping context */
-
-/* Retrieve the VOL object wrap context */
-if(H5CX_get_vol_wrap_ctx((void **)&vol_wrap_ctx) < 0)
-    HGOTO_ERROR(H5E_VOL, H5E_CANTGET, H5I_INVALID_HID, "can't get VOL object wrap context")
-HDassert(vol_wrap_ctx);
-}
     if((cur_grp = H5VL_wrap_register(H5I_GROUP, grp, FALSE)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTREGISTER, FAIL, "unable to register group")
 

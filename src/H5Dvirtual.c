@@ -2972,14 +2972,6 @@ H5D__virtual_refresh_source_dset(H5D_t **dset)
     HDassert(dset && *dset);
 
     /* Get a temporary identifier for this source dataset */
-{
-void *vol_wrap_ctx = NULL;       /* Object wrapping context */
-
-/* Retrieve the VOL object wrap context */
-if(H5CX_get_vol_wrap_ctx((void **)&vol_wrap_ctx) < 0)
-    HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't get VOL object wrap context")
-HDassert(vol_wrap_ctx);
-}
     if((temp_id = H5VL_wrap_register(H5I_DATASET, *dset, FALSE)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL, "can't register (temporary) source dataset ID")
 

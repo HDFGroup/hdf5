@@ -204,7 +204,6 @@ H5Ocopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
     H5VL_loc_params_t loc_params1;
     H5VL_object_t    *vol_obj2 = NULL;        /* object token of dst_id */
     H5VL_loc_params_t loc_params2;
-    hbool_t         vol_wrapper_set = FALSE;            /* Whether the VOL object wrapping context was set up */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -247,20 +246,11 @@ H5Ocopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
     loc_params2.type        = H5VL_OBJECT_BY_SELF;
     loc_params2.obj_type    = H5I_get_type(dst_loc_id);
 
-    /* Set wrapper info in API context */
-    if(H5VL_set_vol_wrapper(vol_obj1->data, vol_obj1->connector) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, H5I_INVALID_HID, "can't set VOL wrapper info")
-    vol_wrapper_set = TRUE;
-
     /* Copy the object */
     if(H5VL_object_copy(vol_obj1, loc_params1, src_name, vol_obj2, loc_params2, dst_name, ocpypl_id, lcpl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy object")
 
 done:
-    /* Reset object wrapping info in API context */
-    if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTSET, H5I_INVALID_HID, "can't reset VOL wrapper info")
-
     FUNC_LEAVE_API(ret_value)
 } /* end H5Ocopy() */
 

@@ -3398,14 +3398,6 @@ H5D__get_type(const H5D_t *dset)
          * two-level IDs, where the VOL object is a copy of the
          * returned datatype.
          */
-{
-void *vol_wrap_ctx = NULL;       /* Object wrapping context */
-
-/* Retrieve the VOL object wrap context */
-if(H5CX_get_vol_wrap_ctx((void **)&vol_wrap_ctx) < 0)
-    HGOTO_ERROR(H5E_VOL, H5E_CANTGET, H5I_INVALID_HID, "can't get VOL object wrap context")
-HDassert(vol_wrap_ctx);
-}
         if((ret_value = H5VL_wrap_register(H5I_DATATYPE, dt, TRUE)) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register datatype")
     } /* end if */

@@ -2658,14 +2658,6 @@ H5O__visit(H5G_loc_t *loc, const char *obj_name, H5_index_t idx_type,
         HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, FAIL, "unable to open object")
 
     /* Get an ID for the visited object */
-{
-void *vol_wrap_ctx = NULL;       /* Object wrapping context */
-
-/* Retrieve the VOL object wrap context */
-if(H5CX_get_vol_wrap_ctx((void **)&vol_wrap_ctx) < 0)
-    HGOTO_ERROR(H5E_VOL, H5E_CANTGET, H5I_INVALID_HID, "can't get VOL object wrap context")
-HDassert(vol_wrap_ctx);
-}
     if((obj_id = H5VL_wrap_register(opened_type, obj, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register visited object")
 

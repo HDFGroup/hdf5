@@ -50,7 +50,6 @@ static hid_t H5VL_NATIVE_ID_g = H5I_INVALID_HID;
 
 
 /* Prototypes */
-static H5F_t *H5VL__native_get_file(void *obj, H5I_type_t type);
 static herr_t H5VL__native_term(void);
 
 /* Atrribute callbacks */
@@ -282,92 +281,6 @@ H5Pset_fapl_native(hid_t fapl_id)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_fapl_native() */
-
-
-/*---------------------------------------------------------------------------
- * Function:    H5VL__native_get_file
- *
- * Purpose:     Utility routine to get file struct for an object via the
- *              native VOL connector.
- *
- * Returns:     SUCCESS:    A pointer to the H5F_t struct for the file
- *                          associated with the object.
- *              FAILURE:    NULL
- *
- *---------------------------------------------------------------------------
- */
-static H5F_t *
-H5VL__native_get_file(void *obj, H5I_type_t type)
-{
-    H5F_t      *ret_value  = NULL;         /* File pointer             */
-    H5O_loc_t  *oloc       = NULL;         /* Object location for ID   */
-
-    FUNC_ENTER_STATIC
-
-    switch(type) {
-        case H5I_FILE:
-            ret_value = (H5F_t *)obj;
-            break;
-
-        case H5I_GROUP:
-            {
-                H5G_t	*grp;
-                grp = (H5G_t *)obj;
-                oloc = H5G_oloc(grp);
-                break;
-            }
-
-        case H5I_DATATYPE:
-            {
-                H5T_t	*dt;
-                dt = (H5T_t *)obj;
-                oloc = H5T_oloc(dt);
-                break;
-            }
-
-        case H5I_DATASET:
-            {
-                H5D_t	*dset;
-                dset = (H5D_t *)obj;
-                oloc = H5D_oloc(dset);
-                break;
-            }
-
-        case H5I_ATTR:
-            {
-                H5A_t	*attr;
-                attr = (H5A_t *)obj;
-                oloc = H5A_oloc(attr);
-                break;
-            }
-
-        case H5I_UNINIT:
-        case H5I_BADID:
-        case H5I_DATASPACE:
-        case H5I_REFERENCE:
-        case H5I_VFL:
-        case H5I_VOL:
-        case H5I_GENPROP_CLS:
-        case H5I_GENPROP_LST:
-        case H5I_ERROR_CLASS:
-        case H5I_ERROR_MSG:
-        case H5I_ERROR_STACK:
-        case H5I_NTYPES:
-        default:
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file or file object")
-    }
-
-    if(!ret_value) {
-        if (!oloc)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "object is not assocated with a file")
-        ret_value = oloc->file;
-    }
-    if(!ret_value)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "object is not associated with a file")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5VL__native_get_file */
 
 
 /*-------------------------------------------------------------------------
@@ -1484,8 +1397,8 @@ H5VL__native_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t 
     /* Create the file */ 
     if(NULL == (new_file = H5F_open(name, flags, fcpl_id, fapl_id)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to create file")
-
     new_file->id_exists = TRUE;
+
     ret_value = (void *)new_file;
 
 done:
@@ -1520,8 +1433,8 @@ H5VL__native_file_open(const char *name, unsigned flags, hid_t fapl_id,
     /* Open the file */ 
     if(NULL == (new_file = H5F_open(name, flags, H5P_FILE_CREATE_DEFAULT, fapl_id)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file")
-
     new_file->id_exists = TRUE;
+
     ret_value = (void *)new_file;
 
 done:
@@ -1659,7 +1572,7 @@ H5VL__native_file_get(void *obj, H5VL_file_get_t get_type,
                 ssize_t    *ret  = va_arg(arguments, ssize_t *);
                 size_t      len;
 
-                if(NULL == (f = H5VL__native_get_file(obj, type)))
+                if(NULL == (f = H5F__get_file(obj, type)))
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
 
                 len = HDstrlen(H5F_OPEN_NAME(f));
@@ -1710,7 +1623,7 @@ H5VL__native_file_specific(void *obj, H5VL_file_specific_t specific_type,
                 H5F_t	       *f = NULL;              /* File to flush */
 
                 /* Get the file for the object */
-                if(NULL == (f = H5VL__native_get_file(obj, type)))
+                if(NULL == (f = H5F__get_file(obj, type)))
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
 
                 /* Nothing to do if the file is read only. This determination is
@@ -1745,6 +1658,7 @@ H5VL__native_file_specific(void *obj, H5VL_file_specific_t specific_type,
                 if(NULL == (new_file = H5F__reopen((H5F_t *)obj)))
                     HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to reopen file")
                 new_file->id_exists = TRUE;
+
                 *ret = (void *)new_file;
                 break;
             }
@@ -1894,7 +1808,7 @@ H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR
                 /* Get the file struct. This call is careful to not return the file pointer
                  * for the top file in a mount hierarchy.
                  */
-                if(NULL == (f = H5VL__native_get_file(obj, type)))
+                if(NULL == (f = H5F__get_file(obj, type)))
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "could not get a file struct")
 
                 /* Get the file info */
@@ -1958,15 +1872,15 @@ H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR
             }
 
         /* H5Iget_file_id */
-        case H5VL_FILE_GET_FILE:
+        case H5VL_FILE_GET_FILE_ID:
             {
                 H5I_type_t  type = va_arg(arguments, H5I_type_t);
-                void      **ret = va_arg(arguments, void **);
+                hid_t      *file_id = va_arg(arguments, hid_t *);
 
-                if(NULL == (f = H5VL__native_get_file(obj, type)))
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
-                f->id_exists = TRUE;
-                *ret = (void*)f;
+                if(NULL == (f = H5F__get_file(obj, type)))
+                    HGOTO_ERROR(H5E_FILE, H5E_BADTYPE, FAIL, "not a file or file object")
+                if((*file_id = H5F__get_file_id(f)) < 0)
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get file ID")
                 break;
             }
 
