@@ -271,6 +271,7 @@ const char *FILENAME[] = {
 
 /* Parameters for testing chunk querying */
 #define DSET_SIMPLE_CHUNKED     "Chunked Dataset"
+#define DSET_EMPTY              "Empty Dataset"
 #define RANK         2
 #define NX          16
 #define NY          16
@@ -12900,8 +12901,8 @@ error:
  * Purpose:     Tests various format versions.
  *              (Currently, only virtual dataset feature)
  *
- * Return:      Success:    0
- *              Failure:    -1
+ * Return:      Success:    SUCCEED
+ *              Failure:    FAIL
  * Description:
  *              This function attempts to create a virtual dataset in all
  *              valid combinations of low/high library format bounds.  Creation
@@ -13030,7 +13031,7 @@ test_versionbounds()
         TEST_ERROR
     dcpl = -1;
     PASSED();
-    return 0;
+    return SUCCEED;
 
  error:
     H5E_BEGIN_TRY {
@@ -13043,7 +13044,7 @@ test_versionbounds()
         H5Fclose(srcfile);
         H5Fclose(vfile);
     } H5E_END_TRY;
-    return -1;
+    return FAIL;
 } /* test_versionbounds() */
 
 /*-------------------------------------------------------------------------
@@ -13077,7 +13078,7 @@ static herr_t read_each_chunk(hid_t dset_id, hsize_t offset1, hsize_t offset2, u
     /* Verify that read chunk is the same as the corresponding written one */
     if (HDmemcmp(direct_buf, read_buf, CHUNK_NX*CHUNK_NY) != 0)
     {
-        fprintf(stderr, "Read chunk differs than written chunk at offset (%d,%d)\n", offset1, offset2);
+        HDfprintf(stderr, "Read chunk differs from written chunk at offset (%d,%d)\n", offset1, offset2);
         return(FAIL);
     }
 
@@ -13098,9 +13099,12 @@ static herr_t read_each_chunk(hid_t dset_id, hsize_t offset1, hsize_t offset2, u
  */
 void reinit_vars(unsigned *read_filter_mask, hsize_t *addr, hsize_t *size)
 {
-    if (read_filter_mask) *read_filter_mask = 0;
-    if (addr) *addr = 0;
-    if (size) *size = 0;
+    if (read_filter_mask)
+        *read_filter_mask = 0;
+    if (addr)
+        *addr = 0;
+    if (size)
+        *size = 0;
 }
 
 /*-------------------------------------------------------------------------
@@ -13110,6 +13114,10 @@ void reinit_vars(unsigned *read_filter_mask, hsize_t *addr, hsize_t *size)
  *
  * Return:	    Success:	0
  *		        Failure:	1
+ *
+ * Description:
+ *              This function tests the new API functions added for EED-343:
+ *              H5Dget_num_chunks, H5Dget_chunk_info, and H5Dget_chunk_info_by_coord.
  *
  * Date:        September 2018
  *
@@ -13265,6 +13273,14 @@ test_get_chunk_info()
     if (size != CHUNK_SIZE) TEST_ERROR;
     if (out_offset[0] != 4 || out_offset[1] != 12) TEST_ERROR;
 
+    /* Attempt to get info of empty chunk and verify the returned address and size */
+    index = 5;
+    reinit_vars(&read_filter_mask, &addr, &size);
+    if (H5Dget_chunk_info(dset, fspace, index, out_offset, &read_filter_mask, &addr, &size) < 0)
+        TEST_ERROR
+    if (addr != HADDR_UNDEF) TEST_ERROR;
+    if (size != 0) TEST_ERROR;
+
     /* Get info of the chunk at logical coordinates (0,2) */
     offset[0] = 0;
     offset[1] = 2 * CHUNK_NY;
@@ -13279,23 +13295,67 @@ test_get_chunk_info()
     if (read_filter_mask != filter_mask) TEST_ERROR;
     if (size != CHUNK_SIZE) TEST_ERROR;
 
-    /* Read each chunk and print the values */
+    /* Attempt to get info of empty chunks, verify the returned address and size */
+    offset[0] = 0;
+    offset[1] = 0;
+    if (H5Dget_chunk_info_by_coord(dset, offset, &read_filter_mask, &addr, &size) < 0) TEST_ERROR;
+    if (addr != HADDR_UNDEF) TEST_ERROR;
+    if (size != 0) TEST_ERROR;
+
+    offset[0] = 3 * CHUNK_NX;
+    offset[1] = 3 * CHUNK_NY;
+    if (H5Dget_chunk_info_by_coord(dset, offset, &read_filter_mask, &addr, &size) < 0) TEST_ERROR;
+    if (addr != HADDR_UNDEF) TEST_ERROR;
+    if (size != 0) TEST_ERROR;
+
+    /* Read each chunk and verify the values */
     n = 0;
     for (i = 0; i < 2; i++)
         for (j = 2; j < 4; j++, n++)
             if (read_each_chunk(dset, i*CHUNK_NX, j*CHUNK_NY, filter_mask, (void*)direct_buf[n]) < 0)
                 TEST_ERROR
 
+    /* Close the first dataset */
+    if (H5Dclose(dset) < 0) TEST_ERROR
+
+    /* Create an empty dataset */
+    if((dset = H5Dcreate2(chunkfile, DSET_EMPTY, H5T_NATIVE_INT, fspace,
+            H5P_DEFAULT, cparms, H5P_DEFAULT)) < 0) TEST_ERROR
+    if (H5Dclose(dset) < 0) TEST_ERROR
+
+    /* Reopen the empty dataset to verify the chunk query functions on it */
+    if((dset = H5Dopen2(chunkfile, DSET_EMPTY, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* Verify that the number of chunks is 0 */
+    if (H5Dget_num_chunks(dset, mspace, &nchunks) < 0) TEST_ERROR;
+    if (nchunks != 0) TEST_ERROR;
+
+    /* Attempt to get info of a chunk from an empty dataset, verify the
+       returned address and size */
+    index = 0;
+    reinit_vars(&read_filter_mask, &addr, &size);
+    if (H5Dget_chunk_info(dset, fspace, index, out_offset, &read_filter_mask, &addr, &size) < 0)
+        TEST_ERROR
+    if (addr != HADDR_UNDEF) TEST_ERROR;
+    if (size != 0) TEST_ERROR;
+
+    /* Attempt to get info of a chunk given its coords from an empty dataset,
+       verify the returned address and size */
+    offset[0] = 0;
+    offset[1] = 0;
+    if (H5Dget_chunk_info_by_coord(dset, offset, &read_filter_mask, &addr, &size) < 0) TEST_ERROR;
+    if (addr != HADDR_UNDEF) TEST_ERROR;
+    if (size != 0) TEST_ERROR;
+
     /* Close/release resources. */
-    H5Dclose(dset);
-    H5Sclose(mspace);
-    H5Sclose(fspace);
-    H5Pclose(cparms);
-    H5Pclose(dxpl);
-    H5Fclose(chunkfile);
+    if (H5Sclose(mspace) < 0) TEST_ERROR
+    if (H5Sclose(fspace) < 0) TEST_ERROR
+    if (H5Pclose(cparms) < 0) TEST_ERROR
+    if (H5Pclose(dxpl) < 0) TEST_ERROR
+    if (H5Fclose(chunkfile) < 0) TEST_ERROR
 
     PASSED();
-    return 0;
+    return SUCCEED;
 
 error:
     H5E_BEGIN_TRY {
@@ -13307,7 +13367,7 @@ error:
     } H5E_END_TRY;
 
     H5_FAILED();
-    return 1;
+    return FAIL;
 } /* test_get_chunk_info() */
 
 

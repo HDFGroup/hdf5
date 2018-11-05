@@ -1230,7 +1230,7 @@ H5Dget_chunk_info(hid_t dset_id, hid_t fspace_id, hsize_t index, hsize_t *offset
 
     /* Call private function to get the chunk info given the chunk's index */
     if(H5D__get_chunk_info(dset, space, index, offset, filter_mask, addr, size) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "Can't get chunk info")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get chunk info")
 
 done:
     FUNC_LEAVE_API(ret_value);
@@ -1279,7 +1279,7 @@ H5Dget_chunk_info_by_coord(hid_t dset_id, const hsize_t *offset, unsigned *filte
 
     /* Internal function to get the chunk info */
     if (H5D__get_chunk_info_by_coord(dset, offset, filter_mask, addr, size) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read unprocessed chunk data")
+        HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't get chunk info")
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Dget_chunk_info_by_coord() */
