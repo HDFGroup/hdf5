@@ -1450,11 +1450,13 @@ ADD_H5_VERIFY_INVALIDBOUNDS (latest_latest_invalid bounds_latest_latest.h5 0 1)
 ##############################################################################
 ###    P L U G I N  T E S T S
 ##############################################################################
+if (BUILD_SHARED_LIBS)
   ADD_H5_UD_TEST (plugin_version_test 0 h5repack_layout.h5 -v -f UD=260,0,4,9,${H5_VERS_MAJOR},${H5_VERS_MINOR},${H5_VERS_RELEASE})
   ADD_H5_UD_TEST (plugin_test 0 h5repack_layout.h5 -v -f UD=257,0,1,9)
   ADD_H5_UD_TEST (plugin_none 0 h5repack_layout.UD.h5 -v -f NONE)
   # check for no parameters
   ADD_H5_UD_TEST (plugin_zero 0 h5repack_layout.h5 -v -f UD=250,0,0)
+endif ()
 
   if (HDF5_TEST_VFD)
     # Run test with different Virtual File Driver
