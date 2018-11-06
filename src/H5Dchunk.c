@@ -265,7 +265,7 @@ static herr_t H5D__chunk_io_term(const H5D_chunk_map_t *fm);
 static herr_t H5D__chunk_dest(H5D_t *dset);
 
 /* Chunk query operation callbacks */
-static int H5D__get_num_chunks_cb(const H5D_chunk_rec_t H5_ATTR_UNUSED *chunk_rec, void *_udata);
+static int H5D__get_num_chunks_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata);
 static int H5D__get_chunk_info_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata);
 static int H5D__get_chunk_info_by_coord_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata);
 
@@ -6827,7 +6827,7 @@ H5D__get_num_chunks(const H5D_t *dset, const H5S_t H5_ATTR_UNUSED *space, hsize_
     idx_info.storage = &dset->shared->layout.storage.u.chunk;
 
     /* If the dataset is not written, number of chunks will be 0 */
-    if (idx_info.storage->idx_addr == HADDR_UNDEF) {
+    if(!H5F_addr_defined(idx_info.storage->idx_addr)) {
         *nchunks = 0;
         HGOTO_DONE(SUCCEED);
     }
@@ -6938,14 +6938,15 @@ H5D__get_chunk_info(const H5D_t *dset, const H5S_t H5_ATTR_UNUSED *space, hsize_
     idx_info.layout = &dset->shared->layout.u.chunk;
     idx_info.storage = &dset->shared->layout.storage.u.chunk;
 
-    /* If the dataset is not written, return the address as undefined */
-    if (idx_info.storage->idx_addr == HADDR_UNDEF) {
-        if (addr)
-            *addr = HADDR_UNDEF;
-        if (size)
-            *size = 0;
+    /* Set addr & size for when dset is not written or queried chunk is not found */
+    if (addr)
+        *addr = HADDR_UNDEF;
+    if (size)
+        *size = 0;
+
+    /* If the dataset is not written, return without error */
+    if(!H5F_addr_defined(idx_info.storage->idx_addr))
         HGOTO_DONE(SUCCEED);
-    }
 
     /* Initialize before iteration */
     udata.chunk_idx = index;
@@ -6971,13 +6972,6 @@ H5D__get_chunk_info(const H5D_t *dset, const H5S_t H5_ATTR_UNUSED *space, hsize_
         if (offset)
             for (ii = 0; ii < udata.ndims; ii++)
                 offset[ii] = udata.scaled[ii] * dset->shared->layout.u.chunk.dim[ii];
-    }
-    /* otherwise, return HADDR_UNDEF for address and 0 for size */
-    else {
-        if (addr)
-            *addr = HADDR_UNDEF;
-        if (size)
-            *size = 0;
     }
 
 done:
@@ -7083,12 +7077,14 @@ H5D__get_chunk_info_by_coord(const H5D_t *dset, const hsize_t *offset, unsigned*
     idx_info.layout = &dset->shared->layout.u.chunk;
     idx_info.storage = &dset->shared->layout.storage.u.chunk;
 
-    /* If the dataset is not written, return the address as undefined */
-    if (idx_info.storage->idx_addr == HADDR_UNDEF) {
-        if (addr)
-            *addr = HADDR_UNDEF;
-        if (size)
-            *size = 0;
+    /* Set addr & size for when dset is not written or queried chunk is not found */
+    if (addr)
+        *addr = HADDR_UNDEF;
+    if (size)
+        *size = 0;
+
+    /* If the dataset is not written, return without errors */
+    if(!H5F_addr_defined(idx_info.storage->idx_addr)) {
         HGOTO_DONE(SUCCEED);
     }
 
@@ -7115,13 +7111,6 @@ H5D__get_chunk_info_by_coord(const H5D_t *dset, const hsize_t *offset, unsigned*
             *addr = udata.chunk_addr;
         if (size)
             *size = udata.nbytes;
-    } else {
-    /* Otherwise, return the address as undefined */
-        if (addr)
-            *addr = HADDR_UNDEF;
-        if (size)
-            *size = 0;
-        HGOTO_DONE(SUCCEED);
     }
 done:
     FUNC_LEAVE_NOAPI_TAG(ret_value)
