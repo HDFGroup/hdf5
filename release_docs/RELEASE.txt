@@ -639,10 +639,9 @@ Supported Platforms
 
     Windows 7                     Visual Studio 2015 w/ Intel Fortran 16 (cmake)
 
-    Windows 7 x64                 Visual Studio 2012 w/ Intel Fortran 15 (cmake)
-                                  Visual Studio 2013 w/ Intel Fortran 15 (cmake)
+    Windows 7 x64                 Visual Studio 2013
                                   Visual Studio 2015 w/ Intel Fortran 16 (cmake)
-                                  Visual Studio 2015 w/ Intel C, Fortran 2017 (cmake)
+                                  Visual Studio 2015 w/ Intel C, Fortran 2018 (cmake)
                                   Visual Studio 2015 w/ MSMPI 8 (cmake)
 
     Windows 10                    Visual Studio 2015 w/ Intel Fortran 18 (cmake)
