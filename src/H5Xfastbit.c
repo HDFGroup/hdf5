@@ -103,6 +103,7 @@ typedef struct H5X_fastbit_t {
     uint64_t nbitmaps;
     uint32_t *bitmaps;
 
+    char *dataset_name;
     char column_name[H5X_FASTBIT_MAX_NAME];
 
     /* For parallel query/indexing support */
@@ -321,6 +322,30 @@ H5X__get_fastbit(hid_t dataset_id)
     return NULL;
 }
 
+
+static void
+dump_as_bytes(char *entry, int64_t length, void *data)
+{
+  static int mpi_rank = -1;
+  char filename[80];
+  FILE *save_dump;
+  unsigned char *show = (char *)data;
+  int i, k;
+  int rows = (int)(length/10);
+  if (mpi_rank < 0) mpi_rank = H5Xparallel_rank();
+  sprintf(filename, "%s-dump-%d.txt", entry, mpi_rank);
+  save_dump = fopen(filename, "a+");
+  
+  fprintf(save_dump, "-----------\n\n%s length is %lld bytes::\n",entry, length);
+  for (i=0; i< rows; i++) {
+    fprintf(save_dump,"%4d\t%02x %02x %02x %02x %02x %02x %02x %02x %02x %02x\n", i, show[0],
+	   show[1],show[2],show[3],show[4],show[5],show[6],show[7],show[8],show[9]);
+    show += 10;
+  }
+  fclose(save_dump);
+}
+
+
 /*-------------------------------------------------------------------------
  * Function:    H5X__fastbit_init
  *
@@ -367,6 +392,7 @@ H5X__fastbit_init(hid_t dataset_id)
         HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, NULL, "can't get dataset name");
 
     H5X_FASTBIT_LOG_DEBUG("Dataset Name : %s", dataset_name);
+    fastbit->dataset_name = strdup(dataset_name);
     sprintf(fastbit->column_name, "array%u", H5X__fastbit_hash_string(dataset_name));
 
     fastbit->nranks = 0;
@@ -774,6 +800,7 @@ H5X__fastbit_build_index(H5X_fastbit_t *fastbit)
             H5S_ALL, H5P_DEFAULT, fastbit->bitmaps))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTUPDATE, FAIL, "can't write index metadata");
 
+
 done:
     if (key_space_id != FAIL)
         H5Sclose(key_space_id);
@@ -895,12 +922,19 @@ H5X__fastbit_define_dataset(H5X_fastbit_t *fastbit, int typeIndex, struct fastbi
 static herr_t
 H5X__fastbit_build_parallel_index(H5X_fastbit_t *fastbit)
 {
+    static int sequence_id = 0;
+    char log_entry[256];
+
     hid_t key_space_id = FAIL, offset_space_id = FAIL, bitmap_space_id = FAIL;
     hid_t info_space_id = FAIL;
     hid_t key_memspace_id = H5S_ALL;
     hid_t offset_memspace_id = H5S_ALL;
     hid_t bitmap_memspace_id = H5S_ALL;
     hid_t info_memspace_id = H5S_ALL;
+
+    hid_t keys_filespace_id = FAIL, offsets_filespace_id = FAIL, bitmaps_filespace_id = FAIL;
+    hid_t keys_memspace_id = FAIL, offsets_memspace_id = FAIL, bitmaps_memspace_id = FAIL;
+
     hsize_t key_array_size, offset_array_size, bitmap_array_size;
     herr_t ret_value = SUCCEED; /* Return value */
     hid_t dxpl_id = H5P_DEFAULT;
@@ -925,9 +959,6 @@ H5X__fastbit_build_parallel_index(H5X_fastbit_t *fastbit)
 
     H5X_FASTBIT_LOG_DEBUG("FastBit build parallel index, nkeys=%lu, noffsets=%lu, nbitmaps=%lu\n",
             fastbit->nkeys, fastbit->noffsets, fastbit->nbitmaps);
-
-    /* Create key array with opaque type */
-    key_array_size = fastbit->nkeys * sizeof(double);
 
     mpi_size = H5Xparallel_size();
     mpi_rank = H5Xparallel_rank();
@@ -955,9 +986,9 @@ H5X__fastbit_build_parallel_index(H5X_fastbit_t *fastbit)
     if (NULL == (gatherInfo = (struct fastbit_meta_collection *)H5MM_malloc(indexinfo_totalsize)))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTALLOC, FAIL, "can't allocate nkeys array");
 
-    gatherInfo[mpi_rank].nkeys    = (int64_t)(fastbit->nkeys * sizeof(double));
-    gatherInfo[mpi_rank].noffsets = (int64_t)(fastbit->noffsets * sizeof(int64_t));
-    gatherInfo[mpi_rank].nbitmaps = (int64_t)(fastbit->nbitmaps * sizeof(int32_t));
+    gatherInfo[mpi_rank].nkeys    = (int64_t)(fastbit->nkeys);
+    gatherInfo[mpi_rank].noffsets = (int64_t)(fastbit->noffsets);
+    gatherInfo[mpi_rank].nbitmaps = (int64_t)(fastbit->nbitmaps);
 
     /* Exchange info with all MPI ranks */
     /* We could use allreduce here if we only needed the total sizes
@@ -1000,95 +1031,121 @@ H5X__fastbit_build_parallel_index(H5X_fastbit_t *fastbit)
             HGOTO_ERROR(H5E_INDEX, H5E_CANTCLOSEOBJ, FAIL, "can't close dataset");
     }
 
-    if (FAIL == H5X__fastbit_define_dataset(fastbit, INFO_, gatherInfo, &indexinfo_totalsize, &indexinfo_offset, &info_space_id, &info_memspace_id ))
-        HGOTO_ERROR(H5E_INDEX, H5E_CANTCREATE, FAIL, "can't create simple (file) dataspace");
+    /* Filespace descriptors */
+    indexinfo_totalsize  /= sizeof(int64_t); /* Previously, was the malloc size in bytes */
+                                             /* Fixed to be the total number of elements */
+    info_space_id        = H5Screate_simple(1, &indexinfo_totalsize, NULL);
+    keys_filespace_id    = H5Screate_simple(1, &nkeys_totalsize, NULL);
+    offsets_filespace_id = H5Screate_simple(1, &noffsets_totalsize, NULL);
+    bitmaps_filespace_id = H5Screate_simple(1, &nbitmaps_totalsize, NULL);
+    
+    /* Memspace descriptors */
+    keys_memspace_id     = H5Screate_simple(1, &gatherInfo[mpi_rank].nkeys, NULL);
+    offsets_memspace_id  = H5Screate_simple(1, &gatherInfo[mpi_rank].noffsets, NULL);
+    bitmaps_memspace_id  = H5Screate_simple(1, &gatherInfo[mpi_rank].nbitmaps, NULL);
+
+    /* Hyperslab selections */
+    if ((H5Sselect_hyperslab(keys_filespace_id, H5S_SELECT_SET, &nkeys_offset, NULL, &gatherInfo[mpi_rank].nkeys, NULL)) < 0 )
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "can't select hyperslab offsets");
+    if ((H5Sselect_hyperslab(offsets_filespace_id, H5S_SELECT_SET, &noffsets_offset, NULL, &gatherInfo[mpi_rank].noffsets, NULL)) < 0 )
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "can't select hyperslab offsets");
+    if ((H5Sselect_hyperslab(bitmaps_filespace_id, H5S_SELECT_SET, &nbitmaps_offset, NULL, &gatherInfo[mpi_rank].nbitmaps, NULL)) < 0 )
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "can't select hyperslab offsets");
 
 
-    /* -------------- */
-    /*  KEYS          */
-    /* -------------- */       
+    /* --------------------- */
+    /* Close open datasets   */
+    /* --------------------- */
+    if (fastbit->index_info_group_id != FAIL) {
+        if (FAIL == H5Odecr_refcount(fastbit->index_info_group_id))
+            HGOTO_ERROR(H5E_INDEX, H5E_CANTINC, FAIL, "can't decrement dataset refcount");
+        if (FAIL == H5Dclose(fastbit->index_info_group_id))
+            HGOTO_ERROR(H5E_INDEX, H5E_CANTCLOSEOBJ, FAIL, "can't close dataset");
+    }
     if (fastbit->keys_id != FAIL) {
         if (FAIL == H5Odecr_refcount(fastbit->keys_id))
             HGOTO_ERROR(H5E_INDEX, H5E_CANTINC, FAIL, "can't decrement dataset refcount");
         if (FAIL == H5Dclose(fastbit->keys_id))
             HGOTO_ERROR(H5E_INDEX, H5E_CANTCLOSEOBJ, FAIL, "can't close dataset");
     }
-
-    key_array_size = nkeys_totalsize;
-    printf("H5X__fastbit_build_parallel_index:\n\tkey_array_size = %lld, nkeys_offset=%lld\n", key_array_size, nkeys_offset);
-    if (FAIL == H5X__fastbit_define_dataset(fastbit, KEYS_, gatherInfo, &key_array_size, &nkeys_offset, &key_space_id, &key_memspace_id ))
-        HGOTO_ERROR(H5E_INDEX, H5E_CANTCREATE, FAIL, "can't create simple (file) dataspace");
-
-    /* -------------- */
-    /*  OFFSETS       */
-    /* -------------- */       
     if (fastbit->offsets_id != FAIL) {
-      if (FAIL == H5Odecr_refcount(fastbit->offsets_id))
+        if (FAIL == H5Odecr_refcount(fastbit->offsets_id))
             HGOTO_ERROR(H5E_INDEX, H5E_CANTINC, FAIL, "can't decrement dataset refcount");
-      if (FAIL == H5Dclose(fastbit->offsets_id))
-           HGOTO_ERROR(H5E_INDEX, H5E_CANTCLOSEOBJ, FAIL, "can't close dataset");
+        if (FAIL == H5Dclose(fastbit->offsets_id))
+            HGOTO_ERROR(H5E_INDEX, H5E_CANTCLOSEOBJ, FAIL, "can't close dataset");
     }
-
-    offset_array_size = noffsets_totalsize;
-    printf("\toffset_array_size = %lld, noffsets_offset=%lld\n", offset_array_size, noffsets_offset);
-    if (FAIL == H5X__fastbit_define_dataset(fastbit, OFFSETS_, gatherInfo, &offset_array_size, &noffsets_offset, &offset_space_id, &offset_memspace_id ))
-        HGOTO_ERROR(H5E_INDEX, H5E_CANTCREATE, FAIL, "can't create simple (file) dataspace");
-
-    /* -------------- */
-    /*  BITMAPS       */
-    /* -------------- */       
     if (fastbit->bitmaps_id != FAIL) {
         if (FAIL == H5Odecr_refcount(fastbit->bitmaps_id))
             HGOTO_ERROR(H5E_INDEX, H5E_CANTINC, FAIL, "can't decrement dataset refcount");
         if (FAIL == H5Dclose(fastbit->bitmaps_id))
             HGOTO_ERROR(H5E_INDEX, H5E_CANTCLOSEOBJ, FAIL, "can't close dataset");
     }
+    /* ---------------------- */
+    /* New Anonymous datasets */
+    /* ---------------------- */
 
-    bitmap_array_size = nbitmaps_totalsize;
-    printf("\tbitmap_array_size = %lld, nbitmaps_offset=%lld\n", bitmap_array_size, nbitmaps_offset);
-    if (FAIL == H5X__fastbit_define_dataset(fastbit, BITMAPS_, gatherInfo, &bitmap_array_size, &nbitmaps_offset, &bitmap_space_id, &bitmap_memspace_id ))
-        HGOTO_ERROR(H5E_INDEX, H5E_CANTCREATE, FAIL, "can't create simple (file) dataspace");
+    /* info */
+    if (FAIL == (fastbit->index_info_group_id = H5Dcreate_anon(fastbit->file_id, H5T_NATIVE_LLONG, info_space_id, H5P_DEFAULT, H5P_DEFAULT)))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTCREATE, FAIL, "can't create anonymous dataset");
+    if (FAIL == H5Oincr_refcount(fastbit->index_info_group_id))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTINC, FAIL, "can't increment dataset refcount");
 
-    /* NO ERRORS (to this point)! */
-    /* ===========================*/
-    /* Write info about the various sizes-per-rank per dataset (see gatherInfo above) */
-    if (FAIL == H5Dwrite(fastbit->index_info_group_id, fastbit->opaque_type_id, info_memspace_id,
-            info_space_id, dxpl_id, gatherInfo))
-        HGOTO_ERROR(H5E_INDEX, H5E_CANTUPDATE, FAIL, "can't write infogroup metadata");
+    /* keys */
+    if (FAIL == (fastbit->keys_id = H5Dcreate_anon(fastbit->file_id, H5T_NATIVE_DOUBLE, keys_filespace_id, H5P_DEFAULT, H5P_DEFAULT)))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTCREATE, FAIL, "can't create anonymous dataset");
+    if (FAIL == H5Oincr_refcount(fastbit->keys_id))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTINC, FAIL, "can't increment dataset refcount");
 
-    /* Write keys */
-    if (FAIL == H5Dwrite(fastbit->keys_id, fastbit->opaque_type_id, key_memspace_id,
-            key_space_id, dxpl_id, fastbit->keys))
+    /* offsets */
+    if (FAIL == (fastbit->offsets_id = H5Dcreate_anon(fastbit->file_id, H5T_NATIVE_LLONG, offsets_filespace_id, H5P_DEFAULT, H5P_DEFAULT)))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTCREATE, FAIL, "can't create anonymous dataset");    
+    if (FAIL == H5Oincr_refcount(fastbit->offsets_id))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTINC, FAIL, "can't increment dataset refcount");
+
+    /* bitmaps */
+    if (FAIL == (fastbit->bitmaps_id = H5Dcreate_anon(fastbit->file_id, H5T_NATIVE_UINT, bitmaps_filespace_id, H5P_DEFAULT, H5P_DEFAULT)))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTCREATE, FAIL, "can't create anonymous dataset");    
+    if (FAIL == H5Oincr_refcount(fastbit->bitmaps_id))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTINC, FAIL, "can't increment dataset refcount");
+
+    /* ---------------------- */
+    /* Write data to datasets */
+    /* ---------------------- */
+
+    /* Write parallel info */
+    if (FAIL == H5Dwrite(fastbit->index_info_group_id, H5T_NATIVE_LLONG, H5S_ALL,
+            H5S_ALL, dxpl_id, gatherInfo))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTUPDATE, FAIL, "can't write index metadata");
 
+    /* Write keys */
+    if (FAIL == H5Dwrite(fastbit->keys_id, H5T_NATIVE_DOUBLE, keys_memspace_id,
+			 keys_filespace_id, dxpl_id, fastbit->keys))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTUPDATE, FAIL, "can't write index metadata");
     /* Write offsets */
-    if (FAIL == H5Dwrite(fastbit->offsets_id, fastbit->opaque_type_id, offset_memspace_id,
-            offset_space_id, dxpl_id, fastbit->offsets))
+    if (FAIL == H5Dwrite(fastbit->offsets_id, H5T_NATIVE_LLONG, offsets_memspace_id,
+			 offsets_filespace_id, dxpl_id, fastbit->offsets))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTUPDATE, FAIL, "can't write index metadata");
 
     /* Write bitmaps */
-    if (FAIL == H5Dwrite(fastbit->bitmaps_id, fastbit->opaque_type_id, bitmap_memspace_id,
-            bitmap_space_id, dxpl_id, fastbit->bitmaps))
+    if (FAIL == H5Dwrite(fastbit->bitmaps_id, H5T_NATIVE_UINT, bitmaps_memspace_id,
+			 bitmaps_filespace_id, dxpl_id, fastbit->bitmaps))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTUPDATE, FAIL, "can't write index metadata");
 
-
 done:
-    if (key_space_id != FAIL)
-        H5Sclose(key_space_id);
-    if (offset_space_id != FAIL)
-        H5Sclose(offset_space_id);
-    if (bitmap_space_id != FAIL)
-        H5Sclose(bitmap_space_id);
     if (info_space_id != FAIL)
         H5Sclose(info_space_id);      
-    if ((key_memspace_id != H5S_ALL) && (key_memspace_id != FAIL))
-        H5Sclose(key_memspace_id);
-    if ((offset_memspace_id != H5S_ALL) && (offset_memspace_id != FAIL))
-        H5Sclose(offset_memspace_id);
-    if ((bitmap_memspace_id != H5S_ALL) && (bitmap_memspace_id != FAIL))
-        H5Sclose(bitmap_memspace_id);
-    if ((info_memspace_id != H5S_ALL) && (info_memspace_id != FAIL))
-        H5Sclose(info_memspace_id);
+    if (keys_filespace_id != FAIL)
+        H5Sclose(keys_filespace_id);
+    if (offsets_filespace_id != FAIL)
+        H5Sclose(offsets_filespace_id);
+    if (bitmaps_filespace_id != FAIL)
+        H5Sclose(bitmaps_filespace_id);
+    if (keys_memspace_id != FAIL)
+        H5Sclose(keys_memspace_id);
+    if (offsets_memspace_id != FAIL)
+        H5Sclose(offsets_memspace_id);
+    if (bitmaps_memspace_id != FAIL)
+        H5Sclose(bitmaps_memspace_id);
     if (dxpl_id != H5P_DEFAULT)
         H5Pclose(dxpl_id);
     if (err_occurred) {
@@ -1275,7 +1332,7 @@ H5X__fastbit_deserialize_metadata(H5X_fastbit_t *fastbit, void *buf)
     FUNC_ENTER_NOAPI_NOINIT
 
 #ifdef H5_HAVE_PARALLEL
-    if (H5Xparallel_queries_enabled() > 0) {
+      if (H5Xparallel_queries_enabled() > 0) {
         addr = *((haddr_t *) buf_ptr);
         if (addr && (FAIL == (fastbit->index_info_group_id = H5Oopen_by_addr(fastbit->file_id, *((haddr_t *) buf_ptr)))))
             HGOTO_ERROR(H5E_INDEX, H5E_CANTOPENOBJ, FAIL, "can't open anonymous dataset");
@@ -1330,11 +1387,13 @@ H5X__fastbit_read_bitmaps(void *context, uint64_t start, uint64_t count,
 static herr_t
 H5X__fastbit_reconstruct_parallel_index(H5X_fastbit_t *fastbit)
 {
+    static int sequence_id = 0;
+    char log_entry[256];
+
     hid_t dxpl_id = H5P_DEFAULT;
     hid_t keys_space_id = FAIL, offsets_space_id = FAIL, bitmaps_space_id = FAIL;
-    hid_t key_memspace_id = H5S_ALL;
-    hid_t offset_memspace_id = H5S_ALL;
-    hid_t bitmap_memspace_id = H5S_ALL;
+    hid_t keys_filespace_id = FAIL, offsets_filespace_id = FAIL, bitmaps_filespace_id = FAIL;
+    hid_t keys_memspace_id = FAIL, offsets_memspace_id = FAIL, bitmaps_memspace_id = FAIL;
 
     size_t key_array_size, offset_array_size, bitmap_array_size;
     FastBitDataType fastbit_type;
@@ -1355,18 +1414,29 @@ H5X__fastbit_reconstruct_parallel_index(H5X_fastbit_t *fastbit)
 
     FUNC_ENTER_NOAPI_NOINIT
 
+    /* Create a transfer property to utilize MPI-IO */
+    if ((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0 )
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "can't define dataset_xfer property");
+    if ((H5Pset_dxpl_mpio(dxpl_id, H5FD_MPIO_COLLECTIVE)) < 0 )
+       HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "can't set dataset_xfer to MPIO_COLLECTIVE");
+
     /* Read the spaceinfo from the anonymous dataset.
      * We will compare the computed total size per private store size
      * to ensure that things are ok to proceed.
      */
     if (FAIL == (info_space_id = H5Dget_space(fastbit->index_info_group_id)))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "can't get dataspace from index");
+    /* Note that the npoints is NOT referenced as the number of bytes...
+     * It refers to the number of elements that the dataset was written with.
+     * In our case, we wrote the data as H5T_NATIVE_LLONG, so we'll get the number
+     * of bytes for our calculation of nranks.
+     */
     if (0 == (info_array_size = (size_t) H5Sget_select_npoints(info_space_id)))
         HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "invalid number of elements");
-    if (NULL == (gatherInfo = (struct fastbit_meta_collection *) H5MM_malloc(info_array_size)))
+    if (NULL == (gatherInfo = (struct fastbit_meta_collection *) H5MM_malloc(info_array_size * sizeof(int64_t))))
         HGOTO_ERROR(H5E_INDEX, H5E_NOSPACE, FAIL, "can't allocate gatherInfo");
-    if (FAIL == H5Dread(fastbit->index_info_group_id, fastbit->opaque_type_id,
-                        H5S_ALL, info_space_id, H5P_DEFAULT, gatherInfo))
+    if (FAIL == H5Dread(fastbit->index_info_group_id, H5T_NATIVE_LLONG,
+                        H5S_ALL, info_space_id, dxpl_id, gatherInfo))
         HGOTO_ERROR(H5E_INDEX, H5E_READERROR, FAIL, "can't read gatherInfo data");
 
     /* The gatherInfo array is N groups of 3 int64_t values
@@ -1374,12 +1444,8 @@ H5X__fastbit_reconstruct_parallel_index(H5X_fastbit_t *fastbit)
      * the size of a single entry to compute the number of rank entries
      * stored.  This needs to match the current MPI size.
      */
-    nranks = info_array_size/ sizeof(struct fastbit_meta_collection);
+    nranks = (info_array_size * sizeof(int64_t)) / sizeof(struct fastbit_meta_collection);
 
-    /* Make sure that the stored information is a match for the
-     * current parallel execution.
-     */
-    HDassert(mpi_size == nranks);
     for(i=0; i< nranks; i++) {
         if (i == mpi_rank) {
             nkeys_offset = nkeys_totalsize;
@@ -1390,6 +1456,7 @@ H5X__fastbit_reconstruct_parallel_index(H5X_fastbit_t *fastbit)
         noffsets_totalsize += gatherInfo[i].noffsets;
         nbitmaps_totalsize += gatherInfo[i].nbitmaps;
     }
+
     /* Prepare to read nkeys */
     if (FAIL == (keys_space_id = H5Dget_space(fastbit->keys_id)))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "can't get dataspace from index");
@@ -1397,7 +1464,7 @@ H5X__fastbit_reconstruct_parallel_index(H5X_fastbit_t *fastbit)
         HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "invalid number of elements");
 
     HDassert(nkeys_totalsize == key_array_size);
-    fastbit->nkeys = gatherInfo[mpi_rank].nkeys / sizeof(double);
+    fastbit->nkeys = gatherInfo[mpi_rank].nkeys;
 
     /* Prepare to read noffsets */
     if (FAIL == (offsets_space_id = H5Dget_space(fastbit->offsets_id)))
@@ -1406,7 +1473,7 @@ H5X__fastbit_reconstruct_parallel_index(H5X_fastbit_t *fastbit)
         HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "invalid number of elements");
 
     HDassert(noffsets_totalsize == offset_array_size);
-    fastbit->noffsets = gatherInfo[mpi_rank].noffsets / sizeof(int64_t);
+    fastbit->noffsets = gatherInfo[mpi_rank].noffsets;
 
     /* Prepare to read nbitmaps */
     if (FAIL == (bitmaps_space_id = H5Dget_space(fastbit->bitmaps_id)))
@@ -1415,50 +1482,52 @@ H5X__fastbit_reconstruct_parallel_index(H5X_fastbit_t *fastbit)
         HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "invalid number of elements");
 
     HDassert(nbitmaps_totalsize == bitmap_array_size);
-    fastbit->nbitmaps = gatherInfo[mpi_rank].nbitmaps / sizeof(uint32_t);
+    fastbit->nbitmaps = gatherInfo[mpi_rank].nbitmaps;
 
-    if (NULL == (fastbit->keys = (double *) H5MM_malloc(gatherInfo[mpi_rank].nkeys)))
+    if (NULL == (fastbit->keys = (double *) H5MM_malloc(gatherInfo[mpi_rank].nkeys * sizeof(double))))
         HGOTO_ERROR(H5E_INDEX, H5E_NOSPACE, FAIL, "can't allocate keys");
-    if (NULL == (fastbit->offsets = (int64_t *) H5MM_malloc(gatherInfo[mpi_rank].noffsets)))
+    if (NULL == (fastbit->offsets = (int64_t *) H5MM_malloc(gatherInfo[mpi_rank].noffsets * sizeof(int64_t))))
         HGOTO_ERROR(H5E_INDEX, H5E_NOSPACE, FAIL, "can't allocate offsets");
-    if (NULL == (fastbit->bitmaps = (uint32_t *) H5MM_malloc(gatherInfo[mpi_rank].nbitmaps)))
+    if (NULL == (fastbit->bitmaps = (uint32_t *) H5MM_malloc(gatherInfo[mpi_rank].nbitmaps * sizeof(uint32_t))))
         HGOTO_ERROR(H5E_INDEX, H5E_NOSPACE, FAIL, "can't allocate offsets");
 
     /* define the hyperslab selection(s) */
+    if((keys_filespace_id = H5Screate_simple(1, &nkeys_totalsize, NULL)) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "H5Screate_simple returned an error");
+    if((offsets_filespace_id = H5Screate_simple(1, &noffsets_totalsize, NULL)) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "H5Screate_simple returned an error");      
+    if((bitmaps_filespace_id = H5Screate_simple(1, &nbitmaps_totalsize, NULL)) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "H5Screate_simple returned an error");      
+    
+    /* Memspace descriptors */
+    if((keys_memspace_id = H5Screate_simple(1, &gatherInfo[mpi_rank].nkeys, NULL)) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "H5Screate_simple returned an error");      
+    if((offsets_memspace_id = H5Screate_simple(1, &gatherInfo[mpi_rank].noffsets, NULL)) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "H5Screate_simple returned an error");      
+    if((bitmaps_memspace_id = H5Screate_simple(1, &gatherInfo[mpi_rank].nbitmaps, NULL)) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "H5Screate_simple returned an error");      
 
-    key_array_size = nkeys_totalsize;
-    if (FAIL == H5X__fastbit_define_dataset(fastbit, KEYS_, gatherInfo, &key_array_size, &nkeys_offset, &keys_space_id, &key_memspace_id ))
-        HGOTO_ERROR(H5E_INDEX, H5E_CANTCREATE, FAIL, "can't create simple (file) dataspace");
+    if ((H5Sselect_hyperslab(keys_filespace_id, H5S_SELECT_SET, &nkeys_offset, NULL, &gatherInfo[mpi_rank].nkeys, NULL)) < 0 )
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "can't select hyperslab offsets");
+    if ((H5Sselect_hyperslab(offsets_filespace_id, H5S_SELECT_SET, &noffsets_offset, NULL, &gatherInfo[mpi_rank].noffsets, NULL)) < 0 )
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "can't select hyperslab offsets");
+    if ((H5Sselect_hyperslab(bitmaps_filespace_id, H5S_SELECT_SET, &nbitmaps_offset, NULL, &gatherInfo[mpi_rank].nbitmaps, NULL)) < 0 )
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "can't select hyperslab offsets");
 
-    offset_array_size = noffsets_totalsize;
-    if (FAIL == H5X__fastbit_define_dataset(fastbit, OFFSETS_, gatherInfo, &offset_array_size, &noffsets_offset, &offsets_space_id, &offset_memspace_id ))
-        HGOTO_ERROR(H5E_INDEX, H5E_CANTCREATE, FAIL, "can't create simple (file) dataspace");
+    /* Read keys */
+    if (FAIL == H5Dread(fastbit->keys_id, H5T_NATIVE_DOUBLE, keys_memspace_id,
+			keys_filespace_id, dxpl_id, fastbit->keys))
+        HGOTO_ERROR(H5E_INDEX, H5E_READERROR, FAIL, "can't read index keys metadata");
 
-    bitmap_array_size = nbitmaps_totalsize;
-    if (FAIL == H5X__fastbit_define_dataset(fastbit, BITMAPS_, gatherInfo, &bitmap_array_size, &nbitmaps_offset, &bitmaps_space_id, &bitmap_memspace_id ))
-        HGOTO_ERROR(H5E_INDEX, H5E_CANTCREATE, FAIL, "can't create simple (file) dataspace");
+    /* Read offsets */
+    if (FAIL == H5Dread(fastbit->offsets_id, H5T_NATIVE_LLONG, offsets_memspace_id,
+			offsets_filespace_id, dxpl_id, fastbit->offsets))
+        HGOTO_ERROR(H5E_INDEX, H5E_READERROR, FAIL, "can't read index offsets metadata");
 
-    /* Create a transfer property to utilize MPI-IO */
-    if ((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0 )
-        HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "can't define dataset_xfer property");
-    if ((H5Pset_dxpl_mpio(dxpl_id, H5FD_MPIO_COLLECTIVE)) < 0 )
-       HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "can't set dataset_xfer to MPIO_COLLECTIVE");
-
-    /* Read the actual metadata (keys) */
-    if (FAIL == H5Dread(fastbit->keys_id, fastbit->opaque_type_id,
-            key_memspace_id, keys_space_id, dxpl_id, fastbit->keys))
-        HGOTO_ERROR(H5E_INDEX, H5E_READERROR, FAIL, "can't read data");
-
-    /* Read FastBit offsets */
-    if (FAIL == H5Dread(fastbit->offsets_id, fastbit->opaque_type_id,
-            offset_memspace_id, offsets_space_id, dxpl_id, fastbit->offsets))
-        HGOTO_ERROR(H5E_INDEX, H5E_READERROR, FAIL, "can't read data");
-
-    /* Read FastBit bitmaps */
-    if (FAIL == H5Dread(fastbit->bitmaps_id, fastbit->opaque_type_id,
-            bitmap_memspace_id, bitmaps_space_id, dxpl_id, fastbit->bitmaps))
-        HGOTO_ERROR(H5E_INDEX, H5E_READERROR, FAIL, "can't read data");
-
+    /* Read bitmaps */
+    if (FAIL == H5Dread(fastbit->bitmaps_id, H5T_NATIVE_UINT, bitmaps_memspace_id,
+			bitmaps_filespace_id, dxpl_id, fastbit->bitmaps))
+        HGOTO_ERROR(H5E_INDEX, H5E_READERROR, FAIL, "can't read index bitmaps metadata");
 
     /* Reconstruct index */
     H5X_FASTBIT_LOG_DEBUG("Reconstructing index with nkeys=%lu, noffsets=%lu, "
@@ -1490,8 +1559,6 @@ done:
 
     if (FAIL != type_id)
         H5Tclose(type_id);
-    if (FAIL != space_id)
-        H5Sclose(space_id);
     if (dxpl_id != H5P_DEFAULT)
         H5Pclose(dxpl_id);
     if (FAIL != keys_space_id)
@@ -1500,12 +1567,21 @@ done:
         H5Sclose(offsets_space_id);
     if (FAIL != bitmaps_space_id)
         H5Sclose(bitmaps_space_id);
-    if ((key_memspace_id != H5S_ALL) && (key_memspace_id != FAIL))
-        H5Sclose(key_memspace_id);
-    if ((offset_memspace_id != H5S_ALL) && (offset_memspace_id != FAIL))
-        H5Sclose(offset_memspace_id);
-    if ((bitmap_memspace_id != H5S_ALL) && (bitmap_memspace_id != FAIL))
-        H5Sclose(bitmap_memspace_id);
+    if (info_space_id != FAIL)
+        H5Sclose(info_space_id);
+    if (keys_filespace_id != FAIL)
+        H5Sclose(keys_filespace_id);
+    if (offsets_filespace_id != FAIL)
+        H5Sclose(offsets_filespace_id);
+    if (bitmaps_filespace_id != FAIL)
+        H5Sclose(bitmaps_filespace_id);
+
+    if (keys_memspace_id != FAIL)
+        H5Sclose(keys_memspace_id);
+    if (offsets_memspace_id != FAIL)
+        H5Sclose(offsets_memspace_id);
+    if (bitmaps_memspace_id != FAIL)
+        H5Sclose(bitmaps_memspace_id);
 
     FUNC_LEAVE_NOAPI(ret_value);
 }
@@ -1513,6 +1589,8 @@ done:
 static herr_t
 H5X__fastbit_reconstruct_index(H5X_fastbit_t *fastbit)
 {
+    static int sequence_id = 0;
+    char log_entry[256];
     hid_t keys_space_id = FAIL, offsets_space_id = FAIL, bitmaps_space_id = FAIL;
     size_t key_array_size, offset_array_size, bitmap_array_size;
     FastBitDataType fastbit_type;
@@ -1561,15 +1639,31 @@ H5X__fastbit_reconstruct_index(H5X_fastbit_t *fastbit)
             H5S_ALL, keys_space_id, H5P_DEFAULT, fastbit->keys))
         HGOTO_ERROR(H5E_INDEX, H5E_READERROR, FAIL, "can't read data");
 
+    /*
+    sprintf(log_entry, "%d-keys-read-%s", sequence_id, fastbit->column_name);
+    dump_as_bytes(log_entry, key_array_size, fastbit->keys);
+    */
+
     /* Read FastBit offsets */
     if (FAIL == H5Dread(fastbit->offsets_id, fastbit->opaque_type_id,
             H5S_ALL, offsets_space_id, H5P_DEFAULT, fastbit->offsets))
         HGOTO_ERROR(H5E_INDEX, H5E_READERROR, FAIL, "can't read data");
 
+    /*
+    sprintf(log_entry, "%d-offsets-read-%s", sequence_id, fastbit->column_name);
+    dump_as_bytes(log_entry, offset_array_size, fastbit->offsets);
+    */
+
     /* Read FastBit bitmaps */
     if (FAIL == H5Dread(fastbit->bitmaps_id, fastbit->opaque_type_id,
             H5S_ALL, bitmaps_space_id, H5P_DEFAULT, fastbit->bitmaps))
         HGOTO_ERROR(H5E_INDEX, H5E_READERROR, FAIL, "can't read data");
+
+    /*
+    sprintf(log_entry, "%d-bitmaps-read-%s", sequence_id,  fastbit->column_name);
+    dump_as_bytes(log_entry, bitmap_array_size, fastbit->bitmaps);
+    sequence_id++;
+    */
 
     /* Reconstruct index */
     H5X_FASTBIT_LOG_DEBUG("Reconstructing index with nkeys=%lu, noffsets=%lu, "
@@ -1705,17 +1799,15 @@ H5X__fastbit_evaluate_query(H5X_fastbit_t *fastbit, hid_t query_id,
     cv = H5X__fasbit_query_get_value_as_double(query);
     selection_handle = fastbit_selection_osr(fastbit->column_name, compare_type, cv);
 
-    H5X_FASTBIT_LOG_DEBUG("Selection estimate: %ld",
-            fastbit_selection_estimate(selection_handle));
+    H5X_FASTBIT_LOG_DEBUG("Selection estimate: %ld", fastbit_selection_estimate(selection_handle));
 
     if (0 > (nhits = fastbit_selection_evaluate(selection_handle)))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTCOMPUTE, FAIL, "can't evaluate selection");
 
-    if (NULL == (hit_coords = (uint64_t *) H5MM_malloc(((size_t) nhits) * sizeof(uint64_t))))
+    if ((nhits != 0) && (NULL == (hit_coords = (uint64_t *) H5MM_malloc(((size_t) nhits) * sizeof(uint64_t)))))
         HGOTO_ERROR(H5E_INDEX, H5E_NOSPACE, FAIL, "can't allocate hit coordinates");
 
-    if (0 > fastbit_selection_get_coordinates(selection_handle, hit_coords,
-            (uint64_t) nhits, 0U))
+    if ((nhits != 0) && (0 > fastbit_selection_get_coordinates(selection_handle, hit_coords,(uint64_t) nhits, 0U)))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "can't get coordinates");
 
 #ifdef H5X_FASTBIT_DEBUG
@@ -1749,6 +1841,9 @@ done:
  *
  * Return:  Non-negative on success/Negative on failure
  *
+ * RAW:: This needs to be able to create a NULL selection so that we don't
+ *       FAIL unless there is an actual error.   It should NOT be an error
+ *       to not have any matches (i.e. when ncords == 0)!
  *-------------------------------------------------------------------------
  */
 static herr_t

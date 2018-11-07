@@ -435,6 +435,7 @@ test_query_create_simple_file(const char *filename, hid_t fapl, unsigned n_objs,
     }
 
     ntuples = (hsize_t)(NTUPLES/mpi_size);
+    nextValue = (float)(mpi_rank * ntuples);
 
     /* setup data to write */
     if ((data_slice = (float *)HDmalloc(ntuples * sizeof(float))) == NULL )
@@ -740,7 +741,6 @@ test_query_apply_view(const char *filename, hid_t fapl, unsigned n_objs,
     if ((test_query_create_simple_file(filename, fapl, n_objs, meta_idx_plugin,
             data_idx_plugin)) < 0) FAIL_STACK_ERROR;
 
-#if 0
     /* setup FAPL */
     if ((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0 )
         FAIL_STACK_ERROR;
@@ -799,7 +799,6 @@ test_query_apply_view(const char *filename, hid_t fapl, unsigned n_objs,
 
     /* Close file */
     if (H5Fclose(file) < 0) FAIL_STACK_ERROR;
-#endif
 
     if (mpi_rank == 0)
         printf("---\n...");
