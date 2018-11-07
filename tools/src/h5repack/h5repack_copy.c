@@ -1422,9 +1422,9 @@ copy_user_block(const char *infile, const char *outfile, hsize_t size)
     } /* end while */
 
 done:
-    if (infid > 0)
+    if (infid >= 0)
         HDclose(infid);
-    if (outfid > 0)
+    if (outfid >= 0)
         HDclose(outfid);
 
     return ret_value;
@@ -1497,7 +1497,7 @@ print_user_block(const char *filename, hid_t fid)
     }
 
 done:
-    if (fh > 0)
+    if (fh >= 0)
         HDclose(fh);
 
     return;
