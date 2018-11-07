@@ -1029,42 +1029,44 @@ endif ()
 ##############################################################################
 ###    F I L T E R  P L U G I N  T E S T S
 ##############################################################################
-if (WIN32)
-  set (CMAKE_SEP "\;")
-  set (BIN_REL_PATH "../../")
-else ()
-  set (CMAKE_SEP ":")
-  set (BIN_REL_PATH "../")
-endif ()
+if (BUILD_SHARED_LIBS)
+  if (WIN32)
+    set (CMAKE_SEP "\;")
+    set (BIN_REL_PATH "../../")
+  else ()
+    set (CMAKE_SEP ":")
+    set (BIN_REL_PATH "../")
+  endif ()
 
-add_test (NAME H5PLUGIN-filter_plugin COMMAND $<TARGET_FILE:filter_plugin>)
-set_tests_properties (H5PLUGIN-filter_plugin PROPERTIES
-    ENVIRONMENT "HDF5_PLUGIN_PATH=${CMAKE_BINARY_DIR}/filter_plugin_dir1${CMAKE_SEP}${CMAKE_BINARY_DIR}/filter_plugin_dir2;srcdir=${HDF5_TEST_BINARY_DIR}"
-    WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}
-)
+  add_test (NAME H5PLUGIN-filter_plugin COMMAND $<TARGET_FILE:filter_plugin>)
+  set_tests_properties (H5PLUGIN-filter_plugin PROPERTIES
+      ENVIRONMENT "HDF5_PLUGIN_PATH=${CMAKE_BINARY_DIR}/filter_plugin_dir1${CMAKE_SEP}${CMAKE_BINARY_DIR}/filter_plugin_dir2;srcdir=${HDF5_TEST_BINARY_DIR}"
+      WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}
+  )
 
 ##############################################################################
 # HDFFV-9655 relative plugin test disabled
 #
-#add_test (NAME H5PLUGIN-pluginRelative COMMAND $<TARGET_FILE:plugin>)
-#set_tests_properties (H5PLUGIN-pluginRelative PROPERTIES
-#    ENVIRONMENT "HDF5_PLUGIN_PATH=@/${BIN_REL_PATH}testdir1${CMAKE_SEP}@/${BIN_REL_PATH}testdir2;srcdir=${HDF5_TEST_BINARY_DIR}"
-#    WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}
-#)
+#  add_test (NAME H5PLUGIN-pluginRelative COMMAND $<TARGET_FILE:plugin>)
+#  set_tests_properties (H5PLUGIN-pluginRelative PROPERTIES
+#      ENVIRONMENT "HDF5_PLUGIN_PATH=@/${BIN_REL_PATH}testdir1${CMAKE_SEP}@/${BIN_REL_PATH}testdir2;srcdir=${HDF5_TEST_BINARY_DIR}"
+#      WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}
+#  )
 ##############################################################################
+endif ()
 
 if (TEST_SHELL_SCRIPTS)
   include (ShellTests.cmake)
 endif()
 
 if (ENABLE_EXTENDED_TESTS)
-    ##############################################################################
-    ###    S W M R  T E S T S
-    ##############################################################################
-    #       testflushrefresh.sh: flushrefresh
-    #       test_usecases.sh: use_append_chunk, use_append_mchunks, use_disable_mdc_flushes
-    #       testswmr.sh: swmr*
-    #       testvdsswmr.sh: vds_swmr*
+##############################################################################
+###    S W M R  T E S T S
+##############################################################################
+#       testflushrefresh.sh: flushrefresh
+#       test_usecases.sh: use_append_chunk, use_append_mchunks, use_disable_mdc_flushes
+#       testswmr.sh: swmr*
+#       testvdsswmr.sh: vds_swmr*
 
 #  add_test (NAME H5Test-swmr_check_compat_vfd COMMAND $<TARGET_FILE:swmr_check_compat_vfd>)
 

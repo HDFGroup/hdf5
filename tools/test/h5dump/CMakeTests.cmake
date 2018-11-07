@@ -1544,4 +1544,6 @@
 ##############################################################################
 ###    P L U G I N  T E S T S
 ##############################################################################
-ADD_H5_UD_TEST (h5dump_plugin_test 0 tudfilter --enable-error-stack tudfilter.h5)
+if (BUILD_SHARED_LIBS)
+  ADD_H5_UD_TEST (h5dump_plugin_test 0 tudfilter --enable-error-stack tudfilter.h5)
+endif ()

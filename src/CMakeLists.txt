@@ -875,13 +875,13 @@ if (NOT EXISTS ${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c)
 
   if (HDF5_BATCH_H5DETECT)
     configure_file (
-        ${HDF5_SOURCE_DIR}/bin/batch/${HDF5_DETECT_BATCH_SCRIPT}.in
-        ${HDF5_BINARY_DIR}/${HDF5_DETECT_BATCH_SCRIPT} ESCAPE_QUOTES @ONLY
+        ${HDF5_SOURCE_DIR}/bin/batch/${HDF5_BATCH_H5DETECT_SCRIPT}.in.cmake
+        ${HDF5_BINARY_DIR}/${HDF5_BATCH_H5DETECT_SCRIPT} ESCAPE_QUOTES @ONLY
     )
     add_custom_command (
         OUTPUT ${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c
         COMMAND ${HDF5_BATCH_CMD}
-        ARGS ${HDF5_BATCH_H5DETECT_SCRIPT}
+        ARGS ${HDF5_BINARY_DIR}/${HDF5_BATCH_H5DETECT_SCRIPT}
         DEPENDS H5detect
         WORKING_DIRECTORY ${HDF5_GENERATED_SOURCE_DIR}
     )
@@ -966,6 +966,7 @@ option (HDF5_ENABLE_DEBUG_APIS "Turn on extra debug output in all packages" OFF)
 #-----------------------------------------------------------------------------
 set (gen_SRCS ${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c ${HDF5_BINARY_DIR}/H5lib_settings.c)
 
+add_custom_target (gen_${HDF5_LIB_TARGET} ALL DEPENDS ${gen_SRCS})
 add_library (${HDF5_LIB_TARGET} STATIC ${common_SRCS} ${gen_SRCS} ${H5_PUBLIC_HEADERS} ${H5_PRIVATE_HEADERS} ${H5_GENERATED_HEADERS})
 target_include_directories(${HDF5_LIB_TARGET}
     PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>"
@@ -988,12 +989,14 @@ target_link_libraries (${HDF5_LIB_TARGET}
 set_global_variable (HDF5_LIBRARIES_TO_EXPORT ${HDF5_LIB_TARGET})
 H5_SET_LIB_OPTIONS (${HDF5_LIB_TARGET} ${HDF5_LIB_NAME} STATIC 0)
 set_target_properties (${HDF5_LIB_TARGET} PROPERTIES FOLDER libraries)
+add_dependencies (${HDF5_LIB_TARGET} gen_${HDF5_LIB_TARGET})
 
 set (install_targets ${HDF5_LIB_TARGET})
 
 if (BUILD_SHARED_LIBS)
   set (shared_gen_SRCS ${HDF5_GENERATED_SOURCE_DIR}/shared/H5Tinit.c ${HDF5_BINARY_DIR}/shared/H5lib_settings.c)
 
+  add_custom_target (gen_${HDF5_LIBSH_TARGET} ALL DEPENDS ${shared_gen_SRCS})
   add_library (${HDF5_LIBSH_TARGET} SHARED ${common_SRCS} ${shared_gen_SRCS} ${H5_PUBLIC_HEADERS} ${H5_PRIVATE_HEADERS} ${H5_GENERATED_HEADERS})
   target_include_directories(${HDF5_LIBSH_TARGET}
       PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>"
@@ -1018,6 +1021,7 @@ if (BUILD_SHARED_LIBS)
   set_global_variable (HDF5_LIBRARIES_TO_EXPORT "${HDF5_LIBRARIES_TO_EXPORT};${HDF5_LIBSH_TARGET}")
   H5_SET_LIB_OPTIONS (${HDF5_LIBSH_TARGET} ${HDF5_LIB_NAME} SHARED "LIB")
   set_target_properties (${HDF5_LIBSH_TARGET} PROPERTIES FOLDER libraries)
+  add_dependencies (${HDF5_LIBSH_TARGET} gen_${HDF5_LIBSH_TARGET})
 
   set (install_targets ${install_targets} ${HDF5_LIBSH_TARGET})
 endif ()
