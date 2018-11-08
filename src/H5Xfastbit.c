@@ -54,8 +54,8 @@
 // #define H5X_FASTBIT_DEBUG
 
 #ifdef H5X_FASTBIT_DEBUG
-// #define H5X_FASTBIT_DEBUG_LVL 6
-#define H5X_FASTBIT_DEBUG_LVL 2
+#define H5X_FASTBIT_DEBUG_LVL 6
+// #define H5X_FASTBIT_DEBUG_LVL 2
 #define H5X_FASTBIT_LOG_DEBUG(...) do {                         \
       fprintf(stdout, " # %s(): ", __func__);                   \
       fprintf(stdout, __VA_ARGS__);                             \
@@ -709,6 +709,9 @@ done:
 static herr_t
 H5X__fastbit_build_index(H5X_fastbit_t *fastbit)
 {
+    static int sequence_id = 0;
+    char log_entry[256];
+
     hid_t key_space_id = FAIL, offset_space_id = FAIL, bitmap_space_id = FAIL;
     hsize_t key_array_size, offset_array_size, bitmap_array_size;
     herr_t ret_value = SUCCEED; /* Return value */
@@ -799,6 +802,23 @@ H5X__fastbit_build_index(H5X_fastbit_t *fastbit)
     if (FAIL == H5Dwrite(fastbit->bitmaps_id, fastbit->opaque_type_id, H5S_ALL,
             H5S_ALL, H5P_DEFAULT, fastbit->bitmaps))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTUPDATE, FAIL, "can't write index metadata");
+
+    if (sequence_id == -1) {	/* Disabled for now */
+      int64_t key_array_size = fastbit->nkeys * sizeof(double);
+      int64_t offset_array_size = fastbit->noffsets * sizeof(int64_t);
+      int64_t bitmap_array_size = fastbit->nbitmaps * sizeof(uint32_t);
+
+      sprintf(log_entry, "seq-keys-save-%s", fastbit->column_name);
+      dump_as_bytes(log_entry, key_array_size, fastbit->keys);
+
+      sprintf(log_entry, "seq-offsets-save-%s", fastbit->column_name);
+      dump_as_bytes(log_entry, offset_array_size, fastbit->offsets);
+
+      sprintf(log_entry, "seq-bitmaps-save-%s", fastbit->column_name);
+      dump_as_bytes(log_entry, bitmap_array_size, fastbit->bitmaps);
+
+      sequence_id++;
+    }
 
 
 done:
@@ -925,12 +945,10 @@ H5X__fastbit_build_parallel_index(H5X_fastbit_t *fastbit)
     static int sequence_id = 0;
     char log_entry[256];
 
-    hid_t key_space_id = FAIL, offset_space_id = FAIL, bitmap_space_id = FAIL;
     hid_t info_space_id = FAIL;
     hid_t key_memspace_id = H5S_ALL;
     hid_t offset_memspace_id = H5S_ALL;
     hid_t bitmap_memspace_id = H5S_ALL;
-    hid_t info_memspace_id = H5S_ALL;
 
     hid_t keys_filespace_id = FAIL, offsets_filespace_id = FAIL, bitmaps_filespace_id = FAIL;
     hid_t keys_memspace_id = FAIL, offsets_memspace_id = FAIL, bitmaps_memspace_id = FAIL;
@@ -1045,11 +1063,14 @@ H5X__fastbit_build_parallel_index(H5X_fastbit_t *fastbit)
     bitmaps_memspace_id  = H5Screate_simple(1, &gatherInfo[mpi_rank].nbitmaps, NULL);
 
     /* Hyperslab selections */
-    if ((H5Sselect_hyperslab(keys_filespace_id, H5S_SELECT_SET, &nkeys_offset, NULL, &gatherInfo[mpi_rank].nkeys, NULL)) < 0 )
+    if ((H5Sselect_hyperslab(keys_filespace_id, H5S_SELECT_SET, &nkeys_offset, NULL,
+			     &gatherInfo[mpi_rank].nkeys, NULL)) < 0 )
         HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "can't select hyperslab offsets");
-    if ((H5Sselect_hyperslab(offsets_filespace_id, H5S_SELECT_SET, &noffsets_offset, NULL, &gatherInfo[mpi_rank].noffsets, NULL)) < 0 )
+    if ((H5Sselect_hyperslab(offsets_filespace_id, H5S_SELECT_SET, &noffsets_offset, NULL,
+			     &gatherInfo[mpi_rank].noffsets, NULL)) < 0 )
         HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "can't select hyperslab offsets");
-    if ((H5Sselect_hyperslab(bitmaps_filespace_id, H5S_SELECT_SET, &nbitmaps_offset, NULL, &gatherInfo[mpi_rank].nbitmaps, NULL)) < 0 )
+    if ((H5Sselect_hyperslab(bitmaps_filespace_id, H5S_SELECT_SET, &nbitmaps_offset, NULL,
+			     &gatherInfo[mpi_rank].nbitmaps, NULL)) < 0 )
         HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "can't select hyperslab offsets");
 
 
@@ -1131,21 +1152,39 @@ H5X__fastbit_build_parallel_index(H5X_fastbit_t *fastbit)
 			 bitmaps_filespace_id, dxpl_id, fastbit->bitmaps))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTUPDATE, FAIL, "can't write index metadata");
 
+    if (sequence_id == -1) {	/* Disabled for now */
+      key_array_size = gatherInfo[mpi_rank].nkeys * sizeof(double);
+      sprintf(log_entry, "%d-keys-save-%s", sequence_id, fastbit->column_name);
+      dump_as_bytes(log_entry, key_array_size, fastbit->keys);
+
+      offset_array_size = gatherInfo[mpi_rank].noffsets * sizeof(int64_t);
+      sprintf(log_entry, "%d-offsets-save-%s", sequence_id, fastbit->column_name);
+      dump_as_bytes(log_entry, offset_array_size, fastbit->offsets);
+
+      bitmap_array_size = gatherInfo[mpi_rank].nbitmaps * sizeof(uint32_t);
+      sprintf(log_entry, "%d-bitmaps-save-%s", sequence_id,  fastbit->column_name);
+      dump_as_bytes(log_entry, bitmap_array_size, fastbit->bitmaps);
+
+      sequence_id++;
+    }
 done:
     if (info_space_id != FAIL)
         H5Sclose(info_space_id);      
+
     if (keys_filespace_id != FAIL)
         H5Sclose(keys_filespace_id);
     if (offsets_filespace_id != FAIL)
         H5Sclose(offsets_filespace_id);
     if (bitmaps_filespace_id != FAIL)
         H5Sclose(bitmaps_filespace_id);
+
     if (keys_memspace_id != FAIL)
         H5Sclose(keys_memspace_id);
     if (offsets_memspace_id != FAIL)
         H5Sclose(offsets_memspace_id);
     if (bitmaps_memspace_id != FAIL)
         H5Sclose(bitmaps_memspace_id);
+
     if (dxpl_id != H5P_DEFAULT)
         H5Pclose(dxpl_id);
     if (err_occurred) {
@@ -1529,6 +1568,23 @@ H5X__fastbit_reconstruct_parallel_index(H5X_fastbit_t *fastbit)
 			bitmaps_filespace_id, dxpl_id, fastbit->bitmaps))
         HGOTO_ERROR(H5E_INDEX, H5E_READERROR, FAIL, "can't read index bitmaps metadata");
 
+    if (sequence_id == -1) {	/* Disabled for now */
+      key_array_size = gatherInfo[mpi_rank].nkeys * sizeof(double);
+      sprintf(log_entry, "%d-keys-read-%s", sequence_id, fastbit->column_name);
+      dump_as_bytes(log_entry, key_array_size, fastbit->keys);
+
+      offset_array_size = gatherInfo[mpi_rank].noffsets * sizeof(int64_t);
+      sprintf(log_entry, "%d-offsets-read-%s", sequence_id, fastbit->column_name);
+      dump_as_bytes(log_entry, offset_array_size, fastbit->offsets);
+
+      bitmap_array_size = gatherInfo[mpi_rank].nbitmaps * sizeof(uint32_t);
+      sprintf(log_entry, "%d-bitmaps-read-%s", sequence_id,  fastbit->column_name);
+      dump_as_bytes(log_entry, bitmap_array_size, fastbit->bitmaps);
+
+      sequence_id++;
+    }
+
+
     /* Reconstruct index */
     H5X_FASTBIT_LOG_DEBUG("Reconstructing index with nkeys=%lu, noffsets=%lu, "
             "nbitmaps=%lu", fastbit->nkeys, fastbit->noffsets, fastbit->nbitmaps);
@@ -1639,31 +1695,15 @@ H5X__fastbit_reconstruct_index(H5X_fastbit_t *fastbit)
             H5S_ALL, keys_space_id, H5P_DEFAULT, fastbit->keys))
         HGOTO_ERROR(H5E_INDEX, H5E_READERROR, FAIL, "can't read data");
 
-    /*
-    sprintf(log_entry, "%d-keys-read-%s", sequence_id, fastbit->column_name);
-    dump_as_bytes(log_entry, key_array_size, fastbit->keys);
-    */
-
     /* Read FastBit offsets */
     if (FAIL == H5Dread(fastbit->offsets_id, fastbit->opaque_type_id,
             H5S_ALL, offsets_space_id, H5P_DEFAULT, fastbit->offsets))
         HGOTO_ERROR(H5E_INDEX, H5E_READERROR, FAIL, "can't read data");
 
-    /*
-    sprintf(log_entry, "%d-offsets-read-%s", sequence_id, fastbit->column_name);
-    dump_as_bytes(log_entry, offset_array_size, fastbit->offsets);
-    */
-
     /* Read FastBit bitmaps */
     if (FAIL == H5Dread(fastbit->bitmaps_id, fastbit->opaque_type_id,
             H5S_ALL, bitmaps_space_id, H5P_DEFAULT, fastbit->bitmaps))
         HGOTO_ERROR(H5E_INDEX, H5E_READERROR, FAIL, "can't read data");
-
-    /*
-    sprintf(log_entry, "%d-bitmaps-read-%s", sequence_id,  fastbit->column_name);
-    dump_as_bytes(log_entry, bitmap_array_size, fastbit->bitmaps);
-    sequence_id++;
-    */
 
     /* Reconstruct index */
     H5X_FASTBIT_LOG_DEBUG("Reconstructing index with nkeys=%lu, noffsets=%lu, "
