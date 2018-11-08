@@ -950,11 +950,9 @@ H5D__chunk_init(H5F_t *f, const H5D_t *dset, hid_t dapl_id)
             if(dset->shared->layout.u.chunk.dim[u] == 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "chunk size must be > 0, dim = %u ", u)
 
-            /* Make a special case when the dimension is 0 because (0 - 1) is a big number for unsigned integer */
-            if(dset->shared->curr_dims[u] == 0)
-                rdcc->scaled_dims[u] = 0;
-            else
-                rdcc->scaled_dims[u] = ((dset->shared->curr_dims[u] - 1) / dset->shared->layout.u.chunk.dim[u]) + 1;
+            /* Round up to the next integer # of chunks, to accommodate partial chunks */
+            rdcc->scaled_dims[u] = (dset->shared->curr_dims[u] + dset->shared->layout.u.chunk.dim[u] - 1) /
+                dset->shared->layout.u.chunk.dim[u];
 
             if( !(scaled_power2up = H5VM_power2up(rdcc->scaled_dims[u])) )
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to get the next power of 2")
