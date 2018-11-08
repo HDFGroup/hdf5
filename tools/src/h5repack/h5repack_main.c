@@ -707,6 +707,8 @@ int main(int argc, const char **argv)
     void               *edata;
     void               *tools_edata;
 
+    HDmemset(&options, 0, sizeof(pack_opt_t));
+
     h5tools_setprogname(PROGRAMNAME);
     h5tools_setstatus(EXIT_SUCCESS);
 
