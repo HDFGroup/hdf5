@@ -472,7 +472,6 @@ create_4x4_dset(void)
 
     return SUCCEED;
 
-/* this will be removed once the existing code is moved out of main */
 error:
     H5Dclose(did);
     H5Sclose(f_sid);
