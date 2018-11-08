@@ -84,7 +84,6 @@ const char *FILENAME[] = {
     "dls_01_strings",   /* 23 */
     "power2up",         /* 24 */
     "version_bounds",   /* 25 */
-    "chunk_info",       /* 26 */
     NULL
 };
 
@@ -269,17 +268,12 @@ const char *FILENAME[] = {
 #define STORAGE_SIZE_CHUNK_DIM1 5
 #define STORAGE_SIZE_CHUNK_DIM2 5
 
-/* Parameters for testing chunk querying */
-#define DSET_SIMPLE_CHUNKED     "Chunked Dataset"
-#define DSET_EMPTY              "Empty Dataset"
-#define RANK         2
-#define NX          16
-#define NY          16
-#define CHUNK_NX     4
-#define CHUNK_NY     4
-#define CHUNK_SIZE  64
-#define NUM_CHUNKS  16
-#define NUM_CHUNKS_WRITTEN  4
+/* Parameters for testing version bounds */
+#define VDS_FNAME1  "virtual_file1"
+#define VDS_FNAME2  "virtual_file2"
+#define SRC_FNAME   "source_file"
+#define SRC_DSET    "src_dset"
+#define V_DSET      "v_dset"
 
 /* Shared global arrays */
 #define DSET_DIM1       100
@@ -12911,13 +12905,8 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-#define VDS_FNAME1  "virtual_file1"
-#define VDS_FNAME2  "virtual_file2"
-#define SRC_FNAME   "source_file"
-#define SRC_DSET    "src_dset"
-#define V_DSET      "v_dset"
 static herr_t
-test_versionbounds()
+test_versionbounds(void)
 {
     hid_t fapl = -1;
     hid_t srcfile = -1;   /* Files with source dsets */
@@ -13046,329 +13035,6 @@ test_versionbounds()
     } H5E_END_TRY;
     return FAIL;
 } /* test_versionbounds() */
-
-/*-------------------------------------------------------------------------
- * Function:    read_each_chunk (helper function)
- *
- * Purpose:     Reads the chunk specified by its offset and verifies that
- *              it contains the same data as what was written.  This function
- *              is used in test_get_chunk_info.
- *
- * Return:      Success:    SUCCEED
- *              Failure:    FAIL
- *
- * Date:        September 2018
- *
- *-------------------------------------------------------------------------
- */
-static herr_t read_each_chunk(hid_t dset_id, hsize_t offset1, hsize_t offset2, unsigned check_filter_mask, void *direct_buf)
-{
-    size_t   buf_size = CHUNK_NX*CHUNK_NY*sizeof(int);
-    int      read_buf[CHUNK_NX][CHUNK_NY];
-    hsize_t  offset[2] = {offset1, offset2};
-    unsigned read_filter_mask = 0;
-
-    /* Read the raw chunk back */
-    HDmemset(&read_buf, 0, sizeof(read_buf));
-
-    /* Read the chunk specified by its offset */
-    if (H5Dread_chunk(dset_id, H5P_DEFAULT, offset, &read_filter_mask, read_buf) < 0)
-        return(FAIL);
-
-    /* Verify that read chunk is the same as the corresponding written one */
-    if (HDmemcmp(direct_buf, read_buf, CHUNK_NX*CHUNK_NY) != 0)
-    {
-        HDfprintf(stderr, "Read chunk differs from written chunk at offset (%d,%d)\n", offset1, offset2);
-        return(FAIL);
-    }
-
-    return(SUCCEED);
-}
-
-/*-------------------------------------------------------------------------
- * Function:    reinit_vars (helper function)
- *
- * Purpose:     Helper function to wipe out variables for the next use,
- *              used in test_get_chunk_info.
- *
- * Return:      Won't fail
- *
- * Date:        September 2018
- *
- *-------------------------------------------------------------------------
- */
-void reinit_vars(unsigned *read_filter_mask, hsize_t *addr, hsize_t *size)
-{
-    if (read_filter_mask)
-        *read_filter_mask = 0;
-    if (addr)
-        *addr = 0;
-    if (size)
-        *size = 0;
-}
-
-/*-------------------------------------------------------------------------
- * Function:	test_get_chunk_info
- *
- * Purpose:	    Test getting various chunk information
- *
- * Return:	    Success:	0
- *		        Failure:	1
- *
- * Description:
- *              This function tests the new API functions added for EED-343:
- *              H5Dget_num_chunks, H5Dget_chunk_info, and H5Dget_chunk_info_by_coord.
- *
- * Date:        September 2018
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-test_get_chunk_info()
-{
-    hid_t       chunkfile = -1, fapl = -1;
-    hid_t       fspace = -1, dset = -1;
-    hid_t       mspace = -1;
-    hid_t       cparms = -1, dxpl = -1;
-    hsize_t     dims[2]  = {NX, NY};
-    hsize_t     maxdims[2] = {H5S_UNLIMITED, H5S_UNLIMITED};
-    hsize_t     chunk_dims[2] ={CHUNK_NX, CHUNK_NY};
-    int         fillvalue = -1;
-    char        filename[FILENAME_BUF_SIZE];
-    unsigned    filter_mask = 0;
-    int         direct_buf[16][CHUNK_NX][CHUNK_NY];
-    int         out_buf[NX][NY];
-    size_t      buf_size = CHUNK_NX*CHUNK_NY*sizeof(int);
-    int         aggression = 9;         /* Compression aggression setting */
-    unsigned    read_filter_mask = 0;   /* filter mask after direct read */
-    H5F_libver_t low, high;             /* File format bounds */
-    hsize_t start[2];  /* Start of hyperslab */
-    hsize_t stride[2]; /* Stride of hyperslab */
-    hsize_t count[2];  /* Block count */
-    hsize_t block[2];  /* Block sizes */
-    hsize_t offset[2];
-    hsize_t coord[H5S_MAX_RANK];
-    hsize_t out_offset[2] = {-1, -1};
-    hsize_t size = 0;
-    hsize_t nchunks = 0;
-    hsize_t addr = 0;
-    hsize_t index = 0;
-    hsize_t i, j, n;
-
-    TESTING("getting chunk information");
-
-    /* Create a copy of file access property list */
-    if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0) TEST_ERROR
-
-    /* Set high bound to V18 */
-    low = H5F_LIBVER_EARLIEST;
-    high = H5F_LIBVER_V18;
-    if (H5Pset_libver_bounds(fapl, low, high) < 0)
-        TEST_ERROR;
-
-    /* Create a file */
-    h5_fixname(FILENAME[26], fapl, filename, sizeof filename);
-    if((chunkfile = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        TEST_ERROR
-
-    /* Create the data space */
-    if((fspace = H5Screate_simple(RANK, dims, maxdims)) < 0)
-        TEST_ERROR
-
-    if((mspace = H5Screate_simple(RANK, chunk_dims, NULL)) < 0)
-        TEST_ERROR
-
-    /* Modify dataset creation properties, i.e. enable chunking and compression */
-    if((cparms = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-        TEST_ERROR
-
-    if(H5Pset_chunk(cparms, RANK, chunk_dims) < 0)
-        TEST_ERROR
-
-    if(H5Pset_deflate(cparms, (unsigned ) aggression) < 0)
-        TEST_ERROR
-
-    if (H5Pset_fill_value(cparms, H5T_NATIVE_INT, &fillvalue) < 0)
-        TEST_ERROR;
-
-    /* Create a new dataset using cparms creation properties */
-    if((dset = H5Dcreate2(chunkfile, DSET_SIMPLE_CHUNKED, H5T_NATIVE_INT, fspace,
-            H5P_DEFAULT, cparms, H5P_DEFAULT)) < 0) TEST_ERROR
-
-    if((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
-        TEST_ERROR
-
-    /* Indicate skipping the compression filter.     */
-    filter_mask = 0x00000001;
-
-    /* Initialize the array of chunk data, that is for all 16 chunks */
-    for(n = 0; n < 16; n++)
-        for(i = 0; i < CHUNK_NX; i++)
-            for(j = 0; j < CHUNK_NY; j++)
-                direct_buf[n][i][j] = n + 1;
-
-    /* Write NUM_CHUNKS_WRITTEN chunks: (0,2) (0,3) (1,2) (1,3) */
-    n = 0;
-    for (i = 0; i < 2; i++)
-        for (j = 2; j < 4; j++, n++)
-        {
-            offset[0] = i * CHUNK_NX;
-            offset[1] = j * CHUNK_NY;
-            if (H5Dwrite_chunk(dset, dxpl, filter_mask, offset, buf_size, (void*)direct_buf[n]) < 0)
-                TEST_ERROR
-        }
-
-    /* Close the dataset then... */
-    if(H5Dclose(dset) < 0) TEST_ERROR
-
-    /* ...open it again to test the chunk query functions */
-    if((dset = H5Dopen2(chunkfile, DSET_SIMPLE_CHUNKED, H5P_DEFAULT)) < 0) TEST_ERROR
-
-    /* Get and verify the number of chunks written */
-    if (H5Dget_num_chunks(dset, mspace, &nchunks) < 0) TEST_ERROR;
-    if (nchunks != NUM_CHUNKS_WRITTEN) TEST_ERROR;
-
-    /* Read the entire dataset back */
-    start[0]  = 0; start[1]  = 0;
-    stride[0] = 1; stride[1] = 1;
-    count[0]  = 1; count[1]  = 1;
-    block[0]  = CHUNK_NX; block[1]  = CHUNK_NY;
-    if(H5Dread(dset, H5T_NATIVE_INT, fspace, fspace, H5P_DEFAULT, out_buf) < 0)
-        TEST_ERROR
-
-    /* Get and verify info of the first chunk */
-    index = 0;
-    reinit_vars(&read_filter_mask, &addr, &size);
-    if (H5Dget_chunk_info(dset, fspace, index, out_offset, &read_filter_mask, &addr, &size) < 0)
-        TEST_ERROR
-    if (read_filter_mask != filter_mask) TEST_ERROR;
-    if (size != CHUNK_SIZE) TEST_ERROR;
-    if (out_offset[0] != 0 || out_offset[1] != 8) TEST_ERROR;
-
-    /* Get and verify info of the second chunk */
-    index = 1;
-    reinit_vars(&read_filter_mask, &addr, &size);
-    if (H5Dget_chunk_info(dset, fspace, index, out_offset, &read_filter_mask, &addr, &size) < 0)
-        TEST_ERROR
-    if (read_filter_mask != filter_mask) TEST_ERROR;
-    if (size != CHUNK_SIZE) TEST_ERROR;
-    if (out_offset[0] != 0 || out_offset[1] != 12) TEST_ERROR;
-
-    /* Get and verify info of the third chunk */
-    index = 2;
-    reinit_vars(&read_filter_mask, &addr, &size);
-    if (H5Dget_chunk_info(dset, fspace, index, out_offset, &read_filter_mask, &addr, &size) < 0)
-        TEST_ERROR
- 
-    if (read_filter_mask != filter_mask) TEST_ERROR;
-    if (size != CHUNK_SIZE) TEST_ERROR;
-    if (out_offset[0] != 4 || out_offset[1] != 8) TEST_ERROR;
-
-    /* Get and verify info of the last chunk */
-    index = 3;
-    reinit_vars(&read_filter_mask, &addr, &size);
-    if (H5Dget_chunk_info(dset, fspace, index, out_offset, &read_filter_mask, &addr, &size) < 0)
-        TEST_ERROR
-    if (read_filter_mask != filter_mask) TEST_ERROR;
-    if (size != CHUNK_SIZE) TEST_ERROR;
-    if (out_offset[0] != 4 || out_offset[1] != 12) TEST_ERROR;
-
-    /* Attempt to get info of empty chunk and verify the returned address and size */
-    index = 5;
-    reinit_vars(&read_filter_mask, &addr, &size);
-    if (H5Dget_chunk_info(dset, fspace, index, out_offset, &read_filter_mask, &addr, &size) < 0)
-        TEST_ERROR
-    if (addr != HADDR_UNDEF) TEST_ERROR;
-    if (size != 0) TEST_ERROR;
-
-    /* Get info of the chunk at logical coordinates (0,2) */
-    offset[0] = 0;
-    offset[1] = 2 * CHUNK_NY;
-    if (H5Dget_chunk_info_by_coord(dset, offset, &read_filter_mask, &addr, &size) < 0) TEST_ERROR;
-    if (read_filter_mask != filter_mask) TEST_ERROR;
-    if (size != CHUNK_SIZE) TEST_ERROR;
-
-    /* Get info of the chunk at logical coordinates (1,3) */
-    offset[0] = 1 * CHUNK_NX;
-    offset[1] = 3 * CHUNK_NY;
-    if (H5Dget_chunk_info_by_coord(dset, offset, &read_filter_mask, &addr, &size) < 0) TEST_ERROR;
-    if (read_filter_mask != filter_mask) TEST_ERROR;
-    if (size != CHUNK_SIZE) TEST_ERROR;
-
-    /* Attempt to get info of empty chunks, verify the returned address and size */
-    offset[0] = 0;
-    offset[1] = 0;
-    if (H5Dget_chunk_info_by_coord(dset, offset, &read_filter_mask, &addr, &size) < 0) TEST_ERROR;
-    if (addr != HADDR_UNDEF) TEST_ERROR;
-    if (size != 0) TEST_ERROR;
-
-    offset[0] = 3 * CHUNK_NX;
-    offset[1] = 3 * CHUNK_NY;
-    if (H5Dget_chunk_info_by_coord(dset, offset, &read_filter_mask, &addr, &size) < 0) TEST_ERROR;
-    if (addr != HADDR_UNDEF) TEST_ERROR;
-    if (size != 0) TEST_ERROR;
-
-    /* Read each chunk and verify the values */
-    n = 0;
-    for (i = 0; i < 2; i++)
-        for (j = 2; j < 4; j++, n++)
-            if (read_each_chunk(dset, i*CHUNK_NX, j*CHUNK_NY, filter_mask, (void*)direct_buf[n]) < 0)
-                TEST_ERROR
-
-    /* Close the first dataset */
-    if (H5Dclose(dset) < 0) TEST_ERROR
-
-    /* Create an empty dataset */
-    if((dset = H5Dcreate2(chunkfile, DSET_EMPTY, H5T_NATIVE_INT, fspace,
-            H5P_DEFAULT, cparms, H5P_DEFAULT)) < 0) TEST_ERROR
-    if (H5Dclose(dset) < 0) TEST_ERROR
-
-    /* Reopen the empty dataset to verify the chunk query functions on it */
-    if((dset = H5Dopen2(chunkfile, DSET_EMPTY, H5P_DEFAULT)) < 0) TEST_ERROR
-
-    /* Verify that the number of chunks is 0 */
-    if (H5Dget_num_chunks(dset, mspace, &nchunks) < 0) TEST_ERROR;
-    if (nchunks != 0) TEST_ERROR;
-
-    /* Attempt to get info of a chunk from an empty dataset, verify the
-       returned address and size */
-    index = 0;
-    reinit_vars(&read_filter_mask, &addr, &size);
-    if (H5Dget_chunk_info(dset, fspace, index, out_offset, &read_filter_mask, &addr, &size) < 0)
-        TEST_ERROR
-    if (addr != HADDR_UNDEF) TEST_ERROR;
-    if (size != 0) TEST_ERROR;
-
-    /* Attempt to get info of a chunk given its coords from an empty dataset,
-       verify the returned address and size */
-    offset[0] = 0;
-    offset[1] = 0;
-    if (H5Dget_chunk_info_by_coord(dset, offset, &read_filter_mask, &addr, &size) < 0) TEST_ERROR;
-    if (addr != HADDR_UNDEF) TEST_ERROR;
-    if (size != 0) TEST_ERROR;
-
-    /* Close/release resources. */
-    if (H5Sclose(mspace) < 0) TEST_ERROR
-    if (H5Sclose(fspace) < 0) TEST_ERROR
-    if (H5Pclose(cparms) < 0) TEST_ERROR
-    if (H5Pclose(dxpl) < 0) TEST_ERROR
-    if (H5Fclose(chunkfile) < 0) TEST_ERROR
-
-    PASSED();
-    return SUCCEED;
-
-error:
-    H5E_BEGIN_TRY {
-        H5Dclose(dset);
-        H5Sclose(mspace);
-        H5Sclose(fspace);
-        H5Pclose(cparms);
-        H5Pclose(dxpl);
-    } H5E_END_TRY;
-
-    H5_FAILED();
-    return FAIL;
-} /* test_get_chunk_info() */
 
 
 /*-------------------------------------------------------------------------
@@ -13569,9 +13235,6 @@ main(void)
 
     /* Tests version bounds using its own file */
     nerrors += (test_versionbounds() < 0                    ? 1 : 0);
-
-    /* Tests getting chunk information */
-    nerrors += (test_get_chunk_info() < 0                   ? 1 : 0);
 
     /* Run misc tests */
     nerrors += dls_01_main();

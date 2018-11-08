@@ -104,8 +104,12 @@ void reinit_vars(unsigned *read_filter_mask, haddr_t *addr, hsize_t *size)
  *
  * Purpose:	    Test getting various chunk information
  *
- * Return:	    Success:	0
- *		        Failure:	1
+ * Return:	    Success:	SUCCEED
+ *		        Failure:	FAIL
+ *
+ * Note:        Note that the dataspace argument in these new functions are
+ *              currently not used.  The functionality involved the dataspace
+ *              will be implemented in the next version.
  *
  * Description:
  *              This function tests the new API functions added for EED-343:
@@ -472,7 +476,6 @@ create_4x4_dset(void)
 
     return SUCCEED;
 
-/* this will be removed once the existing code is moved out of main */
 error:
     H5Dclose(did);
     H5Sclose(f_sid);
