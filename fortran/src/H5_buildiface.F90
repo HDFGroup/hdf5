@@ -144,7 +144,7 @@ PROGRAM H5_buildiface
   WRITE(11,'(2X,A)') 'IMPLICIT NONE'
 
 !******************************
-! DECLARE PRIVETE INTERFACES
+! DECLARE PRIVATE INTERFACES
 !******************************
 
   DO i = 1, num_rkinds
