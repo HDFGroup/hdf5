@@ -750,10 +750,10 @@
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
       set_tests_properties (H5DUMP-IMPORT-${resultfile} PROPERTIES DEPENDS "H5DUMP-IMPORT-${resultfile}-clear-objects")
-      add_test (NAME H5DUMP-IMPORT-h5import-${resultfile} COMMAND h5import ${resultfile}.bin -c ${conffile}.out -o ${resultfile}.h5)
+      add_test (NAME H5DUMP-IMPORT-h5import-${resultfile} COMMAND $<TARGET_FILE:h5import> ${resultfile}.bin -c ${conffile}.out -o ${resultfile}.h5)
       set_tests_properties (H5DUMP-IMPORT-h5import-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
       set_tests_properties (H5DUMP-IMPORT-h5import-${resultfile} PROPERTIES DEPENDS H5DUMP-IMPORT-${resultfile})
-      add_test (NAME H5DUMP-IMPORT-h5diff-${resultfile} COMMAND h5diff ${testfile} ${resultfile}.h5 /integer /integer)
+      add_test (NAME H5DUMP-IMPORT-h5diff-${resultfile} COMMAND $<TARGET_FILE:h5diff> ${testfile} ${resultfile}.h5 /integer /integer)
       set_tests_properties (H5DUMP-IMPORT-h5diff-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
       set_tests_properties (H5DUMP-IMPORT-h5diff-${resultfile} PROPERTIES DEPENDS H5DUMP-IMPORT-h5import-${resultfile})
     endif ()
