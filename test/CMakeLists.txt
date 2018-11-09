@@ -59,6 +59,7 @@ endif ()
 #################################################################################
 # If filter plugin tests can be tested
 #################################################################################
+if (BUILD_SHARED_LIBS)
   # make plugins dir
   file (MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/testdir1")
   file (MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/testdir2")
@@ -124,6 +125,7 @@ endif ()
           "${CMAKE_BINARY_DIR}/testdir2/$<TARGET_FILE_NAME:${HDF5_TEST_PLUGIN_TARGET}>"
     )
   endforeach ()
+endif ()
 
 #################################################################################
 #  Test program sources

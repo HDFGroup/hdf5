@@ -65,7 +65,7 @@ struct handler_t {
  * parameters. The long-named ones can be partially spelled. When
  * adding more, make sure that they don't clash with each other.
  */
-/* The following initialization makes use of C language cancatenating */
+/* The following initialization makes use of C language concatenating */
 /* "xxx" "yyy" into "xxxyyy". */
 static const char *s_opts = "hn*peyBHirVa:c:d:f:g:k:l:t:w:xD:uX:o*b*F:s:S:A*q:z:m:RE*CM:O*N:";
 static struct long_options l_opts[] = {
@@ -189,7 +189,7 @@ static struct long_options l_opts[] = {
     { NULL, 0, '\0' }
 };
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    leave
  *
@@ -212,7 +212,7 @@ leave(int ret)
     HDexit(ret);
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    usage
  *
@@ -362,7 +362,7 @@ usage(const char *prog)
     PRINTVALSTREAM(rawoutstream, "\n");
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function: table_list_add
  *
@@ -415,7 +415,7 @@ table_list_add(hid_t oid, unsigned long file_no)
     return((ssize_t) idx);
 } /* end table_list_add() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: table_list_visited
  *
@@ -445,7 +445,7 @@ table_list_visited(unsigned long file_no)
     return(-1);
 } /* end table_list_visited() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: table_list_free
  *
@@ -813,7 +813,7 @@ parse_mask_list(const char *h_list)
     }
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    free_handler
  *
@@ -861,7 +861,7 @@ free_handler(struct handler_t *hand, int len)
     }
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    parse_command_line
  *
@@ -1295,7 +1295,7 @@ error:
     return hand;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    main
  *
@@ -1753,7 +1753,7 @@ h5_fileaccess(void)
     return fapl;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    init_prefix
  *
@@ -1774,7 +1774,7 @@ init_prefix(char **prfx, size_t prfx_len)
         error_msg("unable to allocate prefix buffer\n");
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    add_prefix
  *

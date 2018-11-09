@@ -9574,7 +9574,7 @@ static void gent_bitnopaquefields(void)
         uint32_t    c;
         uint64_t    d;
     } s_t;
-    
+
     hid_t  file, grp=-1, type=-1, space=-1, dset=-1;
     size_t  i;
     hsize_t  nelmts = F80_DIM32;
