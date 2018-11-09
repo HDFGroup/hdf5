@@ -368,7 +368,7 @@
     HDFTEST_COPY_FILE("${tst_other_file}" "${PROJECT_BINARY_DIR}/testfiles/std/${fname}" "h5dump_std_files")
   endforeach ()
   foreach (tst_h5N_file ${HDF5_N_REFERENCE_FILES})
-    HDFTEST_COPY_FILE("${HDF5_TOOLS_SOURCE_DIR}/testfiles/${tst_h5N_file}.ddl" "${PROJECT_BINARY_DIR}/testfiles/std/${tst_h5N_file}-N.ddl" "h5dump_std_files")
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_SRC_DIR}/testfiles/${tst_h5N_file}.ddl" "${PROJECT_BINARY_DIR}/testfiles/std/${tst_h5N_file}-N.ddl" "h5dump_std_files")
   endforeach ()
 
   foreach (tst_error_file ${HDF5_ERROR_REFERENCE_TEST_FILES})
@@ -379,7 +379,7 @@
   # --------------------------------------------------------------------
   # Special file handling
   # --------------------------------------------------------------------
-  HDFTEST_COPY_FILE("${HDF5_TOOLS_SOURCE_DIR}/testfiles/tbin1.ddl" "${PROJECT_BINARY_DIR}/testfiles/std/tbin1LE.ddl" "h5dump_std_files")
+  HDFTEST_COPY_FILE("${HDF5_TOOLS_SRC_DIR}/testfiles/tbin1.ddl" "${PROJECT_BINARY_DIR}/testfiles/std/tbin1LE.ddl" "h5dump_std_files")
 
   if (WIN32)
     file (READ ${HDF5_TOOLS_SRC_DIR}/testfiles/tbinregR.exp TEST_STREAM)
