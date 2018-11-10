@@ -1966,7 +1966,7 @@ H5D_nameof(const H5D_t *dataset)
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    FUNC_LEAVE_NOAPI(dataset ? &(dataset->path) : (H5G_name_t *)NULL)
+    FUNC_LEAVE_NOAPI(dataset ? (H5G_name_t *)&(dataset->path) : (H5G_name_t *)NULL)
 } /* end H5D_nameof() */
 
 

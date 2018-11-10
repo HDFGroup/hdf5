@@ -728,7 +728,7 @@ H5R__get_name(H5F_t *f, H5R_type_t ref_type, const void *_ref,
             UINT32DECODE(p, hobjid.idx);
 
             /* Get the dataset region from the heap (allocate inside routine) */
-            if ((buf = (uint8_t *)H5HG_read(oloc.file, &hobjid, NULL, NULL)) == NULL)
+            if((buf = (uint8_t *)H5HG_read(oloc.file, &hobjid, NULL, NULL)) == NULL)
                 HGOTO_ERROR(H5E_REFERENCE, H5E_READERROR, (-1), "Unable to read dataset region information")
 
             /* Get the object oid for the dataset */
@@ -748,7 +748,7 @@ H5R__get_name(H5F_t *f, H5R_type_t ref_type, const void *_ref,
     } /* end switch */
 
     /* Get name, length, etc. */
-    if ((ret_value = H5G_get_name_by_addr(f, &oloc, name, size)) < 0)
+    if((ret_value = H5G_get_name_by_addr(f, &oloc, name, size)) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, (-1), "can't determine name")
 
 done:

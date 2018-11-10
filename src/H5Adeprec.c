@@ -115,7 +115,7 @@ H5Acreate1(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
 	  hid_t acpl_id)
 {
     void    *attr = NULL;       /* attr token from VOL connector */
-    H5VL_object_t    *vol_obj = NULL;        /* object token of loc_id */
+    H5VL_object_t  *vol_obj = NULL;     /* Object token of loc_id */
     H5VL_loc_params_t   loc_params;
     H5P_genplist_t      *plist;            /* Property list pointer */
     hid_t		ret_value = H5I_INVALID_HID;              /* Return value */
@@ -199,7 +199,7 @@ hid_t
 H5Aopen_name(hid_t loc_id, const char *name)
 {
     void    *attr = NULL;       /* attr token from VOL connector */
-    H5VL_object_t    *vol_obj = NULL;        /* object token of loc_id */
+    H5VL_object_t  *vol_obj = NULL;     /* Object token of loc_id */
     H5VL_loc_params_t loc_params; 
     hid_t		ret_value = H5I_INVALID_HID;              /* Return value */
 
@@ -264,7 +264,7 @@ hid_t
 H5Aopen_idx(hid_t loc_id, unsigned idx)
 {
     void    *attr = NULL;       /* attr token from VOL connector */
-    H5VL_object_t    *vol_obj = NULL;        /* object token of loc_id */
+    H5VL_object_t  *vol_obj = NULL;     /* Object token of loc_id */
     H5VL_loc_params_t   loc_params;
     hid_t		ret_value = H5I_INVALID_HID;              /* Return value */
 
@@ -327,7 +327,7 @@ done:
 int
 H5Aget_num_attrs(hid_t loc_id)
 {
-    H5VL_object_t      *vol_obj;
+    H5VL_object_t  *vol_obj = NULL;     /* Object token of loc_id */
     H5VL_loc_params_t   loc_params;
     H5O_info_t          oinfo;
     int                 ret_value = -1;
@@ -338,7 +338,7 @@ H5Aget_num_attrs(hid_t loc_id)
     loc_params.type     = H5VL_OBJECT_BY_SELF;
     loc_params.obj_type = H5I_get_type(loc_id);
 
-    /* get the location object */
+    /* Get the location object */
     if(NULL == (vol_obj = H5VL_vol_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, (-1), "invalid location identifier")
 
@@ -393,18 +393,23 @@ done:
 herr_t
 H5Aiterate1(hid_t loc_id, unsigned *attr_num, H5A_operator1_t op, void *op_data)
 {
-    herr_t	    ret_value;      /* Return value */
+    H5VL_object_t  *vol_obj = NULL;     /* Object token of loc_id */
+    herr_t	    ret_value;          /* Return value */
 
-    FUNC_ENTER_API(FAIL)
+    FUNC_ENTER_API(H5_ITER_ERROR)
     H5TRACE4("e", "i*Iux*x", loc_id, attr_num, op, op_data);
 
     /* check arguments */
     if(H5I_ATTR == H5I_get_type(loc_id))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5_ITER_ERROR, "location is not valid for an attribute")
+
+    /* Get the location object */
+    if(NULL == (vol_obj = H5VL_vol_object(loc_id)))
+        HGOTO_ERROR(H5E_VOL, H5E_BADTYPE, H5_ITER_ERROR, "invalid location identifier")
 
     /* Call attribute iteration routine */
-    if((ret_value = H5A__iterate_old(loc_id, attr_num, op, op_data)) < 0)
-        HERROR(H5E_ATTR, H5E_BADITER, "error iterating over attributes");
+    if((ret_value = H5VL_attr_optional(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, H5VL_ATTR_ITERATE_OLD, loc_id, attr_num, op, op_data)) < 0)
+        HERROR(H5E_VOL, H5E_BADITER, "error iterating over attributes");
 
 done:
     FUNC_LEAVE_API(ret_value)

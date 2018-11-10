@@ -59,6 +59,7 @@ static herr_t H5VL__native_attr_read(void *attr, hid_t dtype_id, void *buf, hid_
 static herr_t H5VL__native_attr_write(void *attr, hid_t dtype_id, const void *buf, hid_t dxpl_id, void **req);
 static herr_t H5VL__native_attr_get(void *obj, H5VL_attr_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
 static herr_t H5VL__native_attr_specific(void *obj, H5VL_loc_params_t loc_params, H5VL_attr_specific_t specific_type, hid_t dxpl_id, void **req, va_list arguments);
+static herr_t H5VL__native_attr_optional(void *obj, hid_t dxpl_id, void **req, va_list arguments);
 static herr_t H5VL__native_attr_close(void *attr, hid_t dxpl_id, void **req);
 
 /* Dataset callbacks */
@@ -85,7 +86,8 @@ static herr_t H5VL__native_file_close(void *file, hid_t dxpl_id, void **req);
 static void *H5VL__native_group_create(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t gcpl_id, hid_t gapl_id, hid_t dxpl_id, void **req);
 static void *H5VL__native_group_open(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t gapl_id, hid_t dxpl_id, void **req);
 static herr_t H5VL__native_group_get(void *obj, H5VL_group_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
-static herr_t H5VL__native_group_specific(void *dset, H5VL_group_specific_t specific_type, hid_t dxpl_id, void **req, va_list arguments);
+static herr_t H5VL__native_group_specific(void *obj, H5VL_group_specific_t specific_type, hid_t dxpl_id, void **req, va_list arguments);
+static herr_t H5VL__native_group_optional(void *obj, hid_t dxpl_id, void **req, va_list arguments);
 static herr_t H5VL__native_group_close(void *grp, hid_t dxpl_id, void **req);
 
 /* Link callbacks */
@@ -139,7 +141,7 @@ static H5VL_class_t H5VL_native_cls_g = {
         H5VL__native_attr_write,                    /* write        */
         H5VL__native_attr_get,                      /* get          */
         H5VL__native_attr_specific,                 /* specific     */
-        NULL,                                       /* optional     */
+        H5VL__native_attr_optional,                 /* optional     */
         H5VL__native_attr_close                     /* close        */
     },
     {   /* dataset_cls */
@@ -173,7 +175,7 @@ static H5VL_class_t H5VL_native_cls_g = {
         H5VL__native_group_open,                    /* open         */
         H5VL__native_group_get,                     /* get          */
         H5VL__native_group_specific,                /* specific     */
-        NULL,                                       /* optional     */
+        H5VL__native_group_optional,                /* optional     */
         H5VL__native_group_close                    /* close        */
     },
     {   /* link_cls */
@@ -793,6 +795,51 @@ H5VL__native_attr_specific(void *obj, H5VL_loc_params_t loc_params, H5VL_attr_sp
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL__native_attr_specific() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL__native_attr_optional
+ *
+ * Purpose:     Perform a connector-specific operation on a native attribute
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL__native_attr_optional(void H5_ATTR_UNUSED *obj, hid_t H5_ATTR_UNUSED dxpl_id,
+    void H5_ATTR_UNUSED **req, va_list arguments)
+{
+    H5VL_attr_optional_t optional_type;
+    herr_t ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    optional_type = va_arg(arguments, H5VL_attr_optional_t);
+    switch(optional_type) {
+#ifndef H5_NO_DEPRECATED_SYMBOLS
+        case H5VL_ATTR_ITERATE_OLD:
+            {
+                hid_t loc_id = va_arg(arguments, hid_t);
+                unsigned *attr_num = va_arg(arguments, unsigned *);
+                H5A_operator1_t op = va_arg(arguments, H5A_operator1_t);
+                void *op_data = va_arg(arguments, void *);
+
+                /* Call the actual iteration routine */
+                if((ret_value = H5A__iterate_old(loc_id, attr_num, op, op_data)) < 0)
+                    HERROR(H5E_VOL, H5E_BADITER, "error iterating over attributes");
+
+                break;
+            }
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
+
+        default:
+            HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "invalid optional operation")
+    } /* end switch */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__native_attr_optional() */
 
 
 /*-------------------------------------------------------------------------
@@ -1551,14 +1598,14 @@ H5VL__native_file_get(void *obj, H5VL_file_get_t get_type,
                     /* Check for SWMR write access on the file */
                     if(H5F_INTENT(f) & H5F_ACC_SWMR_WRITE)
                         *intent_flags |= H5F_ACC_SWMR_WRITE;
-                }
+                } /* end if */
                 else {
                     *intent_flags = H5F_ACC_RDONLY;
 
                     /* Check for SWMR read access on the file */
                     if(H5F_INTENT(f) & H5F_ACC_SWMR_READ)
                         *intent_flags |= H5F_ACC_SWMR_READ;
-                }
+                } /* end else */
 
                 break;
             }
@@ -1581,7 +1628,7 @@ H5VL__native_file_get(void *obj, H5VL_file_get_t get_type,
                     HDstrncpy(name, H5F_OPEN_NAME(f), MIN(len + 1,size));
                     if(len >= size)
                         name[size-1]='\0';
-                }
+                } /* end if */
 
                 /* Set the return value for the API call */
                 *ret = (ssize_t)len;
@@ -2370,6 +2417,77 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5VL__native_group_optional
+ *
+ * Purpose:     Perform a connector-specific operation on a native group
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL__native_group_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id,
+    void H5_ATTR_UNUSED **req, va_list arguments)
+{
+    H5VL_group_optional_t optional_type;
+    herr_t ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    optional_type = va_arg(arguments, H5VL_group_optional_t);
+    switch(optional_type) {
+#ifndef H5_NO_DEPRECATED_SYMBOLS
+        /* H5Giterate (deprecated) */
+        case H5VL_GROUP_ITERATE_OLD:
+            {
+                H5VL_loc_params_t loc_params = va_arg(arguments, H5VL_loc_params_t);
+                hsize_t idx = va_arg(arguments, hsize_t);
+                hsize_t *last_obj = va_arg(arguments, hsize_t *);
+                const H5G_link_iterate_t *lnk_op = va_arg(arguments, const H5G_link_iterate_t *);
+                void *op_data = va_arg(arguments, void *);
+                H5G_loc_t grp_loc;
+
+                /* Get the location struct for the object */
+                if(H5G_loc_real(obj, loc_params.obj_type, &grp_loc) < 0)
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
+
+                /* Call the actual iteration routine */
+                if((ret_value = H5G_iterate(&grp_loc, loc_params.loc_data.loc_by_name.name, H5_INDEX_NAME, H5_ITER_INC, idx, last_obj, lnk_op, op_data)) < 0)
+                    HERROR(H5E_VOL, H5E_BADITER, "error iterating over group's links");
+
+                break;
+            }
+
+        /* H5Gget_objinfo (deprecated) */
+        case H5VL_GROUP_GET_OBJINFO:
+            {
+                H5VL_loc_params_t loc_params = va_arg(arguments, H5VL_loc_params_t);
+                hbool_t follow_link = va_arg(arguments, unsigned);
+                H5G_stat_t *statbuf = va_arg(arguments, H5G_stat_t *);
+                H5G_loc_t grp_loc;
+
+                /* Get the location struct for the object */
+                if(H5G_loc_real(obj, loc_params.obj_type, &grp_loc) < 0)
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
+
+                /* Call the actual group objinfo routine */
+                if(H5G__get_objinfo(&grp_loc, loc_params.loc_data.loc_by_name.name, follow_link, statbuf) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "cannot stat object")
+
+                break;
+            }
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
+
+        default:
+            HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "invalid optional operation")
+    } /* end switch */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__native_group_optional() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5VL__native_group_close
  *
  * Purpose:     Closes a group.
@@ -2655,13 +2773,12 @@ H5VL__native_link_get(void *obj, H5VL_loc_params_t loc_params, H5VL_link_get_t g
                 if(loc_params.type == H5VL_OBJECT_BY_NAME) { /* H5Lget_info */
                     if(H5L_get_info(&loc, loc_params.loc_data.loc_by_name.name, linfo) < 0)
                         HGOTO_ERROR(H5E_LINK, H5E_NOTFOUND, FAIL, "unable to get link info")
-                }
+                } /* end if */
                 else if(loc_params.type == H5VL_OBJECT_BY_IDX) { /* H5Lget_info_by_idx */
-
                     if(H5L_get_info_by_idx(&loc, loc_params.loc_data.loc_by_idx.name, loc_params.loc_data.loc_by_idx.idx_type,
                             loc_params.loc_data.loc_by_idx.order, loc_params.loc_data.loc_by_idx.n, linfo) < 0)
                         HGOTO_ERROR(H5E_LINK, H5E_NOTFOUND, FAIL, "unable to get link info")
-                }
+                } /* end else-if */
                 else
                     HGOTO_ERROR(H5E_LINK, H5E_NOTFOUND, FAIL, "unable to get link info")
                 break;
@@ -3018,6 +3135,20 @@ H5VL__native_object_get(void *obj, H5VL_loc_params_t loc_params, H5VL_object_get
                 break;
             }
 
+        /* H5Iget_name */
+        case H5VL_ID_GET_NAME:
+            {
+                ssize_t *ret = va_arg(arguments, ssize_t *);
+                char *name = va_arg(arguments, char *);
+                size_t size = va_arg(arguments, size_t);
+
+                /* Retrieve object's name */
+                if((*ret = H5G_get_name(&loc, name, size, NULL)) < 0)
+                    HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't retrieve object name")
+
+                break;
+            }
+
         default:
             HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't get this type of information from object")
     } /* end switch */
@@ -3222,7 +3353,7 @@ H5VL__native_object_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id,
                         HGOTO_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "can't free location")
                 } /* end else-if */
                 else
-                    HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "unknown get info parameters")
+                    HGOTO_ERROR(H5E_OHDR, H5E_UNSUPPORTED, FAIL, "unknown get info parameters")
                 break;
             }
 

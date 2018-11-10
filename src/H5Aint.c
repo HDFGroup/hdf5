@@ -2659,7 +2659,7 @@ done:
     if(obj_loc_id != H5I_INVALID_HID) {
         if(H5I_dec_app_ref(obj_loc_id) < 0)
             HDONE_ERROR(H5E_ATTR, H5E_CANTDEC, FAIL, "unable to close temporary object");
-    }
+    } /* end if */
     else if(loc_found && H5G_loc_free(&obj_loc) < 0)
         HDONE_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't free location");
 
@@ -2688,7 +2688,7 @@ H5A__iterate_old(hid_t loc_id, unsigned *attr_num, H5A_operator1_t op,
     hsize_t idx;                        /* Index of attribute to start iterating at */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_PACKAGE
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Build attribute operator info */
     attr_op.op_type = H5A_ATTR_OP_APP;
@@ -2699,13 +2699,12 @@ H5A__iterate_old(hid_t loc_id, unsigned *attr_num, H5A_operator1_t op,
 
     /* Call internal attribute iteration routine */
     if((ret_value = H5A__iterate_common(loc_id, H5_INDEX_CRT_ORDER, H5_ITER_INC, &idx, &attr_op, op_data)) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_BADITER, FAIL, "error iterating over attributes")
+        HERROR(H5E_ATTR, H5E_BADITER, "error iterating over attributes");
 
     /* Translate hsize_t index value to legacy unsigned index value*/
     if(attr_num)
         *attr_num = (unsigned)idx;
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5A__iterate_old() */
 #endif /* H5_NO_DEPRECATED_SYMBOLS */

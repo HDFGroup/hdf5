@@ -2114,7 +2114,7 @@ H5O_get_info(const H5O_loc_t *loc, H5O_info_t *oinfo, unsigned fields)
 
         /* Set the object's reference count */
         oinfo->rc = oh->nlink;
-    } 
+    } /* end if */
 
     /* Get time information, if requested */
     if(fields & H5O_INFO_TIME) {

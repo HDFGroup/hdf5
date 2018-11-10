@@ -2164,36 +2164,27 @@ done:
 ssize_t
 H5Iget_name(hid_t id, char *name/*out*/, size_t size)
 {
-    H5VL_object_t  *vol_obj;
+    H5VL_object_t *vol_obj;     /* Object token of loc_id */
+    H5VL_loc_params_t loc_params;
     H5G_loc_t     loc;          /* Object location */
-    hbool_t         vol_wrapper_set = FALSE;            /* Whether the VOL object wrapping context was set up */
     ssize_t       ret_value;    /* Return value */
 
     FUNC_ENTER_API((-1))
     H5TRACE3("Zs", "ixz", id, name, size);
 
-    /* Get object location */
-    if(H5G_loc(id, &loc) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, (-1), "can't retrieve object location")
-
     /* Get the object pointer */
     if(NULL == (vol_obj = H5VL_vol_object(id)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADTYPE, (-1), "invalid identifier")
 
-    /* Set wrapper info in API context */
-    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->connector) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTSET, (-1), "can't set VOL wrapper info")
-    vol_wrapper_set = TRUE;
+    /* Set location parameters */
+    loc_params.type         = H5VL_OBJECT_BY_SELF;
+    loc_params.obj_type     = H5I_get_type(id);
 
     /* Retrieve object's name */
-    if((ret_value = H5G_get_name(&loc, name, size, NULL)) < 0)
+    if(H5VL_object_get(vol_obj, loc_params, H5VL_ID_GET_NAME, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &ret_value, name, size) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, (-1), "can't retrieve object name")
 
 done:
-    /* Reset object wrapping info in API context */
-    if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_ATOM, H5E_CANTSET, (-1), "can't reset VOL wrapper info")
-
     FUNC_LEAVE_API(ret_value)
 } /* end H5Iget_name() */
 
