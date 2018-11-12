@@ -956,11 +956,18 @@ if (NOT EXISTS ${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c)
     set_source_files_properties (${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c PROPERTIES GENERATED TRUE)
   else ()
     add_custom_command (
-        OUTPUT ${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c
+        OUTPUT ${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.tmp
         COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR}$<TARGET_FILE:H5detect>
-        ARGS ${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c
+        ARGS ${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.tmp
         DEPENDS H5detect
         WORKING_DIRECTORY ${HDF5_GENERATED_SOURCE_DIR}
+    )
+    add_custom_target (gen_H5Tinit ALL DEPENDS ${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.tmp)
+    add_custom_command (
+        OUTPUT     ${HDF5_GENERATED_SOURCE_DIR}/shared/H5Tinit.c
+        COMMAND    ${CMAKE_COMMAND}
+        ARGS       -E copy_if_different "${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.tmp" "${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c"
+        DEPENDS    gen_H5Tinit ${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.tmp
     )
     set_source_files_properties (${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c PROPERTIES GENERATED TRUE)
   endif ()
