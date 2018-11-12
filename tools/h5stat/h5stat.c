@@ -24,9 +24,9 @@
 /* Parameters to control statistics gathered */
 
 /* Default threshold for small groups/datasets/attributes */
-#define DEF_SIZE_SMALL_GROUPS       	10
-#define DEF_SIZE_SMALL_DSETS        	10
-#define DEF_SIZE_SMALL_ATTRS  		10
+#define DEF_SIZE_SMALL_GROUPS           10
+#define DEF_SIZE_SMALL_DSETS            10
+#define DEF_SIZE_SMALL_ATTRS            10
 
 #define  H5_NFILTERS_IMPL        8     /* Number of currently implemented filters + one to
                                           accommodate for user-define filters + one
@@ -72,7 +72,7 @@ typedef struct iter_t {
     hsize_t max_dset_dims;              /* Maximum dimension size of dataset */
     unsigned long *small_dset_dims;    /* Size of dimensions of small datasets tracked */
     unsigned long dset_layouts[H5D_NLAYOUTS];           /* Type of storage for each dataset */
-    unsigned long dset_comptype[H5_NFILTERS_IMPL]; 	/* Number of currently implemented filters */
+    unsigned long dset_comptype[H5_NFILTERS_IMPL];     /* Number of currently implemented filters */
     unsigned long dset_ntypes;          /* Number of diff. dataset datatypes found */
     dtype_info_t *dset_type_info;       /* Pointer to dataset datatype information found */
     unsigned dset_dim_nbins;            /* Number of bins for dataset dimensions */
@@ -114,9 +114,9 @@ static int        display_dset_metadata = FALSE;    /* display file space info f
 static int        display_object = FALSE;  /* not implemented yet */
 
 /* Initialize threshold for small groups/datasets/attributes */
-static int	  sgroups_threshold = DEF_SIZE_SMALL_GROUPS;
-static int	  sdsets_threshold = DEF_SIZE_SMALL_DSETS;
-static int	  sattrs_threshold = DEF_SIZE_SMALL_ATTRS;
+static int      sgroups_threshold = DEF_SIZE_SMALL_GROUPS;
+static int      sdsets_threshold = DEF_SIZE_SMALL_DSETS;
+static int      sattrs_threshold = DEF_SIZE_SMALL_ATTRS;
 
 /* a structure for handling the order command-line parameters come in */
 struct handler_t {
@@ -347,9 +347,8 @@ attribute_stats(iter_t *iter, const H5O_info_t *oi)
  *
  * Purpose: Gather statistics about the group
  *
- * Return: Success: 0
- *
- *  Failure: -1
+ * Return:  Success: 0
+ *          Failure: -1
  *
  * Programmer: Quincey Koziol
  *             Tuesday, August 16, 2005
@@ -430,7 +429,6 @@ group_stats(iter_t *iter, const char *name, const H5O_info_t *oi)
  * Purpose: Gather statistics about the dataset
  *
  * Return:  Success: 0
- *
  *          Failure: -1
  *
  * Programmer:    Quincey Koziol
@@ -521,27 +519,27 @@ dataset_stats(iter_t *iter, const char *name, const H5O_info_t *oi)
 
     /* Only gather dim size statistics on 1-D datasets */
     if(ndims == 1) {
-	/* Determine maximum dimension size */
-	if(dims[0] > iter->max_dset_dims)
-	    iter->max_dset_dims = dims[0];
-	/* Collect statistics for small datasets */
-       if(dims[0] < (hsize_t)sdsets_threshold)
-           (iter->small_dset_dims[(size_t)dims[0]])++;
+        /* Determine maximum dimension size */
+        if(dims[0] > iter->max_dset_dims)
+            iter->max_dset_dims = dims[0];
+        /* Collect statistics for small datasets */
+        if(dims[0] < (hsize_t)sdsets_threshold)
+            (iter->small_dset_dims[(size_t)dims[0]])++;
 
-       /* Add dim count to proper bin */
-       bin = ceil_log10((unsigned long)dims[0]);
-       if((bin + 1) > iter->dset_dim_nbins) {
-          /* Allocate more storage for info about dataset's datatype */
-          iter->dset_dim_bins = (unsigned long *)HDrealloc(iter->dset_dim_bins, (bin + 1) * sizeof(unsigned long));
-          HDassert(iter->dset_dim_bins);
+        /* Add dim count to proper bin */
+        bin = ceil_log10((unsigned long)dims[0]);
+        if((bin + 1) > iter->dset_dim_nbins) {
+            /* Allocate more storage for info about dataset's datatype */
+            iter->dset_dim_bins = (unsigned long *)HDrealloc(iter->dset_dim_bins, (bin + 1) * sizeof(unsigned long));
+            HDassert(iter->dset_dim_bins);
 
-          /* Initialize counts for intermediate bins */
-          while(iter->dset_dim_nbins < bin)
-              iter->dset_dim_bins[iter->dset_dim_nbins++] = 0;
-          iter->dset_dim_nbins++;
+            /* Initialize counts for intermediate bins */
+            while(iter->dset_dim_nbins < bin)
+                iter->dset_dim_bins[iter->dset_dim_nbins++] = 0;
+            iter->dset_dim_nbins++;
 
-          /* Initialize count for this bin */
-          iter->dset_dim_bins[bin] = 1;
+            /* Initialize count for this bin */
+            iter->dset_dim_bins[bin] = 1;
         } /* end if */
         else
             (iter->dset_dim_bins[bin])++;
@@ -560,6 +558,7 @@ dataset_stats(iter_t *iter, const char *name, const H5O_info_t *oi)
             type_found = TRUE;
             break;
         } /* end for */
+
     if(type_found)
          (iter->dset_type_info[u].count)++;
     else {
@@ -702,9 +701,8 @@ obj_stats(const char *path, const H5O_info_t *oi, const char *already_visited,
  *
  * Purpose: Gather statistics about a link
  *
- * Return: Success: 0
- *
- *  Failure: -1
+ * Return:  Success: 0
+ *          Failure: -1
  *
  * Programmer: Quincey Koziol
  *             Tuesday, November 6, 2007
@@ -822,14 +820,14 @@ parse_command_line(int argc, const char *argv[], struct handler_t **hand_ret)
                 break;
 
             case 'l':
-		if(opt_arg) {
-		    sgroups_threshold = HDatoi(opt_arg);
-		    if(sgroups_threshold < 1) {
-			error_msg("Invalid threshold for small groups\n");
-			goto error;
-		    }
-		} else
-		    error_msg("Missing threshold for small groups\n");
+                if(opt_arg) {
+                    sgroups_threshold = HDatoi(opt_arg);
+                    if(sgroups_threshold < 1) {
+                        error_msg("Invalid threshold for small groups\n");
+                        goto error;
+                    }
+                } else
+                    error_msg("Missing threshold for small groups\n");
 
                 break;
 
@@ -844,14 +842,14 @@ parse_command_line(int argc, const char *argv[], struct handler_t **hand_ret)
                 break;
 
             case 'm':
-		if(opt_arg) {
-		    sdsets_threshold = HDatoi(opt_arg);
-		    if(sdsets_threshold < 1) {
-			error_msg("Invalid threshold for small datasets\n");
-			goto error;
-		    }
-		} else
-		    error_msg("Missing threshold for small datasets\n");
+                if(opt_arg) {
+                    sdsets_threshold = HDatoi(opt_arg);
+                    if(sdsets_threshold < 1) {
+                        error_msg("Invalid threshold for small datasets\n");
+                        goto error;
+                    }
+                } else
+                    error_msg("Missing threshold for small datasets\n");
 
                 break;
 
@@ -866,13 +864,13 @@ parse_command_line(int argc, const char *argv[], struct handler_t **hand_ret)
                 break;
 
             case 'a':
-		if(opt_arg) {
-		    sattrs_threshold = HDatoi(opt_arg);
-		    if(sattrs_threshold < 1) {
-			error_msg("Invalid threshold for small # of attributes\n");
-			goto error;
-		    }
-		} else
+                if(opt_arg) {
+                    sattrs_threshold = HDatoi(opt_arg);
+                    if(sattrs_threshold < 1) {
+                        error_msg("Invalid threshold for small # of attributes\n");
+                        goto error;
+                    }
+                } else
                     error_msg("Missing threshold for small # of attributes\n");
 
                 break;
@@ -1143,9 +1141,8 @@ print_group_info(const iter_t *iter)
  *
  * Purpose: Prints file space information for groups' metadata
  *
- * Return: Success: 0
- *
- * Failure: Never fails
+ * Return:  Success: 0
+ *          Failure: Never fails
  *
  * Programmer: Vailin Choi; October 2009
  *
@@ -1171,9 +1168,8 @@ print_group_metadata(const iter_t *iter)
  *
  * Purpose: Prints information about datasets in the file
  *
- * Return: Success: 0
- *
- * Failure: Never fails
+ * Return:  Success: 0
+ *          Failure: Never fails
  *
  * Programmer: Elena Pourmal
  *             Saturday, August 12, 2006
@@ -1234,7 +1230,7 @@ print_dataset_info(const iter_t *iter)
 
         printf("Dataset layout information:\n");
         for(u = 0; u < H5D_NLAYOUTS; u++)
-        printf("\tDataset layout counts[%s]: %lu\n", (u == 0 ? "COMPACT" :
+            printf("\tDataset layout counts[%s]: %lu\n", (u == 0 ? "COMPACT" :
                 (u == 1 ? "CONTIG" : "CHUNKED")), iter->dset_layouts[u]);
         printf("\tNumber of external files : %lu\n", iter->nexternal);
 

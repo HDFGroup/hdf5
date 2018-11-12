@@ -59,11 +59,6 @@ static struct long_options l_opts[] = {
  * Purpose:     Print the usage message
  *
  * Return:      void
- *
- * Programmer:
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -123,7 +118,6 @@ usage (const char *prog)
  * Purpose:     Shutdown and call exit()
  *
  * Return:      Does not return
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -147,13 +141,7 @@ leave(int ret)
  * Purpose:     Parse the command line for the h5dumper.
  *
  * Return:      Success:
- *
  *              Failure:    Exits program with EXIT_FAILURE value.
- *
- * Programmer:
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
@@ -202,7 +190,6 @@ parse_command_line (int argc, const char *argv[])
  *
  * Return:      Success:    0
  *              Failure:    1
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -237,7 +224,7 @@ main (int argc, const char *argv[])
     /* Initialize h5tools lib */
     h5tools_init();
 
-    parse_command_line (argc, argv);
+    parse_command_line(argc, argv);
 
     if (ub_file == NULL) {
         /* no user block */
@@ -268,21 +255,21 @@ main (int argc, const char *argv[])
         leave (EXIT_FAILURE);
     }
 
-    ifile = H5Fopen (input_file, H5F_ACC_RDONLY, H5P_DEFAULT);
+    ifile = H5Fopen(input_file, H5F_ACC_RDONLY, H5P_DEFAULT);
 
     if (ifile < 0) {
         error_msg("Can't open input HDF5 file \"%s\"\n", input_file);
         leave (EXIT_FAILURE);
     }
 
-    plist = H5Fget_create_plist (ifile);
+    plist = H5Fget_create_plist(ifile);
     if (plist < 0) {
         error_msg("Can't get file creation plist for file \"%s\"\n", input_file);
         H5Fclose(ifile);
         leave (EXIT_FAILURE);
     }
 
-    status = H5Pget_userblock (plist, &usize);
+    status = H5Pget_userblock(plist, &usize);
     if (status < 0) {
         error_msg("Can't get user block for file \"%s\"\n", input_file);
         H5Pclose(plist);
@@ -346,7 +333,7 @@ main (int argc, const char *argv[])
         }
     }
 
-    newubsize = compute_user_block_size ((hsize_t) fsize);
+    newubsize = compute_user_block_size((hsize_t) fsize);
 
     startub = usize;
 
@@ -361,39 +348,39 @@ main (int argc, const char *argv[])
         else {
             /* add new ub to current ublock, pad to new offset */
             newubsize += usize;
-            newubsize = compute_user_block_size ((hsize_t) newubsize);
+            newubsize = compute_user_block_size((hsize_t) newubsize);
         }
     }
 
     /* copy the HDF5 from starting at usize to starting at newubsize:
      *  makes room at 'from' for new ub */
     /* if no current ub, usize is 0 */
-    copy_some_to_file (h5fid, ofid, usize, newubsize, (ssize_t) (h5fsize - usize));
+    copy_some_to_file(h5fid, ofid, usize, newubsize, (ssize_t) (h5fsize - usize));
 
     /* copy the old ub to the beginning of the new file */
     if (!do_clobber) {
-        where = copy_some_to_file (h5fid, ofid, (hsize_t) 0, (hsize_t) 0, (ssize_t) usize);
+        where = copy_some_to_file(h5fid, ofid, (hsize_t) 0, (hsize_t) 0, (ssize_t) usize);
     }
 
     /* copy the new ub to the end of the ub */
-    where = copy_some_to_file (ufid, ofid, (hsize_t) 0, startub, (ssize_t) - 1);
+    where = copy_some_to_file(ufid, ofid, (hsize_t) 0, startub, (ssize_t) - 1);
 
     /* pad the ub */
     where = write_pad (ofid, where);
 
     if(ub_file)
-        HDfree (ub_file);
+        HDfree(ub_file);
     if(input_file)
-        HDfree (input_file);
+        HDfree(input_file);
     if(output_file)
-        HDfree (output_file);
+        HDfree(output_file);
 
     if(ufid >= 0)
-        HDclose (ufid);
+        HDclose(ufid);
     if(h5fid >= 0)
-        HDclose (h5fid);
+        HDclose(h5fid);
     if(ofid >= 0)
-        HDclose (ofid);
+        HDclose(ofid);
 
     return h5tools_getstatus();
 }
@@ -416,7 +403,6 @@ main (int argc, const char *argv[])
  *
  * Return:      Success:    last byte written in the output.
  *              Failure:    Exits program with EXIT_FAILURE value.
- *
  *-------------------------------------------------------------------------
  */
 hsize_t
@@ -448,7 +434,8 @@ copy_some_to_file(int infid, int outfid, hsize_t startin, hsize_t startout,
         } /* end if */
 
         howmuch = (ssize_t)sbuf.st_size;
-    } else {
+    }
+    else {
         howmuch = limit;
     } /* end if */
 
@@ -461,7 +448,8 @@ copy_some_to_file(int infid, int outfid, hsize_t startin, hsize_t startout,
     if (howmuch > 512) {
         to = toend - 512;
         from = fromend - 512;
-    } else {
+    }
+    else {
         to = toend - howmuch;
         from = fromend - howmuch;
     } /* end if */
@@ -472,7 +460,8 @@ copy_some_to_file(int infid, int outfid, hsize_t startin, hsize_t startout,
 
         if (howmuch > 512) {
             nchars = HDread(infid, buf, (unsigned) 512);
-        } else {
+        }
+        else {
             nchars = HDread(infid, buf, (unsigned)howmuch);
         } /* end if */
 
@@ -491,7 +480,8 @@ copy_some_to_file(int infid, int outfid, hsize_t startin, hsize_t startout,
         if(howmuch > 512) {
             to -= nchars;
             from -= nchars;
-        } else {
+        }
+        else {
             to -= howmuch;
             from -= howmuch;
         } /* end if */
@@ -505,15 +495,11 @@ copy_some_to_file(int infid, int outfid, hsize_t startin, hsize_t startout,
  * Function:    compute_user_block_size
  *
  * Purpose:     Find the offset of the HDF5 header after the user block:
- *                 align at 0, 512, 1024, etc.
- *      ublock_size: the size of the user block (bytes).
+ *              align at 0, 512, 1024, etc.
+ *              ublock_size: the size of the user block (bytes).
  *
- * Return:      Success:    the location of the header == the size of the
- *        padded user block.
+ * Return:      Success:    the location of the header == the size of the padded user block.
  *              Failure:    none
- *
- * Return:      Success:    last byte written in the output.
- *              Failure:    Exits program with EXIT_FAILURE value.
  *-------------------------------------------------------------------------
  */
 hsize_t
@@ -530,7 +516,7 @@ compute_user_block_size (hsize_t ublock_size)
     return where;
 } /* end compute_user_block_size() */
 
-/*
+/*-------------------------------------------------------------------------
  *  Write zeroes to fill the file from 'where' to 512, 1024, etc. bytes.
  *
  *  Returns the size of the padded file.

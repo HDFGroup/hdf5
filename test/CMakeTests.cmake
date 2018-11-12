@@ -798,19 +798,21 @@ endif ()
 ##############################################################################
 ###    F I L T E R  P L U G I N  T E S T S
 ##############################################################################
-if (WIN32)
-  set (CMAKE_SEP "\;")
-  set (BIN_REL_PATH "../../")
-else ()
-  set (CMAKE_SEP ":")
-  set (BIN_REL_PATH "../")
-endif ()
+if (BUILD_SHARED_LIBS AND TEST_SHARED_PROGRAMS)
+  if (WIN32)
+    set (CMAKE_SEP "\;")
+    set (BIN_REL_PATH "../../")
+  else ()
+    set (CMAKE_SEP ":")
+    set (BIN_REL_PATH "../")
+  endif ()
 
-add_test (NAME H5PLUGIN-plugin COMMAND $<TARGET_FILE:filter_plugin>)
-set_tests_properties (H5PLUGIN-plugin PROPERTIES
-    ENVIRONMENT "HDF5_PLUGIN_PATH=${CMAKE_BINARY_DIR}/testdir1${CMAKE_SEP}${CMAKE_BINARY_DIR}/testdir2;srcdir=${HDF5_TEST_BINARY_DIR}"
-    WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}
-)
+  add_test (NAME H5PLUGIN-plugin COMMAND $<TARGET_FILE:filter_plugin>)
+  set_tests_properties (H5PLUGIN-plugin PROPERTIES
+      ENVIRONMENT "HDF5_PLUGIN_PATH=${CMAKE_BINARY_DIR}/testdir1${CMAKE_SEP}${CMAKE_BINARY_DIR}/testdir2;srcdir=${HDF5_TEST_BINARY_DIR}"
+      WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}
+  )
+endif ()
 
 ##############################################################################
 ##############################################################################

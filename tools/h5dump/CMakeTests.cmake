@@ -368,7 +368,7 @@
     HDFTEST_COPY_FILE("${tst_other_file}" "${PROJECT_BINARY_DIR}/testfiles/std/${fname}" "h5dump_std_files")
   endforeach ()
   foreach (tst_h5N_file ${HDF5_N_REFERENCE_FILES})
-    HDFTEST_COPY_FILE("${HDF5_TOOLS_SOURCE_DIR}/testfiles/${tst_h5N_file}.ddl" "${PROJECT_BINARY_DIR}/testfiles/std/${tst_h5N_file}-N.ddl" "h5dump_std_files")
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_SRC_DIR}/testfiles/${tst_h5N_file}.ddl" "${PROJECT_BINARY_DIR}/testfiles/std/${tst_h5N_file}-N.ddl" "h5dump_std_files")
   endforeach ()
 
   foreach (tst_error_file ${HDF5_ERROR_REFERENCE_TEST_FILES})
@@ -379,7 +379,7 @@
   # --------------------------------------------------------------------
   # Special file handling
   # --------------------------------------------------------------------
-  HDFTEST_COPY_FILE("${HDF5_TOOLS_SOURCE_DIR}/testfiles/tbin1.ddl" "${PROJECT_BINARY_DIR}/testfiles/std/tbin1LE.ddl" "h5dump_std_files")
+  HDFTEST_COPY_FILE("${HDF5_TOOLS_SRC_DIR}/testfiles/tbin1.ddl" "${PROJECT_BINARY_DIR}/testfiles/std/tbin1LE.ddl" "h5dump_std_files")
 
   if (WIN32)
     file (READ ${HDF5_TOOLS_SRC_DIR}/testfiles/tbinregR.exp TEST_STREAM)
@@ -744,10 +744,10 @@
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
       set_tests_properties (H5DUMP-IMPORT-${resultfile} PROPERTIES DEPENDS "H5DUMP-IMPORT-${resultfile}-clear-objects")
-      add_test (NAME H5DUMP-IMPORT-h5import-${resultfile} COMMAND h5import ${resultfile}.bin -c ${conffile}.out -o ${resultfile}.h5)
+      add_test (NAME H5DUMP-IMPORT-h5import-${resultfile} COMMAND $<TARGET_FILE:h5import> ${resultfile}.bin -c ${conffile}.out -o ${resultfile}.h5)
       set_tests_properties (H5DUMP-IMPORT-h5import-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
       set_tests_properties (H5DUMP-IMPORT-h5import-${resultfile} PROPERTIES DEPENDS H5DUMP-IMPORT-${resultfile})
-      add_test (NAME H5DUMP-IMPORT-h5diff-${resultfile} COMMAND h5diff ${testfile} ${resultfile}.h5 /integer /integer)
+      add_test (NAME H5DUMP-IMPORT-h5diff-${resultfile} COMMAND $<TARGET_FILE:h5diff> ${testfile} ${resultfile}.h5 /integer /integer)
       set_tests_properties (H5DUMP-IMPORT-h5diff-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
       set_tests_properties (H5DUMP-IMPORT-h5diff-${resultfile} PROPERTIES DEPENDS H5DUMP-IMPORT-h5import-${resultfile})
     endif ()
@@ -1532,4 +1532,6 @@
 ##############################################################################
 ###    P L U G I N  T E S T S
 ##############################################################################
-ADD_H5_UD_TEST (h5dump_plugin_test 0 tudfilter --enable-error-stack tudfilter.h5)
+if (BUILD_SHARED_LIBS)
+  ADD_H5_UD_TEST (h5dump_plugin_test 0 tudfilter --enable-error-stack tudfilter.h5)
+endif ()
