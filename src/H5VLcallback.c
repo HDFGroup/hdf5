@@ -1620,7 +1620,7 @@ H5VL__dataset_create(void *obj, H5VL_loc_params_t loc_params, const H5VL_class_t
 
     /* Call the corresponding VOL callback */
     if(NULL == (ret_value = (cls->dataset_cls.create)(obj, loc_params, name, dcpl_id, dapl_id, dxpl_id, req)))
-        HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, NULL, "create failed")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, NULL, "dataset create failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1653,7 +1653,7 @@ H5VL_dataset_create(const H5VL_object_t *vol_obj, H5VL_loc_params_t loc_params,
 
     /* Call the corresponding internal VOL routine */
     if(NULL == (ret_value = H5VL__dataset_create(vol_obj->data, loc_params, vol_obj->connector->cls, name, dcpl_id, dapl_id, dxpl_id, req)))
-        HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, NULL, "create failed")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, NULL, "dataset create failed")
 
 done:
     /* Reset object wrapping info in API context */
@@ -5092,7 +5092,7 @@ H5VL__datatype_open(void *obj, H5VL_loc_params_t loc_params, const H5VL_class_t 
 
     /* Call the corresponding VOL callback */
     if(NULL == (ret_value = (cls->datatype_cls.open)(obj, loc_params, name, tapl_id, dxpl_id, req)))
-        HGOTO_ERROR(H5E_VOL, H5E_CANTOPENOBJ, NULL, "open failed")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPENOBJ, NULL, "datatype open failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -5125,7 +5125,7 @@ H5VL_datatype_open(const H5VL_object_t *vol_obj, H5VL_loc_params_t loc_params,
 
     /* Call the corresponding internal VOL routine */
     if(NULL == (ret_value = H5VL__datatype_open(vol_obj->data, loc_params, vol_obj->connector->cls, name, tapl_id, dxpl_id, req)))
-        HGOTO_ERROR(H5E_VOL, H5E_CANTOPENOBJ, NULL, "open failed")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPENOBJ, NULL, "datatype open failed")
 
 done:
     /* Reset object wrapping info in API context */
