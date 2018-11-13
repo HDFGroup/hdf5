@@ -58,6 +58,6 @@ int setup_parameters(int argc, char * const argv[]);
 void show_parameters(void);
 void usage(const char *prog);
 int create_uc_file(void);
-int write_uc_file(hbool_t tosend);
+int write_uc_file(hbool_t tosend, hid_t fid);
 int read_uc_file(hbool_t towait);
 
