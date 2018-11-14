@@ -17,6 +17,8 @@
  *          2. number of slots in chunk cache is smaller than the number of chunks
  *             in the fastest-growing dimension.
  */
+#include <stdio.h>
+#include <stdlib.h>
 #include <time.h>
 #include "hdf5.h"
 
@@ -133,49 +135,87 @@ test_time_subtract(test_time_t in1, test_time_t in2)
     
     return out;
 }
+/*-------------------------------------------------------------------------
+ * Function:  cleanup
+ *
+ * Purpose:  Removes test files
+ *
+ * Return:  void
+ *
+ * Programmer:  Robb Matzke
+ *              Thursday, June  4, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static void
+cleanup (void)
+{
+    if (!getenv ("HDF5_NOCLEANUP")) {
+        remove (FILENAME);
+    }
+}
 
 /*-------------------------------------------------------------------------------
  *      Create a chunked dataset with partial chunks along either dimensions:
  *          dataset dimension:  9000 x 9
  *          chunk dimension:    2000 x 2
  */
-static void create_dset1(hid_t file)
+static int create_dset1(hid_t file)
 {
     hid_t        dataspace, dataset;
     hid_t        dcpl;
     hsize_t      dims[RANK]  = {DSET1_DIM1, DSET1_DIM2};
-    herr_t       status;
     hsize_t      chunk_dims[RANK] = {CHUNK1_DIM1, CHUNK1_DIM2};
     int          data[DSET1_DIM1][DSET1_DIM2];    /* data for writing */
     int          i, j;
     
     /* Create the data space. */
-    dataspace = H5Screate_simple (RANK, dims, NULL);
+    if((dataspace = H5Screate_simple (RANK, dims, NULL)) < 0)
+        goto error;
     
     /* Modify dataset creation properties, i.e. enable chunking  */
-    dcpl = H5Pcreate (H5P_DATASET_CREATE);
-    status = H5Pset_chunk (dcpl, RANK, chunk_dims);
+    if((dcpl = H5Pcreate (H5P_DATASET_CREATE)) < 0)
+        goto error;
+    if(H5Pset_chunk (dcpl, RANK, chunk_dims) < 0)
+        goto error;
     
     /* Set the dummy filter simply for counting the number of bytes being read into the memory */
-    H5Zregister(H5Z_COUNTER);
-    H5Pset_filter(dcpl, FILTER_COUNTER, 0, 0, NULL);
+    if(H5Zregister(H5Z_COUNTER) < 0)
+        goto error;
+    
+    if(H5Pset_filter(dcpl, FILTER_COUNTER, 0, 0, NULL) < 0)
+        goto error;
     
     /* Create a new dataset within the file using chunk creation properties.  */
-    dataset = H5Dcreate2 (file, DSET1_NAME, H5T_NATIVE_INT, dataspace,
-                          H5P_DEFAULT, dcpl, H5P_DEFAULT);
+    if((dataset = H5Dcreate2 (file, DSET1_NAME, H5T_NATIVE_INT, dataspace,
+                          H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+        goto error;
     
     for (i = 0; i < DSET1_DIM1; i++)
         for (j = 0; j < DSET1_DIM2; j++)
             data[i][j] = i+j;
     
     /* Write data to dataset */
-    status = H5Dwrite (dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
-                       H5P_DEFAULT, data);
+    if(H5Dwrite (dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
+                       H5P_DEFAULT, data) < 0)
+        goto error;
     
     /* Close resources */
-    status = H5Dclose (dataset);
-    status = H5Pclose (dcpl);
-    status = H5Sclose (dataspace);
+    H5Dclose (dataset);
+    H5Pclose (dcpl);
+    H5Sclose (dataspace);
+    return 0;
+    
+error:
+    H5E_BEGIN_TRY {
+        H5Dclose (dataset);
+        H5Pclose (dcpl);
+        H5Sclose (dataspace);
+    } H5E_END_TRY;
+    
+    return 1;
 }
 
 /*---------------------------------------------------------------------------
@@ -183,56 +223,72 @@ static void create_dset1(hid_t file)
  *          dataset dimensions: 300 x 600
  *          chunk dimensions:   100 x 100
  */
-static void create_dset2(hid_t file)
+static int create_dset2(hid_t file)
 {
     hid_t        dataspace, dataset;
     hid_t        dcpl;
     hsize_t      dims[RANK]  = {DSET2_DIM1, DSET2_DIM2};
-    herr_t       status;
     hsize_t      chunk_dims[RANK] = {CHUNK2_DIM1, CHUNK2_DIM2};
     int          data[DSET2_DIM1][DSET2_DIM2];    /* data for writing */
     int          i, j;
     
     /* Create the data space. */
-    dataspace = H5Screate_simple (RANK, dims, NULL);
+    if((dataspace = H5Screate_simple (RANK, dims, NULL)) < 0)
+        goto error;
     
     /* Modify dataset creation properties, i.e. enable chunking  */
-    dcpl = H5Pcreate (H5P_DATASET_CREATE);
-    status = H5Pset_chunk (dcpl, RANK, chunk_dims);
+    if((dcpl = H5Pcreate (H5P_DATASET_CREATE)) < 0)
+        goto error;
+    if(H5Pset_chunk (dcpl, RANK, chunk_dims) < 0)
+        goto error;
     
     /* Set the dummy filter simply for counting the number of bytes being read into the memory */
-    H5Zregister(H5Z_COUNTER);
-    H5Pset_filter(dcpl, FILTER_COUNTER, 0, 0, NULL);
+    if(H5Zregister(H5Z_COUNTER) < 0)
+        goto error;
+    if(H5Pset_filter(dcpl, FILTER_COUNTER, 0, 0, NULL) < 0)
+        goto error;
     
     /* Create a new dataset within the file using chunk creation properties.  */
-    dataset = H5Dcreate2 (file, DSET2_NAME, H5T_NATIVE_INT, dataspace,
-                          H5P_DEFAULT, dcpl, H5P_DEFAULT);
+    if((dataset = H5Dcreate2 (file, DSET2_NAME, H5T_NATIVE_INT, dataspace,
+                          H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+        goto error;
     
     for (i = 0; i < DSET2_DIM1; i++)
         for (j = 0; j < DSET2_DIM2; j++)
             data[i][j] = i+j;
     
     /* Write data to dataset */
-    status = H5Dwrite (dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
-                       H5P_DEFAULT, data);
+    if(H5Dwrite (dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
+                       H5P_DEFAULT, data) < 0)
+        goto error;
     
     /* Close resources */
-    status = H5Dclose (dataset);
-    status = H5Pclose (dcpl);
-    status = H5Sclose (dataspace);
+    H5Dclose (dataset);
+    H5Pclose (dcpl);
+    H5Sclose (dataspace);
+    
+    return 0;
+    
+error:
+    H5E_BEGIN_TRY {
+        H5Dclose (dataset);
+        H5Pclose (dcpl);
+        H5Sclose (dataspace);
+    } H5E_END_TRY;
+    
+    return 1;
 }
 /*---------------------------------------------------------------------------
  *      Check the performance of the chunk cache when partial chunks exist
  *      along the dataset dimensions.
  */
-static void check_partial_chunks_perf(hid_t file)
+static int check_partial_chunks_perf(hid_t file)
 {
     hid_t        dataset;
     hid_t        filespace;
     hid_t        memspace;
     hid_t        dapl;
     
-    herr_t       status;
     int          rdata[DSET1_DIM2];   /* data for reading */
     int          i;
     
@@ -242,8 +298,10 @@ static void check_partial_chunks_perf(hid_t file)
     hsize_t      count[RANK] = {1, DSET1_DIM2};
     test_time_t t = {0, 0}, t1 = {0, 0}, t2 = {0, 0};
     
-    dapl = H5Pcreate(H5P_DATASET_ACCESS);
-    status = H5Pset_chunk_cache (dapl, RDCC_NSLOTS, RDCC_NBYTES, RDCC_W0);
+    if((dapl = H5Pcreate(H5P_DATASET_ACCESS)) < 0)
+        goto error;
+    if(H5Pset_chunk_cache (dapl, RDCC_NSLOTS, RDCC_NBYTES, RDCC_W0) < 0)
+        goto error;
 
     dataset = H5Dopen2 (file, DSET1_NAME, dapl);
     
@@ -257,11 +315,13 @@ static void check_partial_chunks_perf(hid_t file)
     /* Read the data row by row */
     for(i = 0; i < DSET1_DIM1; i++) {
         start[0] = i;
-        status = H5Sselect_hyperslab(filespace, H5S_SELECT_SET,
-                                     start, NULL, count, NULL);
+        if(H5Sselect_hyperslab(filespace, H5S_SELECT_SET,
+                                     start, NULL, count, NULL) < 0)
+            goto error;
         
-        status = H5Dread (dataset, H5T_NATIVE_INT, memspace, filespace,
-                          H5P_DEFAULT, rdata);
+        if(H5Dread (dataset, H5T_NATIVE_INT, memspace, filespace,
+                          H5P_DEFAULT, rdata) < 0)
+            goto error;
     }
     
     test_time_get_current(&t2);
@@ -269,10 +329,20 @@ static void check_partial_chunks_perf(hid_t file)
     
     printf("1. Partial chunks: total read time is %lf; number of bytes being read from file is %lu\n", test_time_to_double(t), nbytes_global);
     
-    status = H5Dclose (dataset);
-    status = H5Sclose (filespace);
-    status = H5Sclose (memspace);
-    status = H5Pclose (dapl);
+    H5Dclose (dataset);
+    H5Sclose (filespace);
+    H5Sclose (memspace);
+    H5Pclose (dapl);
+    
+    return 0;
+error:
+    H5E_BEGIN_TRY {
+        H5Dclose (dataset);
+        H5Sclose (filespace);
+        H5Sclose (memspace);
+        H5Pclose (dapl);
+    } H5E_END_TRY;
+    return 1;
 }
 
 /*---------------------------------------------------------------------------
@@ -280,14 +350,13 @@ static void check_partial_chunks_perf(hid_t file)
  *      is smaller than the number of chunks along the fastest-growing
  *      dimension of the dataset.
  */
-static void check_hash_value_perf(hid_t file)
+static int check_hash_value_perf(hid_t file)
 {
     hid_t        dataset;
     hid_t        filespace;
     hid_t        memspace;
     hid_t        dapl;
     
-    herr_t       status;
     int          rdata[DSET2_DIM1];   /* data for reading */
     int          i;
     
@@ -297,13 +366,17 @@ static void check_hash_value_perf(hid_t file)
     hsize_t      count[RANK] = {DSET2_DIM1, 1};
     test_time_t t = {0, 0}, t1 = {0, 0}, t2 = {0, 0};
     
-    dapl = H5Pcreate(H5P_DATASET_ACCESS);
-    status = H5Pset_chunk_cache (dapl, RDCC_NSLOTS, RDCC_NBYTES, RDCC_W0);
+    if((dapl = H5Pcreate(H5P_DATASET_ACCESS)) < 0)
+        goto error;
+    if(H5Pset_chunk_cache (dapl, RDCC_NSLOTS, RDCC_NBYTES, RDCC_W0) < 0)
+        goto error;
     
-    dataset = H5Dopen2 (file, DSET2_NAME, dapl);
-    
-    memspace = H5Screate_simple(column_rank, column_dim, NULL);
-    filespace = H5Dget_space(dataset);
+    if((dataset = H5Dopen2 (file, DSET2_NAME, dapl)) < 0)
+        goto error;
+    if((memspace = H5Screate_simple(column_rank, column_dim, NULL)) < 0)
+        goto error;
+    if((filespace = H5Dget_space(dataset)) < 0)
+        goto error;
     
     nbytes_global = 0;
     
@@ -312,11 +385,13 @@ static void check_hash_value_perf(hid_t file)
     /* Read the data column by column */
     for(i = 0; i < DSET2_DIM2; i++) {
         start[1] = i;
-        status = H5Sselect_hyperslab(filespace, H5S_SELECT_SET,
-                                     start, NULL, count, NULL);
+        if(H5Sselect_hyperslab(filespace, H5S_SELECT_SET,
+                                     start, NULL, count, NULL) < 0)
+            goto error;
         
-        status = H5Dread (dataset, H5T_NATIVE_INT, memspace, filespace,
-                          H5P_DEFAULT, rdata);
+        if(H5Dread (dataset, H5T_NATIVE_INT, memspace, filespace,
+                          H5P_DEFAULT, rdata) < 0)
+            goto error;
     }
     
     test_time_get_current(&t2);
@@ -324,10 +399,20 @@ static void check_hash_value_perf(hid_t file)
     
     printf("2. Hash value: total read time is %lf; number of bytes being read from file is %lu\n", test_time_to_double(t), nbytes_global);
     
-    status = H5Dclose (dataset);
-    status = H5Sclose (filespace);
-    status = H5Sclose (memspace);
-    status = H5Pclose (dapl);
+    H5Dclose (dataset);
+    H5Sclose (filespace);
+    H5Sclose (memspace);
+    H5Pclose (dapl);
+    return 0;
+    
+error:
+    H5E_BEGIN_TRY {
+        H5Dclose (dataset);
+        H5Sclose (filespace);
+        H5Sclose (memspace);
+        H5Pclose (dapl);
+    } H5E_END_TRY;
+    return 1;
 }
 
 /*-------------------------------------------------------------------------------------
@@ -340,22 +425,33 @@ int
 main (void)
 {
     hid_t        file;                          /* handles */
-
-    /* Create a new file. If file exists its contents will be overwritten. */
-    file = H5Fcreate (FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-
-    create_dset1(file);
-    create_dset2(file);
+    int          nerrors = 0;
     
-    H5Fclose (file);
+    /* Create a new file. If file exists its contents will be overwritten. */
+    if((file = H5Fcreate (FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        goto error;
+
+    nerrors += create_dset1(file);
+    nerrors += create_dset2(file);
+    
+    if(H5Fclose (file) < 0)
+        goto error;
 
     /* Re-open the file for testing performance. */
-    file = H5Fopen (FILENAME, H5F_ACC_RDONLY, H5P_DEFAULT);
+    if((file = H5Fopen (FILENAME, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+        goto error;
 
-    check_partial_chunks_perf(file);
-    check_hash_value_perf(file);
+    nerrors += check_partial_chunks_perf(file);
+    nerrors += check_hash_value_perf(file);
     
-    H5Fclose (file);
+    if(H5Fclose (file) < 0)
+        goto error;
     
+    if (nerrors>0) goto error;
+    cleanup();
     return 0;
+    
+error:
+    fprintf(stderr, "*** ERRORS DETECTED ***\n");
+    return 1;
 }
