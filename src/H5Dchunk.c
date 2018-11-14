@@ -697,7 +697,7 @@ H5D__chunk_set_info_real(H5O_layout_chunk_t *layout, unsigned ndims,
     for(u = 0, layout->nchunks = 1, layout->max_nchunks = 1; u < ndims; u++) {
         /* Just in case that something goes very wrong, such as file corruption. */
         if(layout->dim[u] == 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "chunk size must be positive: layout->dim[%u] = %u ", u, layout->dim[u])
+            HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "chunk dimension must be positive: layout->dim[%u] = %u ", u, layout->dim[u])
             
         /* Round up to the next integer # of chunks, to accommodate partial chunks */
         layout->chunks[u] = ((curr_dims[u] + layout->dim[u]) - 1) / layout->dim[u];
