@@ -3579,6 +3579,7 @@ H5MF_tidy_self_referential_fsm_hack(H5F_t *f)
     H5F_mem_page_t sm_fssinfo_fs_type;  /* Small fs sinfo fsm */
     H5F_mem_page_t lg_fshdr_fs_type;    /* Large fs hdr fsm */
     H5F_mem_page_t lg_fssinfo_fs_type;  /* Large fs sinfo fsm */
+    H5PB_t *saved_pb_ptr = NULL;        /* Pointer to page buffer */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_TAG(H5AC__FREESPACE_TAG, FAIL)
@@ -3635,6 +3636,18 @@ H5MF_tidy_self_referential_fsm_hack(H5F_t *f)
 
     HDassert(NULL == f->shared->fs_man[sm_fshdr_fs_type]);
     HDassert(NULL == f->shared->fs_man[sm_fssinfo_fs_type]);
+
+    /* Disable page buffering when paged aggregation strategy with
+     * persistent FS and page buffering are used.
+     * This is in response to an assertion failure in H5PB.c when 
+     * running test/fheap.c.  
+     * This is due to header/section info got loaded into the page buffer
+     * when freeing them via H5FS_free() called in this routine.
+     */
+    if(H5F_PAGED_AGGR(f) && f->shared->pb_ptr) {
+        saved_pb_ptr = f->shared->pb_ptr;
+        f->shared->pb_ptr = NULL;
+    }
 
     if(H5F_addr_defined(f->shared->fs_addr[sm_fshdr_fs_type])) {
         first_srfsm_hdr = f->shared->fs_addr[sm_fshdr_fs_type];
@@ -3790,6 +3803,12 @@ H5MF_tidy_self_referential_fsm_hack(H5F_t *f)
     HDassert((!H5F_PAGED_AGGR(f)) || (0 == (eoa % f->shared->fs_page_size)));
 
 done:
+    /* Enable page buffering as needed */
+    if(H5F_PAGED_AGGR(f) && saved_pb_ptr) {
+        HDassert(f->shared->pb_ptr == NULL);
+        f->shared->pb_ptr = saved_pb_ptr;
+    }
+
     /* Reset the ring in the API context */
     if(orig_ring != H5AC_RING_INV)
         H5AC_set_ring(orig_ring, NULL);

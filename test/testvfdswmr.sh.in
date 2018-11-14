@@ -14,13 +14,9 @@
 # Tests for the vfd swmr feature.
 #
 ###############################################################################
-# Copied current SWMR concurrent tests and renamed to:
-#   testswmr.sh.in-->test_vfd_swmr.sh.in
-#   swmr_generator.c-->vfd_swmr_generator.c
-#   swmr_reader.c-->vfd_swmr_reader.c
-#   swmr_writer.c-->vfd_swmr_writer.c
+# VFD SWMR concurrent tests which are modified from existing swmr concurrent tests.
+# This is copied and modified from testswmr.sh.in
 #
-# FOR NOW: only one test is copied
 ###############################################################################
 
 srcdir=@srcdir@
@@ -29,8 +25,11 @@ srcdir=@srcdir@
 ## test parameters
 ###############################################################################
 
+#Nreaders=5             # number of readers to launch
+#Nrdrs_spa=3            # number of sparse readers to launch
+# Temporarily set readers to be 0 for testing VFD SWMR writer only
 Nreaders=1              # number of readers to launch
-Nrdrs_spa=3             # number of sparse readers to launch
+Nrdrs_spa=0             # number of sparse readers to launch
 Nrecords=200000         # number of records to write
 Nrecs_rem=40000         # number of times to shrink
 Nrecs_spa=20000         # number of records to write in the sparse test
@@ -42,7 +41,7 @@ nerrors=0
 ###############################################################################
 ## definitions for message file to coordinate test runs
 ###############################################################################
-WRITER_MESSAGE=SWMR_WRITER_MESSAGE      # The message file created by writer that the open is complete
+WRITER_MESSAGE=VFD_SWMR_WRITER_MESSAGE  # The message file created by writer that the open is complete
                                         # This should be the same as the define in "./swmr_common.h"
 MESSAGE_TIMEOUT=300                     # Message timeout length in secs
                                         # This should be the same as the define in "./h5test.h"
@@ -50,11 +49,9 @@ MESSAGE_TIMEOUT=300                     # Message timeout length in secs
 ###############################################################################
 ## short hands and function definitions
 ###############################################################################
-##DPRINT=:              # Set to "echo Debug:" for debugging printing,
-DPRINT="echo Debug:"    # Set to "echo Debug:" for debugging printing,
+DPRINT=:              # Set to "echo Debug:" for debugging printing,
                         # else ":" for noop.
-##IFDEBUG=:             # Set to null to turn on debugging, else ":" for noop.
-IFDEBUG=                # Set to null to turn on debugging, else ":" for noop.
+IFDEBUG=:             # Set to null to turn on debugging, else ":" for noop.
 
 # Print a line-line message left justified in a field of 70 characters
 # beginning with the word "Testing".
@@ -107,15 +104,15 @@ if test -z "$srcdir"; then
 fi
 
 # Check to see if the VFD specified by the HDF5_DRIVER environment variable
-# supports SWMR.
+# supports SWMR. ??? DO I NEED TO MODIFY THIS ????
 ./swmr_check_compat_vfd
 rc=$?
 if [ $rc -ne 0 ] ; then
     echo
     echo "The VFD specified by the HDF5_DRIVER environment variable"
-    echo "does not support SWMR."
+    echo "does not support VFD SWMR."
     echo
-    echo "SWMR acceptance tests skipped"
+    echo "VFD SWMR acceptance tests skipped"
     echo
     exit 0
 fi
@@ -148,7 +145,7 @@ cp vfd_swmr* vfd_swmr_test
 # directory, otherwise they are in test/.libs with a corresponding wrapper
 # script in the test directory.  The programs or wrapper scripts in test should
 # always be copied, swmr files in .libs should be copied only if they exists.
-if [ -f .libs/swmr ]; then
+if [ -f .libs/vfd_swmr ]; then
     mkdir vfd_swmr_test/.libs
     for FILE in .libs/vfd_swmr*; do
         case "$FILE" in
@@ -175,7 +172,7 @@ do
         echo "###############################################################################"
         echo "## Generator test"
         echo "###############################################################################"
-        # Launch the Generator without SWMR_WRITE
+        # Launch the Generator without VFD SWMR write
         echo launch the vfd_swmr_generator
         ./vfd_swmr_generator $compress $index_type
         if test $? -ne 0; then
@@ -183,8 +180,8 @@ do
             nerrors=`expr $nerrors + 1`
         fi
 
-        # Launch the Generator with SWMR_WRITE
-        echo launch the vfd_swmr_generator with SWMR_WRITE
+        # Launch the Generator with VFD SWMR write
+        echo launch the vfd_swmr_generator with VFD SWMR write
         ./vfd_swmr_generator -s $compress $index_type
         if test $? -ne 0; then
             echo generator had error
@@ -194,7 +191,7 @@ do
         # Check for error and exit if one occured
         $DPRINT nerrors=$nerrors
         if test $nerrors -ne 0 ; then
-            echo "SWMR tests failed with $nerrors errors."
+            echo "VFD SWMR tests failed with $nerrors errors."
             exit 1
         fi
 
@@ -204,7 +201,7 @@ do
         echo "###############################################################################"
 
         # Launch the Generator
-        echo launch the vfd_swmr_generator
+        echo launch the vfd_swmr_generator with VFD SWMR write
         ./vfd_swmr_generator -s $compress $index_type
         if test $? -ne 0; then
             echo generator had error
@@ -267,9 +264,222 @@ do
         fi
 
         # Clean up output files
-        ##rm -f vfd_swmr_writer.out
-        ##rm -f vfd_swmr_reader.out.*
+        rm -f vfd_swmr_writer.out
+        rm -f vfd_swmr_reader.out.*
 
+        echo
+        echo "###############################################################################"
+        echo "## Remove test - test shrinking the dataset"
+        echo "###############################################################################"
+
+        # Remove any possible writer message file before launching writer
+        rm -f $WRITER_MESSAGE
+        # Launch the Remove Writer
+        echo launch the vfd_swmr_remove_writer
+        seed="" # Put -r <random seed> command here
+        ./vfd_swmr_remove_writer -o $Nrecs_rem $seed 2>&1 |tee vfd_swmr_writer.out &
+        pid_writer=$!
+        $DPRINT pid_writer=$pid_writer
+
+        # Wait for message from writer process before starting reader(s)
+        WAIT_MESSAGE $WRITER_MESSAGE
+        #
+        # Launch the Remove Readers
+        #declare -a seeds=(<seed1> <seed2> <seed3> ... )
+        n=0
+        pid_readers=""
+        echo launch $Nreaders swmr_remove_readers
+        while [ $n -lt $Nreaders ]; do
+            #seed="-r ${seeds[$n]}"
+            seed=""
+            ./vfd_swmr_remove_reader $Nsecs_rem $seed 2>&1 |tee vfd_swmr_reader.out.$n &
+            pid_readers="$pid_readers $!"
+            n=`expr $n + 1`
+        done
+        $DPRINT pid_readers=$pid_readers
+        $IFDEBUG ps
+
+        # Collect exit code of the readers first because they usually finish
+        # before the writer.
+        for xpid in $pid_readers; do
+            $DPRINT checked reader $xpid
+            wait $xpid
+            if test $? -ne 0; then
+                echo reader had error
+                nerrors=`expr $nerrors + 1`
+            fi
+        done
+
+        # Collect exit code of the writer
+        $DPRINT checked writer $pid_writer
+        wait $pid_writer
+        if test $? -ne 0; then
+            echo writer had error
+            nerrors=`expr $nerrors + 1`
+        fi
+
+        # Check for error and exit if one occured
+        $DPRINT nerrors=$nerrors
+        if test $nerrors -ne 0 ; then
+            echo "VFD SWMR tests failed with $nerrors errors."
+            echo "(Writer and reader output preserved)"
+            exit 1
+        fi
+
+        # Clean up output files
+        rm -f vfd_swmr_writer.out
+        rm -f vfd_swmr_reader.out.*
+
+        echo
+        echo "###############################################################################"
+        echo "## Add/remove test - randomly grow or shrink the dataset"
+        echo "###############################################################################"
+
+        # Launch the Generator
+        echo launch the vfd_swmr_generator with VFD SWMR write
+        ./vfd_swmr_generator -s $compress $index_type
+        if test $? -ne 0; then
+            echo generator had error
+            nerrors=`expr $nerrors + 1`
+        fi
+
+        # Launch the Writer (not in parallel - just to rebuild the datasets)
+        echo launch the vfd_swmr_writer
+        seed="" # Put -r <random seed> command here
+        ./vfd_swmr_writer $Nrecords $seed
+        if test $? -ne 0; then
+            echo writer had error
+            nerrors=`expr $nerrors + 1`
+        fi
+
+        # Remove any possible writer message file before launching writer
+        rm -f $WRITER_MESSAGE
+        #
+        # Launch the Add/Remove Writer
+        echo launch the vfd_swmr_addrem_writer
+        seed="" # Put -r <random seed> command here
+        ./vfd_swmr_addrem_writer $Nrecords $seed 2>&1 |tee vfd_swmr_writer.out &
+        pid_writer=$!
+        $DPRINT pid_writer=$pid_writer
+
+        # Wait for message from writer process before starting reader(s)
+        WAIT_MESSAGE $WRITER_MESSAGE
+        #
+        # Launch the Add/Remove Readers
+        #declare -a seeds=(<seed1> <seed2> <seed3> ... )
+        n=0
+        pid_readers=""
+        echo launch $Nreaders vfd_swmr_remove_readers
+        while [ $n -lt $Nreaders ]; do
+            #seed="-r ${seeds[$n]}"
+            seed=""
+            ./vfd_swmr_remove_reader $Nsecs_addrem $seed 2>&1 |tee vfd_swmr_reader.out.$n &
+            pid_readers="$pid_readers $!"
+            n=`expr $n + 1`
+        done
+        $DPRINT pid_readers=$pid_readers
+        $IFDEBUG ps
+
+        # Collect exit code of the readers first because they usually finish
+        # before the writer.
+        for xpid in $pid_readers; do
+            $DPRINT checked reader $xpid
+            wait $xpid
+            if test $? -ne 0; then
+                echo reader had error
+                nerrors=`expr $nerrors + 1`
+            fi
+        done
+
+        # Collect exit code of the writer
+        $DPRINT checked writer $pid_writer
+        wait $pid_writer
+        if test $? -ne 0; then
+            echo writer had error
+            nerrors=`expr $nerrors + 1`
+        fi
+
+        # Check for error and exit if one occured
+        $DPRINT nerrors=$nerrors
+        if test $nerrors -ne 0 ; then
+            echo "VFD SWMR tests failed with $nerrors errors."
+            echo "(Writer and reader output preserved)"
+            exit 1
+        fi
+
+        # Clean up output files
+        rm -f vfd_swmr_writer.out
+        rm -f vfd_swmr_reader.out.*
+
+        echo
+        echo "###############################################################################"
+        echo "## Sparse writer test - test writing to random locations in the dataset"
+        echo "###############################################################################"
+
+        # Launch the Generator
+        # NOTE: Random seed is shared between readers and writers and is
+        #       created by the generator.
+        echo launch the vfd_swmr_generator with VFD SWMR write
+        seed="" # Put -r <random seed> command here
+        ./vfd_swmr_generator -s $compress $index_type $seed
+        if test $? -ne 0; then
+            echo generator had error
+            nerrors=`expr $nerrors + 1`
+        fi
+
+        # Remove any possible writer message file before launching writer
+        rm -f $WRITER_MESSAGE
+        # Launch the Sparse writer
+        echo launch the vfd_swmr_sparse_writer
+        nice -n 20 ./vfd_swmr_sparse_writer $Nrecs_spa 2>&1 |tee vfd_swmr_writer.out &
+        pid_writer=$!
+        $DPRINT pid_writer=$pid_writer
+
+        # Wait for message from writer process before starting reader(s)
+        WAIT_MESSAGE $WRITER_MESSAGE
+        #
+        # Launch the Sparse readers
+        n=0
+        pid_readers=""
+        echo launch $Nrdrs_spa vfd_swmr_sparse_readers
+        while [ $n -lt $Nrdrs_spa ]; do
+            # The sparse reader spits out a LOT of data so it's set to 'quiet'
+            ./vfd_swmr_sparse_reader -q $Nrecs_spa 2>&1 |tee vfd_swmr_reader.out.$n &
+            pid_readers="$pid_readers $!"
+            n=`expr $n + 1`
+        done
+        $DPRINT pid_readers=$pid_readers
+        $IFDEBUG ps
+
+        # Collect exit code of the writer
+        $DPRINT checked writer $pid_writer
+        wait $pid_writer
+        if test $? -ne 0; then
+            echo writer had error
+            nerrors=`expr $nerrors + 1`
+        fi
+
+        # Collect exit code of the readers
+        for xpid in $pid_readers; do
+            $DPRINT checked reader $xpid
+            wait $xpid
+            if test $? -ne 0; then
+                echo reader had error
+                nerrors=`expr $nerrors + 1`
+            fi
+        done
+
+        # Check for error and exit if one occured
+        $DPRINT nerrors=$nerrors
+        if test $nerrors -ne 0 ; then
+            echo "VFD SWMR tests failed with $nerrors errors."
+            echo "(Writer and reader output preserved)"
+            exit 1
+        fi
+
+        # Clean up output files
+        rm -f vfd_swmr_writer.out
+        rm -f vfd_swmr_reader.out.*
     done
 done
 

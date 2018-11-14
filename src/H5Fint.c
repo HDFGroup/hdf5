@@ -132,7 +132,7 @@ static herr_t H5F__idx_entry_cmp(const void *_entry1, const void *_entry2);
 /*********************/
 
 /* VFD SWMR globals */
-H5F_t *vfd_swmr_file_g;                 /* Points to the file struct */
+H5F_t *vfd_swmr_file_g = NULL;          /* Points to the file struct */
 hbool_t vfd_swmr_g = FALSE;             /* Is this a VFD SWMR configured file */
 hbool_t vfd_swmr_writer_g = FALSE;      /* Is this the VFD SWMR writer */
 uint64_t tick_num_g = 0;                /* The current tick_num */
@@ -1370,6 +1370,7 @@ H5F__dest(H5F_t *f, hbool_t flush)
             if(H5F__vfd_swmr_close_or_flush(f, TRUE) < 0)
                 HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to close the metadata file")
         }
+        vfd_swmr_file_g = NULL;
 
         /* Close the file */
         if(H5FD_close(f->shared->lf) < 0)
@@ -3651,6 +3652,7 @@ H5F__vfd_swmr_init(H5F_t *f, hbool_t file_create)
 
     } else { /* VFD SWMR reader  */
         HDassert(!f->shared->vfd_swmr_config.vfd_swmr_writer);
+
         vfd_swmr_writer_g = f->shared->vfd_swmr_writer = FALSE;
 
         /* Set tick_num_g to the current tick read from the metadata file */
@@ -3941,8 +3943,6 @@ H5F__vfd_swmr_close_or_flush(H5F_t *f, hbool_t closing)
         } /* end while */
         f->shared->dl_head_ptr = f->shared->dl_tail_ptr = NULL;
 
-        vfd_swmr_file_g = NULL;
-
     } else { /* For file flush */
         /* Update end_of_tick */
         if(H5F__vfd_swmr_update_end_of_tick_and_tick_num(f, TRUE) < 0)
@@ -4136,15 +4136,25 @@ done:
 herr_t
 H5F_vfd_swmr_reader_end_of_tick(void)
 {
+    uint64_t tmp_tick_num = 0;
     herr_t ret_value = SUCCEED;              /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* construct */
     if(vfd_swmr_file_g) {
-        /* Update end_of_tick */
-        if(H5F__vfd_swmr_update_end_of_tick_and_tick_num(vfd_swmr_file_g, FALSE) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "unable to update end of tick")
+        HDassert(vfd_swmr_file_g->shared);
+        HDassert(vfd_swmr_file_g->shared->lf);
+
+        if(H5FD_vfd_swmr_get_tick_and_idx(vfd_swmr_file_g->shared->lf, TRUE, &tmp_tick_num, NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_ARGS, H5E_CANTGET, FAIL, "error in retrieving tick_num from driver")
+        if(tmp_tick_num != tick_num_g) {
+            vfd_swmr_file_g->shared->tick_num = tick_num_g = tmp_tick_num;
+
+            /* Update end_of_tick */
+            if(H5F__vfd_swmr_update_end_of_tick_and_tick_num(vfd_swmr_file_g, FALSE) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "unable to update end of tick")
+        }
     }
 
 done:

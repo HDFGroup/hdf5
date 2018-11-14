@@ -13,14 +13,17 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:     vfd_swmr_writer.c
- *              (copied and modified from swmr_writer.c)
+ * Created:     vfd_swmr_remove_writer.c
+ *              (copied and modified from swmr_remove_writer.c)
  *
- * Purpose:     Writes data to a randomly selected subset of the datasets
+ * Purpose:     Removes data from a randomly selected subset of the datasets
  *              in the VFD SWMR test file.
  *
  *              This program is intended to run concurrently with the
- *              vfd_swmr_reader program.
+ *              vfd_swmr_remove_reader program.  It is also run AFTER a sequential
+ *              (not concurrent!) invoking of vfd_swmr_writer so the writer
+ *              can dump a bunch of data into the datasets.  Otherwise,
+ *              there wouldn't be much to shrink :)
  *
  *-------------------------------------------------------------------------
  */
@@ -32,14 +35,20 @@
 #include "h5test.h"
 #include "vfd_swmr_common.h"
 
+/****************/
+/* Local Macros */
+/****************/
+
+/* The maximum number of records to remove in one step */
+#define MAX_REMOVE_SIZE     10
+
 /********************/
 /* Local Prototypes */
 /********************/
 
-static hid_t open_skeleton(const char *filename, hbool_t verbose, FILE *verbose_file,
-    unsigned random_seed, hbool_t old);
-static int add_records(hid_t fid, hbool_t verbose, FILE *verbose_file,
-    unsigned long nrecords, unsigned long flush_count);
+static hid_t open_skeleton(const char *filename, unsigned verbose, unsigned old);
+static int remove_records(hid_t fid, unsigned verbose, unsigned long nshrinks,
+    unsigned long flush_count);
 static void usage(void);
 
 
@@ -51,17 +60,8 @@ static void usage(void);
  * Parameters:  const char *filename
  *              The filename of the SWMR HDF5 file to open
  *
- *              hbool_t verbose
+ *              unsigned verbose
  *              Whether or not to emit verbose console messages
- *
- *              FILE *verbose_file
- *              File handle for verbose output
- *
- *              unsigned random_seed
- *              Random seed for the file (used for verbose logging)
- *
- *              hbool_t old
- *              Whether to write in "old" file format
  *
  * Return:      Success:    The file ID of the opened SWMR file
  *                          The dataset IDs are stored in a global array
@@ -71,13 +71,13 @@ static void usage(void);
  *-------------------------------------------------------------------------
  */
 static hid_t
-open_skeleton(const char *filename, hbool_t verbose, FILE *verbose_file,
-    unsigned random_seed, hbool_t old)
+open_skeleton(const char *filename, unsigned verbose, unsigned old)
 {
     hid_t fid;          /* File ID for new HDF5 file */
     hid_t fapl;         /* File access property list */
+    hid_t sid;          /* Dataspace ID */
+    hsize_t dim[2];     /* Dataspace dimensions */
     unsigned u, v;      /* Local index variable */
-    hbool_t use_log_vfd = FALSE;    /* Use the log VFD (set this manually) */
     H5F_vfd_swmr_config_t *config = NULL;   /* Configuration for VFD SWMR */
 
     HDassert(filename);
@@ -91,7 +91,7 @@ open_skeleton(const char *filename, hbool_t verbose, FILE *verbose_file,
         return -1;
 
 #ifdef QAK
-    /* Increase the initial size of the metadata cache */
+/* Increase the initial size of the metadata cache */
     {
         H5AC_cache_config_t mdc_config;
 
@@ -106,15 +106,11 @@ open_skeleton(const char *filename, hbool_t verbose, FILE *verbose_file,
     }
 #endif /* QAK */
 
-    if(use_log_vfd) {
-        char verbose_name[1024];
+#ifdef QAK
+    H5Pset_fapl_log(fapl, "append.log", H5FD_LOG_ALL, (size_t)(512 * 1024 * 1024));
+#endif /* QAK */
 
-        HDsnprintf(verbose_name, sizeof(verbose_name), "vfd_swmr_writer.log.%u", random_seed);
-
-        H5Pset_fapl_log(fapl, verbose_name, H5FD_LOG_ALL, (size_t)(512 * 1024 * 1024));
-    } /* end if */
-
-    /*
+     /*
      * Set up to open the file with VFD SWMR configured.
      */
 
@@ -137,7 +133,7 @@ open_skeleton(const char *filename, hbool_t verbose, FILE *verbose_file,
     if(H5Pset_vfd_swmr_config(fapl, config) < 0)
         return -1;
 
-    /* Open the file with VFD SWMR configured */
+    /* Open the file */
     if((fid = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
         return -1;
 
@@ -150,14 +146,20 @@ open_skeleton(const char *filename, hbool_t verbose, FILE *verbose_file,
 
     /* Emit informational message */
     if(verbose)
-        HDfprintf(verbose_file, "Opening datasets\n");
+        HDfprintf(stderr, "Opening datasets\n");
 
     /* Open the datasets */
     for(u = 0; u < NLEVELS; u++)
         for(v = 0; v < symbol_count[u]; v++) {
             if((symbol_info[u][v].dsid = H5Dopen2(fid, symbol_info[u][v].name, H5P_DEFAULT)) < 0)
                 return -1;
-            symbol_info[u][v].nrecords = 0;
+            if((sid = H5Dget_space(symbol_info[u][v].dsid)) < 0)
+                return -1;
+            if(2 != H5Sget_simple_extent_ndims(sid))
+                return -1;
+            if(H5Sget_simple_extent_dims(sid, dim, NULL) < 0)
+                return -1;
+            symbol_info[u][v].nrecords = dim[1];
         } /* end for */
 
     return fid;
@@ -165,22 +167,19 @@ open_skeleton(const char *filename, hbool_t verbose, FILE *verbose_file,
 
 
 /*-------------------------------------------------------------------------
- * Function:    add_records
+ * Function:    remove_records
  *
- * Purpose:     Writes a specified number of records to random datasets in
+ * Purpose:     Removes a specified number of records from random datasets in
  *              the SWMR test file.
  *
  * Parameters:  hid_t fid
  *              The file ID of the SWMR HDF5 file
  *
- *              hbool_t verbose
+ *              unsigned verbose
  *              Whether or not to emit verbose console messages
  *
- *              FILE *verbose_file
- *              File handle for verbose output
- *
- *              unsigned long nrecords
- *              # of records to write to the datasets
+ *              unsigned long nshrinks
+ *              # of records to remove from the datasets
  *
  *              unsigned long flush_count
  *              # of records to write before flushing the file to disk
@@ -191,107 +190,55 @@ open_skeleton(const char *filename, hbool_t verbose, FILE *verbose_file,
  *-------------------------------------------------------------------------
  */
 static int
-add_records(hid_t fid, hbool_t verbose, FILE *verbose_file,
-    unsigned long nrecords, unsigned long flush_count)
+remove_records(hid_t fid, unsigned verbose, unsigned long nshrinks, unsigned long flush_count)
 {
-    hid_t tid;                              /* Datatype ID for records */
-    hid_t mem_sid;                          /* Memory dataspace ID */
-    hsize_t start[2] = {0, 0}, count[2] = {1, 1}; /* Hyperslab selection values */
-    hsize_t dim[2] = {1, 0};                /* Dataspace dimensions */
-    symbol_t record;                        /* The record to add to the dataset */
-    unsigned long rec_to_flush;             /* # of records left to write before flush */
-    unsigned long u, v;                     /* Local index variables */
+    unsigned long shrink_to_flush;      /* # of removals before flush */
+    hsize_t dim[2] = {1,0};             /* Dataspace dimensions */
+    unsigned long u, v;                 /* Local index variables */
 
     HDassert(fid >= 0);
 
-    /* Reset the record */
-    /* (record's 'info' field might need to change for each record written, also) */
-    HDmemset(&record, 0, sizeof(record));
-
-    /* Create a dataspace for the record to add */
-    if((mem_sid = H5Screate(H5S_SCALAR)) < 0)
-        return -1;
-
-    /* Create datatype for appending records */
-    if((tid = create_symbol_datatype()) < 0)
-        return -1;
-
-    /* Add records to random datasets, according to frequency distribution */
-    rec_to_flush = flush_count;
-    for(u = 0; u < nrecords; u++) {
-        symbol_info_t *symbol;  /* Symbol to write record to */
-        hid_t file_sid;         /* Dataset's space ID */
+    /* Remove records from random datasets, according to frequency distribution */
+    shrink_to_flush = flush_count;
+    for(u = 0; u < nshrinks; u++) {
+        symbol_info_t *symbol;  /* Symbol to remove record from */
+        hsize_t remove_size;    /* Size to reduce dataset dimension by */
 
         /* Get a random dataset, according to the symbol distribution */
         symbol = choose_dataset();
 
-        /* Set the record's ID (equal to its position) */
-        record.rec_id = symbol->nrecords;
-
-        /* Get the coordinate to write */
-        start[1] = symbol->nrecords;
-
-        /* Cork the metadata cache, to prevent the object header from being
-         * flushed before the data has been written */
-        if(H5Odisable_mdc_flushes(symbol->dsid) < 0)
-            return -1;
-
-        /* Extend the dataset's dataspace to hold the new record */
-        symbol->nrecords++;
+        /* Shrink the dataset's dataspace */
+        remove_size = (hsize_t)HDrandom() % MAX_REMOVE_SIZE + 1;
+        if(remove_size > symbol->nrecords)
+            symbol->nrecords = 0;
+        else
+            symbol->nrecords -= remove_size;
         dim[1] = symbol->nrecords;
         if(H5Dset_extent(symbol->dsid, dim) < 0)
-            return -1;
-
-        /* Get the dataset's dataspace */
-        if((file_sid = H5Dget_space(symbol->dsid)) < 0)
-            return -1;
-
-        /* Choose the last record in the dataset */
-        if(H5Sselect_hyperslab(file_sid, H5S_SELECT_SET, start, NULL, count, NULL) < 0)
-            return -1;
-
-        /* Write record to the dataset */
-        if(H5Dwrite(symbol->dsid, tid, mem_sid, file_sid, H5P_DEFAULT, &record) < 0)
-            return -1;
-
-        /* Uncork the metadata cache */
-        if(H5Oenable_mdc_flushes(symbol->dsid) < 0)
-            return -1;
-
-        /* Close the dataset's dataspace */
-        if(H5Sclose(file_sid) < 0)
             return -1;
 
         /* Check for flushing file */
         if(flush_count > 0) {
             /* Decrement count of records to write before flushing */
-            rec_to_flush--;
+            shrink_to_flush--;
 
             /* Check for counter being reached */
-            if(0 == rec_to_flush) {
+            if(0 == shrink_to_flush) {
 #ifdef TEMP_OUT
                 /* Flush contents of file */
                 if(H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0)
                     return -1;
-#endif /* TEMP_OUT */
+#endif
 
                 /* Reset flush counter */
-                rec_to_flush = flush_count;
+                shrink_to_flush = flush_count;
             } /* end if */
         } /* end if */
     } /* end for */
 
-    /* Close the memory dataspace */
-    if(H5Sclose(mem_sid) < 0)
-        return -1;
-
-    /* Close the datatype */
-    if(H5Tclose(tid) < 0)
-        return -1;
-
     /* Emit informational message */
     if(verbose)
-        HDfprintf(verbose_file, "Closing datasets\n");
+        HDfprintf(stderr, "Closing datasets\n");
 
     /* Close the datasets */
     for(u = 0; u < NLEVELS; u++)
@@ -300,7 +247,7 @@ add_records(hid_t fid, hbool_t verbose, FILE *verbose_file,
                 return -1;
 
     return 0;
-}
+} /* remove_records() */
 
 static void
 usage(void)
@@ -308,29 +255,26 @@ usage(void)
     printf("\n");
     printf("Usage error!\n");
     printf("\n");
-    printf("Usage: vfd_swmr_writer [-q] [-o] [-f <# of records to write between flushing\n");
-    printf("    file contents>] [-r <random seed>] <# of records>\n");
+    printf("Usage: swmr_remove_writer [-q] [-o] [-f <# of shrinks between flushing\n");
+    printf("    file contents>] [-r <random seed>] <# of shrinks>\n");
     printf("\n");
-    printf("<# of records to write between flushing file contents> should be 0\n");
-    printf("(for no flushing) or between 1 and (<# of records> - 1).\n");
-    printf("\n");
-    printf("<# of records> must be specified.\n");
+    printf("<# of shrinks between flushing file contents> should be 0 (for no\n");
+    printf("flushing) or between 1 and (<# of shrinks> - 1)\n");
     printf("\n");
     printf("Defaults to verbose (no '-q' given), latest format when opening file (no '-o' given),\n");
-    printf("flushing every 10000 records ('-f 10000'), and will generate a random seed (no -r given).\n");
+    printf("flushing every 1000 shrinks ('-f 1000'), and will generate a random seed (no -r given).\n");
     printf("\n");
     HDexit(1);
-}
+} /* usage() */
 
 int main(int argc, const char *argv[])
 {
     hid_t fid;                  /* File ID for file opened */
-    long nrecords = 0;          /* # of records to append */
-    long flush_count = 10000;   /* # of records to write between flushing file */
-    hbool_t verbose = TRUE;     /* Whether to emit some informational messages */
-    FILE *verbose_file = NULL;  /* File handle for verbose output */
-    hbool_t old = FALSE;        /* Whether to use non-latest-format when opening file */
-    hbool_t use_seed = FALSE;   /* Set to TRUE if a seed was set on the command line */
+    long nshrinks = 0;          /* # of times to shrink the dataset */
+    long flush_count = 1000;    /* # of records to write between flushing file */
+    unsigned verbose = 1;       /* Whether to emit some informational messages */
+    unsigned old = 0;           /* Whether to use non-latest-format when opening file */
+    unsigned use_seed = 0;      /* Set to 1 if a seed was set on the command line */
     unsigned random_seed = 0;   /* Random # seed */
     unsigned u;                 /* Local index variable */
     int temp;
@@ -353,13 +297,13 @@ int main(int argc, const char *argv[])
 
                     /* Be quiet */
                     case 'q':
-                        verbose = FALSE;
+                        verbose = 0;
                         u++;
                         break;
                     
                     /* Random # seed */
                     case 'r':
-                        use_seed = TRUE;
+                        use_seed = 1;
                         temp = HDatoi(argv[u + 1]);
                         random_seed = (unsigned)temp;
                         u += 2;
@@ -367,7 +311,7 @@ int main(int argc, const char *argv[])
 
                     /* Use non-latest-format when opening file */
                     case 'o':
-                        old = TRUE;
+                        old = 1;
                         u++;
                         break;
 
@@ -378,52 +322,39 @@ int main(int argc, const char *argv[])
             } /* end if */
             else {
                 /* Get the number of records to append */
-                nrecords = HDatol(argv[u]);
-                if(nrecords <= 0)
+                nshrinks = HDatol(argv[u]);
+                if(nshrinks <= 0)
                     usage();
 
                 u++;
             } /* end else */
         } /* end while */
     } /* end if */
-    if(nrecords <= 0)
+    if(nshrinks <= 0)
         usage();
-    if(flush_count >= nrecords)
+    if(flush_count >= nshrinks)
         usage();
+
+    /* Emit informational message */
+    if(verbose) {
+        HDfprintf(stderr, "Parameters:\n");
+        HDfprintf(stderr, "\t# of shrinks between flushes = %ld\n", flush_count);
+        HDfprintf(stderr, "\t# of shrinks = %ld\n", nshrinks);
+    } /* end if */
 
     /* Set the random seed */
-    if(!use_seed) {
+    if(0 == use_seed) {
         struct timeval t;
-
         HDgettimeofday(&t, NULL);
         random_seed = (unsigned)(t.tv_usec);
     } /* end if */
     HDsrandom(random_seed);
-
-    /* Open output file */
-    if(verbose) {
-        char verbose_name[1024];
-
-        HDsnprintf(verbose_name, sizeof(verbose_name), "vfd_swmr_writer.out.%u", random_seed);
-        if(NULL == (verbose_file = HDfopen(verbose_name, "w"))) {
-            HDfprintf(stderr, "Can't open verbose output file!\n");
-            HDexit(1);
-        }
-    } /* end if */
-
-    /* Emit informational message */
-    if(verbose) {
-        HDfprintf(verbose_file, "Parameters:\n");
-        HDfprintf(verbose_file, "\t# of records between flushes = %ld\n", flush_count);
-        HDfprintf(verbose_file, "\t# of records to write = %ld\n", nrecords);
-    } /* end if */
-
     /* ALWAYS emit the random seed for possible debugging */
-    HDfprintf(stdout, "Using writer random seed: %u\n", random_seed);
+    HDfprintf(stderr, "Using writer random seed: %u\n", random_seed);
 
     /* Emit informational message */
     if(verbose)
-        HDfprintf(verbose_file, "Generating symbol names\n");
+        HDfprintf(stderr, "Generating symbol names\n");
 
     /* Generate dataset names */
     if(generate_symbols() < 0)
@@ -431,10 +362,10 @@ int main(int argc, const char *argv[])
 
     /* Emit informational message */
     if(verbose)
-        HDfprintf(verbose_file, "Opening skeleton file: %s\n", FILENAME);
+        HDfprintf(stderr, "Opening skeleton file: %s\n", FILENAME);
 
     /* Open file skeleton */
-    if((fid = open_skeleton(FILENAME, verbose, verbose_file, random_seed, old)) < 0) {
+    if((fid = open_skeleton(FILENAME, verbose, old)) < 0) {
         HDfprintf(stderr, "Error opening skeleton file!\n");
         HDexit(1);
     } /* end if */
@@ -444,17 +375,17 @@ int main(int argc, const char *argv[])
 
     /* Emit informational message */
     if(verbose)
-        HDfprintf(verbose_file, "Adding records\n");
+        HDfprintf(stderr, "Removing records\n");
 
-    /* Append records to datasets */
-    if(add_records(fid, verbose, verbose_file, (unsigned long)nrecords, (unsigned long)flush_count) < 0) {
-        HDfprintf(stderr, "Error appending records to datasets!\n");
+    /* Remove records from datasets */
+    if(remove_records(fid, verbose, (unsigned long)nshrinks, (unsigned long)flush_count) < 0) {
+        HDfprintf(stderr, "Error removing records from datasets!\n");
         HDexit(1);
     } /* end if */
 
     /* Emit informational message */
     if(verbose)
-        HDfprintf(verbose_file, "Releasing symbols\n");
+        HDfprintf(stderr, "Releasing symbols\n");
 
     /* Clean up the symbols */
     if(shutdown_symbols() < 0) {
@@ -464,7 +395,7 @@ int main(int argc, const char *argv[])
 
     /* Emit informational message */
     if(verbose)
-        HDfprintf(verbose_file, "Closing objects\n");
+        HDfprintf(stderr, "Closing objects\n");
 
     /* Close objects opened */
     if(H5Fclose(fid) < 0) {
@@ -473,5 +404,4 @@ int main(int argc, const char *argv[])
     } /* end if */
 
     return 0;
-}
-
+} /* main() */

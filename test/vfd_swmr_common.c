@@ -13,7 +13,7 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:     swmr_common.c
+ * Created:     vfd_swmr_common.c
  *
  * Purpose:     Utility functions for the SWMR test code.
  *
@@ -25,7 +25,7 @@
 /***********/
 
 #include "h5test.h"
-#include "swmr_common.h"
+#include "vfd_swmr_common.h"
 
 /*******************/
 /* Local Variables */

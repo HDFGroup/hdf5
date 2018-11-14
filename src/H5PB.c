@@ -1344,7 +1344,7 @@ H5PB_write(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
                 /* case 5) -- page buffer configured for raw data only */
                 bypass_pb = TRUE;
 
-            } else if ( ( size > pb_ptr->page_size ) && 
+            } else if ( ( size >= pb_ptr->page_size ) && 
                         ( ! ( pb_ptr->vfd_swmr_writer ) ) ) {
 
                 /* case 6) -- md read larger than one page and 
@@ -1566,23 +1566,8 @@ H5PB__create_new_page(H5PB_t *pb_ptr, haddr_t addr, size_t size,
 
     if ( entry_ptr != NULL ) {
 
-#if 0 /* JRM */
         HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
             "page buffer already contains a page at the specified address")
-#else /* JRM */
-        /* this should be an error, but until we update the page allocation
-         * code to tell the page buffer to discard the associated entry
-         * whenever a page is freed, this situation can occur.
-         *
-         * For now, just force the eviction of the existing page.
-         * Delete this code as soon as the paged allocation code is 
-         * updated accordingly
-         */
-        if ( H5PB__evict_entry(pb_ptr, entry_ptr, TRUE) < 0 )
-
-            HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, "forced eviction failed")
-
-#endif /* JRM */
     } 
 
     entry_ptr = H5PB__allocate_page(pb_ptr, size, clean_image);
@@ -1844,7 +1829,6 @@ H5PB__flush_entry(H5F_t *f, H5PB_t *pb_ptr, H5PB_entry_t *entry_ptr)
         HGOTO_ERROR(H5E_PAGEBUF, H5E_CANTGET, FAIL, \
                     "driver get_eoa request failed")
 
-#if 0 /* JRM */
     /* TODO: update the free space manager to inform the page buffer when 
      *       space is de-allocated so that the following assertions will be
      *       true in all cases.
@@ -1862,25 +1846,8 @@ H5PB__flush_entry(H5F_t *f, H5PB_t *pb_ptr, H5PB_entry_t *entry_ptr)
      * an assertion is adequate here.
      */
     HDassert( eoa >= entry_ptr->addr + entry_ptr->size );
-#else /* JRM */
-    if ( eoa < entry_ptr->addr ) {
-
-        skip_write = TRUE;
-
-    } else if ( eoa < entry_ptr->addr + entry_ptr->size ) {
-
-        /* adjust the size of the write so that the write 
-         * will not extend beyond EOA.
-         */
-        write_size = (size_t)(eoa - entry_ptr->addr);
-
-    } else {
-
-        write_size = entry_ptr->size;
-    }
     
-#endif /* JRM */
-
+    write_size = entry_ptr->size;
 
     /* flush the entry */
     if ( ! skip_write ) {
@@ -2557,7 +2524,7 @@ H5PB__read_meta(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
 
         HDassert( page_addr == addr );
 
-        if ( size > pb_ptr->page_size ) {
+        if ( size >= pb_ptr->page_size ) {
 
             /* search the page buffer for an entry at page */
             H5PB__SEARCH_INDEX(pb_ptr, page, entry_ptr, FAIL)
@@ -2965,7 +2932,7 @@ H5PB__read_raw(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
         /* first page */
         offset = addr - first_page_addr;
 
-        if ( (offset + size) < pb_ptr->page_size ) {
+        if ( (offset + size) <= pb_ptr->page_size ) {
 
             HDassert(num_touched_pages == 1);
             length = size;
@@ -3135,7 +3102,7 @@ H5PB__write_meta(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
 
 
     /* case 7) metadata read of size greater than page size. */
-    if ( size > pb_ptr->page_size ) {
+    if ( size >= pb_ptr->page_size ) {
 
         /* The write must be for a multi-page metadata entry, and 
          * we must be running as a VFD SWMR writer.
@@ -3225,29 +3192,6 @@ H5PB__write_meta(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
         /* update hit rate stats */
         H5PB__UPDATE_PB_HIT_RATE_STATS(pb_ptr, (entry_ptr != NULL), \
                                       TRUE, FALSE)
-
-#if 1 /* JRM */
-        /* Since the space allocation code doesn't always tell the page
-         * buffer when a page is freed, it is possible that the page
-         * found by the index search is an ophaned raw data page.  
-         *
-         * Until this is fixed, test to see entry_ptr points to 
-         * a raw data page, and force its eviction if it does.
-         *
-         * Remove this code as soon as the space allocation code is 
-         * updated to tell the page buffer to discard pages when 
-         * they are freed.
-         */
-        if ( ( entry_ptr ) && ( ! ( entry_ptr->is_metadata ) ) ) {
-
-            if ( H5PB__evict_entry(pb_ptr, entry_ptr, TRUE) < 0 )
-
-                HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
-                            "forced eviction failed")
-
-            entry_ptr = NULL;
-        }
-#endif /* JRM */
 
         if ( ( NULL == entry_ptr ) &&
              ( H5PB__load_page(f, pb_ptr, page_addr, type, &entry_ptr) < 0 ) )
@@ -3421,29 +3365,6 @@ H5PB__write_raw(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
             /* update hit rate stats */
             H5PB__UPDATE_PB_HIT_RATE_STATS(pb_ptr, (entry_ptr != NULL), \
                                            FALSE, FALSE)
-
-#if 1 /* JRM */
-            /* Since the space allocation code doesn't always tell the page
-             * buffer when a page is freed, it is possible that the page
-             * found by the index search is an ophaned metadata page.  
-             *
-             * Until this is fixed, test to see entry_ptr points to 
-             * a metadata page, and force its eviction if it does.
-             *
-             * Remove this code as soon as the space allocation code is 
-             * updated to tell the page buffer to discard pages when 
-             * they are freed.
-             */
-            if ( ( entry_ptr ) && ( entry_ptr->is_metadata ) ) {
-
-                if ( H5PB__evict_entry(pb_ptr, entry_ptr, TRUE) < 0 )
-
-                    HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
-                                "forced eviction failed")
-
-                entry_ptr = NULL;
-            }
-#endif /* JRM */
 
             if ( entry_ptr ) {
 

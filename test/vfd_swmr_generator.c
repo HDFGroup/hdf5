@@ -14,8 +14,9 @@
 /*-------------------------------------------------------------------------
  *
  * Created:     vfd_swmr_generator.c
+ *              (copied and modified from swmr_generator.c)
  *
- * Purpose:     Functions for building and setting up the SWMR test file
+ * Purpose:     Functions for building and setting up the VFD SWMR test file
  *              and datasets.
  *
  *-------------------------------------------------------------------------
@@ -47,7 +48,7 @@
 /********************/
 
 static int gen_skeleton(const char *filename, hbool_t verbose,
-    hbool_t swmr_write, int comp_level, const char *index_type,
+    hbool_t vfd_swmr_write, int comp_level, const char *index_type,
     unsigned random_seed);
 static void usage(void);
 
@@ -64,8 +65,8 @@ static void usage(void);
  *              hbool_t verbose
  *              Whether verbose console output is desired.
  *
- *              hbool_t swmr_write
- *              Whether to create the file with SWMR writing enabled
+ *              hbool_t vfd_swmr_write
+ *              Whether to create the file with VFD SWMR writing enabled
  *
  *              int comp_level
  *              The zlib compression level to use. -1 = no compression.
@@ -83,7 +84,7 @@ static void usage(void);
  *-------------------------------------------------------------------------
  */
 static int
-gen_skeleton(const char *filename, hbool_t verbose, hbool_t swmr_write,
+gen_skeleton(const char *filename, hbool_t verbose, hbool_t vfd_swmr_write,
     int comp_level, const char *index_type, unsigned random_seed)
 {
     hid_t fid;          /* File ID for new HDF5 file */
@@ -109,7 +110,8 @@ gen_skeleton(const char *filename, hbool_t verbose, hbool_t swmr_write,
     if((fapl = h5_fileaccess()) < 0)
         return -1;
 
-    /* FOR NOW: create the file with the latest format so that the latest chunk indexing will be used */
+    /* Set to use the latest format with the latest chunk indexing */
+    /* FOR NOW: the parameter vfd_swmr_write is not used here as in swmr_generator.c */
     if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
         return -1;
 
@@ -157,19 +159,19 @@ gen_skeleton(const char *filename, hbool_t verbose, hbool_t swmr_write,
         HDfprintf(stderr, "Creating file\n");
 
     /*
-     * Set up to create the file with VFD SWMR configured.
+     * Set up to create the file with VFD SWMR write configured.
      */
 
-    if(swmr_write) {
-        /* Set file space strategy to paged aggregation */
+    if(vfd_swmr_write) {
+        /* Set file space strategy to paged aggregation in fcpl */
         if(H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, FALSE, (hsize_t)1) < 0)
             return -1;
 
-         /* Enable page buffering */
+         /* Enable page buffering in fapl */
         if(H5Pset_page_buffer_size(fapl, 4096, 0, 0) < 0)
             return -1;
 
-        /* Allocate memory for the configuration structure */
+        /* Allocate memory for the VFD SWMR configuration structure */
         if((config = (H5F_vfd_swmr_config_t *)HDmalloc(sizeof(H5F_vfd_swmr_config_t))) == NULL)
             return -1;
 
@@ -180,12 +182,12 @@ gen_skeleton(const char *filename, hbool_t verbose, hbool_t swmr_write,
         config->md_pages_reserved = 2;
         HDstrcpy(config->md_file_path, "my_md_file");
 
-        /* Enable VFD SWMR configuration */
+        /* Enable VFD SWMR configuration in fapl */
         if(H5Pset_vfd_swmr_config(fapl, config) < 0)
             return -1;
     } 
 
-    /* Create the file with VFD SWMR configured */
+    /* Create the file with VFD SWMR write configured */
     if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl)) < 0)
         return -1;
 
@@ -310,7 +312,7 @@ usage(void)
     printf("\n");
     printf("<index type> should be b2 or ea\n");
     printf("\n");
-    printf("Defaults to verbose (no '-q' given), no SWMR_WRITE mode (no '-s' given) no\n");
+    printf("Defaults to verbose (no '-q' given), no VFD_SWMR_WRITE mode (no '-s' given) no\n");
     printf("compression ('-c -1'), v1 b-tree indexing (-i b1), and will generate a random\n");
     printf("seed (no -r given).\n");
     printf("\n");
@@ -321,7 +323,7 @@ int main(int argc, const char *argv[])
 {
     int comp_level = -1;            /* Compression level (-1 is no compression) */
     hbool_t verbose = TRUE;         /* Whether to emit some informational messages */
-    hbool_t swmr_write = FALSE;     /* Whether to create file with SWMR_WRITE access */
+    hbool_t vfd_swmr_write = FALSE; /* Whether to create file with VFD SWMR access */
     const char *index_type = "b1";  /* Chunk index type */
     hbool_t use_seed = FALSE;       /* Set to TRUE if a seed was set on the command line */
     unsigned random_seed = 0;       /* Random # seed */
@@ -370,7 +372,7 @@ int main(int argc, const char *argv[])
 
                     /* Run with SWMR_WRITE */
                     case 's':
-                        swmr_write = TRUE;
+                        vfd_swmr_write = TRUE;
                         u++;
                         break;
 
@@ -385,7 +387,7 @@ int main(int argc, const char *argv[])
     /* Emit informational message */
     if(verbose) {
         HDfprintf(stderr, "Parameters:\n");
-        HDfprintf(stderr, "\tswmr writes %s\n", swmr_write ? "on" : "off");
+        HDfprintf(stderr, "\tswmr writes %s\n", vfd_swmr_write ? "on" : "off");
         HDfprintf(stderr, "\tcompression level = %d\n", comp_level);
         HDfprintf(stderr, "\tindex type = %s\n", index_type);
     } /* end if */
@@ -406,10 +408,10 @@ int main(int argc, const char *argv[])
         HDfprintf(stderr, "Generating skeleton file: %s\n", FILENAME);
 
     /* Generate file skeleton */
-    if(gen_skeleton(FILENAME, verbose, swmr_write, comp_level, index_type, random_seed) < 0) {
+    if(gen_skeleton(FILENAME, verbose, vfd_swmr_write, comp_level, index_type, random_seed) < 0) {
         HDfprintf(stderr, "Error generating skeleton file!\n");
         HDexit(1);
     } /* end if */
 
     return 0;
-}
+} /* main() */
