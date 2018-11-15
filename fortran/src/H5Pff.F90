@@ -42,6 +42,14 @@ MODULE H5P
   USE H5GLOBAL
   USE H5fortkit
 
+  PRIVATE h5pset_fapl_multi_l, h5pset_fapl_multi_s
+  PRIVATE h5pset_fill_value_integer, h5pset_fill_value_char, h5pset_fill_value_ptr
+  PRIVATE h5pget_fill_value_integer, h5pget_fill_value_char, h5pget_fill_value_ptr
+  PRIVATE h5pset_integer, h5pset_char, h5pset_ptr
+  PRIVATE h5pget_integer, h5pget_char, h5pget_ptr
+  PRIVATE h5pregister_integer, h5pregister_ptr
+  PRIVATE h5pinsert_integer, h5pinsert_char, h5pinsert_ptr
+
   INTERFACE h5pset_fapl_multi_f
      MODULE PROCEDURE h5pset_fapl_multi_l
      MODULE PROCEDURE h5pset_fapl_multi_s
