@@ -248,7 +248,8 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh,
 
                         /* Just in case that something goes very wrong, such as file corruption. */
                         if(mesg->u.chunk.dim[u] == 0)
-                            HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, NULL, "chunk dimension must be positive: mesg->u.chunk.dim[%u] = %u", u, mesg->u.chunk.dim[u])
+                            HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, NULL, "chunk dimension must be positive: mesg->u.chunk.dim[%u] = %u",
+                                        u, mesg->u.chunk.dim[u])
                     }
 
                     /* Compute chunk size */
