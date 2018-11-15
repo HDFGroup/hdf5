@@ -250,7 +250,7 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh,
                         if(mesg->u.chunk.dim[u] == 0)
                             HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, NULL, "chunk dimension must be positive: mesg->u.chunk.dim[%u] = %u",
                                         u, mesg->u.chunk.dim[u])
-                    }
+                    } /* end for */
 
                     /* Compute chunk size */
                     for(u = 1, mesg->u.chunk.size = mesg->u.chunk.dim[0]; u < mesg->u.chunk.ndims; u++)

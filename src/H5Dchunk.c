@@ -684,7 +684,6 @@ H5D__chunk_set_info_real(H5O_layout_chunk_t *layout, unsigned ndims,
     const hsize_t *curr_dims, const hsize_t *max_dims)
 {
     unsigned u;                 /* Local index variable */
-
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_STATIC
