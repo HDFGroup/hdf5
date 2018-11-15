@@ -684,6 +684,7 @@ H5D__chunk_set_info_real(H5O_layout_chunk_t *layout, unsigned ndims,
     const hsize_t *curr_dims, const hsize_t *max_dims)
 {
     unsigned u;                 /* Local index variable */
+
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_STATIC
@@ -695,10 +696,9 @@ H5D__chunk_set_info_real(H5O_layout_chunk_t *layout, unsigned ndims,
 
     /* Compute the # of chunks in dataset dimensions */
     for(u = 0, layout->nchunks = 1, layout->max_nchunks = 1; u < ndims; u++) {
-        /* Just in case that something goes very wrong, such as file corruption. */
-        if(layout->dim[u] == 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "chunk dimension must be positive: layout->dim[%u] = %u ", u, layout->dim[u])
-            
+        /* Sanity check */
+        HDassert(layout->dim[u] > 0);
+        
         /* Round up to the next integer # of chunks, to accommodate partial chunks */
         layout->chunks[u] = ((curr_dims[u] + layout->dim[u]) - 1) / layout->dim[u];
         if(H5S_UNLIMITED == max_dims[u])
