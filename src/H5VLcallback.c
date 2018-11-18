@@ -95,6 +95,12 @@ static herr_t H5VL__dataset_optional(void *obj, const H5VL_class_t *cls,
     hid_t dxpl_id, void **req, va_list arguments);
 static herr_t H5VL__dataset_close(void *obj, const H5VL_class_t *cls, hid_t dxpl_id,
     void **req);
+static herr_t H5VL__file_cache_connector(void *obj, const H5VL_class_t *cls,
+    hid_t dxpl_id, void **req, ...);
+static void * H5VL__file_create(const H5VL_class_t *cls, const char *name,
+    unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t dxpl_id, void **req);
+static void * H5VL__file_open(const H5VL_class_t *cls, const char *name,
+    unsigned flags, hid_t fapl_id, hid_t dxpl_id, void **req);
 static herr_t H5VL__file_get(void *obj, const H5VL_class_t *cls, H5VL_file_get_t get_type, 
     hid_t dxpl_id, void **req, va_list arguments);
 static herr_t H5VL__file_specific(void *obj, const H5VL_class_t *cls, H5VL_file_specific_t specific_type, 
@@ -2463,6 +2469,76 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5VL__file_cache_connector
+ *
+ * Purpose:	Wrap varargs and reissue 'cache VOL connector' operation
+ *		to file specific call
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL__file_cache_connector(void *obj, const H5VL_class_t *cls, hid_t dxpl_id,
+    void **req, ...)
+{
+    va_list arguments;                  /* Argument list passed from the API call */
+    hbool_t arg_started = FALSE;        /* Whether the va_list has been started */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Re-issue call to internal file specific callback routine */
+    va_start(arguments, req);
+    arg_started = TRUE;
+    if(H5VL__file_specific(obj, cls, H5VL_FILE_CACHE_VOL_CONN, dxpl_id, req, arguments) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "file specific failed")
+
+done:
+    /* End access to the va_list, if we started it */
+    if(arg_started)
+        va_end(arguments);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__file_cache_connector() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL__file_create
+ *
+ * Purpose:	Creates a file through the VOL
+ *
+ * Note:	Does not have a 'static' version of the routine, since there's
+ *		no objects in the container before this operation completes.
+ *
+ * Return:      Success: Pointer to new file
+ *		Failure: NULL
+ *
+ *-------------------------------------------------------------------------
+ */
+static void *
+H5VL__file_create(const H5VL_class_t *cls, const char *name,
+    unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t dxpl_id, void **req)
+{
+    void *ret_value = NULL;     /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Check if the corresponding VOL callback exists */
+    if(NULL == cls->file_cls.create)
+        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, NULL, "VOL connector has no 'file create' method")
+
+    /* Call the corresponding VOL callback */
+    if(NULL == (ret_value = (cls->file_cls.create)(name, flags, fcpl_id, fapl_id, dxpl_id, req)))
+        HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, NULL, "file create failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__file_create() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5VL_file_create
  *
  * Purpose:	Creates a file through the VOL
@@ -2476,20 +2552,25 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VL_file_create(const H5VL_class_t *cls, const char *name, unsigned flags, hid_t fcpl_id, 
-    hid_t fapl_id, hid_t dxpl_id, void **req)
+H5VL_file_create(const H5VL_connector_prop_t *connector_prop, const char *name,
+    unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t dxpl_id, void **req)
 {
-    void *ret_value = NULL;             /* Return value */
+    H5VL_class_t *cls;          /* VOL Class structure for callback info    */
+    void *ret_value = NULL;     /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
-    /* Check if the corresponding VOL callback exists */
-    if(NULL == cls->file_cls.create)
-        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, NULL, "VOL connector has no 'file create' method")
+    /* Get the connector's class */
+    if(NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_prop->connector_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a VOL connector ID")
 
-    /* Call the corresponding VOL callback */
-    if(NULL == (ret_value = (cls->file_cls.create)(name, flags, fcpl_id, fapl_id, dxpl_id, req)))
+    /* Call the corresponding internal VOL routine */
+    if(NULL == (ret_value = H5VL__file_create(cls, name, flags, fcpl_id, fapl_id, dxpl_id, req)))
         HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, NULL, "file create failed")
+
+    /* Cache the connector ID & info */
+    if(H5VL__file_cache_connector(ret_value, cls, dxpl_id, req, connector_prop->connector_id, connector_prop->connector_info) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, NULL, "caching VOL connector ID & info failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2529,12 +2610,43 @@ H5VLfile_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a VOL connector ID")
 
     /* Call the corresponding internal VOL routine */
-    if(NULL == (ret_value = H5VL_file_create(cls, name, flags, fcpl_id, fapl_id, dxpl_id, req)))
+    if(NULL == (ret_value = H5VL__file_create(cls, name, flags, fcpl_id, fapl_id, dxpl_id, req)))
         HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, NULL, "unable to create file")
 
 done:
     FUNC_LEAVE_API_NOINIT(ret_value)
 } /* end H5VLfile_create() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL__file_open
+ *
+ * Purpose:	Opens a file through the VOL.
+ *
+ * Return:      Success: Pointer to file. 
+ *		Failure: NULL
+ *
+ *-------------------------------------------------------------------------
+ */
+static void *
+H5VL__file_open(const H5VL_class_t *cls, const char *name, unsigned flags,
+    hid_t fapl_id, hid_t dxpl_id, void **req)
+{
+    void *ret_value = NULL;             /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Check if the corresponding VOL callback exists */
+    if(NULL == cls->file_cls.open)
+        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, NULL, "VOL connector has no 'file open' method")
+
+    /* Call the corresponding VOL callback */
+    if(NULL == (ret_value = (cls->file_cls.open)(name, flags, fapl_id, dxpl_id, req)))
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPENOBJ, NULL, "open failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__file_open() */
 
 
 /*-------------------------------------------------------------------------
@@ -2551,20 +2663,25 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VL_file_open(const H5VL_class_t *cls, const char *name, unsigned flags, hid_t fapl_id, 
-    hid_t dxpl_id, void **req)
+H5VL_file_open(const H5VL_connector_prop_t *connector_prop, const char *name,
+    unsigned flags, hid_t fapl_id, hid_t dxpl_id, void **req)
 {
-    void *ret_value = NULL;             /* Return value */
+    H5VL_class_t *cls;          /* VOL Class structure for callback info    */
+    void *ret_value = NULL;     /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
-    /* Check if the corresponding VOL callback exists */
-    if(NULL == cls->file_cls.open)
-        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, NULL, "VOL connector has no 'file open' method")
+    /* Get the connector's class */
+    if(NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_prop->connector_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a VOL connector ID")
 
-    /* Call the corresponding VOL callback */
-    if(NULL == (ret_value = (cls->file_cls.open)(name, flags, fapl_id, dxpl_id, req)))
+    /* Call the corresponding internal VOL routine */
+    if(NULL == (ret_value = H5VL__file_open(cls, name, flags, fapl_id, dxpl_id, req)))
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPENOBJ, NULL, "open failed")
+
+    /* Cache the connector ID & info */
+    if(H5VL__file_cache_connector(ret_value, cls, dxpl_id, req, connector_prop->connector_id, connector_prop->connector_info) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, NULL, "caching VOL connector ID & info failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2604,7 +2721,7 @@ H5VLfile_open(const char *name, unsigned flags, hid_t fapl_id, hid_t dxpl_id,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a VOL connector ID")
 
     /* Call the corresponding internal VOL routine */
-    if(NULL == (ret_value = H5VL_file_open(cls, name, flags, fapl_id, dxpl_id, req)))
+    if(NULL == (ret_value = H5VL__file_open(cls, name, flags, fapl_id, dxpl_id, req)))
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPENOBJ, NULL, "unable to open file")
 
 done:
@@ -2815,7 +2932,6 @@ H5VL_file_specific(const H5VL_object_t *vol_obj, H5VL_file_specific_t specific_t
         /* Set the VOL connector class pointer */
         cls = vol_obj->connector->cls;
     } /* end else */
-
 
     /* Call the corresponding internal VOL routine */
     if(H5VL__file_specific(vol_obj ? vol_obj->data : NULL, cls, specific_type, dxpl_id, req, arguments) < 0)

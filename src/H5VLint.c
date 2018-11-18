@@ -225,7 +225,7 @@ H5VL__free_cls(H5VL_class_t *cls)
         HGOTO_ERROR(H5E_VOL, H5E_CANTCLOSEOBJ, FAIL, "VOL connector did not terminate cleanly")
 
     /* Release the class */
-    H5MM_xfree(cls->name);
+    H5MM_xfree((void *)cls->name);      /* Casting away const OK -QAK */
     H5FL_FREE(H5VL_class_t, cls);
 
 done:
@@ -333,6 +333,99 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5VL_conn_copy
+ *
+ * Purpose:     Copy VOL connector ID & info.
+ *
+ * Note:        This is an "in-place" copy.
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_conn_copy(H5VL_connector_prop_t *connector_prop)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    if(connector_prop) {
+        /* Copy the connector ID & info, if there is one */
+        if(connector_prop->connector_id > 0) {
+            /* Increment the reference count on connector ID and copy connector info */
+            if(H5I_inc_ref(connector_prop->connector_id, FALSE) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTINC, FAIL, "unable to increment ref count on VOL connector ID")
+
+            /* Copy connector info, if it exists */
+            if(connector_prop->connector_info) {
+                H5VL_class_t *connector;           /* Pointer to connector */
+                void *new_connector_info = NULL;   /* Copy of connector info */
+
+                /* Retrieve the connector for the ID */
+                if(NULL == (connector = (H5VL_class_t *)H5I_object(connector_prop->connector_id)))
+                    HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a VOL connector ID")
+
+                /* Allocate and copy connector info */
+                if(H5VL_copy_connector_info(connector, &new_connector_info, connector_prop->connector_info) < 0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "connector info copy failed")
+
+                /* Set the connector info to the copy */
+                connector_prop->connector_info = new_connector_info;
+            } /* end if */
+        } /* end if */
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_conn_copy() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_conn_free
+ *
+ * Purpose:     Free VOL connector ID & info.
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_conn_free(const H5VL_connector_prop_t *info)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    if(info) {
+        /* Free the connector info (if it exists) and decrement the ID */
+        if(info->connector_id > 0) {
+            if(info->connector_info) {
+                H5VL_class_t *connector;       /* Pointer to connector */
+
+                /* Retrieve the connector for the ID */
+                if(NULL == (connector = (H5VL_class_t *)H5I_object(info->connector_id)))
+                    HGOTO_ERROR(H5E_VOL, H5E_BADTYPE, FAIL, "not a VOL connector ID")
+
+                /* Free the connector info */
+                if(H5VL_free_connector_info(connector, (void *)info->connector_info) < 0)        /* Casting away const OK - QAK */
+                    HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "unable to release VOL connector info object")
+            } /* end if */
+
+            /* Decrement reference count for connector ID */
+            if(H5I_dec_ref(info->connector_id) < 0)
+                HGOTO_ERROR(H5E_VOL, H5E_CANTDEC, FAIL, "can't decrement reference count for connector ID")
+        } /* end if */
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_conn_free() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5VL_register
  *
  * Purpose:     VOL-aware version of H5I_register. Constructs an H5VL_object_t
@@ -436,19 +529,19 @@ H5VL_register_using_vol_id(H5I_type_t type, void *obj, hid_t connector_id, hbool
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Get the VOL class object from the connector's ID */
-    if (NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
+    if(NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
         HGOTO_ERROR(H5E_VOL, H5E_BADTYPE, H5I_INVALID_HID, "not a VOL connector ID")
 
     /* Setup VOL info struct */
-    if (NULL == (connector = H5FL_CALLOC(H5VL_t)))
+    if(NULL == (connector = H5FL_CALLOC(H5VL_t)))
         HGOTO_ERROR(H5E_VOL, H5E_CANTALLOC, H5I_INVALID_HID, "can't allocate VOL info struct")
     connector->cls = cls;
     connector->id = connector_id;
-    if (H5I_inc_ref(connector->id, FALSE) < 0)
+    if(H5I_inc_ref(connector->id, FALSE) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTINC, H5I_INVALID_HID, "unable to increment ref count on VOL connector")
 
     /* Get an ID for the VOL object */
-    if ((ret_value = H5VL_register(type, obj, connector, app_ref)) < 0)
+    if((ret_value = H5VL_register(type, obj, connector, app_ref)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register object handle")
 
 done:

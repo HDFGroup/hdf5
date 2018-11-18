@@ -1685,13 +1685,13 @@ H5VL__native_file_specific(void *obj, H5VL_file_specific_t specific_type,
                          /* Call the flush routine for mounted file hierarchies */
                          if(H5F_flush_mounts(f) < 0)
                              HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush mounted file hierarchy")
-                     }
+                     } /* end if */
                      else {
                          /* Call the flush routine, for this file */
                          if(H5F__flush(f) < 0)
                              HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush file's cached information")
-                     }
-                 }
+                     } /* end else */
+                 } /* end if */
                 break;
             }
 
@@ -1756,6 +1756,18 @@ H5VL__native_file_specific(void *obj, H5VL_file_specific_t specific_type,
                 /* Call private routine */
                 if((*ret = H5F__is_hdf5(name, fapl_id)) < 0)
                     HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "error in HDF5 file check")
+                break;
+            }
+
+        /* H5Fcreate / H5Fopen */
+        case H5VL_FILE_CACHE_VOL_CONN:
+            {
+                hid_t      vol_id   = va_arg(arguments, hid_t);
+                void      *vol_info = va_arg(arguments, void *);
+
+                /* Call private routine */
+                if(H5F__set_vol_conn((H5F_t *)obj, vol_id, vol_info) < 0)
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "cache VOL connector ID & info failed")
                 break;
             }
 

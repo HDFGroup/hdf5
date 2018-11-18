@@ -292,7 +292,7 @@ struct H5F_file_t {
                                 /* begin on file access/create          */
     char        *mdc_log_location; /* location of mdc log               */
     hid_t       fcpl_id;	/* File creation property list ID 	*/
-    H5F_close_degree_t fc_degree;   /* File close behavior degree	*/
+    H5F_close_degree_t fc_degree; /* File close behavior degree	*/
     hbool_t evict_on_close; /* If the file's objects should be evicted from the metadata cache on close */
     size_t	rdcc_nslots;	/* Size of raw data chunk cache (slots)	*/
     size_t	rdcc_nbytes;	/* Size of raw data chunk cache	(bytes)	*/
@@ -309,6 +309,10 @@ struct H5F_file_t {
     struct H5G_t *root_grp;	/* Open root group			*/
     H5FO_t *open_objs;          /* Open objects in file                 */
     H5UC_t *grp_btree_shared;   /* Ref-counted group B-tree node info   */
+
+    /* Cached VOL connector ID & info */
+    hid_t       vol_id;         /* ID of VOL connector for the container */
+    void       *vol_info;       /* Copy of VOL connector info for container */
 
     /* File space allocation information */
     H5F_fspace_strategy_t fs_strategy; /* File space handling strategy	*/
@@ -349,6 +353,7 @@ struct H5F_file_t {
 
     /* Metadata retry info */
     unsigned 		read_attempts;	    /* The # of reads to try when reading metadata with checksum */
+    unsigned 		orig_read_attempts; /* Original value from the property: The # of reads to try when reading metadata with checksum */
     unsigned		retries_nbins;	    /* # of bins for each retries[] */
     uint32_t		*retries[H5AC_NTYPES];  /* Track # of read retries for metdata items with checksum */
 
@@ -407,19 +412,6 @@ typedef enum H5VL_file_optional_t {
     H5VL_FILE_SET_LIBVER_BOUNDS
 } H5VL_file_optional_t;
 
-/* User data for traversal routine to get ID counts */
-typedef struct {
-    ssize_t *obj_count;   /* number of objects counted so far */
-    unsigned types;      /* types of objects to be counted */
-} H5F_trav_obj_cnt_t;
-
-/* User data for traversal routine to get ID lists */
-/* XXX (VOL MERGE): Should the type of obj_count and max_objs be identical? */
-typedef struct {
-    size_t max_objs;
-    hid_t *oid_list;
-    ssize_t *obj_count;   /* number of objects counted so far */
-} H5F_trav_obj_ids_t;
 
 /*****************************/
 /* Package Private Variables */
@@ -438,7 +430,6 @@ H5FL_EXTERN(H5F_file_t);
 
 /* General routines */
 H5_DLL H5F_t *H5F__reopen(H5F_t *f);
-H5_DLL H5F_t *H5F__new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf);
 H5_DLL herr_t H5F__dest(H5F_t *f, hbool_t flush);
 H5_DLL herr_t H5F__flush(H5F_t *f);
 H5_DLL htri_t H5F__is_hdf5(const char *name, hid_t fapl_id);
@@ -450,6 +441,7 @@ H5_DLL herr_t H5F__close(H5F_t *f);
 H5_DLL herr_t H5F__set_libver_bounds(H5F_t *f, H5F_libver_t low, H5F_libver_t high);
 H5_DLL H5F_t *H5F__get_file(void *obj, H5I_type_t type);
 H5_DLL hid_t H5F__get_file_id(H5F_t *file);
+H5_DLL herr_t H5F__set_vol_conn(H5F_t *file, hid_t vol_id, const void *vol_info);
 
 /* File mount related routines */
 H5_DLL herr_t H5F__mount(H5G_loc_t *loc, const char *name, H5F_t *child, hid_t plist_id);

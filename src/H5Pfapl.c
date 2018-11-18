@@ -5125,7 +5125,7 @@ H5Pget_vol_info(hid_t plist_id, void **vol_info)
 
         /* Get the connector property */
         if(H5P_peek(plist, H5F_ACS_VOL_CONN_NAME, &connector_prop) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get VOL connector info")
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get VOL connector property")
 
         /* Copy connector info, if it exists */
         if(connector_prop.connector_info) {
@@ -5152,105 +5152,6 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5P__vol_copy
- *
- * Purpose:     Copy VOL connector ID & info.
- *
- * Note:        This is an "in-place" copy, since this routine gets called
- *              after the top-level copy has been performed and this routine
- *              finishes the "deep" part of the copy.
- *
- * Return:      Success:        Non-negative
- *              Failure:        Negative
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5P__vol_copy(void *value)
-{
-    herr_t ret_value = SUCCEED;         /* Return value */
-
-    FUNC_ENTER_STATIC
-
-    if(value) {
-        H5VL_connector_prop_t *connector_prop = (H5VL_connector_prop_t *)value; /* connector ID & info struct */
-
-        /* Copy the connector ID & info, if there is one */
-        if(connector_prop->connector_id > 0) {
-            /* Increment the reference count on connector ID and copy connector info */
-            if(H5I_inc_ref(connector_prop->connector_id, FALSE) < 0)
-                HGOTO_ERROR(H5E_PLIST, H5E_CANTINC, FAIL, "unable to increment ref count on VOL connector ID")
-
-            /* Copy connector info, if it exists */
-            if(connector_prop->connector_info) {
-                H5VL_class_t *connector;           /* Pointer to connector */
-                void *new_connector_info = NULL;   /* Copy of connector info */
-
-                /* Retrieve the connector for the ID */
-                if(NULL == (connector = (H5VL_class_t *)H5I_object(connector_prop->connector_id)))
-                    HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a VOL connector ID")
-
-                /* Allocate and copy connector info */
-                if(H5VL_copy_connector_info(connector, &new_connector_info, connector_prop->connector_info) < 0)
-                    HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "connector info copy failed")
-
-                /* Set the connector info to the copy */
-                connector_prop->connector_info = new_connector_info;
-            } /* end if */
-        } /* end if */
-    } /* end if */
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5P__vol_copy() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5P__vol_free
- *
- * Purpose:     Free VOL connector ID & info.
- *
- * Return:      Success:        Non-negative
- *              Failure:        Negative
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5P__vol_free(void *value)
-{
-    herr_t ret_value = SUCCEED;         /* Return value */
-
-    FUNC_ENTER_STATIC
-
-    if(value) {
-        H5VL_connector_prop_t *info = (H5VL_connector_prop_t *)value; /* connector ID & info struct */
-
-        /* Free the connector info (if it exists) and decrement the ID */
-        if(info->connector_id > 0) {
-            if(info->connector_info) {
-                H5VL_class_t *connector;       /* Pointer to connector */
-
-                /* Retrieve the connector for the ID */
-                if(NULL == (connector = (H5VL_class_t *)H5I_object(info->connector_id)))
-                    HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a VOL connector ID")
-
-                /* Free the connector info */
-                if(H5VL_free_connector_info(connector, (void *)info->connector_info) < 0)        /* Casting away const OK - QAK */
-                    HGOTO_ERROR(H5E_PLIST, H5E_CANTRELEASE, FAIL, "unable to release VOL connector info object")
-            } /* end if */
-
-            /* Decrement reference count for connector ID */
-            if(H5I_dec_ref(info->connector_id) < 0)
-                HGOTO_ERROR(H5E_PLIST, H5E_CANTDEC, FAIL, "can't decrement reference count for connector ID")
-        } /* end if */
-    } /* end if */
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5P__vol_free() */
-
-
-/*-------------------------------------------------------------------------
  * Function:    H5P__facc_vol_create
  *
  connectorose:     Create callback for the VOL connector ID & info property.
@@ -5268,7 +5169,7 @@ H5P__facc_vol_create(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size
     FUNC_ENTER_STATIC
 
     /* Make copy of the VOL connector */
-    if(H5P__vol_copy(value) < 0)
+    if(H5VL_conn_copy((H5VL_connector_prop_t *)value) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy VOL connector")
 
 done:
@@ -5298,7 +5199,7 @@ H5P__facc_vol_set(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name,
     HDassert(value);
 
     /* Make copy of VOL connector ID & info */
-    if(H5P__vol_copy(value) < 0)
+    if(H5VL_conn_copy((H5VL_connector_prop_t *)value) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy VOL connector")
 
 done:
@@ -5328,7 +5229,7 @@ H5P__facc_vol_get(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name,
     HDassert(value);
 
     /* Make copy of VOL connector */
-    if(H5P__vol_copy(value) < 0)
+    if(H5VL_conn_copy((H5VL_connector_prop_t *)value) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy VOL connector")
 
 done:
@@ -5354,7 +5255,7 @@ H5P__facc_vol_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name,
     FUNC_ENTER_STATIC
 
     /* Free the VOL connector ID & info */
-    if(H5P__vol_free(value) < 0)
+    if(H5VL_conn_free((H5VL_connector_prop_t *)value) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTRELEASE, FAIL, "can't release VOL connector")
 
 done:
@@ -5380,7 +5281,7 @@ H5P__facc_vol_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, 
     FUNC_ENTER_STATIC
 
     /* Make copy of VOL connector */
-    if(H5P__vol_copy(value) < 0)
+    if(H5VL_conn_copy((H5VL_connector_prop_t *)value) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy VOL connector")
 
 done:
@@ -5460,7 +5361,7 @@ H5P__facc_vol_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size,
     FUNC_ENTER_STATIC
 
     /* Free the VOL connector */
-    if(H5P__vol_free(value) < 0)
+    if(H5VL_conn_free((H5VL_connector_prop_t *)value) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTRELEASE, FAIL, "can't release VOL connector")
 
 done:

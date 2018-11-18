@@ -43,9 +43,23 @@
 /* Local Macros */
 /****************/
 
+
 /******************/
 /* Local Typedefs */
 /******************/
+
+/* User data for traversal routine to get ID counts */
+typedef struct {
+    size_t obj_count;           /* Number of objects counted so far */
+    unsigned types;             /* Types of objects to be counted */
+} H5F_trav_obj_cnt_t;
+
+/* User data for traversal routine to get ID lists */
+typedef struct {
+    size_t max_objs;            /* Maximum # of IDs to record */
+    hid_t *oid_list;            /* Array of recorded IDs*/
+    size_t obj_count;           /* Number of objects counted so far */
+} H5F_trav_obj_ids_t;
 
 
 /********************/
@@ -200,11 +214,11 @@ H5F__close_cb(H5VL_object_t *file_vol_obj)
 
     /* Close the file */
     if(H5VL_file_close(file_vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to close file");
+        HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to close file")
 
     /* Free the VOL object */
     if(H5VL_free_object(file_vol_obj) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "unable to free VOL object");
+        HGOTO_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "unable to free VOL object")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -306,7 +320,7 @@ H5F__get_all_count_cb(void H5_ATTR_UNUSED *obj_ptr, hid_t H5_ATTR_UNUSED obj_id,
 
     FUNC_ENTER_STATIC_NOERR
 
-    *(udata->obj_count) = *(udata->obj_count) + 1; 
+    udata->obj_count++;
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5F_get_all_count_cb */
@@ -353,36 +367,33 @@ H5Fget_obj_count(hid_t file_id, unsigned types)
     }
     /* If we passed in the 'special' ID, get the count for everything open in the
      * library, iterating over all open files and getting the object count for each.
-     *
-     * XXX: Consider making this a helper function in H5I.
      */
     else {
         H5F_trav_obj_cnt_t udata;
 
-        udata.obj_count = &ret_value;
+        /* Set up callback context */
         udata.types = types | H5F_OBJ_LOCAL;
+        udata.obj_count = 0;
 
-        if(types & H5F_OBJ_FILE) {
+        if(types & H5F_OBJ_FILE)
             if(H5I_iterate(H5I_FILE, H5F__get_all_count_cb, &udata, TRUE) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_BADITER, (-1), "iteration over file IDs failed");
-        }
-        if(types & H5F_OBJ_DATASET) {
+                HGOTO_ERROR(H5E_FILE, H5E_BADITER, (-1), "iteration over file IDs failed")
+        if(types & H5F_OBJ_DATASET)
             if(H5I_iterate(H5I_DATASET, H5F__get_all_count_cb, &udata, TRUE) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_BADITER, (-1), "iteration over dataset IDs failed");
-        }
-        if(types & H5F_OBJ_GROUP) {
+                HGOTO_ERROR(H5E_FILE, H5E_BADITER, (-1), "iteration over dataset IDs failed")
+        if(types & H5F_OBJ_GROUP)
             if(H5I_iterate(H5I_GROUP, H5F__get_all_count_cb, &udata, TRUE) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_BADITER, (-1), "iteration over group IDs failed");
-        }
-        if(types & H5F_OBJ_DATATYPE) {
+                HGOTO_ERROR(H5E_FILE, H5E_BADITER, (-1), "iteration over group IDs failed")
+        if(types & H5F_OBJ_DATATYPE)
             if(H5I_iterate(H5I_DATATYPE, H5F__get_all_count_cb, &udata, TRUE) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_BADITER, (-1), "iteration over datatype IDs failed");
-        }
-        if(types & H5F_OBJ_ATTR) {
+                HGOTO_ERROR(H5E_FILE, H5E_BADITER, (-1), "iteration over datatype IDs failed")
+        if(types & H5F_OBJ_ATTR)
             if(H5I_iterate(H5I_ATTR, H5F__get_all_count_cb, &udata, TRUE) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_BADITER, (-1), "iteration over attribute IDs failed");
-        }
-    }
+                HGOTO_ERROR(H5E_FILE, H5E_BADITER, (-1), "iteration over attribute IDs failed")
+
+        /* Set return value */
+        ret_value = (ssize_t)udata.obj_count;
+    } /* end else */
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -408,11 +419,12 @@ H5F__get_all_ids_cb(void H5_ATTR_UNUSED *obj_ptr, hid_t obj_id, void *key)
 
     FUNC_ENTER_STATIC_NOERR
 
-    if(*udata->obj_count >= udata->max_objs)
+    if(udata->obj_count >= udata->max_objs)
         HGOTO_DONE(H5_ITER_STOP);
 
-    udata->oid_list[*udata->obj_count] = obj_id;
-    *(udata->obj_count) = *(udata->obj_count) + 1;
+    /* Add the ID to the array */
+    udata->oid_list[udata->obj_count] = obj_id;
+    udata->obj_count++;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -426,6 +438,9 @@ done:
  *
  * NOTE:        Type mismatch - You can ask for more objects than can be
  *              returned.
+ *
+ * NOTE:        Currently, the IDs' ref counts are not incremented.  Is this
+ *              intentional and documented?
  *
  * Return:      Success:    The number of IDs in oid_list
  *
@@ -465,7 +480,6 @@ H5Fget_obj_ids(hid_t file_id, unsigned types, size_t max_objs, hid_t *oid_list)
     /* If we passed in the 'special' ID, get the count for everything open in the
      * library, iterating over all open files and getting the object count for each.
      *
-     * XXX: Consider making this a helper function in H5I.
      * XXX: Note that the RM states that passing in a negative value for max_objs
      *      gets you all the objects. This technically works, but is clearly wrong
      *      behavior since max_objs is an unsigned type.
@@ -473,30 +487,29 @@ H5Fget_obj_ids(hid_t file_id, unsigned types, size_t max_objs, hid_t *oid_list)
     else {
         H5F_trav_obj_ids_t udata;
 
+        /* Set up callback context */
         udata.max_objs = max_objs;
         udata.oid_list = oid_list;
-        udata.obj_count = &ret_value;
+        udata.obj_count = 0;
 
-        if(types & H5F_OBJ_FILE) {
+        if(types & H5F_OBJ_FILE)
             if(H5I_iterate(H5I_FILE, H5F__get_all_ids_cb, &udata, TRUE) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_BADITER, (-1), "iteration over file IDs failed");
-        } /* end if */
-        if(types & H5F_OBJ_DATASET) {
+                HGOTO_ERROR(H5E_FILE, H5E_BADITER, (-1), "iteration over file IDs failed")
+        if(types & H5F_OBJ_DATASET)
             if(H5I_iterate(H5I_DATASET, H5F__get_all_ids_cb, &udata, TRUE) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_BADITER, (-1), "iteration over dataset IDs failed");
-        } /* end if */
-        if(types & H5F_OBJ_GROUP) {
+                HGOTO_ERROR(H5E_FILE, H5E_BADITER, (-1), "iteration over dataset IDs failed")
+        if(types & H5F_OBJ_GROUP)
             if(H5I_iterate(H5I_GROUP, H5F__get_all_ids_cb, &udata, TRUE) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_BADITER, (-1), "iteration over group IDs failed");
-        } /* end if */
-        if(types & H5F_OBJ_DATATYPE) {
+                HGOTO_ERROR(H5E_FILE, H5E_BADITER, (-1), "iteration over group IDs failed")
+        if(types & H5F_OBJ_DATATYPE)
             if(H5I_iterate(H5I_DATATYPE, H5F__get_all_ids_cb, &udata, TRUE) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_BADITER, (-1), "iteration over datatype IDs failed");
-        } /* end if */
-        if(types & H5F_OBJ_ATTR) {
+                HGOTO_ERROR(H5E_FILE, H5E_BADITER, (-1), "iteration over datatype IDs failed")
+        if(types & H5F_OBJ_ATTR)
             if(H5I_iterate(H5I_ATTR, H5F__get_all_ids_cb, &udata, TRUE) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_BADITER, (-1), "iteration over attribute IDs failed");
-        } /* end if */
+                HGOTO_ERROR(H5E_FILE, H5E_BADITER, (-1), "iteration over attribute IDs failed")
+
+        /* Set return value */
+        ret_value = (ssize_t)udata.obj_count;
     } /* end else */
 
 done:
@@ -605,11 +618,9 @@ done:
 hid_t
 H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 {
-    void               *new_file = NULL;    /* file struct for new file                 */
-
+    H5F_t              *new_file = NULL;    /* File struct for new file                 */
     H5P_genplist_t     *plist;              /* Property list pointer                    */
-    H5VL_class_t       *cls = NULL;         /* VOL Class structure for callback info    */
-    H5VL_connector_prop_t  connector_prop;        /* Property for VOL connector ID & info        */
+    H5VL_connector_prop_t  connector_prop;  /* Property for VOL connector ID & info        */
     hid_t               ret_value;          /* return value                             */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
@@ -645,8 +656,6 @@ H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a file access property list")
     if(H5P_peek(plist, H5F_ACS_VOL_CONN_NAME, &connector_prop) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, H5I_INVALID_HID, "can't get VOL connector info")
-    if(NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_prop.connector_id, H5I_VOL)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a VOL connector ID")
 
     /* Adjust bit flags by turning on the creation bit and making sure that
      * the EXCL or TRUNC bit is set.  All newly-created files are opened for
@@ -657,7 +666,7 @@ H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     flags |= H5F_ACC_RDWR | H5F_ACC_CREAT;
 
     /* Create a new file or truncate an existing file through the VOL */
-    if(NULL == (new_file = H5VL_file_create(cls, filename, flags, fcpl_id, fapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
+    if(NULL == (new_file = (H5F_t *)H5VL_file_create(&connector_prop, filename, flags, fcpl_id, fapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, H5I_INVALID_HID, "unable to create file")
 
     /* Get an atom for the file */
@@ -691,11 +700,10 @@ done:
 hid_t
 H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
 {
-    void               *new_file = NULL;            /* file struct for new file                 */
-    H5P_genplist_t     *plist;                      /* Property list pointer                    */
-    H5VL_connector_prop_t  connector_prop;                /* Property for VOL connector ID & info        */
-    H5VL_class_t       *cls = NULL;             /* VOL class structure for callback info    */
-    hid_t               ret_value;                  /* return value                             */
+    H5F_t              *new_file = NULL;        /* File struct for new file                 */
+    H5P_genplist_t     *plist;                  /* Property list pointer                    */
+    H5VL_connector_prop_t  connector_prop;      /* Property for VOL connector ID & info        */
+    hid_t               ret_value;              /* return value                             */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE3("i", "*sIui", filename, flags, fapl_id);
@@ -724,11 +732,9 @@ H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a file access property list")
     if(H5P_peek(plist, H5F_ACS_VOL_CONN_NAME, &connector_prop) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, H5I_INVALID_HID, "can't get VOL connector info")
-    if(NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_prop.connector_id, H5I_VOL)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid VOL connector ID")
 
     /* Open the file through the VOL layer */
-    if(NULL == (new_file = H5VL_file_open(cls, filename, flags, fapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
+    if(NULL == (new_file = (H5F_t *)H5VL_file_open(&connector_prop, filename, flags, fapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, H5I_INVALID_HID, "unable to open file")
 
     /* Get an ID for the file */
@@ -836,7 +842,7 @@ hid_t
 H5Freopen(hid_t file_id)
 {
     H5VL_object_t   *vol_obj = NULL;
-    void            *file;                          /* File token from VOL connector */
+    H5F_t           *file = NULL;                   /* File struct for new file */
     hid_t           ret_value = H5I_INVALID_HID;    /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)

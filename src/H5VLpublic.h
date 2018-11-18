@@ -121,10 +121,11 @@ typedef enum H5VL_file_get_t {
 /* types for file SPECIFIC callback */
 typedef enum H5VL_file_specific_t {
     H5VL_FILE_FLUSH,                        /* Flush file                       */
-    H5VL_FILE_IS_ACCESSIBLE,                /* Check if a file is accessible    */
-    H5VL_FILE_REOPEN,                       /* Reopen the file                      */
+    H5VL_FILE_REOPEN,                       /* Reopen the file                  */
     H5VL_FILE_MOUNT,                        /* Mount a file                     */
-    H5VL_FILE_UNMOUNT                       /* Un-Mount a file                  */
+    H5VL_FILE_UNMOUNT,                      /* Unmount a file                   */
+    H5VL_FILE_IS_ACCESSIBLE,                /* Check if a file is accessible    */
+    H5VL_FILE_CACHE_VOL_CONN                /* Cache VOL connector ID & info    */
 } H5VL_file_specific_t;
 
 /* types for group GET callback */

@@ -56,11 +56,8 @@ typedef struct H5VL_connector_prop_t {
 /* Utility functions */
 H5_DLL herr_t H5VL_init(void);
 H5_DLL int H5VL_cmp_connector_cls(const H5VL_class_t *cls1, const H5VL_class_t *cls);
-H5_DLL int H5VL_copy_connector_info(const H5VL_class_t *connector, void **dst_info,
-    const void *src_info);
-H5_DLL int H5VL_cmp_connector_info(const H5VL_class_t *connector, const void *info1,
-    const void *info2);
-H5_DLL herr_t H5VL_free_connector_info(const H5VL_class_t *connector, void *info);
+H5_DLL herr_t H5VL_conn_copy(H5VL_connector_prop_t *value);
+H5_DLL herr_t H5VL_conn_free(const H5VL_connector_prop_t *info);
 
 /* Functions that deal with VOL connectors */
 H5_DLL hid_t H5VL_register_connector(const void *cls, hbool_t app_ref, hid_t vipl_id);
@@ -98,9 +95,16 @@ H5_DLL hid_t H5VL_wrap_register(H5I_type_t type, void *obj, hbool_t app_ref);
 H5_DLL hid_t H5VL_register_using_vol_id(H5I_type_t type, void *obj, hid_t connector_id, hbool_t app_ref);
 H5_DLL herr_t H5VL_register_using_existing_id(H5I_type_t type, void *object, H5VL_t *vol_connector, hbool_t app_ref, hid_t existing_id);
 
-/******************************
+/**********************************
  * VOL connector callback wrappers
- *****************************/
+ *********************************/
+
+/* Connector "management" functions */
+H5_DLL int H5VL_copy_connector_info(const H5VL_class_t *connector, void **dst_info,
+    const void *src_info);
+H5_DLL int H5VL_cmp_connector_info(const H5VL_class_t *connector, const void *info1,
+    const void *info2);
+H5_DLL herr_t H5VL_free_connector_info(const H5VL_class_t *connector, void *info);
 
 /* Attribute functions */
 H5_DLL void *H5VL_attr_create(const H5VL_object_t *vol_obj, H5VL_loc_params_t loc_params, const char *attr_name, hid_t acpl_id, hid_t aapl_id, hid_t dxpl_id, void **req);
@@ -123,8 +127,8 @@ H5_DLL herr_t H5VL_dataset_optional(const H5VL_object_t *vol_obj, hid_t dxpl_id,
 H5_DLL herr_t H5VL_dataset_close(const H5VL_object_t *vol_obj, hid_t dxpl_id, void **req);
 
 /* File functions */
-H5_DLL void *H5VL_file_create(const H5VL_class_t *cls, const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t dxpl_id, void **req);
-H5_DLL void *H5VL_file_open(const H5VL_class_t *cls, const char *name, unsigned flags, hid_t fapl_id, hid_t dxpl_id, void **req);
+H5_DLL void *H5VL_file_create(const H5VL_connector_prop_t *connector_prop, const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t dxpl_id, void **req);
+H5_DLL void *H5VL_file_open(const H5VL_connector_prop_t *connector_prop, const char *name, unsigned flags, hid_t fapl_id, hid_t dxpl_id, void **req);
 H5_DLL herr_t H5VL_file_get(const H5VL_object_t *vol_obj, H5VL_file_get_t get_type, hid_t dxpl_id, void **req, ...);
 H5_DLL herr_t H5VL_file_specific(const H5VL_object_t *vol_obj, H5VL_file_specific_t specific_type, hid_t dxpl_id, void **req, ...);
 H5_DLL herr_t H5VL_file_optional(const H5VL_object_t *vol_obj, hid_t dxpl_id, void **req, ...);

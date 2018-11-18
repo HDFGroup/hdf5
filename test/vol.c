@@ -240,6 +240,7 @@ test_basic_file_operation(void)
     hid_t fid           = H5I_INVALID_HID;
     hid_t fid_reopen    = H5I_INVALID_HID;
     hid_t fapl_id       = H5I_INVALID_HID;
+    hid_t fapl_id2      = H5I_INVALID_HID;
     hid_t fcpl_id       = H5I_INVALID_HID;
 
     ssize_t         obj_count;
@@ -252,8 +253,23 @@ test_basic_file_operation(void)
 
     TESTING("Basic VOL file operations");
 
+    /* Retrieve the file access property for testing */
+    fapl_id = h5_fileaccess();
+
+    /* Set the file close degree to a non-default value, to make the H5Pequal
+     *  work out.  This is kinda odd, but the library's current behavior with
+     *  a default value is to return the value chosen (H5F_CLOSE_SEMI) instead
+     *  of the default value (H5F_CLOSE_DEFAULT) from the property and then
+     *  the H5Pequal doesn't detect that the property lists are the same.  Since
+     *  this is the documented behavior for file close degree for many years,
+     *  I'm not fighting it, just getting the testing to verify that the VOL
+     *  connector property is returned correctly.  -QAK, 2018/11/17
+     */
+    if(H5Pset_fclose_degree(fapl_id, H5F_CLOSE_SEMI) < 0)
+        TEST_ERROR;
+
     /* H5Fcreate */
-    if ((fid = H5Fcreate(NATIVE_VOL_TEST_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+    if ((fid = H5Fcreate(NATIVE_VOL_TEST_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
         TEST_ERROR;
 
     /* H5Fget_obj_count */
@@ -271,9 +287,11 @@ test_basic_file_operation(void)
         TEST_ERROR;
 
     /* H5Fget_access_plist */
-    if ((fapl_id = H5Fget_access_plist(fid)) < 0)
+    if ((fapl_id2 = H5Fget_access_plist(fid)) < 0)
         TEST_ERROR;
-    if (H5Pclose(fapl_id) < 0)
+    if (H5Pequal(fapl_id, fapl_id2) != TRUE)
+        TEST_ERROR;
+    if (H5Pclose(fapl_id2) < 0)
         TEST_ERROR;
 
     /* H5Fget_create_plist */
@@ -315,17 +333,39 @@ test_basic_file_operation(void)
         TEST_ERROR;
 
     /* H5Fis_accessible */
-    if (H5Fis_accessible(NATIVE_VOL_TEST_FILENAME, H5P_DEFAULT) < 0)
+    if (H5Fis_accessible(NATIVE_VOL_TEST_FILENAME, fapl_id) < 0)
         TEST_ERROR;
 
     /* H5Fopen */
-    if ((fid = H5Fopen(NATIVE_VOL_TEST_FILENAME, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+    if ((fid = H5Fopen(NATIVE_VOL_TEST_FILENAME, H5F_ACC_RDWR, fapl_id)) < 0)
         TEST_ERROR;
+
+    /* H5Fget_access_plist */
+    if ((fapl_id2 = H5Fget_access_plist(fid)) < 0)
+        TEST_ERROR;
+    if (H5Pequal(fapl_id, fapl_id2) != TRUE)
+        TEST_ERROR;
+    if (H5Pclose(fapl_id2) < 0)
+        TEST_ERROR;
+
     if ((fid_reopen = H5Freopen(fid)) < 0)
         TEST_ERROR;
+
+    /* H5Fget_access_plist */
+    if ((fapl_id2 = H5Fget_access_plist(fid_reopen)) < 0)
+        TEST_ERROR;
+    if (H5Pequal(fapl_id, fapl_id2) != TRUE)
+        TEST_ERROR;
+    if (H5Pclose(fapl_id2) < 0)
+        TEST_ERROR;
+
     if (H5Fclose(fid) < 0)
         TEST_ERROR;
     if (H5Fclose(fid_reopen) < 0)
+        TEST_ERROR;
+
+    /* H5Pclose */
+    if (H5Pclose(fapl_id) < 0)
         TEST_ERROR;
 
     HDremove(NATIVE_VOL_TEST_FILENAME);
@@ -338,6 +378,7 @@ error:
         H5Fclose(fid);
         H5Fclose(fid_reopen);
         H5Pclose(fapl_id);
+        H5Pclose(fapl_id2);
         H5Pclose(fcpl_id);
     } H5E_END_TRY;
 
