@@ -17,10 +17,8 @@
  *          2. number of slots in chunk cache is smaller than the number of chunks
  *             in the fastest-growing dimension.
  */
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
 #include "hdf5.h"
+#include "H5private.h"
 
 #define FILENAME    "chunk_cache_perf.h5"
 
@@ -81,74 +79,18 @@ counter (unsigned flags, size_t cd_nelmts,
 }
 
 /*---------------------------------------------------------------------------*/
-static int
-test_time_get_current(test_time_t *tv)
+double retrieve_time(void)
 {
-    struct timespec tp;
-    
-    if (!tv)
-        return -1;
-    if (clock_gettime(CLOCK_MONOTONIC, &tp))
-        return -1;
-    
-    tv->tv_sec = tp.tv_sec;
-    tv->tv_usec = tp.tv_nsec / 1000;
-    
-    return 0;
+#ifdef H5_HAVE_GETTIMEOFDAY
+    struct timeval t;
+    HDgettimeofday(&t, NULL);
+    return ((double)t.tv_sec + (double)t.tv_usec / 1000000);
+#else
+    return 0.0;
+#endif
 }
 
 /*---------------------------------------------------------------------------*/
-static double
-test_time_to_double(test_time_t tv)
-{
-    return (double) tv.tv_sec + (double) (tv.tv_usec) * 0.000001;
-}
-
-/*---------------------------------------------------------------------------*/
-static test_time_t
-test_time_add(test_time_t in1, test_time_t in2)
-{
-    test_time_t out;
-    
-    out.tv_sec = in1.tv_sec + in2.tv_sec;
-    out.tv_usec = in1.tv_usec + in2.tv_usec;
-    if(out.tv_usec > 1000000) {
-        out.tv_usec -= 1000000;
-        out.tv_sec += 1;
-    }
-    
-    return out;
-}
-
-/*---------------------------------------------------------------------------*/
-static test_time_t
-test_time_subtract(test_time_t in1, test_time_t in2)
-{
-    test_time_t out;
-    
-    out.tv_sec = in1.tv_sec - in2.tv_sec;
-    out.tv_usec = in1.tv_usec - in2.tv_usec;
-    if(out.tv_usec < 0) {
-        out.tv_usec += 1000000;
-        out.tv_sec -= 1;
-    }
-    
-    return out;
-}
-/*-------------------------------------------------------------------------
- * Function:  cleanup
- *
- * Purpose:  Removes test files
- *
- * Return:  void
- *
- * Programmer:  Robb Matzke
- *              Thursday, June  4, 1998
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
 static void
 cleanup (void)
 {
@@ -296,7 +238,7 @@ static int check_partial_chunks_perf(hid_t file)
     hsize_t      row_dim[1] = {DSET1_DIM2};
     hsize_t      start[RANK] = {0, 0};
     hsize_t      count[RANK] = {1, DSET1_DIM2};
-    test_time_t t = {0, 0}, t1 = {0, 0}, t2 = {0, 0};
+    double       start_t, end_t;
     
     if((dapl = H5Pcreate(H5P_DATASET_ACCESS)) < 0)
         goto error;
@@ -310,7 +252,7 @@ static int check_partial_chunks_perf(hid_t file)
     
     nbytes_global = 0;
     
-    test_time_get_current(&t1);
+    start_t = retrieve_time();
     
     /* Read the data row by row */
     for(i = 0; i < DSET1_DIM1; i++) {
@@ -324,10 +266,13 @@ static int check_partial_chunks_perf(hid_t file)
             goto error;
     }
     
-    test_time_get_current(&t2);
-    t = test_time_add(t, test_time_subtract(t2, t1));
+    end_t = retrieve_time();
     
-    printf("1. Partial chunks: total read time is %lf; number of bytes being read from file is %lu\n", test_time_to_double(t), nbytes_global);
+#ifdef H5_HAVE_GETTIMEOFDAY
+    printf("1. Partial chunks: total read time is %lf; number of bytes being read from file is %lu\n", (end_t -start_t), nbytes_global);
+#else
+    printf("1. Partial chunks: no total read time because gettimeofday() is not available; number of bytes being read from file is %lu\n", nbytes_global);
+#endif
     
     H5Dclose (dataset);
     H5Sclose (filespace);
@@ -364,7 +309,7 @@ static int check_hash_value_perf(hid_t file)
     hsize_t      column_dim[1] = {DSET2_DIM1};
     hsize_t      start[RANK] = {0, 0};
     hsize_t      count[RANK] = {DSET2_DIM1, 1};
-    test_time_t t = {0, 0}, t1 = {0, 0}, t2 = {0, 0};
+    double       start_t, end_t;
     
     if((dapl = H5Pcreate(H5P_DATASET_ACCESS)) < 0)
         goto error;
@@ -380,7 +325,7 @@ static int check_hash_value_perf(hid_t file)
     
     nbytes_global = 0;
     
-    test_time_get_current(&t1);
+    start_t = retrieve_time();
     
     /* Read the data column by column */
     for(i = 0; i < DSET2_DIM2; i++) {
@@ -394,10 +339,13 @@ static int check_hash_value_perf(hid_t file)
             goto error;
     }
     
-    test_time_get_current(&t2);
-    t = test_time_add(t, test_time_subtract(t2, t1));
+    end_t = retrieve_time();
     
-    printf("2. Hash value: total read time is %lf; number of bytes being read from file is %lu\n", test_time_to_double(t), nbytes_global);
+#ifdef H5_HAVE_GETTIMEOFDAY
+    printf("2. Hash value: total read time is %lf; number of bytes being read from file is %lu\n", (end_t -start_t), nbytes_global);
+#else
+    printf("2. Hash value: no total read time because gettimeofday() is not available; number of bytes being read from file is %lu\n", nbytes_global);
+#endif
     
     H5Dclose (dataset);
     H5Sclose (filespace);
