@@ -76,6 +76,9 @@ MODULE H5A
 
   USE H5GLOBAL
 
+  PRIVATE h5awrite_char_scalar, h5awrite_ptr
+  PRIVATE h5aread_char_scalar, h5aread_ptr
+
   INTERFACE h5awrite_f
      MODULE PROCEDURE h5awrite_char_scalar
      ! This is the preferred way to call h5awrite

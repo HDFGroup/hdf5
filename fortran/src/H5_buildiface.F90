@@ -135,162 +135,268 @@ PROGRAM H5_buildiface
 
   WRITE(11,'(A)') "MODULE H5_GEN"
 
-  WRITE(11,'(A)') '  USE, INTRINSIC :: ISO_C_BINDING'
-  WRITE(11,'(A)') '  USE H5GLOBAL'
+  WRITE(11,'(2X,A)') 'USE, INTRINSIC :: ISO_C_BINDING'
+  WRITE(11,'(2X,A)') 'USE H5GLOBAL'
 
-  WRITE(11,'(A)') '  USE H5A'
-  WRITE(11,'(A)') '  USE H5D'
-  WRITE(11,'(A)') '  USE H5P'
-  WRITE(11,'(A)') '  IMPLICIT NONE'
+  WRITE(11,'(2X,A)') 'USE H5A'
+  WRITE(11,'(2X,A)') 'USE H5D'
+  WRITE(11,'(2X,A)') 'USE H5P'
+  WRITE(11,'(2X,A)') 'IMPLICIT NONE'
+
+!******************************
+! DECLARE PRIVATE INTERFACES
+!******************************
+
+  DO i = 1, num_rkinds
+     j = rkind(i)
+     WRITE(chr2,'(I2)') j
+     DO k = 1, 8
+        WRITE(11,'(2X,A)') "PRIVATE h5awrite_rkind_"//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(k)
+     ENDDO
+  END DO
+  DO i = 1, num_ikinds
+     j = ikind(i)
+     WRITE(chr2,'(I2)') j
+     DO k = 1, 8
+        WRITE(11,'(2X,A)') "PRIVATE h5awrite_ikind_"//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(k)
+     ENDDO
+  END DO
+  DO k = 2, 8
+     WRITE(11,'(2X,A)') "PRIVATE h5awrite_ckind_rank"//chr_rank(k)
+  ENDDO
+  DO i = 1, num_rkinds
+     j = rkind(i)
+     WRITE(chr2,'(I2)') j
+     DO k = 1, 8
+        WRITE(11,'(2X,A)') "PRIVATE h5aread_rkind_"//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(k)
+     ENDDO
+  END DO
+  DO i = 1, num_ikinds
+     j = ikind(i)
+     WRITE(chr2,'(I2)') j
+     DO k = 1, 8
+        WRITE(11,'(2X,A)') "PRIVATE h5aread_ikind_"//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(k)
+     ENDDO
+  END DO
+  DO k = 2, 8
+     WRITE(11,'(2X,A)') "PRIVATE h5aread_ckind_rank"//chr_rank(k)
+  ENDDO
+
+  DO i = 1, num_rkinds
+     j = rkind(i)
+     WRITE(chr2,'(I2)') j
+     DO k = 1, 8
+        WRITE(11,'(2X,A)') "PRIVATE h5dwrite_rkind_"//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(k)
+     ENDDO
+  END DO
+  DO i = 1, num_ikinds
+     j = ikind(i)
+     WRITE(chr2,'(I2)') j
+     DO k = 1, 8
+        WRITE(11,'(2X,A)') "PRIVATE h5dwrite_ikind_"//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(k)
+     ENDDO
+  END DO 
+  DO k = 2, 8
+     WRITE(11,'(2X,A)') "PRIVATE h5dwrite_ckind_rank"//chr_rank(k)
+  END DO
+  DO i = 1, num_rkinds
+     j = rkind(i)
+     WRITE(chr2,'(I2)') j
+     DO k = 1, 8
+        WRITE(11,'(2X,A)') "PRIVATE h5dread_rkind_"//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(k)
+     ENDDO
+  END DO
+  DO i = 1, num_ikinds
+     j = ikind(i)
+     WRITE(chr2,'(I2)') j
+     DO k = 1, 8
+        WRITE(11,'(2X,A)') "PRIVATE h5dread_ikind_"//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(k)
+     ENDDO 
+  END DO
+  DO k = 2, 8
+     WRITE(11,'(2X,A)') "PRIVATE h5dread_ckind_rank"//chr_rank(k)
+  ENDDO
+
+  DO i = 1, num_rkinds
+     j = rkind(i)
+     WRITE(chr2,'(I2)') j
+     WRITE(11,'(2X,A)') "PRIVATE h5pset_fill_value_kind_"//TRIM(ADJUSTL(chr2))
+  END DO
+  DO i = 1, num_rkinds
+     j = rkind(i)
+     WRITE(chr2,'(I2)') j
+     WRITE(11,'(2X,A)') "PRIVATE h5pget_fill_value_kind_"//TRIM(ADJUSTL(chr2))
+  END DO
+  DO i = 1, num_rkinds
+     j = rkind(i)
+     WRITE(chr2,'(I2)') j
+     WRITE(11,'(2X,A)') "PRIVATE h5pset_kind_"//TRIM(ADJUSTL(chr2))
+  END DO
+  DO i = 1, num_rkinds
+     j = rkind(i)
+     WRITE(chr2,'(I2)') j
+     WRITE(11,'(2X,A)') "PRIVATE h5pget_kind_"//TRIM(ADJUSTL(chr2))
+  END DO
+  DO i = 1, num_rkinds
+     j = rkind(i)
+     WRITE(chr2,'(I2)') j
+     WRITE(11,'(2X,A)') "PRIVATE h5pregister_kind_"//TRIM(ADJUSTL(chr2))
+  END DO
+  DO i = 1, num_rkinds
+     j = rkind(i)
+     WRITE(chr2,'(I2)') j
+     WRITE(11,'(2X,A)') "PRIVATE h5pinsert_kind_"//TRIM(ADJUSTL(chr2))
+  END DO
+
 !***************
 ! H5A INTERFACES
 !***************
 !
 ! H5Awrite_f
 !
-  WRITE(11,'(A)') "  INTERFACE h5awrite_f"
+  WRITE(11,'(2X,A)') "INTERFACE h5awrite_f"
   DO i = 1, num_rkinds
      j = rkind(i)
      WRITE(chr2,'(I2)') j
      DO k = 1, 8
-        WRITE(11,'(A)') "     MODULE PROCEDURE h5awrite_rkind_"//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(k)
+        WRITE(11,'(5X,A)') "MODULE PROCEDURE h5awrite_rkind_"//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(k)
      ENDDO
   END DO
   DO i = 1, num_ikinds
      j = ikind(i)
      WRITE(chr2,'(I2)') j
      DO k = 1, 8
-        WRITE(11,'(A)') "     MODULE PROCEDURE h5awrite_ikind_"//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(k)
+        WRITE(11,'(5X,A)') "MODULE PROCEDURE h5awrite_ikind_"//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(k)
      ENDDO
   END DO
   DO k = 2, 8
-     WRITE(11,'(A)') "     MODULE PROCEDURE h5awrite_ckind_rank"//chr_rank(k)
+     WRITE(11,'(5X,A)') "MODULE PROCEDURE h5awrite_ckind_rank"//chr_rank(k)
   ENDDO
-  WRITE(11,'(A)') "  END INTERFACE"
+  WRITE(11,'(2X,A)') "END INTERFACE"
 
 ! H5Aread_f
-  WRITE(11,'(A)') "  INTERFACE h5aread_f"
+  WRITE(11,'(2X,A)') "INTERFACE h5aread_f"
   DO i = 1, num_rkinds
      j = rkind(i)
      WRITE(chr2,'(I2)') j
      DO k = 1, 8
-        WRITE(11,'(A)') "     MODULE PROCEDURE h5aread_rkind_"//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(k)
+        WRITE(11,'(5X,A)') "MODULE PROCEDURE h5aread_rkind_"//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(k)
      ENDDO
   END DO
   DO i = 1, num_ikinds
      j = ikind(i)
      WRITE(chr2,'(I2)') j
      DO k = 1, 8
-        WRITE(11,'(A)') "     MODULE PROCEDURE h5aread_ikind_"//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(k)
+        WRITE(11,'(5X,A)') "MODULE PROCEDURE h5aread_ikind_"//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(k)
      ENDDO
   END DO
   DO k = 2, 8
-     WRITE(11,'(A)') "     MODULE PROCEDURE h5aread_ckind_rank"//chr_rank(k)
+     WRITE(11,'(5X,A)') "MODULE PROCEDURE h5aread_ckind_rank"//chr_rank(k)
   ENDDO
-  WRITE(11,'(A)') "  END INTERFACE"
+  WRITE(11,'(2X,A)') "END INTERFACE"
 !***************
 ! H5D INTERFACES
 !***************
 !
 ! H5Dwrite_f
-  WRITE(11,'(A)') "  INTERFACE h5dwrite_f"
+  WRITE(11,'(2X,A)') "INTERFACE h5dwrite_f"
   DO i = 1, num_rkinds
      j = rkind(i)
      WRITE(chr2,'(I2)') j
      DO k = 1, 8
-        WRITE(11,'(A)') "     MODULE PROCEDURE h5dwrite_rkind_"//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(k)
+        WRITE(11,'(5X,A)') "MODULE PROCEDURE h5dwrite_rkind_"//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(k)
      ENDDO
   END DO
   DO i = 1, num_ikinds
      j = ikind(i)
      WRITE(chr2,'(I2)') j
      DO k = 1, 8
-        WRITE(11,'(A)') "     MODULE PROCEDURE h5dwrite_ikind_"//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(k)
+        WRITE(11,'(5X,A)') "MODULE PROCEDURE h5dwrite_ikind_"//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(k)
      ENDDO
   END DO 
   DO k = 2, 8
-     WRITE(11,'(A)') "     MODULE PROCEDURE h5dwrite_ckind_rank"//chr_rank(k)
+     WRITE(11,'(5X,A)') "MODULE PROCEDURE h5dwrite_ckind_rank"//chr_rank(k)
   END DO
-  WRITE(11,'(A)') "  END INTERFACE"
+  WRITE(11,'(2X,A)') "END INTERFACE"
 
 ! H5Dread_f
-  WRITE(11,'(A)') "  INTERFACE h5dread_f"
+  WRITE(11,'(2X,A)') "INTERFACE h5dread_f"
   DO i = 1, num_rkinds
      j = rkind(i)
      WRITE(chr2,'(I2)') j
      DO k = 1, 8
-        WRITE(11,'(A)') "     MODULE PROCEDURE h5dread_rkind_"//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(k)
+        WRITE(11,'(5X,A)') "MODULE PROCEDURE h5dread_rkind_"//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(k)
      ENDDO
   END DO
   DO i = 1, num_ikinds
      j = ikind(i)
      WRITE(chr2,'(I2)') j
      DO k = 1, 8
-        WRITE(11,'(A)') "     MODULE PROCEDURE h5dread_ikind_"//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(k)
+        WRITE(11,'(5X,A)') "MODULE PROCEDURE h5dread_ikind_"//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(k)
      ENDDO 
   END DO
   DO k = 2, 8
-     WRITE(11,'(A)') "     MODULE PROCEDURE h5dread_ckind_rank"//chr_rank(k)
+     WRITE(11,'(5X,A)') "MODULE PROCEDURE h5dread_ckind_rank"//chr_rank(k)
   ENDDO
-  WRITE(11,'(A)') "  END INTERFACE"
+  WRITE(11,'(2X,A)') "END INTERFACE"
 
 !***************
 ! H5P INTERFACES
 !***************
 !
 ! H5Pset_fill_value_f
-  WRITE(11,'(A)') "  INTERFACE h5pset_fill_value_f"
+  WRITE(11,'(2X,A)') "INTERFACE h5pset_fill_value_f"
   DO i = 1, num_rkinds
      j = rkind(i)
      WRITE(chr2,'(I2)') j
-     WRITE(11,'(A)') "     MODULE PROCEDURE h5pset_fill_value_kind_"//TRIM(ADJUSTL(chr2))
+     WRITE(11,'(5X,A)') "MODULE PROCEDURE h5pset_fill_value_kind_"//TRIM(ADJUSTL(chr2))
   END DO
-  WRITE(11,'(A)') "  END INTERFACE"
+  WRITE(11,'(2X,A)') "END INTERFACE"
 
 ! H5Pget_fill_value_f
-  WRITE(11,'(A)') "  INTERFACE h5pget_fill_value_f"
+  WRITE(11,'(2X,A)') "INTERFACE h5pget_fill_value_f"
   DO i = 1, num_rkinds
      j = rkind(i)
      WRITE(chr2,'(I2)') j
-     WRITE(11,'(A)') "     MODULE PROCEDURE h5pget_fill_value_kind_"//TRIM(ADJUSTL(chr2))
+     WRITE(11,'(5X,A)') "MODULE PROCEDURE h5pget_fill_value_kind_"//TRIM(ADJUSTL(chr2))
   END DO
-  WRITE(11,'(A)') "  END INTERFACE"
+  WRITE(11,'(2X,A)') "END INTERFACE"
 
 ! H5Pset_f
-  WRITE(11,'(A)') "  INTERFACE h5pset_f"
+  WRITE(11,'(2X,A)') "INTERFACE h5pset_f"
   DO i = 1, num_rkinds
      j = rkind(i)
      WRITE(chr2,'(I2)') j
-     WRITE(11,'(A)') "     MODULE PROCEDURE h5pset_kind_"//TRIM(ADJUSTL(chr2))
+     WRITE(11,'(5X,A)') "MODULE PROCEDURE h5pset_kind_"//TRIM(ADJUSTL(chr2))
   END DO
-  WRITE(11,'(A)') "  END INTERFACE"
+  WRITE(11,'(2X,A)') "END INTERFACE"
 
 ! H5Pget_f
-  WRITE(11,'(A)') "  INTERFACE h5pget_f"
+  WRITE(11,'(2X,A)') "INTERFACE h5pget_f"
   DO i = 1, num_rkinds
      j = rkind(i)
      WRITE(chr2,'(I2)') j
-     WRITE(11,'(A)') "     MODULE PROCEDURE h5pget_kind_"//TRIM(ADJUSTL(chr2))
+     WRITE(11,'(5X,A)') "MODULE PROCEDURE h5pget_kind_"//TRIM(ADJUSTL(chr2))
   END DO
-  WRITE(11,'(A)') "  END INTERFACE"
+  WRITE(11,'(2X,A)') "END INTERFACE"
 
 ! H5Pregister_f
-  WRITE(11,'(A)') "  INTERFACE h5pregister_f"
+  WRITE(11,'(2X,A)') "INTERFACE h5pregister_f"
   DO i = 1, num_rkinds
      j = rkind(i)
      WRITE(chr2,'(I2)') j
-     WRITE(11,'(A)') "     MODULE PROCEDURE h5pregister_kind_"//TRIM(ADJUSTL(chr2))
+     WRITE(11,'(5X,A)') "MODULE PROCEDURE h5pregister_kind_"//TRIM(ADJUSTL(chr2))
   END DO
-  WRITE(11,'(A)') "  END INTERFACE"
+  WRITE(11,'(2X,A)') "END INTERFACE"
 
 ! H5Pinsert_f
-  WRITE(11,'(A)') "  INTERFACE h5pinsert_f"
+  WRITE(11,'(2X,A)') "INTERFACE h5pinsert_f"
   DO i = 1, num_rkinds
      j = rkind(i)
      WRITE(chr2,'(I2)') j
-     WRITE(11,'(A)') "     MODULE PROCEDURE h5pinsert_kind_"//TRIM(ADJUSTL(chr2))
+     WRITE(11,'(5X,A)') "MODULE PROCEDURE h5pinsert_kind_"//TRIM(ADJUSTL(chr2))
   END DO
-  WRITE(11,'(A)') "  END INTERFACE"
+  WRITE(11,'(2X,A)') "END INTERFACE"
 
   WRITE(11,'(A)') 'CONTAINS'
 

@@ -68,6 +68,7 @@
         scd_family00001.h5
         scd_family00002.h5
         scd_family00003.h5
+        family_to_single.h5
         family_to_sec2.h5
   )
   if (NOT "${last_test}" STREQUAL "")
@@ -84,6 +85,10 @@
   set_tests_properties (H5REPART-h5repart_5K PROPERTIES DEPENDS H5REPART-clearall-objects)
 
   # convert family file to sec2 file of 20,000 bytes
+  add_test (NAME H5REPART-h5repart_single COMMAND $<TARGET_FILE:h5repart> -m 20000 -family_to_single family_file%05d.h5 family_to_single.h5)
+  set_tests_properties (H5REPART-h5repart_single PROPERTIES DEPENDS H5REPART-clearall-objects)
+
+  # convert family file to sec2 file of 20,000 bytes (old argument)
   add_test (NAME H5REPART-h5repart_sec2 COMMAND $<TARGET_FILE:h5repart> -m 20000 -family_to_sec2 family_file%05d.h5 family_to_sec2.h5)
   set_tests_properties (H5REPART-h5repart_sec2 PROPERTIES DEPENDS H5REPART-clearall-objects)
 
