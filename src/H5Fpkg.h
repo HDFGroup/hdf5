@@ -353,7 +353,6 @@ struct H5F_file_t {
 
     /* Metadata retry info */
     unsigned 		read_attempts;	    /* The # of reads to try when reading metadata with checksum */
-    unsigned 		orig_read_attempts; /* Original value from the property: The # of reads to try when reading metadata with checksum */
     unsigned		retries_nbins;	    /* # of bins for each retries[] */
     uint32_t		*retries[H5AC_NTYPES];  /* Track # of read retries for metdata items with checksum */
 

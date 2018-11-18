@@ -265,8 +265,19 @@ test_basic_file_operation(void)
      *  I'm not fighting it, just getting the testing to verify that the VOL
      *  connector property is returned correctly.  -QAK, 2018/11/17
      */
+    /* Set the file close degree to a non-default value, to make the H5Pequal
+     *  work out.  This is kinda odd, but the library's current behavior with
+     *  a default value is to return the value chosen (H5F_CLOSE_SEMI) instead
+     *  of the default value (H5F_CLOSE_DEFAULT) from the property and then
+     *  the H5Pequal doesn't detect that the property lists are the same.  Since
+     *  this is the documented behavior for file close degree for many years,
+     *  I'm not fighting it, just getting the testing to verify that the VOL
+     *  connector property is returned correctly.  -QAK, 2018/11/17
+     */
     if(H5Pset_fclose_degree(fapl_id, H5F_CLOSE_SEMI) < 0)
         TEST_ERROR;
+    if(H5Pset_metadata_read_attempts(fapl_id, 9) < 0)
+        FAIL_STACK_ERROR
 
     /* H5Fcreate */
     if ((fid = H5Fcreate(NATIVE_VOL_TEST_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
