@@ -36,10 +36,6 @@ if (NOT SITE_OS_NAME)
   message (STATUS "Dashboard script uname output: ${osname}-${osrel}-${cpu}\n")
 
   set (CTEST_BUILD_NAME  "${osname}-${osrel}-${cpu}")
-  if (SITE_BUILDNAME_SUFFIX)
-    set (CTEST_BUILD_NAME  "${SITE_BUILDNAME_SUFFIX}-${CTEST_BUILD_NAME}")
-  endif ()
-  set (BUILD_OPTIONS "${ADD_BUILD_OPTIONS}")
 else ()
   ## machine name provided
   ## --------------------------
@@ -48,11 +44,11 @@ else ()
   else ()
     set (CTEST_BUILD_NAME "${SITE_OS_NAME}-${SITE_OS_VERSION}-${SITE_COMPILER_NAME}")
   endif ()
-  if (SITE_BUILDNAME_SUFFIX)
-    set (CTEST_BUILD_NAME "${CTEST_BUILD_NAME}-${SITE_BUILDNAME_SUFFIX}")
-  endif ()
-  set (BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DSITE:STRING=${CTEST_SITE} -DBUILDNAME:STRING=${CTEST_BUILD_NAME}")
 endif ()
+if (SITE_BUILDNAME_SUFFIX)
+  set (CTEST_BUILD_NAME  "${SITE_BUILDNAME_SUFFIX}-${CTEST_BUILD_NAME}")
+endif ()
+set (BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DSITE:STRING=${CTEST_SITE} -DBUILDNAME:STRING=${CTEST_BUILD_NAME}")
 
 #-----------------------------------------------------------------------------
 # MAC machines need special option
@@ -194,10 +190,10 @@ endforeach ()
 #-----------------------------------------------------------------------------
 # Initialize the CTEST commands
 #------------------------------
-if(CMAKE_GENERATOR_TOOLSET)
-  set(CTEST_CONFIGURE_TOOLSET  "-T${CMAKE_GENERATOR_TOOLSET}")
+if (CMAKE_GENERATOR_TOOLSET)
+  set (CTEST_CONFIGURE_TOOLSET  "-T${CMAKE_GENERATOR_TOOLSET}")
 else ()
-  set(CTEST_CONFIGURE_TOOLSET  "")
+  set (CTEST_CONFIGURE_TOOLSET  "")
 endif()
 if (LOCAL_MEMCHECK_TEST)
   find_program (CTEST_MEMORYCHECK_COMMAND NAMES valgrind)
