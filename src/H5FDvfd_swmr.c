@@ -1119,7 +1119,7 @@ H5FD_vfd_swmr_get_tick_and_idx(H5FD_t *_file, hbool_t reload_hdr_and_index,
     H5FD_vfd_swmr_t *file = (H5FD_vfd_swmr_t *)_file;   /* VFD SWMR file struct */
     herr_t ret_value = SUCCEED;                         /* Return value  */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Load and decode the header and index as indicated */
     if(reload_hdr_and_index) {

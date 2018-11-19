@@ -11,8 +11,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef _SWMR_COMMON_H
-#define _SWMR_COMMON_H
+#ifndef _VFD_SWMR_COMMON_H
+#define _VFD_SWMR_COMMON_H
 
 /***********/
 /* Headers */
@@ -32,7 +32,7 @@
 #define DTYPE_SIZE      150             /* Data size in opaque type */
 
 /* The message sent by writer that the file open is done--releasing the file lock */
-#define WRITER_MESSAGE "SWMR_WRITER_MESSAGE"
+#define WRITER_MESSAGE "VFD_SWMR_WRITER_MESSAGE"
 
 /************/
 /* Typedefs */
