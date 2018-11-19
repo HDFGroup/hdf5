@@ -97,7 +97,7 @@ static herr_t H5PB__make_space(H5F_t *f, H5PB_t *pb_ptr,
 static herr_t H5PB__mark_entry_clean(H5PB_t *pb_ptr, 
     H5PB_entry_t *entry_ptr);
 
-static herr_t H5PB__mark_entry_dirty(H5PB_t *pb_ptr, 
+static herr_t H5PB__mark_entry_dirty(H5F_t * f, H5PB_t *pb_ptr, 
     H5PB_entry_t *entry_ptr);
 
 static herr_t H5PB__read_meta(H5F_t *f, H5FD_mem_t type, haddr_t addr, 
@@ -188,6 +188,10 @@ H5PB_reset_stats(H5PB_t *pb_ptr)
     pb_ptr->failed_ht_searches               = 0;
     pb_ptr->total_failed_ht_search_depth     = 0;
     pb_ptr->max_index_len                    = 0;
+    pb_ptr->max_clean_index_len              = 0;
+    pb_ptr->max_dirty_index_len              = 0;
+    pb_ptr->max_clean_index_size             = 0;
+    pb_ptr->max_dirty_index_size             = 0;
     pb_ptr->max_index_size                   = 0;
     pb_ptr->max_rd_pages                     = 0;
     pb_ptr->max_md_pages                     = 0;
@@ -389,10 +393,17 @@ H5PB_print_stats(const H5PB_t *pb_ptr)
  *              buffer is configured to allow pages of the specified
  *              type.
  *
- *              This function is called by the 
- *              from the MF layer when a new page is allocated to 
- *              indicate to the page buffer layer that a read of the page 
- *              from the file is not necessary since it's an empty page.
+ *              This function is called by the MF layer when a new page 
+ *              is allocated to indicate to the page buffer layer that 
+ *              a read of the page from the file is not necessary since 
+ *              it's an empty page.
+ *
+ *              For purposes of the VFD SWMR writer, we also track pages
+ *              that are inserted via this call, as the fact that the 
+ *              page was allocated implies that an earlier version does
+ *              not exist in the HDF5 file, and thus we need not concern
+ *              ourselves with delaying the write of this pages to avoid 
+ *              messages from the future on the reader.
  *
  *              Note that this function inserts the new page without 
  *              attempting to make space.  This can result in the page 
@@ -451,6 +462,9 @@ H5PB_add_new_page(H5F_t *f, H5FD_mem_t type, haddr_t page_addr)
 
             HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
                         "new page buffer page creation failed.")
+
+        /* make note that this page was allocated, not loaded from file */
+        entry_ptr->loaded = FALSE;
 
         /* updates stats */
         H5PB__UPDATE_STATS_FOR_INSERTION(pb_ptr, entry_ptr);
@@ -538,53 +552,61 @@ H5PB_create(H5F_t *f, size_t size, unsigned page_buf_min_meta_perc,
 
     /* initialize the new instance of H5PB_t */
 
-    pb_ptr->magic           = H5PB__H5PB_T_MAGIC;
-    pb_ptr->page_size       = f->shared->fs_page_size;
+    pb_ptr->magic            = H5PB__H5PB_T_MAGIC;
+    pb_ptr->page_size        = f->shared->fs_page_size;
     H5_CHECKED_ASSIGN(pb_ptr->page_size, size_t, \
                       f->shared->fs_page_size, hsize_t);
-    pb_ptr->max_pages       = (int32_t)(size / f->shared->fs_page_size);
-    pb_ptr->curr_pages      = 0;
-    pb_ptr->curr_md_pages   = 0;
-    pb_ptr->curr_rd_pages   = 0;
-    pb_ptr->min_md_pages    = min_md_pages;
-    pb_ptr->min_rd_pages    = min_rd_pages;
+    pb_ptr->max_pages        = (int32_t)(size / f->shared->fs_page_size);
+    pb_ptr->curr_pages       = 0;
+    pb_ptr->curr_md_pages    = 0;
+    pb_ptr->curr_rd_pages    = 0;
+    pb_ptr->min_md_pages     = min_md_pages;
+    pb_ptr->min_rd_pages     = min_rd_pages;
 
-    pb_ptr->max_size        = size;
-    pb_ptr->min_meta_perc   = page_buf_min_meta_perc;
-    pb_ptr->min_raw_perc    = page_buf_min_raw_perc;
+    pb_ptr->max_size         = size;
+    pb_ptr->min_meta_perc    = page_buf_min_meta_perc;
+    pb_ptr->min_raw_perc     = page_buf_min_raw_perc;
 
     /* index */
     for ( i = 0; i < H5PB__HASH_TABLE_LEN; i++ )
-        pb_ptr->ht[i]       = NULL;
-    pb_ptr->index_len       = 0;
-    pb_ptr->index_size      = 0;
+        pb_ptr->ht[i]        = NULL;
+    pb_ptr->index_len        = 0;
+    pb_ptr->clean_index_len  = 0;
+    pb_ptr->dirty_index_len  = 0;
+    pb_ptr->index_size       = 0;
+    pb_ptr->clean_index_size = 0;
+    pb_ptr->dirty_index_size = 0;
+    pb_ptr->il_len           = 0;
+    pb_ptr->il_size          = 0;
+    pb_ptr->il_head          = NULL;
+    pb_ptr->il_tail          = NULL;
 
     /* LRU */
-    pb_ptr->LRU_len         = 0;
-    pb_ptr->LRU_size        = 0;
-    pb_ptr->LRU_head_ptr    = NULL;
-    pb_ptr->LRU_tail_ptr    = NULL;
+    pb_ptr->LRU_len          = 0;
+    pb_ptr->LRU_size         = 0;
+    pb_ptr->LRU_head_ptr     = NULL;
+    pb_ptr->LRU_tail_ptr     = NULL;
 
 
     /* VFD SWMR specific fields.  
      * The following fields are defined iff vfd_swmr_writer is TRUE. 
      */
-    pb_ptr->vfd_swmr_writer = FALSE;
-    pb_ptr->mpmde_count     = 0;
-    pb_ptr->cur_tick        = 0;
+    pb_ptr->vfd_swmr_writer  = FALSE;
+    pb_ptr->mpmde_count      = 0;
+    pb_ptr->cur_tick         = 0;
 
     /* delayed write list */
-    pb_ptr->max_delay       = 0;
-    pb_ptr->dwl_len         = 0;
-    pb_ptr->dwl_size        = 0;
-    pb_ptr->dwl_head_ptr    = NULL;
-    pb_ptr->dwl_tail_ptr    = NULL;
+    pb_ptr->max_delay        = 0;
+    pb_ptr->dwl_len          = 0;
+    pb_ptr->dwl_size         = 0;
+    pb_ptr->dwl_head_ptr     = NULL;
+    pb_ptr->dwl_tail_ptr     = NULL;
 
     /* tick list */
-    pb_ptr->tl_len          = 0;
-    pb_ptr->tl_size         = 0;
-    pb_ptr->tl_head_ptr     = NULL;
-    pb_ptr->tl_tail_ptr     = NULL;
+    pb_ptr->tl_len           = 0;
+    pb_ptr->tl_size          = 0;
+    pb_ptr->tl_head_ptr      = NULL;
+    pb_ptr->tl_tail_ptr      = NULL;
 
     H5PB_reset_stats(pb_ptr);
 
@@ -1232,6 +1254,453 @@ done:
 
 /*-------------------------------------------------------------------------
  *
+ * Function:	H5PB_vfd_swmr__release_delayed_writes
+ *
+ * Purpose:	After the tick list has been released, and before the 
+ *              beginning of the next tick, we must scan the delayed
+ *              write list, and release those entries whose delays have
+ *              expired.
+ *
+ *              Note that pages of metadata, and multi-page metadata entries
+ *              are handled differently.
+ *
+ *              Regular pages are removed from the delayed write list and 
+ *              inserted in the replacement policy
+ *
+ *              In contrast, multi-page metadata entries are simply 
+ *              flushed and evicted.
+ *
+ *              Since the delayed write list is sorted in decreasing
+ *              delay_write_until order, we start our scan at the bottom
+ *              of the delayed write list and continue upwards until no
+ *              expired entries remain.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	John Mainzer -- 11/15/18
+ *
+ * Changes:     None.
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t 
+H5PB_vfd_swmr__release_delayed_writes(H5F_t * f)
+{
+    H5PB_t * pb_ptr = NULL;
+    H5PB_entry_t *entry_ptr = NULL;
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity checks */
+    HDassert(f);
+    HDassert(f->shared);
+    HDassert(f->shared->vfd_swmr);
+    HDassert(f->shared->vfd_swmr_writer);
+
+    pb_ptr = f->shared->pb_ptr;
+
+    HDassert(pb_ptr);
+    HDassert(pb_ptr->magic == H5PB__H5PB_T_MAGIC);
+    HDassert(pb_ptr->vfd_swmr_writer);
+
+    while ( ( pb_ptr->dwl_tail_ptr ) &&
+            ( pb_ptr->dwl_tail_ptr->delay_write_until < 
+              f->shared->tick_num ) ) {
+
+        entry_ptr = pb_ptr->dwl_tail_ptr;
+
+        HDassert(entry_ptr->is_dirty);
+
+        H5PB__REMOVE_FROM_DWL(pb_ptr, entry_ptr, FAIL)
+
+        entry_ptr->delay_write_until = 0;
+
+        if ( entry_ptr->is_mpmde ) { /* flush and evict now */
+
+            if ( H5PB__flush_entry(f, pb_ptr, entry_ptr) < 0 )
+
+                HGOTO_ERROR(H5E_PAGEBUF, H5E_WRITEERROR, FAIL, \
+                            "flush of mpmde failed")
+
+            if ( H5PB__evict_entry(pb_ptr, entry_ptr, TRUE) < 0 )
+
+                HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
+                            "eviction of mpmde failed")
+
+        } else { /* insert it in the replacement policy */
+
+            H5PB__UPDATE_RP_FOR_INSERT_APPEND(pb_ptr, entry_ptr, FAIL)
+        }
+    }
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5PB_vfd_swmr__release_delayed_writes() */
+
+
+/*-------------------------------------------------------------------------
+ *
+ * Function:	H5PB_vfd_swmr__release_tick_list
+ *
+ * Purpose:	After the metadata file has been updated, and before the 
+ *              beginning of the next tick, we must release the tick list.
+ *
+ *              This function performs this function.
+ *
+ *              In passing, flush and evict any multi-page metadata entries
+ *              that are not subject to a delayed write.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	John Mainzer -- 11/12/18
+ *
+ * Changes:     None.
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t 
+H5PB_vfd_swmr__release_tick_list(H5F_t * f)
+{
+    H5PB_t * pb_ptr = NULL;
+    H5PB_entry_t *entry_ptr = NULL;
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity checks */
+    HDassert(f);
+    HDassert(f->shared);
+    HDassert(f->shared->vfd_swmr);
+    HDassert(f->shared->vfd_swmr_writer);
+
+    pb_ptr = f->shared->pb_ptr;
+
+    HDassert(pb_ptr);
+    HDassert(pb_ptr->magic == H5PB__H5PB_T_MAGIC);
+    HDassert(pb_ptr->vfd_swmr_writer);
+
+    /* remove all entries from the tick list */
+    while ( pb_ptr->tl_head_ptr ) {
+
+        entry_ptr = pb_ptr->tl_head_ptr;
+
+        H5PB__REMOVE_FROM_TL(pb_ptr, entry_ptr, FAIL)
+
+        entry_ptr->modified_this_tick = FALSE;
+
+        if ( entry_ptr->is_mpmde ) {
+        
+            HDassert(entry_ptr->is_dirty);
+
+            if ( entry_ptr->delay_write_until == 0 ) {
+
+                /* flush and evict the multi-page metadata entry immediately */
+                if ( H5PB__flush_entry(f, pb_ptr, entry_ptr) < 0 )
+
+                    HGOTO_ERROR(H5E_PAGEBUF, H5E_WRITEERROR, FAIL, \
+                                "flush of mpmde failed")
+
+                if ( H5PB__evict_entry(pb_ptr, entry_ptr, TRUE) < 0 )
+
+                    HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
+                                "eviction of mpmde failed")
+            }
+        }
+        /* if the entry is not a multi-page metadata entry, it must already
+         * be on either the replacment policy or the delayed write list.
+         * In either case, it will be flush when possible and necessary.
+         */
+    }
+
+    HDassert(pb_ptr->tl_head_ptr == NULL);
+    HDassert(pb_ptr->tl_tail_ptr == NULL);
+    HDassert(pb_ptr->tl_len == 0);
+    HDassert(pb_ptr->tl_size == 0);
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5PB_vfd_swmr__release_tick_list */
+
+
+/*-------------------------------------------------------------------------
+ *
+ * Function:	H5PB_vfd_swmr__update_index
+ *
+ * Purpose:	In the VFD SWMR writer, all metadata writes to the page 
+ *              buffer during a tick are buffered in the page buffer in 
+ *              the tick list.  Further, the metadata cache is flushed 
+ *              to the page buffer at the end of the tick so that all 
+ *              metadata changes during the tick are reflected in the 
+ *              tick list.
+ *
+ *              Once this is done, the internal representation of the 
+ *              metadata file index must be updated from the tick list 
+ *              so that the metadata file can be updated, and the tick 
+ *              list can be emptied and prepared to buffer metadata changes
+ *              in the next tick.
+ *
+ *              This function is called to accomplish this.  Its cycle of
+ *              operation is as follows:
+ *
+ *              1) Scan the tick list.  For each entry (*pbe_ptr), test 
+ *                 to see if it appears in the index.
+ *
+ *                 If it does the entry must have been modified in the 
+ *                 past tick.  Update the index entry (*ie_ptr) as follows:
+ *
+ *                 a) Set ie_ptr->entry_ptr = pbe_ptr->image_ptr.  This 
+ *                    is needed to give the metadata file update code 
+ *                    access to the image of the target page or multi-page
+ *                    multi-date entry.  Note that ie_ptr->entry_ptr will
+ *                    be set to NULL as soon as the metadata file is updated,
+ *                    so the buffer pointed to by pbe_ptr->image_ptr can 
+ *                    be safely discarded at any time after the metadata 
+ *                    file update.
+ *
+ *                 b) Set ie_ptr->tick_of_last_change to the current tick.
+ *
+ *                 c) If pbe_ptr->is_dirty, set ie_ptr->clean to FALSE.
+ *                    If pbe_ptr->is_dirty is FALSE, set ie_ptr->clean
+ *                    to TRUE and set ie_ptr->tick_of_last_flush to the 
+ *                    current tick.
+ *
+ *                 If the tick list entry (*pbe_ptr) doesn't appear in 
+ *                 the index, allocate a metadata file index entry (*ie_ptr), 
+ *                 and initialize it as follows:
+ *
+ *                     ie_ptr->hdf5_page_offset = pbe_ptr->page
+ *                     ie_ptr->length           = pbe_ptr->size
+ *                     ie_ptr->delayed_flush    = pbe_ptr->delay_write_until
+ * 
+ *                 and then update the new entry as per the existing entry
+ *                 case described above.
+ *
+ *              2) Scan the internal representation of the metadata file 
+ *                 index for entries that do not appear in the tick list.
+ *                 For each such entry (*ie_ptr), proceed as follows:
+ *
+ *                 1) If ie_ptr->clean, we are done -- proceed to the 
+ *                    next index entry that doesn't appear in the tick list.
+ *
+ *                 2) Test to see if the cognate entry appears in the page 
+ *                    buffer.  If it doesn't, it must have been flushed and
+ *                    evicted in the past tick.  Set
+ *
+ *                        ie_ptr->clean = TRUE, and 
+ *
+ *                        ie_ptr->tick_of_last_flush = current tick
+ *
+ *                    and proceed to the next index entry that doesn't 
+ *                    appear in the tick list.
+ *
+ *                 3) If the cognate entry does appear in the page buffer
+ *                    and is clean, proceed as per 2) above.
+ *
+ *                 4) In all other cases, do nothing, and proceed to the 
+ *                    next index entry that does not appear in the tick list.
+ *
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	John Mainzer -- 11/9/18
+ *
+ * Changes:     None.
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t 
+H5PB_vfd_swmr__update_index(H5F_t * f, 
+                            int * idx_ent_added_ptr, 
+                            int * idx_ent_modified_ptr,
+                            int * idx_ent_not_in_tl_ptr,
+                            int * idx_ent_not_in_tl_flushed_ptr)
+{
+    int32_t i;
+    int32_t idx_ent_added = 0;
+    int32_t idx_ent_modified = 0;
+    int32_t idx_ent_not_in_tl = 0;
+    int32_t idx_ent_not_in_tl_flushed = 0;
+    H5PB_t * pb_ptr = NULL;
+    H5PB_entry_t *pbe_ptr = NULL;
+    H5FD_vfd_swmr_idx_entry_t * ie_ptr = NULL;
+    H5FD_vfd_swmr_idx_entry_t * idx = NULL;
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity checks */
+    HDassert(f);
+    HDassert(f->shared);
+    HDassert(f->shared->vfd_swmr);
+    HDassert(f->shared->vfd_swmr_writer);
+
+    idx = f->shared->mdf_idx;
+
+    HDassert(idx);
+    
+    pb_ptr = f->shared->pb_ptr;
+
+    HDassert(pb_ptr);
+    HDassert(pb_ptr->magic == H5PB__H5PB_T_MAGIC);
+    HDassert(pb_ptr->vfd_swmr_writer);
+
+    HDassert(idx_ent_added_ptr);
+    HDassert(idx_ent_modified_ptr);
+    HDassert(idx_ent_not_in_tl_ptr);
+    HDassert(idx_ent_not_in_tl_flushed_ptr);
+
+    /* scan the tick list and insert or update metadata file index entries 
+     * as appropriate.
+     */
+
+    pbe_ptr = pb_ptr->tl_head_ptr;
+    
+    while ( pbe_ptr ) {
+
+        uint64_t target_page;
+        int32_t top;
+        int32_t bottom;
+        int32_t probe;
+
+        HDassert(pbe_ptr->magic == H5PB__H5PB_ENTRY_T_MAGIC);
+
+        /* do a binary search on the metadata file index to see if 
+         * it already contains an entry for *pbe_ptr.
+         */
+
+        ie_ptr = NULL; 
+        top = f->shared->mdf_idx_entries_used - 1;
+        bottom = 0;
+        target_page = pbe_ptr->page;
+        
+        while ( top >= bottom ) {
+
+            probe = top + bottom / 2;
+
+            if ( idx[probe].hdf5_page_offset < target_page ) {
+
+                bottom = probe + 1;
+
+            } else if ( idx[probe].hdf5_page_offset > target_page ) {
+
+                top = probe - 1;
+
+            } else { /* found it */
+
+                ie_ptr = idx + probe;
+                bottom = top + 1; /* to exit loop */
+            }
+        }
+
+        if ( ie_ptr == NULL ) { /* alloc new entry in the metadata file index*/
+
+            /* for now the metadata file index is of fixed size -- if we 
+             * exceed the maximum size, just abort.
+             *
+             * Obviously, this must be fixed for the production version.
+             */
+            int32_t new_index_entry_index;
+
+            new_index_entry_index = f->shared->mdf_idx_entries_used + 
+                                    idx_ent_added++;
+
+            if ( new_index_entry_index >= f->shared->mdf_idx_len ) {
+
+                HDfprintf(stderr, "\n\nmax mdf index len exceeded.\n\n");
+                exit(1);
+            }
+
+            ie_ptr = idx + new_index_entry_index;
+
+            /* partial initialization of new entry -- rest done later */
+            ie_ptr->hdf5_page_offset     = target_page;
+            ie_ptr->md_file_page_offset  = 0; /* undefined at this point */
+            ie_ptr->length               = (uint32_t)(pbe_ptr->size);
+            ie_ptr->chksum               = 0; /* undefined at this point */
+            /* ie_ptr->entry_ptr            initialized below */
+            /* ie_ptr->tick_of_last_change  initialized below */
+            /* ie_ptr->clean                initialized below */
+            /* ie_ptr->tick_of_last_flush   initialized below */
+            ie_ptr->delayed_flush        = pbe_ptr->delay_write_until;
+            ie_ptr->moved_to_hdf5_file   = FALSE;
+
+        } else {
+
+            idx_ent_modified++;
+        }
+
+        ie_ptr->entry_ptr            = pbe_ptr->image_ptr;
+        ie_ptr->tick_of_last_change  = f->shared->tick_num;
+        ie_ptr->clean                = !(pbe_ptr->is_dirty);
+
+        if ( ie_ptr->clean ) {
+
+            ie_ptr->tick_of_last_flush = f->shared->tick_num;
+
+        } else {
+
+            ie_ptr->tick_of_last_flush = 0;
+        }
+
+        HDassert(ie_ptr);
+    }
+
+    /* scan the metadata file index for entries that don't appear in the 
+     * tick list.  If the index entry is dirty, and either doesn't appear
+     * in the page buffer, or is clean in the page buffer, mark the index
+     * entry clean and as having been flushed in the current tick.
+     */
+    for ( i = 0; i < f->shared->mdf_idx_entries_used; i++ ) {
+
+        HDassert( ( i == 0 ) || 
+                  ( idx[i - 1].hdf5_page_offset < idx[i].hdf5_page_offset ) );
+
+        if ( idx[i].tick_of_last_change < f->shared->tick_num ) {
+
+            idx_ent_not_in_tl++;
+
+            ie_ptr = idx + i;
+
+            if ( ! ( ie_ptr->clean ) ) {
+
+                H5PB__SEARCH_INDEX(pb_ptr, ie_ptr->hdf5_page_offset, \
+                                   pbe_ptr, FAIL);
+
+                if ( ( ! pbe_ptr ) || ( ! ( pbe_ptr->is_dirty ) ) ) {
+
+                    idx_ent_not_in_tl_flushed++;
+                    ie_ptr->clean = TRUE;
+                    ie_ptr->tick_of_last_flush = f->shared->tick_num;
+                }
+            }
+        }
+    }
+
+    HDassert(idx_ent_modified + idx_ent_not_in_tl == 
+             f->shared->mdf_idx_entries_used);
+
+    HDassert(idx_ent_modified + idx_ent_not_in_tl + idx_ent_added <=
+             f->shared->mdf_idx_len);
+
+    *idx_ent_added_ptr             = idx_ent_added;
+    *idx_ent_modified_ptr          = idx_ent_modified;
+    *idx_ent_not_in_tl_ptr         = idx_ent_not_in_tl;
+    *idx_ent_not_in_tl_flushed_ptr = idx_ent_not_in_tl_flushed;
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5PB_vfd_swmr__update_index */
+
+
+/*-------------------------------------------------------------------------
+ *
  * Function:	H5PB_write
  *
  * Purpose:	Write data into the Page Buffer if practical, and to file
@@ -1275,14 +1744,17 @@ done:
  *                 one page, and vfd_swmr_writer is TRUE, the write must
  *                 buffered in the page buffer until the end of the tick.
  *
- *                 Create a multi-page metadata entry in the page buffer
- *                 and copy the write into it.  Insert the new entry in
- *                 the tick list.
+ *                 If it doesn't exist already, create a multi-page metadata 
+ *                 entry in the page buffer and copy the write into it.  
+ *                 Insert the new entry in the tick list if necessary.
  *
  *                 Test to see if the write of the multi-page metadata 
  *                 entry must be delayed.  If so, place the entry in 
- *                 the delayed write list.  Otherwise, write the multi-page
- *                 metadata entry to the HDF5 file.
+ *                 the delayed write list.  Otherwise, the multi-page
+ *                 metadata entry will be written to the HDF5 file and
+ *                 evicted when the tick list is released at the of the 
+ *                 tick.
+ *
  *
  *              8) If the write is of metadata, and the write is of size
  *                 less than or equal to the page size, write the data
@@ -1329,7 +1801,7 @@ H5PB_write(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
 
         HDassert(pb_ptr->magic == H5PB__H5PB_T_MAGIC);
 
-        if ( H5FD_MEM_DRAW == type ) { /* raw data read */
+        if ( H5FD_MEM_DRAW == type ) { /* raw data write */
 
             if ( pb_ptr->min_md_pages == pb_ptr->max_pages ) {
 
@@ -1337,7 +1809,7 @@ H5PB_write(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
                 bypass_pb = TRUE;
 
             }
-        } else { /* metadata read */
+        } else { /* metadata write */
 
             if ( pb_ptr->min_rd_pages == pb_ptr->max_pages ) {
 
@@ -1483,6 +1955,8 @@ H5PB__allocate_page(H5PB_t *pb_ptr, size_t size, hbool_t clean_image)
     /* fields supporting the hash table */
     entry_ptr->ht_prev            = NULL;
     entry_ptr->ht_next            = NULL;
+    entry_ptr->il_prev            = NULL;
+    entry_ptr->il_next            = NULL;
 
     /* fields supporting replacement policise */
     entry_ptr->next               = NULL;
@@ -1675,6 +2149,8 @@ H5PB__deallocate_page(H5PB_entry_t *entry_ptr)
     HDassert(!(entry_ptr->is_dirty));
     HDassert(entry_ptr->ht_next == NULL);
     HDassert(entry_ptr->ht_prev == NULL);
+    HDassert(entry_ptr->il_next == NULL);
+    HDassert(entry_ptr->il_prev == NULL);
     HDassert(entry_ptr->next == NULL);
     HDassert(entry_ptr->prev == NULL);
     HDassert(entry_ptr->tl_next == NULL);
@@ -1695,7 +2171,7 @@ H5PB__deallocate_page(H5PB_entry_t *entry_ptr)
  *
  * Purpose:	Evict the target entry from the from the page buffer, and 
  *              de-allocate its associated image and instance of 
- *              H5PB_entry_t..
+ *              H5PB_entry_t.
  *
  *              In general, entries must be clean before they can be 
  *              evicted, and the minimum metadata and raw data limits 
@@ -1835,8 +2311,7 @@ H5PB__flush_entry(H5F_t *f, H5PB_t *pb_ptr, H5PB_entry_t *entry_ptr)
     HDassert(entry_ptr->image_ptr);
     HDassert(entry_ptr->is_dirty);
     HDassert((pb_ptr->vfd_swmr_writer) || (!(entry_ptr->is_mpmde)));
-    HDassert( ( ! (pb_ptr->vfd_swmr_writer) ) || 
-              ( (pb_ptr->cur_tick) >= (entry_ptr->delay_write_until) ) );
+    HDassert(0 == (entry_ptr->delay_write_until));
 
     /* Retrieve the 'eoa' for the file */
     if ( HADDR_UNDEF == (eoa = H5F_get_eoa(f, entry_ptr->mem_type)) )
@@ -1898,11 +2373,14 @@ H5PB__flush_entry(H5F_t *f, H5PB_t *pb_ptr, H5PB_entry_t *entry_ptr)
     }
 
     /* mark the entry clean */
-    entry_ptr->is_dirty = FALSE;
+    if ( H5PB__mark_entry_clean(pb_ptr, entry_ptr) < 0 )
+
+        HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, "mark entry clean failed")
 
 
     /* if the entry is on the LRU, update the replacement policy */
-    if ( ! (entry_ptr->is_mpmde) ) {
+    if ( ( ! (entry_ptr->is_mpmde) ) && 
+         ( entry_ptr->delay_write_until == 0 ) ) {
 
         H5PB__UPDATE_RP_FOR_FLUSH(pb_ptr, entry_ptr, FAIL)        
     }
@@ -1929,6 +2407,14 @@ done:
  *              even in the VFD SWMR case, as in this context, multi-page 
  *              metadata entries are always written in full, and they 
  *              may only enter the page buffer as the result of a write.
+ *
+ *              In the context of VFD SWMR, when an page is loaded from 
+ *              file, it is possible that the VFD SWMR writer must delay 
+ *              writes to the page to avoid the possibility of message from 
+ *              the future bugs on the VFD SWMR reader.  For this reason,
+ *              make note of the fact that the entry has be loaded from 
+ *              from file, so that the necessary checks can be made when
+ *              writing to the page.
  *              
  * Return:	SUCCEED if no errors are encountered, and 
  *              FAIL otherwise.
@@ -1986,7 +2472,6 @@ H5PB__load_page(H5F_t *f, H5PB_t *pb_ptr, haddr_t addr, H5FD_mem_t type,
      */
     skip_read = (addr >= eof);
 
-
     /* make space in the page buffer if necessary */
     if ( ( pb_ptr->curr_pages >= pb_ptr->max_pages ) &&
          ( H5PB__make_space(f, pb_ptr, type) < 0 ) )
@@ -2023,6 +2508,11 @@ H5PB__load_page(H5F_t *f, H5PB_t *pb_ptr, haddr_t addr, H5FD_mem_t type,
 
         HGOTO_ERROR(H5E_PAGEBUF, H5E_READERROR, FAIL, \
                     "driver read request failed")
+
+    /* If in fact the page was read from file, make note of this fact
+     * for purposes of VFD SWMR delayed writes in the VFD SWMR writer.
+     */
+    entry_ptr->loaded = ! skip_read;
 
     H5PB__UPDATE_STATS_FOR_LOAD(pb_ptr, entry_ptr)
 
@@ -2233,6 +2723,10 @@ done:
  *              this case, the entry must be marked clean to avoid 
  *              sanity check failures on evictions.
  *
+ *              While this function does update the index for the 
+ *              entry clean, it does not update the replacement policy.
+ *              If this is desired, it must be done by the caller.   
+ *
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	John Mainzer -- 10/14/18
@@ -2262,13 +2756,12 @@ H5PB__mark_entry_clean(H5PB_t *pb_ptr, H5PB_entry_t *entry_ptr)
     /* mark the entry clean */
     entry_ptr->is_dirty = FALSE;
 
-    /* delete this once we start tracking clean and dirty entry is the hash
-     * table.
-     */
-    if ( ! (entry_ptr->is_mpmde) ) {
+    /* update the index for the entry clean */
+    H5PB__UPDATE_INDEX_FOR_ENTRY_CLEAN(pb_ptr, entry_ptr)
 
-       H5PB__UPDATE_RP_FOR_ACCESS(pb_ptr, entry_ptr, FAIL)        
-    }
+    /* don't update the replacement policy -- this will be done by 
+     * the caller if desired.
+     */
 
 done:
 
@@ -2283,14 +2776,17 @@ done:
  *
  * Purpose:	Mark the target entry as dirty.
  *
- *              Under normal circumstances, the entry will be in the 
- *              replacement policy.  In this, also update the replacement
- *              policy for and access.
+ *              If pb_ptr->vfd_swmr_writer is FALSE, the entry will be 
+ *              in the replacement policy.  In this, we simply mark the 
+ *              entry as dirty, and update the replacement policy for an 
+ *              access.
  *
- *              If pb_ptr->vfd_swmr_writer, it is possible that the target
- *              is a multi-page metadata entry.  In this case, the entry
- *              is not in the replacement policy, and thus the policy 
- *              should not be updated.
+ *              If pb_ptr->vfd_swmr_writer, it is possible that we must 
+ *              delay writes to the target page or multi-page metadata 
+ *              entry to avoid message from the future bugs on the VFD 
+ *              SWMR readers.  In such cases we must set the 
+ *              delay_write_until field and insert the entry on the 
+ *              delayed write list instead of the replacement policy.
  *              
  * Return:	Non-negative on success/Negative on failure
  *
@@ -2301,8 +2797,9 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5PB__mark_entry_dirty(H5PB_t *pb_ptr, H5PB_entry_t *entry_ptr)
+H5PB__mark_entry_dirty(H5F_t * f, H5PB_t *pb_ptr, H5PB_entry_t *entry_ptr)
 {
+    uint64_t delay_write_until = 0;
     herr_t ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -2318,14 +2815,49 @@ H5PB__mark_entry_dirty(H5PB_t *pb_ptr, H5PB_entry_t *entry_ptr)
     HDassert(entry_ptr->image_ptr);
     HDassert((pb_ptr->vfd_swmr_writer) || (!(entry_ptr->is_mpmde)));
 
-    /* mark the entry dirty */
-    entry_ptr->is_dirty = TRUE;
+    /* mark the entry dirty if necessary */
+    if ( ! ( entry_ptr->is_dirty ) ) {
 
-    /* if the entry is on the LRU, update the replacement policy */
-    if ( ( ! (entry_ptr->is_mpmde) ) && 
-         ( entry_ptr->delay_write_until == 0 ) ) {
+        entry_ptr->is_dirty = TRUE;
 
-       H5PB__UPDATE_RP_FOR_ACCESS(pb_ptr, entry_ptr, FAIL)        
+        H5PB__UPDATE_INDEX_FOR_ENTRY_DIRTY(pb_ptr, entry_ptr)
+
+        /* since the entry was clean, there can be no pending delayed write */
+        HDassert(entry_ptr->delay_write_until == 0);
+
+        if ( ( pb_ptr->vfd_swmr_writer ) &&
+             ( entry_ptr->loaded ) &&
+             ( H5F_vfd_swmr_writer__delay_write(f, entry_ptr->page, 
+                                                &delay_write_until) < 0 ) )
+
+            HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
+                        "get delayed write request failed")
+
+        if ( delay_write_until > 0 ) {
+
+            H5PB__INSERT_IN_DWL(pb_ptr, entry_ptr, FAIL)
+
+        } else if ( ! (entry_ptr->is_mpmde) ) {
+
+           H5PB__UPDATE_RP_FOR_ACCESS(pb_ptr, entry_ptr, FAIL)        
+
+        } else {
+
+            /* the entry should be a multi-page metadata entry that 
+             * has been modified this tick.  Thus it is only on the 
+             * tick list, and no action is required.
+             */
+            HDassert(entry_ptr->modified_this_tick);
+            HDassert(entry_ptr->is_mpmde);
+            HDassert(pb_ptr->vfd_swmr_writer);
+        }
+    } else if ( ( ! (entry_ptr->is_mpmde) ) && 
+                ( entry_ptr->delay_write_until == 0 ) ) {
+
+        /* the entry is dirty and on the replacement policy -- just update
+         * the replacement policy for an access 
+         */
+        H5PB__UPDATE_RP_FOR_ACCESS(pb_ptr, entry_ptr, FAIL)        
     }
 
 done:
@@ -3054,14 +3586,16 @@ done:
  *                 one page, and vfd_swmr_writer is TRUE, the write must
  *                 buffered in the page buffer until the end of the tick.
  *
- *                 Create a multi-page metadata entry in the page buffer
- *                 and copy the write into it.  Insert the new entry in
- *                 the tick list.
+ *                 If it doesn't exist already, create a multi-page metadata 
+ *                 entry in the page buffer and copy the write into it.  
+ *                 Insert the new entry in the tick list if necessary.
  *
  *                 Test to see if the write of the multi-page metadata 
  *                 entry must be delayed.  If so, place the entry in 
- *                 the delayed write list.  Otherwise, write the multi-page
- *                 metadata entry to the HDF5 file.
+ *                 the delayed write list.  Otherwise, the multi-page
+ *                 metadata entry will be written to the HDF5 file and
+ *                 evicted when the tick list is released at the of the 
+ *                 tick.
  *
  *              8) If the write is of metadata, and the write is of size
  *                 less than or equal to the page size, write the data
@@ -3154,6 +3688,8 @@ H5PB__write_meta(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
          *    test to see if it should be, and move it from the 
          *    LRU to the delayed write list and set the delay_write_until
          *    field appropriately.
+         *
+         *    This is done via the call to H5PB__mark_entry_dirty()
          */
         HDassert(pb_ptr->vfd_swmr_writer);
         HDassert(addr == page_addr);
@@ -3177,6 +3713,11 @@ H5PB__write_meta(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
 
                 HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
                             "can't create new page buffer page")
+
+            /* set entry_ptr->loaded to TRUE so as to trigger the 
+             * the delayed write test in H5PB__mark_entry_dirty().
+             */
+            entry_ptr->loaded = TRUE;
         }
 
         /* at this point, one way or the other, the multi-page metadata 
@@ -3191,25 +3732,19 @@ H5PB__write_meta(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
         HDmemcpy((uint8_t *)(entry_ptr->image_ptr), buf, size);
 
         /* mark the entry dirty */
-        if ( H5PB__mark_entry_dirty(pb_ptr, entry_ptr) < 0 )
+        if ( H5PB__mark_entry_dirty(f, pb_ptr, entry_ptr) < 0 )
 
             HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
                         "mark entry dirty failed (1)")
 
-
         /* insert in tick list if not there already */
         if ( ! ( entry_ptr->modified_this_tick ) ) {
+
+            entry_ptr->modified_this_tick = TRUE;
 
             H5PB__INSERT_IN_TL(pb_ptr, entry_ptr, FAIL)
         }
 
-        /* Test to see if we must delay the write of the multi-page 
-         * metadata entry, and move it from the LRU to the delayed write
-         * list if so.
-         */
-
-        /* Write function for this -- assert false for now */
-        HDassert(FALSE);
 
     } else {
         /* case 8) metadata write of size no larger than page size */
@@ -3267,7 +3802,7 @@ H5PB__write_meta(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
         HDmemcpy(((uint8_t *)(entry_ptr->image_ptr) + offset), 
                  (const uint8_t *)buf, size);
 
-        if ( H5PB__mark_entry_dirty(pb_ptr, entry_ptr) < 0 )
+        if ( H5PB__mark_entry_dirty(f, pb_ptr, entry_ptr) < 0 )
 
             HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
                         "mark entry dirty failed (2)")
@@ -3280,16 +3815,10 @@ H5PB__write_meta(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
              */
             if ( ! ( entry_ptr->modified_this_tick ) ) {
 
+                entry_ptr->modified_this_tick = TRUE;
+
                 H5PB__INSERT_IN_TL(pb_ptr, entry_ptr, FAIL)
             }
-
-            /* Test to see if we must delay the write of the multi-page 
-             * metadata entry, and move it from the LRU to the delayed write
-             * list if so.
-             */
-
-            /* Write function for this -- assert false for now */
-            HDassert(FALSE);
         }
     } 
 
@@ -3491,7 +4020,7 @@ H5PB__write_raw(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
                     HDmemcpy((uint8_t *)entry_ptr->image_ptr + offset, buf, 
                              pb_ptr->page_size - (size_t)offset);
 
-                    if ( H5PB__mark_entry_dirty(pb_ptr, entry_ptr) < 0 )
+                    if ( H5PB__mark_entry_dirty(f, pb_ptr, entry_ptr) < 0 )
 
                         HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
                                     "mark entry dirty failed (1)")
@@ -3512,7 +4041,7 @@ H5PB__write_raw(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
                              (const uint8_t *)buf + offset,
                              (size_t)((addr + size) - last_page_addr));
 
-                    if ( H5PB__mark_entry_dirty(pb_ptr, entry_ptr) < 0 )
+                    if ( H5PB__mark_entry_dirty(f, pb_ptr, entry_ptr) < 0 )
 
                         HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
                                     "mark entry dirty failed (2)")
@@ -3574,7 +4103,7 @@ H5PB__write_raw(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
         HDmemcpy(((uint8_t *)(entry_ptr->image_ptr)) + offset, 
                  (const uint8_t *)buf, length);
 
-        if ( H5PB__mark_entry_dirty(pb_ptr, entry_ptr) < 0 )
+        if ( H5PB__mark_entry_dirty(f, pb_ptr, entry_ptr) < 0 )
 
             HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
                         "mark entry dirty failed (3)")
@@ -3610,7 +4139,7 @@ H5PB__write_raw(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
             HDmemcpy((uint8_t *)(entry_ptr->image_ptr), 
                      ((const uint8_t *)(buf) + offset), length);
 
-            if ( H5PB__mark_entry_dirty(pb_ptr, entry_ptr) < 0 )
+            if ( H5PB__mark_entry_dirty(f, pb_ptr, entry_ptr) < 0 )
 
                 HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
                             "mark entry dirty failed (3)")

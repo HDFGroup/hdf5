@@ -35,6 +35,7 @@
 /* Other private headers needed by this file */
 #include "H5private.h"		    /* Generic Functions                        */
 #include "H5ACprivate.h"        /* Metadata cache                           */
+#include "H5FDprivate.h"        /* VFD -- for VFD SWMR                      */
 #include "H5FLprivate.h"        /* Free Lists                               */
 #include "H5FOprivate.h"        /* File objects                             */
 #include "H5FSprivate.h"        /* File free space                          */
@@ -381,24 +382,69 @@ struct H5F_file_t {
     /* VFD SWMR */
 
     /* Configuration info */
-    H5F_vfd_swmr_config_t vfd_swmr_config;  /* Copy of the VFD SWMR configuration from the
-                                               FAPL used to open the file */
-    hbool_t vfd_swmr;                       /* The file is opened with VFD SWMR configured or not*/
-    hbool_t vfd_swmr_writer;                /* This is the VFD SWMR writer or not */
+    H5F_vfd_swmr_config_t vfd_swmr_config;  /* Copy of the VFD SWMR 
+                                             * configuration from the
+                                             * FAPL used to open the file 
+                                             */
+    hbool_t vfd_swmr;                       /* The file is opened with VFD 
+                                             * SWMR configured or not
+                                             */
+    hbool_t vfd_swmr_writer;                /* This is the VFD SWMR writer or 
+                                             * not 
+                                             */
     uint64_t tick_num;                      /* Number of the current tick */
     struct timespec end_of_tick;            /* End time of the current tick */
 
+    /* VFD SWMR metadata file index */
+    H5FD_vfd_swmr_idx_entry_t * mdf_idx;    /* pointer to an array of instance
+                                             * of H5FD_vfd_swmr_idx_entry_t of 
+                                             * length mdf_idx_len.  This array 
+                                             * is used by the vfd swmr writer 
+                                             * to assemble the metadata file 
+                                             * index at the end of each tick,
+                                             * and by the vfd swmr readers to 
+                                             * track changes in the index.
+                                             * With one brief exception during
+                                             * writer end of tick processing,
+                                             * this index will alwasy be sorted
+                                             * in increasing HDF5 file page 
+                                             * offset order.
+                                             *
+                                             * This field should be NULL unless
+                                             * the index is defined.
+                                             */
+    int32_t mdf_idx_len;                    /* number of entries in the array 
+                                             * of instances of 
+                                             * H5FD_vfd_swmr_idx_entry_t pointed
+                                             * to by mdf_idx above.  Note that 
+                                             * not all entries in the index 
+                                             * need be used.
+                                             */
+    int32_t mdf_idx_entries_used;           /* Number of entries in *mdf_idx
+                                             * that are in use -- these will 
+                                             * be contiguous at indicies 0 
+                                             * through mdf_idx_entries_used - 1.
+                                             */
+
     /* Metadata file for VFD SWMR writer */
-    int vfd_swmr_md_fd;                     /* POSIX: file descriptor for the metadata file */
-    haddr_t vfd_swmr_md_eoa;                /* POSIX: eoa for the metadata file */
+    int vfd_swmr_md_fd;                     /* POSIX: file descriptor for the 
+                                             * metadata file 
+                                             */
+    haddr_t vfd_swmr_md_eoa;                /* POSIX: eoa for the metadata 
+                                             * file 
+                                             */
 
     /* Free space manager for the metadata file */
     H5FS_t *fs_man_md;                      /* Free-space manager */
-    H5F_fs_state_t fs_state_md;             /* State of the free space manager */
+    H5F_fs_state_t fs_state_md;             /* State of the free space 
+                                             * manager 
+                                             */
 
     /* Delayed free space release doubly linked list */
     uint32_t dl_len;                        /* # of entries in the list */
-    H5F_vfd_swmr_dl_entry_t *dl_head_ptr;   /* Points to the beginning of the list */
+    H5F_vfd_swmr_dl_entry_t *dl_head_ptr;   /* Points to the beginning of 
+                                             * the list 
+                                             */
     H5F_vfd_swmr_dl_entry_t *dl_tail_ptr;   /* Points to the end of the list */
 
 };

@@ -69,25 +69,26 @@
 
 #if H5PB__DO_SANITY_CHECKS
 
-#define H5PB__DLL_PRE_REMOVE_SC(entry_ptr, head_ptr, tail_ptr, len, Size, fv) \
-if ( ( (head_ptr) == NULL ) ||                                                \
-     ( (tail_ptr) == NULL ) ||                                                \
-     ( (entry_ptr) == NULL ) ||                                               \
-     ( (len) <= 0 ) ||                                                        \
-     ( (size_t)(Size) < (entry_ptr)->size ) ||                                \
-     ( ( (entry_ptr)->prev == NULL ) && ( (head_ptr) != (entry_ptr) ) ) ||    \
-     ( ( (entry_ptr)->next == NULL ) && ( (tail_ptr) != (entry_ptr) ) ) ||    \
-     ( ( (len) == 1 ) &&                                                      \
-       ( ! ( ( (head_ptr) == (entry_ptr) ) &&                                 \
-             ( (tail_ptr) == (entry_ptr) ) &&                                 \
-             ( (entry_ptr)->next == NULL ) &&                                 \
-             ( (entry_ptr)->prev == NULL ) &&                                 \
-             ( (Size) == (int64_t)((entry_ptr)->size) )                       \
-           )                                                                  \
-       )                                                                      \
-     )                                                                        \
-   ) {                                                                        \
-    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fv), "DLL pre remove SC failed")      \
+#define H5PB__DLL_PRE_REMOVE_SC(entry_ptr, head_ptr, tail_ptr, len, Size, fv)  \
+if ( ( (head_ptr) == NULL ) ||                                                 \
+     ( (tail_ptr) == NULL ) ||                                                 \
+     ( (entry_ptr) == NULL ) ||                                                \
+     ( (len) <= 0 ) ||                                                         \
+     ( (Size) < (int64_t)((entry_ptr)->size ) ) ||                             \
+     ( ( (Size) == (int64_t)((entry_ptr)->size) ) && ( ! ( (len) == 1 ) ) ) || \
+     ( ( (entry_ptr)->prev == NULL ) && ( (head_ptr) != (entry_ptr) ) ) ||     \
+     ( ( (entry_ptr)->next == NULL ) && ( (tail_ptr) != (entry_ptr) ) ) ||     \
+     ( ( (len) == 1 ) &&                                                       \
+       ( ! ( ( (head_ptr) == (entry_ptr) ) &&                                  \
+             ( (tail_ptr) == (entry_ptr) ) &&                                  \
+             ( (entry_ptr)->next == NULL ) &&                                  \
+             ( (entry_ptr)->prev == NULL ) &&                                  \
+             ( (Size) == (int64_t)((entry_ptr)->size) )                        \
+           )                                                                   \
+       )                                                                       \
+     )                                                                         \
+   ) {                                                                         \
+    HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, (fv), "DLL pre remove SC failed")       \
 }
 
 #define H5PB__DLL_SC(head_ptr, tail_ptr, len, Size, fv)                   \
@@ -107,7 +108,7 @@ if ( ( ( ( (head_ptr) == NULL ) || ( (tail_ptr) == NULL ) ) &&            \
        )                                                                  \
      )                                                                    \
    ) {                                                                    \
-    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fv), "DLL sanity check failed")   \
+    HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, (fv), "DLL sanity check failed")   \
 }
 
 #define H5PB__DLL_PRE_INSERT_SC(entry_ptr, head_ptr, tail_ptr, len, Size, fv) \
@@ -128,7 +129,7 @@ if ( ( (entry_ptr) == NULL ) ||                                               \
        )                                                                      \
      )                                                                        \
    ) {                                                                        \
-    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fv), "DLL pre insert SC failed")      \
+    HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, (fv), "DLL pre insert SC failed")      \
 }
 
 #else /* H5PB__DO_SANITY_CHECKS */
@@ -238,25 +239,146 @@ if ( ( (entry_ptr) == NULL ) ||                                               \
 
 #if H5PB__DO_SANITY_CHECKS
 
+#define H5PB__IL_DLL_PRE_REMOVE_SC(entry_ptr, hd_ptr, tail_ptr, len, Size, fv) \
+if ( ( (hd_ptr) == NULL ) ||                                                  \
+     ( (tail_ptr) == NULL ) ||                                                \
+     ( (entry_ptr) == NULL ) ||                                               \
+     ( (len) <= 0 ) ||                                                        \
+     ( (Size) < (int64_t)((entry_ptr)->size) ) ||                             \
+     ( ( (Size) == (int64_t)((entry_ptr)->size) ) &&                          \
+       ( ! ( (len) == 1 ) ) ) ||                                              \
+     ( ( (entry_ptr)->il_prev == NULL ) && ( (hd_ptr) != (entry_ptr) ) ) ||   \
+     ( ( (entry_ptr)->il_next == NULL ) && ( (tail_ptr) != (entry_ptr) ) ) || \
+     ( ( (len) == 1 ) &&                                                      \
+       ( ! ( ( (hd_ptr) == (entry_ptr) ) && ( (tail_ptr) == (entry_ptr) ) &&  \
+             ( (entry_ptr)->il_next == NULL ) &&                              \
+             ( (entry_ptr)->il_prev == NULL ) &&                              \
+             ( (Size) == (int64_t)((entry_ptr)->size) )                       \
+           )                                                                  \
+       )                                                                      \
+     )                                                                        \
+   ) {                                                                        \
+    HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, (fv), "il DLL pre remove SC failed")   \
+}
+
+#define H5PB__IL_DLL_PRE_INSERT_SC(entry_ptr, hd_ptr, tail_ptr, len, Size, fv) \
+if ( ( (entry_ptr) == NULL ) ||                                               \
+     ( (entry_ptr)->il_next != NULL ) ||                                      \
+     ( (entry_ptr)->il_prev != NULL ) ||                                      \
+     ( ( ( (hd_ptr) == NULL ) || ( (tail_ptr) == NULL ) ) &&                  \
+       ( (hd_ptr) != (tail_ptr) )                                             \
+     ) ||                                                                     \
+     ( ( (len) == 1 ) &&                                                      \
+       ( ( (hd_ptr) != (tail_ptr) ) || ( (Size) <= 0 ) ||                     \
+         ( (hd_ptr) == NULL ) || ( (int64_t)((hd_ptr)->size) != (Size) )      \
+       )                                                                      \
+     ) ||                                                                     \
+     ( ( (len) >= 1 ) &&                                                      \
+       ( ( (hd_ptr) == NULL ) || ( (hd_ptr)->il_prev != NULL ) ||             \
+         ( (tail_ptr) == NULL ) || ( (tail_ptr)->il_next != NULL )            \
+       )                                                                      \
+     )                                                                        \
+   ) {                                                                        \
+    HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, (fv), "IL DLL pre insert SC failed")   \
+}
+
+#define H5PB__IL_DLL_SC(head_ptr, tail_ptr, len, Size, fv)                  \
+if ( ( ( ( (head_ptr) == NULL ) || ( (tail_ptr) == NULL ) ) &&             \
+       ( (head_ptr) != (tail_ptr) )                                        \
+     ) ||                                                                  \
+     ( ( (len) == 1 ) &&                                                   \
+       ( ( (head_ptr) != (tail_ptr) ) ||                                   \
+         ( (head_ptr) == NULL ) || ( (int64_t)((head_ptr)->size) != (Size) ) \
+       )                                                                   \
+     ) ||                                                                  \
+     ( ( (len) >= 1 ) &&                                                   \
+       ( ( (head_ptr) == NULL ) || ( (head_ptr)->il_prev != NULL ) ||      \
+         ( (tail_ptr) == NULL ) || ( (tail_ptr)->il_next != NULL )         \
+       )                                                                   \
+     )                                                                     \
+   ) {                                                                     \
+    HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, (fv), "IL DLL sanity check failed") \
+}
+
+#else /* H5PB__DO_SANITY_CHECKS */
+
+#define H5PB__IL_DLL_PRE_REMOVE_SC(entry_ptr, hd_ptr, tail_ptr, len, Size, fv)
+#define H5PB__IL_DLL_PRE_INSERT_SC(entry_ptr, hd_ptr, tail_ptr, len, Size, fv)
+#define H5PB__IL_DLL_SC(head_ptr, tail_ptr, len, Size, fv)
+
+#endif /* H5PB__DO_SANITY_CHECKS */
+
+
+#define H5PB__IL_DLL_APPEND(entry_ptr, head_ptr, tail_ptr, len, Size, fail_val)\
+{                                                                             \
+    H5PB__IL_DLL_PRE_INSERT_SC(entry_ptr, head_ptr, tail_ptr, len, Size,       \
+                               fail_val)                                      \
+    if ( (head_ptr) == NULL )                                                 \
+    {                                                                         \
+       (head_ptr) = (entry_ptr);                                              \
+       (tail_ptr) = (entry_ptr);                                              \
+    }                                                                         \
+    else                                                                      \
+    {                                                                         \
+       (tail_ptr)->il_next = (entry_ptr);                                     \
+       (entry_ptr)->il_prev = (tail_ptr);                                     \
+       (tail_ptr) = (entry_ptr);                                              \
+    }                                                                         \
+    (len)++;                                                                  \
+    (Size) += (int64_t)((entry_ptr)->size);                                   \
+    H5PB__IL_DLL_SC(head_ptr, tail_ptr, len, Size, fail_val)                   \
+} /* H5PB__IL_DLL_APPEND() */
+
+#define H5PB__IL_DLL_REMOVE(entry_ptr, head_ptr, tail_ptr, len, Size, fv)    \
+{                                                                           \
+    H5PB__IL_DLL_PRE_REMOVE_SC(entry_ptr, head_ptr, tail_ptr, len, Size, fv) \
+    {                                                                       \
+       if ( (head_ptr) == (entry_ptr) )                                     \
+       {                                                                    \
+          (head_ptr) = (entry_ptr)->il_next;                                \
+          if ( (head_ptr) != NULL )                                         \
+             (head_ptr)->il_prev = NULL;                                    \
+       }                                                                    \
+       else                                                                 \
+          (entry_ptr)->il_prev->il_next = (entry_ptr)->il_next;             \
+       if ( (tail_ptr) == (entry_ptr) )                                     \
+       {                                                                    \
+          (tail_ptr) = (entry_ptr)->il_prev;                                \
+          if ( (tail_ptr) != NULL )                                         \
+             (tail_ptr)->il_next = NULL;                                    \
+       }                                                                    \
+       else                                                                 \
+          (entry_ptr)->il_next->il_prev = (entry_ptr)->il_prev;             \
+       entry_ptr->il_next = NULL;                                           \
+       entry_ptr->il_prev = NULL;                                           \
+       (len)--;                                                             \
+       (Size) -= (int64_t)((entry_ptr)->size);                              \
+    }                                                                       \
+    H5PB__IL_DLL_SC(head_ptr, tail_ptr, len, Size, fv)                       \
+} /* H5PB__IL_DLL_REMOVE() */
+
+
+#if H5PB__DO_SANITY_CHECKS
+
 #define H5PB__TL_DLL_PRE_REMOVE_SC(entry_ptr, hd_ptr, tail_ptr, len, Size, fv) \
 if ( ( (hd_ptr) == NULL ) ||                                                   \
      ( (tail_ptr) == NULL ) ||                                                 \
      ( (entry_ptr) == NULL ) ||                                                \
      ( (len) <= 0 ) ||                                                         \
-     ( (Size) < (entry_ptr)->size ) ||                                         \
-     ( ( (Size) == (entry_ptr)->size ) && ( ! ( (len) == 1 ) ) ) ||            \
+     ( (Size) < (int64_t)((entry_ptr)->size ) ) ||                             \
+     ( ( (Size) == (int64_t)((entry_ptr)->size) ) && ( ! ( (len) == 1 ) ) ) || \
      ( ( (entry_ptr)->tl_prev == NULL ) && ( (hd_ptr) != (entry_ptr) ) ) ||    \
      ( ( (entry_ptr)->tl_next == NULL ) && ( (tail_ptr) != (entry_ptr) ) ) ||  \
      ( ( (len) == 1 ) &&                                                       \
        ( ! ( ( (hd_ptr) == (entry_ptr) ) && ( (tail_ptr) == (entry_ptr) ) &&   \
              ( (entry_ptr)->tl_next == NULL ) &&                               \
-             ( (entry_ptr)->tlx_prev == NULL ) &&                              \
-             ( (Size) == (entry_ptr)->size )                                   \
+             ( (entry_ptr)->tl_prev == NULL ) &&                               \
+             ( (Size) == (int64_t)((entry_ptr)->size) )                        \
            )                                                                   \
        )                                                                       \
      )                                                                         \
    ) {                                                                         \
-    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fv), "TL DLL pre remove SC failed")    \
+    HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, (fv), "TL DLL pre remove SC failed")  \
 }
 
 #define H5PB__TL_DLL_SC(head_ptr, tail_ptr, len, Size, fv)                  \
@@ -276,7 +398,7 @@ if ( ( ( ( (head_ptr) == NULL ) || ( (tail_ptr) == NULL ) ) &&              \
        )                                                                    \
      )                                                                      \
    ) {                                                                      \
-    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fv), "TL DLL sanity check failed")  \
+    HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, (fv), "TL DLL sanity check failed")  \
 }
 
 #define H5PB__TL_DLL_PRE_INSERT_SC(entry_ptr, hd_ptr, tail_ptr, len, Size, fv) \
@@ -297,7 +419,7 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
        )                                                                       \
      )                                                                         \
    ) {                                                                         \
-    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fv), "TL DLL pre insert SC failed")    \
+    HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, (fv), "TL DLL pre insert SC failed")    \
 }
 
 #else /* H5PB__DO_SANITY_CHECKS */
@@ -369,7 +491,7 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
        entry_ptr->tl_next = NULL;                                            \
        entry_ptr->tl_prev = NULL;                                            \
        (len)--;                                                              \
-       (Size) -= entry_ptr->size;                                            \
+       (Size) -= (int64_t)(entry_ptr->size);                                 \
     }                                                                        \
 } /* H5PB__TL_DLL_REMOVE() */
 
@@ -411,16 +533,24 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
         ((pb_ptr)->misses[ii])++;                                          \
 } /* H5PB__UPDATE_PB_HIT_RATE_STATS */
 
-#define H5PB__UPDATE_HT_SIZE_STATS(pb_ptr)                       \
-        if ( (pb_ptr)->index_len > (pb_ptr)->max_index_len )     \
-            (pb_ptr)->max_index_len = (pb_ptr)->index_len;       \
-        if ( (pb_ptr)->index_size > (pb_ptr)->max_index_size )   \
-            (pb_ptr)->max_index_size = (pb_ptr)->index_size;     \
-        if ( (pb_ptr)->curr_md_pages > (pb_ptr)->max_md_pages )  \
-           (pb_ptr)->max_md_pages = (pb_ptr)->curr_md_pages;     \
-        if ( (pb_ptr)->curr_rd_pages > (pb_ptr)->max_rd_pages )  \
-           (pb_ptr)->max_rd_pages = (pb_ptr)->curr_rd_pages;     \
-        if ( (pb_ptr)->mpmde_count > (pb_ptr)->max_mpmde_count ) \
+#define H5PB__UPDATE_HT_SIZE_STATS(pb_ptr)                                  \
+        if ( (pb_ptr)->index_len > (pb_ptr)->max_index_len )                \
+            (pb_ptr)->max_index_len = (pb_ptr)->index_len;                  \
+        if ( (pb_ptr)->clean_index_len > (pb_ptr)->max_clean_index_len )    \
+            (pb_ptr)->max_clean_index_len = (pb_ptr)->clean_index_len;      \
+        if ( (pb_ptr)->dirty_index_len > (pb_ptr)->max_dirty_index_len )    \
+            (pb_ptr)->max_dirty_index_len = (pb_ptr)->dirty_index_len;      \
+        if ( (pb_ptr)->index_size > (pb_ptr)->max_index_size )              \
+            (pb_ptr)->max_index_size = (pb_ptr)->index_size;                \
+        if ( (pb_ptr)->clean_index_size > (pb_ptr)->max_clean_index_size )  \
+            (pb_ptr)->max_clean_index_size = (pb_ptr)->clean_index_size;    \
+        if ( (pb_ptr)->dirty_index_size > (pb_ptr)->max_dirty_index_size )  \
+            (pb_ptr)->max_dirty_index_size = (pb_ptr)->dirty_index_size;    \
+        if ( (pb_ptr)->curr_md_pages > (pb_ptr)->max_md_pages )             \
+           (pb_ptr)->max_md_pages = (pb_ptr)->curr_md_pages;                \
+        if ( (pb_ptr)->curr_rd_pages > (pb_ptr)->max_rd_pages )             \
+           (pb_ptr)->max_rd_pages = (pb_ptr)->curr_rd_pages;                \
+        if ( (pb_ptr)->mpmde_count > (pb_ptr)->max_mpmde_count )            \
            (pb_ptr)->max_rd_pages = (pb_ptr)->curr_rd_pages;    
 
 #define H5PB__UPDATE_STATS_FOR_HT_INSERTION(pb_ptr) \
@@ -485,9 +615,9 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
 #define H5PB__UPDATE_DWL_DELAYED_WRITES(pb_ptr, insertion_depth, delay) \
 {                                                                       \
     HDassert((pb_ptr)->vfd_swmr_writer);                                \
-    (pb_ptr)delayed_writes++;                                           \
-    (pb_ptr)total_delay += delay;                                       \
-    (pb_ptr)total_dwl_ins_depth += (insertion_depth)                    \
+    (pb_ptr)->delayed_writes++;                                         \
+    (pb_ptr)->total_delay += (int64_t)(delay);                          \
+    (pb_ptr)->total_dwl_ins_depth += (insertion_depth);                 \
 }
 
 
@@ -685,122 +815,236 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
 
 #if H5PB__DO_SANITY_CHECKS
 
-#define H5PB__PRE_HT_INSERT_SC(pb_ptr, entry_ptr, fail_val)                 \
-if ( ( (pb_ptr) == NULL ) ||                                                \
-     ( (pb_ptr)->magic != H5PB__H5PB_T_MAGIC ) ||                           \
-     ( (entry_ptr) == NULL ) ||                                             \
-     ( (entry_ptr)->magic != H5PB__H5PB_ENTRY_T_MAGIC ) ||                  \
-     ( (entry_ptr)->ht_next != NULL ) ||                                    \
-     ( (entry_ptr)->ht_prev != NULL ) ||                                    \
-     ( (entry_ptr)->size < pb_ptr->page_size ) ||                           \
-     ( H5PB__HASH_FCN((entry_ptr)->page) < 0 ) ||                           \
-     ( H5PB__HASH_FCN((entry_ptr)->page) >= H5PB__HASH_TABLE_LEN ) ||       \
-     ( (pb_ptr)->index_len < 0 ) ||                                         \
-     ( (pb_ptr)->index_size < 0 ) ||                                        \
-     ( (pb_ptr)->curr_pages < 0 ) ||                                        \
-     ( (pb_ptr)->curr_rd_pages < 0 ) ||                                     \
-     ( (pb_ptr)->curr_md_pages < 0 ) ||                                     \
-     ( ((pb_ptr)->curr_pages !=                                             \
-        ((pb_ptr)->curr_md_pages + (pb_ptr)->curr_rd_pages)) ) ||           \
-     ( (pb_ptr)->mpmde_count < 0 ) ||                                       \
-     ( (pb_ptr)->index_len !=                                               \
-       ((pb_ptr)->curr_pages + (pb_ptr)->mpmde_count) ) ) {                 \
-    HDassert(FALSE);                                                        \
-    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, fail_val, "pre HT insert SC failed") \
+#define H5PB__PRE_HT_INSERT_SC(pb_ptr, entry_ptr, fail_val)                   \
+if ( ( (pb_ptr) == NULL ) ||                                                  \
+     ( (pb_ptr)->magic != H5PB__H5PB_T_MAGIC ) ||                             \
+     ( (entry_ptr) == NULL ) ||                                               \
+     ( (entry_ptr)->ht_next != NULL ) ||                                      \
+     ( (entry_ptr)->ht_prev != NULL ) ||                                      \
+     ( (entry_ptr)->size <= 0 ) ||                                            \
+     ( H5PB__HASH_FCN((entry_ptr)->page) < 0 ) ||                             \
+     ( H5PB__HASH_FCN((entry_ptr)->page) >= H5PB__HASH_TABLE_LEN ) ||         \
+     ( (pb_ptr)->index_size !=                                                \
+       ((pb_ptr)->clean_index_size +                                          \
+	(pb_ptr)->dirty_index_size) ) ||                                      \
+     ( (pb_ptr)->index_size < ((pb_ptr)->clean_index_size) ) ||               \
+     ( (pb_ptr)->index_size < ((pb_ptr)->dirty_index_size) ) ||               \
+     ( (pb_ptr)->index_len != (pb_ptr)->il_len ) ||                           \
+     ( (pb_ptr)->index_size != (pb_ptr)->il_size ) ||                         \
+     ( (pb_ptr)->curr_pages < 0 ) ||                                          \
+     ( (pb_ptr)->curr_rd_pages < 0 ) ||                                       \
+     ( (pb_ptr)->curr_md_pages < 0 ) ||                                       \
+     ( ((pb_ptr)->curr_pages !=                                               \
+        ((pb_ptr)->curr_md_pages + (pb_ptr)->curr_rd_pages)) ) ||             \
+     ( (pb_ptr)->mpmde_count < 0 ) ||                                         \
+     ( (pb_ptr)->index_len !=                                                 \
+       ((pb_ptr)->curr_pages + (pb_ptr)->mpmde_count) ) ) {                   \
+    HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, fail_val, "pre HT insert SC failed") \
 }
 
-#define H5PB__POST_HT_INSERT_SC(pb_ptr, entry_ptr, fail_val)                 \
-if ( ( (pb_ptr) == NULL ) ||                                                 \
-     ( (pb_ptr)->magic != H5PB__H5PB_T_MAGIC ) ||                            \
-     ( (entry_ptr)->magic != H5PB__H5PB_ENTRY_T_MAGIC ) ||                   \
-     ( (pb_ptr)->index_len < 1 ) ||                                          \
-     ( (pb_ptr)->index_len !=                                                \
-       ((pb_ptr)->curr_pages + (pb_ptr)->mpmde_count) ) ||                   \
-     ( (pb_ptr)->index_size < (int64_t)((entry_ptr)->size) ) ) {             \
-    HDassert(FALSE);                                                         \
-    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, fail_val, "post HT insert SC failed") \
+#define H5PB__POST_HT_INSERT_SC(pb_ptr, entry_ptr, fail_val)                   \
+if ( ( (pb_ptr) == NULL ) ||                                                   \
+     ( (pb_ptr)->magic != H5PB__H5PB_T_MAGIC ) ||                              \
+     ( (pb_ptr)->index_size !=                                                 \
+       ((pb_ptr)->clean_index_size +                                           \
+	(pb_ptr)->dirty_index_size) ) ||                                       \
+     ( (pb_ptr)->index_size < ((pb_ptr)->clean_index_size) ) ||                \
+     ( (pb_ptr)->index_size < ((pb_ptr)->dirty_index_size) ) ||                \
+     ( (pb_ptr)->index_len != (pb_ptr)->il_len ) ||                            \
+     ( (pb_ptr)->index_len !=                                                  \
+       ((pb_ptr)->curr_pages + (pb_ptr)->mpmde_count) ) ||                     \
+     ( (pb_ptr)->index_size != (pb_ptr)->il_size) ) {                          \
+    HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, fail_val, "post HT insert SC failed") \
 }
 
-#define H5PB__PRE_HT_REMOVE_SC(pb_ptr, entry_ptr)                       \
-if ( ( (pb_ptr) == NULL ) ||                                            \
-     ( (pb_ptr)->magic != H5PB__H5PB_T_MAGIC ) ||                       \
-     ( (pb_ptr)->index_len < 1 ) ||                                     \
-     ( (entry_ptr) == NULL ) ||                                         \
-     ( (entry_ptr)->magic != H5PB__H5PB_ENTRY_T_MAGIC ) ||              \
-     ( (entry_ptr)->size < pb_ptr->page_size ) ||                       \
-     ( (pb_ptr)->index_len < 1 ) ||                                     \
-     ( (pb_ptr)->index_size < (int64_t)((entry_ptr)->size) ) ||         \
-     ( ((pb_ptr)->ht)[(H5PB__HASH_FCN((entry_ptr)->page))]              \
-        == NULL ) ||                                                    \
-     ( ( ((pb_ptr)->ht)[(H5PB__HASH_FCN((entry_ptr)->page))]            \
-       != (entry_ptr) ) &&                                              \
-       ( (entry_ptr)->ht_prev == NULL ) ) ||                            \
-     ( ( ((pb_ptr)->ht)[(H5PB__HASH_FCN((entry_ptr)->page))] ==         \
-         (entry_ptr) ) &&                                               \
-       ( (entry_ptr)->ht_prev != NULL ) ) ) {                           \
-    HDassert(FALSE);                                                    \
-    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "pre HT remove SC failed") \
+#define H5PB__PRE_HT_REMOVE_SC(pb_ptr, entry_ptr)                         \
+if ( ( (pb_ptr) == NULL ) ||                                              \
+     ( (pb_ptr)->magic != H5PB__H5PB_T_MAGIC ) ||                         \
+     ( (pb_ptr)->index_len < 1 ) ||                                       \
+     ( (entry_ptr) == NULL ) ||                                           \
+     ( (pb_ptr)->index_size < (int64_t)((entry_ptr)->size) ) ||           \
+     ( (entry_ptr)->size <= 0 ) ||                                        \
+     ( H5PB__HASH_FCN((entry_ptr)->page) < 0 ) ||                         \
+     ( H5PB__HASH_FCN((entry_ptr)->page) >= H5PB__HASH_TABLE_LEN ) ||     \
+     ( ((pb_ptr)->ht)[(H5PB__HASH_FCN((entry_ptr)->page))]                \
+       == NULL ) ||                                                       \
+     ( ( ((pb_ptr)->ht)[(H5PB__HASH_FCN((entry_ptr)->page))]              \
+       != (entry_ptr) ) &&                                                \
+       ( (entry_ptr)->ht_prev == NULL ) ) ||                              \
+     ( ( ((pb_ptr)->ht)[(H5PB__HASH_FCN((entry_ptr)->page))] ==           \
+         (entry_ptr) ) &&                                                 \
+       ( (entry_ptr)->ht_prev != NULL ) ) ||                              \
+     ( (pb_ptr)->index_size !=                                            \
+       ((pb_ptr)->clean_index_size +                                      \
+	(pb_ptr)->dirty_index_size) ) ||                                  \
+     ( (pb_ptr)->index_size < ((pb_ptr)->clean_index_size) ) ||           \
+     ( (pb_ptr)->index_size < ((pb_ptr)->dirty_index_size) ) ||           \
+     ( (pb_ptr)->index_len != (pb_ptr)->il_len ) ||                       \
+     ( (pb_ptr)->index_size != (pb_ptr)->il_size ) ) {                    \
+    HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, "pre HT remove SC failed") \
 }
 
-#define H5PB__POST_HT_REMOVE_SC(pb_ptr, entry_ptr)                       \
-if ( ( (pb_ptr) == NULL ) ||                                             \
-     ( (pb_ptr)->magic != H5PB__H5PB_T_MAGIC ) ||                        \
-     ( (entry_ptr) == NULL ) ||                                          \
-     ( (entry_ptr)->magic != H5PB__H5PB_ENTRY_T_MAGIC ) ||               \
-     ( (entry_ptr)->size < (pb_ptr)->page_size ) ||                      \
-     ( (entry_ptr)->ht_prev != NULL ) ||                                 \
-     ( (entry_ptr)->ht_prev != NULL ) ||                                 \
-     ( (pb_ptr)->index_len < 0 ) ||                                      \
-     ( (pb_ptr)->index_size < 0 ) ||                                     \
-     ( (pb_ptr)->curr_pages < 0 ) ||                                     \
-     ( (pb_ptr)->curr_rd_pages < 0 ) ||                                  \
-     ( (pb_ptr)->curr_md_pages < 0 ) ||                                  \
-     ( ((pb_ptr)->curr_pages !=                                          \
-        ((pb_ptr)->curr_md_pages + (pb_ptr)->curr_rd_pages)) ) ||        \
-     ( (pb_ptr)->mpmde_count < 0 ) ||                                    \
-     ( (pb_ptr)->index_len !=                                            \
-       ((pb_ptr)->curr_pages + (pb_ptr)->mpmde_count) ) ) {              \
-    HDassert(FALSE);                                                     \
-    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "post HT remove SC failed") \
+#define H5PB__POST_HT_REMOVE_SC(pb_ptr, entry_ptr)                         \
+if ( ( (pb_ptr) == NULL ) ||                                               \
+     ( (pb_ptr)->magic != H5PB__H5PB_T_MAGIC ) ||                          \
+     ( (entry_ptr) == NULL ) ||                                            \
+     ( (entry_ptr)->size <= 0 ) ||                                         \
+     ( (entry_ptr)->ht_prev != NULL ) ||                                   \
+     ( (entry_ptr)->ht_prev != NULL ) ||                                   \
+     ( (pb_ptr)->index_size !=                                             \
+       ((pb_ptr)->clean_index_size +                                       \
+	(pb_ptr)->dirty_index_size) ) ||                                   \
+     ( (pb_ptr)->index_size < ((pb_ptr)->clean_index_size) ) ||            \
+     ( (pb_ptr)->index_size < ((pb_ptr)->dirty_index_size) ) ||            \
+     ( (pb_ptr)->index_len != (pb_ptr)->il_len ) ||                        \
+     ( (pb_ptr)->index_size != (pb_ptr)->il_size ) ||                      \
+     ( (pb_ptr)->curr_pages < 0 ) ||                                       \
+     ( (pb_ptr)->curr_rd_pages < 0 ) ||                                    \
+     ( (pb_ptr)->curr_md_pages < 0 ) ||                                    \
+     ( ((pb_ptr)->curr_pages !=                                            \
+        ((pb_ptr)->curr_md_pages + (pb_ptr)->curr_rd_pages)) ) ||          \
+     ( (pb_ptr)->mpmde_count < 0 ) ||                                      \
+     ( (pb_ptr)->index_len !=                                              \
+       ((pb_ptr)->curr_pages + (pb_ptr)->mpmde_count) ) ) {                \
+    HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, "post HT remove SC failed") \
 }
 
-#define H5PB__PRE_HT_SEARCH_SC(pb_ptr, page, fail_val)                      \
-if ( ( (pb_ptr) == NULL ) ||                                                \
-     ( (pb_ptr)->magic != H5PB__H5PB_T_MAGIC ) ||                           \
-     ( H5PB__HASH_FCN(page) < 0 ) ||                                        \
-     ( H5PB__HASH_FCN(page) >= H5PB__HASH_TABLE_LEN ) ) {                   \
-    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, fail_val, "pre HT search SC failed") \
+#define H5PB__PRE_HT_SEARCH_SC(pb_ptr, page, fail_val)                        \
+if ( ( (pb_ptr) == NULL ) ||                                                  \
+     ( (pb_ptr)->magic != H5PB__H5PB_T_MAGIC ) ||                             \
+     ( (pb_ptr)->index_size !=                                                \
+       ((pb_ptr)->clean_index_size + (pb_ptr)->dirty_index_size) ) ||         \
+     ( H5PB__HASH_FCN(page) < 0 ) ||                                          \
+     ( H5PB__HASH_FCN(page) >= H5PB__HASH_TABLE_LEN ) ) {                     \
+    HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, fail_val, "pre HT search SC failed") \
 }
 
-#define H5PB__POST_SUC_HT_SEARCH_SC(pb_ptr, entry_ptr, k, fail_val) \
-if ( ( (pb_ptr) == NULL ) ||                                        \
-     ( (pb_ptr)->magic != H5PB__H5PB_T_MAGIC ) ||                   \
-     ( (pb_ptr)->index_len < 1 ) ||                                 \
-     ( (entry_ptr) == NULL ) ||                                     \
-     ( (entry_ptr)->magic != H5PB__H5PB_ENTRY_T_MAGIC ) ||          \
-     ( (pb_ptr)->index_size < (int64_t)((entry_ptr)->size) ) ||     \
-     ( (pb_ptr)->index_len < 1 ) ||                                 \
-     ( (entry_ptr)->size < (pb_ptr)->page_size ) ||                 \
-     ( ( k < 0 ) || ( k >= H5PB__HASH_TABLE_LEN ) ) ||              \
-     ( ((pb_ptr)->ht)[k] == NULL ) ||                               \
-     ( ( ((pb_ptr)->ht)[k] != (entry_ptr) ) &&                      \
-       ( (entry_ptr)->ht_prev == NULL ) ) ||                        \
-     ( ( ((pb_ptr)->ht)[k] == (entry_ptr) ) &&                      \
-       ( (entry_ptr)->ht_prev != NULL ) ) ||                        \
-     ( ( (entry_ptr)->ht_prev != NULL ) &&                          \
-       ( (entry_ptr)->ht_prev->ht_next != (entry_ptr) ) ) ||        \
-     ( ( (entry_ptr)->ht_next != NULL ) &&                          \
-       ( (entry_ptr)->ht_next->ht_prev != (entry_ptr) ) ) ) {       \
-    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, fail_val,                    \
-                "post successful HT search SC failed")              \
+#define H5PB__POST_SUC_HT_SEARCH_SC(pb_ptr, entry_ptr, k, fail_val)   \
+if ( ( (pb_ptr) == NULL ) ||                                          \
+     ( (pb_ptr)->magic != H5PB__H5PB_T_MAGIC ) ||                     \
+     ( (pb_ptr)->index_len < 1 ) ||                                   \
+     ( (entry_ptr) == NULL ) ||                                       \
+     ( (pb_ptr)->index_size < (int64_t)((entry_ptr)->size )) ||       \
+     ( (pb_ptr)->index_size !=                                        \
+       ((pb_ptr)->clean_index_size + (pb_ptr)->dirty_index_size) ) || \
+     ( (entry_ptr)->size <= 0 ) ||                                    \
+     ( ((pb_ptr)->ht)[k] == NULL ) ||                                 \
+     ( ( ((pb_ptr)->ht)[k] != (entry_ptr) ) &&                        \
+       ( (entry_ptr)->ht_prev == NULL ) ) ||                          \
+     ( ( ((pb_ptr)->ht)[k] == (entry_ptr) ) &&                        \
+       ( (entry_ptr)->ht_prev != NULL ) ) ||                          \
+     ( ( (entry_ptr)->ht_prev != NULL ) &&                            \
+       ( (entry_ptr)->ht_prev->ht_next != (entry_ptr) ) ) ||          \
+     ( ( (entry_ptr)->ht_next != NULL ) &&                            \
+       ( (entry_ptr)->ht_next->ht_prev != (entry_ptr) ) ) ) {         \
+    HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, fail_val,                    \
+                "post successful HT search SC failed")                \
 }
 
 #define H5PB__POST_HT_SHIFT_TO_FRONT_SC(pb_ptr, entry_ptr, k, fail_val) \
 if ( ( (pb_ptr) == NULL ) ||                                            \
      ( ((pb_ptr)->ht)[k] != (entry_ptr) ) ||                            \
      ( (entry_ptr)->ht_prev != NULL ) ) {                               \
-    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, fail_val,                        \
+    HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, fail_val,                      \
                 "post HT shift to front SC failed")                     \
+}
+
+#define H5PB__PRE_HT_ENTRY_SIZE_CHANGE_SC(pb_ptr, old_size, new_size, \
+		                         entry_ptr, was_clean)        \
+if ( ( (pb_ptr) == NULL ) ||                                          \
+     ( (pb_ptr)->index_len <= 0 ) ||                                  \
+     ( (pb_ptr)->index_size <= 0 ) ||                                 \
+     ( (new_size) <= 0 ) ||                                           \
+     ( (old_size) > (pb_ptr)->index_size ) ||                         \
+     ( ( (pb_ptr)->index_len == 1 ) &&                                \
+       ( (pb_ptr)->index_size != (old_size) ) ) ||                    \
+     ( (pb_ptr)->index_size !=                                        \
+       ((pb_ptr)->clean_index_size +                                  \
+        (pb_ptr)->dirty_index_size) ) ||                              \
+     ( (pb_ptr)->index_size < ((pb_ptr)->clean_index_size) ) ||       \
+     ( (pb_ptr)->index_size < ((pb_ptr)->dirty_index_size) ) ||       \
+     ( ( !( was_clean ) ||                                            \
+	    ( (pb_ptr)->clean_index_size < (old_size) ) ) &&          \
+	  ( ( (was_clean) ) ||                                        \
+	    ( (pb_ptr)->dirty_index_size < (old_size) ) ) ) ||        \
+     ( (entry_ptr) == NULL ) ||                                       \
+     ( (pb_ptr)->index_len != (pb_ptr)->il_len ) ||                   \
+     ( (pb_ptr)->index_size != (pb_ptr)->il_size ) ) {                \
+    HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL,                        \
+                "pre HT entry size change SC failed")                 \
+}
+
+#define H5PB__POST_HT_ENTRY_SIZE_CHANGE_SC(pb_ptr, old_size, new_size, \
+		                          entry_ptr)                   \
+if ( ( (pb_ptr) == NULL ) ||                                           \
+     ( (pb_ptr)->index_len <= 0 ) ||                                   \
+     ( (pb_ptr)->index_size <= 0 ) ||                                  \
+     ( (new_size) > (pb_ptr)->index_size ) ||                          \
+     ( (pb_ptr)->index_size !=                                         \
+	  ((pb_ptr)->clean_index_size +                                \
+           (pb_ptr)->dirty_index_size) ) ||                            \
+     ( (pb_ptr)->index_size < ((pb_ptr)->clean_index_size) ) ||        \
+     ( (pb_ptr)->index_size < ((pb_ptr)->dirty_index_size) ) ||        \
+     ( ( !((entry_ptr)->is_dirty ) ||                                  \
+	    ( (pb_ptr)->dirty_index_size < (new_size) ) ) &&           \
+	  ( ( ((entry_ptr)->is_dirty)  ) ||                            \
+	    ( (pb_ptr)->clean_index_size < (new_size) ) ) ) ||         \
+     ( ( (pb_ptr)->index_len == 1 ) &&                                 \
+       ( (pb_ptr)->index_size != (new_size) ) ) ||                     \
+     ( (pb_ptr)->index_len != (pb_ptr)->il_len ) ||                    \
+     ( (pb_ptr)->index_size != (pb_ptr)->il_size ) ) {                 \
+    HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL,                         \
+                "post HT entry size change SC failed")                 \
+}
+
+#define H5PB__PRE_HT_UPDATE_FOR_ENTRY_CLEAN_SC(pb_ptr, entry_ptr)     \
+if ( ( (pb_ptr) == NULL ) ||                                          \
+     ( (pb_ptr)->magic != H5PB__H5PB_T_MAGIC ) ||                     \
+     ( (pb_ptr)->index_len <= 0 ) ||                                  \
+     ( (entry_ptr) == NULL ) ||                                       \
+     ( (entry_ptr)->is_dirty != FALSE ) ||                            \
+     ( (pb_ptr)->index_size < (int64_t)((entry_ptr)->size) ) ||       \
+     ( (pb_ptr)->dirty_index_size < (int64_t)((entry_ptr)->size) ) || \
+     ( (pb_ptr)->index_size !=                                        \
+       ((pb_ptr)->clean_index_size + (pb_ptr)->dirty_index_size) ) || \
+     ( (pb_ptr)->index_size < ((pb_ptr)->clean_index_size) ) ||       \
+     ( (pb_ptr)->index_size < ((pb_ptr)->dirty_index_size) ) ) {      \
+    HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL,                        \
+                "pre HT update for entry clean SC failed")            \
+}
+
+#define H5PB__PRE_HT_UPDATE_FOR_ENTRY_DIRTY_SC(pb_ptr, entry_ptr)     \
+if ( ( (pb_ptr) == NULL ) ||                                          \
+     ( (pb_ptr)->magic != H5PB__H5PB_T_MAGIC ) ||                     \
+     ( (pb_ptr)->index_len <= 0 ) ||                                  \
+     ( (entry_ptr) == NULL ) ||                                       \
+     ( (entry_ptr)->is_dirty != TRUE ) ||                             \
+     ( (pb_ptr)->index_size < (int64_t)((entry_ptr)->size) ) ||       \
+     ( (pb_ptr)->clean_index_size < (int64_t)((entry_ptr)->size) ) || \
+     ( (pb_ptr)->index_size !=                                        \
+       ((pb_ptr)->clean_index_size + (pb_ptr)->dirty_index_size) ) || \
+     ( (pb_ptr)->index_size < ((pb_ptr)->clean_index_size) ) ||       \
+     ( (pb_ptr)->index_size < ((pb_ptr)->dirty_index_size) ) ) {      \
+    HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL,                        \
+                "pre HT update for entry dirty SC failed")            \
+}
+
+#define H5PB__POST_HT_UPDATE_FOR_ENTRY_CLEAN_SC(pb_ptr, entry_ptr)    \
+if ( ( (pb_ptr)->index_size !=                                        \
+       ((pb_ptr)->clean_index_size + (pb_ptr)->dirty_index_size) ) || \
+     ( (pb_ptr)->index_size < ((pb_ptr)->clean_index_size) ) ||       \
+     ( (pb_ptr)->index_size < ((pb_ptr)->dirty_index_size) ) ) {      \
+    HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL,                        \
+                "post HT update for entry clean SC failed")           \
+}
+
+#define H5PB__POST_HT_UPDATE_FOR_ENTRY_DIRTY_SC(pb_ptr, entry_ptr)    \
+if ( ( (pb_ptr)->index_size !=                                        \
+       ((pb_ptr)->clean_index_size + (pb_ptr)->dirty_index_size) ) || \
+     ( (pb_ptr)->index_size < ((pb_ptr)->clean_index_size) ) ||       \
+     ( (pb_ptr)->index_size < ((pb_ptr)->dirty_index_size) ) ) {      \
+    HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL,                        \
+                "post HT update for entry dirty SC failed")           \
 }
 
 #else /* H5PB__DO_SANITY_CHECKS */
@@ -809,97 +1053,188 @@ if ( ( (pb_ptr) == NULL ) ||                                            \
 #define H5PB__POST_HT_INSERT_SC(pb_ptr, entry_ptr, fail_val)
 #define H5PB__PRE_HT_REMOVE_SC(pb_ptr, entry_ptr)
 #define H5PB__POST_HT_REMOVE_SC(pb_ptr, entry_ptr)
-#define H5PB__PRE_HT_SEARCH_SC(pb_ptr, page, fail_val)
+#define H5PB__PRE_HT_SEARCH_SC(pb_ptr, Addr, fail_val)
 #define H5PB__POST_SUC_HT_SEARCH_SC(pb_ptr, entry_ptr, k, fail_val)
 #define H5PB__POST_HT_SHIFT_TO_FRONT_SC(pb_ptr, entry_ptr, k, fail_val)
+#define H5PB__PRE_HT_UPDATE_FOR_ENTRY_CLEAN_SC(pb_ptr, entry_ptr)
+#define H5PB__PRE_HT_UPDATE_FOR_ENTRY_DIRTY_SC(pb_ptr, entry_ptr)
+#define H5PB__PRE_HT_ENTRY_SIZE_CHANGE_SC(pb_ptr, old_size, new_size, \
+		                          entry_ptr, was_clean)
+#define H5PB__POST_HT_ENTRY_SIZE_CHANGE_SC(pb_ptr, old_size, new_size, \
+		                           entry_ptr)
+#define H5PB__POST_HT_UPDATE_FOR_ENTRY_CLEAN_SC(pb_ptr, entry_ptr)
+#define H5PB__POST_HT_UPDATE_FOR_ENTRY_DIRTY_SC(pb_ptr, entry_ptr)
 
 #endif /* H5PB__DO_SANITY_CHECKS */
 
-#define H5PB__INSERT_IN_INDEX(pb_ptr, entry_ptr, fail_val)      \
-{                                                               \
-    int k;                                                      \
-    H5PB__PRE_HT_INSERT_SC(pb_ptr, entry_ptr, fail_val)         \
-    k = H5PB__HASH_FCN((entry_ptr)->page);                      \
-    if(((pb_ptr)->ht)[k] != NULL) {                             \
-        (entry_ptr)->ht_next = ((pb_ptr)->ht)[k];               \
-        (entry_ptr)->ht_next->ht_prev = (entry_ptr);            \
-    }                                                           \
-    ((pb_ptr)->ht)[k] = (entry_ptr);                            \
-    (pb_ptr)->index_len++;                                      \
-    (pb_ptr)->index_size += (int64_t)((entry_ptr)->size);       \
-    if ( (entry_ptr)->is_metadata ) {                           \
-        if ( (entry_ptr)->is_mpmde ) {                          \
-            ((pb_ptr)->mpmde_count)++;                          \
-        } else {                                                \
-            ((pb_ptr)->curr_md_pages)++;                        \
-            (pb_ptr)->curr_pages++;                             \
-        }                                                       \
-    } else {                                                    \
-        ((pb_ptr)->curr_rd_pages)++;                            \
-        (pb_ptr)->curr_pages++;                                 \
-    }                                                           \
-    H5PB__UPDATE_STATS_FOR_HT_INSERTION(pb_ptr)                 \
-    H5PB__UPDATE_HT_SIZE_STATS(pb_ptr)                          \
-    H5PB__POST_HT_INSERT_SC(pb_ptr, entry_ptr, fail_val)        \
+
+#define H5PB__INSERT_IN_INDEX(pb_ptr, entry_ptr, fail_val)          \
+{                                                                   \
+    int k;                                                          \
+    H5PB__PRE_HT_INSERT_SC(pb_ptr, entry_ptr, fail_val)             \
+    k = H5PB__HASH_FCN((entry_ptr)->page);                          \
+    if(((pb_ptr)->ht)[k] != NULL) {                                 \
+        (entry_ptr)->ht_next = ((pb_ptr)->ht)[k];                   \
+        (entry_ptr)->ht_next->ht_prev = (entry_ptr);                \
+    }                                                               \
+    ((pb_ptr)->ht)[k] = (entry_ptr);                                \
+    (pb_ptr)->index_len++;                                          \
+    (pb_ptr)->index_size += (int64_t)((entry_ptr)->size);           \
+    if((entry_ptr)->is_dirty) {                                     \
+        (pb_ptr)->dirty_index_size += (int64_t)((entry_ptr)->size); \
+    } else {                                                        \
+        (pb_ptr)->clean_index_size += (int64_t)((entry_ptr)->size); \
+    }                                                               \
+    if ( (entry_ptr)->is_metadata ) {                               \
+        if ( (entry_ptr)->is_mpmde ) {                              \
+            ((pb_ptr)->mpmde_count)++;                              \
+        } else {                                                    \
+            ((pb_ptr)->curr_md_pages)++;                            \
+            (pb_ptr)->curr_pages++;                                 \
+        }                                                           \
+    } else {                                                        \
+        ((pb_ptr)->curr_rd_pages)++;                                \
+        (pb_ptr)->curr_pages++;                                     \
+    }                                                               \
+    H5PB__IL_DLL_APPEND((entry_ptr), (pb_ptr)->il_head,             \
+                        (pb_ptr)->il_tail, (pb_ptr)->il_len,        \
+                        (pb_ptr)->il_size, fail_val)                \
+    H5PB__UPDATE_STATS_FOR_HT_INSERTION(pb_ptr)                     \
+    H5PB__UPDATE_HT_SIZE_STATS(pb_ptr)                              \
+    H5PB__POST_HT_INSERT_SC(pb_ptr, entry_ptr, fail_val)            \
 }
 
-#define H5PB__DELETE_FROM_INDEX(pb_ptr, entry_ptr, fail_val)    \
-{                                                               \
-    int k;                                                      \
-    H5PB__PRE_HT_REMOVE_SC(pb_ptr, entry_ptr)                   \
-    k = H5PB__HASH_FCN((entry_ptr)->page);                      \
-    if((entry_ptr)->ht_next)                                    \
-        (entry_ptr)->ht_next->ht_prev = (entry_ptr)->ht_prev;   \
-    if((entry_ptr)->ht_prev)                                    \
-        (entry_ptr)->ht_prev->ht_next = (entry_ptr)->ht_next;   \
-    if(((pb_ptr)->ht)[k] == (entry_ptr))                        \
-        ((pb_ptr)->ht)[k] = (entry_ptr)->ht_next;               \
-    (entry_ptr)->ht_next = NULL;                                \
-    (entry_ptr)->ht_prev = NULL;                                \
-    (pb_ptr)->index_len--;                                      \
-    (pb_ptr)->index_size -= (int64_t)((entry_ptr)->size);       \
-    if ( (entry_ptr)->is_metadata ) {                           \
-        if ( (entry_ptr)->is_mpmde ) {                          \
-            ((pb_ptr)->mpmde_count)--;                          \
-        } else {                                                \
-            ((pb_ptr)->curr_md_pages)--;                        \
-            (pb_ptr)->curr_pages--;                             \
-        }                                                       \
-    } else {                                                    \
-        ((pb_ptr)->curr_rd_pages)--;                            \
-        (pb_ptr)->curr_pages--;                                 \
-    }                                                           \
-    H5PB__UPDATE_STATS_FOR_HT_DELETION(pb_ptr)                  \
-    H5PB__POST_HT_REMOVE_SC(pb_ptr, entry_ptr)                  \
+#define H5PB__DELETE_FROM_INDEX(pb_ptr, entry_ptr, fail_val)        \
+{                                                                   \
+    int k;                                                          \
+    H5PB__PRE_HT_REMOVE_SC(pb_ptr, entry_ptr)                       \
+    k = H5PB__HASH_FCN((entry_ptr)->page);                          \
+    if((entry_ptr)->ht_next)                                        \
+        (entry_ptr)->ht_next->ht_prev = (entry_ptr)->ht_prev;       \
+    if((entry_ptr)->ht_prev)                                        \
+        (entry_ptr)->ht_prev->ht_next = (entry_ptr)->ht_next;       \
+    if(((pb_ptr)->ht)[k] == (entry_ptr))                            \
+        ((pb_ptr)->ht)[k] = (entry_ptr)->ht_next;                   \
+    (entry_ptr)->ht_next = NULL;                                    \
+    (entry_ptr)->ht_prev = NULL;                                    \
+    (pb_ptr)->index_len--;                                          \
+    (pb_ptr)->index_size -= (int64_t)((entry_ptr)->size);           \
+    if((entry_ptr)->is_dirty) {                                     \
+        (pb_ptr)->dirty_index_size -= (int64_t)((entry_ptr)->size); \
+    } else {                                                        \
+        (pb_ptr)->clean_index_size -= (int64_t)((entry_ptr)->size); \
+    }                                                               \
+    if ( (entry_ptr)->is_metadata ) {                               \
+        if ( (entry_ptr)->is_mpmde ) {                              \
+            ((pb_ptr)->mpmde_count)--;                              \
+        } else {                                                    \
+            ((pb_ptr)->curr_md_pages)--;                            \
+            (pb_ptr)->curr_pages--;                                 \
+        }                                                           \
+    } else {                                                        \
+        ((pb_ptr)->curr_rd_pages)--;                                \
+        (pb_ptr)->curr_pages--;                                     \
+    }                                                               \
+    H5PB__IL_DLL_REMOVE((entry_ptr), (pb_ptr)->il_head,             \
+                       (pb_ptr)->il_tail, (pb_ptr)->il_len,         \
+                       (pb_ptr)->il_size, fail_val)                 \
+    H5PB__UPDATE_STATS_FOR_HT_DELETION(pb_ptr)                      \
+    H5PB__POST_HT_REMOVE_SC(pb_ptr, entry_ptr)                      \
 }
 
-#define H5PB__SEARCH_INDEX(pb_ptr, pg, entry_ptr, f_val)                     \
-{                                                                            \
-    int k;                                                                   \
-    int depth = 0;                                                           \
-    H5PB__PRE_HT_SEARCH_SC((pb_ptr), (pg), (f_val))                          \
-    k = H5PB__HASH_FCN((pg));                                                \
-    entry_ptr = ((pb_ptr)->ht)[k];                                           \
-    while ( entry_ptr ) {                                                    \
-        if ( (pg) == (entry_ptr)->page ) {                                   \
-            H5PB__POST_SUC_HT_SEARCH_SC(pb_ptr, entry_ptr, k, f_val)         \
-            if ( entry_ptr != ((pb_ptr)->ht)[k] ) {                          \
-                if ( (entry_ptr)->ht_next )                                  \
-                    (entry_ptr)->ht_next->ht_prev = (entry_ptr)->ht_prev;    \
-                HDassert((entry_ptr)->ht_prev != NULL);                      \
-                (entry_ptr)->ht_prev->ht_next = (entry_ptr)->ht_next;        \
-                ((pb_ptr)->ht)[k]->ht_prev = (entry_ptr);                    \
-                (entry_ptr)->ht_next = ((pb_ptr)->ht)[k];                    \
-                (entry_ptr)->ht_prev = NULL;                                 \
-                ((pb_ptr)->ht)[k] = (entry_ptr);                             \
-                H5PB__POST_HT_SHIFT_TO_FRONT_SC(pb_ptr, entry_ptr, k, f_val) \
-            }                                                                \
-            break;                                                           \
-        }                                                                    \
-        (entry_ptr) = (entry_ptr)->ht_next;                                  \
-        (depth)++;                                                           \
-    }                                                                        \
-    H5PB__UPDATE_STATS_FOR_HT_SEARCH(pb_ptr, (entry_ptr != NULL), depth)     \
+#define H5PB__SEARCH_INDEX(pb_ptr, Page, entry_ptr, fail_val)                  \
+{                                                                              \
+    int k;                                                                     \
+    int depth = 0;                                                             \
+    H5PB__PRE_HT_SEARCH_SC(pb_ptr, Page, fail_val)                             \
+    k = H5PB__HASH_FCN(Page);                                                  \
+    entry_ptr = ((pb_ptr)->ht)[k];                                             \
+    while(entry_ptr) {                                                         \
+        if ( (Page) == (entry_ptr)->page ) {                                   \
+            H5PB__POST_SUC_HT_SEARCH_SC(pb_ptr, entry_ptr, k, fail_val)        \
+            if ( (entry_ptr) != ((pb_ptr)->ht)[k] ) {                          \
+                if ( (entry_ptr)->ht_next )                                    \
+                    (entry_ptr)->ht_next->ht_prev = (entry_ptr)->ht_prev;      \
+                HDassert((entry_ptr)->ht_prev != NULL);                        \
+                (entry_ptr)->ht_prev->ht_next = (entry_ptr)->ht_next;          \
+                ((pb_ptr)->ht)[k]->ht_prev = (entry_ptr);                      \
+                (entry_ptr)->ht_next = ((pb_ptr)->ht)[k];                      \
+                (entry_ptr)->ht_prev = NULL;                                   \
+                ((pb_ptr)->ht)[k] = (entry_ptr);                               \
+                H5PB__POST_HT_SHIFT_TO_FRONT_SC(pb_ptr, entry_ptr, k, fail_val)\
+            }                                                                  \
+            break;                                                             \
+        }                                                                      \
+        (entry_ptr) = (entry_ptr)->ht_next;                                    \
+        (depth)++;                                                             \
+    }                                                                          \
+    H5PB__UPDATE_STATS_FOR_HT_SEARCH(pb_ptr, (entry_ptr != NULL), depth)       \
+}
+
+#define H5PB__SEARCH_INDEX_NO_STATS(pb_ptr, Page, entry_ptr, fail_val)         \
+{                                                                              \
+    int k;                                                                     \
+    H5PB__PRE_HT_SEARCH_SC(pb_ptr, Page, fail_val)                             \
+    k = H5PB__HASH_FCN(Page);                                                  \
+    entry_ptr = ((pb_ptr)->ht)[k];                                             \
+    while(entry_ptr) {                                                         \
+        if ( (Page), (entry_ptr)->page) ) {                                    \
+            H5PB__POST_SUC_HT_SEARCH_SC(pb_ptr, entry_ptr, k, fail_val)        \
+            if ( entry_ptr != ((pb_ptr)->ht)[k] ) {                            \
+                if( (entry_ptr)->ht_next )                                     \
+                    (entry_ptr)->ht_next->ht_prev = (entry_ptr)->ht_prev;      \
+                HDassert((entry_ptr)->ht_prev != NULL);                        \
+                (entry_ptr)->ht_prev->ht_next = (entry_ptr)->ht_next;          \
+                ((pb_ptr)->ht)[k]->ht_prev = (entry_ptr);                      \
+                (entry_ptr)->ht_next = ((pb_ptr)->ht)[k];                      \
+                (entry_ptr)->ht_prev = NULL;                                   \
+                ((pb_ptr)->ht)[k] = (entry_ptr);                               \
+                H5PB__POST_HT_SHIFT_TO_FRONT_SC(pb_ptr, entry_ptr, k, fail_val)\
+            }                                                                  \
+            break;                                                             \
+        }                                                                      \
+        (entry_ptr) = (entry_ptr)->ht_next;                                    \
+    }                                                                          \
+}
+
+#define H5PB__UPDATE_INDEX_FOR_ENTRY_CLEAN(pb_ptr, entry_ptr)   \
+{                                                               \
+    H5PB__PRE_HT_UPDATE_FOR_ENTRY_CLEAN_SC(pb_ptr, entry_ptr);  \
+    (pb_ptr)->dirty_index_size -= (int64_t)((entry_ptr)->size); \
+    (pb_ptr)->clean_index_size += (int64_t)((entry_ptr)->size); \
+    H5PB__POST_HT_UPDATE_FOR_ENTRY_CLEAN_SC(pb_ptr, entry_ptr); \
+}
+
+#define H5PB__UPDATE_INDEX_FOR_ENTRY_DIRTY(pb_ptr, entry_ptr)   \
+{                                                               \
+    H5PB__PRE_HT_UPDATE_FOR_ENTRY_DIRTY_SC(pb_ptr, entry_ptr);  \
+    (pb_ptr)->clean_index_size -= (int64_t)((entry_ptr)->size); \
+    (pb_ptr)->dirty_index_size += (int64_t)((entry_ptr)->size); \
+    H5PB__POST_HT_UPDATE_FOR_ENTRY_DIRTY_SC(pb_ptr, entry_ptr); \
+}
+
+#define H5PB__UPDATE_INDEX_FOR_SIZE_CHANGE(pb_ptr, old_size, new_size, \
+		                          entry_ptr, was_clean)        \
+{                                                                      \
+    H5PB__PRE_HT_ENTRY_SIZE_CHANGE_SC(pb_ptr, old_size, new_size,      \
+		                     entry_ptr, was_clean)             \
+    (pb_ptr)->index_size -= (old_size);                                \
+    (pb_ptr)->index_size += (new_size);                                \
+    if(was_clean) {                                                    \
+        (pb_ptr)->clean_index_size -= (old_size);                      \
+    } else {                                                           \
+	(pb_ptr)->dirty_index_size -= (old_size);                      \
+    }                                                                  \
+    if((entry_ptr)->is_dirty) {                                        \
+        (pb_ptr)->dirty_index_size += (new_size);                      \
+    } else {                                                           \
+	(pb_ptr)->clean_index_size += (new_size);                      \
+    }                                                                  \
+    H5PB__DLL_UPDATE_FOR_SIZE_CHANGE((pb_ptr)->il_len,                 \
+                                    (pb_ptr)->il_size,                 \
+                                    (old_size), (new_size))            \
+    H5PB__POST_HT_ENTRY_SIZE_CHANGE_SC(pb_ptr, old_size, new_size,     \
+                                      entry_ptr)                       \
 }
 
 
@@ -1072,7 +1407,7 @@ if ( ( (pb_ptr) == NULL ) ||                                            \
     HDassert( (pb_ptr)->magic == H5PB__H5PB_T_MAGIC );                 \
     HDassert( (entry_ptr) );                                           \
     HDassert( (entry_ptr)->magic == H5PB__H5PB_ENTRY_T_MAGIC );        \
-    HDassert( (entry_ptr)->size >= pb_ptr->page_size );                \
+    HDassert( (entry_ptr)->size == pb_ptr->page_size );                \
                                                                        \
     /* modified LRU specific code */                                   \
                                                                        \
@@ -1217,7 +1552,7 @@ if ( ( (pb_ptr) == NULL ) ||                                            \
 {                                                                 \
     HDassert( (pb_ptr) );                                         \
     HDassert( (pb_ptr)->magic == H5PB__H5PB_T_MAGIC );            \
-    HDassert( (pb_ptr)->vfd_swmr_writer )                         \
+    HDassert( (pb_ptr)->vfd_swmr_writer );                        \
     HDassert( (entry_ptr) );                                      \
     HDassert( (entry_ptr)->magic == H5PB__H5PB_ENTRY_T_MAGIC );   \
     HDassert( (entry_ptr)->modified_this_tick );                  \
@@ -1295,7 +1630,7 @@ if ( ( (pb_ptr) == NULL ) ||                                            \
                                                                               \
     HDassert( (pb_ptr) );                                                     \
     HDassert( (pb_ptr)->magic == H5PB__H5PB_T_MAGIC );                        \
-    HDassert( (pb_ptr)->vfd_swmr_writer )                                     \
+    HDassert( (pb_ptr)->vfd_swmr_writer );                                    \
     HDassert( (entry_ptr) );                                                  \
     HDassert( (entry_ptr)->magic == H5PB__H5PB_ENTRY_T_MAGIC );               \
     HDassert( (entry_ptr)->size >= pb_ptr->page_size );                       \
@@ -1313,7 +1648,7 @@ if ( ( (pb_ptr) == NULL ) ||                                            \
                                                                               \
     H5PB__DLL_INSERT_BEFORE((entry_ptr), (suc_ptr), (pb_ptr)->dwl_head_ptr,   \
                             (pb_ptr)->dwl_tail_ptr, (pb_ptr)->dwl_len,        \
-                            (pb_ptr)->dwl_size), (fail_val))                  \
+                            (pb_ptr)->dwl_size, (fail_val))                   \
                                                                               \
     if ( entry_ptr->delay_write_until > pb_ptr->max_delay )                   \
         pb_ptr->max_delay = entry_ptr->delay_write_until;                     \
@@ -1346,7 +1681,7 @@ if ( ( (pb_ptr) == NULL ) ||                                            \
 {                                                                    \
     HDassert( (pb_ptr) );                                            \
     HDassert( (pb_ptr)->magic == H5PB__H5PB_T_MAGIC );               \
-    HDassert( (pb_ptr)->vfd_swmr_writer )                            \
+    HDassert( (pb_ptr)->vfd_swmr_writer );                           \
     HDassert( (entry_ptr) );                                         \
     HDassert( (entry_ptr)->magic == H5PB__H5PB_ENTRY_T_MAGIC );      \
     HDassert( (entry_ptr)->size >= pb_ptr->page_size );              \
@@ -1421,6 +1756,9 @@ if ( ( (pb_ptr) == NULL ) ||                                            \
  * If there are multiple entries in any hash bin, they are stored in a doubly
  * linked list.
  *
+ * To facilitate flushing the page buffer, we also maintain a doubly linked
+ * list of all entries in the page buffer.
+ *
  * ht_next:     Next pointer used by the hash table to store multiple
  *              entries in a single hash bin.  This field points to the
  *              next entry in the doubly linked list of entries in the
@@ -1430,6 +1768,16 @@ if ( ( (pb_ptr) == NULL ) ||                                            \
  *              entries in a single hash bin.  This field points to the
  *              previous entry in the doubly linked list of entries in
  *              the hash bin, or NULL if there is no previuos entry.
+ *
+ * il_next:     Next pointer used by the index to maintain a doubly linked
+ *              list of all entries in the index (and thus in the page buffer).
+ *              This field contains a pointer to the next entry in the
+ *              index list, or NULL if there is no next entry.
+ *
+ * il_prev:     Prev pointer used by the index to maintain a doubly linked
+ *              list of all entries in the index (and thus in the page buffer).
+ *              This field contains a pointer to the previous entry in the
+ *              index list, or NULL if there is no previous entry.
  *
  *
  * Fields supporting replacement policies:
@@ -1487,13 +1835,12 @@ if ( ( (pb_ptr) == NULL ) ||                                            \
  *
  ****************************************************************************/
 
-
 #define H5PB__H5PB_ENTRY_T_MAGIC  0x02030405
 
 struct H5PB_entry_t {
 
     uint32_t                    magic;
-    H5PB_t                    *pb_ptr;
+    H5PB_t                     *pb_ptr;
     haddr_t                     addr;
     uint64_t                    page;
     size_t                      size;
@@ -1505,6 +1852,8 @@ struct H5PB_entry_t {
     /* fields supporting the hash table: */
     struct H5PB_entry_t        *ht_next;
     struct H5PB_entry_t        *ht_prev;
+    struct H5PB_entry_t        *il_next;
+    struct H5PB_entry_t        *il_prev;
 
     /* fields supporting replacement policies: */
     struct H5PB_entry_t        *next;

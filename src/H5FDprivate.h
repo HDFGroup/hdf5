@@ -87,55 +87,77 @@
 
 
 /*  Internal representation of metadata file index entry */
-/*  
- *  hdf5_page_offset:       Unsigned 64-bit value containing the base address of the
- *                          metadata page, or multi page metadata entry in the HDF5
- *                          file IN PAGES.
- *                          To obtain byte offset, multiply this value by the page size.
+
+/*----------------------------------------------------------------------------
  *
- *  md_file_page_offset:    Unsigned 64-bit value containing the base address of the 
- *                          metadata page, or multi page metadata entry in the metadata
- *                          file IN PAGES.
- *                          To obtain byte offset, multiply this value by the page size.
+ *  struct H5FD_vfd_swmr_idx_entry_t
  *
- *  length:                 The length of the metadata page or multi- page metadata entry
- *                          in BYTES.
+ * Indicies into the VFD SWMR metadata file are maintained in arrays of 
+ * instances of H5FD_vfd_swmr_index_t.
  *
- *  chksum:                 Checksum for the metadata page or multi-page metadata entry.
- *                          For the VFD SWMR writer, this value is undefined until the
- *                          referenced entry has been written to the metadata file.
+ * The fields of H5FD_vfd_swmr_idx_entry_t are discussed below.
+ *  
+ * hdf5_page_offset: Unsigned 64-bit value containing the base address of the
+ *              metadata page, or multi page metadata entry in the HDF5
+ *              file IN PAGES.
+ *
+ *              To obtain byte offset, multiply this value by the page size.
+ *
+ * md_file_page_offset: Unsigned 64-bit value containing the base address of 
+ *              the metadata page, or multi page metadata entry in the metadata
+ *              file IN PAGES.
+ *
+ *              To obtain byte offset, multiply this value by the page size.
+ *
+ * length:      The length of the metadata page or multi- page metadata entry
+ *              in BYTES.
+ *
+ * chksum:      Checksum for the metadata page or multi-page metadata entry.
+ *              For the VFD SWMR writer, this value is undefined until the
+ *              referenced entry has been written to the metadata file.
  *                          
- *  entry_ptr:              Used by the VFD SWMR writer only.
- *                          For the VFD SWMR reader, this field should always be NULL.
- *                          If the referenced metadata page or multi-page metadata 
- *                          entry was modified in the current tick, this field points to 
- *                          a buffer in the page buffer containing its value.
- *                          This field is used by the metadata file creation/update code 
- *                          to access the metadata pages or multi-page metadata entries
- *                          so that their current values can be copied into the metadata
- *                          file.  After this copy, this field should be set to NULL.
+ * entry_ptr:   Used by the VFD SWMR writer only.
  *
- *  tick_of_last_change:    Number of the last tick in which this index entry was changed.
- *                          Used by the VFD SWMR writer only.
- *                          For the VFD SWMR reader, this field will always be set to 0.
+ *              For the VFD SWMR reader, this field should always be NULL.
+ *              If the referenced metadata page or multi-page metadata 
+ *              entry was modified in the current tick, this field points to 
+ *              a buffer in the page buffer containing its value.
+ *              This field is used by the metadata file creation/update code 
+ *              to access the metadata pages or multi-page metadata entries
+ *              so that their current values can be copied into the metadata
+ *              file.  After this copy, this field should be set to NULL.
  *
- *  clean:                  Used by the VFD SWMR writer only.
- *                          Set to TRUE whenever the referenced metadata page or multi-page
- *                          metadata entry is written to the HDF5 file.
- *                          Set to FALSE whenever it is marked dirty in the page buffer.
+ * tick_of_last_change: Number of the last tick in which this index entry 
+ *              was changed.
  *
- *  tick_of_last_flush:     Number of the tick in which this entry was last written to the
- *                          HDF5 file or zero if it has never been flusehd.
- *                          Used by the VFD SWMR writer only.
- *                          For the VFD SWMR reader, this field should always be 0.
+ *              Used by the VFD SWMR writer only.
+ *
+ *              For the VFD SWMR reader, this field will always be set to 0.
+ *
+ * clean:       Used by the VFD SWMR writer only.
+ *
+ *              Set to TRUE whenever the referenced metadata page or 
+ *              multi-page metadata entry is written to the HDF5 file.
+ *              Set to FALSE whenever it is marked dirty in the page buffer.
+ *
+ * tick_of_last_flush: Number of the tick in which this entry was last 
+ *              written to the HDF5 file or zero if it has never been flusehd.
+ *
+ *              Used by the VFD SWMR writer only.
+ *
+ *              For the VFD SWMR reader, this field should always be 0.
  *                          
- *  delayed_flush:          If the flush of the referenced metadata page or multi-page
- *                          metadata entry must be delayed, the earliest tick in which 
- *                          it may be flushed, or zero if there is no such constraint.
- *                          Used by the VFD SWMR writer only.
+ * delayed_flush: If the flush of the referenced metadata page or multi-page
+ *              metadata entry must be delayed, the earliest tick in which 
+ *              it may be flushed, or zero if there is no such constraint.
  *
- *  is_moved_to_hdf5_file:  Set to TRUE iff the entry referenced is in the HDF5 file and
- *                          is therefore about to be removed from the metadata file
+ *              Used by the VFD SWMR writer only.
+ *
+ * is_moved_to_hdf5_file: Set to TRUE iff the entry referenced is in the 
+ *              HDF5 file and is therefore about to be removed from the 
+ *              metadata file
+ *
+ *----------------------------------------------------------------------------
  */
 typedef struct H5FD_vfd_swmr_idx_entry_t {
     uint64_t hdf5_page_offset;  

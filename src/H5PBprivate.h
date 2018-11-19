@@ -140,21 +140,86 @@ typedef struct H5PB_entry_t H5PB_entry_t;
  * hash to the same bucket.  That said, we must collect statistics to alert 
  * us should this not be the case.
  *
+ * We also maintain a linked list of all entries in the index to facilitate
+ * flush operations.
+ *
  * index        Array of pointer to H5PB_entry_t of size
  *              H5PB__HASH_TABLE_LEN.  This size must ba a power of 2,
  *              not the usual prime number.
  *
  * index_len:   Number of entries currently in the hash table used to index
- *              the page buffer.
+ *              the page buffer.  index_len should always equal
+ *              clean_index_len + dirty_index_len.
+ *
+ * clean_index_len: Number of clean entries currently in the hash table 
+ *              used to index the page buffer.
+ *
+ * dirty_index_len: Number of dirty entries currently in the hash table 
+ *              used to index the page buffer.
  *
  * index_size:  Number of bytes currently stored in the hash table used to 
  *              index the page buffer.  Under normal circumstances, this 
  *              value will be index_len * page size.  However, if
  *              vfd_swmr_writer is TRUE, it may be larger.
  *
+ *              index_size should always equal clean_index_size + 
+ *              dirty_index_size.
+ *
+ * clean_index_size: Number of bytes of clean entries currently stored in 
+ *              the hash table used to index the page buffer. 
+ *
+ * dirty_index_size: Number of bytes of dirty entries currently stored in 
+ *              the hash table used to index the page buffer. 
+ *
+ * il_len:      Number of entries on the index list.
+ *
+ *              This must always be equal to index_len.  As such, this
+ *              field is redundant.  However, the existing linked list
+ *              management macros expect to maintain a length field, so
+ *              this field exists primarily to avoid adding complexity to
+ *              these macros.
+ *
+ * il_size:     Number of bytes of cache entries currently stored in the
+ *              index list.
+ *
+ *              This must always be equal to index_size.  As such, this
+ *              field is redundant.  However, the existing linked list
+ *              management macros expect to maintain a size field, so
+ *              this field exists primarily to avoid adding complexity to
+ *              these macros.
+ *
+ * il_head:     Pointer to the head of the doubly linked list of entries in
+ *              the index list.  Note that cache entries on this list are
+ *              linked by their il_next and il_prev fields.
+ *
+ *              This field is NULL if the index is empty.
+ *
+ * il_tail:     Pointer to the tail of the doubly linked list of entries in
+ *              the index list.  Note that cache entries on this list are
+ *              linked by their il_next and il_prev fields.
+ *
+ *              This field is NULL if the index is empty.
+
+ *
+ *
  * Fields supporting the modified LRU policy:
  *
  * See most any OS text for a discussion of the LRU replacement policy.
+ *
+ * Under normal operating circumstances (i.e. vfd_swmr_writer is FALSE)
+ * all entries will reside both in the index and in the LRU.  Further, 
+ * all entries will be of size page_size.  
+ *
+ * The VFD SWMR writer case (i.e. vfd_swmr_writer is TRUE) is complicated
+ * by the requirements that we:
+ *
+ * 1) buffer all metadat writes (including multi-page metadata writes) that
+ *    occur during a tick, and 
+ *
+ * 2) when necessary, delay metadata writes for up to max_lag ticks to 
+ *    avoid message from the future bugs on the VFD SWMR readers.
+ *
+ * See discussion of fields supporting VFD SWMR below for details.
  *
  * Discussions of the individual fields used by the modified LRU replacement
  * policy follow:
@@ -183,7 +248,43 @@ typedef struct H5PB_entry_t H5PB_entry_t;
  *              This field is NULL if the list is empty.
  *
  *
- * FIELDS FOR VFD SWMR:
+ * FIELDS SUPPORTING VFD SWMR:
+ *
+ * If the file is opened as a VFD SWMR writer (i.e. vfd_swmr_writer == TRUE),
+ * the page buffer must retain the data necessary to update the metadata 
+ * file at the end of each tick, and also delay writes as necessary so as 
+ * to avoid message from the future bugs on the VFD SWMR readers.
+ *
+ * The tick list exists to allow us to buffer copies of all metadata writes
+ * during a tick, and the delayed write list supports delayed writes.  
+ *
+ * If a regular page is written to during a tick, it is placed on the tick
+ * list.  If there is no reason to delay its write to file (i.e. either 
+ * it was just allocated, or it has existed in the metadata file index for 
+ * at least max_lag ticks), it is also placed on the LRU, where it may be 
+ * flushed, but not evicted.  If its write must be delayed, it is placed on
+ * the delayed write list, where it must remain until its write delay is 
+ * satisfied -- at which point it is moved to the LRU.
+ *
+ * If a multi-page metadata entry is written during a tick, it is placed on
+ * the tick list.  If, in addition, the write of the entry must be delayed,
+ * it is also place on the delayed write list.  Note that multi-page metadata
+ * entries may never appear on the LRU.
+ *
+ * At the end of each tick, the tick list is emptied.
+ *
+ * Regular pages are simply removed from the tick list, as they must already
+ * appear on either the LRU or the delayed write list.
+ *
+ * Multi-page metadata entries that are not also on the delayed write list
+ * are simply flushed and evicted.
+ *
+ * The delayed write list is also scanned at the end of each tick.  Regular 
+ * entries that are now flushable are placed at the head of the LRU.  Multi-
+ * page metadata entries that are flushable are flushed and evicted.
+ *
+ * The remainder of this sections contains discussions of the fields and 
+ * data structures used to support the above operations.
  *
  * vfd_swmr_writer: Boolean flag that is set to TRUE iff the file is 
  *              the file is opened in VFD SWMR mode.  The remaining 
@@ -205,8 +306,8 @@ typedef struct H5PB_entry_t H5PB_entry_t;
  * likely be perciived as file corruption by the reader.
  *
  * To facilitate identification of entries that must be removed from the 
- * DWL, the list always observes the following invarient for any entry
- * on the list:
+ * DWL during the end of tick scan, the list always observes the following 
+ * invarient for any entry on the list:
  *
  *    entry_ptr->next == NULL ||
  *    entry_ptr->delay_write_until >= entry_ptr->next->delay_write_until
@@ -384,7 +485,15 @@ typedef struct H5PB_entry_t H5PB_entry_t;
  *
  * max_index_len:  Largest value attained by the index_len field.
  *
+ * max_clean_index_len:  Largest value attained by the clean_index_len field.
+ *
+ * max_dirty_index_len:  Largest value attained by the dirty_index_len field.
+ *
  * max_index_size:  Largest value attained by the index_size field.
+ *
+ * max_clean_index_size:  Largest value attained by the clean_index_size field.
+ *
+ * max_dirty_index_size:  Largest value attained by the dirty_index_size field.
  *
  * max_rd_pages: Maximum number of raw data pages in the page buffer.
  *
@@ -459,7 +568,15 @@ typedef struct H5PB_t {
     /* index */
     H5PB_entry_t *(ht[H5PB__HASH_TABLE_LEN]);
     int64_t index_len;
+    int64_t clean_index_len;
+    int64_t dirty_index_len;
     int64_t index_size;
+    int64_t clean_index_size;
+    int64_t dirty_index_size;
+    int64_t il_len;
+    int64_t il_size;
+    H5PB_entry_t * il_head;
+    H5PB_entry_t * il_tail;
 
     /* LRU */
     int64_t LRU_len;
@@ -518,7 +635,11 @@ typedef struct H5PB_t {
     int64_t failed_ht_searches;
     int64_t total_failed_ht_search_depth;
     int64_t max_index_len;
+    int64_t max_clean_index_len;
+    int64_t max_dirty_index_len;
     int64_t max_index_size;
+    int64_t max_clean_index_size;
+    int64_t max_dirty_index_size;
     int64_t max_rd_pages;
     int64_t max_md_pages;
 
@@ -567,6 +688,17 @@ H5_DLL herr_t H5PB_read(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
 H5_DLL herr_t H5PB_write(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size, 
     const void *buf);
 
+
+/* VFD SWMR specific routines */
+H5_DLL herr_t H5PB_vfd_swmr__release_delayed_writes(H5F_t * f);
+
+H5_DLL herr_t H5PB_vfd_swmr__release_tick_list(H5F_t * f);
+
+H5_DLL herr_t H5PB_vfd_swmr__update_index(H5F_t * f, int * idx_ent_added_ptr,
+    int * idx_ent_modified_ptr, int * idx_ent_not_in_tl_ptr,
+    int * idx_ent_not_in_tl_flushed_ptr);
+
+
 /* Statistics routines */
 H5_DLL herr_t H5PB_reset_stats(H5PB_t *page_buf);
 
@@ -575,6 +707,7 @@ H5_DLL herr_t H5PB_get_stats(const H5PB_t *page_buf, unsigned accesses[2],
     unsigned bypasses[2]);
 
 H5_DLL herr_t H5PB_print_stats(const H5PB_t *page_buf);
+
 
 /* test & debug functions */
 H5_DLL herr_t H5PB_page_exists(H5F_t *f, haddr_t addr, 
