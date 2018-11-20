@@ -170,7 +170,7 @@ New Features
       (DER - 2018/10/26, HDFFV-10614)
 
 
-     Parallel Library:
+    Parallel Library:
     -----------------
     -
 
@@ -233,7 +233,17 @@ New Features
 
     Tools:
     ------
-    -
+    - The h5repart -family-to-sec2 argument was changed to -family-to-single
+
+      In order to better support other single-file VFDs which could work with
+      h5repart, the -family-to-sec2 argument was renamed to -family-to-single.
+      This is just a name change and the functionality of the argument has not
+      changed.
+
+      The -family-to-sec2 argument has been kept for backwards-compatibility.
+      This argument should be considered deprecated.
+
+      (DER - 2018/11/14, HDFFV-10633)
 
     High-Level APIs:
     ---------------
