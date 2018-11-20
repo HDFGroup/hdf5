@@ -956,7 +956,7 @@ if (NOT EXISTS ${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c)
         WORKING_DIRECTORY ${HDF5_GENERATED_SOURCE_DIR}
     )
     add_custom_target (gen_H5Tinit
-        COMMAND ${CMAKE_COMMAND} -P ${HDF5_SOURCE_DIR}/config/cmake/scripts/wait_H5Tinit.cmake
+        COMMAND ${CMAKE_COMMAND} -P ${HDF5_SOURCE_DIR}/config/cmake/wait_H5Tinit.cmake
     )
     if (BUILD_SHARED_LIBS)
       add_custom_command (
