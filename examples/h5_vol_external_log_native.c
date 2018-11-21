@@ -53,6 +53,8 @@ static const H5VL_class_t H5VL_log_g = {
     NULL,                                       /* info copy    */
     NULL,                                       /* info compare */
     NULL,                                       /* info free    */
+    NULL,                                       /* info to str  */
+    NULL,                                       /* str to info  */
     NULL,                                       /* get_object   */
     NULL,                                       /* get_wrap_ctx */
     NULL,                                       /* free_wrap_ctx */

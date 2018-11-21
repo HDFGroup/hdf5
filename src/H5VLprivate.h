@@ -45,9 +45,17 @@ typedef struct H5VL_connector_prop_t {
     const void         *connector_info; /* VOL connector info, for open callbacks               */
 } H5VL_connector_prop_t;
 
+/* Which kind of VOL connector field to use for searching */
+typedef enum H5VL_get_connector_kind_t {
+    H5VL_GET_CONNECTOR_BY_NAME,         /* Name field is set */
+    H5VL_GET_CONNECTOR_BY_VALUE         /* Value field is set */
+} H5VL_get_connector_kind_t;
+
+
 /*****************************/
 /* Library Private Variables */
 /*****************************/
+
 
 /******************************/
 /* Library Private Prototypes */

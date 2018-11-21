@@ -291,6 +291,37 @@ done:
 } /* H5VLget_cap_flags */
 
 
+/*---------------------------------------------------------------------------
+ * Function:    H5VLget_value
+ *
+ * Purpose:     Retrieves the 'value' for a connector
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *---------------------------------------------------------------------------
+ */
+herr_t
+H5VLget_value(hid_t connector_id, H5VL_class_value_t *value)
+{
+    H5VL_class_t *cls;                  /* VOL connector's class struct */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_API_NOINIT
+
+    /* Check args */
+    if(NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID")
+
+    /* Retrieve connector value */
+    if(value)
+        *value = cls->value;
+
+done:
+    FUNC_LEAVE_API_NOINIT(ret_value)
+} /* H5VLget_value */
+
+
 /*-------------------------------------------------------------------------
  * Function:    H5VL_copy_connector_info
  *
@@ -523,6 +554,88 @@ done:
 
 
 /*---------------------------------------------------------------------------
+ * Function:    H5VLconnector_info_to_str
+ *
+ * Purpose:     Serialize a connector's info into a string
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *---------------------------------------------------------------------------
+ */
+herr_t
+H5VLconnector_info_to_str(const void *info, hid_t connector_id, char **str)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_API_NOINIT
+
+    /* Only serialize info object, if it's non-NULL */
+    if(info) {
+        H5VL_class_t *cls;                  /* VOL connector's class struct */
+
+        /* Check args and get class pointer */
+        if(NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID")
+
+        /* Allow the connector to serialize info */
+        if(cls->info_to_str) {
+            if((cls->info_to_str)(info, str) < 0)
+                HGOTO_ERROR(H5E_VOL, H5E_CANTSERIALIZE, FAIL, "can't serialize connector info")
+        } /* end if */
+        else
+            *str = NULL;
+    } /* end if */
+    else
+        *str = NULL;
+
+done:
+    FUNC_LEAVE_API_NOINIT(ret_value)
+} /* H5VLconnector_info_to_str() */
+
+
+/*---------------------------------------------------------------------------
+ * Function:    H5VLconnector_str_to_info
+ *
+ * Purpose:     Deserialize a string into a connector's info
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *---------------------------------------------------------------------------
+ */
+herr_t
+H5VLconnector_str_to_info(const char *str, hid_t connector_id, void **info)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_API_NOINIT
+
+    /* Only deserialize string, if it's non-NULL */
+    if(str) {
+        H5VL_class_t *cls;                  /* VOL connector's class struct */
+
+        /* Check args and get class pointer */
+        if(NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID")
+
+        /* Allow the connector to deserialize info */
+        if(cls->str_to_info) {
+            if((cls->str_to_info)(str, info) < 0)
+                HGOTO_ERROR(H5E_VOL, H5E_CANTUNSERIALIZE, FAIL, "can't deserialize connector info")
+        } /* end if */
+        else
+            *info = NULL;
+    } /* end if */
+    else
+        *info = NULL;
+
+done:
+    FUNC_LEAVE_API_NOINIT(ret_value)
+} /* H5VLconnector_str_to_info() */
+
+
+/*---------------------------------------------------------------------------
  * Function:    H5VLget_object
  *
  * Purpose:     Retrieves an underlying object.
@@ -658,7 +771,7 @@ H5VL_free_wrap_ctx(const H5VL_class_t *connector, void *wrap_ctx)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_free_connector_info() */
+} /* end H5VL_free_wrap_ctx() */
 
 
 /*---------------------------------------------------------------------------

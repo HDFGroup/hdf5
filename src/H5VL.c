@@ -41,37 +41,50 @@
 /* Local Macros */
 /****************/
 
+
 /******************/
 /* Local Typedefs */
 /******************/
 
 /* Information needed for iterating over the registered VOL connector hid_t IDs.
- * The name of the new VOL connector that is being registered is stored in the
- * name field and the found_id field is initialized to H5I_INVALID_HID (-1).
- * If we find a VOL connector with the same name, we set the found_id field to
- * the existing ID for return to the function.
+ * The name or value of the new VOL connector that is being registered is
+ * stored in the name (or value) field and the found_id field is initialized to
+ * H5I_INVALID_HID (-1).  If we find a VOL connector with the same name / value,
+ * we set the found_id field to the existing ID for return to the function.
  */
 typedef struct {
-    const char *name;           /* The name of the VOL connector to check */
-    hid_t found_id;             /* The library ID if we found a match */
+    /* IN */
+    H5VL_get_connector_kind_t kind;     /* Which kind of connector search to make */
+    union {
+        const char *name;               /* The name of the VOL connector to check */
+        H5VL_class_value_t value;       /* The value of the VOL connector to check */
+    } u;
+
+    /* OUT */
+    hid_t found_id;                     /* The connector ID, if we found a match */
 } H5VL_get_connector_ud_t;
+
 
 /********************/
 /* Local Prototypes */
 /********************/
 static int H5VL__get_connector_cb(void *obj, hid_t id, void *_op_data);
 
+
 /*********************/
 /* Package Variables */
 /*********************/
+
 
 /*****************************/
 /* Library Private Variables */
 /*****************************/
 
+
 /*******************/
 /* Local Variables */
 /*******************/
+
 
 
 /*-------------------------------------------------------------------------
@@ -95,10 +108,19 @@ H5VL__get_connector_cb(void *obj, hid_t id, void *_op_data)
 
     FUNC_ENTER_STATIC_NOERR
 
-    if (0 == HDstrcmp(cls->name, op_data->name)) {
-        op_data->found_id = id;
-        ret_value = H5_ITER_STOP;
+    if(H5VL_GET_CONNECTOR_BY_NAME == op_data->kind) {
+        if(0 == HDstrcmp(cls->name, op_data->u.name)) {
+            op_data->found_id = id;
+            ret_value = H5_ITER_STOP;
+        } /* end if */
     } /* end if */
+    else {
+        HDassert(H5VL_GET_CONNECTOR_BY_VALUE == op_data->kind);
+        if(cls->value == op_data->u.value) {
+            op_data->found_id = id;
+            ret_value = H5_ITER_STOP;
+        } /* end if */
+    } /* end else */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL__get_connector_cb() */
@@ -139,8 +161,9 @@ H5VLregister_connector(const H5VL_class_t *cls, hid_t vipl_id)
     if (cls->get_wrap_ctx && !cls->free_wrap_ctx)
         HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID, "VOL connector must provide free callback for object wrapping contexts when a get callback is provided")
 
+    op_data.kind = H5VL_GET_CONNECTOR_BY_NAME;
+    op_data.u.name = cls->name;
     op_data.found_id = H5I_INVALID_HID;
-    op_data.name = cls->name;
 
     /* check if connector is already registered */
     if (H5I_iterate(H5I_VOL, H5VL__get_connector_cb, &op_data, TRUE) < 0)
@@ -192,16 +215,17 @@ H5VLregister_connector_by_name(const char *name, hid_t vipl_id)
     if (0 == HDstrlen(name))
         HGOTO_ERROR(H5E_ARGS, H5E_UNINITIALIZED, H5I_INVALID_HID, "zero-length VOL connector name is disallowed")
 
+    op_data.kind = H5VL_GET_CONNECTOR_BY_NAME;
+    op_data.u.name = name;
     op_data.found_id = H5I_INVALID_HID;
-    op_data.name = name;
 
     /* Check if connector is already registered */
-    if (H5I_iterate(H5I_VOL, H5VL__get_connector_cb, &op_data, TRUE) < 0)
+    if(H5I_iterate(H5I_VOL, H5VL__get_connector_cb, &op_data, TRUE) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_BADITER, H5I_INVALID_HID, "can't iterate over VOL ids")
 
     /* If connector alread registered, increment ref count on ID and return ID */
-    if (op_data.found_id != H5I_INVALID_HID) {
-        if (H5I_inc_ref(op_data.found_id, TRUE) < 0)
+    if(op_data.found_id != H5I_INVALID_HID) {
+        if(H5I_inc_ref(op_data.found_id, TRUE) < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTINC, H5I_INVALID_HID, "unable to increment ref count on VOL connector")
         ret_value = op_data.found_id;
     } /* end if */
@@ -210,18 +234,79 @@ H5VLregister_connector_by_name(const char *name, hid_t vipl_id)
         const H5VL_class_t *cls;
 
         /* Try loading the connector */
-        key.name = name;
-        if (NULL == (cls = (const H5VL_class_t *)H5PL_load(H5PL_TYPE_VOL, key)))
+        key.vol.kind = H5VL_GET_CONNECTOR_BY_NAME;
+        key.vol.u.name = name;
+        if(NULL == (cls = (const H5VL_class_t *)H5PL_load(H5PL_TYPE_VOL, &key)))
             HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, H5I_INVALID_HID, "unable to load VOL connector")
 
         /* Register the connector we loaded */
-        if ((ret_value = H5VL_register_connector(cls, TRUE, vipl_id)) < 0)
+        if((ret_value = H5VL_register_connector(cls, TRUE, vipl_id)) < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register VOL connector ID")
     } /* end else */
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5VLregister_connector_by_name() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VLregister_connector_by_value
+ *
+ * Purpose:     Registers a new VOL connector as a member of the virtual object
+ *              layer class.
+ *
+ * Return:      Success:    A VOL connector ID which is good until the
+ *                          library is closed or the connector is
+ *                          unregistered.
+ *
+ *              Failure:    H5I_INVALID_HID
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5VLregister_connector_by_value(H5VL_class_value_t value, hid_t vipl_id)
+{
+    H5VL_get_connector_ud_t op_data;       /* Callback info for connector search */
+    hid_t ret_value = H5I_INVALID_HID;
+
+    FUNC_ENTER_API(H5I_INVALID_HID)
+
+    /* Check arguments */
+    if(value < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_UNINITIALIZED, H5I_INVALID_HID, "negative VOL connector value is disallowed")
+
+    op_data.kind = H5VL_GET_CONNECTOR_BY_VALUE;
+    op_data.u.value = value;
+    op_data.found_id = H5I_INVALID_HID;
+
+    /* Check if connector is already registered */
+    if(H5I_iterate(H5I_VOL, H5VL__get_connector_cb, &op_data, TRUE) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_BADITER, H5I_INVALID_HID, "can't iterate over VOL ids")
+
+    /* If connector alread registered, increment ref count on ID and return ID */
+    if(op_data.found_id != H5I_INVALID_HID) {
+        if(H5I_inc_ref(op_data.found_id, TRUE) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTINC, H5I_INVALID_HID, "unable to increment ref count on VOL connector")
+        ret_value = op_data.found_id;
+    } /* end if */
+    else {
+        H5PL_key_t key;
+        const H5VL_class_t *cls;
+
+        /* Try loading the connector */
+        key.vol.kind = H5VL_GET_CONNECTOR_BY_NAME;
+        key.vol.u.value = value;
+        if(NULL == (cls = (const H5VL_class_t *)H5PL_load(H5PL_TYPE_VOL, &key)))
+            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, H5I_INVALID_HID, "unable to load VOL connector")
+
+        /* Register the connector we loaded */
+        if((ret_value = H5VL_register_connector(cls, TRUE, vipl_id)) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register VOL connector ID")
+    } /* end else */
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5VLregister_connector_by_value() */
 
 
 /*-------------------------------------------------------------------------
@@ -246,8 +331,9 @@ H5VLis_connector_registered(const char *name)
     FUNC_ENTER_API(FAIL)
     H5TRACE1("t", "*s", name);
 
+    op_data.kind = H5VL_GET_CONNECTOR_BY_NAME;
+    op_data.u.name = name;
     op_data.found_id = H5I_INVALID_HID;
-    op_data.name = name;
 
     /* Check arguments */
     if (H5I_iterate(H5I_VOL, H5VL__get_connector_cb, &op_data, TRUE) < 0)
@@ -280,8 +366,9 @@ H5VLget_connector_id(const char *name)
     FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE1("i", "*s", name);
 
-    op_data.found_id    = H5I_INVALID_HID;
-    op_data.name        = name;
+    op_data.kind = H5VL_GET_CONNECTOR_BY_NAME;
+    op_data.u.name = name;
+    op_data.found_id = H5I_INVALID_HID;
 
     /* Check arguments */
     if (H5I_iterate(H5I_VOL, H5VL__get_connector_cb, &op_data, TRUE) < 0)
