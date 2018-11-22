@@ -92,7 +92,7 @@ H5Oflush(hid_t obj_id)
     loc_params.obj_type     = H5I_get_type(obj_id);
 
     /* Flush the object */
-    if(H5VL_object_specific(vol_obj, loc_params, H5VL_OBJECT_FLUSH, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, obj_id) < 0)
+    if(H5VL_object_specific(vol_obj, &loc_params, H5VL_OBJECT_FLUSH, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, obj_id) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTFLUSH, FAIL, "unable to flush object")
 
 done:
@@ -256,7 +256,7 @@ H5Orefresh(hid_t oid)
     loc_params.obj_type     = H5I_get_type(oid);
 
     /* Refresh the object */
-    if(H5VL_object_specific(vol_obj, loc_params, H5VL_OBJECT_REFRESH, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, oid) < 0)
+    if(H5VL_object_specific(vol_obj, &loc_params, H5VL_OBJECT_REFRESH, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, oid) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to refresh object")
 
 done:

@@ -56,10 +56,10 @@
 /********************/
 /* Local Prototypes */
 /********************/
-static void *H5VL__attr_create(void *obj, H5VL_loc_params_t loc_params,
+static void *H5VL__attr_create(void *obj, const H5VL_loc_params_t *loc_params,
     const H5VL_class_t *cls, const char *name, hid_t acpl_id, hid_t aapl_id,
     hid_t dxpl_id, void **req);
-static void *H5VL__attr_open(void *obj, H5VL_loc_params_t loc_params,
+static void *H5VL__attr_open(void *obj, const H5VL_loc_params_t *loc_params,
     const H5VL_class_t *cls, const char *name, hid_t aapl_id, hid_t dxpl_id,
     void **req);
 static herr_t H5VL__attr_read(void *obj, const H5VL_class_t *cls, hid_t mem_type_id,
@@ -68,17 +68,17 @@ static herr_t H5VL__attr_write(void *obj, const H5VL_class_t *cls, hid_t mem_typ
     const void *buf, hid_t dxpl_id, void **req);
 static herr_t H5VL__attr_get(void *obj, const H5VL_class_t *cls, H5VL_attr_get_t get_type, 
     hid_t dxpl_id, void **req, va_list arguments);
-static herr_t H5VL__attr_specific(void *obj, H5VL_loc_params_t loc_params,
+static herr_t H5VL__attr_specific(void *obj, const H5VL_loc_params_t *loc_params,
     const H5VL_class_t *cls, H5VL_attr_specific_t specific_type, hid_t dxpl_id,
     void **req, va_list arguments);
 static herr_t H5VL__attr_optional(void *obj, const H5VL_class_t *cls, hid_t dxpl_id,
     void **req, va_list arguments);
 static herr_t H5VL__attr_close(void *obj, const H5VL_class_t *cls, hid_t dxpl_id,
     void **req);
-static void *H5VL__dataset_create(void *obj, H5VL_loc_params_t loc_params,
+static void *H5VL__dataset_create(void *obj, const H5VL_loc_params_t *loc_params,
     const H5VL_class_t *cls, const char *name, hid_t dcpl_id, hid_t dapl_id,
     hid_t dxpl_id, void **req);
-static void *H5VL__dataset_open(void *obj, H5VL_loc_params_t loc_params,
+static void *H5VL__dataset_open(void *obj, const H5VL_loc_params_t *loc_params,
     const H5VL_class_t *cls, const char *name, hid_t dapl_id, hid_t dxpl_id,
     void **req);
 static herr_t H5VL__dataset_read(void *dset, const H5VL_class_t *cls,
@@ -109,10 +109,10 @@ static herr_t H5VL__file_optional(void *obj, const H5VL_class_t *cls, hid_t dxpl
     void **req, va_list arguments);
 static herr_t H5VL__file_close(void *obj, const H5VL_class_t *cls, hid_t dxpl_id,
     void **req);
-static void *H5VL__group_create(void *obj, H5VL_loc_params_t loc_params,
+static void *H5VL__group_create(void *obj, const H5VL_loc_params_t *loc_params,
     const H5VL_class_t *cls, const char *name, hid_t gcpl_id, hid_t gapl_id,
     hid_t dxpl_id, void **req);
-static void *H5VL__group_open(void *obj, H5VL_loc_params_t loc_params,
+static void *H5VL__group_open(void *obj, const H5VL_loc_params_t *loc_params,
     const H5VL_class_t *cls, const char *name, hid_t gapl_id, hid_t dxpl_id,
     void **req);
 static herr_t H5VL__group_get(void *obj, const H5VL_class_t *cls, H5VL_group_get_t get_type, 
@@ -124,40 +124,40 @@ static herr_t H5VL__group_optional(void *obj, const H5VL_class_t *cls, hid_t dxp
 static herr_t H5VL__group_close(void *obj, const H5VL_class_t *cls,
     hid_t dxpl_id, void **req);
 static herr_t H5VL__link_create(H5VL_link_create_type_t create_type, void *obj,
-    H5VL_loc_params_t loc_params, const H5VL_class_t *cls, hid_t lcpl_id,
+    const H5VL_loc_params_t *loc_params, const H5VL_class_t *cls, hid_t lcpl_id,
     hid_t lapl_id, hid_t dxpl_id, void **req);
-static herr_t H5VL__link_copy(void *src_obj, H5VL_loc_params_t loc_params1,
-    void *dst_obj, H5VL_loc_params_t loc_params2, const H5VL_class_t *cls,
+static herr_t H5VL__link_copy(void *src_obj, const H5VL_loc_params_t *loc_params1,
+    void *dst_obj, const H5VL_loc_params_t *loc_params2, const H5VL_class_t *cls,
     hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req);
-static herr_t H5VL__link_move(void *src_obj, H5VL_loc_params_t loc_params1,
-    void *dst_obj, H5VL_loc_params_t loc_params2, const H5VL_class_t *cls,
+static herr_t H5VL__link_move(void *src_obj, const H5VL_loc_params_t *loc_params1,
+    void *dst_obj, const H5VL_loc_params_t *loc_params2, const H5VL_class_t *cls,
     hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req);
-static herr_t H5VL__link_get(void *obj, H5VL_loc_params_t loc_params,
+static herr_t H5VL__link_get(void *obj, const H5VL_loc_params_t *loc_params,
     const H5VL_class_t *cls, H5VL_link_get_t get_type, hid_t dxpl_id,
     void **req, va_list arguments);
-static herr_t H5VL__link_specific(void *obj, H5VL_loc_params_t loc_params,
+static herr_t H5VL__link_specific(void *obj, const H5VL_loc_params_t *loc_params,
     const H5VL_class_t *cls, H5VL_link_specific_t specific_type, hid_t dxpl_id,
     void **req, va_list arguments);
 static herr_t H5VL__link_optional(void *obj, const H5VL_class_t *cls, hid_t dxpl_id,
     void **req, va_list arguments);
-static void *H5VL__object_open(void *obj, H5VL_loc_params_t params, const H5VL_class_t *cls,
+static void *H5VL__object_open(void *obj, const H5VL_loc_params_t *params, const H5VL_class_t *cls,
     H5I_type_t *opened_type, hid_t dxpl_id, void **req);
-static herr_t H5VL__object_copy(void *src_obj, H5VL_loc_params_t src_loc_params,
-    const char *src_name, void *dst_obj, H5VL_loc_params_t dst_loc_params,
+static herr_t H5VL__object_copy(void *src_obj, const H5VL_loc_params_t *src_loc_params,
+    const char *src_name, void *dst_obj, const H5VL_loc_params_t *dst_loc_params,
     const char *dst_name, const H5VL_class_t *cls, hid_t ocpypl_id,
     hid_t lcpl_id, hid_t dxpl_id, void **req);
-static herr_t H5VL__object_get(void *obj, H5VL_loc_params_t loc_params,
+static herr_t H5VL__object_get(void *obj, const H5VL_loc_params_t *loc_params,
     const H5VL_class_t *cls, H5VL_object_get_t get_type, hid_t dxpl_id,
     void **req, va_list arguments);
-static herr_t H5VL__object_specific(void *obj, H5VL_loc_params_t loc_params,
+static herr_t H5VL__object_specific(void *obj, const H5VL_loc_params_t *loc_params,
     const H5VL_class_t *cls, H5VL_object_specific_t specific_type, hid_t dxpl_id,
     void **req, va_list arguments);
 static herr_t H5VL__object_optional(void *obj, const H5VL_class_t *cls, hid_t dxpl_id,
     void **req, va_list arguments);
-static void * H5VL__datatype_commit(void *obj, H5VL_loc_params_t loc_params,
+static void * H5VL__datatype_commit(void *obj, const H5VL_loc_params_t *loc_params,
     const H5VL_class_t *cls, const char *name, hid_t type_id, hid_t lcpl_id,
     hid_t tcpl_id, hid_t tapl_id, hid_t dxpl_id, void **req);
-static void *H5VL__datatype_open(void *obj, H5VL_loc_params_t loc_params,
+static void *H5VL__datatype_open(void *obj, const H5VL_loc_params_t *loc_params,
     const H5VL_class_t *cls, const char *name, hid_t tapl_id, hid_t dxpl_id,
     void **req);
 static herr_t H5VL__datatype_get(void *obj, const H5VL_class_t *cls,
@@ -886,7 +886,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static void *
-H5VL__attr_create(void *obj, H5VL_loc_params_t loc_params, const H5VL_class_t *cls,
+H5VL__attr_create(void *obj, const H5VL_loc_params_t *loc_params, const H5VL_class_t *cls,
     const char *name, hid_t acpl_id, hid_t aapl_id, hid_t dxpl_id, void **req)
 {
     void *ret_value = NULL;     /* Return value */
@@ -917,7 +917,7 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VL_attr_create(const H5VL_object_t *vol_obj, H5VL_loc_params_t loc_params, 
+H5VL_attr_create(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *loc_params, 
     const char *name, hid_t acpl_id, hid_t aapl_id, hid_t dxpl_id, void **req)
 {
     hbool_t vol_wrapper_set = FALSE;    /* Whether the VOL object wrapping context was set up */
@@ -954,7 +954,7 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VLattr_create(void *obj, H5VL_loc_params_t loc_params, hid_t connector_id,
+H5VLattr_create(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id,
     const char *name, hid_t acpl_id, hid_t aapl_id, hid_t dxpl_id, void **req)
 {
     H5VL_class_t *cls;          /* VOL connector's class struct */
@@ -990,7 +990,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static void *
-H5VL__attr_open(void *obj, H5VL_loc_params_t loc_params, const H5VL_class_t *cls, const char *name, 
+H5VL__attr_open(void *obj, const H5VL_loc_params_t *loc_params, const H5VL_class_t *cls, const char *name, 
     hid_t aapl_id, hid_t dxpl_id, void **req)
 {
     void *ret_value = NULL;     /* Return value */
@@ -1021,7 +1021,7 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VL_attr_open(const H5VL_object_t *vol_obj, H5VL_loc_params_t loc_params,
+H5VL_attr_open(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *loc_params,
     const char *name, hid_t aapl_id, hid_t dxpl_id, void **req)
 {
     hbool_t vol_wrapper_set = FALSE;    /* Whether the VOL object wrapping context was set up */
@@ -1058,7 +1058,7 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VLattr_open(void *obj, H5VL_loc_params_t loc_params, hid_t connector_id,
+H5VLattr_open(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id,
     const char *name, hid_t aapl_id, hid_t dxpl_id, void **req)
 {
     H5VL_class_t *cls;          /* VOL connector's class struct */
@@ -1411,7 +1411,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL__attr_specific(void *obj, H5VL_loc_params_t loc_params, const H5VL_class_t *cls, 
+H5VL__attr_specific(void *obj, const H5VL_loc_params_t *loc_params, const H5VL_class_t *cls, 
     H5VL_attr_specific_t specific_type, hid_t dxpl_id, void **req,
     va_list arguments)
 {
@@ -1443,7 +1443,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_attr_specific(const H5VL_object_t *vol_obj, H5VL_loc_params_t loc_params,
+H5VL_attr_specific(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *loc_params,
     H5VL_attr_specific_t specific_type, hid_t dxpl_id, void **req, ...)
 {
     va_list arguments;                  /* Argument list passed from the API call */
@@ -1488,7 +1488,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLattr_specific(void *obj, H5VL_loc_params_t loc_params, hid_t connector_id,
+H5VLattr_specific(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id,
     H5VL_attr_specific_t specific_type, hid_t dxpl_id, void **req, va_list arguments)
 {
     H5VL_class_t *cls;                  /* VOL connector's class struct */
@@ -1726,7 +1726,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static void *
-H5VL__dataset_create(void *obj, H5VL_loc_params_t loc_params, const H5VL_class_t *cls,
+H5VL__dataset_create(void *obj, const H5VL_loc_params_t *loc_params, const H5VL_class_t *cls,
     const char *name, hid_t dcpl_id, hid_t dapl_id, hid_t dxpl_id, void **req)
 {
     void *ret_value = NULL;     /* Return value */
@@ -1757,7 +1757,7 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VL_dataset_create(const H5VL_object_t *vol_obj, H5VL_loc_params_t loc_params,
+H5VL_dataset_create(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *loc_params,
     const char *name, hid_t dcpl_id, hid_t dapl_id, hid_t dxpl_id, void **req)
 {
     hbool_t vol_wrapper_set = FALSE;    /* Whether the VOL object wrapping context was set up */
@@ -1794,7 +1794,7 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VLdataset_create(void *obj, H5VL_loc_params_t loc_params, hid_t connector_id,
+H5VLdataset_create(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id,
     const char *name, hid_t dcpl_id, hid_t dapl_id, hid_t dxpl_id, void **req)
 {
     H5VL_class_t *cls;                  /* VOL connector's class struct */
@@ -1830,7 +1830,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static void *
-H5VL__dataset_open(void *obj, H5VL_loc_params_t loc_params, const H5VL_class_t *cls, const char *name, 
+H5VL__dataset_open(void *obj, const H5VL_loc_params_t *loc_params, const H5VL_class_t *cls, const char *name, 
     hid_t dapl_id, hid_t dxpl_id, void **req)
 {
     void *ret_value = NULL;             /* Return value */
@@ -1861,7 +1861,7 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VL_dataset_open(const H5VL_object_t *vol_obj, H5VL_loc_params_t loc_params,
+H5VL_dataset_open(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *loc_params,
     const char *name, hid_t dapl_id, hid_t dxpl_id, void **req)
 {
     hbool_t vol_wrapper_set = FALSE;    /* Whether the VOL object wrapping context was set up */
@@ -1898,7 +1898,7 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VLdataset_open(void *obj, H5VL_loc_params_t loc_params, hid_t connector_id,
+H5VLdataset_open(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id,
     const char *name, hid_t dapl_id, hid_t dxpl_id, void **req)
 {
     H5VL_class_t *cls;                  /* VOL connector's class struct */
@@ -3324,7 +3324,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static void *
-H5VL__group_create(void *obj, H5VL_loc_params_t loc_params, const H5VL_class_t *cls,
+H5VL__group_create(void *obj, const H5VL_loc_params_t *loc_params, const H5VL_class_t *cls,
     const char *name, hid_t gcpl_id, hid_t gapl_id, hid_t dxpl_id, void **req)
 {
     void *ret_value = NULL;     /* Return value */
@@ -3355,7 +3355,7 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VL_group_create(const H5VL_object_t *vol_obj, H5VL_loc_params_t loc_params,
+H5VL_group_create(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *loc_params,
     const char *name, hid_t gcpl_id, hid_t gapl_id, hid_t dxpl_id, void **req)
 {
     hbool_t vol_wrapper_set = FALSE;    /* Whether the VOL object wrapping context was set up */
@@ -3392,7 +3392,7 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VLgroup_create(void *obj, H5VL_loc_params_t loc_params, hid_t connector_id, const char *name,
+H5VLgroup_create(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, const char *name,
     hid_t gcpl_id, hid_t gapl_id, hid_t dxpl_id, void **req)
 {
     H5VL_class_t *cls;                  /* VOL connector's class struct */
@@ -3428,7 +3428,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static void *
-H5VL__group_open(void *obj, H5VL_loc_params_t loc_params, const H5VL_class_t *cls,
+H5VL__group_open(void *obj, const H5VL_loc_params_t *loc_params, const H5VL_class_t *cls,
     const char *name, hid_t gapl_id, hid_t dxpl_id, void **req)
 {
     void *ret_value = NULL;             /* Return value */
@@ -3459,7 +3459,7 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VL_group_open(const H5VL_object_t *vol_obj, H5VL_loc_params_t loc_params,
+H5VL_group_open(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *loc_params,
     const char *name, hid_t gapl_id, hid_t dxpl_id, void **req)
 {
     hbool_t vol_wrapper_set = FALSE;    /* Whether the VOL object wrapping context was set up */
@@ -3496,7 +3496,7 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VLgroup_open(void *obj, H5VL_loc_params_t loc_params, hid_t connector_id, const char *name,
+H5VLgroup_open(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, const char *name,
     hid_t gapl_id, hid_t dxpl_id, void **req)
 {
     H5VL_class_t *cls;                  /* VOL connector's class struct */
@@ -3972,7 +3972,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL__link_create(H5VL_link_create_type_t create_type, void *obj, H5VL_loc_params_t loc_params, 
+H5VL__link_create(H5VL_link_create_type_t create_type, void *obj, const H5VL_loc_params_t *loc_params, 
     const H5VL_class_t *cls, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -4004,7 +4004,7 @@ done:
  */
 herr_t
 H5VL_link_create(H5VL_link_create_type_t create_type, const H5VL_object_t *vol_obj,
-    H5VL_loc_params_t loc_params, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id,
+    const H5VL_loc_params_t *loc_params, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id,
     void **req)
 {
     H5VL_object_t tmp_vol_obj;          /* Temporary object token of */
@@ -4059,7 +4059,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLlink_create(H5VL_link_create_type_t create_type, void *obj, H5VL_loc_params_t loc_params,
+H5VLlink_create(H5VL_link_create_type_t create_type, void *obj, const H5VL_loc_params_t *loc_params,
     hid_t connector_id, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req)
 {
     H5VL_class_t *cls;                  /* VOL connector's class struct */
@@ -4093,8 +4093,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t 
-H5VL__link_copy(void *src_obj, H5VL_loc_params_t loc_params1, void *dst_obj,
-    H5VL_loc_params_t loc_params2, const H5VL_class_t *cls, hid_t lcpl_id,
+H5VL__link_copy(void *src_obj, const H5VL_loc_params_t *loc_params1, void *dst_obj,
+    const H5VL_loc_params_t *loc_params2, const H5VL_class_t *cls, hid_t lcpl_id,
     hid_t lapl_id, hid_t dxpl_id, void **req)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -4125,8 +4125,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t 
-H5VL_link_copy(const H5VL_object_t *src_vol_obj, H5VL_loc_params_t loc_params1,
-    const H5VL_object_t *dst_vol_obj, H5VL_loc_params_t loc_params2, hid_t lcpl_id,
+H5VL_link_copy(const H5VL_object_t *src_vol_obj, const H5VL_loc_params_t *loc_params1,
+    const H5VL_object_t *dst_vol_obj, const H5VL_loc_params_t *loc_params2, hid_t lcpl_id,
     hid_t lapl_id, hid_t dxpl_id, void **req)
 {
     const H5VL_object_t *vol_obj;       /* VOL object for object with data */
@@ -4167,8 +4167,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLlink_copy(void *src_obj, H5VL_loc_params_t loc_params1, void *dst_obj,
-    H5VL_loc_params_t loc_params2, hid_t connector_id, hid_t lcpl_id,
+H5VLlink_copy(void *src_obj, const H5VL_loc_params_t *loc_params1, void *dst_obj,
+    const H5VL_loc_params_t *loc_params2, hid_t connector_id, hid_t lcpl_id,
     hid_t lapl_id, hid_t dxpl_id, void **req)
 {
     H5VL_class_t *cls;                  /* VOL connector's class struct */
@@ -4202,8 +4202,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t 
-H5VL__link_move(void *src_obj, H5VL_loc_params_t loc_params1, void *dst_obj,
-    H5VL_loc_params_t loc_params2, const H5VL_class_t *cls, hid_t lcpl_id,
+H5VL__link_move(void *src_obj, const H5VL_loc_params_t *loc_params1, void *dst_obj,
+    const H5VL_loc_params_t *loc_params2, const H5VL_class_t *cls, hid_t lcpl_id,
     hid_t lapl_id, hid_t dxpl_id, void **req)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -4234,8 +4234,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t 
-H5VL_link_move(const H5VL_object_t *src_vol_obj, H5VL_loc_params_t loc_params1,
-    const H5VL_object_t *dst_vol_obj, H5VL_loc_params_t loc_params2, hid_t lcpl_id,
+H5VL_link_move(const H5VL_object_t *src_vol_obj, const H5VL_loc_params_t *loc_params1,
+    const H5VL_object_t *dst_vol_obj, const H5VL_loc_params_t *loc_params2, hid_t lcpl_id,
     hid_t lapl_id, hid_t dxpl_id, void **req)
 {
     const H5VL_object_t *vol_obj;       /* VOL object for object with data */
@@ -4276,8 +4276,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLlink_move(void *src_obj, H5VL_loc_params_t loc_params1, void *dst_obj,
-    H5VL_loc_params_t loc_params2, hid_t connector_id, hid_t lcpl_id,
+H5VLlink_move(void *src_obj, const H5VL_loc_params_t *loc_params1, void *dst_obj,
+    const H5VL_loc_params_t *loc_params2, hid_t connector_id, hid_t lcpl_id,
     hid_t lapl_id, hid_t dxpl_id, void **req)
 {
     H5VL_class_t *cls;                  /* VOL connector's class struct */
@@ -4311,7 +4311,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL__link_get(void *obj, H5VL_loc_params_t loc_params, const H5VL_class_t *cls,
+H5VL__link_get(void *obj, const H5VL_loc_params_t *loc_params, const H5VL_class_t *cls,
     H5VL_link_get_t get_type, hid_t dxpl_id, void **req, va_list arguments)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -4342,7 +4342,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_link_get(const H5VL_object_t *vol_obj, H5VL_loc_params_t loc_params,
+H5VL_link_get(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *loc_params,
     H5VL_link_get_t get_type, hid_t dxpl_id, void **req, ...)
 {
     va_list arguments;                  /* Argument list passed from the API call */
@@ -4387,7 +4387,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLlink_get(void *obj, H5VL_loc_params_t loc_params, hid_t connector_id, H5VL_link_get_t get_type,
+H5VLlink_get(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, H5VL_link_get_t get_type,
     hid_t dxpl_id, void **req, va_list arguments)
 {
     H5VL_class_t *cls;                  /* VOL connector's class struct */
@@ -4423,7 +4423,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL__link_specific(void *obj, H5VL_loc_params_t loc_params, const H5VL_class_t *cls, 
+H5VL__link_specific(void *obj, const H5VL_loc_params_t *loc_params, const H5VL_class_t *cls, 
     H5VL_link_specific_t specific_type, hid_t dxpl_id, void **req, va_list arguments)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -4454,7 +4454,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_link_specific(const H5VL_object_t *vol_obj, H5VL_loc_params_t loc_params,
+H5VL_link_specific(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *loc_params,
     H5VL_link_specific_t specific_type, hid_t dxpl_id, void **req, ...)
 {
     va_list arguments;                  /* Argument list passed from the API call */
@@ -4499,7 +4499,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLlink_specific(void *obj, H5VL_loc_params_t loc_params, hid_t connector_id,
+H5VLlink_specific(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id,
     H5VL_link_specific_t specific_type, hid_t dxpl_id, void **req, va_list arguments)
 {
     H5VL_class_t *cls;                  /* VOL connector's class struct */
@@ -4644,7 +4644,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static void *
-H5VL__object_open(void *obj, H5VL_loc_params_t params, const H5VL_class_t *cls, H5I_type_t *opened_type,
+H5VL__object_open(void *obj, const H5VL_loc_params_t *params, const H5VL_class_t *cls, H5I_type_t *opened_type,
     hid_t dxpl_id, void **req)
 {
     void *ret_value = NULL;             /* Return value */
@@ -4675,7 +4675,7 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VL_object_open(const H5VL_object_t *vol_obj, H5VL_loc_params_t params,
+H5VL_object_open(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *params,
     H5I_type_t *opened_type, hid_t dxpl_id, void **req)
 {
     hbool_t vol_wrapper_set = FALSE;    /* Whether the VOL object wrapping context was set up */
@@ -4712,7 +4712,7 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VLobject_open(void *obj, H5VL_loc_params_t params, hid_t connector_id, H5I_type_t *opened_type,
+H5VLobject_open(void *obj, const H5VL_loc_params_t *params, hid_t connector_id, H5I_type_t *opened_type,
     hid_t dxpl_id, void **req)
 {
     H5VL_class_t *cls;                  /* VOL connector's class struct */
@@ -4748,8 +4748,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t 
-H5VL__object_copy(void *src_obj, H5VL_loc_params_t src_loc_params, const char *src_name,
-    void *dst_obj, H5VL_loc_params_t dst_loc_params, const char *dst_name,
+H5VL__object_copy(void *src_obj, const H5VL_loc_params_t *src_loc_params, const char *src_name,
+    void *dst_obj, const H5VL_loc_params_t *dst_loc_params, const char *dst_name,
     const H5VL_class_t *cls, hid_t ocpypl_id, hid_t lcpl_id, hid_t dxpl_id,
     void **req)
 {
@@ -4781,8 +4781,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t 
-H5VL_object_copy(const H5VL_object_t *src_obj, H5VL_loc_params_t src_loc_params,
-    const char *src_name, const H5VL_object_t *dst_obj, H5VL_loc_params_t dst_loc_params,
+H5VL_object_copy(const H5VL_object_t *src_obj, const H5VL_loc_params_t *src_loc_params,
+    const char *src_name, const H5VL_object_t *dst_obj, const H5VL_loc_params_t *dst_loc_params,
     const char *dst_name, hid_t ocpypl_id, hid_t lcpl_id, hid_t dxpl_id,
     void **req)
 {
@@ -4824,8 +4824,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLobject_copy(void *src_obj, H5VL_loc_params_t src_loc_params,
-    const char *src_name, void *dst_obj, H5VL_loc_params_t dst_loc_params,
+H5VLobject_copy(void *src_obj, const H5VL_loc_params_t *src_loc_params,
+    const char *src_name, void *dst_obj, const H5VL_loc_params_t *dst_loc_params,
     const char *dst_name, hid_t connector_id, hid_t ocpypl_id, hid_t lcpl_id,
     hid_t dxpl_id, void **req)
 {
@@ -4863,7 +4863,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL__object_get(void *obj, H5VL_loc_params_t loc_params, const H5VL_class_t *cls,
+H5VL__object_get(void *obj, const H5VL_loc_params_t *loc_params, const H5VL_class_t *cls,
     H5VL_object_get_t get_type, hid_t dxpl_id, void **req, va_list arguments)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -4894,7 +4894,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_object_get(const H5VL_object_t *vol_obj, H5VL_loc_params_t loc_params,
+H5VL_object_get(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *loc_params,
     H5VL_object_get_t get_type, hid_t dxpl_id, void **req, ...)
 {
     va_list arguments;                  /* Argument list passed from the API call */
@@ -4939,7 +4939,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLobject_get(void *obj, H5VL_loc_params_t loc_params, hid_t connector_id, H5VL_object_get_t get_type,
+H5VLobject_get(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, H5VL_object_get_t get_type,
     hid_t dxpl_id, void **req, va_list arguments)
 {
     H5VL_class_t *cls;                  /* VOL connector's class struct */
@@ -4975,7 +4975,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL__object_specific(void *obj, H5VL_loc_params_t loc_params, const H5VL_class_t *cls, 
+H5VL__object_specific(void *obj, const H5VL_loc_params_t *loc_params, const H5VL_class_t *cls, 
     H5VL_object_specific_t specific_type, hid_t dxpl_id, void **req,
     va_list arguments)
 {
@@ -5007,7 +5007,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_object_specific(const H5VL_object_t *vol_obj, H5VL_loc_params_t loc_params,
+H5VL_object_specific(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *loc_params,
     H5VL_object_specific_t specific_type, hid_t dxpl_id, void **req, ...)
 {
     va_list arguments;                  /* Argument list passed from the API call */
@@ -5052,7 +5052,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLobject_specific(void *obj, H5VL_loc_params_t loc_params, hid_t connector_id,
+H5VLobject_specific(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id,
     H5VL_object_specific_t specific_type, hid_t dxpl_id, void **req, va_list arguments)
 {
     H5VL_class_t *cls;                  /* VOL connector's class struct */
@@ -5201,7 +5201,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static void *
-H5VL__datatype_commit(void *obj, H5VL_loc_params_t loc_params, const H5VL_class_t *cls,
+H5VL__datatype_commit(void *obj, const H5VL_loc_params_t *loc_params, const H5VL_class_t *cls,
     const char *name, hid_t type_id, hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id, 
     hid_t dxpl_id, void **req)
 {
@@ -5233,7 +5233,7 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VL_datatype_commit(const H5VL_object_t *vol_obj, H5VL_loc_params_t loc_params,
+H5VL_datatype_commit(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *loc_params,
     const char *name, hid_t type_id, hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id, 
     hid_t dxpl_id, void **req)
 {
@@ -5271,7 +5271,7 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VLdatatype_commit(void *obj, H5VL_loc_params_t loc_params, hid_t connector_id,
+H5VLdatatype_commit(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id,
     const char *name, hid_t type_id, hid_t lcpl_id, hid_t tcpl_id,
     hid_t tapl_id, hid_t dxpl_id, void **req)
 {
@@ -5308,7 +5308,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static void *
-H5VL__datatype_open(void *obj, H5VL_loc_params_t loc_params, const H5VL_class_t *cls,
+H5VL__datatype_open(void *obj, const H5VL_loc_params_t *loc_params, const H5VL_class_t *cls,
     const char *name, hid_t tapl_id, hid_t dxpl_id, void **req)
 {
     void *ret_value = NULL;             /* Return value */
@@ -5339,7 +5339,7 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VL_datatype_open(const H5VL_object_t *vol_obj, H5VL_loc_params_t loc_params,
+H5VL_datatype_open(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *loc_params,
     const char *name, hid_t tapl_id, hid_t dxpl_id, void **req)
 {
     hbool_t vol_wrapper_set = FALSE;    /* Whether the VOL object wrapping context was set up */
@@ -5376,7 +5376,7 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VLdatatype_open(void *obj, H5VL_loc_params_t loc_params, hid_t connector_id,
+H5VLdatatype_open(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id,
     const char *name, hid_t tapl_id, hid_t dxpl_id, void **req)
 {
     H5VL_class_t *cls;                  /* VOL connector's class struct */

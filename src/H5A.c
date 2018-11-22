@@ -296,7 +296,7 @@ H5Acreate2(hid_t loc_id, const char *attr_name, hid_t type_id, hid_t space_id,
     loc_params.obj_type = H5I_get_type(loc_id);
 
     /* Create the attribute */
-    if(NULL == (attr = H5VL_attr_create(vol_obj, loc_params, attr_name, acpl_id, aapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
+    if(NULL == (attr = H5VL_attr_create(vol_obj, &loc_params, attr_name, acpl_id, aapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, H5I_INVALID_HID, "unable to create attribute")
 
     /* Register the new attribute and get an ID for it */
@@ -401,7 +401,7 @@ H5Acreate_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier")
 
     /* Create the attribute */
-    if(NULL == (attr = H5VL_attr_create(vol_obj, loc_params, attr_name, acpl_id, aapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
+    if(NULL == (attr = H5VL_attr_create(vol_obj, &loc_params, attr_name, acpl_id, aapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, H5I_INVALID_HID, "unable to create attribute")
 
     /* Register the new attribute and get an ID for it */
@@ -469,7 +469,7 @@ H5Aopen(hid_t loc_id, const char *attr_name, hid_t aapl_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier")
 
     /* Open the attribute */
-    if(NULL == (attr = H5VL_attr_open(vol_obj, loc_params, attr_name, aapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
+    if(NULL == (attr = H5VL_attr_open(vol_obj, &loc_params, attr_name, aapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open attribute: '%s'", attr_name)
 
     /* Register the attribute and get an ID for it */
@@ -551,7 +551,7 @@ H5Aopen_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier")
 
     /* Open the attribute */
-    if(NULL == (attr = H5VL_attr_open(vol_obj, loc_params, attr_name, aapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
+    if(NULL == (attr = H5VL_attr_open(vol_obj, &loc_params, attr_name, aapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, H5I_INVALID_HID, "can't open attribute")
 
     /* Register the attribute and get an ID for it */
@@ -642,7 +642,7 @@ H5Aopen_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier")
 
     /* Open the attribute */
-    if(NULL == (attr = H5VL_attr_open(vol_obj, loc_params, NULL, aapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
+    if(NULL == (attr = H5VL_attr_open(vol_obj, &loc_params, NULL, aapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open attribute")
 
     /* Register the attribute and get an ID for it */
@@ -908,7 +908,7 @@ H5Aget_name(hid_t attr_id, size_t buf_size, char *buf)
     loc_params.obj_type = H5I_get_type(attr_id);
 
     /* Get the attribute name */
-    if(H5VL_attr_get(vol_obj, H5VL_ATTR_GET_NAME, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, loc_params, buf_size, buf, &ret_value) < 0)
+    if(H5VL_attr_get(vol_obj, H5VL_ATTR_GET_NAME, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &loc_params, buf_size, buf, &ret_value) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, (-1), "unable to get attribute name")
 
 done:
@@ -973,7 +973,7 @@ H5Aget_name_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
     loc_params.obj_type = H5I_get_type(loc_id);
 
     /* Get the name */
-    if(H5VL_attr_get(vol_obj, H5VL_ATTR_GET_NAME, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, loc_params, size, name, &ret_value) < 0)
+    if(H5VL_attr_get(vol_obj, H5VL_ATTR_GET_NAME, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &loc_params, size, name, &ret_value) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "unable to get name")
 
 done:
@@ -1051,7 +1051,7 @@ H5Aget_info(hid_t attr_id, H5A_info_t *ainfo)
     loc_params.obj_type = H5I_get_type(attr_id);
 
     /* Get the attribute information */
-    if(H5VL_attr_get(vol_obj, H5VL_ATTR_GET_INFO, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, loc_params, ainfo) < 0)
+    if(H5VL_attr_get(vol_obj, H5VL_ATTR_GET_INFO, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &loc_params, ainfo) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "unable to get attribute info")
 
 done:
@@ -1107,7 +1107,7 @@ H5Aget_info_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
 
     /* Get the attribute information */
-    if(H5VL_attr_get(vol_obj, H5VL_ATTR_GET_INFO, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, loc_params, ainfo, attr_name) < 0)
+    if(H5VL_attr_get(vol_obj, H5VL_ATTR_GET_INFO, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &loc_params, ainfo, attr_name) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "unable to get attribute info")
 
 done:
@@ -1170,7 +1170,7 @@ H5Aget_info_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
 
     /* Get the attribute information */
-    if(H5VL_attr_get(vol_obj, H5VL_ATTR_GET_INFO, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, loc_params, ainfo) < 0)
+    if(H5VL_attr_get(vol_obj, H5VL_ATTR_GET_INFO, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &loc_params, ainfo) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "unable to get attribute info")
 
 done:
@@ -1221,7 +1221,7 @@ H5Arename(hid_t loc_id, const char *old_name, const char *new_name)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, FAIL, "can't set collective metadata read")
 
         /* Rename the attribute */
-        if(H5VL_attr_specific(vol_obj, loc_params, H5VL_ATTR_RENAME, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, old_name, new_name) < 0)
+        if(H5VL_attr_specific(vol_obj, &loc_params, H5VL_ATTR_RENAME, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, old_name, new_name) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTRENAME, FAIL, "can't rename attribute")
     } /* end if */
 
@@ -1281,7 +1281,7 @@ H5Arename_by_name(hid_t loc_id, const char *obj_name, const char *old_attr_name,
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
         /* Rename the attribute */
-        if(H5VL_attr_specific(vol_obj, loc_params, H5VL_ATTR_RENAME, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, old_attr_name, new_attr_name) < 0)
+        if(H5VL_attr_specific(vol_obj, &loc_params, H5VL_ATTR_RENAME, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, old_attr_name, new_attr_name) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTRENAME, FAIL, "can't rename attribute")
     } /* end if */
 
@@ -1358,7 +1358,7 @@ H5Aiterate2(hid_t loc_id, H5_index_t idx_type, H5_iter_order_t order,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
     /* Iterate over attributes */
-    if((ret_value = H5VL_attr_specific(vol_obj, loc_params, H5VL_ATTR_ITER, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, idx_type, order, idx, op, op_data)) < 0)
+    if((ret_value = H5VL_attr_specific(vol_obj, &loc_params, H5VL_ATTR_ITER, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, idx_type, order, idx, op, op_data)) < 0)
         HERROR(H5E_ATTR, H5E_BADITER, "error iterating over attributes");
 
 done:
@@ -1446,7 +1446,7 @@ H5Aiterate_by_name(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
     /* Iterate over attributes */
-    if((ret_value = H5VL_attr_specific(vol_obj, loc_params, H5VL_ATTR_ITER, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, idx_type, order, idx, op, op_data)) < 0)
+    if((ret_value = H5VL_attr_specific(vol_obj, &loc_params, H5VL_ATTR_ITER, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, idx_type, order, idx, op, op_data)) < 0)
         HERROR(H5E_ATTR, H5E_BADITER, "attribute iteration failed");
 
 done:
@@ -1499,7 +1499,7 @@ H5Adelete(hid_t loc_id, const char *name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
 
     /* Delete the attribute */
-    if(H5VL_attr_specific(vol_obj, loc_params, H5VL_ATTR_DELETE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, name) < 0)
+    if(H5VL_attr_specific(vol_obj, &loc_params, H5VL_ATTR_DELETE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, name) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, FAIL, "unable to delete attribute")
 
 done:
@@ -1557,7 +1557,7 @@ H5Adelete_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
 
     /* Delete the attribute */
-    if(H5VL_attr_specific(vol_obj, loc_params, H5VL_ATTR_DELETE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, attr_name) < 0)
+    if(H5VL_attr_specific(vol_obj, &loc_params, H5VL_ATTR_DELETE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, attr_name) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, FAIL, "unable to delete attribute")
 
 done:
@@ -1627,7 +1627,7 @@ H5Adelete_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
 
     /* Delete the attribute through the VOL */
-    if(H5VL_attr_specific(vol_obj, loc_params, H5VL_ATTR_DELETE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, NULL) < 0)
+    if(H5VL_attr_specific(vol_obj, &loc_params, H5VL_ATTR_DELETE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, NULL) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, FAIL, "unable to delete attribute")
 
 done:
@@ -1705,7 +1705,7 @@ H5Aexists(hid_t obj_id, const char *attr_name)
     loc_params.obj_type = H5I_get_type(obj_id);
 
     /* Check if the attribute exists */
-    if(H5VL_attr_specific(vol_obj, loc_params, H5VL_ATTR_EXISTS, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, attr_name, &ret_value) < 0)
+    if(H5VL_attr_specific(vol_obj, &loc_params, H5VL_ATTR_EXISTS, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, attr_name, &ret_value) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "unable to determine if attribute exists")
 
 done:
@@ -1759,7 +1759,7 @@ H5Aexists_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
     loc_params.obj_type = H5I_get_type(loc_id);
 
     /* Check existence of attribute */
-    if(H5VL_attr_specific(vol_obj, loc_params, H5VL_ATTR_EXISTS, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, attr_name, &ret_value) < 0)
+    if(H5VL_attr_specific(vol_obj, &loc_params, H5VL_ATTR_EXISTS, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, attr_name, &ret_value) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "unable to determine if attribute exists")
 
 done:

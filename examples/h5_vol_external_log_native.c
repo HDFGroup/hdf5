@@ -10,14 +10,14 @@ static herr_t H5VL_log_init(hid_t vipl_id);
 static herr_t H5VL_log_term(void);
 
 /* Datatype callbacks */
-static void *H5VL_log_datatype_commit(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t type_id, hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id, hid_t dxpl_id, void **req);
-static void *H5VL_log_datatype_open(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t tapl_id, hid_t dxpl_id, void **req);
+static void *H5VL_log_datatype_commit(void *obj, const H5VL_loc_params_t *loc_params, const char *name, hid_t type_id, hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id, hid_t dxpl_id, void **req);
+static void *H5VL_log_datatype_open(void *obj, const H5VL_loc_params_t *loc_params, const char *name, hid_t tapl_id, hid_t dxpl_id, void **req);
 static herr_t H5VL_log_datatype_get(void *dt, H5VL_datatype_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
 static herr_t H5VL_log_datatype_close(void *dt, hid_t dxpl_id, void **req);
 
 /* Dataset callbacks */
-static void *H5VL_log_dataset_create(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t dcpl_id, hid_t dapl_id, hid_t dxpl_id, void **req);
-static void *H5VL_log_dataset_open(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t dapl_id, hid_t dxpl_id, void **req);
+static void *H5VL_log_dataset_create(void *obj, const H5VL_loc_params_t *loc_params, const char *name, hid_t dcpl_id, hid_t dapl_id, hid_t dxpl_id, void **req);
+static void *H5VL_log_dataset_open(void *obj, const H5VL_loc_params_t *loc_params, const char *name, hid_t dapl_id, hid_t dxpl_id, void **req);
 static herr_t H5VL_log_dataset_read(void *dset, hid_t mem_type_id, hid_t mem_space_id,
                                     hid_t file_space_id, hid_t plist_id, void *buf, void **req);
 static herr_t H5VL_log_dataset_write(void *dset, hid_t mem_type_id, hid_t mem_space_id,
@@ -31,14 +31,14 @@ static herr_t H5VL_log_file_get(void *file, H5VL_file_get_t get_type, hid_t dxpl
 static herr_t H5VL_log_file_close(void *file, hid_t dxpl_id, void **req);
 
 /* Group callbacks */
-static void *H5VL_log_group_create(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t gcpl_id, hid_t gapl_id, hid_t dxpl_id, void **req);
+static void *H5VL_log_group_create(void *obj, const H5VL_loc_params_t *loc_params, const char *name, hid_t gcpl_id, hid_t gapl_id, hid_t dxpl_id, void **req);
 static herr_t H5VL_log_group_close(void *grp, hid_t dxpl_id, void **req);
 
 /* Link callbacks */
 
 /* Object callbacks */
-static void *H5VL_log_object_open(void *obj, H5VL_loc_params_t loc_params, H5I_type_t *opened_type, hid_t dxpl_id, void **req);
-static herr_t H5VL_log_object_specific(void *obj, H5VL_loc_params_t loc_params, H5VL_object_specific_t specific_type, hid_t dxpl_id, void **req, va_list arguments);
+static void *H5VL_log_object_open(void *obj, const H5VL_loc_params_t *loc_params, H5I_type_t *opened_type, hid_t dxpl_id, void **req);
+static herr_t H5VL_log_object_specific(void *obj, const H5VL_loc_params_t *loc_params, H5VL_object_specific_t specific_type, hid_t dxpl_id, void **req, va_list arguments);
 
 hid_t native_connector_id = -1;
 
@@ -321,7 +321,7 @@ H5VL_log_file_close(void *file, hid_t dxpl_id, void **req)
 }
 
 static void *
-H5VL_log_group_create(void *obj, H5VL_loc_params_t loc_params, const char *name, 
+H5VL_log_group_create(void *obj, const H5VL_loc_params_t *loc_params, const char *name, 
                       hid_t gcpl_id, hid_t gapl_id, hid_t dxpl_id, void **req)
 {
     H5VL_log_t *group;
@@ -348,7 +348,7 @@ H5VL_log_group_close(void *grp, hid_t dxpl_id, void **req)
 }
 
 static void *
-H5VL_log_datatype_commit(void *obj, H5VL_loc_params_t loc_params, const char *name, 
+H5VL_log_datatype_commit(void *obj, const H5VL_loc_params_t *loc_params, const char *name, 
                          hid_t type_id, hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id, hid_t dxpl_id, void **req)
 {
     H5VL_log_t *dt;
@@ -364,7 +364,7 @@ H5VL_log_datatype_commit(void *obj, H5VL_loc_params_t loc_params, const char *na
 }
 
 static void *
-H5VL_log_datatype_open(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t tapl_id, hid_t dxpl_id, void **req)
+H5VL_log_datatype_open(void *obj, const H5VL_loc_params_t *loc_params, const char *name, hid_t tapl_id, hid_t dxpl_id, void **req)
 {
     H5VL_log_t *dt;
     H5VL_log_t *o = (H5VL_log_t *)obj;  
@@ -404,7 +404,7 @@ H5VL_log_datatype_close(void *dt, hid_t dxpl_id, void **req)
 }
 
 static void *
-H5VL_log_object_open(void *obj, H5VL_loc_params_t loc_params, H5I_type_t *opened_type, hid_t dxpl_id, void **req)
+H5VL_log_object_open(void *obj, const H5VL_loc_params_t *loc_params, H5I_type_t *opened_type, hid_t dxpl_id, void **req)
 {
     H5VL_log_t *new_obj;
     H5VL_log_t *o = (H5VL_log_t *)obj;
@@ -418,7 +418,7 @@ H5VL_log_object_open(void *obj, H5VL_loc_params_t loc_params, H5I_type_t *opened
 }
 
 static herr_t 
-H5VL_log_object_specific(void *obj, H5VL_loc_params_t loc_params, H5VL_object_specific_t specific_type, 
+H5VL_log_object_specific(void *obj, const H5VL_loc_params_t *loc_params, H5VL_object_specific_t specific_type, 
                          hid_t dxpl_id, void **req, va_list arguments)
 {
     H5VL_log_t *o = (H5VL_log_t *)obj;
@@ -430,7 +430,7 @@ H5VL_log_object_specific(void *obj, H5VL_loc_params_t loc_params, H5VL_object_sp
 }
 
 static void *
-H5VL_log_dataset_create(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t dcpl_id, hid_t dapl_id, hid_t dxpl_id, void **req) 
+H5VL_log_dataset_create(void *obj, const H5VL_loc_params_t *loc_params, const char *name, hid_t dcpl_id, hid_t dapl_id, hid_t dxpl_id, void **req) 
 {
     H5VL_log_t *dset;
     H5VL_log_t *o = (H5VL_log_t *)obj;
@@ -444,7 +444,7 @@ H5VL_log_dataset_create(void *obj, H5VL_loc_params_t loc_params, const char *nam
 }
 
 static void *
-H5VL_log_dataset_open(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t dapl_id, hid_t dxpl_id, void **req)
+H5VL_log_dataset_open(void *obj, const H5VL_loc_params_t *loc_params, const char *name, hid_t dapl_id, hid_t dxpl_id, void **req)
 {
     H5VL_log_t *dset;
     H5VL_log_t *o = (H5VL_log_t *)obj;

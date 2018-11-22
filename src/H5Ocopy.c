@@ -247,7 +247,7 @@ H5Ocopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
     loc_params2.obj_type    = H5I_get_type(dst_loc_id);
 
     /* Copy the object */
-    if(H5VL_object_copy(vol_obj1, loc_params1, src_name, vol_obj2, loc_params2, dst_name, ocpypl_id, lcpl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+    if(H5VL_object_copy(vol_obj1, &loc_params1, src_name, vol_obj2, &loc_params2, dst_name, ocpypl_id, lcpl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy object")
 
 done:
