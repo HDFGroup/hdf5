@@ -1147,7 +1147,6 @@
 ./test/test_filters_le.h5
 ./test/test_filters_be.h5
 ./test/gen_filters.c
-./test/chunk_info.c
 ./test/vds.c
 ./test/vds_swmr.h
 ./test/vds_swmr_gen.c
