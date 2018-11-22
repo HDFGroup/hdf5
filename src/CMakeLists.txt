@@ -948,38 +948,45 @@ if (NOT EXISTS ${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c)
         ${HDF5_BINARY_DIR}/${HDF5_BATCH_H5DETECT_SCRIPT} ESCAPE_QUOTES @ONLY
     )
     add_custom_command (
-        OUTPUT ${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.tmp
+        OUTPUT ${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c
         COMMAND ${HDF5_BATCH_CMD}
         ARGS ${HDF5_BINARY_DIR}/${HDF5_BATCH_H5DETECT_SCRIPT}
+        COMMAND ${CMAKE_COMMAND}
+        ARGS -E echo "Executed batch command to create H5Tinit.c"
         DEPENDS H5detect
         WORKING_DIRECTORY ${HDF5_GENERATED_SOURCE_DIR}
     )
+    add_custom_target (gen_H5Tinit
+        COMMAND ${CMAKE_COMMAND} -P ${HDF5_SOURCE_DIR}/config/cmake/wait_H5Tinit.cmake
+    )
+    if (BUILD_SHARED_LIBS)
+      add_custom_command (
+          OUTPUT     ${HDF5_GENERATED_SOURCE_DIR}/shared/H5Tinit.c
+          COMMAND    ${CMAKE_COMMAND}
+          ARGS       -E copy_if_different "${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c" "${HDF5_GENERATED_SOURCE_DIR}/shared/H5Tinit.c"
+          DEPENDS    gen_H5Tinit ${HDF5_GENERATED_SOURCE_DIR}/H5Tinit_created
+      )
+      set_source_files_properties (${HDF5_GENERATED_SOURCE_DIR}/shared/H5Tinit.c PROPERTIES GENERATED TRUE)
+    endif ()
   else ()
     add_custom_command (
-        OUTPUT ${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.tmp
+        OUTPUT ${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c
         COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR}$<TARGET_FILE:H5detect>
-        ARGS ${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.tmp
+        ARGS ${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c
         DEPENDS H5detect
         WORKING_DIRECTORY ${HDF5_GENERATED_SOURCE_DIR}
     )
+    if (BUILD_SHARED_LIBS)
+      add_custom_command (
+          OUTPUT     ${HDF5_GENERATED_SOURCE_DIR}/shared/H5Tinit.c
+          COMMAND    ${CMAKE_COMMAND}
+          ARGS       -E copy_if_different "${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c" "${HDF5_GENERATED_SOURCE_DIR}/shared/H5Tinit.c"
+          DEPENDS    ${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c
+      )
+      set_source_files_properties (${HDF5_GENERATED_SOURCE_DIR}/shared/H5Tinit.c PROPERTIES GENERATED TRUE)
+    endif ()
   endif ()
-  add_custom_target (gen_H5Tinit ALL DEPENDS ${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.tmp)
-  add_custom_command (
-      OUTPUT     ${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c
-      COMMAND    ${CMAKE_COMMAND}
-      ARGS       -E copy_if_different "${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.tmp" "${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c"
-      DEPENDS    gen_H5Tinit ${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.tmp
-  )
   set_source_files_properties (${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c PROPERTIES GENERATED TRUE)
-endif ()
-if (BUILD_SHARED_LIBS)
-  add_custom_command (
-      OUTPUT     ${HDF5_GENERATED_SOURCE_DIR}/shared/H5Tinit.c
-      COMMAND    ${CMAKE_COMMAND}
-      ARGS       -E copy_if_different "${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c" "${HDF5_GENERATED_SOURCE_DIR}/shared/H5Tinit.c"
-      DEPENDS    ${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c
-  )
-  set_source_files_properties (${HDF5_GENERATED_SOURCE_DIR}/shared/H5Tinit.c PROPERTIES GENERATED TRUE)
 endif ()
 
 add_executable (H5make_libsettings ${HDF5_SRC_DIR}/H5make_libsettings.c)

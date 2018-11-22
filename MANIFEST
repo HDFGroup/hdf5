@@ -92,8 +92,12 @@
 ./bin/timekeeper      _DO_NOT_DISTRIBUTE_
 ./bin/trace
 ./bin/yodconfigure
+./bin/batch/knl_ctestP.sl
+./bin/batch/knl_ctestS.sl
 ./bin/batch/knl_ctestSP.sl
 ./bin/batch/knl_H5detect.sl.in.cmake
+./bin/batch/sbatch_ctestS.sl
+./bin/batch/sbatch_ctestP.sl
 ./bin/batch/sbatch_ctestSP.sl
 ./bin/pkgscrpts/h5rmflags                  _DO_NOT_DISTRIBUTE_
 ./bin/pkgscrpts/makeHDF5BinaryTarfiles.pl  _DO_NOT_DISTRIBUTE_
@@ -3193,6 +3197,7 @@
 ./config/cmake/UseJavaSymlinks.cmake
 ./config/cmake/userblockTest.cmake
 ./config/cmake/vfdTest.cmake
+./config/cmake/wait_H5Tinit.cmake
 
 ./config/cmake_ext_mod/ConfigureChecks.cmake
 ./config/cmake_ext_mod/CTestCustom.cmake
