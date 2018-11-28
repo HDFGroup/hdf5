@@ -2572,6 +2572,29 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                             } /* end switch */
                         } /* end else */
                         break;
+                    case 'C':
+                        if(ptr) {
+                            if(vp)
+                                HDfprintf (out, "0x%lx", (unsigned long)vp);
+                            else
+                                HDfprintf(out, "NULL");
+                        } /* end if */
+                        else {
+                            H5VL_class_value_t class_val = (H5VL_class_value_t)va_arg(ap, int);
+
+                            switch(class_val) {
+                                case H5_VOL_NATIVE:
+                                    HDfprintf(out, "H5_VOL_NATIVE");
+                                    break;
+                                case H5_VOL_MAX_LIB_VALUE:
+                                    HDfprintf(out, "H5_VOL_MAX_LIB_VALUE");
+                                    break;
+                                default:
+                                    HDfprintf(out, "%ld", (long)class_val);
+                                    break;
+                            } /* end switch */
+                        } /* end else */
+                        break;
                     case 'c':
                         if(ptr) {
                             if(vp)
@@ -2933,6 +2956,32 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                                     break;
                                 case H5VL_OBJECT_REFRESH:
                                     HDfprintf(out, "H5VL_OBJECT_REFRESH");
+                                    break;
+                                default:
+                                    HDfprintf(out, "%ld", (long)specific);
+                                    break;
+                            } /* end switch */
+                        } /* end else */
+                        break;
+                    case 'r':
+                        if(ptr) {
+                            if(vp)
+                                HDfprintf (out, "0x%lx", (unsigned long)vp);
+                            else
+                                HDfprintf(out, "NULL");
+                        } /* end if */
+                        else {
+                            H5VL_request_specific_t specific = (H5VL_request_specific_t)va_arg(ap, int);
+
+                            switch(specific) {
+                                case H5VL_REQUEST_WAITANY:
+                                    HDfprintf(out, "H5VL_REQUEST_WAITANY");
+                                    break;
+                                case H5VL_REQUEST_WAITSOME:
+                                    HDfprintf(out, "H5VL_REQUEST_WAITSOME");
+                                    break;
+                                case H5VL_REQUEST_WAITALL:
+                                    HDfprintf(out, "H5VL_REQUEST_WAITALL");
                                     break;
                                 default:
                                     HDfprintf(out, "%ld", (long)specific);

@@ -270,6 +270,7 @@ H5VLregister_connector_by_value(H5VL_class_value_t value, hid_t vipl_id)
     hid_t ret_value = H5I_INVALID_HID;
 
     FUNC_ENTER_API(H5I_INVALID_HID)
+    H5TRACE2("i", "VCi", value, vipl_id);
 
     /* Check arguments */
     if(value < 0)
