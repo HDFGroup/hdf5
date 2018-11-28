@@ -337,9 +337,13 @@ typedef struct H5VL_object_class_t {
     herr_t (*optional)(void *obj, hid_t dxpl_id, void **req, va_list arguments);
 } H5VL_object_class_t;
 
-/* Async operation routines */
+/* Asynchronous request 'notify' callback */
+typedef herr_t (*H5VL_request_notify_t)(void *ctx, H5ES_status_t status);
+
+/* Async request operation routines */
 typedef struct H5VL_request_class_t {
     herr_t (*wait)(void *req, uint64_t timeout, H5ES_status_t *status);
+    herr_t (*notify)(void *req, H5VL_request_notify_t cb, void *ctx);
     herr_t (*cancel)(void *req);
     herr_t (*specific)(void *req, H5VL_request_specific_t specific_type, va_list arguments);
     herr_t (*optional)(void *req, va_list arguments);
@@ -383,14 +387,14 @@ typedef struct H5VL_class_t {
     herr_t  (*terminate)(void);                     /* Connector termination callback               */
     size_t  info_size;                              /* size of the vol info                         */
     void *  (*info_copy)(const void *info);         /* Callback to create a copy of the vol info    */
-    int     (*info_cmp)(const void *info1, const void *info2); /* Callback to compare vol info      */
+    herr_t  (*info_cmp)(int *cmp_value, const void *info1, const void *info2); /* Callback to compare vol info      */
     herr_t  (*info_free)(void *info);               /* Callback to release the vol info copy        */
     herr_t  (*info_to_str)(const void *info, char **str); /* Callback to serialize connector's info into a string */
     herr_t  (*str_to_info)(const char *str, void **info); /* Callback to deserialize a string into connector's info */
     void *  (*get_object)(const void *obj);         /* Callback to retrieve underlying object       */
     herr_t  (*get_wrap_ctx)(const void *obj, void **wrap_ctx); /* Callback to retrieve the object wrapping context for the connector */
-    herr_t  (*free_wrap_ctx)(void *wrap_ctx);       /* Callback to release the object wrapping context for the connector */
     void*   (*wrap_object)(void *obj, void *wrap_ctx); /* Callback to wrap an object */
+    herr_t  (*free_wrap_ctx)(void *wrap_ctx);       /* Callback to release the object wrapping context for the connector */
 
     /* Data Model */
     H5VL_attr_class_t          attr_cls;            /* attribute class callbacks    */
@@ -454,8 +458,8 @@ H5_DLL herr_t H5VLconnector_info_to_str(const void *info, hid_t connector_id, ch
 H5_DLL herr_t H5VLconnector_str_to_info(const char *str, hid_t connector_id, void **info);
 H5_DLL void *H5VLget_object(void *obj, hid_t connector_id);
 H5_DLL herr_t H5VLget_wrap_ctx(void *obj, hid_t connector_id, void **wrap_ctx);
-H5_DLL herr_t H5VLfree_wrap_ctx(void *wrap_ctx, hid_t connector_id);
 H5_DLL void *H5VLwrap_object(void *obj, hid_t connector_id, void *wrap_ctx);
+H5_DLL herr_t H5VLfree_wrap_ctx(void *wrap_ctx, hid_t connector_id);
 
 /* Public wrappers for attribute callbacks */
 H5_DLL void *H5VLattr_create(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, const char *attr_name, hid_t acpl_id, hid_t aapl_id, hid_t dxpl_id, void **req);
@@ -524,6 +528,7 @@ H5_DLL herr_t H5VLdatatype_close(void *dt, hid_t connector_id, hid_t dxpl_id, vo
 
 /* Public wrappers for asynchronous request callbacks */
 H5_DLL herr_t H5VLrequest_wait(void *req, hid_t connector_id, uint64_t timeout, H5ES_status_t *status);
+H5_DLL herr_t H5VLrequest_notify(void *req, hid_t connector_id, H5VL_request_notify_t cb, void *ctx);
 H5_DLL herr_t H5VLrequest_cancel(void *req, hid_t connector_id);
 H5_DLL herr_t H5VLrequest_specific(void *req, hid_t connector_id, H5VL_request_specific_t specific_type, va_list arguments);
 H5_DLL herr_t H5VLrequest_optional(void *req, hid_t connector_id, va_list arguments);

@@ -171,6 +171,8 @@ static herr_t H5VL__datatype_close(void *obj, const H5VL_class_t *cls, hid_t dxp
     void **req);
 static herr_t H5VL__request_wait(void *req, const H5VL_class_t *cls,
     uint64_t timeout, H5ES_status_t *status);
+static herr_t H5VL__request_notify(void *req, const H5VL_class_t *cls,
+    H5VL_request_notify_t cb, void *ctx);
 static herr_t H5VL__request_cancel(void *req, const H5VL_class_t *cls);
 static herr_t H5VL__request_specific(void *req, const H5VL_class_t *cls,
     H5VL_request_specific_t specific_type, va_list arguments);
@@ -403,44 +405,53 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5VL_cmp_connector_info
  *
- * Purpose:     Compare VOL info for a connector
+ * Purpose:     Compare VOL info for a connector.  Sets *cmp_value to
+ *              positive if INFO1 is greater than INFO2, negative if
+ *              INFO2 is greater than INFO1 and zero if INFO1 and
+ *              INFO2 are equal.
  *
- * Return:      Positive if VALUE1 is greater than VALUE2, negative if
- *              VALUE2 is greater than VALUE1 and zero if VALUE1 and
- *              VALUE2 are equal.
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
  *
  *-------------------------------------------------------------------------
  */
-int
-H5VL_cmp_connector_info(const H5VL_class_t *connector, const void *info1,
-    const void *info2)
+herr_t
+H5VL_cmp_connector_info(const H5VL_class_t *connector, int *cmp_value,
+    const void *info1, const void *info2)
 {
-    int cmp_value;              /* Value from comparison */
-    int ret_value = 0;          /* Return value */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
     HDassert(connector);
+    HDassert(cmp_value);
+
+    /* Take care of cases where one or both pointers is NULL */
+    if(info1 == NULL && info2 != NULL) {
+        *cmp_value = -1;
+        HGOTO_DONE(SUCCEED);
+    } /* end if */
+    if(info1 != NULL && info2 == NULL) {
+        *cmp_value = 1;
+        HGOTO_DONE(SUCCEED);
+    } /* end if */
+    if(info1 == NULL && info2 == NULL) {
+        *cmp_value = 0;
+        HGOTO_DONE(SUCCEED);
+    } /* end if */
 
     /* Use the class's info comparison routine to compare the info objects,
      * if there is a a callback, otherwise just compare the info objects as
      * memory buffers
      */
     if(connector->info_cmp) {
-        if(0 != (cmp_value = (connector->info_cmp)(info1, info2)))
-            HGOTO_DONE(cmp_value);
+        if((connector->info_cmp)(cmp_value, info1, info2) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTCOMPARE, FAIL, "can't compare connector info")
     } /* end if */
     else {
-        if(info1 == NULL && info2 != NULL)
-            HGOTO_DONE(-1);
-        if(info1 != NULL && info2 == NULL)
-            HGOTO_DONE(1);
-        if(info1) {
-            HDassert(connector->info_size > 0);
-            if(0 != (cmp_value = HDmemcmp(info1, info2, connector->info_size)))
-                HGOTO_DONE(cmp_value);
-        } /* end if */
+        HDassert(connector->info_size > 0);
+        *cmp_value = HDmemcmp(info1, info2, connector->info_size);
     } /* end else */
 
 done:
@@ -478,7 +489,7 @@ H5VLcmp_connector_info(int *cmp, hid_t connector_id, const void *info1, const vo
 
     /* Compare the two VOL connector info objects */
     if(cmp)
-        *cmp = H5VL_cmp_connector_info(cls, info1, info2);
+        H5VL_cmp_connector_info(cls, cmp, info1, info2);
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -5846,6 +5857,9 @@ done:
  *
  * Purpose:     Waits on an asychronous request through the VOL
  *
+ * Note:	Releases the request if the operation has completed and the
+ *		connector callback succeeds
+ *
  * Return:      Success:    Non-negative
  *              Failure:    Negative
  *
@@ -5881,6 +5895,9 @@ done:
  * Function:    H5VL_request_wait
  *
  * Purpose:     Waits on an asychronous request through the VOL
+ *
+ * Note:	Releases the request if the operation has completed and the
+ *		connector callback succeeds
  *
  * Return:      Success:    Non-negative
  *              Failure:    Negative
@@ -5922,6 +5939,9 @@ done:
  *
  * Purpose:     Waits on a request
  *
+ * Note:	Releases the request if the operation has completed and the
+ *		connector callback succeeds
+ *
  * Return:      Success:    Non-negative
  *              Failure:    Negative
  *
@@ -5950,9 +5970,127 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5VL__request_notify
+ *
+ * Purpose:     Registers a user callback to be invoked when an asynchronous
+ *		operation completes
+ *
+ * Note:	Releases the request, if connector callback succeeds
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL__request_notify(void *req, const H5VL_class_t *cls, H5VL_request_notify_t cb,
+    void *ctx)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity check */
+    HDassert(req);
+    HDassert(cls);
+
+    /* Check if the corresponding VOL callback exists */
+    if(NULL == cls->request_cls.notify)
+        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL connector has no 'async notify' method")
+
+    /* Call the corresponding VOL callback */
+    if((cls->request_cls.notify)(req, cb, ctx) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "request notify failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__request_notify() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_request_notify
+ *
+ * Purpose:     Registers a user callback to be invoked when an asynchronous
+ *		operation completes
+ *
+ * Note:	Releases the request, if connector callback succeeds
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_request_notify(const H5VL_object_t *vol_obj, H5VL_request_notify_t cb,
+    void *ctx)
+{
+    hbool_t vol_wrapper_set = FALSE;    /* Whether the VOL object wrapping context was set up */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(vol_obj);
+
+    /* Set wrapper info in API context */
+    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->connector) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
+    vol_wrapper_set = TRUE;
+
+    /* Call the corresponding internal VOL routine */
+    if(H5VL__request_notify(vol_obj->data, vol_obj->connector->cls, cb, ctx) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "request notify failed")
+
+done:
+    /* Reset object wrapping info in API context */
+    if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_request_notify() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VLrequest_notify
+ *
+ * Purpose:     Registers a user callback to be invoked when an asynchronous
+ *		operation completes
+ *
+ * Note:	Releases the request, if connector callback succeeds
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VLrequest_notify(void *req, hid_t connector_id, H5VL_request_notify_t cb,
+    void *ctx)
+{
+    H5VL_class_t *cls;                  /* VOL connector's class struct */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_API_NOINIT
+
+    /* Get class pointer */
+    if(NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID")
+
+    /* Call the corresponding internal VOL routine */
+    if(H5VL__request_notify(req, cls, cb, ctx) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "unable to register notify callback for request")
+
+done:
+    FUNC_LEAVE_API_NOINIT(ret_value)
+} /* end H5VLrequest_notify() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5VL__request_cancel
  *
  * Purpose:     Cancels an asynchronous request through the VOL
+ *
+ * Note:	Releases the request, if connector callback succeeds
  *
  * Return:      Success:    Non-negative
  *              Failure:    Negative
@@ -5987,6 +6125,8 @@ done:
  * Function:    H5VL_request_cancel
  *
  * Purpose:     Cancels an asynchronous request through the VOL
+ *
+ * Note:	Releases the request, if connector callback succeeds
  *
  * Return:      Success:    Non-negative
  *              Failure:    Negative
@@ -6026,6 +6166,8 @@ done:
  * Function:    H5VLrequest_cancel
  *
  * Purpose:     Cancels a request
+ *
+ * Note:	Releases the request, if connector callback succeeds
  *
  * Return:      Success:    Non-negative
  *              Failure:    Negative

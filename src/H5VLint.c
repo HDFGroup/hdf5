@@ -883,46 +883,64 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-int
-H5VL_cmp_connector_cls(const H5VL_class_t *cls1, const H5VL_class_t *cls2)
+herr_t
+H5VL_cmp_connector_cls(int *cmp_value, const H5VL_class_t *cls1, const H5VL_class_t *cls2)
 {
-    int cmp_value;              /* Value from comparison */
-    int ret_value = 0;          /* Return value */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
     HDassert(cls1);
-    HDassert(cls1);
+    HDassert(cls2);
 
     /* Compare connector "values" */
-    if(cls1->value < cls2->value)
-        HGOTO_DONE(-1)
-    if(cls1->value > cls2->value)
-        HGOTO_DONE(1)
+    if(cls1->value < cls2->value) {
+        *cmp_value = -1;
+        HGOTO_DONE(SUCCEED)
+    } /* end if */
+    if(cls1->value > cls2->value) {
+        *cmp_value = 1;
+        HGOTO_DONE(SUCCEED)
+    } /* end if */
     HDassert(cls1->value == cls2->value);
 
     /* Compare connector names */
-    if(cls1->name == NULL && cls2->name != NULL)
-        HGOTO_DONE(-1);
-    if(cls1->name != NULL && cls2->name == NULL)
-        HGOTO_DONE(1);
-    if(0 != (cmp_value = HDstrcmp(cls1->name, cls2->name)))
-        HGOTO_DONE(cmp_value);
+    if(cls1->name == NULL && cls2->name != NULL) {
+        *cmp_value = -1;
+        HGOTO_DONE(SUCCEED)
+    } /* end if */
+    if(cls1->name != NULL && cls2->name == NULL) {
+        *cmp_value = 1;
+        HGOTO_DONE(SUCCEED)
+    } /* end if */
+    if(0 != (*cmp_value = HDstrcmp(cls1->name, cls2->name)))
+        HGOTO_DONE(SUCCEED)
 
     /* Compare connector VOL API versions */
-    if(cls1->version < cls2->version)
-        HGOTO_DONE(-1)
-    if(cls1->version > cls2->version)
-        HGOTO_DONE(1)
+    if(cls1->version < cls2->version) {
+        *cmp_value = -1;
+        HGOTO_DONE(SUCCEED)
+    } /* end if */
+    if(cls1->version > cls2->version) {
+        *cmp_value = 1;
+        HGOTO_DONE(SUCCEED)
+    } /* end if */
     HDassert(cls1->version == cls2->version);
 
     /* Compare connector info */
-    if(cls1->info_size < cls2->info_size)
-        HGOTO_DONE(-1)
-    if(cls1->info_size > cls2->info_size)
-        HGOTO_DONE(1)
+    if(cls1->info_size < cls2->info_size) {
+        *cmp_value = -1;
+        HGOTO_DONE(SUCCEED)
+    } /* end if */
+    if(cls1->info_size > cls2->info_size) {
+        *cmp_value = 1;
+        HGOTO_DONE(SUCCEED)
+    } /* end if */
     HDassert(cls1->info_size == cls2->info_size);
+
+    /* Set comparison value to 'equal' */
+    *cmp_value = 0;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

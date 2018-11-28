@@ -5309,7 +5309,8 @@ H5P__facc_vol_cmp(const void *_info1, const void *_info2, size_t H5_ATTR_UNUSED 
     const H5VL_connector_prop_t *info1 = (const H5VL_connector_prop_t *)_info1; /* Create local aliases for values */
     const H5VL_connector_prop_t *info2 = (const H5VL_connector_prop_t *)_info2;
     H5VL_class_t *cls1, *cls2;  /* connector class for each property */
-    int cmp_value;              /* Value from comparison */
+    int cmp_value = 0;          /* Value from comparison */
+    herr_t status;              /* Status from info comparison */
     int ret_value = 0;          /* Return value */
 
     FUNC_ENTER_STATIC_NOERR
@@ -5324,7 +5325,9 @@ H5P__facc_vol_cmp(const void *_info1, const void *_info2, size_t H5_ATTR_UNUSED 
         HGOTO_DONE(-1)
     if(NULL == (cls2 = (H5VL_class_t *)H5I_object(info2->connector_id)))
         HGOTO_DONE(1)
-    if(0 != (cmp_value = H5VL_cmp_connector_cls(cls1, cls2)))
+    status = H5VL_cmp_connector_cls(&cmp_value, cls1, cls2);
+    HDassert(status >= 0);
+    if(cmp_value != 0)
         HGOTO_DONE(cmp_value);
 
     /* At this point, we should be able to assume that we are dealing with
@@ -5336,8 +5339,11 @@ H5P__facc_vol_cmp(const void *_info1, const void *_info2, size_t H5_ATTR_UNUSED 
      * info objects
      */
     HDassert(cls1->info_cmp == cls2->info_cmp);
-    if(0 != (cmp_value = H5VL_cmp_connector_info(cls1, info1->connector_info, info2->connector_info)))
-        HGOTO_DONE(cmp_value);
+    status = H5VL_cmp_connector_info(cls1, &cmp_value, info1->connector_info, info2->connector_info);
+    HDassert(status >= 0);
+
+    /* Set return value */
+    ret_value = cmp_value;
     
 done:
     FUNC_LEAVE_NOAPI(ret_value)

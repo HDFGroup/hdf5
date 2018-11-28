@@ -134,8 +134,8 @@ static H5VL_class_t H5VL_native_cls_g = {
     NULL,                                           /* str to info  */
     NULL,                                           /* get_object   */
     NULL,                                           /* get_wrap_ctx */
-    NULL,                                           /* free_wrap_ctx */
     NULL,                                           /* wrap_object  */
+    NULL,                                           /* free_wrap_ctx */
     {   /* attribute_cls */
         H5VL__native_attr_create,                   /* create       */
         H5VL__native_attr_open,                     /* open         */
@@ -197,6 +197,7 @@ static H5VL_class_t H5VL_native_cls_g = {
     },
     {   /* request_cls */
         NULL,                                       /* wait         */
+        NULL,                                       /* notify       */
         NULL,                                       /* cancel       */
         NULL,                                       /* specific     */
         NULL,                                       /* optional     */
@@ -292,7 +293,7 @@ done:
  *
  * Purpose:	Creates an attribute on an object.
  *
- * Return:	Success:	attr id. 
+ * Return:	Success:	Pointer to attribute object
  *		Failure:	NULL
  *
  *-------------------------------------------------------------------------
@@ -365,9 +366,9 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5VL__native_attr_open
  *
- * Purpose:	Opens a attr inside a native h5 file.
+ * Purpose:	Opens an attr inside a native H5 file.
  *
- * Return:	Success:	attr id. 
+ * Return:	Success:	Pointer to attribute object
  *		Failure:	NULL
  *
  * Programmer:  Mohamad Chaarawi
@@ -423,9 +424,9 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5VL__native_attr_read
  *
- * Purpose:	Reads in data from attribute.
+ * Purpose:	Reads data from attribute.
  *
- *              Non-negative on success/Negative on failure
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:  Mohamad Chaarawi
  *              March, 2012
@@ -456,9 +457,9 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5VL__native_attr_write
  *
- * Purpose:	Writes out data to attribute.
+ * Purpose:	Writes data to attribute.
  *
- *              Non-negative on success/Negative on failure
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:  Mohamad Chaarawi
  *              March, 2012
@@ -489,7 +490,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5VL__native_attr_get
  *
- * Purpose:	Gets certain information about an attribute
+ * Purpose:	Gets information about an attribute
  *
  * Return:	Success:	0
  *		Failure:	-1
@@ -673,7 +674,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5VL__native_attr_specific
  *
- * Purpose:	Specific operations for attributes
+ * Purpose:	Specific operation on attribute
  *
  * Return:	Success:	0
  *		Failure:	-1
@@ -1176,7 +1177,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5VL__native_dataset_specific
  *
- * Purpose:     Specific operations for datasets
+ * Purpose:     Specific operation on dataset
  *
  * Return:      SUCCEED/FAIL
  *
@@ -1496,7 +1497,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5VL__native_file_get
  *
- * Purpose:     Gets certain data about a file
+ * Purpose:     Get info about a file
  *
  * Return:      SUCCEED/FAIL
  *
@@ -1648,7 +1649,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5VL__native_file_specific
  *
- * Purpose:     Perform an operation
+ * Purpose:	Specific operation on file
  *
  * Return:      SUCCEED/FAIL
  *
@@ -2307,7 +2308,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5VL__native_group_get
  *
- * Purpose:     Gets data about a group
+ * Purpose:     Get info about a group
  *
  * Return:      SUCCEED/FAIL
  *
@@ -2754,7 +2755,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5VL__native_link_get
  *
- * Purpose:	Gets certain data about a link
+ * Purpose:	Get info about a link
  *
  * Return:	Success:	0
  *		Failure:	-1
@@ -2847,7 +2848,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5VL__native_link_specific
  *
- * Purpose:	Specific operations with links
+ * Purpose:	Specific operation on a link
  *
  * Return:	Success:	0
  *		Failure:	-1
@@ -2959,7 +2960,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5VL__native_object_open
  *
- * Purpose:	Opens a object inside a native h5 file.
+ * Purpose:	Opens an object inside a native h5 file.
  *
  * Return:	Success:	object id. 
  *		Failure:	NULL
@@ -3040,10 +3041,10 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5VL__native_object_copy
  *
- * Purpose:	Copys a object inside a native h5 file.
+ * Purpose:	Copies an object inside a native h5 file.
  *
- * Return:	Success:	object id. 
- *		Failure:	NULL
+ * Return:	Success:	0
+ *		Failure:	-1
  *
  * Programmer:  Mohamad Chaarawi
  *              March, 2012
@@ -3174,7 +3175,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5VL__native_object_specific
  *
- * Purpose:     Perform a connector-specific operation for an objectibute
+ * Purpose:	Specific operation on an object
  *
  * Return:      SUCCEED/FAIL
  *
@@ -3533,7 +3534,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5VL__native_datatype_get
  *
- * Purpose:	Gets certain information about a datatype
+ * Purpose:	Get information about a datatype
  *
  * Return:	Success:	0
  *		Failure:	-1
@@ -3639,7 +3640,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5VL__native_datatype_close
  *
- * Purpose:	Closes an datatype.
+ * Purpose:	Closes a datatype.
  *
  * Return:	Success:	0
  *		Failure:	-1, datatype not closed.

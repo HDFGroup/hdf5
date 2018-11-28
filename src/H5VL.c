@@ -512,7 +512,8 @@ H5VLcmp_connector_cls(int *cmp, hid_t connector_id1, hid_t connector_id2)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID")
 
     /* Compare the two VOL connector classes */
-    *cmp = H5VL_cmp_connector_cls(cls1, cls2);
+    if(H5VL_cmp_connector_cls(cmp, cls1, cls2) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTCOMPARE, FAIL, "can't compare connector classes")
 
 done:
     FUNC_LEAVE_API(ret_value)

@@ -63,7 +63,7 @@ typedef enum H5VL_get_connector_kind_t {
 
 /* Utility functions */
 H5_DLL herr_t H5VL_init(void);
-H5_DLL int H5VL_cmp_connector_cls(const H5VL_class_t *cls1, const H5VL_class_t *cls);
+H5_DLL herr_t H5VL_cmp_connector_cls(int *cmp_value, const H5VL_class_t *cls1, const H5VL_class_t *cls2);
 H5_DLL herr_t H5VL_conn_copy(H5VL_connector_prop_t *value);
 H5_DLL herr_t H5VL_conn_free(const H5VL_connector_prop_t *info);
 
@@ -110,8 +110,8 @@ H5_DLL herr_t H5VL_register_using_existing_id(H5I_type_t type, void *object, H5V
 /* Connector "management" functions */
 H5_DLL int H5VL_copy_connector_info(const H5VL_class_t *connector, void **dst_info,
     const void *src_info);
-H5_DLL int H5VL_cmp_connector_info(const H5VL_class_t *connector, const void *info1,
-    const void *info2);
+H5_DLL herr_t H5VL_cmp_connector_info(const H5VL_class_t *connector, int *cmp_value,
+    const void *info1, const void *info2);
 H5_DLL herr_t H5VL_free_connector_info(const H5VL_class_t *connector, void *info);
 
 /* Attribute functions */
@@ -175,6 +175,7 @@ H5_DLL herr_t H5VL_datatype_close(const H5VL_object_t *vol_obj, hid_t dxpl_id, v
 
 /* Asynchronous functions */
 H5_DLL herr_t H5VL_request_wait(const H5VL_object_t *vol_obj, uint64_t timeout, H5ES_status_t *status);
+H5_DLL herr_t H5VL_request_notify(const H5VL_object_t *vol_obj, H5VL_request_notify_t cb, void *ctx);
 H5_DLL herr_t H5VL_request_cancel(const H5VL_object_t *vol_obj);
 H5_DLL herr_t H5VL_request_specific(const H5VL_object_t *vol_obj, H5VL_request_specific_t specific_type, ...);
 H5_DLL herr_t H5VL_request_optional(const H5VL_object_t *vol_obj, ...);

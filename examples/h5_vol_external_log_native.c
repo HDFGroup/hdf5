@@ -120,6 +120,7 @@ static const H5VL_class_t H5VL_log_g = {
     },
     {                                           /* request_cls */
         NULL,                                       /* wait         */
+        NULL,                                       /* notify       */
         NULL,                                       /* cancel       */
         NULL,                                       /* specific     */
         NULL,                                       /* optional     */
