@@ -237,7 +237,7 @@ static const H5VL_class_t H5VL_pass_through_g = {
 };
 
 /* The connector identification number, initialized at runtime */
-static hid_t H5VL_PASSTHRU_g = 0;
+static hid_t H5VL_PASSTHRU_g = H5I_INVALID_HID;
 
 
 /*-------------------------------------------------------------------------
@@ -315,7 +315,7 @@ H5VL_pass_through_term(void)
 #endif
 
     /* Reset VOL ID */
-    H5VL_PASSTHRU_g = 0;
+    H5VL_PASSTHRU_g = H5I_INVALID_HID;
 
     return(0);
 } /* end H5VL_pass_through_term() */
@@ -462,7 +462,7 @@ H5VL_pass_through_info_to_str(const void *_info, char **str)
     assert(*str);
 
     /* Encode our info */
-    snprintf(*str, 32 + under_vol_str_len, "under_val=%u, under_info={%s}", (unsigned)under_value, (under_vol_string ? under_vol_string : ""));
+    snprintf(*str, 32 + under_vol_str_len, "under_val=%u;under_info={%s}", (unsigned)under_value, (under_vol_string ? under_vol_string : ""));
 
     return(0);
 } /* end H5VL_pass_through_info_to_str() */
@@ -492,7 +492,7 @@ H5VL_pass_through_str_to_info(const char *str, void **_info)
 #endif
 
     /* Retrieve the underlying VOL connector value and info */
-    sscanf(str, "under_vol=%u,", &under_vol_value);
+    sscanf(str, "under_vol=%u;", &under_vol_value);
     under_vol_id = H5VLregister_connector_by_value((H5VL_class_value_t)under_vol_value, H5P_DEFAULT);
     under_vol_info_start = strchr(str, '{');
     under_vol_info_end = strrchr(str, '}');

@@ -41,7 +41,7 @@
 #include "H5SMprivate.h"        /* Shared Object Header Messages            */
 #include "H5Tpkg.h"             /* Datatypes                                */
 #include "H5VLprivate.h"        /* Virtual Object Layer                     */
-#include "H5VLnative_private.h" /* Native VOL connector                     */
+#include "H5VLnative.h"         /* Native VOL connector                     */
 
 /*
  * The VOL connector identification number.
@@ -208,10 +208,9 @@ static H5VL_class_t H5VL_native_cls_g = {
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5VL_native_init
+ * Function:    H5VL_native_register
  *
- * Purpose:     Initialize this VOL connector by registering it with the
- *              library.
+ * Purpose:	Register the native VOL connector and retrieve an ID for it.
  *
  * Return:      Success:    The ID for the native connector
  *              Failure:    H5I_INVALID_HID
@@ -219,7 +218,7 @@ static H5VL_class_t H5VL_native_cls_g = {
  *-------------------------------------------------------------------------
  */
 hid_t
-H5VL_native_init(hid_t vipl_id)
+H5VL_native_register(void)
 {
     hid_t ret_value = H5I_INVALID_HID;            /* Return value */
 
@@ -227,7 +226,7 @@ H5VL_native_init(hid_t vipl_id)
 
     /* Register the native VOL connector, if it isn't already */
     if(NULL == H5I_object_verify(H5VL_NATIVE_ID_g, H5I_VOL))
-        if((H5VL_NATIVE_ID_g = H5VL_register_connector((const H5VL_class_t *)&H5VL_native_cls_g, TRUE, vipl_id)) < 0)
+        if((H5VL_NATIVE_ID_g = H5VL_register_connector((const H5VL_class_t *)&H5VL_native_cls_g, TRUE, H5P_DEFAULT)) < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTINSERT, H5I_INVALID_HID, "can't create ID for native VOL connector")
 
     /* Set return value */
@@ -235,7 +234,7 @@ H5VL_native_init(hid_t vipl_id)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_native_init() */
+} /* end H5VL_native_register() */
 
 
 /*---------------------------------------------------------------------------
@@ -252,40 +251,11 @@ H5VL__native_term(void)
 {
     FUNC_ENTER_STATIC_NOERR
 
-    /* Reset VFL ID */
+    /* Reset VOL ID */
     H5VL_NATIVE_ID_g = H5I_INVALID_HID;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5VL__native_term() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5Pset_fapl_native
- *
- * Purpose:     Modify the file access property list to use the H5VL_NATIVE
- *              connector defined in this source file.
- *
- * Return:      SUCCEED/FAIL
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5Pset_fapl_native(hid_t fapl_id)
-{
-    H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t          ret_value;
-
-    FUNC_ENTER_API(FAIL)
-    H5TRACE1("e", "i", fapl_id);
-
-    if(NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
-
-    ret_value = H5P_set_vol(plist, H5VL_NATIVE_ID_g, NULL);
-
-done:
-    FUNC_LEAVE_API(ret_value)
-} /* end H5Pset_fapl_native() */
 
 
 /*-------------------------------------------------------------------------

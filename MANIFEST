@@ -894,7 +894,6 @@
 ./src/H5VLmodule.h
 ./src/H5VLnative.c
 ./src/H5VLnative.h
-./src/H5VLnative_private.h
 ./src/H5VLpassthru.c
 ./src/H5VLpassthru.h
 ./src/H5VLpkg.h

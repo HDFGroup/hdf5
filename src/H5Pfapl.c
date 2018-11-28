@@ -41,15 +41,15 @@
 #include "H5Ppkg.h"             /* Property lists                       */
 #include "H5VLprivate.h"        /* Virtual Object Layer                 */
 
-/* Includes needed to set as default file driver */
+/* Includes needed to set default file driver */
 #include "H5FDsec2.h"           /* POSIX unbuffered I/O                 */
 #include "H5FDstdio.h"          /* Standard C buffered I/O              */
 #ifdef H5_HAVE_WINDOWS
 #include "H5FDwindows.h"        /* Win32 I/O                            */
 #endif
 
-/* Includes needed to set the default VOL connector */
-#include "H5VLnative_private.h" /* Native VOL connector                 */
+/* Includes needed to set default VOL connector */
+#include "H5VLnative.h"         /* Native VOL connector                 */
 
 
 /****************/

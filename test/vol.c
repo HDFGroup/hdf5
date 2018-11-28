@@ -19,7 +19,6 @@
  */
 
 #include "h5test.h"
-#include "H5VLnative_private.h"
 
 
 #define NATIVE_VOL_TEST_FILENAME        "native_vol_test"
