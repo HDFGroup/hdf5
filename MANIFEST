@@ -171,7 +171,6 @@
 ./examples/h5_vds-percival.c
 ./examples/h5_vds-percival-unlim.c
 ./examples/h5_vds-percival-unlim-maxmin.c
-./examples/h5_vol_external_log_native.c
 ./examples/testh5cc.sh.in
 ./examples/README
 
