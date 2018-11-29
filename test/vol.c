@@ -40,7 +40,7 @@
  */
 static const H5VL_class_t fake_vol_g = {
     0,                                              /* version      */
-    (H5VL_class_value_t)999,                        /* value        */
+    (H5VL_class_value_t)501,                        /* value        */
     FAKE_VOL_NAME,                                  /* name         */
     0,                                              /* capability flags */
     NULL,                                           /* initialize   */
@@ -49,10 +49,12 @@ static const H5VL_class_t fake_vol_g = {
     NULL,                                           /* info copy    */
     NULL,                                           /* info compare */
     NULL,                                           /* info free    */
+    NULL,                                           /* info to str  */
+    NULL,                                           /* str to info  */
     NULL,                                           /* get_object   */
     NULL,                                           /* get_wrap_ctx */
-    NULL,                                           /* free_wrap_ctx */
     NULL,                                           /* wrap_object  */
+    NULL,                                           /* free_wrap_ctx */
     {   /* attribute_cls */
         NULL,                                       /* create       */
         NULL,                                       /* open         */
@@ -114,6 +116,7 @@ static const H5VL_class_t fake_vol_g = {
     },
     {   /* request_cls */
         NULL,                                       /* wait         */
+        NULL,                                       /* notify       */
         NULL,                                       /* cancel       */
         NULL,                                       /* specific     */
         NULL,                                       /* optional     */

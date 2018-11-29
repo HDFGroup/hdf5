@@ -350,50 +350,40 @@ typedef struct H5VL_request_class_t {
     herr_t (*free)(void *req);
 } H5VL_request_class_t;
 
+/*
+ * VOL connector identifiers.  Values 0 through 255 are for connectors defined
+ * by the HDF5 library.  Values 256 through 511 are available for testing new
+ * filters.  Subsequent values should be obtained from the HDF5 development
+ * team at help@hdfgroup.org.
+ */
+typedef unsigned H5VL_class_value_t;
 
-/* enum value to identify the class of a VOL connector (mostly for comparison purposes) */
-typedef enum H5VL_class_value_t {
-    H5_VOL_NATIVE = 0,              /* This should be first */
-    H5_VOL_MAX_LIB_VALUE = 128      /* This should be last */
-} H5VL_class_value_t;
-
+/* VOL connector identifier values */
+#define H5_VOL_NATIVE   0       /* Native HDF5 file formnat VOL connector */
+#define H5_VOL_RESERVED 256     /* VOL connector IDs below this value are reserved for library use */
+#define H5_VOL_MAX	65535	/* Maximum VOL connector ID */
 
 /* Capability flags for connector */
 #define H5VL_CAP_FLAG_NONE              0       /* No special connector capabilities */
 #define H5VL_CAP_FLAG_THREADSAFE        0x01    /* Connector is threadsafe */
 
-
 /* Class information for each VOL connector */
-/* XXX: We should consider adding a UUID/GUID field to this struct
- *      as well as a H5VLregister_by_uuid() API call for people who
- *      really care about getting a particular VOL connector.
- * XXX: We should also consider adding enough information so that
- *      files can be opened without specifying the VOL connector.
- *      e.g.: If we stored a UUID and version, we could search for
- *      a matching VOL connector so a user did not have to make any
- *      H5VL calls.
- */
 typedef struct H5VL_class_t {
-                                                    /* XXX: How do we identify unique VOL connector?
-                                                     *      This is unclear, but for now we'll keep
-                                                     *      all the ID fields from the original VOL
-                                                     *      branch.
-                                                     */
-    unsigned int version;                           /* VOL connector API version #                  */
-    H5VL_class_value_t value;                       /* value to identify connector                  */
-    const char *name;                               /* connector name (MUST be unique!)             */
-    unsigned cap_flags;                             /* capability flags for connector               */
+    unsigned int version;                           /* VOL connector class struct version #         */
+    H5VL_class_value_t value;                       /* Value to identify connector                  */
+    const char *name;                               /* Connector name (MUST be unique!)             */
+    unsigned cap_flags;                             /* Capability flags for connector               */
     herr_t  (*initialize)(hid_t vipl_id);           /* Connector initialization callback            */
     herr_t  (*terminate)(void);                     /* Connector termination callback               */
-    size_t  info_size;                              /* size of the vol info                         */
-    void *  (*info_copy)(const void *info);         /* Callback to create a copy of the vol info    */
-    herr_t  (*info_cmp)(int *cmp_value, const void *info1, const void *info2); /* Callback to compare vol info      */
-    herr_t  (*info_free)(void *info);               /* Callback to release the vol info copy        */
+    size_t  info_size;                              /* Size of the VOL info                         */
+    void *  (*info_copy)(const void *info);         /* Callback to create a copy of the VOL info    */
+    herr_t  (*info_cmp)(int *cmp_value, const void *info1, const void *info2); /* Callback to compare VOL info */
+    herr_t  (*info_free)(void *info);               /* Callback to release the VOL info copy        */
     herr_t  (*info_to_str)(const void *info, char **str); /* Callback to serialize connector's info into a string */
     herr_t  (*str_to_info)(const char *str, void **info); /* Callback to deserialize a string into connector's info */
     void *  (*get_object)(const void *obj);         /* Callback to retrieve underlying object       */
     herr_t  (*get_wrap_ctx)(const void *obj, void **wrap_ctx); /* Callback to retrieve the object wrapping context for the connector */
-    void*   (*wrap_object)(void *obj, void *wrap_ctx); /* Callback to wrap an object */
+    void*   (*wrap_object)(void *obj, void *wrap_ctx); /* Callback to wrap a library object */
     herr_t  (*free_wrap_ctx)(void *wrap_ctx);       /* Callback to release the object wrapping context for the connector */
 
     /* Data Model */

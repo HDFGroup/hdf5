@@ -2580,19 +2580,12 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                                 HDfprintf(out, "NULL");
                         } /* end if */
                         else {
-                            H5VL_class_value_t class_val = (H5VL_class_value_t)va_arg(ap, int);
+                            H5VL_class_value_t class_val = (H5VL_class_value_t)va_arg(ap, H5VL_class_value_t);
 
-                            switch(class_val) {
-                                case H5_VOL_NATIVE:
-                                    HDfprintf(out, "H5_VOL_NATIVE");
-                                    break;
-                                case H5_VOL_MAX_LIB_VALUE:
-                                    HDfprintf(out, "H5_VOL_MAX_LIB_VALUE");
-                                    break;
-                                default:
-                                    HDfprintf(out, "%ld", (long)class_val);
-                                    break;
-                            } /* end switch */
+                            if(H5_VOL_NATIVE == class_val)
+                                HDfprintf(out, "H5_VOL_NATIVE");
+                            else
+                                HDfprintf(out, "%ld", (long)class_val);
                         } /* end else */
                         break;
                     case 'c':
