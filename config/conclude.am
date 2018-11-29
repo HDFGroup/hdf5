@@ -266,3 +266,15 @@ check-vfd: $(LIB) $(PROGS) $(chk_TESTS)
 	        HDF5_DRIVER=$$vfd $(MAKE) $(AM_MAKEFLAGS) check || exit 1;    \
 	    fi;                                                               \
 	done
+
+# Run test with different Virtual Object Layer Connector
+check-vol: $(LIB) $(PROGS) $(chk_TESTS)
+	@for vol in $(VOL_LIST) dummy; do                                     \
+	    if test $$vol != dummy; then                                      \
+	        echo "============================";                          \
+	        echo "Testing VOL Connector $$vol";                           \
+	        echo "============================";                          \
+	        $(MAKE) $(AM_MAKEFLAGS) check-clean || exit 1;                \
+	        HDF5_VOL_CONNECTOR=$$vol $(MAKE) $(AM_MAKEFLAGS) check || exit 1;    \
+	    fi;                                                               \
+	done

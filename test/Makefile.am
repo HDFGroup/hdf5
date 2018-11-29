@@ -144,6 +144,9 @@ if DIRECT_VFD_CONDITIONAL
   VFD_LIST += direct
 endif
 
+VOL_LIST = native "pass_through under_vol=0;under_info={}" \
+           "pass_through under_vol=505;under_info={under_vol=0;under_info={}}"
+
 # Additional target for running timing test
 timings _timings: testmeta
 	@for timing in $(TIMINGS) dummy; do                                   \

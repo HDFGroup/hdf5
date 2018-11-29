@@ -2862,13 +2862,7 @@ main(void)
 {
     hid_t           fapl = -1;              /* File access property list for data files */
     unsigned        nerrors = 0;            /* Cumulative error count */
-    const char     *env_h5_drvr = NULL;     /* File Driver value from environment */
     hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
-
-    /* Get the VFD to use */
-    env_h5_drvr = HDgetenv("HDF5_DRIVER");
-    if(env_h5_drvr == NULL)
-        env_h5_drvr = "nomatch";
 
     h5_reset();
 

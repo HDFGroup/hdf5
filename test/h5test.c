@@ -42,7 +42,16 @@
  *      use for HDF5 file access.  The first word in the
  *      value is the name of the driver and subsequent data
  *      is interpreted according to the driver.  See
- *      h5_fileaccess() for details.
+ *      h5_get_vfd_fapl() for details.
+ *
+ * HDF5_VOL_CONNECTOR:    This string describes what VOL connector to
+ *      use for HDF5 file access.  The first word in the
+ *      value is the name of the connector and subsequent data
+ *      is interpreted according to the driver.  See
+ *      h5_get_vol_fapl() for details.
+ *
+ * HDF5_LIBVER_BOUNDS:    This string describes what library version bounds to
+ *      use for HDF5 file access.  See h5_get_libver_fapl() for details.
  *
  * HDF5_PREFIX:    A string to add to the beginning of all serial test
  *      file names.  This can be used to run tests in a
@@ -1021,7 +1030,7 @@ done:
 
 error:
     return -1;
-} /* end h5_get_vfd_fapl() */
+} /* end h5_get_libver_fapl() */
 
 
 /*-------------------------------------------------------------------------

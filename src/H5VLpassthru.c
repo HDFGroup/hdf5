@@ -462,7 +462,7 @@ H5VL_pass_through_info_to_str(const void *_info, char **str)
     assert(*str);
 
     /* Encode our info */
-    snprintf(*str, 32 + under_vol_str_len, "under_val=%u;under_info={%s}", (unsigned)under_value, (under_vol_string ? under_vol_string : ""));
+    snprintf(*str, 32 + under_vol_str_len, "under_vol=%u;under_info={%s}", (unsigned)under_value, (under_vol_string ? under_vol_string : ""));
 
     return(0);
 } /* end H5VL_pass_through_info_to_str() */
