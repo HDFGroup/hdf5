@@ -47,7 +47,7 @@
  * HDF5_VOL_CONNECTOR:    This string describes what VOL connector to
  *      use for HDF5 file access.  The first word in the
  *      value is the name of the connector and subsequent data
- *      is interpreted according to the driver.  See
+ *      is interpreted according to the connector.  See
  *      h5_get_vol_fapl() for details.
  *
  * HDF5_LIBVER_BOUNDS:    This string describes what library version bounds to
@@ -1983,14 +1983,14 @@ error:
  * Purpose:     Returns a disposable, generally non-functional,
  *              VOL class struct.
  *
- *              In some of the test code, we need a disposable VOL plugin
+ *              In some of the test code, we need a disposable VOL connector
  *              but we don't want to mess with the real VFDs and we also
- *              don't have access to the internals of the real VOL plugins
+ *              don't have access to the internals of the real VOL connectors
  *              (which use static globals and functions) to easily duplicate
- *              them (e.g.: for testing VOL plugin ID handling).
+ *              them (e.g.: for testing VOL connector ID handling).
  *
  *              This API call will return a pointer to a VOL class that
- *              can be used to construct a test VOL using H5VLregister_plugin().
+ *              can be used to construct a test VOL using H5VLregister_connector().
  *
  * Return:      Success:    A pointer to a VOL class struct
  *              Failure:    NULL
@@ -2006,7 +2006,7 @@ h5_get_dummy_vol_class(void)
     if(NULL == (vol_class = (H5VL_class_t *)HDcalloc((size_t)1, sizeof(H5VL_class_t))))
         TEST_ERROR;
 
-    /* Fill in the minimum parameters to make a VOL plugin class that
+    /* Fill in the minimum parameters to make a VOL connector class that
      * can be registered.
      */
     vol_class->name = "dummy";

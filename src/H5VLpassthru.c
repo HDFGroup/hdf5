@@ -63,6 +63,12 @@ typedef struct H5VL_pass_through_wrap_ctx_t {
 /* Function prototypes */
 /********************* */
 
+/* Helper routines */
+static herr_t H5VL_pass_through_file_specific_reissue(void *obj, hid_t connector_id,
+    H5VL_file_specific_t specific_type, hid_t dxpl_id, void **req, ...);
+static herr_t H5VL_pass_through_request_specific_reissue(void *obj, hid_t connector_id,
+    H5VL_request_specific_t specific_type, ...);
+
 /* "Management" callbacks */
 static herr_t H5VL_pass_through_init(hid_t vipl_id);
 static herr_t H5VL_pass_through_term(void);
