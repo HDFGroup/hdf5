@@ -57,7 +57,7 @@
  * The following #define controls this.  Set VFD_IO to FALSE to reproduce
  * the bug.
  */
-#define VFD_IO TRUE
+#define VFD_IO FALSE
 
 
 /******************/
@@ -1951,8 +1951,7 @@ H5PB__load_page(H5F_t *f, H5PB_t *pb_ptr, haddr_t addr, H5FD_mem_t type,
      * written.  Skip the read if addr > EOF.  In this case, tell 
      * H5PB__create_new_page() to zero the page image.
      */
-    skip_read = (addr >= eof);
-
+    /* Remove "skip_read = (addr >= eof);" when accumulator is used  */
 
     /* make space in the page buffer if necessary */
     if ( ( pb_ptr->curr_pages >= pb_ptr->max_pages ) &&
@@ -2533,7 +2532,7 @@ H5PB__read_meta(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
             if ( entry_ptr == NULL ) { /* case 7 */
 
                 /* update hit rate stats */
-                H5PB__UPDATE_PB_HIT_RATE_STATS(pb_ptr, FALSE, TRUE, TRUE)
+                H5PB__UPDATE_PB_HIT_RATE_STATS(pb_ptr, FALSE, TRUE, size > pb_ptr->page_size)
 
                 /* If the read is for metadata, is page aligned, is larger 
                  * than one page, and there is no entry in the page buffer,
@@ -2547,6 +2546,8 @@ H5PB__read_meta(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
 
                     HGOTO_ERROR(H5E_PAGEBUF, H5E_READERROR, FAIL, \
                                 "driver read request failed (1)")
+
+                H5PB__UPDATE_STATS_FOR_BYPASS(pb_ptr, type, size);
             } else {
 
                 HDassert( entry_ptr );
@@ -2590,6 +2591,8 @@ H5PB__read_meta(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
 
                             HGOTO_ERROR(H5E_PAGEBUF, H5E_READERROR, FAIL, \
                                         "driver read request failed (2)")
+
+                        H5PB__UPDATE_STATS_FOR_BYPASS(pb_ptr, type, size);
                     } else {
 
                         HDassert( entry_ptr->image_ptr );
@@ -2609,7 +2612,7 @@ H5PB__read_meta(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
                         }
 
                         /* update hit rate stats */
-                        H5PB__UPDATE_PB_HIT_RATE_STATS(pb_ptr, TRUE, TRUE, TRUE)
+                        H5PB__UPDATE_PB_HIT_RATE_STATS(pb_ptr, TRUE, TRUE, FALSE)
                     }
                 } else { /* case 9 */
 
@@ -2812,6 +2815,9 @@ H5PB__read_raw(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
 
             HGOTO_ERROR(H5E_PAGEBUF, H5E_READERROR, FAIL, \
                         "read through metadata accumulator failed")
+
+
+        H5PB__UPDATE_STATS_FOR_BYPASS(pb_ptr, type, size);
 
 
         /* For each page that intersects with the above read, check to see 
@@ -3345,6 +3351,9 @@ H5PB__write_raw(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
 
             HGOTO_ERROR(H5E_PAGEBUF, H5E_WRITEERROR, FAIL, \
                         "write through metadata accumulator failed")
+
+
+        H5PB__UPDATE_STATS_FOR_BYPASS(pb_ptr, type, size);
 
         /* For each page that intersects with the above write, check to see 
          * if it exists in the page buffer.

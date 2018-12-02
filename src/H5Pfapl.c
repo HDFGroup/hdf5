@@ -3985,7 +3985,8 @@ H5P__facc_vfd_swmr_config_enc(const void *value, void **_pp, size_t *size)
     } /* end if */
 
     /* Compute encoded size */
-    *size += ( (4 * sizeof(int32_t)) + sizeof(unsigned) + 
+    *size += ( (4 * sizeof(int32_t)) + 
+               (2 * sizeof(unsigned)) + 
                (2 * (H5F__MAX_VFD_SWMR_FILE_NAME_LEN + 1)) );
 
     FUNC_LEAVE_NOAPI(SUCCEED)
