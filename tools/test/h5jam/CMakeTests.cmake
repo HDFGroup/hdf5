@@ -74,6 +74,8 @@
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
               -D "TEST_OUTPUT=${expectfile}.out"
               -D "TEST_EXPECT=${resultcode}"
+              -D "TEST_ERRREF=testfiles/${expectfile}.txt"
+              -D "TEST_SKIP_COMPARE=1"
               -D "TEST_REFERENCE=testfiles/${expectfile}.txt"
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
