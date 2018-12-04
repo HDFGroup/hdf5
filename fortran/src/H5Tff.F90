@@ -41,6 +41,8 @@ MODULE H5T
   USE H5GLOBAL
   IMPLICIT NONE
 
+  PRIVATE h5tenum_insert_f03, h5tenum_insert_f90 
+
 !****t* H5T/hvl_t
 ! Fortran2003 Derived Type:
   TYPE hvl_t
