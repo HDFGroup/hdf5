@@ -699,18 +699,11 @@ test_parallel_read(MPI_Comm comm, int mpi_rank, int group_id)
  *              with the opening and validation of the data contained
  *              therein.
  *
- *              WARNING: This test uses fork() and execve(), and
- *                       therefore will not run on Windows.
- *
  * Return:      Success: 0
- *
  *              Failure: 1
  *
  * Programmer:  Richard Warren
  *              10/1/17
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 

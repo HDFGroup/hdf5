@@ -428,7 +428,7 @@ H5P__encode(const H5P_genplist_t *plist, hbool_t enc_all_prop, void *buf,
 
     /* Iterate over all properties in property list, encoding them */
     idx = 0;
-    if(H5P_iterate_plist(plist, enc_all_prop, &idx, H5P__encode_cb, &udata) < 0)
+    if(H5P__iterate_plist(plist, enc_all_prop, &idx, H5P__encode_cb, &udata) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_BADITER, FAIL, "can't iterate over properties")
 
     /* Encode a terminator for list of properties */

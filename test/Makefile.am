@@ -56,11 +56,11 @@ TEST_PROG= testhdf5 \
            evict_on_close farray earray btree2 fheap \
            pool accum hyperslab istore bittests dt_arith page_buffer \
            dtypes dsets cmpd_dset filter_fail extend direct_chunk external efc \
-		   objcopy links unlink twriteorder big mtime fillval mount \
-		   flush1 flush2 app_ref enum set_extent ttsafe enc_dec_plist \
-		   enc_dec_plist_cross_platform getname vfd ntypes dangle dtransform \
-		   reserved cross_read freespace mf vds file_image unregister \
-		   cache_logging cork swmr
+           objcopy links unlink twriteorder big mtime fillval mount \
+           flush1 flush2 app_ref enum set_extent ttsafe enc_dec_plist \
+           enc_dec_plist_cross_platform getname vfd ntypes dangle dtransform \
+           reserved cross_read freespace mf vds file_image unregister \
+           cache_logging cork swmr vol
 
 # List programs to be built when testing here.
 # error_test and err_compat are built at the same time as the other tests, but executed by testerror.sh.
@@ -106,7 +106,9 @@ if HAVE_SHARED_CONDITIONAL
   # The libh5test library provides common support code for the tests.
   # The filter_plugin* libraries are for use in filter_plugin.c.
   # Build them as shared libraries if that option was enabled in configure.
-  noinst_LTLIBRARIES=libh5test.la libfilter_plugin1_dsets.la libfilter_plugin2_dsets.la libfilter_plugin3_dsets.la libfilter_plugin4_groups.la
+  #
+  # echo_vol is used for testing VOL plugin functionality.
+  noinst_LTLIBRARIES=libh5test.la libfilter_plugin1_dsets.la libfilter_plugin2_dsets.la libfilter_plugin3_dsets.la libfilter_plugin4_groups.la echo_vol.la
   libfilter_plugin1_dsets_la_SOURCES=filter_plugin1_dsets.c
   libfilter_plugin2_dsets_la_SOURCES=filter_plugin2_dsets.c
   libfilter_plugin3_dsets_la_SOURCES=filter_plugin3_dsets.c
@@ -115,6 +117,13 @@ if HAVE_SHARED_CONDITIONAL
   libfilter_plugin2_dsets_la_LDFLAGS=$(AM_LDFLAGS) -avoid-version -module -shared -export-dynamic -rpath /nowhere
   libfilter_plugin3_dsets_la_LDFLAGS=$(AM_LDFLAGS) -avoid-version -module -shared -export-dynamic -rpath /nowhere
   libfilter_plugin4_groups_la_LDFLAGS=$(AM_LDFLAGS) -avoid-version -module -shared -export-dynamic -rpath /nowhere
+  libfilter_plugin3_dsets_la_LIBADD=$(LIBHDF5)
+  libfilter_plugin4_groups_la_LIBADD=$(LIBHDF5)
+
+  # VOL plugin test libraries
+  echo_vol_la_SOURCES=echo_vol.c
+  echo_vol_la_LDFLAGS=$(AM_LDFLAGS) -avoid-version -module -shared -export-dynamic -rpath /nowhere
+
 else
   # The libh5test library provides common support code for the tests.
   noinst_LTLIBRARIES=libh5test.la
@@ -191,7 +200,7 @@ CHECK_CLEANFILES+=accum.h5 cmpd_dset.h5 compact_dataset.h5 dataset.h5 dset_offse
     flushrefresh_VERIFICATION_DONE atomic_data accum_swmr_big.h5 ohdr_swmr.h5 \
     test_swmr*.h5 cache_logging.h5 cache_logging.out vds_swmr.h5 vds_swmr_src_*.h5 \
     swmr[0-2].h5 swmr_writer.out swmr_writer.log.* swmr_reader.out.* swmr_reader.log.* \
-    tbogus.h5.copy cache_image_test.h5 direct_chunk.h5
+    tbogus.h5.copy cache_image_test.h5 direct_chunk.h5 native_vol_test.h5
 
 # Sources for testhdf5 executable
 testhdf5_SOURCES=testhdf5.c tarray.c tattr.c tchecksum.c tconfig.c tfile.c \

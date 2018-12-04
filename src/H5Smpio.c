@@ -271,29 +271,58 @@ H5S_mpio_create_point_datatype (size_t elmt_size, hsize_t num_points,
       if(NULL == (inner_disps = (MPI_Aint *)H5MM_malloc(sizeof(MPI_Aint) * (size_t)total_types)))
           HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate array of blocks")
 
+#if MPI_VERSION < 3
+      /* Allocate block sizes for MPI datatype call */
+      if(NULL == (blocks = (int *)H5MM_malloc(sizeof(int) * bigio_count)))
+          HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate array of blocks")
+
+      for(u = 0; u < bigio_count; u++)
+          blocks[u] = 1;
+#endif
+
       for(i=0 ; i<num_big_types ; i++) {
+#if MPI_VERSION >= 3
           if(MPI_SUCCESS != (mpi_code = MPI_Type_create_hindexed_block(bigio_count,
                                                                        1,
                                                                        &disp[i*bigio_count],
                                                                        elmt_type,
                                                                        &inner_types[i]))) {
-             HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hindexed_block failed", mpi_code);
+              HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hindexed_block failed", mpi_code);
           }
+#else
+          if(MPI_SUCCESS != (mpi_code = MPI_Type_create_hindexed((int)bigio_count,
+                                                                      blocks,
+                                                                      &disp[i*bigio_count],
+                                                                      elmt_type,
+                                                                      &inner_types[i]))) {
+              HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hindexed failed", mpi_code)
+          }
+#endif
           inner_blocks[i] = 1;
           inner_disps[i]  = 0;
       }
 
       if(remaining_points) {
+#if MPI_VERSION >= 3
           if(MPI_SUCCESS != (mpi_code = MPI_Type_create_hindexed_block(remaining_points,
                                                                        1,
                                                                        &disp[num_big_types*bigio_count],
                                                                        elmt_type,
                                                                        &inner_types[num_big_types]))) {
               HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hindexed_block failed", mpi_code);
-	  }
+	      }
+#else
+          if(MPI_SUCCESS != (mpi_code = MPI_Type_create_hindexed((int)remaining_points,
+                                                                      blocks,
+                                                                      &disp[num_big_types*bigio_count],
+                                                                      elmt_type,
+                                                                      &inner_types[num_big_types]))) {
+              HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hindexed failed", mpi_code)
+          }
+#endif
           inner_blocks[num_big_types] = 1;
           inner_disps[num_big_types] = 0;
-        }
+      }
 
       if(MPI_SUCCESS != (mpi_code = MPI_Type_create_struct(total_types,
                                                            inner_blocks,
@@ -849,7 +878,14 @@ H5S_mpio_hyper_type(const H5S_t *space, size_t elmt_size,
                     HMPI_GOTO_ERROR(FAIL, "MPI_Type_contiguous failed", mpi_code)
             }
 
-            MPI_Type_get_extent (inner_type, &lb, &inner_extent);
+            /* As of version 4.0, OpenMPI now turns off MPI-1 API calls by default,
+             * so we're using the MPI-2 version even though we don't need the lb
+             * value.
+             */
+            {
+                MPI_Aint unused_lb_arg;
+                MPI_Type_get_extent(inner_type, &unused_lb_arg, &inner_extent);
+            }
             stride_in_bytes = inner_extent * (MPI_Aint)d[i].strid;
 
             /* If the element count is larger than what a 32 bit integer can hold,
@@ -1471,7 +1507,14 @@ static herr_t H5S_mpio_create_large_type (hsize_t num_elements,
             }
         }
 
-        MPI_Type_get_extent (old_type, &lb, &old_extent);
+        /* As of version 4.0, OpenMPI now turns off MPI-1 API calls by default,
+         * so we're using the MPI-2 version even though we don't need the lb
+         * value.
+         */
+        {
+            MPI_Aint unused_lb_arg;
+            MPI_Type_get_extent(old_type, &unused_lb_arg, &old_extent);
+        }
 
         /* Set up the arguments for MPI_Type_struct constructor */
         type[0] = outer_type;

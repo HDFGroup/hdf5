@@ -114,6 +114,7 @@
 #define FILE84  "tudfilter.h5"
 #define FILE85  "tgrpnullspace.h5"
 #define FILE86  "err_attr_dspace.h5"
+#define FILE87  "tintsnodata.h5"
 
 /*-------------------------------------------------------------------------
  * prototypes
@@ -293,7 +294,7 @@ typedef struct s1_t {
 #define THRESHOLD10           10           /* Free-space section threshold */
 #define FSPACE_PAGE_SIZE         8192         /* File space page size */
 
-/* "FILE66" macros and for FILE69 */
+/* "FILE66" macros and for FILE69, FILE87 */
 #define F66_XDIM        8
 #define F66_DATASETU08        "DU08BITS"
 #define F66_DATASETS08        "DS08BITS"
@@ -7526,6 +7527,89 @@ gent_attr_intsize(void)
     H5Gclose(root);
     H5Fclose(fid);
 }
+static void
+gent_nodata(void)
+{
+    hid_t fid, dataset, space;
+    hsize_t dims[2];
+    uint8_t  dsetu8[F66_XDIM][F66_YDIM8],   valu8bits;
+    uint16_t dsetu16[F66_XDIM][F66_YDIM16], valu16bits;
+    uint32_t dsetu32[F66_XDIM][F66_YDIM32], valu32bits;
+    uint64_t dsetu64[F66_XDIM][F66_YDIM64], valu64bits;
+    int8_t  dset8[F66_XDIM][F66_YDIM8],   val8bits;
+    int16_t dset16[F66_XDIM][F66_YDIM16], val16bits;
+    int32_t dset32[F66_XDIM][F66_YDIM32], val32bits;
+    int64_t dset64[F66_XDIM][F66_YDIM64], val64bits;
+    double  dsetdbl[F66_XDIM][F66_YDIM8];
+    unsigned int i, j;
+
+    fid = H5Fcreate(FILE87, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+    /* Dataset of 8 bits unsigned int */
+    dims[0] = F66_XDIM; dims[1] = F66_YDIM8;
+    space = H5Screate_simple(2, dims, NULL);
+    dataset = H5Dcreate2(fid, F66_DATASETU08, H5T_STD_U8LE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5Sclose(space);
+    H5Dclose(dataset);
+
+    /* Dataset of 16 bits unsigned int */
+    dims[0] = F66_XDIM; dims[1] = F66_YDIM16;
+    space = H5Screate_simple(2, dims, NULL);
+    dataset = H5Dcreate2(fid, F66_DATASETU16, H5T_STD_U16LE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5Sclose(space);
+    H5Dclose(dataset);
+
+    /* Dataset of 32 bits unsigned int */
+    dims[0] = F66_XDIM; dims[1] = F66_YDIM32;
+    space = H5Screate_simple(2, dims, NULL);
+    dataset = H5Dcreate2(fid, F66_DATASETU32, H5T_STD_U32LE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5Sclose(space);
+    H5Dclose(dataset);
+
+    /* Dataset of 64 bits unsigned int */
+    dims[0] = F66_XDIM; dims[1] = F66_YDIM64;
+    space = H5Screate_simple(2, dims, NULL);
+    dataset = H5Dcreate2(fid, F66_DATASETU64, H5T_STD_U64LE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5Sclose(space);
+    H5Dclose(dataset);
+
+    /* Dataset of 8 bits signed int */
+    dims[0] = F66_XDIM; dims[1] = F66_YDIM8;
+    space = H5Screate_simple(2, dims, NULL);
+    dataset = H5Dcreate2(fid, F66_DATASETS08, H5T_STD_I8LE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5Sclose(space);
+    H5Dclose(dataset);
+
+    /* Dataset of 16 bits signed int */
+    dims[0] = F66_XDIM; dims[1] = F66_YDIM16;
+    space = H5Screate_simple(2, dims, NULL);
+    dataset = H5Dcreate2(fid, F66_DATASETS16, H5T_STD_I16LE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5Sclose(space);
+    H5Dclose(dataset);
+
+    /* Dataset of 32 bits signed int */
+    dims[0] = F66_XDIM; dims[1] = F66_YDIM32;
+    space = H5Screate_simple(2, dims, NULL);
+    dataset = H5Dcreate2(fid, F66_DATASETS32, H5T_STD_I32LE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5Sclose(space);
+    H5Dclose(dataset);
+
+    /* Dataset of 64 bits signed int */
+    dims[0] = F66_XDIM; dims[1] = F66_YDIM64;
+    space = H5Screate_simple(2, dims, NULL);
+    dataset = H5Dcreate2(fid, F66_DATASETS64, H5T_STD_I64LE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5Sclose(space);
+    H5Dclose(dataset);
+
+    /* Double Dummy set for failure tests */
+    dims[0] = F66_XDIM; dims[1] = F66_YDIM8;
+    space = H5Screate_simple(2, dims, NULL);
+    dataset = H5Dcreate2(fid, F66_DUMMYDBL, H5T_IEEE_F64BE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5Sclose(space);
+    H5Dclose(dataset);
+    H5Fclose(fid);
+}
+
 
 /*-------------------------------------------------------------------------
  * Function:    gent_charsets
@@ -10484,13 +10568,13 @@ static void gent_null_space_group(void)
  *          Then write an illegal version to the shared dataspace message
  *          to trigger the error.
  *          This is to verify HDFFV-10333 that h5dump will exit
- *          gracefully when encountered error similar to 
+ *          gracefully when encountered error similar to
  *          H5O_attr_decode in the jira issue.
  *
  *-------------------------------------------------------------------------
  */
-static void 
-gent_err_attr_dspace()
+static void
+gent_err_attr_dspace(void)
 {
     hid_t fid = -1;         /* File identifier */
     hid_t fcpl = -1;        /* File access property list */
@@ -10535,7 +10619,7 @@ gent_err_attr_dspace()
     if(H5Fclose(fid) < 0)
         goto error;
 
-    /* This section of code will write an illegal version to the "version" field 
+    /* This section of code will write an illegal version to the "version" field
        of the shared dataspace message */
     if((fd = HDopen(FILE86, O_RDWR, 0633)) < 0)
         goto error;
@@ -10647,6 +10731,7 @@ int main(void)
     gent_intattrscalars();
     gent_intsattrs();
     gent_bitnopaquefields();
+    gent_nodata();
 
     gent_intsfourdims();
     gent_null_space_group();

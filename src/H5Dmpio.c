@@ -229,9 +229,11 @@ static herr_t H5D__mpio_get_sum_chunk(const H5D_io_info_t *io_info,
 static herr_t H5D__construct_filtered_io_info_list(const H5D_io_info_t *io_info,
     const H5D_type_info_t *type_info, const H5D_chunk_map_t *fm,
     H5D_filtered_collective_io_info_t **chunk_list, size_t *num_entries);
+#if MPI_VERSION >= 3
 static herr_t H5D__chunk_redistribute_shared_chunks(const H5D_io_info_t *io_info,
     const H5D_type_info_t *type_info, const H5D_chunk_map_t *fm,
     H5D_filtered_collective_io_info_t *local_chunk_array, size_t *local_chunk_array_num_entries);
+#endif
 static herr_t H5D__mpio_array_gatherv(void *local_array, size_t local_array_num_entries,
     size_t array_entry_size, void **gathered_array, size_t *gathered_array_num_entries,
     hbool_t allgather, int root, MPI_Comm comm, int (*sort_func)(const void *, const void *));
@@ -244,8 +246,10 @@ static herr_t H5D__filtered_collective_chunk_entry_io(H5D_filtered_collective_io
 static int H5D__cmp_chunk_addr(const void *chunk_addr_info1, const void *chunk_addr_info2);
 static int H5D__cmp_filtered_collective_io_info_entry(const void *filtered_collective_io_info_entry1,
     const void *filtered_collective_io_info_entry2);
+#if MPI_VERSION >= 3
 static int H5D__cmp_filtered_collective_io_info_entry_owner(const void *filtered_collective_io_info_entry1,
     const void *filtered_collective_io_info_entry2);
+#endif
 
 
 /*********************/
@@ -329,6 +333,18 @@ H5D__mpio_opt_possible(const H5D_io_info_t *io_info, const H5S_t *file_space,
      *  change for different chunks. So for chunking storage, whether we can
      *  use collective IO will defer until each chunk IO is reached.
      */
+
+#if MPI_VERSION < 3
+    /*
+     * Don't allow parallel writes to filtered datasets if the MPI version
+     * is less than 3. The functions needed (MPI_Mprobe and MPI_Imrecv) will
+     * not be available.
+     */
+    if (io_info->op_type == H5D_IO_OP_WRITE &&
+        io_info->dset->shared->layout.type == H5D_CHUNKED &&
+        io_info->dset->shared->dcpl_cache.pline.nused > 0)
+        local_cause |= H5D_MPIO_PARALLEL_FILTERED_WRITES_DISABLED;
+#endif
 
     /* Check for independent I/O */
     if(local_cause & H5D_MPIO_SET_INDEPENDENT)
@@ -463,8 +479,7 @@ H5D__mpio_array_gatherv(void *local_array, size_t local_array_num_entries,
     MPI_Comm_size(comm, &mpi_size);
     MPI_Comm_rank(comm, &mpi_rank);
 
-    /*
-     * Determine the size of the end result array by collecting the number
+    /* Determine the size of the end result array by collecting the number
      * of entries contributed by each processor into a single total.
      */
     if (MPI_SUCCESS != (mpi_code = MPI_Allreduce(&local_array_num_entries, &gathered_array_num_entries, 1, MPI_INT, MPI_SUM, comm)))
@@ -909,7 +924,6 @@ H5D__link_chunk_collective_io(H5D_io_info_t *io_info, const H5D_type_info_t *typ
     hbool_t chunk_final_ftype_is_derived = FALSE;
     H5D_storage_t ctg_store;                /* Storage info for "fake" contiguous dataset */
     size_t              total_chunks;
-    haddr_t            *total_chunk_addr_array = NULL;
     MPI_Datatype       *chunk_mtype = NULL;
     MPI_Datatype       *chunk_ftype = NULL;
     MPI_Aint           *chunk_disp_array = NULL;
@@ -1130,20 +1144,7 @@ if(H5DEBUG(D))
             mpi_buf_count  = (hsize_t)1;
         } /* end if */
         else {      /* no selection at all for this process */
-            /* Allocate chunking information */
-            if(NULL == (total_chunk_addr_array = (haddr_t *)H5MM_malloc(sizeof(haddr_t) * total_chunks)))
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate total chunk address arraybuffer")
-
-            /* Retrieve chunk address map */
-            if(H5D__chunk_addrmap(io_info, total_chunk_addr_array) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get chunk address")
-
-            /* Get chunk with lowest address */
-            ctg_store.contig.dset_addr = HADDR_MAX;
-            for(u = 0; u < total_chunks; u++)
-                if(total_chunk_addr_array[u] < ctg_store.contig.dset_addr)
-                    ctg_store.contig.dset_addr = total_chunk_addr_array[u];
-            HDassert(ctg_store.contig.dset_addr != HADDR_MAX);
+            ctg_store.contig.dset_addr = 0;
 
             /* Set the MPI datatype */
             chunk_final_ftype = MPI_BYTE;
@@ -1171,8 +1172,6 @@ if(H5DEBUG(D))
     HDfprintf(H5DEBUG(D),"before freeing memory inside H5D_link_collective_io ret_value = %d\n", ret_value);
 #endif
     /* Release resources */
-    if(total_chunk_addr_array)
-        H5MM_xfree(total_chunk_addr_array);
     if(chunk_addr_info_array)
         H5MM_xfree(chunk_addr_info_array);
     if(chunk_mtype)
@@ -2127,6 +2126,7 @@ H5D__cmp_filtered_collective_io_info_entry(const void *filtered_collective_io_in
     FUNC_LEAVE_NOAPI(H5F_addr_cmp(addr1, addr2))
 } /* end H5D__cmp_filtered_collective_io_info_entry() */
 
+#if MPI_VERSION >= 3
 
 /*-------------------------------------------------------------------------
  * Function:    H5D__cmp_filtered_collective_io_info_entry_owner
@@ -2157,6 +2157,7 @@ H5D__cmp_filtered_collective_io_info_entry_owner(const void *filtered_collective
 
     FUNC_LEAVE_NOAPI(owner1 - owner2)
 } /* end H5D__cmp_filtered_collective_io_info_entry_owner() */
+#endif
 
 
 /*-------------------------------------------------------------------------
@@ -2585,8 +2586,12 @@ H5D__construct_filtered_io_info_list(const H5D_io_info_t *io_info, const H5D_typ
 
     /* Redistribute shared chunks to new owners as necessary */
     if (io_info->op_type == H5D_IO_OP_WRITE)
+#if MPI_VERSION >= 3
         if (H5D__chunk_redistribute_shared_chunks(io_info, type_info, fm, local_info_array, &num_chunks_selected) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to redistribute shared chunks")
+#else
+        HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to redistribute shared chunks - MPI version < 3 (MPI_Mprobe and MPI_Imrecv missing)")
+#endif
 
     *chunk_list = local_info_array;
     *num_entries = num_chunks_selected;
@@ -2595,6 +2600,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__construct_filtered_io_info_list() */
 
+#if MPI_VERSION >= 3
 
 /*-------------------------------------------------------------------------
  * Function:    H5D__chunk_redistribute_shared_chunks
@@ -2893,6 +2899,7 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__chunk_redistribute_shared_chunks() */
+#endif
 
 
 /*-------------------------------------------------------------------------

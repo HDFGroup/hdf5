@@ -146,10 +146,10 @@ void TestInit(const char *ProgName, void (*private_usage)(void), int (*private_p
      * Record the program name and private routines if provided.
      */
     TestProgName = ProgName;
-    if (NULL != private_usage)
-	TestPrivateUsage = private_usage;
-    if (NULL != private_parser)
-	TestPrivateParser = private_parser;
+    if(NULL != private_usage)
+        TestPrivateUsage = private_usage;
+    if(NULL != private_parser)
+        TestPrivateParser = private_parser;
 }
 
 

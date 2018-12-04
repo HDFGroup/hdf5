@@ -294,6 +294,7 @@ void file_image_daisy_chain_test(void);
 void compress_readAll(void);
 #endif /* H5_HAVE_FILTER_DEFLATE */
 void test_dense_attr(void);
+void test_partial_no_selection_coll_md_read(void);
 
 /* commonly used prototypes */
 hid_t create_faccess_plist(MPI_Comm comm, MPI_Info info, int l_facc_type);

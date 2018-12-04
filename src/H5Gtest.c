@@ -28,13 +28,15 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5CXprivate.h"        /* API Contexts                         */
-#include "H5Dprivate.h"		/* Datasets				*/
-#include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5Gpkg.h"		/* Groups		  		*/
-#include "H5HLprivate.h"	/* Local Heaps				*/
-#include "H5Iprivate.h"		/* IDs			  		*/
+#include "H5private.h"          /* Generic Functions                        */
+#include "H5CXprivate.h"        /* API Contexts                             */
+#include "H5Dprivate.h"         /* Datasets                                 */
+#include "H5Eprivate.h"         /* Error handling                           */
+#include "H5Gpkg.h"             /* Groups                                   */
+#include "H5HLprivate.h"        /* Local Heaps                              */
+#include "H5Iprivate.h"         /* IDs                                      */
+#include "H5VLprivate.h"        /* Virtual Object Layer                     */
+
 
 /****************/
 /* Local Macros */
@@ -80,7 +82,7 @@
     htri_t H5G__is_empty_test(gid)
         hid_t gid;              IN: group to check
  RETURNS
-    Non-negative TRUE/FALSE on success, negative on failure
+    TRUE/FALSE on success, FAIL on failure
  DESCRIPTION
     Checks to see if the group has no link messages and no symbol table message
     and no "dense" link storage
@@ -102,7 +104,7 @@ H5G__is_empty_test(hid_t gid)
     FUNC_ENTER_PACKAGE
 
     /* Get group structure */
-    if(NULL == (grp = (H5G_t *)H5I_object_verify(gid, H5I_GROUP)))
+    if(NULL == (grp = (H5G_t *)H5VL_object_verify(gid, H5I_GROUP)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group")
 
     /* Set API context */
@@ -114,7 +116,7 @@ H5G__is_empty_test(hid_t gid)
 
     /* Check if the group has any link messages */
     if((msg_exists = H5O_msg_exists(&(grp->oloc), H5O_LINK_ID)) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to read object header")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to read object header")
     if(msg_exists > 0) {
         /* Sanity check that new group format shouldn't have old messages */
         if((msg_exists = H5O_msg_exists(&(grp->oloc), H5O_STAB_ID)) < 0)
@@ -127,7 +129,7 @@ H5G__is_empty_test(hid_t gid)
 
     /* Check for a link info message */
     if((linfo_exists = H5O_msg_exists(&(grp->oloc), H5O_LINFO_ID)) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to read object header")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to read object header")
     if(linfo_exists > 0) {
         H5O_linfo_t linfo;		/* Link info message */
 
@@ -158,7 +160,7 @@ H5G__is_empty_test(hid_t gid)
 
     /* Check if the group has a symbol table message */
     if((msg_exists = H5O_msg_exists(&(grp->oloc), H5O_STAB_ID)) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to read object header")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to read object header")
     if(msg_exists > 0) {
         H5O_stab_t stab;        /* Info about local heap & B-tree */
         hsize_t nlinks;         /* Number of links in the group */
@@ -202,7 +204,7 @@ done:
         hid_t gid;              IN: group to check
         unsigned *nmsgs;        OUT: # of link messages in header
  RETURNS
-    Non-negative TRUE/FALSE on success, negative on failure
+    TRUE/FALSE on success, FAIL on failure
  DESCRIPTION
     Checks to see if the group has link messages and how many.
  GLOBAL VARIABLES
@@ -222,7 +224,7 @@ H5G__has_links_test(hid_t gid, unsigned *nmsgs)
     FUNC_ENTER_PACKAGE
 
     /* Get group structure */
-    if(NULL == (grp = (H5G_t *)H5I_object_verify(gid, H5I_GROUP)))
+    if(NULL == (grp = (H5G_t *)H5VL_object_verify(gid, H5I_GROUP)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group")
 
     /* Set API context */
@@ -232,15 +234,15 @@ H5G__has_links_test(hid_t gid, unsigned *nmsgs)
 
     /* Check if the group has any link messages */
     if((msg_exists = H5O_msg_exists(&(grp->oloc), H5O_LINK_ID)) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to read object header")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to read object header")
     if(msg_exists == 0)
         HGOTO_DONE(FALSE)
 
     /* Check if the group has a symbol table message */
     if((msg_exists = H5O_msg_exists(&(grp->oloc), H5O_STAB_ID)) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to read object header")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to read object header")
     if(msg_exists > 0)
-	HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "both symbol table and link messages found")
+        HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "both symbol table and link messages found")
 
     /* Check if we should retrieve the number of link messages */
     if(nmsgs) {
@@ -269,7 +271,7 @@ done:
     htri_t H5G__has_stab_test(gid)
         hid_t gid;              IN: group to check
  RETURNS
-    Non-negative TRUE/FALSE on success, negative on failure
+    TRUE/FALSE on success, FAIL on failure
  DESCRIPTION
     Checks to see if the group has a symbol table message.
  GLOBAL VARIABLES
@@ -289,7 +291,7 @@ H5G__has_stab_test(hid_t gid)
     FUNC_ENTER_PACKAGE
 
     /* Get group structure */
-    if(NULL == (grp = (H5G_t *)H5I_object_verify(gid, H5I_GROUP)))
+    if(NULL == (grp = (H5G_t *)H5VL_object_verify(gid, H5I_GROUP)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group")
 
     /* Set API context */
@@ -299,15 +301,15 @@ H5G__has_stab_test(hid_t gid)
 
     /* Check if the group has a symbol table message */
     if((msg_exists = H5O_msg_exists(&(grp->oloc), H5O_STAB_ID)) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to read object header")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to read object header")
     if(msg_exists == 0)
         HGOTO_DONE(FALSE)
 
     /* Check if the group has any link messages */
     if((msg_exists = H5O_msg_exists(&(grp->oloc), H5O_LINK_ID)) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to read object header")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to read object header")
     if(msg_exists > 0)
-	HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "both symbol table and link messages found")
+        HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "both symbol table and link messages found")
 
 done:
     if(api_ctx_pushed && H5CX_pop() < 0)
@@ -326,7 +328,7 @@ done:
     htri_t H5G__is_new_dense_test(gid)
         hid_t gid;              IN: group to check
  RETURNS
-    Non-negative TRUE/FALSE on success, negative on failure
+    TRUE/FALSE on success, FAIL on failure
  DESCRIPTION
     Checks to see if the group is in the "new" format for groups (link messages/
     fractal heap+v2 B-tree) and if it is in "dense" storage form (ie. it has
@@ -348,7 +350,7 @@ H5G__is_new_dense_test(hid_t gid)
     FUNC_ENTER_PACKAGE
 
     /* Get group structure */
-    if(NULL == (grp = (H5G_t *)H5I_object_verify(gid, H5I_GROUP)))
+    if(NULL == (grp = (H5G_t *)H5VL_object_verify(gid, H5I_GROUP)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group")
 
     /* Set API context */
@@ -358,19 +360,19 @@ H5G__is_new_dense_test(hid_t gid)
 
     /* Check if the group has a symbol table message */
     if((msg_exists = H5O_msg_exists(&(grp->oloc), H5O_STAB_ID)) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to read object header")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to read object header")
     if(msg_exists > 0)
         HGOTO_DONE(FALSE)
 
     /* Check if the group has any link messages */
     if((msg_exists = H5O_msg_exists(&(grp->oloc), H5O_LINK_ID)) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to read object header")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to read object header")
     if(msg_exists > 0)
         HGOTO_DONE(FALSE)
 
     /* Check if the group has link info message */
     if((msg_exists = H5O_msg_exists(&(grp->oloc), H5O_LINFO_ID)) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to read object header")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to read object header")
     if(msg_exists > 0) {
         H5O_linfo_t linfo;		/* Link info message */
 
@@ -404,7 +406,7 @@ done:
         hsize_t *name_count;    OUT: Number of links in name index
         hsize_t *corder_count;  OUT: Number of links in creation order index
  RETURNS
-    Non-negative on success, negative on failure
+    SUCCEED/FAIL
  DESCRIPTION
     Currently, just retrieves the number of links in each index and returns
     them.
@@ -427,7 +429,7 @@ H5G__new_dense_info_test(hid_t gid, hsize_t *name_count, hsize_t *corder_count)
     FUNC_ENTER_PACKAGE
 
     /* Get group structure */
-    if(NULL == (grp = (H5G_t *)H5I_object_verify(gid, H5I_GROUP)))
+    if(NULL == (grp = (H5G_t *)H5VL_object_verify(gid, H5I_GROUP)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group")
 
     /* Set API context */
@@ -495,7 +497,7 @@ done:
         hid_t gid;              IN: group to check
         size_t *lheap_size;     OUT: Size of local heap
  RETURNS
-    Non-negative on success, negative on failure
+    SUCCEED/FAIL
  DESCRIPTION
     Checks the size of the local heap for a group
  GLOBAL VARIABLES
@@ -515,7 +517,7 @@ H5G__lheap_size_test(hid_t gid, size_t *lheap_size)
     FUNC_ENTER_PACKAGE
 
     /* Get group structure */
-    if(NULL == (grp = (H5G_t *)H5I_object_verify(gid, H5I_GROUP)))
+    if(NULL == (grp = (H5G_t *)H5VL_object_verify(gid, H5I_GROUP)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group")
 
     /* Set API context */
@@ -525,11 +527,11 @@ H5G__lheap_size_test(hid_t gid, size_t *lheap_size)
 
     /* Make certain the group has a symbol table message */
     if(NULL == H5O_msg_read(&(grp->oloc), H5O_STAB_ID, &stab))
-	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to read symbol table message")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to read symbol table message")
 
     /* Check the size of the local heap for the group */
     if(H5HL_get_size(grp->oloc.file, stab.heap_addr, lheap_size) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_CANTGETSIZE, FAIL, "can't query local heap size")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGETSIZE, FAIL, "can't query local heap size")
 
 done:
     if(api_ctx_pushed && H5CX_pop() < 0)
@@ -551,7 +553,7 @@ done:
         size_t *user_path_len;  OUT: Size of user path
         unsigned *obj_hidden;   OUT: Whether object is hidden
  RETURNS
-    Non-negative on success, negative on failure
+    SUCCEED/FAIL
  DESCRIPTION
     Retrieves the user path for an ID.  A zero for the length is returned in
     the case of no user path.
@@ -576,7 +578,7 @@ H5G__user_path_test(hid_t obj_id, char *user_path, size_t *user_path_len, unsign
     HDassert(obj_hidden);
 
     /* Get pointer to object for ID */
-    if(NULL == (obj_ptr = H5I_object(obj_id)))
+    if(NULL == (obj_ptr = H5VL_object(obj_id)))
          HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get object for ID")
 
     /* Set API context */
@@ -609,6 +611,7 @@ H5G__user_path_test(hid_t obj_id, char *user_path, size_t *user_path_len, unsign
         case H5I_ATTR:
         case H5I_REFERENCE:
         case H5I_VFL:
+        case H5I_VOL:
         case H5I_GENPROP_CLS:
         case H5I_GENPROP_LST:
         case H5I_ERROR_CLASS:
@@ -648,15 +651,14 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5G__verify_cached_stab_test
+ * Function:    H5G__verify_cached_stab_test
  *
  * Purpose:     Check that a that the provided group entry contains a
  *              cached symbol table entry, that the entry matches that in
  *              the provided group's object header, and check that the
  *              addresses are valid.
  *
- * Return:	Success:        Non-negative
- *		Failure:	Negative
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:	Neil Fortner
  *	        Mar  31, 2009
@@ -666,9 +668,9 @@ done:
 herr_t
 H5G__verify_cached_stab_test(H5O_loc_t *grp_oloc, H5G_entry_t *ent)
 {
-    H5O_stab_t  stab;                   /* Symbol table */
-    H5HL_t      *heap = NULL;           /* Pointer to local heap */
-    herr_t	ret_value = SUCCEED;    /* Return value */
+    H5O_stab_t  stab;                           /* Symbol table             */
+    H5HL_t     *heap        = NULL;             /* Pointer to local heap    */
+    herr_t	    ret_value   = SUCCEED;          /* Return value             */
 
     FUNC_ENTER_PACKAGE_TAG(grp_oloc->addr)
 
@@ -681,7 +683,8 @@ H5G__verify_cached_stab_test(H5O_loc_t *grp_oloc, H5G_entry_t *ent)
         HGOTO_ERROR(H5E_SYM, H5E_BADMESG, FAIL, "unable to read symbol table message")
 
     /* Verify that the cached symbol table info matches the symbol table message
-     * in the object header */
+     * in the object header.
+     */
     if((ent->cache.stab.btree_addr != stab.btree_addr)
             || (ent->cache.stab.heap_addr != stab.heap_addr))
         HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "cached stab info does not match object header")
@@ -711,7 +714,7 @@ done:
  *              group with a symbol table, and that that information is
  *              correct.
  *
- * Return:      Non-negative on success/Negative on failure
+ * Return:      H5_ITER_STOP/H5_ITER_CONT/H5_ITER_ERROR
  *
  * Programmer:  Neil Fortner
  *              Apr 8, 2011
@@ -732,9 +735,7 @@ H5G__verify_cached_stabs_test_cb(H5F_t *f, const void H5_ATTR_UNUSED *_lt_key,
 
     FUNC_ENTER_STATIC
 
-    /*
-     * Check arguments.
-     */
+    /* Check arguments */
     HDassert(f);
     HDassert(H5F_addr_defined(addr));
 
@@ -749,7 +750,7 @@ H5G__verify_cached_stabs_test_cb(H5F_t *f, const void H5_ATTR_UNUSED *_lt_key,
     targ_oloc.holding_file = FALSE;
 
     /* Iterate over entries */
-    for(i=0; i<sn->nsyms; i++) {
+    for(i = 0; i < sn->nsyms; i++) {
         /* Update oloc address */
         targ_oloc.addr = sn->entry[i].header;
 
@@ -773,7 +774,7 @@ H5G__verify_cached_stabs_test_cb(H5F_t *f, const void H5_ATTR_UNUSED *_lt_key,
             if((sn->entry[i].cache.stab.btree_addr != stab.btree_addr)
                     || (sn->entry[i].cache.stab.heap_addr != stab.heap_addr))
                 HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, H5_ITER_ERROR, "cached symbol table information is incorrect")
-        } /* end if */
+        }
         else if(sn->entry[i].type == H5G_CACHED_STAB)
             HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, H5_ITER_ERROR, "nonexistent STAB message is cached")
 
@@ -831,7 +832,7 @@ H5G__verify_cached_stabs_test(hid_t gid)
     HDassert(gid >= 0);
 
     /* Check args */
-    if(NULL == (grp = (H5G_t *)H5I_object_verify(gid, H5I_GROUP)))
+    if(NULL == (grp = (H5G_t *)H5VL_object_verify(gid, H5I_GROUP)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group")
 
     /* Set up metadata tagging */

@@ -41,7 +41,7 @@ target_include_directories(${HDF5_TOOLS_LIB_TARGET}
 TARGET_C_PROPERTIES (${HDF5_TOOLS_LIB_TARGET} STATIC)
 target_link_libraries (${HDF5_TOOLS_LIB_TARGET}
     PUBLIC ${HDF5_LIB_TARGET}
-    PRIVATE $<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_LIBRARIES}>
+    PRIVATE "$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_LIBRARIES}>"
 )
 set_global_variable (HDF5_LIBRARIES_TO_EXPORT "${HDF5_LIBRARIES_TO_EXPORT};${HDF5_TOOLS_LIB_TARGET}")
 H5_SET_LIB_OPTIONS (${HDF5_TOOLS_LIB_TARGET} ${HDF5_TOOLS_LIB_NAME} STATIC 0)
@@ -61,7 +61,7 @@ if (BUILD_SHARED_LIBS)
   TARGET_C_PROPERTIES (${HDF5_TOOLS_LIBSH_TARGET} SHARED)
   target_link_libraries (${HDF5_TOOLS_LIBSH_TARGET}
       PUBLIC ${HDF5_LIBSH_TARGET}
-      PRIVATE $<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_LIBRARIES}>
+      PRIVATE "$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_LIBRARIES}>"
   )
   set_global_variable (HDF5_LIBRARIES_TO_EXPORT "${HDF5_LIBRARIES_TO_EXPORT};${HDF5_TOOLS_LIBSH_TARGET}")
   H5_SET_LIB_OPTIONS (${HDF5_TOOLS_LIBSH_TARGET} ${HDF5_TOOLS_LIB_NAME} SHARED "TOOLS")
@@ -74,18 +74,6 @@ endif ()
 ###           I N S T A L L A T I O N                                      ###
 ##############################################################################
 ##############################################################################
-
-#-----------------------------------------------------------------------------
-# Add file(s) to CMake Install
-#-----------------------------------------------------------------------------
-install (
-    FILES
-        ${H5_TOOLS_LIB_HDRS}
-    DESTINATION
-        ${HDF5_INSTALL_INCLUDE_DIR}
-    COMPONENT
-        toolsheaders
-)
 
 #-----------------------------------------------------------------------------
 # Add Target(s) to CMake Install for import into other projects

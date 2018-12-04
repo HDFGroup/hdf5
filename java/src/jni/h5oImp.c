@@ -27,13 +27,17 @@ extern "C" {
 #include "h5oImp.h"
 
 extern JavaVM *jvm;
-extern jobject visit_callback;
+
+typedef struct _cb_wrapper {
+    jobject visit_callback;
+    jobject op_data;
+} cb_wrapper;
 
 /********************/
 /* Local Prototypes */
 /********************/
 
-static herr_t H5O_iterate_cb(hid_t g_id, const char *name, const H5O_info_t *info, void *op_data);
+static herr_t H5O_iterate_cb(hid_t g_id, const char *name, const H5O_info_t *info, void *cb_data);
 
 /*
  * Class:     hdf_hdf5lib_H5
@@ -330,7 +334,7 @@ Java_hdf_hdf5lib_H5_H5Olink
 
 static herr_t
 H5O_iterate_cb
-    (hid_t g_id, const char *name, const H5O_info_t *info, void *op_data)
+    (hid_t g_id, const char *name, const H5O_info_t *info, void *cb_data)
 {
     JNIEnv    *cbenv;
     jint       status = -1;
@@ -343,6 +347,9 @@ H5O_iterate_cb
     jobject    ihinfobuf1;
     jobject    ihinfobuf2;
     jobject    cb_info_t = NULL;
+    cb_wrapper *wrapper = (cb_wrapper *)cb_data;
+    void *op_data = (void *)wrapper->op_data;
+    jobject visit_callback = wrapper->visit_callback;
 
     if(JVMPTR->AttachCurrentThread(JVMPAR2 (void**)&cbenv, NULL) != 0) {
         /* printf("JNI H5O_iterate_cb error: AttachCurrentThread failed\n"); */
@@ -372,41 +379,58 @@ H5O_iterate_cb
                 constructor = CBENVPTR->GetMethodID(CBENVPAR cls, "<init>", "(IIIIJJJJJJ)V");
                 if (constructor != 0) {
                     hdrinfobuf = CBENVPTR->NewObjectA(CBENVPAR cls, constructor, args);
-
-                    args[0].j = (jlong)info->meta_size.obj.index_size;
-                    args[1].j = (jlong)info->meta_size.obj.heap_size;
-                    // get a reference to the H5_ih_info_t class
-                    cls = CBENVPTR->FindClass(CBENVPAR "hdf/hdf5lib/structs/H5_ih_info_t");
-                    if (cls != 0) {
-                        // get a reference to the constructor; the name is <init>
-                        constructor = CBENVPTR->GetMethodID(CBENVPAR cls, "<init>", "(JJ)V");
-                        if (constructor != 0) {
-                            ihinfobuf1 = CBENVPTR->NewObjectA(CBENVPAR cls, constructor, args);
-                            args[0].j = (jlong)info->meta_size.attr.index_size;
-                            args[1].j = (jlong)info->meta_size.attr.heap_size;
-                            ihinfobuf2 = CBENVPTR->NewObjectA(CBENVPAR cls, constructor, args);
-
-                            args[0].j = (jlong)info->fileno;
-                            args[1].j = (jlong)info->addr;
-                            args[2].i = info->type;
-                            args[3].i = (jint)info->rc;
-                            args[4].j = (jlong)info->num_attrs;
-                            args[5].j = info->atime;
-                            args[6].j = info->mtime;
-                            args[7].j = info->ctime;
-                            args[8].j = info->btime;
-                            args[9].l = hdrinfobuf;
-                            args[10].l = ihinfobuf1;
-                            args[11].l = ihinfobuf2;
-                            // get a reference to the H5O_info_t class
-                            cls = CBENVPTR->FindClass(CBENVPAR "hdf/hdf5lib/structs/H5O_info_t");
-                            if (cls != 0) {
-                                // get a reference to the constructor; the name is <init>
-                                constructor = CBENVPTR->GetMethodID(CBENVPAR cls, "<init>", "(JJIIJJJJJLhdf/hdf5lib/structs/H5O_hdr_info_t;Lhdf/hdf5lib/structs/H5_ih_info_t;Lhdf/hdf5lib/structs/H5_ih_info_t;)V");
-                                if (constructor != 0) {
-                                    cb_info_t = CBENVPTR->NewObjectA(CBENVPAR cls, constructor, args);
-
-                                    status = CBENVPTR->CallIntMethod(CBENVPAR visit_callback, mid, g_id, str, cb_info_t, op_data);
+                    if (hdrinfobuf == NULL) {
+                        printf("H5O_iterate_cb ERROR: hdf/hdf5lib/structs/H5O_hdr_info_t: Creation failed\n");
+                    }
+                    else {
+                        args[0].j = (jlong)info->meta_size.obj.index_size;
+                        args[1].j = (jlong)info->meta_size.obj.heap_size;
+                        // get a reference to the H5_ih_info_t class
+                        cls = CBENVPTR->FindClass(CBENVPAR "hdf/hdf5lib/structs/H5_ih_info_t");
+                        if (cls != 0) {
+                            // get a reference to the constructor; the name is <init>
+                            constructor = CBENVPTR->GetMethodID(CBENVPAR cls, "<init>", "(JJ)V");
+                            if (constructor != 0) {
+                                ihinfobuf1 = CBENVPTR->NewObjectA(CBENVPAR cls, constructor, args);
+                                if (ihinfobuf1 == NULL) {
+                                    printf("H5O_iterate_cb ERROR: hdf/hdf5lib/structs/H5_ih_info_t: Creation failed\n");
+                                }
+                                else {
+                                    args[0].j = (jlong)info->meta_size.attr.index_size;
+                                    args[1].j = (jlong)info->meta_size.attr.heap_size;
+                                    ihinfobuf2 = CBENVPTR->NewObjectA(CBENVPAR cls, constructor, args);
+                                    if (ihinfobuf2 == NULL) {
+                                        printf("H5O_iterate_cb ERROR: hdf/hdf5lib/structs/H5_ih_info_t: Creation failed\n");
+                                    }
+                                    else {
+                                        args[0].j = (jlong)info->fileno;
+                                        args[1].j = (jlong)info->addr;
+                                        args[2].i = info->type;
+                                        args[3].i = (jint)info->rc;
+                                        args[4].j = (jlong)info->num_attrs;
+                                        args[5].j = info->atime;
+                                        args[6].j = info->mtime;
+                                        args[7].j = info->ctime;
+                                        args[8].j = info->btime;
+                                        args[9].l = hdrinfobuf;
+                                        args[10].l = ihinfobuf1;
+                                        args[11].l = ihinfobuf2;
+                                        // get a reference to the H5O_info_t class
+                                        cls = CBENVPTR->FindClass(CBENVPAR "hdf/hdf5lib/structs/H5O_info_t");
+                                        if (cls != 0) {
+                                            // get a reference to the constructor; the name is <init>
+                                            constructor = CBENVPTR->GetMethodID(CBENVPAR cls, "<init>", "(JJIIJJJJJLhdf/hdf5lib/structs/H5O_hdr_info_t;Lhdf/hdf5lib/structs/H5_ih_info_t;Lhdf/hdf5lib/structs/H5_ih_info_t;)V");
+                                            if (constructor != 0) {
+                                                cb_info_t = CBENVPTR->NewObjectA(CBENVPAR cls, constructor, args);
+                                                if (cb_info_t == NULL) {
+                                                    printf("H5O_iterate_cb ERROR: hdf/hdf5lib/structs/H5O_info_t: Creation failed\n");
+                                                }
+                                                else {
+                                                    status = CBENVPTR->CallIntMethod(CBENVPAR visit_callback, mid, g_id, str, cb_info_t, op_data);
+                                                }
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -431,9 +455,9 @@ Java_hdf_hdf5lib_H5_H5Ovisit
         jobject callback_op, jobject op_data, jint fields)
 {
     herr_t   status = -1;
+    cb_wrapper wrapper = {callback_op, op_data};
 
     ENVPTR->GetJavaVM(ENVPAR &jvm);
-    visit_callback = callback_op;
 
     if (op_data == NULL) {
         h5nullArgument(env, "H5Ovisit:  op_data is NULL");
@@ -442,7 +466,7 @@ Java_hdf_hdf5lib_H5_H5Ovisit
         h5nullArgument(env, "H5Ovisit:  callback_op is NULL");
     } /* end if */
     else {
-        status = H5Ovisit2((hid_t)grp_id, (H5_index_t)idx_type, (H5_iter_order_t)order, (H5O_iterate_t)H5O_iterate_cb, (void*)op_data, (unsigned)fields);
+        status = H5Ovisit2((hid_t)grp_id, (H5_index_t)idx_type, (H5_iter_order_t)order, (H5O_iterate_t)H5O_iterate_cb, (void*)&wrapper, (unsigned)fields);
 
         if (status < 0)
             h5libraryError(env);
@@ -463,9 +487,9 @@ Java_hdf_hdf5lib_H5_H5Ovisit_1by_1name
 {
     herr_t        status = -1;
     const char   *lName;
+    cb_wrapper wrapper = {callback_op, op_data};
 
     ENVPTR->GetJavaVM(ENVPAR &jvm);
-    visit_callback = callback_op;
 
     if (op_data == NULL) {
         h5nullArgument(env, "H5Ovisit_by_name:  op_data is NULL");
@@ -478,7 +502,7 @@ Java_hdf_hdf5lib_H5_H5Ovisit_1by_1name
     else {
         PIN_JAVA_STRING(name, lName);
         if (lName != NULL) {
-            status = H5Ovisit_by_name2((hid_t)grp_id, lName, (H5_index_t)idx_type, (H5_iter_order_t)order, (H5O_iterate_t)H5O_iterate_cb, (void*)op_data, (unsigned)fields, (hid_t)access_id);
+            status = H5Ovisit_by_name2((hid_t)grp_id, lName, (H5_index_t)idx_type, (H5_iter_order_t)order, (H5O_iterate_t)H5O_iterate_cb, (void*)&wrapper, (unsigned)fields, (hid_t)access_id);
 
             UNPIN_JAVA_STRING(name, lName);
 

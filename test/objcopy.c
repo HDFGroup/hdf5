@@ -21,9 +21,9 @@
 #include "testhdf5.h"
 #include "H5srcdir.h"
 
-#include "H5Bprivate.h"
 #include "H5Iprivate.h"
 #include "H5Pprivate.h"
+#include "H5VLprivate.h"        /* Virtual Object Layer                     */
 
 #define H5F_FRIEND      /*suppress error about including H5Fpkg */
 #define H5F_TESTING
@@ -2180,7 +2180,7 @@ test_copy_dataset_versionbounds(hid_t fcpl_src, hid_t fapl_src)
     if (ret < 0) TEST_ERROR
 
     /* Get the internal dset ptr to get the fill version for verifying later */
-    if ((dsetp = (H5D_t *)H5I_object(did_src)) == NULL) TEST_ERROR
+    if ((dsetp = (H5D_t *)H5VL_object(did_src)) == NULL) TEST_ERROR
     srcdset_fillversion = dsetp->shared->dcpl_cache.fill.version;
 
     /* Close dataspace */

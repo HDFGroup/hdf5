@@ -55,20 +55,20 @@ Java_hdf_hdf5lib_exceptions_HDF5LibraryException_printStackTrace0
 
 /*
  * Class:     hdf_hdf5lib_exceptions_HDFLibraryException
- * Method:    getMajorErrorNumber
+ * Method:    _getMajorErrorNumber
  * Signature: ()J
  */
 JNIEXPORT jlong JNICALL
-Java_hdf_hdf5lib_exceptions_HDF5LibraryException_getMajorErrorNumber
+Java_hdf_hdf5lib_exceptions_HDF5LibraryException__1getMajorErrorNumber
   (JNIEnv *env, jobject obj);
 
 /*
  * Class:     hdf_hdf5lib_exceptions_HDFLibraryException
- * Method:    getMinorErrorNumber
+ * Method:    _getMinorErrorNumber
  * Signature: ()J
  */
 JNIEXPORT jlong JNICALL
-Java_hdf_hdf5lib_exceptions_HDF5LibraryException_getMinorErrorNumber
+Java_hdf_hdf5lib_exceptions_HDF5LibraryException__1getMinorErrorNumber
   (JNIEnv *env, jobject obj);
 
 #ifdef __cplusplus

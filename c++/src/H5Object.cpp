@@ -25,6 +25,7 @@
 #include "H5DxferProp.h"
 #include "H5LcreatProp.h"
 #include "H5LaccProp.h"
+#include "H5DaccProp.h"
 #include "H5Location.h"
 #include "H5Object.h"
 #include "H5DataType.h"
@@ -224,130 +225,6 @@ int H5Object::iterateAttrs(attr_operator_t user_op, unsigned *_idx, void *op_dat
     }
     else  // raise exception when H5Aiterate returns a negative value
         throw AttributeIException(inMemFunc("iterateAttrs"), "H5Aiterate2 failed");
-}
-
-//--------------------------------------------------------------------------
-// Function:    H5Object::getInfo
-///\brief       Retrieves information about an HDF5 object.
-///\param       objinfo - OUT: Struct containing the object info
-///\param       fields  - IN: Indicates the group of information to be retrieved
-///\par Description
-///             Valid values of \a fields are as follows:
-///             \li \c H5O_INFO_BASIC (default)
-///             \li \c H5O_INFO_TIME
-///             \li \c H5O_INFO_NUM_ATTRS
-///             \li \c H5O_INFO_HDR
-///             \li \c H5O_INFO_META_SIZE
-///             \li \c H5O_INFO_ALL
-// July, 2018
-//--------------------------------------------------------------------------
-void H5Object::getInfo(H5O_info_t& objinfo, unsigned fields) const
-{
-
-    // Use C API to get information of the object
-    herr_t ret_value = H5Oget_info2(getId(), &objinfo, fields);
-
-    // Throw exception if C API returns failure
-    if (ret_value < 0)
-        throwException(inMemFunc("getInfo"), "H5Oget_info2 failed");
-}
-
-//--------------------------------------------------------------------------
-// Function:    H5Object::getInfo
-///\brief       Retrieves information about an HDF5 object given its name.
-///\param       name    - IN: Name of the object to be queried - \c char *
-///\param       objinfo - OUT: Struct containing the object info
-///\param       fields  - IN: Indicates the group of information to be retrieved
-///                           - default to H5O_INFO_BASIC
-///\param       lapl - IN: Link access property list
-///\par Description
-///             Valid values of \a fields are as follows:
-///             \li \c H5O_INFO_BASIC (default)
-///             \li \c H5O_INFO_TIME
-///             \li \c H5O_INFO_NUM_ATTRS
-///             \li \c H5O_INFO_HDR
-///             \li \c H5O_INFO_META_SIZE
-///             \li \c H5O_INFO_ALL
-// July, 2018
-//--------------------------------------------------------------------------
-void H5Object::getInfo(const char* name, H5O_info_t& objinfo, unsigned fields, const LinkAccPropList& lapl) const
-{
-    // Use C API to get information of the object
-    herr_t ret_value = H5Oget_info_by_name2(getId(), name, &objinfo, fields, lapl.getId());
-
-    // Throw exception if C API returns failure
-    if (ret_value < 0)
-        throwException(inMemFunc("getInfo"), "H5Oget_info_by_name2 failed");
-}
-
-//--------------------------------------------------------------------------
-// Function:    H5Object::getInfo
-///\brief       This is an overloaded member function, provided for convenience.
-///             It differs from the above function in that it takes
-///             a reference to an \c H5std_string for \a name.
-///\param       name    - IN: Name of the object to be queried - \c H5std_string
-///\param       objinfo - OUT: Struct containing the object info
-///\param       fields  - IN: Indicates the group of information to be retrieved
-///                           - default to H5O_INFO_BASIC
-///\param       lapl - IN: Link access property list
-// July, 2018
-//--------------------------------------------------------------------------
-void H5Object::getInfo(const H5std_string& name, H5O_info_t& objinfo, unsigned fields, const LinkAccPropList& lapl) const
-{
-    getInfo(name.c_str(), objinfo, fields, lapl);
-}
-
-//--------------------------------------------------------------------------
-// Function:    H5Object::getInfo
-///\brief       Retrieves information about an HDF5 object given its index.
-///\param       grp_name - IN: Group name where the object belongs - \c char *
-///\param       idx_type - IN: Type of index
-///\param       order   - IN: Order to traverse
-///\param       idx     - IN: Object position
-///\param       objinfo - OUT: Struct containing the object info
-///\param       fields  - IN: Indicates the group of information to be retrieved
-///                           - default to H5O_INFO_BASIC
-///\param       lapl    - IN: Link access property list
-///\par Description
-///             Valid values of \a fields are as follows:
-///             \li \c H5O_INFO_BASIC (default)
-///             \li \c H5O_INFO_TIME
-///             \li \c H5O_INFO_NUM_ATTRS
-///             \li \c H5O_INFO_HDR
-///             \li \c H5O_INFO_META_SIZE
-///             \li \c H5O_INFO_ALL
-// July, 2018
-//--------------------------------------------------------------------------
-void H5Object::getInfo(const char* grp_name, H5_index_t idx_type,
-     H5_iter_order_t order, hsize_t idx, H5O_info_t& objinfo, unsigned fields,
-     const LinkAccPropList& lapl) const
-{
-    // Use C API to get information of the object
-    herr_t ret_value = H5Oget_info_by_idx2(getId(), grp_name, idx_type, order,
-                       idx, &objinfo, fields, lapl.getId());
-
-    // Throw exception if C API returns failure
-    if (ret_value < 0)
-        throwException(inMemFunc("getInfo"), "H5Oget_info_by_idx2 failed");
-}
-
-//--------------------------------------------------------------------------
-// Function:    H5Object::getInfo
-///\brief       This is an overloaded member function, provided for convenience.
-///             It differs from the above function in that it takes
-///             a reference to an \c H5std_string for \a name.
-///\param       name    - IN: Name of the object to be queried - \c H5std_string
-///\param       objinfo - OUT: Struct containing the object info
-///\param       fields  - IN: Indicates a group of information to be retrieved
-///                           - default to H5O_INFO_BASIC
-///\param       lapl - IN: Link access property list
-// July, 2018
-//--------------------------------------------------------------------------
-void H5Object::getInfo(const H5std_string& grp_name, H5_index_t idx_type,
-     H5_iter_order_t order, hsize_t idx, H5O_info_t& objinfo, unsigned fields,
-     const LinkAccPropList& lapl) const
-{
-    getInfo(grp_name.c_str(), idx_type, order, idx, objinfo, fields, lapl);
 }
 
 //--------------------------------------------------------------------------

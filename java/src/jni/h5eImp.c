@@ -40,7 +40,11 @@ extern "C" {
 #include "h5eImp.h"
 
 extern JavaVM *jvm;
-extern jobject visit_callback;
+
+typedef struct _cb_wrapper {
+    jobject visit_callback;
+    jobject op_data;
+} cb_wrapper;
 
 #ifdef __cplusplus
   #define CBENVPTR (cbenv)
@@ -60,7 +64,7 @@ extern jobject visit_callback;
 /* Local Prototypes */
 /********************/
 
-static herr_t H5E_walk_cb(int nindx, const H5E_error2_t *info, void *op_data);
+static herr_t H5E_walk_cb(int nindx, const H5E_error2_t *info, void *cb_data);
 
 /*
  * Class:     hdf_hdf5lib_H5
@@ -475,7 +479,7 @@ Java_hdf_hdf5lib_H5_H5Eget_1num
 
 static herr_t
 H5E_walk_cb
-    (int nindx, const H5E_error2_t *info, void *op_data)
+    (int nindx, const H5E_error2_t *info, void *cb_data)
 {
     JNIEnv    *cbenv;
     jint       status = -1;
@@ -485,6 +489,9 @@ H5E_walk_cb
     jmethodID  constructor;
     jvalue     args[7];
     jobject    cb_info_t = NULL;
+    cb_wrapper *wrapper = (cb_wrapper *)cb_data;
+    void *op_data = (void *)wrapper->op_data;
+    jobject visit_callback = wrapper->visit_callback;
 
     if(JVMPTR->AttachCurrentThread(JVMPAR2 (void**)&cbenv, NULL) == 0) {
         cls = CBENVPTR->GetObjectClass(CBENVPAR visit_callback);
@@ -508,8 +515,12 @@ H5E_walk_cb
                     constructor = CBENVPTR->GetMethodID(CBENVPAR cls, "<init>", "(JJJILjava/lang/String;Ljava/lang/String;Ljava/lang/String;)V");
                     if (constructor != 0) {
                         cb_info_t = CBENVPTR->NewObjectA(CBENVPAR cls, constructor, args);
-
-                        status = CBENVPTR->CallIntMethod(CBENVPAR visit_callback, mid, nindx, cb_info_t, op_data);
+                        if (cb_info_t == NULL) {
+                            printf("FATAL ERROR: hdf/hdf5lib/structs/H5E_error2_t: Creation failed\n");
+                        }
+                        else {
+                            status = CBENVPTR->CallIntMethod(CBENVPAR visit_callback, mid, nindx, cb_info_t, op_data);
+                        }
                     } /* end if (constructor != 0) */
                 } /* end if(cls != 0) */
             } /* end if (mid != 0) */
@@ -528,13 +539,14 @@ JNIEXPORT void JNICALL
 Java_hdf_hdf5lib_H5_H5Ewalk2
     (JNIEnv *env, jclass cls, jlong stk_id, jlong direction, jobject callback_op, jobject op_data)
 {
+    cb_wrapper wrapper = {callback_op, op_data};
+
     ENVPTR->GetJavaVM(ENVPAR &jvm);
-    visit_callback = callback_op;
 
     if ((op_data == NULL) || (callback_op == NULL)) {
         h5nullArgument(env,  "H5Ewalk2:  op_data or callback_op is NULL");
     } /* end if */
-    else if (H5Ewalk2(stk_id, (H5E_direction_t)direction, (H5E_walk2_t)H5E_walk_cb, (void*)op_data) < 0)
+    else if (H5Ewalk2(stk_id, (H5E_direction_t)direction, (H5E_walk2_t)H5E_walk_cb, (void*)&wrapper) < 0)
             h5libraryError(env);
 } /* end iJava_hdf_hdf5lib_H5_H5Ewalk2f */
 

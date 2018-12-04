@@ -36,6 +36,7 @@
 /* The key that will be used to find the plugin */
 typedef union H5PL_key_t {
     int         id;         /* filters      */
+    const char *name;       /* VOL drivers  */
 } H5PL_key_t;
 
 

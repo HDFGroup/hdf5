@@ -30,6 +30,9 @@ import hdf.hdf5lib.HDF5Constants;
 
 @SuppressWarnings("serial")
 public class HDF5LibraryException extends HDF5Exception {
+    private final long majorErrorNumber;
+    private final long minorErrorNumber;
+
     /**
      * Constructs an <code>HDF5LibraryException</code> with no specified detail
      * message.
@@ -44,9 +47,10 @@ public class HDF5LibraryException extends HDF5Exception {
         }
         catch (Exception e) {
         }
-        ;
 
-        detailMessage = getMinorError(getMinorErrorNumber());
+        this.majorErrorNumber = _getMajorErrorNumber();
+        this.minorErrorNumber = _getMinorErrorNumber();
+        detailMessage = getMinorError(minorErrorNumber);
     }
 
     /**
@@ -65,7 +69,8 @@ public class HDF5LibraryException extends HDF5Exception {
         }
         catch (Exception e) {
         }
-        ;
+        this.majorErrorNumber = _getMajorErrorNumber();
+        this.minorErrorNumber = _getMinorErrorNumber();
     }
 
     /**
@@ -74,7 +79,11 @@ public class HDF5LibraryException extends HDF5Exception {
      *
      * @return the major error number
      */
-    public native long getMajorErrorNumber();
+    public long getMajorErrorNumber()
+    {
+        return majorErrorNumber;
+    }
+    private native long _getMajorErrorNumber();
 
     /**
      * Get the minor error number of the first error on the HDF5 library error
@@ -82,7 +91,11 @@ public class HDF5LibraryException extends HDF5Exception {
      *
      * @return the minor error number
      */
-    public native long getMinorErrorNumber();
+    public long getMinorErrorNumber()
+    {
+        return minorErrorNumber;
+    }
+    private native long _getMinorErrorNumber();
 
     /**
      * Return a error message for the minor error number.

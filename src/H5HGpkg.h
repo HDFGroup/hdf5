@@ -137,7 +137,7 @@ struct H5HG_heap_t {
 /******************************/
 /* Package Private Prototypes */
 /******************************/
-H5_DLL herr_t H5HG_free(H5HG_heap_t *heap);
+H5_DLL herr_t H5HG__free(H5HG_heap_t *heap);
 H5_DLL H5HG_heap_t *H5HG__protect(H5F_t *f, haddr_t addr, unsigned flags);
 
 #endif /* _H5HGpkg_H */

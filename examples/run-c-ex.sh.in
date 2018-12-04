@@ -31,7 +31,7 @@ EXIT_FAILURE=1
  
 # Where the tool is installed.
 # default is relative path to installed location of the tools 
-prefix="${prefix:-@prefix@}"
+prefix="${prefix:-../../..}"
 PARALLEL=@PARALLEL@             # Am I in parallel mode?
 AR="@AR@"
 RANLIB="@RANLIB@"
@@ -139,7 +139,9 @@ then
         RunTest h5_vds-percival-unlim-maxmin&&\
         rm h5_vds-percival-unlim-maxmin &&\
         RunTest h5_vds &&\
-        rm h5_vds); then
+        rm h5_vds &&\
+        RunTest h5_vol_external_log_native &&\
+        rm h5_vol_external_log_native); then
         EXIT_VALUE=${EXIT_SUCCESS}
     else
         EXIT_VALUE=${EXIT_FAILURE}

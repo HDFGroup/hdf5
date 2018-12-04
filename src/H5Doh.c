@@ -29,6 +29,7 @@
 #include "H5FLprivate.h"	/* Free lists                           */
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5Opkg.h"             /* Object headers			*/
+#include "H5VLprivate.h"        /* Virtual Object Layer                     */
 
 
 /****************/
@@ -47,7 +48,7 @@
 static void *H5O__dset_get_copy_file_udata(void);
 static void H5O__dset_free_copy_file_udata(void *);
 static htri_t H5O__dset_isa(const H5O_t *loc);
-static hid_t H5O__dset_open(const H5G_loc_t *obj_loc, hbool_t app_ref);
+static void *H5O__dset_open(const H5G_loc_t *obj_loc, H5I_type_t *opened_type);
 static void *H5O__dset_create(H5F_t *f, void *_crt_info, H5G_loc_t *obj_loc);
 static H5O_loc_t *H5O__dset_get_oloc(hid_t obj_id);
 static herr_t H5O__dset_bh_info(const H5O_loc_t *loc, H5O_t *oh,
@@ -189,15 +190,15 @@ H5O__dset_isa(const H5O_t *oh)
 
     /* Datatype */
     if((exists = H5O_msg_exists_oh(oh, H5O_DTYPE_ID)) < 0)
-	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to read object header")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to read object header")
     else if(!exists)
-	HGOTO_DONE(FALSE)
+        HGOTO_DONE(FALSE)
 
     /* Layout */
     if((exists = H5O_msg_exists_oh(oh, H5O_SDSPACE_ID)) < 0)
-	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to read object header")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to read object header")
     else if(!exists)
-	HGOTO_DONE(FALSE)
+        HGOTO_DONE(FALSE)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -217,16 +218,18 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static hid_t
-H5O__dset_open(const H5G_loc_t *obj_loc, hbool_t app_ref)
+static void *
+H5O__dset_open(const H5G_loc_t *obj_loc, H5I_type_t *opened_type)
 {
-    H5D_t  *dset = NULL;                /* Dataset opened */
-    hid_t   dapl_id;                    /* dapl to use to open this dataset */
-    hid_t   ret_value = H5I_INVALID_HID;        /* Return value */
+    H5D_t  *dset = NULL;                    /* Dataset opened */
+    hid_t   dapl_id;                        /* dapl to use to open this dataset */
+    void   *ret_value = NULL;               /* Return value */
 
     FUNC_ENTER_STATIC
 
     HDassert(obj_loc);
+
+    *opened_type = H5I_DATASET;
 
     /* Get the LAPL (which is a superclass of DAPLs) from the API context, but
      * if it's the default link access property list or a custom link access
@@ -242,9 +245,9 @@ H5O__dset_open(const H5G_loc_t *obj_loc, hbool_t app_ref)
 
         /* Check class of LAPL from API context */
         if((is_lapl = H5P_isa_class(dapl_id, H5P_LINK_ACCESS)) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, H5I_INVALID_HID, "unable to get LAPL status")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "unable to get LAPL status")
         if((is_dapl = H5P_isa_class(dapl_id, H5P_DATASET_ACCESS)) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, H5I_INVALID_HID, "unable to get DAPL status")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "unable to get DAPL status")
 
         /* Switch to default DAPL if not an actual DAPL in the API context */
         if(!is_dapl && is_lapl)
@@ -253,16 +256,14 @@ H5O__dset_open(const H5G_loc_t *obj_loc, hbool_t app_ref)
 
     /* Open the dataset */
     if(NULL == (dset = H5D_open(obj_loc, dapl_id)))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open dataset")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, NULL, "unable to open dataset")
 
-    /* Register an ID for the dataset */
-    if((ret_value = H5I_register(H5I_DATASET, dset, app_ref)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register dataset")
+    ret_value = (void *)dset;
 
 done:
-    if(ret_value < 0)
+    if(NULL == ret_value)
         if(dset && H5D_close(dset) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release dataset")
+            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, NULL, "unable to release dataset")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__dset_open() */
@@ -339,7 +340,7 @@ H5O__dset_get_oloc(hid_t obj_id)
     FUNC_ENTER_STATIC
 
     /* Get the dataset */
-    if(NULL == (dset = (H5D_t *)H5I_object(obj_id)))
+    if(NULL == (dset = (H5D_t *)H5VL_object(obj_id)))
         HGOTO_ERROR(H5E_OHDR, H5E_BADATOM, NULL, "couldn't get object from ID")
 
     /* Get the dataset's object header location */

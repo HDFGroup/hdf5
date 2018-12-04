@@ -28,13 +28,17 @@ extern "C" {
 #include "h5lImp.h"
 
 extern JavaVM *jvm;
-extern jobject visit_callback;
+
+typedef struct _cb_wrapper {
+    jobject visit_callback;
+    jobject op_data;
+} cb_wrapper;
 
 /********************/
 /* Local Prototypes */
 /********************/
 
-static herr_t H5L_iterate_cb(hid_t g_id, const char *name, const H5L_info_t *info, void *op_data);
+static herr_t H5L_iterate_cb(hid_t g_id, const char *name, const H5L_info_t *info, void *cb_data);
 
 /*
  * Class:     hdf_hdf5lib_H5
@@ -541,7 +545,7 @@ Java_hdf_hdf5lib_H5_H5Lmove
 
 static herr_t
 H5L_iterate_cb
-    (hid_t g_id, const char *name, const H5L_info_t *info, void *op_data)
+    (hid_t g_id, const char *name, const H5L_info_t *info, void *cb_data)
 {
     JNIEnv    *cbenv;
     jint       status;
@@ -551,6 +555,9 @@ H5L_iterate_cb
     jmethodID  constructor;
     jvalue     args[5];
     jobject    cb_info_t = NULL;
+    cb_wrapper *wrapper = (cb_wrapper *)cb_data;
+    void *op_data = (void *)wrapper->op_data;
+    jobject visit_callback = wrapper->visit_callback;
 
     if(JVMPTR->AttachCurrentThread(JVMPAR2 (void**)&cbenv, NULL) == 0) {
         cls = CBENVPTR->GetObjectClass(CBENVPAR visit_callback);
@@ -574,8 +581,12 @@ H5L_iterate_cb
                     constructor = CBENVPTR->GetMethodID(CBENVPAR cls, "<init>", "(IZJIJ)V");
                     if (constructor != 0) {
                         cb_info_t = CBENVPTR->NewObjectA(CBENVPAR cls, constructor, args);
-
-                        status = CBENVPTR->CallIntMethod(CBENVPAR visit_callback, mid, g_id, str, cb_info_t, op_data);
+                        if (cb_info_t == NULL) {
+                            printf("FATAL ERROR: hdf/hdf5lib/structs/H5L_info_t: Creation failed\n");
+                        }
+                        else {
+                            status = CBENVPTR->CallIntMethod(CBENVPAR visit_callback, mid, g_id, str, cb_info_t, op_data);
+                        }
                     } /* end if */
                 } /* end if */
             } /* end if */
@@ -596,15 +607,15 @@ Java_hdf_hdf5lib_H5_H5Lvisit
         jobject callback_op, jobject op_data)
 {
     herr_t status = -1;
+    cb_wrapper wrapper = {callback_op, op_data};
 
     ENVPTR->GetJavaVM(ENVPAR &jvm);
-    visit_callback = callback_op;
 
     if ((op_data == NULL) || (callback_op == NULL)) {
         h5nullArgument(env,  "H5Lvisit:  op_data or callback_op is NULL");
     } /* end if */
     else {
-        status = H5Lvisit((hid_t)grp_id, (H5_index_t)idx_type, (H5_iter_order_t)order, (H5L_iterate_t)H5L_iterate_cb, (void*)op_data);
+        status = H5Lvisit((hid_t)grp_id, (H5_index_t)idx_type, (H5_iter_order_t)order, (H5L_iterate_t)H5L_iterate_cb, (void*)&wrapper);
         if (status < 0)
             h5libraryError(env);
     } /* end else */
@@ -624,9 +635,9 @@ Java_hdf_hdf5lib_H5_H5Lvisit_1by_1name
 {
     herr_t        status = -1;
     const char   *lName;
+    cb_wrapper wrapper = {callback_op, op_data};
 
     ENVPTR->GetJavaVM(ENVPAR &jvm);
-    visit_callback = callback_op;
 
     if ((op_data == NULL) || (callback_op == NULL)) {
         h5nullArgument(env,  "H5Lvisit_by_name:  op_data or callback_op is NULL");
@@ -634,7 +645,7 @@ Java_hdf_hdf5lib_H5_H5Lvisit_1by_1name
     else {
         PIN_JAVA_STRING(name, lName);
         if (lName != NULL) {
-            status = H5Lvisit_by_name((hid_t)grp_id, lName, (H5_index_t)idx_type, (H5_iter_order_t)order, (H5L_iterate_t)H5L_iterate_cb, (void*)op_data, (hid_t)access_id);
+            status = H5Lvisit_by_name((hid_t)grp_id, lName, (H5_index_t)idx_type, (H5_iter_order_t)order, (H5L_iterate_t)H5L_iterate_cb, (void*)&wrapper, (hid_t)access_id);
 
             UNPIN_JAVA_STRING(name, lName);
 
@@ -658,15 +669,15 @@ Java_hdf_hdf5lib_H5_H5Literate
 {
     hsize_t       start_idx = (hsize_t)idx;
     herr_t        status = -1;
+    cb_wrapper wrapper = {callback_op, op_data};
 
     ENVPTR->GetJavaVM(ENVPAR &jvm);
-    visit_callback = callback_op;
 
     if ((op_data == NULL) || (callback_op == NULL)) {
         h5nullArgument(env,  "H5Literate:  op_data or callback_op is NULL");
     } /* end if */
     else {
-        status = H5Literate((hid_t)grp_id, (H5_index_t)idx_type, (H5_iter_order_t)order, (hsize_t*)&start_idx, (H5L_iterate_t)H5L_iterate_cb, (void*)op_data);
+        status = H5Literate((hid_t)grp_id, (H5_index_t)idx_type, (H5_iter_order_t)order, (hsize_t*)&start_idx, (H5L_iterate_t)H5L_iterate_cb, (void*)&wrapper);
 
         if (status < 0)
             h5libraryError(env);
@@ -690,7 +701,7 @@ Java_hdf_hdf5lib_H5_H5Literate_1by_1name
     const char   *lName;
 
     ENVPTR->GetJavaVM(ENVPAR &jvm);
-    visit_callback = callback_op;
+    cb_wrapper wrapper = {callback_op, op_data};
 
     if ((op_data == NULL) || (callback_op == NULL)) {
         h5nullArgument(env,  "H5Literate_by_name:  op_data or callback_op is NULL");
@@ -698,7 +709,7 @@ Java_hdf_hdf5lib_H5_H5Literate_1by_1name
     else {
         PIN_JAVA_STRING(name, lName);
         if (lName != NULL) {
-            status = H5Literate_by_name((hid_t)grp_id, lName, (H5_index_t)idx_type, (H5_iter_order_t)order, (hsize_t*)&start_idx, (H5L_iterate_t)H5L_iterate_cb, (void*)op_data, (hid_t)access_id);
+            status = H5Literate_by_name((hid_t)grp_id, lName, (H5_index_t)idx_type, (H5_iter_order_t)order, (hsize_t*)&start_idx, (H5L_iterate_t)H5L_iterate_cb, (void*)&wrapper, (hid_t)access_id);
 
             UNPIN_JAVA_STRING(name, lName);
 

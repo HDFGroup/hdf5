@@ -419,7 +419,9 @@ fill_with_random_data(Bytef *src, uLongf src_len)
             buf += rc;
             len -= (size_t)rc;
         }
-    } else {
+        HDclose(fd);
+    }
+    else {
         HDfprintf(stdout, "Using random() for random data\n");
 
         for (u = 0; u < src_len; ++u)
@@ -557,7 +559,7 @@ main(int argc, char **argv)
     int opt;
 
     prog = argv[0];
-    
+
     /* Initialize h5tools lib */
     h5tools_init();
 

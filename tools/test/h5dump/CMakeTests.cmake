@@ -125,6 +125,7 @@
       ${HDF5_TOOLS_DIR}/testfiles/tints4dimsCountEq.ddl
       ${HDF5_TOOLS_DIR}/testfiles/tints4dimsStride2.ddl
       ${HDF5_TOOLS_DIR}/testfiles/tintsattrs.ddl
+      ${HDF5_TOOLS_DIR}/testfiles/tintsnodata.ddl
       ${HDF5_TOOLS_DIR}/testfiles/tlarge_objname.ddl
       #${HDF5_TOOLS_DIR}/testfiles/tldouble.ddl
       ${HDF5_TOOLS_DIR}/testfiles/tlonglinks.ddl
@@ -280,6 +281,7 @@
       ${HDF5_TOOLS_DIR}/testfiles/thyperslab.h5
       ${HDF5_TOOLS_DIR}/testfiles/tints4dims.h5
       ${HDF5_TOOLS_DIR}/testfiles/tintsattrs.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tintsnodata.h5
       ${HDF5_TOOLS_DIR}/testfiles/tlarge_objname.h5
       #${HDF5_TOOLS_DIR}/testfiles/tldouble.h5
       ${HDF5_TOOLS_DIR}/testfiles/tlonglinks.h5
@@ -439,9 +441,10 @@
     if ("${testtype}" STREQUAL "SKIP")
       if (NOT HDF5_ENABLE_USING_MEMCHECKER)
         add_test (
-            NAME H5DUMP-${skipresultfile}-SKIPPED
+            NAME H5DUMP-${skipresultfile}
             COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${skipresultfile} ${ARGN}"
         )
+        set_property(TEST H5DUMP-${skipresultfile} PROPERTY DISABLED)
       endif ()
     else ()
       ADD_H5_TEST (${skipresultfile} ${skipresultcode} ${ARGN})
@@ -747,10 +750,10 @@
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
       set_tests_properties (H5DUMP-IMPORT-${resultfile} PROPERTIES DEPENDS "H5DUMP-IMPORT-${resultfile}-clear-objects")
-      add_test (NAME H5DUMP-IMPORT-h5import-${resultfile} COMMAND h5import ${resultfile}.bin -c ${conffile}.out -o ${resultfile}.h5)
+      add_test (NAME H5DUMP-IMPORT-h5import-${resultfile} COMMAND $<TARGET_FILE:h5import> ${resultfile}.bin -c ${conffile}.out -o ${resultfile}.h5)
       set_tests_properties (H5DUMP-IMPORT-h5import-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
       set_tests_properties (H5DUMP-IMPORT-h5import-${resultfile} PROPERTIES DEPENDS H5DUMP-IMPORT-${resultfile})
-      add_test (NAME H5DUMP-IMPORT-h5diff-${resultfile} COMMAND h5diff ${testfile} ${resultfile}.h5 /integer /integer)
+      add_test (NAME H5DUMP-IMPORT-h5diff-${resultfile} COMMAND $<TARGET_FILE:h5diff> ${testfile} ${resultfile}.h5 /integer /integer)
       set_tests_properties (H5DUMP-IMPORT-h5diff-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
       set_tests_properties (H5DUMP-IMPORT-h5diff-${resultfile} PROPERTIES DEPENDS H5DUMP-IMPORT-h5import-${resultfile})
     endif ()
@@ -998,6 +1001,8 @@
           tints4dimsStride2.out.err
           tintsattrs.out
           tintsattrs.out.err
+          tintsnodata.out
+          tintsnodata.out.err
           tlarge_objname.out
           tlarge_objname.out.err
           tldouble.out
@@ -1167,6 +1172,9 @@
 
   # test for maximum display datasets
   ADD_H5_TEST (twidedisplay 0 --enable-error-stack -w0 packedbits.h5)
+
+  # test for unwritten datasets
+  ADD_H5_TEST (tintsnodata 0 --enable-error-stack -p tintsnodata.h5)
 
   # test for signed/unsigned datasets
   ADD_H5_TEST (packedbits 0 --enable-error-stack packedbits.h5)
@@ -1541,4 +1549,6 @@
 ##############################################################################
 ###    P L U G I N  T E S T S
 ##############################################################################
-ADD_H5_UD_TEST (h5dump_plugin_test 0 tudfilter --enable-error-stack tudfilter.h5)
+if (BUILD_SHARED_LIBS)
+  ADD_H5_UD_TEST (h5dump_plugin_test 0 tudfilter --enable-error-stack tudfilter.h5)
+endif ()

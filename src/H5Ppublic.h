@@ -166,7 +166,8 @@ typedef enum H5D_mpio_no_collective_cause_t {
     H5D_MPIO_MPI_OPT_TYPES_ENV_VAR_DISABLED = 0x08,
     H5D_MPIO_NOT_SIMPLE_OR_SCALAR_DATASPACES = 0x10,
     H5D_MPIO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET = 0x20,
-    H5D_MPIO_NO_COLLECTIVE_MAX_CAUSE = 0x40
+    H5D_MPIO_PARALLEL_FILTERED_WRITES_DISABLED = 0x40,
+    H5D_MPIO_NO_COLLECTIVE_MAX_CAUSE = 0x80
 } H5D_mpio_no_collective_cause_t;
 
 /********************/
@@ -312,6 +313,8 @@ H5_DLL herr_t H5Pset_driver(hid_t plist_id, hid_t driver_id,
         const void *driver_info);
 H5_DLL hid_t H5Pget_driver(hid_t plist_id);
 H5_DLL const void *H5Pget_driver_info(hid_t plist_id);
+H5_DLL herr_t H5Pset_vol(hid_t plist_id, hid_t new_vol_id, const void *new_vol_info);
+H5_DLL void *H5Pget_vol_info(hid_t plist_id);
 H5_DLL herr_t H5Pset_family_offset(hid_t fapl_id, hsize_t offset);
 H5_DLL herr_t H5Pget_family_offset(hid_t fapl_id, hsize_t *offset);
 H5_DLL herr_t H5Pset_multi_type(hid_t fapl_id, H5FD_mem_t type);

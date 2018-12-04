@@ -188,45 +188,47 @@ tar2zip()
 # Returns 0 if successful; 1 otherwise
 #
  # need function to create another temporary directory, extract the
-            # $tmpdir/$HDF5_VERS.tar into it, add (create) build-unix.sh,
-            # CTestScript.cmake, HDF5config.cmake, SZIP.tar.gz and ZLib.tar.gz,
-             # and then tar.gz it.
+            # $tmpdir/$HDF5_VERS.tar into it, create build-VS*.bat files,
+            # add CTestScript.cmake, HDF5config.cmake, SZIP.tar.gz
+            # ZLib.tar.gz, HDF5 examples, and then zip it.
 tar2cmakezip()
 {
     if [ $# -ne 3 ]; then
-	echo "usage: tar2cmakezip <tarfilename> <tgzfilename>"
+	echo "usage: tar2cmakezip <tarfilename> <zipfilename>"
 	return 1
     fi
     cmziptmpdir=/tmp/cmziptmpdir$$
-    mkdir -p $cmziptmpdir
+    cmziptmpsubdir=$cmziptmpdir/CMake-$HDF5_VERS
+    mkdir -p $cmziptmpsubdir
     version=$1
     tarfile=$2
     zipfile=$3
 
     # step 1: untar tarball in cmgztmpdir
-    (cd $cmziptmpdir; tar xf -) < $tarfile
+    (cd $cmziptmpsubdir; tar xf -) < $tarfile
     # sanity check
-    if [ ! -d $cmziptmpdir/$version ]; then
-	echo "untar did not create $cmziptmpdir/$version source dir"
+    if [ ! -d $cmziptmpsubdir/$version ]; then
+	echo "untar did not create $cmziptmpsubdir/$version source dir"
 	# cleanup
 	rm -rf $cmziptmpdir
 	return 1
     fi
 
     # step 2: add batch file for building CMake on window
-    cp /mnt/scr1/pre-release/hdf5/CMake/build-VS2013-32.bat $cmziptmpdir
-    cp /mnt/scr1/pre-release/hdf5/CMake/build-VS2013-64.bat $cmziptmpdir
-    cp /mnt/scr1/pre-release/hdf5/CMake/build-VS2015-32.bat $cmziptmpdir
-    cp /mnt/scr1/pre-release/hdf5/CMake/build-VS2015-64.bat $cmziptmpdir
-    cp /mnt/scr1/pre-release/hdf5/CMake/build-VS2017-32.bat $cmziptmpdir
-    cp /mnt/scr1/pre-release/hdf5/CMake/build-VS2017-64.bat $cmziptmpdir
+    (cd $cmziptmpsubdir; echo "ctest -S HDF5config.cmake,BUILD_GENERATOR=VS2013 -C Release -V -O hdf5.log" > build-VS2013-32.bat; chmod 755 build-VS2013-32.bat)
+    (cd $cmziptmpsubdir; echo "ctest -S HDF5config.cmake,BUILD_GENERATOR=VS201364 -C Release -V -O hdf5.log" > build-VS2013-64.bat; chmod 755 build-VS2013-64.bat)
+    (cd $cmziptmpsubdir; echo "ctest -S HDF5config.cmake,BUILD_GENERATOR=VS2015 -C Release -V -O hdf5.log" > build-VS2015-32.bat; chmod 755 build-VS2015-32.bat)
+    (cd $cmziptmpsubdir; echo "ctest -S HDF5config.cmake,BUILD_GENERATOR=VS201564 -C Release -V -O hdf5.log" > build-VS2015-64.bat; chmod 755 build-VS2015-64.bat)
+    (cd $cmziptmpsubdir; echo "ctest -S HDF5config.cmake,BUILD_GENERATOR=VS2017 -C Release -V -O hdf5.log" > build-VS2017-32.bat; chmod 755 build-VS2017-32.bat)
+    (cd $cmziptmpsubdir; echo "ctest -S HDF5config.cmake,BUILD_GENERATOR=VS201764 -C Release -V -O hdf5.log" > build-VS2017-64.bat; chmod 755 build-VS2017-64.bat)
 
     # step 3: add SZIP.tar.gz, ZLib.tar.gz and cmake files
-    cp /mnt/scr1/pre-release/hdf5/CMake/SZip.tar.gz $cmziptmpdir
-    cp /mnt/scr1/pre-release/hdf5/CMake/ZLib.tar.gz $cmziptmpdir
-    cp $cmziptmpdir/$version/config/cmake/scripts/CTestScript.cmake $cmziptmpdir
-    cp $cmziptmpdir/$version/config/cmake/scripts/HDF5config.cmake $cmziptmpdir
-    cp $cmziptmpdir/$version/config/cmake/scripts/HDF5options.cmake $cmziptmpdir
+    cp /mnt/scr1/pre-release/hdf5/CMake/SZip.tar.gz $cmziptmpsubdir
+    cp /mnt/scr1/pre-release/hdf5/CMake/ZLib.tar.gz $cmziptmpsubdir
+    cp /mnt/scr1/pre-release/hdf5/CMake/HDF5Examples-1.10.10-Source.tar.gz $cmziptmpsubdir
+    cp $cmziptmpsubdir/$version/config/cmake/scripts/CTestScript.cmake $cmziptmpsubdir
+    cp $cmziptmpsubdir/$version/config/cmake/scripts/HDF5config.cmake $cmziptmpsubdir
+    cp $cmziptmpsubdir/$version/config/cmake/scripts/HDF5options.cmake $cmziptmpsubdir
 
     # step 4: convert text files
     # There maybe a simpler way to do this.
@@ -234,12 +236,13 @@ tar2cmakezip()
     # -k   Keep the date stamp 
     # -q   quiet mode
     # grep redirect output to /dev/null because -q or -s are not portable.
-    find $cmziptmpdir/$version | \
+    find $cmziptmpsubdir/$version | \
 	while read inf; do \
 	    if file $inf | grep "$inf\: .*text" > /dev/null 2>&1 ; then \
 		unix2dos -q -k $inf; \
 	    fi\
 	done
+
     # step 3: make zipball
     # -9 maximum compression
     # -y Store symbolic links as such in the zip archive
@@ -284,9 +287,9 @@ tar2cmakezip()
 # Returns 0 if successful; 1 otherwise
 #
  # need function to create another temporary directory, extract the
-            # $tmpdir/$HDF5_VERS.tar into it, add (create) build-unix.sh,
-            # CTestScript.cmake, HDF5config.cmake, SZIP.tar.gz and ZLib.tar.gz,
-             # and then tar.gz it.
+            # $tmpdir/$HDF5_VERS.tar into it, create build-unix.sh,
+            # add CTestScript.cmake, HDF5config.cmake, SZIP.tar.gz
+            # ZLib.tar.gz, HDF5 examples, and then tar.gz it.
 tar2cmaketgz()
 {
     if [ $# -ne 3 ]; then
@@ -294,16 +297,17 @@ tar2cmaketgz()
 	return 1
     fi
     cmgztmpdir=/tmp/cmgztmpdir$$
-    mkdir -p $cmgztmpdir
+    cmgztmpsubdir=$cmgztmpdir/CMake-$HDF5_VERS
+    mkdir -p $cmgztmpsubdir
     version=$1
     tarfile=$2
     tgzfile=$3
 
     # step 1: untar tarball in cmgztmpdir
-    (cd $cmgztmpdir; tar xf -) < $tarfile
+    (cd $cmgztmpsubdir; tar xf -) < $tarfile
     # sanity check
-    if [ ! -d $cmgztmpdir/$version ]; then
-	echo "untar did not create $cmgztmpdir/$version source dir"
+    if [ ! -d $cmgztmpsubdir/$version ]; then
+	echo "untar did not create $cmgztmpsubdir/$version source dir"
 	# cleanup
 	rm -rf $cmgztmpdir
 	return 1
@@ -311,14 +315,15 @@ tar2cmaketgz()
 
 
     # step 2: add build-unix.sh script
-    (cd $cmgztmpdir; echo "ctest -S HDF5config.cmake,BUILD_GENERATOR=Unix -C Release -V -O hdf5.log" > build-unix.sh; chmod 755 build-unix.sh)
+    (cd $cmgztmpsubdir; echo "ctest -S HDF5config.cmake,BUILD_GENERATOR=Unix -C Release -V -O hdf5.log" > build-unix.sh; chmod 755 build-unix.sh)
 
     # step 3: add SZIP.tar.gz, ZLib.tar.gz and cmake files
-    cp /mnt/scr1/pre-release/hdf5/CMake/SZip.tar.gz $cmgztmpdir
-    cp /mnt/scr1/pre-release/hdf5/CMake/ZLib.tar.gz $cmgztmpdir
-    cp $cmgztmpdir/$version/config/cmake/scripts/CTestScript.cmake $cmgztmpdir
-    cp $cmgztmpdir/$version/config/cmake/scripts/HDF5config.cmake $cmgztmpdir
-    cp $cmgztmpdir/$version/config/cmake/scripts/HDF5options.cmake $cmgztmpdir
+    cp /mnt/scr1/pre-release/hdf5/CMake/SZip.tar.gz $cmgztmpsubdir
+    cp /mnt/scr1/pre-release/hdf5/CMake/ZLib.tar.gz $cmgztmpsubdir
+    cp /mnt/scr1/pre-release/hdf5/CMake/HDF5Examples-1.10.10-Source.tar.gz $cmgztmpsubdir
+    cp $cmgztmpsubdir/$version/config/cmake/scripts/CTestScript.cmake $cmgztmpsubdir
+    cp $cmgztmpsubdir/$version/config/cmake/scripts/HDF5config.cmake $cmgztmpsubdir
+    cp $cmgztmpsubdir/$version/config/cmake/scripts/HDF5options.cmake $cmgztmpsubdir
     tar czf $DEST/CMake-$HDF5_VERS.tar.gz -C $cmgztmpdir . || exit 1 
                  
     # cleanup

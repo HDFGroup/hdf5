@@ -20,6 +20,7 @@
 #include "H5CXprivate.h"        /* API Contexts                         */
 #include "H5MFprivate.h"
 #include "H5MMprivate.h"
+
 #include "cache_common.h"
 
 
@@ -3276,23 +3277,24 @@ setup_cache(size_t max_cache_size,
                   FUNC, mile_stone++, (int)pass);
 
     if(pass) {
-	HDassert(fid >= 0);
-	saved_fid = fid;
+        HDassert(fid >= 0);
+        saved_fid = fid;
         if(H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0) {
             pass = FALSE;
             failure_mssg = "H5Fflush() failed.";
 
             if(verbose)
                 HDfprintf(stdout, "%s: H5Fflush() failed.\n", FUNC);
-        } else {
-            file_ptr = (H5F_t *)H5I_object_verify(fid, H5I_FILE);
-	    if(file_ptr == NULL) {
+        }
+        else {
+            file_ptr = (H5F_t *)H5VL_object_verify(fid, H5I_FILE);
+            if(file_ptr == NULL) {
                 pass = FALSE;
                 failure_mssg = "Can't get file_ptr.";
 
                 if(verbose)
                     HDfprintf(stdout, "%s: H5Fflush() failed.\n", FUNC);
-	    }
+            }
         }
     }
 
@@ -3303,36 +3305,36 @@ setup_cache(size_t max_cache_size,
     if(pass) {
 
         /* A bit of fancy footwork here:
-	 *
-	 * The call to H5Fcreate() allocates an instance of H5C_t,
-	 * initializes it, and stores its address in f->shared->cache.
-	 *
-	 * We don't want to use this cache, as it has a bunch of extra
-	 * initialization that may change over time, and in any case
-	 * it will not in general be configured the way we want it.
-	 *
-	 * We used to deal with this problem by storing the file pointer
-	 * in another instance of H5C_t, and then ignoring the original
-	 * version.  However, this strategy doesn't work any more, as
-	 * we can't store the file pointer in the instance of H5C_t,
-	 * and we have modified many cache routines to use a file
-	 * pointer to look up the target cache.
-	 *
-	 * Thus we now make note of the address of the instance of
-	 * H5C_t created by the call to H5Fcreate(), set
-	 * file_ptr->shared->cache to NULL, call H5C_create()
-	 * to allocate a new instance of H5C_t for test purposes,
-	 * and store than new instance's address in
-	 * file_ptr->shared->cache.
-	 *
-	 * On shut down, we call H5C_dest on our instance of H5C_t,
-	 * set file_ptr->shared->cache to point to the original
-	 * instance, and then close the file normally.
-	 */
+         *
+         * The call to H5Fcreate() allocates an instance of H5C_t,
+         * initializes it, and stores its address in f->shared->cache.
+         *
+         * We don't want to use this cache, as it has a bunch of extra
+         * initialization that may change over time, and in any case
+         * it will not in general be configured the way we want it.
+         *
+         * We used to deal with this problem by storing the file pointer
+         * in another instance of H5C_t, and then ignoring the original
+         * version.  However, this strategy doesn't work any more, as
+         * we can't store the file pointer in the instance of H5C_t,
+         * and we have modified many cache routines to use a file
+         * pointer to look up the target cache.
+         *
+         * Thus we now make note of the address of the instance of
+         * H5C_t created by the call to H5Fcreate(), set
+         * file_ptr->shared->cache to NULL, call H5C_create()
+         * to allocate a new instance of H5C_t for test purposes,
+         * and store than new instance's address in
+         * file_ptr->shared->cache.
+         *
+         * On shut down, we call H5C_dest on our instance of H5C_t,
+         * set file_ptr->shared->cache to point to the original
+         * instance, and then close the file normally.
+         */
 
         HDassert(saved_cache == NULL);
-	saved_cache = file_ptr->shared->cache;
-	file_ptr->shared->cache = NULL;
+        saved_cache = file_ptr->shared->cache;
+        file_ptr->shared->cache = NULL;
 
         cache_ptr = H5C_create(max_cache_size,
                                min_clean_size,
@@ -3351,19 +3353,20 @@ setup_cache(size_t max_cache_size,
                   FUNC, mile_stone++, (int)pass);
 
     if(pass) {
-	if(cache_ptr == NULL) {
+        if(cache_ptr == NULL) {
             pass = FALSE;
             failure_mssg = "H5C_create() failed.";
 
             if(verbose)
                  HDfprintf(stdout, "%s: H5C_create() failed.\n", FUNC);
-        } else if(cache_ptr->magic != H5C__H5C_T_MAGIC) {
+        }
+        else if(cache_ptr->magic != H5C__H5C_T_MAGIC) {
             pass = FALSE;
-	    failure_mssg = "Bad cache_ptr magic.";
+            failure_mssg = "Bad cache_ptr magic.";
 
             if(verbose)
                 HDfprintf(stdout, "%s: Bad cache_ptr magic.\n", FUNC);
-	}
+        }
     }
 
     if(show_progress) /* 7 */
@@ -3446,7 +3449,7 @@ takedown_cache(H5F_t * file_ptr,
             H5C_stats(cache_ptr, "test cache", dump_detailed_stats);
         }
 
-	if ( H5C_prep_for_file_close(file_ptr) < 0 ) {
+        if ( H5C_prep_for_file_close(file_ptr) < 0 ) {
 
             pass = FALSE;
             failure_mssg = "unexpected failure of prep for file close.\n";
@@ -3456,23 +3459,23 @@ takedown_cache(H5F_t * file_ptr,
 
         H5C_dest(file_ptr);
 
-	if ( saved_cache != NULL ) {
+        if ( saved_cache != NULL ) {
 
-	    file_ptr->shared->cache = saved_cache;
-	    saved_cache = NULL;
-	}
+            file_ptr->shared->cache = saved_cache;
+            saved_cache = NULL;
+        }
 
     }
 
     if ( saved_fapl_id != H5P_DEFAULT ) {
 
         H5Pclose(saved_fapl_id);
-	saved_fapl_id = H5P_DEFAULT;
+        saved_fapl_id = H5P_DEFAULT;
     }
 
     if ( saved_fcpl_id != H5P_DEFAULT ) {
         H5Pclose(saved_fcpl_id);
-	saved_fcpl_id = H5P_DEFAULT;
+        saved_fcpl_id = H5P_DEFAULT;
     }
 
     if ( saved_fid != -1 ) {
@@ -3480,7 +3483,7 @@ takedown_cache(H5F_t * file_ptr,
         if ( H5F_addr_defined(saved_actual_base_addr) ) {
 
             if ( NULL == file_ptr )  {
-                file_ptr = (H5F_t *)H5I_object_verify(saved_fid, H5I_FILE);
+                file_ptr = (H5F_t *)H5VL_object_verify(saved_fid, H5I_FILE);
                 HDassert ( file_ptr );
             }
 
@@ -3489,21 +3492,21 @@ takedown_cache(H5F_t * file_ptr,
             saved_actual_base_addr = HADDR_UNDEF;
         }
 
-	if ( H5Fclose(saved_fid) < 0  ) {
+        if ( H5Fclose(saved_fid) < 0  ) {
 
             pass = FALSE;
-	    failure_mssg = "couldn't close test file.";
+            failure_mssg = "couldn't close test file.";
 
-	} else {
+        } else {
 
-	    saved_fid = -1;
+            saved_fid = -1;
 
         }
 
         /* Pop API context */
         H5CX_pop();
 
-	if ( ( ! try_core_file_driver ) || ( core_file_driver_failed ) ) {
+        if ( ( ! try_core_file_driver ) || ( core_file_driver_failed ) ) {
 
             if ( h5_fixname(FILENAME[0], H5P_DEFAULT, filename, sizeof(filename))
                  == NULL ) {
@@ -3515,10 +3518,10 @@ takedown_cache(H5F_t * file_ptr,
             if ( HDremove(filename) < 0 ) {
 
                 pass = FALSE;
-	        failure_mssg = "couldn't delete test file.";
+                failure_mssg = "couldn't delete test file.";
 
-	    }
-	}
+            }
+        }
     }
 
     return;
@@ -6030,7 +6033,7 @@ check_and_validate_cache_hit_rate(hid_t file_id,
     /* get a pointer to the files internal data structure */
     if ( pass ) {
 
-        file_ptr = (H5F_t *)H5I_object_verify(file_id, H5I_FILE);
+        file_ptr = (H5F_t *)H5VL_object_verify(file_id, H5I_FILE);
 
         if ( file_ptr == NULL ) {
 
@@ -6167,7 +6170,7 @@ check_and_validate_cache_size(hid_t file_id,
     /* get a pointer to the files internal data structure */
     if ( pass ) {
 
-        file_ptr = (H5F_t *)H5I_object_verify(file_id, H5I_FILE);
+        file_ptr = (H5F_t *)H5VL_object_verify(file_id, H5I_FILE);
 
         if ( file_ptr == NULL ) {
 
@@ -6349,7 +6352,7 @@ validate_mdc_config(hid_t file_id,
     /* get a pointer to the files internal data structure */
     if ( pass ) {
 
-        file_ptr = (H5F_t *)H5I_object_verify(file_id, H5I_FILE);
+        file_ptr = (H5F_t *)H5VL_object_verify(file_id, H5I_FILE);
 
         if ( file_ptr == NULL ) {
 

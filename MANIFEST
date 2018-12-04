@@ -92,6 +92,13 @@
 ./bin/timekeeper      _DO_NOT_DISTRIBUTE_
 ./bin/trace
 ./bin/yodconfigure
+./bin/batch/knl_ctestP.sl
+./bin/batch/knl_ctestS.sl
+./bin/batch/knl_ctestSP.sl
+./bin/batch/knl_H5detect.sl.in.cmake
+./bin/batch/sbatch_ctestS.sl
+./bin/batch/sbatch_ctestP.sl
+./bin/batch/sbatch_ctestSP.sl
 ./bin/pkgscrpts/h5rmflags                  _DO_NOT_DISTRIBUTE_
 ./bin/pkgscrpts/makeHDF5BinaryTarfiles.pl  _DO_NOT_DISTRIBUTE_
 ./bin/pkgscrpts/makeInternalREADME.pl      _DO_NOT_DISTRIBUTE_
@@ -164,6 +171,7 @@
 ./examples/h5_vds-percival.c
 ./examples/h5_vds-percival-unlim.c
 ./examples/h5_vds-percival-unlim-maxmin.c
+./examples/h5_vol_external_log_native.c
 ./examples/testh5cc.sh.in
 ./examples/README
 
@@ -351,6 +359,8 @@
 ./c++/src/H5DataSpace.h
 ./c++/src/H5DataType.cpp
 ./c++/src/H5DataType.h
+./c++/src/H5DaccProp.cpp
+./c++/src/H5DaccProp.h
 ./c++/src/H5DcreatProp.cpp
 ./c++/src/H5DcreatProp.h
 ./c++/src/H5DxferProp.cpp
@@ -396,7 +406,7 @@
 ./c++/src/H5VarLenType.h
 ./c++/src/Makefile.am
 ./c++/src/RM_stylesheet.css
-./c++/src/C2Cppfunction_map.mht
+./c++/src/C2Cppfunction_map.htm
 ./c++/src/cpp_doc_config
 ./c++/src/h5c++.in
 ./c++/src/footer.html
@@ -443,6 +453,7 @@
 ./release_docs/INSTALL_CMake.txt
 ./release_docs/INSTALL_Cygwin.txt
 ./release_docs/INSTALL_parallel
+./release_docs/INSTALL_Warnings.txt
 ./release_docs/INSTALL_Windows.txt
 ./release_docs/RELEASE.txt
 ./release_docs/USING_HDF5_CMake.txt
@@ -492,7 +503,6 @@
 ./src/H5Bmodule.h
 ./src/H5Bpkg.h
 ./src/H5Bprivate.h
-./src/H5Bpublic.h
 ./src/H5B2.c
 ./src/H5B2cache.c
 ./src/H5B2dbg.c
@@ -503,7 +513,6 @@
 ./src/H5B2module.h
 ./src/H5B2pkg.h
 ./src/H5B2private.h
-./src/H5B2public.h
 ./src/H5B2stat.c
 ./src/H5B2test.c
 ./src/H5C.c
@@ -523,8 +532,8 @@
 ./src/H5CS.c
 ./src/H5CSprivate.h
 ./src/H5CX.c
-./src/H5CXprivate.h
 ./src/H5CXmodule.h
+./src/H5CXprivate.h
 ./src/H5D.c
 ./src/H5Dbtree.c
 ./src/H5Dbtree2.c
@@ -573,6 +582,7 @@
 ./src/H5EAsblock.c
 ./src/H5EAstat.c
 ./src/H5EAtest.c
+./src/H5ESpublic.h
 ./src/H5F.c
 ./src/H5Faccum.c
 ./src/H5Fcwfs.c
@@ -647,7 +657,6 @@
 ./src/H5FSmodule.h
 ./src/H5FSpkg.h
 ./src/H5FSprivate.h
-./src/H5FSpublic.h
 ./src/H5FSsection.c
 ./src/H5FSstat.c
 ./src/H5FStest.c
@@ -687,7 +696,6 @@
 ./src/H5HFmodule.h
 ./src/H5HFpkg.h
 ./src/H5HFprivate.h
-./src/H5HFpublic.h
 ./src/H5HFsection.c
 ./src/H5HFspace.c
 ./src/H5HFstat.c
@@ -699,7 +707,6 @@
 ./src/H5HGmodule.h
 ./src/H5HGpkg.h
 ./src/H5HGprivate.h
-./src/H5HGpublic.h
 ./src/H5HGquery.c
 ./src/H5HL.c
 ./src/H5HLcache.c
@@ -710,7 +717,6 @@
 ./src/H5HLpkg.h
 ./src/H5HLprfx.c
 ./src/H5HLprivate.h
-./src/H5HLpublic.h
 ./src/H5HP.c
 ./src/H5HPprivate.h
 ./src/H5I.c
@@ -883,6 +889,15 @@
 ./src/H5Tvlen.c
 ./src/H5TS.c
 ./src/H5TSprivate.h
+./src/H5VL.c
+./src/H5VLint.c
+./src/H5VLmodule.h
+./src/H5VLnative.c
+./src/H5VLnative.h
+./src/H5VLnative_private.h
+./src/H5VLpkg.h
+./src/H5VLprivate.h
+./src/H5VLpublic.h
 ./src/H5VM.c
 ./src/H5VMprivate.h
 ./src/H5WB.c
@@ -948,6 +963,7 @@
 ./test/dtypes.c
 ./test/dtransform.c
 ./test/earray.c
+./test/echo_vol.c
 ./test/efc.c
 ./test/enc_dec_plist.c
 ./test/enc_dec_plist_cross_platform.c
@@ -1126,6 +1142,7 @@
 ./test/use_disable_mdc_flushes.c
 ./test/use.h
 ./test/vfd.c
+./test/vol.c
 ./test/test_filters_le.h5
 ./test/test_filters_be.h5
 ./test/gen_filters.c
@@ -1245,6 +1262,7 @@
 ./testpar/t_cache_image.c
 ./testpar/t_chunk_alloc.c
 ./testpar/t_coll_chunk.c
+./testpar/t_coll_md_read.c
 ./testpar/t_dset.c
 ./testpar/t_file.c
 ./testpar/t_file_image.c
@@ -1797,6 +1815,8 @@
 ./tools/testfiles/tints4dims.h5
 ./tools/testfiles/tintsattrs.ddl
 ./tools/testfiles/tintsattrs.h5
+./tools/testfiles/tintsnodata.ddl
+./tools/testfiles/tintsnodata.h5
 ./tools/testfiles/tlarge_objname.ddl
 ./tools/testfiles/tlarge_objname.h5
 ./tools/testfiles/tldouble.h5
@@ -2601,6 +2621,7 @@
 ./tools/test/perform/build_h5perf_alone.sh
 ./tools/test/perform/build_h5perf_serial_alone.sh
 ./tools/test/perform/chunk.c
+./tools/test/perform/chunk_cache.c
 ./tools/test/perform/direct_write_perf.c
 ./tools/test/perform/gen_report.pl
 ./tools/test/perform/iopipe.c
@@ -3144,6 +3165,10 @@
 ./java/lib/ext/slf4j-simple-1.7.25.jar
 
 # CMake-specific Files
+./config/toolchain/crayle.cmake
+./config/toolchain/GCC.cmake
+./config/toolchain/intel.cmake
+
 ./config/cmake/cacheinit.cmake
 ./config/cmake/CMakeFindJavaCommon.cmake
 ./config/cmake/ConversionTests.c
@@ -3173,6 +3198,7 @@
 ./config/cmake/UseJavaSymlinks.cmake
 ./config/cmake/userblockTest.cmake
 ./config/cmake/vfdTest.cmake
+./config/cmake/wait_H5Tinit.cmake
 
 ./config/cmake_ext_mod/ConfigureChecks.cmake
 ./config/cmake_ext_mod/CTestCustom.cmake

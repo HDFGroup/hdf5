@@ -174,7 +174,7 @@ done:
 --------------------------------------------------------------------------*/
 herr_t
 H5D__fill(const void *fill, const H5T_t *fill_type, void *buf,
-    const H5T_t *buf_type, const H5S_t *space)
+          const H5T_t *buf_type, const H5S_t *space)
 {
     H5S_sel_iter_t *mem_iter = NULL; /* Memory selection iteration info */
     hbool_t mem_iter_init = FALSE; /* Whether the memory selection iterator has been initialized */

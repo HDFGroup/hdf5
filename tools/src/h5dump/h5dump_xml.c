@@ -3438,8 +3438,7 @@ xml_dump_fill_value(hid_t dcpl, hid_t type)
             h5tools_str_reset(&buffer);
             h5tools_str_append(&buffer, "\"");
             for (i = 0; i < sz; i++) {
-                h5tools_str_append(&buffer, "%x ", *(unsigned int *) buf);
-                buf = (char *) buf + sizeof(unsigned int);
+                h5tools_str_append(&buffer, "%x ", *(unsigned int *) buf + (i * sizeof(unsigned int)));
             }
             h5tools_str_append(&buffer, "\"");
             h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);

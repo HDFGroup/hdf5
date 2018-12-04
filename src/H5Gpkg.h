@@ -331,17 +331,11 @@ H5FL_EXTERN(H5G_shared_t);
 H5_DLL H5G_t *H5G__create(H5F_t *file, H5G_obj_create_t *gcrt_info);
 H5_DLL H5G_t *H5G__create_named(const H5G_loc_t *loc, const char *name,
     hid_t lcpl_id, hid_t gcpl_id);
-H5_DLL H5G_t *H5G__create_anon(H5F_t *file, H5G_obj_create_t *gcrt_info);
 H5_DLL H5G_t *H5G__open_name(const H5G_loc_t *loc, const char *name);
-H5_DLL hid_t H5G__get_create_plist(const H5G_t *grp);
-H5_DLL herr_t H5G__get_info(const H5G_loc_t *loc, H5G_info_t *grp_info);
 H5_DLL herr_t H5G__get_info_by_name(const H5G_loc_t *loc, const char *name,
     H5G_info_t *grp_info);
 H5_DLL herr_t H5G__get_info_by_idx(const H5G_loc_t *loc, const char *group_name,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t n, H5G_info_t *grp_info);
-H5_DLL herr_t H5G__flush(H5G_t *grp, hid_t group_id);
-H5_DLL herr_t H5G__refresh(H5G_t *grp, hid_t group_id);
-H5_DLL herr_t H5G__close_cb(H5G_t *grp);
 
 /*
  * Group hierarchy traversal routines
@@ -434,8 +428,7 @@ H5_DLL herr_t H5G__link_sort_table(H5G_link_table_t *ltable, H5_index_t idx_type
 H5_DLL herr_t H5G__link_iterate_table(const H5G_link_table_t *ltable,
     hsize_t skip, hsize_t *last_lnk, const H5G_lib_iterate_t op, void *op_data);
 H5_DLL herr_t H5G__link_release_table(H5G_link_table_t *ltable);
-H5_DLL herr_t H5G__link_name_replace(H5F_t *file, H5RS_str_t *grp_full_path_r,
-    const H5O_link_t *lnk);
+H5_DLL herr_t H5G__link_name_replace(H5F_t *file, H5RS_str_t *grp_full_path_r, const H5O_link_t *lnk);
 
 /* Functions that understand "compact" link storage */
 H5_DLL herr_t H5G__compact_insert(const H5O_loc_t *grp_oloc, H5O_link_t *obj_lnk);

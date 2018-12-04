@@ -46,6 +46,9 @@ endif ()
 #   dependencies of the HDF5 libs may be 'incomplete', add additional
 #   dependencies to this variable so that external projects pick them up
 #
+#option (HDF5_EXTERNAL_LIB_PREFIX "Use prefix for custom library naming." "")
+set (HDF5_EXTERNAL_LIB_PREFIX "" CACHE STRING "Use prefix for custom library naming.")
+mark_as_advanced (HDF5_EXTERNAL_LIB_PREFIX)
 # HDF5_EXTERNAL_LIB_PREFIX :
 #   If the parent project needs to install hdf libraries, but avoid
 #   name conflicts with system versions, then a prefix may be added
@@ -430,7 +433,7 @@ set (CMAKE_POSITION_INDEPENDENT_CODE ON)
 #-----------------------------------------------------------------------------
 # Option to Build Static executables
 #-----------------------------------------------------------------------------
-option (BUILD_STATIC_EXECS "Build Static Executabless" OFF)
+option (BUILD_STATIC_EXECS "Build Static Executables" OFF)
 if (BUILD_STATIC_EXECS)
   if (NOT WIN32)
     set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -static")
@@ -443,9 +446,14 @@ endif ()
 #-----------------------------------------------------------------------------
 option (HDF5_ENABLE_COVERAGE "Enable code coverage for Libraries and Programs" OFF)
 if (HDF5_ENABLE_COVERAGE)
-  set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O0 -fprofile-arcs -ftest-coverage")
-  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0 -fprofile-arcs -ftest-coverage")
-  set (LDFLAGS "${LDFLAGS} -fprofile-arcs -ftest-coverage")
+  set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O0 --coverage -fprofile-arcs -ftest-coverage")
+  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g --coverage -O0 -fprofile-arcs -ftest-coverage")
+  if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
+    set (LDFLAGS "${LDFLAGS} -fprofile-arcs -ftest-coverage")
+    link_libraries (gcov)
+  else ()
+    set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --coverage")
+  endif ()
 endif ()
 
 #-----------------------------------------------------------------------------
@@ -543,11 +551,11 @@ else ()
 endif ()
 
 include (${HDF_RESOURCES_DIR}/HDFCompilerFlags.cmake)
+set (CMAKE_MODULE_PATH ${HDF_RESOURCES_DIR} ${HDF_RESOURCES_EXT_DIR} ${CMAKE_MODULE_PATH})
 
 #-----------------------------------------------------------------------------
 # Option to Enable MPI Parallel
 #-----------------------------------------------------------------------------
-set (CMAKE_MODULE_PATH ${HDF_RESOURCES_DIR} ${HDF_RESOURCES_EXT_DIR} ${CMAKE_MODULE_PATH})
 option (HDF5_ENABLE_PARALLEL "Enable parallel build (requires MPI)" OFF)
 if (HDF5_ENABLE_PARALLEL)
   find_package(MPI REQUIRED)
@@ -555,12 +563,33 @@ if (HDF5_ENABLE_PARALLEL)
     set (H5_HAVE_PARALLEL 1)
     # MPI checks, only do these if MPI_C_FOUND is true, otherwise they always fail
     # and once set, they are cached as false and not regenerated
-    set (CMAKE_REQUIRED_LIBRARIES "${MPI_C_LIBRARIES}" )
+    set (CMAKE_REQUIRED_LIBRARIES "${MPI_C_LIBRARIES}")
+    set (CMAKE_REQUIRED_INCLUDES "${MPI_C_INCLUDE_DIRS}")
     # Used by Fortran + MPI
-    CHECK_SYMBOL_EXISTS (MPI_Comm_c2f "${MPI_C_INCLUDE_DIRS}/mpi.h"  H5_HAVE_MPI_MULTI_LANG_Comm)
-    CHECK_SYMBOL_EXISTS (MPI_Info_c2f "${MPI_C_INCLUDE_DIRS}/mpi.h"  H5_HAVE_MPI_MULTI_LANG_Info)
+    CHECK_SYMBOL_EXISTS (MPI_Comm_c2f "mpi.h"  H5_HAVE_MPI_MULTI_LANG_Comm)
+    CHECK_SYMBOL_EXISTS (MPI_Info_c2f "mpi.h"  H5_HAVE_MPI_MULTI_LANG_Info)
+
+    # Used by Parallel Compression feature
+    set (PARALLEL_FILTERED_WRITES ON)
+    CHECK_SYMBOL_EXISTS (MPI_Mprobe "mpi.h" H5_HAVE_MPI_Mprobe)
+    CHECK_SYMBOL_EXISTS (MPI_Imrecv "mpi.h" H5_HAVE_MPI_Imrecv)
+    if (NOT H5_HAVE_MPI_Mprobe OR NOT H5_HAVE_MPI_Imrecv)
+      message (WARNING "The MPI_Mprobe and/or MPI_Imrecv functions could not be located.
+               Parallel writes of filtered data will be disabled.")
+      set (PARALLEL_FILTERED_WRITES OFF)
+    endif ()
+
+    # Used by big I/O feature
+    set (LARGE_PARALLEL_IO ON)
+    CHECK_SYMBOL_EXISTS (MPI_Get_elements_x "mpi.h" H5_HAVE_MPI_Get_elements_x)
+    CHECK_SYMBOL_EXISTS (MPI_Type_size_x "mpi.h" H5_HAVE_MPI_Type_size_x)
+    if (NOT H5_HAVE_MPI_Get_elements_x OR NOT H5_HAVE_MPI_Type_size_x)
+      message (WARNING "The MPI_Get_elements_x and/or MPI_Type_size_x functions could not be located.
+               Reading/Writing >2GB of data in a single parallel I/O operation will be disabled.")
+      set (LARGE_PARALLEL_IO OFF)
+    endif ()
   else ()
-    message (STATUS "Parallel libraries not found")
+    message (FATAL_ERROR "Parallel libraries not found")
   endif ()
 endif ()
 
@@ -591,6 +620,26 @@ set (H5_USE_18_API_DEFAULT 0)
 if (HDF5_USE_18_API_DEFAULT)
   set (H5_USE_18_API_DEFAULT 1)
   set (DEFAULT_API_VERSION "v18")
+endif ()
+
+#-----------------------------------------------------------------------------
+# Option to use 1.10.x API
+#-----------------------------------------------------------------------------
+option (HDF5_USE_110_API_DEFAULT "Use the HDF5 1.10.x API by default" OFF)
+set (H5_USE_110_API_DEFAULT 0)
+if (HDF5_USE_110_API_DEFAULT)
+  set (H5_USE_110_API_DEFAULT 1)
+  set (DEFAULT_API_VERSION "v110")
+endif ()
+
+#-----------------------------------------------------------------------------
+# Option to use 1.12.x API
+#-----------------------------------------------------------------------------
+option (HDF5_USE_112_API_DEFAULT "Use the HDF5 1.12.x API by default" ON)
+set (H5_USE_112_API_DEFAULT 0)
+if (HDF5_USE_112_API_DEFAULT)
+  set (H5_USE_112_API_DEFAULT 1)
+  set (DEFAULT_API_VERSION "v112")
 endif ()
 
 #-----------------------------------------------------------------------------
@@ -863,5 +912,11 @@ endif ()
 # Generate the H5pubconf.h file containing user settings needed by compilation
 #-----------------------------------------------------------------------------
 configure_file (${HDF_RESOURCES_DIR}/H5pubconf.h.in ${HDF5_BINARY_DIR}/H5pubconf.h @ONLY)
+
+#-----------------------------------------------------------------------------
+# Options for use by cross compiling and toolchains
+#-----------------------------------------------------------------------------
+option (HDF5_USE_PREGEN "Use pre-generated Files" OFF)
+option (HDF5_BATCH_H5DETECT "Use a batch command for running h5detect" OFF)
 
 include (CMakeInstallation.cmake)

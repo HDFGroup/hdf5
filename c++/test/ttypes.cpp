@@ -1026,6 +1026,94 @@ static void test_encode_decode()
 
 
 /*-------------------------------------------------------------------------
+ * Function:    test_operators
+ *
+ * Purpose      Test datatype encode/decode functionality.
+ *
+ * Return       None
+ *
+ * Programmer   Binh-Minh Ribler (using C version)
+ *              August, 2017
+ *-------------------------------------------------------------------------
+ */
+const H5std_string filename4("h5_type_operators.h5");
+
+static void test_operators()
+{
+    short        enum_val;
+
+    SUBTEST("DataType::operator== and DataType::operator!=");
+    try {
+        // Create the file.
+        H5File file(filename4, H5F_ACC_TRUNC);
+
+        //
+        // Test with CompType
+        //
+
+        // Create a compound datatype
+        CompType cmptyp(sizeof(src_typ_t));
+
+        cmptyp.insertMember("a", HOFFSET(src_typ_t, a), PredType::NATIVE_INT);
+        cmptyp.insertMember("b", HOFFSET(src_typ_t, b), PredType::NATIVE_FLOAT);
+        cmptyp.insertMember("c", HOFFSET(src_typ_t, c), PredType::NATIVE_LONG);
+        cmptyp.insertMember("d", HOFFSET(src_typ_t, d), PredType::NATIVE_DOUBLE);
+
+        // Copy this compound datatype
+        CompType clone_cmptyp(cmptyp);
+
+        // Verify that operator== and operator!= work properly
+        verify_val(cmptyp == clone_cmptyp, true, "DataType::operator==", __LINE__, __FILE__);
+        verify_val(cmptyp != clone_cmptyp, false, "DataType::operator!=", __LINE__, __FILE__);
+
+        //
+        // Test with EnumType
+        //
+
+        // Create an enumerate datatype
+        EnumType enumtyp(sizeof(short));
+
+        enumtyp.insert("RED", (enum_val=0,&enum_val));
+        enumtyp.insert("GREEN", (enum_val=1,&enum_val));
+        enumtyp.insert("BLUE", (enum_val=2,&enum_val));
+
+        // Verify that operator== and operator!= work properly
+        verify_val(cmptyp == enumtyp, false, "DataType::operator==", __LINE__, __FILE__);
+        verify_val(cmptyp != enumtyp, true, "DataType::operator!=", __LINE__, __FILE__);
+
+        //
+        // Test with compound datatype's member
+        //
+
+        // Create random atomic datatypes
+        IntType inttyp(PredType::NATIVE_INT);
+        FloatType flttyp(PredType::NATIVE_FLOAT);
+
+        // Get the NATIVE_INT member from the compound datatype above
+        IntType member_inttyp = cmptyp.getMemberIntType(0);
+
+        // Test various combinations
+        verify_val(inttyp == member_inttyp, true, "DataType::operator==", __LINE__, __FILE__);
+        verify_val(flttyp == member_inttyp, false, "DataType::operator==", __LINE__, __FILE__);
+        verify_val(flttyp != member_inttyp, true, "DataType::operator==", __LINE__, __FILE__);
+
+        // Get the NATIVE_FLOAT member from the compound datatype above
+        IntType member_flttyp = cmptyp.getMemberIntType(1);
+
+        // Test various combinations
+        verify_val(inttyp == member_flttyp, false, "DataType::operator==", __LINE__, __FILE__);
+        verify_val(flttyp != member_flttyp, false, "DataType::operator==", __LINE__, __FILE__);
+
+        PASSED();
+    }
+    catch (Exception& E)
+    {
+        issue_fail_msg("test_operators", __LINE__, __FILE__, E.getCDetailMsg());
+    }
+}   // test_operators
+
+
+/*-------------------------------------------------------------------------
  * Function:    test_types
  *
  * Purpose      Main datatypes testing routine
@@ -1048,6 +1136,7 @@ void test_types()
     test_transient();
     test_named();
     test_encode_decode();
+    test_operators();
 
 }   // test_types()
 

@@ -30,6 +30,7 @@
 #include "H5DxferProp.h"
 #include "H5LcreatProp.h"
 #include "H5LaccProp.h"
+#include "H5DaccProp.h"
 #include "H5Location.h"
 #include "H5Object.h"
 #include "H5DataType.h"
@@ -280,6 +281,7 @@ hid_t DataType::p_decode() const
 // Function:    DataType::decode
 ///\brief       Returns a DataType instance by decoding the binary object
 ///             description of this datatype.
+///
 ///\exception   H5::DataTypeIException
 // Programmer   Binh-Minh Ribler - Aug 2017
 //--------------------------------------------------------------------------
@@ -300,6 +302,7 @@ DataType* DataType::decode() const
 //--------------------------------------------------------------------------
 // Function:    DataType::encode
 ///\brief       Creates a binary object description of this datatype.
+///
 ///\exception   H5::DataTypeIException
 // Programmer   Binh-Minh Ribler - Aug 2017
 //--------------------------------------------------------------------------
@@ -332,6 +335,7 @@ void DataType::encode()
 // Function:    DataType::hasBinaryDesc
 ///\brief       Determines whether this datatype has a binary object
 ///             description.
+///
 ///\exception   H5::DataTypeIException
 // Programmer   Binh-Minh Ribler - Aug 2017
 //--------------------------------------------------------------------------
@@ -393,6 +397,20 @@ bool DataType::operator==(const DataType& compared_type) const
     {
         throw DataTypeIException(inMemFunc("operator=="), "H5Tequal returns negative value");
     }
+}
+
+//--------------------------------------------------------------------------
+// Function:    DataType::operator!=
+///\brief       Compares this DataType against the given one to determines
+///             whether the two objects refer to different actual datatypes.
+///\param       compared_type - IN: Reference to the datatype to compare
+///\return      true if the datatypes are not equal, and false, otherwise.
+///\exception   H5::DataTypeIException
+// July, 2018
+//--------------------------------------------------------------------------
+bool DataType::operator!=(const DataType& compared_type) const
+{
+    return !operator==(compared_type);
 }
 
 //--------------------------------------------------------------------------

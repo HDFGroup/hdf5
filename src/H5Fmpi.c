@@ -231,7 +231,7 @@ H5Fset_mpi_atomicity(hid_t file_id, hbool_t flag)
     H5TRACE2("e", "ib", file_id, flag);
 
     /* Check args */
-    if(NULL == (file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
+    if(NULL == (file = (H5F_t *)H5VL_object_verify(file_id, H5I_FILE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
 
     /* Check VFD */
@@ -271,7 +271,7 @@ H5Fget_mpi_atomicity(hid_t file_id, hbool_t *flag)
     H5TRACE2("e", "i*b", file_id, flag);
 
     /* Check args */
-    if(NULL == (file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
+    if(NULL == (file = (H5F_t *)H5VL_object_verify(file_id, H5I_FILE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
 
     /* Check VFD */
@@ -320,11 +320,11 @@ H5F_mpi_retrieve_comm(hid_t loc_id, hid_t acspl_id, MPI_Comm *mpi_comm)
        attached to the loc_id */
     if(H5I_INVALID_HID != loc_id) {
         H5G_loc_t loc;
-        H5F_t *f;
+        H5F_t *f = NULL;
 
         /* Retrieve the file structure */
         if(H5G_loc(loc_id, &loc) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_BADTYPE, FAIL, "not a location")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
         f = loc.oloc->file;
         HDassert(f);
 
@@ -333,8 +333,8 @@ H5F_mpi_retrieve_comm(hid_t loc_id, hid_t acspl_id, MPI_Comm *mpi_comm)
             /* retrieve the file communicator */
             if(MPI_COMM_NULL == (*mpi_comm = H5F_mpi_get_comm(f)))
                 HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get MPI communicator")
-        } /* end if */
-    } /* end if */
+        }
+    }
     /* otherwise, this is from H5Fopen or H5Fcreate and has to be collective */
     else {
         H5P_genplist_t *plist;      /* Property list pointer */
@@ -349,8 +349,8 @@ H5F_mpi_retrieve_comm(hid_t loc_id, hid_t acspl_id, MPI_Comm *mpi_comm)
                 HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "bad VFL driver info")
 
             *mpi_comm = fa->comm;
-        } /* end if */
-    } /* end else */
+        }
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

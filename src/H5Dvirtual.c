@@ -59,7 +59,8 @@
 #include "H5Oprivate.h"         /* Object headers                       */
 #include "H5Pprivate.h"         /* Property Lists                       */
 #include "H5Sprivate.h"         /* Dataspaces                           */
-
+#include "H5VLnative_private.h" /* Native VOL driver                        */
+#include "H5VLprivate.h"        /* Virtual Object Layer                 */
 
 /****************/
 /* Local Macros */
@@ -431,8 +432,8 @@ H5D__virtual_store_layout(H5F_t *f, H5O_layout_t *layout)
     if((layout->storage.u.virt.serial_list_hobjid.addr == HADDR_UNDEF)
        && (layout->storage.u.virt.list_nused > 0)) {
 
-        if(H5Fset_libver_bounds(H5F_FILE_ID(f), H5F_LOW_BOUND(f), H5F_HIGH_BOUND(f)) < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "cannot set low/high bounds")
+ /*        if(H5Fset_libver_bounds(H5F_FILE_ID(f), H5F_LOW_BOUND(f), H5F_HIGH_BOUND(f)) < 0) */
+/*             HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "cannot set low/high bounds") */
 
         /* Allocate array for caching results of strlen */
         if(NULL == (str_size = (size_t *)H5MM_malloc(2 * layout->storage.u.virt.list_nused * sizeof(size_t))))
@@ -3013,27 +3014,38 @@ done:
 static herr_t
 H5D__virtual_refresh_source_dset(H5D_t **dset)
 {
-    hid_t       dset_id;                /* Temporary dataset identifier */
-    herr_t      ret_value = SUCCEED;    /* Return value */
+    hid_t           temp_id = H5I_INVALID_HID;          /* Temporary dataset identifier */
+    hid_t           native_vol_id = H5I_INVALID_HID;    /* ID for the native VOL driver */
+    H5VL_object_t  *vol_obj = NULL;                     /* VOL object stored with the ID */
+    herr_t          ret_value = SUCCEED;                /* Return value */
 
     FUNC_ENTER_STATIC
 
     /* Sanity check */
     HDassert(dset && *dset);
 
+    /* Get the native VOL driver's ID */
+    if((native_vol_id = H5VL_native_get_driver_id()) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get native VOL driver ID")
+
     /* Get a temporary identifier for this source dataset */
-    if((dset_id = H5I_register(H5I_DATASET, *dset, FALSE)) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL, "can't register source dataset ID")
+    if((temp_id = H5VL_register_using_vol_id(H5I_DATASET, *dset, native_vol_id, FALSE)) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL, "can't register (temporary) source dataset ID")
 
     /* Refresh source dataset */
-    if(H5D__refresh(dset_id, *dset) < 0)
+    if(H5D__refresh(temp_id, *dset) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTFLUSH, FAIL, "unable to refresh source dataset")
 
     /* Discard the identifier & replace the dataset */
-    if(NULL == (*dset = (H5D_t *)H5I_remove(dset_id)))
+    if(NULL == (vol_obj = (H5VL_object_t *)H5I_remove(temp_id)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTREMOVE, FAIL, "can't unregister source dataset ID")
+    *dset = (H5D_t *)(vol_obj->data);
+    vol_obj->data = NULL;
 
 done:
+    if(vol_obj && H5VL_free_object(vol_obj) < 0)
+        HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "unable to free VOL object")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__virtual_refresh_source_dsets() */
 
