@@ -91,14 +91,23 @@ main(void)
     unsigned nerrors = 0;        /* track errors */
     hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     hid_t fid = -1;
+    hid_t fapl = -1;			/* File access property list */
     H5F_t * f = NULL;           /* File for all tests */
 
 
     /* Test Setup */
     puts("Testing the metadata accumulator");
 
+    /* File access property list */
+    if((fapl = h5_fileaccess()) < 0)
+        FAIL_STACK_ERROR
+
     /* Create a test file */
-    if((fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    if((fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) FAIL_STACK_ERROR
+
+    /* Closing and remove the file */
+    if(H5Pclose(fapl) < 0)
+        FAIL_STACK_ERROR
 
     /* Push API context */
     if(H5CX_push() < 0) FAIL_STACK_ERROR

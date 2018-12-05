@@ -186,6 +186,15 @@ check-vfd:
 	  fi;                                                          \
 	done
 
+# Run tests with different Virtual Object Layer Connectors.
+# Currently, only invoke check-vol in the test directory.
+check-vol:
+	for d in src test; do                                 \
+	  if test $$d != .; then                                       \
+	    (cd $$d && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;          \
+	  fi;                                                          \
+	done
+
 # Automake wants to make config.status depend on configure.  This
 # makes sense, but config.status can't always be regenerated
 # properly, which can cause builds to fail.

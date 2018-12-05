@@ -584,21 +584,9 @@ H5G_get_name(const H5G_loc_t *loc, char *name/*out*/, size_t size,
             *cached = TRUE;
     } /* end if */
     else if(!loc->path->obj_hidden) {
-        hid_t	  file;
-
-        /* Retrieve file ID for name search */
-        if((file = H5F_get_id(loc->oloc->file, FALSE)) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get file ID")
-
         /* Search for name of object */
-        if((len = H5G_get_name_by_addr(file, loc->oloc, name, size)) < 0) {
-            H5I_dec_ref(file);
+        if((len = H5G_get_name_by_addr(loc->oloc->file, loc->oloc, name, size)) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't determine name")
-        } /* end if */
-
-        /* Close file ID used for search */
-        if(H5I_dec_ref(file) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTCLOSEFILE, FAIL, "can't determine name")
 
         /* Indicate that the name is _not_ cached, if requested */
         /* (Currently only used for testing - QAK, 2010/07/26) */
@@ -1282,8 +1270,7 @@ done:
  *-------------------------------------------------------------------------
  */
 ssize_t
-H5G_get_name_by_addr(hid_t file, const H5O_loc_t *loc,
-    char *name, size_t size)
+H5G_get_name_by_addr(H5F_t *f, const H5O_loc_t *loc, char *name, size_t size)
 {
     H5G_gnba_iter_t udata;                  /* User data for iteration  */
     H5G_loc_t       root_loc;               /* Root group's location    */
@@ -1296,8 +1283,8 @@ H5G_get_name_by_addr(hid_t file, const H5O_loc_t *loc,
 
     FUNC_ENTER_NOAPI((-1))
 
-    /* Construct the link info for the file's root group */
-    if(H5G_loc(file, &root_loc) < 0)
+    /* Construct a group location for root group of the file */
+    if(H5G_root_loc(f, &root_loc) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, (-1), "can't get root group's location")
 
     /* Check for root group being the object looked for */
