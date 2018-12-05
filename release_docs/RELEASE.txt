@@ -331,8 +331,12 @@ Bug Fixes since HDF5-1.10.3 release
 
     Fortran
     --------
-    -
+    - Made Fortran specific subroutines PRIVATE in generic procedures.
 
+      Effected generic procedures were functions in H5A, H5D, H5P, H5R and H5T.
+    
+      (MSB, 2018/12/04, HDFFV-10511)
+ 
     Tools
     -----
     -
