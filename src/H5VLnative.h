@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -11,42 +10,27 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/*-------------------------------------------------------------------------
- *
- * Created:             H5FSpublic.h
- *                      May  2 2006
- *                      Quincey Koziol <koziol@hdfgroup.org>
- *
- * Purpose:             Public declarations for the file free space package.
- *
- *-------------------------------------------------------------------------
+/*
+ * Purpose:	The public header file for the native VOL driver.
  */
 
-#ifndef _H5FSpublic_H
-#define _H5FSpublic_H
+#ifndef _H5VLnative_H
+#define _H5VLnative_H
 
-/* Public headers needed by this file */
-#include "H5public.h"
+/* Characteristics of the native VOL driver */
+#define H5VL_NATIVE_NAME        "native"
+#define H5VL_NATIVE_VALUE       H5_VOL_NATIVE   /* enum value */
+#define H5VL_NATIVE_VERSION     0
 
-/*****************/
-/* Public Macros */
-/*****************/
-
-/*******************/
-/* Public Typedefs */
-/*******************/
-
-/**********************************/
-/* Public API Function Prototypes */
-/**********************************/
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+H5_DLL herr_t H5Pset_fapl_native(hid_t fapl_id);
+
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _H5FSpublic_H */
-
+#endif /* _H5VLnative_H */

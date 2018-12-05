@@ -1187,7 +1187,7 @@ open_hdf5_file(const hbool_t create_file,
 
         } else {
 
-            file_ptr = (struct H5F_t *)H5I_object_verify(file_id, H5I_FILE);
+            file_ptr = (struct H5F_t *)H5VL_object_verify(file_id, H5I_FILE);
 
             if ( file_ptr == NULL ) {
 

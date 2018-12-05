@@ -2,38 +2,47 @@ HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
   #000: (file name) line (number) in H5Dopen2(): unable to open dataset
     major: Dataset
     minor: Can't open object
-  #001: (file name) line (number) in H5D__open_name(): not found
+  #001: (file name) line (number) in H5VL_dataset_open(): dataset open failed
+    major: Virtual Object Layer
+    minor: Can't open object
+  #002: (file name) line (number) in H5VL_native_dataset_open(): unable to open dataset
+    major: Dataset
+    minor: Can't open object
+  #003: (file name) line (number) in H5D__open_name(): not found
     major: Dataset
     minor: Object not found
-  #002: (file name) line (number) in H5G_loc_find(): can't find object
+  #004: (file name) line (number) in H5G_loc_find(): can't find object
     major: Symbol table
     minor: Object not found
-  #003: (file name) line (number) in H5G_traverse(): internal path traversal failed
+  #005: (file name) line (number) in H5G_traverse(): internal path traversal failed
     major: Symbol table
     minor: Object not found
-  #004: (file name) line (number) in H5G__traverse_real(): traversal operator failed
+  #006: (file name) line (number) in H5G__traverse_real(): traversal operator failed
     major: Symbol table
     minor: Callback failed
-  #005: (file name) line (number) in H5G__loc_find_cb(): object 'bogus' doesn't exist
+  #007: (file name) line (number) in H5G__loc_find_cb(): object 'bogus' doesn't exist
     major: Symbol table
     minor: Object not found
 HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
   #000: (file name) line (number) in H5Lget_info(): unable to get link info
     major: Links
     minor: Can't get value
-  #001: (file name) line (number) in H5L__get_info(): unable to get link info for: 'bogus'
-    major: Links
+  #001: (file name) line (number) in H5VL_link_get(): get failed
+    major: Virtual Object Layer
     minor: Can't get value
-  #002: (file name) line (number) in H5L_get_info(): name doesn't exist
+  #002: (file name) line (number) in H5VL_native_link_get(): unable to get link info
+    major: Links
+    minor: Object not found
+  #003: (file name) line (number) in H5L_get_info(): name doesn't exist
     major: Links
     minor: Object already exists
-  #003: (file name) line (number) in H5G_traverse(): internal path traversal failed
+  #004: (file name) line (number) in H5G_traverse(): internal path traversal failed
     major: Symbol table
     minor: Object not found
-  #004: (file name) line (number) in H5G__traverse_real(): traversal operator failed
+  #005: (file name) line (number) in H5G__traverse_real(): traversal operator failed
     major: Symbol table
     minor: Callback failed
-  #005: (file name) line (number) in H5L__get_info_cb(): name doesn't exist
+  #006: (file name) line (number) in H5L__get_info_cb(): name doesn't exist
     major: Links
     minor: Object not found
 h5dump error: unable to get link info from "bogus"

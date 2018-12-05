@@ -358,6 +358,21 @@ macro (HDF_DIR_PATHS package_prefix)
     endif ()
   endif ()
 
+  set (CMAKE_SKIP_BUILD_RPATH  FALSE)
+  set (CMAKE_INSTALL_RPATH_USE_LINK_PATH  FALSE)
+  set (CMAKE_BUILD_WITH_INSTALL_RPATH ON)
+  if (APPLE)
+    set (CMAKE_INSTALL_NAME_DIR "@rpath")
+    set (CMAKE_INSTALL_RPATH
+        "@executable_path/../${${package_prefix}_INSTALL_LIB_DIR}"
+        "@executable_path/"
+        "@loader_path/../${${package_prefix}_INSTALL_LIB_DIR}"
+        "@loader_path/"
+    )
+  else ()
+    set (CMAKE_INSTALL_RPATH "\$ORIGIN/../${${package_prefix}_INSTALL_LIB_DIR}:\$ORIGIN/")
+  endif ()
+
   if (DEFINED ADDITIONAL_CMAKE_PREFIX_PATH AND EXISTS "${ADDITIONAL_CMAKE_PREFIX_PATH}")
     set (CMAKE_PREFIX_PATH ${ADDITIONAL_CMAKE_PREFIX_PATH} ${CMAKE_PREFIX_PATH})
   endif ()
@@ -380,13 +395,14 @@ macro (HDF_DIR_PATHS package_prefix)
     set (CMAKE_Fortran_MODULE_DIRECTORY
         ${PROJECT_BINARY_DIR}/bin CACHE PATH "Single Directory for all fortran modules."
     )
-    if (WIN32)
-      set (CMAKE_TEST_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CTEST_CONFIGURATION_TYPE})
+    get_property(_isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+    if(_isMultiConfig)
+      set (CMAKE_TEST_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_BUILD_TYPE})
       set (CMAKE_PDB_OUTPUT_DIRECTORY
           ${PROJECT_BINARY_DIR}/bin CACHE PATH "Single Directory for all pdb files."
       )
     else ()
-      set (CMAKE_TEST_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CTEST_CONFIGURATION_TYPE})
+      set (CMAKE_TEST_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
     endif ()
   else ()
     # if we are externally configured, but the project uses old cmake scripts

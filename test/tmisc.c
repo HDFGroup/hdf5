@@ -2272,7 +2272,7 @@ misc13_insert_user_block(const char *old_name, const char *new_name, const char 
     CHECK_PTR(user_block, "HDcalloc");
 
     /* Copy in the user block data */
-    HDmemcpy(user_block, str, strlen(str));
+    HDmemcpy(user_block, str, HDstrlen(str));
 
     /* Open the new file */
     new_fp = HDfopen(new_name,"wb");
@@ -2713,15 +2713,15 @@ test_misc15(void)
     fapl = H5Fget_access_plist(file);
     CHECK(fapl, FAIL, "H5Fget_access_plist");
 
-    ret = H5Pclose(fapl);
-    CHECK(ret, FAIL, "H5Pclose");
-
     ret = H5Fclose(file);
     CHECK(ret, FAIL, "H5Fclose");
 
     /* Verify that the file is still OK */
-    ret = H5Fis_hdf5(MISC15_FILE);
+    ret = H5Fis_accessible(MISC15_FILE, fapl);
     CHECK(ret, FAIL, "H5Fis_hdf5");
+
+    ret = H5Pclose(fapl);
+    CHECK(ret, FAIL, "H5Pclose");
 
     file = H5Fopen(MISC15_FILE, H5F_ACC_RDONLY, H5P_DEFAULT);
     CHECK(file, FAIL, "H5Fopen");
@@ -3028,7 +3028,9 @@ test_misc19(void)
     hid_t emid = -1;                /* Error Message ID         */
     hid_t esid = -1;                /* Error Stack ID           */
     hid_t vfdid = -1;               /* Virtual File Driver ID   */
+    hid_t volid = -1;               /* Virtual Object Layer ID  */
     H5FD_class_t *vfd_cls = NULL;   /* VFD class                */
+    H5VL_class_t *vol_cls = NULL;   /* VOL class                */
     int rc;                         /* Reference count          */
     herr_t ret;                     /* Generic return value     */
 
@@ -3478,6 +3480,44 @@ test_misc19(void)
     VERIFY(ret, FAIL, "H5FDunregister");
 
     HDfree(vfd_cls);
+
+/* Check H5I operations on virtual object drivers */
+
+    /* Get a VOL class to register */
+    vol_cls = h5_get_dummy_vol_class();
+    CHECK(vol_cls, NULL, "h5_get_dummy_vol_class");
+
+    /* Register a VOL driver */
+    volid = H5VLregister_driver(vol_cls);
+    CHECK(volid, FAIL, "H5VLregister_driver");
+
+    /* Check the reference count */
+    rc = H5Iget_ref(volid);
+    VERIFY(rc, 1, "H5Iget_ref");
+
+    /* Increment the reference count */
+    rc = H5Iinc_ref(volid);
+    VERIFY(rc, 2, "H5Iinc_ref");
+
+    /* Unregister the VOL driver normally */
+    ret = H5VLunregister_driver(volid);
+    CHECK(ret, FAIL, "H5VLunregister_driver");
+
+    /* Check the reference count */
+    rc = H5Iget_ref(volid);
+    VERIFY(rc, 1, "H5Iget_ref");
+
+    /* Unregister the VOL driver by decrementing the reference count */
+    rc = H5Idec_ref(volid);
+    VERIFY(rc, 0, "H5Idec_ref");
+
+    /* Try unregistering the VOL driver again (should fail) */
+    H5E_BEGIN_TRY {
+        ret = H5VLunregister_driver(volid);
+    } H5E_END_TRY;
+    VERIFY(ret, FAIL, "H5VLunregister_driver");
+
+    HDfree(vol_cls);
 
 } /* end test_misc19() */
 
@@ -4721,6 +4761,7 @@ test_misc25a(void)
     CHECK(ret, FAIL, "H5Fclose");
 } /* end test_misc25a() */
 
+
 /****************************************************************
 **
 **  test_misc25b(): Exercise null object header message merge bug
@@ -4756,7 +4797,7 @@ test_misc25b(void)
     CHECK(ret, FAIL, "H5Fclose");
 } /* end test_misc25b() */
 
-
+
 /****************************************************************
 **
 **  test_misc25c(): Exercise another null object header message merge bug.
@@ -4890,7 +4931,7 @@ test_misc25c(void)
     CHECK(ret, FAIL, "H5Fclose");
 } /* end test_misc25c() */
 
-
+
 /****************************************************************
 **
 **  test_misc26(): Regression test: ensure that copying filter
@@ -4976,7 +5017,7 @@ test_misc26(void)
     CHECK_I(ret, "H5Pclose");
 }
 
-
+
 /****************************************************************
 **
 **  test_misc27(): Ensure that objects with incorrect # of object
@@ -5021,7 +5062,7 @@ test_misc27(void)
     CHECK(ret, FAIL, "H5Fclose");
 } /* end test_misc27() */
 
-
+
 /****************************************************************
 **
 **  test_misc28(): Ensure that the dataset chunk cache will hold
@@ -5198,7 +5239,7 @@ test_misc28(void)
     CHECK_I(ret, "H5Pclose");
 } /* end test_misc28() */
 
-
+
 /****************************************************************
 **
 **  test_misc29(): Ensure that speculative metadata reads don't
@@ -5247,7 +5288,7 @@ test_misc30_get_info(hid_t loc_id)
     return H5Literate(loc_id, H5_INDEX_NAME, H5_ITER_INC, NULL, test_misc30_get_info_cb, NULL);
 }
 
-
+
 /****************************************************************
 **
 **  test_misc30(): Exercise local heap code that loads prefix
@@ -5312,7 +5353,7 @@ test_misc30(void)
     VERIFY(file_size[0], file_size[1], "test_misc30");
 } /* end test_misc30() */
 
-
+
 /****************************************************************
 **
 **  test_misc31(): Test reentering library through deprecated
@@ -5410,7 +5451,7 @@ test_misc31(void)
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 } /* end test_misc31() */
 
-
+
 /****************************************************************
  *
  *  test_misc32(): Simple test of filter memory allocation
@@ -5584,7 +5625,7 @@ test_misc34(void)
 
 } /* end test_misc34() */
 
-
+
 /****************************************************************
 **
 **  test_misc(): Main misc. test routine.
@@ -5637,7 +5678,7 @@ test_misc(void)
 
 } /* test_misc() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    cleanup_misc
  *
@@ -5647,9 +5688,6 @@ test_misc(void)
  *
  * Programmer:    Albert Cheng
  *              July 2, 1998
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 void

@@ -29,6 +29,7 @@
 #include "H5Fpkg.h"
 #include "H5Iprivate.h"
 #include "H5MFprivate.h"
+#include "H5VLprivate.h"        /* Virtual Object Layer                     */
 
 /* Include test header files */
 #include "h5test.h"

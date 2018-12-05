@@ -45,6 +45,18 @@ MODULE H5F
   ! Number of objects opened in H5open_f
   INTEGER(SIZE_T) :: H5OPEN_NUM_OBJ
 
+  INTERFACE
+     INTEGER(C_INT) FUNCTION h5fis_accessible(name, &
+          access_prp_default) BIND(C,NAME='H5Fis_accessible')
+       IMPORT :: C_CHAR
+       IMPORT :: HID_T
+       IMPORT :: C_INT
+       IMPLICIT NONE
+       CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name
+       INTEGER(HID_T), INTENT(IN), VALUE :: access_prp_default
+     END FUNCTION h5fis_accessible
+  END INTERFACE
+
 CONTAINS
 !****s* H5F/h5fcreate_f
 !
@@ -486,6 +498,63 @@ CONTAINS
 
   END SUBROUTINE h5fget_access_plist_f
 
+!****s* H5F/h5fis_accessible_f
+!
+! NAME
+!  h5fis_accessible_f
+!
+! PURPOSE
+!  Determines whether a file can be accessed as HDF5.
+!
+! INPUTS
+!  name 	 - name of the file to check
+! OUTPUTS
+!  status 	 - indicates if file is and HDF5 file
+!  hdferr 	 - Returns 0 if successful and -1 if fails
+! OPTIONAL PARAMETERS
+!  access_prp 	 - file access property list identifier
+! AUTHOR
+!  Dana Robinson
+!  September 2018
+!
+! HISTORY
+!  Explicit Fortran interfaces were added for
+!  called C functions (it is needed for Windows
+!  port).  February 28, 2001
+!
+! SOURCE
+  SUBROUTINE h5fis_accessible_f(name, status, hdferr, access_prp)
+    IMPLICIT NONE
+    CHARACTER(LEN=*), INTENT(IN) :: name   ! Name of the file
+    LOGICAL, INTENT(OUT) :: status         ! Indicates if file
+                                           ! is an HDF5 file
+    INTEGER, INTENT(OUT) :: hdferr         ! Error code
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: access_prp
+                                           ! File access property list
+                                           ! identifier
+!*****
+    INTEGER(HID_T) :: access_prp_default
+    CHARACTER(LEN=LEN_TRIM(name)+1,KIND=C_CHAR) :: c_name
+    INTEGER(C_INT) :: flag    ! "TRUE/FALSE/ERROR" flag from C routine
+
+    access_prp_default = H5P_DEFAULT_F
+    IF (PRESENT(access_prp)) access_prp_default = access_prp
+
+    c_name = TRIM(name)//C_NULL_CHAR
+
+    flag = H5Fis_accessible(c_name, access_prp_default)
+
+    hdferr = 0
+    IF(flag.LT.0) hdferr = -1
+
+    status = .TRUE.
+    IF (flag .EQ. 0) status = .FALSE.
+
+  END SUBROUTINE h5fis_accessible_f
+
+! XXX (VOL_MERGE): This function should probably be marked as
+!                  deprecated since H5Fis_hdf5() is deprecated.
+
 !****s* H5F/h5fis_hdf5_f
 !
 ! NAME
@@ -503,6 +572,12 @@ CONTAINS
 !  Elena Pourmal
 !  August 12, 1999
 !
+! NOTES
+!  The underlying HDF5 C API call (H5Fis_hdf5) has been deprecated
+!  in favor of the VOL-capable H5Fis_accessible(). New code should
+!  use h5fis_accessible_f() instead of this function in case this
+!  function is deprecated in the future.
+!
 ! HISTORY
 !  Explicit Fortran interfaces were added for
 !  called C functions (it is needed for Windows
@@ -516,26 +591,23 @@ CONTAINS
                                            ! is an HDF5 file
     INTEGER, INTENT(OUT) :: hdferr         ! Error code
 !*****
-    INTEGER :: namelen ! Length of the name character string
-    INTEGER :: flag    ! "TRUE/FALSE" flag from C routine
-                       ! to define status value.
+    INTEGER(HID_T) :: access_prp_default
+    CHARACTER(LEN=LEN_TRIM(name)+1,KIND=C_CHAR) :: c_name
+    INTEGER(C_INT) :: flag    ! "TRUE/FALSE/ERROR" flag from C routine
+                              ! to define status value.
 
-    INTERFACE
-       INTEGER FUNCTION h5fis_hdf5_c(name, namelen, flag) BIND(C,NAME='h5fis_hdf5_c')
-         IMPORT :: C_CHAR
-         IMPLICIT NONE
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name
-         INTEGER :: namelen
-         INTEGER :: flag
-       END FUNCTION h5fis_hdf5_c
-    END INTERFACE
+    c_name = TRIM(name)//C_NULL_CHAR
 
-    namelen = LEN_TRIM(name)
-    hdferr = h5fis_hdf5_c(name, namelen, flag)
+    flag = H5Fis_accessible(c_name, H5P_DEFAULT_F)
+
+    hdferr = 0
+    IF(flag.LT.0) hdferr = -1
+
     status = .TRUE.
     IF (flag .EQ. 0) status = .FALSE.
 
   END SUBROUTINE h5fis_hdf5_f
+
 !****s* H5F/h5fclose_f
 !
 ! NAME

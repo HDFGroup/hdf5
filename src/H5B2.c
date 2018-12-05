@@ -220,7 +220,7 @@ H5B2_open(H5F_t *f, haddr_t addr, void *ctx_udata)
 
     /* Look up the B-tree header */
     if(NULL == (hdr = H5B2__hdr_protect(f, addr, ctx_udata, H5AC__READ_ONLY_FLAG)))
-	HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, NULL, "unable to protect v2 B-tree header")
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, NULL, "unable to protect v2 B-tree header")
 
     /* Check for pending heap deletion */
     if(hdr->pending_delete)

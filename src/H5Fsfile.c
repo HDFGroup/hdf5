@@ -40,11 +40,11 @@ H5F_sfile_node_t *H5F_sfile_head_g = NULL;
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_sfile_assert_num
+ * Function:    H5F_sfile_assert_num
  *
- * Purpose:	Sanity checking that shared file list is empty
+ * Purpose:     Sanity checking that shared file list is empty
  *
- * Return:	none (void)
+ * Return:      void
  *
  * Programmer:	Quincey Koziol
  *              Monday, July 25, 2005
@@ -84,33 +84,31 @@ H5F_sfile_assert_num(unsigned n)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_sfile_add
+ * Function:    H5F__sfile_add
  *
- * Purpose:	Add a "shared" file struct to the list of open files
+ * Purpose:     Add a "shared" file struct to the list of open files
  *
- * Return:	SUCCEED/FAIL
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
  *              Monday, July 18, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_sfile_add(H5F_file_t *shared)
+H5F__sfile_add(H5F_file_t *shared)
 {
     H5F_sfile_node_t *new_shared;              /* New shared file node */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(shared);
 
     /* Allocate new shared file node */
     if (NULL == (new_shared = H5FL_CALLOC(H5F_sfile_node_t)))
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
     /* Set shared file value */
     new_shared->shared = shared;
@@ -121,31 +119,29 @@ H5F_sfile_add(H5F_file_t *shared)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5F_sfile_add() */
+} /* end H5F__sfile_add() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_sfile_search
+ * Function:    H5F__sfile_search
  *
- * Purpose:	Search for a "shared" file with low-level file info that
+ * Purpose:     Search for a "shared" file with low-level file info that
  *              matches
  *
- * Return:	Non-NULL on success / NULL on failure
+ * Return:      Non-NULL on success / NULL on failure
  *
  * Programmer:	Quincey Koziol
  *              Monday, July 18, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 H5F_file_t *
-H5F_sfile_search(H5FD_t *lf)
+H5F__sfile_search(H5FD_t *lf)
 {
     H5F_sfile_node_t *curr;             /* Current shared file node */
     H5F_file_t *ret_value = NULL;       /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(lf);
@@ -154,7 +150,7 @@ H5F_sfile_search(H5FD_t *lf)
     curr = H5F_sfile_head_g;
     while(curr) {
         /* Check for match */
-        if(0==H5FD_cmp(curr->shared->lf, lf))
+        if(0 == H5FD_cmp(curr->shared->lf, lf))
             HGOTO_DONE(curr->shared)
 
         /* Advance to next shared file node */
@@ -163,31 +159,29 @@ H5F_sfile_search(H5FD_t *lf)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5F_sfile_search() */
+} /* end H5F__sfile_search() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_sfile_remove
+ * Function:    H5F__sfile_remove
  *
- * Purpose:	Remove a "shared" file struct from the list of open files
+ * Purpose:     Remove a "shared" file struct from the list of open files
  *
- * Return:	SUCCEED/FAIL
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
  *              Monday, July 18, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_sfile_remove(H5F_file_t *shared)
+H5F__sfile_remove(H5F_file_t *shared)
 {
     H5F_sfile_node_t *curr;             /* Current shared file node */
     H5F_sfile_node_t *last;             /* Last shared file node */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(shared);
@@ -203,7 +197,7 @@ H5F_sfile_remove(H5F_file_t *shared)
 
     /* Indicate error if the node wasn't found */
     if(curr == NULL)
-	HGOTO_ERROR(H5E_FILE, H5E_NOTFOUND, FAIL, "can't find shared file info")
+        HGOTO_ERROR(H5E_FILE, H5E_NOTFOUND, FAIL, "can't find shared file info")
 
     /* Remove node found from list */
     if(last != NULL)
@@ -219,5 +213,5 @@ H5F_sfile_remove(H5F_file_t *shared)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5F_sfile_remove() */
+} /* end H5F__sfile_remove() */
 

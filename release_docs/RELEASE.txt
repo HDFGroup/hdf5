@@ -1,4 +1,4 @@
-HDF5 version 1.11.2 currently under development
+HDF5 version 1.11.4 currently under development
 ================================================================================
 
 
@@ -34,6 +34,7 @@ CONTENTS
 
 - New Features
 - Support for new platforms and languages
+- Bug Fixes since HDF5-1.10.3
 - Bug Fixes since HDF5-1.10.2
 - Supported Platforms
 - Tested Configuration Features Summary
@@ -47,6 +48,34 @@ New Features
 
     Configuration:
     -------------
+    - Add toolchain and cross-compile support
+
+      Added info on using a toolchain file to INSTALL_CMAKE.txt. A
+      toolchain file is also used in cross-compiling, which requires
+      CMAKE_CROSSCOMPILING_EMULATOR to be set. To help with cross-compiling
+      the fortran configure process, the HDF5UseFortran.cmake file macros
+      were improved. Fixed a Fortran configure file issue that incorrectly
+      used #cmakedefine instead of #define.
+
+      (ADB - 2018/10/04, HDFFV-10594)
+
+    - Add warning flags for Intel compilers
+
+      Identified Intel compiler specific warnings flags that should be used
+      instead of GNU flags.
+
+      (ADB - 2018/10/04, TRILABS-21)
+
+    - Add default rpath to targets
+
+      Default rpaths should be set in shared executables and
+      libraries to allow the use of loading dependent libraries
+      without requiring LD_LIBRARY_PATH to be set. The default
+      path should be relative using @rpath on osx and $ORIGIN
+      on linux. Windows is not affected.
+
+      (ADB - 2018/09/26, HDFFV-10594)
+
     - Add missing USE_110_API_DEFAULT option.
 
       Option USE_110_API_DEFAULT sets the default version of
@@ -81,9 +110,64 @@ New Features
 
       (ADB - 2018/07/16)
 
+
+    - Incorrectly installed private header files were removed from
+      CMake installs.
+
+      The CMake build files incorrectly flagged the following header files
+      as public and installed them. They are private and will no longer be
+      installed.
+
+        HDF5 library private package files (H5Xpkg.h)
+        H5Edefin.h
+        H5Einit.h
+        H5Eterm.h
+        H5LTparse.h
+        h5diff.h
+        h5tools_dump.h
+        h5tools.h
+        h5tools_ref.h
+        h5tools_str.h
+        h5tools_utils.h
+        h5trav.h
+
+      (DER - 2018/10/26, HDFFV-10614, 10609)
+      
+    - Autotools installs now install H5FDwindows.h
+
+      This is simply to align the installed header files between the
+      autotools and CMake. H5FDwindows.h has no functionality on
+      non-Windows systems.
+
+      (DER - 2018/10/26, HDFFV-10614)
+
+ 
     Library:
     --------
-    -
+    - Allow pre-generated H5Tinit.c and H5make_libsettings.c to be used.
+
+      Rather than always running H5detect and generating H5Tinit.c and
+      H5make_libsettings.c, supply a location for those files.
+
+      (ADB - 2018/09/18, HDFFV-10332)
+
+
+    - Several empty public header files where removed from the distribution
+
+      The following files were empty placeholders. They are for internal
+      packages that are unlikely to ever have public functionality and have
+      thus been removed.
+
+        H5Bpublic.h
+        H5B2public.h
+        H5FSpublic.h
+        H5HFpublic.h
+        H5HGpublic.h
+        H5HLpublic.h
+
+      They were only installed in CMake builds.
+
+      (DER - 2018/10/26, HDFFV-10614)
 
 
     Parallel Library:
@@ -146,29 +230,6 @@ New Features
 
     Java Library:
     ----------------
-    - Java iterator callbacks
-
-      Change global callback object to a small stack structure in order
-      to fix a runtime crash. This crash was discovered when iterating
-      through a file with nested group members. The global variable
-      visit_callback is overwritten when recursion starts. When recursion
-      completes, visit_callback will be pointing to the wrong callback method.
-
-      (ADB - 2018/08/15, HDFFV-10536)
-
-    - Java HDFLibraryException class
-
-      Change parent class from Exception to RuntimeException.
-
-      (ADB - 2018/07/30, HDFFV-10534)
-
-    - JNI Read and Write
-
-      Refactored variable-length functions, H5DreadVL and H5AreadVL,
-      to correct dataset and attribute reads. New write functions,
-      H5DwriteVL and H5AwriteVL, are under construction.
-
-      (ADB - 2018/06/02, HDFFV-10519)
 
     Tools:
     ------
@@ -193,6 +254,115 @@ New Features
 Support for new platforms, languages and compilers.
 =======================================
     -
+
+Bug Fixes since HDF5-1.10.3 release
+==================================
+
+    Library
+    -------
+    - Allow H5detect and H5make_libsettings to take a file as an argument.
+
+      Rather than only writing to stdout, add a command argument to name
+      the file that H5detect and H5make_libsettings will use for output.
+      Without an argument, stdout is still used, so backwards compatibility
+      is maintained.
+
+      (ADB - 2018/09/05, HDFFV-9059)
+
+    - A bug was discovered in the parallel library where an application
+      would hang if a collective read/write of a chunked dataset occurred
+      when collective metadata reads were enabled and some of the ranks
+      had no selection in the dataset's dataspace. The ranks which had no
+      selection in the dataset's dataspace called H5D__chunk_addrmap() to
+      retrieve the lowest chunk address in the dataset. This is because we
+      require reads/writes to be performed in strictly non-decreasing order
+      of chunk address in the file.
+
+      When the chunk index used was a version 1 or 2 B-tree, these
+      non-participating ranks would issue a collective MPI_Bcast() call
+      that the participating ranks would not issue, causing the hang. Since
+      the non-participating ranks are not actually reading/writing anything,
+      the H5D__chunk_addrmap() call can be safely removed and the address used
+      for the read/write can be set to an arbitrary number (0 was chosen).
+
+      (JTH - 2018/08/25, HDFFV-10501)
+
+    Java Library:
+    ----------------
+    - JNI native library dependencies
+
+      The build for the hdf5_java native library used the wrong
+      hdf5 target library for CMake builds. Correcting the hdf5_java
+      library to build with the shared hdf5 library required testing
+      paths to change also.
+
+      (ADB - 2018/08/31, HDFFV-10568)
+     - Java iterator callbacks
+
+      Change global callback object to a small stack structure in order
+      to fix a runtime crash. This crash was discovered when iterating
+      through a file with nested group members. The global variable
+      visit_callback is overwritten when recursion starts. When recursion
+      completes, visit_callback will be pointing to the wrong callback method.
+
+      (ADB - 2018/08/15, HDFFV-10536)
+
+    - Java HDFLibraryException class
+
+      Change parent class from Exception to RuntimeException.
+
+      (ADB - 2018/07/30, HDFFV-10534)
+
+    - JNI Read and Write
+
+      Refactored variable-length functions, H5DreadVL and H5AreadVL,
+      to correct dataset and attribute reads. New write functions,
+      H5DwriteVL and H5AwriteVL, are under construction.
+
+      (ADB - 2018/06/02, HDFFV-10519)
+
+    Configuration
+    -------------
+    -
+
+    Performance
+    -------------
+    -
+
+    Fortran
+    --------
+    - Made Fortran specific subroutines PRIVATE in generic procedures.
+
+      Effected generic procedures were functions in H5A, H5D, H5P, H5R and H5T.
+    
+      (MSB, 2018/12/04, HDFFV-10511)
+ 
+    Tools
+    -----
+    -
+
+    High-Level APIs:
+    ------
+    -
+
+    Fortran High-Level APIs:
+    ------
+    -
+
+    Documentation
+    -------------
+    -
+
+    F90 APIs
+    --------
+    -
+
+    C++ APIs
+    --------
+    -
+
+    Testing
+    -------
 
 Bug Fixes since HDF5-1.10.2 release
 ==================================
@@ -473,10 +643,9 @@ Supported Platforms
 
     Windows 7                     Visual Studio 2015 w/ Intel Fortran 16 (cmake)
 
-    Windows 7 x64                 Visual Studio 2012 w/ Intel Fortran 15 (cmake)
-                                  Visual Studio 2013 w/ Intel Fortran 15 (cmake)
+    Windows 7 x64                 Visual Studio 2013
                                   Visual Studio 2015 w/ Intel Fortran 16 (cmake)
-                                  Visual Studio 2015 w/ Intel C, Fortran 2017 (cmake)
+                                  Visual Studio 2015 w/ Intel C, Fortran 2018 (cmake)
                                   Visual Studio 2015 w/ MSMPI 8 (cmake)
 
     Windows 10                    Visual Studio 2015 w/ Intel Fortran 18 (cmake)

@@ -169,6 +169,9 @@
  */
 #define H5_DEFAULT_VFD      H5FD_SEC2
 
+/* Define the default VOL driver */
+#define H5_DEFAULT_VOL      H5VL_NATIVE
+
 #ifdef H5_HAVE_WIN32_API
 /* The following two defines must be before any windows headers are included */
 #define WIN32_LEAN_AND_MEAN    /* Exclude rarely-used stuff from Windows headers */
@@ -509,6 +512,11 @@
 #ifndef H5_INC_ENUM
 #  define H5_INC_ENUM(TYPE,VAR) (VAR)=((TYPE)((VAR)+1))
 #endif
+
+/* Represents an empty asynchronous request handle.
+ * Used in the VOL code.
+ */
+#define H5_REQUEST_NULL                 NULL
 
 /*
  * A macro to portably decrement enumerated types.
@@ -1708,6 +1716,7 @@ typedef enum {
     H5_PKG_S,       /* Dataspaces               */
     H5_PKG_T,       /* Datatypes                */
     H5_PKG_V,       /* Vector functions         */
+    H5_PKG_VL,      /* VOL functions            */
     H5_PKG_Z,       /* Raw data filters         */
     H5_NPKGS        /* Must be last             */
 } H5_pkg_t;
@@ -1996,7 +2005,6 @@ extern hbool_t H5_MPEinit_g;   /* Has the MPE Library been initialized? */
 H5_DLL herr_t H5CX_push(void);
 H5_DLL herr_t H5CX_pop(void);
 
-
 #ifndef NDEBUG
 #define FUNC_ENTER_CHECK_NAME(asrt)                                           \
     {                                                                         \
@@ -2035,7 +2043,7 @@ H5_DLL herr_t H5CX_pop(void);
 /* Local variables for API routines */
 #define FUNC_ENTER_API_VARS                                                   \
     MPE_LOG_VARS                                                              \
-    H5TRACE_DECL                                                              \
+    H5TRACE_DECL
 
 #define FUNC_ENTER_API_COMMON                                                 \
     FUNC_ENTER_API_VARS                                                       \
@@ -2625,6 +2633,7 @@ H5_DLL int H5S_top_term_package(void);
 H5_DLL int H5SL_term_package(void);
 H5_DLL int H5T_term_package(void);
 H5_DLL int H5T_top_term_package(void);
+H5_DLL int H5VL_term_package(void);
 H5_DLL int H5Z_term_package(void);
 
 /* Checksum functions */

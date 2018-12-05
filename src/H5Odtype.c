@@ -15,13 +15,13 @@
 #define H5T_FRIEND		/*prevent warning from including H5Tpkg   */
 
 
-#include "H5private.h"		/* Generic Functions    */
-#include "H5Dprivate.h"		/* Datasets	            */
-#include "H5Eprivate.h"		/* Error handling       */
-#include "H5Fprivate.h"		/* Files                */
-#include "H5FLprivate.h"	/* Free Lists           */
-#include "H5Gprivate.h"		/* Groups               */
-#include "H5MMprivate.h"	/* Memory management    */
+#include "H5private.h"      /* Generic Functions    */
+#include "H5Dprivate.h"     /* Datasets	            */
+#include "H5Eprivate.h"     /* Error handling       */
+#include "H5Fprivate.h"     /* Files                */
+#include "H5FLprivate.h"    /* Free Lists           */
+#include "H5Gprivate.h"     /* Groups               */
+#include "H5MMprivate.h"    /* Memory management    */
 #include "H5Opkg.h"         /* Object headers       */
 #include "H5Tpkg.h"         /* Datatypes            */
 #include "H5VMprivate.h"    /* Vectors and arrays   */
@@ -1486,7 +1486,7 @@ H5O_dtype_can_share(const void *_mesg)
         HGOTO_ERROR(H5E_OHDR, H5E_BADTYPE, FAIL, "can't tell if datatype is immutable")
 
     /* Don't share committed datatypes */
-    if((tri_ret = H5T_committed(mesg)) > 0)
+    if((tri_ret = H5T_is_named(mesg)) > 0)
         HGOTO_DONE(FALSE)
     else if(tri_ret < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_BADTYPE, FAIL, "can't tell if datatype is shared")
@@ -1620,14 +1620,15 @@ H5O__dtype_shared_post_copy_upd(const H5O_loc_t H5_ATTR_UNUSED *src_oloc,
     FUNC_ENTER_STATIC
 
     if(dt_dst->sh_loc.type == H5O_SHARE_TYPE_COMMITTED) {
-        HDassert(H5T_committed(dt_dst));
+        HDassert(H5T_is_named(dt_dst));
         if(H5O_loc_reset(&(dt_dst->oloc)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to reset location")
         dt_dst->oloc.file = dt_dst->sh_loc.file;
         dt_dst->oloc.addr = dt_dst->sh_loc.u.loc.oh_addr;
     } /* end if */
-    else
-        HDassert(!H5T_committed(dt_dst));
+    else {
+        HDassert(!H5T_is_named(dt_dst));
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

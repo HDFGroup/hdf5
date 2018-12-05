@@ -82,7 +82,7 @@ static struct long_options l_opts[] = {
 };
 
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    usage
  *
@@ -119,7 +119,7 @@ static void usage(const char *prog)
     HDfprintf(stdout, "  Set the EOA to the maximum of (EOA, EOF) + 512 for the file <file_name>.\n");
 } /* usage() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: parse_command_line
  *
@@ -170,9 +170,12 @@ parse_command_line(int argc, const char **argv)
 
             case 'i':
                 increment_eoa_eof = TRUE;
-                if(opt_arg != NULL && (increment = HDatoi(opt_arg)) < 0) {
-                    usage(h5tools_getprogname());
-                    goto done;
+                if(opt_arg != NULL) {
+                    if (HDatoi(opt_arg) < 0) {
+                        usage(h5tools_getprogname());
+                        goto done;
+                    }
+                    increment = HDatoi(opt_arg);
                 }
                 break;
 
@@ -217,7 +220,7 @@ leave(int ret)
 } /* leave() */
 
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    main
  *
@@ -231,14 +234,14 @@ leave(int ret)
  *          so the file is opened with write access.
  *          The --filesize option just prints the EOA and EOF, so the file
  *          is opened with read access.
- *      
+ *
  *          The -s option will activate the private property:
- *              --H5F_ACS_CLEAR_STATUS_FLAGS_NAME         
+ *              --H5F_ACS_CLEAR_STATUS_FLAGS_NAME
  *          The --increment option will active these two private properties:
- *              --H5F_ACS_NULL_FSM_ADDR_NAME              
- *              --H5F_ACS_SKIP_EOF_CHECK_NAME            
+ *              --H5F_ACS_NULL_FSM_ADDR_NAME
+ *              --H5F_ACS_SKIP_EOF_CHECK_NAME
  *          The --filesize will activate the private property:
- *              --H5F_ACS_SKIP_EOF_CHECK_NAME            
+ *              --H5F_ACS_SKIP_EOF_CHECK_NAME
  *
  * Return:      Success: 0
  *              Failure: 1
@@ -280,7 +283,7 @@ main (int argc, const char *argv[])
     }
 
     /* Cannot combine the --filesize option with other options */
-    if(print_filesize && 
+    if(print_filesize &&
        (clear_status_flags || remove_cache_image || increment_eoa_eof)) {
         error_msg("Cannot combine --filesize with other options\n");
         h5tools_setstatus(EXIT_FAILURE);
@@ -298,7 +301,7 @@ main (int argc, const char *argv[])
      }
 
     /* -s option */
-    if(clear_status_flags) { 
+    if(clear_status_flags) {
         /* Set to clear the status_flags in the file's superblock */
         /* Activate this private property */
         if(H5Pset(fapl, H5F_ACS_CLEAR_STATUS_FLAGS_NAME, &clear_status_flags) < 0) {
@@ -309,7 +312,7 @@ main (int argc, const char *argv[])
     }
 
     /* --increment option */
-    if(increment_eoa_eof) { 
+    if(increment_eoa_eof) {
         /* Activate this private property */
         if(H5Pset(fapl, H5F_ACS_SKIP_EOF_CHECK_NAME, &increment_eoa_eof) < 0) {
             error_msg("H5Pset\n");
@@ -325,7 +328,7 @@ main (int argc, const char *argv[])
     }
 
     /* --filesize option; open the file read-only */
-    if(print_filesize) { 
+    if(print_filesize) {
         /* Activate this private property */
         if(H5Pset(fapl, H5F_ACS_SKIP_EOF_CHECK_NAME, &print_filesize) < 0) {
             error_msg("H5Pset\n");
@@ -333,7 +336,7 @@ main (int argc, const char *argv[])
             goto done;
         }
         flags = H5F_ACC_RDONLY;
-    } 
+    }
 
     /* Open the file */
     if((fid = h5tools_fopen(fname, flags, fapl, NULL, NULL, (size_t)0)) < 0) {
@@ -367,7 +370,7 @@ main (int argc, const char *argv[])
     }
 
     /* -m option */
-    if(remove_cache_image) { 
+    if(remove_cache_image) {
         if(H5Fget_mdc_image_info(fid, &image_addr, &image_len) < 0) {
             error_msg("H5Fget_mdc_image_info\n");
             h5tools_setstatus(EXIT_FAILURE);
@@ -375,7 +378,7 @@ main (int argc, const char *argv[])
         }
         if(image_addr == HADDR_UNDEF && image_len == 0)
             warn_msg("No cache image in the file\n");
-    } 
+    }
 
 
     h5tools_setstatus(EXIT_SUCCESS);

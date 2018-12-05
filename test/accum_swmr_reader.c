@@ -20,6 +20,7 @@
 
 #include "H5CXprivate.h"        /* API Contexts                         */
 #include "H5Iprivate.h"
+#include "H5VLprivate.h"        /* Virtual Object Layer                     */
 
 /* Filename: this is the same as the define in accum.c used by test_swmr_write_big() */
 #define SWMR_FILENAME "accum_swmr_big.h5"
@@ -56,9 +57,8 @@ main(void)
      * by the environment variable.
      */
     driver = HDgetenv("HDF5_DRIVER");
-    if(!H5FD_supports_swmr_test(driver)) {
+    if(!H5FD__supports_swmr_test(driver))
         return EXIT_SUCCESS;
-    }
 
     /* Initialize buffers */
     for(u = 0; u < 1024; u++) {
@@ -78,7 +78,7 @@ main(void)
     api_ctx_pushed = TRUE;
 
     /* Get H5F_t * to internal file structure */
-    if(NULL == (f = (H5F_t *)H5I_object(fid))) 
+    if(NULL == (f = (H5F_t *)H5VL_object(fid))) 
 	    FAIL_STACK_ERROR
 
     /* Should read in [1024, 2024] with buf data */
@@ -101,8 +101,11 @@ main(void)
 
     return EXIT_SUCCESS;
 
-error: 
-    H5Fclose(fid);
+error:
+    H5E_BEGIN_TRY {
+        H5Pclose(fapl);
+        H5Fclose(fid);
+    } H5E_END_TRY;
 
     if(api_ctx_pushed) H5CX_pop();
 

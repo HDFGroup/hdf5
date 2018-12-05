@@ -24,11 +24,11 @@
 /* Parameters to control statistics gathered */
 
 /* Default threshold for small groups/datasets/attributes */
-#define DEF_SIZE_SMALL_GROUPS       	10
-#define DEF_SIZE_SMALL_DSETS        	10
-#define DEF_SIZE_SMALL_ATTRS  		10
+#define DEF_SIZE_SMALL_GROUPS           10
+#define DEF_SIZE_SMALL_DSETS            10
+#define DEF_SIZE_SMALL_ATTRS            10
 
-#define SIZE_SMALL_SECTS        	10
+#define SIZE_SMALL_SECTS            10
 
 #define  H5_NFILTERS_IMPL        8     /* Number of currently implemented filters + one to
                                           accommodate for user-define filters + one
@@ -83,7 +83,7 @@ typedef struct iter_t {
     hsize_t max_dset_dims;              /* Maximum dimension size of dataset */
     unsigned long *small_dset_dims;    /* Size of dimensions of small datasets tracked */
     unsigned long dset_layouts[H5D_NLAYOUTS];           /* Type of storage for each dataset */
-    unsigned long dset_comptype[H5_NFILTERS_IMPL]; 	/* Number of currently implemented filters */
+    unsigned long dset_comptype[H5_NFILTERS_IMPL];     /* Number of currently implemented filters */
     unsigned long dset_ntypes;          /* Number of diff. dataset datatypes found */
     dtype_info_t *dset_type_info;       /* Pointer to dataset datatype information found */
     unsigned dset_dim_nbins;            /* Number of bins for dataset dimensions */
@@ -103,9 +103,9 @@ typedef struct iter_t {
     hsize_t super_ext_size;             /* superblock extension size */
     hsize_t ublk_size;                  /* user block size (if exists) */
     H5F_fspace_strategy_t fs_strategy;  /* File space management strategy */
-    hbool_t fs_persist;               	/* Free-space persist or not */
+    hbool_t fs_persist;                 /* Free-space persist or not */
     hsize_t fs_threshold;               /* Free-space section threshold */
-    hsize_t fsp_size;               	/* File space page size */
+    hsize_t fsp_size;                   /* File space page size */
     hsize_t free_space;                 /* Amount of freespace in the file */
     hsize_t free_hdr;                   /* Size of free space manager metadata in the file */
     unsigned long num_small_sects[SIZE_SMALL_SECTS];   /* Size of small free-space sections */
@@ -136,9 +136,9 @@ static int        display_dset_metadata = FALSE;    /* display file space info f
 static int        display_object = FALSE;  /* not implemented yet */
 
 /* Initialize threshold for small groups/datasets/attributes */
-static int	  sgroups_threshold = DEF_SIZE_SMALL_GROUPS;
-static int	  sdsets_threshold = DEF_SIZE_SMALL_DSETS;
-static int	  sattrs_threshold = DEF_SIZE_SMALL_ATTRS;
+static int      sgroups_threshold = DEF_SIZE_SMALL_GROUPS;
+static int      sdsets_threshold = DEF_SIZE_SMALL_DSETS;
+static int      sattrs_threshold = DEF_SIZE_SMALL_ATTRS;
 
 /* a structure for handling the order command-line parameters come in */
 struct handler_t {
@@ -1733,7 +1733,7 @@ main(int argc, const char *argv[])
     /* Disable tools error reporting */
     H5Eget_auto2(H5tools_ERR_STACK_g, &tools_func, &tools_edata);
     H5Eset_auto2(H5tools_ERR_STACK_g, NULL, NULL);
-    
+
     HDmemset(&iter, 0, sizeof(iter));
 
     if(parse_command_line(argc, argv, &hand) < 0)
@@ -1780,15 +1780,15 @@ main(int argc, const char *argv[])
             iter.free_hdr = finfo.free.meta_size;
         } /* end else */
 
-	iter.num_small_groups = (unsigned long *)HDcalloc((size_t)sgroups_threshold, sizeof(unsigned long));
-	iter.num_small_attrs = (unsigned long *)HDcalloc((size_t)(sattrs_threshold+1), sizeof(unsigned long));
-	iter.small_dset_dims = (unsigned long *)HDcalloc((size_t)sdsets_threshold, sizeof(unsigned long));
+        iter.num_small_groups = (unsigned long *)HDcalloc((size_t)sgroups_threshold, sizeof(unsigned long));
+        iter.num_small_attrs = (unsigned long *)HDcalloc((size_t)(sattrs_threshold+1), sizeof(unsigned long));
+        iter.small_dset_dims = (unsigned long *)HDcalloc((size_t)sdsets_threshold, sizeof(unsigned long));
 
-	if(iter.num_small_groups == NULL || iter.num_small_attrs == NULL || iter.small_dset_dims == NULL) {
-	    error_msg("Unable to allocate memory for tracking small groups/datasets/attributes\n");
-            h5tools_setstatus(EXIT_FAILURE);
-	    goto done;
-	}
+        if(iter.num_small_groups == NULL || iter.num_small_attrs == NULL || iter.small_dset_dims == NULL) {
+            error_msg("Unable to allocate memory for tracking small groups/datasets/attributes\n");
+                h5tools_setstatus(EXIT_FAILURE);
+            goto done;
+        }
 
         if((fcpl = H5Fget_create_plist(fid)) < 0)
             warn_msg("Unable to retrieve file creation property\n");

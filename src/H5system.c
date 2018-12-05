@@ -294,13 +294,13 @@ HDfprintf(FILE *stream, const char *fmt, ...)
                         unsigned short x = (unsigned short)va_arg(ap, unsigned int);
                         n = fprintf(stream, format_templ, x);
                     } else if(!*modifier) {
-                        unsigned int x = va_arg(ap, unsigned int); /*lint !e732 Loss of sign not really occurring */
+                        unsigned int x = va_arg(ap, unsigned int);
                         n = fprintf(stream, format_templ, x);
                     } else if(!HDstrcmp(modifier, "l")) {
-                        unsigned long x = va_arg(ap, unsigned long); /*lint !e732 Loss of sign not really occurring */
+                        unsigned long x = va_arg(ap, unsigned long);
                         n = fprintf(stream, format_templ, x);
                     } else {
-                        uint64_t x = va_arg(ap, uint64_t); /*lint !e732 Loss of sign not really occurring */
+                        uint64_t x = va_arg(ap, uint64_t);
                         n = fprintf(stream, format_templ, x);
                     }
                     break;
@@ -333,7 +333,7 @@ HDfprintf(FILE *stream, const char *fmt, ...)
 
                 case 'a':
                     {
-                        haddr_t x = va_arg(ap, haddr_t); /*lint !e732 Loss of sign not really occurring */
+                        haddr_t x = va_arg(ap, haddr_t);
 
                         if(H5F_addr_defined(x)) {
                             len = 0;
@@ -387,7 +387,7 @@ HDfprintf(FILE *stream, const char *fmt, ...)
                 case 's':
                 case 'p':
                     {
-                        char *x = va_arg(ap, char*); /*lint !e64 Type mismatch not really occurring */
+                        char *x = va_arg(ap, char*);
                         n = fprintf(stream, format_templ, x);
                     }
                     break;

@@ -63,13 +63,13 @@
 #define H5FATAL 1
 #define VRFY(val, mesg, fatal) do {                                            \
     if (!val) {                                                                \
-  	printf("Proc %d: ", mynod);                 \
+    printf("Proc %d: ", mynod);                 \
         printf("*** Assertion failed (%s) at line %4d in %s\n",                \
       mesg, (int)__LINE__, __FILE__);                  \
-  	if (fatal){                     \
+    if (fatal){                     \
       fflush(stdout);                   \
       goto die_jar_jar_die;                 \
-  	}                       \
+    }                       \
     }                                                                          \
 } while(0)
 #define RANK 1
@@ -180,38 +180,38 @@ int main(int argc, char **argv)
 
     /* setup file access template with parallel IO access. */
     if (opt_split_vfd){
-  	hid_t mpio_pl;
+    hid_t mpio_pl;
 
-  	mpio_pl = H5Pcreate (H5P_FILE_ACCESS);
-  	VRFY((acc_tpl >= 0), "", H5FATAL);
-  	ret = H5Pset_fapl_mpio(mpio_pl, MPI_COMM_WORLD, MPI_INFO_NULL);
-  	VRFY((ret >= 0), "", H5FATAL);
+    mpio_pl = H5Pcreate (H5P_FILE_ACCESS);
+    VRFY((acc_tpl >= 0), "", H5FATAL);
+    ret = H5Pset_fapl_mpio(mpio_pl, MPI_COMM_WORLD, MPI_INFO_NULL);
+    VRFY((ret >= 0), "", H5FATAL);
 
-  	/* set optional allocation alignment */
-  	if (opt_alignment*opt_threshold != 1){
-      	ret = H5Pset_alignment(acc_tpl, opt_threshold, opt_alignment );
-      	VRFY((ret >= 0), "H5Pset_alignment succeeded", !H5FATAL);
-  	}
+    /* set optional allocation alignment */
+    if (opt_alignment*opt_threshold != 1){
+        ret = H5Pset_alignment(acc_tpl, opt_threshold, opt_alignment );
+        VRFY((ret >= 0), "H5Pset_alignment succeeded", !H5FATAL);
+    }
 
-  	/* setup file access template */
-  	acc_tpl = H5Pcreate (H5P_FILE_ACCESS);
-  	VRFY((acc_tpl >= 0), "", H5FATAL);
-  	ret = H5Pset_fapl_split(acc_tpl, meta_ext, mpio_pl, raw_ext, mpio_pl);
-  	VRFY((ret >= 0), "H5Pset_fapl_split succeeded", H5FATAL);
-  	ret = H5Pclose(mpio_pl);
-  	VRFY((ret >= 0), "H5Pclose mpio_pl succeeded", H5FATAL);
+    /* setup file access template */
+    acc_tpl = H5Pcreate (H5P_FILE_ACCESS);
+    VRFY((acc_tpl >= 0), "", H5FATAL);
+    ret = H5Pset_fapl_split(acc_tpl, meta_ext, mpio_pl, raw_ext, mpio_pl);
+    VRFY((ret >= 0), "H5Pset_fapl_split succeeded", H5FATAL);
+    ret = H5Pclose(mpio_pl);
+    VRFY((ret >= 0), "H5Pclose mpio_pl succeeded", H5FATAL);
     }else{
-  	/* setup file access template */
-  	acc_tpl = H5Pcreate (H5P_FILE_ACCESS);
-  	VRFY((acc_tpl >= 0), "", H5FATAL);
-  	ret = H5Pset_fapl_mpio(acc_tpl, MPI_COMM_WORLD, MPI_INFO_NULL);
-  	VRFY((ret >= 0), "", H5FATAL);
+    /* setup file access template */
+    acc_tpl = H5Pcreate (H5P_FILE_ACCESS);
+    VRFY((acc_tpl >= 0), "", H5FATAL);
+    ret = H5Pset_fapl_mpio(acc_tpl, MPI_COMM_WORLD, MPI_INFO_NULL);
+    VRFY((ret >= 0), "", H5FATAL);
 
-  	/* set optional allocation alignment */
-  	if (opt_alignment*opt_threshold != 1){
-  	    ret = H5Pset_alignment(acc_tpl, opt_threshold, opt_alignment );
-      	VRFY((ret >= 0), "H5Pset_alignment succeeded", !H5FATAL);
-  	}
+    /* set optional allocation alignment */
+    if (opt_alignment*opt_threshold != 1){
+        ret = H5Pset_alignment(acc_tpl, opt_threshold, opt_alignment );
+        VRFY((ret >= 0), "H5Pset_alignment succeeded", !H5FATAL);
+    }
     }
 
     h5_fixname_no_suffix(FILENAME[0], acc_tpl, filename, sizeof filename);
@@ -225,7 +225,7 @@ int main(int argc, char **argv)
     sid = H5Screate_simple(RANK, dims, NULL);
     VRFY((sid >= 0), "H5Screate_simple succeeded", H5FATAL);
     dataset = H5Dcreate2(fid, "Dataset1", H5T_NATIVE_CHAR, sid,
-      		H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+            H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     VRFY((dataset >= 0), "H5Dcreate2 succeeded", H5FATAL);
 
     /* create the memory dataspace and the file dataspace */

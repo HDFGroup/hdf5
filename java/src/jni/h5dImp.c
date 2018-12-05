@@ -1109,7 +1109,7 @@ Java_hdf_hdf5lib_H5_H5Dwrite_1string
                     const char *utf8 = ENVPTR->GetStringUTFChars(ENVPAR obj, 0);
 
                     if (utf8) {
-                        strncpy(&c_buf[i * str_len], utf8, str_len);
+                        HDstrncpy(&c_buf[i * str_len], utf8, str_len);
                     } /* end if */
 
                     ENVPTR->ReleaseStringUTFChars(ENVPAR obj, utf8);

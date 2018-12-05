@@ -66,12 +66,11 @@ Preconditions:
     2.2.2 Szip
        The HDF5 library has a predefined compression filter that uses
        the extended-Rice lossless compression algorithm for chunked
-       datatsets. For more information about Szip compression and 
-       license terms see 
-       http://hdfgroup.org/HDF5/doc_resource/SZIP/index.html.
+       datatsets. For more information on Szip compression, license terms, 
+       and obtaining the Szip source code, see:
+
+          https://portal.hdfgroup.org/display/HDF5/Szip+Compression+in+HDF+Products
       
-       The latest supported public release of SZIP is available from
-       ftp://ftp.hdfgroup.org/lib-external/szip/2.1.
     
     2.3 Additional Utilities
     
@@ -266,4 +265,5 @@ Build, Test and Install HDF5 on Cygwin
 
 -----------------------------------------------------------------------
 
-Need Further assistance, email help@hdfgroup.org
+    HDF Forum:     https://forum.hdfgroup.org/
+    HDF Helpdesk:  https://portal.hdfgroup.org/display/support/The+HDF+Help+Desk

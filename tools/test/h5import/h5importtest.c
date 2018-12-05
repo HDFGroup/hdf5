@@ -71,9 +71,9 @@ main(void)
     volatile uint32_t ibyte=0x01234567;
     /* 0 for big endian, 1 for little endian. */
     if ((*((uint8_t*)(&ibyte))) == 0x67)
-        strncpy(machine_order, "LE", 2);
+        HDstrncpy(machine_order, "LE", 2);
     else
-        strncpy(machine_order, "BE", 2);
+        HDstrncpy(machine_order, "BE", 2);
 
 
     /*

@@ -44,48 +44,48 @@ static herr_t H5O__attr_debug(H5F_t *f, const void *_mesg, FILE * stream,
     int indent, int fwidth);
 
 /* Set up & include shared message "interface" info */
-#define H5O_SHARED_TYPE			H5O_MSG_ATTR
-#define H5O_SHARED_DECODE		H5O_attr_shared_decode
-#define H5O_SHARED_DECODE_REAL		H5O_attr_decode
-#define H5O_SHARED_ENCODE		H5O_attr_shared_encode
-#define H5O_SHARED_ENCODE_REAL		H5O_attr_encode
-#define H5O_SHARED_SIZE			H5O_attr_shared_size
-#define H5O_SHARED_SIZE_REAL		H5O_attr_size
-#define H5O_SHARED_DELETE		H5O__attr_shared_delete
-#define H5O_SHARED_DELETE_REAL		H5O__attr_delete
-#define H5O_SHARED_LINK			H5O__attr_shared_link
-#define H5O_SHARED_LINK_REAL		H5O__attr_link
-#define H5O_SHARED_COPY_FILE		H5O__attr_shared_copy_file
-#define H5O_SHARED_COPY_FILE_REAL	H5O__attr_copy_file
-#define H5O_SHARED_POST_COPY_FILE	H5O_attr_shared_post_copy_file
-#define H5O_SHARED_POST_COPY_FILE_REAL	H5O__attr_post_copy_file
+#define H5O_SHARED_TYPE                 H5O_MSG_ATTR
+#define H5O_SHARED_DECODE               H5O_attr_shared_decode
+#define H5O_SHARED_DECODE_REAL          H5O_attr_decode
+#define H5O_SHARED_ENCODE               H5O_attr_shared_encode
+#define H5O_SHARED_ENCODE_REAL          H5O_attr_encode
+#define H5O_SHARED_SIZE                 H5O_attr_shared_size
+#define H5O_SHARED_SIZE_REAL            H5O_attr_size
+#define H5O_SHARED_DELETE               H5O__attr_shared_delete
+#define H5O_SHARED_DELETE_REAL          H5O__attr_delete
+#define H5O_SHARED_LINK                 H5O__attr_shared_link
+#define H5O_SHARED_LINK_REAL            H5O__attr_link
+#define H5O_SHARED_COPY_FILE            H5O__attr_shared_copy_file
+#define H5O_SHARED_COPY_FILE_REAL       H5O__attr_copy_file
+#define H5O_SHARED_POST_COPY_FILE       H5O_attr_shared_post_copy_file
+#define H5O_SHARED_POST_COPY_FILE_REAL  H5O__attr_post_copy_file
 #undef  H5O_SHARED_POST_COPY_FILE_UPD
-#define H5O_SHARED_DEBUG		H5O_attr_shared_debug
-#define H5O_SHARED_DEBUG_REAL		H5O__attr_debug
+#define H5O_SHARED_DEBUG                H5O_attr_shared_debug
+#define H5O_SHARED_DEBUG_REAL           H5O__attr_debug
 #include "H5Oshared.h"			/* Shared Object Header Message Callbacks */
 
 /* This message derives from H5O message class */
 const H5O_msg_class_t H5O_MSG_ATTR[1] = {{
-    H5O_ATTR_ID,		/* message id number            */
-    "attribute",		/* message name for debugging   */
-    sizeof(H5A_t),		/* native message size          */
-    H5O_SHARE_IS_SHARABLE,	/* messages are sharable?       */
-    H5O_attr_shared_decode,	/* decode message               */
-    H5O_attr_shared_encode,	/* encode message               */
-    H5O_attr_copy,		/* copy the native value        */
-    H5O_attr_shared_size,	/* size of raw message          */
-    H5O__attr_reset,	        /* reset method                 */
-    H5O__attr_free,	        /* free method			*/
-    H5O__attr_shared_delete,	/* file delete method		*/
-    H5O__attr_shared_link,	/* link method			*/
-    NULL,			/*set share method		*/
-    NULL,		    	/*can share method		*/
-    H5O_attr_pre_copy_file,	/* pre copy native value to file */
-    H5O__attr_shared_copy_file,	/* copy native value to file    */
-    H5O_attr_shared_post_copy_file,	/* post copy native value to file    */
-    H5O_attr_get_crt_index,	/* get creation index		*/
-    H5O_attr_set_crt_index,	/* set creation index		*/
-    H5O_attr_shared_debug	/* debug the message            */
+    H5O_ATTR_ID,                        /* message id number                */
+    "attribute",                        /* message name for debugging       */
+    sizeof(H5A_t),                      /* native message size              */
+    H5O_SHARE_IS_SHARABLE,              /* messages are sharable?           */
+    H5O_attr_shared_decode,             /* decode message                   */
+    H5O_attr_shared_encode,             /* encode message                   */
+    H5O_attr_copy,                      /* copy the native value            */
+    H5O_attr_shared_size,               /* size of raw message              */
+    H5O__attr_reset,                    /* reset method                     */
+    H5O__attr_free,                     /* free method                      */
+    H5O__attr_shared_delete,            /* file delete method               */
+    H5O__attr_shared_link,              /* link method                      */
+    NULL,                               /* set share method                 */
+    NULL,                               /* can share method                 */
+    H5O_attr_pre_copy_file,             /* pre copy native value to file    */
+    H5O__attr_shared_copy_file,         /* copy native value to file        */
+    H5O_attr_shared_post_copy_file,     /* post copy native value to file   */
+    H5O_attr_get_crt_index,             /* get creation index               */
+    H5O_attr_set_crt_index,             /* set creation index               */
+    H5O_attr_shared_debug               /* debug the message                */
 }};
 
 /* Flags for attribute flag encoding */
@@ -474,7 +474,7 @@ H5O_attr_size(const H5F_t H5_ATTR_UNUSED *f, const void *_mesg)
  * Purpose:     Frees resources within a attribute message, but doesn't free
  *              the message itself.
  *
- * Return:      Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:  Robb Matzke
  *              Tuesday, December  9, 1997
@@ -491,11 +491,11 @@ H5O__attr_reset(void H5_ATTR_UNUSED *_mesg)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O__attr_free
+ * Function:    H5O__attr_free
  *
- * Purpose:	Frees the message
+ * Purpose:     Frees the message
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
  *              Thursday, November 18, 2004
@@ -525,7 +525,7 @@ done:
  *
  * Purpose:     Free file space referenced by message
  *
- * Return:      Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:  Quincey Koziol
  *              Friday, September 26, 2003
@@ -563,7 +563,7 @@ done:
  * Purpose:     Increment reference count on any objects referenced by
  *              message
  *
- * Return:      Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:  Quincey Koziol
  *              Friday, September 26, 2003
@@ -604,9 +604,7 @@ done:
  * Purpose:     Perform any necessary actions before copying message between
  *              files for attribute messages.
  *
- * Return:      Success:        Non-negative
- *
- *              Failure:        Negative
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:  Quincey Koziol
  *              Monday, June 26, 2006
@@ -628,7 +626,8 @@ H5O_attr_pre_copy_file(H5F_t H5_ATTR_UNUSED *file_src, const void *native_src,
     HDassert(cpy_info->file_dst);
 
     /* Check to ensure that the version of the message to be copied does not exceed
-       the message version allowed by the destination file's high bound */
+     * the message version allowed by the destination file's high bound.
+     */
     if(attr_src->shared->version > H5O_attr_ver_bounds[H5F_HIGH_BOUND(cpy_info->file_dst)])
         HGOTO_ERROR(H5E_OHDR, H5E_BADRANGE, FAIL, "attribute message version out of bounds")
 
@@ -649,7 +648,6 @@ done:
  * Purpose:     Copies a message from _MESG to _DEST in file
  *
  * Return:      Success:        Ptr to _DEST
- *
  *              Failure:        NULL
  *
  * Programmer:  Quincey Koziol
@@ -695,7 +693,7 @@ done:
  *              an object may have a reference attribute that points to the
  *              object itself.
  *
- * Return:      Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:  Peter Cao
  *              March 6, 2005
@@ -719,12 +717,11 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_attr_get_crt_index
+ * Function:    H5O_attr_get_crt_index
  *
- * Purpose:	Get creation index from the message
+ * Purpose:     Get creation index from the message
  *
- * Return:      Success:        Non-negative
- *              Failure:        Negative
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
  *              Thursday, January 18, 2007
@@ -749,12 +746,11 @@ H5O_attr_get_crt_index(const void *_mesg, H5O_msg_crt_idx_t *crt_idx /*out*/)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_attr_set_crt_index
+ * Function:    H5O_attr_set_crt_index
  *
- * Purpose:	Set creation index from the message
+ * Purpose:     Set creation index from the message
  *
- * Return:      Success:        Non-negative
- *              Failure:        Negative
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
  *              Thursday, January 18, 2007

@@ -258,7 +258,7 @@ main(void)
 
     /* Check if the current VFD supports SWMR */
     driver = HDgetenv("HDF5_DRIVER");
-    vfd_supports_swmr = H5FD_supports_swmr_test(driver);
+    vfd_supports_swmr = H5FD__supports_swmr_test(driver);
 
     /* TEST 1 */
     /* Check the case where the file was flushed */

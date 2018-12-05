@@ -1,9 +1,8 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
- * This file is part of HDF5.  The full HDF5 copyright notice, including     *
+ * This file is part of HDF5. The full HDF5 copyright notice, including      *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
  * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
@@ -11,22 +10,11 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/*-------------------------------------------------------------------------
- *
- * Created:             H5B2public.h
- *                      Jan 31 2005
- *                      Quincey Koziol <koziol@ncsa.uiuc.edu>
- *
- * Purpose:             Public declarations for the v2 B-tree package.
- *
- *-------------------------------------------------------------------------
- */
-
-#ifndef _H5B2public_H
-#define _H5B2public_H
+#ifndef _H5ESpublic_H
+#define _H5ESpublic_H
 
 /* Public headers needed by this file */
-#include "H5public.h"
+#include "H5public.h"           /* Generic Functions                    */
 
 /*****************/
 /* Public Macros */
@@ -36,9 +24,22 @@
 /* Public Typedefs */
 /*******************/
 
-/**********************************/
-/* Public API Function Prototypes */
-/**********************************/
+/* Asynchronous operation status */
+typedef enum H5ES_status_t {
+    H5ES_STATUS_IN_PROGRESS,   /* Operation has not yet completed                       */
+    H5ES_STATUS_SUCCEED,       /* Operation has completed, successfully                 */
+    H5ES_STATUS_FAIL,          /* Operation has completed, but failed                   */
+    H5ES_STATUS_CANCEL         /* Operation has not completed and has been cancelled    */
+} H5ES_status_t;
+
+
+/********************/
+/* Public Variables */
+/********************/
+
+/*********************/
+/* Public Prototypes */
+/*********************/
 
 #ifdef __cplusplus
 extern "C" {
@@ -48,5 +49,5 @@ extern "C" {
 }
 #endif
 
-#endif /* _H5B2public_H */
+#endif /* _H5ESpublic_H */
 

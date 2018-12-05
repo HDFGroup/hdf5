@@ -1547,7 +1547,7 @@ H5D__bt2_idx_dest(const H5D_chk_idx_info_t *idx_info)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't patch v2 B-tree file pointer")
 
         /* Close v2 B-tree */
-	if(H5B2_close(idx_info->storage->u.btree2.bt2) < 0)
+        if(H5B2_close(idx_info->storage->u.btree2.bt2) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "can't close v2 B-tree")
         idx_info->storage->u.btree2.bt2 = NULL;
     } /* end if */

@@ -27,6 +27,7 @@
 #include "H5Gpkg.h"             /* Groups				*/
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5Opkg.h"             /* Object headers			*/
+#include "H5VLprivate.h"        /* Virtual Object Layer                     */
 
 
 /****************/
@@ -46,7 +47,7 @@
 static void *H5O__group_get_copy_file_udata(void);
 static void H5O__group_free_copy_file_udata(void *udata);
 static htri_t H5O__group_isa(const H5O_t *loc);
-static hid_t H5O__group_open(const H5G_loc_t *obj_loc, hbool_t app_ref);
+static void *H5O__group_open(const H5G_loc_t *obj_loc, H5I_type_t *opened_type);
 static void *H5O__group_create(H5F_t *f, void *_crt_info, H5G_loc_t *obj_loc);
 static H5O_loc_t *H5O__group_get_oloc(hid_t obj_id);
 static herr_t H5O__group_bh_info(const H5O_loc_t *loc, H5O_t *oh,
@@ -193,40 +194,40 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O__group_open
+ * Function:    H5O__group_open
  *
- * Purpose:	Open a group at a particular location
+ * Purpose:     Open a group at a particular location
  *
- * Return:	Success:	Open object identifier
- *		Failure:	Negative
+ * Return:      Success:    Pointer to group data
+ *              Failure:    NULL
  *
  * Programmer:	Quincey Koziol
  *              Monday, November  6, 2006
  *
  *-------------------------------------------------------------------------
  */
-static hid_t
-H5O__group_open(const H5G_loc_t *obj_loc, hbool_t app_ref)
+static void *
+H5O__group_open(const H5G_loc_t *obj_loc, H5I_type_t *opened_type)
 {
-    H5G_t       *grp = NULL;            /* Group opened */
-    hid_t	ret_value = H5I_INVALID_HID;    /* Return value */
+    H5G_t      *grp         = NULL;         /* Group opened */
+    void       *ret_value   = NULL;         /* Return value */
 
     FUNC_ENTER_STATIC
 
     HDassert(obj_loc);
 
+    *opened_type = H5I_GROUP;
+
     /* Open the group */
     if(NULL == (grp = H5G_open(obj_loc)))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open group")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, NULL, "unable to open group")
 
-    /* Register an ID for the group */
-    if((ret_value = H5I_register(H5I_GROUP, grp, app_ref)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register group")
+    ret_value = (void *)grp;
 
 done:
-    if(ret_value < 0)
+    if(NULL == ret_value)
         if(grp && H5G_close(grp) < 0)
-            HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "unable to release group")
+            HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, NULL, "unable to release group")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__group_open() */
@@ -303,7 +304,7 @@ H5O__group_get_oloc(hid_t obj_id)
     FUNC_ENTER_STATIC
 
     /* Get the group */
-    if(NULL ==  (grp = (H5G_t *)H5I_object(obj_id)))
+    if(NULL ==  (grp = (H5G_t *)H5VL_object(obj_id)))
         HGOTO_ERROR(H5E_OHDR, H5E_BADATOM, NULL, "couldn't get object from ID")
 
     /* Get the group's object header location */

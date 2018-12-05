@@ -2525,6 +2525,7 @@ H5MF_get_freespace(H5F_t *f, hsize_t *tot_space, hsize_t *meta_size)
             needed_ring = H5AC_RING_MDFSM;
         else
             needed_ring = H5AC_RING_RDFSM;
+
         if(needed_ring != curr_ring) {
             H5AC_set_ring(needed_ring, NULL);
             curr_ring = needed_ring;
@@ -2554,6 +2555,7 @@ H5MF_get_freespace(H5F_t *f, hsize_t *tot_space, hsize_t *meta_size)
             needed_ring = H5AC_RING_MDFSM;
         else
             needed_ring = H5AC_RING_RDFSM;
+
         if(needed_ring != curr_ring) {
             H5AC_set_ring(needed_ring, &curr_ring);
             curr_ring = needed_ring;
@@ -2670,6 +2672,7 @@ H5MF_get_free_sections(H5F_t *f, H5FD_mem_t type, size_t nsects, H5F_sect_info_t
             needed_ring = H5AC_RING_MDFSM;
         else
             needed_ring = H5AC_RING_RDFSM;
+
         if(needed_ring != curr_ring) {
             H5AC_set_ring(needed_ring, &curr_ring);
             curr_ring = needed_ring;
