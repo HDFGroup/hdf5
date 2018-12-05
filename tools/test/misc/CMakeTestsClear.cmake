@@ -133,6 +133,7 @@
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
               -D "TEST_OUTPUT=${testname}.out"
               -D "TEST_EXPECT=${resultcode}"
+              -D "TEST_REFERENCE=${resultfile}.mty"
               -D "TEST_ERRREF=${resultfile}.err"
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )

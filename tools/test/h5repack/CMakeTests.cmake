@@ -377,6 +377,7 @@
                 -D "TEST_OUTPUT=${resultfile}-${testname}.out"
                 -D "TEST_EXPECT=${resultcode}"
                 -D "TEST_MASK_ERROR=true"
+                -D "TEST_REFERENCE=${resultfile}.mty"
                 -D "TEST_ERRREF=${resultfile}-${testname}.tst"
                 -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
         )

@@ -96,7 +96,7 @@ add_custom_target(H5WATCH_files ALL COMMENT "Copying files needed by H5WATCH tes
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
               -D "TEST_OUTPUT=${resultfile}.out"
               -D "TEST_EXPECT=${resultcode}"
-              -D "TEST_REFERENCE=${resultfile}.ddl"
+              -D "TEST_REFERENCE=${resultfile}.mty"
               -D "TEST_ERRREF=${resultfile}.err"
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
