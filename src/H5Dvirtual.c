@@ -432,9 +432,6 @@ H5D__virtual_store_layout(H5F_t *f, H5O_layout_t *layout)
     if((layout->storage.u.virt.serial_list_hobjid.addr == HADDR_UNDEF)
        && (layout->storage.u.virt.list_nused > 0)) {
 
- /*        if(H5Fset_libver_bounds(H5F_FILE_ID(f), H5F_LOW_BOUND(f), H5F_HIGH_BOUND(f)) < 0) */
-/*             HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "cannot set low/high bounds") */
-
         /* Allocate array for caching results of strlen */
         if(NULL == (str_size = (size_t *)H5MM_malloc(2 * layout->storage.u.virt.list_nused * sizeof(size_t))))
             HGOTO_ERROR(H5E_OHDR, H5E_RESOURCE, FAIL, "unable to allocate string length array")
