@@ -148,7 +148,7 @@ main(int argc, const char *argv[])
 error:
     if(buf)
         HDfree(buf);
-    if(fd > -1)
+    if(fd >= 0)
         HDclose(fd);
     return EXIT_FAILURE;
 } /* end main() */

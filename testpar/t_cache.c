@@ -1217,20 +1217,20 @@ setup_derived_types(void)
     struct mssg_t sample; /* used to compute displacements */
 
     /* setup the displacements array */
-    if ( ( MPI_SUCCESS != MPI_Address(&sample.req, &displs[0]) ) ||
-         ( MPI_SUCCESS != MPI_Address(&sample.src, &displs[1]) ) ||
-         ( MPI_SUCCESS != MPI_Address(&sample.dest, &displs[2]) ) ||
-         ( MPI_SUCCESS != MPI_Address(&sample.mssg_num, &displs[3]) ) ||
-         ( MPI_SUCCESS != MPI_Address(&sample.base_addr, &displs[4]) ) ||
-         ( MPI_SUCCESS != MPI_Address(&sample.len, &displs[5]) ) ||
-         ( MPI_SUCCESS != MPI_Address(&sample.ver, &displs[6]) ) ||
-         ( MPI_SUCCESS != MPI_Address(&sample.count, &displs[7]) ) ||
-         ( MPI_SUCCESS != MPI_Address(&sample.magic, &displs[8]) ) ) {
+    if ( ( MPI_SUCCESS != MPI_Get_address(&sample.req, &displs[0]) ) ||
+         ( MPI_SUCCESS != MPI_Get_address(&sample.src, &displs[1]) ) ||
+         ( MPI_SUCCESS != MPI_Get_address(&sample.dest, &displs[2]) ) ||
+         ( MPI_SUCCESS != MPI_Get_address(&sample.mssg_num, &displs[3]) ) ||
+         ( MPI_SUCCESS != MPI_Get_address(&sample.base_addr, &displs[4]) ) ||
+         ( MPI_SUCCESS != MPI_Get_address(&sample.len, &displs[5]) ) ||
+         ( MPI_SUCCESS != MPI_Get_address(&sample.ver, &displs[6]) ) ||
+         ( MPI_SUCCESS != MPI_Get_address(&sample.count, &displs[7]) ) ||
+         ( MPI_SUCCESS != MPI_Get_address(&sample.magic, &displs[8]) ) ) {
 
         nerrors++;
         success = FALSE;
         if ( verbose ) {
-            HDfprintf(stdout, "%d:%s: MPI_Address() call failed.\n",
+            HDfprintf(stdout, "%d:%s: MPI_Get_address() call failed.\n",
                       world_mpi_rank, FUNC);
         }
 
@@ -1245,14 +1245,14 @@ setup_derived_types(void)
 
     if ( success ) {
 
-        result = MPI_Type_struct(9, block_len, displs, mpi_types, &mpi_mssg_t);
+        result = MPI_Type_create_struct(9, block_len, displs, mpi_types, &mpi_mssg_t);
 
         if ( result != MPI_SUCCESS ) {
 
             nerrors++;
             success = FALSE;
             if ( verbose ) {
-                HDfprintf(stdout, "%d:%s: MPI_Type_struct() call failed.\n",
+                HDfprintf(stdout, "%d:%s: MPI_Type_create_struct() call failed.\n",
                           world_mpi_rank, FUNC);
             }
         }

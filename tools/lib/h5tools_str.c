@@ -1045,43 +1045,47 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
 
                 }
                 else {
-                    unsigned nmembs;
-                    unsigned j;
+                    int retvalue;
 
-                    nmembs = (unsigned)H5Tget_nmembers(type);
-                    h5tools_str_append(str, "%s", OPT(info->cmpd_pre, "{"));
+                    retvalue = H5Tget_nmembers(type);
+                    if (retvalue >= 0) {
+                        unsigned j;
+                        unsigned nmembs = (unsigned)retvalue;
 
-                    ctx->indent_level++;
+                        h5tools_str_append(str, "%s", OPT(info->cmpd_pre, "{"));
 
-                    for(j = 0; j < nmembs; j++) {
-                        if(j)
-                            h5tools_str_append(str, "%s", OPT(info->cmpd_sep, ", "OPTIONAL_LINE_BREAK));
-                        else
+                        ctx->indent_level++;
+
+                        for(j = 0; j < nmembs; j++) {
+                            if(j)
+                                h5tools_str_append(str, "%s", OPT(info->cmpd_sep, ", "OPTIONAL_LINE_BREAK));
+                            else
+                                h5tools_str_append(str, "%s", OPT(info->cmpd_end, ""));
+
+                            if(info->arr_linebreak)
+                                h5tools_str_indent(str, info, ctx);
+
+                            /* The name */
+                            name = H5Tget_member_name(type, j);
+                            h5tools_str_append(str, OPT(info->cmpd_name, ""), name);
+                            H5free_memory(name);
+
+                            /* The value */
+                            offset = H5Tget_member_offset(type, j);
+                            memb = H5Tget_member_type(type, j);
+
+                            h5tools_str_sprint(str, info, container, memb, cp_vp + offset, ctx);
+
+                            H5Tclose(memb);
+                        }
+                        ctx->indent_level--;
+
+                        if(info->arr_linebreak) {
                             h5tools_str_append(str, "%s", OPT(info->cmpd_end, ""));
-
-                        if(info->arr_linebreak)
                             h5tools_str_indent(str, info, ctx);
-
-                        /* The name */
-                        name = H5Tget_member_name(type, j);
-                        h5tools_str_append(str, OPT(info->cmpd_name, ""), name);
-                        H5free_memory(name);
-
-                        /* The value */
-                        offset = H5Tget_member_offset(type, j);
-                        memb = H5Tget_member_type(type, j);
-
-                        h5tools_str_sprint(str, info, container, memb, cp_vp + offset, ctx);
-
-                        H5Tclose(memb);
+                        }
+                        h5tools_str_append(str, "%s", OPT(info->cmpd_suf, "}"));
                     }
-                    ctx->indent_level--;
-
-                    if(info->arr_linebreak) {
-                        h5tools_str_append(str, "%s", OPT(info->cmpd_end, ""));
-                        h5tools_str_indent(str, info, ctx);
-                    }
-                    h5tools_str_append(str, "%s", OPT(info->cmpd_suf, "}"));
                 }
                 break;
 
