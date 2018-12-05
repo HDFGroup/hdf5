@@ -141,6 +141,16 @@ Bug Fixes since HDF5-1.10.3 release
 
     Library
     -------
+    - A bug was discovered in the parallel library where an application
+      would eventually consume all of the available MPI communicators
+      when continually writing to a compressed dataset in parallel. This
+      was due to internal copies of an HDF5 File Access Property List,
+      which each contained a copy of the MPI communicator, not being
+      closed at the end of each write operation. This problem was
+      exacerbated by larger numbers of processors.
+
+      (JTH - 2018/12/05, HDFFV-10629)
+
     - Allow H5detect and H5make_libsettings to take a file as an argument.
 
       Rather than only writing to stdout, add a command argument to name
