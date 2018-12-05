@@ -1304,7 +1304,7 @@ H5O_attr_iterate_real(hid_t loc_id, const H5O_loc_t *loc, H5_index_t idx_type,
 
         /* Iterate over attributes in table */
         if((ret_value = H5A__attr_iterate_table(&atable, skip, last_attr, loc_id, attr_op, op_data)) < 0)
-            HERROR(H5E_ATTR, H5E_CANTNEXT, "iteration operator failed");
+            HERROR(H5E_ATTR, H5E_BADITER, "iteration operator failed");
     } /* end else */
 
 done:

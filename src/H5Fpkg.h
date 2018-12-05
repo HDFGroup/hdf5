@@ -292,7 +292,7 @@ struct H5F_file_t {
                                 /* begin on file access/create          */
     char        *mdc_log_location; /* location of mdc log               */
     hid_t       fcpl_id;	/* File creation property list ID 	*/
-    H5F_close_degree_t fc_degree;   /* File close behavior degree	*/
+    H5F_close_degree_t fc_degree; /* File close behavior degree	*/
     hbool_t evict_on_close; /* If the file's objects should be evicted from the metadata cache on close */
     size_t	rdcc_nslots;	/* Size of raw data chunk cache (slots)	*/
     size_t	rdcc_nbytes;	/* Size of raw data chunk cache	(bytes)	*/
@@ -309,6 +309,10 @@ struct H5F_file_t {
     struct H5G_t *root_grp;	/* Open root group			*/
     H5FO_t *open_objs;          /* Open objects in file                 */
     H5UC_t *grp_btree_shared;   /* Ref-counted group B-tree node info   */
+
+    /* Cached VOL connector ID & info */
+    hid_t       vol_id;         /* ID of VOL connector for the container */
+    void       *vol_info;       /* Copy of VOL connector info for container */
 
     /* File space allocation information */
     H5F_fspace_strategy_t fs_strategy; /* File space handling strategy	*/
@@ -383,14 +387,14 @@ typedef enum H5VL_file_optional_t {
     H5VL_FILE_CLEAR_ELINK_CACHE,        /* Clear external link cache            */
     H5VL_FILE_GET_FILE_IMAGE,           /* file image                           */
     H5VL_FILE_GET_FREE_SECTIONS,        /* file free selections                 */
-    H5VL_FILE_GET_FREE_SPACE,	        /* file freespace         		        */
-    H5VL_FILE_GET_INFO,	                /* file info             		        */
-    H5VL_FILE_GET_MDC_CONF,	            /* file metadata cache configuration	*/
-    H5VL_FILE_GET_MDC_HR,	            /* file metadata cache hit rate		    */
-    H5VL_FILE_GET_MDC_SIZE,             /* file metadata cache size		        */
-    H5VL_FILE_GET_SIZE,	                /* file size             		        */
-    H5VL_FILE_GET_VFD_HANDLE,	        /* file VFD handle       		        */
-    H5VL_FILE_REOPEN,                   /* reopen the file                      */
+    H5VL_FILE_GET_FREE_SPACE,	        /* file freespace         		*/
+    H5VL_FILE_GET_INFO,	                /* file info             		*/
+    H5VL_FILE_GET_MDC_CONF,	        /* file metadata cache configuration	*/
+    H5VL_FILE_GET_MDC_HR,	        /* file metadata cache hit rate		*/
+    H5VL_FILE_GET_MDC_SIZE,             /* file metadata cache size		*/
+    H5VL_FILE_GET_SIZE,	                /* file size             		*/
+    H5VL_FILE_GET_VFD_HANDLE,	        /* file VFD handle       		*/
+    H5VL_FILE_GET_FILE_ID,              /* retrieve or resurrect file ID of object */
     H5VL_FILE_RESET_MDC_HIT_RATE,       /* get metadata cache hit rate          */
     H5VL_FILE_SET_MDC_CONFIG,           /* set metadata cache configuration     */
     H5VL_FILE_GET_METADATA_READ_RETRY_INFO,
@@ -398,27 +402,15 @@ typedef enum H5VL_file_optional_t {
     H5VL_FILE_START_MDC_LOGGING,
     H5VL_FILE_STOP_MDC_LOGGING,
     H5VL_FILE_GET_MDC_LOGGING_STATUS,
-    H5VL_FILE_SET_LATEST_FORMAT,
     H5VL_FILE_FORMAT_CONVERT,
     H5VL_FILE_RESET_PAGE_BUFFERING_STATS,
     H5VL_FILE_GET_PAGE_BUFFERING_STATS,
-    H5VL_FILE_GET_MDC_IMAGE_INFO
-
+    H5VL_FILE_GET_MDC_IMAGE_INFO,
+    H5VL_FILE_GET_EOA,
+    H5VL_FILE_INCR_FILESIZE,
+    H5VL_FILE_SET_LIBVER_BOUNDS
 } H5VL_file_optional_t;
 
-/* User data for traversal routine to get ID counts */
-typedef struct {
-    ssize_t *obj_count;   /* number of objects counted so far */
-    unsigned types;      /* types of objects to be counted */
-} H5F_trav_obj_cnt_t;
-
-/* User data for traversal routine to get ID lists */
-/* XXX (VOL MERGE): Should the type of obj_count and max_objs be identical? */
-typedef struct {
-    size_t max_objs;
-    hid_t *oid_list;
-    ssize_t *obj_count;   /* number of objects counted so far */
-} H5F_trav_obj_ids_t;
 
 /*****************************/
 /* Package Private Variables */
@@ -437,7 +429,6 @@ H5FL_EXTERN(H5F_file_t);
 
 /* General routines */
 H5_DLL H5F_t *H5F__reopen(H5F_t *f);
-H5_DLL H5F_t *H5F__new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf);
 H5_DLL herr_t H5F__dest(H5F_t *f, hbool_t flush);
 H5_DLL herr_t H5F__flush(H5F_t *f);
 H5_DLL htri_t H5F__is_hdf5(const char *name, hid_t fapl_id);
@@ -447,6 +438,9 @@ H5_DLL herr_t H5F__format_convert(H5F_t *f);
 H5_DLL herr_t H5F__start_swmr_write(H5F_t *f);
 H5_DLL herr_t H5F__close(H5F_t *f);
 H5_DLL herr_t H5F__set_libver_bounds(H5F_t *f, H5F_libver_t low, H5F_libver_t high);
+H5_DLL H5F_t *H5F__get_file(void *obj, H5I_type_t type);
+H5_DLL hid_t H5F__get_file_id(H5F_t *file);
+H5_DLL herr_t H5F__set_vol_conn(H5F_t *file, hid_t vol_id, const void *vol_info);
 
 /* File mount related routines */
 H5_DLL herr_t H5F__mount(H5G_loc_t *loc, const char *name, H5F_t *child, hid_t plist_id);
@@ -506,6 +500,7 @@ H5_DLL herr_t H5F__get_sohm_mesg_count_test(hid_t fid, unsigned type_id, size_t 
 H5_DLL herr_t H5F__check_cached_stab_test(hid_t file_id);
 H5_DLL herr_t H5F__get_maxaddr_test(hid_t file_id, haddr_t *maxaddr);
 H5_DLL herr_t H5F__get_sbe_addr_test(hid_t file_id, haddr_t *sbe_addr);
+H5_DLL htri_t H5F__same_file_test(hid_t file_id1, hid_t file_id2);
 #endif /* H5F_TESTING */
 
 #endif /* _H5Fpkg_H */

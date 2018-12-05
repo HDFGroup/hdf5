@@ -114,8 +114,8 @@ hid_t
 H5Acreate1(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
 	  hid_t acpl_id)
 {
-    void    *attr = NULL;       /* attr token from VOL plugin */
-    H5VL_object_t    *vol_obj = NULL;        /* object token of loc_id */
+    void    *attr = NULL;       /* attr token from VOL connector */
+    H5VL_object_t  *vol_obj = NULL;     /* Object token of loc_id */
     H5VL_loc_params_t   loc_params;
     H5P_genplist_t      *plist;            /* Property list pointer */
     hid_t		ret_value = H5I_INVALID_HID;              /* Return value */
@@ -156,18 +156,17 @@ H5Acreate1(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier")
 
     /* Create the attribute */
-    if(NULL == (attr = H5VL_attr_create(vol_obj->data, loc_params, vol_obj->driver->cls, name, 
-                                        acpl_id, H5P_DEFAULT, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
+    if(NULL == (attr = H5VL_attr_create(vol_obj, &loc_params, name, acpl_id, H5P_DEFAULT, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, H5I_INVALID_HID, "unable to create attribute")
 
     /* Register the new attribute and get an ID for it */
-    if((ret_value = H5VL_register(H5I_ATTR, attr, vol_obj->driver, TRUE)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register attribute for ID")
+    if((ret_value = H5VL_register(H5I_ATTR, attr, vol_obj->connector, TRUE)) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register attribute for ID")
 
 done:
     /* Clean up on failure */
     if(H5I_INVALID_HID == ret_value)
-        if(attr && H5VL_attr_close(attr, vol_obj->driver->cls, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+        if(attr && H5VL_attr_close(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
             HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, H5I_INVALID_HID, "can't close attribute")
 
     FUNC_LEAVE_API(ret_value)
@@ -199,8 +198,8 @@ done:
 hid_t
 H5Aopen_name(hid_t loc_id, const char *name)
 {
-    void    *attr = NULL;       /* attr token from VOL plugin */
-    H5VL_object_t    *vol_obj = NULL;        /* object token of loc_id */
+    void    *attr = NULL;       /* attr token from VOL connector */
+    H5VL_object_t  *vol_obj = NULL;     /* Object token of loc_id */
     H5VL_loc_params_t loc_params; 
     hid_t		ret_value = H5I_INVALID_HID;              /* Return value */
 
@@ -218,22 +217,21 @@ H5Aopen_name(hid_t loc_id, const char *name)
     loc_params.obj_type     = H5I_get_type(loc_id);
 
     /* Get the location object */
-    if (NULL == (vol_obj = H5VL_vol_object(loc_id)))
+    if(NULL == (vol_obj = H5VL_vol_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier")
 
     /* Open the attribute */
-    if (NULL == (attr = H5VL_attr_open(vol_obj->data, loc_params, vol_obj->driver->cls, 
-                                      name, H5P_DEFAULT, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
+    if(NULL == (attr = H5VL_attr_open(vol_obj, &loc_params, name, H5P_DEFAULT, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open attribute")
 
     /* Register the attribute and get an ID for it */
-    if ((ret_value = H5VL_register(H5I_ATTR, attr, vol_obj->driver, TRUE)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize attribute handle")
+    if((ret_value = H5VL_register(H5I_ATTR, attr, vol_obj->connector, TRUE)) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize attribute handle")
 
 done:
     /* Clean up on failure */
     if(H5I_INVALID_HID == ret_value)
-        if(attr && H5VL_attr_close(attr, vol_obj->driver->cls, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+        if(attr && H5VL_attr_close(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
             HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, H5I_INVALID_HID, "can't close attribute")
 
     FUNC_LEAVE_API(ret_value)
@@ -265,8 +263,8 @@ done:
 hid_t
 H5Aopen_idx(hid_t loc_id, unsigned idx)
 {
-    void    *attr = NULL;       /* attr token from VOL plugin */
-    H5VL_object_t    *vol_obj = NULL;        /* object token of loc_id */
+    void    *attr = NULL;       /* attr token from VOL connector */
+    H5VL_object_t  *vol_obj = NULL;     /* Object token of loc_id */
     H5VL_loc_params_t   loc_params;
     hid_t		ret_value = H5I_INVALID_HID;              /* Return value */
 
@@ -291,18 +289,17 @@ H5Aopen_idx(hid_t loc_id, unsigned idx)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier")
 
     /* Open the attribute */
-    if(NULL == (attr = H5VL_attr_open(vol_obj->data, loc_params, vol_obj->driver->cls, 
-                                      NULL, H5P_DEFAULT, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
+    if(NULL == (attr = H5VL_attr_open(vol_obj, &loc_params, NULL, H5P_DEFAULT, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open attribute")
 
     /* Register the attribute and get an ID for it */
-    if((ret_value = H5VL_register(H5I_ATTR, attr, vol_obj->driver, TRUE)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize attribute handle")
+    if((ret_value = H5VL_register(H5I_ATTR, attr, vol_obj->connector, TRUE)) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize attribute handle")
 
 done:
     /* Clean up on failure */
     if(H5I_INVALID_HID == ret_value)
-        if(attr && H5VL_attr_close(attr, vol_obj->driver->cls, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+        if(attr && H5VL_attr_close(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
             HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, H5I_INVALID_HID, "can't close attribute")
 
     FUNC_LEAVE_API(ret_value)
@@ -330,7 +327,7 @@ done:
 int
 H5Aget_num_attrs(hid_t loc_id)
 {
-    H5VL_object_t      *vol_obj;
+    H5VL_object_t  *vol_obj = NULL;     /* Object token of loc_id */
     H5VL_loc_params_t   loc_params;
     H5O_info_t          oinfo;
     int                 ret_value = -1;
@@ -341,13 +338,12 @@ H5Aget_num_attrs(hid_t loc_id)
     loc_params.type     = H5VL_OBJECT_BY_SELF;
     loc_params.obj_type = H5I_get_type(loc_id);
 
-    /* get the location object */
+    /* Get the location object */
     if(NULL == (vol_obj = H5VL_vol_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, (-1), "invalid location identifier")
 
     /* Get the number of attributes for the object */
-    if(H5VL_object_optional(vol_obj->data, vol_obj->driver->cls, H5P_DATASET_XFER_DEFAULT, 
-                            H5_REQUEST_NULL, H5VL_OBJECT_GET_INFO, loc_params, &oinfo, H5O_INFO_ALL) < 0)
+    if(H5VL_object_optional(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, H5VL_OBJECT_GET_INFO, &loc_params, &oinfo, H5O_INFO_ALL) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, (-1), "unable to get attribute count for object")
 
     H5_CHECKED_ASSIGN(ret_value, int, oinfo.num_attrs, hsize_t);
@@ -397,18 +393,23 @@ done:
 herr_t
 H5Aiterate1(hid_t loc_id, unsigned *attr_num, H5A_operator1_t op, void *op_data)
 {
-    herr_t	    ret_value;      /* Return value */
+    H5VL_object_t  *vol_obj = NULL;     /* Object token of loc_id */
+    herr_t	    ret_value;          /* Return value */
 
-    FUNC_ENTER_API(FAIL)
+    FUNC_ENTER_API(H5_ITER_ERROR)
     H5TRACE4("e", "i*Iux*x", loc_id, attr_num, op, op_data);
 
     /* check arguments */
     if(H5I_ATTR == H5I_get_type(loc_id))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5_ITER_ERROR, "location is not valid for an attribute")
+
+    /* Get the location object */
+    if(NULL == (vol_obj = H5VL_vol_object(loc_id)))
+        HGOTO_ERROR(H5E_VOL, H5E_BADTYPE, H5_ITER_ERROR, "invalid location identifier")
 
     /* Call attribute iteration routine */
-    if((ret_value = H5A__iterate_old(loc_id, attr_num, op, op_data)) < 0)
-        HERROR(H5E_ATTR, H5E_BADITER, "error iterating over attributes");
+    if((ret_value = H5VL_attr_optional(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, H5VL_ATTR_ITERATE_OLD, loc_id, attr_num, op, op_data)) < 0)
+        HERROR(H5E_VOL, H5E_BADITER, "error iterating over attributes");
 
 done:
     FUNC_LEAVE_API(ret_value)

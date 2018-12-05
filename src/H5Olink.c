@@ -612,6 +612,7 @@ herr_t
 H5O_link_delete(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, void *_mesg)
 {
     H5O_link_t *lnk = (H5O_link_t *)_mesg;
+    hid_t file_id = -1;           /* ID for the file the link is located in (passed to user callback) */
     herr_t ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -645,25 +646,21 @@ H5O_link_delete(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, void *_mesg)
 
         /* Check for delete callback */
         if(link_class->del_func) {
-            hid_t file_id;           /* ID for the file the link is located in (passed to user callback) */
-
             /* Get a file ID for the file the link is in */
-            if((file_id = H5F_get_id(f, FALSE)) < 0)
+            if((file_id = H5F_get_id(f)) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to get file ID")
 
             /* Call user-defined link's 'delete' callback */
-            if((link_class->del_func)(lnk->name, file_id, lnk->u.ud.udata, lnk->u.ud.size) < 0) {
-                H5I_dec_ref(file_id);
+            if((link_class->del_func)(lnk->name, file_id, lnk->u.ud.udata, lnk->u.ud.size) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CALLBACK, FAIL, "link deletion callback returned failure")
-            } /* end if */
-
-            /* Release the file ID */
-            if(H5I_dec_ref(file_id) < 0)
-                HGOTO_ERROR(H5E_OHDR, H5E_CANTCLOSEFILE, FAIL, "can't close file")
         } /* end if */
     } /* end if */
 
 done:
+    /* Release the file ID */
+    if(file_id > 0 && H5I_dec_ref(file_id) < 0)
+        HDONE_ERROR(H5E_OHDR, H5E_CANTCLOSEFILE, FAIL, "can't close file")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_link_delete() */
 

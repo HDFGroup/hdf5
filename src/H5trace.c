@@ -834,8 +834,8 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                                 case H5ES_STATUS_FAIL:
                                     HDfprintf(out, "H5ES_STATUS_FAIL");
                                     break;
-                                case H5ES_STATUS_CANCEL:
-                                    HDfprintf(out, "H5ES_STATUS_CANCEL");
+                                case H5ES_STATUS_CANCELED:
+                                    HDfprintf(out, "H5ES_STATUS_CANCELED");
                                     break;
 
                                 default:
@@ -2572,6 +2572,22 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                             } /* end switch */
                         } /* end else */
                         break;
+                    case 'C':
+                        if(ptr) {
+                            if(vp)
+                                HDfprintf (out, "0x%lx", (unsigned long)vp);
+                            else
+                                HDfprintf(out, "NULL");
+                        } /* end if */
+                        else {
+                            H5VL_class_value_t class_val = (H5VL_class_value_t)va_arg(ap, H5VL_class_value_t);
+
+                            if(H5_VOL_NATIVE == class_val)
+                                HDfprintf(out, "H5_VOL_NATIVE");
+                            else
+                                HDfprintf(out, "%ld", (long)class_val);
+                        } /* end else */
+                        break;
                     case 'c':
                         if(ptr) {
                             if(vp)
@@ -2711,9 +2727,6 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                                 case H5VL_FILE_GET_OBJ_IDS:
                                     HDfprintf(out, "H5VL_FILE_GET_OBJ_IDS");
                                     break;
-                                case H5VL_OBJECT_GET_FILE:
-                                    HDfprintf(out, "H5VL_OBJECT_GET_FILE");
-                                    break;
                                 default:
                                     HDfprintf(out, "%ld", (long)get);
                                     break;
@@ -2734,6 +2747,9 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                                 case H5VL_FILE_FLUSH:
                                     HDfprintf(out, "H5VL_FILE_FLUSH");
                                     break;
+                                case H5VL_FILE_REOPEN:
+                                    HDfprintf(out, "H5VL_FILE_REOPEN");
+                                    break;
                                 case H5VL_FILE_MOUNT:
                                     HDfprintf(out, "H5VL_FILE_MOUNT");
                                     break;
@@ -2742,6 +2758,9 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                                     break;
                                 case H5VL_FILE_IS_ACCESSIBLE:
                                     HDfprintf(out, "H5VL_FILE_IS_ACCESSIBLE");
+                                    break;
+                                case H5VL_FILE_CACHE_VOL_CONN:
+                                    HDfprintf(out, "H5VL_FILE_CACHE_VOL_CONN");
                                     break;
                                 default:
                                     HDfprintf(out, "%ld", (long)specific);
@@ -2893,6 +2912,9 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                                 case H5VL_REF_GET_NAME:
                                     HDfprintf(out, "H5VL_REF_GET_NAME");
                                     break;
+                                case H5VL_ID_GET_NAME:
+                                    HDfprintf(out, "H5VL_ID_GET_NAME");
+                                    break;
                                 default:
                                     HDfprintf(out, "%ld", (long)get);
                                     break;
@@ -2927,6 +2949,32 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                                     break;
                                 case H5VL_OBJECT_REFRESH:
                                     HDfprintf(out, "H5VL_OBJECT_REFRESH");
+                                    break;
+                                default:
+                                    HDfprintf(out, "%ld", (long)specific);
+                                    break;
+                            } /* end switch */
+                        } /* end else */
+                        break;
+                    case 'r':
+                        if(ptr) {
+                            if(vp)
+                                HDfprintf (out, "0x%lx", (unsigned long)vp);
+                            else
+                                HDfprintf(out, "NULL");
+                        } /* end if */
+                        else {
+                            H5VL_request_specific_t specific = (H5VL_request_specific_t)va_arg(ap, int);
+
+                            switch(specific) {
+                                case H5VL_REQUEST_WAITANY:
+                                    HDfprintf(out, "H5VL_REQUEST_WAITANY");
+                                    break;
+                                case H5VL_REQUEST_WAITSOME:
+                                    HDfprintf(out, "H5VL_REQUEST_WAITSOME");
+                                    break;
+                                case H5VL_REQUEST_WAITALL:
+                                    HDfprintf(out, "H5VL_REQUEST_WAITALL");
                                     break;
                                 default:
                                     HDfprintf(out, "%ld", (long)specific);
