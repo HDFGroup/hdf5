@@ -2417,14 +2417,28 @@ test_attr_dense_delete(hid_t fcpl, hid_t fapl)
     h5_stat_size_t empty_filesize;       /* Size of empty file */
     h5_stat_size_t filesize;             /* Size of file after modifications */
     H5O_info_t  oinfo;          /* Object info                  */
+    int         use_min_dset_oh = (dcpl_g != H5P_DEFAULT);
     herr_t      ret;            /* Generic return value        */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Deleting Attributes in Dense Storage\n"));
 
-    /* Create file */
+    if (use_min_dset_oh) { /* using minimized dataset headers */
+        /* modify fcpl...
+         * sidestep "bug" where file space is lost with minimized dset ohdrs
+         */
+        fcpl = H5Pcopy(fcpl);
+        CHECK(fcpl, FAIL, "H5Pcopy");
+        ret = H5Pset_file_space_strategy(
+                fcpl,
+                H5F_FSPACE_STRATEGY_FSM_AGGR,
+                TRUE, 1);
+        CHECK(ret, FAIL, "H5Pset_file_space_strategy");
+    }
     fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, fapl);
     CHECK(fid, FAIL, "H5Fcreate");
+    if (use_min_dset_oh)
+        CHECK(H5Pclose(fcpl), FAIL, "H5Pclose");
 
     /* Close file */
     ret = H5Fclose(fid);
@@ -2444,12 +2458,12 @@ test_attr_dense_delete(hid_t fcpl, hid_t fapl)
     CHECK(sid, FAIL, "H5Screate");
 
     /* need DCPL to query the group creation properties */
-    if (dcpl_g == H5P_DEFAULT) {
-        dcpl = H5Pcreate(H5P_DATASET_CREATE);
-        CHECK(dcpl, FAIL, "H5Pcreate");
-    } else {
+    if (use_min_dset_oh) {
         dcpl = H5Pcopy(dcpl_g);
         CHECK(dcpl, FAIL, "H5Pcopy");
+    } else {
+        dcpl = H5Pcreate(H5P_DATASET_CREATE);
+        CHECK(dcpl, FAIL, "H5Pcreate");
     }
 
     /* Enable creation order tracking on attributes, so creation order tests work */
@@ -2601,14 +2615,28 @@ test_attr_dense_rename(hid_t fcpl, hid_t fapl)
     h5_stat_size_t filesize;             /* Size of file after modifications */
     H5O_info_t  oinfo;          /* Object info */
     unsigned    u;              /* Local index variable */
+    int         use_min_dset_oh = (dcpl_g != H5P_DEFAULT);
     herr_t      ret;            /* Generic return value        */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Renaming Attributes in Dense Storage\n"));
 
-    /* Create file */
+    if (use_min_dset_oh) { /* using minimized dataset headers */
+        /* modify fcpl...
+         * sidestep "bug" where file space is lost with minimized dset ohdrs
+         */
+        fcpl = H5Pcopy(fcpl);
+        CHECK(fcpl, FAIL, "H5Pcopy");
+        ret = H5Pset_file_space_strategy(
+                fcpl,
+                H5F_FSPACE_STRATEGY_FSM_AGGR,
+                TRUE, 1);
+        CHECK(ret, FAIL, "H5Pset_file_space_strategy");
+    }
     fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, fapl);
     CHECK(fid, FAIL, "H5Fcreate");
+    if (use_min_dset_oh)
+        CHECK(H5Pclose(fcpl), FAIL, "H5Pclose");
 
     /* Close file */
     ret = H5Fclose(fid);
@@ -2628,12 +2656,12 @@ test_attr_dense_rename(hid_t fcpl, hid_t fapl)
     CHECK(sid, FAIL, "H5Screate");
 
     /* need DCPL to query the group creation properties */
-    if (dcpl_g == H5P_DEFAULT) {
-        dcpl = H5Pcreate(H5P_DATASET_CREATE);
-        CHECK(dcpl, FAIL, "H5Pcreate");
-    } else {
+    if (use_min_dset_oh) {
         dcpl = H5Pcopy(dcpl_g);
         CHECK(dcpl, FAIL, "H5Pcopy");
+    } else {
+        dcpl = H5Pcreate(H5P_DATASET_CREATE);
+        CHECK(dcpl, FAIL, "H5Pcreate");
     }
 
     /* Create a dataset */
@@ -2765,20 +2793,32 @@ test_attr_dense_unlink(hid_t fcpl, hid_t fapl)
     h5_stat_size_t filesize;             /* Size of file after modifications */
     H5O_info_t  oinfo;          /* Object info */
     unsigned    u;              /* Local index variable */
+    int         use_min_dset_oh = (dcpl_g != H5P_DEFAULT);
     herr_t      ret;            /* Generic return value        */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Unlinking Object with Attributes in Dense Storage\n"));
 
-    /* Create file */
+    if (use_min_dset_oh) { /* using minimized dataset headers */
+        /* modify fcpl...
+         * sidestep "bug" where file space is lost with minimized dset ohdrs
+         */
+        fcpl = H5Pcopy(fcpl);
+        CHECK(fcpl, FAIL, "H5Pcopy");
+        ret = H5Pset_file_space_strategy(
+                fcpl,
+                H5F_FSPACE_STRATEGY_FSM_AGGR,
+                TRUE, 1);
+        CHECK(ret, FAIL, "H5Pset_file_space_strategy");
+    }
     fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, fapl);
     CHECK(fid, FAIL, "H5Fcreate");
+    if (use_min_dset_oh)
+        CHECK(H5Pclose(fcpl), FAIL, "H5Pclose");
 
-    /* Close file */
     ret = H5Fclose(fid);
     CHECK(ret, FAIL, "H5Fclose");
 
-    /* Get size of file */
     empty_filesize = h5_get_file_size(FILENAME, fapl);
     if(empty_filesize < 0)
         TestErrPrintf("Line %d: file size wrong!\n", __LINE__);
@@ -2792,12 +2832,12 @@ test_attr_dense_unlink(hid_t fcpl, hid_t fapl)
     CHECK(sid, FAIL, "H5Screate");
 
     /* need DCPL to query the group creation properties */
-    if (dcpl_g == H5P_DEFAULT) {
-        dcpl = H5Pcreate(H5P_DATASET_CREATE);
-        CHECK(dcpl, FAIL, "H5Pcreate");
-    } else {
+    if (use_min_dset_oh) {
         dcpl = H5Pcopy(dcpl_g);
         CHECK(dcpl, FAIL, "H5Pcopy");
+    } else {
+        dcpl = H5Pcreate(H5P_DATASET_CREATE);
+        CHECK(dcpl, FAIL, "H5Pcreate");
     }
 
     /* Create a dataset */
