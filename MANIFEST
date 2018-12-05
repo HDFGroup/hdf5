@@ -25,6 +25,7 @@
 ./ACKNOWLEDGMENTS
 ./COPYING
 ./COPYING_LBNL_HDF5
+./HOW_TO_BUILD.txt
 ./MANIFEST
 ./Makefile.dist
 ./Makefile.am

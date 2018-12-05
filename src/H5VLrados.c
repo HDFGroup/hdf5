@@ -565,8 +565,6 @@ H5VL_rados_init(void)
     /* Register interfaces that might not be initialized in time (for example if
      * we open an object without knowing its type first, H5Oopen will not
      * initialize that type) */
-    if(H5G_init() < 0)
-        HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize group interface")
     if(H5D_init() < 0)
         HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize dataset interface")
     if(H5T_init() < 0)
@@ -574,7 +572,7 @@ H5VL_rados_init(void)
 
     /* Register the RADOS VOL, if it isn't already */
     if(NULL == H5I_object_verify(H5VL_RADOS_g, H5I_VOL)) {
-        if((H5VL_RADOS_g = H5VL_register((const H5VL_class_t *)&H5VL_rados_g, 
+        if((H5VL_RADOS_g = H5VL_register_driver((const H5VL_class_t *)&H5VL_rados_g, 
                                           sizeof(H5VL_class_t), TRUE)) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTINSERT, FAIL, "can't create ID for RADOS plugin")
     } /* end if */
