@@ -187,7 +187,7 @@ typedef struct H5G_entry_t H5G_entry_t;
  * call.
  */
 H5_DLL struct H5O_loc_t *H5G_oloc(H5G_t *grp);
-H5_DLL H5G_name_t * H5G_nameof(H5G_t *grp);
+H5_DLL H5G_name_t * H5G_nameof(const H5G_t *grp);
 H5_DLL H5F_t *H5G_fileof(H5G_t *grp);
 H5_DLL H5G_t *H5G_open(const H5G_loc_t *loc);
 H5_DLL herr_t H5G_close(H5G_t *grp);
@@ -261,7 +261,7 @@ H5_DLL herr_t H5G_name_copy(H5G_name_t *dst, const H5G_name_t *src, H5_copy_dept
 H5_DLL herr_t H5G_name_free(H5G_name_t *name);
 H5_DLL ssize_t H5G_get_name(const H5G_loc_t *loc, char *name/*out*/, size_t size,
     hbool_t *cached);
-H5_DLL ssize_t H5G_get_name_by_addr(hid_t fid, const struct H5O_loc_t *loc,
+H5_DLL ssize_t H5G_get_name_by_addr(H5F_t *f, const struct H5O_loc_t *loc,
     char* name, size_t size);
 H5_DLL H5RS_str_t *H5G_build_fullpath_refstr_str(H5RS_str_t *path_r, const char *name);
 

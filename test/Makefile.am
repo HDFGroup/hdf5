@@ -144,6 +144,11 @@ if DIRECT_VFD_CONDITIONAL
   VFD_LIST += direct
 endif
 
+# Test with just the native connector, with a single pass-through connector
+# and with a doubly-stacked pass-through.
+VOL_LIST = native "pass_through under_vol=0;under_info={}" \
+           "pass_through under_vol=505;under_info={under_vol=0;under_info={}}"
+
 # Additional target for running timing test
 timings _timings: testmeta
 	@for timing in $(TIMINGS) dummy; do                                   \

@@ -278,7 +278,7 @@ H5G__close_cb(H5VL_object_t *grp_vol_obj)
     HDassert(grp_vol_obj);
 
     /* Close the group */
-    if(H5VL_group_close(grp_vol_obj->data, grp_vol_obj->driver->cls, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+    if(H5VL_group_close(grp_vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "unable to close group")
 
     /* Free the VOL object */
@@ -351,13 +351,13 @@ H5Gcreate2(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gcpl_id,
         HGOTO_ERROR(H5E_SYM, H5E_CANTSET, H5I_INVALID_HID, "can't set access property list info")
 
     /* Get the gcpl structure and set the link properties on it */
-    if (NULL == (plist = (H5P_genplist_t *)H5I_object(gcpl_id)))
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(gcpl_id)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, H5I_INVALID_HID, "can't find object for ID")
-    if (H5P_set(plist, H5VL_PROP_GRP_LCPL_ID, &lcpl_id) < 0)
+    if(H5P_set(plist, H5VL_PROP_GRP_LCPL_ID, &lcpl_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, H5I_INVALID_HID, "can't set property value for lcpl id")
 
-    /* get the location object */
-    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(loc_id)))
+    /* Get the location object */
+    if(NULL == (vol_obj = (H5VL_object_t *)H5I_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier")
 
     /* Set the location parameters */
@@ -365,17 +365,16 @@ H5Gcreate2(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gcpl_id,
     loc_params.obj_type     = H5I_get_type(loc_id);
 
     /* Create the group */
-    if(NULL == (grp = H5VL_group_create(vol_obj->data, loc_params, vol_obj->driver->cls, name, 
-                                        gcpl_id, gapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
+    if(NULL == (grp = H5VL_group_create(vol_obj, &loc_params, name, gcpl_id, gapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, H5I_INVALID_HID, "unable to create group")
 
     /* Get an atom for the group */
-    if((ret_value = H5VL_register(H5I_GROUP, grp, vol_obj->driver, TRUE)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize group handle")
+    if((ret_value = H5VL_register(H5I_GROUP, grp, vol_obj->connector, TRUE)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize group handle")
 
 done:
     if(H5I_INVALID_HID == ret_value)
-        if(grp && H5VL_group_close(grp, vol_obj->driver->cls, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+        if(grp && H5VL_group_close(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release group")
 
     FUNC_LEAVE_API(ret_value)
@@ -440,23 +439,22 @@ H5Gcreate_anon(hid_t loc_id, hid_t gcpl_id, hid_t gapl_id)
     loc_params.type         = H5VL_OBJECT_BY_SELF;
     loc_params.obj_type     = H5I_get_type(loc_id);
 
-    /* get the location object */
+    /* Get the location object */
     if(NULL == (vol_obj = (H5VL_object_t *)H5I_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier")
 
     /* Create the group */
-    if(NULL == (grp = H5VL_group_create(vol_obj->data, loc_params, vol_obj->driver->cls, NULL, 
-                                        gcpl_id, gapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
+    if(NULL == (grp = H5VL_group_create(vol_obj, &loc_params, NULL, gcpl_id, gapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, H5I_INVALID_HID, "unable to create group")
 
     /* Get an atom for the group */
-    if((ret_value = H5VL_register(H5I_GROUP, grp, vol_obj->driver, TRUE)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize group handle")
+    if((ret_value = H5VL_register(H5I_GROUP, grp, vol_obj->connector, TRUE)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize group handle")
 
 done:
     /* Cleanup on failure */
     if(H5I_INVALID_HID == ret_value)
-        if(grp && H5VL_group_close(grp, vol_obj->driver->cls, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+        if(grp && H5VL_group_close(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release group")
 
     FUNC_LEAVE_API(ret_value)
@@ -482,9 +480,9 @@ hid_t
 H5Gopen2(hid_t loc_id, const char *name, hid_t gapl_id)
 {
     void               *grp = NULL;                     /* Group opened */
-    H5VL_object_t      *vol_obj = NULL;                     /* object token of loc_id */
+    H5VL_object_t      *vol_obj = NULL;                 /* object token of loc_id */
     H5VL_loc_params_t   loc_params;
-    hid_t	            ret_value = H5I_INVALID_HID;    /* Return value */
+    hid_t	        ret_value = H5I_INVALID_HID;    /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE3("i", "i*si", loc_id, name, gapl_id);
@@ -506,17 +504,17 @@ H5Gopen2(hid_t loc_id, const char *name, hid_t gapl_id)
     /* Open the group */
     loc_params.type = H5VL_OBJECT_BY_SELF;
     loc_params.obj_type = H5I_get_type(loc_id);
-    if(NULL == (grp = H5VL_group_open(vol_obj->data, loc_params, vol_obj->driver->cls, 
-                                      name, gapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
+
+    if(NULL == (grp = H5VL_group_open(vol_obj, &loc_params, name, gapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open group")
 
     /* Register an ID for the group */
-    if((ret_value = H5VL_register(H5I_GROUP, grp, vol_obj->driver, TRUE)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register group")
+    if((ret_value = H5VL_register(H5I_GROUP, grp, vol_obj->connector, TRUE)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register group")
 
 done:
     if(H5I_INVALID_HID == ret_value)
-        if(grp && H5VL_group_close(grp, vol_obj->driver->cls, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+        if(grp && H5VL_group_close(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release group")
 
     FUNC_LEAVE_API(ret_value)
@@ -550,8 +548,7 @@ H5Gget_create_plist(hid_t group_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a group ID")
 
     /* Get the group creation property list for the group */
-    if(H5VL_group_get(vol_obj->data, vol_obj->driver->cls, H5VL_GROUP_GET_GCPL, 
-                      H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &ret_value) < 0)
+    if(H5VL_group_get(vol_obj, H5VL_GROUP_GET_GCPL, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &ret_value) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, H5I_INVALID_HID, "can't get group's creation property list")
 
 done:
@@ -593,8 +590,7 @@ H5Gget_info(hid_t loc_id, H5G_info_t *group_info)
     /* Retrieve the group's information */
     loc_params.type     = H5VL_OBJECT_BY_SELF;
     loc_params.obj_type = id_type;
-    if((ret_value = H5VL_group_get(vol_obj->data, vol_obj->driver->cls, H5VL_GROUP_GET_INFO, 
-                                   H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, loc_params, group_info)) < 0)
+    if(H5VL_group_get(vol_obj, H5VL_GROUP_GET_INFO, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &loc_params, group_info) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to get group info")
 
 done:
@@ -636,7 +632,7 @@ H5Gget_info_by_name(hid_t loc_id, const char *name, H5G_info_t *group_info,
         HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set access property list info")
 
     /* Get the location object */
-    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(loc_id)))
+    if(NULL == (vol_obj = (H5VL_object_t *)H5I_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
     /* Set up location parameters */
@@ -646,8 +642,7 @@ H5Gget_info_by_name(hid_t loc_id, const char *name, H5G_info_t *group_info,
     loc_params.obj_type                         = H5I_get_type(loc_id);
 
     /* Retrieve the group's information */
-    if((ret_value = H5VL_group_get(vol_obj->data, vol_obj->driver->cls, H5VL_GROUP_GET_INFO, 
-                                   H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, loc_params, group_info)) < 0)
+    if(H5VL_group_get(vol_obj, H5VL_GROUP_GET_INFO, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &loc_params, group_info) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve group info")
 
 done:
@@ -693,7 +688,7 @@ H5Gget_info_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
     if(H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, FALSE) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set access property list info")
 
-    /* get the location object */
+    /* Get the location object */
     if(NULL == (vol_obj = (H5VL_object_t *)H5I_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
@@ -707,8 +702,7 @@ H5Gget_info_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
     loc_params.obj_type                     = H5I_get_type(loc_id);
 
     /* Retrieve the group's information */
-    if((ret_value = H5VL_group_get(vol_obj->data, vol_obj->driver->cls, H5VL_GROUP_GET_INFO, 
-                                   H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, loc_params, group_info)) < 0)
+    if(H5VL_group_get(vol_obj, H5VL_GROUP_GET_INFO, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &loc_params, group_info) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve group info")
 
 done:
@@ -779,8 +773,7 @@ H5Gflush(hid_t group_id)
         HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set collective metadata read info")
 
     /* Flush group's metadata to file */
-    if((ret_value = H5VL_group_specific(vol_obj->data, vol_obj->driver->cls, H5VL_GROUP_FLUSH, 
-                                          H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, group_id)) < 0)
+    if(H5VL_group_specific(vol_obj, H5VL_GROUP_FLUSH, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, group_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTFLUSH, FAIL, "unable to flush group")
 
 done:
@@ -818,8 +811,7 @@ H5Grefresh(hid_t group_id)
         HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set collective metadata read info")
 
     /* Refresh group's metadata */
-    if((ret_value = H5VL_group_specific(vol_obj->data, vol_obj->driver->cls, H5VL_GROUP_REFRESH, 
-                                          H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, group_id)) < 0)
+    if(H5VL_group_specific(vol_obj, H5VL_GROUP_REFRESH, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, group_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, FAIL, "unable to refresh group")
 
 done:

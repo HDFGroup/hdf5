@@ -39,7 +39,6 @@
 #include "H5Iprivate.h"         /* IDs                                      */
 #include "H5Lprivate.h"         /* Links                                    */
 #include "H5MMprivate.h"        /* Memory management                        */
-#include "H5VLnative_private.h" /* Native VOL driver                        */
 
 
 /****************/
@@ -579,7 +578,7 @@ H5G_oloc(H5G_t *grp)
  *-------------------------------------------------------------------------
  */
 H5G_name_t *
-H5G_nameof(H5G_t *grp)
+H5G_nameof(const H5G_t *grp)
 {
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
     FUNC_ENTER_NOAPI_NOINIT_NOERR
@@ -808,7 +807,7 @@ H5G_iterate(H5G_loc_t *loc, const char *group_name,
      */
     if(NULL == (grp = H5G__open_name(loc, group_name)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open group")
-    if((gid = H5VL_native_register(H5I_GROUP, grp, TRUE)) < 0)
+    if((gid = H5VL_wrap_register(H5I_GROUP, grp, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register group")
 
     /* Set up user data for callback */
@@ -1070,7 +1069,7 @@ H5G_visit(H5G_loc_t *loc, const char *group_name, H5_index_t idx_type,
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open group")
 
     /* Register an ID for the starting group */
-    if((gid = H5VL_native_register(H5I_GROUP, grp, TRUE)) < 0)
+    if((gid = H5VL_wrap_register(H5I_GROUP, grp, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register group")
 
     /* Get the location of the starting group */

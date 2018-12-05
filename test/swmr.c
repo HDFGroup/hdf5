@@ -8588,10 +8588,9 @@ test_refresh_concur(hid_t in_fapl, hbool_t new_format)
             HDexit(EXIT_FAILURE);
 
         /* Wait for notification from parent process */
-        while(child_notify != 1) {
+        while(child_notify != 1)
             if(HDread(out_pdf[0], &child_notify, sizeof(int)) < 0)
                 HDexit(EXIT_FAILURE);
-        }
 
         /* Open the file 2 times */
         if((child_fid1 = H5Fopen(filename, H5F_ACC_RDONLY|H5F_ACC_SWMR_READ, fapl)) < 0)
@@ -8628,10 +8627,9 @@ test_refresh_concur(hid_t in_fapl, hbool_t new_format)
             HDexit(EXIT_FAILURE);
 
         /* Wait for notification from parent process */
-        while(child_notify != 3) {
+        while(child_notify != 3)
             if(HDread(out_pdf[0], &child_notify, sizeof(int)) < 0)
                 HDexit(EXIT_FAILURE);
-        }
 
         /* Refresh dataset via did1 */
         if(H5Drefresh(child_did1) < 0)

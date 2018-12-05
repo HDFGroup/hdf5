@@ -110,7 +110,7 @@ typedef struct H5D_type_info_t {
     hbool_t  bkg_buf_allocated;          /* Whether the background buffer was allocated */
 } H5D_type_info_t;
 
-/* types for dataset optional VOL operations */
+/* Types for dataset optional VOL operations */
 typedef enum H5VL_dataset_optional_t {
     H5VL_DATASET_FORMAT_CONVERT,            /* H5Dformat_convert (internal) */
     H5VL_DATASET_GET_CHUNK_INDEX_TYPE,      /* H5Dget_chunk_index_type      */

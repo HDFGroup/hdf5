@@ -171,7 +171,6 @@
 ./examples/h5_vds-percival.c
 ./examples/h5_vds-percival-unlim.c
 ./examples/h5_vds-percival-unlim-maxmin.c
-./examples/h5_vol_external_log_native.c
 ./examples/testh5cc.sh.in
 ./examples/README
 
@@ -894,11 +893,13 @@
 ./src/H5TS.c
 ./src/H5TSprivate.h
 ./src/H5VL.c
+./src/H5VLcallback.c
 ./src/H5VLint.c
 ./src/H5VLmodule.h
 ./src/H5VLnative.c
 ./src/H5VLnative.h
-./src/H5VLnative_private.h
+./src/H5VLpassthru.c
+./src/H5VLpassthru.h
 ./src/H5VLpkg.h
 ./src/H5VLprivate.h
 ./src/H5VLpublic.h
@@ -1153,7 +1154,6 @@
 ./test/test_filters_le.h5
 ./test/test_filters_be.h5
 ./test/gen_filters.c
-./test/chunk_info.c
 ./test/vds.c
 ./test/vds_swmr.h
 ./test/vds_swmr_gen.c

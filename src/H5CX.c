@@ -271,6 +271,10 @@ typedef struct H5CX_t {
     /* Cached LAPL properties */
     size_t nlinks;              /* Number of soft / UD links to traverse (H5L_ACS_NLINKS_NAME) */
     hbool_t nlinks_valid;       /* Whether number of soft / UD links to traverse is valid */
+
+    /* Cached VOL properties */
+    void *vol_wrap_ctx;         /* VOL plugin's "wrap context" for creating IDs */
+    hbool_t vol_wrap_ctx_valid; /* Whether VOL plugin's "wrap context" for creating IDs is valid */
 } H5CX_t;
 
 /* Typedef for nodes on the API context stack */
@@ -923,6 +927,40 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5CX_set_vol_wrap_ctx
+ *
+ * Purpose:     Sets the VOL object wrapping context for an operation.
+ *
+ * Return:      Non-negative on success / Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              October 14, 2018
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5CX_set_vol_wrap_ctx(void *vol_wrap_ctx)
+{
+    H5CX_node_t **head = H5CX_get_my_context();  /* Get the pointer to the head of the API context, for this thread */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(head && *head);
+
+    /* Set the API context value */
+    (*head)->ctx.vol_wrap_ctx = vol_wrap_ctx;
+
+    /* Mark the value as valid */
+    (*head)->ctx.vol_wrap_ctx_valid = TRUE;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5CX_set_vol_wrap_ctx() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5CX_get_dxpl
  *
  * Purpose:     Retrieves the DXPL ID for the current API call context.
@@ -972,6 +1010,42 @@ H5CX_get_lapl(void)
 
     FUNC_LEAVE_NOAPI((*head)->ctx.lapl_id)
 } /* end H5CX_get_lapl() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5CX_get_vol_wrap_ctx
+ *
+ * Purpose:     Retrieves the VOL object wrapping context for an operation.
+ *
+ * Return:      Non-negative on success / Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              October 14, 2018
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5CX_get_vol_wrap_ctx(void **vol_wrap_ctx)
+{
+    H5CX_node_t **head = H5CX_get_my_context();  /* Get the pointer to the head of the API context, for this thread */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(vol_wrap_ctx);
+    HDassert(head && *head);
+
+    /* Check for value that was set */
+    if((*head)->ctx.vol_wrap_ctx_valid)
+        /* Get the value */
+        *vol_wrap_ctx = (*head)->ctx.vol_wrap_ctx;
+    else
+        *vol_wrap_ctx = NULL;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5CX_get_vol_wrap_ctx() */
 
 
 /*-------------------------------------------------------------------------

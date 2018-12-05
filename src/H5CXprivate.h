@@ -63,10 +63,12 @@ H5_DLL void H5CX_set_lapl(hid_t lapl_id);
 H5_DLL herr_t H5CX_set_apl(hid_t *acspl_id, const H5P_libclass_t *libclass,
     hid_t loc_id, hbool_t is_collective);
 H5_DLL herr_t H5CX_set_loc(hid_t loc_id);
+H5_DLL herr_t H5CX_set_vol_wrap_ctx(void *wrap_ctx);
 
 /* "Getter" routines for API context info */
 H5_DLL hid_t H5CX_get_dxpl(void);
 H5_DLL hid_t H5CX_get_lapl(void);
+H5_DLL herr_t H5CX_get_vol_wrap_ctx(void **wrap_ctx);
 H5_DLL haddr_t H5CX_get_tag(void);
 H5_DLL H5AC_ring_t H5CX_get_ring(void);
 H5_DLL hbool_t H5CX_get_swmr_first_metadata_access(void);

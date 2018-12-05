@@ -904,7 +904,7 @@ H5F_get_eoa(const H5F_t *f, H5FD_mem_t type)
 
     /* Dispatch to driver */
     if(HADDR_UNDEF == (ret_value = H5FD_get_eoa(f->shared->lf, type)))
-    HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, HADDR_UNDEF, "driver get_eoa request failed")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, HADDR_UNDEF, "driver get_eoa request failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
