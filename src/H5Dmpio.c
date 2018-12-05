@@ -2901,6 +2901,8 @@ done:
         H5MM_free(num_assigned_chunks_array);
     if (shared_chunks_info_array)
         H5MM_free(shared_chunks_info_array);
+    if (H5Pclose(fapl_id) < 0)
+        HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "couldn't close FAPL")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__chunk_redistribute_shared_chunks() */
