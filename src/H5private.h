@@ -568,9 +568,6 @@
 #define H5_PB (1024.0F * 1024.0F * 1024.0F * 1024.0F * 1024.0F)
 #define H5_EB (1024.0F * 1024.0F * 1024.0F * 1024.0F * 1024.0F * 1024.0F)
 
-/* Define 2GB -- Used for 2GB limitation checks */
-#define H5_2GB (2.0F * 1024.0F * 1024.0F * 1024.0F)
-
 #ifndef H5_HAVE_FLOCK
 /* flock() operations. Used in the source so we have to define them when
  * the call is not available (e.g.: Windows). These should NOT be used

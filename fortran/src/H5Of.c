@@ -27,11 +27,15 @@ fill_h5o_info_t_f(H5O_info_t Oinfo, H5O_info_t_f *object_info);
 int_f
 fill_h5o_info_t_f(H5O_info_t Oinfo, H5O_info_t_f *object_info) {
 
+  /* This function does not used the field parameter because we want 
+   * this function to fill the unfilled fields with C's default values.
+   */
+
   struct tm *ts;
 
   object_info->fileno    = Oinfo.fileno;
   object_info->addr      = (haddr_t_f)Oinfo.addr;
- 
+
   object_info->type      = (int_f)Oinfo.type;
   object_info->rc        = (int_f)Oinfo.rc;
 
@@ -96,6 +100,8 @@ fill_h5o_info_t_f(H5O_info_t Oinfo, H5O_info_t_f *object_info) {
 
   object_info->meta_size.obj.index_size = (hsize_t_f)Oinfo.meta_size.obj.index_size;
   object_info->meta_size.obj.heap_size  = (hsize_t_f)Oinfo.meta_size.obj.heap_size;
+  object_info->meta_size.attr.index_size = (hsize_t_f)Oinfo.meta_size.attr.index_size;
+  object_info->meta_size.attr.heap_size  = (hsize_t_f)Oinfo.meta_size.attr.heap_size;
 
   return 0;
 
@@ -138,7 +144,7 @@ h5olink_c (hid_t_f *object_id, hid_t_f *new_loc_id, _fcd name, size_t_f *namelen
    * Call H5Olink function.
    */
   if((hid_t_f)H5Olink((hid_t)*object_id, (hid_t)*new_loc_id, c_name,
-		       (hid_t)*lcpl_id, (hid_t)*lapl_id) < 0)
+                      (hid_t)*lcpl_id, (hid_t)*lapl_id) < 0)
     HGOTO_DONE(FAIL);
 
  done:
@@ -229,6 +235,7 @@ h5oclose_c ( hid_t_f *object_id )
  *  idx - Iteration position at which to start
  *  op - Callback function passing data regarding the link to the calling application
  *  op_data - User-defined pointer to data required by the application for its processing of the link
+ *  fields - Flags specifying the fields to include in object_info.
  *
  * OUTPUTS
  *  idx - Position at which an interrupted iteration may be restarted
@@ -241,7 +248,7 @@ h5oclose_c ( hid_t_f *object_id )
  * SOURCE
 */
 int_f
-h5ovisit_c(hid_t_f *group_id, int_f *index_type, int_f *order, H5O_iterate_t op, void *op_data )
+h5ovisit_c(hid_t_f *group_id, int_f *index_type, int_f *order, H5O_iterate_t op, void *op_data, int_f *fields )
 /******/
 {
   int_f ret_value = -1;       /* Return value */
@@ -250,7 +257,8 @@ h5ovisit_c(hid_t_f *group_id, int_f *index_type, int_f *order, H5O_iterate_t op,
   /*
    * Call H5Ovisit2
    */
-  func_ret_value = H5Ovisit2( (hid_t)*group_id, (H5_index_t)*index_type, (H5_iter_order_t)*order, op, op_data, H5O_INFO_ALL);
+
+  func_ret_value = H5Ovisit2( (hid_t)*group_id, (H5_index_t)*index_type, (H5_iter_order_t)*order, op, op_data, (uint)*fields);
 
   ret_value = (int_f)func_ret_value;
 
@@ -302,6 +310,7 @@ h5oopen_by_addr_c (hid_t_f *loc_id, haddr_t_f *addr, hid_t_f *obj_id)
  *  name         - Name of group, relative to loc_id.
  *  namelen      - Name length.
  *  lapl_id      - Link access property list.
+ *  fields       - Flags specifying the fields to include in object_info.
  * OUTPUTS
  *  object_info  - Buffer in which to return object information.
  *
@@ -314,7 +323,7 @@ h5oopen_by_addr_c (hid_t_f *loc_id, haddr_t_f *addr, hid_t_f *obj_id)
 */
 int_f
 h5oget_info_by_name_c (hid_t_f *loc_id, _fcd name, size_t_f *namelen, hid_t_f *lapl_id,
-			H5O_info_t_f *object_info)
+                       H5O_info_t_f *object_info, int_f *fields)
 /******/
 {
   char *c_name = NULL;          /* Buffer to hold C string */
@@ -331,10 +340,10 @@ h5oget_info_by_name_c (hid_t_f *loc_id, _fcd name, size_t_f *namelen, hid_t_f *l
    * Call H5Oinfo_by_name function.
    */
   if(H5Oget_info_by_name2((hid_t)*loc_id, c_name,
-			 &Oinfo, H5O_INFO_ALL, (hid_t)*lapl_id) < 0)
+                          &Oinfo, (uint)*fields, (hid_t)*lapl_id) < 0)
     HGOTO_DONE(FAIL);
 
-  ret_value = fill_h5o_info_t_f(Oinfo,object_info);
+  ret_value = fill_h5o_info_t_f(Oinfo, object_info);
 
  done:
   if(c_name)
@@ -354,6 +363,7 @@ h5oget_info_by_name_c (hid_t_f *loc_id, _fcd name, size_t_f *namelen, hid_t_f *l
  *  lapl_id      - Link access property list.
  * OUTPUTS
  *  object_info  - Buffer in which to return object information.
+ *  fields       - Flags specifying the fields to include in object_info.
  *
  * RETURNS
  *  0 on success, -1 on failure
@@ -364,7 +374,7 @@ h5oget_info_by_name_c (hid_t_f *loc_id, _fcd name, size_t_f *namelen, hid_t_f *l
 */
 int_f
 h5oget_info_by_idx_c (hid_t_f *loc_id, _fcd  group_name, size_t_f *namelen, 
-		       int_f *index_field, int_f *order, hsize_t_f *n, hid_t_f *lapl_id, H5O_info_t_f *object_info)
+                      int_f *index_field, int_f *order, hsize_t_f *n, hid_t_f *lapl_id, H5O_info_t_f *object_info, int_f *fields)
 /******/
 {
   char *c_group_name = NULL;     /* Buffer to hold C string */
@@ -386,7 +396,7 @@ h5oget_info_by_idx_c (hid_t_f *loc_id, _fcd  group_name, size_t_f *namelen,
    * Call H5Oinfo_by_idx function.
    */
   if(H5Oget_info_by_idx2((hid_t)*loc_id, c_group_name, c_index_field, c_order, (hsize_t)*n,
-			 &Oinfo, H5O_INFO_ALL, (hid_t)*lapl_id) < 0)
+                         &Oinfo, (uint)*fields, (hid_t)*lapl_id) < 0)
     HGOTO_DONE(FAIL);
 
   ret_value = fill_h5o_info_t_f(Oinfo,object_info);
@@ -404,6 +414,7 @@ h5oget_info_by_idx_c (hid_t_f *loc_id, _fcd  group_name, size_t_f *namelen,
  *  Calls H5Oget_info
  * INPUTS
  *  object_id   - Identifier for target object.
+ *  fields      - Flags specifying the fields to include in object_info.
  * OUTPUTS
  *  object_info - Buffer in which to return object information.
  *
@@ -415,7 +426,7 @@ h5oget_info_by_idx_c (hid_t_f *loc_id, _fcd  group_name, size_t_f *namelen,
  * SOURCE
 */
 int_f
-h5oget_info_c (hid_t_f *object_id, H5O_info_t_f *object_info)
+h5oget_info_c (hid_t_f *object_id, H5O_info_t_f *object_info, int_f *fields)
 /******/
 {
   int_f ret_value = 0;          /* Return value */
@@ -424,7 +435,7 @@ h5oget_info_c (hid_t_f *object_id, H5O_info_t_f *object_info)
   /*
    * Call H5Oinfo_by_name function.
    */
-  if(H5Oget_info2((hid_t)*object_id, &Oinfo, H5O_INFO_ALL) < 0)
+  if(H5Oget_info2((hid_t)*object_id, &Oinfo, (uint)*fields) < 0)
     HGOTO_DONE(FAIL);
 
   ret_value = fill_h5o_info_t_f(Oinfo,object_info);
@@ -457,8 +468,8 @@ h5oget_info_c (hid_t_f *object_id, H5O_info_t_f *object_info)
 */
 int_f
 h5ocopy_c (hid_t_f *src_loc_id, _fcd src_name, size_t_f *src_name_len,
-	    hid_t_f *dst_loc_id, _fcd dst_name, size_t_f *dst_name_len, 
-	    hid_t_f *ocpypl_id, hid_t_f *lcpl_id )
+           hid_t_f *dst_loc_id, _fcd dst_name, size_t_f *dst_name_len, 
+           hid_t_f *ocpypl_id, hid_t_f *lcpl_id )
 /******/
 {
   char *c_src_name = NULL;  /* Buffer to hold C string */
@@ -478,7 +489,7 @@ h5ocopy_c (hid_t_f *src_loc_id, _fcd src_name, size_t_f *src_name_len,
    * Call H5Ocopy function.
    */
   if(H5Ocopy( (hid_t)*src_loc_id, c_src_name, (hid_t)*dst_loc_id, c_dst_name, 
-	      (hid_t)*ocpypl_id, (hid_t)*lcpl_id) < 0)
+              (hid_t)*ocpypl_id, (hid_t)*lcpl_id) < 0)
     HGOTO_DONE(FAIL);
 
  done:
@@ -503,6 +514,7 @@ h5ocopy_c (hid_t_f *src_loc_id, _fcd src_name, size_t_f *src_name_len,
  *  idx - Iteration position at which to start
  *  op - Callback function passing data regarding the link to the calling application
  *  op_data - User-defined pointer to data required by the application for its processing of the link
+ *  fields - Flags specifying the fields to include in object_info.
  *
  * OUTPUTS
  *  idx - Position at which an interrupted iteration may be restarted
@@ -516,7 +528,7 @@ h5ocopy_c (hid_t_f *src_loc_id, _fcd src_name, size_t_f *src_name_len,
 */
 int_f
 h5ovisit_by_name_c(hid_t_f *loc_id,  _fcd object_name, size_t_f *namelen, int_f *index_type, int_f *order,
-		    H5O_iterate_t op, void *op_data, hid_t_f *lapl_id )
+                   H5O_iterate_t op, void *op_data, hid_t_f *lapl_id, int_f *fields )
 /******/
 {
   int_f ret_value = -1;       /* Return value */
@@ -533,7 +545,7 @@ h5ovisit_by_name_c(hid_t_f *loc_id,  _fcd object_name, size_t_f *namelen, int_f 
    * Call H5Ovisit
    */
   func_ret_value = H5Ovisit_by_name2( (hid_t)*loc_id, c_object_name, (H5_index_t)*index_type, (H5_iter_order_t)*order,
-				     op, op_data, H5O_INFO_ALL, (hid_t)*lapl_id);
+                                      op, op_data, (uint)*fields, (hid_t)*lapl_id);
   ret_value = (int_f)func_ret_value;
 
  done:
@@ -763,7 +775,7 @@ h5oset_comment_by_name_c (hid_t_f *object_id, _fcd name, size_t_f *namelen,  _fc
 */
 int_f
 h5oopen_by_idx_c (hid_t_f *loc_id, _fcd  group_name, size_t_f *group_namelen, 
-		       int_f *index_type, int_f *order, hsize_t_f *n, hid_t_f *obj_id, hid_t_f *lapl_id)
+                  int_f *index_type, int_f *order, hsize_t_f *n, hid_t_f *obj_id, hid_t_f *lapl_id)
 /******/
 {
   char *c_group_name = NULL;     /* Buffer to hold C string */
@@ -868,7 +880,7 @@ h5oget_comment_c (hid_t_f *object_id, _fcd comment, size_t_f *commentsize,  hssi
 */
 int_f
 h5oget_comment_by_name_c (hid_t_f *loc_id, _fcd name, size_t_f *name_size, 
-			   _fcd comment, size_t_f *commentsize, size_t_f *bufsize, hid_t_f *lapl_id)
+                          _fcd comment, size_t_f *commentsize, size_t_f *bufsize, hid_t_f *lapl_id)
 /******/
 {
   char *c_comment = NULL;  /* Buffer to hold C string */
