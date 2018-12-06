@@ -50,6 +50,7 @@
   set (HDF5_REFERENCE_ERR_FILES
       h5fc_d_file.ddl.err
       h5fc_dname.err
+      h5fc_nonexistfile.ddl.err
       h5fc_nonexistdset_file.ddl.err
   )
   set (HDF5_REFERENCE_TEST_FILES

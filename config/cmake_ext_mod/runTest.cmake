@@ -144,6 +144,7 @@ if (TEST_MASK_ERROR)
     # the error stack remains in the .err file
     file (READ ${TEST_FOLDER}/${TEST_OUTPUT}.err TEST_STREAM)
   endif ()
+  string (REGEX REPLACE "[.]*_pmi_alps[.]*\n" "" TEST_STREAM "${TEST_STREAM}")
   string (REGEX REPLACE "thread [0-9]*:" "thread (IDs):" TEST_STREAM "${TEST_STREAM}")
   string (REGEX REPLACE ": ([^\n]*)[.]c " ": (file name) " TEST_STREAM "${TEST_STREAM}")
   string (REGEX REPLACE " line [0-9]*" " line (number)" TEST_STREAM "${TEST_STREAM}")
