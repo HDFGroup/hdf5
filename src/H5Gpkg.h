@@ -301,10 +301,18 @@ typedef struct H5G_copy_file_ud_t {
 
 /* Types for optional group VOL operations */
 typedef enum H5VL_group_optional_t {
-#ifndef H5_NO_DEPRECATED_SYMBOLS
     H5VL_GROUP_ITERATE_OLD,             /* HG5Giterate (deprecated routine) */
     H5VL_GROUP_GET_OBJINFO              /* HG5Gget_objinfo (deprecated routine) */
-#endif /* H5_NO_DEPRECATED_SYMBOLS */
+                                        /* (These two enum values should have an
+                                         *      "#ifndefH5_NO_DEPRECATED_SYMBOLS"
+                                         *      around them, but the compiler
+                                         *      complains about an empty enum
+                                         *      when deprecated symbols are
+                                         *      disabled currently.  When
+                                         *      another enum value is added,
+                                         *      please put the #ifdef around
+                                         *      these symbols.  QAK - 2018/12/06
+                                         */
 } H5VL_group_optional_t;
 
 
