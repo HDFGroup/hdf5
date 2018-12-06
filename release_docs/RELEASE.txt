@@ -76,6 +76,38 @@ New Features
       (ADB - 2018/09/26, HDFFV-10594)
 
 
+
+    - Incorrectly installed private header files were removed from
+      CMake installs.
+
+      The CMake build files incorrectly flagged the following header files
+      as public and installed them. They are private and will no longer be
+      installed.
+
+        HDF5 library private package files (H5Xpkg.h)
+        H5Edefin.h
+        H5Einit.h
+        H5Eterm.h
+        H5LTparse.h
+        h5diff.h
+        h5tools_dump.h
+        h5tools.h
+        h5tools_ref.h
+        h5tools_str.h
+        h5tools_utils.h
+        h5trav.h
+
+      (DER - 2018/10/26, HDFFV-10614, 10609)
+ 
+    - Autotools installs now install H5FDwindows.h
+
+      This is simply to align the installed header files between the
+      autotools and CMake. H5FDwindows.h has no functionality on
+      non-Windows systems.
+
+      (DER - 2018/10/26, HDFFV-10614)
+
+ 
     Library:
     --------
     - Allow pre-generated H5Tinit.c and H5make_libsettings.c to be used.
@@ -86,7 +118,25 @@ New Features
       (ADB - 2018/09/18, HDFFV-10332)
 
 
-    Parallel Library:
+    - Several empty public header files where removed from the distribution
+
+      The following files were empty placeholders. They are for internal
+      packages that are unlikely to ever have public functionality and have
+      thus been removed.
+
+        H5Bpublic.h
+        H5B2public.h
+        H5FSpublic.h
+        H5HFpublic.h
+        H5HGpublic.h
+        H5HLpublic.h
+
+      They were only installed in CMake builds.
+
+      (DER - 2018/10/26, HDFFV-10614)
+
+
+     Parallel Library:
     -----------------
     -
 
