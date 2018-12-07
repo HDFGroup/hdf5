@@ -1148,7 +1148,7 @@ done:
  * Return:      Non-negative on success, negative on failure
  *
  * Programmer:  Binh-Minh Ribler
- *              August 2018 (EED-343)
+ *              August 2018 (HDFFV-10615)
  *
  *-------------------------------------------------------------------------
  */
@@ -1199,7 +1199,7 @@ done:
  * Return:      Non-negative on success, negative on failure
  *
  * Programmer:  Binh-Minh Ribler
- *              August 2018 (EED-343)
+ *              August 2018 (HDFFV-10615)
  *
  *-------------------------------------------------------------------------
  */
@@ -1208,7 +1208,6 @@ H5Dget_chunk_info(hid_t dset_id, hid_t fspace_id, hsize_t index, hsize_t *offset
 {
     H5D_t       *dset = NULL;
     const H5S_t *space;              /* Dataspace for dataset */
-    hsize_t     space_allocated = 0;
     herr_t      ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
@@ -1220,8 +1219,6 @@ H5Dget_chunk_info(hid_t dset_id, hid_t fspace_id, hsize_t index, hsize_t *offset
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset ID")
     if(NULL == (space = (const H5S_t *)H5I_object_verify(fspace_id, H5I_DATASPACE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace ID")
-    if(index < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid argument (null)")
     if(NULL == offset && NULL == filter_mask && NULL == addr && NULL == size)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid arguments, must have at least one non-null output argument")
 
@@ -1253,7 +1250,7 @@ done:
  * Return:      Non-negative on success, negative on failure
  *
  * Programmer:  Binh-Minh Ribler
- *              August 2018 (EED-343)
+ *              August 2018 (HDFFV-10615)
  *
  *-------------------------------------------------------------------------
  */

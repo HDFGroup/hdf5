@@ -6754,11 +6754,10 @@ done:
  * Note:        Currently, this function only gets the number of all written
  *              chunks, regardless the dataspace.
  *
- * Return:      Success:    H5_ITER_CONT or H5_ITER_STOP
- *              Failure:    Negative (H5_ITER_ERROR)
+ * Return:      H5_ITER_CONT
  *
  * Programmer:  Binh-Minh Ribler
- *              September 2018 (EED-343)
+ *              September 2018 (HDFFV-10615)
  *
  *-------------------------------------------------------------------------
  */
@@ -6790,7 +6789,7 @@ H5D__get_num_chunks_cb(const H5D_chunk_rec_t H5_ATTR_UNUSED *chunk_rec, void *_u
  *              Failure:        Negative
  *
  * Programmer:  Binh-Minh Ribler
- *              September 2018 (EED-343)
+ *              September 2018 (HDFFV-10615)
  *
  *-------------------------------------------------------------------------
  */
@@ -6852,7 +6851,7 @@ done:
  *              Failure:    Negative (H5_ITER_ERROR)
  *
  * Programmer:  Binh-Minh Ribler
- *              September 2018 (EED-343)
+ *              September 2018 (HDFFV-10615)
  *
  *-------------------------------------------------------------------------
  */
@@ -6902,7 +6901,7 @@ H5D__get_chunk_info_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
  *              Failure: FAIL
  *
  * Programmer:  Binh-Minh Ribler
- *              September 2018 (EED-343)
+ *              September 2018 (HDFFV-10615)
  *
  *-------------------------------------------------------------------------
  */
@@ -6989,7 +6988,7 @@ done:
  *              Failure:    Negative (H5_ITER_ERROR)
  *
  * Programmer:  Binh-Minh Ribler
- *              September 2018 (EED-343)
+ *              September 2018 (HDFFV-10615)
  *
  *-------------------------------------------------------------------------
  */
@@ -7037,7 +7036,7 @@ H5D__get_chunk_info_by_coord_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
  *              Failure:        Negative
  *
  * Programmer:  Binh-Minh Ribler
- *              September 2018 (EED-343)
+ *              September 2018 (HDFFV-10615)
  *
  *-------------------------------------------------------------------------
  */
