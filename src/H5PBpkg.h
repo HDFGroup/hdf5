@@ -108,7 +108,7 @@ if ( ( ( ( (head_ptr) == NULL ) || ( (tail_ptr) == NULL ) ) &&            \
        )                                                                  \
      )                                                                    \
    ) {                                                                    \
-    HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, (fv), "DLL sanity check failed")   \
+    HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, (fv), "DLL sanity check failed") \
 }
 
 #define H5PB__DLL_PRE_INSERT_SC(entry_ptr, head_ptr, tail_ptr, len, Size, fv) \
@@ -129,7 +129,8 @@ if ( ( (entry_ptr) == NULL ) ||                                               \
        )                                                                      \
      )                                                                        \
    ) {                                                                        \
-    HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, (fv), "DLL pre insert SC failed")      \
+    HDassert(FALSE); \
+    HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, (fv), "DLL pre insert SC failed")    \
 }
 
 #else /* H5PB__DO_SANITY_CHECKS */
@@ -310,9 +311,30 @@ if ( ( ( ( (head_ptr) == NULL ) || ( (tail_ptr) == NULL ) ) &&             \
 
 
 #define H5PB__IL_DLL_APPEND(entry_ptr, head_ptr, tail_ptr, len, Size, fail_val)\
-{                                                                             \
+{                                                                              \
     H5PB__IL_DLL_PRE_INSERT_SC(entry_ptr, head_ptr, tail_ptr, len, Size,       \
-                               fail_val)                                      \
+                               fail_val)                                       \
+    if ( (head_ptr) == NULL )                                                  \
+    {                                                                          \
+       (head_ptr) = (entry_ptr);                                               \
+       (tail_ptr) = (entry_ptr);                                               \
+    }                                                                          \
+    else                                                                       \
+    {                                                                          \
+       (tail_ptr)->il_next = (entry_ptr);                                      \
+       (entry_ptr)->il_prev = (tail_ptr);                                      \
+       (tail_ptr) = (entry_ptr);                                               \
+    }                                                                          \
+    (len)++;                                                                   \
+    (Size) += (int64_t)((entry_ptr)->size);                                    \
+    H5PB__IL_DLL_SC(head_ptr, tail_ptr, len, Size, fail_val)                   \
+} /* H5PB__IL_DLL_APPEND() */
+
+#define H5PB__IL_DLL_PREPEND(entry_ptr, head_ptr, tail_ptr, len, Size,        \
+                             fail_val)                                        \
+{                                                                             \
+    H5PB__DLL_PRE_INSERT_SC(entry_ptr, head_ptr, tail_ptr, len, Size,         \
+                            fail_val)                                         \
     if ( (head_ptr) == NULL )                                                 \
     {                                                                         \
        (head_ptr) = (entry_ptr);                                              \
@@ -320,14 +342,45 @@ if ( ( ( ( (head_ptr) == NULL ) || ( (tail_ptr) == NULL ) ) &&             \
     }                                                                         \
     else                                                                      \
     {                                                                         \
-       (tail_ptr)->il_next = (entry_ptr);                                     \
-       (entry_ptr)->il_prev = (tail_ptr);                                     \
-       (tail_ptr) = (entry_ptr);                                              \
+       (head_ptr)->il_prev = (entry_ptr);                                     \
+       (entry_ptr)->il_next = (head_ptr);                                     \
+       (head_ptr) = (entry_ptr);                                              \
     }                                                                         \
     (len)++;                                                                  \
     (Size) += (int64_t)((entry_ptr)->size);                                   \
-    H5PB__IL_DLL_SC(head_ptr, tail_ptr, len, Size, fail_val)                   \
-} /* H5PB__IL_DLL_APPEND() */
+} /* H5PB__DLL_PREPEND() */
+
+
+#define H5PB__IL_DLL_INSERT_BEFORE(entry_ptr, suc_ptr, head_ptr, tail_ptr,    \
+                                   len, Size, fail_val)                       \
+{                                                                             \
+    HDassert( ((suc_ptr) == NULL) ||                                          \
+              ((suc_ptr)->magic == H5PB__H5PB_ENTRY_T_MAGIC) );               \
+                                                                              \
+    if ( suc_ptr == NULL )                                                    \
+        /* list empty or no successor -- append */                            \
+        H5PB__IL_DLL_APPEND(entry_ptr, head_ptr, tail_ptr, len, Size,         \
+                            fail_val)                                         \
+                                                                              \
+    else if ( suc_ptr->il_prev == NULL )                                      \
+        /* successor at head of list -- prepend */                            \
+        H5PB__IL_DLL_PREPEND(entry_ptr, head_ptr, tail_ptr, len, Size,        \
+                             fail_val)                                        \
+                                                                              \
+    else /* sucessor in body of list -- insert before it */                   \
+    {                                                                         \
+        H5PB__IL_DLL_PRE_INSERT_SC(entry_ptr, head_ptr, tail_ptr, len, Size,  \
+                                   fail_val)                                  \
+        HDassert(suc_ptr->il_prev->magic == H5PB__H5PB_ENTRY_T_MAGIC);        \
+        HDassert(suc_ptr->il_prev->il_next == suc_ptr);                       \
+        entry_ptr->il_prev = suc_ptr->il_prev;                                \
+        entry_ptr->il_prev->il_next = entry_ptr;                              \
+        entry_ptr->il_next = suc_ptr;                                         \
+        suc_ptr->il_prev = entry_ptr;                                         \
+        (len)++;                                                              \
+        (Size) += (int64_t)((entry_ptr)->size);                               \
+    }                                                                         \
+} /* H5PB__DLL_INSERT_BEFORE() */
 
 #define H5PB__IL_DLL_REMOVE(entry_ptr, head_ptr, tail_ptr, len, Size, fv)    \
 {                                                                           \
@@ -1295,6 +1348,54 @@ if ( ( (pb_ptr)->index_size !=                                        \
                                                                   \
 } /* H5PB__UPDATE_RP_FOR_EVICTION */
 
+/*-------------------------------------------------------------------------
+ *
+ * Macro:	H5PB__UPDATE_RP_FOR_REMOVE
+ *
+ * Purpose:     Update the replacement policy data structures for the
+ *		removal of the specified page buffer entry from the 
+ *              replacement policy, but not from the page buffer.  
+ *
+ *              At present, this this only happens when an entry is 
+ *              dirtied, and subject to a delayed write.
+ *
+ *		At present, we only support the modified LRU policy, so
+ *		this function deals with that case unconditionally.  If
+ *		we ever support other replacement policies, the function
+ *		should switch on the current policy and act accordingly.
+ *
+ * Return:      Non-negative on success/Negative on failure.
+ *
+ * Programmer:  John Mainzer, 10/09/18
+ *
+ * Modifications:
+ *
+ *		None.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+#define H5PB__UPDATE_RP_FOR_REMOVE(pb_ptr, entry_ptr, fail_val) \
+{                                                               \
+    HDassert( (pb_ptr) );                                       \
+    HDassert( (pb_ptr)->magic == H5PB__H5PB_T_MAGIC );          \
+    HDassert( (entry_ptr) );                                    \
+    HDassert( (entry_ptr)->magic == H5PB__H5PB_ENTRY_T_MAGIC ); \
+    HDassert( ! ((entry_ptr)->is_mpmde) );                      \
+    HDassert( (entry_ptr)->size == pb_ptr->page_size );         \
+                                                                \
+    /* modified LRU specific code */                            \
+                                                                \
+    /* remove the entry from the LRU list. */                   \
+                                                                \
+    H5PB__DLL_REMOVE((entry_ptr), (pb_ptr)->LRU_head_ptr,       \
+                     (pb_ptr)->LRU_tail_ptr, (pb_ptr)->LRU_len, \
+                     (pb_ptr)->LRU_size, (fail_val))            \
+                                                                \
+    /* End modified LRU specific code. */                       \
+                                                                \
+} /* H5PB__UPDATE_RP_FOR_EVICTION */
+
 
 /*-------------------------------------------------------------------------
  *
@@ -1646,7 +1747,8 @@ if ( ( (pb_ptr)->index_size !=                                        \
         suc_ptr = suc_ptr->next;                                              \
     }                                                                         \
                                                                               \
-    H5PB__DLL_INSERT_BEFORE((entry_ptr), (suc_ptr), (pb_ptr)->dwl_head_ptr,   \
+    H5PB__DLL_INSERT_BEFORE((entry_ptr), (suc_ptr),                           \
+                            (pb_ptr)->dwl_head_ptr,                           \
                             (pb_ptr)->dwl_tail_ptr, (pb_ptr)->dwl_len,        \
                             (pb_ptr)->dwl_size, (fail_val))                   \
                                                                               \
@@ -1685,11 +1787,11 @@ if ( ( (pb_ptr)->index_size !=                                        \
     HDassert( (entry_ptr) );                                         \
     HDassert( (entry_ptr)->magic == H5PB__H5PB_ENTRY_T_MAGIC );      \
     HDassert( (entry_ptr)->size >= pb_ptr->page_size );              \
-    HDassert( (entry_ptr)->delay_write_until < (pb_ptr)->cur_tick ); \
+    HDassert( (entry_ptr)->delay_write_until == 0 );                 \
                                                                      \
     /* remove the entry from the delayed write list. */              \
                                                                      \
-    H5PB__TL_DLL_REMOVE((entry_ptr), (pb_ptr)->dwl_head_ptr,         \
+    H5PB__DLL_REMOVE((entry_ptr), (pb_ptr)->dwl_head_ptr,            \
                      (pb_ptr)->dwl_tail_ptr, (pb_ptr)->dwl_len,      \
                      (pb_ptr)->dwl_size, (fail_val))                 \
                                                                      \

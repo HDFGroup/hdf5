@@ -179,7 +179,7 @@ gen_skeleton(const char *filename, hbool_t verbose, hbool_t vfd_swmr_write,
         config->tick_len = 4;
         config->max_lag = 6;
         config->vfd_swmr_writer = TRUE;
-        config->md_pages_reserved = 2;
+        config->md_pages_reserved = 200;
         HDstrcpy(config->md_file_path, "my_md_file");
 
         /* Enable VFD SWMR configuration in fapl */
@@ -240,6 +240,10 @@ gen_skeleton(const char *filename, hbool_t verbose, hbool_t vfd_swmr_write,
     if(verbose)
         HDfprintf(stderr, "Creating datasets\n");
 
+#if 1 /* delete this once the race condiditon bug is fixed */ /* JRM */
+    sleep(1);
+#endif /* JRM */
+
     /* Create the datasets */
     for(u = 0; u < NLEVELS; u++)
         for(v = 0; v < symbol_count[u]; v++) {
@@ -287,6 +291,10 @@ gen_skeleton(const char *filename, hbool_t verbose, hbool_t vfd_swmr_write,
         return -1;
     if(H5Tclose(tid) < 0)
         return -1;
+
+    if(verbose)
+        HDfprintf(stderr, "Closing file\n");
+
     if(H5Fclose(fid) < 0)
         return -1;
 

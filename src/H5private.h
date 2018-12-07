@@ -375,8 +375,12 @@
 #  define H5_EXP2(n)    (1 << (n))
 
 /* VFD SWMR */
-#define SECOND_TO_NANOSECS          1000000000      /* Second to nanoseconds */
-#define TENTH_SEC_TO_NANOSECS       100000000       /* Tenth of a second to nanoseconds */
+#define SECOND_TO_NANOSECS          1000000000 /* Second to nanoseconds */
+#define TENTH_SEC_TO_NANOSECS       100000000  /* 0.1 second to nanoseconds */
+#if 0 /* use gettimeofday() */ /* JRM */
+#define SECOND_TO_MICROSECS         1000000    /* Second to microseconds */
+#define TENTH_SEC_TO_MICROSECS      100000     /* 0.1 second to microseconds */
+#endif /* use gettimeofday() */ /* JRM */
 
 /*
  * HDF Boolean type.
@@ -1953,7 +1957,11 @@ extern hbool_t H5_libterm_g;    /* Is the library being shutdown? */
 extern hbool_t vfd_swmr_g;
 extern hbool_t vfd_swmr_writer_g;
 extern uint64_t tick_num_g;
+#if 1 /* use clock_gettime() */ /* JRM */
 extern struct timespec end_of_tick_g;
+#else /* use gettimeofday() */ /* JRM */
+extern struct timeval end_of_tick_g;
+#endif /* use gettimeofday() */ /* JRM */
 
 #endif /* H5_HAVE_THREADSAFE */
 
@@ -2070,26 +2078,53 @@ H5_DLL herr_t H5CX_pop(void);
                                                                               \
     BEGIN_MPE_LOG
 
-#define VFD_SWMR_TEST_FOR_END_OF_TICK(swmr_reader_exit, err)                                            \
-    /* Initialize the library */                                                                        \
-    if(vfd_swmr_g) {                                                                                    \
-        struct timespec curr_time;                                                                      \
-        long curr_nsecs, end_nsecs;                                                                     \
-        if(HDclock_gettime(CLOCK_MONOTONIC, &curr_time) < 0)                                            \
-            HGOTO_ERROR(H5E_FUNC, H5E_CANTGET, err, "can't get time via clock_gettime")                 \
-        curr_nsecs = curr_time.tv_sec * 1000000000 + curr_time.tv_nsec;                                 \
-        end_nsecs = end_of_tick_g.tv_sec * 1000000000 + end_of_tick_g.tv_nsec;                          \
-        if(curr_nsecs > end_nsecs) {                                                                    \
-            if(vfd_swmr_writer_g) {                                                                     \
-                if(H5F_vfd_swmr_writer_end_of_tick() < 0)                                               \
-                    HGOTO_ERROR(H5E_FUNC, H5E_CANTSET, err, "end of tick error for VFD SWMR writer")    \
-            }                                                                                           \
-            else if(!swmr_reader_exit) {                                                                \
-                if(H5F_vfd_swmr_reader_end_of_tick() < 0)                                               \
-                    HGOTO_ERROR(H5E_FUNC, H5E_CANTSET, err, "end of tick error for VFD SWMR reader")    \
-            }                                                                                           \
-        }                                                                                               \
+#if 1 /* clock_gettime() version */ /* JRM */
+#define VFD_SWMR_TEST_FOR_END_OF_TICK(swmr_reader_exit, err)                  \
+    /* Initialize the library */                                              \
+    if(vfd_swmr_g) {                                                          \
+        struct timespec curr_time;                                            \
+        long curr_nsecs, end_nsecs;                                           \
+        if(HDclock_gettime(CLOCK_MONOTONIC, &curr_time) < 0)                  \
+            HGOTO_ERROR(H5E_FUNC, H5E_CANTGET, err,                           \
+                        "can't get time via clock_gettime")                   \
+        curr_nsecs = curr_time.tv_sec * 1000000000 + curr_time.tv_nsec;       \
+        end_nsecs = end_of_tick_g.tv_sec * 1000000000 + end_of_tick_g.tv_nsec;\
+        if(curr_nsecs > end_nsecs) {                                          \
+            if(vfd_swmr_writer_g) {                                           \
+                if(H5F_vfd_swmr_writer_end_of_tick() < 0)                     \
+                    HGOTO_ERROR(H5E_FUNC, H5E_CANTSET, err,                   \
+                                "end of tick error for VFD SWMR writer")      \
+            }                                                                 \
+            else if(!swmr_reader_exit) {                                      \
+                if(H5F_vfd_swmr_reader_end_of_tick() < 0)                     \
+                    HGOTO_ERROR(H5E_FUNC, H5E_CANTSET, err,                   \
+                                "end of tick error for VFD SWMR reader")      \
+            }                                                                 \
+        }                                                                     \
     }
+#else /* gettimeofday() version */ /* JRM */
+#define VFD_SWMR_TEST_FOR_END_OF_TICK(swmr_reader_exit, err)                   \
+    /* Initialize the library */                                               \
+    if(vfd_swmr_g) {                                                           \
+        struct timeval curr_time;                                              \
+        if(HDgettimeofday(&curr_time, NULL) < 0)                               \
+            HGOTO_ERROR(H5E_FUNC, H5E_CANTGET, err,                            \
+                        "can't get time via gettimeofday()")                   \
+        if((curr_time.tv_sec >= end_of_tick_g.tv_sec) &&                       \
+           (curr_time.tv_usec >= end_of_tick_g.tv_usec)) {                     \
+            if(vfd_swmr_writer_g) {                                            \
+                if(H5F_vfd_swmr_writer_end_of_tick() < 0)                      \
+                    HGOTO_ERROR(H5E_FUNC, H5E_CANTSET, err,                    \
+                                "end of tick error for VFD SWMR writer")       \
+            }                                                                  \
+            else if(!swmr_reader_exit) {                                       \
+                if(H5F_vfd_swmr_reader_end_of_tick() < 0)                      \
+                    HGOTO_ERROR(H5E_FUNC, H5E_CANTSET, err,                    \
+                           "end of tick error for VFD SWMR reader")            \
+            }                                                                  \
+        }                                                                      \
+    }
+#endif /* gettimeofday() version */ /* JRM */
 
 /* Use this macro for all "normal" API functions */
 #define FUNC_ENTER_API(err) {{                                                \

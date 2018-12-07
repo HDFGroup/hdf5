@@ -126,6 +126,8 @@ static herr_t H5F__vfd_swmr_construct_write_md_hdr(H5F_t *f, uint32_t num_entrie
 static herr_t H5F__vfd_swmr_construct_write_md_idx(H5F_t *f, uint32_t num_entries, struct H5FD_vfd_swmr_idx_entry_t index[]);
 static herr_t H5F__idx_entry_cmp(const void *_entry1, const void *_entry2);
 static herr_t H5F__vfd_swmr_writer__create_index(H5F_t * f);
+static herr_t H5F_vfd_swmr_writer__prep_for_flush_or_close(H5F_t *f);
+static herr_t H5F__vfd_swmr_writer__wait_a_tick(H5F_t *f);
 
 
 
@@ -138,7 +140,11 @@ H5F_t *vfd_swmr_file_g = NULL;          /* Points to the file struct */
 hbool_t vfd_swmr_g = FALSE;             /* Is this a VFD SWMR configured file */
 hbool_t vfd_swmr_writer_g = FALSE;      /* Is this the VFD SWMR writer */
 uint64_t tick_num_g = 0;                /* The current tick_num */
+#if 1 /* clock_gettime() version */ /* JRM */
 struct timespec end_of_tick_g;          /* The current end_of_tick */
+#else /* gettimeofday() version */ /* JRM */
+struct timeval end_of_tick_g;          /* The current end_of_tick */
+#endif /* gettimeofday() version */ /* JRM */
 
 
 /*****************************/
@@ -1101,11 +1107,18 @@ H5F__new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get VFD SWMR config info")
 
         /* Initialization for VFD SWMR */
-        f->shared->vfd_swmr_md_fd = -1;
-        f->shared->fs_man_md = NULL;
-        f->shared->dl_head_ptr = NULL;
-        f->shared->dl_tail_ptr = NULL;
-        f->shared->dl_len = 0;
+        f->shared->vfd_swmr             = FALSE;
+        f->shared->vfd_swmr_writer      = FALSE;
+        f->shared->tick_num             = 0;
+        f->shared->mdf_idx              = NULL;
+        f->shared->mdf_idx_len          = 0;
+        f->shared->mdf_idx_entries_used = 0;
+
+        f->shared->vfd_swmr_md_fd       = -1;
+        f->shared->fs_man_md            = NULL;
+        f->shared->dl_head_ptr          = NULL;
+        f->shared->dl_tail_ptr          = NULL;
+        f->shared->dl_len               = 0;
 
         /* Create a metadata cache with the specified number of elements.
          * The cache might be created with a different number of elements and
@@ -1325,6 +1338,12 @@ H5F__dest(H5F_t *f, hbool_t flush)
         if(H5AC_dest(f))
             /* Push error, but keep going*/
             HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "problems closing file")
+
+        /* If this is a VFD SWMR writer, prep for flush or close */
+        if((f->shared->vfd_swmr) && (f->shared->vfd_swmr_writer) &&
+           (H5F_vfd_swmr_writer__prep_for_flush_or_close(f) < 0))
+            /* Push error, but keep going*/
+            HDONE_ERROR(H5E_IO, H5E_CANTFLUSH, FAIL, "vfd swmr prep for flush or close failed")
 
         /* Shutdown the page buffer cache */
         if(H5PB_dest(f) < 0)
@@ -1955,6 +1974,12 @@ H5F__flush_phase2(H5F_t *f, hbool_t closing)
         /* Push error, but keep going*/
         HDONE_ERROR(H5E_IO, H5E_CANTFLUSH, FAIL, "unable to flush metadata accumulator")
 
+    /* If this is a VFD SWMR writer, prep for flush or close */
+    if((f->shared->vfd_swmr) && (f->shared->vfd_swmr_writer) &&
+       (H5F_vfd_swmr_writer__prep_for_flush_or_close(f) < 0))
+        /* Push error, but keep going*/
+        HDONE_ERROR(H5E_IO, H5E_CANTFLUSH, FAIL, "vfd swmr prep for flush or close failed")
+
     /* Flush the page buffer */
     if(H5PB_flush(f) < 0)
         /* Push error, but keep going*/
@@ -2039,6 +2064,7 @@ H5F__close(hid_t file_id)
 
         if((nref = H5I_get_ref(file_id, FALSE)) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get ID ref count")
+
         if(nref == 1)
             if(H5F__flush(f) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
@@ -3606,7 +3632,7 @@ done:
  *              For VFD SWMR writer:
  *
  *                  --set vfd_swmr_writer_g to TRUE
- *                  --set tick_num_g to 0
+ *                  --set tick_num_g to 1
  *                  --create the metadata file
  *                  --when opening an existing HDF5 file, write header and 
  *                    empty index in the metadata file
@@ -3644,7 +3670,12 @@ H5F__vfd_swmr_init(H5F_t *f, hbool_t file_create)
         HDassert(f->shared->vfd_swmr_config.vfd_swmr_writer);
 
         vfd_swmr_writer_g = f->shared->vfd_swmr_writer = TRUE;
-        tick_num_g = f->shared->tick_num = 0;
+        tick_num_g = f->shared->tick_num = 1;
+
+        if ( H5PB_vfd_swmr__set_tick(f) < 0 )
+
+            HGOTO_ERROR(H5E_FILE, H5E_SYSTEM, FAIL, \
+                        "Can't update page buffer current tick")
 
         /* Create the metadata file */
         if ( ((f->shared->vfd_swmr_md_fd = 
@@ -3907,6 +3938,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
+#if 1 /* clock_gettime() version */ /* JRM */
 static herr_t
 H5F__vfd_swmr_update_end_of_tick_and_tick_num(H5F_t *f, hbool_t incr_tick_num)
 {
@@ -3954,6 +3986,11 @@ H5F__vfd_swmr_update_end_of_tick_and_tick_num(H5F_t *f, hbool_t incr_tick_num)
         tick_num_g++;
 #endif /* JRM */
         f->shared->tick_num = tick_num_g;
+
+        if ( H5PB_vfd_swmr__set_tick(f) < 0 )
+
+            HGOTO_ERROR(H5E_FILE, H5E_SYSTEM, FAIL, \
+                        "Can't update page buffer current tick")
     }
 
     /* 
@@ -3981,6 +4018,72 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 
 } /* H5F__vfd_swmr_update_end_of_tick_and_tick_num() */
+
+#else /* gettimeofday() version */ /* JRM */
+
+static herr_t
+H5F__vfd_swmr_update_end_of_tick_and_tick_num(H5F_t *f, hbool_t incr_tick_num)
+{
+    struct timeval curr;                /* Current time in struct timeval */
+    struct timeval new_end_of_tick;     /* new end_of_tick in struct timeval */
+    uint64_t tlen_usecs;
+    uint64_t new_usecs;
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Get current time in struct timespec */
+    if ( HDgettimeofday(&curr, NULL) < 0 )
+
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, \
+                    "can't get time via gettimeofday()")
+
+    /* Convert tick_len to u_secs */
+    tlen_usecs = f->shared->vfd_swmr_config.tick_len * TENTH_SEC_TO_MICROSECS;
+
+    /* compute new end of tick */
+    new_end_of_tick.tv_sec = curr.tv_sec;
+    new_usecs = curr.tv_usec + tlen_usecs;
+
+    while ( new_usecs > SECOND_TO_MICROSECS ) {
+
+        (new_end_of_tick.tv_sec)++;
+        new_usecs -= SECOND_TO_MICROSECS;
+    }
+
+    new_end_of_tick.tv_usec = (suseconds_t)new_usecs;
+
+    /* Update end_of_tick_g, f->shared->end_of_tick */
+
+    HDmemcpy(&end_of_tick_g, &new_end_of_tick, sizeof(struct timeval));
+    HDmemcpy(&f->shared->end_of_tick, &new_end_of_tick, sizeof(struct timeval));
+
+    /* 
+     *  Update tick_num_g, f->shared->tick_num 
+     */
+    if ( incr_tick_num ) {
+
+        /* Regardless of elapsed time, only increment the tick num by 1
+         * so as to avoid the possibility of using up all of max_lag in
+         * one or two ticks.
+         */
+        tick_num_g++;
+
+        f->shared->tick_num = tick_num_g;
+
+        if ( H5PB_vfd_swmr__set_tick(f) < 0 )
+
+            HGOTO_ERROR(H5E_FILE, H5E_SYSTEM, FAIL, \
+                        "Can't update page buffer current tick")
+    }
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5F__vfd_swmr_update_end_of_tick_and_tick_num() */
+
+#endif /* gettimeofday() version */ /* JRM */
 
 
 /*-------------------------------------------------------------------------
@@ -4319,7 +4422,7 @@ done:
  *           the metadata file index, failure to delay such writes can 
  *           result in message from the future bugs.
  *
- *           The easy case case is pages or multi-page metadata entries
+ *           The easy case is pages or multi-page metadata entries
  *           have just been allocated.  Obviously, these can be written 
  *           immediately.  This case is tracked and tested by the page 
  *           buffer proper.
@@ -4363,7 +4466,7 @@ H5F_vfd_swmr_writer__delay_write(H5F_t *f, uint64_t page,
 
     idx = f->shared->mdf_idx;
 
-    HDassert((idx) ||( f->shared->tick_num <= 0));
+    HDassert((idx) ||( f->shared->tick_num <= 1));
 
     /* do a binary search on the metadata file index to see if
      * it already contains an entry for *pbe_ptr.
@@ -4431,6 +4534,134 @@ done:
 
 /*-------------------------------------------------------------------------
  *
+ * Function: H5F_vfd_swmr_writer__prep_for_flush_or_close
+ *
+ * Purpose:  In the context of the VFD SWMR writer, two issues must be 
+ *           addressed before the page buffer can be flushed -- as is 
+ *           necessary on both HDF5 file flush or close:
+ *
+ *           1) We must force an end of tick so as to clean the tick list
+ *              in the page buffer.
+ *              
+ *           2) If the page buffer delayed write list is not empty, we 
+ *              must repeatedly wait a tick and then run the writer end 
+ *              of tick function until the delayed write list drains.
+ *
+ *           This function manages these details.
+ *
+ * Return:   SUCCEED/FAIL
+ *
+ * Programmer: John Mainzer 11/27/18
+ *
+ * Changes:  None.
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_vfd_swmr_writer__prep_for_flush_or_close(H5F_t *f)
+{
+    herr_t ret_value = SUCCEED;              /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    HDassert(f);
+    HDassert(f->shared);
+    HDassert(f->shared->vfd_swmr);
+    HDassert(f->shared->vfd_swmr_writer);
+    HDassert(f->shared->pb_ptr);
+
+    /* since we are about to flush the page buffer, force and end of
+     * tick so as to avoid attempts to flush entries on the page buffer 
+     * tick list that were modified during the current tick.
+     */
+    if ( H5F_vfd_swmr_writer_end_of_tick() < 0 )
+
+        HGOTO_ERROR(H5E_FILE, H5E_SYSTEM, FAIL, \
+                    "H5F_vfd_swmr_writer_end_of_tick() failed.")
+
+    while(f->shared->pb_ptr->dwl_len > 0) {
+
+        if(H5F__vfd_swmr_writer__wait_a_tick(f) < 0)
+
+            HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "wait a tick failed.")
+    }
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5F_vfd_swmr_writer__prep_for_flush_or_close() */
+
+
+/*-------------------------------------------------------------------------
+ *
+ * Function: H5F__vfd_swmr_writer__wait_a_tick
+ *
+ * Purpose:  Before a file that has been opened by a VFD SWMR writer,
+ *           all pending delayed writes must be allowed drain.
+ *
+ *           This function facilitates this by sleeping for a tick, and
+ *           the running the writer end of tick function.  
+ *
+ *           It should only be called as part the flush or close operations.
+ *
+ * Return:   SUCCEED/FAIL
+ *
+ * Programmer: John Mainzer 11/23/18
+ *
+ * Changes:  None.
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F__vfd_swmr_writer__wait_a_tick(H5F_t *f)
+{
+    int result;
+    struct timespec req;
+    struct timespec rem;
+    uint64_t tick_in_nsec;
+    herr_t ret_value = SUCCEED;              /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    HDassert(f);
+    HDassert(f->shared);
+    HDassert(f->shared->vfd_swmr);
+    HDassert(f->shared->vfd_swmr_writer);
+    HDassert((f == vfd_swmr_file_g) ||
+             ((vfd_swmr_file_g) && (f->shared == vfd_swmr_file_g->shared)));
+
+    tick_in_nsec = f->shared->vfd_swmr_config.tick_len * TENTH_SEC_TO_NANOSECS;
+    req.tv_nsec = (long)(tick_in_nsec % SECOND_TO_NANOSECS);
+    req.tv_sec = (time_t)(tick_in_nsec / SECOND_TO_NANOSECS);
+
+    result = HDnanosleep(&req, &rem);
+
+    while ( result == -1 ) {
+
+        req.tv_nsec = rem.tv_nsec;
+        req.tv_sec = rem.tv_sec;
+        result = HDnanosleep(&req, &rem);
+    }
+
+    if ( result != 0 )
+
+        HGOTO_ERROR(H5E_FILE, H5E_SYSTEM, FAIL, "HDnanosleep() failed.")
+        
+    if ( H5F_vfd_swmr_writer_end_of_tick() < 0 )
+
+        HGOTO_ERROR(H5E_FILE, H5E_SYSTEM, FAIL, \
+                    "H5F_vfd_swmr_writer_end_of_tick() failed.")
+    
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5F__vfd_swmr_writer__wait_a_tick() */
+
+
+/*-------------------------------------------------------------------------
+ *
  * Function: H5F_vfd_swmr_writer_end_of_tick
  *
  * Purpose:  Main routine for managing the end of tick for the VFD 
@@ -4445,7 +4676,15 @@ done:
  *
  *            2) Flush the metadata cache to the page buffer.
  *
- *            3) If this is the first tick (i.e. tick == 0), create the
+ *               Note that we must run a tick after the destruction 
+ *               of the metadata cache, since this operation will usually
+ *               dirty the first page in the HDF5 file.  However, the 
+ *               metadata cache will no longer exist at this point.
+ *
+ *               Thus, we must check for the existance of the metadata 
+ *               cache, and only attempt to flush it if it exists.
+ *
+ *            3) If this is the first tick (i.e. tick == 1), create the
  *               in memory version of the metadata file index.
  *
  *            4) Scan the page buffer tick list, and use it to update 
@@ -4459,25 +4698,15 @@ done:
  *
  *               (This is an optimization -- adress it later)
  *
- *            6) Scan the page buffer delayed write list for entries that 
- *               may now be written, and move any such entries to the 
- *               page buffer LRU.
- *
- *               (For the first cut, we will assume file was just created,
- *                that there have been no flushes, and that no entries 
- *                have been removed from the metadata file index.  Under 
- *                these circumstances, the delayed write list must always 
- *                be empty. Thus delay implementing this.)
- *
- *            7) Update the metadata file.  Must do this before we 
+ *            6) Update the metadata file.  Must do this before we 
  *               release the tick list, as otherwise the page buffer 
  *               entry images may not be available.
  *
- *            8) Release the page buffer tick list.
+ *            7) Release the page buffer tick list.
  *
- *            9) Release any delayed writes whose delay has expired.
+ *            8) Release any delayed writes whose delay has expired.
  *
- *           10) Increment the tick, and update the end of tick.
+ *            9) Increment the tick, and update the end of tick.
  *
  *           In passing, generate log entries as appropriate.
  *
@@ -4507,6 +4736,7 @@ H5F_vfd_swmr_writer_end_of_tick(void)
     HDassert(f->shared);
     HDassert(f->shared->pb_ptr);
     HDassert(f->shared->vfd_swmr_writer);
+
   
     /* 1) If requested, flush all raw data to the HDF5 file.
      *
@@ -4518,17 +4748,20 @@ H5F_vfd_swmr_writer_end_of_tick(void)
     }
 
 
-    /* 2) Flush the metadata cache to the page buffer. */
-    if ( H5AC_flush(f) < 0 ) 
+    /* 2) If it exists, flush the metadata cache to the page buffer. */
+    if ( f->shared->cache ) {
 
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, \
-                    "Can't flush metadata cache to the page buffer")
- 
+        if ( H5AC_flush(f) < 0 ) 
 
-    /* 3) If this is the first tick (i.e. tick == 0), create the
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, \
+                        "Can't flush metadata cache to the page buffer")
+    }
+
+
+    /* 3) If this is the first tick (i.e. tick == 1), create the
      *    in memory version of the metadata file index.
      */
-    if ( ( f->shared->tick_num == 0 ) &&
+    if ( ( f->shared->tick_num == 1 ) &&
          ( H5F__vfd_swmr_writer__create_index(f) < 0 ) )
 
 
@@ -4553,31 +4786,26 @@ H5F_vfd_swmr_writer_end_of_tick(void)
      */
 
 
-    /* 6) Scan the page buffer delayed write list for entries that 
-     *    may now be written, and move any such entries to the 
-     *    page buffer LRU.
-     *
-     *    (For the first cut, we will assume file was just created,
-     *     that there have been no flushes, and that no entries 
-     *     have been removed from the metadata file index.  Under 
-     *     these circumstances, the delayed write list must always 
-     *     be empty. Thus delay implementing this.)
-     */
-    HDassert( f->shared->pb_ptr->dwl_len == 0 );
-
-
-    /* 7) Update the metadata file.  Must do this before we 
+    /* 6) Update the metadata file.  Must do this before we 
      *    release the tick list, as otherwise the page buffer 
      *    entry images may not be available.
      *
      *    Note that this operation will restore the index to 
      *    sorted order.
      */
-    if ( H5F_update_vfd_swmr_metadata_file(f, 
+    if ( (uint32_t)(f->shared->mdf_idx_entries_used + idx_entries_added) > 0 ) {
+
+        if ( H5F_update_vfd_swmr_metadata_file(f, 
                 (uint32_t)(f->shared->mdf_idx_entries_used + idx_entries_added),
                 f->shared->mdf_idx) < 0 )
 
-        HGOTO_ERROR(H5E_FILE, H5E_SYSTEM, FAIL, "can't update MD file")
+            HGOTO_ERROR(H5E_FILE, H5E_SYSTEM, FAIL, "can't update MD file")
+    } else {
+
+        if ( H5F_update_vfd_swmr_metadata_file(f, 0, NULL) < 0 )
+
+            HGOTO_ERROR(H5E_FILE, H5E_SYSTEM, FAIL, "can't update MD file")
+    }
 
     /* at this point the metadata file index should be sorted -- update
      * f->shared->mdf_idx_entries_used.
@@ -4587,19 +4815,19 @@ H5F_vfd_swmr_writer_end_of_tick(void)
     HDassert(f->shared->mdf_idx_entries_used <= f->shared->mdf_idx_len);
 
 
-    /* 8) Release the page buffer tick list. */
+    /* 7) Release the page buffer tick list. */
     if ( H5PB_vfd_swmr__release_tick_list(f) < 0 )
 
         HGOTO_ERROR(H5E_FILE, H5E_SYSTEM, FAIL, "can't release tick list")
 
 
-    /* 9) Release any delayed writes whose delay has expired */
+    /* 8) Release any delayed writes whose delay has expired */
     if ( H5PB_vfd_swmr__release_delayed_writes(f) < 0 )
 
         HGOTO_ERROR(H5E_FILE, H5E_SYSTEM, FAIL, "can't release delayed writes")
  
 
-    /* 10) Increment the tick, and update the end of tick. */
+    /* 9) Increment the tick, and update the end of tick. */
     if( vfd_swmr_file_g ) {
 
         /* Update end_of_tick */

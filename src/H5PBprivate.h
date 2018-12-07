@@ -694,6 +694,8 @@ H5_DLL herr_t H5PB_vfd_swmr__release_delayed_writes(H5F_t * f);
 
 H5_DLL herr_t H5PB_vfd_swmr__release_tick_list(H5F_t * f);
 
+H5_DLL herr_t H5PB_vfd_swmr__set_tick(H5F_t * f);
+
 H5_DLL herr_t H5PB_vfd_swmr__update_index(H5F_t * f, int * idx_ent_added_ptr,
     int * idx_ent_modified_ptr, int * idx_ent_not_in_tl_ptr,
     int * idx_ent_not_in_tl_flushed_ptr);
