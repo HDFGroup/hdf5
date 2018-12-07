@@ -238,6 +238,7 @@
 ./fortran/src/H5Sff.F90
 ./fortran/src/H5Tf.c
 ./fortran/src/H5Tff.F90
+./fortran/src/H5VLff.F90
 ./fortran/src/H5Zf.c
 ./fortran/src/H5Zff.F90
 ./fortran/src/H5config_f.inc.cmake

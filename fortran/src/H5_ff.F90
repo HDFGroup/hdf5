@@ -88,7 +88,7 @@ MODULE H5LIB
   !
   ! H5I flags declaration
   !
-  INTEGER, PARAMETER :: H5I_FLAGS_LEN = 7
+  INTEGER, PARAMETER :: H5I_FLAGS_LEN = 17
   INTEGER, DIMENSION(1:H5I_FLAGS_LEN) :: H5I_flags
   !
   ! H5L flags declaration
@@ -129,6 +129,13 @@ MODULE H5LIB
   !
   INTEGER, PARAMETER :: H5T_FLAGS_LEN = 35
   INTEGER, DIMENSION(1:H5T_FLAGS_LEN) :: H5T_flags
+  !
+  ! H5VL flags declaration
+  !
+  
+  INTEGER, PARAMETER :: H5VL_FLAGS_LEN = 67
+  INTEGER, DIMENSION(1:H5VL_FLAGS_LEN) :: H5VL_flags
+
   !
   ! H5Z flags declaration
   !
@@ -204,6 +211,7 @@ CONTAINS
             i_H5S_hid_flags, &
             i_H5S_hsize_flags, &
             i_H5T_flags, &
+            i_H5VL_flags, &
             i_H5Z_flags, &
             i_H5generic_flags, &
             i_H5generic_haddr_flags) &
@@ -215,7 +223,7 @@ CONTAINS
               H5FD_HID_FLAGS_LEN, H5I_FLAGS_LEN, H5L_FLAGS_LEN, &
               H5O_FLAGS_LEN, H5P_FLAGS_LEN, H5P_FLAGS_INT_LEN, &
               H5R_FLAGS_LEN, H5S_FLAGS_LEN, H5S_HID_FLAGS_LEN, H5S_HSIZE_FLAGS_LEN, &
-              H5T_FLAGS_LEN, H5Z_FLAGS_LEN, H5generic_FLAGS_LEN, H5generic_haddr_FLAGS_LEN
+              H5T_FLAGS_LEN, H5VL_FLAGS_LEN, H5Z_FLAGS_LEN, H5generic_FLAGS_LEN, H5generic_haddr_FLAGS_LEN
          IMPLICIT NONE
          INTEGER         , DIMENSION(1:H5D_FLAGS_LEN)             :: i_H5D_flags
          INTEGER(SIZE_T) , DIMENSION(1:H5D_SIZE_FLAGS_LEN)        :: i_H5D_size_flags
@@ -235,6 +243,7 @@ CONTAINS
          INTEGER(HID_T)  , DIMENSION(1:H5S_HID_FLAGS_LEN)         :: i_H5S_hid_flags
          INTEGER(HSIZE_T), DIMENSION(1:H5S_HSIZE_FLAGS_LEN)       :: i_H5S_hsize_flags
          INTEGER         , DIMENSION(1:H5T_FLAGS_LEN)             :: i_H5T_flags
+         INTEGER         , DIMENSION(1:H5VL_FLAGS_LEN)            :: i_H5VL_flags
          INTEGER         , DIMENSION(1:H5Z_FLAGS_LEN)             :: i_H5Z_flags
          INTEGER         , DIMENSION(1:H5generic_FLAGS_LEN)       :: i_H5generic_flags
          INTEGER(HADDR_T), DIMENSION(1:H5generic_haddr_FLAGS_LEN) :: i_H5generic_haddr_flags
@@ -318,6 +327,7 @@ CONTAINS
          H5S_hid_flags, &
          H5S_hsize_flags, &
          H5T_flags, &
+         H5VL_flags, &
          H5Z_flags, &
          H5generic_flags,&
          H5generic_haddr_flags)
@@ -443,13 +453,23 @@ CONTAINS
     !
     ! H5I flags declaration
     !
-    H5I_FILE_F      = H5I_flags(1)
-    H5I_GROUP_F     = H5I_flags(2)
-    H5I_DATATYPE_F  = H5I_flags(3)
-    H5I_DATASPACE_F = H5I_flags(4)
-    H5I_DATASET_F   = H5I_flags(5)
-    H5I_ATTR_F      = H5I_flags(6)
-    H5I_BADID_F     = H5I_flags(7)
+    H5I_FILE_F        = H5I_flags(1)
+    H5I_GROUP_F       = H5I_flags(2)
+    H5I_DATATYPE_F    = H5I_flags(3)
+    H5I_DATASPACE_F   = H5I_flags(4)
+    H5I_DATASET_F     = H5I_flags(5)
+    H5I_ATTR_F        = H5I_flags(6)
+    H5I_BADID_F       = H5I_flags(7)
+    H5I_UNINIT_F      = H5I_flags(8)
+    H5I_VFL_F         = H5I_flags(9)
+    H5I_VOL_F         = H5I_flags(10)
+    H5I_GENPROP_CLS_F = H5I_flags(11)
+    H5I_GENPROP_LST_F = H5I_flags(12)
+    H5I_ERROR_CLASS_F = H5I_flags(13)
+    H5I_ERROR_MSG_F   = H5I_flags(14)
+    H5I_ERROR_STACK_F = H5I_flags(15)
+    H5I_NTYPES_F      = H5I_flags(16)
+    H5I_INVALID_HID_F = H5I_flags(17)
     !
     ! H5L flags
     !    
@@ -583,6 +603,76 @@ CONTAINS
     H5T_ARRAY_F          = H5T_flags(33)
     H5T_DIR_ASCEND_F     = H5T_flags(34)
     H5T_DIR_DESCEND_F    = H5T_flags(35)
+    !
+    ! H5VL flags declaration
+    !
+    H5VL_ATTR_GET_ACPL_F            = H5VL_flags(1)
+    H5VL_ATTR_GET_INFO_F            = H5VL_flags(2)
+    H5VL_ATTR_GET_NAME_F            = H5VL_flags(3)
+    H5VL_ATTR_GET_SPACE_F           = H5VL_flags(4)
+    H5VL_ATTR_GET_STORAGE_SIZE_F    = H5VL_flags(5)
+    H5VL_ATTR_GET_TYPE_F            = H5VL_flags(6)
+    H5VL_ATTR_DELETE_F              = H5VL_flags(7)
+    H5VL_ATTR_EXISTS_F              = H5VL_flags(8)
+    H5VL_ATTR_ITER_F                = H5VL_flags(9)
+    H5VL_ATTR_RENAME_F              = H5VL_flags(10)
+    H5VL_DATASET_GET_DAPL_F         = H5VL_flags(11)
+    H5VL_DATASET_GET_DCPL_F         = H5VL_flags(12)
+    H5VL_DATASET_GET_OFFSET_F       = H5VL_flags(13)
+    H5VL_DATASET_GET_SPACE_F        = H5VL_flags(14)
+    H5VL_DATASET_GET_SPACE_STATUS_F = H5VL_flags(15)
+    H5VL_DATASET_GET_STORAGE_SIZE_F = H5VL_flags(16)
+    H5VL_DATASET_GET_TYPE_F         = H5VL_flags(17)
+    H5VL_DATASET_SET_EXTENT_F       = H5VL_flags(18)
+    H5VL_DATASET_FLUSH_F            = H5VL_flags(19)
+    H5VL_DATASET_REFRESH_F          = H5VL_flags(20)
+    H5VL_DATATYPE_GET_BINARY_F      = H5VL_flags(21)
+    H5VL_DATATYPE_GET_TCPL_F        = H5VL_flags(22)
+    H5VL_DATATYPE_FLUSH_F           = H5VL_flags(23)
+    H5VL_DATATYPE_REFRESH_F         = H5VL_flags(24)
+    H5VL_FILE_GET_FAPL_F            = H5VL_flags(25)
+    H5VL_FILE_GET_FCPL_F            = H5VL_flags(26)
+    H5VL_FILE_GET_INTENT_F          = H5VL_flags(27)
+    H5VL_FILE_GET_NAME_F            = H5VL_flags(28)
+    H5VL_FILE_GET_OBJ_COUNT_F       = H5VL_flags(29)
+    H5VL_FILE_GET_OBJ_IDS_F         = H5VL_flags(30)
+    H5VL_FILE_FLUSH_F               = H5VL_flags(31)
+    H5VL_FILE_REOPEN_F              = H5VL_flags(32)
+    H5VL_FILE_MOUNT_F               = H5VL_flags(33)
+    H5VL_FILE_UNMOUNT_F             = H5VL_flags(34)
+    H5VL_FILE_IS_ACCESSIBLE_F       = H5VL_flags(35)
+    H5VL_FILE_CACHE_VOL_CONN_F      = H5VL_flags(36)
+    H5VL_GROUP_GET_GCPL_F           = H5VL_flags(37)
+    H5VL_GROUP_GET_INFO_F           = H5VL_flags(38)
+    H5VL_GROUP_FLUSH_F              = H5VL_flags(39)
+    H5VL_GROUP_REFRESH_F            = H5VL_flags(40)
+    H5VL_LINK_CREATE_HARD_F         = H5VL_flags(41)
+    H5VL_LINK_CREATE_SOFT_F         = H5VL_flags(42)
+    H5VL_LINK_CREATE_UD_F           = H5VL_flags(43)
+    H5VL_LINK_GET_INFO_F            = H5VL_flags(44)
+    H5VL_LINK_GET_NAME_F            = H5VL_flags(45)
+    H5VL_LINK_GET_VAL_F             = H5VL_flags(46)
+    H5VL_LINK_DELETE_F              = H5VL_flags(47)
+    H5VL_LINK_EXISTS_F              = H5VL_flags(48)
+    H5VL_LINK_ITER_F                = H5VL_flags(49)
+    H5VL_REF_GET_NAME_F             = H5VL_flags(50)
+    H5VL_REF_GET_REGION_F           = H5VL_flags(51)
+    H5VL_REF_GET_TYPE_F             = H5VL_flags(52)
+    H5VL_ID_GET_NAME_F              = H5VL_flags(53)
+    H5VL_OBJECT_CHANGE_REF_COUNT_F  = H5VL_flags(54)
+    H5VL_OBJECT_EXISTS_F            = H5VL_flags(55)
+    H5VL_OBJECT_VISIT_F             = H5VL_flags(56)
+    H5VL_REF_CREATE_F               = H5VL_flags(57)
+    H5VL_OBJECT_FLUSH_F             = H5VL_flags(58)
+    H5VL_OBJECT_REFRESH_F           = H5VL_flags(59)
+    H5VL_REQUEST_WAITANY_F          = H5VL_flags(60)
+    H5VL_REQUEST_WAITSOME_F         = H5VL_flags(61)
+    H5VL_REQUEST_WAITALL_F          = H5VL_flags(62)
+    H5VL_OBJECT_BY_SELF_F           = H5VL_flags(63)
+    H5VL_OBJECT_BY_NAME_F           = H5VL_flags(64)
+    H5VL_OBJECT_BY_IDX_F            = H5VL_flags(65)
+    H5VL_OBJECT_BY_ADDR_F           = H5VL_flags(66)
+    H5VL_OBJECT_BY_REF_F            = H5VL_flags(67)
     !
     ! H5Z flags
     !

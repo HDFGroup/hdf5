@@ -360,7 +360,7 @@ typedef int H5VL_class_value_t;
 
 /* VOL connector identifier values */
 #define H5_VOL_INVALID  (-1)    /* Invalid ID for VOL connector iD */
-#define H5_VOL_NATIVE   0       /* Native HDF5 file formnat VOL connector */
+#define H5_VOL_NATIVE   0       /* Native HDF5 file format VOL connector */
 #define H5_VOL_RESERVED 256     /* VOL connector IDs below this value are reserved for library use */
 #define H5_VOL_MAX	65535	/* Maximum VOL connector ID */
 
