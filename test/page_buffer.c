@@ -2053,22 +2053,22 @@ test_stats_collection(hid_t orig_fapl, const char *env_h5_drvr)
                       sizeof(int)*100, data) < 0)
         FAIL_STACK_ERROR;
 
-    if ( ( f->shared->pb_ptr->accesses[0] != 10 ) ||
+    if ( ( f->shared->pb_ptr->accesses[0] != 9 ) ||
          ( f->shared->pb_ptr->accesses[1] != 16 ) ||
          ( f->shared->pb_ptr->accesses[2] != 0 ) ) {
 
-        HDfprintf(stderr, "accesses[] = {%d, %d, %d}. {10, 16, 0} expected\n",
+        HDfprintf(stderr, "accesses[] = {%d, %d, %d}. {9, 16, 0} expected\n",
                  f->shared->pb_ptr->accesses[0],
                  f->shared->pb_ptr->accesses[1],
                  f->shared->pb_ptr->accesses[2]);
         TEST_ERROR;
     }
 
-    if ( ( f->shared->pb_ptr->bypasses[0] != 0 ) ||
-         ( f->shared->pb_ptr->bypasses[1] != 0 ) ||
+    if ( ( f->shared->pb_ptr->bypasses[0] != 2 ) ||
+         ( f->shared->pb_ptr->bypasses[1] != 1 ) ||
          ( f->shared->pb_ptr->bypasses[2] != 1 ) ) {
 
-        HDfprintf(stderr, "bypasses[] = {%d, %d, %d}. {0, 0, 1} expected\n",
+        HDfprintf(stderr, "bypasses[] = {%d, %d, %d}. {2, 1, 1} expected\n",
                  f->shared->pb_ptr->bypasses[0],
                  f->shared->pb_ptr->bypasses[1],
                  f->shared->pb_ptr->bypasses[2]);
@@ -2086,26 +2086,25 @@ test_stats_collection(hid_t orig_fapl, const char *env_h5_drvr)
         TEST_ERROR;
     }
 
-    if ( ( f->shared->pb_ptr->misses[0] != 10 ) ||
+    if ( ( f->shared->pb_ptr->misses[0] != 9 ) ||
          ( f->shared->pb_ptr->misses[1] != 16 ) ||
          ( f->shared->pb_ptr->misses[2] != 0 ) ) {
 
-        HDfprintf(stderr, "misses[] = {%d, %d, %d}. {10, 16, 0} expected\n",
+        HDfprintf(stderr, "misses[] = {%d, %d, %d}. {9, 16, 0} expected\n",
                  f->shared->pb_ptr->misses[0],
                  f->shared->pb_ptr->misses[1],
                  f->shared->pb_ptr->misses[2]);
         TEST_ERROR;
     }
 
-    if ( ( f->shared->pb_ptr->evictions[0] != 7 + base_meta_cnt ) ||
-         ( f->shared->pb_ptr->evictions[1] != 9 + base_raw_cnt ) ||
+    if ( ( f->shared->pb_ptr->evictions[0] != 7) ||
+         ( f->shared->pb_ptr->evictions[1] != 9) ||
          ( f->shared->pb_ptr->evictions[2] != 0 ) ) {
 
         HDfprintf(stderr, "evictions[] = {%d, %d, %d}. {%d, %d, 0} expected\n",
                  f->shared->pb_ptr->evictions[0],
                  f->shared->pb_ptr->evictions[1],
-                 f->shared->pb_ptr->evictions[2],
-                 7 + base_meta_cnt, 9 + base_raw_cnt);
+                 f->shared->pb_ptr->evictions[2], 7, 9);
         TEST_ERROR;
     }
 
@@ -2120,21 +2119,21 @@ test_stats_collection(hid_t orig_fapl, const char *env_h5_drvr)
                                        evictions, bypasses) < 0)
             FAIL_STACK_ERROR;
 
-        if ( ( accesses[0] != 10 ) ||
+        if ( ( accesses[0] != 9 ) ||
              ( accesses[1] != 16 ) ||
              ( accesses[2] != 0 ) ) {
 
             HDfprintf(stderr, 
-                      "accesses[] = {%d, %d, %d}. {10, 16, 0} expected\n",
+                      "accesses[] = {%d, %d, %d}. {9, 16, 0} expected\n",
                       accesses[0], accesses[1], accesses[2]);
             TEST_ERROR;
         }
 
-        if ( ( bypasses[0] != 0 ) ||
-             ( bypasses[1] != 0 ) ||
+        if ( ( bypasses[0] != 2 ) ||
+             ( bypasses[1] != 1 ) ||
              ( bypasses[2] != 1 ) ) {
 
-            HDfprintf(stderr, "bypasses[] = {%d, %d, %d}. {0, 0, 1} expected\n",
+            HDfprintf(stderr, "bypasses[] = {%d, %d, %d}. {2, 1, 1} expected\n",
                      bypasses[0], bypasses[1], bypasses[2]);
             TEST_ERROR;
         }
@@ -2148,23 +2147,22 @@ test_stats_collection(hid_t orig_fapl, const char *env_h5_drvr)
             TEST_ERROR;
         }
 
-        if ( ( misses[0] != 10 ) ||
+        if ( ( misses[0] != 9 ) ||
              ( misses[1] != 16 ) ||
              ( misses[2] != 0 ) ) {
 
-            HDfprintf(stderr, "misses[] = {%d, %d, %d}. {10, 16, 0} expected\n",
+            HDfprintf(stderr, "misses[] = {%d, %d, %d}. {9, 16, 0} expected\n",
                       misses[0], misses[1], misses[2]);
             TEST_ERROR;
         }
 
-        if ( ( evictions[0] != 7 + base_meta_cnt ) ||
-             ( evictions[1] != 9 + base_raw_cnt ) ||
+        if ( ( evictions[0] != 7 ) ||
+             ( evictions[1] != 9 ) ||
              ( evictions[2] != 0 ) ) {
 
             HDfprintf(stderr, 
                       "evictions[] = {%d, %d, %d}. {%d, %d, 0} expected\n",
-                      evictions[0], evictions[1], evictions[2],
-                      7 + base_meta_cnt, 9 + base_raw_cnt);
+                      evictions[0], evictions[1], evictions[2], 7, 9);
             TEST_ERROR;
         }
 
