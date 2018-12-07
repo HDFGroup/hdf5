@@ -112,7 +112,7 @@ void reinit_vars(unsigned *read_filter_mask, haddr_t *addr, hsize_t *size)
  *              will be implemented in the next version.
  *
  * Description:
- *              This function tests the new API functions added for EED-343:
+ *              This function tests the new API functions added for HDFFV-10615:
  *              H5Dget_num_chunks, H5Dget_chunk_info, and H5Dget_chunk_info_by_coord.
  *
  * Date:        September 2018
@@ -149,17 +149,8 @@ test_get_chunk_info(void)
 
     TESTING("getting chunk information");
 
-    /* Create a copy of file access property list */
-    if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0) TEST_ERROR
-
-    /* Set high bound to V18 */
-    low = H5F_LIBVER_EARLIEST;
-    high = H5F_LIBVER_V18;
-    if (H5Pset_libver_bounds(fapl, low, high) < 0)
-        TEST_ERROR;
-
     /* Create a file */
-    h5_fixname(FILENAME, fapl, filename, sizeof filename);
+    h5_fixname(FILENAME, H5P_DEFAULT, filename, sizeof filename);
     if((chunkfile = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
 
@@ -372,7 +363,7 @@ error:
  *              Pedro in main() that writes a 4x4 dataset by iterating on
  *              2x2 chunks at a time, with the intention of making a frame
  *              work to test H5Dget_chunk_info, which was not in the library,
- *              until now.  For the work in EED-343, the test function
+ *              until now.  For the work in HDFFV-10615, the test function
  *              test_get_chunk_info was added to test the new query chunk
  *              API functions: H5Dget_num_chunk, H5Dget_chunk_info, and
  *              H5Dget_chunk_info_by_coord.  This code can be used at a
@@ -471,8 +462,6 @@ create_4x4_dset(void)
     if (H5Sclose(m_sid) < 0) TEST_ERROR
     if (H5Pclose(pid) < 0) TEST_ERROR
     if (H5Fclose(fid) < 0) TEST_ERROR
-
-    PASSED();
 
     return SUCCEED;
 
