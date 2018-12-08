@@ -19,7 +19,6 @@
  */
 
 #include "h5test.h"
-#include "H5VLnative_private.h"
 
 
 #define NATIVE_VOL_TEST_FILENAME        "native_vol_test"
@@ -41,13 +40,21 @@
  */
 static const H5VL_class_t fake_vol_g = {
     0,                                              /* version      */
-    (H5VL_class_value_t)999,                        /* value        */
+    (H5VL_class_value_t)501,                        /* value        */
     FAKE_VOL_NAME,                                  /* name         */
+    0,                                              /* capability flags */
     NULL,                                           /* initialize   */
     NULL,                                           /* terminate    */
-    (size_t)0,                                      /* fapl size    */
-    NULL,                                           /* fapl copy    */
-    NULL,                                           /* fapl free    */
+    (size_t)0,                                      /* info size    */
+    NULL,                                           /* info copy    */
+    NULL,                                           /* info compare */
+    NULL,                                           /* info free    */
+    NULL,                                           /* info to str  */
+    NULL,                                           /* str to info  */
+    NULL,                                           /* get_object   */
+    NULL,                                           /* get_wrap_ctx */
+    NULL,                                           /* wrap_object  */
+    NULL,                                           /* free_wrap_ctx */
     {   /* attribute_cls */
         NULL,                                       /* create       */
         NULL,                                       /* open         */
@@ -107,10 +114,13 @@ static const H5VL_class_t fake_vol_g = {
         NULL,                                       /* specific     */
         NULL                                        /* optional     */
     },
-    {   /* async_cls */
+    {   /* request_cls */
+        NULL,                                       /* wait         */
+        NULL,                                       /* notify       */
         NULL,                                       /* cancel       */
-        NULL,                                       /* test         */
-        NULL                                        /* wait         */
+        NULL,                                       /* specific     */
+        NULL,                                       /* optional     */
+        NULL                                        /* free         */
     },
     NULL                                            /* optional     */
 };
@@ -120,7 +130,7 @@ static const H5VL_class_t fake_vol_g = {
  * Function:    test_vol_registration()
  *
  * Purpose:     Tests if we can load, register, and close a simple
- *              VOL driver.
+ *              VOL connector.
  *
  * Return:      SUCCEED/FAIL
  *
@@ -130,28 +140,48 @@ static herr_t
 test_vol_registration(void)
 {
     htri_t is_registered;
-    hid_t vol_id = -1;
+    hid_t vol_id = -1, vol_id2 = -1;
 
     TESTING("VOL registration");
 
-    /* The test/fake VOL driver should not be registered at the start of the test */
-    if ((is_registered = H5VLis_driver_registered(FAKE_VOL_NAME)) < 0)
+    /* The test/fake VOL connector should not be registered at the start of the test */
+    if ((is_registered = H5VLis_connector_registered(FAKE_VOL_NAME)) < 0)
         FAIL_STACK_ERROR;
     if (is_registered > 0)
-        FAIL_PUTS_ERROR("native VOL driver is inappropriately registered");
+        FAIL_PUTS_ERROR("native VOL connector is inappropriately registered");
 
     /* Load a VOL interface */
-    if ((vol_id = H5VLregister_driver(&fake_vol_g)) < 0)
+    if ((vol_id = H5VLregister_connector(&fake_vol_g, H5P_DEFAULT)) < 0)
         FAIL_STACK_ERROR;
 
-    /* The test/fake VOL driver should be registered now */
-    if ((is_registered = H5VLis_driver_registered(FAKE_VOL_NAME)) < 0)
+    /* The test/fake VOL connector should be registered now */
+    if ((is_registered = H5VLis_connector_registered(FAKE_VOL_NAME)) < 0)
         FAIL_STACK_ERROR;
     if (0 == is_registered)
-        FAIL_PUTS_ERROR("native VOL driver is un-registered");
+        FAIL_PUTS_ERROR("native VOL connector is un-registered");
 
-    /* Close the VOL interface */
-    if (H5VLclose(vol_id) < 0)
+    /* Re-register a VOL connector */
+    if ((vol_id2 = H5VLregister_connector(&fake_vol_g, H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR;
+
+    /* The test/fake VOL connector should still be registered now */
+    if ((is_registered = H5VLis_connector_registered(FAKE_VOL_NAME)) < 0)
+        FAIL_STACK_ERROR;
+    if (0 == is_registered)
+        FAIL_PUTS_ERROR("native VOL connector is un-registered");
+
+    /* Unregister the second test/fake VOL ID */
+    if (H5VLunregister_connector(vol_id2) < 0)
+        FAIL_STACK_ERROR;
+
+    /* The test/fake VOL connector should still be registered now */
+    if ((is_registered = H5VLis_connector_registered(FAKE_VOL_NAME)) < 0)
+        FAIL_STACK_ERROR;
+    if (0 == is_registered)
+        FAIL_PUTS_ERROR("native VOL connector is un-registered");
+
+    /* Unregister the original test/fake VOL ID */
+    if (H5VLunregister_connector(vol_id) < 0)
         FAIL_STACK_ERROR;
 
     PASSED();
@@ -159,7 +189,7 @@ test_vol_registration(void)
 
 error:
     H5E_BEGIN_TRY {
-        H5VLclose(vol_id);
+        H5VLunregister_connector(vol_id);
     } H5E_END_TRY;
     return FAIL;
 
@@ -169,7 +199,7 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    test_native_vol_init()
  *
- * Purpose:     Tests if the native VOL driver gets initialized.
+ * Purpose:     Tests if the native VOL connector gets initialized.
  *
  * Return:      SUCCEED/FAIL
  *
@@ -180,13 +210,13 @@ test_native_vol_init(void)
 {
     htri_t is_registered;
 
-    TESTING("Native VOL driver initialization");
+    TESTING("Native VOL connector initialization");
 
-    /* The native VOL driver should always be registered */
-    if ((is_registered = H5VLis_driver_registered(H5VL_NATIVE_NAME)) < 0)
+    /* The native VOL connector should always be registered */
+    if ((is_registered = H5VLis_connector_registered(H5VL_NATIVE_NAME)) < 0)
         FAIL_STACK_ERROR;
     if (0 == is_registered)
-        FAIL_PUTS_ERROR("native VOL driver is un-registered");
+        FAIL_PUTS_ERROR("native VOL connector is un-registered");
 
     PASSED();
     return SUCCEED;
@@ -200,7 +230,7 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    test_basic_file_operation()
  *
- * Purpose:     Uses the native VOL driver to test basic VOL file operations
+ * Purpose:     Uses the native VOL connector to test basic VOL file operations
  *
  * Return:      SUCCEED/FAIL
  *
@@ -212,6 +242,7 @@ test_basic_file_operation(void)
     hid_t fid           = H5I_INVALID_HID;
     hid_t fid_reopen    = H5I_INVALID_HID;
     hid_t fapl_id       = H5I_INVALID_HID;
+    hid_t fapl_id2      = H5I_INVALID_HID;
     hid_t fcpl_id       = H5I_INVALID_HID;
 
     ssize_t         obj_count;
@@ -224,8 +255,25 @@ test_basic_file_operation(void)
 
     TESTING("Basic VOL file operations");
 
+    /* Retrieve the file access property for testing */
+    fapl_id = h5_fileaccess();
+
+    /* Set the file close degree to a non-default value, to make the H5Pequal
+     *  work out.  This is kinda odd, but the library's current behavior with
+     *  a default value is to return the value chosen (H5F_CLOSE_SEMI) instead
+     *  of the default value (H5F_CLOSE_DEFAULT) from the property and then
+     *  the H5Pequal doesn't detect that the property lists are the same.  Since
+     *  this is the documented behavior for file close degree for many years,
+     *  I'm not fighting it, just getting the testing to verify that the VOL
+     *  connector property is returned correctly.  -QAK, 2018/11/17
+     */
+    if(H5Pset_fclose_degree(fapl_id, H5F_CLOSE_SEMI) < 0)
+        TEST_ERROR;
+    if(H5Pset_metadata_read_attempts(fapl_id, 9) < 0)
+        FAIL_STACK_ERROR
+
     /* H5Fcreate */
-    if ((fid = H5Fcreate(NATIVE_VOL_TEST_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+    if ((fid = H5Fcreate(NATIVE_VOL_TEST_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
         TEST_ERROR;
 
     /* H5Fget_obj_count */
@@ -243,9 +291,11 @@ test_basic_file_operation(void)
         TEST_ERROR;
 
     /* H5Fget_access_plist */
-    if ((fapl_id = H5Fget_access_plist(fid)) < 0)
+    if ((fapl_id2 = H5Fget_access_plist(fid)) < 0)
         TEST_ERROR;
-    if (H5Pclose(fapl_id) < 0)
+    if (H5Pequal(fapl_id, fapl_id2) != TRUE)
+        TEST_ERROR;
+    if (H5Pclose(fapl_id2) < 0)
         TEST_ERROR;
 
     /* H5Fget_create_plist */
@@ -287,17 +337,39 @@ test_basic_file_operation(void)
         TEST_ERROR;
 
     /* H5Fis_accessible */
-    if (H5Fis_accessible(NATIVE_VOL_TEST_FILENAME, H5P_DEFAULT) < 0)
+    if (H5Fis_accessible(NATIVE_VOL_TEST_FILENAME, fapl_id) < 0)
         TEST_ERROR;
 
     /* H5Fopen */
-    if ((fid = H5Fopen(NATIVE_VOL_TEST_FILENAME, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+    if ((fid = H5Fopen(NATIVE_VOL_TEST_FILENAME, H5F_ACC_RDWR, fapl_id)) < 0)
         TEST_ERROR;
+
+    /* H5Fget_access_plist */
+    if ((fapl_id2 = H5Fget_access_plist(fid)) < 0)
+        TEST_ERROR;
+    if (H5Pequal(fapl_id, fapl_id2) != TRUE)
+        TEST_ERROR;
+    if (H5Pclose(fapl_id2) < 0)
+        TEST_ERROR;
+
     if ((fid_reopen = H5Freopen(fid)) < 0)
         TEST_ERROR;
+
+    /* H5Fget_access_plist */
+    if ((fapl_id2 = H5Fget_access_plist(fid_reopen)) < 0)
+        TEST_ERROR;
+    if (H5Pequal(fapl_id, fapl_id2) != TRUE)
+        TEST_ERROR;
+    if (H5Pclose(fapl_id2) < 0)
+        TEST_ERROR;
+
     if (H5Fclose(fid) < 0)
         TEST_ERROR;
     if (H5Fclose(fid_reopen) < 0)
+        TEST_ERROR;
+
+    /* H5Pclose */
+    if (H5Pclose(fapl_id) < 0)
         TEST_ERROR;
 
     HDremove(NATIVE_VOL_TEST_FILENAME);
@@ -310,6 +382,7 @@ error:
         H5Fclose(fid);
         H5Fclose(fid_reopen);
         H5Pclose(fapl_id);
+        H5Pclose(fapl_id2);
         H5Pclose(fcpl_id);
     } H5E_END_TRY;
 
@@ -321,7 +394,7 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    test_basic_group_operation()
  *
- * Purpose:     Uses the native VOL driver to test basic VOL group operations
+ * Purpose:     Uses the native VOL connector to test basic VOL group operations
  *
  * Return:      SUCCEED/FAIL
  *
@@ -412,7 +485,7 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    test_basic_dataset_operation()
  *
- * Purpose:     Uses the native VOL driver to test basic VOL dataset operations
+ * Purpose:     Uses the native VOL connector to test basic VOL dataset operations
  *
  * Return:      SUCCEED/FAIL
  *
@@ -581,7 +654,7 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    test_basic_attribute_operation()
  *
- * Purpose:     Uses the native VOL driver to test basic VOL attribute operations
+ * Purpose:     Uses the native VOL connector to test basic VOL attribute operations
  *
  * Return:      SUCCEED/FAIL
  *
@@ -679,7 +752,7 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    test_basic_object_operation()
  *
- * Purpose:     Uses the native VOL driver to test basic VOL object operations
+ * Purpose:     Uses the native VOL connector to test basic VOL object operations
  *
  * Return:      SUCCEED/FAIL
  *
@@ -743,7 +816,7 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    test_basic_link_operation()
  *
- * Purpose:     Uses the native VOL driver to test basic VOL link operations
+ * Purpose:     Uses the native VOL connector to test basic VOL link operations
  *
  * Return:      SUCCEED/FAIL
  *
@@ -808,7 +881,7 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    test_basic_datatype_operation()
  *
- * Purpose:     Uses the native VOL driver to test basic VOL datatype operations
+ * Purpose:     Uses the native VOL connector to test basic VOL datatype operations
  *
  * Return:      SUCCEED/FAIL
  *
@@ -890,7 +963,7 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    test_echo_vol_operation()
  *
- * Purpose:     Uses the echo VOL driver to test basic VOL operations
+ * Purpose:     Uses the echo VOL connector to test basic VOL operations
  *              via the H5VL public API.
  *
  * Return:      SUCCEED/FAIL

@@ -347,9 +347,9 @@ H5O_fill_old_decode(H5F_t *f, H5O_t *open_oh,
             if(NULL == (dt = (H5T_t *)H5O_msg_read_oh(f, open_oh, H5O_DTYPE_ID, NULL)))
                 HGOTO_ERROR(H5E_SYM, H5E_CANTGET, NULL, "can't read DTYPE message")
             /* Verify size */
-            if(fill->size != H5T_GET_SIZE(dt))
+            if(fill->size != (ssize_t)H5T_GET_SIZE(dt))
                 HGOTO_ERROR(H5E_SYM, H5E_CANTGET, NULL, "inconsistent fill value size")
-        }
+        } /* end if */
 
         if(NULL == (fill->buf = H5MM_malloc((size_t)fill->size)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for fill value")

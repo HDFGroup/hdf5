@@ -40,7 +40,7 @@
 #include "H5Dpkg.h"		/* Datasets 				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Iprivate.h"		/* IDs			  		*/
-#include "H5VLprivate.h"	/* VOL plugins				*/
+#include "H5VLprivate.h"        /* Virtual Object Layer                 */
 
 
 /****************/
@@ -113,7 +113,7 @@ hid_t
 H5Dcreate1(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
 	  hid_t dcpl_id)
 {
-    void           *dset = NULL;                        /* dset token from VOL plugin */
+    void           *dset = NULL;                        /* dset token from VOL connector */
     H5VL_object_t  *vol_obj = NULL;                     /* object token of loc_id */
     H5VL_loc_params_t loc_params;
     H5P_genplist_t *plist;                              /* Property list pointer */
@@ -161,17 +161,16 @@ H5Dcreate1(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier")
 
     /* Create the dataset through the VOL */
-    if(NULL == (dset = H5VL_dataset_create(vol_obj->data, loc_params, vol_obj->driver->cls, name, dcpl_id, 
-                                           H5P_DATASET_ACCESS_DEFAULT, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
+    if(NULL == (dset = H5VL_dataset_create(vol_obj, &loc_params, name, dcpl_id, H5P_DATASET_ACCESS_DEFAULT, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, H5I_INVALID_HID, "unable to create dataset")
 
     /* Get an atom for the dataset */
-    if((ret_value = H5VL_register(H5I_DATASET, dset, vol_obj->driver, TRUE)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register dataset")
+    if((ret_value = H5VL_register(H5I_DATASET, dset, vol_obj->connector, TRUE)) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register dataset")
 
 done:
     if (H5I_INVALID_HID == ret_value)
-        if(dset && H5VL_dataset_close(dset, vol_obj->driver->cls, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+        if(dset && H5VL_dataset_close(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release dataset")
 
     FUNC_LEAVE_API(ret_value)
@@ -198,7 +197,7 @@ done:
 hid_t
 H5Dopen1(hid_t loc_id, const char *name)
 {
-    void         *dset = NULL;      /* dset token from VOL plugin */
+    void         *dset = NULL;      /* dset token from VOL connector */
     H5VL_object_t *vol_obj = NULL;      /* object token of loc_id */
     H5VL_loc_params_t loc_params;
     hid_t        ret_value = H5I_INVALID_HID;         /* Return value */
@@ -221,17 +220,16 @@ H5Dopen1(hid_t loc_id, const char *name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier")
 
     /* Open the dataset */
-    if(NULL == (dset = H5VL_dataset_open(vol_obj->data, loc_params, vol_obj->driver->cls, name, 
-                                         H5P_DATASET_ACCESS_DEFAULT, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
+    if(NULL == (dset = H5VL_dataset_open(vol_obj, &loc_params, name, H5P_DATASET_ACCESS_DEFAULT, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open dataset")
 
     /* Get an atom for the dataset */
-    if((ret_value = H5VL_register(H5I_DATASET, dset, vol_obj->driver, TRUE)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "can't register dataset atom")
+    if((ret_value = H5VL_register(H5I_DATASET, dset, vol_obj->connector, TRUE)) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, H5I_INVALID_HID, "can't register dataset atom")
 
 done:
     if(H5I_INVALID_HID == ret_value)
-        if(dset && H5VL_dataset_close(dset, vol_obj->driver->cls, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+        if(dset && H5VL_dataset_close(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release dataset")
 
     FUNC_LEAVE_API(ret_value)
@@ -275,8 +273,7 @@ H5Dextend(hid_t dset_id, const hsize_t size[])
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no size specified")
 
     /* Get the dataspace pointer for the dataset */
-    if(H5VL_dataset_get(vol_obj->data, vol_obj->driver->cls, H5VL_DATASET_GET_SPACE, 
-                        H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &sid) < 0)
+    if(H5VL_dataset_get(vol_obj, H5VL_DATASET_GET_SPACE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &sid) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to get dataspace")
     if(H5I_INVALID_HID == sid)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "received an invalid dataspace from the dataset")
@@ -306,8 +303,7 @@ H5Dextend(hid_t dset_id, const hsize_t size[])
         HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set collective metadata read info")
 
     /* Increase size */
-    if ((ret_value = H5VL_dataset_specific(vol_obj->data, vol_obj->driver->cls, H5VL_DATASET_SET_EXTENT, 
-                                          H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, dset_dims)) < 0)
+    if ((ret_value = H5VL_dataset_specific(vol_obj, H5VL_DATASET_SET_EXTENT, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, dset_dims)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "unable to extend dataset")
 
 done:

@@ -6957,13 +6957,13 @@ test_delete_obj_named_fileid(hid_t fapl)
 
             /* Verify file ID from dataset matches correct file */
             dset_fid = H5Iget_file_id(dset);
-            if(dset_fid != filea1) TEST_ERROR
+            if(!H5F__same_file_test(dset_fid, filea1)) TEST_ERROR
             H5Fclose(dset_fid);
 
             /* Verify file ID from datatype (from dataset) matches correct file */
             type = H5Dget_type(dset);
             type_fid = H5Iget_file_id(type);
-            if(type_fid != filea1) TEST_ERROR
+            if(!H5F__same_file_test(type_fid, filea1)) TEST_ERROR
             H5Fclose(type_fid);
             H5Tclose(type);
 
@@ -6979,13 +6979,13 @@ test_delete_obj_named_fileid(hid_t fapl)
 
             /* Verify file ID from dataset matches correct file */
             dset_fid = H5Iget_file_id(dset);
-            if(dset_fid != filea1) TEST_ERROR
+            if(!H5F__same_file_test(dset_fid, filea1)) TEST_ERROR
             H5Fclose(dset_fid);
 
             /* Verify file ID from datatype (from dataset) matches correct file */
             type = H5Dget_type(dset);
             type_fid = H5Iget_file_id(type);
-            if(type_fid != filea1) TEST_ERROR
+            if(!H5F__same_file_test(type_fid, filea1)) TEST_ERROR
             H5Fclose(type_fid);
             H5Tclose(type);
 
@@ -7007,13 +7007,13 @@ test_delete_obj_named_fileid(hid_t fapl)
 
             /* Verify file ID from dataset matches correct file */
             attr_fid = H5Iget_file_id(attr);
-            if(attr_fid != filea1) TEST_ERROR
+            if(!H5F__same_file_test(attr_fid, filea1)) TEST_ERROR
             H5Fclose(attr_fid);
 
             /* Verify file ID from datatype (from dataset) matches correct file */
             type = H5Aget_type(attr);
             type_fid = H5Iget_file_id(type);
-            if(type_fid != filea1) TEST_ERROR
+            if(!H5F__same_file_test(type_fid, filea1)) TEST_ERROR
             H5Fclose(type_fid);
             H5Tclose(type);
 
@@ -7029,13 +7029,13 @@ test_delete_obj_named_fileid(hid_t fapl)
 
             /* Verify file ID from dataset matches correct file */
             attr_fid = H5Iget_file_id(attr);
-            if(attr_fid != filea1) TEST_ERROR
+            if(!H5F__same_file_test(attr_fid, filea1)) TEST_ERROR
             H5Fclose(attr_fid);
 
             /* Verify file ID from datatype (from dataset) matches correct file */
             type = H5Aget_type(attr);
             type_fid = H5Iget_file_id(type);
-            if(type_fid != filea1) TEST_ERROR
+            if(!H5F__same_file_test(type_fid, filea1)) TEST_ERROR
             H5Fclose(type_fid);
             H5Tclose(type);
 

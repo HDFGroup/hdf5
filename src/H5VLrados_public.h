@@ -31,6 +31,9 @@
 #include "H5public.h"
 #include "H5Ipublic.h"
 
+#define H5_VOL_RADOS   2022         /* RADOS VOL connector ID*/
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif

@@ -586,7 +586,9 @@ static int
 H5Z__flush_file_cb(void *obj_ptr, hid_t H5_ATTR_UNUSED obj_id, void *key)
 {
     H5F_t          *f           = (H5F_t *)obj_ptr;     /* File object for operations */
+#ifdef H5_HAVE_PARALLEL
     H5Z_object_t   *object      = (H5Z_object_t *)key;
+#endif /* H5_HAVE_PARALLEL */
     int             ret_value   = FALSE;                /* Return value */
 
     FUNC_ENTER_STATIC
@@ -695,11 +697,11 @@ H5Z_filter_avail(H5Z_filter_t id)
             HGOTO_DONE(TRUE)
 
     key.id = (int)id;
-    if (NULL != (filter_info = (const H5Z_class2_t *)H5PL_load(H5PL_TYPE_FILTER, key))) {
-        if (H5Z_register(filter_info) < 0)
+    if(NULL != (filter_info = (const H5Z_class2_t *)H5PL_load(H5PL_TYPE_FILTER, &key))) {
+        if(H5Z_register(filter_info) < 0)
             HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register loaded filter")
         HGOTO_DONE(TRUE)
-    }
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1287,7 +1289,7 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags,
 
                 /* Try loading the filter */
                 key.id = (int)(pline->filter[idx].id);
-                if(NULL != (filter_info = (const H5Z_class2_t *)H5PL_load(H5PL_TYPE_FILTER, key))) {
+                if(NULL != (filter_info = (const H5Z_class2_t *)H5PL_load(H5PL_TYPE_FILTER, &key))) {
                     /* Register the filter we loaded */
                     if(H5Z_register(filter_info) < 0)
                         HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register filter")

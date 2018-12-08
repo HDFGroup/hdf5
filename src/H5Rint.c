@@ -692,9 +692,9 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 ssize_t
-H5R__get_name(H5F_t *f, H5R_type_t ref_type, const void *_ref, char *name, size_t size)
+H5R__get_name(H5F_t *f, H5R_type_t ref_type, const void *_ref,
+    char *name, size_t size)
 {
-    hid_t file_id = H5I_INVALID_HID;    /* ID for file that the reference is in */
     H5O_loc_t oloc;             /* Object location describing object for reference */
     ssize_t ret_value = -1;     /* Return value */
 
@@ -728,7 +728,7 @@ H5R__get_name(H5F_t *f, H5R_type_t ref_type, const void *_ref, char *name, size_
             UINT32DECODE(p, hobjid.idx);
 
             /* Get the dataset region from the heap (allocate inside routine) */
-            if ((buf = (uint8_t *)H5HG_read(oloc.file, &hobjid, NULL, NULL)) == NULL)
+            if((buf = (uint8_t *)H5HG_read(oloc.file, &hobjid, NULL, NULL)) == NULL)
                 HGOTO_ERROR(H5E_REFERENCE, H5E_READERROR, (-1), "Unable to read dataset region information")
 
             /* Get the object oid for the dataset */
@@ -747,19 +747,11 @@ H5R__get_name(H5F_t *f, H5R_type_t ref_type, const void *_ref, char *name, size_
             HGOTO_ERROR(H5E_REFERENCE, H5E_UNSUPPORTED, (-1), "internal error (unknown reference type)")
     } /* end switch */
 
-    /* Retrieve file ID for name search */
-    if ((file_id = H5F_get_id(f, FALSE)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, (-1), "can't get file ID")
-
     /* Get name, length, etc. */
-    if ((ret_value = H5G_get_name_by_addr(file_id, &oloc, name, size)) < 0)
+    if((ret_value = H5G_get_name_by_addr(f, &oloc, name, size)) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, (-1), "can't determine name")
 
 done:
-    /* Close file ID used for search */
-    if (file_id > 0 && H5I_dec_ref(file_id) < 0)
-        HDONE_ERROR(H5E_REFERENCE, H5E_CANTDEC, (-1), "can't decrement ref count of temp ID")
-
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5R__get_name() */
 

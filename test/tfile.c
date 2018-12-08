@@ -1600,6 +1600,7 @@ test_file_is_accessible(void)
 {
     hid_t    fid;               /* File opened with read-write permission */
     hid_t    fcpl_id;           /* File creation property list */
+    hid_t    fapl = -1;         /* File access property list */
     int      fd;                /* POSIX file descriptor */
     ssize_t  nbytes;            /* Number of bytes written */
     unsigned u;                 /* Local index variable */
@@ -1610,8 +1611,12 @@ test_file_is_accessible(void)
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Detection of HDF5 Files\n"));
 
+    /* Get FAPL */
+    fapl = h5_fileaccess();
+    CHECK(fapl, FAIL, "H5Pcreate");
+
     /* Create a file */
-    fid = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    fid = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
     CHECK(fid, FAIL, "H5Fcreate");
 
     /* Close file */
@@ -1619,7 +1624,7 @@ test_file_is_accessible(void)
     CHECK(ret, FAIL, "H5Fclose");
 
     /* Verify that the file is an HDF5 file */
-    status = H5Fis_accessible(FILE1, H5P_DEFAULT);
+    status = H5Fis_accessible(FILE1, fapl);
     VERIFY(status, TRUE, "H5Fis_accessible");
 
 
@@ -1631,7 +1636,7 @@ test_file_is_accessible(void)
     CHECK(ret, FAIL, "H5Pset_userblock");
 
     /* Create file with non-default user block */
-    fid = H5Fcreate(FILE1, H5F_ACC_TRUNC, fcpl_id, H5P_DEFAULT);
+    fid = H5Fcreate(FILE1, H5F_ACC_TRUNC, fcpl_id, fapl);
     CHECK(fid, FAIL, "H5Fcreate");
 
     /* Release file-creation property list */
@@ -1643,7 +1648,7 @@ test_file_is_accessible(void)
     CHECK(ret, FAIL, "H5Fclose");
 
     /* Verify that the file is an HDF5 file */
-    status = H5Fis_accessible(FILE1, H5P_DEFAULT);
+    status = H5Fis_accessible(FILE1, fapl);
     VERIFY(status, TRUE, "H5Fis_accessible");
 
 
@@ -1664,8 +1669,12 @@ test_file_is_accessible(void)
     CHECK(ret, FAIL, "HDclose");
 
     /* Verify that the file is not an HDF5 file */
-    status = H5Fis_accessible(FILE1, H5P_DEFAULT);
+    status = H5Fis_accessible(FILE1, fapl);
     VERIFY(status, FALSE, "H5Fis_accessible");
+
+    /* Close property list */
+    ret = H5Pclose(fapl);
+    CHECK(ret, FAIL, "H5Pclose");
 
 } /* end test_file_is_accessible() */
 
@@ -1683,6 +1692,7 @@ test_file_ishdf5(void)
 {
     hid_t    file;      /* File opened with read-write permission */
     hid_t    fcpl;      /* File creation property list */
+    hid_t    fapl = -1; /* File access property list */
     int      fd;        /* File Descriptor */
     ssize_t  nbytes;    /* Number of bytes written */
     unsigned u;         /* Local index variable */
@@ -1693,8 +1703,12 @@ test_file_ishdf5(void)
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Detection of HDF5 Files (using deprecated H5Fis_hdf5() call)\n"));
 
+    /* Get FAPL */
+    fapl = h5_fileaccess();
+    CHECK(fapl, FAIL, "H5Pcreate");
+
     /* Create a file */
-    file = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    file = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
     CHECK(file, FAIL, "H5Fcreate");
 
     /* Close file */
@@ -1714,7 +1728,7 @@ test_file_ishdf5(void)
     CHECK(ret, FAIL, "H5Pset_userblock");
 
     /* Create file with non-default user block */
-    file = H5Fcreate(FILE1, H5F_ACC_TRUNC, fcpl, H5P_DEFAULT);
+    file = H5Fcreate(FILE1, H5F_ACC_TRUNC, fcpl, fapl);
     CHECK(file, FAIL, "H5Fcreate");
 
     /* Release file-creation property list */
@@ -1749,6 +1763,10 @@ test_file_ishdf5(void)
     /* Verify that the file is not an HDF5 file */
     status = H5Fis_hdf5(FILE1);
     VERIFY(status, FALSE, "H5Fis_hdf5");
+
+    /* Close property list */
+    ret = H5Pclose(fapl);
+    CHECK(ret, FAIL, "H5Pclose");
 
 } /* end test_file_ishdf5() */
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
@@ -2240,10 +2258,8 @@ test_file_double_file_dataset_open(hbool_t new_format)
     MESSAGE(5, ("Testing double file and dataset open/close\n"));
 
     /* Setting up test file */
-
-    fapl = H5Pcreate(H5P_FILE_ACCESS);
+    fapl = h5_fileaccess();
     CHECK(fapl, FAIL, "H5Pcreate");
-
     if(new_format) {
         ret = H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST);
         CHECK(ret, FAIL, "H5Pset_libver_bounds");
@@ -4165,10 +4181,7 @@ test_file_freespace(const char *env_h5_drvr)
             /* Check that there is the right amount of free space in the file */
             free_space = H5Fget_freespace(file);
             CHECK(free_space, FAIL, "H5Fget_freespace");
-            if(new_format)
-                VERIFY(free_space, expected_fs_del, "H5Fget_freespace");
-            else
-                VERIFY(free_space, expected_fs_del, "H5Fget_freespace");
+            VERIFY(free_space, expected_fs_del, "H5Fget_freespace");
 
             /* Close file */
             ret = H5Fclose(file);

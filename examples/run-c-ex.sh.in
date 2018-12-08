@@ -139,35 +139,7 @@ then
         RunTest h5_vds-percival-unlim-maxmin &&\
         rm h5_vds-percival-unlim-maxmin &&\
         RunTest h5_vds &&\
-        rm h5_vds &&\
-
-#        RunTest h5rados_file_create  &&\
-#        rm h5rados_file_create &&\
-#        RunTest h5rados_file_open &&\
-#        rm h5rados_file_open &&\
-#        RunTest h5rados_dset_create &&\
-#        rm h5rados_dset_create &&\
-#        RunTest h5rados_dset_open &&\
-#        rm h5rados_dset_open &&\
-#        RunTest h5rados_dset_read &&\
-#        rm h5rados_dset_read &&\
-#        RunTest h5rados_dset_rpartial &&\
-#        rm h5rados_dset_rpartial &&\
-#        RunTest h5rados_dset_rss &&\
-#        rm h5rados_dset_rss &&\
-#        RunTest h5rados_dset_write &&\
-#        rm  h5rados_dset_write &&\
-#        RunTest h5rados_dset_wpartial &&\
-#        rm h5rados_dset_wpartial &&\
-#        RunTest h5rados_dset_wss &&\
-#        rm h5rados_dset_wss &&\
-#        RunTest h5rados_group_create &&\
-#        rm h5rados_group_create &&\
-#        RunTest h5rados_group_open &&\
-#        rm h5rados_group_open &&\
-
-        RunTest h5_vol_external_log_native &&\
-        rm h5_vol_external_log_native); then
+        rm h5_vds); then
         EXIT_VALUE=${EXIT_SUCCESS}
     else
         EXIT_VALUE=${EXIT_FAILURE}

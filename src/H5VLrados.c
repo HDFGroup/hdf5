@@ -17,7 +17,7 @@
  * Programmer:  Neil Fortner <nfortne2@hdfgroup.org>
  *              December, 2017
  *
- * Purpose: The RADOS VOL plugin where access is forwarded to the RADOS API 
+ * Purpose: The RADOS VOL connector where access is forwarded to the RADOS API 
  */
  
 #define H5O_FRIEND              /* Suppress error about including H5Opkg */
@@ -33,8 +33,8 @@
 #include "H5Opkg.h"             /* Objects                              */
 #include "H5Pprivate.h"         /* Property lists                       */
 #include "H5Sprivate.h"         /* Dataspaces                           */
-#include "H5VLprivate.h"        /* VOL plugins                          */
-#include "H5VLrados.h"          /* RADOS plugin                         */
+#include "H5VLprivate.h"        /* Virtual Object Layer                 */
+#include "H5VLrados.h"          /* RADOS connector                      */
 
 hid_t H5VL_RADOS_g = -1;
 
@@ -113,8 +113,8 @@ typedef struct H5VL_rados_select_chunk_info_t {
 /*
  * Prototypes
  */
-static void *H5VL_rados_fapl_copy(const void *_old_fa);
-static herr_t H5VL_rados_fapl_free(void *_fa);
+static void *H5VL_rados_info_copy(const void *_old_info);
+static herr_t H5VL_rados_info_free(void *_info);
 static herr_t H5VL_rados_term(hid_t vtpl_id);
 
 /* File callbacks */
@@ -262,16 +262,24 @@ H5FL_DEFINE(H5VL_rados_dset_t);
 /*H5FL_DEFINE(H5VL_rados_dtype_t);
 H5FL_DEFINE(H5VL_rados_attr_t);*/
 
-/* The RADOS VOL plugin struct */
+/* The RADOS VOL connector struct */
 static H5VL_class_t H5VL_rados_g = {
     HDF5_VOL_RADOS_VERSION_1,                   /* Version number */
     H5_VOL_RADOS,                               /* Plugin value */
     "rados",                                    /* name */
+    (unsigned)0,                                /* capability flags */
     NULL,                                       /* initialize */
     H5VL_rados_term,                            /* terminate */
-    sizeof(H5VL_rados_fapl_t),                  /*fapl_size */
-    H5VL_rados_fapl_copy,                       /*fapl_copy */
-    H5VL_rados_fapl_free,                       /*fapl_free */
+    sizeof(H5VL_rados_fapl_t),                  /* info_size */
+    H5VL_rados_info_copy,                       /* info_copy */
+    NULL,                                       /* info_cmp */
+    H5VL_rados_info_free,                       /* info_free */
+    NULL,                                       /* info_to_str */
+    NULL,                                       /* str_to_info */
+    NULL,                                       /* get_object */
+    NULL,                                       /* get_wrap_ctx */
+    NULL,                                       /* wrap_object */
+    NULL,                                       /* free_wrap_ctx */
     {                                           /* attribute_cls */
         NULL,//H5VL_rados_attribute_create,            /* create */
         NULL,//H5VL_rados_attribute_open,              /* open */
@@ -280,7 +288,7 @@ static H5VL_class_t H5VL_rados_g = {
         NULL,//H5VL_rados_attribute_get,               /* get */
         NULL,//H5VL_rados_attribute_specific,          /* specific */
         NULL,                                   /* optional */
-        NULL,//H5VL_rados_attribute_close              /* close */
+        NULL //H5VL_rados_attribute_close              /* close */
     },
     {                                           /* dataset_cls */
         H5VL_rados_dataset_create,              /* create */
@@ -298,7 +306,7 @@ static H5VL_class_t H5VL_rados_g = {
         NULL,//H5VL_rados_datatype_get,                /* get */
         NULL,                                   /* specific */
         NULL,                                   /* optional */
-        NULL,//H5VL_rados_datatype_close               /* close */
+        NULL //H5VL_rados_datatype_close               /* close */
     },
     {                                           /* file_cls */
         H5VL_rados_file_create,                 /* create */
@@ -329,12 +337,15 @@ static H5VL_class_t H5VL_rados_g = {
         NULL,                                   /* copy */
         NULL,                                   /* get */
         NULL,//H5VL_iod_object_specific,               /* specific */
-        NULL,//H5VL_rados_object_optional              /* optional */
+        NULL //H5VL_rados_object_optional              /* optional */
     },
-    {
-        NULL,//H5VL_iod_cancel,
-        NULL,//H5VL_iod_test,
-        NULL,//H5VL_iod_wait
+    {                                           /* request class */
+        NULL,//wait,
+        NULL,//notify,
+        NULL,//cancel
+        NULL,//specific
+        NULL,//optional
+        NULL //free
     },
     NULL
 };
@@ -497,8 +508,8 @@ H5VL_rados_oid_to_idx(uint64_t bin_oid)
 /*-------------------------------------------------------------------------
  * Function:    H5VLrados_init
  *
- * Purpose:     Initialize this vol plugin by connecting to the cluster
- *              and registering the driver with the library.
+ * Purpose:     Initialize this vol connector by connecting to the cluster
+ *              and registering the connector with the library.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -522,7 +533,7 @@ H5VLrados_init(rados_t rados_cluster, const char *rados_pool)
 
     /* Register the RADOS VOL, if it isn't already */
     if(H5VL_rados_init() < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to initialize RADOS VOL plugin")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to initialize RADOS VOL connector")
 
     /* Save cluster */
     cluster_g = rados_cluster;
@@ -545,7 +556,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5VL_rados_init
  *
- * Purpose:     Initialize this vol plugin by registering the driver with the
+ * Purpose:     Initialize this vol connector by registering the connector with the
  *              library.
  *
  * Return:      Non-negative on success/Negative on failure
@@ -572,9 +583,9 @@ H5VL_rados_init(void)
 
     /* Register the RADOS VOL, if it isn't already */
     if(NULL == H5I_object_verify(H5VL_RADOS_g, H5I_VOL)) {
-        if((H5VL_RADOS_g = H5VL_register_driver((const H5VL_class_t *)&H5VL_rados_g, 
+        if((H5VL_RADOS_g = H5VL_register_connector((const H5VL_class_t *)&H5VL_rados_g, 
                                           sizeof(H5VL_class_t), TRUE)) < 0)
-            HGOTO_ERROR(H5E_ATOM, H5E_CANTINSERT, FAIL, "can't create ID for RADOS plugin")
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTINSERT, FAIL, "can't create ID for RADOS connector")
     } /* end if */
 
 done:
@@ -602,9 +613,9 @@ H5VLrados_term(void)
     FUNC_ENTER_API(FAIL)
     H5TRACE0("e","");
 
-    /* Terminate the plugin */
+    /* Terminate the connector */
     if(H5VL_rados_term(-1) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CLOSEERROR, FAIL, "can't close RADOS VOL plugin")
+        HGOTO_ERROR(H5E_VOL, H5E_CLOSEERROR, FAIL, "can't close RADOS VOL connector")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -638,7 +649,7 @@ H5VL_rados_term(hid_t H5_ATTR_UNUSED vtpl_id)
             cluster_init_g = FALSE;
         } /* end if */
 
-        /* "Forget" plugin id.  This should normally be called by the library
+        /* "Forget" connector id.  This should normally be called by the library
          * when it is closing the id, so no need to close it here. */
         H5VL_RADOS_g = -1;
     } /* end if */
@@ -651,7 +662,7 @@ H5VL_rados_term(hid_t H5_ATTR_UNUSED vtpl_id)
  * Function:    H5Pset_fapl_rados
  *
  * Purpose:     Modify the file access property list to use the H5VL_RADOS
- *              plugin defined in this source file.  file_comm and
+ *              connector defined in this source file.  file_comm and
  *              file_info identify the communicator and info object used
  *              to coordinate actions on file create, open, flush, and
  *              close.
@@ -674,7 +685,7 @@ H5Pset_fapl_rados(hid_t fapl_id, MPI_Comm file_comm, MPI_Info file_info)
     H5TRACE3("e", "iMcMi", fapl_id, file_comm, file_info);
 
     if(H5VL_RADOS_g < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_UNINITIALIZED, FAIL, "RADOS VOL plugin not initialized")
+        HGOTO_ERROR(H5E_VOL, H5E_UNINITIALIZED, FAIL, "RADOS VOL connector not initialized")
 
     if(fapl_id == H5P_DEFAULT)
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't set values in default property list")
@@ -685,7 +696,7 @@ H5Pset_fapl_rados(hid_t fapl_id, MPI_Comm file_comm, MPI_Info file_info)
     if(MPI_COMM_NULL == file_comm)
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a valid communicator")
 
-    /* Initialize driver specific properties */
+    /* Initialize connector specific properties */
     fa.comm = file_comm;
     fa.info = file_info;
 
@@ -697,7 +708,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5VL_rados_fapl_copy
+ * Function:    H5VL_rados_info_copy
  *
  * Purpose:     Copies the rados-specific file access properties.
  *
@@ -710,43 +721,43 @@ done:
  *-------------------------------------------------------------------------
  */
 static void *
-H5VL_rados_fapl_copy(const void *_old_fa)
+H5VL_rados_info_copy(const void *_old_info)
 {
-    const H5VL_rados_fapl_t *old_fa = (const H5VL_rados_fapl_t*)_old_fa;
-    H5VL_rados_fapl_t     *new_fa = NULL;
+    const H5VL_rados_fapl_t *old_info = (const H5VL_rados_fapl_t*)_old_info;
+    H5VL_rados_fapl_t     *new_info = NULL;
     void                  *ret_value = NULL;
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if(NULL == (new_fa = (H5VL_rados_fapl_t *)H5MM_malloc(sizeof(H5VL_rados_fapl_t))))
+    if(NULL == (new_info = (H5VL_rados_fapl_t *)H5MM_malloc(sizeof(H5VL_rados_fapl_t))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Copy the general information */
-    HDmemcpy(new_fa, old_fa, sizeof(H5VL_rados_fapl_t));
+    HDmemcpy(new_info, old_info, sizeof(H5VL_rados_fapl_t));
 
     /* Clear allocated fields, so they aren't freed if something goes wrong.  No
      * need to clear info since it is only freed if comm is not null. */
-    new_fa->comm = MPI_COMM_NULL;
+    new_info->comm = MPI_COMM_NULL;
 
     /* Duplicate communicator and Info object. */
-    if(FAIL == H5FD_mpi_comm_info_dup(old_fa->comm, old_fa->info, &new_fa->comm, &new_fa->info))
+    if(FAIL == H5FD_mpi_comm_info_dup(old_info->comm, old_info->info, &new_info->comm, &new_info->info))
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTCOPY, NULL, "Communicator/Info duplicate failed")
 
-    ret_value = new_fa;
+    ret_value = new_info;
 
 done:
     if (NULL == ret_value) {
         /* cleanup */
-        if(new_fa && H5VL_rados_fapl_free(new_fa) < 0)
+        if(new_info && H5VL_rados_fapl_free(new_info) < 0)
             HDONE_ERROR(H5E_PLIST, H5E_CANTFREE, NULL, "can't free fapl")
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_rados_fapl_copy() */
+} /* end H5VL_rados_info_copy() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5VL_rados_fapl_free
+ * Function:    H5VL_rados_info_free
  *
  * Purpose:     Frees the rados-specific file access properties.
  *
@@ -759,26 +770,26 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_rados_fapl_free(void *_fa)
+H5VL_rados_info_free(void *_info)
 {
     herr_t              ret_value = SUCCEED;
-    H5VL_rados_fapl_t   *fa = (H5VL_rados_fapl_t*)_fa;
+    H5VL_rados_fapl_t   *info = (H5VL_rados_fapl_t *)_info;
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    assert(fa);
+    assert(info);
 
     /* Free the internal communicator and INFO object */
-    if(fa->comm != MPI_COMM_NULL)
-        if(H5FD_mpi_comm_info_free(&fa->comm, &fa->info) < 0)
+    if(info->comm != MPI_COMM_NULL)
+        if(H5FD_mpi_comm_info_free(&info->comm, &info->info) < 0)
             HGOTO_ERROR(H5E_INTERNAL, H5E_CANTFREE, FAIL, "Communicator/Info free failed")
 
     /* free the struct */
-    H5MM_xfree(fa);
+    H5MM_xfree(info);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_rados_fapl_free() */
+} /* end H5VL_rados_info_free() */
 
 
 /*-------------------------------------------------------------------------
@@ -1193,7 +1204,7 @@ H5VL_rados_file_close_helper(H5VL_rados_file_t *file, hid_t dxpl_id, void **req)
      * app reference count incremented by use of public API to create the ID,
      * while use of H5Idec_ref clears the error stack.  In general we can't use
      * public APIs in the "done" section or in close routines for this reason,
-     * until we implement a separate error stack for the VOL plugin */
+     * until we implement a separate error stack for the VOL connector */
     if(file->fapl_id != FAIL && H5I_dec_app_ref(file->fapl_id) < 0)
         HDONE_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to close plist")
     if(file->fcpl_id != FAIL && H5I_dec_app_ref(file->fcpl_id) < 0)
@@ -1732,7 +1743,7 @@ H5VL_rados_group_traverse_const(H5VL_rados_item_t *item, const char *path,
      * buffer (since the RADOS API expects null terminated strings we must
      * insert null terminators to pass path components to RADOS.  We could
      * alternatively copy each path name but this is simpler and shares more
-     * code with other VOL plugins) */
+     * code with other VOL connectors) */
     if(NULL == (tmp_path = HDstrdup(path)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "can't duplicate path name")
 

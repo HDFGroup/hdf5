@@ -11,30 +11,36 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Purpose:	The private header file for the native VOL driver.
+ * Purpose:	The public header file for the pass-through VOL connector.
  */
 
-#ifndef _H5VLnative_private_H
-#define _H5VLnative_private_H
+#ifndef _H5VLpassthru_H
+#define _H5VLpassthru_H
 
-/* Include driver's public header */
-#include "H5VLnative.h"
+/* Identifier for the pass-through VOL connector */
+#define H5VL_PASSTHRU	(H5VL_pass_through_register())
 
-/* Initializer function for native VOL driver */
-#define H5VL_NATIVE             (H5VL_native_init())
+/* Characteristics of the pass-through VOL connector */
+#define H5VL_PASSTHRU_NAME        "pass_through"
+#define H5VL_PASSTHRU_VALUE       505           /* VOL connector ID */
+#define H5VL_PASSTHRU_VERSION     0
+
+/* Pass-through VOL connector info */
+typedef struct H5VL_pass_through_info_t {
+    hid_t under_vol_id;         /* VOL ID for under VOL */
+    void *under_vol_info;       /* VOL info for under VOL */
+} H5VL_pass_through_info_t;
 
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-H5_DLL hid_t H5VL_native_get_driver_id(void);
-H5_DLL hid_t H5VL_native_init(void);
-H5_DLL hid_t H5VL_native_register(H5I_type_t type, const void *obj, hbool_t app_ref);
-H5_DLL herr_t H5VL_native_unregister(hid_t obj_id);
+H5_DLL hid_t H5VL_pass_through_register(void);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _H5VLnative_private_H */
+#endif /* _H5VLpassthru_H */
+

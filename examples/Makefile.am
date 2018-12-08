@@ -38,7 +38,6 @@ EXAMPLE_PROG = h5_write h5_read h5_extend_write h5_chunk_read h5_compound \
             h5_ref2reg h5_extlink h5_elink_unix2win h5_shared_mesg h5_vds h5_vds-exc \
             h5_vds-exclim h5_vds-eiger h5_vds-simpleIO h5_vds-percival \
             h5_vds-percival-unlim h5_vds-percival-unlim-maxmin \
-            h5_vol_external_log_native \
             h5rados_file_create h5rados_file_open \
             h5rados_dset_create h5rados_dset_open h5rados_dset_read h5rados_dset_rpartial \
             h5rados_dset_rss h5rados_dset_wpartial h5rados_dset_write h5rados_dset_wss \
@@ -57,7 +56,6 @@ INSTALL_FILES = h5_write.c h5_read.c h5_extend_write.c h5_chunk_read.c   \
             h5_ref2reg.c h5_shared_mesg.c ph5example.c h5_vds.c h5_vds-exc.c \
             h5_vds-exclim.c h5_vds-eiger.c h5_vds-simpleIO.c h5_vds-percival.c \
             h5_vds-percival-unlim.c h5_vds-percival-unlim-maxmin.c \
-            h5_vol_external_log_native.c \
             h5rados_example.h h5rados_file_create.c h5rados_file_open.c \
             h5rados_dset_create.c h5rados_dset_open.c h5rados_dset_read.c h5rados_dset_rpartial.c \
             h5rados_dset_rss.c h5rados_dset_wpartial.c h5rados_dset_write.c h5rados_dset_wss.c \
@@ -136,7 +134,6 @@ h5_vds-simpleIO: $(srcdir)/h5_vds-simpleIO.c
 h5_vds-percival: $(srcdir)/h5_vds-percival.c
 h5_vds-percival-unlim: $(srcdir)/h5_vds-percival-unlim.c
 h5_vds-percival-unlim-maxmin: $(srcdir)/h5_vds-percival-unlim-maxmin.c
-h5_vol_external_log_native: $(srcdir)/h5_vol_external_log_native.c
 
 if BUILD_SHARED_SZIP_CONDITIONAL
 LD_LIBRARY_PATH=$(LL_PATH)
