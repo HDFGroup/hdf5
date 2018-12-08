@@ -748,7 +748,7 @@ H5VL_rados_info_copy(const void *_old_info)
 done:
     if (NULL == ret_value) {
         /* cleanup */
-        if(new_info && H5VL_rados_fapl_free(new_info) < 0)
+        if(new_info && H5VL_rados_info_free(new_info) < 0)
             HDONE_ERROR(H5E_PLIST, H5E_CANTFREE, NULL, "can't free fapl")
     } /* end if */
 
@@ -821,14 +821,12 @@ H5VL_rados_file_create(const char *name, unsigned flags, hid_t fcpl_id,
      * the EXCL or TRUNC bit is set.  All newly-created files are opened for
      * reading and writing.
      */
-    if(0==(flags & (H5F_ACC_EXCL|H5F_ACC_TRUNC)))
+    if(0 == (flags & (H5F_ACC_EXCL|H5F_ACC_TRUNC)))
         flags |= H5F_ACC_EXCL;      /*default*/
     flags |= H5F_ACC_RDWR | H5F_ACC_CREAT;
 
     /* Get information from the FAPL */
-    if(NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list")
-    if(NULL == (fa = (H5VL_rados_fapl_t *)H5P_get_vol_info(plist)))
+    if(H5Pget_vol_info(fapl_id, (void **)(&fa)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't get RADOS info struct")
 
     /* allocate the file object that is returned to the user */
@@ -924,9 +922,7 @@ H5VL_rados_file_open(const char *name, unsigned flags, hid_t fapl_id,
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Get information from the FAPL */
-    if(NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list")
-    if(NULL == (fa = (H5VL_rados_fapl_t *)H5P_get_vol_info(plist)))
+    if(H5Pget_vol_info(fapl_id, (void **)(&fa)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, NULL, "can't get RADOS info struct")
 
     /* allocate the file object that is returned to the user */
