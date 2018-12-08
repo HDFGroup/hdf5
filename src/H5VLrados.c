@@ -62,10 +62,10 @@ hid_t H5VL_RADOS_g = -1;
  * Typedefs
  */
 /* RADOS-specific file access properties */
-typedef struct H5VL_rados_fapl_t {
+typedef struct H5VL_rados_info_t {
     MPI_Comm            comm;           /*communicator                  */
     MPI_Info            info;           /*file information              */
-} H5VL_rados_fapl_t;
+} H5VL_rados_info_t;
 
 /* Enum to indicate if the supplied read buffer can be used as a type conversion
  * or background buffer */
@@ -270,7 +270,7 @@ static H5VL_class_t H5VL_rados_g = {
     (unsigned)0,                                /* capability flags */
     NULL,                                       /* initialize */
     H5VL_rados_term,                            /* terminate */
-    sizeof(H5VL_rados_fapl_t),                  /* info_size */
+    sizeof(H5VL_rados_info_t),                  /* info_size */
     H5VL_rados_info_copy,                       /* info_copy */
     NULL,                                       /* info_cmp */
     H5VL_rados_info_free,                       /* info_free */
@@ -677,7 +677,7 @@ H5VL_rados_term(hid_t H5_ATTR_UNUSED vtpl_id)
 herr_t
 H5Pset_fapl_rados(hid_t fapl_id, MPI_Comm file_comm, MPI_Info file_info)
 {
-    H5VL_rados_fapl_t fa;
+    H5VL_rados_info_t fa;
     H5P_genplist_t  *plist;      /* Property list pointer */
     herr_t          ret_value;
 
@@ -723,17 +723,17 @@ done:
 static void *
 H5VL_rados_info_copy(const void *_old_info)
 {
-    const H5VL_rados_fapl_t *old_info = (const H5VL_rados_fapl_t*)_old_info;
-    H5VL_rados_fapl_t     *new_info = NULL;
+    const H5VL_rados_info_t *old_info = (const H5VL_rados_info_t*)_old_info;
+    H5VL_rados_info_t     *new_info = NULL;
     void                  *ret_value = NULL;
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if(NULL == (new_info = (H5VL_rados_fapl_t *)H5MM_malloc(sizeof(H5VL_rados_fapl_t))))
+    if(NULL == (new_info = (H5VL_rados_info_t *)H5MM_malloc(sizeof(H5VL_rados_info_t))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Copy the general information */
-    HDmemcpy(new_info, old_info, sizeof(H5VL_rados_fapl_t));
+    HDmemcpy(new_info, old_info, sizeof(H5VL_rados_info_t));
 
     /* Clear allocated fields, so they aren't freed if something goes wrong.  No
      * need to clear info since it is only freed if comm is not null. */
@@ -773,7 +773,7 @@ static herr_t
 H5VL_rados_info_free(void *_info)
 {
     herr_t              ret_value = SUCCEED;
-    H5VL_rados_fapl_t   *info = (H5VL_rados_fapl_t *)_info;
+    H5VL_rados_info_t   *info = (H5VL_rados_info_t *)_info;
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -809,7 +809,7 @@ static void *
 H5VL_rados_file_create(const char *name, unsigned flags, hid_t fcpl_id,
     hid_t fapl_id, hid_t dxpl_id, void **req)
 {
-    H5VL_rados_fapl_t *fa = NULL;
+    H5VL_rados_info_t *fa = NULL;
     H5P_genplist_t *plist = NULL;      /* Property list pointer */
     H5VL_rados_file_t *file = NULL;
     void *ret_value = NULL;
@@ -905,7 +905,7 @@ static void *
 H5VL_rados_file_open(const char *name, unsigned flags, hid_t fapl_id,
     hid_t dxpl_id, void **req)
 {
-    H5VL_rados_fapl_t *fa = NULL;
+    H5VL_rados_info_t *fa = NULL;
     H5P_genplist_t *plist = NULL;      /* Property list pointer */
     H5VL_rados_file_t *file = NULL;
     char foi_buf_static[H5VL_RADOS_FOI_BUF_SIZE];
