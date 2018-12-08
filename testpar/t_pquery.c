@@ -26,6 +26,9 @@
 #include <mpi.h>
 #endif
 
+extern void H5Q_enable_visualize_query(void);
+
+
 /****************/
 /* Local Macros */
 /****************/
@@ -160,6 +163,8 @@ test_query_create(void)
             &value2)) < 0) FAIL_STACK_ERROR;
     if ((q7 = H5Qcombine(q5, H5Q_COMBINE_OR, q6)) < 0) FAIL_STACK_ERROR;
 
+    // H5Q_enable_visualize_query();
+
     return q7;
 
 error:
@@ -227,6 +232,8 @@ test_query_create_type(H5R_type_t type, hbool_t compound)
             q9 = q5;
         }
     }
+
+    // H5Q_enable_visualize_query();
 
     return q9;
 
@@ -595,7 +602,7 @@ test_query_read_selection(size_t file_count, const char *filenames[],
     hid_t *files, hid_t view, H5R_type_t rtype)
 {
     hid_t refs = H5I_BADID, ref_type = H5I_BADID, ref_space = H5I_BADID;
-    size_t n_refs, ref_size, ref_buf_size;
+    size_t n_refs = 0, ref_size, ref_buf_size;
     void *ref_buf = NULL;
     href_t *ref_ptr = NULL;
     const char *ref_path = NULL;
@@ -612,93 +619,95 @@ test_query_read_selection(size_t file_count, const char *filenames[],
         ref_path = H5Q_VIEW_REF_ATTR_NAME;
 
     /* Get region references from view */
-    if ((refs = H5Dopen(view, ref_path, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR;
-    if ((ref_type = H5Dget_type(refs)) < 0) FAIL_STACK_ERROR;
-    if ((ref_space = H5Dget_space(refs)) < 0) FAIL_STACK_ERROR;
-    if (0 == (n_refs = (size_t) H5Sget_select_npoints(ref_space))) FAIL_STACK_ERROR;
-        if (mpi_rank == 0)
-           printf("Found %zu reference(s)\n", n_refs);
-    if (0 == (ref_size = H5Tget_size(ref_type))) FAIL_STACK_ERROR;
-//    printf("Reference type size: %zu\n", ref_size);
-
-    /* Allocate buffer to hold data */
-    ref_buf_size = n_refs * ref_size;
-    if (NULL == (ref_buf = HDmalloc(ref_buf_size))) FAIL_STACK_ERROR;
-
-    if ((H5Dread(refs, ref_type, H5S_ALL, ref_space, H5P_DEFAULT, ref_buf)) < 0) FAIL_STACK_ERROR;
-
-    /* Get dataset / space / type ID for the referenced dataset region */
-    ref_ptr = (href_t *) ref_buf;
-    for (i = 0; i < n_refs; i++) {
-        char obj_path[MAX_NAME];
-        char filename[MAX_NAME];
-        hid_t loc = H5I_BADID;
-
-        if (H5Rget_file_name(ref_ptr[i], filename, MAX_NAME) < 0) FAIL_STACK_ERROR;
-        printf("Found reference from file: %s\n", filename);
-        if (file_count > 1) {
-            unsigned int j;
-            for (j = 0; j < file_count; j++) {
-                if (0 == HDstrcmp(filename, filenames[j])) {
-                    loc = files[j];
-                    break;
-                }
-            }
-        } else {
-            if (0 != HDstrcmp(filename, filenames[0])) FAIL_STACK_ERROR;
-            loc = files[0];
-        }
-        if (H5Rget_obj_name(loc, ref_ptr[i], obj_path, MAX_NAME) < 0) FAIL_STACK_ERROR;
-        printf("Found reference from object: %s\n", obj_path);
-        if ((obj = H5Rget_object(loc, H5P_DEFAULT, ref_ptr[i])) < 0) FAIL_STACK_ERROR;
-
-        if (rtype == H5R_REGION) {
-            unsigned int j;
-
-            if ((space = H5Rget_region2(loc, ref_ptr[i])) < 0) FAIL_STACK_ERROR;
-            if ((type = H5Dget_type(obj)) < 0) FAIL_STACK_ERROR;
-            if (0 == (n_elem = (size_t) H5Sget_select_npoints(space))) FAIL_STACK_ERROR;
-            if (0 == (elem_size = H5Tget_size(type))) FAIL_STACK_ERROR;
-
-            /* Get name of dataset */
-            printf("Region has %zu elements of size %zu\n", n_elem, elem_size);
-
-            /* Allocate buffer to hold data */
-            buf_size = n_elem * elem_size;
-            if (NULL == (buf = (float *) HDmalloc(buf_size))) FAIL_STACK_ERROR;
-
-            if ((mem_space = H5Screate_simple(1, (hsize_t *) &n_elem, NULL)) < 0) FAIL_STACK_ERROR;
-
-            if ((H5Dread(obj, type, mem_space, space, H5P_DEFAULT, buf)) < 0) FAIL_STACK_ERROR;
-
-            printf("Elements found are:\n");
-            for (j = 0; j < n_elem; j++)
-                printf("%f ", buf[j]);
-            printf("\n");
-
-            if (H5Sclose(mem_space) < 0) FAIL_STACK_ERROR;
-            if (H5Sclose(space) < 0) FAIL_STACK_ERROR;
-            if (H5Tclose(type) < 0) FAIL_STACK_ERROR;
-            HDfree(buf);
-            buf = NULL;
-        }
-        if (rtype == H5R_ATTR) {
-            char attr_name[MAX_NAME];
-
-            if (H5Rget_attr_name(obj, ref_ptr[i], attr_name, MAX_NAME) < 0) FAIL_STACK_ERROR;
-            printf("Attribute name: %s\n", attr_name);
-
-        }
-        if (H5Dclose(obj) < 0) FAIL_STACK_ERROR;
+    if (H5Lexists(view, ref_path, H5P_DEFAULT) == TRUE) {
+       if ((refs = H5Dopen(view, ref_path, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR;
+       if ((ref_type = H5Dget_type(refs)) < 0) FAIL_STACK_ERROR;
+       if ((ref_space = H5Dget_space(refs)) < 0) FAIL_STACK_ERROR;
+       if (0 == (n_refs = (size_t) H5Sget_select_npoints(ref_space))) FAIL_STACK_ERROR;
     }
+    if (mpi_rank == 0)
+           printf("Found %zu reference(s)\n", n_refs);
+    if (n_refs) {
+        if (0 == (ref_size = H5Tget_size(ref_type))) FAIL_STACK_ERROR;
+        //    printf("Reference type size: %zu\n", ref_size);
 
-    if ((H5Dref_reclaim(ref_type, ref_space, H5P_DEFAULT, ref_buf)) < 0) FAIL_STACK_ERROR;
-    if (H5Sclose(ref_space) < 0) FAIL_STACK_ERROR;
-    if (H5Tclose(ref_type) < 0) FAIL_STACK_ERROR;
-    if (H5Dclose(refs) < 0) FAIL_STACK_ERROR;
-    HDfree(ref_buf);
-    ref_buf = NULL;
+        /* Allocate buffer to hold data */
+        ref_buf_size = n_refs * ref_size;
+        if (NULL == (ref_buf = HDmalloc(ref_buf_size))) FAIL_STACK_ERROR;
 
+        if ((H5Dread(refs, ref_type, H5S_ALL, ref_space, H5P_DEFAULT, ref_buf)) < 0) FAIL_STACK_ERROR;
+
+        /* Get dataset / space / type ID for the referenced dataset region */
+        ref_ptr = (href_t *) ref_buf;
+        for (i = 0; i < n_refs; i++) {
+            char obj_path[MAX_NAME];
+            char filename[MAX_NAME];
+            hid_t loc = H5I_BADID;
+
+            if (H5Rget_file_name(ref_ptr[i], filename, MAX_NAME) < 0) FAIL_STACK_ERROR;
+            printf("Found reference from file: %s\n", filename);
+            if (file_count > 1) {
+                unsigned int j;
+                for (j = 0; j < file_count; j++) {
+                    if (0 == HDstrcmp(filename, filenames[j])) {
+                        loc = files[j];
+                        break;
+                    }
+                }
+            } else {
+                if (0 != HDstrcmp(filename, filenames[0])) FAIL_STACK_ERROR;
+                loc = files[0];
+            }
+            if (H5Rget_obj_name(loc, ref_ptr[i], obj_path, MAX_NAME) < 0) FAIL_STACK_ERROR;
+                printf("Found reference from object: %s\n", obj_path);
+                if ((obj = H5Rget_object(loc, H5P_DEFAULT, ref_ptr[i])) < 0) FAIL_STACK_ERROR;
+
+                if (rtype == H5R_REGION) {
+                    unsigned int j;
+
+                if ((space = H5Rget_region2(loc, ref_ptr[i])) < 0) FAIL_STACK_ERROR;
+                if ((type = H5Dget_type(obj)) < 0) FAIL_STACK_ERROR;
+                if (0 == (n_elem = (size_t) H5Sget_select_npoints(space))) FAIL_STACK_ERROR;
+                if (0 == (elem_size = H5Tget_size(type))) FAIL_STACK_ERROR;
+
+                /* Get name of dataset */
+                printf("Region has %zu elements of size %zu\n", n_elem, elem_size);
+
+                /* Allocate buffer to hold data */
+                buf_size = n_elem * elem_size;
+                if (NULL == (buf = (float *) HDmalloc(buf_size))) FAIL_STACK_ERROR;
+
+                if ((mem_space = H5Screate_simple(1, (hsize_t *) &n_elem, NULL)) < 0) FAIL_STACK_ERROR;
+
+                if ((H5Dread(obj, type, mem_space, space, H5P_DEFAULT, buf)) < 0) FAIL_STACK_ERROR;
+
+                printf("Elements found are:\n");
+                for (j = 0; j < n_elem; j++)
+                    printf("%f ", buf[j]);
+                printf("\n");
+
+                if (H5Sclose(mem_space) < 0) FAIL_STACK_ERROR;
+                if (H5Sclose(space) < 0) FAIL_STACK_ERROR;
+                if (H5Tclose(type) < 0) FAIL_STACK_ERROR;
+                HDfree(buf);
+                buf = NULL;
+            }
+            if (rtype == H5R_ATTR) {
+                char attr_name[MAX_NAME];
+
+                if (H5Rget_attr_name(obj, ref_ptr[i], attr_name, MAX_NAME) < 0) FAIL_STACK_ERROR;
+                printf("Attribute name: %s\n", attr_name);
+            }
+            if (H5Dclose(obj) < 0) FAIL_STACK_ERROR;
+        }
+
+        if ((H5Dref_reclaim(ref_type, ref_space, H5P_DEFAULT, ref_buf)) < 0) FAIL_STACK_ERROR;
+        if (H5Sclose(ref_space) < 0) FAIL_STACK_ERROR;
+        if (H5Tclose(ref_type) < 0) FAIL_STACK_ERROR;
+        if (H5Dclose(refs) < 0) FAIL_STACK_ERROR;
+        HDfree(ref_buf);
+        ref_buf = NULL;
+    }
     return 0;
 
 error:
@@ -771,6 +780,7 @@ test_query_apply_view(const char *filename, hid_t fapl, unsigned n_objs,
         if ((query = test_query_create_type(ref_types[i], compound[i])) < 0) FAIL_STACK_ERROR;
 
         for (loop = 0; loop < NLOOP; loop++) {
+	    result = 0;
             HDgettimeofday(&t1, NULL);
             if ((view = H5Qapply(file, query, &result, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR;
             HDgettimeofday(&t2, NULL);

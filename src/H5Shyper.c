@@ -8034,6 +8034,15 @@ H5S_combine_select(H5S_t *space1, H5S_seloper_t op, H5S_t *space2)
         if(H5S_hyper_generate_spans(space1) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_UNINITIALIZED, NULL, "dataspace does not have span tree")
 
+    if (space2->select.type->type == H5S_SEL_NONE) {
+        if (op == H5S_SELECT_AND)
+            ret_value = new_space = H5S_copy(space2, FALSE, TRUE);
+	else if (op == H5S_SELECT_OR)
+            ret_value = new_space = H5S_copy(space1, FALSE, TRUE);
+	goto done;
+    }
+
+    
     if(NULL == space2->select.sel_info.hslab->span_lst) {
         hsize_t tmp_start[H5S_MAX_RANK];
         hsize_t tmp_stride[H5S_MAX_RANK];

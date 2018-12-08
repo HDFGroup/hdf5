@@ -184,8 +184,11 @@ done:
         H5Tclose(type_id);
     if (space_id != FAIL)
         H5Sclose(space_id);
-    if (ret_value == FAIL)
+    if (ret_value == FAIL) {
+        *buf = NULL;
+	*buf_size = 0;
         H5MM_free(data);
+    }
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
@@ -268,7 +271,7 @@ H5X_dummy_create(hid_t dataset_id, hid_t H5_ATTR_UNUSED xcpl_id, hid_t H5_ATTR_U
 done:
     if (FAIL != file_id)
         H5Fclose(file_id);
-    H5MM_free(buf);
+    if (buf) H5MM_free(buf);
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5X_dummy_create() */
 
@@ -383,6 +386,7 @@ H5X_dummy_close(void *idx_handle)
     if (FAIL == H5Dclose(dummy->idx_anon_id))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTCLOSEOBJ, FAIL, "can't close anonymous dataset for index");
 
+    if (dummy->idx_token != NULL)
     H5MM_free(dummy->idx_token);
     H5MM_free(dummy);
 
@@ -570,7 +574,7 @@ H5X_dummy_query(void *idx_handle, hid_t H5_ATTR_UNUSED dataspace_id, hid_t query
             (int) H5Sget_select_npoints(ret_value));
 
 done:
-    H5MM_free(buf);
+    if (buf) H5MM_free(buf);
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5X_dummy_query() */
 

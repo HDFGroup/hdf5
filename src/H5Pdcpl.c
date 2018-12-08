@@ -3657,9 +3657,8 @@ H5Pset_index_plugin(hid_t plist_id, unsigned plugin_id)
     if (plugin_id > H5X_PLUGIN_MAX)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid plugin identification number");
 
-    /* Get the property list structure */
-    if(NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_CREATE)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_CREATE)))
+            HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     plugin = plugin_id;
 

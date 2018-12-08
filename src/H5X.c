@@ -1017,7 +1017,7 @@ int getLocalInfo(int hostid)
 }
 
 static
-void gather_topology_info(void)
+void gather_topology_info(MPI_Comm comm)
 {
     int isInitialized = 0;
     int hostid = gethostid();
@@ -1026,8 +1026,8 @@ void gather_topology_info(void)
        enable_parallel_queries = 0;
        return;
     }
-    MPI_Comm_rank(MPI_COMM_WORLD, &g_mpi_rank);
-    MPI_Comm_size(MPI_COMM_WORLD, &g_mpi_size);
+    MPI_Comm_rank(comm, &g_mpi_rank);
+    MPI_Comm_size(comm, &g_mpi_size);
     if (g_mpi_size == 1) {
       g_group_peer_count = 1;
       g_local_peer_count = 1;
@@ -1041,7 +1041,7 @@ void gather_topology_info(void)
 }
 
 static 
-herr_t create_group_comms(void)
+herr_t create_group_comms(MPI_Comm comm)
 {
     herr_t ret_value = SUCCEED; /* Return value */
     int query_rank = -1;
@@ -1087,11 +1087,17 @@ herr_t create_group_comms(void)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Xinitialize_parallel_query(void)
+H5Xinitialize_parallel_query()
 {
     static int initialized = 0;
-    gather_topology_info();
-    return create_group_comms();
+    herr_t ret = SUCCEED;
+    MPI_Comm comm = MPI_COMM_WORLD;
+    if (!initialized) {
+       gather_topology_info(comm);
+       ret = create_group_comms(comm);
+       if (ret == SUCCEED) initialized++;
+    }
+    return ret;
 }
 
 int
@@ -1111,6 +1117,31 @@ H5Xparallel_size(void)
 {
     return g_mpi_size;
 }
+
+unsigned
+H5Xallreduce_unsigned_status(unsigned status, hbool_t do_summation)
+{
+    unsigned global_status = 0;
+    unsigned local_status = status;
+    if ((g_mpi_size > 1) && do_summation) {
+        if (MPI_SUCCESS == MPI_Allreduce(&local_status, &global_status, 1, MPI_UNSIGNED, MPI_SUM, query_group_comm))
+            return global_status;
+    }
+    return status;
+}
+
+int
+H5Xallreduce_int_status(int status, hbool_t do_summation)
+{
+    int global_status = 0;
+    int local_status = status;
+    if ((g_mpi_size > 1) && do_summation) {    
+        if (MPI_SUCCESS == MPI_Allreduce(&local_status, &global_status, 1, MPI_INT, MPI_SUM, query_group_comm))
+            return global_status;
+    }
+    return status;
+}
+
 
 herr_t
 H5Xallgather_by_size(void *alldata, int nelems, int typesize)

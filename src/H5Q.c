@@ -283,6 +283,10 @@ static herr_t H5Q__view_combine(H5Q_combine_op_t combine_op, H5Q_view_t *view1, 
 static herr_t H5Q__view_write(H5G_t *grp, H5Q_view_t *view);
 static herr_t H5Q__view_free(H5Q_view_t *view);
 
+/* Parallel query support functions */
+static hbool_t H5Q__contains_data_match(H5Q_t *query);
+static hbool_t H5Q__contains_link_match(H5Q_t *query, char *obj_name, hbool_t previous);
+
 
 static H5_INLINE void
 H5Q__encode_memcpy(unsigned char **buf_ptr, size_t *nalloc, const void *data,
@@ -1383,7 +1387,9 @@ H5Qapply_atom(hid_t query_id, hbool_t *result, ...)
 {
     H5Q_t *query = NULL;
     H5T_t *native_type = NULL;
+    hbool_t summation_result = false;
     herr_t ret_value;
+    unsigned local_result, global_result;
     va_list ap;
 
     FUNC_ENTER_API(FAIL)
@@ -1458,6 +1464,14 @@ H5Qapply_atom(hid_t query_id, hbool_t *result, ...)
     }
 
 done:
+
+#ifdef H5_HAVE_PARALLEL
+    local_result = (unsigned)(*result);
+    summation_result = H5Q__contains_data_match(query);
+    global_result = H5Xallreduce_unsigned_status(local_result, summation_result);
+    *result = (hbool_t)(global_result);
+#endif
+
     if (native_type)
         H5T_close(native_type);
 
@@ -1516,7 +1530,6 @@ H5Q__apply_atom(const H5Q_t *query, hbool_t *result, va_list ap)
 
     HDassert(query);
     HDassert(result);
-    HDassert(query->is_combined == FALSE);
 
     va_copy(aq, ap);
 
@@ -1864,8 +1877,11 @@ hid_t
 H5Qapply(hid_t loc_id, hid_t query_id, unsigned *result, hid_t vcpl_id)
 {
     H5Q_t *query = NULL;
+    hbool_t summation_result = false;
     H5G_t *ret_grp;
     hid_t ret_value;
+    unsigned local_result;
+    unsigned global_result;
 
     FUNC_ENTER_API(FAIL)
     H5TRACE4("i", "ii*Iui", loc_id, query_id, result, vcpl_id);
@@ -1892,6 +1908,14 @@ H5Qapply(hid_t loc_id, hid_t query_id, unsigned *result, hid_t vcpl_id)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register group");
 
 done:
+
+#ifdef H5_HAVE_PARALLEL
+    local_result = *result;
+    summation_result = H5Q__contains_data_match(query);
+    global_result = H5Xallreduce_unsigned_status(local_result, summation_result);
+    *result = global_result;
+#endif
+
     FUNC_LEAVE_API(ret_value)
 } /* end H5Qapply() */
 
@@ -2186,6 +2210,13 @@ done:
 } /* H5Q__apply_index() */
 
 
+typedef struct lnk_entry_list {
+    char *link_name;
+    H5Q_combine_op_t op;
+    struct lnk_entry_list *next;
+} lnk_entry_list_t;
+
+
 static char *
 whitespace(int level)
 {
@@ -2361,7 +2392,6 @@ show_query(H5Q_t *query, int indent)
     }
 }
 
-
 static int visualize_query = 0;
 
 void
@@ -2369,6 +2399,77 @@ H5Q_enable_visualize_query(void)
 {
     visualize_query++;
 }
+
+static hbool_t
+H5Q__contains_data_match(H5Q_t *query)
+{
+    H5Q_type_t query_type;
+    H5Q_combine_op_t op_type;
+    H5T_t *d_type;
+    H5T_class_t data_class;
+    hbool_t have_match = false;
+
+    if (FAIL == H5Q_get_type(query, &query_type)) {
+        printf("H5Q_get_type returned error!\n");
+    }
+    else {
+        switch(query_type) {
+	case H5Q_TYPE_DATA_ELEM:
+	  return true;
+          break;
+        case H5Q_TYPE_ATTR_VALUE:
+	case H5Q_TYPE_ATTR_NAME:
+	case H5Q_TYPE_LINK_NAME:
+          break;
+        case H5Q_TYPE_MISC:
+	  if (query->is_combined) {
+	    have_match = H5Q__contains_data_match(query->query.combine.l_query);
+	    have_match |= H5Q__contains_data_match(query->query.combine.r_query);
+	  }
+	}
+    }
+    return have_match;
+}
+
+static hbool_t
+H5Q__contains_link_match(H5Q_t *query, char *obj_name, hbool_t previous)
+{
+    if (query->is_combined == false) {
+      if ((query->query.select.type == H5Q_TYPE_LINK_NAME) &&
+	  (query->query.select.match_op == H5Q_MATCH_EQUAL)) {
+	char *link_name = query->query.select.elem.link_name.name;
+	char *slash;
+	char *dataset;
+	slash = strrchr(link_name, '/');
+	/* If groups are utilized, name will be the fully qualified name which
+	 * includes slashes ('/').  If user isn't specific to a group with the
+	 * query, then we'll attempt to match the non-group-specific names
+	 */
+	if ((dataset = strrchr(obj_name, '/')) != NULL) {
+	  if (slash == NULL) {	/* General User Query */
+	    dataset++;
+	    if (strcmp(link_name, dataset) == 0)
+	      return TRUE;
+	    return FALSE;
+	  }
+          else { /* Specific User Query */
+	    if (strcmp(link_name, obj_name) == 0)
+	      return TRUE;
+	    return FALSE;
+	  }
+	}
+	else {
+	  if (strcmp(link_name, obj_name) == 0) 
+	    return TRUE;
+	  return FALSE;
+	}
+      }
+    }
+
+    return previous;
+}
+
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5Q__apply_iterate
@@ -2382,11 +2483,12 @@ H5Q_enable_visualize_query(void)
 static herr_t
 H5Q__apply_iterate(hid_t oid, const char *name, const H5O_info_t *oinfo, void *op_data)
 {
-    static int count = 0;
+    static hbool_t restrict_link_targets = FALSE;
+    static int misc_count = 0;
+
     H5Q_apply_arg_t *args = (H5Q_apply_arg_t *) op_data;
     H5Q_type_t query_type;
     herr_t ret_value = SUCCEED; /* Return value */
-
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -2405,12 +2507,14 @@ H5Q__apply_iterate(hid_t oid, const char *name, const H5O_info_t *oinfo, void *o
         H5Q_apply_arg_t args1, args2;
         H5Q_view_t view1 = H5Q_VIEW_INITIALIZER(view1), view2 = H5Q_VIEW_INITIALIZER(view2);
         unsigned result1 = 0, result2 = 0;
+
 	if (visualize_query > 0) {
-            show_query(args->query->query.combine.l_query, 0);
-            show_query(args->query->query.combine.r_query, 0);
+            puts("");
+            show_query(args->query, 0);
 	    puts("--------------\n");
 	    visualize_query = 0;
 	}
+
         if (FAIL == H5Q_get_combine_op(args->query, &op_type))
             HGOTO_ERROR(H5E_QUERY, H5E_CANTGET, FAIL, "unable to get combine op");
 
@@ -2422,11 +2526,22 @@ H5Q__apply_iterate(hid_t oid, const char *name, const H5O_info_t *oinfo, void *o
         args2.result = &result2;
         args2.view = &view2;
 
-        if (FAIL == H5Q__apply_iterate(oid, name, oinfo, &args1))
-            HGOTO_ERROR(H5E_QUERY, H5E_CANTCOMPARE, FAIL, "unable to apply query");
-        if (FAIL == H5Q__apply_iterate(oid, name, oinfo, &args2))
-            HGOTO_ERROR(H5E_QUERY, H5E_CANTCOMPARE, FAIL, "unable to apply query");
-
+        if (oinfo->type != H5O_TYPE_DATASET) {
+            if (FAIL == H5Q__apply_iterate(oid, name, oinfo, &args1))
+                HGOTO_ERROR(H5E_QUERY, H5E_CANTCOMPARE, FAIL, "unable to apply query");
+            if (FAIL == H5Q__apply_iterate(oid, name, oinfo, &args2))
+                HGOTO_ERROR(H5E_QUERY, H5E_CANTCOMPARE, FAIL, "unable to apply query");
+        }
+	else {
+            hbool_t match1 = H5Q__contains_link_match(args1.query, name, true);
+            hbool_t match2 = H5Q__contains_link_match(args2.query, name, match1);
+            if (match1 || match2) {
+                if (FAIL == H5Q__apply_iterate(oid, name, oinfo, &args1))
+                    HGOTO_ERROR(H5E_QUERY, H5E_CANTCOMPARE, FAIL, "unable to apply query");
+                if (FAIL == H5Q__apply_iterate(oid, name, oinfo, &args2))
+                    HGOTO_ERROR(H5E_QUERY, H5E_CANTCOMPARE, FAIL, "unable to apply query");
+            }
+ 	}
         if (FAIL == H5Q__view_combine(op_type, &view1, &view2, result1, result2,
                 args->view, args->result))
             HGOTO_ERROR(H5E_QUERY, H5E_CANTMERGE, FAIL, "unable to merge results");
@@ -3029,8 +3144,12 @@ H5Q__view_write(H5G_t *grp, H5Q_view_t *view)
 {
     H5G_loc_t loc;
     H5D_t *dset = NULL;
+    hid_t dataset = -1;
+    hid_t viewspace = -1;
+    hid_t gid = -1;
     H5S_t *mem_space = NULL;
     H5S_t *space = NULL;
+    hsize_t max_unlim[1] = {H5S_UNLIMITED};	/* Maximum size of dataspace (unlimited) */
     H5Q_ref_head_t *refs[H5Q_VIEW_REF_NTYPES] = { &view->reg_refs, &view->obj_refs,
             &view->attr_refs };
     const char *dset_name[H5Q_VIEW_REF_NTYPES] = { H5Q_VIEW_REF_REG_NAME,
@@ -3053,12 +3172,13 @@ H5Q__view_write(H5G_t *grp, H5Q_view_t *view)
         H5Q_ref_entry_t *ref_entry = NULL;
         hsize_t n_elem = refs[i]->n_elem;
         hsize_t start = 0;
+	hsize_t *maxdims = NULL;
 
         if (!n_elem)
             continue;
 
         /* Create dataspace */
-        if (NULL == (space = H5S_create_simple(1, &n_elem, NULL)))
+        if (NULL == (space = H5S_create_simple(1, &n_elem, maxdims)))
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, FAIL, "unable to create dataspace");
 
         /* Create the new dataset & get its ID */
@@ -3071,8 +3191,7 @@ H5Q__view_write(H5G_t *grp, H5Q_view_t *view)
         /* Iterate over reference entries in view */
         H5Q_QUEUE_FOREACH(ref_entry, refs[i], entry) {
             hsize_t count = 1;
-
-            if (NULL == (mem_space = H5S_create_simple(1, &count, NULL)))
+            if (NULL == (mem_space = H5S_create_simple(1, &count, maxdims)))
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, FAIL, "unable to create dataspace");
             if (FAIL == H5S_select_hyperslab(space, H5S_SELECT_SET, &start, NULL, &count, NULL))
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to set hyperslab selection")

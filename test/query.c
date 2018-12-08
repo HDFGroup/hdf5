@@ -847,8 +847,7 @@ main(int argc, char *argv[])
     if(h5_verify_cached_stabs(FILENAME, fapl) < 0) TEST_ERROR
 
     puts("All query tests passed.");
-    h5_cleanup(FILENAME, fapl);
-
+//    h5_cleanup(FILENAME, fapl);
 //    for (i = 0; i < MULTI_NFILES; i++)
 //        HDfree(filename_multi[i]);
 //    HDfree(filename_multi);

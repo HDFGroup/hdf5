@@ -1108,6 +1108,7 @@ H5Rcopy(href_t ref)
     href_t ret_value;
 
     FUNC_ENTER_API(NULL)
+    H5TRACE1("r", "r", ref);
 
     /* Check args */
     if(!ref)
@@ -2129,6 +2130,7 @@ H5Rencode(href_t ref, void *buf, size_t *nalloc)
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE3("e", "r*x*z", ref, buf, nalloc);
 
     /* Check argument and retrieve object */
     if(nalloc == NULL)
@@ -2201,6 +2203,7 @@ H5Rdecode(const void *buf)
     href_t ret_value; /* Return value */
 
     FUNC_ENTER_API(NULL)
+    H5TRACE1("r", "*x", buf);
 
     /* Check args */
     if(buf == NULL)

@@ -152,7 +152,10 @@ H5_DLL int H5Xparallel_queries_enabled(void);
 H5_DLL int H5Xslab_set(hid_t filespace_id, hsize_t **start, hsize_t **count, hsize_t **stride, hsize_t **block);
 H5_DLL int H5Xparallel_rank(void);
 H5_DLL int H5Xparallel_size(void);
+H5_DLL unsigned H5Xallreduce_unsigned_status(unsigned status, hbool_t do_summation);
+H5_DLL int H5Xallreduce_int_status(int status, hbool_t do_summation);
 H5_DLL herr_t H5Xallgather_by_size(void *xdata, int nelems, int typesize);
+
 #endif
 
 #ifdef __cplusplus
