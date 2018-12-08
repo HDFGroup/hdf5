@@ -120,6 +120,12 @@ New Features
 
       (ADB - 2018/09/18, HDFFV-10332)
 
+    - Remove H5I_REFERENCE from the library
+
+      This ID class was never used by the library and has been removed.
+
+      (DER - 2018/12/08, HDFFV-10252)
+
 
     Parallel Library:
     -----------------
@@ -181,6 +187,14 @@ New Features
 
     Java Library:
     ----------------
+
+    - Removed H5I_REFERENCE from the Java wrappers
+
+      This ID class was never used by the library and has been removed
+      from the Java wrappers.
+
+      (DER - 2018/12/08, HDFFV-10252)
+
 
     Tools:
     ------

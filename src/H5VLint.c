@@ -793,7 +793,6 @@ H5VL__object(hid_t id, H5I_type_t obj_type)
         case H5I_UNINIT:
         case H5I_BADID:
         case H5I_DATASPACE:
-        case H5I_REFERENCE:
         case H5I_VFL:
         case H5I_VOL:
         case H5I_GENPROP_CLS:
