@@ -250,7 +250,7 @@ Java_hdf_hdf5lib_H5_H5Dread_1VLStrings
 /*
  * Class:     hdf_hdf5lib_H5
  * Method:    H5Dwrite_VLStrings
- * Signature: (JJJJJ[BZ)I
+ * Signature: (JJJJJ[B)I
  */
 JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_H5_H5Dwrite_1VLStrings
