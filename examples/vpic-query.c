@@ -227,7 +227,6 @@ static herr_t
 test_query_apply_elem(hid_t query, hbool_t *result, hid_t type_id, const void *value)
 {
     H5Q_combine_op_t op_type;
-
     H5Qget_combine_op(query, &op_type);
     if (op_type == H5Q_SINGLETON) {
         H5Q_type_t query_type;
@@ -327,7 +326,8 @@ test_query_read_selection(size_t file_count, const char *filenames[], hid_t *fil
 
         if (rtype == H5R_REGION) {
             unsigned int j;
-
+	    int line, k;
+            int lastline;
             if ((space = H5Rget_region2(loc, ref_ptr[i])) < 0) FAIL_STACK_ERROR;
             if ((type = H5Dget_type(obj)) < 0) FAIL_STACK_ERROR;
             if (0 == (n_elem = (size_t) H5Sget_select_npoints(space))) FAIL_STACK_ERROR;
@@ -345,10 +345,21 @@ test_query_read_selection(size_t file_count, const char *filenames[], hid_t *fil
             if ((H5Dread(obj, type, mem_space, space, H5P_DEFAULT, buf)) < 0) FAIL_STACK_ERROR;
 
             printf("Elements found are:\n");
+#if 1
+            lastline = n_elem/10;
+            for(line=0; line < lastline; line++) {
+                for(k=0; k < 10; k++) printf(" %f", buf[line*10 + k]);
+                puts("");
+	    }
+
+            for (j = line*10; j < n_elem; j++)
+                printf("_%f", buf[j]);
+            printf("\n");
+#else            
             for (j = 0; j < n_elem; j++)
                 printf("%f ", buf[j]);
             printf("\n");
-
+#endif
             if (H5Sclose(mem_space) < 0) FAIL_STACK_ERROR;
             if (H5Sclose(space) < 0) FAIL_STACK_ERROR;
             if (H5Tclose(type) < 0) FAIL_STACK_ERROR;
@@ -486,6 +497,8 @@ read_client_data(int grank, int gsize, char *filename, char *datasetID)
     if (group != NULL) {
       grp  = H5Gopen2(fid, group, H5P_DEFAULT);
       dset = H5Dopen2(grp, datasetID, H5P_DEFAULT);
+      H5Gclose(grp);
+      grp = -1;
     }
     else {
       dset = H5Dopen2(fid, datasetID, H5P_DEFAULT);
@@ -774,6 +787,7 @@ main(int argc, char **argv)
         if (test_query_read_selection(1, &filename, &fid, view, H5R_REGION) < 0) {
 	}
 
+	H5Gclose(view);
 	H5Fclose(fid);
     }
     else {
@@ -783,6 +797,7 @@ main(int argc, char **argv)
 finalize:
 
     H5close();
+    
     // H5_term_library();
     MPI_Finalize();
     return 0;

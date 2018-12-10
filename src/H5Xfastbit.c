@@ -51,6 +51,7 @@
 /****************/
 /* Local Macros */
 /****************/
+#define LIMIT_RESULTS_FOR_TESTING
 #define SHOW_TIME
 // #define H5X_FASTBIT_DEBUG
 
@@ -114,6 +115,7 @@ typedef struct H5X_fastbit_t {
     hid_t filespace_id; 
     hid_t memspace_id;
     hid_t index_info_group_id;
+    hsize_t filespace_offset;
     int64_t blocksize;
     int64_t nelmts;
 
@@ -1960,6 +1962,8 @@ H5X__fastbit_create_selection(H5X_fastbit_t *fastbit, hid_t dataspace_id,
     hsize_t start_coord[H5S_MAX_RANK + 1], end_coord[H5S_MAX_RANK + 1], nelmts;
     herr_t ret_value = SUCCEED; /* Return value */
     size_t i, dataset_rank;
+    uint64_t colimit = ncoords;
+
     double t_start, t_end, t_loop, t_select_bounds, t_select_npoints;
     double t_hyperslab = 0, temp, t0, t1;
     double t_min = 0.1, t_max = 0, target = 0.01;
@@ -1969,13 +1973,16 @@ H5X__fastbit_create_selection(H5X_fastbit_t *fastbit, hid_t dataspace_id,
     /* Check for non-null selections */
     if (ncoords > 0) {
         /* Initialize count */
+#ifdef LIMIT_RESULTS_FOR_TESTING
+        if (colimit > 10000) colimit = 10000;
+#endif
         for (i = 0; i < H5S_MAX_RANK; i++)
             count[i] = 1;
 
 #ifdef SHOW_TIME
         t_start = MPI_Wtime();
 #endif
-        for (i = 0; i < ncoords; i++) {
+        for (i = 0; i < colimit /* ncoords*/; i++) {
             hsize_t new_coords[H5S_MAX_RANK + 1];
             const hsize_t point = coords[i];
             /* Convert coordinates */
