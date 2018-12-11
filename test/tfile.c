@@ -7062,7 +7062,8 @@ test_incr_filesize(void)
 static void
 test_min_dset_ohdr(void)
 {
-    const char my_filename[] = "some_arbitrary_filename";
+    const char _filename[] = "min_dset_ohdr_testfile";
+    char filename[FILENAME_LEN] = "";
     hid_t      file_id       = -1;
     hid_t      file2_id      = -1;
     hbool_t    minimize;
@@ -7073,8 +7074,10 @@ test_min_dset_ohdr(void)
     /* SETUP */
     /*********/
 
+    h5_fixname(_filename, H5P_DEFAULT, filename, sizeof(filename));
+
     file_id = H5Fcreate(
-            my_filename,
+            filename,
             H5F_ACC_TRUNC,
             H5P_DEFAULT,
             H5P_DEFAULT);
@@ -7111,7 +7114,7 @@ test_min_dset_ohdr(void)
      * TEST second file open on same filename
      */
     file2_id = H5Fopen(
-            my_filename,
+            filename,
             H5F_ACC_RDWR,
             H5P_DEFAULT);
     CHECK_I(file2_id, "H5Fopen");
