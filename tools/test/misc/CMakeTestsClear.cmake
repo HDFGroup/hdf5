@@ -49,8 +49,6 @@
       h5clear_missing_file.ddl
       h5clear_noclose_after_size.ddl
       h5clear_noclose_before_size.ddl
-      h5clear_no_mdc_image.ddl
-      h5clear_open_fail.ddl
       h5clear_status_noclose_after_size.ddl
       h5clear_usage.ddl
       h5clear_user_equal_after_size.ddl
@@ -60,8 +58,15 @@
       h5clear_user_less_after_size.ddl
       h5clear_user_less_before_size.ddl
   )
+  set (HDF5_REFERENCE_ERR_FILES
+      h5clear_no_mdc_image.err
+      h5clear_open_fail.err
+  )
 
   foreach (h5_file ${HDF5_TEST_FILES} ${HDF5_SEC2_TEST_FILES} ${HDF5_REFERENCE_TEST_FILES})
+    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/testfiles/${h5_file}" "${PROJECT_BINARY_DIR}/testfiles/${h5_file}" "h5clear_files")
+  endforeach ()
+  foreach (h5_file ${HDF5_REFERENCE_ERR_FILES})
     HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/testfiles/${h5_file}" "${PROJECT_BINARY_DIR}/testfiles/${h5_file}" "h5clear_files")
   endforeach ()
   # make second copy of h5clear_sec2.h5
@@ -108,6 +113,35 @@
     endif ()
   endmacro ()
 
+  macro (ADD_H5_ERR_CMP testname resultfile resultcode)
+    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+      add_test (
+          NAME H5CLEAR_CMP-${testname}-clear-objects
+          COMMAND    ${CMAKE_COMMAND}
+              -E remove
+                  testfiles/${testname}.out
+                  testfiles/${testname}.out.err
+      )
+      if (NOT "${last_test}" STREQUAL "")
+        set_tests_properties (H5CLEAR_CMP-${testname}-clear-objects PROPERTIES DEPENDS ${last_test})
+      endif ()
+      add_test (
+          NAME H5CLEAR_CMP-${testname}
+          COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5clear>"
+              -D "TEST_ARGS:STRING=${ARGN}"
+              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
+              -D "TEST_OUTPUT=${testname}.out"
+              -D "TEST_EXPECT=${resultcode}"
+              -D "TEST_REFERENCE=${resultfile}.mty"
+              -D "TEST_ERRREF=${resultfile}.err"
+              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+      )
+      set_tests_properties (H5CLEAR_CMP-${testname} PROPERTIES DEPENDS H5CLEAR_CMP-${testname}-clear-objects)
+      set (last_test "H5CLEAR_CMP-${testname}")
+    endif ()
+  endmacro ()
+
   macro (ADD_H5_CMP_WITH_COPY testname resultcode resultfile testfile)
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
       add_test (
@@ -137,6 +171,43 @@
               -D "TEST_OUTPUT=${testname}.out"
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=${resultfile}.ddl"
+              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+      )
+      set_tests_properties (H5CLEAR_CMP-${testname} PROPERTIES DEPENDS H5CLEAR_CMP-copy_${testname})
+      set (last_test "H5CLEAR_CMP-${testname}")
+    endif ()
+  endmacro ()
+
+  macro (ADD_H5_ERR_CMP_WITH_COPY testname resultcode resultfile testfile)
+    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+      add_test (
+          NAME H5CLEAR_CMP-${testname}-clear-objects
+          COMMAND    ${CMAKE_COMMAND}
+              -E remove
+                  testfiles/${testname}.out
+                  testfiles/${testname}.out.err
+                  testfiles/${testfile}
+      )
+      if (NOT "${last_test}" STREQUAL "")
+        set_tests_properties (H5CLEAR_CMP-${testname}-clear-objects PROPERTIES DEPENDS ${last_test})
+      endif ()
+      add_test (
+          NAME H5CLEAR_CMP-copy_${testname}
+          COMMAND    ${CMAKE_COMMAND}
+              -E copy_if_different
+              "${PROJECT_SOURCE_DIR}/testfiles/${testfile}" "${PROJECT_BINARY_DIR}/testfiles/${testfile}"
+      )
+      set_tests_properties (H5CLEAR_CMP-copy_${testname} PROPERTIES DEPENDS H5CLEAR_CMP-${testname}-clear-objects)
+      add_test (
+          NAME H5CLEAR_CMP-${testname}
+          COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5clear>"
+              -D "TEST_ARGS:STRING=${ARGN};${testfile}"
+              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
+              -D "TEST_OUTPUT=${testname}.out"
+              -D "TEST_EXPECT=${resultcode}"
+              -D "TEST_REFERENCE=${resultfile}.mty"
+              -D "TEST_ERRREF=${resultfile}.err"
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
       set_tests_properties (H5CLEAR_CMP-${testname} PROPERTIES DEPENDS H5CLEAR_CMP-copy_${testname})
@@ -347,11 +418,11 @@ endif()
   ADD_H5_CMP (h5clr_usage_junk h5clear_usage 1 "" junk.h5)
   ADD_H5_CMP (h5clr_usage_none h5clear_usage 1 "" orig_h5clear_sec2_v3.h5)
   ADD_H5_CMP (h5clr_missing_file_m h5clear_missing_file 1 "-m")
-  ADD_H5_CMP (h5clr_open_fail_s h5clear_open_fail 1 "-s" junk.h5)
+  ADD_H5_ERR_CMP (h5clr_open_fail_s h5clear_open_fail 1 "-s" junk.h5)
   ADD_H5_CMP (h5clr_missing_file_ms h5clear_missing_file 1 "-m" "-s")
-  ADD_H5_CMP (h5clr_open_fail_ms h5clear_open_fail 1 "-m" "-s"  junk.h5)
-  ADD_H5_CMP (h5clr_no_mdc_image_m h5clear_no_mdc_image 0 "-m" orig_h5clear_sec2_v2.h5)
-  ADD_H5_CMP (h5clr_no_mdc_image_ms h5clear_no_mdc_image 0 "-s" "-m" orig_h5clear_sec2_v0.h5)
+  ADD_H5_ERR_CMP (h5clr_open_fail_ms h5clear_open_fail 1 "-m" "-s"  junk.h5)
+  ADD_H5_ERR_CMP (h5clr_no_mdc_image_m h5clear_no_mdc_image 0 "-m" orig_h5clear_sec2_v2.h5)
+  ADD_H5_ERR_CMP (h5clr_no_mdc_image_ms h5clear_no_mdc_image 0 "-s" "-m" orig_h5clear_sec2_v0.h5)
 #
 #
 #
@@ -382,8 +453,8 @@ endif()
 #
 #
 # h5clear_mdc_image.h5 already has cache image removed earlier, verify the expected warning from h5clear:
-  ADD_H5_CMP (h5clr_mdc_image_m h5clear_no_mdc_image 0 "-m" mod_h5clear_mdc_image.h5)
-  ADD_H5_CMP (h5clr_mdc_image_sm h5clear_no_mdc_image 0 "-s" "-m" mod_h5clear_mdc_image2.h5)
+  ADD_H5_ERR_CMP (h5clr_mdc_image_m h5clear_no_mdc_image 0 "-m" mod_h5clear_mdc_image.h5)
+  ADD_H5_ERR_CMP (h5clr_mdc_image_sm h5clear_no_mdc_image 0 "-s" "-m" mod_h5clear_mdc_image2.h5)
 #
 #
 #
@@ -404,7 +475,7 @@ endif()
 # "h5clear -s --increment=0 h5clear_status_noclose.h5"  (clear status_flag, EOA = MAX(EOA, EOF) + 0)
 #                                                       (no output, check exit code)
 # "h5clear --filesize h5clear_status_noclose.h5"        (print EOA/EOF after the last action)
-  ADD_H5_CMP_WITH_COPY (h5clr_open_fail_nc_s 1 h5clear_open_fail h5clear_status_noclose.h5 "--filesize")
+  ADD_H5_ERR_CMP_WITH_COPY (h5clr_open_fail_nc_s 1 h5clear_open_fail h5clear_status_noclose.h5 "--filesize")
   ADD_H5_RETTEST (h5clr_mdc_image_nc "false" "-s" "--increment=0" h5clear_status_noclose.h5)
   ADD_H5_CMP (h5clr_no_mdc_image_nc_m h5clear_status_noclose_after_size 0 "--filesize" h5clear_status_noclose.h5)
 #

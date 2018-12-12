@@ -20,4 +20,3 @@ h5clear --increment file_name
 
 h5clear --increment=512 file_name
   Set the EOA to the maximum of (EOA, EOF) + 512 for the file <file_name>.
-h5clear error: missing file name
