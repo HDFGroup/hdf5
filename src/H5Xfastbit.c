@@ -646,6 +646,7 @@ H5X__fastbit_read_data(hid_t dataset_id, const char *column_name, void **buf,
             HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "H5Screate_simple returned an error");
 
 	fastbit->memspace_id = mem_space;
+	fastbit->filespace_offset = start; /* Save the rank specific file offset */
 	nelmts = block[0];
         for (i=1; i< ds_ndims; i++) 
             nelmts *= block[i];
@@ -991,6 +992,7 @@ H5X__fastbit_build_parallel_index(H5X_fastbit_t *fastbit)
     herr_t ret_value = SUCCEED; /* Return value */
     hid_t dxpl_id = H5P_DEFAULT;
     int i, mpi_rank, mpi_size;
+    hsize_t filespace_offset = 0;
     hsize_t nkeys_totalsize = 0, nkeys_offset = 0;
     hsize_t noffsets_totalsize = 0, noffsets_offset = 0;
     hsize_t nbitmaps_totalsize = 0, nbitmaps_offset = 0;
@@ -1056,10 +1058,12 @@ H5X__fastbit_build_parallel_index(H5X_fastbit_t *fastbit)
            nkeys_offset = nkeys_totalsize;
            noffsets_offset = noffsets_totalsize;
            nbitmaps_offset = nbitmaps_totalsize;
+           fastbit->filespace_offset = filespace_offset;           
         }
         nkeys_totalsize += gatherInfo[i].nkeys+1;
         noffsets_totalsize += gatherInfo[i].noffsets+1;
         nbitmaps_totalsize += gatherInfo[i].nbitmaps+1;
+	filespace_offset += gatherInfo[i].data_length;
     }
 
     /* Save the exchanged info for future use */
@@ -1476,6 +1480,7 @@ H5X__fastbit_reconstruct_parallel_index(H5X_fastbit_t *fastbit)
     size_t nelmts, memelmts;
 
     herr_t ret_value = SUCCEED; /* Return value */
+    hsize_t filespace_offset = 0;
     hsize_t nkeys_totalsize = 0, nkeys_offset = 0;
     hsize_t noffsets_totalsize = 0, noffsets_offset = 0;
     hsize_t nbitmaps_totalsize = 0, nbitmaps_offset = 0;
@@ -1532,10 +1537,12 @@ H5X__fastbit_reconstruct_parallel_index(H5X_fastbit_t *fastbit)
                 noffsets_offset = noffsets_totalsize;
                 nbitmaps_offset = nbitmaps_totalsize;
                 fastbit->nelmts = (int64_t)(gatherInfo[i].data_length);
+		fastbit->filespace_offset = filespace_offset;
             }
             nkeys_totalsize += gatherInfo[i].nkeys +1;
             noffsets_totalsize += gatherInfo[i].noffsets +1;
             nbitmaps_totalsize += gatherInfo[i].nbitmaps +1;
+	    filespace_offset += gatherInfo[i].data_length;
         }
 
 	fastbit->nblocks = mpi_size;
@@ -1972,46 +1979,27 @@ H5X__fastbit_create_selection(H5X_fastbit_t *fastbit, hid_t dataspace_id,
 
     /* Check for non-null selections */
     if (ncoords > 0) {
+        hsize_t new_coords[H5S_MAX_RANK + 1];
+        HDmemset(new_coords, 0, sizeof(new_coords));
         /* Initialize count */
 #ifdef LIMIT_RESULTS_FOR_TESTING
-        if (colimit > 10000) colimit = 10000;
+        if (colimit > 1000) colimit = 1000;
 #endif
         for (i = 0; i < H5S_MAX_RANK; i++)
             count[i] = 1;
 
 #ifdef SHOW_TIME
-        t_start = MPI_Wtime();
+        t_start = MPI_Wtime();        
 #endif
         for (i = 0; i < colimit /* ncoords*/; i++) {
-            hsize_t new_coords[H5S_MAX_RANK + 1];
-            const hsize_t point = coords[i];
+            const hsize_t point = coords[i] + fastbit->filespace_offset;
             /* Convert coordinates */
             if (FAIL == H5VM_array_calc_pre(point, fastbit->dataset_ndims, fastbit->dataset_down_dims, new_coords))
                 HGOTO_ERROR(H5E_INDEX, H5E_CANTALLOC, FAIL, "can't allocate coord array");
 
-#ifdef SHOW_TIME
-	    t0 = MPI_Wtime();
-#endif
             /* Add converted coordinate to selection */
             if (H5Sselect_hyperslab(dataspace_id, H5S_SELECT_OR, new_coords, NULL, count, NULL))
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSET, FAIL, "unable to add point to selection");
-#ifdef SHOW_TIME
-	    t1 = MPI_Wtime();
-	    temp = (t1 - t0);
-	    t_hyperslab += temp;
-	    if (t_min == 0) {
-	      t_min = t_max = temp;
-	    }
-	    if (temp < t_min)
-		t_min = temp;
-	    else if (temp > t_max) {
-		t_max = temp;
-		if ((temp > target)) {
-		  printf("exceeded target max (%f) at index = %lld\n", target, i);
-		  target *= 2.0;
-		}
-	    }
-#endif
         }
 
 #ifdef SHOW_TIME
@@ -2034,11 +2022,8 @@ H5X__fastbit_create_selection(H5X_fastbit_t *fastbit, hid_t dataspace_id,
 	t_select_npoints = (t_end - t_start);
 
 	printf("\tt_loop = %f (cummulative)\n", t_loop);
-	printf("\tt_hyperslab = %f (cummulative)\n", t_hyperslab);
 	printf("\tt_select_bounds = %f\n", t_select_bounds);
 	printf("\tt_select_npoints = %f\n", t_select_npoints);
-	printf("\tt_min hyperslab = %f\n", t_min);
-	printf("\tt_max hyperslab = %f\n", t_max);
 #endif
         H5X_FASTBIT_LOG_DEBUG("Created dataspace from index with %llu elements [(%llu, %llu):(%llu, %llu)]",
                 nelmts, start_coord[0], start_coord[1], end_coord[0], end_coord[1]);
