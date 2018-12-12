@@ -1021,11 +1021,6 @@ H5D__update_oh_info(H5F_t *file, H5D_t *dset, hid_t dapl_id)
     if(NULL == (oh = H5O_pin(oloc)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTPIN, FAIL, "unable to pin dataset object header")
 
-#if 0
-       HDprintf("DATATYPE SIZE: %lu\n",
-               H5O_msg_size_oh(file, oh, H5O_DTYPE_ID, type, 0));
-#endif /* TESTING DEBUG */
-
     /* Write the dataspace header message */
     if(H5S_append(file, oh, dset->shared->space) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update dataspace header message")

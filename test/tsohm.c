@@ -3494,7 +3494,7 @@ verify_dataset_extension(hid_t fcpl_id, hbool_t close_reopen)
  * Macro:      TSOHM_EDH_VERIFY_SPACES
  *
  * Purpose:    Encapsulate a common pattern
- *             Open, read-verity, and close the dataspaces for datasets 1-3
+ *             Open, read-verify, and close the dataspaces for datasets 1-3
  *
  * Programmer: Jacob Smith
  *             2018 November 5
@@ -3570,7 +3570,7 @@ verify_dataset_extension(hid_t fcpl_id, hbool_t close_reopen)
     }                                                          \
     if ((n) > 2) {                                             \
         dset3_id = H5Dopen2(file_id, "dataset3", H5P_DEFAULT); \
-        CHECK_I(dset2_id, "H5Dopen2");                         \
+        CHECK_I(dset3_id, "H5Dopen2");                         \
     }                                                          \
 } /* define TSOHM_EDH_CLOSE_REOPEN_FILE_AND_DSETS */
 
