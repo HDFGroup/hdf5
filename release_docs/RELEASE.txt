@@ -55,7 +55,7 @@ New Features
       which output to check against a reference. Also added the option
       to grep for a string in either output.
 
-      (ADB - 2018/12/12, HDFFV-10594)
+      (ADB - 2018/12/12, HDFFV-10632)
 
     - Add toolchain and cross-compile support
 
