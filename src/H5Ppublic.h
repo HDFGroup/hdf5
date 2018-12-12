@@ -170,6 +170,12 @@ typedef enum H5D_mpio_no_collective_cause_t {
     H5D_MPIO_NO_COLLECTIVE_MAX_CAUSE = 0x80
 } H5D_mpio_no_collective_cause_t;
 
+typedef enum H5D_mpio_no_proc0_bcast_cause_t {
+    H5D_MPIO_PROC0_BCAST = 0x00,
+    H5D_MPIO_NOT_H5S_ALL = 0x01,
+    H5D_MPIO_GREATER_THAN_2GB = 0x02
+} H5D_mpio_no_proc0_bcast_cause_t;
+
 /********************/
 /* Public Variables */
 /********************/

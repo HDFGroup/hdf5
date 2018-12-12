@@ -568,6 +568,9 @@
 #define H5_PB (1024.0F * 1024.0F * 1024.0F * 1024.0F * 1024.0F)
 #define H5_EB (1024.0F * 1024.0F * 1024.0F * 1024.0F * 1024.0F * 1024.0F)
 
+/* Define 2GB -- Used for 2GB limitation checks */
+#define H5_2GB (2.0F * 1024.0F * 1024.0F * 1024.0F)
+
 #ifndef H5_HAVE_FLOCK
 /* flock() operations. Used in the source so we have to define them when
  * the call is not available (e.g.: Windows). These should NOT be used
@@ -1735,6 +1738,7 @@ typedef struct H5_debug_t {
 
 #ifdef H5_HAVE_PARALLEL
 extern hbool_t H5_coll_api_sanity_check_g;
+extern hbool_t H5FD_MPIO_Proc0_BCast_g; /* Meets read-proc0-and-bcast requirements*/ 
 #endif /* H5_HAVE_PARALLEL */
 
 extern H5_debug_t    H5_debug_g;

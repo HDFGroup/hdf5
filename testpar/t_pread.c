@@ -46,7 +46,7 @@ completely foolproof is to underestimate the ingenuity of complete\n\
 fools.\n";
 
 static int generate_test_file(MPI_Comm comm, int mpi_rank, int group);
-static int test_parallel_read(MPI_Comm comm, int mpi_rank, int group);
+static int test_parallel_read(MPI_Comm comm, int mpi_rank, int mpi_size, int group);
 
 static char *test_argv0 = NULL;
 
@@ -413,7 +413,7 @@ generate_test_file( MPI_Comm comm, int mpi_rank, int group_id )
  * Function:    test_parallel_read
  *
  * Purpose:     This actually tests the superblock optimization
- *              and covers the two primary cases we're interested in.
+ *              and covers the three primary cases we're interested in.
  *              1). That HDF5 files can be opened in parallel by
  *                  the rank 0 process and that the superblock
  *                  offset is correctly broadcast to the other
@@ -423,6 +423,10 @@ generate_test_file( MPI_Comm comm, int mpi_rank, int group_id )
  *                  subgroups of MPI_COMM_WORLD and that each
  *                  subgroup operates as described in (1) to
  *                  collectively read the data.
+ *              3). Testing proc0-read-and-MPI_Bcast using
+ *                  sub-communicators, and reading into
+ *                  a memory space that is different from the
+ *                  file space.
  *
  *              The global MPI rank is used for reading and
  *              writing data for process specific data in the
@@ -444,7 +448,7 @@ generate_test_file( MPI_Comm comm, int mpi_rank, int group_id )
  *-------------------------------------------------------------------------
  */
 static int
-test_parallel_read(MPI_Comm comm, int mpi_rank, int group_id)
+test_parallel_read(MPI_Comm comm, int mpi_rank, int mpi_size, int group_id)
 {
     const char *failure_mssg;
     const char *fcn_name = "test_parallel_read()";
@@ -457,8 +461,12 @@ test_parallel_read(MPI_Comm comm, int mpi_rank, int group_id)
     hid_t fapl_id   = -1;
     hid_t file_id   = -1;
     hid_t dset_id   = -1;
+    hid_t dxpl_id   = H5P_DEFAULT;
     hid_t memspace  = -1;
     hid_t filespace = -1;
+    hid_t filetype  = -1;
+    size_t filetype_size;
+    hssize_t dset_size;
     hsize_t i;
     hsize_t offset;
     hsize_t count = COUNT;
@@ -606,14 +614,6 @@ test_parallel_read(MPI_Comm comm, int mpi_rank, int group_id)
         }
     }
 
-    /* close file, etc. */
-    if ( pass || (dset_id != -1) ) {
-        if ( H5Dclose(dset_id) < 0 ) {
-            pass = false;
-            failure_mssg = "H5Dclose(dset_id) failed.\n";
-        }
-    }
-
     if ( pass || (memspace != -1) ) {
         if ( H5Sclose(memspace) < 0 ) {
             pass = false;
@@ -625,6 +625,202 @@ test_parallel_read(MPI_Comm comm, int mpi_rank, int group_id)
         if ( H5Sclose(filespace) < 0 ) {
             pass = false;
             failure_mssg = "H5Sclose(filespace) failed.\n";
+        }
+    }
+
+    /* free data_slice if it has been allocated */
+    if ( data_slice != NULL ) {
+        HDfree(data_slice);
+        data_slice = NULL;
+    }
+
+    /* 
+     * Test reading proc0-read-and-bcast with sub-communicators 
+     */
+
+    /* Don't test with more than 6 processes to avoid memory issues */
+
+    if( group_size <= 6 ) {
+
+      if ( (filespace = H5Dget_space(dset_id )) < 0 ) {
+        pass = FALSE;
+        failure_mssg = "H5Dget_space failed.\n";
+      }
+
+      if ( (dset_size = H5Sget_simple_extent_npoints(filespace)) < 0 ) {
+        pass = FALSE;
+        failure_mssg = "H5Sget_simple_extent_npoints failed.\n";
+      }
+
+      if ( (filetype = H5Dget_type(dset_id)) < 0 ) {
+        pass = FALSE;
+        failure_mssg = "H5Dget_type failed.\n";
+      }
+
+      if ( (filetype_size = H5Tget_size(filetype)) == 0 ) {
+        pass = FALSE;
+        failure_mssg = "H5Tget_size failed.\n";
+      }
+
+      if ( H5Tclose(filetype) < 0 ) {
+        pass = FALSE;
+        failure_mssg = "H5Tclose failed.\n";
+      };
+
+      if ( (data_slice = (float *)HDmalloc((size_t)dset_size*filetype_size)) == NULL ) {
+        pass = FALSE;
+        failure_mssg = "malloc of data_slice failed.\n";
+      }
+
+      if ( pass ) {
+        if ( (dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0 ) {
+          pass = FALSE;
+          failure_mssg = "H5Pcreate(H5P_DATASET_XFER) failed.\n";
+        }
+      }
+
+      if ( pass ) {
+        if ( (H5Pset_dxpl_mpio(dxpl_id, H5FD_MPIO_COLLECTIVE)) < 0 ) {
+          pass = FALSE;
+          failure_mssg = "H5Pset_dxpl_mpio() failed.\n";
+        }
+      }
+
+      /* read H5S_ALL section */
+      if ( pass ) {
+        if ( (H5Dread(dset_id, H5T_NATIVE_FLOAT, H5S_ALL,
+                      H5S_ALL, dxpl_id, data_slice)) < 0 ) {
+          pass = FALSE;
+          failure_mssg = "H5Dread() failed\n";
+        }
+      }
+
+      /* verify the data */
+      if ( pass ) {
+
+        if ( comm == MPI_COMM_WORLD )       /* test 1 */
+          nextValue = 0;
+        else if ( group_id == 0 )           /* test 2 group 0 */
+          nextValue = 0;
+        else                                /* test 2 group 1 */
+          nextValue = (float)((hsize_t)( mpi_size / 2 )*count);
+        
+        i = 0;
+        while ( ( pass ) && ( i < (hsize_t)dset_size ) ) {
+          /* what we really want is data_slice[i] != nextValue --
+           * the following is a circumlocution to shut up the
+           * the compiler.
+           */
+          if ( ( data_slice[i] > nextValue ) ||
+               ( data_slice[i] < nextValue ) ) {
+            pass = FALSE;
+            failure_mssg = "Unexpected dset contents.\n";
+          }
+          nextValue += 1;
+          i++;
+        }
+      }
+
+      if ( pass || (filespace != -1) ) {
+        if ( H5Sclose(filespace) < 0 ) {
+          pass = false;
+          failure_mssg = "H5Sclose(filespace) failed.\n";
+        }
+      }
+
+      /* free data_slice if it has been allocated */
+      if ( data_slice != NULL ) {
+        HDfree(data_slice);
+        data_slice = NULL;
+      }
+
+      /* 
+       * Read an H5S_ALL filespace into a hyperslab defined memory space 
+       */
+
+      if ( (data_slice = (float *)HDmalloc((size_t)(dset_size*2)*filetype_size)) == NULL ) {
+        pass = FALSE;
+        failure_mssg = "malloc of data_slice failed.\n";
+      }
+
+      /* setup memspace */
+      if ( pass ) {
+        dims[0] = (hsize_t)dset_size*2;
+        if ( (memspace = H5Screate_simple(1, dims, NULL)) < 0 ) {
+          pass = FALSE;
+          failure_mssg = "H5Screate_simple(1, dims, NULL) failed\n";
+        }
+      }
+      if ( pass ) {
+        offset = (hsize_t)dset_size;
+        if ( (H5Sselect_hyperslab(memspace, H5S_SELECT_SET,
+                                  &offset, NULL, &offset, NULL)) < 0 ) {
+          pass = FALSE;
+          failure_mssg = "H5Sselect_hyperslab() failed\n";
+        }
+      }
+
+      /* read this processes section of the data */
+      if ( pass ) {
+        if ( (H5Dread(dset_id, H5T_NATIVE_FLOAT, memspace,
+                      H5S_ALL, dxpl_id, data_slice)) < 0 ) {
+          pass = FALSE;
+          failure_mssg = "H5Dread() failed\n";
+        }
+      }
+
+      /* verify the data */
+      if ( pass ) {
+
+        if ( comm == MPI_COMM_WORLD )       /* test 1 */
+          nextValue = 0;
+        else if ( group_id == 0 )           /* test 2 group 0 */
+          nextValue = 0;
+        else                                /* test 2 group 1 */
+          nextValue = (float)((hsize_t)(mpi_size / 2)*count);
+
+        i = (hsize_t)dset_size;
+        while ( ( pass ) && ( i < (hsize_t)dset_size ) ) {
+          /* what we really want is data_slice[i] != nextValue --
+           * the following is a circumlocution to shut up the
+           * the compiler.
+           */
+          if ( ( data_slice[i] > nextValue ) ||
+               ( data_slice[i] < nextValue ) ) {
+            pass = FALSE;
+            failure_mssg = "Unexpected dset contents.\n";
+          }
+          nextValue += 1;
+          i++;
+        }
+      }
+      
+      if ( pass || (memspace != -1) ) {
+        if ( H5Sclose(memspace) < 0 ) {
+          pass = false;
+          failure_mssg = "H5Sclose(memspace) failed.\n";
+        }
+      }
+      
+      /* free data_slice if it has been allocated */
+      if ( data_slice != NULL ) {
+        HDfree(data_slice);
+        data_slice = NULL;
+      }
+
+      if ( pass || (dxpl_id != -1) ) {
+        if ( H5Pclose(dxpl_id) < 0 ) {
+          pass = false;
+          failure_mssg = "H5Pclose(dxpl_id) failed.\n";
+        }
+      }
+    }
+
+    /* close file, etc. */
+    if ( pass || (dset_id != -1) ) {
+        if ( H5Dclose(dset_id) < 0 ) {
+            pass = false;
+            failure_mssg = "H5Dclose(dset_id) failed.\n";
         }
     }
 
@@ -668,16 +864,8 @@ test_parallel_read(MPI_Comm comm, int mpi_rank, int group_id)
             HDfprintf(stdout, "%s: failure_mssg = \"%s\"\n",
                       fcn_name, failure_mssg);
         }
-
         HDremove(reloc_data_filename);
     }
-
-    /* free data_slice if it has been allocated */
-    if ( data_slice != NULL ) {
-        HDfree(data_slice);
-        data_slice = NULL;
-    }
-
 
     return( ! pass );
 
@@ -803,7 +991,7 @@ main( int argc, char **argv)
     }
 
     /* Now read the generated test file (stil using MPI_COMM_WORLD) */
-    nerrs += test_parallel_read( MPI_COMM_WORLD, mpi_rank, which_group);
+    nerrs += test_parallel_read( MPI_COMM_WORLD, mpi_rank, mpi_size, which_group);
 
     if ( nerrs > 0 ) {
         if ( mpi_rank == 0 ) {
@@ -819,7 +1007,7 @@ main( int argc, char **argv)
     }
 
     /* run the 2nd set of tests */
-    nerrs += test_parallel_read(group_comm, mpi_rank, which_group);
+    nerrs += test_parallel_read(group_comm, mpi_rank, mpi_size, which_group);
 
     if ( nerrs > 0 ) {
         if ( mpi_rank == 0 ) {

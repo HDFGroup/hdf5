@@ -37,7 +37,7 @@
 #include "H5Eprivate.h"       /* Error handling    */
 #include "H5Fprivate.h"       /* File access       */
 #include "H5FDprivate.h"      /* File drivers      */
-#include "H5FDmpi.h"          /* MPI-based file drivers	*/
+#include "H5FDmpi.h"          /* MPI-based file drivers */
 #include "H5Iprivate.h"       /* IDs               */
 #include "H5MMprivate.h"      /* Memory management */
 #include "H5Oprivate.h"       /* Object headers    */
@@ -46,6 +46,8 @@
 #include "H5VMprivate.h"      /* Vector            */
 
 #ifdef H5_HAVE_PARALLEL
+
+hbool_t H5FD_MPIO_Proc0_BCast_g;  /* Flag if dataset is both: H5S_ALL and < 2GB */
 
 /****************/
 /* Local Macros */
@@ -281,8 +283,9 @@ H5D__mpio_opt_possible(const H5D_io_info_t *io_info, const H5S_t *file_space,
     const H5S_t *mem_space, const H5D_type_info_t *type_info)
 {
     H5FD_mpio_xfer_t io_xfer_mode;      /* MPI I/O transfer mode */
-    unsigned local_cause = 0;                /* Local reason(s) for breaking collective mode */
-    unsigned global_cause = 0;               /* Global reason(s) for breaking collective mode */
+    unsigned local_cause[2] = {0,0};    /* [0] Local reason(s) for breaking collective mode */
+                                        /* [1] Flag if dataset is both: H5S_ALL and small */
+    unsigned global_cause[2] = {0,0};   /* Global reason(s) for breaking collective mode */
     htri_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -298,34 +301,34 @@ H5D__mpio_opt_possible(const H5D_io_info_t *io_info, const H5S_t *file_space,
     if(H5CX_get_io_xfer_mode(&io_xfer_mode) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get MPI-I/O transfer mode")
     if(io_xfer_mode == H5FD_MPIO_INDEPENDENT)
-        local_cause |= H5D_MPIO_SET_INDEPENDENT;
+        local_cause[0] |= H5D_MPIO_SET_INDEPENDENT;
 
     /* Optimized MPI types flag must be set */
     /* (based on 'HDF5_MPI_OPT_TYPES' environment variable) */
     if(!H5FD_mpi_opt_types_g)
-        local_cause |= H5D_MPIO_MPI_OPT_TYPES_ENV_VAR_DISABLED;
+        local_cause[0] |= H5D_MPIO_MPI_OPT_TYPES_ENV_VAR_DISABLED;
 
     /* Don't allow collective operations if datatype conversions need to happen */
     if(!type_info->is_conv_noop)
-        local_cause |= H5D_MPIO_DATATYPE_CONVERSION;
+        local_cause[0] |= H5D_MPIO_DATATYPE_CONVERSION;
 
     /* Don't allow collective operations if data transform operations should occur */
     if(!type_info->is_xform_noop)
-        local_cause |= H5D_MPIO_DATA_TRANSFORMS;
+        local_cause[0] |= H5D_MPIO_DATA_TRANSFORMS;
 
     /* Check whether these are both simple or scalar dataspaces */
     if(!((H5S_SIMPLE == H5S_GET_EXTENT_TYPE(mem_space) || H5S_SCALAR == H5S_GET_EXTENT_TYPE(mem_space))
             && (H5S_SIMPLE == H5S_GET_EXTENT_TYPE(file_space) || H5S_SCALAR == H5S_GET_EXTENT_TYPE(file_space))))
-        local_cause |= H5D_MPIO_NOT_SIMPLE_OR_SCALAR_DATASPACES;
+        local_cause[0] |= H5D_MPIO_NOT_SIMPLE_OR_SCALAR_DATASPACES;
 
     /* Dataset storage must be contiguous or chunked */
     if(!(io_info->dset->shared->layout.type == H5D_CONTIGUOUS ||
             io_info->dset->shared->layout.type == H5D_CHUNKED))
-        local_cause |= H5D_MPIO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET;
+        local_cause[0] |= H5D_MPIO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET;
 
     /* check if external-file storage is used */
     if(io_info->dset->shared->dcpl_cache.efl.nused > 0)
-        local_cause |= H5D_MPIO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET;
+        local_cause[0] |= H5D_MPIO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET;
 
     /* The handling of memory space is different for chunking and contiguous
      *  storage.  For contiguous storage, mem_space and file_space won't change
@@ -343,28 +346,56 @@ H5D__mpio_opt_possible(const H5D_io_info_t *io_info, const H5S_t *file_space,
     if (io_info->op_type == H5D_IO_OP_WRITE &&
         io_info->dset->shared->layout.type == H5D_CHUNKED &&
         io_info->dset->shared->dcpl_cache.pline.nused > 0)
-        local_cause |= H5D_MPIO_PARALLEL_FILTERED_WRITES_DISABLED;
+        local_cause[0] |= H5D_MPIO_PARALLEL_FILTERED_WRITES_DISABLED;
 #endif
 
+    H5FD_MPIO_Proc0_BCast_g = FALSE;
+    /* Check to see if all the processes are reading the same data */
+    if((H5S_GET_SELECT_TYPE(file_space) != H5S_SEL_ALL)) {
+      /* Flag to do a MPI_Bcast of the data from one proc instead of 
+       * having all the processes involved in the persistent I/O.
+       */
+      local_cause[1] |= H5D_MPIO_NOT_H5S_ALL; 
+    }
+    else {
+
+     /* If the size of the dataset is less than 2GB then do an MPI_Bcast
+      * of the data from one process instead of having all the processes 
+      * involved in the persistent I/O.
+      */
+
+      hsize_t dset_storage_size;
+      H5D__get_storage_size(io_info->dset, &dset_storage_size);
+
+      if(dset_storage_size > ((hsize_t)(H5_2GB) - 1) ) {
+        local_cause[1] |= H5D_MPIO_GREATER_THAN_2GB;
+      }
+    }
+    
     /* Check for independent I/O */
-    if(local_cause & H5D_MPIO_SET_INDEPENDENT)
-        global_cause = local_cause;
+    if(local_cause[0] & H5D_MPIO_SET_INDEPENDENT)
+        global_cause[0] = local_cause[0];
     else {
         int mpi_code;               /* MPI error code */
 
         /* Form consensus opinion among all processes about whether to perform
          * collective I/O
          */
-        if(MPI_SUCCESS != (mpi_code = MPI_Allreduce(&local_cause, &global_cause, 1, MPI_UNSIGNED, MPI_BOR, io_info->comm)))
+        if(MPI_SUCCESS != (mpi_code = MPI_Allreduce(&local_cause, &global_cause, 2, MPI_UNSIGNED, MPI_BOR, io_info->comm)))
             HMPI_GOTO_ERROR(FAIL, "MPI_Allreduce failed", mpi_code)
+
     } /* end else */
 
     /* Set the local & global values of no-collective-cause in the API context */
-    H5CX_set_mpio_local_no_coll_cause(local_cause);
-    H5CX_set_mpio_global_no_coll_cause(global_cause);
+    H5CX_set_mpio_local_no_coll_cause(local_cause[0]);
+    H5CX_set_mpio_global_no_coll_cause(global_cause[0]);
 
     /* Set the return value, based on the global cause */
-    ret_value = global_cause > 0 ? FALSE : TRUE;
+    ret_value = global_cause[0] > 0 ? FALSE : TRUE;
+
+    /* read-proc0-and-bcast if collective and H5S_ALL */
+    if(global_cause[0] == 0 && global_cause[1] == 0)
+      H5FD_MPIO_Proc0_BCast_g = TRUE;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3069,8 +3100,8 @@ H5D__filtered_collective_chunk_entry_io(H5D_filtered_collective_io_info_t *chunk
         chunk_entry->chunk_states.new_chunk.length = chunk_entry->chunk_states.chunk_current.length;
 
         /* Currently, these chunk reads are done independently and will likely
-	 * cause issues with collective metadata reads enabled. In the future,
-	 * this should be refactored to use collective chunk reads - JTH */
+         * cause issues with collective metadata reads enabled. In the future,
+         * this should be refactored to use collective chunk reads - JTH */
 
         /* Get the original state of parallel I/O transfer mode */
         if(H5CX_get_io_xfer_mode(&xfer_mode) < 0)
