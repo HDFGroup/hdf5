@@ -153,7 +153,7 @@ done:
  *
  * Return:	Success:	SUCCEED
  *
- *		Failure:	Negative
+ *		Failure:	FAIL
  *
  * Programmer:	John Mainzer
  *              4/4/17

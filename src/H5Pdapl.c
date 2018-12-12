@@ -204,46 +204,46 @@ H5P__dacc_reg_prop(H5P_genclass_t *pclass)
     FUNC_ENTER_STATIC
 
     /* Register the size of raw data chunk cache (elements) */
-    if(H5P_register_real(pclass, H5D_ACS_DATA_CACHE_NUM_SLOTS_NAME, H5D_ACS_DATA_CACHE_NUM_SLOTS_SIZE, &rdcc_nslots,
+    if(H5P__register_real(pclass, H5D_ACS_DATA_CACHE_NUM_SLOTS_NAME, H5D_ACS_DATA_CACHE_NUM_SLOTS_SIZE, &rdcc_nslots,
              NULL, NULL, NULL, H5D_ACS_DATA_CACHE_NUM_SLOTS_ENC, H5D_ACS_DATA_CACHE_NUM_SLOTS_DEC, NULL, NULL, NULL, NULL) < 0)
          HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the size of raw data chunk cache(bytes) */
-    if(H5P_register_real(pclass, H5D_ACS_DATA_CACHE_BYTE_SIZE_NAME, H5D_ACS_DATA_CACHE_BYTE_SIZE_SIZE, &rdcc_nbytes,
+    if(H5P__register_real(pclass, H5D_ACS_DATA_CACHE_BYTE_SIZE_NAME, H5D_ACS_DATA_CACHE_BYTE_SIZE_SIZE, &rdcc_nbytes,
              NULL, NULL, NULL, H5D_ACS_DATA_CACHE_BYTE_SIZE_ENC, H5D_ACS_DATA_CACHE_BYTE_SIZE_DEC, NULL, NULL, NULL, NULL) < 0)
          HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the preemption for reading chunks */
-    if(H5P_register_real(pclass, H5D_ACS_PREEMPT_READ_CHUNKS_NAME, H5D_ACS_PREEMPT_READ_CHUNKS_SIZE, &rdcc_w0,
+    if(H5P__register_real(pclass, H5D_ACS_PREEMPT_READ_CHUNKS_NAME, H5D_ACS_PREEMPT_READ_CHUNKS_SIZE, &rdcc_w0,
              NULL, NULL, NULL, H5D_ACS_PREEMPT_READ_CHUNKS_ENC, H5D_ACS_PREEMPT_READ_CHUNKS_DEC, NULL, NULL, NULL, NULL) < 0)
          HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the VDS view option */
-    if(H5P_register_real(pclass, H5D_ACS_VDS_VIEW_NAME, H5D_ACS_VDS_VIEW_SIZE, &virtual_view,
+    if(H5P__register_real(pclass, H5D_ACS_VDS_VIEW_NAME, H5D_ACS_VDS_VIEW_SIZE, &virtual_view,
             NULL, NULL, NULL, H5D_ACS_VDS_VIEW_ENC, H5D_ACS_VDS_VIEW_DEC,
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the VDS printf gap */
-    if(H5P_register_real(pclass, H5D_ACS_VDS_PRINTF_GAP_NAME, H5D_ACS_VDS_PRINTF_GAP_SIZE, &printf_gap,
+    if(H5P__register_real(pclass, H5D_ACS_VDS_PRINTF_GAP_NAME, H5D_ACS_VDS_PRINTF_GAP_SIZE, &printf_gap,
             NULL, NULL, NULL, H5D_ACS_VDS_PRINTF_GAP_ENC, H5D_ACS_VDS_PRINTF_GAP_DEC,
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register property for vds prefix */
-    if(H5P_register_real(pclass, H5D_ACS_VDS_PREFIX_NAME, H5D_ACS_VDS_PREFIX_SIZE, &H5D_def_vds_prefix_g,
+    if(H5P__register_real(pclass, H5D_ACS_VDS_PREFIX_NAME, H5D_ACS_VDS_PREFIX_SIZE, &H5D_def_vds_prefix_g,
             NULL, H5D_ACS_VDS_PREFIX_SET, H5D_ACS_VDS_PREFIX_GET, H5D_ACS_VDS_PREFIX_ENC, H5D_ACS_VDS_PREFIX_DEC,
             H5D_ACS_VDS_PREFIX_DEL, H5D_ACS_VDS_PREFIX_COPY, H5D_ACS_VDS_PREFIX_CMP, H5D_ACS_VDS_PREFIX_CLOSE) < 0)
          HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register info for append flush */
     /* (Note: this property should not have an encode/decode callback -QAK) */
-    if(H5P_register_real(pclass, H5D_ACS_APPEND_FLUSH_NAME, H5D_ACS_APPEND_FLUSH_SIZE, &H5D_def_append_flush_g,
+    if(H5P__register_real(pclass, H5D_ACS_APPEND_FLUSH_NAME, H5D_ACS_APPEND_FLUSH_SIZE, &H5D_def_append_flush_g,
              NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
          HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register property for external file prefix */
-    if(H5P_register_real(pclass, H5D_ACS_EFILE_PREFIX_NAME, H5D_ACS_EFILE_PREFIX_SIZE, &H5D_def_efile_prefix_g,
+    if(H5P__register_real(pclass, H5D_ACS_EFILE_PREFIX_NAME, H5D_ACS_EFILE_PREFIX_SIZE, &H5D_def_efile_prefix_g,
             NULL, H5D_ACS_EFILE_PREFIX_SET, H5D_ACS_EFILE_PREFIX_GET, H5D_ACS_EFILE_PREFIX_ENC, H5D_ACS_EFILE_PREFIX_DEC,
             H5D_ACS_EFILE_PREFIX_DEL, H5D_ACS_EFILE_PREFIX_COPY, H5D_ACS_EFILE_PREFIX_CMP, H5D_ACS_EFILE_PREFIX_CLOSE) < 0)
          HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")

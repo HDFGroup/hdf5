@@ -130,7 +130,7 @@ herr_t end_verification(void);
  *              it will time out waiting for a signal from the test script
  *              which will never come.
  *
- * Return:      0 on Success, 1 on Failure
+ * Return:      EXIT_SUCCESS/EXIT_FAILURE
  *
  * Programmer:  Mike McGreevy
  *              July 1, 2010
@@ -155,7 +155,7 @@ int main(int argc, const char *argv[])
         /* Determine driver being used */
         envval = HDgetenv("HDF5_DRIVER");
 
-        if(envval == NULL || H5FD_supports_swmr_test(envval)) {
+        if(envval == NULL || H5FD__supports_swmr_test(envval)) {
             if(test_flush() != SUCCEED) TEST_ERROR;
             if(test_refresh() != SUCCEED) TEST_ERROR;
         } /* end if */
@@ -166,23 +166,26 @@ int main(int argc, const char *argv[])
             if(end_verification() < 0) TEST_ERROR;
             if(end_verification() < 0) TEST_ERROR;
         } /* end else */
-    } else if(argc == 3) {
+    }
+    else if(argc == 3) {
         /* Two arguments supplied. Pass them to flush verification routine. */
         if(flush_verification(argv[1], argv[2]) != 0) PROCESS_ERROR;
-    } else if(argc == 2) {
+    }
+    else if(argc == 2) {
         /* One argument supplied. Pass it to refresh verification routine. */
         if(refresh_verification(argv[1]) != 0) PROCESS_ERROR;
-    } else {
+    }
+    else {
         /* Illegal number of arguments supplied. Error. */
         HDfprintf(stderr, "Error. %d is an Invalid number of arguments to main().\n", argc);
         PROCESS_ERROR
     } /* end if */
 
-    return SUCCEED;
+    return EXIT_SUCCESS;
 
 error:
     /* Return */
-    return FAIL;
+    return EXIT_FAILURE;
 } /* main */
 
 
@@ -695,7 +698,6 @@ herr_t test_refresh(void)
     /* ================= */
     /* Refresh Datatypes */
     /* ================= */
-
     TESTING("to ensure that H5Trefresh correctly refreshes single datatypes");
 
     /* Verify First Committed Datatype can be refreshed with H5Trefresh */
@@ -715,7 +717,6 @@ herr_t test_refresh(void)
     if(H5Oflush(tid2) < 0) TEST_ERROR;
 
     if(end_refresh_verification_process() != 0) TEST_ERROR;
-
     PASSED();
 
     /* =============== */
@@ -995,7 +996,7 @@ herr_t refresh_verification(const char * obj_pathname)
         check to ensure we didn't erroneously flush the attribute before
         starting the verification. */
     if(flushed_oinfo.num_attrs != 0)
-	PROCESS_ERROR;
+        PROCESS_ERROR;
 
     /* Send Signal to MAIN PROCESS indicating that it can go ahead and modify the 
         object. */
@@ -1027,55 +1028,57 @@ herr_t refresh_verification(const char * obj_pathname)
      * test cases is easy). */
     do {
 
-	if((HDstrcmp(obj_pathname, D1) == 0) || (HDstrcmp(obj_pathname, D2) == 0)) {
-	    if(H5Drefresh(oid) < 0) PROCESS_ERROR;
-	} /* end if */
-	else if((HDstrcmp(obj_pathname, G1) == 0) || (HDstrcmp(obj_pathname, G2) == 0)) {
-	    if(H5Grefresh(oid) < 0) PROCESS_ERROR;
-	} /* end if */
-	else if((HDstrcmp(obj_pathname, T1) == 0) || (HDstrcmp(obj_pathname, T2) == 0)) {
-	    if(H5Trefresh(oid) < 0) PROCESS_ERROR;
-	} /* end if */
-	else if((HDstrcmp(obj_pathname, D3) == 0) || (HDstrcmp(obj_pathname, G3) == 0) ||
+        if((HDstrcmp(obj_pathname, D1) == 0) || (HDstrcmp(obj_pathname, D2) == 0)) {
+            if(H5Drefresh(oid) < 0) PROCESS_ERROR;
+        } /* end if */
+        else if((HDstrcmp(obj_pathname, G1) == 0) || (HDstrcmp(obj_pathname, G2) == 0)) {
+            if(H5Grefresh(oid) < 0) PROCESS_ERROR;
+        } /* end if */
+        else if((HDstrcmp(obj_pathname, T1) == 0) || (HDstrcmp(obj_pathname, T2) == 0)) {
+            if(H5Trefresh(oid) < 0) PROCESS_ERROR;
+        } /* end if */
+        else if((HDstrcmp(obj_pathname, D3) == 0) || (HDstrcmp(obj_pathname, G3) == 0) ||
                 (HDstrcmp(obj_pathname, T3) == 0)) {
-	    if(H5Orefresh(oid) < 0) PROCESS_ERROR;
-	} /* end if */
-	else {
-	    HDfprintf(stdout, "Error. %s is an unrecognized object.\n", obj_pathname);
-	    PROCESS_ERROR;
-	} /* end else */
+            if(H5Orefresh(oid) < 0) PROCESS_ERROR;
+        } /* end if */
+        else {
+            HDfprintf(stdout, "Error. %s is an unrecognized object.\n", obj_pathname);
+            PROCESS_ERROR;
+        } /* end else */
 
-	/* Get object info. This should now accurately reflect the refreshed object on disk. */
-	if((status = H5Oget_info2(oid, &refreshed_oinfo, H5O_INFO_BASIC|H5O_INFO_NUM_ATTRS|H5O_INFO_HDR)) < 0) PROCESS_ERROR;
-    
-	/* Confirm following (first 4) attributes are the same: */
-	/* Confirm following (last 4) attributes are different */
-	if( (flushed_oinfo.addr == refreshed_oinfo.addr) &&
-	    (flushed_oinfo.type == refreshed_oinfo.type) &&
-	    (flushed_oinfo.hdr.version == refreshed_oinfo.hdr.version) &&
-	    (flushed_oinfo.hdr.flags == refreshed_oinfo.hdr.flags) &&
-	    (flushed_oinfo.num_attrs != refreshed_oinfo.num_attrs) &&
-	    (flushed_oinfo.hdr.nmesgs != refreshed_oinfo.hdr.nmesgs) &&
-	    (flushed_oinfo.hdr.nchunks != refreshed_oinfo.hdr.nchunks) &&
-	    (flushed_oinfo.hdr.space.total != refreshed_oinfo.hdr.space.total) ) {
-		ok = TRUE;
-		break;
-	}
-	if(tries == sleep_tries)
-	    HDsleep(1);
+        /* Get object info. This should now accurately reflect the refreshed object on disk. */
+        if((status = H5Oget_info2(oid, &refreshed_oinfo, H5O_INFO_BASIC|H5O_INFO_NUM_ATTRS|H5O_INFO_HDR)) < 0)
+            PROCESS_ERROR;
+
+        /* Confirm following (first 4) attributes are the same: */
+        /* Confirm following (last 4) attributes are different */
+        if( (flushed_oinfo.addr == refreshed_oinfo.addr) &&
+            (flushed_oinfo.type == refreshed_oinfo.type) &&
+            (flushed_oinfo.hdr.version == refreshed_oinfo.hdr.version) &&
+            (flushed_oinfo.hdr.flags == refreshed_oinfo.hdr.flags) &&
+            (flushed_oinfo.num_attrs != refreshed_oinfo.num_attrs) &&
+            (flushed_oinfo.hdr.nmesgs != refreshed_oinfo.hdr.nmesgs) &&
+            (flushed_oinfo.hdr.nchunks != refreshed_oinfo.hdr.nchunks) &&
+            (flushed_oinfo.hdr.space.total != refreshed_oinfo.hdr.space.total) ) {
+            ok = TRUE;
+            break;
+        }
+
+        if(tries == sleep_tries)
+            HDsleep(1);
 
     } while(--tries);
-    
+
     if(!ok) {
-	printf("FLUSHED: num_attrs=%d, nmesgs=%d, nchunks=%d, total=%d\n",
-	    (int)flushed_oinfo.num_attrs, (int)flushed_oinfo.hdr.nmesgs,
-	    (int)flushed_oinfo.hdr.nchunks, (int)flushed_oinfo.hdr.space.total);
-	printf("REFRESHED: num_attrs=%d, nmesgs=%d, nchunks=%d, total=%d\n",
-	    (int)refreshed_oinfo.num_attrs, (int)refreshed_oinfo.hdr.nmesgs,
-	    (int)refreshed_oinfo.hdr.nchunks, (int)refreshed_oinfo.hdr.space.total);
-	PROCESS_ERROR;
+        HDprintf("FLUSHED: num_attrs=%d, nmesgs=%d, nchunks=%d, total=%d\n",
+            (int)flushed_oinfo.num_attrs, (int)flushed_oinfo.hdr.nmesgs,
+            (int)flushed_oinfo.hdr.nchunks, (int)flushed_oinfo.hdr.space.total);
+        HDprintf("REFRESHED: num_attrs=%d, nmesgs=%d, nchunks=%d, total=%d\n",
+            (int)refreshed_oinfo.num_attrs, (int)refreshed_oinfo.hdr.nmesgs,
+            (int)refreshed_oinfo.hdr.nchunks, (int)refreshed_oinfo.hdr.space.total);
+        PROCESS_ERROR;
     }
-    
+
     /* Close objects */
     if(H5Oclose(oid) < 0) PROCESS_ERROR;
     if(H5Fclose(fid) < 0) PROCESS_ERROR;

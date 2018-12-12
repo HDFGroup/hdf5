@@ -467,7 +467,7 @@ test_vltypes_vlen_atomic(void)
 
     /* Try to call H5Dvlen_get_buf with bad dataspace */
     H5E_BEGIN_TRY {
-    ret = H5Dvlen_get_buf_size(dataset, tid1, sid2, &size);
+        ret = H5Dvlen_get_buf_size(dataset, tid1, sid2, &size);
     } H5E_END_TRY
     VERIFY(ret, FAIL, "H5Dvlen_get_buf_size");
 
@@ -499,7 +499,7 @@ test_vltypes_vlen_atomic(void)
     /* Try to reclaim read data using "bad" dataspace with no extent
      * Should fail */
     H5E_BEGIN_TRY {
-    ret=H5Dvlen_reclaim(tid1,sid2,xfer_pid,rdata);
+        ret=H5Dvlen_reclaim(tid1,sid2,xfer_pid,rdata);
     } H5E_END_TRY
     VERIFY(ret, FAIL, "H5Dvlen_reclaim");
 
@@ -1205,9 +1205,9 @@ test_vltypes_compound_vlstr(void)
         wdata[i].v.p=(s2*)HDmalloc((i+L3_INCM)*sizeof(s2));
         wdata[i].v.len=i+L3_INCM;
         for(t1=(s2 *)((wdata[i].v).p), j=0; j<(i+L3_INCM); j++, t1++) {
-            strcat(str, "m");
-            t1->string = (char*)HDmalloc(strlen(str)*sizeof(char)+1);
-            strcpy(t1->string, str);
+            HDstrcat(str, "m");
+            t1->string = (char*)HDmalloc(HDstrlen(str)*sizeof(char)+1);
+            HDstrcpy(t1->string, str);
             /*t1->color = red;*/
             t1->color = blue;
         }
@@ -1348,7 +1348,7 @@ test_vltypes_compound_vlstr(void)
         } /* end if */
 
         for(t1=(s2 *)(wdata[i].v.p), t2=(s2 *)(rdata[i].v.p), j=0; j<rdata[i].v.len; j++, t1++, t2++) {
-                if( strcmp(t1->string, t2->string) ) {
+                if(HDstrcmp(t1->string, t2->string)) {
                     TestErrPrintf("VL data values don't match!, t1->string=%s, t2->string=%s\n",t1->string, t2->string);
                     continue;
                 } /* end if */
@@ -1368,14 +1368,14 @@ test_vltypes_compound_vlstr(void)
     CHECK(ret, FAIL, "H5Dvlen_reclaim");
 
     /* Use this part for new data */
-    strcpy(str, "bbbbbbbb\0");
+    HDstrcpy(str, "bbbbbbbb\0");
     for(i=0; i<SPACE1_DIM1; i++) {
         wdata2[i].v.p=(s2*)HDmalloc((i+1)*sizeof(s2));
         wdata2[i].v.len=i+1;
         for(t1=(s2*)(wdata2[i].v).p, j=0; j<i+1; j++, t1++) {
-        strcat(str, "pp");
-        t1->string = (char*)HDmalloc(strlen(str)*sizeof(char)+1);
-            strcpy(t1->string, str);
+        HDstrcat(str, "pp");
+        t1->string = (char*)HDmalloc(HDstrlen(str)*sizeof(char)+1);
+            HDstrcpy(t1->string, str);
         t1->color = green;
         }
     } /* end for */
@@ -1406,7 +1406,7 @@ test_vltypes_compound_vlstr(void)
         } /* end if */
 
         for(t1=(s2 *)(wdata2[i].v.p), t2=(s2 *)(rdata2[i].v.p), j=0; j<rdata2[i].v.len; j++, t1++, t2++) {
-                if( strcmp(t1->string, t2->string) ) {
+                if(HDstrcmp(t1->string, t2->string)) {
                     TestErrPrintf("VL data values don't match!, t1->string=%s, t2->string=%s\n",t1->string, t2->string);
                     continue;
                 } /* end if */

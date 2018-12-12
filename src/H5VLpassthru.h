@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -11,42 +10,37 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/*-------------------------------------------------------------------------
- *
- * Created:             H5B2public.h
- *                      Jan 31 2005
- *                      Quincey Koziol <koziol@ncsa.uiuc.edu>
- *
- * Purpose:             Public declarations for the v2 B-tree package.
- *
- *-------------------------------------------------------------------------
+/*
+ * Purpose:	The public header file for the pass-through VOL connector.
  */
 
-#ifndef _H5B2public_H
-#define _H5B2public_H
+#ifndef _H5VLpassthru_H
+#define _H5VLpassthru_H
 
-/* Public headers needed by this file */
-#include "H5public.h"
+/* Identifier for the pass-through VOL connector */
+#define H5VL_PASSTHRU	(H5VL_pass_through_register())
 
-/*****************/
-/* Public Macros */
-/*****************/
+/* Characteristics of the pass-through VOL connector */
+#define H5VL_PASSTHRU_NAME        "pass_through"
+#define H5VL_PASSTHRU_VALUE       505           /* VOL connector ID */
+#define H5VL_PASSTHRU_VERSION     0
 
-/*******************/
-/* Public Typedefs */
-/*******************/
+/* Pass-through VOL connector info */
+typedef struct H5VL_pass_through_info_t {
+    hid_t under_vol_id;         /* VOL ID for under VOL */
+    void *under_vol_info;       /* VOL info for under VOL */
+} H5VL_pass_through_info_t;
 
-/**********************************/
-/* Public API Function Prototypes */
-/**********************************/
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+H5_DLL hid_t H5VL_pass_through_register(void);
+
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _H5B2public_H */
+#endif /* _H5VLpassthru_H */
 

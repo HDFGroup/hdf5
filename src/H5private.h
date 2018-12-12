@@ -169,6 +169,9 @@
  */
 #define H5_DEFAULT_VFD      H5FD_SEC2
 
+/* Define the default VOL driver */
+#define H5_DEFAULT_VOL      H5VL_NATIVE
+
 #ifdef H5_HAVE_WIN32_API
 /* The following two defines must be before any windows headers are included */
 #define WIN32_LEAN_AND_MEAN    /* Exclude rarely-used stuff from Windows headers */
@@ -509,6 +512,11 @@
 #ifndef H5_INC_ENUM
 #  define H5_INC_ENUM(TYPE,VAR) (VAR)=((TYPE)((VAR)+1))
 #endif
+
+/* Represents an empty asynchronous request handle.
+ * Used in the VOL code.
+ */
+#define H5_REQUEST_NULL                 NULL
 
 /*
  * A macro to portably decrement enumerated types.
@@ -1704,6 +1712,7 @@ typedef enum {
     H5_PKG_S,       /* Dataspaces               */
     H5_PKG_T,       /* Datatypes                */
     H5_PKG_V,       /* Vector functions         */
+    H5_PKG_VL,      /* VOL functions            */
     H5_PKG_Z,       /* Raw data filters         */
     H5_NPKGS        /* Must be last             */
 } H5_pkg_t;
@@ -1992,7 +2001,6 @@ extern hbool_t H5_MPEinit_g;   /* Has the MPE Library been initialized? */
 H5_DLL herr_t H5CX_push(void);
 H5_DLL herr_t H5CX_pop(void);
 
-
 #ifndef NDEBUG
 #define FUNC_ENTER_CHECK_NAME(asrt)                                           \
     {                                                                         \
@@ -2031,7 +2039,7 @@ H5_DLL herr_t H5CX_pop(void);
 /* Local variables for API routines */
 #define FUNC_ENTER_API_VARS                                                   \
     MPE_LOG_VARS                                                              \
-    H5TRACE_DECL                                                              \
+    H5TRACE_DECL
 
 #define FUNC_ENTER_API_COMMON                                                 \
     FUNC_ENTER_API_VARS                                                       \
@@ -2078,10 +2086,11 @@ H5_DLL herr_t H5CX_pop(void);
 /*
  * Use this macro for API functions that shouldn't perform _any_ initialization
  *      of the library or an interface, just perform tracing, etc.  Examples
- *      are: H5allocate_memory, H5is_library_threadsafe, etc.
+ *      are: H5allocate_memory, H5is_library_threadsafe, public VOL callback
+ *      wrappers (e.g. H5VLfile_create, H5VLdataset_read, etc.), etc.
  *
  */
-#define FUNC_ENTER_API_NOINIT {{                                              \
+#define FUNC_ENTER_API_NOINIT {{{                                             \
     FUNC_ENTER_API_COMMON                                                     \
     H5_PUSH_FUNC                                                              \
     BEGIN_MPE_LOG                                                             \
@@ -2094,7 +2103,7 @@ H5_DLL herr_t H5CX_pop(void);
  *      are: H5close, H5check_version, etc.
  *
  */
-#define FUNC_ENTER_API_NOINIT_NOERR_NOFS {{                                   \
+#define FUNC_ENTER_API_NOINIT_NOERR_NOFS {{{{                                 \
     FUNC_ENTER_API_VARS                                                       \
     FUNC_ENTER_COMMON_NOERR(H5_IS_API(FUNC));                                 \
     FUNC_ENTER_API_THREADSAFE;                                                \
@@ -2199,12 +2208,6 @@ H5_DLL herr_t H5CX_pop(void);
     H5_PUSH_FUNC                                                              \
     if(H5_PKG_INIT_VAR || !H5_TERM_GLOBAL) {
 
-/* Use this macro for all package-level functions that are VOL entry-points */
-#define FUNC_ENTER_PACKAGE_VOL {                                              \
-    FUNC_ENTER_COMMON(H5_IS_PKG(FUNC));                                       \
-    H5_PUSH_FUNC                                                              \
-    if(H5_PKG_INIT_VAR || !H5_TERM_GLOBAL) {
-
 /* Use this macro for package-level functions which propgate errors, but don't issue them */
 #define FUNC_ENTER_PACKAGE_NOERR {                                            \
     FUNC_ENTER_COMMON_NOERR(H5_IS_PKG(FUNC));                                 \
@@ -2221,25 +2224,8 @@ H5_DLL herr_t H5CX_pop(void);
     H5_PUSH_FUNC                                                              \
     if(H5_PKG_INIT_VAR || !H5_TERM_GLOBAL) {
 
-/* Use the following macro as replacement for the FUNC_ENTER_PACKAGE
- * macro when the function needs to set up a metadata tag and is also a
- * VOL entry-point. */
-#define FUNC_ENTER_PACKAGE_VOL_TAG(tag) {                                     \
-    haddr_t prev_tag = HADDR_UNDEF;                                           \
-                                                                              \
-    FUNC_ENTER_COMMON(H5_IS_PKG(FUNC));                                       \
-    H5AC_tag(tag, &prev_tag);                                                 \
-    H5_PUSH_FUNC                                                              \
-    if(H5_PKG_INIT_VAR || !H5_TERM_GLOBAL) {
-
 /* Use this macro for all "normal" staticly-scoped functions */
 #define FUNC_ENTER_STATIC {                                                   \
-    FUNC_ENTER_COMMON(H5_IS_PKG(FUNC));                                       \
-    H5_PUSH_FUNC                                                              \
-    if(H5_PKG_INIT_VAR || !H5_TERM_GLOBAL) {
-
-/* Use this macro for all "normal" staticly-scoped functions that are VOL entry-points */
-#define FUNC_ENTER_STATIC_VOL {                                               \
     FUNC_ENTER_COMMON(H5_IS_PKG(FUNC));                                       \
     H5_PUSH_FUNC                                                              \
     if(H5_PKG_INIT_VAR || !H5_TERM_GLOBAL) {
@@ -2259,17 +2245,6 @@ H5_DLL herr_t H5CX_pop(void);
 /* Use the following macro as replacement for the FUNC_ENTER_STATIC
  * macro when the function needs to set up a metadata tag. */
 #define FUNC_ENTER_STATIC_TAG(tag) {                                          \
-    haddr_t prev_tag = HADDR_UNDEF;                                           \
-                                                                              \
-    FUNC_ENTER_COMMON(H5_IS_PKG(FUNC));                                       \
-    H5AC_tag(tag, &prev_tag);                                                 \
-    H5_PUSH_FUNC                                                              \
-    if(H5_PKG_INIT_VAR || !H5_TERM_GLOBAL) {
-
-/* Use the following macro as replacement for the FUNC_ENTER_STATIC
- * macro when the function needs to set up a metadata tag and is a VOL
- * entry-point. */
-#define FUNC_ENTER_STATIC_VOL_TAG(tag) {                                      \
     haddr_t prev_tag = HADDR_UNDEF;                                           \
                                                                               \
     FUNC_ENTER_COMMON(H5_IS_PKG(FUNC));                                       \
@@ -2315,23 +2290,16 @@ H5_DLL herr_t H5CX_pop(void);
        (void)H5E_dump_api_stack(TRUE);                                        \
     FUNC_LEAVE_API_THREADSAFE                                                 \
     return(ret_value);                                                        \
-}} /*end scope from beginning of FUNC_ENTER*/
+}}} /*end scope from beginning of FUNC_ENTER*/
 
 /* Use this macro to match the FUNC_ENTER_API_NOINIT_NOERR_NOFS macro */
 #define FUNC_LEAVE_API_NOFS(ret_value)                                        \
     FUNC_LEAVE_API_COMMON(ret_value);                                         \
     FUNC_LEAVE_API_THREADSAFE                                                 \
     return(ret_value);                                                        \
-}} /*end scope from beginning of FUNC_ENTER*/
+}}}} /*end scope from beginning of FUNC_ENTER*/
 
 #define FUNC_LEAVE_NOAPI(ret_value)                                           \
-        ;                                                                     \
-    } /*end scope from end of FUNC_ENTER*/                                    \
-    H5_POP_FUNC                                                               \
-    return(ret_value);                                                        \
-} /*end scope from beginning of FUNC_ENTER*/
-
-#define FUNC_LEAVE_NOAPI_VOL(ret_value)                                       \
         ;                                                                     \
     } /*end scope from end of FUNC_ENTER*/                                    \
     H5_POP_FUNC                                                               \
@@ -2358,15 +2326,6 @@ H5_DLL herr_t H5CX_pop(void);
 
 /* Use this macro when exiting a function that set up a metadata tag */
 #define FUNC_LEAVE_NOAPI_TAG(ret_value)                                       \
-        ;                                                                     \
-    } /*end scope from end of FUNC_ENTER*/                                    \
-    H5AC_tag(prev_tag, NULL);                                                 \
-    H5_POP_FUNC                                                               \
-    return(ret_value);                                                        \
-} /*end scope from beginning of FUNC_ENTER*/
-
-/* Use this macro when exiting a VOL entry-point function that set up a metadata tag */
-#define FUNC_LEAVE_NOAPI_VOL_TAG(ret_value)                                   \
         ;                                                                     \
     } /*end scope from end of FUNC_ENTER*/                                    \
     H5AC_tag(prev_tag, NULL);                                                 \
@@ -2671,6 +2630,7 @@ H5_DLL int H5S_top_term_package(void);
 H5_DLL int H5SL_term_package(void);
 H5_DLL int H5T_term_package(void);
 H5_DLL int H5T_top_term_package(void);
+H5_DLL int H5VL_term_package(void);
 H5_DLL int H5Z_term_package(void);
 
 /* Checksum functions */

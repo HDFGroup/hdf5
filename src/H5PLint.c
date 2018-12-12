@@ -235,7 +235,7 @@ done:
  *-------------------------------------------------------------------------
  */
 const void *
-H5PL_load(H5PL_type_t type, H5PL_key_t key)
+H5PL_load(H5PL_type_t type, const H5PL_key_t *key)
 {
     H5PL_search_params_t    search_params;          /* Plugin search parameters     */
     hbool_t                 found = FALSE;          /* Whether the plugin was found */
@@ -250,6 +250,10 @@ H5PL_load(H5PL_type_t type, H5PL_key_t key)
             if ((H5PL_plugin_control_mask_g & H5PL_FILTER_PLUGIN) == 0)
                 HGOTO_ERROR(H5E_PLUGIN, H5E_CANTLOAD, NULL, "filter plugins disabled")
             break;
+        case H5PL_TYPE_VOL:
+            if((H5PL_plugin_control_mask_g & H5PL_VOL_PLUGIN) == 0)
+                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTLOAD, NULL, "Virtual Object Layer (VOL) driver plugins disabled")
+            break;
         case H5PL_TYPE_ERROR:
         case H5PL_TYPE_NONE:
         default:
@@ -258,7 +262,7 @@ H5PL_load(H5PL_type_t type, H5PL_key_t key)
 
     /* Set up the search parameters */
     search_params.type = type;
-    search_params.key.id = key.id;
+    search_params.key.id = key->id;
 
     /* Search in the table of already loaded plugin libraries */
     if(H5PL__find_plugin_in_cache(&search_params, &found, &plugin_info) < 0)
@@ -303,7 +307,8 @@ done:
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"
 herr_t
-H5PL__open(const char *path, H5PL_type_t type, H5PL_key_t key, hbool_t *success, const void **plugin_info)
+H5PL__open(const char *path, H5PL_type_t type, const H5PL_key_t *key,
+    hbool_t *success, const void **plugin_info)
 {
     H5PL_HANDLE             handle = NULL;
     H5PL_get_plugin_info_t  get_plugin_info = NULL;
@@ -345,13 +350,44 @@ H5PL__open(const char *path, H5PL_type_t type, H5PL_key_t key, hbool_t *success,
                 HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "can't get filter info from plugin")
 
             /* If the filter IDs match, we're done. Set the output parameters. */
-            if (filter_info->id == key.id) {
+            if (filter_info->id == key->id) {
                 *plugin_info = (const void *)filter_info;
                 *success = TRUE;
             }
 
             break;
         }
+
+        case H5PL_TYPE_VOL:
+        {
+            const H5VL_class_t *cls;
+
+            /* Get the plugin info */
+            if(NULL == (cls = (const H5VL_class_t *)(*get_plugin_info)()))
+                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "can't get VOL driver info from plugin")
+
+            /* Which kind of key are we looking for? */
+            if(key->vol.kind == H5VL_GET_CONNECTOR_BY_NAME) {
+                /* If the plugin names match, we're done. Set the output parameters. */
+                if(cls->name && !HDstrcmp(cls->name, key->vol.u.name)) {
+                    *plugin_info = (const void *)cls;
+                    *success = TRUE;
+                } /* end if */
+            } /* end if */
+            else {
+                /* Sanity check */
+                HDassert(key->vol.kind == H5VL_GET_CONNECTOR_BY_VALUE);
+
+                /* If the plugin values match, we're done. Set the output parameters. */
+                if(cls->value == key->vol.u.value) {
+                    *plugin_info = (const void *)cls;
+                    *success = TRUE;
+                } /* end if */
+            } /* end else */
+
+            break;
+        }
+
         case H5PL_TYPE_ERROR:
         case H5PL_TYPE_NONE:
         default:

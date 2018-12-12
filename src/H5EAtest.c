@@ -401,7 +401,7 @@ END_FUNC(STATIC)  /* end H5EA__test_dst_dbg_context() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5EA_get_cparam_test
+ * Function:	H5EA__get_cparam_test
  *
  * Purpose:	Retrieve the parameters used to create the extensible array
  *
@@ -413,9 +413,9 @@ END_FUNC(STATIC)  /* end H5EA__test_dst_dbg_context() */
  *
  *-------------------------------------------------------------------------
  */
-BEGIN_FUNC(PRIV, NOERR,
+BEGIN_FUNC(PKG, NOERR,
 herr_t, SUCCEED, -,
-H5EA_get_cparam_test(const H5EA_t *ea, H5EA_create_t *cparam))
+H5EA__get_cparam_test(const H5EA_t *ea, H5EA_create_t *cparam))
 
     /* Check arguments. */
     HDassert(ea);
@@ -429,11 +429,11 @@ H5EA_get_cparam_test(const H5EA_t *ea, H5EA_create_t *cparam))
     cparam->data_blk_min_elmts = ea->hdr->cparam.data_blk_min_elmts;
     cparam->max_dblk_page_nelmts_bits = ea->hdr->cparam.max_dblk_page_nelmts_bits;
 
-END_FUNC(PRIV)  /* end H5EA_get_cparam_test() */
+END_FUNC(PKG)  /* end H5EA__get_cparam_test() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5EA_cmp_cparam_test
+ * Function:	H5EA__cmp_cparam_test
  *
  * Purpose:	Compare the parameters used to create the extensible array
  *
@@ -445,9 +445,9 @@ END_FUNC(PRIV)  /* end H5EA_get_cparam_test() */
  *
  *-------------------------------------------------------------------------
  */
-BEGIN_FUNC(PRIV, ERRCATCH,
+BEGIN_FUNC(PKG, ERRCATCH,
 int, 0, -,
-H5EA_cmp_cparam_test(const H5EA_create_t *cparam1, const H5EA_create_t *cparam2))
+H5EA__cmp_cparam_test(const H5EA_create_t *cparam1, const H5EA_create_t *cparam2))
 
     /* Check arguments. */
     HDassert(cparam1);
@@ -481,5 +481,5 @@ H5EA_cmp_cparam_test(const H5EA_create_t *cparam1, const H5EA_create_t *cparam2)
 
 CATCH
 
-END_FUNC(PRIV)  /* end H5EA_cmp_cparam_test() */
+END_FUNC(PKG)  /* end H5EA__cmp_cparam_test() */
 

@@ -30,11 +30,12 @@
 #include "H5Fprivate.h"
 
 /* Other public headers needed by this file */
-#include "H5Bpublic.h"          /* B-tree header, for H5B_NUM_BTREE_ID      */
+#include "H5VLpublic.h"         /* Virtual Object Layer                     */
 
 /* Other private headers needed by this file */
 #include "H5private.h"		    /* Generic Functions                        */
 #include "H5ACprivate.h"        /* Metadata cache                           */
+#include "H5Bprivate.h"         /* B-trees                                  */
 #include "H5FLprivate.h"        /* Free Lists                               */
 #include "H5FOprivate.h"        /* File objects                             */
 #include "H5FSprivate.h"        /* File free space                          */
@@ -291,7 +292,7 @@ struct H5F_file_t {
                                 /* begin on file access/create          */
     char        *mdc_log_location; /* location of mdc log               */
     hid_t       fcpl_id;	/* File creation property list ID 	*/
-    H5F_close_degree_t fc_degree;   /* File close behavior degree	*/
+    H5F_close_degree_t fc_degree; /* File close behavior degree	*/
     hbool_t evict_on_close; /* If the file's objects should be evicted from the metadata cache on close */
     size_t	rdcc_nslots;	/* Size of raw data chunk cache (slots)	*/
     size_t	rdcc_nbytes;	/* Size of raw data chunk cache	(bytes)	*/
@@ -309,6 +310,10 @@ struct H5F_file_t {
     H5FO_t *open_objs;          /* Open objects in file                 */
     H5UC_t *grp_btree_shared;   /* Ref-counted group B-tree node info   */
 
+    /* Cached VOL connector ID & info */
+    hid_t       vol_id;         /* ID of VOL connector for the container */
+    void       *vol_info;       /* Copy of VOL connector info for container */
+
     /* File space allocation information */
     H5F_fspace_strategy_t fs_strategy; /* File space handling strategy	*/
     hsize_t     fs_threshold;	/* Free space section threshold 	*/
@@ -325,7 +330,7 @@ struct H5F_file_t {
                                             /* been used accessed for either  */
                                             /* allocation or deallocation     */
                                             /* since file open.               */
-    haddr_t eoa_pre_fsm_fsalloc;	    /* eoa pre file space allocation  */
+    haddr_t eoa_pre_fsm_fsalloc;            /* eoa pre file space allocation  */
                                             /* for self referential FSMs      */
     haddr_t eoa_post_fsm_fsalloc;           /* eoa post file space allocation */
                                             /* for self referential FSMs      */
@@ -368,7 +373,7 @@ struct H5F_t {
     H5F_file_t		   *shared;         /* The shared file info                                         */
     unsigned		    nopen_objs;     /* Number of open object headers                                */
     H5FO_t             *obj_count;      /* # of time each object is opened through top file structure   */
-    hid_t               file_id;        /* ID of this file                                              */
+    hbool_t             id_exists;      /* Whether an ID for this struct exists                         */
     hbool_t             closing;        /* File is in the process of being closed                       */
     struct H5F_t       *parent;         /* Parent file that this file is mounted to                     */
     unsigned            nmounts;        /* Number of children mounted to this file                      */
@@ -377,6 +382,36 @@ struct H5F_t {
     hbool_t             coll_md_write;  /* Do all metadata writes collectively */
 #endif /* H5_HAVE_PARALLEL */
 };
+
+/* types for file optional VOL operations */
+typedef enum H5VL_file_optional_t {
+    H5VL_FILE_CLEAR_ELINK_CACHE,        /* Clear external link cache            */
+    H5VL_FILE_GET_FILE_IMAGE,           /* file image                           */
+    H5VL_FILE_GET_FREE_SECTIONS,        /* file free selections                 */
+    H5VL_FILE_GET_FREE_SPACE,	        /* file freespace         		*/
+    H5VL_FILE_GET_INFO,	                /* file info             		*/
+    H5VL_FILE_GET_MDC_CONF,	        /* file metadata cache configuration	*/
+    H5VL_FILE_GET_MDC_HR,	        /* file metadata cache hit rate		*/
+    H5VL_FILE_GET_MDC_SIZE,             /* file metadata cache size		*/
+    H5VL_FILE_GET_SIZE,	                /* file size             		*/
+    H5VL_FILE_GET_VFD_HANDLE,	        /* file VFD handle       		*/
+    H5VL_FILE_GET_FILE_ID,              /* retrieve or resurrect file ID of object */
+    H5VL_FILE_RESET_MDC_HIT_RATE,       /* get metadata cache hit rate          */
+    H5VL_FILE_SET_MDC_CONFIG,           /* set metadata cache configuration     */
+    H5VL_FILE_GET_METADATA_READ_RETRY_INFO,
+    H5VL_FILE_START_SWMR_WRITE,
+    H5VL_FILE_START_MDC_LOGGING,
+    H5VL_FILE_STOP_MDC_LOGGING,
+    H5VL_FILE_GET_MDC_LOGGING_STATUS,
+    H5VL_FILE_FORMAT_CONVERT,
+    H5VL_FILE_RESET_PAGE_BUFFERING_STATS,
+    H5VL_FILE_GET_PAGE_BUFFERING_STATS,
+    H5VL_FILE_GET_MDC_IMAGE_INFO,
+    H5VL_FILE_GET_EOA,
+    H5VL_FILE_INCR_FILESIZE,
+    H5VL_FILE_SET_LIBVER_BOUNDS,
+    H5VL_FILE_SET_MIN_DSET_OHDR_FLAG
+} H5VL_file_optional_t;
 
 
 /*****************************/
@@ -395,24 +430,19 @@ H5FL_EXTERN(H5F_file_t);
 /******************************/
 
 /* General routines */
-H5_DLL H5F_t *H5F__new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf);
+H5_DLL H5F_t *H5F__reopen(H5F_t *f);
 H5_DLL herr_t H5F__dest(H5F_t *f, hbool_t flush);
-H5_DLL H5F_t *H5F__create(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id);
-H5_DLL H5F_t *H5F__open(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id);
-H5_DLL herr_t H5F__flush(H5F_t *f, H5F_scope_t scope);
-H5_DLL herr_t H5F__flush_real(H5F_t *f);
-H5_DLL htri_t H5F__is_hdf5(const char *name);
-H5_DLL herr_t H5F_get_objects(const H5F_t *f, unsigned types, size_t max_index, hid_t *obj_id_list, hbool_t app_ref, size_t *obj_id_count_ptr);
-H5_DLL herr_t H5F__get_freespace(H5F_t *f, hsize_t *tot_space);
+H5_DLL herr_t H5F__flush(H5F_t *f);
+H5_DLL htri_t H5F__is_hdf5(const char *name, hid_t fapl_id);
 H5_DLL ssize_t H5F__get_file_image(H5F_t *f, void *buf_ptr, size_t buf_len);
 H5_DLL herr_t H5F__get_info(H5F_t *f, H5F_info2_t *finfo);
-H5_DLL ssize_t H5F__get_free_sections(H5F_t *f, H5FD_mem_t type, size_t nsects, H5F_sect_info_t *sect_info);
-H5_DLL herr_t H5F__get_metadata_read_retry_info(H5F_t *file, H5F_retry_info_t *info);
 H5_DLL herr_t H5F__format_convert(H5F_t *f);
 H5_DLL herr_t H5F__start_swmr_write(H5F_t *f);
-H5_DLL herr_t H5F__close(hid_t file_id);
-H5_DLL herr_t H5F__close_cb(H5F_t *f);
+H5_DLL herr_t H5F__close(H5F_t *f);
 H5_DLL herr_t H5F__set_libver_bounds(H5F_t *f, H5F_libver_t low, H5F_libver_t high);
+H5_DLL H5F_t *H5F__get_file(void *obj, H5I_type_t type);
+H5_DLL hid_t H5F__get_file_id(H5F_t *file);
+H5_DLL herr_t H5F__set_vol_conn(H5F_t *file, hid_t vol_id, const void *vol_info);
 
 /* File mount related routines */
 H5_DLL herr_t H5F__mount(H5G_loc_t *loc, const char *name, H5F_t *child, hid_t plist_id);
@@ -427,7 +457,7 @@ H5_DLL herr_t H5F__super_size(H5F_t *f, hsize_t *super_size, hsize_t *super_ext_
 H5_DLL herr_t H5F__super_free(H5F_super_t *sblock);
 
 /* Superblock extension related routines */
-H5_DLL herr_t H5F_super_ext_open(H5F_t *f, haddr_t ext_addr, H5O_loc_t *ext_ptr);
+H5_DLL herr_t H5F__super_ext_open(H5F_t *f, haddr_t ext_addr, H5O_loc_t *ext_ptr);
 H5_DLL herr_t H5F__super_ext_write_msg(H5F_t *f, unsigned id, void *mesg, hbool_t may_create, unsigned mesg_flags);
 H5_DLL herr_t H5F__super_ext_remove_msg(H5F_t *f, unsigned id);
 H5_DLL herr_t H5F__super_ext_close(H5F_t *f, H5O_loc_t *ext_ptr, hbool_t was_created);
@@ -440,9 +470,9 @@ H5_DLL herr_t H5F__accum_flush(H5F_t *f);
 H5_DLL herr_t H5F__accum_reset(H5F_t *f, hbool_t flush);
 
 /* Shared file list related routines */
-H5_DLL herr_t H5F_sfile_add(H5F_file_t *shared);
-H5_DLL H5F_file_t * H5F_sfile_search(H5FD_t *lf);
-H5_DLL herr_t H5F_sfile_remove(H5F_file_t *shared);
+H5_DLL herr_t H5F__sfile_add(H5F_file_t *shared);
+H5_DLL H5F_file_t *H5F__sfile_search(H5FD_t *lf);
+H5_DLL herr_t H5F__sfile_remove(H5F_file_t *shared);
 
 /* External file cache routines */
 H5_DLL H5F_efc_t *H5F__efc_create(unsigned max_nfiles);
@@ -468,10 +498,11 @@ H5_DLL herr_t H5F__evict_cache_entries(H5F_t *f);
 
 /* Testing functions */
 #ifdef H5F_TESTING
-H5_DLL herr_t H5F_get_sohm_mesg_count_test(hid_t fid, unsigned type_id, size_t *mesg_count);
-H5_DLL herr_t H5F_check_cached_stab_test(hid_t file_id);
-H5_DLL herr_t H5F_get_maxaddr_test(hid_t file_id, haddr_t *maxaddr);
-H5_DLL herr_t H5F_get_sbe_addr_test(hid_t file_id, haddr_t *sbe_addr);
+H5_DLL herr_t H5F__get_sohm_mesg_count_test(hid_t fid, unsigned type_id, size_t *mesg_count);
+H5_DLL herr_t H5F__check_cached_stab_test(hid_t file_id);
+H5_DLL herr_t H5F__get_maxaddr_test(hid_t file_id, haddr_t *maxaddr);
+H5_DLL herr_t H5F__get_sbe_addr_test(hid_t file_id, haddr_t *sbe_addr);
+H5_DLL htri_t H5F__same_file_test(hid_t file_id1, hid_t file_id2);
 #endif /* H5F_TESTING */
 
 #endif /* _H5Fpkg_H */

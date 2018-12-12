@@ -225,14 +225,14 @@ H5G__stab_create(H5O_loc_t *grp_oloc, const H5O_ginfo_t *ginfo, H5O_stab_t *stab
 
     /* Go create the B-tree & local heap */
     if(H5G__stab_create_components(grp_oloc->file, stab, size_hint) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create symbol table components")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create symbol table components")
 
     /*
      * Insert the symbol table message into the object header and the symbol
      * table entry.
      */
     if(H5O_msg_create(grp_oloc, H5O_STAB_ID, 0, H5O_UPDATE_TIME, stab) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create message")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create message")
 
 done:
     FUNC_LEAVE_NOAPI_TAG(ret_value)
@@ -534,7 +534,7 @@ H5G__stab_iterate(const H5O_loc_t *oloc, H5_iter_order_t order,
 
     /* Get the B-tree info */
     if(NULL == H5O_msg_read(oloc, H5O_STAB_ID, &stab))
-	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to determine local heap address")
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to determine local heap address")
 
     /* Pin the heap down in memory */
     if(NULL == (heap = H5HL_protect(oloc->file, stab.heap_addr, H5AC__READ_ONLY_FLAG)))
@@ -626,7 +626,7 @@ H5G__stab_count(const H5O_loc_t *oloc, hsize_t *num_objs)
 
     /* Get the B-tree info */
     if(NULL == H5O_msg_read(oloc, H5O_STAB_ID, &stab))
-	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to determine local heap address")
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to determine local heap address")
 
     /* Iterate over the group members */
     if(H5B_iterate(oloc->file, H5B_SNODE, stab.btree_addr, H5G__node_sumup, num_objs) < 0)
@@ -757,7 +757,7 @@ H5G__stab_get_name_by_idx(const H5O_loc_t *oloc, H5_iter_order_t order, hsize_t 
 
     /* Get the B-tree & local heap info */
     if(NULL == H5O_msg_read(oloc, H5O_STAB_ID, &stab))
-	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to determine local heap address")
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to determine local heap address")
 
     /* Pin the heap down in memory */
     if(NULL == (heap = H5HL_protect(oloc->file, stab.heap_addr, H5AC__READ_ONLY_FLAG)))
@@ -785,11 +785,11 @@ H5G__stab_get_name_by_idx(const H5O_loc_t *oloc, H5_iter_order_t order, hsize_t 
 
     /* Iterate over the group members */
     if(H5B_iterate(oloc->file, H5B_SNODE, stab.btree_addr, H5G__node_by_idx, &udata) < 0)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "iteration operator failed")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "iteration operator failed")
 
     /* If we don't know the name now, we almost certainly went out of bounds */
     if(udata.name == NULL)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "index out of bound")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "index out of bound")
 
     /* Get the length of the name */
     ret_value = (ssize_t)HDstrlen(udata.name);
@@ -979,7 +979,7 @@ H5G__stab_lookup_by_idx(const H5O_loc_t *grp_oloc, H5_iter_order_t order, hsize_
 
     /* Get the B-tree & local heap info */
     if(NULL == H5O_msg_read(grp_oloc, H5O_STAB_ID, &stab))
-	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to determine local heap address")
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to determine local heap address")
 
     /* Pin the heap down in memory */
     if(NULL == (heap = H5HL_protect(grp_oloc->file, stab.heap_addr, H5AC__READ_ONLY_FLAG)))
@@ -1007,11 +1007,11 @@ H5G__stab_lookup_by_idx(const H5O_loc_t *grp_oloc, H5_iter_order_t order, hsize_
 
     /* Iterate over the group members */
     if(H5B_iterate(grp_oloc->file, H5B_SNODE, stab.btree_addr, H5G__node_by_idx, &udata) < 0)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "iteration operator failed")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "iteration operator failed")
 
     /* If we didn't find the link, we almost certainly went out of bounds */
     if(!udata.found)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "index out of bound")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "index out of bound")
 
 done:
     /* Release resources */
@@ -1102,119 +1102,4 @@ done:
     FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5G__stab_valid */
 #endif /* H5_STRICT_FORMAT_CHECKS */
-
-#ifndef H5_NO_DEPRECATED_SYMBOLS
-
-/*-------------------------------------------------------------------------
- * Function:	H5G_stab_get_type_by_idx_cb
- *
- * Purpose:     Callback for B-tree iteration 'by index' info query to
- *              retrieve the type of an object
- *
- * Return:	Success:        Non-negative
- *		Failure:	Negative
- *
- * Programmer:	Quincey Koziol
- *	        Nov  7, 2006
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5G_stab_get_type_by_idx_cb(const H5G_entry_t *ent, void *_udata)
-{
-    H5G_bt_it_gtbi_t	*udata = (H5G_bt_it_gtbi_t *)_udata;
-    herr_t ret_value = SUCCEED;         /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-    /* Sanity check */
-    HDassert(ent);
-    HDassert(udata);
-
-    /* Check for a soft link */
-    switch(ent->type) {
-        case H5G_CACHED_SLINK:
-            udata->type = H5G_LINK;
-            break;
-
-        case H5G_CACHED_ERROR:
-        case H5G_NOTHING_CACHED:
-        case H5G_CACHED_STAB:
-        case H5G_NCACHED:
-        default:
-            {
-                H5O_loc_t tmp_oloc;             /* Temporary object location */
-                H5O_type_t obj_type;            /* Type of object at location */
-
-                /* Build temporary object location */
-                tmp_oloc.file = udata->f;
-                HDassert(H5F_addr_defined(ent->header));
-                tmp_oloc.addr = ent->header;
-
-                /* Get the type of the object */
-                if(H5O_obj_type(&tmp_oloc, &obj_type) < 0)
-                    HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get object type")
-                udata->type = H5G_map_obj_type(obj_type);
-            }
-            break;
-    } /* end switch */
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G_stab_get_type_by_idx_cb */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5G__stab_get_type_by_idx
- *
- * Purpose:     Private function for H5Gget_objtype_by_idx.
- *              Returns the type of objects in the group by giving index.
- *
- * Return:	Success:        H5G_GROUP(1), H5G_DATASET(2), H5G_TYPE(3)
- *
- *		Failure:	UNKNOWN
- *
- * Programmer:	Raymond Lu
- *	        Nov 20, 2002
- *
- *-------------------------------------------------------------------------
- */
-H5G_obj_t
-H5G__stab_get_type_by_idx(H5O_loc_t *oloc, hsize_t idx)
-{
-    H5O_stab_t		stab;	        /* Info about local heap & B-tree */
-    H5G_bt_it_gtbi_t	udata;          /* User data for B-tree callback */
-    H5G_obj_t		ret_value = H5G_UNKNOWN;        /* Return value */
-
-    FUNC_ENTER_PACKAGE_TAG(oloc->addr)
-
-    /* Sanity check */
-    HDassert(oloc);
-
-    /* Get the B-tree & local heap info */
-    if(NULL == H5O_msg_read(oloc, H5O_STAB_ID, &stab))
-	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, H5G_UNKNOWN, "unable to determine local heap address")
-
-    /* Set iteration information */
-    udata.common.idx = idx;
-    udata.common.num_objs = 0;
-    udata.common.op = H5G_stab_get_type_by_idx_cb;
-    udata.f = oloc->file;
-    udata.type = H5G_UNKNOWN;
-
-    /* Iterate over the group members */
-    if(H5B_iterate(oloc->file, H5B_SNODE, stab.btree_addr, H5G__node_by_idx, &udata) < 0)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5G_UNKNOWN, "iteration operator failed")
-
-    /* If we don't know the type now, we almost certainly went out of bounds */
-    if(udata.type == H5G_UNKNOWN)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5G_UNKNOWN, "index out of bound")
-
-    /* Set the return value */
-    ret_value = udata.type;
-
-done:
-    FUNC_LEAVE_NOAPI_TAG(ret_value)
-} /* end H5G__stab_get_type_by_idx() */
-#endif /* H5_NO_DEPRECATED_SYMBOLS */
 

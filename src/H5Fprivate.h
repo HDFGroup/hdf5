@@ -286,7 +286,7 @@ typedef struct H5F_t H5F_t;
 #define H5F_NOPEN_OBJS(F)       ((F)->nopen_objs)
 #define H5F_INCR_NOPEN_OBJS(F)  ((F)->nopen_objs++)
 #define H5F_DECR_NOPEN_OBJS(F)  ((F)->nopen_objs--)
-#define H5F_FILE_ID(F)          ((F)->file_id)
+#define H5F_ID_EXISTS(F)        ((F)->id_exists)
 #define H5F_PARENT(F)           ((F)->parent)
 #define H5F_NMOUNTS(F)          ((F)->nmounts)
 #define H5F_GET_READ_ATTEMPTS(F) ((F)->shared->read_attempts)
@@ -332,6 +332,7 @@ typedef struct H5F_t H5F_t;
 #define H5F_FIRST_ALLOC_DEALLOC(F) ((F)->shared->first_alloc_dealloc)
 #define H5F_EOA_PRE_FSM_FSALLOC(F) ((F)->shared->eoa_pre_fsm_fsalloc)
 #define H5F_MIN_DSET_OHDR(F) ((F)->shared->crt_dset_min_ohdr_flag)
+#define H5F_SET_MIN_DSET_OHDR(F, V) ((F)->shared->crt_dset_min_ohdr_flag = (V))
 #else /* H5F_MODULE */
 #define H5F_LOW_BOUND(F)        (H5F_get_low_bound(F))
 #define H5F_HIGH_BOUND(F)       (H5F_get_high_bound(F))
@@ -344,7 +345,7 @@ typedef struct H5F_t H5F_t;
 #define H5F_NOPEN_OBJS(F)       (H5F_get_nopen_objs(F))
 #define H5F_INCR_NOPEN_OBJS(F)  (H5F_incr_nopen_objs(F))
 #define H5F_DECR_NOPEN_OBJS(F)  (H5F_decr_nopen_objs(F))
-#define H5F_FILE_ID(F)          (H5F_get_file_id(F))
+#define H5F_ID_EXISTS(F)        (H5F_file_id_exists(F))
 #define H5F_PARENT(F)           (H5F_get_parent(F))
 #define H5F_NMOUNTS(F)          (H5F_get_nmounts(F))
 #define H5F_GET_READ_ATTEMPTS(F) (H5F_get_read_attempts(F))
@@ -390,6 +391,7 @@ typedef struct H5F_t H5F_t;
 #define H5F_FIRST_ALLOC_DEALLOC(F) (H5F_get_first_alloc_dealloc(F))
 #define H5F_EOA_PRE_FSM_FSALLOC(F) (H5F_get_eoa_pre_fsm_fsalloc(F))
 #define H5F_MIN_DSET_OHDR(F) (H5F_get_min_dset_ohdr(F))
+#define H5F_SET_MIN_DSET_OHDR(F) (H5F_get_min_dset_ohdr((F), (V)))
 #endif /* H5F_MODULE */
 
 
@@ -481,10 +483,11 @@ typedef struct H5F_t H5F_t;
 #define H5F_ACS_SDATA_BLOCK_SIZE_NAME           "sdata_block_size" /* Minimum "small data" allocation block size (when aggregating "small" raw data allocations) */
 #define H5F_ACS_GARBG_COLCT_REF_NAME            "gc_ref"        /* Garbage-collect references */
 #define H5F_ACS_FILE_DRV_NAME                   "vfd_info" /* File driver ID & info */
+#define H5F_ACS_VOL_CONN_NAME                   "vol_connector_info" /* VOL connector ID & info */
 #define H5F_ACS_CLOSE_DEGREE_NAME               "close_degree"  /* File close degree */
 #define H5F_ACS_FAMILY_OFFSET_NAME              "family_offset" /* Offset position in file for family file driver */
 #define H5F_ACS_FAMILY_NEWSIZE_NAME             "family_newsize" /* New member size of family driver.  (private property only used by h5repart) */
-#define H5F_ACS_FAMILY_TO_SEC2_NAME             "family_to_sec2" /* Whether to convert family to sec2 driver.  (private property only used by h5repart) */
+#define H5F_ACS_FAMILY_TO_SINGLE_NAME           "family_to_single" /* Whether to convert family to a single-file driver.  (private property only used by h5repart) */
 #define H5F_ACS_MULTI_TYPE_NAME                 "multi_type"    /* Data type in multi file driver */
 #define H5F_ACS_LIBVER_LOW_BOUND_NAME           "libver_low_bound"     /* 'low' bound of library format versions */
 #define H5F_ACS_LIBVER_HIGH_BOUND_NAME          "libver_high_bound"    /* 'high' bound of library format versions */
@@ -717,7 +720,7 @@ typedef enum H5F_prefix_open_t {
 /* Private functions */
 H5_DLL H5F_t *H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id);
 H5_DLL herr_t H5F_try_close(H5F_t *f, hbool_t *was_closed/*out*/);
-H5_DLL herr_t H5F_start_swmr_write(H5F_t *file);
+H5_DLL hid_t H5F_get_file_id(hid_t obj_id, H5I_type_t id_type);
 
 /* Functions that retrieve values from the file struct */
 H5_DLL H5F_libver_t H5F_get_low_bound(const H5F_t *f);
@@ -731,12 +734,12 @@ H5_DLL hbool_t H5F_same_shared(const H5F_t *f1, const H5F_t *f2);
 H5_DLL unsigned H5F_get_nopen_objs(const H5F_t *f);
 H5_DLL unsigned H5F_incr_nopen_objs(H5F_t *f);
 H5_DLL unsigned H5F_decr_nopen_objs(H5F_t *f);
-H5_DLL hid_t H5F_get_file_id(const H5F_t *f);
+H5_DLL hbool_t H5F_file_id_exists(const H5F_t *f);
 H5_DLL H5F_t *H5F_get_parent(const H5F_t *f);
 H5_DLL unsigned H5F_get_nmounts(const H5F_t *f);
 H5_DLL unsigned H5F_get_read_attempts(const H5F_t *f);
 H5_DLL hid_t H5F_get_access_plist(H5F_t *f, hbool_t app_ref);
-H5_DLL hid_t H5F_get_id(H5F_t *file, hbool_t app_ref);
+H5_DLL hid_t H5F_get_id(H5F_t *file);
 H5_DLL herr_t H5F_get_obj_count(const H5F_t *f, unsigned types, hbool_t app_ref, size_t *obj_id_count_ptr);
 H5_DLL herr_t H5F_get_obj_ids(const H5F_t *f, unsigned types, size_t max_objs, hid_t *oid_list, hbool_t app_ref, size_t *obj_id_count_ptr);
 H5_DLL hsize_t H5F_get_pgend_meta_thres(const H5F_t *f);
@@ -766,7 +769,6 @@ H5_DLL size_t H5F_rdcc_nslots(const H5F_t *f);
 H5_DLL double H5F_rdcc_w0(const H5F_t *f);
 H5_DLL size_t H5F_sieve_buf_size(const H5F_t *f);
 H5_DLL unsigned H5F_gc_ref(const H5F_t *f);
-H5_DLL unsigned H5F_use_latest_flags(const H5F_t *f, unsigned fl);
 H5_DLL hbool_t H5F_store_msg_crt_idx(const H5F_t *f);
 H5_DLL herr_t H5F_set_store_msg_crt_idx(H5F_t *f, hbool_t flag);
 H5_DLL struct H5UC_t *H5F_grp_btree_shared(const H5F_t *f);
@@ -782,6 +784,7 @@ H5_DLL void H5F_set_coll_md_read(H5F_t *f, H5P_coll_md_read_flag_t flag);
 H5_DLL hbool_t H5F_use_mdc_logging(const H5F_t *f);
 H5_DLL hbool_t H5F_start_mdc_log_on_access(const H5F_t *f);
 H5_DLL char *H5F_mdc_log_location(const H5F_t *f);
+H5_DLL herr_t H5F_set_min_dset_ohdr(H5F_t *f, hbool_t minimize);
 
 /* Functions that retrieve values from VFD layer */
 H5_DLL hid_t H5F_get_driver_id(const H5F_t *f);
@@ -802,7 +805,7 @@ H5_DLL herr_t H5F_block_write(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t si
 
 /* Functions that flush or evict */
 H5_DLL herr_t H5F_flush_tagged_metadata(H5F_t *f, haddr_t tag);
-H5_DLL herr_t H5F_evict_tagged_metadata(H5F_t * f, haddr_t tag);
+H5_DLL herr_t H5F_evict_tagged_metadata(H5F_t *f, haddr_t tag);
 
 /* Functions that verify a piece of metadata with checksum */
 H5_DLL herr_t H5F_get_checksums(const uint8_t *buf, size_t chk_size, uint32_t *s_chksum, uint32_t *c_chksum);
@@ -810,6 +813,7 @@ H5_DLL herr_t H5F_get_checksums(const uint8_t *buf, size_t chk_size, uint32_t *s
 /* Routine to track the # of retries */
 H5_DLL herr_t H5F_track_metadata_read_retries(H5F_t *f, unsigned actype, unsigned retries);
 H5_DLL herr_t H5F_set_retries(H5F_t *f);
+H5_DLL herr_t H5F_get_metadata_read_retry_info(H5F_t *file, H5F_retry_info_t *info);
 
 /* Routine to invoke callback function upon object flush */
 H5_DLL herr_t H5F_object_flush_cb(H5F_t *f, hid_t obj_id);

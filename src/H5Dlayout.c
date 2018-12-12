@@ -25,7 +25,6 @@
 #include "H5Dpkg.h"             /* Datasets                                 */
 #include "H5Eprivate.h"         /* Error handling                           */
 #include "H5HLprivate.h"        /* Local heaps                              */
-#include "H5MMprivate.h"        /* Memory management                        */
 
 
 /****************/
@@ -506,7 +505,7 @@ H5D__layout_oh_create(H5F_t *file, H5O_t *oh, H5D_t *dset, hid_t dapl_id)
 
         if(H5D__alloc_storage(&io_info, H5D_ALLOC_CREATE, FALSE, NULL) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize storage")
-    } /* end if */
+    }
 
     /* Update external storage message, if it's used */
     if(dset->shared->dcpl_cache.efl.nused > 0) {
@@ -557,6 +556,7 @@ H5D__layout_oh_create(H5F_t *file, H5O_t *oh, H5D_t *dset, hid_t dapl_id)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update external file list message")
     } /* end if */
 
+    /* Create layout message */
     /* (Don't make layout message constant unless allocation time is early and non-filtered, since space may not be allocated) */
     /* (Note: this is relying on H5D__alloc_storage not calling H5O_msg_write during dataset creation) */
     if(fill_prop->alloc_time == H5D_ALLOC_TIME_EARLY && H5D_COMPACT != layout->type

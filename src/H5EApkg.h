@@ -469,8 +469,8 @@ H5_DLL herr_t H5EA__dblock_debug(H5F_t *f, haddr_t addr,
 
 /* Testing routines */
 #ifdef H5EA_TESTING
-H5_DLL herr_t H5EA_get_cparam_test(const H5EA_t *ea, H5EA_create_t *cparam);
-H5_DLL int H5EA_cmp_cparam_test(const H5EA_create_t *cparam1, const H5EA_create_t *cparam2);
+H5_DLL herr_t H5EA__get_cparam_test(const H5EA_t *ea, H5EA_create_t *cparam);
+H5_DLL int H5EA__cmp_cparam_test(const H5EA_create_t *cparam1, const H5EA_create_t *cparam2);
 #endif /* H5EA_TESTING */
 
 #endif /* _H5EApkg_H */

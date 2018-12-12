@@ -27,7 +27,6 @@ extern "C" {
 #include "h5sImp.h"
 
 extern JavaVM *jvm;
-extern jobject visit_callback;
 
 /*
  * Class:     hdf_hdf5lib_H5
@@ -572,7 +571,7 @@ Java_hdf_hdf5lib_H5_H5Sset_1extent_1simple
         h5JNIFatalError(env, "H5Pset_simple_extent:  dims not pinned");
         return -1;
     } /* end if */
-    sa = lp = (hsize_t *) malloc((size_t)rank * sizeof(hsize_t));
+    sa = lp = (hsize_t *) HDmalloc((size_t)rank * sizeof(hsize_t));
     if (sa == NULL) {
         ENVPTR->ReleaseLongArrayElements(ENVPAR dims, dimsP, JNI_ABORT);
         h5JNIFatalError(env, "H5Sset_simple_extent:  dims not converted to hsize_t");
@@ -1018,7 +1017,7 @@ Java_hdf_hdf5lib_H5_H5Sget_1select_1hyper_1blocklist
                 h5JNIFatalError(env, "H5Sget_select_hyper_blocklist:  buf not pinned");
             } /* end if */
             else {
-                ba = (hsize_t *) malloc((size_t)nb * 2 * (size_t)rank * sizeof(hsize_t));
+                ba = (hsize_t *) HDmalloc((size_t)nb * 2 * (size_t)rank * sizeof(hsize_t));
                 if (ba == NULL) {
                     ENVPTR->ReleaseLongArrayElements(ENVPAR buf, bufP, JNI_ABORT);
                     h5JNIFatalError(env, "H5Screate-simple:  buffer not converted to hsize_t");
@@ -1136,7 +1135,7 @@ Java_hdf_hdf5lib_H5_H5Sget_1select_1bounds
             return -1;
         } /* end if */
         rank = (int) ENVPTR->GetArrayLength(ENVPAR start);
-        strt = (hsize_t *)malloc((size_t)rank * sizeof(hsize_t));
+        strt = (hsize_t *)HDmalloc((size_t)rank * sizeof(hsize_t));
         if (strt == NULL) {
             ENVPTR->ReleaseLongArrayElements(ENVPAR start, startP, JNI_ABORT);
             h5JNIFatalError(env, "H5Sget_select_bounds:  start not converted to hsize_t");

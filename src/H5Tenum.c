@@ -46,8 +46,6 @@ static herr_t H5T_enum_valueof(const H5T_t *dt, const char *name,
  * Programmer:	Robb Matzke
  *              Tuesday, December 22, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 hid_t

@@ -42,7 +42,16 @@
  *      use for HDF5 file access.  The first word in the
  *      value is the name of the driver and subsequent data
  *      is interpreted according to the driver.  See
- *      h5_fileaccess() for details.
+ *      h5_get_vfd_fapl() for details.
+ *
+ * HDF5_VOL_CONNECTOR:    This string describes what VOL connector to
+ *      use for HDF5 file access.  The first word in the
+ *      value is the name of the connector and subsequent data
+ *      is interpreted according to the connector.  See
+ *      h5_get_vol_fapl() for details.
+ *
+ * HDF5_LIBVER_BOUNDS:    This string describes what library version bounds to
+ *      use for HDF5 file access.  See h5_get_libver_fapl() for details.
  *
  * HDF5_PREFIX:    A string to add to the beginning of all serial test
  *      file names.  This can be used to run tests in a
@@ -753,8 +762,8 @@ h5_rmprefix(const char *filename)
  * Function:    h5_fileaccess
  *
  * Purpose:     Returns a file access template which is the default template
- *              but with a file driver set according to the constant or
- *              environment variable HDF5_DRIVER
+ *              but with a file driver, VOL connector, or libver bound set
+ *		according to a constant or environment variable
  *
  * Return:      Success:  A file access property list
  *              Failure:  -1
@@ -767,135 +776,34 @@ h5_rmprefix(const char *filename)
 hid_t
 h5_fileaccess(void)
 {
-    const char  *val = NULL;
-    const char  *name;
-    char        s[1024];
     hid_t       fapl = -1;
-
-    /* First use the environment variable, then the constant */
-    val = HDgetenv("HDF5_DRIVER");
-#ifdef HDF5_DRIVER
-    if(!val)
-        val = HDF5_DRIVER;
-#endif
 
     if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
         return -1;
-    if(!val || !*val)
-        return fapl; /* use default */
 
-    HDstrncpy(s, val, sizeof s);
-    s[sizeof(s)-1] = '\0';
-    if(NULL == (name = HDstrtok(s, " \t\n\r")))
-        return fapl;
+    /* Attempt to set up a file driver first */
+    if(h5_get_vfd_fapl(fapl) < 0)
+         return -1;
 
-    if(!HDstrcmp(name, "sec2")) {
-        /* Unix read() and write() system calls */
-        if (H5Pset_fapl_sec2(fapl) < 0)
-            return -1;
-    }
-    else if(!HDstrcmp(name, "stdio")) {
-        /* Standard C fread() and fwrite() system calls */
-        if (H5Pset_fapl_stdio(fapl) < 0)
-            return -1;
-    }
-    else if(!HDstrcmp(name, "core")) {
-        /* In-memory driver settings (backing store on, 1 MB increment) */
-        if(H5Pset_fapl_core(fapl, (size_t)1, TRUE) < 0)
-            return -1;
-    }
-    else if(!HDstrcmp(name, "core_paged")) {
-        /* In-memory driver with write tracking and paging on */
-        if(H5Pset_fapl_core(fapl, (size_t)1, TRUE) < 0)
-            return -1;
-        if(H5Pset_core_write_tracking(fapl, TRUE, (size_t)4096) < 0)
-            return -1;
-    }
-    else if(!HDstrcmp(name, "split")) {
-        /* Split meta data and raw data each using default driver */
-        if(H5Pset_fapl_split(fapl,
-            "-m.h5", H5P_DEFAULT,
-            "-r.h5", H5P_DEFAULT) < 0)
-            return -1;
-    }
-    else if(!HDstrcmp(name, "multi")) {
-        /* Multi-file driver, general case of the split driver */
-        H5FD_mem_t memb_map[H5FD_MEM_NTYPES];
-        hid_t memb_fapl[H5FD_MEM_NTYPES];
-        const char *memb_name[H5FD_MEM_NTYPES];
-        char *sv[H5FD_MEM_NTYPES];
-        haddr_t memb_addr[H5FD_MEM_NTYPES];
-        H5FD_mem_t  mt;
-
-        HDmemset(memb_map, 0, sizeof memb_map);
-        HDmemset(memb_fapl, 0, sizeof memb_fapl);
-        HDmemset(memb_name, 0, sizeof memb_name);
-        HDmemset(memb_addr, 0, sizeof memb_addr);
-
-        HDassert(HDstrlen(multi_letters)==H5FD_MEM_NTYPES);
-        for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, mt)) {
-            memb_fapl[mt] = H5P_DEFAULT;
-            if(NULL == (sv[mt] = (char *)HDmalloc(H5TEST_MULTI_FILENAME_LEN)))
-                return -1;
-            HDsprintf(sv[mt], "%%s-%c.h5", multi_letters[mt]);
-            memb_name[mt] = sv[mt];
-            memb_addr[mt] = (haddr_t)MAX(mt - 1, 0) * (HADDR_MAX / 10);
-        } /* end for */
-
-        if(H5Pset_fapl_multi(fapl, memb_map, memb_fapl, memb_name, memb_addr, FALSE) < 0)
-            return -1;
-
-        for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, mt))
-            HDfree(sv[mt]);
-    }
-    else if(!HDstrcmp(name, "family")) {
-        hsize_t fam_size = 100*1024*1024; /*100 MB*/
-
-        /* Family of files, each 1MB and using the default driver */
-        if((val = HDstrtok(NULL, " \t\n\r")))
-            fam_size = (hsize_t)(HDstrtod(val, NULL) * 1024*1024);
-        if(H5Pset_fapl_family(fapl, fam_size, H5P_DEFAULT)<0)
-            return -1;
-    }
-    else if(!HDstrcmp(name, "log")) {
-        unsigned log_flags = H5FD_LOG_LOC_IO | H5FD_LOG_ALLOC;
-
-        /* Log file access */
-        if((val = HDstrtok(NULL, " \t\n\r")))
-            log_flags = (unsigned)HDstrtol(val, NULL, 0);
-        if(H5Pset_fapl_log(fapl, NULL, log_flags, (size_t)0) < 0)
-            return -1;
-    }
-    else if(!HDstrcmp(name, "direct")) {
-#ifdef H5_HAVE_DIRECT
-        /* Linux direct read() and write() system calls.  Set memory boundary, file block size,
-         * and copy buffer size to the default values. */
-        if(H5Pset_fapl_direct(fapl, 1024, 4096, 8 * 4096) < 0)
-            return -1;
-#endif
-    }
-    else if(!HDstrcmp(name, "latest")) {
-        /* use the latest format */
-        if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
-            return -1;
-    }
-    else {
-        /* Unknown driver */
+    /* Next, try to set up a VOL connector */
+    if(h5_get_vol_fapl(fapl) < 0)
         return -1;
-    }
-
-    return fapl;
-}
+ 
+    /* Finally, check for libver bounds */
+    if(h5_get_libver_fapl(fapl) < 0)
+        return -1;
+ 
+    return(fapl);
+} /* end h5_fileaccess() */
 
 
 /*-------------------------------------------------------------------------
  * Function:    h5_get_vfd_fapl
  *
- * Purpose:     Returns a file access property list which is the default
- *              fapl but with a file driver set according to the constant or
- *              environment variable HDF5_DRIVER.
+ * Purpose:     Sets the file driver for a FAPL according to the value specified
+ *              in the constant or environment variable "HDF5_DRIVER".
  *
- * Return:      Success:    A file access property list ID
+ * Return:      Success:    0
  *              Failure:    -1
  *
  * Programmer:  Dana Robinson
@@ -903,60 +811,58 @@ h5_fileaccess(void)
  *
  *-------------------------------------------------------------------------
  */
-hid_t
-h5_get_vfd_fapl(void)
+herr_t
+h5_get_vfd_fapl(hid_t fapl)
 {
     const char  *env = NULL;    /* HDF5_DRIVER environment variable     */
     const char  *tok = NULL;    /* strtok pointer                       */
     char        buf[1024];      /* buffer for tokenizing HDF5_DRIVER    */
-    hid_t       fapl = -1;      /* fapl to be returned                  */
 
     /* Get the environment variable, if it exists */
     env = HDgetenv("HDF5_DRIVER");
-
-    /* Create a default fapl */
-    if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
-        return -1;
+#ifdef HDF5_DRIVER
+    /* Use the environment variable, then the compile-time constant */
+    if(!env)
+        env = HDF5_DRIVER;
+#endif
 
     /* If the environment variable was not set, just return
-     * the default fapl.
+     * without modifying the FAPL.
      */
     if(!env || !*env)
-        return fapl;
+        goto done;
 
     /* Get the first 'word' of the environment variable.
      * If it's nothing (environment variable was whitespace)
      * just return the default fapl.
      */
     HDstrncpy(buf, env, sizeof(buf));
-    HDmemset(buf, 0, sizeof(buf));
+    buf[sizeof(buf) - 1] = '\0';
     if(NULL == (tok = HDstrtok(buf, " \t\n\r")))
-        return fapl;
+        goto done;
 
     if(!HDstrcmp(tok, "sec2")) {
         /* POSIX (section 2) read() and write() system calls */
         if(H5Pset_fapl_sec2(fapl) < 0)
-            return -1;
+            goto error;
     } else if(!HDstrcmp(tok, "stdio")) {
         /* Standard C fread() and fwrite() system calls */
         if(H5Pset_fapl_stdio(fapl) < 0)
-            return -1;
+            goto error;
     } else if(!HDstrcmp(tok, "core")) {
         /* In-memory driver settings (backing store on, 1 MB increment) */
         if(H5Pset_fapl_core(fapl, (size_t)1, TRUE) < 0)
-            return -1;
+            goto error;
     } else if(!HDstrcmp(tok, "core_paged")) {
         /* In-memory driver with write tracking and paging on */
         if(H5Pset_fapl_core(fapl, (size_t)1, TRUE) < 0)
-            return -1;
+            goto error;
         if(H5Pset_core_write_tracking(fapl, TRUE, (size_t)4096) < 0)
-            return -1;
+            goto error;
      } else if(!HDstrcmp(tok, "split")) {
         /* Split meta data and raw data each using default driver */
-        if(H5Pset_fapl_split(fapl,
-            "-m.h5", H5P_DEFAULT,
-            "-r.h5", H5P_DEFAULT) < 0)
-            return -1;
+        if(H5Pset_fapl_split(fapl, "-m.h5", H5P_DEFAULT, "-r.h5", H5P_DEFAULT) < 0)
+            goto error;
     } else if(!HDstrcmp(tok, "multi")) {
         /* Multi-file driver, general case of the split driver */
         H5FD_mem_t  memb_map[H5FD_MEM_NTYPES];
@@ -982,19 +888,19 @@ h5_get_vfd_fapl(void)
         } /* end for */
 
         if(H5Pset_fapl_multi(fapl, memb_map, memb_fapl, memb_name, memb_addr, FALSE) < 0)
-            return -1;
+            goto error;
 
         for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, mt))
             HDfree(sv[mt]);
     } else if(!HDstrcmp(tok, "family")) {
         /* Family of files, each 1MB and using the default driver */
-        hsize_t fam_size = 100*1024*1024; /*100 MB*/
+        hsize_t fam_size = 100 * 1024 * 1024;   /* 100 MB */
 
         /* Was a family size specified in the environment variable? */
         if((tok = HDstrtok(NULL, " \t\n\r")))
-            fam_size = (hsize_t)(HDstrtod(tok, NULL) * 1024*1024);
+            fam_size = (hsize_t)(HDstrtod(tok, NULL) * 1024 * 1024);
         if(H5Pset_fapl_family(fapl, fam_size, H5P_DEFAULT) < 0)
-            return -1;
+            goto error;
     } else if(!HDstrcmp(tok, "log")) {
         /* Log file access */
         unsigned log_flags = H5FD_LOG_LOC_IO | H5FD_LOG_ALLOC;
@@ -1004,22 +910,191 @@ h5_get_vfd_fapl(void)
             log_flags = (unsigned)HDstrtol(tok, NULL, 0);
 
         if(H5Pset_fapl_log(fapl, NULL, log_flags, (size_t)0) < 0)
-            return -1;
+            goto error;
 #ifdef H5_HAVE_DIRECT
     } else if(!HDstrcmp(tok, "direct")) {
         /* Linux direct read() and write() system calls.  Set memory boundary,
          * file block size, and copy buffer size to the default values.
          */
-        if(H5Pset_fapl_direct(fapl, 1024, 4096, 8*4096)<0)
-            return -1;
+        if(H5Pset_fapl_direct(fapl, 1024, 4096, 8 * 4096) < 0)
+            goto error;
 #endif
     } else {
         /* Unknown driver */
-        return -1;
+        goto error;
     } /* end if */
 
-    return fapl;
+done:
+    return 0;
+
+error:
+    return -1;
 } /* end h5_get_vfd_fapl() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    h5_get_libver_fapl
+ *
+ * Purpose:     Sets the library version bounds for a FAPL according to the
+ *              value in the constant or environment variable "HDF5_LIBVER_BOUNDS".
+ *
+ * Return:      Success:    0
+ *              Failure:    -1
+ *
+ * Programmer:  Quincey Koziol
+ *              November 2018
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+h5_get_libver_fapl(hid_t fapl)
+{
+    const char  *env = NULL;    /* HDF5_DRIVER environment variable     */
+    const char  *tok = NULL;    /* strtok pointer                       */
+    char        buf[1024];      /* buffer for tokenizing HDF5_DRIVER    */
+
+    /* Get the environment variable, if it exists */
+    env = HDgetenv("HDF5_LIBVER_BOUNDS");
+#ifdef HDF5_LIBVER_BOUNDS
+    /* Use the environment variable, then the compile-time constant */
+    if(!env)
+        env = HDF5_LIBVER_BOUNDS;
+#endif
+
+    /* If the environment variable was not set, just return
+     * without modifying the FAPL.
+     */
+    if(!env || !*env)
+        goto done;
+
+    /* Get the first 'word' of the environment variable.
+     * If it's nothing (environment variable was whitespace)
+     * just return the default fapl.
+     */
+    HDstrncpy(buf, env, sizeof(buf));
+    buf[sizeof(buf) - 1] = '\0';
+    if(NULL == (tok = HDstrtok(buf, " \t\n\r")))
+        goto done;
+
+    if(!HDstrcmp(tok, "latest")) {
+        /* use the latest format */
+        if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
+            goto error;
+    } /* end if */
+    else {
+        /* Unknown setting */
+        goto error;
+    } /* end else */
+
+done:
+    return 0;
+
+error:
+    return -1;
+} /* end h5_get_libver_fapl() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    h5_get_vol_fapl
+ *
+ * Purpose:     Returns a file access property list which is the default
+ *              fapl but with a VOL connector set according to the constant
+ *              or environment variable HDF5_VOL_CONNECTOR.
+ *
+ * Return:      Success:    A file access property list ID
+ *              Failure:    -1
+ *
+ * Programmer:  Jordan Henderson
+ *              November 2018
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+h5_get_vol_fapl(hid_t fapl)
+{
+    const char *env = NULL;
+    const char *tok = NULL;
+    htri_t      connector_is_registered;
+    char        buf[1024];              /* Buffer for tokenizing HDF5_VOL_CONNECTOR */
+    void       *vol_info = NULL;        /* VOL connector info */
+    hid_t       connector_id = -1;
+
+    /* Get the environment variable, if it exists */
+    env = HDgetenv("HDF5_VOL_CONNECTOR");
+#ifdef HDF5_VOL_CONNECTOR
+    /* Use the environment variable, then the compile-time constant */
+    if(!env)
+        env = HDF5_VOL_CONNECTOR;
+#endif
+
+    /* If the environment variable was not set, just return. */
+    if(!env || !*env)
+        goto done;
+
+    /* Get the first 'word' of the environment variable.
+     * If it's nothing (environment variable was whitespace) just return.
+     */
+    HDstrncpy(buf, env, sizeof(buf));
+    buf[sizeof(buf) - 1] = '\0';
+    if(NULL == (tok = HDstrtok(buf, " \t\n\r")))
+        goto done;
+
+    /* First, check to see if the connector is already registered */
+    if((connector_is_registered = H5VLis_connector_registered(tok)) < 0)
+        goto done;
+    else if(connector_is_registered) {
+        /* Retrieve the ID of the already-registered VOL connector */
+        if((connector_id = H5VLget_connector_id(tok)) < 0)
+            goto error;
+    } /* end else-if */
+    else {
+        /* Check for VOL connectors that ship with the library */
+        if(!HDstrcmp(tok, "native")) {
+            connector_id = H5VL_NATIVE;
+            if(H5Iinc_ref(connector_id) < 0)
+                goto error;
+        } else if(!HDstrcmp(tok, "pass_through")) {
+            connector_id = H5VL_PASSTHRU;
+            if(H5Iinc_ref(connector_id) < 0)
+                goto error;
+        } else {
+            /* Register the VOL connector */
+            /* (NOTE: No provisions for vipl_id currently) */
+            if((connector_id = H5VLregister_connector_by_name(tok, H5P_DEFAULT)) < 0)
+                goto error;
+        } /* end else */
+    } /* end else */
+
+    /* Was there any connector info specified in the environment variable? */
+    if(NULL != (tok = HDstrtok(NULL, " \t\n\r")))
+        if(H5VLconnector_str_to_info(tok, connector_id, &vol_info) < 0)
+            goto error;
+
+    /* Set the VOL connector in the FAPL */
+    if(H5Pset_vol(fapl, connector_id, vol_info) < 0)
+        goto error;
+
+    /* Release VOL connector info, if there was any */
+    if(vol_info)
+        if(H5VLfree_connector_info(connector_id, vol_info) < 0)
+            goto error;
+
+    /* Close the connector ID */
+    if(connector_id >= 0)
+        if(H5VLunregister_connector(connector_id) < 0)
+            goto error;
+
+done:
+    return 0;
+
+error:
+    if(vol_info)
+        H5VLfree_connector_info(connector_id, vol_info);
+    if(connector_id >= 0)
+        H5VLunregister_connector(connector_id);
+
+    return -1;
+} /* end h5_get_vol_fapl() */
 
 
 /*-------------------------------------------------------------------------
@@ -1594,14 +1669,10 @@ error:
  *
  * Purpose:     Callback function for h5_verify_cached_stabs.
  *
- * Return:      Success:        0
- *
- *              Failure:        -1
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:  Neil Fortner
  *              Tuesday, April 12, 2011
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1610,9 +1681,9 @@ h5_verify_cached_stabs_cb(hid_t oid, const char H5_ATTR_UNUSED *name,
     const H5O_info_t *oinfo, void H5_ATTR_UNUSED *udata)
 {
     if(oinfo->type == H5O_TYPE_GROUP)
-        return(H5G__verify_cached_stabs_test(oid));
+        return H5G__verify_cached_stabs_test(oid);
     else
-        return(0);
+        return SUCCEED;
 } /* end h5_verify_cached_stabs_cb() */
 
 
@@ -1865,4 +1936,47 @@ error:
         HDfree(vfd_class);
     return NULL;
 } /* h5_get_dummy_vfd_class */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    h5_get_dummy_vol_class()
+ *
+ * Purpose:     Returns a disposable, generally non-functional,
+ *              VOL class struct.
+ *
+ *              In some of the test code, we need a disposable VOL connector
+ *              but we don't want to mess with the real VFDs and we also
+ *              don't have access to the internals of the real VOL connectors
+ *              (which use static globals and functions) to easily duplicate
+ *              them (e.g.: for testing VOL connector ID handling).
+ *
+ *              This API call will return a pointer to a VOL class that
+ *              can be used to construct a test VOL using H5VLregister_connector().
+ *
+ * Return:      Success:    A pointer to a VOL class struct
+ *              Failure:    NULL
+ *
+ *-------------------------------------------------------------------------
+ */
+H5VL_class_t *
+h5_get_dummy_vol_class(void)
+{
+    H5VL_class_t *vol_class = NULL;     /* Dummy VOL class that will be returned */
+
+    /* Create the class and initialize everything to zero/NULL */
+    if(NULL == (vol_class = (H5VL_class_t *)HDcalloc((size_t)1, sizeof(H5VL_class_t))))
+        TEST_ERROR;
+
+    /* Fill in the minimum parameters to make a VOL connector class that
+     * can be registered.
+     */
+    vol_class->name = "dummy";
+
+    return vol_class;
+
+error:
+    if(vol_class)
+        HDfree(vol_class);
+    return NULL;
+} /* h5_get_dummy_vol_class */
 

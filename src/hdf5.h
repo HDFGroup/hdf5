@@ -36,6 +36,7 @@
 #include "H5Rpublic.h"          /* References                               */
 #include "H5Spublic.h"          /* Dataspaces                               */
 #include "H5Tpublic.h"          /* Datatypes                                */
+#include "H5VLpublic.h"         /* Virtual Object Layer                     */
 #include "H5Zpublic.h"          /* Data filters                             */
 
 /* Predefined file drivers */
@@ -50,5 +51,9 @@
 #ifdef H5_HAVE_WINDOWS
 #include "H5FDwindows.h"        /* Win32 I/O                                    */
 #endif
+
+/* Virtual object layer (VOL) connectors */
+#include "H5VLnative.h"         /* Native VOL connector                     */
+#include "H5VLpassthru.h"       /* Pass-through VOL connector               */
 
 #endif

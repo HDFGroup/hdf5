@@ -59,19 +59,20 @@ typedef struct {
 /* Private macros */
 
 /* PRIVATE PROTOTYPES */
-static herr_t H5G_compact_build_table_cb(const void *_mesg, unsigned idx, void *_udata);
+static herr_t H5G__compact_build_table_cb(const void *_mesg, unsigned idx, void *_udata);
 static herr_t H5G__compact_build_table(const H5O_loc_t *oloc, 
     const H5O_linfo_t *linfo, H5_index_t idx_type, H5_iter_order_t order,
     H5G_link_table_t *ltable);
+static herr_t H5G__compact_lookup_cb(const void *_mesg, unsigned H5_ATTR_UNUSED idx, void *_udata);
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_compact_build_table_cb
+ * Function:    H5G__compact_build_table_cb
  *
- * Purpose:	Callback routine for searching 'link' messages for a particular
+ * Purpose:     Callback routine for searching 'link' messages for a particular
  *              name.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
  *		koziol@ncsa.uiuc.edu
@@ -80,13 +81,13 @@ static herr_t H5G__compact_build_table(const H5O_loc_t *oloc,
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_compact_build_table_cb(const void *_mesg, unsigned H5_ATTR_UNUSED idx, void *_udata)
+H5G__compact_build_table_cb(const void *_mesg, unsigned H5_ATTR_UNUSED idx, void *_udata)
 {
     const H5O_link_t *lnk = (const H5O_link_t *)_mesg;  /* Pointer to link */
     H5G_iter_bt_t *udata = (H5G_iter_bt_t *)_udata;     /* 'User data' passed in */
     herr_t ret_value=H5_ITER_CONT;             /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* check arguments */
     HDassert(lnk);
@@ -102,7 +103,7 @@ H5G_compact_build_table_cb(const void *_mesg, unsigned H5_ATTR_UNUSED idx, void 
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G_compact_build_table_cb() */
+} /* end H5G__compact_build_table_cb() */
 
 
 /*-------------------------------------------------------------------------
@@ -151,7 +152,7 @@ H5G__compact_build_table(const H5O_loc_t *oloc, const H5O_linfo_t *linfo,
 
         /* Iterate through the link messages, adding them to the table */
         op.op_type = H5O_MESG_OP_APP;
-        op.u.app_op = H5G_compact_build_table_cb;
+        op.u.app_op = H5G__compact_build_table_cb;
         if(H5O_msg_iterate(oloc, H5O_LINK_ID, &op, &udata) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "error iterating over link messages")
 
@@ -432,12 +433,12 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_compact_lookup_cb
+ * Function:    H5G__compact_lookup_cb
  *
- * Purpose:	Callback routine for searching 'link' messages for a particular
+ * Purpose:     Callback routine for searching 'link' messages for a particular
  *              name & gettting object location for it
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
  *		koziol@ncsa.uiuc.edu
@@ -446,13 +447,13 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_compact_lookup_cb(const void *_mesg, unsigned H5_ATTR_UNUSED idx, void *_udata)
+H5G__compact_lookup_cb(const void *_mesg, unsigned H5_ATTR_UNUSED idx, void *_udata)
 {
     const H5O_link_t *lnk = (const H5O_link_t *)_mesg;  /* Pointer to link */
     H5G_iter_lkp_t *udata = (H5G_iter_lkp_t *)_udata;     /* 'User data' passed in */
     herr_t ret_value = H5_ITER_CONT;           /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* check arguments */
     HDassert(lnk);
@@ -475,7 +476,7 @@ H5G_compact_lookup_cb(const void *_mesg, unsigned H5_ATTR_UNUSED idx, void *_uda
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G_compact_lookup_cb() */
+} /* end H5G__compact_lookup_cb() */
 
 
 /*-------------------------------------------------------------------------
@@ -511,7 +512,7 @@ H5G__compact_lookup(const H5O_loc_t *oloc, const char *name, H5O_link_t *lnk)
 
     /* Iterate through the link messages, adding them to the table */
     op.op_type = H5O_MESG_OP_APP;
-    op.u.app_op = H5G_compact_lookup_cb;
+    op.u.app_op = H5G__compact_lookup_cb;
     if(H5O_msg_iterate(oloc, H5O_LINK_ID, &op, &udata) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "error iterating over link messages")
 
@@ -570,72 +571,4 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G__compact_lookup_by_idx() */
-
-#ifndef H5_NO_DEPRECATED_SYMBOLS
-
-/*-------------------------------------------------------------------------
- * Function:	H5G__compact_get_type_by_idx
- *
- * Purpose:     Returns the type of objects in the group by giving index.
- *
- * Return:	Success:        Non-negative
- *		Failure:	Negative
- *
- * Programmer:	Quincey Koziol
- *	        Sep 12, 2005
- *
- *-------------------------------------------------------------------------
- */
-H5G_obj_t
-H5G__compact_get_type_by_idx(H5O_loc_t *oloc, const H5O_linfo_t *linfo,
-    hsize_t idx)
-{
-    H5G_link_table_t    ltable = {0, NULL};         /* Link table */
-    H5G_obj_t		ret_value = H5G_UNKNOWN;    /* Return value */
-
-    FUNC_ENTER_PACKAGE
-
-    /* Sanity check */
-    HDassert(oloc);
-
-    /* Build table of all link messages */
-    if(H5G__compact_build_table(oloc, linfo, H5_INDEX_NAME, H5_ITER_INC, &ltable) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, H5G_UNKNOWN, "can't create link message table")
-
-    /* Check for going out of bounds */
-    if(idx >= ltable.nlinks)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, H5G_UNKNOWN, "index out of bound")
-
-    /* Determine type of object */
-    if(ltable.lnks[idx].type == H5L_TYPE_SOFT)
-        ret_value = H5G_LINK;
-    else if(ltable.lnks[idx].type >= H5L_TYPE_UD_MIN)
-        ret_value = H5G_UDLINK;
-    else if(ltable.lnks[idx].type == H5L_TYPE_HARD){
-        H5O_loc_t tmp_oloc;             /* Temporary object location */
-        H5O_type_t obj_type;            /* Type of object at location */
-
-        /* Build temporary object location */
-        tmp_oloc.file = oloc->file;
-        tmp_oloc.addr = ltable.lnks[idx].u.hard.addr;
-
-        /* Get the type of the object */
-        if(H5O_obj_type(&tmp_oloc, &obj_type) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, H5G_UNKNOWN, "can't get object type")
-
-        /* Map to group object type */
-        if(H5G_UNKNOWN == (ret_value = H5G_map_obj_type(obj_type)))
-            HGOTO_ERROR(H5E_SYM, H5E_BADTYPE, H5G_UNKNOWN, "can't determine object type")
-    } else {
-        HGOTO_ERROR(H5E_SYM, H5E_BADTYPE, H5G_UNKNOWN, "unknown link type")
-    } /* end else */
-
-done:
-    /* Release link table */
-    if(ltable.lnks && H5G__link_release_table(&ltable) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CANTFREE, H5G_UNKNOWN, "unable to release link table")
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G__compact_get_type_by_idx() */
-#endif /* H5_NO_DEPRECATED_SYMBOLS */
 

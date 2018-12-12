@@ -39,13 +39,17 @@
 #include "H5Iprivate.h"         /* IDs                                  */
 #include "H5MMprivate.h"        /* Memory Management                    */
 #include "H5Ppkg.h"             /* Property lists                       */
+#include "H5VLprivate.h"        /* Virtual Object Layer                 */
 
-/* Includes needed to set as default file driver */
-#include "H5FDsec2.h"           /* Posix unbuffered I/O    file driver     */
+/* Includes needed to set default file driver */
+#include "H5FDsec2.h"           /* POSIX unbuffered I/O                 */
 #include "H5FDstdio.h"          /* Standard C buffered I/O              */
 #ifdef H5_HAVE_WINDOWS
 #include "H5FDwindows.h"        /* Win32 I/O                            */
 #endif
+
+/* Includes needed to set default VOL connector */
+#include "H5VLnative.h"         /* Native VOL connector                 */
 
 
 /****************/
@@ -131,10 +135,11 @@
  * property only used by h5repart */
 #define H5F_ACS_FAMILY_NEWSIZE_SIZE             sizeof(hsize_t)
 #define H5F_ACS_FAMILY_NEWSIZE_DEF              0
-/* Definition for whether to convert family to sec2 driver. It's private
- * property only used by h5repart */
-#define H5F_ACS_FAMILY_TO_SEC2_SIZE             sizeof(hbool_t)
-#define H5F_ACS_FAMILY_TO_SEC2_DEF              FALSE
+/* Definition for whether to convert family to a single-file driver.
+ * It's a private property only used by h5repart.
+ */
+#define H5F_ACS_FAMILY_TO_SINGLE_SIZE           sizeof(hbool_t)
+#define H5F_ACS_FAMILY_TO_SINGLE_DEF            FALSE
 /* Definition for data type in multi file driver */
 #define H5F_ACS_MULTI_TYPE_SIZE                 sizeof(H5FD_mem_t)
 #define H5F_ACS_MULTI_TYPE_DEF                  H5FD_MEM_DEFAULT
@@ -258,6 +263,16 @@
 #define H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_DEF            0
 #define H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_ENC            H5P__encode_unsigned
 #define H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_DEC            H5P__decode_unsigned
+/* Definition for file VOL connector properties (ID, etc.) */
+#define H5F_ACS_VOL_CONN_SIZE                   sizeof(H5VL_connector_prop_t)
+#define H5F_ACS_VOL_CONN_DEF                    {H5_DEFAULT_VOL, NULL}
+#define H5F_ACS_VOL_CONN_CRT                    H5P__facc_vol_create
+#define H5F_ACS_VOL_CONN_SET                    H5P__facc_vol_set
+#define H5F_ACS_VOL_CONN_GET                    H5P__facc_vol_get
+#define H5F_ACS_VOL_CONN_DEL                    H5P__facc_vol_del
+#define H5F_ACS_VOL_CONN_COPY                   H5P__facc_vol_copy
+#define H5F_ACS_VOL_CONN_CMP                    H5P__facc_vol_cmp
+#define H5F_ACS_VOL_CONN_CLOSE                  H5P__facc_vol_close
 
 
 /******************/
@@ -320,6 +335,15 @@ static int H5P__facc_cache_image_config_cmp(const void *_config1, const void *_c
 static herr_t H5P__facc_cache_image_config_enc(const void *value, void **_pp, size_t *size);
 static herr_t H5P__facc_cache_image_config_dec(const void **_pp, void *_value);
 
+/* VOL connector callbacks */
+static herr_t H5P__facc_vol_create(const char *name, size_t size, void *value);
+static herr_t H5P__facc_vol_set(hid_t prop_id, const char *name, size_t size, void *value);
+static herr_t H5P__facc_vol_get(hid_t prop_id, const char *name, size_t size, void *value);
+static herr_t H5P__facc_vol_del(hid_t prop_id, const char *name, size_t size, void *value);
+static herr_t H5P__facc_vol_copy(const char *name, size_t size, void *value);
+static int H5P__facc_vol_cmp(const void *value1, const void *value2, size_t size);
+static herr_t H5P__facc_vol_close(const char *name, size_t size, void *value);
+
 
 /*********************/
 /* Package Variables */
@@ -368,7 +392,7 @@ static const unsigned H5F_def_gc_ref_g = H5F_ACS_GARBG_COLCT_REF_DEF;           
 static const H5F_close_degree_t H5F_def_close_degree_g = H5F_CLOSE_DEGREE_DEF;     /* Default file close degree */
 static const hsize_t H5F_def_family_offset_g = H5F_ACS_FAMILY_OFFSET_DEF;          /* Default offset for family VFD */
 static const hsize_t H5F_def_family_newsize_g = H5F_ACS_FAMILY_NEWSIZE_DEF;        /* Default size of new files for family VFD */
-static const hbool_t H5F_def_family_to_sec2_g = H5F_ACS_FAMILY_TO_SEC2_DEF;        /* Default ?? for family VFD */
+static const hbool_t H5F_def_family_to_single_g = H5F_ACS_FAMILY_TO_SINGLE_DEF;    /* Default ?? for family VFD */
 static const H5FD_mem_t H5F_def_mem_type_g = H5F_ACS_MULTI_TYPE_DEF;               /* Default file space type for multi VFD */
 
 static const H5F_libver_t H5F_def_libver_low_bound_g = H5F_ACS_LIBVER_LOW_BOUND_DEF;    /* Default setting for "low" bound of format version */
@@ -398,7 +422,7 @@ static const size_t H5F_def_page_buf_size_g = H5F_ACS_PAGE_BUFFER_SIZE_DEF;     
 static const unsigned H5F_def_page_buf_min_meta_perc_g = H5F_ACS_PAGE_BUFFER_MIN_META_PERC_DEF;      /* Default page buffer minimum metadata size */
 static const unsigned H5F_def_page_buf_min_raw_perc_g = H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_DEF;      /* Default page buffer mininum raw data size */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5P__facc_reg_prop
  *
@@ -414,115 +438,116 @@ static herr_t
 H5P__facc_reg_prop(H5P_genclass_t *pclass)
 {
     const H5FD_driver_prop_t def_driver_prop    = H5F_ACS_FILE_DRV_DEF;     /* Default VFL driver ID & info (initialized from a variable) */
+    const H5VL_connector_prop_t def_vol_prop    = H5F_ACS_VOL_CONN_DEF;     /* Default VOL connector ID & info (initialized from a variable) */
     herr_t ret_value = SUCCEED;                                             /* Return value */
 
     FUNC_ENTER_STATIC
 
     /* Register the initial metadata cache resize configuration */
-    if(H5P_register_real(pclass, H5F_ACS_META_CACHE_INIT_CONFIG_NAME, H5F_ACS_META_CACHE_INIT_CONFIG_SIZE, &H5F_def_mdc_initCacheCfg_g,
+    if(H5P__register_real(pclass, H5F_ACS_META_CACHE_INIT_CONFIG_NAME, H5F_ACS_META_CACHE_INIT_CONFIG_SIZE, &H5F_def_mdc_initCacheCfg_g,
             NULL, NULL, NULL, H5F_ACS_META_CACHE_INIT_CONFIG_ENC, H5F_ACS_META_CACHE_INIT_CONFIG_DEC,
             NULL, NULL, H5F_ACS_META_CACHE_INIT_CONFIG_CMP, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the size of raw data chunk cache (elements) */
-    if(H5P_register_real(pclass, H5F_ACS_DATA_CACHE_NUM_SLOTS_NAME, H5F_ACS_DATA_CACHE_NUM_SLOTS_SIZE, &H5F_def_rdcc_nslots_g,
+    if(H5P__register_real(pclass, H5F_ACS_DATA_CACHE_NUM_SLOTS_NAME, H5F_ACS_DATA_CACHE_NUM_SLOTS_SIZE, &H5F_def_rdcc_nslots_g,
             NULL, NULL, NULL, H5F_ACS_DATA_CACHE_NUM_SLOTS_ENC, H5F_ACS_DATA_CACHE_NUM_SLOTS_DEC,
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the size of raw data chunk cache(bytes) */
-    if(H5P_register_real(pclass, H5F_ACS_DATA_CACHE_BYTE_SIZE_NAME, H5F_ACS_DATA_CACHE_BYTE_SIZE_SIZE, &H5F_def_rdcc_nbytes_g,
+    if(H5P__register_real(pclass, H5F_ACS_DATA_CACHE_BYTE_SIZE_NAME, H5F_ACS_DATA_CACHE_BYTE_SIZE_SIZE, &H5F_def_rdcc_nbytes_g,
             NULL, NULL, NULL, H5F_ACS_DATA_CACHE_BYTE_SIZE_ENC, H5F_ACS_DATA_CACHE_BYTE_SIZE_DEC,
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the preemption for reading chunks */
-    if(H5P_register_real(pclass, H5F_ACS_PREEMPT_READ_CHUNKS_NAME, H5F_ACS_PREEMPT_READ_CHUNKS_SIZE, &H5F_def_rdcc_w0_g,
+    if(H5P__register_real(pclass, H5F_ACS_PREEMPT_READ_CHUNKS_NAME, H5F_ACS_PREEMPT_READ_CHUNKS_SIZE, &H5F_def_rdcc_w0_g,
             NULL, NULL, NULL, H5F_ACS_PREEMPT_READ_CHUNKS_ENC, H5F_ACS_PREEMPT_READ_CHUNKS_DEC,
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the threshold for alignment */
-    if(H5P_register_real(pclass, H5F_ACS_ALIGN_THRHD_NAME, H5F_ACS_ALIGN_THRHD_SIZE, &H5F_def_threshold_g,
+    if(H5P__register_real(pclass, H5F_ACS_ALIGN_THRHD_NAME, H5F_ACS_ALIGN_THRHD_SIZE, &H5F_def_threshold_g,
             NULL, NULL, NULL, H5F_ACS_ALIGN_THRHD_ENC, H5F_ACS_ALIGN_THRHD_DEC,
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the alignment */
-    if(H5P_register_real(pclass, H5F_ACS_ALIGN_NAME, H5F_ACS_ALIGN_SIZE, &H5F_def_alignment_g,
+    if(H5P__register_real(pclass, H5F_ACS_ALIGN_NAME, H5F_ACS_ALIGN_SIZE, &H5F_def_alignment_g,
             NULL, NULL, NULL, H5F_ACS_ALIGN_ENC, H5F_ACS_ALIGN_DEC,
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the minimum metadata allocation block size */
-    if(H5P_register_real(pclass, H5F_ACS_META_BLOCK_SIZE_NAME, H5F_ACS_META_BLOCK_SIZE_SIZE, &H5F_def_meta_block_size_g,
+    if(H5P__register_real(pclass, H5F_ACS_META_BLOCK_SIZE_NAME, H5F_ACS_META_BLOCK_SIZE_SIZE, &H5F_def_meta_block_size_g,
             NULL, NULL, NULL, H5F_ACS_META_BLOCK_SIZE_ENC, H5F_ACS_META_BLOCK_SIZE_DEC,
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the maximum sieve buffer size */
-    if(H5P_register_real(pclass, H5F_ACS_SIEVE_BUF_SIZE_NAME, H5F_ACS_SIEVE_BUF_SIZE_SIZE, &H5F_def_sieve_buf_size_g,
+    if(H5P__register_real(pclass, H5F_ACS_SIEVE_BUF_SIZE_NAME, H5F_ACS_SIEVE_BUF_SIZE_SIZE, &H5F_def_sieve_buf_size_g,
             NULL, NULL, NULL, H5F_ACS_SIEVE_BUF_SIZE_ENC, H5F_ACS_SIEVE_BUF_SIZE_DEC,
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the minimum "small data" allocation block size */
-    if(H5P_register_real(pclass, H5F_ACS_SDATA_BLOCK_SIZE_NAME, H5F_ACS_SDATA_BLOCK_SIZE_SIZE, &H5F_def_sdata_block_size_g,
+    if(H5P__register_real(pclass, H5F_ACS_SDATA_BLOCK_SIZE_NAME, H5F_ACS_SDATA_BLOCK_SIZE_SIZE, &H5F_def_sdata_block_size_g,
             NULL, NULL, NULL, H5F_ACS_SDATA_BLOCK_SIZE_ENC, H5F_ACS_SDATA_BLOCK_SIZE_DEC,
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the garbage collection reference */
-    if(H5P_register_real(pclass, H5F_ACS_GARBG_COLCT_REF_NAME, H5F_ACS_GARBG_COLCT_REF_SIZE, &H5F_def_gc_ref_g,
+    if(H5P__register_real(pclass, H5F_ACS_GARBG_COLCT_REF_NAME, H5F_ACS_GARBG_COLCT_REF_SIZE, &H5F_def_gc_ref_g,
             NULL, NULL, NULL, H5F_ACS_GARBG_COLCT_REF_ENC, H5F_ACS_GARBG_COLCT_REF_DEC,
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the file driver ID & info */
     /* (Note: this property should not have an encode/decode callback -QAK) */
-    if(H5P_register_real(pclass, H5F_ACS_FILE_DRV_NAME, H5F_ACS_FILE_DRV_SIZE, &def_driver_prop,
+    if(H5P__register_real(pclass, H5F_ACS_FILE_DRV_NAME, H5F_ACS_FILE_DRV_SIZE, &def_driver_prop,
             H5F_ACS_FILE_DRV_CRT, H5F_ACS_FILE_DRV_SET, H5F_ACS_FILE_DRV_GET, NULL, NULL,
             H5F_ACS_FILE_DRV_DEL, H5F_ACS_FILE_DRV_COPY, H5F_ACS_FILE_DRV_CMP, H5F_ACS_FILE_DRV_CLOSE) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the file close degree */
-    if(H5P_register_real(pclass, H5F_ACS_CLOSE_DEGREE_NAME, H5F_CLOSE_DEGREE_SIZE, &H5F_def_close_degree_g,
+    if(H5P__register_real(pclass, H5F_ACS_CLOSE_DEGREE_NAME, H5F_CLOSE_DEGREE_SIZE, &H5F_def_close_degree_g,
             NULL, NULL, NULL, H5F_CLOSE_DEGREE_ENC, H5F_CLOSE_DEGREE_DEC,
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the offset of family driver info */
-    if(H5P_register_real(pclass, H5F_ACS_FAMILY_OFFSET_NAME, H5F_ACS_FAMILY_OFFSET_SIZE, &H5F_def_family_offset_g,
+    if(H5P__register_real(pclass, H5F_ACS_FAMILY_OFFSET_NAME, H5F_ACS_FAMILY_OFFSET_SIZE, &H5F_def_family_offset_g,
             NULL, NULL, NULL, H5F_ACS_FAMILY_OFFSET_ENC, H5F_ACS_FAMILY_OFFSET_DEC,
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the private property of new family file size. It's used by h5repart only. */
     /* (Note: this property should not have an encode/decode callback -QAK) */
-    if(H5P_register_real(pclass, H5F_ACS_FAMILY_NEWSIZE_NAME, H5F_ACS_FAMILY_NEWSIZE_SIZE, &H5F_def_family_newsize_g,
+    if(H5P__register_real(pclass, H5F_ACS_FAMILY_NEWSIZE_NAME, H5F_ACS_FAMILY_NEWSIZE_SIZE, &H5F_def_family_newsize_g,
             NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
-    /* Register the private property of whether convert family to sec2 driver. It's used by h5repart only. */
+    /* Register the private property of whether convert family to a single-file driver. It's used by h5repart only. */
     /* (Note: this property should not have an encode/decode callback -QAK) */
-    if(H5P_register_real(pclass, H5F_ACS_FAMILY_TO_SEC2_NAME, H5F_ACS_FAMILY_TO_SEC2_SIZE, &H5F_def_family_to_sec2_g,
+    if(H5P__register_real(pclass, H5F_ACS_FAMILY_TO_SINGLE_NAME, H5F_ACS_FAMILY_TO_SINGLE_SIZE, &H5F_def_family_to_single_g,
             NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the data type of multi driver info */
-    if(H5P_register_real(pclass, H5F_ACS_MULTI_TYPE_NAME, H5F_ACS_MULTI_TYPE_SIZE, &H5F_def_mem_type_g,
+    if(H5P__register_real(pclass, H5F_ACS_MULTI_TYPE_NAME, H5F_ACS_MULTI_TYPE_SIZE, &H5F_def_mem_type_g,
             NULL, NULL, NULL, H5F_ACS_MULTI_TYPE_ENC, H5F_ACS_MULTI_TYPE_DEC,
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the 'low' bound of library format versions */
-    if(H5P_register_real(pclass, H5F_ACS_LIBVER_LOW_BOUND_NAME, H5F_ACS_LIBVER_LOW_BOUND_SIZE, &H5F_def_libver_low_bound_g,
+    if(H5P__register_real(pclass, H5F_ACS_LIBVER_LOW_BOUND_NAME, H5F_ACS_LIBVER_LOW_BOUND_SIZE, &H5F_def_libver_low_bound_g,
             NULL, NULL, NULL, H5F_ACS_LIBVER_LOW_BOUND_ENC, H5F_ACS_LIBVER_LOW_BOUND_DEC,
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the 'high' bound of library format versions */
-    if(H5P_register_real(pclass, H5F_ACS_LIBVER_HIGH_BOUND_NAME, H5F_ACS_LIBVER_HIGH_BOUND_SIZE, &H5F_def_libver_high_bound_g,
+    if(H5P__register_real(pclass, H5F_ACS_LIBVER_HIGH_BOUND_NAME, H5F_ACS_LIBVER_HIGH_BOUND_SIZE, &H5F_def_libver_high_bound_g,
             NULL, NULL, NULL, H5F_ACS_LIBVER_HIGH_BOUND_ENC, H5F_ACS_LIBVER_HIGH_BOUND_DEC,
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
@@ -530,125 +555,132 @@ H5P__facc_reg_prop(H5P_genclass_t *pclass)
     /* Register the private property of whether to retrieve the file descriptor from the core VFD */
     /* (used internally to the library only) */
     /* (Note: this property should not have an encode/decode callback -QAK) */
-    if(H5P_register_real(pclass, H5F_ACS_WANT_POSIX_FD_NAME, H5F_ACS_WANT_POSIX_FD_SIZE, &H5F_def_want_posix_fd_g,
+    if(H5P__register_real(pclass, H5F_ACS_WANT_POSIX_FD_NAME, H5F_ACS_WANT_POSIX_FD_SIZE, &H5F_def_want_posix_fd_g,
             NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the external file cache size */
-    if(H5P_register_real(pclass, H5F_ACS_EFC_SIZE_NAME, H5F_ACS_EFC_SIZE_SIZE, &H5F_def_efc_size_g,
+    if(H5P__register_real(pclass, H5F_ACS_EFC_SIZE_NAME, H5F_ACS_EFC_SIZE_SIZE, &H5F_def_efc_size_g,
             NULL, NULL, NULL, H5F_ACS_EFC_SIZE_ENC, H5F_ACS_EFC_SIZE_DEC,
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the initial file image info */
     /* (Note: this property should not have an encode/decode callback -QAK) */
-    if(H5P_register_real(pclass, H5F_ACS_FILE_IMAGE_INFO_NAME, H5F_ACS_FILE_IMAGE_INFO_SIZE, &H5F_def_file_image_info_g,
+    if(H5P__register_real(pclass, H5F_ACS_FILE_IMAGE_INFO_NAME, H5F_ACS_FILE_IMAGE_INFO_SIZE, &H5F_def_file_image_info_g,
             NULL, H5F_ACS_FILE_IMAGE_INFO_SET, H5F_ACS_FILE_IMAGE_INFO_GET, NULL, NULL,
             H5F_ACS_FILE_IMAGE_INFO_DEL, H5F_ACS_FILE_IMAGE_INFO_COPY, H5F_ACS_FILE_IMAGE_INFO_CMP, H5F_ACS_FILE_IMAGE_INFO_CLOSE) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the core VFD backing store write tracking flag */
-    if(H5P_register_real(pclass, H5F_ACS_CORE_WRITE_TRACKING_FLAG_NAME, H5F_ACS_CORE_WRITE_TRACKING_FLAG_SIZE, &H5F_def_core_write_tracking_flag_g,
+    if(H5P__register_real(pclass, H5F_ACS_CORE_WRITE_TRACKING_FLAG_NAME, H5F_ACS_CORE_WRITE_TRACKING_FLAG_SIZE, &H5F_def_core_write_tracking_flag_g,
             NULL, NULL, NULL, H5F_ACS_CORE_WRITE_TRACKING_FLAG_ENC, H5F_ACS_CORE_WRITE_TRACKING_FLAG_DEC,
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the size of the core VFD backing store page size */
-    if(H5P_register_real(pclass, H5F_ACS_CORE_WRITE_TRACKING_PAGE_SIZE_NAME, H5F_ACS_CORE_WRITE_TRACKING_PAGE_SIZE_SIZE, &H5F_def_core_write_tracking_page_size_g,
+    if(H5P__register_real(pclass, H5F_ACS_CORE_WRITE_TRACKING_PAGE_SIZE_NAME, H5F_ACS_CORE_WRITE_TRACKING_PAGE_SIZE_SIZE, &H5F_def_core_write_tracking_page_size_g,
             NULL, NULL, NULL, H5F_ACS_CORE_WRITE_TRACKING_PAGE_SIZE_ENC, H5F_ACS_CORE_WRITE_TRACKING_PAGE_SIZE_DEC,
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the # of read attempts */
-    if(H5P_register_real(pclass, H5F_ACS_METADATA_READ_ATTEMPTS_NAME, H5F_ACS_METADATA_READ_ATTEMPTS_SIZE, &H5F_def_metadata_read_attempts_g,
+    if(H5P__register_real(pclass, H5F_ACS_METADATA_READ_ATTEMPTS_NAME, H5F_ACS_METADATA_READ_ATTEMPTS_SIZE, &H5F_def_metadata_read_attempts_g,
             NULL, NULL, NULL, H5F_ACS_METADATA_READ_ATTEMPTS_ENC, H5F_ACS_METADATA_READ_ATTEMPTS_DEC,
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register object flush callback */
     /* (Note: this property should not have an encode/decode callback -QAK) */
-    if(H5P_register_real(pclass, H5F_ACS_OBJECT_FLUSH_CB_NAME, H5F_ACS_OBJECT_FLUSH_CB_SIZE, &H5F_def_object_flush_cb_g,
+    if(H5P__register_real(pclass, H5F_ACS_OBJECT_FLUSH_CB_NAME, H5F_ACS_OBJECT_FLUSH_CB_SIZE, &H5F_def_object_flush_cb_g,
             NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the private property of whether to clear the superblock status_flags. It's used by h5clear only. */
-    if(H5P_register_real(pclass, H5F_ACS_CLEAR_STATUS_FLAGS_NAME, H5F_ACS_CLEAR_STATUS_FLAGS_SIZE, &H5F_def_clear_status_flags_g,
+    if(H5P__register_real(pclass, H5F_ACS_CLEAR_STATUS_FLAGS_NAME, H5F_ACS_CLEAR_STATUS_FLAGS_SIZE, &H5F_def_clear_status_flags_g,
             NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the private property of whether to skip EOF check. It's used by h5clear only. */
-    if(H5P_register_real(pclass, H5F_ACS_SKIP_EOF_CHECK_NAME, H5F_ACS_SKIP_EOF_CHECK_SIZE, &H5F_def_skip_eof_check_g,
+    if(H5P__register_real(pclass, H5F_ACS_SKIP_EOF_CHECK_NAME, H5F_ACS_SKIP_EOF_CHECK_SIZE, &H5F_def_skip_eof_check_g,
             NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the private property of whether to drop free-space to the floor. It's used by h5clear only. */
-    if(H5P_register_real(pclass, H5F_ACS_NULL_FSM_ADDR_NAME, H5F_ACS_NULL_FSM_ADDR_SIZE, &H5F_def_null_fsm_addr_g,
+    if(H5P__register_real(pclass, H5F_ACS_NULL_FSM_ADDR_NAME, H5F_ACS_NULL_FSM_ADDR_SIZE, &H5F_def_null_fsm_addr_g,
             NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the metadata cache logging flag. */
-    if(H5P_register_real(pclass, H5F_ACS_USE_MDC_LOGGING_NAME, H5F_ACS_USE_MDC_LOGGING_SIZE, &H5F_def_use_mdc_logging_g,
+    if(H5P__register_real(pclass, H5F_ACS_USE_MDC_LOGGING_NAME, H5F_ACS_USE_MDC_LOGGING_SIZE, &H5F_def_use_mdc_logging_g,
             NULL, NULL, NULL, H5F_ACS_USE_MDC_LOGGING_ENC, H5F_ACS_USE_MDC_LOGGING_DEC, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the metadata cache log location. */
-    if(H5P_register_real(pclass, H5F_ACS_MDC_LOG_LOCATION_NAME, H5F_ACS_MDC_LOG_LOCATION_SIZE, &H5F_def_mdc_log_location_g,
+    if(H5P__register_real(pclass, H5F_ACS_MDC_LOG_LOCATION_NAME, H5F_ACS_MDC_LOG_LOCATION_SIZE, &H5F_def_mdc_log_location_g,
         NULL, NULL, NULL, H5F_ACS_MDC_LOG_LOCATION_ENC, H5F_ACS_MDC_LOG_LOCATION_DEC,
         H5F_ACS_MDC_LOG_LOCATION_DEL, H5F_ACS_MDC_LOG_LOCATION_COPY, H5F_ACS_MDC_LOG_LOCATION_CMP, H5F_ACS_MDC_LOG_LOCATION_CLOSE) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the flag that indicates whether mdc logging starts on file access. */
-    if(H5P_register_real(pclass, H5F_ACS_START_MDC_LOG_ON_ACCESS_NAME, H5F_ACS_START_MDC_LOG_ON_ACCESS_SIZE, &H5F_def_start_mdc_log_on_access_g,
+    if(H5P__register_real(pclass, H5F_ACS_START_MDC_LOG_ON_ACCESS_NAME, H5F_ACS_START_MDC_LOG_ON_ACCESS_SIZE, &H5F_def_start_mdc_log_on_access_g,
             NULL, NULL, NULL, H5F_ACS_START_MDC_LOG_ON_ACCESS_ENC, H5F_ACS_START_MDC_LOG_ON_ACCESS_DEC, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the evict on close flag */
-    if(H5P_register_real(pclass, H5F_ACS_EVICT_ON_CLOSE_FLAG_NAME, H5F_ACS_EVICT_ON_CLOSE_FLAG_SIZE, &H5F_def_evict_on_close_flag_g,
+    if(H5P__register_real(pclass, H5F_ACS_EVICT_ON_CLOSE_FLAG_NAME, H5F_ACS_EVICT_ON_CLOSE_FLAG_SIZE, &H5F_def_evict_on_close_flag_g,
             NULL, NULL, NULL, H5F_ACS_EVICT_ON_CLOSE_FLAG_ENC, H5F_ACS_EVICT_ON_CLOSE_FLAG_DEC,
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
 #ifdef H5_HAVE_PARALLEL
     /* Register the metadata collective read flag */
-    if(H5P_register_real(pclass, H5_COLL_MD_READ_FLAG_NAME, H5F_ACS_COLL_MD_READ_FLAG_SIZE, &H5F_def_coll_md_read_flag_g,
+    if(H5P__register_real(pclass, H5_COLL_MD_READ_FLAG_NAME, H5F_ACS_COLL_MD_READ_FLAG_SIZE, &H5F_def_coll_md_read_flag_g,
             NULL, NULL, NULL, H5F_ACS_COLL_MD_READ_FLAG_ENC, H5F_ACS_COLL_MD_READ_FLAG_DEC,
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the metadata collective write flag */
-    if(H5P_register_real(pclass, H5F_ACS_COLL_MD_WRITE_FLAG_NAME, H5F_ACS_COLL_MD_WRITE_FLAG_SIZE, &H5F_def_coll_md_write_flag_g,
+    if(H5P__register_real(pclass, H5F_ACS_COLL_MD_WRITE_FLAG_NAME, H5F_ACS_COLL_MD_WRITE_FLAG_SIZE, &H5F_def_coll_md_write_flag_g,
             NULL, NULL, NULL, H5F_ACS_COLL_MD_WRITE_FLAG_ENC, H5F_ACS_COLL_MD_WRITE_FLAG_DEC,
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 #endif /* H5_HAVE_PARALLEL */
 
     /* Register the initial metadata cache image configuration */
-    if(H5P_register_real(pclass, H5F_ACS_META_CACHE_INIT_IMAGE_CONFIG_NAME, H5F_ACS_META_CACHE_INIT_IMAGE_CONFIG_SIZE, &H5F_def_mdc_initCacheImageCfg_g,
+    if(H5P__register_real(pclass, H5F_ACS_META_CACHE_INIT_IMAGE_CONFIG_NAME, H5F_ACS_META_CACHE_INIT_IMAGE_CONFIG_SIZE, &H5F_def_mdc_initCacheImageCfg_g,
             NULL, NULL, NULL, H5F_ACS_META_CACHE_INIT_IMAGE_CONFIG_ENC, H5F_ACS_META_CACHE_INIT_IMAGE_CONFIG_DEC,
             NULL, NULL, H5F_ACS_META_CACHE_INIT_IMAGE_CONFIG_CMP, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the size of the page buffer size */
-    if(H5P_register_real(pclass, H5F_ACS_PAGE_BUFFER_SIZE_NAME, H5F_ACS_PAGE_BUFFER_SIZE_SIZE, &H5F_def_page_buf_size_g,
+    if(H5P__register_real(pclass, H5F_ACS_PAGE_BUFFER_SIZE_NAME, H5F_ACS_PAGE_BUFFER_SIZE_SIZE, &H5F_def_page_buf_size_g,
             NULL, NULL, NULL, H5F_ACS_PAGE_BUFFER_SIZE_ENC, H5F_ACS_PAGE_BUFFER_SIZE_DEC,
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
     /* Register the size of the page buffer minimum metadata size */
-    if(H5P_register_real(pclass, H5F_ACS_PAGE_BUFFER_MIN_META_PERC_NAME, H5F_ACS_PAGE_BUFFER_MIN_META_PERC_SIZE, &H5F_def_page_buf_min_meta_perc_g,
+    if(H5P__register_real(pclass, H5F_ACS_PAGE_BUFFER_MIN_META_PERC_NAME, H5F_ACS_PAGE_BUFFER_MIN_META_PERC_SIZE, &H5F_def_page_buf_min_meta_perc_g,
             NULL, NULL, NULL, H5F_ACS_PAGE_BUFFER_MIN_META_PERC_ENC, H5F_ACS_PAGE_BUFFER_MIN_META_PERC_DEC,
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
     /* Register the size of the page buffer minimum raw data size */
-    if(H5P_register_real(pclass, H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_NAME, H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_SIZE, &H5F_def_page_buf_min_raw_perc_g,
+    if(H5P__register_real(pclass, H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_NAME, H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_SIZE, &H5F_def_page_buf_min_raw_perc_g,
             NULL, NULL, NULL, H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_ENC, H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_DEC,
             NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register the file VOL connector ID & info */
+    /* (Note: this property should not have an encode/decode callback -QAK) */
+    if(H5P__register_real(pclass, H5F_ACS_VOL_CONN_NAME, H5F_ACS_VOL_CONN_SIZE, &def_vol_prop,
+            H5F_ACS_VOL_CONN_CRT, H5F_ACS_VOL_CONN_SET, H5F_ACS_VOL_CONN_GET, NULL, NULL,
+            H5F_ACS_VOL_CONN_DEL, H5F_ACS_VOL_CONN_COPY, H5F_ACS_VOL_CONN_CMP, H5F_ACS_VOL_CONN_CLOSE) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__facc_reg_prop() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_alignment
  *
@@ -706,7 +738,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_alignment
  *
@@ -747,7 +779,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_alignment() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5P_set_driver
  *
@@ -795,7 +827,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P_set_driver() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_driver
  *
@@ -838,7 +870,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_driver() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5P_peek_driver
  *
@@ -882,7 +914,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P_peek_driver() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_driver
  *
@@ -923,7 +955,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_driver() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5P_peek_driver_info
  *
@@ -965,7 +997,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P_peek_driver_info() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_driver_info
  *
@@ -1005,7 +1037,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_driver_info() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5P__file_driver_copy
  *
@@ -1071,7 +1103,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__file_driver_copy() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5P__file_driver_free
  *
@@ -1123,7 +1155,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__file_driver_free() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5P__facc_file_driver_create
  *
@@ -1152,7 +1184,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__facc_file_driver_create() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5P__facc_file_driver_set
  *
@@ -1185,7 +1217,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__facc_file_driver_set() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5P__facc_file_driver_get
  *
@@ -1218,7 +1250,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__facc_file_driver_get() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5P__facc_file_driver_del
  *
@@ -1247,7 +1279,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__facc_file_driver_del() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5P__facc_file_driver_copy
  *
@@ -1276,7 +1308,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__facc_file_driver_copy() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:       H5P__facc_file_driver_cmp
  *
@@ -1335,7 +1367,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__facc_file_driver_cmp() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5P__facc_file_driver_close
  *
@@ -1364,7 +1396,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__facc_file_driver_close() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_family_offset
  *
@@ -1403,7 +1435,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_family_offset() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_family_offset
  *
@@ -1444,7 +1476,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_family_offset() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_multi_type
  *
@@ -1483,7 +1515,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_multi_type() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_multi_type
  *
@@ -1524,7 +1556,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_multi_type() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_cache
  *
@@ -1578,7 +1610,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_cache() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_cache
  *
@@ -1630,7 +1662,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_cache() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_mdc_image_config
  *
@@ -1674,7 +1706,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Pset_mdc_image_config() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_mdc_image_config
  *
@@ -1725,7 +1757,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Pget_mdc_image_config() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_mdc_config
  *
@@ -1769,7 +1801,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Pset_mdc_config() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_mdc_config
  *
@@ -1820,7 +1852,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Pget_mdc_config() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_gc_references
  *
@@ -1873,7 +1905,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_gc_references
  *
@@ -1916,7 +1948,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_fclose_degree
  *
@@ -1952,7 +1984,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_fclose_degree() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_fclose_degree
  *
@@ -1987,7 +2019,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_fclose_degree() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_meta_block_size
  *
@@ -2038,7 +2070,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_meta_block_size
  *
@@ -2082,7 +2114,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_sieve_buf_size
  *
@@ -2133,7 +2165,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_sieve_buf_size() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_sieve_buf_size
  *
@@ -2176,7 +2208,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_sieve_buf_size() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_small_data_block_size
  *
@@ -2222,7 +2254,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_small_data_block_size() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_small_data_block_size
  *
@@ -2261,7 +2293,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_small_data_block_size() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_libver_bounds
  *
@@ -2403,14 +2435,14 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_libver_bounds() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_libver_bounds
  *
- * Purpose:    Returns the current settings for the library version format bounds
- *          from a file access property list.
+ * Purpose:     Returns the current settings for the library version format bounds
+ *              from a file access property list.
  *
- * Return:    Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:    Quincey Koziol
  *              Thursday, January 3, 2008
@@ -2446,7 +2478,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_libver_bounds() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_elink_file_cache_size
  *
@@ -2484,7 +2516,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_elink_file_cache_size() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_elink_file_cache_size
  *
@@ -2523,7 +2555,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_elink_file_cache_size() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5Pset_file_image
  *
@@ -2604,7 +2636,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_file_image() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5Pget_file_image
  *
@@ -2693,7 +2725,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_file_image */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5Pset_file_image_callbacks
  *
@@ -2770,7 +2802,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_file_image_callbacks() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5Pget_file_image_callbacks
  *
@@ -2826,7 +2858,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_file_image_callbacks() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5P__file_image_info_copy
  *
@@ -2904,7 +2936,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__file_image_info_copy() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5P__file_image_info_free
  *
@@ -2959,7 +2991,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__file_image_info_free() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5P__facc_cache_image_config_cmp
  *
@@ -3002,7 +3034,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__facc_cache_image_config_cmp() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:       H5P__facc_cache_image_config_enc
  *
@@ -3048,7 +3080,7 @@ H5P__facc_cache_image_config_enc(const void *value, void **_pp, size_t *size)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5P__facc_cache_image_config_enc() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:       H5P__facc_cache_image_config_dec
  *
@@ -3100,7 +3132,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__facc_cache_image_config_dec() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5P__facc_file_image_info_set
  *
@@ -3133,7 +3165,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__facc_file_image_info_set() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5P__facc_file_image_info_get
  *
@@ -3166,7 +3198,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__facc_file_image_info_get() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5P__facc_file_image_info_del
  *
@@ -3197,7 +3229,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__facc_file_image_info_del() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5P__facc_file_image_info_copy
  *
@@ -3227,7 +3259,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__facc_file_image_info_copy() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:       H5P__facc_file_image_info_cmp
  *
@@ -3286,7 +3318,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__facc_file_image_info_cmp() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5P__facc_file_image_info_close
  *
@@ -3316,7 +3348,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__facc_file_image_info_close() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5P__facc_cache_config_cmp
  *
@@ -3428,7 +3460,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__facc_cache_config_cmp() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:       H5P__facc_cache_config_enc
  *
@@ -3573,7 +3605,7 @@ H5P__facc_cache_config_enc(const void *value, void **_pp, size_t *size)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5P__facc_cache_config_enc() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:       H5P__facc_cache_config_dec
  *
@@ -3708,7 +3740,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__facc_cache_config_dec() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:       H5P__facc_fclose_degree_enc
  *
@@ -3746,7 +3778,7 @@ H5P__facc_fclose_degree_enc(const void *value, void **_pp, size_t *size)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5P__facc_fclose_degree_enc() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:       H5P__facc_fclose_degree_dec
  *
@@ -3781,7 +3813,7 @@ H5P__facc_fclose_degree_dec(const void **_pp, void *_value)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5P__facc_fclose_degree_dec() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:       H5P__facc_multi_type_enc
  *
@@ -3819,7 +3851,7 @@ H5P__facc_multi_type_enc(const void *value, void **_pp, size_t *size)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5P__facc_multi_type_enc() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:       H5P__facc_multi_type_dec
  *
@@ -3854,7 +3886,7 @@ H5P__facc_multi_type_dec(const void **_pp, void *_value)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5P__facc_multi_type_dec() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:       H5P__facc_libver_type_enc
  *
@@ -3966,7 +3998,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_core_write_tracking() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_core_write_tracking
  *
@@ -4008,7 +4040,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_core_write_tracking() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_metadata_read_attempts
  *
@@ -4051,7 +4083,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Pset_metadata_read_attempts() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_metadata_read_attempts
  *
@@ -4092,7 +4124,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_metadata_read_attempts() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_obj_flush_cb
  *
@@ -4136,7 +4168,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Pset_obj_flush_cb() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_obj_flush_cb
  *
@@ -4177,7 +4209,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Pget_obj_flush_cb() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_mdc_log_options
  *
@@ -4229,7 +4261,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_mdc_log_options() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_mdc_log_options
  *
@@ -4284,7 +4316,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_mdc_log_options() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:       H5P_facc_mdc_log_location_enc
  *
@@ -4337,7 +4369,7 @@ H5P_facc_mdc_log_location_enc(const void *value, void **_pp, size_t *size)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5P_facc_mdc_log_location_enc() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:       H5P_facc_mdc_log_location_dec
  *
@@ -4391,7 +4423,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P_facc_mdc_log_location_dec() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5P_facc_mdc_log_location_del
  *
@@ -4414,7 +4446,7 @@ H5P_facc_mdc_log_location_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_U
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5P_facc_mdc_log_location_del() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5P_facc_mdc_log_location_copy
  *
@@ -4436,7 +4468,7 @@ H5P_facc_mdc_log_location_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_U
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5P_facc_mdc_log_location_copy() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:       H5P_facc_mdc_log_location_cmp
  *
@@ -4468,7 +4500,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P_facc_mdc_log_location_cmp() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5P_facc_mdc_log_location_close
  *
@@ -4491,7 +4523,7 @@ H5P_facc_mdc_log_location_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5P_facc_mdc_log_location_close() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_evict_on_close
  *
@@ -4539,7 +4571,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_evict_on_close() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_evict_on_close
  *
@@ -4583,7 +4615,7 @@ done:
 } /* end H5Pget_evict_on_close() */
 
 #ifdef H5_HAVE_PARALLEL
-
+
 /*-------------------------------------------------------------------------
  * Function:       H5P__encode_coll_md_read_flag_t
  *
@@ -4621,7 +4653,7 @@ H5P__encode_coll_md_read_flag_t(const void *value, void **_pp, size_t *size)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5P__encode_coll_md_read_flag_t() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:       H5P__decode_coll_md_read_flag_t
  *
@@ -4655,7 +4687,7 @@ H5P__decode_coll_md_read_flag_t(const void **_pp, void *_value)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5P__decode_coll_md_read_flag_t() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_all_coll_metadata_ops
  *
@@ -4714,7 +4746,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_all_coll_metadata_ops() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_all_coll_metadata_ops
  *
@@ -4772,7 +4804,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Pget_all_coll_metadata_ops */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_coll_metadata_write
  *
@@ -4811,7 +4843,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_coll_metadata_write() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_coll_metadata_write
  *
@@ -4849,7 +4881,7 @@ done:
 } /* end H5Pget_coll_metadata_write() */
 #endif /* H5_HAVE_PARALLEL */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_page_buffer_size
  *
@@ -4897,7 +4929,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_page_buffer_size() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_page_buffer_size
  *
@@ -4938,4 +4970,409 @@ H5Pget_page_buffer_size(hid_t plist_id, size_t *buf_size, unsigned *min_meta_per
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_page_buffer_size() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P_set_vol
+ *
+ * Purpose:     Set the VOL connector for a file access property list
+ *              (PLIST_ID).  The VOL properties will
+ *              be copied into the property list and the reference count on
+ *              the VOL will be incremented.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5P_set_vol(H5P_genplist_t *plist, hid_t vol_id, const void *vol_info)
+{
+    herr_t  ret_value = SUCCEED;   /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    if(NULL == H5I_object_verify(vol_id, H5I_VOL))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID")
+
+    if(TRUE == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS)) {
+        H5VL_connector_prop_t vol_prop;         /* Property for VOL ID & info */
+
+        /* Prepare the VOL connector property */
+        vol_prop.connector_id = vol_id;
+        vol_prop.connector_info = vol_info;
+
+        /* Set the connector ID & info property */
+        if(H5P_set(plist, H5F_ACS_VOL_CONN_NAME, &vol_prop) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set VOL connector ID & info")
+    } /* end if */
+    else
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P_set_vol() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Pset_vol
+ *
+ * Purpose:     Set the file VOL connector (VOL_ID) for a file access
+ *              property list (PLIST_ID)
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_vol(hid_t plist_id, hid_t new_vol_id, const void *new_vol_info)
+{
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE3("e", "ii*x", plist_id, new_vol_id, new_vol_info);
+
+    /* Check arguments */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object_verify(plist_id, H5I_GENPROP_LST)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
+    if(NULL == H5I_object_verify(new_vol_id, H5I_VOL))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file VOL ID")
+
+    /* Set the VOL */
+    if(H5P_set_vol(plist, new_vol_id, new_vol_info) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set VOL")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pset_vol() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Pget_vol_id
+ *
+ * Purpose:     Returns the ID of the current VOL connector.
+ *              This ID should be closed with H5VLclose().
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_vol_id(hid_t plist_id, hid_t *vol_id)
+{
+    H5P_genplist_t  *plist;             /* Property list pointer */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "i*i", plist_id, vol_id);
+
+    /* Get property list for ID */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object_verify(plist_id, H5I_GENPROP_LST)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
+
+    /* Get the current VOL ID */
+    if(TRUE == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS)) {
+        H5VL_connector_prop_t connector_prop;         /* Property for VOL connector ID & info */
+
+        /* Get the connector property */
+        if(H5P_peek(plist, H5F_ACS_VOL_CONN_NAME, &connector_prop) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get VOL connector info")
+
+        /* Increment the VOL ID's ref count */
+        if(H5I_inc_ref(connector_prop.connector_id, TRUE) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTINC, FAIL, "unable to increment ref count on VOL connector ID")
+
+        /* Set the connector ID to return */
+        *vol_id = connector_prop.connector_id;
+    } /* end if */
+    else
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pget_vol_id() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Pget_vol_info
+ *
+ * Purpose:     Returns a copy of the VOL info for a connector.
+ *              This information should be freed with H5VLfree_connector_info.
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_vol_info(hid_t plist_id, void **vol_info)
+{
+    H5P_genplist_t  *plist;             /* Property list pointer */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "i**x", plist_id, vol_info);
+
+    /* Get property list for ID */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object_verify(plist_id, H5I_GENPROP_LST)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
+
+    /* Get the current VOL info */
+    if(TRUE == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS)) {
+        void *new_connector_info = NULL;   /* Copy of connector info */
+        H5VL_connector_prop_t connector_prop;         /* Property for VOL connector ID & info */
+
+        /* Get the connector property */
+        if(H5P_peek(plist, H5F_ACS_VOL_CONN_NAME, &connector_prop) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get VOL connector property")
+
+        /* Copy connector info, if it exists */
+        if(connector_prop.connector_info) {
+            H5VL_class_t *connector;           /* Pointer to connector */
+
+            /* Retrieve the connector for the ID */
+            if(NULL == (connector = (H5VL_class_t *)H5I_object(connector_prop.connector_id)))
+                HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a VOL connector ID")
+
+            /* Allocate and copy connector info */
+            if(H5VL_copy_connector_info(connector, &new_connector_info, connector_prop.connector_info) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "connector info copy failed")
+        } /* end if */
+
+        /* Set the connector info */
+        *vol_info = new_connector_info;
+    } /* end if */
+    else
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pget_vol_info() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P__facc_vol_create
+ *
+ connectorose:     Create callback for the VOL connector ID & info property.
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__facc_vol_create(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Make copy of the VOL connector */
+    if(H5VL_conn_copy((H5VL_connector_prop_t *)value) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy VOL connector")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__facc_vol_create() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P__facc_vol_set
+ *
+ * Purpose:     Copies a VOL connector property when it's set for a property list
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__facc_vol_set(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name,
+    size_t H5_ATTR_UNUSED size, void *value)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity check */
+    HDassert(value);
+
+    /* Make copy of VOL connector ID & info */
+    if(H5VL_conn_copy((H5VL_connector_prop_t *)value) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy VOL connector")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__facc_vol_set() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P__facc_vol_get
+ *
+ * Purpose:     Copies a VOL connector property when it's retrieved from a property list
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__facc_vol_get(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name,
+    size_t H5_ATTR_UNUSED size, void *value)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity check */
+    HDassert(value);
+
+    /* Make copy of VOL connector */
+    if(H5VL_conn_copy((H5VL_connector_prop_t *)value) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy VOL connector")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__facc_vol_get() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P__facc_vol_del
+ *
+ * Purpose:     Frees memory used to store the VOL connector ID & info property
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__facc_vol_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Free the VOL connector ID & info */
+    if(H5VL_conn_free((H5VL_connector_prop_t *)value) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTRELEASE, FAIL, "can't release VOL connector")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__facc_vol_del() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P__facc_vol_copy
+ *
+ * Purpose:     Copy callback for the VOL connector ID & info property.
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__facc_vol_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Make copy of VOL connector */
+    if(H5VL_conn_copy((H5VL_connector_prop_t *)value) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy VOL connector")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__facc_vol_copy() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:       H5P__facc_vol_cmp
+ *
+ * Purpose:        Callback routine which is called whenever the VOL connector
+ *                 ID & info property in the file access property list
+ *                 is compared.
+ *
+ * Return:         positive if VALUE1 is greater than VALUE2, negative if
+ *                 VALUE2 is greater than VALUE1 and zero if VALUE1 and
+ *                 VALUE2 are equal.
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5P__facc_vol_cmp(const void *_info1, const void *_info2, size_t H5_ATTR_UNUSED size)
+{
+    const H5VL_connector_prop_t *info1 = (const H5VL_connector_prop_t *)_info1; /* Create local aliases for values */
+    const H5VL_connector_prop_t *info2 = (const H5VL_connector_prop_t *)_info2;
+    H5VL_class_t *cls1, *cls2;  /* connector class for each property */
+    int cmp_value = 0;          /* Value from comparison */
+    herr_t status;              /* Status from info comparison */
+    int ret_value = 0;          /* Return value */
+
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Sanity check */
+    HDassert(info1);
+    HDassert(info2);
+    HDassert(size == sizeof(H5VL_connector_prop_t));
+
+    /* Compare connectors */
+    if(NULL == (cls1 = (H5VL_class_t *)H5I_object(info1->connector_id)))
+        HGOTO_DONE(-1)
+    if(NULL == (cls2 = (H5VL_class_t *)H5I_object(info2->connector_id)))
+        HGOTO_DONE(1)
+    status = H5VL_cmp_connector_cls(&cmp_value, cls1, cls2);
+    HDassert(status >= 0);
+    if(cmp_value != 0)
+        HGOTO_DONE(cmp_value);
+
+    /* At this point, we should be able to assume that we are dealing with
+     * the same connector class struct (or a copies of the same class struct)
+     */
+
+
+    /* Use one of the classes (cls1) info comparison routines to compare the
+     * info objects
+     */
+    HDassert(cls1->info_cmp == cls2->info_cmp);
+    status = H5VL_cmp_connector_info(cls1, &cmp_value, info1->connector_info, info2->connector_info);
+    HDassert(status >= 0);
+
+    /* Set return value */
+    ret_value = cmp_value;
+    
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__facc_vol_cmp() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P__facc_vol_close
+ *
+ * Purpose:     Close callback for the VOL connector ID & info property.
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__facc_vol_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Free the VOL connector */
+    if(H5VL_conn_free((H5VL_connector_prop_t *)value) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTRELEASE, FAIL, "can't release VOL connector")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__facc_vol_close() */
+
 

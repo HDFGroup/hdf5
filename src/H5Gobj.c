@@ -36,7 +36,6 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fprivate.h"		/* File access				*/
 #include "H5Gpkg.h"		/* Groups		  		*/
-#include "H5HLprivate.h"	/* Local Heaps				*/
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5Lprivate.h"         /* Links			  	*/
 #include "H5MMprivate.h"	/* Memory management			*/
@@ -257,7 +256,7 @@ H5G__obj_create_real(H5F_t *f, const H5O_ginfo_t *ginfo,
      * incremented if the object is added to the group directed graph.
      */
     if(H5O_create(f, hdr_size, (size_t)1, gcpl_id, oloc/*out*/) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create header")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create header")
 
     /* Check for format of group to create */
     if(use_at_least_v18) {

@@ -27,6 +27,7 @@
 /* Other private headers that this test requires */
 #include "H5CXprivate.h"        /* API Contexts                         */
 #include "H5Iprivate.h"		/* IDs			  		*/
+#include "H5VLprivate.h"        /* Virtual Object Layer                     */
 #include "H5VMprivate.h"		/* Vectors and arrays 			*/
 
 
@@ -300,7 +301,7 @@ create_file(unsigned flags, hid_t fapl, hid_t *file, H5F_t **f)
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (*f = (H5F_t *)H5I_object(*file)))
+    if(NULL == (*f = (H5F_t *)H5VL_object(*file)))
         FAIL_STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
@@ -433,7 +434,7 @@ reopen_file(hid_t *file, H5F_t **f, hid_t fapl,
             FAIL_STACK_ERROR
 
         /* Get a pointer to the internal file object */
-        if(NULL == (*f = (H5F_t *)H5I_object(*file)))
+        if(NULL == (*f = (H5F_t *)H5VL_object(*file)))
             FAIL_STACK_ERROR
 
         /* Ignore metadata tags in the file's cache */
@@ -521,18 +522,18 @@ verify_cparam(const H5EA_t *ea, const H5EA_create_t *cparam)
 
     /* Retrieve creation parameters */
     HDmemset(&test_cparam, 0, sizeof(H5EA_create_t));
-    if(H5EA_get_cparam_test(ea, &test_cparam) < 0)
+    if(H5EA__get_cparam_test(ea, &test_cparam) < 0)
         FAIL_STACK_ERROR
 
     /* Verify creation parameters */
-    if(H5EA_cmp_cparam_test(cparam, &test_cparam))
+    if(H5EA__cmp_cparam_test(cparam, &test_cparam))
         TEST_ERROR
 
     /* Success */
-    return(0);
+    return 0;
 
 error:
-    return(-1);
+    return -1;
 } /* verify_cparam() */
 
 
@@ -943,7 +944,7 @@ test_open_twice(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam)
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f2 = (H5F_t *)H5I_object(file2)))
+    if(NULL == (f2 = (H5F_t *)H5VL_object(file2)))
         FAIL_STACK_ERROR
 
     /* Open the extensible array through the second file handle */
@@ -1089,7 +1090,7 @@ test_open_twice_diff(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tpa
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f2 = (H5F_t *)H5I_object(file2)))
+    if(NULL == (f2 = (H5F_t *)H5VL_object(file2)))
         FAIL_STACK_ERROR
 
     /* Open the extensible array through the second file handle */
@@ -2398,7 +2399,7 @@ error:
     H5E_BEGIN_TRY {
         if(ea)
             H5EA_close(ea);
-	H5Fclose(file);
+        H5Fclose(file);
     } H5E_END_TRY;
 
     return 1;

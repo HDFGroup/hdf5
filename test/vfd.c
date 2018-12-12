@@ -149,7 +149,7 @@ test_sec2(void)
 
     /* There is no garantee the size of metadata in file is constant.
      * Just try to check if it's reasonable.
-     * 
+     *
      * Currently it should be around 2 KB.
      */
     if(H5Fget_filesize(fid, &file_size) < 0)
@@ -258,7 +258,7 @@ test_core(void)
                         | H5FD_FEAT_ACCUMULATE_METADATA
                         | H5FD_FEAT_DATA_SIEVE
                         | H5FD_FEAT_AGGREGATE_SMALLDATA
-                        | H5FD_FEAT_ALLOW_FILE_IMAGE 
+                        | H5FD_FEAT_ALLOW_FILE_IMAGE
                         | H5FD_FEAT_CAN_USE_FILE_IMAGE_CALLBACKS))
         TEST_ERROR
 
@@ -341,7 +341,7 @@ test_core(void)
 
     /* There is no garantee the size of metadata in file is constant.
      * Just try to check if it's reasonable.
-     * 
+     *
      * TODO: Needs justification of why is this is a reasonable size.
      */
     if(H5Fget_filesize(fid, &file_size) < 0)
@@ -379,7 +379,7 @@ test_core(void)
     for(i = 0; i < CORE_DSET_DIM1; i++)
         for(j = 0; j < CORE_DSET_DIM2; j++)
             *pw++ = val++;
-    HDmemset(data_r, 0, DSET1_DIM1 * DSET1_DIM2 * sizeof(int)); 
+    HDmemset(data_r, 0, DSET1_DIM1 * DSET1_DIM2 * sizeof(int));
 
     /* Create the dataspace */
     dims[0] = CORE_DSET_DIM1;
@@ -469,7 +469,7 @@ test_core(void)
         TEST_ERROR;
 
     /* Read the data back from the dataset */
-    HDmemset(data_r, 0, DSET1_DIM1 * DSET1_DIM2 * sizeof(int)); 
+    HDmemset(data_r, 0, DSET1_DIM1 * DSET1_DIM2 * sizeof(int));
     if(H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data_r) < 0)
         TEST_ERROR;
 
@@ -488,7 +488,7 @@ test_core(void)
     /* Check file size API.
      * There is no garantee the size of metadata in file is constant.
      * Just try to check if it's reasonable.
-     * 
+     *
      * TODO: Needs justification of why is this is a reasonable size.
      */
     if(H5Fget_filesize(fid, &file_size) < 0)
@@ -1118,8 +1118,7 @@ error:
  * Purpose:     Private function for test_multi() to tests wrong ways of
  *              reopening multi file.
  *
- * Return:      Success:        0
- *              Failure:        -1
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:  Raymond Lu
  *              Thursday, May 19, 2005
@@ -1129,7 +1128,7 @@ error:
 static herr_t
 test_multi_opens(char *fname)
 {
-    hid_t file=-1;
+    hid_t fid = H5I_INVALID_HID;
     char  super_name[1024];     /*name string "%%s-s.h5"*/
     char  sf_name[1024];        /*name string "multi_file-s.h5"*/
 
@@ -1138,11 +1137,11 @@ test_multi_opens(char *fname)
     HDsnprintf(sf_name, sizeof(sf_name), super_name, fname);
 
     H5E_BEGIN_TRY {
-        file = H5Fopen(sf_name, H5F_ACC_RDWR, H5P_DEFAULT);
+        fid = H5Fopen(sf_name, H5F_ACC_RDWR, H5P_DEFAULT);
     } H5E_END_TRY;
 
-    return(file >= 0 ? -1 : 0);
-}
+    return(fid >= 0 ? FAIL : SUCCEED);
+} /* end test_multi_opens() */
 
 
 /*-------------------------------------------------------------------------
@@ -1150,8 +1149,7 @@ test_multi_opens(char *fname)
  *
  * Purpose:     Tests the file handle interface for MUTLI driver
  *
- * Return:      Success:        0
- *              Failure:        -1
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:  Raymond Lu
  *              Tuesday, Sept 24, 2002
@@ -1330,7 +1328,7 @@ test_multi(void)
     if((atype = H5Tcopy(H5T_C_S1)) < 0)
         TEST_ERROR;
 
-    if(H5Tset_size(atype, strlen(meta) + 1) < 0)
+    if(H5Tset_size(atype, HDstrlen(meta) + 1) < 0)
         TEST_ERROR;
 
     if(H5Tset_strpad(atype, H5T_STR_NULLTERM) < 0)
@@ -1365,7 +1363,7 @@ test_multi(void)
 
     PASSED();
 
-    return 0;
+    return SUCCEED;
 
 error:
     H5E_BEGIN_TRY {
@@ -1374,9 +1372,10 @@ error:
         H5Pclose(fapl);
         H5Pclose(fapl2);
         H5Fclose(file);
+        H5Aclose(attr);
     } H5E_END_TRY;
-    return -1;
-}
+    return FAIL;
+} /* end test_multi() */
 
 
 /*-------------------------------------------------------------------------
@@ -1385,7 +1384,7 @@ error:
  * Purpose:     Tests the backward compatibility for MULTI driver.
  *              See if we can open files created with v1.6 library.
  *              The source file was created by the test/file_handle.c
- *              of the v1.6 library.  This test verifies the fix for 
+ *              of the v1.6 library.  This test verifies the fix for
  *              Issue 2598. In v1.6 library, there was EOA for the whole
  *              MULTI file saved in the super block.  We took it out in
  *              v1.8 library because it's meaningless for the MULTI file.
@@ -1446,7 +1445,7 @@ test_multi_compat(void)
 
     h5_fixname(FILENAME[9], fapl, newname, sizeof newname);
 
-    /* Make copy for the data file in the build directory, to protect the 
+    /* Make copy for the data file in the build directory, to protect the
      * original file in the source directory */
     sprintf(filename_s, "%s-%c.h5", MULTI_COMPAT_BASENAME, 's');
     sprintf(newname_s, "%s-%c.h5", FILENAME[9], 's');
@@ -1483,7 +1482,7 @@ test_multi_compat(void)
     if(H5Fclose(file) < 0)
         TEST_ERROR;
 
-    /* Reopen the file for adding another dataset. The new EOA for metadata file 
+    /* Reopen the file for adding another dataset. The new EOA for metadata file
      * should be written to the file */
     if((file=H5Fopen(newname, H5F_ACC_RDWR, fapl)) < 0)
         TEST_ERROR;
@@ -1510,7 +1509,7 @@ test_multi_compat(void)
     if(H5Fclose(file) < 0)
         TEST_ERROR;
 
-    /* Reopen the file for read only again. Verify the library can handle 
+    /* Reopen the file for read only again. Verify the library can handle
      * the EOA correctly */
     if((file=H5Fopen(newname, H5F_ACC_RDONLY, fapl)) < 0)
         TEST_ERROR;

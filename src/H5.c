@@ -138,7 +138,7 @@ H5_init_library(void)
         if (mpi_initialized && !mpi_finalized) {
             int key_val;
 
-            if(MPI_SUCCESS != (mpi_code = MPI_Comm_create_keyval(MPI_NULL_COPY_FN, 
+            if(MPI_SUCCESS != (mpi_code = MPI_Comm_create_keyval(MPI_COMM_NULL_COPY_FN, 
                                                                  (MPI_Comm_delete_attr_function *)H5_mpi_delete_cb, 
                                                                  &key_val, NULL)))
                 HMPI_GOTO_ERROR(FAIL, "MPI_Comm_create_keyval failed", mpi_code)
@@ -173,6 +173,7 @@ H5_init_library(void)
     H5_debug_g.pkg[H5_PKG_S].name = "s";
     H5_debug_g.pkg[H5_PKG_T].name = "t";
     H5_debug_g.pkg[H5_PKG_V].name = "v";
+    H5_debug_g.pkg[H5_PKG_VL].name = "vl";
     H5_debug_g.pkg[H5_PKG_Z].name = "z";
 
     /*
@@ -213,6 +214,8 @@ H5_init_library(void)
      */
     if(H5E_init() < 0)
         HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize error interface")
+    if(H5VL_init() < 0)
+        HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize vol interface")
     if(H5P_init() < 0)
         HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize property list interface")
     if(H5T_init() < 0)
@@ -262,7 +265,7 @@ H5_term_library(void)
 
     /* Don't do anything if the library is already closed */
     if(!(H5_INIT_GLOBAL))
-	goto done;
+        goto done;
 
     /* Indicate that the library is being shut down */
     H5_TERM_GLOBAL = TRUE;
@@ -344,6 +347,7 @@ H5_term_library(void)
             pending += DOWN(AC);
             pending += DOWN(Z);
             pending += DOWN(FD);
+            pending += DOWN(VL);
             pending += DOWN(PL);
             /* Don't shut down the error code until other APIs which use it are shut down */
             if(pending == 0)
@@ -379,18 +383,18 @@ H5_term_library(void)
      * down if any of the below code involves using the instrumentation code.
      */
     if(H5_MPEinit_g) {
-	int mpi_initialized;
-	int mpi_finalized;
-	int mpe_code;
+        int mpi_initialized;
+        int mpi_finalized;
+        int mpe_code;
 
-	MPI_Initialized(&mpi_initialized);
-	MPI_Finalized(&mpi_finalized);
+        MPI_Initialized(&mpi_initialized);
+        MPI_Finalized(&mpi_finalized);
 
         if (mpi_initialized && !mpi_finalized) {
-	    mpe_code = MPE_Finish_log("h5log");
-	    HDassert(mpe_code >=0);
-	} /* end if */
-	H5_MPEinit_g = FALSE;	/* turn it off no matter what */
+            mpe_code = MPE_Finish_log("h5log");
+            HDassert(mpe_code >=0);
+        } /* end if */
+        H5_MPEinit_g = FALSE;	/* turn it off no matter what */
     } /* end if */
 #endif
 

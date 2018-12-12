@@ -65,7 +65,7 @@ struct handler_t {
  * parameters. The long-named ones can be partially spelled. When
  * adding more, make sure that they don't clash with each other.
  */
-/* The following initialization makes use of C language cancatenating */
+/* The following initialization makes use of C language concatenating */
 /* "xxx" "yyy" into "xxxyyy". */
 static const char *s_opts = "hn*peyBHirVa:c:d:f:g:k:l:t:w:xD:uX:o*b*F:s:S:A*q:z:m:RE*CM:O*N:vG:";
 static struct long_options l_opts[] = {

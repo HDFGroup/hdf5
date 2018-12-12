@@ -2032,7 +2032,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_ooo_order(char *filename)
+test_ooo_order(char *filename, hid_t fapl_id)
 {
     hid_t       file = -1;          /* File ID */
     hid_t       dtype = -1;         /* Datatype IDs */
@@ -2042,7 +2042,7 @@ test_ooo_order(char *filename)
     TESTING("that compound member insertion order is preserved")
 
     /* Create the file */
-    if ((file = H5Fcreate (filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+    if ((file = H5Fcreate (filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
         TEST_ERROR
 
     /* Create the compound */
@@ -2242,7 +2242,7 @@ main (int argc, char *argv[])
     nerrors += test_pack_ooo();
 
     puts("Testing compound member ordering:");
-    nerrors += test_ooo_order(fname);
+    nerrors += test_ooo_order(fname, fapl_id);
 
     /* Verify symbol table messages are cached */
     nerrors += (h5_verify_cached_stabs(FILENAME, fapl_id) < 0 ? 1 : 0);

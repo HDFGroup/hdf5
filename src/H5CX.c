@@ -53,7 +53,7 @@
  * each thread individually. The association of contexts to threads will
  * be handled by the pthread library.
  *
- * In order for this macro to work, H5E_get_my_stack() must be preceeded
+ * In order for this macro to work, H5E__get_my_stack() must be preceeded
  * by "H5CX_node_t *ctx =".
  */
 #define H5CX_get_my_context()  H5CX__get_context()
@@ -125,7 +125,6 @@
         (*head)->ctx.H5_GLUE(PROP_FIELD,_set) = TRUE;                         \
     } /* end if */                                                            \
 }
-#endif /* H5_HAVE_PARALLEL */
 
 /* Macro for the duplicated code to test and set properties for a property list */
 #define H5CX_SET_PROP(PROP_NAME, PROP_FIELD)                                  \
@@ -140,6 +139,7 @@
         if(H5P_set((*head)->ctx.dxpl, PROP_NAME, &(*head)->ctx.PROP_FIELD) < 0) \
             HGOTO_ERROR(H5E_CONTEXT, H5E_CANTSET, NULL, "error setting filter mask xfer property") \
     } /* end if */
+#endif /* H5_HAVE_PARALLEL */
 
 
 /******************/
@@ -267,6 +267,10 @@ typedef struct H5CX_t {
     /* Cached LAPL properties */
     size_t nlinks;              /* Number of soft / UD links to traverse (H5L_ACS_NLINKS_NAME) */
     hbool_t nlinks_valid;       /* Whether number of soft / UD links to traverse is valid */
+
+    /* Cached VOL properties */
+    void *vol_wrap_ctx;         /* VOL plugin's "wrap context" for creating IDs */
+    hbool_t vol_wrap_ctx_valid; /* Whether VOL plugin's "wrap context" for creating IDs is valid */
 } H5CX_t;
 
 /* Typedef for nodes on the API context stack */
@@ -320,7 +324,9 @@ typedef struct H5CX_lapl_cache_t {
 /********************/
 /* Local Prototypes */
 /********************/
+#ifdef H5_HAVE_THREADSAFE
 static H5CX_node_t **H5CX__get_context(void);
+#endif /* H5_HAVE_THREADSAFE */
 static void H5CX__push_common(H5CX_node_t *cnode);
 static H5CX_node_t *H5CX__pop_common(void);
 
@@ -862,7 +868,7 @@ done:
  *
  * Purpose:     Sanity checks and sets up collective operations.
  *
- * Note:	Should be called for all API routines that modify file
+ * Note:        Should be called for all API routines that modify file
  *              file metadata but don't pass in an access property list.
  *
  * Return:      Non-negative on success / Negative on failure
@@ -916,6 +922,40 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5CX_set_vol_wrap_ctx
+ *
+ * Purpose:     Sets the VOL object wrapping context for an operation.
+ *
+ * Return:      Non-negative on success / Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              October 14, 2018
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5CX_set_vol_wrap_ctx(void *vol_wrap_ctx)
+{
+    H5CX_node_t **head = H5CX_get_my_context();  /* Get the pointer to the head of the API context, for this thread */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(head && *head);
+
+    /* Set the API context value */
+    (*head)->ctx.vol_wrap_ctx = vol_wrap_ctx;
+
+    /* Mark the value as valid */
+    (*head)->ctx.vol_wrap_ctx_valid = TRUE;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5CX_set_vol_wrap_ctx() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5CX_get_dxpl
  *
  * Purpose:     Retrieves the DXPL ID for the current API call context.
@@ -965,6 +1005,42 @@ H5CX_get_lapl(void)
 
     FUNC_LEAVE_NOAPI((*head)->ctx.lapl_id)
 } /* end H5CX_get_lapl() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5CX_get_vol_wrap_ctx
+ *
+ * Purpose:     Retrieves the VOL object wrapping context for an operation.
+ *
+ * Return:      Non-negative on success / Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              October 14, 2018
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5CX_get_vol_wrap_ctx(void **vol_wrap_ctx)
+{
+    H5CX_node_t **head = H5CX_get_my_context();  /* Get the pointer to the head of the API context, for this thread */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(vol_wrap_ctx);
+    HDassert(head && *head);
+
+    /* Check for value that was set */
+    if((*head)->ctx.vol_wrap_ctx_valid)
+        /* Get the value */
+        *vol_wrap_ctx = (*head)->ctx.vol_wrap_ctx;
+    else
+        *vol_wrap_ctx = NULL;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5CX_get_vol_wrap_ctx() */
 
 
 /*-------------------------------------------------------------------------
@@ -2470,7 +2546,11 @@ H5CX__pop_common(void)
     H5CX_node_t **head = H5CX_get_my_context();  /* Get the pointer to the head of the API context, for this thread */
     H5CX_node_t *ret_value = NULL;      /* Return value */
 
+#ifdef H5_HAVE_PARALLEL
     FUNC_ENTER_STATIC
+#else
+    FUNC_ENTER_STATIC_NOERR
+#endif
 
     /* Sanity check */
     HDassert(head && *head);
@@ -2495,7 +2575,9 @@ H5CX__pop_common(void)
     ret_value = (*head);
     (*head) = (*head)->next;
 
+#ifdef H5_HAVE_PARALLEL
 done:
+#endif /* H5_HAVE_PARALLEL */
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5CX__pop_common() */
 

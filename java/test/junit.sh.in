@@ -59,11 +59,13 @@ LIST_LIBRARY_FILES="
 $top_builddir/src/.libs/libhdf5.*
 $top_builddir/java/src/jni/.libs/libhdf5_java.*
 "
-LIST_JAR_FILES="
+LIST_JAR_TESTFILES="
 $HDFLIB_HOME/hamcrest-core.jar
 $HDFLIB_HOME/junit.jar
 $HDFLIB_HOME/slf4j-api-1.7.25.jar
 $HDFLIB_HOME/ext/slf4j-simple-1.7.25.jar
+"
+LIST_JAR_FILES="
 $top_builddir/java/src/$JARFILE
 "
 LIST_DATA_FILES="
@@ -109,6 +111,7 @@ $HDFTEST_HOME/testfiles/JUnit-TestH5Giterate.txt
 # copy files from source dirs to test dir
 #
 COPY_LIBFILES="$LIST_LIBRARY_FILES"
+COPY_JARTESTFILES="$LIST_JAR_TESTFILES"
 COPY_JARFILES="$LIST_JAR_FILES"
 
 COPY_LIBFILES_TO_BLDLIBDIR()
@@ -138,6 +141,29 @@ COPY_LIBFILES_TO_BLDLIBDIR()
         fi
     done
     # copy jar files. Used -f to make sure get a new copy
+    for tstfile in $COPY_JARTESTFILES
+    do
+        # ignore '#' comment
+        echo $tstfile | tr -d ' ' | grep '^#' > /dev/null
+        RET=$?
+        if [ $RET -eq 1 ]; then
+            # skip cp if srcdir is same as destdir
+            # this occurs when build/test performed in source dir and
+            # make cp fail
+            SDIR=`$DIRNAME $tstfile`
+            INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
+            INODE_DDIR=`$LS -i -d $BLDLIBDIR | $AWK -F' ' '{print $1}'`
+            if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
+                $CP -f $tstfile $BLDLIBDIR
+                if [ $? -ne 0 ]; then
+                    echo "Error: FAILED to copy $tstfile ."
+
+                    # Comment out this to CREATE expected file
+                    exit $EXIT_FAILURE
+                fi
+            fi
+        fi
+    done
     for tstfile in $COPY_JARFILES
     do
         # ignore '#' comment
@@ -172,7 +198,10 @@ CLEAN_LIBFILES_AND_BLDLIBDIR()
     INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
     INODE_DDIR=`$LS -i -d $BLDLIBDIR | $AWK -F' ' '{print $1}'`
     if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
-        $RM $BLDLIBDIR
+        for tstfile in $COPY_JARTESTFILES
+        do
+            $RM $BLDLIBDIR/tstfile
+        done
     fi
 }
 
@@ -281,11 +310,6 @@ if $TEST -z "$LD_LIBRARY_PATH" ; then
 fi
 
 case  $os_name in
-    Darwin)
-    DYLD_LIBRARY_PATH=$BLDLIBDIR:$DYLD_LIBRARY_PATH
-    export DYLD_LIBRARY_PATH
-    LD_LIBRARY_PATH=$DYLD_LIBRARY_PATH
-    ;;
     *)
     LD_LIBRARY_PATH=$BLDLIBDIR:$LD_LIBRARY_PATH
     ;;
@@ -986,53 +1010,48 @@ else
     test yes = "$verbose" && $DIFF JUnit-TestH5Z.txt JUnit-TestH5Z.out |sed 's/^/    /'
 fi
 
-if test "X-$BUILD_MODE" = "X-production" ; then
-    if test $USE_FILTER_SZIP = "yes"; then
-        echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH -ea org.junit.runner.JUnitCore test.TestH5E"
-        TESTING JUnit-TestH5E
-        ($RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH -ea org.junit.runner.JUnitCore test.TestH5E > JUnit-TestH5E.ext)
+echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH -ea org.junit.runner.JUnitCore test.TestH5E"
+TESTING JUnit-TestH5E
+($RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH -ea org.junit.runner.JUnitCore test.TestH5E > JUnit-TestH5E.ext)
 
-        # Extract file name, line number, version and thread IDs because they may be different
-        sed -e 's/thread [0-9]*/thread (IDs)/' -e 's/: .*\.c /: (file name) /' \
-            -e 's/line [0-9]*/line (number)/' \
-            -e 's/Time: [0-9]*\.[0-9]*/Time:  XXXX/' \
-            -e 's/v[1-9]*\.[0-9]*\./version (number)\./' \
-            -e 's/[1-9]*\.[0-9]*\.[0-9]*[^)]*/version (number)/' \
-            JUnit-TestH5E.ext > JUnit-TestH5E.out
+# Extract file name, line number, version and thread IDs because they may be different
+sed -e 's/thread [0-9]*/thread (IDs)/' -e 's/: .*\.c /: (file name) /' \
+    -e 's/line [0-9]*/line (number)/' \
+    -e 's/Time: [0-9]*\.[0-9]*/Time:  XXXX/' \
+    -e 's/v[1-9]*\.[0-9]*\./version (number)\./' \
+    -e 's/[1-9]*\.[0-9]*\.[0-9]*[^)]*/version (number)/' \
+    JUnit-TestH5E.ext > JUnit-TestH5E.out
 
-        if diff JUnit-TestH5E.out JUnit-TestH5E.txt > /dev/null; then
-            echo "  PASSED      JUnit-TestH5E"
-        else
-            echo "**FAILED**    JUnit-TestH5E"
-            echo "    Expected result differs from actual result"
-            nerrors="`expr $nerrors + 1`"
-            test yes = "$verbose" && $DIFF JUnit-TestH5E.txt JUnit-TestH5E.out |sed 's/^/    /'
-        fi
-    fi
-
-    if test $USE_FILTER_SZIP = "yes"; then
-        echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH -ea org.junit.runner.JUnitCore test.TestH5Edefault"
-        TESTING JUnit-TestH5Edefault
-        ($RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH -ea org.junit.runner.JUnitCore test.TestH5Edefault > JUnit-TestH5Edefault.ext)
-
-        # Extract file name, line number, version and thread IDs because they may be different
-        sed -e 's/thread [0-9]*/thread (IDs)/' -e 's/: .*\.c /: (file name) /' \
-            -e 's/line [0-9]*/line (number)/' \
-            -e 's/Time: [0-9]*\.[0-9]*/Time:  XXXX/' \
-            -e 's/v[1-9]*\.[0-9]*\./version (number)\./' \
-            -e 's/[1-9]*\.[0-9]*\.[0-9]*[^)]*/version (number)/' \
-            JUnit-TestH5Edefault.ext > JUnit-TestH5Edefault.out
-
-        if diff JUnit-TestH5Edefault.out JUnit-TestH5Edefault.txt > /dev/null; then
-            echo "  PASSED      JUnit-TestH5Edefault"
-        else
-            echo "**FAILED**    JUnit-TestH5Edefault"
-            echo "    Expected result differs from actual result"
-            nerrors="`expr $nerrors + 1`"
-            test yes = "$verbose" && $DIFF JUnit-TestH5Edefault.txt JUnit-TestH5Edefault.out |sed 's/^/    /'
-        fi
-    fi
+if diff JUnit-TestH5E.out JUnit-TestH5E.txt > /dev/null; then
+    echo "  PASSED      JUnit-TestH5E"
+else
+    echo "**FAILED**    JUnit-TestH5E"
+    echo "    Expected result differs from actual result"
+    nerrors="`expr $nerrors + 1`"
+    test yes = "$verbose" && $DIFF JUnit-TestH5E.txt JUnit-TestH5E.out |sed 's/^/    /'
 fi
+
+echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH -ea org.junit.runner.JUnitCore test.TestH5Edefault"
+TESTING JUnit-TestH5Edefault
+($RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH -ea org.junit.runner.JUnitCore test.TestH5Edefault > JUnit-TestH5Edefault.ext)
+
+# Extract file name, line number, version and thread IDs because they may be different
+sed -e 's/thread [0-9]*/thread (IDs)/' -e 's/: .*\.c /: (file name) /' \
+    -e 's/line [0-9]*/line (number)/' \
+    -e 's/Time: [0-9]*\.[0-9]*/Time:  XXXX/' \
+    -e 's/v[1-9]*\.[0-9]*\./version (number)\./' \
+    -e 's/[1-9]*\.[0-9]*\.[0-9]*[^)]*/version (number)/' \
+    JUnit-TestH5Edefault.ext > JUnit-TestH5Edefault.out
+
+if diff JUnit-TestH5Edefault.out JUnit-TestH5Edefault.txt > /dev/null; then
+    echo "  PASSED      JUnit-TestH5Edefault"
+else
+    echo "**FAILED**    JUnit-TestH5Edefault"
+    echo "    Expected result differs from actual result"
+    nerrors="`expr $nerrors + 1`"
+    test yes = "$verbose" && $DIFF JUnit-TestH5Edefault.txt JUnit-TestH5Edefault.out |sed 's/^/    /'
+fi
+
 if test $USE_FILTER_SZIP = "yes"; then
     echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH -ea org.junit.runner.JUnitCore test.TestH5Giterate"
     TESTING JUnit-TestH5Giterate

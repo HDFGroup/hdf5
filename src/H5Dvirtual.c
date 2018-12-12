@@ -58,7 +58,7 @@
 #include "H5Oprivate.h"         /* Object headers                       */
 #include "H5Pprivate.h"         /* Property Lists                       */
 #include "H5Sprivate.h"         /* Dataspaces                           */
-
+#include "H5VLprivate.h"        /* Virtual Object Layer                 */
 
 /****************/
 /* Local Macros */
@@ -2961,8 +2961,9 @@ done:
 static herr_t
 H5D__virtual_refresh_source_dset(H5D_t **dset)
 {
-    hid_t       dset_id;                /* Temporary dataset identifier */
-    herr_t      ret_value = SUCCEED;    /* Return value */
+    hid_t           temp_id = H5I_INVALID_HID;          /* Temporary dataset identifier */
+    H5VL_object_t  *vol_obj = NULL;                     /* VOL object stored with the ID */
+    herr_t          ret_value = SUCCEED;                /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -2970,20 +2971,26 @@ H5D__virtual_refresh_source_dset(H5D_t **dset)
     HDassert(dset && *dset);
 
     /* Get a temporary identifier for this source dataset */
-    if((dset_id = H5I_register(H5I_DATASET, *dset, FALSE)) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL, "can't register source dataset ID")
+    if((temp_id = H5VL_wrap_register(H5I_DATASET, *dset, FALSE)) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL, "can't register (temporary) source dataset ID")
 
     /* Refresh source dataset */
-    if(H5D__refresh(dset_id, *dset) < 0)
+    if(H5D__refresh(temp_id, *dset) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTFLUSH, FAIL, "unable to refresh source dataset")
 
     /* Discard the identifier & replace the dataset */
-    if(NULL == (*dset = (H5D_t *)H5I_remove(dset_id)))
+    if(NULL == (vol_obj = (H5VL_object_t *)H5I_remove(temp_id)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTREMOVE, FAIL, "can't unregister source dataset ID")
+    if(NULL == (*dset = (H5D_t *)H5VL_object_data(vol_obj)))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve library object from VOL object")
+    vol_obj->data = NULL;
 
 done:
+    if(vol_obj && H5VL_free_object(vol_obj) < 0)
+        HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "unable to free VOL object")
+
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D__virtual_refresh_source_dsets() */
+} /* end H5D__virtual_refresh_source_dset() */
 
 
 /*-------------------------------------------------------------------------

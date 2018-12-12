@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -11,27 +10,22 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/*-------------------------------------------------------------------------
- *
- * Created:             H5HLpublic.h
- *                      Jul 16 1997
- *                      Robb Matzke <matzke@llnl.gov>
- *
- * Purpose:             Public declarations for the H5HL (local heap) package.
- *
- *-------------------------------------------------------------------------
+/*
+ * Purpose:	This file contains declarations which define macros for the
+ *          H5VL package.  Including this header means that the source file
+ *          is part of the H5VL package.
  */
-#ifndef _H5HLpublic_H
-#define _H5HLpublic_H
 
-/* Public headers needed by this file */
-#include "H5public.h"
+#ifndef _H5VLmodule_H
+#define _H5VLmodule_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+/* Define the proper control macros for the generic FUNC_ENTER/LEAVE and error
+ *      reporting macros.
+ */
+#define H5VL_MODULE
+#define H5_MY_PKG       H5VL
+#define H5_MY_PKG_ERR   H5E_VOL
+#define H5_MY_PKG_INIT  YES
 
-#ifdef __cplusplus
-}
-#endif
-#endif
+#endif /* _H5VLmodule_H */
+

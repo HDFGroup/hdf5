@@ -52,11 +52,13 @@ test -d $BLDLIBDIR || mkdir -p $BLDLIBDIR
 #       Comment '#' without space can be used.
 # --------------------------------------------------------------------
 LIST_LIBRARY_FILES="
-$HDFLIB_HOME/slf4j-api-1.7.25.jar
-$HDFLIB_HOME/ext/slf4j-simple-1.7.25.jar
 $top_builddir/src/.libs/libhdf5.*
 $top_builddir/java/src/jni/.libs/libhdf5_java.*
 $top_builddir/java/src/$JARFILE
+"
+LIST_JAR_TESTFILES="
+$HDFLIB_HOME/slf4j-api-1.7.25.jar
+$HDFLIB_HOME/ext/slf4j-simple-1.7.25.jar
 "
 LIST_DATA_FILES="
 $HDFTEST_HOME/../testfiles/examples.datasets.H5Ex_D_Alloc.txt
@@ -83,11 +85,36 @@ $HDFTEST_HOME/../testfiles/examples.datasets.H5Ex_D_Soint.txt
 # copy files from source dirs to test dir
 #
 COPY_LIBFILES="$LIST_LIBRARY_FILES"
+COPY_JARTESTFILES="$LIST_JAR_TESTFILES"
 
 COPY_LIBFILES_TO_BLDLIBDIR()
 {
     # copy test files. Used -f to make sure get a new copy
     for tstfile in $COPY_LIBFILES
+    do
+        # ignore '#' comment
+        echo $tstfile | tr -d ' ' | grep '^#' > /dev/null
+        RET=$?
+        if [ $RET -eq 1 ]; then
+            # skip cp if srcdir is same as destdir
+            # this occurs when build/test performed in source dir and
+            # make cp fail
+            SDIR=`$DIRNAME $tstfile`
+            INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
+            INODE_DDIR=`$LS -i -d $BLDLIBDIR | $AWK -F' ' '{print $1}'`
+            if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
+                $CP -f $tstfile $BLDLIBDIR
+                if [ $? -ne 0 ]; then
+                    echo "Error: FAILED to copy $tstfile ."
+
+                    # Comment out this to CREATE expected file
+                    exit $EXIT_FAILURE
+                fi
+            fi
+        fi
+    done
+    # copy jar files. Used -f to make sure get a new copy
+    for tstfile in $COPY_JARTESTFILES
     do
         # ignore '#' comment
         echo $tstfile | tr -d ' ' | grep '^#' > /dev/null
@@ -117,11 +144,14 @@ CLEAN_LIBFILES_AND_BLDLIBDIR()
     # skip rm if srcdir is same as destdir
     # this occurs when build/test performed in source dir and
     # make cp fail
-    SDIR=`$DIRNAME $HDFLIB_HOME/slf4j-api-1.7.25.jar`
+    SDIR=$HDFLIB_HOME
     INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
     INODE_DDIR=`$LS -i -d $BLDLIBDIR | $AWK -F' ' '{print $1}'`
     if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
-        $RM $BLDLIBDIR
+        for tstfile in $COPY_JARTESTFILES
+        do
+            $RM $BLDLIBDIR/tstfile
+        done
     fi
 }
 
@@ -215,14 +245,9 @@ if $TEST -z "$LD_LIBRARY_PATH" ; then
 fi
 
 case  $os_name in
-    Darwin)
-    DYLD_LIBRARY_PATH=$BLDLIBDIR:$DYLD_LIBRARY_PATH
-    export DYLD_LIBRARY_PATH
-    LD_LIBRARY_PATH=$DYLD_LIBRARY_PATH
-    ;;
     *)
     LD_LIBRARY_PATH=$BLDLIBDIR:$LD_LIBRARY_PATH
-        ;;
+    ;;
 esac
 
 export LD_LIBRARY_PATH

@@ -78,7 +78,6 @@ typedef struct H5O_info_t_f {
  */
 H5_FCDLL int_f h5fcreate_c(_fcd name, int_f *namelen, int_f *access_flags, hid_t_f *crt_prp, hid_t_f *acc_prp, hid_t_f *file_id);
 H5_FCDLL int_f h5fopen_c(_fcd name, int_f *namelen, int_f *access_flags, hid_t_f *acc_prp, hid_t_f *file_id);
-H5_FCDLL int_f h5fis_hdf5_c(_fcd name, int_f *namelen, int_f *flag);
 H5_FCDLL int_f h5fclose_c(hid_t_f *file_id);
 H5_FCDLL int_f h5fmount_c(hid_t_f *loc_id, _fcd dsetname, int_f *namelen, hid_t_f *file_id, hid_t_f *acc_prp);
 H5_FCDLL int_f h5funmount_c(hid_t_f *loc_id, _fcd dsetname, int_f *namelen);

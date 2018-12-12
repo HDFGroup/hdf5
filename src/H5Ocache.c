@@ -437,7 +437,7 @@ H5O__cache_serialize(const H5F_t *f, void *image, size_t len, void *_thing)
     HDassert(oh->cache_info.type == H5AC_OHDR);
     HDassert(oh->chunk[0].size == len);
 #ifdef H5O_DEBUG
-    H5O_assert(oh);
+    H5O__assert(oh);
 #endif /* H5O_DEBUG */
 
     /* Point to raw data 'image' for first chunk, which 
@@ -1430,9 +1430,9 @@ H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t len, const uint8_t *image
 
         /* Check for combining two adjacent 'null' messages */
         if((udata->file_intent & H5F_ACC_RDWR) &&
-            H5O_NULL_ID == id && oh->nmesgs > 0 &&
-            H5O_NULL_ID == oh->mesg[oh->nmesgs - 1].type->id &&
-            oh->mesg[oh->nmesgs - 1].chunkno == chunkno) {
+                H5O_NULL_ID == id && oh->nmesgs > 0 &&
+                H5O_NULL_ID == oh->mesg[oh->nmesgs - 1].type->id &&
+                oh->mesg[oh->nmesgs - 1].chunkno == chunkno) {
 
             size_t mesgno;          /* Current message to operate on */
 
@@ -1448,7 +1448,7 @@ H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t len, const uint8_t *image
 
             /* Check if we need to extend message table to hold the new message */
             if(oh->nmesgs >= oh->alloc_nmesgs)
-                if(H5O_alloc_msgs(oh, (size_t)1) < 0)
+                if(H5O__alloc_msgs(oh, (size_t)1) < 0)
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTALLOC, FAIL, "can't allocate more space for messages")
 
             /* Get pointer to message to set up */
@@ -1470,9 +1470,9 @@ H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t len, const uint8_t *image
             /* (Usually from future versions of the library) */
             if(id >= H5O_UNKNOWN_ID ||
 #ifdef H5O_ENABLE_BOGUS
-               id == H5O_BOGUS_VALID_ID ||
+                    id == H5O_BOGUS_VALID_ID ||
 #endif
-               NULL == H5O_msg_class_g[id]) {
+                    NULL == H5O_msg_class_g[id]) {
 
                 H5O_unknown_t *unknown;     /* Pointer to "unknown" message info */
 
@@ -1491,9 +1491,9 @@ H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t len, const uint8_t *image
 
                 /* Check for "fail if unknown" message flags */
                 if(((udata->file_intent & H5F_ACC_RDWR) && 
-                    (flags & H5O_MSG_FLAG_FAIL_IF_UNKNOWN_AND_OPEN_FOR_WRITE))
-                    || (flags & H5O_MSG_FLAG_FAIL_IF_UNKNOWN_ALWAYS))
-                        HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "unknown message with 'fail if unknown' flag found")
+                        (flags & H5O_MSG_FLAG_FAIL_IF_UNKNOWN_AND_OPEN_FOR_WRITE))
+                        || (flags & H5O_MSG_FLAG_FAIL_IF_UNKNOWN_ALWAYS))
+                    HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "unknown message with 'fail if unknown' flag found")
                 /* Check for "mark if unknown" message flag, etc. */
                 else if((flags & H5O_MSG_FLAG_MARK_IF_UNKNOWN) &&
                         !(flags & H5O_MSG_FLAG_WAS_UNKNOWN) &&
@@ -1619,7 +1619,7 @@ H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t len, const uint8_t *image
 
 done:
     if(ret_value < 0 && udata->cont_msg_info->msgs) {
-        udata->cont_msg_info->msgs = (H5O_chunk_t *)H5FL_SEQ_FREE(H5O_cont_t, udata->cont_msg_info->msgs);
+        udata->cont_msg_info->msgs = H5FL_SEQ_FREE(H5O_cont_t, udata->cont_msg_info->msgs);
         udata->cont_msg_info->alloc_nmsgs = 0;
     }
     FUNC_LEAVE_NOAPI(ret_value)

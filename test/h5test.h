@@ -142,13 +142,12 @@ H5TEST_DLL int print_func(const char *format, ...);
 H5TEST_DLL int h5_make_local_copy(const char *origfilename, const char *local_copy_name);
 H5TEST_DLL herr_t h5_verify_cached_stabs(const char *base_name[], hid_t fapl);
 H5TEST_DLL H5FD_class_t *h5_get_dummy_vfd_class(void);
+H5TEST_DLL H5VL_class_t *h5_get_dummy_vol_class(void);
 
-/* Functions that will replace VFD-dependent functions that violate
- * the single responsibility principle. Unlike their predecessors,
- * these new functions do not have hidden side effects.
- */
-/* h5_fileaccess() replacement */
-H5TEST_DLL hid_t h5_get_vfd_fapl(void);
+/* Functions that will replace components of a FAPL */
+H5TEST_DLL herr_t h5_get_vfd_fapl(hid_t fapl_id);
+H5TEST_DLL herr_t h5_get_vol_fapl(hid_t fapl_id);
+H5TEST_DLL herr_t h5_get_libver_fapl(hid_t fapl_id);
 
 /* h5_clean_files() replacements */
 H5TEST_DLL void h5_delete_test_file(const char *base_name, hid_t fapl);

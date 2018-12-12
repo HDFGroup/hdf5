@@ -469,7 +469,7 @@ main(void)
     char		filename[1024];
     const char          *FUNC_main="main";
 
-    fprintf(stderr, "   This program tests the Error API compatible with HDF5 v1.6.  There're supposed to be some error messages\n");
+    fprintf(stderr, "   This program tests the Error API compatible with HDF5 v1.6.  There are supposed to be some error messages\n");
     fapl = h5_fileaccess();
 
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);

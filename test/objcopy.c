@@ -21,9 +21,9 @@
 #include "testhdf5.h"
 #include "H5srcdir.h"
 
-#include "H5Bprivate.h"
 #include "H5Iprivate.h"
 #include "H5Pprivate.h"
+#include "H5VLprivate.h"        /* Virtual Object Layer                     */
 
 #define H5F_FRIEND      /*suppress error about including H5Fpkg */
 #define H5F_TESTING
@@ -2151,7 +2151,7 @@ test_copy_dataset_versionbounds(hid_t fcpl_src, hid_t fapl_src)
             buf[i][j] = 10000 + 100*i+j;
 
     /* Create a file access property list for destination file */
-    if ((fapl_dst = H5Pcreate(H5P_FILE_ACCESS)) < 0) TEST_ERROR
+    if ((fapl_dst = h5_fileaccess()) < 0) TEST_ERROR
 
     /* Initialize the filenames */
     h5_fixname(FILENAME[4], fapl_src, src_fname, sizeof src_fname);
@@ -2180,7 +2180,7 @@ test_copy_dataset_versionbounds(hid_t fcpl_src, hid_t fapl_src)
     if (ret < 0) TEST_ERROR
 
     /* Get the internal dset ptr to get the fill version for verifying later */
-    if ((dsetp = (H5D_t *)H5I_object(did_src)) == NULL) TEST_ERROR
+    if ((dsetp = (H5D_t *)H5VL_object(did_src)) == NULL) TEST_ERROR
     srcdset_fillversion = dsetp->shared->dcpl_cache.fill.version;
 
     /* Close dataspace */
@@ -7854,6 +7854,7 @@ test_copy_old_layout(hid_t fcpl_dst, hid_t fapl, hbool_t test_open)
 {
     hid_t fid_src = -1, fid_dst = -1;           /* File IDs */
     hid_t did = -1, did2 = -1;                  /* Dataset IDs */
+    hid_t src_fapl = -1;                        /* Source file FAPL ID */
     const char *src_filename = H5_get_srcdir_filename(FILE_OLD_LAYOUT); /* Corrected test file name */
     char dst_filename[NAME_BUF_SIZE];
 
@@ -7869,8 +7870,14 @@ test_copy_old_layout(hid_t fcpl_dst, hid_t fapl, hbool_t test_open)
     /* Reset file address checking info */
     addr_reset();
 
+    /* Setup */
+    if((src_fapl = h5_fileaccess()) < 0) TEST_ERROR
+
     /* open source file (read-only) */
-    if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, src_fapl)) < 0) TEST_ERROR
+
+    /* Close source FAPL */
+    if(H5Pclose(src_fapl) < 0) TEST_ERROR
 
     /* create destination file */
     if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, fapl)) < 0) TEST_ERROR
@@ -7914,6 +7921,7 @@ test_copy_old_layout(hid_t fcpl_dst, hid_t fapl, hbool_t test_open)
 
 error:
     H5E_BEGIN_TRY {
+        H5Pclose(src_fapl);
         H5Dclose(did2);
         H5Dclose(did);
         H5Fclose(fid_dst);

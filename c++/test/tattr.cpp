@@ -1712,7 +1712,7 @@ static void test_attr_dense_create(FileCreatPropList& fcpl,
         // Close property list
         dcpl.close();
 
-        // H5O_is_attr_dense_test - un-usable
+        // H5O__is_attr_dense_test - un-usable
 
         // Add attributes, until just before converting to dense storage
         char attr_name[NAME_BUF_SIZE];
@@ -1727,7 +1727,7 @@ static void test_attr_dense_create(FileCreatPropList& fcpl,
             attr.write(PredType::NATIVE_UINT, &attr_num);
         } // end for
 
-        // H5O_is_attr_dense_test - un-usable
+        // H5O__is_attr_dense_test - un-usable
 
         { // Add one more attribute, to push into "dense" storage
 
@@ -1815,8 +1815,8 @@ static void test_attr_corder_create_basic(FileCreatPropList& fcpl,
         ds_space.close();
 
         // Check on dataset's attribute storage status.
-        // NOTE: Wrappers not available yet (H5O_is_attr_empty_test
-        // and H5O_is_attr_dense_test)
+        // NOTE: Wrappers not available yet (H5O__is_attr_empty_test
+        // and H5O__is_attr_dense_test)
 
         // Close dataset
         dataset.close();

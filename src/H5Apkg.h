@@ -155,6 +155,21 @@ typedef struct {
     H5A_t       **attrs;        /* Pointer to array of attribute pointers */
 } H5A_attr_table_t;
 
+/* Types for optional attribute VOL operations */
+typedef enum H5VL_attr_optional_t {
+    H5VL_ATTR_ITERATE_OLD               /* H5Aiterate (deprecated routine) */
+                                        /* (This enum value should have an
+                                         *      "#ifndefH5_NO_DEPRECATED_SYMBOLS"
+                                         *      around it, but the compiler
+                                         *      complains about an empty enum
+                                         *      when deprecated symbols are
+                                         *      disabled currently.  When
+                                         *      another enum value is added,
+                                         *      please put the #ifdef around
+                                         *      this symbol.  QAK - 2018/12/06
+                                         */
+} H5VL_attr_optional_t;
+
 
 /*****************************/
 /* Package Private Variables */
@@ -191,37 +206,28 @@ H5_DLL H5A_t *H5A__open_by_name(const H5G_loc_t *loc, const char *obj_name,
     const char *attr_name);
 H5_DLL H5A_t *H5A__open_by_idx(const H5G_loc_t *loc, const char *obj_name,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t n);
+H5_DLL herr_t H5A__open_common(const H5G_loc_t *loc, H5A_t *attr);
 H5_DLL H5A_t *H5A__copy(H5A_t *new_attr, const H5A_t *old_attr);
 H5_DLL hid_t H5A__get_type(H5A_t *attr);
 H5_DLL herr_t H5A__get_info(const H5A_t *attr, H5A_info_t *ainfo);
 H5_DLL hid_t H5A__get_create_plist(H5A_t* attr);
 H5_DLL herr_t H5A__free(H5A_t *attr);
 H5_DLL herr_t H5A__close(H5A_t *attr);
-H5_DLL herr_t H5A__close_cb(H5A_t *attr);
+H5_DLL herr_t H5A__close_cb(H5VL_object_t *attr_vol_obj);
 H5_DLL htri_t H5A__get_ainfo(H5F_t *f, H5O_t *oh, H5O_ainfo_t *ainfo);
 H5_DLL herr_t H5A__set_version(const H5F_t *f, H5A_t *attr);
-H5_DLL herr_t H5A__rename(const H5G_loc_t *loc, const char *old_name,
-    const char *new_name);
 H5_DLL herr_t H5A__rename_by_name(H5G_loc_t loc, const char *obj_name, const char *old_attr_name,
     const char *new_attr_name);
-#ifndef H5_NO_DEPRECATED_SYMBOLS
-H5_DLL int H5A__get_num_attrs(const H5O_loc_t *loc);
-#endif /* H5_NO_DEPRECATED_SYMBOLS */
-H5_DLL herr_t H5A__iterate(hid_t loc_id, H5_index_t idx_type, H5_iter_order_t order,
+H5_DLL herr_t H5A__iterate(const H5G_loc_t *loc, const char *obj_name,H5_index_t idx_type, H5_iter_order_t order,
     hsize_t *idx, H5A_operator2_t op, void *op_data);
-H5_DLL herr_t H5A__iterate_by_name(const H5G_loc_t *loc, const char *obj_name,
-    H5_index_t idx_type, H5_iter_order_t order, hsize_t *idx, H5A_operator2_t op,
-    void *op_data);
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 H5_DLL herr_t H5A__iterate_old(hid_t loc_id, unsigned *attr_num,
     H5A_operator1_t op, void *op_data);
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
-H5_DLL herr_t H5A__delete(const H5G_loc_t *loc, const char *name);
 H5_DLL herr_t H5A__delete_by_name(const H5G_loc_t *loc, const char *obj_name,
     const char *attr_name);
 H5_DLL herr_t H5A__delete_by_idx(const H5G_loc_t *loc, const char *obj_name,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t n);
-H5_DLL htri_t H5A__exists(const H5G_loc_t *loc, const char *name);
 H5_DLL htri_t H5A__exists_by_name(H5G_loc_t loc, const char *obj_name, const char *attr_name);
 H5_DLL herr_t H5A__write(H5A_t *attr, const H5T_t *mem_type, const void *buf);
 H5_DLL herr_t H5A__read(const H5A_t *attr, const H5T_t *mem_type, void *buf);

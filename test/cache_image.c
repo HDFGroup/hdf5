@@ -586,12 +586,12 @@ open_hdf5_file(hbool_t create_file, hbool_t mdci_sbem_expected,
     /* create a file access propertly list. */
     if ( pass ) {
 
-        fapl_id = H5Pcreate(H5P_FILE_ACCESS);
+        fapl_id = h5_fileaccess();
 
         if ( fapl_id < 0 ) {
 
             pass = FALSE;
-            failure_mssg = "H5Pcreate() failed.\n";
+            failure_mssg = "h5_fileaccess() failed.\n";
         }
     }
 
@@ -720,7 +720,7 @@ open_hdf5_file(hbool_t create_file, hbool_t mdci_sbem_expected,
 
         } else {
 
-            file_ptr = (struct H5F_t *)H5I_object_verify(file_id, H5I_FILE);
+            file_ptr = (struct H5F_t *)H5VL_object_verify(file_id, H5I_FILE);
 
             if ( file_ptr == NULL ) {
 
@@ -928,12 +928,12 @@ attempt_swmr_open_hdf5_file(const hbool_t create_file,
     /* create a file access propertly list. */
     if ( pass ) {
 
-        fapl_id = H5Pcreate(H5P_FILE_ACCESS);
+        fapl_id = h5_fileaccess();
 
         if ( fapl_id < 0 ) {
 
             pass = FALSE;
-            failure_mssg = "H5Pcreate() failed.\n";
+            failure_mssg = "h5_fileaccess() failed.\n";
         }
     }
 
@@ -6688,12 +6688,12 @@ cache_image_api_error_check_4(void)
      */
     if ( pass ) {
 
-        fapl_id = H5Pcreate(H5P_FILE_ACCESS);
+        fapl_id = h5_fileaccess();
 
         if ( fapl_id < 0 ) {
 
             pass = FALSE;
-            failure_mssg = "H5Pcreate() failed.\n";
+            failure_mssg = "h5_fileaccess() failed.\n";
         }
     }
 
@@ -6732,7 +6732,7 @@ cache_image_api_error_check_4(void)
 
         } else {
 
-            file_ptr = (struct H5F_t *)H5I_object_verify(file_id, H5I_FILE);
+            file_ptr = (struct H5F_t *)H5VL_object_verify(file_id, H5I_FILE);
 
             if ( file_ptr == NULL ) {
 
@@ -6882,7 +6882,7 @@ cache_image_api_error_check_4(void)
 
         } else {
 
-            file_ptr = (struct H5F_t *)H5I_object_verify(file_id, H5I_FILE);
+            file_ptr = (struct H5F_t *)H5VL_object_verify(file_id, H5I_FILE);
 
             if ( file_ptr == NULL ) {
 
@@ -6960,7 +6960,7 @@ cache_image_api_error_check_4(void)
 
         } else {
 
-            file_ptr = (struct H5F_t *)H5I_object_verify(file_id, H5I_FILE);
+            file_ptr = (struct H5F_t *)H5VL_object_verify(file_id, H5I_FILE);
 
             if ( file_ptr == NULL ) {
 

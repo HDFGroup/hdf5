@@ -441,14 +441,6 @@ set (test_CLEANFILES
     tvlstr.h5
     tvlstr2.h5
     twriteorder.dat
-    flush.h5
-    flush-swmr.h5
-    noflush.h5
-    noflush-swmr.h5
-    flush_extend.h5
-    flush_extend-swmr.h5
-    noflush_extend.h5
-    noflush_extend-swmr.h5
     enum1.h5
     titerate.h5
     ttsafe.h5
@@ -537,6 +529,7 @@ set (test_CLEANFILES
     vds_swmr_src_*.h5
     tmp/vds_src_2.h5
     direct_chunk.h5
+    native_vol_test.h5
 )
 
 # Remove any output file left over from previous test run
@@ -553,6 +546,8 @@ set (H5TEST_SEPARATE_TESTS
     testhdf5
     cache
     cache_image
+    flush1
+    flush2
 )
 foreach (test ${H5_TESTS})
   if (NOT ${test} IN_LIST H5TEST_SEPARATE_TESTS)
@@ -589,7 +584,6 @@ foreach (test ${H5_TESTS})
   endif ()
 endforeach ()
 
-set_tests_properties (H5TEST-flush2 PROPERTIES DEPENDS H5TEST-flush1)
 set_tests_properties (H5TEST-fheap PROPERTIES TIMEOUT 1800)
 set_tests_properties (H5TEST-big PROPERTIES TIMEOUT 1800)
 set_tests_properties (H5TEST-btree2 PROPERTIES TIMEOUT 1800)
@@ -632,7 +626,6 @@ if (BUILD_SHARED_LIBS)
     endif ()
   endforeach ()
 
-  set_tests_properties (H5TEST-shared-flush2 PROPERTIES DEPENDS H5TEST-shared-flush1)
   set_tests_properties (H5TEST-shared-fheap PROPERTIES TIMEOUT 1800)
   set_tests_properties (H5TEST-shared-big PROPERTIES TIMEOUT 1800)
   set_tests_properties (H5TEST-shared-btree2 PROPERTIES TIMEOUT 1800)
@@ -721,6 +714,54 @@ if (BUILD_SHARED_LIBS)
     set_tests_properties (H5TEST-shared-cache PROPERTIES TIMEOUT 1800)
   endif ()
 endif ()
+
+#-- Adding test for flush1/2
+add_test (NAME H5TEST-clear-flush-objects
+    COMMAND    ${CMAKE_COMMAND}
+        -E remove
+        flush.h5
+        flush-swmr.h5
+        noflush.h5
+        noflush-swmr.h5
+        flush_extend.h5
+        flush_extend-swmr.h5
+        noflush_extend.h5
+        noflush_extend-swmr.h5
+    WORKING_DIRECTORY
+        ${HDF5_TEST_BINARY_DIR}/H5TEST
+)
+if (HDF5_ENABLE_USING_MEMCHECKER)
+  add_test (NAME H5TEST-flush1 COMMAND $<TARGET_FILE:flush1>)
+else ()
+  add_test (NAME H5TEST-flush1 COMMAND "${CMAKE_COMMAND}"
+      -D "TEST_PROGRAM=$<TARGET_FILE:flush1>"
+      -D "TEST_ARGS:STRING="
+      -D "TEST_EXPECT=0"
+      -D "TEST_SKIP_COMPARE=TRUE"
+      -D "TEST_OUTPUT=flush1.txt"
+      -D "TEST_FOLDER=${HDF5_TEST_BINARY_DIR}/H5TEST"
+      -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+  )
+endif ()
+set_tests_properties (H5TEST-flush1 PROPERTIES
+    DEPENDS H5TEST-clear-flush-objects
+    ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST;HDF5TestExpress=${HDF_TEST_EXPRESS}"
+    WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
+)
+if (HDF5_ENABLE_USING_MEMCHECKER)
+  add_test (NAME H5TEST-flush2 COMMAND $<TARGET_FILE:flush2>)
+else ()
+  add_test (NAME H5TEST-flush2 COMMAND "${CMAKE_COMMAND}"
+      -D "TEST_PROGRAM=$<TARGET_FILE:flush2>"
+      -D "TEST_ARGS:STRING="
+      -D "TEST_EXPECT=0"
+      -D "TEST_SKIP_COMPARE=TRUE"
+      -D "TEST_OUTPUT=flush2.txt"
+      -D "TEST_FOLDER=${HDF5_TEST_BINARY_DIR}/H5TEST"
+      -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+  )
+endif ()
+set_tests_properties (H5TEST-flush2 PROPERTIES DEPENDS H5TEST-flush1)
 
 #-- Adding test for tcheck_version
 add_test (NAME H5TEST-tcheck_version-major COMMAND $<TARGET_FILE:tcheck_version> "-tM")
@@ -828,9 +869,10 @@ add_test (NAME H5TEST-clear-error_test-objects
 set_tests_properties (H5TEST-clear-error_test-objects PROPERTIES FIXTURES_SETUP error_test_clear_objects)
 if (HDF5_USE_16_API_DEFAULT)
   add_test (
-      NAME H5TEST-error_test-SKIPPED
+      NAME H5TEST-error_test
       COMMAND ${CMAKE_COMMAND} -E echo "SKIP $<TARGET_FILE:error_test>"
   )
+  set_property(TEST H5TEST-error_test PROPERTY DISABLED)
 else ()
   add_test (NAME H5TEST-error_test COMMAND "${CMAKE_COMMAND}"
       -D "TEST_PROGRAM=$<TARGET_FILE:error_test>"
@@ -927,9 +969,10 @@ if (BUILD_SHARED_LIBS)
   set_tests_properties (H5TEST-shared-clear-error_test-objects PROPERTIES FIXTURES_SETUP shared_error_test_clear_objects)
   if (HDF5_USE_16_API_DEFAULT)
     add_test (
-        NAME H5TEST-shared-error_test-SKIPPED
+        NAME H5TEST-shared-error_test
         COMMAND ${CMAKE_COMMAND} -E echo "SKIP $<TARGET_FILE:error_test-shared>"
     )
+    set_property(TEST H5TEST-shared-error_test PROPERTY DISABLED)
   else ()
     add_test (NAME H5TEST-shared-error_test COMMAND "${CMAKE_COMMAND}"
         -D "TEST_PROGRAM=$<TARGET_FILE:error_test-shared>"
@@ -989,42 +1032,44 @@ endif ()
 ##############################################################################
 ###    F I L T E R  P L U G I N  T E S T S
 ##############################################################################
-if (WIN32)
-  set (CMAKE_SEP "\;")
-  set (BIN_REL_PATH "../../")
-else ()
-  set (CMAKE_SEP ":")
-  set (BIN_REL_PATH "../")
-endif ()
+if (BUILD_SHARED_LIBS)
+  if (WIN32)
+    set (CMAKE_SEP "\;")
+    set (BIN_REL_PATH "../../")
+  else ()
+    set (CMAKE_SEP ":")
+    set (BIN_REL_PATH "../")
+  endif ()
 
-add_test (NAME H5PLUGIN-filter_plugin COMMAND $<TARGET_FILE:filter_plugin>)
-set_tests_properties (H5PLUGIN-filter_plugin PROPERTIES
-    ENVIRONMENT "HDF5_PLUGIN_PATH=${CMAKE_BINARY_DIR}/filter_plugin_dir1${CMAKE_SEP}${CMAKE_BINARY_DIR}/filter_plugin_dir2;srcdir=${HDF5_TEST_BINARY_DIR}"
-    WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}
-)
+  add_test (NAME H5PLUGIN-filter_plugin COMMAND $<TARGET_FILE:filter_plugin>)
+  set_tests_properties (H5PLUGIN-filter_plugin PROPERTIES
+      ENVIRONMENT "HDF5_PLUGIN_PATH=${CMAKE_BINARY_DIR}/filter_plugin_dir1${CMAKE_SEP}${CMAKE_BINARY_DIR}/filter_plugin_dir2;srcdir=${HDF5_TEST_BINARY_DIR}"
+      WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}
+  )
 
 ##############################################################################
 # HDFFV-9655 relative plugin test disabled
 #
-#add_test (NAME H5PLUGIN-pluginRelative COMMAND $<TARGET_FILE:plugin>)
-#set_tests_properties (H5PLUGIN-pluginRelative PROPERTIES
-#    ENVIRONMENT "HDF5_PLUGIN_PATH=@/${BIN_REL_PATH}testdir1${CMAKE_SEP}@/${BIN_REL_PATH}testdir2;srcdir=${HDF5_TEST_BINARY_DIR}"
-#    WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}
-#)
+#  add_test (NAME H5PLUGIN-pluginRelative COMMAND $<TARGET_FILE:plugin>)
+#  set_tests_properties (H5PLUGIN-pluginRelative PROPERTIES
+#      ENVIRONMENT "HDF5_PLUGIN_PATH=@/${BIN_REL_PATH}testdir1${CMAKE_SEP}@/${BIN_REL_PATH}testdir2;srcdir=${HDF5_TEST_BINARY_DIR}"
+#      WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}
+#  )
 ##############################################################################
+endif ()
 
 if (TEST_SHELL_SCRIPTS)
   include (ShellTests.cmake)
 endif()
 
 if (ENABLE_EXTENDED_TESTS)
-    ##############################################################################
-    ###    S W M R  T E S T S
-    ##############################################################################
-    #       testflushrefresh.sh: flushrefresh
-    #       test_usecases.sh: use_append_chunk, use_append_mchunks, use_disable_mdc_flushes
-    #       testswmr.sh: swmr*
-    #       testvdsswmr.sh: vds_swmr*
+##############################################################################
+###    S W M R  T E S T S
+##############################################################################
+#       testflushrefresh.sh: flushrefresh
+#       test_usecases.sh: use_append_chunk, use_append_mchunks, use_disable_mdc_flushes
+#       testswmr.sh: swmr*
+#       testvdsswmr.sh: vds_swmr*
 
 #  add_test (NAME H5Test-swmr_check_compat_vfd COMMAND $<TARGET_FILE:swmr_check_compat_vfd>)
 

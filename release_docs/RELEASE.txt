@@ -1,4 +1,4 @@
-HDF5 version 1.11.2 currently under development
+HDF5 version 1.11.4 currently under development
 ================================================================================
 
 
@@ -34,6 +34,7 @@ CONTENTS
 
 - New Features
 - Support for new platforms and languages
+- Bug Fixes since HDF5-1.10.3
 - Bug Fixes since HDF5-1.10.2
 - Supported Platforms
 - Tested Configuration Features Summary
@@ -47,6 +48,44 @@ New Features
 
     Configuration:
     -------------
+    - Add toolchain and cross-compile support
+
+      Added info on using a toolchain file to INSTALL_CMAKE.txt. A
+      toolchain file is also used in cross-compiling, which requires
+      CMAKE_CROSSCOMPILING_EMULATOR to be set. To help with cross-compiling
+      the fortran configure process, the HDF5UseFortran.cmake file macros
+      were improved. Fixed a Fortran configure file issue that incorrectly
+      used #cmakedefine instead of #define.
+
+      (ADB - 2018/10/04, HDFFV-10594)
+
+    - Add warning flags for Intel compilers
+
+      Identified Intel compiler specific warnings flags that should be used
+      instead of GNU flags.
+
+      (ADB - 2018/10/04, TRILABS-21)
+
+    - Add default rpath to targets
+
+      Default rpaths should be set in shared executables and
+      libraries to allow the use of loading dependent libraries
+      without requiring LD_LIBRARY_PATH to be set. The default
+      path should be relative using @rpath on osx and $ORIGIN
+      on linux. Windows is not affected.
+
+      (ADB - 2018/09/26, HDFFV-10594)
+
+    - Add missing USE_110_API_DEFAULT option.
+
+      Option USE_110_API_DEFAULT sets the default version of
+      versioned APIs. The bin/makevers perl script did not set
+      the maxidx variable correctly when the 1.10 branch was
+      created. This caused the versioning process to always use
+      the latest version of any API.
+
+      (ADB - 2018/08/17, HDFFV-10552)
+
     - Added configuration checks for the following MPI functions:
 
       MPI_Mprobe - Used for the Parallel Compression feature
@@ -71,9 +110,15 @@ New Features
 
       (ADB - 2018/07/16)
 
+ 
     Library:
     --------
-    -
+    - Allow pre-generated H5Tinit.c and H5make_libsettings.c to be used.
+
+      Rather than always running H5detect and generating H5Tinit.c and
+      H5make_libsettings.c, supply a location for those files.
+
+      (ADB - 2018/09/18, HDFFV-10332)
 
 
     Parallel Library:
@@ -136,19 +181,6 @@ New Features
 
     Java Library:
     ----------------
-    - Java HDFLibraryException class
-
-      Change parent class from Exception to RuntimeException.
-
-      (ADB - 2018/07/30, HDFFV10534)
-
-    - JNI Read and Write
-
-      Refactored variable-length functions, H5DreadVL and H5AreadVL,
-      to correct dataset and attribute reads. New write functions,
-      H5DwriteVL and H5AwriteVL, are under construction.
-
-      (ADB - 2018/06/02, HDFFV10519)
 
     Tools:
     ------
@@ -173,6 +205,115 @@ New Features
 Support for new platforms, languages and compilers.
 =======================================
     -
+
+Bug Fixes since HDF5-1.10.3 release
+==================================
+
+    Library
+    -------
+    - Allow H5detect and H5make_libsettings to take a file as an argument.
+
+      Rather than only writing to stdout, add a command argument to name
+      the file that H5detect and H5make_libsettings will use for output.
+      Without an argument, stdout is still used, so backwards compatibility
+      is maintained.
+
+      (ADB - 2018/09/05, HDFFV-9059)
+
+    - A bug was discovered in the parallel library where an application
+      would hang if a collective read/write of a chunked dataset occurred
+      when collective metadata reads were enabled and some of the ranks
+      had no selection in the dataset's dataspace. The ranks which had no
+      selection in the dataset's dataspace called H5D__chunk_addrmap() to
+      retrieve the lowest chunk address in the dataset. This is because we
+      require reads/writes to be performed in strictly non-decreasing order
+      of chunk address in the file.
+
+      When the chunk index used was a version 1 or 2 B-tree, these
+      non-participating ranks would issue a collective MPI_Bcast() call
+      that the participating ranks would not issue, causing the hang. Since
+      the non-participating ranks are not actually reading/writing anything,
+      the H5D__chunk_addrmap() call can be safely removed and the address used
+      for the read/write can be set to an arbitrary number (0 was chosen).
+
+      (JTH - 2018/08/25, HDFFV-10501)
+
+    Java Library:
+    ----------------
+    - JNI native library dependencies
+
+      The build for the hdf5_java native library used the wrong
+      hdf5 target library for CMake builds. Correcting the hdf5_java
+      library to build with the shared hdf5 library required testing
+      paths to change also.
+
+      (ADB - 2018/08/31, HDFFV-10568)
+     - Java iterator callbacks
+
+      Change global callback object to a small stack structure in order
+      to fix a runtime crash. This crash was discovered when iterating
+      through a file with nested group members. The global variable
+      visit_callback is overwritten when recursion starts. When recursion
+      completes, visit_callback will be pointing to the wrong callback method.
+
+      (ADB - 2018/08/15, HDFFV-10536)
+
+    - Java HDFLibraryException class
+
+      Change parent class from Exception to RuntimeException.
+
+      (ADB - 2018/07/30, HDFFV-10534)
+
+    - JNI Read and Write
+
+      Refactored variable-length functions, H5DreadVL and H5AreadVL,
+      to correct dataset and attribute reads. New write functions,
+      H5DwriteVL and H5AwriteVL, are under construction.
+
+      (ADB - 2018/06/02, HDFFV-10519)
+
+    Configuration
+    -------------
+    -
+
+    Performance
+    -------------
+    -
+
+    Fortran
+    --------
+    - Made Fortran specific subroutines PRIVATE in generic procedures.
+
+      Effected generic procedures were functions in H5A, H5D, H5P, H5R and H5T.
+    
+      (MSB, 2018/12/04, HDFFV-10511)
+ 
+    Tools
+    -----
+    -
+
+    High-Level APIs:
+    ------
+    -
+
+    Fortran High-Level APIs:
+    ------
+    -
+
+    Documentation
+    -------------
+    -
+
+    F90 APIs
+    --------
+    -
+
+    C++ APIs
+    --------
+    -
+
+    Testing
+    -------
 
 Bug Fixes since HDF5-1.10.2 release
 ==================================
@@ -204,6 +345,39 @@ Bug Fixes since HDF5-1.10.2 release
       on the MPI-3 functions used.
 
       (JTH - 2018/08/02, HDFFV-10512)
+
+    - User's patches: CVEs
+
+      The following patches have been applied:
+
+      CVE-2018-11202 - NULL pointer dereference was discovered in
+                       H5S_hyper_make_spans in H5Shyper.c (HDFFV-10476)
+        https://security-tracker.debian.org/tracker/CVE-2018-11202
+        https://cve.mitre.org/cgi-bin/cvename.cgi?name=3DCVE-2018-11202
+
+      CVE-2018-11203 - A division by zero was discovered in
+                       H5D__btree_decode_key in H5Dbtree.c (HDFFV-10477)
+        https://security-tracker.debian.org/tracker/CVE-2018-11203
+        https://cve.mitre.org/cgi-bin/cvename.cgi?name=3DCVE-2018-11203
+
+      CVE-2018-11204 - A NULL pointer dereference was discovered in
+                       H5O__chunk_deserialize in H5Ocache.c (HDFFV-10478)
+        https://security-tracker.debian.org/tracker/CVE-2018-11204
+        https://cve.mitre.org/cgi-bin/cvename.cgi?name=3DCVE-2018-11204
+
+      CVE-2018-11206 - An out of bound read was discovered in
+                       H5O_fill_new_decode and H5O_fill_old_decode in H5Ofill.c
+                       (HDFFV-10480)
+        https://security-tracker.debian.org/tracker/CVE-2018-11206
+        https://cve.mitre.org/cgi-bin/cvename.cgi?name=3DCVE-2018-11206
+
+      CVE-2018-11207 - A division by zero was discovered in
+                       H5D__chunk_init in H5Dchunk.c  (HDFFV-10481)
+        https://security-tracker.debian.org/tracker/CVE-2018-11207
+        https://cve.mitre.org/cgi-bin/cvename.cgi?name=3DCVE-2018-11207
+
+      (BMR - 2018/7/22, PR#s: 1134 and 1139,
+       HDFFV-10476, HDFFV-10477, HDFFV-10478, HDFFV-10480, HDFFV-10481)
 
     - H5Adelete
 
@@ -297,19 +471,6 @@ Bug Fixes since HDF5-1.10.2 release
       Patches to address these issues were received and incorporated in this version.
 
       (LRK - 2018/07/18, HDFFV-10475)
-
-    - The --enable-debug/production configure flags are listed as 'deprecated'
-      when they should really be listed as 'removed'.
-
-      In the autotools overhaul several years ago, we removed these flags and
-      implemented a new --enable-build-mode= flag. This was done because we
-      changed the semantics of the modes and didn't want users to silently
-      be exposed to them. The newer system is also more flexible and us to
-      add other modes (like 'clean').
-
-      The --enable-debug/production flags are now listed as removed.
-
-      (DER - 2018/05/31, HDFFV-10505)
 
     - Moved the location of gcc attribute.
 
@@ -420,15 +581,14 @@ Supported Platforms
 
     Windows 7                     Visual Studio 2015 w/ Intel Fortran 16 (cmake)
 
-    Windows 7 x64                 Visual Studio 2012 w/ Intel Fortran 15 (cmake)
-                                  Visual Studio 2013 w/ Intel Fortran 15 (cmake)
+    Windows 7 x64                 Visual Studio 2013
                                   Visual Studio 2015 w/ Intel Fortran 16 (cmake)
-                                  Visual Studio 2015 w/ Intel C, Fortran 2017 (cmake)
+                                  Visual Studio 2015 w/ Intel C, Fortran 2018 (cmake)
                                   Visual Studio 2015 w/ MSMPI 8 (cmake)
 
-    Windows 10                    Visual Studio 2015 w/ Intel Fortran 16 (cmake)
+    Windows 10                    Visual Studio 2015 w/ Intel Fortran 18 (cmake)
 
-    Windows 10 x64                Visual Studio 2015 w/ Intel Fortran 16 (cmake)
+    Windows 10 x64                Visual Studio 2015 w/ Intel Fortran 18 (cmake)
                                   Visual Studio 2017 w/ Intel Fortran 18 (cmake)
 
     Mac OS X Yosemite 10.10.5     Apple clang/clang++ version 6.1 from Xcode 7.0

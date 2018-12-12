@@ -4059,7 +4059,7 @@ external_set_elink_acc_flags(const char *env_h5_drvr, hid_t fapl, hbool_t new_fo
     if(H5Fclose(file1) < 0) TEST_ERROR
 
     /* Only run this part with VFDs that support SWMR */
-    if(H5FD_supports_swmr_test(env_h5_drvr)) {
+    if(H5FD__supports_swmr_test(env_h5_drvr)) {
 
         /* Reopen file1, with read-write and SWMR-write access */
         /* Only supported under the latest file format */
@@ -7756,6 +7756,7 @@ done:
             case H5I_ATTR:
             case H5I_REFERENCE:
             case H5I_VFL:
+            case H5I_VOL:
             case H5I_GENPROP_CLS:
             case H5I_GENPROP_LST:
             case H5I_ERROR_CLASS:
@@ -7844,6 +7845,7 @@ done:
             case H5I_ATTR:
             case H5I_REFERENCE:
             case H5I_VFL:
+            case H5I_VOL:
             case H5I_GENPROP_CLS:
             case H5I_GENPROP_LST:
             case H5I_ERROR_CLASS:
@@ -8365,9 +8367,9 @@ ud_callbacks(hid_t fapl, hbool_t new_format)
     if (H5Lget_info(fid, UD_CB_LINK_NAME, &li, H5P_DEFAULT) < 0) TEST_ERROR
     if(li.u.val_size != 16) TEST_ERROR
     if (UD_CB_TYPE != li.type) {
-	H5_FAILED();
-	HDputs("    Unexpected link class - should have been a UD hard link");
-	goto error;
+        H5_FAILED();
+        HDputs("    Unexpected link class - should have been a UD hard link");
+        goto error;
     }
 
     /* Fill the query buffer */
@@ -9015,9 +9017,9 @@ lapl_nlinks(hid_t fapl, hbool_t new_format)
         gid = H5Oopen(fid, "soft5", plist);
     } H5E_END_TRY;
     if (gid >= 0) {
-	H5_FAILED();
-	HDputs("    Should have failed for sequence of too many nested links.");
-	goto error;
+        H5_FAILED();
+        HDputs("    Should have failed for sequence of too many nested links.");
+        goto error;
     }
 
     /* Open object through lesser soft link */
@@ -15061,6 +15063,7 @@ main(void)
 
         /* New group revision feature tests */
         nerrors += corder_create_empty(fapl2) < 0 ? 1 : 0;
+
 /* XXX: when creation order indexing is fully working, go back and add checks
 *      to these tests to make certain that the creation order values are
 *      correct.

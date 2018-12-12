@@ -30,7 +30,6 @@ extern "C" {
 #include "h5gImp.h"
 
 extern JavaVM *jvm;
-extern jobject visit_callback;
 
 /*
  * Class:     hdf_hdf5lib_H5

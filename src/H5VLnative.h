@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -11,29 +10,32 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/*-------------------------------------------------------------------------
- *
- * Created:             H5Bproto.h
- *                      Jul 10 1997
- *                      Robb Matzke <matzke@llnl.gov>
- *
- * Purpose:             Public declarations for the H5B package.
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
+/*
+ * Purpose:	The public header file for the native VOL connector.
  */
-#ifndef _H5Bpublic_H
-#define _H5Bpublic_H
 
-/* Public headers needed by this file */
-#include "H5public.h"
+#ifndef _H5VLnative_H
+#define _H5VLnative_H
+
+/* Identifier for the native VOL connector */
+#define H5VL_NATIVE     (H5VL_native_register())
+
+/* Characteristics of the native VOL connector */
+#define H5VL_NATIVE_NAME        "native"
+#define H5VL_NATIVE_VALUE       H5_VOL_NATIVE   /* enum value */
+#define H5VL_NATIVE_VERSION     0
+
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+H5_DLL hid_t H5VL_native_register(void);
+
+
 #ifdef __cplusplus
 }
 #endif
-#endif
+
+#endif /* _H5VLnative_H */
+

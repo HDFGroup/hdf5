@@ -92,7 +92,7 @@ static herr_t H5S__hyper_num_elem_non_unlim(const H5S_t *space,
 static htri_t H5S__hyper_is_contiguous(const H5S_t *space);
 static htri_t H5S__hyper_is_single(const H5S_t *space);
 static htri_t H5S__hyper_is_regular(const H5S_t *space);
-static void H5S__hyper_adjust_u(H5S_t *space, const hsize_t *offset);
+static herr_t H5S__hyper_adjust_u(H5S_t *space, const hsize_t *offset);
 static herr_t H5S__hyper_project_scalar(const H5S_t *space, hsize_t *offset);
 static herr_t H5S__hyper_project_simple(const H5S_t *space, H5S_t *new_space, hsize_t *offset);
 static herr_t H5S__hyper_iter_init(H5S_sel_iter_t *iter, const H5S_t *space);
@@ -4203,7 +4203,7 @@ H5S__hyper_adjust_u_helper(H5S_hyper_span_info_t *spans,
         H5S_t *space;           IN/OUT: Pointer to dataspace to adjust
         const hsize_t *offset; IN: Offset to subtract
  RETURNS
-    None
+    Non-negative on success, negative on failure
  DESCRIPTION
     Moves a hyperslab selection by subtracting an offset from it.
  GLOBAL VARIABLES
@@ -4211,7 +4211,7 @@ H5S__hyper_adjust_u_helper(H5S_hyper_span_info_t *spans,
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static void
+static herr_t
 H5S__hyper_adjust_u(H5S_t *space, const hsize_t *offset)
 {
     FUNC_ENTER_STATIC_NOERR
@@ -4238,7 +4238,7 @@ H5S__hyper_adjust_u(H5S_t *space, const hsize_t *offset)
         H5S__hyper_span_scratch(space->select.sel_info.hslab->span_lst);
     } /* end if */
 
-    FUNC_LEAVE_NOAPI_VOID
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5S__hyper_adjust_u() */
 
 

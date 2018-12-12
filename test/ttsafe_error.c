@@ -38,7 +38,7 @@
 
 /* Having a common dataset name is an error */
 #define DATASETNAME             "commonname"
-#define EXPECTED_ERROR_DEPTH	7
+#define EXPECTED_ERROR_DEPTH    9
 #define WRITE_NUMBER            37
 
 /* Typedefs */
@@ -73,23 +73,32 @@ tts_error(void)
     expected_g[0].maj_num = H5E_DATASET;
     expected_g[0].min_num = H5E_CANTINIT;
 
-    expected_g[1].maj_num = H5E_DATASET;
-    expected_g[1].min_num = H5E_CANTINIT;
+    expected_g[1].maj_num = H5E_VOL;
+    expected_g[1].min_num = H5E_CANTCREATE;
 
-    expected_g[2].maj_num = H5E_LINK;
-    expected_g[2].min_num = H5E_CANTINIT;
+    expected_g[2].maj_num = H5E_VOL;
+    expected_g[2].min_num = H5E_CANTCREATE;
 
-    expected_g[3].maj_num = H5E_LINK;
-    expected_g[3].min_num = H5E_CANTINSERT;
+    expected_g[3].maj_num = H5E_DATASET;
+    expected_g[3].min_num = H5E_CANTINIT;
 
-    expected_g[4].maj_num = H5E_SYM;
-    expected_g[4].min_num = H5E_NOTFOUND;
+    expected_g[4].maj_num = H5E_DATASET;
+    expected_g[4].min_num = H5E_CANTINIT;
 
-    expected_g[5].maj_num = H5E_SYM;
-    expected_g[5].min_num = H5E_CALLBACK;
+    expected_g[5].maj_num = H5E_LINK;
+    expected_g[5].min_num = H5E_CANTINIT;
 
     expected_g[6].maj_num = H5E_LINK;
-    expected_g[6].min_num = H5E_EXISTS;
+    expected_g[6].min_num = H5E_CANTINSERT;
+
+    expected_g[7].maj_num = H5E_SYM;
+    expected_g[7].min_num = H5E_NOTFOUND;
+
+    expected_g[8].maj_num = H5E_SYM;
+    expected_g[8].min_num = H5E_CALLBACK;
+
+    expected_g[9].maj_num = H5E_LINK;
+    expected_g[9].min_num = H5E_EXISTS;
 
     /* set up mutex for global count of errors */
     H5TS_mutex_init(&error_mutex_g);
@@ -115,7 +124,7 @@ tts_error(void)
         H5TS_wait_for_thread(threads[i]);
 
     if (error_flag_g) {
-        TestErrPrintf("At least one thread reported a value that was different from the exected value\n");
+        TestErrPrintf("At least one thread reported a value that was different from the expected value\n");
         HDprintf("(Update this test if the error stack changed!)\n");
     }
 
