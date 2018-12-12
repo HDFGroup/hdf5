@@ -155,6 +155,21 @@ typedef struct {
     H5A_t       **attrs;        /* Pointer to array of attribute pointers */
 } H5A_attr_table_t;
 
+/* Types for optional attribute VOL operations */
+typedef enum H5VL_attr_optional_t {
+    H5VL_ATTR_ITERATE_OLD               /* H5Aiterate (deprecated routine) */
+                                        /* (This enum value should have an
+                                         *      "#ifndefH5_NO_DEPRECATED_SYMBOLS"
+                                         *      around it, but the compiler
+                                         *      complains about an empty enum
+                                         *      when deprecated symbols are
+                                         *      disabled currently.  When
+                                         *      another enum value is added,
+                                         *      please put the #ifdef around
+                                         *      this symbol.  QAK - 2018/12/06
+                                         */
+} H5VL_attr_optional_t;
+
 
 /*****************************/
 /* Package Private Variables */

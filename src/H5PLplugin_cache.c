@@ -216,7 +216,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5PL__add_plugin(H5PL_type_t type, H5PL_key_t key, H5PL_HANDLE handle)
+H5PL__add_plugin(H5PL_type_t type, const H5PL_key_t *key, H5PL_HANDLE handle)
 {
     herr_t      ret_value = SUCCEED;
 
@@ -229,7 +229,7 @@ H5PL__add_plugin(H5PL_type_t type, H5PL_key_t key, H5PL_HANDLE handle)
 
     /* Store the plugin info and bump the # of plugins */
     H5PL_cache_g[H5PL_num_plugins_g].type       = type;
-    H5PL_cache_g[H5PL_num_plugins_g].key        = key;
+    H5PL_cache_g[H5PL_num_plugins_g].key        = *key;
     H5PL_cache_g[H5PL_num_plugins_g].handle     = handle;
 
     H5PL_num_plugins_g++;

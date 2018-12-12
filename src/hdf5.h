@@ -52,7 +52,8 @@
 #include "H5FDwindows.h"        /* Win32 I/O                                    */
 #endif
 
-/* Virtual object layer drivers */
-#include "H5VLnative.h"         /* Native VOL driver                        */
+/* Virtual object layer (VOL) connectors */
+#include "H5VLnative.h"         /* Native VOL connector                     */
+#include "H5VLpassthru.h"       /* Pass-through VOL connector               */
 
 #endif

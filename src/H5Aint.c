@@ -43,7 +43,6 @@
 #include "H5Opkg.h"             /* Object headers                           */
 #include "H5SMprivate.h"        /* Shared Object Header Messages            */
 #include "H5VLprivate.h"        /* Virtual Object Layer                     */
-#include "H5VLnative_private.h" /* Native VOL driver                        */
 
 
 /****************/
@@ -924,7 +923,7 @@ H5A__get_type(H5A_t *attr)
          * two level IDs, where the VOL object is a copy of the
          * returned datatype
          */
-        if ((ret_value = H5VL_native_register(H5I_DATATYPE, dt, TRUE)) < 0)
+        if ((ret_value = H5VL_wrap_register(H5I_DATATYPE, dt, TRUE)) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize file handle")
     }
     else {
@@ -1156,7 +1155,7 @@ H5A__close_cb(H5VL_object_t *attr_vol_obj)
     HDassert(attr_vol_obj);
 
     /* Close the attribute */
-    if((ret_value = H5VL_attr_close(attr_vol_obj->data, attr_vol_obj->driver->cls, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)) < 0)
+    if((ret_value = H5VL_attr_close(attr_vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CLOSEERROR, FAIL, "problem closing attribute")
 
     /* Free the VOL object */
@@ -2621,7 +2620,7 @@ H5A__iterate(const H5G_loc_t *loc, const char *obj_name, H5_index_t idx_type, H5
     H5G_name_t  obj_path;       /* Opened object group hier. path */
     H5O_loc_t   obj_oloc;       /* Opened object object location */
     hbool_t     loc_found = FALSE;      /* Entry at 'obj_name' found */
-    hid_t       obj_loc_id = (-1);      /* ID for object located */
+    hid_t       obj_loc_id = H5I_INVALID_HID;      /* ID for object located */
     H5A_attr_iter_op_t  attr_op;        /* Attribute operator */
     void        *temp_obj = NULL;
     H5I_type_t  obj_type;
@@ -2648,7 +2647,7 @@ H5A__iterate(const H5G_loc_t *loc, const char *obj_name, H5_index_t idx_type, H5
         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to open object");
 
     /* Get an ID for the object */
-    if((obj_loc_id = H5VL_native_register(obj_type, temp_obj, TRUE)) < 0)
+    if((obj_loc_id = H5VL_wrap_register(obj_type, temp_obj, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register datatype");
 
     /* Call internal attribute iteration routine */
@@ -2660,7 +2659,7 @@ done:
     if(obj_loc_id != H5I_INVALID_HID) {
         if(H5I_dec_app_ref(obj_loc_id) < 0)
             HDONE_ERROR(H5E_ATTR, H5E_CANTDEC, FAIL, "unable to close temporary object");
-    }
+    } /* end if */
     else if(loc_found && H5G_loc_free(&obj_loc) < 0)
         HDONE_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't free location");
 
@@ -2689,7 +2688,7 @@ H5A__iterate_old(hid_t loc_id, unsigned *attr_num, H5A_operator1_t op,
     hsize_t idx;                        /* Index of attribute to start iterating at */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_PACKAGE
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Build attribute operator info */
     attr_op.op_type = H5A_ATTR_OP_APP;
@@ -2700,13 +2699,12 @@ H5A__iterate_old(hid_t loc_id, unsigned *attr_num, H5A_operator1_t op,
 
     /* Call internal attribute iteration routine */
     if((ret_value = H5A__iterate_common(loc_id, H5_INDEX_CRT_ORDER, H5_ITER_INC, &idx, &attr_op, op_data)) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_BADITER, FAIL, "error iterating over attributes")
+        HERROR(H5E_ATTR, H5E_BADITER, "error iterating over attributes");
 
     /* Translate hsize_t index value to legacy unsigned index value*/
     if(attr_num)
         *attr_num = (unsigned)idx;
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5A__iterate_old() */
 #endif /* H5_NO_DEPRECATED_SYMBOLS */

@@ -2086,10 +2086,11 @@ H5_DLL herr_t H5CX_pop(void);
 /*
  * Use this macro for API functions that shouldn't perform _any_ initialization
  *      of the library or an interface, just perform tracing, etc.  Examples
- *      are: H5allocate_memory, H5is_library_threadsafe, etc.
+ *      are: H5allocate_memory, H5is_library_threadsafe, public VOL callback
+ *      wrappers (e.g. H5VLfile_create, H5VLdataset_read, etc.), etc.
  *
  */
-#define FUNC_ENTER_API_NOINIT {{                                              \
+#define FUNC_ENTER_API_NOINIT {{{                                             \
     FUNC_ENTER_API_COMMON                                                     \
     H5_PUSH_FUNC                                                              \
     BEGIN_MPE_LOG                                                             \
@@ -2102,7 +2103,7 @@ H5_DLL herr_t H5CX_pop(void);
  *      are: H5close, H5check_version, etc.
  *
  */
-#define FUNC_ENTER_API_NOINIT_NOERR_NOFS {{                                   \
+#define FUNC_ENTER_API_NOINIT_NOERR_NOFS {{{{                                 \
     FUNC_ENTER_API_VARS                                                       \
     FUNC_ENTER_COMMON_NOERR(H5_IS_API(FUNC));                                 \
     FUNC_ENTER_API_THREADSAFE;                                                \
@@ -2289,14 +2290,14 @@ H5_DLL herr_t H5CX_pop(void);
        (void)H5E_dump_api_stack(TRUE);                                        \
     FUNC_LEAVE_API_THREADSAFE                                                 \
     return(ret_value);                                                        \
-}} /*end scope from beginning of FUNC_ENTER*/
+}}} /*end scope from beginning of FUNC_ENTER*/
 
 /* Use this macro to match the FUNC_ENTER_API_NOINIT_NOERR_NOFS macro */
 #define FUNC_LEAVE_API_NOFS(ret_value)                                        \
     FUNC_LEAVE_API_COMMON(ret_value);                                         \
     FUNC_LEAVE_API_THREADSAFE                                                 \
     return(ret_value);                                                        \
-}} /*end scope from beginning of FUNC_ENTER*/
+}}}} /*end scope from beginning of FUNC_ENTER*/
 
 #define FUNC_LEAVE_NOAPI(ret_value)                                           \
         ;                                                                     \
