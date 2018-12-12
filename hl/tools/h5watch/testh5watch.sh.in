@@ -32,19 +32,19 @@ fi
 #echo
 #exit 0
 
-H5WATCH=h5watch               	# The tool name
-H5WATCH_BIN=`pwd`/$H5WATCH    	# The path of H5WATCH
-EXTEND_DSET=extend_dset 	# Routine to extend the dataset when watching
-EXTEND_BIN=`pwd`/$EXTEND_DSET 	# The path of EXTEND_DSET
+H5WATCH=h5watch                   # The tool name
+H5WATCH_BIN=`pwd`/$H5WATCH        # The path of H5WATCH
+EXTEND_DSET=extend_dset     # Routine to extend the dataset when watching
+EXTEND_BIN=`pwd`/$EXTEND_DSET     # The path of EXTEND_DSET
 #
 EXIT_SUCCESS=0
 EXIT_FAILURE=1
 #
-GEN_TEST=h5watchgentest	      	# Generate HDF5 file with various datasets
-GEN_TEST_BIN=`pwd`/$GEN_TEST 	# Path of the binary GEN_TEST
+GEN_TEST=h5watchgentest              # Generate HDF5 file with various datasets
+GEN_TEST_BIN=`pwd`/$GEN_TEST     # Path of the binary GEN_TEST
 WATCHFILE=`pwd`/WATCH.h5        # The HDF5 file generated to test h5watch
 TESTFILE=TEST.h5                # The temporary file (a copy of WATCH.h5) used by tests
-TRY_MAX=30                      # Try running the test again 
+TRY_MAX=30                      # Try running the test again
 #
 # These 3 defines should be the same as the defines in ./extend_dset.c
 WRITER_MESSAGE=writer_message   # The message file created by the "extend" process
@@ -53,7 +53,7 @@ MESSAGE_TIMEOUT=300             # Message timeout length in secs
 #
 CMP='cmp -s'
 DIFF='diff -c'
-NLINES=20			# Max. lines of output to display if test fails
+NLINES=20            # Max. lines of output to display if test fails
 #
 # Mac OS: just to make sure echo "backslash backslash" behaves properly
 if test `uname -s` = 'Darwin'; then
@@ -83,9 +83,9 @@ TESTING() {
 # Overall algorithm:
 #
 # Run a test and print PASSED or FAILED
-# If a test did not return with the expected return code, 
+# If a test did not return with the expected return code,
 # increment the `nerrors' global variable and (if $verbose is set) display up to $NLINES
-# lines of the actual output from the test.  
+# lines of the actual output from the test.
 # If the test did return the expected code,
 # compare the actual output with the expected output;
 # If the outputs are the same, print PASSED,
@@ -137,7 +137,54 @@ TOOLTEST() {
 
     # Clean up output file
     if test -z "$HDF5_NOCLEANUP"; then
-	rm -f $actual $actual_err
+    rm -f $actual $actual_err
+    fi
+}
+#
+# TOOLTEST_ERR():
+# same as toolset only compare error file
+#
+# Arguments:
+#
+# $1 -- expected output
+# $2 -- expected return code
+# $3 and on -- arguments for h5watch
+TOOLTEST_ERR() {
+    expect="$srcdir/../testfiles/$1"
+    expect_err="$srcdir/../testfiles/`basename $1 .ddl`.err"
+    actual="../testfiles/`basename $1 .ddl`.out"
+    actual_err="../testfiles/`basename $1 .ddl`.out.err"
+    shift
+    retvalexpect=$1
+    shift
+    # Run test.
+    TESTING $H5WATCH $@
+    (
+        $RUNSERIAL $H5WATCH_BIN "$@"
+    ) > $actual 2>$actual_err
+    exitcode=$?
+    if [ $exitcode -ne $retvalexpect ]; then
+        $ECHO "*FAILED*"
+        nerrors="`expr $nerrors + 1`"
+        if [ yes = "$verbose" ]; then
+            $ECHO "test returned with exit code $exitcode"
+            $ECHO "test output: (up to $NLINES lines)"
+            head -$NLINES $actual
+            $ECHO "***end of test output***"
+            $ECHO ""
+        fi
+        elif $CMP $expect_err $actual_err; then
+            $ECHO " PASSED"
+        else
+            $ECHO "*FAILED*"
+            $ECHO "    Expected result differs from actual result"
+            nerrors="`expr $nerrors + 1`"
+            test yes = "$verbose" && $DIFF $expect_err $actual_err |sed 's/^/    /'
+        fi
+
+    # Clean up output file
+    if test -z "$HDF5_NOCLEANUP"; then
+    rm -f $actual $actual_err
     fi
 }
 
@@ -176,15 +223,15 @@ do
     # Wait for message from "extend_dset" process to start h5watch--
     # To wait for the writer message file or till the maximum # of seconds is reached
     # This performs similar function as the routine h5_wait_message() in test/h5test.c
-    mexist=0                                    	# Indicate whether the message file is found
-    t0=`date +%s`                               	# Get current time in seconds
-    difft=0                                     	# Initialize the time difference
-    while [ $difft -lt $MESSAGE_TIMEOUT ] ;     	# Loop till message times out
+    mexist=0                                        # Indicate whether the message file is found
+    t0=`date +%s`                                   # Get current time in seconds
+    difft=0                                         # Initialize the time difference
+    while [ $difft -lt $MESSAGE_TIMEOUT ] ;         # Loop till message times out
     do
-        t1=`date +%s`                           	# Get current time in seconds
-        difft=`expr $t1 - $t0`                  	# Calculate the time difference
+        t1=`date +%s`                               # Get current time in seconds
+        difft=`expr $t1 - $t0`                      # Calculate the time difference
         if [ -e $WRITER_MESSAGE ]; then             # If message file is found:
-            mexist=1                            	#       indicate the message file is found
+            mexist=1                                #       indicate the message file is found
             rm $WRITER_MESSAGE                      #       remove the message file
             break                                   #       get out of the while loop
         fi
@@ -211,8 +258,8 @@ do
         wait $extend_pid                                # Wait for "extend" process to complete
         extend_exit=$?                                  # Collect "extend" process' exit code
         sleep 1                                         # Sleep to make sure output is flushed
-        kill $watch_pid                              	# Kill h5watch
-        wait $watch_pid					                # Wait for "h5watch" process to complete
+        kill $watch_pid                                  # Kill h5watch
+        wait $watch_pid                                    # Wait for "h5watch" process to complete
         #
         if [ $extend_exit -ne 0 ]; then                 # Error returned from "extend" process
             $ECHO "*FAILED*"
@@ -265,7 +312,7 @@ done;
 #       DSET_ONE: one-dimensional dataset                                                       #
 #       DSET_TWO: two-dimensional dataset                                                       #
 #       DSET_CMPD: one-dimensional dataset with compound type                                   #
-#       DSET_CMPD_ESC: one-dimensional dataset with compound type & escape/separator characters	#
+#       DSET_CMPD_ESC: one-dimensional dataset with compound type & escape/separator characters    #
 #       DSET_CMPD_TWO: two-dimensional dataset with compound type                               #
 #                                                                                               #
 #   The following datasets are one-dimensional, chunked, max. dimension setting:                #
@@ -282,11 +329,11 @@ done;
 #################################################################################################
 #                                                                                               #
 # Tests on expected failures:                                                                   #
-#	Invalid file name                                                                           #
-#	Unable to find dataset, invalid dataset                                                     #
-#	  DSET_NONE and DSET_NOMAX                                                                  #
-#	Invalid input to options --width and --polling                                              #
-#	Invalid field names for -f option                                                           #
+#    Invalid file name                                                                           #
+#    Unable to find dataset, invalid dataset                                                     #
+#      DSET_NONE and DSET_NOMAX                                                                  #
+#    Invalid input to options --width and --polling                                              #
+#    Invalid field names for -f option                                                           #
 #                                                                                               #
 #################################################################################################
 #
@@ -296,21 +343,21 @@ $GEN_TEST_BIN
 TOOLTEST w-help1.ddl 0 --help
 #
 # Tests on expected failures
-TOOLTEST w-err-dset1.ddl 1 WATCH.h5
-TOOLTEST w-err-dset2.ddl 1 WATCH.h5/group/DSET_CMPD
-TOOLTEST w-err-dset-none.ddl 1 WATCH.h5/DSET_NONE
-TOOLTEST w-err-dset-nomax.ddl 1 WATCH.h5/DSET_NOMAX
-TOOLTEST w-err-file.ddl 1 ../WATCH.h5/DSET_CMPD
+TOOLTEST_ERR w-err-dset1.ddl 1 WATCH.h5
+TOOLTEST_ERR w-err-dset2.ddl 1 WATCH.h5/group/DSET_CMPD
+TOOLTEST_ERR w-err-dset-none.ddl 1 WATCH.h5/DSET_NONE
+TOOLTEST_ERR w-err-dset-nomax.ddl 1 WATCH.h5/DSET_NOMAX
+TOOLTEST_ERR w-err-file.ddl 1 ../WATCH.h5/DSET_CMPD
 TOOLTEST w-err-width.ddl 1 --width=-8 WATCH.h5/DSET_ONE
 TOOLTEST w-err-poll.ddl 1 --polling=-8 WATCH.h5/DSET_ONE
 TOOLTEST w-err-poll0.ddl 1 --polling=0 WATCH.h5/DSET_ONE
 #
 # Tests on invalid field names via --fields option for a compound typed dataset: DSET_CMPD
-TOOLTEST w-err-cmpd1.ddl 1 --fields=fieldx WATCH.h5/DSET_CMPD
-TOOLTEST w-err-cmpd2.ddl 1 --fields=field1,field2. WATCH.h5/DSET_CMPD
-TOOLTEST w-err-cmpd3.ddl 1 --fields=field1,field2, WATCH.h5/DSET_CMPD
-TOOLTEST w-err-cmpd4.ddl 1 --fields=field1,field2.b.k WATCH.h5/DSET_CMPD
-TOOLTEST w-err-cmpd5.ddl 1 --fields=field1 --fields=field2.b.k WATCH.h5/DSET_CMPD
+TOOLTEST_ERR w-err-cmpd1.ddl 1 --fields=fieldx WATCH.h5/DSET_CMPD
+TOOLTEST_ERR w-err-cmpd2.ddl 1 --fields=field1,field2. WATCH.h5/DSET_CMPD
+TOOLTEST_ERR w-err-cmpd3.ddl 1 --fields=field1,field2, WATCH.h5/DSET_CMPD
+TOOLTEST_ERR w-err-cmpd4.ddl 1 --fields=field1,field2.b.k WATCH.h5/DSET_CMPD
+TOOLTEST_ERR w-err-cmpd5.ddl 1 --fields=field1 --fields=field2.b.k WATCH.h5/DSET_CMPD
 #
 echo "DONE WITH 1st SET OF TESTS"
 #
