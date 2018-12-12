@@ -1175,7 +1175,6 @@ public class H5 implements java.io.Serializable {
 
     public synchronized static native int H5Aread_reg_ref(long attr_id, long mem_type_id, String[] buf)
             throws HDF5LibraryException, NullPointerException;
-            throws HDF5LibraryException, NullPointerException;
 
     public synchronized static native int H5Aread_short(long attr_id, long mem_type_id, short[] buf, boolean isCriticalPinning)
             throws HDF5LibraryException, NullPointerException;
