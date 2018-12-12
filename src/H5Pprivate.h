@@ -44,7 +44,6 @@ typedef struct H5P_genplist_t H5P_genplist_t;
 
 #define H5_COLL_MD_READ_FLAG_NAME "collective_metadata_read"
 
-
 /****************************/
 /* Library Private Typedefs */
 /****************************/
