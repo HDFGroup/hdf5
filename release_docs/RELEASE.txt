@@ -194,6 +194,14 @@ New Features
 
       (DER - 2018/12/30, HDFFV-10566)
 
+    - Changed the default behavior in parallel when reading the same dataset in its entirely
+      (i.e. H5S_ALL dataset selection) which is being read by all the processes collectively.
+      The dataset mush be contiguous, less than 2GB, and of an atomic datatype.
+      The new behavior is the HDF5 library will use an MPI_Bcast to pass the data read from 
+      the disk by the root process to the remain processes in the MPI communicator associated 
+      with the HDF5 file.
+
+      (MSB - 2019/01/02, HDFFV-10652)
 
     Fortran Library:
     ----------------
@@ -208,6 +216,22 @@ New Features
       h5pset_dset_no_attrs_hint_f
 
       (DER - 2019/01/09, TRILAB-45)
+
+    - Added new Fortran derived type, c_h5o_info_t, which is interoperable with
+      C's h5o_info_t. This is needed for callback functions which
+      pass C's h5o_info_t data type definition.
+
+      (MSB, 2019/01/08, HDFFV-10443)
+
+    - Added new Fortran API, H5gmtime, which converts (C) 'time_t' structure
+      to Fortran DATE AND TIME storage format.
+      
+      (MSB, 2019/01/08, HDFFV-10443)
+
+    - Added new Fortran 'fields' optional parameter to: h5ovisit_f, h5oget_info_by_name_f, 
+      h5oget_info, h5oget_info_by_idx and h5ovisit_by_name_f.
+
+      (MSB, 2019/01/08, HDFFV-10443)
 
     C++ Library:
     ------------
@@ -384,6 +408,284 @@ Bug Fixes since HDF5-1.10.3 release
 
       (MSB, 2018/12/04, HDFFV-10511)
 
+<<<<<<< HEAD
+=======
+    - Fixed issue with Fortran not returning h5o_info_t field values 
+      meta_size%attr%index_size and  meta_size%attr%heap_size.
+
+      (MSB, 2018/1/8, HDFFV-10443)
+
+
+    Tools
+    -----
+    -
+
+    High-Level APIs:
+    ------
+    -
+
+    Fortran High-Level APIs:
+    ------
+    -
+
+    Documentation
+    -------------
+    -
+
+    F90 APIs
+    --------
+    -
+
+    C++ APIs
+    --------
+    -
+
+    Testing
+    -------
+
+Bug Fixes since HDF5-1.10.2 release
+==================================
+
+    Library
+    -------
+    - Java HDF5LibraryException class
+
+      The error minor and major values would be lost after the
+      constructor executed.
+
+      Created two local class variables to hold the values obtained during
+      execution of the constructor. Refactored the class functions to retrieve
+      the class values rather then calling the native functions.
+      The native functions were renamed and called only during execution
+      of the constructor.
+      Added error checking to calling class constructors in JNI classes.
+
+      (ADB - 2018/08/06, HDFFV-10544)
+
+    - Added checks of the defined MPI_VERSION to guard against usage of
+      MPI-3 functions in the Parallel Compression and "big Parallel I/O"
+      features when HDF5 is built with MPI-2. Previously, the configure
+      step would pass but the build itself would fail when it could not
+      locate the MPI-3 functions used.
+
+      As a result of these new checks, HDF5 can again be built with MPI-2,
+      but the Parallel Compression feature will be disabled as it relies
+      on the MPI-3 functions used.
+
+      (JTH - 2018/08/02, HDFFV-10512)
+
+    - User's patches: CVEs
+
+      The following patches have been applied:
+
+      CVE-2018-11202 - NULL pointer dereference was discovered in
+                       H5S_hyper_make_spans in H5Shyper.c (HDFFV-10476)
+        https://security-tracker.debian.org/tracker/CVE-2018-11202
+        https://cve.mitre.org/cgi-bin/cvename.cgi?name=3DCVE-2018-11202
+
+      CVE-2018-11203 - A division by zero was discovered in
+                       H5D__btree_decode_key in H5Dbtree.c (HDFFV-10477)
+        https://security-tracker.debian.org/tracker/CVE-2018-11203
+        https://cve.mitre.org/cgi-bin/cvename.cgi?name=3DCVE-2018-11203
+
+      CVE-2018-11204 - A NULL pointer dereference was discovered in
+                       H5O__chunk_deserialize in H5Ocache.c (HDFFV-10478)
+        https://security-tracker.debian.org/tracker/CVE-2018-11204
+        https://cve.mitre.org/cgi-bin/cvename.cgi?name=3DCVE-2018-11204
+
+      CVE-2018-11206 - An out of bound read was discovered in
+                       H5O_fill_new_decode and H5O_fill_old_decode in H5Ofill.c
+                       (HDFFV-10480)
+        https://security-tracker.debian.org/tracker/CVE-2018-11206
+        https://cve.mitre.org/cgi-bin/cvename.cgi?name=3DCVE-2018-11206
+
+      CVE-2018-11207 - A division by zero was discovered in
+                       H5D__chunk_init in H5Dchunk.c  (HDFFV-10481)
+        https://security-tracker.debian.org/tracker/CVE-2018-11207
+        https://cve.mitre.org/cgi-bin/cvename.cgi?name=3DCVE-2018-11207
+
+      (BMR - 2018/7/22, PR#s: 1134 and 1139,
+       HDFFV-10476, HDFFV-10477, HDFFV-10478, HDFFV-10480, HDFFV-10481)
+
+    - H5Adelete
+
+      H5Adelete failed when deleting the last "large" attribute that
+      is stored densely via fractal heap/v2 b-tree.
+
+      After removing the attribute, update the ainfo message.  If the
+      number of attributes goes to zero, remove the message.
+
+      (VC - 2018/07/20, HDFFV-9277)
+
+    - A bug was discovered in the parallel library which caused partial
+      parallel reads of filtered datasets to return incorrect data. The
+      library used the incorrect dataspace for each chunk read, causing
+      the selection used in each chunk to be wrong.
+
+      The bug was not caught during testing because all of the current
+      tests which do parallel reads of filtered data read all of the data
+      using an H5S_ALL selection. Several tests were added which exercise
+      partial parallel reads.
+
+      (JTH - 2018/07/16, HDFFV-10467)
+
+    - A bug was discovered in the parallel library which caused parallel
+      writes of filtered datasets to trigger an assertion failure in the
+      file free space manager.
+
+      This occurred when the filter used caused chunks to repeatedly shrink
+      and grow over the course of several dataset writes. The previous chunk
+      information, such as the size of the chunk and the offset in the file,
+      was being cached and not updated after each write, causing the next write
+      to the chunk to retrieve the incorrect cached information and run into
+      issues when reallocating space in the file for the chunk.
+
+      (JTH - 2018/07/16, HDFFV-10509)
+
+    - A bug was discovered in the parallel library which caused the
+      H5D__mpio_array_gatherv() function to allocate too much memory.
+
+      When the function is called with the 'allgather' parameter set
+      to a non-true value, the function will receive data from all MPI
+      ranks and gather it to the single rank specied by the 'root'
+      parameter. However, the bug in the function caused memory for
+      the received data to be allocated on all MPI ranks, not just the
+      singular rank specified as the receiver. In some circumstances,
+      this would cause an application to fail due to the large amounts
+      of memory being allocated.
+
+      (JTH - 2018/07/16, HDFFV-10467)
+
+    - Error checks in h5stat and when decoding messages
+
+      h5stat exited with seg fault/core dumped when
+      errors are encountered in the internal library.
+
+      Add error checks and --enable-error-stack option to h5stat.
+      Add range checks when decoding messages: old fill value, old
+      layout and refcount.
+
+      (VC - 2018/07/11, HDFFV-10333)
+
+    - If an HDF5 file contains a malformed compound datatype with a
+      suitably large offset, the type conversion code can run off
+      the end of the type conversion buffer, causing a segmentation
+      fault.
+
+      This issue was reported to The HDF Group as issue #CVE-2017-17507.
+
+      NOTE: The HDF5 C library cannot produce such a file. This condition
+            should only occur in a corrupt (or deliberately altered) file
+            or a file created by third-party software.
+
+      THE HDF GROUP WILL NOT FIX THIS BUG AT THIS TIME
+
+      Fixing this problem would involve updating the publicly visible
+      H5T_conv_t function pointer typedef and versioning the API calls
+      which use it. We normally only modify the public API during
+      major releases, so this bug will not be fixed at this time.
+
+      (DER - 2018/02/26, HDFFV-10356)
+
+    Configuration
+    -------------
+    - Applied patches to address Cywin build issues
+
+      There were three issues for Cygwin builds:
+      - Shared libs were not built.
+      - The -std=c99 flag caused a SIG_SETMASK undeclared error.
+      - Undefined errors when buildbing test shared libraries.
+
+      Patches to address these issues were received and incorporated in this version.
+
+      (LRK - 2018/07/18, HDFFV-10475)
+
+    - Moved the location of gcc attribute.
+
+      The gcc attribute(no_sanitize), named as the macro HDF_NO_UBSAN,
+      was located after the function name. Builds with GCC 7 did not
+      indicate any problem, but GCC 8 issued errors. Moved the
+      attribute before the function name, as required.
+
+      (ADB - 2018/05/22, HDFFV-10473)
+
+    - Reworked java test suite into individual JUnit tests.
+
+      Testing the whole suite of java unit tests in a single JUnit run
+      made it difficult to determine actual failures when tests would fail.
+      Running each file set of tests individually, allows individual failures
+      to be diagnosed easier. A side benefit is that tests for optional components
+      of the library can be disabled if not configured.
+
+      (ADB - 2018/05/16, HDFFV-9739)
+
+    - Converted CMake global commands ADD_DEFINITIONS and INCLUDE_DIRECTORIES
+      to use target_* type commands. This change modernizes the CMake usage
+      in the HDF5 library.
+
+      In addition, there is the intention to convert to generator expressions,
+      where possible. The exception is Fortran FLAGS on Windows Visual Studio.
+      The HDF macros TARGET_C_PROPERTIES and TARGET_FORTRAN_PROPERTIES have
+      been removed with this change in usage.
+
+      The additional language (C++ and Fortran) checks have also been localized
+      to only be checked when that language is enabled.
+
+      (ADB - 2018/05/08)
+
+    Performance
+    -------------
+    -
+
+    Fortran
+    --------
+    -
+
+    Tools
+    -----
+    -
+
+    High-Level APIs:
+    ------
+    -
+
+    Fortran High-Level APIs:
+    ------
+    -
+
+    Documentation
+    -------------
+    -
+
+    F90 APIs
+    --------
+    -
+
+    C++ APIs
+    --------
+    - Adding default arguments to existing functions
+
+      Added the following items:
+      + Two more property list arguments are added to H5Location::createDataSet:
+        const DSetAccPropList& dapl = DSetAccPropList::DEFAULT
+        const LinkCreatPropList& lcpl = LinkCreatPropList::DEFAULT
+
+      + One more property list argument is added to H5Location::openDataSet:
+        const DSetAccPropList& dapl = DSetAccPropList::DEFAULT
+
+      (BMR - 2018/07/21, PR# 1146)
+
+    - Improvement C++ documentation
+
+      Replaced the table in main page of the C++ documentation from mht to htm format
+      for portability.
+
+      (BMR - 2018/07/17, PR# 1141)
+
+    Testing
+    -------
+
+>>>>>>> fb5d83e146... Updated Fortran Bug and new features
 Supported Platforms
 ===================
 
