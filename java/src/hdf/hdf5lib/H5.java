@@ -1175,8 +1175,6 @@ public class H5 implements java.io.Serializable {
 
     public synchronized static native int H5Aread_reg_ref(long attr_id, long mem_type_id, String[] buf)
             throws HDF5LibraryException, NullPointerException;
-
-    public synchronized static native int H5Aread_reg_ref_data(long attr_id, long mem_type_id, String[] buf)
             throws HDF5LibraryException, NullPointerException;
 
     public synchronized static native int H5Aread_short(long attr_id, long mem_type_id, short[] buf, boolean isCriticalPinning)
@@ -2081,9 +2079,6 @@ public class H5 implements java.io.Serializable {
     }
 
     public synchronized static native int H5Dread_reg_ref(long dataset_id, long mem_type_id, long mem_space_id,
-            long file_space_id, long xfer_plist_id, String[] buf) throws HDF5LibraryException, NullPointerException;
-
-    public synchronized static native int H5Dread_reg_ref_data(long dataset_id, long mem_type_id, long mem_space_id,
             long file_space_id, long xfer_plist_id, String[] buf) throws HDF5LibraryException, NullPointerException;
 
     public synchronized static native int H5Dread_short(long dataset_id, long mem_type_id, long mem_space_id,

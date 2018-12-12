@@ -222,15 +222,6 @@ Java_hdf_hdf5lib_H5_H5Aread_1reg_1ref
 
 /*
  * Class:     hdf_hdf5lib_H5
- * Method:    H5Aread_reg_ref_data
- * Signature: (JJ[Ljava/lang/String;)I
- */
-JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Aread_1reg_1ref_1data
-  (JNIEnv*, jclass, jlong, jlong, jobjectArray);
-
-/*
- * Class:     hdf_hdf5lib_H5
  * Method:    H5Aget_space
  * Signature: (J)J
  */
