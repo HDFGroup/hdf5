@@ -18,16 +18,16 @@
 
 set (H5WATCH_TEST_FILES
     w-help1.ddl
-    w-err-cmpd1.ddl
-    w-err-cmpd2.ddl
-    w-err-cmpd3.ddl
-    w-err-cmpd4.ddl
-    w-err-cmpd5.ddl
-    w-err-dset1.ddl
-    w-err-dset2.ddl
-    w-err-dset-nomax.ddl
-    w-err-dset-none.ddl
-    w-err-file.ddl
+    w-err-cmpd1.err
+    w-err-cmpd2.err
+    w-err-cmpd3.err
+    w-err-cmpd4.err
+    w-err-cmpd5.err
+    w-err-dset1.err
+    w-err-dset2.err
+    w-err-dset-nomax.err
+    w-err-dset-none.err
+    w-err-file.err
     w-err-poll.ddl
     w-err-poll0.ddl
     w-err-width.ddl
@@ -79,6 +79,25 @@ add_custom_target(H5WATCH_files ALL COMMENT "Copying files needed by H5WATCH tes
               -D "TEST_OUTPUT=${resultfile}.out"
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=${resultfile}.ddl"
+              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+      )
+      set_tests_properties (H5WATCH_ARGS-h5watch-${resultfile} PROPERTIES DEPENDS ${last_test})
+      set (last_test "H5WATCH_ARGS-h5watch-${resultfile}")
+    endif ()
+  endmacro ()
+
+  macro (ADD_H5_ERR_TEST resultfile resultcode)
+    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+      add_test (
+          NAME H5WATCH_ARGS-h5watch-${resultfile}
+          COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5watch>"
+              -D "TEST_ARGS:STRING=${ARGN}"
+              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
+              -D "TEST_OUTPUT=${resultfile}.out"
+              -D "TEST_EXPECT=${resultcode}"
+              -D "TEST_REFERENCE=${resultfile}.mty"
+              -D "TEST_ERRREF=${resultfile}.err"
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
       set_tests_properties (H5WATCH_ARGS-h5watch-${resultfile} PROPERTIES DEPENDS ${last_test})
@@ -162,20 +181,20 @@ if (NOT SWMR_INCOMPAT)
   ADD_H5_TEST (w-help1 0 --help)
 #
 # Tests on expected failures
-  ADD_H5_TEST (w-err-dset1 1 WATCH.h5)
-  ADD_H5_TEST (w-err-dset2 1 WATCH.h5/group/DSET_CMPD)
-  ADD_H5_TEST (w-err-dset-none 1 WATCH.h5/DSET_NONE)
-  ADD_H5_TEST (w-err-dset-nomax 1 WATCH.h5/DSET_NOMAX)
-  ADD_H5_TEST (w-err-file 1 ../WATCH.h5/DSET_CMPD)
+  ADD_H5_ERR_TEST (w-err-dset1 1 WATCH.h5)
+  ADD_H5_ERR_TEST (w-err-dset2 1 WATCH.h5/group/DSET_CMPD)
+  ADD_H5_ERR_TEST (w-err-dset-none 1 WATCH.h5/DSET_NONE)
+  ADD_H5_ERR_TEST (w-err-dset-nomax 1 WATCH.h5/DSET_NOMAX)
+  ADD_H5_ERR_TEST (w-err-file 1 ../WATCH.h5/DSET_CMPD)
   ADD_H5_TEST (w-err-width 1 --width=-8 WATCH.h5/DSET_ONE)
   ADD_H5_TEST (w-err-poll 1 --polling=-8 WATCH.h5/DSET_ONE)
   ADD_H5_TEST (w-err-poll0 1 --polling=0 WATCH.h5/DSET_ONE)
 #
 # Tests on invalid field names via --fields option for a compound typed dataset: DSET_CMPD
-  ADD_H5_TEST (w-err-cmpd1 1 --fields=fieldx WATCH.h5/DSET_CMPD)
-  ADD_H5_TEST (w-err-cmpd2 1 --fields=field1,field2. WATCH.h5/DSET_CMPD)
-  ADD_H5_TEST (w-err-cmpd3 1 --fields=field1,field2, WATCH.h5/DSET_CMPD)
-  ADD_H5_TEST (w-err-cmpd4 1 --fields=field1,field2.b.k WATCH.h5/DSET_CMPD)
-  ADD_H5_TEST (w-err-cmpd5 1 --fields=field1 --fields=field2.b.k WATCH.h5/DSET_CMPD)
+  ADD_H5_ERR_TEST (w-err-cmpd1 1 --fields=fieldx WATCH.h5/DSET_CMPD)
+  ADD_H5_ERR_TEST (w-err-cmpd2 1 --fields=field1,field2. WATCH.h5/DSET_CMPD)
+  ADD_H5_ERR_TEST (w-err-cmpd3 1 --fields=field1,field2, WATCH.h5/DSET_CMPD)
+  ADD_H5_ERR_TEST (w-err-cmpd4 1 --fields=field1,field2.b.k WATCH.h5/DSET_CMPD)
+  ADD_H5_ERR_TEST (w-err-cmpd5 1 --fields=field1 --fields=field2.b.k WATCH.h5/DSET_CMPD)
 #
 endif ()

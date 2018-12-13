@@ -22,10 +22,8 @@
   set (HDF5_REFERENCE_FILES
       h5fc_help.ddl
       h5fc_nooption.ddl
-      h5fc_nonexistfile.ddl
       h5fc_d_file.ddl
       h5fc_dname.ddl
-      h5fc_nonexistdset_file.ddl
       h5fc_v_non_chunked.ddl
       h5fc_v_bt1.ddl
       h5fc_v_ndata_bt1.ddl
@@ -48,6 +46,12 @@
       old_h5fc_ext3_isf.ddl
       h5fc_v_err.ddl
       h5fc_v_err.ddl.err
+  )
+  set (HDF5_REFERENCE_ERR_FILES
+      h5fc_d_file.ddl.err
+      h5fc_dname.err
+      h5fc_nonexistfile.ddl.err
+      h5fc_nonexistdset_file.ddl.err
   )
   set (HDF5_REFERENCE_TEST_FILES
       h5fc_non_v3.h5
@@ -76,6 +80,10 @@
 
   foreach (ddl_file ${HDF5_REFERENCE_FILES})
     HDFTEST_COPY_FILE("${HDF5_TOOLS_TEST_H5FC_SOURCE_DIR}/testfiles/${ddl_file}" "${PROJECT_BINARY_DIR}/testfiles/${ddl_file}" "h5fc_files")
+  endforeach ()
+
+  foreach (h5_file ${HDF5_REFERENCE_ERR_FILES})
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_TEST_H5FC_SOURCE_DIR}/testfiles/${h5_file}" "${PROJECT_BINARY_DIR}/testfiles/${h5_file}" "h5fc_files")
   endforeach ()
 
   foreach (h5_file ${HDF5_REFERENCE_TEST_FILES})
@@ -119,6 +127,7 @@
                   -D "TEST_OUTPUT=${testname}.out"
                   -D "TEST_EXPECT=${resultcode}"
                   -D "TEST_REFERENCE=${resultfile}"
+                  -D "TEST_ERRREF=${resultfile}.err"
                   -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
           )
           set_tests_properties (H5FC-${testname}-${testfile} PROPERTIES DEPENDS "H5FC-${testname}-${testfile}-tmpfile")
@@ -138,6 +147,42 @@
           set_tests_properties (H5FC-${testname}-NA PROPERTIES DEPENDS "H5FC-${testname}-clear-objects")
           set (last_test "H5FC-${testname}-NA")
       endif ()
+    endif ()
+  endmacro ()
+
+  macro (ADD_H5_NOERR_OUTPUT testname resultfile resultcode testfile)
+    # If using memchecker add tests without using scripts
+    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+      add_test (
+          NAME H5FC-${testname}-clear-objects
+          COMMAND    ${CMAKE_COMMAND}
+              -E remove
+              ./testfiles/outtmp.h5
+              ./testfiles/${testname}.out
+              ./testfiles/${testname}.out.err
+      )
+      if (NOT "${last_test}" STREQUAL "")
+        set_tests_properties (H5FC-${testname}-clear-objects PROPERTIES DEPENDS ${last_test})
+      endif ()
+      add_test (
+          NAME H5FC-${testname}-${testfile}-tmpfile
+          COMMAND    ${CMAKE_COMMAND}
+              -E copy_if_different ${HDF5_TOOLS_TEST_H5FC_SOURCE_DIR}/testfiles/${testfile} ./testfiles/outtmp.h5
+      )
+      set_tests_properties (H5FC-${testname}-${testfile}-tmpfile PROPERTIES DEPENDS "H5FC-${testname}-clear-objects")
+      add_test (
+          NAME H5FC-${testname}-${testfile}
+          COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5format_convert>"
+              -D "TEST_ARGS=${ARGN};outtmp.h5"
+              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
+              -D "TEST_OUTPUT=${testname}.out"
+              -D "TEST_EXPECT=${resultcode}"
+              -D "TEST_REFERENCE=${resultfile}"
+              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+      )
+      set_tests_properties (H5FC-${testname}-${testfile} PROPERTIES DEPENDS "H5FC-${testname}-${testfile}-tmpfile")
+      set (last_test "H5FC-${testname}-${testfile}")
     endif ()
   endmacro ()
 
@@ -433,17 +478,17 @@
 # h5format_convert -d /GROUP/DSET_BT2 --verbose old_h5fc_ext_none.h5 (verbose, bt1 dataset)
 # h5format_convert -d /DSET_NDATA_BT2 -v -n old_h5fc_ext_none.h5 (verbose, noop, bt1+nodata dataset)
 # h5format_convert -v old_h5fc_ext_none.h5 (verbose, all datasets)
-  ADD_H5_OUTPUT (h5fc_v_non_chunked h5fc_v_non_chunked.ddl 0 old_h5fc_ext_none.h5 -d /DSET_CONTIGUOUS -v)
-  ADD_H5_OUTPUT (h5fc_v_bt1 h5fc_v_bt1.ddl 0 old_h5fc_ext_none.h5 -d /GROUP/DSET_BT2 --verbose)
-  ADD_H5_OUTPUT (h5fc_v_ndata_bt1 h5fc_v_ndata_bt1.ddl 0 old_h5fc_ext_none.h5 -d /DSET_NDATA_BT2 -v -n)
-  ADD_H5_OUTPUT (h5fc_v_all h5fc_v_all.ddl 0 old_h5fc_ext_none.h5 -v)
+  ADD_H5_NOERR_OUTPUT (h5fc_v_non_chunked h5fc_v_non_chunked.ddl 0 old_h5fc_ext_none.h5 -d /DSET_CONTIGUOUS -v)
+  ADD_H5_NOERR_OUTPUT (h5fc_v_bt1 h5fc_v_bt1.ddl 0 old_h5fc_ext_none.h5 -d /GROUP/DSET_BT2 --verbose)
+  ADD_H5_NOERR_OUTPUT (h5fc_v_ndata_bt1 h5fc_v_ndata_bt1.ddl 0 old_h5fc_ext_none.h5 -d /DSET_NDATA_BT2 -v -n)
+  ADD_H5_NOERR_OUTPUT (h5fc_v_all h5fc_v_all.ddl 0 old_h5fc_ext_none.h5 -v)
 #
 #
 #
 # h5format_convert -d /DSET_EA -v -n h5fc_ext_none.h5 (verbose, noop, one ea dataset)
 # h5format_convert -v -n h5fc_non_v3.h5 (verbose, noop, all datasets)
-  ADD_H5_OUTPUT (h5fc_v_n_1d h5fc_v_n_1d.ddl 0 h5fc_ext_none.h5 -d /DSET_EA -v -n)
-  ADD_H5_OUTPUT (h5fc_v_n_all h5fc_v_n_all.ddl 0 h5fc_non_v3.h5 -v -n)
+  ADD_H5_NOERR_OUTPUT (h5fc_v_n_1d h5fc_v_n_1d.ddl 0 h5fc_ext_none.h5 -d /DSET_EA -v -n)
+  ADD_H5_NOERR_OUTPUT (h5fc_v_n_all h5fc_v_n_all.ddl 0 h5fc_non_v3.h5 -v -n)
 #
 #
 #

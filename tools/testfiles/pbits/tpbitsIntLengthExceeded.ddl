@@ -15,4 +15,3 @@ DATASET "/DS16BITS" {
    }
 }
 }
-h5dump error: Packed Bit offset+length value(17) too large. Max is 16

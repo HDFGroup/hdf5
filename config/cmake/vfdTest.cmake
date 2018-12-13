@@ -32,9 +32,9 @@ if (EXISTS ${TEST_FOLDER}/${TEST_OUTPUT}.err)
 endif ()
 
 # if there is not an error reference file add the error output to the stdout file
-if (NOT TEST_ERRREF)
-  set (ERROR_APPEND 1)
-endif ()
+#if (NOT TEST_ERRREF)
+#  set (ERROR_APPEND 1)
+#endif ()
 
 message (STATUS "USING ${TEST_VFD} ON COMMAND: ${TEST_PROGRAM} ${TEST_ARGS}")
 
