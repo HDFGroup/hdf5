@@ -391,7 +391,7 @@ typedef struct H5F_t H5F_t;
 #define H5F_FIRST_ALLOC_DEALLOC(F) (H5F_get_first_alloc_dealloc(F))
 #define H5F_EOA_PRE_FSM_FSALLOC(F) (H5F_get_eoa_pre_fsm_fsalloc(F))
 #define H5F_MIN_DSET_OHDR(F) (H5F_get_min_dset_ohdr(F))
-#define H5F_SET_MIN_DSET_OHDR(F) (H5F_set_min_dset_ohdr((F), (V)))
+#define H5F_SET_MIN_DSET_OHDR(F, V) (H5F_set_min_dset_ohdr((F), (V)))
 #endif /* H5F_MODULE */
 
 
