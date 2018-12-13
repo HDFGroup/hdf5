@@ -150,7 +150,15 @@ New Features
 
     Java Library:
     ----------------
-    - 
+    - Duplicate the data read/write functions of Datasets for Attributes.
+
+      Region references could not be displayed for attributes as they could
+      for datasets. Datasets had overloaded read and write functions for different
+      datatypes that were not available for attributes. After adding similar
+      functions, attribute region references work normally.
+
+      (ADB - 2018/12/12, HDFVIEW-4)
+
 
     Tools:
     ------
