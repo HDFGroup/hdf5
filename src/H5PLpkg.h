@@ -116,7 +116,7 @@
 /* Data used to search for plugins */
 typedef struct H5PL_search_params_t {
     H5PL_type_t         type;
-    H5PL_key_t          key;
+    const H5PL_key_t   *key;
 } H5PL_search_params_t;
 
 
