@@ -1002,6 +1002,26 @@ if (NOT EXISTS ${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c)
     endif ()
   endif ()
   set_source_files_properties (${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c PROPERTIES GENERATED TRUE)
+else ()
+  add_custom_command (
+      OUTPUT ${HDF5_GENERATED_SOURCE_DIR}/gen_SRCS.stamp1
+      COMMAND    ${CMAKE_COMMAND}
+      ARGS       -E touch ${HDF5_GENERATED_SOURCE_DIR}/gen_SRCS.stamp1
+      DEPENDS    ${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c
+      WORKING_DIRECTORY ${HDF5_GENERATED_SOURCE_DIR}
+  )
+  if (BUILD_SHARED_LIBS)
+    add_custom_command (
+        OUTPUT     ${HDF5_GENERATED_SOURCE_DIR}/shared/shared_gen_SRCS.stamp1
+        COMMAND    ${CMAKE_COMMAND}
+        ARGS       -E copy_if_different "${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c" "${HDF5_GENERATED_SOURCE_DIR}/shared/H5Tinit.c"
+        COMMAND    ${CMAKE_COMMAND}
+        ARGS       -E touch ${HDF5_GENERATED_SOURCE_DIR}/shared/shared_gen_SRCS.stamp1
+        DEPENDS    ${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c
+        WORKING_DIRECTORY ${HDF5_GENERATED_SOURCE_DIR}
+    )
+    set_source_files_properties (${HDF5_GENERATED_SOURCE_DIR}/shared/H5Tinit.c PROPERTIES GENERATED TRUE)
+  endif ()
 endif ()
 
 add_executable (H5make_libsettings ${HDF5_SRC_DIR}/H5make_libsettings.c)
