@@ -1393,6 +1393,9 @@ typedef off_t               h5_stat_size_t;
 #ifndef HDstrtok
     #define HDstrtok(X,Y)    strtok(X,Y)
 #endif /* HDstrtok */
+#ifndef HDstrtok_r
+    #define HDstrtok_r(X,Y,Z) strtok_r(X,Y,Z)
+#endif /* HDstrtok */
 #ifndef HDstrtol
     #define HDstrtol(S,R,N)    strtol(S,R,N)
 #endif /* HDstrtol */

@@ -262,7 +262,7 @@ H5PL_load(H5PL_type_t type, const H5PL_key_t *key)
 
     /* Set up the search parameters */
     search_params.type = type;
-    search_params.key.id = key->id;
+    search_params.key = key;
 
     /* Search in the table of already loaded plugin libraries */
     if(H5PL__find_plugin_in_cache(&search_params, &found, &plugin_info) < 0)
