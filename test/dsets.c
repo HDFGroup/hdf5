@@ -13057,7 +13057,7 @@ test_versionbounds(void)
  *             Failure/error: -1
  *
  * Programmer: Jacob Smith
- *             15 Aug 2018
+ *             2018 August 15
  *
  * Changes:    None.
  *-----------------------------------------------------------------------------
@@ -13075,11 +13075,7 @@ test_object_header_minimization_dcpl(void)
     /* SETUP */
     /*********/
 
-    file_id = H5Fcreate(
-            "some_arbitrary_filename",
-            H5F_ACC_TRUNC,
-            H5P_DEFAULT,
-            H5P_DEFAULT);
+    file_id = H5Fcreate("some_arbitrary_filename", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     if (0 > file_id)
         FAIL_PUTS_ERROR("unable to create test file\n");
 

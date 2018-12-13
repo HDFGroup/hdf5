@@ -2432,10 +2432,7 @@ test_attr_dense_delete(hid_t fcpl, hid_t fapl)
          */
         fcpl = H5Pcopy(fcpl);
         CHECK(fcpl, FAIL, "H5Pcopy");
-        ret = H5Pset_file_space_strategy(
-                fcpl,
-                H5F_FSPACE_STRATEGY_FSM_AGGR,
-                TRUE, 1);
+        ret = H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_FSM_AGGR, TRUE, 1);
         CHECK(ret, FAIL, "H5Pset_file_space_strategy");
     }
     fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, fapl);
@@ -2630,10 +2627,7 @@ test_attr_dense_rename(hid_t fcpl, hid_t fapl)
          */
         fcpl = H5Pcopy(fcpl);
         CHECK(fcpl, FAIL, "H5Pcopy");
-        ret = H5Pset_file_space_strategy(
-                fcpl,
-                H5F_FSPACE_STRATEGY_FSM_AGGR,
-                TRUE, 1);
+        ret = H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_FSM_AGGR, TRUE, 1);
         CHECK(ret, FAIL, "H5Pset_file_space_strategy");
     }
     fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, fapl);
@@ -2808,10 +2802,7 @@ test_attr_dense_unlink(hid_t fcpl, hid_t fapl)
          */
         fcpl = H5Pcopy(fcpl);
         CHECK(fcpl, FAIL, "H5Pcopy");
-        ret = H5Pset_file_space_strategy(
-                fcpl,
-                H5F_FSPACE_STRATEGY_FSM_AGGR,
-                TRUE, 1);
+        ret = H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_FSM_AGGR, TRUE, 1);
         CHECK(ret, FAIL, "H5Pset_file_space_strategy");
     }
     fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, fapl);

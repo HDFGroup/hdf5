@@ -182,13 +182,7 @@ static void test_sohm_extlink(void);
 **
 ****************************************************************/
 static void
-verify_fcpl_values(
-        hid_t           fcpl_id,
-        const unsigned  nindexes_expected,
-        const unsigned *flags_expected,
-        const unsigned *minsizes_expected,
-        unsigned        l2b,
-        unsigned        b2l)
+verify_fcpl_values(hid_t fcpl_id, const unsigned nindexes_expected, const unsigned *flags_expected, const unsigned *minsizes_expected, unsigned l2b, unsigned b2l)
 {
     unsigned  nindexes_actual;
     unsigned  list_size;
@@ -601,10 +595,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static hid_t
-size1_helper(hid_t       file,
-             const char *filename,
-             hid_t       fapl_id,
-             int         test_file_closing)
+size1_helper(hid_t file, const char *filename, hid_t fapl_id, int test_file_closing)
 {
     dtype1_struct wdata;
     dtype1_struct rdata;
@@ -628,22 +619,12 @@ size1_helper(hid_t       file,
 #define TSOHM_S1H_VERIFY_DATA(dset_id, dtype_id) \
 {                                                \
     HDmemset(&rdata, 0, sizeof(rdata));          \
-    if (0 > H5Dread(                             \
-            (dset_id),                           \
-            (dtype_id),                          \
-            H5S_ALL,                             \
-            H5S_ALL,                             \
-            H5P_DEFAULT,                         \
-            &rdata))                             \
-    {                                            \
+    if (0 > H5Dread((dset_id), (dtype_id), H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata)) { \
         H5_FAILED(); AT();                       \
         printf("Can't read data\n");             \
         goto error;                              \
     }                                            \
-    if (rdata.i1 != wdata.i1 ||                  \
-        rdata.i2 != wdata.i2 ||                  \
-        HDstrcmp(rdata.str, wdata.str))          \
-    {                                            \
+    if ((rdata.i1 != wdata.i1) || (rdata.i2 != wdata.i2) || HDstrcmp(rdata.str, wdata.str)) { \
         H5_FAILED(); AT();                       \
         printf("incorrect read data\n");         \
         goto error;                              \
@@ -763,12 +744,7 @@ size1_helper(hid_t       file,
  *----------------------------------------------------------------------------
  */
 static h5_stat_size_t
-getsize_testsize1(
-        const char *filename,
-        hid_t       fcpl_id,
-        hid_t       fapl_id,
-        unsigned    open_close,
-        H5O_info_t *oinfo)
+getsize_testsize1(const char *filename, hid_t fcpl_id, hid_t fapl_id, unsigned open_close, H5O_info_t *oinfo)
 {
     hid_t file = -1;
     herr_t ret;
@@ -779,12 +755,7 @@ getsize_testsize1(
     file = size1_helper(file, FILENAME, fapl_id, open_close);
     CHECK_I(file, "size1_helper");
 
-    ret = H5Oget_info_by_name2(
-            file,
-            DSETNAME[0],
-            oinfo,
-            H5O_INFO_HDR,
-            H5P_DEFAULT);
+    ret = H5Oget_info_by_name2(file, DSETNAME[0], oinfo, H5O_INFO_HDR, H5P_DEFAULT);
     CHECK_I(ret, "H5Oget_info_by_name");
 
     ret = H5Fclose(file);
@@ -801,11 +772,6 @@ getsize_testsize1(
  *
  * Programmer:  James Laird
  *              Monday, April 10, 2006
- *
- * Modifications:
- *              2018 November 1 - Jacob Smith
- *              Heavily refactored to re-use and loop over patterns of
- *              file creation, setup, and size read.
  *
  *-------------------------------------------------------------------------
  */
@@ -871,20 +837,13 @@ test_sohm_size1(void)
                 /* Tests one index holding only datatype messages */
                 ret = H5Pset_shared_mesg_nindexes(fcpl_id, num_indexes);
                 CHECK_I(ret, "H5Pset_shared_mesg_nindexes");
-                ret = H5Pset_shared_mesg_index(
-                        fcpl_id,
-                        0,
-                        index_flags,
-                        min_mesg_size);
+                ret = H5Pset_shared_mesg_index(fcpl_id, 0, index_flags, min_mesg_size);
                 CHECK_I(ret, "H5Pset_shared_mesg_index");
 
                 if (use_btree) {
                     ret = H5Pset_shared_mesg_phase_change(fcpl_id, 0, 0);
                 } else {
-                    ret = H5Pset_shared_mesg_phase_change(
-                        fcpl_id,
-                        list_max,
-                        btree_min);
+                    ret = H5Pset_shared_mesg_phase_change(fcpl_id, list_max, btree_min);
                 }
                 CHECK_I(ret, "H5Pset_shared_mesg_phase_change");
             } else {
@@ -901,14 +860,8 @@ test_sohm_size1(void)
             file_sizes[size_index++] = h5_get_file_size(FILENAME, fapl_id);
 
             /* size of populated file, with different populating behaviors */
-            for (open_close = 0; open_close < 2; open_close++) {
-                file_sizes[size_index++] = getsize_testsize1(
-                        FILENAME,
-                        fcpl_id,
-                        fapl_id,
-                        open_close,
-                        &oinfo);
-            }
+            for (open_close = 0; open_close < 2; open_close++)
+                file_sizes[size_index++] = getsize_testsize1(FILENAME, fcpl_id, fapl_id, open_close, &oinfo);
             oh_sizes[oh_size_index++] = oinfo.hdr.space.total;
 
             ret = H5Pclose(fcpl_id);
@@ -1061,12 +1014,7 @@ test_sohm_size_consistency_open_create(void)
         CHECK_I(file, "size1_helper");
 
         /* Get the size of a dataset object header */
-        ret = H5Oget_info_by_name2(
-                file,
-                DSETNAME[0],
-                &oinfo,
-                H5O_INFO_HDR,
-                H5P_DEFAULT);
+        ret = H5Oget_info_by_name2(file, DSETNAME[0], &oinfo, H5O_INFO_HDR, H5P_DEFAULT);
         CHECK_I(ret, "H5Oget_info_by_name");
         oh_size_open = oinfo.hdr.space.total;
 
@@ -1081,12 +1029,7 @@ test_sohm_size_consistency_open_create(void)
         CHECK_I(file, "size1_helper");
 
         /* Get the size of a dataset object header */
-        ret = H5Oget_info_by_name2(
-                file,
-                DSETNAME[0],
-                &oinfo,
-                H5O_INFO_HDR,
-                H5P_DEFAULT);
+        ret = H5Oget_info_by_name2(file, DSETNAME[0], &oinfo, H5O_INFO_HDR, H5P_DEFAULT);
         CHECK_I(ret, "H5Oget_info_by_name");
         oh_size_create = oinfo.hdr.space.total;
 
@@ -1116,11 +1059,6 @@ test_sohm_size_consistency_open_create(void)
  *
  * Programmer:  James Laird
  *              Thursday, November 30, 2006
- *
- * Modifications:
- *              2018 November 2 - Jacob Smith
- *              Heavily refactored to re-use and loop over patterns of
- *              file creation, setup, and size read.
  *
  *-------------------------------------------------------------------------
  */
@@ -1161,12 +1099,7 @@ sohm_attr_helper(hid_t fcpl_id)
         hid_t attr_read_id;
 
         /* create group in file with name unique to op_index */
-        group_id = H5Gcreate2(
-                file_id,
-                groupnames[op_index],
-                H5P_DEFAULT,
-                H5P_DEFAULT,
-                H5P_DEFAULT);
+        group_id = H5Gcreate2(file_id, groupnames[op_index], H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         CHECK_I(group_id, "H5Gcreate2");
 
         type_id = H5Tcopy(H5T_NATIVE_INT);
@@ -1176,23 +1109,11 @@ sohm_attr_helper(hid_t fcpl_id)
          * Only do this ONCE.
          */
         if (op_index == 1) {
-            ret = H5Tcommit2(
-                    file_id,
-                    "datatype",
-                    type_id,
-                    H5P_DEFAULT,
-                    H5P_DEFAULT,
-                    H5P_DEFAULT);
+            ret = H5Tcommit2(file_id, "datatype", type_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
             CHECK_I(ret, "H5Tcommit2");
         }
 
-        attr_id = H5Acreate2(
-                group_id,
-                "attribute",
-                type_id,
-                space_id,
-                H5P_DEFAULT,
-                H5P_DEFAULT);
+        attr_id = H5Acreate2(group_id, "attribute", type_id, space_id, H5P_DEFAULT, H5P_DEFAULT);
         CHECK_I(attr_id, "H5Acreate2");
 
         if (op_index == 2) {
@@ -1248,12 +1169,6 @@ sohm_attr_helper(hid_t fcpl_id)
  *
  * Programmer:  James Laird
  *              Thursday, November 30, 2006
- *
- * Modifications:
- *              2018 November 5 - Jacob Smith
- *              Heavy refactoring.
- *              Add test for duplicate flag in separate index.
- *              Add test for 'missing' flag index.
  *
  *-------------------------------------------------------------------------
  */
@@ -1439,34 +1354,23 @@ size2_verify_plist1(hid_t plist)
     /* Hardcoded to correspond to dcpl1_id created in size2_helper */
     /* Check filters */
     cd_nelmts = 1;
-    filter = H5Pget_filter2(plist, 0, NULL, &cd_nelmts, &cd_value,
-                            (size_t)NAME_BUF_SIZE, name, NULL);
+    filter = H5Pget_filter2(plist, 0, NULL, &cd_nelmts, &cd_value, (size_t)NAME_BUF_SIZE, name, NULL);
     CHECK_I(filter, "H5Pget_filter2");
     VERIFY(filter, H5Z_FILTER_SHUFFLE, "H5Pget_filter2");
 
     cd_nelmts = 1;
-    filter = H5Pget_filter2(plist, 1, NULL, &cd_nelmts, &cd_value,
-                            (size_t)NAME_BUF_SIZE, name, NULL);
+    filter = H5Pget_filter2(plist, 1, NULL, &cd_nelmts, &cd_value, (size_t)NAME_BUF_SIZE, name, NULL);
     CHECK_I(filter, "H5Pget_filter2");
     VERIFY(filter, H5Z_FILTER_DEFLATE, "H5Pget_filter2");
     VERIFY(cd_value, 1, "H5Pget_filter2");
 
     cd_nelmts = 1;
-    filter = H5Pget_filter2(
-            plist,
-            2,
-            NULL,
-            &cd_nelmts,
-            &cd_value,
-            (size_t)NAME_BUF_SIZE,
-            name,
-            NULL);
+    filter = H5Pget_filter2(plist, 2, NULL, &cd_nelmts, &cd_value, (size_t)NAME_BUF_SIZE, name, NULL);
     CHECK_I(filter, "H5Pget_filter2");
     VERIFY(filter, H5Z_FILTER_SHUFFLE, "H5Pget_filter2");
 
     cd_nelmts = 1;
-    filter = H5Pget_filter2(plist, 3, NULL, &cd_nelmts, &cd_value,
-                            (size_t)NAME_BUF_SIZE, name, NULL);
+    filter = H5Pget_filter2(plist, 3, NULL, &cd_nelmts, &cd_value, (size_t)NAME_BUF_SIZE, name, NULL);
     CHECK_I(filter, "H5Pget_filter2");
     VERIFY(filter, H5Z_FILTER_FLETCHER32, "H5Pget_filter2");
 
@@ -1514,36 +1418,31 @@ size2_verify_plist2(hid_t plist)
     /* Hardcoded to correspond to dcpl1_id created in size2_helper */
     /* Check filters */
     cd_nelmts = 1;
-    filter = H5Pget_filter2(plist, 0, NULL, &cd_nelmts, &cd_value,
-                            (size_t)NAME_BUF_SIZE, name, NULL);
+    filter = H5Pget_filter2(plist, 0, NULL, &cd_nelmts, &cd_value, (size_t)NAME_BUF_SIZE, name, NULL);
     CHECK_I(filter, "H5Pget_filter2");
     VERIFY(filter, H5Z_FILTER_DEFLATE, "H5Pget_filter2");
     VERIFY(cd_value, 1, "H5Pget_filter2");
 
     cd_nelmts = 1;
-    filter = H5Pget_filter2(plist, 1, NULL, &cd_nelmts, &cd_value,
-                            (size_t)NAME_BUF_SIZE, name, NULL);
+    filter = H5Pget_filter2(plist, 1, NULL, &cd_nelmts, &cd_value, (size_t)NAME_BUF_SIZE, name, NULL);
     CHECK_I(filter, "H5Pget_filter2");
     VERIFY(filter, H5Z_FILTER_DEFLATE, "H5Pget_filter2");
     VERIFY(cd_value, 2, "H5Pget_filter2");
 
     cd_nelmts = 1;
-    filter = H5Pget_filter2(plist, 2, NULL, &cd_nelmts, &cd_value,
-                            (size_t)NAME_BUF_SIZE, name, NULL);
+    filter = H5Pget_filter2(plist, 2, NULL, &cd_nelmts, &cd_value, (size_t)NAME_BUF_SIZE, name, NULL);
     CHECK_I(filter, "H5Pget_filter2");
     VERIFY(filter, H5Z_FILTER_DEFLATE, "H5Pget_filter2");
     VERIFY(cd_value, 2, "H5Pget_filter2");
 
     cd_nelmts = 1;
-    filter = H5Pget_filter2(plist, 3, NULL, &cd_nelmts, &cd_value,
-                            (size_t)NAME_BUF_SIZE, name, NULL);
+    filter = H5Pget_filter2(plist, 3, NULL, &cd_nelmts, &cd_value, (size_t)NAME_BUF_SIZE, name, NULL);
     CHECK_I(filter, "H5Pget_filter2");
     VERIFY(filter, H5Z_FILTER_DEFLATE, "H5Pget_filter2");
     VERIFY(cd_value, 1, "H5Pget_filter2");
 
     cd_nelmts = 1;
-    filter = H5Pget_filter2(plist, 4, NULL, &cd_nelmts, &cd_value,
-                            (size_t)NAME_BUF_SIZE, name, NULL);
+    filter = H5Pget_filter2(plist, 4, NULL, &cd_nelmts, &cd_value, (size_t)NAME_BUF_SIZE, name, NULL);
     CHECK_I(filter, "H5Pget_filter2");
     VERIFY(filter, H5Z_FILTER_DEFLATE, "H5Pget_filter2");
     VERIFY(cd_value, 5, "H5Pget_filter2");
@@ -1584,29 +1483,14 @@ static void
 size2_dump_struct(const char *name, size2_helper_struct *sizes)
 {
   puts(name);
-  printf("    empty size: %llu\n",
-         (unsigned long long)sizes->empty_size);
-  printf(" first dataset: %llu \tdelta: %llu\n",
-         (unsigned long long)sizes->first_dset,
-         (unsigned long long)(sizes->first_dset - sizes->empty_size));
-  printf("second dataset: %llu \tdelta: %llu\n",
-         (unsigned long long)sizes->second_dset,
-         (unsigned long long)(sizes->second_dset - sizes->first_dset));
-  printf("       dsets 1: %llu \tdelta: %llu\n",
-         (unsigned long long)sizes->dsets1,
-         (unsigned long long)(sizes->dsets1 - sizes->second_dset));
-  printf("       dsets 2: %llu \tdelta: %llu\n",
-         (unsigned long long)sizes->dsets2,
-         (unsigned long long)(sizes->dsets2 - sizes->dsets1));
-  printf("   interleaved: %llu \tdelta: %llu\n",
-         (unsigned long long)sizes->interleaved,
-         (unsigned long long)(sizes->interleaved - sizes->dsets2));
-  printf("    attributes: %llu \tdelta: %llu\n",
-         (unsigned long long)sizes->attrs1,
-         (unsigned long long)(sizes->attrs1 - sizes->interleaved));
-  printf("  attributes 2: %llu \tdelta: %llu\n",
-         (unsigned long long)sizes->attrs2,
-         (unsigned long long)(sizes->attrs2 - sizes->attrs1));
+  printf("    empty size: %llu\n", (unsigned long long)sizes->empty_size);
+  printf(" first dataset: %llu \tdelta: %llu\n", (unsigned long long)sizes->first_dset, (unsigned long long)(sizes->first_dset - sizes->empty_size));
+  printf("second dataset: %llu \tdelta: %llu\n", (unsigned long long)sizes->second_dset, (unsigned long long)(sizes->second_dset - sizes->first_dset));
+  printf("       dsets 1: %llu \tdelta: %llu\n", (unsigned long long)sizes->dsets1, (unsigned long long)(sizes->dsets1 - sizes->second_dset));
+  printf("       dsets 2: %llu \tdelta: %llu\n", (unsigned long long)sizes->dsets2, (unsigned long long)(sizes->dsets2 - sizes->dsets1));
+  printf("   interleaved: %llu \tdelta: %llu\n", (unsigned long long)sizes->interleaved, (unsigned long long)(sizes->interleaved - sizes->dsets2));
+  printf("    attributes: %llu \tdelta: %llu\n", (unsigned long long)sizes->attrs1, (unsigned long long)(sizes->attrs1 - sizes->interleaved));
+  printf("  attributes 2: %llu \tdelta: %llu\n", (unsigned long long)sizes->attrs2, (unsigned long long)(sizes->attrs2 - sizes->attrs1));
 } /* size2_dump_struct */
 #endif /* NOT_NOW */
 
@@ -1634,10 +1518,7 @@ size2_dump_struct(const char *name, size2_helper_struct *sizes)
  *-------------------------------------------------------------------------
  */
 static int
-size2_helper(                                   \
-        hid_t                fcpl_id,           \
-        int                  test_file_closing, \
-        size2_helper_struct *ret_sizes)
+size2_helper(hid_t fcpl_id, int test_file_closing, size2_helper_struct *ret_sizes)
 {
     hid_t file_id = -1;
     hid_t dtype1_id = -1;
@@ -2838,32 +2719,13 @@ delete_helper_write(hid_t file_id, hid_t *dspace_id, hid_t *dcpl_id, int x)
     char   wdata;
     herr_t ret;
 
-    dset_id = H5Dcreate2(
-            file_id,
-            DSETNAME[x],
-            H5T_NATIVE_CHAR,
-            dspace_id[x],
-            H5P_DEFAULT,
-            dcpl_id[x],
-            H5P_DEFAULT);
+    dset_id = H5Dcreate2(file_id, DSETNAME[x], H5T_NATIVE_CHAR, dspace_id[x], H5P_DEFAULT, dcpl_id[x], H5P_DEFAULT);
     CHECK_I(dset_id, "H5Dcreate2");
     wdata = (char)(x + 'a');
-    ret = H5Dwrite(
-            dset_id,
-            H5T_NATIVE_CHAR,
-            dspace_id[x],
-            dspace_id[x],
-            H5P_DEFAULT,
-            &wdata);
+    ret = H5Dwrite(dset_id, H5T_NATIVE_CHAR, dspace_id[x], dspace_id[x], H5P_DEFAULT, &wdata);
     CHECK_I(ret, "H5Dwrite");
 
-    attr_id = H5Acreate2(
-            dset_id,
-            "attr_name",
-            H5T_NATIVE_CHAR,
-            dspace_id[x],
-            H5P_DEFAULT,
-            H5P_DEFAULT);
+    attr_id = H5Acreate2(dset_id, "attr_name", H5T_NATIVE_CHAR, dspace_id[x], H5P_DEFAULT, H5P_DEFAULT);
     CHECK_I(attr_id, "H5Acreate2");
     ret = H5Awrite(attr_id, H5T_NATIVE_CHAR, &wdata);
     CHECK_I(ret, "H5Awrite");
@@ -2899,13 +2761,7 @@ delete_helper_read(hid_t file_id, hid_t *dspace_id, int x)
     dset_id = H5Dopen2(file_id, DSETNAME[x], H5P_DEFAULT);
     CHECK_I(dset_id, "H5Dopen2");
     rdata = '\0';
-    ret = H5Dread(
-            dset_id,
-            H5T_NATIVE_CHAR,
-            dspace_id[x],
-            dspace_id[x],
-            H5P_DEFAULT,
-            &rdata);
+    ret = H5Dread(dset_id, H5T_NATIVE_CHAR, dspace_id[x], dspace_id[x], H5P_DEFAULT, &rdata);
     CHECK_I(ret, "H5Dread");
     VERIFY(rdata, (x + 'a'), "H5Dread");
 
@@ -3491,7 +3347,7 @@ verify_dataset_extension(hid_t fcpl_id, hbool_t close_reopen)
     hsize_t *space_dims[3];
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
- * Macro:      TSOHM_EDH_VERIFY_SPACES
+ * Macro:      TSOHM_VDE_VERIFY_SPACES
  *
  * Purpose:    Encapsulate a common pattern
  *             Open, read-verify, and close the dataspaces for datasets 1-3
@@ -3500,7 +3356,7 @@ verify_dataset_extension(hid_t fcpl_id, hbool_t close_reopen)
  *             2018 November 5
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  */
-#define TSOHM_EDH_VERIFY_SPACES(dims)                                     \
+#define TSOHM_VDE_VERIFY_SPACES(dims)                                     \
 {                                                                         \
     /* Open dataspaces                                                    \
      */                                                                   \
@@ -3535,10 +3391,10 @@ verify_dataset_extension(hid_t fcpl_id, hbool_t close_reopen)
     CHECK_I(H5Sclose(space1_id), "H5Sclose");                             \
     CHECK_I(H5Sclose(space2_id), "H5Sclose");                             \
     CHECK_I(H5Sclose(space3_id), "H5Sclose");                             \
-} /* define TSOHM_EDH_VERIFY_SPACES */
+} /* define TSOHM_VDE_VERIFY_SPACES */
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
- * Macro:      TSOHM_EDH_CLOSE_REOPEN_FILE_AND_DSETS()
+ * Macro:      TSOHM_VDE_CLOSE_REOPEN_FILE_AND_DSETS()
  *
  * Purpose:    Encapsulate a common pattern
  *             Wrapper to close and reopen file and datasets:
@@ -3551,7 +3407,7 @@ verify_dataset_extension(hid_t fcpl_id, hbool_t close_reopen)
  *             2018 November 5
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  */
-#define TSOHM_EDH_CLOSE_REOPEN_FILE_AND_DSETS(n)               \
+#define TSOHM_VDE_CLOSE_REOPEN_FILE_AND_DSETS(n)               \
 {                                                              \
     CHECK_I(H5Dclose(dset1_id), "H5Dclose");                   \
     if ((n) > 1)                                               \
@@ -3572,7 +3428,7 @@ verify_dataset_extension(hid_t fcpl_id, hbool_t close_reopen)
         dset3_id = H5Dopen2(file_id, "dataset3", H5P_DEFAULT); \
         CHECK_I(dset3_id, "H5Dopen2");                         \
     }                                                          \
-} /* define TSOHM_EDH_CLOSE_REOPEN_FILE_AND_DSETS */
+} /* define TSOHM_VDE_CLOSE_REOPEN_FILE_AND_DSETS */
 
     /* Remember the current # of reported errors */
     old_nerrs = GetTestNumErrs();
@@ -3592,48 +3448,48 @@ verify_dataset_extension(hid_t fcpl_id, hbool_t close_reopen)
     dset1_id = H5Dcreate2(file_id, "dataset", H5T_NATIVE_LONG, orig_space_id, H5P_DEFAULT, dcpl_id, H5P_DEFAULT);
     CHECK_I(dset1_id, "H5Dcreate2");
     if(close_reopen)
-        TSOHM_EDH_CLOSE_REOPEN_FILE_AND_DSETS(1);
+        TSOHM_VDE_CLOSE_REOPEN_FILE_AND_DSETS(1);
 
     /* Create another dataset starting with the same dataspace */
     dset2_id = H5Dcreate2(file_id, "dataset2", H5T_NATIVE_LONG, orig_space_id, H5P_DEFAULT, dcpl_id, H5P_DEFAULT);
     CHECK_I(dset2_id, "H5Dcreate2");
     if (close_reopen)
-        TSOHM_EDH_CLOSE_REOPEN_FILE_AND_DSETS(2);
+        TSOHM_VDE_CLOSE_REOPEN_FILE_AND_DSETS(2);
 
     /* Create a third dataset with the same dataspace */
     dset3_id = H5Dcreate2(file_id, "dataset3", H5T_NATIVE_LONG, orig_space_id, H5P_DEFAULT, dcpl_id, H5P_DEFAULT);
     CHECK_I(dset3_id, "H5Dcreate2");
     if (close_reopen)
-        TSOHM_EDH_CLOSE_REOPEN_FILE_AND_DSETS(3);
+        TSOHM_VDE_CLOSE_REOPEN_FILE_AND_DSETS(3);
 
     /* Extend the first dataset */
     ret = H5Dset_extent(dset1_id, dims2);
     CHECK_I(ret, "H5Dset_extent");
     if (close_reopen)
-        TSOHM_EDH_CLOSE_REOPEN_FILE_AND_DSETS(3);
+        TSOHM_VDE_CLOSE_REOPEN_FILE_AND_DSETS(3);
 
     space_dims[0] = dims2;
     space_dims[1] = dims1;
     space_dims[2] = dims1;
-    TSOHM_EDH_VERIFY_SPACES(space_dims);
+    TSOHM_VDE_VERIFY_SPACES(space_dims);
 
     /* Extend the second dataset */
     ret = H5Dset_extent(dset2_id, dims2);
     CHECK_I(ret, "H5Dset_extent");
     if(close_reopen)
-        TSOHM_EDH_CLOSE_REOPEN_FILE_AND_DSETS(3);
+        TSOHM_VDE_CLOSE_REOPEN_FILE_AND_DSETS(3);
 
     space_dims[1] = dims2;
-    TSOHM_EDH_VERIFY_SPACES(space_dims);
+    TSOHM_VDE_VERIFY_SPACES(space_dims);
 
     /* Extend the third dataset */
     ret = H5Dset_extent(dset3_id, dims2);
     CHECK_I(ret, "H5Dset_extent");
     if(close_reopen)
-        TSOHM_EDH_CLOSE_REOPEN_FILE_AND_DSETS(3);
+        TSOHM_VDE_CLOSE_REOPEN_FILE_AND_DSETS(3);
 
     space_dims[2] = dims2;
-    TSOHM_EDH_VERIFY_SPACES(space_dims);
+    TSOHM_VDE_VERIFY_SPACES(space_dims);
 
     /* Close the datasets and file */
     ret = H5Dclose(dset1_id);
@@ -3656,13 +3512,13 @@ verify_dataset_extension(hid_t fcpl_id, hbool_t close_reopen)
     dset1_id = H5Dcreate2(file_id, "dataset", H5T_NATIVE_LONG, orig_space_id, H5P_DEFAULT, dcpl_id, H5P_DEFAULT);
     CHECK_I(dset1_id, "H5Dcreate2");
     if (close_reopen)
-        TSOHM_EDH_CLOSE_REOPEN_FILE_AND_DSETS(1);
+        TSOHM_VDE_CLOSE_REOPEN_FILE_AND_DSETS(1);
 
     /* Extend the first dataset */
     ret = H5Dset_extent(dset1_id, dims2);
     CHECK_I(ret, "H5Dset_extent");
     if (close_reopen)
-        TSOHM_EDH_CLOSE_REOPEN_FILE_AND_DSETS(1);
+        TSOHM_VDE_CLOSE_REOPEN_FILE_AND_DSETS(1);
 
     /* Create the second dataset.  Its dataspace will be unshared and then
      * become shared when extended.
@@ -3670,13 +3526,13 @@ verify_dataset_extension(hid_t fcpl_id, hbool_t close_reopen)
     dset2_id = H5Dcreate2(file_id, "dataset2", H5T_NATIVE_LONG, orig_space_id, H5P_DEFAULT, dcpl_id, H5P_DEFAULT);
     CHECK_I(dset2_id, "H5Dcreate2");
     if (close_reopen)
-        TSOHM_EDH_CLOSE_REOPEN_FILE_AND_DSETS(2);
+        TSOHM_VDE_CLOSE_REOPEN_FILE_AND_DSETS(2);
 
     /* Extend the second dataset */
     ret = H5Dset_extent(dset2_id, dims2);
     CHECK_I(ret, "H5Dset_extent");
     if (close_reopen)
-        TSOHM_EDH_CLOSE_REOPEN_FILE_AND_DSETS(2);
+        TSOHM_VDE_CLOSE_REOPEN_FILE_AND_DSETS(2);
 
     /* Create the third dataset.  Its dataspace will be unshared and then
      * become shared when extended.
@@ -3684,15 +3540,15 @@ verify_dataset_extension(hid_t fcpl_id, hbool_t close_reopen)
     dset3_id = H5Dcreate2(file_id, "dataset3", H5T_NATIVE_LONG, orig_space_id, H5P_DEFAULT, dcpl_id, H5P_DEFAULT);
     CHECK_I(dset3_id, "H5Dcreate2");
     if(close_reopen)
-        TSOHM_EDH_CLOSE_REOPEN_FILE_AND_DSETS(3);
+        TSOHM_VDE_CLOSE_REOPEN_FILE_AND_DSETS(3);
 
     /* Extend the third dataset */
     ret = H5Dset_extent(dset3_id, dims2);
     CHECK_I(ret, "H5Dset_extent");
     if(close_reopen)
-        TSOHM_EDH_CLOSE_REOPEN_FILE_AND_DSETS(3);
+        TSOHM_VDE_CLOSE_REOPEN_FILE_AND_DSETS(3);
 
-    TSOHM_EDH_VERIFY_SPACES(space_dims);
+    TSOHM_VDE_VERIFY_SPACES(space_dims);
 
     /* Close the datasets and file */
     ret = H5Dclose(dset1_id);
@@ -3716,8 +3572,8 @@ verify_dataset_extension(hid_t fcpl_id, hbool_t close_reopen)
     else
         return(-1);
 /* macros are exclusive to this function */
-#undef TSOHM_EDH_CLOSE_REOPEN_FILE_AND_DSETS
-#undef TSOHM_EDH_VERIFY_SPACES
+#undef TSOHM_VDE_CLOSE_REOPEN_FILE_AND_DSETS
+#undef TSOHM_VDE_VERIFY_SPACES
 } /* verify_dataset_extension */
 
 

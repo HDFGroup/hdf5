@@ -3760,11 +3760,10 @@ external_set_elink_fapl2(hid_t fapl, hbool_t new_format)
     if((space = H5Screate_simple(2, dims, NULL)) < 0) TEST_ERROR
 
     /* Create dataset creation property list */
-    if (dcpl_g == H5P_DEFAULT) {
+    if (dcpl_g == H5P_DEFAULT)
         dcpl = H5Pcreate(H5P_DATASET_CREATE);
-    } else {
+    else
         dcpl = H5Pcopy(dcpl_g);
-    }
     if (0 > dcpl) TEST_ERROR;
     if(H5Pset_alloc_time(dcpl, H5D_ALLOC_TIME_LATE) < 0) TEST_ERROR;
 
@@ -7521,11 +7520,10 @@ external_link_with_committed_datatype(hid_t fapl, hbool_t new_format)
     if((sid2 = H5Screate_simple(2, dims, NULL)) < 0)
         FAIL_STACK_ERROR
 
-    if (dcpl_g == H5P_DEFAULT) {
+    if (dcpl_g == H5P_DEFAULT)
         dcpl = H5Pcreate(H5P_DATASET_CREATE);
-    } else {
+    else
         dcpl = H5Pcopy(dcpl_g);
-    }
     if (0 > dcpl) FAIL_STACK_ERROR
     if(H5Pset_chunk(dcpl, 2, chunks) < 0)
         FAIL_STACK_ERROR
@@ -14941,7 +14939,8 @@ main(void)
             }
 
             /* always enter tests without external cache */
-            if(H5Pset_elink_file_cache_size(my_fapl, 0) < 0) TEST_ERROR
+            if(H5Pset_elink_file_cache_size(my_fapl, 0) < 0)
+                TEST_ERROR
 
             /* General tests... (on both old & new format groups */
             nerrors += mklinks(my_fapl, new_format) < 0 ? 1 : 0;
@@ -15089,7 +15088,8 @@ main(void)
         nerrors += group_info_old(fapl) < 0 ? 1 : 0;
 
         if (minimize_dset_oh) {
-            if (0 > H5Pclose(dcpl_g)) TEST_ERROR;
+            if (0 > H5Pclose(dcpl_g))
+                TEST_ERROR;
             dcpl_g = -1;
         }
     } /* [un]minimized dataset object headers */

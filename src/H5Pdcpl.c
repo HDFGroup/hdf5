@@ -3790,15 +3790,14 @@ done:
  *     Success: Non-negative value (SUCCEED)
  *
  * Programmer: Jacob Smith
- *             14 August 2018
+ *             2018 August 14
  *
  * Modifications: None.
  *
  *-----------------------------------------------------------------------------
  */
 herr_t
-H5Pget_dset_no_attrs_hint(hid_t    dcpl_id,
-                          hbool_t *minimize)
+H5Pget_dset_no_attrs_hint(hid_t dcpl_id, hbool_t *minimize)
 {
     hbool_t         setting   = FALSE;
     H5P_genplist_t *plist     = NULL;
@@ -3808,23 +3807,20 @@ H5Pget_dset_no_attrs_hint(hid_t    dcpl_id,
     H5TRACE2("e", "i*b", dcpl_id, minimize);
 
     if (NULL == minimize)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                    "receiving pointer cannot be NULL")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "receiving pointer cannot be NULL")
 
     plist = H5P_object_verify(dcpl_id, H5P_DATASET_CREATE);
     if (NULL == plist)
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL,
-                        "can't find object for ID")
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     if (0 > H5P_peek(plist, H5D_CRT_MIN_DSET_HDR_SIZE_NAME, &setting))
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL,
-                    "can't get dset oh minimize flag value")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get dset oh minimize flag value")
 
     *minimize = setting;
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* H5Pget_dset_no_attrs_hint */
+} /* H5Pget_dset_no_attrs_hint() */
 
 
 /*-----------------------------------------------------------------------------
@@ -3841,15 +3837,14 @@ done:
  *     Success: Non-negative value (SUCCEED)
  *
  * Programmer: Jacob Smith
- *             14 August 2018
+ *             2018 August 14
  *
  * Modifications: None.
  *
  *-----------------------------------------------------------------------------
  */
 herr_t
-H5Pset_dset_no_attrs_hint(hid_t   dcpl_id,
-                          hbool_t minimize)
+H5Pset_dset_no_attrs_hint(hid_t dcpl_id, hbool_t minimize)
 {
     H5P_genplist_t *plist     = NULL;
     hbool_t         prev_set  = FALSE;
@@ -3860,18 +3855,15 @@ H5Pset_dset_no_attrs_hint(hid_t   dcpl_id,
 
     plist = H5P_object_verify(dcpl_id, H5P_DATASET_CREATE);
     if (NULL == plist)
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL,
-                        "can't find object for ID")
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     if (0 > H5P_peek(plist, H5D_CRT_MIN_DSET_HDR_SIZE_NAME, &prev_set))
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL,
-                    "can't get extant dset oh minimize flag value")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get extant dset oh minimize flag value")
 
     if (0 > H5P_poke(plist, H5D_CRT_MIN_DSET_HDR_SIZE_NAME, &minimize))
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL,
-                    "can't get dset oh minimize flag value")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't get dset oh minimize flag value")
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* H5Pset_dset_no_attrs_hint */
+} /* H5Pset_dset_no_attrs_hint() */
 
