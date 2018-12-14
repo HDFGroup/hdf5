@@ -7180,7 +7180,7 @@ test_min_dset_ohdr(void)
      */
     ret = H5Fget_dset_no_attrs_hint(file_id, &minimize);
     CHECK(ret, FAIL, "H5Fget_dset_no_attrs_hint");
-    VERIFY(minimize, FALSE, "minimize flag);
+    VERIFY(minimize, FALSE, "minimize flag");
 
     /*----------------------------------------
      * TEST set to TRUE
@@ -7190,7 +7190,7 @@ test_min_dset_ohdr(void)
 
     ret = H5Fget_dset_no_attrs_hint(file_id, &minimize);
     CHECK(ret, FAIL, "H5Fget_dset_no_attrs_hint");
-    VERIFY(minimize, TRUE, "minimize flag);
+    VERIFY(minimize, TRUE, "minimize flag");
 
     /*----------------------------------------
      * TEST second file open on same filename
@@ -7248,11 +7248,11 @@ test_min_dset_ohdr(void)
     H5E_BEGIN_TRY {
         ret = H5Fget_dset_no_attrs_hint(-1, &minimize);
     } H5E_END_TRY;
-    VERIFY(ret, FAIL, H5Fget_dset_no_attrs_hint);
+    VERIFY(ret, FAIL, "H5Fget_dset_no_attrs_hint");
 
     /* trying to get with invalid pointer */
     H5E_BEGIN_TRY {
-        ret = H5Fget_dset_no_attrs_hint(file_id, NULL)
+        ret = H5Fget_dset_no_attrs_hint(file_id, NULL);
     } H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Fget_dset_no_attrs_hint");
 

@@ -826,7 +826,7 @@ test_compact_io(hid_t fapl)
      **************************************/
 
     /* Create a copy of file access property list */
-    if((new_fapl = new_fapl = h5_fileaccess()) < 0) TEST_ERROR
+    if((new_fapl = h5_fileaccess()) < 0) TEST_ERROR
 
     /* Loop through all the combinations of low/high library format bounds,
        skipping invalid combinations.
