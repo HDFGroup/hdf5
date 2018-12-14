@@ -75,9 +75,9 @@ static hsize_t H5S__hyper_get_clip_extent_real(const H5S_t *clip_space,
 
 /* Selection callbacks */
 static herr_t H5S__hyper_copy(H5S_t *dst, const H5S_t *src, hbool_t share_selection);
-static herr_t H5S__hyper_get_seq_list(const H5S_t *space, unsigned flags,
-    H5S_sel_iter_t *iter, size_t maxseq, size_t maxbytes,
-    size_t *nseq, size_t *nbytes, hsize_t *off, size_t *len);
+//static herr_t H5S__hyper_get_seq_list(const H5S_t *space, unsigned flags,
+//    H5S_sel_iter_t *iter, size_t maxseq, size_t maxbytes,
+//    size_t *nseq, size_t *nbytes, hsize_t *off, size_t *len);
 static herr_t H5S__hyper_release(H5S_t *space);
 static htri_t H5S__hyper_is_valid(const H5S_t *space);
 static hssize_t H5S__hyper_serial_size(const H5S_t *space);
@@ -4522,22 +4522,22 @@ H5S__hyper_project_simple(const H5S_t *base_space, H5S_t *new_space, hsize_t *of
 
         /* Copy the diminfo */
         while(base_space_dim < base_space->extent.rank) {
-            new_space->select.sel_info.hslab->app_diminfo[new_space_dim].start = 
+            new_space->select.sel_info.hslab->app_diminfo[new_space_dim].start =
                     base_space->select.sel_info.hslab->app_diminfo[base_space_dim].start;
-            new_space->select.sel_info.hslab->app_diminfo[new_space_dim].stride = 
+            new_space->select.sel_info.hslab->app_diminfo[new_space_dim].stride =
                     base_space->select.sel_info.hslab->app_diminfo[base_space_dim].stride;
-            new_space->select.sel_info.hslab->app_diminfo[new_space_dim].count = 
+            new_space->select.sel_info.hslab->app_diminfo[new_space_dim].count =
                     base_space->select.sel_info.hslab->app_diminfo[base_space_dim].count;
-            new_space->select.sel_info.hslab->app_diminfo[new_space_dim].block = 
+            new_space->select.sel_info.hslab->app_diminfo[new_space_dim].block =
                     base_space->select.sel_info.hslab->app_diminfo[base_space_dim].block;
 
-            new_space->select.sel_info.hslab->opt_diminfo[new_space_dim].start = 
+            new_space->select.sel_info.hslab->opt_diminfo[new_space_dim].start =
                     base_space->select.sel_info.hslab->opt_diminfo[base_space_dim].start;
             new_space->select.sel_info.hslab->opt_diminfo[new_space_dim].stride =
                     base_space->select.sel_info.hslab->opt_diminfo[base_space_dim].stride;
-            new_space->select.sel_info.hslab->opt_diminfo[new_space_dim].count = 
+            new_space->select.sel_info.hslab->opt_diminfo[new_space_dim].count =
                     base_space->select.sel_info.hslab->opt_diminfo[base_space_dim].count;
-            new_space->select.sel_info.hslab->opt_diminfo[new_space_dim].block = 
+            new_space->select.sel_info.hslab->opt_diminfo[new_space_dim].block =
                     base_space->select.sel_info.hslab->opt_diminfo[base_space_dim].block;
 
             /* Advance to next dimensions */
@@ -7224,7 +7224,7 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
     /* Check for unlimited dimension */
     for(u = 0; u<space->extent.rank; u++)
         if((count[u] == H5S_UNLIMITED) || (block[u] == H5S_UNLIMITED)) {
-            if(unlim_dim >= 0) 
+            if(unlim_dim >= 0)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "cannot have more than one unlimited dimension in selection")
             else {
                 if(count[u] == block[u] /* == H5S_UNLIMITED */)
@@ -9086,7 +9086,7 @@ H5S__hyper_get_seq_list_single(const H5S_t *space, H5S_sel_iter_t *iter,
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static herr_t
+herr_t
 H5S__hyper_get_seq_list(const H5S_t *space, unsigned H5_ATTR_UNUSED flags, H5S_sel_iter_t *iter,
     size_t maxseq, size_t maxelem, size_t *nseq, size_t *nelem,
     hsize_t *off, size_t *len)
@@ -9314,7 +9314,7 @@ H5S__hyper_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
     HDassert(dst_space);
     HDassert(src_intersect_space);
     HDassert(proj_space);
-        
+
     /* Assert that src_space and src_intersect_space have same extent and there
      * are no point selections */
     HDassert(H5S_GET_EXTENT_NDIMS(src_space)
@@ -9483,7 +9483,7 @@ H5S__hyper_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
              * selection and advance any sequences we complete */
             if(ss_off[ss_i] >= sis_off[sis_i])
                 int_sel_off = ss_sel_off;
-            else 
+            else
                 int_sel_off = sis_off[sis_i] - ss_off[ss_i] + ss_sel_off;
             if((ss_off[ss_i] + (hsize_t)ss_len[ss_i]) <= (sis_off[sis_i]
                     + (hsize_t)sis_len[sis_i])) {
@@ -10429,4 +10429,3 @@ H5Sget_regular_hyperslab(hid_t spaceid, hsize_t start[], hsize_t stride[],
 done:
     FUNC_LEAVE_API(ret_value)
 }   /* H5Sget_regular_hyperslab() */
-

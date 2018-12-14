@@ -31,9 +31,9 @@
 
 /* Selection callbacks */
 static herr_t H5S__all_copy(H5S_t *dst, const H5S_t *src, hbool_t share_selection);
-static herr_t H5S__all_get_seq_list(const H5S_t *space, unsigned flags,
-    H5S_sel_iter_t *iter, size_t maxseq, size_t maxbytes,
-    size_t *nseq, size_t *nbytes, hsize_t *off, size_t *len);
+//static herr_t H5S__all_get_seq_list(const H5S_t *space, unsigned flags,
+//    H5S_sel_iter_t *iter, size_t maxseq, size_t maxbytes,
+//    size_t *nseq, size_t *nbytes, hsize_t *off, size_t *len);
 static herr_t H5S__all_release(H5S_t *space);
 static htri_t H5S__all_is_valid(const H5S_t *space);
 static hssize_t H5S__all_serial_size(const H5S_t *space);
@@ -987,7 +987,7 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static herr_t
+herr_t
 H5S__all_get_seq_list(const H5S_t H5_ATTR_UNUSED *space, unsigned H5_ATTR_UNUSED flags, H5S_sel_iter_t *iter,
     size_t H5_ATTR_UNUSED maxseq, size_t maxelem, size_t *nseq, size_t *nelem,
     hsize_t *off, size_t *len)
@@ -1028,4 +1028,3 @@ H5S__all_get_seq_list(const H5S_t H5_ATTR_UNUSED *space, unsigned H5_ATTR_UNUSED
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5S__all_get_seq_list() */
-

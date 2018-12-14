@@ -618,6 +618,10 @@ H5D__contig_collective_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_
     H5D_chunk_map_t H5_ATTR_UNUSED *fm)
 {
     H5D_mpio_actual_io_mode_t actual_io_mode = H5D_MPIO_CONTIGUOUS_COLLECTIVE;
+    char *do_custom_agg;                /* CCIO-read env variable */
+    hid_t file_space_hid;               /* file space for CCIO */
+    hid_t mem_space_hid;                /* memory space for CCIO */
+    const H5D_contig_storage_t *store_contig;  /* Storage structure for CCIO */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -625,9 +629,32 @@ H5D__contig_collective_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_
     /* Sanity check */
     HDassert(H5FD_MPIO == H5F_DRIVER_ID(io_info->dset->oloc.file));
 
-    /* Call generic internal collective I/O routine */
-    if(H5D__inter_collective_io(io_info, type_info, file_space, mem_space) < 0)
-        HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "couldn't finish shared collective MPI-IO")
+    /* Check for CCIO-read option */
+    do_custom_agg = HDgetenv("HDF5_CCIO_RD");
+    if (do_custom_agg && (strcmp(do_custom_agg,"yes") == 0)) {
+
+        /* Call select_read (rather than `inter_collective` if using CCIO) */
+        file_space_hid = H5I_register(H5I_DATASPACE, file_space, TRUE);
+        mem_space_hid = H5I_register(H5I_DATASPACE, mem_space, TRUE);
+
+        /* Contiguous storage info for this I/O operation: */
+        store_contig = &(io_info->store->contig);
+
+        if(H5F_select_read(io_info->dset->oloc.file, H5FD_MEM_DRAW, file_space_hid, mem_space_hid, (size_t)type_info->src_type_size,  store_contig->dset_addr, io_info->u.rbuf) < 0)
+            HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "can't finish collective parallel read")
+
+        if(NULL != ((H5S_t *)H5I_object_verify(file_space_hid, H5I_DATASPACE)))
+            H5Sclose(file_space_hid);
+        if(NULL != ((H5S_t *)H5I_object_verify(mem_space_hid, H5I_DATASPACE)))
+            H5Sclose(mem_space_hid);
+
+    } else {
+
+        /* Call generic internal collective I/O routine */
+        if(H5D__inter_collective_io(io_info, type_info, file_space, mem_space) < 0)
+            HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "couldn't finish shared collective MPI-IO")
+
+    }
 
     /* Set the actual I/O mode property. internal_collective_io will not break to
      * independent I/O, so we set it here.
@@ -658,6 +685,10 @@ H5D__contig_collective_write(H5D_io_info_t *io_info, const H5D_type_info_t *type
     H5D_chunk_map_t H5_ATTR_UNUSED *fm)
 {
     H5D_mpio_actual_io_mode_t actual_io_mode = H5D_MPIO_CONTIGUOUS_COLLECTIVE;
+    char *do_custom_agg;                /* CCIO-write env variable */
+    hid_t file_space_hid;               /* file space for CCIO */
+    hid_t mem_space_hid;                /* memory space for CCIO */
+    const H5D_contig_storage_t *store_contig;  /* Storage structure for CCIO */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -665,9 +696,32 @@ H5D__contig_collective_write(H5D_io_info_t *io_info, const H5D_type_info_t *type
     /* Sanity check */
     HDassert(H5FD_MPIO == H5F_DRIVER_ID(io_info->dset->oloc.file));
 
-    /* Call generic internal collective I/O routine */
-    if(H5D__inter_collective_io(io_info, type_info, file_space, mem_space) < 0)
-        HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "couldn't finish shared collective MPI-IO")
+    /* Check for CCIO-write option */
+    do_custom_agg = HDgetenv("HDF5_CCIO_WR");
+    if (do_custom_agg && (strcmp(do_custom_agg,"yes") == 0)) {
+
+        /* Call select_write (rather than `inter_collective` if using CCIO) */
+        hid_t file_space_hid = H5I_register(H5I_DATASPACE, file_space,TRUE);
+        hid_t mem_space_hid = H5I_register(H5I_DATASPACE, mem_space,TRUE);
+
+        /* Contiguous storage info for this I/O operation: */
+        store_contig = &(io_info->store->contig);
+
+        if(H5F_select_write(io_info->dset->oloc.file, H5FD_MEM_DRAW, file_space_hid, mem_space_hid, (size_t)type_info->src_type_size,  store_contig->dset_addr, io_info->u.wbuf) < 0)
+            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "can't finish collective parallel write")
+
+        if(NULL != ((H5S_t *)H5I_object_verify(file_space_hid, H5I_DATASPACE)))
+            H5Sclose(file_space_hid);
+        if(NULL != ((H5S_t *)H5I_object_verify(mem_space_hid, H5I_DATASPACE)))
+            H5Sclose(mem_space_hid);
+
+    } else {
+
+        /* Call generic internal collective I/O routine */
+        if(H5D__inter_collective_io(io_info, type_info, file_space, mem_space) < 0)
+            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "couldn't finish shared collective MPI-IO")
+
+    }
 
     /* Set the actual I/O mode property. internal_collective_io will not break to
      * independent I/O, so we set it here.
@@ -743,7 +797,7 @@ H5D__chunk_collective_io(H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
         io_option = H5D_ONE_LINK_CHUNK_IO;      /*no opt*/
     /* direct request to multi-chunk-io */
     else if(H5FD_MPIO_CHUNK_MULTI_IO == chunk_opt_mode)
-        io_option = H5D_MULTI_CHUNK_IO;         
+        io_option = H5D_MULTI_CHUNK_IO;
     /* via default path. branch by num threshold */
     else {
         unsigned one_link_chunk_io_threshold;   /* Threshold to use single collective I/O for all chunks */
@@ -1054,9 +1108,9 @@ if(H5DEBUG(D))
 
             /* Obtain MPI derived datatype from all individual chunks */
             for(u = 0; u < num_chunk; u++) {
-                hsize_t *permute_map = NULL; /* array that holds the mapping from the old, 
-                                                out-of-order displacements to the in-order 
-                                                displacements of the MPI datatypes of the 
+                hsize_t *permute_map = NULL; /* array that holds the mapping from the old,
+                                                out-of-order displacements to the in-order
+                                                displacements of the MPI datatypes of the
                                                 point selection of the file space */
                 hbool_t is_permuted = FALSE;
 
@@ -1066,8 +1120,8 @@ if(H5DEBUG(D))
                  *              where it will be freed.
                  */
                 if(H5S_mpio_space_type(chunk_addr_info_array[u].chunk_info.fspace,
-                                       type_info->src_type_size, 
-                                       &chunk_ftype[u], /* OUT: datatype created */ 
+                                       type_info->src_type_size,
+                                       &chunk_ftype[u], /* OUT: datatype created */
                                        &chunk_mpi_file_counts[u], /* OUT */
                                        &(chunk_mft_is_derived_array[u]), /* OUT */
                                        TRUE, /* this is a file space,
@@ -1085,9 +1139,9 @@ if(H5DEBUG(D))
                 if(is_permuted)
                     HDassert(permute_map);
                 if(H5S_mpio_space_type(chunk_addr_info_array[u].chunk_info.mspace,
-                                       type_info->dst_type_size, &chunk_mtype[u], 
-                                       &chunk_mpi_mem_counts[u], 
-                                       &(chunk_mbt_is_derived_array[u]), 
+                                       type_info->dst_type_size, &chunk_mtype[u],
+                                       &chunk_mpi_mem_counts[u],
+                                       &(chunk_mbt_is_derived_array[u]),
                                        FALSE, /* this is a memory
                                                  space, so if the file
                                                  space is not
@@ -1947,9 +2001,9 @@ H5D__inter_collective_io(H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
 
     if((file_space != NULL) && (mem_space != NULL)) {
         int  mpi_file_count;         /* Number of file "objects" to transfer */
-        hsize_t *permute_map = NULL; /* array that holds the mapping from the old, 
-                                        out-of-order displacements to the in-order 
-                                        displacements of the MPI datatypes of the 
+        hsize_t *permute_map = NULL; /* array that holds the mapping from the old,
+                                        out-of-order displacements to the in-order
+                                        displacements of the MPI datatypes of the
                                         point selection of the file space */
         hbool_t is_permuted = FALSE;
 
@@ -1958,8 +2012,8 @@ H5D__inter_collective_io(H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
          *              and will be fed into the next call to H5S_mpio_space_type
          *              where it will be freed.
          */
-        if(H5S_mpio_space_type(file_space, type_info->src_type_size, 
-                               &mpi_file_type, &mpi_file_count, &mft_is_derived, /* OUT: datatype created */  
+        if(H5S_mpio_space_type(file_space, type_info->src_type_size,
+                               &mpi_file_type, &mpi_file_count, &mft_is_derived, /* OUT: datatype created */
                                TRUE, /* this is a file space, so
                                         permute the datatype if the
                                         point selection is out of
@@ -1968,13 +2022,13 @@ H5D__inter_collective_io(H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
                                                 the permutation of
                                                 points selected in
                                                 case they are out of
-                                                order */ 
+                                                order */
                                &is_permuted /* OUT */) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "couldn't create MPI file type")
         /* Sanity check */
         if(is_permuted)
             HDassert(permute_map);
-        if(H5S_mpio_space_type(mem_space, type_info->src_type_size, 
+        if(H5S_mpio_space_type(mem_space, type_info->src_type_size,
                                &mpi_buf_type, &mpi_buf_count, &mbt_is_derived, /* OUT: datatype created */
                                FALSE, /* this is a memory space, so if
                                          the file space is not
@@ -1986,7 +2040,7 @@ H5D__inter_collective_io(H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
                                                generated by the
                                                file_space selection
                                                and applied to the
-                                               memory selection */, 
+                                               memory selection */,
                                &is_permuted /* IN */) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "couldn't create MPI buffer type")
         /* Sanity check */
@@ -2556,7 +2610,7 @@ H5D__construct_filtered_io_info_list(const H5D_io_info_t *io_info, const H5D_typ
             local_info_array[i].num_writers = 0;
             local_info_array[i].owners.original_owner = local_info_array[i].owners.new_owner = mpi_rank;
             local_info_array[i].buf = NULL;
-            
+
             local_info_array[i].async_info.num_receive_requests = 0;
             local_info_array[i].async_info.receive_buffer_array = NULL;
             local_info_array[i].async_info.receive_requests_array = NULL;
@@ -3246,4 +3300,3 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__filtered_collective_chunk_entry_io() */
 #endif  /* H5_HAVE_PARALLEL */
-

@@ -207,7 +207,7 @@ typedef enum H5F_mem_t	H5FD_mem_t;
      * the handle for the VFD (returned with the 'get_handle' callback) is
      * of type 'int' and is compatible with POSIX I/O calls.
      */
-#define H5FD_FEAT_POSIX_COMPAT_HANDLE   0x00000080    
+#define H5FD_FEAT_POSIX_COMPAT_HANDLE   0x00000080
     /*
      * Defining H5FD_FEAT_HAS_MPI for a VFL driver means that
      * the driver makes use of MPI communication and code may retrieve
@@ -220,7 +220,7 @@ typedef enum H5F_mem_t	H5FD_mem_t;
      * instead of the default H5D_ALLOC_TIME_LATE
      */
 #define H5FD_FEAT_ALLOCATE_EARLY        0x00000200
-    /* 
+    /*
      * Defining H5FD_FEAT_ALLOW_FILE_IMAGE for a VFL driver means that
      * the driver is able to use a file image in the fapl as the initial
      * contents of a file.
@@ -269,8 +269,7 @@ typedef struct H5FD_class_t {
     H5F_close_degree_t fc_degree;
     herr_t  (*terminate)(void);
     hsize_t (*sb_size)(H5FD_t *file);
-    herr_t  (*sb_encode)(H5FD_t *file, char *name/*out*/,
-                         unsigned char *p/*out*/);
+    herr_t  (*sb_encode)(H5FD_t *file, char *name/*out*/, unsigned char *p/*out*/);
     herr_t  (*sb_decode)(H5FD_t *f, const char *name, const unsigned char *p);
     size_t  fapl_size;
     void *  (*fapl_get)(H5FD_t *file);
@@ -279,23 +278,21 @@ typedef struct H5FD_class_t {
     size_t  dxpl_size;
     void *  (*dxpl_copy)(const void *dxpl);
     herr_t  (*dxpl_free)(void *dxpl);
-    H5FD_t *(*open)(const char *name, unsigned flags, hid_t fapl,
-                    haddr_t maxaddr);
+    H5FD_t *(*open)(const char *name, unsigned flags, hid_t fapl, haddr_t maxaddr);
     herr_t  (*close)(H5FD_t *file);
     int     (*cmp)(const H5FD_t *f1, const H5FD_t *f2);
     herr_t  (*query)(const H5FD_t *f1, unsigned long *flags);
     herr_t  (*get_type_map)(const H5FD_t *file, H5FD_mem_t *type_map);
     haddr_t (*alloc)(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size);
-    herr_t  (*free)(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id,
-                    haddr_t addr, hsize_t size);
+    herr_t  (*free)(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t size);
     haddr_t (*get_eoa)(const H5FD_t *file, H5FD_mem_t type);
     herr_t  (*set_eoa)(H5FD_t *file, H5FD_mem_t type, haddr_t addr);
     haddr_t (*get_eof)(const H5FD_t *file, H5FD_mem_t type);
     herr_t  (*get_handle)(H5FD_t *file, hid_t fapl, void**file_handle);
-    herr_t  (*read)(H5FD_t *file, H5FD_mem_t type, hid_t dxpl,
-                    haddr_t addr, size_t size, void *buffer);
-    herr_t  (*write)(H5FD_t *file, H5FD_mem_t type, hid_t dxpl,
-                     haddr_t addr, size_t size, const void *buffer);
+    herr_t  (*read)(H5FD_t *file, H5FD_mem_t type, hid_t dxpl, haddr_t addr, size_t size, void *buffer);
+    herr_t  (*write)(H5FD_t *file, H5FD_mem_t type, hid_t dxpl, haddr_t addr, size_t size, const void *buffer);
+    herr_t  (*select_read)(H5FD_t *file, H5FD_mem_t type, hid_t dxpl, hid_t file_space, hid_t mem_space, size_t elmt_size, haddr_t addr, void *buffer);
+    herr_t  (*select_write)(H5FD_t *file, H5FD_mem_t type, hid_t dxpl, hid_t file_space, hid_t mem_space, size_t elmt_size, haddr_t addr, const void *buffer);
     herr_t  (*flush)(H5FD_t *file, hid_t dxpl_id, hbool_t closing);
     herr_t  (*truncate)(H5FD_t *file, hid_t dxpl_id, hbool_t closing);
     herr_t  (*lock)(H5FD_t *file, hbool_t rw);
@@ -332,7 +329,7 @@ struct H5FD_t {
 /* Define enum for the source of file image callbacks */
 typedef enum {
     H5FD_FILE_IMAGE_OP_NO_OP,
-    H5FD_FILE_IMAGE_OP_PROPERTY_LIST_SET,     
+    H5FD_FILE_IMAGE_OP_PROPERTY_LIST_SET,
     H5FD_FILE_IMAGE_OP_PROPERTY_LIST_COPY,
     H5FD_FILE_IMAGE_OP_PROPERTY_LIST_GET,
     H5FD_FILE_IMAGE_OP_PROPERTY_LIST_CLOSE,
@@ -343,13 +340,13 @@ typedef enum {
 
 /* Define structure to hold file image callbacks */
 typedef struct {
-    void   *(*image_malloc)(size_t size, H5FD_file_image_op_t file_image_op, 
+    void   *(*image_malloc)(size_t size, H5FD_file_image_op_t file_image_op,
                             void *udata);
     void   *(*image_memcpy)(void *dest, const void *src, size_t size,
                             H5FD_file_image_op_t file_image_op, void *udata);
-    void   *(*image_realloc)(void *ptr, size_t size, 
+    void   *(*image_realloc)(void *ptr, size_t size,
                             H5FD_file_image_op_t file_image_op, void *udata);
-    herr_t  (*image_free)(void *ptr, H5FD_file_image_op_t file_image_op, 
+    herr_t  (*image_free)(void *ptr, H5FD_file_image_op_t file_image_op,
                           void *udata);
     void   *(*udata_copy)(void *udata);
     herr_t  (*udata_free)(void *udata);
@@ -391,4 +388,3 @@ H5_DLL herr_t H5FDdriver_query(hid_t driver_id, unsigned long *flags/*out*/);
 }
 #endif
 #endif
-

@@ -252,6 +252,81 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_write() */
 
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_select_read
+ *
+ * Purpose:	Private version of H5FDselect_read()
+ *
+ * Return:	Success:	Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *              Saturday, November  4, 2017
+ *
+ *              Rick Zamora (Revised October 24, 2018)
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FD_select_read(H5FD_t *file, H5FD_mem_t type,
+    hid_t file_space, hid_t mem_space, size_t elmt_size, haddr_t addr, void *buf/*out*/)
+{
+    hid_t           dxpl_id = H5I_INVALID_HID;  /* DXPL for operation */
+    herr_t          ret_value = SUCCEED;        /* Return value */
+    FUNC_ENTER_NOAPI(FAIL)
+    {}
+    /* Sanity checks */
+    HDassert(file);
+    HDassert(file->cls);
+    HDassert(file->cls->select_read);
+    HDassert(buf);
+    /* Get proper DXPL for I/O */
+    dxpl_id = H5CX_get_dxpl();
+    /* Dispatch to driver */
+    if((file->cls->select_read)(file, type, dxpl_id, file_space, mem_space, elmt_size, addr + file->base_addr, buf) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "driver read request failed")
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD_select_read() */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_select_write
+ *
+ * Purpose:	Private version of H5FDselect_write()
+ *
+ * Return:	Success:	Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *              Saturday, November  4, 2017
+ *
+ *              Rick Zamora (Revised October 24, 2018)
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FD_select_write(H5FD_t *file, H5FD_mem_t type,
+    hid_t file_space, hid_t mem_space, size_t elmt_size, haddr_t addr, const void *buf)
+{
+    hid_t           dxpl_id;                    /* DXPL for operation */
+    haddr_t         eoa = HADDR_UNDEF;          /* EOA for file */
+    herr_t          ret_value = SUCCEED;        /* Return value */
+    FUNC_ENTER_NOAPI(FAIL)
+    {}
+    /* Sanity checks */
+    HDassert(file);
+    HDassert(file->cls);
+    HDassert(file->cls->select_write);
+    HDassert(buf);
+    /* Get proper DXPL for I/O */
+    dxpl_id = H5CX_get_dxpl();
+    /* Dispatch to driver */
+    if((file->cls->select_write)(file, type, dxpl_id, file_space, mem_space, elmt_size, addr + file->base_addr, buf) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "driver write request failed")
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD_select_write() */
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5FD_set_eoa

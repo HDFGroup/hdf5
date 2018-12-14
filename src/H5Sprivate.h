@@ -314,10 +314,35 @@ H5_DLL herr_t H5S_mpio_space_type(const H5S_t *space, size_t elmt_size,
     /* out: */  MPI_Datatype *new_type,
                 int *count,
                 hbool_t *is_derived_type,
-                hbool_t do_permute, 
+                hbool_t do_permute,
                 hsize_t **permute_map,
                 hbool_t * is_permuted);
+
+/*
+ * Buffer-flattening struct for derived MPI_Types.
+ * All values are in bytes.
+ */
+typedef struct H5S_flatbuf_t {
+    hsize_t count; /* number of contiguous blocks */
+    size_t *blocklens; /* array of contiguous block lengths (bytes)*/
+    hsize_t *indices; /*array of byte offsets of each block */
+    hsize_t extent; /* offset range for one instance of this flatbuf */
+    hsize_t size; /* number of bytes of block data */
+} H5S_flatbuf_t;
+H5_DLL herr_t H5S__hyper_get_seq_list(const H5S_t *space, unsigned H5_ATTR_UNUSED flags, H5S_sel_iter_t *iter,
+    size_t maxseq, size_t maxelem, size_t *nseq, size_t *nelem,
+    hsize_t *off, size_t *len);
+H5_DLL herr_t H5S__all_get_seq_list(const H5S_t *space, unsigned flags,
+    H5S_sel_iter_t *iter, size_t maxseq, size_t maxbytes,
+    size_t *nseq, size_t *nbytes, hsize_t *off, size_t *len);
+H5_DLL herr_t H5S_point_get_seq_list(const H5S_t *space, unsigned flags, H5S_sel_iter_t *iter,
+    size_t maxseq, size_t maxelem, size_t *nseq, size_t *nelem,
+    hsize_t *off, size_t *len);
+
+H5_DLL herr_t H5S_mpio_return_space_rank_and_extent(const H5S_t *space, unsigned *rank, hsize_t *extent);
+
+H5_DLL herr_t H5S_mpio_return_space_extent_and_select_type(const H5S_t *space, hbool_t *is_permuted, hbool_t *is_regular, H5S_class_t *space_extent_type, H5S_sel_type *space_sel_type);
+
 #endif /* H5_HAVE_PARALLEL */
 
 #endif /* _H5Sprivate_H */
-
