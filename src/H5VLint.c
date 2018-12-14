@@ -625,9 +625,12 @@ H5VL_register_connector(const void *_cls, hbool_t app_ref, hid_t vipl_id)
         HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register VOL connector ID")
 
 done:
-    if (ret_value < 0)
-        if (saved)
-            H5FL_FREE(H5VL_class_t, saved);
+    if (ret_value < 0 && saved) {
+        if (saved->name)
+            H5MM_xfree(saved->name);
+
+        H5FL_FREE(H5VL_class_t, saved);
+    }
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_register_connector() */
