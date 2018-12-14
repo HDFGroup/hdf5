@@ -278,24 +278,10 @@ H5P__dcrt_reg_prop(H5P_genclass_t *pclass)
        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the object header minimization property */
-    if (0 > H5P__register_real(
-            pclass,                         /* class   */
-            H5D_CRT_MIN_DSET_HDR_SIZE_NAME, /* name    */
-            H5D_CRT_MIN_DSET_HDR_SIZE_SIZE, /* size    */
-            &H5O_ohdr_min_g,                /* default */
-            NULL,                           /* create  */
-            NULL,                           /* set     */
-            NULL,                           /* get     */
-            H5D_CRT_MIN_DSET_HDR_SIZE_ENC,  /* encode  */
-            H5D_CRT_MIN_DSET_HDR_SIZE_DEC,  /* decode  */
-            NULL,                           /* delete  */
-            NULL,                           /* copy    */
-            NULL,                           /* compare */
-            NULL))                          /* close   */
-    {
-       HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL,
-                   "can't insert property into class")
-    }
+    if (H5P__register_real(pclass, H5D_CRT_MIN_DSET_HDR_SIZE_NAME, H5D_CRT_MIN_DSET_HDR_SIZE_SIZE, &H5O_ohdr_min_g,
+            NULL, NULL, NULL, H5D_CRT_MIN_DSET_HDR_SIZE_ENC, H5D_CRT_MIN_DSET_HDR_SIZE_DEC,
+            NULL, NULL, NULL, NULL) < 0)
+       HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the type ID property*/
     if(H5P__register_real(pclass, H5VL_PROP_DSET_TYPE_ID, sizeof(hid_t), &type_id, 

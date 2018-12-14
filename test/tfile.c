@@ -7158,6 +7158,7 @@ test_min_dset_ohdr(void)
     hid_t      file_id          = -1;
     hid_t      file2_id         = -1;
     hbool_t    minimize;
+    herr_t     ret;
 
     MESSAGE(5, ("Testing dataset object header minimization\n"));
 
@@ -7177,15 +7178,19 @@ test_min_dset_ohdr(void)
     /*----------------------------------------
      * TEST default value
      */
-    VERIFY(H5Fget_dset_no_attrs_hint(file_id, &minimize), SUCCEED, "H5Fget_dset_no_attrs_hint");
-    VERIFY(minimize, FALSE, "getting default dset minimize flag value");
+    ret = H5Fget_dset_no_attrs_hint(file_id, &minimize);
+    CHECK(ret, FAIL, "H5Fget_dset_no_attrs_hint");
+    VERIFY(minimize, FALSE, "minimize flag);
 
     /*----------------------------------------
      * TEST set to TRUE
      */
-    VERIFY(H5Fset_dset_no_attrs_hint(file_id, TRUE), SUCCEED, "H5Fset_dset_no_attrs_hint");
-    VERIFY(H5Fget_dset_no_attrs_hint(file_id, &minimize), SUCCEED, "H5Fget_dset_no_attrs_hint");
-    VERIFY(minimize, TRUE, "getting set-TRUE dset minimize flag value");
+    ret = H5Fset_dset_no_attrs_hint(file_id, TRUE);
+    CHECK(ret, FAIL, "H5Fset_dset_no_attrs_hint");
+
+    ret = H5Fget_dset_no_attrs_hint(file_id, &minimize);
+    CHECK(ret, FAIL, "H5Fget_dset_no_attrs_hint");
+    VERIFY(minimize, TRUE, "minimize flag);
 
     /*----------------------------------------
      * TEST second file open on same filename
@@ -7193,43 +7198,72 @@ test_min_dset_ohdr(void)
     file2_id = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT);
     CHECK_I(file2_id, "H5Fopen");
 
-    /* verify TRUE setting on second open */
-    VERIFY(H5Fget_dset_no_attrs_hint(file_id, &minimize), SUCCEED, "H5Fget_dset_no_attrs_hint");
-    VERIFY(minimize, TRUE, "getting set-TRUE dset minimize flag value");
+    /* verify TRUE setting on second open
+     */
+    ret = H5Fget_dset_no_attrs_hint(file_id, &minimize);
+    CHECK(ret, FAIL, "H5Fget_dset_no_attrs_hint");
+    VERIFY(minimize, TRUE, "minimize flag");
 
-    /* re-set to FALSE on first open */
-    VERIFY(H5Fset_dset_no_attrs_hint(file_id, FALSE), SUCCEED, "H5Fset_dset_no_attrs_hint");
+    /* re-set to FALSE on first open
+     */
+    ret = H5Fset_dset_no_attrs_hint(file_id, FALSE);
+    CHECK(ret, FAIL, "H5Fset_dset_no_attrs_hint");
 
-    /* verify FALSE set on both opens */
-    VERIFY(H5Fget_dset_no_attrs_hint(file_id, &minimize), SUCCEED, "H5Fget_dset_no_attrs_hint");
-    VERIFY(minimize, FALSE, "getting set-FALSE dset minimize flag value");
-    VERIFY(H5Fget_dset_no_attrs_hint(file2_id, &minimize), SUCCEED, "H5Fget_dset_no_attrs_hint");
-    VERIFY(minimize, FALSE, "getting set-FALSE dset minimize flag value");
+    /* verify FALSE set on both opens
+     */
+    ret = H5Fget_dset_no_attrs_hint(file_id, &minimize);
+    CHECK(ret, FAIL, "H5Fget_dset_no_attrs_hint");
+    VERIFY(minimize, FALSE, "minimize flag");
 
-    /* re-set to TRUE on second open */
-    VERIFY(H5Fset_dset_no_attrs_hint(file2_id, TRUE), SUCCEED, "H5Fset_dset_no_attrs_hint");
+    ret = H5Fget_dset_no_attrs_hint(file2_id, &minimize);
+    CHECK(ret, FAIL, "H5Fget_dset_no_attrs_hint");
+    VERIFY(minimize, FALSE, "minimize flag");
 
-    /* verify TRUE set on both opens */
-    VERIFY(H5Fget_dset_no_attrs_hint(file_id, &minimize), SUCCEED, "H5Fget_dset_no_attrs_hint");
-    VERIFY(minimize, TRUE, "getting set-FALSE dset minimize flag value");
-    VERIFY(H5Fget_dset_no_attrs_hint(file2_id, &minimize), SUCCEED, "H5Fget_dset_no_attrs_hint");
-    VERIFY(minimize, TRUE, "getting set-FALSE dset minimize flag value");
+    /* re-set to TRUE on second open
+     */
+    ret = H5Fset_dset_no_attrs_hint(file2_id, TRUE);
+    CHECK(ret, FAIL, "H5Fset_dset_no_attrs_hint");
+
+    /* verify TRUE set on both opens
+     */
+    ret = H5Fget_dset_no_attrs_hint(file_id, &minimize);
+    CHECK(ret, FAIL, "H5Fget_dset_no_attrs_hint");
+    VERIFY(minimize, TRUE, "minimize flag");
+
+    ret = H5Fget_dset_no_attrs_hint(file2_id, &minimize);
+    CHECK(ret, FAIL, "H5Fget_dset_no_attrs_hint");
+    VERIFY(minimize, TRUE, "minimize flag");
 
     /*----------------------------------------
      * TEST error cases
      */
+
+    /* trying to set with invalid file ID */
     H5E_BEGIN_TRY {
-        VERIFY(H5Fset_dset_no_attrs_hint(-1, TRUE), FAIL, "trying to set with invalid file ID");
-        VERIFY(H5Fget_dset_no_attrs_hint(-1, &minimize), FAIL, "trying to get with invalid file ID");
-        VERIFY(H5Fget_dset_no_attrs_hint(file_id, NULL), FAIL, "trying to get with invalid pointer");
+        ret = H5Fset_dset_no_attrs_hint(-1, TRUE);
     } H5E_END_TRY;
+    VERIFY(ret, FAIL, "H5Fset_dset_no_attrs_hint");
+
+    /* trying to get with invalid file ID */
+    H5E_BEGIN_TRY {
+        ret = H5Fget_dset_no_attrs_hint(-1, &minimize);
+    } H5E_END_TRY;
+    VERIFY(ret, FAIL, H5Fget_dset_no_attrs_hint);
+
+    /* trying to get with invalid pointer */
+    H5E_BEGIN_TRY {
+        ret = H5Fget_dset_no_attrs_hint(file_id, NULL)
+    } H5E_END_TRY;
+    VERIFY(ret, FAIL, "H5Fget_dset_no_attrs_hint");
 
     /************/
     /* TEARDOWN */
     /************/
 
-    VERIFY(H5Fclose(file_id), SUCCEED, "H5Fclose");
-    VERIFY(H5Fclose(file2_id), SUCCEED, "H5Fclose");
+    ret = H5Fclose(file_id);
+    CHECK(ret, FAIL, "H5Fclose");
+    ret = H5Fclose(file2_id);
+    CHECK(ret, FAIL, "H5Fclose");
 } /* end test_min_dset_ohdr() */
 
 /****************************************************************
