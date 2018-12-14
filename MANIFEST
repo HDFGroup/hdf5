@@ -1389,6 +1389,7 @@
 ./tools/test/h5format_convert/testfiles/h5fc_v_non_chunked.ddl
 ./tools/test/h5format_convert/testfiles/h5fc_d_file.ddl
 ./tools/test/h5format_convert/testfiles/h5fc_d_file.ddl.err
+./tools/test/h5format_convert/testfiles/h5fc_d_file-d.ddl
 ./tools/test/h5format_convert/testfiles/h5fc_v_ndata_bt1.ddl
 ./tools/test/h5format_convert/testfiles/h5fc_dname.ddl
 ./tools/test/h5format_convert/testfiles/h5fc_dname.err
@@ -1527,6 +1528,7 @@
 ./tools/test/misc/testfiles/h5clear_less_after_size.ddl
 ./tools/test/misc/testfiles/h5clear_less_before_size.ddl
 ./tools/test/misc/testfiles/h5clear_missing_file.ddl
+./tools/test/misc/testfiles/h5clear_missing_file.err
 ./tools/test/misc/testfiles/h5clear_noclose_after_size.ddl
 ./tools/test/misc/testfiles/h5clear_noclose_before_size.ddl
 ./tools/test/misc/testfiles/h5clear_no_mdc_image.err
