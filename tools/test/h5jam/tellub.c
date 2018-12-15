@@ -104,7 +104,7 @@ main (int argc, const char *argv[])
     hsize_t usize;
     htri_t testval;
     herr_t status;
-    hid_t plist = -1;
+    hid_t plist = H5I_INVALID_HID;
 
     h5tools_setprogname(PROGRAMNAME);
     h5tools_setstatus(EXIT_SUCCESS);
