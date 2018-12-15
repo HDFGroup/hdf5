@@ -1190,7 +1190,7 @@ done:
  * Parameters:
  *              hid_t dset_id;          IN: Chunked dataset ID
  *              hid_t fspace_id;        IN: File dataspace ID
- *              hsize_t index;          IN: Index of written chunk
+ *              hsize_t chk_idx;        IN: Index of allocated/written chunk
  *              hsize_t *offset         OUT: Offset coordinates of the chunk
  *              unsigned *filter_mask   OUT: Filter mask
  *              haddr_t *addr           OUT: Address of the chunk
@@ -1204,14 +1204,14 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Dget_chunk_info(hid_t dset_id, hid_t fspace_id, hsize_t index, hsize_t *offset, unsigned *filter_mask, haddr_t *addr, hsize_t *size)
+H5Dget_chunk_info(hid_t dset_id, hid_t fspace_id, hsize_t chk_idx, hsize_t *offset, unsigned *filter_mask, haddr_t *addr, hsize_t *size)
 {
     H5D_t       *dset = NULL;
     const H5S_t *space;              /* Dataspace for dataset */
     herr_t      ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE7("e", "iih*h*Iu*a*h", dset_id, fspace_id, index, offset, filter_mask,
+    H5TRACE7("e", "iih*h*Iu*a*h", dset_id, fspace_id, chk_idx, offset, filter_mask,
              addr, size);
 
     /* Check arguments */
@@ -1226,7 +1226,7 @@ H5Dget_chunk_info(hid_t dset_id, hid_t fspace_id, hsize_t index, hsize_t *offset
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a chunked dataset")
 
     /* Call private function to get the chunk info given the chunk's index */
-    if(H5D__get_chunk_info(dset, space, index, offset, filter_mask, addr, size) < 0)
+    if(H5D__get_chunk_info(dset, space, chk_idx, offset, filter_mask, addr, size) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get chunk info")
 
 done:
@@ -1242,7 +1242,7 @@ done:
  *
  * Parameters:
  *              hid_t dset_id           IN: Chunked dataset ID
- *              hsize_t *offset         IN: Coordinates of the chunk
+ *              hsize_t *offset         IN: Offset coordinates of the chunk
  *              unsigned *filter_mask   OUT: Filter mask
  *              haddr_t *addr           OUT: Address of the chunk
  *              hsize_t *size           OUT: Size of the chunk

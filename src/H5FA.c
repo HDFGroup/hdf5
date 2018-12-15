@@ -699,6 +699,7 @@ H5FA_iterate(H5FA_t *fa, H5FA_operator_t op, void *udata))
     /* Local variables */
     uint8_t     *elmt = NULL;
     hsize_t     u;
+    int         ret_value = H5_ITER_CONT;     /* Return value from callback */
 
     /*
      * Check arguments.
@@ -712,17 +713,15 @@ H5FA_iterate(H5FA_t *fa, H5FA_operator_t op, void *udata))
         H5E_THROW(H5E_CANTALLOC, "memory allocation failed for fixed array element")
 
     /* Iterate over all elements in array */
-    for(u = 0; u < fa->hdr->stats.nelmts; u++) {
-        int cb_ret;     /* Return value from callback */
-
+    for(u = 0; u < fa->hdr->stats.nelmts && ret_value == H5_ITER_CONT; u++) {
         /* Get array element */
         if(H5FA_get(fa, u, elmt) < 0)
             H5E_THROW(H5E_CANTGET, "unable to delete fixed array")
 
         /* Make callback */
-        if((cb_ret = (*op)(u, elmt, udata)) < 0) {
+        if((ret_value = (*op)(u, elmt, udata)) < 0) {
             H5E_PRINTF(H5E_BADITER, "iterator function failed");
-            H5_LEAVE(cb_ret)
+            H5_LEAVE(ret_value)
         } /* end if */
     } /* end for */
 
