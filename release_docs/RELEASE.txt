@@ -47,6 +47,15 @@ New Features
 
     Configuration:
     -------------
+    - Keep stderr and stdout separate in tests
+
+      Changed test handling of output capture. Tests now keep the stderr
+      output separate from the stdout output. It is up to the test to decide
+      which output to check against a reference. Also added the option
+      to grep for a string in either output.
+
+      (ADB - 2018/12/12, HDFFV-10632)
+
     - Add toolchain and cross-compile support
 
       Added info on using a toolchain file to INSTALL_CMAKE.txt. A

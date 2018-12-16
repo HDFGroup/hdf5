@@ -103,13 +103,18 @@ $SRC_H5FORMCONV_TESTFILES/old_h5fc_ext3_isf.h5
 $SRC_H5FORMCONV_TESTFILES/h5fc_err_level.h5
 "
 
+LIST_ERR_TEST_FILES="
+$SRC_H5FORMCONV_TESTFILES/h5fc_d_file.ddl.err
+$SRC_H5FORMCONV_TESTFILES/h5fc_dname.err
+$SRC_H5FORMCONV_TESTFILES/h5fc_nonexistfile.ddl.err
+$SRC_H5FORMCONV_TESTFILES/h5fc_nonexistdset_file.ddl.err
+"
+
 LIST_OTHER_TEST_FILES="
 $SRC_H5FORMCONV_TESTFILES/h5fc_help.ddl
 $SRC_H5FORMCONV_TESTFILES/h5fc_nooption.ddl
-$SRC_H5FORMCONV_TESTFILES/h5fc_nonexistfile.ddl
 $SRC_H5FORMCONV_TESTFILES/h5fc_d_file.ddl
 $SRC_H5FORMCONV_TESTFILES/h5fc_dname.ddl
-$SRC_H5FORMCONV_TESTFILES/h5fc_nonexistdset_file.ddl
 $SRC_H5FORMCONV_TESTFILES/h5fc_v_non_chunked.ddl
 $SRC_H5FORMCONV_TESTFILES/h5fc_v_bt1.ddl
 $SRC_H5FORMCONV_TESTFILES/h5fc_v_ndata_bt1.ddl
@@ -137,7 +142,7 @@ $SRC_H5FORMCONV_TESTFILES/h5fc_v_err.ddl.err
 #
 # copy test files and expected output files from source dirs to test dir
 #
-COPY_TESTFILES="$LIST_HDF5_TEST_FILES $LIST_OTHER_TEST_FILES"
+COPY_TESTFILES="$LIST_HDF5_TEST_FILES $LIST_ERR_TEST_FILES $LIST_OTHER_TEST_FILES"
 
 COPY_TESTFILES_TO_TESTDIR()
 {
@@ -193,6 +198,9 @@ TESTING() {
    echo "Testing $* $SPACES" | cut -c1-80 | tr -d '\012'
 }
 
+# Source in the output filter function definitions.
+. $srcdir/../../../bin/output_filter.sh
+
 # Run a test and print PASS or *FAIL*.  If a test fails then increment
 # the `nerrors' global variable and (if $verbose is set) display the
 # difference between the actual output and the expected output. The
@@ -212,8 +220,9 @@ TESTING() {
 TOOLTEST_OUT() {
     # Prepare expected and actual output
     expect="$TESTDIR/$1"
+    expect_err="$TESTDIR/`basename $1 .ddl`.err"
     actual="$TESTDIR/`basename $1 .ddl`.out"
-    actual_err="$TESTDIR/`basename $1 .ddl`.err"
+    actual_err="$TESTDIR/`basename $1 .ddl`.out.err"
     actual_sav=${actual}-sav
     actual_err_sav=${actual_err}-sav
 
@@ -233,7 +242,6 @@ TOOLTEST_OUT() {
     ) >$actual 2>$actual_err
     cp $actual $actual_sav
     cp $actual_err $actual_err_sav
-    cat $actual_err >> $actual
 
     # Compare output
     COMPARE_OUT $expect $actual
@@ -251,7 +259,7 @@ TOOLTEST_MASK_OUT() {
     expect_err="$TESTDIR/$1.err"
     actual_ext="$TESTDIR/$1.ext"
     actual="$TESTDIR/`basename $1 .ddl`.out"
-    actual_err="$TESTDIR/`basename $1 .ddl`.err"
+    actual_err="$TESTDIR/`basename $1 .ddl`.out.err"
     actual_sav=${actual}-sav
     actual_err_sav=${actual_err}-sav
 
@@ -298,6 +306,42 @@ TOOLTEST_MASK_OUT() {
         nerrors="`expr $nerrors + 1`"
         test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
     fi
+
+    # Clean up output file
+    if test -z "$HDF5_NOCLEANUP"; then
+    $RM $actual $actual_err
+    $RM $actual $actual_err $actual_sav $actual_err_sav
+    fi
+}
+# Same as TOOLTEST_OUT except only compares error outout
+TOOLTEST_ERR() {
+    # Prepare expected and actual output
+    expect="$TESTDIR/$1"
+    expect_err="$TESTDIR/$1.err"
+    actual="$TESTDIR/`basename $1 .ddl`.out"
+    actual_err="$TESTDIR/`basename $1 .ddl`.out.err"
+    actual_sav=${actual}-sav
+    actual_err_sav=${actual_err}-sav
+
+    # Prepare the test file
+    $RM $TESTDIR/$TMPOUTFILE
+    TFILE=$2
+    if [ ! -z "$2" ] && [ -e $TESTDIR/$2 ] ; then
+    $CP $TESTDIR/$2 $TESTDIR/$TMPOUTFILE
+    TFILE=$TMPOUTFILE
+    fi
+
+    # Run test.
+    TESTING $FORMCONV $3 $4 $5 $6 $2
+    (
+    cd $TESTDIR
+    $RUNSERIAL $FORMCONV_BIN $3 $4 $5 $6 $TFILE
+    ) >$actual 2>$actual_err
+    cp $actual $actual_sav
+    cp $actual_err $actual_err_sav
+
+    # Compare output
+    COMPARE_OUT $expect_err $actual_err
 
     # Clean up output file
     if test -z "$HDF5_NOCLEANUP"; then
@@ -406,7 +450,7 @@ COPY_TESTFILES_TO_TESTDIR
 # h5format_convert nonexist.h5  (no options, file does not exist)
 TOOLTEST_OUT h5fc_help.ddl '' --help
 TOOLTEST_OUT h5fc_nooption.ddl ''
-TOOLTEST_OUT h5fc_nonexistfile.ddl nonexist.h5
+TOOLTEST_ERR h5fc_nonexistfile.ddl nonexist.h5
 #
 #
 # h5format_convert -d old_h5fc_ext_none.h5 (just -d option, file exists)
@@ -416,7 +460,7 @@ TOOLTEST_OUT h5fc_nonexistfile.ddl nonexist.h5
 TOOLTEST_OUT h5fc_d_file.ddl old_h5fc_ext_none.h5 -d
 TOOLTEST_OUT h5fc_d_file.ddl old_h5fc_ext_none.h5 --dname
 TOOLTEST_OUT h5fc_dname.ddl '' --dname
-TOOLTEST_OUT h5fc_nonexistdset_file.ddl old_h5fc_ext_none.h5 --dname=nonexist
+TOOLTEST_ERR h5fc_nonexistdset_file.ddl old_h5fc_ext_none.h5 --dname=nonexist
 #
 #
 #

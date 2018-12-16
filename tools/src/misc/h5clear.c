@@ -82,7 +82,7 @@ static struct long_options l_opts[] = {
 };
 
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    usage
  *
@@ -119,7 +119,7 @@ static void usage(const char *prog)
     HDfprintf(stdout, "  Set the EOA to the maximum of (EOA, EOF) + 512 for the file <file_name>.\n");
 } /* usage() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: parse_command_line
  *
@@ -220,7 +220,7 @@ leave(int ret)
 } /* leave() */
 
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    main
  *

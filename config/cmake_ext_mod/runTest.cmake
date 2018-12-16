@@ -26,9 +26,6 @@ endif ()
 if (NOT TEST_EXPECT)
   message (STATUS "Require TEST_EXPECT to be defined")
 endif ()
-if (NOT TEST_SKIP_COMPARE AND NOT TEST_REFERENCE)
-  message (FATAL_ERROR "Require TEST_REFERENCE to be defined")
-endif ()
 
 if (EXISTS ${TEST_FOLDER}/${TEST_OUTPUT})
   file (REMOVE ${TEST_FOLDER}/${TEST_OUTPUT})
@@ -36,11 +33,6 @@ endif ()
 
 if (EXISTS ${TEST_FOLDER}/${TEST_OUTPUT}.err)
   file (REMOVE ${TEST_FOLDER}/${TEST_OUTPUT}.err)
-endif ()
-
-# if there is not an error reference file add the error output to the stdout file
-if (NOT TEST_ERRREF)
-  set (ERROR_APPEND 1)
 endif ()
 
 message (STATUS "COMMAND: ${TEST_PROGRAM} ${TEST_ARGS}")
@@ -96,9 +88,19 @@ endif ()
 message (STATUS "COMMAND Result: ${TEST_RESULT}")
 
 # if the .err file exists and ERRROR_APPEND is enabled
-if (ERROR_APPEND AND EXISTS ${TEST_FOLDER}/${TEST_OUTPUT}.err)
+if (EXISTS ${TEST_FOLDER}/${TEST_OUTPUT}.err)
   file (READ ${TEST_FOLDER}/${TEST_OUTPUT}.err TEST_STREAM)
-  file (APPEND ${TEST_FOLDER}/${TEST_OUTPUT} "${TEST_STREAM}")
+  if (TEST_MASK_FILE)
+    STRING(REGEX REPLACE "CurrentDir is [^\n]+\n" "CurrentDir is (dir name)\n" TEST_STREAM "${TEST_STREAM}")
+  endif ()
+
+  if (NOT ERROR_APPEND)
+    # append error output to the stdout output file
+    file (WRITE ${TEST_FOLDER}/${TEST_OUTPUT}.err "${TEST_STREAM}")
+  else ()
+    # write back to original .err file
+    file (APPEND ${TEST_FOLDER}/${TEST_OUTPUT} "${TEST_STREAM}")
+  endif ()
 endif ()
 
 # append the test result status with a predefined text
@@ -142,6 +144,7 @@ if (TEST_MASK_ERROR)
     # the error stack remains in the .err file
     file (READ ${TEST_FOLDER}/${TEST_OUTPUT}.err TEST_STREAM)
   endif ()
+  string (REGEX REPLACE "^.*_pmi_alps[^\n]+\n" "" TEST_STREAM "${TEST_STREAM}")
   string (REGEX REPLACE "thread [0-9]*:" "thread (IDs):" TEST_STREAM "${TEST_STREAM}")
   string (REGEX REPLACE ": ([^\n]*)[.]c " ": (file name) " TEST_STREAM "${TEST_STREAM}")
   string (REGEX REPLACE " line [0-9]*" " line (number)" TEST_STREAM "${TEST_STREAM}")
@@ -173,63 +176,65 @@ endif ()
 
 # compare output files to references unless this must be skipped
 if (NOT TEST_SKIP_COMPARE)
-  if (WIN32 AND NOT MINGW)
-    file (READ ${TEST_FOLDER}/${TEST_REFERENCE} TEST_STREAM)
-    file (WRITE ${TEST_FOLDER}/${TEST_REFERENCE} "${TEST_STREAM}")
-  endif ()
-
-  if (NOT TEST_SORT_COMPARE)
-    # now compare the output with the reference
-    execute_process (
-        COMMAND ${CMAKE_COMMAND} -E compare_files ${TEST_FOLDER}/${TEST_OUTPUT} ${TEST_FOLDER}/${TEST_REFERENCE}
-        RESULT_VARIABLE TEST_RESULT
-    )
-  else ()
-    file (STRINGS ${TEST_FOLDER}/${TEST_OUTPUT} v1)
-    file (STRINGS ${TEST_FOLDER}/${TEST_REFERENCE} v2)
-    list (SORT v1)
-    list (SORT v2)
-    if (NOT v1 STREQUAL v2)
-      set(TEST_RESULT 1)
+  if (EXISTS ${TEST_FOLDER}/${TEST_REFERENCE})
+    if (WIN32 AND NOT MINGW)
+      file (READ ${TEST_FOLDER}/${TEST_REFERENCE} TEST_STREAM)
+      file (WRITE ${TEST_FOLDER}/${TEST_REFERENCE} "${TEST_STREAM}")
     endif ()
-  endif ()
 
-  if (NOT "${TEST_RESULT}" STREQUAL "0")
-    set (TEST_RESULT 0)
-    file (STRINGS ${TEST_FOLDER}/${TEST_OUTPUT} test_act)
-    list (LENGTH test_act len_act)
-    file (STRINGS ${TEST_FOLDER}/${TEST_REFERENCE} test_ref)
-    list (LENGTH test_ref len_ref)
-    if (NOT "${len_act}" STREQUAL "0" AND NOT "${len_ref}" STREQUAL "0")
-      math (EXPR _FP_LEN "${len_ref} - 1")
-      foreach (line RANGE 0 ${_FP_LEN})
-        list (GET test_act ${line} str_act)
-        list (GET test_ref ${line} str_ref)
-        if (NOT "${str_act}" STREQUAL "${str_ref}")
-          if (NOT "${str_act}" STREQUAL "")
-            set (TEST_RESULT 1)
-            message ("line = ${line}\n***ACTUAL: ${str_act}\n****REFER: ${str_ref}\n")
-          endif ()
-        endif ()
-      endforeach ()
+    if (NOT TEST_SORT_COMPARE)
+      # now compare the output with the reference
+      execute_process (
+          COMMAND ${CMAKE_COMMAND} -E compare_files ${TEST_FOLDER}/${TEST_OUTPUT} ${TEST_FOLDER}/${TEST_REFERENCE}
+          RESULT_VARIABLE TEST_RESULT
+      )
     else ()
-      if ("${len_act}" STREQUAL "0")
-        message (STATUS "COMPARE Failed: ${TEST_FOLDER}/${TEST_OUTPUT} is empty")
-      endif ()
-      if ("${len_ref}" STREQUAL "0")
-        message (STATUS "COMPARE Failed: ${TEST_FOLDER}/${TEST_REFERENCE} is empty")
+      file (STRINGS ${TEST_FOLDER}/${TEST_OUTPUT} v1)
+      file (STRINGS ${TEST_FOLDER}/${TEST_REFERENCE} v2)
+      list (SORT v1)
+      list (SORT v2)
+      if (NOT v1 STREQUAL v2)
+        set(TEST_RESULT 1)
       endif ()
     endif ()
-    if (NOT "${len_act}" STREQUAL "${len_ref}")
-      set (TEST_RESULT 1)
+
+    if (NOT "${TEST_RESULT}" STREQUAL "0")
+      set (TEST_RESULT 0)
+      file (STRINGS ${TEST_FOLDER}/${TEST_OUTPUT} test_act)
+      list (LENGTH test_act len_act)
+      file (STRINGS ${TEST_FOLDER}/${TEST_REFERENCE} test_ref)
+      list (LENGTH test_ref len_ref)
+      if (NOT "${len_act}" STREQUAL "0" AND NOT "${len_ref}" STREQUAL "0")
+        math (EXPR _FP_LEN "${len_ref} - 1")
+        foreach (line RANGE 0 ${_FP_LEN})
+          list (GET test_act ${line} str_act)
+          list (GET test_ref ${line} str_ref)
+          if (NOT "${str_act}" STREQUAL "${str_ref}")
+            if (NOT "${str_act}" STREQUAL "")
+              set (TEST_RESULT 1)
+              message ("line = ${line}\n***ACTUAL: ${str_act}\n****REFER: ${str_ref}\n")
+            endif ()
+          endif ()
+        endforeach ()
+      else ()
+        if ("${len_act}" STREQUAL "0")
+          message (STATUS "COMPARE Failed: ${TEST_FOLDER}/${TEST_OUTPUT} is empty")
+        endif ()
+        if ("${len_ref}" STREQUAL "0")
+          message (STATUS "COMPARE Failed: ${TEST_FOLDER}/${TEST_REFERENCE} is empty")
+        endif ()
+      endif ()
+      if (NOT "${len_act}" STREQUAL "${len_ref}")
+        set (TEST_RESULT 1)
+      endif ()
     endif ()
-  endif ()
 
-  message (STATUS "COMPARE Result: ${TEST_RESULT}")
+    message (STATUS "COMPARE Result: ${TEST_RESULT}")
 
-  # again, if return value is !=0 scream and shout
-  if (NOT "${TEST_RESULT}" STREQUAL "0")
-    message (FATAL_ERROR "Failed: The output of ${TEST_OUTPUT} did not match ${TEST_REFERENCE}")
+    # again, if return value is !=0 scream and shout
+    if (NOT "${TEST_RESULT}" STREQUAL "0")
+      message (FATAL_ERROR "Failed: The output of ${TEST_OUTPUT} did not match ${TEST_REFERENCE}")
+    endif ()
   endif ()
 
   # now compare the .err file with the error reference, if supplied
@@ -260,7 +265,7 @@ if (NOT TEST_SKIP_COMPARE)
             if (NOT "${str_act}" STREQUAL "")
               set (TEST_RESULT 1)
               message ("line = ${line}\n***ACTUAL: ${str_act}\n****REFER: ${str_ref}\n")
-             endif ()
+            endif ()
           endif ()
         endforeach ()
       else ()
@@ -285,5 +290,27 @@ if (NOT TEST_SKIP_COMPARE)
   endif ()
 endif ()
 
+if (TEST_GREP_COMPARE)
+  # now grep the output with the reference
+  file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
+
+  # TEST_REFERENCE should always be matched
+  string (REGEX MATCH "${TEST_REFERENCE}" TEST_MATCH ${TEST_STREAM})
+  string (COMPARE EQUAL "${TEST_REFERENCE}" "${TEST_MATCH}" TEST_RESULT)
+  if ("${TEST_RESULT}" STREQUAL "0")
+    message (FATAL_ERROR "Failed: The output of ${TEST_PROGRAM} did not contain ${TEST_REFERENCE}")
+  endif ()
+
+  string (REGEX MATCH "${TEST_FILTER}" TEST_MATCH ${TEST_STREAM})
+  if ("${TEST_EXPECT}" STREQUAL "1")
+    # TEST_EXPECT (1) interperts TEST_FILTER as NOT to match
+    string (LENGTH "${TEST_MATCH}" TEST_RESULT)
+    if (NOT "${TEST_RESULT}" STREQUAL "0")
+      message (FATAL_ERROR "Failed: The output of ${TEST_PROGRAM} did contain ${TEST_FILTER}")
+    endif ()
+  endif ()
+endif ()
+
 # everything went fine...
-message ("Passed: The output of ${TEST_PROGRAM} matches ${TEST_REFERENCE}")
+message ("${TEST_PROGRAM} Passed")
+
