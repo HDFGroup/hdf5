@@ -62,6 +62,7 @@ typedef __int64             h5_stat_size_t;
 #define HDstat(S,B)         _stati64(S,B)
 #define HDstrcasecmp(A,B)   _stricmp(A,B)
 #define HDstrdup(S)         _strdup(S)
+#define HDstrtok_r(X,Y,Z)   strtok_s(X,Y,Z)
 #define HDtzset()           _tzset()
 #define HDunlink(S)         _unlink(S)
 #define HDwrite(F,M,Z)      _write(F,M,Z)
