@@ -38,6 +38,22 @@ typedef struct {
 typedef herr_t (*H5A_operator2_t)(hid_t location_id/*in*/,
     const char *attr_name/*in*/, const H5A_info_t *ainfo/*in*/, void *op_data/*in,out*/);
 
+/* Enumeration for native VOL connector attribute optional VOL operations */
+typedef enum H5VL_native_attr_optional_t {
+    H5VL_NATIVE_ATTR_ITERATE_OLD        /* H5Aiterate (deprecated routine) */
+                                        /* (This enum value should have an
+                                         *      "#ifndefH5_NO_DEPRECATED_SYMBOLS"
+                                         *      around it, but the compiler
+                                         *      complains about an empty enum
+                                         *      when deprecated symbols are
+                                         *      disabled currently.  When
+                                         *      another enum value is added,
+                                         *      please put the #ifdef around
+                                         *      this symbol.  QAK - 2018/12/06
+                                         */
+} H5VL_native_attr_optional_t;
+
+
 /* Public function prototypes */
 H5_DLL hid_t   H5Acreate2(hid_t loc_id, const char *attr_name, hid_t type_id,
     hid_t space_id, hid_t acpl_id, hid_t aapl_id);

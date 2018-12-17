@@ -782,15 +782,15 @@ static herr_t
 H5VL__native_attr_optional(void H5_ATTR_UNUSED *obj, hid_t H5_ATTR_UNUSED dxpl_id,
     void H5_ATTR_UNUSED **req, va_list arguments)
 {
-    H5VL_attr_optional_t optional_type;
+    H5VL_native_attr_optional_t optional_type;
     herr_t ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_STATIC
 
-    optional_type = va_arg(arguments, H5VL_attr_optional_t);
+    optional_type = va_arg(arguments, H5VL_native_attr_optional_t);
     switch(optional_type) {
 #ifndef H5_NO_DEPRECATED_SYMBOLS
-        case H5VL_ATTR_ITERATE_OLD:
+        case H5VL_NATIVE_ATTR_ITERATE_OLD:
             {
                 hid_t loc_id = va_arg(arguments, hid_t);
                 unsigned *attr_num = va_arg(arguments, unsigned *);
@@ -803,6 +803,13 @@ H5VL__native_attr_optional(void H5_ATTR_UNUSED *obj, hid_t H5_ATTR_UNUSED dxpl_i
 
                 break;
             }
+#else
+        /* XXX: This case only exists because this is the only attribute optional
+         *      value and we can't have empty enums. Delete it when we have another
+         *      attribute optional enum value.
+         */
+        case H5VL_NATIVE_ATTR_ITERATE_OLD:
+            HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "H5VL_NATIVE_ATTR_ITERATE_OLD is not a valid value when the library is built without deprecated routines")
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
         default:
@@ -1218,13 +1225,13 @@ H5VL__native_dataset_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id,
     void H5_ATTR_UNUSED **req, va_list arguments)
 {
     H5D_t *dset = NULL;             /* Dataset */
-    H5VL_dataset_optional_t optional_type = va_arg(arguments, H5VL_dataset_optional_t);
+    H5VL_native_dataset_optional_t optional_type = va_arg(arguments, H5VL_native_dataset_optional_t);
     herr_t ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_STATIC
 
     switch(optional_type) {
-        case H5VL_DATASET_FORMAT_CONVERT:
+        case H5VL_NATIVE_DATASET_FORMAT_CONVERT:
             {
                 dset = (H5D_t *)obj;
 
@@ -1259,7 +1266,7 @@ H5VL__native_dataset_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id,
                 break;
             }
 
-        case H5VL_DATASET_GET_CHUNK_INDEX_TYPE:
+        case H5VL_NATIVE_DATASET_GET_CHUNK_INDEX_TYPE:
             {
                 H5D_chunk_index_t *idx_type = va_arg(arguments, H5D_chunk_index_t *);
 
@@ -1275,7 +1282,7 @@ H5VL__native_dataset_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id,
                 break;
             }
 
-        case H5VL_DATASET_GET_CHUNK_STORAGE_SIZE:
+        case H5VL_NATIVE_DATASET_GET_CHUNK_STORAGE_SIZE:
             {
                 hsize_t *offset = va_arg(arguments, hsize_t *);
                 hsize_t *chunk_nbytes = va_arg(arguments, hsize_t *);
@@ -1293,7 +1300,7 @@ H5VL__native_dataset_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id,
                 break;
             }
 
-        case H5VL_DATASET_CHUNK_READ:
+        case H5VL_NATIVE_DATASET_CHUNK_READ:
             {
                 const       hsize_t *offset     = va_arg(arguments, hsize_t *);
                 uint32_t   *filters             = va_arg(arguments, uint32_t *);
@@ -1321,7 +1328,7 @@ H5VL__native_dataset_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id,
                 break;
             }
 
-        case H5VL_DATASET_CHUNK_WRITE:
+        case H5VL_NATIVE_DATASET_CHUNK_WRITE:
             {
                 uint32_t        filters             = va_arg(arguments, uint32_t);
                 const  hsize_t *offset              = va_arg(arguments, const hsize_t *);
@@ -1765,7 +1772,7 @@ static herr_t
 H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req, va_list arguments)
 {
     H5F_t *f = NULL;           /* File */
-    H5VL_file_optional_t optional_type = va_arg(arguments, H5VL_file_optional_t);
+    H5VL_native_file_optional_t optional_type = va_arg(arguments, H5VL_native_file_optional_t);
     herr_t ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_STATIC
@@ -1773,7 +1780,7 @@ H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR
     f = (H5F_t *)obj;
     switch(optional_type) {
         /* H5Fget_filesize */
-        case H5VL_FILE_GET_SIZE:
+        case H5VL_NATIVE_FILE_GET_SIZE:
             {
                 haddr_t     max_eof_eoa;            /* Maximum of the EOA & EOF */
                 haddr_t     base_addr;              /* Base address for the file */
@@ -1792,7 +1799,7 @@ H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR
             }
 
         /* H5Fget_file_image */
-        case H5VL_FILE_GET_FILE_IMAGE:
+        case H5VL_NATIVE_FILE_GET_FILE_IMAGE:
             {
                 void       *buf_ptr   = va_arg(arguments, void *);
                 ssize_t    *ret       = va_arg(arguments, ssize_t *);
@@ -1805,7 +1812,7 @@ H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR
             }
 
         /* H5Fget_freespace */
-        case H5VL_FILE_GET_FREE_SPACE:
+        case H5VL_NATIVE_FILE_GET_FREE_SPACE:
             {
                 hsize_t	tot_space;	/* Amount of free space in the file */
                 hssize_t    *ret = va_arg(arguments, hssize_t *);
@@ -1817,7 +1824,8 @@ H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR
                 break;
             }
 
-        case H5VL_FILE_GET_FREE_SECTIONS:
+        /* H5Fget_free_sections */
+        case H5VL_NATIVE_FILE_GET_FREE_SECTIONS:
             {
                 H5F_sect_info_t *sect_info = va_arg(arguments, H5F_sect_info_t *);
                 ssize_t         *ret       = va_arg(arguments, ssize_t *);
@@ -1830,8 +1838,8 @@ H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR
                 break;
             }
 
-        /* H5Fget_info2 */
-        case H5VL_FILE_GET_INFO:
+        /* H5Fget_info1/2 */
+        case H5VL_NATIVE_FILE_GET_INFO:
             {
                 H5I_type_t  type   = va_arg(arguments, H5I_type_t);
                 H5F_info2_t *finfo = va_arg(arguments, H5F_info2_t *);
@@ -1850,7 +1858,7 @@ H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR
             }
 
         /* H5Fget_mdc_config */
-        case H5VL_FILE_GET_MDC_CONF:
+        case H5VL_NATIVE_FILE_GET_MDC_CONF:
             {
                 H5AC_cache_config_t *config_ptr = va_arg(arguments, H5AC_cache_config_t *);
 
@@ -1861,7 +1869,7 @@ H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR
             }
 
         /* H5Fget_mdc_hit_rate */
-        case H5VL_FILE_GET_MDC_HR:
+        case H5VL_NATIVE_FILE_GET_MDC_HR:
             {
                 double *hit_rate_ptr = va_arg(arguments, double *);
 
@@ -1872,7 +1880,7 @@ H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR
             }
 
         /* H5Fget_mdc_size */
-        case H5VL_FILE_GET_MDC_SIZE:
+        case H5VL_NATIVE_FILE_GET_MDC_SIZE:
             {
                 size_t *max_size_ptr        = va_arg(arguments, size_t *);
                 size_t *min_clean_size_ptr  = va_arg(arguments, size_t *);
@@ -1891,7 +1899,7 @@ H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR
             }
 
         /* H5Fget_vfd_handle */
-        case H5VL_FILE_GET_VFD_HANDLE:
+        case H5VL_NATIVE_FILE_GET_VFD_HANDLE:
             {
                 void **file_handle  = va_arg(arguments, void **);
                 hid_t  fapl_id      = va_arg(arguments, hid_t);
@@ -1903,7 +1911,7 @@ H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR
             }
 
         /* H5Iget_file_id */
-        case H5VL_FILE_GET_FILE_ID:
+        case H5VL_NATIVE_FILE_GET_FILE_ID:
             {
                 H5I_type_t  type = va_arg(arguments, H5I_type_t);
                 hid_t      *file_id = va_arg(arguments, hid_t *);
@@ -1916,7 +1924,7 @@ H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR
             }
 
         /* H5Fclear_elink_file_cache */
-        case H5VL_FILE_CLEAR_ELINK_CACHE:
+        case H5VL_NATIVE_FILE_CLEAR_ELINK_CACHE:
             {
                 /* Release the EFC */
                 if(f->shared->efc)
@@ -1926,7 +1934,7 @@ H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR
             }
 
         /* H5Freset_mdc_hit_rate_stats */
-        case H5VL_FILE_RESET_MDC_HIT_RATE:
+        case H5VL_NATIVE_FILE_RESET_MDC_HIT_RATE:
             {
                 /* Reset the hit rate statistic */
                 if(H5AC_reset_cache_hit_rate_stats(f->shared->cache) < 0)
@@ -1934,7 +1942,8 @@ H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR
                 break;
             }
 
-        case H5VL_FILE_SET_MDC_CONFIG:
+        /* H5Fset_mdc_config */
+        case H5VL_NATIVE_FILE_SET_MDC_CONFIG:
             {
                 H5AC_cache_config_t *config_ptr = va_arg(arguments, H5AC_cache_config_t *);
 
@@ -1944,7 +1953,8 @@ H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR
                 break;
             }
 
-        case H5VL_FILE_GET_METADATA_READ_RETRY_INFO:
+        /* H5Fget_metadata_read_retry_info */
+        case H5VL_NATIVE_FILE_GET_METADATA_READ_RETRY_INFO:
             {
                 H5F_retry_info_t *info = va_arg(arguments, H5F_retry_info_t *);
 
@@ -1954,7 +1964,8 @@ H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR
                 break;
             }
 
-        case H5VL_FILE_START_SWMR_WRITE:
+        /* H5Fstart_swmr_write */
+        case H5VL_NATIVE_FILE_START_SWMR_WRITE:
             {
                 if(H5F__start_swmr_write(f) < 0)
                     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "can't start SWMR write")
@@ -1962,7 +1973,8 @@ H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR
                 break;
             }
 
-        case H5VL_FILE_START_MDC_LOGGING:
+        /* H5Fstart_mdc_logging */
+        case H5VL_NATIVE_FILE_START_MDC_LOGGING:
             {
                 /* Call mdc logging function */
                 if(H5C_start_logging(f->shared->cache) < 0)
@@ -1971,7 +1983,8 @@ H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR
                 break;
             }
 
-        case H5VL_FILE_STOP_MDC_LOGGING:
+        /* H5Fstop_mdc_logging */
+        case H5VL_NATIVE_FILE_STOP_MDC_LOGGING:
             {
                 /* Call mdc logging function */
                 if(H5C_stop_logging(f->shared->cache) < 0)
@@ -1980,7 +1993,8 @@ H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR
                 break;
             }
 
-        case H5VL_FILE_GET_MDC_LOGGING_STATUS:
+        /* H5Fget_mdc_logging_status */
+        case H5VL_NATIVE_FILE_GET_MDC_LOGGING_STATUS:
             {
                 hbool_t *is_enabled				= va_arg(arguments, hbool_t *);
                 hbool_t *is_currently_logging	= va_arg(arguments, hbool_t *);
@@ -1992,7 +2006,8 @@ H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR
                 break;
             }
 
-        case H5VL_FILE_FORMAT_CONVERT:
+        /* H5Fformat_convert */
+        case H5VL_NATIVE_FILE_FORMAT_CONVERT:
             {
                 /* Convert the format */
                 if(H5F__format_convert(f) < 0)
@@ -2001,7 +2016,8 @@ H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR
                 break;
             }
 
-        case H5VL_FILE_RESET_PAGE_BUFFERING_STATS:
+        /* H5Freset_page_buffering_stats */
+        case H5VL_NATIVE_FILE_RESET_PAGE_BUFFERING_STATS:
             {
                 /* Sanity check */
                 if(NULL == f->shared->page_buf)
@@ -2014,7 +2030,8 @@ H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR
                 break;
             }
 
-        case H5VL_FILE_GET_PAGE_BUFFERING_STATS:
+        /* H5Fget_page_buffering_stats */
+        case H5VL_NATIVE_FILE_GET_PAGE_BUFFERING_STATS:
             {
                 unsigned *accesses      = va_arg(arguments, unsigned *);
                 unsigned *hits          = va_arg(arguments, unsigned *);
@@ -2033,7 +2050,8 @@ H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR
                 break;
             }
 
-        case H5VL_FILE_GET_MDC_IMAGE_INFO:
+        /* H5Fget_mdc_image_info */
+        case H5VL_NATIVE_FILE_GET_MDC_IMAGE_INFO:
             {
                 haddr_t *image_addr = va_arg(arguments, haddr_t *);
                 hsize_t *image_len = va_arg(arguments, hsize_t *);
@@ -2045,7 +2063,8 @@ H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR
                 break;
             }
 
-        case H5VL_FILE_GET_EOA:
+        /* H5Fget_eoa */
+        case H5VL_NATIVE_FILE_GET_EOA:
             {
                 haddr_t *eoa = va_arg(arguments, haddr_t *);
                 haddr_t rel_eoa;        /* Relative address of EOA */
@@ -2069,7 +2088,8 @@ H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR
                 break;
             }
 
-        case H5VL_FILE_INCR_FILESIZE:
+        /* H5Fincrement_filesize */
+        case H5VL_NATIVE_FILE_INCR_FILESIZE:
             {
                 hsize_t increment = va_arg(arguments, hsize_t);
                 haddr_t max_eof_eoa;        /* Maximum of the relative EOA & EOF */
@@ -2090,7 +2110,8 @@ H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR
                 break;
             }
 
-        case H5VL_FILE_SET_LIBVER_BOUNDS:
+        /* H5Fset_latest_format, H5Fset_libver_bounds */
+        case H5VL_NATIVE_FILE_SET_LIBVER_BOUNDS:
             {
                 H5F_libver_t low = va_arg(arguments, H5F_libver_t);
                 H5F_libver_t high = va_arg(arguments, H5F_libver_t);
@@ -2413,16 +2434,16 @@ static herr_t
 H5VL__native_group_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id,
     void H5_ATTR_UNUSED **req, va_list arguments)
 {
-    H5VL_group_optional_t optional_type;
+    H5VL_native_group_optional_t optional_type;
     herr_t ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_STATIC
 
-    optional_type = va_arg(arguments, H5VL_group_optional_t);
+    optional_type = va_arg(arguments, H5VL_native_group_optional_t);
     switch(optional_type) {
 #ifndef H5_NO_DEPRECATED_SYMBOLS
         /* H5Giterate (deprecated) */
-        case H5VL_GROUP_ITERATE_OLD:
+        case H5VL_NATIVE_GROUP_ITERATE_OLD:
             {
                 const H5VL_loc_params_t *loc_params = va_arg(arguments, const H5VL_loc_params_t *);
                 hsize_t idx = va_arg(arguments, hsize_t);
@@ -2443,7 +2464,7 @@ H5VL__native_group_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id,
             }
 
         /* H5Gget_objinfo (deprecated) */
-        case H5VL_GROUP_GET_OBJINFO:
+        case H5VL_NATIVE_GROUP_GET_OBJINFO:
             {
                 const H5VL_loc_params_t *loc_params = va_arg(arguments, const H5VL_loc_params_t *);
                 hbool_t follow_link = va_arg(arguments, unsigned);
@@ -2460,6 +2481,15 @@ H5VL__native_group_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id,
 
                 break;
             }
+#else
+        /* XXX: These cases only exist because they are the only group optional
+         *      values and we can't have empty enums. Delete them when we have
+         *      non-deprecated group optional enum values.
+         */
+        case H5VL_NATIVE_GROUP_ITERATE_OLD:
+            HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "H5VL_NATIVE_GROUP_ITERATE_OLD is not a valid value when the library is built without deprecated routines")
+        case H5VL_NATIVE_GROUP_GET_OBJINFO:
+            HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "H5VL_NATIVE_GROUP_GET_OBJINFO is not a valid value when the library is built without deprecated routines")
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
         default:
@@ -3282,7 +3312,7 @@ static herr_t
 H5VL__native_object_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id,
     void H5_ATTR_UNUSED **req, va_list arguments)
 {
-    H5VL_object_optional_t optional_type = va_arg(arguments, H5VL_object_optional_t);
+    H5VL_native_object_optional_t optional_type = va_arg(arguments, H5VL_native_object_optional_t);
     H5VL_loc_params_t *loc_params = va_arg(arguments, H5VL_loc_params_t *);
     H5G_loc_t	loc;                    /* Location of group */
     herr_t       ret_value = SUCCEED;    /* Return value */
@@ -3294,7 +3324,7 @@ H5VL__native_object_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id,
 
     switch(optional_type) {
         /* H5Oget_info / H5Oget_info_by_name / H5Oget_info_by_idx */
-        case H5VL_OBJECT_GET_INFO:
+        case H5VL_NATIVE_OBJECT_GET_INFO:
             {
                 H5O_info_t  *obj_info = va_arg(arguments, H5O_info_t *);
                 unsigned fields         = va_arg(arguments, unsigned);
@@ -3342,7 +3372,7 @@ H5VL__native_object_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id,
             }
 
         /* H5Oget_comment / H5Oget_comment_by_name */
-        case H5VL_OBJECT_GET_COMMENT:
+        case H5VL_NATIVE_OBJECT_GET_COMMENT:
             {
                 char     *comment =  va_arg(arguments, char *);
                 size_t   bufsize  =  va_arg(arguments, size_t);
@@ -3363,7 +3393,7 @@ H5VL__native_object_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id,
             }
 
         /* H5Oset_comment */
-        case H5VL_OBJECT_SET_COMMENT:
+        case H5VL_NATIVE_OBJECT_SET_COMMENT:
             {
                 const char    *comment  = va_arg(arguments, char *);
 

@@ -851,13 +851,6 @@ typedef struct {
     } u;
 } H5O_mesg_operator_t;
 
-/* Types for object optional VOL operations */
-typedef enum H5VL_object_optional_t {
-    H5VL_OBJECT_GET_COMMENT,            /* get object comment                   */
-    H5VL_OBJECT_GET_INFO,               /* get object info                      */
-    H5VL_OBJECT_SET_COMMENT             /* set object comment                   */
-} H5VL_object_optional_t;
-
 /* Typedef for abstract object creation */
 typedef struct {
     H5O_type_t obj_type;        /* Type of object to create */

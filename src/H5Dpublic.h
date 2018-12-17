@@ -104,6 +104,16 @@ typedef enum H5D_vds_view_t {
 /* Callback for H5Pset_append_flush() in a dataset access property list */
 typedef herr_t (*H5D_append_cb_t)(hid_t dataset_id, hsize_t *cur_dims, void *op_data);
 
+/* Enumeration for native VOL connector dataset optional VOL operations */
+typedef enum H5VL_native_dataset_optional_t {
+    H5VL_NATIVE_DATASET_FORMAT_CONVERT,             /* H5Dformat_convert (internal) */
+    H5VL_NATIVE_DATASET_GET_CHUNK_INDEX_TYPE,       /* H5Dget_chunk_index_type      */
+    H5VL_NATIVE_DATASET_GET_CHUNK_STORAGE_SIZE,     /* H5Dget_chunk_storage_size    */
+    H5VL_NATIVE_DATASET_CHUNK_READ,                 /* H5Dchunk_read                */
+    H5VL_NATIVE_DATASET_CHUNK_WRITE,                /* H5Dchunk_write               */
+} H5VL_native_dataset_optional_t;
+
+
 /********************/
 /* Public Variables */
 /********************/

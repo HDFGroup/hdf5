@@ -62,6 +62,22 @@ typedef struct H5G_info_t {
     hbool_t     mounted;                /* Whether group has a file mounted on it */
 } H5G_info_t;
 
+/* Enumeration for native VOL connector group optional VOL operations */
+typedef enum H5VL_native_group_optional_t {
+    H5VL_NATIVE_GROUP_ITERATE_OLD,      /* HG5Giterate (deprecated routine) */
+    H5VL_NATIVE_GROUP_GET_OBJINFO       /* HG5Gget_objinfo (deprecated routine) */
+                                        /* (These two enum values should have an
+                                         *      "#ifndefH5_NO_DEPRECATED_SYMBOLS"
+                                         *      around them, but the compiler
+                                         *      complains about an empty enum
+                                         *      when deprecated symbols are
+                                         *      disabled currently.  When
+                                         *      another enum value is added,
+                                         *      please put the #ifdef around
+                                         *      these symbols.  QAK - 2018/12/06
+                                         */
+} H5VL_native_group_optional_t;
+
 /********************/
 /* Public Variables */
 /********************/
