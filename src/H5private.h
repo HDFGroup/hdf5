@@ -1498,6 +1498,9 @@ typedef off_t               h5_stat_size_t;
 #ifndef HDva_arg
     #define HDva_arg(A,T)    va_arg(A,T)
 #endif /* HDva_arg */
+#ifndef HDva_copy
+#define HDva_copy(D,S)    va_copy(D,S)
+#endif /* HDva_copy */
 #ifndef HDva_end
     #define HDva_end(A)    va_end(A)
 #endif /* HDva_end */

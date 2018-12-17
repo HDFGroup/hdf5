@@ -66,6 +66,13 @@ typedef __int64             h5_stat_size_t;
 #define HDtzset()           _tzset()
 #define HDunlink(S)         _unlink(S)
 #define HDwrite(F,M,Z)      _write(F,M,Z)
+#if (_MSC_VER < 1800)
+/* va_copy() does not exist on pre-2013 Visual Studio. Since va_lists are
+ * just pointers into the stack in those CRTs, the usual work-around
+ * is to just define the operation as a pointer copy.
+ */
+#define HDva_copy(D,S)      ((D) = (S))
+#endif /* MSC_VER < 1800 */
 
 #ifdef H5_HAVE_VISUAL_STUDIO
 

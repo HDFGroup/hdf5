@@ -1360,7 +1360,7 @@ H5VL_attr_get(const H5VL_object_t *vol_obj, H5VL_attr_get_t get_type,
     vol_wrapper_set = TRUE;
 
     /* Call the corresponding internal VOL routine */
-    va_start(arguments, req);
+    HDva_start(arguments, req);
     arg_started = TRUE;
     if(H5VL__attr_get(vol_obj->data, vol_obj->connector->cls, get_type, dxpl_id, req, arguments) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "attribute get failed")
@@ -1368,7 +1368,7 @@ H5VL_attr_get(const H5VL_object_t *vol_obj, H5VL_attr_get_t get_type,
 done:
     /* End access to the va_list, if we started it */
     if(arg_started)
-        va_end(arguments);
+        HDva_end(arguments);
 
     /* Reset object wrapping info in API context */
     if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
@@ -1473,7 +1473,7 @@ H5VL_attr_specific(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *loc_pa
     vol_wrapper_set = TRUE;
 
     /* Call the corresponding internal VOL routine */
-    va_start(arguments, req);
+    HDva_start(arguments, req);
     arg_started = TRUE;
     if((ret_value = H5VL__attr_specific(vol_obj->data, loc_params, vol_obj->connector->cls, specific_type, dxpl_id, req, arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute attribute specific callback")
@@ -1481,7 +1481,7 @@ H5VL_attr_specific(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *loc_pa
 done:
     /* End access to the va_list, if we started it */
     if(arg_started)
-        va_end(arguments);
+        HDva_end(arguments);
 
     /* Reset object wrapping info in API context */
     if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
@@ -1584,7 +1584,7 @@ H5VL_attr_optional(const H5VL_object_t *vol_obj, hid_t dxpl_id, void **req, ...)
     vol_wrapper_set = TRUE;
 
     /* Call the corresponding internal VOL routine */
-    va_start(arguments, req);
+    HDva_start(arguments, req);
     arg_started = TRUE;
     if((ret_value = H5VL__attr_optional(vol_obj->data, vol_obj->connector->cls, dxpl_id, req, arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute attribute optional callback")
@@ -1592,7 +1592,7 @@ H5VL_attr_optional(const H5VL_object_t *vol_obj, hid_t dxpl_id, void **req, ...)
 done:
     /* End access to the va_list, if we started it */
     if(arg_started)
-        va_end(arguments);
+        HDva_end(arguments);
 
     /* Reset object wrapping info in API context */
     if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
@@ -2207,7 +2207,7 @@ H5VL_dataset_get(const H5VL_object_t *vol_obj, H5VL_dataset_get_t get_type,
     vol_wrapper_set = TRUE;
 
     /* Call the corresponding internal VOL routine */
-    va_start(arguments, req);
+    HDva_start(arguments, req);
     arg_started = TRUE;
     if(H5VL__dataset_get(vol_obj->data, vol_obj->connector->cls, get_type, dxpl_id, req, arguments) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "dataset get failed")
@@ -2215,7 +2215,7 @@ H5VL_dataset_get(const H5VL_object_t *vol_obj, H5VL_dataset_get_t get_type,
 done:
     /* End access to the va_list, if we started it */
     if(arg_started)
-        va_end(arguments);
+        HDva_end(arguments);
 
     /* Reset object wrapping info in API context */
     if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
@@ -2319,7 +2319,7 @@ H5VL_dataset_specific(const H5VL_object_t *vol_obj, H5VL_dataset_specific_t spec
     vol_wrapper_set = TRUE;
 
     /* Call the corresponding internal VOL routine */
-    va_start(arguments, req);
+    HDva_start(arguments, req);
     arg_started = TRUE;
     if(H5VL__dataset_specific(vol_obj->data, vol_obj->connector->cls, specific_type, dxpl_id, req, arguments) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute dataset specific callback")
@@ -2327,7 +2327,7 @@ H5VL_dataset_specific(const H5VL_object_t *vol_obj, H5VL_dataset_specific_t spec
 done:
     /* End access to the va_list, if we started it */
     if(arg_started)
-        va_end(arguments);
+        HDva_end(arguments);
 
     /* Reset object wrapping info in API context */
     if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
@@ -2432,7 +2432,7 @@ H5VL_dataset_optional(const H5VL_object_t *vol_obj, hid_t dxpl_id,
     vol_wrapper_set = TRUE;
 
     /* Call the corresponding internal VOL routine */
-    va_start(arguments, req);
+    HDva_start(arguments, req);
     arg_started = TRUE;
     if(H5VL__dataset_optional(vol_obj->data, vol_obj->connector->cls, dxpl_id, req, arguments) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute dataset optional callback")
@@ -2440,7 +2440,7 @@ H5VL_dataset_optional(const H5VL_object_t *vol_obj, hid_t dxpl_id,
 done:
     /* End access to the va_list, if we started it */
     if(arg_started)
-        va_end(arguments);
+        HDva_end(arguments);
 
     /* Reset object wrapping info in API context */
     if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
@@ -2617,7 +2617,7 @@ H5VL__file_cache_connector(void *obj, const H5VL_class_t *cls, hid_t dxpl_id,
     FUNC_ENTER_STATIC
 
     /* Re-issue call to internal file specific callback routine */
-    va_start(arguments, req);
+    HDva_start(arguments, req);
     arg_started = TRUE;
     if(H5VL__file_specific(obj, cls, H5VL_FILE_CACHE_VOL_CONN, dxpl_id, req, arguments) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "file specific failed")
@@ -2625,7 +2625,7 @@ H5VL__file_cache_connector(void *obj, const H5VL_class_t *cls, hid_t dxpl_id,
 done:
     /* End access to the va_list, if we started it */
     if(arg_started)
-        va_end(arguments);
+        HDva_end(arguments);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL__file_cache_connector() */
@@ -2914,7 +2914,7 @@ H5VL_file_get(const H5VL_object_t *vol_obj, H5VL_file_get_t get_type,
     vol_wrapper_set = TRUE;
 
     /* Call the corresponding internal VOL routine */
-    va_start(arguments, req);
+    HDva_start(arguments, req);
     arg_started = TRUE;
     if(H5VL__file_get(vol_obj->data, vol_obj->connector->cls, get_type, dxpl_id, req, arguments) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "file get failed")
@@ -2922,7 +2922,7 @@ H5VL_file_get(const H5VL_object_t *vol_obj, H5VL_file_get_t get_type,
 done:
     /* End access to the va_list, if we started it */
     if(arg_started)
-        va_end(arguments);
+        HDva_end(arguments);
 
     /* Reset object wrapping info in API context */
     if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
@@ -3022,7 +3022,7 @@ H5VL_file_specific(const H5VL_object_t *vol_obj, H5VL_file_specific_t specific_t
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Start access to the varargs, so they are available in all situations below */
-    va_start(arguments, req);
+    HDva_start(arguments, req);
     arg_started = TRUE;
 
     /* Special treatment of file access check */
@@ -3033,9 +3033,9 @@ H5VL_file_specific(const H5VL_object_t *vol_obj, H5VL_file_specific_t specific_t
         hid_t               fapl_id;        /* File access property list for accessing the file */
 
         /* Get the file access property list to access the file */
-        va_copy(tmp_args, arguments);
+        HDva_copy(tmp_args, arguments);
         fapl_id = va_arg(tmp_args, hid_t);
-        va_end(tmp_args);
+        HDva_end(tmp_args);
 
         /* Get the VOL info from the FAPL */
         if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
@@ -3067,7 +3067,7 @@ H5VL_file_specific(const H5VL_object_t *vol_obj, H5VL_file_specific_t specific_t
 done:
     /* End access to the va_list, if we started it */
     if(arg_started)
-        va_end(arguments);
+        HDva_end(arguments);
 
     /* Reset object wrapping info in API context */
     if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
@@ -3170,7 +3170,7 @@ H5VL_file_optional(const H5VL_object_t *vol_obj, hid_t dxpl_id, void **req, ...)
     vol_wrapper_set = TRUE;
 
     /* Call the corresponding internal VOL routine */
-    va_start(arguments, req);
+    HDva_start(arguments, req);
     arg_started = TRUE;
     if(H5VL__file_optional(vol_obj->data, vol_obj->connector->cls, dxpl_id, req, arguments) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "file optional failed")
@@ -3178,7 +3178,7 @@ H5VL_file_optional(const H5VL_object_t *vol_obj, hid_t dxpl_id, void **req, ...)
 done:
     /* End access to the va_list, if we started it */
     if(arg_started)
-        va_end(arguments);
+        HDva_end(arguments);
 
     /* Reset object wrapping info in API context */
     if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
@@ -3593,7 +3593,7 @@ H5VL_group_get(const H5VL_object_t *vol_obj, H5VL_group_get_t get_type,
     vol_wrapper_set = TRUE;
 
     /* Call the corresponding internal VOL routine */
-    va_start(arguments, req);
+    HDva_start(arguments, req);
     arg_started = TRUE;
     if(H5VL__group_get(vol_obj->data, vol_obj->connector->cls, get_type, dxpl_id, req, arguments) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "group get failed")
@@ -3601,7 +3601,7 @@ H5VL_group_get(const H5VL_object_t *vol_obj, H5VL_group_get_t get_type,
 done:
     /* End access to the va_list, if we started it */
     if(arg_started)
-        va_end(arguments);
+        HDva_end(arguments);
 
     /* Reset object wrapping info in API context */
     if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
@@ -3705,7 +3705,7 @@ H5VL_group_specific(const H5VL_object_t *vol_obj, H5VL_group_specific_t specific
     vol_wrapper_set = TRUE;
 
     /* Call the corresponding internal VOL routine */
-    va_start(arguments, req);
+    HDva_start(arguments, req);
     arg_started = TRUE;
     if(H5VL__group_specific(vol_obj->data, vol_obj->connector->cls, specific_type, dxpl_id, req, arguments) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute group specific callback")
@@ -3713,7 +3713,7 @@ H5VL_group_specific(const H5VL_object_t *vol_obj, H5VL_group_specific_t specific
 done:
     /* End access to the va_list, if we started it */
     if(arg_started)
-        va_end(arguments);
+        HDva_end(arguments);
 
     /* Reset object wrapping info in API context */
     if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
@@ -3816,7 +3816,7 @@ H5VL_group_optional(const H5VL_object_t *vol_obj, hid_t dxpl_id, void **req, ...
     vol_wrapper_set = TRUE;
 
     /* Call the corresponding internal VOL routine */
-    va_start(arguments, req);
+    HDva_start(arguments, req);
     arg_started = TRUE;
     if((ret_value = H5VL__group_optional(vol_obj->data, vol_obj->connector->cls, dxpl_id, req, arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute group optional callback")
@@ -3824,7 +3824,7 @@ H5VL_group_optional(const H5VL_object_t *vol_obj, hid_t dxpl_id, void **req, ...
 done:
     /* End access to the va_list, if we started it */
     if(arg_started)
-        va_end(arguments);
+        HDva_end(arguments);
 
     /* Reset object wrapping info in API context */
     if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
@@ -4372,7 +4372,7 @@ H5VL_link_get(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *loc_params,
     vol_wrapper_set = TRUE;
 
     /* Call the corresponding internal VOL routine */
-    va_start(arguments, req);
+    HDva_start(arguments, req);
     arg_started = TRUE;
     if(H5VL__link_get(vol_obj->data, loc_params, vol_obj->connector->cls, get_type, dxpl_id, req, arguments) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "link get failed")
@@ -4380,7 +4380,7 @@ H5VL_link_get(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *loc_params,
 done:
     /* End access to the va_list, if we started it */
     if(arg_started)
-        va_end(arguments);
+        HDva_end(arguments);
 
     /* Reset object wrapping info in API context */
     if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
@@ -4484,7 +4484,7 @@ H5VL_link_specific(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *loc_pa
     vol_wrapper_set = TRUE;
 
     /* Call the corresponding internal VOL routine */
-    va_start(arguments, req);
+    HDva_start(arguments, req);
     arg_started = TRUE;
     if((ret_value = H5VL__link_specific(vol_obj->data, loc_params, vol_obj->connector->cls, specific_type, dxpl_id, req, arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute link specific callback")
@@ -4492,7 +4492,7 @@ H5VL_link_specific(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *loc_pa
 done:
     /* End access to the va_list, if we started it */
     if(arg_started)
-        va_end(arguments);
+        HDva_end(arguments);
 
     /* Reset object wrapping info in API context */
     if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
@@ -4595,7 +4595,7 @@ H5VL_link_optional(const H5VL_object_t *vol_obj, hid_t dxpl_id, void **req, ...)
     vol_wrapper_set = TRUE;
 
     /* Call the corresponding internal VOL routine */
-    va_start(arguments, req);
+    HDva_start(arguments, req);
     arg_started = TRUE;
     if(H5VL__link_optional(vol_obj->data, vol_obj->connector->cls, dxpl_id, req, arguments) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute link optional callback")
@@ -4603,7 +4603,7 @@ H5VL_link_optional(const H5VL_object_t *vol_obj, hid_t dxpl_id, void **req, ...)
 done:
     /* End access to the va_list, if we started it */
     if(arg_started)
-        va_end(arguments);
+        HDva_end(arguments);
 
     /* Reset object wrapping info in API context */
     if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
@@ -4924,7 +4924,7 @@ H5VL_object_get(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *loc_param
     vol_wrapper_set = TRUE;
 
     /* Call the corresponding internal VOL routine */
-    va_start(arguments, req);
+    HDva_start(arguments, req);
     arg_started = TRUE;
     if(H5VL__object_get(vol_obj->data, loc_params, vol_obj->connector->cls, get_type, dxpl_id, req, arguments) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "get failed")
@@ -4932,7 +4932,7 @@ H5VL_object_get(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *loc_param
 done:
     /* End access to the va_list, if we started it */
     if(arg_started)
-        va_end(arguments);
+        HDva_end(arguments);
 
     /* Reset object wrapping info in API context */
     if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
@@ -5037,7 +5037,7 @@ H5VL_object_specific(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *loc_
     vol_wrapper_set = TRUE;
 
     /* Call the corresponding internal VOL routine */
-    va_start(arguments, req);
+    HDva_start(arguments, req);
     arg_started = TRUE;
     if((ret_value = H5VL__object_specific(vol_obj->data, loc_params, vol_obj->connector->cls, specific_type, dxpl_id, req, arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "object specific failed")
@@ -5045,7 +5045,7 @@ H5VL_object_specific(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *loc_
 done:
     /* End access to the va_list, if we started it */
     if(arg_started)
-        va_end(arguments);
+        HDva_end(arguments);
 
     /* Reset object wrapping info in API context */
     if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
@@ -5152,7 +5152,7 @@ H5VL_object_optional(const H5VL_object_t *vol_obj, hid_t dxpl_id, void **req, ..
     vol_wrapper_set = TRUE;
 
     /* Call the corresponding internal VOL routine */
-    va_start(arguments, req);
+    HDva_start(arguments, req);
     arg_started = TRUE;
     if(H5VL__object_optional(vol_obj->data, vol_obj->connector->cls, dxpl_id, req, arguments) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute object optional callback")
@@ -5160,7 +5160,7 @@ H5VL_object_optional(const H5VL_object_t *vol_obj, hid_t dxpl_id, void **req, ..
 done:
     /* End access to the va_list, if we started it */
     if(arg_started)
-        va_end(arguments);
+        HDva_end(arguments);
 
     /* Reset object wrapping info in API context */
     if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
@@ -5473,7 +5473,7 @@ H5VL_datatype_get(const H5VL_object_t *vol_obj, H5VL_datatype_get_t get_type,
     vol_wrapper_set = TRUE;
 
     /* Call the corresponding internal VOL routine */
-    va_start(arguments, req);
+    HDva_start(arguments, req);
     arg_started = TRUE;
     if(H5VL__datatype_get(vol_obj->data, vol_obj->connector->cls, get_type, dxpl_id, req, arguments) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "datatype get failed")
@@ -5481,7 +5481,7 @@ H5VL_datatype_get(const H5VL_object_t *vol_obj, H5VL_datatype_get_t get_type,
 done:
     /* End access to the va_list, if we started it */
     if(arg_started)
-        va_end(arguments);
+        HDva_end(arguments);
 
     /* Reset object wrapping info in API context */
     if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
@@ -5589,7 +5589,7 @@ H5VL_datatype_specific(const H5VL_object_t *vol_obj, H5VL_datatype_specific_t sp
     vol_wrapper_set = TRUE;
 
     /* Call the corresponding internal VOL routine */
-    va_start(arguments, req);
+    HDva_start(arguments, req);
     arg_started = TRUE;
     if(H5VL__datatype_specific(vol_obj->data, vol_obj->connector->cls, specific_type, dxpl_id, req, arguments) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute datatype specific callback")
@@ -5597,7 +5597,7 @@ H5VL_datatype_specific(const H5VL_object_t *vol_obj, H5VL_datatype_specific_t sp
 done:
     /* End access to the va_list, if we started it */
     if(arg_started)
-        va_end(arguments);
+        HDva_end(arguments);
 
     /* Reset object wrapping info in API context */
     if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
@@ -5701,7 +5701,7 @@ H5VL_datatype_optional(const H5VL_object_t *vol_obj, hid_t dxpl_id,
     vol_wrapper_set = TRUE;
 
     /* Call the corresponding internal VOL routine */
-    va_start(arguments, req);
+    HDva_start(arguments, req);
     arg_started = TRUE;
     if(H5VL__datatype_optional(vol_obj->data, vol_obj->connector->cls, dxpl_id, req, arguments) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute datatype optional callback")
@@ -5709,7 +5709,7 @@ H5VL_datatype_optional(const H5VL_object_t *vol_obj, hid_t dxpl_id,
 done:
     /* End access to the va_list, if we started it */
     if(arg_started)
-        va_end(arguments);
+        HDva_end(arguments);
 
     /* Reset object wrapping info in API context */
     if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
@@ -6265,7 +6265,7 @@ H5VL_request_specific(const H5VL_object_t *vol_obj,
     vol_wrapper_set = TRUE;
 
     /* Call the corresponding internal VOL routine */
-    va_start(arguments, specific_type);
+    HDva_start(arguments, specific_type);
     arg_started = TRUE;
     if((ret_value = H5VL__request_specific(vol_obj->data, vol_obj->connector->cls, specific_type, arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute asynchronous request specific callback")
@@ -6273,7 +6273,7 @@ H5VL_request_specific(const H5VL_object_t *vol_obj,
 done:
     /* End access to the va_list, if we started it */
     if(arg_started)
-        va_end(arguments);
+        HDva_end(arguments);
 
     /* Reset object wrapping info in API context */
     if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
@@ -6379,7 +6379,7 @@ H5VL_request_optional(const H5VL_object_t *vol_obj, ...)
     vol_wrapper_set = TRUE;
 
     /* Call the corresponding internal VOL routine */
-    va_start(arguments, vol_obj);
+    HDva_start(arguments, vol_obj);
     arg_started = TRUE;
     if((ret_value = H5VL__request_optional(vol_obj->data, vol_obj->connector->cls, arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute asynchronous request optional callback")
@@ -6387,7 +6387,7 @@ H5VL_request_optional(const H5VL_object_t *vol_obj, ...)
 done:
     /* End access to the va_list, if we started it */
     if(arg_started)
-        va_end(arguments);
+        HDva_end(arguments);
 
     /* Reset object wrapping info in API context */
     if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
