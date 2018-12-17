@@ -66,6 +66,9 @@ typedef __int64             h5_stat_size_t;
 #define HDtzset()           _tzset()
 #define HDunlink(S)         _unlink(S)
 #define HDwrite(F,M,Z)      _write(F,M,Z)
+#if (_MSC_VER < 1800)
+#define HDva_copy(D,S)      ((D) = (S))
+#endif /* MSC_VER < 1800 */
 
 #ifdef H5_HAVE_VISUAL_STUDIO
 
