@@ -168,6 +168,33 @@ Java_hdf_hdf5lib_H5_H5Fis_1hdf5
 
 /*
  * Class:     hdf_hdf5lib_H5
+ * Method:    H5Fis_accessible
+ * Signature: (Ljava/lang/String;J)Z
+ */
+JNIEXPORT jboolean JNICALL
+Java_hdf_hdf5lib_H5_H5Fis_1accessible
+    (JNIEnv *env, jclass clss, jstring name, jlong file_id)
+{
+    htri_t      bval = JNI_FALSE;
+    const char *fileName;
+
+    PIN_JAVA_STRING(name, fileName);
+    if (fileName != NULL) {
+        bval = H5Fis_accessible(fileName, (hid_t)file_id);
+
+        UNPIN_JAVA_STRING(name, fileName);
+
+        if (bval > 0)
+            bval = JNI_TRUE;
+        else if (bval < 0)
+            h5libraryError(env);
+    }
+
+    return (jboolean)bval;
+} /* end Java_hdf_hdf5lib_H5_H5Fis_1accessible */
+
+/*
+ * Class:     hdf_hdf5lib_H5
  * Method:    H5Fget_create_plist
  * Signature: (J)J
  */
@@ -177,7 +204,7 @@ Java_hdf_hdf5lib_H5__1H5Fget_1create_1plist
 {
     hid_t retVal = -1;
 
-    retVal =  H5Fget_create_plist((hid_t)file_id );
+    retVal =  H5Fget_create_plist((hid_t)file_id);
     if (retVal < 0)
         h5libraryError(env);
 

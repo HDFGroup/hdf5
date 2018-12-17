@@ -3077,8 +3077,27 @@ public class H5 implements java.io.Serializable {
      *                - Error from the HDF-5 Library.
      * @exception NullPointerException
      *                - name is null.
+     *
+     * @deprecated As of HDF5 1.10.5 in favor of H5Fis_accessible.
      **/
     public synchronized static native boolean H5Fis_hdf5(String name) throws HDF5LibraryException, NullPointerException;
+
+    /**
+     * H5Fis_accessible determines if the file can be opened with the given fapl.
+     *
+     * @param name
+     *            IN: File name to check.
+     * @param file_id
+     *            IN: File identifier for a currently-open HDF5 file
+     *
+     * @return true if file is accessible, false if not.
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     * @exception NullPointerException
+     *                - name is null.
+     **/
+    public synchronized static native boolean H5Fis_accessible(String name, long file_id) throws HDF5LibraryException, NullPointerException;
 
     /**
      * H5Fmount mounts the file specified by child_id onto the group specified by loc_id and name using the mount
