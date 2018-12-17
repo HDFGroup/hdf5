@@ -493,7 +493,6 @@ H5F__get_objects_cb(void *obj_ptr, hid_t obj_id, void *key)
             case H5I_BADID:
             case H5I_FILE:
             case H5I_DATASPACE:
-            case H5I_REFERENCE:
             case H5I_VFL:
             case H5I_VOL:
             case H5I_GENPROP_CLS:
@@ -3612,7 +3611,6 @@ H5F__get_file(void *obj, H5I_type_t type)
         case H5I_UNINIT:
         case H5I_BADID:
         case H5I_DATASPACE:
-        case H5I_REFERENCE:
         case H5I_VFL:
         case H5I_VOL:
         case H5I_GENPROP_CLS:

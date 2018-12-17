@@ -210,9 +210,6 @@ H5G_loc_real(void *obj, H5I_type_t type, H5G_loc_t *loc)
             break;
         }
 
-        case H5I_REFERENCE:
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get group location of reference")
-
         case H5I_DATASPACE:
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get group location of dataspace")
 

@@ -603,8 +603,6 @@ Java_hdf_hdf5lib_HDF5Constants_H5I_1DATASET(JNIEnv *env, jclass cls) { return H5
 JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_HDF5Constants_H5I_1ATTR(JNIEnv *env, jclass cls) { return H5I_ATTR; }
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_HDF5Constants_H5I_1REFERENCE(JNIEnv *env, jclass cls) { return H5I_REFERENCE; }
-JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_HDF5Constants_H5I_1VFL(JNIEnv *env, jclass cls) { return H5I_VFL; }
 JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_HDF5Constants_H5I_1VOL(JNIEnv *env, jclass cls) { return H5I_VOL; }
