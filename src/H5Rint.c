@@ -62,18 +62,6 @@ hbool_t H5_PKG_INIT_VAR = FALSE;
 /* Local Variables */
 /*******************/
 
-/* Reference ID class
- *
- * NOTE: H5I_REFERENCE is not used by the library and has been deprecated
- *       with a tentative removal version of 1.12.0. (DER, July 2017)
- */
-static const H5I_class_t H5I_REFERENCE_CLS[1] = {{
-    H5I_REFERENCE,          /* ID class value                                       */
-    0,                      /* Class flags                                          */
-    0,                      /* # of reserved IDs for class                          */
-    NULL                    /* Callback routine for closing objects of this class   */
-}};
-
 /* Flag indicating "top" of interface has been initialized */
 static hbool_t H5R_top_package_initialize_s = FALSE;
 
@@ -97,11 +85,7 @@ H5R__init_package(void)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    /* Initialize the atom group for the file IDs */
-    if (H5I_register_type(H5I_REFERENCE_CLS) < 0)
-        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINIT, FAIL, "unable to initialize interface")
-
-    /* Mark "top" of interface as initialized, too */
+    /* Mark "top" of interface as initialized */
     H5R_top_package_initialize_s = TRUE;
 
 done:
@@ -134,16 +118,10 @@ H5R_top_term_package(void)
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    if (H5R_top_package_initialize_s) {
-        if (H5I_nmembers(H5I_REFERENCE) > 0) {
-            (void)H5I_clear_type(H5I_REFERENCE, FALSE, FALSE);
-            n++;
-	    }
-
-        /* Mark closed */
-        if (0 == n)
+    /* Mark closed if initialized */
+    if(H5R_top_package_initialize_s)
+        if(0 == n)
             H5R_top_package_initialize_s = FALSE;
-    }
 
     FUNC_LEAVE_NOAPI(n)
 } /* end H5R_top_term_package() */
@@ -176,16 +154,12 @@ H5R_term_package(void)
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    if (H5_PKG_INIT_VAR) {
+    if(H5_PKG_INIT_VAR) {
         /* Sanity checks */
-        HDassert(0 == H5I_nmembers(H5I_REFERENCE));
         HDassert(FALSE == H5R_top_package_initialize_s);
 
-        /* Destroy the reference id group */
-        n += (H5I_dec_type_ref(H5I_REFERENCE) > 0);
-
         /* Mark closed */
-        if (0 == n)
+        if(0 == n)
             H5_PKG_INIT_VAR = FALSE;
     }
 
