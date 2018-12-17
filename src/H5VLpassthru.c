@@ -42,9 +42,9 @@
 /* #define ENABLE_PASSTHRU_LOGGING */
 
 /* Windows missing va_copy() hack (from H5win2_defs.h) */
-#if (_MSC_VER < 1800)
+#if defined(_WIN32) && (_MSC_VER < 1800)
 #define va_copy(D,S)      ((D) = (S))
-#endif /* MSC_VER < 1800 */
+#endif /* defined(_WIN32) && (_MSC_VER < 1800) */
 
 /************/
 /* Typedefs */
