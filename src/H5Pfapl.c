@@ -684,7 +684,7 @@ H5P__facc_reg_prop(H5P_genclass_t *pclass)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register SWMR info */
-    if(H5P_register_real(pclass, H5F_ACS_SWMR_DELTAT_NAME, H5F_ACS_SWMR_DELTAT_SIZE, &H5F_def_swmr_deltat_g, 
+    if(H5P__register_real(pclass, H5F_ACS_SWMR_DELTAT_NAME, H5F_ACS_SWMR_DELTAT_SIZE, &H5F_def_swmr_deltat_g, 
             NULL, NULL, NULL, H5F_ACS_SWMR_DELTAT_ENC, H5F_ACS_SWMR_DELTAT_DEC, 
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")

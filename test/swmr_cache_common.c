@@ -684,7 +684,7 @@ fullswmr_takedown_cache(H5F_t * file_ptr,
         file_ptr->shared->cache = saved_cache_g;
     }
 
-    fid = H5F_get_file_id(file_ptr);
+    fid = H5F_get_file_id(file_ptr, H5I_FILE);
     if ( fid >= 0 ) {
         /* Free all allocated cache entries */
         if ( H5F_addr_defined(allocated_base_addr_array_g) ) {
