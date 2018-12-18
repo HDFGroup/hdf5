@@ -244,7 +244,8 @@ typedef enum H5VL_native_file_optional_t {
     H5VL_NATIVE_FILE_GET_EOA,                       /* H5Fget_eoa                           */
     H5VL_NATIVE_FILE_INCR_FILESIZE,                 /* H5Fincrement_filesize                */
     H5VL_NATIVE_FILE_SET_LIBVER_BOUNDS,             /* H5Fset_latest_format/libver_bounds   */
-    H5VL_NATIVE_FILE_SET_MIN_DSET_OHDR_FLAG         /* H5Fset_dset_no_attrs_hint*/
+    H5VL_NATIVE_FILE_GET_MIN_DSET_OHDR_FLAG,        /* H5Fget_dset_no_attrs_hint */
+    H5VL_NATIVE_FILE_SET_MIN_DSET_OHDR_FLAG         /* H5Fset_dset_no_attrs_hint */
 } H5VL_native_file_optional_t;
 
 

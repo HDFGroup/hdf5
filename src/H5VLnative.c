@@ -1614,17 +1614,6 @@ H5VL__native_file_get(void *obj, H5VL_file_get_t get_type,
                 break;
             }
 
-        /* H5Fget_dset_no_attrs_hint */
-        case H5VL_FILE_GET_MIN_DSET_OHDR_FLAG:
-            {
-                hbool_t *minimize = va_arg(arguments, hbool_t*);
-                f = (H5F_t*)obj;
-                if(NULL == f)
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
-                *minimize = H5F_MIN_DSET_OHDR(f);
-                break;
-            }
-
         default:
             HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't get this type of information")
     } /* end switch */
@@ -2123,6 +2112,18 @@ H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR
             }
 
         /* H5Fget_dset_no_attrs_hint */
+        case H5VL_NATIVE_FILE_GET_MIN_DSET_OHDR_FLAG:
+            {
+                hbool_t *minimize = va_arg(arguments, hbool_t *);
+                *minimize = H5F_GET_MIN_DSET_OHDR(f);
+#if 0
+                if(H5F_get_min_dset_ohdr(f, (hbool_t)minimize) < 0)
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "cannot set file's dataset object header minimization flag")
+#endif
+                break;
+            }
+
+        /* H5Fset_dset_no_attrs_hint */
         case H5VL_NATIVE_FILE_SET_MIN_DSET_OHDR_FLAG:
             {
                 int minimize = va_arg(arguments, int);

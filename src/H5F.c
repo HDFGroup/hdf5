@@ -1858,7 +1858,7 @@ H5Fget_dset_no_attrs_hint(hid_t file_id, hbool_t *minimize)
     if(NULL == vol_obj)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
 
-#if 1
+#if 0
     if(H5VL_file_get(vol_obj, H5VL_FILE_GET_MIN_DSET_OHDR_FLAG, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, minimize) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to get file's dataset header minimization flag")
 #else

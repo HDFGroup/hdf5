@@ -2719,9 +2719,6 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                                 case H5VL_FILE_GET_OBJ_IDS:
                                     HDfprintf(out, "H5VL_FILE_GET_OBJ_IDS");
                                     break;
-                                case H5VL_FILE_GET_MIN_DSET_OHDR_FLAG:
-                                    HDfprintf(out, "H5VL_FILE_GET_MIN_DSET_OHDR_FLAG");
-                                    break;
                                 default:
                                     HDfprintf(out, "%ld", (long)get);
                                     break;

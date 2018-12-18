@@ -115,8 +115,7 @@ typedef enum H5VL_file_get_t {
     H5VL_FILE_GET_INTENT,	            /* file intent           		*/
     H5VL_FILE_GET_NAME,	                    /* file name             		*/
     H5VL_FILE_GET_OBJ_COUNT,	            /* object count in file	       	*/
-    H5VL_FILE_GET_OBJ_IDS,	            /* object ids in file     		*/
-    H5VL_FILE_GET_MIN_DSET_OHDR_FLAG        /* minimize dataset object headers? */
+    H5VL_FILE_GET_OBJ_IDS	            /* object ids in file     		*/
 } H5VL_file_get_t;
 
 /* types for file SPECIFIC callback */
