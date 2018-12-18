@@ -143,6 +143,10 @@ float attr_data5=-5.123F;        /* Test data for 5th attribute */
 #define DIM1 100
 #define RANK 2
 
+/* Used by test_attr_info_null_info_pointer() */
+#define GET_INFO_NULL_POINTER_ATTR_NAME "NullInfoPointerAttr"
+
+
 /* Attribute iteration struct */
 typedef struct {
     H5_iter_order_t order;      /* Direction of iteration */
@@ -5875,6 +5879,65 @@ test_attr_info_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
 }   /* test_attr_info_by_idx() */
 
 
+/***************************************************************
+**
+**  test_attr_info_null_info_pointer(): A test to ensure that
+**      passing a NULL attribute info pointer to H5Aget_info
+**      (_by_name/_by_idx) doesn't cause bad behavior.
+**
+****************************************************************/
+static void
+test_attr_info_null_info_pointer(hid_t fcpl, hid_t fapl)
+{
+    herr_t err_ret = -1;
+    hid_t  fid;
+    hid_t  attr;
+    hid_t  sid;
+
+    /* Create dataspace for dataset & attributes */
+    sid = H5Screate(H5S_SCALAR);
+    CHECK(sid, FAIL, "H5Screate");
+
+    /* Create file */
+    fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, fapl);
+    CHECK(fid, FAIL, "H5Fcreate");
+
+    /* Create attribute */
+    attr = H5Acreate2(fid, GET_INFO_NULL_POINTER_ATTR_NAME, H5T_NATIVE_UINT, sid, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(attr, FAIL, "H5Acreate2");
+
+    H5E_BEGIN_TRY {
+        err_ret = H5Aget_info(attr, NULL);
+    } H5E_END_TRY;
+
+    CHECK(err_ret, SUCCEED, "H5Aget_info");
+
+    H5E_BEGIN_TRY {
+        err_ret = H5Aget_info_by_name(fid, ".", GET_INFO_NULL_POINTER_ATTR_NAME, NULL, H5P_DEFAULT);
+    } H5E_END_TRY;
+
+    CHECK(err_ret, SUCCEED, "H5Aget_info_by_name");
+
+    H5E_BEGIN_TRY {
+        err_ret = H5Aget_info_by_idx(fid, ".", H5_INDEX_NAME, H5_ITER_INC, 0, NULL, H5P_DEFAULT);
+    } H5E_END_TRY;
+
+    CHECK(err_ret, SUCCEED, "H5Aget_info_by_idx");
+
+    /* Close dataspace */
+    err_ret = H5Sclose(sid);
+    CHECK(err_ret, FAIL, "H5Sclose");
+
+    /* Close attribute */
+    err_ret = H5Aclose(attr);
+    CHECK(err_ret, FAIL, "H5Aclose");
+
+    /* Close file */
+    err_ret = H5Fclose(fid);
+    CHECK(err_ret, FAIL, "H5Fclose");
+}
+
+
 /****************************************************************
 **
 **  test_attr_delete_by_idx(): Test basic H5A (attribute) code.
@@ -10875,6 +10938,7 @@ test_attr(void)
                 test_attr_null_space(my_fcpl, my_fapl);         /* Test storing attribute with NULL dataspace */
                 test_attr_deprec(fcpl, my_fapl);                /* Test deprecated API routines */
                 test_attr_many(new_format, my_fcpl, my_fapl);               /* Test storing lots of attributes */
+                test_attr_info_null_info_pointer(my_fcpl, my_fapl); /* Test passing a NULL attribute info pointer to H5Aget_info(_by_name/_by_idx) */
 
                 /* Attribute creation order tests */
                 test_attr_corder_create_basic(my_fcpl, my_fapl);/* Test creating an object w/attribute creation order info */
@@ -10919,6 +10983,7 @@ test_attr(void)
             test_attr_null_space(fcpl, my_fapl);                /* Test storing attribute with NULL dataspace */
             test_attr_deprec(fcpl, my_fapl);                    /* Test deprecated API routines */
             test_attr_many(new_format, fcpl, my_fapl);               /* Test storing lots of attributes */
+            test_attr_info_null_info_pointer(fcpl, my_fapl); /* Test passing a NULL attribute info pointer to H5Aget_info(_by_name/_by_idx) */
 
             /* New attribute API routine tests, on old-format storage */
             test_attr_info_by_idx(new_format, fcpl, my_fapl);   /* Test querying attribute info by index */

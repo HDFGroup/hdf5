@@ -299,14 +299,6 @@ typedef struct H5G_copy_file_ud_t {
     H5G_cache_t cache;                  /* Cached data for symbol table entry */
 } H5G_copy_file_ud_t;
 
-/* Types for optional group VOL operations */
-typedef enum H5VL_group_optional_t {
-#ifndef H5_NO_DEPRECATED_SYMBOLS
-    H5VL_GROUP_ITERATE_OLD,             /* HG5Giterate (deprecated routine) */
-    H5VL_GROUP_GET_OBJINFO              /* HG5Gget_objinfo (deprecated routine) */
-#endif /* H5_NO_DEPRECATED_SYMBOLS */
-} H5VL_group_optional_t;
-
 
 /*****************************/
 /* Package Private Variables */

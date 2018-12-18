@@ -155,13 +155,6 @@ typedef struct {
     H5A_t       **attrs;        /* Pointer to array of attribute pointers */
 } H5A_attr_table_t;
 
-/* Types for optional attribute VOL operations */
-typedef enum H5VL_attr_optional_t {
-#ifndef H5_NO_DEPRECATED_SYMBOLS
-    H5VL_ATTR_ITERATE_OLD               /* H5Aiterate (deprecated routine) */
-#endif /* H5_NO_DEPRECATED_SYMBOLS */
-} H5VL_attr_optional_t;
-
 
 /*****************************/
 /* Package Private Variables */

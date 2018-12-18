@@ -60,6 +60,7 @@ $SRC_H5COPY_TESTFILES/h5copy_extlinks_trg.h5
 # List of expect files that will be copied over to local test dir
 LIST_OTHER_TEST_FILES="
 $SRC_H5COPY_TESTFILES/h5copy_misc1.out
+$SRC_H5COPY_TESTFILES/h5copy_misc1.err
 "
 
 H5COPY=../../src/h5copy/h5copy               # The tool name
@@ -396,6 +397,7 @@ CMP_OUTPUT()
 TOOLTEST_FAIL()
 {
     expectout="$TESTDIR/$1"
+    expecterr="$TESTDIR/`basename $1 .out`.err"
     actualout="$TESTDIR/$1.actualout"
     actualerr="$TESTDIR/$1.actualerr"
     actualout_sav=${actualout}-sav
@@ -426,10 +428,7 @@ TOOLTEST_FAIL()
         echo " PASSED"
         # Verifying output text from h5copy
         if [ "$expectout" != "SKIP" ]; then
-            # combine stderr to stdout to compare the output at once.
-            # We may seperate stdout and stderr later.
-            cat $actualerr >> $actualout
-            CMP_OUTPUT $expectout $actualout
+            CMP_OUTPUT $expecterr $actualerr
         fi
     else
         echo "*FAILED*"

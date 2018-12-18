@@ -392,35 +392,6 @@ struct H5F_t {
 #endif /* H5_HAVE_PARALLEL */
 };
 
-/* types for file optional VOL operations */
-typedef enum H5VL_file_optional_t {
-    H5VL_FILE_CLEAR_ELINK_CACHE,        /* Clear external link cache            */
-    H5VL_FILE_GET_FILE_IMAGE,           /* file image                           */
-    H5VL_FILE_GET_FREE_SECTIONS,        /* file free selections                 */
-    H5VL_FILE_GET_FREE_SPACE,	        /* file freespace         		*/
-    H5VL_FILE_GET_INFO,	                /* file info             		*/
-    H5VL_FILE_GET_MDC_CONF,	        /* file metadata cache configuration	*/
-    H5VL_FILE_GET_MDC_HR,	        /* file metadata cache hit rate		*/
-    H5VL_FILE_GET_MDC_SIZE,             /* file metadata cache size		*/
-    H5VL_FILE_GET_SIZE,	                /* file size             		*/
-    H5VL_FILE_GET_VFD_HANDLE,	        /* file VFD handle       		*/
-    H5VL_FILE_GET_FILE_ID,              /* retrieve or resurrect file ID of object */
-    H5VL_FILE_RESET_MDC_HIT_RATE,       /* get metadata cache hit rate          */
-    H5VL_FILE_SET_MDC_CONFIG,           /* set metadata cache configuration     */
-    H5VL_FILE_GET_METADATA_READ_RETRY_INFO,
-    H5VL_FILE_START_SWMR_WRITE,
-    H5VL_FILE_START_MDC_LOGGING,
-    H5VL_FILE_STOP_MDC_LOGGING,
-    H5VL_FILE_GET_MDC_LOGGING_STATUS,
-    H5VL_FILE_FORMAT_CONVERT,
-    H5VL_FILE_RESET_PAGE_BUFFERING_STATS,
-    H5VL_FILE_GET_PAGE_BUFFERING_STATS,
-    H5VL_FILE_GET_MDC_IMAGE_INFO,
-    H5VL_FILE_GET_EOA,
-    H5VL_FILE_INCR_FILESIZE,
-    H5VL_FILE_SET_LIBVER_BOUNDS
-} H5VL_file_optional_t;
-
 
 /*****************************/
 /* Package Private Variables */
@@ -450,7 +421,6 @@ H5_DLL herr_t H5F__close(H5F_t *f);
 H5_DLL herr_t H5F__set_libver_bounds(H5F_t *f, H5F_libver_t low, H5F_libver_t high);
 H5_DLL H5F_t *H5F__get_file(void *obj, H5I_type_t type);
 H5_DLL hid_t H5F__get_file_id(H5F_t *file);
-H5_DLL herr_t H5F__set_vol_conn(H5F_t *file, hid_t vol_id, const void *vol_info);
 
 /* File mount related routines */
 H5_DLL herr_t H5F__mount(H5G_loc_t *loc, const char *name, H5F_t *child, hid_t plist_id);
