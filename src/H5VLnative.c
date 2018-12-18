@@ -2872,7 +2872,7 @@ H5VL__native_link_specific(void *obj, const H5VL_loc_params_t *loc_params, H5VL_
         case H5VL_LINK_ITER:
             {
                 H5G_loc_t loc;
-                hbool_t recursive       = (hbool_t)HDva_arg(arguments, int);
+                hbool_t recursive       = (hbool_t)HDva_arg(arguments, unsigned);
                 H5_index_t idx_type     = (H5_index_t)HDva_arg(arguments, int); /* enum work-around */
                 H5_iter_order_t order   = (H5_iter_order_t)HDva_arg(arguments, int); /* enum work-around */
                 hsize_t *idx_p          = HDva_arg(arguments, hsize_t *);
