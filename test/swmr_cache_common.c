@@ -24,6 +24,10 @@
 const char *failure_mssg_g = NULL;
 hbool_t pass_g = TRUE; /* set to false on error */
 
+hid_t saved_fid = -1; /* store the file id here between cache setup
+		       * and takedown.
+		       */
+
 int                                 entry_type_id_g = -1;
 fullswmr_cache_entry_t             *entry_array_g;  
 H5F_t                              *entry_file_ptr_array_g;
@@ -427,6 +431,8 @@ fullswmr_setup_cache(hsize_t entry_size, int n_entry, unsigned file_flags)
     int32_t max_type_id;
 
 
+    saved_fid = -1;
+
     entry_array_g = (fullswmr_cache_entry_t *)HDcalloc((size_t)(n_entry), sizeof(fullswmr_cache_entry_t));
     if(NULL == entry_array_g) {
         pass_g = FALSE;
@@ -472,6 +478,7 @@ fullswmr_setup_cache(hsize_t entry_size, int n_entry, unsigned file_flags)
         failure_mssg_g = "H5Fcreate() failed.";
         goto done;
     } /* end if */
+    saved_fid = fid;
 
     /* Push API context */
     H5CX_push();
@@ -482,7 +489,7 @@ fullswmr_setup_cache(hsize_t entry_size, int n_entry, unsigned file_flags)
         goto done;
     } 
     else {
-        file_ptr = (H5F_t *)H5I_object_verify(fid, H5I_FILE);
+        file_ptr = (H5F_t *)H5VL_object_verify(fid, H5I_FILE);
         if(file_ptr == NULL) {
             pass_g = FALSE;
             failure_mssg_g = "Can't get file_ptr.";
@@ -661,9 +668,6 @@ fullswmr_takedown_cache(H5F_t * file_ptr,
                hbool_t dump_stats,
                hbool_t dump_detailed_stats)
 {
-    /* char filename[512]; */
-    hid_t fid;
-
     if ( file_ptr != NULL ) {
         H5C_t * cache_ptr = file_ptr->shared->cache;
 
@@ -684,12 +688,11 @@ fullswmr_takedown_cache(H5F_t * file_ptr,
         file_ptr->shared->cache = saved_cache_g;
     }
 
-    fid = H5F_get_file_id(file_ptr, H5I_FILE);
-    if ( fid >= 0 ) {
+    if(saved_fid != -1) {
         /* Free all allocated cache entries */
-        if ( H5F_addr_defined(allocated_base_addr_array_g) ) {
-            if (NULL == file_ptr)  {
-                file_ptr = (H5F_t *)H5I_object_verify(fid, H5I_FILE);
+        if(H5F_addr_defined(allocated_base_addr_array_g) ) {
+            if(NULL == file_ptr)  {
+                file_ptr = (H5F_t *)H5VL_object_verify(saved_fid, H5I_FILE);
                 HDassert(file_ptr);
             }
 
@@ -699,14 +702,14 @@ fullswmr_takedown_cache(H5F_t * file_ptr,
             allocated_base_addr_array_g = HADDR_UNDEF;
         }
 
-	if (H5Fclose(fid) < 0) {
+        if(H5Fclose(saved_fid) < 0) {
             pass_g = FALSE;
-	    failure_mssg_g = "couldn't close test file.";
-	} 
-    }
+            failure_mssg_g = "couldn't close test file.";
+        } 
 
-    /* Pop API context */
-    H5CX_pop();
+        /* Pop API context */
+        H5CX_pop();
+    }
 
     /* Reset all global helper arrays */
     HDfree(entry_array_g);
