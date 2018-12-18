@@ -718,8 +718,8 @@ H5VL__native_attr_specific(void *obj, const H5VL_loc_params_t *loc_params, H5VL_
 
         case H5VL_ATTR_ITER:
             {
-                H5_index_t          idx_type    = HDva_arg(arguments, H5_index_t);
-                H5_iter_order_t     order       = HDva_arg(arguments, H5_iter_order_t);
+                H5_index_t          idx_type    = (H5_index_t)HDva_arg(arguments, int); /* enum work-around */
+                H5_iter_order_t     order       = (H5_iter_order_t)HDva_arg(arguments, int); /* enum work-around */
                 hsize_t            *idx         = HDva_arg(arguments, hsize_t *);
                 H5A_operator2_t     op          = HDva_arg(arguments, H5A_operator2_t);
                 void               *op_data     = HDva_arg(arguments, void *);
@@ -1592,7 +1592,7 @@ H5VL__native_file_get(void *obj, H5VL_file_get_t get_type,
         /* H5Fget_name */
         case H5VL_FILE_GET_NAME:
             {
-                H5I_type_t  type = HDva_arg(arguments, H5I_type_t);
+                H5I_type_t  type = (H5I_type_t)HDva_arg(arguments, int); /* enum work-around */
                 size_t      size = HDva_arg(arguments, size_t);
                 char       *name = HDva_arg(arguments, char *);
                 ssize_t    *ret  = HDva_arg(arguments, ssize_t *);
@@ -1644,8 +1644,8 @@ H5VL__native_file_specific(void *obj, H5VL_file_specific_t specific_type,
         /* H5Fflush */
         case H5VL_FILE_FLUSH:
             {
-                H5I_type_t      type = HDva_arg(arguments, H5I_type_t);
-                H5F_scope_t     scope = HDva_arg(arguments, H5F_scope_t);
+                H5I_type_t      type = (H5I_type_t)HDva_arg(arguments, int); /* enum work-around */
+                H5F_scope_t     scope = (H5F_scope_t)HDva_arg(arguments, int); /* enum work-around */
                 H5F_t	       *f = NULL;              /* File to flush */
 
                 /* Get the file for the object */
@@ -1692,7 +1692,7 @@ H5VL__native_file_specific(void *obj, H5VL_file_specific_t specific_type,
         /* H5Fmount */
         case H5VL_FILE_MOUNT:
             {
-                H5I_type_t  type       = HDva_arg(arguments, H5I_type_t);
+                H5I_type_t  type       = (H5I_type_t)HDva_arg(arguments, int); /* enum work-around */
                 const char *name       = HDva_arg(arguments, const char *);
                 H5F_t      *child      = HDva_arg(arguments, H5F_t *);
                 hid_t       plist_id   = HDva_arg(arguments, hid_t);
@@ -1711,7 +1711,7 @@ H5VL__native_file_specific(void *obj, H5VL_file_specific_t specific_type,
         /* H5Funmount */
         case H5VL_FILE_UNMOUNT:
             {
-                H5I_type_t  type       = HDva_arg(arguments, H5I_type_t);
+                H5I_type_t  type       = (H5I_type_t)HDva_arg(arguments, int); /* enum work-around */
                 const char *name       = HDva_arg(arguments, const char *);
                 H5G_loc_t   loc;
 
@@ -1829,7 +1829,7 @@ H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR
             {
                 H5F_sect_info_t *sect_info = HDva_arg(arguments, H5F_sect_info_t *);
                 ssize_t         *ret       = HDva_arg(arguments, ssize_t *);
-                H5F_mem_t       type       = HDva_arg(arguments, H5F_mem_t);
+                H5F_mem_t       type       = (H5F_mem_t)HDva_arg(arguments, int); /* enum work-around */
                 size_t          nsects     = HDva_arg(arguments, size_t);
 
                 /* Go get the free-space section information in the file */
@@ -1841,7 +1841,7 @@ H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR
         /* H5Fget_info1/2 */
         case H5VL_NATIVE_FILE_GET_INFO:
             {
-                H5I_type_t  type   = HDva_arg(arguments, H5I_type_t);
+                H5I_type_t  type   = (H5I_type_t)HDva_arg(arguments, int); /* enum work-around */
                 H5F_info2_t *finfo = HDva_arg(arguments, H5F_info2_t *);
 
                 /* Get the file struct. This call is careful to not return the file pointer
@@ -1913,7 +1913,7 @@ H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR
         /* H5Iget_file_id */
         case H5VL_NATIVE_FILE_GET_FILE_ID:
             {
-                H5I_type_t  type = HDva_arg(arguments, H5I_type_t);
+                H5I_type_t  type = (H5I_type_t)HDva_arg(arguments, int); /* enum work-around */
                 hid_t      *file_id = HDva_arg(arguments, hid_t *);
 
                 if(NULL == (f = H5F__get_file(obj, type)))
@@ -2113,8 +2113,8 @@ H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR
         /* H5Fset_latest_format, H5Fset_libver_bounds */
         case H5VL_NATIVE_FILE_SET_LIBVER_BOUNDS:
             {
-                H5F_libver_t low = HDva_arg(arguments, H5F_libver_t);
-                H5F_libver_t high = HDva_arg(arguments, H5F_libver_t);
+                H5F_libver_t low = (H5F_libver_t)HDva_arg(arguments, int); /* enum work-around */
+                H5F_libver_t high = (H5F_libver_t)HDva_arg(arguments, int); /* enum work-around */
 
                 /* Call internal set_libver_bounds function */
                 if(H5F__set_libver_bounds(f, low, high) < 0)
@@ -2467,7 +2467,7 @@ H5VL__native_group_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id,
         case H5VL_NATIVE_GROUP_GET_OBJINFO:
             {
                 const H5VL_loc_params_t *loc_params = HDva_arg(arguments, const H5VL_loc_params_t *);
-                hbool_t follow_link = HDva_arg(arguments, unsigned);
+                hbool_t follow_link = (hbool_t)HDva_arg(arguments, unsigned);
                 H5G_stat_t *statbuf = HDva_arg(arguments, H5G_stat_t *);
                 H5G_loc_t grp_loc;
 
@@ -2884,12 +2884,12 @@ H5VL__native_link_specific(void *obj, const H5VL_loc_params_t *loc_params, H5VL_
         case H5VL_LINK_ITER:
             {
                 H5G_loc_t loc;
-                hbool_t recursive = HDva_arg(arguments, int);                     
-                H5_index_t idx_type = HDva_arg(arguments, H5_index_t);
-                H5_iter_order_t order = HDva_arg(arguments, H5_iter_order_t);
-                hsize_t *idx_p = HDva_arg(arguments, hsize_t *);
-                H5L_iterate_t op = HDva_arg(arguments, H5L_iterate_t);
-                void *op_data = HDva_arg(arguments, void *);
+                hbool_t recursive       = (hbool_t)HDva_arg(arguments, int);
+                H5_index_t idx_type     = (H5_index_t)HDva_arg(arguments, int); /* enum work-around */
+                H5_iter_order_t order   = (H5_iter_order_t)HDva_arg(arguments, int); /* enum work-around */
+                hsize_t *idx_p          = HDva_arg(arguments, hsize_t *);
+                H5L_iterate_t op        = HDva_arg(arguments, H5L_iterate_t);
+                void *op_data           = HDva_arg(arguments, void *);
 
                 /* Get the location */
                 if(H5G_loc_real(obj, loc_params->obj_type, &loc) < 0)
@@ -3106,7 +3106,7 @@ H5VL__native_object_get(void *obj, const H5VL_loc_params_t *loc_params, H5VL_obj
         case H5VL_REF_GET_REGION:
             {
                 hid_t       *ret                    =  HDva_arg(arguments, hid_t *);
-                H5R_type_t  H5_ATTR_UNUSED ref_type =  HDva_arg(arguments, H5R_type_t);
+                H5R_type_t  H5_ATTR_UNUSED ref_type =  (H5R_type_t)HDva_arg(arguments, int); /* enum work-around */
                 void        *ref                    =  HDva_arg(arguments, void *);
                 H5S_t       *space = NULL;    /* Dataspace object */
 
@@ -3125,7 +3125,7 @@ H5VL__native_object_get(void *obj, const H5VL_loc_params_t *loc_params, H5VL_obj
         case H5VL_REF_GET_TYPE:
             {
                 H5O_type_t  *obj_type  =  HDva_arg(arguments, H5O_type_t *);
-                H5R_type_t  ref_type   =  HDva_arg(arguments, H5R_type_t);
+                H5R_type_t  ref_type   =  (H5R_type_t)HDva_arg(arguments, int); /* enum work-around */
                 void        *ref       =  HDva_arg(arguments, void *);
 
                 /* Get the object information */
@@ -3140,7 +3140,7 @@ H5VL__native_object_get(void *obj, const H5VL_loc_params_t *loc_params, H5VL_obj
                 ssize_t     *ret       = HDva_arg(arguments, ssize_t *);
                 char        *name      = HDva_arg(arguments, char *);
                 size_t      size       = HDva_arg(arguments, size_t);
-                H5R_type_t  ref_type   = HDva_arg(arguments, H5R_type_t);
+                H5R_type_t  ref_type   = (H5R_type_t)HDva_arg(arguments, int); /* enum work-around */
                 void        *ref       = HDva_arg(arguments, void *);
 
                 /* Get name */
@@ -3223,8 +3223,8 @@ H5VL__native_object_specific(void *obj, const H5VL_loc_params_t *loc_params, H5V
 
         case H5VL_OBJECT_VISIT:
             {
-                H5_index_t idx_type     = HDva_arg(arguments, H5_index_t);
-                H5_iter_order_t order   = HDva_arg(arguments, H5_iter_order_t);
+                H5_index_t idx_type     = (H5_index_t)HDva_arg(arguments, int); /* enum work-around */
+                H5_iter_order_t order   = (H5_iter_order_t)HDva_arg(arguments, int); /* enum work-around */
                 H5O_iterate_t op        = HDva_arg(arguments, H5O_iterate_t);
                 void *op_data           = HDva_arg(arguments, void *);
                 unsigned fields         = HDva_arg(arguments, unsigned);
@@ -3272,7 +3272,7 @@ H5VL__native_object_specific(void *obj, const H5VL_loc_params_t *loc_params, H5V
             {
                 void        *ref      = HDva_arg(arguments, void *);
                 const char  *name     = HDva_arg(arguments, char *);
-                H5R_type_t  ref_type  = HDva_arg(arguments, H5R_type_t);
+                H5R_type_t  ref_type  = (H5R_type_t)HDva_arg(arguments, int); /* enum work-around */
                 hid_t       space_id  = HDva_arg(arguments, hid_t);
                 H5S_t       *space = NULL;   /* Pointer to dataspace containing region */
                 

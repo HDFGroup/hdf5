@@ -225,7 +225,7 @@ H5Fset_latest_format(hid_t file_id, hbool_t latest_format)
         low = H5F_LIBVER_EARLIEST;
 
     /* Set the library's version bounds */
-    if(H5VL_file_optional(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, H5VL_NATIVE_FILE_SET_LIBVER_BOUNDS, low, high) < 0)
+    if(H5VL_file_optional(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, H5VL_NATIVE_FILE_SET_LIBVER_BOUNDS, (int)low, (int)high) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set library version bounds")
 
 done:
