@@ -26,11 +26,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-/* Disable certain warnings in PC-Lint: */
-/*lint --emacro( {534, 830}, H5P_DEFAULT, H5P_FILE_ACCESS, H5P_DATASET_XFER) */
-/*lint --emacro( {534, 830}, H5FD_MULTI) */
-/*lint -esym( 534, H5Eclear2, H5Epush2) */
-
 #include "hdf5.h"
 
 
@@ -211,16 +206,15 @@ my_strdup(const char *s)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_multi_init
+ * Function:    H5FD_multi_init
  *
- * Purpose:	Initialize this driver by registering the driver with the
- *		library.
+ * Purpose:     Initialize this driver by registering the driver with the
+ *              library.
  *
- * Return:	Success:	The driver ID for the multi driver.
+ * Return:      Success:    The driver ID for the multi driver
+ *              Failure:    H5I_INVALID_HID
  *
- *		Failure:	Negative
- *
- * Programmer:	Robb Matzke
+ * Programmer:  Robb Matzke
  *              Wednesday, August  4, 1999
  *
  *-------------------------------------------------------------------------
@@ -231,11 +225,11 @@ H5FD_multi_init(void)
     /* Clear the error stack */
     H5Eclear2(H5E_DEFAULT);
 
-    if(H5I_VFL!=H5Iget_type(H5FD_MULTI_g))
+    if(H5I_VFL != H5Iget_type(H5FD_MULTI_g))
         H5FD_MULTI_g = H5FDregister(&H5FD_multi_g);
 
     return H5FD_MULTI_g;
-}
+} /* end H5FD_multi_init() */
 
 
 /*---------------------------------------------------------------------------

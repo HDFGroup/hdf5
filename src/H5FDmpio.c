@@ -187,15 +187,15 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_mpio_init
+ * Function:    H5FD_mpio_init
  *
- * Purpose:	Initialize this driver by registering the driver with the
- *		library.
+ * Purpose:     Initialize this driver by registering the driver with the
+ *              library.
  *
- * Return:	Success:	The driver ID for the mpio driver.
- *		Failure:	Negative.
+ * Return:      Success:    The driver ID for the mpio driver
+ *              Failure:    H5I_INVALID_HID
  *
- * Programmer:	Robb Matzke
+ * Programmer:  Robb Matzke
  *              Thursday, August 5, 1999
  *
  *-------------------------------------------------------------------------
@@ -206,10 +206,10 @@ H5FD_mpio_init(void)
 #ifdef H5FDmpio_DEBUG
     static int H5FD_mpio_Debug_inited = 0;
 #endif /* H5FDmpio_DEBUG */
-    const char *s;              /* String for environment variables */
-    hid_t ret_value;        	/* Return value */
+    const char *s;                          /* String for environment variables */
+    hid_t ret_value = H5I_INVALID_HID;      /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI(H5I_INVALID_HID)
 
     /* Register the MPI-IO VFD, if it isn't already */
     if(H5I_VFL != H5I_get_type(H5FD_MPIO_g))
@@ -217,8 +217,10 @@ H5FD_mpio_init(void)
 
     /* Allow MPI buf-and-file-type optimizations? */
     s = HDgetenv("HDF5_MPI_OPT_TYPES");
-    if(s && HDisdigit(*s))
-        H5FD_mpi_opt_types_g = (hbool_t)HDstrtol(s, NULL, 0);
+    if(s && HDisdigit(*s)) {
+        long env_val = HDstrtol(s, NULL, 0);
+        H5FD_mpi_opt_types_g = (0 == env_val) ? FALSE : TRUE;
+    }
 
 #ifdef H5FDmpio_DEBUG
     if(!H5FD_mpio_Debug_inited) {
@@ -226,12 +228,12 @@ H5FD_mpio_init(void)
         s = HDgetenv("H5FD_mpio_Debug");
         if(s) {
             /* Set debug mask */
-	    while(*s) {
-		H5FD_mpio_Debug[(int)*s]++;
-		s++;
-	    } /* end while */
+            while(*s) {
+                H5FD_mpio_Debug[(int)*s]++;
+                s++;
+            } /* end while */
         } /* end if */
-	H5FD_mpio_Debug_inited++;
+        H5FD_mpio_Debug_inited++;
     } /* end if */
 #endif /* H5FDmpio_DEBUG */
 

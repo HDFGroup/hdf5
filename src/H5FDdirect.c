@@ -206,30 +206,27 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:  H5FD_direct_init
+ * Function:    H5FD_direct_init
  *
- * Purpose:  Initialize this driver by registering the driver with the
- *    library.
+ * Purpose:     Initialize this driver by registering the driver with the
+ *              library.
  *
- * Return:  Success:  The driver ID for the direct driver.
- *
- *    Failure:  Negative.
+ * Return:      Success:    The driver ID for the direct driver
+ *              Failure:    H5I_INVALID_HID
  *
  * Programmer:  Raymond Lu
  *              Wednesday, 20 September 2006
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
 hid_t
 H5FD_direct_init(void)
 {
-    hid_t ret_value;        /* Return value */
+    hid_t ret_value = H5I_INVALID_HID;        /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI(H5I_INVALID_HID)
 
-    if (H5I_VFL!=H5I_get_type(H5FD_DIRECT_g))
+    if (H5I_VFL != H5I_get_type(H5FD_DIRECT_g))
         H5FD_DIRECT_g = H5FD_register(&H5FD_direct_g,sizeof(H5FD_class_t),FALSE);
 
     /* Set return value */
@@ -237,7 +234,7 @@ H5FD_direct_init(void)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5FD_direct_init() */
 
 
 /*---------------------------------------------------------------------------
