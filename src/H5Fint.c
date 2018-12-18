@@ -74,6 +74,7 @@ typedef struct H5F_olist_t {
 /* Local Prototypes */
 /********************/
 
+static herr_t H5F__set_vol_conn(H5F_t *file, hid_t vol_id, const void *vol_info);
 static herr_t H5F__get_objects(const H5F_t *f, unsigned types, size_t max_index, hid_t *obj_id_list, hbool_t app_ref, size_t *obj_id_count_ptr);
 static int H5F__get_objects_cb(void *obj_ptr, hid_t obj_id, void *key);
 static herr_t H5F__build_name(const char *prefix, const char *file_name, char **full_name/*out*/);
@@ -115,38 +116,35 @@ H5FL_DEFINE(H5F_file_t);
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5F__set_vol_conn(H5F_t *file, hid_t vol_id, const void *vol_info)
 {
     void *new_connector_info = NULL;    /* Copy of connector info */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_PACKAGE
+    FUNC_ENTER_STATIC
 
     /* Sanity check */
     HDassert(file);
 
-    /* Only cache VOL connector ID & info the first time the file is opened */
-    if(file->shared->nrefs == 1) {
-        /* Copy connector info, if it exists */
-        if(vol_info) {
-            H5VL_class_t *connector;           /* Pointer to connector */
+    /* Copy connector info, if it exists */
+    if(vol_info) {
+        H5VL_class_t *connector;           /* Pointer to connector */
 
-            /* Retrieve the connector for the ID */
-            if(NULL == (connector = (H5VL_class_t *)H5I_object(vol_id)))
-                HGOTO_ERROR(H5E_FILE, H5E_BADTYPE, FAIL, "not a VOL connector ID")
+        /* Retrieve the connector for the ID */
+        if(NULL == (connector = (H5VL_class_t *)H5I_object(vol_id)))
+            HGOTO_ERROR(H5E_FILE, H5E_BADTYPE, FAIL, "not a VOL connector ID")
 
-            /* Allocate and copy connector info */
-            if(H5VL_copy_connector_info(connector, &new_connector_info, vol_info) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTCOPY, FAIL, "connector info copy failed")
-        } /* end if */
-
-        /* Cache the connector ID & info for the container */
-        file->shared->vol_id = vol_id;
-        file->shared->vol_info = new_connector_info;
-        if(H5I_inc_ref(file->shared->vol_id, FALSE) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTINC, FAIL, "incrementing VOL connector ID failed")
+        /* Allocate and copy connector info */
+        if(H5VL_copy_connector_info(connector, &new_connector_info, vol_info) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTCOPY, FAIL, "connector info copy failed")
     } /* end if */
+
+    /* Cache the connector ID & info for the container */
+    file->shared->vol_id = vol_id;
+    file->shared->vol_info = new_connector_info;
+    if(H5I_inc_ref(file->shared->vol_id, FALSE) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINC, FAIL, "incrementing VOL connector ID failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -492,7 +490,6 @@ H5F__get_objects_cb(void *obj_ptr, hid_t obj_id, void *key)
             case H5I_BADID:
             case H5I_FILE:
             case H5I_DATASPACE:
-            case H5I_REFERENCE:
             case H5I_VFL:
             case H5I_VOL:
             case H5I_GENPROP_CLS:
@@ -937,9 +934,6 @@ H5F__new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_
         /* intialize point of no return */
         f->shared->point_of_no_return = FALSE;
 
-        /* set default value for minimizing dataset object headers */
-        f->shared->crt_dset_min_ohdr_flag = FALSE;
-
         /* Copy the file creation and file access property lists into the
          * new file handle. We do this early because some values might need
          * to change as the file is being opened.
@@ -1092,6 +1086,16 @@ H5F__new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_
         /* Get object flush callback information */
         if(H5P_get(plist, H5F_ACS_OBJECT_FLUSH_CB_NAME, &(f->shared->object_flush)) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't get object flush cb info")
+
+        /* Get the VOL connector info */
+        {
+            H5VL_connector_prop_t  connector_prop;      /* Property for VOL connector ID & info */
+
+            if(H5P_peek(plist, H5F_ACS_VOL_CONN_NAME, &connector_prop) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't get VOL connector info")
+            if(H5F__set_vol_conn(f, connector_prop.connector_id, connector_prop.connector_info) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't cache VOL connector info")
+        } /* end block */
 
         /* Create a metadata cache with the specified number of elements.
          * The cache might be created with a different number of elements and
@@ -3604,7 +3608,6 @@ H5F__get_file(void *obj, H5I_type_t type)
         case H5I_UNINIT:
         case H5I_BADID:
         case H5I_DATASPACE:
-        case H5I_REFERENCE:
         case H5I_VFL:
         case H5I_VOL:
         case H5I_GENPROP_CLS:
@@ -3698,7 +3701,7 @@ H5F_get_file_id(hid_t obj_id, H5I_type_t type)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid identifier")
 
     /* Get the file through the VOL */
-    if(H5VL_file_optional(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, H5VL_FILE_GET_FILE_ID, type, &file_id) < 0)
+    if(H5VL_file_optional(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, H5VL_NATIVE_FILE_GET_FILE_ID, type, &file_id) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, H5I_INVALID_HID, "unable to get file ID")
     if(H5I_INVALID_HID == file_id)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, H5I_INVALID_HID, "unable to get the file ID through the VOL")
@@ -3709,29 +3712,4 @@ H5F_get_file_id(hid_t obj_id, H5I_type_t type)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_get_file_id() */
-
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5F_set_min_dset_ohdr
- *
- * Purpose:     Set the crt_dset_ohdr_flag field with a new value.
- *
- * Return:      SUCCEED/FAIL
- *-------------------------------------------------------------------------
- */
-herr_t
-H5F_set_min_dset_ohdr(H5F_t *f, hbool_t minimize)
-{
-    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    /* Sanity check */
-    HDassert(f);
-    HDassert(f->shared);
-
-    f->shared->crt_dset_min_ohdr_flag = minimize;
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* H5F_set_min_dset_ohdr() */
 

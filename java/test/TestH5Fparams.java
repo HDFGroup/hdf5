@@ -60,6 +60,11 @@ public class TestH5Fparams {
     }
 
     @Test(expected = NullPointerException.class)
+    public void testH5Fis_accessible_null() throws Throwable {
+        H5.H5Fis_accessible(null, -1);
+    }
+
+    @Test(expected = NullPointerException.class)
     public void testH5Fmount_null() throws Throwable {
         H5.H5Fmount(-1, null, -1, HDF5Constants.H5P_DEFAULT);
     }

@@ -816,6 +816,7 @@ h5_get_vfd_fapl(hid_t fapl)
 {
     const char  *env = NULL;    /* HDF5_DRIVER environment variable     */
     const char  *tok = NULL;    /* strtok pointer                       */
+    char        *lasts = NULL;  /* Context pointer for strtok_r() call */
     char        buf[1024];      /* buffer for tokenizing HDF5_DRIVER    */
 
     /* Get the environment variable, if it exists */
@@ -838,7 +839,7 @@ h5_get_vfd_fapl(hid_t fapl)
      */
     HDstrncpy(buf, env, sizeof(buf));
     buf[sizeof(buf) - 1] = '\0';
-    if(NULL == (tok = HDstrtok(buf, " \t\n\r")))
+    if(NULL == (tok = HDstrtok_r(buf, " \t\n\r", &lasts)))
         goto done;
 
     if(!HDstrcmp(tok, "sec2")) {
@@ -897,7 +898,7 @@ h5_get_vfd_fapl(hid_t fapl)
         hsize_t fam_size = 100 * 1024 * 1024;   /* 100 MB */
 
         /* Was a family size specified in the environment variable? */
-        if((tok = HDstrtok(NULL, " \t\n\r")))
+        if((tok = HDstrtok_r(NULL, " \t\n\r", &lasts)))
             fam_size = (hsize_t)(HDstrtod(tok, NULL) * 1024 * 1024);
         if(H5Pset_fapl_family(fapl, fam_size, H5P_DEFAULT) < 0)
             goto error;
@@ -906,7 +907,7 @@ h5_get_vfd_fapl(hid_t fapl)
         unsigned log_flags = H5FD_LOG_LOC_IO | H5FD_LOG_ALLOC;
 
         /* Were special log file flags specified in the environment variable? */
-        if((tok = HDstrtok(NULL, " \t\n\r")))
+        if((tok = HDstrtok_r(NULL, " \t\n\r", &lasts)))
             log_flags = (unsigned)HDstrtol(tok, NULL, 0);
 
         if(H5Pset_fapl_log(fapl, NULL, log_flags, (size_t)0) < 0)
@@ -951,6 +952,7 @@ h5_get_libver_fapl(hid_t fapl)
 {
     const char  *env = NULL;    /* HDF5_DRIVER environment variable     */
     const char  *tok = NULL;    /* strtok pointer                       */
+    char        *lasts = NULL;  /* Context pointer for strtok_r() call */
     char        buf[1024];      /* buffer for tokenizing HDF5_DRIVER    */
 
     /* Get the environment variable, if it exists */
@@ -973,7 +975,7 @@ h5_get_libver_fapl(hid_t fapl)
      */
     HDstrncpy(buf, env, sizeof(buf));
     buf[sizeof(buf) - 1] = '\0';
-    if(NULL == (tok = HDstrtok(buf, " \t\n\r")))
+    if(NULL == (tok = HDstrtok_r(buf, " \t\n\r", &lasts)))
         goto done;
 
     if(!HDstrcmp(tok, "latest")) {
@@ -1014,6 +1016,7 @@ h5_get_vol_fapl(hid_t fapl)
 {
     const char *env = NULL;
     const char *tok = NULL;
+    char        *lasts = NULL;  /* Context pointer for strtok_r() call */
     htri_t      connector_is_registered;
     char        buf[1024];              /* Buffer for tokenizing HDF5_VOL_CONNECTOR */
     void       *vol_info = NULL;        /* VOL connector info */
@@ -1036,7 +1039,7 @@ h5_get_vol_fapl(hid_t fapl)
      */
     HDstrncpy(buf, env, sizeof(buf));
     buf[sizeof(buf) - 1] = '\0';
-    if(NULL == (tok = HDstrtok(buf, " \t\n\r")))
+    if(NULL == (tok = HDstrtok_r(buf, " \t\n\r", &lasts)))
         goto done;
 
     /* First, check to see if the connector is already registered */
@@ -1066,7 +1069,7 @@ h5_get_vol_fapl(hid_t fapl)
     } /* end else */
 
     /* Was there any connector info specified in the environment variable? */
-    if(NULL != (tok = HDstrtok(NULL, " \t\n\r")))
+    if(NULL != (tok = HDstrtok_r(NULL, " \t\n\r", &lasts)))
         if(H5VLconnector_str_to_info(tok, connector_id, &vol_info) < 0)
             goto error;
 

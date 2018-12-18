@@ -86,6 +86,9 @@ const char *FILENAME[] = {
     NULL
 };
 
+#define OHMIN_FILENAME_A "ohdr_min_a"
+
+
 #define FILENAME_BUF_SIZE       1024
 #define KB                      1024
 
@@ -13067,6 +13070,7 @@ test_object_header_minimization_dcpl(void)
 {
     hid_t    dcpl_id  = -1;
     hid_t    file_id  = -1;
+    char     filename[FILENAME_BUF_SIZE] = "";
     hbool_t  minimize = FALSE;
 
     TESTING("dcpl flags to minimize dataset object header");
@@ -13075,7 +13079,10 @@ test_object_header_minimization_dcpl(void)
     /* SETUP */
     /*********/
 
-    file_id = H5Fcreate("some_arbitrary_filename", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    if(NULL == h5_fixname(OHMIN_FILENAME_A, H5P_DEFAULT, filename, sizeof(filename)))
+        FAIL_PUTS_ERROR("unable to prepare filename")
+
+    file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     if (0 > file_id)
         FAIL_PUTS_ERROR("unable to create test file\n");
 

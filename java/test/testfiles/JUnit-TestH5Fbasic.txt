@@ -9,6 +9,7 @@ JUnit version 4.11
 .testH5Freopen_closed
 .testH5Freset_mdc_hit_rate_stats
 .testH5Fget_name
+.testH5Fis_accessible
 .testH5Fcreate
 .testH5Fclear_elink_file_cache
 .testH5Fclose_twice
@@ -17,5 +18,5 @@ JUnit version 4.11
 
 Time:  XXXX
 
-OK (15 tests)
+OK (16 tests)
 

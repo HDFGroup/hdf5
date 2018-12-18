@@ -9,8 +9,6 @@
  * TESTING MACROS *
  ******************/
 
-#define DEBUG_OH_SIZE 0 /* toggle some debug printing (0 off, 1 on)*/
-
 /* basenames of test files created in this test suite */
 #define OHMIN_FILENAME_A "ohdr_min_a"
 #define OHMIN_FILENAME_B "ohdr_min_b"
@@ -19,40 +17,6 @@
 #define EQ 1
 #define LT 2
 #define GT 3
-
-
-/* ---------------------------------------------------------------------------
- * Macro: PRINT_DSET_OH_COMPARISON(...)
- *
- * Pretty-print metadata information about two dataset object headers.
- * Please use only at "top level" of test function.
- * ---------------------------------------------------------------------------
- */
-#define PRINT_DSET_OH_COMPARISON(did1, did2)                      \
-{   H5O_info_t info1;                                             \
-    H5O_info_t info2;                                             \
-                                                                  \
-    if(H5Oget_info2((did1), &info1, H5O_INFO_HDR) < 0) TEST_ERROR \
-    if(H5Oget_info2((did2), &info2, H5O_INFO_HDR) < 0) TEST_ERROR \
-                                                                  \
-    HDprintf("\n==HEADERS==  UNMINIMIZED  MINIMIZED\n");          \
-    HDprintf("    version: %11u  %9u\n",                          \
-            info1.hdr.version,                                    \
-            info2.hdr.version);                                   \
-    HDprintf(" # messages: %11u  %9u\n",                          \
-            info1.hdr.nmesgs,                                     \
-            info2.hdr.nmesgs);                                    \
-    HDprintf("       meta: %11llu  %9llu\n",                      \
-            info1.hdr.space.meta,                                 \
-            info2.hdr.space.meta);                                \
-    HDprintf("       free: %11llu  %9llu\n",                      \
-            info1.hdr.space.free,                                 \
-            info2.hdr.space.free);                                \
-    HDprintf("      total: %11llu  %9llu\n",                      \
-            info1.hdr.space.total,                                \
-            info2.hdr.space.total);                               \
-}
-
 
 /*********************
  * UTILITY FUNCTIONS *
@@ -77,10 +41,10 @@
 static herr_t
 put_attribute(hid_t loc_id, const char *attrname, const void *attrvalue, hid_t datatype_id, hid_t dataspace_id, hid_t *attribute_id)
 {
-    if ((*attribute_id) < 0) {
+    if((*attribute_id) < 0) {
         hid_t id = -1;
         id = H5Acreate(loc_id, attrname, datatype_id, dataspace_id, H5P_DEFAULT, H5P_DEFAULT);
-        if (id < 0)
+        if(id < 0)
             return FAIL;
         *attribute_id = id;
     }
@@ -105,7 +69,7 @@ count_attributes(hid_t dset_id)
 {
     H5O_info_t info;
 
-    if (0 > H5Oget_info(dset_id, &info, H5O_INFO_ALL))
+    if(0 > H5Oget_info(dset_id, &info, H5O_INFO_ALL))
         return -1;
     else
         return (int)info.num_attrs; /* should never exceed int bounds */
@@ -126,7 +90,7 @@ static herr_t
 _oh_getsize(hid_t did, hsize_t *size_out)
 {
     H5O_info_t info;
-    if (FAIL == H5Oget_info2(did, &info, H5O_INFO_HDR))
+    if(FAIL == H5Oget_info2(did, &info, H5O_INFO_HDR))
         return FAIL;
     *size_out = info.hdr.space.total;
     return SUCCEED;
@@ -150,14 +114,14 @@ oh_compare(hid_t did1, hid_t did2)
     hsize_t space1 = 0;
     hsize_t space2 = 0;
 
-    if (FAIL == _oh_getsize(did1, &space1))
+    if(FAIL == _oh_getsize(did1, &space1))
         return -1;
-    if (FAIL == _oh_getsize(did2, &space2))
+    if(FAIL == _oh_getsize(did2, &space2))
         return -2;
 
-    if (space1 < space2)
+    if(space1 < space2)
         return LT;
-    else if (space1 > space2)
+    else if(space1 > space2)
         return GT;
     else
         return EQ;
@@ -169,16 +133,13 @@ oh_compare(hid_t did1, hid_t did2)
 
 
 /* ---------------------------------------------------------------------------
- * Function:  test_attribute_addition()
- *
- * Purpose: Demonstrate attribute addition to datasets.
- *
- * Return: 0 (pass) or 1 (failure)
- *
+ * Demonstrate attribute addition to datasets.
+ * Conduct additions side-by-side with a standard datataset and one with
+ * minimized dataset object headers.
  * ---------------------------------------------------------------------------
  */
-static int
-test_attribute_addition(void)
+static herr_t
+test_minimized_oh_attribute_addition(void)
 {
     hsize_t array_10[1]      = {10}; /* dataspace extent */
     char    buffer[10]       = "";   /* to inspect string attribute */
@@ -210,10 +171,7 @@ test_attribute_addition(void)
     if(h5_fixname(OHMIN_FILENAME_A, H5P_DEFAULT, filename, sizeof(filename)) == NULL)
         TEST_ERROR
 
-    dspace_id = H5Screate_simple(
-            1,        /* rank */
-            array_10, /* current dimensions */
-            NULL);    /* maximum dimensions */
+    dspace_id = H5Screate_simple(1, array_10, NULL);
     if(dspace_id < 0) TEST_ERROR
 
     dspace_scalar_id = H5Screate(H5S_SCALAR);
@@ -258,9 +216,6 @@ test_attribute_addition(void)
     count = count_attributes(mindset_id);
     if(count != 0) TEST_ERROR
 
-    if (DEBUG_OH_SIZE)
-        PRINT_DSET_OH_COMPARISON(dset_id, mindset_id)
-
     /* -----------------
      * add one attribute
      */
@@ -282,9 +237,6 @@ test_attribute_addition(void)
     ret = H5Aread(attr_1a_id, char_type_id, buffer);
     if(ret < 0) TEST_ERROR
     if(HDstrcmp("DEMO", buffer)) TEST_ERROR
-
-    if (DEBUG_OH_SIZE)
-        PRINT_DSET_OH_COMPARISON(dset_id, mindset_id)
 
     /* -----------------
      * modify one attribute
@@ -308,9 +260,6 @@ test_attribute_addition(void)
     ret = H5Aread(attr_1a_id, char_type_id, buffer);
     if(ret < 0) TEST_ERROR
     if(HDstrcmp("REWRITE", buffer)) TEST_ERROR
-
-    if (DEBUG_OH_SIZE)
-        PRINT_DSET_OH_COMPARISON(dset_id, mindset_id)
 
     /* -----------------
      * add second attribute
@@ -337,9 +286,6 @@ test_attribute_addition(void)
     if(ret < 0) TEST_ERROR
     if(a_out != 3) TEST_ERROR
 
-    if (DEBUG_OH_SIZE)
-        PRINT_DSET_OH_COMPARISON(dset_id, mindset_id)
-
     /* -----------------
      * add third attribute
      */
@@ -365,9 +311,6 @@ test_attribute_addition(void)
     if(ret < 0) TEST_ERROR
     if(a_out != 2185) TEST_ERROR
 
-    if (DEBUG_OH_SIZE)
-        PRINT_DSET_OH_COMPARISON(dset_id, mindset_id)
-
     /************
      * TEARDOWN *
      ************/
@@ -387,7 +330,7 @@ test_attribute_addition(void)
     if(H5Fclose(file_id) < 0) TEST_ERROR
 
     PASSED()
-    return 0;
+    return SUCCEED;
 
 error :
     H5E_BEGIN_TRY {
@@ -405,21 +348,16 @@ error :
         (void)H5Aclose(attr_3a_id);
         (void)H5Fclose(file_id);
     } H5E_END_TRY;
-    return 1;
-} /* test_attribute_addition */
+    return FAIL;
+} /* test_minimized_oh_attribute_addition */
 
 
 /* ---------------------------------------------------------------------------
- * Function:  test_size_comparisons()
- *
- * Purpose: Examine when headers have been minimized.
- *
- * Return: 0 (pass) or 1 (failure)
- *
+ * Compare header sizes against when headers have been minimized.
  * ---------------------------------------------------------------------------
  */
-static int
-test_size_comparisons(void)
+static herr_t
+test_minimized_oh_size_comparisons(void)
 {
     hsize_t array_10[1] = {10}; /* dataspace extents */
 
@@ -519,9 +457,6 @@ test_size_comparisons(void)
     if(oh_compare(dset_F_x_id, dset_f_Y_id) != EQ) TEST_ERROR
     if(oh_compare(dset_F_x_id, dset_f_x_id) != LT) TEST_ERROR
 
-    if (DEBUG_OH_SIZE)
-        PRINT_DSET_OH_COMPARISON(dset_f_x_id, dset_F_x_id)
-
     /************
      * TEARDOWN *
      ************/
@@ -542,7 +477,7 @@ test_size_comparisons(void)
     if(H5Dclose(dset_F_Y_id) < 0) TEST_ERROR
 
     PASSED()
-    return 0;
+    return SUCCEED;
 
 error :
     H5E_BEGIN_TRY {
@@ -561,16 +496,16 @@ error :
         (void)H5Dclose(dset_F_N_id);
         (void)H5Dclose(dset_F_Y_id);
     } H5E_END_TRY;
-    return 1;
-} /* test_size_comparisons */
+    return FAIL;
+} /* test_minimized_oh_size_comparisons */
 
 
 /* ---------------------------------------------------------------------------
- * Test minimized dataset header with filter/pipeline message
+ * Test minimized dataset object header with filter/pipeline message
  * ---------------------------------------------------------------------------
  */
-static int
-test_minimized_with_filter(void)
+static herr_t
+test_minimized_oh_with_filter(void)
 {
     char           filename[512]   = "";
     const hsize_t  extents[1]      = {1024}; /* extents of dataspace */
@@ -656,9 +591,6 @@ test_minimized_with_filter(void)
     if(oh_compare(dset_mZ_id, dset_mx_id) != GT) TEST_ERROR
     if(oh_compare(dset_mZ_id, dset_xZ_id) != LT) TEST_ERROR
 
-    if (DEBUG_OH_SIZE)
-        PRINT_DSET_OH_COMPARISON(dset_xZ_id, dset_mZ_id)
-
     /************
      * TEARDOWN *
      ************/
@@ -675,7 +607,7 @@ test_minimized_with_filter(void)
     if(H5Fclose(file_id) < 0) TEST_ERROR
 
     PASSED()
-    return 0;
+    return SUCCEED;
 
 error:
     H5E_BEGIN_TRY {
@@ -690,16 +622,16 @@ error:
         (void)H5Dclose(dset_mZ_id);
         (void)H5Fclose(file_id);
     } H5E_END_TRY;
-    return 1;
-} /* test_minimized_with_filter */
+    return FAIL;
+} /* test_minimized_oh_with_filter */
 
 
 /* ---------------------------------------------------------------------------
- * Test minimized and recording modification times.
+ * Test minimized dataset object header and recording modification times.
  * ---------------------------------------------------------------------------
  */
-static int
-test_modification_times(void)
+static herr_t
+test_minimized_oh_modification_times(void)
 {
     /* test-local structure for parameterized testing
      */
@@ -778,7 +710,7 @@ test_modification_times(void)
 
         fapl_id = H5P_DEFAULT;
 
-        if (cases[i].oh_version > 1) {
+        if(cases[i].oh_version > 1) {
             fapl_id = H5Pcreate(H5P_FILE_ACCESS);
             if(fapl_id < 0) TEST_ERROR
             ret = H5Pset_libver_bounds(fapl_id, H5F_LIBVER_V18, H5F_LIBVER_V110);
@@ -811,12 +743,6 @@ test_modification_times(void)
         if(oh_compare(dset_mx_id, dset_xx_id) != LT) TEST_ERROR
         if(oh_compare(dset_mx_id, dset_xT_id) != LT) TEST_ERROR
 
-        if (DEBUG_OH_SIZE) {
-            PRINT_DSET_OH_COMPARISON(dset_xx_id, dset_mx_id)
-            PRINT_DSET_OH_COMPARISON(dset_xT_id, dset_mT_id)
-            PRINT_DSET_OH_COMPARISON(dset_mT_id, dset_mN_id)
-        }
-
         if(oh_compare(dset_xx_id, dset_xT_id) != EQ) TEST_ERROR
         if(oh_compare(dset_mx_id, dset_mT_id) != EQ) TEST_ERROR
         if(oh_compare(dset_mN_id, dset_mT_id) != LT) TEST_ERROR
@@ -834,7 +760,7 @@ test_modification_times(void)
         if(H5Dclose(dset_mN_id) < 0) TEST_ERROR
         if(H5Fclose(file_id) < 0) TEST_ERROR
 
-        if ((fapl_id != H5P_DEFAULT) && (H5Pclose(fapl_id) < 0))
+        if((fapl_id != H5P_DEFAULT) && (H5Pclose(fapl_id) < 0))
             TEST_ERROR
 
     } /* for each version tested */
@@ -851,7 +777,7 @@ test_modification_times(void)
     if(H5Pclose(dcpl_mN_id) < 0) TEST_ERROR
 
     PASSED()
-    return 0;
+    return SUCCEED;
 
 error:
     H5E_BEGIN_TRY {
@@ -869,16 +795,16 @@ error:
         (void)H5Fclose(file_id);
         (void)H5Pclose(fapl_id);
     } H5E_END_TRY;
-    return 1;
-} /* test_modification_times */
+    return FAIL;
+} /* test_minimized_oh_modification_times */
 
 
 /* ---------------------------------------------------------------------------
- * Test minimized dataset header with a fill value set.
+ * Test minimized dataset object header with a fill value set.
  * ---------------------------------------------------------------------------
  */
-static int
-test_fillvalue_backwards_compatability(void)
+static herr_t
+test_minimized_oh_fillvalue_backwards_compatability(void)
 {
     char          filename[512] = "";
     const hsize_t extents[1]    = {64}; /* extents of dataspace */
@@ -952,9 +878,6 @@ test_fillvalue_backwards_compatability(void)
      * TESTS *
      *********/
 
-    if(DEBUG_OH_SIZE)
-        PRINT_DSET_OH_COMPARISON(dset_1_id, dset_0_id)
-
     /* dset not supporting pre-1.08 should be smaller? */
     if(oh_compare(dset_1_id, dset_0_id) != LT) TEST_ERROR
 
@@ -971,7 +894,7 @@ test_fillvalue_backwards_compatability(void)
     if(H5Fclose(file_id) < 0) TEST_ERROR;
 
     PASSED()
-    return 0;
+    return SUCCEED;
 
 error:
     H5E_BEGIN_TRY {
@@ -983,8 +906,8 @@ error:
         (void)H5Dclose(dset_1_id);
         (void)H5Fclose(file_id);
     } H5E_END_TRY;
-    return 1;
-} /* test_fillvalue_backwards_compatability */
+    return FAIL;
+} /* test_minimized_oh_fillvalue_backwards_compatability */
 
 /********
  * MAIN *
@@ -1004,19 +927,16 @@ main(void)
 
     HDprintf("Testing minimized dataset object headers.\n");
 
-    nerrors += test_attribute_addition();
-    nerrors += test_size_comparisons();
-    nerrors += test_minimized_with_filter();
-    nerrors += test_modification_times();
-    nerrors += test_fillvalue_backwards_compatability();
+    nerrors += test_minimized_oh_attribute_addition();
+    nerrors += test_minimized_oh_size_comparisons();
+    nerrors += test_minimized_oh_with_filter();
+    nerrors += test_minimized_oh_modification_times();
+    nerrors += test_minimized_oh_fillvalue_backwards_compatability();
 
-    if (nerrors > 0) {
-        HDprintf("***** %d MINIMIZED DATASET OHDR TEST%s FAILED! *****\n",
-                nerrors,
-                nerrors > 1 ? "S" : "");
-    } else {
+    if(nerrors < 0)
+        HDprintf("***** %d MINIMIZED DATASET OHDR TEST%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");
+    else
         HDprintf("All minimized dataset object header tests passed.\n");
-    }
 
     return nerrors;
 } /* main */

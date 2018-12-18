@@ -482,7 +482,7 @@ H5VL__native_attr_get(void *obj, H5VL_attr_get_t get_type,
         /* H5Aget_space */
         case H5VL_ATTR_GET_SPACE:
             {
-                hid_t	*ret_id = va_arg(arguments, hid_t *);
+                hid_t	*ret_id = HDva_arg(arguments, hid_t *);
                 H5A_t   *attr = (H5A_t *)obj;
 
                 if((*ret_id = H5A_get_space(attr)) < 0)
@@ -493,7 +493,7 @@ H5VL__native_attr_get(void *obj, H5VL_attr_get_t get_type,
         /* H5Aget_type */
         case H5VL_ATTR_GET_TYPE:
             {
-                hid_t	*ret_id = va_arg(arguments, hid_t *);
+                hid_t	*ret_id = HDva_arg(arguments, hid_t *);
                 H5A_t   *attr = (H5A_t *)obj;
 
                 if((*ret_id = H5A__get_type(attr)) < 0)
@@ -504,7 +504,7 @@ H5VL__native_attr_get(void *obj, H5VL_attr_get_t get_type,
         /* H5Aget_create_plist */
         case H5VL_ATTR_GET_ACPL:
             {
-                hid_t	*ret_id = va_arg(arguments, hid_t *);
+                hid_t	*ret_id = HDva_arg(arguments, hid_t *);
                 H5A_t   *attr = (H5A_t *)obj;
 
                 if((*ret_id = H5A__get_create_plist(attr)) < 0)
@@ -516,10 +516,10 @@ H5VL__native_attr_get(void *obj, H5VL_attr_get_t get_type,
         /* H5Aget_name */
         case H5VL_ATTR_GET_NAME:
             {
-                const H5VL_loc_params_t *loc_params = va_arg(arguments, const H5VL_loc_params_t *);
-                size_t	buf_size = va_arg(arguments, size_t);
-                char    *buf = va_arg(arguments, char *);
-                ssize_t	*ret_val = va_arg(arguments, ssize_t *);
+                const H5VL_loc_params_t *loc_params = HDva_arg(arguments, const H5VL_loc_params_t *);
+                size_t	buf_size = HDva_arg(arguments, size_t);
+                char    *buf = HDva_arg(arguments, char *);
+                ssize_t	*ret_val = HDva_arg(arguments, ssize_t *);
                 H5A_t   *attr = NULL;
 
                 if(H5VL_OBJECT_BY_SELF == loc_params->type) {
@@ -565,8 +565,8 @@ H5VL__native_attr_get(void *obj, H5VL_attr_get_t get_type,
         /* H5Aget_info */
         case H5VL_ATTR_GET_INFO:
             {
-                const H5VL_loc_params_t *loc_params = va_arg(arguments, const H5VL_loc_params_t *);
-                H5A_info_t   *ainfo = va_arg(arguments, H5A_info_t *);
+                const H5VL_loc_params_t *loc_params = HDva_arg(arguments, const H5VL_loc_params_t *);
+                H5A_info_t   *ainfo = HDva_arg(arguments, H5A_info_t *);
                 H5A_t   *attr = NULL;
 
                 if(H5VL_OBJECT_BY_SELF == loc_params->type) {
@@ -575,7 +575,7 @@ H5VL__native_attr_get(void *obj, H5VL_attr_get_t get_type,
                         HGOTO_ERROR(H5E_ARGS, H5E_CANTGET, FAIL, "can't get attribute info")
                 }
                 else if(H5VL_OBJECT_BY_NAME == loc_params->type) {
-                    char *attr_name = va_arg(arguments, char *);
+                    char *attr_name = HDva_arg(arguments, char *);
                     H5G_loc_t loc;
                     
                     /* check arguments */
@@ -624,7 +624,7 @@ H5VL__native_attr_get(void *obj, H5VL_attr_get_t get_type,
 
         case H5VL_ATTR_GET_STORAGE_SIZE:
             {
-                hsize_t *ret = va_arg(arguments, hsize_t *);
+                hsize_t *ret = HDva_arg(arguments, hsize_t *);
                 H5A_t   *attr = (H5A_t *)obj;
 
                 /* Set return value */
@@ -670,7 +670,7 @@ H5VL__native_attr_specific(void *obj, const H5VL_loc_params_t *loc_params, H5VL_
     switch(specific_type) {
         case H5VL_ATTR_DELETE:
             {
-                char    *attr_name = va_arg(arguments, char *);
+                char    *attr_name = HDva_arg(arguments, char *);
 
                 if(H5VL_OBJECT_BY_SELF == loc_params->type) {
                     /* H5Adelete */
@@ -698,8 +698,8 @@ H5VL__native_attr_specific(void *obj, const H5VL_loc_params_t *loc_params, H5VL_
 
         case H5VL_ATTR_EXISTS:
             {
-                const char *attr_name = va_arg(arguments, const char *);
-                htri_t	*ret = va_arg(arguments, htri_t *);
+                const char *attr_name = HDva_arg(arguments, const char *);
+                htri_t	*ret = HDva_arg(arguments, htri_t *);
 
                 if(loc_params->type == H5VL_OBJECT_BY_SELF) { /* H5Aexists */
                     /* Check if the attribute exists */
@@ -718,11 +718,11 @@ H5VL__native_attr_specific(void *obj, const H5VL_loc_params_t *loc_params, H5VL_
 
         case H5VL_ATTR_ITER:
             {
-                H5_index_t          idx_type    = va_arg(arguments, H5_index_t);
-                H5_iter_order_t     order       = va_arg(arguments, H5_iter_order_t);
-                hsize_t            *idx         = va_arg(arguments, hsize_t *);
-                H5A_operator2_t     op          = va_arg(arguments, H5A_operator2_t);
-                void               *op_data     = va_arg(arguments, void *);
+                H5_index_t          idx_type    = HDva_arg(arguments, H5_index_t);
+                H5_iter_order_t     order       = HDva_arg(arguments, H5_iter_order_t);
+                hsize_t            *idx         = HDva_arg(arguments, hsize_t *);
+                H5A_operator2_t     op          = HDva_arg(arguments, H5A_operator2_t);
+                void               *op_data     = HDva_arg(arguments, void *);
 
                 if(loc_params->type == H5VL_OBJECT_BY_SELF) { /* H5Aiterate2 */
                     /* Iterate over attributes */
@@ -742,8 +742,8 @@ H5VL__native_attr_specific(void *obj, const H5VL_loc_params_t *loc_params, H5VL_
         /* H5Arename/rename_by_name */
         case H5VL_ATTR_RENAME:
             {
-                const char *old_name  = va_arg(arguments, const char *);
-                const char *new_name  = va_arg(arguments, const char *);
+                const char *old_name  = HDva_arg(arguments, const char *);
+                const char *new_name  = HDva_arg(arguments, const char *);
 
                 if(loc_params->type == H5VL_OBJECT_BY_SELF) { /* H5Arename */
                     /* Call attribute rename routine */
@@ -782,20 +782,20 @@ static herr_t
 H5VL__native_attr_optional(void H5_ATTR_UNUSED *obj, hid_t H5_ATTR_UNUSED dxpl_id,
     void H5_ATTR_UNUSED **req, va_list arguments)
 {
-    H5VL_attr_optional_t optional_type;
+    H5VL_native_attr_optional_t optional_type;
     herr_t ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_STATIC
 
-    optional_type = va_arg(arguments, H5VL_attr_optional_t);
+    optional_type = HDva_arg(arguments, H5VL_native_attr_optional_t);
     switch(optional_type) {
 #ifndef H5_NO_DEPRECATED_SYMBOLS
-        case H5VL_ATTR_ITERATE_OLD:
+        case H5VL_NATIVE_ATTR_ITERATE_OLD:
             {
-                hid_t loc_id = va_arg(arguments, hid_t);
-                unsigned *attr_num = va_arg(arguments, unsigned *);
-                H5A_operator1_t op = va_arg(arguments, H5A_operator1_t);
-                void *op_data = va_arg(arguments, void *);
+                hid_t loc_id = HDva_arg(arguments, hid_t);
+                unsigned *attr_num = HDva_arg(arguments, unsigned *);
+                H5A_operator1_t op = HDva_arg(arguments, H5A_operator1_t);
+                void *op_data = HDva_arg(arguments, void *);
 
                 /* Call the actual iteration routine */
                 if((ret_value = H5A__iterate_old(loc_id, attr_num, op, op_data)) < 0)
@@ -803,6 +803,13 @@ H5VL__native_attr_optional(void H5_ATTR_UNUSED *obj, hid_t H5_ATTR_UNUSED dxpl_i
 
                 break;
             }
+#else
+        /* XXX: This case only exists because this is the only attribute optional
+         *      value and we can't have empty enums. Delete it when we have another
+         *      attribute optional enum value.
+         */
+        case H5VL_NATIVE_ATTR_ITERATE_OLD:
+            HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "H5VL_NATIVE_ATTR_ITERATE_OLD is not a valid value when the library is built without deprecated routines")
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
         default:
@@ -1059,7 +1066,7 @@ H5VL__native_dataset_get(void *obj, H5VL_dataset_get_t get_type,
         /* H5Dget_space */
         case H5VL_DATASET_GET_SPACE:
             {
-                hid_t	*ret_id = va_arg(arguments, hid_t *);
+                hid_t	*ret_id = HDva_arg(arguments, hid_t *);
 
                 if((*ret_id = H5D__get_space(dset)) < 0)
                     HGOTO_ERROR(H5E_ARGS, H5E_CANTGET, FAIL, "can't get space ID of dataset")
@@ -1070,7 +1077,7 @@ H5VL__native_dataset_get(void *obj, H5VL_dataset_get_t get_type,
         /* H5Dget_space_statuc */
         case H5VL_DATASET_GET_SPACE_STATUS:
             {
-                H5D_space_status_t *allocation = va_arg(arguments, H5D_space_status_t *);
+                H5D_space_status_t *allocation = HDva_arg(arguments, H5D_space_status_t *);
 
                 /* Read data space address and return */
                 if(H5D__get_space_status(dset, allocation) < 0)
@@ -1082,7 +1089,7 @@ H5VL__native_dataset_get(void *obj, H5VL_dataset_get_t get_type,
         /* H5Dget_type */
         case H5VL_DATASET_GET_TYPE:
             {
-                hid_t	*ret_id = va_arg(arguments, hid_t *);
+                hid_t	*ret_id = HDva_arg(arguments, hid_t *);
 
                 if((*ret_id = H5D__get_type(dset)) < 0)
                     HGOTO_ERROR(H5E_ARGS, H5E_CANTGET, FAIL, "can't get datatype ID of dataset")
@@ -1093,7 +1100,7 @@ H5VL__native_dataset_get(void *obj, H5VL_dataset_get_t get_type,
         /* H5Dget_create_plist */
         case H5VL_DATASET_GET_DCPL:
             {
-                hid_t	*ret_id = va_arg(arguments, hid_t *);
+                hid_t	*ret_id = HDva_arg(arguments, hid_t *);
 
                 if((*ret_id = H5D_get_create_plist(dset)) < 0)
                     HGOTO_ERROR(H5E_ARGS, H5E_CANTGET, FAIL, "can't get creation property list for dataset")
@@ -1104,7 +1111,7 @@ H5VL__native_dataset_get(void *obj, H5VL_dataset_get_t get_type,
         /* H5Dget_access_plist */
         case H5VL_DATASET_GET_DAPL:
             {
-                hid_t	*ret_id = va_arg(arguments, hid_t *);
+                hid_t	*ret_id = HDva_arg(arguments, hid_t *);
 
                 if((*ret_id = H5D_get_access_plist(dset)) < 0)
                     HGOTO_ERROR(H5E_ARGS, H5E_CANTGET, FAIL, "can't get access property list for dataset")
@@ -1115,7 +1122,7 @@ H5VL__native_dataset_get(void *obj, H5VL_dataset_get_t get_type,
         /* H5Dget_storage_size */
         case H5VL_DATASET_GET_STORAGE_SIZE:
             {
-                hsize_t *ret = va_arg(arguments, hsize_t *);
+                hsize_t *ret = HDva_arg(arguments, hsize_t *);
 
                 /* Set return value */
                 if(H5D__get_storage_size(dset, ret) < 0)
@@ -1126,7 +1133,7 @@ H5VL__native_dataset_get(void *obj, H5VL_dataset_get_t get_type,
         /* H5Dget_offset */
         case H5VL_DATASET_GET_OFFSET:
             {
-                haddr_t *ret = va_arg(arguments, haddr_t *);
+                haddr_t *ret = HDva_arg(arguments, haddr_t *);
 
                 /* Set return value */
                 *ret = H5D__get_offset(dset);
@@ -1166,7 +1173,7 @@ H5VL__native_dataset_specific(void *obj, H5VL_dataset_specific_t specific_type,
         /* H5Dspecific_space */
         case H5VL_DATASET_SET_EXTENT:
             {
-                const hsize_t *size = va_arg(arguments, const hsize_t *); 
+                const hsize_t *size = HDva_arg(arguments, const hsize_t *); 
 
                 if(H5D__set_extent(dset, size) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set extent of dataset")
@@ -1175,7 +1182,7 @@ H5VL__native_dataset_specific(void *obj, H5VL_dataset_specific_t specific_type,
 
         case H5VL_DATASET_FLUSH:
             {
-                hid_t dset_id = va_arg(arguments, hid_t);
+                hid_t dset_id = HDva_arg(arguments, hid_t);
 
                 /* Flush the dataset */
                 if(H5D__flush(dset, dset_id) < 0)
@@ -1186,7 +1193,7 @@ H5VL__native_dataset_specific(void *obj, H5VL_dataset_specific_t specific_type,
 
         case H5VL_DATASET_REFRESH:
             {
-                hid_t dset_id = va_arg(arguments, hid_t);
+                hid_t dset_id = HDva_arg(arguments, hid_t);
 
                 /* Refresh the dataset */
                 if((H5D__refresh(dset_id, dset)) < 0)
@@ -1218,13 +1225,13 @@ H5VL__native_dataset_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id,
     void H5_ATTR_UNUSED **req, va_list arguments)
 {
     H5D_t *dset = NULL;             /* Dataset */
-    H5VL_dataset_optional_t optional_type = va_arg(arguments, H5VL_dataset_optional_t);
+    H5VL_native_dataset_optional_t optional_type = HDva_arg(arguments, H5VL_native_dataset_optional_t);
     herr_t ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_STATIC
 
     switch(optional_type) {
-        case H5VL_DATASET_FORMAT_CONVERT:
+        case H5VL_NATIVE_DATASET_FORMAT_CONVERT:
             {
                 dset = (H5D_t *)obj;
 
@@ -1259,9 +1266,9 @@ H5VL__native_dataset_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id,
                 break;
             }
 
-        case H5VL_DATASET_GET_CHUNK_INDEX_TYPE:
+        case H5VL_NATIVE_DATASET_GET_CHUNK_INDEX_TYPE:
             {
-                H5D_chunk_index_t *idx_type = va_arg(arguments, H5D_chunk_index_t *);
+                H5D_chunk_index_t *idx_type = HDva_arg(arguments, H5D_chunk_index_t *);
 
                 dset = (H5D_t *)obj;
 
@@ -1275,10 +1282,10 @@ H5VL__native_dataset_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id,
                 break;
             }
 
-        case H5VL_DATASET_GET_CHUNK_STORAGE_SIZE:
+        case H5VL_NATIVE_DATASET_GET_CHUNK_STORAGE_SIZE:
             {
-                hsize_t *offset = va_arg(arguments, hsize_t *);
-                hsize_t *chunk_nbytes = va_arg(arguments, hsize_t *);
+                hsize_t *offset = HDva_arg(arguments, hsize_t *);
+                hsize_t *chunk_nbytes = HDva_arg(arguments, hsize_t *);
 
                 dset = (H5D_t *)obj;
 
@@ -1293,11 +1300,11 @@ H5VL__native_dataset_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id,
                 break;
             }
 
-        case H5VL_DATASET_CHUNK_READ:
+        case H5VL_NATIVE_DATASET_CHUNK_READ:
             {
-                const       hsize_t *offset     = va_arg(arguments, hsize_t *);
-                uint32_t   *filters             = va_arg(arguments, uint32_t *);
-                void       *buf                 = va_arg(arguments, void *);
+                const       hsize_t *offset     = HDva_arg(arguments, hsize_t *);
+                uint32_t   *filters             = HDva_arg(arguments, uint32_t *);
+                void       *buf                 = HDva_arg(arguments, void *);
                 hsize_t     offset_copy[H5O_LAYOUT_NDIMS];  /* Internal copy of chunk offset */
 
                 dset = (H5D_t *)obj;
@@ -1321,12 +1328,12 @@ H5VL__native_dataset_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id,
                 break;
             }
 
-        case H5VL_DATASET_CHUNK_WRITE:
+        case H5VL_NATIVE_DATASET_CHUNK_WRITE:
             {
-                uint32_t        filters             = va_arg(arguments, uint32_t);
-                const  hsize_t *offset              = va_arg(arguments, const hsize_t *);
-                uint32_t        data_size_32        = va_arg(arguments, uint32_t);
-                const void     *buf                 = va_arg(arguments, const void *);
+                uint32_t        filters             = HDva_arg(arguments, uint32_t);
+                const  hsize_t *offset              = HDva_arg(arguments, const hsize_t *);
+                uint32_t        data_size_32        = HDva_arg(arguments, uint32_t);
+                const void     *buf                 = HDva_arg(arguments, const void *);
                 hsize_t         offset_copy[H5O_LAYOUT_NDIMS];  /* Internal copy of chunk offset */
 
                 dset = (H5D_t *)obj;
@@ -1487,7 +1494,7 @@ H5VL__native_file_get(void *obj, H5VL_file_get_t get_type,
         case H5VL_FILE_GET_FAPL:
             {
                 H5P_genplist_t *new_plist;              /* New property list */
-                hid_t          *plist_id = va_arg(arguments, hid_t *);
+                hid_t          *plist_id = HDva_arg(arguments, hid_t *);
 
                 f = (H5F_t *)obj;
 
@@ -1504,7 +1511,7 @@ H5VL__native_file_get(void *obj, H5VL_file_get_t get_type,
         case H5VL_FILE_GET_FCPL:
             {
                 H5P_genplist_t *plist;      /* Property list */
-                hid_t          *plist_id = va_arg(arguments, hid_t *);
+                hid_t          *plist_id = HDva_arg(arguments, hid_t *);
 
                 f = (H5F_t *)obj;
                 if(NULL == (plist = (H5P_genplist_t *)H5I_object(f->shared->fcpl_id)))
@@ -1520,8 +1527,8 @@ H5VL__native_file_get(void *obj, H5VL_file_get_t get_type,
         /* H5Fget_obj_count */
         case H5VL_FILE_GET_OBJ_COUNT:
             {
-                unsigned    types = va_arg(arguments, unsigned);
-                ssize_t    *ret = va_arg(arguments, ssize_t *);
+                unsigned    types = HDva_arg(arguments, unsigned);
+                ssize_t    *ret = HDva_arg(arguments, ssize_t *);
                 size_t      obj_count = 0;      /* Number of opened objects */
 
                 f = (H5F_t *)obj;
@@ -1537,10 +1544,10 @@ H5VL__native_file_get(void *obj, H5VL_file_get_t get_type,
         /* H5Fget_obj_ids */
         case H5VL_FILE_GET_OBJ_IDS:
             {
-                unsigned    types = va_arg(arguments, unsigned);
-                size_t      max_objs = va_arg(arguments, size_t);
-                hid_t      *oid_list = va_arg(arguments, hid_t *);
-                ssize_t    *ret = va_arg(arguments, ssize_t *);
+                unsigned    types = HDva_arg(arguments, unsigned);
+                size_t      max_objs = HDva_arg(arguments, size_t);
+                hid_t      *oid_list = HDva_arg(arguments, hid_t *);
+                ssize_t    *ret = HDva_arg(arguments, ssize_t *);
                 size_t      obj_count = 0;      /* Number of opened objects */
 
                 f = (H5F_t *)obj;
@@ -1556,7 +1563,7 @@ H5VL__native_file_get(void *obj, H5VL_file_get_t get_type,
         /* H5Fget_intent */
         case H5VL_FILE_GET_INTENT:
             {
-                unsigned *intent_flags = va_arg(arguments, unsigned *);
+                unsigned *intent_flags = HDva_arg(arguments, unsigned *);
 
                 f = (H5F_t *)obj;
 
@@ -1585,10 +1592,10 @@ H5VL__native_file_get(void *obj, H5VL_file_get_t get_type,
         /* H5Fget_name */
         case H5VL_FILE_GET_NAME:
             {
-                H5I_type_t  type = va_arg(arguments, H5I_type_t);
-                size_t      size = va_arg(arguments, size_t);
-                char       *name = va_arg(arguments, char *);
-                ssize_t    *ret  = va_arg(arguments, ssize_t *);
+                H5I_type_t  type = HDva_arg(arguments, H5I_type_t);
+                size_t      size = HDva_arg(arguments, size_t);
+                char       *name = HDva_arg(arguments, char *);
+                ssize_t    *ret  = HDva_arg(arguments, ssize_t *);
                 size_t      len;
 
                 if(NULL == (f = H5F__get_file(obj, type)))
@@ -1607,11 +1614,12 @@ H5VL__native_file_get(void *obj, H5VL_file_get_t get_type,
                 break;
             }
 
+        /* H5Fget_dset_no_attrs_hint */
         case H5VL_FILE_GET_MIN_DSET_OHDR_FLAG:
             {
                 hbool_t *minimize = va_arg(arguments, hbool_t*);
                 f = (H5F_t*)obj;
-                if (NULL == f)
+                if(NULL == f)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
                 *minimize = H5F_MIN_DSET_OHDR(f);
                 break;
@@ -1647,8 +1655,8 @@ H5VL__native_file_specific(void *obj, H5VL_file_specific_t specific_type,
         /* H5Fflush */
         case H5VL_FILE_FLUSH:
             {
-                H5I_type_t      type = va_arg(arguments, H5I_type_t);
-                H5F_scope_t     scope = va_arg(arguments, H5F_scope_t);
+                H5I_type_t      type = HDva_arg(arguments, H5I_type_t);
+                H5F_scope_t     scope = HDva_arg(arguments, H5F_scope_t);
                 H5F_t	       *f = NULL;              /* File to flush */
 
                 /* Get the file for the object */
@@ -1680,7 +1688,7 @@ H5VL__native_file_specific(void *obj, H5VL_file_specific_t specific_type,
         /* H5Freopen */
         case H5VL_FILE_REOPEN:
             {
-                void   **ret        = va_arg(arguments, void **);
+                void   **ret        = HDva_arg(arguments, void **);
                 H5F_t  *new_file    = NULL;
 
                 /* Reopen the file through the VOL connector */
@@ -1695,10 +1703,10 @@ H5VL__native_file_specific(void *obj, H5VL_file_specific_t specific_type,
         /* H5Fmount */
         case H5VL_FILE_MOUNT:
             {
-                H5I_type_t  type       = va_arg(arguments, H5I_type_t);
-                const char *name       = va_arg(arguments, const char *);
-                H5F_t      *child      = va_arg(arguments, H5F_t *);
-                hid_t       plist_id   = va_arg(arguments, hid_t);
+                H5I_type_t  type       = HDva_arg(arguments, H5I_type_t);
+                const char *name       = HDva_arg(arguments, const char *);
+                H5F_t      *child      = HDva_arg(arguments, H5F_t *);
+                hid_t       plist_id   = HDva_arg(arguments, hid_t);
                 H5G_loc_t   loc;
 
                 if(H5G_loc_real(obj, type, &loc) < 0)
@@ -1714,8 +1722,8 @@ H5VL__native_file_specific(void *obj, H5VL_file_specific_t specific_type,
         /* H5Funmount */
         case H5VL_FILE_UNMOUNT:
             {
-                H5I_type_t  type       = va_arg(arguments, H5I_type_t);
-                const char *name       = va_arg(arguments, const char *);
+                H5I_type_t  type       = HDva_arg(arguments, H5I_type_t);
+                const char *name       = HDva_arg(arguments, const char *);
                 H5G_loc_t   loc;
 
                 if(H5G_loc_real(obj, type, &loc) < 0)
@@ -1731,25 +1739,13 @@ H5VL__native_file_specific(void *obj, H5VL_file_specific_t specific_type,
         /* H5Fis_accessible */
         case H5VL_FILE_IS_ACCESSIBLE:
             {
-                hid_t       fapl_id = va_arg(arguments, hid_t);
-                const char *name    = va_arg(arguments, const char *);
-                htri_t     *ret     = va_arg(arguments, htri_t *);
+                hid_t       fapl_id = HDva_arg(arguments, hid_t);
+                const char *name    = HDva_arg(arguments, const char *);
+                htri_t     *ret     = HDva_arg(arguments, htri_t *);
 
                 /* Call private routine */
                 if((*ret = H5F__is_hdf5(name, fapl_id)) < 0)
                     HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "error in HDF5 file check")
-                break;
-            }
-
-        /* H5Fcreate / H5Fopen */
-        case H5VL_FILE_CACHE_VOL_CONN:
-            {
-                hid_t      vol_id   = va_arg(arguments, hid_t);
-                void      *vol_info = va_arg(arguments, void *);
-
-                /* Call private routine */
-                if(H5F__set_vol_conn((H5F_t *)obj, vol_id, vol_info) < 0)
-                    HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "cache VOL connector ID & info failed")
                 break;
             }
 
@@ -1775,7 +1771,7 @@ static herr_t
 H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req, va_list arguments)
 {
     H5F_t *f = NULL;           /* File */
-    H5VL_file_optional_t optional_type = va_arg(arguments, H5VL_file_optional_t);
+    H5VL_native_file_optional_t optional_type = HDva_arg(arguments, H5VL_native_file_optional_t);
     herr_t ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_STATIC
@@ -1783,11 +1779,11 @@ H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR
     f = (H5F_t *)obj;
     switch(optional_type) {
         /* H5Fget_filesize */
-        case H5VL_FILE_GET_SIZE:
+        case H5VL_NATIVE_FILE_GET_SIZE:
             {
                 haddr_t     max_eof_eoa;            /* Maximum of the EOA & EOF */
                 haddr_t     base_addr;              /* Base address for the file */
-                hsize_t    *size = va_arg(arguments, hsize_t *);
+                hsize_t    *size = HDva_arg(arguments, hsize_t *);
 
                 /* Go get the actual file size */
                 if(H5F__get_max_eof_eoa(f, &max_eof_eoa) < 0)
@@ -1802,11 +1798,11 @@ H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR
             }
 
         /* H5Fget_file_image */
-        case H5VL_FILE_GET_FILE_IMAGE:
+        case H5VL_NATIVE_FILE_GET_FILE_IMAGE:
             {
-                void       *buf_ptr   = va_arg(arguments, void *);
-                ssize_t    *ret       = va_arg(arguments, ssize_t *);
-                size_t      buf_len   = va_arg(arguments, size_t );
+                void       *buf_ptr   = HDva_arg(arguments, void *);
+                ssize_t    *ret       = HDva_arg(arguments, ssize_t *);
+                size_t      buf_len   = HDva_arg(arguments, size_t );
 
                 /* Do the actual work */
                 if((*ret = H5F__get_file_image(f, buf_ptr, buf_len)) < 0)
@@ -1815,10 +1811,10 @@ H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR
             }
 
         /* H5Fget_freespace */
-        case H5VL_FILE_GET_FREE_SPACE:
+        case H5VL_NATIVE_FILE_GET_FREE_SPACE:
             {
                 hsize_t	tot_space;	/* Amount of free space in the file */
-                hssize_t    *ret = va_arg(arguments, hssize_t *);
+                hssize_t    *ret = HDva_arg(arguments, hssize_t *);
 
                 /* Go get the actual amount of free space in the file */
                 if(H5MF_get_freespace(f, &tot_space, NULL) < 0)
@@ -1827,12 +1823,13 @@ H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR
                 break;
             }
 
-        case H5VL_FILE_GET_FREE_SECTIONS:
+        /* H5Fget_free_sections */
+        case H5VL_NATIVE_FILE_GET_FREE_SECTIONS:
             {
-                H5F_sect_info_t *sect_info = va_arg(arguments, H5F_sect_info_t *);
-                ssize_t         *ret       = va_arg(arguments, ssize_t *);
-                H5F_mem_t       type       = va_arg(arguments, H5F_mem_t);
-                size_t          nsects     = va_arg(arguments, size_t);
+                H5F_sect_info_t *sect_info = HDva_arg(arguments, H5F_sect_info_t *);
+                ssize_t         *ret       = HDva_arg(arguments, ssize_t *);
+                H5F_mem_t       type       = HDva_arg(arguments, H5F_mem_t);
+                size_t          nsects     = HDva_arg(arguments, size_t);
 
                 /* Go get the free-space section information in the file */
                 if((*ret = H5MF_get_free_sections(f, type, nsects, sect_info)) < 0)
@@ -1840,11 +1837,11 @@ H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR
                 break;
             }
 
-        /* H5Fget_info2 */
-        case H5VL_FILE_GET_INFO:
+        /* H5Fget_info1/2 */
+        case H5VL_NATIVE_FILE_GET_INFO:
             {
-                H5I_type_t  type   = va_arg(arguments, H5I_type_t);
-                H5F_info2_t *finfo = va_arg(arguments, H5F_info2_t *);
+                H5I_type_t  type   = HDva_arg(arguments, H5I_type_t);
+                H5F_info2_t *finfo = HDva_arg(arguments, H5F_info2_t *);
 
                 /* Get the file struct. This call is careful to not return the file pointer
                  * for the top file in a mount hierarchy.
@@ -1860,9 +1857,9 @@ H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR
             }
 
         /* H5Fget_mdc_config */
-        case H5VL_FILE_GET_MDC_CONF:
+        case H5VL_NATIVE_FILE_GET_MDC_CONF:
             {
-                H5AC_cache_config_t *config_ptr = va_arg(arguments, H5AC_cache_config_t *);
+                H5AC_cache_config_t *config_ptr = HDva_arg(arguments, H5AC_cache_config_t *);
 
                 /* Go get the resize configuration */
                 if(H5AC_get_cache_auto_resize_config(f->shared->cache, config_ptr) < 0)
@@ -1871,9 +1868,9 @@ H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR
             }
 
         /* H5Fget_mdc_hit_rate */
-        case H5VL_FILE_GET_MDC_HR:
+        case H5VL_NATIVE_FILE_GET_MDC_HR:
             {
-                double *hit_rate_ptr = va_arg(arguments, double *);
+                double *hit_rate_ptr = HDva_arg(arguments, double *);
 
                 /* Go get the current hit rate */
                 if(H5AC_get_cache_hit_rate(f->shared->cache, hit_rate_ptr) < 0)
@@ -1882,12 +1879,12 @@ H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR
             }
 
         /* H5Fget_mdc_size */
-        case H5VL_FILE_GET_MDC_SIZE:
+        case H5VL_NATIVE_FILE_GET_MDC_SIZE:
             {
-                size_t *max_size_ptr        = va_arg(arguments, size_t *);
-                size_t *min_clean_size_ptr  = va_arg(arguments, size_t *);
-                size_t *cur_size_ptr        = va_arg(arguments, size_t *); 
-                int    *cur_num_entries_ptr = va_arg(arguments, int *); 
+                size_t *max_size_ptr        = HDva_arg(arguments, size_t *);
+                size_t *min_clean_size_ptr  = HDva_arg(arguments, size_t *);
+                size_t *cur_size_ptr        = HDva_arg(arguments, size_t *); 
+                int    *cur_num_entries_ptr = HDva_arg(arguments, int *); 
                 uint32_t cur_num_entries;
 
                 /* Go get the size data */
@@ -1901,10 +1898,10 @@ H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR
             }
 
         /* H5Fget_vfd_handle */
-        case H5VL_FILE_GET_VFD_HANDLE:
+        case H5VL_NATIVE_FILE_GET_VFD_HANDLE:
             {
-                void **file_handle  = va_arg(arguments, void **);
-                hid_t  fapl_id      = va_arg(arguments, hid_t);
+                void **file_handle  = HDva_arg(arguments, void **);
+                hid_t  fapl_id      = HDva_arg(arguments, hid_t);
 
                 /* Retrieve the VFD handle for the file */
                 if(H5F_get_vfd_handle(f, fapl_id, file_handle) < 0)
@@ -1913,10 +1910,10 @@ H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR
             }
 
         /* H5Iget_file_id */
-        case H5VL_FILE_GET_FILE_ID:
+        case H5VL_NATIVE_FILE_GET_FILE_ID:
             {
-                H5I_type_t  type = va_arg(arguments, H5I_type_t);
-                hid_t      *file_id = va_arg(arguments, hid_t *);
+                H5I_type_t  type = HDva_arg(arguments, H5I_type_t);
+                hid_t      *file_id = HDva_arg(arguments, hid_t *);
 
                 if(NULL == (f = H5F__get_file(obj, type)))
                     HGOTO_ERROR(H5E_FILE, H5E_BADTYPE, FAIL, "not a file or file object")
@@ -1926,7 +1923,7 @@ H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR
             }
 
         /* H5Fclear_elink_file_cache */
-        case H5VL_FILE_CLEAR_ELINK_CACHE:
+        case H5VL_NATIVE_FILE_CLEAR_ELINK_CACHE:
             {
                 /* Release the EFC */
                 if(f->shared->efc)
@@ -1936,7 +1933,7 @@ H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR
             }
 
         /* H5Freset_mdc_hit_rate_stats */
-        case H5VL_FILE_RESET_MDC_HIT_RATE:
+        case H5VL_NATIVE_FILE_RESET_MDC_HIT_RATE:
             {
                 /* Reset the hit rate statistic */
                 if(H5AC_reset_cache_hit_rate_stats(f->shared->cache) < 0)
@@ -1944,9 +1941,10 @@ H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR
                 break;
             }
 
-        case H5VL_FILE_SET_MDC_CONFIG:
+        /* H5Fset_mdc_config */
+        case H5VL_NATIVE_FILE_SET_MDC_CONFIG:
             {
-                H5AC_cache_config_t *config_ptr = va_arg(arguments, H5AC_cache_config_t *);
+                H5AC_cache_config_t *config_ptr = HDva_arg(arguments, H5AC_cache_config_t *);
 
                 /* set the resize configuration  */
                 if(H5AC_set_cache_auto_resize_config(f->shared->cache, config_ptr) < 0)
@@ -1954,9 +1952,10 @@ H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR
                 break;
             }
 
-        case H5VL_FILE_GET_METADATA_READ_RETRY_INFO:
+        /* H5Fget_metadata_read_retry_info */
+        case H5VL_NATIVE_FILE_GET_METADATA_READ_RETRY_INFO:
             {
-                H5F_retry_info_t *info = va_arg(arguments, H5F_retry_info_t *);
+                H5F_retry_info_t *info = HDva_arg(arguments, H5F_retry_info_t *);
 
                 if(H5F_get_metadata_read_retry_info(f, info) < 0)
                     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "can't get metadata read retry info")
@@ -1964,7 +1963,8 @@ H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR
                 break;
             }
 
-        case H5VL_FILE_START_SWMR_WRITE:
+        /* H5Fstart_swmr_write */
+        case H5VL_NATIVE_FILE_START_SWMR_WRITE:
             {
                 if(H5F__start_swmr_write(f) < 0)
                     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "can't start SWMR write")
@@ -1972,7 +1972,8 @@ H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR
                 break;
             }
 
-        case H5VL_FILE_START_MDC_LOGGING:
+        /* H5Fstart_mdc_logging */
+        case H5VL_NATIVE_FILE_START_MDC_LOGGING:
             {
                 /* Call mdc logging function */
                 if(H5C_start_logging(f->shared->cache) < 0)
@@ -1981,7 +1982,8 @@ H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR
                 break;
             }
 
-        case H5VL_FILE_STOP_MDC_LOGGING:
+        /* H5Fstop_mdc_logging */
+        case H5VL_NATIVE_FILE_STOP_MDC_LOGGING:
             {
                 /* Call mdc logging function */
                 if(H5C_stop_logging(f->shared->cache) < 0)
@@ -1990,10 +1992,11 @@ H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR
                 break;
             }
 
-        case H5VL_FILE_GET_MDC_LOGGING_STATUS:
+        /* H5Fget_mdc_logging_status */
+        case H5VL_NATIVE_FILE_GET_MDC_LOGGING_STATUS:
             {
-                hbool_t *is_enabled				= va_arg(arguments, hbool_t *);
-                hbool_t *is_currently_logging	= va_arg(arguments, hbool_t *);
+                hbool_t *is_enabled				= HDva_arg(arguments, hbool_t *);
+                hbool_t *is_currently_logging	= HDva_arg(arguments, hbool_t *);
 
                 /* Call mdc logging function */
                 if(H5C_get_logging_status(f->shared->cache, is_enabled, is_currently_logging) < 0)
@@ -2002,7 +2005,8 @@ H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR
                 break;
             }
 
-        case H5VL_FILE_FORMAT_CONVERT:
+        /* H5Fformat_convert */
+        case H5VL_NATIVE_FILE_FORMAT_CONVERT:
             {
                 /* Convert the format */
                 if(H5F__format_convert(f) < 0)
@@ -2011,26 +2015,28 @@ H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR
                 break;
             }
 
-        case H5VL_FILE_RESET_PAGE_BUFFERING_STATS:
+        /* H5Freset_page_buffering_stats */
+        case H5VL_NATIVE_FILE_RESET_PAGE_BUFFERING_STATS:
             {
                 /* Sanity check */
                 if(NULL == f->shared->page_buf)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "page buffering not enabled on file")
 
                 /* Reset the statistics */
-                if (H5PB_reset_stats(f->shared->page_buf) < 0)
+                if(H5PB_reset_stats(f->shared->page_buf) < 0)
                     HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't reset stats for page buffering")
 
                 break;
             }
 
-        case H5VL_FILE_GET_PAGE_BUFFERING_STATS:
+        /* H5Fget_page_buffering_stats */
+        case H5VL_NATIVE_FILE_GET_PAGE_BUFFERING_STATS:
             {
-                unsigned *accesses      = va_arg(arguments, unsigned *);
-                unsigned *hits          = va_arg(arguments, unsigned *);
-                unsigned *misses        = va_arg(arguments, unsigned *);
-                unsigned *evictions     = va_arg(arguments, unsigned *);
-                unsigned *bypasses      = va_arg(arguments, unsigned *);
+                unsigned *accesses      = HDva_arg(arguments, unsigned *);
+                unsigned *hits          = HDva_arg(arguments, unsigned *);
+                unsigned *misses        = HDva_arg(arguments, unsigned *);
+                unsigned *evictions     = HDva_arg(arguments, unsigned *);
+                unsigned *bypasses      = HDva_arg(arguments, unsigned *);
                 
                 /* Sanity check */
                 if(NULL == f->shared->page_buf)
@@ -2043,10 +2049,11 @@ H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR
                 break;
             }
 
-        case H5VL_FILE_GET_MDC_IMAGE_INFO:
+        /* H5Fget_mdc_image_info */
+        case H5VL_NATIVE_FILE_GET_MDC_IMAGE_INFO:
             {
-                haddr_t *image_addr = va_arg(arguments, haddr_t *);
-                hsize_t *image_len = va_arg(arguments, hsize_t *);
+                haddr_t *image_addr = HDva_arg(arguments, haddr_t *);
+                hsize_t *image_len = HDva_arg(arguments, hsize_t *);
 
                 /* Go get the address and size of the cache image */
                 if(H5AC_get_mdc_image_info(f->shared->cache, image_addr, image_len) < 0)
@@ -2055,9 +2062,10 @@ H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR
                 break;
             }
 
-        case H5VL_FILE_GET_EOA:
+        /* H5Fget_eoa */
+        case H5VL_NATIVE_FILE_GET_EOA:
             {
-                haddr_t *eoa = va_arg(arguments, haddr_t *);
+                haddr_t *eoa = HDva_arg(arguments, haddr_t *);
                 haddr_t rel_eoa;        /* Relative address of EOA */
 
                 /* Sanity check */
@@ -2079,9 +2087,10 @@ H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR
                 break;
             }
 
-        case H5VL_FILE_INCR_FILESIZE:
+        /* H5Fincrement_filesize */
+        case H5VL_NATIVE_FILE_INCR_FILESIZE:
             {
-                hsize_t increment = va_arg(arguments, hsize_t);
+                hsize_t increment = HDva_arg(arguments, hsize_t);
                 haddr_t max_eof_eoa;        /* Maximum of the relative EOA & EOF */
 
                 /* This public routine will work only for drivers with this feature enabled.*/
@@ -2100,10 +2109,11 @@ H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR
                 break;
             }
 
-        case H5VL_FILE_SET_LIBVER_BOUNDS:
+        /* H5Fset_latest_format, H5Fset_libver_bounds */
+        case H5VL_NATIVE_FILE_SET_LIBVER_BOUNDS:
             {
-                H5F_libver_t low = va_arg(arguments, H5F_libver_t);
-                H5F_libver_t high = va_arg(arguments, H5F_libver_t);
+                H5F_libver_t low = HDva_arg(arguments, H5F_libver_t);
+                H5F_libver_t high = HDva_arg(arguments, H5F_libver_t);
 
                 /* Call internal set_libver_bounds function */
                 if(H5F__set_libver_bounds(f, low, high) < 0)
@@ -2112,10 +2122,11 @@ H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR
                 break;
             }
 
-        case H5VL_FILE_SET_MIN_DSET_OHDR_FLAG:
+        /* H5Fget_dset_no_attrs_hint */
+        case H5VL_NATIVE_FILE_SET_MIN_DSET_OHDR_FLAG:
             {
-                int minimize = va_arg(arguments, int); /* int to satisfy va_arg */
-                if (0 > H5F_set_min_dset_ohdr(f, (hbool_t)minimize))
+                int minimize = va_arg(arguments, int);
+                if(H5F_set_min_dset_ohdr(f, (hbool_t)minimize) < 0)
                     HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "cannot set file's dataset object header minimization flag")
                 break;
             }
@@ -2314,7 +2325,7 @@ H5VL__native_group_get(void *obj, H5VL_group_get_t get_type,
         /* H5Gget_create_plist */
         case H5VL_GROUP_GET_GCPL:
             {
-                hid_t      *new_gcpl_id     = va_arg(arguments, hid_t *);
+                hid_t      *new_gcpl_id     = HDva_arg(arguments, hid_t *);
                 H5G_t      *grp             = (H5G_t *)obj;
 
                 if((*new_gcpl_id = H5G_get_create_plist(grp)) < 0)
@@ -2325,8 +2336,8 @@ H5VL__native_group_get(void *obj, H5VL_group_get_t get_type,
         /* H5Gget_info */
         case H5VL_GROUP_GET_INFO:
             {
-                const H5VL_loc_params_t  *loc_params  = va_arg(arguments, const H5VL_loc_params_t *);
-                H5G_info_t         *group_info  = va_arg(arguments, H5G_info_t *);
+                const H5VL_loc_params_t  *loc_params  = HDva_arg(arguments, const H5VL_loc_params_t *);
+                H5G_info_t         *group_info  = HDva_arg(arguments, H5G_info_t *);
                 H5G_loc_t           loc;
 
                 if(H5G_loc_real(obj, loc_params->obj_type, &loc) < 0)
@@ -2389,7 +2400,7 @@ H5VL__native_group_specific(void *obj, H5VL_group_specific_t specific_type,
     switch(specific_type) {
         case H5VL_GROUP_FLUSH:
             {
-                hid_t group_id = va_arg(arguments, hid_t);
+                hid_t group_id = HDva_arg(arguments, hid_t);
 
                 /* Flush object's metadata to file */
                 if(H5O_flush_common(&grp->oloc, group_id) < 0)
@@ -2400,7 +2411,7 @@ H5VL__native_group_specific(void *obj, H5VL_group_specific_t specific_type,
 
         case H5VL_GROUP_REFRESH:
             {
-                hid_t group_id = va_arg(arguments, hid_t);
+                hid_t group_id = HDva_arg(arguments, hid_t);
 
                 /* Call private function to refresh group object */
                 if((H5O_refresh_metadata(group_id, grp->oloc)) < 0)
@@ -2431,22 +2442,22 @@ static herr_t
 H5VL__native_group_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id,
     void H5_ATTR_UNUSED **req, va_list arguments)
 {
-    H5VL_group_optional_t optional_type;
+    H5VL_native_group_optional_t optional_type;
     herr_t ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_STATIC
 
-    optional_type = va_arg(arguments, H5VL_group_optional_t);
+    optional_type = HDva_arg(arguments, H5VL_native_group_optional_t);
     switch(optional_type) {
 #ifndef H5_NO_DEPRECATED_SYMBOLS
         /* H5Giterate (deprecated) */
-        case H5VL_GROUP_ITERATE_OLD:
+        case H5VL_NATIVE_GROUP_ITERATE_OLD:
             {
-                const H5VL_loc_params_t *loc_params = va_arg(arguments, const H5VL_loc_params_t *);
-                hsize_t idx = va_arg(arguments, hsize_t);
-                hsize_t *last_obj = va_arg(arguments, hsize_t *);
-                const H5G_link_iterate_t *lnk_op = va_arg(arguments, const H5G_link_iterate_t *);
-                void *op_data = va_arg(arguments, void *);
+                const H5VL_loc_params_t *loc_params = HDva_arg(arguments, const H5VL_loc_params_t *);
+                hsize_t idx = HDva_arg(arguments, hsize_t);
+                hsize_t *last_obj = HDva_arg(arguments, hsize_t *);
+                const H5G_link_iterate_t *lnk_op = HDva_arg(arguments, const H5G_link_iterate_t *);
+                void *op_data = HDva_arg(arguments, void *);
                 H5G_loc_t grp_loc;
 
                 /* Get the location struct for the object */
@@ -2461,11 +2472,11 @@ H5VL__native_group_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id,
             }
 
         /* H5Gget_objinfo (deprecated) */
-        case H5VL_GROUP_GET_OBJINFO:
+        case H5VL_NATIVE_GROUP_GET_OBJINFO:
             {
-                const H5VL_loc_params_t *loc_params = va_arg(arguments, const H5VL_loc_params_t *);
-                hbool_t follow_link = va_arg(arguments, unsigned);
-                H5G_stat_t *statbuf = va_arg(arguments, H5G_stat_t *);
+                const H5VL_loc_params_t *loc_params = HDva_arg(arguments, const H5VL_loc_params_t *);
+                hbool_t follow_link = HDva_arg(arguments, unsigned);
+                H5G_stat_t *statbuf = HDva_arg(arguments, H5G_stat_t *);
                 H5G_loc_t grp_loc;
 
                 /* Get the location struct for the object */
@@ -2478,6 +2489,15 @@ H5VL__native_group_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id,
 
                 break;
             }
+#else
+        /* XXX: These cases only exist because they are the only group optional
+         *      values and we can't have empty enums. Delete them when we have
+         *      non-deprecated group optional enum values.
+         */
+        case H5VL_NATIVE_GROUP_ITERATE_OLD:
+            HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "H5VL_NATIVE_GROUP_ITERATE_OLD is not a valid value when the library is built without deprecated routines")
+        case H5VL_NATIVE_GROUP_GET_OBJINFO:
+            HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "H5VL_NATIVE_GROUP_GET_OBJINFO is not a valid value when the library is built without deprecated routines")
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
         default:
@@ -2769,7 +2789,7 @@ H5VL__native_link_get(void *obj, const H5VL_loc_params_t *loc_params, H5VL_link_
         /* H5Lget_info/H5Lget_info_by_idx */
         case H5VL_LINK_GET_INFO:
             {
-                H5L_info_t *linfo  = va_arg(arguments, H5L_info_t *);
+                H5L_info_t *linfo  = HDva_arg(arguments, H5L_info_t *);
 
                 /* Get the link information */
                 if(loc_params->type == H5VL_OBJECT_BY_NAME) { /* H5Lget_info */
@@ -2789,9 +2809,9 @@ H5VL__native_link_get(void *obj, const H5VL_loc_params_t *loc_params, H5VL_link_
         /* H5Lget_name_by_idx */
         case H5VL_LINK_GET_NAME:
             {
-                char       *name   = va_arg(arguments, char *);
-                size_t      size   = va_arg(arguments, size_t);
-                ssize_t    *ret    = va_arg(arguments, ssize_t *);
+                char       *name   = HDva_arg(arguments, char *);
+                size_t      size   = HDva_arg(arguments, size_t);
+                ssize_t    *ret    = HDva_arg(arguments, ssize_t *);
 
                 /* Get the link name */
                 if((*ret = H5L_get_name_by_idx(&loc, loc_params->loc_data.loc_by_idx.name, loc_params->loc_data.loc_by_idx.idx_type,
@@ -2804,8 +2824,8 @@ H5VL__native_link_get(void *obj, const H5VL_loc_params_t *loc_params, H5VL_link_
         /* H5Lget_val/H5Lget_val_by_idx */
         case H5VL_LINK_GET_VAL:
             {
-                void       *buf    = va_arg(arguments, void *);
-                size_t     size    = va_arg(arguments, size_t);
+                void       *buf    = HDva_arg(arguments, void *);
+                size_t     size    = HDva_arg(arguments, size_t);
 
                 /* Get the link information */
                 if(loc_params->type == H5VL_OBJECT_BY_NAME) { /* H5Lget_val */
@@ -2857,7 +2877,7 @@ H5VL__native_link_specific(void *obj, const H5VL_loc_params_t *loc_params, H5VL_
     switch(specific_type) {
         case H5VL_LINK_EXISTS:
             {
-                htri_t *ret = va_arg(arguments, htri_t *);
+                htri_t *ret = HDva_arg(arguments, htri_t *);
                 H5G_loc_t loc;
 
                 if(H5G_loc_real(obj, loc_params->obj_type, &loc) < 0)
@@ -2872,12 +2892,12 @@ H5VL__native_link_specific(void *obj, const H5VL_loc_params_t *loc_params, H5VL_
         case H5VL_LINK_ITER:
             {
                 H5G_loc_t loc;
-                hbool_t recursive = va_arg(arguments, int);                     
-                H5_index_t idx_type = va_arg(arguments, H5_index_t);
-                H5_iter_order_t order = va_arg(arguments, H5_iter_order_t);
-                hsize_t *idx_p = va_arg(arguments, hsize_t *);
-                H5L_iterate_t op = va_arg(arguments, H5L_iterate_t);
-                void *op_data = va_arg(arguments, void *);
+                hbool_t recursive = HDva_arg(arguments, int);                     
+                H5_index_t idx_type = HDva_arg(arguments, H5_index_t);
+                H5_iter_order_t order = HDva_arg(arguments, H5_iter_order_t);
+                hsize_t *idx_p = HDva_arg(arguments, hsize_t *);
+                H5L_iterate_t op = HDva_arg(arguments, H5L_iterate_t);
+                void *op_data = HDva_arg(arguments, void *);
 
                 /* Get the location */
                 if(H5G_loc_real(obj, loc_params->obj_type, &loc) < 0)
@@ -3093,9 +3113,9 @@ H5VL__native_object_get(void *obj, const H5VL_loc_params_t *loc_params, H5VL_obj
         /* H5Rget_region */
         case H5VL_REF_GET_REGION:
             {
-                hid_t       *ret                    =  va_arg(arguments, hid_t *);
-                H5R_type_t  H5_ATTR_UNUSED ref_type =  va_arg(arguments, H5R_type_t);
-                void        *ref                    =  va_arg(arguments, void *);
+                hid_t       *ret                    =  HDva_arg(arguments, hid_t *);
+                H5R_type_t  H5_ATTR_UNUSED ref_type =  HDva_arg(arguments, H5R_type_t);
+                void        *ref                    =  HDva_arg(arguments, void *);
                 H5S_t       *space = NULL;    /* Dataspace object */
 
                 /* Get the dataspace with the correct region selected */
@@ -3112,9 +3132,9 @@ H5VL__native_object_get(void *obj, const H5VL_loc_params_t *loc_params, H5VL_obj
         /* H5Rget_obj_type2 */
         case H5VL_REF_GET_TYPE:
             {
-                H5O_type_t  *obj_type  =  va_arg(arguments, H5O_type_t *);
-                H5R_type_t  ref_type   =  va_arg(arguments, H5R_type_t);
-                void        *ref       =  va_arg(arguments, void *);
+                H5O_type_t  *obj_type  =  HDva_arg(arguments, H5O_type_t *);
+                H5R_type_t  ref_type   =  HDva_arg(arguments, H5R_type_t);
+                void        *ref       =  HDva_arg(arguments, void *);
 
                 /* Get the object information */
                 if(H5R__get_obj_type(loc.oloc->file, ref_type, ref, obj_type) < 0)
@@ -3125,11 +3145,11 @@ H5VL__native_object_get(void *obj, const H5VL_loc_params_t *loc_params, H5VL_obj
         /* H5Rget_name */
         case H5VL_REF_GET_NAME:
             {
-                ssize_t     *ret       = va_arg(arguments, ssize_t *);
-                char        *name      = va_arg(arguments, char *);
-                size_t      size       = va_arg(arguments, size_t);
-                H5R_type_t  ref_type   = va_arg(arguments, H5R_type_t);
-                void        *ref       = va_arg(arguments, void *);
+                ssize_t     *ret       = HDva_arg(arguments, ssize_t *);
+                char        *name      = HDva_arg(arguments, char *);
+                size_t      size       = HDva_arg(arguments, size_t);
+                H5R_type_t  ref_type   = HDva_arg(arguments, H5R_type_t);
+                void        *ref       = HDva_arg(arguments, void *);
 
                 /* Get name */
                 if((*ret = H5R__get_name(loc.oloc->file, ref_type, ref, name, size)) < 0)
@@ -3140,9 +3160,9 @@ H5VL__native_object_get(void *obj, const H5VL_loc_params_t *loc_params, H5VL_obj
         /* H5Iget_name */
         case H5VL_ID_GET_NAME:
             {
-                ssize_t *ret = va_arg(arguments, ssize_t *);
-                char *name = va_arg(arguments, char *);
-                size_t size = va_arg(arguments, size_t);
+                ssize_t *ret = HDva_arg(arguments, ssize_t *);
+                char *name = HDva_arg(arguments, char *);
+                size_t size = HDva_arg(arguments, size_t);
 
                 /* Retrieve object's name */
                 if((*ret = H5G_get_name(&loc, name, size, NULL)) < 0)
@@ -3185,7 +3205,7 @@ H5VL__native_object_specific(void *obj, const H5VL_loc_params_t *loc_params, H5V
         /* H5Oincr_refcount / H5Odecr_refcount */
         case H5VL_OBJECT_CHANGE_REF_COUNT:
             {
-                int update_ref  = va_arg(arguments, int);
+                int update_ref  = HDva_arg(arguments, int);
                 H5O_loc_t  *oloc = loc.oloc;
 
                 if(H5O_link(oloc, update_ref) < 0)
@@ -3197,7 +3217,7 @@ H5VL__native_object_specific(void *obj, const H5VL_loc_params_t *loc_params, H5V
         /* H5Oexists_by_name */
         case H5VL_OBJECT_EXISTS:
             {
-                htri_t *ret = va_arg(arguments, htri_t *);
+                htri_t *ret = HDva_arg(arguments, htri_t *);
 
                 if(loc_params->type == H5VL_OBJECT_BY_NAME) {
                     /* Check if the object exists */
@@ -3211,11 +3231,11 @@ H5VL__native_object_specific(void *obj, const H5VL_loc_params_t *loc_params, H5V
 
         case H5VL_OBJECT_VISIT:
             {
-                H5_index_t idx_type     = va_arg(arguments, H5_index_t);
-                H5_iter_order_t order   = va_arg(arguments, H5_iter_order_t);
-                H5O_iterate_t op        = va_arg(arguments, H5O_iterate_t);
-                void *op_data           = va_arg(arguments, void *);
-                unsigned fields         = va_arg(arguments, unsigned);
+                H5_index_t idx_type     = HDva_arg(arguments, H5_index_t);
+                H5_iter_order_t order   = HDva_arg(arguments, H5_iter_order_t);
+                H5O_iterate_t op        = HDva_arg(arguments, H5O_iterate_t);
+                void *op_data           = HDva_arg(arguments, void *);
+                unsigned fields         = HDva_arg(arguments, unsigned);
 
                 /* Call internal object visitation routine */
                 if(loc_params->type == H5VL_OBJECT_BY_SELF) {
@@ -3235,7 +3255,7 @@ H5VL__native_object_specific(void *obj, const H5VL_loc_params_t *loc_params, H5V
 
         case H5VL_OBJECT_FLUSH:
             {
-                hid_t   oid     = va_arg(arguments, hid_t);
+                hid_t   oid     = HDva_arg(arguments, hid_t);
 
                 /* Flush the object's metadata */
                 if(H5O_flush(loc.oloc, oid) < 0)
@@ -3246,7 +3266,7 @@ H5VL__native_object_specific(void *obj, const H5VL_loc_params_t *loc_params, H5V
 
         case H5VL_OBJECT_REFRESH:
             {
-                hid_t                   oid         = va_arg(arguments, hid_t);
+                hid_t                   oid         = HDva_arg(arguments, hid_t);
                 H5O_loc_t              *oloc        = loc.oloc;
 
                 /* Refresh the metadata */
@@ -3258,10 +3278,10 @@ H5VL__native_object_specific(void *obj, const H5VL_loc_params_t *loc_params, H5V
 
         case H5VL_REF_CREATE:
             {
-                void        *ref      = va_arg(arguments, void *);
-                const char  *name     = va_arg(arguments, char *);
-                H5R_type_t  ref_type  = va_arg(arguments, H5R_type_t);
-                hid_t       space_id  = va_arg(arguments, hid_t);
+                void        *ref      = HDva_arg(arguments, void *);
+                const char  *name     = HDva_arg(arguments, char *);
+                H5R_type_t  ref_type  = HDva_arg(arguments, H5R_type_t);
+                hid_t       space_id  = HDva_arg(arguments, hid_t);
                 H5S_t       *space = NULL;   /* Pointer to dataspace containing region */
                 
                 if(space_id != (-1) && (NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE))))
@@ -3300,8 +3320,8 @@ static herr_t
 H5VL__native_object_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id,
     void H5_ATTR_UNUSED **req, va_list arguments)
 {
-    H5VL_object_optional_t optional_type = va_arg(arguments, H5VL_object_optional_t);
-    H5VL_loc_params_t *loc_params = va_arg(arguments, H5VL_loc_params_t *);
+    H5VL_native_object_optional_t optional_type = HDva_arg(arguments, H5VL_native_object_optional_t);
+    H5VL_loc_params_t *loc_params = HDva_arg(arguments, H5VL_loc_params_t *);
     H5G_loc_t	loc;                    /* Location of group */
     herr_t       ret_value = SUCCEED;    /* Return value */
 
@@ -3312,10 +3332,10 @@ H5VL__native_object_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id,
 
     switch(optional_type) {
         /* H5Oget_info / H5Oget_info_by_name / H5Oget_info_by_idx */
-        case H5VL_OBJECT_GET_INFO:
+        case H5VL_NATIVE_OBJECT_GET_INFO:
             {
-                H5O_info_t  *obj_info = va_arg(arguments, H5O_info_t *);
-                unsigned fields         = va_arg(arguments, unsigned);
+                H5O_info_t  *obj_info = HDva_arg(arguments, H5O_info_t *);
+                unsigned fields         = HDva_arg(arguments, unsigned);
 
                 if(loc_params->type == H5VL_OBJECT_BY_SELF) { /* H5Oget_info */
                     /* Retrieve the object's information */
@@ -3360,11 +3380,11 @@ H5VL__native_object_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id,
             }
 
         /* H5Oget_comment / H5Oget_comment_by_name */
-        case H5VL_OBJECT_GET_COMMENT:
+        case H5VL_NATIVE_OBJECT_GET_COMMENT:
             {
-                char     *comment =  va_arg(arguments, char *);
-                size_t   bufsize  =  va_arg(arguments, size_t);
-                ssize_t  *ret     =  va_arg(arguments, ssize_t *);
+                char     *comment =  HDva_arg(arguments, char *);
+                size_t   bufsize  =  HDva_arg(arguments, size_t);
+                ssize_t  *ret     =  HDva_arg(arguments, ssize_t *);
 
                 /* Retrieve the object's comment */
                 if(loc_params->type == H5VL_OBJECT_BY_SELF) { /* H5Oget_comment */
@@ -3381,9 +3401,9 @@ H5VL__native_object_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id,
             }
 
         /* H5Oset_comment */
-        case H5VL_OBJECT_SET_COMMENT:
+        case H5VL_NATIVE_OBJECT_SET_COMMENT:
             {
-                const char    *comment  = va_arg(arguments, char *);
+                const char    *comment  = HDva_arg(arguments, char *);
 
                 if(loc_params->type == H5VL_OBJECT_BY_SELF) { /* H5Oset_comment */
                     /* (Re)set the object's comment */
@@ -3544,9 +3564,9 @@ H5VL__native_datatype_get(void *obj, H5VL_datatype_get_t get_type,
     switch (get_type) {
         case H5VL_DATATYPE_GET_BINARY:
             {
-                ssize_t *nalloc = va_arg(arguments, ssize_t *);
-                void *buf = va_arg(arguments, void *);
-                size_t size = va_arg(arguments, size_t);
+                ssize_t *nalloc = HDva_arg(arguments, ssize_t *);
+                void *buf = HDva_arg(arguments, void *);
+                size_t size = HDva_arg(arguments, size_t);
 
                 if(H5T_encode(dt, (unsigned char *)buf, &size) < 0)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't determine serialized length of datatype")
@@ -3558,7 +3578,7 @@ H5VL__native_datatype_get(void *obj, H5VL_datatype_get_t get_type,
         /* H5Tget_create_plist */
         case H5VL_DATATYPE_GET_TCPL:
             {
-                hid_t *ret_id = va_arg(arguments, hid_t *);
+                hid_t *ret_id = HDva_arg(arguments, hid_t *);
 
                 if(H5I_INVALID_HID == (*ret_id = H5T__get_create_plist(dt)))
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "can't get object creation info");
@@ -3596,10 +3616,10 @@ H5VL__native_datatype_specific(void *obj, H5VL_datatype_specific_t specific_type
     switch(specific_type) {
         case H5VL_DATATYPE_FLUSH:
             {
-                hid_t type_id = va_arg(arguments, hid_t);
+                hid_t type_id = HDva_arg(arguments, hid_t);
 
                 /* To flush metadata and invoke flush callback if there is */
-                if (H5O_flush_common(&dt->oloc, type_id) < 0)
+                if(H5O_flush_common(&dt->oloc, type_id) < 0)
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTFLUSH, FAIL, "unable to flush datatype")
 
                 break;
@@ -3607,10 +3627,10 @@ H5VL__native_datatype_specific(void *obj, H5VL_datatype_specific_t specific_type
 
         case H5VL_DATATYPE_REFRESH:
             {
-                hid_t type_id = va_arg(arguments, hid_t);
+                hid_t type_id = HDva_arg(arguments, hid_t);
 
                 /* Call private function to refresh datatype object */
-                if ((H5O_refresh_metadata(type_id, dt->oloc)) < 0)
+                if((H5O_refresh_metadata(type_id, dt->oloc)) < 0)
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTLOAD, FAIL, "unable to refresh datatype")
 
                 break;
