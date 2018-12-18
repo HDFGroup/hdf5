@@ -74,6 +74,7 @@ typedef struct H5F_olist_t {
 /* Local Prototypes */
 /********************/
 
+static herr_t H5F__set_vol_conn(H5F_t *file, hid_t vol_id, const void *vol_info);
 static herr_t H5F__get_objects(const H5F_t *f, unsigned types, size_t max_index, hid_t *obj_id_list, hbool_t app_ref, size_t *obj_id_count_ptr);
 static int H5F__get_objects_cb(void *obj_ptr, hid_t obj_id, void *key);
 static herr_t H5F__build_name(const char *prefix, const char *file_name, char **full_name/*out*/);
@@ -115,13 +116,13 @@ H5FL_DEFINE(H5F_file_t);
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5F__set_vol_conn(H5F_t *file, hid_t vol_id, const void *vol_info)
 {
     void *new_connector_info = NULL;    /* Copy of connector info */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_PACKAGE
+    FUNC_ENTER_STATIC
 
     /* Sanity check */
     HDassert(file);
@@ -1088,6 +1089,16 @@ H5F__new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_
         /* Get object flush callback information */
         if(H5P_get(plist, H5F_ACS_OBJECT_FLUSH_CB_NAME, &(f->shared->object_flush)) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't get object flush cb info")
+
+        /* Get the VOL connector info */
+        {
+            H5VL_connector_prop_t  connector_prop;      /* Property for VOL connector ID & info */
+
+            if(H5P_peek(plist, H5F_ACS_VOL_CONN_NAME, &connector_prop) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't get VOL connector info")
+            if(H5F__set_vol_conn(f, connector_prop.connector_id, connector_prop.connector_info) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't cache VOL connector info")
+        } /* end block */
 
         /* Create a metadata cache with the specified number of elements.
          * The cache might be created with a different number of elements and
