@@ -95,8 +95,6 @@ static herr_t H5VL__dataset_optional(void *obj, const H5VL_class_t *cls,
     hid_t dxpl_id, void **req, va_list arguments);
 static herr_t H5VL__dataset_close(void *obj, const H5VL_class_t *cls, hid_t dxpl_id,
     void **req);
-static herr_t H5VL__file_cache_connector(void *obj, const H5VL_class_t *cls,
-    hid_t dxpl_id, void **req, ...);
 static void * H5VL__file_create(const H5VL_class_t *cls, const char *name,
     unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t dxpl_id, void **req);
 static void * H5VL__file_open(const H5VL_class_t *cls, const char *name,
@@ -2596,42 +2594,6 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5VL__file_cache_connector
- *
- * Purpose:	Wrap varargs and reissue 'cache VOL connector' operation
- *		to file specific call
- *
- * Return:      Success:    Non-negative
- *              Failure:    Negative
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5VL__file_cache_connector(void *obj, const H5VL_class_t *cls, hid_t dxpl_id,
-    void **req, ...)
-{
-    va_list arguments;                  /* Argument list passed from the API call */
-    hbool_t arg_started = FALSE;        /* Whether the va_list has been started */
-    herr_t ret_value = SUCCEED;         /* Return value */
-
-    FUNC_ENTER_STATIC
-
-    /* Re-issue call to internal file specific callback routine */
-    HDva_start(arguments, req);
-    arg_started = TRUE;
-    if(H5VL__file_specific(obj, cls, H5VL_FILE_CACHE_VOL_CONN, dxpl_id, req, arguments) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "file specific failed")
-
-done:
-    /* End access to the va_list, if we started it */
-    if(arg_started)
-        HDva_end(arguments);
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL__file_cache_connector() */
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5VL__file_create
  *
  * Purpose:	Creates a file through the VOL
@@ -2694,10 +2656,6 @@ H5VL_file_create(const H5VL_connector_prop_t *connector_prop, const char *name,
     /* Call the corresponding internal VOL routine */
     if(NULL == (ret_value = H5VL__file_create(cls, name, flags, fcpl_id, fapl_id, dxpl_id, req)))
         HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, NULL, "file create failed")
-
-    /* Cache the connector ID & info */
-    if(H5VL__file_cache_connector(ret_value, cls, dxpl_id, req, connector_prop->connector_id, connector_prop->connector_info) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, NULL, "caching VOL connector ID & info failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2805,10 +2763,6 @@ H5VL_file_open(const H5VL_connector_prop_t *connector_prop, const char *name,
     /* Call the corresponding internal VOL routine */
     if(NULL == (ret_value = H5VL__file_open(cls, name, flags, fapl_id, dxpl_id, req)))
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPENOBJ, NULL, "open failed")
-
-    /* Cache the connector ID & info */
-    if(H5VL__file_cache_connector(ret_value, cls, dxpl_id, req, connector_prop->connector_id, connector_prop->connector_info) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, NULL, "caching VOL connector ID & info failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
