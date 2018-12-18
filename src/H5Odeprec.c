@@ -36,6 +36,7 @@
 #include "H5Eprivate.h"         /* Error handling                           */
 #include "H5Iprivate.h"         /* IDs                                      */
 #include "H5Opkg.h"             /* Object headers                           */
+#include "H5VLnative.h"         /* Native VOL connector                     */
 
 
 /****************/

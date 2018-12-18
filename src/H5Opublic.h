@@ -150,25 +150,19 @@ typedef enum H5O_mcdt_search_ret_t {
 /* Callback to invoke when completing the search for a matching committed datatype from the committed dtype list */
 typedef H5O_mcdt_search_ret_t (*H5O_mcdt_search_cb_t)(void *op_data);
 
-/* Enumeration for native VOL connector object optional VOL operations */
-typedef enum H5VL_native_object_optional_t {
-    H5VL_NATIVE_OBJECT_GET_COMMENT,         /* H5G|H5Oget_comment, H5Oget_comment_by_name   */
-    H5VL_NATIVE_OBJECT_GET_INFO,            /* H5Oget_info(_by_idx, _by_name)(2?)           */
-    H5VL_NATIVE_OBJECT_SET_COMMENT          /* H5G|H5Oset_comment, H5Oset_comment_by_name   */
-} H5VL_native_object_optional_t;
 
 /********************/
 /* Public Variables */
 /********************/
 
 
+/*********************/
+/* Public Prototypes */
+/*********************/
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/*********************/
-/* Public Prototypes */
-/*********************/
 H5_DLL hid_t H5Oopen(hid_t loc_id, const char *name, hid_t lapl_id);
 H5_DLL hid_t H5Oopen_by_addr(hid_t loc_id, haddr_t addr);
 H5_DLL hid_t H5Oopen_by_idx(hid_t loc_id, const char *group_name,

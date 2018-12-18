@@ -38,6 +38,7 @@
 #include "H5SMprivate.h"        /* Shared Object Header Messages            */
 #include "H5Tprivate.h"         /* Datatypes                                */
 #include "H5VLprivate.h"        /* Virtual Object Layer                     */
+#include "H5VLnative.h"         /* Native VOL connector                     */
 
 
 /****************/
