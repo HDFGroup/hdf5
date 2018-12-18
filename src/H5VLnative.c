@@ -3109,7 +3109,7 @@ H5VL__native_object_get(void *obj, const H5VL_loc_params_t *loc_params, H5VL_obj
                 break;
             }
 
-        /* H5Rget_obj_type2 */
+        /* H5Rget_obj_type1/2 */
         case H5VL_REF_GET_TYPE:
             {
                 H5O_type_t  *obj_type  =  HDva_arg(arguments, H5O_type_t *);
