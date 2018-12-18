@@ -278,7 +278,7 @@ H5P__dcrt_reg_prop(H5P_genclass_t *pclass)
        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the object header minimization property */
-    if (H5P__register_real(pclass, H5D_CRT_MIN_DSET_HDR_SIZE_NAME, H5D_CRT_MIN_DSET_HDR_SIZE_SIZE, &H5O_ohdr_min_g,
+    if(H5P__register_real(pclass, H5D_CRT_MIN_DSET_HDR_SIZE_NAME, H5D_CRT_MIN_DSET_HDR_SIZE_SIZE, &H5O_ohdr_min_g,
             NULL, NULL, NULL, H5D_CRT_MIN_DSET_HDR_SIZE_ENC, H5D_CRT_MIN_DSET_HDR_SIZE_DEC,
             NULL, NULL, NULL, NULL) < 0)
        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
@@ -3792,14 +3792,14 @@ H5Pget_dset_no_attrs_hint(hid_t dcpl_id, hbool_t *minimize)
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*b", dcpl_id, minimize);
 
-    if (NULL == minimize)
+    if(NULL == minimize)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "receiving pointer cannot be NULL")
 
     plist = H5P_object_verify(dcpl_id, H5P_DATASET_CREATE);
-    if (NULL == plist)
+    if(NULL == plist)
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
-    if (0 > H5P_peek(plist, H5D_CRT_MIN_DSET_HDR_SIZE_NAME, &setting))
+    if(H5P_peek(plist, H5D_CRT_MIN_DSET_HDR_SIZE_NAME, &setting) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get dset oh minimize flag value")
 
     *minimize = setting;
@@ -3840,13 +3840,13 @@ H5Pset_dset_no_attrs_hint(hid_t dcpl_id, hbool_t minimize)
     H5TRACE2("e", "ib", dcpl_id, minimize);
 
     plist = H5P_object_verify(dcpl_id, H5P_DATASET_CREATE);
-    if (NULL == plist)
+    if(NULL == plist)
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
-    if (0 > H5P_peek(plist, H5D_CRT_MIN_DSET_HDR_SIZE_NAME, &prev_set))
+    if(H5P_peek(plist, H5D_CRT_MIN_DSET_HDR_SIZE_NAME, &prev_set) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get extant dset oh minimize flag value")
 
-    if (0 > H5P_poke(plist, H5D_CRT_MIN_DSET_HDR_SIZE_NAME, &minimize))
+    if(H5P_poke(plist, H5D_CRT_MIN_DSET_HDR_SIZE_NAME, &minimize) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't get dset oh minimize flag value")
 
 done:

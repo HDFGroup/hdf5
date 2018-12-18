@@ -302,16 +302,16 @@ H5O_create(H5F_t *f, size_t size_hint, size_t initial_rc, hid_t ocpl_id, H5O_loc
      * header version is set internally
      */
     oh = H5O__create_ohdr(f, ocpl_id);
-    if (NULL == oh)
+    if(NULL == oh)
         HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "Can't instantiate object header")
 
     /* apply object header information to file
      */
-    if (0 > H5O__apply_ohdr(f, oh, ocpl_id, size_hint, initial_rc, loc))
+    if(H5O__apply_ohdr(f, oh, ocpl_id, size_hint, initial_rc, loc) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "Can't apply object header to file")
 
 done:
-    if ((FAIL == ret_value) && (NULL != oh) && (0 > H5O__free(oh)))
+    if((FAIL == ret_value) && (NULL != oh) && (H5O__free(oh) < 0))
         HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "can't delete object header")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -345,22 +345,22 @@ H5O__create_ohdr(H5F_t *f, hid_t ocpl_id)
     HDassert(TRUE == H5P_isa_class(ocpl_id, H5P_OBJECT_CREATE));
 
     /* Check for invalid access request */
-    if (0 == (H5F_INTENT(f) & H5F_ACC_RDWR))
+    if(0 == (H5F_INTENT(f) & H5F_ACC_RDWR))
         HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "no write intent on file")
 
     oh = H5FL_CALLOC(H5O_t);
-    if (NULL == oh)
+    if(NULL == oh)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     oc_plist = (H5P_genplist_t *)H5I_object(ocpl_id);
-    if (NULL == oc_plist)
+    if(NULL == oc_plist)
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, NULL, "not a property list")
 
     /* Get any object header status flags set by properties */
-    if (0 > H5P_get(oc_plist, H5O_CRT_OHDR_FLAGS_NAME, &oh_flags))
+    if(H5P_get(oc_plist, H5O_CRT_OHDR_FLAGS_NAME, &oh_flags) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get object header flags")
 
-    if (0 > H5O_set_version(f, oh, oh_flags, H5F_STORE_MSG_CRT_IDX(f)))
+    if(H5O_set_version(f, oh, oh_flags, H5F_STORE_MSG_CRT_IDX(f)) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, NULL, "can't set version of object header")
 
     oh->flags = oh_flags;
@@ -368,7 +368,7 @@ H5O__create_ohdr(H5F_t *f, hid_t ocpl_id)
     ret_value = oh;
 
 done:
-    if ((NULL == ret_value) && (NULL != oh) && (0 > H5O__free(oh)))
+    if((NULL == ret_value) && (NULL != oh) && (H5O__free(oh) < 0))
         HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, NULL, "can't delete object header")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -414,57 +414,57 @@ H5O__apply_ohdr(H5F_t *f, H5O_t *oh, hid_t ocpl_id, size_t size_hint, size_t ini
 
 #ifdef H5O_ENABLE_BAD_MESG_COUNT
     /* Check whether the "bad message count" property is set */
-    if (0 < H5P_exist_plist(oc_plist, H5O_BAD_MESG_COUNT_NAME))
+    if(0 < H5P_exist_plist(oc_plist, H5O_BAD_MESG_COUNT_NAME))
         /* Get bad message count flag -- from property list */
-        if (0 > H5P_get(oc_plist, H5O_BAD_MESG_COUNT_NAME, &oh->store_bad_mesg_count))
+        if(H5P_get(oc_plist, H5O_BAD_MESG_COUNT_NAME, &oh->store_bad_mesg_count) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't get bad message count flag")
 #endif /* H5O_ENABLE_BAD_MESG_COUNT */
 
     /* Create object header proxy if doing SWMR writes */
-    if (oh->swmr_write) {
+    if(oh->swmr_write) {
         oh->proxy = H5AC_proxy_entry_create();
-        if (NULL == oh->proxy)
+        if(NULL == oh->proxy)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTCREATE, FAIL, "can't create object header proxy")
     } else {
         oh->proxy = NULL;
     }
 
     oc_plist = (H5P_genplist_t *)H5I_object(ocpl_id);
-    if (NULL == oc_plist)
+    if(NULL == oc_plist)
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a property list")
 
     /* Initialize version-specific fields */
-    if (oh->version > H5O_VERSION_1) {
+    if(oh->version > H5O_VERSION_1) {
         /* Initialize all time fields */
-        if (oh->flags & H5O_HDR_STORE_TIMES)
+        if(oh->flags & H5O_HDR_STORE_TIMES)
             oh->atime = oh->mtime = oh->ctime = oh->btime = H5_now();
         else
             oh->atime = oh->mtime = oh->ctime = oh->btime = 0;
 
-        if (H5F_STORE_MSG_CRT_IDX(f))
+        if(H5F_STORE_MSG_CRT_IDX(f))
             /* flag to record message creation indices */
             oh->flags |= H5O_HDR_ATTR_CRT_ORDER_TRACKED;
 
         /* Get attribute storage phase change values -- from property list */
-        if (0 > H5P_get(oc_plist, H5O_CRT_ATTR_MAX_COMPACT_NAME, &oh->max_compact))
+        if(H5P_get(oc_plist, H5O_CRT_ATTR_MAX_COMPACT_NAME, &oh->max_compact) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get max. # of compact attributes")
-        if (0 > H5P_get(oc_plist, H5O_CRT_ATTR_MIN_DENSE_NAME, &oh->min_dense))
+        if(H5P_get(oc_plist, H5O_CRT_ATTR_MIN_DENSE_NAME, &oh->min_dense) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get min. # of dense attributes")
 
         /* Check for non-default attribute storage phase change values */
-        if (H5O_CRT_ATTR_MAX_COMPACT_DEF != oh->max_compact  || H5O_CRT_ATTR_MIN_DENSE_DEF != oh->min_dense )
+        if(H5O_CRT_ATTR_MAX_COMPACT_DEF != oh->max_compact  || H5O_CRT_ATTR_MIN_DENSE_DEF != oh->min_dense )
             oh->flags |= H5O_HDR_ATTR_STORE_PHASE_CHANGE;
 
         /* Determine correct value for chunk #0 size bits */
 /* Avoid compiler warning on 32-bit machines */
 #if H5_SIZEOF_SIZE_T > H5_SIZEOF_INT32_T
-        if (size_hint > 4294967295UL)
+        if(size_hint > 4294967295UL)
             oh->flags |= H5O_HDR_CHUNK0_8;
         else
 #endif /* H5_SIZEOF_SIZE_T > H5_SIZEOF_INT32_T */
-        if (size_hint > 65535)
+        if(size_hint > 65535)
             oh->flags |= H5O_HDR_CHUNK0_4;
-        else if (size_hint > 255)
+        else if(size_hint > 255)
             oh->flags |= H5O_HDR_CHUNK0_2;
     } else {
         /* Reset unused time fields */
@@ -477,14 +477,14 @@ H5O__apply_ohdr(H5F_t *f, H5O_t *oh, hid_t ocpl_id, size_t size_hint, size_t ini
 
     /* Allocate disk space for header and first chunk */
     oh_addr = H5MF_alloc(f, H5FD_MEM_OHDR, (hsize_t)oh_size);
-    if (HADDR_UNDEF == oh_addr)
+    if(HADDR_UNDEF == oh_addr)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "file allocation failed for object header")
 
     /* Create the chunk list */
     oh->nchunks = 1;
     oh->alloc_nchunks = 1;
     oh->chunk = H5FL_SEQ_MALLOC(H5O_chunk_t, (size_t)oh->alloc_nchunks);
-    if (NULL == oh->chunk)
+    if(NULL == oh->chunk)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
     /* Initialize the first chunk */
@@ -500,14 +500,14 @@ H5O__apply_ohdr(H5F_t *f, H5O_t *oh, hid_t ocpl_id, size_t size_hint, size_t ini
     oh->chunk[0].chunk_proxy = NULL;
 
     /* Put magic # for object header in first chunk */
-    if (H5O_VERSION_1 < oh->version)
+    if(H5O_VERSION_1 < oh->version)
         HDmemcpy(oh->chunk[0].image, H5O_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC);
 
     /* Create the message list */
     oh->nmesgs = 1;
     oh->alloc_nmesgs = H5O_NMESGS;
     oh->mesg = H5FL_SEQ_CALLOC(H5O_mesg_t, oh->alloc_nmesgs);
-    if (NULL == oh->mesg)
+    if(NULL == oh->mesg)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
     /* Initialize the initial "null" message; covers the entire first chunk */
@@ -519,7 +519,7 @@ H5O__apply_ohdr(H5F_t *f, H5O_t *oh, hid_t ocpl_id, size_t size_hint, size_t ini
     oh->mesg[0].chunkno = 0;
 
     /* Check for non-zero initial refcount on the object header */
-    if (initial_rc > 0) {
+    if(initial_rc > 0) {
         /* Set the initial refcount & pin the header when its inserted */
         oh->rc = initial_rc;
         insert_flags |= H5AC__PIN_ENTRY_FLAG;
@@ -529,7 +529,7 @@ H5O__apply_ohdr(H5F_t *f, H5O_t *oh, hid_t ocpl_id, size_t size_hint, size_t ini
     H5_BEGIN_TAG(oh_addr);
 
     /* Cache object header */
-    if (0 > H5AC_insert_entry(f, H5AC_OHDR, oh_addr, oh, insert_flags))
+    if(H5AC_insert_entry(f, H5AC_OHDR, oh_addr, oh, insert_flags) < 0)
         HGOTO_ERROR_TAG(H5E_OHDR, H5E_CANTINSERT, FAIL, "unable to cache object header")
 
     /* Reset object header pointer, now that it's been inserted into the cache */
@@ -542,7 +542,7 @@ H5O__apply_ohdr(H5F_t *f, H5O_t *oh, hid_t ocpl_id, size_t size_hint, size_t ini
     loc_out->file = f;
     loc_out->addr = oh_addr;
 
-    if (0 > H5O_open(loc_out))
+    if(H5O_open(loc_out) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, FAIL, "unable to open object header")
 
 done:
