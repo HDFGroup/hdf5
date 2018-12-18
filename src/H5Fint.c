@@ -127,27 +127,24 @@ H5F__set_vol_conn(H5F_t *file, hid_t vol_id, const void *vol_info)
     /* Sanity check */
     HDassert(file);
 
-    /* Only cache VOL connector ID & info the first time the file is opened */
-    if(file->shared->nrefs == 1) {
-        /* Copy connector info, if it exists */
-        if(vol_info) {
-            H5VL_class_t *connector;           /* Pointer to connector */
+    /* Copy connector info, if it exists */
+    if(vol_info) {
+        H5VL_class_t *connector;           /* Pointer to connector */
 
-            /* Retrieve the connector for the ID */
-            if(NULL == (connector = (H5VL_class_t *)H5I_object(vol_id)))
-                HGOTO_ERROR(H5E_FILE, H5E_BADTYPE, FAIL, "not a VOL connector ID")
+        /* Retrieve the connector for the ID */
+        if(NULL == (connector = (H5VL_class_t *)H5I_object(vol_id)))
+            HGOTO_ERROR(H5E_FILE, H5E_BADTYPE, FAIL, "not a VOL connector ID")
 
-            /* Allocate and copy connector info */
-            if(H5VL_copy_connector_info(connector, &new_connector_info, vol_info) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTCOPY, FAIL, "connector info copy failed")
-        } /* end if */
-
-        /* Cache the connector ID & info for the container */
-        file->shared->vol_id = vol_id;
-        file->shared->vol_info = new_connector_info;
-        if(H5I_inc_ref(file->shared->vol_id, FALSE) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTINC, FAIL, "incrementing VOL connector ID failed")
+        /* Allocate and copy connector info */
+        if(H5VL_copy_connector_info(connector, &new_connector_info, vol_info) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTCOPY, FAIL, "connector info copy failed")
     } /* end if */
+
+    /* Cache the connector ID & info for the container */
+    file->shared->vol_id = vol_id;
+    file->shared->vol_info = new_connector_info;
+    if(H5I_inc_ref(file->shared->vol_id, FALSE) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINC, FAIL, "incrementing VOL connector ID failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
