@@ -341,7 +341,7 @@ filter_count(unsigned int flags, size_t H5_ATTR_UNUSED cd_nelmts,
         count_nbytes_written += nbytes;
 
     return nbytes;
-}
+} /* end filter_count() */
 
 
 /*-------------------------------------------------------------------------
@@ -484,11 +484,11 @@ test_create(hid_t file)
     if(H5Dclose(dataset) < 0) goto error;
 
     PASSED();
-    return 0;
+    return SUCCEED;
 
  error:
-    return -1;
-}
+    return FAIL;
+} /* end test_create() */
 
 
 /*-------------------------------------------------------------------------
@@ -608,7 +608,7 @@ test_simple_io(const char *env_h5_drvr, hid_t fapl)
         puts("    Current VFD doesn't support continuous address space");
     } /* end else */
 
-    return 0;
+    return SUCCEED;
 
 error:
     if(space > 0)
@@ -623,8 +623,8 @@ error:
         HDclose(f);
     if(tconv_buf)
         HDfree(tconv_buf);
-    return -1;
-}
+    return FAIL;
+} /* end test_simple_io() */
 
 
 /*-------------------------------------------------------------------------
@@ -716,7 +716,7 @@ test_userblock_offset(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
         puts("    Current VFD doesn't support continuous address space");
     } /* end else */
 
-    return 0;
+    return SUCCEED;
 
 error:
     if(space > 0)
@@ -729,8 +729,8 @@ error:
         if(H5Fclose(file) < 0) TEST_ERROR
     if(f > 0)
         HDclose(f);
-    return -1;
-}
+    return FAIL;
+} /* end test_userblock_offset() */
 
 
 /*-------------------------------------------------------------------------
@@ -910,7 +910,7 @@ test_compact_io(hid_t fapl)
     if(H5Pclose(plist) < 0) TEST_ERROR
 
     PASSED();
-    return 0;
+    return SUCCEED;
 
  error:
     H5E_BEGIN_TRY {
@@ -922,8 +922,8 @@ test_compact_io(hid_t fapl)
         H5Fclose(verfile);
     } H5E_END_TRY;
 
-    return -1;
-}
+    return FAIL;
+} /* end test_compact_io() */
 
 
 /*-------------------------------------------------------------------------
@@ -1059,7 +1059,7 @@ test_max_compact(hid_t fapl)
          FAIL_STACK_ERROR
 
      PASSED();
-     return 0;
+     return SUCCEED;
 
 error:
     if(wbuf)
@@ -1075,7 +1075,7 @@ error:
         H5Fclose(file);
     } H5E_END_TRY;
 
-     return -1;
+     return FAIL;
 } /* end test_max_compact() */
 
 
@@ -1184,7 +1184,7 @@ test_layout_extend(hid_t fapl)
     if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
 
     PASSED();
-    return 0;
+    return SUCCEED;
 
 error:
     H5E_BEGIN_TRY {
@@ -1198,7 +1198,7 @@ error:
         H5Fclose(fid);
     } H5E_END_TRY;
 
-     return -1;
+     return FAIL;
 } /* end test_layout_extend() */
 
 
@@ -1334,7 +1334,7 @@ test_conv_buffer(hid_t fid)
   HDfree(cf);
   HDfree(cfrR);
   puts(" PASSED");
-  return 0;
+  return SUCCEED;
 
 error:
     H5E_BEGIN_TRY {
@@ -1350,8 +1350,8 @@ error:
         H5Dclose(dataset);
     } H5E_END_TRY;
 
-  return -1;
-}
+  return FAIL;
+} /* end test_conv_buffer() */
 
 
 /*-------------------------------------------------------------------------
@@ -1421,7 +1421,7 @@ test_tconv(hid_t file)
     HDfree(in);
 
     puts(" PASSED");
-    return 0;
+    return SUCCEED;
 
 error:
     if(out)
@@ -1434,8 +1434,8 @@ error:
         H5Sclose(space);
     } H5E_END_TRY;
 
-    return -1;
-}
+    return FAIL;
+} /* end test_tconv() */
 
 /* This message derives from H5Z */
 const H5Z_class2_t H5Z_BOGUS[1] = {{
@@ -1468,7 +1468,7 @@ can_apply_bogus(hid_t H5_ATTR_UNUSED dcpl_id, hid_t type_id, hid_t H5_ATTR_UNUSE
         return 1;
     else
         return -1;
-}
+} /* end can_apply_bogus() */
 
 
 /*-------------------------------------------------------------------------
@@ -1486,7 +1486,7 @@ filter_bogus(unsigned int H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_nelmts,
       size_t H5_ATTR_UNUSED *buf_size, void H5_ATTR_UNUSED **buf)
 {
     return nbytes;
-}
+} /* end filter_bogus() */
 
 
 /*-------------------------------------------------------------------------
@@ -1586,7 +1586,7 @@ filter_bogus2(unsigned int flags, size_t cd_nelmts,
     /* Filter is "no op" */
     else
         return(nbytes);
-}
+} /* end filter_bogus2() */
 
 
 /*-------------------------------------------------------------------------
@@ -1604,7 +1604,7 @@ filter_bogus3(unsigned int H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_nelmts
       size_t H5_ATTR_UNUSED *buf_size, void H5_ATTR_UNUSED **buf)
 {
     return 0;
-}
+} /* end filter_bogus3() */
 
 /* This message derives from H5Z */
 const H5Z_class2_t H5Z_CORRUPT[1] = {{
@@ -1693,7 +1693,7 @@ filter_cb_cont(H5Z_filter_t filter, void H5_ATTR_UNUSED *buf, size_t H5_ATTR_UNU
        return H5Z_CB_CONT;
     else
         return H5Z_CB_FAIL;
-}
+} /* end filter_cb_cont() */
 
 
 /*-------------------------------------------------------------------------
@@ -1712,7 +1712,7 @@ filter_cb_fail(H5Z_filter_t filter, void H5_ATTR_UNUSED *buf, size_t H5_ATTR_UNU
        return H5Z_CB_FAIL;
     else
        return H5Z_CB_CONT;
-}
+} /* end filter_cb_fail() */
 
 
 /*-------------------------------------------------------------------------
@@ -2055,13 +2055,13 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
     if(H5Pclose (write_dxpl) < 0) goto error;
     HDfree (tconv_buf);
 
-    return(0);
+    return SUCCEED;
 
 error:
     if(tconv_buf)
         HDfree (tconv_buf);
-    return -1;
-}
+    return FAIL;
+} /* end test_filter_internal() */
 
 /*-------------------------------------------------------------------------
  * Function:  test_filter_noencoder
@@ -2163,7 +2163,7 @@ test_filter_noencoder(const char *dset_name)
 
     PASSED();
 
-    return 0;
+    return SUCCEED;
 
 error:
     H5_FAILED();
@@ -2178,8 +2178,8 @@ error:
     if(file_id != -1)
         H5Fclose(file_id);
 
-    return -1;
-}
+    return FAIL;
+} /* end test_filter_noencoder() */
 #endif /* H5_HAVE_FILTER_SZIP */
 
 /*-------------------------------------------------------------------------
@@ -2245,11 +2245,11 @@ test_get_filter_info(void)
   if(err >= 0) TEST_ERROR
 
   PASSED();
-  return 0;
+  return SUCCEED;
 
 error:
-  return -1;
-}
+  return FAIL;
+} /* end test_get_filter_info() */
 
 /*-------------------------------------------------------------------------
  * Function:  test_filters
@@ -2520,11 +2520,11 @@ H5_ATTR_UNUSED
     SKIPPED();
     puts("    szip filter not enabled");
 #endif /* H5_HAVE_FILTER_SZIP */
-    return 0;
+    return SUCCEED;
 
 error:
-    return -1;
-}
+    return FAIL;
+} /* end test_filters() */
 
 
 /*-------------------------------------------------------------------------
@@ -2859,11 +2859,11 @@ test_onebyte_shuffle(hid_t file)
 
     PASSED();
 
-    return 0;
+    return SUCCEED;
 
 error:
-    return -1;
-}
+    return FAIL;
+} /* end test_onebyte_shuffle() */
 
 
 /*-------------------------------------------------------------------------
@@ -2977,11 +2977,11 @@ test_nbit_int(hid_t file)
 
     PASSED();
 
-    return 0;
+    return SUCCEED;
 
 error:
-    return -1;
-}
+    return FAIL;
+} /* end test_nbit_int() */
 
 
 /*-------------------------------------------------------------------------
@@ -3095,11 +3095,11 @@ test_nbit_float(hid_t file)
 
     PASSED();
 
-    return 0;
+    return SUCCEED;
 
 error:
-    return -1;
-}
+    return FAIL;
+} /* end test_nbit_float() */
 
 
 /*-------------------------------------------------------------------------
@@ -3227,11 +3227,11 @@ test_nbit_double(hid_t file)
 
     PASSED();
 
-    return 0;
+    return SUCCEED;
 
 error:
-    return -1;
-}
+    return FAIL;
+} /* end test_nbit_double() */
 
 
 /*-------------------------------------------------------------------------
@@ -3354,11 +3354,11 @@ test_nbit_array(hid_t file)
 
     PASSED();
 
-    return 0;
+    return SUCCEED;
 
 error:
-    return -1;
-}
+    return FAIL;
+} /* end test_nbit_array() */
 
 
 /*-------------------------------------------------------------------------
@@ -3571,11 +3571,11 @@ test_nbit_compound(hid_t file)
 
     PASSED();
 
-    return 0;
+    return SUCCEED;
 
 error:
-    return -1;
-}
+    return FAIL;
+} /* end test_nbit_compound() */
 
 
 /*-------------------------------------------------------------------------
@@ -3916,11 +3916,11 @@ out:
 
     PASSED();
 
-    return 0;
+    return SUCCEED;
 
 error:
-    return -1;
-}
+    return FAIL;
+} /* end test_nbit_compound_2() */
 
 
 /*-------------------------------------------------------------------------
@@ -4096,11 +4096,11 @@ test_nbit_compound_3(hid_t file)
 
     PASSED();
 
-    return 0;
+    return SUCCEED;
 
 error:
-    return -1;
-}
+    return FAIL;
+} /* end test_nbit_compound_3() */
 
 
 /*-------------------------------------------------------------------------
@@ -4264,10 +4264,10 @@ test_nbit_int_size(hid_t file)
 
     PASSED();
 
-   return 0;
+   return SUCCEED;
 error:
-    return -1;
-}
+    return FAIL;
+} /* end test_nbit_int_size() */
 
 
 /*-------------------------------------------------------------------------
@@ -4461,10 +4461,10 @@ test_nbit_flt_size(hid_t file)
 
     PASSED();
 
-   return 0;
+   return SUCCEED;
 error:
-    return -1;
-}
+    return FAIL;
+} /* end test_nbit_flt_size() */
 
 /*-------------------------------------------------------------------------
  * Function:    test_scaleoffset_int
@@ -4572,10 +4572,10 @@ test_scaleoffset_int(hid_t file)
 
     PASSED();
 
-    return 0;
+    return SUCCEED;
 error:
-    return -1;
-}
+    return FAIL;
+} /* end test_scaleoffset_int() */
 
 
 /*-------------------------------------------------------------------------
@@ -4700,10 +4700,10 @@ test_scaleoffset_int_2(hid_t file)
 
     PASSED();
 
-    return 0;
+    return SUCCEED;
 error:
-    return -1;
-}
+    return FAIL;
+} /* end test_scaleoffset_int_2() */
 
 
 /*-------------------------------------------------------------------------
@@ -4813,10 +4813,10 @@ test_scaleoffset_float(hid_t file)
 
     PASSED();
 
-    return 0;
+    return SUCCEED;
 error:
-    return -1;
-}
+    return FAIL;
+} /* end test_scaleoffset_float() */
 
 
 /*-------------------------------------------------------------------------
@@ -4942,10 +4942,10 @@ test_scaleoffset_float_2(hid_t file)
 
     PASSED();
 
-    return 0;
+    return SUCCEED;
 error:
-    return -1;
-}
+    return FAIL;
+} /* end test_scaleoffset_float_2() */
 
 
 /*-------------------------------------------------------------------------
@@ -5055,10 +5055,10 @@ test_scaleoffset_double(hid_t file)
 
     PASSED();
 
-    return 0;
+    return SUCCEED;
 error:
-    return -1;
-}
+    return FAIL;
+} /* end test_scaleoffset_double() */
 
 
 /*-------------------------------------------------------------------------
@@ -5185,10 +5185,10 @@ test_scaleoffset_double_2(hid_t file)
 
     PASSED();
 
-    return 0;
+    return SUCCEED;
 error:
-    return -1;
-}
+    return FAIL;
+} /* end test_scaleoffset_double_2() */
 
 
 /*-------------------------------------------------------------------------
@@ -5245,17 +5245,17 @@ test_multiopen (hid_t file)
     if(H5Pclose(dcpl) < 0) goto error;
 
     PASSED();
-    return 0;
+    return SUCCEED;
 
  error:
     H5E_BEGIN_TRY {
-    H5Dclose(dset1);
-    H5Dclose(dset2);
-    H5Sclose(space);
-    H5Pclose(dcpl);
+        H5Dclose(dset1);
+        H5Dclose(dset2);
+        H5Sclose(space);
+        H5Pclose(dcpl);
     } H5E_END_TRY;
-    return -1;
-}
+    return FAIL;
+} /* end test_multiopen() */
 
 
 /*-------------------------------------------------------------------------
@@ -5341,7 +5341,7 @@ test_types(hid_t file)
     /* Cleanup */
     if(H5Gclose(grp) < 0) goto error;
     PASSED();
-    return 0;
+    return SUCCEED;
 
  error:
     H5E_BEGIN_TRY {
@@ -5350,8 +5350,8 @@ test_types(hid_t file)
     H5Sclose(space);
     H5Dclose(dset);
     } H5E_END_TRY;
-    return -1;
-}
+    return FAIL;
+} /* end test_types() */
 
 /* This message derives from H5Z */
 const H5Z_class2_t H5Z_CAN_APPLY_TEST[1] = {{
@@ -5528,10 +5528,10 @@ test_can_apply(hid_t file)
 
 
     PASSED();
-    return 0;
+    return SUCCEED;
 
 error:
-    return -1;
+    return FAIL;
 } /* end test_can_apply() */
 
 /* This message derives from H5Z */
@@ -5687,10 +5687,10 @@ test_can_apply2(hid_t file)
 
 
     PASSED();
-    return 0;
+    return SUCCEED;
 
 error:
-    return -1;
+    return FAIL;
 } /* end test_can_apply2() */
 
 
@@ -5879,11 +5879,11 @@ file)
     SKIPPED();
     puts("    Szip filter is not enabled.");
 #endif /* H5_HAVE_FILTER_SZIP */
-    return 0;
+    return SUCCEED;
 
 #ifdef H5_HAVE_FILTER_SZIP
 error:
-    return -1;
+    return FAIL;
 #endif /* H5_HAVE_FILTER_SZIP */
 } /* end test_can_apply_szip() */
 
@@ -6158,10 +6158,10 @@ test_set_local(hid_t fapl)
 
 
     PASSED();
-    return 0;
+    return SUCCEED;
 
 error:
-    return -1;
+    return FAIL;
 } /* end test_set_local() */
 
 
@@ -6236,7 +6236,7 @@ test_compare_dcpl(hid_t file)
 
     PASSED();
 
-    return 0;
+    return SUCCEED;
 
 error:
     H5E_BEGIN_TRY {
@@ -6246,7 +6246,7 @@ error:
         H5Pclose(dcpl1);
         H5Pclose(dcpl2);
     } H5E_END_TRY;
-    return -1;
+    return FAIL;
 } /* end test_compare_dcpl() */
 
 
@@ -6363,7 +6363,7 @@ test_copy_dcpl(hid_t file, hid_t fapl)
 
     PASSED();
 
-    return 0;
+    return SUCCEED;
 
 error:
     H5E_BEGIN_TRY {
@@ -6378,7 +6378,7 @@ error:
         H5Pclose(dcpl1_copy);
         H5Pclose(dcpl2_copy);
     } H5E_END_TRY;
-    return -1;
+    return FAIL;
 } /* end test_copy_dcpl() */
 
 
@@ -6495,7 +6495,7 @@ test_filter_delete(hid_t file)
 #else
     SKIPPED();
 #endif
-    return 0;
+    return SUCCEED;
 
 error:
     H5E_BEGIN_TRY {
@@ -6504,7 +6504,7 @@ error:
         H5Dclose(dsid);
         H5Sclose(sid);
     } H5E_END_TRY;
-    return -1;
+    return FAIL;
 } /* end test_filter_delete() */
 
 
@@ -6577,7 +6577,7 @@ auxread_fdata(hid_t fid, const char *name)
     if(buf)
         HDfree(buf);
 
-    return 0;
+    return SUCCEED;
 
 error:
     H5E_BEGIN_TRY {
@@ -6589,8 +6589,8 @@ error:
         if(buf)
             HDfree(buf);
     } H5E_END_TRY;
-    return -1;
-}
+    return FAIL;
+} /* end auxread_fdata() */
 
 
 /*-------------------------------------------------------------------------
@@ -6650,7 +6650,7 @@ test_filters_endianess(void)
 
     PASSED();
 
-    return 0;
+    return SUCCEED;
 
 error:
     H5E_BEGIN_TRY {
@@ -6659,7 +6659,7 @@ error:
         H5Sclose(sid);
         H5Fclose(fid);
     } H5E_END_TRY;
-    return -1;
+    return FAIL;
 } /* end test_filters_endianess() */
 
 
@@ -6809,7 +6809,7 @@ test_zero_dims(hid_t file)
     if(H5Sclose(s2) < 0) FAIL_STACK_ERROR
 
     PASSED();
-    return 0;
+    return SUCCEED;
 
 error:
     H5E_BEGIN_TRY {
@@ -6823,7 +6823,7 @@ error:
         H5Dclose(d2);
         H5Sclose(s2);
     } H5E_END_TRY;
-    return -1;
+    return FAIL;
 } /* end test_zero_dims() */
 
 
@@ -7002,7 +7002,7 @@ test_missing_chunk(hid_t file)
     if(H5Dclose(did2) < 0) TEST_ERROR;
 
     PASSED();
-    return 0;
+    return SUCCEED;
 
 error:
     H5E_BEGIN_TRY {
@@ -7015,7 +7015,7 @@ error:
         H5Sclose(s);
         H5Sclose(sid2);
     } H5E_END_TRY;
-    return -1;
+    return FAIL;
 } /* end test_missing_chunk() */
 
 
@@ -7373,7 +7373,7 @@ test_random_chunks_real(const char *testname, hbool_t early_alloc, hid_t fapl)
     if(H5Fclose(file) < 0) TEST_ERROR;
 
     PASSED();
-    return 0;
+    return SUCCEED;
 
 error:
     H5E_BEGIN_TRY {
@@ -7383,7 +7383,7 @@ error:
         H5Dclose(d);
         H5Fclose(file);
     } H5E_END_TRY;
-    return -1;
+    return FAIL;
 } /* end test_random_chunks_real() */
 
 
@@ -7630,10 +7630,10 @@ test_deprec(hid_t file)
 
     if(H5Pclose(dcpl) < 0) goto error;
 
-    return 0;
+    return SUCCEED;
 
  error:
-    return -1;
+    return FAIL;
 } /* end test_deprec() */
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
@@ -7737,7 +7737,7 @@ test_huge_chunks(hid_t fapl)
     if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
 
     PASSED();
-    return 0;
+    return SUCCEED;
 
 error:
     H5E_BEGIN_TRY {
@@ -7746,7 +7746,7 @@ error:
         H5Sclose(sid);
         H5Fclose(fid);
     } H5E_END_TRY;
-    return -1;
+    return FAIL;
 } /* end test_huge_chunks() */
 
 
@@ -7941,7 +7941,7 @@ test_chunk_cache(hid_t fapl)
     if (H5Fclose(fid) < 0) FAIL_STACK_ERROR
 
     PASSED();
-    return 0;
+    return SUCCEED;
 
 error:
     H5E_BEGIN_TRY {
@@ -7954,7 +7954,7 @@ error:
         H5Sclose(sid);
         H5Fclose(fid);
     } H5E_END_TRY;
-    return -1;
+    return FAIL;
 } /* end test_chunk_cache() */
 
 
@@ -8228,7 +8228,7 @@ test_big_chunks_bypass_cache(hid_t fapl)
     HDfree(rdata2);
 
     PASSED();
-    return 0;
+    return SUCCEED;
 
 error:
     H5E_BEGIN_TRY {
@@ -8247,7 +8247,7 @@ error:
         HDfree(rdata1);
     if(rdata2)
         HDfree(rdata2);
-    return -1;
+    return FAIL;
 } /* end test_big_chunks_bypass_cache() */
 
 
@@ -8583,7 +8583,7 @@ test_chunk_fast(const char *env_h5_driver, hid_t fapl)
     if(H5Pclose(my_fapl) < 0) FAIL_STACK_ERROR
 
     PASSED();
-    return 0;
+    return SUCCEED;
 
 error:
     H5E_BEGIN_TRY {
@@ -8594,7 +8594,7 @@ error:
         H5Fclose(fid);
         H5Pclose(my_fapl);
     } H5E_END_TRY;
-    return -1;
+    return FAIL;
 } /* end test_chunk_fast() */
 
 
@@ -8707,7 +8707,7 @@ test_reopen_chunk_fast(hid_t fapl)
     } /* end for */
 
     PASSED();
-    return 0;
+    return SUCCEED;
 
 error:
     H5E_BEGIN_TRY {
@@ -8717,7 +8717,7 @@ error:
         H5Sclose(scalar_sid);
         H5Fclose(fid);
     } H5E_END_TRY;
-    return -1;
+    return FAIL;
 } /* end test_reopen_chunk_fast() */
 
 
@@ -8816,7 +8816,7 @@ test_chunk_fast_bug1(hid_t fapl)
     if(H5Sclose(sid) < 0) FAIL_STACK_ERROR
 
     PASSED();
-    return 0;
+    return SUCCEED;
 
 error:
     H5E_BEGIN_TRY {
@@ -8825,7 +8825,7 @@ error:
         H5Sclose(sid);
         H5Fclose(fid);
     } H5E_END_TRY;
-    return -1;
+    return FAIL;
 } /* end test_chunk_fast_bug1() */
 
 /* This message derives from H5Z */
@@ -9271,7 +9271,7 @@ test_chunk_expand(hid_t fapl)
         PASSED();
     } /* end else */
 
-    return 0;
+    return SUCCEED;
 
 error:
     H5E_BEGIN_TRY {
@@ -9284,7 +9284,7 @@ error:
         H5Sclose(scalar_sid);
         H5Fclose(fid);
     } H5E_END_TRY;
-    return -1;
+    return FAIL;
 } /* end test_chunk_expand() */
 
 
@@ -9689,7 +9689,7 @@ test_fixed_array(hid_t fapl)
     HDfree(rbuf_big);
 
     PASSED();
-    return 0;
+    return SUCCEED;
 
 error:
     H5E_BEGIN_TRY {
@@ -9703,7 +9703,7 @@ error:
         HDfree(wbuf_big);
     if(rbuf_big)
         HDfree(rbuf_big);
-    return -1;
+    return FAIL;
 } /* end test_fixed_array() */
 
 
@@ -9947,7 +9947,7 @@ test_single_chunk(hid_t fapl)
     HDfree(t_rbuf);
 
     PASSED();
-    return 0;
+    return SUCCEED;
 
 error:
     H5E_BEGIN_TRY {
@@ -9967,7 +9967,7 @@ error:
         HDfree(t_wbuf);
     if(t_rbuf)
         HDfree(t_rbuf);
-    return -1;
+    return FAIL;
 } /* end test_single_chunk() */
 
 
@@ -10033,15 +10033,15 @@ test_idx_compatible(void)
     }
 
     PASSED();
-    return 0;
+    return SUCCEED;
 
 error:
     H5E_BEGIN_TRY {
         H5Dclose(did);
     H5Fclose(fid);
     } H5E_END_TRY;
-    return -1;
-} /* test_idx_compatible */
+    return FAIL;
+} /* end test_idx_compatible() */
 
 /*-------------------------------------------------------------------------
  *
@@ -10171,7 +10171,7 @@ test_unfiltered_edge_chunks(hid_t fapl)
         TEST_ERROR
 
     PASSED();
-    return 0;
+    return SUCCEED;
 
 error:
     H5E_BEGIN_TRY {
@@ -10180,8 +10180,8 @@ error:
         H5Sclose(sid);
         H5Fclose(fid);
     } H5E_END_TRY;
-    return -1;
-} /* test_unfiltered_edge_chunks */
+    return FAIL;
+} /* end test_unfiltered_edge_chunks() */
 
 
 /*-------------------------------------------------------------------------
@@ -10285,7 +10285,7 @@ test_large_chunk_shrink(hid_t fapl)
 
     PASSED();
 
-    return 0;
+    return SUCCEED;
 
 error:
     H5E_BEGIN_TRY {
@@ -10295,7 +10295,7 @@ error:
         H5Sclose(scalar_sid);
         H5Fclose(fid);
     } H5E_END_TRY;
-    return -1;
+    return FAIL;
 } /* end test_large_chunk_shrink() */
 
 
@@ -10379,7 +10379,7 @@ test_zero_dim_dset(hid_t fapl)
 
     PASSED();
 
-    return 0;
+    return SUCCEED;
 
 error:
     H5E_BEGIN_TRY {
@@ -10388,7 +10388,7 @@ error:
         H5Sclose(sid);
         H5Fclose(fid);
     } H5E_END_TRY;
-    return -1;
+    return FAIL;
 } /* end test_zero_dim_dset() */
 
 
@@ -10429,7 +10429,7 @@ test_swmr_non_latest(const char *env_h5_driver, hid_t fapl)
     if(!H5FD__supports_swmr_test(env_h5_driver)) {
         SKIPPED();
         HDputs("    Test skipped due to VFD not supporting SWMR I/O.");
-        return 0;
+        return SUCCEED;
     }
 
     /* Check if we are using the latest version of the format */
@@ -10628,7 +10628,7 @@ test_swmr_non_latest(const char *env_h5_driver, hid_t fapl)
 
     PASSED();
 
-    return 0;
+    return SUCCEED;
 
 error:
     H5E_BEGIN_TRY {
@@ -10638,7 +10638,7 @@ error:
         H5Gclose(gid);
         H5Fclose(fid);
     } H5E_END_TRY;
-    return -1;
+    return FAIL;
 } /* test_swmr_non_latest() */
 
 
@@ -10679,7 +10679,7 @@ test_earray_hdr_fd(const char *env_h5_driver, hid_t fapl)
     if(!H5FD__supports_swmr_test(env_h5_driver)) {
         SKIPPED();
         HDputs("    Test skipped due to VFD not supporting SWMR I/O.");
-        return 0;
+        return SUCCEED;
     }
 
     if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
@@ -10746,7 +10746,7 @@ test_earray_hdr_fd(const char *env_h5_driver, hid_t fapl)
 
     PASSED();
 
-    return 0;
+    return SUCCEED;
 
 error:
     H5E_BEGIN_TRY {
@@ -10758,7 +10758,7 @@ error:
         H5Sclose(sid);
         H5Sclose(msid);
     } H5E_END_TRY;
-    return -1;
+    return FAIL;
 } /* test_earray_hdr_fd() */
 
 
@@ -10799,7 +10799,7 @@ test_farray_hdr_fd(const char *env_h5_driver, hid_t fapl)
     if(!H5FD__supports_swmr_test(env_h5_driver)) {
         SKIPPED();
         HDputs("    Test skipped due to VFD not supporting SWMR I/O.");
-        return 0;
+        return SUCCEED;
     }
 
     if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
@@ -10866,7 +10866,7 @@ test_farray_hdr_fd(const char *env_h5_driver, hid_t fapl)
 
     PASSED();
 
-    return 0;
+    return SUCCEED;
 
 error:
     H5E_BEGIN_TRY {
@@ -10878,8 +10878,8 @@ error:
         H5Sclose(sid);
         H5Sclose(msid);
     } H5E_END_TRY;
-    return -1;
-} /* test_farray_hdr_fd() */
+    return FAIL;
+} /* end test_farray_hdr_fd() */
 
 
 /*-------------------------------------------------------------------------
@@ -10919,7 +10919,7 @@ test_bt2_hdr_fd(const char *env_h5_driver, hid_t fapl)
     if(!H5FD__supports_swmr_test(env_h5_driver)) {
         SKIPPED();
         HDputs("    Test skipped due to VFD not supporting SWMR I/O.");
-        return 0;
+        return SUCCEED;
     }
 
     if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
@@ -10986,7 +10986,7 @@ test_bt2_hdr_fd(const char *env_h5_driver, hid_t fapl)
 
     PASSED();
 
-    return 0;
+    return SUCCEED;
 
 error:
     H5E_BEGIN_TRY {
@@ -10998,8 +10998,8 @@ error:
         H5Sclose(sid);
         H5Sclose(msid);
     } H5E_END_TRY;
-    return -1;
-} /* test_bt2_hdr_fd() */
+    return FAIL;
+} /* end test_bt2_hdr_fd() */
 
 
 /*-------------------------------------------------------------------------
@@ -11382,7 +11382,7 @@ test_storage_size(hid_t fapl)
 
     PASSED();
 
-    return 0;
+    return SUCCEED;
 
 error:
     H5E_BEGIN_TRY {
@@ -11392,7 +11392,7 @@ error:
         H5Sclose(sid);
         H5Fclose(fid);
     } H5E_END_TRY;
-    return -1;
+    return FAIL;
 } /* end test_storage_size() */
 
 
@@ -11473,7 +11473,7 @@ test_power2up(hid_t fapl)
 
     PASSED();
 
-    return 0;
+    return SUCCEED;
 
 error:
     H5E_BEGIN_TRY {
@@ -11483,7 +11483,7 @@ error:
         H5Pclose(dcpl);
         H5Fclose(fid);
     } H5E_END_TRY;
-    return -1;
+    return FAIL;
 } /* end test_power2up() */
 
 
@@ -11795,13 +11795,13 @@ test_scatter(void)
 
     PASSED();
 
-    return 0;
+    return SUCCEED;
 
 error:
     H5E_BEGIN_TRY {
         H5Sclose(sid);
     } H5E_END_TRY;
-    return -1;
+    return FAIL;
 } /* end test_scatter() */
 
 
@@ -11863,7 +11863,7 @@ gather_cb(const void *dst_buf, size_t dst_buf_bytes_used,
 
 error:
     return FAIL;
-}
+} /* end gather_cb() */
 
 static herr_t
 test_gather(void)
@@ -12157,13 +12157,13 @@ test_gather(void)
 
     PASSED();
 
-    return 0;
+    return SUCCEED;
 
 error:
     H5E_BEGIN_TRY {
         H5Sclose(sid);
     } H5E_END_TRY;
-    return -1;
+    return FAIL;
 } /* end test_gather() */
 
 
@@ -12197,7 +12197,7 @@ scatter_error_cb_fail(void **src_buf/*out*/, size_t *src_buf_bytes_used/*out*/,
     *src_buf_bytes_used = nelmts * sizeof(scatter_info->src_buf[0]);
 
     return FAIL;
-}
+} /* end scatter_error_cb_fail() */
 
 static herr_t
 scatter_error_cb_null(void **src_buf/*out*/, size_t *src_buf_bytes_used/*out*/,
@@ -12215,7 +12215,7 @@ scatter_error_cb_null(void **src_buf/*out*/, size_t *src_buf_bytes_used/*out*/,
     *src_buf_bytes_used = nelmts * sizeof(scatter_info->src_buf[0]);
 
     return SUCCEED;
-}
+} /* end scatter_error_cb_null() */
 
 static herr_t
 scatter_error_cb_unalign(void **src_buf/*out*/, size_t *src_buf_bytes_used/*out*/,
@@ -12226,7 +12226,7 @@ scatter_error_cb_unalign(void **src_buf/*out*/, size_t *src_buf_bytes_used/*out*
     *src_buf_bytes_used = *(size_t *)_src_buf_bytes_used;
 
     return SUCCEED;
-}
+} /* endscatter_error_cb_unalign() */
 
 static herr_t
 test_scatter_error(void)
@@ -12360,13 +12360,13 @@ test_scatter_error(void)
 
     PASSED();
 
-    return 0;
+    return SUCCEED;
 
 error:
     H5E_BEGIN_TRY {
         H5Sclose(sid);
     } H5E_END_TRY;
-    return -1;
+    return FAIL;
 } /* end test_scatter_error() */
 
 
@@ -12389,7 +12389,7 @@ gather_error_cb_fail(const void H5_ATTR_UNUSED *dst_buf,
     size_t H5_ATTR_UNUSED dst_buf_bytes_used, void H5_ATTR_UNUSED *op_data)
 {
     return FAIL;
-}
+} /* end gather_error_cb_fail() */
 
 static herr_t
 test_gather_error(void)
@@ -12499,13 +12499,13 @@ test_gather_error(void)
 
     PASSED();
 
-    return 0;
+    return SUCCEED;
 
 error:
     H5E_BEGIN_TRY {
         H5Sclose(sid);
     } H5E_END_TRY;
-    return -1;
+    return FAIL;
 } /* end test_gather_error() */
 
 /*-------------------------------------------------------------------------
@@ -12602,8 +12602,8 @@ static herr_t dls_01_read_stuff( hid_t fid );
 static herr_t dls_01_main( void );
 
 static herr_t
-dls_01_setup_file( hid_t fid ) {
-
+dls_01_setup_file( hid_t fid )
+{
     int status = 0;
     hid_t sid = 0, did = 0, tid = 0, dcpl = 0;
     int ndims = 1;
@@ -12641,17 +12641,15 @@ dls_01_setup_file( hid_t fid ) {
     status = H5Sclose( sid );
     if ( status != 0 ) TEST_ERROR
 
-    return 0;
+    return SUCCEED;
 
 error:
-
-    return -1;
-
-} /* dls_01_setup_file */
+    return FAIL;
+} /* end dls_01_setup_file() */
 
 static herr_t
-dls_01_write_data( hid_t fid, char* buffer ) {
-
+dls_01_write_data( hid_t fid, char* buffer )
+{
     int status = 0;
     hid_t did = 0, tid = 0;
     hsize_t extent[1] = {4};
@@ -12677,17 +12675,15 @@ dls_01_write_data( hid_t fid, char* buffer ) {
     status = H5Dclose( did );
     if ( status != 0 ) TEST_ERROR
 
-    return 0;
+    return SUCCEED;
 
 error:
-
-    return -1;
-
-} /* dls_01_write_data */
+    return FAIL;
+} /* end dls_01_write_data() */
 
 static herr_t
-dls_01_read_stuff( hid_t fid ) {
-
+dls_01_read_stuff( hid_t fid )
+{
     int status = 0;
     hid_t did = 0;
     H5O_info_t info;
@@ -12701,17 +12697,15 @@ dls_01_read_stuff( hid_t fid ) {
     status = H5Dclose( did );
     if ( status != 0 ) TEST_ERROR
 
-    return 0;
+    return SUCCEED;
 
 error:
-
-    return -1;
-
-} /* dls_01_read_stuff() */
+    return FAIL;
+} /* end dls_01_read_stuff() */
 
 static herr_t
-dls_01_main( void ) {
-
+dls_01_main( void )
+{
     char filename[512];
     int status = 0;
     hid_t fapl = 0, fid = 0;
@@ -12768,15 +12762,12 @@ dls_01_main( void ) {
 
     PASSED();
 
-    return 0;
+    return SUCCEED;
 
 error:
-
     if ( buffer ) HDfree(buffer);
-
-    return -1;
-
-} /* dls_01_main() */
+    return FAIL;
+} /* end dls_01_main() */
 
 /*-------------------------------------------------------------------------
  * Function:    test_compact_open_close_dirty
@@ -12884,7 +12875,7 @@ test_compact_open_close_dirty(hid_t fapl)
         TEST_ERROR
 
      PASSED();
-     return 0;
+     return SUCCEED;
 
 error:
     H5E_BEGIN_TRY {
@@ -12893,8 +12884,8 @@ error:
         H5Dclose(did);
         H5Fclose(fid);
     } H5E_END_TRY;
-    return -1;
-} /* test_compact_open_close_dirty() */
+    return FAIL;
+} /* end test_compact_open_close_dirty() */
 
 
 /*-------------------------------------------------------------------------
@@ -13033,7 +13024,7 @@ test_versionbounds(void)
         TEST_ERROR
     dcpl = -1;
     PASSED();
-    return 0;
+    return SUCCEED;
 
  error:
     H5E_BEGIN_TRY {
@@ -13046,8 +13037,8 @@ test_versionbounds(void)
         H5Fclose(srcfile);
         H5Fclose(vfile);
     } H5E_END_TRY;
-    return -1;
-} /* test_versionbounds() */
+    return FAIL;
+} /* end test_versionbounds() */
 
 
 /*-----------------------------------------------------------------------------
@@ -13146,15 +13137,15 @@ test_object_header_minimization_dcpl(void)
         FAIL_PUTS_ERROR("unable to close DCPL\n");
 
     PASSED();
-    return 0;
+    return SUCCEED;
 
 error:
     H5E_BEGIN_TRY {
         H5Pclose(dcpl_id);
         H5Fclose(file_id);
     } H5E_END_TRY;
-    return -1;
-} /* test_object_header_minimization_dcpl */
+    return FAIL;
+} /* end test_object_header_minimization_dcpl() */
 
 
 /*-------------------------------------------------------------------------
@@ -13383,12 +13374,12 @@ main(void)
 #endif /* H5_HAVE_FILTER_SZIP */
     h5_cleanup(FILENAME, fapl);
 
-    return 0;
+    return EXIT_SUCCESS;
 
 error:
     nerrors = MAX(1, nerrors);
     printf("***** %d DATASET TEST%s FAILED! *****\n",
             nerrors, 1 == nerrors ? "" : "S");
-    return 1;
-}
+    return EXIT_FAILURE;
+} /* end main() */
 

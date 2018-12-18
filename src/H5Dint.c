@@ -925,9 +925,10 @@ H5D__update_oh_info(H5F_t *file, H5D_t *dset, hid_t dapl_id)
     if(H5D__use_minimized_dset_headers(file, dset, &minimize_header) == FAIL)
         HGOTO_ERROR(H5E_ARGS, H5E_CANTGET, FAIL, "can't get minimize settings")
 
-    if((TRUE == minimize_header) && (H5D__prepare_minimized_oh(file, dset, oloc) == FAIL)
+    if(TRUE == minimize_header) {
+        if(H5D__prepare_minimized_oh(file, dset, oloc) == FAIL)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't create minimized dataset object header")
-    else {
+    } else {
         /* Add the dataset's raw data size to the size of the header, if the
          * raw data will be stored as compact
          */
