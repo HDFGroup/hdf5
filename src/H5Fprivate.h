@@ -500,9 +500,7 @@ typedef struct H5F_t H5F_t;
 #define H5F_ACS_USE_MDC_LOGGING_NAME            "use_mdc_logging" /* Whether to use metadata cache logging */
 #define H5F_ACS_MDC_LOG_LOCATION_NAME           "mdc_log_location" /* Name of metadata cache log location */
 #define H5F_ACS_START_MDC_LOG_ON_ACCESS_NAME    "start_mdc_log_on_access" /* Whether logging starts on file create/open */
-#define H5F_ACS_CORE_WRITE_TRACKING_FLAG_NAME   "core_write_tracking_flag" /* Whether or not core VFD backing store write tracking is enabled */
 #define H5F_ACS_EVICT_ON_CLOSE_FLAG_NAME        "evict_on_close_flag" /* Whether or not the metadata cache will evict objects on close */
-#define H5F_ACS_CORE_WRITE_TRACKING_PAGE_SIZE_NAME "core_write_tracking_page_size" /* The page size in kiB when core VFD write tracking is enabled */
 #define H5F_ACS_COLL_MD_WRITE_FLAG_NAME         "collective_metadata_write" /* property indicating whether metadata writes are done collectively or not */
 #define H5F_ACS_META_CACHE_INIT_IMAGE_CONFIG_NAME "mdc_initCacheImageCfg" /* Initial metadata cache image creation configuration */
 #define H5F_ACS_PAGE_BUFFER_SIZE_NAME           "page_buffer_size" /* the maximum size for the page buffer cache */
