@@ -93,6 +93,8 @@ if (EXISTS ${TEST_FOLDER}/${TEST_OUTPUT}.err)
   if (TEST_MASK_FILE)
     STRING(REGEX REPLACE "CurrentDir is [^\n]+\n" "CurrentDir is (dir name)\n" TEST_STREAM "${TEST_STREAM}")
   endif ()
+  # remove special output
+  string (REGEX REPLACE "^.*_pmi_alps[^\n]+\n" "" TEST_STREAM "${TEST_STREAM}")
 
   if (NOT ERROR_APPEND)
     # append error output to the stdout output file
@@ -121,6 +123,11 @@ endif ()
 
 message (STATUS "COMMAND Error: ${TEST_ERROR}")
 
+# remove special output
+file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
+string (REGEX REPLACE "^.*_pmi_alps[^\n]+\n" "" TEST_STREAM "${TEST_STREAM}")
+file (WRITE ${TEST_FOLDER}/${TEST_OUTPUT} "${TEST_STREAM}")
+
 # if the output file needs Storage text removed
 if (TEST_MASK)
   file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
@@ -144,7 +151,6 @@ if (TEST_MASK_ERROR)
     # the error stack remains in the .err file
     file (READ ${TEST_FOLDER}/${TEST_OUTPUT}.err TEST_STREAM)
   endif ()
-  string (REGEX REPLACE "^.*_pmi_alps[^\n]+\n" "" TEST_STREAM "${TEST_STREAM}")
   string (REGEX REPLACE "thread [0-9]*:" "thread (IDs):" TEST_STREAM "${TEST_STREAM}")
   string (REGEX REPLACE ": ([^\n]*)[.]c " ": (file name) " TEST_STREAM "${TEST_STREAM}")
   string (REGEX REPLACE " line [0-9]*" " line (number)" TEST_STREAM "${TEST_STREAM}")
