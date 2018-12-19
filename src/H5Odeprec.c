@@ -36,6 +36,7 @@
 #include "H5Eprivate.h"         /* Error handling                           */
 #include "H5Iprivate.h"         /* IDs                                      */
 #include "H5Opkg.h"             /* Object headers                           */
+#include "H5VLnative.h"         /* Native VOL connector                     */
 
 
 /****************/
@@ -289,7 +290,7 @@ H5Ovisit1(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order,
     loc_params.obj_type     = H5I_get_type(obj_id);
 
     /* Visit the objects */
-    if((ret_value = H5VL_object_specific(vol_obj, &loc_params, H5VL_OBJECT_VISIT, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, idx_type, order, op, op_data, H5O_INFO_ALL)) < 0)
+    if((ret_value = H5VL_object_specific(vol_obj, &loc_params, H5VL_OBJECT_VISIT, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, (int)idx_type, (int)order, op, op_data, H5O_INFO_ALL)) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_BADITER, FAIL, "object visitation failed")
 
 done:
@@ -368,7 +369,7 @@ H5Ovisit_by_name1(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
     loc_params.obj_type                     = H5I_get_type(loc_id);
 
     /* Visit the objects */
-    if((ret_value = H5VL_object_specific(vol_obj, &loc_params, H5VL_OBJECT_VISIT, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, idx_type, order, op, op_data, H5O_INFO_ALL)) < 0)
+    if((ret_value = H5VL_object_specific(vol_obj, &loc_params, H5VL_OBJECT_VISIT, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, (int)idx_type, (int)order, op, op_data, H5O_INFO_ALL)) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_BADITER, FAIL, "object visitation failed")
 
 done:

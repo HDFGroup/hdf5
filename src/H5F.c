@@ -37,6 +37,7 @@
 #include "H5Pprivate.h"         /* Property lists                           */
 #include "H5Tprivate.h"         /* Datatypes                                */
 #include "H5VLprivate.h"        /* Virtual Object Layer                     */
+#include "H5VLnative.h"         /* Native VOL connector                     */
 
 
 /****************/
@@ -778,7 +779,7 @@ H5Fflush(hid_t object_id, H5F_scope_t scope)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
 
     /* Flush the object */
-    if(H5VL_file_specific(vol_obj, H5VL_FILE_FLUSH, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, obj_type, scope) < 0)
+    if(H5VL_file_specific(vol_obj, H5VL_FILE_FLUSH, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, (int)obj_type, (int)scope) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush file")
 
 done:
@@ -1260,7 +1261,7 @@ H5Fget_name(hid_t obj_id, char *name/*out*/, size_t size)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, (-1), "invalid file identifier")
 
     /* Get the filename via the VOL */
-    if(H5VL_file_get(vol_obj, H5VL_FILE_GET_NAME, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, type, size, name, &ret_value) < 0)
+    if(H5VL_file_get(vol_obj, H5VL_FILE_GET_NAME, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, (int)type, size, name, &ret_value) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, (-1), "unable to get file name")
 
 done:
@@ -1305,7 +1306,7 @@ H5Fget_info2(hid_t obj_id, H5F_info2_t *finfo)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
 
     /* Get the file information */
-    if(H5VL_file_optional(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, H5VL_NATIVE_FILE_GET_INFO, type, finfo) < 0)
+    if(H5VL_file_optional(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, H5VL_NATIVE_FILE_GET_INFO, (int)type, finfo) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to retrieve file info")
 
 done:
@@ -1380,7 +1381,7 @@ H5Fget_free_sections(hid_t file_id, H5F_mem_t type, size_t nsects,
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, (-1), "nsects must be > 0")
 
     /* Get the free-space section information in the file */
-    if(H5VL_file_optional(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, H5VL_NATIVE_FILE_GET_FREE_SECTIONS, sect_info, &ret_value, type, nsects) < 0)
+    if(H5VL_file_optional(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, H5VL_NATIVE_FILE_GET_FREE_SECTIONS, sect_info, &ret_value, (int)type, nsects) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, (-1), "unable to get file free sections")
 
 done:

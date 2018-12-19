@@ -497,6 +497,7 @@ H5Pset_fapl_multi(hid_t fapl_id, const H5FD_mem_t *memb_map,
      * Initialize driver specific information. No need to copy it into the FA
      * struct since all members will be copied by H5Pset_driver().
      */
+    memset(&fa, 0, sizeof(H5FD_multi_fapl_t));
     memcpy(fa.memb_map, memb_map, H5FD_MEM_NTYPES*sizeof(H5FD_mem_t));
     memcpy(fa.memb_fapl, memb_fapl, H5FD_MEM_NTYPES*sizeof(hid_t));
     memcpy(fa.memb_name, memb_name, H5FD_MEM_NTYPES*sizeof(char*));
@@ -892,7 +893,7 @@ static void *
 H5FD_multi_fapl_copy(const void *_old_fa)
 {
     const H5FD_multi_fapl_t *old_fa = (const H5FD_multi_fapl_t*)_old_fa;
-    H5FD_multi_fapl_t *new_fa = (H5FD_multi_fapl_t *)malloc(sizeof(H5FD_multi_fapl_t));
+    H5FD_multi_fapl_t *new_fa = (H5FD_multi_fapl_t *)calloc(1, sizeof(H5FD_multi_fapl_t));
     int nerrors = 0;
     static const char *func="H5FD_multi_fapl_copy";  /* Function Name for error reporting */
 

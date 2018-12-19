@@ -1360,7 +1360,7 @@ H5Aiterate2(hid_t loc_id, H5_index_t idx_type, H5_iter_order_t order,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
     /* Iterate over attributes */
-    if((ret_value = H5VL_attr_specific(vol_obj, &loc_params, H5VL_ATTR_ITER, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, idx_type, order, idx, op, op_data)) < 0)
+    if((ret_value = H5VL_attr_specific(vol_obj, &loc_params, H5VL_ATTR_ITER, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, (int)idx_type, (int)order, idx, op, op_data)) < 0)
         HERROR(H5E_ATTR, H5E_BADITER, "error iterating over attributes");
 
 done:
@@ -1448,7 +1448,7 @@ H5Aiterate_by_name(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
     /* Iterate over attributes */
-    if((ret_value = H5VL_attr_specific(vol_obj, &loc_params, H5VL_ATTR_ITER, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, idx_type, order, idx, op, op_data)) < 0)
+    if((ret_value = H5VL_attr_specific(vol_obj, &loc_params, H5VL_ATTR_ITER, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, (int)idx_type, (int)order, idx, op, op_data)) < 0)
         HERROR(H5E_ATTR, H5E_BADITER, "attribute iteration failed");
 
 done:

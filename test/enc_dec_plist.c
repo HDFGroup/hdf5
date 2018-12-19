@@ -463,8 +463,6 @@ main(void)
         FAIL_STACK_ERROR
     if((H5Pset_mdc_image_config(fapl, &my_cache_image_config)) < 0)
         FAIL_STACK_ERROR
-    if((H5Pset_core_write_tracking(fapl, TRUE, 1024 * 1024)) < 0)
-        FAIL_STACK_ERROR
 
     /* Test encoding & decoding property list */
     if(test_encode_decode(fapl) < 0)
