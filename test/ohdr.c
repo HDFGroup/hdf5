@@ -1035,17 +1035,20 @@ error :
 
 /*
  * Compare header sizes against when headers have been minimized.
+ * Repeats tests with headers "compact" and normal.
  */
 static herr_t
 test_minimized_oh_size_comparisons(void)
 {
-    hsize_t array_10[1] = {10}; /* dataspace extents */
+    hsize_t  array_10[1] = {10}; /* dataspace extents */
+    unsigned compact     = 0;
 
     /* IDs that are file-agnostic */
     hid_t dspace_id     = -1;
     hid_t int_type_id   = -1;
     hid_t dcpl_minimize = -1;
     hid_t dcpl_dontmin  = -1;
+    hid_t dcpl_default  = -1;
 
     /* IDs for non-minimzed file open */
     hid_t file_f_id   = -1; /* lower 'f' for standard file setting */
@@ -1076,91 +1079,108 @@ test_minimized_oh_size_comparisons(void)
     if(h5_fixname(FILENAME[2], H5P_DEFAULT, filename_b, sizeof(filename_b)) == NULL)
         TEST_ERROR
 
-    dcpl_minimize = H5Pcreate(H5P_DATASET_CREATE);
-    if(dcpl_minimize < 0) TEST_ERROR
+    for (compact = 0; compact < 2; compact++) { /* 0 or 1 */
+        dcpl_default = H5Pcreate(H5P_DATASET_CREATE);
+        if(dcpl_default < 0) TEST_ERROR
+ 
+        dcpl_minimize = H5Pcreate(H5P_DATASET_CREATE);
+        if(dcpl_minimize < 0) TEST_ERROR
+        ret = H5Pset_dset_no_attrs_hint(dcpl_minimize, TRUE);
+        if(ret < 0) TEST_ERROR
 
-    ret = H5Pset_dset_no_attrs_hint(dcpl_minimize, TRUE);
-    if(ret < 0) TEST_ERROR
+        dcpl_dontmin = H5Pcreate(H5P_DATASET_CREATE);
+        if(dcpl_dontmin < 0) TEST_ERROR
+        ret = H5Pset_dset_no_attrs_hint(dcpl_dontmin, FALSE);
+        if(ret < 0) TEST_ERROR
 
-    dcpl_dontmin = H5Pcreate(H5P_DATASET_CREATE);
-    if(dcpl_dontmin < 0) TEST_ERROR
+        if(compact) {
+            HDprintf("...compact ");
+            ret = H5Pset_layout(dcpl_default, H5D_COMPACT);
+            if(ret < 0) TEST_ERROR
+            ret = H5Pset_layout(dcpl_minimize, H5D_COMPACT);
+            if(ret < 0) TEST_ERROR
+            ret = H5Pset_layout(dcpl_dontmin, H5D_COMPACT);
+            if(ret < 0) TEST_ERROR
+        } else 
+            HDprintf("...not compact ");
 
-    ret = H5Pset_dset_no_attrs_hint(dcpl_dontmin, FALSE);
-    if(ret < 0) TEST_ERROR
+        dspace_id = H5Screate_simple(1, array_10, NULL);
+        if(dspace_id < 0) TEST_ERROR
 
-    dspace_id = H5Screate_simple(1, array_10, NULL);
-    if(dspace_id < 0) TEST_ERROR
+        int_type_id = H5Tcopy(H5T_NATIVE_INT);
+        if(int_type_id < 0) TEST_ERROR
 
-    int_type_id = H5Tcopy(H5T_NATIVE_INT);
-    if(int_type_id < 0) TEST_ERROR
+        file_f_id = H5Fcreate(filename_a, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+        if(file_f_id < 0) TEST_ERROR
 
-    file_f_id = H5Fcreate(filename_a, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-    if(file_f_id < 0) TEST_ERROR
+        dset_f_x_id = H5Dcreate(file_f_id, "default", int_type_id, dspace_id, H5P_DEFAULT, dcpl_default, H5P_DEFAULT);
+        if(dset_f_x_id < 0) TEST_ERROR
 
-    dset_f_x_id = H5Dcreate(file_f_id, "default", int_type_id, dspace_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    if(dset_f_x_id < 0) TEST_ERROR
+        dset_f_N_id = H5Dcreate(file_f_id, "dsetNOT", int_type_id, dspace_id, H5P_DEFAULT, dcpl_dontmin, H5P_DEFAULT);
+        if(dset_f_N_id < 0) TEST_ERROR
 
-    dset_f_N_id = H5Dcreate(file_f_id, "dsetNOT", int_type_id, dspace_id, H5P_DEFAULT, dcpl_dontmin, H5P_DEFAULT);
-    if(dset_f_N_id < 0) TEST_ERROR
+        dset_f_Y_id = H5Dcreate(file_f_id, "dsetMIN", int_type_id, dspace_id, H5P_DEFAULT, dcpl_minimize, H5P_DEFAULT);
+        if(dset_f_x_id < 0) TEST_ERROR
 
-    dset_f_Y_id = H5Dcreate(file_f_id, "dsetMIN", int_type_id, dspace_id, H5P_DEFAULT, dcpl_minimize, H5P_DEFAULT);
-    if(dset_f_x_id < 0) TEST_ERROR
+        file_F_id = H5Fcreate(filename_b, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+        if(file_F_id < 0) TEST_ERROR
+        ret = H5Fset_dset_no_attrs_hint(file_F_id, TRUE);
+        if(ret < 0) TEST_ERROR
 
-    file_F_id = H5Fcreate(filename_b, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-    if(file_F_id < 0) TEST_ERROR
-    ret = H5Fset_dset_no_attrs_hint(file_F_id, TRUE);
-    if(ret < 0) TEST_ERROR
+        dset_F_x_id = H5Dcreate(file_F_id, "default", int_type_id, dspace_id, H5P_DEFAULT, dcpl_default, H5P_DEFAULT);
+        if(dset_F_x_id < 0) TEST_ERROR
 
-    dset_F_x_id = H5Dcreate(file_F_id, "default", int_type_id, dspace_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    if(dset_F_x_id < 0) TEST_ERROR
+        dset_F_N_id = H5Dcreate(file_F_id, "dsetNOT", int_type_id, dspace_id, H5P_DEFAULT, dcpl_dontmin, H5P_DEFAULT);
+        if(dset_F_N_id < 0) TEST_ERROR
 
-    dset_F_N_id = H5Dcreate(file_F_id, "dsetNOT", int_type_id, dspace_id, H5P_DEFAULT, dcpl_dontmin, H5P_DEFAULT);
-    if(dset_F_N_id < 0) TEST_ERROR
+        dset_F_Y_id = H5Dcreate(file_F_id, "dsetMIN", int_type_id, dspace_id, H5P_DEFAULT, dcpl_minimize, H5P_DEFAULT);
+        if(dset_F_Y_id < 0) TEST_ERROR
 
-    dset_F_Y_id = H5Dcreate(file_F_id, "dsetMIN", int_type_id, dspace_id, H5P_DEFAULT, dcpl_minimize, H5P_DEFAULT);
-    if(dset_F_Y_id < 0) TEST_ERROR
+        /*********
+         * TESTS *
+         *********/
 
-    /*********
-     * TESTS *
-     *********/
+        if(oh_compare(dset_f_x_id, dset_f_x_id) != EQ) TEST_ERROR /* identity */
 
-    if(oh_compare(dset_f_x_id, dset_f_x_id) != EQ) TEST_ERROR /* identity */
+        if(oh_compare(dset_f_x_id, dset_f_N_id) != EQ) TEST_ERROR
+        if(oh_compare(dset_f_x_id, dset_f_Y_id) != GT) TEST_ERROR
+        if(oh_compare(dset_f_N_id, dset_f_Y_id) != GT) TEST_ERROR
 
-    if(oh_compare(dset_f_x_id, dset_f_N_id) != EQ) TEST_ERROR
-    if(oh_compare(dset_f_x_id, dset_f_Y_id) != GT) TEST_ERROR
-    if(oh_compare(dset_f_N_id, dset_f_Y_id) != GT) TEST_ERROR
+        if(oh_compare(dset_F_x_id, dset_F_N_id) != EQ) TEST_ERROR
+        if(oh_compare(dset_F_x_id, dset_F_Y_id) != EQ) TEST_ERROR
+        if(oh_compare(dset_F_N_id, dset_F_Y_id) != EQ) TEST_ERROR
 
-    if(oh_compare(dset_F_x_id, dset_F_N_id) != EQ) TEST_ERROR
-    if(oh_compare(dset_F_x_id, dset_F_Y_id) != EQ) TEST_ERROR
-    if(oh_compare(dset_F_N_id, dset_F_Y_id) != EQ) TEST_ERROR
+        if(oh_compare(dset_F_x_id, dset_f_Y_id) != EQ) TEST_ERROR
+        if(oh_compare(dset_F_x_id, dset_f_x_id) != LT) TEST_ERROR
 
-    if(oh_compare(dset_F_x_id, dset_f_Y_id) != EQ) TEST_ERROR
-    if(oh_compare(dset_F_x_id, dset_f_x_id) != LT) TEST_ERROR
+        /************
+         * TEARDOWN *
+         ************/
 
-    /************
-     * TEARDOWN *
-     ************/
+        if(H5Sclose(dspace_id) < 0) TEST_ERROR
+        if(H5Tclose(int_type_id) < 0) TEST_ERROR
+        if(H5Pclose(dcpl_default) < 0) TEST_ERROR
+        if(H5Pclose(dcpl_minimize) < 0) TEST_ERROR
+        if(H5Pclose(dcpl_dontmin) < 0) TEST_ERROR
 
-    if(H5Sclose(dspace_id) < 0) TEST_ERROR
-    if(H5Tclose(int_type_id) < 0) TEST_ERROR
-    if(H5Pclose(dcpl_minimize) < 0) TEST_ERROR
-    if(H5Pclose(dcpl_dontmin) < 0) TEST_ERROR
+        if(H5Fclose(file_f_id) < 0) TEST_ERROR
+        if(H5Dclose(dset_f_x_id) < 0) TEST_ERROR
+        if(H5Dclose(dset_f_N_id) < 0) TEST_ERROR
+        if(H5Dclose(dset_f_Y_id) < 0) TEST_ERROR
 
-    if(H5Fclose(file_f_id) < 0) TEST_ERROR
-    if(H5Dclose(dset_f_x_id) < 0) TEST_ERROR
-    if(H5Dclose(dset_f_N_id) < 0) TEST_ERROR
-    if(H5Dclose(dset_f_Y_id) < 0) TEST_ERROR
+        if(H5Fclose(file_F_id) < 0) TEST_ERROR
+        if(H5Dclose(dset_F_x_id) < 0) TEST_ERROR
+        if(H5Dclose(dset_F_N_id) < 0) TEST_ERROR
+        if(H5Dclose(dset_F_Y_id) < 0) TEST_ERROR
 
-    if(H5Fclose(file_F_id) < 0) TEST_ERROR
-    if(H5Dclose(dset_F_x_id) < 0) TEST_ERROR
-    if(H5Dclose(dset_F_N_id) < 0) TEST_ERROR
-    if(H5Dclose(dset_F_Y_id) < 0) TEST_ERROR
+    } /* compact and non-compact */
 
     PASSED()
     return SUCCEED;
 
 error :
     H5E_BEGIN_TRY {
+        (void)H5Pclose(dcpl_default);
         (void)H5Pclose(dcpl_minimize);
         (void)H5Pclose(dcpl_dontmin);
         (void)H5Sclose(dspace_id);
