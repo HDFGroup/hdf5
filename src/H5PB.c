@@ -1162,7 +1162,12 @@ H5PB_remove_entry(const H5F_t *f, haddr_t addr)
     if ( entry_ptr ) {
 
         HDassert(entry_ptr->addr == addr);
-        HDassert(entry_ptr->size == pb_ptr->page_size);
+
+        /* A page or a metadata multi-page with vfd_swmr_writer (case 7) */
+        HDassert( (entry_ptr->size == pb_ptr->page_size) ||
+                  (entry_ptr->size > pb_ptr->page_size && 
+                   entry_ptr->mem_type != H5FD_MEM_DRAW &&
+                   pb_ptr->vfd_swmr_writer) );
 
         if ( entry_ptr->modified_this_tick ) {
 

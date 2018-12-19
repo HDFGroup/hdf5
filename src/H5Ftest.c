@@ -297,7 +297,7 @@ H5F__vfd_swmr_writer_create_open_flush_test(hid_t file_id, hbool_t file_create)
         uint32_t hdr_magic;
 
         /* Seek to the beginning of the file */
-        if(HDlseek(md_fd, (HDoff_t)0, SEEK_SET) < 0)
+        if(HDlseek(md_fd, (HDoff_t)H5FD_MD_HEADER_OFF, SEEK_SET) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_SEEKERROR, FAIL, "error seeking metadata file")
 
         /* Try to read the magic for header */
@@ -358,7 +358,7 @@ H5F__vfd_swmr_decode_md_hdr(int md_fd, H5FD_vfd_swmr_md_header *md_hdr)
     p = image;
 
     /* Seek to the beginning of the file */
-    if(HDlseek(md_fd, (HDoff_t)0, SEEK_SET) < 0)
+    if(HDlseek(md_fd, (HDoff_t)H5FD_MD_HEADER_OFF, SEEK_SET) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_SEEKERROR, FAIL, "error seeking metadata file")
 
     /* Read the header */

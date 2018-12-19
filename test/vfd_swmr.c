@@ -683,6 +683,7 @@ test_writer_create_open_flush(void)
     if(H5F__vfd_swmr_writer_create_open_flush_test(fid, TRUE) < 0)
         TEST_ERROR
 
+#ifdef LATER /* Will activate the test when flush is implemented */
     /* Flush the HDF5 file */
     if(H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0) 
         FAIL_STACK_ERROR
@@ -690,6 +691,7 @@ test_writer_create_open_flush(void)
     /* Verify info in metadata file when flushing the HDF5 file */
     if(H5F__vfd_swmr_writer_create_open_flush_test(fid, FALSE) < 0)
         TEST_ERROR
+#endif
 
     /* Close the file */
     if(H5Fclose(fid) < 0)
@@ -1711,26 +1713,28 @@ main(void)
         nerrors += test_file_end_tick();
 
         nerrors += test_writer_create_open_flush();
-        nerrors += test_writer_md();
+            nerrors += test_writer_md();
 
-        nerrors += test_reader_md_concur();
+#ifdef LATER /* Will activate the test when reader EOT is implemented */
+            nerrors += test_reader_md_concur()flush ;
+#endif
 
-    } /* end if */
+        } /* end if */
 
-    if(nerrors)
-        goto error;
+        if(nerrors)
+            goto error;
 
-    HDputs("All VFD SWMR tests passed.");
+        HDputs("All VFD SWMR tests passed.");
 
-    HDexit(EXIT_SUCCESS);
+        HDexit(EXIT_SUCCESS);
 
-error:
-    HDprintf("***** %d VFD SWMR TEST%s FAILED! *****\n",
-        nerrors, nerrors > 1 ? "S" : "");
+    error:
+        HDprintf("***** %d VFD SWMR TEST%s FAILED! *****\n",
+            nerrors, nerrors > 1 ? "S" : "");
 
-    H5E_BEGIN_TRY {
-        H5Pclose(fapl);
-    } H5E_END_TRY;
+        H5E_BEGIN_TRY {
+            H5Pclose(fapl);
+        } H5E_END_TRY;
 
-    HDexit(EXIT_FAILURE);
+        HDexit(EXIT_FAILURE);
 } /* main() */

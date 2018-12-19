@@ -777,7 +777,7 @@ H5MF__sect_small_merge(H5FS_section_info_t **_sect1, H5FS_section_info_t *_sect2
          * Note: Large raw/metadata page bypasses the page buffer */
         if(udata->f->shared->pb_ptr != NULL)
             if(H5PB_remove_entry(udata->f, (*sect1)->sect_info.addr) < 0)
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "can't free merged section")
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "can't free merged section from page buffer")
 
         if(H5MF__sect_free((H5FS_section_info_t *)(*sect1)) < 0)
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "can't free section node")

@@ -1238,6 +1238,17 @@ HDfprintf(stderr, "%s: After H5FS_sect_add()\n", FUNC);
             node = NULL;
     } /* end else */
 
+    /* Multi-page and VFD SWMR writer: remove from PB if exists there */
+    if(size > f->shared->fs_page_size && f->shared->vfd_swmr_writer) {
+
+        HDassert(f->shared->pb_ptr != NULL);
+        HDassert(H5F_USE_VFD_SWMR(f));
+        HDassert(H5F_PAGED_AGGR(f));
+
+        if(H5PB_remove_entry(f, addr) < 0)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "can't remove the page from page buffer")
+    }
+
 done:
     /* Reset the ring in the API context */
     if(orig_ring != H5AC_RING_INV)

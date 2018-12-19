@@ -1392,7 +1392,8 @@ H5F__dest(H5F_t *f, hbool_t flush)
                 HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to close the metadata file")
         }
         vfd_swmr_file_g = NULL;
-
+        vfd_swmr_g = vfd_swmr_writer_g = FALSE;
+    
         /* Close the file */
         if(H5FD_close(f->shared->lf) < 0)
             /* Push error, but keep going*/
@@ -3656,6 +3657,7 @@ static herr_t
 H5F__vfd_swmr_init(H5F_t *f, hbool_t file_create)
 {
     hsize_t md_size;                /* Size of the metadata file */
+    haddr_t md_addr;                /* Address returned from H5MV_alloc() */
     herr_t ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_STATIC
@@ -3687,6 +3689,12 @@ H5F__vfd_swmr_init(H5F_t *f, hbool_t file_create)
 
         md_size = (hsize_t)f->shared->vfd_swmr_config.md_pages_reserved * 
                   f->shared->fs_page_size;
+
+        /* Make sure that the free-space manager for the metadata file is initialized */
+        if((md_addr = H5MV_alloc(f, md_size)) == HADDR_UNDEF)
+            HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, \
+                            "error in allocating md_pages_reserved from the metadata file")
+        HDassert(H5F_addr_eq(md_addr, H5FD_MD_HEADER_OFF));
 
         /* Set the metadata file size to md_pages_reserved */
         if ( -1 == HDftruncate(f->shared->vfd_swmr_md_fd, (HDoff_t)md_size) )
@@ -3799,7 +3807,7 @@ H5F__vfd_swmr_construct_write_md_hdr(H5F_t *f, uint32_t num_entries)
     HDassert((size_t)(p - image == hdr_size));
 
     /* Set to beginning of the file */
-    if ( HDlseek(f->shared->vfd_swmr_md_fd, (HDoff_t)0, SEEK_SET) < 0 )
+    if ( HDlseek(f->shared->vfd_swmr_md_fd, (HDoff_t)H5FD_MD_HEADER_OFF, SEEK_SET) < 0 )
 
         HGOTO_ERROR(H5E_VFL, H5E_SEEKERROR, FAIL, \
                     "unable to seek in metadata file")
@@ -3897,7 +3905,7 @@ H5F__vfd_swmr_construct_write_md_idx(H5F_t *f, uint32_t num_entries,
     HDassert(f->shared->vfd_swmr_md_fd >= 0);
 
     /* Set to right after the header */
-    if ( HDlseek(f->shared->vfd_swmr_md_fd, (HDoff_t)H5FD_MD_HEADER_SIZE, 
+    if ( HDlseek(f->shared->vfd_swmr_md_fd, (HDoff_t)(H5FD_MD_HEADER_OFF + H5FD_MD_HEADER_SIZE), 
                  SEEK_SET) < 0)
 
         HGOTO_ERROR(H5E_VFL, H5E_SEEKERROR, FAIL, \
@@ -4315,7 +4323,6 @@ H5F_update_vfd_swmr_metadata_file(H5F_t *f, uint32_t num_entries,
 
             /* Allocate space for the entry in the metadata file */
             if((md_addr = H5MV_alloc(f, index[i].length)) == HADDR_UNDEF)
-
                 HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, \
                             "error in allocating space from the metadata file")
 

@@ -28,7 +28,7 @@ srcdir=@srcdir@
 #Nreaders=5             # number of readers to launch
 #Nrdrs_spa=3            # number of sparse readers to launch
 # Temporarily set readers to be 0 for testing VFD SWMR writer only
-Nreaders=1              # number of readers to launch
+Nreaders=0              # number of readers to launch
 Nrdrs_spa=0             # number of sparse readers to launch
 Nrecords=200000         # number of records to write
 Nrecs_rem=40000         # number of times to shrink

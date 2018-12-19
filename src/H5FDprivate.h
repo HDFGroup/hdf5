@@ -42,6 +42,7 @@
  * VFD SWMR 
  */
 /* Metadata file header */
+#define H5FD_MD_HEADER_OFF              0               /* Header offset in the metadata file */
 #define H5FD_MD_HEADER_MAGIC            "VHDR"          /* Header magic */
 #define H5FD_SIZEOF_CHKSUM              4               /* Size of checksum */
 

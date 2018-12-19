@@ -240,7 +240,7 @@ gen_skeleton(const char *filename, hbool_t verbose, hbool_t vfd_swmr_write,
     if(verbose)
         HDfprintf(stderr, "Creating datasets\n");
 
-#if 1 /* delete this once the race condiditon bug is fixed */ /* JRM */
+#if 0 /* delete this once the race condiditon bug is fixed */ /* JRM */
     sleep(1);
 #endif /* JRM */
 

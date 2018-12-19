@@ -933,7 +933,7 @@ H5FD__vfd_swmr_header_deserialize(H5FD_t *_file, H5FD_vfd_swmr_md_header *md_hea
     p = image;
     do {
         /* Set file pointer to the beginning the file */
-        if(HDlseek(file->md_fd, (HDoff_t)0, SEEK_SET) < 0)
+        if(HDlseek(file->md_fd, (HDoff_t)H5FD_MD_HEADER_OFF, SEEK_SET) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_SEEKERROR, FAIL, "unable to seek in metadata file")
         /* Read the header */
         if(HDread(file->md_fd, image, H5FD_MD_HEADER_SIZE) < H5FD_MD_HEADER_SIZE)
