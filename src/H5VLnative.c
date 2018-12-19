@@ -803,13 +803,6 @@ H5VL__native_attr_optional(void H5_ATTR_UNUSED *obj, hid_t H5_ATTR_UNUSED dxpl_i
 
                 break;
             }
-#else
-        /* XXX: This case only exists because this is the only attribute optional
-         *      value and we can't have empty enums. Delete it when we have another
-         *      attribute optional enum value.
-         */
-        case H5VL_NATIVE_ATTR_ITERATE_OLD:
-            HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "H5VL_NATIVE_ATTR_ITERATE_OLD is not a valid value when the library is built without deprecated routines")
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
         default:
@@ -2469,15 +2462,6 @@ H5VL__native_group_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id,
 
                 break;
             }
-#else
-        /* XXX: These cases only exist because they are the only group optional
-         *      values and we can't have empty enums. Delete them when we have
-         *      non-deprecated group optional enum values.
-         */
-        case H5VL_NATIVE_GROUP_ITERATE_OLD:
-            HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "H5VL_NATIVE_GROUP_ITERATE_OLD is not a valid value when the library is built without deprecated routines")
-        case H5VL_NATIVE_GROUP_GET_OBJINFO:
-            HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "H5VL_NATIVE_GROUP_GET_OBJINFO is not a valid value when the library is built without deprecated routines")
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
         default:

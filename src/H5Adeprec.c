@@ -44,6 +44,7 @@
 #include "H5Iprivate.h"         /* IDs                                      */
 #include "H5Opkg.h"             /* Object headers                           */
 #include "H5VLprivate.h"        /* Virtual object layer                     */
+#include "H5VLnative.h"         /* Native VOL connector                     */
 
 
 /****************/
