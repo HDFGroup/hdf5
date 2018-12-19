@@ -93,6 +93,8 @@ if (EXISTS ${TEST_FOLDER}/${TEST_OUTPUT}.err)
   if (TEST_MASK_FILE)
     STRING(REGEX REPLACE "CurrentDir is [^\n]+\n" "CurrentDir is (dir name)\n" TEST_STREAM "${TEST_STREAM}")
   endif ()
+  # remove special output
+  string (REGEX REPLACE "^.*_pmi_alps[^\n]+\n" "" TEST_STREAM "${TEST_STREAM}")
 
   if (NOT ERROR_APPEND)
     # append error output to the stdout output file
