@@ -771,6 +771,7 @@ H5Gget_comment(hid_t loc_id, const char *name, size_t bufsize, char *buf)
 {
     H5VL_object_t *vol_obj;             /* Object token of loc_id */
     H5VL_loc_params_t loc_params;
+    ssize_t op_ret;                     /* Return value from operation */
     int	ret_value;                      /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -796,8 +797,11 @@ H5Gget_comment(hid_t loc_id, const char *name, size_t bufsize, char *buf)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
     /* Get the comment */
-    if(H5VL_object_optional(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, H5VL_NATIVE_OBJECT_GET_COMMENT, &loc_params, buf, bufsize, &ret_value) < 0)
+    if(H5VL_object_optional(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, H5VL_NATIVE_OBJECT_GET_COMMENT, &loc_params, buf, bufsize, &op_ret) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to get comment value")
+
+    /* Set return value */
+    ret_value = (int)op_ret;
 
 done:
     FUNC_LEAVE_API(ret_value)
