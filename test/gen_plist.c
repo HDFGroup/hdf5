@@ -363,9 +363,6 @@ main(void)
     if((ret = H5Pset_mdc_image_config(fapl1, &my_cache_image_config)) < 0)
         assert(ret > 0);
 
-    if((ret = H5Pset_core_write_tracking(fapl1, TRUE, (size_t)(1024 * 1024))) < 0)
-        assert(ret > 0);
-
     if((ret = encode_plist(fapl1, little_endian, word_length, "testfiles/plist_files/fapl_")) < 0)
         assert(ret > 0);
 
@@ -476,7 +473,7 @@ encode_plist(hid_t plist_id, int little_endian, int word_length, const char *fil
         HDassert(ret > 0);
 
     fd = HDopen(filename, O_RDWR | O_CREAT | O_TRUNC, H5_POSIX_CREATE_MODE_RW);
-    HDassert(fd > 0);
+    HDassert(fd >= 0);
 
     write_size = HDwrite(fd, temp_buf, temp_size);
     HDassert(write_size == (ssize_t)temp_size);
