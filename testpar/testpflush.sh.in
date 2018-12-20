@@ -36,7 +36,13 @@ fi
 # Run the first parallel flush test program
 # (note that we ignore any errors here)
 # ==========================================
+echo "*** NOTE ***********************************************************"
+echo "You may see complaints from mpiexec et al. that not all processes"
+echo "called MPI_Finalize(). This is an intended characteristic of the"
+echo "test and should not be considered an  error."
+echo "********************************************************************"
 @RUNPARALLELSCRIPT@ ./t_pflush1
+
 
 # ===========================================
 # Run the second parallel flush test program
