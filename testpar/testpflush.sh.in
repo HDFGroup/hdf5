@@ -1,0 +1,47 @@
+#! /bin/sh
+#
+# Copyright by The HDF Group.
+# Copyright by the Board of Trustees of the University of Illinois.
+# All rights reserved.
+#
+# This file is part of HDF5.  The full HDF5 copyright notice, including
+# terms governing use, modification, and redistribution, is contained in
+# the COPYING file, which can be found at the root of the source code
+# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# If you do not have access to either file, you may request a copy from
+# help@hdfgroup.org.
+#
+#
+# Test script for the parallel flush test
+#
+# The parallel flush test uses two programs to test flush operations
+# in parallel HDF5. The first program purposely exits without calling
+# MPI_Finalize(), which is an error under the MPI standard and mpiexec
+# in some implementations will return an error code even though all
+# processes exit successfully. This script lets us swallow the error
+# from the first program.
+#
+# True errors in the first program will be detected as errors in the
+# second program, so watch out for that.
+#
+# Programmer:   Dana Robinson
+#               Fall 2018
+
+# The build (current) directory might be different than the source directory.
+if test -z "$srcdir"; then
+   srcdir=.
+fi
+
+# ==========================================
+# Run the first parallel flush test program
+# (note that we ignore any errors here)
+# ==========================================
+@RUNPARALLELSCRIPT@ ./t_pflush1
+
+# ===========================================
+# Run the second parallel flush test program
+# The return code of this call is the return
+# code of the script.
+# ===========================================
+@RUNPARALLELSCRIPT@ ./t_pflush2
+

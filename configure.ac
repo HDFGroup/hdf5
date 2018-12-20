@@ -841,9 +841,13 @@ fi
 ##               command).  The value of this variable is
 ##               substituted in *.in files.
 ##
+##    RUNPARALLELSCRIPT -- Identical to RUNPARALLEL but without
+##               the special makefile protection for environment
+##               variables.
 AC_SUBST([PARALLEL])
 AC_SUBST([RUNSERIAL])
 AC_SUBST([RUNPARALLEL])
+AC_SUBST([RUNPARALLELSCRIPT])
 AC_SUBST([TESTPARALLEL])
 
 ## ----------------------------------------------------------------------
@@ -2511,9 +2515,10 @@ case "X-$enable_parallel" in
       PAC_PROG_FC_MPI_CHECK
     fi
 
-    ## Set RUNPARALLEL to mpiexec if not set yet.
+    ## Set RUNPARALLEL and RUNPARALLELSCRIPT to mpiexec if not set yet.
     if test "X$PARALLEL" = "Xyes" -a -z "$RUNPARALLEL"; then
       RUNPARALLEL="mpiexec -n \$\${NPROCS:=6}"
+      RUNPARALLELSCRIPT="mpiexec -n ${NPROCS:=6}"
     fi
     ;;
 
@@ -3444,6 +3449,7 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  test/test_filter_plugin.sh
                  test/test_usecases.sh
                  testpar/Makefile
+                 testpar/testpflush.sh
                  tools/Makefile
                  tools/lib/Makefile
                  tools/src/Makefile
