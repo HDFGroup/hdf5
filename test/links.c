@@ -15086,7 +15086,7 @@ main(void)
         nerrors += group_info_old(fapl) < 0 ? 1 : 0;
 
         if (minimize_dset_oh) {
-            if (0 > H5Pclose(dcpl_g))
+            if (H5Pclose(dcpl_g) < 0)
                 TEST_ERROR;
             dcpl_g = -1;
         }
