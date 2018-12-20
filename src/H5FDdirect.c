@@ -418,7 +418,7 @@ static void *
 H5FD_direct_fapl_copy(const void *_old_fa)
 {
     const H5FD_direct_fapl_t *old_fa = (const H5FD_direct_fapl_t*)_old_fa;
-    H5FD_direct_fapl_t *new_fa = H5MM_calloc(1, sizeof(H5FD_direct_fapl_t));
+    H5FD_direct_fapl_t *new_fa = H5MM_calloc(sizeof(H5FD_direct_fapl_t));
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
