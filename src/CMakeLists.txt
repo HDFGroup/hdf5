@@ -628,6 +628,13 @@ set (H5VL_SOURCES
     ${HDF5_SRC_DIR}/H5VLcallback.c
     ${HDF5_SRC_DIR}/H5VLint.c
     ${HDF5_SRC_DIR}/H5VLnative.c
+    ${HDF5_SRC_DIR}/H5VLnative_attr.c
+    ${HDF5_SRC_DIR}/H5VLnative_dataset.c
+    ${HDF5_SRC_DIR}/H5VLnative_datatype.c
+    ${HDF5_SRC_DIR}/H5VLnative_file.c
+    ${HDF5_SRC_DIR}/H5VLnative_group.c
+    ${HDF5_SRC_DIR}/H5VLnative_link.c
+    ${HDF5_SRC_DIR}/H5VLnative_object.c
     ${HDF5_SRC_DIR}/H5VLpassthru.c
 )
 set (H5VL_HDRS

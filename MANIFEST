@@ -894,6 +894,13 @@
 ./src/H5VLmodule.h
 ./src/H5VLnative.c
 ./src/H5VLnative.h
+./src/H5VLnative_attr.c
+./src/H5VLnative_dataset.c
+./src/H5VLnative_datatype.c
+./src/H5VLnative_file.c
+./src/H5VLnative_group.c
+./src/H5VLnative_link.c
+./src/H5VLnative_object.c
 ./src/H5VLpassthru.c
 ./src/H5VLpassthru.h
 ./src/H5VLpkg.h
