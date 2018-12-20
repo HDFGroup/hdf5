@@ -2109,10 +2109,6 @@ H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR
             {
                 hbool_t *minimize = va_arg(arguments, hbool_t *);
                 *minimize = H5F_GET_MIN_DSET_OHDR(f);
-#if 0
-                if(H5F_get_min_dset_ohdr(f, (hbool_t)minimize) < 0)
-                    HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "cannot set file's dataset object header minimization flag")
-#endif
                 break;
             }
 
