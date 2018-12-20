@@ -2892,6 +2892,8 @@
 ./java/src/jni/h5sImp.h
 ./java/src/jni/h5tImp.c
 ./java/src/jni/h5tImp.h
+./java/src/jni/h5vlImp.c
+./java/src/jni/h5vlImp.h
 ./java/src/jni/h5zImp.c
 ./java/src/jni/h5zImp.h
 
@@ -3130,6 +3132,7 @@
 ./java/test/testfiles/JUnit-TestH5Tparams.txt
 ./java/test/testfiles/JUnit-TestH5Tbasic.txt
 ./java/test/testfiles/JUnit-TestH5T.txt
+./java/test/testfiles/JUnit-TestH5VL.txt
 ./java/test/testfiles/JUnit-TestH5Z.txt
 ./java/test/h5ex_g_iterate.orig
 ./java/test/TestH5.java
@@ -3167,6 +3170,7 @@
 ./java/test/TestH5Tparams.java
 ./java/test/TestH5Tbasic.java
 ./java/test/TestH5T.java
+./java/test/TestH5VL.java
 ./java/test/TestH5Z.java
 ./java/test/TestAll.java
 

@@ -69,6 +69,7 @@ noinst_JAVA = \
     TestH5Ocreate.java \
     TestH5Ocopy.java \
     TestH5PL.java \
+    TestH5VL.java \
     TestH5Z.java \
     TestH5E.java \
     TestH5Edefault.java \
