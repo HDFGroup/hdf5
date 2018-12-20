@@ -9,60 +9,47 @@
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
-HDFTEST_COPY_FILE("${HDF5_CPP_TEST_SOURCE_DIR}/th5s.h5" "${PROJECT_BINARY_DIR}/th5s.h5" "cpp_testhdf5_files")
-add_custom_target(cpp_testhdf5_files ALL COMMENT "Copying files needed by cpp_testhdf5 tests" DEPENDS ${cpp_testhdf5_files_list})
 
 ##############################################################################
 ##############################################################################
 ###           T E S T I N G                                                ###
 ##############################################################################
 ##############################################################################
-# Remove any output file left over from previous test run
-add_test (
-    NAME CPP_testhdf5-clear-objects
-    COMMAND    ${CMAKE_COMMAND}
-        -E remove
-            tattr_basic.h5
-            tattr_compound.h5
-            tattr_dtype.h5
-            tattr_multi.h5
-            tattr_scalar.h5
-            tfattrs.h5
-            titerate.h5
-)
 
-if (HDF5_ENABLE_USING_MEMCHECKER)
-  add_test (NAME CPP_testhdf5 COMMAND $<TARGET_FILE:cpp_testhdf5>)
-else ()
-  add_test (NAME CPP_testhdf5 COMMAND "${CMAKE_COMMAND}"
-      -D "TEST_PROGRAM=$<TARGET_FILE:cpp_testhdf5>"
-      -D "TEST_ARGS:STRING="
-      -D "TEST_EXPECT=0"
-      -D "TEST_SKIP_COMPARE=TRUE"
-      -D "TEST_OUTPUT=cpp_testhdf5.txt"
-      #-D "TEST_REFERENCE=cpp_testhdf5.out"
-      -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
-      -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
-  )
-endif ()
-set_tests_properties (CPP_testhdf5 PROPERTIES DEPENDS CPP_testhdf5-clear-objects)
+    set (VOL_LIST
+    )
 
 ##############################################################################
 ##############################################################################
-###                         V F D   T E S T S                              ###
+###           T H E   T E S T S  M A C R O S                               ###
 ##############################################################################
 ##############################################################################
 
-if (HDF5_TEST_VFD)
-  include (CMakeVFDTests.cmake)
-endif ()
+  macro (ADD_VOL_TEST volname resultcode)
+    add_test (
+      NAME H5REPACK-VOL-${volname}-h5repacktest
+      COMMAND "${CMAKE_COMMAND}"
+          -D "TEST_PROGRAM=$<TARGET_FILE:h5repacktest>"
+          -D "TEST_ARGS:STRING="
+          -D "TEST_VFD:STRING=${volname}"
+          -D "TEST_EXPECT=${resultcode}"
+          -D "TEST_OUTPUT=h5repacktest"
+          -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
+          -P "${HDF_RESOURCES_DIR}/volTest.cmake"
+    )
+    if (NOT "${last_test}" STREQUAL "")
+      set_tests_properties (H5REPACK-VOL-${volname}-h5repacktest PROPERTIES DEPENDS ${last_test})
+    endif ()
+    set (last_test "H5REPACK-VOL-${volname}-h5repacktest")
+  endmacro ()
 
 ##############################################################################
 ##############################################################################
-###                         V O L   T E S T S                              ###
+###           T H E   T E S T S                                            ###
 ##############################################################################
 ##############################################################################
 
-if (HDF5_TEST_VOL)
-  include (CMakeVOLTests.cmake)
-endif ()
+  # Run test with different VOL
+#  foreach (vol ${VOL_LIST})
+#    ADD_VOL_TEST (${vol} 0)
+#  endforeach ()

@@ -756,6 +756,13 @@ if (BUILD_TESTING)
     mark_as_advanced (HDF5_TEST_FHEAP_VFD)
   endif ()
 
+  option (HDF5_TEST_VOL "Execute tests with different VOLs" OFF)
+  mark_as_advanced (HDF5_TEST_VOL)
+  if (HDF5_TEST_VOL)
+    option (HDF5_TEST_FHEAP_VOL "Execute tests with different VOLs" ON)
+    mark_as_advanced (HDF5_TEST_FHEAP_VOL)
+  endif ()
+
   option (HDF_TEST_EXPRESS "Control testing framework (0-3)" "0")
   mark_as_advanced (HDF_TEST_EXPRESS)
 

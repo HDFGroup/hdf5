@@ -15,40 +15,6 @@
 ###           T E S T I N G                                                ###
 ##############################################################################
 ##############################################################################
-
-add_test (NAME TEST_PAR_testphdf5 COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_PREFLAGS} $<TARGET_FILE:testphdf5> ${MPIEXEC_POSTFLAGS})
-
-foreach (testp ${H5P_TESTS})
-  add_test (NAME TEST_PAR_${testp} COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_PREFLAGS} $<TARGET_FILE:${testp}> ${MPIEXEC_POSTFLAGS})
-endforeach ()
-
-# The following will only be correct on windows shared
-#set_tests_properties (TEST_PAR_t_pflush1 PROPERTIES WILL_FAIL "true")
-set_property (TEST TEST_PAR_t_pflush1 PROPERTY PASS_REGULAR_EXPRESSION "PASSED")
-set_tests_properties (TEST_PAR_t_pflush2 PROPERTIES DEPENDS TEST_PAR_t_pflush1)
-
-##############################################################################
-##############################################################################
-###                         V F D   T E S T S                              ###
-##############################################################################
-##############################################################################
-
-if (HDF5_TEST_VFD)
-  include (CMakeVFDTests.cmake)
-endif ()
-
-##############################################################################
-##############################################################################
-###                         V O L   T E S T S                              ###
-##############################################################################
-##############################################################################
-
-if (HDF5_TEST_VOL)
-  include (CMakeVOLTests.cmake)
-endif ()
-
-if (HDF5_TEST_VFD)
-
   set (VFD_LIST
       sec2
       stdio
@@ -89,5 +55,3 @@ if (HDF5_TEST_VFD)
   foreach (vfd ${VFD_LIST})
     ADD_VFD_TEST (${vfd} 0)
   endforeach ()
-
-endif ()

@@ -16,39 +16,6 @@
 ##############################################################################
 ##############################################################################
 
-  if (HDF5_TEST_VFD)
-    set (VFD_LIST
-        sec2
-        stdio
-        core
-        split
-        multi
-        family
-    )
-
-    if (DIRECT_VFD)
-      set (VFD_LIST ${VFD_LIST} direct)
-    endif ()
-
-    macro (ADD_VFD_TEST vfdname resultcode)
-      add_test (
-        NAME H5REPACK-VFD-${vfdname}-h5repacktest
-        COMMAND "${CMAKE_COMMAND}"
-            -D "TEST_PROGRAM=$<TARGET_FILE:h5repacktest>"
-            -D "TEST_ARGS:STRING="
-            -D "TEST_VFD:STRING=${vfdname}"
-            -D "TEST_EXPECT=${resultcode}"
-            -D "TEST_OUTPUT=h5repacktest"
-            -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
-            -P "${HDF_RESOURCES_DIR}/vfdTest.cmake"
-      )
-      if (NOT "${last_test}" STREQUAL "")
-        set_tests_properties (H5REPACK-VFD-${vfdname}-h5repacktest PROPERTIES DEPENDS ${last_test})
-      endif ()
-      set (last_test "H5REPACK-VFD-${vfdname}-h5repacktest")
-    endmacro ()
-  endif ()
-
   # --------------------------------------------------------------------
   # Copy all the HDF5 files from the source directory into the test directory
   # --------------------------------------------------------------------
@@ -1459,9 +1426,22 @@ if (BUILD_SHARED_LIBS)
   ADD_H5_UD_TEST (plugin_zero 0 h5repack_layout.h5 -v -f UD=250,0,0)
 endif ()
 
-  if (HDF5_TEST_VFD)
-    # Run test with different Virtual File Driver
-    foreach (vfd ${VFD_LIST})
-      ADD_VFD_TEST (${vfd} 0)
-    endforeach ()
-  endif ()
+##############################################################################
+##############################################################################
+###                         V F D   T E S T S                              ###
+##############################################################################
+##############################################################################
+
+if (HDF5_TEST_VFD)
+  include (CMakeVFDTests.cmake)
+endif ()
+
+##############################################################################
+##############################################################################
+###                         V O L   T E S T S                              ###
+##############################################################################
+##############################################################################
+
+if (HDF5_TEST_VOL)
+  include (CMakeVOLTests.cmake)
+endif ()
