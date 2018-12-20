@@ -11,7 +11,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Purpose:     Attribute code for the native VOL connector.
+ * Purpose:     Attribute callbacks for the native VOL connector
  *
  */
 
@@ -115,9 +115,6 @@ done:
  * Return:      Success:    attribute pointer
  *              Failure:    NULL
  *
- * Programmer:  Mohamad Chaarawi
- *              March, 2012
- *
  *-------------------------------------------------------------------------
  */
 void *
@@ -172,9 +169,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Mohamad Chaarawi
- *              March, 2012
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -205,9 +199,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Mohamad Chaarawi
- *              March, 2012
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -237,9 +228,6 @@ done:
  * Purpose:     Handles the attribute get callback
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Mohamad Chaarawi
- *              March, 2012
  *
  *-------------------------------------------------------------------------
  */
@@ -421,9 +409,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Mohamad Chaarawi
- *              August, 2014
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -592,10 +577,7 @@ done:
  * Purpose:     Handles the attribute close callback
  *
  * Return:      Success:    SUCCEED
- *              Failure:    FAIL, attribute not closed
- *
- * Programmer:  Mohamad Chaarawi
- *              March, 2012
+ *              Failure:    FAIL (attribute will not be closed)
  *
  *-------------------------------------------------------------------------
  */
