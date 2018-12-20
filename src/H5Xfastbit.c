@@ -1918,8 +1918,7 @@ H5X__fastbit_evaluate_query(H5X_fastbit_t *fastbit, hid_t query_id,
         if (0 > fastbit_selection_get_coordinates(selection_handle, hit_coords,(uint64_t) nhits, 0U))
             HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "can't get coordinates");
 
-// #ifdef H5X_FASTBIT_DEBUG
-#if 0
+#ifdef H5X_FASTBIT_DEBUG
         /* TODO remove debug */
         {
             int k;

@@ -1613,7 +1613,6 @@ done:
 static herr_t
 H5Q__apply_data_elem(const H5Q_t *query, hbool_t *result, const H5T_t *type, const void *value)
 {
-    static int call_count = 0;
     herr_t ret_value = SUCCEED; /* Return value */
     void *value_buf = NULL, *query_value_buf = NULL;
     H5T_t *query_type, *promoted_type;
@@ -1630,8 +1629,6 @@ H5Q__apply_data_elem(const H5Q_t *query, hbool_t *result, const H5T_t *type, con
     HDassert((query->query.select.type == H5Q_TYPE_DATA_ELEM) ||
             (query->query.select.type == H5Q_TYPE_ATTR_VALUE));
 
-    call_count++;
-    // printf("H5Q__apply_data_elem: %d\n", call_count);
     /* Keep a copy of elem to work on */
     if (0 == (type_size = H5T_get_size(type)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a valid size");
@@ -2215,6 +2212,269 @@ typedef struct lnk_entry_list {
     H5Q_combine_op_t op;
     struct lnk_entry_list *next;
 } lnk_entry_list_t;
+
+/*
+ * Prototyping support for merging conditional query expressions
+ * to allow faster selections by executing a single (merged) query after
+ * having read a dataset. This could be an approach to use when no
+ * indexing information is available.
+ */
+
+typedef int (*F_EXPR)(float,float);
+typedef int (*D_EXPR)(double,double);
+typedef int (*B_EXPR)(int8_t,int8_t);
+typedef int (*S_EXPR)(short,short);
+typedef int (*I_EXPR)(int,int);
+typedef int (*L_EXPR)(long,long);
+typedef int (*LL_EXPR)(int64_t,int64_t);
+
+
+/**************/
+/* FLOAT      */
+/**************/
+static int
+f_expr_eq(float in, float value)
+{
+    return (in == value);
+}
+
+static int
+f_expr_ne(float in, float value)
+{
+    return (in != value);
+}
+
+static int
+f_expr_lt(float in, float value)
+{
+    return (in < value);
+}
+
+static int
+f_expr_gt(float in, float value)
+{
+    return (in > value);
+}
+
+static int
+f_in_range(float this_value, float min, float max)
+{
+    return ((this_value <= max) && (this_value >= min));
+}
+
+/**************/
+/* DOUBLE     */
+/**************/
+static int
+d_expr_eq(double in, double value)
+{
+    return (in == value);
+}
+
+static int
+d_expr_ne(double in, double value)
+{
+    return (in != value);
+}
+
+static int
+d_expr_lt(double in, double value)
+{
+    return (in < value);
+}
+
+static int
+d_expr_gt(double in, double value)
+{
+    return (in > value);
+}
+
+static int
+d_in_range(double this_value, double min, double max)
+{
+    return ((this_value <= max) && (this_value >= min));
+}
+
+/**************/
+/* BYTE(int8) */
+/**************/
+static int
+b_expr_eq(int8_t in, int8_t value)
+{
+    return (in == value);
+}
+
+static int
+b_expr_ne(int8_t in, int8_t value)
+{
+    return (in != value);
+}
+
+static int
+b_expr_lt(int8_t in, int8_t value)
+{
+    return (in < value);
+}
+
+static int
+b_expr_gt(int8_t in, int8_t value)
+{
+    return (in > value);
+}
+
+static int
+b_in_range(int8_t this_value, int8_t min, int8_t max)
+{
+    return ((this_value <= max) && (this_value >= min));
+}
+
+/**************/
+/* SHORT      */
+/**************/
+static int
+s_expr_eq(short in, short value)
+{
+    return (in == value);
+}
+
+static int
+s_expr_ne(short in, short value)
+{
+    return (in != value);
+}
+
+static int
+s_expr_lt(short in, short value)
+{
+    return (in < value);
+}
+
+static int
+s_expr_gt(short in, short value)
+{
+    return (in > value);
+}
+
+static int
+s_in_range(short this_value, short min, short max)
+{
+    return ((this_value <= max) && (this_value >= min));
+}
+
+/**************/
+/* INT        */
+/**************/
+static int
+i_expr_eq(int in, int value)
+{
+    return (in == value);
+}
+
+static int
+i_expr_ne(int in, int value)
+{
+    return (in != value);
+}
+
+static int
+i_expr_lt(int in, int value)
+{
+    return (in < value);
+}
+
+static int
+i_expr_gt(int in, int value)
+{
+    return (in > value);
+}
+
+static int
+i_in_range(int this_value, int min, int max)
+{
+    return ((this_value <= max) && (this_value >= min));
+}
+
+/**************/
+/* LONG       */
+/**************/
+static int
+l_expr_eq(long in, long value)
+{
+    return (in == value);
+}
+
+static int
+l_expr_ne(long in, long value)
+{
+    return (in != value);
+}
+
+static int
+l_expr_lt(long in, long value)
+{
+    return (in < value);
+}
+
+static int
+l_expr_gt(long in, long value)
+{
+    return (in > value);
+}
+
+static int
+l_in_range(long this_value, long min, long max)
+{
+    return ((this_value <= max) && (this_value >= min));
+}
+
+/**************/
+/* LONG LONG  */
+/**************/
+static int
+ll_expr_eq(int64_t in, int64_t value)
+{
+    return (in == value);
+}
+
+static int
+ll_expr_ne(int64_t in, int64_t value)
+{
+    return (in != value);
+}
+
+static int
+ll_expr_lt(int64_t in, int64_t value)
+{
+    return (in < value);
+}
+
+static int
+ll_expr_gt(int64_t in, int64_t value)
+{
+    return (in > value);
+}
+
+static int
+ll_in_range(int64_t this_value, int64_t min, int64_t max)
+{
+    return ((this_value <= max) && (this_value >= min));
+}
+
+/***************/
+/*  LOGICALS   */
+/***************/
+static int
+logic_or(int in1, int in2)
+{
+    return (in1 || in2);
+}
+
+static int
+logic_and(int in1, int in2)
+{
+    return (in1 && in2);
+}
+
 
 
 static char *
