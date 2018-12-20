@@ -28,7 +28,8 @@
 #include "H5FLprivate.h"        /* Free lists                               */
 #include "H5Iprivate.h"         /* IDs                                      */
 #include "H5VLprivate.h"        /* Virtual Object Layer                     */
-#include "H5VLnative.h"         /* Native VOL connector                     */
+
+#include "H5VLnative_private.h" /* Native VOL connector                     */
 
 
 /****************/

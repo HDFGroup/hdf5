@@ -21,7 +21,8 @@
 #include "H5Pprivate.h"         /* Property lists                           */
 #include "H5VLprivate.h"        /* Virtual Object Layer                     */
 
-#include "H5VLnative.h"         /* Native VOL connector                     */
+#include "H5VLnative_private.h" /* Native VOL connector                     */
+
 
 /* The VOL connector identification number */
 static hid_t H5VL_NATIVE_ID_g = H5I_INVALID_HID;

@@ -876,6 +876,7 @@ set (H5_PRIVATE_HEADERS
 
     ${HDF5_SRC_DIR}/H5UCprivate.h
 
+    ${HDF5_SRC_DIR}/H5VLnative_private.h
     ${HDF5_SRC_DIR}/H5VLpkg.h
     ${HDF5_SRC_DIR}/H5VLprivate.h
 
