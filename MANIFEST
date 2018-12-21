@@ -3249,7 +3249,6 @@
 ./c++/test/CMakeLists.txt
 ./c++/test/CMakeTests.cmake
 ./c++/test/CMakeVFDTests.cmake
-./c++/test/CMakeVOLTests.cmake
 ./examples/CMakeLists.txt
 ./examples/CMakeTests.cmake
 ./examples/run-all-ex.sh
@@ -3295,7 +3294,6 @@
 ./testpar/CMakeLists.txt
 ./testpar/CMakeTests.cmake
 ./testpar/CMakeVFDTests.cmake
-./testpar/CMakeVOLTests.cmake
 ./tools/CMakeLists.txt
 ./tools/lib/CMakeLists.txt
 ./tools/src/CMakeLists.txt
@@ -3329,7 +3327,6 @@
 ./tools/test/h5repack/CMakeLists.txt
 ./tools/test/h5repack/CMakeTests.cmake
 ./tools/test/h5repack/CMakeVFDTests.cmake
-./tools/test/h5repack/CMakeVOLTests.cmake
 ./tools/src/h5stat/CMakeLists.txt
 ./tools/test/h5stat/CMakeLists.txt
 ./tools/test/h5stat/CMakeTests.cmake
