@@ -489,7 +489,6 @@
 ./src/H5Apublic.h
 ./src/H5AC.c
 ./src/H5ACdbg.c
-./src/H5AClog.c
 ./src/H5ACmodule.h
 ./src/H5ACmpio.c
 ./src/H5ACpkg.h
@@ -519,6 +518,9 @@
 ./src/H5Cepoch.c
 ./src/H5Cimage.c
 ./src/H5Clog.c
+./src/H5Clog.h
+./src/H5Clog_json.c
+./src/H5Clog_trace.c
 ./src/H5Cmodule.h
 ./src/H5Cmpio.c
 ./src/H5Cpkg.h
