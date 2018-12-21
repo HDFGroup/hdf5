@@ -708,8 +708,8 @@ done:
  *
  * Purpose:    Calculate the size required for the minimized object header.
  *
- * Return:     Success: SUCCEED (0) (non-negative value)
- *             Failure: FAIL (-1) (negative value)
+ * Return:     Success: Positive value > 0
+ *             Failure: 0
  *
  * Programmer: Jacob Smith
  *             16 August 2018
@@ -722,9 +722,10 @@ H5D__calculate_minimum_header_size(H5F_t *file, H5D_t *dset, H5O_t *ohdr)
     H5O_fill_t *fill_prop        = NULL;
     hbool_t     use_at_least_v18 = FALSE;
     const char  continuation[1]  = ""; /* requred for work-around */
+    size_t      get_value        = 0;
     size_t      ret_value        = 0;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR;
+    FUNC_ENTER_NOAPI_NOINIT;
 
     HDassert(file);
     HDassert(dset);
@@ -735,22 +736,37 @@ H5D__calculate_minimum_header_size(H5F_t *file, H5D_t *dset, H5O_t *ohdr)
     use_at_least_v18 = (H5F_LOW_BOUND(file) >= H5F_LIBVER_V18);
 
     /* Datatype message size */
-    ret_value += H5O_msg_size_oh(file, ohdr, H5O_DTYPE_ID, type, 0);
+    get_value = H5O_msg_size_oh(file, ohdr, H5O_DTYPE_ID, type, 0);
+    if (get_value == 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, 0, "Can't get size of datatype message")
+    ret_value += get_value;
 
     /* Shared Dataspace message size */
-    ret_value += H5O_msg_size_oh(file, ohdr, H5O_SDSPACE_ID, dset->shared->space, 0);
+    get_value = H5O_msg_size_oh(file, ohdr, H5O_SDSPACE_ID, dset->shared->space, 0);
+    if (get_value == 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, 0, "can't get size of dataspace message")
+    ret_value += get_value;
 
     /* "Layout" message size */
-    ret_value += H5O_msg_size_oh(file, ohdr, H5O_LAYOUT_ID, &dset->shared->layout, 0);
+    get_value = H5O_msg_size_oh(file, ohdr, H5O_LAYOUT_ID, &dset->shared->layout, 0);
+    if (get_value == 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, 0, "can't get size of layout message")
+    ret_value += get_value;
 
     /* Fill Value message size */
-    ret_value += H5O_msg_size_oh(file, ohdr, H5O_FILL_NEW_ID, fill_prop, 0);
+    get_value = H5O_msg_size_oh(file, ohdr, H5O_FILL_NEW_ID, fill_prop, 0);
+    if (get_value == 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, 0, "can't get size of fill value message")
+    ret_value += get_value;
 
     /* "Continuation" message size */
     /* message pointer "continuation" is unused by raw get function, however,
      * a null pointer would be intercepted by an assert in H5O_msg_size_oh().
      */
-    ret_value += H5O_msg_size_oh(file, ohdr, H5O_CONT_ID, continuation, 0);
+    get_value = H5O_msg_size_oh(file, ohdr, H5O_CONT_ID, continuation, 0);
+    if (get_value == 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, 0, "can't get size of continuation message")
+    ret_value += get_value;
 
     /* Fill Value (backwards compatability) message size */
     if(fill_prop->buf && !use_at_least_v18) {
@@ -760,21 +776,33 @@ H5D__calculate_minimum_header_size(H5F_t *file, H5D_t *dset, H5O_t *ohdr)
         /* guards against shared component modification */
         HDmemcpy(&old_fill_prop, fill_prop, sizeof(old_fill_prop));
 
-        H5O_msg_reset_share(H5O_FILL_ID, &old_fill_prop);
+        if (H5O_msg_reset_share(H5O_FILL_ID, &old_fill_prop) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, 0, "can't reset the copied fill property")
 
-        ret_value += H5O_msg_size_oh(file, ohdr, H5O_FILL_ID, &old_fill_prop, 0);
+        get_value = H5O_msg_size_oh(file, ohdr, H5O_FILL_ID, &old_fill_prop, 0);
+        if (get_value == 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, 0, "can't get size of fill value (backwards compat) message")
+        ret_value += get_value;
     }
 
     /* Filter/Pipeline message size */
     if(H5D_CHUNKED == dset->shared->layout.type) {
         H5O_pline_t *pline = &dset->shared->dcpl_cache.pline;
-        if(pline->nused > 0)
-            ret_value += H5O_msg_size_oh(file, ohdr, H5O_PLINE_ID, pline, 0);
+        if(pline->nused > 0) {
+            get_value = H5O_msg_size_oh(file, ohdr, H5O_PLINE_ID, pline, 0);
+            if (get_value == 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, 0, "can't get size of filter message")
+            ret_value += get_value;
+        }
     }
 
     /* External File Link message size */
-    if(dset->shared->dcpl_cache.efl.nused > 0)
-        ret_value += H5O_msg_size_oh(file, ohdr, H5O_EFL_ID, &dset->shared->dcpl_cache.efl, 0);
+    if(dset->shared->dcpl_cache.efl.nused > 0) {
+        get_value = H5O_msg_size_oh(file, ohdr, H5O_EFL_ID, &dset->shared->dcpl_cache.efl, 0);
+        if (get_value == 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, 0, "can't get size of external file link message")
+        ret_value += get_value;
+    }
 
     /* Modification Time message size */
     if(H5O_HDR_STORE_TIMES & H5O_OH_GET_FLAGS(ohdr)) {
@@ -783,10 +811,14 @@ H5D__calculate_minimum_header_size(H5F_t *file, H5D_t *dset, H5O_t *ohdr)
         if(H5O_OH_GET_VERSION(ohdr) == 1) {
             /* v1 object headers store modification time as a message */
             time_t mtime;
-            ret_value += H5O_msg_size_oh(file, ohdr, H5O_MTIME_NEW_ID, &mtime, 0);
+            get_value = H5O_msg_size_oh(file, ohdr, H5O_MTIME_NEW_ID, &mtime, 0);
+            if (get_value == 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, 0, "can't get size of modification time message")
+            ret_value += get_value;
         }
     }
 
+done:
     FUNC_LEAVE_NOAPI(ret_value);
 } /* H5D__calculate_minimum_header_size */
 
@@ -822,6 +854,8 @@ H5D__prepare_minimized_oh(H5F_t *file, H5D_t *dset, H5O_loc_t *oloc)
         HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "can't instantiate object header")
 
     ohdr_size = H5D__calculate_minimum_header_size(file, dset, oh);
+    if (ohdr_size == 0)
+       HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "computed header size is invalid")
 
     if(H5O__apply_ohdr(file, oh, dset->shared->dcpl_id, ohdr_size, (size_t)1, oloc) == FAIL)
         HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "can't apply object header to file")
