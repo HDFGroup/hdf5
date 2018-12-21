@@ -756,10 +756,10 @@ if (BUILD_TESTING)
     mark_as_advanced (HDF5_TEST_FHEAP_VFD)
   endif ()
 
-  option (HDF5_TEST_VOL "Execute tests with different VOLs" OFF)
+  option (HDF5_TEST_VOL "Execute tests with different VOL connectors" OFF)
   mark_as_advanced (HDF5_TEST_VOL)
   if (HDF5_TEST_VOL)
-    option (HDF5_TEST_FHEAP_VOL "Execute tests with different VOLs" ON)
+    option (HDF5_TEST_FHEAP_VOL "Execute fheap test with different VOL connectors" ON)
     mark_as_advanced (HDF5_TEST_FHEAP_VOL)
   endif ()
 
