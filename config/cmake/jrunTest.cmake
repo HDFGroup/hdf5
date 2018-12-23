@@ -32,9 +32,6 @@ endif ()
 if (NOT TEST_CLASSPATH)
   message (STATUS "Require TEST_CLASSPATH to be defined")
 endif ()
-if (NOT TEST_REFERENCE)
-  message (FATAL_ERROR "Require TEST_REFERENCE to be defined")
-endif ()
 
 if (EXISTS ${TEST_FOLDER}/${TEST_OUTPUT})
   file (REMOVE ${TEST_FOLDER}/${TEST_OUTPUT})
@@ -42,14 +39,6 @@ endif ()
 
 if (EXISTS ${TEST_FOLDER}/${TEST_OUTPUT}.err)
   file (REMOVE ${TEST_FOLDER}/${TEST_OUTPUT}.err)
-endif ()
-
-# if there is not an error reference file add the error output to the stdout file
-if (NOT TEST_ERRREF)
-  if (NOT SKIP_APPEND)
-    # append error file since skip was not defined
-    set (ERROR_APPEND 1)
-  endif ()
 endif ()
 
 if (NOT TEST_LOG_LEVEL)
@@ -131,52 +120,54 @@ message (STATUS "COMMAND Error: ${TEST_ERROR}")
 
 # compare output files to references unless this must be skipped
 if (NOT TEST_SKIP_COMPARE)
-  if (WIN32 AND NOT MINGW)
-    file (READ ${TEST_FOLDER}/${TEST_REFERENCE} TEST_STREAM)
-    file (WRITE ${TEST_FOLDER}/${TEST_REFERENCE} "${TEST_STREAM}")
-  endif ()
+  if (EXISTS ${TEST_FOLDER}/${TEST_REFERENCE})
+    if (WIN32 AND NOT MINGW)
+      file (READ ${TEST_FOLDER}/${TEST_REFERENCE} TEST_STREAM)
+      file (WRITE ${TEST_FOLDER}/${TEST_REFERENCE} "${TEST_STREAM}")
+    endif ()
 
-  # now compare the output with the reference
-  execute_process (
-      COMMAND ${CMAKE_COMMAND} -E compare_files ${TEST_FOLDER}/${TEST_OUTPUT} ${TEST_FOLDER}/${TEST_REFERENCE}
-      RESULT_VARIABLE TEST_RESULT
-  )
-  if (NOT "${TEST_RESULT}" STREQUAL "0")
-    set (TEST_RESULT 0)
-    file (STRINGS ${TEST_FOLDER}/${TEST_OUTPUT} test_act)
-    list (LENGTH test_act len_act)
-    file (STRINGS ${TEST_FOLDER}/${TEST_REFERENCE} test_ref)
-    list (LENGTH test_ref len_ref)
-    if (NOT "${len_act}" STREQUAL "0" AND NOT "${len_ref}" STREQUAL "0")
-      math (EXPR _FP_LEN "${len_ref} - 1")
-      foreach (line RANGE 0 ${_FP_LEN})
-        list (GET test_act ${line} str_act)
-        list (GET test_ref ${line} str_ref)
-        if (NOT "${str_act}" STREQUAL "${str_ref}")
-          if (NOT "${str_act}" STREQUAL "")
-            set (TEST_RESULT 1)
-            message ("line = ${line}\n***ACTUAL: ${str_act}\n****REFER: ${str_ref}\n")
+    # now compare the output with the reference
+    execute_process (
+        COMMAND ${CMAKE_COMMAND} -E compare_files ${TEST_FOLDER}/${TEST_OUTPUT} ${TEST_FOLDER}/${TEST_REFERENCE}
+        RESULT_VARIABLE TEST_RESULT
+    )
+    if (NOT "${TEST_RESULT}" STREQUAL "0")
+      set (TEST_RESULT 0)
+      file (STRINGS ${TEST_FOLDER}/${TEST_OUTPUT} test_act)
+      list (LENGTH test_act len_act)
+      file (STRINGS ${TEST_FOLDER}/${TEST_REFERENCE} test_ref)
+      list (LENGTH test_ref len_ref)
+      if (NOT "${len_act}" STREQUAL "0" AND NOT "${len_ref}" STREQUAL "0")
+        math (EXPR _FP_LEN "${len_ref} - 1")
+        foreach (line RANGE 0 ${_FP_LEN})
+          list (GET test_act ${line} str_act)
+          list (GET test_ref ${line} str_ref)
+          if (NOT "${str_act}" STREQUAL "${str_ref}")
+            if (NOT "${str_act}" STREQUAL "")
+              set (TEST_RESULT 1)
+              message ("line = ${line}\n***ACTUAL: ${str_act}\n****REFER: ${str_ref}\n")
+            endif ()
           endif ()
+        endforeach ()
+      else ()
+        if ("${len_act}" STREQUAL "0")
+          message (STATUS "COMPARE Failed: ${TEST_FOLDER}/${TEST_OUTPUT} is empty")
         endif ()
-      endforeach ()
-    else ()
-      if ("${len_act}" STREQUAL "0")
-        message (STATUS "COMPARE Failed: ${TEST_FOLDER}/${TEST_OUTPUT} is empty")
+        if ("${len_ref}" STREQUAL "0")
+          message (STATUS "COMPARE Failed: ${TEST_FOLDER}/${TEST_REFERENCE} is empty")
+        endif ()
       endif ()
-      if ("${len_ref}" STREQUAL "0")
-        message (STATUS "COMPARE Failed: ${TEST_FOLDER}/${TEST_REFERENCE} is empty")
+      if (NOT "${len_act}" STREQUAL "${len_ref}")
+        set (TEST_RESULT 1)
       endif ()
     endif ()
-    if (NOT "${len_act}" STREQUAL "${len_ref}")
-      set (TEST_RESULT 1)
+
+    message (STATUS "COMPARE Result: ${TEST_RESULT}")
+
+    # again, if return value is !=0 scream and shout
+    if (NOT "${TEST_RESULT}" STREQUAL "0")
+      message (FATAL_ERROR "Failed: The output of ${TEST_OUTPUT} did not match ${TEST_REFERENCE}")
     endif ()
-  endif ()
-
-  message (STATUS "COMPARE Result: ${TEST_RESULT}")
-
-  # again, if return value is !=0 scream and shout
-  if (NOT "${TEST_RESULT}" STREQUAL "0")
-    message (FATAL_ERROR "Failed: The output of ${TEST_OUTPUT} did not match ${TEST_REFERENCE}")
   endif ()
 
   # now compare the .err file with the error reference, if supplied
@@ -217,7 +208,7 @@ if (NOT TEST_SKIP_COMPARE)
         if ("${len_ref}" STREQUAL "0")
           message (STATUS "COMPARE Failed: ${TEST_FOLDER}/${TEST_ERRREF} is empty")
         endif ()
-      endif()
+      endif ()
       if (NOT "${len_act}" STREQUAL "${len_ref}")
         set (TEST_RESULT 1)
       endif ()
@@ -226,7 +217,7 @@ if (NOT TEST_SKIP_COMPARE)
     message (STATUS "COMPARE Result: ${TEST_RESULT}")
 
     # again, if return value is !=0 scream and shout
-    if (NOT ${TEST_RESULT} STREQUAL 0)
+    if (NOT "${TEST_RESULT}" STREQUAL "0")
       message (FATAL_ERROR "Failed: The error output of ${TEST_OUTPUT}.err did not match ${TEST_ERRREF}")
     endif ()
   endif ()

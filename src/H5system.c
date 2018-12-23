@@ -121,7 +121,7 @@ HDfprintf(FILE *stream, const char *fmt, ...)
     HDassert(stream);
     HDassert(fmt);
 
-    va_start (ap, fmt);
+    HDva_start (ap, fmt);
     while (*fmt) {
         fwidth = prec = 0;
         zerofill = 0;
@@ -170,7 +170,7 @@ HDfprintf(FILE *stream, const char *fmt, ...)
                 s = rest;
             } /* end if */
             else if ('*'==*s) {
-                fwidth = va_arg(ap, int);
+                fwidth = HDva_arg(ap, int);
                 if(fwidth < 0) {
                     leftjust = 1;
                     fwidth = -fwidth;
@@ -185,7 +185,7 @@ HDfprintf(FILE *stream, const char *fmt, ...)
                     prec = (int)HDstrtol(s, &rest, 10);
                     s = rest;
                 } else if('*'==*s) {
-                    prec = va_arg(ap, int);
+                    prec = HDva_arg(ap, int);
                     s++;
                 }
                 if(prec < 1)
@@ -272,16 +272,16 @@ HDfprintf(FILE *stream, const char *fmt, ...)
                 case 'd':
                 case 'i':
                     if(!HDstrcmp(modifier, "h")) {
-                        short x = (short)va_arg(ap, int);
+                        short x = (short)HDva_arg(ap, int);
                         n = fprintf(stream, format_templ, x);
                     } else if(!*modifier) {
-                        int x = va_arg(ap, int);
+                        int x = HDva_arg(ap, int);
                         n = fprintf(stream, format_templ, x);
                     } else if(!HDstrcmp(modifier, "l")) {
-                        long x = va_arg(ap, long);
+                        long x = HDva_arg(ap, long);
                         n = fprintf(stream, format_templ, x);
                     } else {
-                        int64_t x = va_arg(ap, int64_t);
+                        int64_t x = HDva_arg(ap, int64_t);
                         n = fprintf(stream, format_templ, x);
                     }
                     break;
@@ -291,16 +291,16 @@ HDfprintf(FILE *stream, const char *fmt, ...)
                 case 'x':
                 case 'X':
                     if(!HDstrcmp(modifier, "h")) {
-                        unsigned short x = (unsigned short)va_arg(ap, unsigned int);
+                        unsigned short x = (unsigned short)HDva_arg(ap, unsigned int);
                         n = fprintf(stream, format_templ, x);
                     } else if(!*modifier) {
-                        unsigned int x = va_arg(ap, unsigned int);
+                        unsigned int x = HDva_arg(ap, unsigned int);
                         n = fprintf(stream, format_templ, x);
                     } else if(!HDstrcmp(modifier, "l")) {
-                        unsigned long x = va_arg(ap, unsigned long);
+                        unsigned long x = HDva_arg(ap, unsigned long);
                         n = fprintf(stream, format_templ, x);
                     } else {
-                        uint64_t x = va_arg(ap, uint64_t);
+                        uint64_t x = HDva_arg(ap, uint64_t);
                         n = fprintf(stream, format_templ, x);
                     }
                     break;
@@ -311,10 +311,10 @@ HDfprintf(FILE *stream, const char *fmt, ...)
                 case 'g':
                 case 'G':
                     if(!HDstrcmp(modifier, "h")) {
-                        float x = (float)va_arg(ap, double);
+                        float x = (float)HDva_arg(ap, double);
                         n = fprintf(stream, format_templ, (double)x);
                     } else if(!*modifier || !HDstrcmp(modifier, "l")) {
-                        double x = va_arg(ap, double);
+                        double x = HDva_arg(ap, double);
                         n = fprintf(stream, format_templ, x);
                     } else {
                     /*
@@ -322,10 +322,10 @@ HDfprintf(FILE *stream, const char *fmt, ...)
                     * `double' are the same thing.
                     */
 #if H5_SIZEOF_LONG_DOUBLE != H5_SIZEOF_DOUBLE
-                        long double x = va_arg(ap, long double);
+                        long double x = HDva_arg(ap, long double);
                         n = fprintf(stream, format_templ, x);
 #else
-                        double x = va_arg(ap, double);
+                        double x = HDva_arg(ap, double);
                         n = fprintf(stream, format_templ, x);
 #endif
                     }
@@ -333,7 +333,7 @@ HDfprintf(FILE *stream, const char *fmt, ...)
 
                 case 'a':
                     {
-                        haddr_t x = va_arg(ap, haddr_t);
+                        haddr_t x = HDva_arg(ap, haddr_t);
 
                         if(H5F_addr_defined(x)) {
                             len = 0;
@@ -379,7 +379,7 @@ HDfprintf(FILE *stream, const char *fmt, ...)
 
                 case 'c':
                     {
-                        char x = (char)va_arg(ap, int);
+                        char x = (char)HDva_arg(ap, int);
                         n = fprintf(stream, format_templ, x);
                     }
                     break;
@@ -387,7 +387,7 @@ HDfprintf(FILE *stream, const char *fmt, ...)
                 case 's':
                 case 'p':
                     {
-                        char *x = va_arg(ap, char*);
+                        char *x = HDva_arg(ap, char*);
                         n = fprintf(stream, format_templ, x);
                     }
                     break;
@@ -399,7 +399,7 @@ HDfprintf(FILE *stream, const char *fmt, ...)
 
                 case 't':
                     {
-                        htri_t tri_var = va_arg(ap, htri_t);
+                        htri_t tri_var = HDva_arg(ap, htri_t);
 
                         if(tri_var > 0)
                             fprintf(stream, "TRUE");
@@ -423,7 +423,7 @@ HDfprintf(FILE *stream, const char *fmt, ...)
             nout++;
         }
     }
-    va_end(ap);
+    HDva_end(ap);
     return nout;
 } /* end HDfprintf() */
 
@@ -492,7 +492,8 @@ HDstrtoll(const char *s, const char **rest, int base)
     /* Optional minus or plus sign */
     if ('+'==*s) {
         s++;
-    } else if ('-'==*s) {
+    }
+    else if ('-'==*s) {
         sign = -1;
         s++;
     }
@@ -501,10 +502,12 @@ HDstrtoll(const char *s, const char **rest, int base)
     if (0==base && '0'==*s && ('x'==s[1] || 'X'==s[1])) {
         base = 16;
         s += 2;
-    } else if (0==base && '0'==*s) {
+    }
+    else if (0==base && '0'==*s) {
         base = 8;
         s++;
-    } else if (0==base) {
+    }
+    else if (0==base) {
         base = 10;
     }
 
@@ -525,7 +528,8 @@ HDstrtoll(const char *s, const char **rest, int base)
 
             if (acc*base+digit < acc) {
                 overflow = TRUE;
-            } else {
+            }
+            else {
                 acc = acc*base + digit;
             }
         }
@@ -536,7 +540,8 @@ HDstrtoll(const char *s, const char **rest, int base)
     if (overflow) {
         if (sign>0) {
             acc = ((uint64_t)1<<(8*sizeof(int64_t)-1))-1;
-        } else {
+        }
+        else {
             acc = (int64_t)((uint64_t)1<<(8*sizeof(int64_t)-1));
         }
         errno = ERANGE;
@@ -843,9 +848,9 @@ int c99_snprintf(char* str, size_t size, const char* format, ...)
     int count;
     va_list ap;
 
-    va_start(ap, format);
+    HDva_start(ap, format);
     count = c99_vsnprintf(str, size, format, ap);
-    va_end(ap);
+    HDva_end(ap);
 
     return count;
 }

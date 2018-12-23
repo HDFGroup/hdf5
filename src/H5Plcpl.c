@@ -55,7 +55,7 @@
 
 /* Definitions for Location params */
 #define H5L_CRT_LOCATION_SIZE       sizeof(H5VL_loc_params_t)
-#define H5L_CRT_LOCATION_DEF        {H5I_BADID, H5VL_OBJECT_BY_SELF, {HADDR_UNDEF}}
+#define H5L_CRT_LOCATION_DEF        {H5I_BADID, H5VL_OBJECT_BY_SELF, {{HADDR_UNDEF}}}
 
 /* Definitions for target object NAME */
 #define H5L_CRT_TARGET_NAME_SIZE    sizeof(char *)

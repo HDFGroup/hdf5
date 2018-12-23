@@ -851,7 +851,6 @@ typedef struct {
     } u;
 } H5O_mesg_operator_t;
 
-
 /* Typedef for abstract object creation */
 typedef struct {
     H5O_type_t obj_type;        /* Type of object to create */

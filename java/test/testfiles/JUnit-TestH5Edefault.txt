@@ -38,17 +38,20 @@ HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
     minor: Unable to open file
   #001: (file name) line (number) in H5VL_file_open(): open failed
     major: Virtual Object Layer
-    minor: Unable to initialize object
-  #002: (file name) line (number) in H5VL_native_file_open(): unable to open file
+    minor: Can't open object
+  #002: (file name) line (number) in H5VL__file_open(): open failed
+    major: Virtual Object Layer
+    minor: Can't open object
+  #003: (file name) line (number) in H5VL__native_file_open(): unable to open file
     major: File accessibility
     minor: Unable to open file
-  #003: (file name) line (number) in H5F_open(): unable to open file: name = 'test', tent_flags = 1
+  #004: (file name) line (number) in H5F_open(): unable to open file: name = 'test', tent_flags = 1
     major: File accessibility
     minor: Unable to open file
-  #004: (file name) line (number) in H5FD_open(): open failed
+  #005: (file name) line (number) in H5FD_open(): open failed
     major: Virtual File Layer
     minor: Unable to initialize object
-  #005: (file name) line (number) in H5FD_sec2_open(): unable to open file: name = 'test', errno = 2, error message = 'No such file or directory', flags = 1, o_flags = 2
+  #006: (file name) line (number) in H5FD_sec2_open(): unable to open file: name = 'test', errno = 2, error message = 'No such file or directory', flags = 1, o_flags = 2
     major: File accessibility
     minor: Unable to open file
 HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
@@ -57,16 +60,19 @@ HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
     minor: Unable to open file
   #001: (file name) line (number) in H5VL_file_open(): open failed
     major: Virtual Object Layer
-    minor: Unable to initialize object
-  #002: (file name) line (number) in H5VL_native_file_open(): unable to open file
+    minor: Can't open object
+  #002: (file name) line (number) in H5VL__file_open(): open failed
+    major: Virtual Object Layer
+    minor: Can't open object
+  #003: (file name) line (number) in H5VL__native_file_open(): unable to open file
     major: File accessibility
     minor: Unable to open file
-  #003: (file name) line (number) in H5F_open(): unable to open file: name = 'test', tent_flags = 1
+  #004: (file name) line (number) in H5F_open(): unable to open file: name = 'test', tent_flags = 1
     major: File accessibility
     minor: Unable to open file
-  #004: (file name) line (number) in H5FD_open(): open failed
+  #005: (file name) line (number) in H5FD_open(): open failed
     major: Virtual File Layer
     minor: Unable to initialize object
-  #005: (file name) line (number) in H5FD_sec2_open(): unable to open file: name = 'test', errno = 2, error message = 'No such file or directory', flags = 1, o_flags = 2
+  #006: (file name) line (number) in H5FD_sec2_open(): unable to open file: name = 'test', errno = 2, error message = 'No such file or directory', flags = 1, o_flags = 2
     major: File accessibility
     minor: Unable to open file

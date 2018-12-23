@@ -843,6 +843,7 @@ if (HDF5_ENABLE_DEPRECATED_SYMBOLS)
       -D "TEST_ARGS:STRING="
       -D "TEST_EXPECT=0"
       -D "TEST_MASK_ERROR=true"
+      -D "ERROR_APPEND=1"
       -D "TEST_OUTPUT=err_compat.txt"
       -D "TEST_REFERENCE=err_compat_1"
       -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/H5TEST"
@@ -877,6 +878,7 @@ else ()
       -D "TEST_ARGS:STRING="
       -D "TEST_EXPECT=0"
       -D "TEST_MASK_ERROR=true"
+      -D "ERROR_APPEND=1"
       -D "TEST_OUTPUT=error_test.txt"
       -D "TEST_REFERENCE=error_test_1"
       -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/H5TEST"
@@ -943,6 +945,7 @@ if (BUILD_SHARED_LIBS)
         -D "TEST_ARGS:STRING="
         -D "TEST_EXPECT=0"
         -D "TEST_MASK_ERROR=true"
+        -D "ERROR_APPEND=1"
         -D "TEST_OUTPUT=err_compat.txt"
         -D "TEST_REFERENCE=err_compat_1"
         -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/H5TEST-shared"
@@ -977,6 +980,7 @@ if (BUILD_SHARED_LIBS)
         -D "TEST_ARGS:STRING="
         -D "TEST_EXPECT=0"
         -D "TEST_MASK_ERROR=true"
+        -D "ERROR_APPEND=1"
         -D "TEST_OUTPUT=error_test.txt"
         -D "TEST_REFERENCE=error_test_1"
         -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/H5TEST-shared"
@@ -1119,6 +1123,16 @@ endif()
 
 if (HDF5_TEST_VFD)
   include (CMakeVFDTests.cmake)
+endif ()
+
+##############################################################################
+##############################################################################
+###                         V O L   T E S T S                              ###
+##############################################################################
+##############################################################################
+
+if (HDF5_TEST_VOL)
+  include (CMakeVOLTests.cmake)
 endif ()
 
 ##############################################################################

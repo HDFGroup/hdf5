@@ -43,7 +43,6 @@
 #endif /* H5O_ENABLE_BOGUS */
 #include "H5Opkg.h"             /* Object headers                           */
 #include "H5VLprivate.h"        /* Virtual Object Layer                     */
-#include "H5VLnative_private.h" /* Native VOL driver                        */
 
 
 /****************/
@@ -1766,7 +1765,6 @@ H5O_get_loc(hid_t object_id)
         case H5I_FILE:
         case H5I_DATASPACE:
         case H5I_ATTR:
-        case H5I_REFERENCE:
         case H5I_VFL:
         case H5I_VOL:
         case H5I_GENPROP_CLS:
@@ -2114,7 +2112,7 @@ H5O_get_info(const H5O_loc_t *loc, H5O_info_t *oinfo, unsigned fields)
 
         /* Set the object's reference count */
         oinfo->rc = oh->nlink;
-    } 
+    } /* end if */
 
     /* Get time information, if requested */
     if(fields & H5O_INFO_TIME) {
@@ -2658,7 +2656,7 @@ H5O__visit(H5G_loc_t *loc, const char *obj_name, H5_index_t idx_type,
         HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, FAIL, "unable to open object")
 
     /* Get an ID for the visited object */
-    if((obj_id = H5VL_native_register(opened_type, obj, TRUE)) < 0)
+    if((obj_id = H5VL_wrap_register(opened_type, obj, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register visited object")
 
     /* Make callback for starting object */

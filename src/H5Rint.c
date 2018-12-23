@@ -62,18 +62,6 @@ hbool_t H5_PKG_INIT_VAR = FALSE;
 /* Local Variables */
 /*******************/
 
-/* Reference ID class
- *
- * NOTE: H5I_REFERENCE is not used by the library and has been deprecated
- *       with a tentative removal version of 1.12.0. (DER, July 2017)
- */
-static const H5I_class_t H5I_REFERENCE_CLS[1] = {{
-    H5I_REFERENCE,          /* ID class value                                       */
-    0,                      /* Class flags                                          */
-    0,                      /* # of reserved IDs for class                          */
-    NULL                    /* Callback routine for closing objects of this class   */
-}};
-
 /* Flag indicating "top" of interface has been initialized */
 static hbool_t H5R_top_package_initialize_s = FALSE;
 
@@ -97,11 +85,7 @@ H5R__init_package(void)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    /* Initialize the atom group for the file IDs */
-    if (H5I_register_type(H5I_REFERENCE_CLS) < 0)
-        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINIT, FAIL, "unable to initialize interface")
-
-    /* Mark "top" of interface as initialized, too */
+    /* Mark "top" of interface as initialized */
     H5R_top_package_initialize_s = TRUE;
 
 done:
@@ -134,16 +118,10 @@ H5R_top_term_package(void)
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    if (H5R_top_package_initialize_s) {
-        if (H5I_nmembers(H5I_REFERENCE) > 0) {
-            (void)H5I_clear_type(H5I_REFERENCE, FALSE, FALSE);
-            n++;
-	    }
-
-        /* Mark closed */
-        if (0 == n)
+    /* Mark closed if initialized */
+    if(H5R_top_package_initialize_s)
+        if(0 == n)
             H5R_top_package_initialize_s = FALSE;
-    }
 
     FUNC_LEAVE_NOAPI(n)
 } /* end H5R_top_term_package() */
@@ -176,16 +154,12 @@ H5R_term_package(void)
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    if (H5_PKG_INIT_VAR) {
+    if(H5_PKG_INIT_VAR) {
         /* Sanity checks */
-        HDassert(0 == H5I_nmembers(H5I_REFERENCE));
         HDassert(FALSE == H5R_top_package_initialize_s);
 
-        /* Destroy the reference id group */
-        n += (H5I_dec_type_ref(H5I_REFERENCE) > 0);
-
         /* Mark closed */
-        if (0 == n)
+        if(0 == n)
             H5_PKG_INIT_VAR = FALSE;
     }
 
@@ -692,9 +666,9 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 ssize_t
-H5R__get_name(H5F_t *f, H5R_type_t ref_type, const void *_ref, char *name, size_t size)
+H5R__get_name(H5F_t *f, H5R_type_t ref_type, const void *_ref,
+    char *name, size_t size)
 {
-    hid_t file_id = H5I_INVALID_HID;    /* ID for file that the reference is in */
     H5O_loc_t oloc;             /* Object location describing object for reference */
     ssize_t ret_value = -1;     /* Return value */
 
@@ -728,7 +702,7 @@ H5R__get_name(H5F_t *f, H5R_type_t ref_type, const void *_ref, char *name, size_
             UINT32DECODE(p, hobjid.idx);
 
             /* Get the dataset region from the heap (allocate inside routine) */
-            if ((buf = (uint8_t *)H5HG_read(oloc.file, &hobjid, NULL, NULL)) == NULL)
+            if((buf = (uint8_t *)H5HG_read(oloc.file, &hobjid, NULL, NULL)) == NULL)
                 HGOTO_ERROR(H5E_REFERENCE, H5E_READERROR, (-1), "Unable to read dataset region information")
 
             /* Get the object oid for the dataset */
@@ -747,19 +721,11 @@ H5R__get_name(H5F_t *f, H5R_type_t ref_type, const void *_ref, char *name, size_
             HGOTO_ERROR(H5E_REFERENCE, H5E_UNSUPPORTED, (-1), "internal error (unknown reference type)")
     } /* end switch */
 
-    /* Retrieve file ID for name search */
-    if ((file_id = H5F_get_id(f, FALSE)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, (-1), "can't get file ID")
-
     /* Get name, length, etc. */
-    if ((ret_value = H5G_get_name_by_addr(file_id, &oloc, name, size)) < 0)
+    if((ret_value = H5G_get_name_by_addr(f, &oloc, name, size)) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, (-1), "can't determine name")
 
 done:
-    /* Close file ID used for search */
-    if (file_id > 0 && H5I_dec_ref(file_id) < 0)
-        HDONE_ERROR(H5E_REFERENCE, H5E_CANTDEC, (-1), "can't decrement ref count of temp ID")
-
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5R__get_name() */
 

@@ -479,7 +479,7 @@ typedef struct H5F_t H5F_t;
 #define H5F_ACS_SDATA_BLOCK_SIZE_NAME           "sdata_block_size" /* Minimum "small data" allocation block size (when aggregating "small" raw data allocations) */
 #define H5F_ACS_GARBG_COLCT_REF_NAME            "gc_ref"        /* Garbage-collect references */
 #define H5F_ACS_FILE_DRV_NAME                   "vfd_info" /* File driver ID & info */
-#define H5F_ACS_VOL_DRV_NAME                    "vol_driver_info" /* VOL driver ID & info */
+#define H5F_ACS_VOL_CONN_NAME                   "vol_connector_info" /* VOL connector ID & info */
 #define H5F_ACS_CLOSE_DEGREE_NAME               "close_degree"  /* File close degree */
 #define H5F_ACS_FAMILY_OFFSET_NAME              "family_offset" /* Offset position in file for family file driver */
 #define H5F_ACS_FAMILY_NEWSIZE_NAME             "family_newsize" /* New member size of family driver.  (private property only used by h5repart) */
@@ -500,9 +500,7 @@ typedef struct H5F_t H5F_t;
 #define H5F_ACS_USE_MDC_LOGGING_NAME            "use_mdc_logging" /* Whether to use metadata cache logging */
 #define H5F_ACS_MDC_LOG_LOCATION_NAME           "mdc_log_location" /* Name of metadata cache log location */
 #define H5F_ACS_START_MDC_LOG_ON_ACCESS_NAME    "start_mdc_log_on_access" /* Whether logging starts on file create/open */
-#define H5F_ACS_CORE_WRITE_TRACKING_FLAG_NAME   "core_write_tracking_flag" /* Whether or not core VFD backing store write tracking is enabled */
 #define H5F_ACS_EVICT_ON_CLOSE_FLAG_NAME        "evict_on_close_flag" /* Whether or not the metadata cache will evict objects on close */
-#define H5F_ACS_CORE_WRITE_TRACKING_PAGE_SIZE_NAME "core_write_tracking_page_size" /* The page size in kiB when core VFD write tracking is enabled */
 #define H5F_ACS_COLL_MD_WRITE_FLAG_NAME         "collective_metadata_write" /* property indicating whether metadata writes are done collectively or not */
 #define H5F_ACS_META_CACHE_INIT_IMAGE_CONFIG_NAME "mdc_initCacheImageCfg" /* Initial metadata cache image creation configuration */
 #define H5F_ACS_PAGE_BUFFER_SIZE_NAME           "page_buffer_size" /* the maximum size for the page buffer cache */
@@ -716,6 +714,7 @@ typedef enum H5F_prefix_open_t {
 /* Private functions */
 H5_DLL H5F_t *H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id);
 H5_DLL herr_t H5F_try_close(H5F_t *f, hbool_t *was_closed/*out*/);
+H5_DLL hid_t H5F_get_file_id(hid_t obj_id, H5I_type_t id_type);
 
 /* Functions that retrieve values from the file struct */
 H5_DLL H5F_libver_t H5F_get_low_bound(const H5F_t *f);
@@ -734,7 +733,7 @@ H5_DLL H5F_t *H5F_get_parent(const H5F_t *f);
 H5_DLL unsigned H5F_get_nmounts(const H5F_t *f);
 H5_DLL unsigned H5F_get_read_attempts(const H5F_t *f);
 H5_DLL hid_t H5F_get_access_plist(H5F_t *f, hbool_t app_ref);
-H5_DLL hid_t H5F_get_id(H5F_t *file, hbool_t app_ref);
+H5_DLL hid_t H5F_get_id(H5F_t *file);
 H5_DLL herr_t H5F_get_obj_count(const H5F_t *f, unsigned types, hbool_t app_ref, size_t *obj_id_count_ptr);
 H5_DLL herr_t H5F_get_obj_ids(const H5F_t *f, unsigned types, size_t max_objs, hid_t *oid_list, hbool_t app_ref, size_t *obj_id_count_ptr);
 H5_DLL hsize_t H5F_get_pgend_meta_thres(const H5F_t *f);
