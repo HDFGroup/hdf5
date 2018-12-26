@@ -821,7 +821,7 @@ oh_compare(hid_t did1, hid_t did2)
  * minimized dataset object headers.
  */
 static herr_t
-test_minimized_oh_attribute_addition(void)
+test_minimized_dset_ohdr_attribute_addition(hid_t fapl_id)
 {
     hsize_t array_10[1]      = {10}; /* dataspace extent */
     char    buffer[10]       = "";   /* to inspect string attribute */
@@ -871,7 +871,7 @@ test_minimized_oh_attribute_addition(void)
     ret = H5Pset_dset_no_attrs_hint(dcpl_id, TRUE);
     if(ret < 0) TEST_ERROR
 
-    file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
     if(file_id < 0) TEST_ERROR
 
     H5E_BEGIN_TRY {
@@ -1031,14 +1031,14 @@ error :
         (void)H5Fclose(file_id);
     } H5E_END_TRY;
     return FAIL;
-} /* test_minimized_oh_attribute_addition */
+} /* test_minimized_dset_ohdr_attribute_addition */
 
 /*
  * Compare header sizes against when headers have been minimized.
  * Repeats tests with headers "compact" and normal.
  */
 static herr_t
-test_minimized_oh_size_comparisons(void)
+test_minimized_dset_ohdr_size_comparisons(hid_t fapl_id)
 {
     hsize_t  array_10[1] = {10}; /* dataspace extents */
     unsigned compact     = 0;
@@ -1050,22 +1050,30 @@ test_minimized_oh_size_comparisons(void)
     hid_t dcpl_dontmin  = -1;
     hid_t dcpl_default  = -1;
 
-    /* IDs for non-minimzed file open */
+    /* IDs for non-minimized file open */
     hid_t file_f_id   = -1; /* lower 'f' for standard file setting */
     hid_t dset_f_x_id = -1; /* 'x' for default */
     hid_t dset_f_N_id = -1; /* 'N' for explcit non-minimized dset */
-    hid_t dset_f_Y_id = -1; /* 'Y' for minimzed dset */
+    hid_t dset_f_Y_id = -1; /* 'Y' for minimized dset */
 
-    /* IDs for minimzed file open */
-    hid_t file_F_id   = -1; /* upper 'F' for minimzed file setting */
+    /* IDs for minimized file open */
+    hid_t file_F_id   = -1; /* upper 'F' for minimized file setting */
     hid_t dset_F_x_id = -1; /* 'x' for default */
     hid_t dset_F_N_id = -1; /* 'N' for explcit non-minimized dset */
-    hid_t dset_F_Y_id = -1; /* 'Y' for minimzed dset */
+    hid_t dset_F_Y_id = -1; /* 'Y' for minimized dset */
 
     char filename_a[512] = "";
     char filename_b[512] = "";
 
     herr_t ret;
+
+    /* dataset suffixes:
+     *                | default | minimize | don't minimize (dcpl-set)
+     * ---------------+---------+----------+---------------
+     * file-default   |   f_x   |   f_Y    |   f_N
+     * ---------------+---------+----------+---------------
+     * file-minimized |   F_x   |   F_Y    |   F_N
+     */
 
     TESTING("minimized dset object headers size comparisons");
 
@@ -1110,7 +1118,7 @@ test_minimized_oh_size_comparisons(void)
         int_type_id = H5Tcopy(H5T_NATIVE_INT);
         if(int_type_id < 0) TEST_ERROR
 
-        file_f_id = H5Fcreate(filename_a, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+        file_f_id = H5Fcreate(filename_a, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
         if(file_f_id < 0) TEST_ERROR
 
         dset_f_x_id = H5Dcreate(file_f_id, "default", int_type_id, dspace_id, H5P_DEFAULT, dcpl_default, H5P_DEFAULT);
@@ -1122,7 +1130,7 @@ test_minimized_oh_size_comparisons(void)
         dset_f_Y_id = H5Dcreate(file_f_id, "dsetMIN", int_type_id, dspace_id, H5P_DEFAULT, dcpl_minimize, H5P_DEFAULT);
         if(dset_f_x_id < 0) TEST_ERROR
 
-        file_F_id = H5Fcreate(filename_b, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+        file_F_id = H5Fcreate(filename_b, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
         if(file_F_id < 0) TEST_ERROR
         ret = H5Fset_dset_no_attrs_hint(file_F_id, TRUE);
         if(ret < 0) TEST_ERROR
@@ -1197,13 +1205,13 @@ error :
         (void)H5Dclose(dset_F_Y_id);
     } H5E_END_TRY;
     return FAIL;
-} /* test_minimized_oh_size_comparisons */
+} /* test_minimized_dset_ohdr_size_comparisons */
 
 /*
  * Test minimized dataset object header with filter/pipeline message
  */
 static herr_t
-test_minimized_oh_with_filter(void)
+test_minimized_dset_ohdr_with_filter(hid_t fapl_id)
 {
     char           filename[512]   = "";
     const hsize_t  extents[1]      = {1024}; /* extents of dataspace */
@@ -1222,12 +1230,13 @@ test_minimized_oh_with_filter(void)
     hid_t          file_id         = -1;
     herr_t         ret;
 
-/*           | default | minimize
- * ----------+---------+---------
- * no filter |    xx   |   mx
- * ----------+---------+---------
- * filter    |    xZ   |   mZ
- */
+    /* dcpl suffixes:
+     *           | default | minimize
+     * ----------+---------+---------
+     * no filter |    xx   |   mx
+     * ----------+---------+---------
+     * filter    |    xZ   |   mZ
+     */
 
     TESTING("minimized dset object headers with filter message");
 
@@ -1264,7 +1273,7 @@ test_minimized_oh_with_filter(void)
     dtype_id = H5Tcopy(H5T_NATIVE_INT);
     if(dtype_id < 0) TEST_ERROR
 
-    file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
     if(file_id < 0) TEST_ERROR
 
     dset_xx_id = H5Dcreate(file_id, "xx", dtype_id, dspace_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
@@ -1320,13 +1329,13 @@ error:
         (void)H5Fclose(file_id);
     } H5E_END_TRY;
     return FAIL;
-} /* test_minimized_oh_with_filter */
+} /* test_minimized_dset_ohdr_with_filter */
 
 /*
  * Test minimized dataset object header and recording modification times.
  */
 static herr_t
-test_minimized_oh_modification_times(void)
+test_minimized_dset_ohdr_modification_times(hid_t _fapl_id)
 {
     /* test-local structure for parameterized testing
      */
@@ -1357,6 +1366,16 @@ test_minimized_oh_modification_times(void)
         { 1, }, /* version 1 object header */
         { 2, }, /* version 2 object header */
     };
+
+    /* dcpl suffixes:
+     *             | default | minimize
+     * ------------+---------+---------
+     * default     |    xx   |   mx
+     * ------------+---------+---------
+     * don't track |    xN   |   mN
+     * ------------+---------+---------
+     * track       |    xT   |   mT
+     */
 
     TESTING("minimized dset object headers with modification times");
 
@@ -1403,7 +1422,8 @@ test_minimized_oh_modification_times(void)
          * per-case setup *
          * -------------- */
 
-        fapl_id = H5P_DEFAULT;
+        fapl_id = H5Pcopy(_fapl_id);
+        if(fapl_id < 0) TEST_ERROR
 
         if(cases[i].oh_version > 1) {
             fapl_id = H5Pcreate(H5P_FILE_ACCESS);
@@ -1453,9 +1473,7 @@ test_minimized_oh_modification_times(void)
         if(H5Dclose(dset_mT_id) < 0) TEST_ERROR
         if(H5Dclose(dset_mN_id) < 0) TEST_ERROR
         if(H5Fclose(file_id) < 0) TEST_ERROR
-
-        if((fapl_id != H5P_DEFAULT) && (H5Pclose(fapl_id) < 0))
-            TEST_ERROR
+        if(H5Pclose(fapl_id) < 0) TEST_ERROR
 
     } /* for each version tested */
 
@@ -1490,13 +1508,13 @@ error:
         (void)H5Pclose(fapl_id);
     } H5E_END_TRY;
     return FAIL;
-} /* test_minimized_oh_modification_times */
+} /* test_minimized_dset_ohdr_modification_times */
 
 /*
  * Test minimized dataset object header with a fill value set.
  */
 static herr_t
-test_minimized_oh_fillvalue_backwards_compatability(void)
+test_minimized_dset_ohdr_fillvalue_backwards_compatability(hid_t _fapl_id)
 {
     char          filename[512] = "";
     const hsize_t extents[1]    = {64}; /* extents of dataspace */
@@ -1534,7 +1552,7 @@ test_minimized_oh_fillvalue_backwards_compatability(void)
     ret = H5Pset_fill_value(dcpl_id, dtype_id, fill);
     if(ret == FAIL) TEST_ERROR;
 
-    fapl_id = H5Pcreate(H5P_FILE_ACCESS);
+    fapl_id = H5Pcopy(_fapl_id);
     if(fapl_id < 0) TEST_ERROR
 
     ret = H5Pset_libver_bounds(fapl_id, H5F_LIBVER_EARLIEST, H5F_LIBVER_LATEST);
@@ -1599,7 +1617,7 @@ error:
         (void)H5Fclose(file_id);
     } H5E_END_TRY;
     return FAIL;
-} /* test_minimized_oh_fillvalue_backwards_compatability */
+} /* test_minimized_dset_ohdr_fillvalue_backwards_compatability */
 
 #define STR_EARLIEST "earliest"
 #define STR_V18 "v18"
@@ -1898,19 +1916,19 @@ main(void)
         if(test_ohdr_cache(filename, fapl) < 0)
             TEST_ERROR
 
-        if(test_minimized_oh_attribute_addition() < 0)
+        if(test_minimized_dset_ohdr_attribute_addition(fapl) < 0)
             TEST_ERROR
 
-        if(test_minimized_oh_size_comparisons() < 0)
+        if(test_minimized_dset_ohdr_size_comparisons(fapl) < 0)
             TEST_ERROR
 
-        if(test_minimized_oh_with_filter() < 0)
+        if(test_minimized_dset_ohdr_with_filter(fapl) < 0)
             TEST_ERROR
 
-        if(test_minimized_oh_modification_times() < 0)
+        if(test_minimized_dset_ohdr_modification_times(fapl) < 0)
             TEST_ERROR
 
-        if(test_minimized_oh_fillvalue_backwards_compatability() < 0)
+        if(test_minimized_dset_ohdr_fillvalue_backwards_compatability(fapl) < 0)
             TEST_ERROR
 
       } /* high */

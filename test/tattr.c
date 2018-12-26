@@ -161,6 +161,10 @@ typedef struct {
 static herr_t attr_op1(hid_t loc_id, const char *name, const H5A_info_t *ainfo,
     void *op_data);
 
+/* Global dcpl ID, can be re-set as a generated dcpl for various operations
+ * across multiple tests.
+ * e.g., minimized dataset object headers
+ */
 static hid_t dcpl_g = H5P_DEFAULT;
 
 
@@ -11011,7 +11015,7 @@ test_attr(void)
     CHECK_I(ret, "H5Pset_shared_mesg_index");
 
     for(minimize_dset_oh = 0; minimize_dset_oh <= 1; minimize_dset_oh++) {
-        if (minimize_dset_oh == 0) {
+        if(minimize_dset_oh == 0) {
             MESSAGE(7, ("testing with default dataset object headers\n"));
             dcpl_g = H5P_DEFAULT;
         } else {
@@ -11020,129 +11024,128 @@ test_attr(void)
             CHECK(dcpl, FAIL, "H5Pcreate");
             ret = H5Pset_dset_no_attrs_hint(dcpl, TRUE);
             CHECK_I(ret, "H5Pset_dset_no_attrs_hint");
-
             dcpl_g = dcpl;
         }
 
-    for(new_format = FALSE; new_format <= TRUE; new_format++) {
-        hid_t my_fapl;
+        for(new_format = FALSE; new_format <= TRUE; new_format++) {
+            hid_t my_fapl;
 
-        if(new_format) {
-            MESSAGE(7, ("testing with new file format\n"));
-            my_fapl = fapl2;
-        } else {
-            MESSAGE(7, ("testing with old file format\n"));
-            my_fapl = fapl;
-        }
-
-        /* These next two tests use the same file information */
-        test_attr_basic_write(my_fapl);    /* Test basic H5A writing code */
-        test_attr_basic_read(my_fapl);     /* Test basic H5A reading code */
-
-        /* These next two tests use their own file information */
-        test_attr_flush(my_fapl);          /* Test H5A I/O in the presence of H5Fflush calls */
-        test_attr_plist(my_fapl);          /* Test attribute property lists */
-
-        /* These next two tests use the same file information */
-        test_attr_compound_write(my_fapl);  /* Test complex datatype H5A writing code */
-        test_attr_compound_read(my_fapl);   /* Test complex datatype H5A reading code */
-
-        /* These next two tests use the same file information */
-        test_attr_scalar_write(my_fapl);  /* Test scalar dataspace H5A writing code */
-        test_attr_scalar_read(my_fapl);   /* Test scalar dataspace H5A reading code */
-
-        /* These next four tests use the same file information */
-        test_attr_mult_write(my_fapl);     /* Test H5A writing code for multiple attributes */
-        test_attr_mult_read(my_fapl);      /* Test H5A reading code for multiple attributes */
-        test_attr_iterate(my_fapl);        /* Test H5A iterator code */
-        test_attr_delete(my_fapl);         /* Test H5A code for deleting attributes */
-
-        /* This next test uses its own file information */
-        test_attr_dtype_shared(my_fapl);   /* Test using shared dataypes in attributes */
-
-        /* This next test uses its own file information */
-        test_attr_duplicate_ids(my_fapl);
-
-        for(use_shared = FALSE; use_shared <= TRUE; use_shared++) {
-            hid_t my_fcpl;
-
-            if(new_format == TRUE && use_shared) {
-                MESSAGE(7, ("testing with shared attributes\n"));
-                my_fcpl = fcpl2;
+            if(new_format) {
+                MESSAGE(7, ("testing with new file format\n"));
+                my_fapl = fapl2;
             } else {
-                MESSAGE(7, ("testing without shared attributes\n"));
-                my_fcpl = fcpl;
+                MESSAGE(7, ("testing with old file format\n"));
+                my_fapl = fapl;
             }
 
-            test_attr_big(my_fcpl, my_fapl);                /* Test storing big attribute */
-            test_attr_null_space(my_fcpl, my_fapl);         /* Test storing attribute with NULL dataspace */
-            test_attr_deprec(fcpl, my_fapl);                /* Test deprecated API routines */
-            test_attr_many(new_format, my_fcpl, my_fapl);               /* Test storing lots of attributes */
-            test_attr_info_null_info_pointer(my_fcpl, my_fapl); /* Test passing a NULL attribute info pointer to H5Aget_info(_by_name/_by_idx) */
+            /* These next two tests use the same file information */
+            test_attr_basic_write(my_fapl);    /* Test basic H5A writing code */
+            test_attr_basic_read(my_fapl);     /* Test basic H5A reading code */
 
-            /* New attribute API routine tests
-             */
-            test_attr_info_by_idx(new_format, my_fcpl, my_fapl);    /* Test querying attribute info by index */
-            test_attr_delete_by_idx(new_format, my_fcpl, my_fapl);  /* Test deleting attribute by index */
-            test_attr_iterate2(new_format, my_fcpl, my_fapl);       /* Test iterating over attributes by index */
-            test_attr_open_by_idx(new_format, my_fcpl, my_fapl);    /* Test opening attributes by index */
-            test_attr_open_by_name(new_format, my_fcpl, my_fapl);   /* Test opening attributes by name */
-            test_attr_create_by_name(new_format, my_fcpl, my_fapl); /* Test creating attributes by name */
+            /* These next two tests use their own file information */
+            test_attr_flush(my_fapl);          /* Test H5A I/O in the presence of H5Fflush calls */
+            test_attr_plist(my_fapl);          /* Test attribute property lists */
 
-            /* Tests that address specific bugs
-             */
-            test_attr_bug1(my_fcpl, my_fapl);               /* Test odd allocation operations */
-            test_attr_bug2(my_fcpl, my_fapl);               /* Test many deleted attributes */
-            test_attr_bug3(my_fcpl, my_fapl);               /* Test "self referential" attributes */
-            test_attr_bug4(my_fcpl, my_fapl);               /* Test attributes on named datatypes */
-            test_attr_bug5(my_fcpl, my_fapl);               /* Test opening/closing attributes through different file handles */
-            test_attr_bug6(my_fcpl, my_fapl);               /* Test reading empty attribute */
-            /* test_attr_bug7 is specific to the "new" object header format,
-             * and in fact fails if used with the old format due to the
-             * attributes being larger than 64K */
-            test_attr_bug8(my_fcpl, my_fapl);               /* Test attribute expanding object header with undecoded messages */
-            test_attr_bug9(my_fcpl, my_fapl);               /* Test large attributes converting to dense storage */
+            /* These next two tests use the same file information */
+            test_attr_compound_write(my_fapl);  /* Test complex datatype H5A writing code */
+            test_attr_compound_read(my_fapl);   /* Test complex datatype H5A reading code */
 
-            /* tests specific to the "new format"
-             */
-            if (new_format == TRUE) {
-                /* General attribute tests */
-                test_attr_dense_create(my_fcpl, my_fapl);       /* Test dense attribute storage creation */
-                test_attr_dense_open(my_fcpl, my_fapl);         /* Test opening attributes in dense storage */
-                test_attr_dense_delete(my_fcpl, my_fapl);       /* Test deleting attributes in dense storage */
-                test_attr_dense_rename(my_fcpl, my_fapl);       /* Test renaming attributes in dense storage */
-                test_attr_dense_unlink(my_fcpl, my_fapl);       /* Test unlinking object with attributes in dense storage */
-                test_attr_dense_limits(my_fcpl, my_fapl);       /* Test dense attribute storage limits */
-                test_attr_dense_dup_ids(my_fcpl, my_fapl);      /* Test duplicated IDs for dense attribute storage */
+            /* These next two tests use the same file information */
+            test_attr_scalar_write(my_fapl);  /* Test scalar dataspace H5A writing code */
+            test_attr_scalar_read(my_fapl);   /* Test scalar dataspace H5A reading code */
 
-                /* Attribute creation order tests
+            /* These next four tests use the same file information */
+            test_attr_mult_write(my_fapl);     /* Test H5A writing code for multiple attributes */
+            test_attr_mult_read(my_fapl);      /* Test H5A reading code for multiple attributes */
+            test_attr_iterate(my_fapl);        /* Test H5A iterator code */
+            test_attr_delete(my_fapl);         /* Test H5A code for deleting attributes */
+
+            /* This next test uses its own file information */
+            test_attr_dtype_shared(my_fapl);   /* Test using shared dataypes in attributes */
+
+            /* This next test uses its own file information */
+            test_attr_duplicate_ids(my_fapl);
+
+            for(use_shared = FALSE; use_shared <= TRUE; use_shared++) {
+                hid_t my_fcpl;
+
+                if(new_format == TRUE && use_shared) {
+                    MESSAGE(7, ("testing with shared attributes\n"));
+                    my_fcpl = fcpl2;
+                } else {
+                    MESSAGE(7, ("testing without shared attributes\n"));
+                    my_fcpl = fcpl;
+                }
+
+                test_attr_big(my_fcpl, my_fapl);                /* Test storing big attribute */
+                test_attr_null_space(my_fcpl, my_fapl);         /* Test storing attribute with NULL dataspace */
+                test_attr_deprec(fcpl, my_fapl);                /* Test deprecated API routines */
+                test_attr_many(new_format, my_fcpl, my_fapl);               /* Test storing lots of attributes */
+                test_attr_info_null_info_pointer(my_fcpl, my_fapl); /* Test passing a NULL attribute info pointer to H5Aget_info(_by_name/_by_idx) */
+
+                /* New attribute API routine tests
                  */
-                test_attr_corder_create_basic(my_fcpl, my_fapl);/* Test creating an object w/attribute creation order info */
-                test_attr_corder_create_compact(my_fcpl, my_fapl);  /* Test compact attribute storage on an object w/attribute creation order info */
-                test_attr_corder_create_dense(my_fcpl, my_fapl);/* Test dense attribute storage on an object w/attribute creation order info */
-                test_attr_corder_create_reopen(my_fcpl, my_fapl);/* Test creating attributes w/reopening file from using new format to using old format */
-                test_attr_corder_transition(my_fcpl, my_fapl);  /* Test attribute storage transitions on an object w/attribute creation order info */
-                test_attr_corder_delete(my_fcpl, my_fapl);      /* Test deleting object using dense storage w/attribute creation order info */
+                test_attr_info_by_idx(new_format, my_fcpl, my_fapl);    /* Test querying attribute info by index */
+                test_attr_delete_by_idx(new_format, my_fcpl, my_fapl);  /* Test deleting attribute by index */
+                test_attr_iterate2(new_format, my_fcpl, my_fapl);       /* Test iterating over attributes by index */
+                test_attr_open_by_idx(new_format, my_fcpl, my_fapl);    /* Test opening attributes by index */
+                test_attr_open_by_name(new_format, my_fcpl, my_fapl);   /* Test opening attributes by name */
+                test_attr_create_by_name(new_format, my_fcpl, my_fapl); /* Test creating attributes by name */
 
-                /* More complex tests with exclusively both "new format" and "shared" attributes
+                /* Tests that address specific bugs
                  */
-                if(use_shared == TRUE) {
-                    test_attr_shared_write(my_fcpl, my_fapl);   /* Test writing to shared attributes in compact & dense storage */
-                    test_attr_shared_rename(my_fcpl, my_fapl);  /* Test renaming shared attributes in compact & dense storage */
-                    test_attr_shared_delete(my_fcpl, my_fapl);  /* Test deleting shared attributes in compact & dense storage */
-                    test_attr_shared_unlink(my_fcpl, my_fapl);  /* Test unlinking object with shared attributes in compact & dense storage */
-                } /* if using shared attributes */
-
-                test_attr_delete_last_dense(my_fcpl, my_fapl);
-
+                test_attr_bug1(my_fcpl, my_fapl);               /* Test odd allocation operations */
+                test_attr_bug2(my_fcpl, my_fapl);               /* Test many deleted attributes */
+                test_attr_bug3(my_fcpl, my_fapl);               /* Test "self referential" attributes */
+                test_attr_bug4(my_fcpl, my_fapl);               /* Test attributes on named datatypes */
+                test_attr_bug5(my_fcpl, my_fapl);               /* Test opening/closing attributes through different file handles */
+                test_attr_bug6(my_fcpl, my_fapl);               /* Test reading empty attribute */
                 /* test_attr_bug7 is specific to the "new" object header format,
                  * and in fact fails if used with the old format due to the
                  * attributes being larger than 64K */
-                test_attr_bug7(my_fcpl, my_fapl);               /* Test creating and deleting large attributes in ohdr chunk 0 */
+                test_attr_bug8(my_fcpl, my_fapl);               /* Test attribute expanding object header with undecoded messages */
+                test_attr_bug9(my_fcpl, my_fapl);               /* Test large attributes converting to dense storage */
 
-            } /* if using "new format" */
-        } /* for unshared/shared attributes */
-    } /* for old/new format */
+                /* tests specific to the "new format"
+                 */
+                if (new_format == TRUE) {
+                    /* General attribute tests */
+                    test_attr_dense_create(my_fcpl, my_fapl);       /* Test dense attribute storage creation */
+                    test_attr_dense_open(my_fcpl, my_fapl);         /* Test opening attributes in dense storage */
+                    test_attr_dense_delete(my_fcpl, my_fapl);       /* Test deleting attributes in dense storage */
+                    test_attr_dense_rename(my_fcpl, my_fapl);       /* Test renaming attributes in dense storage */
+                    test_attr_dense_unlink(my_fcpl, my_fapl);       /* Test unlinking object with attributes in dense storage */
+                    test_attr_dense_limits(my_fcpl, my_fapl);       /* Test dense attribute storage limits */
+                    test_attr_dense_dup_ids(my_fcpl, my_fapl);      /* Test duplicated IDs for dense attribute storage */
+
+                    /* Attribute creation order tests
+                     */
+                    test_attr_corder_create_basic(my_fcpl, my_fapl);/* Test creating an object w/attribute creation order info */
+                    test_attr_corder_create_compact(my_fcpl, my_fapl);  /* Test compact attribute storage on an object w/attribute creation order info */
+                    test_attr_corder_create_dense(my_fcpl, my_fapl);/* Test dense attribute storage on an object w/attribute creation order info */
+                    test_attr_corder_create_reopen(my_fcpl, my_fapl);/* Test creating attributes w/reopening file from using new format to using old format */
+                    test_attr_corder_transition(my_fcpl, my_fapl);  /* Test attribute storage transitions on an object w/attribute creation order info */
+                    test_attr_corder_delete(my_fcpl, my_fapl);      /* Test deleting object using dense storage w/attribute creation order info */
+
+                    /* More complex tests with exclusively both "new format" and "shared" attributes
+                     */
+                    if(use_shared == TRUE) {
+                        test_attr_shared_write(my_fcpl, my_fapl);   /* Test writing to shared attributes in compact & dense storage */
+                        test_attr_shared_rename(my_fcpl, my_fapl);  /* Test renaming shared attributes in compact & dense storage */
+                        test_attr_shared_delete(my_fcpl, my_fapl);  /* Test deleting shared attributes in compact & dense storage */
+                        test_attr_shared_unlink(my_fcpl, my_fapl);  /* Test unlinking object with shared attributes in compact & dense storage */
+                    } /* if using shared attributes */
+
+                    test_attr_delete_last_dense(my_fcpl, my_fapl);
+
+                    /* test_attr_bug7 is specific to the "new" object header format,
+                     * and in fact fails if used with the old format due to the
+                     * attributes being larger than 64K */
+                    test_attr_bug7(my_fcpl, my_fapl);               /* Test creating and deleting large attributes in ohdr chunk 0 */
+
+                } /* if using "new format" */
+            } /* for unshared/shared attributes */
+        } /* for old/new format */
 
         if (minimize_dset_oh != 0) {
             ret = H5Pclose(dcpl);

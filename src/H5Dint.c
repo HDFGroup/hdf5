@@ -857,12 +857,13 @@ H5D__prepare_minimized_oh(H5F_t *file, H5D_t *dset, H5O_loc_t *oloc)
     if (ohdr_size == 0)
        HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "computed header size is invalid")
 
+    /* Special allocation of space for compact datsets is handled by the call here. */
     if(H5O__apply_ohdr(file, oh, dset->shared->dcpl_id, ohdr_size, (size_t)1, oloc) == FAIL)
         HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "can't apply object header to file")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
-} /* H5D_prepare_minimized_oh */
+} /* H5D__prepare_minimized_oh */
 
 
 /*-------------------------------------------------------------------------
