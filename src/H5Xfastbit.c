@@ -1982,7 +1982,7 @@ H5X__fastbit_create_selection(H5X_fastbit_t *fastbit, hid_t dataspace_id,
         HDmemset(new_coords, 0, sizeof(new_coords));
         /* Initialize count */
 #ifdef LIMIT_RESULTS_FOR_TESTING
-        if (colimit > 1000) colimit = 1000;
+        if (colimit > 10000) colimit = 10000;
 #endif
         for (i = 0; i < H5S_MAX_RANK; i++)
             count[i] = 1;
@@ -2305,7 +2305,7 @@ H5X_fastbit_post_update(void *idx_handle, const void *data, hid_t dataspace_id,
         HGOTO_ERROR(H5E_INDEX, H5E_CANTCREATE, FAIL, "can't create index data from dataset");
 
 done:
-//    H5MM_free(buf);
+    H5MM_free(buf);
     H5X_FASTBIT_LOG_DEBUG("Leave");
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5X_fastbit_post_update() */
