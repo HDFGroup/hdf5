@@ -3443,6 +3443,7 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  test/test_filenotclosed.sh
                  test/test_filter_plugin.sh
                  test/test_usecases.sh
+                 test/test_vol_plugin.sh
                  testpar/Makefile
                  tools/Makefile
                  tools/lib/Makefile

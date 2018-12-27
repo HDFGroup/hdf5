@@ -41,8 +41,8 @@ SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT) links_env$(EXEEXT) filen
     swmr_sparse_reader$(EXEEXT) swmr_sparse_writer$(EXEEXT) swmr_start_write$(EXEEXT) \
     vds_swmr_gen$(EXEEXT) vds_swmr_reader$(EXEEXT) vds_swmr_writer$(EXEEXT)
 if HAVE_SHARED_CONDITIONAL
-  TEST_SCRIPT += test_filter_plugin.sh
-  SCRIPT_DEPEND += filter_plugin$(EXEEXT)
+  TEST_SCRIPT += test_filter_plugin.sh test_vol_plugin.sh
+  SCRIPT_DEPEND += filter_plugin$(EXEEXT) vol_plugin$(EXEEXT)
 endif
 
 check_SCRIPTS = $(TEST_SCRIPT)
@@ -83,7 +83,7 @@ check_PROGRAMS=$(TEST_PROG) error_test err_compat tcheck_version \
     swmr_remove_writer swmr_addrem_writer swmr_sparse_reader swmr_sparse_writer \
     swmr_check_compat_vfd vds_swmr_gen vds_swmr_reader vds_swmr_writer
 if HAVE_SHARED_CONDITIONAL
-  check_PROGRAMS+= filter_plugin
+  check_PROGRAMS+= filter_plugin vol_plugin
 endif
 
 # These programs generate test files for the tests.  They don't need to be
@@ -106,9 +106,7 @@ if HAVE_SHARED_CONDITIONAL
   # The libh5test library provides common support code for the tests.
   # The filter_plugin* libraries are for use in filter_plugin.c.
   # Build them as shared libraries if that option was enabled in configure.
-  #
-  # echo_vol is used for testing VOL plugin functionality.
-  noinst_LTLIBRARIES=libh5test.la libfilter_plugin1_dsets.la libfilter_plugin2_dsets.la libfilter_plugin3_dsets.la libfilter_plugin4_groups.la echo_vol.la
+  noinst_LTLIBRARIES=libh5test.la libfilter_plugin1_dsets.la libfilter_plugin2_dsets.la libfilter_plugin3_dsets.la libfilter_plugin4_groups.la libnull_vol_connector.la
   libfilter_plugin1_dsets_la_SOURCES=filter_plugin1_dsets.c
   libfilter_plugin2_dsets_la_SOURCES=filter_plugin2_dsets.c
   libfilter_plugin3_dsets_la_SOURCES=filter_plugin3_dsets.c
@@ -121,8 +119,10 @@ if HAVE_SHARED_CONDITIONAL
   libfilter_plugin4_groups_la_LIBADD=$(LIBHDF5)
 
   # VOL plugin test libraries
-  echo_vol_la_SOURCES=echo_vol.c
-  echo_vol_la_LDFLAGS=$(AM_LDFLAGS) -avoid-version -module -shared -export-dynamic -rpath /nowhere
+  #
+  # null_vol_connector is used for testing basic VOL plugin functionality.
+  libnull_vol_connector_la_SOURCES=null_vol_connector.c
+  libnull_vol_connector_la_LDFLAGS=$(AM_LDFLAGS) -avoid-version -module -shared -export-dynamic -rpath /nowhere
 
 else
   # The libh5test library provides common support code for the tests.

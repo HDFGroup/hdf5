@@ -972,7 +972,6 @@
 ./test/dtypes.c
 ./test/dtransform.c
 ./test/earray.c
-./test/echo_vol.c
 ./test/efc.c
 ./test/enc_dec_plist.c
 ./test/enc_dec_plist_cross_platform.c
@@ -1020,6 +1019,7 @@
 ./test/gen_deflate.c
 ./test/gen_file_image.c
 ./test/gen_filespace.c
+./test/gen_filters.c
 ./test/gen_mergemsg.c
 ./test/gen_new_array.c
 ./test/gen_new_fill.c
@@ -1063,6 +1063,8 @@
 ./test/noencoder.h5
 ./test/none.h5
 ./test/ntypes.c
+./test/null_vol_connector.c
+./test/null_vol_connector.h
 ./test/ohdr.c
 ./test/objcopy.c
 ./test/page_buffer.c
@@ -1103,12 +1105,15 @@
 ./test/testlinks_env.sh.in
 ./test/test_filenotclosed.sh.in
 ./test/test_filter_plugin.sh.in
+./test/test_filters_le.h5
+./test/test_filters_be.h5
 ./test/testflushrefresh.sh.in
 ./test/testframe.c
 ./test/testhdf5.c
 ./test/testhdf5.h
 ./test/testlibinfo.sh.in
 ./test/test_usecases.sh.in
+./test/test_vol_plugin.sh.in
 ./test/testmeta.c
 ./test/testswmr.sh.in
 ./test/testvdsswmr.sh.in
@@ -1150,16 +1155,14 @@
 ./test/use_common.c
 ./test/use_disable_mdc_flushes.c
 ./test/use.h
-./test/vfd.c
-./test/vol.c
-./test/test_filters_le.h5
-./test/test_filters_be.h5
-./test/gen_filters.c
 ./test/vds.c
 ./test/vds_swmr.h
 ./test/vds_swmr_gen.c
 ./test/vds_swmr_reader.c
 ./test/vds_swmr_writer.c
+./test/vfd.c
+./test/vol.c
+./test/vol_plugin.c
 
 ./test/testfiles/err_compat_1
 ./test/testfiles/err_compat_2
