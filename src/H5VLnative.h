@@ -82,13 +82,12 @@ typedef int H5VL_native_object_optional_t;
 #define H5VL_NATIVE_OBJECT_GET_INFO         1   /* H5Oget_info(_by_idx, _by_name)(2)            */
 #define H5VL_NATIVE_OBJECT_SET_COMMENT      2   /* H5G|H5Oset_comment, H5Oset_comment_by_name   */
 
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+/* Private functions */
 H5_DLL hid_t H5VL_native_register(void);
-
 
 #ifdef __cplusplus
 }

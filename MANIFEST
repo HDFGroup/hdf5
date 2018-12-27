@@ -894,6 +894,14 @@
 ./src/H5VLmodule.h
 ./src/H5VLnative.c
 ./src/H5VLnative.h
+./src/H5VLnative_attr.c
+./src/H5VLnative_dataset.c
+./src/H5VLnative_datatype.c
+./src/H5VLnative_file.c
+./src/H5VLnative_group.c
+./src/H5VLnative_link.c
+./src/H5VLnative_object.c
+./src/H5VLnative_private.h
 ./src/H5VLpassthru.c
 ./src/H5VLpassthru.h
 ./src/H5VLpkg.h
@@ -2884,6 +2892,8 @@
 ./java/src/jni/h5sImp.h
 ./java/src/jni/h5tImp.c
 ./java/src/jni/h5tImp.h
+./java/src/jni/h5vlImp.c
+./java/src/jni/h5vlImp.h
 ./java/src/jni/h5zImp.c
 ./java/src/jni/h5zImp.h
 
@@ -3122,6 +3132,7 @@
 ./java/test/testfiles/JUnit-TestH5Tparams.txt
 ./java/test/testfiles/JUnit-TestH5Tbasic.txt
 ./java/test/testfiles/JUnit-TestH5T.txt
+./java/test/testfiles/JUnit-TestH5VL.txt
 ./java/test/testfiles/JUnit-TestH5Z.txt
 ./java/test/h5ex_g_iterate.orig
 ./java/test/TestH5.java
@@ -3159,6 +3170,7 @@
 ./java/test/TestH5Tparams.java
 ./java/test/TestH5Tbasic.java
 ./java/test/TestH5T.java
+./java/test/TestH5VL.java
 ./java/test/TestH5Z.java
 ./java/test/TestAll.java
 
@@ -3203,6 +3215,7 @@
 ./config/cmake/UseJavaSymlinks.cmake
 ./config/cmake/userblockTest.cmake
 ./config/cmake/vfdTest.cmake
+./config/cmake/volTest.cmake
 ./config/cmake/wait_H5Tinit.cmake
 
 ./config/cmake_ext_mod/ConfigureChecks.cmake
@@ -3243,6 +3256,7 @@
 ./c++/src/CMakeLists.txt
 ./c++/test/CMakeLists.txt
 ./c++/test/CMakeTests.cmake
+./c++/test/CMakeVFDTests.cmake
 ./examples/CMakeLists.txt
 ./examples/CMakeTests.cmake
 ./examples/run-all-ex.sh
@@ -3282,10 +3296,12 @@
 ./test/CMakeLists.txt
 ./test/CMakeTests.cmake
 ./test/CMakeVFDTests.cmake
+./test/CMakeVOLTests.cmake
 ./test/flushrefreshTest.cmake
 ./test/ShellTests.cmake
 ./testpar/CMakeLists.txt
 ./testpar/CMakeTests.cmake
+./testpar/CMakeVFDTests.cmake
 ./tools/CMakeLists.txt
 ./tools/lib/CMakeLists.txt
 ./tools/src/CMakeLists.txt
@@ -3318,6 +3334,7 @@
 ./tools/src/h5repack/CMakeLists.txt
 ./tools/test/h5repack/CMakeLists.txt
 ./tools/test/h5repack/CMakeTests.cmake
+./tools/test/h5repack/CMakeVFDTests.cmake
 ./tools/src/h5stat/CMakeLists.txt
 ./tools/test/h5stat/CMakeLists.txt
 ./tools/test/h5stat/CMakeTests.cmake

@@ -857,11 +857,11 @@ h5_get_vfd_fapl(hid_t fapl)
             goto error;
     } else if(!HDstrcmp(tok, "core")) {
         /* In-memory driver settings (backing store on, 1 MB increment) */
-        if(H5Pset_fapl_core(fapl, (size_t)1, TRUE) < 0)
+        if(H5Pset_fapl_core(fapl, (size_t)H5_MB, TRUE) < 0)
             goto error;
     } else if(!HDstrcmp(tok, "core_paged")) {
         /* In-memory driver with write tracking and paging on */
-        if(H5Pset_fapl_core(fapl, (size_t)1, TRUE) < 0)
+        if(H5Pset_fapl_core(fapl, (size_t)H5_MB, TRUE) < 0)
             goto error;
         if(H5Pset_core_write_tracking(fapl, TRUE, (size_t)4096) < 0)
             goto error;

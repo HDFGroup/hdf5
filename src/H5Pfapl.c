@@ -49,7 +49,7 @@
 #endif
 
 /* Includes needed to set default VOL connector */
-#include "H5VLnative.h"         /* Native VOL connector                 */
+#include "H5VLnative_private.h" /* Native VOL connector                     */
 
 
 /****************/

@@ -41,7 +41,8 @@
 #include "H5Fpkg.h"             /* File access                              */
 #include "H5Iprivate.h"         /* IDs                                      */
 #include "H5SMprivate.h"        /* Shared object header messages            */
-#include "H5VLnative.h"         /* Native VOL connector                     */
+
+#include "H5VLnative_private.h" /* Native VOL connector                     */
 
 
 /****************/
