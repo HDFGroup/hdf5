@@ -295,7 +295,7 @@ H5VLregister_connector_by_value(H5VL_class_value_t value, hid_t vipl_id)
         const H5VL_class_t *cls;
 
         /* Try loading the connector */
-        key.vol.kind = H5VL_GET_CONNECTOR_BY_NAME;
+        key.vol.kind = H5VL_GET_CONNECTOR_BY_VALUE;
         key.vol.u.value = value;
         if(NULL == (cls = (const H5VL_class_t *)H5PL_load(H5PL_TYPE_VOL, &key)))
             HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, H5I_INVALID_HID, "unable to load VOL connector")

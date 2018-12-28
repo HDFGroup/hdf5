@@ -101,6 +101,7 @@ $HDFTEST_HOME/testfiles/JUnit-TestH5Obasic.txt
 $HDFTEST_HOME/testfiles/JUnit-TestH5Ocreate.txt
 $HDFTEST_HOME/testfiles/JUnit-TestH5Ocopy.txt
 $HDFTEST_HOME/testfiles/JUnit-TestH5PL.txt
+$HDFTEST_HOME/testfiles/JUnit-TestH5VL.txt
 $HDFTEST_HOME/testfiles/JUnit-TestH5Z.txt
 $HDFTEST_HOME/testfiles/JUnit-TestH5E.txt
 $HDFTEST_HOME/testfiles/JUnit-TestH5Edefault.txt

@@ -3217,6 +3217,7 @@
 ./config/cmake/UseJavaSymlinks.cmake
 ./config/cmake/userblockTest.cmake
 ./config/cmake/vfdTest.cmake
+./config/cmake/volTest.cmake
 ./config/cmake/wait_H5Tinit.cmake
 
 ./config/cmake_ext_mod/ConfigureChecks.cmake
@@ -3257,6 +3258,7 @@
 ./c++/src/CMakeLists.txt
 ./c++/test/CMakeLists.txt
 ./c++/test/CMakeTests.cmake
+./c++/test/CMakeVFDTests.cmake
 ./examples/CMakeLists.txt
 ./examples/CMakeTests.cmake
 ./examples/run-all-ex.sh
@@ -3296,10 +3298,12 @@
 ./test/CMakeLists.txt
 ./test/CMakeTests.cmake
 ./test/CMakeVFDTests.cmake
+./test/CMakeVOLTests.cmake
 ./test/flushrefreshTest.cmake
 ./test/ShellTests.cmake
 ./testpar/CMakeLists.txt
 ./testpar/CMakeTests.cmake
+./testpar/CMakeVFDTests.cmake
 ./tools/CMakeLists.txt
 ./tools/lib/CMakeLists.txt
 ./tools/src/CMakeLists.txt
@@ -3332,6 +3336,7 @@
 ./tools/src/h5repack/CMakeLists.txt
 ./tools/test/h5repack/CMakeLists.txt
 ./tools/test/h5repack/CMakeTests.cmake
+./tools/test/h5repack/CMakeVFDTests.cmake
 ./tools/src/h5stat/CMakeLists.txt
 ./tools/test/h5stat/CMakeLists.txt
 ./tools/test/h5stat/CMakeTests.cmake
