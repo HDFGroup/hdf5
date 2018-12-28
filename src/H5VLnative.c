@@ -169,4 +169,3 @@ H5VL__native_term(void)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5VL__native_term() */
 
-
