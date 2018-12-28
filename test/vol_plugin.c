@@ -96,7 +96,7 @@ test_registration_by_name(void)
     htri_t  is_registered   = FAIL;
     hid_t   vol_id          = H5I_INVALID_HID;
 
-    TESTING("registering a VOL connector multiple times");
+    TESTING("VOL registration by name");
 
     /* The null VOL connector should not be registered at the start of the test */
     if((is_registered = H5VLis_connector_registered(NULL_VOL_CONNECTOR_NAME)) < 0)
@@ -153,7 +153,7 @@ test_multiple_registration(void)
     hid_t   vol_ids[N_REGISTRATIONS];
     int     i;
 
-    TESTING("VOL registration by name");
+    TESTING("registering a VOL connector multiple times");
 
     /* The null VOL connector should not be registered at the start of the test */
     if((is_registered = H5VLis_connector_registered(NULL_VOL_CONNECTOR_NAME)) < 0)
