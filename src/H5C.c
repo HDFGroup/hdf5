@@ -282,13 +282,8 @@ H5C_create(size_t		      max_cache_size,
 
     cache_ptr->flush_in_progress		= FALSE;
 
-    cache_ptr->logging_enabled                  = FALSE;
-
-    cache_ptr->currently_logging                = FALSE;
-
-    cache_ptr->log_file_ptr			= NULL;
-
-    cache_ptr->trace_file_ptr			= NULL;
+    if(NULL == (cache_ptr->log_info = (H5C_log_info_t *)H5MM_calloc(sizeof(H5C_log_info_t))))
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, NULL, "memory allocation failed")
 
     cache_ptr->aux_ptr				= aux_ptr;
 
@@ -492,6 +487,9 @@ done:
 
             if(cache_ptr->tag_list != NULL)
                 H5SL_close(cache_ptr->tag_list);
+
+            if(cache_ptr->log_info != NULL)
+                H5MM_xfree(cache_ptr->log_info);
 
             cache_ptr->magic = 0;
             cache_ptr = H5FL_FREE(H5C_t, cache_ptr);
@@ -864,6 +862,9 @@ H5C_dest(H5F_t * f)
         H5SL_destroy(cache_ptr->tag_list, H5C_free_tag_list_cb, NULL);
         cache_ptr->tag_list = NULL;
     } /* end if */
+
+    if(cache_ptr->log_info != NULL)
+        H5MM_xfree(cache_ptr->log_info);
 
 #ifndef NDEBUG
 #if H5C_DO_SANITY_CHECKS

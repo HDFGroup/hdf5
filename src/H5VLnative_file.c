@@ -605,7 +605,7 @@ H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR
             {
                 /* Call mdc logging function */
                 if(H5C_start_logging(f->shared->cache) < 0)
-                    HGOTO_ERROR(H5E_FILE, H5E_LOGFAIL, FAIL, "unable to start mdc logging")
+                    HGOTO_ERROR(H5E_FILE, H5E_LOGGING, FAIL, "unable to start mdc logging")
 
                 break;
             }
@@ -615,7 +615,7 @@ H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR
             {
                 /* Call mdc logging function */
                 if(H5C_stop_logging(f->shared->cache) < 0)
-                    HGOTO_ERROR(H5E_FILE, H5E_LOGFAIL, FAIL, "unable to stop mdc logging")
+                    HGOTO_ERROR(H5E_FILE, H5E_LOGGING, FAIL, "unable to stop mdc logging")
 
                 break;
             }
@@ -628,7 +628,7 @@ H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR
 
                 /* Call mdc logging function */
                 if(H5C_get_logging_status(f->shared->cache, is_enabled, is_currently_logging) < 0)
-                    HGOTO_ERROR(H5E_FILE, H5E_LOGFAIL, FAIL, "unable to get logging status")
+                    HGOTO_ERROR(H5E_FILE, H5E_LOGGING, FAIL, "unable to get logging status")
 
                 break;
             }
