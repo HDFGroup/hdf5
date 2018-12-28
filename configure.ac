@@ -3406,7 +3406,7 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  test/testlinks_env.sh
                  test/testswmr.sh
                  test/testvdsswmr.sh
-                 test/test_filenotclosed.sh
+                 test/testabort_fail.sh
                  test/test_filter_plugin.sh
                  test/test_usecases.sh
                  testpar/Makefile

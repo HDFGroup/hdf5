@@ -996,6 +996,7 @@
 ./test/filespace_1_6.h5
 ./test/freespace.c
 ./test/filenotclosed.c
+./test/del_many_dense_attrs.c
 ./test/file_image.c
 ./test/file_image_core_test.h5
 ./test/fill_old.h5
@@ -1103,7 +1104,7 @@
 ./test/testcheck_version.sh.in
 ./test/testerror.sh.in
 ./test/testlinks_env.sh.in
-./test/test_filenotclosed.sh.in
+./test/testabort_fail.sh.in
 ./test/test_filter_plugin.sh.in
 ./test/testflushrefresh.sh.in
 ./test/testframe.c

@@ -243,6 +243,19 @@ Bug Fixes since HDF5-1.10.3 release
 
     Library
     -------
+    - Deleting attributes in densed storage
+
+      The library abort with "infinite loop closing library" after
+      attributes in densed storage are created and then deleted.
+
+      When deleting the attribute nodes from the name index v2 B-tree,
+      if an attribute is found in the intermediate B-tree nodes,
+      which may be merged/redistributed in the process, we need to 
+      free the dynamically allocated spaces for the intermediate 
+      decoded attribute.
+
+      (VC - 2018/12/26, HDFFV-10659)
+
     - Allow H5detect and H5make_libsettings to take a file as an argument.
 
       Rather than only writing to stdout, add a command argument to name
