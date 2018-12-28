@@ -82,32 +82,33 @@ struct H5C_log_info_t {
 /******************************/
 /* Package Private Prototypes */
 /******************************/
-H5_DLL herr_t H5C_set_up_logging(H5C_t *cache, const char log_location[], H5C_log_style_t style, hbool_t start_immediately);
-H5_DLL herr_t H5C_tear_down_logging(H5C_t *cache);
-H5_DLL herr_t H5C_write_create_cache_log_msg(H5C_t *cache, herr_t fxn_ret_value);
-H5_DLL herr_t H5C_write_destroy_cache_log_msg(H5C_t *cache);
-H5_DLL herr_t H5C_write_evict_cache_log_msg(H5C_t *cache, herr_t fxn_ret_value);
-H5_DLL herr_t H5C_write_expunge_entry_log_msg(H5C_t *cache, haddr_t address, int type_id, herr_t fxn_ret_value);
-H5_DLL herr_t H5C_write_flush_cache_log_msg(H5C_t *cache, herr_t fxn_ret_value);
-H5_DLL herr_t H5C_write_insert_entry_log_msg(H5C_t *cache, haddr_t address, int type_id, unsigned flags, size_t size, herr_t fxn_ret_value);
-H5_DLL herr_t H5C_write_mark_entry_dirty_log_msg(H5C_t *cache, const H5C_cache_entry_t *entry, herr_t fxn_ret_value);
-H5_DLL herr_t H5C_write_mark_entry_clean_log_msg(H5C_t *cache, const H5C_cache_entry_t *entry, herr_t fxn_ret_value);
-H5_DLL herr_t H5C_write_mark_unserialized_entry_log_msg(H5C_t *cache, const H5C_cache_entry_t *entry, herr_t fxn_ret_value);
-H5_DLL herr_t H5C_write_mark_serialized_entry_log_msg(H5C_t *cache, const H5C_cache_entry_t *entry, herr_t fxn_ret_value);
-H5_DLL herr_t H5C_write_move_entry_log_msg(H5C_t *cache, haddr_t old_addr, haddr_t new_addr, int type_id, herr_t fxn_ret_value);
-H5_DLL herr_t H5C_write_pin_entry_log_msg(H5C_t *cache, const H5C_cache_entry_t *entry, herr_t fxn_ret_value);
-H5_DLL herr_t H5C_write_create_fd_log_msg(H5C_t *cache, const H5C_cache_entry_t *parent, const H5C_cache_entry_t *child, herr_t fxn_ret_value);
-H5_DLL herr_t H5C_write_protect_entry_log_msg(H5C_t *cache, const H5C_cache_entry_t *entry, int type_id, unsigned flags, herr_t fxn_ret_value);
-H5_DLL herr_t H5C_write_resize_entry_log_msg(H5C_t *cache, const H5C_cache_entry_t *entry, size_t new_size, herr_t fxn_ret_value);
-H5_DLL herr_t H5C_write_unpin_entry_log_msg(H5C_t *cache, const H5C_cache_entry_t *entry, herr_t fxn_ret_value);
-H5_DLL herr_t H5C_write_destroy_fd_log_msg(H5C_t *cache, const H5C_cache_entry_t *parent, const H5C_cache_entry_t *child, herr_t fxn_ret_value);
-H5_DLL herr_t H5C_write_unprotect_entry_log_msg(H5C_t *cache, const H5C_cache_entry_t *entry, int type_id, unsigned flags, herr_t fxn_ret_value);
-H5_DLL herr_t H5C_write_set_cache_config_log_msg(H5C_t *cache, const H5AC_cache_config_t *config, herr_t fxn_ret_value);
-H5_DLL herr_t H5C_write_remove_entry_log_msg(H5C_t *cache, const H5C_cache_entry_t *entry, herr_t fxn_ret_value);
+H5_DLL herr_t H5C_log_set_up(H5C_t *cache, const char log_location[], H5C_log_style_t style, hbool_t start_immediately);
+H5_DLL herr_t H5C_log_tear_down(H5C_t *cache);
+
+H5_DLL herr_t H5C_log_write_create_cache_msg(H5C_t *cache, herr_t fxn_ret_value);
+H5_DLL herr_t H5C_log_write_destroy_cache_msg(H5C_t *cache);
+H5_DLL herr_t H5C_log_write_evict_cache_msg(H5C_t *cache, herr_t fxn_ret_value);
+H5_DLL herr_t H5C_log_write_expunge_entry_msg(H5C_t *cache, haddr_t address, int type_id, herr_t fxn_ret_value);
+H5_DLL herr_t H5C_log_write_flush_cache_msg(H5C_t *cache, herr_t fxn_ret_value);
+H5_DLL herr_t H5C_log_write_insert_entry_msg(H5C_t *cache, haddr_t address, int type_id, unsigned flags, size_t size, herr_t fxn_ret_value);
+H5_DLL herr_t H5C_log_write_mark_entry_dirty_msg(H5C_t *cache, const H5C_cache_entry_t *entry, herr_t fxn_ret_value);
+H5_DLL herr_t H5C_log_write_mark_entry_clean_msg(H5C_t *cache, const H5C_cache_entry_t *entry, herr_t fxn_ret_value);
+H5_DLL herr_t H5C_log_write_mark_unserialized_entry_msg(H5C_t *cache, const H5C_cache_entry_t *entry, herr_t fxn_ret_value);
+H5_DLL herr_t H5C_log_write_mark_serialized_entry_msg(H5C_t *cache, const H5C_cache_entry_t *entry, herr_t fxn_ret_value);
+H5_DLL herr_t H5C_log_write_move_entry_msg(H5C_t *cache, haddr_t old_addr, haddr_t new_addr, int type_id, herr_t fxn_ret_value);
+H5_DLL herr_t H5C_log_write_pin_entry_msg(H5C_t *cache, const H5C_cache_entry_t *entry, herr_t fxn_ret_value);
+H5_DLL herr_t H5C_log_write_create_fd_msg(H5C_t *cache, const H5C_cache_entry_t *parent, const H5C_cache_entry_t *child, herr_t fxn_ret_value);
+H5_DLL herr_t H5C_log_write_protect_entry_msg(H5C_t *cache, const H5C_cache_entry_t *entry, int type_id, unsigned flags, herr_t fxn_ret_value);
+H5_DLL herr_t H5C_log_write_resize_entry_msg(H5C_t *cache, const H5C_cache_entry_t *entry, size_t new_size, herr_t fxn_ret_value);
+H5_DLL herr_t H5C_log_write_unpin_entry_msg(H5C_t *cache, const H5C_cache_entry_t *entry, herr_t fxn_ret_value);
+H5_DLL herr_t H5C_log_write_destroy_fd_msg(H5C_t *cache, const H5C_cache_entry_t *parent, const H5C_cache_entry_t *child, herr_t fxn_ret_value);
+H5_DLL herr_t H5C_log_write_unprotect_entry_msg(H5C_t *cache, const H5C_cache_entry_t *entry, int type_id, unsigned flags, herr_t fxn_ret_value);
+H5_DLL herr_t H5C_log_write_set_cache_config_msg(H5C_t *cache, const H5AC_cache_config_t *config, herr_t fxn_ret_value);
+H5_DLL herr_t H5C_log_write_remove_entry_msg(H5C_t *cache, const H5C_cache_entry_t *entry, herr_t fxn_ret_value);
 
 /* Logging-specific setup functions */
-H5_DLL herr_t H5C_json_set_up_logging(H5C_log_info_t *log_info, const char log_location[], int mpi_rank);
-H5_DLL herr_t H5C_trace_set_up_logging(H5C_log_info_t *log_info, const char log_location[], int mpi_rank);
+H5_DLL herr_t H5C_log_json_set_up(H5C_log_info_t *log_info, const char log_location[], int mpi_rank);
+H5_DLL herr_t H5C_log_trace_set_up(H5C_log_info_t *log_info, const char log_location[], int mpi_rank);
 
 #endif /* _H5Clog_H */
 

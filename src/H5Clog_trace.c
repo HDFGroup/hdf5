@@ -173,7 +173,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5C_trace_set_up_logging
+ * Function:    H5C_log_trace_set_up
  *
  * Purpose:     Setup for metadata cache logging.
  *
@@ -197,7 +197,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C_trace_set_up_logging(H5C_log_info_t *log_info, const char log_location[], int mpi_rank)
+H5C_log_trace_set_up(H5C_log_info_t *log_info, const char log_location[], int mpi_rank)
 {
     H5C_log_trace_udata_t *trace_udata = NULL;
     char *file_name = NULL;
@@ -265,7 +265,7 @@ H5C_trace_set_up_logging(H5C_log_info_t *log_info, const char log_location[], in
     }
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5C_trace_set_up_logging() */
+} /* H5C_log_trace_set_up() */
 
 
 /*-------------------------------------------------------------------------

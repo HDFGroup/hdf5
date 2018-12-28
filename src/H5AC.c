@@ -413,7 +413,7 @@ H5AC_create(const H5F_t *f, H5AC_cache_config_t *config_ptr, H5AC_cache_image_co
      * is generated when logging is controlled by the struct.
      */
     if(H5F_USE_MDC_LOGGING(f))
-        if(H5C_set_up_logging(f->shared->cache, H5F_MDC_LOG_LOCATION(f), H5C_LOG_STYLE_JSON, H5F_START_MDC_LOG_ON_ACCESS(f)) < 0)
+        if(H5C_log_set_up(f->shared->cache, H5F_MDC_LOG_LOCATION(f), H5C_LOG_STYLE_JSON, H5F_START_MDC_LOG_ON_ACCESS(f)) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "mdc logging setup failed")
 
     /* Set the cache parameters */
@@ -436,7 +436,7 @@ H5AC_create(const H5F_t *f, H5AC_cache_config_t *config_ptr, H5AC_cache_image_co
 done:
     /* If currently logging, generate a message */
     if(f->shared->cache->log_info->logging)
-        if(H5C_write_create_cache_log_msg(f->shared->cache, ret_value) < 0)
+        if(H5C_log_write_create_cache_msg(f->shared->cache, ret_value) < 0)
             HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
 
 #ifdef H5_HAVE_PARALLEL
@@ -500,11 +500,11 @@ H5AC_dest(H5F_t *f)
     if(H5C_get_logging_status(f->shared->cache, &log_enabled, &curr_logging) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to get logging status")
     if(log_enabled && curr_logging)
-        if(H5C_write_destroy_cache_log_msg(f->shared->cache) < 0)
+        if(H5C_log_write_destroy_cache_msg(f->shared->cache) < 0)
             HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
     /* Tear down logging */
     if(log_enabled)
-        if(H5C_tear_down_logging(f->shared->cache) < 0)
+        if(H5C_log_tear_down(f->shared->cache) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "mdc logging tear-down failed")
 
 #ifdef H5_HAVE_PARALLEL
@@ -590,7 +590,7 @@ done:
 
     /* If currently logging, generate a message */
     if(f->shared->cache->log_info->logging)
-        if(H5C_write_evict_cache_log_msg(f->shared->cache, ret_value) < 0)
+        if(H5C_log_write_evict_cache_msg(f->shared->cache, ret_value) < 0)
             HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -633,7 +633,7 @@ H5AC_expunge_entry(H5F_t *f, const H5AC_class_t *type, haddr_t addr,
 done:
     /* If currently logging, generate a message */
     if(f->shared->cache->log_info->logging)
-        if(H5C_write_expunge_entry_log_msg(f->shared->cache, addr, type->id, ret_value) < 0)
+        if(H5C_log_write_expunge_entry_msg(f->shared->cache, addr, type->id, ret_value) < 0)
             HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -690,7 +690,7 @@ H5AC_flush(H5F_t *f)
 done:
     /* If currently logging, generate a message */
     if(f->shared->cache->log_info->logging)
-        if(H5C_write_flush_cache_log_msg(f->shared->cache, ret_value) < 0)
+        if(H5C_log_write_flush_cache_msg(f->shared->cache, ret_value) < 0)
             HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -870,7 +870,7 @@ H5AC_insert_entry(H5F_t *f, const H5AC_class_t *type, haddr_t addr, void *thing,
 done:
     /* If currently logging, generate a message */
     if(f->shared->cache->log_info->logging)
-        if(H5C_write_insert_entry_log_msg(f->shared->cache, addr, type->id, flags, ((H5C_cache_entry_t *)thing)->size, ret_value) < 0)
+        if(H5C_log_write_insert_entry_msg(f->shared->cache, addr, type->id, flags, ((H5C_cache_entry_t *)thing)->size, ret_value) < 0)
             HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -959,7 +959,7 @@ H5AC_mark_entry_dirty(void *thing)
 done:
     /* If currently logging, generate a message */
     if(cache_ptr->log_info->logging)
-        if(H5C_write_mark_entry_dirty_log_msg(cache_ptr, entry_ptr, ret_value) < 0)
+        if(H5C_log_write_mark_entry_dirty_msg(cache_ptr, entry_ptr, ret_value) < 0)
             HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1012,7 +1012,7 @@ H5AC_mark_entry_clean(void *thing)
 done:
     /* If currently logging, generate a message */
     if(cache_ptr->log_info->logging)
-        if(H5C_write_mark_entry_clean_log_msg(cache_ptr, entry_ptr, ret_value) < 0)
+        if(H5C_log_write_mark_entry_clean_msg(cache_ptr, entry_ptr, ret_value) < 0)
             HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1054,7 +1054,7 @@ H5AC_mark_entry_unserialized(void *thing)
 done:
     /* If currently logging, generate a message */
     if(cache_ptr->log_info->logging)
-        if(H5C_write_mark_unserialized_entry_log_msg(cache_ptr, entry_ptr, ret_value) < 0)
+        if(H5C_log_write_mark_unserialized_entry_msg(cache_ptr, entry_ptr, ret_value) < 0)
             HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1095,7 +1095,7 @@ H5AC_mark_entry_serialized(void *thing)
 done:
     /* If currently logging, generate a message */
     if(cache_ptr->log_info->logging)
-        if(H5C_write_mark_serialized_entry_log_msg(cache_ptr, entry_ptr, ret_value) < 0)
+        if(H5C_log_write_mark_serialized_entry_msg(cache_ptr, entry_ptr, ret_value) < 0)
             HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1154,7 +1154,7 @@ H5AC_move_entry(H5F_t *f, const H5AC_class_t *type, haddr_t old_addr, haddr_t ne
 done:
     /* If currently logging, generate a message */
     if(f->shared->cache->log_info->logging)
-        if(H5C_write_move_entry_log_msg(f->shared->cache, old_addr, new_addr, type->id, ret_value) < 0)
+        if(H5C_log_write_move_entry_msg(f->shared->cache, old_addr, new_addr, type->id, ret_value) < 0)
             HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1197,7 +1197,7 @@ H5AC_pin_protected_entry(void *thing)
 done:
     /* If currently logging, generate a message */
     if(cache_ptr->log_info->logging)
-        if(H5C_write_pin_entry_log_msg(cache_ptr, entry_ptr, ret_value) < 0)
+        if(H5C_log_write_pin_entry_msg(cache_ptr, entry_ptr, ret_value) < 0)
             HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1279,7 +1279,7 @@ H5AC_create_flush_dependency(void * parent_thing, void * child_thing)
 done:
     /* If currently logging, generate a message */
     if(cache_ptr->log_info->logging)
-        if(H5C_write_create_fd_log_msg(cache_ptr, (H5AC_info_t *)parent_thing, (H5AC_info_t *)child_thing, ret_value) < 0)
+        if(H5C_log_write_create_fd_msg(cache_ptr, (H5AC_info_t *)parent_thing, (H5AC_info_t *)child_thing, ret_value) < 0)
             HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1360,7 +1360,7 @@ done:
         herr_t fake_ret_value = (NULL == ret_value) ? FAIL : SUCCEED;
 
         if(f->shared->cache->log_info->logging)
-            if(H5C_write_protect_entry_log_msg(f->shared->cache, (H5AC_info_t *)thing, type->id, flags, fake_ret_value) < 0)
+            if(H5C_log_write_protect_entry_msg(f->shared->cache, (H5AC_info_t *)thing, type->id, flags, fake_ret_value) < 0)
                 HDONE_ERROR(H5E_CACHE, H5E_LOGGING, NULL, "unable to emit log message")
     }
 
@@ -1414,7 +1414,7 @@ H5AC_resize_entry(void *thing, size_t new_size)
 done:
     /* If currently logging, generate a message */
     if(cache_ptr->log_info->logging)
-        if(H5C_write_resize_entry_log_msg(cache_ptr, entry_ptr, new_size, ret_value) < 0)
+        if(H5C_log_write_resize_entry_msg(cache_ptr, entry_ptr, new_size, ret_value) < 0)
             HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1457,7 +1457,7 @@ H5AC_unpin_entry(void *thing)
 done:
     /* If currently logging, generate a message */
     if(cache_ptr->log_info->logging)
-        if(H5C_write_unpin_entry_log_msg(cache_ptr, entry_ptr, ret_value) < 0)
+        if(H5C_log_write_unpin_entry_msg(cache_ptr, entry_ptr, ret_value) < 0)
             HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1500,7 +1500,7 @@ H5AC_destroy_flush_dependency(void * parent_thing, void * child_thing)
 done:
     /* If currently logging, generate a message */
     if(cache_ptr->log_info->logging)
-        if(H5C_write_destroy_fd_log_msg(cache_ptr, (H5AC_info_t *)parent_thing, (H5AC_info_t *)child_thing, ret_value) < 0)
+        if(H5C_log_write_destroy_fd_msg(cache_ptr, (H5AC_info_t *)parent_thing, (H5AC_info_t *)child_thing, ret_value) < 0)
             HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1612,7 +1612,7 @@ H5AC_unprotect(H5F_t *f, const H5AC_class_t *type, haddr_t addr, void *thing,
 done:
     /* If currently logging, generate a message */
     if(f->shared->cache->log_info->logging)
-        if(H5C_write_unprotect_entry_log_msg(f->shared->cache, (H5AC_info_t *)thing, type->id, flags, ret_value) < 0)
+        if(H5C_log_write_unprotect_entry_msg(f->shared->cache, (H5AC_info_t *)thing, type->id, flags, ret_value) < 0)
             HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1843,7 +1843,7 @@ H5AC_set_cache_auto_resize_config(H5AC_t *cache_ptr, H5AC_cache_config_t *config
      */
     /* close */
     if(config_ptr->close_trace_file)
-        if(H5C_tear_down_logging((H5C_t *)cache_ptr) < 0)
+        if(H5C_log_tear_down((H5C_t *)cache_ptr) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "mdc logging tear-down failed")
 
     /* open */
@@ -1852,7 +1852,7 @@ H5AC_set_cache_auto_resize_config(H5AC_t *cache_ptr, H5AC_cache_config_t *config
          * This will be trace output until we create a special API call. JSON
          * output is generated when logging is controlled by the H5P calls.
          */
-        if(H5C_set_up_logging((H5C_t *)cache_ptr, config_ptr->trace_file_name, H5C_LOG_STYLE_TRACE, TRUE) < 0)
+        if(H5C_log_set_up((H5C_t *)cache_ptr, config_ptr->trace_file_name, H5C_LOG_STYLE_TRACE, TRUE) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "mdc logging setup failed")
     }
 
@@ -1882,7 +1882,7 @@ H5AC_set_cache_auto_resize_config(H5AC_t *cache_ptr, H5AC_cache_config_t *config
 done:
     /* If currently logging, generate a message */
     if(cache_ptr->log_info->logging)
-        if(H5C_write_set_cache_config_log_msg(cache_ptr, config_ptr, ret_value) < 0)
+        if(H5C_log_write_set_cache_config_msg(cache_ptr, config_ptr, ret_value) < 0)
             HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2641,7 +2641,7 @@ H5AC_remove_entry(void *_entry)
 done:
     /* If currently logging, generate a message */
     if(cache->log_info->logging)
-        if(H5C_write_remove_entry_log_msg(cache, entry, ret_value) < 0)
+        if(H5C_log_write_remove_entry_msg(cache, entry, ret_value) < 0)
             HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
 
     FUNC_LEAVE_NOAPI(ret_value)

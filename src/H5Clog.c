@@ -73,7 +73,7 @@
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5C_set_up_logging
+ * Function:    H5C_log_set_up
  *
  * Purpose:     Setup for metadata cache logging.
  *
@@ -85,7 +85,7 @@
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C_set_up_logging(H5C_t *cache, const char log_location[], H5C_log_style_t style, hbool_t start_immediately)
+H5C_log_set_up(H5C_t *cache, const char log_location[], H5C_log_style_t style, hbool_t start_immediately)
 {
     int mpi_rank = -1;              /* -1 indicates serial (no MPI rank) */
     herr_t ret_value = SUCCEED;     /* Return value */
@@ -110,11 +110,11 @@ H5C_set_up_logging(H5C_t *cache, const char log_location[], H5C_log_style_t styl
 
     /* Set up logging */
     if(H5C_LOG_STYLE_JSON == style) {
-        if(H5C_json_set_up_logging(cache->log_info, log_location, mpi_rank) < 0)
+        if(H5C_log_json_set_up(cache->log_info, log_location, mpi_rank) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to set up json logging")
     }
     else if(H5C_LOG_STYLE_TRACE == style) {
-        if(H5C_trace_set_up_logging(cache->log_info, log_location, mpi_rank) < 0)
+        if(H5C_log_trace_set_up(cache->log_info, log_location, mpi_rank) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to set up trace logging")
     }
     else
@@ -131,11 +131,11 @@ H5C_set_up_logging(H5C_t *cache, const char log_location[], H5C_log_style_t styl
  done:
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5C_set_up_logging() */
+} /* H5C_log_set_up() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5C_tear_down_logging
+ * Function:    H5C_log_tear_down
  *
  * Purpose:     Tear-down for metadata cache logging.
  *
@@ -147,7 +147,7 @@ H5C_set_up_logging(H5C_t *cache, const char log_location[], H5C_log_style_t styl
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C_tear_down_logging(H5C_t *cache)
+H5C_log_tear_down(H5C_t *cache)
 {
     herr_t ret_value = SUCCEED;      /* Return value */
 
@@ -175,7 +175,7 @@ H5C_tear_down_logging(H5C_t *cache)
 
  done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5C_tear_down_logging() */
+} /* H5C_log_tear_down() */
 
 
 /*-------------------------------------------------------------------------
@@ -301,7 +301,7 @@ H5C_get_logging_status(const H5C_t *cache, /*OUT*/ hbool_t *is_enabled,
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5C_write_create_cache_log_msg
+ * Function:    H5C_log_write_create_cache_msg
  *
  * Purpose:     Write a log message for cache creation.
  *
@@ -313,7 +313,7 @@ H5C_get_logging_status(const H5C_t *cache, /*OUT*/ hbool_t *is_enabled,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C_write_create_cache_log_msg(H5C_t *cache, herr_t fxn_ret_value) 
+H5C_log_write_create_cache_msg(H5C_t *cache, herr_t fxn_ret_value) 
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -329,10 +329,10 @@ H5C_write_create_cache_log_msg(H5C_t *cache, herr_t fxn_ret_value)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5C_write_create_cache_log_msg() */
+} /* H5C_log_write_create_cache_msg() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5C_write_destroy_cache_log_msg
+ * Function:    H5C_log_write_destroy_cache_msg
  *
  * Purpose:     Write a log message for cache destruction.
  *
@@ -348,7 +348,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C_write_destroy_cache_log_msg(H5C_t *cache) 
+H5C_log_write_destroy_cache_msg(H5C_t *cache) 
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -364,11 +364,11 @@ H5C_write_destroy_cache_log_msg(H5C_t *cache)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5C_write_destroy_cache_log_msg() */
+} /* H5C_log_write_destroy_cache_msg() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5C_write_evict_cache_log_msg
+ * Function:    H5C_log_write_evict_cache_msg
  *
  * Purpose:     Write a log message for eviction of cache entries.
  *
@@ -380,7 +380,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C_write_evict_cache_log_msg(H5C_t *cache, herr_t fxn_ret_value)
+H5C_log_write_evict_cache_msg(H5C_t *cache, herr_t fxn_ret_value)
 {
     herr_t ret_value = SUCCEED;
 
@@ -396,11 +396,11 @@ H5C_write_evict_cache_log_msg(H5C_t *cache, herr_t fxn_ret_value)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5C_write_evict_cache_log_msg() */
+} /* H5C_log_write_evict_cache_msg() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5C_write_expunge_entry_log_msg
+ * Function:    H5C_log_write_expunge_entry_msg
  *
  * Purpose:     Write a log message for expunge of cache entries.
  *
@@ -412,7 +412,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C_write_expunge_entry_log_msg(H5C_t *cache, haddr_t address,
+H5C_log_write_expunge_entry_msg(H5C_t *cache, haddr_t address,
     int type_id, herr_t fxn_ret_value)
 {
     herr_t ret_value = SUCCEED;
@@ -429,11 +429,11 @@ H5C_write_expunge_entry_log_msg(H5C_t *cache, haddr_t address,
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5C_write_expunge_entry_log_msg() */
+} /* H5C_log_write_expunge_entry_msg() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5C_write_flush_cache_log_msg
+ * Function:    H5C_log_write_flush_cache_msg
  *
  * Purpose:     Write a log message for cache flushes.
  *
@@ -445,7 +445,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C_write_flush_cache_log_msg(H5C_t *cache, herr_t fxn_ret_value)
+H5C_log_write_flush_cache_msg(H5C_t *cache, herr_t fxn_ret_value)
 {
     herr_t ret_value = SUCCEED;
 
@@ -461,11 +461,11 @@ H5C_write_flush_cache_log_msg(H5C_t *cache, herr_t fxn_ret_value)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5C_write_flush_cache_log_msg() */
+} /* H5C_log_write_flush_cache_msg() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5C_write_insert_entry_log_msg
+ * Function:    H5C_log_write_insert_entry_msg
  *
  * Purpose:     Write a log message for insertion of cache entries.
  *
@@ -477,7 +477,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C_write_insert_entry_log_msg(H5C_t *cache, haddr_t address,
+H5C_log_write_insert_entry_msg(H5C_t *cache, haddr_t address,
     int type_id, unsigned flags, size_t size, herr_t fxn_ret_value)
 {
     herr_t ret_value = SUCCEED;
@@ -494,11 +494,11 @@ H5C_write_insert_entry_log_msg(H5C_t *cache, haddr_t address,
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5C_write_insert_entry_log_msg() */
+} /* H5C_log_write_insert_entry_msg() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5C_write_mark_entry_dirty_log_msg
+ * Function:    H5C_log_write_mark_entry_dirty_msg
  *
  * Purpose:     Write a log message for marking cache entries as dirty.
  *
@@ -510,7 +510,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C_write_mark_entry_dirty_log_msg(H5C_t *cache, const H5C_cache_entry_t *entry,
+H5C_log_write_mark_entry_dirty_msg(H5C_t *cache, const H5C_cache_entry_t *entry,
     herr_t fxn_ret_value)
 {
     herr_t ret_value = SUCCEED;
@@ -528,11 +528,11 @@ H5C_write_mark_entry_dirty_log_msg(H5C_t *cache, const H5C_cache_entry_t *entry,
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5C_write_mark_entry_dirty_log_msg() */
+} /* H5C_log_write_mark_entry_dirty_msg() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5C_write_mark_entry_clean_log_msg
+ * Function:    H5C_log_write_mark_entry_clean_msg
  *
  * Purpose:     Write a log message for marking cache entries as clean.
  *
@@ -544,7 +544,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C_write_mark_entry_clean_log_msg(H5C_t *cache, const H5C_cache_entry_t *entry,
+H5C_log_write_mark_entry_clean_msg(H5C_t *cache, const H5C_cache_entry_t *entry,
     herr_t fxn_ret_value)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -562,11 +562,11 @@ H5C_write_mark_entry_clean_log_msg(H5C_t *cache, const H5C_cache_entry_t *entry,
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5C_write_mark_entry_clean_log_msg() */
+} /* H5C_log_write_mark_entry_clean_msg() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5C_write_mark_unserialized_entry_log_msg
+ * Function:    H5C_log_write_mark_unserialized_entry_msg
  *
  * Purpose:     Write a log message for marking cache entries as unserialized.
  *
@@ -578,7 +578,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C_write_mark_unserialized_entry_log_msg(H5C_t *cache,
+H5C_log_write_mark_unserialized_entry_msg(H5C_t *cache,
     const H5C_cache_entry_t *entry, herr_t fxn_ret_value)
 {
     herr_t ret_value = SUCCEED;
@@ -596,11 +596,11 @@ H5C_write_mark_unserialized_entry_log_msg(H5C_t *cache,
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5C_write_mark_unserialized_entry_log_msg() */
+} /* H5C_log_write_mark_unserialized_entry_msg() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5C_write_mark_serialized_entry_log_msg
+ * Function:    H5C_log_write_mark_serialized_entry_msg
  *
  * Purpose:     Write a log message for marking cache entries as serialize.
  *
@@ -612,7 +612,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C_write_mark_serialized_entry_log_msg(H5C_t *cache, const H5C_cache_entry_t *entry,
+H5C_log_write_mark_serialized_entry_msg(H5C_t *cache, const H5C_cache_entry_t *entry,
     herr_t fxn_ret_value)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -630,11 +630,11 @@ H5C_write_mark_serialized_entry_log_msg(H5C_t *cache, const H5C_cache_entry_t *e
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5C_write_mark_serialized_entry_log_msg() */
+} /* H5C_log_write_mark_serialized_entry_msg() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5C_write_move_entry_log_msg
+ * Function:    H5C_log_write_move_entry_msg
  *
  * Purpose:     Write a log message for moving a cache entry.
  *
@@ -646,7 +646,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C_write_move_entry_log_msg(H5C_t *cache, haddr_t old_addr, haddr_t new_addr,
+H5C_log_write_move_entry_msg(H5C_t *cache, haddr_t old_addr, haddr_t new_addr,
     int type_id, herr_t fxn_ret_value)
 {
     herr_t ret_value = SUCCEED;
@@ -663,11 +663,11 @@ H5C_write_move_entry_log_msg(H5C_t *cache, haddr_t old_addr, haddr_t new_addr,
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5C_write_move_entry_log_msg() */
+} /* H5C_log_write_move_entry_msg() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5C_write_pin_entry_log_msg
+ * Function:    H5C_log_write_pin_entry_msg
  *
  * Purpose:     Write a log message for pinning a cache entry.
  *
@@ -679,7 +679,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C_write_pin_entry_log_msg(H5C_t *cache, const H5C_cache_entry_t *entry,
+H5C_log_write_pin_entry_msg(H5C_t *cache, const H5C_cache_entry_t *entry,
     herr_t fxn_ret_value)
 {
     herr_t ret_value = SUCCEED;
@@ -697,11 +697,11 @@ H5C_write_pin_entry_log_msg(H5C_t *cache, const H5C_cache_entry_t *entry,
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5C_write_pin_entry_log_msg() */
+} /* H5C_log_write_pin_entry_msg() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5C_write_create_fd_log_msg
+ * Function:    H5C_log_write_create_fd_msg
  *
  * Purpose:     Write a log message for creating a flush dependency between
  *              two cache entries.
@@ -714,7 +714,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C_write_create_fd_log_msg(H5C_t *cache, const H5C_cache_entry_t *parent,
+H5C_log_write_create_fd_msg(H5C_t *cache, const H5C_cache_entry_t *parent,
     const H5C_cache_entry_t *child, herr_t fxn_ret_value)
 {
     herr_t ret_value = SUCCEED;
@@ -733,11 +733,11 @@ H5C_write_create_fd_log_msg(H5C_t *cache, const H5C_cache_entry_t *parent,
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5C_write_create_fd_log_msg() */
+} /* H5C_log_write_create_fd_msg() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5C_write_protect_entry_log_msg
+ * Function:    H5C_log_write_protect_entry_msg
  *
  * Purpose:     Write a log message for protecting a cache entry.
  *
@@ -749,7 +749,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C_write_protect_entry_log_msg(H5C_t *cache, const H5C_cache_entry_t *entry,
+H5C_log_write_protect_entry_msg(H5C_t *cache, const H5C_cache_entry_t *entry,
     int type_id, unsigned flags, herr_t fxn_ret_value)
 {
     herr_t ret_value = SUCCEED;
@@ -767,11 +767,11 @@ H5C_write_protect_entry_log_msg(H5C_t *cache, const H5C_cache_entry_t *entry,
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5C_write_protect_entry_log_msg() */
+} /* H5C_log_write_protect_entry_msg() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5C_write_resize_entry_log_msg
+ * Function:    H5C_log_write_resize_entry_msg
  *
  * Purpose:     Write a log message for resizing a cache entry.
  *
@@ -783,7 +783,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C_write_resize_entry_log_msg(H5C_t *cache, const H5C_cache_entry_t *entry,
+H5C_log_write_resize_entry_msg(H5C_t *cache, const H5C_cache_entry_t *entry,
     size_t new_size, herr_t fxn_ret_value)
 {
     herr_t ret_value = SUCCEED;
@@ -801,11 +801,11 @@ H5C_write_resize_entry_log_msg(H5C_t *cache, const H5C_cache_entry_t *entry,
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5C_write_resize_entry_log_msg() */
+} /* H5C_log_write_resize_entry_msg() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5C_write_unpin_entry_log_msg
+ * Function:    H5C_log_write_unpin_entry_msg
  *
  * Purpose:     Write a log message for unpinning a cache entry.
  *
@@ -817,7 +817,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C_write_unpin_entry_log_msg(H5C_t *cache, const H5C_cache_entry_t *entry,
+H5C_log_write_unpin_entry_msg(H5C_t *cache, const H5C_cache_entry_t *entry,
     herr_t fxn_ret_value)
 {
     herr_t ret_value = SUCCEED;
@@ -835,11 +835,11 @@ H5C_write_unpin_entry_log_msg(H5C_t *cache, const H5C_cache_entry_t *entry,
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5C_write_unpin_entry_log_msg() */
+} /* H5C_log_write_unpin_entry_msg() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5C_write_destroy_fd_log_msg
+ * Function:    H5C_log_write_destroy_fd_msg
  *
  * Purpose:     Write a log message for destroying a flush dependency
  *              between two cache entries.
@@ -852,7 +852,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C_write_destroy_fd_log_msg(H5C_t *cache, const H5C_cache_entry_t *parent,
+H5C_log_write_destroy_fd_msg(H5C_t *cache, const H5C_cache_entry_t *parent,
     const H5C_cache_entry_t *child, herr_t fxn_ret_value)
 {
     herr_t ret_value = SUCCEED;
@@ -871,11 +871,11 @@ H5C_write_destroy_fd_log_msg(H5C_t *cache, const H5C_cache_entry_t *parent,
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5C_write_destroy_fd_log_msg() */
+} /* H5C_log_write_destroy_fd_msg() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5C_write_unprotect_entry_log_msg
+ * Function:    H5C_log_write_unprotect_entry_msg
  *
  * Purpose:     Write a log message for unprotecting a cache entry.
  *
@@ -887,7 +887,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C_write_unprotect_entry_log_msg(H5C_t *cache, const H5C_cache_entry_t *entry,
+H5C_log_write_unprotect_entry_msg(H5C_t *cache, const H5C_cache_entry_t *entry,
     int type_id, unsigned flags, herr_t fxn_ret_value)
 {
     herr_t ret_value = SUCCEED;
@@ -905,11 +905,11 @@ H5C_write_unprotect_entry_log_msg(H5C_t *cache, const H5C_cache_entry_t *entry,
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5C_write_unprotect_entry_log_msg() */
+} /* H5C_log_write_unprotect_entry_msg() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5C_write_set_cache_config_log_msg
+ * Function:    H5C_log_write_set_cache_config_msg
  *
  * Purpose:     Write a log message for setting the cache configuration.
  *
@@ -921,7 +921,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C_write_set_cache_config_log_msg(H5C_t *cache, const H5AC_cache_config_t *config,
+H5C_log_write_set_cache_config_msg(H5C_t *cache, const H5AC_cache_config_t *config,
     herr_t fxn_ret_value)
 {
     herr_t ret_value = SUCCEED;
@@ -939,11 +939,11 @@ H5C_write_set_cache_config_log_msg(H5C_t *cache, const H5AC_cache_config_t *conf
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5C_write_set_cache_config_log_msg() */
+} /* H5C_log_write_set_cache_config_msg() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5C_write_remove_entry_log_msg
+ * Function:    H5C_log_write_remove_entry_msg
  *
  * Purpose:     Write a log message for removing a cache entry.
  *
@@ -955,7 +955,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C_write_remove_entry_log_msg(H5C_t *cache, const H5C_cache_entry_t *entry,
+H5C_log_write_remove_entry_msg(H5C_t *cache, const H5C_cache_entry_t *entry,
     herr_t fxn_ret_value)
 {
     herr_t ret_value = SUCCEED;
@@ -973,5 +973,5 @@ H5C_write_remove_entry_log_msg(H5C_t *cache, const H5C_cache_entry_t *entry,
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5C_write_remove_entry_log_msg() */
+} /* H5C_log_write_remove_entry_msg() */
 
