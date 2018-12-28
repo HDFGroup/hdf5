@@ -146,6 +146,10 @@ float attr_data5=-5.123F;        /* Test data for 5th attribute */
 /* Used by test_attr_info_null_info_pointer() */
 #define GET_INFO_NULL_POINTER_ATTR_NAME "NullInfoPointerAttr"
 
+/* Used by test_attr_rename_invalid_name() */
+#define INVALID_RENAME_TEST_ATTR_NAME "InvalidRenameTestAttr"
+#define INVALID_RENAME_TEST_NEW_ATTR_NAME "InvalidRenameTestNewAttr"
+
 
 /* Attribute iteration struct */
 typedef struct {
@@ -6001,7 +6005,7 @@ test_attr_info_null_info_pointer(hid_t fcpl, hid_t fapl)
     hid_t  attr;
     hid_t  sid;
 
-    /* Create dataspace for dataset & attributes */
+    /* Create dataspace for attribute */
     sid = H5Screate(H5S_SCALAR);
     CHECK(sid, FAIL, "H5Screate");
 
@@ -6030,6 +6034,95 @@ test_attr_info_null_info_pointer(hid_t fcpl, hid_t fapl)
     } H5E_END_TRY;
 
     CHECK(err_ret, SUCCEED, "H5Aget_info_by_idx");
+
+    /* Close dataspace */
+    err_ret = H5Sclose(sid);
+    CHECK(err_ret, FAIL, "H5Sclose");
+
+    /* Close attribute */
+    err_ret = H5Aclose(attr);
+    CHECK(err_ret, FAIL, "H5Aclose");
+
+    /* Close file */
+    err_ret = H5Fclose(fid);
+    CHECK(err_ret, FAIL, "H5Fclose");
+}
+
+
+/***************************************************************
+**
+**  test_attr_rename_invalid_name(): A test to ensure that
+**      passing a NULL or empty attribute name to
+**      H5Arename(_by_name) doesn't cause bad behavior.
+**
+****************************************************************/
+static void
+test_attr_rename_invalid_name(hid_t fcpl, hid_t fapl)
+{
+    herr_t err_ret = -1;
+    hid_t  fid;
+    hid_t  attr;
+    hid_t  sid;
+
+    /* Create dataspace for attribute */
+    sid = H5Screate(H5S_SCALAR);
+    CHECK(sid, FAIL, "H5Screate");
+
+    /* Create file */
+    fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, fapl);
+    CHECK(fid, FAIL, "H5Fcreate");
+
+    /* Create attribute */
+    attr = H5Acreate2(fid, INVALID_RENAME_TEST_ATTR_NAME, H5T_NATIVE_UINT, sid, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(attr, FAIL, "H5Acreate2");
+
+    H5E_BEGIN_TRY {
+        err_ret = H5Arename(fid, NULL, INVALID_RENAME_TEST_NEW_ATTR_NAME);
+    } H5E_END_TRY;
+
+    CHECK(err_ret, SUCCEED, "H5Arename");
+
+    H5E_BEGIN_TRY {
+        err_ret = H5Arename(fid, "", INVALID_RENAME_TEST_NEW_ATTR_NAME);
+    } H5E_END_TRY;
+
+    CHECK(err_ret, SUCCEED, "H5Arename");
+
+    H5E_BEGIN_TRY {
+        err_ret = H5Arename(fid, INVALID_RENAME_TEST_ATTR_NAME, NULL);
+    } H5E_END_TRY;
+
+    CHECK(err_ret, SUCCEED, "H5Arename");
+
+    H5E_BEGIN_TRY {
+        err_ret = H5Arename(fid, INVALID_RENAME_TEST_ATTR_NAME, "");
+    } H5E_END_TRY;
+
+    CHECK(err_ret, SUCCEED, "H5Arename");
+
+    H5E_BEGIN_TRY {
+        err_ret = H5Arename_by_name(fid, ".", NULL, INVALID_RENAME_TEST_NEW_ATTR_NAME, H5P_DEFAULT);
+    } H5E_END_TRY;
+
+    CHECK(err_ret, SUCCEED, "H5Arename_by_name");
+
+    H5E_BEGIN_TRY {
+        err_ret = H5Arename_by_name(fid, ".", "", INVALID_RENAME_TEST_NEW_ATTR_NAME, H5P_DEFAULT);
+    } H5E_END_TRY;
+
+    CHECK(err_ret, SUCCEED, "H5Arename_by_name");
+
+    H5E_BEGIN_TRY {
+        err_ret = H5Arename_by_name(fid, ".", INVALID_RENAME_TEST_ATTR_NAME, NULL, H5P_DEFAULT);
+    } H5E_END_TRY;
+
+    CHECK(err_ret, SUCCEED, "H5Arename_by_name");
+
+    H5E_BEGIN_TRY {
+        err_ret = H5Arename_by_name(fid, ".", INVALID_RENAME_TEST_ATTR_NAME, "", H5P_DEFAULT);
+    } H5E_END_TRY;
+
+    CHECK(err_ret, SUCCEED, "H5Arename_by_name");
 
     /* Close dataspace */
     err_ret = H5Sclose(sid);
@@ -11082,6 +11175,7 @@ test_attr(void)
                 test_attr_deprec(fcpl, my_fapl);                /* Test deprecated API routines */
                 test_attr_many(new_format, my_fcpl, my_fapl);               /* Test storing lots of attributes */
                 test_attr_info_null_info_pointer(my_fcpl, my_fapl); /* Test passing a NULL attribute info pointer to H5Aget_info(_by_name/_by_idx) */
+                test_attr_rename_invalid_name(my_fcpl, my_fapl); /* Test passing a NULL or empty attribute name to H5Arename(_by_name) */
 
                 /* New attribute API routine tests
                  */
