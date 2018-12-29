@@ -125,6 +125,9 @@ main(void)
     if((ret = H5Pset_fill_value(dcpl1, H5T_STD_I32BE, &fill)) < 0)
         assert(ret > 0);
 
+    if((ret = H5Pset_dset_no_attrs_hint(dcpl1, FALSE)) < 0)
+        assert(ret > 0);
+
     max_size[0] = 100;
     if((ret = H5Pset_external(dcpl1, "ext1.data", (off_t)0, 
                          (hsize_t)(max_size[0] * sizeof(int)/4))) < 0)
