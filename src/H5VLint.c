@@ -881,7 +881,7 @@ done:
  *
  * Return:      Positive if VALUE1 is greater than VALUE2, negative if
  *              VALUE2 is greater than VALUE1 and zero if VALUE1 and
- *              VALUE2 are equal.
+ *              VALUE2 are equal (like strcmp).
  *
  *-------------------------------------------------------------------------
  */
