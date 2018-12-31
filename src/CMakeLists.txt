@@ -948,13 +948,13 @@ endif ()
 if (LOCAL_BATCH_TEST)
   configure_file (
       ${HDF5_SOURCE_DIR}/bin/batch/ctestP.lsf.in.cmake
-      ${HDF5_SOURCE_DIR}/bin/batch/ctestP.lsf
+      ${HDF5_SOURCE_DIR}/bin/batch ESCAPE_QUOTES @ONLY
   )
   configure_file (
       ${HDF5_SOURCE_DIR}/bin/batch/ctestS.lsf.in.cmake
-      ${HDF5_SOURCE_DIR}/bin/batch/ctestS.lsf
+      ${HDF5_SOURCE_DIR}/bin/batch ESCAPE_QUOTES @ONLY
   )
-)
+endif ()
 
 if (NOT EXISTS ${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c)
   add_executable (H5detect ${HDF5_SRC_DIR}/H5detect.c)
