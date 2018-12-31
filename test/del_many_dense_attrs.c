@@ -13,7 +13,7 @@
 
 /*
  * Purpose:	Test to verify that the infinite loop closing library/abort failure
- *          is fixed when the application creates and removes densed attributes 
+ *          is fixed when the application creates and removes dense attributes 
  *          (See HDFFV-10659).
  */
 
@@ -49,7 +49,7 @@ static void catch_signal(int H5_ATTR_UNUSED signo)
  * Function:	main
  *
  * Purpose:	Test to verify that the infinite loop closing library/abort failure
- *          is fixed when the application creates and removes densed attributes 
+ *          is fixed when the application creates and removes dense attributes 
  *          (See HDFFV-10659).
  *
  * Return:	Success:	exit(EXIT_SUCCESS)

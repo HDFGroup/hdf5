@@ -243,10 +243,10 @@ Bug Fixes since HDF5-1.10.3 release
 
     Library
     -------
-    - Deleting attributes in densed storage
+    - Deleting attributes in dense storage
 
       The library abort with "infinite loop closing library" after
-      attributes in densed storage are created and then deleted.
+      attributes in dense storage are created and then deleted.
 
       When deleting the attribute nodes from the name index v2 B-tree,
       if an attribute is found in the intermediate B-tree nodes,

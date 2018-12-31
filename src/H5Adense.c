@@ -307,6 +307,7 @@ H5A__dense_fnd_cb(const H5A_t *attr, hbool_t *took_ownership, void *_user_attr)
     /* Check arguments */
     HDassert(attr);
     HDassert(user_attr);
+    HDassert(took_ownership);
     /*
      *  If there is an attribute already stored in "user_attr", 
      *  we need to free the dynamially allocated spaces for the 

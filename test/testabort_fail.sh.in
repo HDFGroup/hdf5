@@ -15,7 +15,7 @@
 # does not close the file. (See HDFFV-10160)
 #
 # Test to verify that the infinite loop closing library/abort failure is fixed 
-# when the application creates and removes densed attributes (See HDFFV-10659)
+# when the application creates and removes dense attributes (See HDFFV-10659)
 
 srcdir=@srcdir@
 
