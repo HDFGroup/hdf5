@@ -97,10 +97,10 @@ if (EXISTS ${TEST_FOLDER}/${TEST_OUTPUT}.err)
   string (REGEX REPLACE "^.*_pmi_alps[^\n]+\n" "" TEST_STREAM "${TEST_STREAM}")
 
   if (NOT ERROR_APPEND)
-    # append error output to the stdout output file
+    # write back to original .err file
     file (WRITE ${TEST_FOLDER}/${TEST_OUTPUT}.err "${TEST_STREAM}")
   else ()
-    # write back to original .err file
+    # append error output to the stdout output file
     file (APPEND ${TEST_FOLDER}/${TEST_OUTPUT} "${TEST_STREAM}")
   endif ()
 endif ()
@@ -125,8 +125,11 @@ message (STATUS "COMMAND Error: ${TEST_ERROR}")
 
 # remove special output
 file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
-string (REGEX REPLACE "^.*_pmi_alps[^\n]+\n" "" TEST_STREAM "${TEST_STREAM}")
-file (WRITE ${TEST_FOLDER}/${TEST_OUTPUT} "${TEST_STREAM}")
+string (FIND TEST_STREAM "_pmi_alps" "${TEST_FIND_RESULT}")
+if ("${TEST_FIND_RESULT}" GREATER "0")
+  string (REGEX REPLACE "^.*_pmi_alps[^\n]+\n" "" TEST_STREAM "${TEST_STREAM}")
+  file (WRITE ${TEST_FOLDER}/${TEST_OUTPUT} ${TEST_STREAM})
+endif ()
 
 # if the output file needs Storage text removed
 if (TEST_MASK)
