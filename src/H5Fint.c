@@ -822,7 +822,7 @@ H5F__is_hdf5(const char *name)
     haddr_t    sig_addr;               /* Addess of hdf5 file signature */
     htri_t     ret_value = FAIL;       /* Return value */
 
-    FUNC_ENTER_PACKAGE_VOL
+    FUNC_ENTER_PACKAGE
 
     /* Open the file at the virtual file layer */
     if(NULL == (file = H5FD_open(name, H5F_ACC_RDONLY, H5P_FILE_ACCESS_DEFAULT, HADDR_UNDEF)))
@@ -839,7 +839,7 @@ done:
         if(H5FD_close(file) < 0 && ret_value >= 0)
             HDONE_ERROR(H5E_IO, H5E_CANTCLOSEFILE, FAIL, "unable to close file")
 
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__is_hdf5() */
 
 
@@ -1357,78 +1357,6 @@ H5F__dest(H5F_t *f, hbool_t flush)
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__dest() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5F__create
- *
- * Purpose:     Internal routine to create a file.
- *
- * Note:        This routine is needed so that there's a non-API routine for
- *              creating files that can set up VOL / SWMR info
- *              (which need a DXPL).
- *
- * Return:      Success:    Non-NULL, pointer to new file object.
- *              Failure:    NULL
- *
- * Programmer:    Quincey Koziol
- *        December 13, 2017
- *
- *-------------------------------------------------------------------------
- */
-H5F_t *
-H5F__create(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
-{
-    H5F_t       *ret_value = NULL;      /* Return value */
-
-    FUNC_ENTER_PACKAGE_VOL
-
-    /* Sanity check */
-    HDassert(filename);
-
-    /* Create a new file or truncate an existing file. */
-    if(NULL == (ret_value = H5F_open(filename, flags, fcpl_id, fapl_id)))
-        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file")
-
-done:
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
-} /* end H5F__create() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5F__open
- *
- * Purpose:     Internal routine to open a file.
- *
- * Note:        This routine is needed so that there's a non-API routine for
- *              opening files that can set up VOL / SWMR info
- *              (which need a DXPL).
- *
- * Return:      Success:    Non-NULL, pointer to new file object.
- *              Failure:    NULL
- *
- * Programmer:    Quincey Koziol
- *        December 13, 2017
- *
- *-------------------------------------------------------------------------
- */
-H5F_t *
-H5F__open(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
-{
-    H5F_t       *ret_value = NULL;      /* Return value */
-
-    FUNC_ENTER_PACKAGE_VOL
-
-    /* Sanity check */
-    HDassert(filename);
-
-    /* Open the file */
-    if(NULL == (ret_value = H5F_open(filename, flags, fcpl_id, fapl_id)))
-        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file")
-
-done:
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
-} /* end H5F__open() */
 
 
 /*-------------------------------------------------------------------------
@@ -1953,7 +1881,7 @@ H5F__flush_phase2(H5F_t *f, hbool_t closing)
 
 
 /*-------------------------------------------------------------------------
- * Function: H5F__flush_real
+ * Function: H5F__flush
  *
  * Purpose:  Flushes cached data.
  *
@@ -1961,7 +1889,7 @@ H5F__flush_phase2(H5F_t *f, hbool_t closing)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F__flush_real(H5F_t *f)
+H5F__flush(H5F_t *f)
 {
     herr_t   ret_value = SUCCEED;       /* Return value */
 
@@ -1981,49 +1909,6 @@ H5F__flush_real(H5F_t *f)
         HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush file data")
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5F__flush_real() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5F__flush
- *
- * Purpose:     Internal routine to flush a file.
- *
- * Note:        This routine is needed so that there's a non-API routine for
- *              flushing files that can set up VOL / SWMR info
- *              (which need a DXPL).
- *
- * Return:      Non-negative on success / Negative on failure
- *
- * Programmer:    Quincey Koziol
- *        December 13, 2017
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5F__flush(H5F_t *f, H5F_scope_t scope)
-{
-    herr_t      ret_value = SUCCEED;    /* Return value */
-
-    FUNC_ENTER_PACKAGE_VOL
-
-    /* Sanity check */
-    HDassert(f);
-    HDassert(f->shared);
-
-    /* Flush other files, depending on scope */
-    if(H5F_SCOPE_GLOBAL == scope) {
-        /* Call the flush routine for mounted file hierarchies */
-        if(H5F_flush_mounts(f) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush mounted file hierarchy")
-    } /* end if */
-    else
-        /* Call the flush routine, for this file */
-        if(H5F__flush_real(f) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush file's cached information")
-
-done:
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
 } /* end H5F__flush() */
 
 
@@ -2031,10 +1916,6 @@ done:
  * Function:    H5F__close
  *
  * Purpose:     Internal routine to close a file.
- *
- * Note:        This routine is needed so that there's a non-API routine for
- *              closing files that can set up VOL / SWMR info
- *              (which need a DXPL).
  *
  * Return:      Non-negative on success / Negative on failure
  *
@@ -2049,7 +1930,7 @@ H5F__close(hid_t file_id)
     H5F_t       *f;                     /* File pointer */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_PACKAGE_VOL
+    FUNC_ENTER_PACKAGE
 
     /* Flush file if this is the last reference to this id and we have write
      * intent, unless it will be flushed by the "shared" file being closed.
@@ -2064,7 +1945,7 @@ H5F__close(hid_t file_id)
         if((nref = H5I_get_ref(file_id, FALSE)) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get ID ref count")
         if(nref == 1)
-            if(H5F__flush_real(f) < 0)
+            if(H5F__flush(f) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
     } /* end if */
 
@@ -2074,7 +1955,7 @@ H5F__close(hid_t file_id)
         HGOTO_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "decrementing file ID failed")
 
 done:
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__close() */
 
 
@@ -2100,7 +1981,7 @@ H5F__close_cb(H5F_t *f)
 {
     herr_t ret_value = SUCCEED;                 /* Return value */
 
-    FUNC_ENTER_PACKAGE_VOL
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(f);
@@ -2132,7 +2013,7 @@ H5F__close_cb(H5F_t *f)
         HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close file")
 
 done:
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__close_cb() */
 
 
@@ -2807,7 +2688,7 @@ H5F__set_libver_bounds(H5F_t *f, H5F_libver_t low, H5F_libver_t high)
 {
     herr_t     ret_value = SUCCEED;     /* Return value */
 
-    FUNC_ENTER_PACKAGE_VOL
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(f);
@@ -2835,7 +2716,7 @@ H5F__set_libver_bounds(H5F_t *f, H5F_libver_t low, H5F_libver_t high)
          *
          *      QAK - April, 2018
          */
-        if(H5F__flush_real(f) < 0)
+        if(H5F__flush(f) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush file's cached information")
 
         /* Set the new bounds */
@@ -2849,44 +2730,9 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5F__get_freespace
- *
- * Purpose:     Private version of H5Fget_freespace
- *
- * Note:        This routine is needed so that there's a non-API routine
- *              that can set up VOL / SWMR info (which need a DXPL).
- *
- * Return:      Success:        SUCCEED
- *              Failure:        FAIL
- *-------------------------------------------------------------------------
- */
-herr_t
-H5F__get_freespace(H5F_t *f, hsize_t *tot_space)
-{
-    herr_t     ret_value = SUCCEED;     /* Return value */
-
-    FUNC_ENTER_PACKAGE_VOL
-
-    /* Sanity check */
-    HDassert(f);
-    HDassert(f->shared);
-
-    /* Go get the actual amount of free space in the file */
-    if(H5MF_get_freespace(f, tot_space, NULL) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to check free space for file")
-
-done:
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
-} /* H5F__get_freespace() */
-
-
-/*-------------------------------------------------------------------------
  * Function:    H5F__get_file_image
  *
  * Purpose:     Private version of H5Fget_file_image
- *
- * Note:        This routine is needed so that there's a non-API routine
- *              that can set up VOL / SWMR info (which need a DXPL).
  *
  * Return:      Success:        Bytes copied / number of bytes needed.
  *              Failure:        negative value
@@ -2899,7 +2745,7 @@ H5F__get_file_image(H5F_t *file, void *buf_ptr, size_t buf_len)
     haddr_t     eoa;                    /* End of file address */
     ssize_t     ret_value = -1;         /* Return value */
 
-    FUNC_ENTER_PACKAGE_VOL
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     if(!file || !file->shared || !file->shared->lf)
@@ -2986,7 +2832,7 @@ H5F__get_file_image(H5F_t *file, void *buf_ptr, size_t buf_len)
     } /* end if */
 
 done:
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5F__get_file_image() */
 
 
@@ -2994,9 +2840,6 @@ done:
  * Function:    H5F__get_info
  *
  * Purpose:     Private version of H5Fget_info
- *
- * Note:        This routine is needed so that there's a non-API routine
- *              that can set up VOL / SWMR info (which need a DXPL).
  *
  * Return:      Success:        SUCCEED
  *              Failure:        FAIL
@@ -3007,7 +2850,7 @@ H5F__get_info(H5F_t *f, H5F_info2_t *finfo)
 {
     herr_t ret_value = SUCCEED;  /* Return value */
 
-    FUNC_ENTER_PACKAGE_VOL
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(f);
@@ -3036,7 +2879,7 @@ H5F__get_info(H5F_t *f, H5F_info2_t *finfo)
     finfo->free.version = HDF5_FREESPACE_VERSION;
 
 done:
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5F__get_info() */
 
 
@@ -3122,39 +2965,6 @@ H5F_set_retries(H5F_t *f)
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5F_set_retries() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5F__get_free_sections
- *
- * Purpose:     Private version of H5Fget_free_sections
- *
- * Note:        This routine is needed so that there's a non-API routine
- *              that can set up VOL / SWMR info (which need a DXPL).
- *
- * Return:      Success:        non-negative, the total # of free space sections
- *              Failure:        negative
- *-------------------------------------------------------------------------
- */
-ssize_t
-H5F__get_free_sections(H5F_t *f, H5FD_mem_t type, size_t nsects,
-    H5F_sect_info_t *sect_info)
-{
-    ssize_t     ret_value = -1;         /* Return value */
-
-    FUNC_ENTER_PACKAGE_VOL
-
-    /* Sanity check */
-    HDassert(f);
-    HDassert(f->shared);
-
-    /* Go get the actual amount of free space in the file */
-    if((ret_value = H5MF_get_free_sections(f, type, nsects, sect_info)) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to get free space sections for file")
-
-done:
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
-} /* H5F__get_free_sections() */
 
 
 /*-------------------------------------------------------------------------
@@ -3453,9 +3263,6 @@ done:
  *              set up flush dependency/proxy even for file opened without
  *              SWMR to resolve issues with opened objects.
  *
- * Note:        This routine is needed so that there's a non-API routine
- *              that can set up VOL / SWMR info (which need a DXPL).
- *
  * Return:      Success:        SUCCEED
  *              Failure:        FAIL
  *-------------------------------------------------------------------------
@@ -3475,7 +3282,7 @@ H5F__start_swmr_write(H5F_t *f)
     hbool_t setup = FALSE;          /* Boolean flag to indicate whether SWMR setting is enabled */
     herr_t ret_value = SUCCEED;     /* Return value */
 
-    FUNC_ENTER_PACKAGE_VOL
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(f);
@@ -3508,7 +3315,7 @@ H5F__start_swmr_write(H5F_t *f)
         HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush superblock extension")
 
     /* Flush data buffers */
-    if(H5F__flush_real(f) < 0)
+    if(H5F__flush(f) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush f's cached information")
 
     /* Get the # of opened named datatypes and attributes */
@@ -3644,7 +3451,7 @@ done:
     if(obj_paths)
         H5MM_xfree(obj_paths);
 
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5F__start_swmr_write() */
 
 
@@ -3652,9 +3459,6 @@ done:
  * Function:    H5F__format_convert
  *
  * Purpose:     Private version of H5Fformat_convert
- *
- * Note:        This routine is needed so that there's a non-API routine
- *              that can set up VOL / SWMR info (which need a DXPL).
  *
  * Return:      Success:        SUCCEED
  *              Failure:        FAIL
@@ -3666,7 +3470,7 @@ H5F__format_convert(H5F_t *f)
     hbool_t mark_dirty = FALSE;        /* Whether to mark the file's superblock dirty */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_PACKAGE_VOL
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(f);
@@ -3709,6 +3513,6 @@ H5F__format_convert(H5F_t *f)
         HGOTO_ERROR(H5E_FILE, H5E_CANTMARKDIRTY, FAIL, "unable to mark superblock as dirty")
 
 done:
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5F__format_convert() */
 

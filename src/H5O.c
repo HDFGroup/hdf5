@@ -116,7 +116,7 @@ H5Oopen(hid_t loc_id, const char *name, hid_t lapl_id)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, H5I_INVALID_HID, "can't set access property list info")
 
     /* Open the object */
-    if((ret_value = H5O__open_name(&loc, name)) < 0)
+    if((ret_value = H5O_open_name(&loc, name, TRUE)) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, FAIL, "unable to open object")
 
 done:
@@ -292,9 +292,9 @@ H5Olink(hid_t obj_id, hid_t new_loc_id, const char *new_name, hid_t lcpl_id,
     if(H5CX_set_apl(&lapl_id, H5P_CLS_LACC, obj_id, TRUE) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set access property list info")
 
-    /* Create a link to the object */
-    if(H5O__create_link(&new_loc, new_name, &obj_loc, lcpl_id) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to create link")
+    /* Link to the object */
+    if(H5L_link(&new_loc, new_name, &obj_loc, lcpl_id) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTCREATE, FAIL, "unable to create link")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -339,7 +339,7 @@ H5Oincr_refcount(hid_t object_id)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set access property list info")
 
     /* Change the object's refcount */
-    if(H5O__link(oloc, 1) < 0)
+    if(H5O_link(oloc, 1) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, FAIL, "modifying object link count failed")
 
 done:
@@ -385,7 +385,7 @@ H5Odecr_refcount(hid_t object_id)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set access property list info")
 
     /* Change the object's refcount */
-    if(H5O__link(oloc, -1) < 0)
+    if(H5O_link(oloc, -1) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, FAIL, "modifying object link count failed")
 
 done:
@@ -426,7 +426,7 @@ H5Oexists_by_name(hid_t loc_id, const char *name, hid_t lapl_id)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set access property list info")
 
     /* Check if the object exists */
-    if((ret_value = H5O__exists_by_name(&loc, name)) < 0)
+    if((ret_value = H5G_loc_exists(&loc, name)) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to determine if '%s' exists", name)
 
 done:
@@ -467,7 +467,7 @@ H5Oget_info2(hid_t loc_id, H5O_info_t *oinfo, unsigned fields)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid fields")
 
     /* Retrieve the object's information */
-    if(H5O__get_info_by_name(&loc, ".", oinfo/*out*/, fields) < 0)
+    if(H5G_loc_info(&loc, ".", oinfo/*out*/, fields) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't get info for object")
 
 done:
@@ -515,7 +515,7 @@ H5Oget_info_by_name2(hid_t loc_id, const char *name, H5O_info_t *oinfo,
         HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set access property list info")
 
     /* Retrieve the object's information */
-    if(H5O__get_info_by_name(&loc, name, oinfo/*out*/, fields) < 0)
+    if(H5G_loc_info(&loc, name, oinfo/*out*/, fields) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't get info for object: '%s'", name)
 
 done:
@@ -612,7 +612,7 @@ H5Oset_comment(hid_t obj_id, const char *comment)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set collective metadata read info")
 
     /* (Re)set the object's comment */
-    if(H5O__set_comment_by_name(&loc, ".", comment) < 0)
+    if(H5G_loc_set_comment(&loc, ".", comment) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set comment for object")
 
 done:
@@ -658,7 +658,7 @@ H5Oset_comment_by_name(hid_t loc_id, const char *name, const char *comment,
         HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set access property list info")
 
     /* (Re)set the object's comment */
-    if(H5O__set_comment_by_name(&loc, name, comment) < 0)
+    if(H5G_loc_set_comment(&loc, name, comment) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set comment for object: '%s'", name)
 
 done:
@@ -696,7 +696,7 @@ H5Oget_comment(hid_t obj_id, char *comment, size_t bufsize)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
 
     /* Retrieve the object's comment */
-    if((ret_value = H5O__get_comment_by_name(&loc, ".", comment/*out*/, bufsize)) < 0)
+    if((ret_value = H5G_loc_get_comment(&loc, ".", comment/*out*/, bufsize)) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't get comment for object")
 
 done:
@@ -741,7 +741,7 @@ H5Oget_comment_by_name(hid_t loc_id, const char *name, char *comment, size_t buf
         HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set access property list info")
 
     /* Retrieve the object's comment */
-    if((ret_value = H5O__get_comment_by_name(&loc, name, comment/*out*/, bufsize)) < 0)
+    if((ret_value = H5G_loc_get_comment(&loc, name, comment/*out*/, bufsize)) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't get comment for object: '%s'", name)
 
 done:
