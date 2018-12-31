@@ -37,6 +37,7 @@
 #include "H5Cprivate.h"
 
 /* Other private headers needed by this file */
+#include "H5Clog.h"             /* Cache logging */
 #include "H5SLprivate.h"        /* Skip lists */
 
 /**************************/
@@ -3497,40 +3498,8 @@ typedef struct H5C_tag_info_t {
  * flush_in_progress: Boolean flag indicating whether a flush is in
  * 		progress.
  *
- * trace_file_ptr:  File pointer pointing to the trace file, which is used
- *              to record cache operations for use in simulations and design
- *              studies.  This field will usually be NULL, indicating that
- *              no trace file should be recorded.
- *
- *              Since much of the code supporting the parallel metadata
- *              cache is in H5AC, we don't write the trace file from
- *              H5C.  Instead, H5AC reads the trace_file_ptr as needed.
- *
- *              When we get to using H5C in other places, we may add
- *              code to write trace file data at the H5C level as well.
- *
- * logging_enabled: Boolean flag indicating whether cache logging
- *              which is used to record cache operations for use in
- *              debugging and performance analysis. When this flag is set
- *              to TRUE, it means that the log file is open and ready to
- *              receive log entries. It does NOT mean that cache operations
- *              are currently being recorded. That is controlled by the
- *              currently_logging flag (below).
- *
- *              Since much of the code supporting the parallel metadata
- *              cache is in H5AC, we don't write the trace file from
- *              H5C.  Instead, H5AC reads the trace_file_ptr as needed.
- *
- *              When we get to using H5C in other places, we may add
- *              code to write trace file data at the H5C level as well.
- *
- * currently_logging: Boolean flag that indicates if cache operations are
- *              currently being logged. This flag is flipped by the
- *              H5Fstart/stop_mdc_logging functions.
- *
- * log_file_ptr:  File pointer pointing to the log file. The I/O functions
- *              in stdio.h are used to write to the log file regardless of
- *              the VFD selected.
+ * log_info:    Information used by the MDC logging functionality.
+ *              Described in H5Clog.h.
  *
  * aux_ptr:	Pointer to void used to allow wrapper code to associate
  *		its data with an instance of H5C_t.  The H5C cache code
@@ -4676,10 +4645,7 @@ typedef struct H5C_tag_info_t {
 struct H5C_t {
     uint32_t			magic;
     hbool_t			flush_in_progress;
-    FILE *			trace_file_ptr;
-    hbool_t                     logging_enabled;
-    hbool_t                     currently_logging;
-    FILE *			log_file_ptr;
+    H5C_log_info_t  *log_info;
     void *			aux_ptr;
     int32_t			max_type_id;
     const H5C_class_t * const   *class_table_ptr;

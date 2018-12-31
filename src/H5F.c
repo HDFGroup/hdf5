@@ -37,7 +37,8 @@
 #include "H5Pprivate.h"         /* Property lists                           */
 #include "H5Tprivate.h"         /* Datatypes                                */
 #include "H5VLprivate.h"        /* Virtual Object Layer                     */
-#include "H5VLnative.h"         /* Native VOL connector                     */
+
+#include "H5VLnative_private.h" /* Native VOL connector                     */
 
 
 /****************/
@@ -1334,7 +1335,7 @@ H5Fget_metadata_read_retry_info(hid_t file_id, H5F_retry_info_t *info)
     H5TRACE2("e", "i*x", file_id, info);
 
     /* Check args */
-    if (!info)
+    if(!info)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no info struct")
 
     /* Get the file pointer */
@@ -1507,7 +1508,7 @@ H5Fstart_mdc_logging(hid_t file_id)
 
     /* Call mdc logging function */
     if(H5VL_file_optional(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, H5VL_NATIVE_FILE_START_MDC_LOGGING) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_LOGFAIL, FAIL, "unable to start mdc logging")
+        HGOTO_ERROR(H5E_FILE, H5E_LOGGING, FAIL, "unable to start mdc logging")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1540,7 +1541,7 @@ H5Fstop_mdc_logging(hid_t file_id)
 
     /* Call mdc logging function */
     if(H5VL_file_optional(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, H5VL_NATIVE_FILE_STOP_MDC_LOGGING) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_LOGFAIL, FAIL, "unable to stop mdc logging")
+        HGOTO_ERROR(H5E_FILE, H5E_LOGGING, FAIL, "unable to stop mdc logging")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1574,7 +1575,7 @@ H5Fget_mdc_logging_status(hid_t file_id, hbool_t *is_enabled,
 
     /* Call mdc logging function */
     if(H5VL_file_optional(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, H5VL_NATIVE_FILE_GET_MDC_LOGGING_STATUS, is_enabled, is_currently_logging) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_LOGFAIL, FAIL, "unable to get logging status")
+        HGOTO_ERROR(H5E_FILE, H5E_LOGGING, FAIL, "unable to get logging status")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1820,4 +1821,90 @@ H5Fincrement_filesize(hid_t file_id, hsize_t increment)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Fincrement_filesize() */
+
+
+/*-------------------------------------------------------------------------
+ * Function: H5Fget_dset_no_attrs_hint
+ *
+ * Purpose:
+ *
+ *     Get the file-level setting to create minimized dataset object headers.
+ *     Result is stored at pointer `minimize`.
+ *
+ * Return:
+ *
+ *     Success: SUCCEED (0) (non-negative value)
+ *     Failure: FAIL (-1) (negative value)
+ *
+ * Programmer:
+ *
+ *     Jacob Smith
+ *     15 August 2018
+ *
+ * Changes: None.
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Fget_dset_no_attrs_hint(hid_t file_id, hbool_t *minimize)
+{
+    H5VL_object_t  *vol_obj   = NULL;
+    herr_t          ret_value = SUCCEED;
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "i*b", file_id, minimize);
+
+    if(NULL == minimize)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "out pointer 'minimize' cannot be NULL")
+
+    vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE);
+    if(NULL == vol_obj)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+
+    if(H5VL_file_optional(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, H5VL_NATIVE_FILE_GET_MIN_DSET_OHDR_FLAG, minimize) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "unable to set file's dataset header minimization flag")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Fget_dset_no_attrs_hint */
+
+
+/*-------------------------------------------------------------------------
+ * Function: H5Fset_dset_no_attrs_hint
+ *
+ * Purpose:
+ *
+ *     Set the file-level setting to create minimized dataset object headers.
+ *
+ * Return:
+ *
+ *     Success: SUCCEED (0) (non-negative value)
+ *     Failure: FAIL (-1) (negative value)
+ *
+ * Programmer:
+ *
+ *     Jacob Smith
+ *     15 August 2018
+ *
+ * Changes: None.
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Fset_dset_no_attrs_hint(hid_t file_id, hbool_t minimize)
+{
+    H5VL_object_t *vol_obj   = NULL;
+    herr_t         ret_value = SUCCEED;
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "ib", file_id, minimize);
+
+    vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE);
+    if(NULL == vol_obj)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+
+    if(H5VL_file_optional(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, H5VL_NATIVE_FILE_SET_MIN_DSET_OHDR_FLAG, minimize) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "unable to set file's dataset header minimization flag")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Fset_dset_no_attrs_hint */
 

@@ -158,47 +158,8 @@ h5_clean_files(const char *base_name[], hid_t fapl)
     int i;
 
     for(i = 0; base_name[i]; i++) {
-        char filename[1024];
-        char temp[2048];
-        hid_t driver;
-
-        if(NULL == h5_fixname(base_name[i], fapl, filename, sizeof(filename)))
-            continue;
-
-        driver = H5Pget_driver(fapl);
-
-        if(driver == H5FD_FAMILY) {
-            int j;
-
-            for(j = 0; /*void*/; j++) {
-                HDsnprintf(temp, sizeof temp, filename, j);
-
-                if(HDaccess(temp, F_OK) < 0)
-                    break;
-
-                HDremove(temp);
-            } /* end for */
-        } else if(driver == H5FD_CORE) {
-            hbool_t backing;        /* Whether the core file has backing store */
-
-            H5Pget_fapl_core(fapl, NULL, &backing);
-
-            /* If the file was stored to disk with bacing store, remove it */
-            if(backing)
-                HDremove(filename);
-        } else if (driver == H5FD_MULTI) {
-            H5FD_mem_t mt;
-
-            HDassert(HDstrlen(multi_letters)==H5FD_MEM_NTYPES);
-
-            for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t,mt)) {
-                HDsnprintf(temp, sizeof temp, "%s-%c.h5", filename, multi_letters[mt]);
-                HDremove(temp); /*don't care if it fails*/
-            } /* end for */
-        } else {
-            HDremove(filename);
-        }
-    } /* end for */
+        h5_delete_test_file(base_name[i], fapl);
+    }
 
     /* Close the FAPL used to access the file */
     H5Pclose(fapl);
@@ -266,10 +227,10 @@ h5_delete_test_file(const char *base_name, hid_t fapl)
         for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t,mt)) {
             HDsnprintf(sub_filename, sizeof(sub_filename), "%s-%c.h5", filename, multi_letters[mt]);
             HDremove(sub_filename);
-        } /* end for */
+        }
     } else {
         HDremove(filename);
-    } /* end if */
+    } /* end driver selection tree */
 
     return;
 } /* end h5_delete_test_file() */
