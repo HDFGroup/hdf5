@@ -1382,7 +1382,7 @@ H5Fstart_mdc_logging(hid_t file_id)
 
     /* Call mdc logging function */
     if(H5C_start_logging(file->shared->cache) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_LOGFAIL, FAIL, "unable to start mdc logging")
+        HGOTO_ERROR(H5E_FILE, H5E_LOGGING, FAIL, "unable to start mdc logging")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1414,7 +1414,7 @@ H5Fstop_mdc_logging(hid_t file_id)
 
     /* Call mdc logging function */
     if(H5C_stop_logging(file->shared->cache) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_LOGFAIL, FAIL, "unable to stop mdc logging")
+        HGOTO_ERROR(H5E_FILE, H5E_LOGGING, FAIL, "unable to stop mdc logging")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1445,9 +1445,9 @@ H5Fget_mdc_logging_status(hid_t file_id, hbool_t *is_enabled,
     if(NULL == (file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "hid_t identifier is not a file ID")
 
-    /* Call mdc logging function */
+    /* Call MDC logging function */
     if(H5C_get_logging_status(file->shared->cache, is_enabled, is_currently_logging) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_LOGFAIL, FAIL, "unable to get logging status")
+        HGOTO_ERROR(H5E_FILE, H5E_LOGGING, FAIL, "unable to get logging status")
 
 done:
     FUNC_LEAVE_API(ret_value)
