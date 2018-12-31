@@ -198,6 +198,7 @@ typedef struct H5CX_t {
     MPI_Datatype btype;         /* MPI datatype for buffer, when using collective I/O */
     MPI_Datatype ftype;         /* MPI datatype for file, when using collective I/O */
     hbool_t mpi_file_flushing;  /* Whether an MPI-opened file is being flushed */
+    hbool_t mpio_Proc0_BCast;   /* Whether a dataset meets read-proc0-and-bcast requirements */
 #endif /* H5_HAVE_PARALLEL */
 
     /* Cached DXPL properties */
@@ -1537,6 +1538,33 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5CX_get_mpio_Proc0_BCast 
+ *
+ * Purpose:     Retrieves if the dataset meets read-proc0-and-bcast requirements for the current API call context.
+ *
+ * Return:      Non-negative on success / Negative on failure
+ *
+ * Programmer:  M. Breitenfeld
+ *              December 31, 2018
+ *
+ *-------------------------------------------------------------------------
+ */
+hbool_t
+H5CX_get_mpio_Proc0_BCast(void)
+{
+    H5CX_node_t **head = H5CX_get_my_context();  /* Get the pointer to the head of the API context, for this thread */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    /* Sanity check */
+    HDassert(head && *head);
+
+    FUNC_LEAVE_NOAPI((*head)->ctx.mpio_Proc0_BCast)
+
+} /* end H5CX_get_mpio_Proc0_BCast() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5CX_get_mpio_chunk_opt_mode
  *
  * Purpose:     Retrieves the collective chunk optimization mode for the current API call context.
@@ -2319,6 +2347,34 @@ H5CX_set_mpio_global_no_coll_cause(uint32_t mpio_global_no_coll_cause)
 
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5CX_set_mpio_global_no_coll_cause() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5CX_set_mpio_Proc0_BCast
+ *
+ * Purpose:     Sets if the dataset meets read-proc0-and-bcast requirements for the current API call context.
+ *
+ * Return:      <none>
+ *
+ * Programmer:  M. Breitenfeld
+ *              December 31, 2018
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+H5CX_set_mpio_Proc0_BCast(hbool_t mpio_Proc0_BCast)
+{
+    H5CX_node_t **head = H5CX_get_my_context();  /* Get the pointer to the head of the API context, for this thread */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    /* Sanity checks */
+    HDassert(head && *head);
+
+    (*head)->ctx.mpio_Proc0_BCast = mpio_Proc0_BCast;
+
+    FUNC_LEAVE_NOAPI_VOID
+} /* end H5CX_set_mpio_Proc0_BCast */
 
 #ifdef H5_HAVE_INSTRUMENTED_LIBRARY
 

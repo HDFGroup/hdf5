@@ -1738,7 +1738,6 @@ typedef struct H5_debug_t {
 
 #ifdef H5_HAVE_PARALLEL
 extern hbool_t H5_coll_api_sanity_check_g;
-extern hbool_t H5FD_MPIO_Proc0_BCast_g; /* Meets read-proc0-and-bcast requirements*/ 
 #endif /* H5_HAVE_PARALLEL */
 
 extern H5_debug_t    H5_debug_g;

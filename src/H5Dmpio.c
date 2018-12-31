@@ -47,8 +47,6 @@
 
 #ifdef H5_HAVE_PARALLEL
 
-hbool_t H5FD_MPIO_Proc0_BCast_g;  /* Flag if dataset is both: H5S_ALL and < 2GB */
-
 /****************/
 /* Local Macros */
 /****************/
@@ -287,6 +285,7 @@ H5D__mpio_opt_possible(const H5D_io_info_t *io_info, const H5S_t *file_space,
                                         /* [1] Flag if dataset is both: H5S_ALL and small */
     unsigned global_cause[2] = {0,0};   /* Global reason(s) for breaking collective mode */
     htri_t ret_value = SUCCEED;         /* Return value */
+    hbool_t H5FD_MPIO_Proc0_BCast;      /* Flag if dataset is both: H5S_ALL and < 2GB */
 
     FUNC_ENTER_PACKAGE
 
@@ -349,7 +348,7 @@ H5D__mpio_opt_possible(const H5D_io_info_t *io_info, const H5S_t *file_space,
         local_cause[0] |= H5D_MPIO_PARALLEL_FILTERED_WRITES_DISABLED;
 #endif
 
-    H5FD_MPIO_Proc0_BCast_g = FALSE;
+    H5FD_MPIO_Proc0_BCast = FALSE;
     /* Check to see if all the processes are reading the same data */
     if((H5S_GET_SELECT_TYPE(file_space) != H5S_SEL_ALL)) {
       /* Flag to do a MPI_Bcast of the data from one proc instead of 
@@ -395,7 +394,10 @@ H5D__mpio_opt_possible(const H5D_io_info_t *io_info, const H5S_t *file_space,
 
     /* read-proc0-and-bcast if collective and H5S_ALL */
     if(global_cause[0] == 0 && global_cause[1] == 0)
-      H5FD_MPIO_Proc0_BCast_g = TRUE;
+      H5FD_MPIO_Proc0_BCast = TRUE;
+
+    /* Set Flag if dataset is both: H5S_ALL and < 2GB in the API context */
+    H5CX_set_mpio_Proc0_BCast(H5FD_MPIO_Proc0_BCast);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

@@ -1515,7 +1515,7 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type,
             if(H5FD_mpio_Debug[(int)'t'])
                 fprintf(stdout, "H5FD_mpio_read: doing MPI collective IO\n");
 #endif
-            if(H5FD_MPIO_Proc0_BCast_g) {
+            if(H5CX_get_mpio_Proc0_BCast()) {
 #ifdef H5FDmpio_DEBUG
               if(H5FD_mpio_Debug[(int)'t'])
                  fprintf(stdout, "H5FD_mpio_read: doing Proc0-read-and-MPI_Bcast\n");
