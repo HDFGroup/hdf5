@@ -147,7 +147,13 @@ New Features
 
      Parallel Library:
     -----------------
-    -
+    - All MPI-1 API calls have been replaced with MPI-2 equivalents.
+
+      This was done to better support OpenMPI, as default builds no longer
+      include MPI-1 support (as of OpenMPI 4.0).
+
+      (DER - 2018/12/30, HDFFV-10566)
+
 
     Fortran Library:
     ----------------

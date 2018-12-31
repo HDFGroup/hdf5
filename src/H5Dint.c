@@ -58,7 +58,6 @@ static herr_t H5D__build_file_prefix(const H5D_t *dset, hid_t dapl_id,
 static herr_t H5D__open_oid(H5D_t *dataset, hid_t dapl_id);
 static herr_t H5D__init_storage(const H5D_io_info_t *io_info, hbool_t full_overwrite,
         hsize_t old_dim[]);
-static herr_t H5D__get_storage_size_real(const H5D_t *dset, hsize_t *storage_size);
 static herr_t H5D__append_flush_setup(H5D_t *dset, hid_t dapl_id);
 static herr_t H5D__close_cb(H5D_t *dataset);
 
@@ -299,7 +298,7 @@ H5D__create_named(const H5G_loc_t *loc, const char *name, hid_t type_id,
     H5D_obj_create_t dcrt_info;         /* Information for dataset creation */
     H5D_t       *ret_value = NULL;      /* Return value */
 
-    FUNC_ENTER_PACKAGE_VOL
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(loc);
@@ -330,49 +329,8 @@ H5D__create_named(const H5G_loc_t *loc, const char *name, hid_t type_id,
     ret_value = (H5D_t *)ocrt_info.new_obj;
 
 done:
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__create_named() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5D__create_anon
- *
- * Purpose:     Internal routine to create a new anonymous dataset.
- *
- * Note:        This routine is needed so that there's a non-API routine for
- *              creating datasets that can set up VOL / SWMR info
- *              (which need a DXPL).
- *
- * Return:      Success:    Non-NULL, pointer to new dataset object.
- *              Failure:    NULL
- *
- * Programmer:	Quincey Koziol
- *		December 9, 2017
- *
- *-------------------------------------------------------------------------
- */
-H5D_t *
-H5D__create_anon(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id,
-    hid_t dapl_id)
-{
-    H5D_t       *ret_value = NULL;      /* Return value */
-
-    FUNC_ENTER_PACKAGE_VOL
-
-    /* Check arguments */
-    HDassert(file);
-    HDassert(type_id != H5P_DEFAULT);
-    HDassert(space);
-    HDassert(dcpl_id != H5P_DEFAULT);
-    HDassert(dapl_id != H5P_DEFAULT);
-
-    /* Build and open the dataset */
-    if(NULL == (ret_value = H5D__create(file, type_id, space, dcpl_id, dapl_id)))
-	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to create dataset")
-
-done:
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
-} /* end H5D__create_anon() */
 
 
 /*-------------------------------------------------------------------------
@@ -390,7 +348,7 @@ H5D__get_space_status(const H5D_t *dset, H5D_space_status_t *allocation)
 {
     herr_t      ret_value = SUCCEED;
 
-    FUNC_ENTER_PACKAGE_VOL
+    FUNC_ENTER_PACKAGE
 
     HDassert(dset);
 
@@ -423,7 +381,7 @@ H5D__get_space_status(const H5D_t *dset, H5D_space_status_t *allocation)
             HGOTO_ERROR(H5E_DATASET, H5E_OVERFLOW, FAIL, "size of dataset's storage overflowed")
 
         /* Difficult to error check, since the error value is 0 and 0 is a valid value... :-/ */
-        if(H5D__get_storage_size_real(dset, &space_allocated) < 0)
+        if(H5D__get_storage_size(dset, &space_allocated) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get size of dataset's storage")
 
         /* Decide on how much of the space is allocated */
@@ -444,7 +402,7 @@ H5D__get_space_status(const H5D_t *dset, H5D_space_status_t *allocation)
     } /* end else */
 
 done:
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__get_space_status() */
 
 
@@ -1189,7 +1147,7 @@ H5D__open_name(const H5G_loc_t *loc, const char *name, hid_t dapl_id)
     hbool_t     loc_found = FALSE;      /* Location at 'name' found */
     H5D_t       *ret_value = NULL;      /* Return value */
 
-    FUNC_ENTER_PACKAGE_VOL
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(loc);
@@ -1223,7 +1181,7 @@ done:
         if(loc_found && H5G_loc_free(&dset_loc) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, NULL, "can't free location")
 
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__open_name() */
 
 
@@ -1617,7 +1575,7 @@ H5D__close_cb(H5D_t *dataset)
 {
     herr_t ret_value = SUCCEED;                 /* Return value */
 
-    FUNC_ENTER_STATIC_VOL
+    FUNC_ENTER_STATIC
 
     /* check args */
     HDassert(dataset && dataset->oloc.file && dataset->shared);
@@ -1628,7 +1586,7 @@ H5D__close_cb(H5D_t *dataset)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "can't close dataset");
 
 done:
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__close_cb() */
 
 
@@ -2262,7 +2220,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function: H5D__get_storage_size_real
+ * Function: H5D__get_storage_size
  *
  * Purpose:  Determines how much space has been reserved to store the raw
  *           data of a dataset.
@@ -2270,8 +2228,8 @@ done:
  * Return:   Non-negative on success, negative on failure
  *-------------------------------------------------------------------------
  */
-static herr_t
-H5D__get_storage_size_real(const H5D_t *dset, hsize_t *storage_size)
+herr_t
+H5D__get_storage_size(const H5D_t *dset, hsize_t *storage_size)
 {
     herr_t    ret_value = SUCCEED;    /* Return value */
 
@@ -2313,35 +2271,6 @@ H5D__get_storage_size_real(const H5D_t *dset, hsize_t *storage_size)
 
 done:
     FUNC_LEAVE_NOAPI_TAG(ret_value)
-} /* end H5D__get_storage_size_real() */
-
-
-/*-------------------------------------------------------------------------
- * Function: H5D__get_storage_size
- *
- * Purpose:  Determines how much space has been reserved to store the raw
- *           data of a dataset.
- *
- * Note:        This routine is needed so that there's a non-API routine for
- *              creating attributes that can set up VOL / SWMR info
- *              (which need a DXPL).
- *
- * Return:   Non-negative on success, negative on failure
- *-------------------------------------------------------------------------
- */
-herr_t
-H5D__get_storage_size(const H5D_t *dset, hsize_t *storage_size)
-{
-    herr_t    ret_value = SUCCEED;    /* Return value */
-
-    FUNC_ENTER_PACKAGE_VOL
-
-    /* Difficult to error check, since the error value is 0 and 0 is a valid value... :-/ */
-    if(H5D__get_storage_size_real(dset, storage_size) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get size of dataset's storage")
-
-done:
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
 } /* end H5D__get_storage_size() */
 
 
@@ -2586,7 +2515,7 @@ H5D__set_extent(H5D_t *dset, const hsize_t *size)
     unsigned dim_idx;                   /* Dimension index */
     herr_t   ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_PACKAGE_VOL_TAG(dset->oloc.addr)
+    FUNC_ENTER_PACKAGE_TAG(dset->oloc.addr)
 
     /* Check args */
     HDassert(dset);
@@ -2747,7 +2676,7 @@ H5D__set_extent(H5D_t *dset, const hsize_t *size)
     } /* end if */
 
 done:
-    FUNC_LEAVE_NOAPI_VOL_TAG(ret_value)
+    FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5D__set_extent() */
 
 
@@ -2833,7 +2762,7 @@ H5D__flush(H5D_t *dset, hid_t dset_id)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_PACKAGE_VOL
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(dset);
@@ -2848,7 +2777,7 @@ H5D__flush(H5D_t *dset, hid_t dset_id)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTFLUSH, FAIL, "unable to flush dataset and object flush callback")
 
 done:
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__flush() */
 
 
@@ -2873,7 +2802,7 @@ H5D__format_convert(H5D_t *dataset)
     hbool_t add_new_layout = FALSE;         /* Indicate that the new layout message is added */
     herr_t ret_value = SUCCEED;             /* Return value */
 
-    FUNC_ENTER_PACKAGE_VOL_TAG(dataset->oloc.addr)
+    FUNC_ENTER_PACKAGE_TAG(dataset->oloc.addr)
 
     /* Check args */
     HDassert(dataset);
@@ -2999,7 +2928,7 @@ done:
     if(newlayout != NULL)
         newlayout = (H5O_layout_t *)H5MM_xfree(newlayout);
 
-    FUNC_LEAVE_NOAPI_VOL_TAG(ret_value)
+    FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5D__format_convert() */
 
 
@@ -3123,44 +3052,6 @@ H5D_flush_all(const H5F_t *f)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_flush_all() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5D__get_create_plist
- *
- * Purpose:     Internal routine to retrieve a dataset's creation property list.
- *
- * Note:        This routine is needed so that there's a non-API routine
- *              that can set up VOL / SWMR info (which need a DXPL).
- *
- * Return:	Success:	ID for a copy of the dataset creation property
- *				list.  The property list ID should be released
- *				by calling H5Pclose().
- *
- *		Failure:	FAIL
- *
- * Programmer:	Quincey Koziol
- *		December 18, 2017
- *
- *-------------------------------------------------------------------------
- */
-hid_t
-H5D__get_create_plist(const H5D_t *dset)
-{
-    hid_t ret_value = FAIL;     /* Return value */
-
-    FUNC_ENTER_PACKAGE_VOL
-
-    /* Check arguments */
-    HDassert(dset);
-
-    /* Retrieve the DCPL */
-    if((ret_value = H5D_get_create_plist(dset)) < 0)
-	HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get dataset's creation property list")
-
-done:
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
-} /* end H5D__get_create_plist() */
 
 
 /*-------------------------------------------------------------------------
@@ -3422,7 +3313,7 @@ H5D__get_space(const H5D_t *dset)
     H5S_t    *space = NULL;
     hid_t     ret_value = H5I_INVALID_HID;
 
-    FUNC_ENTER_PACKAGE_VOL
+    FUNC_ENTER_PACKAGE
 
     /* If the layout is virtual, update the extent */
     if(dset->shared->layout.type == H5D_VIRTUAL)
@@ -3443,7 +3334,7 @@ done:
             if(H5S_close(space) < 0)
                 HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataspace")
 
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__get_space() */
 
 
@@ -3508,7 +3399,7 @@ H5D__refresh(hid_t dset_id, H5D_t *dset)
     hbool_t virt_dsets_held = FALSE;            /* Whether virtual datasets' files are held open */
     herr_t      ret_value   = SUCCEED;          /* Return value */
 
-    FUNC_ENTER_PACKAGE_VOL
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(dset);
@@ -3536,6 +3427,6 @@ done:
         if(H5D__virtual_release_source_dset_files(head) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "can't release VDS source files held open")
 
-    FUNC_LEAVE_NOAPI_VOL(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__refresh() */
 

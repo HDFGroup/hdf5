@@ -449,7 +449,7 @@ H5D__read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
     char        fake_char;              /* Temporary variable for NULL buffer pointers */
     herr_t	ret_value = SUCCEED;	/* Return value	*/
 
-    FUNC_ENTER_PACKAGE_VOL_TAG(dataset->oloc.addr)
+    FUNC_ENTER_PACKAGE_TAG(dataset->oloc.addr)
 
     /* check args */
     HDassert(dataset && dataset->oloc.file);
@@ -616,7 +616,7 @@ done:
         if(H5S_close(projected_mem_space) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down projected memory dataspace")
 
-    FUNC_LEAVE_NOAPI_VOL_TAG(ret_value)
+    FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5D__read() */
 
 
