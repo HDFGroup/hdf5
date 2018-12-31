@@ -1713,3 +1713,98 @@ H5Fincrement_filesize(hid_t file_id, hsize_t increment)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Fincrement_filesize() */
+
+#if 0 /* MINIMIZED DATASET HEADERS */
+#else
+
+/*-------------------------------------------------------------------------
+ * Function: H5Fget_dset_no_attrs_hint
+ *
+ * Purpose:
+ *
+ *     Get the file-level setting to create minimized dataset object headers.
+ *     Result is stored at pointer `minimize`.
+ *
+ * Return:
+ *
+ *     Success: SUCCEED (0) (non-negative value)
+ *     Failure: FAIL (-1) (negative value)
+ *
+ * Programmer:
+ *
+ *     Jacob Smith
+ *     15 August 2018
+ *
+ * Changes: None.
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Fget_dset_no_attrs_hint(hid_t file_id, hbool_t *minimize)
+{
+    H5F_t  *file      = NULL;    /* File object for file ID */
+    herr_t          ret_value = SUCCEED;
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "i*b", file_id, minimize);
+
+    if(NULL == minimize)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "out pointer 'minimize' cannot be NULL")
+
+    file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE);
+    if(NULL == file)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+
+/*
+    if(H5VL_file_optional(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, H5VL_NATIVE_FILE_GET_MIN_DSET_OHDR_FLAG, minimize) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "unable to set file's dataset header minimization flag")
+*/
+    *minimize = H5F_GET_MIN_DSET_OHDR(file);
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Fget_dset_no_attrs_hint */
+
+
+/*-------------------------------------------------------------------------
+ * Function: H5Fset_dset_no_attrs_hint
+ *
+ * Purpose:
+ *
+ *     Set the file-level setting to create minimized dataset object headers.
+ *
+ * Return:
+ *
+ *     Success: SUCCEED (0) (non-negative value)
+ *     Failure: FAIL (-1) (negative value)
+ *
+ * Programmer:
+ *
+ *     Jacob Smith
+ *     15 August 2018
+ *
+ * Changes: None.
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Fset_dset_no_attrs_hint(hid_t file_id, hbool_t minimize)
+{
+    H5F_t  *file      = NULL;    /* File object for file ID */
+    herr_t  ret_value = SUCCEED;
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "ib", file_id, minimize);
+
+    file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE);
+    if(NULL == file)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+
+/*
+    if(H5VL_file_optional(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, H5VL_NATIVE_FILE_SET_MIN_DSET_OHDR_FLAG, minimize) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "unable to set file's dataset header minimization flag")
+*/
+    H5F_SET_MIN_DSET_OHDR(file, minimize);
+
+done:
+    FUNC_LEAVE_API(ret_value)
+#endif /* MINIMIZED DATASET HEADERS */
+} /* H5Fset_dset_no_attrs_hint */

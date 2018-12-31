@@ -7051,6 +7051,132 @@ test_incr_filesize(void)
 
 /****************************************************************
 **
+**  test_min_dset_ohdr():
+**    Test API calls to toggle dataset object header minimization.
+**
+**  TODO (as separate function?):
+**    + setting persists between close and (re)open?
+**    + dataset header sizes created while changing value of toggle
+**
+****************************************************************/
+static void
+test_min_dset_ohdr(void)
+{
+    const char basename[]       = "min_dset_ohdr_testfile";
+    char filename[FILENAME_LEN] = "";
+    hid_t      file_id          = -1;
+    hid_t      file2_id         = -1;
+    hbool_t    minimize;
+    herr_t     ret;
+
+    MESSAGE(5, ("Testing dataset object header minimization\n"));
+
+    /*********/
+    /* SETUP */
+    /*********/
+
+    h5_fixname(basename, H5P_DEFAULT, filename, sizeof(filename));
+
+    file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK_I(file_id, "H5Fcreate");
+
+    /*********/
+    /* TESTS */
+    /*********/
+
+    /*----------------------------------------
+     * TEST default value
+     */
+    ret = H5Fget_dset_no_attrs_hint(file_id, &minimize);
+    CHECK(ret, FAIL, "H5Fget_dset_no_attrs_hint");
+    VERIFY(minimize, FALSE, "minimize flag");
+
+    /*----------------------------------------
+     * TEST set to TRUE
+     */
+    ret = H5Fset_dset_no_attrs_hint(file_id, TRUE);
+    CHECK(ret, FAIL, "H5Fset_dset_no_attrs_hint");
+
+    ret = H5Fget_dset_no_attrs_hint(file_id, &minimize);
+    CHECK(ret, FAIL, "H5Fget_dset_no_attrs_hint");
+    VERIFY(minimize, TRUE, "minimize flag");
+
+    /*----------------------------------------
+     * TEST second file open on same filename
+     */
+    file2_id = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT);
+    CHECK_I(file2_id, "H5Fopen");
+
+    /* verify TRUE setting on second open
+     */
+    ret = H5Fget_dset_no_attrs_hint(file_id, &minimize);
+    CHECK(ret, FAIL, "H5Fget_dset_no_attrs_hint");
+    VERIFY(minimize, TRUE, "minimize flag");
+
+    /* re-set to FALSE on first open
+     */
+    ret = H5Fset_dset_no_attrs_hint(file_id, FALSE);
+    CHECK(ret, FAIL, "H5Fset_dset_no_attrs_hint");
+
+    /* verify FALSE set on both opens
+     */
+    ret = H5Fget_dset_no_attrs_hint(file_id, &minimize);
+    CHECK(ret, FAIL, "H5Fget_dset_no_attrs_hint");
+    VERIFY(minimize, FALSE, "minimize flag");
+
+    ret = H5Fget_dset_no_attrs_hint(file2_id, &minimize);
+    CHECK(ret, FAIL, "H5Fget_dset_no_attrs_hint");
+    VERIFY(minimize, FALSE, "minimize flag");
+
+    /* re-set to TRUE on second open
+     */
+    ret = H5Fset_dset_no_attrs_hint(file2_id, TRUE);
+    CHECK(ret, FAIL, "H5Fset_dset_no_attrs_hint");
+
+    /* verify TRUE set on both opens
+     */
+    ret = H5Fget_dset_no_attrs_hint(file_id, &minimize);
+    CHECK(ret, FAIL, "H5Fget_dset_no_attrs_hint");
+    VERIFY(minimize, TRUE, "minimize flag");
+
+    ret = H5Fget_dset_no_attrs_hint(file2_id, &minimize);
+    CHECK(ret, FAIL, "H5Fget_dset_no_attrs_hint");
+    VERIFY(minimize, TRUE, "minimize flag");
+
+    /*----------------------------------------
+     * TEST error cases
+     */
+
+    /* trying to set with invalid file ID */
+    H5E_BEGIN_TRY {
+        ret = H5Fset_dset_no_attrs_hint(-1, TRUE);
+    } H5E_END_TRY;
+    VERIFY(ret, FAIL, "H5Fset_dset_no_attrs_hint");
+
+    /* trying to get with invalid file ID */
+    H5E_BEGIN_TRY {
+        ret = H5Fget_dset_no_attrs_hint(-1, &minimize);
+    } H5E_END_TRY;
+    VERIFY(ret, FAIL, "H5Fget_dset_no_attrs_hint");
+
+    /* trying to get with invalid pointer */
+    H5E_BEGIN_TRY {
+        ret = H5Fget_dset_no_attrs_hint(file_id, NULL);
+    } H5E_END_TRY;
+    VERIFY(ret, FAIL, "H5Fget_dset_no_attrs_hint");
+
+    /************/
+    /* TEARDOWN */
+    /************/
+
+    ret = H5Fclose(file_id);
+    CHECK(ret, FAIL, "H5Fclose");
+    ret = H5Fclose(file2_id);
+    CHECK(ret, FAIL, "H5Fclose");
+} /* end test_min_dset_ohdr() */
+
+/****************************************************************
+**
 **  test_deprec():
 **    Test deprecated functionality.
 **
@@ -7336,6 +7462,7 @@ test_file(void)
     test_libver_macros();                       /* Test the macros for library version comparison */
     test_libver_macros2();                      /* Test the macros for library version comparison */
     test_incr_filesize();                       /* Test H5Fincrement_filesize() and H5Fget_eoa() */
+    test_min_dset_ohdr();                       /* Test datset object header minimization */
 #ifndef H5_NO_DEPRECATED_SYMBOLS
     test_deprec();                              /* Test deprecated routines */
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
