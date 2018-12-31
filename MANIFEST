@@ -1295,6 +1295,7 @@
 ./testpar/t_span_tree.c
 ./testpar/t_init_term.c
 ./testpar/testpar.h
+./testpar/testpflush.sh.in
 ./testpar/testphdf5.c
 ./testpar/testphdf5.h
 
