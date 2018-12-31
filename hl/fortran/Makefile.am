@@ -26,6 +26,18 @@ include $(top_srcdir)/config/commence.am
 SUBDIRS=src test
 DIST_SUBDIRS=src test examples
 
+# The name of the lib file doesn't follow the same pattern as the other hl lib
+# files, namely libhdf5_hl_*.  Add a symlink with the compliant name to the 
+# actual lib file.
+install-exec-hook:
+	cd $(DESTDIR)$(libdir) && \
+	    if test -f libhdf5hl_fortran.a; then \
+	        $(LN_S) libhdf5hl_fortran.a libhdf5_hl_fortran.a; \
+	    fi; \
+	    if test -f libhdf5hl_fortran.so; then \
+	        $(LN_S) libhdf5hl_fortran.so libhdf5_hl_fortran.so; \
+	    fi; 
+
 # Install examples
 install-examples uninstall-examples:
 	@(cd examples && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;

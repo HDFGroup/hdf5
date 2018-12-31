@@ -943,17 +943,19 @@ if (BUILD_SHARED_LIBS)
   file (MAKE_DIRECTORY "${HDF5_BINARY_DIR}/shared")
 endif ()
 
-# This should perhaps be some kind of foreach or for loop for all of the files in the bin/batch directory.
-# For today I'll do it for the two that I want to try.
 if (LOCAL_BATCH_TEST)
-  configure_file (
-      ${HDF5_SOURCE_DIR}/bin/batch/ctestP.lsf.in.cmake
-      ${HDF5_SOURCE_DIR}/bin/batch ESCAPE_QUOTES @ONLY
-  )
-  configure_file (
-      ${HDF5_SOURCE_DIR}/bin/batch/ctestS.lsf.in.cmake
-      ${HDF5_SOURCE_DIR}/bin/batch ESCAPE_QUOTES @ONLY
-  )
+  if (LOCAL_BATCH_SCRIPT_NAME)
+    configure_file (
+        ${HDF5_SOURCE_DIR}/bin/batch/${LOCAL_BATCH_SCRIPT_NAME}.in.cmake
+        ${HDF5_SOURCE_DIR}/bin/batch/${LOCAL_BATCH_SCRIPT_NAME} ESCAPE_QUOTES @ONLY
+    )
+  endif ()
+  if (LOCAL_BATCH_SCRIPT_PARALLEL_NAME)
+    configure_file (
+        ${HDF5_SOURCE_DIR}/bin/batch/${LOCAL_BATCH_SCRIPT_PARALLEL_NAME}.in.cmake
+        ${HDF5_SOURCE_DIR}/bin/batch/${LOCAL_BATCH_SCRIPT_PARALLEL_NAME} ESCAPE_QUOTES @ONLY
+    )
+  endif ()
 endif ()
 
 if (NOT EXISTS ${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c)

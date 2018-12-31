@@ -1,6 +1,6 @@
 #!/bin/tcsh
 ### LSF syntax
-#BSUB -n 1                       #number of nodes
+#BSUB -nnodes 1                  #number of nodes
 #BSUB -W 30                      #walltime in minutes
 #BSUB -G guests                  #account
 #BSUB -e ctestPerrors.txt        #stderr
