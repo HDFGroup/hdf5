@@ -32,6 +32,17 @@ if test -z "$srcdir"; then
    srcdir=.
 fi
 
+# Turn the $$ we use to avoid Autotools munging into $
+#
+# Allowing $$ to substitute in both the RUNPARALLEL string and the
+# regexp is intentional. There doesn't seem to be a way around
+# this using quote shenanigans. The downside is that there is a remote
+# chance that the shell's pid will match a number in the RUNPARALLEL
+# variable, but that seems less likely to cause problems than expecting
+# library builders to specify two almost identical versions of the
+# RUNPARALLEL command, one for use in scripts and one via Makefiles.
+RUNPARALLELSCRIPT=`echo "@RUNPARALLEL@" | sed "s/$$/\$/g"`
+
 # ==========================================
 # Run the first parallel flush test program
 # (note that we ignore any errors here)
@@ -41,7 +52,7 @@ echo "You may see complaints from mpiexec et al. that not all processes"
 echo "called MPI_Finalize(). This is an intended characteristic of the"
 echo "test and should not be considered an  error."
 echo "********************************************************************"
-@RUNPARALLELSCRIPT@ ./t_pflush1
+eval ${RUNPARALLELSCRIPT} ./t_pflush1
 
 
 # ===========================================
@@ -49,5 +60,5 @@ echo "********************************************************************"
 # The return code of this call is the return
 # code of the script.
 # ===========================================
-@RUNPARALLELSCRIPT@ ./t_pflush2
+eval ${RUNPARALLELSCRIPT} ./t_pflush2
 
