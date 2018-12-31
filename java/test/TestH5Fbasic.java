@@ -328,4 +328,18 @@ public class TestH5Fbasic {
             fail("H5.H5Freset_mdc_hit_rate_stats: " + err);
         }
     }
+
+    @Test
+    public void testH5F_dset_no_attrs_hint() {
+        boolean ret_val_id = false;
+        try {
+            H5.H5Fset_dset_no_attrs_hint(H5fid, true);
+            ret_val_id = H5.H5Fget_dset_no_attrs_hint(H5fid);
+            assertTrue("H5F_dset_no_attrs_hint", ret_val_id);
+        }
+        catch (Throwable err) {
+            err.printStackTrace();
+            fail("H5F_dset_no_attrs_hint: " + err);
+        }
+    }
 }

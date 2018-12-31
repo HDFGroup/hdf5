@@ -3229,6 +3229,34 @@ public class H5 implements java.io.Serializable {
     public synchronized static native void H5Fget_mdc_logging_status(long file_id, boolean[] mdc_logging_status)
             throws HDF5LibraryException, NullPointerException;
 
+    /**
+     * H5Fget_dset_no_attrs_hint gets the file-level setting to create minimized dataset object headers.
+     *
+     * @param file_id
+     *            IN: Identifier of the target file.
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     **/
+    public synchronized static native boolean H5Fget_dset_no_attrs_hint(long file_id)
+            throws HDF5LibraryException;
+
+
+    /**
+     * H5Fset_dset_no_attrs_hint sets the file-level setting to create minimized dataset object headers.
+     *
+     * @param file_id
+     *            IN: Identifier of the target file.
+     *
+     * @param minimize
+     *          the minimize hint setting
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     **/
+    public synchronized static native void H5Fset_dset_no_attrs_hint(long file_id, boolean minimize)
+            throws HDF5LibraryException;
+
     // /////// unimplemented ////////
     //  herr_t H5Fget_eoa(hid_t file_id, haddr_t *eoa);
     //  herr_t H5Fincrement_filesize(hid_t file_id, hsize_t increment);
@@ -6922,8 +6950,6 @@ public class H5 implements java.io.Serializable {
     public synchronized static native int H5Pset_fill_time(long plist_id, int fill_time) throws HDF5LibraryException,
     NullPointerException;
 
-    // /////// Dataset creation property list (DCPL) routines ///////
-
     /**
      * H5Pset_chunk_opts Sets the edge chunk option in a dataset creation property list.
      *
@@ -6951,6 +6977,36 @@ public class H5 implements java.io.Serializable {
      *                - Error from the HDF-5 Library
      **/
     public synchronized static native int H5Pget_chunk_opts(long dcpl_id) throws HDF5LibraryException;
+
+    /**
+     * H5Pget_dset_no_attrs_hint accesses the flag for whether or not datasets created by the given dcpl
+     *     will be created with a "minimized" object header.
+     *
+     * @param dcpl_id
+     *            IN: Dataset creation property list
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     **/
+    public synchronized static native boolean H5Pget_dset_no_attrs_hint(long dcpl_id)
+            throws HDF5LibraryException;
+
+
+    /**
+     * H5Pset_dset_no_attrs_hint sets the dcpl to minimize (or explicitly to not minimized) dataset object
+     *     headers upon creation.
+     *
+     * @param dcpl_id
+     *            IN: Dataset creation property list
+     *
+     * @param minimize
+     *          the minimize hint setting
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     **/
+    public synchronized static native void H5Pset_dset_no_attrs_hint(long dcpl_id, boolean minimize)
+            throws HDF5LibraryException;
 
     // /////// Dataset access property list (DAPL) routines ///////
 
