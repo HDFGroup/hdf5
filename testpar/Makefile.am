@@ -21,11 +21,19 @@ include $(top_srcdir)/config/commence.am
 
 AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_srcdir)/test
 
+# Test scripts--
+#       testpflush.sh:
+TEST_SCRIPT_PARA = testpflush.sh
+SCRIPT_DEPEND = t_pflush1$(EXEEXT) t_pflush2$(EXEEXT) 
+
+check_SCRIPTS = $(TEST_SCRIPT_PARA)
+
 # Test programs.  These are our main targets.
 #
-TEST_PROG_PARA=t_mpi t_bigio testphdf5 t_cache t_cache_image t_pflush1 t_pflush2 t_pread t_pshutdown t_prestart t_init_term t_shapesame t_filters_parallel
+TEST_PROG_PARA=t_mpi t_bigio testphdf5 t_cache t_cache_image t_pread t_pshutdown t_prestart t_init_term t_shapesame t_filters_parallel
 
-check_PROGRAMS = $(TEST_PROG_PARA)
+# t_pflush1 and t_pflush2 are used by testpflush.sh
+check_PROGRAMS = $(TEST_PROG_PARA) t_pflush1 t_pflush2
 
 testphdf5_SOURCES=testphdf5.c t_dset.c t_file.c t_file_image.c t_mdset.c \
 	t_ph5basic.c t_coll_chunk.c t_span_tree.c t_chunk_alloc.c t_filter_read.c \

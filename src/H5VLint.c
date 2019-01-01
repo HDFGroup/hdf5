@@ -627,7 +627,7 @@ H5VL_register_connector(const void *_cls, hbool_t app_ref, hid_t vipl_id)
 done:
     if (ret_value < 0 && saved) {
         if (saved->name)
-            H5MM_xfree(saved->name);
+            H5MM_xfree((void *)(saved->name));  /* Casting away const OK -QAK */
 
         H5FL_FREE(H5VL_class_t, saved);
     }
@@ -881,7 +881,7 @@ done:
  *
  * Return:      Positive if VALUE1 is greater than VALUE2, negative if
  *              VALUE2 is greater than VALUE1 and zero if VALUE1 and
- *              VALUE2 are equal.
+ *              VALUE2 are equal (like strcmp).
  *
  *-------------------------------------------------------------------------
  */

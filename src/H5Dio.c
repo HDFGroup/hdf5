@@ -30,6 +30,8 @@
 #include "H5MMprivate.h"        /* Memory management                        */
 #include "H5Sprivate.h"         /* Dataspace                                */
 
+#include "H5VLnative_private.h" /* Native VOL connector                     */
+
 #ifdef H5_HAVE_PARALLEL
 /* Remove this if H5R_DATASET_REGION is no longer used in this file */
 #include "H5Rpublic.h"

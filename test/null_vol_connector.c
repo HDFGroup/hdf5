@@ -10,19 +10,20 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/*
- * Purpose:     A simple virtual object layer (VOL) plugin that just echoes
- *              the name of the API call.
+/* Purpose:     A simple virtual object layer (VOL) connector with almost no
+ *              functionality that is used for testing basic plugin handling
+ *              (registration, etc.).
  */
 
 #include "H5PLextern.h"
 
-/* The VOL class struct.
- */
-static const H5VL_class_t echo_vol_g = {
+#include "null_vol_connector.h"
+
+/* The VOL class struct */
+static const H5VL_class_t null_vol_g = {
     0,                                              /* version      */
-    (H5VL_class_value_t)501,                        /* value        */
-    "echo",                                         /* name         */
+    NULL_VOL_CONNECTOR_VALUE,                       /* value        */
+    NULL_VOL_CONNECTOR_NAME,                        /* name         */
     0,                                              /* capability flags */
     NULL,                                           /* initialize   */
     NULL,                                           /* terminate    */
@@ -106,22 +107,10 @@ static const H5VL_class_t echo_vol_g = {
     NULL                                            /* optional     */
 };
 
-
-
 /* These two functions are necessary to load this plugin using
  * the HDF5 library.
  */
 
-H5PL_type_t
-H5PLget_plugin_type(void)
-{
-    return H5PL_TYPE_VOL;
-}
-
-
-const void*
-H5PLget_plugin_info(void)
-{
-    return &echo_vol_g;
-}
+H5PL_type_t H5PLget_plugin_type(void) {return H5PL_TYPE_VOL;}
+const void *H5PLget_plugin_info(void) {return &null_vol_g;}
 

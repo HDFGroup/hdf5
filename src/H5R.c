@@ -127,7 +127,7 @@ H5Rcreate(void *ref, hid_t loc_id, const char *name, H5R_type_t ref_type, hid_t 
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTSET, FAIL, "can't set access property list info")
 
     /* Create reference */
-    if((ret_value = H5VL_object_specific(vol_obj, &loc_params, H5VL_REF_CREATE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, ref, name, ref_type, space_id)) < 0)
+    if((ret_value = H5VL_object_specific(vol_obj, &loc_params, H5VL_REF_CREATE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, ref, name, (int)ref_type, space_id)) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTCREATE, FAIL, "unable to create reference")
 
 done:
@@ -257,7 +257,7 @@ H5Rget_region(hid_t id, H5R_type_t ref_type, const void *ref)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid file identifier")
 
     /* Get the dataspace with the correct region selected */
-    if(H5VL_object_get(vol_obj, &loc_params, H5VL_REF_GET_REGION, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &ret_value, ref_type, ref) < 0)
+    if(H5VL_object_get(vol_obj, &loc_params, H5VL_REF_GET_REGION, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &ret_value, (int)ref_type, ref) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, H5I_INVALID_HID, "unable to retrieve dataspace")
 
 done:
@@ -314,7 +314,7 @@ H5Rget_obj_type2(hid_t id, H5R_type_t ref_type, const void *ref,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
 
     /* Get the object type */
-    if(H5VL_object_get(vol_obj, &loc_params, H5VL_REF_GET_TYPE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, obj_type, ref_type, ref) < 0)
+    if(H5VL_object_get(vol_obj, &loc_params, H5VL_REF_GET_TYPE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, obj_type, (int)ref_type, ref) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL, "unable to determine object type")
 
 done:
@@ -381,7 +381,7 @@ H5Rget_name(hid_t id, H5R_type_t ref_type, const void *_ref, char *name,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, (-1), "invalid file identifier")
 
     /* Get name */
-    if(H5VL_object_get(vol_obj, &loc_params, H5VL_REF_GET_NAME, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &ret_value, name, size, ref_type, _ref) < 0)
+    if(H5VL_object_get(vol_obj, &loc_params, H5VL_REF_GET_NAME, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &ret_value, name, size, (int)ref_type, _ref) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, (-1), "unable to determine object path")
 
 done:

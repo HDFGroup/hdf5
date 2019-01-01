@@ -217,41 +217,13 @@ typedef struct H5F_retry_info_t {
 /* Callback for H5Pset_object_flush_cb() in a file access property list */
 typedef herr_t (*H5F_flush_cb_t)(hid_t object_id, void *udata);
 
-/* Enumeration for native VOL connector file optional VOL operations */
-typedef enum H5VL_native_file_optional_t {
-    H5VL_NATIVE_FILE_CLEAR_ELINK_CACHE,             /* H5Fclear_elink_file_cache            */
-    H5VL_NATIVE_FILE_GET_FILE_IMAGE,                /* H5Fget_file_image                    */
-    H5VL_NATIVE_FILE_GET_FREE_SECTIONS,             /* H5Fget_free_sections                 */
-    H5VL_NATIVE_FILE_GET_FREE_SPACE,                /* H5Fget_freespace                     */
-    H5VL_NATIVE_FILE_GET_INFO,                      /* H5Fget_info1/2                       */
-    H5VL_NATIVE_FILE_GET_MDC_CONF,                  /* H5Fget_mdc_config                    */
-    H5VL_NATIVE_FILE_GET_MDC_HR,                    /* H5Fget_mdc_hit_rate                  */
-    H5VL_NATIVE_FILE_GET_MDC_SIZE,                  /* H5Fget_mdc_size                      */
-    H5VL_NATIVE_FILE_GET_SIZE,                      /* H5Fget_filesize                      */
-    H5VL_NATIVE_FILE_GET_VFD_HANDLE,                /* H5Fget_vfd_handle                    */
-    H5VL_NATIVE_FILE_GET_FILE_ID,                   /* H5Fget_file_id                       */
-    H5VL_NATIVE_FILE_RESET_MDC_HIT_RATE,            /* H5Freset_mdc_hit_rate_stats          */
-    H5VL_NATIVE_FILE_SET_MDC_CONFIG,                /* H5Fset_mdc_config                    */
-    H5VL_NATIVE_FILE_GET_METADATA_READ_RETRY_INFO,  /* H5Fget_metadata_read_retry_info      */
-    H5VL_NATIVE_FILE_START_SWMR_WRITE,              /* H5Fstart_swmr_write                  */
-    H5VL_NATIVE_FILE_START_MDC_LOGGING,             /* H5Fstart_mdc_logging                 */
-    H5VL_NATIVE_FILE_STOP_MDC_LOGGING,              /* H5Fstop_mdc_logging                  */
-    H5VL_NATIVE_FILE_GET_MDC_LOGGING_STATUS,        /* H5Fget_mdc_logging_status            */
-    H5VL_NATIVE_FILE_FORMAT_CONVERT,                /* H5Fformat_convert                    */
-    H5VL_NATIVE_FILE_RESET_PAGE_BUFFERING_STATS,    /* H5Freset_page_buffering_stats        */
-    H5VL_NATIVE_FILE_GET_PAGE_BUFFERING_STATS,      /* H5Fget_page_buffering_stats          */
-    H5VL_NATIVE_FILE_GET_MDC_IMAGE_INFO,            /* H5Fget_mdc_image_info                */
-    H5VL_NATIVE_FILE_GET_EOA,                       /* H5Fget_eoa                           */
-    H5VL_NATIVE_FILE_INCR_FILESIZE,                 /* H5Fincrement_filesize                */
-    H5VL_NATIVE_FILE_SET_LIBVER_BOUNDS              /* H5Fset_latest_format/libver_bounds   */
-} H5VL_native_file_optional_t;
-
-
+/*********************/
+/* Public Prototypes */
+/*********************/
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/* Functions in H5F.c */
 H5_DLL htri_t H5Fis_accessible(const char *container_name, hid_t fapl_id);
 H5_DLL hid_t  H5Fcreate(const char *filename, unsigned flags,
 		  	  hid_t create_plist, hid_t access_plist);
@@ -302,6 +274,8 @@ H5_DLL herr_t H5Freset_page_buffering_stats(hid_t file_id);
 H5_DLL herr_t H5Fget_page_buffering_stats(hid_t file_id, unsigned accesses[2],
     unsigned hits[2], unsigned misses[2], unsigned evictions[2], unsigned bypasses[2]);
 H5_DLL herr_t H5Fget_mdc_image_info(hid_t file_id, haddr_t *image_addr, hsize_t *image_size);
+H5_DLL herr_t H5Fget_dset_no_attrs_hint(hid_t file_id, hbool_t *minimize);
+H5_DLL herr_t H5Fset_dset_no_attrs_hint(hid_t file_id, hbool_t minimize);
 
 #ifdef H5_HAVE_PARALLEL
 H5_DLL herr_t H5Fset_mpi_atomicity(hid_t file_id, hbool_t flag);

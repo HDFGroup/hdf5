@@ -29,6 +29,8 @@
 #include "H5Iprivate.h"         /* IDs                                      */
 #include "H5VLprivate.h"        /* Virtual Object Layer                     */
 
+#include "H5VLnative_private.h" /* Native VOL connector                     */
+
 
 /****************/
 /* Local Macros */

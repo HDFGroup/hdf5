@@ -45,6 +45,8 @@
 #include "H5Pprivate.h"         /* Property lists                       */
 #include "H5VLprivate.h"        /* Virtual Object Layer                 */
 
+#include "H5VLnative_private.h" /* Native VOL connector                     */
+
 
 /****************/
 /* Local Macros */
@@ -770,19 +772,20 @@ H5Gget_comment(hid_t loc_id, const char *name, size_t bufsize, char *buf)
 {
     H5VL_object_t *vol_obj;             /* Object token of loc_id */
     H5VL_loc_params_t loc_params;
+    ssize_t op_ret;                     /* Return value from operation */
     int	ret_value;                      /* Return value */
 
-    FUNC_ENTER_API(FAIL)
+    FUNC_ENTER_API(-1)
     H5TRACE4("Is", "i*sz*s", loc_id, name, bufsize, buf);
 
     if(!name || !*name)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, -1, "no name specified")
     if(bufsize > 0 && !buf)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no buffer specified")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, -1, "no buffer specified")
 
     /* Set up collective metadata if appropriate */
     if(H5CX_set_loc(loc_id) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set collective metadata read info")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTSET, -1, "can't set collective metadata read info")
 
     /* Fill in location struct fields */
     loc_params.type                         = H5VL_OBJECT_BY_NAME;
@@ -792,11 +795,14 @@ H5Gget_comment(hid_t loc_id, const char *name, size_t bufsize, char *buf)
 
     /* Get the location object */
     if(NULL == (vol_obj = H5VL_vol_object(loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, -1, "invalid location identifier")
 
     /* Get the comment */
-    if(H5VL_object_optional(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, H5VL_NATIVE_OBJECT_GET_COMMENT, &loc_params, buf, bufsize, &ret_value) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to get comment value")
+    if(H5VL_object_optional(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, H5VL_NATIVE_OBJECT_GET_COMMENT, &loc_params, buf, bufsize, &op_ret) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, -1, "unable to get comment value")
+
+    /* Set return value */
+    ret_value = (int)op_ret;
 
 done:
     FUNC_LEAVE_API(ret_value)

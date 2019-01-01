@@ -321,6 +321,7 @@ H5Pset_fapl_mpio(hid_t fapl_id, MPI_Comm comm, MPI_Info info)
 	HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a valid communicator")
 
     /* Initialize driver specific properties */
+    HDmemset(&fa, 0, sizeof(H5FD_mpio_fapl_t));
     fa.comm = comm;
     fa.info = info;
 

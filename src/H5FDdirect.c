@@ -288,6 +288,7 @@ H5Pset_fapl_direct(hid_t fapl_id, size_t boundary, size_t block_size, size_t cbu
     if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
 
+    HDmemset(&fa, 0, sizeof(H5FD_direct_fapl_t));
     if(boundary != 0)
         fa.mboundary = boundary;
     else
@@ -414,7 +415,7 @@ static void *
 H5FD_direct_fapl_copy(const void *_old_fa)
 {
     const H5FD_direct_fapl_t *old_fa = (const H5FD_direct_fapl_t*)_old_fa;
-    H5FD_direct_fapl_t *new_fa = H5MM_malloc(sizeof(H5FD_direct_fapl_t));
+    H5FD_direct_fapl_t *new_fa = H5MM_calloc(sizeof(H5FD_direct_fapl_t));
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
