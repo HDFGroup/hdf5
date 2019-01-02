@@ -354,7 +354,7 @@ H5D__mpio_opt_possible(const H5D_io_info_t *io_info, const H5S_t *file_space,
       /* Flag to do a MPI_Bcast of the data from one proc instead of 
        * having all the processes involved in the persistent I/O.
        */
-      local_cause[1] |= H5D_MPIO_NOT_H5S_ALL; 
+      local_cause[1] |= 0x01; 
     }
     else {
 
@@ -367,7 +367,7 @@ H5D__mpio_opt_possible(const H5D_io_info_t *io_info, const H5S_t *file_space,
       H5D__get_storage_size(io_info->dset, &dset_storage_size);
 
       if(dset_storage_size > ((hsize_t)(H5_2GB) - 1) ) {
-        local_cause[1] |= H5D_MPIO_GREATER_THAN_2GB;
+        local_cause[1] |= 0x02;
       }
     }
     
