@@ -1,4 +1,4 @@
-HDF5 version 1.11.4 currently under development
+ version 1.11.4 currently under development
 ================================================================================
 
 
@@ -245,7 +245,7 @@ Bug Fixes since HDF5-1.10.3 release
     -------
     - Deleting attributes in dense storage
 
-      The library abort with "infinite loop closing library" after
+      The library aborts with "infinite loop closing library" after
       attributes in dense storage are created and then deleted.
 
       When deleting the attribute nodes from the name index v2 B-tree,
