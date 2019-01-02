@@ -13,6 +13,7 @@
 
 package test;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -213,11 +214,13 @@ public class TestH5Dplist {
 
   @Test
   public void testH5P_dset_no_attrs_hint() {
-      boolean ret_val_id = false;
+      boolean ret_val_id = true;
 
       _createPDataset(H5fid, H5dsid, "dset", HDF5Constants.H5P_DATASET_CREATE);
 
       try {
+          ret_val_id = H5.H5Pget_dset_no_attrs_hint(H5dcpl_id);
+          assertFalse("H5P_dset_no_attrs_hint", ret_val_id);
           H5.H5Pset_dset_no_attrs_hint(H5dcpl_id, true);
           ret_val_id = H5.H5Pget_dset_no_attrs_hint(H5dcpl_id);
           assertTrue("H5P_dset_no_attrs_hint", ret_val_id);
