@@ -69,7 +69,7 @@ put_attribute(hid_t loc_id, const char *attrname, const void *attrvalue, hid_t d
 {
     if((*attribute_id) < 0) {
         hid_t id = -1;
-        id = H5Acreate(loc_id, attrname, datatype_id, dataspace_id, H5P_DEFAULT, H5P_DEFAULT);
+        id = H5Acreate2(loc_id, attrname, datatype_id, dataspace_id, H5P_DEFAULT, H5P_DEFAULT);
         if(id < 0)
             return FAIL;
         *attribute_id = id;
