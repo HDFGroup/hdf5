@@ -83,6 +83,10 @@
 /* Macros to represent the regularity of the selection for multiple chunk IO case. */
 #define H5D_CHUNK_SELECT_REG          1
 
+/* Macros for reason's to not enable read-proc-and-bcast. */
+#define H5D_MPIO_PROC0_BCAST 0x00
+#define H5D_MPIO_NOT_H5S_ALL 0x01
+#define H5D_MPIO_GREATER_THAN_2GB 0x02
 
 /******************/
 /* Local Typedefs */
@@ -281,9 +285,9 @@ H5D__mpio_opt_possible(const H5D_io_info_t *io_info, const H5S_t *file_space,
     const H5S_t *mem_space, const H5D_type_info_t *type_info)
 {
     H5FD_mpio_xfer_t io_xfer_mode;      /* MPI I/O transfer mode */
-    unsigned local_cause[2] = {0,0};    /* [0] Local reason(s) for breaking collective mode */
-                                        /* [1] Flag if dataset is both: H5S_ALL and small */
-    unsigned global_cause[2] = {0,0};   /* Global reason(s) for breaking collective mode */
+    unsigned local_cause[2] = {0,H5D_MPIO_PROC0_BCAST};  /* [0] Local reason(s) for breaking collective mode */
+                                                         /* [1] Flag if dataset is both: H5S_ALL and small */
+    unsigned global_cause[2] = {0,H5D_MPIO_PROC0_BCAST}; /* Global reason(s) for breaking collective mode */
     htri_t ret_value = SUCCEED;         /* Return value */
     hbool_t H5FD_MPIO_Proc0_BCast;      /* Flag if dataset is both: H5S_ALL and < 2GB */
 
@@ -354,7 +358,7 @@ H5D__mpio_opt_possible(const H5D_io_info_t *io_info, const H5S_t *file_space,
       /* Flag to do a MPI_Bcast of the data from one proc instead of 
        * having all the processes involved in the persistent I/O.
        */
-      local_cause[1] |= 0x01; 
+      local_cause[1] |= H5D_MPIO_NOT_H5S_ALL; 
     }
     else {
 
@@ -367,7 +371,7 @@ H5D__mpio_opt_possible(const H5D_io_info_t *io_info, const H5S_t *file_space,
       H5D__get_storage_size(io_info->dset, &dset_storage_size);
 
       if(dset_storage_size > ((hsize_t)(H5_2GB) - 1) ) {
-        local_cause[1] |= 0x02;
+        local_cause[1] |= H5D_MPIO_GREATER_THAN_2GB;
       }
     }
     
@@ -393,7 +397,7 @@ H5D__mpio_opt_possible(const H5D_io_info_t *io_info, const H5S_t *file_space,
     ret_value = global_cause[0] > 0 ? FALSE : TRUE;
 
     /* read-proc0-and-bcast if collective and H5S_ALL */
-    if(global_cause[0] == 0 && global_cause[1] == 0)
+    if(global_cause[0] == 0 && global_cause[1] == H5D_MPIO_PROC0_BCAST)
       H5FD_MPIO_Proc0_BCast = TRUE;
 
     /* Set Flag if dataset is both: H5S_ALL and < 2GB in the API context */
