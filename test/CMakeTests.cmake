@@ -359,6 +359,9 @@ set (test_CLEANFILES
     lheap.h5
     fheap.h5
     ohdr.h5
+    ohdr_min_a.h5
+    ohdr_min_b.h5
+    min_dset_ohdr_testfile.h5
     stab.h5
     extern_*.h5
     extern_*.raw

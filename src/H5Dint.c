@@ -25,6 +25,7 @@
 #include "H5CXprivate.h"        /* API Contexts                             */
 #include "H5Dpkg.h"             /* Datasets                                 */
 #include "H5Eprivate.h"         /* Error handling                           */
+#include "H5Fprivate.h"         /* Files                                    */
 #include "H5FLprivate.h"        /* Free Lists                               */
 #include "H5FOprivate.h"        /* File objects                             */
 #include "H5Iprivate.h"         /* IDs                                      */
@@ -59,6 +60,9 @@ static herr_t H5D__init_storage(const H5D_io_info_t *io_info, hbool_t full_overw
         hsize_t old_dim[]);
 static herr_t H5D__append_flush_setup(H5D_t *dset, hid_t dapl_id);
 static herr_t H5D__close_cb(H5VL_object_t *dset_vol_obj);
+static herr_t H5D__use_minimized_dset_headers(H5F_t *file, H5D_t *dset, hbool_t *minimize);
+static herr_t H5D__prepare_minimized_oh(H5F_t *file, H5D_t *dset, H5O_loc_t *oloc);
+static size_t H5D__calculate_minimum_header_size(H5F_t *file, H5D_t *dset, H5O_t *ohdr);
 
 
 /*********************/
@@ -658,6 +662,211 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:   H5D__use_minimized_dset_headers
+ *
+ * Purpose:    Compartmentalize check for file- or dcpl-set values indicating
+ *             to create a "minimized" dataset object header.
+ *             Upon success, write resulting value to out pointer `minimize`.
+ *
+ * Return:     Success: SUCCEED (0) (non-negative value)
+ *             Failure: FAIL (-1) (negative value)
+ *
+ * Programmer: Jacob Smith
+ *             16 August 2018
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D__use_minimized_dset_headers(H5F_t *file, H5D_t *dset, hbool_t *minimize)
+{
+    H5P_genplist_t *plist     = NULL;
+    herr_t          ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT;
+
+    HDassert(file);
+    HDassert(dset);
+    HDassert(minimize);
+
+    plist = H5P_object_verify(dset->shared->dcpl_id, H5P_DATASET_CREATE);
+    if(NULL == plist)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "problem getting dcpl")
+    if(H5P_get(plist, H5D_CRT_MIN_DSET_HDR_SIZE_NAME, minimize) == FAIL)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get minimize value from dcpl")
+
+    if(FALSE == *minimize)
+        *minimize = H5F_get_min_dset_ohdr(file);
+
+done:
+    if(FAIL == ret_value)
+        *minimize = FALSE;
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* H5D__use_minimized_dset_headers */
+
+
+/*-------------------------------------------------------------------------
+ * Function:   H5D__calculate_minimium_header_size
+ *
+ * Purpose:    Calculate the size required for the minimized object header.
+ *
+ * Return:     Success: Positive value > 0
+ *             Failure: 0
+ *
+ * Programmer: Jacob Smith
+ *             16 August 2018
+ *-------------------------------------------------------------------------
+ */
+static size_t
+H5D__calculate_minimum_header_size(H5F_t *file, H5D_t *dset, H5O_t *ohdr)
+{
+    H5T_t      *type             = NULL;
+    H5O_fill_t *fill_prop        = NULL;
+    hbool_t     use_at_least_v18 = FALSE;
+    const char  continuation[1]  = ""; /* requred for work-around */
+    size_t      get_value        = 0;
+    size_t      ret_value        = 0;
+
+    FUNC_ENTER_NOAPI_NOINIT;
+
+    HDassert(file);
+    HDassert(dset);
+    HDassert(ohdr);
+
+    type = dset->shared->type;
+    fill_prop = &(dset->shared->dcpl_cache.fill);
+    use_at_least_v18 = (H5F_LOW_BOUND(file) >= H5F_LIBVER_V18);
+
+    /* Datatype message size */
+    get_value = H5O_msg_size_oh(file, ohdr, H5O_DTYPE_ID, type, 0);
+    if (get_value == 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, 0, "Can't get size of datatype message")
+    ret_value += get_value;
+
+    /* Shared Dataspace message size */
+    get_value = H5O_msg_size_oh(file, ohdr, H5O_SDSPACE_ID, dset->shared->space, 0);
+    if (get_value == 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, 0, "can't get size of dataspace message")
+    ret_value += get_value;
+
+    /* "Layout" message size */
+    get_value = H5O_msg_size_oh(file, ohdr, H5O_LAYOUT_ID, &dset->shared->layout, 0);
+    if (get_value == 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, 0, "can't get size of layout message")
+    ret_value += get_value;
+
+    /* Fill Value message size */
+    get_value = H5O_msg_size_oh(file, ohdr, H5O_FILL_NEW_ID, fill_prop, 0);
+    if (get_value == 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, 0, "can't get size of fill value message")
+    ret_value += get_value;
+
+    /* "Continuation" message size */
+    /* message pointer "continuation" is unused by raw get function, however,
+     * a null pointer would be intercepted by an assert in H5O_msg_size_oh().
+     */
+    get_value = H5O_msg_size_oh(file, ohdr, H5O_CONT_ID, continuation, 0);
+    if (get_value == 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, 0, "can't get size of continuation message")
+    ret_value += get_value;
+
+    /* Fill Value (backwards compatability) message size */
+    if(fill_prop->buf && !use_at_least_v18) {
+        H5O_fill_t old_fill_prop; /* Copy for writing "old" fill value */
+
+        /* Shallow copy the fill value property */
+        /* guards against shared component modification */
+        HDmemcpy(&old_fill_prop, fill_prop, sizeof(old_fill_prop));
+
+        if (H5O_msg_reset_share(H5O_FILL_ID, &old_fill_prop) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, 0, "can't reset the copied fill property")
+
+        get_value = H5O_msg_size_oh(file, ohdr, H5O_FILL_ID, &old_fill_prop, 0);
+        if (get_value == 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, 0, "can't get size of fill value (backwards compat) message")
+        ret_value += get_value;
+    }
+
+    /* Filter/Pipeline message size */
+    if(H5D_CHUNKED == dset->shared->layout.type) {
+        H5O_pline_t *pline = &dset->shared->dcpl_cache.pline;
+        if(pline->nused > 0) {
+            get_value = H5O_msg_size_oh(file, ohdr, H5O_PLINE_ID, pline, 0);
+            if (get_value == 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, 0, "can't get size of filter message")
+            ret_value += get_value;
+        }
+    }
+
+    /* External File Link message size */
+    if(dset->shared->dcpl_cache.efl.nused > 0) {
+        get_value = H5O_msg_size_oh(file, ohdr, H5O_EFL_ID, &dset->shared->dcpl_cache.efl, 0);
+        if (get_value == 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, 0, "can't get size of external file link message")
+        ret_value += get_value;
+    }
+
+    /* Modification Time message size */
+    if(H5O_HDR_STORE_TIMES & H5O_OH_GET_FLAGS(ohdr)) {
+        HDassert(H5O_OH_GET_VERSION(ohdr) >= 1); /* 1 :: H5O_VERSION_1 (H5Opkg.h) */
+
+        if(H5O_OH_GET_VERSION(ohdr) == 1) {
+            /* v1 object headers store modification time as a message */
+            time_t mtime;
+            get_value = H5O_msg_size_oh(file, ohdr, H5O_MTIME_NEW_ID, &mtime, 0);
+            if (get_value == 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, 0, "can't get size of modification time message")
+            ret_value += get_value;
+        }
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* H5D__calculate_minimum_header_size */
+
+
+/*-------------------------------------------------------------------------
+ * Function:   H5D__prepare_minimized_oh
+ *
+ * Purpose:    Create an object header (H5O_t) allocated with the smallest
+ *             possible size.
+ *
+ * Return:     Success: SUCCEED (0) (non-negative value)
+ *             Failure: FAIL (-1) (negative value)
+ *
+ * Programmer: Jacob Smith
+ *             16 August 2018
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D__prepare_minimized_oh(H5F_t *file, H5D_t *dset, H5O_loc_t *oloc)
+{
+    H5O_t  *oh        = NULL;
+    size_t  ohdr_size = 0;
+    herr_t  ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT;
+
+    HDassert(file);
+    HDassert(dset);
+    HDassert(oloc);
+
+    oh = H5O__create_ohdr(file, dset->shared->dcpl_id);
+    if(NULL == oh)
+        HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "can't instantiate object header")
+
+    ohdr_size = H5D__calculate_minimum_header_size(file, dset, oh);
+    if (ohdr_size == 0)
+       HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "computed header size is invalid")
+
+    /* Special allocation of space for compact datsets is handled by the call here. */
+    if(H5O__apply_ohdr(file, oh, dset->shared->dcpl_id, ohdr_size, (size_t)1, oloc) == FAIL)
+        HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "can't apply object header to file")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* H5D__prepare_minimized_oh */
+
+
+/*-------------------------------------------------------------------------
  * Function: H5D__update_oh_info
  *
  * Purpose:  Create and fill object header for dataset
@@ -669,17 +878,18 @@ done:
 static herr_t
 H5D__update_oh_info(H5F_t *file, H5D_t *dset, hid_t dapl_id)
 {
-    H5O_t              *oh = NULL;      /* Pointer to dataset's object header */
-    size_t              ohdr_size = H5D_MINHDR_SIZE;    /* Size of dataset's object header */
-    H5O_loc_t          *oloc = NULL;    /* Dataset's object location */
-    H5O_layout_t       *layout;         /* Dataset's layout information */
-    H5T_t              *type;           /* Dataset's datatype */
-    H5O_fill_t         *fill_prop;      /* Pointer to dataset's fill value information */
-    H5D_fill_value_t    fill_status;    /* Fill value status */
-    hbool_t             fill_changed = FALSE;   /* Flag indicating the fill value was changed */
-    hbool_t             layout_init = FALSE;    /* Flag to indicate that chunk information was initialized */
-    hbool_t             use_at_least_v18;       /* Flag indicating to use at least v18 format versions */
-    herr_t ret_value = SUCCEED;         /* Return value */
+    H5O_t            *oh = NULL;      /* Pointer to dataset's object header */
+    size_t            ohdr_size = H5D_MINHDR_SIZE;    /* Size of dataset's object header */
+    H5O_loc_t        *oloc = NULL;    /* Dataset's object location */
+    H5O_layout_t     *layout;         /* Dataset's layout information */
+    H5T_t            *type;           /* Dataset's datatype */
+    H5O_fill_t       *fill_prop;      /* Pointer to dataset's fill value information */
+    H5D_fill_value_t  fill_status;    /* Fill value status */
+    hbool_t           fill_changed = FALSE;   /* Flag indicating the fill value was changed */
+    hbool_t           layout_init = FALSE;    /* Flag to indicate that chunk information was initialized */
+    hbool_t           use_at_least_v18;       /* Flag indicating to use at least v18 format versions */
+    hbool_t           minimize_header = FALSE;
+    herr_t            ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -747,13 +957,24 @@ H5D__update_oh_info(H5F_t *file, H5D_t *dset, hid_t dapl_id)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set fill value info")
     } /* end if */
 
-    /* Add the dataset's raw data size to the size of the header, if the raw data will be stored as compact */
-    if(layout->type == H5D_COMPACT)
-        ohdr_size += layout->storage.u.compact.size;
+    if(H5D__use_minimized_dset_headers(file, dset, &minimize_header) == FAIL)
+        HGOTO_ERROR(H5E_ARGS, H5E_CANTGET, FAIL, "can't get minimize settings")
 
-    /* Create an object header for the dataset */
-    if(H5O_create(file, ohdr_size, (size_t)1, dset->shared->dcpl_id, oloc/*out*/) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create dataset object header")
+    if(TRUE == minimize_header) {
+        if(H5D__prepare_minimized_oh(file, dset, oloc) == FAIL)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't create minimized dataset object header")
+    } else {
+        /* Add the dataset's raw data size to the size of the header, if the
+         * raw data will be stored as compact
+         */
+        if(H5D_COMPACT == layout->type)
+            ohdr_size += layout->storage.u.compact.size;
+
+        /* Create an object header for the dataset */
+        if(H5O_create(file, ohdr_size, (size_t)1, dset->shared->dcpl_id, oloc/*out*/) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create dataset object header")
+    } /* If use minimum/standard object header space */
+
     HDassert(file == dset->oloc.file);
 
     /* Pin the object header */
@@ -910,7 +1131,7 @@ H5D__build_file_prefix(const H5D_t *dset, hid_t dapl_id, const char *prefix_type
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
     } /* end if */
     else {
-        if (HDstrncmp(prefix, "${ORIGIN}", HDstrlen("${ORIGIN}")) == 0) {
+        if(HDstrncmp(prefix, "${ORIGIN}", HDstrlen("${ORIGIN}")) == 0) {
             /* Replace ${ORIGIN} at beginning of prefix by directory of HDF5 file */
             filepath_len = HDstrlen(filepath);
             prefix_len = HDstrlen(prefix);

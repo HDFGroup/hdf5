@@ -133,7 +133,7 @@ if (BUILD_SHARED_LIBS)
   # Define VOL Plugin Test Sources
   #-----------------------------------------------------------------------------
   set (VOL_PLUGIN_LIBS
-      echo_vol
+      null_vol_connector
   )
 
   foreach (vol_lib ${VOL_PLUGIN_LIBS})

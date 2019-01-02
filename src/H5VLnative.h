@@ -66,6 +66,8 @@ typedef int H5VL_native_file_optional_t;
 #define H5VL_NATIVE_FILE_GET_EOA                        22  /* H5Fget_eoa                           */
 #define H5VL_NATIVE_FILE_INCR_FILESIZE                  23  /* H5Fincrement_filesize                */
 #define H5VL_NATIVE_FILE_SET_LIBVER_BOUNDS              24  /* H5Fset_latest_format/libver_bounds   */
+#define H5VL_NATIVE_FILE_GET_MIN_DSET_OHDR_FLAG         25  /* H5Fget_dset_no_attrs_hint            */
+#define H5VL_NATIVE_FILE_SET_MIN_DSET_OHDR_FLAG         26  /* H5Fset_dset_no_attrs_hint            */
 
 /* Typedef and values for native VOL connector group optional VOL operations */
 typedef int H5VL_native_group_optional_t;

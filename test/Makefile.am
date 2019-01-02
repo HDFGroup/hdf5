@@ -42,8 +42,8 @@ SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT) links_env$(EXEEXT) \
     swmr_sparse_reader$(EXEEXT) swmr_sparse_writer$(EXEEXT) swmr_start_write$(EXEEXT) \
     vds_swmr_gen$(EXEEXT) vds_swmr_reader$(EXEEXT) vds_swmr_writer$(EXEEXT)
 if HAVE_SHARED_CONDITIONAL
-  TEST_SCRIPT += test_filter_plugin.sh
-  SCRIPT_DEPEND += filter_plugin$(EXEEXT)
+  TEST_SCRIPT += test_filter_plugin.sh test_vol_plugin.sh
+  SCRIPT_DEPEND += filter_plugin$(EXEEXT) vol_plugin$(EXEEXT)
 endif
 
 check_SCRIPTS = $(TEST_SCRIPT)
@@ -53,8 +53,8 @@ check_SCRIPTS = $(TEST_SCRIPT)
 # As an exception, long-running tests should occur earlier in the list.
 # This gives them more time to run when tests are executing in parallel.
 TEST_PROG= testhdf5 \
-           cache cache_api cache_image cache_tagging lheap ohdr stab gheap \
-           evict_on_close farray earray btree2 fheap \
+           cache cache_api cache_image cache_tagging lheap ohdr \
+           stab gheap evict_on_close farray earray btree2 fheap \
            pool accum hyperslab istore bittests dt_arith page_buffer \
            dtypes dsets cmpd_dset filter_fail extend direct_chunk external efc \
            objcopy links unlink twriteorder big mtime fillval mount \
@@ -85,7 +85,7 @@ check_PROGRAMS=$(TEST_PROG) error_test err_compat tcheck_version \
     swmr_remove_writer swmr_addrem_writer swmr_sparse_reader swmr_sparse_writer \
     swmr_check_compat_vfd vds_swmr_gen vds_swmr_reader vds_swmr_writer
 if HAVE_SHARED_CONDITIONAL
-  check_PROGRAMS+= filter_plugin
+  check_PROGRAMS+= filter_plugin vol_plugin
 endif
 
 # These programs generate test files for the tests.  They don't need to be
@@ -108,9 +108,7 @@ if HAVE_SHARED_CONDITIONAL
   # The libh5test library provides common support code for the tests.
   # The filter_plugin* libraries are for use in filter_plugin.c.
   # Build them as shared libraries if that option was enabled in configure.
-  #
-  # echo_vol is used for testing VOL plugin functionality.
-  noinst_LTLIBRARIES=libh5test.la libfilter_plugin1_dsets.la libfilter_plugin2_dsets.la libfilter_plugin3_dsets.la libfilter_plugin4_groups.la echo_vol.la
+  noinst_LTLIBRARIES=libh5test.la libfilter_plugin1_dsets.la libfilter_plugin2_dsets.la libfilter_plugin3_dsets.la libfilter_plugin4_groups.la libnull_vol_connector.la
   libfilter_plugin1_dsets_la_SOURCES=filter_plugin1_dsets.c
   libfilter_plugin2_dsets_la_SOURCES=filter_plugin2_dsets.c
   libfilter_plugin3_dsets_la_SOURCES=filter_plugin3_dsets.c
@@ -123,8 +121,10 @@ if HAVE_SHARED_CONDITIONAL
   libfilter_plugin4_groups_la_LIBADD=$(LIBHDF5)
 
   # VOL plugin test libraries
-  echo_vol_la_SOURCES=echo_vol.c
-  echo_vol_la_LDFLAGS=$(AM_LDFLAGS) -avoid-version -module -shared -export-dynamic -rpath /nowhere
+  #
+  # null_vol_connector is used for testing basic VOL plugin functionality.
+  libnull_vol_connector_la_SOURCES=null_vol_connector.c
+  libnull_vol_connector_la_LDFLAGS=$(AM_LDFLAGS) -avoid-version -module -shared -export-dynamic -rpath /nowhere
 
 else
   # The libh5test library provides common support code for the tests.
@@ -179,6 +179,7 @@ CHECK_CLEANFILES+=accum.h5 cmpd_dset.h5 compact_dataset.h5 dataset.h5 dset_offse
     extend.h5 istore.h5 extlinks*.h5 frspace.h5 links*.h5 \
     sys_file1 tfile[1-7].h5 th5s[1-4].h5 lheap.h5 fheap.h5 ohdr.h5 \
     stab.h5 extern_[1-5].h5 extern_[1-4][rw].raw gheap[0-4].h5 \
+    ohdr_min_a.h5 ohdr_min_b.h5 min_dset_ohdr_testfile.h5\
     dt_arith[1-2] links.h5 links[0-6]*.h5 extlinks[0-15].h5 tmp \
     big.data big[0-9][0-9][0-9][0-9][0-9].h5  \
     stdio.h5 sec2.h5 dtypes[0-9].h5 dtypes1[0].h5 dt_arith[1-2].h5 tattr.h5 \
@@ -222,6 +223,7 @@ use_disable_mdc_flushes_SOURCES=use_disable_mdc_flushes.c
 
 # Temporary files.
 DISTCLEANFILES=testerror.sh testlibinfo.sh testcheck_version.sh testlinks_env.sh test_filter_plugin.sh \
-    testswmr.sh testvdsswmr.sh test_usecases.sh testflushrefresh.sh testabort_fail.sh
+    testswmr.sh testvdsswmr.sh test_usecases.sh testflushrefresh.sh testabort_fail.sh \
+	test_vol_plugin.sh
 
 include $(top_srcdir)/config/conclude.am
