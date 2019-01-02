@@ -54,6 +54,7 @@ typedef struct H5FD_core_t {
     haddr_t eof;                /* current allocated size               */
     size_t  increment;          /* multiples for mem allocation         */
     hbool_t backing_store;      /* write to file name on flush          */
+    hbool_t write_tracking;     /* Whether to track writes              */
     size_t  bstore_page_size;   /* backing store page size              */
     int     fd;                 /* backing store file descriptor        */
     /* Information for determining uniqueness of a file with a backing store */
@@ -93,10 +94,14 @@ typedef struct H5FD_core_t {
 typedef struct H5FD_core_fapl_t {
     size_t  increment;          /* how much to grow memory */
     hbool_t backing_store;      /* write to file name on flush */
+    hbool_t write_tracking;     /* Whether to track writes */
+    size_t page_size;           /* Page size for tracked writes */
 } H5FD_core_fapl_t;
 
 /* Allocate memory in multiples of this size by default */
-#define H5FD_CORE_INCREMENT 8192
+#define H5FD_CORE_INCREMENT                     8192
+#define H5FD_CORE_WRITE_TRACKING_FLAG           FALSE
+#define H5FD_CORE_WRITE_TRACKING_PAGE_SIZE      524288
 
 /* These macros check for overflow of various quantities.  These macros
  * assume that file_offset_t is signed and haddr_t and size_t are unsigned.
@@ -415,8 +420,8 @@ done:
  * Purpose:     Initialize this driver by registering the driver with the
  *              library.
  *
- * Return:      Success:    The driver ID for the core driver.
- *              Failure:    Negative.
+ * Return:      Success:    The driver ID for the core driver
+ *              Failure:    H5I_INVALID_HID
  *
  * Programmer:  Robb Matzke
  *              Thursday, July 29, 1999
@@ -428,7 +433,7 @@ H5FD_core_init(void)
 {
     hid_t ret_value = H5I_INVALID_HID;  /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI(H5I_INVALID_HID)
 
     if(H5I_VFL != H5I_get_type(H5FD_CORE_g))
         H5FD_CORE_g = H5FD_register(&H5FD_core_g, sizeof(H5FD_class_t), FALSE);
@@ -466,6 +471,100 @@ H5FD__core_term(void)
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5Pset_core_write_tracking
+ *
+ * Purpose:    Enables/disables core VFD write tracking and page
+ *              aggregation size.
+ *
+ * Return:    Non-negative on success/Negative on failure
+ *
+ * Programmer:  Dana Robinson
+ *              Tuesday, April 8, 2014
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_core_write_tracking(hid_t plist_id, hbool_t is_enabled, size_t page_size)
+{
+    H5P_genplist_t *plist;              /* Property list pointer */
+    H5FD_core_fapl_t fa;                /* Core VFD info */
+    const H5FD_core_fapl_t *old_fa;     /* Old core VFD info */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE3("e", "ibz", plist_id, is_enabled, page_size);
+
+    /* The page size cannot be zero */
+    if(page_size == 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "page_size cannot be zero")
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
+        HGOTO_ERROR(H5E_PLIST, H5E_BADATOM, FAIL, "can't find object for ID")
+    if(H5FD_CORE != H5P_peek_driver(plist))
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "incorrect VFL driver")
+    if(NULL == (old_fa = (const H5FD_core_fapl_t *)H5P_peek_driver_info(plist)))
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "bad VFL driver info")
+
+    /* Set VFD info values */
+    HDmemset(&fa, 0, sizeof(H5FD_core_fapl_t));
+    fa.increment = old_fa->increment;
+    fa.backing_store = old_fa->backing_store;
+    fa.write_tracking = is_enabled;
+    fa.page_size = page_size;
+
+    /* Set the property values & the driver for the FAPL */
+    if(H5P_set_driver(plist, H5FD_CORE, &fa) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set core VFD as driver")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pset_core_write_tracking() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Pget_core_write_tracking
+ *
+ * Purpose:    Gets information about core VFD write tracking and page
+ *              aggregation size.
+ *
+ * Return:    Non-negative on success/Negative on failure
+ *
+ * Programmer:  Dana Robinson
+ *              Tuesday, April 8, 2014
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_core_write_tracking(hid_t plist_id, hbool_t *is_enabled, size_t *page_size)
+{
+    H5P_genplist_t *plist;      /* Property list pointer */
+    const H5FD_core_fapl_t *fa; /* Core VFD info */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE3("e", "i*b*z", plist_id, is_enabled, page_size);
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
+        HGOTO_ERROR(H5E_PLIST, H5E_BADATOM, FAIL, "can't find object for ID")
+    if(H5FD_CORE != H5P_peek_driver(plist))
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "incorrect VFL driver")
+    if(NULL == (fa = (const H5FD_core_fapl_t *)H5P_peek_driver_info(plist)))
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "bad VFL driver info")
+
+    /* Get values */
+    if(is_enabled)
+        *is_enabled = fa->write_tracking;
+    if(page_size)
+        *page_size = fa->page_size;
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pget_core_write_tracking() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5Pset_fapl_core
  *
  * Purpose:     Modify the file access property list to use the H5FD_CORE
@@ -482,9 +581,9 @@ H5FD__core_term(void)
 herr_t
 H5Pset_fapl_core(hid_t fapl_id, size_t increment, hbool_t backing_store)
 {
-    H5FD_core_fapl_t    fa;
-    H5P_genplist_t      *plist;         /* Property list pointer */
-    herr_t              ret_value;
+    H5P_genplist_t *plist;      /* Property list pointer */
+    H5FD_core_fapl_t fa;        /* Core VFD info */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "izb", fapl_id, increment, backing_store);
@@ -493,10 +592,16 @@ H5Pset_fapl_core(hid_t fapl_id, size_t increment, hbool_t backing_store)
     if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
 
+    /* Set VFD info values */
+    HDmemset(&fa, 0, sizeof(H5FD_core_fapl_t));
     fa.increment = increment;
     fa.backing_store = backing_store;
+    fa.write_tracking = H5FD_CORE_WRITE_TRACKING_FLAG;
+    fa.page_size = H5FD_CORE_WRITE_TRACKING_PAGE_SIZE;
 
-    ret_value = H5P_set_driver(plist, H5FD_CORE, &fa);
+    /* Set the property values & the driver for the FAPL */
+    if(H5P_set_driver(plist, H5FD_CORE, &fa) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set core VFD as driver")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -518,9 +623,9 @@ done:
 herr_t
 H5Pget_fapl_core(hid_t fapl_id, size_t *increment /*out*/, hbool_t *backing_store /*out*/)
 {
-    H5P_genplist_t      *plist;                 /* Property list pointer */
-    const H5FD_core_fapl_t    *fa;
-    herr_t              ret_value = SUCCEED;    /* Return value */
+    H5P_genplist_t *plist;      /* Property list pointer */
+    const H5FD_core_fapl_t *fa; /* Core VFD info */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "ixx", fapl_id, increment, backing_store);
@@ -559,7 +664,7 @@ static void *
 H5FD__core_fapl_get(H5FD_t *_file)
 {
     H5FD_core_t         *file = (H5FD_core_t*)_file;
-    H5FD_core_fapl_t    *fa;
+    H5FD_core_fapl_t    *fa;                    /* Core VFD info */
     void                *ret_value = NULL;      /* Return value */
 
     FUNC_ENTER_STATIC
@@ -569,6 +674,8 @@ H5FD__core_fapl_get(H5FD_t *_file)
 
     fa->increment = file->increment;
     fa->backing_store = (hbool_t)(file->fd >= 0);
+    fa->write_tracking = file->write_tracking;
+    fa->page_size = file->bstore_page_size;
 
     /* Set return value */
     ret_value = fa;
@@ -776,35 +883,28 @@ H5FD__core_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
         } /* end if */
     } /* end if */
 
+    /* Get the write tracking & page size */
+    file->write_tracking = fa->write_tracking;
+    file->bstore_page_size = fa->page_size;
+
     /* Set up write tracking if the backing store is on */
     file->dirty_list = NULL;
     if(fa->backing_store) {
-        hbool_t write_tracking_flag = FALSE;    /* what the user asked for */
         hbool_t use_write_tracking = FALSE;     /* what we're actually doing */
-
-        /* Get the write tracking flag */
-        if(H5P_get(plist, H5F_ACS_CORE_WRITE_TRACKING_FLAG_NAME, &write_tracking_flag) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get core VFD write tracking flag");
-
-        /* Get the page size */
-        if(H5P_get(plist, H5F_ACS_CORE_WRITE_TRACKING_PAGE_SIZE_NAME, &(file->bstore_page_size)) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get core VFD write tracking page size");
 
         /* default is to have write tracking OFF for create (hence the check to see
          * if the user explicitly set a page size) and ON with the default page size
          * on open (when not read-only).
          */
         /* Only use write tracking if the file is open for writing */
-        use_write_tracking = 
-            TRUE == write_tracking_flag         /* user asked for write tracking */
-            && !(o_flags & O_RDONLY)            /* file is open for writing (i.e. not read-only) */
-            && file->bstore_page_size != 0;     /* page size is not zero */
+        use_write_tracking = (TRUE == fa->write_tracking)    /* user asked for write tracking */
+                    && !(o_flags & O_RDONLY)                /* file is open for writing (i.e. not read-only) */
+                    && (file->bstore_page_size != 0);         /* page size is not zero */
 
         /* initialize the dirty list */
-        if(use_write_tracking) {
+        if(use_write_tracking)
             if(NULL == (file->dirty_list = H5SL_create(H5SL_TYPE_HADDR, NULL)))
                 HGOTO_ERROR(H5E_SLIST, H5E_CANTCREATE, NULL, "can't create core vfd dirty region list");
-        } /* end if */
     } /* end if */
 
     /* Set return value */

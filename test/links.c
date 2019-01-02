@@ -315,6 +315,8 @@ typedef struct {
     const obj_visit_t *info;    /* Pointer to the object visit structure to use */
 } ovisit_ud_t;
 
+static hid_t dcpl_g; /* for [un]minimized dataset object headers */
+
 
 
 /*-------------------------------------------------------------------------
@@ -377,7 +379,7 @@ mklinks(hid_t fapl, hbool_t new_format)
     if(H5Gclose(grp) < 0) TEST_ERROR
 
     /* Create a dataset */
-    if((d1 = H5Dcreate2(file, "d1", H5T_NATIVE_INT, scalar, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((d1 = H5Dcreate2(file, "d1", H5T_NATIVE_INT, scalar, H5P_DEFAULT, dcpl_g, H5P_DEFAULT)) < 0) TEST_ERROR
     if(H5Dclose(d1) < 0) TEST_ERROR
 
     /* Create a hard link */
@@ -451,8 +453,8 @@ new_links(hid_t fapl, hbool_t new_format)
     if((grp2_b = H5Gcreate2(file_b, "grp2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Create datasets */
-    if((dset1 = H5Dcreate2(file_a, "dataset1", H5T_NATIVE_INT, scalar, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
-    if((dset2 = H5Dcreate2(grp1_a, "dataset2", H5T_NATIVE_INT, scalar, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((dset1 = H5Dcreate2(file_a, "dataset1", H5T_NATIVE_INT, scalar, H5P_DEFAULT, dcpl_g, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((dset2 = H5Dcreate2(grp1_a, "dataset2", H5T_NATIVE_INT, scalar, H5P_DEFAULT, dcpl_g, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Create links within a file.  Both of source and destination use
      * H5L_SAME_LOC.  Both hard and soft links should fail. */
@@ -545,7 +547,7 @@ cklinks(hid_t fapl, hbool_t new_format)
     if(H5Oget_info_by_name2(file, "grp1/hard", &oinfo2, H5O_INFO_BASIC, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
     if(H5O_TYPE_DATASET != oinfo2.type) {
 	H5_FAILED();
-	printf("    %d: Unexpected object type should have been a dataset\n", __LINE__);
+	HDprintf("    %d: Unexpected object type should have been a dataset\n", __LINE__);
 	TEST_ERROR
     } /* end if */
     if(H5F_addr_ne(oinfo1.addr, oinfo2.addr)) {
@@ -580,7 +582,7 @@ cklinks(hid_t fapl, hbool_t new_format)
     if(H5Oget_info_by_name2(file, "grp1/soft", &oinfo2, H5O_INFO_BASIC, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
     if(H5O_TYPE_DATASET != oinfo2.type) {
 	H5_FAILED();
-	printf("    %d: Unexpected object type should have been a dataset\n", __LINE__);
+	HDprintf("    %d: Unexpected object type should have been a dataset\n", __LINE__);
 	TEST_ERROR
     } /* end if */
     if(H5F_addr_ne(oinfo1.addr, oinfo2.addr)) {
@@ -609,12 +611,12 @@ cklinks(hid_t fapl, hbool_t new_format)
     if(H5Lget_info(file, "grp1/dangle", &linfo2, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
     if(H5L_TYPE_SOFT != linfo2.type) {
 	H5_FAILED();
-	printf("    %d: Unexpected object type should have been a symbolic link\n", __LINE__);
+	HDprintf("    %d: Unexpected object type should have been a symbolic link\n", __LINE__);
 	TEST_ERROR
     } /* end if */
     if(H5Lget_val(file, "grp1/dangle", linkval, sizeof linkval, H5P_DEFAULT) < 0) {
 	H5_FAILED();
-	printf("    %d: Can't retrieve link value\n", __LINE__);
+	HDprintf("    %d: Can't retrieve link value\n", __LINE__);
 	TEST_ERROR
     } /* end if */
     if(HDstrcmp(linkval, "foobar")) {
@@ -636,12 +638,12 @@ cklinks(hid_t fapl, hbool_t new_format)
     if(H5Lget_info(file, "grp1/recursive", &linfo2, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
     if(H5L_TYPE_SOFT != linfo2.type) {
 	H5_FAILED();
-	printf("    %d: Unexpected object type should have been a symbolic link\n", __LINE__);
+	HDprintf("    %d: Unexpected object type should have been a symbolic link\n", __LINE__);
 	TEST_ERROR
     } /* end if */
     if(H5Lget_val(file, "grp1/recursive", linkval, sizeof linkval, H5P_DEFAULT) < 0) {
 	H5_FAILED();
-	printf("    %d: Can't retrieve link value\n", __LINE__);
+	HDprintf("    %d: Can't retrieve link value\n", __LINE__);
 	TEST_ERROR
     } /* end if */
     if(HDstrcmp(linkval, "/grp1/recursive")) {
@@ -706,7 +708,7 @@ ck_new_links(hid_t fapl, hbool_t new_format)
     /* Check hard links */
     if(H5O_TYPE_DATASET != oi_hard1.type || H5O_TYPE_DATASET != oi_hard2.type) {
 	H5_FAILED();
-	printf("    %d: Unexpected object type should have been a dataset\n", __LINE__);
+	HDprintf("    %d: Unexpected object type should have been a dataset\n", __LINE__);
 	TEST_ERROR
     }
     if(H5F_addr_ne(oi_dset.addr, oi_hard1.addr) || H5F_addr_ne(oi_dset.addr, oi_hard2.addr)) {
@@ -1014,7 +1016,7 @@ test_lcpl(hid_t fapl, hbool_t new_format)
     if((space_id=H5Screate_simple(2 ,dims, NULL)) < 0) TEST_ERROR
 
     /* Create a dataset using the default LCPL */
-    if((dset_id = H5Dcreate2(file_id, "/dataset", H5T_NATIVE_INT, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((dset_id = H5Dcreate2(file_id, "/dataset", H5T_NATIVE_INT, space_id, H5P_DEFAULT, dcpl_g, H5P_DEFAULT)) < 0) TEST_ERROR
     if(H5Dclose(dset_id) < 0) TEST_ERROR
 
     /* Check that its character encoding is the default */
@@ -1043,7 +1045,7 @@ test_lcpl(hid_t fapl, hbool_t new_format)
     if(linfo.cset != H5T_CSET_UTF8) TEST_ERROR
 
     /* Create a dataset using the new LCPL */
-    if((dset_id = H5Dcreate2(file_id, "/dataset2", H5T_NATIVE_INT, space_id, lcpl_id, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((dset_id = H5Dcreate2(file_id, "/dataset2", H5T_NATIVE_INT, space_id, lcpl_id, dcpl_g, H5P_DEFAULT)) < 0) TEST_ERROR
     if(H5Dclose(dset_id) < 0) TEST_ERROR
 
     /* Check that its character encoding is UTF-8 */
@@ -2602,7 +2604,7 @@ external_link_toomany(hid_t fapl, hbool_t new_format)
     } H5E_END_TRY;
     if (gid >= 0) {
 	H5_FAILED();
-	printf("%d:    Should have failed for sequence of too many nested links.", __LINE__);
+	HDprintf("%d:    Should have failed for sequence of too many nested links.", __LINE__);
 	goto error;
     }
 
@@ -3758,7 +3760,11 @@ external_set_elink_fapl2(hid_t fapl, hbool_t new_format)
     if((space = H5Screate_simple(2, dims, NULL)) < 0) TEST_ERROR
 
     /* Create dataset creation property list */
-    if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) TEST_ERROR;
+    if (dcpl_g == H5P_DEFAULT)
+        dcpl = H5Pcreate(H5P_DATASET_CREATE);
+    else
+        dcpl = H5Pcopy(dcpl_g);
+    if (0 > dcpl) TEST_ERROR;
     if(H5Pset_alloc_time(dcpl, H5D_ALLOC_TIME_LATE) < 0) TEST_ERROR;
 
     /* create "Dataset" in group "A" of target file */
@@ -6100,7 +6106,7 @@ external_link_closing(hid_t fapl, hbool_t new_format)
     /* Test creating each kind of object */
     if((gid = H5Gcreate2(fid1, "elink/elink/elink/group1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
     if(H5Tcommit2(fid1, "elink/elink/elink/type1", tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
-    if((did = H5Dcreate2(fid1, "elink/elink/elink/dataset1", tid2, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((did = H5Dcreate2(fid1, "elink/elink/elink/dataset1", tid2, sid, H5P_DEFAULT, dcpl_g, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Close objects */
     if(H5Gclose(gid) < 0) TEST_ERROR
@@ -7298,7 +7304,7 @@ external_open_twice(hid_t fapl, hbool_t new_format)
     if((space = H5Screate(H5S_SCALAR)) < 0)
         TEST_ERROR
     if((oid1 = H5Dcreate2(fid2, "dset", H5T_NATIVE_INT, space, H5P_DEFAULT,
-            H5P_DEFAULT, H5P_DEFAULT)) < 0)
+            dcpl_g, H5P_DEFAULT)) < 0)
         TEST_ERROR
     if(H5Dclose(oid1) < 0)
         TEST_ERROR
@@ -7514,8 +7520,11 @@ external_link_with_committed_datatype(hid_t fapl, hbool_t new_format)
     if((sid2 = H5Screate_simple(2, dims, NULL)) < 0)
         FAIL_STACK_ERROR
 
-    if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-        FAIL_STACK_ERROR
+    if (dcpl_g == H5P_DEFAULT)
+        dcpl = H5Pcreate(H5P_DATASET_CREATE);
+    else
+        dcpl = H5Pcopy(dcpl_g);
+    if (0 > dcpl) FAIL_STACK_ERROR
     if(H5Pset_chunk(dcpl, 2, chunks) < 0)
         FAIL_STACK_ERROR
 
@@ -7743,7 +7752,6 @@ done:
             case H5I_FILE:
             case H5I_DATASPACE:
             case H5I_ATTR:
-            case H5I_REFERENCE:
             case H5I_VFL:
             case H5I_VOL:
             case H5I_GENPROP_CLS:
@@ -7832,7 +7840,6 @@ done:
             case H5I_FILE:
             case H5I_DATASPACE:
             case H5I_ATTR:
-            case H5I_REFERENCE:
             case H5I_VFL:
             case H5I_VOL:
             case H5I_GENPROP_CLS:
@@ -9060,7 +9067,7 @@ lapl_nlinks(hid_t fapl, hbool_t new_format)
     dims[0] = 2;
     dims[1] = 2;
     if((sid = H5Screate_simple(2, dims, NULL)) < 0) TEST_ERROR
-    if((did = H5Dcreate2(gid, "dataset", H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((did = H5Dcreate2(gid, "dataset", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl_g, H5P_DEFAULT)) < 0) TEST_ERROR
     if(H5Dclose(did) < 0) TEST_ERROR
 
     /* Close group */
@@ -9172,7 +9179,7 @@ linkinfo(hid_t fapl, hbool_t new_format)
     if(H5Lcreate_soft("group", fid, "softlink", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     if((sid = H5Screate(H5S_SCALAR)) < 0) TEST_ERROR
-    if((did = H5Dcreate2(fid, "dataset", H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((did = H5Dcreate2(fid, "dataset", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl_g, H5P_DEFAULT)) < 0) TEST_ERROR
 
     if(H5Lcreate_ud(fid, "ud_link", (H5L_type_t)UD_PLIST_TYPE, NULL, (size_t)0, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
     if(H5Lcreate_external("file_name", "obj_path", fid, "ext_link", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
@@ -9337,13 +9344,13 @@ build_visit_file(hid_t fapl)
     /* Create dataset in each group */
     if((sid = H5Screate(H5S_SCALAR)) < 0) TEST_ERROR
 
-    if((did = H5Dcreate2(fid, "/Dataset_zero", H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((did = H5Dcreate2(fid, "/Dataset_zero", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl_g, H5P_DEFAULT)) < 0) TEST_ERROR
     if(H5Dclose(did) < 0) TEST_ERROR
 
-    if((did = H5Dcreate2(fid, "/Group1/Dataset_one", H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((did = H5Dcreate2(fid, "/Group1/Dataset_one", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl_g, H5P_DEFAULT)) < 0) TEST_ERROR
     if(H5Dclose(did) < 0) TEST_ERROR
 
-    if((did = H5Dcreate2(fid, "/Group1/Group2/Dataset_two", H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((did = H5Dcreate2(fid, "/Group1/Group2/Dataset_two", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl_g, H5P_DEFAULT)) < 0) TEST_ERROR
     if(H5Dclose(did) < 0) TEST_ERROR
 
     if(H5Sclose(sid) < 0) TEST_ERROR
@@ -14892,6 +14899,7 @@ main(void)
     hid_t	fapl, fapl2;    /* File access property lists */
     int	nerrors = 0;
     unsigned new_format;    /* Whether to use the new format or not */
+    unsigned minimize_dset_oh;
     unsigned efc;           /* Whether to use the external file cache */
     const char  *env_h5_drvr;      /* File Driver value from environment */
 
@@ -14902,165 +14910,187 @@ main(void)
     h5_reset();
     fapl = h5_fileaccess();
 
-    /* Copy the file access property list */
+    /* fapl2 uses "latest version bounds" */
     if((fapl2 = H5Pcopy(fapl)) < 0) TEST_ERROR
-
-    /* Set the "use the latest version of the format" bounds for creating objects in the file */
     if(H5Pset_libver_bounds(fapl2, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0) TEST_ERROR
 
-    /* Loop over using new group format */
-    for(new_format = FALSE; new_format <= TRUE; new_format++) {
-        hid_t my_fapl;
+    for (minimize_dset_oh = 0; minimize_dset_oh <= 1; minimize_dset_oh++) {
+        if (minimize_dset_oh) {
+            HDprintf("\n-Testing with minimzed dataset object headers-\n");
+            dcpl_g = H5Pcreate(H5P_DATASET_CREATE);
+            if (0 > dcpl_g) TEST_ERROR
+        } else {
+            HDprintf("\n-Testing with unminimzed dataset object headers-\n");
+            dcpl_g = H5P_DEFAULT;
+        }
 
-        /* Check for FAPL to use */
-        if(new_format)
-            my_fapl = fapl2;
-        else
-            my_fapl = fapl;
+        for(new_format = FALSE; new_format <= TRUE; new_format++) {
+            hid_t my_fapl;
 
-        /* General tests... (on both old & new format groups */
-        nerrors += mklinks(my_fapl, new_format) < 0 ? 1 : 0;
-        nerrors += cklinks(my_fapl, new_format) < 0 ? 1 : 0;
-        nerrors += new_links(my_fapl, new_format) < 0 ? 1 : 0;
-        nerrors += ck_new_links(my_fapl, new_format) < 0 ? 1 : 0;
-        nerrors += long_links(my_fapl, new_format) < 0 ? 1 : 0;
-        nerrors += toomany(my_fapl, new_format) < 0 ? 1 : 0;
+            /* Check for FAPL to use */
+            if(new_format) {
+                my_fapl = fapl2;
+                HDprintf("\n--Testing with 'new format'--\n");
+            } else {
+                my_fapl = fapl;
+                HDprintf("\n--Testing with 'old format'--\n");
+            }
 
-        /* Test new H5L link creation routine */
-        nerrors += test_lcpl(my_fapl, new_format);
-        nerrors += test_move(my_fapl, new_format);
-        nerrors += test_copy(my_fapl, new_format);
-        nerrors += test_move_preserves(my_fapl, new_format);
+            /* always enter tests without external cache */
+            if(H5Pset_elink_file_cache_size(my_fapl, 0) < 0)
+                TEST_ERROR
+
+            /* General tests... (on both old & new format groups */
+            nerrors += mklinks(my_fapl, new_format) < 0 ? 1 : 0;
+            nerrors += cklinks(my_fapl, new_format) < 0 ? 1 : 0;
+            nerrors += new_links(my_fapl, new_format) < 0 ? 1 : 0;
+            nerrors += ck_new_links(my_fapl, new_format) < 0 ? 1 : 0;
+            nerrors += long_links(my_fapl, new_format) < 0 ? 1 : 0;
+            nerrors += toomany(my_fapl, new_format) < 0 ? 1 : 0;
+
+            /* Test new H5L link creation routine */
+            nerrors += test_lcpl(my_fapl, new_format);
+            nerrors += test_move(my_fapl, new_format);
+            nerrors += test_copy(my_fapl, new_format);
+            nerrors += test_move_preserves(my_fapl, new_format);
 #ifndef H5_NO_DEPRECATED_SYMBOLS
-        nerrors += test_deprec(my_fapl, new_format);
+            nerrors += test_deprec(my_fapl, new_format);
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
-        /* tests for external link */
-        /* Test external file cache first, so it sees the default efc setting on
-         * the fapl */
-        nerrors += external_file_cache(my_fapl, new_format) < 0 ? 1 : 0;
+            /* tests for external link */
+            /* Test external file cache first, so it sees the default efc setting on
+             * the fapl */
+            nerrors += external_file_cache(my_fapl, new_format) < 0 ? 1 : 0;
 
-        /* This test cannot run with the EFC because it assumes that an
-         * intermediate file is not held open */
-        nerrors += external_link_mult(my_fapl, new_format) < 0 ? 1 : 0;
+            /* This test cannot run with the EFC because it assumes that an
+             * intermediate file is not held open */
+            nerrors += external_link_mult(my_fapl, new_format) < 0 ? 1 : 0;
 
-        /* This test cannot run with the EFC because the EFC cannot currently
-         * reopen a cached file with a different intent */
-        nerrors += external_set_elink_acc_flags(env_h5_drvr, my_fapl, new_format) < 0 ? 1 : 0;
+            /* This test cannot run with the EFC because the EFC cannot currently
+             * reopen a cached file with a different intent */
+            nerrors += external_set_elink_acc_flags(env_h5_drvr, my_fapl, new_format) < 0 ? 1 : 0;
 
-        /* Try external link tests both with and without the external file cache
-         */
-        for(efc = FALSE; efc <= TRUE; efc++) {
-            if(efc) {
-                if(H5Pset_elink_file_cache_size(my_fapl, 8) < 0)
-                    TEST_ERROR
-                printf("\n---Testing with external file cache---\n");
-            } /* end if */
-            else {
-                if(H5Pset_elink_file_cache_size(my_fapl, 0) < 0)
-                    TEST_ERROR
-                printf("\n---Testing without external file cache---\n");
-            } /* end else */
+            /* Try external link tests both with and without the external file cache
+             */
+            for(efc = FALSE; efc <= TRUE; efc++) {
+                if(efc) {
+                    if(H5Pset_elink_file_cache_size(my_fapl, 8) < 0)
+                        TEST_ERROR
+                    HDprintf("\n---Testing with external file cache---\n");
+                } /* end if */
+                else {
+                    if(H5Pset_elink_file_cache_size(my_fapl, 0) < 0)
+                        TEST_ERROR
+                    HDprintf("\n---Testing without external file cache---\n");
+                } /* end else */
 
-            nerrors += external_link_root(my_fapl, new_format) < 0 ? 1 : 0;
-            nerrors += external_link_path(my_fapl, new_format) < 0 ? 1 : 0;
-            nerrors += external_link_self(my_fapl, new_format) < 0 ? 1 : 0;
-            nerrors += external_link_pingpong(my_fapl, new_format) < 0 ? 1 : 0;
-            nerrors += external_link_toomany(my_fapl, new_format) < 0 ? 1 : 0;
-            nerrors += external_link_dangling(my_fapl, new_format) < 0 ? 1 : 0;
-            nerrors += external_link_recursive(my_fapl, new_format) < 0 ? 1 : 0;
-            nerrors += external_link_query(my_fapl, new_format) < 0 ? 1 : 0;
-            nerrors += external_link_unlink_compact(my_fapl, new_format) < 0 ? 1 : 0;
-            nerrors += external_link_unlink_dense(my_fapl, new_format) < 0 ? 1 : 0;
-            nerrors += external_link_move(my_fapl, new_format) < 0 ? 1 : 0;
-            nerrors += external_link_ride(my_fapl, new_format) < 0 ? 1 : 0;
-            nerrors += external_link_closing(my_fapl, new_format) < 0 ? 1 : 0;
-            nerrors += external_link_endian(new_format) < 0 ? 1 : 0;
-            nerrors += external_link_strong(my_fapl, new_format) < 0 ? 1 : 0;
+                nerrors += external_link_root(my_fapl, new_format) < 0 ? 1 : 0;
+                nerrors += external_link_path(my_fapl, new_format) < 0 ? 1 : 0;
+                nerrors += external_link_self(my_fapl, new_format) < 0 ? 1 : 0;
+                nerrors += external_link_pingpong(my_fapl, new_format) < 0 ? 1 : 0;
+                nerrors += external_link_toomany(my_fapl, new_format) < 0 ? 1 : 0;
+                nerrors += external_link_dangling(my_fapl, new_format) < 0 ? 1 : 0;
+                nerrors += external_link_recursive(my_fapl, new_format) < 0 ? 1 : 0;
+                nerrors += external_link_query(my_fapl, new_format) < 0 ? 1 : 0;
+                nerrors += external_link_unlink_compact(my_fapl, new_format) < 0 ? 1 : 0;
+                nerrors += external_link_unlink_dense(my_fapl, new_format) < 0 ? 1 : 0;
+                nerrors += external_link_move(my_fapl, new_format) < 0 ? 1 : 0;
+                nerrors += external_link_ride(my_fapl, new_format) < 0 ? 1 : 0;
+                nerrors += external_link_closing(my_fapl, new_format) < 0 ? 1 : 0;
+                nerrors += external_link_endian(new_format) < 0 ? 1 : 0;
+                nerrors += external_link_strong(my_fapl, new_format) < 0 ? 1 : 0;
 
-            nerrors += external_link_prefix(my_fapl, new_format) < 0 ? 1 : 0;
-            nerrors += external_link_abs_mainpath(my_fapl, new_format) < 0 ? 1 : 0;
-            nerrors += external_link_rel_mainpath(my_fapl, new_format) < 0 ? 1 : 0;
-            nerrors += external_link_cwd(my_fapl, new_format) < 0 ? 1 : 0;
-            nerrors += external_link_abstar(my_fapl, new_format) < 0 ? 1 : 0;
-            nerrors += external_link_abstar_cur(my_fapl, new_format) < 0 ? 1 : 0;
-            nerrors += external_link_reltar(my_fapl, new_format) < 0 ? 1 : 0;
-            nerrors += external_link_chdir(my_fapl, new_format) < 0 ? 1 : 0;
-            nerrors += external_set_elink_fapl1(my_fapl, new_format) < 0 ? 1 : 0;
-            nerrors += external_set_elink_fapl2(my_fapl, new_format) < 0 ? 1 : 0;
-            nerrors += external_set_elink_fapl3(new_format) < 0 ? 1 : 0;
-            nerrors += external_set_elink_cb(my_fapl, new_format) < 0 ? 1 : 0;
+                nerrors += external_link_prefix(my_fapl, new_format) < 0 ? 1 : 0;
+                nerrors += external_link_abs_mainpath(my_fapl, new_format) < 0 ? 1 : 0;
+                nerrors += external_link_rel_mainpath(my_fapl, new_format) < 0 ? 1 : 0;
+                nerrors += external_link_cwd(my_fapl, new_format) < 0 ? 1 : 0;
+                nerrors += external_link_abstar(my_fapl, new_format) < 0 ? 1 : 0;
+                nerrors += external_link_abstar_cur(my_fapl, new_format) < 0 ? 1 : 0;
+                nerrors += external_link_reltar(my_fapl, new_format) < 0 ? 1 : 0;
+                nerrors += external_link_chdir(my_fapl, new_format) < 0 ? 1 : 0;
+                nerrors += external_set_elink_fapl1(my_fapl, new_format) < 0 ? 1 : 0;
+                nerrors += external_set_elink_fapl2(my_fapl, new_format) < 0 ? 1 : 0;
+                nerrors += external_set_elink_fapl3(new_format) < 0 ? 1 : 0;
+                nerrors += external_set_elink_cb(my_fapl, new_format) < 0 ? 1 : 0;
 #ifdef H5_HAVE_WINDOW_PATH
-            nerrors += external_link_win1(my_fapl, new_format) < 0 ? 1 : 0;
-            nerrors += external_link_win2(my_fapl, new_format) < 0 ? 1 : 0;
-            nerrors += external_link_win3(my_fapl, new_format) < 0 ? 1 : 0;
-            nerrors += external_link_win4(my_fapl, new_format) < 0 ? 1 : 0;
-            nerrors += external_link_win5(my_fapl, new_format) < 0 ? 1 : 0;
-            nerrors += external_link_win6(my_fapl, new_format) < 0 ? 1 : 0;
-            nerrors += external_link_win7(my_fapl, new_format) < 0 ? 1 : 0;
-            nerrors += external_link_win8(my_fapl, new_format) < 0 ? 1 : 0;
-            nerrors += external_link_win9(my_fapl, new_format) < 0 ? 1 : 0;
+                nerrors += external_link_win1(my_fapl, new_format) < 0 ? 1 : 0;
+                nerrors += external_link_win2(my_fapl, new_format) < 0 ? 1 : 0;
+                nerrors += external_link_win3(my_fapl, new_format) < 0 ? 1 : 0;
+                nerrors += external_link_win4(my_fapl, new_format) < 0 ? 1 : 0;
+                nerrors += external_link_win5(my_fapl, new_format) < 0 ? 1 : 0;
+                nerrors += external_link_win6(my_fapl, new_format) < 0 ? 1 : 0;
+                nerrors += external_link_win7(my_fapl, new_format) < 0 ? 1 : 0;
+                nerrors += external_link_win8(my_fapl, new_format) < 0 ? 1 : 0;
+                nerrors += external_link_win9(my_fapl, new_format) < 0 ? 1 : 0;
 #endif
-            nerrors += external_symlink(env_h5_drvr, my_fapl, new_format) < 0 ? 1 : 0;
-            nerrors += external_copy_invalid_object(my_fapl, new_format) < 0 ? 1 : 0;
-            nerrors += external_dont_fail_to_source(my_fapl, new_format) < 0 ? 1 : 0;
-            nerrors += external_open_twice(my_fapl, new_format) < 0 ? 1 : 0;
-            nerrors += external_link_with_committed_datatype(my_fapl, new_format) < 0 ? 1 : 0;
-        } /* end for */
+                nerrors += external_symlink(env_h5_drvr, my_fapl, new_format) < 0 ? 1 : 0;
+                nerrors += external_copy_invalid_object(my_fapl, new_format) < 0 ? 1 : 0;
+                nerrors += external_dont_fail_to_source(my_fapl, new_format) < 0 ? 1 : 0;
+                nerrors += external_open_twice(my_fapl, new_format) < 0 ? 1 : 0;
+	        nerrors += external_link_with_committed_datatype(my_fapl, new_format) < 0 ? 1 : 0;
+            } /* with/without external file cache */
 
-        /* These tests assume that external links are a form of UD links,
-         * so assume that everything that passed for external links
-         * above has already been tested for UD links.
-         */
-        if(new_format == TRUE) {
-            nerrors += ud_hard_links(fapl2) < 0 ? 1 : 0;     /* requires new format groups */
-            nerrors += ud_link_reregister(fapl2) < 0 ? 1 : 0;        /* requires new format groups */
-        } /* end if */
-        nerrors += ud_callbacks(my_fapl, new_format) < 0 ? 1 : 0;
-        nerrors += ud_link_errors(my_fapl, new_format) < 0 ? 1 : 0;
-        nerrors += lapl_udata(my_fapl, new_format) < 0 ? 1 : 0;
-        nerrors += lapl_nlinks(my_fapl, new_format) < 0 ? 1 : 0;
-        nerrors += linkinfo(my_fapl, new_format) < 0 ? 1 : 0;
+            /* These tests assume that external links are a form of UD links,
+             * so assume that everything that passed for external links
+             * above has already been tested for UD links.
+             */
+            if(new_format == TRUE) {
+                nerrors += ud_hard_links(fapl2) < 0 ? 1 : 0;     /* requires new format groups */
+                nerrors += ud_link_reregister(fapl2) < 0 ? 1 : 0;        /* requires new format groups */
+            } /* end if */
+            nerrors += ud_callbacks(my_fapl, new_format) < 0 ? 1 : 0;
+            nerrors += ud_link_errors(my_fapl, new_format) < 0 ? 1 : 0;
+            nerrors += lapl_udata(my_fapl, new_format) < 0 ? 1 : 0;
+            nerrors += lapl_nlinks(my_fapl, new_format) < 0 ? 1 : 0;
+            nerrors += linkinfo(my_fapl, new_format) < 0 ? 1 : 0;
 
-        /* Misc. extra tests, useful for both new & old format files */
-        nerrors += link_visit(my_fapl, new_format) < 0 ? 1 : 0;
-        nerrors += link_visit_by_name(my_fapl, new_format) < 0 ? 1 : 0;
-        nerrors += obj_visit(my_fapl, new_format) < 0 ? 1 : 0;
-        nerrors += obj_visit_by_name(my_fapl, new_format) < 0 ? 1 : 0;
-        nerrors += obj_visit_stop(my_fapl, new_format) < 0 ? 1 : 0;
-        nerrors += link_filters(my_fapl, new_format) < 0 ? 1 : 0;
-        nerrors += obj_exists(my_fapl, new_format) < 0 ? 1 : 0;
+            /* Misc. extra tests, useful for both new & old format files */
+            nerrors += link_visit(my_fapl, new_format) < 0 ? 1 : 0;
+            nerrors += link_visit_by_name(my_fapl, new_format) < 0 ? 1 : 0;
+            nerrors += obj_visit(my_fapl, new_format) < 0 ? 1 : 0;
+            nerrors += obj_visit_by_name(my_fapl, new_format) < 0 ? 1 : 0;
+            nerrors += obj_visit_stop(my_fapl, new_format) < 0 ? 1 : 0;
+            nerrors += link_filters(my_fapl, new_format) < 0 ? 1 : 0;
+            nerrors += obj_exists(my_fapl, new_format) < 0 ? 1 : 0;
 
-        /* Keep this test last, it's testing files that are used above */
-        /* do not do this for files used by external link tests */
-        nerrors += check_all_closed(my_fapl, new_format, EXTSTOP) < 0 ? 1 : 0;
-    } /* end for */
+            /* Keep this test last, it's testing files that are used above */
+            /* do not do this for files used by external link tests */
+            nerrors += check_all_closed(my_fapl, new_format, EXTSTOP) < 0 ? 1 : 0;
+        } /* new/old format */
 
-    /* New group revision feature tests */
-    nerrors += corder_create_empty(fapl2) < 0 ? 1 : 0;
+        /* New group revision feature tests */
+        nerrors += corder_create_empty(fapl2) < 0 ? 1 : 0;
+
 /* XXX: when creation order indexing is fully working, go back and add checks
 *      to these tests to make certain that the creation order values are
 *      correct.
 */
-    nerrors += corder_create_compact(fapl2) < 0 ? 1 : 0;
-    nerrors += corder_create_dense(fapl2) < 0 ? 1 : 0;
-    nerrors += corder_transition(fapl2) < 0 ? 1 : 0;
-    nerrors += corder_delete(fapl2) < 0 ? 1 : 0;
-    nerrors += link_info_by_idx(fapl2) < 0 ? 1 : 0;
-    nerrors += delete_by_idx(fapl2) < 0 ? 1 : 0;
-    nerrors += link_iterate(fapl2) < 0 ? 1 : 0;
-    nerrors += open_by_idx(fapl2) < 0 ? 1 : 0;
-    nerrors += object_info(fapl2) < 0 ? 1 : 0;
-    nerrors += group_info(fapl2) < 0 ? 1 : 0;
-    nerrors += timestamps(fapl2) < 0 ? 1 : 0;
+        nerrors += corder_create_compact(fapl2) < 0 ? 1 : 0;
+        nerrors += corder_create_dense(fapl2) < 0 ? 1 : 0;
+        nerrors += corder_transition(fapl2) < 0 ? 1 : 0;
+        nerrors += corder_delete(fapl2) < 0 ? 1 : 0;
+        nerrors += link_info_by_idx(fapl2) < 0 ? 1 : 0;
+        nerrors += delete_by_idx(fapl2) < 0 ? 1 : 0;
+        nerrors += link_iterate(fapl2) < 0 ? 1 : 0;
+        nerrors += open_by_idx(fapl2) < 0 ? 1 : 0;
+        nerrors += object_info(fapl2) < 0 ? 1 : 0;
+        nerrors += group_info(fapl2) < 0 ? 1 : 0;
+        nerrors += timestamps(fapl2) < 0 ? 1 : 0;
 
-    /* Test new API calls on old-style groups */
-    nerrors += link_info_by_idx_old(fapl) < 0 ? 1 : 0;
-    nerrors += delete_by_idx_old(fapl) < 0 ? 1 : 0;
-    nerrors += link_iterate_old(fapl) < 0 ? 1 : 0;
-    nerrors += open_by_idx_old(fapl) < 0 ? 1 : 0;
-    nerrors += object_info_old(fapl) < 0 ? 1 : 0;
-    nerrors += group_info_old(fapl) < 0 ? 1 : 0;
+        /* Test new API calls on old-style groups */
+        nerrors += link_info_by_idx_old(fapl) < 0 ? 1 : 0;
+        nerrors += delete_by_idx_old(fapl) < 0 ? 1 : 0;
+        nerrors += link_iterate_old(fapl) < 0 ? 1 : 0;
+        nerrors += open_by_idx_old(fapl) < 0 ? 1 : 0;
+        nerrors += object_info_old(fapl) < 0 ? 1 : 0;
+        nerrors += group_info_old(fapl) < 0 ? 1 : 0;
+
+        if (minimize_dset_oh) {
+            if (H5Pclose(dcpl_g) < 0)
+                TEST_ERROR;
+            dcpl_g = -1;
+        }
+    } /* [un]minimized dataset object headers */
 
     /* Close 2nd FAPL */
     H5Pclose(fapl2);
@@ -15077,11 +15107,11 @@ main(void)
 
     /* Results */
     if(nerrors) {
-        printf("***** %d LINK TEST%s FAILED! *****\n",
+        HDprintf("***** %d LINK TEST%s FAILED! *****\n",
                 nerrors, 1 == nerrors ? "" : "S");
         HDexit(EXIT_FAILURE);
     }
-    printf("All link tests passed.\n");
+    HDprintf("All link tests passed.\n");
 
     /* clean up symlink created by external link tests */
     HDremove(SYMLINK1);

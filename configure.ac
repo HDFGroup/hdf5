@@ -2289,40 +2289,6 @@ case "X-$CODESTACK" in
 esac
 
 ## ----------------------------------------------------------------------
-## Check if they would like the metadata trace file code compiled in
-##
-AC_MSG_CHECKING([whether metadata trace file code is enabled])
-AC_ARG_ENABLE([metadata-trace-file],
-              [AS_HELP_STRING([--enable-metadata-trace-file],
-                              [Enable metadata trace file collection.
-                               [default=no]
-                              ])],
-              [METADATATRACEFILE=$enableval])
-
-## Set the default level.
-if test "X-$METADATATRACEFILE" = X- ; then
-  METADATATRACEFILE=no
-fi
-
-## Allow this variable to be substituted in
-## other files (src/libhdf5.settings.in, etc.)
-AC_SUBST([METADATATRACEFILE])
-
-case "X-$METADATATRACEFILE" in
-  X-yes)
-      AC_MSG_RESULT([yes])
-      AC_DEFINE([METADATA_TRACE_FILE], [1],
-                [Define if the metadata trace file code is to be compiled in])
-    ;;
-  X-no)
-      AC_MSG_RESULT([no])
-    ;;
-  *)
-      AC_MSG_ERROR([Unrecognized value: $METADATATRACEFILE])
-    ;;
-esac
-
-## ----------------------------------------------------------------------
 ## Enable tracing of the API
 ##
 AC_MSG_CHECKING([for API tracing]);
@@ -3443,7 +3409,9 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  test/test_filenotclosed.sh
                  test/test_filter_plugin.sh
                  test/test_usecases.sh
+                 test/test_vol_plugin.sh
                  testpar/Makefile
+                 testpar/testpflush.sh
                  tools/Makefile
                  tools/lib/Makefile
                  tools/src/Makefile

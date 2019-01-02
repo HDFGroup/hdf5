@@ -126,7 +126,7 @@ H5Rget_obj_type1(hid_t id, H5R_type_t ref_type, const void *ref)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5G_UNKNOWN, "invalid file identifier")
 
     /* Get the object information */
-    if(H5VL_object_get(vol_obj, &loc_params, H5VL_REF_GET_TYPE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &obj_type, ref_type, ref) < 0)
+    if(H5VL_object_get(vol_obj, &loc_params, H5VL_REF_GET_TYPE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &obj_type, (int)ref_type, ref) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, H5G_UNKNOWN, "unable to determine object type")
 
     /* Set return value */

@@ -68,6 +68,15 @@ Java_hdf_hdf5lib_H5_H5Fis_1hdf5
 
 /*
  * Class:     hdf_hdf5lib_H5
+ * Method:    H5Fis_accessible
+ * Signature: (Ljava/lang/String;J)Z
+ */
+JNIEXPORT jboolean JNICALL
+Java_hdf_hdf5lib_H5_H5Fis_1ccessible
+  (JNIEnv*, jclass, jstring, jlong);
+
+/*
+ * Class:     hdf_hdf5lib_H5
  * Method:    H5Fget_create_plist
  * Signature: (J)J
  */

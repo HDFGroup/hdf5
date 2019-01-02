@@ -625,9 +625,12 @@ H5VL_register_connector(const void *_cls, hbool_t app_ref, hid_t vipl_id)
         HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register VOL connector ID")
 
 done:
-    if (ret_value < 0)
-        if (saved)
-            H5FL_FREE(H5VL_class_t, saved);
+    if (ret_value < 0 && saved) {
+        if (saved->name)
+            H5MM_xfree((void *)(saved->name));  /* Casting away const OK -QAK */
+
+        H5FL_FREE(H5VL_class_t, saved);
+    }
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_register_connector() */
@@ -793,7 +796,6 @@ H5VL__object(hid_t id, H5I_type_t obj_type)
         case H5I_UNINIT:
         case H5I_BADID:
         case H5I_DATASPACE:
-        case H5I_REFERENCE:
         case H5I_VFL:
         case H5I_VOL:
         case H5I_GENPROP_CLS:
@@ -879,7 +881,7 @@ done:
  *
  * Return:      Positive if VALUE1 is greater than VALUE2, negative if
  *              VALUE2 is greater than VALUE1 and zero if VALUE1 and
- *              VALUE2 are equal.
+ *              VALUE2 are equal (like strcmp).
  *
  *-------------------------------------------------------------------------
  */
