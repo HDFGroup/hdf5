@@ -1721,8 +1721,6 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Fincrement_filesize() */
 
-#if 0 /* MINIMIZED DATASET HEADERS */
-#else
 
 /*-------------------------------------------------------------------------
  * Function: H5Fget_dset_no_attrs_hint
@@ -1813,5 +1811,4 @@ H5Fset_dset_no_attrs_hint(hid_t file_id, hbool_t minimize)
 
 done:
     FUNC_LEAVE_API(ret_value)
-#endif /* MINIMIZED DATASET HEADERS */
 } /* H5Fset_dset_no_attrs_hint */

@@ -482,8 +482,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_get_objects_cb() */
 
-#if 0 /* MINIMIZED DATASET HEADERS */
-#else
 
 /*-------------------------------------------------------------------------
  * Function:    H5F_set_min_dset_ohdr
@@ -507,7 +505,6 @@ H5F_set_min_dset_ohdr(H5F_t *f, hbool_t minimize)
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5F_set_min_dset_ohdr() */
-#endif /* MINIMIZED DATASET HEADERS */
 
 
 /*--------------------------------------------------------------------------
