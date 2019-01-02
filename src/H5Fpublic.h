@@ -217,7 +217,6 @@ typedef struct H5F_retry_info_t {
 /* Callback for H5Pset_object_flush_cb() in a file access property list */
 typedef herr_t (*H5F_flush_cb_t)(hid_t object_id, void *udata);
 
-
 /*********************/
 /* Public Prototypes */
 /*********************/
@@ -275,6 +274,8 @@ H5_DLL herr_t H5Freset_page_buffering_stats(hid_t file_id);
 H5_DLL herr_t H5Fget_page_buffering_stats(hid_t file_id, unsigned accesses[2],
     unsigned hits[2], unsigned misses[2], unsigned evictions[2], unsigned bypasses[2]);
 H5_DLL herr_t H5Fget_mdc_image_info(hid_t file_id, haddr_t *image_addr, hsize_t *image_size);
+H5_DLL herr_t H5Fget_dset_no_attrs_hint(hid_t file_id, hbool_t *minimize);
+H5_DLL herr_t H5Fset_dset_no_attrs_hint(hid_t file_id, hbool_t minimize);
 
 #ifdef H5_HAVE_PARALLEL
 H5_DLL herr_t H5Fset_mpi_atomicity(hid_t file_id, hbool_t flag);

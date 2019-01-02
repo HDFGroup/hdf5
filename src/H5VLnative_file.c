@@ -377,6 +377,8 @@ H5VL__native_file_specific(void *obj, H5VL_file_specific_t specific_type,
                 break;
             }
 
+
+
         default:
             HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "invalid specific operation")
     } /* end switch */
@@ -747,6 +749,23 @@ H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR
                 if(H5F__set_libver_bounds(f, low, high) < 0)
                     HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "cannot set low/high bounds")
 
+                break;
+            }
+
+        /* H5Fget_dset_no_attrs_hint */
+        case H5VL_NATIVE_FILE_GET_MIN_DSET_OHDR_FLAG:
+            {
+                hbool_t *minimize = va_arg(arguments, hbool_t *);
+                *minimize = H5F_GET_MIN_DSET_OHDR(f);
+                break;
+            }
+
+        /* H5Fset_dset_no_attrs_hint */
+        case H5VL_NATIVE_FILE_SET_MIN_DSET_OHDR_FLAG:
+            {
+                int minimize = va_arg(arguments, int);
+                if(H5F_set_min_dset_ohdr(f, (hbool_t)minimize) < 0)
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "cannot set file's dataset object header minimization flag")
                 break;
             }
 
