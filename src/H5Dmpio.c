@@ -83,7 +83,7 @@
 /* Macros to represent the regularity of the selection for multiple chunk IO case. */
 #define H5D_CHUNK_SELECT_REG          1
 
-/* Macros for reason's to not enable read-proc-and-bcast. */
+/* Macros for reasons to not enable read-proc-and-bcast. */
 #define H5D_MPIO_PROC0_BCAST 0x00
 #define H5D_MPIO_NOT_H5S_ALL 0x01
 #define H5D_MPIO_GREATER_THAN_2GB 0x02
