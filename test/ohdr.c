@@ -770,7 +770,7 @@ count_attributes(hid_t dset_id)
 {   
     H5O_info_t info;
     
-    if(H5Oget_info(dset_id, &info, H5O_INFO_ALL) < 0)
+    if(H5Oget_info2(dset_id, &info, H5O_INFO_ALL) < 0)
         return -1;
     else
         return (int)info.num_attrs; /* should never exceed int bounds */
