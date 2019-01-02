@@ -3399,6 +3399,7 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  src/Makefile
                  test/Makefile
                  test/H5srcdir_str.h
+                 test/testabort_fail.sh
                  test/testcheck_version.sh
                  test/testerror.sh
                  test/testflushrefresh.sh
@@ -3406,7 +3407,6 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  test/testlinks_env.sh
                  test/testswmr.sh
                  test/testvdsswmr.sh
-                 test/test_filenotclosed.sh
                  test/test_filter_plugin.sh
                  test/test_usecases.sh
                  test/test_vol_plugin.sh
