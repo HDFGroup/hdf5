@@ -4641,7 +4641,6 @@ H5D__chunk_collective_fill(const H5D_t *dset, H5D_chunk_coll_info_t *chunk_info,
     /* Distribute evenly the number of blocks between processes. */
     if(mpi_size == 0)
         HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "Resulted in division by zero")
-/* BMR: I don't know whether mpi_size = 0 is a valid value, please advise */
     num_blocks = chunk_info->num_io / mpi_size; /* value should be the same on all procs */
 
     /* after evenly distributing the blocks between processes, are
