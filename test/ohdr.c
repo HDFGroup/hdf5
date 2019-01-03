@@ -195,10 +195,10 @@ test_minimized_dset_ohdr_attribute_addition(hid_t fapl_id)
     } H5E_END_TRY;
     if(count != -1) TEST_ERROR
 
-    dset_id = H5Dcreate(file_id, "dataset", int_type_id, dspace_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    dset_id = H5Dcreate2(file_id, "dataset", int_type_id, dspace_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if(dset_id < 0) TEST_ERROR
 
-    mindset_id  = H5Dcreate(file_id, "mindataset", int_type_id, dspace_id, H5P_DEFAULT, dcpl_id, H5P_DEFAULT);
+    mindset_id  = H5Dcreate2(file_id, "mindataset", int_type_id, dspace_id, H5P_DEFAULT, dcpl_id, H5P_DEFAULT);
     if(mindset_id < 0) TEST_ERROR
 
     /********************
@@ -437,13 +437,13 @@ test_minimized_dset_ohdr_size_comparisons(hid_t fapl_id)
         file_f_id = H5Fcreate(filename_a, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
         if(file_f_id < 0) TEST_ERROR
 
-        dset_f_x_id = H5Dcreate(file_f_id, "default", int_type_id, dspace_id, H5P_DEFAULT, dcpl_default, H5P_DEFAULT);
+        dset_f_x_id = H5Dcreate2(file_f_id, "default", int_type_id, dspace_id, H5P_DEFAULT, dcpl_default, H5P_DEFAULT);
         if(dset_f_x_id < 0) TEST_ERROR
 
-        dset_f_N_id = H5Dcreate(file_f_id, "dsetNOT", int_type_id, dspace_id, H5P_DEFAULT, dcpl_dontmin, H5P_DEFAULT);
+        dset_f_N_id = H5Dcreate2(file_f_id, "dsetNOT", int_type_id, dspace_id, H5P_DEFAULT, dcpl_dontmin, H5P_DEFAULT);
         if(dset_f_N_id < 0) TEST_ERROR
 
-        dset_f_Y_id = H5Dcreate(file_f_id, "dsetMIN", int_type_id, dspace_id, H5P_DEFAULT, dcpl_minimize, H5P_DEFAULT);
+        dset_f_Y_id = H5Dcreate2(file_f_id, "dsetMIN", int_type_id, dspace_id, H5P_DEFAULT, dcpl_minimize, H5P_DEFAULT);
         if(dset_f_x_id < 0) TEST_ERROR
 
         file_F_id = H5Fcreate(filename_b, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
@@ -451,13 +451,13 @@ test_minimized_dset_ohdr_size_comparisons(hid_t fapl_id)
         ret = H5Fset_dset_no_attrs_hint(file_F_id, TRUE);
         if(ret < 0) TEST_ERROR
 
-        dset_F_x_id = H5Dcreate(file_F_id, "default", int_type_id, dspace_id, H5P_DEFAULT, dcpl_default, H5P_DEFAULT);
+        dset_F_x_id = H5Dcreate2(file_F_id, "default", int_type_id, dspace_id, H5P_DEFAULT, dcpl_default, H5P_DEFAULT);
         if(dset_F_x_id < 0) TEST_ERROR
 
-        dset_F_N_id = H5Dcreate(file_F_id, "dsetNOT", int_type_id, dspace_id, H5P_DEFAULT, dcpl_dontmin, H5P_DEFAULT);
+        dset_F_N_id = H5Dcreate2(file_F_id, "dsetNOT", int_type_id, dspace_id, H5P_DEFAULT, dcpl_dontmin, H5P_DEFAULT);
         if(dset_F_N_id < 0) TEST_ERROR
 
-        dset_F_Y_id = H5Dcreate(file_F_id, "dsetMIN", int_type_id, dspace_id, H5P_DEFAULT, dcpl_minimize, H5P_DEFAULT);
+        dset_F_Y_id = H5Dcreate2(file_F_id, "dsetMIN", int_type_id, dspace_id, H5P_DEFAULT, dcpl_minimize, H5P_DEFAULT);
         if(dset_F_Y_id < 0) TEST_ERROR
 
         /*********
@@ -592,16 +592,16 @@ test_minimized_dset_ohdr_with_filter(hid_t fapl_id)
     file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
     if(file_id < 0) TEST_ERROR
 
-    dset_xx_id = H5Dcreate(file_id, "xx", dtype_id, dspace_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    dset_xx_id = H5Dcreate2(file_id, "xx", dtype_id, dspace_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if(dset_xx_id < 0) TEST_ERROR
 
-    dset_mx_id = H5Dcreate(file_id, "Mx", dtype_id, dspace_id, H5P_DEFAULT, dcpl_mx_id, H5P_DEFAULT);
+    dset_mx_id = H5Dcreate2(file_id, "Mx", dtype_id, dspace_id, H5P_DEFAULT, dcpl_mx_id, H5P_DEFAULT);
     if(dset_mx_id < 0) TEST_ERROR
 
-    dset_xZ_id = H5Dcreate(file_id, "xZ", dtype_id, dspace_id, H5P_DEFAULT, dcpl_xZ_id, H5P_DEFAULT);
+    dset_xZ_id = H5Dcreate2(file_id, "xZ", dtype_id, dspace_id, H5P_DEFAULT, dcpl_xZ_id, H5P_DEFAULT);
     if(dset_xZ_id < 0) TEST_ERROR
 
-    dset_mZ_id = H5Dcreate(file_id, "MZ", dtype_id, dspace_id, H5P_DEFAULT, dcpl_mZ_id, H5P_DEFAULT);
+    dset_mZ_id = H5Dcreate2(file_id, "MZ", dtype_id, dspace_id, H5P_DEFAULT, dcpl_mZ_id, H5P_DEFAULT);
     if(dset_mZ_id < 0) TEST_ERROR
 
     /*********
@@ -751,18 +751,18 @@ test_minimized_dset_ohdr_modification_times(hid_t _fapl_id)
         file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
         if(file_id < 0) TEST_ERROR
 
-        dset_xx_id = H5Dcreate( file_id, "xx", dtype_id, dspace_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+        dset_xx_id = H5Dcreate2( file_id, "xx", dtype_id, dspace_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         if(dset_xx_id < 0) TEST_ERROR
 
-        dset_mx_id = H5Dcreate(file_id, "mx", dtype_id, dspace_id, H5P_DEFAULT, dcpl_mx_id, H5P_DEFAULT);
+        dset_mx_id = H5Dcreate2(file_id, "mx", dtype_id, dspace_id, H5P_DEFAULT, dcpl_mx_id, H5P_DEFAULT);
         if(dset_mx_id < 0) TEST_ERROR
 
-        dset_xT_id = H5Dcreate(file_id, "xT", dtype_id, dspace_id, H5P_DEFAULT, dcpl_xT_id, H5P_DEFAULT);
+        dset_xT_id = H5Dcreate2(file_id, "xT", dtype_id, dspace_id, H5P_DEFAULT, dcpl_xT_id, H5P_DEFAULT);
         if(dset_xT_id < 0) TEST_ERROR
-        dset_mT_id = H5Dcreate(file_id, "mT", dtype_id, dspace_id, H5P_DEFAULT, dcpl_mT_id, H5P_DEFAULT);
+        dset_mT_id = H5Dcreate2(file_id, "mT", dtype_id, dspace_id, H5P_DEFAULT, dcpl_mT_id, H5P_DEFAULT);
         if(dset_mT_id < 0) TEST_ERROR
 
-        dset_mN_id = H5Dcreate(file_id, "mN", dtype_id, dspace_id, H5P_DEFAULT, dcpl_mN_id, H5P_DEFAULT);
+        dset_mN_id = H5Dcreate2(file_id, "mN", dtype_id, dspace_id, H5P_DEFAULT, dcpl_mN_id, H5P_DEFAULT);
         if(dset_mN_id < 0) TEST_ERROR
 
         /* ----- *
@@ -877,7 +877,7 @@ test_minimized_dset_ohdr_fillvalue_backwards_compatability(hid_t _fapl_id)
     file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
     if(file_id < 0) TEST_ERROR
 
-    dset_0_id = H5Dcreate(file_id, "fullrange", dtype_id, dspace_id, H5P_DEFAULT, dcpl_id, H5P_DEFAULT);
+    dset_0_id = H5Dcreate2(file_id, "fullrange", dtype_id, dspace_id, H5P_DEFAULT, dcpl_id, H5P_DEFAULT);
     if(dset_0_id < 0) TEST_ERROR
 
     /* Close file and re-open with different libver bounds.
@@ -892,7 +892,7 @@ test_minimized_dset_ohdr_fillvalue_backwards_compatability(hid_t _fapl_id)
     file_id = H5Fopen(filename, H5F_ACC_RDWR, fapl_id);
     if(file_id < 0) TEST_ERROR
 
-    dset_1_id = H5Dcreate(file_id, "upperrange", dtype_id, dspace_id, H5P_DEFAULT, dcpl_id, H5P_DEFAULT);
+    dset_1_id = H5Dcreate2(file_id, "upperrange", dtype_id, dspace_id, H5P_DEFAULT, dcpl_id, H5P_DEFAULT);
     if(dset_1_id < 0) TEST_ERROR
 
     /* re-open "fullrange" dataset
