@@ -1107,18 +1107,21 @@ H5F__new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get VFD SWMR config info")
 
         /* Initialization for VFD SWMR */
-        f->shared->vfd_swmr             = FALSE;
-        f->shared->vfd_swmr_writer      = FALSE;
-        f->shared->tick_num             = 0;
-        f->shared->mdf_idx              = NULL;
-        f->shared->mdf_idx_len          = 0;
-        f->shared->mdf_idx_entries_used = 0;
+        f->shared->vfd_swmr                 = FALSE;
+        f->shared->vfd_swmr_writer          = FALSE;
+        f->shared->tick_num                 = 0;
+        f->shared->mdf_idx                  = NULL;
+        f->shared->mdf_idx_len              = 0;
+        f->shared->mdf_idx_entries_used     = 0;
+        f->shared->old_mdf_idx              = NULL;
+        f->shared->old_mdf_idx_len          = 0;
+        f->shared->old_mdf_idx_entries_used = 0;
 
-        f->shared->vfd_swmr_md_fd       = -1;
-        f->shared->fs_man_md            = NULL;
-        f->shared->dl_head_ptr          = NULL;
-        f->shared->dl_tail_ptr          = NULL;
-        f->shared->dl_len               = 0;
+        f->shared->vfd_swmr_md_fd           = -1;
+        f->shared->fs_man_md                = NULL;
+        f->shared->dl_head_ptr              = NULL;
+        f->shared->dl_tail_ptr              = NULL;
+        f->shared->dl_len                   = 0;
 
         /* Create a metadata cache with the specified number of elements.
          * The cache might be created with a different number of elements and
@@ -4323,6 +4326,7 @@ H5F_update_vfd_swmr_metadata_file(H5F_t *f, uint32_t num_entries,
 
             /* Allocate space for the entry in the metadata file */
             if((md_addr = H5MV_alloc(f, index[i].length)) == HADDR_UNDEF)
+
                 HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, \
                             "error in allocating space from the metadata file")
 
@@ -4771,6 +4775,9 @@ H5F_vfd_swmr_writer_end_of_tick(void)
     if ( ( f->shared->tick_num == 1 ) &&
          ( H5F__vfd_swmr_writer__create_index(f) < 0 ) )
 
+       HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL, \
+                   "unable to allocate metadata file index")
+
 
     /* 4) Scan the page buffer tick list, and use it to update 
      *    the metadata file index, adding or modifying entries as 
@@ -4940,36 +4947,283 @@ done:
 /*-------------------------------------------------------------------------
  * Function: H5F_vfd_swmr_reader_end_of_tick
  *
- * Purpose:  Dummy right now
+ * Purpose:  Main routine for VFD SWMR reader end of tick operations.
+ *           The following operations must be performed:
+ *
+ *           1) Direct the VFD SWMR reader VFD to load the current header
+ *              from the metadata file, and report the current tick.
+ *
+ *              If the tick reported has not increased since the last 
+ *              call, do nothing and exit.
+ *
+ *           2) If the tick has increased, obtain a copy of the new
+ *              index from the VFD SWMR reader VFD, and compare it with
+ *              the old index to identify all pages that have been updated
+ *              in the previous tick.  
+ *
+ *              If any such pages or multi-page metadata entries are found:
+ *
+ *                 a) direct the page buffer to evict any such superceeded
+ *                    pages, and 
+ *
+ *                 b) direct the metadata cache to either evict or refresh
+ *                    any entries residing in the superceeded pages.
+ *
+ *              Note that this operation MUST be performed in this order,
+ *              as the metadata cache will refer to the page buffer 
+ *              when refreshing entries.
+ *
+ *           9) Increment the tick, and update the end of tick.
  *
  * Return:   SUCCEED/FAIL
+ *
+ * Programmer: John Mainzer 12/29/18
+ *
+ * Changes:  None.
  *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5F_vfd_swmr_reader_end_of_tick(void)
 {
+    int pass = 0;
     uint64_t tmp_tick_num = 0;
+    H5F_t * f;
+    H5FD_vfd_swmr_idx_entry_t * tmp_mdf_idx;
+    int32_t tmp_mdf_idx_len;
+    int32_t tmp_mdf_idx_entries_used;
+    uint32_t mdf_idx_entries_used;
+
     herr_t ret_value = SUCCEED;              /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    /* construct */
-    if(vfd_swmr_file_g) {
-        HDassert(vfd_swmr_file_g->shared);
-        HDassert(vfd_swmr_file_g->shared->lf);
+    f = vfd_swmr_file_g;
 
-        if(H5FD_vfd_swmr_get_tick_and_idx(vfd_swmr_file_g->shared->lf, TRUE, &tmp_tick_num, NULL, NULL) < 0)
-            HGOTO_ERROR(H5E_ARGS, H5E_CANTGET, FAIL, "error in retrieving tick_num from driver")
-        if(tmp_tick_num != tick_num_g) {
-            vfd_swmr_file_g->shared->tick_num = tick_num_g = tmp_tick_num;
+    HDassert(f);
+    HDassert(f->shared);
+    HDassert(f->shared->pb_ptr);
+    HDassert(f->shared->vfd_swmr);
+    HDassert(!f->shared->vfd_swmr_writer);
+    HDassert(f->shared->lf);
 
-            /* Update end_of_tick */
-            if(H5F__vfd_swmr_update_end_of_tick_and_tick_num(vfd_swmr_file_g, FALSE) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "unable to update end of tick")
-        }
-    }
+    /* 1) Direct the VFD SWMR reader VFD to load the current header
+     *    from the metadata file, and report the current tick.
+     *
+     *    If the tick reported has not increased since the last
+     *    call, do nothing and exit.
+     */
+    if ( H5FD_vfd_swmr_get_tick_and_idx(f->shared->lf, TRUE, &tmp_tick_num, 
+                                        NULL, NULL) < 0 )
+
+        HGOTO_ERROR(H5E_ARGS, H5E_CANTGET, FAIL, \
+                    "error in retrieving tick_num from driver")
+
+    if ( tmp_tick_num != tick_num_g ) {
+
+        /* swap the old and new metadata file indexes */
+
+        tmp_mdf_idx              = f->shared->old_mdf_idx;
+        tmp_mdf_idx_len          = f->shared->old_mdf_idx_len;
+        tmp_mdf_idx_entries_used = f->shared->old_mdf_idx_entries_used;
+
+        f->shared->old_mdf_idx              = f->shared->mdf_idx;
+        f->shared->old_mdf_idx_len          = f->shared->mdf_idx_len;
+        f->shared->old_mdf_idx_entries_used = f->shared->mdf_idx_entries_used;
+
+        f->shared->mdf_idx              = tmp_mdf_idx;
+        f->shared->mdf_idx_len          = tmp_mdf_idx_len;
+        f->shared->mdf_idx_entries_used = tmp_mdf_idx_entries_used;
+
+        /* if f->shared->mdf_idx is NULL, allocate an index */
+        if ( H5F__vfd_swmr_writer__create_index(f) < 0 )
+
+           HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL, \
+                       "unable to allocate metadata file index")
+
+
+        mdf_idx_entries_used = (uint32_t)(f->shared->mdf_idx_len);
+        if ( H5FD_vfd_swmr_get_tick_and_idx(f->shared->lf, FALSE, NULL,
+                                            &mdf_idx_entries_used, 
+                                            f->shared->mdf_idx) < 0 )
+
+            HGOTO_ERROR(H5E_ARGS, H5E_CANTGET, FAIL, \
+                        "error in retrieving tick_num from driver")
+
+        HDassert(tmp_mdf_idx_entries_used <= f->shared->mdf_idx_len);
+
+        f->shared->mdf_idx_entries_used = tmp_mdf_idx_entries_used;
+
+        /* if an old metadata file index exists, compare it with the 
+         * new index and evict any modified, new, or deleted pages
+         * and any associated metadata cache entries.
+         *
+         * Note that we must do this in two passes -- page buffer first,
+         * and then metadata cache.  This is necessary as the metadata 
+         * cache may attempt to refresh entries rather than evict them,
+         * in which case it may access an entry in the page buffer. 
+         */
+        pass = 0;
+        while ( pass <= 1 ) {
+
+            haddr_t page_addr;
+            int32_t i = 0;
+            int32_t j = 0;
+            H5FD_vfd_swmr_idx_entry_t * new_mdf_idx;
+            H5FD_vfd_swmr_idx_entry_t * old_mdf_idx;
+            int32_t new_mdf_idx_entries_used;
+            int32_t old_mdf_idx_entries_used;
+
+            new_mdf_idx              = f->shared->mdf_idx;
+            new_mdf_idx_entries_used = f->shared->mdf_idx_entries_used;
+
+            old_mdf_idx              = f->shared->old_mdf_idx;
+            old_mdf_idx_entries_used = f->shared->old_mdf_idx_entries_used;
+
+            while ( ( i < old_mdf_idx_entries_used ) &&
+                    ( j < new_mdf_idx_entries_used ) ) {
+
+                if ( old_mdf_idx[i].hdf5_page_offset == 
+                     new_mdf_idx[j].hdf5_page_offset ) {
+
+                    if ( old_mdf_idx[i].md_file_page_offset != 
+                         new_mdf_idx[j].md_file_page_offset ) {
+
+                        /* the page has been altered -- evict it and 
+                         * any contained metadata cache entries.
+                         */
+                        if ( pass == 0 ) {
+
+                            page_addr = (haddr_t)
+                                (new_mdf_idx[j].hdf5_page_offset *
+                                 f->shared->pb_ptr->page_size);
+                                    
+                            if ( H5PB_remove_entry(f, page_addr) < 0 )
+
+                                HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, \
+                                            "remove page buffer entry failed")
+                        } else {
+
+                           if ( H5C_evict_or_refresh_all_entries_in_page(f,
+                                               new_mdf_idx[j].hdf5_page_offset, 
+                                               tmp_tick_num) < 0 )
+
+                                HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, \
+                                    "evict or refresh stale MDC entries failed")
+                        }
+                    }
+                    i++;
+                    j++;
+
+                } else if ( old_mdf_idx[i].hdf5_page_offset < 
+                            new_mdf_idx[j].hdf5_page_offset ) {
+
+                   /* the page has been removed from the new version 
+                    * of the index.  Evict it and any contained metadata
+                    * cache entries.  
+                    *
+                    * If we are careful about removing entries from the 
+                    * the index so as to ensure that they haven't changed 
+                    * for several ticks, we can probably omit this.  However,
+                    * lets not worry about this for the first cut.
+                    */
+                    if ( pass == 0 ) {
+
+                        page_addr = (haddr_t)(old_mdf_idx[i].hdf5_page_offset *
+                                              f->shared->pb_ptr->page_size);
+                                    
+                        if ( H5PB_remove_entry(f, page_addr) < 0 )
+
+                            HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, \
+                                        "remove page buffer entry failed")
+                    } else {
+
+                       if ( H5C_evict_or_refresh_all_entries_in_page(f,
+                                                old_mdf_idx[i].hdf5_page_offset,
+                                                tmp_tick_num) < 0 )
+
+                            HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, \
+                                    "evict or refresh stale MDC entries failed")
+                    }
+
+                    i++;
+
+                } else { /* ( old_mdf_idx[i].hdf5_page_offset > */
+                         /*   new_mdf_idx[j].hdf5_page_offset ) */
+
+                    /* the page has been added to the index.  No action 
+                     * is required.
+                     */
+                    j++;
+               
+                }
+
+                /* sanity checks to verify that the old and new indicies
+                 * are sorted as expected.
+                 */
+                HDassert( ( i == 0 ) ||
+                          ( i >= old_mdf_idx_entries_used ) ||
+                          ( old_mdf_idx[i - 1].hdf5_page_offset <
+                            old_mdf_idx[i].hdf5_page_offset ) );
+
+                HDassert( ( j == 0 ) ||
+                          ( j >= new_mdf_idx_entries_used ) ||
+                          ( new_mdf_idx[j - 1].hdf5_page_offset <
+                            new_mdf_idx[j].hdf5_page_offset ) );
+
+            }
+
+            /* cleanup any left overs in the old index */
+            while ( i < old_mdf_idx_entries_used ) {
+
+                /* the page has been removed from the new version of the 
+                 * index.  Evict it from the page buffer and also evict any 
+                 * contained metadata cache entries
+                 */
+                if ( pass == 0 ) {
+
+                    page_addr = (haddr_t)(old_mdf_idx[i].hdf5_page_offset *
+                                          f->shared->pb_ptr->page_size);
+                                    
+                    if ( H5PB_remove_entry(f, page_addr) < 0 )
+
+                        HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, \
+                                        "remove page buffer entry failed")
+                } else {
+
+                   if ( H5C_evict_or_refresh_all_entries_in_page(f,
+                                               old_mdf_idx[i].hdf5_page_offset,
+                                               tmp_tick_num) < 0 )
+
+                        HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, \
+                                "evict or refresh stale MDC entries failed")
+                }
+
+                i++;
+            }
+
+            pass++;
+
+        } /* while ( pass <= 1 ) */
+
+        /* At this point, we should have evicted or refreshed all stale 
+         * page buffer and metadata cache entries.  
+         *
+         * Start the next tick.
+         */
+        vfd_swmr_file_g->shared->tick_num = tick_num_g = tmp_tick_num;
+
+        /* Update end_of_tick */
+        if ( H5F__vfd_swmr_update_end_of_tick_and_tick_num(vfd_swmr_file_g, 
+                                                           FALSE) < 0 )
+
+            HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, \
+                        "unable to update end of tick")
+
+    } /* if ( tmp_tick_num != tick_num_g ) */
 
 done:
+
     FUNC_LEAVE_NOAPI(ret_value)
+
 } /* end H5F_vfd_swmr_reader_end_of_tick() */

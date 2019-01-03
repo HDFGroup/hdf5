@@ -99,36 +99,41 @@ hbool_t H5_coll_api_sanity_check_g = false;
  */
 
 static const H5AC_class_t *const H5AC_class_s[] = {
-    H5AC_BT,                    /* ( 0) B-tree nodes                    */
-    H5AC_SNODE,                 /* ( 1) symbol table nodes              */
-    H5AC_LHEAP_PRFX,            /* ( 2) local heap prefix               */
-    H5AC_LHEAP_DBLK,            /* ( 3) local heap data block           */
-    H5AC_GHEAP,                 /* ( 4) global heap                     */
-    H5AC_OHDR,                  /* ( 5) object header                   */
-    H5AC_OHDR_CHK,              /* ( 6) object header chunk             */
-    H5AC_BT2_HDR,               /* ( 7) v2 B-tree header                */
-    H5AC_BT2_INT,               /* ( 8) v2 B-tree internal node         */
-    H5AC_BT2_LEAF,              /* ( 9) v2 B-tree leaf node             */
-    H5AC_FHEAP_HDR,             /* (10) fractal heap header             */
-    H5AC_FHEAP_DBLOCK,          /* (11) fractal heap direct block       */
-    H5AC_FHEAP_IBLOCK,          /* (12) fractal heap indirect block     */
-    H5AC_FSPACE_HDR,            /* (13) free space header               */
-    H5AC_FSPACE_SINFO,          /* (14) free space sections             */
-    H5AC_SOHM_TABLE,            /* (15) shared object header message master table */
-    H5AC_SOHM_LIST,             /* (16) shared message index stored as a list */
-    H5AC_EARRAY_HDR,            /* (17) extensible array header         */
-    H5AC_EARRAY_IBLOCK,         /* (18) extensible array index block    */
-    H5AC_EARRAY_SBLOCK,         /* (19) extensible array super block    */
-    H5AC_EARRAY_DBLOCK,         /* (20) extensible array data block     */
+    H5AC_BT,                    /* ( 0) B-tree nodes                     */
+    H5AC_SNODE,                 /* ( 1) symbol table nodes               */
+    H5AC_LHEAP_PRFX,            /* ( 2) local heap prefix                */
+    H5AC_LHEAP_DBLK,            /* ( 3) local heap data block            */
+    H5AC_GHEAP,                 /* ( 4) global heap                      */
+    H5AC_OHDR,                  /* ( 5) object header                    */
+    H5AC_OHDR_CHK,              /* ( 6) object header chunk              */
+    H5AC_BT2_HDR,               /* ( 7) v2 B-tree header                 */
+    H5AC_BT2_INT,               /* ( 8) v2 B-tree internal node          */
+    H5AC_BT2_LEAF,              /* ( 9) v2 B-tree leaf node              */
+    H5AC_FHEAP_HDR,             /* (10) fractal heap header              */
+    H5AC_FHEAP_DBLOCK,          /* (11) fractal heap direct block        */
+    H5AC_FHEAP_IBLOCK,          /* (12) fractal heap indirect block      */
+    H5AC_FSPACE_HDR,            /* (13) free space header                */
+    H5AC_FSPACE_SINFO,          /* (14) free space sections              */
+    H5AC_SOHM_TABLE,            /* (15) shared object header message     */
+                                /*      master table                     */
+    H5AC_SOHM_LIST,             /* (16) shared message index stored as   */
+                                /*      a list                           */
+    H5AC_EARRAY_HDR,            /* (17) extensible array header          */
+    H5AC_EARRAY_IBLOCK,         /* (18) extensible array index block     */
+    H5AC_EARRAY_SBLOCK,         /* (19) extensible array super block     */
+    H5AC_EARRAY_DBLOCK,         /* (20) extensible array data block      */
     H5AC_EARRAY_DBLK_PAGE,      /* (21) extensible array data block page */
-    H5AC_FARRAY_HDR,            /* (22) fixed array header              */
-    H5AC_FARRAY_DBLOCK,         /* (23) fixed array data block          */
-    H5AC_FARRAY_DBLK_PAGE,      /* (24) fixed array data block page     */
-    H5AC_SUPERBLOCK,            /* (25) file superblock                 */
-    H5AC_DRVRINFO,              /* (26) driver info block (supplements superblock) */
-    H5AC_EPOCH_MARKER,          /* (27) epoch marker - always internal to cache */
-    H5AC_PROXY_ENTRY,           /* (28) cache entry proxy               */
-    H5AC_PREFETCHED_ENTRY  	/* (29) prefetched entry - always internal to cache */
+    H5AC_FARRAY_HDR,            /* (22) fixed array header               */
+    H5AC_FARRAY_DBLOCK,         /* (23) fixed array data block           */
+    H5AC_FARRAY_DBLK_PAGE,      /* (24) fixed array data block page      */
+    H5AC_SUPERBLOCK,            /* (25) file superblock                  */
+    H5AC_DRVRINFO,              /* (26) driver info block (supplements   */
+                                /*      superblock)                      */
+    H5AC_EPOCH_MARKER,          /* (27) epoch marker - always internal   */
+                                /*      to cache                         */
+    H5AC_PROXY_ENTRY,           /* (28) cache entry proxy                */
+    H5AC_PREFETCHED_ENTRY  	/* (29) prefetched entry - always        */
+                                /*      internal to cache                */
 };
 
 
@@ -1342,7 +1347,7 @@ H5AC_move_entry(H5F_t *f, const H5AC_class_t *type, haddr_t old_addr, haddr_t ne
             HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, "can't log moved entry")
 #endif /* H5_HAVE_PARALLEL */
 
-    if(H5C_move_entry(f->shared->cache, type, old_addr, new_addr) < 0)
+    if(H5C_move_entry(f, type, old_addr, new_addr) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTMOVE, FAIL, "H5C_move_entry() failed")
 
 #ifdef H5_HAVE_PARALLEL

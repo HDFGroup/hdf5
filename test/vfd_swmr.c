@@ -793,7 +793,7 @@ test_writer_md(void)
     my_config->tick_len = 1; 
     my_config->max_lag = 3;
     my_config->vfd_swmr_writer = TRUE;
-    my_config->md_pages_reserved = 2;
+    my_config->md_pages_reserved = 256;
     HDstrcpy(my_config->md_file_path, MD_FILENAME);
 
     /* Set the VFD SWMR configuration in fapl */

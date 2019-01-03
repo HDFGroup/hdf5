@@ -13976,7 +13976,7 @@ check_move_entry__run_test(H5F_t * file_ptr,
         if(!spec_ptr->is_protected)
             unprotect_entry(file_ptr, spec_ptr->entry_type, spec_ptr->entry_index, flags);
 
-        move_entry(cache_ptr, spec_ptr->entry_type, spec_ptr->entry_index, FALSE);
+        move_entry(file_ptr, spec_ptr->entry_type, spec_ptr->entry_index, FALSE);
 
     }
 
@@ -14074,7 +14074,7 @@ check_move_entry__run_test(H5F_t * file_ptr,
     }
 
     /* put the entry back where it started from */
-    move_entry(cache_ptr, spec_ptr->entry_type, spec_ptr->entry_index, TRUE);
+    move_entry(file_ptr, spec_ptr->entry_type, spec_ptr->entry_index, TRUE);
 
     return;
 
@@ -16960,7 +16960,8 @@ check_move_entry_errs(unsigned paged)
     } /* end if */
 
     if(pass) {
-        result = H5C_move_entry(cache_ptr, types[0], entry_0_0_ptr->addr, entry_0_1_ptr->addr);
+        result = H5C_move_entry(file_ptr, types[0], entry_0_0_ptr->addr, 
+                                entry_0_1_ptr->addr);
 
         if(result >= 0) {
             pass = FALSE;
@@ -16969,7 +16970,8 @@ check_move_entry_errs(unsigned paged)
     } /* end if */
 
     if(pass) {
-        result = H5C_move_entry(cache_ptr, types[0], entry_0_0_ptr->addr, entry_1_0_ptr->addr);
+        result = H5C_move_entry(file_ptr, types[0], entry_0_0_ptr->addr, 
+                                entry_1_0_ptr->addr);
 
         if(result >= 0) {
             pass = FALSE;
@@ -17000,7 +17002,8 @@ check_move_entry_errs(unsigned paged)
     } /* end if */
 
     if(pass) {
-	result = H5C_move_entry(cache_ptr, types[0], entry_ptr->header.addr, entry_ptr->header.addr + 10);
+	result = H5C_move_entry(file_ptr, types[0], entry_ptr->header.addr, 
+                                entry_ptr->header.addr + 10);
 
         if(result >= 0) {
             pass = FALSE;

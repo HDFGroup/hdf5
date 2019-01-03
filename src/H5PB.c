@@ -1132,6 +1132,14 @@ done:
  *
  *                                               JRM -- 10/23/18
  *
+ *              We also need to evict modified pages from the page 
+ *              buffer in the VFD SWMR reader case to avoid message from
+ *              the past bugs.  This function will serve for this for 
+ *              now, but for efficiency, we may want a version that takes
+ *              a list of pages instead.
+ *
+ *                                               JRM -- 12/30/18
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1725,6 +1733,7 @@ H5PB_vfd_swmr__update_index(H5F_t * f,
 
                 HDfprintf(stderr, "\n\nmax mdf index len (%d)exceeded.\n\n",
                           f->shared->mdf_idx_len);
+                HDfprintf(stderr, "tick = %lld.\n", f->shared->tick_num);
                 exit(1);
             }
 
@@ -2405,7 +2414,9 @@ H5PB__flush_entry(H5F_t *f, H5PB_t *pb_ptr, H5PB_entry_t *entry_ptr)
     hbool_t skip_write = FALSE;
     size_t write_size;
     haddr_t eoa;                   /* Current EOA for the file */
+#if VFD_IO  /* JRM */
     H5FD_t *file;                  /* file driver */
+#endif /* VFD_IO */ /* JRM */
     herr_t ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -2529,7 +2540,9 @@ H5PB__load_page(H5F_t *f, H5PB_t *pb_ptr, haddr_t addr, H5FD_mem_t type,
     haddr_t eof = HADDR_UNDEF;
     H5PB_entry_t *entry_ptr = NULL;
     void *image_ptr = NULL;
+#if VFD_IO /* JRM */
     H5FD_t *file;                       /* File driver pointer */
+#endif /* VFD_IO */ /* JRM */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -2538,9 +2551,6 @@ H5PB__load_page(H5F_t *f, H5PB_t *pb_ptr, haddr_t addr, H5FD_mem_t type,
     HDassert(f);
     HDassert(f->shared);
     HDassert(f->shared->lf);
-
-    file = f->shared->lf;
-
     HDassert(pb_ptr);
     HDassert(pb_ptr->magic == H5PB__H5PB_T_MAGIC);
     HDassert((entry_ptr_ptr == NULL) || (*entry_ptr_ptr == NULL));
@@ -2598,6 +2608,7 @@ H5PB__load_page(H5F_t *f, H5PB_t *pb_ptr, haddr_t addr, H5FD_mem_t type,
      * image buffer associated with the new entry.
      */
 #if VFD_IO /* JRM */
+    file = f->shared->lf;
     if ( ( ! skip_read ) &&
          ( H5FD_read(file, type, addr, entry_ptr->size, image_ptr) < 0 ) )
 #else /* VFD_IO */ /* JRM */
@@ -3106,7 +3117,9 @@ H5PB__read_meta(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
 {
     H5PB_t *pb_ptr;                         /* Page buffer for this file */
     H5PB_entry_t *entry_ptr;                /* Pointer to page buffer entry */
+#if VFD_IO /* JRM */
     H5FD_t *file;                           /* File driver pointer */
+#endif /* VFD_IO */ /* JRM */
     uint64_t page;		            /* page offset of addr */
     haddr_t page_addr;                      /* page containg addr */
     static haddr_t prev_addr = HADDR_UNDEF; /* addr of last call */
@@ -3127,7 +3140,9 @@ H5PB__read_meta(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
     HDassert(pb_ptr->min_rd_pages < pb_ptr->max_pages);
     HDassert(f->shared->lf);
 
+#if VFD_IO /* JRM */
     file = f->shared->lf;
+#endif /* VFD_IO */ /* JRM */
 
     HDassert(H5FD_MEM_DRAW != type);
     HDassert(buf);

@@ -144,6 +144,7 @@ const H5AC_class_t H5AC_EARRAY_HDR[1] = {{
     H5EA__cache_hdr_notify,             /* 'notify' callback */
     H5EA__cache_hdr_free_icr,           /* 'free_icr' callback */
     NULL,                               /* 'fsf_size' callback */
+    NULL,                               /* VFD SWMR 'refresh' callback */
 }};
 
 /* H5EA index block inherits cache-like properties from H5AC */
@@ -162,6 +163,7 @@ const H5AC_class_t H5AC_EARRAY_IBLOCK[1] = {{
     H5EA__cache_iblock_notify,          /* 'notify' callback */
     H5EA__cache_iblock_free_icr,        /* 'free_icr' callback */
     NULL,                               /* 'fsf_size' callback */
+    NULL,                               /* VFD SWMR 'refresh' callback */
 }};
 
 /* H5EA super block inherits cache-like properties from H5AC */
@@ -180,6 +182,7 @@ const H5AC_class_t H5AC_EARRAY_SBLOCK[1] = {{
     H5EA__cache_sblock_notify,          /* 'notify' callback */
     H5EA__cache_sblock_free_icr,        /* 'free_icr' callback */
     NULL,                               /* 'fsf_size' callback */
+    NULL,                               /* VFD SWMR 'refresh' callback */
 }};
 
 /* H5EA data block inherits cache-like properties from H5AC */
@@ -198,6 +201,7 @@ const H5AC_class_t H5AC_EARRAY_DBLOCK[1] = {{
     H5EA__cache_dblock_notify,          /* 'notify' callback */
     H5EA__cache_dblock_free_icr,        /* 'free_icr' callback */
     H5EA__cache_dblock_fsf_size,        /* 'fsf_size' callback */
+    NULL,                               /* VFD SWMR 'refresh' callback */
 }};
 
 /* H5EA data block page inherits cache-like properties from H5AC */
@@ -216,6 +220,7 @@ const H5AC_class_t H5AC_EARRAY_DBLK_PAGE[1] = {{
     H5EA__cache_dblk_page_notify,       /* 'notify' callback */
     H5EA__cache_dblk_page_free_icr,     /* 'free_icr' callback */
     NULL,                               /* 'fsf_size' callback */
+    NULL,                               /* VFD SWMR 'refresh' callback */
 }};
 
 

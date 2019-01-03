@@ -308,6 +308,7 @@ static const H5C_class_t pico_class[1] = {{
     NULL,
     pico_free_icr,
     NULL,
+    NULL,
 }};
 
 static const H5C_class_t nano_class[1] = {{
@@ -324,6 +325,7 @@ static const H5C_class_t nano_class[1] = {{
     nano_serialize,
     NULL,
     nano_free_icr,
+    NULL,
     NULL,
 }};
 
@@ -342,6 +344,7 @@ static const H5C_class_t micro_class[1] = {{
     NULL,
     micro_free_icr,
     NULL,
+    NULL,
 }};
 
 static const H5C_class_t tiny_class[1] = {{
@@ -358,6 +361,7 @@ static const H5C_class_t tiny_class[1] = {{
     tiny_serialize,
     NULL,
     tiny_free_icr,
+    NULL,
     NULL,
 }};
 
@@ -376,6 +380,7 @@ static const H5C_class_t small_class[1] = {{
     NULL,
     small_free_icr,
     NULL,
+    NULL,
 }};
 
 static const H5C_class_t medium_class[1] = {{
@@ -392,6 +397,7 @@ static const H5C_class_t medium_class[1] = {{
     medium_serialize,
     NULL,
     medium_free_icr,
+    NULL,
     NULL,
 }};
 
@@ -410,6 +416,7 @@ static const H5C_class_t large_class[1] = {{
     NULL,
     large_free_icr,
     NULL,
+    NULL,
 }};
 
 static const H5C_class_t huge_class[1] = {{
@@ -426,6 +433,7 @@ static const H5C_class_t huge_class[1] = {{
     huge_serialize,
     NULL,
     huge_free_icr,
+    NULL,
     NULL,
 }};
 
@@ -444,6 +452,7 @@ static const H5C_class_t monster_class[1] = {{
     NULL,
     monster_free_icr,
     NULL,
+    NULL,
 }};
 
 static const H5C_class_t variable_class[1] = {{
@@ -461,6 +470,7 @@ static const H5C_class_t variable_class[1] = {{
     NULL,
     variable_free_icr,
     NULL,
+    NULL,
 }};
 
 static const H5C_class_t notify_class[1] = {{
@@ -477,6 +487,7 @@ static const H5C_class_t notify_class[1] = {{
     notify_serialize,
     notify_notify,
     notify_free_icr,
+    NULL,
     NULL,
 }};
 
@@ -2088,7 +2099,7 @@ execute_flush_op(H5F_t * file_ptr,
                     } /* end else */
 		} /* end if */
                 else
-		    move_entry(cache_ptr, op_ptr->type, op_ptr->idx, op_ptr->flag);
+		    move_entry(file_ptr, op_ptr->type, op_ptr->idx, op_ptr->flag);
 		break;
 
 	    case FLUSH_OP__ORDER:
@@ -3928,10 +3939,10 @@ mark_entry_dirty(int32_t type,
  */
 
 void
-move_entry(H5C_t * cache_ptr,
-             int32_t type,
-             int32_t idx,
-             hbool_t main_addr)
+move_entry(H5F_t * file_ptr,
+           int32_t type,
+           int32_t idx,
+           hbool_t main_addr)
 {
     herr_t         result;
     hbool_t	   done = TRUE; /* will set to FALSE if we have work to do */
@@ -3942,7 +3953,7 @@ move_entry(H5C_t * cache_ptr,
 
     if ( pass ) {
 
-        HDassert( cache_ptr );
+        HDassert( file_ptr );
         HDassert( ( 0 <= type ) && ( type < NUMBER_OF_ENTRY_TYPES ) );
         HDassert( ( 0 <= idx ) && ( idx <= max_indices[type] ) );
 
@@ -3952,7 +3963,7 @@ move_entry(H5C_t * cache_ptr,
         HDassert( entry_ptr->index == idx );
         HDassert( entry_ptr->type == type );
         HDassert( entry_ptr == entry_ptr->self );
-        HDassert( entry_ptr->cache_ptr == cache_ptr );
+        HDassert( entry_ptr->cache_ptr == file_ptr->shared->cache );
         HDassert( !entry_ptr->is_read_only );
         HDassert( !entry_ptr->header.is_read_only );
 
@@ -3987,7 +3998,7 @@ move_entry(H5C_t * cache_ptr,
                 mark_flush_dep_dirty(entry_ptr);
 
             entry_ptr->action = TEST_ENTRY_ACTION_MOVE;
-            result = H5C_move_entry(cache_ptr, types[type], old_addr, new_addr);
+            result = H5C_move_entry(file_ptr, types[type], old_addr, new_addr);
             entry_ptr->action = TEST_ENTRY_ACTION_NUL;
         }
 
@@ -4544,7 +4555,7 @@ row_major_scan_forward(H5F_t * file_ptr,
                 if(verbose)
                     HDfprintf(stdout, "4(r, %d, %d, %d) ", type, tmp_idx, (int)move_to_main_addr);
 
-                move_entry(cache_ptr, type, tmp_idx, move_to_main_addr);
+                move_entry(file_ptr, type, tmp_idx, move_to_main_addr);
 		HDassert(cache_ptr->slist_size == cache_ptr->dirty_index_size);
             } /* end if */
 
@@ -4964,7 +4975,7 @@ row_major_scan_backward(H5F_t * file_ptr,
                     HDfprintf(stdout, "(r, %d, %d, %d) ",
 			      type, tmp_idx, (int)move_to_main_addr);
 
-                move_entry(cache_ptr, type, tmp_idx, move_to_main_addr);
+                move_entry(file_ptr, type, tmp_idx, move_to_main_addr);
             }
 
             tmp_idx++;
