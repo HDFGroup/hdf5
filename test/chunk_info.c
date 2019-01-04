@@ -1484,19 +1484,19 @@ test_get_chunk_info_110(hid_t fapl)
         /* Set version bounds for creating file */
         if(H5Pset_libver_bounds(fapl, low, high) < 0)
             TEST_ERROR
-        
+
         /* Test getting chunk info when Single Chunk index type is used */
         if(test_chunk_info_single_chunk(filename, fapl) < 0)
             TEST_ERROR
-        
+
         /* Test getting chunk info when Implicit index type is used */
         if(test_chunk_info_implicit(filename, fapl) < 0)
             TEST_ERROR
-        
+
         /* Test getting chunk info when Fixed Array index type is used */
         if(test_chunk_info_fixed_array(filename, fapl) < 0)
             TEST_ERROR
-        
+
         /* Test getting chunk info when Extensible Array index type is used */
         if(test_chunk_info_extensible_array(filename, fapl) < 0)
             TEST_ERROR
