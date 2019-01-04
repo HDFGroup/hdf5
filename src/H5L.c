@@ -648,6 +648,8 @@ H5Lcreate_ud(hid_t link_loc_id, const char *link_name, H5L_type_t link_type,
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no link name specified")
     if(link_type < H5L_TYPE_UD_MIN || link_type > H5L_TYPE_MAX)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid link class")
+    if(!udata && udata_size)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "udata cannot be NULL if udata_size is non-zero")
 
     /* Check the group access property list */
     if(H5P_DEFAULT == lcpl_id)
