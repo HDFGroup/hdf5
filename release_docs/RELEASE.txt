@@ -119,7 +119,7 @@ New Features
     --------
     - Added new chunk query functions
 
-      The following public functions are added to discover information about
+      The following public functions were added to discover information about
       the chunks in an HDF5 file.
         herr_t H5Dget_num_chunks(dset_id, fspace_id, *nchunks)
         herr_t H5Dget_chunk_info_by_coord(dset_id, *coord, *filter_mask, *addr, *size)
@@ -261,8 +261,9 @@ Bug Fixes since HDF5-1.10.3 release
     - There was an incorrect protection against division by zero reported
       to The HDF Group as issue #CVE-2018-17233.
       
-      Protection against division by zero were added in several internal
-      functions.
+      Protection against division by zero was added to address the issue
+      #CVE-2018-17233.  In addition, several similar occurrences in the same
+      file were fixed as well.
 
       (BMR - 2018/02/26, HDFFV-10577)
 
