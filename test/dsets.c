@@ -13074,7 +13074,7 @@ test_object_header_minimization_dcpl(void)
     /*********/
 
     if(NULL == h5_fixname(OHMIN_FILENAME_A, H5P_DEFAULT, filename, sizeof(filename)))
-        TEST_ERROR("unable to prepare filename")
+        TEST_ERROR("unable to prepare filename");
 
     file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     if (0 > file_id)
