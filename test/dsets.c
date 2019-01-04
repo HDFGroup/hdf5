@@ -13077,12 +13077,12 @@ test_object_header_minimization_dcpl(void)
         TEST_ERROR("unable to prepare filename");
 
     file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-    if (0 > file_id)
-        TEST_ERROR("unable to create test file\n");
+    if (file_id == H5I_INVALID_HID)
+        TEST_ERROR
 
     dcpl_id = H5Pcreate(H5P_DATASET_CREATE);
-    if (0 > dcpl_id)
-        TEST_ERROR("unable to create DCPL\n");
+    if (dcpl_id == H5I_INVALID_HID)
+        TEST_ERROR
 
     /*********/
     /* TESTS */
@@ -13091,27 +13091,27 @@ test_object_header_minimization_dcpl(void)
     /* default value (not set explicitly)
      */
     if (H5Pget_dset_no_attrs_hint(dcpl_id, &minimize) == FAIL)
-        TEST_ERROR("unable to get minimize value\n");
+        TEST_ERROR
     if (FALSE != minimize)
-        TEST_ERROR("Expected FALSE default but was not!\n");
+        TEST_ERROR
 
     /* FALSE-set value
      */
     if (H5Pset_dset_no_attrs_hint(dcpl_id, FALSE) == FAIL)
-        TEST_ERROR("unable to set minimize value to FALSE\n");
+        TEST_ERROR
     if (H5Pget_dset_no_attrs_hint(dcpl_id, &minimize) == FAIL)
-        TEST_ERROR("unable to get minimize value\n");
+        TEST_ERROR
     if (FALSE != minimize)
-        TEST_ERROR("Expected FALSE default but was not!\n");
+        TEST_ERROR
 
     /* TRUE-set value
      */
     if (H5Pset_dset_no_attrs_hint(dcpl_id, TRUE) == FAIL)
-        TEST_ERROR("unable to set minimize value to TRUE\n");
+        TEST_ERROR
     if (H5Pget_dset_no_attrs_hint(dcpl_id, &minimize) == FAIL)
-        TEST_ERROR("unable to get minimize value\n");
+        TEST_ERROR
     if (TRUE != minimize)
-        TEST_ERROR("Expected TRUE default but was not!\n");
+        TEST_ERROR
 
     /* error cases
      */
@@ -13119,35 +13119,35 @@ test_object_header_minimization_dcpl(void)
         ret = H5Pget_dset_no_attrs_hint(-1, &minimize);
     } H5E_END_TRY;
     if (ret == SUCCEED)
-        TEST_ERROR("Invalid DCPL ID should fail\n");
+        TEST_ERROR
 
     H5E_BEGIN_TRY {
         ret = H5Pset_dset_no_attrs_hint(-1, FALSE);
     } H5E_END_TRY;
     if (ret == SUCCEED)
-        TEST_ERROR("Invalid DCPL ID should fail\n");
+        TEST_ERROR
 
     H5E_BEGIN_TRY {
         ret = H5Pset_dset_no_attrs_hint(-1, TRUE);
     } H5E_END_TRY;
     if (ret == SUCCEED)
-        TEST_ERROR("Invalid DCPL ID should fail\n");
+        TEST_ERROR
 
     H5E_BEGIN_TRY {
         ret = H5Pget_dset_no_attrs_hint(dcpl_id, NULL);
     } H5E_END_TRY;
     if (ret == SUCCEED)
-        TEST_ERROR("NULL out pointer should fail\n");
+        TEST_ERROR
 
     /************/
     /* TEARDOWN */
     /************/
 
     if (H5Fclose(file_id) == FAIL)
-        TEST_ERROR("can't close FILE");
+        TEST_ERROR
 
     if (H5Pclose(dcpl_id) == FAIL)
-        TEST_ERROR("unable to close DCPL\n");
+        TEST_ERROR
 
     PASSED();
     return SUCCEED;
