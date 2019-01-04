@@ -13072,15 +13072,15 @@ test_object_header_minimization_dcpl(void)
     /*********/
 
     if(NULL == h5_fixname(OHMIN_FILENAME_A, H5P_DEFAULT, filename, sizeof(filename)))
-        FAIL_PUTS_ERROR("unable to prepare filename")
+        TEST_ERROR("unable to prepare filename")
 
     file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     if (0 > file_id)
-        FAIL_PUTS_ERROR("unable to create test file\n");
+        TEST_ERROR("unable to create test file\n");
 
     dcpl_id = H5Pcreate(H5P_DATASET_CREATE);
     if (0 > dcpl_id)
-        FAIL_PUTS_ERROR("unable to create DCPL\n");
+        TEST_ERROR("unable to create DCPL\n");
 
     /*********/
     /* TESTS */
@@ -13089,27 +13089,27 @@ test_object_header_minimization_dcpl(void)
     /* default value (not set explicitly)
      */
     if (H5Pget_dset_no_attrs_hint(dcpl_id, &minimize) == FAIL)
-        FAIL_PUTS_ERROR("unable to get minimize value\n");
+        TEST_ERROR("unable to get minimize value\n");
     if (FALSE != minimize)
-        FAIL_PUTS_ERROR("Expected FALSE default but was not!\n");
+        TEST_ERROR("Expected FALSE default but was not!\n");
 
     /* FALSE-set value
      */
     if (H5Pset_dset_no_attrs_hint(dcpl_id, FALSE) == FAIL)
-        FAIL_PUTS_ERROR("unable to set minimize value to FALSE\n");
+        TEST_ERROR("unable to set minimize value to FALSE\n");
     if (H5Pget_dset_no_attrs_hint(dcpl_id, &minimize) == FAIL)
-        FAIL_PUTS_ERROR("unable to get minimize value\n");
+        TEST_ERROR("unable to get minimize value\n");
     if (FALSE != minimize)
-        FAIL_PUTS_ERROR("Expected FALSE default but was not!\n");
+        TEST_ERROR("Expected FALSE default but was not!\n");
 
     /* TRUE-set value
      */
     if (H5Pset_dset_no_attrs_hint(dcpl_id, TRUE) == FAIL)
-        FAIL_PUTS_ERROR("unable to set minimize value to TRUE\n");
+        TEST_ERROR("unable to set minimize value to TRUE\n");
     if (H5Pget_dset_no_attrs_hint(dcpl_id, &minimize) == FAIL)
-        FAIL_PUTS_ERROR("unable to get minimize value\n");
+        TEST_ERROR("unable to get minimize value\n");
     if (TRUE != minimize)
-        FAIL_PUTS_ERROR("Expected TRUE default but was not!\n");
+        TEST_ERROR("Expected TRUE default but was not!\n");
 
     /* error cases
      */
@@ -13117,35 +13117,35 @@ test_object_header_minimization_dcpl(void)
         ret = H5Pget_dset_no_attrs_hint(-1, &minimize);
     } H5E_END_TRY;
     if (ret == SUCCEED)
-        FAIL_PUTS_ERROR("Invalid DCPL ID should fail\n");
+        TEST_ERROR("Invalid DCPL ID should fail\n");
 
     H5E_BEGIN_TRY {
         ret = H5Pset_dset_no_attrs_hint(-1, FALSE);
     } H5E_END_TRY;
     if (ret == SUCCEED)
-        FAIL_PUTS_ERROR("Invalid DCPL ID should fail\n");
+        TEST_ERROR("Invalid DCPL ID should fail\n");
 
     H5E_BEGIN_TRY {
         ret = H5Pset_dset_no_attrs_hint(-1, TRUE);
     } H5E_END_TRY;
     if (ret == SUCCEED)
-        FAIL_PUTS_ERROR("Invalid DCPL ID should fail\n");
+        TEST_ERROR("Invalid DCPL ID should fail\n");
 
     H5E_BEGIN_TRY {
         ret = H5Pget_dset_no_attrs_hint(dcpl_id, NULL);
     } H5E_END_TRY;
     if (ret == SUCCEED)
-        FAIL_PUTS_ERROR("NULL out pointer should fail\n");
+        TEST_ERROR("NULL out pointer should fail\n");
 
     /************/
     /* TEARDOWN */
     /************/
 
     if (H5Fclose(file_id) == FAIL)
-        FAIL_PUTS_ERROR("can't close FILE");
+        TEST_ERROR("can't close FILE");
 
     if (H5Pclose(dcpl_id) == FAIL)
-        FAIL_PUTS_ERROR("unable to close DCPL\n");
+        TEST_ERROR("unable to close DCPL\n");
 
     PASSED();
     return SUCCEED;
