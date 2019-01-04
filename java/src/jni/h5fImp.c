@@ -149,6 +149,9 @@ Java_hdf_hdf5lib_H5_H5Fis_1hdf5
     (JNIEnv *env, jclass clss, jstring name)
 {
     htri_t      bval = JNI_FALSE;
+#ifdef H5_NO_DEPRECATED_SYMBOLS
+    h5unimplemented(env, "H5Fis_hdf5:  not implemented");
+#else
     const char *fileName;
 
     PIN_JAVA_STRING(name, fileName);
@@ -162,7 +165,7 @@ Java_hdf_hdf5lib_H5_H5Fis_1hdf5
         else if (bval < 0)
             h5libraryError(env);
     }
-
+#endif
     return (jboolean)bval;
 } /* end Java_hdf_hdf5lib_H5_H5Fis_1hdf5 */
 
@@ -680,6 +683,22 @@ Java_hdf_hdf5lib_H5_H5Fget_1dset_1no_1attrs_1hint
 
     return bval;
 }
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Fset_libver_bounds
+ * Signature: (JII)V
+ */
+JNIEXPORT void JNICALL
+Java_hdf_hdf5lib_H5_H5Fset_1libver_1bounds
+    (JNIEnv *env, jclass clss, jlong file_id, jint low, jint high)
+{
+    herr_t retVal = -1;
+
+    retVal = H5Fset_libver_bounds((hid_t)file_id, (H5F_libver_t)low, (H5F_libver_t)high);
+    if(retVal < 0)
+        h5libraryError(env);
+} /* end Java_hdf_hdf5lib_H5_H5Fset_1libver_1bounds */
 
 
 #ifdef __cplusplus

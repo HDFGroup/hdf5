@@ -3247,7 +3247,6 @@ public class H5 implements java.io.Serializable {
      *
      * @param file_id
      *            IN: Identifier of the target file.
-     *
      * @param minimize
      *          the minimize hint setting
      *
@@ -3257,13 +3256,29 @@ public class H5 implements java.io.Serializable {
     public synchronized static native void H5Fset_dset_no_attrs_hint(long file_id, boolean minimize)
             throws HDF5LibraryException;
 
+
+    /**
+     * H5Fset_libver_bounds sets a different low and high bounds while a file is open.
+     *
+     * @param file_id
+     *            IN: Identifier of the target file.
+     * @param low
+     *            IN: The earliest version of the library that will be used for writing objects
+     * @param high
+     *            IN: The latest version of the library that will be used for writing objects.
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     **/
+    public synchronized static native void H5Fset_libver_bounds(long file_id, int low, int high)
+            throws HDF5LibraryException;
+
     // /////// unimplemented ////////
     //  herr_t H5Fget_eoa(hid_t file_id, haddr_t *eoa);
     //  herr_t H5Fincrement_filesize(hid_t file_id, hsize_t increment);
     // ssize_t H5Fget_file_image(hid_t file_id, void * buf_ptr, size_t buf_len);
     // herr_t H5Fget_metadata_read_retry_info(hid_t file_id, H5F_retry_info_t *info);
     // ssize_t H5Fget_free_sections(hid_t file_id, H5F_mem_t type, size_t nsects, H5F_sect_info_t *sect_info/*out*/);
-    //  herr_t H5Fset_libver_bounds(hid_t file_id, H5F_libver_t low, H5F_libver_t high);
     //  herr_t H5Fformat_convert(hid_t fid);
     //  herr_t H5Freset_page_buffering_stats(hid_t file_id);
     //  herr_t H5Fget_page_buffering_stats(hid_t file_id, unsigned accesses[2],
