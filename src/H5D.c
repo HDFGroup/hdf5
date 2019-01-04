@@ -220,8 +220,8 @@ H5Dcreate_anon(hid_t loc_id, hid_t type_id, hid_t space_id, hid_t dcpl_id,
         HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, H5I_INVALID_HID, "can't set access property list info")
 
     /* build and open the new dataset */
-    if(NULL == (dset = H5D__create_anon(loc.oloc->file, type_id, space, dcpl_id, dapl_id)))
-	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create dataset")
+    if(NULL == (dset = H5D__create(loc.oloc->file, type_id, space, dcpl_id, dapl_id)))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create dataset")
 
     /* Register the new dataset to get an ID for it */
     if((ret_value = H5I_register(H5I_DATASET, dset, TRUE)) < 0)
@@ -481,8 +481,8 @@ H5Dget_create_plist(hid_t dset_id)
     if(NULL == (dataset = (H5D_t *)H5I_object_verify(dset_id, H5I_DATASET)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a dataset")
 
-    if((ret_value = H5D__get_create_plist(dataset)) < 0)
-	HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, H5I_INVALID_HID, "Can't get creation plist")
+    if((ret_value = H5D_get_create_plist(dataset)) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, H5I_INVALID_HID, "Can't get creation plist")
 
 done:
     FUNC_LEAVE_API(ret_value)

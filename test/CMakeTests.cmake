@@ -359,6 +359,9 @@ set (test_CLEANFILES
     lheap.h5
     fheap.h5
     ohdr.h5
+    ohdr_min_a.h5
+    ohdr_min_b.h5
+    min_dset_ohdr_testfile.h5
     stab.h5
     extern_*.h5
     extern_*.raw
@@ -842,6 +845,7 @@ if (HDF5_ENABLE_DEPRECATED_SYMBOLS)
       -D "TEST_ARGS:STRING="
       -D "TEST_EXPECT=0"
       -D "TEST_MASK_ERROR=true"
+      -D "ERROR_APPEND=1"
       -D "TEST_OUTPUT=err_compat.txt"
       -D "TEST_REFERENCE=err_compat_1"
       -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/H5TEST"
@@ -876,6 +880,7 @@ else ()
       -D "TEST_ARGS:STRING="
       -D "TEST_EXPECT=0"
       -D "TEST_MASK_ERROR=true"
+      -D "ERROR_APPEND=1"
       -D "TEST_OUTPUT=error_test.txt"
       -D "TEST_REFERENCE=error_test_1"
       -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/H5TEST"
@@ -942,6 +947,7 @@ if (BUILD_SHARED_LIBS)
         -D "TEST_ARGS:STRING="
         -D "TEST_EXPECT=0"
         -D "TEST_MASK_ERROR=true"
+        -D "ERROR_APPEND=1"
         -D "TEST_OUTPUT=err_compat.txt"
         -D "TEST_REFERENCE=err_compat_1"
         -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/H5TEST-shared"
@@ -976,6 +982,7 @@ if (BUILD_SHARED_LIBS)
         -D "TEST_ARGS:STRING="
         -D "TEST_EXPECT=0"
         -D "TEST_MASK_ERROR=true"
+        -D "ERROR_APPEND=1"
         -D "TEST_OUTPUT=error_test.txt"
         -D "TEST_REFERENCE=error_test_1"
         -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/H5TEST-shared"

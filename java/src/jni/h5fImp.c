@@ -177,7 +177,7 @@ Java_hdf_hdf5lib_H5__1H5Fget_1create_1plist
 {
     hid_t retVal = -1;
 
-    retVal =  H5Fget_create_plist((hid_t)file_id );
+    retVal =  H5Fget_create_plist((hid_t)file_id);
     if (retVal < 0)
         h5libraryError(env);
 
