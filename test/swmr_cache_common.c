@@ -24,7 +24,7 @@
 const char *failure_mssg_g = NULL;
 hbool_t pass_g = TRUE; /* set to false on error */
 
-hid_t saved_fid = -1; /* store the file id here between cache setup
+hid_t saved_fid_g = -1; /* store the file id here between cache setup
 		       * and takedown.
 		       */
 
@@ -431,7 +431,7 @@ fullswmr_setup_cache(hsize_t entry_size, int n_entry, unsigned file_flags)
     int32_t max_type_id;
 
 
-    saved_fid = -1;
+    saved_fid_g = -1;
 
     entry_array_g = (fullswmr_cache_entry_t *)HDcalloc((size_t)(n_entry), sizeof(fullswmr_cache_entry_t));
     if(NULL == entry_array_g) {
@@ -478,7 +478,7 @@ fullswmr_setup_cache(hsize_t entry_size, int n_entry, unsigned file_flags)
         failure_mssg_g = "H5Fcreate() failed.";
         goto done;
     } /* end if */
-    saved_fid = fid;
+    saved_fid_g = fid;
 
     /* Push API context */
     H5CX_push();
@@ -688,11 +688,11 @@ fullswmr_takedown_cache(H5F_t * file_ptr,
         file_ptr->shared->cache = saved_cache_g;
     }
 
-    if(saved_fid != -1) {
+    if(saved_fid_g != -1) {
         /* Free all allocated cache entries */
         if(H5F_addr_defined(allocated_base_addr_array_g) ) {
             if(NULL == file_ptr)  {
-                file_ptr = (H5F_t *)H5VL_object_verify(saved_fid, H5I_FILE);
+                file_ptr = (H5F_t *)H5VL_object_verify(saved_fid_g, H5I_FILE);
                 HDassert(file_ptr);
             }
 
@@ -702,7 +702,7 @@ fullswmr_takedown_cache(H5F_t * file_ptr,
             allocated_base_addr_array_g = HADDR_UNDEF;
         }
 
-        if(H5Fclose(saved_fid) < 0) {
+        if(H5Fclose(saved_fid_g) < 0) {
             pass_g = FALSE;
             failure_mssg_g = "couldn't close test file.";
         } 
