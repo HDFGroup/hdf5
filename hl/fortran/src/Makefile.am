@@ -85,6 +85,7 @@ uninstall-local:
 	    set -x; $(RM) $(includedir)/*.$(F9XMODEXT);                 \
 	  fi;                                                           \
 	fi
+	$(RM) $(DESTDIR)$(libdir)/libhdf5_hl_fortran*
 
 # These are the helper programs we need to build.
 noinst_PROGRAMS = H5HL_buildiface
