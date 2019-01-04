@@ -273,6 +273,15 @@ JNIEXPORT jboolean JNICALL
 Java_hdf_hdf5lib_H5_H5Fget_1dset_1no_1attrs_1hint
   (JNIEnv *, jclass, jlong);
 
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Fset_libver_bounds
+ * Signature: (JII)V
+ */
+JNIEXPORT void JNICALL
+Java_hdf_hdf5lib_H5_H5Fset_1libver_1bounds
+(JNIEnv *, jclass, jlong, jint, jint);
+
 #ifdef __cplusplus
 } /* end extern "C" */
 #endif /* __cplusplus */
