@@ -144,6 +144,17 @@ New Features
 
       (DER - 2018/10/26, HDFFV-10614)
 
+    - Add ability to minimze dataset object headers.
+
+      Inform the library to expect no attributes on created datasets, and to
+      allocate the least space possible for the object headers.
+      A continuation block is created if attributes are added to a 'minimized'
+      dataset, which can reduce performance.
+
+      H5Pget/set_dset_no_attrs_hint, H5Fget/set_no_dset_attrs_hint
+
+      (TRILAB-45)
+
 
      Parallel Library:
     -----------------
