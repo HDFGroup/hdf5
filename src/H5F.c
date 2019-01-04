@@ -1759,10 +1759,6 @@ H5Fget_dset_no_attrs_hint(hid_t file_id, hbool_t *minimize)
     if(NULL == file)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
 
-/*
-    if(H5VL_file_optional(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, H5VL_NATIVE_FILE_GET_MIN_DSET_OHDR_FLAG, minimize) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "unable to set file's dataset header minimization flag")
-*/
     *minimize = H5F_GET_MIN_DSET_OHDR(file);
 
 done:
@@ -1803,10 +1799,6 @@ H5Fset_dset_no_attrs_hint(hid_t file_id, hbool_t minimize)
     if(NULL == file)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
 
-/*
-    if(H5VL_file_optional(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, H5VL_NATIVE_FILE_SET_MIN_DSET_OHDR_FLAG, minimize) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "unable to set file's dataset header minimization flag")
-*/
     H5F_SET_MIN_DSET_OHDR(file, minimize);
 
 done:
