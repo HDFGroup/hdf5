@@ -483,6 +483,30 @@ done:
 } /* end H5F_get_objects_cb() */
 
 
+/*-------------------------------------------------------------------------
+ * Function:    H5F_set_min_dset_ohdr
+ *
+ * Purpose:     Set the crt_dset_ohdr_flag field with a new value.
+ *
+ * Return:      SUCCEED/FAIL
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_set_min_dset_ohdr(H5F_t *f, hbool_t minimize)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    /* Sanity check */
+    HDassert(f);
+    HDassert(f->shared);
+
+    f->shared->crt_dset_min_ohdr_flag = minimize;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* H5F_set_min_dset_ohdr() */
+
+
 /*--------------------------------------------------------------------------
  * Function:    H5F__build_name
  *

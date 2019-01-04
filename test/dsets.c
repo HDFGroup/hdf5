@@ -87,6 +87,8 @@ const char *FILENAME[] = {
     NULL
 };
 
+#define OHMIN_FILENAME_A "ohdr_min_a"
+
 #define FILENAME_BUF_SIZE       1024
 #define KB                      1024
 
@@ -346,7 +348,7 @@ filter_count(unsigned int flags, size_t H5_ATTR_UNUSED cd_nelmts,
         count_nbytes_written += nbytes;
 
     return nbytes;
-}
+} /* end filter_count() */
 
 
 /*-------------------------------------------------------------------------
@@ -493,7 +495,7 @@ test_create(hid_t file)
 
  error:
     return -1;
-}
+} /* end test_create() */
 
 
 /*-------------------------------------------------------------------------
@@ -629,7 +631,7 @@ error:
     if(tconv_buf)
         HDfree(tconv_buf);
     return -1;
-}
+} /* end test_simple_io() */
 
 
 /*-------------------------------------------------------------------------
@@ -735,7 +737,7 @@ error:
     if(f > 0)
         HDclose(f);
     return -1;
-}
+} /* end test_userblock_offset() */
 
 
 /*-------------------------------------------------------------------------
@@ -928,7 +930,7 @@ test_compact_io(hid_t fapl)
     } H5E_END_TRY;
 
     return -1;
-}
+} /* end test_compact_io() */
 
 
 /*-------------------------------------------------------------------------
@@ -1343,7 +1345,7 @@ test_conv_buffer(hid_t fid)
 
 error:
   return -1;
-}
+} /* end test_conv_buffer() */
 
 
 /*-------------------------------------------------------------------------
@@ -1427,7 +1429,7 @@ error:
     } H5E_END_TRY;
 
     return -1;
-}
+} /* end test_tconv() */
 
 /* This message derives from H5Z */
 const H5Z_class2_t H5Z_BOGUS[1] = {{
@@ -1460,7 +1462,7 @@ can_apply_bogus(hid_t H5_ATTR_UNUSED dcpl_id, hid_t type_id, hid_t H5_ATTR_UNUSE
         return 1;
     else
         return -1;
-}
+} /* end can_apply_bogus() */
 
 
 /*-------------------------------------------------------------------------
@@ -1478,7 +1480,7 @@ filter_bogus(unsigned int H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_nelmts,
       size_t H5_ATTR_UNUSED *buf_size, void H5_ATTR_UNUSED **buf)
 {
     return nbytes;
-}
+} /* end filter_bogus() */
 
 
 /*-------------------------------------------------------------------------
@@ -1578,7 +1580,7 @@ filter_bogus2(unsigned int flags, size_t cd_nelmts,
     /* Filter is "no op" */
     else
         return(nbytes);
-}
+} /* end filter_bogus2() */
 
 
 /*-------------------------------------------------------------------------
@@ -1596,7 +1598,7 @@ filter_bogus3(unsigned int H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_nelmts
       size_t H5_ATTR_UNUSED *buf_size, void H5_ATTR_UNUSED **buf)
 {
     return 0;
-}
+} /* end filter_bogus3() */
 
 /* This message derives from H5Z */
 const H5Z_class2_t H5Z_CORRUPT[1] = {{
@@ -1685,7 +1687,7 @@ filter_cb_cont(H5Z_filter_t filter, void H5_ATTR_UNUSED *buf, size_t H5_ATTR_UNU
        return H5Z_CB_CONT;
     else
         return H5Z_CB_FAIL;
-}
+} /* end filter_cb_cont() */
 
 
 /*-------------------------------------------------------------------------
@@ -1704,7 +1706,7 @@ filter_cb_fail(H5Z_filter_t filter, void H5_ATTR_UNUSED *buf, size_t H5_ATTR_UNU
        return H5Z_CB_FAIL;
     else
        return H5Z_CB_CONT;
-}
+} /* end filter_cb_fail() */
 
 
 /*-------------------------------------------------------------------------
@@ -2053,7 +2055,7 @@ error:
     if(tconv_buf)
         HDfree (tconv_buf);
     return -1;
-}
+} /* end test_filter_internal() */
 
 /*-------------------------------------------------------------------------
  * Function:  test_filter_noencoder
@@ -2171,7 +2173,7 @@ error:
         H5Fclose(file_id);
 
     return -1;
-}
+} /* end test_filter_noencoder() */
 #endif /* H5_HAVE_FILTER_SZIP */
 
 /*-------------------------------------------------------------------------
@@ -2241,7 +2243,7 @@ test_get_filter_info(void)
 
 error:
   return -1;
-}
+} /* end test_get_filter_info() */
 
 /*-------------------------------------------------------------------------
  * Function:  test_filters
@@ -2516,7 +2518,7 @@ H5_ATTR_UNUSED
 
 error:
     return -1;
-}
+} /* end test_filters() */
 
 
 /*-------------------------------------------------------------------------
@@ -2856,7 +2858,7 @@ test_onebyte_shuffle(hid_t file)
 
 error:
     return -1;
-}
+} /* end test_onebyte_shuffle() */
 
 
 /*-------------------------------------------------------------------------
@@ -2974,7 +2976,7 @@ test_nbit_int(hid_t file)
 
 error:
     return -1;
-}
+} /* end test_nbit_int() */
 
 
 /*-------------------------------------------------------------------------
@@ -3092,7 +3094,7 @@ test_nbit_float(hid_t file)
 
 error:
     return -1;
-}
+} /* end test_nbit_float() */
 
 
 /*-------------------------------------------------------------------------
@@ -3224,7 +3226,7 @@ test_nbit_double(hid_t file)
 
 error:
     return -1;
-}
+} /* end test_nbit_double() */
 
 
 /*-------------------------------------------------------------------------
@@ -3351,7 +3353,7 @@ test_nbit_array(hid_t file)
 
 error:
     return -1;
-}
+} /* end test_nbit_array() */
 
 
 /*-------------------------------------------------------------------------
@@ -3568,7 +3570,7 @@ test_nbit_compound(hid_t file)
 
 error:
     return -1;
-}
+} /* end test_nbit_compound() */
 
 
 /*-------------------------------------------------------------------------
@@ -3913,7 +3915,7 @@ out:
 
 error:
     return -1;
-}
+} /* end test_nbit_compound_2() */
 
 
 /*-------------------------------------------------------------------------
@@ -4093,7 +4095,7 @@ test_nbit_compound_3(hid_t file)
 
 error:
     return -1;
-}
+} /* end test_nbit_compound_3() */
 
 
 /*-------------------------------------------------------------------------
@@ -4260,7 +4262,7 @@ test_nbit_int_size(hid_t file)
    return 0;
 error:
     return -1;
-}
+} /* end test_nbit_int_size() */
 
 
 /*-------------------------------------------------------------------------
@@ -4457,7 +4459,7 @@ test_nbit_flt_size(hid_t file)
    return 0;
 error:
     return -1;
-}
+} /* end test_nbit_flt_size() */
 
 /*-------------------------------------------------------------------------
  * Function:    test_scaleoffset_int
@@ -4568,7 +4570,7 @@ test_scaleoffset_int(hid_t file)
     return 0;
 error:
     return -1;
-}
+} /* end test_scaleoffset_int() */
 
 
 /*-------------------------------------------------------------------------
@@ -4696,7 +4698,7 @@ test_scaleoffset_int_2(hid_t file)
     return 0;
 error:
     return -1;
-}
+} /* end test_scaleoffset_int_2() */
 
 
 /*-------------------------------------------------------------------------
@@ -4809,7 +4811,7 @@ test_scaleoffset_float(hid_t file)
     return 0;
 error:
     return -1;
-}
+} /* end test_scaleoffset_float() */
 
 
 /*-------------------------------------------------------------------------
@@ -4938,7 +4940,7 @@ test_scaleoffset_float_2(hid_t file)
     return 0;
 error:
     return -1;
-}
+} /* end test_scaleoffset_float_2() */
 
 
 /*-------------------------------------------------------------------------
@@ -5051,7 +5053,7 @@ test_scaleoffset_double(hid_t file)
     return 0;
 error:
     return -1;
-}
+} /* end test_scaleoffset_double() */
 
 
 /*-------------------------------------------------------------------------
@@ -5181,7 +5183,7 @@ test_scaleoffset_double_2(hid_t file)
     return 0;
 error:
     return -1;
-}
+} /* end test_scaleoffset_double_2() */
 
 
 /*-------------------------------------------------------------------------
@@ -5248,7 +5250,7 @@ test_multiopen (hid_t file)
     H5Pclose(dcpl);
     } H5E_END_TRY;
     return -1;
-}
+} /* end test_multiopen () */
 
 
 /*-------------------------------------------------------------------------
@@ -5344,7 +5346,7 @@ test_types(hid_t file)
     H5Dclose(dset);
     } H5E_END_TRY;
     return -1;
-}
+} /* end test_types() */
 
 /* This message derives from H5Z */
 const H5Z_class2_t H5Z_CAN_APPLY_TEST[1] = {{
@@ -6583,7 +6585,7 @@ error:
             HDfree(buf);
     } H5E_END_TRY;
     return -1;
-}
+} /* end auxread_fdata() */
 
 
 /*-------------------------------------------------------------------------
@@ -10034,7 +10036,7 @@ error:
     H5Fclose(fid);
     } H5E_END_TRY;
     return -1;
-} /* test_idx_compatible */
+} /* end test_idx_compatible() */
 
 /*-------------------------------------------------------------------------
  *
@@ -10174,7 +10176,7 @@ error:
         H5Fclose(fid);
     } H5E_END_TRY;
     return -1;
-} /* test_unfiltered_edge_chunks */
+} /* end test_unfiltered_edge_chunks() */
 
 
 /*-------------------------------------------------------------------------
@@ -10871,7 +10873,7 @@ error:
         H5Sclose(msid);
     } H5E_END_TRY;
     return -1;
-} /* test_farray_hdr_fd() */
+} /* end test_farray_hdr_fd() */
 
 
 /*-------------------------------------------------------------------------
@@ -10991,7 +10993,7 @@ error:
         H5Sclose(msid);
     } H5E_END_TRY;
     return -1;
-} /* test_bt2_hdr_fd() */
+} /* end test_bt2_hdr_fd() */
 
 
 /*-------------------------------------------------------------------------
@@ -12189,7 +12191,7 @@ scatter_error_cb_fail(void **src_buf/*out*/, size_t *src_buf_bytes_used/*out*/,
     *src_buf_bytes_used = nelmts * sizeof(scatter_info->src_buf[0]);
 
     return FAIL;
-}
+} /* end scatter_error_cb_fail() */
 
 static herr_t
 scatter_error_cb_null(void **src_buf/*out*/, size_t *src_buf_bytes_used/*out*/,
@@ -12207,7 +12209,7 @@ scatter_error_cb_null(void **src_buf/*out*/, size_t *src_buf_bytes_used/*out*/,
     *src_buf_bytes_used = nelmts * sizeof(scatter_info->src_buf[0]);
 
     return SUCCEED;
-}
+} /* end scatter_error_cb_null() */
 
 static herr_t
 scatter_error_cb_unalign(void **src_buf/*out*/, size_t *src_buf_bytes_used/*out*/,
@@ -12218,7 +12220,7 @@ scatter_error_cb_unalign(void **src_buf/*out*/, size_t *src_buf_bytes_used/*out*
     *src_buf_bytes_used = *(size_t *)_src_buf_bytes_used;
 
     return SUCCEED;
-}
+} /* end scatter_error_cb_unalign() */
 
 static herr_t
 test_scatter_error(void)
@@ -12381,7 +12383,7 @@ gather_error_cb_fail(const void H5_ATTR_UNUSED *dst_buf,
     size_t H5_ATTR_UNUSED dst_buf_bytes_used, void H5_ATTR_UNUSED *op_data)
 {
     return FAIL;
-}
+} /* end gather_error_cb_fail() */
 
 static herr_t
 test_gather_error(void)
@@ -12594,7 +12596,8 @@ static herr_t dls_01_read_stuff( hid_t fid );
 static herr_t dls_01_main( void );
 
 static herr_t
-dls_01_setup_file( hid_t fid ) {
+dls_01_setup_file( hid_t fid )
+{
 
     int status = 0;
     hid_t sid = 0, did = 0, tid = 0, dcpl = 0;
@@ -12639,10 +12642,11 @@ error:
 
     return -1;
 
-} /* dls_01_setup_file */
+} /* end dls_01_setup_file() */
 
 static herr_t
-dls_01_write_data( hid_t fid, char* buffer ) {
+dls_01_write_data( hid_t fid, char* buffer )
+{
 
     int status = 0;
     hid_t did = 0, tid = 0;
@@ -12675,10 +12679,11 @@ error:
 
     return -1;
 
-} /* dls_01_write_data */
+} /* end dls_01_write_data() */
 
 static herr_t
-dls_01_read_stuff( hid_t fid ) {
+dls_01_read_stuff( hid_t fid )
+{
 
     int status = 0;
     hid_t did = 0;
@@ -12699,10 +12704,11 @@ error:
 
     return -1;
 
-} /* dls_01_read_stuff() */
+} /* end dls_01_read_stuff() */
 
 static herr_t
-dls_01_main( void ) {
+dls_01_main( void )
+{
 
     char filename[512];
     int status = 0;
@@ -12768,7 +12774,7 @@ error:
 
     return -1;
 
-} /* dls_01_main() */
+} /* end dls_01_main() */
 
 /*-------------------------------------------------------------------------
  * Function:    test_compact_open_close_dirty
@@ -12886,7 +12892,7 @@ error:
         H5Fclose(fid);
     } H5E_END_TRY;
     return -1;
-} /* test_compact_open_close_dirty() */
+} /* end test_compact_open_close_dirty() */
 
 
 /*-------------------------------------------------------------------------
@@ -13034,7 +13040,125 @@ test_versionbounds(void)
         H5Fclose(vfile);
     } H5E_END_TRY;
     return FAIL;
-} /* test_versionbounds() */
+} /* end test_versionbounds() */
+
+
+/*-----------------------------------------------------------------------------
+ * Function:   test_object_header_minimization_dcpl
+ *
+ * Purpose:    Test the "datset object header minimization" property as part of
+ *             the DCPL.
+ *
+ * Return:     Success/pass:   0
+ *             Failure/error: -1
+ *
+ * Programmer: Jacob Smith
+ *             2018 August 15
+ *
+ * Changes:    None.
+ *-----------------------------------------------------------------------------
+ */
+static herr_t
+test_object_header_minimization_dcpl(void)
+{
+    hid_t    dcpl_id  = -1;
+    hid_t    file_id  = -1;
+    char     filename[FILENAME_BUF_SIZE] = "";
+    hbool_t  minimize = FALSE;
+    herr_t   ret;
+
+    TESTING("dcpl flags to minimize dataset object header");
+
+    /*********/
+    /* SETUP */
+    /*********/
+
+    if(NULL == h5_fixname(OHMIN_FILENAME_A, H5P_DEFAULT, filename, sizeof(filename)))
+        TEST_ERROR("unable to prepare filename");
+
+    file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    if (file_id == H5I_INVALID_HID)
+        TEST_ERROR
+
+    dcpl_id = H5Pcreate(H5P_DATASET_CREATE);
+    if (dcpl_id == H5I_INVALID_HID)
+        TEST_ERROR
+
+    /*********/
+    /* TESTS */
+    /*********/
+
+    /* default value (not set explicitly)
+     */
+    if (H5Pget_dset_no_attrs_hint(dcpl_id, &minimize) == FAIL)
+        TEST_ERROR
+    if (FALSE != minimize)
+        TEST_ERROR
+
+    /* FALSE-set value
+     */
+    if (H5Pset_dset_no_attrs_hint(dcpl_id, FALSE) == FAIL)
+        TEST_ERROR
+    if (H5Pget_dset_no_attrs_hint(dcpl_id, &minimize) == FAIL)
+        TEST_ERROR
+    if (FALSE != minimize)
+        TEST_ERROR
+
+    /* TRUE-set value
+     */
+    if (H5Pset_dset_no_attrs_hint(dcpl_id, TRUE) == FAIL)
+        TEST_ERROR
+    if (H5Pget_dset_no_attrs_hint(dcpl_id, &minimize) == FAIL)
+        TEST_ERROR
+    if (TRUE != minimize)
+        TEST_ERROR
+
+    /* error cases
+     */
+    H5E_BEGIN_TRY {
+        ret = H5Pget_dset_no_attrs_hint(-1, &minimize);
+    } H5E_END_TRY;
+    if (ret == SUCCEED)
+        TEST_ERROR
+
+    H5E_BEGIN_TRY {
+        ret = H5Pset_dset_no_attrs_hint(-1, FALSE);
+    } H5E_END_TRY;
+    if (ret == SUCCEED)
+        TEST_ERROR
+
+    H5E_BEGIN_TRY {
+        ret = H5Pset_dset_no_attrs_hint(-1, TRUE);
+    } H5E_END_TRY;
+    if (ret == SUCCEED)
+        TEST_ERROR
+
+    H5E_BEGIN_TRY {
+        ret = H5Pget_dset_no_attrs_hint(dcpl_id, NULL);
+    } H5E_END_TRY;
+    if (ret == SUCCEED)
+        TEST_ERROR
+
+    /************/
+    /* TEARDOWN */
+    /************/
+
+    if (H5Fclose(file_id) == FAIL)
+        TEST_ERROR
+
+    if (H5Pclose(dcpl_id) == FAIL)
+        TEST_ERROR
+
+    PASSED();
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Pclose(dcpl_id);
+        H5Fclose(file_id);
+    } H5E_END_TRY;
+    return FAIL;
+} /* end test_object_header_minimization_dcpl() */
 
 
 /*-------------------------------------------------------------------------
@@ -13058,6 +13182,7 @@ main(void)
     hid_t    fcpl = -1, fcpl2 = -1;
     unsigned new_format;
     unsigned paged;
+    unsigned minimized_ohdr;
     int      mdc_nelmts;
     size_t   rdcc_nelmts;
     size_t   rdcc_nbytes;
@@ -13113,113 +13238,122 @@ main(void)
         if(!contig_addr_vfd && paged)
             continue;
 
-        /* Test with old & new format groups */
-        for(new_format = FALSE; new_format <= TRUE; new_format++) {
-            hid_t my_fapl, my_fcpl;
+        for(minimized_ohdr = FALSE; minimized_ohdr <= TRUE; minimized_ohdr++) {
 
-            /* Set the FAPL for the type of format */
-            if(new_format) {
-                my_fapl = fapl2;
-                if(paged) {
-                    my_fcpl = fcpl2;
-                    puts("\nTesting with new file format and paged aggregation");
-                } else {
-                    my_fcpl = fcpl;
-                    puts("\nTesting with new file format and non-paged aggregation");
+            /* Test with old & new format groups */
+            for(new_format = FALSE; new_format <= TRUE; new_format++) {
+                hid_t my_fapl, my_fcpl;
+
+                /* Set the FAPL for the type of format */
+                if(new_format) {
+                    my_fapl = fapl2;
+                    if(paged) {
+                        my_fcpl = fcpl2;
+                        puts("\nTesting with new file format and paged aggregation");
+                    } else {
+                        my_fcpl = fcpl;
+                        puts("\nTesting with new file format and non-paged aggregation");
+                    }
+                } /* end if */
+                else {
+                    my_fapl = fapl;
+                    if(paged) {
+                        my_fcpl = fcpl2;
+                        puts("Testing with old file format and paged aggregation:");
+                    } else {
+                        my_fcpl = fcpl;
+                        puts("Testing with old file format and non-paged aggregation:");
+                    }
+                } /* end else */
+
+                /* Create the file for this test */
+                if((file = H5Fcreate(filename, H5F_ACC_TRUNC, my_fcpl, my_fapl)) < 0)
+                    goto error;
+
+                if (TRUE == minimized_ohdr) {
+                    if (0 > H5Fset_dset_no_attrs_hint(file, TRUE))
+                        goto error;
+                    puts("(minimized dataset object headers with file setting)");
                 }
-            } /* end if */
-            else {
-                my_fapl = fapl;
-                if(paged) {
-                    my_fcpl = fcpl2;
-                    puts("Testing with old file format and paged aggregation:");
-                } else {
-                    my_fcpl = fcpl;
-                    puts("Testing with old file format and non-paged aggregation:");
-                }
-            } /* end else */
 
-            /* Create the file for this test */
-            if((file = H5Fcreate(filename, H5F_ACC_TRUNC, my_fcpl, my_fapl)) < 0)
-                goto error;
+                /* Cause the library to emit initial messages */
+                if((grp = H5Gcreate2(file, "emit diagnostics", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+                    goto error;
+                if(H5Oset_comment(grp, "Causes diagnostic messages to be emitted") < 0)
+                    goto error;
+                if(H5Gclose(grp) < 0)
+                    goto error;
 
-            /* Cause the library to emit initial messages */
-            if((grp = H5Gcreate2(file, "emit diagnostics", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-                goto error;
-            if(H5Oset_comment(grp, "Causes diagnostic messages to be emitted") < 0)
-                goto error;
-            if(H5Gclose(grp) < 0)
-                goto error;
-
-            nerrors += (test_create(file) < 0             ? 1 : 0);
-            nerrors += (test_simple_io(envval, my_fapl) < 0        ? 1 : 0);
-            nerrors += (test_compact_io(my_fapl) < 0          ? 1 : 0);
-            nerrors += (test_max_compact(my_fapl) < 0        ? 1 : 0);
-            nerrors += (test_compact_open_close_dirty(my_fapl) < 0     ? 1 : 0);
-            nerrors += (test_conv_buffer(file) < 0            ? 1 : 0);
-            nerrors += (test_tconv(file) < 0            ? 1 : 0);
-            nerrors += (test_filters(file, my_fapl) < 0        ? 1 : 0);
-            nerrors += (test_onebyte_shuffle(file) < 0         ? 1 : 0);
-            nerrors += (test_nbit_int(file) < 0                 ? 1 : 0);
-            nerrors += (test_nbit_float(file) < 0                     ? 1 : 0);
-            nerrors += (test_nbit_double(file) < 0                     ? 1 : 0);
-            nerrors += (test_nbit_array(file) < 0                 ? 1 : 0);
-            nerrors += (test_nbit_compound(file) < 0         ? 1 : 0);
-            nerrors += (test_nbit_compound_2(file) < 0         ? 1 : 0);
-            nerrors += (test_nbit_compound_3(file) < 0         ? 1 : 0);
-            nerrors += (test_nbit_int_size(file) < 0         ? 1 : 0);
-            nerrors += (test_nbit_flt_size(file) < 0         ? 1 : 0);
-            nerrors += (test_scaleoffset_int(file) < 0         ? 1 : 0);
-            nerrors += (test_scaleoffset_int_2(file) < 0             ? 1 : 0);
-            nerrors += (test_scaleoffset_float(file) < 0             ? 1 : 0);
-            nerrors += (test_scaleoffset_float_2(file) < 0             ? 1 : 0);
-            nerrors += (test_scaleoffset_double(file) < 0             ? 1 : 0);
-            nerrors += (test_scaleoffset_double_2(file) < 0     ? 1 : 0);
-            nerrors += (test_multiopen (file) < 0                ? 1 : 0);
-            nerrors += (test_types(file) < 0                       ? 1 : 0);
-            nerrors += (test_userblock_offset(envval, my_fapl, new_format) < 0  ? 1 : 0);
-            nerrors += (test_missing_filter(file) < 0        ? 1 : 0);
-            nerrors += (test_can_apply(file) < 0                ? 1 : 0);
-            nerrors += (test_can_apply2(file) < 0                ? 1 : 0);
-            nerrors += (test_set_local(my_fapl) < 0                ? 1 : 0);
-            nerrors += (test_can_apply_szip(file) < 0        ? 1 : 0);
-            nerrors += (test_compare_dcpl(file) < 0                ? 1 : 0);
-            nerrors += (test_copy_dcpl(file, my_fapl) < 0            ? 1 : 0);
-            nerrors += (test_filter_delete(file) < 0        ? 1 : 0);
-            nerrors += (test_filters_endianess() < 0            ? 1 : 0);
-            nerrors += (test_zero_dims(file) < 0                ? 1 : 0);
-            nerrors += (test_missing_chunk(file) < 0        ? 1 : 0);
-            nerrors += (test_random_chunks(my_fapl) < 0        ? 1 : 0);
+                nerrors += (test_create(file) < 0             ? 1 : 0);
+                nerrors += (test_simple_io(envval, my_fapl) < 0        ? 1 : 0);
+                nerrors += (test_compact_io(my_fapl) < 0          ? 1 : 0);
+                nerrors += (test_max_compact(my_fapl) < 0        ? 1 : 0);
+                nerrors += (test_compact_open_close_dirty(my_fapl) < 0     ? 1 : 0);
+                nerrors += (test_conv_buffer(file) < 0            ? 1 : 0);
+                nerrors += (test_tconv(file) < 0            ? 1 : 0);
+                nerrors += (test_filters(file, my_fapl) < 0        ? 1 : 0);
+                nerrors += (test_onebyte_shuffle(file) < 0         ? 1 : 0);
+                nerrors += (test_nbit_int(file) < 0                 ? 1 : 0);
+                nerrors += (test_nbit_float(file) < 0                     ? 1 : 0);
+                nerrors += (test_nbit_double(file) < 0                     ? 1 : 0);
+                nerrors += (test_nbit_array(file) < 0                 ? 1 : 0);
+                nerrors += (test_nbit_compound(file) < 0         ? 1 : 0);
+                nerrors += (test_nbit_compound_2(file) < 0         ? 1 : 0);
+                nerrors += (test_nbit_compound_3(file) < 0         ? 1 : 0);
+                nerrors += (test_nbit_int_size(file) < 0         ? 1 : 0);
+                nerrors += (test_nbit_flt_size(file) < 0         ? 1 : 0);
+                nerrors += (test_scaleoffset_int(file) < 0         ? 1 : 0);
+                nerrors += (test_scaleoffset_int_2(file) < 0             ? 1 : 0);
+                nerrors += (test_scaleoffset_float(file) < 0             ? 1 : 0);
+                nerrors += (test_scaleoffset_float_2(file) < 0             ? 1 : 0);
+                nerrors += (test_scaleoffset_double(file) < 0             ? 1 : 0);
+                nerrors += (test_scaleoffset_double_2(file) < 0     ? 1 : 0);
+                nerrors += (test_multiopen (file) < 0                ? 1 : 0);
+                nerrors += (test_types(file) < 0                       ? 1 : 0);
+                nerrors += (test_userblock_offset(envval, my_fapl, new_format) < 0  ? 1 : 0);
+                nerrors += (test_missing_filter(file) < 0        ? 1 : 0);
+                nerrors += (test_can_apply(file) < 0                ? 1 : 0);
+                nerrors += (test_can_apply2(file) < 0                ? 1 : 0);
+                nerrors += (test_set_local(my_fapl) < 0                ? 1 : 0);
+                nerrors += (test_can_apply_szip(file) < 0        ? 1 : 0);
+                nerrors += (test_compare_dcpl(file) < 0                ? 1 : 0);
+                nerrors += (test_copy_dcpl(file, my_fapl) < 0            ? 1 : 0);
+                nerrors += (test_filter_delete(file) < 0        ? 1 : 0);
+                nerrors += (test_filters_endianess() < 0            ? 1 : 0);
+                nerrors += (test_zero_dims(file) < 0                ? 1 : 0);
+                nerrors += (test_missing_chunk(file) < 0        ? 1 : 0);
+                nerrors += (test_random_chunks(my_fapl) < 0        ? 1 : 0);
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS
-            nerrors += (test_deprec(file) < 0            ? 1 : 0);
+                nerrors += (test_deprec(file) < 0            ? 1 : 0);
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
-            nerrors += (test_huge_chunks(my_fapl) < 0        ? 1 : 0);
-            nerrors += (test_chunk_cache(my_fapl) < 0        ? 1 : 0);
-            nerrors += (test_big_chunks_bypass_cache(my_fapl) < 0   ? 1 : 0);
-            nerrors += (test_chunk_fast(envval, my_fapl) < 0    ? 1 : 0);
-            nerrors += (test_reopen_chunk_fast(my_fapl) < 0        ? 1 : 0);
-            nerrors += (test_chunk_fast_bug1(my_fapl) < 0           ? 1 : 0);
-            nerrors += (test_chunk_expand(my_fapl) < 0        ? 1 : 0);
-            nerrors += (test_layout_extend(my_fapl) < 0        ? 1 : 0);
-            nerrors += (test_fixed_array(my_fapl) < 0        ? 1 : 0);
-            nerrors += (test_idx_compatible() < 0            ? 1 : 0);
-            nerrors += (test_unfiltered_edge_chunks(my_fapl) < 0    ? 1 : 0);
-            nerrors += (test_single_chunk(my_fapl) < 0              ? 1 : 0);
-            nerrors += (test_large_chunk_shrink(my_fapl) < 0        ? 1 : 0);
-            nerrors += (test_zero_dim_dset(my_fapl) < 0             ? 1 : 0);
-            nerrors += (test_storage_size(my_fapl) < 0              ? 1 : 0);
-            nerrors += (test_power2up(my_fapl) < 0                  ? 1 : 0);
+                nerrors += (test_huge_chunks(my_fapl) < 0        ? 1 : 0);
+                nerrors += (test_chunk_cache(my_fapl) < 0        ? 1 : 0);
+                nerrors += (test_big_chunks_bypass_cache(my_fapl) < 0   ? 1 : 0);
+                nerrors += (test_chunk_fast(envval, my_fapl) < 0    ? 1 : 0);
+                nerrors += (test_reopen_chunk_fast(my_fapl) < 0        ? 1 : 0);
+                nerrors += (test_chunk_fast_bug1(my_fapl) < 0           ? 1 : 0);
+                nerrors += (test_chunk_expand(my_fapl) < 0        ? 1 : 0);
+                nerrors += (test_layout_extend(my_fapl) < 0        ? 1 : 0);
+                nerrors += (test_fixed_array(my_fapl) < 0        ? 1 : 0);
+                nerrors += (test_idx_compatible() < 0            ? 1 : 0);
+                nerrors += (test_unfiltered_edge_chunks(my_fapl) < 0    ? 1 : 0);
+                nerrors += (test_single_chunk(my_fapl) < 0              ? 1 : 0);
+                nerrors += (test_large_chunk_shrink(my_fapl) < 0        ? 1 : 0);
+                nerrors += (test_zero_dim_dset(my_fapl) < 0             ? 1 : 0);
+                nerrors += (test_storage_size(my_fapl) < 0              ? 1 : 0);
+                nerrors += (test_power2up(my_fapl) < 0                  ? 1 : 0);
 
-            nerrors += (test_swmr_non_latest(envval, my_fapl) < 0   ? 1 : 0);
-            nerrors += (test_earray_hdr_fd(envval, my_fapl) < 0     ? 1 : 0);
-            nerrors += (test_farray_hdr_fd(envval, my_fapl) < 0     ? 1 : 0);
-            nerrors += (test_bt2_hdr_fd(envval, my_fapl) < 0        ? 1 : 0);
+                nerrors += (test_swmr_non_latest(envval, my_fapl) < 0   ? 1 : 0);
+                nerrors += (test_earray_hdr_fd(envval, my_fapl) < 0     ? 1 : 0);
+                nerrors += (test_farray_hdr_fd(envval, my_fapl) < 0     ? 1 : 0);
+                nerrors += (test_bt2_hdr_fd(envval, my_fapl) < 0        ? 1 : 0);
 
-            if(H5Fclose(file) < 0)
-                goto error;
-        } /* end for new_format */
+                if(H5Fclose(file) < 0)
+                    goto error;
+            } /* end for new_format */
+        } /* end for minimized_ohdr */
     } /* end for paged */
 
     /* Close property lists */
@@ -13236,6 +13370,8 @@ main(void)
     /* Tests version bounds using its own file */
     nerrors += (test_versionbounds() < 0                    ? 1 : 0);
 
+    nerrors += (test_object_header_minimization_dcpl() < 0 ? 1 : 0);
+
     /* Run misc tests */
     nerrors += dls_01_main();
 
@@ -13251,12 +13387,12 @@ main(void)
 #endif /* H5_HAVE_FILTER_SZIP */
     h5_cleanup(FILENAME, fapl);
 
-    return 0;
+    return EXIT_SUCCESS;
 
 error:
     nerrors = MAX(1, nerrors);
     printf("***** %d DATASET TEST%s FAILED! *****\n",
             nerrors, 1 == nerrors ? "" : "S");
-    return 1;
-}
+    return EXIT_FAILURE;
+} /* end main() */
 

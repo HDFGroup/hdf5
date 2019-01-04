@@ -351,6 +351,7 @@ struct H5F_file_t {
 
     /* Object flush info */
     H5F_object_flush_t 	object_flush;	    /* Information for object flush callback */
+    hbool_t crt_dset_min_ohdr_flag; /* flag to create minimized dataset object headers */
 };
 
 /*
