@@ -84,8 +84,6 @@ New Features
 
       (ADB - 2018/09/26, HDFFV-10594)
 
-
-
     - Incorrectly installed private header files were removed from
       CMake installs.
 
@@ -119,13 +117,22 @@ New Features
  
     Library:
     --------
+    - Added new chunk query functions
+
+      The following public functions were added to discover information about
+      the chunks in an HDF5 file.
+        herr_t H5Dget_num_chunks(dset_id, fspace_id, *nchunks)
+        herr_t H5Dget_chunk_info_by_coord(dset_id, *coord, *filter_mask, *addr, *size)
+        herr_t H5Dget_chunk_info(dset_id, fspace_id, index, *coord, *filter_mask, *addr, *size)
+
+      (BMR - 2018/11/07, HDFFV-10615)
+
     - Allow pre-generated H5Tinit.c and H5make_libsettings.c to be used.
 
       Rather than always running H5detect and generating H5Tinit.c and
       H5make_libsettings.c, supply a location for those files.
 
       (ADB - 2018/09/18, HDFFV-10332)
-
 
     - Several empty public header files where removed from the distribution
 
@@ -275,6 +282,16 @@ Bug Fixes since HDF5-1.10.3 release
       for the read/write can be set to an arbitrary number (0 was chosen).
 
       (JTH - 2018/08/25, HDFFV-10501)
+
+    - There was an incorrect protection against division by zero reported
+      to The HDF Group as issue #CVE-2018-17233.
+      
+      Protection against division by zero was added to address the issue
+      #CVE-2018-17233.  In addition, several similar occurrences in the same
+      file were fixed as well.
+
+      (BMR - 2018/02/26, HDFFV-10577)
+
 
     Java Library:
     ----------------
