@@ -144,6 +144,31 @@ New Features
 
       (DER - 2018/10/26, HDFFV-10614)
 
+    - Add ability to minimze dataset object headers.
+
+      Creation of many, very small datasets resulted in extensive file bloat
+      due to extra space in the dataset object headers -- this space is
+      allocated by default to allow for the insertion of a small number of
+      attributes within the object header and not require a continuation
+      block, an unnecessary provision in the target use case.
+
+      Inform the library to expect no attributes on created datasets, and to
+      allocate the least space possible for the object headers.
+      NOTE: A continuation block is created if attributes are added to a
+      'minimized' dataset, which can reduce performance.
+      NOTE: Some extra space is allocated for attributes essential to the
+      correct behavior of the object header (store creation times, e.g.). This
+      does not violate the design principle, as the space is calculated and
+      allocated as needed at the time of dataset object header creation --
+      unused space is not generated.
+      New API calls:
+      H5Fget_dset_no_attrs_hint
+      H5Fset_dset_no_attrs_hint
+      H5Pget_dset_no_attrs_hint
+      H5Pset_dset_no_attrs_hint
+
+      (JOS - 2019/01/04, TRILAB-45)
+
 
      Parallel Library:
     -----------------
