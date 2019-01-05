@@ -3229,13 +3229,56 @@ public class H5 implements java.io.Serializable {
     public synchronized static native void H5Fget_mdc_logging_status(long file_id, boolean[] mdc_logging_status)
             throws HDF5LibraryException, NullPointerException;
 
+    /**
+     * H5Fget_dset_no_attrs_hint gets the file-level setting to create minimized dataset object headers.
+     *
+     * @param file_id
+     *            IN: Identifier of the target file.
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     **/
+    public synchronized static native boolean H5Fget_dset_no_attrs_hint(long file_id)
+            throws HDF5LibraryException;
+
+
+    /**
+     * H5Fset_dset_no_attrs_hint sets the file-level setting to create minimized dataset object headers.
+     *
+     * @param file_id
+     *            IN: Identifier of the target file.
+     * @param minimize
+     *          the minimize hint setting
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     **/
+    public synchronized static native void H5Fset_dset_no_attrs_hint(long file_id, boolean minimize)
+            throws HDF5LibraryException;
+
+
+    /**
+     * H5Fset_libver_bounds sets a different low and high bounds while a file is open.
+     *
+     * @param file_id
+     *            IN: Identifier of the target file.
+     * @param low
+     *            IN: The earliest version of the library that will be used for writing objects
+     * @param high
+     *            IN: The latest version of the library that will be used for writing objects.
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     **/
+    public synchronized static native void H5Fset_libver_bounds(long file_id, int low, int high)
+            throws HDF5LibraryException;
+
     // /////// unimplemented ////////
     //  herr_t H5Fget_eoa(hid_t file_id, haddr_t *eoa);
     //  herr_t H5Fincrement_filesize(hid_t file_id, hsize_t increment);
     // ssize_t H5Fget_file_image(hid_t file_id, void * buf_ptr, size_t buf_len);
     // herr_t H5Fget_metadata_read_retry_info(hid_t file_id, H5F_retry_info_t *info);
     // ssize_t H5Fget_free_sections(hid_t file_id, H5F_mem_t type, size_t nsects, H5F_sect_info_t *sect_info/*out*/);
-    //  herr_t H5Fset_libver_bounds(hid_t file_id, H5F_libver_t low, H5F_libver_t high);
     //  herr_t H5Fformat_convert(hid_t fid);
     //  herr_t H5Freset_page_buffering_stats(hid_t file_id);
     //  herr_t H5Fget_page_buffering_stats(hid_t file_id, unsigned accesses[2],
@@ -6922,8 +6965,6 @@ public class H5 implements java.io.Serializable {
     public synchronized static native int H5Pset_fill_time(long plist_id, int fill_time) throws HDF5LibraryException,
     NullPointerException;
 
-    // /////// Dataset creation property list (DCPL) routines ///////
-
     /**
      * H5Pset_chunk_opts Sets the edge chunk option in a dataset creation property list.
      *
@@ -6951,6 +6992,36 @@ public class H5 implements java.io.Serializable {
      *                - Error from the HDF-5 Library
      **/
     public synchronized static native int H5Pget_chunk_opts(long dcpl_id) throws HDF5LibraryException;
+
+    /**
+     * H5Pget_dset_no_attrs_hint accesses the flag for whether or not datasets created by the given dcpl
+     *     will be created with a "minimized" object header.
+     *
+     * @param dcpl_id
+     *            IN: Dataset creation property list
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     **/
+    public synchronized static native boolean H5Pget_dset_no_attrs_hint(long dcpl_id)
+            throws HDF5LibraryException;
+
+
+    /**
+     * H5Pset_dset_no_attrs_hint sets the dcpl to minimize (or explicitly to not minimized) dataset object
+     *     headers upon creation.
+     *
+     * @param dcpl_id
+     *            IN: Dataset creation property list
+     *
+     * @param minimize
+     *          the minimize hint setting
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     **/
+    public synchronized static native void H5Pset_dset_no_attrs_hint(long dcpl_id, boolean minimize)
+            throws HDF5LibraryException;
 
     // /////// Dataset access property list (DAPL) routines ///////
 

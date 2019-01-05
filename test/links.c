@@ -8823,6 +8823,12 @@ ud_link_errors(hid_t fapl, hbool_t new_format)
             TEST_ERROR
     } H5E_END_TRY
 
+    /* Try to create a link with H5Lcreate_ud that has a NULL udata pointer, but a non-zero udata_size value */
+    H5E_BEGIN_TRY {
+        if(H5Lcreate_ud(fid, "/ud_link", (H5L_type_t)UD_CBFAIL_TYPE, NULL, 1, H5P_DEFAULT, H5P_DEFAULT) >= 0)
+            TEST_ERROR
+    } H5E_END_TRY;
+
     /* Create a user-defined link to the group. */
     strcpy(group_name, "/group");
     if(H5Lcreate_ud(fid, "/ud_link", (H5L_type_t)UD_CBFAIL_TYPE, &group_name, HDstrlen(group_name) + 1, H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR

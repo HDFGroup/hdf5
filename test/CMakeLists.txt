@@ -374,6 +374,7 @@ set (H5_CHECK_TESTS
     atomic_reader
     links_env
     filenotclosed
+    del_many_dense_attrs
     flushrefresh
 )
 
