@@ -1614,6 +1614,24 @@ JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_H5_H5Pget_1chunk_1opts
 (JNIEnv *, jclass, jlong);
 
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Pset_dset_no_attrs_hint
+ * Signature: (JZ)V
+ */
+JNIEXPORT void JNICALL
+Java_hdf_hdf5lib_H5_H5Pset_1dset_1no_1attrs_1hint
+  (JNIEnv *, jclass, jlong, jboolean);
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Pget_dset_no_attrs_hint
+ * Signature: (J)Z
+ */
+JNIEXPORT jboolean JNICALL
+Java_hdf_hdf5lib_H5_H5Pget_1dset_1no_1attrs_1hint
+  (JNIEnv *, jclass, jlong);
+
 
 #ifdef __cplusplus
 } /* end extern "C" */
