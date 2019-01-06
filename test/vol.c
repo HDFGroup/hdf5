@@ -21,7 +21,6 @@
 #include "h5test.h"
 
 /* Filename */
-/* (The file names are the same as the define in accum_swmr_reader.c) */
 const char *FILENAME[] = {
     "native_vol_test",
     NULL
