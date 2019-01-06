@@ -1,9 +1,4 @@
-<<<<<<< HEAD
 HDF5 version 1.10.5-snap1 currently under development
-=======
- version 1.11.4 currently under development
->>>>>>> c70498f... Merge pull request #1414 in HDFFV/hdf5 from ~VCHOI/my_hdf5_fork:develop to develop
-================================================================================
 
 
 INTRODUCTION
