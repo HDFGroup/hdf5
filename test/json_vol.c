@@ -18,6 +18,8 @@
 
 #include "json_vol_connector.h"
 
+#define JSON_FILE_NAME  "json_vol_test.json"
+
 
 /*-------------------------------------------------------------------------
  * Function:    test_registration_by_value()
@@ -250,6 +252,66 @@ error:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    test_file_operations()
+ *
+ * Purpose:     Tests JSON file operations
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_file_operations(void)
+{
+    hid_t   vol_id          = H5I_INVALID_HID;
+    hid_t   fapl_id         = H5I_INVALID_HID;
+    hid_t   fid             = H5I_INVALID_HID;
+
+    TESTING("File operations");
+
+    /* Register the connector by name */
+    if((vol_id = H5VLregister_connector_by_name(JSON_VOL_CONNECTOR_NAME, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Set the JSON VOL connector */
+    if((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        TEST_ERROR;
+    if(H5Pset_vol(fapl_id, vol_id, NULL) < 0)
+        TEST_ERROR;
+
+    /* Create/open/close the file */
+    if((fid = H5Fcreate(JSON_FILE_NAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
+        TEST_ERROR;
+    if(H5Fclose(fid) < 0)
+        TEST_ERROR;
+    if((fid = H5Fopen(JSON_FILE_NAME, H5F_ACC_RDWR, fapl_id)) < 0)
+        TEST_ERROR;
+    if(H5Fclose(fid) < 0)
+        TEST_ERROR;
+
+    /* Close remaining IDs */
+    if(H5Pclose(fapl_id) < 0)
+        TEST_ERROR;
+
+    /* Unregister the connector */
+    if(H5VLunregister_connector(vol_id) < 0)
+        TEST_ERROR;
+
+    PASSED();
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY {
+        H5VLunregister_connector(vol_id);
+        H5Fclose(fid);
+        H5Pclose(fapl_id);
+    } H5E_END_TRY;
+    return FAIL;
+
+} /* end test_getters() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    main
  *
  * Purpose:     Tests JSON VOL connector operations
@@ -271,6 +333,7 @@ main(void)
     nerrors += test_registration_by_value() < 0         ? 1 : 0;
     nerrors += test_multiple_registration() < 0         ? 1 : 0;
     nerrors += test_getters() < 0                       ? 1 : 0;
+    nerrors += test_file_operations() < 0               ? 1 : 0;
 
     if(nerrors) {
         HDprintf("***** %d JSON VOL connector TEST%s FAILED! *****\n",
