@@ -20,6 +20,7 @@
 #include "H5Fpkg.h"
 #include "H5CXprivate.h"        /* API Contexts                         */
 #include "H5Iprivate.h"
+#include "H5Pprivate.h"         /* Property lists                       */
 
 const char *FILENAME[] = {
     "efc0",
@@ -2896,6 +2897,8 @@ int
 main(void)
 {
     unsigned nerrors = 0;        /* track errors */
+    H5P_genplist_t *plist;      /* Property list pointer for FAPL */
+    H5VL_connector_prop_t connector_prop; /* Property for VOL connector ID & info        */
     hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
 
     /* Test Setup */
@@ -2916,6 +2919,15 @@ main(void)
     /* Push API context */
     if(H5CX_push() < 0) FAIL_STACK_ERROR
     api_ctx_pushed = TRUE;
+
+    /* Get the VOL info from the fapl */
+    plist = (H5P_genplist_t *)H5I_object(fapl_id);
+    H5P_peek(plist, H5F_ACS_VOL_CONN_NAME, &connector_prop);
+
+    /* Stash a copy of the "top-level" connector property, before any pass-through
+     *  connectors modify or unwrap it.
+     */
+    H5CX_set_vol_connector_prop(&connector_prop);
 
     /* Test Functions */
     nerrors += test_single();

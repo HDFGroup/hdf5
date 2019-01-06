@@ -803,6 +803,50 @@ error:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    h5_fileaccess_flags
+ *
+ * Purpose:     Returns a file access template which is the default template
+ *              but with a file driver, VOL connector, or libver bound set
+ *              according to a constant or environment variable
+ *
+ * Return:      Success:    A file access property list
+ *              Failure:    H5I_INVALID_HID
+ *
+ * Programmer:  Robb Matzke
+ *              Thursday, November 19, 1998
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+h5_fileaccess_flags(unsigned flags)
+{
+    hid_t       fapl_id = H5I_INVALID_HID;
+
+    if((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        goto error;
+
+    /* Attempt to set up a file driver first */
+    if((flags & H5_FILEACCESS_VFD) && h5_get_vfd_fapl(fapl_id) < 0)
+        goto error;
+
+    /* Next, try to set up a VOL connector */
+    if((flags & H5_FILEACCESS_VOL) && h5_get_vol_fapl(fapl_id) < 0)
+        goto error;
+ 
+    /* Finally, check for libver bounds */
+    if((flags & H5_FILEACCESS_LIBVER) && h5_get_libver_fapl(fapl_id) < 0)
+        goto error;
+ 
+    return fapl_id;
+
+error:
+    if(fapl_id != H5I_INVALID_HID)
+        H5Pclose(fapl_id);
+    return H5I_INVALID_HID;
+} /* end h5_fileaccess_flags() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    h5_get_vfd_fapl
  *
  * Purpose:     Sets the file driver for a FAPL according to the value specified

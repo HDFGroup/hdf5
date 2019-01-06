@@ -268,9 +268,11 @@ typedef struct H5CX_t {
     size_t nlinks;              /* Number of soft / UD links to traverse (H5L_ACS_NLINKS_NAME) */
     hbool_t nlinks_valid;       /* Whether number of soft / UD links to traverse is valid */
 
-    /* Cached VOL properties */
-    void *vol_wrap_ctx;         /* VOL plugin's "wrap context" for creating IDs */
-    hbool_t vol_wrap_ctx_valid; /* Whether VOL plugin's "wrap context" for creating IDs is valid */
+    /* Cached VOL settings */
+    H5VL_connector_prop_t vol_connector_prop;  /* Property for VOL connector ID & info */
+    hbool_t vol_connector_prop_valid; /* Whether property for VOL connector ID & info is valid */
+    void *vol_wrap_ctx;         /* VOL connector's "wrap context" for creating IDs */
+    hbool_t vol_wrap_ctx_valid; /* Whether VOL connector's "wrap context" for creating IDs is valid */
 } H5CX_t;
 
 /* Typedef for nodes on the API context stack */
@@ -956,6 +958,40 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5CX_set_vol_connector_prop
+ *
+ * Purpose:     Sets the VOL connector ID & info for an operation.
+ *
+ * Return:      Non-negative on success / Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              January 3, 2019
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5CX_set_vol_connector_prop(const H5VL_connector_prop_t *vol_connector_prop)
+{
+    H5CX_node_t **head = H5CX_get_my_context();  /* Get the pointer to the head of the API context, for this thread */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(head && *head);
+
+    /* Set the API context value */
+    HDmemcpy(&(*head)->ctx.vol_connector_prop, vol_connector_prop, sizeof(H5VL_connector_prop_t));
+
+    /* Mark the value as valid */
+    (*head)->ctx.vol_connector_prop_valid = TRUE;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5CX_set_vol_connector_prop() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5CX_get_dxpl
  *
  * Purpose:     Retrieves the DXPL ID for the current API call context.
@@ -1041,6 +1077,42 @@ H5CX_get_vol_wrap_ctx(void **vol_wrap_ctx)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5CX_get_vol_wrap_ctx() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5CX_get_vol_connector_prop
+ *
+ * Purpose:     Retrieves the VOL connector ID & info for an operation.
+ *
+ * Return:      Non-negative on success / Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              January 3, 2019
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5CX_get_vol_connector_prop(H5VL_connector_prop_t *vol_connector_prop)
+{
+    H5CX_node_t **head = H5CX_get_my_context();  /* Get the pointer to the head of the API context, for this thread */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(vol_connector_prop);
+    HDassert(head && *head);
+
+    /* Check for value that was set */
+    if((*head)->ctx.vol_connector_prop_valid)
+        /* Get the value */
+        HDmemcpy(vol_connector_prop, &(*head)->ctx.vol_connector_prop, sizeof(H5VL_connector_prop_t));
+    else
+        HDmemset(vol_connector_prop, 0, sizeof(H5VL_connector_prop_t));
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5CX_get_vol_connector_prop() */
 
 
 /*-------------------------------------------------------------------------

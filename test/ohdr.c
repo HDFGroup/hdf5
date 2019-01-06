@@ -850,7 +850,7 @@ test_minimized_dset_ohdr_attribute_addition(hid_t fapl_id)
      * SETUP *
      *********/
 
-    if(h5_fixname(FILENAME[1], H5P_DEFAULT, filename, sizeof(filename)) == NULL)
+    if(h5_fixname(FILENAME[1], fapl_id, filename, sizeof(filename)) == NULL)
         TEST_ERROR
 
     dspace_id = H5Screate_simple(1, array_10, NULL);
@@ -1081,10 +1081,10 @@ test_minimized_dset_ohdr_size_comparisons(hid_t fapl_id)
      * SETUP *
      *********/
 
-    if(h5_fixname(FILENAME[1], H5P_DEFAULT, filename_a, sizeof(filename_a)) == NULL)
+    if(h5_fixname(FILENAME[1], fapl_id, filename_a, sizeof(filename_a)) == NULL)
         TEST_ERROR
 
-    if(h5_fixname(FILENAME[2], H5P_DEFAULT, filename_b, sizeof(filename_b)) == NULL)
+    if(h5_fixname(FILENAME[2], fapl_id, filename_b, sizeof(filename_b)) == NULL)
         TEST_ERROR
 
     for (compact = 0; compact < 2; compact++) { /* 0 or 1 */
@@ -1244,7 +1244,7 @@ test_minimized_dset_ohdr_with_filter(hid_t fapl_id)
      * SETUP *
      *********/
 
-    if(h5_fixname(FILENAME[1], H5P_DEFAULT, filename, sizeof(filename)) == NULL)
+    if(h5_fixname(FILENAME[1], fapl_id, filename, sizeof(filename)) == NULL)
         TEST_ERROR
 
     dcpl_mx_id = H5Pcreate(H5P_DATASET_CREATE);
@@ -1383,7 +1383,7 @@ test_minimized_dset_ohdr_modification_times(hid_t _fapl_id)
      * SETUP *
      *********/
 
-    if(h5_fixname(FILENAME[1], H5P_DEFAULT, filename, sizeof(filename)) == NULL)
+    if(h5_fixname(FILENAME[1], _fapl_id, filename, sizeof(filename)) == NULL)
         TEST_ERROR
 
     dcpl_mx_id = H5Pcreate(H5P_DATASET_CREATE);
@@ -1426,8 +1426,6 @@ test_minimized_dset_ohdr_modification_times(hid_t _fapl_id)
         if(fapl_id < 0) TEST_ERROR
 
         if(cases[i].oh_version > 1) {
-            fapl_id = H5Pcreate(H5P_FILE_ACCESS);
-            if(fapl_id < 0) TEST_ERROR
             ret = H5Pset_libver_bounds(fapl_id, H5F_LIBVER_V18, H5F_LIBVER_V110);
             if(ret < 0) TEST_ERROR
         }
@@ -1534,7 +1532,10 @@ test_minimized_dset_ohdr_fillvalue_backwards_compatability(hid_t _fapl_id)
 
     TESTING("minimized dset object headers with fill values and different libver support");
 
-    if(h5_fixname(FILENAME[1], H5P_DEFAULT, filename, sizeof(filename)) == NULL)
+    fapl_id = H5Pcopy(_fapl_id);
+    if(fapl_id < 0) TEST_ERROR
+
+    if(h5_fixname(FILENAME[1], fapl_id, filename, sizeof(filename)) == NULL)
         TEST_ERROR
 
     dspace_id = H5Screate_simple(1, extents, extents);
@@ -1551,9 +1552,6 @@ test_minimized_dset_ohdr_fillvalue_backwards_compatability(hid_t _fapl_id)
 
     ret = H5Pset_fill_value(dcpl_id, dtype_id, fill);
     if(ret == FAIL) TEST_ERROR;
-
-    fapl_id = H5Pcopy(_fapl_id);
-    if(fapl_id < 0) TEST_ERROR
 
     ret = H5Pset_libver_bounds(fapl_id, H5F_LIBVER_EARLIEST, H5F_LIBVER_LATEST);
     if(ret == FAIL) TEST_ERROR;
@@ -1678,6 +1676,8 @@ main(void)
     hid_t fapl = -1;
     hid_t file = -1;
     H5F_t *f = NULL;
+    const char  *env_h5_drvr;   /* File driver value from environment */
+    hbool_t single_file_vfd;    /* Whether VFD used stores data in a single file */
     char  filename[1024];
     H5O_hdr_info_t hdr_info;  /* Object info */
     H5O_loc_t      oh_loc;    /* Object header locations */
@@ -1687,6 +1687,14 @@ main(void)
     int    i;                 /* Local index variable */
     hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t ret;               /* Generic return value */
+
+    /* Get the VFD to use */
+    env_h5_drvr = HDgetenv("HDF5_DRIVER");
+    if(env_h5_drvr == NULL)
+        env_h5_drvr = "nomatch";
+
+    /* Check for VFD which stores data in multiple files */
+    single_file_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "split") && HDstrcmp(env_h5_drvr, "multi") && HDstrcmp(env_h5_drvr, "family"));
 
     /* Reset library */
     h5_reset();
@@ -1906,11 +1914,23 @@ main(void)
          * and the various "fail/mark if unknown" object header message flags
          */
         HDputs("Accessing objects with unknown header messages: H5O_BOGUS_VALID_ID");
-        if(test_unknown(H5O_BOGUS_VALID_ID, filename, fapl) < 0)
-            TEST_ERROR
+        if(single_file_vfd) {
+            if(test_unknown(H5O_BOGUS_VALID_ID, filename, fapl) < 0)
+                TEST_ERROR
+        } /* end if */
+        else {
+            SKIPPED();
+            HDputs("    Unknown header message test not supported with the current VFD.");
+        } /* end else */
         HDputs("Accessing objects with unknown header messages: H5O_BOGUS_INVALID_ID");
-        if(test_unknown(H5O_BOGUS_INVALID_ID, filename, fapl) < 0)
-            TEST_ERROR
+        if(single_file_vfd) {
+            if(test_unknown(H5O_BOGUS_INVALID_ID, filename, fapl) < 0)
+                TEST_ERROR
+        } /* end if */
+        else {
+            SKIPPED();
+            HDputs("    Unknown header message test not supported with the current VFD.");
+        } /* end else */
 
         /* Test object header creation metadata cache issues */
         if(test_ohdr_cache(filename, fapl) < 0)
