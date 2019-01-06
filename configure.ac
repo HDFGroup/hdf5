@@ -1245,6 +1245,87 @@ AC_ARG_WITH([fnord],
   ])
 
 ## ----------------------------------------------------------------------
+## Is Jansson (JSON parser used for VOL testing) available? It has a
+## header file 'jansson.h' and a library '-ljansson' and their locations
+## might be specified with the '--with-jansson' command-line switch. The
+## value is an include path and/or a library path. If the library path is
+## specified then it must be preceded by a comma.
+##
+## NOTE: If this becomes an actual library thing, we'll eventually start
+##       distributing Jansson with the library so builders don't have
+##       have to go dig a copy up and install it. For right now, I
+##       simply avoid building the JSON VOL connector unless it's
+##       available.
+##
+AC_SUBST([HAVE_JANSSON])
+
+## Default is not present
+HAVE_JANSSON=no
+
+AC_ARG_WITH([jansson],
+            [AS_HELP_STRING([--with-jansson=DIR],
+                            ["Location of Jansson JSON parser (used for testing)" [default=no]])],,
+            [withval=no])
+
+case "X-$withval" in
+  X-yes)
+    HAVE_JANSSON="yes"
+    AC_CHECK_HEADERS([jansson.h],, [unset HAVE_JANSSON])
+    if test "x$HAVE_JANSSON" = "xyes"; then
+      AC_CHECK_LIB([jansson], [json_loads],, [unset HAVE_JANSSON])
+    fi
+    if test -z "$HAVE_JANSSON" -a -n "$HDF5_CONFIG_ABORT"; then
+      AC_MSG_ERROR([couldn't find Jansson library])
+    fi
+    ;;
+  X-|X-no|X-none)
+    HAVE_JANSSON="no"
+    AC_MSG_CHECKING([for Jansson library])
+    AC_MSG_RESULT([suppressed])
+    ;;
+  *)
+    HAVE_JANSSON="yes"
+    case "$withval" in
+      *,*)
+        jansson_inc="`echo $withval |cut -f1 -d,`"
+        jansson_lib="`echo $withval |cut -f2 -d, -s`"
+        ;;
+      *)
+        if test -n "$withval"; then
+          jansson_inc="$withval/include"
+          jansson_lib="$withval/lib"
+        fi
+        ;;
+    esac
+
+    saved_CPPFLAGS="$CPPFLAGS"
+    saved_AM_CPPFLAGS="$AM_CPPFLAGS"
+    saved_LDFLAGS="$LDFLAGS"
+    saved_AM_LDFLAGS="$AM_LDFLAGS"
+
+    if test -n "$jansson_inc"; then
+      CPPFLAGS="$CPPFLAGS -I$jansson_inc"
+      AM_CPPFLAGS="$AM_CPPFLAGS -I$jansson_inc"
+    fi
+
+    AC_CHECK_HEADERS([jansson.h],,[CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"] [unset HAVE_JANSSON])
+
+    if test "x$HAVE_JANSSON" = "xyes"; then
+      if test -n "$jansson_lib"; then
+        LDFLAGS="$LDFLAGS -L$jansson_lib"
+        AM_LDFLAGS="$AM_LDFLAGS -L$jansson_lib"
+      fi
+
+      AC_CHECK_LIB([jansson], [json_loads],, [LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_JANSSON])
+    fi
+
+    if test -z "$HAVE_JANSSON" -a -n "$HDF5_CONFIG_ABORT"; then
+      AC_MSG_ERROR([couldn't find Jansson library])
+    fi
+    ;;
+esac
+
+## ----------------------------------------------------------------------
 ## Is dmalloc (debug malloc library) requested? It has a header file
 ## `dmalloc.h' and a library `-ldmalloc' and their locations might be
 ## specified with the `--with-dmalloc' command-line switch. The value

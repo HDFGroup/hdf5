@@ -18,6 +18,9 @@
 
 #include "json_vol_connector.h"
 
+/* The Jansson JSON parser */
+#include "jansson.h"
+
 /* The VOL class struct */
 static const H5VL_class_t json_vol_g = {
     0,                                              /* version      */
