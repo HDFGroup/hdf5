@@ -1052,6 +1052,9 @@
 ./test/h5test.h
 ./test/hyperslab.c
 ./test/istore.c
+./test/json_vol.c
+./test/json_vol_connector.c
+./test/json_vol_connector.h
 ./test/le_data.h5
 ./test/le_extlink1.h5
 ./test/le_extlink2.h5
@@ -1114,6 +1117,7 @@
 ./test/testframe.c
 ./test/testhdf5.c
 ./test/testhdf5.h
+./test/test_json_vol.sh.in
 ./test/testlibinfo.sh.in
 ./test/test_usecases.sh.in
 ./test/test_vol_plugin.sh.in

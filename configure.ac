@@ -3403,6 +3403,7 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  test/testcheck_version.sh
                  test/testerror.sh
                  test/testflushrefresh.sh
+                 test/test_json_vol.sh
                  test/testlibinfo.sh
                  test/testlinks_env.sh
                  test/testswmr.sh

@@ -42,8 +42,8 @@ SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT) links_env$(EXEEXT) \
     swmr_sparse_reader$(EXEEXT) swmr_sparse_writer$(EXEEXT) swmr_start_write$(EXEEXT) \
     vds_swmr_gen$(EXEEXT) vds_swmr_reader$(EXEEXT) vds_swmr_writer$(EXEEXT)
 if HAVE_SHARED_CONDITIONAL
-  TEST_SCRIPT += test_filter_plugin.sh test_vol_plugin.sh
-  SCRIPT_DEPEND += filter_plugin$(EXEEXT) vol_plugin$(EXEEXT)
+  TEST_SCRIPT += test_filter_plugin.sh test_vol_plugin.sh test_json_vol.sh
+  SCRIPT_DEPEND += filter_plugin$(EXEEXT) vol_plugin$(EXEEXT) json_vol$(EXEEXT)
 endif
 
 check_SCRIPTS = $(TEST_SCRIPT)
@@ -85,7 +85,7 @@ check_PROGRAMS=$(TEST_PROG) error_test err_compat tcheck_version \
     swmr_remove_writer swmr_addrem_writer swmr_sparse_reader swmr_sparse_writer \
     swmr_check_compat_vfd vds_swmr_gen vds_swmr_reader vds_swmr_writer
 if HAVE_SHARED_CONDITIONAL
-  check_PROGRAMS+= filter_plugin vol_plugin
+  check_PROGRAMS+= filter_plugin vol_plugin json_vol
 endif
 
 # These programs generate test files for the tests.  They don't need to be
@@ -123,8 +123,11 @@ if HAVE_SHARED_CONDITIONAL
   # VOL plugin test libraries
   #
   # null_vol_connector is used for testing basic VOL plugin functionality.
+  # json_vol_connector is used for testing non-native-HDF5 file storage.
   libnull_vol_connector_la_SOURCES=null_vol_connector.c
   libnull_vol_connector_la_LDFLAGS=$(AM_LDFLAGS) -avoid-version -module -shared -export-dynamic -rpath /nowhere
+  libjson_vol_connector_la_SOURCES=json_vol_connector.c
+  libjson_vol_connector_la_LDFLAGS=$(AM_LDFLAGS) -avoid-version -module -shared -export-dynamic -rpath /nowhere
 
 else
   # The libh5test library provides common support code for the tests.
