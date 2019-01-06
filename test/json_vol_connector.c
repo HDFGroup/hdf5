@@ -12,6 +12,10 @@
 
 /* Purpose:     A virtual object layer (VOL) connector that uses JSON to
  *              store HDF5 data and metadata.
+ *
+ *              The JSON representation is taken from hdf5-json, though
+ *              that code can't be directly used because it's in Python.
+ *              (https://github.com/HDFGroup/hdf5-json)
  */
 
 /* Until we get a platform-independence library working, we'll cheat and
@@ -131,7 +135,8 @@ const void *H5PLget_plugin_info(void) {return &json_vol_g;}
 /******************/
 
 typedef struct json_vol_file_t {
-    FILE *fp;                /* File pointer to JSON file */
+    FILE    *fp;                /* File pointer to JSON file */
+    json_t  *root;              /* Root of the JSON tree */
 } json_vol_file_t;
 
 /* File callback implementation */
@@ -148,6 +153,9 @@ jvc_file_create(const char *name, unsigned H5_ATTR_UNUSED flags, hid_t H5_ATTR_U
     /* Create the file */
     if(NULL == (jfile->fp = HDfopen(name, "w")))
         goto error;
+
+    /* Create the JSON root */
+    jfile->root = json_object();
 
     return (void *)jfile;
 
@@ -173,6 +181,9 @@ jvc_file_open(const char *name, unsigned H5_ATTR_UNUSED flags, hid_t H5_ATTR_UNU
     if(NULL == (jfile->fp = HDfopen(name, "r+")))
         goto error;
 
+    /* Create the JSON root */
+    jfile->root = json_object();
+
     return (void *)jfile;
 
 error:
@@ -188,9 +199,15 @@ jvc_file_close(void *file, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **r
 {
     json_vol_file_t *jfile = (json_vol_file_t *)file;
 
+    /* Dump the JSON string to the file */
+    HDfprintf(jfile->fp, "%s", json_dumps(jfile->root, 0));
+
     /* Close the file */
     if(EOF == HDfclose(jfile->fp))
         goto error;
+
+    /* Decrement the reference count on the JSON root, closing it */
+    json_decref(jfile->root);
 
     /* Tear down */
     HDfree(jfile);
