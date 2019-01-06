@@ -142,9 +142,19 @@ const void *H5PLget_plugin_info(void) {return &json_vol_g;}
 /******************/
 
 typedef struct json_vol_file_t {
-    FILE    *fp;                /* File pointer to JSON file */
-    json_t  *root;              /* Root of the JSON tree */
+    FILE    *fp;                /* File pointer to JSON file    */
+    json_t  *root;              /* Root of the JSON tree        */
+    json_t  *groups;            /* JSON array of groups         */
 } json_vol_file_t;
+
+#if 0
+/* Helper functions */
+static herr_t
+jvc_helper_create_group(json_vol_file_t *jfile, char *group_name)
+{
+    return SUCCEED;
+} /* end jvc_helper_create_group() */
+#endif
 
 /* File callback implementation */
 static void *
@@ -164,6 +174,10 @@ jvc_file_create(const char *name, unsigned H5_ATTR_UNUSED flags, hid_t H5_ATTR_U
     /* Create the JSON root */
     jfile->root = json_object();
 
+    /* Add the groups array */
+    jfile->groups = json_array();
+    json_object_set_new(jfile->root, "groups", jfile->groups);
+
     return (void *)jfile;
 
 error:
@@ -179,21 +193,36 @@ jvc_file_open(const char *name, unsigned H5_ATTR_UNUSED flags, hid_t H5_ATTR_UNU
         hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req)
 {
     json_vol_file_t *jfile = NULL;
+    char            *json_in = NULL;
+    long int        file_size;
+    json_error_t    jerror;
 
     /* Set up */
     if(NULL == (jfile = (json_vol_file_t *)HDcalloc((size_t)1, sizeof(json_vol_file_t))))
         goto error;
 
-    /* Open the file */
-    if(NULL == (jfile->fp = HDfopen(name, "r+")))
+    /* Open the file and get the size */
+    if(NULL == (jfile->fp = HDfopen(name, "r")))
         goto error;
+    fseek(jfile->fp, 0, SEEK_END);
+    file_size = ftell(jfile->fp);
+    fseek(jfile->fp, 0, SEEK_SET);
 
     /* Create the JSON root */
-    jfile->root = json_object();
+    if(NULL == (json_in = (char *)HDmalloc((size_t)(file_size + 1) * sizeof(char))))
+        goto error;
+    fread(json_in, (size_t)file_size, 1, jfile->fp);
+    jfile->root = json_loads(json_in, 0, &jerror);
+
+    /* Will still need to parse out the groups array */
+
+    HDfree(json_in);
 
     return (void *)jfile;
 
 error:
+    if(json_in)
+        HDfree(json_in);
     if(jfile->fp)
         HDfclose(jfile->fp);
     if(jfile)
