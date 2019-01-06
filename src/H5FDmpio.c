@@ -1320,7 +1320,6 @@ done:
  *		effect the transfer.
  *
  *		Reading past the end of the MPI file returns zeros instead of
-    hbool_t     rank0_bcast = FALSE; /* If read-with-rank0-and-bcast flag was used */
  *		failing.  MPI is able to coalesce requests from different
  *		processes (collective or independent).
  *
@@ -1355,6 +1354,7 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type,
     int         n;
 #endif
     hbool_t     use_view_this_time = FALSE;
+    hbool_t     rank0_bcast = FALSE; /* If read-with-rank0-and-bcast flag was used */
     herr_t      ret_value = SUCCEED;
 
     FUNC_ENTER_STATIC
