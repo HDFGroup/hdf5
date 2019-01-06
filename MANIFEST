@@ -948,6 +948,7 @@
 ./test/cross_read.c
 ./test/dangle.c
 ./test/deflate.h5
+./test/del_many_dense_attrs.c
 ./test/direct_chunk.c
 ./test/dsets.c
 ./test/dt_arith.c
@@ -1079,10 +1080,10 @@
 ./test/tcheck_version.c
 ./test/tconfig.c
 ./test/tcoords.c
+./test/testabort_fail.sh.in
 ./test/testcheck_version.sh.in
 ./test/testerror.sh.in
 ./test/testlinks_env.sh.in
-./test/test_filenotclosed.sh.in
 ./test/test_filter_plugin.sh.in
 ./test/testflushrefresh.sh.in
 ./test/testframe.c
