@@ -19,8 +19,12 @@ Plan:
 * Implement basic dataset operations.
 * Implement basic attribute operations.
 
-The difficult part of dealing with this is going to involve dealing with
-state, particularly as 'files' grow large. There may be clashes when it
-comes to mapping a fundamentally random-access data store to a file stream
-data store.
-
+NOTES:
+* The internets says to use libuuid to generate UUIDs as it's pretty
+  lightweight.
+* Due to dependencies on libuuid and jansson, we're going to need to
+  protect the code and only build when everything is present. I think
+  this is okay since this is more of a test for ensuring the VOL doesn't
+  suck than it is a test that someone's build is working normally.
+* Partial I/O is going to be crazy slow unless I want to add in some
+  sort of optimized data container behind the scenes.
