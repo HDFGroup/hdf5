@@ -22,9 +22,9 @@ foreach (testp ${H5P_TESTS})
   add_test (NAME TEST_PAR_${testp} COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_PREFLAGS} $<TARGET_FILE:${testp}> ${MPIEXEC_POSTFLAGS})
 endforeach ()
 
-# The following will only be correct on windows shared
-#set_tests_properties (TEST_PAR_t_pflush1 PROPERTIES WILL_FAIL "true")
-set_property (TEST TEST_PAR_t_pflush1 PROPERTY PASS_REGULAR_EXPRESSION "PASSED")
+# The t_pflush1 test is hard-coded to fail.
+set_tests_properties (TEST_PAR_t_pflush1 PROPERTIES WILL_FAIL "true")
+#set_property (TEST TEST_PAR_t_pflush1 PROPERTY PASS_REGULAR_EXPRESSION "PASSED")
 set_tests_properties (TEST_PAR_t_pflush2 PROPERTIES DEPENDS TEST_PAR_t_pflush1)
 
 ##############################################################################
