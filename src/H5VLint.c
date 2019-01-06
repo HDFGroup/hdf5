@@ -879,9 +879,11 @@ done:
  *
  * Purpose:     Compare VOL class for a connector
  *
- * Return:      Positive if VALUE1 is greater than VALUE2, negative if
- *              VALUE2 is greater than VALUE1 and zero if VALUE1 and
- *              VALUE2 are equal (like strcmp).
+ * Note:        Sets *cmp_value positive if VALUE1 is greater than VALUE2,
+ *		negative if VALUE2 is greater than VALUE1, and zero if VALUE1
+ *              and VALUE2 are equal (like strcmp).
+ *
+ * Return:      SUCCEED / FAIL
  *
  *-------------------------------------------------------------------------
  */
