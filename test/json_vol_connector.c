@@ -27,8 +27,15 @@
 
 #include "json_vol_connector.h"
 
+/* XXX: Note that we're going to have to guard most of the JSON VOL
+ *      connector content with #ifdefs in the final product...
+ */
+
 /* The Jansson JSON parser */
 #include <jansson.h>
+
+/* libuuid for generating UUIDs */
+#include <uuid/uuid.h>
 
 /* Callbacks */
 /* File */

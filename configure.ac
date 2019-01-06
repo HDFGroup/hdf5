@@ -1027,6 +1027,7 @@ esac
 ##
 AC_CHECK_LIB([m], [ceil])
 AC_CHECK_LIB([dl], [dlopen])
+AC_CHECK_LIB([uuid], [uuid_generate])
 
 ## ----------------------------------------------------------------------
 ## Check for system header files.
@@ -1041,6 +1042,7 @@ AC_CHECK_HEADERS([stddef.h setjmp.h features.h])
 AC_CHECK_HEADERS([dirent.h])
 AC_CHECK_HEADERS([stdint.h], [C9x=yes])
 AC_CHECK_HEADERS([stdbool.h])
+AC_CHECK_HEADERS([uuid/uuid.h])
 
 ## Darwin
 AC_CHECK_HEADERS([mach/mach_time.h])
