@@ -267,6 +267,10 @@ done:
 haddr_t
 H5MV_alloc(H5F_t *f, hsize_t size)
 {
+    haddr_t eoa;                        /* EOA for the file */
+    hsize_t frag_size = 0;              /* Fragment size */
+    hsize_t misalign_size = 0;          /* Mis-aligned size */
+    H5MV_free_section_t *node = NULL;   /* Free space section pointer */
     haddr_t ret_value = HADDR_UNDEF;    /* Return value */
 
     FUNC_ENTER_NOAPI(HADDR_UNDEF)
@@ -288,9 +292,42 @@ HDfprintf(stderr, "%s: size = %Hu\n", FUNC, size);
 
     /* If no space is found from the free-space manager or no free-space manager, extend md's EOF */
     if(!H5F_addr_defined(ret_value)) {
-        if(HADDR_UNDEF == (ret_value = H5F__alloc_md(f, size)))
+
+        /* Get the EOA for the metadata file */
+        if(HADDR_UNDEF == (eoa = H5F_get_vfd_swmr_md_eoa(f)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, HADDR_UNDEF, "Unable to get eoa for VFD SWMR metadata file")
+
+        /* If EOA is mis-aligned, calculate the fragment size */
+        if(H5F_addr_gt(eoa, 0) && (misalign_size = eoa % f->shared->fs_page_size))
+            frag_size = f->shared->fs_page_size - misalign_size;
+
+        /* Allocate from end of file */
+        if(HADDR_UNDEF == (ret_value = H5F__alloc_md(f, size + frag_size)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, HADDR_UNDEF, "allocation failed")
+
+        /* If there is a mis-aligned fragment at EOA */
+        if(frag_size) {
+            /* Start up the free-space manager if not so */
+            if(f->shared->fs_man_md == NULL) {
+                if(H5MV__create(f) < 0)
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't initialize free space manager")
+            }
+            HDassert(f->shared->fs_man_md);
+
+            /* Create the free-space section for the fragment */
+            if(NULL == (node = H5MV__sect_new(eoa, frag_size)))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't initialize free space section")
+
+            /* Add the section */
+            if(H5FS_sect_add(f, f->shared->fs_man_md, (H5FS_section_info_t *)node, H5FS_ADD_RETURNED_SPACE, f) < 0)
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINSERT, FAIL, "can't re-add section to file free space")
+
+            node = NULL;
+        }
+        ret_value += frag_size;
+
     } /* end if */
+
     HDassert(H5F_addr_defined(ret_value));
 
 done:
@@ -377,7 +414,7 @@ HDfprintf(stderr, "%s: dropping addr = %a, size = %Hu, on the floor!\n", FUNC, a
 	HDassert(f->shared->fs_man_md);
 
 #ifdef H5MV_VFD_SWMR_DEBUG
-HDfprintf(stderr, "%s: Before H5FS_sect_add()\n", FUNC);
+HDfprintf(stderr, "%s: Before H5FS_sect_add(): addr=%a, size=%Hu\n", FUNC, addr, size);
 #endif
 
      /* Add the section */
