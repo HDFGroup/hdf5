@@ -35,6 +35,8 @@ const char *FILENAMES[NFILENAME + 1]={"reloc_t_pread_data_file",
 
 #define COUNT 1000
 
+#define LIMIT_NPROC 6
+
 hbool_t pass = true;
 static const char *random_hdf5_text =
 "Now is the time for all first-time-users of HDF5 to read their \
@@ -109,6 +111,9 @@ generate_test_file( MPI_Comm comm, int mpi_rank, int group_id )
     hid_t fapl_id   = -1;
     hid_t dxpl_id   = -1;
     hid_t dset_id   = -1;
+    hid_t dset_id_ch = -1;
+    hid_t dcpl_id = H5P_DEFAULT;
+    hsize_t chunk[1];
     float nextValue;
     float *data_slice = NULL;
 
@@ -273,6 +278,55 @@ generate_test_file( MPI_Comm comm, int mpi_rank, int group_id )
         }
     }
 
+
+    /* create a chunked dataset */
+    chunk[0] = COUNT/8;
+    
+    if ( pass ) {
+      if ( (dcpl_id = H5Pcreate (H5P_DATASET_CREATE)) < 0 ) {
+        pass = false;
+          failure_mssg = "H5Pcreate() failed.\n";
+      }
+    }
+
+    if ( pass ) {
+      if ( (H5Pset_chunk (dcpl_id, 1, chunk) ) < 0 ) {
+        pass = false;
+        failure_mssg = "H5Pset_chunk() failed.\n";
+      }
+    }
+    
+    if ( pass ) {
+      
+      if ( (dset_id_ch = H5Dcreate2(file_id, "dataset0_chunked", H5T_NATIVE_FLOAT,
+                                    filespace, H5P_DEFAULT, dcpl_id,
+                                    H5P_DEFAULT)) < 0 ) {
+        pass = false;
+        failure_mssg = "H5Dcreate2() failed.\n";
+      }
+    }
+
+    if ( pass ) {
+      if ( (H5Dwrite(dset_id_ch, H5T_NATIVE_FLOAT, memspace,
+                     filespace, dxpl_id, data_slice)) < 0 ) {
+        pass = false;
+        failure_mssg = "H5Dwrite() failed.\n";
+      }
+    }
+    if ( pass || (dcpl_id != -1)) {
+      if ( H5Pclose(dcpl_id) < 0 ) {
+        pass = false;
+        failure_mssg = "H5Pclose(dcpl_id) failed.\n";
+      }
+    }
+    
+    if ( pass || (dset_id_ch != -1)) {
+      if ( H5Dclose(dset_id_ch) < 0 ) {
+        pass = false;
+        failure_mssg = "H5Dclose(dset_id_ch) failed.\n";
+      }
+    }
+
     /* close file, etc. */
     if ( pass || (dset_id != -1)) {
         if ( H5Dclose(dset_id) < 0 ) {
@@ -427,7 +481,7 @@ generate_test_file( MPI_Comm comm, int mpi_rank, int group_id )
  *              3). Testing proc0-read-and-MPI_Bcast using
  *                  sub-communicators, and reading into
  *                  a memory space that is different from the
- *                  file space.
+ *                  file space, and chunked datasets.
  *
  *              The global MPI rank is used for reading and
  *              writing data for process specific data in the
@@ -462,6 +516,7 @@ test_parallel_read(MPI_Comm comm, int mpi_rank, int mpi_size, int group_id)
     hid_t fapl_id   = -1;
     hid_t file_id   = -1;
     hid_t dset_id   = -1;
+    hid_t dset_id_ch = -1;
     hid_t dxpl_id   = H5P_DEFAULT;
     hid_t memspace  = -1;
     hid_t filespace = -1;
@@ -561,6 +616,14 @@ test_parallel_read(MPI_Comm comm, int mpi_rank, int mpi_size, int group_id)
         }
     }
 
+    /* open the chunked data set */
+    if ( pass ) {
+      if ( (dset_id_ch = H5Dopen2(file_id, "dataset0_chunked", H5P_DEFAULT)) < 0 ) {
+        pass = FALSE;
+        failure_mssg = "H5Dopen2() failed\n";
+      }
+    }
+
     /* setup memspace */
     if ( pass ) {
         dims[0] = count;
@@ -639,9 +702,9 @@ test_parallel_read(MPI_Comm comm, int mpi_rank, int mpi_size, int group_id)
      * Test reading proc0-read-and-bcast with sub-communicators 
      */
 
-    /* Don't test with more than 6 processes to avoid memory issues */
+    /* Don't test with more than LIMIT_NPROC processes to avoid memory issues */
 
-    if( group_size <= 6 ) {
+    if( group_size <= LIMIT_NPROC ) {
 #ifdef H5_HAVE_INSTRUMENTED_LIBRARY
       hbool_t prop_value;
 #endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
@@ -720,7 +783,7 @@ test_parallel_read(MPI_Comm comm, int mpi_rank, int mpi_size, int group_id)
         if (pass) {
           if(prop_value != TRUE) {
             pass = FALSE;
-            failure_mssg = "rank 0 Bcast optimization was not performed\n";
+            failure_mssg = "rank 0 Bcast optimization was mistakenly not performed\n";
           }
         }
       }
@@ -746,6 +809,71 @@ test_parallel_read(MPI_Comm comm, int mpi_rank, int mpi_size, int group_id)
                ( data_slice[i] < nextValue ) ) {
             pass = FALSE;
             failure_mssg = "Unexpected dset contents.\n";
+          }
+          nextValue += 1;
+          i++;
+        }
+      }
+
+      /* read H5S_ALL section for the chunked dataset */
+
+#ifdef H5_HAVE_INSTRUMENTED_LIBRARY
+      if ( pass ) {
+        prop_value = H5D_XFER_COLL_RANK0_BCAST_DEF;
+        if(H5Pset(dxpl_id, H5D_XFER_COLL_RANK0_BCAST_NAME, &prop_value) < 0) {
+            pass = FALSE;
+            failure_mssg = "H5Pset() failed\n";
+        }
+      }
+#endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
+
+      for ( i = 0; i < (hsize_t)dset_size; i++) {
+        data_slice[i] = 0;
+      }
+      if ( pass ) {
+        if ( (H5Dread(dset_id_ch, H5T_NATIVE_FLOAT, H5S_ALL,
+                      H5S_ALL, dxpl_id, data_slice)) < 0 ) {
+          pass = FALSE;
+          failure_mssg = "H5Dread() failed\n";
+        }
+      }
+
+#ifdef H5_HAVE_INSTRUMENTED_LIBRARY
+      if ( pass ) {
+        prop_value = FALSE;
+        if(H5Pget(dxpl_id, H5D_XFER_COLL_RANK0_BCAST_NAME, &prop_value) < 0) {
+            pass = FALSE;
+            failure_mssg = "H5Pget() failed\n";
+        }
+        if (pass) {
+          if(prop_value == TRUE) {
+            pass = FALSE;
+            failure_mssg = "rank 0 Bcast optimization was mistakenly performed for chunked dataset\n";
+          }
+        }
+      }
+#endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
+
+      /* verify the data */
+      if ( pass ) {
+
+        if ( comm == MPI_COMM_WORLD )       /* test 1 */
+          nextValue = 0;
+        else if ( group_id == 0 )           /* test 2 group 0 */
+          nextValue = 0;
+        else                                /* test 2 group 1 */
+          nextValue = (float)((hsize_t)( mpi_size / 2 )*count);
+        
+        i = 0;
+        while ( ( pass ) && ( i < (hsize_t)dset_size ) ) {
+          /* what we really want is data_slice[i] != nextValue --
+           * the following is a circumlocution to shut up the
+           * the compiler.
+           */
+          if ( ( data_slice[i] > nextValue ) ||
+               ( data_slice[i] < nextValue ) ) {
+            pass = FALSE;
+            failure_mssg = "Unexpected chunked dset contents.\n";
           }
           nextValue += 1;
           i++;
@@ -820,7 +948,7 @@ test_parallel_read(MPI_Comm comm, int mpi_rank, int mpi_size, int group_id)
         if (pass) {
           if(prop_value != TRUE) {
             pass = FALSE;
-            failure_mssg = "rank 0 Bcast optimization was not performed\n";
+            failure_mssg = "rank 0 Bcast optimization was mistakenly not performed\n";
           }
         }
       }
@@ -878,6 +1006,13 @@ test_parallel_read(MPI_Comm comm, int mpi_rank, int mpi_size, int group_id)
         if ( H5Dclose(dset_id) < 0 ) {
             pass = false;
             failure_mssg = "H5Dclose(dset_id) failed.\n";
+        }
+    }
+
+    if ( pass || (dset_id_ch != -1) ) {
+        if ( H5Dclose(dset_id_ch) < 0 ) {
+            pass = false;
+            failure_mssg = "H5Dclose(dset_id_ch) failed.\n";
         }
     }
 
