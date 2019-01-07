@@ -166,7 +166,7 @@ test_minimized_dset_ohdr_attribute_addition(hid_t fapl_id)
      * SETUP *
      *********/
 
-    if(h5_fixname(FILENAME[1], H5P_DEFAULT, filename, sizeof(filename)) == NULL)
+    if(h5_fixname(FILENAME[1], fapl_id, filename, sizeof(filename)) == NULL)
         TEST_ERROR
 
     dspace_id = H5Screate_simple(1, array_10, NULL);
@@ -397,10 +397,10 @@ test_minimized_dset_ohdr_size_comparisons(hid_t fapl_id)
      * SETUP *
      *********/
 
-    if(h5_fixname(FILENAME[1], H5P_DEFAULT, filename_a, sizeof(filename_a)) == NULL)
+    if(h5_fixname(FILENAME[1], fapl_id, filename_a, sizeof(filename_a)) == NULL)
         TEST_ERROR
 
-    if(h5_fixname(FILENAME[2], H5P_DEFAULT, filename_b, sizeof(filename_b)) == NULL)
+    if(h5_fixname(FILENAME[2], fapl_id, filename_b, sizeof(filename_b)) == NULL)
         TEST_ERROR
 
     for (compact = 0; compact < 2; compact++) { /* 0 or 1 */
@@ -560,7 +560,7 @@ test_minimized_dset_ohdr_with_filter(hid_t fapl_id)
      * SETUP *
      *********/
 
-    if(h5_fixname(FILENAME[1], H5P_DEFAULT, filename, sizeof(filename)) == NULL)
+    if(h5_fixname(FILENAME[1], fapl_id, filename, sizeof(filename)) == NULL)
         TEST_ERROR
 
     dcpl_mx_id = H5Pcreate(H5P_DATASET_CREATE);
@@ -699,7 +699,7 @@ test_minimized_dset_ohdr_modification_times(hid_t _fapl_id)
      * SETUP *
      *********/
 
-    if(h5_fixname(FILENAME[1], H5P_DEFAULT, filename, sizeof(filename)) == NULL)
+    if(h5_fixname(FILENAME[1], _fapl_id, filename, sizeof(filename)) == NULL)
         TEST_ERROR
 
     dcpl_mx_id = H5Pcreate(H5P_DATASET_CREATE);
@@ -738,14 +738,14 @@ test_minimized_dset_ohdr_modification_times(hid_t _fapl_id)
          * per-case setup *
          * -------------- */
 
-        fapl_id = H5Pcopy(_fapl_id);
-        if(fapl_id < 0) TEST_ERROR
-
         if(cases[i].oh_version > 1) {
             fapl_id = H5Pcreate(H5P_FILE_ACCESS);
             if(fapl_id < 0) TEST_ERROR
             ret = H5Pset_libver_bounds(fapl_id, H5F_LIBVER_V18, H5F_LIBVER_V110);
             if(ret < 0) TEST_ERROR
+        } else {
+            fapl_id = H5Pcopy(_fapl_id);
+            if(fapl_id < 0) TEST_ERROR
         }
 
         file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
@@ -850,7 +850,7 @@ test_minimized_dset_ohdr_fillvalue_backwards_compatability(hid_t _fapl_id)
 
     TESTING("minimized dset object headers with fill values and different libver support");
 
-    if(h5_fixname(FILENAME[1], H5P_DEFAULT, filename, sizeof(filename)) == NULL)
+    if(h5_fixname(FILENAME[1], _fapl_id, filename, sizeof(filename)) == NULL)
         TEST_ERROR
 
     dspace_id = H5Screate_simple(1, extents, extents);

@@ -13059,7 +13059,7 @@ test_versionbounds(void)
  *-----------------------------------------------------------------------------
  */
 static herr_t
-test_object_header_minimization_dcpl(void)
+test_object_header_minimization_dcpl(hid_t fapl_id)
 {
     hid_t    dcpl_id  = -1;
     hid_t    file_id  = -1;
@@ -13073,10 +13073,10 @@ test_object_header_minimization_dcpl(void)
     /* SETUP */
     /*********/
 
-    if(NULL == h5_fixname(OHMIN_FILENAME_A, H5P_DEFAULT, filename, sizeof(filename)))
-        TEST_ERROR("unable to prepare filename");
+    if(NULL == h5_fixname(OHMIN_FILENAME_A, fapl_id, filename, sizeof(filename)))
+        TEST_ERROR
 
-    file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
     if (file_id == H5I_INVALID_HID)
         TEST_ERROR
 
@@ -13370,7 +13370,7 @@ main(void)
     /* Tests version bounds using its own file */
     nerrors += (test_versionbounds() < 0                    ? 1 : 0);
 
-    nerrors += (test_object_header_minimization_dcpl() < 0 ? 1 : 0);
+    nerrors += (test_object_header_minimization_dcpl(fapl) < 0 ? 1 : 0);
 
     /* Run misc tests */
     nerrors += dls_01_main();
