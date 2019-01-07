@@ -1403,7 +1403,6 @@ H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t len, const uint8_t *image
             HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "bad flag combination for message")
         if((flags & H5O_MSG_FLAG_WAS_UNKNOWN) && !(flags & H5O_MSG_FLAG_MARK_IF_UNKNOWN))
             HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "bad flag combination for message")
-
         if((flags & H5O_MSG_FLAG_SHAREABLE)
                 && H5O_msg_class_g[id]
                 && !(H5O_msg_class_g[id]->share_flags & H5O_SHARE_IS_SHARABLE))
