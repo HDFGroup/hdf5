@@ -316,11 +316,11 @@ void compact_dataset(void)
     VRFY((dataset >= 0), "H5Dopen2 succeeded");
 
 #ifdef H5_HAVE_INSTRUMENTED_LIBRARY
-      hbool_t prop_value;
-      prop_value = H5D_XFER_COLL_RANK0_BCAST_DEF;
-      ret = H5Pinsert2(dxpl, H5D_XFER_COLL_RANK0_BCAST_NAME, H5D_XFER_COLL_RANK0_BCAST_SIZE, &prop_value,
-                       NULL, NULL, NULL, NULL, NULL, NULL);
-      VRFY((ret >= 0), "H5Pinsert2() succeeded");
+    hbool_t prop_value;
+    prop_value = H5D_XFER_COLL_RANK0_BCAST_DEF;
+    ret = H5Pinsert2(dxpl, H5D_XFER_COLL_RANK0_BCAST_NAME, H5D_XFER_COLL_RANK0_BCAST_SIZE, &prop_value,
+                     NULL, NULL, NULL, NULL, NULL, NULL);
+    VRFY((ret >= 0), "H5Pinsert2() succeeded");
 #endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
 
     ret = H5Dread(dataset, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, dxpl, inme);
