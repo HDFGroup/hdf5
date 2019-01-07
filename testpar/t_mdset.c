@@ -330,9 +330,8 @@ void compact_dataset(void)
     prop_value = FALSE;
     ret = H5Pget(dxpl, H5D_XFER_COLL_RANK0_BCAST_NAME, &prop_value);
     VRFY((ret >= 0), "H5Pget succeeded");
-    VRFY((prop_value != TRUE && dxfer_coll_type != DXFER_INDEPENDENT_IO),"rank 0 Bcast optimization was performed for a compact dataset");
+    VRFY((prop_value == FALSE && dxfer_coll_type == DXFER_COLLECTIVE_IO),"rank 0 Bcast optimization was performed for a compact dataset");
 #endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
-
 
     /* Verify data value */
     for(i = 0; i < size; i++)
