@@ -133,7 +133,7 @@ if (BUILD_SHARED_LIBS)
   # Define VOL Plugin Test Sources
   #-----------------------------------------------------------------------------
   set (VOL_PLUGIN_LIBS
-      echo_vol
+      null_vol_connector
   )
 
   foreach (vol_lib ${VOL_PLUGIN_LIBS})
@@ -374,6 +374,7 @@ set (H5_CHECK_TESTS
     atomic_reader
     links_env
     filenotclosed
+    del_many_dense_attrs
     flushrefresh
 )
 

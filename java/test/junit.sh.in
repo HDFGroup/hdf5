@@ -101,6 +101,7 @@ $HDFTEST_HOME/testfiles/JUnit-TestH5Obasic.txt
 $HDFTEST_HOME/testfiles/JUnit-TestH5Ocreate.txt
 $HDFTEST_HOME/testfiles/JUnit-TestH5Ocopy.txt
 $HDFTEST_HOME/testfiles/JUnit-TestH5PL.txt
+$HDFTEST_HOME/testfiles/JUnit-TestH5VL.txt
 $HDFTEST_HOME/testfiles/JUnit-TestH5Z.txt
 $HDFTEST_HOME/testfiles/JUnit-TestH5E.txt
 $HDFTEST_HOME/testfiles/JUnit-TestH5Edefault.txt
@@ -987,6 +988,27 @@ else
     echo "    Expected result differs from actual result"
     nerrors="`expr $nerrors + 1`"
     test yes = "$verbose" && $DIFF JUnit-TestH5PL.txt JUnit-TestH5PL.out |sed 's/^/    /'
+fi
+
+echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH -ea org.junit.runner.JUnitCore test.TestH5VL"
+TESTING JUnit-TestH5VL
+($RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH -ea org.junit.runner.JUnitCore test.TestH5VL > JUnit-TestH5VL.ext)
+
+# Extract file name, line number, version and thread IDs because they may be different
+sed -e 's/thread [0-9]*/thread (IDs)/' -e 's/: .*\.c /: (file name) /' \
+    -e 's/line [0-9]*/line (number)/' \
+    -e 's/Time: [0-9]*\.[0-9]*/Time:  XXXX/' \
+    -e 's/v[1-9]*\.[0-9]*\./version (number)\./' \
+    -e 's/[1-9]*\.[0-9]*\.[0-9]*[^)]*/version (number)/' \
+    JUnit-TestH5VL.ext > JUnit-TestH5VL.out
+
+if diff JUnit-TestH5VL.out JUnit-TestH5VL.txt > /dev/null; then
+    echo "  PASSED      JUnit-TestH5VL"
+else
+    echo "**FAILED**    JUnit-TestH5VL"
+    echo "    Expected result differs from actual result"
+    nerrors="`expr $nerrors + 1`"
+    test yes = "$verbose" && $DIFF JUnit-TestH5VL.txt JUnit-TestH5VL.out |sed 's/^/    /'
 fi
 
 echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH -ea org.junit.runner.JUnitCore test.TestH5Z"

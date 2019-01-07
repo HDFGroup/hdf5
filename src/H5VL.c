@@ -11,7 +11,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Purpose:	The Virtual Object Layer as described in documentation.
+ * Purpose:     The Virtual Object Layer as described in documentation.
  *              The pupose is to provide an abstraction on how to access the
  *              underlying HDF5 container, whether in a local file with
  *              a specific file format, or remotely on other machines, etc...
@@ -295,7 +295,7 @@ H5VLregister_connector_by_value(H5VL_class_value_t value, hid_t vipl_id)
         const H5VL_class_t *cls;
 
         /* Try loading the connector */
-        key.vol.kind = H5VL_GET_CONNECTOR_BY_NAME;
+        key.vol.kind = H5VL_GET_CONNECTOR_BY_VALUE;
         key.vol.u.value = value;
         if(NULL == (cls = (const H5VL_class_t *)H5PL_load(H5PL_TYPE_VOL, &key)))
             HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, H5I_INVALID_HID, "unable to load VOL connector")
@@ -486,14 +486,11 @@ done:
 /*---------------------------------------------------------------------------
  * Function:    H5VLcmp_connector_cls
  *
- * Purpose:     Compares two connector classes
+ * Purpose:     Compares two connector classes (based on their value field)
  *
- * Return:      Success:    Non-negative, with *cmp set to positive if
- *		connector_id1 is greater than connector_id2, negative if connector_id2
- *		is greater than connector_id1 and zero if connector_id1 and connector_id2
- *		are equal.
+ * Return:      Success:    Non-negative, *cmp set to a value like strcmp
  *
- *              Failure:    Negative
+ *              Failure:    Negative, *cmp unset
  *
  *---------------------------------------------------------------------------
  */

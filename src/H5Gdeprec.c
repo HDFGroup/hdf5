@@ -45,6 +45,8 @@
 #include "H5Pprivate.h"         /* Property lists                       */
 #include "H5VLprivate.h"        /* Virtual Object Layer                 */
 
+#include "H5VLnative_private.h" /* Native VOL connector                     */
+
 
 /****************/
 /* Local Macros */
@@ -734,7 +736,7 @@ H5Gset_comment(hid_t loc_id, const char *name, const char *comment)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
     /* Set the comment */
-    if(H5VL_object_optional(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, H5VL_OBJECT_SET_COMMENT, &loc_params, comment) < 0)
+    if(H5VL_object_optional(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, H5VL_NATIVE_OBJECT_SET_COMMENT, &loc_params, comment) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "unable to set comment value")
 
 done:
@@ -770,19 +772,20 @@ H5Gget_comment(hid_t loc_id, const char *name, size_t bufsize, char *buf)
 {
     H5VL_object_t *vol_obj;             /* Object token of loc_id */
     H5VL_loc_params_t loc_params;
+    ssize_t op_ret;                     /* Return value from operation */
     int	ret_value;                      /* Return value */
 
-    FUNC_ENTER_API(FAIL)
+    FUNC_ENTER_API(-1)
     H5TRACE4("Is", "i*sz*s", loc_id, name, bufsize, buf);
 
     if(!name || !*name)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, -1, "no name specified")
     if(bufsize > 0 && !buf)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no buffer specified")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, -1, "no buffer specified")
 
     /* Set up collective metadata if appropriate */
     if(H5CX_set_loc(loc_id) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set collective metadata read info")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTSET, -1, "can't set collective metadata read info")
 
     /* Fill in location struct fields */
     loc_params.type                         = H5VL_OBJECT_BY_NAME;
@@ -792,11 +795,14 @@ H5Gget_comment(hid_t loc_id, const char *name, size_t bufsize, char *buf)
 
     /* Get the location object */
     if(NULL == (vol_obj = H5VL_vol_object(loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, -1, "invalid location identifier")
 
     /* Get the comment */
-    if(H5VL_object_optional(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, H5VL_OBJECT_GET_COMMENT, &loc_params, buf, bufsize, &ret_value) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to get comment value")
+    if(H5VL_object_optional(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, H5VL_NATIVE_OBJECT_GET_COMMENT, &loc_params, buf, bufsize, &op_ret) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, -1, "unable to get comment value")
+
+    /* Set return value */
+    ret_value = (int)op_ret;
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -868,7 +874,7 @@ H5Giterate(hid_t loc_id, const char *name, int *idx_p, H5G_iterate_t op,
         HGOTO_ERROR(H5E_ATOM, H5E_BADTYPE, (-1), "invalid identifier")
 
     /* Call private iteration function, through VOL callback */
-    if((ret_value = H5VL_group_optional(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, H5VL_GROUP_ITERATE_OLD, &loc_params, idx, &last_obj, &lnk_op, op_data)) < 0)
+    if((ret_value = H5VL_group_optional(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, H5VL_NATIVE_GROUP_ITERATE_OLD, &loc_params, idx, &last_obj, &lnk_op, op_data)) < 0)
         HERROR(H5E_SYM, H5E_BADITER, "error iterating over group's links");
 
     /* Set the index we stopped at */
@@ -985,7 +991,7 @@ H5Gget_objinfo(hid_t loc_id, const char *name, hbool_t follow_link,
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
         /* Retrieve the object's information */
-        if(H5VL_group_optional(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, H5VL_GROUP_GET_OBJINFO, &loc_params, (unsigned)follow_link, statbuf) < 0)
+        if(H5VL_group_optional(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, H5VL_NATIVE_GROUP_GET_OBJINFO, &loc_params, (unsigned)follow_link, statbuf) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get info for object: '%s'", name)
     } /* end if */
 
@@ -1239,7 +1245,7 @@ H5Gget_objtype_by_idx(hid_t loc_id, hsize_t idx)
 
     /* Retrieve the object's basic information (which includes its type) */
     fields = H5O_INFO_BASIC;
-    if(H5VL_object_optional(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, H5VL_OBJECT_GET_INFO, &loc_params, &oinfo, fields) < 0)
+    if(H5VL_object_optional(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, H5VL_NATIVE_OBJECT_GET_INFO, &loc_params, &oinfo, fields) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_BADTYPE, H5G_UNKNOWN, "can't get object info")
 
     /* Map to group object type */

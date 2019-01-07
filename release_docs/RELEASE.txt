@@ -1,4 +1,4 @@
-HDF5 version 1.11.4 currently under development
+ version 1.11.4 currently under development
 ================================================================================
 
 
@@ -129,6 +129,12 @@ New Features
 
       (ADB - 2018/09/18, HDFFV-10332)
 
+    - Remove H5I_REFERENCE from the library
+
+      This ID class was never used by the library and has been removed.
+
+      (DER - 2018/12/08, HDFFV-10252)
+
 
     Parallel Library:
     -----------------
@@ -206,6 +212,14 @@ New Features
       (ADB - 2018/12/12, HDFVIEW-4)
 
 
+    - Removed H5I_REFERENCE from the Java wrappers
+
+      This ID class was never used by the library and has been removed
+      from the Java wrappers.
+
+      (DER - 2018/12/08, HDFFV-10252)
+
+
     Tools:
     ------
     -
@@ -235,6 +249,19 @@ Bug Fixes since HDF5-1.10.3 release
 
     Library
     -------
+    - Deleting attributes in dense storage
+
+      The library aborts with "infinite loop closing library" after
+      attributes in dense storage are created and then deleted.
+
+      When deleting the attribute nodes from the name index v2 B-tree,
+      if an attribute is found in the intermediate B-tree nodes,
+      which may be merged/redistributed in the process, we need to 
+      free the dynamically allocated spaces for the intermediate 
+      decoded attribute.
+
+      (VC - 2018/12/26, HDFFV-10659)
+
     - Allow H5detect and H5make_libsettings to take a file as an argument.
 
       Rather than only writing to stdout, add a command argument to name
@@ -306,6 +333,15 @@ Bug Fixes since HDF5-1.10.3 release
 
     Fortran
     --------
+    - Added symbolic links libhdf5_hl_fortran.so to libhdf5hl_fortran.so and
+      libhdf5_hl_fortran.a to libhdf5hl_fortran.a in hdf5/lib directory for 
+      autotools installs.  These were added to match the name of the files 
+      installed by cmake and the general pattern of hl lib files.  We will 
+      change the names of the installed lib files to the matching name in 
+      the next major release.
+
+      (LRK - 2019/01/04, HDFFV-10596)
+
     - Made Fortran specific subroutines PRIVATE in generic procedures.
 
       Effected generic procedures were functions in H5A, H5D, H5P, H5R and H5T.

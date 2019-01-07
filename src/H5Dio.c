@@ -30,6 +30,8 @@
 #include "H5MMprivate.h"        /* Memory management                        */
 #include "H5Sprivate.h"         /* Dataspace                                */
 
+#include "H5VLnative_private.h" /* Native VOL connector                     */
+
 #ifdef H5_HAVE_PARALLEL
 /* Remove this if H5R_DATASET_REGION is no longer used in this file */
 #include "H5Rpublic.h"
@@ -242,7 +244,7 @@ H5Dread_chunk(hid_t dset_id, hid_t dxpl_id, const hsize_t *offset, uint32_t *fil
     H5CX_set_dxpl(dxpl_id);
 
     /* Read the raw chunk */
-    if(H5VL_dataset_optional(vol_obj, dxpl_id, H5_REQUEST_NULL, H5VL_DATASET_CHUNK_READ, offset, filters, buf) < 0)
+    if(H5VL_dataset_optional(vol_obj, dxpl_id, H5_REQUEST_NULL, H5VL_NATIVE_DATASET_CHUNK_READ, offset, filters, buf) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read unprocessed chunk data")
 
 done:
@@ -370,7 +372,7 @@ H5Dwrite_chunk(hid_t dset_id, hid_t dxpl_id, uint32_t filters, const hsize_t *of
     H5CX_set_dxpl(dxpl_id);
 
     /* Write chunk */
-    if(H5VL_dataset_optional(vol_obj, dxpl_id, H5_REQUEST_NULL, H5VL_DATASET_CHUNK_WRITE, filters, offset, data_size_32, buf) < 0)
+    if(H5VL_dataset_optional(vol_obj, dxpl_id, H5_REQUEST_NULL, H5VL_NATIVE_DATASET_CHUNK_WRITE, filters, offset, data_size_32, buf) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write unprocessed chunk data")
 
 done:

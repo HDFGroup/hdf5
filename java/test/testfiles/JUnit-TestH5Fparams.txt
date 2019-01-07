@@ -1,4 +1,5 @@
 JUnit version 4.11
+.testH5Fis_accessible_null
 .testH5Fcreate_null
 .testH5Fflush_local
 .testH5Fget_info
@@ -8,10 +9,8 @@ JUnit version 4.11
 .testH5Funmount_null
 .testH5Fclose_negative
 .testH5Fopen_null
-.testH5Fis_hdf5_null
-.testH5Fis_hdf5_text
 
 Time:  XXXX
 
-OK (11 tests)
+OK (10 tests)
 

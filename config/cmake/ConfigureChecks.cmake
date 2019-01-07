@@ -28,15 +28,6 @@ if (HDF5_STRICT_FORMAT_CHECKS)
 endif ()
 MARK_AS_ADVANCED (HDF5_STRICT_FORMAT_CHECKS)
 
-#-----------------------------------------------------------------------------
-# Option for --enable-metadata-trace-file
-#-----------------------------------------------------------------------------
-option (HDF5_METADATA_TRACE_FILE "Enable metadata trace file collection" OFF)
-if (HDF5_METADATA_TRACE_FILE)
-  set (${HDF_PREFIX}_METADATA_TRACE_FILE 1)
-endif ()
-MARK_AS_ADVANCED (HDF5_METADATA_TRACE_FILE)
-
 # ----------------------------------------------------------------------
 # Decide whether the data accuracy has higher priority during data
 # conversions.  If not, some hard conversions will still be prefered even
