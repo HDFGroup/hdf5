@@ -520,6 +520,7 @@ set (test_CLEANFILES
     flushrefresh_VERIFICATION_CHECKPOINT2
     flushrefresh_VERIFICATION_DONE
     filenotclosed.h5
+    del_many_dense_attrs.h5
     atomic_data
     accum_swmr_big.h5
     ohdr_swmr.h5
@@ -795,6 +796,7 @@ set_tests_properties (H5TEST-tcheck_version-release PROPERTIES
 #    atomic_reader
 #    links_env
 #    filenotclosed
+#    del_many_dense_attrs
 #    flushrefresh
 ##############################################################################
 # autotools script tests
@@ -802,7 +804,7 @@ set_tests_properties (H5TEST-tcheck_version-release PROPERTIES
 # NOT CONVERTED accum_swmr_reader is used by accum.c.
 # NOT CONVERTED atomic_writer and atomic_reader are standalone programs.
 # links_env is used by testlinks_env.sh
-# filenotclosed is used by test_filenotclosed.sh
+# filenotclosed and del_many_dense_attrs are used by testabort_fail.sh
 # NOT CONVERTED flushrefresh is used by testflushrefresh.sh.
 # NOT CONVERTED use_append_chunk, use_append_mchunks and use_disable_mdc_flushes are used by test_usecases.sh
 # NOT CONVERTED swmr_* files (besides swmr.c) are used by testswmr.sh.
@@ -825,6 +827,23 @@ set_tests_properties (H5TEST-clear-filenotclosed-objects PROPERTIES FIXTURES_SET
 add_test (NAME H5TEST-filenotclosed COMMAND $<TARGET_FILE:filenotclosed>)
 set_tests_properties (H5TEST-filenotclosed PROPERTIES
     FIXTURES_REQUIRED filenotclosed_clear_objects
+    ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST"
+    WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
+)
+
+#-- Adding test for del_many_dense_attrs
+add_test (
+    NAME H5TEST-clear-del_many_dense_attrs-objects
+    COMMAND    ${CMAKE_COMMAND}
+        -E remove
+        del_many_dense_attrs.h5
+    WORKING_DIRECTORY
+        ${HDF5_TEST_BINARY_DIR}/H5TEST
+)
+set_tests_properties (H5TEST-clear-del_many_dense_attrs-objects PROPERTIES FIXTURES_SETUP  del_many_dense_attrs_clear_objects)
+add_test (NAME H5TEST-del_many_dense_attrs COMMAND $<TARGET_FILE:del_many_dense_attrs>)
+set_tests_properties (H5TEST-del_many_dense_attrs PROPERTIES
+    FIXTURES_REQUIRED del_many_dense_attrs_clear_objects
     ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST"
     WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
 )
