@@ -47,6 +47,14 @@ New Features
 
     Configuration:
     -------------
+    - Rework CMake configure files to eliminate developer CMP0075 warning
+
+      Renamed varname to HDF5_REQUIRED_LIBRARIES as the contents were not
+      required for configuration. Also moved check includes calls to top of
+      files.
+
+      (ADB - 2019/01/03, HDFFV-10546)
+
     - Keep stderr and stdout separate in tests
 
       Changed test handling of output capture. Tests now keep the stderr
@@ -105,7 +113,7 @@ New Features
         h5trav.h
 
       (DER - 2018/10/26, HDFFV-10614, 10609)
- 
+
     - Autotools installs now install H5FDwindows.h
 
       This is simply to align the installed header files between the
@@ -114,7 +122,7 @@ New Features
 
       (DER - 2018/10/26, HDFFV-10614)
 
- 
+
     Library:
     --------
     - Added new chunk query functions
@@ -193,10 +201,27 @@ New Features
 
     C++ Library:
     ------------
-    - 
+    -
 
     Java Library:
     ----------------
+    - Add new functions to java interface
+
+      Added wrappers for:
+      H5Fset_libver_bounds
+      H5Fget_dset_no_attrs_hint/H5Fset_dset_no_attrs_hint
+      H5Pget_dset_no_attrs_hint/H5Pset_dset_no_attrs_hint
+
+      (ADB - 2019/01/07, HDFFV-10664)
+
+    - Fix java unit tests when Time is a natural number
+
+      Time substitution in java/test/junit.sh.in doesn't
+      handle the case when Time is a natural number. Fixed
+      the regular expression.
+
+      (ADB - 2019/01/07, HDFFV-10674)
+
     - Duplicate the data read/write functions of Datasets for Attributes.
 
       Region references could not be displayed for attributes as they could
@@ -285,7 +310,7 @@ Bug Fixes since HDF5-1.10.3 release
 
     - There was an incorrect protection against division by zero reported
       to The HDF Group as issue #CVE-2018-17233.
-      
+
       Protection against division by zero was added to address the issue
       #CVE-2018-17233.  In addition, several similar occurrences in the same
       file were fixed as well.
@@ -333,7 +358,7 @@ Bug Fixes since HDF5-1.10.3 release
     - Made Fortran specific subroutines PRIVATE in generic procedures.
 
       Effected generic procedures were functions in H5A, H5D, H5P, H5R and H5T.
-    
+
       (MSB, 2018/12/04, HDFFV-10511)
 
 Supported Platforms
@@ -459,7 +484,7 @@ The following platforms are not supported but have been tested for this release.
     #1 SMP x86_64 GNU/Linux          Version 4.8.5 20150623 (Red Hat 4.8.5-4)
     (jelly)                       with NAG Fortran Compiler Release 6.1(Tozai)
                                   GCC Version 7.1.0
-                                  OpenMPI 3.0.0-GCC-7.2.0-2.29, 
+                                  OpenMPI 3.0.0-GCC-7.2.0-2.29,
                                      3.1.0-GCC-7.2.0-2.29
                                   Intel(R) C (icc) and C++ (icpc) compilers
                                      Version 17.0.0.098 Build 20160721

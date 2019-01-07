@@ -5946,6 +5946,51 @@ Java_hdf_hdf5lib_H5_H5Pget_1chunk_1opts
     return (jint)opts;
 } /* end Java_hdf_hdf5lib_H5_H5Pget_1chunk_1opts */
 
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Pset_dset_no_attrs_hint
+ * Signature: (JZ)V
+ */
+JNIEXPORT void JNICALL
+Java_hdf_hdf5lib_H5_H5Pset_1dset_1no_1attrs_1hint
+(JNIEnv *env, jclass clss, jlong dcpl_id, jboolean minimize)
+{
+    herr_t   retVal = -1;
+    hbool_t  minimize_val;
+
+    if (minimize == JNI_TRUE)
+        minimize_val = TRUE;
+    else
+        minimize_val = FALSE;
+
+    retVal = H5Pset_dset_no_attrs_hint((hid_t)dcpl_id, (hbool_t)minimize_val);
+    if (retVal < 0)
+        h5libraryError(env);
+}
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Pget_dset_no_attrs_hint
+ * Signature: (J)Z
+ */
+JNIEXPORT jboolean JNICALL
+Java_hdf_hdf5lib_H5_H5Pget_1dset_1no_1attrs_1hint
+(JNIEnv *env, jclass clss, jlong dcpl_id)
+{
+    hbool_t    minimize = FALSE;
+    jboolean  bval = JNI_FALSE;
+
+    if (H5Pget_dset_no_attrs_hint((hid_t)dcpl_id, (hbool_t *)&minimize) < 0) {
+        h5libraryError(env);
+    }
+    else {
+        if (minimize == TRUE)
+            bval =  JNI_TRUE;
+    } /* end else */
+
+    return bval;
+}
+
 #ifdef __cplusplus
 } /* end extern "C" */
 #endif /* __cplusplus */
