@@ -3406,6 +3406,7 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  test/test_filter_plugin.sh
                  test/test_usecases.sh
                  testpar/Makefile
+                 testpar/testpflush.sh
                  tools/Makefile
                  tools/lib/Makefile
                  tools/src/Makefile
