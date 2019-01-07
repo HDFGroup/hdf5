@@ -407,9 +407,9 @@ table_list_add(hid_t oid, unsigned long file_no)
     }
     if(init_objs(oid, &info, &table_list.tables[idx].group_table,
                  &table_list.tables[idx].dset_table, &table_list.tables[idx].type_table) < 0) {
-            H5Idec_ref(oid);
-            table_list.nused--;
-            return -1;
+        H5Idec_ref(oid);
+        table_list.nused--;
+        return -1;
     }
 
 #ifdef H5DUMP_DEBUG
