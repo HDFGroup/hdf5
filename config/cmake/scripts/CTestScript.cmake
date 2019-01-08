@@ -254,6 +254,15 @@ message (STATUS "Dashboard script configuration:\n${vars}\n")
     file (APPEND ${CTEST_SCRIPT_DIRECTORY}/FailedCTest.txt "Failed Configure: ${res}\n")
   endif ()
 
+  # On Cray XC40, configuring fails in the Fortran section when using the craype-mic-knl module.
+  # When the configure phase is done with the craype-haswell module and the build phase is done
+  # with the craype-mic-knl module, configure succeeds and tests pass on the knl compute nodes
+  # for Intel, Cray, GCC and Clang compilers.  If the variables aren't set or if not 
+  # cross compiling, the module switch will not occur.
+  if (CMAKE_CROSSCOMPILING AND COMPILENODE_HWCOMPILE_MODULE AND COMPUTENODE_HWCOMPILE_MODULE)
+      execute_process (COMMAND module switch ${COMPILENODE_HWCOMPILE_MODULE} ${COMPUTENODE_HWCOMPILE_MODULE})
+  endif ()
+
   ctest_build (BUILD "${CTEST_BINARY_DIRECTORY}" APPEND RETURN_VALUE res NUMBER_ERRORS errval)
   if (LOCAL_SUBMIT)
     ctest_submit (PARTS Build)
