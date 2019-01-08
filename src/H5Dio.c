@@ -1172,15 +1172,19 @@ H5D__ioinfo_adjust(H5D_io_info_t *io_info, const H5D_t *dset,
                 hbool_t                         local_error_message_previously_written = FALSE;
                 hbool_t                         global_error_message_previously_written = FALSE;
                 size_t                          index;
-                char                            local_no_collective_cause_string[256] = "";
-                char                            global_no_collective_cause_string[256] = "";
+                size_t                          cause_strings_len;
+                char                            local_no_collective_cause_string[512] = "";
+                char                            global_no_collective_cause_string[512] = "";
                 const char                     *cause_strings[] = { "independent I/O was requested",
                                                                     "datatype conversions were required",
                                                                     "data transforms needed to be applied",
                                                                     "optimized MPI types flag wasn't set",
                                                                     "one of the dataspaces was neither simple nor scalar",
                                                                     "dataset was not contiguous or chunked",
-                                                                    "parallel writes to filtered datasets are disabled" };
+                                                                    "parallel writes to filtered datasets are disabled",
+                                                                    "an error occurred while checking if collective I/O was possible" };
+
+                cause_strings_len = sizeof(cause_strings) / sizeof(cause_strings[0]);
 
                 if(H5CX_get_mpio_local_no_coll_cause(&local_no_collective_cause) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to get local no collective cause value")
@@ -1189,7 +1193,7 @@ H5D__ioinfo_adjust(H5D_io_info_t *io_info, const H5D_t *dset,
 
                 /* Append each of the "reason for breaking collective I/O" error messages to the
                  * local and global no collective cause strings */
-                for (cause = 1, index = 0; cause < H5D_MPIO_NO_COLLECTIVE_MAX_CAUSE; cause <<= 1, index++) {
+                for (cause = 1, index = 0; (cause < H5D_MPIO_NO_COLLECTIVE_MAX_CAUSE) && (index < cause_strings_len); cause <<= 1, index++) {
                     size_t cause_strlen = HDstrlen(cause_strings[index]);
 
                     if (cause & local_no_collective_cause) {
