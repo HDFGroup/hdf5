@@ -580,7 +580,7 @@ init_objs(hid_t fid, find_objs_t *info, table_t **group_table,
 
 done:
     /* Release resources */
-    if(ret_value == FAIL) {
+    if(ret_value < 0) {
         free_table(*group_table);
         info->group_table = NULL;
         free_table(*type_table);
