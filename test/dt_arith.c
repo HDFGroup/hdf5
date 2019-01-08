@@ -4893,8 +4893,24 @@ run_fp_tests(const char *name)
 #if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE && H5_SIZEOF_LONG_DOUBLE!=0
     nerrors += test_conv_flt_1(name, TEST_SPECIAL, H5T_NATIVE_FLOAT, H5T_NATIVE_LDOUBLE);
     nerrors += test_conv_flt_1(name, TEST_SPECIAL, H5T_NATIVE_DOUBLE, H5T_NATIVE_LDOUBLE);
+#ifndef H5_DISABLE_SOME_LDOUBLE_CONV
     nerrors += test_conv_flt_1(name, TEST_SPECIAL, H5T_NATIVE_LDOUBLE, H5T_NATIVE_FLOAT);
     nerrors += test_conv_flt_1(name, TEST_SPECIAL, H5T_NATIVE_LDOUBLE, H5T_NATIVE_DOUBLE);
+#else
+    {
+        char		str[256];		/*string		*/
+
+        HDsnprintf(str, sizeof(str), "Testing %s special %s -> %s conversions",
+                name, "long double", "float or double");
+        printf("%-70s", str);
+        SKIPPED();
+#if H5_SIZEOF_LONG_DOUBLE!=0
+        HDputs("    Test skipped due to the conversion problem on IBM Power9 cpu.");
+#else
+        HDputs("    Test skipped due to disabled long double.");
+#endif
+    }
+#endif
 #endif
 
 done:
@@ -4963,7 +4979,7 @@ run_int_fp_conv(const char *name)
     nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_INT, H5T_NATIVE_LDOUBLE);
     nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_UINT, H5T_NATIVE_LDOUBLE);
 #if H5_SIZEOF_LONG!=H5_SIZEOF_INT
-#ifndef H5_LONG_TO_LDOUBLE_SPECIAL
+#if !defined(H5_LONG_TO_LDOUBLE_SPECIAL) && !defined(H5_DISABLE_SOME_LDOUBLE_CONV)
     nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_LONG, H5T_NATIVE_LDOUBLE);
     nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_ULONG, H5T_NATIVE_LDOUBLE);
 #else
@@ -5077,7 +5093,25 @@ run_fp_int_conv(const char *name)
 #endif
 
 #if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE
-        nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_LDOUBLE, H5T_NATIVE_SCHAR);
+        if(test_values != TEST_SPECIAL) {
+	    nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_LDOUBLE, H5T_NATIVE_SCHAR);
+        } else {
+#ifndef H5_DISABLE_SOME_LDOUBLE_CONV
+	    nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_LDOUBLE, H5T_NATIVE_SCHAR);
+#else
+            char		str[256];		/*string		*/
+
+            HDsnprintf(str, sizeof(str), "Testing %s special %s -> %s conversions",
+                name, "long double", "signed char");
+            printf("%-70s", str);
+            SKIPPED();
+#if H5_SIZEOF_LONG_DOUBLE!=0
+            HDputs("    Test skipped due to the conversion problem on IBM Power9 cpu.");
+#else
+            HDputs("    Test skipped due to disabled long double.");
+#endif
+#endif
+        }
         nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_LDOUBLE, H5T_NATIVE_UCHAR);
         nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_LDOUBLE, H5T_NATIVE_SHORT);
         nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_LDOUBLE, H5T_NATIVE_USHORT);
