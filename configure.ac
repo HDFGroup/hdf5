@@ -2960,10 +2960,10 @@ else
 fi
 
 ## ----------------------------------------------------------------------
-## Set the flag to indicate that the machine is power9 and cannot
+## Set the flag to indicate that the machine is IBM ppc64le and cannot
 ## accurately convert some long double values.
 ##
-AC_MSG_CHECKING([if the system is power9 and cannot correctly convert some long double values])
+AC_MSG_CHECKING([if the system is IBM ppc64le and cannot correctly convert some long double values])
 
 TEST_SRC="`(echo \"#define H5_DISABLE_SOME_LDOUBLE_CONV_TEST 1\"; cat $srcdir/config/cmake/ConversionTests.c)`"
 
@@ -2977,7 +2977,7 @@ fi
 
 if test ${hdf5_cv_disable_some_ldouble_conv} = "yes"; then
   AC_DEFINE([DISABLE_SOME_LDOUBLE_CONV], [1],
-            [Define if your system is power9 and cannot convert some long double values correctly.])
+            [Define if your system is IBM ppc64le and cannot convert some long double values correctly.])
   AC_MSG_RESULT([yes])
 else
   AC_MSG_RESULT([no])
