@@ -17,6 +17,7 @@
  */
 
 #include "testpar.h"
+#include "H5Dprivate.h"
 
 /* The collection of files is included below to aid
  * an external "cleanup" process if required.
@@ -704,6 +705,9 @@ test_parallel_read(MPI_Comm comm, int mpi_rank, int mpi_size, int group_id)
     /* Don't test with more than LIMIT_NPROC processes to avoid memory issues */
 
     if( group_size <= LIMIT_NPROC ) {
+#ifdef H5_HAVE_INSTRUMENTED_LIBRARY
+      hbool_t prop_value;
+#endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
 
       if ( (filespace = H5Dget_space(dset_id )) < 0 ) {
         pass = FALSE;
@@ -749,6 +753,17 @@ test_parallel_read(MPI_Comm comm, int mpi_rank, int mpi_size, int group_id)
         }
       }
 
+#ifdef H5_HAVE_INSTRUMENTED_LIBRARY
+      if ( pass ) {
+        prop_value = H5D_XFER_COLL_RANK0_BCAST_DEF;
+        if(H5Pinsert2(dxpl_id, H5D_XFER_COLL_RANK0_BCAST_NAME, H5D_XFER_COLL_RANK0_BCAST_SIZE, &prop_value,
+                   NULL, NULL, NULL, NULL, NULL, NULL) < 0) {
+            pass = FALSE;
+            failure_mssg = "H5Pinsert2() failed\n";
+        }
+      }
+#endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
+
       /* read H5S_ALL section */
       if ( pass ) {
         if ( (H5Dread(dset_id, H5T_NATIVE_FLOAT, H5S_ALL,
@@ -757,6 +772,22 @@ test_parallel_read(MPI_Comm comm, int mpi_rank, int mpi_size, int group_id)
           failure_mssg = "H5Dread() failed\n";
         }
       }
+
+#ifdef H5_HAVE_INSTRUMENTED_LIBRARY
+      if ( pass ) {
+        prop_value = FALSE;
+        if(H5Pget(dxpl_id, H5D_XFER_COLL_RANK0_BCAST_NAME, &prop_value) < 0) {
+            pass = FALSE;
+            failure_mssg = "H5Pget() failed\n";
+        }
+        if (pass) {
+          if(prop_value != TRUE) {
+            pass = FALSE;
+            failure_mssg = "rank 0 Bcast optimization was mistakenly not performed\n";
+          }
+        }
+      }
+#endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
 
       /* verify the data */
       if ( pass ) {
@@ -785,6 +816,17 @@ test_parallel_read(MPI_Comm comm, int mpi_rank, int mpi_size, int group_id)
       }
 
       /* read H5S_ALL section for the chunked dataset */
+
+#ifdef H5_HAVE_INSTRUMENTED_LIBRARY
+      if ( pass ) {
+        prop_value = H5D_XFER_COLL_RANK0_BCAST_DEF;
+        if(H5Pset(dxpl_id, H5D_XFER_COLL_RANK0_BCAST_NAME, &prop_value) < 0) {
+            pass = FALSE;
+            failure_mssg = "H5Pset() failed\n";
+        }
+      }
+#endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
+
       for ( i = 0; i < (hsize_t)dset_size; i++) {
         data_slice[i] = 0;
       }
@@ -795,6 +837,22 @@ test_parallel_read(MPI_Comm comm, int mpi_rank, int mpi_size, int group_id)
           failure_mssg = "H5Dread() failed\n";
         }
       }
+
+#ifdef H5_HAVE_INSTRUMENTED_LIBRARY
+      if ( pass ) {
+        prop_value = FALSE;
+        if(H5Pget(dxpl_id, H5D_XFER_COLL_RANK0_BCAST_NAME, &prop_value) < 0) {
+            pass = FALSE;
+            failure_mssg = "H5Pget() failed\n";
+        }
+        if (pass) {
+          if(prop_value == TRUE) {
+            pass = FALSE;
+            failure_mssg = "rank 0 Bcast optimization was mistakenly performed for chunked dataset\n";
+          }
+        }
+      }
+#endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
 
       /* verify the data */
       if ( pass ) {
@@ -820,7 +878,7 @@ test_parallel_read(MPI_Comm comm, int mpi_rank, int mpi_size, int group_id)
           nextValue += 1;
           i++;
         }
-      }  
+      }
 
       if ( pass || (filespace != -1) ) {
         if ( H5Sclose(filespace) < 0 ) {
@@ -861,6 +919,16 @@ test_parallel_read(MPI_Comm comm, int mpi_rank, int mpi_size, int group_id)
         }
       }
 
+#ifdef H5_HAVE_INSTRUMENTED_LIBRARY
+      if ( pass ) {
+        prop_value = H5D_XFER_COLL_RANK0_BCAST_DEF;
+        if(H5Pset(dxpl_id, H5D_XFER_COLL_RANK0_BCAST_NAME, &prop_value) < 0) {
+            pass = FALSE;
+            failure_mssg = "H5Pset() failed\n";
+        }
+      }
+#endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
+
       /* read this processes section of the data */
       if ( pass ) {
         if ( (H5Dread(dset_id, H5T_NATIVE_FLOAT, memspace,
@@ -869,6 +937,22 @@ test_parallel_read(MPI_Comm comm, int mpi_rank, int mpi_size, int group_id)
           failure_mssg = "H5Dread() failed\n";
         }
       }
+
+#ifdef H5_HAVE_INSTRUMENTED_LIBRARY
+      if ( pass ) {
+        prop_value = FALSE;
+        if(H5Pget(dxpl_id, H5D_XFER_COLL_RANK0_BCAST_NAME, &prop_value) < 0) {
+            pass = FALSE;
+            failure_mssg = "H5Pget() failed\n";
+        }
+        if (pass) {
+          if(prop_value != TRUE) {
+            pass = FALSE;
+            failure_mssg = "rank 0 Bcast optimization was mistakenly not performed\n";
+          }
+        }
+      }
+#endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
 
       /* verify the data */
       if ( pass ) {

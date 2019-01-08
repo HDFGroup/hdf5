@@ -12,6 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include "testphdf5.h"
+#include "H5Dprivate.h"
 
 #define DIM  2
 #define SIZE 32
@@ -311,12 +312,26 @@ void compact_dataset(void)
      VRFY((ret>= 0),"set independent IO collectively succeeded");
     }
 
-
     dataset = H5Dopen2(iof, dname, H5P_DEFAULT);
     VRFY((dataset >= 0), "H5Dopen2 succeeded");
 
+#ifdef H5_HAVE_INSTRUMENTED_LIBRARY
+    hbool_t prop_value;
+    prop_value = H5D_XFER_COLL_RANK0_BCAST_DEF;
+    ret = H5Pinsert2(dxpl, H5D_XFER_COLL_RANK0_BCAST_NAME, H5D_XFER_COLL_RANK0_BCAST_SIZE, &prop_value,
+                     NULL, NULL, NULL, NULL, NULL, NULL);
+    VRFY((ret >= 0), "H5Pinsert2() succeeded");
+#endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
+
     ret = H5Dread(dataset, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, dxpl, inme);
     VRFY((ret >= 0), "H5Dread succeeded");
+
+#ifdef H5_HAVE_INSTRUMENTED_LIBRARY
+    prop_value = FALSE;
+    ret = H5Pget(dxpl, H5D_XFER_COLL_RANK0_BCAST_NAME, &prop_value);
+    VRFY((ret >= 0), "H5Pget succeeded");
+    VRFY((prop_value == FALSE && dxfer_coll_type == DXFER_COLLECTIVE_IO),"rank 0 Bcast optimization was performed for a compact dataset");
+#endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
 
     /* Verify data value */
     for(i = 0; i < size; i++)
@@ -650,7 +665,16 @@ void dataset_fillvalue(void)
     dxpl = H5Pcreate(H5P_DATASET_XFER);
     VRFY((dxpl >= 0), "H5Pcreate succeeded");
 
+#ifdef H5_HAVE_INSTRUMENTED_LIBRARY
+      hbool_t prop_value;
+      prop_value = H5D_XFER_COLL_RANK0_BCAST_DEF;
+      ret = H5Pinsert2(dxpl, H5D_XFER_COLL_RANK0_BCAST_NAME, H5D_XFER_COLL_RANK0_BCAST_SIZE, &prop_value,
+                   NULL, NULL, NULL, NULL, NULL, NULL);
+      VRFY((ret >= 0),"testing property list inserted succeeded");
+#endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
+
     for(ii = 0; ii < 2; ii++) {
+
       if(ii == 0)
         ret = H5Pset_dxpl_mpio(dxpl, H5FD_MPIO_INDEPENDENT);
       else
@@ -659,9 +683,20 @@ void dataset_fillvalue(void)
 
       /* set entire read buffer with the constant 2 */
       HDmemset(rdata,2,(size_t)(dset_size*sizeof(int)));
+
       /* Read the entire dataset back */
       ret = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, rdata);
       VRFY((ret >= 0), "H5Dread succeeded");
+
+#ifdef H5_HAVE_INSTRUMENTED_LIBRARY
+      prop_value = FALSE;
+      ret = H5Pget(dxpl, H5D_XFER_COLL_RANK0_BCAST_NAME, &prop_value);
+      VRFY((ret >= 0), "testing property list get succeeded");
+      if(ii == 0)
+        VRFY((prop_value == FALSE), "correctly handled rank 0 Bcast");
+      else
+        VRFY((prop_value == TRUE), "correctly handled rank 0 Bcast");
+#endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
 
       /* Verify all data read are the fill value 0 */
       trdata = rdata;
@@ -675,7 +710,7 @@ void dataset_fillvalue(void)
                   printf("Dataset Verify failed at [%d][%d][%d][%d]: expect 0, got %d\n", i, j, k, l, *trdata);
       if(err_num > MAX_ERR_REPORT && !VERBOSE_MED)
         printf("[more errors ...]\n");
-      if(err_num){
+      if(err_num) {
         printf("%d errors found in check_value\n", err_num);
         nerrors++;
       }
@@ -721,7 +756,14 @@ void dataset_fillvalue(void)
      * Read dataset after partial write.
      */
 
+#ifdef H5_HAVE_INSTRUMENTED_LIBRARY
+      prop_value = H5D_XFER_COLL_RANK0_BCAST_DEF;
+      ret = H5Pset(dxpl, H5D_XFER_COLL_RANK0_BCAST_NAME, &prop_value);
+      VRFY((ret >= 0), " H5Pset succeeded");
+#endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
+
     for(ii = 0; ii < 2; ii++) {
+
       if(ii == 0)
         ret = H5Pset_dxpl_mpio(dxpl, H5FD_MPIO_INDEPENDENT);
       else
@@ -730,9 +772,20 @@ void dataset_fillvalue(void)
 
       /* set entire read buffer with the constant 2 */
       HDmemset(rdata,2,(size_t)(dset_size*sizeof(int)));
+
       /* Read the entire dataset back */
       ret = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, rdata);
       VRFY((ret >= 0), "H5Dread succeeded");
+
+#ifdef H5_HAVE_INSTRUMENTED_LIBRARY
+      prop_value = FALSE;
+      ret = H5Pget(dxpl, H5D_XFER_COLL_RANK0_BCAST_NAME, &prop_value);
+      VRFY((ret >= 0), "testing property list get succeeded");
+      if(ii == 0)
+        VRFY((prop_value == FALSE), "correctly handled rank 0 Bcast");
+      else
+        VRFY((prop_value == TRUE), "correctly handled rank 0 Bcast");
+#endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
 
       /* Verify correct data read */
       twdata=wdata;
