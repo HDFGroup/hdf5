@@ -1210,6 +1210,15 @@ EOF
 AC_CHECK_SIZEOF([bool])
 fi
 
+AC_CHECK_SIZEOF(time_t, [], [
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_TIME_H
+#include <time.h>
+#endif
+])
+
 ## Checkpoint the cache
 AC_CACHE_SAVE
 

@@ -138,7 +138,13 @@ New Features
 
     Parallel Library:
     -----------------
-    -
+    - Changed the default behavior in parallel when reading the same dataset in its entirely
+      (i.e. H5S_ALL dataset selection) which is being read by all the processes collectively.
+      The new behavior is the HDF5 library will use an MPI_Bcast to pass the data read from 
+      the disk by the root process to the remain processes in the MPI communicator associated 
+      with the HDF5 file.
+
+      (MSB - 2019/01/02, HDFFV-10652)
 
     Fortran Library:
     ----------------
