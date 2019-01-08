@@ -4883,7 +4883,24 @@ run_fp_tests(const char *name)
 #if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE && H5_SIZEOF_LONG_DOUBLE!=0
     nerrors += test_conv_flt_1(name, TEST_DENORM, H5T_NATIVE_FLOAT, H5T_NATIVE_LDOUBLE);
     nerrors += test_conv_flt_1(name, TEST_DENORM, H5T_NATIVE_DOUBLE, H5T_NATIVE_LDOUBLE);
+#ifndef H5_DISABLE_SOME_LDOUBLE_CONV
     nerrors += test_conv_flt_1(name, TEST_DENORM, H5T_NATIVE_LDOUBLE, H5T_NATIVE_FLOAT);
+#else
+    {
+        char		str[256];		/*string		*/
+
+        HDsnprintf(str, sizeof(str), "Testing %s denormalized %s -> %s conversions",
+                name, "long double", "float");
+        printf("%-70s", str);
+        SKIPPED();
+#if H5_SIZEOF_LONG_DOUBLE!=0
+        HDputs("    Test skipped due to the conversion problem on IBM ppc64le cpu.");
+#else
+        HDputs("    Test skipped due to disabled long double.");
+#endif
+    }
+#endif
+
     nerrors += test_conv_flt_1(name, TEST_DENORM, H5T_NATIVE_LDOUBLE, H5T_NATIVE_DOUBLE);
 #endif
 
@@ -5124,7 +5141,7 @@ run_fp_int_conv(const char *name)
         }
 #if H5_SIZEOF_LONG!=H5_SIZEOF_INT && H5_SIZEOF_LONG_DOUBLE!=0
 #ifndef H5_LDOUBLE_TO_LONG_SPECIAL
-        if(test_values != TEST_SPECIAL) {
+        if(test_values != TEST_SPECIAL && test_values != TEST_NORMAL) {
             nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_LDOUBLE, H5T_NATIVE_LONG);
             nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_LDOUBLE, H5T_NATIVE_ULONG);
         } else {
