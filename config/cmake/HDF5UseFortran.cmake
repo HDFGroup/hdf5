@@ -18,16 +18,6 @@ ENABLE_LANGUAGE (Fortran)
 set (HDF_PREFIX "H5")
 include (CheckFortranFunctionExists)
 
-## Check for non-standard extenstion quadmath.h
-
-CHECK_INCLUDE_FILES(quadmath.h C_HAVE_QUADMATH)
-
-if (${C_HAVE_QUADMATH})
-  set(${HDF_PREFIX}_HAVE_QUADMATH_H 1)
-else ()
-  set(${HDF_PREFIX}_HAVE_QUADMATH_H 0)
-endif ()
-
 # The provided CMake Fortran macros don't provide a general compile/run function
 # so this one is used.
 #-----------------------------------------------------------------------------
