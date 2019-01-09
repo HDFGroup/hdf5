@@ -1390,7 +1390,8 @@ H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t len, const uint8_t *image
 
         /* Message size */
         UINT16DECODE(chunk_image, mesg_size);
-        HDassert(mesg_size == H5O_ALIGN_OH(oh, mesg_size));
+        if(mesg_size != H5O_ALIGN_OH(oh, mesg_size))
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "message not aligned")
 
         /* Message flags */
         flags = *chunk_image++;
