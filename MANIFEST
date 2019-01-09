@@ -92,13 +92,13 @@
 ./bin/timekeeper      _DO_NOT_DISTRIBUTE_
 ./bin/trace
 ./bin/yodconfigure
-./bin/batch/knl_ctestP.sl
-./bin/batch/knl_ctestS.sl
-./bin/batch/knl_ctestSP.sl
+./bin/batch/ctestP.lsf.in.cmake
+./bin/batch/ctestP.sl.in.cmake
+./bin/batch/ctestS.lsf.in.cmake
+./bin/batch/ctestS.sl.in.cmake
+./bin/batch/knl_ctestP.sl.in.cmake
+./bin/batch/knl_ctestS.sl.in.cmake
 ./bin/batch/knl_H5detect.sl.in.cmake
-./bin/batch/sbatch_ctestS.sl
-./bin/batch/sbatch_ctestP.sl
-./bin/batch/sbatch_ctestSP.sl
 ./bin/pkgscrpts/h5rmflags                  _DO_NOT_DISTRIBUTE_
 ./bin/pkgscrpts/makeHDF5BinaryTarfiles.pl  _DO_NOT_DISTRIBUTE_
 ./bin/pkgscrpts/makeInternalREADME.pl      _DO_NOT_DISTRIBUTE_
