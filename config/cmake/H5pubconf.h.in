@@ -599,7 +599,7 @@
 /* The size of `short', as computed by sizeof. */
 #cmakedefine H5_SIZEOF_SHORT @H5_SIZEOF_SHORT@
 
-/* The size of `time_t', as computed by sizeof.*/
+/* The size of `time_t', as computed by sizeof. */
 #cmakedefine H5_SIZEOF_TIME_T @H5_SIZEOF_TIME_T@
 
 /* The size of `uint16_t', as computed by sizeof. */
