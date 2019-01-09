@@ -940,10 +940,11 @@ CONTAINS
     INTEGER(C_INT), DIMENSION(:), POINTER :: c_time
 
     INTERFACE
-       TYPE(C_PTR) FUNCTION gmtime(stdtime_t) BIND(C, NAME='gmtime')
+       FUNCTION gmtime(stdtime_t) BIND(C, NAME='gmtime')
          IMPORT :: TIME_T, C_PTR
          IMPLICIT NONE
          INTEGER(KIND=TIME_T) :: stdtime_t
+         TYPE(C_PTR) :: gmtime
        END FUNCTION gmtime
     END INTERFACE
 
