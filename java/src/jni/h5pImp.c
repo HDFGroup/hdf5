@@ -142,6 +142,9 @@ Java_hdf_hdf5lib_H5_H5Pget_1version
     (JNIEnv *env, jclass clss, jlong plist, jintArray version_info)
 {
     herr_t   status = -1;
+#ifdef H5_NO_DEPRECATED_SYMBOLS
+    h5unimplemented(env, "H5Pget_version:  not implemented");
+#else
     jint    *theArray;
     jboolean isCopy;
 
@@ -167,7 +170,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1version
                 ENVPTR->ReleaseIntArrayElements(ENVPAR version_info, theArray, 0);
         } /* end else */
     } /* end else */
-
+#endif
     return (jint)status;
 } /* end Java_hdf_hdf5lib_H5_H5Pget_1version */
 
