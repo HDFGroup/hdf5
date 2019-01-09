@@ -69,6 +69,15 @@ MODULE H5O
      TYPE(mesg_t)   :: mesg
   END TYPE hdr_t
 
+  TYPE, BIND(C) :: c_hdr_t
+     INTEGER(C_INT) :: version ! Version number of header format in file
+     INTEGER(C_INT) :: nmesgs  ! Number of object header messages
+     INTEGER(C_INT) :: nchunks ! Number of object header chunks
+     INTEGER(C_INT) :: flags   ! Object header status flags
+     TYPE(space_t)  :: space   
+     TYPE(mesg_t)   :: mesg
+  END TYPE c_hdr_t
+
   ! Extra metadata storage for obj & attributes
   TYPE, BIND(C) :: H5_ih_info_t
      INTEGER(hsize_t) :: index_size ! btree and/or list
@@ -115,7 +124,7 @@ MODULE H5O
 
      INTEGER(hsize_t) :: num_attrs  ! # of attributes attached to object
 
-     TYPE(hdr_t) :: hdr
+     TYPE(c_hdr_t) :: hdr
 
      TYPE(meta_size_t) :: meta_size
   END TYPE c_h5o_info_t
