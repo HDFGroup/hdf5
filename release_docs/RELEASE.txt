@@ -197,7 +197,17 @@ New Features
 
     Fortran Library:
     ----------------
-    -
+    - Added wrappers for dataset object header minimization calls.
+      (see the note for TRILAB-45, above)
+
+      New API calls:
+
+      h5fget_dset_no_attrs_hint_f
+      h5fset_dset_no_attrs_hint_f
+      h5pget_dset_no_attrs_hint_f
+      h5pset_dset_no_attrs_hint_f
+
+      (DER - 2019/01/09, TRILAB-45)
 
     C++ Library:
     ------------
@@ -370,7 +380,7 @@ Bug Fixes since HDF5-1.10.3 release
 
     - Made Fortran specific subroutines PRIVATE in generic procedures.
 
-      Effected generic procedures were functions in H5A, H5D, H5P, H5R and H5T.
+      Affected generic procedures were functions in H5A, H5D, H5P, H5R and H5T.
 
       (MSB, 2018/12/04, HDFFV-10511)
 
