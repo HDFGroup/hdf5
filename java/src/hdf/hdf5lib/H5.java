@@ -7729,34 +7729,6 @@ public class H5 implements java.io.Serializable {
     public synchronized static native void H5Pset_copy_object(long ocp_plist_id, int copy_options)
             throws HDF5LibraryException;
 
-    // /////// Other/Older property list routines ///////
-
-    /**
-     * H5Pget_version retrieves the version information of various objects for a file creation property list.
-     *
-     * @param plist
-     *            IN: Identifier of the file creation property list.
-     * @param version_info
-     *            OUT: version information.
-     *
-     *            <pre>
-     *      version_info[0] = boot  // boot block version number
-     *      version_info[1] = freelist  // global freelist version
-     *      version_info[2] = stab  // symbol tabl version number
-     *      version_info[3] = shhdr  // shared object header version
-     * </pre>
-     * @return a non-negative value, with the values of version_info initialized, if successful
-     *
-     * @exception HDF5LibraryException
-     *                - Error from the HDF-5 Library.
-     * @exception NullPointerException
-     *                - version_info is null.
-     * @exception IllegalArgumentException
-     *                - version_info is illegal.
-     **/
-    public synchronized static native int H5Pget_version(long plist, int[] version_info) throws HDF5LibraryException,
-    NullPointerException, IllegalArgumentException;
-
     // /////// file drivers property list routines ///////
 
     public synchronized static native void H5Pget_fapl_core(long fapl_id, long[] increment, boolean[] backing_store)
