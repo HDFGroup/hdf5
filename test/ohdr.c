@@ -1399,6 +1399,16 @@ test_unknown(unsigned bogus_id, char *filename, hid_t fapl)
 
     PASSED();
 
+    TESTING("object with unknown header message & 'shareable' flag set");
+
+    /* Open the dataset with the unknown header message, adn "shareable" flag */
+    if((did = H5Dopen2(loc_bogus, "Dataset5", H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR
+    if(H5Dclose(did) < 0)
+        FAIL_STACK_ERROR
+
+    PASSED();
+
     TESTING("object in r/o file with unknown header message & 'fail if unknown and open for write' flag set");
 
     /* Open the dataset with the unknown header message, and "fail if unknown and open for write" flag */
