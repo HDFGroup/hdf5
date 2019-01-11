@@ -517,3 +517,73 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* H5VLcmp_connector_cls() */
 
+
+/*---------------------------------------------------------------------------
+ * Function:    H5VLwrap_register
+ *
+ * Purpose:     Wrap an internal object with a "wrap context" and register an
+ *		hid_t for the resulting object.
+ *
+ * Note:	This routine is mainly targeted toward wrapping objects for
+ *		iteration routine callbacks (i.e. the callbacks from H5Aiterate*,
+ *		H5Literate* / H5Lvisit*, and H5Ovisit* ).
+ *
+ * Return:      Success:    Non-negative hid_t for the object.
+ *              Failure:    Negative (H5I_INVALID_HID)
+ *
+ *---------------------------------------------------------------------------
+ */
+hid_t
+H5VLwrap_register(void *obj, H5I_type_t type)
+{
+    hid_t ret_value;            /* Return value */
+
+    /* Use FUNC_ENTER_API_NOINIT here, so the API context doesn't get reset */
+    FUNC_ENTER_API_NOINIT
+    H5TRACE2("i", "*xIt", obj, type);
+
+    /* Check args */
+    if(type <= H5I_BADID || type >= H5I_NTYPES)
+        HGOTO_ERROR(H5E_VOL, H5E_BADRANGE, H5I_INVALID_HID, "invalid type number")
+    if(NULL == obj)
+        HGOTO_ERROR(H5E_VOL, H5E_BADVALUE, H5I_INVALID_HID, "obj is NULL")
+
+    /* Wrap the object and register an ID for it */
+    if((ret_value = H5VL_wrap_register(type, obj, TRUE)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to wrap object")
+
+done:
+    FUNC_LEAVE_API_NOINIT(ret_value)
+} /* H5VLwrap_register() */
+
+
+/*---------------------------------------------------------------------------
+ * Function:    H5VLobject
+ *
+ * Purpose:     Retrieve the object pointer associated with an hid_t for a.
+ *		VOL object.
+ *
+ * Note:	This routine is mainly targeted toward unwrapping objects for
+ *		testing.
+ *
+ * Return:      Success:    Object pointer
+ *              Failure:    NULL
+ *
+ *---------------------------------------------------------------------------
+ */
+void *
+H5VLobject(hid_t id)
+{
+    void *ret_value;            /* Return value */
+
+    FUNC_ENTER_API(NULL)
+    H5TRACE1("*x", "i", id);
+
+    /* Retrieve the object pointer for the ID */
+    if(NULL == (ret_value = H5VL_object(id)))
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, NULL, "unable to retrieve object")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5VLobject() */
+
