@@ -82,11 +82,6 @@
 /* Macros to represent the regularity of the selection for multiple chunk IO case. */
 #define H5D_CHUNK_SELECT_REG          1
 
-/* Macros for reasons to not enable read-proc-and-bcast. */
-#define H5D_MPIO_PROC0_BCAST 0x00
-#define H5D_MPIO_NOT_H5S_ALL 0x01
-#define H5D_MPIO_GREATER_THAN_2GB 0x02
-
 /******************/
 /* Local Typedefs */
 /******************/
@@ -299,7 +294,6 @@ H5D__mpio_opt_possible(const H5D_io_info_t *io_info, const H5S_t *file_space,
     unsigned global_cause[2] = {0,0};   /* Global reason(s) for breaking collective mode */
     htri_t is_vl_storage;               /* Whether the dataset's datatype is stored in a variable-length form */
     htri_t ret_value = SUCCEED;         /* Return value */
-    hbool_t H5FD_MPIO_Proc0_BCast;      /* Flag if dataset is both: H5S_ALL and < 2GB */
 
     FUNC_ENTER_PACKAGE
 
@@ -419,7 +413,6 @@ H5D__mpio_opt_possible(const H5D_io_info_t *io_info, const H5S_t *file_space,
          */
         if(MPI_SUCCESS != (mpi_code = MPI_Allreduce(&local_cause, &global_cause, 2, MPI_UNSIGNED, MPI_BOR, io_info->comm)))
             HMPI_GOTO_ERROR(FAIL, "MPI_Allreduce failed", mpi_code)
-
     } /* end else */
 
     /* Set the local & global values of no-collective-cause in the API context */

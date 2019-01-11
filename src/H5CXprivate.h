@@ -128,7 +128,6 @@ H5_DLL void H5CX_set_mpio_actual_chunk_opt(H5D_mpio_actual_chunk_opt_mode_t chun
 H5_DLL void H5CX_set_mpio_actual_io_mode(H5D_mpio_actual_io_mode_t actual_io_mode);
 H5_DLL void H5CX_set_mpio_local_no_coll_cause(uint32_t mpio_local_no_coll_cause);
 H5_DLL void H5CX_set_mpio_global_no_coll_cause(uint32_t mpio_global_no_coll_cause);
-H5_DLL void H5CX_set_mpio_Proc0_BCast(hbool_t mpio_Proc0_BCast);
 #ifdef H5_HAVE_INSTRUMENTED_LIBRARY
 H5_DLL herr_t H5CX_test_set_mpio_coll_chunk_link_hard(int mpio_coll_chunk_link_hard);
 H5_DLL herr_t H5CX_test_set_mpio_coll_chunk_multi_hard(int mpio_coll_chunk_multi_hard);
