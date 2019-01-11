@@ -2958,15 +2958,6 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                             H5VL_object_get_t get = (H5VL_object_get_t)HDva_arg(ap, int);
 
                             switch(get) {
-                                case H5VL_REF_GET_REGION:
-                                    HDfprintf(out, "H5VL_REF_GET_REGION");
-                                    break;
-                                case H5VL_REF_GET_TYPE:
-                                    HDfprintf(out, "H5VL_REF_GET_TYPE");
-                                    break;
-                                case H5VL_REF_GET_NAME:
-                                    HDfprintf(out, "H5VL_REF_GET_NAME");
-                                    break;
                                 case H5VL_OBJECT_GET_NAME:
                                     HDfprintf(out, "H5VL_OBJECT_GET_NAME");
                                     break;
@@ -3001,9 +2992,6 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                                     break;
                                 case H5VL_OBJECT_VISIT:
                                     HDfprintf(out, "H5VL_OBJECT_VISIT");
-                                    break;
-                                case H5VL_REF_CREATE:
-                                    HDfprintf(out, "H5VL_REF_CREATE");
                                     break;
                                 case H5VL_OBJECT_FLUSH:
                                     HDfprintf(out, "H5VL_OBJECT_FLUSH");
