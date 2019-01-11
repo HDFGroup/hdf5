@@ -408,8 +408,6 @@ Bug Fixes since HDF5-1.10.3 release
 
       (MSB, 2018/12/04, HDFFV-10511)
 
-<<<<<<< HEAD
-=======
     - Fixed issue with Fortran not returning h5o_info_t field values 
       meta_size%attr%index_size and  meta_size%attr%heap_size.
 
@@ -685,7 +683,6 @@ Bug Fixes since HDF5-1.10.2 release
     Testing
     -------
 
->>>>>>> fb5d83e146... Updated Fortran Bug and new features
 Supported Platforms
 ===================
 
