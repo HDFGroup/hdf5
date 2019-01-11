@@ -656,6 +656,7 @@ H5T__ref_mem_write(H5VL_object_t *src_file, const void *src_buf, size_t src_size
     HDassert(dst_buf);
     HDassert(dst_size == H5T_REF_MEM_SIZE);
     HDcompile_assert(sizeof(*dst_ref) == sizeof(tmp_ref));
+    (void)dst_size;
 
     /* Memory-to-memory conversion to support vlen conversion */
     if (NULL == src_file) {

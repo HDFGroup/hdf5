@@ -3045,6 +3045,8 @@ H5O__free(H5O_t *oh, hbool_t force)
                 oh->ndecode_dirtied--;
             else if (!force)
                 HDassert(oh->mesg[u].dirty == 0);
+#else
+            (void)force;
 #endif /* NDEBUG */
 
             H5O__msg_free_mesg(&oh->mesg[u]);

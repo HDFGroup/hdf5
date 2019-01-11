@@ -8114,6 +8114,7 @@ H5D__chunk_iter(const H5D_t *dset, H5D_chunk_iter_op_t op, void *op_data)
     HDassert(layout);
     HDassert(rdcc);
     HDassert(H5D_CHUNKED == layout->type);
+    (void)layout;
 
     /* Search for cached chunks that haven't been written out */
     for (ent = rdcc->head; ent; ent = ent->next)

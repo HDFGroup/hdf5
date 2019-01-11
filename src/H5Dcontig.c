@@ -614,6 +614,7 @@ H5D__contig_may_use_select_io(const H5D_io_info_t *io_info, H5D_io_op_type_t op_
     HDassert(io_info);
     HDassert(dataset);
     HDassert(op_type == H5D_IO_OP_READ || op_type == H5D_IO_OP_WRITE);
+    (void)dataset;
 
     /* Don't use selection I/O if it's globally disabled, if there is a type
      * conversion, or if it's not a contiguous dataset, or if the sieve buffer

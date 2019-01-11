@@ -1085,6 +1085,7 @@ H5FD__sec2_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void H5_AT
 
     /* Sanity checks */
     HDassert(file);
+    (void)file;
 
     switch (op_code) {
         /* Unknown op code */
