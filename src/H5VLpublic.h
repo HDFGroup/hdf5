@@ -433,6 +433,8 @@ H5_DLL herr_t H5VLunregister_connector(hid_t connector_id);
 
 /* Helper routines for VOL connector authors */
 H5_DLL herr_t H5VLcmp_connector_cls(int *cmp, hid_t connector_id1, hid_t connector_id2);
+H5_DLL hid_t H5VLwrap_register(void *obj, H5I_type_t type);
+H5_DLL void *H5VLobject(hid_t obj_id);
 
 
 /* Public wrappers for generic callbacks */
