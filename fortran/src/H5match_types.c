@@ -191,6 +191,8 @@ int main(void)
       }
     if(sizeof(size_t) == IntKinds_SizeOf[i])
       writeTypedef("size_t", "size_t", IntKinds[i]);
+    if(sizeof(time_t) == IntKinds_SizeOf[i])
+      writeTypedef("time_t", "time_t", IntKinds[i]);
     if(sizeof(hsize_t) == IntKinds_SizeOf[i])
       writeTypedef("hsize_t", "hsize_t", IntKinds[i]);
   }
@@ -303,6 +305,17 @@ int main(void)
     }
     if(i == (FORTRAN_NUM_INTEGER_KINDS-1) )
       /* Error: couldn't find a size for size_t */
+      return -1;
+  }
+
+  /* time_t */
+  for(i=0;i< FORTRAN_NUM_INTEGER_KINDS;i++) {
+    if(IntKinds_SizeOf[i] == H5_SIZEOF_TIME_T) {
+      writeToFiles("time_t","TIME_T", "time_t_f", IntKinds[i]);
+      break;
+    }
+    if(i == (FORTRAN_NUM_INTEGER_KINDS-1) )
+      /* Error: couldn't find a size for time_t */
       return -1;
   }
 
