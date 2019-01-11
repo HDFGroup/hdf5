@@ -775,7 +775,6 @@ done:
 static hssize_t
 H5S_point_serial_size (const H5S_t *space)
 {
-    H5S_pnt_node_t *curr;       /* Point information nodes */
     hssize_t ret_value = -1;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
@@ -789,12 +788,8 @@ H5S_point_serial_size (const H5S_t *space)
     ret_value = 24;
 
     /* Count points in selection */
-    curr=space->select.sel_info.pnt_lst->head;
-    while(curr!=NULL) {
-        /* Add 4 bytes times the rank for each element selected */
-        ret_value+=4*space->extent.rank;
-        curr=curr->next;
-    } /* end while */
+    /* (Add 4 bytes times the rank for each element selected) */
+    ret_value += (4 * space->extent.rank) * (hssize_t)H5S_GET_SELECT_NPOINTS(space);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S_point_serial_size() */
