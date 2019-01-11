@@ -1397,7 +1397,7 @@ H5T_top_term_package(void)
                         if((path->conv.u.lib_func)((hid_t)FAIL, (hid_t)FAIL, &(path->cdata), (size_t)0, (size_t)0, (size_t)0, NULL, NULL) < 0) {
 #ifdef H5T_DEBUG
                             if (H5DEBUG(T)) {
-                                fprintf(H5DEBUG(T), "H5T: conversion function "
+                                HDfprintf(H5DEBUG(T), "H5T: conversion function "
                                         "0x%08lx failed to free private data for "
                                         "%s (ignored)\n",
                                         (unsigned long)(path->conv.u.lib_func), path->name);

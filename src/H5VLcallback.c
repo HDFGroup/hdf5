@@ -2988,7 +2988,7 @@ H5VL_file_specific(const H5VL_object_t *vol_obj, H5VL_file_specific_t specific_t
 
         /* Get the file access property list to access the file */
         HDva_copy(tmp_args, arguments);
-        fapl_id = va_arg(tmp_args, hid_t);
+        fapl_id = HDva_arg(tmp_args, hid_t);
         HDva_end(tmp_args);
 
         /* Get the VOL info from the FAPL */

@@ -6303,15 +6303,16 @@ H5D__chunk_stats(const H5D_t *dset, hbool_t headers)
         HGOTO_DONE(SUCCEED)
 
     if (headers) {
-        fprintf(H5DEBUG(AC), "H5D: raw data cache statistics\n");
-        fprintf(H5DEBUG(AC), "   %-18s %8s %8s %8s %8s+%-8s\n",
+        HDfprintf(H5DEBUG(AC), "H5D: raw data cache statistics\n");
+        HDfprintf(H5DEBUG(AC), "   %-18s %8s %8s %8s %8s+%-8s\n",
             "Layer", "Hits", "Misses", "MissRate", "Inits", "Flushes");
-        fprintf(H5DEBUG(AC), "   %-18s %8s %8s %8s %8s-%-8s\n",
+        HDfprintf(H5DEBUG(AC), "   %-18s %8s %8s %8s %8s-%-8s\n",
             "-----", "----", "------", "--------", "-----", "-------");
     }
 
 #ifdef H5AC_DEBUG
-    if (H5DEBUG(AC)) headers = TRUE;
+    if (H5DEBUG(AC))
+        headers = TRUE;
 #endif
 
     if (headers) {
@@ -6322,12 +6323,12 @@ H5D__chunk_stats(const H5D_t *dset, hbool_t headers)
             miss_rate = 0.0;
         }
         if (miss_rate > 100) {
-            sprintf(ascii, "%7d%%", (int) (miss_rate + 0.5));
+            HDsprintf(ascii, "%7d%%", (int) (miss_rate + 0.5));
         } else {
-            sprintf(ascii, "%7.2f%%", miss_rate);
+            HDsprintf(ascii, "%7.2f%%", miss_rate);
         }
 
-        fprintf(H5DEBUG(AC), "   %-18s %8u %8u %7s %8d+%-9ld\n",
+        HDfprintf(H5DEBUG(AC), "   %-18s %8u %8u %7s %8d+%-9ld\n",
             "raw data chunks", rdcc->stats.nhits, rdcc->stats.nmisses, ascii,
             rdcc->stats.ninits, (long)(rdcc->stats.nflushes)-(long)(rdcc->stats.ninits));
     }

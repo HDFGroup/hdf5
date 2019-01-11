@@ -315,7 +315,7 @@ H5FA__test_debug(FILE *stream, int indent, int fwidth, hsize_t idx,
     HDassert(elmt);
 
     /* Print element */
-    sprintf(temp_str, "Element #%llu:", (unsigned long long)idx);
+    HDsprintf(temp_str, "Element #%llu:", (unsigned long long)idx);
     HDfprintf(stream, "%*s%-*s %llu\n", indent, "", fwidth, temp_str,
         (unsigned long long)*(const uint64_t *)elmt);
 

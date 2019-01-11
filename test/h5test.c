@@ -1270,7 +1270,7 @@ h5_set_info_object(void)
     int    ret_value=0;
 
     /* handle any MPI INFO hints via $HDF5_MPI_INFO */
-    if ((envp = getenv("HDF5_MPI_INFO")) != NULL){
+    if ((envp = HDgetenv("HDF5_MPI_INFO")) != NULL){
         char *next, *valp;
 
         valp = envp = next = HDstrdup(envp);
@@ -1332,7 +1332,7 @@ h5_set_info_object(void)
 
                 /* actually set the darned thing */
                 if (MPI_SUCCESS != MPI_Info_set(h5_io_info_g, namep, valp)) {
-                    printf("MPI_Info_set failed\n");
+                    HDprintf("MPI_Info_set failed\n");
                     ret_value = -1;
                 }
             }
@@ -1508,9 +1508,9 @@ print_func(const char *format, ...)
   va_list arglist;
   int ret_value;
 
-  va_start(arglist, format);
+  HDva_start(arglist, format);
   ret_value = vprintf(format, arglist);
-  va_end(arglist);
+  HDva_end(arglist);
   return ret_value;
 }
 
@@ -1595,7 +1595,7 @@ getenv_all(MPI_Comm comm, int root, const char* name)
     int len;
     static char* env = NULL;
 
-    assert(name);
+    HDassert(name);
 
     MPI_Initialized(&mpi_initialized);
     MPI_Finalized(&mpi_finalized);
@@ -1603,7 +1603,7 @@ getenv_all(MPI_Comm comm, int root, const char* name)
     if(mpi_initialized && !mpi_finalized) {
         MPI_Comm_rank(comm, &mpi_rank);
         MPI_Comm_size(comm, &mpi_size);
-        assert(root < mpi_size);
+        HDassert(root < mpi_size);
 
         /* The root task does the getenv call
          * and sends the result to the other tasks */
