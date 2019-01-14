@@ -126,7 +126,7 @@ message (STATUS "COMMAND Error: ${TEST_ERROR}")
 # remove special output
 file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
 string (FIND TEST_STREAM "_pmi_alps" "${TEST_FIND_RESULT}")
-if (NOT "${TEST_FIND_RESULT}" STREQUAL "0")
+if (NOT ${TEST_FIND_RESULT} STREQUAL "0")
   string (REGEX REPLACE "^.*_pmi_alps[^\n]+\n" "" TEST_STREAM "${TEST_STREAM}")
   file (WRITE ${TEST_FOLDER}/${TEST_OUTPUT} ${TEST_STREAM})
 endif ()
