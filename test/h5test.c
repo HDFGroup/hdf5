@@ -158,47 +158,8 @@ h5_clean_files(const char *base_name[], hid_t fapl)
     int i;
 
     for(i = 0; base_name[i]; i++) {
-        char filename[1024];
-        char temp[2048];
-        hid_t driver;
-
-        if(NULL == h5_fixname(base_name[i], fapl, filename, sizeof(filename)))
-            continue;
-
-        driver = H5Pget_driver(fapl);
-
-        if(driver == H5FD_FAMILY) {
-            int j;
-
-            for(j = 0; /*void*/; j++) {
-                HDsnprintf(temp, sizeof temp, filename, j);
-
-                if(HDaccess(temp, F_OK) < 0)
-                    break;
-
-                HDremove(temp);
-            } /* end for */
-        } else if(driver == H5FD_CORE) {
-            hbool_t backing;        /* Whether the core file has backing store */
-
-            H5Pget_fapl_core(fapl, NULL, &backing);
-
-            /* If the file was stored to disk with bacing store, remove it */
-            if(backing)
-                HDremove(filename);
-        } else if (driver == H5FD_MULTI) {
-            H5FD_mem_t mt;
-
-            HDassert(HDstrlen(multi_letters)==H5FD_MEM_NTYPES);
-
-            for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t,mt)) {
-                HDsnprintf(temp, sizeof temp, "%s-%c.h5", filename, multi_letters[mt]);
-                HDremove(temp); /*don't care if it fails*/
-            } /* end for */
-        } else {
-            HDremove(filename);
-        }
-    } /* end for */
+        h5_delete_test_file(base_name[i], fapl);
+    }
 
     /* Close the FAPL used to access the file */
     H5Pclose(fapl);
@@ -266,10 +227,10 @@ h5_delete_test_file(const char *base_name, hid_t fapl)
         for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t,mt)) {
             HDsnprintf(sub_filename, sizeof(sub_filename), "%s-%c.h5", filename, multi_letters[mt]);
             HDremove(sub_filename);
-        } /* end for */
+        }
     } else {
         HDremove(filename);
-    } /* end if */
+    } /* end driver selection tree */
 
     return;
 } /* end h5_delete_test_file() */
@@ -652,7 +613,7 @@ h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix,
                 printf("*** Hint ***\n"
                        "You can use environment variable HDF5_PARAPREFIX to "
                        "run parallel test files in a\n"
-                       "different directory or to add file type prefix. E.g.,\n"
+                       "different directory or to add file type prefix. e.g.,\n"
                        "   HDF5_PARAPREFIX=pfs:/PFS/user/me\n"
                        "   export HDF5_PARAPREFIX\n"
                        "*** End of Hint ***\n");
@@ -802,10 +763,10 @@ h5_rmprefix(const char *filename)
  *
  * Purpose:     Returns a file access template which is the default template
  *              but with a file driver, VOL connector, or libver bound set
- *		according to a constant or environment variable
+ *              according to a constant or environment variable
  *
- * Return:      Success:  A file access property list
- *              Failure:  -1
+ * Return:      Success:    A file access property list
+ *              Failure:    H5I_INVALID_HID
  *
  * Programmer:  Robb Matzke
  *              Thursday, November 19, 1998
@@ -815,25 +776,74 @@ h5_rmprefix(const char *filename)
 hid_t
 h5_fileaccess(void)
 {
-    hid_t       fapl = -1;
+    hid_t       fapl_id = H5I_INVALID_HID;
 
-    if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
-        return -1;
+    if((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        goto error;
 
     /* Attempt to set up a file driver first */
-    if(h5_get_vfd_fapl(fapl) < 0)
-         return -1;
+    if(h5_get_vfd_fapl(fapl_id) < 0)
+        goto error;
 
     /* Next, try to set up a VOL connector */
-    if(h5_get_vol_fapl(fapl) < 0)
-        return -1;
+    if(h5_get_vol_fapl(fapl_id) < 0)
+        goto error;
  
     /* Finally, check for libver bounds */
-    if(h5_get_libver_fapl(fapl) < 0)
-        return -1;
+    if(h5_get_libver_fapl(fapl_id) < 0)
+        goto error;
  
-    return(fapl);
+    return fapl_id;
+
+error:
+    if(fapl_id != H5I_INVALID_HID)
+        H5Pclose(fapl_id);
+    return H5I_INVALID_HID;
 } /* end h5_fileaccess() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    h5_fileaccess_flags
+ *
+ * Purpose:     Returns a file access template which is the default template
+ *              but with a file driver, VOL connector, or libver bound set
+ *              according to a constant or environment variable
+ *
+ * Return:      Success:    A file access property list
+ *              Failure:    H5I_INVALID_HID
+ *
+ * Programmer:  Robb Matzke
+ *              Thursday, November 19, 1998
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+h5_fileaccess_flags(unsigned flags)
+{
+    hid_t       fapl_id = H5I_INVALID_HID;
+
+    if((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        goto error;
+
+    /* Attempt to set up a file driver first */
+    if((flags & H5_FILEACCESS_VFD) && h5_get_vfd_fapl(fapl_id) < 0)
+        goto error;
+
+    /* Next, try to set up a VOL connector */
+    if((flags & H5_FILEACCESS_VOL) && h5_get_vol_fapl(fapl_id) < 0)
+        goto error;
+ 
+    /* Finally, check for libver bounds */
+    if((flags & H5_FILEACCESS_LIBVER) && h5_get_libver_fapl(fapl_id) < 0)
+        goto error;
+ 
+    return fapl_id;
+
+error:
+    if(fapl_id != H5I_INVALID_HID)
+        H5Pclose(fapl_id);
+    return H5I_INVALID_HID;
+} /* end h5_fileaccess_flags() */
 
 
 /*-------------------------------------------------------------------------
@@ -855,6 +865,7 @@ h5_get_vfd_fapl(hid_t fapl)
 {
     const char  *env = NULL;    /* HDF5_DRIVER environment variable     */
     const char  *tok = NULL;    /* strtok pointer                       */
+    char        *lasts = NULL;  /* Context pointer for strtok_r() call */
     char        buf[1024];      /* buffer for tokenizing HDF5_DRIVER    */
 
     /* Get the environment variable, if it exists */
@@ -877,7 +888,7 @@ h5_get_vfd_fapl(hid_t fapl)
      */
     HDstrncpy(buf, env, sizeof(buf));
     buf[sizeof(buf) - 1] = '\0';
-    if(NULL == (tok = HDstrtok(buf, " \t\n\r")))
+    if(NULL == (tok = HDstrtok_r(buf, " \t\n\r", &lasts)))
         goto done;
 
     if(!HDstrcmp(tok, "sec2")) {
@@ -890,11 +901,11 @@ h5_get_vfd_fapl(hid_t fapl)
             goto error;
     } else if(!HDstrcmp(tok, "core")) {
         /* In-memory driver settings (backing store on, 1 MB increment) */
-        if(H5Pset_fapl_core(fapl, (size_t)1, TRUE) < 0)
+        if(H5Pset_fapl_core(fapl, (size_t)H5_MB, TRUE) < 0)
             goto error;
     } else if(!HDstrcmp(tok, "core_paged")) {
         /* In-memory driver with write tracking and paging on */
-        if(H5Pset_fapl_core(fapl, (size_t)1, TRUE) < 0)
+        if(H5Pset_fapl_core(fapl, (size_t)H5_MB, TRUE) < 0)
             goto error;
         if(H5Pset_core_write_tracking(fapl, TRUE, (size_t)4096) < 0)
             goto error;
@@ -936,7 +947,7 @@ h5_get_vfd_fapl(hid_t fapl)
         hsize_t fam_size = 100 * 1024 * 1024;   /* 100 MB */
 
         /* Was a family size specified in the environment variable? */
-        if((tok = HDstrtok(NULL, " \t\n\r")))
+        if((tok = HDstrtok_r(NULL, " \t\n\r", &lasts)))
             fam_size = (hsize_t)(HDstrtod(tok, NULL) * 1024 * 1024);
         if(H5Pset_fapl_family(fapl, fam_size, H5P_DEFAULT) < 0)
             goto error;
@@ -945,7 +956,7 @@ h5_get_vfd_fapl(hid_t fapl)
         unsigned log_flags = H5FD_LOG_LOC_IO | H5FD_LOG_ALLOC;
 
         /* Were special log file flags specified in the environment variable? */
-        if((tok = HDstrtok(NULL, " \t\n\r")))
+        if((tok = HDstrtok_r(NULL, " \t\n\r", &lasts)))
             log_flags = (unsigned)HDstrtol(tok, NULL, 0);
 
         if(H5Pset_fapl_log(fapl, NULL, log_flags, (size_t)0) < 0)
@@ -990,6 +1001,7 @@ h5_get_libver_fapl(hid_t fapl)
 {
     const char  *env = NULL;    /* HDF5_DRIVER environment variable     */
     const char  *tok = NULL;    /* strtok pointer                       */
+    char        *lasts = NULL;  /* Context pointer for strtok_r() call */
     char        buf[1024];      /* buffer for tokenizing HDF5_DRIVER    */
 
     /* Get the environment variable, if it exists */
@@ -1012,7 +1024,7 @@ h5_get_libver_fapl(hid_t fapl)
      */
     HDstrncpy(buf, env, sizeof(buf));
     buf[sizeof(buf) - 1] = '\0';
-    if(NULL == (tok = HDstrtok(buf, " \t\n\r")))
+    if(NULL == (tok = HDstrtok_r(buf, " \t\n\r", &lasts)))
         goto done;
 
     if(!HDstrcmp(tok, "latest")) {
@@ -1040,7 +1052,7 @@ error:
  *              fapl but with a VOL connector set according to the constant
  *              or environment variable HDF5_VOL_CONNECTOR.
  *
- * Return:      Success:    A file access property list ID
+ * Return:      Success:    0
  *              Failure:    -1
  *
  * Programmer:  Jordan Henderson
@@ -1053,6 +1065,7 @@ h5_get_vol_fapl(hid_t fapl)
 {
     const char *env = NULL;
     const char *tok = NULL;
+    char        *lasts = NULL;  /* Context pointer for strtok_r() call */
     htri_t      connector_is_registered;
     char        buf[1024];              /* Buffer for tokenizing HDF5_VOL_CONNECTOR */
     void       *vol_info = NULL;        /* VOL connector info */
@@ -1075,7 +1088,7 @@ h5_get_vol_fapl(hid_t fapl)
      */
     HDstrncpy(buf, env, sizeof(buf));
     buf[sizeof(buf) - 1] = '\0';
-    if(NULL == (tok = HDstrtok(buf, " \t\n\r")))
+    if(NULL == (tok = HDstrtok_r(buf, " \t\n\r", &lasts)))
         goto done;
 
     /* First, check to see if the connector is already registered */
@@ -1105,7 +1118,7 @@ h5_get_vol_fapl(hid_t fapl)
     } /* end else */
 
     /* Was there any connector info specified in the environment variable? */
-    if(NULL != (tok = HDstrtok(NULL, " \t\n\r")))
+    if(NULL != (tok = HDstrtok_r(NULL, " \t\n\r", &lasts)))
         if(H5VLconnector_str_to_info(tok, connector_id, &vol_info) < 0)
             goto error;
 
@@ -1925,6 +1938,42 @@ static herr_t dummy_vfd_read(H5FD_t H5_ATTR_UNUSED *_file, H5FD_mem_t H5_ATTR_UN
 static herr_t dummy_vfd_write(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr, size_t size, const void *buf);
 static herr_t dummy_vfd_write(H5FD_t H5_ATTR_UNUSED *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUSED fapl_id, haddr_t H5_ATTR_UNUSED addr, size_t H5_ATTR_UNUSED size, const void H5_ATTR_UNUSED *buf) { return FAIL; }
 
+/* Dummy VFD with the minimum parameters to make a VFD that can be registered */
+static const H5FD_class_t H5FD_dummy_g = {
+    "dummy",                    /* name         */
+    1,                          /* maxaddr      */
+    H5F_CLOSE_WEAK,             /* fc_degree    */
+    NULL,                       /* terminate    */
+    NULL,                       /* sb_size      */
+    NULL,                       /* sb_encode    */
+    NULL,                       /* sb_decode    */
+    0,                          /* fapl_size    */
+    NULL,                       /* fapl_get     */
+    NULL,                       /* fapl_copy    */
+    NULL,                       /* fapl_free    */
+    0,                          /* dxpl_size    */
+    NULL,                       /* dxpl_copy    */
+    NULL,                       /* dxpl_free    */
+    dummy_vfd_open,             /* open         */
+    dummy_vfd_close,            /* close        */
+    NULL,                       /* cmp          */
+    NULL,                       /* query        */
+    NULL,                       /* get_type_map */
+    NULL,                       /* alloc        */
+    NULL,                       /* free         */
+    dummy_vfd_get_eoa,          /* get_eoa      */
+    dummy_vfd_set_eoa,          /* set_eoa      */
+    dummy_vfd_get_eof,          /* get_eof      */
+    NULL,                       /* get_handle   */
+    dummy_vfd_read,             /* read         */
+    dummy_vfd_write,            /* write        */
+    NULL,                       /* flush        */
+    NULL,                       /* truncate     */
+    NULL,                       /* lock         */
+    NULL,                       /* unlock       */
+    H5FD_FLMAP_DICHOTOMY	/* fl_map       */
+};
+
 
 /*-------------------------------------------------------------------------
  * Function:    h5_get_dummy_vfd_class()
@@ -1952,21 +2001,11 @@ h5_get_dummy_vfd_class(void)
     H5FD_class_t *vfd_class = NULL;     /* Dummy VFD that will be returned */
 
     /* Create the class and initialize everything to zero/NULL */
-    if(NULL == (vfd_class = (H5FD_class_t *)HDcalloc((size_t)1, sizeof(H5FD_class_t))))
+    if(NULL == (vfd_class = (H5FD_class_t *)HDmalloc(sizeof(H5FD_class_t))))
         TEST_ERROR;
 
-    /* Fill in the minimum parameters to make a VFD that
-     * can be registered.
-     */
-    vfd_class->name = "dummy";
-    vfd_class->maxaddr = 1;
-    vfd_class->open = dummy_vfd_open;
-    vfd_class->close = dummy_vfd_close;
-    vfd_class->get_eoa = dummy_vfd_get_eoa;
-    vfd_class->set_eoa = dummy_vfd_set_eoa;
-    vfd_class->get_eof = dummy_vfd_get_eof;
-    vfd_class->read = dummy_vfd_read;
-    vfd_class->write = dummy_vfd_write;
+    /* Copy the dummy VFD */
+    HDmemcpy(vfd_class, &H5FD_dummy_g, sizeof(H5FD_class_t));
 
     return vfd_class;
 

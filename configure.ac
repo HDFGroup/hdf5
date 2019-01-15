@@ -1210,6 +1210,15 @@ EOF
 AC_CHECK_SIZEOF([bool])
 fi
 
+AC_CHECK_SIZEOF(time_t, [], [
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_TIME_H
+#include <time.h>
+#endif
+])
+
 ## Checkpoint the cache
 AC_CACHE_SAVE
 
@@ -2368,40 +2377,6 @@ case "X-$CODESTACK" in
 esac
 
 ## ----------------------------------------------------------------------
-## Check if they would like the metadata trace file code compiled in
-##
-AC_MSG_CHECKING([whether metadata trace file code is enabled])
-AC_ARG_ENABLE([metadata-trace-file],
-              [AS_HELP_STRING([--enable-metadata-trace-file],
-                              [Enable metadata trace file collection.
-                               [default=no]
-                              ])],
-              [METADATATRACEFILE=$enableval])
-
-## Set the default level.
-if test "X-$METADATATRACEFILE" = X- ; then
-  METADATATRACEFILE=no
-fi
-
-## Allow this variable to be substituted in
-## other files (src/libhdf5.settings.in, etc.)
-AC_SUBST([METADATATRACEFILE])
-
-case "X-$METADATATRACEFILE" in
-  X-yes)
-      AC_MSG_RESULT([yes])
-      AC_DEFINE([METADATA_TRACE_FILE], [1],
-                [Define if the metadata trace file code is to be compiled in])
-    ;;
-  X-no)
-      AC_MSG_RESULT([no])
-    ;;
-  *)
-      AC_MSG_ERROR([Unrecognized value: $METADATATRACEFILE])
-    ;;
-esac
-
-## ----------------------------------------------------------------------
 ## Enable tracing of the API
 ##
 AC_MSG_CHECKING([for API tracing]);
@@ -3073,6 +3048,30 @@ else
 fi
 
 ## ----------------------------------------------------------------------
+## Set the flag to indicate that the machine is IBM ppc64le and cannot
+## accurately convert some long double values.
+##
+AC_MSG_CHECKING([if the system is IBM ppc64le and cannot correctly convert some long double values])
+
+TEST_SRC="`(echo \"#define H5_DISABLE_SOME_LDOUBLE_CONV_TEST 1\"; cat $srcdir/config/cmake/ConversionTests.c)`"
+
+if test ${ac_cv_sizeof_long_double} = 0; then
+   hdf5_cv_disable_some_ldouble_conv=${hdf5_cv_disable_some_ldouble_conv=no}
+else
+   AC_CACHE_VAL([hdf5_cv_disable_some_ldouble_conv],
+        [AC_RUN_IFELSE([AC_LANG_SOURCE([$TEST_SRC])],
+        [hdf5_cv_disable_some_ldouble_conv=yes], [hdf5_cv_disable_some_ldouble_conv=no],[])])
+fi
+
+if test ${hdf5_cv_disable_some_ldouble_conv} = "yes"; then
+  AC_DEFINE([DISABLE_SOME_LDOUBLE_CONV], [1],
+            [Define if your system is IBM ppc64le and cannot convert some long double values correctly.])
+  AC_MSG_RESULT([yes])
+else
+  AC_MSG_RESULT([no])
+fi
+
+## ----------------------------------------------------------------------
 ## Set some variables for general configuration information to be saved
 ## and installed with the libraries (used to generate libhdf5.settings).
 ##
@@ -3512,6 +3511,7 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  src/Makefile
                  test/Makefile
                  test/H5srcdir_str.h
+                 test/testabort_fail.sh
                  test/testcheck_version.sh
                  test/testerror.sh
                  test/testflushrefresh.sh
@@ -3519,10 +3519,11 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  test/testlinks_env.sh
                  test/testswmr.sh
                  test/testvdsswmr.sh
-                 test/test_filenotclosed.sh
                  test/test_filter_plugin.sh
                  test/test_usecases.sh
+                 test/test_vol_plugin.sh
                  testpar/Makefile
+                 testpar/testpflush.sh
                  tools/Makefile
                  tools/lib/Makefile
                  tools/src/Makefile

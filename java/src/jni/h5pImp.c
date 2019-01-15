@@ -134,45 +134,6 @@ Java_hdf_hdf5lib_H5__1H5Pcopy
 
 /*
  * Class:     hdf_hdf5lib_H5
- * Method:    H5Pget_version
- * Signature: (J[I)I
- */
-JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Pget_1version
-    (JNIEnv *env, jclass clss, jlong plist, jintArray version_info)
-{
-    herr_t   status = -1;
-    jint    *theArray;
-    jboolean isCopy;
-
-    if (version_info == NULL) {
-        h5nullArgument(env, "H5Pget_version:  version_info input array is NULL");
-    } /* end if */
-    else if (ENVPTR->GetArrayLength(ENVPAR version_info) < 4) {
-        h5badArgument(env, "H5Pget_version:  version_info input array < 4");
-    } /* end else if */
-    else {
-        theArray = (jint *)ENVPTR->GetIntArrayElements(ENVPAR version_info, &isCopy);
-        if (theArray == NULL) {
-            h5JNIFatalError(env, "H5Pget_version:  version_info not pinned");
-        } /* end if */
-        else {
-            status = H5Pget_version((hid_t)plist, (unsigned *)&(theArray[0]),
-                    (unsigned *)&(theArray[1]), (unsigned *)&(theArray[2]), (unsigned *)&(theArray[3]));
-            if (status < 0) {
-                ENVPTR->ReleaseIntArrayElements(ENVPAR version_info, theArray, JNI_ABORT);
-                h5libraryError(env);
-            } /* end if */
-            else
-                ENVPTR->ReleaseIntArrayElements(ENVPAR version_info, theArray, 0);
-        } /* end else */
-    } /* end else */
-
-    return (jint)status;
-} /* end Java_hdf_hdf5lib_H5_H5Pget_1version */
-
-/*
- * Class:     hdf_hdf5lib_H5
  * Method:    H5Pset_userblock
  * Signature: (JJ)I
  */
@@ -5945,6 +5906,51 @@ Java_hdf_hdf5lib_H5_H5Pget_1chunk_1opts
 
     return (jint)opts;
 } /* end Java_hdf_hdf5lib_H5_H5Pget_1chunk_1opts */
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Pset_dset_no_attrs_hint
+ * Signature: (JZ)V
+ */
+JNIEXPORT void JNICALL
+Java_hdf_hdf5lib_H5_H5Pset_1dset_1no_1attrs_1hint
+(JNIEnv *env, jclass clss, jlong dcpl_id, jboolean minimize)
+{
+    herr_t   retVal = -1;
+    hbool_t  minimize_val;
+
+    if (minimize == JNI_TRUE)
+        minimize_val = TRUE;
+    else
+        minimize_val = FALSE;
+
+    retVal = H5Pset_dset_no_attrs_hint((hid_t)dcpl_id, (hbool_t)minimize_val);
+    if (retVal < 0)
+        h5libraryError(env);
+}
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Pget_dset_no_attrs_hint
+ * Signature: (J)Z
+ */
+JNIEXPORT jboolean JNICALL
+Java_hdf_hdf5lib_H5_H5Pget_1dset_1no_1attrs_1hint
+(JNIEnv *env, jclass clss, jlong dcpl_id)
+{
+    hbool_t    minimize = FALSE;
+    jboolean  bval = JNI_FALSE;
+
+    if (H5Pget_dset_no_attrs_hint((hid_t)dcpl_id, (hbool_t *)&minimize) < 0) {
+        h5libraryError(env);
+    }
+    else {
+        if (minimize == TRUE)
+            bval =  JNI_TRUE;
+    } /* end else */
+
+    return bval;
+}
 
 #ifdef __cplusplus
 } /* end extern "C" */

@@ -40,27 +40,27 @@ static void attempt_swmr_open_hdf5_file(hbool_t create_file,
 static void verify_datasets(hid_t file_id, int min_dset, int max_dset);
 
 /* local test function declarations */
-static unsigned check_cache_image_ctl_flow_1(void);
-static unsigned check_cache_image_ctl_flow_2(void);
-static unsigned check_cache_image_ctl_flow_3(void);
-static unsigned check_cache_image_ctl_flow_4(void);
-static unsigned check_cache_image_ctl_flow_5(void);
-static unsigned check_cache_image_ctl_flow_6(void);
+static unsigned check_cache_image_ctl_flow_1(hbool_t single_file_vfd);
+static unsigned check_cache_image_ctl_flow_2(hbool_t single_file_vfd);
+static unsigned check_cache_image_ctl_flow_3(hbool_t single_file_vfd);
+static unsigned check_cache_image_ctl_flow_4(hbool_t single_file_vfd);
+static unsigned check_cache_image_ctl_flow_5(hbool_t single_file_vfd);
+static unsigned check_cache_image_ctl_flow_6(hbool_t single_file_vfd);
 
-static unsigned cache_image_smoke_check_1(void);
-static unsigned cache_image_smoke_check_2(void);
-static unsigned cache_image_smoke_check_3(void);
-static unsigned cache_image_smoke_check_4(void);
-static unsigned cache_image_smoke_check_5(void);
-static unsigned cache_image_smoke_check_6(void);
+static unsigned cache_image_smoke_check_1(hbool_t single_file_vfd);
+static unsigned cache_image_smoke_check_2(hbool_t single_file_vfd);
+static unsigned cache_image_smoke_check_3(hbool_t single_file_vfd);
+static unsigned cache_image_smoke_check_4(hbool_t single_file_vfd);
+static unsigned cache_image_smoke_check_5(hbool_t single_file_vfd);
+static unsigned cache_image_smoke_check_6(hbool_t single_file_vfd);
 
-static unsigned cache_image_api_error_check_1(void);
-static unsigned cache_image_api_error_check_2(void);
-static unsigned cache_image_api_error_check_3(void);
-static unsigned cache_image_api_error_check_4(void);
+static unsigned cache_image_api_error_check_1(hbool_t single_file_vfd);
+static unsigned cache_image_api_error_check_2(hbool_t single_file_vfd);
+static unsigned cache_image_api_error_check_3(hbool_t single_file_vfd);
+static unsigned cache_image_api_error_check_4(hbool_t single_file_vfd);
 
-static unsigned get_free_sections_test(void);
-static unsigned evict_on_close_test(void);
+static unsigned get_free_sections_test(hbool_t single_file_vfd);
+static unsigned evict_on_close_test(hbool_t single_file_vfd);
 
 
 /****************************************************************************/
@@ -1329,7 +1329,7 @@ verify_datasets(hid_t file_id, int min_dset, int max_dset)
  */
 
 static unsigned
-check_cache_image_ctl_flow_1(void)
+check_cache_image_ctl_flow_1(hbool_t single_file_vfd)
 {
     const char * fcn_name = "check_cache_image_ctl_flow_1()";
     char filename[512];
@@ -1340,6 +1340,13 @@ check_cache_image_ctl_flow_1(void)
     int cp = 0;
 
     TESTING("metadata cache image control flow test 1");
+
+    /* Check for VFD that is a single file */
+    if(!single_file_vfd) {
+        SKIPPED();
+        HDputs("    Cache image not supported with the current VFD.");
+        return 0;
+    }
 
     pass = TRUE;
 
@@ -1608,7 +1615,7 @@ check_cache_image_ctl_flow_1(void)
  */
 
 static unsigned
-check_cache_image_ctl_flow_2(void)
+check_cache_image_ctl_flow_2(hbool_t single_file_vfd)
 {
     const char * fcn_name = "check_cache_image_ctl_flow_2()";
     char filename[512];
@@ -1619,6 +1626,13 @@ check_cache_image_ctl_flow_2(void)
     int cp = 0;
 
     TESTING("metadata cache image control flow test 2");
+
+    /* Check for VFD that is a single file */
+    if(!single_file_vfd) {
+        SKIPPED();
+        HDputs("    Cache image not supported with the current VFD.");
+        return 0;
+    }
 
     pass = TRUE;
 
@@ -1871,7 +1885,7 @@ check_cache_image_ctl_flow_2(void)
  */
 
 static unsigned
-check_cache_image_ctl_flow_3(void)
+check_cache_image_ctl_flow_3(hbool_t single_file_vfd)
 {
     const char * fcn_name = "check_cache_image_ctl_flow_3()";
     char filename[512];
@@ -1882,6 +1896,13 @@ check_cache_image_ctl_flow_3(void)
     int cp = 0;
 
     TESTING("metadata cache image control flow test 3");
+
+    /* Check for VFD that is a single file */
+    if(!single_file_vfd) {
+        SKIPPED();
+        HDputs("    Cache image not supported with the current VFD.");
+        return 0;
+    }
 
     pass = TRUE;
 
@@ -2242,7 +2263,7 @@ check_cache_image_ctl_flow_3(void)
  */
 
 static unsigned
-check_cache_image_ctl_flow_4(void)
+check_cache_image_ctl_flow_4(hbool_t single_file_vfd)
 {
     const char * fcn_name = "check_cache_image_ctl_flow_4()";
     char filename[512];
@@ -2253,6 +2274,13 @@ check_cache_image_ctl_flow_4(void)
     int cp = 0;
 
     TESTING("metadata cache image control flow test 4");
+
+    /* Check for VFD that is a single file */
+    if(!single_file_vfd) {
+        SKIPPED();
+        HDputs("    Cache image not supported with the current VFD.");
+        return 0;
+    }
 
     pass = TRUE;
 
@@ -2573,7 +2601,7 @@ check_cache_image_ctl_flow_4(void)
  */
 
 static unsigned
-check_cache_image_ctl_flow_5(void)
+check_cache_image_ctl_flow_5(hbool_t single_file_vfd)
 {
     const char * fcn_name = "check_cache_image_ctl_flow_5()";
     char filename[512];
@@ -2584,6 +2612,13 @@ check_cache_image_ctl_flow_5(void)
     int cp = 0;
 
     TESTING("metadata cache image control flow test 5");
+
+    /* Check for VFD that is a single file */
+    if(!single_file_vfd) {
+        SKIPPED();
+        HDputs("    Cache image not supported with the current VFD.");
+        return 0;
+    }
 
     pass = TRUE;
 
@@ -2854,7 +2889,7 @@ check_cache_image_ctl_flow_5(void)
  */
 
 static unsigned
-check_cache_image_ctl_flow_6(void)
+check_cache_image_ctl_flow_6(hbool_t single_file_vfd)
 {
     const char * fcn_name = "check_cache_image_ctl_flow_6()";
     char filename[512];
@@ -2865,6 +2900,13 @@ check_cache_image_ctl_flow_6(void)
     int cp = 0;
 
     TESTING("metadata cache image control flow test 6");
+
+    /* Check for VFD that is a single file */
+    if(!single_file_vfd) {
+        SKIPPED();
+        HDputs("    Cache image not supported with the current VFD.");
+        return 0;
+    }
 
     pass = TRUE;
 
@@ -3139,7 +3181,7 @@ check_cache_image_ctl_flow_6(void)
  */
 
 static unsigned
-cache_image_smoke_check_1(void)
+cache_image_smoke_check_1(hbool_t single_file_vfd)
 {
     const char * fcn_name = "cache_image_smoke_check_1()";
     char filename[512];
@@ -3150,6 +3192,13 @@ cache_image_smoke_check_1(void)
     int cp = 0;
 
     TESTING("metadata cache image smoke check 1");
+
+    /* Check for VFD that is a single file */
+    if(!single_file_vfd) {
+        SKIPPED();
+        HDputs("    Cache image not supported with the current VFD.");
+        return 0;
+    }
 
     pass = TRUE;
 
@@ -3562,7 +3611,7 @@ cache_image_smoke_check_1(void)
  */
 
 static unsigned
-cache_image_smoke_check_2(void)
+cache_image_smoke_check_2(hbool_t single_file_vfd)
 {
     const char * fcn_name = "cache_image_smoke_check_2()";
     char filename[512];
@@ -3573,6 +3622,13 @@ cache_image_smoke_check_2(void)
     int cp = 0;
 
     TESTING("metadata cache image smoke check 2");
+
+    /* Check for VFD that is a single file */
+    if(!single_file_vfd) {
+        SKIPPED();
+        HDputs("    Cache image not supported with the current VFD.");
+        return 0;
+    }
 
     pass = TRUE;
 
@@ -3863,7 +3919,7 @@ cache_image_smoke_check_2(void)
  */
 
 static unsigned
-cache_image_smoke_check_3(void)
+cache_image_smoke_check_3(hbool_t single_file_vfd)
 {
     const char * fcn_name = "cache_image_smoke_check_3()";
     char filename[512];
@@ -3874,6 +3930,13 @@ cache_image_smoke_check_3(void)
     int cp = 0;
 
     TESTING("metadata cache image smoke check 3");
+
+    /* Check for VFD that is a single file */
+    if(!single_file_vfd) {
+        SKIPPED();
+        HDputs("    Cache image not supported with the current VFD.");
+        return 0;
+    }
 
     pass = TRUE;
 
@@ -4248,7 +4311,7 @@ cache_image_smoke_check_3(void)
  */
 
 static unsigned
-cache_image_smoke_check_4(void)
+cache_image_smoke_check_4(hbool_t single_file_vfd)
 {
     const char * fcn_name = "cache_image_smoke_check_4()";
     char filename[512];
@@ -4261,6 +4324,13 @@ cache_image_smoke_check_4(void)
     int max_dset = 0;
 
     TESTING("metadata cache image smoke check 4");
+
+    /* Check for VFD that is a single file */
+    if(!single_file_vfd) {
+        SKIPPED();
+        HDputs("    Cache image not supported with the current VFD.");
+        return 0;
+    }
 
     pass = TRUE;
 
@@ -4653,7 +4723,7 @@ cache_image_smoke_check_4(void)
 #define MAX_NUM_GROUPS 128
 
 static unsigned
-cache_image_smoke_check_5(void)
+cache_image_smoke_check_5(hbool_t single_file_vfd)
 {
     const char * fcn_name = "cache_image_smoke_check_5()";
     char filename[512];
@@ -4669,6 +4739,13 @@ cache_image_smoke_check_5(void)
     int max_group = 0;
 
     TESTING("metadata cache image smoke check 5");
+
+    /* Check for VFD that is a single file */
+    if(!single_file_vfd) {
+        SKIPPED();
+        HDputs("    Cache image not supported with the current VFD.");
+        return 0;
+    }
 
     pass = TRUE;
 
@@ -5168,7 +5245,7 @@ cache_image_smoke_check_5(void)
  */
 
 static unsigned
-cache_image_smoke_check_6(void)
+cache_image_smoke_check_6(hbool_t single_file_vfd)
 {
     const char * fcn_name = "cache_image_smoke_check_6()";
     char filename[512];
@@ -5182,6 +5259,13 @@ cache_image_smoke_check_6(void)
     int max_dset = 0;
 
     TESTING("metadata cache image smoke check 6");
+
+    /* Check for VFD that is a single file */
+    if(!single_file_vfd) {
+        SKIPPED();
+        HDputs("    Cache image not supported with the current VFD.");
+        return 0;
+    }
 
     pass = TRUE;
 
@@ -5578,7 +5662,7 @@ cache_image_smoke_check_6(void)
  */
 
 static unsigned
-cache_image_api_error_check_1(void)
+cache_image_api_error_check_1(hbool_t single_file_vfd)
 {
     const char * fcn_name = "cache_image_api_error_check_1()";
     char filename[512];
@@ -5589,6 +5673,13 @@ cache_image_api_error_check_1(void)
     int cp = 0;
 
     TESTING("metadata cache image api error check 1");
+
+    /* Check for VFD that is a single file */
+    if(!single_file_vfd) {
+        SKIPPED();
+        HDputs("    Cache image not supported with the current VFD.");
+        return 0;
+    }
 
     pass = TRUE;
 
@@ -5954,7 +6045,7 @@ cache_image_api_error_check_1(void)
  */
 
 static unsigned
-cache_image_api_error_check_2(void)
+cache_image_api_error_check_2(hbool_t single_file_vfd)
 {
     const char * fcn_name = "cache_image_api_error_check_2()";
     char filename[512];
@@ -5965,6 +6056,13 @@ cache_image_api_error_check_2(void)
     int cp = 0;
 
     TESTING("metadata cache image api error check 2");
+
+    /* Check for VFD that is a single file */
+    if(!single_file_vfd) {
+        SKIPPED();
+        HDputs("    Cache image not supported with the current VFD.");
+        return 0;
+    }
 
     pass = TRUE;
 
@@ -6365,7 +6463,7 @@ cache_image_api_error_check_2(void)
  */
 
 static unsigned
-cache_image_api_error_check_3(void)
+cache_image_api_error_check_3(hbool_t single_file_vfd)
 {
     const char * fcn_name = "cache_image_api_error_check_3()";
     char filename[512];
@@ -6376,6 +6474,13 @@ cache_image_api_error_check_3(void)
     int cp = 0;
 
     TESTING("metadata cache image api error check 3");
+
+    /* Check for VFD that is a single file */
+    if(!single_file_vfd) {
+        SKIPPED();
+        HDputs("    Cache image not supported with the current VFD.");
+        return 0;
+    }
 
     pass = TRUE;
 
@@ -6649,7 +6754,7 @@ cache_image_api_error_check_3(void)
  */
 
 static unsigned
-cache_image_api_error_check_4(void)
+cache_image_api_error_check_4(hbool_t single_file_vfd)
 {
     const char * fcn_name = "cache_image_api_error_check_4()";
     char filename[512];
@@ -6662,6 +6767,13 @@ cache_image_api_error_check_4(void)
     H5AC_cache_image_config_t cache_image_config;
 
     TESTING("metadata cache image api error check 4");
+
+    /* Check for VFD that is a single file */
+    if(!single_file_vfd) {
+        SKIPPED();
+        HDputs("    Cache image not supported with the current VFD.");
+        return 0;
+    }
 
     pass = TRUE;
 
@@ -7238,7 +7350,7 @@ cache_image_api_error_check_4(void)
  *-------------------------------------------------------------------------
  */
 static unsigned
-get_free_sections_test(void)
+get_free_sections_test(hbool_t single_file_vfd)
 {
     const char * fcn_name = "get_free_sections_test()";
     char filename[512];
@@ -7250,6 +7362,13 @@ get_free_sections_test(void)
     int cp = 0;
 
     TESTING("Cache image / H5Fget_free_sections() interaction");
+
+    /* Check for VFD that is a single file */
+    if(!single_file_vfd) {
+        SKIPPED();
+        HDputs("    Cache image not supported with the current VFD.");
+        return 0;
+    }
 
     pass = TRUE;
 
@@ -7710,7 +7829,7 @@ get_free_sections_test(void)
  *-------------------------------------------------------------------------
  */
 static unsigned
-evict_on_close_test(void)
+evict_on_close_test(hbool_t single_file_vfd)
 {
 #ifndef H5_HAVE_PARALLEL
     const char * fcn_name = "evict_on_close_test()";
@@ -7730,6 +7849,13 @@ evict_on_close_test(void)
     HDputs("    EoC not supported in the parallel library.");
     return 0;
 #else
+
+    /* Check for VFD that is a single file */
+    if(!single_file_vfd) {
+        SKIPPED();
+        HDputs("    Cache image not supported with the current VFD.");
+        return 0;
+    }
 
     pass = TRUE;
 
@@ -8041,8 +8167,15 @@ evict_on_close_test(void)
 int
 main(void)
 {
+    const char  *env_h5_drvr;   /* File driver value from environment */
+    hbool_t single_file_vfd;    /* Whether VFD used stores data in a single file */
     unsigned nerrs = 0;
     int express_test;
+
+    /* Get the VFD to use */
+    env_h5_drvr = HDgetenv("HDF5_DRIVER");
+    if(env_h5_drvr == NULL)
+        env_h5_drvr = "nomatch";
 
     H5open();
 
@@ -8053,27 +8186,30 @@ main(void)
     printf("        express_test = %d\n", express_test);
     printf("=========================================\n");
 
-    nerrs += check_cache_image_ctl_flow_1();
-    nerrs += check_cache_image_ctl_flow_2();
-    nerrs += check_cache_image_ctl_flow_3();
-    nerrs += check_cache_image_ctl_flow_4();
-    nerrs += check_cache_image_ctl_flow_5();
-    nerrs += check_cache_image_ctl_flow_6();
+    /* Check for VFD which stores data in multiple files */
+    single_file_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "split") && HDstrcmp(env_h5_drvr, "multi") && HDstrcmp(env_h5_drvr, "family"));
 
-    nerrs += cache_image_smoke_check_1();
-    nerrs += cache_image_smoke_check_2();
-    nerrs += cache_image_smoke_check_3();
-    nerrs += cache_image_smoke_check_4();
-    nerrs += cache_image_smoke_check_5();
-    nerrs += cache_image_smoke_check_6();
+    nerrs += check_cache_image_ctl_flow_1(single_file_vfd);
+    nerrs += check_cache_image_ctl_flow_2(single_file_vfd);
+    nerrs += check_cache_image_ctl_flow_3(single_file_vfd);
+    nerrs += check_cache_image_ctl_flow_4(single_file_vfd);
+    nerrs += check_cache_image_ctl_flow_5(single_file_vfd);
+    nerrs += check_cache_image_ctl_flow_6(single_file_vfd);
 
-    nerrs += cache_image_api_error_check_1();
-    nerrs += cache_image_api_error_check_2();
-    nerrs += cache_image_api_error_check_3();
-    nerrs += cache_image_api_error_check_4();
+    nerrs += cache_image_smoke_check_1(single_file_vfd);
+    nerrs += cache_image_smoke_check_2(single_file_vfd);
+    nerrs += cache_image_smoke_check_3(single_file_vfd);
+    nerrs += cache_image_smoke_check_4(single_file_vfd);
+    nerrs += cache_image_smoke_check_5(single_file_vfd);
+    nerrs += cache_image_smoke_check_6(single_file_vfd);
 
-    nerrs += get_free_sections_test();
-    nerrs += evict_on_close_test();
+    nerrs += cache_image_api_error_check_1(single_file_vfd);
+    nerrs += cache_image_api_error_check_2(single_file_vfd);
+    nerrs += cache_image_api_error_check_3(single_file_vfd);
+    nerrs += cache_image_api_error_check_4(single_file_vfd);
+
+    nerrs += get_free_sections_test(single_file_vfd);
+    nerrs += evict_on_close_test(single_file_vfd);
 
     return(nerrs > 0);
 

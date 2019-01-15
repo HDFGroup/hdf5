@@ -149,6 +149,9 @@ Java_hdf_hdf5lib_H5_H5Fis_1hdf5
     (JNIEnv *env, jclass clss, jstring name)
 {
     htri_t      bval = JNI_FALSE;
+#ifdef H5_NO_DEPRECATED_SYMBOLS
+    h5unimplemented(env, "H5Fis_hdf5:  not implemented");
+#else
     const char *fileName;
 
     PIN_JAVA_STRING(name, fileName);
@@ -162,9 +165,36 @@ Java_hdf_hdf5lib_H5_H5Fis_1hdf5
         else if (bval < 0)
             h5libraryError(env);
     }
-
+#endif
     return (jboolean)bval;
 } /* end Java_hdf_hdf5lib_H5_H5Fis_1hdf5 */
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Fis_accessible
+ * Signature: (Ljava/lang/String;J)Z
+ */
+JNIEXPORT jboolean JNICALL
+Java_hdf_hdf5lib_H5_H5Fis_1accessible
+    (JNIEnv *env, jclass clss, jstring name, jlong file_id)
+{
+    htri_t      bval = JNI_FALSE;
+    const char *fileName;
+
+    PIN_JAVA_STRING(name, fileName);
+    if (fileName != NULL) {
+        bval = H5Fis_accessible(fileName, (hid_t)file_id);
+
+        UNPIN_JAVA_STRING(name, fileName);
+
+        if (bval > 0)
+            bval = JNI_TRUE;
+        else if (bval < 0)
+            h5libraryError(env);
+    }
+
+    return (jboolean)bval;
+} /* end Java_hdf_hdf5lib_H5_H5Fis_1accessible */
 
 /*
  * Class:     hdf_hdf5lib_H5
@@ -177,7 +207,7 @@ Java_hdf_hdf5lib_H5__1H5Fget_1create_1plist
 {
     hid_t retVal = -1;
 
-    retVal =  H5Fget_create_plist((hid_t)file_id );
+    retVal =  H5Fget_create_plist((hid_t)file_id);
     if (retVal < 0)
         h5libraryError(env);
 
@@ -609,6 +639,66 @@ Java_hdf_hdf5lib_H5_H5Fget_1mdc_1logging_1status
     } /* end else */
 } /* end Java_hdf_hdf5lib_H5_H5Fget_1mdc_1logging_1status */
 
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Fset_dset_no_attrs_hint
+ * Signature: (JZ)V
+ */
+JNIEXPORT void JNICALL
+Java_hdf_hdf5lib_H5_H5Fset_1dset_1no_1attrs_1hint
+(JNIEnv *env, jclass clss, jlong file_id, jboolean minimize)
+{
+    herr_t   retVal = -1;
+    hbool_t  minimize_val;
+
+    if (minimize == JNI_TRUE)
+        minimize_val = TRUE;
+    else
+        minimize_val = FALSE;
+
+    retVal = H5Fset_dset_no_attrs_hint((hid_t)file_id, (hbool_t)minimize_val);
+    if (retVal < 0)
+        h5libraryError(env);
+}
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Fget_dset_no_attrs_hint
+ * Signature: (J)Z
+ */
+JNIEXPORT jboolean JNICALL
+Java_hdf_hdf5lib_H5_H5Fget_1dset_1no_1attrs_1hint
+(JNIEnv *env, jclass clss, jlong file_id)
+{
+    hbool_t    minimize = FALSE;
+    jboolean  bval = JNI_FALSE;
+
+    if (H5Fget_dset_no_attrs_hint((hid_t)file_id, (hbool_t *)&minimize) < 0) {
+        h5libraryError(env);
+    }
+    else {
+        if (minimize == TRUE)
+            bval =  JNI_TRUE;
+    } /* end else */
+
+    return bval;
+}
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Fset_libver_bounds
+ * Signature: (JII)V
+ */
+JNIEXPORT void JNICALL
+Java_hdf_hdf5lib_H5_H5Fset_1libver_1bounds
+    (JNIEnv *env, jclass clss, jlong file_id, jint low, jint high)
+{
+    herr_t retVal = -1;
+
+    retVal = H5Fset_libver_bounds((hid_t)file_id, (H5F_libver_t)low, (H5F_libver_t)high);
+    if(retVal < 0)
+        h5libraryError(env);
+} /* end Java_hdf_hdf5lib_H5_H5Fset_1libver_1bounds */
 
 
 #ifdef __cplusplus

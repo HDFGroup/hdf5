@@ -89,6 +89,14 @@ generate_datasets(hid_t loc_id, unsigned bogus_id)
     if((did = H5Dcreate2(loc_id, "Dataset4", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0) goto error;
     if(H5Dclose(did) < 0) goto error;
 
+    /* Set "shareable" message flag for bogus message */
+    bogus_flags = H5O_MSG_FLAG_SHAREABLE;
+    if(H5Pset(dcpl, H5O_BOGUS_MSG_FLAGS_NAME, &bogus_flags) < 0) goto error;
+
+    /* Create fourth dataset, with "shareable" message flag */
+    if((did = H5Dcreate2(loc_id, "Dataset5", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0) goto error;
+    if(H5Dclose(did) < 0) goto error;
+
     /* Close dataset creation property list */
     if(H5Pclose(dcpl) < 0) goto error;
 
