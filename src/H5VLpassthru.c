@@ -26,6 +26,7 @@
 /* Header files needed */
 /* (Public HDF5 and standard C / POSIX only) */
 #include <assert.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -171,7 +172,7 @@ static const H5VL_class_t H5VL_pass_through_g = {
     0,                                              /* capability flags */
     H5VL_pass_through_init,                         /* initialize   */
     H5VL_pass_through_term,                         /* terminate    */
-    sizeof(H5VL_pass_through_t),                    /* info size    */
+    sizeof(H5VL_pass_through_info_t),               /* info size    */
     H5VL_pass_through_info_copy,                    /* info copy    */
     H5VL_pass_through_info_cmp,                     /* info compare */
     H5VL_pass_through_info_free,                    /* info free    */

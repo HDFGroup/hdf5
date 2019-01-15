@@ -1308,14 +1308,8 @@ test_select_hyper_contig(hid_t dset_type, hid_t xfer_plist)
     CHECK(ret, FAIL, "H5Dread");
 
     /* Compare data read with data written out */
-    if(HDmemcmp(rbuf, wbuf, sizeof(uint16_t) * 30 * 12)) {
+    if(HDmemcmp(rbuf, wbuf, sizeof(uint16_t) * 30 * 12))
         TestErrPrintf("hyperslab values don't match! Line=%d\n",__LINE__);
-#ifdef QAK
-        for(i=0, tbuf=wbuf; i<12; i++)
-            for(j=0; j<30; j++)
-                printf("i=%d, j=%d, *wbuf=%u, *rbuf=%u\n",i,j,(unsigned)*(wbuf+i*30+j),(unsigned)*(rbuf+i*30+j));
-#endif /* QAK */
-    } /* end if */
 
     /* Close memory dataspace */
     ret = H5Sclose(sid2);
@@ -1432,14 +1426,8 @@ test_select_hyper_contig2(hid_t dset_type, hid_t xfer_plist)
     CHECK(ret, FAIL, "H5Dread");
 
     /* Compare data read with data written out */
-    if(HDmemcmp(rbuf,wbuf,sizeof(uint16_t)*2*SPACE8_DIM3*SPACE8_DIM2*SPACE8_DIM1)) {
+    if(HDmemcmp(rbuf,wbuf,sizeof(uint16_t)*2*SPACE8_DIM3*SPACE8_DIM2*SPACE8_DIM1))
         TestErrPrintf("Error: hyperslab values don't match!\n");
-#ifdef QAK
-        for(i=0, tbuf=wbuf; i<12; i++)
-            for(j=0; j<30; j++)
-                printf("i=%d, j=%d, *wbuf=%u, *rbuf=%u\n",i,j,(unsigned)*(wbuf+i*30+j),(unsigned)*(rbuf+i*30+j));
-#endif /* QAK */
-    } /* end if */
 
     /* Close memory dataspace */
     ret = H5Sclose(sid2);
@@ -3743,15 +3731,8 @@ test_select_hyper_copy(void)
     CHECK(ret, FAIL, "H5Dread");
 
     /* Compare data read with data written out */
-    if(HDmemcmp(rbuf,rbuf2,sizeof(uint16_t)*SPACE3_DIM1*SPACE3_DIM2)) {
+    if(HDmemcmp(rbuf,rbuf2,sizeof(uint16_t)*SPACE3_DIM1*SPACE3_DIM2))
         TestErrPrintf("hyperslab values don't match! Line=%d\n",__LINE__);
-#ifdef QAK
-        for(i=0; i<SPACE3_DIM1; i++)
-            for(j=0; j<SPACE3_DIM2; j++)
-                if((unsigned)*(rbuf+i*SPACE3_DIM2+j)!=(unsigned)*(rbuf2+i*SPACE3_DIM2+j))
-                    printf("i=%d, j=%d, *rbuf=%u, *rbuf2=%u\n",i,j,(unsigned)*(rbuf+i*SPACE3_DIM2+j),(unsigned)*(rbuf2+i*SPACE3_DIM2+j));
-#endif /* QAK */
-    } /* end if */
 
     /* Close memory dataspace */
     ret = H5Sclose(sid2);
@@ -5220,7 +5201,7 @@ test_select_hyper_union_3d(void)
     tmp2_space = H5Scombine_select(sid2,H5S_SELECT_OR,tmp_space);
     CHECK(tmp2_space, FAIL, "H5Scombin_select");
 
-    npoints = H5Sget_select_npoints(tmp2_space);
+    npoints = (hsize_t)H5Sget_select_npoints(tmp2_space);
     VERIFY(npoints, 15*26, "H5Sget_select_npoints");
 
     /* Create a dataset */
@@ -5902,37 +5883,20 @@ test_select_hyper_union_random_5d(hid_t read_plist)
     CHECK(sid2, FAIL, "H5Screate_simple");
 
     /* Get initial random # seed */
-    seed=(unsigned)time(NULL)+(unsigned)clock();
+    seed = (unsigned)HDtime(NULL) + (unsigned)HDclock();
 
     /* Crunch through a bunch of random hyperslab reads from the file dataset */
     for(test_num=0; test_num<NRAND_HYPER; test_num++) {
         /* Save random # seed for later use */
         /* (Used in case of errors, to regenerate the hyperslab sequence) */
-#ifndef QAK
-        seed+=(unsigned)clock();
-#else /* QAK */
-        seed=987909620;
-#endif /* QAK */
+        seed += (unsigned)HDclock();
         HDsrandom(seed);
 
-#ifdef QAK
-printf("test_num=%d, seed=%u\n",test_num,seed);
-#endif /* QAK */
-#ifndef QAK
         for(i=0; i<NHYPERSLABS; i++) {
-#else /* QAK */
-        for(i=0; i<2; i++) {
-#endif /* QAK */
-#ifdef QAK
-printf("hyperslab=%d\n",i);
-#endif /* QAK */
             /* Select random hyperslab location & size for selection */
             for(j=0; j<SPACE5_RANK; j++) {
                 start[j] = ((hsize_t)HDrandom() % dims1[j]);
                 count[j] = (((hsize_t)HDrandom() % (dims1[j] - start[j])) + 1);
-#ifdef QAK
-printf("start[%d]=%d, count[%d]=%d (end[%d]=%d)\n",j,(int)start[j],j,(int)count[j],j,(int)(start[j]+count[j]-1));
-#endif /* QAK */
             } /* end for */
 
             /* Select hyperslab */
@@ -5953,41 +5917,9 @@ printf("start[%d]=%d, count[%d]=%d (end[%d]=%d)\n",j,(int)start[j],j,(int)count[
         npoints2 = H5Sget_select_npoints(sid2);
         VERIFY(npoints, npoints2, "H5Sget_select_npoints");
 
-#ifdef QAK
-printf("random I/O, before H5Dread(), npoints=%lu\n",(unsigned long)npoints);
-{
-    hsize_t blocks[128][2][SPACE5_RANK];
-    hssize_t nblocks;
-    int k;
-
-    nblocks=H5Sget_select_hyper_nblocks(sid1);
-    printf("nblocks=%d\n",(int)nblocks);
-    H5Sget_select_hyper_blocklist(sid1,0,nblocks,blocks);
-    for(j=0; j<nblocks; j++) {
-        printf("Block #%d, start = {",j);
-        for(k=0; k<SPACE5_RANK; k++) {
-            printf("%d",blocks[j][0][k]);
-            if(k<(SPACE5_RANK-1))
-                printf(", ");
-            else
-                printf("}, end = {");
-        } /* end for */
-        for(k=0; k<SPACE5_RANK; k++) {
-            printf("%d",blocks[j][1][k]);
-            if(k<(SPACE5_RANK-1))
-                printf(", ");
-            else
-                printf("}\n");
-        } /* end for */
-    } /* end for */
-}
-#endif /* QAK */
         /* Read selection from disk */
         ret=H5Dread(dataset,H5T_NATIVE_INT,sid2,sid1,read_plist,rbuf);
         CHECK(ret, FAIL, "H5Dread");
-#ifdef QAK
-printf("random I/O, after H5Dread()\n");
-#endif /* QAK */
 
         /* Compare data read with data written out */
         tbuf=rbuf;

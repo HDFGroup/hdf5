@@ -150,6 +150,8 @@ float attr_data5=-5.123F;        /* Test data for 5th attribute */
 #define INVALID_RENAME_TEST_ATTR_NAME "InvalidRenameTestAttr"
 #define INVALID_RENAME_TEST_NEW_ATTR_NAME "InvalidRenameTestNewAttr"
 
+/* Used by test_attr_get_name_invalid_buf() */
+#define GET_NAME_INVALID_BUF_TEST_ATTR_NAME "InvalidNameBufferTestAttr"
 
 /* Attribute iteration struct */
 typedef struct {
@@ -6138,6 +6140,60 @@ test_attr_rename_invalid_name(hid_t fcpl, hid_t fapl)
 }
 
 
+/***************************************************************
+**
+**  test_attr_get_name_invalid_buf(): A test to ensure that
+**      passing a NULL buffer to H5Aget_name(_by_idx) when
+**      the 'size' parameter is non-zero doesn't cause bad
+**      behavior.
+**
+****************************************************************/
+static void
+test_attr_get_name_invalid_buf(hid_t fcpl, hid_t fapl)
+{
+    ssize_t err_ret = -1;
+    hid_t   fid;
+    hid_t   attr;
+    hid_t   sid;
+
+    /* Create dataspace for attribute */
+    sid = H5Screate(H5S_SCALAR);
+    CHECK(sid, FAIL, "H5Screate");
+
+    /* Create file */
+    fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, fapl);
+    CHECK(fid, FAIL, "H5Fcreate");
+
+    /* Create attribute */
+    attr = H5Acreate2(fid, GET_NAME_INVALID_BUF_TEST_ATTR_NAME, H5T_NATIVE_UINT, sid, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(attr, FAIL, "H5Acreate2");
+
+    H5E_BEGIN_TRY {
+        err_ret = H5Aget_name(attr, 1, NULL);
+    } H5E_END_TRY;
+
+    VERIFY(err_ret, FAIL, "H5Aget_name");
+
+    H5E_BEGIN_TRY {
+        err_ret = H5Aget_name_by_idx(fid, ".", H5_INDEX_NAME, H5_ITER_INC, 0, NULL, 1, H5P_DEFAULT);
+    } H5E_END_TRY;
+
+    VERIFY(err_ret, FAIL, "H5Aget_name_by_idx");
+
+    /* Close dataspace */
+    err_ret = H5Sclose(sid);
+    CHECK(err_ret, FAIL, "H5Sclose");
+
+    /* Close attribute */
+    err_ret = H5Aclose(attr);
+    CHECK(err_ret, FAIL, "H5Aclose");
+
+    /* Close file */
+    err_ret = H5Fclose(fid);
+    CHECK(err_ret, FAIL, "H5Fclose");
+}
+
+
 /****************************************************************
 **
 **  test_attr_delete_by_idx(): Test basic H5A (attribute) code.
@@ -11176,6 +11232,7 @@ test_attr(void)
                 test_attr_many(new_format, my_fcpl, my_fapl);               /* Test storing lots of attributes */
                 test_attr_info_null_info_pointer(my_fcpl, my_fapl); /* Test passing a NULL attribute info pointer to H5Aget_info(_by_name/_by_idx) */
                 test_attr_rename_invalid_name(my_fcpl, my_fapl); /* Test passing a NULL or empty attribute name to H5Arename(_by_name) */
+                test_attr_get_name_invalid_buf(my_fcpl, my_fapl); /* Test passing NULL buffer to H5Aget_name(_by_idx) */
 
                 /* New attribute API routine tests
                  */

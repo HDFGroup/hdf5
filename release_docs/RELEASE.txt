@@ -138,11 +138,32 @@ New Features
 
     Parallel Library:
     -----------------
-    -
+    - Changed the default behavior in parallel when reading the same dataset in its entirely
+      (i.e. H5S_ALL dataset selection) which is being read by all the processes collectively.
+      The dataset mush be contiguous, less than 2GB, and of an atomic datatype.
+      The new behavior is the HDF5 library will use an MPI_Bcast to pass the data read from 
+      the disk by the root process to the remain processes in the MPI communicator associated 
+      with the HDF5 file.
+
+      (MSB - 2019/01/02, HDFFV-10652)
 
     Fortran Library:
     ----------------
-    -
+    - Added new Fortran derived type, c_h5o_info_t, which is interoperable with
+      C's h5o_info_t. This is needed for callback functions which
+      pass C's h5o_info_t data type definition.
+
+      (MSB, 2019/01/08, HDFFV-10443)
+
+    - Added new Fortran API, H5gmtime, which converts (C) 'time_t' structure
+      to Fortran DATE AND TIME storage format.
+      
+      (MSB, 2019/01/08, HDFFV-10443)
+
+    - Added new Fortran 'fields' optional parameter to: h5ovisit_f, h5oget_info_by_name_f, 
+      h5oget_info, h5oget_info_by_idx and h5ovisit_by_name_f.
+
+      (MSB, 2019/01/08, HDFFV-10443)
 
     C++ Library:
     ------------
@@ -341,6 +362,12 @@ Bug Fixes since HDF5-1.10.3 release
       Effected generic procedures were functions in H5A, H5D, H5P, H5R and H5T.
 
       (MSB, 2018/12/04, HDFFV-10511)
+
+    - Fixed issue with Fortran not returning h5o_info_t field values 
+      meta_size%attr%index_size and  meta_size%attr%heap_size.
+
+      (MSB, 2018/1/8, HDFFV-10443)
+
 
     Tools
     -----

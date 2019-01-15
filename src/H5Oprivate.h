@@ -227,11 +227,11 @@ typedef struct H5O_copy_t {
  * Note: Must increment H5O_MSG_TYPES in H5Opkg.h and update H5O_msg_class_g
  *      in H5O.c when creating a new message type.  Also bump the value of
  *      H5O_BOGUS_INVALID_ID, below, to be one greater than the value of
- *      H5O_UNKNOWN_ID.
+ *      H5O_UNKNOWN_ID, and re-run gen_bogus.c.
  *
  * (this should never exist in a file)
  */
-#define H5O_BOGUS_INVALID_ID	0x001A  /* "Bogus invalid" Message.  */
+#define H5O_BOGUS_INVALID_ID	0x001a  /* "Bogus invalid" Message.  */
 
 /* Shared object message types.
  * Shared objects can be committed, in which case the shared message contains
@@ -651,6 +651,7 @@ typedef struct H5O_layout_t {
  */
 #define H5O_BOGUS_VALUE         0xdeadbeef
 typedef struct H5O_bogus_t {
+    H5O_shared_t        sh_loc;         /* Shared message info (must be first) */
     unsigned u;                         /* Hold the bogus info */
 } H5O_bogus_t;
 #endif /* H5O_ENABLE_BOGUS */
