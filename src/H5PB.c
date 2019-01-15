@@ -1700,7 +1700,7 @@ H5PB_vfd_swmr__update_index(H5F_t * f,
         
         while ( top >= bottom ) {
 
-            probe = top + bottom / 2;
+            probe = (top + bottom) / 2;
 
             if ( idx[probe].hdf5_page_offset < target_page ) {
 
@@ -2560,12 +2560,12 @@ H5PB__load_page(H5F_t *f, H5PB_t *pb_ptr, haddr_t addr, H5FD_mem_t type,
 
         HGOTO_ERROR(H5E_PAGEBUF, H5E_CANTGET, FAIL, \
                     "driver get_eoa request failed")
-
+#if 0 /* JRM */
     if ( addr + ((haddr_t)(pb_ptr->page_size)) > eoa )
 
         HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
                     "Attempt to load page that extends past EOA")
-
+#endif /* JRM */
     if ( HADDR_UNDEF == (eof = H5FD_get_eof(f->shared->lf, H5FD_MEM_DEFAULT)) )
 
         HGOTO_ERROR(H5E_PAGEBUF, H5E_CANTGET, FAIL, \
@@ -2960,10 +2960,8 @@ H5PB__mark_entry_dirty(H5F_t * f, H5PB_t *pb_ptr, H5PB_entry_t *entry_ptr)
         } else {
 
             /* the entry should be a multi-page metadata entry that 
-             * has been modified this tick.  Thus it is only on the 
-             * tick list, and no action is required.
+             * has been modified this tick.  Thus no action is required.
              */
-            HDassert(entry_ptr->modified_this_tick);
             HDassert(entry_ptr->is_mpmde);
             HDassert(pb_ptr->vfd_swmr_writer);
         }

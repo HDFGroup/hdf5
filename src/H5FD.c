@@ -737,6 +737,9 @@ H5FD_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     /* Dispatch to file driver */
     if(HADDR_UNDEF == maxaddr)
         maxaddr = driver->maxaddr;
+#if 0 /* JRM */
+    HDfprintf(stderr, "H5FD_open():  calling %s.open().\n", driver->name);
+#endif /* JRM */
     if(NULL == (file = (driver->open)(name, flags, fapl_id, maxaddr)))
         HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, NULL, "open failed")
 

@@ -183,6 +183,7 @@ H5FD_read(H5FD_t *file, H5FD_mem_t type, haddr_t addr, size_t size, void *buf/*o
      * objects being written within the file by the application performing
      * SWMR write operations.
      */
+#if 0 /* JRM */
     if(!(file->access_flags & H5F_ACC_SWMR_READ)) {
         haddr_t     eoa;
 
@@ -192,6 +193,7 @@ H5FD_read(H5FD_t *file, H5FD_mem_t type, haddr_t addr, size_t size, void *buf/*o
          if((addr + file->base_addr + size) > eoa)
             HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow, addr = %llu, size = %llu, eoa = %llu", (unsigned long long)(addr + file->base_addr), (unsigned long long)size, (unsigned long long)eoa)
     }
+#endif /* JRM */
 
     /* Dispatch to driver */
     if((file->cls->read)(file, type, dxpl_id, addr + file->base_addr, size, buf) < 0)

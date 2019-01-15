@@ -278,6 +278,11 @@ H5AC_cache_image_pending(const H5F_t *f)
  *              matzke@llnl.gov
  *              Jul  9 1997
  *
+ * Changes:     Added code to configrue the metadata cache for VFD SWMR
+ *              reader operations when indicated.
+ *
+ *                                              JRM -- 1/15/19
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -417,6 +422,23 @@ H5AC_create(const H5F_t *f, H5AC_cache_config_t *config_ptr, H5AC_cache_image_co
         if(H5AC__write_create_cache_log_msg(f->shared->cache) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "unable to emit log message")
     } /* end if */
+
+    /* Configure the metadata cache for VFD SWMR reader operation if 
+     * specified.
+     */
+    if ( ( H5F_VFD_SWMR_CONFIG(f) ) && 
+         ( !f->shared->vfd_swmr_config.vfd_swmr_writer ) ) {
+
+        HDassert(!(H5F_INTENT(f) & H5F_ACC_RDWR));
+        HDassert(f->shared->fs_page_size > 0);
+
+        if ( H5C_set_vfd_swmr_reader(f->shared->cache, TRUE, 
+                                     f->shared->fs_page_size) < 0 )
+
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTSET, FAIL, \
+                        "can't configure MDC for VFD SWMR reader operations");
+
+    }
 
     /* Set the cache parameters */
     if(H5AC_set_cache_auto_resize_config(f->shared->cache, config_ptr) < 0)

@@ -1037,10 +1037,11 @@ test_reader_md_concur(void)
     H5O_info_t oinfo;           /* Object metadata information */
     char dname[100];            /* Name of dataset */
     hsize_t dims[2] = {50, 20}; /* Dataset dimension sizes */
-    hsize_t max_dims[2] = {H5S_UNLIMITED, H5S_UNLIMITED}; /* Dataset maximum dimension sizes */
-    hsize_t chunk_dims[2] = {2, 5};             /* Dataset chunked dimension sizes */
-    unsigned num_entries = 0 ;                  /* Number of entries in the index */
-    H5FD_vfd_swmr_idx_entry_t *index = NULL;    /* Pointer to the index entries */
+    hsize_t max_dims[2] =       /* Dataset maximum dimension sizes */
+        {H5S_UNLIMITED, H5S_UNLIMITED};
+    hsize_t chunk_dims[2] = {2, 5}; /* Dataset chunked dimension sizes */
+    unsigned num_entries = 0 ;  /* Number of entries in the index */
+    H5FD_vfd_swmr_idx_entry_t *index = NULL;  /* Pointer to the index entries */
 
     hid_t fcpl = -1;            /* File creation property list */
     hid_t fid_writer = -1;      /* File ID for writer */
@@ -1060,8 +1061,10 @@ test_reader_md_concur(void)
     TESTING("Verify the metadata file for VFD SWMR reader");
 
     /* Allocate memory for the configuration structure */
-    if((config_writer = (H5F_vfd_swmr_config_t *)HDmalloc(sizeof(H5F_vfd_swmr_config_t))) == NULL)
+    if((config_writer = (H5F_vfd_swmr_config_t *)
+                        HDmalloc(sizeof(H5F_vfd_swmr_config_t))) == NULL)
         FAIL_STACK_ERROR;
+
     HDmemset(config_writer, 0, sizeof(H5F_vfd_swmr_config_t));
 
     /* Create a copy of the file access property list */
@@ -1073,7 +1076,7 @@ test_reader_md_concur(void)
     config_writer->tick_len = 1; 
     config_writer->max_lag = 3;
     config_writer->vfd_swmr_writer = TRUE;
-    config_writer->md_pages_reserved = 2;
+    config_writer->md_pages_reserved = 256;
     HDstrcpy(config_writer->md_file_path, MD_FILENAME);
 
     /* Set the VFD SWMR configuration in fapl */
@@ -1089,8 +1092,10 @@ test_reader_md_concur(void)
         FAIL_STACK_ERROR
 
     /* Set file space strategy */
-    if(H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, FALSE, (hsize_t)1) < 0)
+    if(H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, 
+                                  FALSE, (hsize_t)1) < 0)
         FAIL_STACK_ERROR;
+
     if(H5Pset_file_space_page_size(fcpl, FS_PAGE_SIZE) < 0)
         FAIL_STACK_ERROR;
 
@@ -1105,6 +1110,7 @@ test_reader_md_concur(void)
     /* Create 2 pipes */
     if(HDpipe(parent_pfd) < 0)
         FAIL_STACK_ERROR
+
     if(HDpipe(child_pfd) < 0)
         FAIL_STACK_ERROR
 
@@ -1121,7 +1127,7 @@ test_reader_md_concur(void)
         hid_t fapl_reader = -1;     /* File access property list for reader */
         H5F_t *file_reader;         /* File pointer for reader */
         H5F_vfd_swmr_config_t *config_reader = NULL;    /* VFD SWMR configuration for reader */
-        unsigned child_num_entries = 0;                 /* Number of entries passed to reader */
+        unsigned child_num_entries = 0; /* Number of entries passed to reader */
         H5FD_vfd_swmr_idx_entry_t *child_index = NULL;  /* Index passed to reader */
 
         /* Close unused write end for writer pipe */
@@ -1144,8 +1150,10 @@ test_reader_md_concur(void)
         }
 
         /* Allocate memory for the configuration structure */
-        if((config_reader = (H5F_vfd_swmr_config_t *)HDmalloc(sizeof(H5F_vfd_swmr_config_t))) == NULL)
+        if((config_reader = (H5F_vfd_swmr_config_t *)
+                            HDmalloc(sizeof(H5F_vfd_swmr_config_t))) == NULL)
             HDexit(EXIT_FAILURE);
+
         HDmemset(config_reader, 0, sizeof(H5F_vfd_swmr_config_t));
 
         /* Set up the VFD SWMR configuration as reader */
@@ -1153,7 +1161,7 @@ test_reader_md_concur(void)
         config_reader->tick_len = 1;
         config_reader->max_lag = 3;
         config_reader->vfd_swmr_writer = FALSE;
-        config_reader->md_pages_reserved = 2;
+        config_reader->md_pages_reserved = 256;
         HDstrcpy(config_reader->md_file_path, MD_FILENAME);
 
         /* Create a copy of the file access property list */
@@ -1206,16 +1214,23 @@ test_reader_md_concur(void)
         if(child_num_entries) {
 
             /* Allocate memory for num_entries index */
-            if((child_index = (H5FD_vfd_swmr_idx_entry_t *)HDcalloc(child_num_entries, sizeof(H5FD_vfd_swmr_idx_entry_t))) == NULL)
+            if((child_index = (H5FD_vfd_swmr_idx_entry_t *)
+                          HDcalloc(child_num_entries, 
+                                   sizeof(H5FD_vfd_swmr_idx_entry_t))) == NULL)
                 HDexit(EXIT_FAILURE);
 
             /* Read index from writer pipe */
-            if(HDread(parent_pfd[0], child_index, child_num_entries * sizeof(H5FD_vfd_swmr_idx_entry_t)) < 0)
+            if(HDread(parent_pfd[0], child_index, 
+                     child_num_entries * sizeof(H5FD_vfd_swmr_idx_entry_t)) < 0)
+
                 HDexit(EXIT_FAILURE);
         }
 
-        /* Read and verify the expected header and index info in the metadata file */
-        if(H5FD__vfd_swmr_reader_md_test(file_reader->shared->lf, child_num_entries, child_index) < 0)
+        /* Read and verify the expected header and index info in the 
+        * metadata file 
+        */
+        if(H5FD__vfd_swmr_reader_md_test(file_reader->shared->lf, 
+                                        child_num_entries, child_index) < 0)
             HDexit(EXIT_FAILURE);
 
         /* Send notification 4 to parent that the verification is complete */
@@ -1244,16 +1259,22 @@ test_reader_md_concur(void)
 
         if(child_num_entries) {
             /* Allocate memory for num_entries index */
-            if((child_index = (H5FD_vfd_swmr_idx_entry_t *)HDcalloc(child_num_entries, sizeof(H5FD_vfd_swmr_idx_entry_t))) == NULL)
+            if((child_index = (H5FD_vfd_swmr_idx_entry_t *)
+                           HDcalloc(child_num_entries, 
+                                    sizeof(H5FD_vfd_swmr_idx_entry_t))) == NULL)
                 HDexit(EXIT_FAILURE);
 
             /* Read index from writer pipe */
-            if(HDread(parent_pfd[0], child_index, child_num_entries * sizeof(H5FD_vfd_swmr_idx_entry_t)) < 0)
+            if(HDread(parent_pfd[0], child_index, 
+                     child_num_entries * sizeof(H5FD_vfd_swmr_idx_entry_t)) < 0)
                 HDexit(EXIT_FAILURE);
         }
 
-        /* Read and verify the expected header and index info in the metadata file */
-        if(H5FD__vfd_swmr_reader_md_test(file_reader->shared->lf, child_num_entries, child_index) < 0)
+        /* Read and verify the expected header and index info in the 
+         * metadata file 
+         */
+        if(H5FD__vfd_swmr_reader_md_test(file_reader->shared->lf, 
+                                         child_num_entries, child_index) < 0)
             HDexit(EXIT_FAILURE);
 
         /* Send notification 6 to parent that the verification is complete */
@@ -1268,9 +1289,12 @@ test_reader_md_concur(void)
 
         /* Wait for notification 7 from parent to start verification */
         while(child_notify != 7) {
+
             if(HDread(parent_pfd[0], &child_notify, sizeof(int)) < 0)
+
                 HDexit(EXIT_FAILURE);
         }
+
         /* Read num_entries from writer pipe */
         if(HDread(parent_pfd[0], &child_num_entries, sizeof(int)) < 0)
             HDexit(EXIT_FAILURE);
@@ -1281,16 +1305,22 @@ test_reader_md_concur(void)
 
         if(child_num_entries) {
             /* Allocate memory for num_entries index */
-            if((child_index = (H5FD_vfd_swmr_idx_entry_t *)HDcalloc(child_num_entries, sizeof(H5FD_vfd_swmr_idx_entry_t))) == NULL)
+            if((child_index = (H5FD_vfd_swmr_idx_entry_t *)
+                           HDcalloc(child_num_entries, 
+                                    sizeof(H5FD_vfd_swmr_idx_entry_t))) == NULL)
                 HDexit(EXIT_FAILURE);
 
             /* Read index from writer pipe */
-            if(HDread(parent_pfd[0], child_index, child_num_entries * sizeof(H5FD_vfd_swmr_idx_entry_t)) < 0)
+            if(HDread(parent_pfd[0], child_index, 
+                     child_num_entries * sizeof(H5FD_vfd_swmr_idx_entry_t)) < 0)
                 HDexit(EXIT_FAILURE);
         }
 
-        /* Read and verify the expected header and index info in the metadata file */
-        if(H5FD__vfd_swmr_reader_md_test(file_reader->shared->lf, child_num_entries, child_index) < 0)
+        /* Read and verify the expected header and index info in the 
+         * metadata file 
+         */
+        if(H5FD__vfd_swmr_reader_md_test(file_reader->shared->lf, 
+                                         child_num_entries, child_index) < 0)
             HDexit(EXIT_FAILURE);
 
         /* Send notification 8 to parent that the verification is complete */
@@ -1390,7 +1420,8 @@ test_reader_md_concur(void)
 
         /* Create a chunked dataset */
         sprintf(dname, "dset %d", i);
-        if((did = H5Dcreate2(fid_writer, dname, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+        if((did = H5Dcreate2(fid_writer, dname, H5T_NATIVE_INT, sid, 
+                             H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
             FAIL_STACK_ERROR
 
         /* Get dataset object header address */
@@ -1405,11 +1436,13 @@ test_reader_md_concur(void)
     num_entries = 12;
 
     /* Allocate num_entries for the data buffer */
-    if((buf = (uint8_t *)HDmalloc((num_entries * FS_PAGE_SIZE * sizeof(uint8_t)))) == NULL)
+    if((buf = (uint8_t *)HDmalloc((num_entries * FS_PAGE_SIZE * 
+                                   sizeof(uint8_t)))) == NULL)
         FAIL_STACK_ERROR;
 
     /* Allocate memory for num_entries index */
-    if(NULL == (index = (H5FD_vfd_swmr_idx_entry_t *)HDcalloc(num_entries, sizeof(H5FD_vfd_swmr_idx_entry_t))))
+    if(NULL == (index = (H5FD_vfd_swmr_idx_entry_t *)
+                    HDcalloc(num_entries, sizeof(H5FD_vfd_swmr_idx_entry_t))))
         FAIL_STACK_ERROR;
 
     /* Construct index for updating the metadata file */
@@ -1437,7 +1470,8 @@ test_reader_md_concur(void)
         FAIL_STACK_ERROR;
 
     /* Send index to the reader */
-    if(HDwrite(parent_pfd[1], index, num_entries * sizeof(H5FD_vfd_swmr_idx_entry_t)) < 0)
+    if(HDwrite(parent_pfd[1], index, 
+               num_entries * sizeof(H5FD_vfd_swmr_idx_entry_t)) < 0)
         FAIL_STACK_ERROR;
 
     /* 
@@ -1467,7 +1501,8 @@ test_reader_md_concur(void)
             FAIL_STACK_ERROR
 
         /* Write to the dataset */
-        if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rwbuf) < 0)
+        if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, 
+                    H5P_DEFAULT, rwbuf) < 0)
             FAIL_STACK_ERROR
 
         /* Close the dataset */
@@ -1494,7 +1529,8 @@ test_reader_md_concur(void)
         FAIL_STACK_ERROR;
 
     /* Send index to the reader */
-    if(HDwrite(parent_pfd[1], index, num_entries * sizeof(H5FD_vfd_swmr_idx_entry_t)) < 0)
+    if(HDwrite(parent_pfd[1], index, 
+               num_entries * sizeof(H5FD_vfd_swmr_idx_entry_t)) < 0)
         FAIL_STACK_ERROR;
 
     /* 
@@ -1518,7 +1554,8 @@ test_reader_md_concur(void)
             FAIL_STACK_ERROR
 
         /* Read from the dataset */
-        if(H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rwbuf) < 0)
+        if(H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, 
+                   H5P_DEFAULT, rwbuf) < 0)
             FAIL_STACK_ERROR
 
         /* Close the dataset */
@@ -1545,7 +1582,8 @@ test_reader_md_concur(void)
         FAIL_STACK_ERROR;
 
     /* Send index to the reader */
-    if(HDwrite(parent_pfd[1], index, num_entries * sizeof(H5FD_vfd_swmr_idx_entry_t)) < 0)
+    if(HDwrite(parent_pfd[1], index, 
+               num_entries * sizeof(H5FD_vfd_swmr_idx_entry_t)) < 0)
         FAIL_STACK_ERROR;
 
     /* 
@@ -1568,7 +1606,8 @@ test_reader_md_concur(void)
             FAIL_STACK_ERROR
 
         /* Write to the dataset */
-        if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rwbuf) < 0)
+        if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, 
+                    H5P_DEFAULT, rwbuf) < 0)
             FAIL_STACK_ERROR
 
         /* Close the dataset */
@@ -1664,7 +1703,8 @@ error:
 int
 main(void)
 {
-    hid_t       fapl = -1;              /* File access property list for data files */
+    hid_t       fapl = -1;              /* File access property list for */
+                                        /* data files                    */
     unsigned    nerrors = 0;            /* Cumulative error count */
     char *lock_env_var = NULL;          /* File locking env var pointer */
     const char  *env_h5_drvr = NULL;    /* File Driver value from environment */
@@ -1711,13 +1751,9 @@ main(void)
 
         nerrors += test_file_fapl();
         nerrors += test_file_end_tick();
-
         nerrors += test_writer_create_open_flush();
-            nerrors += test_writer_md();
-
-#ifdef LATER /* Will activate the test when reader EOT is implemented */
-            nerrors += test_reader_md_concur()flush ;
-#endif
+        nerrors += test_writer_md();
+        nerrors += test_reader_md_concur();
 
         } /* end if */
 

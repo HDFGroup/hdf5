@@ -1102,7 +1102,7 @@ if ( ( (cache_ptr) == NULL ) ||                                             \
         (cache_ptr)->dirty_index_ring_size[(entry_ptr)->ring]) ) ||         \
      ( (cache_ptr)->index_len != (cache_ptr)->il_len ) ||                   \
      ( (cache_ptr)->index_size != (cache_ptr)->il_size ) ) {                \
-    HDassert(FALSE);                                                        \
+    HDassert(FALSE && "pre HT remove SC failed");                           \
     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "pre HT remove SC failed")     \
 }
 
@@ -1113,9 +1113,9 @@ if ( ( (cache_ptr) == NULL ) ||                                          \
      ( ! H5F_addr_defined((entry_ptr)->addr) ) ||                        \
      ( (entry_ptr)->size <= 0 ) ||                                       \
      ( (entry_ptr)->ht_prev != NULL ) ||                                 \
-     ( (entry_ptr)->ht_prev != NULL ) ||                                 \
+     ( (entry_ptr)->ht_next != NULL ) ||                                 \
      ( (entry_ptr)->pi_prev != NULL ) ||                                 \
-     ( (entry_ptr)->pi_prev != NULL ) ||                                 \
+     ( (entry_ptr)->pi_next != NULL ) ||                                 \
      ( (cache_ptr)->index_size !=                                        \
        ((cache_ptr)->clean_index_size +                                  \
 	(cache_ptr)->dirty_index_size) ) ||                              \
@@ -1130,7 +1130,7 @@ if ( ( (cache_ptr) == NULL ) ||                                          \
         (cache_ptr)->dirty_index_ring_size[(entry_ptr)->ring]) ) ||      \
      ( (cache_ptr)->index_len != (cache_ptr)->il_len ) ||                \
      ( (cache_ptr)->index_size != (cache_ptr)->il_size ) ) {             \
-    HDassert(FALSE);                                                     \
+    HDassert(FALSE && "post HT remove SC failed");                       \
     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "post HT remove SC failed") \
 }
 
@@ -1409,10 +1409,10 @@ if ( ( (cache_ptr)->index_size !=                                           \
     H5C__PRE_HT_REMOVE_SC(cache_ptr, entry_ptr)                              \
     if ( cache_ptr->vfd_swmr_reader ) {                                      \
         k = H5C__PI_HASH_FCN((entry_ptr)->page);                             \
-        if ( (entry_ptr)->ht_next ) {                                        \
+        if ( (entry_ptr)->pi_next ) {                                        \
             (entry_ptr)->pi_next->pi_prev = (entry_ptr)->pi_prev;            \
         }                                                                    \
-        if ( (entry_ptr)->ht_prev ) {                                        \
+        if ( (entry_ptr)->pi_prev ) {                                        \
             (entry_ptr)->pi_prev->pi_next = (entry_ptr)->pi_next;            \
         }                                                                    \
         if ( ( (cache_ptr)->page_index)[k] == (entry_ptr) ) {                \
@@ -3814,6 +3814,9 @@ typedef struct H5C_tag_info_t {
  *              H5C__PAGE_HASH_TABLE_LEN.  This size must be a power of 
  *              two, not the usual prime number.
  *
+ * page_size:   Convenience copy of the page size used by the page 
+ *              buffer.
+ *
  *
  * With the addition of the take ownership flag, it is possible that 
  * an entry may be removed from the cache as the result of the flush of 
@@ -4802,6 +4805,7 @@ struct H5C_t {
     /* Fields supporting VFD SWMR */
     hbool_t                     vfd_swmr_reader;
     H5C_cache_entry_t *         page_index[H5C__PAGE_HASH_TABLE_LEN];
+    hsize_t                     page_size;
 
     /* Fields to detect entries removed during scans */
     int64_t			entries_removed_counter;

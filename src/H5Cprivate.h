@@ -2445,6 +2445,8 @@ H5_DLL herr_t H5C_set_cache_image_config(const H5F_t *f, H5C_t *cache_ptr,
     H5C_cache_image_ctl_t *config_ptr);
 H5_DLL herr_t H5C_set_evictions_enabled(H5C_t *cache_ptr, 
     hbool_t evictions_enabled);
+H5_DLL herr_t H5C_set_vfd_swmr_reader(H5C_t *cache_ptr, 
+    hbool_t vfd_swmr_reader, hsize_t page_size);
 H5_DLL herr_t H5C_set_prefix(H5C_t *cache_ptr, char *prefix);
 H5_DLL herr_t H5C_set_trace_file_ptr(H5C_t *cache_ptr, FILE *trace_file_ptr);
 H5_DLL herr_t H5C_stats(H5C_t *cache_ptr, const char *cache_name,

@@ -336,6 +336,7 @@ H5C_create(size_t		      max_cache_size,
     for(i = 0; i < H5C__PAGE_HASH_TABLE_LEN; i++) {
         (cache_ptr->page_index)[i] = NULL;
     }
+    cache_ptr->page_size                        = 0;
 
     /* Tagging Field Initializations */
     cache_ptr->ignore_tags                      = FALSE;
@@ -983,7 +984,6 @@ H5C_evict_or_refresh_all_entries_in_page(H5F_t * f, uint64_t page,
     unsigned flush_flags = (H5C__FLUSH_INVALIDATE_FLAG | 
                             H5C__FLUSH_CLEAR_ONLY_FLAG);
     haddr_t tag;
-    H5PB_t * pb_ptr = NULL;
     H5C_t * cache_ptr = NULL;
     H5C_cache_entry_t * entry_ptr;
     H5C_cache_entry_t * follow_ptr = NULL;
@@ -1001,15 +1001,16 @@ H5C_evict_or_refresh_all_entries_in_page(H5F_t * f, uint64_t page,
     HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
     HDassert(cache_ptr->vfd_swmr_reader);
 
+#if 1 /* JRM */
+    HDfprintf(stderr, 
+           "H5C_evict_or_refresh_all_entries_in_page() entering. page = %lld\n",
+            page);
+#endif /* JRM */
+
     /* since file must be opened R/O for a VFD SWMR reader, the skip
      * list must be empty.  Verify this.
      */
     HDassert(cache_ptr->slist_len == 0);
-
-    pb_ptr = f->shared->pb_ptr;
-
-    HDassert(pb_ptr);
-    HDassert(pb_ptr->magic == H5PB__H5PB_T_MAGIC); 
 
     i = H5C__PI_HASH_FCN(page);
 
@@ -1021,8 +1022,9 @@ H5C_evict_or_refresh_all_entries_in_page(H5F_t * f, uint64_t page,
 
         if ( entry_ptr->page == page ) {
 
-            HDassert(entry_ptr->addr >= (haddr_t)(page * pb_ptr->page_size));
-            HDassert(entry_ptr->addr < (haddr_t)((page+1) * pb_ptr->page_size));
+            HDassert(entry_ptr->addr >= (haddr_t)(page * cache_ptr->page_size));
+            HDassert(entry_ptr->addr < 
+                     (haddr_t)((page+1) * cache_ptr->page_size));
 
             /* since end of tick occurs only on API call entry in 
              * the VFD SWMR reader case, the entry must not be protected.
@@ -1047,6 +1049,11 @@ H5C_evict_or_refresh_all_entries_in_page(H5F_t * f, uint64_t page,
                     tag = entry_ptr->tag_info->tag;
 
                     HDassert(!(entry_ptr->tag_info->corked));
+#if 1 /* JRM */
+                    HDfprintf(stderr, 
+                    "evicting tagged entries addr/page/tag == %lld/%lld/%lld\n",
+                              entry_ptr->addr, entry_ptr->page, tag);
+#endif /* JRM */
 
                     /* passing TRUE for the match_global parameter.  Look 
                      * into this and verify that it is the right thing to 
@@ -1061,6 +1068,10 @@ H5C_evict_or_refresh_all_entries_in_page(H5F_t * f, uint64_t page,
                     entry_ptr = NULL;
 
                 } else if ( entry_ptr->type->refresh ) {
+#if 1 /* JRM */
+                    HDfprintf(stderr, "refreshing addr/page/tag == %lld/%lld\n",
+                              entry_ptr->addr, entry_ptr->page);
+#endif /* JRM */
                     /* If the entry is pinned and not tagged, it is a global
                      * object such as the super block, persistant free 
                      * space manager, or a global heap.
@@ -1205,6 +1216,19 @@ H5C_evict_or_refresh_all_entries_in_page(H5F_t * f, uint64_t page,
                  * skip list -- thus no need for the 
                  * H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG.
                  */
+#if 1 /* JRM */
+                if ( entry_ptr->tag_info ) {
+
+                    HDfprintf(stderr, 
+                          "evicting entry addr/page/tag == %lld/%lld/%lld\n",
+                          entry_ptr->addr, entry_ptr->page, 
+                          entry_ptr->tag_info->tag);
+                } else {
+                    HDfprintf(stderr, 
+                          "evicting entry addr/page == %lld/%lld no tag\n",
+                          entry_ptr->addr, entry_ptr->page);
+                }
+#endif /* JRM */
                 if ( H5C__flush_single_entry(f, entry_ptr, flush_flags) < 0 )
 
                     HGOTO_ERROR(H5E_CACHE, H5E_CANTEXPUNGE, FAIL, \
@@ -1628,12 +1652,9 @@ H5C_insert_entry(H5F_t *             f,
     HDassert( cache_ptr );
     HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
 
-    /* if this is a VFD SWMR reader, verify that the page buffer is 
-     * configured.
-     */
-    HDassert( ( ! cache_ptr->vfd_swmr_reader ) ||
-              ( ( f->shared->pb_ptr ) &&
-                ( f->shared->pb_ptr->magic == H5PB__H5PB_T_MAGIC ) ) );
+    /* if this is a VFD SWMR reader, verify that the page size is defined */
+    HDassert( ( ! cache_ptr->vfd_swmr_reader ) || 
+              ( cache_ptr->page_size > 0 ) );
 
     HDassert( type );
     HDassert( type->mem_type == cache_ptr->class_table_ptr[type->id]->mem_type );
@@ -1767,7 +1788,7 @@ H5C_insert_entry(H5F_t *             f,
     /* initialize fields supporting VFD SWMR */
     if ( cache_ptr->vfd_swmr_reader ) {
 
-        entry_ptr->page                 = (addr / f->shared->pb_ptr->page_size);
+        entry_ptr->page                 = (addr / cache_ptr->page_size);
 
     } else {
 
@@ -2256,11 +2277,7 @@ done:
  *              6/2/04
  *
  * Changes:     Added code to update cache entry page field required
- *              by VFD SWMR.  To do this, we need the page size used 
- *              by the page buffer.  The simple way to do this was to 
- *              replace the cache_ptr parameter with a pointer to the
- *              H5F_t, and then lookup the cache_ptr and pb_ptr as 
- *              required.
+ *              by VFD SWMR.  
  *                                            JRM -- 12/13/18
  *
  *-------------------------------------------------------------------------
@@ -2287,14 +2304,9 @@ H5C_move_entry(H5F_t *             f,
     HDassert(cache_ptr);
     HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
 
-    /* if this is a VFD SWMR reader, verify that the page buffer is
-     * configured.
-     */
+    /* if this is a VFD SWMR reader, verify that the page size is defined */
     HDassert(( ! cache_ptr->vfd_swmr_reader ) ||
-             ( ( f->shared->pb_ptr ) &&
-               ( f->shared->pb_ptr->magic == H5PB__H5PB_T_MAGIC ) ));
-
-
+             ( cache_ptr->page_size > 0 ) );
 
     HDassert(type);
     HDassert(H5F_addr_defined(old_addr));
@@ -2375,7 +2387,7 @@ H5C_move_entry(H5F_t *             f,
      */
     if ( cache_ptr->vfd_swmr_reader ) {
 
-        entry_ptr->page = (new_addr / f->shared->pb_ptr->page_size);
+        entry_ptr->page = (new_addr / cache_ptr->page_size);
 
     }
 
@@ -3408,6 +3420,43 @@ H5C_set_evictions_enabled(H5C_t *cache_ptr, hbool_t evictions_enabled)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5C_set_evictions_enabled() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5C_set_vfd_swmr_reader()
+ *
+ * Purpose:     Set cache_ptr->vfd_swmr_reader and cache_ptr->page_size to 
+ *              the values specified in the parameter list.
+ *
+ * Return:      SUCCEED on success, and FAIL on failure.
+ *
+ * Programmer:  John Mainzer
+ *              1/15/19
+ *
+ * Changes:     None.
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5C_set_vfd_swmr_reader(H5C_t *cache_ptr, hbool_t vfd_swmr_reader, 
+    hsize_t page_size)
+{
+    herr_t ret_value = SUCCEED;      /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    if((cache_ptr == NULL) || (cache_ptr->magic != H5C__H5C_T_MAGIC))
+
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Bad cache_ptr on entry")
+
+    cache_ptr->vfd_swmr_reader = vfd_swmr_reader;
+    cache_ptr->page_size = page_size;
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5C_set_vfd_swmr_reader() */
 
 
 /*-------------------------------------------------------------------------
@@ -6913,14 +6962,24 @@ H5C__flush_single_entry(H5F_t *f, H5C_cache_entry_t *entry_ptr, unsigned flags)
     /* Check if we have to update the page buffer with cleared entries 
      * so it doesn't go out of date 
      */
+
+    /* VFD SWMR TODO: Think on this, and decide if we need to extend 
+     * this for multi page metadata entries.
+     */
     if(update_page_buffer) {
         /* Sanity check */
         HDassert(!destroy);
         HDassert(entry_ptr->image_ptr);
 
-        if(f->shared->pb_ptr && f->shared->pb_ptr->page_size >= entry_ptr->size)
-            if(H5PB_update_entry(f->shared->pb_ptr, entry_ptr->addr, entry_ptr->size, entry_ptr->image_ptr) > 0)
-                HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Failed to update PB with metadata cache")
+        if ( ( f->shared->pb_ptr ) && 
+             ( f->shared->pb_ptr->page_size >= entry_ptr->size ) ) {
+
+            if ( H5PB_update_entry(f->shared->pb_ptr, entry_ptr->addr, 
+                                   entry_ptr->size, entry_ptr->image_ptr) > 0 )
+
+                HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+                            "Failed to update PB with metadata cache")
+        }
     } /* end if */
 
     if(cache_ptr->log_flush)
@@ -7034,6 +7093,7 @@ H5C_load_entry(H5F_t *              f,
     void *      thing = NULL;           /* Pointer to thing loaded        */
     H5C_cache_entry_t *entry = NULL;    /* Alias for thing loaded, as     */
                                         /* cache entry                    */
+    size_t      init_len;
     size_t      len;                    /* Size of image in file          */
 #ifdef H5_HAVE_PARALLEL
     int         mpi_rank = 0;           /* MPI process rank               */
@@ -7050,12 +7110,9 @@ H5C_load_entry(H5F_t *              f,
     HDassert(f->shared->cache);
     HDassert(f->shared->cache->magic == H5C__H5C_T_MAGIC );
 
-    /* if this is a VFD SWMR reader, verify that the page buffer is 
-     * configured.
-     */
+    /* if this is a VFD SWMR reader, verify that the page size is defined */
     HDassert( ( ! f->shared->cache->vfd_swmr_reader ) ||
-              ( ( f->shared->pb_ptr ) &&
-                ( f->shared->pb_ptr->magic == H5PB__H5PB_T_MAGIC ) ) );
+              ( f->shared->cache->page_size > 0 ) );
 
     HDassert(type);
     HDassert(H5F_addr_defined(addr));
@@ -7086,6 +7143,8 @@ H5C_load_entry(H5F_t *              f,
         HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, NULL, "can't retrieve image size")
 
     HDassert(len > 0);
+
+    init_len = len;
 
     /* Check for possible speculative read off the end of the file */
     if ( type->flags & H5C__CLASS_SPECULATIVE_LOAD_FLAG ) {
@@ -7296,9 +7355,23 @@ H5C_load_entry(H5F_t *              f,
         } while(--tries);
 
         /* Check for too many tries */
-        if(tries == 0)
+        if ( tries == 0 ) {
+
+            haddr_t eoa;
+            int64_t page = (int64_t)(addr / f->shared->cache->page_size);
+
+            eoa = H5F_get_eoa(f, type->mem_type);
+
+            HDfprintf(stderr, "addr = 0x%llx, init_len = %lld, len = %lld\n",
+                      (int64_t)addr, (int64_t)init_len, (int64_t)len);
+            HDfprintf(stderr, "type = %s, eoa = 0x%llx, tick = %lld\n",
+                      type->name, (int64_t)eoa, f->shared->tick_num);
+            HDfprintf(stderr, "page = %lld, index_len = %d\n",
+                      page, f->shared->mdf_idx_entries_used);
+            H5FD_vfd_swmr_dump_status(f->shared->lf, page);
             HGOTO_ERROR(H5E_CACHE, H5E_READERROR, NULL, \
                       "incorrect metadatda checksum after all read attempts")
+        }
 
         /* Calculate and track the # of retries */
         retries = max_tries - tries;
@@ -7419,7 +7492,7 @@ H5C_load_entry(H5F_t *              f,
     /* initialize fields supporting VFD SWMR */
     if ( f->shared->cache->vfd_swmr_reader ) {
 
-        entry->page                     = (addr / f->shared->pb_ptr->page_size);
+        entry->page                     = (addr / f->shared->cache->page_size);
 
     } else {
 
@@ -9152,12 +9225,9 @@ H5C__generate_image(H5F_t *f, H5C_t *cache_ptr, H5C_cache_entry_t *entry_ptr)
     HDassert(cache_ptr);
     HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
 
-    /* if this is a VFD SWMR reader, verify that the page buffer is
-     * configured.
-     */
+    /* if this is a VFD SWMR reader, verify that the page size is defined */
     HDassert( ( ! cache_ptr->vfd_swmr_reader ) ||
-              ( ( f->shared->pb_ptr ) &&
-                ( f->shared->pb_ptr->magic == H5PB__H5PB_T_MAGIC ) ) );
+              ( cache_ptr->page_size > 0 ) );
 
     HDassert(entry_ptr);
     HDassert(entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
@@ -9293,7 +9363,7 @@ H5C__generate_image(H5F_t *f, H5C_t *cache_ptr, H5C_cache_entry_t *entry_ptr)
                 /* In the VFD SWMR reader case, update the entry page field */
                 if ( cache_ptr->vfd_swmr_reader ) {
 
-                    entry_ptr->page = (new_addr / f->shared->pb_ptr->page_size);
+                    entry_ptr->page = (new_addr / cache_ptr->page_size);
                 }
 
                 /* And then reinsert in the index and slist */
@@ -9305,7 +9375,7 @@ H5C__generate_image(H5F_t *f, H5C_t *cache_ptr, H5C_cache_entry_t *entry_ptr)
                 HDassert(entry_ptr->addr == new_addr);
                 HDassert(( ! cache_ptr->vfd_swmr_reader ) ||
                          ( entry_ptr->page == 
-                           (entry_ptr->addr / f->shared->pb_ptr->page_size) ));
+                           (entry_ptr->addr / cache_ptr->page_size) ));
            }
         } /* end if */
     } /* end if(serialize_flags != H5C__SERIALIZE_NO_FLAGS_SET) */

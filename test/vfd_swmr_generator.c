@@ -177,9 +177,9 @@ gen_skeleton(const char *filename, hbool_t verbose, hbool_t vfd_swmr_write,
 
         config->version = H5F__CURR_VFD_SWMR_CONFIG_VERSION;
         config->tick_len = 4;
-        config->max_lag = 6;
+        config->max_lag = 10;
         config->vfd_swmr_writer = TRUE;
-        config->md_pages_reserved = 512; 
+        config->md_pages_reserved = 128; 
         HDstrcpy(config->md_file_path, "my_md_file");
 
         /* Enable VFD SWMR configuration in fapl */
