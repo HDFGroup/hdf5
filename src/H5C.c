@@ -7356,7 +7356,7 @@ H5C_load_entry(H5F_t *              f,
 
         /* Check for too many tries */
         if ( tries == 0 ) {
-
+#if 0 /* JRM */
             haddr_t eoa;
             int64_t page = (int64_t)(addr / f->shared->cache->page_size);
 
@@ -7369,6 +7369,7 @@ H5C_load_entry(H5F_t *              f,
             HDfprintf(stderr, "page = %lld, index_len = %d\n",
                       page, f->shared->mdf_idx_entries_used);
             H5FD_vfd_swmr_dump_status(f->shared->lf, page);
+#endif /* JRM */
             HGOTO_ERROR(H5E_CACHE, H5E_READERROR, NULL, \
                       "incorrect metadatda checksum after all read attempts")
         }
