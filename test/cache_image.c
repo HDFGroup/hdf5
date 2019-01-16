@@ -713,6 +713,9 @@ open_hdf5_file(hbool_t create_file, hbool_t mdci_sbem_expected,
                 file_id = H5Fopen(hdf_file_name, H5F_ACC_RDWR, fapl_id);
         }
 
+        /* tidy up */
+        H5Pclose(fapl_id);
+
         if ( file_id < 0 ) {
 
             pass = FALSE;
@@ -4720,7 +4723,7 @@ cache_image_smoke_check_4(hbool_t single_file_vfd)
  *-------------------------------------------------------------------------
  */
 
-#define MAX_NUM_GROUPS 128
+#define MAX_NUM_GROUPS 64
 
 static unsigned
 cache_image_smoke_check_5(hbool_t single_file_vfd)
@@ -4756,12 +4759,16 @@ cache_image_smoke_check_5(hbool_t single_file_vfd)
     /* setup the file name */
     if ( pass ) {
 
-        if ( h5_fixname(FILENAMES[0], H5P_DEFAULT, filename, sizeof(filename))
+        hid_t fapl_id = h5_fileaccess();
+
+        if ( h5_fixname(FILENAMES[0], fapl_id, filename, sizeof(filename))
             == NULL ) {
 
             pass = FALSE;
             failure_mssg = "h5_fixname() failed.\n";
         }
+
+        H5Pclose(fapl_id);
     }
 
     if ( show_progress ) 
