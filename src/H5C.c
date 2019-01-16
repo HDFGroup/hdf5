@@ -1001,7 +1001,7 @@ H5C_evict_or_refresh_all_entries_in_page(H5F_t * f, uint64_t page,
     HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
     HDassert(cache_ptr->vfd_swmr_reader);
 
-#if 1 /* JRM */
+#if 0 /* JRM */
     HDfprintf(stderr, 
            "H5C_evict_or_refresh_all_entries_in_page() entering. page = %lld\n",
             page);
@@ -1044,12 +1044,17 @@ H5C_evict_or_refresh_all_entries_in_page(H5F_t * f, uint64_t page,
              */
             if ( entry_ptr->is_pinned ) {
 
-                if ( entry_ptr->tag_info ) {
+                /* if the entry has tag_info and there is no refresh 
+                 * callback, a call to H5C_evict_tagged_entries() is the
+                 * only option available.
+                 */
+                if ( ( entry_ptr->tag_info ) &&
+                     ( entry_ptr->type->refresh == NULL ) ) {
 
                     tag = entry_ptr->tag_info->tag;
 
                     HDassert(!(entry_ptr->tag_info->corked));
-#if 1 /* JRM */
+#if 0 /* JRM */
                     HDfprintf(stderr, 
                     "evicting tagged entries addr/page/tag == %lld/%lld/%lld\n",
                               entry_ptr->addr, entry_ptr->page, tag);
@@ -1068,22 +1073,20 @@ H5C_evict_or_refresh_all_entries_in_page(H5F_t * f, uint64_t page,
                     entry_ptr = NULL;
 
                 } else if ( entry_ptr->type->refresh ) {
-#if 1 /* JRM */
+#if 0 /* JRM */
                     HDfprintf(stderr, "refreshing addr/page/tag == %lld/%lld\n",
                               entry_ptr->addr, entry_ptr->page);
 #endif /* JRM */
-                    /* If the entry is pinned and not tagged, it is a global
-                     * object such as the super block, persistant free 
-                     * space manager, or a global heap.
+                    /* If there is a refresh callback, use it to minimize
+                     * overhead.  
                      *
-                     * In this case, we must either refresh the entry,
-                     * or verify that it has not changed, and that no 
-                     * action is required.
+                     * At present, the only refresh call is for the 
+                     * superblock.  This is essential, as the superblock
+                     * is manually pinned for as long as the file is open,
+                     * and thus cannot be evicted.
                      *
-                     * For the initial prototype, we avoid global heaps,
-                     * and claim that we need not concern ourselves with 
-                     * free space managers, since the VFD SWMR reader opens
-                     * the file R/O.
+                     * there may be other examples of this, but for the 
+                     * prototype, we seem to be able to avoid them.
                      */
 
                     /* 1) Get the on disk size of the entry.  Since the 
@@ -1203,7 +1206,7 @@ H5C_evict_or_refresh_all_entries_in_page(H5F_t * f, uint64_t page,
                 } else {
 
                     /* The entry is pinned, is not tagged, and has no
-                     * callback.
+                     * refresh callback.
                      *
                      * This should be un-reachable. If it is reached, we 
                      * probably have another refresh callback to write.
@@ -1216,7 +1219,7 @@ H5C_evict_or_refresh_all_entries_in_page(H5F_t * f, uint64_t page,
                  * skip list -- thus no need for the 
                  * H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG.
                  */
-#if 1 /* JRM */
+#if 0 /* JRM */
                 if ( entry_ptr->tag_info ) {
 
                     HDfprintf(stderr, 
