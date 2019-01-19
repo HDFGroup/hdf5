@@ -181,17 +181,18 @@
 ### Windows pops up a modal permission dialog on this test
   if (H5_HAVE_PARALLEL AND NOT WIN32)
     if (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (NAME EXAMPLES_PAR-ph5example COMMAND $<TARGET_FILE:ph5example>)
+      add_test (NAME EXAMPLES_PAR-ph5example COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_PREFLAGS} $<TARGET_FILE:ph5example> ${MPIEXEC_POSTFLAGS})
     else ()
       add_test (NAME EXAMPLES_PAR-ph5example COMMAND "${CMAKE_COMMAND}"
           -D "TEST_PROGRAM=$<TARGET_FILE:ph5example>"
           -D "TEST_ARGS:STRING="
           -D "TEST_EXPECT=0"
           -D "TEST_SKIP_COMPARE=TRUE"
+          #-D "TEST_SORT_COMPARE=TRUE"
           -D "TEST_OUTPUT=ph5example.txt"
           #-D "TEST_REFERENCE=ph5example.out"
           -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
-          -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+          -P "${HDF_RESOURCES_EXT_DIR}/parrunTest.cmake"
       )
     endif ()
     if (NOT "${last_test}" STREQUAL "")
@@ -200,17 +201,18 @@
     set (last_test "EXAMPLES_PAR-ph5example")
     if (BUILD_SHARED_LIBS)
       if (HDF5_ENABLE_USING_MEMCHECKER)
-        add_test (NAME EXAMPLES_PAR-shared-ph5example COMMAND $<TARGET_FILE:ph5example-shared>)
+        add_test (NAME EXAMPLES_PAR-shared-ph5example COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_PREFLAGS} $<TARGET_FILE:ph5example-shared> ${MPIEXEC_POSTFLAGS})
       else ()
         add_test (NAME EXAMPLES_PAR-shared-ph5example COMMAND "${CMAKE_COMMAND}"
             -D "TEST_PROGRAM=$<TARGET_FILE:ph5example-shared>"
             -D "TEST_ARGS:STRING="
             -D "TEST_EXPECT=0"
             -D "TEST_SKIP_COMPARE=TRUE"
+            #-D "TEST_SORT_COMPARE=TRUE"
             -D "TEST_OUTPUT=ph5example-shared.txt"
             #-D "TEST_REFERENCE=ph5example-shared.out"
             -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/H5EX-shared"
-            -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+            -P "${HDF_RESOURCES_EXT_DIR}/parrunTest.cmake"
         )
       endif ()
       set_tests_properties (EXAMPLES_PAR-shared-ph5example PROPERTIES WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/H5EX-shared)
