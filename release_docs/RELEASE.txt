@@ -47,6 +47,12 @@ New Features
 
     Configuration:
     -------------
+    - Rework CMake command files to eliminate developer CMP005 warning
+
+      Use variables without quotes in if () statements.
+
+      (ADB - 2019/01/18, TILABS-105)
+
     - Rework CMake configure files to eliminate developer CMP0075 warning
 
       Renamed varname to HDF5_REQUIRED_LIBRARIES as the contents were not
