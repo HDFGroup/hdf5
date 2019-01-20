@@ -3211,7 +3211,6 @@
 ./config/cmake_ext_mod/NSIS.InstallOptions.ini.in
 ./config/cmake_ext_mod/NSIS.template.in
 ./config/cmake_ext_mod/runTest.cmake
-./config/cmake_ext_mod/parrunTest.cmake
 ./config/cmake_ext_mod/version.plist.in
 
 # CMake-specific User Files
