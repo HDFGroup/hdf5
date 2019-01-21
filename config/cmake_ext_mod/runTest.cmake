@@ -312,7 +312,7 @@ if (TEST_GREP_COMPARE)
 
   string (REGEX MATCH "${TEST_FILTER}" TEST_MATCH ${TEST_STREAM})
   if (TEST_EXPECT)
-    # TEST_EXPECT (1) interperts TEST_FILTER as NOT to match
+    # TEST_EXPECT (1) interprets TEST_FILTER as; NOT to match
     string (LENGTH "${TEST_MATCH}" TEST_RESULT)
     if (TEST_RESULT)
       message (FATAL_ERROR "Failed: The output of ${TEST_PROGRAM} did contain ${TEST_FILTER}")
