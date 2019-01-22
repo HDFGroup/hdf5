@@ -15,6 +15,8 @@ macro (H5_SET_LIB_OPTIONS libtarget libname libtype libpackage)
   # SOVERSION passed in ARGN when shared
   if (${libtype} MATCHES "SHARED")
     set (PACKAGE_SOVERSION ${HDF5_${libpackage}_PACKAGE_SOVERSION})
+    set (PACKAGE_COMPATIBILITY ${H5_${libpackage}_SOVERS_INTERFACE}.0.0)
+    set (PACKAGE_CURRENT ${H5_${libpackage}_SOVERS_INTERFACE}.${H5_${libpackage}_SOVERS_MINOR}.0)
     if (WIN32)
       set (LIBHDF_VERSION ${HDF5_PACKAGE_VERSION_MAJOR})
     else ()
@@ -28,7 +30,7 @@ macro (H5_SET_LIB_OPTIONS libtarget libname libtype libpackage)
     endif ()
     if (CMAKE_C_OSX_CURRENT_VERSION_FLAG)
       set_property(TARGET ${libtarget} APPEND PROPERTY
-          LINK_FLAGS "${CMAKE_C_OSX_CURRENT_VERSION_FLAG}${PACKAGE_SOVERSION} ${CMAKE_C_OSX_COMPATIBILITY_VERSION_FLAG}${LIBHDF_VERSION}.0.0"
+          LINK_FLAGS "${CMAKE_C_OSX_CURRENT_VERSION_FLAG}${PACKAGE_CURRENT} ${CMAKE_C_OSX_COMPATIBILITY_VERSION_FLAG}${PACKAGE_COMPATIBILITY}"
     endif ()
   endif ()
   HDF_SET_LIB_OPTIONS (${libtarget} ${LIB_OUT_NAME} ${libtype})
