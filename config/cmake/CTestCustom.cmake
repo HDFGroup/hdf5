@@ -307,6 +307,11 @@ set (CTEST_CUSTOM_MEMCHECK_IGNORE
     H5REPACK_VERIFY_LAYOUT_ALL-layout_short_switches    #uses grepTest.cmake
     H5REPACK-plugin
     H5REPACK_CMP-plugin_zero
+    #########
+    ADD_H5_VERIFY_INVALIDBOUNDS-h5repack-latest_latest_invalid-clear-objects
+    H5REPACK_VERIFY_SUPERBLOCK-SB_IS_0-clear-objects
+    H5REPACK_VERIFY_SUPERBLOCK-SB_IS_2-clear-objects
+    H5REPACK_VERIFY_SUPERBLOCK-SB_IS_3-clear-objects
     ######### tools/h5stat #########
     H5STAT-clearall-objects
     ######### tools/misc #########
