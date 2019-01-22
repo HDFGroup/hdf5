@@ -41,8 +41,8 @@ set (CTEST_CUSTOM_MEMCHECK_IGNORE
     H5TEST-err_compat       #uses runTest.cmake
     H5TEST-links_env        #uses runTest.cmake
     H5TEST-testlibinfo      #uses grepTest.cmake
-    H5TEST-clear-objects
     #########
+    H5TEST-clear-objects
     H5TEST-clear-cache-objects
     H5TEST-clear-cache_api-objects
     H5TEST-clear-cache_image-objects
