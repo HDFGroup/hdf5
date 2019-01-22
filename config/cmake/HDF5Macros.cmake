@@ -31,6 +31,7 @@ macro (H5_SET_LIB_OPTIONS libtarget libname libtype libpackage)
     if (CMAKE_C_OSX_CURRENT_VERSION_FLAG)
       set_property(TARGET ${libtarget} APPEND PROPERTY
           LINK_FLAGS "${CMAKE_C_OSX_CURRENT_VERSION_FLAG}${PACKAGE_CURRENT} ${CMAKE_C_OSX_COMPATIBILITY_VERSION_FLAG}${PACKAGE_COMPATIBILITY}"
+      )
     endif ()
   endif ()
   HDF_SET_LIB_OPTIONS (${libtarget} ${LIB_OUT_NAME} ${libtype})
