@@ -47,6 +47,13 @@ New Features
 
     Configuration:
     -------------
+    - Rework CMake versioning for OSX platforms.
+
+      Changed the current_version and compatibility_version flags from optional
+      with HDF5_BUILD_WITH_INSTALL_NAME to always setting the flags for OSX.
+
+      (ADB - 2019/01/22, HDFFV-10685)
+
     - Rework CMake command files to eliminate developer CMP005 warning
 
       Use variables without quotes in if () statements.
@@ -203,8 +210,8 @@ New Features
     - Changed the default behavior in parallel when reading the same dataset in its entirely
       (i.e. H5S_ALL dataset selection) which is being read by all the processes collectively.
       The dataset mush be contiguous, less than 2GB, and of an atomic datatype.
-      The new behavior is the HDF5 library will use an MPI_Bcast to pass the data read from 
-      the disk by the root process to the remain processes in the MPI communicator associated 
+      The new behavior is the HDF5 library will use an MPI_Bcast to pass the data read from
+      the disk by the root process to the remain processes in the MPI communicator associated
       with the HDF5 file.
 
       (MSB - 2019/01/02, HDFFV-10652)
@@ -231,10 +238,10 @@ New Features
 
     - Added new Fortran API, H5gmtime, which converts (C) 'time_t' structure
       to Fortran DATE AND TIME storage format.
-      
+
       (MSB, 2019/01/08, HDFFV-10443)
 
-    - Added new Fortran 'fields' optional parameter to: h5ovisit_f, h5oget_info_by_name_f, 
+    - Added new Fortran 'fields' optional parameter to: h5ovisit_f, h5oget_info_by_name_f,
       h5oget_info, h5oget_info_by_idx and h5ovisit_by_name_f.
 
       (MSB, 2019/01/08, HDFFV-10443)
@@ -318,8 +325,8 @@ Bug Fixes since HDF5-1.10.3 release
 
       When deleting the attribute nodes from the name index v2 B-tree,
       if an attribute is found in the intermediate B-tree nodes,
-      which may be merged/redistributed in the process, we need to 
-      free the dynamically allocated spaces for the intermediate 
+      which may be merged/redistributed in the process, we need to
+      free the dynamically allocated spaces for the intermediate
       decoded attribute.
 
       (VC - 2018/12/26, HDFFV-10659)
@@ -415,10 +422,10 @@ Bug Fixes since HDF5-1.10.3 release
     Fortran
     --------
     - Added symbolic links libhdf5_hl_fortran.so to libhdf5hl_fortran.so and
-      libhdf5_hl_fortran.a to libhdf5hl_fortran.a in hdf5/lib directory for 
-      autotools installs.  These were added to match the name of the files 
-      installed by cmake and the general pattern of hl lib files.  We will 
-      change the names of the installed lib files to the matching name in 
+      libhdf5_hl_fortran.a to libhdf5hl_fortran.a in hdf5/lib directory for
+      autotools installs.  These were added to match the name of the files
+      installed by cmake and the general pattern of hl lib files.  We will
+      change the names of the installed lib files to the matching name in
       the next major release.
 
       (LRK - 2019/01/04, HDFFV-10596)
@@ -429,7 +436,7 @@ Bug Fixes since HDF5-1.10.3 release
 
       (MSB, 2018/12/04, HDFFV-10511)
 
-    - Fixed issue with Fortran not returning h5o_info_t field values 
+    - Fixed issue with Fortran not returning h5o_info_t field values
       meta_size%attr%index_size and  meta_size%attr%heap_size.
 
       (MSB, 2018/1/8, HDFFV-10443)
