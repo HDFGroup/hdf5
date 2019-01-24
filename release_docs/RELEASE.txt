@@ -331,6 +331,13 @@ Bug Fixes since HDF5-1.10.3 release
 
       (VC - 2018/12/26, HDFFV-10659)
 
+    - Fixed an issue where the parallel filters tests would fail
+      if zlib was not available on the system. Until support can
+      be added in the tests for filters beyond gzip/zlib, the tests
+      will be skipped if zlib is not available.
+
+      (JTH - 2018/12/05)
+
     - A bug was discovered in the parallel library where an application
       would eventually consume all of the available MPI communicators
       when continually writing to a compressed dataset in parallel. This
