@@ -397,7 +397,7 @@ macro (HDF_DIR_PATHS package_prefix)
     )
     get_property(_isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
     if(_isMultiConfig)
-      set (CMAKE_TEST_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${HDF_BUILD_TYPE})
+      set (CMAKE_TEST_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_BUILD_TYPE})
       set (CMAKE_PDB_OUTPUT_DIRECTORY
           ${PROJECT_BINARY_DIR}/bin CACHE PATH "Single Directory for all pdb files."
       )
