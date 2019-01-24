@@ -57,21 +57,21 @@ import hdf.hdf5lib.structs.H5O_info_t;
 /**
  * This class is the Java interface for the HDF5 library.
  * <p>
- * This code is the called by Java programs to access the entry points of the HDF5 library. Each routine wraps a single
- * HDF5 entry point, generally with the arguments and return codes analogous to the C interface.
+ * This code is the called by Java programs to access the entry points of the HDF5 library. Each
+ * routine wraps a single HDF5 entry point, generally with the arguments and return codes analogous
+ * to the C interface.
  * <p>
- * For details of the HDF5 library, see the HDF5 Documentation at: <a
- * href="http://hdfgroup.org/HDF5/">http://hdfgroup.org/HDF5/</a>
+ * For details of the HDF5 library, see the HDF5 Documentation at:
+ * <a href="http://hdfgroup.org/HDF5/">http://hdfgroup.org/HDF5/</a>
  * <hr>
  * <p>
  * <b>Mapping of arguments for Java</b>
  *
  * <p>
- * In general, arguments to the HDF Java API are straightforward translations from the 'C' API described in the HDF
- * Reference Manual.
+ * In general, arguments to the HDF Java API are straightforward translations from the 'C' API
+ * described in the HDF Reference Manual.
  *
- * <center>
- * <table border=2 cellpadding=2>
+ * <table border=1>
  * <caption><b>HDF-5 C types to Java types</b> </caption>
  * <tr>
  * <td><b>HDF-5</b></td>
@@ -107,20 +107,21 @@ import hdf.hdf5lib.structs.H5O_info_t;
  * <td>Special -- see HDFArray</td>
  * </tr>
  * </table>
- * </center>
- * <center> <b>General Rules for Passing Arguments and Results</b> </center>
+ * <b>General Rules for Passing Arguments and Results</b>
  * <p>
- * In general, arguments passed <b>IN</b> to Java are the analogous basic types, as above. The exception is for arrays,
- * which are discussed below.
+ * In general, arguments passed <b>IN</b> to Java are the analogous basic types, as above. The
+ * exception is for arrays, which are discussed below.
  * <p>
- * The <i>return value</i> of Java methods is also the analogous type, as above. A major exception to that rule is that
- * all HDF functions that return SUCCEED/FAIL are declared <i>boolean</i> in the Java version, rather than <i>int</i> as
- * in the C. Functions that return a value or else FAIL are declared the equivalent to the C function. However, in most
- * cases the Java method will raise an exception instead of returning an error code. See <a href="#ERRORS">Errors and
- * Exceptions</a> below.
+ * The <i>return value</i> of Java methods is also the analogous type, as above. A major exception
+ * to that rule is that all HDF functions that return SUCCEED/FAIL are declared <i>boolean</i> in
+ * the Java version, rather than <i>int</i> as in the C. Functions that return a value or else FAIL
+ * are declared the equivalent to the C function. However, in most cases the Java method will raise
+ * an exception instead of returning an error code. See <a href="#ERRORS">Errors and Exceptions</a>
+ * below.
  * <p>
- * Java does not support pass by reference of arguments, so arguments that are returned through <b>OUT</b> parameters
- * must be wrapped in an object or array. The Java API for HDF consistently wraps arguments in arrays.
+ * Java does not support pass by reference of arguments, so arguments that are returned through
+ * <b>OUT</b> parameters must be wrapped in an object or array. The Java API for HDF consistently
+ * wraps arguments in arrays.
  * <p>
  * For instance, a function that returns two integers is declared:
  *
@@ -141,12 +142,14 @@ import hdf.hdf5lib.structs.H5O_info_t;
  * </pre>
  *
  * <p>
- * All the routines where this convention is used will have specific documentation of the details, given below.
+ * All the routines where this convention is used will have specific documentation of the details,
+ * given below.
  * <p>
- * <a NAME="ARRAYS"> <b>Arrays</b> </a>
+ * <b>Arrays</b>
  * <p>
- * HDF5 needs to read and write multi-dimensional arrays of any number type (and records). The HDF5 API describes the
- * layout of the source and destination, and the data for the array passed as a block of bytes, for instance,
+ * HDF5 needs to read and write multi-dimensional arrays of any number type (and records). The HDF5
+ * API describes the layout of the source and destination, and the data for the array passed as a
+ * block of bytes, for instance,
  *
  * <pre>
  *      herr_t H5Dread(long fid, long filetype, long memtype, long memspace,
@@ -154,40 +157,45 @@ import hdf.hdf5lib.structs.H5O_info_t;
  * </pre>
  *
  * <p>
- * where ``void *'' means that the data may be any valid numeric type, and is a contiguous block of bytes that is the
- * data for a multi-dimensional array. The other parameters describe the dimensions, rank, and datatype of the array on
- * disk (source) and in memory (destination).
+ * where ``void *'' means that the data may be any valid numeric type, and is a contiguous block of
+ * bytes that is the data for a multi-dimensional array. The other parameters describe the
+ * dimensions, rank, and datatype of the array on disk (source) and in memory (destination).
  * <p>
- * For Java, this ``ANY'' is a problem, as the type of data must always be declared. Furthermore, multidimensional
- * arrays are definitely <i>not</i> layed out contiguously in memory. It would be infeasible to declare a separate
- * routine for every combination of number type and dimensionality. For that reason, the <a
- * href="./hdf.hdf5lib.HDFArray.html"><b>HDFArray</b></a> class is used to discover the type, shape, and size of the
- * data array at run time, and to convert to and from a contiguous array of bytes in synchronized static native C order.
+ * For Java, this ``ANY'' is a problem, as the type of data must always be declared. Furthermore,
+ * multidimensional arrays are definitely <i>not</i> layed out contiguously in memory. It would be
+ * infeasible to declare a separate routine for every combination of number type and dimensionality.
+ * For that reason, the <a href="./hdf.hdf5lib.HDFArray.html"><b>HDFArray</b></a> class is used to
+ * discover the type, shape, and size of the data array at run time, and to convert to and from a
+ * contiguous array of bytes in synchronized static native C order.
  * <p>
- * The upshot is that any Java array of numbers (either primitive or sub-classes of type <b>Number</b>) can be passed as
- * an ``Object'', and the Java API will translate to and from the appropriate packed array of bytes needed by the C
- * library. So the function above would be declared:
+ * The upshot is that any Java array of numbers (either primitive or sub-classes of type
+ * <b>Number</b>) can be passed as an ``Object'', and the Java API will translate to and from the
+ * appropriate packed array of bytes needed by the C library. So the function above would be
+ * declared:
  *
  * <pre>
  * public synchronized static native int H5Dread(long fid, long filetype, long memtype, long memspace, Object data);
  * </pre>
- *            OPEN_IDS.addElement(id);
-
- * and the parameter <i>data</i> can be any multi-dimensional array of numbers, such as float[][], or int[][][], or
- * Double[][].
+ *
+ * OPEN_IDS.addElement(id);
+ *
+ * and the parameter <i>data</i> can be any multi-dimensional array of numbers, such as float[][],
+ * or int[][][], or Double[][].
  * <p>
- * <a NAME="CONSTANTS"> <b>HDF-5 Constants</b></a>
+ * <b>HDF-5 Constants</b>
  * <p>
- * The HDF-5 API defines a set of constants and enumerated values. Most of these values are available to Java programs
- * via the class <a href="./hdf.hdf5lib.HDF5Constants.html"> <b>HDF5Constants</b></a>. For example, the parameters for
- * the h5open() call include two numeric values, <b><i>HDFConstants.H5F_ACC_RDWR</i></b> and
- * <b><i>HDF5Constants.H5P_DEFAULT</i></b>. As would be expected, these numbers correspond to the C constants
- * <b><i>H5F_ACC_RDWR</i></b> and <b><i>H5P_DEFAULT</i></b>.
+ * The HDF-5 API defines a set of constants and enumerated values. Most of these values are
+ * available to Java programs via the class <a href="./hdf.hdf5lib.HDF5Constants.html">
+ * <b>HDF5Constants</b></a>. For example, the parameters for the h5open() call include two numeric
+ * values, <b><i>HDFConstants.H5F_ACC_RDWR</i></b> and <b><i>HDF5Constants.H5P_DEFAULT</i></b>. As
+ * would be expected, these numbers correspond to the C constants <b><i>H5F_ACC_RDWR</i></b> and
+ * <b><i>H5P_DEFAULT</i></b>.
  * <p>
- * The HDF-5 API defines a set of values that describe number types and sizes, such as "H5T_NATIVE_INT" and "hsize_t".
- * These values are determined at run time by the HDF-5 C library. To support these parameters, the Java class <a
- * href="./hdf.hdf5lib.HDF5CDataTypes.html"> <b>HDF5CDataTypes</b></a> looks up the values when initiated. The values
- * can be accessed as public variables of the Java class, such as:
+ * The HDF-5 API defines a set of values that describe number types and sizes, such as
+ * "H5T_NATIVE_INT" and "hsize_t". These values are determined at run time by the HDF-5 C library.
+ * To support these parameters, the Java class <a href="./hdf.hdf5lib.HDF5CDataTypes.html">
+ * <b>HDF5CDataTypes</b></a> looks up the values when initiated. The values can be accessed as
+ * public variables of the Java class, such as:
  *
  * <pre>
  * long data_type = HDF5CDataTypes.JH5T_NATIVE_INT;
@@ -196,22 +204,23 @@ import hdf.hdf5lib.structs.H5O_info_t;
  * The Java application uses both types of constants the same way, the only difference is that the
  * <b><i>HDF5CDataTypes</i></b> may have different values on different platforms.
  * <p>
- * <a NAME="ERRORS"> <b>Error handling and Exceptions</b></a>
+ * <b>Error handling and Exceptions</b>
  * <p>
- * The HDF5 error API (H5E) manages the behavior of the error stack in the HDF-5 library. This API is omitted from the
- * JHI5. Errors are converted into Java exceptions. This is totally different from the C interface, but is very natural
- * for Java programming.
+ * The HDF5 error API (H5E) manages the behavior of the error stack in the HDF-5 library. This API
+ * is omitted from the JHI5. Errors are converted into Java exceptions. This is totally different
+ * from the C interface, but is very natural for Java programming.
  * <p>
- * The exceptions of the JHI5 are organized as sub-classes of the class <a
- * href="./hdf.hdf5lib.exceptions.HDF5Exception.html"> <b>HDF5Exception</b></a>. There are two subclasses of
- * <b>HDF5Exception</b>, <a href="./hdf.hdf5lib.exceptions.HDF5LibraryException.html"> <b>HDF5LibraryException</b></a>
- * and <a href="./hdf.hdf5lib.exceptions.HDF5JavaException.html"> <b>HDF5JavaException</b></a>. The sub-classes of the
- * former represent errors from the HDF-5 C library, while sub-classes of the latter represent errors in the JHI5
- * wrapper and support code.
+ * The exceptions of the JHI5 are organized as sub-classes of the class
+ * <a href="./hdf.hdf5lib.exceptions.HDF5Exception.html"> <b>HDF5Exception</b></a>. There are two
+ * subclasses of <b>HDF5Exception</b>, <a href="./hdf.hdf5lib.exceptions.HDF5LibraryException.html">
+ * <b>HDF5LibraryException</b></a> and <a href="./hdf.hdf5lib.exceptions.HDF5JavaException.html">
+ * <b>HDF5JavaException</b></a>. The sub-classes of the former represent errors from the HDF-5 C
+ * library, while sub-classes of the latter represent errors in the JHI5 wrapper and support code.
  * <p>
- * The super-class <b><i>HDF5LibraryException</i></b> implements the method '<b><i>printStackTrace()</i></b>', which
- * prints out the HDF-5 error stack, as described in the HDF-5 C API <i><b>H5Eprint()</b>.</i> This may be used by Java
- * exception handlers to print out the HDF-5 error stack.
+ * The super-class <b><i>HDF5LibraryException</i></b> implements the method
+ * '<b><i>printStackTrace()</i></b>', which prints out the HDF-5 error stack, as described in the
+ * HDF-5 C API <i><b>H5Eprint()</b>.</i> This may be used by Java exception handlers to print out
+ * the HDF-5 error stack.
  * <hr>
  *
  * @version HDF5 1.10.5 <BR>
