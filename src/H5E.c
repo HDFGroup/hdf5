@@ -1566,7 +1566,7 @@ H5Ewalk2(hid_t err_stack, H5E_direction_t direction, H5E_walk2_t stack_func, voi
     /* Walk the error stack */
     op.vers = 2;
     op.u.func2 = stack_func;
-    if(H5E__walk(estack, direction, &op, client_data) < 0)
+    if((ret_value = H5E__walk(estack, direction, &op, client_data)) < 0)
         HERROR(H5E_ERROR, H5E_CANTLIST, "can't walk error stack");
 
 done:
