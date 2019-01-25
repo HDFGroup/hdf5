@@ -330,7 +330,8 @@
                 -D "TEST_OUTPUT=${resultfile}-${testname}.out"
                 -D "TEST_EXPECT=${resultcode}"
                 -D "TEST_MASK_ERROR=true"
-                -D "TEST_REFERENCE=${resultfile}-${testname}.tst"
+                -D "TEST_REFERENCE=${resultfile}.mty"
+                -D "TEST_ERRREF=${resultfile}-${testname}.tst"
                 -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
         )
         set_tests_properties (H5REPACK_MASK-${testname} PROPERTIES DEPENDS H5REPACK_MASK-${testname}-clear-objects)
@@ -1194,11 +1195,13 @@
 ##############################################################################
 ###    P L U G I N  T E S T S
 ##############################################################################
+if (BUILD_SHARED_LIBS)
   ADD_H5_UD_TEST (plugin_version_test 0 h5repack_layout.h5 -v -f UD=260,0,4,9,${H5_VERS_MAJOR},${H5_VERS_MINOR},${H5_VERS_RELEASE})
   ADD_H5_UD_TEST (plugin_test 0 h5repack_layout.h5 -v -f UD=257,0,1,9)
   ADD_H5_UD_TEST (plugin_none 0 h5repack_layout.UD.h5 -v -f NONE)
   # check for no parameters
   ADD_H5_UD_TEST (plugin_zero 0 h5repack_layout.h5 -v -f UD=250,0,0)
+endif ()
 
   if (HDF5_TEST_VFD)
     # Run test with different Virtual File Driver
