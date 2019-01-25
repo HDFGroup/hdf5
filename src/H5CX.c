@@ -815,8 +815,8 @@ H5CX_set_apl(hid_t *acspl_id, const H5P_libclass_t *libclass,
 
 #ifdef H5_HAVE_PARALLEL
         /* If this routine is not guaranteed to be collective (i.e. it doesn't
-         * modify the structural metadata in a file), check if we should use
-         * a collective metadata read.
+         * modify the structural metadata in a file), check if the application
+         * specified a collective metadata read for just this operation.
          */
         if(!is_collective) {
             H5P_genplist_t *plist;                  /* Property list pointer */

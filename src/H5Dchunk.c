@@ -2914,9 +2914,6 @@ H5D__chunk_lookup(const H5D_t *dset, const hsize_t *scaled,
         /* Check for cached information */
         if(!H5D__chunk_cinfo_cache_found(&dset->shared->cache.chunk.last, udata)) {
             H5D_chk_idx_info_t idx_info;        /* Chunked index info */
-#ifdef H5_HAVE_PARALLEL
-            H5P_coll_md_read_flag_t temp_cmr;   /* Temp value to hold the coll metadata read setting */
-#endif /* H5_HAVE_PARALLEL */
 
             /* Compose chunked index info struct */
             idx_info.f = dset->oloc.file;
@@ -2925,24 +2922,17 @@ H5D__chunk_lookup(const H5D_t *dset, const hsize_t *scaled,
             idx_info.storage = &dset->shared->layout.storage.u.chunk;
 
 #ifdef H5_HAVE_PARALLEL
-            if(H5F_HAS_FEATURE(idx_info.f, H5FD_FEAT_HAS_MPI)) {
-                /* disable collective metadata read for chunk indexes
-                   as it is highly unlikely that users would read the
-                   same chunks from all processes. MSC - might turn on
-                   for root node? */
-                temp_cmr = H5F_COLL_MD_READ(idx_info.f);
-                H5F_set_coll_md_read(idx_info.f, H5P_FORCE_FALSE);
-            } /* end if */
+            /* Disable collective metadata read for chunk indexes as it is
+             * highly unlikely that users would read the same chunks from all
+             * processes.
+             */
+            if(H5F_HAS_FEATURE(idx_info.f, H5FD_FEAT_HAS_MPI))
+                H5CX_set_coll_metadata_read(FALSE);
 #endif /* H5_HAVE_PARALLEL */
 
             /* Go get the chunk information */
             if((dset->shared->layout.storage.u.chunk.ops->get_addr)(&idx_info, udata) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't query chunk address")
-
-#ifdef H5_HAVE_PARALLEL
-            if(H5F_HAS_FEATURE(idx_info.f, H5FD_FEAT_HAS_MPI))
-                H5F_set_coll_md_read(idx_info.f, temp_cmr);
-#endif /* H5_HAVE_PARALLEL */
 
             /*
              * Cache the information retrieved.
