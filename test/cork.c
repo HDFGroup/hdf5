@@ -286,19 +286,19 @@ static unsigned
 verify_obj_dset_cork(hbool_t swmr)
 {
     /* Variable Declarations */
-    hid_t fid = -1;     /* File ID */
+    hid_t fid = -1;             /* File ID */
     hid_t fapl = -1;            /* File access property list */
     hid_t aid = -1;             /* Attribute ID */
     hid_t sid = -1, sid2 = -1;  /* Dataspace IDs */
     hid_t did = -1, did2 = -1;  /* Dataset IDs */
     hid_t oid = -1;             /* Object ID */
-    hid_t dcpl2;            /* Dataset creation property list */
+    hid_t dcpl2;                /* Dataset creation property list */
     int i = 0;                  /* Local index variable */
-    hsize_t dim[1] = {100}; /* Dataset dimension size */
+    hsize_t dim[1] = {100};     /* Dataset dimension size */
     hsize_t chunk_dim[1] = {7}; /* Dataset chunk dimension size */
     H5O_info_t oinfo, oinfo2;   /* Object metadata information */
     char attrname[500];         /* Name of attribute */
-    unsigned flags;     /* File access flags */
+    unsigned flags;             /* File access flags */
 
     if(swmr) {
         TESTING("cork status for dataset objects with attributes (SWMR)");
@@ -341,7 +341,7 @@ verify_obj_dset_cork(hbool_t swmr)
         TEST_ERROR
 
     /* Attach and write to an attribute to the dataset: DSET */
-    if((aid = H5Acreate2(did, ATTR, H5T_NATIVE_UINT, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0) 
+    if((aid = H5Acreate2(did, ATTR, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0) 
         TEST_ERROR
 
     /* Verify cork status of the dataset: DSET */
@@ -380,11 +380,11 @@ verify_obj_dset_cork(hbool_t swmr)
         TEST_ERROR
 
     /* Attach 8 attributes to the dataset */
-    for(i = 0;i < 8; i++) {
-        sprintf(attrname, "attr %d", i);
-        if((aid = H5Acreate2(did2, attrname, H5T_NATIVE_UINT, sid2, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+    for(i = 0; i < 8; i++) {
+        HDsprintf(attrname, "attr %d", i);
+        if((aid = H5Acreate2(did2, attrname, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             TEST_ERROR
-        if(H5Awrite(aid, H5T_NATIVE_UINT, &i) < 0)
+        if(H5Awrite(aid, H5T_NATIVE_INT, &i) < 0)
             TEST_ERROR
         if(H5Aclose(aid) < 0)
             TEST_ERROR
