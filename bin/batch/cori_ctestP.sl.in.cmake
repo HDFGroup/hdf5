@@ -6,10 +6,9 @@
 #SBATCH --mail-type=BEGIN,END,FAIL
 ##SBATCH --mail-user=<username>@sandia.gov
 #SBATCH --export=ALL
-#SBATCH --job-name=h5_ctestS
+#SBATCH --job-name=h5_ctestP
 
 cd @HDF5_BINARY_DIR@
-#run parallel tests except t_cache_image test
 CMD="ctest . -R TEST_PAR|PH5DIFF|PERFORM|ph5example -E t_cache_image -C Release -T test"
 
 echo "Run $CMD. Test output will be in build/ctestP.out"
