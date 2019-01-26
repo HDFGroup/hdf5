@@ -70,8 +70,7 @@ import hdf.hdf5lib.structs.H5O_info_t;
  * In general, arguments to the HDF Java API are straightforward translations from the 'C' API described in the HDF
  * Reference Manual.
  *
- * <center>
- * <table border=2 cellpadding=2>
+ * <table border=1>
  * <caption><b>HDF-5 C types to Java types</b> </caption>
  * <tr>
  * <td><b>HDF-5</b></td>
@@ -107,8 +106,7 @@ import hdf.hdf5lib.structs.H5O_info_t;
  * <td>Special -- see HDFArray</td>
  * </tr>
  * </table>
- * </center>
- * <center> <b>General Rules for Passing Arguments and Results</b> </center>
+ * <b>General Rules for Passing Arguments and Results</b>
  * <p>
  * In general, arguments passed <b>IN</b> to Java are the analogous basic types, as above. The exception is for arrays,
  * which are discussed below.
@@ -143,7 +141,7 @@ import hdf.hdf5lib.structs.H5O_info_t;
  * <p>
  * All the routines where this convention is used will have specific documentation of the details, given below.
  * <p>
- * <a NAME="ARRAYS"> <b>Arrays</b> </a>
+ * <b>Arrays</b>
  * <p>
  * HDF5 needs to read and write multi-dimensional arrays of any number type (and records). The HDF5 API describes the
  * layout of the source and destination, and the data for the array passed as a block of bytes, for instance,
@@ -176,7 +174,7 @@ import hdf.hdf5lib.structs.H5O_info_t;
  * and the parameter <i>data</i> can be any multi-dimensional array of numbers, such as float[][], or int[][][], or
  * Double[][].
  * <p>
- * <a NAME="CONSTANTS"> <b>HDF-5 Constants</b></a>
+ * <b>HDF-5 Constants</b>
  * <p>
  * The HDF-5 API defines a set of constants and enumerated values. Most of these values are available to Java programs
  * via the class <a href="./hdf.hdf5lib.HDF5Constants.html"> <b>HDF5Constants</b></a>. For example, the parameters for
@@ -196,7 +194,7 @@ import hdf.hdf5lib.structs.H5O_info_t;
  * The Java application uses both types of constants the same way, the only difference is that the
  * <b><i>HDF5CDataTypes</i></b> may have different values on different platforms.
  * <p>
- * <a NAME="ERRORS"> <b>Error handling and Exceptions</b></a>
+ * <b>Error handling and Exceptions</b>
  * <p>
  * The HDF5 error API (H5E) manages the behavior of the error stack in the HDF-5 library. This API is omitted from the
  * JHI5. Errors are converted into Java exceptions. This is totally different from the C interface, but is very natural
