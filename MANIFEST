@@ -2329,6 +2329,7 @@
 # CMake-specific Files
 ./config/toolchain/GCC.cmake
 ./config/toolchain/intel.cmake
+./config/toolchain/PGI.cmake
 
 ./config/cmake/cacheinit.cmake
 ./config/cmake/ConversionTests.c

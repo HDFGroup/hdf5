@@ -396,6 +396,7 @@ CMP_OUTPUT()
 TOOLTEST_FAIL()
 {
     expectout="$TESTDIR/$1"
+    expecterr="$TESTDIR/`basename $1 .out`.err"
     actualout="$TESTDIR/$1.actualout"
     actualerr="$TESTDIR/$1.actualerr"
     actualout_sav=${actualout}-sav
@@ -426,10 +427,7 @@ TOOLTEST_FAIL()
         echo " PASSED"
         # Verifying output text from h5copy
         if [ "$expectout" != "SKIP" ]; then
-            # combine stderr to stdout to compare the output at once.
-            # We may seperate stdout and stderr later.
-            cat $actualerr >> $actualout
-            CMP_OUTPUT $expectout $actualout
+            CMP_OUTPUT $expecterr $actualerr
         fi
     else
         echo "*FAILED*"
