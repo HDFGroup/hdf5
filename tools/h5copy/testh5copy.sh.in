@@ -60,6 +60,7 @@ $SRC_H5COPY_TESTFILES/h5copy_extlinks_trg.h5
 # List of expect files that will be copied over to local test dir
 LIST_OTHER_TEST_FILES="
 $SRC_H5COPY_TESTFILES/h5copy_misc1.out
+$SRC_H5COPY_TESTFILES/h5copy_misc1.err
 "
 
 H5COPY=h5copy               # The tool name
