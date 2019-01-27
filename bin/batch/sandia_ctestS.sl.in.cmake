@@ -1,5 +1,6 @@
 #!/bin/bash
 
+##SBATCH --account=fy140085  # WC ID
 #SBATCH --nodes=1
 #SBATCH -t 00:30:00
 #SBATCH --mail-type=BEGIN,END,FAIL
