@@ -1145,6 +1145,11 @@
 ./tools/h5ls/h5ls_plugin.sh.in
 ./tools/h5ls/testh5ls.sh.in
 
+# h5ls test error files
+./tools/h5ls/errfiles/nosuchfile.err
+./tools/h5ls/errfiles/textlinksrc-nodangle-1.err
+./tools/h5ls/errfiles/tgroup-1.err
+
 # h5copy sources
 ./tools/h5copy/Makefile.am
 ./tools/h5copy/Makefile.in
@@ -1206,10 +1211,10 @@
 ./tools/h5stat/testh5stat.sh.in
 ./tools/h5stat/testfiles/h5stat_dims1.ddl
 ./tools/h5stat/testfiles/h5stat_dims2.ddl
-./tools/h5stat/testfiles/h5stat_err1_dims.ddl
-./tools/h5stat/testfiles/h5stat_err1_links.ddl
-./tools/h5stat/testfiles/h5stat_err1_numattrs.ddl
-./tools/h5stat/testfiles/h5stat_err2_numattrs.ddl
+./tools/h5stat/testfiles/h5stat_err1_dims.err
+./tools/h5stat/testfiles/h5stat_err1_links.err
+./tools/h5stat/testfiles/h5stat_err1_numattrs.err
+./tools/h5stat/testfiles/h5stat_err2_numattrs.err
 ./tools/h5stat/testfiles/h5stat_filters.ddl
 ./tools/h5stat/testfiles/h5stat_filters-d.ddl
 ./tools/h5stat/testfiles/h5stat_filters-dT.ddl
@@ -1239,6 +1244,8 @@
 ./tools/h5stat/testfiles/h5stat_threshold.h5
 ./tools/h5stat/testfiles/h5stat_tsohm.ddl
 ./tools/h5stat/testfiles/h5stat_tsohm.h5
+./tools/h5stat/testfiles/h5stat_notexist.err
+./tools/h5stat/testfiles/h5stat_nofile.err
 
 # h5dump test files
 ./tools/testfiles/charsets.h5
@@ -1807,6 +1814,7 @@
 ./tools/h5diff/testfiles/h5diff_172.txt
 ./tools/h5diff/testfiles/h5diff_18.txt
 ./tools/h5diff/testfiles/h5diff_18_1.txt
+./tools/h5diff/testfiles/h5diff_19.txt
 ./tools/h5diff/testfiles/h5diff_20.txt
 ./tools/h5diff/testfiles/h5diff_21.txt
 ./tools/h5diff/testfiles/h5diff_22.txt
@@ -1834,7 +1842,6 @@
 ./tools/h5diff/testfiles/h5diff_600.txt
 ./tools/h5diff/testfiles/h5diff_601.txt
 ./tools/h5diff/testfiles/h5diff_601_ERR.err
-./tools/h5diff/testfiles/h5diff_601_ERR.txt
 ./tools/h5diff/testfiles/h5diff_603.txt
 ./tools/h5diff/testfiles/h5diff_604.txt
 ./tools/h5diff/testfiles/h5diff_605.txt
@@ -1941,21 +1948,12 @@
 ./tools/h5diff/testfiles/h5diff_452.txt
 ./tools/h5diff/testfiles/h5diff_453.txt
 ./tools/h5diff/testfiles/h5diff_454.txt
-./tools/h5diff/testfiles/h5diff_454_ERR.err
-./tools/h5diff/testfiles/h5diff_454_ERR.txt
+./tools/h5diff/testfiles/dangling_link.err
 ./tools/h5diff/testfiles/h5diff_455.txt
-./tools/h5diff/testfiles/h5diff_455_ERR.err
-./tools/h5diff/testfiles/h5diff_455_ERR.txt
 ./tools/h5diff/testfiles/h5diff_456.txt
 ./tools/h5diff/testfiles/h5diff_457.txt
-./tools/h5diff/testfiles/h5diff_457_ERR.err
-./tools/h5diff/testfiles/h5diff_457_ERR.txt
 ./tools/h5diff/testfiles/h5diff_458.txt
-./tools/h5diff/testfiles/h5diff_458_ERR.err
-./tools/h5diff/testfiles/h5diff_458_ERR.txt
 ./tools/h5diff/testfiles/h5diff_459.txt
-./tools/h5diff/testfiles/h5diff_459_ERR.err
-./tools/h5diff/testfiles/h5diff_459_ERR.txt
 ./tools/h5diff/testfiles/h5diff_465.txt
 ./tools/h5diff/testfiles/h5diff_466.txt
 ./tools/h5diff/testfiles/h5diff_467.txt
@@ -2045,6 +2043,7 @@
 ./tools/h5diff/testfiles/tudfilter.h5
 ./tools/h5diff/testfiles/tudfilter2.h5
 ./tools/h5diff/testfiles/h5diff_ud.txt
+./tools/h5diff/testfiles/h5diff_udfail.err
 ./tools/h5diff/testfiles/h5diff_udfail.txt
 ./tools/h5diff/testfiles/diff_strings1.h5
 ./tools/h5diff/testfiles/diff_strings2.h5
@@ -2124,6 +2123,7 @@
 ./tools/h5copy/testfiles/h5copy_extlinks_src.h5
 ./tools/h5copy/testfiles/h5copy_extlinks_trg.h5
 ./tools/h5copy/testfiles/h5copy_extlinks_src.out.ls
+./tools/h5copy/testfiles/h5copy_misc1.err
 ./tools/h5copy/testfiles/h5copy_misc1.out
 ./tools/h5copy/testfiles/h5copy_plugin_fail_ERR.out.h5.txt
 ./tools/h5copy/testfiles/h5copy_plugin_test.out.h5.txt
