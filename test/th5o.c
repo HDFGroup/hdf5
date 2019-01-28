@@ -13,7 +13,7 @@
 
 /***********************************************************
 *
-* Test program:	 th5o
+* Test program:     th5o
 *
 * Test public H5O functions for accessing
 *
@@ -30,7 +30,7 @@
 #define TEST6_DIM1 100
 #define TEST6_DIM2 100
 
-
+
 /****************************************************************
 **
 **  test_h5o_open(): Test H5Oopen function.
@@ -140,7 +140,7 @@ test_h5o_open(void)
 } /* test_h5o_open() */
 
 
-
+
 /****************************************************************
 **
 **  test_h5o_close(): Test H5Oclose function.
@@ -230,7 +230,7 @@ test_h5o_close(void)
     CHECK(ret, FAIL, "H5Fclose");
 }
 
-
+
 /****************************************************************
 **
 **  test_h5o_open_by_addr(): Test H5Oopen_by_addr function.
@@ -367,7 +367,7 @@ test_h5o_open_by_addr(void)
     VERIFY(dtype, FAIL, "H5Oopen_by_addr");
 } /* test_h5o_open_by_addr() */
 
-
+
 /****************************************************************
 **
 **  test_h5o_refcount(): Test H5O refcounting functions.
@@ -378,7 +378,7 @@ test_h5o_refcount(void)
 {
     hid_t       fid;                        /* HDF5 File ID      */
     hid_t       grp, dset, dtype, dspace;   /* Object identifiers */
-    H5O_info_t	oinfo;                      /* Object info struct */
+    H5O_info_t    oinfo;                      /* Object info struct */
     hsize_t     dims[RANK];
     herr_t      ret;                        /* Value returned from API calls */
 
@@ -562,7 +562,7 @@ test_h5o_refcount(void)
     CHECK(ret, FAIL, "H5Fclose");
 } /* test_h5o_refcount() */
 
-
+
 /****************************************************************
 **
 **  test_h5o_plist(): Test object creation properties
@@ -756,7 +756,7 @@ test_h5o_plist(void)
     CHECK(ret, FAIL, "H5Pclose");
 } /* test_h5o_plist() */
 
-
+
 /****************************************************************
 **
 **  test_h5o_link(): Test creating link to object
@@ -850,7 +850,7 @@ test_h5o_link(void)
             /* Verify the data */
             for(i = 0; i < (TEST6_DIM1 * TEST6_DIM2); i++)
                 VERIFY(wdata[i], rdata[i], "H5Dread");
-    
+
             /* Create a group with no name*/
             group_id = H5Gcreate_anon(file_id, H5P_DEFAULT, H5P_DEFAULT);
             CHECK(group_id, FAIL, "H5Gcreate_anon");
@@ -910,7 +910,7 @@ test_h5o_link(void)
     HDfree(rdata);
 } /* end test_h5o_link() */
 
-
+
 /****************************************************************
 **
 **  test_h5o_comment(): Test H5Oset(get)_comment functions.
@@ -1083,7 +1083,7 @@ test_h5o_comment(void)
 
 } /* test_h5o_comment() */
 
-
+
 /****************************************************************
 **
 **  test_h5o_comment_by_name(): Test H5Oset(get)_comment_by_name functions.
@@ -1242,7 +1242,7 @@ test_h5o_comment_by_name(void)
 
 } /* test_h5o_comment_by_name() */
 
-
+
 /****************************************************************
 **
 **  test_h5o_getinfo_same_file():  Test that querying the object info for
@@ -1254,7 +1254,7 @@ test_h5o_getinfo_same_file(void)
 {
     hid_t       fid1, fid2;             /* HDF5 File ID */
     hid_t       gid1, gid2;             /* Group IDs */
-    H5O_info_t	oinfo1, oinfo2;         /* Object info structs */
+    H5O_info_t    oinfo1, oinfo2;         /* Object info structs */
     herr_t      ret;                    /* Value returned from API calls */
 
     /* Create a new HDF5 file */
@@ -1353,7 +1353,7 @@ test_h5o_getinfo_same_file(void)
 /****************************************************************
 **
 **  visit_obj_cb():
-**      This is the callback function invoked by H5Ovisit1() in 
+**      This is the callback function invoked by H5Ovisit() in
 **      test_h5o_getinfo_visit():
 **      --Verify that the object info returned to the callback
 **        function is the same as H5Oget_info2().
@@ -1368,27 +1368,27 @@ visit_obj_cb(hid_t group_id, const char *name, const H5O_info_t *oinfo1,
     /* Verify the object info for "group1", "group2" and the root group */
     if(!(HDstrcmp(name, "group1"))) {
         H5Oget_info_by_name2(group_id, name, &oinfo2, H5O_INFO_NUM_ATTRS, H5P_DEFAULT);
-        VERIFY(oinfo1->num_attrs, oinfo2.num_attrs, "obj info from H5Ovisit1");
+        VERIFY(oinfo1->num_attrs, oinfo2.num_attrs, "obj info from H5Ovisit");
     } else if(!(HDstrcmp(name, "group2"))) {
         H5Oget_info_by_name2(group_id, name, &oinfo2, H5O_INFO_HDR, H5P_DEFAULT);
-        VERIFY(oinfo1->hdr.nmesgs, oinfo2.hdr.nmesgs, "obj info from H5Ovisit1/H5Oget_info2");
-        VERIFY(oinfo1->hdr.nchunks, oinfo2.hdr.nchunks, "obj info from H5Ovisit1/H5Oget_info2");
+        VERIFY(oinfo1->hdr.nmesgs, oinfo2.hdr.nmesgs, "obj info from H5Ovisit/H5Oget_info2");
+        VERIFY(oinfo1->hdr.nchunks, oinfo2.hdr.nchunks, "obj info from H5Ovisit/H5Oget_info2");
     } else if(!(HDstrcmp(name, "."))) {
         H5Oget_info_by_name2(group_id, name, &oinfo2, H5O_INFO_META_SIZE, H5P_DEFAULT);
-        VERIFY(oinfo1->meta_size.obj.index_size, oinfo2.meta_size.obj.index_size, "obj info from H5Ovisit1/H5Oget_info2");
-        VERIFY(oinfo1->meta_size.obj.heap_size, oinfo2.meta_size.obj.heap_size, "obj info from H5Ovisit1/H5Oget_info2");
+        VERIFY(oinfo1->meta_size.obj.index_size, oinfo2.meta_size.obj.index_size, "obj info from H5Ovisit/H5Oget_info2");
+        VERIFY(oinfo1->meta_size.obj.heap_size, oinfo2.meta_size.obj.heap_size, "obj info from H5Ovisit/H5Oget_info2");
     }
 
     return(H5_ITER_CONT);
 } /* end visit_obj_cb() */
 
-
+
 /****************************************************************
 **
-**  test_h5o_getinfo_visit():  
-**    Verify that the object info returned via H5Oget_info1()
+**  test_h5o_getinfo_visit():
+**    Verify that the object info returned via H5Oget_info()
 **    and H5Oget_info2() are the same.
-**    Verify that the object info retrieved via H5Ovisit1() is
+**    Verify that the object info retrieved via H5Ovisit() is
 **    the same as H5Oget_info2().
 **
 ****************************************************************/
@@ -1436,31 +1436,31 @@ test_h5o_getinfo_visit(void)
     HDmemset(&oinfo1, 0, sizeof(oinfo1));
     HDmemset(&oinfo2, 0, sizeof(oinfo2));
 
-    /* Query the object info for "group1" via H5Oget_info1 and H5Oget_info2 */
-    ret = H5Oget_info1(gid1, &oinfo1);
+    /* Query the object info for "group1" via H5Oget_info and H5Oget_info2 */
+    ret = H5Oget_info(gid1, &oinfo1);
     CHECK(ret, FAIL, "H5Oget_info");
     ret = H5Oget_info2(gid1, &oinfo2, H5O_INFO_BASIC|H5O_INFO_NUM_ATTRS);
     CHECK(ret, FAIL, "H5Oget_info");
 
     /* Verify the object info for "group1" is correct */
-    VERIFY(oinfo1.fileno, oinfo2.fileno, "obj info from H5Oget_info1/2");
-    VERIFY(oinfo1.num_attrs, oinfo2.num_attrs, "obj info from H5Oget_info1/2");
+    VERIFY(oinfo1.fileno, oinfo2.fileno, "obj info from H5Oget_info/2");
+    VERIFY(oinfo1.num_attrs, oinfo2.num_attrs, "obj info from H5Oget_info/2");
 
     /* Reset object info */
     HDmemset(&oinfo1, 0, sizeof(oinfo1));
     HDmemset(&oinfo2, 0, sizeof(oinfo2));
 
-    /* Query the object info for "group2" via H5Oget_info1 and H5Oget_info2 */
-    ret = H5Oget_info_by_name1(fid, "group2", &oinfo1, H5P_DEFAULT);
+    /* Query the object info for "group2" via H5Oget_info_by_name and H5Oget_info_by_name2 */
+    ret = H5Oget_info_by_name(fid, "group2", &oinfo1, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Oget_info_by_name");
     ret = H5Oget_info_by_name2(fid, "group2", &oinfo2, H5O_INFO_HDR|H5O_INFO_META_SIZE, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Oget_info_by_name");
 
     /* Verify the object info for "group2" is correct */
-    VERIFY(oinfo1.hdr.nmesgs, oinfo2.hdr.nmesgs, "obj info from H5Oget_info1/2");
-    VERIFY(oinfo1.hdr.nchunks, oinfo2.hdr.nchunks, "obj info from H5Oget_info1/2");
-    VERIFY(oinfo1.meta_size.obj.index_size, oinfo2.meta_size.obj.index_size, "obj info from H5Oget_info1/2");
-    VERIFY(oinfo1.meta_size.obj.heap_size, oinfo2.meta_size.obj.heap_size, "obj info from H5Oget_info1/2");
+    VERIFY(oinfo1.hdr.nmesgs, oinfo2.hdr.nmesgs, "obj info from H5Oget_info_by_name/2");
+    VERIFY(oinfo1.hdr.nchunks, oinfo2.hdr.nchunks, "obj info from H5Oget_info_by_name/2");
+    VERIFY(oinfo1.meta_size.obj.index_size, oinfo2.meta_size.obj.index_size, "obj info from H5Oget_info_by_name/2");
+    VERIFY(oinfo1.meta_size.obj.heap_size, oinfo2.meta_size.obj.heap_size, "obj info from H5Oget_info_by_name/2");
 
     /* Close everything */
     ret = H5Gclose(gid1);
@@ -1469,7 +1469,7 @@ test_h5o_getinfo_visit(void)
     CHECK(ret, FAIL, "H5Gclose");
 
     /* Verify the object info returned to the callback function is correct */
-    ret = H5Ovisit1(fid, H5_INDEX_NAME, H5_ITER_INC, visit_obj_cb, NULL);
+    ret = H5Ovisit(fid, H5_INDEX_NAME, H5_ITER_INC, visit_obj_cb, NULL);
 
     /* Close the file */
     ret = H5Fclose(fid);
@@ -1479,7 +1479,7 @@ test_h5o_getinfo_visit(void)
 
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
-
+
 /****************************************************************
 **
 **  test_h5o(): Main H5O (generic object) testing routine.
@@ -1491,9 +1491,9 @@ test_h5o(void)
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Objects\n"));
 
-    test_h5o_open();		/* Test generic open function */
-    test_h5o_open_by_addr();	/* Test opening objects by address */
-    test_h5o_close();		/* Test generic close function */
+    test_h5o_open();        /* Test generic open function */
+    test_h5o_open_by_addr();    /* Test opening objects by address */
+    test_h5o_close();        /* Test generic close function */
     test_h5o_refcount();        /* Test incrementing and decrementing reference count */
     test_h5o_plist();           /* Test object creation properties */
     test_h5o_link();            /* Test object link routine */
@@ -1501,19 +1501,19 @@ test_h5o(void)
     test_h5o_comment_by_name(); /* Test routines for comment by name */
     test_h5o_getinfo_same_file(); /* Test info for objects in the same file */
 #ifndef H5_NO_DEPRECATED_SYMBOLS
-    test_h5o_getinfo_visit();   /* Test object info for H5Oget_info1/2 and H5Ovisit1 */
+    test_h5o_getinfo_visit();   /* Test object info for H5Oget_info/2 and H5Ovisit */
 #endif
 } /* test_h5o() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	cleanup_h5o
+ * Function:    cleanup_h5o
  *
- * Purpose:	Cleanup temporary test files
+ * Purpose:    Cleanup temporary test files
  *
- * Return:	none
+ * Return:    none
  *
- * Programmer:	James Laird
+ * Programmer:    James Laird
  *              June 3, 2006
  *
  *-------------------------------------------------------------------------
