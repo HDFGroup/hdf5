@@ -101,7 +101,6 @@ $SRC_H5STAT_TESTFILES/h5stat_tsohm.ddl
 $SRC_H5STAT_TESTFILES/h5stat_newgrat.ddl
 $SRC_H5STAT_TESTFILES/h5stat_newgrat-UG.ddl
 $SRC_H5STAT_TESTFILES/h5stat_newgrat-UA.ddl
-$SRC_H5STAT_TESTFILES/h5stat_err1_links.ddl
 $SRC_H5STAT_TESTFILES/h5stat_links1.ddl
 $SRC_H5STAT_TESTFILES/h5stat_links2.ddl
 $SRC_H5STAT_TESTFILES/h5stat_links3.ddl
