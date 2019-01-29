@@ -264,6 +264,12 @@ Bug Fixes since HDF5-1.10.3 release
 
     Library
     -------
+    - Fixed a potential invalid memory access and failure that could occur when
+      decoding an unknown object header message (from a future version of the
+      library).
+
+      (NAF - 2019/01/07)
+
     - Deleting attributes in dense storage
 
       The library aborts with "infinite loop closing library" after
