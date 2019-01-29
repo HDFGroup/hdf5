@@ -175,8 +175,8 @@ set (H5_TESTS
     ohdr
     stab
     gheap
-    #cache # multiple source
-    #cache_api # multiple source
+    cache # multiple source
+    cache_api # multiple source
     pool
     hyperslab
     istore
@@ -201,7 +201,7 @@ set (H5_TESTS
     app_ref
     enum
     set_extent
-    #ttsafe # multiple source
+    ttsafe # multiple source
     getname
     vfd
     ntypes

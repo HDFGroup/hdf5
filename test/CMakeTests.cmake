@@ -26,26 +26,6 @@ if (BUILD_SHARED_LIBS AND TEST_SHARED_PROGRAMS)
   file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/H5TEST-shared/testfiles/plist_files")
 endif ()
 
-if (HDF5_TEST_VFD)
-  set (VFD_LIST
-      sec2
-      stdio
-      core
-      split
-      multi
-      family
-  )
-  if (DIRECT_VFD)
-    set (VFD_LIST ${VFD_LIST} direct)
-  endif ()
-  foreach (vfdtest ${VFD_LIST})
-    file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/${vfdtest}")
-    if (BUILD_SHARED_LIBS AND TEST_SHARED_PROGRAMS)
-      file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/${vfdtest}-shared")
-    endif ()
-  endforeach ()
-endif ()
-
 # --------------------------------------------------------------------
 # Copy all the HDF5 files from the source directory into the test directory
 # --------------------------------------------------------------------
@@ -59,16 +39,6 @@ foreach (h5_tfile ${HDF5_TEST_FILES})
     HDFTEST_COPY_FILE("${HDF5_TOOLS_DIR}/testfiles/${h5_tfile}" "${PROJECT_BINARY_DIR}/H5TEST-shared/${h5_tfile}" "HDF5_TEST_LIBSH_files")
   endif ()
 endforeach ()
-if (HDF5_TEST_VFD)
-  foreach (vfdtest ${VFD_LIST})
-    foreach (h5_tfile ${HDF5_TEST_FILES})
-      HDFTEST_COPY_FILE("${HDF5_TOOLS_DIR}/testfiles/${h5_tfile}" "${PROJECT_BINARY_DIR}/${vfdtest}/${h5_tfile}" "HDF5_TEST_LIB_files")
-      if (BUILD_SHARED_LIBS AND TEST_SHARED_PROGRAMS)
-        HDFTEST_COPY_FILE("${HDF5_TOOLS_DIR}/testfiles/${h5_tfile}" "${PROJECT_BINARY_DIR}/${vfdtest}-shared/${h5_tfile}" "HDF5_TEST_LIBSH_files")
-      endif ()
-    endforeach ()
-  endforeach ()
-endif ()
 
 # --------------------------------------------------------------------
 # Copy all the HDF5 files from the test directory into the source directory
@@ -87,16 +57,6 @@ foreach (ref_file ${HDF5_REFERENCE_FILES})
     HDFTEST_COPY_FILE("${HDF5_TEST_SOURCE_DIR}/testfiles/${ref_file}" "${PROJECT_BINARY_DIR}/H5TEST-shared/${ref_file}" "HDF5_TEST_LIBSH_files")
   endif ()
 endforeach ()
-if (HDF5_TEST_VFD)
-  foreach (vfdtest ${VFD_LIST})
-    foreach (ref_file ${HDF5_REFERENCE_FILES})
-      HDFTEST_COPY_FILE("${HDF5_TEST_SOURCE_DIR}/testfiles/${ref_file}" "${PROJECT_BINARY_DIR}/${vfdtest}/${ref_file}" "HDF5_TEST_LIB_files")
-      if (BUILD_SHARED_LIBS AND TEST_SHARED_PROGRAMS)
-        HDFTEST_COPY_FILE("${HDF5_TEST_SOURCE_DIR}/testfiles/${ref_file}" "${PROJECT_BINARY_DIR}/${vfdtest}-shared/${ref_file}" "HDF5_TEST_LIBSH_files")
-      endif ()
-    endforeach ()
-  endforeach ()
-endif ()
 
 # --------------------------------------------------------------------
 #-- Copy all the HDF5 files from the test directory into the source directory
@@ -149,16 +109,7 @@ foreach (h5_file ${HDF5_REFERENCE_TEST_FILES})
     HDFTEST_COPY_FILE("${HDF5_TEST_SOURCE_DIR}/${h5_file}" "${HDF5_TEST_BINARY_DIR}/H5TEST-shared/${h5_file}" "HDF5_TEST_LIBSH_files")
   endif ()
 endforeach ()
-if (HDF5_TEST_VFD)
-  foreach (vfdtest ${VFD_LIST})
-    foreach (h5_file ${HDF5_REFERENCE_TEST_FILES})
-      HDFTEST_COPY_FILE("${HDF5_TEST_SOURCE_DIR}/${h5_file}" "${HDF5_TEST_BINARY_DIR}/${vfdtest}/${h5_file}" "HDF5_TEST_LIB_files")
-      if (BUILD_SHARED_LIBS AND TEST_SHARED_PROGRAMS)
-        HDFTEST_COPY_FILE("${HDF5_TEST_SOURCE_DIR}/${h5_file}" "${HDF5_TEST_BINARY_DIR}/${vfdtest}-shared/${h5_file}" "HDF5_TEST_LIBSH_files")
-      endif ()
-    endforeach ()
-  endforeach ()
-endif ()
+
 add_custom_target(HDF5_TEST_LIB_files ALL COMMENT "Copying files needed by HDF5_TEST_LIB tests" DEPENDS ${HDF5_TEST_LIB_files_list})
 if (BUILD_SHARED_LIBS AND TEST_SHARED_PROGRAMS)
   add_custom_target(HDF5_TEST_LIBSH_files ALL COMMENT "Copying files needed by HDF5_TEST_LIBSH tests" DEPENDS ${HDF5_TEST_LIBSH_files_list})

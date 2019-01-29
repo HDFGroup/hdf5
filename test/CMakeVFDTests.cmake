@@ -80,7 +80,7 @@ foreach (vfdtest ${VFD_LIST})
 endforeach ()
 
 add_custom_target(HDF5_VFDTEST_LIB_files ALL COMMENT "Copying files needed by HDF5_VFDTEST_LIB tests" DEPENDS ${HDF5_VFDTEST_LIB_files_list})
-if (BUILD_SHARED_LIBS)
+if (BUILD_SHARED_LIBS AND TEST_SHARED_PROGRAMS)
   add_custom_target(HDF5_VFDTEST_LIBSH_files ALL COMMENT "Copying files needed by HDF5_VFDTEST_LIBSH tests" DEPENDS ${HDF5_VFDTEST_LIBSH_files_list})
 endif ()
 
@@ -232,7 +232,7 @@ endif ()
           ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${vfdname}"
           WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/${vfdname}
       )
-      if (BUILD_SHARED_LIBS)
+      if (BUILD_SHARED_LIBS AND TEST_SHARED_PROGRAMS)
         add_test (NAME VFD-${vfdname}-${vfdtest}-shared
             COMMAND "${CMAKE_COMMAND}"
                 -D "TEST_PROGRAM=$<TARGET_FILE:${vfdtest}-shared>"
@@ -267,7 +267,7 @@ endif ()
     if (NOT CYGWIN)
       set_tests_properties (VFD-${vfdname}-cache PROPERTIES TIMEOUT 1800)
     endif ()
-    if (BUILD_SHARED_LIBS)
+    if (BUILD_SHARED_LIBS AND TEST_SHARED_PROGRAMS)
       set_tests_properties (VFD-${vfdname}-flush2-shared PROPERTIES DEPENDS VFD-${vfdname}-flush1-shared)
       set_tests_properties (VFD-${vfdname}-flush1-shared PROPERTIES TIMEOUT 10)
       set_tests_properties (VFD-${vfdname}-flush2-shared PROPERTIES TIMEOUT 10)
@@ -292,7 +292,7 @@ endif ()
           ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${vfdname};HDF5TestExpress=${HDF_TEST_EXPRESS}"
           WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/${vfdname}
       )
-      if (BUILD_SHARED_LIBS)
+      if (BUILD_SHARED_LIBS AND TEST_SHARED_PROGRAMS)
         add_test (NAME VFD-${vfdname}-fheap-shared
             COMMAND "${CMAKE_COMMAND}"
                 -D "TEST_PROGRAM=$<TARGET_FILE:fheap-shared>"
