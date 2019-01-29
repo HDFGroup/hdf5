@@ -139,6 +139,12 @@ Bug Fixes since HDF5-1.8.20
 
     Library
     -------
+    - Fixed a potential invalid memory access and failure that could occur when
+      decoding an unknown object header message (from a future version of the
+      library).
+
+      (NAF - 2019/01/07)
+
     - Allow H5detect and H5make_libsettings to take a file as an argument.
 
       Rather than only writing to stdout, add a command argument to name
