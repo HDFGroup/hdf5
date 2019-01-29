@@ -232,6 +232,7 @@ endif ()
 ##############################################################################
 
 set (test_CLEANFILES
+    cache_api_test.h5
     dt_arith1.h5
     dt_arith2.h5
     dtransform.h5
@@ -289,6 +290,10 @@ set (test_CLEANFILES
     testmeta.h5
     tstint1.h5
     tstint2.h5
+    ttsafe_error.h5
+    ttsafe_dcreate.h5
+    ttsafe_cancel.h5
+    ttsafe_acreate.h5
     unregister_filter_1.h5
     unregister_filter_2.h5
 )
@@ -306,7 +311,6 @@ set_tests_properties (H5TEST-clear-objects PROPERTIES FIXTURES_SETUP clear_objec
 set (H5TEST_SEPARATE_TESTS
     testhdf5
     cache
-    cache_image
     flush1
     flush2
 )
@@ -430,41 +434,6 @@ if (NOT CYGWIN)
   )
   set_tests_properties (H5TEST-cache PROPERTIES TIMEOUT 1800)
 endif ()
-
-#-- Adding test for cache_api
-add_test (
-    NAME H5TEST-clear-cache_api-objects
-    COMMAND    ${CMAKE_COMMAND}
-        -E remove
-        cache_api_test.h5
-    WORKING_DIRECTORY
-        ${HDF5_TEST_BINARY_DIR}/H5TEST
-)
-add_test (NAME H5TEST-cache_api COMMAND $<TARGET_FILE:cache_api>)
-set_tests_properties (H5TEST-cache_api PROPERTIES
-    DEPENDS H5TEST-clear-cache_api-objects
-    ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST"
-    WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
-)
-
-#-- Adding test for ttsafe
-add_test (
-    NAME H5TEST-clear-ttsafe-objects
-    COMMAND    ${CMAKE_COMMAND}
-        -E remove
-        ttsafe_error.h5
-        ttsafe_dcreate.h5
-        ttsafe_cancel.h5
-        ttsafe_acreate.h5
-    WORKING_DIRECTORY
-        ${HDF5_TEST_BINARY_DIR}/H5TEST
-)
-add_test (NAME H5TEST-ttsafe COMMAND $<TARGET_FILE:ttsafe>)
-set_tests_properties (H5TEST-ttsafe PROPERTIES
-    DEPENDS H5TEST-clear-ttsafe-objects
-    ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST"
-    WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
-)
 
 #-- Adding test for flush1/2
 add_test (NAME H5TEST-clear-flush-objects
