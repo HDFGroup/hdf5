@@ -26,26 +26,6 @@ if (BUILD_SHARED_LIBS AND TEST_SHARED_PROGRAMS)
   file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/H5TEST-shared/testfiles/plist_files")
 endif ()
 
-if (HDF5_TEST_VFD)
-  set (VFD_LIST
-      sec2
-      stdio
-      core
-      split
-      multi
-      family
-  )
-  if (DIRECT_VFD)
-    set (VFD_LIST ${VFD_LIST} direct)
-  endif ()
-  foreach (vfdtest ${VFD_LIST})
-    file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/${vfdtest}")
-    if (BUILD_SHARED_LIBS AND TEST_SHARED_PROGRAMS)
-      file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/${vfdtest}-shared")
-    endif ()
-  endforeach ()
-endif ()
-
 # --------------------------------------------------------------------
 # Copy all the HDF5 files from the source directory into the test directory
 # --------------------------------------------------------------------
@@ -59,16 +39,6 @@ foreach (h5_tfile ${HDF5_TEST_FILES})
     HDFTEST_COPY_FILE("${HDF5_TOOLS_DIR}/testfiles/${h5_tfile}" "${PROJECT_BINARY_DIR}/H5TEST-shared/${h5_tfile}" "HDF5_TEST_LIBSH_files")
   endif ()
 endforeach ()
-if (HDF5_TEST_VFD)
-  foreach (vfdtest ${VFD_LIST})
-    foreach (h5_tfile ${HDF5_TEST_FILES})
-      HDFTEST_COPY_FILE("${HDF5_TOOLS_DIR}/testfiles/${h5_tfile}" "${PROJECT_BINARY_DIR}/${vfdtest}/${h5_tfile}" "HDF5_TEST_LIB_files")
-      if (BUILD_SHARED_LIBS AND TEST_SHARED_PROGRAMS)
-        HDFTEST_COPY_FILE("${HDF5_TOOLS_DIR}/testfiles/${h5_tfile}" "${PROJECT_BINARY_DIR}/${vfdtest}-shared/${h5_tfile}" "HDF5_TEST_LIBSH_files")
-      endif ()
-    endforeach ()
-  endforeach ()
-endif ()
 
 # --------------------------------------------------------------------
 # Copy all the HDF5 files from the test directory into the source directory
@@ -87,16 +57,6 @@ foreach (ref_file ${HDF5_REFERENCE_FILES})
     HDFTEST_COPY_FILE("${HDF5_TEST_SOURCE_DIR}/testfiles/${ref_file}" "${PROJECT_BINARY_DIR}/H5TEST-shared/${ref_file}" "HDF5_TEST_LIBSH_files")
   endif ()
 endforeach ()
-if (HDF5_TEST_VFD)
-  foreach (vfdtest ${VFD_LIST})
-    foreach (ref_file ${HDF5_REFERENCE_FILES})
-      HDFTEST_COPY_FILE("${HDF5_TEST_SOURCE_DIR}/testfiles/${ref_file}" "${PROJECT_BINARY_DIR}/${vfdtest}/${ref_file}" "HDF5_TEST_LIB_files")
-      if (BUILD_SHARED_LIBS AND TEST_SHARED_PROGRAMS)
-        HDFTEST_COPY_FILE("${HDF5_TEST_SOURCE_DIR}/testfiles/${ref_file}" "${PROJECT_BINARY_DIR}/${vfdtest}-shared/${ref_file}" "HDF5_TEST_LIBSH_files")
-      endif ()
-    endforeach ()
-  endforeach ()
-endif ()
 
 # --------------------------------------------------------------------
 #-- Copy all the HDF5 files from the test directory into the source directory
@@ -149,16 +109,7 @@ foreach (h5_file ${HDF5_REFERENCE_TEST_FILES})
     HDFTEST_COPY_FILE("${HDF5_TEST_SOURCE_DIR}/${h5_file}" "${HDF5_TEST_BINARY_DIR}/H5TEST-shared/${h5_file}" "HDF5_TEST_LIBSH_files")
   endif ()
 endforeach ()
-if (HDF5_TEST_VFD)
-  foreach (vfdtest ${VFD_LIST})
-    foreach (h5_file ${HDF5_REFERENCE_TEST_FILES})
-      HDFTEST_COPY_FILE("${HDF5_TEST_SOURCE_DIR}/${h5_file}" "${HDF5_TEST_BINARY_DIR}/${vfdtest}/${h5_file}" "HDF5_TEST_LIB_files")
-      if (BUILD_SHARED_LIBS AND TEST_SHARED_PROGRAMS)
-        HDFTEST_COPY_FILE("${HDF5_TEST_SOURCE_DIR}/${h5_file}" "${HDF5_TEST_BINARY_DIR}/${vfdtest}-shared/${h5_file}" "HDF5_TEST_LIBSH_files")
-      endif ()
-    endforeach ()
-  endforeach ()
-endif ()
+
 add_custom_target(HDF5_TEST_LIB_files ALL COMMENT "Copying files needed by HDF5_TEST_LIB tests" DEPENDS ${HDF5_TEST_LIB_files_list})
 if (BUILD_SHARED_LIBS AND TEST_SHARED_PROGRAMS)
   add_custom_target(HDF5_TEST_LIBSH_files ALL COMMENT "Copying files needed by HDF5_TEST_LIBSH tests" DEPENDS ${HDF5_TEST_LIBSH_files_list})
@@ -281,6 +232,7 @@ endif ()
 ##############################################################################
 
 set (test_CLEANFILES
+    cache_api_test.h5
     dt_arith1.h5
     dt_arith2.h5
     dtransform.h5
@@ -338,6 +290,10 @@ set (test_CLEANFILES
     testmeta.h5
     tstint1.h5
     tstint2.h5
+    ttsafe_error.h5
+    ttsafe_dcreate.h5
+    ttsafe_cancel.h5
+    ttsafe_acreate.h5
     unregister_filter_1.h5
     unregister_filter_2.h5
 )
@@ -355,7 +311,6 @@ set_tests_properties (H5TEST-clear-objects PROPERTIES FIXTURES_SETUP clear_objec
 set (H5TEST_SEPARATE_TESTS
     testhdf5
     cache
-    cache_image
     flush1
     flush2
 )
@@ -479,41 +434,6 @@ if (NOT CYGWIN)
   )
   set_tests_properties (H5TEST-cache PROPERTIES TIMEOUT 1800)
 endif ()
-
-#-- Adding test for cache_api
-add_test (
-    NAME H5TEST-clear-cache_api-objects
-    COMMAND    ${CMAKE_COMMAND}
-        -E remove
-        cache_api_test.h5
-    WORKING_DIRECTORY
-        ${HDF5_TEST_BINARY_DIR}/H5TEST
-)
-add_test (NAME H5TEST-cache_api COMMAND $<TARGET_FILE:cache_api>)
-set_tests_properties (H5TEST-cache_api PROPERTIES
-    DEPENDS H5TEST-clear-cache_api-objects
-    ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST"
-    WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
-)
-
-#-- Adding test for ttsafe
-add_test (
-    NAME H5TEST-clear-ttsafe-objects
-    COMMAND    ${CMAKE_COMMAND}
-        -E remove
-        ttsafe_error.h5
-        ttsafe_dcreate.h5
-        ttsafe_cancel.h5
-        ttsafe_acreate.h5
-    WORKING_DIRECTORY
-        ${HDF5_TEST_BINARY_DIR}/H5TEST
-)
-add_test (NAME H5TEST-ttsafe COMMAND $<TARGET_FILE:ttsafe>)
-set_tests_properties (H5TEST-ttsafe PROPERTIES
-    DEPENDS H5TEST-clear-ttsafe-objects
-    ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST"
-    WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
-)
 
 #-- Adding test for flush1/2
 add_test (NAME H5TEST-clear-flush-objects
