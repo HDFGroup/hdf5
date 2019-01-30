@@ -57,8 +57,8 @@ endmacro ()
 
 # Read source line beginning at the line matching Input:"START" and ending at the line matching Input:"END"
 macro (READ_SOURCE SOURCE_START SOURCE_END RETURN_VAR)
-  file (READ "${HDF5_SOURCE_DIR}/m4/aclocal_fc.f90" SOURCE_CODE)
-  string (REGEX MATCH "${SOURCE_START}[\\\t\\\n\\\r[].+]*${SOURCE_END}" SOURCE_CODE ${SOURCE_CODE})
+  file (READ "${HDF5_SOURCE_DIR}/m4/aclocal_fc.f90" SOURCE_MASTER)
+  string (REGEX MATCH "${SOURCE_START}[\\\t\\\n\\\r[].+]*${SOURCE_END}" SOURCE_CODE ${SOURCE_MASTER})
   set (RETURN_VAR "${SOURCE_CODE}")
 endmacro ()
 

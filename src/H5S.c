@@ -237,26 +237,25 @@ H5S_get_validated_dataspace(hid_t space_id, const H5S_t **space)
 
     HDassert(space);
 
-    if (space_id < 0)
+    /* Check for invalid ID */
+    if(space_id < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid space_id (ID cannot be a negative number)")
  
-    if (H5S_ALL == space_id) {
-        /* No special dataspace struct for H5S_ALL */
+    /* No special dataspace struct for H5S_ALL */
+    if(H5S_ALL == space_id)
         *space = NULL;
-    }
     else {
         /* Get the dataspace pointer */
-        if (NULL == (*space = (const H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
+        if(NULL == (*space = (const H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "space_id is not a dataspace ID")
 
         /* Check for valid selection */
-        if (H5S_SELECT_VALID(*space) != TRUE)
+        if(H5S_SELECT_VALID(*space) != TRUE)
             HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "selection + offset not within extent")
-    }
+    } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-
 } /* end H5S_get_validated_dataspace() */
 
 
