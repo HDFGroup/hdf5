@@ -621,6 +621,23 @@ H5PB_create(H5F_t *f, size_t size, unsigned page_buf_min_meta_perc,
 
     f->shared->pb_ptr = pb_ptr;
 
+    /* if this is a VFD SWMR reader, inform the reader VFD that the 
+     * page buffer is configured.  Note that this is for sanity 
+     * checking, and only needed until we modify the file open 
+     * code to create the page buffer before any file reads in 
+     * the VFD SWMR reader case.  After that, this code should be
+     * removed.
+     *                               JRM -- 1/29/19
+     */
+    if ( ( H5F_VFD_SWMR_CONFIG(f) ) && 
+         ( 0 == (H5F_INTENT(f) & H5F_ACC_RDWR) ) ) {
+
+        HDassert(f->shared->lf);
+        HDassert(! f->shared->vfd_swmr_config.vfd_swmr_writer);
+
+        H5FD_vfd_swmr_set_pb_configured(f->shared->lf);
+    }
+
 done:
 
     if ( ret_value < 0 ) {

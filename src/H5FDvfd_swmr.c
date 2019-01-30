@@ -48,6 +48,11 @@ typedef struct H5FD_vfd_swmr_t {
     char md_file_path[H5FD_MAX_FILENAME_LEN];   /* Name of the metadate file  */
     H5FD_vfd_swmr_md_header md_header;          /* Metadata file header       */
     H5FD_vfd_swmr_md_index md_index;            /* Metadata file index        */
+
+    hbool_t pb_configured;                      /* boolean flag set to TRUE   */
+                                                /* when the page buffer is    */
+                                                /* and to FALSE otherwise.    */
+                                                /* Used for sanity checking.  */
 } H5FD_vfd_swmr_t;
 
 #define MAXADDR (((haddr_t)1<<(8*sizeof(HDoff_t)-1))-1)
@@ -328,6 +333,17 @@ H5FD_vfd_swmr_open(const char *name, unsigned flags, hid_t fapl_id,
 
         HGOTO_ERROR(H5E_VFL, H5E_CANTOPENFILE, NULL, "can't set driver info")
 
+    /* set pb_configured to FALSE.  This field should not exist, but 
+     * until we modify the file open proceedure to create the page buffer
+     * before there is any file I/O when opening a file VFD SWMR reader, 
+     * we need to be able to turn off sanity checking in the read function
+     * until the page buffer is enabled.  This field exists for this 
+     * purpose, and should be remove when it is no longer necessary.
+     *
+     *                                            JRM -- 1/29/19
+     */
+    file->pb_configured = FALSE;
+
     /* Set return value */
     ret_value = (H5FD_t*)file;
 
@@ -603,7 +619,31 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5FD_vfd_swmr_read
  *
- * Purpose:     TBD
+ * Purpose:     If the target page or multi-page metadata entry is 
+ *              defined in the current metadata file index, satisfy 
+ *              the read from the metadata file.  Otherwise, pass the
+ *              read through to the underlying VFD.
+ *
+ *              Under normal operating conditions, the size of the 
+ *              read must always match the size supplied in the 
+ *              metadata file index.  However, until we modify the 
+ *              file open process for VFD SWMR readers to create the 
+ *              page buffer before any reads, we must allow non 
+ *              full page / non full multi-page metadata entry reads
+ *              until the page buffer is created.
+ *
+ *              This is tracked by the pb_configured flag in 
+ *              H5FD_vfd_swmr_t.  If this field is FALSE, the function 
+ *              must allow reads smaller than the size listed in the 
+ *              index, and possibly starting anywhere in the page.  
+ *              Note, however, that these reads must not cross page 
+ *              boundaries.
+ *
+ *              Once we modify the file open code to start up the 
+ *              page buffer before we attempt any reads, this exception
+ *              will not longer be necessary, and should be removed.
+ *
+ *                                            JRM -- 1/29/19
  *
  * Return:      Success:    SUCCEED. Result is stored in caller-supplied
  *                          buffer BUF.
@@ -723,7 +763,35 @@ H5FD_vfd_swmr_read(H5FD_t *_file, H5FD_mem_t type,
 #endif /* JRM */
 
     /* Found in index, read from the metadata file */
+#if 0 /* JRM */
     if( (cmp == 0) && ( target_page != 0)) {
+#else /* JRM */
+    if ( cmp == 0 ) {
+#endif /* JRM */
+
+        haddr_t page_offset;
+        haddr_t init_addr = addr;
+        size_t init_size = size;
+
+        HDassert(addr >= target_page * fs_page_size);
+        
+        page_offset = addr - (target_page * fs_page_size);
+
+#if 0 /* JRM */
+        if ( ( page_offset != 0 ) &&
+             ( ( file->pb_configured ) ||
+               ( page_offset + size > fs_page_size ) ) ) {
+
+            HDfprintf(stderr, 
+                      "page_offset = %lld, size = %lld, page_size = %lld\b",
+                      (uint64_t)page_offset, (uint64_t)size, 
+                      (uint64_t)fs_page_size);
+        }
+#endif /* JRM */
+
+        HDassert( ( page_offset == 0 ) ||
+                  ( ( ! file->pb_configured ) &&
+                    ( page_offset + size <= fs_page_size ) ) );
 
 #if 0 /* JRM */
         HDfprintf(stderr, "addr = %lld, page = %lld, len = %lld\n", 
@@ -750,14 +818,28 @@ H5FD_vfd_swmr_read(H5FD_t *_file, H5FD_mem_t type,
                       (int64_t)(index[my_idx].length));
         }
 #endif /* JRM */
-        HDassert((size == 8) ||
-                 (size == index[my_idx].length));
+
+#if 0 /* JRM */
+        if ( ( init_size != 8 ) &&
+             ( init_size != index[my_idx].length ) ) {
+
+            HDfprintf(stderr, "ERROR: addr = %lld, page = %lld, len = %lld\n", 
+                      (int64_t)init_addr, (int64_t)(init_addr / fs_page_size),
+                      (int64_t)init_size);
+        }
+
+        HDassert((init_size == 8) ||
+                 (init_size == index[my_idx].length));
+#endif /* JRM */
+
+        HDassert( ( ! file->pb_configured ) ||
+                  ( init_size == index[my_idx].length ) );
 
         do {
 
-            if(HDlseek(file->md_fd, 
-                     (HDoff_t)index[my_idx].md_file_page_offset * fs_page_size,
-                      SEEK_SET) < 0)
+            if(HDlseek(file->md_fd, (HDoff_t)
+                       ((index[my_idx].md_file_page_offset * fs_page_size)
+                        + page_offset), SEEK_SET) < 0)
 
                 HGOTO_ERROR(H5E_VFL, H5E_SEEKERROR, FAIL, \
                             "unable to seek in metadata file")
@@ -805,9 +887,10 @@ H5FD_vfd_swmr_read(H5FD_t *_file, H5FD_mem_t type,
              * signature -- clean this up.   
              *                                   JRM -- 1/14/19
              */
-            if ( size != 8 ) {
-                computed_chksum = H5_checksum_metadata(buf, 
-                                                       index[my_idx].length,0);
+            if ( file->pb_configured ) {
+
+                computed_chksum = 
+                    H5_checksum_metadata(buf, index[my_idx].length,0);
             } else {
                 computed_chksum = index[my_idx].chksum;
             }
@@ -832,10 +915,23 @@ H5FD_vfd_swmr_read(H5FD_t *_file, H5FD_mem_t type,
         } while(--entry_retries);
 
         /* Exhaust all retries for reading the page/multi-page entry */
-        if(entry_retries == 0)
+        if(entry_retries == 0) {
+
+            HDfprintf(stderr, "ERROR: addr = %lld, page = %lld, len = %lld\n", 
+                      (int64_t)init_addr, (int64_t)(init_addr / fs_page_size),
+                      (int64_t)init_size);
+            HDfprintf(stderr, " type = %d\n", type);
+            HDfprintf(stderr, 
+            "reading index[%d]  fo/mdfo/l/chksum/fc/lc = %lld/%lld/%ld/%llx\n",
+                      my_idx,
+                      index[my_idx].hdf5_page_offset,
+                      index[my_idx].md_file_page_offset,
+                      index[my_idx].length,
+                      (uint64_t)(index[my_idx].chksum));
 
             HGOTO_ERROR(H5E_VFL, H5E_CANTLOAD, FAIL, \
                         "error in reading the page/multi-page entry")
+        }
 
     } else { /* Cannot find addr in index, read from the underlying hdf5 file */
 
@@ -1617,6 +1713,42 @@ H5FD_vfd_swmr_dump_status(H5FD_t *_file, int64_t page)
     FUNC_LEAVE_NOAPI_VOID
 
 }  /* H5FD_vfd_swmr_dump_status() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD_vfd_swmr_set_pb_configured
+ *
+ * Purpose:     Set the pb_configured field.  
+ *
+ *              This notifies the VFD that the page buffer is configured,
+ *              and that therefore all reads to the metadata file should
+ *              read complete pages or multi-page metadata entries.
+ *
+ *              This function in necessary because we haven't modified
+ *              the file open code to configure the page buffer prior 
+ *              to any file I/O when opening a file VFD SWMR reader.
+ *              Once this is done, this function should be removed.
+ *
+ * Return:      VOID
+ *
+ * Programmer:  JRM -- 1/29/19
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+H5FD_vfd_swmr_set_pb_configured(H5FD_t *_file)
+{
+    H5FD_vfd_swmr_t *file = (H5FD_vfd_swmr_t *)_file; /* VFD SWMR file struct */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDassert(file);
+
+    file->pb_configured = TRUE;
+
+    FUNC_LEAVE_NOAPI_VOID
+
+}  /* H5FD_vfd_swmr_set_pb_configured() */
 
 
 
