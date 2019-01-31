@@ -47,6 +47,19 @@ New Features
 
     Configuration:
     -------------
+    - Rework CMake versioning for OSX platforms.
+
+      Changed the current_version and compatibility_version flags from optional
+      with HDF5_BUILD_WITH_INSTALL_NAME to always setting the flags for OSX.
+
+      (ADB - 2019/01/22, HDFFV-10685)
+
+    - Rework CMake command files to eliminate developer CMP005 warning
+
+      Use variables without quotes in if () statements.
+
+      (ADB - 2019/01/18, TILABS-105)
+
     - Rework CMake configure files to eliminate developer CMP0075 warning
 
       Renamed varname to HDF5_REQUIRED_LIBRARIES as the contents were not
@@ -197,8 +210,8 @@ New Features
     - Changed the default behavior in parallel when reading the same dataset in its entirely
       (i.e. H5S_ALL dataset selection) which is being read by all the processes collectively.
       The dataset mush be contiguous, less than 2GB, and of an atomic datatype.
-      The new behavior is the HDF5 library will use an MPI_Bcast to pass the data read from 
-      the disk by the root process to the remain processes in the MPI communicator associated 
+      The new behavior is the HDF5 library will use an MPI_Bcast to pass the data read from
+      the disk by the root process to the remain processes in the MPI communicator associated
       with the HDF5 file.
 
       (MSB - 2019/01/02, HDFFV-10652)
@@ -225,10 +238,10 @@ New Features
 
     - Added new Fortran API, H5gmtime, which converts (C) 'time_t' structure
       to Fortran DATE AND TIME storage format.
-      
+
       (MSB, 2019/01/08, HDFFV-10443)
 
-    - Added new Fortran 'fields' optional parameter to: h5ovisit_f, h5oget_info_by_name_f, 
+    - Added new Fortran 'fields' optional parameter to: h5ovisit_f, h5oget_info_by_name_f,
       h5oget_info, h5oget_info_by_idx and h5ovisit_by_name_f.
 
       (MSB, 2019/01/08, HDFFV-10443)
@@ -305,6 +318,27 @@ Bug Fixes since HDF5-1.10.3 release
 
     Library
     -------
+    - Revert H5Oget_info* and H5Ovisit* functions
+
+      In 1.10.3 new H5Oget_info*2 and H5Ovisit*2 functions were
+      added for performance. Inadvertently, the original functions;
+          H5Oget_info,
+          H5Oget_info_by_name,
+          H5Oget_info_by_idx,
+          H5Ovisit,
+          H5Ovisit_by_name
+      were versioned to H5Oget_info*1 and H5Ovisit*1. This
+      broke the API compatibility for a maintenance release. The
+      original functions have been restored.
+
+      (ADB - 2019/01/24, HDFFV-10686)
+
+    - Fixed a potential invalid memory access and failure that could occur when
+      decoding an unknown object header message (from a future version of the
+      library).
+
+      (NAF - 2019/01/07)
+
     - Deleting attributes in dense storage
 
       The library aborts with "infinite loop closing library" after
@@ -312,11 +346,18 @@ Bug Fixes since HDF5-1.10.3 release
 
       When deleting the attribute nodes from the name index v2 B-tree,
       if an attribute is found in the intermediate B-tree nodes,
-      which may be merged/redistributed in the process, we need to 
-      free the dynamically allocated spaces for the intermediate 
+      which may be merged/redistributed in the process, we need to
+      free the dynamically allocated spaces for the intermediate
       decoded attribute.
 
       (VC - 2018/12/26, HDFFV-10659)
+
+    - Fixed an issue where the parallel filters tests would fail
+      if zlib was not available on the system. Until support can
+      be added in the tests for filters beyond gzip/zlib, the tests
+      will be skipped if zlib is not available.
+
+      (JTH - 2018/12/05)
 
     - A bug was discovered in the parallel library where an application
       would eventually consume all of the available MPI communicators
@@ -430,10 +471,10 @@ Bug Fixes since HDF5-1.10.3 release
     Fortran
     --------
     - Added symbolic links libhdf5_hl_fortran.so to libhdf5hl_fortran.so and
-      libhdf5_hl_fortran.a to libhdf5hl_fortran.a in hdf5/lib directory for 
-      autotools installs.  These were added to match the name of the files 
-      installed by cmake and the general pattern of hl lib files.  We will 
-      change the names of the installed lib files to the matching name in 
+      libhdf5_hl_fortran.a to libhdf5hl_fortran.a in hdf5/lib directory for
+      autotools installs.  These were added to match the name of the files
+      installed by cmake and the general pattern of hl lib files.  We will
+      change the names of the installed lib files to the matching name in
       the next major release.
 
       (LRK - 2019/01/04, HDFFV-10596)
@@ -444,7 +485,7 @@ Bug Fixes since HDF5-1.10.3 release
 
       (MSB, 2018/12/04, HDFFV-10511)
 
-    - Fixed issue with Fortran not returning h5o_info_t field values 
+    - Fixed issue with Fortran not returning h5o_info_t field values
       meta_size%attr%index_size and  meta_size%attr%heap_size.
 
       (MSB, 2018/1/8, HDFFV-10443)

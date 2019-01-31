@@ -247,6 +247,11 @@ H5ConversionTests (${HDF_PREFIX}_LDOUBLE_TO_LLONG_ACCURATE "Checking IF correctl
 #
 H5ConversionTests (${HDF_PREFIX}_LLONG_TO_LDOUBLE_CORRECT "Checking IF correctly converting (unsigned) long long to long double values")
 # ----------------------------------------------------------------------
+# Set the flag to indicate that the machine can accurately convert
+# some long double values
+#
+H5ConversionTests (${HDF_PREFIX}_DISABLE_SOME_LDOUBLE_CONV "Checking IF the cpu is power9 and cannot correctly converting long double values")
+# ----------------------------------------------------------------------
 # Check if pointer alignments are enforced
 #
 H5ConversionTests (${HDF_PREFIX}_NO_ALIGNMENT_RESTRICTIONS "Checking IF alignment restrictions are strictly enforced")
