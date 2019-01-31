@@ -171,6 +171,7 @@ set (HDF5_REFERENCE_TEST_FILES
     le_data.h5
     le_extlink1.h5
     le_extlink2.h5
+    memleak_H5O_dtype_decode_helper_H5Odtype.h5
     mergemsg.h5
     multi_file_v16-r.h5
     multi_file_v16-s.h5
