@@ -72,9 +72,9 @@ static void usage(void);
 static hid_t
 open_skeleton(const char *filename, unsigned verbose)
 {
-    hid_t fid;          /* File ID for new HDF5 file */
-    hid_t fapl;         /* File access property list */
-    hid_t aid;          /* Attribute ID */
+    hid_t fid = -1;     /* File ID for new HDF5 file */
+    hid_t fapl = -1;    /* File access property list */
+    hid_t aid = -1;     /* Attribute ID */
     unsigned seed;      /* Seed for random number generator */
     unsigned u, v;      /* Local index variable */
     H5F_vfd_swmr_config_t *config = NULL;   /* Configuration for VFD SWMR */
@@ -83,11 +83,11 @@ open_skeleton(const char *filename, unsigned verbose)
 
     /* Create file access property list */
     if((fapl = h5_fileaccess()) < 0)
-        return -1;
+        goto error;
 
     /* Set to use the latest library format */
     if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
-        return -1;
+        goto error;
 
 #ifdef QAK
     /* Increase the initial size of the metadata cache */
@@ -115,11 +115,11 @@ open_skeleton(const char *filename, unsigned verbose)
 
     /* Enable page buffering */
     if(H5Pset_page_buffer_size(fapl, 4096, 0, 0) < 0)
-        return -1;
+        goto error;
 
      /* Allocate memory for the configuration structure */
      if((config = (H5F_vfd_swmr_config_t *)HDmalloc(sizeof(H5F_vfd_swmr_config_t))) == NULL)
-        return -1;
+        goto error;
 
     config->version = H5F__CURR_VFD_SWMR_CONFIG_VERSION;
     config->tick_len = 4;
@@ -130,30 +130,30 @@ open_skeleton(const char *filename, unsigned verbose)
 
     /* Enable VFD SWMR configuration */
     if(H5Pset_vfd_swmr_config(fapl, config) < 0)
-        return -1;
+        goto error;
 
     /* Open the file */
     if((fid = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
-        return -1;
+        goto error;
 
     /* Close file access property list */
     if(H5Pclose(fapl) < 0)
-        return -1;
+        goto error;
     
     if(config)
         HDfree(config);
 
     /* Emit informational message */
     if(verbose)
-        fprintf(stderr, "Opening datasets\n");
+        fprintf(stderr, "WRITER: Opening datasets\n");
 
     /* Seed the random number generator with the attribute in the file */
     if((aid = H5Aopen(fid, "seed", H5P_DEFAULT)) < 0)
-        return -1;
+        goto error;
     if(H5Aread(aid, H5T_NATIVE_UINT, &seed) < 0)
-        return -1;
+        goto error;
     if(H5Aclose(aid) < 0)
-        return -1;
+        goto error;
     HDsrandom(seed);
 
     /* Open the datasets */
@@ -165,6 +165,22 @@ open_skeleton(const char *filename, unsigned verbose)
         } /* end for */
 
     return fid;
+
+error:
+    if(config)
+        HDfree(config);
+
+    H5E_BEGIN_TRY {
+        for(u = 0; u < NLEVELS; u++)
+            for(v = 0; v < symbol_count[u]; v++)
+                H5Dclose(symbol_info[u][v].dsid);
+        H5Aclose(aid);
+        H5Pclose(fapl);
+        H5Fclose(fid);
+    } H5E_END_TRY;
+
+    return -1;
+
 } /* open_skeleton() */
 
 
@@ -194,8 +210,10 @@ open_skeleton(const char *filename, unsigned verbose)
 static int
 add_records(hid_t fid, unsigned verbose, unsigned long nrecords, unsigned long flush_count)
 {
-    hid_t tid;                          /* Datatype ID for records */
-    hid_t mem_sid;                      /* Memory dataspace ID */
+    hid_t tid = -1;                     /* Datatype ID for records */
+    hid_t mem_sid = -1;                 /* Memory dataspace ID */
+    hid_t file_sid = -1;                /* Dataset's space ID */
+    hid_t aid = -1;                     /* Attribute ID */
     hsize_t start[2] = {0, 0};          /* Hyperslab selection values */
     hsize_t count[2] = {1, 1};          /* Hyperslab selection values */
     symbol_t record;                    /* The record to add to the dataset */
@@ -214,18 +232,16 @@ add_records(hid_t fid, unsigned verbose, unsigned long nrecords, unsigned long f
 
     /* Create a dataspace for the record to add */
     if((mem_sid = H5Screate(H5S_SCALAR)) < 0)
-        return -1;
+        goto error;
 
     /* Create datatype for appending records */
     if((tid = create_symbol_datatype()) < 0)
-        return -1;
+        goto error;
 
     /* Add records to random datasets, according to frequency distribution */
     rec_to_flush = flush_count;
     for(u = 0; u < nrecords; u++) {
         symbol_info_t *symbol;  /* Symbol to write record to */
-        hid_t file_sid;         /* Dataset's space ID */
-        hid_t aid;              /* Attribute ID */
         hbool_t corked;         /* Whether the dataset was corked */
 
         /* Get a random dataset, according to the symbol distribution */
@@ -240,22 +256,22 @@ add_records(hid_t fid, unsigned verbose, unsigned long nrecords, unsigned long f
             /* Cork the metadata cache, to prevent the object header from being
              * flushed before the data has been written */
             if(H5Odisable_mdc_flushes(symbol->dsid) < 0)
-                return -1;
+                goto error;
             corked = TRUE;
 
             if(H5Dset_extent(symbol->dsid, dim) < 0)
-                return -1;
+                goto error;
 
             if((file_sid = H5Screate(H5S_SCALAR)) < 0)
-                return -1;
+                goto error;
             if((aid = H5Acreate2(symbol->dsid, "seq", H5T_NATIVE_ULONG, file_sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-                return -1;
+                goto error;
             if(H5Sclose(file_sid) < 0)
-                return -1;
+                goto error;
         } /* end if */
         else {
             if((aid = H5Aopen(symbol->dsid, "seq", H5P_DEFAULT)) < 0)
-                return -1;
+                goto error;
             corked = FALSE;
         } /* end else */
 
@@ -267,15 +283,15 @@ add_records(hid_t fid, unsigned verbose, unsigned long nrecords, unsigned long f
 
         /* Get the dataset's dataspace */
         if((file_sid = H5Dget_space(symbol->dsid)) < 0)
-            return -1;
+            goto error;
 
         /* Choose a random record in the dataset */
         if(H5Sselect_hyperslab(file_sid, H5S_SELECT_SET, start, NULL, count, NULL) < 0)
-            return -1;
+            goto error;
 
         /* Write record to the dataset */
         if(H5Dwrite(symbol->dsid, tid, mem_sid, file_sid, H5P_DEFAULT, &record) < 0)
-            return -1;
+            goto error;
 
         /* Write the sequence number attribute.  Since we synchronize the random
          * number seed, the readers will always generate the same sequence of
@@ -284,20 +300,20 @@ add_records(hid_t fid, unsigned verbose, unsigned long nrecords, unsigned long f
          * guaranteed to see the written data if the sequence attribute is >=u.
          */
         if(H5Awrite(aid, H5T_NATIVE_ULONG, &u) < 0)
-            return -1;
+            goto error;
 
         /* Close the attribute */
         if(H5Aclose(aid) < 0)
-            return -1;
+            goto error;
 
         /* Uncork the metadata cache, if it's been */
         if(corked)
             if(H5Oenable_mdc_flushes(symbol->dsid) < 0)
-                return -1;
+                goto error;
 
         /* Close the dataset's dataspace */
         if(H5Sclose(file_sid) < 0)
-            return -1;
+            goto error;
 
         /* Check for flushing file */
         if(flush_count > 0) {
@@ -333,23 +349,38 @@ add_records(hid_t fid, unsigned verbose, unsigned long nrecords, unsigned long f
 
     /* Close the memory dataspace */
     if(H5Sclose(mem_sid) < 0)
-        return -1;
+        goto error;
 
     /* Close the datatype */
     if(H5Tclose(tid) < 0)
-        return -1;
+        goto error;
 
     /* Emit informational message */
     if(verbose)
-        fprintf(stderr, "Closing datasets\n");
+        fprintf(stderr, "WRITER: Closing datasets\n");
 
     /* Close the datasets */
     for(u = 0; u < NLEVELS; u++)
         for(v = 0; v < symbol_count[u]; v++)
             if(H5Dclose(symbol_info[u][v].dsid) < 0)
-                return -1;
+                goto error;
 
     return 0;
+
+error:
+     H5E_BEGIN_TRY {
+        H5Sclose(mem_sid);
+        H5Sclose(file_sid);
+        H5Tclose(tid);
+        H5Aclose(aid);
+
+        for(u = 0; u < NLEVELS; u++)
+            for(v = 0; v < symbol_count[u]; v++)
+                H5Dclose(symbol_info[u][v].dsid);
+
+    } H5E_END_TRY;
+
+    return -1;
 } /* add_records() */
 
 static void
@@ -422,14 +453,14 @@ int main(int argc, const char *argv[])
 
     /* Emit informational message */
     if(verbose) {
-        HDfprintf(stderr, "Parameters:\n");
+        HDfprintf(stderr, "WRITER: Parameters:\n");
         HDfprintf(stderr, "\t# of records between flushes = %ld\n", flush_count);
         HDfprintf(stderr, "\t# of records to write = %ld\n", nrecords);
     } /* end if */
 
     /* Emit informational message */
     if(verbose)
-        HDfprintf(stderr, "Generating symbol names\n");
+        HDfprintf(stderr, "WRITER: Generating symbol names\n");
 
     /* Generate dataset names */
     if(generate_symbols() < 0)
@@ -437,11 +468,11 @@ int main(int argc, const char *argv[])
 
     /* Emit informational message */
     if(verbose)
-        HDfprintf(stderr, "Opening skeleton file: %s\n", FILENAME);
+        HDfprintf(stderr, "WRITER: Opening skeleton file: %s\n", FILENAME);
 
     /* Open file skeleton */
     if((fid = open_skeleton(FILENAME, verbose)) < 0) {
-        HDfprintf(stderr, "Error opening skeleton file!\n");
+        HDfprintf(stderr, "WRITER: Error opening skeleton file!\n");
         HDexit(1);
     } /* end if */
 
@@ -450,31 +481,31 @@ int main(int argc, const char *argv[])
 
     /* Emit informational message */
     if(verbose)
-        HDfprintf(stderr, "Adding records\n");
+        HDfprintf(stderr, "WRITER: Adding records\n");
 
     /* Append records to datasets */
     if(add_records(fid, verbose, (unsigned long)nrecords, (unsigned long)flush_count) < 0) {
-        HDfprintf(stderr, "Error appending records to datasets!\n");
+        HDfprintf(stderr, "WRITER: Error appending records to datasets!\n");
         HDexit(1);
     } /* end if */
 
     /* Emit informational message */
     if(verbose)
-        HDfprintf(stderr, "Releasing symbols\n");
+        HDfprintf(stderr, "WRITER: Releasing symbols\n");
 
     /* Clean up the symbols */
     if(shutdown_symbols() < 0) {
-        HDfprintf(stderr, "Error releasing symbols!\n");
+        HDfprintf(stderr, "WRITER: Error releasing symbols!\n");
         HDexit(1);
     } /* end if */
 
     /* Emit informational message */
     if(verbose)
-        HDfprintf(stderr, "Closing objects\n");
+        HDfprintf(stderr, "WRITER: Closing objects/file\n");
 
     /* Close objects opened */
     if(H5Fclose(fid) < 0) {
-        HDfprintf(stderr, "Error closing file!\n");
+        HDfprintf(stderr, "WRITER: Error closing file!\n");
         HDexit(1);
     } /* end if */
 
