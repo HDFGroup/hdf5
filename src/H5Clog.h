@@ -59,7 +59,7 @@ typedef struct H5C_log_class_t {
     herr_t (*write_resize_entry_log_msg)(void *udata, const H5C_cache_entry_t *entry, size_t new_size, herr_t fxn_ret_value);
     herr_t (*write_unpin_entry_log_msg)(void *udata, const H5C_cache_entry_t *entry, herr_t fxn_ret_value);
     herr_t (*write_destroy_fd_log_msg)(void *udata, const H5C_cache_entry_t *parent, const H5C_cache_entry_t *child, herr_t fxn_ret_value);
-    herr_t (*write_unprotect_entry_log_msg)(void *udata, const H5C_cache_entry_t *entry, int type_id, unsigned flags, herr_t fxn_ret_value);
+    herr_t (*write_unprotect_entry_log_msg)(void *udata, haddr_t address, int type_id, unsigned flags, herr_t fxn_ret_value);
     herr_t (*write_set_cache_config_log_msg)(void *udata, const H5AC_cache_config_t *config, herr_t fxn_ret_value);
     herr_t (*write_remove_entry_log_msg)(void *udata, const H5C_cache_entry_t *entry, herr_t fxn_ret_value);
 
@@ -102,7 +102,7 @@ H5_DLL herr_t H5C_log_write_protect_entry_msg(H5C_t *cache, const H5C_cache_entr
 H5_DLL herr_t H5C_log_write_resize_entry_msg(H5C_t *cache, const H5C_cache_entry_t *entry, size_t new_size, herr_t fxn_ret_value);
 H5_DLL herr_t H5C_log_write_unpin_entry_msg(H5C_t *cache, const H5C_cache_entry_t *entry, herr_t fxn_ret_value);
 H5_DLL herr_t H5C_log_write_destroy_fd_msg(H5C_t *cache, const H5C_cache_entry_t *parent, const H5C_cache_entry_t *child, herr_t fxn_ret_value);
-H5_DLL herr_t H5C_log_write_unprotect_entry_msg(H5C_t *cache, const H5C_cache_entry_t *entry, int type_id, unsigned flags, herr_t fxn_ret_value);
+H5_DLL herr_t H5C_log_write_unprotect_entry_msg(H5C_t *cache, haddr_t address, int type_id, unsigned flags, herr_t fxn_ret_value);
 H5_DLL herr_t H5C_log_write_set_cache_config_msg(H5C_t *cache, const H5AC_cache_config_t *config, herr_t fxn_ret_value);
 H5_DLL herr_t H5C_log_write_remove_entry_msg(H5C_t *cache, const H5C_cache_entry_t *entry, herr_t fxn_ret_value);
 
