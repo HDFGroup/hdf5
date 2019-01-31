@@ -643,6 +643,15 @@ Bug Fixes since HDF5-1.10.2 release
 
     Testing
     -------
+    - The dt_arith test failed on IBM Power8 and Power9 machines when testing
+      conversions from or to long double types, especially when special values
+      such as infinity or NAN were involved.  In some cases the results differed
+      by extremely small amounts from those on other machines, while some other
+      tests resulted in segmentation faults.  These conversion tests with long 
+      double types have been disabled for ppc64 machines until the problems are 
+      better understood and can be properly addressed.
+    
+      (SRL - 2019/01/07, TRILAB-98)
 
 Supported Platforms
 ===================
