@@ -55,7 +55,7 @@ typedef struct {
 } iter_info;
 
 /* Definition for test_corrupted_attnamelen */
-#define CORRUPTED_ATNAMELEN_FILE   "memleak_H5O_dtype_decode_helper_H5Odtype.h5"
+#define CORRUPTED_ATNAMELEN_FILE   "corrupted_name_len.h5"
 #define DSET_NAME   "image"
 typedef struct searched_err_t {
     char message[256];

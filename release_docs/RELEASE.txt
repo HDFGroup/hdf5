@@ -415,8 +415,8 @@ Bug Fixes since HDF5-1.10.3 release
 
     - The issue CVE-2018-17437 was reported to The HDF Group
 
-      Although CVE-2018-17437 reported memory leak, the actual issues
-      were invalid read.  It was found that the attribute name length
+      Although CVE-2018-17437 reported a memory leak, the actual issue
+      was invalid read. It was found that the attribute name length
       in an attribute message was corrupted, which caused the buffer
       pointer to be advanced too far and later caused an invalid read.
 
