@@ -1031,12 +1031,9 @@ H5D__typeinfo_init(const H5D_t *dset, hid_t mem_type_id, hbool_t do_write,
         if(type_info->request_nelmts == 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "temporary buffer max size is too small")
 
-        /*
-         * Get a temporary buffer for type conversion unless the app has already
+        /* Get a temporary buffer for type conversion unless the app has already
          * supplied one through the xfer properties. Instead of allocating a
-         * buffer which is the exact size, we allocate the target size.  The
-         * malloc() is usually less resource-intensive if we allocate/free the
-         * same size over and over.
+         * buffer which is the exact size, we allocate the target size.
          */
         if(NULL == (type_info->tconv_buf = (uint8_t *)tconv_buf)) {
             /* Allocate temporary buffer */
