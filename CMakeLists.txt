@@ -486,7 +486,7 @@ endif ()
 #-----------------------------------------------------------------------------
 option (HDF5_ENABLE_PREADWRITE "Use pread/pwrite in sec2/log/core VFDs in place of read/write (when available)" ON)
 mark_as_advanced (HDF5_ENABLE_PREADWRITE)
-if (HDF5_ENABLE_PREADWRITE AND ${HDF_PREFIX}_HAVE_PREAD AND ${HDF_PREFIX}_HAVE_PWRITE)
+if (HDF5_ENABLE_PREADWRITE AND H5_HAVE_PREAD AND H5_HAVE_PWRITE)
   set (H5_HAVE_PREADWRITE 1)
 endif ()
 
