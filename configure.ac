@@ -1130,11 +1130,12 @@ case "$host_cpu-$host_vendor-$host_os" in
     ## functionality so clock_gettime and CLOCK_MONOTONIC are defined
     ## correctly. This was later updated to 200112L so that
     ## posix_memalign() is visible for the direct VFD code on Linux
-    ## systems.
+    ## systems. Even later, this was changed to 200809L to support
+    ## pread/pwrite in VFDs.
     ##
     ## POSIX feature information can be found in the gcc manual at:
     ## http://www.gnu.org/s/libc/manual/html_node/Feature-Test-Macros.html
-    H5_CPPFLAGS="-D_POSIX_C_SOURCE=200112L $H5_CPPFLAGS"
+    H5_CPPFLAGS="-D_POSIX_C_SOURCE=200809L $H5_CPPFLAGS"
 
     ## Need to add this so that O_DIRECT is visible for the direct
     ## VFD on Linux systems.
@@ -3261,6 +3262,47 @@ case "X-$STRICT_FORMAT_CHECKS" in
     ;;
   *)
     AC_MSG_ERROR([Unrecognized value: $STRICT_FORMAT_CHECKS])
+    ;;
+esac
+
+
+## ----------------------------------------------------------------------
+## Enable use of pread/pwrite instead of read/write in certain VFDs.
+##
+AC_SUBST([PREADWRITE])
+
+## Check these first to avoid interspersed output in the AC_ARG_ENABLE line
+## below. (Probably overkill to check for both, but we'll be extra careful)
+PREADWRITE_HAVE_BOTH=yes
+AC_CHECK_FUNC([pread], [], [PREADWRITE_HAVE_BOTH=no])
+AC_CHECK_FUNC([pwrite], [], [PREADWRITE_HAVE_BOTH=no])
+
+AC_MSG_CHECKING([whether to use pread/pwrite instead of read/write in certain VFDs])
+AC_ARG_ENABLE([preadwrite],
+              [AS_HELP_STRING([--enable-preadwrite],
+                              [Enable using pread/pwrite instead of read/write in sec2/log/core VFDs.
+                              [default=yes if pread/pwrite are present]])],
+              [PREADWRITE=$enableval])
+
+## Set the default level.
+if test "X-$PREADWRITE" = X- ; then
+  PREADWRITE=yes
+fi
+
+case "X-$PREADWRITE" in
+  X-yes)
+      if test "X-$PREADWRITE_HAVE_BOTH" = "X-yes"; then
+        AC_DEFINE([HAVE_PREADWRITE], [1], [Define if both pread and pwrite exist.])
+        AC_MSG_RESULT([yes])
+      else
+        AC_MSG_RESULT([no])
+      fi
+    ;;
+  X-no)
+      AC_MSG_RESULT([no])
+    ;;
+  *)
+      AC_MSG_ERROR([Unrecognized value: $PREADWRITE])
     ;;
 esac
 
