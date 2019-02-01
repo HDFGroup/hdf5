@@ -41,7 +41,7 @@
 /****************/
 
 /* Max log message size */
-#define H5C_MAX_JSON_LOG_MSG_SIZE 128
+#define H5C_MAX_JSON_LOG_MSG_SIZE 1024
 
 
 /******************/
@@ -87,7 +87,7 @@ static herr_t H5C__json_write_protect_entry_log_msg(void *udata, const H5C_cache
 static herr_t H5C__json_write_resize_entry_log_msg(void *udata, const H5C_cache_entry_t *entry, size_t new_size, herr_t fxn_ret_value);
 static herr_t H5C__json_write_unpin_entry_log_msg(void *udata, const H5C_cache_entry_t *entry, herr_t fxn_ret_value);
 static herr_t H5C__json_write_destroy_fd_log_msg(void *udata, const H5C_cache_entry_t *parent, const H5C_cache_entry_t *child, herr_t fxn_ret_value);
-static herr_t H5C__json_write_unprotect_entry_log_msg(void *udata, const H5C_cache_entry_t *entry, int type_id, unsigned flags, herr_t fxn_ret_value);
+static herr_t H5C__json_write_unprotect_entry_log_msg(void *udata, haddr_t address, int type_id, unsigned flags, herr_t fxn_ret_value);
 static herr_t H5C__json_write_set_cache_config_log_msg(void *udata, const H5AC_cache_config_t *config, herr_t fxn_ret_value);
 static herr_t H5C__json_write_remove_entry_log_msg(void *udata, const H5C_cache_entry_t *entry, herr_t fxn_ret_value);
 
@@ -1232,7 +1232,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5C__json_write_unprotect_entry_log_msg(void *udata, const H5C_cache_entry_t *entry,
+H5C__json_write_unprotect_entry_log_msg(void *udata, haddr_t address,
     int type_id, unsigned flags, herr_t fxn_ret_value)
 {
     H5C_log_json_udata_t *json_udata = (H5C_log_json_udata_t *)(udata);
@@ -1243,7 +1243,6 @@ H5C__json_write_unprotect_entry_log_msg(void *udata, const H5C_cache_entry_t *en
     /* Sanity checks */
     HDassert(json_udata);
     HDassert(json_udata->message);
-    HDassert(entry);
 
     /* Create the log message string */
     HDsnprintf(json_udata->message, H5C_MAX_JSON_LOG_MSG_SIZE, 
@@ -1257,7 +1256,7 @@ H5C__json_write_unprotect_entry_log_msg(void *udata, const H5C_cache_entry_t *en
 \"returned\":%d\
 },\n\
 "
-    , (long long)HDtime(NULL), (unsigned long)entry->addr, 
+    , (long long)HDtime(NULL), (unsigned long)address, 
       type_id, flags, (int)fxn_ret_value);
 
     /* Write the log message to the file */

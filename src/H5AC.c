@@ -1612,7 +1612,7 @@ H5AC_unprotect(H5F_t *f, const H5AC_class_t *type, haddr_t addr, void *thing,
 done:
     /* If currently logging, generate a message */
     if(f->shared->cache->log_info->logging)
-        if(H5C_log_write_unprotect_entry_msg(f->shared->cache, (H5AC_info_t *)thing, type->id, flags, ret_value) < 0)
+        if(H5C_log_write_unprotect_entry_msg(f->shared->cache, addr, type->id, flags, ret_value) < 0)
             HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
 
     FUNC_LEAVE_NOAPI(ret_value)

@@ -887,7 +887,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C_log_write_unprotect_entry_msg(H5C_t *cache, const H5C_cache_entry_t *entry,
+H5C_log_write_unprotect_entry_msg(H5C_t *cache, haddr_t address,
     int type_id, unsigned flags, herr_t fxn_ret_value)
 {
     herr_t ret_value = SUCCEED;
@@ -898,9 +898,8 @@ H5C_log_write_unprotect_entry_msg(H5C_t *cache, const H5C_cache_entry_t *entry,
     HDassert(cache);
 
     /* Write a log message */
-    HDassert(entry);
     if(cache->log_info->cls->write_unprotect_entry_log_msg)
-        if(cache->log_info->cls->write_unprotect_entry_log_msg(cache->log_info->udata, entry, type_id, flags, fxn_ret_value) < 0)
+        if(cache->log_info->cls->write_unprotect_entry_log_msg(cache->log_info->udata, address, type_id, flags, fxn_ret_value) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "log-specific unprotect entry call failed")
 
 done:
