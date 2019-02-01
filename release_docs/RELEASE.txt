@@ -396,14 +396,42 @@ Bug Fixes since HDF5-1.10.3 release
 
       (JTH - 2018/08/25, HDFFV-10501)
 
-    - There was an incorrect protection against division by zero reported
-      to The HDF Group as issue #CVE-2018-17233.
+    - There was missing protection against division by zero reported to
+      The HDF Group as issue #CVE-2018-17233.
 
       Protection against division by zero was added to address the issue
       #CVE-2018-17233.  In addition, several similar occurrences in the same
       file were fixed as well.
 
-      (BMR - 2018/02/26, HDFFV-10577)
+      (BMR - 2018/12/23, HDFFV-10577)
+
+    - There was missing protection against division by zero reported to
+      The HDF Group as issue #CVE-2018-17434.
+
+      Protection against division by zero was added to address the issue
+      #CVE-2018-17434.
+
+      (BMR - 2019/01/29, HDFFV-10586)
+
+    - The issue CVE-2018-17437 was reported to The HDF Group
+
+      Although CVE-2018-17437 reported a memory leak, the actual issue
+      was invalid read. It was found that the attribute name length
+      in an attribute message was corrupted, which caused the buffer
+      pointer to be advanced too far and later caused an invalid read.
+
+      A check was added to detect when the attribute name or its length
+      was corrupted and report the potential of data corruption.
+
+      (BMR - 2019/01/29, HDFFV-10588)
+
+    - H5Ewalk did not stop when it was supposed to
+
+      H5Ewalk was supposed to stop when the callback function stopped
+      even though the errors in the stack were not all visited, but it
+      did not.  This problem is now fixed.
+
+      (BMR - 2019/01/29, HDFFV-10684)
 
 
     Java Library:

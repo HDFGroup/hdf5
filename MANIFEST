@@ -1035,6 +1035,7 @@
 ./test/le_extlink2.h5
 ./test/lheap.c
 ./test/links.c
+./test/corrupted_name_len.h5
 ./test/mergemsg.h5
 ./test/mf.c
 ./test/mount.c
