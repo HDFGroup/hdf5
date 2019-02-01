@@ -233,7 +233,7 @@ tar2cmakezip()
     # step 3: add SZIP.tar.gz, ZLib.tar.gz and cmake files
     cp /mnt/scr1/pre-release/hdf5/CMake/SZip.tar.gz $cmziptmpsubdir
     cp /mnt/scr1/pre-release/hdf5/CMake/ZLib.tar.gz $cmziptmpsubdir
-    cp /mnt/scr1/pre-release/hdf5/CMake/HDF5Examples-1.10.10-Source.tar.gz $cmziptmpsubdir
+    cp /mnt/scr1/pre-release/hdf5/CMake/HDF5Examples-1.12.4-Source.tar.gz $cmziptmpsubdir
     cp $cmziptmpsubdir/$version/config/cmake/scripts/CTestScript.cmake $cmziptmpsubdir
     cp $cmziptmpsubdir/$version/config/cmake/scripts/HDF5config.cmake $cmziptmpsubdir
     cp $cmziptmpsubdir/$version/config/cmake/scripts/HDF5options.cmake $cmziptmpsubdir
@@ -328,7 +328,7 @@ tar2cmaketgz()
     # step 3: add SZIP.tar.gz, ZLib.tar.gz and cmake files
     cp /mnt/scr1/pre-release/hdf5/CMake/SZip.tar.gz $cmgztmpsubdir
     cp /mnt/scr1/pre-release/hdf5/CMake/ZLib.tar.gz $cmgztmpsubdir
-    cp /mnt/scr1/pre-release/hdf5/CMake/HDF5Examples-1.10.10-Source.tar.gz $cmgztmpsubdir
+    cp /mnt/scr1/pre-release/hdf5/CMake/HDF5Examples-1.12.4-Source.tar.gz $cmgztmpsubdir
     cp $cmgztmpsubdir/$version/config/cmake/scripts/CTestScript.cmake $cmgztmpsubdir
     cp $cmgztmpsubdir/$version/config/cmake/scripts/HDF5config.cmake $cmgztmpsubdir
     cp $cmgztmpsubdir/$version/config/cmake/scripts/HDF5options.cmake $cmgztmpsubdir
@@ -384,11 +384,11 @@ tar2cmaketgz()
 tar2hpccmaketgz()
 {
     if [ $# -ne 3 ]; then
-	echo "usage: tar2cmaketgz <tarfilename> <tgzfilename>"
+	echo "usage: tar2hpccmaketgz <tarfilename> <tgzfilename>"
 	return 1
     fi
     cmgztmpdir=/tmp/cmgztmpdir$$
-    cmgztmpsubdir=$cmgztmpdir/CMake-$HDF5_VERS
+    cmgztmpsubdir=$cmgztmpdir/HPC-CMake-$HDF5_VERS
     mkdir -p $cmgztmpsubdir
     version=$1
     tarfile=$2
@@ -411,16 +411,15 @@ tar2hpccmaketgz()
     # step 3: add SZIP.tar.gz, ZLib.tar.gz and cmake files
     cp /mnt/scr1/pre-release/hdf5/CMake/SZip.tar.gz $cmgztmpsubdir
     cp /mnt/scr1/pre-release/hdf5/CMake/ZLib.tar.gz $cmgztmpsubdir
-    cp /mnt/scr1/pre-release/hdf5/CMake/HDF5Examples-1.10.10-Source.tar.gz $cmgztmpsubdir
+    cp /mnt/scr1/pre-release/hdf5/CMake/HDF5Examples-1.12.4-Source.tar.gz $cmgztmpsubdir
     cp $cmgztmpsubdir/$version/config/cmake/scripts/CTestScript.cmake $cmgztmpsubdir
     cp $cmgztmpsubdir/$version/config/cmake/scripts/HDF5config.cmake $cmgztmpsubdir
-    cp $cmgztmpsubdir/$version/config/cmake/scripts/HDF5options.cmake $cmgztmpsubdir
 
     cp $cmgztmpsubdir/$version/release_docs/README_HPC $cmgztmpsubdir
     cp $cmgztmpsubdir/$version/config/cmake/scripts/HPC/ser-HDF5options.cmake $cmgztmpsubdir
     cp $cmgztmpsubdir/$version/config/cmake/scripts/HPC/par-HDF5options.cmake $cmgztmpsubdir
     (cd $cmgztmpsubdir; ln -s par-HDF5options.cmake HDF5options.cmake)
-    tar czf $DEST/CMake-$HDF5_VERS.tar.gz -C $cmgztmpdir . || exit 1 
+    tar czf $DEST/HPC-CMake-$HDF5_VERS.tar.gz -C $cmgztmpdir . || exit 1 
                  
     # cleanup
     rm -rf $cmgztmpdir
@@ -609,6 +608,11 @@ for comp in $methods; do
 	    test "$verbose" && echo "   Creating CMake tar.gz file..." 1>&2
 	    tar2cmaketgz $HDF5_VERS $tmpdir/$HDF5_VERS.tar $DEST/CMake-$HDF5_VERS.tar.gz 1>&2
 	    (cd $DEST; md5sum CMake-$HDF5_VERS.tar.gz >> $MD5file) 
+            ;;
+        hpc-cmake-tgz)
+	    test "$verbose" && echo "   Creating HPC-CMake tar.gz file..." 1>&2
+	    tar2hpccmaketgz $HDF5_VERS $tmpdir/$HDF5_VERS.tar $DEST/HPC-CMake-$HDF5_VERS.tar.gz 1>&2
+	    (cd $DEST; md5sum HPC-CMake-$HDF5_VERS.tar.gz >> $MD5file) 
             ;;
 	bzip2)
 	    test "$verbose" && echo "   Running bzip2..." 1>&2
