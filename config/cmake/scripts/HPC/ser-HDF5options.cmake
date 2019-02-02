@@ -100,6 +100,11 @@ set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ALLOW_EXTERNAL_SUPPORT:STRIN
 ### Create install package with external libraries (szip, zlib)
 set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_PACKAGE_EXTLIBS:BOOL=ON")
 
+#options to run test scripts in batch commands
+set (LOCAL_BATCH_SCRIPT_COMMAND "sbatch")
+set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DLOCAL_BATCH_TEST:BOOL=ON")
+set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DLOCAL_BATCH_SCRIPT_NAME:STRING=ctestS.sl")
+
 #############################################################################################
 ### use a toolchain file
 
@@ -107,11 +112,10 @@ set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_PACKAGE_EXTLIBS:BOOL=ON")
 #set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DCMAKE_TOOLCHAIN_FILE:STRING=config/toolchain/crayle.cmake")
 #set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DCMAKE_TOOLCHAIN_FILE:STRING=config/toolchain/GCC.cmake")
 
-#options to run test scripts in batch commands
-set (LOCAL_BATCH_TEST ON)
-set (LOCAL_BATCH_SCRIPT_COMMAND "sbatch")
-set (LOCAL_BATCH_SCRIPT_NAME "knl_ctestS.sl")
-set (LOCAL_BATCH_SCRIPT_PARALLEL_NAME "knl_ctestP.sl")
-set(MPIEXEC_EXECUTABLE "srun")
+#some additions and alternatives to cross compile on haswell for knl
+#set (COMPILENODE_HWCOMPILE_MODULE "craype-haswell")
+#set (COMPUTENODE_HWCOMPILE_MODULE "craype-mic-knl")
+#set (SITE_BUILDNAME_SUFFIX "knl-intel17-SHARED"
+#set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DLOCAL_BATCH_SCRIPT_NAME:STRING=knl_ctestS.sl")
 
 #############################################################################################
