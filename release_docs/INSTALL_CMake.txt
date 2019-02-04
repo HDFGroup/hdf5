@@ -635,6 +635,7 @@ HDF5_ENABLE_DIRECT_VFD         "Build the Direct I/O Virtual File Driver"       
 HDF5_ENABLE_EMBEDDED_LIBINFO   "embed library info into executables"                          ON
 HDF5_ENABLE_HSIZET             "Enable datasets larger than memory"                           ON
 HDF5_ENABLE_PARALLEL           "Enable parallel build (requires MPI)"                         OFF
+HDF5_ENABLE_PREADWRITE         "Use pread/pwrite in sec2/log/core VFDs in place of read/write (when available)" ON
 HDF5_ENABLE_TRACE              "Enable API tracing capability"                                OFF
 HDF5_ENABLE_USING_MEMCHECKER   "Indicate that a memory checker is used"                       OFF
 HDF5_GENERATE_HEADERS          "Rebuild Generated Files"                                      ON
