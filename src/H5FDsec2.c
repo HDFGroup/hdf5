@@ -682,11 +682,13 @@ H5FD_sec2_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUS
     if(REGION_OVERFLOW(addr, size))
         HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow, addr = %llu", (unsigned long long)addr)
 
-    /* Seek to the correct location */
+#ifndef H5_HAVE_PREADWRITE
+    /* Seek to the correct location (if we don't have pread) */
     if(addr != file->pos || OP_READ != file->op) {
         if(HDlseek(file->fd, (HDoff_t)addr, SEEK_SET) < 0)
             HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to seek to proper position")
     } /* end if */
+#endif /* H5_HAVE_PREADWRITE */
 
     /* Read data, being careful of interrupted system calls, partial results,
      * and the end of the file.
@@ -694,7 +696,8 @@ H5FD_sec2_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUS
     while(size > 0) {
 
         h5_posix_io_t       bytes_in        = 0;    /* # of bytes to read       */
-        h5_posix_io_ret_t   bytes_read      = -1;   /* # of bytes actually read */ 
+        h5_posix_io_ret_t   bytes_read      = -1;   /* # of bytes actually read */
+        HDoff_t             offset          = (HDoff_t)addr;
 
         /* Trying to read more bytes than the return type can handle is
          * undefined behavior in POSIX.
@@ -705,15 +708,21 @@ H5FD_sec2_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUS
             bytes_in = (h5_posix_io_t)size;
 
         do {
+#ifdef H5_HAVE_PREADWRITE
+            bytes_read = HDpread(file->fd, buf, bytes_in, offset);
+            offset += bytes_read;
+#else
             bytes_read = HDread(file->fd, buf, bytes_in);
+#endif /* H5_HAVE_PREADWRITE */
         } while(-1 == bytes_read && EINTR == errno);
         
         if(-1 == bytes_read) { /* error */
             int myerrno = errno;
             time_t mytime = HDtime(NULL);
-            HDoff_t myoffset = HDlseek(file->fd, (HDoff_t)0, SEEK_CUR);
 
-            HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file read failed: time = %s, filename = '%s', file descriptor = %d, errno = %d, error message = '%s', buf = %p, total read size = %llu, bytes this sub-read = %llu, bytes actually read = %llu, offset = %llu", HDctime(&mytime), file->filename, file->fd, myerrno, HDstrerror(myerrno), buf, (unsigned long long)size, (unsigned long long)bytes_in, (unsigned long long)bytes_read, (unsigned long long)myoffset);
+            offset = HDlseek(file->fd, (HDoff_t)0, SEEK_CUR);
+
+            HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file read failed: time = %s, filename = '%s', file descriptor = %d, errno = %d, error message = '%s', buf = %p, total read size = %llu, bytes this sub-read = %llu, bytes actually read = %llu, offset = %llu", HDctime(&mytime), file->filename, file->fd, myerrno, HDstrerror(myerrno), buf, (unsigned long long)size, (unsigned long long)bytes_in, (unsigned long long)bytes_read, (unsigned long long)offset);
         } /* end if */
         
         if(0 == bytes_read) {
@@ -777,11 +786,13 @@ H5FD_sec2_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
     if(REGION_OVERFLOW(addr, size))
         HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow, addr = %llu, size = %llu", (unsigned long long)addr, (unsigned long long)size)
 
-    /* Seek to the correct location */
+#ifndef H5_HAVE_PREADWRITE
+    /* Seek to the correct location (if we don't have pwrite) */
     if(addr != file->pos || OP_WRITE != file->op) {
         if(HDlseek(file->fd, (HDoff_t)addr, SEEK_SET) < 0)
             HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to seek to proper position")
     } /* end if */
+#endif /* H5_HAVE_PREADWRITE */
 
     /* Write the data, being careful of interrupted system calls and partial
      * results
@@ -790,6 +801,7 @@ H5FD_sec2_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
 
         h5_posix_io_t       bytes_in        = 0;    /* # of bytes to write  */
         h5_posix_io_ret_t   bytes_wrote     = -1;   /* # of bytes written   */ 
+        HDoff_t             offset          = (HDoff_t)addr;
 
         /* Trying to write more bytes than the return type can handle is
          * undefined behavior in POSIX.
@@ -800,15 +812,21 @@ H5FD_sec2_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
             bytes_in = (h5_posix_io_t)size;
 
         do {
+#ifdef H5_HAVE_PREADWRITE
+            bytes_wrote = HDpwrite(file->fd, buf, bytes_in, offset);
+            offset += bytes_wrote;
+#else
             bytes_wrote = HDwrite(file->fd, buf, bytes_in);
+#endif /* H5_HAVE_PREADWRITE */
         } while(-1 == bytes_wrote && EINTR == errno);
         
         if(-1 == bytes_wrote) { /* error */
             int myerrno = errno;
             time_t mytime = HDtime(NULL);
-            HDoff_t myoffset = HDlseek(file->fd, (HDoff_t)0, SEEK_CUR);
 
-            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "file write failed: time = %s, filename = '%s', file descriptor = %d, errno = %d, error message = '%s', buf = %p, total write size = %llu, bytes this sub-write = %llu, bytes actually written = %llu, offset = %llu", HDctime(&mytime), file->filename, file->fd, myerrno, HDstrerror(myerrno), buf, (unsigned long long)size, (unsigned long long)bytes_in, (unsigned long long)bytes_wrote, (unsigned long long)myoffset);
+            offset = HDlseek(file->fd, (HDoff_t)0, SEEK_CUR);
+
+            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "file write failed: time = %s, filename = '%s', file descriptor = %d, errno = %d, error message = '%s', buf = %p, total write size = %llu, bytes this sub-write = %llu, bytes actually written = %llu, offset = %llu", HDctime(&mytime), file->filename, file->fd, myerrno, HDstrerror(myerrno), buf, (unsigned long long)size, (unsigned long long)bytes_in, (unsigned long long)bytes_wrote, (unsigned long long)offset);
         } /* end if */
         
         HDassert(bytes_wrote > 0);

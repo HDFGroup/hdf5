@@ -274,10 +274,12 @@ if (NOT WINDOWS)
   # functionality so clock_gettime and CLOCK_MONOTONIC are defined
   # correctly. This was later updated to 200112L so that
   # posix_memalign() is visible for the direct VFD code on Linux
-  # systems.
+  # systems. Even later, this was changed to 200809L to support
+  # pread/pwrite in VFDs.
+  #
   # POSIX feature information can be found in the gcc manual at:
   # http://www.gnu.org/s/libc/manual/html_node/Feature-Test-Macros.html
-  set (HDF_EXTRA_C_FLAGS -D_POSIX_C_SOURCE=200112L)
+  set (HDF_EXTRA_C_FLAGS -D_POSIX_C_SOURCE=200809L)
 
   # Need to add this so that O_DIRECT is visible for the direct
   # VFD on Linux systems.
@@ -506,6 +508,8 @@ CHECK_FUNCTION_EXISTS (lround            ${HDF_PREFIX}_HAVE_LROUND)
 CHECK_FUNCTION_EXISTS (lroundf           ${HDF_PREFIX}_HAVE_LROUNDF)
 CHECK_FUNCTION_EXISTS (lstat             ${HDF_PREFIX}_HAVE_LSTAT)
 
+CHECK_FUNCTION_EXISTS (pread             ${HDF_PREFIX}_HAVE_PREAD)
+CHECK_FUNCTION_EXISTS (pwrite            ${HDF_PREFIX}_HAVE_PWRITE)
 CHECK_FUNCTION_EXISTS (rand_r            ${HDF_PREFIX}_HAVE_RAND_R)
 CHECK_FUNCTION_EXISTS (random            ${HDF_PREFIX}_HAVE_RANDOM)
 CHECK_FUNCTION_EXISTS (round             ${HDF_PREFIX}_HAVE_ROUND)

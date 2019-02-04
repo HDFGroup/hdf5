@@ -1148,6 +1148,9 @@ typedef off_t               h5_stat_size_t;
 #ifndef HDpowf
     #define HDpowf(X,Y)   powf(X,Y)
 #endif /* HDpowf */
+#ifndef HDpread
+    #define HDpread(F,B,C,O)    pread(F,B,C,O)
+#endif /* HDpread */
 #ifndef HDprintf
     #define HDprintf(...)   HDfprintf(stdout, __VA_ARGS__)
 #endif /* HDprintf */
@@ -1160,6 +1163,9 @@ typedef off_t               h5_stat_size_t;
 #ifndef HDputs
     #define HDputs(S)    puts(S)
 #endif /* HDputs */
+#ifndef HDpwrite
+    #define HDpwrite(F,B,C,O)    pwrite(F,B,C,O)
+#endif /* HDpwrite */
 #ifndef HDqsort
     #define HDqsort(M,N,Z,F)  qsort(M,N,Z,F)
 #endif /* HDqsort*/

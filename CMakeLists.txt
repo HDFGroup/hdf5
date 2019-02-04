@@ -482,6 +482,15 @@ if (HDF5_MEMORY_ALLOC_SANITY_CHECK)
 endif ()
 
 #-----------------------------------------------------------------------------
+# Option to enable/disable using pread/pwrite for VFDs
+#-----------------------------------------------------------------------------
+option (HDF5_ENABLE_PREADWRITE "Use pread/pwrite in sec2/log/core VFDs in place of read/write (when available)" ON)
+mark_as_advanced (HDF5_ENABLE_PREADWRITE)
+if (HDF5_ENABLE_PREADWRITE AND H5_HAVE_PREAD AND H5_HAVE_PWRITE)
+  set (H5_HAVE_PREADWRITE 1)
+endif ()
+
+#-----------------------------------------------------------------------------
 # Option to use deprecated public API symbols
 #-----------------------------------------------------------------------------
 option (HDF5_ENABLE_DEPRECATED_SYMBOLS "Enable deprecated public API symbols" ON)
