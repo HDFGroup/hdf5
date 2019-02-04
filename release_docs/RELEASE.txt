@@ -135,6 +135,16 @@ New Features
 
       (DER - 2018/10/26, HDFFV-10614)
 
+    - Added a new option to enable/disable using pread/pwrite instead of
+      read/write in the sec2, log, and core VFDs.
+
+      This option is enabled by default when pread/pwrite are detected.
+
+      Autotools:    --enable-preadwrite
+      CMake:        HDF5_ENABLE_PREADWRITE
+
+      (DER - 2019/02/03, HDFFV-10696)
+
 
     Library:
     --------
@@ -196,6 +206,16 @@ New Features
       H5Pset_dset_no_attrs_hint
 
       (JOS - 2019/01/04, TRILAB-45)
+
+    - The sec2, log, and core VFDs can now use pread/pwrite instead of
+      read/write.
+
+      pread and pwrite do not change the file offset, a feature that was
+      requested by a user working with a multi-threaded application.
+
+      The option to configure this feature is described above.
+
+      (DER - 2019/02/03, HDFFV-10696)
 
 
      Parallel Library:
@@ -432,6 +452,25 @@ Bug Fixes since HDF5-1.10.3 release
       did not.  This problem is now fixed.
 
       (BMR - 2019/01/29, HDFFV-10684)
+
+    - Uninitialized bytes from a type conversion buffer could be written
+      to disk in H5Dwrite calls where type conversion takes place
+      and the type conversion buffer was created by the HDF5 library.
+
+      When H5Dwrite is called and datatype conversion must be performed,
+      the library will create a temporary buffer for type conversion if
+      one is not provided by the user via H5Pset_buffer. This internal
+      buffer is allocated via malloc and contains uninitialized data. In
+      some datatype conversions (float to long double, possibly others),
+      some of this uninitialized data could be written to disk.
+
+      This was flagged by valgrind in the dtransform test and does not
+      appear to be a common occurrence (it is flagged in one test out
+      of the entire HDF5 test suite).
+
+      Switching to calloc fixed the problem.
+
+      (DER - 2019/02/03, HDFFV-10694)
 
 
     Java Library:
