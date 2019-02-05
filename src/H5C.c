@@ -327,7 +327,7 @@ H5C_create(size_t		      max_cache_size,
 
     /* Tagging Field Initializations */
     cache_ptr->ignore_tags                      = FALSE;
-    cache_ptr->num_objs_corked                  = FALSE;
+    cache_ptr->num_objs_corked                  = 0;
 
     cache_ptr->slist_changed			= FALSE;
     cache_ptr->slist_len			= 0;
