@@ -43,6 +43,7 @@ set (CTEST_SOURCE_VERSEXT "-snap1")
 #INSTALLDIR - HDF5-1.10.0 root folder
 #CTEST_CONFIGURATION_TYPE - Release, Debug, RelWithDebInfo
 #CTEST_SOURCE_NAME - name of source folder; HDF5-1.10.0
+#MODEL - CDash group name
 if (DEFINED CTEST_SCRIPT_ARG)
     # transform ctest script arguments of the form
     # script.ctest,var1=value1,var2=value2
@@ -169,7 +170,10 @@ endif ()
 ###################################################################
 #########       Following is for submission to CDash   ############
 ###################################################################
-set (MODEL "Experimental")
+if (NOT DEFINED MODEL)
+  set (MODEL "Experimental")
+endif ()
+
 ###################################################################
 
 ###################################################################
