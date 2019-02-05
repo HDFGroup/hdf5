@@ -2403,8 +2403,13 @@ H5AC_cork(H5F_t *f, haddr_t obj_addr, unsigned action, hbool_t *corked)
     HDassert(H5F_addr_defined(obj_addr));
     HDassert(action == H5AC__SET_CORK || action == H5AC__UNCORK || action == H5AC__GET_CORKED);
 
-    if(action == H5AC__GET_CORKED)
-	HDassert(corked);
+    if(action == H5AC__GET_CORKED) {
+        HDassert(corked);
+        if(H5C_get_num_objs_corked(f->shared->cache) == 0) {
+            *corked = FALSE;
+            HGOTO_DONE(SUCCEED)
+        }
+    }
 
     if(H5C_cork(f->shared->cache, obj_addr, action, corked) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Cannot perform the cork action")
