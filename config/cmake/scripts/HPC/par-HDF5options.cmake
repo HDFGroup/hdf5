@@ -33,12 +33,8 @@ set (MAX_PROC_COUNT 8)
 #############################################################################################
 ####      fortran enabled      ####
 set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_FORTRAN:BOOL=ON")
-    ### enable Fortran 2003 depends on HDF5_BUILD_FORTRAN
-#set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_F2003:BOOL=ON")
 ####      fortran disabled      ####
 #set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_FORTRAN:BOOL=OFF")
-    ### enable Fortran 2003 depends on HDF5_BUILD_FORTRAN
-#set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_F2003:BOOL=OFF")
 
 #############################################################################################
 ####      java enabled      ####
