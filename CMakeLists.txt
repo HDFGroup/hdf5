@@ -758,6 +758,11 @@ if (BUILD_TESTING)
       "Timeout in seconds for each test (default 1200=20minutes)"
   )
 
+  # Generate a list of timeouts based on DART_TESTING_TIMEOUT
+  math (EXPR CTEST_SHORT_TIMEOUT "${DART_TESTING_TIMEOUT} / 2")
+  math (EXPR CTEST_LONG_TIMEOUT "${DART_TESTING_TIMEOUT} * 2")
+  math (EXPR CTEST_VERY_LONG_TIMEOUT "${DART_TESTING_TIMEOUT} * 3")
+
   option (HDF5_TEST_VFD "Execute tests with different VFDs" OFF)
   mark_as_advanced (HDF5_TEST_VFD)
   if (HDF5_TEST_VFD)
