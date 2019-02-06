@@ -3823,6 +3823,13 @@ typedef struct H5C_tag_info_t {
  *
  * ignore_tags:	Boolean flag to disable tag validation during entry insertion.
  *
+ * num_objs_corked: Unsigned integer field containing the number of objects
+ *                  that are "corked".  The "corked" status of an object is
+ *                  found by searching the "tag_list".  This field is added
+ *                  for optimization so that the skip list search on "tag_list" 
+ *                  can be skipped if this field is zero, i.e. no "corked"
+ *                  objects.
+ *
  * When a cache entry is protected, it must be removed from the LRU
  * list(s) as it cannot be either flushed or evicted until it is unprotected.
  * The following fields are used to implement the protected list (pl).
@@ -4693,6 +4700,7 @@ struct H5C_t {
     /* Fields for maintaining list of tagged entries */
     H5SL_t *                    tag_list;
     hbool_t                     ignore_tags;
+    uint32_t			        num_objs_corked;
 
     /* Fields for tracking protected entries */
     uint32_t                    pl_len;
