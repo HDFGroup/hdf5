@@ -185,7 +185,7 @@ H5C_get_ignore_tags(const H5C_t *cache_ptr)
  *
  *-------------------------------------------------------------------------
  */
-hbool_t
+uint32_t
 H5C_get_num_objs_corked(const H5C_t *cache_ptr)
 {
     FUNC_ENTER_NOAPI_NOERR
