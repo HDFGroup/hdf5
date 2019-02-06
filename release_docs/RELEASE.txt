@@ -264,6 +264,16 @@ Bug Fixes since HDF5-1.10.3 release
 
     Library
     -------
+    - Performance issue when closing an object
+
+      The slow down is due to the search of the "tag_list" to find
+      out the "corked" status of an object and "uncork" it if so.
+
+      Improve porformance by skipping the search of the "tag_list"
+      if there are no "corked" objects when closing an object.
+
+      (VC - 2019/2/6)
+
     - Fixed a potential invalid memory access and failure that could occur when
       decoding an unknown object header message (from a future version of the
       library).
