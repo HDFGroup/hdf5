@@ -90,7 +90,8 @@ static herr_t H5VL_pass_through_str_to_info(const char *str, void **info);
 static void *H5VL_pass_through_get_object(const void *obj);
 static herr_t H5VL_pass_through_get_wrap_ctx(const void *obj, void **wrap_ctx);
 static herr_t H5VL_pass_through_free_wrap_ctx(void *obj);
-static void *H5VL_pass_through_wrap_object(void *obj, void *wrap_ctx);
+static void *H5VL_pass_through_wrap_object(void *obj, H5I_type_t obj_type,
+    void *wrap_ctx);
 
 /* Attribute callbacks */
 static void *H5VL_pass_through_attr_create(void *obj, const H5VL_loc_params_t *loc_params, const char *name, hid_t acpl_id, hid_t aapl_id, hid_t dxpl_id, void **req);
@@ -660,7 +661,7 @@ H5VL_pass_through_get_wrap_ctx(const void *obj, void **wrap_ctx)
  *---------------------------------------------------------------------------
  */
 static void *
-H5VL_pass_through_wrap_object(void *obj, void *_wrap_ctx)
+H5VL_pass_through_wrap_object(void *obj, H5I_type_t obj_type, void *_wrap_ctx)
 {
     H5VL_pass_through_wrap_ctx_t *wrap_ctx = (H5VL_pass_through_wrap_ctx_t *)_wrap_ctx;
     H5VL_pass_through_t *new_obj;
@@ -671,7 +672,7 @@ H5VL_pass_through_wrap_object(void *obj, void *_wrap_ctx)
 #endif
 
     /* Wrap the object with the underlying VOL */
-    under = H5VLwrap_object(obj, wrap_ctx->under_vol_id, wrap_ctx->under_wrap_ctx);
+    under = H5VLwrap_object(obj, obj_type, wrap_ctx->under_vol_id, wrap_ctx->under_wrap_ctx);
     if(under)
         new_obj = H5VL_pass_through_new_obj(under, wrap_ctx->under_vol_id);
     else
