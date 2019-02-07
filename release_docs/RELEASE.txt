@@ -411,6 +411,11 @@ Bug Fixes since HDF5-1.10.3 release
 
     Testing
     -------
+    - Fixed a test failure in testpar/t_dset.c caused by
+      the test trying to use the parallel filters feature
+      on MPI-2 implementations.
+
+      (JTH, 2019/2/7)
 
 Bug Fixes since HDF5-1.10.2 release
 ==================================
