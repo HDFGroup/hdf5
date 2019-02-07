@@ -66,7 +66,7 @@ else ()
       -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
   )
 endif ()
-set_tests_properties (PERFORM_h5perf_serial PROPERTIES TIMEOUT 1800)
+set_tests_properties (PERFORM_h5perf_serial PROPERTIES TIMEOUT ${CTEST_VERY_LONG_TIMEOUT})
 set_tests_properties (PERFORM_h5perf_serial PROPERTIES DEPENDS "PERFORM_h5perform-clearall-objects")
 
 if (HDF5_BUILD_PERFORM_STANDALONE)

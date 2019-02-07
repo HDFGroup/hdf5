@@ -47,6 +47,13 @@ New Features
 
     Configuration:
     -------------
+    - Disable SZIP or ZLIB options if TGZ files are not available.
+
+      Changed the TGZ option for SZip and ZLib to disable the options
+      if the source tar.gz files are not found.
+
+      (ADB - 2019/02/05, HDFFV-10697)
+
     - Rework CMake versioning for OSX platforms.
 
       Changed the current_version and compatibility_version flags from optional
