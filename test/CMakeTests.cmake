@@ -587,10 +587,10 @@ foreach (test ${H5_TESTS})
   endif ()
 endforeach ()
 
-set_tests_properties (H5TEST-fheap PROPERTIES TIMEOUT 1800)
-set_tests_properties (H5TEST-big PROPERTIES TIMEOUT 1800)
-set_tests_properties (H5TEST-btree2 PROPERTIES TIMEOUT 1800)
-set_tests_properties (H5TEST-objcopy PROPERTIES TIMEOUT 1800)
+set_tests_properties (H5TEST-fheap PROPERTIES TIMEOUT ${CTEST_VERY_LONG_TIMEOUT})
+set_tests_properties (H5TEST-big PROPERTIES TIMEOUT ${CTEST_VERY_LONG_TIMEOUT})
+set_tests_properties (H5TEST-btree2 PROPERTIES TIMEOUT ${CTEST_VERY_LONG_TIMEOUT})
+set_tests_properties (H5TEST-objcopy PROPERTIES TIMEOUT ${CTEST_VERY_LONG_TIMEOUT})
 
 if (BUILD_SHARED_LIBS)
   # Remove any output file left over from previous test run
@@ -629,10 +629,10 @@ if (BUILD_SHARED_LIBS)
     endif ()
   endforeach ()
 
-  set_tests_properties (H5TEST-shared-fheap PROPERTIES TIMEOUT 1800)
-  set_tests_properties (H5TEST-shared-big PROPERTIES TIMEOUT 1800)
-  set_tests_properties (H5TEST-shared-btree2 PROPERTIES TIMEOUT 1800)
-  set_tests_properties (H5TEST-shared-objcopy PROPERTIES TIMEOUT 1800)
+  set_tests_properties (H5TEST-shared-fheap PROPERTIES TIMEOUT ${CTEST_VERY_LONG_TIMEOUT})
+  set_tests_properties (H5TEST-shared-big PROPERTIES TIMEOUT ${CTEST_VERY_LONG_TIMEOUT})
+  set_tests_properties (H5TEST-shared-btree2 PROPERTIES TIMEOUT ${CTEST_VERY_LONG_TIMEOUT})
+  set_tests_properties (H5TEST-shared-objcopy PROPERTIES TIMEOUT ${CTEST_VERY_LONG_TIMEOUT})
 endif ()
 
 #-- Adding test for cache
@@ -664,7 +664,7 @@ if (NOT CYGWIN)
       ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST;HDF5TestExpress=${HDF_TEST_EXPRESS}"
       WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
   )
-  set_tests_properties (H5TEST-cache PROPERTIES TIMEOUT 1800)
+  set_tests_properties (H5TEST-cache PROPERTIES TIMEOUT ${CTEST_VERY_LONG_TIMEOUT})
 endif ()
 
 #-- Adding test for cache_image
@@ -714,7 +714,7 @@ if (BUILD_SHARED_LIBS)
         ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST-shared;HDF5TestExpress=${HDF_TEST_EXPRESS}"
         WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST-shared
     )
-    set_tests_properties (H5TEST-shared-cache PROPERTIES TIMEOUT 1800)
+    set_tests_properties (H5TEST-shared-cache PROPERTIES TIMEOUT ${CTEST_VERY_LONG_TIMEOUT})
   endif ()
 endif ()
 

@@ -103,26 +103,24 @@ endif ()
 set_tests_properties (FORTRAN_testhdf5_fortran_1_8 PROPERTIES DEPENDS FORTRAN_testhdf5_fortran)
 
 #-- Adding test for fortranlib_test_F03
-if (HDF5_ENABLE_F2003)
-  if (HDF5_ENABLE_USING_MEMCHECKER)
-    add_test (NAME FORTRAN_fortranlib_test_F03 COMMAND $<TARGET_FILE:fortranlib_test_F03>)
-  else ()
-    add_test (NAME FORTRAN_fortranlib_test_F03 COMMAND "${CMAKE_COMMAND}"
-        -D "TEST_PROGRAM=$<TARGET_FILE:fortranlib_test_F03>"
-        -D "TEST_ARGS:STRING="
-        -D "TEST_EXPECT=0"
-        -D "TEST_SKIP_COMPARE=TRUE"
-        -D "TEST_REGEX= 0 error.s."
-        -D "TEST_MATCH= 0 error(s)"
-        -D "TEST_OUTPUT=fortranlib_test_F03.txt"
-        #-D "TEST_REFERENCE=fortranlib_test_F03.out"
-        -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
-        -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
-    )
-  endif ()
+if (HDF5_ENABLE_USING_MEMCHECKER)
+  add_test (NAME FORTRAN_fortranlib_test_F03 COMMAND $<TARGET_FILE:fortranlib_test_F03>)
+else ()
+  add_test (NAME FORTRAN_fortranlib_test_F03 COMMAND "${CMAKE_COMMAND}"
+      -D "TEST_PROGRAM=$<TARGET_FILE:fortranlib_test_F03>"
+      -D "TEST_ARGS:STRING="
+      -D "TEST_EXPECT=0"
+      -D "TEST_SKIP_COMPARE=TRUE"
+      -D "TEST_REGEX= 0 error.s."
+      -D "TEST_MATCH= 0 error(s)"
+      -D "TEST_OUTPUT=fortranlib_test_F03.txt"
+      #-D "TEST_REFERENCE=fortranlib_test_F03.out"
+      -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
+      -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+  )
+endif ()
 #  set_tests_properties (FORTRAN_fortranlib_test_F03 PROPERTIES PASS_REGULAR_EXPRESSION "[ ]*0 error.s")
   set_tests_properties (FORTRAN_fortranlib_test_F03 PROPERTIES DEPENDS FORTRAN_testhdf5_fortran_1_8)
-endif ()
 
 #-- Adding test for fflush1
 add_test (NAME FORTRAN_fflush1 COMMAND $<TARGET_FILE:fflush1>)
@@ -215,26 +213,24 @@ if (BUILD_SHARED_LIBS)
   set_tests_properties (FORTRAN_testhdf5_fortran_1_8-shared PROPERTIES DEPENDS FORTRAN_testhdf5_fortran_1_8)
 
   #-- Adding test for fortranlib_test_F03
-  if (HDF5_ENABLE_F2003)
-    if (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (NAME FORTRAN_fortranlib_test_F03-shared COMMAND $<TARGET_FILE:fortranlib_test_F03-shared>)
-    else ()
-      add_test (NAME FORTRAN_fortranlib_test_F03-shared COMMAND "${CMAKE_COMMAND}"
-          -D "TEST_PROGRAM=$<TARGET_FILE:fortranlib_test_F03-shared>"
-          -D "TEST_ARGS:STRING="
-          -D "TEST_EXPECT=0"
-          -D "TEST_SKIP_COMPARE=TRUE"
-          -D "TEST_REGEX= 0 error.s."
-          -D "TEST_MATCH= 0 error(s)"
-          -D "TEST_OUTPUT=fortranlib_test_F03.txt"
-          #-D "TEST_REFERENCE=fortranlib_test_F03.out"
-          -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/fshared"
-          -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
-      )
-    endif ()
-#    set_tests_properties (FORTRAN_fortranlib_test_F03-shared PROPERTIES PASS_REGULAR_EXPRESSION "[ ]*0 error.s")
-    set_tests_properties (FORTRAN_fortranlib_test_F03-shared PROPERTIES DEPENDS FORTRAN_fortranlib_test_F03)
+  if (HDF5_ENABLE_USING_MEMCHECKER)
+    add_test (NAME FORTRAN_fortranlib_test_F03-shared COMMAND $<TARGET_FILE:fortranlib_test_F03-shared>)
+  else ()
+    add_test (NAME FORTRAN_fortranlib_test_F03-shared COMMAND "${CMAKE_COMMAND}"
+        -D "TEST_PROGRAM=$<TARGET_FILE:fortranlib_test_F03-shared>"
+        -D "TEST_ARGS:STRING="
+        -D "TEST_EXPECT=0"
+        -D "TEST_SKIP_COMPARE=TRUE"
+        -D "TEST_REGEX= 0 error.s."
+        -D "TEST_MATCH= 0 error(s)"
+        -D "TEST_OUTPUT=fortranlib_test_F03.txt"
+        #-D "TEST_REFERENCE=fortranlib_test_F03.out"
+        -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/fshared"
+        -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+    )
   endif ()
+#    set_tests_properties (FORTRAN_fortranlib_test_F03-shared PROPERTIES PASS_REGULAR_EXPRESSION "[ ]*0 error.s")
+  set_tests_properties (FORTRAN_fortranlib_test_F03-shared PROPERTIES DEPENDS FORTRAN_fortranlib_test_F03)
 
   #-- Adding test for fflush1
   add_test (NAME FORTRAN_fflush1-shared COMMAND $<TARGET_FILE:fflush1-shared>)

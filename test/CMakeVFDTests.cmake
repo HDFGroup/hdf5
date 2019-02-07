@@ -263,17 +263,17 @@ endif ()
     set_tests_properties (VFD-${vfdname}-flush2 PROPERTIES DEPENDS VFD-${vfdname}-flush1)
     set_tests_properties (VFD-${vfdname}-flush1 PROPERTIES TIMEOUT 10)
     set_tests_properties (VFD-${vfdname}-flush2 PROPERTIES TIMEOUT 10)
-    set_tests_properties (VFD-${vfdname}-istore PROPERTIES TIMEOUT 1800)
+    set_tests_properties (VFD-${vfdname}-istore PROPERTIES TIMEOUT ${CTEST_VERY_LONG_TIMEOUT})
     if (NOT CYGWIN)
-      set_tests_properties (VFD-${vfdname}-cache PROPERTIES TIMEOUT 1800)
+      set_tests_properties (VFD-${vfdname}-cache PROPERTIES TIMEOUT ${CTEST_VERY_LONG_TIMEOUT})
     endif ()
     if (BUILD_SHARED_LIBS)
       set_tests_properties (VFD-${vfdname}-flush2-shared PROPERTIES DEPENDS VFD-${vfdname}-flush1-shared)
       set_tests_properties (VFD-${vfdname}-flush1-shared PROPERTIES TIMEOUT 10)
       set_tests_properties (VFD-${vfdname}-flush2-shared PROPERTIES TIMEOUT 10)
-      set_tests_properties (VFD-${vfdname}-istore-shared PROPERTIES TIMEOUT 1800)
+      set_tests_properties (VFD-${vfdname}-istore-shared PROPERTIES TIMEOUT ${CTEST_VERY_LONG_TIMEOUT})
       if (NOT CYGWIN AND NOT WIN32)
-        set_tests_properties (VFD-${vfdname}-cache-shared PROPERTIES TIMEOUT 1800)
+        set_tests_properties (VFD-${vfdname}-cache-shared PROPERTIES TIMEOUT ${CTEST_VERY_LONG_TIMEOUT})
       endif ()
     endif ()
     if (HDF5_TEST_FHEAP_VFD)
@@ -288,7 +288,7 @@ endif ()
               -P "${HDF_RESOURCES_DIR}/vfdTest.cmake"
       )
       set_tests_properties (VFD-${vfdname}-fheap PROPERTIES
-          TIMEOUT 1800
+          TIMEOUT ${CTEST_VERY_LONG_TIMEOUT}
           ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${vfdname};HDF5TestExpress=${HDF_TEST_EXPRESS}"
           WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/${vfdname}
       )
@@ -304,7 +304,7 @@ endif ()
                 -P "${HDF_RESOURCES_DIR}/vfdTest.cmake"
         )
         set_tests_properties (VFD-${vfdname}-fheap-shared PROPERTIES
-            TIMEOUT 1800
+            TIMEOUT ${CTEST_VERY_LONG_TIMEOUT}
             ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${vfdname}-shared;HDF5TestExpress=${HDF_TEST_EXPRESS}"
             WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/${vfdname}-shared
         )
