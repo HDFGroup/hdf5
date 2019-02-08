@@ -124,7 +124,7 @@ typedef struct {
          * information. */
     int unlim_dim;                      /* Dimension where selection is unlimited, or -1 if none */
     hsize_t num_elem_non_unlim;         /* # of elements in a "slice" excluding the unlimited dimension */
-    H5S_hyper_span_info_t *span_lst;    /* List of hyperslab span information */
+    H5S_hyper_span_info_t *span_lst;    /* List of hyperslab span information of all dimensions */
 } H5S_hyper_sel_t;
 
 /* Selection information methods */
@@ -275,8 +275,7 @@ H5_DLL herr_t H5S_extent_copy_real(H5S_extent_t *dst, const H5S_extent_t *src,
 
 /* Operations on selections */
 H5_DLL herr_t H5S__hyper_project_intersection(const H5S_t *src_space,
-    const H5S_t *dst_space, const H5S_t *src_intersect_space,
-    H5S_t *proj_space);
+    const H5S_t *dst_space, const H5S_t *src_intersect_space, H5S_t *proj_space);
 H5_DLL herr_t H5S__hyper_subtract(H5S_t *space, H5S_t *subtract_space);
 
 /* Testing functions */

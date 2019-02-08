@@ -125,12 +125,7 @@ const H5O_msg_class_t *const H5O_msg_class_g[] = {
     H5O_MSG_REFCOUNT,		/*0x0016 Object's ref. count		*/
     H5O_MSG_FSINFO,		/*0x0017 Free-space manager info        */
     H5O_MSG_MDCI,               /*0x0018 Metadata cache image           */
-    H5O_MSG_UNKNOWN,		/*0x0019 Placeholder for unknown message */
-#ifdef H5O_ENABLE_BOGUS
-    H5O_MSG_BOGUS_INVALID, 	/*0x001A "Bogus invalid" (for testing) 	*/
-#else /* H5O_ENABLE_BOGUS */
-    NULL,                       /*0x001A "Bogus invalid" (for testing) 	*/
-#endif /* H5O_ENABLE_BOGUS */
+    H5O_MSG_UNKNOWN		/*0x0019 Placeholder for unknown message */
 };
 
 /* Format version bounds for object header */

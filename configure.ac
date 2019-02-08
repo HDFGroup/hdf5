@@ -1130,11 +1130,12 @@ case "$host_cpu-$host_vendor-$host_os" in
     ## functionality so clock_gettime and CLOCK_MONOTONIC are defined
     ## correctly. This was later updated to 200112L so that
     ## posix_memalign() is visible for the direct VFD code on Linux
-    ## systems.
+    ## systems. Even later, this was changed to 200809L to support
+    ## pread/pwrite in VFDs.
     ##
     ## POSIX feature information can be found in the gcc manual at:
     ## http://www.gnu.org/s/libc/manual/html_node/Feature-Test-Macros.html
-    H5_CPPFLAGS="-D_POSIX_C_SOURCE=200112L $H5_CPPFLAGS"
+    H5_CPPFLAGS="-D_POSIX_C_SOURCE=200809L $H5_CPPFLAGS"
 
     ## Need to add this so that O_DIRECT is visible for the direct
     ## VFD on Linux systems.
@@ -1209,6 +1210,15 @@ if test "X$C9x" = "Xyes"; then
 EOF
 AC_CHECK_SIZEOF([bool])
 fi
+
+AC_CHECK_SIZEOF(time_t, [], [
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_TIME_H
+#include <time.h>
+#endif
+])
 
 ## Checkpoint the cache
 AC_CACHE_SAVE
@@ -2960,6 +2970,30 @@ else
 fi
 
 ## ----------------------------------------------------------------------
+## Set the flag to indicate that the machine is IBM ppc64le and cannot
+## accurately convert some long double values.
+##
+AC_MSG_CHECKING([if the system is IBM ppc64le and cannot correctly convert some long double values])
+
+TEST_SRC="`(echo \"#define H5_DISABLE_SOME_LDOUBLE_CONV_TEST 1\"; cat $srcdir/config/cmake/ConversionTests.c)`"
+
+if test ${ac_cv_sizeof_long_double} = 0; then
+   hdf5_cv_disable_some_ldouble_conv=${hdf5_cv_disable_some_ldouble_conv=no}
+else
+   AC_CACHE_VAL([hdf5_cv_disable_some_ldouble_conv],
+        [AC_RUN_IFELSE([AC_LANG_SOURCE([$TEST_SRC])],
+        [hdf5_cv_disable_some_ldouble_conv=yes], [hdf5_cv_disable_some_ldouble_conv=no],[])])
+fi
+
+if test ${hdf5_cv_disable_some_ldouble_conv} = "yes"; then
+  AC_DEFINE([DISABLE_SOME_LDOUBLE_CONV], [1],
+            [Define if your system is IBM ppc64le and cannot convert some long double values correctly.])
+  AC_MSG_RESULT([yes])
+else
+  AC_MSG_RESULT([no])
+fi
+
+## ----------------------------------------------------------------------
 ## Set some variables for general configuration information to be saved
 ## and installed with the libraries (used to generate libhdf5.settings).
 ##
@@ -3233,6 +3267,47 @@ esac
 
 
 ## ----------------------------------------------------------------------
+## Enable use of pread/pwrite instead of read/write in certain VFDs.
+##
+AC_SUBST([PREADWRITE])
+
+## Check these first to avoid interspersed output in the AC_ARG_ENABLE line
+## below. (Probably overkill to check for both, but we'll be extra careful)
+PREADWRITE_HAVE_BOTH=yes
+AC_CHECK_FUNC([pread], [], [PREADWRITE_HAVE_BOTH=no])
+AC_CHECK_FUNC([pwrite], [], [PREADWRITE_HAVE_BOTH=no])
+
+AC_MSG_CHECKING([whether to use pread/pwrite instead of read/write in certain VFDs])
+AC_ARG_ENABLE([preadwrite],
+              [AS_HELP_STRING([--enable-preadwrite],
+                              [Enable using pread/pwrite instead of read/write in sec2/log/core VFDs.
+                              [default=yes if pread/pwrite are present]])],
+              [PREADWRITE=$enableval])
+
+## Set the default level.
+if test "X-$PREADWRITE" = X- ; then
+  PREADWRITE=yes
+fi
+
+case "X-$PREADWRITE" in
+  X-yes)
+      if test "X-$PREADWRITE_HAVE_BOTH" = "X-yes"; then
+        AC_DEFINE([HAVE_PREADWRITE], [1], [Define if both pread and pwrite exist.])
+        AC_MSG_RESULT([yes])
+      else
+        AC_MSG_RESULT([no])
+      fi
+    ;;
+  X-no)
+      AC_MSG_RESULT([no])
+    ;;
+  *)
+      AC_MSG_ERROR([Unrecognized value: $PREADWRITE])
+    ;;
+esac
+
+
+## ----------------------------------------------------------------------
 ## Enable embedded library information
 ##
 AC_MSG_CHECKING([whether to have library information embedded in the executables])
@@ -3399,6 +3474,7 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  src/Makefile
                  test/Makefile
                  test/H5srcdir_str.h
+                 test/testabort_fail.sh
                  test/testcheck_version.sh
                  test/testerror.sh
                  test/testflushrefresh.sh
@@ -3406,7 +3482,6 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  test/testlinks_env.sh
                  test/testswmr.sh
                  test/testvdsswmr.sh
-                 test/test_filenotclosed.sh
                  test/test_filter_plugin.sh
                  test/test_usecases.sh
                  test/test_vol_plugin.sh

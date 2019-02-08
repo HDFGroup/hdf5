@@ -1,4 +1,4 @@
-HDF5 version 1.11.4 currently under development
+ version 1.11.4 currently under development
 ================================================================================
 
 
@@ -151,11 +151,32 @@ New Features
 
       (HDFFV-10287, RAW, 2018/07/18)
 
-    -
+    - Changed the default behavior in parallel when reading the same dataset in its entirely
+      (i.e. H5S_ALL dataset selection) which is being read by all the processes collectively.
+      The dataset mush be contiguous, less than 2GB, and of an atomic datatype.
+      The new behavior is the HDF5 library will use an MPI_Bcast to pass the data read from 
+      the disk by the root process to the remain processes in the MPI communicator associated 
+      with the HDF5 file.
+
+      (MSB - 2019/01/02, HDFFV-10652)
 
     Fortran Library:
     ----------------
-    -
+    - Added new Fortran derived type, c_h5o_info_t, which is interoperable with
+      C's h5o_info_t. This is needed for callback functions which
+      pass C's h5o_info_t data type definition.
+
+      (MSB, 2019/01/08, HDFFV-10443)
+
+    - Added new Fortran API, H5gmtime, which converts (C) 'time_t' structure
+      to Fortran DATE AND TIME storage format.
+      
+      (MSB, 2019/01/08, HDFFV-10443)
+
+    - Added new Fortran 'fields' optional parameter to: h5ovisit_f, h5oget_info_by_name_f, 
+      h5oget_info, h5oget_info_by_idx and h5ovisit_by_name_f.
+
+      (MSB, 2019/01/08, HDFFV-10443)
 
     C++ Library:
     ------------
@@ -256,6 +277,35 @@ Bug Fixes since HDF5-1.10.3 release
 
     Library
     -------
+    - Performance issue when closing an object
+
+      The slow down is due to the search of the "tag_list" to find
+      out the "corked" status of an object and "uncork" it if so.
+
+      Improve porformance by skipping the search of the "tag_list"
+      if there are no "corked" objects when closing an object.
+
+      (VC - 2019/2/6)
+
+    - Fixed a potential invalid memory access and failure that could occur when
+      decoding an unknown object header message (from a future version of the
+      library).
+
+      (NAF - 2019/01/07)
+
+    - Deleting attributes in dense storage
+
+      The library aborts with "infinite loop closing library" after
+      attributes in dense storage are created and then deleted.
+
+      When deleting the attribute nodes from the name index v2 B-tree,
+      if an attribute is found in the intermediate B-tree nodes,
+      which may be merged/redistributed in the process, we need to 
+      free the dynamically allocated spaces for the intermediate 
+      decoded attribute.
+
+      (VC - 2018/12/26, HDFFV-10659)
+
     - Allow H5detect and H5make_libsettings to take a file as an argument.
 
       Rather than only writing to stdout, add a command argument to name
@@ -327,11 +377,26 @@ Bug Fixes since HDF5-1.10.3 release
 
     Fortran
     --------
+    - Added symbolic links libhdf5_hl_fortran.so to libhdf5hl_fortran.so and
+      libhdf5_hl_fortran.a to libhdf5hl_fortran.a in hdf5/lib directory for 
+      autotools installs.  These were added to match the name of the files 
+      installed by cmake and the general pattern of hl lib files.  We will 
+      change the names of the installed lib files to the matching name in 
+      the next major release.
+
+      (LRK - 2019/01/04, HDFFV-10596)
+
     - Made Fortran specific subroutines PRIVATE in generic procedures.
 
       Effected generic procedures were functions in H5A, H5D, H5P, H5R and H5T.
 
       (MSB, 2018/12/04, HDFFV-10511)
+
+    - Fixed issue with Fortran not returning h5o_info_t field values 
+      meta_size%attr%index_size and  meta_size%attr%heap_size.
+
+      (MSB, 2018/1/8, HDFFV-10443)
+
 
     Tools
     -----
@@ -359,6 +424,11 @@ Bug Fixes since HDF5-1.10.3 release
 
     Testing
     -------
+    - Fixed a test failure in testpar/t_dset.c caused by
+      the test trying to use the parallel filters feature
+      on MPI-2 implementations.
+
+      (JTH, 2019/2/7)
 
 Bug Fixes since HDF5-1.10.2 release
 ==================================
@@ -601,6 +671,15 @@ Bug Fixes since HDF5-1.10.2 release
 
     Testing
     -------
+    - The dt_arith test failed on IBM Power8 and Power9 machines when testing
+      conversions from or to long double types, especially when special values
+      such as infinity or NAN were involved.  In some cases the results differed
+      by extremely small amounts from those on other machines, while some other
+      tests resulted in segmentation faults.  These conversion tests with long 
+      double types have been disabled for ppc64 machines until the problems are 
+      better understood and can be properly addressed.
+    
+      (SRL - 2019/01/07, TRILAB-98)
 
 Supported Platforms
 ===================

@@ -803,6 +803,50 @@ error:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    h5_fileaccess_flags
+ *
+ * Purpose:     Returns a file access template which is the default template
+ *              but with a file driver, VOL connector, or libver bound set
+ *              according to a constant or environment variable
+ *
+ * Return:      Success:    A file access property list
+ *              Failure:    H5I_INVALID_HID
+ *
+ * Programmer:  Robb Matzke
+ *              Thursday, November 19, 1998
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+h5_fileaccess_flags(unsigned flags)
+{
+    hid_t       fapl_id = H5I_INVALID_HID;
+
+    if((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        goto error;
+
+    /* Attempt to set up a file driver first */
+    if((flags & H5_FILEACCESS_VFD) && h5_get_vfd_fapl(fapl_id) < 0)
+        goto error;
+
+    /* Next, try to set up a VOL connector */
+    if((flags & H5_FILEACCESS_VOL) && h5_get_vol_fapl(fapl_id) < 0)
+        goto error;
+ 
+    /* Finally, check for libver bounds */
+    if((flags & H5_FILEACCESS_LIBVER) && h5_get_libver_fapl(fapl_id) < 0)
+        goto error;
+ 
+    return fapl_id;
+
+error:
+    if(fapl_id != H5I_INVALID_HID)
+        H5Pclose(fapl_id);
+    return H5I_INVALID_HID;
+} /* end h5_fileaccess_flags() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    h5_get_vfd_fapl
  *
  * Purpose:     Sets the file driver for a FAPL according to the value specified
@@ -1894,6 +1938,42 @@ static herr_t dummy_vfd_read(H5FD_t H5_ATTR_UNUSED *_file, H5FD_mem_t H5_ATTR_UN
 static herr_t dummy_vfd_write(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr, size_t size, const void *buf);
 static herr_t dummy_vfd_write(H5FD_t H5_ATTR_UNUSED *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUSED fapl_id, haddr_t H5_ATTR_UNUSED addr, size_t H5_ATTR_UNUSED size, const void H5_ATTR_UNUSED *buf) { return FAIL; }
 
+/* Dummy VFD with the minimum parameters to make a VFD that can be registered */
+static const H5FD_class_t H5FD_dummy_g = {
+    "dummy",                    /* name         */
+    1,                          /* maxaddr      */
+    H5F_CLOSE_WEAK,             /* fc_degree    */
+    NULL,                       /* terminate    */
+    NULL,                       /* sb_size      */
+    NULL,                       /* sb_encode    */
+    NULL,                       /* sb_decode    */
+    0,                          /* fapl_size    */
+    NULL,                       /* fapl_get     */
+    NULL,                       /* fapl_copy    */
+    NULL,                       /* fapl_free    */
+    0,                          /* dxpl_size    */
+    NULL,                       /* dxpl_copy    */
+    NULL,                       /* dxpl_free    */
+    dummy_vfd_open,             /* open         */
+    dummy_vfd_close,            /* close        */
+    NULL,                       /* cmp          */
+    NULL,                       /* query        */
+    NULL,                       /* get_type_map */
+    NULL,                       /* alloc        */
+    NULL,                       /* free         */
+    dummy_vfd_get_eoa,          /* get_eoa      */
+    dummy_vfd_set_eoa,          /* set_eoa      */
+    dummy_vfd_get_eof,          /* get_eof      */
+    NULL,                       /* get_handle   */
+    dummy_vfd_read,             /* read         */
+    dummy_vfd_write,            /* write        */
+    NULL,                       /* flush        */
+    NULL,                       /* truncate     */
+    NULL,                       /* lock         */
+    NULL,                       /* unlock       */
+    H5FD_FLMAP_DICHOTOMY	/* fl_map       */
+};
+
 
 /*-------------------------------------------------------------------------
  * Function:    h5_get_dummy_vfd_class()
@@ -1921,21 +2001,11 @@ h5_get_dummy_vfd_class(void)
     H5FD_class_t *vfd_class = NULL;     /* Dummy VFD that will be returned */
 
     /* Create the class and initialize everything to zero/NULL */
-    if(NULL == (vfd_class = (H5FD_class_t *)HDcalloc((size_t)1, sizeof(H5FD_class_t))))
+    if(NULL == (vfd_class = (H5FD_class_t *)HDmalloc(sizeof(H5FD_class_t))))
         TEST_ERROR;
 
-    /* Fill in the minimum parameters to make a VFD that
-     * can be registered.
-     */
-    vfd_class->name = "dummy";
-    vfd_class->maxaddr = 1;
-    vfd_class->open = dummy_vfd_open;
-    vfd_class->close = dummy_vfd_close;
-    vfd_class->get_eoa = dummy_vfd_get_eoa;
-    vfd_class->set_eoa = dummy_vfd_set_eoa;
-    vfd_class->get_eof = dummy_vfd_get_eof;
-    vfd_class->read = dummy_vfd_read;
-    vfd_class->write = dummy_vfd_write;
+    /* Copy the dummy VFD */
+    HDmemcpy(vfd_class, &H5FD_dummy_g, sizeof(H5FD_class_t));
 
     return vfd_class;
 

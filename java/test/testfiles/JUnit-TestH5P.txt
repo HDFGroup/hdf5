@@ -48,7 +48,6 @@ JUnit version 4.11
 .testH5Pset_link_creation_order_invalidvalue
 .testH5P_sym_k
 .testH5PH5Pset_shared_mesg_phase_change_MinbtreeGreaterThanMaxlist
-.testH5Pget_version_null
 .testH5Pset_scaleoffset_Invalidscale_factor
 .testH5Pget_elink_prefix_null
 .testH5Pget_data_transform_IllegalSize
@@ -74,7 +73,6 @@ JUnit version 4.11
 .testH5Pget_shared_mesg_index
 .testH5Pset_link_phase_change
 .testH5Pget_shared_mesg_nindexes
-.testH5Pget_version
 .testH5Pset_elink_acc_flags_InvalidFlag1
 .testH5Pset_elink_acc_flags_InvalidFlag2
 .testH5Pget_link_phase_change_EqualsSet
@@ -87,5 +85,5 @@ JUnit version 4.11
 
 Time:  XXXX
 
-OK (85 tests)
+OK (83 tests)
 

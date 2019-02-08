@@ -1515,13 +1515,19 @@ H5S_select_iterate(void *buf, const H5T_t *type, const H5S_t *space,
                         /* Make the application callback */
                         user_ret = (op->u.app_op.op)(loc, op->u.app_op.type_id, ndims, coords, op_data);
                     break;
+
                     case H5S_SEL_ITER_OP_LIB:
                         /* Call the library's callback */
                         user_ret = (op->u.lib_op)(loc, type, ndims, coords, op_data);
                     break;
+
                     default:
                         HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "unsupported op type")
                 } /* end switch */
+
+                /* Check for error return from iterator */
+                if(user_ret < 0)
+                    HERROR(H5E_DATASPACE, H5E_CANTNEXT, "iteration operator failed");
 
                 /* Increment offset in dataspace */
                 curr_off += elmt_size;
@@ -1710,10 +1716,6 @@ H5S_select_shape_same(const H5S_t *space1, const H5S_t *space2)
         } /* end else */
         HDassert(space_a_rank >= space_b_rank);
         HDassert(space_b_rank > 0);
-
-        /* Check for different number of elements selected */
-        if(H5S_GET_SELECT_NPOINTS(space_a) != H5S_GET_SELECT_NPOINTS(space_b))
-            HGOTO_DONE(FALSE)
 
         /* Check for "easy" cases before getting into generalized block iteration code */
         if((H5S_GET_SELECT_TYPE(space_a) == H5S_SEL_ALL) && (H5S_GET_SELECT_TYPE(space_b) == H5S_SEL_ALL)) {

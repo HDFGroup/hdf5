@@ -943,6 +943,27 @@ if (BUILD_SHARED_LIBS)
   file (MAKE_DIRECTORY "${HDF5_BINARY_DIR}/shared")
 endif ()
 
+if (LOCAL_BATCH_TEST)
+  if ("${LOCAL_BATCH_SCRIPT_COMMAND}" STREQUAL "raybsub")
+    configure_file (
+        ${HDF5_SOURCE_DIR}/bin/batch/${LOCAL_BATCH_SCRIPT_COMMAND}
+        ${HDF5_BINARY_DIR}/${LOCAL_BATCH_SCRIPT_COMMAND} ESCAPE_QUOTES @ONLY
+    )
+  endif ()
+  if (LOCAL_BATCH_SCRIPT_NAME)
+    configure_file (
+        ${HDF5_SOURCE_DIR}/bin/batch/${LOCAL_BATCH_SCRIPT_NAME}.in.cmake
+        ${HDF5_BINARY_DIR}/${LOCAL_BATCH_SCRIPT_NAME} ESCAPE_QUOTES @ONLY
+    )
+  endif ()
+  if (LOCAL_BATCH_SCRIPT_PARALLEL_NAME)
+    configure_file (
+        ${HDF5_SOURCE_DIR}/bin/batch/${LOCAL_BATCH_SCRIPT_PARALLEL_NAME}.in.cmake
+        ${HDF5_BINARY_DIR}/${LOCAL_BATCH_SCRIPT_PARALLEL_NAME} ESCAPE_QUOTES @ONLY
+    )
+  endif ()
+endif ()
+
 if (NOT EXISTS ${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c)
   add_executable (H5detect ${HDF5_SRC_DIR}/H5detect.c)
   target_include_directories(H5detect PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")

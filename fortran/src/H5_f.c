@@ -556,6 +556,17 @@ h5init_flags_c( int_f *h5d_flags, size_t_f *h5d_size_flags,
       h5o_flags[24] = (int_f)H5O_TYPE_DATASET;        /* Object is a dataset */
       h5o_flags[25] = (int_f)H5O_TYPE_NAMED_DATATYPE; /* Object is a named data type */
       h5o_flags[26] = (int_f)H5O_TYPE_NTYPES;         /* Number of different object types */
+
+/* Flags for H5Oget_info.
+ * These flags determine which fields will be filled in in the H5O_info_t
+ * struct. 
+ */
+      h5o_flags[27] = (int_f)H5O_INFO_ALL; /* (H5O_INFO_BASIC|H5O_INFO_TIME|H5O_INFO_NUM_ATTRS|H5O_INFO_HDR|H5O_INFO_META_SIZE) */
+      h5o_flags[28] = (int_f)H5O_INFO_BASIC; /* Fill in the fileno, addr, type, and rc fields */
+      h5o_flags[29] = (int_f)H5O_INFO_TIME;  /* Fill in the atime, mtime, ctime, and btime fields */
+      h5o_flags[30] = (int_f)H5O_INFO_NUM_ATTRS; /* Fill in the num_attrs field */
+      h5o_flags[31] = (int_f)H5O_INFO_HDR;       /* Fill in the hdr field */
+      h5o_flags[32] = (int_f)H5O_INFO_META_SIZE; /* Fill in the meta_size field */
 /*
  *  H5P flags
  */
