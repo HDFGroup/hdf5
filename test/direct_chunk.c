@@ -1910,10 +1910,10 @@ test_read_unallocated_chunk (hid_t file)
         goto error;
 
     /* Write a single chunk to intialize the chunk storage */
-    HDmemset(&chunk_dims, 0, sizeof(chunk_dims));
+    HDmemset(direct_buf, 0, CHUNK_NX * CHUNK_NY * sizeof(int));
     offset[0] = 0; offset[1] = 0;
 
-    if(H5Dwrite_chunk(dataset, dxpl, filter_mask, offset, chunk_nbytes, &chunk_dims) < 0)
+    if(H5Dwrite_chunk(dataset, dxpl, filter_mask, offset, chunk_nbytes, direct_buf) < 0)
         goto error;
 
     /* Attempt to read each chunk in the dataset. Chunks are not allocated,

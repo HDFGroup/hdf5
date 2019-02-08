@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#SBATCH -p knl -C quad,cache
+#SBATCH -C haswell
 #SBATCH --nodes=1
 #SBATCH -t 00:30:00
 #SBATCH --mail-type=BEGIN,END,FAIL
@@ -14,4 +14,3 @@ CMD="ctest . -E TEST_PAR|PH5DIFF|PERFORM|ph5example -C Release -j 32 -T test"
 echo "Run $CMD. Test output will be in build/ctestS.out"
 $CMD  >& ctestS.out
 echo "Done running $CMD"
-
