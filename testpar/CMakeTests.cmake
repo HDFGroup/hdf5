@@ -16,16 +16,16 @@
 ##############################################################################
 ##############################################################################
 
-add_test (NAME PAR_TEST_testphdf5 COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_PREFLAGS} $<TARGET_FILE:testphdf5> ${MPIEXEC_POSTFLAGS})
+add_test (NAME MPI_TEST_testphdf5 COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_PREFLAGS} $<TARGET_FILE:testphdf5> ${MPIEXEC_POSTFLAGS})
 
 foreach (testp ${H5P_TESTS})
-  add_test (NAME PAR_TEST_${testp} COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_PREFLAGS} $<TARGET_FILE:${testp}> ${MPIEXEC_POSTFLAGS})
+  add_test (NAME MPI_TEST_${testp} COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_PREFLAGS} $<TARGET_FILE:${testp}> ${MPIEXEC_POSTFLAGS})
 endforeach ()
 
 # The t_pflush1 test is hard-coded to fail.
-set_tests_properties (PAR_TEST_t_pflush1 PROPERTIES WILL_FAIL "true")
-#set_property (TEST PAR_TEST_t_pflush1 PROPERTY PASS_REGULAR_EXPRESSION "PASSED")
-set_tests_properties (PAR_TEST_t_pflush2 PROPERTIES DEPENDS PAR_TEST_t_pflush1)
+set_tests_properties (MPI_TEST_t_pflush1 PROPERTIES WILL_FAIL "true")
+#set_property (TEST MPI_TEST_t_pflush1 PROPERTY PASS_REGULAR_EXPRESSION "PASSED")
+set_tests_properties (MPI_TEST_t_pflush2 PROPERTIES DEPENDS MPI_TEST_t_pflush1)
 
 ##############################################################################
 ##############################################################################
