@@ -1550,9 +1550,7 @@ H5CX_get_tconv_buf(void **tconv_buf)
 
     /* Sanity check */
     HDassert(tconv_buf);
-    /* HDassert(head && *head); */
-    if (NULL == head || NULL == *head) // Tang
-        goto done;
+    HDassert(head && *head);
 
     HDassert(H5P_DEFAULT != (*head)->ctx.dxpl_id);
 
@@ -2010,9 +2008,7 @@ H5CX_get_data_transform(H5Z_data_xform_t **data_transform)
 
     /* Sanity check */
     HDassert(data_transform);
-    /* HDassert(head && *head); */
-    if (NULL == head || NULL == *head) // Tang
-        goto done;
+    HDassert(head && *head);
 
     HDassert(H5P_DEFAULT != (*head)->ctx.dxpl_id);
 
