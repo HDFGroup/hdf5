@@ -41,16 +41,20 @@ set (CTEST_CUSTOM_MEMCHECK_IGNORE
     H5TEST-err_compat       #uses runTest.cmake
     H5TEST-links_env        #uses runTest.cmake
     H5TEST-testlibinfo      #uses grepTest.cmake
-    H5TEST-clear-testhdf5-objects
+    #########
     H5TEST-clear-objects
     H5TEST-clear-cache-objects
     H5TEST-clear-cache_api-objects
     H5TEST-clear-cache_image-objects
     H5TEST-clear-cache_tagging-objects
+    H5TEST-clear-del_many_dense_attrs-objects
     H5TEST-clear-err_compat-objects
     H5TEST-clear-error_test-objects
     H5TEST-clear-filenotclosed-objects
+    H5TEST-clear-flush-objects
     H5TEST-clear-links_env-objects
+    H5TEST-clear-testflushrefresh-objects
+    H5TEST-clear-testhdf5-objects
     H5TEST-clear-ttsafe-objects
     PERFORM_h5perform-clear-objects
     HL_TOOLS-clear-objects
@@ -60,11 +64,19 @@ set (CTEST_CUSTOM_MEMCHECK_IGNORE
     CPP_testhdf5-clear-objects
     ######### tools/h5clear #########
     H5CLEAR-clearall-objects
+    H5CLEAR-copy_h5clear_fsm_persist_equal.h5
+    H5CLEAR-copy_h5clear_fsm_persist_greater.h5
+    H5CLEAR-copy_h5clear_fsm_persist_less.h5
+    H5CLEAR-copy_h5clear_fsm_persist_noclose.h5
+    H5CLEAR-copy_h5clear_fsm_persist_user_equal.h5
+    H5CLEAR-copy_h5clear_fsm_persist_user_greater.h5
+    H5CLEAR-copy_h5clear_fsm_persist_user_less.h5
     H5CLEAR-copy_h5clear_log_v3.h5
     H5CLEAR-copy_h5clear_mdc_image.h5
     H5CLEAR-copy_h5clear_sec2_v0.h5
     H5CLEAR-copy_h5clear_sec2_v2.h5
     H5CLEAR-copy_h5clear_sec2_v3.h5
+    H5CLEAR-copy_h5clear_status_noclear.h5
     H5CLEAR-copy_latest_h5clear_log_v3.h5
     H5CLEAR-copy_latest_h5clear_sec2_v3.h5
     H5CLEAR-copy_mod_h5clear_mdc_image.h5
@@ -307,6 +319,11 @@ set (CTEST_CUSTOM_MEMCHECK_IGNORE
     H5REPACK_VERIFY_LAYOUT_ALL-layout_short_switches    #uses grepTest.cmake
     H5REPACK-plugin
     H5REPACK_CMP-plugin_zero
+    #########
+    ADD_H5_VERIFY_INVALIDBOUNDS-h5repack-latest_latest_invalid-clear-objects
+    H5REPACK_VERIFY_SUPERBLOCK-SB_IS_0-clear-objects
+    H5REPACK_VERIFY_SUPERBLOCK-SB_IS_2-clear-objects
+    H5REPACK_VERIFY_SUPERBLOCK-SB_IS_3-clear-objects
     ######### tools/h5stat #########
     H5STAT-clearall-objects
     ######### tools/misc #########

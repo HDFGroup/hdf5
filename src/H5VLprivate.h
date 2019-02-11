@@ -97,7 +97,7 @@ H5_DLL herr_t H5VL_inc_vol_wrapper(void *vol_wrap_ctx);
 H5_DLL herr_t H5VL_dec_vol_wrapper(void *vol_wrap_ctx);
 H5_DLL herr_t H5VL_reset_vol_wrapper(void);
 H5_DLL void * H5VL_wrap_object(const H5VL_class_t *connector, void *wrap_ctx,
-    void *obj);
+    void *obj, H5I_type_t obj_type);
 
 /* Library state functions */
 H5_DLL herr_t H5VL_retrieve_lib_state(void **state);

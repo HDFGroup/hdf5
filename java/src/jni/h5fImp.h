@@ -72,7 +72,7 @@ Java_hdf_hdf5lib_H5_H5Fis_1hdf5
  * Signature: (Ljava/lang/String;J)Z
  */
 JNIEXPORT jboolean JNICALL
-Java_hdf_hdf5lib_H5_H5Fis_1ccessible
+Java_hdf_hdf5lib_H5_H5Fis_1accessible
   (JNIEnv*, jclass, jstring, jlong);
 
 /*

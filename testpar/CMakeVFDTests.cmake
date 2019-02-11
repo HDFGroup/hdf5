@@ -37,7 +37,7 @@
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
       foreach (test ${H5P_VFD_TESTS})
         add_test (
-          NAME TEST_PAR_VFD-${vfdname}-${test}
+          NAME MPI_TEST_VFD-${vfdname}-${test}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_PROGRAM=$<TARGET_FILE:${test}>"
               -D "TEST_ARGS:STRING="

@@ -262,17 +262,17 @@ endif ()
     set_tests_properties (VOL-${volname}-flush2 PROPERTIES DEPENDS VOL-${volname}-flush1)
     set_tests_properties (VOL-${volname}-flush1 PROPERTIES TIMEOUT 10)
     set_tests_properties (VOL-${volname}-flush2 PROPERTIES TIMEOUT 10)
-    set_tests_properties (VOL-${volname}-istore PROPERTIES TIMEOUT 1800)
+    set_tests_properties (VOL-${volname}-istore PROPERTIES TIMEOUT ${CTEST_VERY_LONG_TIMEOUT})
     if (NOT CYGWIN)
-      set_tests_properties (VOL-${volname}-cache PROPERTIES TIMEOUT 1800)
+      set_tests_properties (VOL-${volname}-cache PROPERTIES TIMEOUT ${CTEST_VERY_LONG_TIMEOUT})
     endif ()
     if (BUILD_SHARED_LIBS)
       set_tests_properties (VOL-${volname}-flush2-shared PROPERTIES DEPENDS VOL-${volname}-flush1-shared)
       set_tests_properties (VOL-${volname}-flush1-shared PROPERTIES TIMEOUT 10)
       set_tests_properties (VOL-${volname}-flush2-shared PROPERTIES TIMEOUT 10)
-      set_tests_properties (VOL-${volname}-istore-shared PROPERTIES TIMEOUT 1800)
+      set_tests_properties (VOL-${volname}-istore-shared PROPERTIES TIMEOUT ${CTEST_VERY_LONG_TIMEOUT})
       if (NOT CYGWIN AND NOT WIN32)
-        set_tests_properties (VOL-${volname}-cache-shared PROPERTIES TIMEOUT 1800)
+        set_tests_properties (VOL-${volname}-cache-shared PROPERTIES TIMEOUT ${CTEST_VERY_LONG_TIMEOUT})
       endif ()
     endif ()
     if (HDF5_TEST_FHEAP_VOL)
@@ -287,7 +287,7 @@ endif ()
               -P "${HDF_RESOURCES_DIR}/volTest.cmake"
       )
       set_tests_properties (VOL-${volname}-fheap PROPERTIES
-          TIMEOUT 1800
+          TIMEOUT ${CTEST_VERY_LONG_TIMEOUT}
           ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${volname};HDF5TestExpress=${HDF_TEST_EXPRESS}"
           WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/${volname}
       )
@@ -303,7 +303,7 @@ endif ()
                 -P "${HDF_RESOURCES_DIR}/volTest.cmake"
         )
         set_tests_properties (VOL-${volname}-fheap-shared PROPERTIES
-            TIMEOUT 1800
+            TIMEOUT ${CTEST_VERY_LONG_TIMEOUT}
             ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${volname}-shared;HDF5TestExpress=${HDF_TEST_EXPRESS}"
             WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/${volname}-shared
         )
