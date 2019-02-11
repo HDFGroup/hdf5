@@ -69,6 +69,7 @@ static void *H5VL__wrap_obj(void *obj);
 static H5VL_object_t *H5VL__new_vol_obj(H5I_type_t type, void *object,
     H5VL_t *vol_connector, hbool_t wrap_obj);
 static void *H5VL__object(hid_t id, H5I_type_t obj_type);
+static herr_t H5VL__free_vol_wrapper(H5VL_wrap_ctx_t *vol_wrap_ctx);
 
 
 /*********************/
@@ -952,6 +953,140 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5VL_retrieve_lib_state
+ *
+ * Purpose:     Retrieve the state of the library.
+ *
+ * Note:        Currently just retrieves the API context state, but could be
+ *		expanded in the future.
+ *
+ * Return:      Success:    Non-negative, *state set
+ *              Failure:    Negative, *state unset
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_retrieve_lib_state(void **state)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity checks */
+    HDassert(state);
+
+    /* Retrieve the API context state */
+    if(H5CX_retrieve_state((H5CX_state_t **)state) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't get API context state")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_retrieve_lib_state() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_restore_lib_state
+ *
+ * Purpose:     Restore the state of the library.
+ *
+ * Note:        Currently just restores the API context state, but could be
+ *		expanded in the future.
+ *
+ * Return:      SUCCEED / FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *		Thursday, January 10, 2019
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_restore_lib_state(const void *state)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity checks */
+    HDassert(state);
+
+    /* Restore the API context state */
+    if(H5CX_restore_state((const H5CX_state_t *)state) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set API context state")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_restore_lib_state() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_free_lib_state
+ *
+ * Purpose:     Free a library state.
+ *
+ * Return:      SUCCEED / FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *		Thursday, January 10, 2019
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_free_lib_state(void *state)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity checks */
+    HDassert(state);
+
+    /* Free the API context state */
+    if(H5CX_free_state((H5CX_state_t *)state) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "can't free API context state")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_free_lib_state() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL__free_vol_wrapper
+ *
+ * Purpose:     Free object wrapping context for VOL connector
+ *
+ * Return:      SUCCEED / FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *		Wednesday, January  9, 2019
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL__free_vol_wrapper(H5VL_wrap_ctx_t *vol_wrap_ctx)
+{
+    herr_t ret_value = SUCCEED;                 /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity check */
+    HDassert(vol_wrap_ctx);
+    HDassert(0 == vol_wrap_ctx->rc);
+
+    /* If there is a VOL connector object wrapping context, release it */
+    if(vol_wrap_ctx->obj_wrap_ctx)
+        /* Release the VOL connector's object wrapping context */
+        if((*vol_wrap_ctx->connector->cls->free_wrap_ctx)(vol_wrap_ctx->obj_wrap_ctx) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "unable to release connector's object wrapping context")
+
+    /* Release object wrapping context */
+    H5FL_FREE(H5VL_wrap_ctx_t, vol_wrap_ctx);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__free_vol_wrapper() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5VL_set_vol_wrapper
  *
  * Purpose:     Set up object wrapping context for current VOL connector
@@ -1016,6 +1151,80 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5VL_inc_vol_wrapper
+ *
+ * Purpose:     Increment refcount on object wrapping context
+ *
+ * Return:      SUCCEED / FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *		Wednesday, January  9, 2019
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_inc_vol_wrapper(void *_vol_wrap_ctx)
+{
+    H5VL_wrap_ctx_t *vol_wrap_ctx = (H5VL_wrap_ctx_t *)_vol_wrap_ctx; /* VOL object wrapping context */
+    herr_t ret_value = SUCCEED;                 /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Check for valid, active VOL object wrap context */
+    if(NULL == vol_wrap_ctx)
+        HGOTO_ERROR(H5E_VOL, H5E_BADVALUE, FAIL, "no VOL object wrap context?")
+    if(0 == vol_wrap_ctx->rc)
+        HGOTO_ERROR(H5E_VOL, H5E_BADVALUE, FAIL, "bad VOL object wrap context refcount?")
+
+    /* Increment ref count on wrapping context */
+    vol_wrap_ctx->rc++;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_inc_vol_wrapper() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_dec_vol_wrapper
+ *
+ * Purpose:     Decrement refcount on object wrapping context, releasing it
+ *		if the refcount drops to zero.
+ *
+ * Return:      SUCCEED / FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *		Wednesday, January  9, 2019
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_dec_vol_wrapper(void *_vol_wrap_ctx)
+{
+    H5VL_wrap_ctx_t *vol_wrap_ctx = (H5VL_wrap_ctx_t *)_vol_wrap_ctx; /* VOL object wrapping context */
+    herr_t ret_value = SUCCEED;                 /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Check for valid, active VOL object wrap context */
+    if(NULL == vol_wrap_ctx)
+        HGOTO_ERROR(H5E_VOL, H5E_BADVALUE, FAIL, "no VOL object wrap context?")
+    if(0 == vol_wrap_ctx->rc)
+        HGOTO_ERROR(H5E_VOL, H5E_BADVALUE, FAIL, "bad VOL object wrap context refcount?")
+
+    /* Decrement ref count on wrapping context */
+    vol_wrap_ctx->rc--;
+
+    /* Release context if the ref count drops to zero */
+    if(0 == vol_wrap_ctx->rc)
+        if(H5VL__free_vol_wrapper(vol_wrap_ctx) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "unable to release VOL object wrapping context")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_dec_vol_wrapper() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5VL_reset_vol_wrapper
  *
  * Purpose:     Reset object wrapping context for current VOL connector
@@ -1038,32 +1247,26 @@ H5VL_reset_vol_wrapper(void)
 
     /* Check for VOL object wrap context */
     if(NULL == vol_wrap_ctx)
-        HGOTO_ERROR(H5E_VOL, H5E_BADVALUE, FAIL, "no VOL object wrap context?")
+        goto done; // Tang
+        /* HGOTO_ERROR(H5E_VOL, H5E_BADVALUE, FAIL, "no VOL object wrap context?") */
 
     /* Decrement ref count on wrapping context */
     vol_wrap_ctx->rc--;
 
     /* Release context if the ref count drops to zero */
     if(0 == vol_wrap_ctx->rc) {
-        /* If there is a VOL connector object wrapping context, release it */
-        if(vol_wrap_ctx->obj_wrap_ctx) {
-            /* Release the VOL connector's object wrapping context */
-            if((*vol_wrap_ctx->connector->cls->free_wrap_ctx)(vol_wrap_ctx->obj_wrap_ctx) < 0)
-                HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "unable to release connector's object wrapping context")
-        } /* end if */
-
         /* Release object wrapping context */
-        H5FL_FREE(H5VL_wrap_ctx_t, vol_wrap_ctx);
+        if(H5VL__free_vol_wrapper(vol_wrap_ctx) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "unable to release VOL object wrapping context")
 
         /* Reset the wrapper context */
         if(H5CX_set_vol_wrap_ctx(NULL) < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL object wrap context")
     } /* end if */
-    else {
+    else
         /* Save the updated wrapper context */
         if(H5CX_set_vol_wrap_ctx(vol_wrap_ctx) < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL object wrap context")
-    } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

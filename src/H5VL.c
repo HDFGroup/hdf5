@@ -488,6 +488,9 @@ done:
  *
  * Purpose:     Compares two connector classes (based on their value field)
  *
+ * Note:	This routine is _only_ for HDF5 VOL connector authors!  It is
+ *		_not_ part of the public API for HDF5 application developers.
+ *
  * Return:      Success:    Non-negative, *cmp set to a value like strcmp
  *
  *              Failure:    Negative, *cmp unset
@@ -516,6 +519,115 @@ H5VLcmp_connector_cls(int *cmp, hid_t connector_id1, hid_t connector_id2)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* H5VLcmp_connector_cls() */
+
+
+/*---------------------------------------------------------------------------
+ * Function:    H5VLretrieve_lib_state
+ *
+ * Purpose:     Retrieves a copy of the internal state of the HDF5 library,
+ *		so that it can be restored later.
+ *
+ * Note:	This routine is _only_ for HDF5 VOL connector authors!  It is
+ *		_not_ part of the public API for HDF5 application developers.
+ *
+ * Return:      Success:    Non-negative, *state set
+ *              Failure:    Negative, *state unset
+ *
+ * Programmer:	Quincey Koziol
+ *		Thursday, January 10, 2019
+ *
+ *---------------------------------------------------------------------------
+ */
+herr_t
+H5VLretrieve_lib_state(void **state)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Check args */
+    if(NULL == state)
+        HGOTO_ERROR(H5E_VOL, H5E_BADVALUE, FAIL, "invalid state pointer")
+
+    /* Retrieve the library state */
+    if(H5VL_retrieve_lib_state(state) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't retrieve library state")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5VLretrieve_lib_state() */
+
+
+/*---------------------------------------------------------------------------
+ * Function:    H5VLrestore_lib_state
+ *
+ * Purpose:     Restores the internal state of the HDF5 library.
+ *
+ * Note:	This routine is _only_ for HDF5 VOL connector authors!  It is
+ *		_not_ part of the public API for HDF5 application developers.
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ * Programmer:	Quincey Koziol
+ *		Thursday, January 10, 2019
+ *
+ *---------------------------------------------------------------------------
+ */
+herr_t
+H5VLrestore_lib_state(const void *state)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Check args */
+    if(NULL == state)
+        HGOTO_ERROR(H5E_VOL, H5E_BADVALUE, FAIL, "invalid state pointer")
+
+    /* Restore the library state */
+    if(H5VL_restore_lib_state(state) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't restore library state")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5VLrestore_lib_state() */
+
+
+/*---------------------------------------------------------------------------
+ * Function:    H5VLfree_lib_state
+ *
+ * Purpose:     Free a retrieved library state.
+ *
+ * Note:	This routine is _only_ for HDF5 VOL connector authors!  It is
+ *		_not_ part of the public API for HDF5 application developers.
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ * Programmer:	Quincey Koziol
+ *		Thursday, January 10, 2019
+ *
+ *---------------------------------------------------------------------------
+ */
+herr_t
+H5VLfree_lib_state(void *state)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Check args */
+    if(NULL == state)
+        HGOTO_ERROR(H5E_VOL, H5E_BADVALUE, FAIL, "invalid state pointer")
+
+    /* Free the library state */
+    if(H5VL_free_lib_state(state) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "can't free library state")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5VLfree_lib_state() */
 
 
 /*---------------------------------------------------------------------------
