@@ -10,7 +10,7 @@
 
 cd @HDF5_BINARY_DIR@
 #run parallel tests except t_cache_image test
-CMD="ctest . -R TEST_PAR|PH5DIFF|PERFORM|ph5example -E t_cache_image -C Release -T test"
+CMD="ctest . -R PAR_ -E t_cache_image -C Release -T test"
 
 echo "Run $CMD. Test output will be in build/ctestP.out"
 $CMD >& ctestP.out
