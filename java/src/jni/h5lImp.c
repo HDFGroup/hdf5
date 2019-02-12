@@ -59,6 +59,11 @@ Java_hdf_hdf5lib_H5_H5Lcopy
 
     UNUSED(clss);
 
+    if (NULL == cur_name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Lcopy: src name is NULL");
+    if (NULL == dst_name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Lcopy: dest name is NULL");
+
     PIN_JAVA_STRING(ENVONLY, cur_name, lCurName, NULL, "H5Lcopy: src name not pinned");
     PIN_JAVA_STRING(ENVONLY, dst_name, lDstName, NULL, "H5Lcopy: dest name not pinned");
 
@@ -88,6 +93,13 @@ Java_hdf_hdf5lib_H5_H5Lcreate_1external
     herr_t      status = FAIL;
 
     UNUSED(clss);
+
+    if (NULL == file_name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Lcreate_external: file name is NULL");
+    if (NULL == cur_name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Lcreate_external: object name is NULL");
+    if (NULL == dst_name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Lcreate_external: link name is NULL");
 
     PIN_JAVA_STRING(ENVONLY, file_name, lFileName, NULL, "H5Lcreate_external: file name not pinned");
     PIN_JAVA_STRING(ENVONLY, cur_name, lCurName, NULL, "H5Lcreate_external: object name not pinned");
@@ -121,6 +133,11 @@ Java_hdf_hdf5lib_H5_H5Lcreate_1hard
 
     UNUSED(clss);
 
+    if (NULL == cur_name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Lcreate_hard: object name is NULL");
+    if (NULL == dst_name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Lcreate_hard: link name is NULL");
+
     PIN_JAVA_STRING(ENVONLY, cur_name, lCurName, NULL, "H5Lcreate_hard: object name not pinned");
     PIN_JAVA_STRING(ENVONLY, dst_name, lDstName, NULL, "H5Lcreate_hard: link name not pinned");
 
@@ -150,6 +167,11 @@ Java_hdf_hdf5lib_H5_H5Lcreate_1soft
 
     UNUSED(clss);
 
+    if (NULL == cur_name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Lcreate_soft: link target is NULL");
+    if (NULL == dst_name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Lcreate_soft: link name is NULL");
+
     PIN_JAVA_STRING(ENVONLY, cur_name, linkTarget, NULL, "H5Lcreate_soft: link target not pinned");
     PIN_JAVA_STRING(ENVONLY, dst_name, linkName, NULL, "H5Lcreate_soft: link name not pinned");
 
@@ -177,6 +199,9 @@ Java_hdf_hdf5lib_H5_H5Ldelete
 
     UNUSED(clss);
 
+    if (NULL == name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Ldelete: link name is NULL");
+
     PIN_JAVA_STRING(ENVONLY, name, linkName, NULL, "H5Ldelete: link name not pinned");
 
     if ((status = H5Ldelete((hid_t)loc_id, linkName, (hid_t)access_id)) < 0)
@@ -203,6 +228,9 @@ Java_hdf_hdf5lib_H5_H5Ldelete_1by_1idx
 
     UNUSED(clss);
 
+    if (NULL == name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Ldelete_by_idx: group name is NULL");
+
     PIN_JAVA_STRING(ENVONLY, name, groupName, NULL, "H5Ldelete_by_idx: group name not pinned");
 
     if ((status = H5Ldelete_by_idx((hid_t)loc_id, groupName, (H5_index_t)index_field, (H5_iter_order_t)order, n, (hid_t)access_id)) < 0)
@@ -226,6 +254,9 @@ Java_hdf_hdf5lib_H5_H5Lexists
     htri_t      bval = JNI_FALSE;
 
     UNUSED(clss);
+
+    if (NULL == name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Lexists: link name is NULL");
 
     PIN_JAVA_STRING(ENVONLY, name, linkName, NULL, "H5Lexists: link name not pinned");
 
@@ -257,6 +288,9 @@ Java_hdf_hdf5lib_H5_H5Lget_1info
     jobject     ret_obj = NULL;
 
     UNUSED(clss);
+
+    if (NULL == name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Lget_info: link name is NULL");
 
     PIN_JAVA_STRING(ENVONLY, name, linkName, NULL, "H5Lget_info: link name not pinned");
 
@@ -296,6 +330,9 @@ Java_hdf_hdf5lib_H5_H5Lget_1info_1by_1idx
 
     UNUSED(clss);
 
+    if (NULL == name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Lget_info_by_idx: group name is NULL");
+
     PIN_JAVA_STRING(ENVONLY, name, groupName, NULL, "H5Lget_info_by_idx: group name not pinned");
 
     if ((status = H5Lget_info_by_idx((hid_t)loc_id, groupName, (H5_index_t)index_field, (H5_iter_order_t)order, (hsize_t)link_n, &infobuf, (hid_t)access_id)) < 0)
@@ -332,6 +369,9 @@ Java_hdf_hdf5lib_H5_H5Lget_1name_1by_1idx
     char       *linkName = NULL;
 
     UNUSED(clss);
+
+    if (NULL == name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Lget_name_by_idx: group name is NULL");
 
     PIN_JAVA_STRING(ENVONLY, name, groupName, NULL, "H5Lget_name_by_idx: group name not pinned");
 
@@ -377,6 +417,9 @@ Java_hdf_hdf5lib_H5_H5Lget_1value
     char       *linkValue = NULL;
 
     UNUSED(clss);
+
+    if (NULL == name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Lget_value: link name is NULL");
 
     infobuf.type = H5L_TYPE_ERROR;
 
@@ -465,6 +508,9 @@ Java_hdf_hdf5lib_H5_H5Lget_1value_1by_1idx
 
     UNUSED(clss);
 
+    if (NULL == name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Lget_val_by_idx: group name is NULL");
+
     infobuf.type = H5L_TYPE_ERROR;
 
     PIN_JAVA_STRING(ENVONLY, name, grpName, NULL, "H5Lget_val_by_idx: group name not pinned");
@@ -550,6 +596,11 @@ Java_hdf_hdf5lib_H5_H5Lmove
     herr_t      status = FAIL;
 
     UNUSED(clss);
+
+    if (NULL == cur_name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Lmove: src name is NULL");
+    if (NULL == dst_name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Lmove: dest name is NULL");
 
     PIN_JAVA_STRING(ENVONLY, cur_name, lCurName, NULL, "H5Lmove: src name not pinned");
     PIN_JAVA_STRING(ENVONLY, dst_name, lDstName, NULL, "H5Lmove: dest name not pinned");
@@ -675,6 +726,8 @@ Java_hdf_hdf5lib_H5_H5Lvisit_1by_1name
         H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Lvisit_by_name: op_data is NULL");
     if (NULL == callback_op)
         H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Lvisit_by_name: callback_op is NULL");
+    if (NULL == name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Lvisit_by_name: group name is NULL");
 
     PIN_JAVA_STRING(ENVONLY, name, grpName, NULL, "H5Lvisit_by_name: group name not pinned");
 
@@ -743,6 +796,8 @@ Java_hdf_hdf5lib_H5_H5Literate_1by_1name
         H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Literate_by_name: op_data is NULL");
     if (NULL == callback_op)
         H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Literate_by_name: callback_op is NULL");
+    if (NULL == name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Literate_by_name: group name is NULL");
 
     PIN_JAVA_STRING(ENVONLY, name, groupName, NULL, "H5Literate_by_name: group name not pinned");
 

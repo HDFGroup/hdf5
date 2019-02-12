@@ -94,6 +94,13 @@ Java_hdf_hdf5lib_H5_H5Eregister_1class
 
     UNUSED(cls);
 
+    if (NULL == cls_name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Eregister_class: class name is NULL");
+    if (NULL == lib_name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Eregister_class: lib name is NULL");
+    if (NULL == version)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Eregister_class: version string is NULL");
+
     PIN_JAVA_STRING(ENVONLY, cls_name, the_cls_name, NULL, "H5Eregister_class: class name not pinned");
     PIN_JAVA_STRING(ENVONLY, lib_name, the_lib_name, NULL, "H5Eregister_class: lib name not pinned");
     PIN_JAVA_STRING(ENVONLY, version, the_version, NULL, "H5Eregister_class: version string not pinned");
@@ -171,6 +178,8 @@ Java_hdf_hdf5lib_H5_H5Ecreate_1msg
 
     if (err_id < 0)
         H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Ecreate_msg: invalid error class ID");
+    if (NULL == err_msg)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Ecreate_msg: error message string is NULL");
 
     PIN_JAVA_STRING(ENVONLY, err_msg, the_err_msg, NULL, "H5Ecreate_msg: error message string not pinned");
 
@@ -376,13 +385,19 @@ Java_hdf_hdf5lib_H5_H5Epush2
     UNUSED(cls);
 
     if (stk_id < 0)
-        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Epush: invalid error stack ID");
+        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Epush2: invalid error stack ID");
     if (class_id < 0)
-        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Epush: invalid error class ID");
+        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Epush2: invalid error class ID");
     if (major_id < 0)
-        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Epush: invalid major error class ID");
+        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Epush2: invalid major error class ID");
     if (minor_id < 0)
-        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Epush: invalid minor error class ID");
+        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Epush2: invalid minor error class ID");
+    if (NULL == filename)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Epush2: filename is NULL");
+    if (NULL == funcname)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Epush2: function name is NULL");
+    if (NULL == err_desc)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Epush2: error message is NULL");
 
     PIN_JAVA_STRING(ENVONLY, filename, fName, NULL, "H5Epush2: filename not pinned");
     PIN_JAVA_STRING(ENVONLY, funcname, fncName, NULL, "H5Epush2: function name not pinned");

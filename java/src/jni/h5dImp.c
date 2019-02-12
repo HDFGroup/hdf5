@@ -69,6 +69,9 @@ Java_hdf_hdf5lib_H5__1H5Dcreate
 
     UNUSED(clss);
 
+    if (NULL == name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Dcreate: dataset name is NULL");
+
     PIN_JAVA_STRING(ENVONLY, name, dsetName, NULL, "H5Dcreate: dataset name not pinned");
 
     if ((dset_id = H5Dcreate2((hid_t)loc_id, dsetName, (hid_t)type_id, (hid_t)space_id, H5P_DEFAULT, (hid_t)create_plist_id, H5P_DEFAULT)) < 0)
@@ -94,6 +97,9 @@ Java_hdf_hdf5lib_H5__1H5Dopen
     hid_t       dset_id = H5I_INVALID_HID;
 
     UNUSED(clss);
+
+    if (NULL == name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Dopen: dataset name is NULL");
 
     PIN_JAVA_STRING(ENVONLY, name, dsetName, NULL, "H5Dopen: dataset name not pinned");
 
@@ -1677,6 +1683,9 @@ Java_hdf_hdf5lib_H5__1H5Dcreate2
 
     UNUSED(clss);
 
+    if (NULL == name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Dcreate2: dataset name is NULL");
+
     PIN_JAVA_STRING(ENVONLY, name, dsetName, NULL, "H5Dcreate2: dataset name not pinned");
 
     if ((dset_id = H5Dcreate2((hid_t)loc_id, dsetName, (hid_t)type_id, (hid_t)space_id, (hid_t)link_plist_id, (hid_t)create_plist_id, (hid_t)access_plist_id)) < 0)
@@ -1702,6 +1711,9 @@ Java_hdf_hdf5lib_H5__1H5Dopen2
     hid_t       dset_id = H5I_INVALID_HID;
 
     UNUSED(clss);
+
+    if (NULL == name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Dopen2: dataset name is NULL");
 
     PIN_JAVA_STRING(ENVONLY, name, dsetName, NULL, "H5Dopen2: dataset name not pinned");
 

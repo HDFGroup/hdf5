@@ -119,6 +119,9 @@ Java_hdf_hdf5lib_H5_H5Pset_1efile_1prefix
 
     UNUSED(clss);
 
+    if (NULL == prefix)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Pset_efile_prefix: external file prefix is NULL");
+
     PIN_JAVA_STRING(ENVONLY, prefix, extFilePrefix, NULL, "H5Pset_efile_prefix: external file prefix not pinned");
 
     if ((retVal = H5Pset_efile_prefix((hid_t)dapl_id, extFilePrefix)) < 0)

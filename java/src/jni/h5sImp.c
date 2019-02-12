@@ -510,7 +510,7 @@ Java_hdf_hdf5lib_H5_H5Sget_1simple_1extent_1type
     UNUSED(clss);
 
     if (space_id < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
+        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Sget_simple_extent_type: space_id < 0");
 
     if (H5S_NO_CLASS == (retVal = H5Sget_simple_extent_type(space_id)))
         H5_LIBRARY_ERROR(ENVONLY);

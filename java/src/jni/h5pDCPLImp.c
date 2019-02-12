@@ -1008,8 +1008,8 @@ Java_hdf_hdf5lib_H5_H5Pset_1scaleoffset
 
     UNUSED(clss);
 
-    if (scale_factor <= 0)
-        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Pset_scaleoffset: scale factor must be > 0");
+    if (scale_factor < 0)
+        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Pset_scaleoffset: scale factor must be >= 0");
     if (scale_type != H5Z_SO_FLOAT_DSCALE && scale_type != H5Z_SO_FLOAT_ESCALE && scale_type != H5Z_SO_INT)
         H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Pset_scaleoffset: invalid scale type");
 
@@ -1073,6 +1073,9 @@ Java_hdf_hdf5lib_H5_H5Pset_1external
     herr_t      status = FAIL;
 
     UNUSED(clss);
+
+    if (NULL == name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Pset_external: file name is NULL");
 
     PIN_JAVA_STRING(ENVONLY, name, fileName, NULL, "H5Pset_external: file name not pinned");
 
@@ -1188,6 +1191,11 @@ Java_hdf_hdf5lib_H5_H5Pset_1virtual
     herr_t      retVal = FAIL;
 
     UNUSED(clss);
+
+    if (NULL == src_file_name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Pset_virtual: src_file_name is NULL");
+    if (NULL == src_dset_name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Pset_virtual: src_dset_name is NULL");
 
     PIN_JAVA_STRING(ENVONLY, src_file_name, fstr, NULL, "H5Pset_virtual: src_file_name not pinned");
     PIN_JAVA_STRING(ENVONLY, src_dset_name, dstr, NULL, "H5Pset_virtual: src_dset_name not pinned");
@@ -1351,6 +1359,9 @@ Java_hdf_hdf5lib_H5_H5Pset_1virtual_1prefix
     herr_t      retVal = FAIL;
 
     UNUSED(clss);
+
+    if (NULL == prefix)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Pset_virtual_prefix: virtual prefix is NULL");
 
     PIN_JAVA_STRING(ENVONLY, prefix, virtPrefix, NULL, "H5Pset_virtual_prefix: virtual prefix not pinned");
 

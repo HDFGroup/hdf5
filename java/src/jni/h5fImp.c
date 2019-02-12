@@ -47,6 +47,9 @@ Java_hdf_hdf5lib_H5__1H5Fopen
 
     UNUSED(clss);
 
+    if (NULL == name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Fopen: file name is NULL");
+
     PIN_JAVA_STRING(ENVONLY, name, fileName, NULL, "H5Fopen: file name not pinned");
 
     if ((status = H5Fopen(fileName, (unsigned)flags, (hid_t)access_id)) < 0)
@@ -72,6 +75,9 @@ Java_hdf_hdf5lib_H5__1H5Fcreate
     hid_t       status = H5I_INVALID_HID;
 
     UNUSED(clss);
+
+    if (NULL == name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Fcreate: file name is NULL");
 
     PIN_JAVA_STRING(ENVONLY, name, fileName, NULL, "H5Fcreate: file name not pinned");
 
@@ -159,6 +165,9 @@ Java_hdf_hdf5lib_H5_H5Fis_1hdf5
     H5_UNIMPLEMENTED(ENVONLY, "H5Fis_hdf5: not implemented");
 #endif
 
+    if (NULL == name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Fis_hdf5: file name is NULL");
+
     PIN_JAVA_STRING(ENVONLY, name, fileName, NULL, "H5Fis_hdf5: file name not pinned");
 
     if ((bval = H5Fis_hdf5(fileName)) < 0)
@@ -186,6 +195,9 @@ Java_hdf_hdf5lib_H5_H5Fis_1accessible
     htri_t      bval = JNI_FALSE;
 
     UNUSED(clss);
+
+    if (NULL == name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Fis_accessible: file name is NULL");
 
     PIN_JAVA_STRING(ENVONLY, name, fileName, NULL, "H5Fis_accessible: file name not pinned");
 
@@ -295,6 +307,9 @@ Java_hdf_hdf5lib_H5_H5Fmount
 
     UNUSED(clss);
 
+    if (NULL == name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Fmount: file name is NULL");
+
     PIN_JAVA_STRING(ENVONLY, name, fileName, NULL, "H5Fmount: file name not pinned");
 
     if ((status = H5Fmount((hid_t)loc_id, fileName, (hid_t)child_id, (hid_t)plist_id)) < 0)
@@ -320,6 +335,9 @@ Java_hdf_hdf5lib_H5_H5Funmount
     herr_t      status = FAIL;
 
     UNUSED(clss);
+
+    if (NULL == name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Funmount: file name is NULL");
 
     PIN_JAVA_STRING(ENVONLY, name, fileName, NULL, "H5Funmount: file name not pinned");
 

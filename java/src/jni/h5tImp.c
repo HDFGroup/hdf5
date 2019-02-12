@@ -48,6 +48,9 @@ Java_hdf_hdf5lib_H5__1H5Topen2
 
     UNUSED(clss);
 
+    if (NULL == name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Topen2: datatype name is NULL");
+
     PIN_JAVA_STRING(ENVONLY, name, datatypeName, NULL, "H5Topen2: datatype name not pinned");
 
     if ((status = H5Topen2((hid_t)loc_id, datatypeName, (hid_t)access_plist)) < 0)
@@ -855,7 +858,10 @@ Java_hdf_hdf5lib_H5_H5Tget_1member_1index
 
     UNUSED(clss);
 
-    PIN_JAVA_STRING(ENVONLY, field_name, datatypeName, NULL, "H5Tget_member_index: datatype name not pinned");
+    if (NULL == field_name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Tget_member_index: field name is NULL");
+
+    PIN_JAVA_STRING(ENVONLY, field_name, datatypeName, NULL, "H5Tget_member_index: field name not pinned");
 
     if ((index = H5Tget_member_index((hid_t)type_id, datatypeName)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
@@ -936,6 +942,9 @@ Java_hdf_hdf5lib_H5_H5Tinsert
     herr_t      status = FAIL;
 
     UNUSED(clss);
+
+    if (NULL == name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Tinsert: datatype name is NULL");
 
     PIN_JAVA_STRING(ENVONLY, name, datatypeName, NULL, "H5Tinsert: datatype name not pinned");
 
@@ -1022,6 +1031,9 @@ Java_hdf_hdf5lib_H5_H5Tset_1tag
     herr_t      status = FAIL;
 
     UNUSED(clss);
+
+    if (NULL == tag)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Tset_tag: tag is NULL");
 
     PIN_JAVA_STRING(ENVONLY, tag, tagBuf, NULL, "H5Tset_tag: tag buffer not pinned");
 
@@ -1119,11 +1131,13 @@ Java_hdf_hdf5lib_H5_H5Tenum_1insert_1int
     UNUSED(clss);
 
     if (NULL == value)
-        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Tenum_insert: value is NULL");
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Tenum_insert_int: value is NULL");
+    if (NULL == name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Tenum_insert_int: member name is NULL");
 
-    PIN_JAVA_STRING(ENVONLY, name, memberName, NULL, "H5Tenum_insert: member name not pinned");
+    PIN_JAVA_STRING(ENVONLY, name, memberName, NULL, "H5Tenum_insert_int: member name not pinned");
 
-    PIN_INT_ARRAY(ENVONLY, value, intBuf, &isCopy, "H5Tenum_insert: int buffer not pinned");
+    PIN_INT_ARRAY(ENVONLY, value, intBuf, &isCopy, "H5Tenum_insert_int: int buffer not pinned");
 
     if ((status = H5Tenum_insert((hid_t)type_id, memberName, intBuf)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
@@ -1155,6 +1169,8 @@ Java_hdf_hdf5lib_H5_H5Tenum_1insert
 
     if (NULL == value)
         H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Tenum_insert: value is NULL");
+    if (NULL == name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Tenum_insert: member name is NULL");
 
     PIN_JAVA_STRING(ENVONLY, name, memberName, NULL, "H5Tenum_insert: member name not pinned");
 
@@ -1234,10 +1250,10 @@ Java_hdf_hdf5lib_H5_H5Tenum_1nameof
 
     UNUSED(clss);
 
-    if (NULL == value)
-        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Tenum_nameof: value is NULL");
     if (size <= 0)
         H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Tenum_nameof: name size < 0");
+    if (NULL == value)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Tenum_nameof: value is NULL");
 
     if (NULL == (nameP = (char *) HDmalloc(sizeof(char) * (size_t)size)))
         H5_JNI_FATAL_ERROR(ENVONLY, "H5Tenum_nameof: failed to allocate name buffer");
@@ -1278,6 +1294,8 @@ Java_hdf_hdf5lib_H5_H5Tenum_1valueof_1int
 
     if (NULL == value)
         H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Tenum_valueof_int: value is NULL");
+    if (NULL == name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Tenum_valueof_int: enum value name is NULL");
 
     PIN_JAVA_STRING(ENVONLY, name, enumValue, NULL, "H5Tenum_valueof_int: enum value not pinned");
 
@@ -1313,6 +1331,8 @@ Java_hdf_hdf5lib_H5_H5Tenum_1valueof
 
     if (NULL == value)
         H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Tenum_valueof: value is NULL");
+    if (NULL == name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Tenum_valueof: enum value name is NULL");
 
     PIN_JAVA_STRING(ENVONLY, name, enumValue, NULL, "H5Tenum_valueof: enum value not pinned");
 
@@ -1533,6 +1553,9 @@ Java_hdf_hdf5lib_H5_H5Tcommit
 
     UNUSED(clss);
 
+    if (NULL == name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Tcommit: datatype name is NULL");
+
     PIN_JAVA_STRING(ENVONLY, name, datatypeName, NULL, "H5Tcommit: datatype name not pinned");
 
     if ((status = H5Tcommit2((hid_t)loc_id, datatypeName, (hid_t)type, (hid_t)link_plist_id, (hid_t)create_plist_id, (hid_t)access_plist_id)) < 0)
@@ -1561,10 +1584,10 @@ Java_hdf_hdf5lib_H5__1H5Tarray_1create2
 
     UNUSED(clss);
 
-    if (NULL == dims)
-        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Tarray_create: dims is NULL");
     if (rank <= 0)
         H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Tarray_create: rank is < 1");
+    if (NULL == dims)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Tarray_create: dims is NULL");
 
     PIN_LONG_ARRAY(ENVONLY, dims, dimsP, &isCopy, "H5Tarray_create: dimsP not pinned");
 

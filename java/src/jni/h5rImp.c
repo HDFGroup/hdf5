@@ -50,6 +50,8 @@ Java_hdf_hdf5lib_H5_H5Rcreate
 
     if (NULL == ref)
         H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Rcreate: reference is NULL");
+    if (NULL == name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Rcreate: name is NULL");
 
     if ((refBufLen = ENVPTR->GetArrayLength(ENVONLY, ref)) < 0) {
         CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);

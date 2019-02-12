@@ -126,6 +126,9 @@ Java_hdf_hdf5lib_H5__1H5Gcreate2
 
     UNUSED(clss);
 
+    if (NULL == name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Gcreate2: group name is NULL");
+
     PIN_JAVA_STRING(ENVONLY, name, grpName, NULL, "H5Gcreate2: group name not pinned");
 
     if ((group_id = H5Gcreate2((hid_t)loc_id, grpName, (hid_t)link_plist_id, (hid_t)create_plist_id, (hid_t)access_plist_id)) < 0)
@@ -171,6 +174,9 @@ Java_hdf_hdf5lib_H5__1H5Gopen2
     hid_t       group_id = H5I_INVALID_HID;
 
     UNUSED(clss);
+
+    if (NULL == name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Gopen2: group name is NULL");
 
     PIN_JAVA_STRING(ENVONLY, name, grpName, NULL, "H5Gopen2: group name not pinned");
 
@@ -245,6 +251,9 @@ Java_hdf_hdf5lib_H5_H5Gget_1info_1by_1name
 
     UNUSED(cls);
 
+    if (NULL == name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Gget_info_by_name: group name is NULL");
+
     PIN_JAVA_STRING(ENVONLY, name, grpName, NULL, "H5Gget_info_by_name: group name not pinned");
 
     if ((ret_val = H5Gget_info_by_name((hid_t)loc_id, grpName, &group_info, (hid_t)lapl_id)) < 0)
@@ -280,6 +289,9 @@ Java_hdf_hdf5lib_H5_H5Gget_1info_1by_1idx
     herr_t           ret_val = FAIL;
 
     UNUSED(cls);
+
+    if (NULL == name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Gget_info_by_idx: group name is NULL");
 
     PIN_JAVA_STRING(ENVONLY, name, grpName, NULL, "H5Gget_info_by_idx: group name not pinned");
 

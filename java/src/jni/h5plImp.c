@@ -83,6 +83,9 @@ Java_hdf_hdf5lib_H5_H5PLappend
 
     UNUSED(clss);
 
+    if (NULL == plugin_path)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5PLappend: new path is NULL");
+
     PIN_JAVA_STRING(ENVONLY, plugin_path, newPath, NULL, "H5PLappend: new path not pinned");
 
     if ((retVal = H5PLappend(newPath)) < 0)
@@ -105,6 +108,9 @@ Java_hdf_hdf5lib_H5_H5PLprepend
     herr_t      retVal = FAIL;
 
     UNUSED(clss);
+
+    if (NULL == plugin_path)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5PLprepend: new path is NULL");
 
     PIN_JAVA_STRING(ENVONLY, plugin_path, newPath, NULL, "H5PLprepend: new path not pinned");
 
@@ -129,6 +135,9 @@ Java_hdf_hdf5lib_H5_H5PLreplace
     herr_t      retVal = FAIL;
 
     UNUSED(clss);
+
+    if (NULL == plugin_path)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5PLreplace: new path is NULL");
 
     if (index < 0)
         H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5PLreplace: index < 0");
@@ -156,6 +165,9 @@ Java_hdf_hdf5lib_H5_H5PLinsert
     herr_t      retVal = FAIL;
 
     UNUSED(clss);
+
+    if (NULL == plugin_path)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5PLinsert: new path is NULL");
 
     if (index < 0)
         H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5PLinsert: index < 0");

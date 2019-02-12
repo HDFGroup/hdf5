@@ -232,7 +232,7 @@ h5str_convert
                     HDmemcpy(cptr, &tmp_double, sizeof(double));
                     break;
                 }
-#if H5_SIZEOF_LONG_DOUBLE != 0
+#if H5_SIZEOF_LONG_DOUBLE != 0 && H5_SIZEOF_LONG_DOUBLE != H5_SIZEOF_DOUBLE
                 case sizeof(long double):
                 {
                     long double tmp_ldouble = 0.0;
@@ -259,6 +259,8 @@ h5str_convert
 
             if (len > 0) {
                 HDstrncpy(cptr, this_str, typeSize);
+                cptr[typeSize - 1] = '\0';
+
                 retVal = typeSize;
             }
             else {
@@ -329,6 +331,7 @@ h5str_convert
                     break;
                 }
 
+#if H5_SIZEOF_LONG != H5_SIZEOF_INT
                 case sizeof(long):
                 {
                     unsigned long tmp_ulong = 0;
@@ -345,7 +348,7 @@ h5str_convert
 
                     break;
                 }
-
+#endif
 #if H5_SIZEOF_LONG_LONG != H5_SIZEOF_LONG
                 case sizeof(long long):
                 {
@@ -444,14 +447,14 @@ h5str_convert
                     value = &tmp_ushort;
                     break;
                 }
-
+#if H5_SIZEOF_LONG != H5_SIZEOF_INT
                 case sizeof(long):
                 {
                     unsigned long tmp_ulong = 0;
                     value = &tmp_ulong;
                     break;
                 }
-
+#endif
 #if H5_SIZEOF_LONG_LONG != H5_SIZEOF_LONG
                 case sizeof(long long):
                 {
@@ -694,7 +697,7 @@ h5str_sprintf
 
                     break;
                 }
-#if H5_SIZEOF_LONG_DOUBLE != 0
+#if H5_SIZEOF_LONG_DOUBLE != 0 && H5_SIZEOF_LONG_DOUBLE != H5_SIZEOF_DOUBLE
                 case sizeof(long double):
                 {
                     long double tmp_ldouble = 0.0;
@@ -750,6 +753,7 @@ h5str_sprintf
                         H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: failed to allocate string buffer");
 
                     HDstrncpy(this_str, tmp_str, typeSize);
+                    this_str[typeSize] = '\0';
                 }
             }
 
@@ -844,7 +848,7 @@ h5str_sprintf
 
                     break;
                 }
-
+#if H5_SIZEOF_LONG != H5_SIZEOF_INT
                 case sizeof(long):
                 {
                     unsigned long tmp_ulong = 0;
@@ -871,7 +875,7 @@ h5str_sprintf
 
                     break;
                 }
-
+#endif
 #if H5_SIZEOF_LONG_LONG != H5_SIZEOF_LONG
                 case sizeof(long long):
                 {

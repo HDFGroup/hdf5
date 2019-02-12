@@ -273,6 +273,9 @@ Java_hdf_hdf5lib_H5_H5Pset_1data_1transform
 
     UNUSED(clss);
 
+    if (NULL == expression)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Pset_data_transform: data transform expression is NULL");
+
     PIN_JAVA_STRING(ENVONLY, expression, express, NULL, "H5Pset_data_transform: data transform expression not pinned");
 
     if ((retVal = H5Pset_data_transform((hid_t)plist_id, express)) < 0)
