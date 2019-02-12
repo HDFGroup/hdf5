@@ -327,6 +327,7 @@ H5C_create(size_t		      max_cache_size,
 
     /* Tagging Field Initializations */
     cache_ptr->ignore_tags                      = FALSE;
+    cache_ptr->num_objs_corked                  = 0;
 
     cache_ptr->slist_changed			= FALSE;
     cache_ptr->slist_len			= 0;
@@ -7700,6 +7701,8 @@ H5C_cork(H5C_t *cache_ptr, haddr_t obj_addr, unsigned action, hbool_t *corked)
 
             /* Set the corked status for the entire object */
             tag_info->corked = TRUE;
+            cache_ptr->num_objs_corked++;
+
         } /* end if */
         else {
             /* Sanity check */
@@ -7711,6 +7714,7 @@ H5C_cork(H5C_t *cache_ptr, haddr_t obj_addr, unsigned action, hbool_t *corked)
 
             /* Set the corked status for the entire object */
             tag_info->corked = FALSE;
+            cache_ptr->num_objs_corked--;
 
             /* Remove the tag info from the tag list, if there's no more entries with this tag */
             if(0 == tag_info->entry_cnt) {

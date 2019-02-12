@@ -264,21 +264,21 @@ Bug Fixes since HDF5-1.10.3 release
 
     Library
     -------
-    - Fix hangs with collective metadata reads during chunked dataset I/O
+    - Performance issue when closing an object
 
-      In the parallel library, it was discovered that when a particular
-      sequence of operations following a pattern of:
+      The slow down is due to the search of the "tag_list" to find
+      out the "corked" status of an object and "uncork" it if so.
 
-      "write to chunked dataset" -> "flush file" -> "read from dataset"
+      Improve porformance by skipping the search of the "tag_list"
+      if there are no "corked" objects when closing an object.
 
-      occurred with collective metadata reads enabled, hangs could be
-      observed due to certain MPI ranks not participating in the collective
-      metadata reads.
+      (VC - 2019/2/6)
 
-      To fix the issue, collective metadata reads are now disabled during
-      chunked dataset raw data I/O.
+    - Fixed a potential invalid memory access and failure that could occur when
+      decoding an unknown object header message (from a future version of the
+      library).
 
-      (JTH - 2019/02/11, HDFFV-10563, HDFFV-10688)
+      (NAF - 2019/01/07)
 
     - Deleting attributes in dense storage
 
@@ -411,6 +411,11 @@ Bug Fixes since HDF5-1.10.3 release
 
     Testing
     -------
+    - Fixed a test failure in testpar/t_dset.c caused by
+      the test trying to use the parallel filters feature
+      on MPI-2 implementations.
+
+      (JTH, 2019/2/7)
 
 Bug Fixes since HDF5-1.10.2 release
 ==================================
@@ -653,6 +658,15 @@ Bug Fixes since HDF5-1.10.2 release
 
     Testing
     -------
+    - The dt_arith test failed on IBM Power8 and Power9 machines when testing
+      conversions from or to long double types, especially when special values
+      such as infinity or NAN were involved.  In some cases the results differed
+      by extremely small amounts from those on other machines, while some other
+      tests resulted in segmentation faults.  These conversion tests with long 
+      double types have been disabled for ppc64 machines until the problems are 
+      better understood and can be properly addressed.
+    
+      (SRL - 2019/01/07, TRILAB-98)
 
 Supported Platforms
 ===================
