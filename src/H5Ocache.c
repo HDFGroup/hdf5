@@ -1627,7 +1627,7 @@ H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t len, const uint8_t *image
 
 done:
     if(ret_value < 0 && udata->cont_msg_info->msgs) {
-        udata->cont_msg_info->msgs = (H5O_chunk_t *)H5FL_SEQ_FREE(H5O_cont_t, udata->cont_msg_info->msgs);
+        udata->cont_msg_info->msgs = H5FL_SEQ_FREE(H5O_cont_t, udata->cont_msg_info->msgs);
         udata->cont_msg_info->alloc_nmsgs = 0;
     }
     FUNC_LEAVE_NOAPI(ret_value)
