@@ -345,6 +345,22 @@ Bug Fixes since HDF5-1.10.3 release
 
     Library
     -------
+    - Fix hangs with collective metadata reads during chunked dataset I/O
+
+      In the parallel library, it was discovered that when a particular
+      sequence of operations following a pattern of:
+
+      "write to chunked dataset" -> "flush file" -> "read from dataset"
+
+      occurred with collective metadata reads enabled, hangs could be
+      observed due to certain MPI ranks not participating in the collective
+      metadata reads.
+
+      To fix the issue, collective metadata reads are now disabled during
+      chunked dataset raw data I/O.
+
+      (JTH - 2019/02/11, HDFFV-10563, HDFFV-10688)
+
     - Performance issue when closing an object
 
       The slow down is due to the search of the "tag_list" to find

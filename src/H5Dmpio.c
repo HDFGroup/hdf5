@@ -800,6 +800,10 @@ H5D__chunk_collective_io(H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
     HDassert(type_info);
     HDassert(fm);
 
+    /* Disable collective metadata reads for chunked dataset I/O operations
+     * in order to prevent potential hangs */
+    H5CX_set_coll_metadata_read(FALSE);
+
     /* Check the optional property list for the collective chunk IO optimization option */
     if(H5CX_get_mpio_chunk_opt_mode(&chunk_opt_mode) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "couldn't get chunk optimization option")
@@ -2313,7 +2317,7 @@ if(H5DEBUG(D))
 
         /* Broadcasting the MPI_IO option info. and chunk address info. */
         if(MPI_SUCCESS != (mpi_code = MPI_Bcast(total_chunk_addr_array, (int)(sizeof(haddr_t) * fm->layout->u.chunk.nchunks), MPI_BYTE, (int)0, io_info->comm)))
-           HMPI_GOTO_ERROR(FAIL, "MPI_BCast failed", mpi_code)
+            HMPI_GOTO_ERROR(FAIL, "MPI_BCast failed", mpi_code)
     } /* end if */
 
     /* Start at first node in chunk skip list */

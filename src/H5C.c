@@ -1483,31 +1483,17 @@ H5C_insert_entry(H5F_t *             f,
     H5C__UPDATE_STATS_FOR_INSERTION(cache_ptr, entry_ptr)
 
 #ifdef H5_HAVE_PARALLEL
-    if(H5F_HAS_FEATURE(f, H5FD_FEAT_HAS_MPI)) {
-        coll_access = (H5P_USER_TRUE == f->coll_md_read ? TRUE : FALSE);
-
-        /* If not explicitly disabled, get the cmdr setting from the API context */
-        if(!coll_access && H5P_FORCE_FALSE != f->coll_md_read)
-            coll_access = H5CX_get_coll_metadata_read();
-    } /* end if */
+    if(H5F_HAS_FEATURE(f, H5FD_FEAT_HAS_MPI))
+        coll_access = H5CX_get_coll_metadata_read();
 
     entry_ptr->coll_access = coll_access;
     if(coll_access) {
         H5C__INSERT_IN_COLL_LIST(cache_ptr, entry_ptr, FAIL)
 
         /* Make sure the size of the collective entries in the cache remain in check */
-        if(H5P_USER_TRUE == f->coll_md_read) {
-            if(cache_ptr->max_cache_size * 80 < cache_ptr->coll_list_size * 100) {
-                if(H5C_clear_coll_entries(cache_ptr, TRUE) < 0)
-                    HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "can't clear collective metadata entries")
-            } /* end if */
-        } /* end if */
-        else {
-            if(cache_ptr->max_cache_size * 40 < cache_ptr->coll_list_size * 100) {
-                if(H5C_clear_coll_entries(cache_ptr, TRUE) < 0)
-                    HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "can't clear collective metadata entries")
-            } /* end if */
-        } /* end else */
+        if(cache_ptr->max_cache_size * 80 < cache_ptr->coll_list_size * 100)
+            if(H5C_clear_coll_entries(cache_ptr, TRUE) < 0)
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "can't clear collective metadata entries")
     } /* end if */
 #endif
 
@@ -2243,13 +2229,8 @@ H5C_protect(H5F_t *		f,
     ring = H5CX_get_ring();
 
 #ifdef H5_HAVE_PARALLEL
-    if(H5F_HAS_FEATURE(f, H5FD_FEAT_HAS_MPI)) {
-        coll_access = (H5P_USER_TRUE == f->coll_md_read ? TRUE : FALSE);
-
-        /* If not explicitly disabled, get the cmdr setting from the API context */
-        if(!coll_access && H5P_FORCE_FALSE != f->coll_md_read)
-            coll_access = H5CX_get_coll_metadata_read();
-    } /* end if */
+    if(H5F_HAS_FEATURE(f, H5FD_FEAT_HAS_MPI))
+        coll_access = H5CX_get_coll_metadata_read();
 #endif /* H5_HAVE_PARALLEL */
 
     /* first check to see if the target is in cache */
@@ -2286,7 +2267,7 @@ H5C_protect(H5F_t *		f,
            the entry in their cache still have to participate in the
            bcast. */
 #ifdef H5_HAVE_PARALLEL
-        if(H5F_HAS_FEATURE(f, H5FD_FEAT_HAS_MPI) && coll_access) {
+        if(coll_access) {
             if(!(entry_ptr->is_dirty) && !(entry_ptr->coll_access)) {
                 MPI_Comm  comm;           /* File MPI Communicator */
                 int       mpi_code;       /* MPI error code */
@@ -2601,21 +2582,11 @@ H5C_protect(H5F_t *		f,
     } /* end if */
 
 #ifdef H5_HAVE_PARALLEL
-    if(H5F_HAS_FEATURE(f, H5FD_FEAT_HAS_MPI)) {
-        /* Make sure the size of the collective entries in the cache remain in check */
-        if(coll_access) {
-            if(H5P_USER_TRUE == f->coll_md_read) {
-                if(cache_ptr->max_cache_size * 80 < cache_ptr->coll_list_size * 100)
-                    if(H5C_clear_coll_entries(cache_ptr, TRUE) < 0)
-                        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, NULL, "can't clear collective metadata entries")
-            } /* end if */
-            else {
-                if(cache_ptr->max_cache_size * 40 < cache_ptr->coll_list_size * 100)
-                    if(H5C_clear_coll_entries(cache_ptr, TRUE) < 0)
-                        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, NULL, "can't clear collective metadata entries")
-            } /* end else */
-        } /* end if */
-    } /* end if */
+    /* Make sure the size of the collective entries in the cache remain in check */
+    if(coll_access)
+        if(cache_ptr->max_cache_size * 80 < cache_ptr->coll_list_size * 100)
+            if(H5C_clear_coll_entries(cache_ptr, TRUE) < 0)
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, NULL, "can't clear collective metadata entries")
 #endif /* H5_HAVE_PARALLEL */
 
 done:
