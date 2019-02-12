@@ -1533,6 +1533,9 @@ Java_hdf_hdf5lib_H5_H5Adelete
 
     UNUSED(clss);
 
+    if (NULL == name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Adelete: attribute name is NULL");
+
     PIN_JAVA_STRING(ENVONLY, name, attrName, NULL, "H5Adelete: attribute name not pinned");
 
     if ((status = H5Adelete((hid_t)loc_id, attrName)) < 0)
@@ -1580,6 +1583,9 @@ Java_hdf_hdf5lib_H5__1H5Acreate2
 
     UNUSED(clss);
 
+    if (NULL == name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Acreate2: attribute name is NULL");
+
     PIN_JAVA_STRING(ENVONLY, name, attrName, NULL, "H5Acreate2: attribute name not pinned");
 
     if ((status = H5Acreate2((hid_t)loc_id, attrName, (hid_t)type_id,
@@ -1608,6 +1614,9 @@ Java_hdf_hdf5lib_H5__1H5Aopen
 
     UNUSED(clss);
 
+    if (NULL == name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Aopen: attribute name is NULL");
+
     PIN_JAVA_STRING(ENVONLY, name, attrName, NULL, "H5Aopen: attribute name not pinned");
 
     if ((retVal = H5Aopen((hid_t)obj_id, attrName, (hid_t)access_plist)) < 0)
@@ -1633,6 +1642,9 @@ Java_hdf_hdf5lib_H5__1H5Aopen_1by_1idx
     hid_t       retVal = H5I_INVALID_HID;
 
     UNUSED(clss);
+
+    if (NULL == name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Aopen_by_idx: object name is NULL");
 
     PIN_JAVA_STRING(ENVONLY, name, objName, NULL, "H5Aopen_by_idx: object name not pinned");
 
@@ -1661,6 +1673,11 @@ Java_hdf_hdf5lib_H5__1H5Acreate_1by_1name
     hid_t       retVal = H5I_INVALID_HID;
 
     UNUSED(clss);
+
+    if (NULL == obj_name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Acreate_by_name: object name is NULL");
+    if (NULL == attr_name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Acreate_by_name: attribute name is NULL");
 
     PIN_JAVA_STRING(ENVONLY, obj_name, objName, NULL, "H5Acreate_by_name: object name not pinned");
     PIN_JAVA_STRING(ENVONLY, attr_name, attrName, NULL, "H5Acreate_by_name: attribute name not pinned");
@@ -1692,6 +1709,11 @@ Java_hdf_hdf5lib_H5_H5Aexists_1by_1name
     htri_t      bval = JNI_FALSE;
 
     UNUSED(clss);
+
+    if (NULL == obj_name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Aexists_by_name: object name is NULL");
+    if (NULL == attr_name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Aexists_by_name: attribute name is NULL");
 
     PIN_JAVA_STRING(ENVONLY, obj_name, objName, NULL, "H5Aexists_by_name: object name not pinned");
     PIN_JAVA_STRING(ENVONLY, attr_name, attrName, NULL, "H5Aexists_by_name: attribute name not pinned");
@@ -1725,6 +1747,11 @@ Java_hdf_hdf5lib_H5_H5Arename
 
     UNUSED(clss);
 
+    if (NULL == old_attr_name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Arename: old attribute name is NULL");
+    if (NULL == new_attr_name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Arename: new attribute name is NULL");
+
     PIN_JAVA_STRING(ENVONLY, old_attr_name, oldAttrName, NULL, "H5Arename: old attribute name not pinned");
     PIN_JAVA_STRING(ENVONLY, new_attr_name, newAttrName, NULL, "H5Arename: new attribute name not pinned");
 
@@ -1755,6 +1782,13 @@ Java_hdf_hdf5lib_H5_H5Arename_1by_1name
     herr_t      retVal = FAIL;
 
     UNUSED(clss);
+
+    if (NULL == obj_name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Arename_by_name: object name is NULL");
+    if (NULL == old_attr_name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Arename_by_name: old attribute name is NULL");
+    if (NULL == new_attr_name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Arename_by_name: new attribute name is NULL");
 
     PIN_JAVA_STRING(ENVONLY, obj_name, objName, NULL, "H5Arename_by_name: object name not pinned");
     PIN_JAVA_STRING(ENVONLY, old_attr_name, oldAttrName, NULL, "H5Arename_by_name: old attribute name not pinned");
@@ -1789,6 +1823,9 @@ Java_hdf_hdf5lib_H5_H5Aget_1name_1by_1idx
     char       *attrName = NULL;
 
     UNUSED(clss);
+
+    if (NULL == obj_name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Aget_name_by_idx: object name is NULL");
 
     PIN_JAVA_STRING(ENVONLY, obj_name, objName, NULL, "H5Aget_name_by_idx: object name not pinned");
 
@@ -1883,6 +1920,9 @@ Java_hdf_hdf5lib_H5_H5Aget_1info_1by_1idx
 
     UNUSED(clss);
 
+    if (NULL == obj_name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Aget_info_by_idx: object name is NULL");
+
     PIN_JAVA_STRING(ENVONLY, obj_name, objName, NULL, "H5Aget_info_by_idx: object name not pinned");
 
     if ((status = H5Aget_info_by_idx((hid_t)loc_id, objName, (H5_index_t)idx_type,
@@ -1921,6 +1961,11 @@ Java_hdf_hdf5lib_H5_H5Aget_1info_1by_1name
 
     UNUSED(clss);
 
+    if (NULL == obj_name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Aget_info_by_name: object name is NULL");
+    if (NULL == attr_name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Aget_info_by_name: attribute name is NULL");
+
     PIN_JAVA_STRING(ENVONLY, obj_name, objName, NULL, "H5Aget_info_by_name: object name not pinned");
     PIN_JAVA_STRING(ENVONLY, attr_name, attrName, NULL, "H5Aget_info_by_name: attribute name not pinned");
 
@@ -1958,6 +2003,11 @@ Java_hdf_hdf5lib_H5_H5Adelete_1by_1name
 
     UNUSED(clss);
 
+    if (NULL == obj_name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Adelete_by_name: object name is NULL");
+    if (NULL == attr_name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Adelete_by_name: attribute name is NULL");
+
     PIN_JAVA_STRING(ENVONLY, obj_name, objName, NULL, "H5Adelete_by_name: object name not pinned");
     PIN_JAVA_STRING(ENVONLY, attr_name, attrName, NULL, "H5Adelete_by_name: attribute name not pinned");
 
@@ -1987,6 +2037,9 @@ Java_hdf_hdf5lib_H5_H5Aexists
 
     UNUSED(clss);
 
+    if (NULL == attr_name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Aexists: attribute name is NULL");
+
     PIN_JAVA_STRING(ENVONLY, attr_name, attrName, NULL, "H5Aexists: attribute name not pinned");
 
     if ((bval = H5Aexists((hid_t)obj_id, attrName)) < 0)
@@ -2015,6 +2068,9 @@ Java_hdf_hdf5lib_H5_H5Adelete_1by_1idx
 
     UNUSED(clss);
 
+    if (NULL == obj_name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Adelete_by_idx: object name is NULL");
+
     PIN_JAVA_STRING(ENVONLY, obj_name, objName, NULL, "H5Adelete_by_idx: object name not pinned");
 
     if ((status = H5Adelete_by_idx((hid_t)loc_id, objName, (H5_index_t)idx_type, (H5_iter_order_t)order, (hsize_t)n, (hid_t)lapl_id)) < 0)
@@ -2040,6 +2096,11 @@ Java_hdf_hdf5lib_H5__1H5Aopen_1by_1name
     hid_t       status = H5I_INVALID_HID;
 
     UNUSED(clss);
+
+    if (NULL == obj_name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Aopen_by_name: object name is NULL");
+    if (NULL == attr_name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Aopen_by_name: attribute name is NULL");
 
     PIN_JAVA_STRING(ENVONLY, obj_name, objName, NULL, "H5Aopen_by_name: object name not pinned");
     PIN_JAVA_STRING(ENVONLY, attr_name, attrName, NULL, "H5Aopen_by_name: attribute name not pinned");
@@ -2187,6 +2248,8 @@ Java_hdf_hdf5lib_H5_H5Aiterate_1by_1name
         H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Aiterate_by_name: op_data is NULL");
     if (NULL == callback_op)
         H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Aiterate_by_name: callback_op is NULL");
+    if (NULL == name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Aiterate_by_name: object name is NULL");
 
     PIN_JAVA_STRING(ENVONLY, name, objName, NULL, "H5Aiterate_by_name: object name not pinned");
 

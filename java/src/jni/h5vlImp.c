@@ -41,6 +41,9 @@ Java_hdf_hdf5lib_H5_H5VLregister_1connector_1by_1name
 
     UNUSED(clss);
 
+    if (NULL == connector_name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5VLregister_connector_by_name: VOL connector name is NULL");
+
     PIN_JAVA_STRING(ENVONLY, connector_name, volName, NULL, "H5VLregister_connector_by_name: VOL connector name not pinned");
 
     if ((status = H5VLregister_connector_by_name(volName, (hid_t)vipl_id)) < 0)
@@ -87,6 +90,9 @@ Java_hdf_hdf5lib_H5_H5VLis_1connector_1registered
 
     UNUSED(clss);
 
+    if (NULL == connector_name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5VLis_connector_registered: VOL connector name is NULL");
+
     PIN_JAVA_STRING(ENVONLY, connector_name, volName, NULL, "H5VLis_connector_registered: VOL connector name not pinned");
 
     if ((bval = H5VLis_connector_registered(volName)) < 0)
@@ -114,6 +120,9 @@ Java_hdf_hdf5lib_H5_H5VLget_1connector_1id
     hid_t       status = H5I_INVALID_HID;
 
     UNUSED(clss);
+
+    if (NULL == connector_name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5VLget_connector_id: VOL connector name is NULL");
 
     PIN_JAVA_STRING(ENVONLY, connector_name, volName, NULL, "H5VLget_connector_id: VOL connector name not pinned");
 

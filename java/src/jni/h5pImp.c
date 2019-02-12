@@ -174,6 +174,9 @@ Java_hdf_hdf5lib_H5__1H5Pcreate_1class
     close_callback = close_op;
     copy_callback = copy_op;
 
+    if (NULL == name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "_H5Pcreate_class: class name is NULL");
+
     PIN_JAVA_STRING(ENVONLY, name, cstr, NULL, "_H5Pcreate_class: class name not pinned");
 
     if ((class_id = H5Pcreate_class((hid_t)parent_class, cstr, (H5P_cls_create_func_t)H5P_cls_create_cb, (void *) create_data,
@@ -200,6 +203,9 @@ Java_hdf_hdf5lib_H5__1H5Pcreate_1class_1nocb
     hid_t       class_id = H5I_INVALID_HID;
 
     UNUSED(clss);
+
+    if (NULL == name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "_H5Pcreate_class_nocb: class name is NULL");
 
     PIN_JAVA_STRING(ENVONLY, name, cstr, NULL, "_H5Pcreate_class_nocb: class name not pinned");
 
@@ -239,6 +245,9 @@ Java_hdf_hdf5lib_H5_H5Pregister2
     get_callback = prp_get;
     delete_callback = prp_delete;
 
+    if (NULL == name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Pregister2: property name is NULL");
+
     PIN_JAVA_STRING(ENVONLY, name, cstr, NULL, "H5Pregister2: property name not pinned");
 
     PIN_BYTE_ARRAY(ENVONLY, def_value, propValBuf, &isCopy, "H5Pregister2: default property value buffer not pinned");
@@ -270,6 +279,9 @@ Java_hdf_hdf5lib_H5_H5Pregister2_1nocb
     jbyte      *propValBuf = NULL;
 
     UNUSED(clss);
+
+    if (NULL == name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Pregister2_nocb: property name is NULL");
 
     PIN_JAVA_STRING(ENVONLY, name, cstr, NULL, "H5Pregister2_nocb: property name not pinned");
 
@@ -310,6 +322,9 @@ Java_hdf_hdf5lib_H5_H5Pinsert2
     get_callback = prp_get;
     delete_callback = prp_delete;
 
+    if (NULL == name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Pinsert2: property name is NULL");
+
     PIN_JAVA_STRING(ENVONLY, name, cstr, NULL, "H5Pinsert2: property name not pinned");
 
     PIN_BYTE_ARRAY(ENVONLY, def_value, propValBuf, &isCopy, "H5Pinsert2: property value buffer not pinned");
@@ -342,6 +357,9 @@ Java_hdf_hdf5lib_H5_H5Pinsert2_1nocb
 
     UNUSED(clss);
 
+    if (NULL == name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Pinsert2_nocb: property name is NULL");
+
     PIN_JAVA_STRING(ENVONLY, name, cstr, NULL, "H5Pinsert2_nocb: property name not pinned");
 
     PIN_BYTE_ARRAY(ENVONLY, def_value, propValBuf, &isCopy, "H5Pinsert2_nocb: property value buffer not pinned");
@@ -370,6 +388,9 @@ Java_hdf_hdf5lib_H5_H5Pset
 
     UNUSED(clss);
 
+    if (NULL == name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Pset: property name is NULL");
+
     PIN_JAVA_STRING(ENVONLY, name, cstr, NULL, "H5Pset: property name not pinned");
 
     if ((retVal = H5Pset((hid_t)plid, cstr, &val)) < 0)
@@ -395,6 +416,9 @@ Java_hdf_hdf5lib_H5_H5Pexist
     htri_t      bval = JNI_FALSE;
 
     UNUSED(clss);
+
+    if (NULL == name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Pexist: property name is NULL");
 
     PIN_JAVA_STRING(ENVONLY, name, cstr, NULL, "H5Pexist: property name not pinned");
 
@@ -424,6 +448,9 @@ Java_hdf_hdf5lib_H5_H5Pget_1size
     herr_t      status = FAIL;
 
     UNUSED(clss);
+
+    if (NULL == name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Pget_size: property name is NULL");
 
     PIN_JAVA_STRING(ENVONLY, name, cstr, NULL, "H5Pget_size: property name not pinned");
 
@@ -541,6 +568,9 @@ Java_hdf_hdf5lib_H5_H5Pget
 
     UNUSED(clss);
 
+    if (NULL == name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Pget: property name is NULL");
+
     PIN_JAVA_STRING(ENVONLY, name, cstr, NULL, "H5Pget: property name not pinned");
 
     if ((status = H5Pget((hid_t)plid, cstr, &val)) < 0)
@@ -629,6 +659,9 @@ Java_hdf_hdf5lib_H5_H5Pcopy_1prop
 
     UNUSED(clss);
 
+    if (NULL == name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Pcopy_prop: property name is NULL");
+
     PIN_JAVA_STRING(ENVONLY, name, cstr, NULL, "H5Pcopy_prop: property name not pinned");
 
     if ((retVal = H5Pcopy_prop((hid_t)dst_plid, (hid_t)src_plid, cstr)) < 0)
@@ -655,6 +688,9 @@ Java_hdf_hdf5lib_H5_H5Premove
 
     UNUSED(clss);
 
+    if (NULL == name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Premove: property name is NULL");
+
     PIN_JAVA_STRING(ENVONLY, name, cstr, NULL, "H5Premove: property name not pinned");
 
     if ((retVal = H5Premove((hid_t)plid, cstr)) < 0)
@@ -680,6 +716,9 @@ Java_hdf_hdf5lib_H5_H5Punregister
     herr_t      retVal = FAIL;
 
     UNUSED(clss);
+
+    if (NULL == name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Punregister: property name is NULL");
 
     PIN_JAVA_STRING(ENVONLY, name, cstr, NULL, "H5Punregister: property name not pinned");
 
