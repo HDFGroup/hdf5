@@ -1,15 +1,50 @@
-autotools_rework
+This branch is a copy of Neil's RADOS VOL connector branch.
+Very few changes have been made to the branch so it stays
+as a 'known good' version of the connector.
 
-The purpose of this branch is to make changes to the autotools files,
-particularly configure.ac. This will remove a lot of old cruft and update
-the input files. This effort was started in January 2015 and should be
-completed within the year.
+This is based off the ancient 'vol' branch and is wildy
+out of sync with develop. You will not be able to move
+the RADOS VOL connector built here to HDF5 1.12.0 without
+a lot of surgery. The rados_vol branch in this repository
+is kept in sync with develop and is probably the one
+you want for that.
 
-This branch tracks the trunk.
+Note that this is a dead branch, so no effort has been
+made to keep the MANIFEST sane, etc.
 
-Dana Robinson and Allen Byrne are the owners of this branch.
+************
+* BUILDING *
+************
 
-This branch should be closed when the bulk of the autotools work is
-complete and has been merged into the trunk and 1.8 branch. This
-work should be completed by mid-2015.
+The code for the RADOS VOL connector lies entirely in
+the H5VLrados* files in the src directory. The connector
+is built as a static part of the library.
 
+I build this branch on Ubuntu, with the system default
+librados-dev package and its dependencies installed. I use
+the autotools and the only thing I have to specify is the
+linker flags:
+
+LDFLAGS="-L/path/to/librados -lrados"
+
+YMMV, but the autotools do no librados hunting so you may
+need to specify things it can't figure out on its own.
+
+
+***********
+* TESTING *
+***********
+
+There are no tests for the RADOS VOL connector in the main
+library, so running 'make check' won't provide much
+information.
+
+Once the library has been built, you can run some smoke
+checks by running 'make install' and going to the
+share/hdf5_examples/c/ directory and running the
+run_rados_examples.sh script found there. That will
+create a small pool (or clear it out if it exists)
+and run all the example scripts in a sane order.
+
+*** YOU WILL NEED TO COPY YOUR ceph.conf FILE
+*** INTO THIS DIRECTORY FIRST!!!
