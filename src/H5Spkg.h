@@ -26,7 +26,11 @@
 #ifndef _H5Spkg_H
 #define _H5Spkg_H
 
+/* Get package's private header */
 #include "H5Sprivate.h"
+
+/* Other private headers needed by this file */
+#include "H5Oprivate.h"		/* Object headers		  	*/
 
 /* Flags to indicate special dataspace features are active */
 #define H5S_VALID_MAX	0x01
@@ -77,6 +81,7 @@ struct H5S_extent_t {
 /*
  * Dataspace selection information
  */
+
 /* Node in point selection list (typedef'd in H5Sprivate.h) */
 struct H5S_pnt_node_t {
     hsize_t *pnt;          /* Pointer to a selected point */
@@ -88,9 +93,9 @@ typedef struct {
     H5S_pnt_node_t *head;   /* Pointer to head of point list */
 } H5S_pnt_list_t;
 
-/* Information about new-style hyperslab spans */
+/* Information about hyperslab spans */
 
-/* Information a particular hyperslab span */
+/* Information a particular hyperslab span (typedef'd in H5Sprivate.h) */
 struct H5S_hyper_span_t {
     hsize_t low, high;          /* Low & high bounds of span */
     hsize_t nelem;              /* Number of elements in span (only needed during I/O) */
@@ -217,9 +222,11 @@ struct H5S_t {
 
 /* Selection iteration methods */
 /* Method to retrieve the current coordinates of iterator for current selection */
-typedef herr_t (*H5S_sel_iter_coords_func_t)(const H5S_sel_iter_t *iter, hsize_t *coords);
+typedef herr_t (*H5S_sel_iter_coords_func_t)(const H5S_sel_iter_t *iter,
+    hsize_t *coords);
 /* Method to retrieve the current block of iterator for current selection */
-typedef herr_t (*H5S_sel_iter_block_func_t)(const H5S_sel_iter_t *iter, hsize_t *start, hsize_t *end);
+typedef herr_t (*H5S_sel_iter_block_func_t)(const H5S_sel_iter_t *iter,
+    hsize_t *start, hsize_t *end);
 /* Method to determine number of elements left in iterator for current selection */
 typedef hsize_t (*H5S_sel_iter_nelmts_func_t)(const H5S_sel_iter_t *iter);
 /* Method to determine if there are more blocks left in the current selection */
@@ -269,8 +276,8 @@ H5_DLLVAR const H5S_select_class_t H5S_sel_point[1];
 H5_DLLVAR const unsigned H5O_sdspace_ver_bounds[H5F_LIBVER_NBOUNDS];
 
 /* Extent functions */
-H5_DLL herr_t H5S_extent_release(H5S_extent_t *extent);
-H5_DLL herr_t H5S_extent_copy_real(H5S_extent_t *dst, const H5S_extent_t *src,
+H5_DLL herr_t H5S__extent_release(H5S_extent_t *extent);
+H5_DLL herr_t H5S__extent_copy_real(H5S_extent_t *dst, const H5S_extent_t *src,
     hbool_t copy_max);
 
 /* Operations on selections */
@@ -280,8 +287,8 @@ H5_DLL herr_t H5S__hyper_subtract(H5S_t *space, H5S_t *subtract_space);
 
 /* Testing functions */
 #ifdef H5S_TESTING
-H5_DLL htri_t H5S_select_shape_same_test(hid_t sid1, hid_t sid2);
-H5_DLL htri_t H5S_get_rebuild_status_test(hid_t space_id);
+H5_DLL htri_t H5S__select_shape_same_test(hid_t sid1, hid_t sid2);
+H5_DLL htri_t H5S__get_rebuild_status_test(hid_t space_id);
 #endif /* H5S_TESTING */
 
 #endif /*_H5Spkg_H*/

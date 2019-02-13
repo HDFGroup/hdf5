@@ -17,9 +17,6 @@
 #ifndef _H5Sprivate_H
 #define _H5Sprivate_H
 
-/* Early typedefs to avoid circular dependencies */
-typedef struct H5S_t H5S_t;
-
 /* Include package's public header */
 #include "H5Spublic.h"
 
@@ -30,7 +27,6 @@ typedef struct H5S_t H5S_t;
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Fprivate.h"		/* Files				*/
 #include "H5Gprivate.h"		/* Groups				*/
-#include "H5Oprivate.h"		/* Object headers		  	*/
 #include "H5Pprivate.h"		/* Property lists			*/
 #include "H5Tprivate.h"		/* Datatypes				*/
 
@@ -68,14 +64,14 @@ typedef struct {
 /* Hyperslab selection iteration container */
 typedef struct {
     /* Common fields for all hyperslab selections */
-    hsize_t off[H5S_MAX_RANK];          /* Offset in span node (used as position for regular hyperslabs) */
+    hsize_t off[H5S_MAX_RANK];  /* Offset in span node (used as position for regular hyperslabs) */
     unsigned iter_rank;     /* Rank of iterator information */
                             /* (This should always be the same as the dataspace
-                             * rank, except for regular hyperslab selections in
-                             * which there are contiguous regions in the lower
-                             * dimensions which have been "flattened" out
+                             *  rank, except for regular hyperslab selections in
+                             *  which there are contiguous regions in the lower
+                             *  dimensions that have been "flattened")
                              */
-    hbool_t diminfo_valid;         /* Whether the dimension information is valid */
+    hbool_t diminfo_valid;  /* Whether the dimension information is valid */
 
     /* "Flattened" regular hyperslab selection fields */
     H5S_hyper_dim_t diminfo[H5S_MAX_RANK];   /* "Flattened" regular selection information */
@@ -196,6 +192,12 @@ typedef struct H5S_sel_iter_op_t {
 #define H5S_SELECT_RELEASE(S)           (H5S_select_release(S))
 #define H5S_SELECT_DESERIALIZE(S,BUF)   (H5S_select_deserialize(S,BUF))
 
+/* Forward declaration of structs used below */
+struct H5O_t;
+struct H5O_loc_t;
+
+/* Early typedef to avoid circular dependencies */
+typedef struct H5S_t H5S_t;
 
 /* Operations on dataspaces */
 H5_DLL H5S_t *H5S_copy(const H5S_t *src, hbool_t share_selection, hbool_t copy_max);
@@ -207,7 +209,7 @@ H5_DLL hbool_t H5S_has_extent(const H5S_t *ds);
 H5_DLL int H5S_get_simple_extent_ndims(const H5S_t *ds);
 H5_DLL int H5S_get_simple_extent_dims(const H5S_t *ds, hsize_t dims[]/*out*/,
     hsize_t max_dims[]/*out*/);
-H5_DLL herr_t H5S_write(H5F_t *f, H5O_t *oh, unsigned update_flags, H5S_t *ds);
+H5_DLL herr_t H5S_write(H5F_t *f, struct H5O_t *oh, unsigned update_flags, H5S_t *ds);
 H5_DLL herr_t H5S_append(H5F_t *f, struct H5O_t *oh, H5S_t *ds);
 H5_DLL H5S_t *H5S_read(const struct H5O_loc_t *loc);
 H5_DLL htri_t H5S_set_extent(H5S_t *space, const hsize_t *size);
@@ -314,7 +316,7 @@ H5_DLL herr_t H5S_mpio_space_type(const H5S_t *space, size_t elmt_size,
     /* out: */  MPI_Datatype *new_type,
                 int *count,
                 hbool_t *is_derived_type,
-                hbool_t do_permute, 
+                hbool_t do_permute,
                 hsize_t **permute_map,
                 hbool_t * is_permuted);
 #endif /* H5_HAVE_PARALLEL */

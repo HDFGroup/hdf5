@@ -1167,7 +1167,7 @@ compare_data(hid_t parent1, hid_t parent2, hid_t pid, hid_t tid, size_t nelmts,
                 if((obj2_sid = H5Rget_region(parent2, H5R_DATASET_REGION, ref_buf2)) < 0) TEST_ERROR
 
                 /* Check if dataspaces are the same shape */
-                if(H5S_select_shape_same_test(obj1_sid, obj2_sid) < 0) TEST_ERROR
+                if(H5S__select_shape_same_test(obj1_sid, obj2_sid) < 0) TEST_ERROR
 
                 /* Close dataspaces */
                 if(H5Sclose(obj1_sid) < 0) TEST_ERROR
@@ -2136,9 +2136,7 @@ test_copy_dataset_versionbounds(hid_t fcpl_src, hid_t fapl_src)
     char src_fname[NAME_BUF_SIZE];      /* Name of source file */
     char dst_fname[NAME_BUF_SIZE];      /* Name of destination file */
     H5F_libver_t low, high;             /* File format bounds */
-    H5F_libver_t low_src, high_src;     /* Source file format bounds */
     unsigned srcdset_fillversion;       /* Fill version of source dataset */
-    hbool_t valid_high = FALSE;         /* TRUE if high bound is valid */
     int i, j;                           /* Local index variables */
     H5D_t *dsetp = NULL;                /* Pointer to internal dset structure */
     herr_t ret;                         /* Generic return value */
