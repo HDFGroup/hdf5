@@ -181,9 +181,9 @@
 ### Windows pops up a modal permission dialog on this test
   if (H5_HAVE_PARALLEL AND NOT WIN32)
     if (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (NAME EXAMPLES_PAR-ph5example COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_PREFLAGS} $<TARGET_FILE:ph5example> ${MPIEXEC_POSTFLAGS})
+      add_test (NAME MPI_TEST_EXAMPLES-ph5example COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_PREFLAGS} $<TARGET_FILE:ph5example> ${MPIEXEC_POSTFLAGS})
     else ()
-      add_test (NAME EXAMPLES_PAR-ph5example COMMAND "${CMAKE_COMMAND}"
+      add_test (NAME MPI_TEST_EXAMPLES-ph5example COMMAND "${CMAKE_COMMAND}"
           -D "TEST_PROGRAM=${MPIEXEC_EXECUTABLE};${MPIEXEC_NUMPROC_FLAG};${MPIEXEC_MAX_NUMPROCS};${MPIEXEC_PREFLAGS};$<TARGET_FILE:ph5example>;${MPIEXEC_POSTFLAGS}"
           -D "TEST_ARGS:STRING="
           -D "TEST_EXPECT=0"
@@ -195,14 +195,14 @@
       )
     endif ()
     if (NOT "${last_test}" STREQUAL "")
-      set_tests_properties (EXAMPLES_PAR-ph5example PROPERTIES DEPENDS ${last_test})
+      set_tests_properties (MPI_TEST_EXAMPLES-ph5example PROPERTIES DEPENDS ${last_test})
     endif ()
-    set (last_test "EXAMPLES_PAR-ph5example")
+    set (last_test "MPI_TEST_EXAMPLES-ph5example")
     if (BUILD_SHARED_LIBS)
       if (HDF5_ENABLE_USING_MEMCHECKER)
-        add_test (NAME EXAMPLES_PAR-shared-ph5example COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_PREFLAGS} $<TARGET_FILE:ph5example-shared> ${MPIEXEC_POSTFLAGS})
+        add_test (NAME MPI_TEST_EXAMPLES-shared-ph5example COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_PREFLAGS} $<TARGET_FILE:ph5example-shared> ${MPIEXEC_POSTFLAGS})
       else ()
-        add_test (NAME EXAMPLES_PAR-shared-ph5example COMMAND "${CMAKE_COMMAND}"
+        add_test (NAME MPI_TEST_EXAMPLES-shared-ph5example COMMAND "${CMAKE_COMMAND}"
             -D "TEST_PROGRAM=${MPIEXEC_EXECUTABLE};${MPIEXEC_NUMPROC_FLAG};${MPIEXEC_MAX_NUMPROCS};${MPIEXEC_PREFLAGS};$<TARGET_FILE:ph5example-shared>;${MPIEXEC_POSTFLAGS}"
             -D "TEST_ARGS:STRING="
             -D "TEST_EXPECT=0"
@@ -213,10 +213,10 @@
             -P "${HDF_RESOURCES_EXT_DIR}/grepTest.cmake"
         )
       endif ()
-      set_tests_properties (EXAMPLES_PAR-shared-ph5example PROPERTIES WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/H5EX-shared)
+      set_tests_properties (MPI_TEST_EXAMPLES-shared-ph5example PROPERTIES WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/H5EX-shared)
       if (NOT "${last_test}" STREQUAL "")
-        set_tests_properties (EXAMPLES_PAR-shared-ph5example PROPERTIES DEPENDS ${last_test})
+        set_tests_properties (MPI_TEST_EXAMPLES-shared-ph5example PROPERTIES DEPENDS ${last_test})
       endif ()
-      set (last_test "EXAMPLES_PAR-shared-ph5example")
+      set (last_test "MPI_TEST_EXAMPLES-shared-ph5example")
     endif ()
   endif ()
