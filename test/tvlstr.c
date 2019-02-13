@@ -880,9 +880,9 @@ static void test_write_same_element(void)
     fspace = H5Screate_simple(SPACE1_RANK, fdim, NULL);
     CHECK(fspace, FAIL, "H5Screate_simple");
 
-    dataset1 = H5Dcreate(file1, DATASET, dtype, fspace, H5P_DEFAULT,
+    dataset1 = H5Dcreate2(file1, DATASET, dtype, fspace, H5P_DEFAULT,
                           H5P_DEFAULT, H5P_DEFAULT);
-    CHECK(dataset1, FAIL, "H5Dcreate");
+    CHECK(dataset1, FAIL, "H5Dcreate2");
 
     ret = H5Dwrite(dataset1, dtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
     CHECK(ret, FAIL, "H5Dwrite");
@@ -905,8 +905,8 @@ static void test_write_same_element(void)
     file1 = H5Fopen(DATAFILE3, H5F_ACC_RDWR, H5P_DEFAULT);
     CHECK(file1, FAIL, "H5Fopen");
 
-    dataset1 = H5Dopen(file1, DATASET, H5P_DEFAULT);
-    CHECK(dataset1, FAIL, "H5Dopen");
+    dataset1 = H5Dopen2(file1, DATASET, H5P_DEFAULT);
+    CHECK(dataset1, FAIL, "H5Dopen2");
 
     fspace = H5Dget_space(dataset1);
     CHECK(fspace, FAIL, "H5Dget_space");
