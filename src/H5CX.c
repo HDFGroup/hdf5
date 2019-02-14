@@ -53,7 +53,7 @@
  * each thread individually. The association of contexts to threads will
  * be handled by the pthread library.
  *
- * In order for this macro to work, H5E__get_my_stack() must be preceeded
+ * In order for this macro to work, H5CX_get_my_context() must be preceeded
  * by "H5CX_node_t *ctx =".
  */
 #define H5CX_get_my_context()  H5CX__get_context()
@@ -983,8 +983,8 @@ H5CX_set_apl(hid_t *acspl_id, const H5P_libclass_t *libclass,
 
 #ifdef H5_HAVE_PARALLEL
         /* If this routine is not guaranteed to be collective (i.e. it doesn't
-         * modify the structural metadata in a file), check if we should use
-         * a collective metadata read.
+         * modify the structural metadata in a file), check if the application
+         * specified a collective metadata read for just this operation.
          */
         if(!is_collective) {
             H5P_genplist_t *plist;                  /* Property list pointer */

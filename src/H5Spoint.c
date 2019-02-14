@@ -18,87 +18,124 @@
  * Purpose:	Point selection dataspace I/O functions.
  */
 
+/****************/
+/* Module Setup */
+/****************/
+
 #include "H5Smodule.h"          /* This source code file is part of the H5S module */
 
 
-#include "H5private.h"		/* Generic Functions			  */
-#include "H5Eprivate.h"		/* Error handling		  */
-#include "H5FLprivate.h"	/* Free Lists	  */
-#include "H5Iprivate.h"		/* ID Functions		  */
-#include "H5MMprivate.h"	/* Memory Management functions		  */
-#include "H5Spkg.h"		/* Dataspace functions			  */
-#include "H5VMprivate.h"         /* Vector functions */
+/***********/
+/* Headers */
+/***********/
+#include "H5private.h"		/* Generic Functions			*/
+#include "H5Eprivate.h"		/* Error handling			*/
+#include "H5FLprivate.h"	/* Free Lists				*/
+#include "H5Iprivate.h"		/* ID Functions				*/
+#include "H5MMprivate.h"        /* Memory management                    */
+#include "H5Spkg.h"		/* Dataspace functions			*/
+#include "H5VMprivate.h"        /* Vector functions			*/
 
-/* Static function prototypes */
+
+/****************/
+/* Local Macros */
+/****************/
+
+
+/******************/
+/* Local Typedefs */
+/******************/
+
+
+/********************/
+/* Local Prototypes */
+/********************/
 
 /* Selection callbacks */
-static herr_t H5S_point_copy(H5S_t *dst, const H5S_t *src, hbool_t share_selection);
-static herr_t H5S_point_get_seq_list(const H5S_t *space, unsigned flags,
+static herr_t H5S__point_copy(H5S_t *dst, const H5S_t *src, hbool_t share_selection);
+static herr_t H5S__point_get_seq_list(const H5S_t *space, unsigned flags,
     H5S_sel_iter_t *iter, size_t maxseq, size_t maxbytes,
     size_t *nseq, size_t *nbytes, hsize_t *off, size_t *len);
-static herr_t H5S_point_release(H5S_t *space);
-static htri_t H5S_point_is_valid(const H5S_t *space);
-static hssize_t H5S_point_serial_size(const H5S_t *space);
-static herr_t H5S_point_serialize(const H5S_t *space, uint8_t **p);
-static herr_t H5S_point_deserialize(H5S_t *space, uint32_t version, uint8_t flags,
+static herr_t H5S__point_release(H5S_t *space);
+static htri_t H5S__point_is_valid(const H5S_t *space);
+static hssize_t H5S__point_serial_size(const H5S_t *space);
+static herr_t H5S__point_serialize(const H5S_t *space, uint8_t **p);
+static herr_t H5S__point_deserialize(H5S_t *space, uint32_t version, uint8_t flags,
     const uint8_t **p);
-static herr_t H5S_point_bounds(const H5S_t *space, hsize_t *start, hsize_t *end);
-static herr_t H5S_point_offset(const H5S_t *space, hsize_t *off);
+static herr_t H5S__point_bounds(const H5S_t *space, hsize_t *start, hsize_t *end);
+static herr_t H5S__point_offset(const H5S_t *space, hsize_t *off);
 static int H5S__point_unlim_dim(const H5S_t *space);
-static htri_t H5S_point_is_contiguous(const H5S_t *space);
-static htri_t H5S_point_is_single(const H5S_t *space);
-static htri_t H5S_point_is_regular(const H5S_t *space);
-static herr_t H5S_point_adjust_u(H5S_t *space, const hsize_t *offset);
-static herr_t H5S_point_project_scalar(const H5S_t *space, hsize_t *offset);
-static herr_t H5S_point_project_simple(const H5S_t *space, H5S_t *new_space, hsize_t *offset);
-static herr_t H5S_point_iter_init(H5S_sel_iter_t *iter, const H5S_t *space);
+static htri_t H5S__point_is_contiguous(const H5S_t *space);
+static htri_t H5S__point_is_single(const H5S_t *space);
+static htri_t H5S__point_is_regular(const H5S_t *space);
+static herr_t H5S__point_adjust_u(H5S_t *space, const hsize_t *offset);
+static herr_t H5S__point_project_scalar(const H5S_t *space, hsize_t *offset);
+static herr_t H5S__point_project_simple(const H5S_t *space, H5S_t *new_space,
+    hsize_t *offset);
+static herr_t H5S__point_iter_init(H5S_sel_iter_t *iter, const H5S_t *space);
 
 /* Selection iteration callbacks */
-static herr_t H5S_point_iter_coords(const H5S_sel_iter_t *iter, hsize_t *coords);
-static herr_t H5S_point_iter_block(const H5S_sel_iter_t *iter, hsize_t *start, hsize_t *end);
-static hsize_t H5S_point_iter_nelmts(const H5S_sel_iter_t *iter);
-static htri_t H5S_point_iter_has_next_block(const H5S_sel_iter_t *iter);
-static herr_t H5S_point_iter_next(H5S_sel_iter_t *sel_iter, size_t nelem);
-static herr_t H5S_point_iter_next_block(H5S_sel_iter_t *sel_iter);
-static herr_t H5S_point_iter_release(H5S_sel_iter_t *sel_iter);
+static herr_t H5S__point_iter_coords(const H5S_sel_iter_t *iter, hsize_t *coords);
+static herr_t H5S__point_iter_block(const H5S_sel_iter_t *iter, hsize_t *start,
+    hsize_t *end);
+static hsize_t H5S__point_iter_nelmts(const H5S_sel_iter_t *iter);
+static htri_t H5S__point_iter_has_next_block(const H5S_sel_iter_t *iter);
+static herr_t H5S__point_iter_next(H5S_sel_iter_t *sel_iter, size_t nelem);
+static herr_t H5S__point_iter_next_block(H5S_sel_iter_t *sel_iter);
+static herr_t H5S__point_iter_release(H5S_sel_iter_t *sel_iter);
+
+
+/*****************************/
+/* Library Private Variables */
+/*****************************/
+
+
+/*********************/
+/* Package Variables */
+/*********************/
 
 /* Selection properties for point selections */
 const H5S_select_class_t H5S_sel_point[1] = {{
     H5S_SEL_POINTS,
 
     /* Methods on selection */
-    H5S_point_copy,
-    H5S_point_get_seq_list,
-    H5S_point_release,
-    H5S_point_is_valid,
-    H5S_point_serial_size,
-    H5S_point_serialize,
-    H5S_point_deserialize,
-    H5S_point_bounds,
-    H5S_point_offset,
+    H5S__point_copy,
+    H5S__point_get_seq_list,
+    H5S__point_release,
+    H5S__point_is_valid,
+    H5S__point_serial_size,
+    H5S__point_serialize,
+    H5S__point_deserialize,
+    H5S__point_bounds,
+    H5S__point_offset,
     H5S__point_unlim_dim,
     NULL,
-    H5S_point_is_contiguous,
-    H5S_point_is_single,
-    H5S_point_is_regular,
-    H5S_point_adjust_u,
-    H5S_point_project_scalar,
-    H5S_point_project_simple,
-    H5S_point_iter_init,
+    H5S__point_is_contiguous,
+    H5S__point_is_single,
+    H5S__point_is_regular,
+    H5S__point_adjust_u,
+    H5S__point_project_scalar,
+    H5S__point_project_simple,
+    H5S__point_iter_init,
 }};
+
+
+/*******************/
+/* Local Variables */
+/*******************/
 
 /* Iteration properties for point selections */
 static const H5S_sel_iter_class_t H5S_sel_iter_point[1] = {{
     H5S_SEL_POINTS,
 
     /* Methods on selection iterator */
-    H5S_point_iter_coords,
-    H5S_point_iter_block,
-    H5S_point_iter_nelmts,
-    H5S_point_iter_has_next_block,
-    H5S_point_iter_next,
-    H5S_point_iter_next_block,
-    H5S_point_iter_release,
+    H5S__point_iter_coords,
+    H5S__point_iter_block,
+    H5S__point_iter_nelmts,
+    H5S__point_iter_has_next_block,
+    H5S__point_iter_next,
+    H5S__point_iter_next_block,
+    H5S__point_iter_release,
 }};
 
 /* Declare a free list to manage the H5S_pnt_node_t struct */
@@ -107,93 +144,88 @@ H5FL_DEFINE_STATIC(H5S_pnt_node_t);
 /* Declare a free list to manage the H5S_pnt_list_t struct */
 H5FL_DEFINE_STATIC(H5S_pnt_list_t);
 
+
 
 /*-------------------------------------------------------------------------
- * Function:	H5S_point_iter_init
+ * Function:	H5S__point_iter_init
  *
  * Purpose:	Initializes iteration information for point selection.
  *
- * Return:	non-negative on success, negative on failure.
+ * Return:	Non-negative on success, negative on failure.
  *
  * Programmer:	Quincey Koziol
  *              Tuesday, June 16, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5S_point_iter_init(H5S_sel_iter_t *iter, const H5S_t *space)
+H5S__point_iter_init(H5S_sel_iter_t *iter, const H5S_t *space)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* Check args */
-    HDassert(space && H5S_SEL_POINTS==H5S_GET_SELECT_TYPE(space));
+    HDassert(space && H5S_SEL_POINTS == H5S_GET_SELECT_TYPE(space));
     HDassert(iter);
 
     /* Initialize the number of points to iterate over */
-    iter->elmt_left=space->select.num_elem;
+    iter->elmt_left = space->select.num_elem;
 
     /* Start at the head of the list of points */
     iter->u.pnt.curr=space->select.sel_info.pnt_lst->head;
 
     /* Initialize type of selection iterator */
-    iter->type=H5S_sel_iter_point;
+    iter->type = H5S_sel_iter_point;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-}   /* H5S_point_iter_init() */
+} /* end H5S__point_iter_init() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5S_point_iter_coords
+ * Function:	H5S__point_iter_coords
  *
  * Purpose:	Retrieve the current coordinates of iterator for current
  *              selection
  *
- * Return:	non-negative on success, negative on failure
+ * Return:	Non-negative on success, negative on failure
  *
  * Programmer:	Quincey Koziol
  *              Tuesday, April 22, 2003
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5S_point_iter_coords (const H5S_sel_iter_t *iter, hsize_t *coords)
+H5S__point_iter_coords(const H5S_sel_iter_t *iter, hsize_t *coords)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* Check args */
     HDassert(iter);
     HDassert(coords);
 
     /* Copy the offset of the current point */
-    HDmemcpy(coords,iter->u.pnt.curr->pnt,sizeof(hsize_t)*iter->rank);
+    HDmemcpy(coords, iter->u.pnt.curr->pnt, sizeof(hsize_t) * iter->rank);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-}   /* H5S_point_iter_coords() */
+} /* end H5S__point_iter_coords() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5S_point_iter_block
+ * Function:	H5S__point_iter_block
  *
  * Purpose:	Retrieve the current block of iterator for current
  *              selection
  *
- * Return:	non-negative on success, negative on failure
+ * Return:	Non-negative on success, negative on failure
  *
  * Programmer:	Quincey Koziol
  *              Monday, June 2, 2003
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5S_point_iter_block (const H5S_sel_iter_t *iter, hsize_t *start, hsize_t *end)
+H5S__point_iter_block(const H5S_sel_iter_t *iter, hsize_t *start, hsize_t *end)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* Check args */
     HDassert(iter);
@@ -201,46 +233,44 @@ H5S_point_iter_block (const H5S_sel_iter_t *iter, hsize_t *start, hsize_t *end)
     HDassert(end);
 
     /* Copy the current point as a block */
-    HDmemcpy(start,iter->u.pnt.curr->pnt,sizeof(hsize_t)*iter->rank);
-    HDmemcpy(end,iter->u.pnt.curr->pnt,sizeof(hsize_t)*iter->rank);
+    HDmemcpy(start, iter->u.pnt.curr->pnt, sizeof(hsize_t) * iter->rank);
+    HDmemcpy(end, iter->u.pnt.curr->pnt, sizeof(hsize_t) * iter->rank);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-}   /* H5S_point_iter_block() */
+} /* end H5S__point_iter_block() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5S_point_iter_nelmts
+ * Function:	H5S__point_iter_nelmts
  *
  * Purpose:	Return number of elements left to process in iterator
  *
- * Return:	non-negative number of elements on success, zero on failure
+ * Return:	Non-negative number of elements on success, zero on failure
  *
  * Programmer:	Quincey Koziol
  *              Tuesday, June 16, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static hsize_t
-H5S_point_iter_nelmts (const H5S_sel_iter_t *iter)
+H5S__point_iter_nelmts(const H5S_sel_iter_t *iter)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* Check args */
     HDassert(iter);
 
     FUNC_LEAVE_NOAPI(iter->elmt_left)
-}   /* H5S_point_iter_nelmts() */
+} /* end H5S__point_iter_nelmts() */
 
 
 /*--------------------------------------------------------------------------
  NAME
-    H5S_point_iter_has_next_block
+    H5S__point_iter_has_next_block
  PURPOSE
     Check if there is another block left in the current iterator
  USAGE
-    htri_t H5S_point_iter_has_next_block(iter)
+    htri_t H5S__point_iter_has_next_block(iter)
         const H5S_sel_iter_t *iter;       IN: Pointer to selection iterator
  RETURNS
     Non-negative (TRUE/FALSE) on success/Negative on failure
@@ -252,31 +282,31 @@ H5S_point_iter_nelmts (const H5S_sel_iter_t *iter)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static htri_t
-H5S_point_iter_has_next_block(const H5S_sel_iter_t *iter)
+H5S__point_iter_has_next_block(const H5S_sel_iter_t *iter)
 {
-    htri_t ret_value=TRUE;   /* Return value */
+    htri_t ret_value = TRUE;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* Check args */
     HDassert(iter);
 
     /* Check if there is another point in the list */
-    if(iter->u.pnt.curr->next==NULL)
+    if(iter->u.pnt.curr->next == NULL)
         HGOTO_DONE(FALSE);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}   /* H5S_point_iter_has_next_block() */
+} /* end H5S__point_iter_has_next_block() */
 
 
 /*--------------------------------------------------------------------------
  NAME
-    H5S_point_iter_next
+    H5S__point_iter_next
  PURPOSE
     Increment selection iterator
  USAGE
-    herr_t H5S_point_iter_next(iter, nelem)
+    herr_t H5S__point_iter_next(iter, nelem)
         H5S_sel_iter_t *iter;       IN: Pointer to selection iterator
         size_t nelem;               IN: Number of elements to advance by
  RETURNS
@@ -289,31 +319,31 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S_point_iter_next(H5S_sel_iter_t *iter, size_t nelem)
+H5S__point_iter_next(H5S_sel_iter_t *iter, size_t nelem)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* Check args */
     HDassert(iter);
-    HDassert(nelem>0);
+    HDassert(nelem > 0);
 
     /* Increment the iterator */
-    while(nelem>0) {
-        iter->u.pnt.curr=iter->u.pnt.curr->next;
+    while(nelem > 0) {
+        iter->u.pnt.curr = iter->u.pnt.curr->next;
         nelem--;
     } /* end while */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-}   /* H5S_point_iter_next() */
+} /* end H5S__point_iter_next() */
 
 
 /*--------------------------------------------------------------------------
  NAME
-    H5S_point_iter_next_block
+    H5S__point_iter_next_block
  PURPOSE
     Increment selection iterator to next block
  USAGE
-    herr_t H5S_point_iter_next_block(iter)
+    herr_t H5S__point_iter_next_block(iter)
         H5S_sel_iter_t *iter;       IN: Pointer to selection iterator
  RETURNS
     Non-negative on success/Negative on failure
@@ -325,27 +355,27 @@ H5S_point_iter_next(H5S_sel_iter_t *iter, size_t nelem)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S_point_iter_next_block(H5S_sel_iter_t *iter)
+H5S__point_iter_next_block(H5S_sel_iter_t *iter)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* Check args */
     HDassert(iter);
 
     /* Increment the iterator */
-    iter->u.pnt.curr=iter->u.pnt.curr->next;
+    iter->u.pnt.curr = iter->u.pnt.curr->next;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-}   /* H5S_point_iter_next_block() */
+} /* end H5S__point_iter_next_block() */
 
 
 /*--------------------------------------------------------------------------
  NAME
-    H5S_point_iter_release
+    H5S__point_iter_release
  PURPOSE
     Release point selection iterator information for a dataspace
  USAGE
-    herr_t H5S_point_iter_release(iter)
+    herr_t H5S__point_iter_release(iter)
         H5S_sel_iter_t *iter;       IN: Pointer to selection iterator
  RETURNS
     Non-negative on success/Negative on failure
@@ -357,24 +387,24 @@ H5S_point_iter_next_block(H5S_sel_iter_t *iter)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S_point_iter_release (H5S_sel_iter_t H5_ATTR_UNUSED * iter)
+H5S__point_iter_release(H5S_sel_iter_t H5_ATTR_UNUSED * iter)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* Check args */
     HDassert(iter);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-}   /* H5S_point_iter_release() */
+} /* end H5S__point_iter_release() */
 
 
 /*--------------------------------------------------------------------------
  NAME
-    H5S_point_add
+    H5S__point_add
  PURPOSE
     Add a series of elements to a point selection
  USAGE
-    herr_t H5S_point_add(space, num_elem, coord)
+    herr_t H5S__point_add(space, num_elem, coord)
         H5S_t *space;           IN: Dataspace of selection to modify
         size_t num_elem;        IN: Number of elements in COORD array.
         const hsize_t *coord[];    IN: The location of each element selected
@@ -388,14 +418,15 @@ H5S_point_iter_release (H5S_sel_iter_t H5_ATTR_UNUSED * iter)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S_point_add(H5S_t *space, H5S_seloper_t op, size_t num_elem, const hsize_t *coord)
+H5S__point_add(H5S_t *space, H5S_seloper_t op, size_t num_elem, const hsize_t *coord)
 {
     H5S_pnt_node_t *top = NULL, *curr = NULL, *new_node = NULL; /* Point selection nodes */
     unsigned u;                         /* Counter */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
+    /* Sanity checks */
     HDassert(space);
     HDassert(num_elem > 0);
     HDassert(coord);
@@ -469,16 +500,16 @@ done:
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
-}   /* H5S_point_add() */
+} /* end H5S__point_add() */
 
 
 /*--------------------------------------------------------------------------
  NAME
-    H5S_point_release
+    H5S__point_release
  PURPOSE
     Release point selection information for a dataspace
  USAGE
-    herr_t H5S_point_release(space)
+    herr_t H5S__point_release(space)
         H5S_t *space;       IN: Pointer to dataspace
  RETURNS
     Non-negative on success/Negative on failure
@@ -490,7 +521,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S_point_release (H5S_t *space)
+H5S__point_release(H5S_t *space)
 {
     H5S_pnt_node_t *curr, *next;        /* Point selection nodes */
 
@@ -515,7 +546,7 @@ H5S_point_release (H5S_t *space)
     space->select.num_elem = 0;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-}   /* H5S_point_release() */
+} /* end H5S__point_release() */
 
 
 /*--------------------------------------------------------------------------
@@ -539,10 +570,7 @@ H5S_point_release (H5S_t *space)
     array elements are iterated through when I/O is performed.  Duplicate
     coordinates are not checked for.  The selection operator, OP, determines
     how the new selection is to be combined with the existing selection for
-    the dataspace.  Currently, only H5S_SELECT_SET is supported, which replaces
-    the existing selection with the one defined in this call.  When operators
-    other than H5S_SELECT_SET are used to combine a new selection with an
-    existing selection, the selection ordering is reset to 'C' array ordering.
+    the dataspace.
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
  EXAMPLES
@@ -552,9 +580,9 @@ herr_t
 H5S_select_elements(H5S_t *space, H5S_seloper_t op, size_t num_elem,
     const hsize_t *coord)
 {
-    herr_t ret_value = SUCCEED;  /* return value */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
     HDassert(space);
@@ -573,7 +601,7 @@ H5S_select_elements(H5S_t *space, H5S_seloper_t op, size_t num_elem,
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate element information")
 
     /* Add points to selection */
-    if(H5S_point_add(space, op, num_elem, coord) < 0)
+    if(H5S__point_add(space, op, num_elem, coord) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINSERT, FAIL, "can't insert elements")
 
     /* Set selection type */
@@ -581,18 +609,19 @@ H5S_select_elements(H5S_t *space, H5S_seloper_t op, size_t num_elem,
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}   /* H5S_select_elements() */
+} /* end H5S_select_elements() */
 
 
 /*--------------------------------------------------------------------------
  NAME
-    H5S_point_copy
+    H5S__point_copy
  PURPOSE
     Copy a selection from one dataspace to another
  USAGE
-    herr_t H5S_point_copy(dst, src)
+    herr_t H5S__point_copy(dst, src, share_selection)
         H5S_t *dst;  OUT: Pointer to the destination dataspace
         H5S_t *src;  IN: Pointer to the source dataspace
+        hbool_t share_selection; IN: Whether to share the selection between the dataspaces
  RETURNS
     Non-negative on success/Negative on failure
  DESCRIPTION
@@ -604,12 +633,12 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S_point_copy(H5S_t *dst, const H5S_t *src, hbool_t H5_ATTR_UNUSED share_selection)
+H5S__point_copy(H5S_t *dst, const H5S_t *src, hbool_t H5_ATTR_UNUSED share_selection)
 {
     H5S_pnt_node_t *curr, *new_node, *new_tail;    /* Point information nodes */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     HDassert(src);
     HDassert(dst);
@@ -660,18 +689,18 @@ done:
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5S_point_copy() */
+} /* end H5S__point_copy() */
 
 
 /*--------------------------------------------------------------------------
  NAME
-    H5S_point_is_valid
+    H5S__point_is_valid
  PURPOSE
     Check whether the selection fits within the extent, with the current
     offset defined.
  USAGE
-    htri_t H5S_point_is_valid(space);
-        H5S_t *space;             IN: Dataspace pointer to query
+    htri_t H5S__point_is_valid(space);
+        const H5S_t *space;             IN: Dataspace pointer to query
  RETURNS
     TRUE if the selection fits within the extent, FALSE if it does not and
         Negative on an error.
@@ -684,13 +713,13 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 static htri_t
-H5S_point_is_valid (const H5S_t *space)
+H5S__point_is_valid(const H5S_t *space)
 {
     H5S_pnt_node_t *curr;       /* Point information nodes */
     unsigned u;                 /* Counter */
     htri_t ret_value = TRUE;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     HDassert(space);
 
@@ -711,7 +740,7 @@ H5S_point_is_valid (const H5S_t *space)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5S_point_is_valid() */
+} /* end H5S__point_is_valid() */
 
 
 /*--------------------------------------------------------------------------
@@ -750,18 +779,18 @@ H5Sget_select_elem_npoints(hid_t spaceid)
 
 done:
     FUNC_LEAVE_API(ret_value)
-}   /* H5Sget_select_elem_npoints() */
+} /* end H5Sget_select_elem_npoints() */
 
 
 /*--------------------------------------------------------------------------
  NAME
-    H5S_point_serial_size
+    H5S__point_serial_size
  PURPOSE
     Determine the number of bytes needed to store the serialized point selection
     information.
  USAGE
-    hssize_t H5S_point_serial_size(space)
-        H5S_t *space;             IN: Dataspace pointer to query
+    hssize_t H5S__point_serial_size(space)
+        const H5S_t *space;     IN: Dataspace pointer to query
  RETURNS
     The number of bytes required on success, negative on an error.
  DESCRIPTION
@@ -773,11 +802,11 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 static hssize_t
-H5S_point_serial_size (const H5S_t *space)
+H5S__point_serial_size(const H5S_t *space)
 {
     hssize_t ret_value = -1;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     HDassert(space);
 
@@ -792,16 +821,16 @@ H5S_point_serial_size (const H5S_t *space)
     ret_value += (4 * space->extent.rank) * (hssize_t)H5S_GET_SELECT_NPOINTS(space);
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5S_point_serial_size() */
+} /* end H5S__point_serial_size() */
 
 
 /*--------------------------------------------------------------------------
  NAME
-    H5S_point_serialize
+    H5S__point_serialize
  PURPOSE
     Serialize the current selection into a user-provided buffer.
  USAGE
-    herr_t H5S_point_serialize(space, p)
+    herr_t H5S__point_serialize(space, p)
         const H5S_t *space;     IN: Dataspace with selection to serialize
         uint8_t **p;            OUT: Pointer to buffer to put serialized
                                 selection.  Will be advanced to end of
@@ -817,15 +846,15 @@ H5S_point_serial_size (const H5S_t *space)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S_point_serialize (const H5S_t *space, uint8_t **p)
+H5S__point_serialize(const H5S_t *space, uint8_t **p)
 {
     H5S_pnt_node_t *curr;       /* Point information nodes */
     uint8_t *pp = (*p);         /* Local pointer for decoding */
-    uint8_t *lenp;              /* pointer to length location for later storage */
-    uint32_t len=0;             /* number of bytes used */
-    unsigned u;                 /* local counting variable */
+    uint8_t *lenp;              /* Pointer to length location for later storage */
+    uint32_t len = 0;           /* Number of bytes used */
+    unsigned u;                 /* Local counting variable */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* Check args */
     HDassert(space);
@@ -841,23 +870,23 @@ H5S_point_serialize (const H5S_t *space, uint8_t **p)
 
     /* Encode number of dimensions */
     UINT32ENCODE(pp, (uint32_t)space->extent.rank);
-    len+=4;
+    len += 4;
 
     /* Encode number of elements */
     UINT32ENCODE(pp, (uint32_t)space->select.num_elem);
-    len+=4;
+    len += 4;
 
     /* Encode each point in selection */
-    curr=space->select.sel_info.pnt_lst->head;
-    while(curr!=NULL) {
+    curr = space->select.sel_info.pnt_lst->head;
+    while(curr != NULL) {
         /* Add 4 bytes times the rank for each element selected */
-        len+=4*space->extent.rank;
+        len += 4 * space->extent.rank;
 
         /* Encode each point */
-        for(u=0; u<space->extent.rank; u++)
+        for(u = 0; u < space->extent.rank; u++)
             UINT32ENCODE(pp, (uint32_t)curr->pnt[u]);
 
-        curr=curr->next;
+        curr = curr->next;
     } /* end while */
 
     /* Encode length */
@@ -867,16 +896,16 @@ H5S_point_serialize (const H5S_t *space, uint8_t **p)
     *p = pp;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-}   /* H5S_point_serialize() */
+} /* end H5S__point_serialize() */
 
 
 /*--------------------------------------------------------------------------
  NAME
-    H5S_point_deserialize
+    H5S__point_deserialize
  PURPOSE
     Deserialize the current selection from a user-provided buffer.
  USAGE
-    herr_t H5S_point_deserialize(space, p)
+    herr_t H5S__point_deserialize(space, p)
         H5S_t *space;           IN/OUT: Dataspace pointer to place
                                 selection into
         uint32_t version        IN: Selection version
@@ -895,10 +924,9 @@ H5S_point_serialize (const H5S_t *space, uint8_t **p)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S_point_deserialize(H5S_t *space, uint32_t H5_ATTR_UNUSED version, uint8_t H5_ATTR_UNUSED flags,
+H5S__point_deserialize(H5S_t *space, uint32_t H5_ATTR_UNUSED version, uint8_t H5_ATTR_UNUSED flags,
     const uint8_t **p)
 {
-    H5S_seloper_t op = H5S_SELECT_SET;  /* Selection operation */
     hsize_t *coord = NULL, *tcoord;     /* Pointer to array of elements */
     const uint8_t *pp = (*p);   /* Local pointer for decoding */
     size_t num_elem = 0;        /* Number of elements in selection */
@@ -906,7 +934,7 @@ H5S_point_deserialize(H5S_t *space, uint32_t H5_ATTR_UNUSED version, uint8_t H5_
     unsigned i, j;              /* local counting variables */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Check args */
     HDassert(space);
@@ -928,7 +956,7 @@ H5S_point_deserialize(H5S_t *space, uint32_t H5_ATTR_UNUSED version, uint8_t H5_
             UINT32DECODE(pp, *tcoord);
 
     /* Select points */
-    if(H5S_select_elements(space, op, num_elem, (const hsize_t *)coord) < 0)
+    if(H5S_select_elements(space, H5S_SELECT_SET, num_elem, (const hsize_t *)coord) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't change selection")
 
     /* Update decoding pointer */
@@ -940,17 +968,17 @@ done:
         H5MM_xfree(coord);
 
     FUNC_LEAVE_NOAPI(ret_value)
-}   /* H5S_point_deserialize() */
+} /* end H5S__point_deserialize() */
 
 
 /*--------------------------------------------------------------------------
  NAME
-    H5S_get_select_elem_pointlist
+    H5S__get_select_elem_pointlist
  PURPOSE
     Get the list of element points currently selected
  USAGE
-    herr_t H5S_get_select_elem_pointlist(space, hsize_t *buf)
-        H5S_t *space;           IN: Dataspace pointer of selection to query
+    herr_t H5S__get_select_elem_pointlist(space, hsize_t *buf)
+        const H5S_t *space;     IN: Dataspace pointer of selection to query
         hsize_t startpoint;     IN: Element point to start with
         hsize_t numpoints;      IN: Number of element points to get
         hsize_t *buf;           OUT: List of element points selected
@@ -973,12 +1001,13 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S_get_select_elem_pointlist(H5S_t *space, hsize_t startpoint, hsize_t numpoints, hsize_t *buf)
+H5S__get_select_elem_pointlist(const H5S_t *space, hsize_t startpoint,
+    hsize_t numpoints, hsize_t *buf)
 {
     H5S_pnt_node_t *node;       /* Point node */
     unsigned rank;              /* Dataspace rank */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     HDassert(space);
     HDassert(buf);
@@ -1004,7 +1033,7 @@ H5S_get_select_elem_pointlist(H5S_t *space, hsize_t startpoint, hsize_t numpoint
       } /* end while */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-}   /* H5S_get_select_elem_pointlist() */
+} /* end H5S__get_select_elem_pointlist() */
 
 
 /*--------------------------------------------------------------------------
@@ -1054,20 +1083,20 @@ H5Sget_select_elem_pointlist(hid_t spaceid, hsize_t startpoint,
     if(H5S_GET_SELECT_TYPE(space) != H5S_SEL_POINTS)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a point selection")
 
-    ret_value = H5S_get_select_elem_pointlist(space, startpoint, numpoints, buf);
+    ret_value = H5S__get_select_elem_pointlist(space, startpoint, numpoints, buf);
 
 done:
     FUNC_LEAVE_API(ret_value)
-}   /* H5Sget_select_elem_pointlist() */
+} /* end H5Sget_select_elem_pointlist() */
 
 
 /*--------------------------------------------------------------------------
  NAME
-    H5S_point_bounds
+    H5S__point_bounds
  PURPOSE
     Gets the bounding box containing the selection.
  USAGE
-    herr_t H5S_point_bounds(space, start, end)
+    herr_t H5S__point_bounds(space, start, end)
         H5S_t *space;           IN: Dataspace pointer of selection to query
         hsize_t *start;         OUT: Starting coordinate of bounding box
         hsize_t *end;           OUT: Opposite coordinate of bounding box
@@ -1088,14 +1117,14 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S_point_bounds(const H5S_t *space, hsize_t *start, hsize_t *end)
+H5S__point_bounds(const H5S_t *space, hsize_t *start, hsize_t *end)
 {
     H5S_pnt_node_t *node;       /* Point node */
     unsigned rank;              /* Dataspace rank */
     unsigned u;                 /* Local index variable */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Sanity check */
     HDassert(space);
@@ -1129,16 +1158,16 @@ H5S_point_bounds(const H5S_t *space, hsize_t *start, hsize_t *end)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}   /* H5S_point_bounds() */
+} /* end H5S__point_bounds() */
 
 
 /*--------------------------------------------------------------------------
  NAME
-    H5S_point_offset
+    H5S__point_offset
  PURPOSE
     Gets the linear offset of the first element for the selection.
  USAGE
-    herr_t H5S_point_offset(space, offset)
+    herr_t H5S__point_offset(space, offset)
         const H5S_t *space;     IN: Dataspace pointer of selection to query
         hsize_t *offset;        OUT: Linear offset of first element in selection
  RETURNS
@@ -1153,7 +1182,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S_point_offset(const H5S_t *space, hsize_t *offset)
+H5S__point_offset(const H5S_t *space, hsize_t *offset)
 {
     const hsize_t *pnt;         /* Pointer to a selected point's coordinates */
     const hssize_t *sel_offset; /* Pointer to the selection's offset */
@@ -1162,7 +1191,7 @@ H5S_point_offset(const H5S_t *space, hsize_t *offset)
     int i;                      /* index variable */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_STATIC
 
     HDassert(space);
     HDassert(offset);
@@ -1193,7 +1222,7 @@ H5S_point_offset(const H5S_t *space, hsize_t *offset)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}   /* H5S_point_offset() */
+} /* end H5S__point_offset() */
 
 
 /*--------------------------------------------------------------------------
@@ -1227,11 +1256,11 @@ H5S__point_unlim_dim(const H5S_t H5_ATTR_UNUSED *space)
 
 /*--------------------------------------------------------------------------
  NAME
-    H5S_point_is_contiguous
+    H5S__point_is_contiguous
  PURPOSE
     Check if a point selection is contiguous within the dataspace extent.
  USAGE
-    htri_t H5S_point_is_contiguous(space)
+    htri_t H5S__point_is_contiguous(space)
         H5S_t *space;           IN: Dataspace pointer to check
  RETURNS
     TRUE/FALSE/FAIL
@@ -1247,31 +1276,31 @@ H5S__point_unlim_dim(const H5S_t H5_ATTR_UNUSED *space)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static htri_t
-H5S_point_is_contiguous(const H5S_t *space)
+H5S__point_is_contiguous(const H5S_t *space)
 {
     htri_t ret_value = FAIL;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     HDassert(space);
 
     /* One point is definitely contiguous */
-    if(space->select.num_elem==1)
-    	ret_value=TRUE;
+    if(space->select.num_elem == 1)
+    	ret_value = TRUE;
     else	/* More than one point might be contiguous, but it's complex to check and we don't need it right now */
-    	ret_value=FALSE;
+    	ret_value = FALSE;
 
     FUNC_LEAVE_NOAPI(ret_value)
-}   /* H5S_point_is_contiguous() */
+} /* end H5S__point_is_contiguous() */
 
 
 /*--------------------------------------------------------------------------
  NAME
-    H5S_point_is_single
+    H5S__point_is_single
  PURPOSE
     Check if a point selection is single within the dataspace extent.
  USAGE
-    htri_t H5S_point_is_single(space)
+    htri_t H5S__point_is_single(space)
         H5S_t *space;           IN: Dataspace pointer to check
  RETURNS
     TRUE/FALSE/FAIL
@@ -1284,31 +1313,31 @@ H5S_point_is_contiguous(const H5S_t *space)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static htri_t
-H5S_point_is_single(const H5S_t *space)
+H5S__point_is_single(const H5S_t *space)
 {
     htri_t ret_value = FAIL;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     HDassert(space);
 
     /* One point is definitely 'single' :-) */
-    if(space->select.num_elem==1)
-    	ret_value=TRUE;
+    if(space->select.num_elem == 1)
+    	ret_value = TRUE;
     else
-    	ret_value=FALSE;
+    	ret_value = FALSE;
 
     FUNC_LEAVE_NOAPI(ret_value)
-}   /* H5S_point_is_single() */
+} /* end H5S__point_is_single() */
 
 
 /*--------------------------------------------------------------------------
  NAME
-    H5S_point_is_regular
+    H5S__point_is_regular
  PURPOSE
     Check if a point selection is "regular"
  USAGE
-    htri_t H5S_point_is_regular(space)
+    htri_t H5S__point_is_regular(space)
         const H5S_t *space;     IN: Dataspace pointer to check
  RETURNS
     TRUE/FALSE/FAIL
@@ -1324,32 +1353,32 @@ H5S_point_is_single(const H5S_t *space)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static htri_t
-H5S_point_is_regular(const H5S_t *space)
+H5S__point_is_regular(const H5S_t *space)
 {
     htri_t ret_value = FAIL;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* Check args */
     HDassert(space);
 
     /* Only simple check for regular points for now... */
-    if(space->select.num_elem==1)
-    	ret_value=TRUE;
+    if(space->select.num_elem == 1)
+    	ret_value = TRUE;
     else
-    	ret_value=FALSE;
+    	ret_value = FALSE;
 
     FUNC_LEAVE_NOAPI(ret_value)
-}   /* H5S_point_is_regular() */
+} /* end H5S__point_is_regular() */
 
 
 /*--------------------------------------------------------------------------
  NAME
-    H5S_point_adjust_u
+    H5S__point_adjust_u
  PURPOSE
     Adjust a "point" selection by subtracting an offset
  USAGE
-    herr_t H5S_point_adjust_u(space, offset)
+    herr_t H5S__point_adjust_u(space, offset)
         H5S_t *space;           IN/OUT: Pointer to dataspace to adjust
         const hsize_t *offset; IN: Offset to subtract
  RETURNS
@@ -1362,12 +1391,12 @@ H5S_point_is_regular(const H5S_t *space)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S_point_adjust_u(H5S_t *space, const hsize_t *offset)
+H5S__point_adjust_u(H5S_t *space, const hsize_t *offset)
 {
     H5S_pnt_node_t *node;               /* Point node */
     unsigned rank;                      /* Dataspace rank */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     HDassert(space);
     HDassert(offset);
@@ -1392,16 +1421,16 @@ H5S_point_adjust_u(H5S_t *space, const hsize_t *offset)
     } /* end while */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-}   /* H5S_point_adjust_u() */
+} /* end H5S__point_adjust_u() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5S_point_project_scalar
+ * Function:	H5S__point_project_scalar
  *
  * Purpose:	Projects a single element point selection into a scalar
  *              dataspace
  *
- * Return:	non-negative on success, negative on failure.
+ * Return:	Non-negative on success, negative on failure.
  *
  * Programmer:	Quincey Koziol
  *              Sunday, July 18, 2010
@@ -1409,12 +1438,12 @@ H5S_point_adjust_u(H5S_t *space, const hsize_t *offset)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5S_point_project_scalar(const H5S_t *space, hsize_t *offset)
+H5S__point_project_scalar(const H5S_t *space, hsize_t *offset)
 {
     const H5S_pnt_node_t *node;         /* Point node */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Check args */
     HDassert(space && H5S_SEL_POINTS == H5S_GET_SELECT_TYPE(space));
@@ -1428,20 +1457,20 @@ H5S_point_project_scalar(const H5S_t *space, hsize_t *offset)
         HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "point selection of one element has more than one node!")
 
     /* Calculate offset of selection in projected buffer */
-    *offset = H5VM_array_offset(space->extent.rank, space->extent.size, node->pnt); 
+    *offset = H5VM_array_offset(space->extent.rank, space->extent.size, node->pnt);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}   /* H5S_point_project_scalar() */
+} /* end H5S__point_project_scalar() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5S_point_project_simple
+ * Function:	H5S__point_project_simple
  *
  * Purpose:	Projects a point selection onto/into a simple dataspace
  *              of a different rank
  *
- * Return:	non-negative on success, negative on failure.
+ * Return:	Non-negative on success, negative on failure.
  *
  * Programmer:	Quincey Koziol
  *              Sunday, July 18, 2010
@@ -1449,7 +1478,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5S_point_project_simple(const H5S_t *base_space, H5S_t *new_space, hsize_t *offset)
+H5S__point_project_simple(const H5S_t *base_space, H5S_t *new_space, hsize_t *offset)
 {
     const H5S_pnt_node_t *base_node;    /* Point node in base space */
     H5S_pnt_node_t *new_node;           /* Point node in new space */
@@ -1457,7 +1486,7 @@ H5S_point_project_simple(const H5S_t *base_space, H5S_t *new_space, hsize_t *off
     unsigned rank_diff;                 /* Difference in ranks between spaces */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Check args */
     HDassert(base_space && H5S_SEL_POINTS == H5S_GET_SELECT_TYPE(base_space));
@@ -1482,7 +1511,7 @@ H5S_point_project_simple(const H5S_t *base_space, H5S_t *new_space, hsize_t *off
         /* Calculate offset of selection in projected buffer */
         HDmemset(block, 0, sizeof(block));
         HDmemcpy(block, base_space->select.sel_info.pnt_lst->head->pnt, sizeof(hsize_t) * rank_diff);
-        *offset = H5VM_array_offset(base_space->extent.rank, base_space->extent.size, block); 
+        *offset = H5VM_array_offset(base_space->extent.rank, base_space->extent.size, block);
 
         /* Iterate through base space's point nodes, copying the point information */
         base_node = base_space->select.sel_info.pnt_lst->head;
@@ -1559,7 +1588,7 @@ H5S_point_project_simple(const H5S_t *base_space, H5S_t *new_space, hsize_t *off
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}   /* H5S_point_project_simple() */
+} /* end H5S__point_project_simple() */
 
 
 /*--------------------------------------------------------------------------
@@ -1620,16 +1649,16 @@ H5Sselect_elements(hid_t spaceid, H5S_seloper_t op, size_t num_elem,
 
 done:
     FUNC_LEAVE_API(ret_value)
-}   /* H5Sselect_elements() */
+} /* end H5Sselect_elements() */
 
 
 /*--------------------------------------------------------------------------
  NAME
-    H5S_point_get_seq_list
+    H5S__point_get_seq_list
  PURPOSE
     Create a list of offsets & lengths for a selection
  USAGE
-    herr_t H5S_point_get_seq_list(space,flags,iter,maxseq,maxelem,nseq,nelem,off,len)
+    herr_t H5S__point_get_seq_list(space,flags,iter,maxseq,maxelem,nseq,nelem,off,len)
         H5S_t *space;           IN: Dataspace containing selection to use.
         unsigned flags;         IN: Flags for extra information about operation
         H5S_sel_iter_t *iter;   IN/OUT: Selection iterator describing last
@@ -1655,14 +1684,14 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S_point_get_seq_list(const H5S_t *space, unsigned flags, H5S_sel_iter_t *iter,
+H5S__point_get_seq_list(const H5S_t *space, unsigned flags, H5S_sel_iter_t *iter,
     size_t maxseq, size_t maxelem, size_t *nseq, size_t *nelem,
     hsize_t *off, size_t *len)
 {
     size_t io_left;             /* The number of bytes left in the selection */
     size_t start_io_left;       /* The initial number of bytes left in the selection */
     H5S_pnt_node_t *node;       /* Point node */
-    hsize_t dims[H5O_LAYOUT_NDIMS];     /* Total size of memory buf */
+    hsize_t dims[H5S_MAX_RANK];     /* Total size of memory buf */
     int	ndims;                  /* Dimensionality of space*/
     hsize_t	acc;            /* Coordinate accumulator */
     hsize_t	loc;            /* Coordinate offset */
@@ -1670,7 +1699,7 @@ H5S_point_get_seq_list(const H5S_t *space, unsigned flags, H5S_sel_iter_t *iter,
     int         i;              /* Local index variable */
     herr_t ret_value=SUCCEED;      /* return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Check args */
     HDassert(space);
@@ -1758,5 +1787,5 @@ H5S_point_get_seq_list(const H5S_t *space, unsigned flags, H5S_sel_iter_t *iter,
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5S_point_get_seq_list() */
+} /* end H5S__point_get_seq_list() */
 

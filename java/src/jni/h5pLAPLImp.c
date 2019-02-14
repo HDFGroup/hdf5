@@ -96,6 +96,9 @@ Java_hdf_hdf5lib_H5_H5Pset_1elink_1prefix
 
     UNUSED(clss);
 
+    if (NULL == prefix)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Pset_elink_prefix: prefix is NULL");
+
     PIN_JAVA_STRING(ENVONLY, prefix, linkPrefix, NULL, "H5Pset_elink_prefix: link prefix not pinned");
 
     if ((retVal = H5Pset_elink_prefix((hid_t)lapl_id, linkPrefix)) < 0)

@@ -17,23 +17,60 @@
  * Purpose:	Dataspace selection testing functions.
  */
 
+/****************/
+/* Module Setup */
+/****************/
+
 #include "H5Smodule.h"          /* This source code file is part of the H5S module */
 #define H5S_TESTING		/*suppress warning about H5S testing funcs*/
 
 
+/***********/
+/* Headers */
+/***********/
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5Spkg.h"		/* Dataspaces 				*/
 
+/****************/
+/* Local Macros */
+/****************/
+
+
+/******************/
+/* Local Typedefs */
+/******************/
+
+
+/********************/
+/* Local Prototypes */
+/********************/
+
+
+/*****************************/
+/* Library Private Variables */
+/*****************************/
+
+
+/*********************/
+/* Package Variables */
+/*********************/
+
+
+/*******************/
+/* Local Variables */
+/*******************/
+
+
 
 /*--------------------------------------------------------------------------
  NAME
-    H5S_select_shape_same_test
+    H5S__select_shape_same_test
  PURPOSE
     Determine if two dataspace selections are the same shape
  USAGE
-    htri_t H5S_select_shape_same_test(sid1, sid2)
+    htri_t H5S__select_shape_same_test(sid1, sid2)
         hid_t sid1;          IN: 1st dataspace to compare
         hid_t sid2;          IN: 2nd dataspace to compare
  RETURNS
@@ -48,13 +85,13 @@
  REVISION LOG
 --------------------------------------------------------------------------*/
 htri_t
-H5S_select_shape_same_test(hid_t sid1, hid_t sid2)
+H5S__select_shape_same_test(hid_t sid1, hid_t sid2)
 {
     H5S_t	*space1;                /* Pointer to 1st dataspace */
     H5S_t	*space2;                /* Pointer to 2nd dataspace */
     htri_t      ret_value = FAIL;       /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_PACKAGE
 
     /* Get dataspace structures */
     if(NULL == (space1 = (H5S_t *)H5I_object_verify(sid1, H5I_DATASPACE)))
@@ -68,16 +105,16 @@ H5S_select_shape_same_test(hid_t sid1, hid_t sid2)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5S_select_shape_same_test() */
+} /* H5S__select_shape_same_test() */
 
 
 /*--------------------------------------------------------------------------
  NAME
-    H5S_get_rebuild_status_test
+    H5S__get_rebuild_status_test
  PURPOSE
     Determine the status of hyperslab rebuild
  USAGE
-    htri_t H5S_inquiry_rebuild_status(hid_t space_id)
+    htri_t H5S__get_rebuild_status_test(hid_t space_id)
         hid_t space_id;          IN:  dataspace id
  RETURNS
     Non-negative TRUE/FALSE on success, negative on failure
@@ -90,12 +127,12 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 htri_t
-H5S_get_rebuild_status_test(hid_t space_id)
+H5S__get_rebuild_status_test(hid_t space_id)
 {
     H5S_t *space;               /* Pointer to 1st dataspace */
     htri_t ret_value = FAIL;    /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_PACKAGE
 
      /* Get dataspace structures */
     if(NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
@@ -105,5 +142,5 @@ H5S_get_rebuild_status_test(hid_t space_id)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5S_get_rebuild_status_test() */
+} /* H5S__get_rebuild_status_test() */
 

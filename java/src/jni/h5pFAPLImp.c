@@ -384,6 +384,9 @@ Java_hdf_hdf5lib_H5_H5Pset_1fapl_1log
 
     UNUSED(clss);
 
+    if (NULL == logfile)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Pset_fapl_log: log file name is NULL");
+
     PIN_JAVA_STRING(ENVONLY, logfile, pLogfile, NULL, "H5Pset_fapl_log: log file name not pinned");
 
     if ((retVal = H5Pset_fapl_log((hid_t)fapl_id, pLogfile, (unsigned long long)flags, (size_t)buf_size)) < 0)
@@ -421,10 +424,12 @@ Java_hdf_hdf5lib_H5_H5Pset_1fapl_1multi
         jlongArray memb_fapl, jobjectArray memb_name, jlongArray memb_addr, jboolean relax)
 {
     const char * const *mName = NULL;
+    const char         *utf8 = NULL;
     jboolean            isCopy;
     jboolean            bb;
     jobject             o;
     jstring             rstring;
+    jstring             obj;
     jclass              Sjc;
     size_t              i;
     jlong              *thefaplArray = NULL;
@@ -445,11 +450,8 @@ Java_hdf_hdf5lib_H5_H5Pset_1fapl_1multi
         PIN_LONG_ARRAY(ENVONLY, memb_addr, theaddrArray, &isCopy, "H5Pset_fapl_multi: memb_addr not pinned");
 
     if (memb_name) {
-        jstring obj;
-
         for (i = 0; i < H5FD_MEM_NTYPES; i++) {
-            const char *utf8 = NULL;
-            size_t      str_len;
+            size_t str_len;
 
             if (NULL == (obj = (jstring) ENVPTR->GetObjectArrayElement(ENVONLY, (jobjectArray) memb_name, (jsize) i))) {
                 CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
@@ -474,6 +476,7 @@ Java_hdf_hdf5lib_H5_H5Pset_1fapl_1multi
                 H5_JNI_FATAL_ERROR(ENVONLY, "H5Pset_fapl_multi: memory allocation failed");
 
             HDstrncpy(member_name[i], utf8, str_len + 1);
+            (member_name[i])[str_len] = '\0';
 
             UNPIN_JAVA_STRING(ENVONLY, obj, utf8);
             utf8 = NULL;
@@ -493,6 +496,8 @@ Java_hdf_hdf5lib_H5_H5Pset_1fapl_1multi
             CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
 
         for (i = 0; i < H5FD_MEM_NTYPES; i++) {
+            if (!member_name[i]) continue;
+
             if (NULL == (rstring = ENVPTR->NewStringUTF(ENVONLY, member_name[i]))) {
                 CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
                 H5_JNI_FATAL_ERROR(ENVONLY, "H5Pset_fapl_multi: out of memory - unable to construct string from UTF characters");
@@ -522,7 +527,12 @@ Java_hdf_hdf5lib_H5_H5Pset_1fapl_1multi
     }
 
 done:
-    h5str_array_free(member_name, H5FD_MEM_NTYPES);
+    for (i = 0; i < H5FD_MEM_NTYPES; i++) {
+        if (member_name[i])
+            HDfree(member_name[i]);
+    }
+    if (utf8)
+        UNPIN_JAVA_STRING(ENVONLY, obj, utf8);
     if (theaddrArray)
         UNPIN_LONG_ARRAY(ENVONLY, memb_addr, theaddrArray, (status < 0) ? JNI_ABORT : 0);
     if (thefaplArray)
@@ -620,6 +630,11 @@ Java_hdf_hdf5lib_H5_H5Pset_1fapl_1split
     herr_t      retVal = FAIL;
 
     UNUSED(clss);
+
+    if (NULL == metaext)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Pset_fapl_split: metaext is NULL");
+    if (NULL == rawext)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Pset_fapl_split: rawext is NULL");
 
     PIN_JAVA_STRING(ENVONLY, metaext, mstr, NULL, "H5Pset_fapl_split: metaext not pinned");
     PIN_JAVA_STRING(ENVONLY, rawext, rstr, NULL, "H5Pset_fapl_split: rawext not pinned");
@@ -1125,12 +1140,17 @@ Java_hdf_hdf5lib_H5_H5Pset_1mdc_1config
     if (NULL == (j_str = (jstring)ENVPTR->GetObjectField(ENVONLY, cache_config, fid)))
         CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
 
-    PIN_JAVA_STRING(ENVONLY, j_str, str, NULL, "H5Pset_mdc_config: cache_config not pinned");
+    if (j_str) {
+        PIN_JAVA_STRING(ENVONLY, j_str, str, NULL, "H5Pset_mdc_config: cache_config not pinned");
 
-    HDstrncpy(cacheinfo.trace_file_name, str, H5AC__MAX_TRACE_FILE_NAME_LEN + 1);
+        HDstrncpy(cacheinfo.trace_file_name, str, H5AC__MAX_TRACE_FILE_NAME_LEN + 1);
+        cacheinfo.trace_file_name[H5AC__MAX_TRACE_FILE_NAME_LEN] = '\0';
 
-    UNPIN_JAVA_STRING(ENVONLY, j_str, str);
-    str = NULL;
+        UNPIN_JAVA_STRING(ENVONLY, j_str, str);
+        str = NULL;
+    }
+    else
+        HDmemset(cacheinfo.trace_file_name, 0, H5AC__MAX_TRACE_FILE_NAME_LEN + 1);
 
     if (NULL == (fid = ENVPTR->GetFieldID(ENVONLY, cls, "evictions_enabled", "Z")))
         CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
@@ -1382,6 +1402,9 @@ Java_hdf_hdf5lib_H5_H5Pset_1mdc_1log_1options
     herr_t      retVal = FAIL;
 
     UNUSED(clss);
+
+    if (NULL == location)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Pset_mdc_log_options: location string is NULL");
 
     PIN_JAVA_STRING(ENVONLY, location, locStr, NULL, "H5Pset_mdc_log_options: location string not pinned");
 

@@ -56,6 +56,9 @@ Java_hdf_hdf5lib_H5__1H5Oopen
 
     UNUSED(clss);
 
+    if (NULL == name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Oopen: object name is NULL");
+
     PIN_JAVA_STRING(ENVONLY, name, objName, NULL, "H5Oopen: object name not pinned");
 
     if ((status = H5Oopen((hid_t)loc_id, objName, (hid_t)access_plist_id)) < 0)
@@ -103,6 +106,11 @@ Java_hdf_hdf5lib_H5_H5Ocopy
     herr_t      status = FAIL;
 
     UNUSED(clss);
+
+    if (NULL == cur_name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Ocopy: src name is NULL");
+    if (NULL == dst_name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Ocopy: dst name is NULL");
 
     PIN_JAVA_STRING(ENVONLY, cur_name, lCurName, NULL, "H5Ocopy: src name not pinned");
     PIN_JAVA_STRING(ENVONLY, dst_name, lDstName, NULL, "H5Ocopy: dest name not pinned");
@@ -204,6 +212,9 @@ Java_hdf_hdf5lib_H5_H5Oget_1info_1by_1name
 
     UNUSED(clss);
 
+    if (NULL == name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Oget_info_by_name: object name is NULL");
+
     PIN_JAVA_STRING(ENVONLY, name, objName, NULL, "H5Oget_info_by_name: object name not pinned");
 
     if ((status = H5Oget_info_by_name2((hid_t)loc_id, objName, &infobuf, (unsigned)fields, (hid_t)access_id)) < 0)
@@ -278,6 +289,9 @@ Java_hdf_hdf5lib_H5_H5Oget_1info_1by_1idx
 
     UNUSED(clss);
 
+    if (NULL == name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Oget_info_by_idx: group name is NULL");
+
     PIN_JAVA_STRING(ENVONLY, name, grpName, NULL, "H5Oget_info_by_idx: group name not pinned");
 
     if ((status = H5Oget_info_by_idx2((hid_t)loc_id, grpName, (H5_index_t)index_field, (H5_iter_order_t)order, (hsize_t)link_n, &infobuf, (unsigned)fields, (hid_t)access_id)) < 0)
@@ -345,6 +359,9 @@ Java_hdf_hdf5lib_H5_H5Olink
     herr_t      status = FAIL;
 
     UNUSED(clss);
+
+    if (NULL == dst_name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Olink: link destination name is NULL");
 
     PIN_JAVA_STRING(ENVONLY, dst_name, linkDstName, NULL, "H5Olink: link destination name not pinned");
 
@@ -525,6 +542,8 @@ Java_hdf_hdf5lib_H5_H5Ovisit_1by_1name
         H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Ovisit_by_name: op_data is NULL");
     if (NULL == callback_op)
         H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Ovisit_by_name: callback_op is NULL");
+    if (NULL == name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Ovisit_by_name: object name is NULL");
 
     PIN_JAVA_STRING(ENVONLY, name, objName, NULL, "H5Ovisit_by_name: object name not pinned");
 
@@ -579,6 +598,9 @@ Java_hdf_hdf5lib_H5_H5Oset_1comment_1by_1name
     herr_t      status = FAIL;
 
     UNUSED(clss);
+
+    if (NULL == name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Oset_comment_by_name: object name is NULL");
 
     PIN_JAVA_STRING(ENVONLY, name, objName, NULL, "H5Oset_comment_by_name: object name not pinned");
 
@@ -651,6 +673,9 @@ Java_hdf_hdf5lib_H5_H5Oget_1comment_1by_1name
 
     UNUSED(clss);
 
+    if (NULL == name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Oget_comment_by_name: object name is NULL");
+
     PIN_JAVA_STRING(ENVONLY, name, objName, NULL, "H5Oget_comment_by_name: object name not pinned");
 
     /* Get the length of the comment */
@@ -691,6 +716,9 @@ Java_hdf_hdf5lib_H5_H5Oexists_1by_1name
     htri_t      bval = JNI_FALSE;
 
     UNUSED(clss);
+
+    if (NULL == name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Oexists_by_name: object name is NULL");
 
     PIN_JAVA_STRING(ENVONLY, name, objName, NULL, "H5Oexists_by_name: object name not pinned");
 
@@ -776,6 +804,9 @@ Java_hdf_hdf5lib_H5__1H5Oopen_1by_1idx
     hid_t       retVal = H5I_INVALID_HID;
 
     UNUSED(clss);
+
+    if (NULL == name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Oopen_by_idx: object name is NULL");
 
     PIN_JAVA_STRING(ENVONLY, name, grpName, NULL, "H5Oopen_by_idx: object name not pinned");
 
