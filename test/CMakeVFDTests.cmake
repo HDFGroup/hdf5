@@ -92,6 +92,7 @@ endif ()
 
   set (H5_VFD_SKIP_TESTS
       cache
+      cache_image
       accum
       fheap
       big
