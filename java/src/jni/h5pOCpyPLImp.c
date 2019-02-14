@@ -21,73 +21,71 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#include "hdf5.h"
-#include <jni.h>
 #include <stdlib.h>
+#include "hdf5.h"
 #include "h5jni.h"
-#include "h5zImp.h"
+#include "h5pOCpyPLImp.h"
+
+/*
+ * Pointer to the JNI's Virtual Machine; used for callback functions.
+ */
+/* extern JavaVM *jvm; */
 
 /*
  * Class:     hdf_hdf5lib_H5
- * Method:    H5Zunregister
- * Signature: (I)I
+ * Method:    H5Pset_copy_object
+ * Signature: (JI)V
  */
-JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Zunregister
-    (JNIEnv *env, jclass clss, jint filter)
+JNIEXPORT void JNICALL
+Java_hdf_hdf5lib_H5_H5Pset_1copy_1object
+    (JNIEnv *env, jclass clss, jlong ocp_plist_id, jint copy_options)
 {
     herr_t retVal = FAIL;
 
     UNUSED(clss);
 
-    if ((retVal = H5Zunregister((H5Z_filter_t)filter)) < 0)
+    if ((retVal = H5Pset_copy_object((hid_t)ocp_plist_id, (unsigned)copy_options)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
 done:
-    return (jint)retVal;
-} /* end Java_hdf_hdf5lib_H5_H5Zunregister */
+    return;
+} /* end Java_hdf_hdf5lib_H5_H5Pset_1copy_1object */
 
 /*
  * Class:     hdf_hdf5lib_H5
- * Method:    H5Zfilter_avail
- * Signature: (I)I
+ * Method:    H5Pget_copy_object
+ * Signature: (J)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Zfilter_1avail
-    (JNIEnv *env, jclass clss, jint filter)
+Java_hdf_hdf5lib_H5_H5Pget_1copy_1object
+    (JNIEnv *env, jclass clss, jlong ocp_plist_id)
 {
-    herr_t retVal = FAIL;
+    unsigned copy_options = 0;
 
     UNUSED(clss);
 
-    if ((retVal = H5Zfilter_avail((H5Z_filter_t)filter)) < 0)
+    if (H5Pget_copy_object((hid_t)ocp_plist_id, &copy_options) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
 done:
-    return (jint)retVal;
-} /* end Java_hdf_hdf5lib_H5_H5Zfilter_1avail */
+    return (jint)copy_options;
+} /* end Java_hdf_hdf5lib_H5_H5Pget_1copy_1object */
 
 /*
- * Class:     hdf_hdf5lib_H5
- * Method:    H5Zget_filter_info
- * Signature: (I)I
+ * TODO: H5Padd_merge_committed_dtype_path
  */
 
-JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Zget_1filter_1info
-    (JNIEnv *env, jclass clss, jint filter)
-{
-    unsigned int flags = 0;
+/*
+ * TODO: H5Pfree_merge_committed_dtype_paths
+ */
 
-    UNUSED(clss);
+/*
+ * TODO: H5Pset_mcdt_search_cb
+ */
 
-    if (H5Zget_filter_info((H5Z_filter_t) filter, (unsigned *) &flags) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
-
-done:
-    return (jint)flags;
-} /* end Java_hdf_hdf5lib_H5_H5Zget_1filter_1info */
-
+/*
+ * TODO: H5Pget_mcdt_search_cb
+ */
 
 #ifdef __cplusplus
 } /* end extern "C" */

@@ -279,6 +279,10 @@ New Features
 
     Java Library:
     ----------------
+    - Rewrote the JNI error handling to be much cleaner
+
+      (JTH - 2019/02/12)
+
     - Add new functions to java interface
 
       Added wrappers for:

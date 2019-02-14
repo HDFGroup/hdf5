@@ -124,7 +124,7 @@ public class TestH5Oparams {
         H5.H5Oset_comment(-1, "Bogus");
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = HDF5LibraryException.class)
     public void testH5Oget_comment_invalid() throws Throwable {
         H5.H5Oget_comment(-1);
     }
@@ -139,7 +139,7 @@ public class TestH5Oparams {
         H5.H5Oset_comment_by_name(-1, null, null, -1);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = HDF5LibraryException.class)
     public void testH5Oget_comment_by_name_invalid() throws Throwable {
         H5.H5Oget_comment_by_name(-1, "Bogus", -1);
     }

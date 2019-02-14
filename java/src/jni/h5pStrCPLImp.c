@@ -21,73 +21,53 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#include "hdf5.h"
-#include <jni.h>
 #include <stdlib.h>
+#include "hdf5.h"
 #include "h5jni.h"
-#include "h5zImp.h"
+#include "h5pStrCPLImp.h"
+
+/*
+ * Pointer to the JNI's Virtual Machine; used for callback functions.
+ */
+/* extern JavaVM *jvm; */
 
 /*
  * Class:     hdf_hdf5lib_H5
- * Method:    H5Zunregister
- * Signature: (I)I
+ * Method:    H5Pset_char_encoding
+ * Signature: (JI)V
  */
-JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Zunregister
-    (JNIEnv *env, jclass clss, jint filter)
+JNIEXPORT void JNICALL
+Java_hdf_hdf5lib_H5_H5Pset_1char_1encoding
+    (JNIEnv *env, jclass clss, jlong acpl, jint encoding)
 {
-    herr_t retVal = FAIL;
-
     UNUSED(clss);
 
-    if ((retVal = H5Zunregister((H5Z_filter_t)filter)) < 0)
+    if (H5Pset_char_encoding((hid_t)acpl, (H5T_cset_t)encoding) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
 done:
-    return (jint)retVal;
-} /* end Java_hdf_hdf5lib_H5_H5Zunregister */
+    return;
+} /* end Java_hdf_hdf5lib_H5_H5Pset_1char_1encoding */
 
 /*
  * Class:     hdf_hdf5lib_H5
- * Method:    H5Zfilter_avail
- * Signature: (I)I
+ * Method:    H5Pget_char_encoding
+ * Signature: (J)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Zfilter_1avail
-    (JNIEnv *env, jclass clss, jint filter)
+Java_hdf_hdf5lib_H5_H5Pget_1char_1encoding
+    (JNIEnv *env, jclass clss, jlong acpl)
 {
-    herr_t retVal = FAIL;
+    H5T_cset_t encoding = H5T_CSET_ERROR;
 
     UNUSED(clss);
 
-    if ((retVal = H5Zfilter_avail((H5Z_filter_t)filter)) < 0)
+    if (H5Pget_char_encoding((hid_t)acpl, &encoding) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
 done:
-    return (jint)retVal;
-} /* end Java_hdf_hdf5lib_H5_H5Zfilter_1avail */
-
-/*
- * Class:     hdf_hdf5lib_H5
- * Method:    H5Zget_filter_info
- * Signature: (I)I
- */
-
-JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Zget_1filter_1info
-    (JNIEnv *env, jclass clss, jint filter)
-{
-    unsigned int flags = 0;
-
-    UNUSED(clss);
-
-    if (H5Zget_filter_info((H5Z_filter_t) filter, (unsigned *) &flags) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
-
-done:
-    return (jint)flags;
-} /* end Java_hdf_hdf5lib_H5_H5Zget_1filter_1info */
-
+    return encoding;
+} /* end Java_hdf_hdf5lib_H5_H5Pget_1char_1encoding */
 
 #ifdef __cplusplus
 } /* end extern "C" */
