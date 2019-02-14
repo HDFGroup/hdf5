@@ -33,17 +33,6 @@ using namespace H5;
 
 // A lot of the definition inherited from C test links.c is left here until
 // the H5L API is implemented and tests are completed - BMR 10/19/2009
-/*
- * This file needs to access private information from the H5G package.
- * This file also needs to access the group testing code.
- */
-//#define H5G_FRIEND
-//#define H5G_TESTING
-
-//#include "h5test.h"
-//#include "H5Gpkg.h"     /* Groups */
-//#include "H5Iprivate.h" /* IDs */
-//#include "H5Lprivate.h" /* Links */
 
 /* File for external link test.  Created with gen_udlinks.c */
 #define LINKED_FILE  "be_extlink2.h5"
@@ -95,6 +84,7 @@ const char *FILENAME[] = {
     "extlinks19A",      /* 42: */
     "extlinks19B",      /* 43: */
     "extlinks20",       /* 44: */
+    "visit",            /* 45: */
     NULL
 };
 
@@ -230,12 +220,15 @@ typedef struct {
     const link_visit_t *info;   /* Pointer to the link visit structure to use */
 } lvisit_ud_t;
 
+#endif
 
 /* Object visit structs */
 typedef struct {
     const char *path;           /* Path to object */
     H5O_type_t type;            /* Type of object */
 } obj_visit_t;
+
+#if 0
 static const obj_visit_t ovisit0_old[] = {
     {".", H5O_TYPE_GROUP},
     {"Dataset_zero", H5O_TYPE_DATASET},
@@ -302,17 +295,18 @@ static const obj_visit_t ovisit2_new[] = {
     {"hard_zero/Group1/Type_one", H5O_TYPE_NAMED_DATATYPE},
     {"hard_zero/Type_zero", H5O_TYPE_NAMED_DATATYPE}
 };
+#endif
 
 typedef struct {
     unsigned idx;               /* Index in object visit structure */
     const obj_visit_t *info;    /* Pointer to the object visit structure to use */
 } ovisit_ud_t;
-#endif
 
 static const char *FILENAME[] = {
     "link0",
     "link1.h5",
     "link2.h5",
+    "visit",
     NULL
 };
 
@@ -842,6 +836,138 @@ static void test_num_links(hid_t fapl_id, hbool_t new_format)
 } // test_num_links
 
 
+static const obj_visit_t file_visit[] = {
+    {".", H5O_TYPE_GROUP},
+    {"Data", H5O_TYPE_GROUP},
+    {"Data/Compressed_Data", H5O_TYPE_DATASET},
+    {"Data/Float_Data", H5O_TYPE_DATASET},
+};
+
+static const obj_visit_t group_visit[] = {
+    {".", H5O_TYPE_GROUP},
+    {"Compressed_Data", H5O_TYPE_DATASET},
+    {"Float_Data", H5O_TYPE_DATASET},
+};
+
+const H5std_string FILE_NAME("tvisit.h5");
+const H5std_string GROUP_NAME("/Data");
+const H5std_string DSET1_NAME("/Data/Compressed_Data");
+const H5std_string DSET2_NAME("/Data/Float_Data");
+const int RANK = 2;
+const int DIM1 = 2;
+
+// Operator function
+static int visit_obj_cb(H5Object& obj, const H5std_string name, const H5O_info_t *oinfo, void *_op_data)
+{
+    ovisit_ud_t *op_data = static_cast <ovisit_ud_t *>(_op_data);
+
+    // Check for correct object information
+    if(strcmp(op_data->info[op_data->idx].path, name.c_str())) return(H5_ITER_ERROR);
+    if(op_data->info[op_data->idx].type != oinfo->type) return(H5_ITER_ERROR);
+
+    // Advance to next location
+    op_data->idx++;
+
+    return(H5_ITER_CONT);
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    test_visit
+ *
+ * Purpose      Test H5Object::visit
+ *
+ * Return       Success: 0
+ *              Failure: -1
+ *
+ * February 8, 2019
+ *-------------------------------------------------------------------------
+ */
+static void test_visit(hid_t fapl_id, hbool_t new_format)
+{
+    hsize_t  dims[2];
+    hsize_t  cdims[2];
+    char filename[NAME_BUF_SIZE];
+
+    if(new_format)
+        SUBTEST("H5Object::visit (w/new group format)")
+    else
+        SUBTEST("H5Object::visit")
+
+    try
+    {
+        // Use the file access template id to create a file access prop. list
+        FileAccPropList fapl(fapl_id);
+
+        // Build the hdf5 file name and create the file
+        h5_fixname(FILENAME[3], fapl_id, filename, sizeof filename);
+	    H5File *file = new H5File(filename, H5F_ACC_TRUNC, FileCreatPropList::DEFAULT, fapl);
+
+        // Create a group
+	    Group* group = new Group(file->createGroup(GROUP_NAME));
+
+        // Create a chunked/compressed dataset within this group specified by path
+	    dims[0] = 20;
+	    dims[1] = 2;
+	    cdims[0] = 2;
+	    cdims[1] = 2;
+	    DataSpace *dataspace = new DataSpace(RANK, dims); // create new dspace
+	    DSetCreatPropList ds_creatplist;  // create dataset creation prop list
+	    ds_creatplist.setChunk(2, cdims);  // then modify it for compression
+	    ds_creatplist.setDeflate(6);
+
+	    DataSet* dataset = new DataSet(file->createDataSet(DSET1_NAME,
+                        PredType::NATIVE_INT, *dataspace, ds_creatplist));
+
+	    delete dataset;
+	    delete dataspace;
+
+	    // Create another dataset
+	    dims[0] = 5;
+	    dims[1] = 2;
+	    dataspace = new DataSpace(RANK, dims); // create second dspace
+	    dataset = new DataSet(file->createDataSet(DSET2_NAME,
+			            PredType::NATIVE_FLOAT, *dataspace));
+
+        // Close everything
+	    delete dataset;
+	    delete dataspace;
+	    delete group;
+	    delete file;
+
+	    // Reopen the file and group in the file.
+	    file = new H5File(filename, H5F_ACC_RDWR);
+	    group = new Group(file->openGroup("Data"));
+
+        // Open the group
+	    dataset = new DataSet(group->openDataSet(DSET2_NAME));
+        delete dataset;
+
+        // Visit objects in the file
+        ovisit_ud_t udata;          /* User-data for visiting */
+        udata.idx = 0;
+        udata.info = file_visit;
+
+        file->visit(H5_INDEX_NAME, H5_ITER_INC, visit_obj_cb, &udata, H5O_INFO_BASIC);
+
+        // Visit objects in the group
+        udata.idx = 0;
+        udata.info = group_visit;
+
+        group->visit(H5_INDEX_NAME, H5_ITER_INC, visit_obj_cb, &udata, H5O_INFO_BASIC);
+
+	    // Close the group and file.
+	    delete group;
+	    delete file;
+
+        PASSED();
+    } // end of try block
+    catch (Exception& E)
+    {
+        issue_fail_msg("test_visit()", __LINE__, __FILE__, E.getCDetailMsg());
+    }
+} // test_visit
+
+
 /*-------------------------------------------------------------------------
  * Function:    test_links
  *
@@ -857,6 +983,11 @@ void test_links()
 {
     hid_t        fapl_id, fapl2_id;    /* File access property lists */
     unsigned new_format;     /* Whether to use the new format or not */
+    const char  *envval;
+
+    envval = HDgetenv("HDF5_DRIVER");
+    if(envval == NULL)
+        envval = "nomatch";
 
     fapl_id = h5_fileaccess();
 
@@ -891,6 +1022,7 @@ void test_links()
             test_move(my_fapl_id, new_format);
             test_copy(my_fapl_id, new_format);
             test_lcpl(my_fapl_id, new_format);
+            test_visit(my_fapl_id, new_format);
         } /* end for */
 
         /* Close 2nd FAPL */

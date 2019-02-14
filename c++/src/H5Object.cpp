@@ -12,6 +12,8 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <string>
+#include <iostream>
+using namespace std;
 
 #include "H5private.h"        // for HDmemset
 #include "H5Include.h"
@@ -40,9 +42,8 @@
 namespace H5 {
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-// userAttrOpWrpr simply interfaces between the user's function and the
-// C library function H5Aiterate2; used to resolve the different prototype
-// problem.  May be moved to Iterator later.
+// userAttrOpWrpr interfaces between the user's function and the
+// C library function H5Aiterate2
 extern "C" herr_t userAttrOpWrpr(hid_t loc_id, const char *attr_name,
     const H5A_info_t *ainfo, void *op_data)
 {
@@ -50,6 +51,17 @@ extern "C" herr_t userAttrOpWrpr(hid_t loc_id, const char *attr_name,
     UserData4Aiterate* myData = reinterpret_cast<UserData4Aiterate *> (op_data);
     myData->op(*myData->location, s_attr_name, myData->opData);
     return 0;
+}
+
+// userVisitOpWrpr interfaces between the user's function and the
+// C library function H5Ovisit2
+extern "C" herr_t userVisitOpWrpr(hid_t obj_id, const char *attr_name,
+    const H5O_info_t *obj_info, void *op_data)
+{
+    H5std_string s_attr_name = H5std_string(attr_name);
+    UserData4Visit* myData = reinterpret_cast<UserData4Visit *> (op_data);
+    int status = myData->op(*myData->obj, s_attr_name, obj_info, myData->opData);
+    return status;
 }
 
 //--------------------------------------------------------------------------
@@ -197,8 +209,6 @@ Attribute H5Object::openAttribute(const unsigned int idx) const
 ///\par Description
 ///             The signature of user_op is
 ///             void (*)(H5::H5Location&, H5std_string, void*).
-///             For information, please refer to the H5Aiterate2 API in
-///             the HDF5 C Reference Manual.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 int H5Object::iterateAttrs(attr_operator_t user_op, unsigned *_idx, void *op_data)
@@ -225,6 +235,55 @@ int H5Object::iterateAttrs(attr_operator_t user_op, unsigned *_idx, void *op_dat
     }
     else  // raise exception when H5Aiterate returns a negative value
         throw AttributeIException(inMemFunc("iterateAttrs"), "H5Aiterate2 failed");
+}
+
+//--------------------------------------------------------------------------
+// Function:    H5Object::visit
+///\brief       Recursively visits all HDF5 objects accessible from this object.
+///\param       idx_type - IN: Type of index; valid values include:
+///             \li \c H5_INDEX_NAME
+///             \li \c H5_INDEX_CRT_ORDER
+///\param       order - IN: Order in which index is traversed; valid values include:
+///             \li \c H5_ITER_DEC
+///             \li \c H5_ITER_INC
+///             \li \c H5_ITER_NATIVE
+///\param       user_op  - IN: Callback function passing data regarding the
+///                            object to the calling application
+///\param       *op_data - IN: User-defined pointer to data required by the
+///                            application for its processing of the object
+///\param       fields   - IN: Flags specifying the fields to be retrieved
+///                            to the callback op
+///\return
+///             \li On success:
+///                 \li the return value of the first operator that returns a positive value
+///                 \li zero if all members were processed with no operator returning non-zero
+///             \li On failure:
+///                 \li an exception Exception will be thrown if something went
+///                     wrong within the library or the operator failed
+///\exception   H5::Exception
+///\par Description
+///             For information, please refer to the H5Ovisit2 API in the HDF5
+///             C Reference Manual.
+// Programmer   Binh-Minh Ribler - Feb, 2019
+//--------------------------------------------------------------------------
+void H5Object::visit(H5_index_t idx_type, H5_iter_order_t order, visit_operator_t user_op, void *op_data, unsigned int fields)
+{
+    // Store the user's function and data
+    UserData4Visit* userData = new UserData4Visit;
+    userData->opData = op_data;
+    userData->op = user_op;
+    userData->obj = this;
+
+    // Call the C API passing in op wrapper and info
+    herr_t ret_value = H5Ovisit2(getId(), idx_type, order, userVisitOpWrpr, static_cast<void *>(userData), fields);
+
+    // Release memory
+    delete userData;
+
+    // Throw exception if H5Ovisit2 failed, which could be a failure in
+    // the library or in the call back operator
+    if (ret_value < 0)
+        throw Exception(inMemFunc("visit"), "H5Ovisit2 failed");
 }
 
 //--------------------------------------------------------------------------
