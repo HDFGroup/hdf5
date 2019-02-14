@@ -1950,8 +1950,8 @@ H5Fwait(hid_t file_id)
     if(NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "file_id parameter is not a valid file identifier")
 
-    if((ret_value = H5VL_file_specific(vol_obj, H5VL_DATASET_WAIT, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, file_id)) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTOPERATE, FAIL, "unable to wait dataset")
+    if((ret_value = H5VL_file_specific(vol_obj, H5VL_FILE_WAIT, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, file_id)) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTOPERATE, FAIL, "unable to wait file")
 
 done:
     FUNC_LEAVE_API(ret_value)
