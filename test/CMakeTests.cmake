@@ -660,6 +660,7 @@ if (NOT CYGWIN)
   set_tests_properties (H5TEST-cache PROPERTIES TIMEOUT ${CTEST_VERY_LONG_TIMEOUT})
 endif ()
 
+if (TEST_CACHE_IMAGE)
 #-- Adding test for cache_image
 add_test (
     NAME H5TEST-clear-cache_image-objects
@@ -676,6 +677,7 @@ set_tests_properties (H5TEST-cache_image PROPERTIES
     ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST;HDF5TestExpress=${HDF_TEST_EXPRESS}"
     WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
 )
+endif ()
 
 if (BUILD_SHARED_LIBS)
   #-- Adding test for cache
