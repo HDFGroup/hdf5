@@ -89,6 +89,7 @@ endif ()
 
   set (H5_VOL_SKIP_TESTS
       cache
+      cache_image
       accum
       fheap
       big
