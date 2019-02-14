@@ -47,6 +47,13 @@ New Features
 
     Configuration:
     -------------
+    - Rework CMake command files to fix MPI testing.
+
+      Added setup fixture to remove any test generated files and added DEPENDS
+      to test properties to execute tests in order expected.
+
+      (ADB - 2019/02/14, TILABS-111)
+
     - Disable SZIP or ZLIB options if TGZ files are not available.
 
       Changed the TGZ option for SZip and ZLib to disable the options
