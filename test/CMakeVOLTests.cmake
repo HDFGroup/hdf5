@@ -106,8 +106,8 @@ endif ()
 
   # Windows only macro
   macro (CHECK_VOL_TEST voltest volname volinfo resultcode)
-    if (voltest STREQUAL "flush1" OR voltest STREQUAL "flush2")
-      if (volname STREQUAL "multi" OR volname STREQUAL "split")
+    if ("${voltest}" STREQUAL "flush1" OR "${voltest}" STREQUAL "flush2")
+      if ("${volname}" STREQUAL "multi" OR "${volname}" STREQUAL "split")
         if (NOT BUILD_SHARED_LIBS AND NOT ${HDF_CFG_NAME} MATCHES "Debug")
           add_test (
               NAME VOL-${volname}-${voltest}-clear-objects
@@ -236,7 +236,7 @@ endif ()
           ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${volname};HDF5TestExpress=${HDF_TEST_EXPRESS}"
           WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/${volname}
       )
-      if (BUILD_SHARED_LIBS AND NOT voltest STREQUAL "cache")
+      if (BUILD_SHARED_LIBS AND NOT "${voltest}" STREQUAL "cache")
         add_test (
             NAME VOL-${volname}-${voltest}-shared-clear-objects
             COMMAND    ${CMAKE_COMMAND}

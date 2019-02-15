@@ -555,7 +555,7 @@ foreach (h5_test ${H5_TESTS})
           WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
       )
     else ()
-      if (h5_test STREQUAL "big" AND CYGWIN)
+      if ("${h5_test}" STREQUAL "big" AND CYGWIN)
         add_test (NAME H5TEST-${h5_test}
             COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${test}"
         )
@@ -598,7 +598,7 @@ if (BUILD_SHARED_LIBS)
 
   foreach (h5_test ${H5_TESTS})
     if (NOT h5_test IN_LIST H5TEST_SEPARATE_TESTS)
-      if (h5_test STREQUAL "big" AND CYGWIN)
+      if ("${h5_test}" STREQUAL "big" AND CYGWIN)
         add_test (NAME H5TEST-shared-${h5_test}
             COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${test}-shared"
         )

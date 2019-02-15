@@ -109,8 +109,8 @@ endif ()
 
   # Windows only macro
   macro (CHECK_VFD_TEST vfdtest vfdname resultcode)
-    if (vfdtest STREQUAL "flush1" OR vfdtest STREQUAL "flush2")
-      if (vfdname STREQUAL "multi" OR vfdname STREQUAL "split")
+    if ("${vfdtest}" STREQUAL "flush1" OR "${vfdtest}" STREQUAL "flush2")
+      if ("${vfdname}" STREQUAL "multi" OR "${vfdname}" STREQUAL "split")
         if (NOT BUILD_SHARED_LIBS AND NOT HDF_CFG_NAME MATCHES "Debug")
           add_test (
               NAME VFD-${vfdname}-${vfdtest}-clear-objects
@@ -239,7 +239,7 @@ endif ()
           ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${vfdname};HDF5TestExpress=${HDF_TEST_EXPRESS}"
           WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/${vfdname}
       )
-      if (BUILD_SHARED_LIBS AND NOT vfdtest STREQUAL "cache")
+      if (BUILD_SHARED_LIBS AND NOT "${vfdtest}" STREQUAL "cache")
         add_test (
             NAME VFD-${vfdname}-${vfdtest}-shared-clear-objects
             COMMAND    ${CMAKE_COMMAND}

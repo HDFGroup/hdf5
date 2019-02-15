@@ -55,7 +55,7 @@ foreach (h5_file ${HDF_JAVA_TEST_FILES})
 endforeach ()
 add_custom_target(H5Ex_G_Visit_files ALL COMMENT "Copying files needed by H5Ex_G_Visit tests" DEPENDS ${H5Ex_G_Visit_files_list})
 
-MACRO (ADD_H5_TEST resultfile resultcode)
+macro (ADD_H5_TEST resultfile resultcode)
   set (CMD_ARGS "-Dhdf.hdf5lib.H5.loadLibraryName=$<TARGET_PROPERTY:${HDF5_JAVA_JNI_LIB_TARGET},OUTPUT_NAME$<$<CONFIG:Debug>:_DEBUG>>;")
   add_test (
       NAME JAVA_groups-${resultfile}
@@ -75,7 +75,7 @@ MACRO (ADD_H5_TEST resultfile resultcode)
     set_tests_properties (JAVA_groups-${resultfile} PROPERTIES DEPENDS ${last_test})
   endif ()
   set (last_test "JAVA_groups-${resultfile}")
-ENDMACRO ()
+endmacro ()
 
 if (BUILD_TESTING)
   foreach (example ${HDF_JAVA_EXAMPLES})
