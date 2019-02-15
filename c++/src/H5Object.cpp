@@ -12,8 +12,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <string>
-#include <iostream>
-using namespace std;
 
 #include "H5private.h"        // for HDmemset
 #include "H5Include.h"
