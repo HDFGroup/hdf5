@@ -252,7 +252,13 @@ int H5Object::iterateAttrs(attr_operator_t user_op, unsigned *_idx, void *op_dat
 ///\param       *op_data - IN: User-defined pointer to data required by the
 ///                            application for its processing of the object
 ///\param       fields   - IN: Flags specifying the fields to be retrieved
-///                            to the callback op
+///                            to the callback op via the H5O_info_t argument.
+///             \li \c H5O_INFO_BASIC      fileno, addr, type, and rc fields
+///             \li \c H5O_INFO_TIME       atime, mtime, ctime, and btime fields
+///             \li \c H5O_INFO_NUM_ATTRS  num_attrs field
+///             \li \c H5O_INFO_HDR        hdr field
+///             \li \c H5O_INFO_META_SIZE  meta_size field
+///             \li \c H5O_INFO_ALL        H5O_INFO_BASIC | H5O_INFO_TIME | H5O_INFO_NUM_ATTRS | H5O_INFO_HDR | H5O_INFO_META_SIZE
 ///\return
 ///             \li On success:
 ///                 \li the return value of the first operator that returns a positive value
