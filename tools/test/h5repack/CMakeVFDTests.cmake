@@ -47,7 +47,7 @@
           -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
           -P "${HDF_RESOURCES_DIR}/vfdTest.cmake"
     )
-    if (NOT "${last_test}" STREQUAL "")
+    if (last_test)
       set_tests_properties (H5REPACK-VFD-${vfdname}-h5repacktest PROPERTIES DEPENDS ${last_test})
     endif ()
     set (last_test "H5REPACK-VFD-${vfdname}-h5repacktest")

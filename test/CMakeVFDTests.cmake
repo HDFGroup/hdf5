@@ -109,9 +109,9 @@ endif ()
 
   # Windows only macro
   macro (CHECK_VFD_TEST vfdtest vfdname resultcode)
-    if ("${vfdtest}" STREQUAL "flush1" OR "${vfdtest}" STREQUAL "flush2")
-      if ("${vfdname}" STREQUAL "multi" OR "${vfdname}" STREQUAL "split")
-        if (NOT BUILD_SHARED_LIBS AND NOT ${HDF_CFG_NAME} MATCHES "Debug")
+    if (vfdtest STREQUAL "flush1" OR vfdtest STREQUAL "flush2")
+      if (vfdname STREQUAL "multi" OR vfdname STREQUAL "split")
+        if (NOT BUILD_SHARED_LIBS AND NOT HDF_CFG_NAME MATCHES "Debug")
           add_test (
               NAME VFD-${vfdname}-${vfdtest}-clear-objects
               COMMAND    ${CMAKE_COMMAND}
@@ -239,7 +239,7 @@ endif ()
           ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${vfdname};HDF5TestExpress=${HDF_TEST_EXPRESS}"
           WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/${vfdname}
       )
-      if (BUILD_SHARED_LIBS AND NOT "${vfdtest}" STREQUAL "cache")
+      if (BUILD_SHARED_LIBS AND NOT vfdtest STREQUAL "cache")
         add_test (
             NAME VFD-${vfdname}-${vfdtest}-shared-clear-objects
             COMMAND    ${CMAKE_COMMAND}
@@ -316,12 +316,12 @@ endif ()
   endmacro ()
 
   macro (ADD_VFD_TEST vfdname resultcode)
-    foreach (test ${H5_TESTS})
-      if (NOT ${test} IN_LIST H5_VFD_SKIP_TESTS)
+    foreach (h5_test ${H5_TESTS})
+      if (NOT h5_test IN_LIST H5_VFD_SKIP_TESTS)
         if (WIN32)
-          CHECK_VFD_TEST (${test} ${vfdname} ${resultcode})
+          CHECK_VFD_TEST (${h5_test} ${vfdname} ${resultcode})
         else ()
-          DO_VFD_TEST (${test} ${vfdname} ${resultcode})
+          DO_VFD_TEST (${h5_test} ${vfdname} ${resultcode})
         endif ()
       endif ()
     endforeach ()
@@ -394,6 +394,6 @@ endif ()
   endmacro ()
 
   # Run test with different Virtual File Driver
-  foreach (vfd ${VFD_LIST})
-    ADD_VFD_TEST (${vfd} 0)
+  foreach (h5_vfd ${VFD_LIST})
+    ADD_VFD_TEST (${h5_vfd} 0)
   endforeach ()

@@ -71,7 +71,7 @@ MACRO (ADD_H5_TEST resultfile resultcode)
           -D "TEST_REFERENCE=groups/${resultfile}.txt"
           -P "${HDF_RESOURCES_DIR}/jrunTest.cmake"
   )
-  if (NOT "${last_test}" STREQUAL "")
+  if (last_test)
     set_tests_properties (JAVA_groups-${resultfile} PROPERTIES DEPENDS ${last_test})
   endif ()
   set (last_test "JAVA_groups-${resultfile}")
@@ -79,8 +79,8 @@ ENDMACRO ()
 
 if (BUILD_TESTING)
   foreach (example ${HDF_JAVA_EXAMPLES})
-    if (NOT "${example}" STREQUAL "H5Ex_G_Iterate" AND NOT "${example}" STREQUAL "H5Ex_G_Visit")
-      if ("${example}" STREQUAL "H5Ex_G_Compact")
+    if (NOT example STREQUAL "H5Ex_G_Iterate" AND NOT example STREQUAL "H5Ex_G_Visit")
+      if (example STREQUAL "H5Ex_G_Compact")
         add_test (
             NAME JAVA_groups-${example}-clear-h5s
             COMMAND    ${CMAKE_COMMAND}
@@ -96,7 +96,7 @@ if (BUILD_TESTING)
                 ${HDFJAVA_EXAMPLES_BINARY_DIR}/${example}.h5
         )
       endif ()
-      if (NOT "${last_test}" STREQUAL "")
+      if (last_test)
         set_tests_properties (JAVA_groups-${example}-clear-h5s PROPERTIES DEPENDS ${last_test})
       endif ()
       set (last_test "JAVA_groups-${example}-clear-h5s")
@@ -108,7 +108,7 @@ if (BUILD_TESTING)
             ${HDFJAVA_EXAMPLES_SOURCE_DIR}/testfiles/examples.groups.${example}.txt
             ${HDFJAVA_EXAMPLES_GROUPS_BINARY_DIR}/${example}.txt
     )
-    if (NOT "${last_test}" STREQUAL "")
+    if (last_test)
       set_tests_properties (JAVA_groups-${example}-copy-objects PROPERTIES DEPENDS ${last_test})
     endif ()
     set (last_test "JAVA_groups-${example}-copy-objects")

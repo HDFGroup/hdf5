@@ -545,33 +545,33 @@ set (H5TEST_SEPARATE_TESTS
     flush1
     flush2
 )
-foreach (test ${H5_TESTS})
-  if (NOT ${test} IN_LIST H5TEST_SEPARATE_TESTS)
+foreach (h5_test ${H5_TESTS})
+  if (NOT h5_test IN_LIST H5TEST_SEPARATE_TESTS)
     if (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (NAME H5TEST-${test} COMMAND $<TARGET_FILE:${test}>)
-      set_tests_properties (H5TEST-${test} PROPERTIES
+      add_test (NAME H5TEST-${h5_test} COMMAND $<TARGET_FILE:${h5_test}>)
+      set_tests_properties (H5TEST-${h5_test} PROPERTIES
           FIXTURES_REQUIRED clear_objects
           ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST"
           WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
       )
     else ()
-      if ("${test}" STREQUAL "big" AND CYGWIN)
-        add_test (NAME H5TEST-${test}
+      if (h5_test STREQUAL "big" AND CYGWIN)
+        add_test (NAME H5TEST-${h5_test}
             COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${test}"
         )
       else ()
-        add_test (NAME H5TEST-${test} COMMAND "${CMAKE_COMMAND}"
-            -D "TEST_PROGRAM=$<TARGET_FILE:${test}>"
+        add_test (NAME H5TEST-${h5_test} COMMAND "${CMAKE_COMMAND}"
+            -D "TEST_PROGRAM=$<TARGET_FILE:${h5_test}>"
             -D "TEST_ARGS:STRING="
             -D "TEST_EXPECT=0"
             -D "TEST_SKIP_COMPARE=TRUE"
-            -D "TEST_OUTPUT=${test}.txt"
+            -D "TEST_OUTPUT=${h5_test}.txt"
             #-D "TEST_REFERENCE=${test}.out"
             -D "TEST_FOLDER=${HDF5_TEST_BINARY_DIR}/H5TEST"
             -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
         )
       endif ()
-      set_tests_properties (H5TEST-${test} PROPERTIES
+      set_tests_properties (H5TEST-${h5_test} PROPERTIES
           FIXTURES_REQUIRED clear_objects
           ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST"
           WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
@@ -596,25 +596,25 @@ if (BUILD_SHARED_LIBS)
   )
   set_tests_properties (H5TEST-shared-clear-objects PROPERTIES FIXTURES_SETUP shared_clear_objects)
 
-  foreach (test ${H5_TESTS})
-    if (NOT ${test} IN_LIST H5TEST_SEPARATE_TESTS)
-      if ("${test}" STREQUAL "big" AND CYGWIN)
-        add_test (NAME H5TEST-shared-${test}
+  foreach (h5_test ${H5_TESTS})
+    if (NOT h5_test IN_LIST H5TEST_SEPARATE_TESTS)
+      if (h5_test STREQUAL "big" AND CYGWIN)
+        add_test (NAME H5TEST-shared-${h5_test}
             COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${test}-shared"
         )
       else ()
-        add_test (NAME H5TEST-shared-${test} COMMAND "${CMAKE_COMMAND}"
-            -D "TEST_PROGRAM=$<TARGET_FILE:${test}-shared>"
+        add_test (NAME H5TEST-shared-${h5_test} COMMAND "${CMAKE_COMMAND}"
+            -D "TEST_PROGRAM=$<TARGET_FILE:${h5_test}-shared>"
             -D "TEST_ARGS:STRING="
             -D "TEST_EXPECT=0"
             -D "TEST_SKIP_COMPARE=TRUE"
-            -D "TEST_OUTPUT=${test}.txt"
+            -D "TEST_OUTPUT=${h5_test}.txt"
             #-D "TEST_REFERENCE=${test}.out"
             -D "TEST_FOLDER=${HDF5_TEST_BINARY_DIR}/H5TEST-shared"
             -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
         )
       endif ()
-      set_tests_properties (H5TEST-shared-${test} PROPERTIES
+      set_tests_properties (H5TEST-shared-${h5_test} PROPERTIES
           FIXTURES_REQUIRED shared_clear_objects
           ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST-shared"
           WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST-shared
@@ -1193,8 +1193,8 @@ if (HDF5_BUILD_GENERATORS)
       gen_plist
   )
 
-  foreach (gen ${H5_GENERATORS})
-    ADD_H5_GENERATOR (${gen})
+  foreach (h5_gen ${H5_GENERATORS})
+    ADD_H5_GENERATOR (${h5_gen})
   endforeach ()
 
 endif ()

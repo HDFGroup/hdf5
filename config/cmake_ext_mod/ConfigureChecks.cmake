@@ -445,7 +445,7 @@ if (NOT WINDOWS)
   # Check a bunch of time functions
   #-----------------------------------------------------------------------------
   CHECK_FUNCTION_EXISTS (gettimeofday      ${HDF_PREFIX}_HAVE_GETTIMEOFDAY)
-  foreach (test
+  foreach (time_test
       HAVE_TM_GMTOFF
       HAVE___TM_GMTOFF
 #      HAVE_TIMEZONE
@@ -455,7 +455,7 @@ if (NOT WINDOWS)
       HAVE_TM_ZONE
       HAVE_STRUCT_TM_TM_ZONE
   )
-    HDF_FUNCTION_TEST (${test})
+    HDF_FUNCTION_TEST (${time_test})
   endforeach ()
   if (NOT CYGWIN AND NOT MINGW)
       HDF_FUNCTION_TEST (HAVE_TIMEZONE)
@@ -559,7 +559,7 @@ endif ()
 # Check a bunch of other functions
 #-----------------------------------------------------------------------------
 if (NOT WINDOWS)
-  foreach (test
+  foreach (other_test
       HAVE_ATTRIBUTE
       HAVE_C99_FUNC
 #      STDC_HEADERS
@@ -568,7 +568,7 @@ if (NOT WINDOWS)
       SYSTEM_SCOPE_THREADS
       HAVE_SOCKLEN_T
   )
-    HDF_FUNCTION_TEST (${test})
+    HDF_FUNCTION_TEST (${other_test})
   endforeach ()
 endif ()
 

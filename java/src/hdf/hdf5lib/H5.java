@@ -3233,6 +3233,8 @@ public class H5 implements java.io.Serializable {
      * @param file_id
      *            IN: Identifier of the target file.
      *
+     * @return true if the file-level is set to create minimized dataset object headers, false if not.
+     *
      * @exception HDF5LibraryException
      *                - Error from the HDF-5 Library.
      **/
@@ -6997,6 +6999,8 @@ public class H5 implements java.io.Serializable {
      *
      * @param dcpl_id
      *            IN: Dataset creation property list
+     *
+     * @return true if the given dcpl is set to create minimized dataset object headers, false if not.
      *
      * @exception HDF5LibraryException
      *                - Error from the HDF-5 Library.

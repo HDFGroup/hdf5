@@ -58,8 +58,8 @@ set (H5P_TESTS
     t_filters_parallel
 )
 
-foreach (testp ${H5P_TESTS})
-  ADD_H5P_EXE(${testp})
+foreach (h5_testp ${H5P_TESTS})
+  ADD_H5P_EXE(${h5_testp})
 endforeach ()
 
 include (CMakeTests.cmake)
