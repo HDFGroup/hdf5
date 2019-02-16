@@ -167,10 +167,10 @@ New Features
 
     C++ Library:
     ------------
-    - Added a wrapper for H5Ovisit2
+    - Added new function to the C++ interface
 
-      // Recursively visit elements reachable from this object.
-      void visit(H5_index_t idx_type, H5_iter_order_t order, visit_operator_t user_op, void *op_data, unsigned int fields);
+      Added wrapper for H5Ovisit2:
+          H5Object::visit()
 
       (BMR - 2019/02/14, HDFFV-10532)
 
