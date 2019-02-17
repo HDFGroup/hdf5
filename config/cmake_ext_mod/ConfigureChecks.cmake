@@ -229,7 +229,7 @@ macro (HDF_FUNCTION_TEST OTHER_TEST)
     endif ()
 
     #message (STATUS "Performing ${OTHER_TEST}")
-    TRY_COMPILE (${OTHER_TEST}
+    try_compile (${OTHER_TEST}
         ${CMAKE_BINARY_DIR}
         ${HDF_RESOURCES_EXT_DIR}/HDFTests.c
         COMPILE_DEFINITIONS "${MACRO_CHECK_FUNCTION_DEFINITIONS}"
@@ -274,12 +274,10 @@ if (NOT WINDOWS)
   # functionality so clock_gettime and CLOCK_MONOTONIC are defined
   # correctly. This was later updated to 200112L so that
   # posix_memalign() is visible for the direct VFD code on Linux
-  # systems. Even later, this was changed to 200809L to support
-  # pread/pwrite in VFDs.
-  #
+  # systems.
   # POSIX feature information can be found in the gcc manual at:
   # http://www.gnu.org/s/libc/manual/html_node/Feature-Test-Macros.html
-  set (HDF_EXTRA_C_FLAGS -D_POSIX_C_SOURCE=200809L)
+  set (HDF_EXTRA_C_FLAGS -D_POSIX_C_SOURCE=200112L)
 
   # Need to add this so that O_DIRECT is visible for the direct
   # VFD on Linux systems.
@@ -288,7 +286,7 @@ if (NOT WINDOWS)
   option (HDF_ENABLE_LARGE_FILE "Enable support for large (64-bit) files on Linux." ON)
   if (HDF_ENABLE_LARGE_FILE AND NOT DEFINED TEST_LFS_WORKS_RUN)
     set (msg "Performing TEST_LFS_WORKS")
-    TRY_RUN (TEST_LFS_WORKS_RUN   TEST_LFS_WORKS_COMPILE
+    try_run (TEST_LFS_WORKS_RUN   TEST_LFS_WORKS_COMPILE
         ${CMAKE_BINARY_DIR}
         ${HDF_RESOURCES_EXT_DIR}/HDFTests.c
         COMPILE_DEFINITIONS "-DTEST_LFS_WORKS"
