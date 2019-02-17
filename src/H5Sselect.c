@@ -295,43 +295,6 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5S_select_get_seq_list
- *
- * Purpose:	Retrieves the next sequence of offset/length pairs for an
- *              iterator on a dataspace
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Tuesday, May 18, 2004
- *
- * Note: This routine participates in the "Inlining C function pointers"
- *      pattern, don't call it directly, use the appropriate macro
- *      defined in H5Sprivate.h.
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5S_select_get_seq_list(const H5S_t *space, unsigned flags,
-    H5S_sel_iter_t *iter, size_t maxseq, size_t maxbytes,
-    size_t *nseq, size_t *nbytes, hsize_t *off, size_t *len)
-{
-    herr_t ret_value = FAIL;    /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-    HDassert(space);
-
-    /* Call the selection type's get_seq_list function */
-    if((ret_value = (*space->select.type->get_seq_list)(space, flags, iter, maxseq, maxbytes, nseq, nbytes, off, len)) < 0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "unable to get selection sequence list")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-}   /* end H5S_select_get_seq_list() */
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5S_select_serial_size
  *
  * Purpose:	Determines the number of bytes required to store the current
@@ -1425,6 +1388,44 @@ H5S_select_iter_next_block(H5S_sel_iter_t *iter)
 #endif /* LATER */
 
 
+/*-------------------------------------------------------------------------
+ * Function:	H5S_select_get_seq_list
+ *
+ * Purpose:	Retrieves the next sequence of offset/length pairs for an
+ *              iterator on a dataspace
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		Tuesday, May 18, 2004
+ *
+ * Note: This routine participates in the "Inlining C function pointers"
+ *      pattern, don't call it directly, use the appropriate macro
+ *      defined in H5Sprivate.h.
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5S_select_get_seq_list(const H5S_t *space, unsigned flags,
+    H5S_sel_iter_t *iter, size_t maxseq, size_t maxbytes,
+    size_t *nseq, size_t *nbytes, hsize_t *off, size_t *len)
+{
+    herr_t ret_value = FAIL;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* Sanity check */
+    HDassert(space);
+
+    /* Call the selection type's get_seq_list function */
+    if((ret_value = (*space->select.type->get_seq_list)(space, flags, iter, maxseq, maxbytes, nseq, nbytes, off, len)) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "unable to get selection sequence list")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}   /* end H5S_select_get_seq_list() */
+
+
 /*--------------------------------------------------------------------------
  NAME
     H5S_select_iter_release
@@ -1731,8 +1732,6 @@ H5S_get_select_type(const H5S_t *space)
     Assumes that there is only a single "block" for hyperslab selections.
  EXAMPLES
  REVISION LOG
-    Modified function to view identical shapes with different dimensions 
-    as being the same under some circumstances.
 --------------------------------------------------------------------------*/
 htri_t
 H5S_select_shape_same(const H5S_t *space1, const H5S_t *space2)
@@ -1912,11 +1911,11 @@ H5S_select_shape_same(const H5S_t *space1, const H5S_t *space2)
                 space_a_dim = (int)space_a_rank - 1;
                 space_b_dim = (int)space_b_rank - 1;
 
-                /* The first block only compares the sizes and sets the 
-                 * relative offsets for later blocks 
+                /* The first block only compares the sizes and sets the
+                 * relative offsets for later blocks
                  */
                 if(first_block) {
-                    /* If the block sizes in the common dimensions from 
+                    /* If the block sizes in the common dimensions from
                      * each selection don't match, get out
                      */
                     while(space_b_dim >= 0) {
@@ -1932,7 +1931,7 @@ H5S_select_shape_same(const H5S_t *space1, const H5S_t *space2)
                         space_b_dim--;
                     } /* end while */
 
-                    /* similarly, if the block size in any dimension that appears only
+                    /* Similarly, if the block size in any dimension that appears only
                      * in space_a is not equal to 1, get out.
                      */
                     while(space_a_dim >= 0) {
@@ -1950,7 +1949,7 @@ H5S_select_shape_same(const H5S_t *space1, const H5S_t *space2)
                 } /* end if */
                 /* Check over the blocks for each selection */
                 else {
-                    /* for dimensions that space_a and space_b have in common: */
+                    /* For dimensions that space_a and space_b have in common: */
                     while(space_b_dim >= 0) {
                         /* Check if the blocks are in the same relative location */
                         if((start_a[space_a_dim] - off_a[space_a_dim]) !=

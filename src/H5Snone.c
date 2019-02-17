@@ -334,6 +334,64 @@ H5S__none_iter_next_block(H5S_sel_iter_t H5_ATTR_UNUSED *iter)
 
 /*--------------------------------------------------------------------------
  NAME
+    H5S__none_get_seq_list
+ PURPOSE
+    Create a list of offsets & lengths for a selection
+ USAGE
+    herr_t H5S__none_get_seq_list(space,flags,iter,maxseq,maxelem,nseq,nelem,off,len)
+        H5S_t *space;           IN: Dataspace containing selection to use.
+        unsigned flags;         IN: Flags for extra information about operation
+        H5S_sel_iter_t *iter;   IN/OUT: Selection iterator describing last
+                                    position of interest in selection.
+        size_t maxseq;          IN: Maximum number of sequences to generate
+        size_t maxelem;         IN: Maximum number of elements to include in the
+                                    generated sequences
+        size_t *nseq;           OUT: Actual number of sequences generated
+        size_t *nelem;          OUT: Actual number of elements in sequences generated
+        hsize_t *off;           OUT: Array of offsets
+        size_t *len;            OUT: Array of lengths
+ RETURNS
+    Non-negative on success/Negative on failure.
+ DESCRIPTION
+    Use the selection in the dataspace to generate a list of byte offsets and
+    lengths for the region(s) selected.  Start/Restart from the position in the
+    ITER parameter.  The number of sequences generated is limited by the MAXSEQ
+    parameter and the number of sequences actually generated is stored in the
+    NSEQ parameter.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+static herr_t
+H5S__none_get_seq_list(const H5S_t H5_ATTR_UNUSED *space, unsigned H5_ATTR_UNUSED flags, H5S_sel_iter_t H5_ATTR_UNUSED *iter,
+    size_t H5_ATTR_UNUSED maxseq, size_t H5_ATTR_UNUSED maxelem, size_t *nseq, size_t *nelem,
+    hsize_t H5_ATTR_UNUSED *off, size_t H5_ATTR_UNUSED *len)
+{
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Check args */
+    HDassert(space);
+    HDassert(iter);
+    HDassert(maxseq > 0);
+    HDassert(maxelem > 0);
+    HDassert(nseq);
+    HDassert(nelem);
+    HDassert(off);
+    HDassert(len);
+
+    /* "none" selections don't generate sequences of bytes */
+    *nseq = 0;
+
+    /* They don't use any elements, either */
+    *nelem = 0;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5S__none_get_seq_list() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
     H5S__none_iter_release
  PURPOSE
     Release "none" selection iterator information for a dataspace
@@ -940,62 +998,4 @@ H5Sselect_none(hid_t spaceid)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Sselect_none() */
-
-
-/*--------------------------------------------------------------------------
- NAME
-    H5S__none_get_seq_list
- PURPOSE
-    Create a list of offsets & lengths for a selection
- USAGE
-    herr_t H5S__none_get_seq_list(space,flags,iter,maxseq,maxelem,nseq,nelem,off,len)
-        H5S_t *space;           IN: Dataspace containing selection to use.
-        unsigned flags;         IN: Flags for extra information about operation
-        H5S_sel_iter_t *iter;   IN/OUT: Selection iterator describing last
-                                    position of interest in selection.
-        size_t maxseq;          IN: Maximum number of sequences to generate
-        size_t maxelem;         IN: Maximum number of elements to include in the
-                                    generated sequences
-        size_t *nseq;           OUT: Actual number of sequences generated
-        size_t *nelem;          OUT: Actual number of elements in sequences generated
-        hsize_t *off;           OUT: Array of offsets
-        size_t *len;            OUT: Array of lengths
- RETURNS
-    Non-negative on success/Negative on failure.
- DESCRIPTION
-    Use the selection in the dataspace to generate a list of byte offsets and
-    lengths for the region(s) selected.  Start/Restart from the position in the
-    ITER parameter.  The number of sequences generated is limited by the MAXSEQ
-    parameter and the number of sequences actually generated is stored in the
-    NSEQ parameter.
- GLOBAL VARIABLES
- COMMENTS, BUGS, ASSUMPTIONS
- EXAMPLES
- REVISION LOG
---------------------------------------------------------------------------*/
-static herr_t
-H5S__none_get_seq_list(const H5S_t H5_ATTR_UNUSED *space, unsigned H5_ATTR_UNUSED flags, H5S_sel_iter_t H5_ATTR_UNUSED *iter,
-    size_t H5_ATTR_UNUSED maxseq, size_t H5_ATTR_UNUSED maxelem, size_t *nseq, size_t *nelem,
-    hsize_t H5_ATTR_UNUSED *off, size_t H5_ATTR_UNUSED *len)
-{
-    FUNC_ENTER_STATIC_NOERR
-
-    /* Check args */
-    HDassert(space);
-    HDassert(iter);
-    HDassert(maxseq > 0);
-    HDassert(maxelem > 0);
-    HDassert(nseq);
-    HDassert(nelem);
-    HDassert(off);
-    HDassert(len);
-
-    /* "none" selections don't generate sequences of bytes */
-    *nseq = 0;
-
-    /* They don't use any elements, either */
-    *nelem = 0;
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5S__none_get_seq_list() */
 

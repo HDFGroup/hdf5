@@ -31,12 +31,7 @@
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Dprivate.h"		/* Datasets				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5Fprivate.h"		/* File access				*/
-#include "H5FDprivate.h"	/* File drivers				*/
-#include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"        /* Memory management                    */
-#include "H5Oprivate.h"		/* Object headers		  	*/
-#include "H5Pprivate.h"         /* Property lists                       */
 #include "H5Spkg.h"		/* Dataspaces 				*/
 #include "H5VMprivate.h"        /* Vector and array functions		*/
 
@@ -97,6 +92,8 @@ static herr_t H5S__mpio_create_large_type(hsize_t, MPI_Aint, MPI_Datatype , MPI_
 static hsize_t bigio_count = H5S_MAX_MPI_COUNT;
 
 
+
+
 /*-------------------------------------------------------------------------
  * Function:  H5S_mpio_set_bigio_count
  *

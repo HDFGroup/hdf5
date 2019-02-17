@@ -116,7 +116,7 @@ struct H5S_hyper_span_info_t {
     struct H5S_hyper_span_t *head;  /* Pointer to list of spans in next dimension down */
 };
 
-/* Information about new-style hyperslab selection */
+/* Information about 'diminfo' form of hyperslab selection */
 typedef struct {
     hbool_t diminfo_valid;                      /* Whether the dataset has valid diminfo */
     H5S_hyper_dim_t opt_diminfo[H5S_MAX_RANK];  /* per-dim selection info */
@@ -280,7 +280,7 @@ H5_DLL herr_t H5S__extent_release(H5S_extent_t *extent);
 H5_DLL herr_t H5S__extent_copy_real(H5S_extent_t *dst, const H5S_extent_t *src,
     hbool_t copy_max);
 
-/* Operations on selections */
+/* Operations on hyperslab selections */
 H5_DLL herr_t H5S__hyper_project_intersection(const H5S_t *src_space,
     const H5S_t *dst_space, const H5S_t *src_intersect_space, H5S_t *proj_space);
 H5_DLL herr_t H5S__hyper_subtract(H5S_t *space, H5S_t *subtract_space);
