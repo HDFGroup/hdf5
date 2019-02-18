@@ -34,7 +34,7 @@ CONTENTS
 
 - New Features
 - Support for new platforms and languages
-- Bug Fixes since HDF5-1.10.3
+- Bug Fixes since HDF5-1.10.4
 - Supported Platforms
 - Tested Configuration Features Summary
 - More Tested Platforms
@@ -52,7 +52,7 @@ New Features
       Added setup fixture to remove any test generated files and added DEPENDS
       to test properties to execute tests in order expected.
 
-      (ADB - 2019/02/14, TILABS-111)
+      (ADB - 2019/02/14, TRILABS-111)
 
     - Disable SZIP or ZLIB options if TGZ files are not available.
 
@@ -60,6 +60,16 @@ New Features
       if the source tar.gz files are not found.
 
       (ADB - 2019/02/05, HDFFV-10697)
+
+    - Added a new option to enable/disable using pread/pwrite instead of
+      read/write in the sec2, log, and core VFDs.
+
+      This option is enabled by default when pread/pwrite are detected.
+
+      Autotools:    --enable-preadwrite
+      CMake:        HDF5_ENABLE_PREADWRITE
+
+      (DER - 2019/02/03, HDFFV-10696)
 
     - Rework CMake versioning for OSX platforms.
 
@@ -91,34 +101,6 @@ New Features
 
       (ADB - 2018/12/12, HDFFV-10632)
 
-    - Add toolchain and cross-compile support
-
-      Added info on using a toolchain file to INSTALL_CMAKE.txt. A
-      toolchain file is also used in cross-compiling, which requires
-      CMAKE_CROSSCOMPILING_EMULATOR to be set. To help with cross-compiling
-      the fortran configure process, the HDF5UseFortran.cmake file macros
-      were improved. Fixed a Fortran configure file issue that incorrectly
-      used #cmakedefine instead of #define.
-
-      (ADB - 2018/10/04, HDFFV-10594)
-
-    - Add warning flags for Intel compilers
-
-      Identified Intel compiler specific warnings flags that should be used
-      instead of GNU flags.
-
-      (ADB - 2018/10/04, TRILABS-21)
-
-    - Add default rpath to targets
-
-      Default rpaths should be set in shared executables and
-      libraries to allow the use of loading dependent libraries
-      without requiring LD_LIBRARY_PATH to be set. The default
-      path should be relative using @rpath on osx and $ORIGIN
-      on linux. Windows is not affected.
-
-      (ADB - 2018/09/26, HDFFV-10594)
-
     - Incorrectly installed private header files were removed from
       CMake installs.
 
@@ -149,52 +131,18 @@ New Features
 
       (DER - 2018/10/26, HDFFV-10614)
 
-    - Added a new option to enable/disable using pread/pwrite instead of
-      read/write in the sec2, log, and core VFDs.
-
-      This option is enabled by default when pread/pwrite are detected.
-
-      Autotools:    --enable-preadwrite
-      CMake:        HDF5_ENABLE_PREADWRITE
-
-      (DER - 2019/02/03, HDFFV-10696)
-
 
     Library:
     --------
-    - Added new chunk query functions
+    - The sec2, log, and core VFDs can now use pread/pwrite instead of
+      read/write.
 
-      The following public functions were added to discover information about
-      the chunks in an HDF5 file.
-        herr_t H5Dget_num_chunks(dset_id, fspace_id, *nchunks)
-        herr_t H5Dget_chunk_info_by_coord(dset_id, *coord, *filter_mask, *addr, *size)
-        herr_t H5Dget_chunk_info(dset_id, fspace_id, index, *coord, *filter_mask, *addr, *size)
+      pread and pwrite do not change the file offset, a feature that was
+      requested by a user working with a multi-threaded application.
 
-      (BMR - 2018/11/07, HDFFV-10615)
+      The option to configure this feature is described above.
 
-    - Allow pre-generated H5Tinit.c and H5make_libsettings.c to be used.
-
-      Rather than always running H5detect and generating H5Tinit.c and
-      H5make_libsettings.c, supply a location for those files.
-
-      (ADB - 2018/09/18, HDFFV-10332)
-
-    - Several empty public header files where removed from the distribution
-
-      The following files were empty placeholders. They are for internal
-      packages that are unlikely to ever have public functionality and have
-      thus been removed.
-
-        H5Bpublic.h
-        H5B2public.h
-        H5FSpublic.h
-        H5HFpublic.h
-        H5HGpublic.h
-        H5HLpublic.h
-
-      They were only installed in CMake builds.
-
-      (DER - 2018/10/26, HDFFV-10614)
+      (DER - 2019/02/03, HDFFV-10696)
 
     - Add ability to minimze dataset object headers.
 
@@ -221,26 +169,36 @@ New Features
 
       (JOS - 2019/01/04, TRILAB-45)
 
-    - The sec2, log, and core VFDs can now use pread/pwrite instead of
-      read/write.
+    - Added new chunk query functions
 
-      pread and pwrite do not change the file offset, a feature that was
-      requested by a user working with a multi-threaded application.
+      The following public functions were added to discover information about
+      the chunks in an HDF5 file.
+        herr_t H5Dget_num_chunks(dset_id, fspace_id, *nchunks)
+        herr_t H5Dget_chunk_info_by_coord(dset_id, *coord, *filter_mask, *addr, *size)
+        herr_t H5Dget_chunk_info(dset_id, fspace_id, index, *coord, *filter_mask, *addr, *size)
 
-      The option to configure this feature is described above.
+      (BMR - 2018/11/07, HDFFV-10615)
 
-      (DER - 2019/02/03, HDFFV-10696)
+    - Several empty public header files where removed from the distribution
+
+      The following files were empty placeholders. They are for internal
+      packages that are unlikely to ever have public functionality and have
+      thus been removed.
+
+        H5Bpublic.h
+        H5B2public.h
+        H5FSpublic.h
+        H5HFpublic.h
+        H5HGpublic.h
+        H5HLpublic.h
+
+      They were only installed in CMake builds.
+
+      (DER - 2018/10/26, HDFFV-10614)
 
 
      Parallel Library:
     -----------------
-    - All MPI-1 API calls have been replaced with MPI-2 equivalents.
-
-      This was done to better support OpenMPI, as default builds no longer
-      include MPI-1 support (as of OpenMPI 4.0).
-
-      (DER - 2018/12/30, HDFFV-10566)
-
     - Changed the default behavior in parallel when reading the same dataset in its entirely
       (i.e. H5S_ALL dataset selection) which is being read by all the processes collectively.
       The dataset must be contiguous, less than 2GB, and of an atomic datatype.
@@ -249,6 +207,13 @@ New Features
       with the HDF5 file.
 
       (MSB - 2019/01/02, HDFFV-10652)
+
+    - All MPI-1 API calls have been replaced with MPI-2 equivalents.
+
+      This was done to better support OpenMPI, as default builds no longer
+      include MPI-1 support (as of OpenMPI 4.0).
+
+      (DER - 2018/12/30, HDFFV-10566)
 
     Fortran Library:
     ----------------
@@ -357,7 +322,7 @@ Support for new platforms, languages and compilers.
 =======================================
     -
 
-Bug Fixes since HDF5-1.10.3 release
+Bug Fixes since HDF5-1.10.4 release
 ==================================
 
     Library
@@ -386,7 +351,54 @@ Bug Fixes since HDF5-1.10.3 release
       Improve porformance by skipping the search of the "tag_list"
       if there are no "corked" objects when closing an object.
 
-      (VC - 2019/2/6)
+      (VC - 2019/02/06)
+
+    - Uninitialized bytes from a type conversion buffer could be written
+      to disk in H5Dwrite calls where type conversion takes place
+      and the type conversion buffer was created by the HDF5 library.
+
+      When H5Dwrite is called and datatype conversion must be performed,
+      the library will create a temporary buffer for type conversion if
+      one is not provided by the user via H5Pset_buffer. This internal
+      buffer is allocated via malloc and contains uninitialized data. In
+      some datatype conversions (float to long double, possibly others),
+      some of this uninitialized data could be written to disk.
+
+      This was flagged by valgrind in the dtransform test and does not
+      appear to be a common occurrence (it is flagged in one test out
+      of the entire HDF5 test suite).
+
+      Switching to calloc fixed the problem.
+
+      (DER - 2019/02/03, HDFFV-10694)
+
+    - There was missing protection against division by zero reported to
+      The HDF Group as issue #CVE-2018-17434.
+
+      Protection against division by zero was added to address the issue
+      #CVE-2018-17434.
+
+      (BMR - 2019/01/29, HDFFV-10586)
+
+    - The issue CVE-2018-17437 was reported to The HDF Group
+
+      Although CVE-2018-17437 reported a memory leak, the actual issue
+      was invalid read. It was found that the attribute name length
+      in an attribute message was corrupted, which caused the buffer
+      pointer to be advanced too far and later caused an invalid read.
+
+      A check was added to detect when the attribute name or its length
+      was corrupted and report the potential of data corruption.
+
+      (BMR - 2019/01/29, HDFFV-10588)
+
+    - H5Ewalk did not stop when it was supposed to
+
+      H5Ewalk was supposed to stop when the callback function stopped
+      even though the errors in the stack were not all visited, but it
+      did not.  This problem is now fixed.
+
+      (BMR - 2019/01/29, HDFFV-10684)
 
     - Revert H5Oget_info* and H5Ovisit* functions
 
@@ -422,6 +434,15 @@ Bug Fixes since HDF5-1.10.3 release
 
       (VC - 2018/12/26, HDFFV-10659)
 
+    - There was missing protection against division by zero reported to
+      The HDF Group as issue #CVE-2018-17233.
+
+      Protection against division by zero was added to address the issue
+      #CVE-2018-17233.  In addition, several similar occurrences in the same
+      file were fixed as well.
+
+      (BMR - 2018/12/23, HDFFV-10577)
+
     - Fixed an issue where the parallel filters tests would fail
       if zlib was not available on the system. Until support can
       be added in the tests for filters beyond gzip/zlib, the tests
@@ -439,126 +460,18 @@ Bug Fixes since HDF5-1.10.3 release
 
       (JTH - 2018/12/05, HDFFV-10629)
 
-    - Allow H5detect and H5make_libsettings to take a file as an argument.
-
-      Rather than only writing to stdout, add a command argument to name
-      the file that H5detect and H5make_libsettings will use for output.
-      Without an argument, stdout is still used, so backwards compatibility
-      is maintained.
-
-      (ADB - 2018/09/05, HDFFV-9059)
-
-    - A bug was discovered in the parallel library where an application
-      would hang if a collective read/write of a chunked dataset occurred
-      when collective metadata reads were enabled and some of the ranks
-      had no selection in the dataset's dataspace. The ranks which had no
-      selection in the dataset's dataspace called H5D__chunk_addrmap() to
-      retrieve the lowest chunk address in the dataset. This is because we
-      require reads/writes to be performed in strictly non-decreasing order
-      of chunk address in the file.
-
-      When the chunk index used was a version 1 or 2 B-tree, these
-      non-participating ranks would issue a collective MPI_Bcast() call
-      that the participating ranks would not issue, causing the hang. Since
-      the non-participating ranks are not actually reading/writing anything,
-      the H5D__chunk_addrmap() call can be safely removed and the address used
-      for the read/write can be set to an arbitrary number (0 was chosen).
-
-      (JTH - 2018/08/25, HDFFV-10501)
-
-    - There was missing protection against division by zero reported to
-      The HDF Group as issue #CVE-2018-17233.
-
-      Protection against division by zero was added to address the issue
-      #CVE-2018-17233.  In addition, several similar occurrences in the same
-      file were fixed as well.
-
-      (BMR - 2018/12/23, HDFFV-10577)
-
-    - There was missing protection against division by zero reported to
-      The HDF Group as issue #CVE-2018-17434.
-
-      Protection against division by zero was added to address the issue
-      #CVE-2018-17434.
-
-      (BMR - 2019/01/29, HDFFV-10586)
-
-    - The issue CVE-2018-17437 was reported to The HDF Group
-
-      Although CVE-2018-17437 reported a memory leak, the actual issue
-      was invalid read. It was found that the attribute name length
-      in an attribute message was corrupted, which caused the buffer
-      pointer to be advanced too far and later caused an invalid read.
-
-      A check was added to detect when the attribute name or its length
-      was corrupted and report the potential of data corruption.
-
-      (BMR - 2019/01/29, HDFFV-10588)
-
-    - H5Ewalk did not stop when it was supposed to
-
-      H5Ewalk was supposed to stop when the callback function stopped
-      even though the errors in the stack were not all visited, but it
-      did not.  This problem is now fixed.
-
-      (BMR - 2019/01/29, HDFFV-10684)
-
-    - Uninitialized bytes from a type conversion buffer could be written
-      to disk in H5Dwrite calls where type conversion takes place
-      and the type conversion buffer was created by the HDF5 library.
-
-      When H5Dwrite is called and datatype conversion must be performed,
-      the library will create a temporary buffer for type conversion if
-      one is not provided by the user via H5Pset_buffer. This internal
-      buffer is allocated via malloc and contains uninitialized data. In
-      some datatype conversions (float to long double, possibly others),
-      some of this uninitialized data could be written to disk.
-
-      This was flagged by valgrind in the dtransform test and does not
-      appear to be a common occurrence (it is flagged in one test out
-      of the entire HDF5 test suite).
-
-      Switching to calloc fixed the problem.
-
-      (DER - 2019/02/03, HDFFV-10694)
-
 
     Java Library:
     ----------------
-    - JNI native library dependencies
-
-      The build for the hdf5_java native library used the wrong
-      hdf5 target library for CMake builds. Correcting the hdf5_java
-      library to build with the shared hdf5 library required testing
-      paths to change also.
-
-      (ADB - 2018/08/31, HDFFV-10568)
-     - Java iterator callbacks
-
-      Change global callback object to a small stack structure in order
-      to fix a runtime crash. This crash was discovered when iterating
-      through a file with nested group members. The global variable
-      visit_callback is overwritten when recursion starts. When recursion
-      completes, visit_callback will be pointing to the wrong callback method.
-
-      (ADB - 2018/08/15, HDFFV-10536)
-
-    - Java HDFLibraryException class
-
-      Change parent class from Exception to RuntimeException.
-
-      (ADB - 2018/07/30, HDFFV-10534)
-
-    - JNI Read and Write
-
-      Refactored variable-length functions, H5DreadVL and H5AreadVL,
-      to correct dataset and attribute reads. New write functions,
-      H5DwriteVL and H5AwriteVL, are under construction.
-
-      (ADB - 2018/06/02, HDFFV-10519)
+    -
 
     Fortran
     --------
+    - Fixed issue with Fortran not returning h5o_info_t field values
+      meta_size%attr%index_size and  meta_size%attr%heap_size.
+
+      (MSB, 2019/01/08, HDFFV-10443)
+
     - Added symbolic links libhdf5_hl_fortran.so to libhdf5hl_fortran.so and
       libhdf5_hl_fortran.a to libhdf5hl_fortran.a in hdf5/lib directory for
       autotools installs.  These were added to match the name of the files
@@ -573,11 +486,6 @@ Bug Fixes since HDF5-1.10.3 release
       Affected generic procedures were functions in H5A, H5D, H5P, H5R and H5T.
 
       (MSB, 2018/12/04, HDFFV-10511)
-
-    - Fixed issue with Fortran not returning h5o_info_t field values
-      meta_size%attr%index_size and  meta_size%attr%heap_size.
-
-      (MSB, 2018/1/8, HDFFV-10443)
 
 
     Tools
@@ -612,247 +520,6 @@ Bug Fixes since HDF5-1.10.3 release
 
       (JTH, 2019/2/7)
 
-Bug Fixes since HDF5-1.10.2 release
-==================================
-
-    Library
-    -------
-    - Java HDF5LibraryException class
-
-      The error minor and major values would be lost after the
-      constructor executed.
-
-      Created two local class variables to hold the values obtained during
-      execution of the constructor. Refactored the class functions to retrieve
-      the class values rather then calling the native functions.
-      The native functions were renamed and called only during execution
-      of the constructor.
-      Added error checking to calling class constructors in JNI classes.
-
-      (ADB - 2018/08/06, HDFFV-10544)
-
-    - Added checks of the defined MPI_VERSION to guard against usage of
-      MPI-3 functions in the Parallel Compression and "big Parallel I/O"
-      features when HDF5 is built with MPI-2. Previously, the configure
-      step would pass but the build itself would fail when it could not
-      locate the MPI-3 functions used.
-
-      As a result of these new checks, HDF5 can again be built with MPI-2,
-      but the Parallel Compression feature will be disabled as it relies
-      on the MPI-3 functions used.
-
-      (JTH - 2018/08/02, HDFFV-10512)
-
-    - User's patches: CVEs
-
-      The following patches have been applied:
-
-      CVE-2018-11202 - NULL pointer dereference was discovered in
-                       H5S_hyper_make_spans in H5Shyper.c (HDFFV-10476)
-        https://security-tracker.debian.org/tracker/CVE-2018-11202
-        https://cve.mitre.org/cgi-bin/cvename.cgi?name=3DCVE-2018-11202
-
-      CVE-2018-11203 - A division by zero was discovered in
-                       H5D__btree_decode_key in H5Dbtree.c (HDFFV-10477)
-        https://security-tracker.debian.org/tracker/CVE-2018-11203
-        https://cve.mitre.org/cgi-bin/cvename.cgi?name=3DCVE-2018-11203
-
-      CVE-2018-11204 - A NULL pointer dereference was discovered in
-                       H5O__chunk_deserialize in H5Ocache.c (HDFFV-10478)
-        https://security-tracker.debian.org/tracker/CVE-2018-11204
-        https://cve.mitre.org/cgi-bin/cvename.cgi?name=3DCVE-2018-11204
-
-      CVE-2018-11206 - An out of bound read was discovered in
-                       H5O_fill_new_decode and H5O_fill_old_decode in H5Ofill.c
-                       (HDFFV-10480)
-        https://security-tracker.debian.org/tracker/CVE-2018-11206
-        https://cve.mitre.org/cgi-bin/cvename.cgi?name=3DCVE-2018-11206
-
-      CVE-2018-11207 - A division by zero was discovered in
-                       H5D__chunk_init in H5Dchunk.c  (HDFFV-10481)
-        https://security-tracker.debian.org/tracker/CVE-2018-11207
-        https://cve.mitre.org/cgi-bin/cvename.cgi?name=3DCVE-2018-11207
-
-      (BMR - 2018/7/22, PR#s: 1134 and 1139,
-       HDFFV-10476, HDFFV-10477, HDFFV-10478, HDFFV-10480, HDFFV-10481)
-
-    - H5Adelete
-
-      H5Adelete failed when deleting the last "large" attribute that
-      is stored densely via fractal heap/v2 b-tree.
-
-      After removing the attribute, update the ainfo message.  If the
-      number of attributes goes to zero, remove the message.
-
-      (VC - 2018/07/20, HDFFV-9277)
-
-    - A bug was discovered in the parallel library which caused partial
-      parallel reads of filtered datasets to return incorrect data. The
-      library used the incorrect dataspace for each chunk read, causing
-      the selection used in each chunk to be wrong.
-
-      The bug was not caught during testing because all of the current
-      tests which do parallel reads of filtered data read all of the data
-      using an H5S_ALL selection. Several tests were added which exercise
-      partial parallel reads.
-
-      (JTH - 2018/07/16, HDFFV-10467)
-
-    - A bug was discovered in the parallel library which caused parallel
-      writes of filtered datasets to trigger an assertion failure in the
-      file free space manager.
-
-      This occurred when the filter used caused chunks to repeatedly shrink
-      and grow over the course of several dataset writes. The previous chunk
-      information, such as the size of the chunk and the offset in the file,
-      was being cached and not updated after each write, causing the next write
-      to the chunk to retrieve the incorrect cached information and run into
-      issues when reallocating space in the file for the chunk.
-
-      (JTH - 2018/07/16, HDFFV-10509)
-
-    - A bug was discovered in the parallel library which caused the
-      H5D__mpio_array_gatherv() function to allocate too much memory.
-
-      When the function is called with the 'allgather' parameter set
-      to a non-true value, the function will receive data from all MPI
-      ranks and gather it to the single rank specied by the 'root'
-      parameter. However, the bug in the function caused memory for
-      the received data to be allocated on all MPI ranks, not just the
-      singular rank specified as the receiver. In some circumstances,
-      this would cause an application to fail due to the large amounts
-      of memory being allocated.
-
-      (JTH - 2018/07/16, HDFFV-10467)
-
-    - Error checks in h5stat and when decoding messages
-
-      h5stat exited with seg fault/core dumped when
-      errors are encountered in the internal library.
-
-      Add error checks and --enable-error-stack option to h5stat.
-      Add range checks when decoding messages: old fill value, old
-      layout and refcount.
-
-      (VC - 2018/07/11, HDFFV-10333)
-
-    - If an HDF5 file contains a malformed compound datatype with a
-      suitably large offset, the type conversion code can run off
-      the end of the type conversion buffer, causing a segmentation
-      fault.
-
-      This issue was reported to The HDF Group as issue #CVE-2017-17507.
-
-      NOTE: The HDF5 C library cannot produce such a file. This condition
-            should only occur in a corrupt (or deliberately altered) file
-            or a file created by third-party software.
-
-      THE HDF GROUP WILL NOT FIX THIS BUG AT THIS TIME
-
-      Fixing this problem would involve updating the publicly visible
-      H5T_conv_t function pointer typedef and versioning the API calls
-      which use it. We normally only modify the public API during
-      major releases, so this bug will not be fixed at this time.
-
-      (DER - 2018/02/26, HDFFV-10356)
-
-    Configuration
-    -------------
-    - Applied patches to address Cywin build issues
-
-      There were three issues for Cygwin builds:
-      - Shared libs were not built.
-      - The -std=c99 flag caused a SIG_SETMASK undeclared error.
-      - Undefined errors when buildbing test shared libraries.
-
-      Patches to address these issues were received and incorporated in this version.
-
-      (LRK - 2018/07/18, HDFFV-10475)
-
-    - Moved the location of gcc attribute.
-
-      The gcc attribute(no_sanitize), named as the macro HDF_NO_UBSAN,
-      was located after the function name. Builds with GCC 7 did not
-      indicate any problem, but GCC 8 issued errors. Moved the
-      attribute before the function name, as required.
-
-      (ADB - 2018/05/22, HDFFV-10473)
-
-    - Reworked java test suite into individual JUnit tests.
-
-      Testing the whole suite of java unit tests in a single JUnit run
-      made it difficult to determine actual failures when tests would fail.
-      Running each file set of tests individually, allows individual failures
-      to be diagnosed easier. A side benefit is that tests for optional components
-      of the library can be disabled if not configured.
-
-      (ADB - 2018/05/16, HDFFV-9739)
-
-    - Converted CMake global commands ADD_DEFINITIONS and INCLUDE_DIRECTORIES
-      to use target_* type commands. This change modernizes the CMake usage
-      in the HDF5 library.
-
-      In addition, there is the intention to convert to generator expressions,
-      where possible. The exception is Fortran FLAGS on Windows Visual Studio.
-      The HDF macros TARGET_C_PROPERTIES and TARGET_FORTRAN_PROPERTIES have
-      been removed with this change in usage.
-
-      The additional language (C++ and Fortran) checks have also been localized
-      to only be checked when that language is enabled.
-
-      (ADB - 2018/05/08)
-
-    Performance
-    -------------
-    -
-
-    Fortran
-    --------
-    -
-
-    Tools
-    -----
-    -
-
-    High-Level APIs:
-    ------
-    -
-
-    Fortran High-Level APIs:
-    ------
-    -
-
-    Documentation
-    -------------
-    -
-
-    F90 APIs
-    --------
-    -
-
-    C++ APIs
-    --------
-    - Adding default arguments to existing functions
-
-      Added the following items:
-      + Two more property list arguments are added to H5Location::createDataSet:
-        const DSetAccPropList& dapl = DSetAccPropList::DEFAULT
-        const LinkCreatPropList& lcpl = LinkCreatPropList::DEFAULT
-
-      + One more property list argument is added to H5Location::openDataSet:
-        const DSetAccPropList& dapl = DSetAccPropList::DEFAULT
-
-      (BMR - 2018/07/21, PR# 1146)
-
-    - Improvement C++ documentation
-
-      Replaced the table in main page of the C++ documentation from mht to htm format
-      for portability.
-
-      (BMR - 2018/07/17, PR# 1141)
-
-    Testing
-    -------
 
 Supported Platforms
 ===================
