@@ -20,7 +20,10 @@
 include $(top_srcdir)/config/commence.am
 
 if BUILD_PARALLEL_CONDITIONAL
-  EXAMPLE_PROG_PARA = ph5example
+  EXAMPLE_PROG_PARA = ph5example h5rados_file_create h5rados_file_open \
+           h5rados_group_create h5rados_group_open h5rados_dset_create \
+           h5rados_dset_open h5rados_dset_write h5rados_dset_read \
+           h5rados_dset_wpartial h5rados_dset_rpartial
 endif
 
 INSTALL_SCRIPT_FILES = run-c-ex.sh
@@ -37,11 +40,7 @@ EXAMPLE_PROG = h5_write h5_read h5_extend_write h5_chunk_read h5_compound \
             h5_group h5_select h5_attribute h5_mount h5_reference h5_drivers \
             h5_ref2reg h5_extlink h5_elink_unix2win h5_shared_mesg h5_vds h5_vds-exc \
             h5_vds-exclim h5_vds-eiger h5_vds-simpleIO h5_vds-percival \
-            h5_vds-percival-unlim h5_vds-percival-unlim-maxmin \
-            h5rados_file_create h5rados_file_open \
-            h5rados_dset_create h5rados_dset_open h5rados_dset_read h5rados_dset_rpartial \
-            h5rados_dset_rss h5rados_dset_wpartial h5rados_dset_write h5rados_dset_wss \
-            h5rados_group_create h5rados_group_open
+            h5_vds-percival-unlim h5_vds-percival-unlim-maxmin
 
 TEST_SCRIPT=testh5cc.sh 
 TEST_EXAMPLES_SCRIPT=$(INSTALL_SCRIPT_FILES)
@@ -59,7 +58,9 @@ INSTALL_FILES = h5_write.c h5_read.c h5_extend_write.c h5_chunk_read.c   \
             h5rados_example.h h5rados_file_create.c h5rados_file_open.c \
             h5rados_dset_create.c h5rados_dset_open.c h5rados_dset_read.c h5rados_dset_rpartial.c \
             h5rados_dset_rss.c h5rados_dset_wpartial.c h5rados_dset_write.c h5rados_dset_wss.c \
-            h5rados_group_create.c h5rados_group_open.c
+            h5rados_group_create.c h5rados_group_open.c \
+	    h5rados_example.h run_rados_examples.sh
+
 
 # How to build examples, using installed version of h5cc
 if BUILD_PARALLEL_CONDITIONAL
@@ -134,6 +135,16 @@ h5_vds-simpleIO: $(srcdir)/h5_vds-simpleIO.c
 h5_vds-percival: $(srcdir)/h5_vds-percival.c
 h5_vds-percival-unlim: $(srcdir)/h5_vds-percival-unlim.c
 h5_vds-percival-unlim-maxmin: $(srcdir)/h5_vds-percival-unlim-maxmin.c
+h5rados_file_create: $(srcdir)/h5rados_file_create.c
+h5rados_file_open: $(srcdir)/h5rados_file_open.c
+h5rados_group_create: $(srcdir)/h5rados_group_create.c
+h5rados_group_open: $(srcdir)/h5rados_group_open.c
+h5rados_dset_create: $(srcdir)/h5rados_dset_create.c
+h5rados_dset_open: $(srcdir)/h5rados_dset_open.c
+h5rados_dset_write: $(srcdir)/h5rados_dset_write.c
+h5rados_dset_read: $(srcdir)/h5rados_dset_read.c
+h5rados_dset_wpartial: $(srcdir)/h5rados_dset_wpartial.c
+h5rados_dset_rpartial: $(srcdir)/h5rados_dset_rpartial.c
 
 if BUILD_SHARED_SZIP_CONDITIONAL
 LD_LIBRARY_PATH=$(LL_PATH)

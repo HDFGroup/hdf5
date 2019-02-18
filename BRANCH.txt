@@ -1,0 +1,55 @@
+This branch is a merge of Neil's original RADOS VOL connector
+branch and develop and is kept in sync with the changes
+in develop.
+
+************
+* BUILDING *
+************
+
+The code for the RADOS VOL connector lies entirely in
+the H5VLrados* files in the src directory. The connector
+is built as a static part of the library.
+
+YOU MUST BUILD THE PARALLEL LIBRARY (--enable-parallel
+in the autotools).
+
+The autotools configuration files have been updated with
+a --with-rados= option. CMake has not yet been updated
+so you'll have to add the -I, -l, and -L flags yourself,
+if necessary.
+
+I build this branch on Ubuntu, with the system default
+librados-dev package and its dependencies installed. On
+Ubuntu, the librados libraries are installed in an odd
+location, so I simplify the configure line by creating
+an opt/librados directory in my home directory and
+creating symlinks to the include and lib directories in
+that.
+
+
+***********
+* TESTING *
+***********
+
+There are no tests for the RADOS VOL connector in the main
+library, so running 'make check' won't provide much
+information.
+
+Once the library has been built, you can run some smoke
+checks by running 'make install' and going to the
+share/hdf5_examples/c/ directory and running the
+run_rados_examples.sh script found there. That will
+create a small pool (or clear it out if it exists)
+and run all the example scripts in a sane order.
+
+*** YOU WILL NEED TO COPY YOUR ceph.conf FILE
+*** INTO THIS DIRECTORY FIRST!!!
+
+This script is not as sophisticated as our usual test
+scripts, so don't be surprised if it fails and you have
+to run the tests manually.
+
+Also note that CMake installs HDF5 to the system by
+default, even in development branches. The autotools
+will install HDF5 to an hdf5 subdirectory of the
+build directory by default in development branches.
