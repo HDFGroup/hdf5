@@ -34,8 +34,8 @@ cmake_minimum_required (VERSION 3.10)
 #     CTEST_SOURCE_NAME  -  source folder
 ##############################################################################
 
-set (CTEST_SOURCE_VERSION "1.10.5")
-set (CTEST_SOURCE_VERSEXT "-snap1")
+set (CTEST_SOURCE_VERSION "1.10.6")
+set (CTEST_SOURCE_VERSEXT "-snap0")
 
 ##############################################################################
 # handle input parameters to script.
