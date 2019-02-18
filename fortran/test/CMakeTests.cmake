@@ -58,7 +58,7 @@ add_test (
         vds.h5
         visit.h5
 )
-if (NOT "${last_test}" STREQUAL "")
+if (last_test)
   set_tests_properties (FORTRAN_testhdf5-clear-objects PROPERTIES DEPENDS ${last_test})
 endif ()
 set (last_test "FORTRAN_testhdf5-clear-objects")

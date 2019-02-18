@@ -147,7 +147,7 @@ if (NOT SWMR_INCOMPAT)
         -E remove
         WATCH.h5
   )
-  if (NOT "${last_test}" STREQUAL "")
+  if (last_test)
     set_tests_properties (H5WATCH-clearall-objects PROPERTIES DEPENDS ${last_test})
   endif ()
   set (last_test "H5WATCH-clearall-objects")
