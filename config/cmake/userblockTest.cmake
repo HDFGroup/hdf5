@@ -62,7 +62,7 @@ if (TEST_CHECKUB STREQUAL "YES")
         OUTPUT_VARIABLE TEST_OUT
         ERROR_VARIABLE TEST_ERROR
     )
-    if (NOT ${TEST_RESULT} STREQUAL "0")
+    if (TEST_RESULT)
       message (FATAL_ERROR "Failed: The output of ${TEST_PROGRAM} ${TEST_OFILE} is: ${TEST_ERROR}")
     endif ()
     file (READ ${TEST_HFILE}.len.txt TEST_O_STRING_LEN)
@@ -70,7 +70,7 @@ if (TEST_CHECKUB STREQUAL "YES")
 
   math( EXPR TEST_STRING_SIZE "${TEST_U_STRING_LEN} + ${TEST_O_STRING_LEN}" )
 
-  if (NOT TEST_O_STRING_LEN STREQUAL "0")
+  if (TEST_O_STRING_LEN)
     #$JAM_BIN/getub -c $s2 $origfile > $cmpfile
     EXECUTE_PROCESS (
         COMMAND ${TEST_GET_PROGRAM} -c ${TEST_O_STRING_LEN} ${TEST_OFILE}
@@ -108,7 +108,7 @@ if (TEST_CHECKUB STREQUAL "YES")
 
   message (STATUS "COMPARE Result: ${TEST_RESULT}: ${TEST_STRING_SIZE}=${TEST_U_STRING_LEN}+${TEST_O_STRING_LEN}")
   # if the return value is !=${TEST_EXPECT} bail out
-  if (NOT ${TEST_RESULT} STREQUAL ${TEST_EXPECT})
+  if (NOT TEST_RESULT EQUAL TEST_EXPECT)
     message (FATAL_ERROR "Failed: The output of ${TEST_HFILE}-ub did not match ${TEST_HFILE}.\n${TEST_ERROR}")
   endif ()
 else ()
@@ -121,7 +121,7 @@ else ()
         OUTPUT_VARIABLE TEST_OUT
         ERROR_VARIABLE TEST_ERROR
     )
-  if (NOT TEST_H_STRING_LEN STREQUAL "0")
+  if (TEST_H_STRING_LEN)
     message (FATAL_ERROR "Failed: The output of ${TEST_HFILE} was NOT empty")
   endif ()
 endif ()

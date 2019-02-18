@@ -72,7 +72,7 @@ MACRO (ADD_H5_TEST resultfile resultcode)
           -D "TEST_REFERENCE=datatypes/${resultfile}.txt"
           -P "${HDF_RESOURCES_DIR}/jrunTest.cmake"
   )
-  if (NOT "${last_test}" STREQUAL "")
+  if (last_test)
     set_tests_properties (JAVA_datatypes-${resultfile} PROPERTIES DEPENDS ${last_test})
   endif ()
   set (last_test "JAVA_datatypes-${resultfile}")
@@ -86,7 +86,7 @@ if (BUILD_TESTING)
             -E remove
             ${HDFJAVA_EXAMPLES_BINARY_DIR}/${example}.h5
     )
-    if (NOT "${last_test}" STREQUAL "")
+    if (last_test)
       set_tests_properties (JAVA_datatypes-${example}-clear-objects PROPERTIES DEPENDS ${last_test})
     endif ()
     add_test (
