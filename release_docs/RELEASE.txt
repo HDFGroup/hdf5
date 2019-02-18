@@ -292,7 +292,13 @@ New Features
 
     C++ Library:
     ------------
-    -
+    - Added new function to the C++ interface
+
+      Added wrapper for H5Ovisit2:
+          H5Object::visit()
+
+      (BMR - 2019/02/14, HDFFV-10532)
+
 
     Java Library:
     ----------------
