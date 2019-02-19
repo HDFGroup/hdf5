@@ -1946,8 +1946,8 @@ H5VL_rados_group_open_helper(H5VL_rados_file_t *file, uint64_t oid,
 {
     H5VL_rados_group_t *grp = NULL;
     void *gcpl_buf = NULL;
-    uint64_t gcpl_len;
-    time_t pmtime;
+    uint64_t gcpl_len = 0;
+    time_t pmtime = 0;
     int ret;
     void *ret_value = NULL;
 
@@ -1965,9 +1965,37 @@ H5VL_rados_group_open_helper(H5VL_rados_file_t *file, uint64_t oid,
     grp->gcpl_id = FAIL;
     grp->gapl_id = FAIL;
 
+#if 1 /* fancy new read-op-based code */
+{
+    rados_read_op_t read_op;
+    hbool_t read_op_init = FALSE;
+    int prval;
+
+    /* Create read op */
+    if(NULL == (read_op = rados_create_read_op()))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "can't create read operation")
+    read_op_init = TRUE;
+
+    /* Add the get stats operation (returns void) */
+    rados_read_op_stat(read_op, &gcpl_len, &pmtime, &prval);
+
+    /* Execute read operation */
+    if((ret = rados_read_op_operate(read_op, ioctx_g, grp->obj.oid, LIBRADOS_OPERATION_NOFLAG)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "can't perform read operation: %s", strerror(-ret))
+    if(0 < prval)
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, NULL, "stats not found for object")
+
+    /* clean up */
+    if(read_op_init)
+        rados_release_read_op(read_op);
+}
+#endif
+
+#if 0 /* old code */
     /* Read internal metadata size from group */
     if((ret = rados_stat(ioctx_g, grp->obj.oid, &gcpl_len, &pmtime)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, NULL, "can't read metadata size from group: %s", strerror(-ret))
+#endif
 
     /* Check for metadata not found */
     if(gcpl_len == (uint64_t)0)
