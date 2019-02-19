@@ -1,7 +1,7 @@
 This tar file contains 
 
     build-unix.sh       script to build HDF5 with CMake on unix machines
-    buidl-unix-hpc.sh   script to build HDF5 with CMake on unix machines and run
+    build-unix-hpc.sh   script to build HDF5 with CMake on unix machines and run
                         tests with batch scripts (sbatch).
     CTestScript.cmake   
     HDF5config.cmake    CMake scripts for building HDF5

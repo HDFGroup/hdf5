@@ -209,7 +209,7 @@ New Features
 
      Parallel Library:
     -----------------
-    - Changed the default behavior in parallel when reading the same dataset in its entirely
+    - Changed the default behavior in parallel when reading the same dataset in its entirety
       (i.e. H5S_ALL dataset selection) which is being read by all the processes collectively.
       The dataset must be contiguous, less than 2GB, and of an atomic datatype.
       The new behavior is the HDF5 library will use an MPI_Bcast to pass the data read from
@@ -339,7 +339,7 @@ Bug Fixes since HDF5-1.10.4 release
       The slow down is due to the search of the "tag_list" to find
       out the "corked" status of an object and "uncork" it if so.
 
-      Improve porformance by skipping the search of the "tag_list"
+      Improve performance by skipping the search of the "tag_list"
       if there are no "corked" objects when closing an object.
 
       (VC - 2019/02/06)
