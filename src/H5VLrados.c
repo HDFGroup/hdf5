@@ -201,10 +201,9 @@ static herr_t H5VL_rados_file_close_helper(H5VL_rados_file_t *file,
     hid_t dxpl_id, void **req);
 
 /* read/write_op equivalents for some RADOS calls */
-static int H5VL_rados_read(rados_ioctx_t io, const char *oid, char *buf,
-    size_t len, uint64_t off);
-static int H5VL_rados_write_full(rados_ioctx_t io, const char *oid,
-    const char *buf, size_t len);
+static int H5VL_rados_read(rados_ioctx_t io, const char *oid, char *buf, size_t len, uint64_t off);
+static int H5VL_rados_write_full(rados_ioctx_t io, const char *oid, const char *buf, size_t len);
+static int H5VL_rados_stat(rados_ioctx_t io, const char *oid, uint64_t *psize, time_t * pmtime);
 
 static herr_t H5VL_rados_link_read(H5VL_rados_group_t *grp, const char *name,
     H5VL_rados_link_val_t *val);
@@ -467,6 +466,64 @@ H5VL_rados_write_full(rados_ioctx_t io, const char *oid, const char *buf, size_t
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_rados_write_full() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_rados_stat
+ *
+ * Purpose:     Recreates rados_stat(). We are trying to use all read_op
+ *              calls and this lets us do that without duplicating all
+ *              the RADOS boilerplate.
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *
+ * Programmer:  Dana Robinson
+ *              February, 2019
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5VL_rados_stat(rados_ioctx_t io, const char *oid, uint64_t *psize, time_t * pmtime)
+{
+    int ret = 0;
+    int ret_value = 0;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+#ifdef OLD_RADOS_CALLS
+    /* Get the object size and time */
+    if((ret = rados_stat(io, oid, psize, pmtime)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, (-1), "can't read object size and time: %s", strerror(-ret))
+#else
+{
+    rados_read_op_t read_op;
+    hbool_t read_op_init = FALSE;
+    int prval;
+
+    /* Create read op */
+    if(NULL == (read_op = rados_create_read_op()))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, (-1), "can't create read operation")
+    read_op_init = TRUE;
+
+    /* Add the get stats operation (returns void) */
+    rados_read_op_stat(read_op, psize, pmtime, &prval);
+
+    /* Execute read operation */
+    if((ret = rados_read_op_operate(read_op, io, oid, LIBRADOS_OPERATION_NOFLAG)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, (-1), "can't perform read operation: %s", strerror(-ret))
+    if(0 < prval)
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, (-1), "stats not found for object")
+
+    /* clean up */
+    if(read_op_init)
+        rados_release_read_op(read_op);
+}
+#endif
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_rados_stat() */
 
 
 /* Create a RADOS string oid given the file name and binary oid */
@@ -2086,35 +2143,9 @@ H5VL_rados_group_open_helper(H5VL_rados_file_t *file, uint64_t oid,
     grp->gcpl_id = FAIL;
     grp->gapl_id = FAIL;
 
-#ifdef OLD_RADOS_CALLS
-    /* Read internal metadata size from group */
-    if((ret = rados_stat(ioctx_g, grp->obj.oid, &gcpl_len, &pmtime)) < 0)
+    /* Get the object size and time */
+    if((ret = H5VL_rados_stat(ioctx_g, grp->obj.oid, &gcpl_len, &pmtime)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, NULL, "can't read metadata size from group: %s", strerror(-ret))
-#else
-{
-    rados_read_op_t read_op;
-    hbool_t read_op_init = FALSE;
-    int prval;
-
-    /* Create read op */
-    if(NULL == (read_op = rados_create_read_op()))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "can't create read operation")
-    read_op_init = TRUE;
-
-    /* Add the get stats operation (returns void) */
-    rados_read_op_stat(read_op, &gcpl_len, &pmtime, &prval);
-
-    /* Execute read operation */
-    if((ret = rados_read_op_operate(read_op, ioctx_g, grp->obj.oid, LIBRADOS_OPERATION_NOFLAG)) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "can't perform read operation: %s", strerror(-ret))
-    if(0 < prval)
-        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, NULL, "stats not found for object")
-
-    /* clean up */
-    if(read_op_init)
-        rados_release_read_op(read_op);
-}
-#endif
 
     /* Check for metadata not found */
     if(gcpl_len == (uint64_t)0)
@@ -2951,36 +2982,9 @@ H5VL_rados_dataset_open(void *_item,
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "can't encode string oid")
         } /* end else */
 
-#ifdef OLD_RADOS_CALLS
-        /* Read internal metadata size from dataset */
-        if((ret = rados_stat(ioctx_g, dset->obj.oid, &md_len, &pmtime)) < 0)
+        /* Get the object size and time */
+        if((ret = H5VL_rados_stat(ioctx_g, dset->obj.oid, &md_len, &pmtime)) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTDECODE, NULL, "can't read metadata size from group: %s", strerror(-ret))
-#else
-{
-        rados_read_op_t read_op;
-        hbool_t read_op_init = FALSE;
-        int prval;
-
-        /* Create read op */
-        if(NULL == (read_op = rados_create_read_op()))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "can't create read operation")
-        read_op_init = TRUE;
-
-        /* Add the get stats operation (returns void) */
-        rados_read_op_stat(read_op, &md_len, &pmtime, &prval);
-
-        /* Execute read operation */
-        if((ret = rados_read_op_operate(read_op, ioctx_g, dset->obj.oid, LIBRADOS_OPERATION_NOFLAG)) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "can't perform read operation: %s", strerror(-ret))
-        if(0 < prval)
-            HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, NULL, "stats not found for object")
-
-        /* clean up */
-        if(read_op_init)
-            rados_release_read_op(read_op);
-}
-#endif
-
 
         /* Check for metadata not found */
         if(md_len == (uint64_t)0)
