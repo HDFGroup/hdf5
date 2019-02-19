@@ -377,9 +377,39 @@ H5VL_rados_read(rados_ioctx_t io, const char *oid, char *buf, size_t len, uint64
 
     FUNC_ENTER_NOAPI_NOINIT
 
+#ifdef OLD_RADOS_CALLS
     /* Read data from the object */
     if((ret = rados_read(io, oid, buf, len, off)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTDECODE, (-1), "can't read metadata from dataset: %s", strerror(-ret))
+#else
+{
+    rados_read_op_t read_op;
+    hbool_t read_op_init = FALSE;
+    size_t bytes_read = 0;
+    int prval;
+
+    /* Create read op */
+    if(NULL == (read_op = rados_create_read_op()))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, (-1), "can't create read operation")
+    read_op_init = TRUE;
+
+    /* Add the read operation (returns void) */
+    rados_read_op_read(read_op, off, len, buf, &bytes_read, &prval);
+
+    /* Execute read operation */
+    if((ret = rados_read_op_operate(read_op, io, oid, LIBRADOS_OPERATION_NOFLAG)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, (-1), "can't perform read operation: %s", strerror(-ret))
+    if(0 < prval)
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, (-1), "RADOS read operation failed for object")
+    if(0 == bytes_read)
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, (-1), "metadata not found for object")
+
+    /* clean up */
+    if(read_op_init)
+        rados_release_read_op(read_op);
+}
+#endif
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_rados_read() */
@@ -433,6 +463,7 @@ H5VL_rados_write_full(rados_ioctx_t io, const char *oid, const char *buf, size_t
         rados_release_write_op(write_op);
 }
 #endif
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_rados_write_full() */
