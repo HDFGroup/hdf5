@@ -87,6 +87,6 @@ if (BUILD_SHARED_LIBS)
   )
 endif ()
 
-foreach (test ${H5_TESTS})
-  ADD_H5_FORTRAN_TEST(${test})
+foreach (h5_test ${H5_TESTS})
+  ADD_H5_FORTRAN_TEST(${h5_test})
 endforeach ()

@@ -44,7 +44,7 @@ Java_hdf_hdf5lib_H5_H5VLregister_1connector_1by_1value
  * Signature: (Ljava/lang/String;)Z
  */
 JNIEXPORT jboolean JNICALL
-Java_hdf_hdf5lib_H5_H5VLis_connector_registered
+Java_hdf_hdf5lib_H5_H5VLis_1connector_1registered
   (JNIEnv *, jclass, jobject);
 
 /*

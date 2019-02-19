@@ -1,0 +1,79 @@
+HDF5 version 1.11.4 currently under development
+
+HDF5 source tar files with the HPC prefix are intended for use on clusters where 
+configuration and build steps will be done on a login node and executable and
+lib files that are built will be run on compute nodes.  
+
+Note these differences from the regular CMake tar and zip files:
+  - Test programs produced by this tar file will be run using batch scripts. 
+  - Serial and parallel HDF5options.cmake files, using parallel options by default.
+
+Note also that options are now available in HDF5 source to facilitate use of 
+toolchain files for using cross compilers available on login nodes to compile
+HDF5 for compute nodes.
+
+Instructions to configure build and test HDF5 using CMake:
+
+1. The cmake version must be 3.10 or later (cmake --version).
+2. Load or switch modules and set CC, FC, CXX for compilers desired.
+3. run build-unix.sh to configure, build, test and package HDF5 with CMake.
+
+Contents:
+
+build-unix.sh           Simple script for running CMake to configure, build, 
+                        test, and package HDF5.
+CTestScript.cmake       CMake script to configure, build, test and package 
+                        HDF5.
+hdf5-<version>          HDF5 source for <version>.
+HDF5config.cmake        CMake script to configure, build, test and package
+                        HDF5. 
+HDF5Examples            Source for HDF5 Examples.
+HDF5options.cmake       symlink to parallel or serial HDF5options.cmake files.
+                        Default is parallel file, which builds and tests both
+                        serial and parallel C and Fortran wrappers.
+                        To build serial only, C Fortran and C++ wrappers, delete
+                        The HDF5options.cmake link and run 
+                        'ln -s ser-HDF5options.cmake HDF5options.cmake' to switch.  
+par-HDF5options.cmake   Options file for HDF5 serial and parallel build and test.
+ser-HDF5options.cmake   Options file for HDF5 serial only build and test.
+SZip.tar.gz             Source for building SZip.
+ZLib.tar.gz             Source for buildng Zlib.
+
+
+To cross compile with this HPC-CMake tar.gz HDF5 source file:
+On Cray XC40  haswell login node for knl compute nodes using CMake and Cray modules:
+        1.  Uncomment line in HDF5options.txt to use a toolchain file - line 106 for
+            config/toolchain/crayle.cmake.
+        2.  Uncomment lines 110, 111, and 115 - 122 of HDF5options.cmake.
+            Line 110 allows configuring to complete on the haswell node.
+            Line 111 switches the compiler to build files for knl nodes.
+            Lines 115 - 122 set up test files to use sbatch to run build tests
+            in batch jobs on a knl compute node with 6 processes.
+        3.  Compiler module may be the default PrgEnv-intel/6.0.4 to use 
+            intel/18.0.2 or other intel, PrgEnv-cray/6.0.4 to use cce/8.7.4,
+            or PrgEnv-gnu/6.0.4 for GCC compilers.  PrgEnv-pgi/6.0.4 is also 
+            available but has not been tested with this tar file.
+        4.  These CMake options are set in config/toolchain/crayle.cmake:
+                set(CMAKE_SYSTEM_NAME Linux)
+                set(CMAKE_COMPILER_VENDOR "CrayLinuxEnvironment")
+                set(CMAKE_C_COMPILER cc)
+                set(CMAKE_CXX_COMPILER c++)
+                set(CMAKE_Fortran_COMPILER ftn)
+                set(CMAKE_CROSSCOMPILING_EMULATOR "")
+
+        5.  Settings for two other cross-compiling options are also in the 
+            config/toolchain files which do not seem to be necessary with the 
+            Cray PrgEnv-* modules
+            a.  HDF5_USE_PREGEN.  This option, along with the HDF5_USE_PREGEN_DIR
+                CMake variable would allow the use of an appropriate H5Tinit.c 
+                file with type information generated on a compute node to be used
+                when cross compiling for those compute nodes.  The use of the 
+                variables in lines 110 and 111 of HDF5options.cmake file seem to
+                preclude needing this option with the available Cray modules and
+                CMake options.
+            b.  HDF5_BATCH_H5DETECT and associated CMake variables.  This option
+                when properly configured will run H5detect in a batch job on a
+                compute node at the beginning of the CMake build process.  It 
+                was also found to be unnecessary with the available Cray modules
+                and CMake options.
+-

@@ -33,25 +33,41 @@
     set (VFD_LIST ${VFD_LIST} direct)
   endif ()
 
+foreach (vfdtest ${VFD_LIST})
+  file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/${vfdtest}")
+endforeach ()
+
   macro (ADD_VFD_TEST vfdname resultcode)
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
-      foreach (test ${H5P_VFD_TESTS})
+      foreach (h5_test ${H5P_VFD_TESTS})
         add_test (
-          NAME TEST_PAR_VFD-${vfdname}-${test}
+            NAME MPI_TEST_VFD-${vfdname}-${h5_test}-clear-objects
+            COMMAND    ${CMAKE_COMMAND}
+                -E remove
+                    ${vfdname}-shared/${vfdname}-${h5_test}.out
+                    ${vfdname}-shared/${vfdname}-${h5_test}.out.err
+        )
+        add_test (
+          NAME MPI_TEST_VFD-${vfdname}-${h5_test}
           COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:${test}>"
+              -D "TEST_PROGRAM=$<TARGET_FILE:${h5_test}>"
               -D "TEST_ARGS:STRING="
               -D "TEST_VFD:STRING=${vfdname}"
               -D "TEST_EXPECT=${resultcode}"
-              -D "TEST_OUTPUT=${test}"
-              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
+              -D "TEST_OUTPUT=${vfdname}-${h5_test}.out"
+              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/${vfdname}"
               -P "${HDF_RESOURCES_DIR}/vfdTest.cmake"
+        )
+        set_tests_properties (MPI_TEST_VFD-${vfdname}-${h5_test} PROPERTIES
+            DEPENDS MPI_TEST_VFD-${vfdname}-${h5_test}-clear-objects
+            ENVIRONMENT "srcdir=${HDF5_TEST_PAR_BINARY_DIR}/${vfdname}"
+            WORKING_DIRECTORY ${HDF5_TEST_PAR_BINARY_DIR}/${vfdname}
         )
       endforeach ()
     endif ()
   endmacro ()
 
   # Run test with different Virtual File Driver
-  foreach (vfd ${VFD_LIST})
-    ADD_VFD_TEST (${vfd} 0)
+  foreach (h5_vfd ${VFD_LIST})
+    ADD_VFD_TEST (${h5_vfd} 0)
   endforeach ()

@@ -657,7 +657,7 @@ SUBROUTINE test_chunk_cache(cleanup, total_error)
   minimize = .TRUE.
   CALL h5pget_dset_no_attrs_hint_f(dcpl, minimize, error)
   CALL check("h5pget_dset_no_attrs_hint_f",error,total_error)
-  if(error .eq. 0 .and. minimize .neqv. .FALSE.) then
+  if(minimize .neqv. .FALSE.) then
     total_error = total_error + 1
     write(*,*) "Default dataset minimize flag was incorrect (H5P)"
   endif
@@ -671,7 +671,7 @@ SUBROUTINE test_chunk_cache(cleanup, total_error)
   minimize = .FALSE.
   CALL h5pget_dset_no_attrs_hint_f(dcpl, minimize, error)
   CALL check("h5pget_dset_no_attrs_hint_f",error,total_error)
-  if(error .eq. 0 .and. minimize .neqv. .TRUE.) then
+  if(minimize .neqv. .TRUE.) then
     total_error = total_error + 1
     write(*,*) "Unable to get correct dataset minimize flag (H5P)"
   endif
@@ -681,7 +681,7 @@ SUBROUTINE test_chunk_cache(cleanup, total_error)
   minimize = .TRUE.
   CALL h5fget_dset_no_attrs_hint_f(fid, minimize, error)
   CALL check("h5fget_dset_no_attrs_hint_f",error,total_error)
-  if(error .eq. 0 .and. minimize .neqv. .FALSE.) then
+  if(minimize .neqv. .FALSE.) then
     total_error = total_error + 1
     write(*,*) "Default dataset minimize flag was incorrect (H5F)"
   endif
@@ -695,7 +695,7 @@ SUBROUTINE test_chunk_cache(cleanup, total_error)
   minimize = .FALSE.
   CALL h5fget_dset_no_attrs_hint_f(fid, minimize, error)
   CALL check("h5fget_dset_no_attrs_hint_f",error,total_error)
-  if(error .eq. 0 .and. minimize .neqv. .TRUE.) then
+  if(minimize .neqv. .TRUE.) then
     total_error = total_error + 1
     write(*,*) "Unable to get correct dataset minimize flag (H5F)"
   endif

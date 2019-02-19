@@ -944,6 +944,12 @@ if (BUILD_SHARED_LIBS)
 endif ()
 
 if (LOCAL_BATCH_TEST)
+  if (LOCAL_BATCH_SCRIPT_COMMAND STREQUAL "raybsub")
+    configure_file (
+        ${HDF5_SOURCE_DIR}/bin/batch/${LOCAL_BATCH_SCRIPT_COMMAND}
+        ${HDF5_BINARY_DIR}/${LOCAL_BATCH_SCRIPT_COMMAND} ESCAPE_QUOTES @ONLY
+    )
+  endif ()
   if (LOCAL_BATCH_SCRIPT_NAME)
     configure_file (
         ${HDF5_SOURCE_DIR}/bin/batch/${LOCAL_BATCH_SCRIPT_NAME}.in.cmake

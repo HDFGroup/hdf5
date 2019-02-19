@@ -65,7 +65,7 @@ typedef struct H5VL_wrap_ctx_t {
 /* Local Prototypes */
 /********************/
 static herr_t H5VL__free_cls(H5VL_class_t *cls);
-static void *H5VL__wrap_obj(void *obj);
+static void *H5VL__wrap_obj(void *obj, H5I_type_t obj_type);
 static H5VL_object_t *H5VL__new_vol_obj(H5I_type_t type, void *object,
     H5VL_t *vol_connector, hbool_t wrap_obj);
 static void *H5VL__object(hid_t id, H5I_type_t obj_type);
@@ -248,7 +248,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static void *
-H5VL__wrap_obj(void *obj)
+H5VL__wrap_obj(void *obj, H5I_type_t obj_type)
 {
     H5VL_wrap_ctx_t *vol_wrap_ctx = NULL;   /* Object wrapping context */
     void *ret_value = NULL;                 /* Return value */
@@ -265,7 +265,7 @@ H5VL__wrap_obj(void *obj)
     /* If there is a VOL object wrapping context, wrap the object */
     if(vol_wrap_ctx) {
         /* Wrap object, using the VOL callback */
-        if(NULL == (ret_value = H5VL_wrap_object(vol_wrap_ctx->connector->cls, vol_wrap_ctx->obj_wrap_ctx, obj)))
+        if(NULL == (ret_value = H5VL_wrap_object(vol_wrap_ctx->connector->cls, vol_wrap_ctx->obj_wrap_ctx, obj, obj_type)))
             HGOTO_ERROR(H5E_VOL, H5E_CANTGET, NULL, "can't wrap object")
     } /* end if */
     else
@@ -310,7 +310,7 @@ H5VL__new_vol_obj(H5I_type_t type, void *object, H5VL_t *vol_connector, hbool_t 
         HGOTO_ERROR(H5E_VOL, H5E_CANTALLOC, NULL, "can't allocate memory for VOL object")
     new_vol_obj->connector = vol_connector;
     if(wrap_obj) {
-        if(NULL == (new_vol_obj->data = H5VL__wrap_obj(object)))
+        if(NULL == (new_vol_obj->data = H5VL__wrap_obj(object, type)))
             HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, NULL, "can't wrap library object")
     } /* end if */
     else
@@ -1099,7 +1099,7 @@ H5VL_wrap_register(H5I_type_t type, void *obj, hbool_t app_ref)
             HGOTO_ERROR(H5E_VOL, H5E_BADTYPE, H5I_INVALID_HID, "can't wrap an uncommitted datatype")
 
     /* Wrap the object with VOL connector info */
-    if(NULL == (new_obj = H5VL__wrap_obj(obj)))
+    if(NULL == (new_obj = H5VL__wrap_obj(obj, type)))
         HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, H5I_INVALID_HID, "can't wrap library object")
 
     /* Retrieve the VOL object wrapping context */

@@ -7225,7 +7225,7 @@ smoke_check_6(int metadata_write_strategy)
             /* some error occured in the server -- report failure */
             nerrors++;
             if ( verbose ) {
-        HDfprintf(stdout, "%d:%s: server_main() failed.\n",
+                HDfprintf(stdout, "%d:%s: server_main() failed.\n",
                           world_mpi_rank, FUNC);
             }
         }
@@ -7241,7 +7241,7 @@ smoke_check_6(int metadata_write_strategy)
             fid = -1;
             cache_ptr = NULL;
             if ( verbose ) {
-        HDfprintf(stdout, "%d:%s: setup_cache_for_test() failed.\n",
+                HDfprintf(stdout, "%d:%s: setup_cache_for_test() failed.\n",
                           world_mpi_rank, FUNC);
             }
         }
@@ -7250,7 +7250,7 @@ smoke_check_6(int metadata_write_strategy)
         virt_num_data_entries = NUM_DATA_ENTRIES;
 
         /* insert the first half collectively */
-        file_ptr->coll_md_read = H5P_USER_TRUE;
+        H5CX_set_coll_metadata_read(TRUE);
         for ( i = 0; i < virt_num_data_entries/2; i++ )
         {
             struct datum * entry_ptr;
@@ -7271,7 +7271,7 @@ smoke_check_6(int metadata_write_strategy)
         }
 
         /* insert the other half independently */
-        file_ptr->coll_md_read = H5P_USER_FALSE;
+        H5CX_set_coll_metadata_read(FALSE);
         for ( i = virt_num_data_entries/2; i < virt_num_data_entries; i++ )
         {
             struct datum * entry_ptr;
@@ -7291,7 +7291,7 @@ smoke_check_6(int metadata_write_strategy)
             HDassert(cache_ptr->max_cache_size*0.8 > cache_ptr->coll_list_size);
         }
 
-    /* flush the file */
+        /* flush the file */
         if ( H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0 ) {
             nerrors++;
             if ( verbose ) {
@@ -7301,7 +7301,7 @@ smoke_check_6(int metadata_write_strategy)
         }
 
         /* Protect the first half of the entries collectively */
-        file_ptr->coll_md_read = H5P_USER_TRUE;
+        H5CX_set_coll_metadata_read(TRUE);
         for ( i = 0; i < (virt_num_data_entries / 2); i++ )
         {
             struct datum * entry_ptr;
@@ -7322,13 +7322,13 @@ smoke_check_6(int metadata_write_strategy)
         }
 
         /* protect the other half independently */
-        file_ptr->coll_md_read = H5P_USER_FALSE;
+        H5CX_set_coll_metadata_read(FALSE);
         for ( i = virt_num_data_entries/2; i < virt_num_data_entries; i++ )
         {
             struct datum * entry_ptr;
             entry_ptr = &(data[i]);
 
-        lock_entry(file_ptr, i);
+            lock_entry(file_ptr, i);
 
             if(FALSE != entry_ptr->header.coll_access) {
                 nerrors++;
