@@ -200,6 +200,12 @@ static herr_t H5VL_rados_file_flush(H5VL_rados_file_t *file);
 static herr_t H5VL_rados_file_close_helper(H5VL_rados_file_t *file,
     hid_t dxpl_id, void **req);
 
+/* read/write_op equivalents for some RADOS calls */
+static int H5VL_rados_read(rados_ioctx_t io, const char *oid, char *buf,
+    size_t len, uint64_t off);
+static int H5VL_rados_write_full(rados_ioctx_t io, const char *oid,
+    const char *buf, size_t len);
+
 static herr_t H5VL_rados_link_read(H5VL_rados_group_t *grp, const char *name,
     H5VL_rados_link_val_t *val);
 static herr_t H5VL_rados_link_write(H5VL_rados_group_t *grp, const char *name,
@@ -349,14 +355,45 @@ hbool_t ioctx_init_g = FALSE;
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5VL_rados_read
+ *
+ * Purpose:     Recreates rados_read(). We are trying to use all read_op
+ *              calls and this lets us do that without duplicating all
+ *              the RADOS boilerplate.
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *
+ * Programmer:  Dana Robinson
+ *              February, 2019
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5VL_rados_read(rados_ioctx_t io, const char *oid, char *buf, size_t len, uint64_t off)
+{
+    int ret = 0;
+    int ret_value = 0;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* Read data from the object */
+    if((ret = rados_read(io, oid, buf, len, off)) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTDECODE, (-1), "can't read metadata from dataset: %s", strerror(-ret))
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_rados_read() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5VL_rados_write_full
  *
  * Purpose:     Recreates rados_write_full(). We are trying to use all
- *              read_op calls and this lets us do that without duplicating
- *              all the RADOS calls.
+ *              write_op calls and this lets us do that without duplicating
+ *              all the RADOS boilerplate.
  *
  * Return:      Success:        0
- *              Failure:        -11
+ *              Failure:        -1
  *
  * Programmer:  Dana Robinson
  *              February, 2019
@@ -367,13 +404,13 @@ static int
 H5VL_rados_write_full(rados_ioctx_t io, const char *oid, const char *buf, size_t len)
 {
     int ret = 0;
-    herr_t ret_value = SUCCEED;
+    int ret_value = 0;
 
     FUNC_ENTER_NOAPI_NOINIT
 
 #ifdef OLD_RADOS_CALLS
     if((ret = rados_write_full(io, oid, buf, len)) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't write metadata to object: %s", strerror(-ret))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, (-1), "can't write metadata to object: %s", strerror(-ret))
 #else
 {
     rados_write_op_t write_op;
@@ -381,7 +418,7 @@ H5VL_rados_write_full(rados_ioctx_t io, const char *oid, const char *buf, size_t
 
     /* Create write op */
     if(NULL == (write_op = rados_create_write_op()))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create write operation")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, (-1), "can't create write operation")
     write_op_init = TRUE;
 
     /* Add the write full operation (returns void) */
@@ -389,7 +426,7 @@ H5VL_rados_write_full(rados_ioctx_t io, const char *oid, const char *buf, size_t
 
     /* Execute write operation */
     if((ret = rados_write_op_operate(write_op, io, oid, NULL, LIBRADOS_OPERATION_NOFLAG)) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't perform write operation: %s", strerror(-ret))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, (-1), "can't perform write operation: %s", strerror(-ret))
 
     /* clean up */
     if(write_op_init)
@@ -1017,7 +1054,7 @@ H5VL_rados_file_open(const char *name, unsigned flags, hid_t fapl_id,
 
         /* Read max oid directly to foi_buf */
         /* Check for does not exist here and assume 0? -NAF */
-        if((ret = rados_read(ioctx_g, file->glob_md_oid, foi_buf, 8, 0)) < 0)
+        if((ret = H5VL_rados_read(ioctx_g, file->glob_md_oid, foi_buf, 8, 0)) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTDECODE, NULL, "can't read metadata from dataset: %s", strerror(-ret))
 
         /* Decode max oid */
@@ -2057,7 +2094,7 @@ H5VL_rados_group_open_helper(H5VL_rados_file_t *file, uint64_t oid,
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "can't allocate buffer for serialized gcpl")
 
     /* Read internal metadata from group */
-    if((ret = rados_read(ioctx_g, grp->obj.oid, gcpl_buf, gcpl_len, 0)) < 0)
+    if((ret = H5VL_rados_read(ioctx_g, grp->obj.oid, gcpl_buf, gcpl_len, 0)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, NULL, "can't read metadata from group: %s", strerror(-ret))
 
     /* Decode GCPL */
@@ -2926,7 +2963,7 @@ H5VL_rados_dataset_open(void *_item,
         } /* end if */
 
         /* Read internal metadata from dataset */
-        if((ret = rados_read(ioctx_g, dset->obj.oid, (char *)(dinfo_buf + sizeof(uint64_t)), md_len, 0)) < 0)
+        if((ret = H5VL_rados_read(ioctx_g, dset->obj.oid, (char *)(dinfo_buf + sizeof(uint64_t)), md_len, 0)) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTDECODE, NULL, "can't read metadata from dataset: %s", strerror(-ret))
 
         /* Decode info lengths */
