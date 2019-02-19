@@ -47,6 +47,16 @@ New Features
 
     Configuration:
     -------------
+    - Cross compile on mutrino and other Cray XC40 systems.
+
+      Added support for CMake options to use CrayLinuxEnvironment, craype-mic-knl
+      module for building with craype-haswell module for configuration, and 
+      batch scripts in bin/batch for use with sbatch or bsub to run tests in 
+      batch jobs on compute nodes.  An instruction file README_HPC describing
+      the use of these options was added in release_docs.
+
+      (LRK - 2019/02/18, TRILABS-34)
+
     - Rework CMake command files to fix MPI testing.
 
       Added setup fixture to remove any test generated files and added DEPENDS
@@ -302,25 +312,6 @@ New Features
 
       (DER - 2018/11/14, HDFFV-10633)
 
-    High-Level APIs:
-    ---------------
-    -
-
-    C Packet Table API
-    ------------------
-    -
-
-    Internal header file
-    --------------------
-    -
-
-    Documentation
-    -------------
-    -
-
-Support for new platforms, languages and compilers.
-=======================================
-    -
 
 Bug Fixes since HDF5-1.10.4 release
 ==================================
@@ -461,10 +452,6 @@ Bug Fixes since HDF5-1.10.4 release
       (JTH - 2018/12/05, HDFFV-10629)
 
 
-    Java Library:
-    ----------------
-    -
-
     Fortran
     --------
     - Fixed issue with Fortran not returning h5o_info_t field values
@@ -487,30 +474,6 @@ Bug Fixes since HDF5-1.10.4 release
 
       (MSB, 2018/12/04, HDFFV-10511)
 
-
-    Tools
-    -----
-    -
-
-    High-Level APIs:
-    ------
-    -
-
-    Fortran High-Level APIs:
-    ------
-    -
-
-    Documentation
-    -------------
-    -
-
-    F90 APIs
-    --------
-    -
-
-    C++ APIs
-    --------
-    -
 
     Testing
     -------
