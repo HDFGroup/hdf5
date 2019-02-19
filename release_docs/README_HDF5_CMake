@@ -1,0 +1,23 @@
+This tar file contains 
+
+    build-unix.sh       script to build HDF5 with CMake on unix machines
+    build-unix-hpc.sh   script to build HDF5 with CMake on unix machines and run
+                        tests with batch scripts (sbatch).
+    CTestScript.cmake   
+    HDF5config.cmake    CMake scripts for building HDF5
+    HDF5options.cmake
+    hdf5-1.10.5-pre1    HDF5 1.10.5-pre1 source
+    SZip.tar.gz         source for building SZIP
+    ZLib.tar.gz         source for building ZLIB
+
+For more information about building HDF5 with CMake, see USING_HDF5_CMake.txt in
+hdf5-1.10.5-pre1/release_docs, or 
+https://portal.hdfgroup.org/display/support/Building+HDF5+with+CMake.
+
+For more information about building HDF5 with CMake on HPC machines, including 
+cross compiling on Cray XC40, see README_HPC in hdf5-1.10.5-pre1/release_docs.
+
+
+
+
+
