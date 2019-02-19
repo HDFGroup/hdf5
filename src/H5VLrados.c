@@ -366,13 +366,36 @@ hbool_t ioctx_init_g = FALSE;
 static int
 H5VL_rados_write_full(rados_ioctx_t io, const char *oid, const char *buf, size_t len)
 {
-    int ret;
+    int ret = 0;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
 
+#ifdef OLD_RADOS_CALLS
     if((ret = rados_write_full(io, oid, buf, len)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't write metadata to object: %s", strerror(-ret))
+#else
+{
+    rados_write_op_t write_op;
+    hbool_t write_op_init = FALSE;
+
+    /* Create write op */
+    if(NULL == (write_op = rados_create_write_op()))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create write operation")
+    write_op_init = TRUE;
+
+    /* Add the write full operation (returns void) */
+    rados_write_op_write_full(write_op, buf, len);
+
+    /* Execute write operation */
+    if((ret = rados_write_op_operate(write_op, io, oid, NULL, LIBRADOS_OPERATION_NOFLAG)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't perform write operation: %s", strerror(-ret))
+
+    /* clean up */
+    if(write_op_init)
+        rados_release_write_op(write_op);
+}
+#endif
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_rados_write_full() */
