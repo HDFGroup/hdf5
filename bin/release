@@ -59,17 +59,9 @@ for compressing the resulting tar archive (if none are given then
     zip		-- convert all text files to DOS style and form a zip file for Windows use.
     cmake-tgz   -- create a tar file using the gzip default level with a build-unix.sh 
                    command file and all other CMake files needed to build HDF5 source
-                   using CMake on unix machines.
+                   using CMake on unix machines, including HPC machines.
     cmake-zip   -- convert all text files to DOS style and create a zip file inluding cmake
                    scripts and .bat files to build HDF5 source using CMake on Windows. 
-    hpc-cmake-tgz  
-                -- create a tar file using the gzip default level with a build-unix.sh 
-                   command file and all other CMake files needed to build HDF5 source
-                   using CMake on unix machines, with HDF5options.cmake files for serial
-                   and parallel builds on machines requiring batch jobs to run tests.
-                   The default is for parallel build, with serial only build by changing
-                   the HDF5options.cmake symlink to ser-HDF5options.cmake.  More 
-                   information is available in the README_HPC file.
     doc         -- produce the latest doc tree in addition to the archive.
 
 An md5 checksum is produced for each archive created and stored in the md5 file.
@@ -279,12 +271,14 @@ tar2cmakezip()
 # 3. add SZIP.tar.gz, ZLib.tar.gz and cmake files to top level directory.
 # 4. create gzipped tar file with these contents:
 #        build-unix.sh          script
+#        build-unix-hpc.sh      script
 #        hdf5-<version>         source code directory extracted from tar file
 #        CTestScript.cmake      cmake file copied from <hdf5 source code>/config/cmake/scripts
 #        HDF5config.cmake       cmake file copied from <hdf5 source code>/config/cmake/scripts
 #        HDF5options.cmake      cmake file copied from <hdf5 source code>/config/cmake/scripts
 #        SZip.tar.gz            copied from /mnt/scr1/pre-release/hdf5/CMake
 #        ZLib.tar.gz            copied from /mnt/scr1/pre-release/hdf5/CMake
+#        README_HDF5_CMake      copied from <hdf5 source code>/release_docs
 
 
 # Parameters:
@@ -322,8 +316,9 @@ tar2cmaketgz()
     fi
 
 
-    # step 2: add build-unix.sh script
+    # step 2: add build-unix.sh and build-unix-hpc.sh scripts
     (cd $cmgztmpsubdir; echo "ctest -S HDF5config.cmake,BUILD_GENERATOR=Unix -C Release -V -O hdf5.log" > build-unix.sh; chmod 755 build-unix.sh)
+    (cd $cmgztmpsubdir; echo "ctest -S HDF5config.cmake,HPC=sbatch,MPI=true -C Release -V -O hdf5.log" > build-unix-hpc.sh; chmod 755 build-unix-hpc.sh)
 
     # step 3: add SZIP.tar.gz, ZLib.tar.gz and cmake files
     cp /mnt/scr1/pre-release/hdf5/CMake/SZip.tar.gz $cmgztmpsubdir
@@ -332,94 +327,8 @@ tar2cmaketgz()
     cp $cmgztmpsubdir/$version/config/cmake/scripts/CTestScript.cmake $cmgztmpsubdir
     cp $cmgztmpsubdir/$version/config/cmake/scripts/HDF5config.cmake $cmgztmpsubdir
     cp $cmgztmpsubdir/$version/config/cmake/scripts/HDF5options.cmake $cmgztmpsubdir
+    cp $cmgztmpsubdir/$version/release_docs/README_HDF5_CMake $cmgztmpsubdir
     tar czf $DEST/CMake-$HDF5_VERS.tar.gz -C $cmgztmpdir . || exit 1 
-                 
-    # cleanup
-    rm -rf $cmgztmpdir
-}
-
-# Function name: tar2hpccmaketgz
-# Convert the release tarball to a gzipped tarfile with files to run CMake build
-# and HDF5options.cmake files for parallel or serial only builds where build
-# tests are run on compute nodes using batch scripts.
-#
-# Programmer: Larry Knox
-# Creation date: 2019-01-28
-#
-# Modifications
-#
-# Steps:
-# 1. untar the tarball in a temporary directory;
-#    Note: do this in a temporary directory to avoid changing
-#    the original source directory which may be around.
-# 2. add build-unix.sh script.
-# 3. add SZIP.tar.gz, ZLib.tar.gz and cmake files to top level directory.
-# 4. create gzipped tar file with these contents:
-#        build-unix.sh          script
-#        hdf5-<version>         source code directory extracted from tar file
-#        CTestScript.cmake      cmake file copied from <hdf5 source code>/config/cmake/scripts
-#        HDF5config.cmake       cmake file copied from <hdf5 source code>/config/cmake/scripts
-#        HDF5options.cmake      cmake file copied from <hdf5 source code>/config/cmake/scripts
-#        SZip.tar.gz            copied from /mnt/scr1/pre-release/hdf5/CMake
-#        ZLib.tar.gz            copied from /mnt/scr1/pre-release/hdf5/CMake
-#
-# 5. For HPC-CMake tgz file the following are also needed in the top-level directory:
-#        README_HPC                 copied from release_docs
-#        ser-HDF5options.cmake      copied from <hdf5 source code>/config/cmake/scripts/HPC
-#        par-HDF5options.cmake      copied from <hdf5 source code>/config/cmake/scripts/HPC
-#        HDF5options.cmake          symlink to par-HDF5options.cmake
-#
-
-# Parameters:
-# $1 version
-# $2 release tarball
-# $3 output zipball file name
-#
-# Returns 0 if successful; 1 otherwise
-#
- # need function to create another temporary directory, extract the
-            # $tmpdir/$HDF5_VERS.tar into it, create build-unix.sh,
-            # add CTestScript.cmake, HDF5config.cmake, SZIP.tar.gz
-            # ZLib.tar.gz, HDF5 examples, and then tar.gz it.
-tar2hpccmaketgz()
-{
-    if [ $# -ne 3 ]; then
-	echo "usage: tar2hpccmaketgz <tarfilename> <tgzfilename>"
-	return 1
-    fi
-    cmgztmpdir=/tmp/cmgztmpdir$$
-    cmgztmpsubdir=$cmgztmpdir/HPC-CMake-$HDF5_VERS
-    mkdir -p $cmgztmpsubdir
-    version=$1
-    tarfile=$2
-    tgzfile=$3
-
-    # step 1: untar tarball in cmgztmpdir
-    (cd $cmgztmpsubdir; tar xf -) < $tarfile
-    # sanity check
-    if [ ! -d $cmgztmpsubdir/$version ]; then
-	echo "untar did not create $cmgztmpsubdir/$version source dir"
-	# cleanup
-	rm -rf $cmgztmpdir
-	return 1
-    fi
-
-
-    # step 2: add build-unix.sh script
-    (cd $cmgztmpsubdir; echo "ctest -S HDF5config.cmake,BUILD_GENERATOR=Unix -C Release -V -O hdf5.log" > build-unix.sh; chmod 755 build-unix.sh)
-
-    # step 3: add SZIP.tar.gz, ZLib.tar.gz and cmake files
-    cp /mnt/scr1/pre-release/hdf5/CMake/SZip.tar.gz $cmgztmpsubdir
-    cp /mnt/scr1/pre-release/hdf5/CMake/ZLib.tar.gz $cmgztmpsubdir
-    cp /mnt/scr1/pre-release/hdf5/CMake/HDF5Examples-1.12.4-Source.tar.gz $cmgztmpsubdir
-    cp $cmgztmpsubdir/$version/config/cmake/scripts/CTestScript.cmake $cmgztmpsubdir
-    cp $cmgztmpsubdir/$version/config/cmake/scripts/HDF5config.cmake $cmgztmpsubdir
-
-    cp $cmgztmpsubdir/$version/release_docs/README_HPC $cmgztmpsubdir
-    cp $cmgztmpsubdir/$version/config/cmake/scripts/HPC/ser-HDF5options.cmake $cmgztmpsubdir
-    cp $cmgztmpsubdir/$version/config/cmake/scripts/HPC/par-HDF5options.cmake $cmgztmpsubdir
-    (cd $cmgztmpsubdir; ln -s par-HDF5options.cmake HDF5options.cmake)
-    tar czf $DEST/HPC-CMake-$HDF5_VERS.tar.gz -C $cmgztmpdir . || exit 1 
                  
     # cleanup
     rm -rf $cmgztmpdir
@@ -608,11 +517,6 @@ for comp in $methods; do
 	    test "$verbose" && echo "   Creating CMake tar.gz file..." 1>&2
 	    tar2cmaketgz $HDF5_VERS $tmpdir/$HDF5_VERS.tar $DEST/CMake-$HDF5_VERS.tar.gz 1>&2
 	    (cd $DEST; md5sum CMake-$HDF5_VERS.tar.gz >> $MD5file) 
-            ;;
-        hpc-cmake-tgz)
-	    test "$verbose" && echo "   Creating HPC-CMake tar.gz file..." 1>&2
-	    tar2hpccmaketgz $HDF5_VERS $tmpdir/$HDF5_VERS.tar $DEST/HPC-CMake-$HDF5_VERS.tar.gz 1>&2
-	    (cd $DEST; md5sum HPC-CMake-$HDF5_VERS.tar.gz >> $MD5file) 
             ;;
 	bzip2)
 	    test "$verbose" && echo "   Running bzip2..." 1>&2
