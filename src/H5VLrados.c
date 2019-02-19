@@ -1965,7 +1965,11 @@ H5VL_rados_group_open_helper(H5VL_rados_file_t *file, uint64_t oid,
     grp->gcpl_id = FAIL;
     grp->gapl_id = FAIL;
 
-#if 1 /* fancy new read-op-based code */
+#ifdef OLD_RADOS_CALLS
+    /* Read internal metadata size from group */
+    if((ret = rados_stat(ioctx_g, grp->obj.oid, &gcpl_len, &pmtime)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, NULL, "can't read metadata size from group: %s", strerror(-ret))
+#else
 {
     rados_read_op_t read_op;
     hbool_t read_op_init = FALSE;
@@ -1989,12 +1993,6 @@ H5VL_rados_group_open_helper(H5VL_rados_file_t *file, uint64_t oid,
     if(read_op_init)
         rados_release_read_op(read_op);
 }
-#endif
-
-#if 0 /* old code */
-    /* Read internal metadata size from group */
-    if((ret = rados_stat(ioctx_g, grp->obj.oid, &gcpl_len, &pmtime)) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, NULL, "can't read metadata size from group: %s", strerror(-ret))
 #endif
 
     /* Check for metadata not found */
@@ -2774,7 +2772,7 @@ H5VL_rados_dataset_open(void *_item,
     uint64_t type_len = 0;
     uint64_t space_len = 0;
     uint64_t dcpl_len = 0;
-    time_t pmtime;
+    time_t pmtime = 0;
     uint8_t dinfo_buf_static[H5VL_RADOS_DINFO_BUF_SIZE];
     uint8_t *dinfo_buf_dyn = NULL;
     uint8_t *dinfo_buf = dinfo_buf_static;
@@ -2832,9 +2830,36 @@ H5VL_rados_dataset_open(void *_item,
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "can't encode string oid")
         } /* end else */
 
+#ifdef OLD_RADOS_CALLS
         /* Read internal metadata size from dataset */
         if((ret = rados_stat(ioctx_g, dset->obj.oid, &md_len, &pmtime)) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTDECODE, NULL, "can't read metadata size from group: %s", strerror(-ret))
+#else
+{
+        rados_read_op_t read_op;
+        hbool_t read_op_init = FALSE;
+        int prval;
+
+        /* Create read op */
+        if(NULL == (read_op = rados_create_read_op()))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "can't create read operation")
+        read_op_init = TRUE;
+
+        /* Add the get stats operation (returns void) */
+        rados_read_op_stat(read_op, &md_len, &pmtime, &prval);
+
+        /* Execute read operation */
+        if((ret = rados_read_op_operate(read_op, ioctx_g, dset->obj.oid, LIBRADOS_OPERATION_NOFLAG)) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "can't perform read operation: %s", strerror(-ret))
+        if(0 < prval)
+            HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, NULL, "stats not found for object")
+
+        /* clean up */
+        if(read_op_init)
+            rados_release_read_op(read_op);
+}
+#endif
+
 
         /* Check for metadata not found */
         if(md_len == (uint64_t)0)
