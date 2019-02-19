@@ -462,6 +462,8 @@
 ./release_docs/INSTALL_Warnings.txt
 ./release_docs/INSTALL_Windows.txt
 ./release_docs/RELEASE.txt
+./release_docs/README_HDF5_CMake
+./release_docs/README_HPC
 ./release_docs/USING_HDF5_CMake.txt
 ./release_docs/USING_HDF5_VS.txt
 
