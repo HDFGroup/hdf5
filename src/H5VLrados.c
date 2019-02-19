@@ -348,6 +348,36 @@ rados_ioctx_t ioctx_g;
 hbool_t ioctx_init_g = FALSE;
 
 
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_rados_write_full
+ *
+ * Purpose:     Recreates rados_write_full(). We are trying to use all
+ *              read_op calls and this lets us do that without duplicating
+ *              all the RADOS calls.
+ *
+ * Return:      Success:        0
+ *              Failure:        -11
+ *
+ * Programmer:  Dana Robinson
+ *              February, 2019
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5VL_rados_write_full(rados_ioctx_t io, const char *oid, const char *buf, size_t len)
+{
+    int ret;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if((ret = rados_write_full(io, oid, buf, len)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't write metadata to object: %s", strerror(-ret))
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_rados_write_full() */
+
+
 /* Create a RADOS string oid given the file name and binary oid */
 static herr_t
 H5VL_rados_oid_create_string(const H5VL_rados_file_t *file, uint64_t bin_oid,
@@ -1272,7 +1302,7 @@ H5VL_rados_write_max_oid(H5VL_rados_file_t *file)
 
         UINT64ENCODE(p, file->max_oid)
 
-        if((ret = rados_write_full(ioctx_g, file->glob_md_oid, (const char *)wbuf, (size_t)8)) < 0)
+        if((ret = H5VL_rados_write_full(ioctx_g, file->glob_md_oid, (const char *)wbuf, (size_t)8)) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't write metadata to group: %s", strerror(-ret))
         file->max_oid_dirty = FALSE;
     } /* end if */
@@ -1822,7 +1852,7 @@ H5VL_rados_group_create_helper(H5VL_rados_file_t *file, hid_t gcpl_id,
             HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, NULL, "can't serialize gcpl")
 
         /* Write internal metadata to group */
-        if((ret = rados_write_full(ioctx_g, grp->obj.oid, gcpl_buf, gcpl_size)) < 0)
+        if((ret = H5VL_rados_write_full(ioctx_g, grp->obj.oid, gcpl_buf, gcpl_size)) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "can't write metadata to group: %s", strerror(-ret))
 
         /* Mark max OID as dirty */
@@ -2700,7 +2730,7 @@ H5VL_rados_dataset_create(void *_item,
             HGOTO_ERROR(H5E_DATASET, H5E_CANTENCODE, NULL, "can't serialize dcpl")
 
         /* Write internal metadata to dataset */
-        if((ret = rados_write_full(ioctx_g, dset->obj.oid, (const char *)md_buf, md_size)) < 0)
+        if((ret = H5VL_rados_write_full(ioctx_g, dset->obj.oid, (const char *)md_buf, md_size)) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "can't write metadata to dataset: %s", strerror(-ret))
 
         /* Mark max OID as dirty */
