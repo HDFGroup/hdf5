@@ -100,7 +100,7 @@ main(void)
 
 
     /* Test Setup */
-    puts("Testing the metadata accumulator");
+    HDputs("Testing the metadata accumulator");
 
     /* File access property list */
     h5_reset();
@@ -152,7 +152,7 @@ main(void)
 
     if(nerrors)
         goto error;
-    puts("All metadata accumulator tests passed.");
+    HDputs("All metadata accumulator tests passed.");
     h5_cleanup(FILENAME, fapl);
 
     return 0;
@@ -160,7 +160,7 @@ main(void)
 error: 
     if(api_ctx_pushed) H5CX_pop();
 
-    puts("*** TESTS FAILED ***");
+    HDputs("*** TESTS FAILED ***");
     return 1;
 } /* end main() */
 

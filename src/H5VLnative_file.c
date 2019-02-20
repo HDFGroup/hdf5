@@ -755,7 +755,7 @@ H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR
         /* H5Fget_dset_no_attrs_hint */
         case H5VL_NATIVE_FILE_GET_MIN_DSET_OHDR_FLAG:
             {
-                hbool_t *minimize = va_arg(arguments, hbool_t *);
+                hbool_t *minimize = HDva_arg(arguments, hbool_t *);
                 *minimize = H5F_GET_MIN_DSET_OHDR(f);
                 break;
             }
@@ -763,7 +763,7 @@ H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR
         /* H5Fset_dset_no_attrs_hint */
         case H5VL_NATIVE_FILE_SET_MIN_DSET_OHDR_FLAG:
             {
-                int minimize = va_arg(arguments, int);
+                int minimize = HDva_arg(arguments, int);
                 if(H5F_set_min_dset_ohdr(f, (hbool_t)minimize) < 0)
                     HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "cannot set file's dataset object header minimization flag")
                 break;

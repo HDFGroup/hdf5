@@ -37,7 +37,7 @@
           SDScompound.h5
           test.h5
   )
-  if (NOT "${last_test}" STREQUAL "")
+  if (last_test)
     set_tests_properties (f90_ex-clear-objects PROPERTIES DEPENDS ${last_test})
   endif ()
   set (last_test "f90_ex-clear-objects")
@@ -62,7 +62,7 @@
             SDScompound.h5
             test.h5
     )
-    if (NOT "${last_test}" STREQUAL "")
+    if (last_test)
       set_tests_properties (f90_ex-shared-clear-objects PROPERTIES DEPENDS ${last_test})
     endif ()
     set (last_test "f90_ex-shared-clear-objects")
@@ -83,7 +83,7 @@ foreach (example ${examples})
         -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
     )
   endif ()
-  if (NOT "${last_test}" STREQUAL "")
+  if (last_test)
     set_tests_properties (f90_ex_${example} PROPERTIES DEPENDS ${last_test})
   endif ()
   set (last_test "f90_ex_${example}")
@@ -102,7 +102,7 @@ foreach (example ${examples})
           -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
     endif ()
-    if (NOT "${last_test}" STREQUAL "")
+    if (last_test)
       set_tests_properties (f90_ex-shared_${example} PROPERTIES DEPENDS ${last_test})
     endif ()
     set (last_test "f90_ex-shared_${example}")
@@ -124,7 +124,7 @@ foreach (example ${F2003_examples})
         -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
     )
   endif ()
-  if (NOT "${last_test}" STREQUAL "")
+  if (last_test)
     set_tests_properties (f03_ex_${example} PROPERTIES DEPENDS ${last_test})
   endif ()
   set (last_test "f03_ex_${example}")
@@ -143,7 +143,7 @@ foreach (example ${F2003_examples})
           -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
     endif ()
-    if (NOT "${last_test}" STREQUAL "")
+    if (last_test)
       set_tests_properties (f03_ex-shared_${example} PROPERTIES DEPENDS ${last_test})
     endif ()
     set (last_test "f03_ex-shared_${example}")

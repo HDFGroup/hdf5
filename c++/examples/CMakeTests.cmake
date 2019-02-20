@@ -26,7 +26,7 @@
           SDSextendible.h5
           Select.h5
   )
-  if (NOT "${last_test}" STREQUAL "")
+  if (last_test)
     set_tests_properties (CPP_ex-clear-objects PROPERTIES DEPENDS ${last_test})
   endif ()
   set (last_test "CPP_ex-clear-objects")
@@ -46,7 +46,7 @@
           -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
     endif ()
-    if (NOT "${last_test}" STREQUAL "")
+    if (last_test)
       set_tests_properties (CPP_ex_${example} PROPERTIES DEPENDS ${last_test})
     endif ()
     set (last_test "CPP_ex_${example}")
@@ -66,7 +66,7 @@
           h5tutr_groups.h5
           h5tutr_subset.h5
   )
-  if (NOT "${last_test}" STREQUAL "")
+  if (last_test)
     set_tests_properties (CPP_ex_tutr-clear-objects PROPERTIES DEPENDS ${last_test})
   endif ()
   set (last_test "CPP_ex_tutr-clear-objects")
@@ -86,7 +86,7 @@
           -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
     endif ()
-    if (NOT "${last_test}" STREQUAL "")
+    if (last_test)
       set_tests_properties (CPP_ex_${example} PROPERTIES DEPENDS ${last_test})
     endif ()
     set (last_test "CPP_ex_${example}")

@@ -854,7 +854,7 @@ void test_unicode(void)
  */
 void cleanup_unicode(void)
 {
-    remove(FILENAME);
+    HDremove(FILENAME);
 }
 
 

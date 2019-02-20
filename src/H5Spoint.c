@@ -371,6 +371,144 @@ H5S__point_iter_next_block(H5S_sel_iter_t *iter)
 
 /*--------------------------------------------------------------------------
  NAME
+    H5S__point_get_seq_list
+ PURPOSE
+    Create a list of offsets & lengths for a selection
+ USAGE
+    herr_t H5S__point_get_seq_list(space,flags,iter,maxseq,maxelem,nseq,nelem,off,len)
+        H5S_t *space;           IN: Dataspace containing selection to use.
+        unsigned flags;         IN: Flags for extra information about operation
+        H5S_sel_iter_t *iter;   IN/OUT: Selection iterator describing last
+                                    position of interest in selection.
+        size_t maxseq;          IN: Maximum number of sequences to generate
+        size_t maxelem;         IN: Maximum number of elements to include in the
+                                    generated sequences
+        size_t *nseq;           OUT: Actual number of sequences generated
+        size_t *nelem;          OUT: Actual number of elements in sequences generated
+        hsize_t *off;           OUT: Array of offsets (in bytes)
+        size_t *len;            OUT: Array of lengths (in bytes)
+ RETURNS
+    Non-negative on success/Negative on failure.
+ DESCRIPTION
+    Use the selection in the dataspace to generate a list of byte offsets and
+    lengths for the region(s) selected.  Start/Restart from the position in the
+    ITER parameter.  The number of sequences generated is limited by the MAXSEQ
+    parameter and the number of sequences actually generated is stored in the
+    NSEQ parameter.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+static herr_t
+H5S__point_get_seq_list(const H5S_t *space, unsigned flags, H5S_sel_iter_t *iter,
+    size_t maxseq, size_t maxelem, size_t *nseq, size_t *nelem,
+    hsize_t *off, size_t *len)
+{
+    size_t io_left;             /* The number of bytes left in the selection */
+    size_t start_io_left;       /* The initial number of bytes left in the selection */
+    H5S_pnt_node_t *node;       /* Point node */
+    hsize_t dims[H5S_MAX_RANK];     /* Total size of memory buf */
+    int	ndims;                  /* Dimensionality of space*/
+    hsize_t	acc;            /* Coordinate accumulator */
+    hsize_t	loc;            /* Coordinate offset */
+    size_t      curr_seq;       /* Current sequence being operated on */
+    int         i;              /* Local index variable */
+    herr_t ret_value = SUCCEED; /* return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Check args */
+    HDassert(space);
+    HDassert(iter);
+    HDassert(maxseq > 0);
+    HDassert(maxelem > 0);
+    HDassert(nseq);
+    HDassert(nelem);
+    HDassert(off);
+    HDassert(len);
+
+    /* Choose the minimum number of bytes to sequence through */
+    H5_CHECK_OVERFLOW(iter->elmt_left, hsize_t, size_t);
+    start_io_left = io_left = (size_t)MIN(iter->elmt_left, maxelem);
+
+    /* Get the dataspace dimensions */
+    if((ndims = H5S_get_simple_extent_dims (space, dims, NULL)) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to retrieve dataspace dimensions")
+
+    /* Walk through the points in the selection, starting at the current */
+    /*  location in the iterator */
+    node = iter->u.pnt.curr;
+    curr_seq = 0;
+    while(NULL != node) {
+        /* Compute the offset of each selected point in the buffer */
+        for(i = ndims - 1, acc = iter->elmt_size, loc = 0; i >= 0; i--) {
+            loc += (hsize_t)((hssize_t)node->pnt[i] + space->select.offset[i]) * acc;
+            acc *= dims[i];
+        } /* end for */
+
+        /* Check if this is a later point in the selection */
+        if(curr_seq > 0) {
+            /* If a sorted sequence is requested, make certain we don't go backwards in the offset */
+            if((flags&H5S_GET_SEQ_LIST_SORTED) && loc<off[curr_seq-1])
+                break;
+
+            /* Check if this point extends the previous sequence */
+            /* (Unlikely, but possible) */
+            if(loc == (off[curr_seq - 1] + len[curr_seq - 1])) {
+                /* Extend the previous sequence */
+                len[curr_seq - 1] += iter->elmt_size;
+            } /* end if */
+            else {
+                /* Add a new sequence */
+                off[curr_seq] = loc;
+                len[curr_seq] = iter->elmt_size;
+
+                /* Increment sequence count */
+                curr_seq++;
+            } /* end else */
+        } /* end if */
+        else {
+            /* Add a new sequence */
+            off[curr_seq] = loc;
+            len[curr_seq] = iter->elmt_size;
+
+            /* Increment sequence count */
+            curr_seq++;
+        } /* end else */
+
+        /* Decrement number of elements left to process */
+        io_left--;
+
+        /* Move the iterator */
+        iter->u.pnt.curr = node->next;
+        iter->elmt_left--;
+
+        /* Check if we're finished with all sequences */
+        if(curr_seq == maxseq)
+            break;
+
+        /* Check if we're finished with all the elements available */
+        if(io_left == 0)
+            break;
+
+        /* Advance to the next point */
+        node = node->next;
+      } /* end while */
+
+    /* Set the number of sequences generated */
+    *nseq = curr_seq;
+
+    /* Set the number of elements used */
+    *nelem = start_io_left - io_left;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5S__point_get_seq_list() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
     H5S__point_iter_release
  PURPOSE
     Release point selection iterator information for a dataspace
@@ -525,7 +663,7 @@ H5S__point_release(H5S_t *space)
 {
     H5S_pnt_node_t *curr, *next;        /* Point selection nodes */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* Check args */
     HDassert(space);
@@ -640,6 +778,7 @@ H5S__point_copy(H5S_t *dst, const H5S_t *src, hbool_t H5_ATTR_UNUSED share_selec
 
     FUNC_ENTER_STATIC
 
+    /* Sanity checks */
     HDassert(src);
     HDassert(dst);
 
@@ -1650,142 +1789,4 @@ H5Sselect_elements(hid_t spaceid, H5S_seloper_t op, size_t num_elem,
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Sselect_elements() */
-
-
-/*--------------------------------------------------------------------------
- NAME
-    H5S__point_get_seq_list
- PURPOSE
-    Create a list of offsets & lengths for a selection
- USAGE
-    herr_t H5S__point_get_seq_list(space,flags,iter,maxseq,maxelem,nseq,nelem,off,len)
-        H5S_t *space;           IN: Dataspace containing selection to use.
-        unsigned flags;         IN: Flags for extra information about operation
-        H5S_sel_iter_t *iter;   IN/OUT: Selection iterator describing last
-                                    position of interest in selection.
-        size_t maxseq;          IN: Maximum number of sequences to generate
-        size_t maxelem;         IN: Maximum number of elements to include in the
-                                    generated sequences
-        size_t *nseq;           OUT: Actual number of sequences generated
-        size_t *nelem;          OUT: Actual number of elements in sequences generated
-        hsize_t *off;           OUT: Array of offsets
-        size_t *len;            OUT: Array of lengths
- RETURNS
-    Non-negative on success/Negative on failure.
- DESCRIPTION
-    Use the selection in the dataspace to generate a list of byte offsets and
-    lengths for the region(s) selected.  Start/Restart from the position in the
-    ITER parameter.  The number of sequences generated is limited by the MAXSEQ
-    parameter and the number of sequences actually generated is stored in the
-    NSEQ parameter.
- GLOBAL VARIABLES
- COMMENTS, BUGS, ASSUMPTIONS
- EXAMPLES
- REVISION LOG
---------------------------------------------------------------------------*/
-static herr_t
-H5S__point_get_seq_list(const H5S_t *space, unsigned flags, H5S_sel_iter_t *iter,
-    size_t maxseq, size_t maxelem, size_t *nseq, size_t *nelem,
-    hsize_t *off, size_t *len)
-{
-    size_t io_left;             /* The number of bytes left in the selection */
-    size_t start_io_left;       /* The initial number of bytes left in the selection */
-    H5S_pnt_node_t *node;       /* Point node */
-    hsize_t dims[H5S_MAX_RANK];     /* Total size of memory buf */
-    int	ndims;                  /* Dimensionality of space*/
-    hsize_t	acc;            /* Coordinate accumulator */
-    hsize_t	loc;            /* Coordinate offset */
-    size_t      curr_seq;       /* Current sequence being operated on */
-    int         i;              /* Local index variable */
-    herr_t ret_value=SUCCEED;      /* return value */
-
-    FUNC_ENTER_STATIC
-
-    /* Check args */
-    HDassert(space);
-    HDassert(iter);
-    HDassert(maxseq > 0);
-    HDassert(maxelem > 0);
-    HDassert(nseq);
-    HDassert(nelem);
-    HDassert(off);
-    HDassert(len);
-
-    /* Choose the minimum number of bytes to sequence through */
-    H5_CHECK_OVERFLOW(iter->elmt_left, hsize_t, size_t);
-    start_io_left = io_left = (size_t)MIN(iter->elmt_left, maxelem);
-
-    /* Get the dataspace dimensions */
-    if((ndims = H5S_get_simple_extent_dims (space, dims, NULL)) < 0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to retrieve dataspace dimensions")
-
-    /* Walk through the points in the selection, starting at the current */
-    /*  location in the iterator */
-    node = iter->u.pnt.curr;
-    curr_seq = 0;
-    while(NULL != node) {
-        /* Compute the offset of each selected point in the buffer */
-        for(i = ndims - 1, acc = iter->elmt_size, loc = 0; i >= 0; i--) {
-            loc += (hsize_t)((hssize_t)node->pnt[i] + space->select.offset[i]) * acc;
-            acc *= dims[i];
-        } /* end for */
-
-        /* Check if this is a later point in the selection */
-        if(curr_seq>0) {
-            /* If a sorted sequence is requested, make certain we don't go backwards in the offset */
-            if((flags&H5S_GET_SEQ_LIST_SORTED) && loc<off[curr_seq-1])
-                break;
-
-            /* Check if this point extends the previous sequence */
-            /* (Unlikely, but possible) */
-            if(loc==(off[curr_seq-1]+len[curr_seq-1])) {
-                /* Extend the previous sequence */
-                len[curr_seq-1]+=iter->elmt_size;
-            } /* end if */
-            else {
-                /* Add a new sequence */
-                off[curr_seq]=loc;
-                len[curr_seq]=iter->elmt_size;
-
-                /* Increment sequence count */
-                curr_seq++;
-            } /* end else */
-        } /* end if */
-        else {
-            /* Add a new sequence */
-            off[curr_seq]=loc;
-            len[curr_seq]=iter->elmt_size;
-
-            /* Increment sequence count */
-            curr_seq++;
-        } /* end else */
-
-        /* Decrement number of elements left to process */
-        io_left--;
-
-        /* Move the iterator */
-        iter->u.pnt.curr=node->next;
-        iter->elmt_left--;
-
-        /* Check if we're finished with all sequences */
-        if(curr_seq==maxseq)
-            break;
-
-        /* Check if we're finished with all the elements available */
-        if(io_left==0)
-            break;
-
-        /* Advance to the next point */
-        node=node->next;
-      } /* end while */
-
-    /* Set the number of sequences generated */
-    *nseq=curr_seq;
-
-    /* Set the number of elements used */
-    *nelem=start_io_left-io_left;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5S__point_get_seq_list() */
 

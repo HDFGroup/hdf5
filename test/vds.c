@@ -378,7 +378,7 @@ test_api_get_ex_dcpl(test_api_config_t config, hid_t fapl, hid_t dcpl,
             TEST_ERROR
         if(config == TEST_API_REOPEN_FILE) {
             if(oinfo.meta_size.obj.heap_size != exp_meta_size) {
-                printf("VDS metadata size: %llu Expected: %llu\n", (long long unsigned)oinfo.meta_size.obj.heap_size, (long long unsigned)exp_meta_size);
+                HDprintf("VDS metadata size: %llu Expected: %llu\n", (long long unsigned)oinfo.meta_size.obj.heap_size, (long long unsigned)exp_meta_size);
                 TEST_ERROR
             }
         }
@@ -11619,7 +11619,7 @@ main(void)
     for(test_api_config = (int)TEST_API_BASIC; test_api_config < (int)TEST_API_NTESTS; test_api_config++)
         nerrors += test_api((test_api_config_t)test_api_config, fapl);
     for(bit_config = 0; bit_config < TEST_IO_NTESTS; bit_config++) {
-        printf("Config: %s%s%s\n", bit_config & TEST_IO_CLOSE_SRC ? "closed source dataset, " : "", bit_config & TEST_IO_DIFFERENT_FILE ? "different source file" : "same source file", bit_config & TEST_IO_REOPEN_VIRT ? ", reopen virtual file" : "");
+        HDprintf("Config: %s%s%s\n", bit_config & TEST_IO_CLOSE_SRC ? "closed source dataset, " : "", bit_config & TEST_IO_DIFFERENT_FILE ? "different source file" : "same source file", bit_config & TEST_IO_REOPEN_VIRT ? ", reopen virtual file" : "");
         nerrors += test_basic_io(bit_config, fapl);
         nerrors += test_vds_prefix(bit_config, fapl);
         nerrors += test_unlim(bit_config, fapl);
@@ -11634,14 +11634,14 @@ main(void)
 
     if(nerrors)
         goto error;
-    printf("All virtual dataset tests passed.\n");
+    HDprintf("All virtual dataset tests passed.\n");
     h5_cleanup(FILENAME, fapl);
 
     return EXIT_SUCCESS;
 
 error:
     nerrors = MAX(1, nerrors);
-    printf("***** %d VIRTUAL DATASET TEST%s FAILED! *****\n",
+    HDprintf("***** %d VIRTUAL DATASET TEST%s FAILED! *****\n",
             nerrors, 1 == nerrors ? "" : "S");
     return EXIT_FAILURE;
 } /* end main() */

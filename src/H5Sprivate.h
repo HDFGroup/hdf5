@@ -58,7 +58,7 @@ typedef struct H5S_hyper_dim_t {
 
 /* Point selection iteration container */
 typedef struct {
-    H5S_pnt_node_t *curr;   /* Pointer to next node to output */
+    H5S_pnt_node_t *curr;       /* Pointer to next node to output */
 } H5S_point_iter_t;
 
 /* Hyperslab selection iteration container */
@@ -286,9 +286,6 @@ H5_DLL herr_t H5S_hyper_add_span_element(H5S_t *space, unsigned rank,
     const hsize_t *coords);
 H5_DLL herr_t H5S_hyper_reset_scratch(H5S_t *space);
 H5_DLL herr_t H5S_hyper_convert(H5S_t *space);
-#ifdef LATER
-H5_DLL htri_t H5S_hyper_intersect (H5S_t *space1, H5S_t *space2);
-#endif /* LATER */
 H5_DLL htri_t H5S_hyper_intersect_block(H5S_t *space, const hsize_t *start, const hsize_t *end);
 H5_DLL herr_t H5S_hyper_adjust_s(H5S_t *space, const hssize_t *offset);
 H5_DLL htri_t H5S_hyper_normalize_offset(H5S_t *space, hssize_t *old_offset);
@@ -304,7 +301,8 @@ H5_DLL hsize_t H5S_hyper_get_first_inc_block(const H5S_t *space,
     hsize_t clip_size, hbool_t *partial);
 
 /* Operations on selection iterators */
-H5_DLL herr_t H5S_select_iter_init(H5S_sel_iter_t *iter, const H5S_t *space, size_t elmt_size);
+H5_DLL herr_t H5S_select_iter_init(H5S_sel_iter_t *iter, const H5S_t *space,
+    size_t elmt_size);
 H5_DLL herr_t H5S_select_iter_coords(const H5S_sel_iter_t *sel_iter, hsize_t *coords);
 H5_DLL hsize_t H5S_select_iter_nelmts(const H5S_sel_iter_t *sel_iter);
 H5_DLL herr_t H5S_select_iter_next(H5S_sel_iter_t *sel_iter, size_t nelem);

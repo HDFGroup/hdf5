@@ -252,7 +252,7 @@ H5PB_print_stats(const H5PB_t *page_buf)
 
     HDassert(page_buf);
 
-    printf("PAGE BUFFER STATISTICS:\n");
+    HDprintf("PAGE BUFFER STATISTICS:\n");
 
     HDprintf("******* METADATA\n");
     HDprintf("\t Total Accesses: %u\n", page_buf->accesses[0]);
