@@ -183,7 +183,7 @@ test_vlstrings_basic(void)
 
     /* Count the actual number of bytes used by the strings */
     for(i=0,str_used=0; i<SPACE1_DIM1; i++)
-        str_used+=HDstrlen(wdata[i])+1;
+        str_used += HDstrlen(wdata[i])+1;
 
     /* Compare against the strings actually written */
     VERIFY(size,(hsize_t)str_used,"H5Dvlen_get_buf_size");
@@ -198,7 +198,7 @@ test_vlstrings_basic(void)
     /* Compare data read in */
     for(i = 0; i < SPACE1_DIM1; i++) {
         if(HDstrlen(wdata[i]) != HDstrlen(rdata[i])) {
-            TestErrPrintf("VL data length don't match!, strlen(wdata[%d])=%d, strlen(rdata[%d])=%d\n",(int)i,(int)strlen(wdata[i]),(int)i,(int)strlen(rdata[i]));
+            TestErrPrintf("VL data length don't match!, strlen(wdata[%d])=%d, strlen(rdata[%d])=%d\n",(int)i,(int)strlen(wdata[i]),(int)i,(int)HDstrlen(rdata[i]));
             continue;
         } /* end if */
         if(HDstrcmp(wdata[i], rdata[i]) != 0 ) {
@@ -300,7 +300,7 @@ test_vlstrings_special(void)
     /* Compare data read in */
     for(i = 0; i < SPACE1_DIM1; i++) {
         if(HDstrlen(wdata[i]) != HDstrlen(rdata[i])) {
-            TestErrPrintf("VL data length don't match!, strlen(wdata[%d])=%d, strlen(rdata[%d])=%d\n",(int)i,(int)strlen(wdata[i]),(int)i,(int)strlen(rdata[i]));
+            TestErrPrintf("VL data length don't match!, strlen(wdata[%d])=%d, strlen(rdata[%d])=%d\n",(int)i,(int)strlen(wdata[i]),(int)i,(int)HDstrlen(rdata[i]));
             continue;
         } /* end if */
         if((wdata[i] == NULL && rdata[i] != NULL) || (rdata[i] == NULL && wdata[i] != NULL)) {
@@ -527,7 +527,7 @@ test_compact_vlstring(void)
     /* Compare data read in */
     for(i = 0; i < SPACE1_DIM1; i++) {
         if(HDstrlen(wdata[i]) != HDstrlen(rdata[i])) {
-            TestErrPrintf("VL data length don't match!, strlen(wdata[%d])=%d, strlen(rdata[%d])=%d\n",(int)i,(int)strlen(wdata[i]),(int)i,(int)strlen(rdata[i]));
+            TestErrPrintf("VL data length don't match!, strlen(wdata[%d])=%d, strlen(rdata[%d])=%d\n",(int)i,(int)strlen(wdata[i]),(int)i,(int)HDstrlen(rdata[i]));
             continue;
         } /* end if */
         if(HDstrcmp(wdata[i], rdata[i]) != 0) {
@@ -802,33 +802,33 @@ static void test_vl_rewrite(void)
 
     /* Create in file 1 */
     for(i=0; i<REWRITE_NDATASETS; i++) {
-        sprintf(name, "/set_%d", i);
+        HDsprintf(name, "/set_%d", i);
         write_scalar_dset(file1, type, space, name, name);
     }
 
     /* Effectively copy data from file 1 to 2 */
     for(i=0; i<REWRITE_NDATASETS; i++) {
-        sprintf(name, "/set_%d", i);
+        HDsprintf(name, "/set_%d", i);
         read_scalar_dset(file1, type, space, name, name);
         write_scalar_dset(file2, type, space, name, name);
     }
 
     /* Read back from file 2 */
     for(i = 0; i < REWRITE_NDATASETS; i++) {
-        sprintf(name, "/set_%d", i);
+        HDsprintf(name, "/set_%d", i);
         read_scalar_dset(file2, type, space, name, name);
     } /* end for */
 
     /* Remove from file 2. */
     for(i = 0; i < REWRITE_NDATASETS; i++) {
-        sprintf(name, "/set_%d", i);
+        HDsprintf(name, "/set_%d", i);
         ret = H5Ldelete(file2, name, H5P_DEFAULT);
         CHECK(ret, FAIL, "H5Ldelete");
     } /* end for */
 
     /* Effectively copy from file 1 to file 2 */
     for(i = 0; i < REWRITE_NDATASETS; i++) {
-        sprintf(name, "/set_%d", i);
+        HDsprintf(name, "/set_%d", i);
         read_scalar_dset(file1, type, space, name, name);
         write_scalar_dset(file2, type, space, name, name);
     } /* end for */

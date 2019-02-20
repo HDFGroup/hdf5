@@ -412,8 +412,8 @@ test_core(void)
         for(j = 0; j < CORE_DSET_DIM2; j++)
             if(*pr++ != *pw++) {
                 H5_FAILED();
-                printf("    Read different values than written in data set.\n");
-                printf("    At index %d,%d\n", i, j);
+                HDprintf("    Read different values than written in data set.\n");
+                HDprintf("    At index %d,%d\n", i, j);
                 TEST_ERROR;
             } /* end if */
 
@@ -480,8 +480,8 @@ test_core(void)
         for(j = 0; j < CORE_DSET_DIM2; j++)
             if(*pw++ != *pr++) {
                 H5_FAILED();
-                printf("    Read different values than written in data set.\n");
-                printf("    At index %d,%d\n", i, j);
+                HDprintf("    Read different values than written in data set.\n");
+                HDprintf("    At index %d,%d\n", i, j);
                 TEST_ERROR;
             } /* end if */
 
@@ -597,7 +597,7 @@ test_direct(void)
     if(file<0) {
         H5Pclose (fapl);
         SKIPPED();
-        printf("  Probably the file system doesn't support Direct I/O\n");
+        HDprintf("  Probably the file system doesn't support Direct I/O\n");
         return 0;
     }
 
@@ -674,8 +674,8 @@ test_direct(void)
         for(j = 0; j < DSET1_DIM2; j++)
             if(*p1++ != *p2++) {
                 H5_FAILED();
-                printf("    Read different values than written in data set 1.\n");
-                printf("    At index %d,%d\n", i, j);
+                HDprintf("    Read different values than written in data set 1.\n");
+                HDprintf("    At index %d,%d\n", i, j);
                 TEST_ERROR;
               } /* end if */
 
@@ -706,8 +706,8 @@ test_direct(void)
     for(i = 0; i < DSET2_DIM; i++)
         if(wdata2[i] != rdata2[i]) {
             H5_FAILED();
-            printf("    Read different values than written in data set 2.\n");
-            printf("    At index %d\n", i);
+            HDprintf("    Read different values than written in data set 2.\n");
+            HDprintf("    At index %d\n", i);
             TEST_ERROR;
         } /* end if */
 
@@ -1199,19 +1199,19 @@ test_multi(void)
     memb_map[H5FD_MEM_BTREE] = H5FD_MEM_BTREE;
     memb_map[H5FD_MEM_GHEAP] = H5FD_MEM_GHEAP;
 
-    sprintf(sv[H5FD_MEM_SUPER], "%%s-%c.h5", 's');
+    HDsprintf(sv[H5FD_MEM_SUPER], "%%s-%c.h5", 's');
     memb_name[H5FD_MEM_SUPER] = sv[H5FD_MEM_SUPER];
     memb_addr[H5FD_MEM_SUPER] = 0;
 
-    sprintf(sv[H5FD_MEM_BTREE],  "%%s-%c.h5", 'b');
+    HDsprintf(sv[H5FD_MEM_BTREE],  "%%s-%c.h5", 'b');
     memb_name[H5FD_MEM_BTREE] = sv[H5FD_MEM_BTREE];
     memb_addr[H5FD_MEM_BTREE] = HADDR_MAX/4;
 
-    sprintf(sv[H5FD_MEM_DRAW], "%%s-%c.h5", 'r');
+    HDsprintf(sv[H5FD_MEM_DRAW], "%%s-%c.h5", 'r');
     memb_name[H5FD_MEM_DRAW] = sv[H5FD_MEM_DRAW];
     memb_addr[H5FD_MEM_DRAW] = HADDR_MAX/2;
 
-    sprintf(sv[H5FD_MEM_GHEAP], "%%s-%c.h5", 'g');
+    HDsprintf(sv[H5FD_MEM_GHEAP], "%%s-%c.h5", 'g');
     memb_name[H5FD_MEM_GHEAP] = sv[H5FD_MEM_GHEAP];
     memb_addr[H5FD_MEM_GHEAP] = (HADDR_MAX/4)*3;
 
@@ -1431,12 +1431,12 @@ test_multi_compat(void)
     memb_map[H5FD_MEM_DRAW] = H5FD_MEM_DRAW;
 
     memb_fapl[H5FD_MEM_SUPER] = H5P_DEFAULT;
-    sprintf(sv[H5FD_MEM_SUPER], "%%s-%c.h5", 's');
+    HDsprintf(sv[H5FD_MEM_SUPER], "%%s-%c.h5", 's');
     memb_name[H5FD_MEM_SUPER] = sv[H5FD_MEM_SUPER];
     memb_addr[H5FD_MEM_SUPER] = 0;
 
     memb_fapl[H5FD_MEM_DRAW] = H5P_DEFAULT;
-    sprintf(sv[H5FD_MEM_DRAW], "%%s-%c.h5", 'r');
+    HDsprintf(sv[H5FD_MEM_DRAW], "%%s-%c.h5", 'r');
     memb_name[H5FD_MEM_DRAW] = sv[H5FD_MEM_DRAW];
     memb_addr[H5FD_MEM_DRAW] = HADDR_MAX/2;
 
@@ -1446,17 +1446,19 @@ test_multi_compat(void)
     h5_fixname(FILENAME[9], fapl, newname, sizeof newname);
 
     /* Make copy for the data file in the build directory, to protect the
-     * original file in the source directory */
-    sprintf(filename_s, "%s-%c.h5", MULTI_COMPAT_BASENAME, 's');
-    sprintf(newname_s, "%s-%c.h5", FILENAME[9], 's');
+     * original file in the source directory
+     */
+    HDsprintf(filename_s, "%s-%c.h5", MULTI_COMPAT_BASENAME, 's');
+    HDsprintf(newname_s, "%s-%c.h5", FILENAME[9], 's');
     h5_make_local_copy(filename_s, newname_s);
 
-    sprintf(filename_r, "%s-%c.h5", MULTI_COMPAT_BASENAME, 'r');
-    sprintf(newname_r, "%s-%c.h5", FILENAME[9], 'r');
+    HDsprintf(filename_r, "%s-%c.h5", MULTI_COMPAT_BASENAME, 'r');
+    HDsprintf(newname_r, "%s-%c.h5", FILENAME[9], 'r');
     h5_make_local_copy(filename_r, newname_r);
 
     /* Reopen the file for read only.  Verify 1.8 library can open file
-     * created with 1.6 library. */
+     * created with 1.6 library.
+     */
     if((file=H5Fopen(newname, H5F_ACC_RDONLY, fapl)) < 0)
         TEST_ERROR;
 

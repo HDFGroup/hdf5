@@ -94,7 +94,7 @@ H5F_get_mpi_handle(const H5F_t *f, MPI_File **f_handle)
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    assert(f && f->shared);
+    HDassert(f && f->shared);
 
     /* Dispatch to driver */
     if ((ret_value = H5FD_get_vfd_handle(f->shared->lf, fapl, (void **)f_handle)) < 0)

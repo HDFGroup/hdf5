@@ -2771,7 +2771,7 @@ H5T__conv_enum(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
         case H5T_CONV_FREE:
 #ifdef H5T_DEBUG
             if (H5DEBUG(T)) {
-                fprintf(H5DEBUG(T), "      Using %s mapping function%s\n",
+                HDfprintf(H5DEBUG(T), "      Using %s mapping function%s\n",
                         priv->length?"O(1)":"O(log N)",
                         priv->length?"":", where N is the number of enum members");
             }

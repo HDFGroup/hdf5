@@ -704,7 +704,7 @@ H5E_printf_stack(H5E_t *estack, const char *file, const char *func, unsigned lin
  */
 
     /* Start the variable-argument parsing */
-    va_start(ap, fmt);
+    HDva_start(ap, fmt);
     va_started = TRUE;
 
 #ifdef H5_HAVE_VASPRINTF
@@ -720,8 +720,8 @@ H5E_printf_stack(H5E_t *estack, const char *file, const char *func, unsigned lin
     /* If the description doesn't fit into the initial buffer size, allocate more space and try again */
     while((desc_len = HDvsnprintf(tmp, (size_t)tmp_len, fmt, ap)) > (tmp_len - 1)) {
         /* shutdown & restart the va_list */
-        va_end(ap);
-        va_start(ap, fmt);
+        HDva_end(ap);
+        HDva_start(ap, fmt);
 
         /* Release the previous description, it's too small */
         H5MM_xfree(tmp);
@@ -739,7 +739,7 @@ H5E_printf_stack(H5E_t *estack, const char *file, const char *func, unsigned lin
 
 done:
     if(va_started)
-        va_end(ap);
+        HDva_end(ap);
 #ifdef H5_HAVE_VASPRINTF
     /* Memory was allocated with HDvasprintf so it needs to be freed
      * with HDfree
