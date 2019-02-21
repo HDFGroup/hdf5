@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#SBATCH -C knl,quad, cache
+#SBATCH -C knl,quad,cache
 #SBATCH --nodes=1
 #SBATCH -t 00:30:00
 #SBATCH --mail-type=BEGIN,END,FAIL
