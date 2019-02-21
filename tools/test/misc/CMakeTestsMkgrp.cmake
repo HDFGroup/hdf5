@@ -73,7 +73,7 @@
     )
     set_tests_properties (H5MKGRP-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
     if (HDF5_ENABLE_USING_MEMCHECKER)
-      if (NOT "${last_test}" STREQUAL "")
+      if (last_test)
         set_tests_properties (H5MKGRP-${resultfile} PROPERTIES DEPENDS ${last_test})
       endif ()
     else (HDF5_ENABLE_USING_MEMCHECKER)
@@ -174,7 +174,7 @@
                 h5mkgrp_nested_mult_lp.out.err
     )
     set_tests_properties (H5MKGRP-clearall-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
-    if (NOT "${last_test}" STREQUAL "")
+    if (last_test)
       set_tests_properties (H5MKGRP-clearall-objects PROPERTIES DEPENDS ${last_test})
     endif ()
     set (last_test "H5MKGRP-clearall-objects")

@@ -26,7 +26,7 @@ add_test (NAME MPI_TEST-clear-testphdf5-objects
 set_tests_properties (MPI_TEST-clear-testphdf5-objects PROPERTIES FIXTURES_SETUP par_clear_testphdf5)
 
 set (SKIP_testphdf5 "")
-#if (${HDF5_OPENMPI_VERSION_SKIP})
+#if (HDF5_OPENMPI_VERSION_SKIP)
 #  set (SKIP_testphdf5 "${SKIP_testphdf5};-x;ecdsetw")
 #endif ()
 
@@ -36,12 +36,12 @@ set_tests_properties (MPI_TEST_testphdf5 PROPERTIES
     ENVIRONMENT "HDF5_ALARM_SECONDS=3600;srcdir=${HDF5_TEST_PAR_BINARY_DIR}"
     WORKING_DIRECTORY ${HDF5_TEST_PAR_BINARY_DIR}
 )
-if (NOT "${last_test}" STREQUAL "")
+if (last_test)
   set_tests_properties (MPI_TEST_testphdf5 PROPERTIES DEPENDS ${last_test})
 endif ()
 set (last_test "MPI_TEST_testphdf5")
 
-#if (${HDF5_OPENMPI_VERSION_SKIP})
+#if (HDF5_OPENMPI_VERSION_SKIP)
 #  list (REMOVE_ITEM H5P_TESTS t_shapesame)
 #endif ()
 
@@ -74,17 +74,17 @@ add_test (NAME MPI_TEST-clear-objects
 )
 set_tests_properties (MPI_TEST-clear-objects PROPERTIES FIXTURES_SETUP par_clear_objects)
 
-foreach (testp ${H5P_TESTS})
-  add_test (NAME MPI_TEST_${testp} COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_PREFLAGS} $<TARGET_FILE:${testp}> ${MPIEXEC_POSTFLAGS})
-  set_tests_properties (MPI_TEST_${testp} PROPERTIES
+foreach (h5_testp ${H5P_TESTS})
+  add_test (NAME MPI_TEST_${h5_testp} COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_PREFLAGS} $<TARGET_FILE:${h5_testp}> ${MPIEXEC_POSTFLAGS})
+  set_tests_properties (MPI_TEST_${h5_testp} PROPERTIES
       FIXTURES_REQUIRED par_clear_objects
       ENVIRONMENT "HDF5_ALARM_SECONDS=3600;srcdir=${HDF5_TEST_PAR_BINARY_DIR}"
       WORKING_DIRECTORY ${HDF5_TEST_PAR_BINARY_DIR}
   )
-  if (NOT "${last_test}" STREQUAL "")
-    set_tests_properties (MPI_TEST_${testp} PROPERTIES DEPENDS ${last_test})
+  if (last_test)
+    set_tests_properties (MPI_TEST_${h5_testp} PROPERTIES DEPENDS ${last_test})
   endif ()
-  set (last_test "MPI_TEST_${testp}")
+  set (last_test "MPI_TEST_${h5_testp}")
 endforeach ()
 
 # The t_pflush1 test is hard-coded to fail.

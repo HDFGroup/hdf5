@@ -71,7 +71,7 @@
           vds-simpleIO.h5
           vds-eiger.h5
   )
-  if (NOT "${last_test}" STREQUAL "")
+  if (last_test)
     set_tests_properties (EXAMPLES-clear-objects PROPERTIES DEPENDS ${last_test})
   endif ()
   set (last_test "EXAMPLES-clear-objects")
@@ -91,7 +91,7 @@
           -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
     endif ()
-    if (NOT "${last_test}" STREQUAL "")
+    if (last_test)
       set_tests_properties (EXAMPLES-${example} PROPERTIES DEPENDS ${last_test})
     endif ()
     set (last_test "EXAMPLES-${example}")
@@ -150,7 +150,7 @@
         WORKING_DIRECTORY
             ${PROJECT_BINARY_DIR}/H5EX-shared
     )
-    if (NOT "${last_test}" STREQUAL "")
+    if (last_test)
       set_tests_properties (EXAMPLES-shared-clear-objects PROPERTIES DEPENDS ${last_test})
     endif ()
     set (last_test "EXAMPLES-shared-clear-objects")
@@ -171,7 +171,7 @@
         )
       endif ()
       set_tests_properties (EXAMPLES-shared-${example} PROPERTIES WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/H5EX-shared)
-      if (NOT "${last_test}" STREQUAL "")
+      if (last_test)
         set_tests_properties (EXAMPLES-shared-${example} PROPERTIES DEPENDS ${last_test})
       endif ()
       set (last_test "EXAMPLES-shared-${example}")
@@ -194,7 +194,7 @@
           -P "${HDF_RESOURCES_EXT_DIR}/grepTest.cmake"
       )
     endif ()
-    if (NOT "${last_test}" STREQUAL "")
+    if (last_test)
       set_tests_properties (MPI_TEST_EXAMPLES-ph5example PROPERTIES DEPENDS ${last_test})
     endif ()
     set (last_test "MPI_TEST_EXAMPLES-ph5example")
@@ -214,7 +214,7 @@
         )
       endif ()
       set_tests_properties (MPI_TEST_EXAMPLES-shared-ph5example PROPERTIES WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/H5EX-shared)
-      if (NOT "${last_test}" STREQUAL "")
+      if (last_test)
         set_tests_properties (MPI_TEST_EXAMPLES-shared-ph5example PROPERTIES DEPENDS ${last_test})
       endif ()
       set (last_test "MPI_TEST_EXAMPLES-shared-ph5example")
