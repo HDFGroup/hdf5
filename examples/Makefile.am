@@ -64,7 +64,7 @@ INSTALL_FILES = h5_write.c h5_read.c h5_extend_write.c h5_chunk_read.c   \
           h5rados_group_open.c h5rados_dset_create.c \
           h5rados_dset_open.c h5rados_dset_write.c h5rados_dset_read.c \
           h5rados_dset_wpartial.c h5rados_dset_rpartial.c \
-	  h5rados_example.h run_rados_examples.sh
+          h5rados_example.h run_rados_examples.sh run_mobject_examples.sh
 
 
 

@@ -16,6 +16,8 @@ made to keep the MANIFEST sane, etc.
 * BUILDING *
 ************
 
+RADOS:
+
 The code for the RADOS VOL connector lies entirely in
 the H5VLrados* files in the src directory. The connector
 is built as a static part of the library.
@@ -30,6 +32,21 @@ LDFLAGS="-L/path/to/librados -lrados"
 YMMV, but the autotools do no librados hunting so you may
 need to specify things it can't figure out on its own.
 
+MOBJECT:
+
+You'll need to be able to find the headers and libs for
+mobject-store. You do not need the RADOS libraries.
+
+On jelly (THG), this will work:
+
+export SPACK_ROOT=/mnt/hdf/jsoumagne/spack
+source $SPACK_ROOT/share/spack/setup-env.sh
+module load GCC
+source <(spack module tcl loads --dependencies mobject)
+
+You will also need to define HDF5_USE_MOBJECT in CPPFLAGS.
+This switches between the RADOS and mobject headers.
+
 
 ***********
 * TESTING *
@@ -38,6 +55,8 @@ need to specify things it can't figure out on its own.
 There are no tests for the RADOS VOL connector in the main
 library, so running 'make check' won't provide much
 information.
+
+RADOS:
 
 Once the library has been built, you can run some smoke
 checks by running 'make install' and going to the
@@ -48,3 +67,21 @@ and run all the example scripts in a sane order.
 
 *** YOU WILL NEED TO COPY YOUR ceph.conf FILE
 *** INTO THIS DIRECTORY FIRST!!!
+
+In case it's not obvious, you'll need an active Ceph
+cluster to run the tests :)
+
+MOBJECT:
+
+Same as above, only the script's name is run_mobject_examples.sh.
+
+You can probably ignore any sdskv_put warnings as long as the
+examples pass.
+
+The tests are hard-coded to use /tmp/mobject-clust-test.gid and
+this can be changed in h5rados_example.h.
+
+So to start mobject-server:
+
+mobject-server-daemon na+sm /tmp/mobject-cluster-test.gid
+
