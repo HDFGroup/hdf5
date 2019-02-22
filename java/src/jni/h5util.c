@@ -978,7 +978,7 @@ h5str_sprintf
 
         case H5T_REFERENCE:
         {
-            if (h5str_is_zero(cptr, 99)) {
+            if (h5str_is_zero(cptr, typeSize)) {
                 if (!h5str_append(out_str, "NULL"))
                     CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
                 break;
