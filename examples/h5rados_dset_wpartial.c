@@ -28,7 +28,7 @@ int main(int argc, char *argv[]) {
 
     if(rados_create(&cluster, NULL) < 0)
         ERROR;
-    if(rados_conf_read_file(cluster, "ceph.conf") < 0)
+    if(rados_conf_read_file(cluster, CEPH_CONFIG_FILE) < 0)
         ERROR;
 
     /* Initialize VOL */
