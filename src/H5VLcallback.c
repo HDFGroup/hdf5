@@ -348,14 +348,14 @@ H5VL_copy_connector_info(const H5VL_class_t *connector, void **dst_info,
     /* Check for actual source info */
     if(src_info) {
         /* Allow the connector to copy or do it ourselves */
-        if(connector->info_copy) {
-            if(NULL == (new_connector_info = (connector->info_copy)(src_info)))
+        if(connector->info_cls.copy) {
+            if(NULL == (new_connector_info = (connector->info_cls.copy)(src_info)))
                 HGOTO_ERROR(H5E_VOL, H5E_CANTCOPY, FAIL, "connector info copy callback failed")
         } /* end if */
-        else if(connector->info_size > 0) {
-            if(NULL == (new_connector_info = H5MM_malloc(connector->info_size)))
+        else if(connector->info_cls.size > 0) {
+            if(NULL == (new_connector_info = H5MM_malloc(connector->info_cls.size)))
                 HGOTO_ERROR(H5E_VOL, H5E_CANTALLOC, FAIL, "connector info allocation failed")
-            HDmemcpy(new_connector_info, src_info, connector->info_size);
+            HDmemcpy(new_connector_info, src_info, connector->info_cls.size);
         } /* end else-if */
         else
             HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "no way to copy connector info")
@@ -444,13 +444,13 @@ H5VL_cmp_connector_info(const H5VL_class_t *connector, int *cmp_value,
      * if there is a a callback, otherwise just compare the info objects as
      * memory buffers
      */
-    if(connector->info_cmp) {
-        if((connector->info_cmp)(cmp_value, info1, info2) < 0)
+    if(connector->info_cls.cmp) {
+        if((connector->info_cls.cmp)(cmp_value, info1, info2) < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTCOMPARE, FAIL, "can't compare connector info")
     } /* end if */
     else {
-        HDassert(connector->info_size > 0);
-        *cmp_value = HDmemcmp(info1, info2, connector->info_size);
+        HDassert(connector->info_cls.size > 0);
+        *cmp_value = HDmemcmp(info1, info2, connector->info_cls.size);
     } /* end else */
 
 done:
@@ -518,8 +518,8 @@ H5VL_free_connector_info(const H5VL_class_t *connector, void *info)
     /* Only free info object, if it's non-NULL */
     if(info) {
         /* Allow the connector to free info or do it ourselves */
-        if(connector->info_free) {
-            if((connector->info_free)(info) < 0)
+        if(connector->info_cls.free) {
+            if((connector->info_cls.free)(info) < 0)
                 HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "connector info free request failed")
         } /* end if */
         else
@@ -590,8 +590,8 @@ H5VLconnector_info_to_str(const void *info, hid_t connector_id, char **str)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID")
 
         /* Allow the connector to serialize info */
-        if(cls->info_to_str) {
-            if((cls->info_to_str)(info, str) < 0)
+        if(cls->info_cls.to_str) {
+            if((cls->info_cls.to_str)(info, str) < 0)
                 HGOTO_ERROR(H5E_VOL, H5E_CANTSERIALIZE, FAIL, "can't serialize connector info")
         } /* end if */
         else
@@ -632,8 +632,8 @@ H5VLconnector_str_to_info(const char *str, hid_t connector_id, void **info)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID")
 
         /* Allow the connector to deserialize info */
-        if(cls->str_to_info) {
-            if((cls->str_to_info)(str, info) < 0)
+        if(cls->info_cls.from_str) {
+            if((cls->info_cls.from_str)(str, info) < 0)
                 HGOTO_ERROR(H5E_VOL, H5E_CANTUNSERIALIZE, FAIL, "can't deserialize connector info")
         } /* end if */
         else
@@ -673,8 +673,8 @@ H5VLget_object(void *obj, hid_t connector_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a VOL connector ID")
 
     /* Check for 'get_object' callback in connector */
-    if(cls->get_object)
-        ret_value = (cls->get_object)(obj);
+    if(cls->wrap_cls.get_object)
+        ret_value = (cls->wrap_cls.get_object)(obj);
     else
         ret_value = obj;
 
@@ -706,12 +706,12 @@ H5VL_get_wrap_ctx(const H5VL_class_t *connector, void *obj, void **wrap_ctx)
     HDassert(wrap_ctx);
 
     /* Allow the connector to copy or do it ourselves */
-    if(connector->get_wrap_ctx) {
+    if(connector->wrap_cls.get_wrap_ctx) {
         /* Sanity check */
-        HDassert(connector->free_wrap_ctx);
+        HDassert(connector->wrap_cls.free_wrap_ctx);
 
         /* Invoke connector's callback */
-        if((connector->get_wrap_ctx)(obj, wrap_ctx) < 0)
+        if((connector->wrap_cls.get_wrap_ctx)(obj, wrap_ctx) < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "connector wrap context callback failed")
     } /* end if */
     else
@@ -777,7 +777,7 @@ H5VL_free_wrap_ctx(const H5VL_class_t *connector, void *wrap_ctx)
     /* Only free wrap context, if it's non-NULL */
     if(wrap_ctx) {
         /* Free the connector's object wrapping context */
-        if((connector->free_wrap_ctx)(wrap_ctx) < 0)
+        if((connector->wrap_cls.free_wrap_ctx)(wrap_ctx) < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "connector wrap context free request failed")
     } /* end if */
 
@@ -843,7 +843,7 @@ H5VL_wrap_object(const H5VL_class_t *connector, void *wrap_ctx, void *obj,
     /* Only wrap object if there's a wrap context */
     if(wrap_ctx) {
         /* Ask the connector to wrap the object */
-        if(NULL == (ret_value = (connector->wrap_object)(obj, obj_type, wrap_ctx)))
+        if(NULL == (ret_value = (connector->wrap_cls.wrap_object)(obj, obj_type, wrap_ctx)))
             HGOTO_ERROR(H5E_VOL, H5E_CANTGET, NULL, "can't wrap object")
     } /* end if */
     else

@@ -740,8 +740,8 @@ H5VL_object_data(const H5VL_object_t *vol_obj)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check for 'get_object' callback in connector */
-    if(vol_obj->connector->cls->get_object)
-        ret_value = (vol_obj->connector->cls->get_object)(vol_obj->data);
+    if(vol_obj->connector->cls->wrap_cls.get_object)
+        ret_value = (vol_obj->connector->cls->wrap_cls.get_object)(vol_obj->data);
     else
         ret_value = vol_obj->data;
 
@@ -933,15 +933,15 @@ H5VL_cmp_connector_cls(int *cmp_value, const H5VL_class_t *cls1, const H5VL_clas
     HDassert(cls1->version == cls2->version);
 
     /* Compare connector info */
-    if(cls1->info_size < cls2->info_size) {
+    if(cls1->info_cls.size < cls2->info_cls.size) {
         *cmp_value = -1;
         HGOTO_DONE(SUCCEED)
     } /* end if */
-    if(cls1->info_size > cls2->info_size) {
+    if(cls1->info_cls.size > cls2->info_cls.size) {
         *cmp_value = 1;
         HGOTO_DONE(SUCCEED)
     } /* end if */
-    HDassert(cls1->info_size == cls2->info_size);
+    HDassert(cls1->info_cls.size == cls2->info_cls.size);
 
     /* Set comparison value to 'equal' */
     *cmp_value = 0;
@@ -980,12 +980,12 @@ H5VL_set_vol_wrapper(void *obj, const H5VL_t *connector)
     /* Check for existing wrapping context */
     if(NULL == vol_wrap_ctx) {
         /* Check if the connector can create a wrap context */
-        if(connector->cls->get_wrap_ctx) {
+        if(connector->cls->wrap_cls.get_wrap_ctx) {
             /* Sanity check */
-            HDassert(connector->cls->free_wrap_ctx);
+            HDassert(connector->cls->wrap_cls.free_wrap_ctx);
 
             /* Get the wrap context from the connector */
-            if((connector->cls->get_wrap_ctx)(obj, &obj_wrap_ctx) < 0)
+            if((connector->cls->wrap_cls.get_wrap_ctx)(obj, &obj_wrap_ctx) < 0)
                 HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't retrieve VOL connector's object wrap context")
         } /* end if */
 
@@ -1048,7 +1048,7 @@ H5VL_reset_vol_wrapper(void)
         /* If there is a VOL connector object wrapping context, release it */
         if(vol_wrap_ctx->obj_wrap_ctx) {
             /* Release the VOL connector's object wrapping context */
-            if((*vol_wrap_ctx->connector->cls->free_wrap_ctx)(vol_wrap_ctx->obj_wrap_ctx) < 0)
+            if((*vol_wrap_ctx->connector->cls->wrap_cls.free_wrap_ctx)(vol_wrap_ctx->obj_wrap_ctx) < 0)
                 HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "unable to release connector's object wrapping context")
         } /* end if */
 
