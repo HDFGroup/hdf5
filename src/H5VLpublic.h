@@ -440,6 +440,7 @@ H5_DLL hid_t H5VLwrap_register(void *obj, H5I_type_t type);
 H5_DLL void *H5VLobject(hid_t obj_id);
 H5_DLL herr_t H5VLretrieve_lib_state(void **state);
 H5_DLL herr_t H5VLrestore_lib_state(const void *state);
+H5_DLL herr_t H5VLreset_lib_state(void);
 H5_DLL herr_t H5VLfree_lib_state(void *state);
 
 

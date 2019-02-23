@@ -1009,6 +1009,10 @@ H5VL_restore_lib_state(const void *state)
     /* Sanity checks */
     HDassert(state);
 
+    /* Push a new API context on the stack */
+    if(H5CX_push() < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't push API context")
+
     /* Restore the API context state */
     if(H5CX_restore_state((const H5CX_state_t *)state) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set API context state")
@@ -1019,9 +1023,48 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5VL_reset_lib_state
+ *
+ * Purpose:     Reset the state of the library, undoing affects of
+ *		H5VL_restore_lib_state.
+ *
+ * Note:        Currently just resets the API context state, but could be
+ *		expanded in the future.
+ *
+ * Note:	This routine must be called as a "pair" with
+ * 		H5VL_restore_lib_state.  It can be called before / after /
+ * 		independently of H5VL_free_lib_state.
+ *
+ * Return:      SUCCEED / FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *		Saturday, February 23, 2019
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_reset_lib_state(void)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Pop the API context off the stack */
+    if(H5CX_pop() < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't pop API context")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_reset_lib_state() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5VL_free_lib_state
  *
  * Purpose:     Free a library state.
+ *
+ * Note:	This routine must be called as a "pair" with
+ * 		H5VL_retrieve_lib_state.
  *
  * Return:      SUCCEED / FAIL
  *
