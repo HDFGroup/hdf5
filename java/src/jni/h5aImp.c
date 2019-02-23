@@ -1389,7 +1389,7 @@ Java_hdf_hdf5lib_H5_H5Aread_1reg_1ref
         H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Aread_reg_ref: buf length < 0");
     }
 
-    if (NULL == (ref_data = (hdset_reg_ref_t *) HDmalloc((size_t)n * sizeof(hdset_reg_ref_t))))
+    if (NULL == (ref_data = (hdset_reg_ref_t *) HDcalloc(1, (size_t)n * sizeof(hdset_reg_ref_t))))
         H5_JNI_FATAL_ERROR(ENVONLY, "H5Aread_reg_ref: failed to allocate read buffer");
 
     if ((status = H5Aread((hid_t)attr_id, (hid_t)mem_type_id, ref_data)) < 0)
