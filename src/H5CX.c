@@ -737,8 +737,9 @@ H5CX_retrieve_state(H5CX_state_t **api_state)
 
     /* Keep a reference to the current VOL wrapping context */
     (*api_state)->vol_wrap_ctx = (*head)->ctx.vol_wrap_ctx;
-    if(H5VL_inc_vol_wrapper((*api_state)->vol_wrap_ctx) < 0)
-        HGOTO_ERROR(H5E_CONTEXT, H5E_CANTINC, FAIL, "can't increment refcount on VOL wrapping context")
+    if(NULL != (*api_state)->vol_wrap_ctx)
+        if(H5VL_inc_vol_wrapper((*api_state)->vol_wrap_ctx) < 0)
+            HGOTO_ERROR(H5E_CONTEXT, H5E_CANTINC, FAIL, "can't increment refcount on VOL wrapping context")
 
 #ifdef H5_HAVE_PARALLEL
     /* Save parallel I/O settings */
