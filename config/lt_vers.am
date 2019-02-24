@@ -18,7 +18,7 @@
 ## files like Makefile.in.
 LT_VERS_INTERFACE = 104
 LT_VERS_REVISION = 0
-LT_VERS_AGE = 0
+LT_VERS_AGE = 1
 
 ## If the API changes *at all*, increment LT_VERS_INTERFACE and
 ## reset LT_VERS_REVISION to 0.

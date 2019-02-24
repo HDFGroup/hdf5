@@ -293,6 +293,7 @@ H5_DLLVAR hid_t H5E_NOIDS_g;         /* Out of IDs for group */
 #define H5E_CANTUNDEPEND     (H5OPEN H5E_CANTUNDEPEND_g)
 #define H5E_CANTNOTIFY       (H5OPEN H5E_CANTNOTIFY_g)
 #define H5E_LOGGING          (H5OPEN H5E_LOGGING_g)
+#define H5E_LOGFAIL          (H5OPEN H5E_LOGFAIL_g)
 #define H5E_CANTCORK         (H5OPEN H5E_CANTCORK_g)
 #define H5E_CANTUNCORK       (H5OPEN H5E_CANTUNCORK_g)
 H5_DLLVAR hid_t H5E_CANTFLUSH_g;     /* Unable to flush data from cache */
@@ -320,6 +321,7 @@ H5_DLLVAR hid_t H5E_CANTDEPEND_g;    /* Unable to create a flush dependency */
 H5_DLLVAR hid_t H5E_CANTUNDEPEND_g;  /* Unable to destroy a flush dependency */
 H5_DLLVAR hid_t H5E_CANTNOTIFY_g;    /* Unable to notify object about action */
 H5_DLLVAR hid_t H5E_LOGGING_g;       /* Failure in the cache logging framework */
+H5_DLLVAR hid_t H5E_LOGFAIL_g;       /* old H5E_LOGGING_g (maintained for binary compatibility) */
 H5_DLLVAR hid_t H5E_CANTCORK_g;      /* Unable to cork an object */
 H5_DLLVAR hid_t H5E_CANTUNCORK_g;    /* Unable to uncork an object */
 
