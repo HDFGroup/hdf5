@@ -819,7 +819,10 @@ H5CX_restore_state(const H5CX_state_t *api_state)
     (*head)->ctx.vol_wrap_ctx = api_state->vol_wrap_ctx;
 
     /* Restore the VOL connector info */
-    HDmemcpy(&(*head)->ctx.vol_connector_prop, &api_state->vol_connector_prop, sizeof(H5VL_connector_prop_t));
+    if(api_state->vol_connector_prop.connector_id) {
+        HDmemcpy(&(*head)->ctx.vol_connector_prop, &api_state->vol_connector_prop, sizeof(H5VL_connector_prop_t));
+        (*head)->ctx.vol_connector_prop_valid = TRUE;
+    } /* end if */
 
 #ifdef H5_HAVE_PARALLEL
     /* Restore parallel I/O settings */
