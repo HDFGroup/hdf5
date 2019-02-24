@@ -741,6 +741,34 @@ H5CX_retrieve_state(H5CX_state_t **api_state)
         if(H5VL_inc_vol_wrapper((*api_state)->vol_wrap_ctx) < 0)
             HGOTO_ERROR(H5E_CONTEXT, H5E_CANTINC, FAIL, "can't increment refcount on VOL wrapping context")
 
+    /* Keep a copy of the VOL connector property, if there is one */
+    if((*head)->ctx.vol_connector_prop_valid && (*head)->ctx.vol_connector_prop.connector_id > 0) {
+        /* Get the connector property */
+        HDmemcpy(&(*api_state)->vol_connector_prop, &(*head)->ctx.vol_connector_prop, sizeof(H5VL_connector_prop_t));
+
+        /* Check for actual VOL connector property */
+        if((*api_state)->vol_connector_prop.connector_id) {
+            /* Copy connector info, if it exists */
+            if((*api_state)->vol_connector_prop.connector_info) {
+                H5VL_class_t *connector;           /* Pointer to connector */
+                void *new_connector_info = NULL;    /* Copy of connector info */
+
+                /* Retrieve the connector for the ID */
+                if(NULL == (connector = (H5VL_class_t *)H5I_object((*api_state)->vol_connector_prop.connector_id)))
+                    HGOTO_ERROR(H5E_CONTEXT, H5E_BADTYPE, FAIL, "not a VOL connector ID")
+
+                /* Allocate and copy connector info */
+                if(H5VL_copy_connector_info(connector, &new_connector_info, (*api_state)->vol_connector_prop.connector_info) < 0)
+                    HGOTO_ERROR(H5E_CONTEXT, H5E_CANTCOPY, FAIL, "connector info copy failed")
+                (*api_state)->vol_connector_prop.connector_info = new_connector_info;
+            } /* end if */
+
+            /* Increment the refcount on the connector ID */
+            if(H5I_inc_ref((*api_state)->vol_connector_prop.connector_id, FALSE) < 0)
+                HGOTO_ERROR(H5E_CONTEXT, H5E_CANTINC, FAIL, "incrementing VOL connector ID failed")
+        } /* end if */
+    } /* end if */
+
 #ifdef H5_HAVE_PARALLEL
     /* Save parallel I/O settings */
     (*api_state)->coll_metadata_read = (*head)->ctx.coll_metadata_read;
@@ -790,6 +818,9 @@ H5CX_restore_state(const H5CX_state_t *api_state)
     /* Restore the VOL wrapper context */
     (*head)->ctx.vol_wrap_ctx = api_state->vol_wrap_ctx;
 
+    /* Restore the VOL connector info */
+    HDmemcpy(&(*head)->ctx.vol_connector_prop, &api_state->vol_connector_prop, sizeof(H5VL_connector_prop_t));
+
 #ifdef H5_HAVE_PARALLEL
     /* Restore parallel I/O settings */
     (*head)->ctx.coll_metadata_read = api_state->coll_metadata_read;
@@ -834,6 +865,26 @@ H5CX_free_state(H5CX_state_t *api_state)
     /* Release the VOL wrapper context */
     if(H5VL_dec_vol_wrapper(api_state->vol_wrap_ctx) < 0)
         HGOTO_ERROR(H5E_CONTEXT, H5E_CANTDEC, FAIL, "can't decrement refcount on VOL wrapping context")
+
+    /* Release the VOL connector property, if it was set */
+    if(api_state->vol_connector_prop.connector_id) {
+        /* Clean up any VOL connector info */
+        if(api_state->vol_connector_prop.connector_info) {
+            H5VL_class_t *connector;       /* Pointer to connector */
+
+            /* Retrieve the connector for the ID */
+            if(NULL == (connector = (H5VL_class_t *)H5I_object(api_state->vol_connector_prop.connector_id)))
+                HGOTO_ERROR(H5E_CONTEXT, H5E_BADTYPE, FAIL, "not a VOL connector ID")
+
+            /* Free the connector info */
+            if(H5VL_free_connector_info(connector, api_state->vol_connector_prop.connector_info) < 0)
+                HGOTO_ERROR(H5E_CONTEXT, H5E_CANTRELEASE, FAIL, "unable to release VOL connector info object")
+        } /* end if */
+
+        /* Decrement connector ID */
+        if(H5I_dec_ref(api_state->vol_connector_prop.connector_id) < 0)
+            HDONE_ERROR(H5E_CONTEXT, H5E_CANTDEC, FAIL, "can't close VOL connector ID")
+    } /* end if */
 
     /* Free the state */
     api_state = H5FL_FREE(H5CX_state_t, api_state);
