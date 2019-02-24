@@ -613,7 +613,8 @@ H5VLretrieve_lib_state(void **state)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_API(FAIL)
+    /* Must use this, to avoid modifying the API context stack in FUNC_ENTER */
+    FUNC_ENTER_API_NOINIT
 
     /* Check args */
     if(NULL == state)
@@ -624,7 +625,7 @@ H5VLretrieve_lib_state(void **state)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't retrieve library state")
 
 done:
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_API_NOINIT(ret_value)
 } /* H5VLretrieve_lib_state() */
 
 
