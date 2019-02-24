@@ -866,8 +866,9 @@ H5CX_free_state(H5CX_state_t *api_state)
             HGOTO_ERROR(H5E_CONTEXT, H5E_CANTDEC, FAIL, "can't decrement refcount on LAPL")
 
     /* Release the VOL wrapper context */
-    if(H5VL_dec_vol_wrapper(api_state->vol_wrap_ctx) < 0)
-        HGOTO_ERROR(H5E_CONTEXT, H5E_CANTDEC, FAIL, "can't decrement refcount on VOL wrapping context")
+    if(api_state->vol_wrap_ctx)
+        if(H5VL_dec_vol_wrapper(api_state->vol_wrap_ctx) < 0)
+            HGOTO_ERROR(H5E_CONTEXT, H5E_CANTDEC, FAIL, "can't decrement refcount on VOL wrapping context")
 
     /* Release the VOL connector property, if it was set */
     if(api_state->vol_connector_prop.connector_id) {
