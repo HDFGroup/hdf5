@@ -92,7 +92,7 @@ H5_DLL herr_t H5VL_free_object(H5VL_object_t *obj);
 H5_DLL herr_t H5VL_get_wrap_ctx(const H5VL_class_t *connector, void *obj,
     void **wrap_ctx);
 H5_DLL herr_t H5VL_free_wrap_ctx(const H5VL_class_t *connector, void *wrap_ctx);
-H5_DLL herr_t H5VL_set_vol_wrapper(void *obj, const H5VL_t *vol_connector);
+H5_DLL herr_t H5VL_set_vol_wrapper(void *obj, H5VL_t *vol_connector);
 H5_DLL herr_t H5VL_inc_vol_wrapper(void *vol_wrap_ctx);
 H5_DLL herr_t H5VL_dec_vol_wrapper(void *vol_wrap_ctx);
 H5_DLL herr_t H5VL_reset_vol_wrapper(void);

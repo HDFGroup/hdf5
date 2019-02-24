@@ -51,7 +51,7 @@
 /* Object wrapping context info */
 typedef struct H5VL_wrap_ctx_t {
     unsigned rc;                /* Ref. count for the # of times the context was set / reset */
-    const H5VL_t *connector;    /* VOL connector for "outermost" class to start wrap */
+    H5VL_t *connector;          /* VOL connector for "outermost" class to start wrap */
     void *obj_wrap_ctx;         /* "wrap context" for outermost connector */
 } H5VL_wrap_ctx_t;
 
@@ -68,6 +68,8 @@ static herr_t H5VL__free_cls(H5VL_class_t *cls);
 static void *H5VL__wrap_obj(void *obj, H5I_type_t obj_type);
 static H5VL_object_t *H5VL__new_vol_obj(H5I_type_t type, void *object,
     H5VL_t *vol_connector, hbool_t wrap_obj);
+static int64_t H5VL__conn_inc_rc(H5VL_t *connector);
+static int64_t H5VL__conn_dec_rc(H5VL_t *connector);
 static void *H5VL__object(hid_t id, H5I_type_t obj_type);
 static herr_t H5VL__free_vol_wrapper(H5VL_wrap_ctx_t *vol_wrap_ctx);
 
@@ -318,7 +320,7 @@ H5VL__new_vol_obj(H5I_type_t type, void *object, H5VL_t *vol_connector, hbool_t 
         new_vol_obj->data = object;
 
     /* Bump the reference count on the VOL connector */
-    vol_connector->nrefs++;
+    H5VL__conn_inc_rc(vol_connector);
 
     /* If this is a datatype, we have to hide the VOL object under the H5T_t pointer */
     if(H5I_DATATYPE == type) {
@@ -551,6 +553,76 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5VL__conn_inc_rc
+ *
+ * Purpose:     Wrapper to increment the ref. count on a connector.
+ *
+ * Return:      Current ref. count (can't fail)
+ *
+ * Programmer:  Quincey Koziol
+ *              February 23, 2019
+ *
+ *-------------------------------------------------------------------------
+ */
+static int64_t
+H5VL__conn_inc_rc(H5VL_t *connector)
+{
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Check arguments */
+    HDassert(connector);
+
+    /* Increment refcount for connector */
+    connector->nrefs++;
+
+    FUNC_LEAVE_NOAPI(connector->nrefs)
+} /* end H5VL__conn_inc_rc() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL__conn_dec_rc
+ *
+ * Purpose:     Wrapper to decrement the ref. count on a connector.
+ *
+ * Return:      Current ref. count (>=0) on success, <0 on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              February 23, 2019
+ *
+ *-------------------------------------------------------------------------
+ */
+static int64_t
+H5VL__conn_dec_rc(H5VL_t *connector)
+{
+    int64_t ret_value = -1;     /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Check arguments */
+    HDassert(connector);
+
+    /* Decrement refcount for connector */
+    connector->nrefs--;
+
+    /* Check for last reference */
+    if(0 == connector->nrefs) {
+        if(H5I_dec_ref(connector->id) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTDEC, FAIL, "unable to decrement ref count on VOL connector")
+        H5FL_FREE(H5VL_t, connector);
+
+        /* Set return value */
+        ret_value = 0;
+    } /* end if */
+    else
+        /* Set return value */
+        ret_value = connector->nrefs;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__conn_dec_rc() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5VL_free_object
  *
  * Purpose:     Wrapper to unregister an object ID with a VOL aux struct
@@ -563,20 +635,16 @@ done:
 herr_t
 H5VL_free_object(H5VL_object_t *vol_obj)
 {
-    herr_t ret_value = SUCCEED;
+    herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(SUCCEED)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check arguments */
     HDassert(vol_obj);
 
-    vol_obj->connector->nrefs --;
-
-    if(0 == vol_obj->connector->nrefs) {
-        if(H5I_dec_ref(vol_obj->connector->id) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTDEC, FAIL, "unable to decrement ref count on VOL connector")
-        vol_obj->connector = H5FL_FREE(H5VL_t, vol_obj->connector);
-    } /* end if */
+    /* Decrement refcount on connector */
+    if(H5VL__conn_dec_rc(vol_obj->connector) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTDEC, FAIL, "unable to decrement ref count on VOL connector")
 
     vol_obj = H5FL_FREE(H5VL_object_t, vol_obj);
 
@@ -1114,12 +1182,18 @@ H5VL__free_vol_wrapper(H5VL_wrap_ctx_t *vol_wrap_ctx)
     /* Sanity check */
     HDassert(vol_wrap_ctx);
     HDassert(0 == vol_wrap_ctx->rc);
+    HDassert(vol_wrap_ctx->connector);
+    HDassert(vol_wrap_ctx->connector->cls);
 
     /* If there is a VOL connector object wrapping context, release it */
     if(vol_wrap_ctx->obj_wrap_ctx)
         /* Release the VOL connector's object wrapping context */
         if((*vol_wrap_ctx->connector->cls->free_wrap_ctx)(vol_wrap_ctx->obj_wrap_ctx) < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "unable to release connector's object wrapping context")
+
+    /* Decrement refcount on connector */
+    if(H5VL__conn_dec_rc(vol_wrap_ctx->connector) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTDEC, FAIL, "unable to decrement ref count on VOL connector")
 
     /* Release object wrapping context */
     H5FL_FREE(H5VL_wrap_ctx_t, vol_wrap_ctx);
@@ -1139,7 +1213,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_set_vol_wrapper(void *obj, const H5VL_t *connector)
+H5VL_set_vol_wrapper(void *obj, H5VL_t *connector)
 {
     H5VL_wrap_ctx_t *vol_wrap_ctx = NULL;       /* Object wrapping context */
     void *obj_wrap_ctx = NULL;          /* VOL connector's wrapping context */
@@ -1171,8 +1245,11 @@ H5VL_set_vol_wrapper(void *obj, const H5VL_t *connector)
         if(NULL == (vol_wrap_ctx = H5FL_MALLOC(H5VL_wrap_ctx_t)))
             HGOTO_ERROR(H5E_VOL, H5E_CANTALLOC, FAIL, "can't allocate VOL wrap context")
 
+        /* Increment the outstanding objects that are using the connector */
+        H5VL__conn_inc_rc(connector);
+
         /* Set up VOL object wrapper context */
-        vol_wrap_ctx->rc = 1;;
+        vol_wrap_ctx->rc = 1;
         vol_wrap_ctx->connector = connector;
         vol_wrap_ctx->obj_wrap_ctx = obj_wrap_ctx;
     } /* end if */
@@ -1290,8 +1367,7 @@ H5VL_reset_vol_wrapper(void)
 
     /* Check for VOL object wrap context */
     if(NULL == vol_wrap_ctx)
-        goto done; // Tang
-        /* HGOTO_ERROR(H5E_VOL, H5E_BADVALUE, FAIL, "no VOL object wrap context?") */
+        HGOTO_ERROR(H5E_VOL, H5E_BADVALUE, FAIL, "no VOL object wrap context?")
 
     /* Decrement ref count on wrapping context */
     vol_wrap_ctx->rc--;
