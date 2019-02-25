@@ -5231,7 +5231,7 @@ H5P__facc_vol_cmp(const void *_info1, const void *_info2, size_t H5_ATTR_UNUSED 
     /* Use one of the classes (cls1) info comparison routines to compare the
      * info objects
      */
-    HDassert(cls1->info_cmp == cls2->info_cmp);
+    HDassert(cls1->info_cls.cmp == cls2->info_cls.cmp);
     status = H5VL_cmp_connector_info(cls1, &cmp_value, info1->connector_info, info2->connector_info);
     HDassert(status >= 0);
 
