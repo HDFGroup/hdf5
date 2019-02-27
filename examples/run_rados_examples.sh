@@ -3,17 +3,16 @@
 # Build RADOS examples.
 # Assumes RADOS can be found in the usual location.
 echo "Building RADOS examples"
-../../../bin/h5pcc -o h5rados_file_create h5rados_file_create.c -lrados
-../../../bin/h5pcc -o h5rados_file_open h5rados_file_open.c -lrados
-../../../bin/h5pcc -o h5rados_dset_create h5rados_dset_create.c -lrados
-../../../bin/h5pcc -o h5rados_dset_open h5rados_dset_open.c -lrados
-../../../bin/h5pcc -o h5rados_group_create h5rados_group_create.c -lrados
-../../../bin/h5pcc -o h5rados_group_open h5rados_group_open.c -lrados
-../../../bin/h5pcc -o h5rados_dset_write h5rados_dset_write.c -lrados
-../../../bin/h5pcc -o h5rados_dset_read h5rados_dset_read.c -lrados
-
-../../../bin/h5pcc -o h5rados_dset_rpartial h5rados_dset_rpartial.c -lrados
-../../../bin/h5pcc -o h5rados_dset_wpartial h5rados_dset_wpartial.c -lrados
+../../../bin/h5pcc -g -o h5rados_file_create h5rados_file_create.c -lrados
+../../../bin/h5pcc -g -o h5rados_file_open h5rados_file_open.c -lrados
+../../../bin/h5pcc -g -o h5rados_dset_create h5rados_dset_create.c -lrados
+../../../bin/h5pcc -g -o h5rados_dset_open h5rados_dset_open.c -lrados
+../../../bin/h5pcc -g -o h5rados_group_create h5rados_group_create.c -lrados
+../../../bin/h5pcc -g -o h5rados_group_open h5rados_group_open.c -lrados
+../../../bin/h5pcc -g -o h5rados_dset_write h5rados_dset_write.c -lrados
+../../../bin/h5pcc -g -o h5rados_dset_read h5rados_dset_read.c -lrados
+../../../bin/h5pcc -g -o h5rados_dset_rpartial h5rados_dset_rpartial.c -lrados
+../../../bin/h5pcc -g -o h5rados_dset_wpartial h5rados_dset_wpartial.c -lrados
 echo "DONE"
 echo
 
