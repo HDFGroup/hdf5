@@ -444,6 +444,7 @@ SUBROUTINE test_chunk_cache(cleanup, total_error)
   INTEGER(size_t) rdcc_nelmts
   INTEGER(size_t) rdcc_nbytes
   REAL :: rdcc_w0
+  LOGICAL :: minimize              ! Flag for minimized headers
 
   CALL h5_fixname_f(filename, fix_filename, H5P_DEFAULT_F, error)
   IF (error .NE. 0) THEN
@@ -647,6 +648,57 @@ SUBROUTINE test_chunk_cache(cleanup, total_error)
   CALL verify("H5Pget_chunk_cache_f", INT(nslots_3), INT(nslots_4), total_error)
   CALL verify("H5Pget_chunk_cache_f", INT(nbytes_2), INT(nbytes_4), total_error)
   CALL verify("H5Pget_chunk_cache_f", w0_3, w0_4, total_error)
+
+  ! Check that the dataset object header minimization hint
+  ! can be set and retrieved.
+
+  ! H5P version
+  ! Check the default value
+  minimize = .TRUE.
+  CALL h5pget_dset_no_attrs_hint_f(dcpl, minimize, error)
+  CALL check("h5pget_dset_no_attrs_hint_f",error,total_error)
+  if(minimize .neqv. .FALSE.) then
+    total_error = total_error + 1
+    write(*,*) "Default dataset minimize flag was incorrect (H5P)"
+  endif
+
+  ! Check setter
+  minimize = .TRUE.
+  CALL h5pset_dset_no_attrs_hint_f(dcpl, minimize, error)
+  CALL check("h5pset_dset_no_attrs_hint_f",error,total_error)
+
+  ! Check getter
+  minimize = .FALSE.
+  CALL h5pget_dset_no_attrs_hint_f(dcpl, minimize, error)
+  CALL check("h5pget_dset_no_attrs_hint_f",error,total_error)
+  if(minimize .neqv. .TRUE.) then
+    total_error = total_error + 1
+    write(*,*) "Unable to get correct dataset minimize flag (H5P)"
+  endif
+
+  ! H5F version
+  ! Check the default value
+  minimize = .TRUE.
+  CALL h5fget_dset_no_attrs_hint_f(fid, minimize, error)
+  CALL check("h5fget_dset_no_attrs_hint_f",error,total_error)
+  if(minimize .neqv. .FALSE.) then
+    total_error = total_error + 1
+    write(*,*) "Default dataset minimize flag was incorrect (H5F)"
+  endif
+
+  ! Check setter
+  minimize = .TRUE.
+  CALL h5fset_dset_no_attrs_hint_f(fid, minimize, error)
+  CALL check("h5fset_dset_no_attrs_hint_f",error,total_error)
+
+  ! Check getter
+  minimize = .FALSE.
+  CALL h5fget_dset_no_attrs_hint_f(fid, minimize, error)
+  CALL check("h5fget_dset_no_attrs_hint_f",error,total_error)
+  if(minimize .neqv. .TRUE.) then
+    total_error = total_error + 1
+    write(*,*) "Unable to get correct dataset minimize flag (H5F)"
+  endif
 
 ! Close
 

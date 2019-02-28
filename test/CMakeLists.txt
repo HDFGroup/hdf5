@@ -62,6 +62,7 @@ endif ()
 #################################################################################
 # If filter plugin tests can be tested
 #################################################################################
+if (BUILD_SHARED_LIBS)
   # make plugins dir
   file (MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/filter_plugin_dir1")
   file (MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/filter_plugin_dir2")
@@ -127,6 +128,7 @@ endif ()
           "${CMAKE_BINARY_DIR}/filter_plugin_dir2/$<TARGET_FILE_NAME:${HDF5_TEST_PLUGIN_TARGET}>"
     )
   endforeach ()
+endif ()
 
 #################################################################################
 #  Test program sources
@@ -197,6 +199,7 @@ set (H5_TESTS
     page_buffer
     dtypes
     dsets
+    chunk_info
     cmpd_dset
     filter_fail
     extend
@@ -339,6 +342,7 @@ set (H5_CHECK_TESTS
     atomic_reader
     links_env
     filenotclosed
+    del_many_dense_attrs
     flushrefresh
 )
 

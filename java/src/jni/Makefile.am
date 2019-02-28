@@ -34,7 +34,10 @@ libhdf5_java_la_LDFLAGS = -avoid-version -shared -export-dynamic -version-info $
 # Source files for the library
 libhdf5_java_la_SOURCES=exceptionImp.c h5Constants.c nativeData.c h5util.c h5Imp.c \
 	h5aImp.c h5dImp.c h5eImp.c h5fImp.c h5gImp.c h5iImp.c h5lImp.c h5oImp.c    \
-	h5pImp.c h5plImp.c h5rImp.c h5sImp.c h5tImp.c h5zImp.c
+	h5pImp.c h5pACPLImp.c h5pDAPLImp.c h5pDCPLImp.c h5pDXPLImp.c \
+	h5pFAPLImp.c h5pFCPLImp.c h5pGAPLImp.c h5pGCPLImp.c h5pLAPLImp.c h5pLCPLImp.c \
+	h5pOCPLImp.c h5pOCpyPLImp.c h5pStrCPLImp.c h5plImp.c h5rImp.c h5sImp.c h5tImp.c \
+	h5zImp.c
 
 # HDF5 Java (JNI) library depends on HDF5 Library.
 libhdf5_java_la_LIBADD=$(LIBHDF5)

@@ -47,6 +47,12 @@
       ${HDF5_TOOLS_DIR}/testfiles/tdset_idx.h5
   )
 
+  set (LIST_ERR_TEST_FILES
+      ${HDF5_TOOLS_DIR}/test/h5ls/errfiles/nosuchfile.err
+      ${HDF5_TOOLS_DIR}/test/h5ls/errfiles/textlinksrc-nodangle-1.err
+      ${HDF5_TOOLS_DIR}/test/h5ls/errfiles/tgroup-1.err
+  )
+
   set (LIST_OTHER_TEST_FILES
       ${HDF5_TOOLS_DIR}/testfiles/help-1.ls
       ${HDF5_TOOLS_DIR}/testfiles/help-2.ls
@@ -116,6 +122,10 @@
     get_filename_component(fname "${listfiles}" NAME)
     HDFTEST_COPY_FILE("${listfiles}" "${PROJECT_BINARY_DIR}/testfiles/${fname}" "h5ls_files")
   endforeach ()
+  foreach (listfiles ${LIST_ERR_TEST_FILES})
+    get_filename_component(fname "${listfiles}" NAME)
+    HDFTEST_COPY_FILE("${listfiles}" "${PROJECT_BINARY_DIR}/testfiles/${fname}" "h5ls_files")
+  endforeach ()
   add_custom_target(h5ls_files ALL COMMENT "Copying files needed by h5ls tests" DEPENDS ${h5ls_files_list})
 
 ##############################################################################
@@ -153,6 +163,42 @@
               -D "TEST_OUTPUT=${resultfile}.out"
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=${resultfile}.ls"
+              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+      )
+      set_tests_properties (H5LS-${resultfile} PROPERTIES DEPENDS H5LS-${resultfile}-clear-objects)
+    endif ()
+  endmacro ()
+
+  macro (ADD_H5_ERR_TEST resultfile resultcode)
+    # If using memchecker add tests without using scripts
+    if (HDF5_ENABLE_USING_MEMCHECKER)
+      add_test (NAME H5LS-${resultfile} COMMAND $<TARGET_FILE:h5ls> ${ARGN})
+      set_tests_properties (H5LS-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
+      if ("${resultcode}" STREQUAL "1")
+        set_tests_properties (H5LS-${resultfile} PROPERTIES WILL_FAIL "true")
+      endif ()
+      if (NOT "${last_test}" STREQUAL "")
+        set_tests_properties (H5LS-${resultfile} PROPERTIES DEPENDS ${last_test})
+      endif ()
+    else ()
+      # Remove any output file left over from previous test run
+      add_test (
+          NAME H5LS-${resultfile}-clear-objects
+          COMMAND    ${CMAKE_COMMAND}
+              -E remove
+              testfiles/${resultfile}.out
+              testfiles/${resultfile}.out.err
+      )
+      add_test (
+          NAME H5LS-${resultfile}
+          COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5ls>"
+              -D "TEST_ARGS=${ARGN}"
+              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
+              -D "TEST_OUTPUT=${resultfile}.out"
+              -D "TEST_EXPECT=${resultcode}"
+              -D "TEST_REFERENCE=${resultfile}.ls"
+              -D "TEST_ERRREF=${resultfile}.err"
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
       set_tests_properties (H5LS-${resultfile} PROPERTIES DEPENDS H5LS-${resultfile}-clear-objects)
@@ -341,7 +387,7 @@
   # test for displaying groups
   # The following combination of arguments is expected to return an error message
   # and return value 1
-  ADD_H5_TEST (tgroup-1 1 -w80 -r -g tgroup.h5)
+  ADD_H5_ERR_TEST (tgroup-1 1 -w80 -r -g tgroup.h5)
   ADD_H5_TEST (tgroup-2 0 -w80 -g tgroup.h5/g1)
 
   # test for files with groups that have long comments
@@ -382,7 +428,7 @@
   # tests for no-dangling-links
   # if this option is given on dangling link, h5ls should return exit code 1
   # when used alone , expect to print out help and return exit code 1
-  ADD_H5_TEST (textlinksrc-nodangle-1 1 -w80 --no-dangling-links textlinksrc.h5)
+  ADD_H5_ERR_TEST (textlinksrc-nodangle-1 1 -w80 --no-dangling-links textlinksrc.h5)
   # external dangling link - expected exit code 1
   ADD_H5_TEST (textlinksrc-nodangle-2 1 -w80 --follow-symlinks --no-dangling-links textlinksrc.h5)
   # soft dangling link - expected exit code 1
@@ -444,7 +490,7 @@
   endif ()
 
   # test for non-existing file
-  ADD_H5_TEST (nosuchfile 1 nosuchfile.h5)
+  ADD_H5_ERR_TEST (nosuchfile 1 nosuchfile.h5)
 
   # test for variable length data types in verbose mode
   if (H5_WORDS_BIGENDIAN)
@@ -470,4 +516,6 @@
 ##############################################################################
 ###    P L U G I N  T E S T S
 ##############################################################################
-ADD_H5_UD_TEST (h5ls_plugin_test 0 tudfilter -w80 -d tudfilter.h5)
+if (BUILD_SHARED_LIBS)
+  ADD_H5_UD_TEST (h5ls_plugin_test 0 tudfilter -w80 -d tudfilter.h5)
+endif ()

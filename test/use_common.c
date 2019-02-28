@@ -252,13 +252,10 @@ int create_uc_file(void)
  *
  * Return: 0 succeed; -1 fail.
  */
-int write_uc_file(hbool_t tosend)
+int write_uc_file(hbool_t tosend, hid_t fid)
 {
-    hid_t	fid;          /* File ID for new HDF5 file */
     hid_t	dsid;         /* dataset ID */
-    hid_t       fapl;         /* File access property list */
     hid_t	dcpl;         /* Dataset creation property list */
-    char	*name;
     UC_CTYPE	*buffer, *bufptr;	/* data buffer */
     hsize_t	cz=UC_opts.chunksize;		/* Chunk size */
     hid_t	f_sid;	    /* dataset file space id */
@@ -269,19 +266,6 @@ int write_uc_file(hbool_t tosend)
     hsize_t	memdims[3]; /* Memory space dimensions */
     hsize_t	start[3] = {0,0,0}, count[3];    /* Hyperslab selection values */
     hsize_t     i, j, k;
-
-    name = UC_opts.filename;
-
-    /* Open the file */
-    if((fapl = h5_fileaccess()) < 0)
-        return -1;
-    if(UC_opts.use_swmr)
-        if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
-            return -1;
-    if((fid = H5Fopen(name, H5F_ACC_RDWR | (UC_opts.use_swmr ? H5F_ACC_SWMR_WRITE : 0), fapl)) < 0){
-	fprintf(stderr, "H5Fopen failed\n");
-        return -1;
-    }
 
     if(tosend)
         /* Send a message that H5Fopen is complete--releasing the file lock */
@@ -427,14 +411,6 @@ int write_uc_file(hbool_t tosend)
 	fprintf(stderr, "Failed to close file space\n");
 	return -1;
     }
-    if (H5Pclose(fapl) < 0){
-	fprintf(stderr, "Failed to property list\n");
-	return -1;
-    }
-    if (H5Fclose(fid) < 0){
-	fprintf(stderr, "Failed to close file id\n");
-	return -1;
-    }
 
     return 0;
 }
@@ -471,7 +447,7 @@ int read_uc_file(hbool_t towait)
 
     /* Before reading, wait for the message that H5Fopen is complete--file lock is released */
     if(towait && h5_wait_message(WRITER_MESSAGE) < 0) {
-        fprintf(stderr, "Cannot find writer message file...failed\n");
+        HDfprintf(stderr, "Cannot find writer message file...failed\n");
         return -1;
     }
 
@@ -481,19 +457,19 @@ int read_uc_file(hbool_t towait)
     if((fapl = h5_fileaccess()) < 0)
         return -1;
     if((fid = H5Fopen(name, H5F_ACC_RDONLY | (UC_opts.use_swmr ? H5F_ACC_SWMR_READ : 0), fapl)) < 0){
-	fprintf(stderr, "H5Fopen failed\n");
+        HDfprintf(stderr, "H5Fopen failed\n");
         return -1;
     }
     if (H5Pclose(fapl) < 0){
-	    fprintf(stderr, "Failed to property list\n");
+	    HDfprintf(stderr, "Failed to property list\n");
 	    return -1;
     }
 
 
     /* Open the dataset of the program name */
     if((dsid = H5Dopen2(fid, progname_g, H5P_DEFAULT)) < 0){
-	fprintf(stderr, "H5Dopen2 failed\n");
-	return -1;
+        HDfprintf(stderr, "H5Dopen2 failed\n");
+        return -1;
     }
 
     /* allocate space for data buffer 1 X dims[1] X dims[2] of UC_CTYPE */
@@ -501,8 +477,8 @@ int read_uc_file(hbool_t towait)
     memdims[1] = UC_opts.dims[1];
     memdims[2] = UC_opts.dims[2];
     if ((buffer=(UC_CTYPE*)HDmalloc((size_t)memdims[1]*(size_t)memdims[2]*sizeof(UC_CTYPE)))==NULL) {
-	fprintf(stderr, "malloc: failed\n");
-	return -1;
+        HDfprintf(stderr, "malloc: failed\n");
+        return -1;
     };
 
     /*
@@ -512,31 +488,31 @@ int read_uc_file(hbool_t towait)
     f_sid = H5Dget_space(dsid);    /* Get filespace handle first. */
     rank  = H5Sget_simple_extent_ndims(f_sid);
     if (rank != UC_RANK){
-	fprintf(stderr, "rank(%d) of dataset does not match\n", rank);
-	return -1;
+        HDfprintf(stderr, "rank(%d) of dataset does not match\n", rank);
+        return -1;
     }
     if (H5Sget_simple_extent_dims(f_sid, dims, NULL) < 0){
-	fprintf(stderr, "H5Sget_simple_extent_dims got error\n");
-	return -1;
+        HDfprintf(stderr, "H5Sget_simple_extent_dims got error\n");
+        return -1;
     }
-    printf("dataset rank %d, dimensions %llu x %llu x %llu\n",
-	   rank, (unsigned long long)(dims[0]), (unsigned long long)(dims[1]),
-           (unsigned long long)(dims[2]));
+    HDprintf("dataset rank %d, dimensions %llu x %llu x %llu\n",
+            rank, (unsigned long long)(dims[0]), (unsigned long long)(dims[1]),
+            (unsigned long long)(dims[2]));
     /* verify that file space dims are as expected and are consistent with memory space dims */
     if (dims[1] != memdims[1] || dims[2] != memdims[2]){
-	fprintf(stderr, "dataset dimension is not as expected. Got dims=(%llu,%llu,%llu)\n",
-	    (unsigned long long)dims[0], (unsigned long long)dims[1],
+        HDfprintf(stderr, "dataset dimension is not as expected. Got dims=(%llu,%llu,%llu)\n",
+            (unsigned long long)dims[0], (unsigned long long)dims[1],
             (unsigned long long)dims[2]);
-	fprintf(stderr, "But memdims=(%llu,%llu,%llu)\n",
-	    (unsigned long long)memdims[0], (unsigned long long)memdims[1], 
+        HDfprintf(stderr, "But memdims=(%llu,%llu,%llu)\n",
+            (unsigned long long)memdims[0], (unsigned long long)memdims[1], 
             (unsigned long long)memdims[2]);
-	return -1;
+        return -1;
     }
     
     /* setup mem-space for buffer */
     if ((m_sid=H5Screate_simple(rank, memdims, NULL))<0){
-	fprintf(stderr, "H5Screate_simple for memory failed\n");
-	return -1;
+        HDfprintf(stderr, "H5Screate_simple for memory failed\n");
+        return -1;
     };
 
     /* Read 1 plane at a time whenever the dataset grows larger
@@ -550,22 +526,22 @@ int read_uc_file(hbool_t towait)
 	/* print progress message according to if new planes are availalbe */
 	if (nplane_old < dims[0]) {
 	    if (nonewplane){
-		/* end the previous message */
-		printf("\n");
-		nonewplane=0;
+            /* end the previous message */
+            HDprintf("\n");
+            nonewplane=0;
 	    }
-	    printf("reading planes %llu to %llu\n", (unsigned long long)nplane_old, 
+	    HDprintf("reading planes %llu to %llu\n", (unsigned long long)nplane_old, 
                 (unsigned long long)dims[0]);
 	}else{
 	    if (nonewplane){
-		printf(".");
+            HDprintf(".");
 		if (nonewplane>=30){
-		    fprintf(stderr, "waited too long for new plane, quit.\n");
+		    HDfprintf(stderr, "waited too long for new plane, quit.\n");
 		    return -1;
 		}
 	    }else{
-		/* print mesg only the first time; dots still no new plane */
-		printf("no new planes to read ");
+            /* print mesg only the first time; dots still no new plane */
+            HDprintf("no new planes to read ");
 	    }
 	    nonewplane++;
 	    /* pause for a second */
@@ -575,41 +551,41 @@ int read_uc_file(hbool_t towait)
 	    /* read planes between last old nplanes and current extent */
 	    /* Get the dataset's dataspace */
 	    if((f_sid = H5Dget_space(dsid)) < 0){
-		fprintf(stderr, "H5Dget_space failed\n");
-		return -1;
+            HDfprintf(stderr, "H5Dget_space failed\n");
+            return -1;
 	    }
 
 	    start[0]=nplane;
 	    /* Choose the next plane to read */
 	    if(H5Sselect_hyperslab(f_sid, H5S_SELECT_SET, start, NULL, count, NULL) < 0){
-		fprintf(stderr, "H5Sselect_hyperslab failed\n");
-		return -1;
+            HDfprintf(stderr, "H5Sselect_hyperslab failed\n");
+            return -1;
 	    }
 
 	    /* Read the plane from the dataset */
 	    if(H5Dread(dsid, UC_DATATYPE, m_sid, f_sid, H5P_DEFAULT, buffer) < 0){
-		fprintf(stderr, "H5Dread failed\n");
-		return -1;
+            HDfprintf(stderr, "H5Dread failed\n");
+            return -1;
 	    }
 
 	    /* compare read data with expected data value which is nplane */
 	    bufptr = buffer;
 	    nerrs=0;
 	    for (j=0; j<dims[1]; j++){
-		for (k=0; k<dims[2]; k++){
-		    if ((hsize_t)*bufptr++ != nplane){
-			if (++nerrs < ErrorReportMax){
-			    fprintf(stderr,
-				"found error %llu plane(%llu,%llu), expected %llu, got %d\n",
-				(unsigned long long)nplane, (unsigned long long)j, 
-                                (unsigned long long)k, (unsigned long long)nplane, (int)*(bufptr-1));
-			}
-		    }
-		}
+            for (k=0; k<dims[2]; k++){
+                if ((hsize_t)*bufptr++ != nplane){
+                    if (++nerrs < ErrorReportMax){
+                        HDfprintf(stderr,
+                            "found error %llu plane(%llu,%llu), expected %llu, got %d\n",
+                            (unsigned long long)nplane, (unsigned long long)j, 
+                            (unsigned long long)k, (unsigned long long)nplane, (int)*(bufptr-1));
+                    }
+                }
+            }
 	    }
 	    if (nerrs){
-		nreadererr++;
-		fprintf(stderr, "found %d unexpected values in plane %llu\n", nerrs, 
+            nreadererr++;
+            HDfprintf(stderr, "found %d unexpected values in plane %llu\n", nerrs, 
                     (unsigned long long)nplane);
 	    }
 	}
@@ -620,19 +596,19 @@ int read_uc_file(hbool_t towait)
 #if 0
 	/* close dsid and file, then reopen them */
 	if (H5Dclose(dsid) < 0){
-	    fprintf(stderr, "H5Dclose failed\n");
+	    HDfprintf(stderr, "H5Dclose failed\n");
 	    return -1;
 	}
 	if (H5Fclose(fid) < 0){
-	    fprintf(stderr, "H5Fclose failed\n");
+	    HDfprintf(stderr, "H5Fclose failed\n");
 	    return -1;
 	}
 	if((fid = H5Fopen(name, H5F_ACC_RDONLY | (UC_opts.use_swmr ? H5F_ACC_SWMR_READ : 0), H5P_DEFAULT)) < 0){
-	    fprintf(stderr, "H5Fopen failed\n");
+	    HDfprintf(stderr, "H5Fopen failed\n");
 	    return -1;
 	}
 	if((dsid = H5Dopen2(fid, progname_g, H5P_DEFAULT)) < 0){
-	    fprintf(stderr, "H5Dopen2 failed\n");
+	    HDfprintf(stderr, "H5Dopen2 failed\n");
 	    return -1;
 	}
 #else
@@ -640,16 +616,22 @@ int read_uc_file(hbool_t towait)
 #endif
 	f_sid = H5Dget_space(dsid);    /* Get filespace handle first. */
 	if (H5Sget_simple_extent_dims(f_sid, dims, NULL) < 0){
-	    fprintf(stderr, "H5Sget_simple_extent_dims got error\n");
+	    HDfprintf(stderr, "H5Sget_simple_extent_dims got error\n");
 	    return -1;
 	}
     }
 
+    /* Close the file */
+    if(H5Fclose(fid) < 0) {
+        HDfprintf(stderr, "H5Fclose failed\n");
+        return -1;
+    }
+
     if (nreadererr)
-	return -1;
+        return -1;
     else
-	return 0;
-}
+        return 0;
+} /* read_uc_file() */
 
 #endif /* H5_HAVE_FORK */
 

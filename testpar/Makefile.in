@@ -102,7 +102,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-check_PROGRAMS = $(am__EXEEXT_1)
+check_PROGRAMS = $(am__EXEEXT_1) t_pflush1$(EXEEXT) t_pflush2$(EXEEXT)
 TESTS =
 subdir = testpar
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -130,13 +130,12 @@ DIST_COMMON = $(srcdir)/Makefile.am $(am__DIST_COMMON)
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/src/H5config.h \
 	$(top_builddir)/fortran/src/H5config_f.inc
-CONFIG_CLEAN_FILES =
+CONFIG_CLEAN_FILES = testpflush.sh
 CONFIG_CLEAN_VPATH_FILES =
 am__EXEEXT_1 = t_mpi$(EXEEXT) t_bigio$(EXEEXT) testphdf5$(EXEEXT) \
-	t_cache$(EXEEXT) t_cache_image$(EXEEXT) t_pflush1$(EXEEXT) \
-	t_pflush2$(EXEEXT) t_pread$(EXEEXT) t_pshutdown$(EXEEXT) \
-	t_prestart$(EXEEXT) t_init_term$(EXEEXT) t_shapesame$(EXEEXT) \
-	t_filters_parallel$(EXEEXT)
+	t_cache$(EXEEXT) t_cache_image$(EXEEXT) t_pread$(EXEEXT) \
+	t_pshutdown$(EXEEXT) t_prestart$(EXEEXT) t_init_term$(EXEEXT) \
+	t_shapesame$(EXEEXT) t_filters_parallel$(EXEEXT)
 t_bigio_SOURCES = t_bigio.c
 t_bigio_OBJECTS = t_bigio.$(OBJEXT)
 t_bigio_LDADD = $(LDADD)
@@ -463,8 +462,9 @@ am__set_b = \
     *) \
       b='$*';; \
   esac
-am__DIST_COMMON = $(srcdir)/Makefile.in $(top_srcdir)/bin/depcomp \
-	$(top_srcdir)/bin/test-driver $(top_srcdir)/config/commence.am \
+am__DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/testpflush.sh.in \
+	$(top_srcdir)/bin/depcomp $(top_srcdir)/bin/test-driver \
+	$(top_srcdir)/config/commence.am \
 	$(top_srcdir)/config/conclude.am COPYING
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
@@ -608,7 +608,6 @@ MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
 MANIFEST_TOOL = @MANIFEST_TOOL@
 MEMORYALLOCSANITYCHECK = @MEMORYALLOCSANITYCHECK@
-METADATATRACEFILE = @METADATATRACEFILE@
 MKDIR_P = @MKDIR_P@
 MPE = @MPE@
 NM = @NM@
@@ -642,6 +641,7 @@ PAC_FORTRAN_NUM_INTEGER_KINDS = @PAC_FORTRAN_NUM_INTEGER_KINDS@
 PARALLEL = @PARALLEL@
 PARALLEL_FILTERED_WRITES = @PARALLEL_FILTERED_WRITES@
 PATH_SEPARATOR = @PATH_SEPARATOR@
+PREADWRITE = @PREADWRITE@
 PROFILING = @PROFILING@
 RANLIB = @RANLIB@
 ROOT = @ROOT@
@@ -798,9 +798,15 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.clog2 MPItest.h5 \
 	Para*.h5 bigio_test.h5 CacheTestDummy.h5 ShapeSameTest.h5 \
 	shutdown.h5 after_mpi_fin.h5 go
 
+# Test scripts--
+#       testpflush.sh:
+TEST_SCRIPT_PARA = testpflush.sh
+SCRIPT_DEPEND = t_pflush1$(EXEEXT) t_pflush2$(EXEEXT) 
+check_SCRIPTS = $(TEST_SCRIPT_PARA)
+
 # Test programs.  These are our main targets.
 #
-TEST_PROG_PARA = t_mpi t_bigio testphdf5 t_cache t_cache_image t_pflush1 t_pflush2 t_pread t_pshutdown t_prestart t_init_term t_shapesame t_filters_parallel
+TEST_PROG_PARA = t_mpi t_bigio testphdf5 t_cache t_cache_image t_pread t_pshutdown t_prestart t_init_term t_shapesame t_filters_parallel
 testphdf5_SOURCES = testphdf5.c t_dset.c t_file.c t_file_image.c t_mdset.c \
 	t_ph5basic.c t_coll_chunk.c t_span_tree.c t_chunk_alloc.c t_filter_read.c \
 	t_prop.c t_coll_md_read.c
@@ -863,6 +869,8 @@ $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(am__aclocal_m4_deps):
+testpflush.sh: $(top_builddir)/config.status $(srcdir)/testpflush.sh.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 
 clean-checkPROGRAMS:
 	@list='$(check_PROGRAMS)'; test -n "$$list" || exit 0; \
@@ -1157,7 +1165,7 @@ $(TEST_SUITE_LOG): $(TEST_LOGS)
 	  echo "$$col$$br$$std";					\
 	fi;								\
 	$$success || exit 1
-recheck: all $(check_PROGRAMS)
+recheck: all $(check_PROGRAMS) $(check_SCRIPTS)
 	@test -z "$(TEST_SUITE_LOG)" || rm -f $(TEST_SUITE_LOG)
 	@set +e; $(am__set_TESTS_bases); \
 	bases=`for i in $$bases; do echo $$i; done \
@@ -1214,7 +1222,7 @@ distdir: $(DISTFILES)
 	  fi; \
 	done
 check-am: all-am
-	$(MAKE) $(AM_MAKEFLAGS) $(check_PROGRAMS)
+	$(MAKE) $(AM_MAKEFLAGS) $(check_PROGRAMS) $(check_SCRIPTS)
 	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
 check: check-am
 all-am: Makefile all-local
@@ -1549,7 +1557,7 @@ build-check-p: $(LIB) $(PROGS) $(chk_TESTS)
 	    echo "**** Hint ****";                                            \
 	    echo "Parallel test files reside in the current directory"        \
 	         "by default.";                                               \
-	    echo "Set HDF5_PARAPREFIX to use another directory. E.g.,";       \
+	    echo "Set HDF5_PARAPREFIX to use another directory. e.g.,";       \
 	    echo "    HDF5_PARAPREFIX=/PFS/user/me";                          \
 	    echo "    export HDF5_PARAPREFIX";                                \
 	    echo "    make check";                                            \
