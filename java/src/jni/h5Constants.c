@@ -21,8 +21,10 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#include <jni.h>
 #include "hdf5.h"
+#include <jni.h>
+#include <stdlib.h>
+#include "h5jni.h"
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"

@@ -162,7 +162,7 @@ public class TestH5 {
      */
     @Test
     public void testH5get_libversion() {
-        int libversion[] = { 1, 10, 4 };
+        int libversion[] = { 1, 10, 5 };
 
         try {
             H5.H5get_libversion(libversion);
@@ -177,6 +177,23 @@ public class TestH5 {
         for (int i = 0; i < 2; i++)
             assertFalse(libversion[i] == 0);
     }
+    
+    /**
+     * Test method for {@link hdf.hdf5lib.H5#H5get_libversion(int[])}
+     * to ensure a null libversion parameter causes the function to
+     * fail.
+     */
+    @Test
+    public void testH5get_libversion_null_param() {
+    	try {
+    		H5.H5get_libversion(null);
+    	}
+    	catch (Throwable err) {
+    		return;
+    	}
+    	
+    	fail("H5.H5get_libversion: succeeded with a null libversion parameter!");
+    }
 
     /**
      * Test method for
@@ -184,7 +201,7 @@ public class TestH5 {
      */
     @Test
     public void testH5check_version() {
-        int majnum = 1, minnum = 10, relnum = 4;
+        int majnum = 1, minnum = 10, relnum = 5;
 
         try {
             H5.H5check_version(majnum, minnum, relnum);

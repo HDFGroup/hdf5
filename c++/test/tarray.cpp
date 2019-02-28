@@ -286,7 +286,7 @@ H5::DataType getArr()
     *dims = 5; 
     H5::ArrayType ret; 
     ret = H5::ArrayType(H5::PredType::NATIVE_INT, 1, dims); 
-    delete[] dims; 
+    delete dims; 
     return ret;
 }
 

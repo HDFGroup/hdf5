@@ -573,7 +573,6 @@ MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
 MANIFEST_TOOL = @MANIFEST_TOOL@
 MEMORYALLOCSANITYCHECK = @MEMORYALLOCSANITYCHECK@
-METADATATRACEFILE = @METADATATRACEFILE@
 MKDIR_P = @MKDIR_P@
 MPE = @MPE@
 NM = @NM@
@@ -607,6 +606,7 @@ PAC_FORTRAN_NUM_INTEGER_KINDS = @PAC_FORTRAN_NUM_INTEGER_KINDS@
 PARALLEL = @PARALLEL@
 PARALLEL_FILTERED_WRITES = @PARALLEL_FILTERED_WRITES@
 PATH_SEPARATOR = @PATH_SEPARATOR@
+PREADWRITE = @PREADWRITE@
 PROFILING = @PROFILING@
 RANLIB = @RANLIB@
 ROOT = @ROOT@
@@ -1185,7 +1185,7 @@ info: info-am
 
 info-am:
 
-install-data-am: install-data-local
+install-data-am:
 
 install-dvi: install-dvi-am
 
@@ -1231,7 +1231,7 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-local
+uninstall-am:
 
 .MAKE: check-am install-am install-strip
 
@@ -1241,15 +1241,14 @@ uninstall-am: uninstall-local
 	distclean-compile distclean-generic distclean-libtool \
 	distclean-local distclean-tags distdir dvi dvi-am html html-am \
 	info info-am install install-am install-data install-data-am \
-	install-data-local install-dvi install-dvi-am install-exec \
-	install-exec-am install-html install-html-am install-info \
-	install-info-am install-man install-pdf install-pdf-am \
-	install-ps install-ps-am install-strip installcheck \
-	installcheck-am installdirs maintainer-clean \
-	maintainer-clean-generic maintainer-clean-local mostlyclean \
-	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
-	mostlyclean-local pdf pdf-am ps ps-am recheck tags tags-am \
-	uninstall uninstall-am uninstall-local
+	install-dvi install-dvi-am install-exec install-exec-am \
+	install-html install-html-am install-info install-info-am \
+	install-man install-pdf install-pdf-am install-ps \
+	install-ps-am install-strip installcheck installcheck-am \
+	installdirs maintainer-clean maintainer-clean-generic \
+	maintainer-clean-local mostlyclean mostlyclean-compile \
+	mostlyclean-generic mostlyclean-libtool mostlyclean-local pdf \
+	pdf-am ps ps-am recheck tags tags-am uninstall uninstall-am
 
 .PRECIOUS: Makefile
 
@@ -1274,18 +1273,6 @@ distclean-local: clean-local
 clean-local:
 	@if test -n "$(F9XMODEXT)" && test "X$(F9XMODEXT)" != "Xo"; then \
 	  $(RM) *.$(F9XMODEXT); \
-	fi
-
-install-data-local:
-	@if test -n "$(F9XMODEXT)" && test "X$(F9XMODEXT)" != "Xo"; then \
-	  $(CP) $(top_builddir)/$(subdir)/*.$(F9XMODEXT) $(DESTDIR)$(includedir)/. ; \
-	fi
-
-uninstall-local:
-	@if test -n "$(F9XMODEXT)" -a "X$(F9XMODEXT)" != "Xo"; then      \
-	  if test -f "$(includedir)/hdf5.$(F9XMODEXT)" -o -f "$(DESTDIR)$(includedir)/HDF5.$(F9XMODEXT)"; then \
-	    set -x; $(RM) $(includedir)/*.$(F9XMODEXT);                 \
-	  fi;                                                           \
 	fi
 
 # Treat all .f90 and .F90 files as preprocessed Fortran.
@@ -1490,7 +1477,7 @@ build-check-p: $(LIB) $(PROGS) $(chk_TESTS)
 	    echo "**** Hint ****";                                            \
 	    echo "Parallel test files reside in the current directory"        \
 	         "by default.";                                               \
-	    echo "Set HDF5_PARAPREFIX to use another directory. E.g.,";       \
+	    echo "Set HDF5_PARAPREFIX to use another directory. e.g.,";       \
 	    echo "    HDF5_PARAPREFIX=/PFS/user/me";                          \
 	    echo "    export HDF5_PARAPREFIX";                                \
 	    echo "    make check";                                            \

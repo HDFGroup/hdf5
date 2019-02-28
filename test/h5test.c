@@ -643,7 +643,7 @@ h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix,
                 printf("*** Hint ***\n"
                        "You can use environment variable HDF5_PARAPREFIX to "
                        "run parallel test files in a\n"
-                       "different directory or to add file type prefix. E.g.,\n"
+                       "different directory or to add file type prefix. e.g.,\n"
                        "   HDF5_PARAPREFIX=pfs:/PFS/user/me\n"
                        "   export HDF5_PARAPREFIX\n"
                        "*** End of Hint ***\n");
@@ -1854,6 +1854,42 @@ static herr_t dummy_vfd_read(H5FD_t H5_ATTR_UNUSED *_file, H5FD_mem_t H5_ATTR_UN
 static herr_t dummy_vfd_write(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr, size_t size, const void *buf);
 static herr_t dummy_vfd_write(H5FD_t H5_ATTR_UNUSED *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUSED fapl_id, haddr_t H5_ATTR_UNUSED addr, size_t H5_ATTR_UNUSED size, const void H5_ATTR_UNUSED *buf) { return FAIL; }
 
+/* Dummy VFD with the minimum parameters to make a VFD that can be registered */
+static const H5FD_class_t H5FD_dummy_g = {
+    "dummy",                    /* name         */
+    1,                          /* maxaddr      */
+    H5F_CLOSE_WEAK,             /* fc_degree    */
+    NULL,                       /* terminate    */
+    NULL,                       /* sb_size      */
+    NULL,                       /* sb_encode    */
+    NULL,                       /* sb_decode    */
+    0,                          /* fapl_size    */
+    NULL,                       /* fapl_get     */
+    NULL,                       /* fapl_copy    */
+    NULL,                       /* fapl_free    */
+    0,                          /* dxpl_size    */
+    NULL,                       /* dxpl_copy    */
+    NULL,                       /* dxpl_free    */
+    dummy_vfd_open,             /* open         */
+    dummy_vfd_close,            /* close        */
+    NULL,                       /* cmp          */
+    NULL,                       /* query        */
+    NULL,                       /* get_type_map */
+    NULL,                       /* alloc        */
+    NULL,                       /* free         */
+    dummy_vfd_get_eoa,          /* get_eoa      */
+    dummy_vfd_set_eoa,          /* set_eoa      */
+    dummy_vfd_get_eof,          /* get_eof      */
+    NULL,                       /* get_handle   */
+    dummy_vfd_read,             /* read         */
+    dummy_vfd_write,            /* write        */
+    NULL,                       /* flush        */
+    NULL,                       /* truncate     */
+    NULL,                       /* lock         */
+    NULL,                       /* unlock       */
+    H5FD_FLMAP_DICHOTOMY	/* fl_map       */
+};
+
 
 /*-------------------------------------------------------------------------
  * Function:    h5_get_dummy_vfd_class()
@@ -1881,21 +1917,11 @@ h5_get_dummy_vfd_class(void)
     H5FD_class_t *vfd_class = NULL;     /* Dummy VFD that will be returned */
 
     /* Create the class and initialize everything to zero/NULL */
-    if(NULL == (vfd_class = (H5FD_class_t *)HDcalloc((size_t)1, sizeof(H5FD_class_t))))
+    if(NULL == (vfd_class = (H5FD_class_t *)HDmalloc(sizeof(H5FD_class_t))))
         TEST_ERROR;
 
-    /* Fill in the minimum parameters to make a VFD that
-     * can be registered.
-     */
-    vfd_class->name = "dummy";
-    vfd_class->maxaddr = 1;
-    vfd_class->open = dummy_vfd_open;
-    vfd_class->close = dummy_vfd_close;
-    vfd_class->get_eoa = dummy_vfd_get_eoa;
-    vfd_class->set_eoa = dummy_vfd_set_eoa;
-    vfd_class->get_eof = dummy_vfd_get_eof;
-    vfd_class->read = dummy_vfd_read;
-    vfd_class->write = dummy_vfd_write;
+    /* Copy the dummy VFD */
+    HDmemcpy(vfd_class, &H5FD_dummy_g, sizeof(H5FD_class_t));
 
     return vfd_class;
 

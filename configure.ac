@@ -24,7 +24,7 @@ AC_PREREQ([2.69])
 ## NOTE: Do not forget to change the version number here when we do a
 ## release!!!
 ##
-AC_INIT([HDF5], [1.10.4], [help@hdfgroup.org])
+AC_INIT([HDF5], [1.10.5], [help@hdfgroup.org])
 
 AC_CONFIG_SRCDIR([src/H5.c])
 AC_CONFIG_HEADERS([src/H5config.h])
@@ -1131,11 +1131,12 @@ case "$host_cpu-$host_vendor-$host_os" in
     ## functionality so clock_gettime and CLOCK_MONOTONIC are defined
     ## correctly. This was later updated to 200112L so that
     ## posix_memalign() is visible for the direct VFD code on Linux
-    ## systems.
+    ## systems. Even later, this was changed to 200809L to support
+    ## pread/pwrite in VFDs.
     ##
     ## POSIX feature information can be found in the gcc manual at:
     ## http://www.gnu.org/s/libc/manual/html_node/Feature-Test-Macros.html
-    H5_CPPFLAGS="-D_POSIX_C_SOURCE=200112L $H5_CPPFLAGS"
+    H5_CPPFLAGS="-D_POSIX_C_SOURCE=200809L $H5_CPPFLAGS"
 
     ## Need to add this so that O_DIRECT is visible for the direct
     ## VFD on Linux systems.
@@ -1211,6 +1212,15 @@ EOF
 AC_CHECK_SIZEOF([bool])
 fi
 
+AC_CHECK_SIZEOF(time_t, [], [
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_TIME_H
+#include <time.h>
+#endif
+])
+
 ## Checkpoint the cache
 AC_CACHE_SAVE
 
@@ -1262,8 +1272,8 @@ AC_ARG_WITH([dmalloc],
                             [Use dmalloc memory debugging aid [default=no]])],,
             [withval=no])
 
-case $withval in
-  yes)
+case "X-$withval" in
+  X-yes)
     HAVE_DMALLOC="yes"
     AC_CHECK_HEADERS([dmalloc.h],, [unset HAVE_DMALLOC])
     if test "x$HAVE_DMALLOC" = "xyes"; then
@@ -1273,7 +1283,7 @@ case $withval in
       AC_MSG_ERROR([couldn't find dmalloc library])
     fi
     ;;
-  no)
+  X-|X-no|X-none)
     HAVE_DMALLOC="no"
     AC_MSG_CHECKING([for dmalloc library])
     AC_MSG_RESULT([suppressed])
@@ -1341,8 +1351,8 @@ AC_ARG_WITH([zlib],
                              filter [default=yes]])],,
             [withval=yes])
 
-case $withval in
-  yes)
+case "X-$withval" in
+  X-yes)
     HAVE_ZLIB="yes"
     AC_CHECK_HEADERS([zlib.h], [HAVE_ZLIB_H="yes"], [unset HAVE_ZLIB])
     if test "x$HAVE_ZLIB" = "xyes" -a "x$HAVE_ZLIB_H" = "xyes"; then
@@ -1356,7 +1366,7 @@ case $withval in
       AC_CHECK_FUNC([compress2], [HAVE_COMPRESS2="yes"])
     fi
     ;;
-  no)
+  X-|X-no|X-none)
     HAVE_ZLIB="no"
     AC_MSG_CHECKING([for zlib])
     AC_MSG_RESULT([suppressed])
@@ -1435,8 +1445,8 @@ AC_ARG_WITH([szlib],
                              filter [default=no]])],,
             [withval=no])
 
-case $withval in
-  yes)
+case "X-$withval" in
+  X-yes)
     HAVE_SZLIB="yes"
     AC_CHECK_HEADERS([szlib.h], [HAVE_SZLIB_H="yes"], [unset HAVE_SZLIB])
     if test "x$HAVE_SZLIB" = "xyes" -a "x$HAVE_SZLIB_H" = "xyes"; then
@@ -1446,7 +1456,7 @@ case $withval in
       AC_MSG_ERROR([couldn't find szlib library])
     fi
     ;;
-  no)
+  X-|X-no|X-none)
     HAVE_SZLIB="no"
     AC_MSG_CHECKING([for szlib])
     AC_MSG_RESULT([suppressed])
@@ -2290,40 +2300,6 @@ case "X-$CODESTACK" in
 esac
 
 ## ----------------------------------------------------------------------
-## Check if they would like the metadata trace file code compiled in
-##
-AC_MSG_CHECKING([whether metadata trace file code is enabled])
-AC_ARG_ENABLE([metadata-trace-file],
-              [AS_HELP_STRING([--enable-metadata-trace-file],
-                              [Enable metadata trace file collection.
-                               [default=no]
-                              ])],
-              [METADATATRACEFILE=$enableval])
-
-## Set the default level.
-if test "X-$METADATATRACEFILE" = X- ; then
-  METADATATRACEFILE=no
-fi
-
-## Allow this variable to be substituted in
-## other files (src/libhdf5.settings.in, etc.)
-AC_SUBST([METADATATRACEFILE])
-
-case "X-$METADATATRACEFILE" in
-  X-yes)
-      AC_MSG_RESULT([yes])
-      AC_DEFINE([METADATA_TRACE_FILE], [1],
-                [Define if the metadata trace file code is to be compiled in])
-    ;;
-  X-no)
-      AC_MSG_RESULT([no])
-    ;;
-  *)
-      AC_MSG_ERROR([Unrecognized value: $METADATATRACEFILE])
-    ;;
-esac
-
-## ----------------------------------------------------------------------
 ## Enable tracing of the API
 ##
 AC_MSG_CHECKING([for API tracing]);
@@ -2995,6 +2971,30 @@ else
 fi
 
 ## ----------------------------------------------------------------------
+## Set the flag to indicate that the machine is IBM ppc64le and cannot
+## accurately convert some long double values.
+##
+AC_MSG_CHECKING([if the system is IBM ppc64le and cannot correctly convert some long double values])
+
+TEST_SRC="`(echo \"#define H5_DISABLE_SOME_LDOUBLE_CONV_TEST 1\"; cat $srcdir/config/cmake/ConversionTests.c)`"
+
+if test ${ac_cv_sizeof_long_double} = 0; then
+   hdf5_cv_disable_some_ldouble_conv=${hdf5_cv_disable_some_ldouble_conv=no}
+else
+   AC_CACHE_VAL([hdf5_cv_disable_some_ldouble_conv],
+        [AC_RUN_IFELSE([AC_LANG_SOURCE([$TEST_SRC])],
+        [hdf5_cv_disable_some_ldouble_conv=yes], [hdf5_cv_disable_some_ldouble_conv=no],[])])
+fi
+
+if test ${hdf5_cv_disable_some_ldouble_conv} = "yes"; then
+  AC_DEFINE([DISABLE_SOME_LDOUBLE_CONV], [1],
+            [Define if your system is IBM ppc64le and cannot convert some long double values correctly.])
+  AC_MSG_RESULT([yes])
+else
+  AC_MSG_RESULT([no])
+fi
+
+## ----------------------------------------------------------------------
 ## Set some variables for general configuration information to be saved
 ## and installed with the libraries (used to generate libhdf5.settings).
 ##
@@ -3263,6 +3263,47 @@ esac
 
 
 ## ----------------------------------------------------------------------
+## Enable use of pread/pwrite instead of read/write in certain VFDs.
+##
+AC_SUBST([PREADWRITE])
+
+## Check these first to avoid interspersed output in the AC_ARG_ENABLE line
+## below. (Probably overkill to check for both, but we'll be extra careful)
+PREADWRITE_HAVE_BOTH=yes
+AC_CHECK_FUNC([pread], [], [PREADWRITE_HAVE_BOTH=no])
+AC_CHECK_FUNC([pwrite], [], [PREADWRITE_HAVE_BOTH=no])
+
+AC_MSG_CHECKING([whether to use pread/pwrite instead of read/write in certain VFDs])
+AC_ARG_ENABLE([preadwrite],
+              [AS_HELP_STRING([--enable-preadwrite],
+                              [Enable using pread/pwrite instead of read/write in sec2/log/core VFDs.
+                              [default=yes if pread/pwrite are present]])],
+              [PREADWRITE=$enableval])
+
+## Set the default level.
+if test "X-$PREADWRITE" = X- ; then
+  PREADWRITE=yes
+fi
+
+case "X-$PREADWRITE" in
+  X-yes)
+      if test "X-$PREADWRITE_HAVE_BOTH" = "X-yes"; then
+        AC_DEFINE([HAVE_PREADWRITE], [1], [Define if both pread and pwrite exist.])
+        AC_MSG_RESULT([yes])
+      else
+        AC_MSG_RESULT([no])
+      fi
+    ;;
+  X-no)
+      AC_MSG_RESULT([no])
+    ;;
+  *)
+      AC_MSG_ERROR([Unrecognized value: $PREADWRITE])
+    ;;
+esac
+
+
+## ----------------------------------------------------------------------
 ## Enable embedded library information
 ##
 AC_MSG_CHECKING([whether to have library information embedded in the executables])
@@ -3429,6 +3470,7 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  src/Makefile
                  test/Makefile
                  test/H5srcdir_str.h
+                 test/testabort_fail.sh
                  test/testcheck_version.sh
                  test/testerror.sh
                  test/testflushrefresh.sh
@@ -3436,10 +3478,10 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  test/testlinks_env.sh
                  test/testswmr.sh
                  test/testvdsswmr.sh
-                 test/test_filenotclosed.sh
                  test/test_filter_plugin.sh
                  test/test_usecases.sh
                  testpar/Makefile
+                 testpar/testpflush.sh
                  tools/Makefile
                  tools/lib/Makefile
                  tools/src/Makefile

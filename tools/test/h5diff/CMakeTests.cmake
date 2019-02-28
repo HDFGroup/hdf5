@@ -168,21 +168,12 @@
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_452.txt
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_453.txt
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_454.txt
-      ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_454_ERR.txt
-      ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_454_ERR.err
+      ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/dangling_link.err
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_455.txt
-      ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_455_ERR.txt
-      ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_455_ERR.err
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_456.txt
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_457.txt
-      ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_457_ERR.txt
-      ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_457_ERR.err
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_458.txt
-      ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_458_ERR.txt
-      ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_458_ERR.err
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_459.txt
-      ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_459_ERR.txt
-      ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_459_ERR.err
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_465.txt
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_466.txt
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_467.txt
@@ -238,7 +229,6 @@
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_63.txt
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_600.txt
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_601.txt
-      ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_601_ERR.txt
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_601_ERR.err
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_603.txt
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_604.txt
@@ -293,6 +283,7 @@
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_8625.txt
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_8639.txt
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_ud.txt
+      ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_udfail.err
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_udfail.txt
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_v1.txt
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_v2.txt
@@ -400,72 +391,31 @@
     endif ()
   endmacro ()
 
-  macro (ADD_H5_ERR_TEST resultfile resultcode)
-    # If using memchecker add tests without using scripts
-    if (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (NAME H5DIFF_ERR-${resultfile} COMMAND $<TARGET_FILE:h5diff> --enable-error-stack ${ARGN})
-      set_tests_properties (H5DIFF_ERR-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
-      if (NOT "${resultcode}" STREQUAL "0")
-        set_tests_properties (H5DIFF_ERR-${resultfile} PROPERTIES WILL_FAIL "true")
-      endif ()
-      if (NOT "${last_test}" STREQUAL "")
-        set_tests_properties (H5DIFF_ERR-${resultfile} PROPERTIES DEPENDS ${last_test})
-      endif ()
-    else ()
-      # Remove any output file left over from previous test run
-      add_test (
-          NAME H5DIFF_ERR-${resultfile}-clear-objects
-          COMMAND    ${CMAKE_COMMAND}
-              -E remove
-              testfiles/${resultfile}_ERR.out
-              testfiles/${resultfile}_ERR.out.err
-      )
-      if (NOT "${last_test}" STREQUAL "")
-        set_tests_properties (H5DIFF_ERR-${resultfile}-clear-objects PROPERTIES DEPENDS ${last_test})
-      endif ()
-      add_test (
-          NAME H5DIFF_ERR-${resultfile}
-          COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5diff>"
-              -D "TEST_ARGS:STRING=--enable-error-stack;${ARGN}"
-              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
-              -D "TEST_OUTPUT=${resultfile}_ERR.out"
-              -D "TEST_EXPECT=${resultcode}"
-              -D "TEST_REFERENCE=${resultfile}_ERR.txt"
-              -D "TEST_MASK_ERROR=true"
-              -D "TEST_APPEND=EXIT CODE:"
-              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
-      )
-      set_tests_properties (H5DIFF_ERR-${resultfile} PROPERTIES DEPENDS H5DIFF_ERR-${resultfile}-clear-objects)
-    endif ()
-    set (last_test "H5DIFF_ERR-${resultfile}")
-  endmacro ()
-
   macro (ADD_PH5_TEST resultfile resultcode)
     # If using memchecker add tests without using scripts
     if (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (NAME PH5DIFF-${resultfile} COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_PREFLAGS} $<TARGET_FILE:ph5diff> ${MPIEXEC_POSTFLAGS} ${ARGN})
-      set_tests_properties (PH5DIFF-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/PAR/testfiles")
+      add_test (NAME MPI_TEST_H5DIFF-${resultfile} COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_PREFLAGS} $<TARGET_FILE:ph5diff> ${MPIEXEC_POSTFLAGS} ${ARGN})
+      set_tests_properties (MPI_TEST_H5DIFF-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/PAR/testfiles")
       if (NOT "${resultcode}" STREQUAL "0")
-        set_tests_properties (PH5DIFF-${resultfile} PROPERTIES WILL_FAIL "true")
+        set_tests_properties (MPI_TEST_H5DIFF-${resultfile} PROPERTIES WILL_FAIL "true")
       endif ()
       if (NOT "${last_test}" STREQUAL "")
-        set_tests_properties (PH5DIFF-${resultfile} PROPERTIES DEPENDS ${last_test})
+        set_tests_properties (MPI_TEST_H5DIFF-${resultfile} PROPERTIES DEPENDS ${last_test})
       endif ()
     else ()
       # Remove any output file left over from previous test run
       add_test (
-          NAME PH5DIFF-${resultfile}-clear-objects
+          NAME MPI_TEST_H5DIFF-${resultfile}-clear-objects
           COMMAND    ${CMAKE_COMMAND}
               -E remove
               PAR/testfiles/${resultfile}.out
               PAR/testfiles/${resultfile}.out.err
       )
       if (NOT "${last_test}" STREQUAL "")
-        set_tests_properties (PH5DIFF-${resultfile}-clear-objects PROPERTIES DEPENDS ${last_test})
+        set_tests_properties (MPI_TEST_H5DIFF-${resultfile}-clear-objects PROPERTIES DEPENDS ${last_test})
       endif ()
       add_test (
-          NAME PH5DIFF-${resultfile}
+          NAME MPI_TEST_H5DIFF-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_PROGRAM=${MPIEXEC_EXECUTABLE};${MPIEXEC_NUMPROC_FLAG};${MPIEXEC_MAX_NUMPROCS};${MPIEXEC_PREFLAGS};$<TARGET_FILE:ph5diff>;${MPIEXEC_POSTFLAGS}"
               -D "TEST_ARGS:STRING=${ARGN}"
@@ -479,7 +429,7 @@
               -D "TEST_SORT_COMPARE=TRUE"
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
-      set_tests_properties (PH5DIFF-${resultfile} PROPERTIES DEPENDS PH5DIFF-${resultfile}-clear-objects)
+      set_tests_properties (MPI_TEST_H5DIFF-${resultfile} PROPERTIES DEPENDS MPI_TEST_H5DIFF-${resultfile}-clear-objects)
       set (last_test "PH5DIFF-${resultfile}")
     endif ()
   endmacro ()
@@ -526,53 +476,6 @@
         )
       endif ()
       set_tests_properties (H5DIFF_UD-${testname} PROPERTIES DEPENDS H5DIFF_UD-${testname}-clear-objects)
-    endif ()
-  endmacro ()
-
-  macro (ADD_H5_UD_ERR_TEST testname resultcode resultfile)
-    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
-      # Remove any output file left over from previous test run
-      add_test (
-          NAME H5DIFF_UD_ERR-${testname}-clearall-objects
-          COMMAND    ${CMAKE_COMMAND}
-              -E remove
-              testfiles/${resultfile}_ERR.out
-              testfiles/${resultfile}_ERR.out.err
-      )
-      if ("${resultcode}" STREQUAL "2")
-        add_test (
-            NAME H5DIFF_UD_ERR-${testname}
-            COMMAND "${CMAKE_COMMAND}"
-                -D "TEST_PROGRAM=$<TARGET_FILE:h5diff-shared>"
-                -D "TEST_ARGS:STRING=--enable-error-stack;${ARGN}"
-                -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
-                -D "TEST_OUTPUT=${resultfile}_ERR.out"
-                -D "TEST_EXPECT=${resultcode}"
-                -D "TEST_REFERENCE=${resultfile}_ERR.txt"
-                -D "TEST_MASK_ERROR=true"
-                -D "TEST_APPEND=EXIT CODE:"
-                -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
-                -D "TEST_ENV_VALUE=${CMAKE_BINARY_DIR}"
-                -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
-        )
-      else ()
-        add_test (
-            NAME H5DIFF_UD_ERR-${testname}
-            COMMAND "${CMAKE_COMMAND}"
-                -D "TEST_PROGRAM=$<TARGET_FILE:h5diff-shared>"
-                -D "TEST_ARGS:STRING=--enable-error-stack;${ARGN}"
-                -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
-                -D "TEST_OUTPUT=${resultfile}_ERR.out"
-                -D "TEST_EXPECT=${resultcode}"
-                -D "TEST_REFERENCE=${resultfile}_ERR.txt"
-                -D "TEST_MASK_ERROR=true"
-                -D "TEST_APPEND=EXIT CODE:"
-                -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
-                -D "TEST_ENV_VALUE=${CMAKE_BINARY_DIR}/plugins"
-                -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
-        )
-      endif ()
-      set_tests_properties (H5DIFF_UD_ERR-${testname} PROPERTIES DEPENDS H5DIFF_UD_ERR-${testname}-clearall-objects)
     endif ()
   endmacro ()
 
@@ -798,26 +701,16 @@
           h5diff_453.out.err
           h5diff_454.out
           h5diff_454.out.err
-          h5diff_454_ERR.out
-          h5diff_454_ERR.out.err
           h5diff_455.out
           h5diff_455.out.err
-          h5diff_455_ERR.out
-          h5diff_455_ERR.out.err
           h5diff_456.out
           h5diff_456.out.err
           h5diff_457.out
           h5diff_457.out.err
-          h5diff_457_ERR.out
-          h5diff_457_ERR.out.err
           h5diff_458.out
           h5diff_458.out.err
-          h5diff_458_ERR.out
-          h5diff_458_ERR.out.err
           h5diff_459.out
           h5diff_459.out.err
-          h5diff_459_ERR.out
-          h5diff_459_ERR.out.err
           h5diff_465.out
           h5diff_465.out.err
           h5diff_466.out
@@ -922,8 +815,6 @@
           h5diff_600.out.err
           h5diff_601.out
           h5diff_601.out.err
-          h5diff_601_ERR.out
-          h5diff_601_ERR.out.err
           h5diff_603.out
           h5diff_603.out.err
           h5diff_604.out
@@ -1181,7 +1072,6 @@ ADD_H5_TEST (h5diff_600 1 ${FILE1})
 
 # 6.1: Check if non-exist object name is specified
 ADD_H5_TEST (h5diff_601 2 ${FILE1} ${FILE1} nono_obj)
-ADD_H5_ERR_TEST (h5diff_601 2 ${FILE1} ${FILE1} nono_obj)
 
 # ##############################################################################
 # # -d
@@ -1481,26 +1371,21 @@ ADD_H5_TEST (h5diff_453 2  --follow-symlinks -v --no-dangling-links  ${FILE13} $
 
 # dangling link found for soft links (obj to obj)
 ADD_H5_TEST (h5diff_454 2  --follow-symlinks -v --no-dangling-links  ${FILE13} ${FILE13} /softlink_dset2 /softlink_noexist)
-ADD_H5_ERR_TEST (h5diff_454 2  --follow-symlinks -v --no-dangling-links  ${FILE13} ${FILE13} /softlink_dset2 /softlink_noexist)
 
 # dangling link found for soft links (obj to obj) Both dangle links
 ADD_H5_TEST (h5diff_455 2  --follow-symlinks -v --no-dangling-links  ${FILE13} ${FILE13} /softlink_noexist /softlink_noexist)
-ADD_H5_ERR_TEST (h5diff_455 2  --follow-symlinks -v --no-dangling-links  ${FILE13} ${FILE13} /softlink_noexist /softlink_noexist)
 
 # dangling link found for ext links (FILE to FILE)
 ADD_H5_TEST (h5diff_456 2  --follow-symlinks -v --no-dangling-links  ${FILE15} ${FILE15})
 
 # dangling link found for ext links (obj to obj). target file exist
 ADD_H5_TEST (h5diff_457 2  --follow-symlinks -v --no-dangling-links  ${FILE15} ${FILE15} /ext_link_dset1 /ext_link_noexist1)
-ADD_H5_ERR_TEST (h5diff_457 2  --follow-symlinks -v --no-dangling-links  ${FILE15} ${FILE15} /ext_link_dset1 /ext_link_noexist1)
 
 # dangling link found for ext links (obj to obj). target file NOT exist
 ADD_H5_TEST (h5diff_458 2  --follow-symlinks -v --no-dangling-links  ${FILE15} ${FILE15} /ext_link_dset1 /ext_link_noexist2)
-ADD_H5_ERR_TEST (h5diff_458 2  --follow-symlinks -v --no-dangling-links  ${FILE15} ${FILE15} /ext_link_dset1 /ext_link_noexist2)
 
 # dangling link found for ext links (obj to obj). Both dangle links
 ADD_H5_TEST (h5diff_459 2  --follow-symlinks -v --no-dangling-links  ${FILE15} ${FILE15} /ext_link_noexist1 /ext_link_noexist2)
-ADD_H5_ERR_TEST (h5diff_459 2  --follow-symlinks -v --no-dangling-links  ${FILE15} ${FILE15} /ext_link_noexist1 /ext_link_noexist2)
 
 # dangling link --follow-symlinks (obj vs obj)
 # (HDFFV-7836)

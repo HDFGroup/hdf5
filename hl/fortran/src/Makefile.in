@@ -584,7 +584,6 @@ MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
 MANIFEST_TOOL = @MANIFEST_TOOL@
 MEMORYALLOCSANITYCHECK = @MEMORYALLOCSANITYCHECK@
-METADATATRACEFILE = @METADATATRACEFILE@
 MKDIR_P = @MKDIR_P@
 MPE = @MPE@
 NM = @NM@
@@ -618,6 +617,7 @@ PAC_FORTRAN_NUM_INTEGER_KINDS = @PAC_FORTRAN_NUM_INTEGER_KINDS@
 PARALLEL = @PARALLEL@
 PARALLEL_FILTERED_WRITES = @PARALLEL_FILTERED_WRITES@
 PATH_SEPARATOR = @PATH_SEPARATOR@
+PREADWRITE = @PREADWRITE@
 PROFILING = @PROFILING@
 RANLIB = @RANLIB@
 ROOT = @ROOT@
@@ -762,29 +762,29 @@ TRACE = perl $(top_srcdir)/bin/trace
 # .chklog files are output from those tests.
 # *.clog and *.clog2 are from the MPE option.
 CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.clog2
-LT_VERS_INTERFACE = 103
+LT_VERS_INTERFACE = 104
 LT_VERS_REVISION = 0
-LT_VERS_AGE = 0
-LT_CXX_VERS_INTERFACE = 103
+LT_VERS_AGE = 1
+LT_CXX_VERS_INTERFACE = 104
 LT_CXX_VERS_REVISION = 0
-LT_CXX_VERS_AGE = 0
-LT_F_VERS_INTERFACE = 101
-LT_F_VERS_REVISION = 2
-LT_F_VERS_AGE = 1
+LT_CXX_VERS_AGE = 1
+LT_F_VERS_INTERFACE = 102
+LT_F_VERS_REVISION = 0
+LT_F_VERS_AGE = 0
 LT_HL_VERS_INTERFACE = 101
-LT_HL_VERS_REVISION = 1
+LT_HL_VERS_REVISION = 2
 LT_HL_VERS_AGE = 1
 LT_HL_CXX_VERS_INTERFACE = 101
-LT_HL_CXX_VERS_REVISION = 2
+LT_HL_CXX_VERS_REVISION = 3
 LT_HL_CXX_VERS_AGE = 1
 LT_HL_F_VERS_INTERFACE = 100
-LT_HL_F_VERS_REVISION = 3
+LT_HL_F_VERS_REVISION = 4
 LT_HL_F_VERS_AGE = 0
-LT_JAVA_VERS_INTERFACE = 103
+LT_JAVA_VERS_INTERFACE = 104
 LT_JAVA_VERS_REVISION = 0
-LT_JAVA_VERS_AGE = 3
+LT_JAVA_VERS_AGE = 4
 LT_TOOLS_VERS_INTERFACE = 101
-LT_TOOLS_VERS_REVISION = 1
+LT_TOOLS_VERS_REVISION = 2
 LT_TOOLS_VERS_AGE = 1
 
 # Our main target, the high-level fortran library
@@ -1264,7 +1264,8 @@ install-dvi: install-dvi-am
 install-dvi-am:
 
 install-exec-am: install-libLTLIBRARIES
-
+	@$(NORMAL_INSTALL)
+	$(MAKE) $(AM_MAKEFLAGS) install-exec-hook
 install-html: install-html-am
 
 install-html-am:
@@ -1306,7 +1307,7 @@ ps-am:
 
 uninstall-am: uninstall-libLTLIBRARIES uninstall-local
 
-.MAKE: check-am install-am install-strip
+.MAKE: check-am install-am install-exec-am install-strip
 
 .PHONY: CTAGS GTAGS TAGS all all-am all-local check check-TESTS \
 	check-am clean clean-generic clean-libLTLIBRARIES \
@@ -1315,8 +1316,8 @@ uninstall-am: uninstall-libLTLIBRARIES uninstall-local
 	distclean-libtool distclean-local distclean-tags distdir dvi \
 	dvi-am html html-am info info-am install install-am \
 	install-data install-data-am install-data-local install-dvi \
-	install-dvi-am install-exec install-exec-am install-html \
-	install-html-am install-info install-info-am \
+	install-dvi-am install-exec install-exec-am install-exec-hook \
+	install-html install-html-am install-info install-info-am \
 	install-libLTLIBRARIES install-man install-pdf install-pdf-am \
 	install-ps install-ps-am install-strip installcheck \
 	installcheck-am installdirs maintainer-clean \
@@ -1340,6 +1341,20 @@ uninstall-am: uninstall-libLTLIBRARIES uninstall-local
 help:
 	@$(top_srcdir)/bin/makehelp
 
+# The name of the lib file doesn't follow the same pattern as the other hl lib
+# files, namely libhdf5_hl_*.  Add a symlink with the compliant name to the
+# actual lib file.
+install-exec-hook:
+	cd $(DESTDIR)$(libdir) && \
+	    if test -f libhdf5hl_fortran.a -a \
+	    ! -f libhdf5_hl_fortran.a; then \
+	        $(LN_S) libhdf5hl_fortran.a libhdf5_hl_fortran.a; \
+	    fi; \
+	    if test -f libhdf5hl_fortran.so -a \
+	    ! -f libhdf5_hl_fortran.so; then \
+	        $(LN_S) libhdf5hl_fortran.so libhdf5_hl_fortran.so; \
+	    fi;
+
 # Fortran module files can have different extensions and different names
 # (e.g., different capitalizations) on different platforms.  Write rules
 # for them explicitly rather than trying to teach automake about them.
@@ -1362,6 +1377,7 @@ uninstall-local:
 	    set -x; $(RM) $(includedir)/*.$(F9XMODEXT);                 \
 	  fi;                                                           \
 	fi
+	$(RM) $(DESTDIR)$(libdir)/libhdf5_hl_fortran*
 
 # H5HL_buildiface.F90 generates all the APIs that have a KIND type associated
 # with them.
@@ -1583,7 +1599,7 @@ build-check-p: $(LIB) $(PROGS) $(chk_TESTS)
 	    echo "**** Hint ****";                                            \
 	    echo "Parallel test files reside in the current directory"        \
 	         "by default.";                                               \
-	    echo "Set HDF5_PARAPREFIX to use another directory. E.g.,";       \
+	    echo "Set HDF5_PARAPREFIX to use another directory. e.g.,";       \
 	    echo "    HDF5_PARAPREFIX=/PFS/user/me";                          \
 	    echo "    export HDF5_PARAPREFIX";                                \
 	    echo "    make check";                                            \

@@ -125,7 +125,7 @@ else ()
 endif ()
 configure_file (
     ${HDF_RESOURCES_DIR}/libhdf5.settings.cmake.in
-    ${HDF5_BINARY_DIR}/libhdf5.settings @ONLY
+    ${HDF5_BINARY_DIR}/libhdf5.settings ESCAPE_QUOTES @ONLY
 )
 install (
     FILES ${HDF5_BINARY_DIR}/libhdf5.settings
@@ -134,7 +134,7 @@ install (
 )
 
 #-----------------------------------------------------------------------------
-# Configure the HDF518_Examples.cmake file and the examples
+# Configure the HDF5_Examples.cmake file and the examples
 #-----------------------------------------------------------------------------
 option (HDF5_PACK_EXAMPLES  "Package the HDF5 Library Examples Compressed File" OFF)
 if (HDF5_PACK_EXAMPLES)

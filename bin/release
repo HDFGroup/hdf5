@@ -55,11 +55,11 @@ for compressing the resulting tar archive (if none are given then
 
     tar		-- use tar and don't do any compressing.
     gzip	-- use gzip with "-9" and append ".gz" to the output name.
-    cmake-tgz   -- create a tar file using the gzip default level with a build-unix.sh 
-                   command file and all other CMake files needed to build HDF5 source
-                   using CMake on unix machines.
     bzip2       -- use bzip2 with "-9" and append ".bz2" to the output name.
     zip		-- convert all text files to DOS style and form a zip file for Windows use.
+    cmake-tgz   -- create a tar file using the gzip default level with a build-unix.sh 
+                   command file and all other CMake files needed to build HDF5 source
+                   using CMake on unix machines, including HPC machines.
     cmake-zip   -- convert all text files to DOS style and create a zip file inluding cmake
                    scripts and .bat files to build HDF5 source using CMake on Windows. 
     doc         -- produce the latest doc tree in addition to the archive.
@@ -225,7 +225,7 @@ tar2cmakezip()
     # step 3: add SZIP.tar.gz, ZLib.tar.gz and cmake files
     cp /mnt/scr1/pre-release/hdf5/CMake/SZip.tar.gz $cmziptmpsubdir
     cp /mnt/scr1/pre-release/hdf5/CMake/ZLib.tar.gz $cmziptmpsubdir
-    cp /mnt/scr1/pre-release/hdf5/CMake/HDF5Examples-1.10.10-Source.tar.gz $cmziptmpsubdir
+    cp /mnt/scr1/pre-release/hdf5/CMake/HDF5Examples-1.10.13-Source.zip $cmziptmpsubdir
     cp $cmziptmpsubdir/$version/config/cmake/scripts/CTestScript.cmake $cmziptmpsubdir
     cp $cmziptmpsubdir/$version/config/cmake/scripts/HDF5config.cmake $cmziptmpsubdir
     cp $cmziptmpsubdir/$version/config/cmake/scripts/HDF5options.cmake $cmziptmpsubdir
@@ -256,7 +256,7 @@ tar2cmakezip()
 }
 
 # Function name: tar2cmaketgz
-# Convert the release tarball to a Windows zipball with files to run CMake build.
+# Convert the release tarball to a gzipped tar file with files to run CMake build.
 #
 # Programmer: Larry Knox
 # Creation date: 2017-02-20
@@ -271,12 +271,14 @@ tar2cmakezip()
 # 3. add SZIP.tar.gz, ZLib.tar.gz and cmake files to top level directory.
 # 4. create gzipped tar file with these contents:
 #        build-unix.sh          script
+#        build-unix-hpc.sh      script
 #        hdf5-<version>         source code directory extracted from tar file
 #        CTestScript.cmake      cmake file copied from <hdf5 source code>/config/cmake/scripts
 #        HDF5config.cmake       cmake file copied from <hdf5 source code>/config/cmake/scripts
 #        HDF5options.cmake      cmake file copied from <hdf5 source code>/config/cmake/scripts
 #        SZip.tar.gz            copied from /mnt/scr1/pre-release/hdf5/CMake
 #        ZLib.tar.gz            copied from /mnt/scr1/pre-release/hdf5/CMake
+#        README_HDF5_CMake      copied from <hdf5 source code>/release_docs
 
 
 # Parameters:
@@ -314,16 +316,18 @@ tar2cmaketgz()
     fi
 
 
-    # step 2: add build-unix.sh script
+    # step 2: add build-unix.sh and build-unix-hpc.sh scripts
     (cd $cmgztmpsubdir; echo "ctest -S HDF5config.cmake,BUILD_GENERATOR=Unix -C Release -V -O hdf5.log" > build-unix.sh; chmod 755 build-unix.sh)
+    (cd $cmgztmpsubdir; echo "ctest -S HDF5config.cmake,HPC=sbatch,MPI=true -C Release -V -O hdf5.log" > build-unix-hpc.sh; chmod 755 build-unix-hpc.sh)
 
     # step 3: add SZIP.tar.gz, ZLib.tar.gz and cmake files
     cp /mnt/scr1/pre-release/hdf5/CMake/SZip.tar.gz $cmgztmpsubdir
     cp /mnt/scr1/pre-release/hdf5/CMake/ZLib.tar.gz $cmgztmpsubdir
-    cp /mnt/scr1/pre-release/hdf5/CMake/HDF5Examples-1.10.10-Source.tar.gz $cmgztmpsubdir
+    cp /mnt/scr1/pre-release/hdf5/CMake/HDF5Examples-1.10.13-Source.tar.gz $cmgztmpsubdir
     cp $cmgztmpsubdir/$version/config/cmake/scripts/CTestScript.cmake $cmgztmpsubdir
     cp $cmgztmpsubdir/$version/config/cmake/scripts/HDF5config.cmake $cmgztmpsubdir
     cp $cmgztmpsubdir/$version/config/cmake/scripts/HDF5options.cmake $cmgztmpsubdir
+    cp $cmgztmpsubdir/$version/release_docs/README_HDF5_CMake $cmgztmpsubdir
     tar czf $DEST/CMake-$HDF5_VERS.tar.gz -C $cmgztmpdir . || exit 1 
                  
     # cleanup

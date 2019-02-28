@@ -594,7 +594,6 @@ MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
 MANIFEST_TOOL = @MANIFEST_TOOL@
 MEMORYALLOCSANITYCHECK = @MEMORYALLOCSANITYCHECK@
-METADATATRACEFILE = @METADATATRACEFILE@
 MKDIR_P = @MKDIR_P@
 MPE = @MPE@
 NM = @NM@
@@ -628,6 +627,7 @@ PAC_FORTRAN_NUM_INTEGER_KINDS = @PAC_FORTRAN_NUM_INTEGER_KINDS@
 PARALLEL = @PARALLEL@
 PARALLEL_FILTERED_WRITES = @PARALLEL_FILTERED_WRITES@
 PATH_SEPARATOR = @PATH_SEPARATOR@
+PREADWRITE = @PREADWRITE@
 PROFILING = @PROFILING@
 RANLIB = @RANLIB@
 ROOT = @ROOT@
@@ -772,29 +772,29 @@ TRACE = perl $(top_srcdir)/bin/trace
 # .chklog files are output from those tests.
 # *.clog and *.clog2 are from the MPE option.
 CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.clog2
-LT_VERS_INTERFACE = 103
+LT_VERS_INTERFACE = 104
 LT_VERS_REVISION = 0
-LT_VERS_AGE = 0
-LT_CXX_VERS_INTERFACE = 103
+LT_VERS_AGE = 1
+LT_CXX_VERS_INTERFACE = 104
 LT_CXX_VERS_REVISION = 0
-LT_CXX_VERS_AGE = 0
-LT_F_VERS_INTERFACE = 101
-LT_F_VERS_REVISION = 2
-LT_F_VERS_AGE = 1
+LT_CXX_VERS_AGE = 1
+LT_F_VERS_INTERFACE = 102
+LT_F_VERS_REVISION = 0
+LT_F_VERS_AGE = 0
 LT_HL_VERS_INTERFACE = 101
-LT_HL_VERS_REVISION = 1
+LT_HL_VERS_REVISION = 2
 LT_HL_VERS_AGE = 1
 LT_HL_CXX_VERS_INTERFACE = 101
-LT_HL_CXX_VERS_REVISION = 2
+LT_HL_CXX_VERS_REVISION = 3
 LT_HL_CXX_VERS_AGE = 1
 LT_HL_F_VERS_INTERFACE = 100
-LT_HL_F_VERS_REVISION = 3
+LT_HL_F_VERS_REVISION = 4
 LT_HL_F_VERS_AGE = 0
-LT_JAVA_VERS_INTERFACE = 103
+LT_JAVA_VERS_INTERFACE = 104
 LT_JAVA_VERS_REVISION = 0
-LT_JAVA_VERS_AGE = 3
+LT_JAVA_VERS_AGE = 4
 LT_TOOLS_VERS_INTERFACE = 101
-LT_TOOLS_VERS_REVISION = 1
+LT_TOOLS_VERS_REVISION = 2
 LT_TOOLS_VERS_AGE = 1
 AM_FCLIBS = $(LIBHDF5)
 
@@ -1680,7 +1680,7 @@ build-check-p: $(LIB) $(PROGS) $(chk_TESTS)
 	    echo "**** Hint ****";                                            \
 	    echo "Parallel test files reside in the current directory"        \
 	         "by default.";                                               \
-	    echo "Set HDF5_PARAPREFIX to use another directory. E.g.,";       \
+	    echo "Set HDF5_PARAPREFIX to use another directory. e.g.,";       \
 	    echo "    HDF5_PARAPREFIX=/PFS/user/me";                          \
 	    echo "    export HDF5_PARAPREFIX";                                \
 	    echo "    make check";                                            \
