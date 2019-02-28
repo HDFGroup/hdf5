@@ -85,23 +85,6 @@ set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ALLOW_EXTERNAL_SUPPORT:STRIN
 #set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_HL_LIB:BOOL=OFF")
 
 #############################################################################################
-### enable parallel builds
-
-#set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_PARALLEL:BOOL=ON")
-#set(ADD_BUILD_OPTIONS “${ADD_BUILD_OPTIONS} -DHDF5_BUILD_CPP_LIB:BOOL=OFF”)
-#set(ADD_BUILD_OPTIONS “${ADD_BUILD_OPTIONS} -DHDF5_BUILD_JAVA:BOOL=OFF”)
-#set(ADD_BUILD_OPTIONS “${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_THREADSAFE:BOOL=OFF”)
-
-#############################################################################################
-### enable thread-safety builds
-
-#set(ADD_BUILD_OPTIONS “${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_THREADSAFE:BOOL=ON”)
-#set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_PARALLEL:BOOL=OFF")
-#set(ADD_BUILD_OPTIONS “${ADD_BUILD_OPTIONS} -DHDF5_BUILD_CPP_LIB:BOOL=OFF”)
-#set(ADD_BUILD_OPTIONS “${ADD_BUILD_OPTIONS} -DHDF5_BUILD_FORTRAN:BOOL=OFF”)
-#set(ADD_BUILD_OPTIONS “${ADD_BUILD_OPTIONS} -DHDF5_BUILD_HL_LIB:BOOL=OFF”)
-
-#############################################################################################
 ### disable test program builds
 
 #set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DBUILD_TESTING:BOOL=OFF")
@@ -117,10 +100,5 @@ set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_PACKAGE_EXTLIBS:BOOL=ON")
 ### use a toolchain file
 
 #set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DCMAKE_TOOLCHAIN_FILE:STRING=config/toolchain/intel.cmake")
-
-#############################################################################################
-### use a toolchain file
-
-#set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DCMAKE_TOOLCHAIN_FILE:STRING=config/intel.cmake")
 
 #############################################################################################
