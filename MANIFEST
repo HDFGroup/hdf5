@@ -898,6 +898,7 @@
 ./src/H5Tvlen.c
 ./src/H5TS.c
 ./src/H5TSprivate.h
+./src/H5TSpublic.h
 ./src/H5VL.c
 ./src/H5VLcallback.c
 ./src/H5VLint.c

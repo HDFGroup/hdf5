@@ -100,23 +100,104 @@ H5TS_pthread_first_thread_init(void)
 #endif
 
     /* initialize global API mutex lock */
-    pthread_mutex_init(&H5_g.init_lock.atomic_lock, NULL);
-    pthread_cond_init(&H5_g.init_lock.cond_var, NULL);
+    HDpthread_mutex_init(&H5_g.init_lock.atomic_lock, NULL);
+    HDpthread_cond_init(&H5_g.init_lock.cond_var, NULL);
     H5_g.init_lock.lock_count = 0;
 
     /* initialize key for thread-specific error stacks */
-    pthread_key_create(&H5TS_errstk_key_g, H5TS_key_destructor);
+    HDpthread_key_create(&H5TS_errstk_key_g, H5TS_key_destructor);
 
     /* initialize key for thread-specific function stacks */
-    pthread_key_create(&H5TS_funcstk_key_g, H5TS_key_destructor);
+    HDpthread_key_create(&H5TS_funcstk_key_g, H5TS_key_destructor);
 
     /* initialize key for thread-specific API contexts */
-    pthread_key_create(&H5TS_apictx_key_g, H5TS_key_destructor);
+    HDpthread_key_create(&H5TS_apictx_key_g, H5TS_key_destructor);
 
     /* initialize key for thread cancellability mechanism */
-    pthread_key_create(&H5TS_cancel_key_g, H5TS_key_destructor);
+    HDpthread_key_create(&H5TS_cancel_key_g, H5TS_key_destructor);
 }
 #endif /* H5_HAVE_WIN_THREADS */
+
+
+/*--------------------------------------------------------------------------
+ * Function:    H5TS__mutex_acquire
+ *
+ * Purpose:     Attempts to acquire a mutex lock, without blocking
+ *
+ * Note:	On success, the 'acquired' flag indicates if the HDF5 library
+ *		global lock was acquired.
+ *
+ * Note:	The Windows threads code is very likely bogus.
+ *
+ * Return:      Non-negative on success / Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              Februrary 27, 2019
+ *
+ *--------------------------------------------------------------------------
+ */
+static herr_t
+H5TS__mutex_acquire(H5TS_mutex_t *mutex, hbool_t *acquired)
+{
+#ifdef  H5_HAVE_WIN_THREADS
+    EnterCriticalSection(&mutex->CriticalSection); 
+    *acquired = TRUE;
+    return 0;
+#else /* H5_HAVE_WIN_THREADS */
+    pthread_t my_thread_id = HDpthread_self();
+    herr_t ret_value = 0;
+
+    /* Attempt to acquire the mutex lock */
+    if(0 == HDpthread_mutex_lock(&mutex->atomic_lock)) {
+        /* Check if locked already */
+        if(mutex->lock_count) {
+             /* Check for this thread already owning the lock */
+             if(HDpthread_equal(my_thread_id, mutex->owner_thread)) {
+                /* Already owned by self - increment count */
+                mutex->lock_count++;
+                *acquired = TRUE;
+            } /* end if */
+            else
+                *acquired = FALSE;
+        } /* end if */
+        else {
+            /* Take ownership of the mutex */
+            mutex->owner_thread = my_thread_id;
+            mutex->lock_count = 1;
+            *acquired = TRUE;
+        } /* end else */
+
+        if(0 != HDpthread_mutex_unlock(&mutex->atomic_lock))
+            ret_value = -1;
+    } /* end if */
+    else
+        ret_value = -1;
+
+    return ret_value;
+#endif /* H5_HAVE_WIN_THREADS */
+} /* end H5TS__mutex_acquire() */
+
+
+/*--------------------------------------------------------------------------
+ * Function:    H5TSmutex_acquire
+ *
+ * Purpose:     Attempts to acquire the HDF5 library global lock
+ *
+ * Note:	On success, the 'acquired' flag indicates if the HDF5 library
+ *		global lock was acquired.
+ *
+ * Return:      Non-negative on success / Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              Februrary 27, 2019
+ *
+ *--------------------------------------------------------------------------
+ */
+herr_t
+H5TSmutex_acquire(hbool_t *acquired)
+{
+    return(H5TS__mutex_acquire(&H5_g.init_lock, acquired));
+} /* end H5TSmutex_acquire() */
 
 
 /*--------------------------------------------------------------------------
@@ -143,28 +224,28 @@ herr_t
 H5TS_mutex_lock(H5TS_mutex_t *mutex)
 {
 #ifdef  H5_HAVE_WIN_THREADS
-    EnterCriticalSection( &mutex->CriticalSection); 
+    EnterCriticalSection(&mutex->CriticalSection); 
     return 0;
 #else /* H5_HAVE_WIN_THREADS */
-    herr_t ret_value = pthread_mutex_lock(&mutex->atomic_lock);
+    herr_t ret_value = HDpthread_mutex_lock(&mutex->atomic_lock);
 
     if (ret_value)
         return ret_value;
 
-    if(mutex->lock_count && pthread_equal(HDpthread_self(), mutex->owner_thread)) {
+    if(mutex->lock_count && HDpthread_equal(HDpthread_self(), mutex->owner_thread)) {
         /* already owned by self - increment count */
         mutex->lock_count++;
     } else {
         /* if owned by other thread, wait for condition signal */
         while(mutex->lock_count)
-            pthread_cond_wait(&mutex->cond_var, &mutex->atomic_lock);
+            HDpthread_cond_wait(&mutex->cond_var, &mutex->atomic_lock);
 
         /* After we've received the signal, take ownership of the mutex */
         mutex->owner_thread = HDpthread_self();
         mutex->lock_count = 1;
     }
 
-    return pthread_mutex_unlock(&mutex->atomic_lock); 
+    return HDpthread_mutex_unlock(&mutex->atomic_lock); 
 #endif /* H5_HAVE_WIN_THREADS */
 }
 
@@ -197,19 +278,19 @@ H5TS_mutex_unlock(H5TS_mutex_t *mutex)
     LeaveCriticalSection(&mutex->CriticalSection);
     return 0; 
 #else  /* H5_HAVE_WIN_THREADS */
-    herr_t ret_value = pthread_mutex_lock(&mutex->atomic_lock);
+    herr_t ret_value = HDpthread_mutex_lock(&mutex->atomic_lock);
 
     if(ret_value)
         return ret_value;
 
     mutex->lock_count--;
 
-    ret_value = pthread_mutex_unlock(&mutex->atomic_lock);
+    ret_value = HDpthread_mutex_unlock(&mutex->atomic_lock);
 
     if(mutex->lock_count == 0) {
         int err;
 
-        err = pthread_cond_signal(&mutex->cond_var);
+        err = HDpthread_cond_signal(&mutex->cond_var);
         if(err != 0)
             ret_value = err;
     } /* end if */
@@ -217,6 +298,30 @@ H5TS_mutex_unlock(H5TS_mutex_t *mutex)
     return ret_value; 
 #endif /* H5_HAVE_WIN_THREADS */
 } /* H5TS_mutex_unlock */
+
+
+/*--------------------------------------------------------------------------
+ * Function:    H5TSmutex_release
+ *
+ * Purpose:     Releases the HDF5 library global lock
+ *
+ * Return:      Non-negative on success / Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              Februrary 27, 2019
+ *
+ *--------------------------------------------------------------------------
+ */
+herr_t
+H5TSmutex_release(void)
+{
+    herr_t ret_value = 0;
+
+    if(0 != H5TS_mutex_unlock(&H5_g.init_lock))
+        ret_value = -1;
+
+    return(ret_value);
+} /* end H5TSmutex_release() */
 
 
 /*--------------------------------------------------------------------------
@@ -270,13 +375,12 @@ H5TS_cancel_count_inc(void)
             return FAIL;
         }
 
-        ret_value = pthread_setspecific(H5TS_cancel_key_g, (void *)cancel_counter);
+        ret_value = HDpthread_setspecific(H5TS_cancel_key_g, (void *)cancel_counter);
     }
 
     if (cancel_counter->cancel_count == 0)
         /* thread entering library */
-        ret_value = pthread_setcancelstate(PTHREAD_CANCEL_DISABLE,
-             &cancel_counter->previous_state);
+        ret_value = HDpthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &cancel_counter->previous_state);
 
     ++cancel_counter->cancel_count;
 
@@ -320,7 +424,7 @@ H5TS_cancel_count_dec(void)
     cancel_counter = (H5TS_cancel_t *)H5TS_get_thread_local_value(H5TS_cancel_key_g); 
 
     if (cancel_counter->cancel_count == 1)
-        ret_value = pthread_setcancelstate(cancel_counter->previous_state, NULL);
+        ret_value = HDpthread_setcancelstate(cancel_counter->previous_state, NULL);
 
     --cancel_counter->cancel_count; 
 
@@ -520,7 +624,7 @@ H5TS_create_thread(void *(*func)(void *), H5TS_attr_t *attr, void *udata)
 
 #else /* H5_HAVE_WIN_THREADS */
 
-    pthread_create(&ret_value, attr, (void * (*)(void *))func, udata);
+    HDpthread_create(&ret_value, attr, (void * (*)(void *))func, udata);
 
 #endif /* H5_HAVE_WIN_THREADS */
 
