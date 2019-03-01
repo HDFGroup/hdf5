@@ -26,11 +26,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-/* Disable certain warnings in PC-Lint: */
-/*lint --emacro( {534, 830}, H5P_DEFAULT, H5P_FILE_ACCESS, H5P_DATASET_XFER) */
-/*lint --emacro( {534, 830}, H5FD_MULTI) */
-/*lint -esym( 534, H5Eclear2, H5Epush2) */
-
 #include "hdf5.h"
 
 
@@ -213,16 +208,15 @@ my_strdup(const char *s)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_multi_init
+ * Function:    H5FD_multi_init
  *
- * Purpose:	Initialize this driver by registering the driver with the
- *		library.
+ * Purpose:     Initialize this driver by registering the driver with the
+ *              library.
  *
- * Return:	Success:	The driver ID for the multi driver.
+ * Return:      Success:    The driver ID for the multi driver
+ *              Failure:    H5I_INVALID_HID
  *
- *		Failure:	Negative
- *
- * Programmer:	Robb Matzke
+ * Programmer:  Robb Matzke
  *              Wednesday, August  4, 1999
  *
  *-------------------------------------------------------------------------
@@ -233,11 +227,11 @@ H5FD_multi_init(void)
     /* Clear the error stack */
     H5Eclear2(H5E_DEFAULT);
 
-    if(H5I_VFL!=H5Iget_type(H5FD_MULTI_g))
+    if(H5I_VFL != H5Iget_type(H5FD_MULTI_g))
         H5FD_MULTI_g = H5FDregister(&H5FD_multi_g);
 
     return H5FD_MULTI_g;
-}
+} /* end H5FD_multi_init() */
 
 
 /*---------------------------------------------------------------------------
@@ -499,6 +493,7 @@ H5Pset_fapl_multi(hid_t fapl_id, const H5FD_mem_t *memb_map,
      * Initialize driver specific information. No need to copy it into the FA
      * struct since all members will be copied by H5Pset_driver().
      */
+    memset(&fa, 0, sizeof(H5FD_multi_fapl_t));
     memcpy(fa.memb_map, memb_map, H5FD_MEM_NTYPES*sizeof(H5FD_mem_t));
     memcpy(fa.memb_fapl, memb_fapl, H5FD_MEM_NTYPES*sizeof(hid_t));
     memcpy(fa.memb_name, memb_name, H5FD_MEM_NTYPES*sizeof(char*));
@@ -894,7 +889,7 @@ static void *
 H5FD_multi_fapl_copy(const void *_old_fa)
 {
     const H5FD_multi_fapl_t *old_fa = (const H5FD_multi_fapl_t*)_old_fa;
-    H5FD_multi_fapl_t *new_fa = (H5FD_multi_fapl_t *)malloc(sizeof(H5FD_multi_fapl_t));
+    H5FD_multi_fapl_t *new_fa = (H5FD_multi_fapl_t *)calloc(1, sizeof(H5FD_multi_fapl_t));
     int nerrors = 0;
     static const char *func="H5FD_multi_fapl_copy";  /* Function Name for error reporting */
 

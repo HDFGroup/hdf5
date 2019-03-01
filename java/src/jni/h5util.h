@@ -35,18 +35,29 @@ typedef struct h5str_t {
     size_t   max;  /* the allocated size of the string */
 } h5str_t;
 
-extern void    h5str_new (h5str_t *str, size_t len);
-extern void    h5str_free (h5str_t *str);
-extern void    h5str_resize (h5str_t *str, size_t new_len);
-extern char*   h5str_append (h5str_t *str, const char* cstr);
-extern size_t  h5str_vlsprintf(h5str_t *str, hid_t container, hid_t tid, hvl_t *buf, int expand_data);
-extern size_t  h5str_sprintf(h5str_t *str, hid_t container, hid_t tid, void *buf, int ptrlen, int expand_data);
-extern size_t  h5str_vlsconvert(char *str, hid_t container, hid_t tid, hvl_t *buf, int expand_data);
-extern size_t  h5str_convert(char **str, hid_t container, hid_t tid, hvl_t *buf, int ptroffset, int expand_data);
+extern void    h5str_new(h5str_t *str, size_t len);
+extern void    h5str_free(h5str_t *str);
+extern void    h5str_resize(h5str_t *str, size_t new_len);
+extern char*   h5str_append(h5str_t *str, const char* cstr);
+extern size_t  h5str_convert(JNIEnv *env, char **in_str, hid_t container, hid_t tid, void *out_buf, size_t out_buf_offset);
+extern size_t  h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *in_buf, size_t in_buf_len, int expand_data);
 extern void    h5str_array_free(char **strs, size_t len);
-extern int     h5str_dump_simple_dset(FILE *stream, hid_t dset, int binary_order);
-extern int     h5str_dump_region_blocks_data(h5str_t *str, hid_t region, hid_t region_obj);
-extern int     h5str_dump_region_points_data(h5str_t *str, hid_t region, hid_t region_obj);
+extern int     h5str_dump_simple_dset(JNIEnv *env, FILE *stream, hid_t dset, int binary_order);
+extern int     h5str_dump_region_blocks_data(JNIEnv *env, h5str_t *str, hid_t region, hid_t region_obj);
+extern int     h5str_dump_region_points_data(JNIEnv *env, h5str_t *str, hid_t region, hid_t region_obj);
+
+extern htri_t  H5Tdetect_variable_str(hid_t tid);
+
+/*
+ * Symbols used to format the output of h5str_sprintf and
+ * to interpret the input to h5str_convert.
+ */
+#define H5_COMPOUND_BEGIN_INDICATOR "{"
+#define H5_COMPOUND_END_INDICATOR "}"
+#define H5_ARRAY_BEGIN_INDICATOR "["
+#define H5_ARRAY_END_INDICATOR "]"
+#define H5_VLEN_BEGIN_INDICATOR "("
+#define H5_VLEN_END_INDICATOR ")"
 
 /*
  * Class:     hdf_hdf5lib_H5

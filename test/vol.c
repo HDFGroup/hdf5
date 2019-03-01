@@ -20,8 +20,12 @@
 
 #include "h5test.h"
 
+/* Filename */
+const char *FILENAME[] = {
+    "native_vol_test",
+    NULL
+};
 
-#define NATIVE_VOL_TEST_FILENAME        "native_vol_test"
 #define NATIVE_VOL_TEST_GROUP_NAME      "test_group"
 #define NATIVE_VOL_TEST_DATASET_NAME    "test_dataset"
 #define NATIVE_VOL_TEST_ATTRIBUTE_NAME  "test_dataset"
@@ -237,7 +241,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_basic_file_operation(void)
+test_basic_file_operation(const char *env_h5_drvr)
 {
     hid_t fid           = H5I_INVALID_HID;
     hid_t fid_reopen    = H5I_INVALID_HID;
@@ -245,6 +249,7 @@ test_basic_file_operation(void)
     hid_t fapl_id2      = H5I_INVALID_HID;
     hid_t fcpl_id       = H5I_INVALID_HID;
 
+    char            filename[1024];
     ssize_t         obj_count;
     hid_t           obj_id_list[1];
     hsize_t         file_size;
@@ -257,6 +262,7 @@ test_basic_file_operation(void)
 
     /* Retrieve the file access property for testing */
     fapl_id = h5_fileaccess();
+    h5_fixname(FILENAME[0], fapl_id, filename, sizeof filename);
 
     /* Set the file close degree to a non-default value, to make the H5Pequal
      *  work out.  This is kinda odd, but the library's current behavior with
@@ -273,7 +279,7 @@ test_basic_file_operation(void)
         FAIL_STACK_ERROR
 
     /* H5Fcreate */
-    if ((fid = H5Fcreate(NATIVE_VOL_TEST_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
+    if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
         TEST_ERROR;
 
     /* H5Fget_obj_count */
@@ -290,13 +296,16 @@ test_basic_file_operation(void)
     if ((obj_count = H5Fget_obj_ids((hid_t)H5F_OBJ_ALL, H5F_OBJ_DATASET, 2, obj_id_list)) < 0)
         TEST_ERROR;
 
-    /* H5Fget_access_plist */
-    if ((fapl_id2 = H5Fget_access_plist(fid)) < 0)
-        TEST_ERROR;
-    if (H5Pequal(fapl_id, fapl_id2) != TRUE)
-        TEST_ERROR;
-    if (H5Pclose(fapl_id2) < 0)
-        TEST_ERROR;
+    /* Can't compare VFD properties for split / multi / family VFDs */
+    if((hbool_t)(HDstrcmp(env_h5_drvr, "split") && HDstrcmp(env_h5_drvr, "multi") && HDstrcmp(env_h5_drvr, "family"))) {
+        /* H5Fget_access_plist */
+        if ((fapl_id2 = H5Fget_access_plist(fid)) < 0)
+            TEST_ERROR;
+        if (H5Pequal(fapl_id, fapl_id2) != TRUE)
+            TEST_ERROR;
+        if (H5Pclose(fapl_id2) < 0)
+            TEST_ERROR;
+    } /* end if */
 
     /* H5Fget_create_plist */
     if ((fcpl_id = H5Fget_create_plist(fid)) < 0)
@@ -308,9 +317,12 @@ test_basic_file_operation(void)
     if (H5Fget_filesize(fid, &file_size) < 0)
         TEST_ERROR;
 
-    /* H5Fget_vfd_handle */
-    if (H5Fget_vfd_handle(fid, H5P_DEFAULT, &os_file_handle) < 0)
-        TEST_ERROR;
+    /* Can't retrieve VFD handle for split / multi / family VFDs */
+    if((hbool_t)(HDstrcmp(env_h5_drvr, "split") && HDstrcmp(env_h5_drvr, "multi") && HDstrcmp(env_h5_drvr, "family"))) {
+        /* H5Fget_vfd_handle */
+        if (H5Fget_vfd_handle(fid, H5P_DEFAULT, &os_file_handle) < 0)
+            TEST_ERROR;
+    } /* end if */
 
     /* H5Fget_intent */
     if (H5Fget_intent(fid, &intent) < 0)
@@ -337,42 +349,48 @@ test_basic_file_operation(void)
         TEST_ERROR;
 
     /* H5Fis_accessible */
-    if (H5Fis_accessible(NATIVE_VOL_TEST_FILENAME, fapl_id) < 0)
+    if (H5Fis_accessible(filename, fapl_id) < 0)
         TEST_ERROR;
 
     /* H5Fopen */
-    if ((fid = H5Fopen(NATIVE_VOL_TEST_FILENAME, H5F_ACC_RDWR, fapl_id)) < 0)
+    if ((fid = H5Fopen(filename, H5F_ACC_RDWR, fapl_id)) < 0)
         TEST_ERROR;
 
-    /* H5Fget_access_plist */
-    if ((fapl_id2 = H5Fget_access_plist(fid)) < 0)
-        TEST_ERROR;
-    if (H5Pequal(fapl_id, fapl_id2) != TRUE)
-        TEST_ERROR;
-    if (H5Pclose(fapl_id2) < 0)
-        TEST_ERROR;
+    /* Can't compare VFD properties for split / multi / family VFDs */
+    if((hbool_t)(HDstrcmp(env_h5_drvr, "split") && HDstrcmp(env_h5_drvr, "multi") && HDstrcmp(env_h5_drvr, "family"))) {
+        /* H5Fget_access_plist */
+        if((fapl_id2 = H5Fget_access_plist(fid)) < 0)
+            TEST_ERROR;
+        if(H5Pequal(fapl_id, fapl_id2) != TRUE)
+            TEST_ERROR;
+        if(H5Pclose(fapl_id2) < 0)
+            TEST_ERROR;
+    } /* end if */
 
     if ((fid_reopen = H5Freopen(fid)) < 0)
         TEST_ERROR;
 
-    /* H5Fget_access_plist */
-    if ((fapl_id2 = H5Fget_access_plist(fid_reopen)) < 0)
-        TEST_ERROR;
-    if (H5Pequal(fapl_id, fapl_id2) != TRUE)
-        TEST_ERROR;
-    if (H5Pclose(fapl_id2) < 0)
-        TEST_ERROR;
+    /* Can't compare VFD properties for split / multi / family VFDs */
+    if((hbool_t)(HDstrcmp(env_h5_drvr, "split") && HDstrcmp(env_h5_drvr, "multi") && HDstrcmp(env_h5_drvr, "family"))) {
+        /* H5Fget_access_plist */
+        if((fapl_id2 = H5Fget_access_plist(fid_reopen)) < 0)
+            TEST_ERROR;
+        if(H5Pequal(fapl_id, fapl_id2) != TRUE)
+            TEST_ERROR;
+        if(H5Pclose(fapl_id2) < 0)
+            TEST_ERROR;
+    } /* end if */
 
     if (H5Fclose(fid) < 0)
         TEST_ERROR;
     if (H5Fclose(fid_reopen) < 0)
         TEST_ERROR;
 
+    h5_delete_test_file(FILENAME[0], fapl_id);
+
     /* H5Pclose */
     if (H5Pclose(fapl_id) < 0)
         TEST_ERROR;
-
-    HDremove(NATIVE_VOL_TEST_FILENAME);
 
     PASSED();
     return SUCCEED;
@@ -404,14 +422,20 @@ static herr_t
 test_basic_group_operation(void)
 {
     hid_t fid = H5I_INVALID_HID;
+    hid_t fapl_id = H5I_INVALID_HID;
     hid_t gid = H5I_INVALID_HID;
     hid_t gid_a = H5I_INVALID_HID;
     hid_t gcpl_id = H5I_INVALID_HID;
+    char filename[1024];
     H5G_info_t info;
 
     TESTING("Basic VOL group operations");
 
-    if ((fid = H5Fcreate(NATIVE_VOL_TEST_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+    /* Retrieve the file access property for testing */
+    fapl_id = h5_fileaccess();
+    h5_fixname(FILENAME[0], fapl_id, filename, sizeof filename);
+
+    if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
         TEST_ERROR;
 
     /* H5Gcreate */
@@ -465,7 +489,11 @@ test_basic_group_operation(void)
     if (H5Fclose(fid) < 0)
         TEST_ERROR;
 
-    HDremove(NATIVE_VOL_TEST_FILENAME);
+    h5_delete_test_file(FILENAME[0], fapl_id);
+
+    /* H5Pclose */
+    if (H5Pclose(fapl_id) < 0)
+        TEST_ERROR;
 
     PASSED();
     return SUCCEED;
@@ -474,6 +502,7 @@ error:
     H5E_BEGIN_TRY {
         H5Fclose(fid);
         H5Gclose(gid);
+        H5Pclose(fapl_id);
         H5Pclose(gcpl_id);
     } H5E_END_TRY;
 
@@ -495,12 +524,15 @@ static herr_t
 test_basic_dataset_operation(void)
 {
     hid_t fid       = H5I_INVALID_HID;
+    hid_t fapl_id   = H5I_INVALID_HID;
     hid_t dcpl_id   = H5I_INVALID_HID;
     hid_t dapl_id   = H5I_INVALID_HID;
     hid_t did       = H5I_INVALID_HID;
     hid_t did_a     = H5I_INVALID_HID;
     hid_t sid       = H5I_INVALID_HID;
     hid_t tid       = H5I_INVALID_HID;
+
+    char filename[1024];
 
     hsize_t curr_dims   = 0;
     hsize_t max_dims    = H5S_UNLIMITED;
@@ -516,7 +548,11 @@ test_basic_dataset_operation(void)
 
     TESTING("Basic VOL dataset operations");
 
-    if ((fid = H5Fcreate(NATIVE_VOL_TEST_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+    /* Retrieve the file access property for testing */
+    fapl_id = h5_fileaccess();
+    h5_fixname(FILENAME[0], fapl_id, filename, sizeof filename);
+
+    if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
         TEST_ERROR;
     for (i = 0; i < N_ELEMENTS; i++) {
         in_buf[i] = i;
@@ -630,7 +666,11 @@ test_basic_dataset_operation(void)
     if (H5Fclose(fid) < 0)
         TEST_ERROR;
 
-    HDremove(NATIVE_VOL_TEST_FILENAME);
+    h5_delete_test_file(FILENAME[0], fapl_id);
+
+    /* H5Pclose */
+    if (H5Pclose(fapl_id) < 0)
+        TEST_ERROR;
 
     PASSED();
     return SUCCEED;
@@ -642,6 +682,7 @@ error:
         H5Dclose(did_a);
         H5Sclose(sid);
         H5Tclose(tid);
+        H5Pclose(fapl_id);
         H5Pclose(dapl_id);
         H5Pclose(dcpl_id);
     } H5E_END_TRY;
@@ -664,10 +705,13 @@ static herr_t
 test_basic_attribute_operation(void)
 {
     hid_t fid       = H5I_INVALID_HID;
+    hid_t fapl_id   = H5I_INVALID_HID;
     hid_t gid       = H5I_INVALID_HID;
     hid_t aid       = H5I_INVALID_HID;
     hid_t aid_name  = H5I_INVALID_HID;
     hid_t sid       = H5I_INVALID_HID;
+
+    char    filename[1024];
 
     hsize_t dims    = 1;
 
@@ -676,7 +720,11 @@ test_basic_attribute_operation(void)
 
     TESTING("Basic VOL attribute operations");
 
-    if ((fid = H5Fcreate(NATIVE_VOL_TEST_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+    /* Retrieve the file access property for testing */
+    fapl_id = h5_fileaccess();
+    h5_fixname(FILENAME[0], fapl_id, filename, sizeof filename);
+
+    if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
         TEST_ERROR;
     if ((gid = H5Gcreate2(fid, NATIVE_VOL_TEST_GROUP_NAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR;
@@ -730,7 +778,11 @@ test_basic_attribute_operation(void)
     if (H5Fclose(fid) < 0)
         TEST_ERROR;
 
-    HDremove(NATIVE_VOL_TEST_FILENAME);
+    h5_delete_test_file(FILENAME[0], fapl_id);
+
+    /* H5Pclose */
+    if (H5Pclose(fapl_id) < 0)
+        TEST_ERROR;
 
     PASSED();
     return SUCCEED;
@@ -738,6 +790,7 @@ test_basic_attribute_operation(void)
 error:
     H5E_BEGIN_TRY {
         H5Fclose(fid);
+        H5Pclose(fapl_id);
         H5Gclose(gid);
         H5Sclose(sid);
         H5Aclose(aid);
@@ -762,14 +815,20 @@ static herr_t
 test_basic_object_operation(void)
 {
     hid_t fid       = H5I_INVALID_HID;
+    hid_t fapl_id   = H5I_INVALID_HID;
     hid_t gid       = H5I_INVALID_HID;
     hid_t oid       = H5I_INVALID_HID;
 
+    char filename[1024];
     H5O_info_t object_info;
 
     TESTING("Basic VOL object operations");
 
-    if ((fid = H5Fcreate(NATIVE_VOL_TEST_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+    /* Retrieve the file access property for testing */
+    fapl_id = h5_fileaccess();
+    h5_fixname(FILENAME[0], fapl_id, filename, sizeof filename);
+
+    if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
         TEST_ERROR;
     if ((gid = H5Gcreate2(fid, NATIVE_VOL_TEST_GROUP_NAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR;
@@ -797,7 +856,12 @@ test_basic_object_operation(void)
     if (H5Gclose(gid) < 0)
         TEST_ERROR;
 
-    HDremove(NATIVE_VOL_TEST_FILENAME);
+    h5_delete_test_file(FILENAME[0], fapl_id);
+
+    /* H5Pclose */
+    if (H5Pclose(fapl_id) < 0)
+        TEST_ERROR;
+
 
     PASSED();
     return SUCCEED;
@@ -805,6 +869,7 @@ test_basic_object_operation(void)
 error:
     H5E_BEGIN_TRY {
         H5Fclose(fid);
+        H5Pclose(fapl_id);
         H5Gclose(gid);
     } H5E_END_TRY;
 
@@ -827,10 +892,16 @@ test_basic_link_operation(void)
 {
     hid_t fid       = H5I_INVALID_HID;
     hid_t gid       = H5I_INVALID_HID;
+    hid_t fapl_id   = H5I_INVALID_HID;
+    char filename[1024];
 
     TESTING("Basic VOL link operations");
 
-    if ((fid = H5Fcreate(NATIVE_VOL_TEST_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+    /* Retrieve the file access property for testing */
+    fapl_id = h5_fileaccess();
+    h5_fixname(FILENAME[0], fapl_id, filename, sizeof filename);
+
+    if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
         TEST_ERROR;
     if ((gid = H5Gcreate2(fid, NATIVE_VOL_TEST_GROUP_NAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR;
@@ -862,7 +933,12 @@ test_basic_link_operation(void)
     if (H5Gclose(gid) < 0)
         TEST_ERROR;
 
-    HDremove(NATIVE_VOL_TEST_FILENAME);
+    h5_delete_test_file(FILENAME[0], fapl_id);
+
+    /* H5Pclose */
+    if (H5Pclose(fapl_id) < 0)
+        TEST_ERROR;
+
 
     PASSED();
     return SUCCEED;
@@ -871,6 +947,7 @@ error:
     H5E_BEGIN_TRY {
         H5Fclose(fid);
         H5Fclose(gid);
+        H5Pclose(fapl_id);
     } H5E_END_TRY;
 
     return FAIL;
@@ -891,13 +968,19 @@ static herr_t
 test_basic_datatype_operation(void)
 {
     hid_t fid       = H5I_INVALID_HID;
+    hid_t fapl_id   = H5I_INVALID_HID;
     hid_t tid       = H5I_INVALID_HID;
     hid_t tid_anon  = H5I_INVALID_HID;
     hid_t tcpl_id   = H5I_INVALID_HID;
+    char filename[1024];
 
     TESTING("Basic VOL datatype operations");
 
-    if ((fid = H5Fcreate(NATIVE_VOL_TEST_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+    /* Retrieve the file access property for testing */
+    fapl_id = h5_fileaccess();
+    h5_fixname(FILENAME[0], fapl_id, filename, sizeof filename);
+
+    if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
         TEST_ERROR;
     if ((tid = H5Tcopy(H5T_NATIVE_INT)) < 0)
         TEST_ERROR;
@@ -941,7 +1024,11 @@ test_basic_datatype_operation(void)
     if (H5Fclose(fid) < 0)
         TEST_ERROR;
 
-    HDremove(NATIVE_VOL_TEST_FILENAME);
+    h5_delete_test_file(FILENAME[0], fapl_id);
+
+    /* H5Pclose */
+    if (H5Pclose(fapl_id) < 0)
+        TEST_ERROR;
 
     PASSED();
     return SUCCEED;
@@ -950,6 +1037,7 @@ error:
     H5E_BEGIN_TRY {
         H5Pclose(tcpl_id);
         H5Fclose(fid);
+        H5Pclose(fapl_id);
         H5Tclose(tid);
         H5Tclose(tid_anon);
     } H5E_END_TRY;
@@ -957,34 +1045,6 @@ error:
     return FAIL;
 
 } /* end test_basic_datatype_operation() */
-
-#if 0
-
-/*-------------------------------------------------------------------------
- * Function:    test_echo_vol_operation()
- *
- * Purpose:     Uses the echo VOL connector to test basic VOL operations
- *              via the H5VL public API.
- *
- * Return:      SUCCEED/FAIL
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-test_echo_vol_operation(void)
-{
-    char name[25];
-
-    TESTING("Echo VOL operations");
-
-    PASSED();
-    return SUCCEED;
-
-error:
-    return FAIL;
-
-} /* end test_basic_vol_operation() */
-#endif
 
 
 /*-------------------------------------------------------------------------
@@ -999,7 +1059,13 @@ error:
 int
 main(void)
 {
+    const char  *env_h5_drvr;   /* File driver value from environment */
     int nerrors = 0;
+
+    /* Get the VFD to use */
+    env_h5_drvr = HDgetenv("HDF5_DRIVER");
+    if(env_h5_drvr == NULL)
+        env_h5_drvr = "nomatch";
 
     h5_reset();
 
@@ -1007,7 +1073,7 @@ main(void)
 
     nerrors += test_vol_registration() < 0          ? 1 : 0;
     nerrors += test_native_vol_init() < 0           ? 1 : 0;
-    nerrors += test_basic_file_operation() < 0      ? 1 : 0;
+    nerrors += test_basic_file_operation(env_h5_drvr) < 0 ? 1 : 0;
     nerrors += test_basic_group_operation() < 0     ? 1 : 0;
     nerrors += test_basic_dataset_operation() < 0   ? 1 : 0;
     nerrors += test_basic_attribute_operation() < 0 ? 1 : 0;

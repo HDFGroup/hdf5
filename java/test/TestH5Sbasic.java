@@ -49,7 +49,7 @@ public class TestH5Sbasic {
         H5.H5Screate(-1);
     }
 
-    @Test(expected = HDF5LibraryException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void testH5Sget_simple_extent_type_invalid() throws Throwable {
         H5.H5Sget_simple_extent_type(-1);
     }

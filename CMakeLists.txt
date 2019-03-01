@@ -482,6 +482,15 @@ if (HDF5_MEMORY_ALLOC_SANITY_CHECK)
 endif ()
 
 #-----------------------------------------------------------------------------
+# Option to enable/disable using pread/pwrite for VFDs
+#-----------------------------------------------------------------------------
+option (HDF5_ENABLE_PREADWRITE "Use pread/pwrite in sec2/log/core VFDs in place of read/write (when available)" ON)
+mark_as_advanced (HDF5_ENABLE_PREADWRITE)
+if (HDF5_ENABLE_PREADWRITE AND H5_HAVE_PREAD AND H5_HAVE_PWRITE)
+  set (H5_HAVE_PREADWRITE 1)
+endif ()
+
+#-----------------------------------------------------------------------------
 # Option to use deprecated public API symbols
 #-----------------------------------------------------------------------------
 option (HDF5_ENABLE_DEPRECATED_SYMBOLS "Enable deprecated public API symbols" ON)
@@ -749,11 +758,23 @@ if (BUILD_TESTING)
       "Timeout in seconds for each test (default 1200=20minutes)"
   )
 
+  # Generate a list of timeouts based on DART_TESTING_TIMEOUT
+  math (EXPR CTEST_SHORT_TIMEOUT "${DART_TESTING_TIMEOUT} / 2")
+  math (EXPR CTEST_LONG_TIMEOUT "${DART_TESTING_TIMEOUT} * 2")
+  math (EXPR CTEST_VERY_LONG_TIMEOUT "${DART_TESTING_TIMEOUT} * 3")
+
   option (HDF5_TEST_VFD "Execute tests with different VFDs" OFF)
   mark_as_advanced (HDF5_TEST_VFD)
   if (HDF5_TEST_VFD)
     option (HDF5_TEST_FHEAP_VFD "Execute tests with different VFDs" ON)
     mark_as_advanced (HDF5_TEST_FHEAP_VFD)
+  endif ()
+
+  option (HDF5_TEST_VOL "Execute tests with different VOL connectors" OFF)
+  mark_as_advanced (HDF5_TEST_VOL)
+  if (HDF5_TEST_VOL)
+    option (HDF5_TEST_FHEAP_VOL "Execute fheap test with different VOL connectors" ON)
+    mark_as_advanced (HDF5_TEST_FHEAP_VOL)
   endif ()
 
   option (HDF_TEST_EXPRESS "Control testing framework (0-3)" "0")
@@ -819,9 +840,6 @@ set (H5_FC_FUNC_ "H5_FC_FUNC_(name,NAME) name ## _")
 if (EXISTS "${HDF5_SOURCE_DIR}/fortran" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/fortran")
   option (HDF5_BUILD_FORTRAN "Build FORTRAN support" OFF)
   if (HDF5_BUILD_FORTRAN)
-
-    option (HDF5_ENABLE_F2003 "Enable FORTRAN 2003 Standard" ON)
-
     include (${HDF_RESOURCES_EXT_DIR}/HDFUseFortran.cmake)
 
     message (STATUS "Fortran compiler ID is ${CMAKE_Fortran_COMPILER_ID}")
@@ -834,10 +852,8 @@ if (EXISTS "${HDF5_SOURCE_DIR}/fortran" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/for
     include (${HDF_RESOURCES_DIR}/HDF5UseFortran.cmake)
     set (LINK_Fortran_LIBS ${LINK_LIBS})
 
-    if (HDF5_ENABLE_F2003)
-      if (NOT FORTRAN_HAVE_ISO_C_BINDING)
-        set (HDF5_ENABLE_F2003 OFF)
-      endif ()
+    if (NOT H5_FORTRAN_HAVE_ISO_C_BINDING)
+      message (FATAL_ERROR " **** Fortran compiler lacks required Fortran 2003 features; unsupported Fortran 2003 compiler, disable HDF5_BUILD_FORTRAN **** ")
     endif ()
 
     # Parallel IO usage requires MPI to be Linked and Included

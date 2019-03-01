@@ -18,21 +18,37 @@
  * Purpose:	Hyperslab selection dataspace I/O functions.
  */
 
+/****************/
+/* Module Setup */
+/****************/
+
 #include "H5Smodule.h"          /* This source code file is part of the H5S module */
 
 
+/***********/
+/* Headers */
+/***********/
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling			*/
 #include "H5FLprivate.h"	/* Free Lists				*/
 #include "H5Iprivate.h"		/* ID Functions				*/
 #include "H5Spkg.h"		/* Dataspace functions			*/
-#include "H5VMprivate.h"         /* Vector functions			*/
+#include "H5VMprivate.h"        /* Vector functions			*/
 
+
+/****************/
 /* Local Macros */
+/****************/
 
-/* Local datatypes */
 
-/* Static function prototypes */
+/******************/
+/* Local Typedefs */
+/******************/
+
+
+/********************/
+/* Local Prototypes */
+/********************/
 static H5S_hyper_span_t *H5S__hyper_new_span(hsize_t low, hsize_t high,
     H5S_hyper_span_info_t *down, H5S_hyper_span_t *next);
 static herr_t H5S__hyper_span_precompute(H5S_hyper_span_info_t *spans, size_t elmt_size);
@@ -64,7 +80,6 @@ static herr_t H5S__hyper_generate_spans(H5S_t *space);
 static herr_t H5S__generate_hyperslab(H5S_t *space, H5S_seloper_t op,
     const hsize_t start[], const hsize_t stride[], const hsize_t count[],
     const hsize_t block[]);
-/* Needed for use in hyperslab code (H5Shyper.c) */
 #ifdef NEW_HYPERSLAB_API
 static herr_t H5S_select_select (H5S_t *space1, H5S_seloper_t op, H5S_t *space2);
 #endif /*NEW_HYPERSLAB_API*/
@@ -111,6 +126,15 @@ static hbool_t H5S__hyper_rebuild_helper(const H5S_hyper_span_t *span,
     H5S_hyper_dim_t span_slab_info[], unsigned rank);
 static hbool_t H5S__hyper_rebuild(H5S_t *space);
 
+/*****************************/
+/* Library Private Variables */
+/*****************************/
+
+
+/*********************/
+/* Package Variables */
+/*********************/
+
 /* Selection properties for hyperslab selections */
 const H5S_select_class_t H5S_sel_hyper[1] = {{
     H5S_SEL_HYPERSLABS,
@@ -136,6 +160,11 @@ const H5S_select_class_t H5S_sel_hyper[1] = {{
     H5S__hyper_iter_init,
 }};
 
+
+/*******************/
+/* Local Variables */
+/*******************/
+
 /* Iteration properties for hyperslab selections */
 static const H5S_sel_iter_class_t H5S_sel_iter_hyper[1] = {{
     H5S_SEL_HYPERSLABS,
@@ -153,16 +182,16 @@ static const H5S_sel_iter_class_t H5S_sel_iter_hyper[1] = {{
 /* Static variables */
 
 /* Arrays for default stride, block, etc. */
-static const hsize_t H5S_hyper_zeros_g[H5O_LAYOUT_NDIMS] = {
+static const hsize_t H5S_hyper_zeros_g[H5S_MAX_RANK] = {
     0,0,0,0, 0,0,0,0,
     0,0,0,0, 0,0,0,0,
     0,0,0,0, 0,0,0,0,
-    0,0,0,0, 0,0,0,0,0};
-static const hsize_t H5S_hyper_ones_g[H5O_LAYOUT_NDIMS] = {
+    0,0,0,0, 0,0,0,0};
+static const hsize_t H5S_hyper_ones_g[H5S_MAX_RANK] = {
     1,1,1,1, 1,1,1,1,
     1,1,1,1, 1,1,1,1,
     1,1,1,1, 1,1,1,1,
-    1,1,1,1, 1,1,1,1,1};
+    1,1,1,1, 1,1,1,1};
 
 /* Declare a free list to manage the H5S_hyper_sel_t struct */
 H5FL_DEFINE_STATIC(H5S_hyper_sel_t);
@@ -261,9 +290,9 @@ H5S__hyper_print_diminfo(FILE *f, const H5S_t *space)
 /*-------------------------------------------------------------------------
  * Function:	H5S__hyper_iter_init
  *
- * Purpose:	Initializes iteration information for hyperslab span tree selection.
+ * Purpose:	Initializes iteration information for hyperslab selection.
  *
- * Return:	non-negative on success, negative on failure.
+ * Return:	Non-negative on success, negative on failure.
  *
  * Programmer:	Quincey Koziol
  *              Saturday, February 24, 2001
@@ -278,11 +307,8 @@ H5S__hyper_print_diminfo(FILE *f, const H5S_t *space)
 static herr_t
 H5S__hyper_iter_init(H5S_sel_iter_t *iter, const H5S_t *space)
 {
-    const H5S_hyper_dim_t *tdiminfo;    /* Temporary pointer to diminfo information */
-    H5S_hyper_span_info_t *spans;   /* Pointer to hyperslab span info node */
     unsigned rank;                  /* Dataspace's dimension rank */
     unsigned u;                     /* Index variable */
-    int i;                          /* Index variable */
 
     FUNC_ENTER_STATIC_NOERR
 
@@ -298,15 +324,15 @@ H5S__hyper_iter_init(H5S_sel_iter_t *iter, const H5S_t *space)
     /* Get the rank of the dataspace */
     rank = space->extent.rank;
 
-    /* Set the temporary pointer to the dimension information */
-    tdiminfo = space->select.sel_info.hslab->opt_diminfo;
-
     /* Check for the special case of just one H5Sselect_hyperslab call made */
     if(space->select.sel_info.hslab->diminfo_valid) {
 /* Initialize the information needed for regular hyperslab I/O */
+        const H5S_hyper_dim_t *tdiminfo;    /* Temporary pointer to diminfo information */
         const hsize_t *mem_size;    /* Temporary pointer to dataspace extent's dimension sizes */
-        hsize_t acc;                /* Accumulator for "flattened" dimension's sizes */
         unsigned cont_dim = 0;      /* # of contiguous dimensions */
+
+        /* Set the temporary pointer to the dimension information */
+        tdiminfo = space->select.sel_info.hslab->opt_diminfo;
 
         /* Set the temporary pointer to the dataspace extent's dimension sizes */
         mem_size = space->extent.size;
@@ -336,9 +362,11 @@ H5S__hyper_iter_init(H5S_sel_iter_t *iter, const H5S_t *space)
 
         /* Check if the regular selection can be "flattened" */
         if(cont_dim > 0) {
-            unsigned last_dim_flattened = 1;    /* Flag to indicate that the last dimension was flattened */
+            hsize_t acc;                /* Accumulator for "flattened" dimension's sizes */
+            hbool_t last_dim_flattened = TRUE;    /* Flag to indicate that the last dimension was flattened */
             unsigned flat_rank = rank-cont_dim; /* Number of dimensions after flattening */
             unsigned curr_dim;                  /* Current dimension */
+            int i;                      /* Index variable */
 
             /* Set the iterator's rank to the contiguous dimensions */
             iter->u.hyp.iter_rank = flat_rank;
@@ -352,7 +380,7 @@ H5S__hyper_iter_init(H5S_sel_iter_t *iter, const H5S_t *space)
                     acc *= mem_size[i];
 
                     /* Indicate that the dimension was flattened */
-                    last_dim_flattened = 1;
+                    last_dim_flattened = TRUE;
                 } /* end if */
                 else {
                     if(last_dim_flattened) {
@@ -370,7 +398,7 @@ H5S__hyper_iter_init(H5S_sel_iter_t *iter, const H5S_t *space)
                         iter->u.hyp.sel_off[curr_dim] = space->select.offset[i] * (hssize_t)acc;
 
                         /* Reset the "last dim flattened" flag to avoid flattened any further dimensions */
-                        last_dim_flattened = 0;
+                        last_dim_flattened = FALSE;
 
                         /* Reset the "accumulator" for possible further dimension flattening */
                         acc = 1;
@@ -415,8 +443,9 @@ H5S__hyper_iter_init(H5S_sel_iter_t *iter, const H5S_t *space)
         /* Initialize irregular region information also (for release) */
         iter->u.hyp.spans = NULL;
     } /* end if */
-    else {
-/* Initialize the information needed for non-regular hyperslab I/O */
+    else {      /* Initialize the information needed for non-regular hyperslab I/O */
+        H5S_hyper_span_info_t *spans;   /* Pointer to hyperslab span info node */
+
         HDassert(space->select.sel_info.hslab->span_lst);
         /* Make a copy of the span tree to iterate over */
         iter->u.hyp.spans = H5S__hyper_copy_span(space->select.sel_info.hslab->span_lst);
@@ -458,7 +487,7 @@ H5S__hyper_iter_init(H5S_sel_iter_t *iter, const H5S_t *space)
  * Purpose:	Retrieve the current coordinates of iterator for current
  *              selection
  *
- * Return:	non-negative on success, negative on failure
+ * Return:	Non-negative on success, negative on failure
  *
  * Programmer:	Quincey Koziol
  *              Tuesday, April 22, 2003
@@ -543,7 +572,7 @@ H5S__hyper_iter_coords(const H5S_sel_iter_t *iter, hsize_t *coords)
  * Purpose:	Retrieve the current block of iterator for current
  *              selection
  *
- * Return:	non-negative on success, negative on failure
+ * Return:	Non-negative on success, negative on failure
  *
  * Programmer:	Quincey Koziol
  *              Monday, June 2, 2003
@@ -569,7 +598,7 @@ H5S__hyper_iter_block(const H5S_sel_iter_t *iter, hsize_t *start, hsize_t *end)
 
     /* Check for a single "regular" hyperslab */
     if(iter->u.hyp.diminfo_valid) {
-        /* Compute the end of the block */
+        /* Copy the start and compute the end of the block */
         for(u = 0; u < iter->rank; u++) {
             start[u] = iter->u.hyp.off[u];
             end[u] = (start[u] + iter->u.hyp.diminfo[u].block) - 1;
@@ -594,7 +623,7 @@ H5S__hyper_iter_block(const H5S_sel_iter_t *iter, hsize_t *start, hsize_t *end)
  *
  * Purpose:	Return number of elements left to process in iterator
  *
- * Return:	non-negative number of elements on success, zero on failure
+ * Return:	Non-negative number of elements on success, zero on failure
  *
  * Programmer:	Quincey Koziol
  *              Tuesday, June 16, 1998
@@ -630,7 +659,7 @@ H5S__hyper_iter_nelmts(const H5S_sel_iter_t *iter)
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static htri_t
+static H5_ATTR_PURE htri_t
 H5S__hyper_iter_has_next_block(const H5S_sel_iter_t *iter)
 {
     unsigned u;                 /* Local index variable */
@@ -688,7 +717,7 @@ H5S__hyper_iter_next(H5S_sel_iter_t *iter, size_t nelem)
 {
     unsigned ndims;     /* Number of dimensions of dataset */
     int fast_dim;       /* Rank of the fastest changing dimension for the dataspace */
-    unsigned i;         /* Counters */
+    unsigned u;         /* Counters */
 
     FUNC_ENTER_STATIC_NOERR
 
@@ -696,19 +725,17 @@ H5S__hyper_iter_next(H5S_sel_iter_t *iter, size_t nelem)
     /* (i.e. a regular hyperslab selection */
     if(iter->u.hyp.diminfo_valid) {
         const H5S_hyper_dim_t *tdiminfo;    /* Temporary pointer to diminfo information */
-        hsize_t iter_offset[H5O_LAYOUT_NDIMS];
-        hsize_t iter_count[H5O_LAYOUT_NDIMS];
+        hsize_t iter_offset[H5S_MAX_RANK];
+        hsize_t iter_count[H5S_MAX_RANK];
         int temp_dim;  /* Temporary rank holder */
 
         /* Check if this is a "flattened" regular hyperslab selection */
-        if(iter->u.hyp.iter_rank != 0 && iter->u.hyp.iter_rank < iter->rank) {
+        if(iter->u.hyp.iter_rank != 0 && iter->u.hyp.iter_rank < iter->rank)
             /* Set the aliases for the dimension rank */
             ndims = iter->u.hyp.iter_rank;
-        } /* end if */
-        else {
+        else
             /* Set the aliases for the dimension rank */
             ndims = iter->rank;
-        } /* end else */
 
         /* Set the fastest dimension rank */
         fast_dim = (int)ndims - 1;
@@ -717,14 +744,14 @@ H5S__hyper_iter_next(H5S_sel_iter_t *iter, size_t nelem)
         tdiminfo = iter->u.hyp.diminfo;
 
         /* Calculate the offset and block count for each dimension */
-        for(i = 0; i < ndims; i++) {
-            if(tdiminfo[i].count == 1) {
-                iter_offset[i] = iter->u.hyp.off[i] - tdiminfo[i].start;
-                iter_count[i] = 0;
+        for(u = 0; u < ndims; u++) {
+            if(tdiminfo[u].count == 1) {
+                iter_offset[u] = iter->u.hyp.off[u] - tdiminfo[u].start;
+                iter_count[u] = 0;
             } /* end if */
             else {
-                iter_offset[i] = (iter->u.hyp.off[i] - tdiminfo[i].start) % tdiminfo[i].stride;
-                iter_count[i] = (iter->u.hyp.off[i] - tdiminfo[i].start) / tdiminfo[i].stride;
+                iter_offset[u] = (iter->u.hyp.off[u] - tdiminfo[u].start) % tdiminfo[u].stride;
+                iter_count[u] = (iter->u.hyp.off[u] - tdiminfo[u].start) / tdiminfo[u].stride;
             } /* end else */
         } /* end for */
 
@@ -749,10 +776,9 @@ H5S__hyper_iter_next(H5S_sel_iter_t *iter, size_t nelem)
                     /* Decrement the number of elements advanced */
                     nelem -= actual_elem;
                 } /* end if */
-                else {
+                else
                     /* Move to the next row in the current dimension */
                     iter_offset[temp_dim]++;
-                } /* end else */
 
                 /* If this block is still in the range of blocks to output for the dimension, break out of loop */
                 if(iter_offset[temp_dim] < tdiminfo[temp_dim].block)
@@ -775,8 +801,8 @@ H5S__hyper_iter_next(H5S_sel_iter_t *iter, size_t nelem)
         } /* end while */
 
         /* Translate current iter_offset and iter_count into iterator position */
-        for(i = 0; i < ndims; i++)
-            iter->u.hyp.off[i] = tdiminfo[i].start + (tdiminfo[i].stride * iter_count[i]) + iter_offset[i];
+        for(u = 0; u < ndims; u++)
+            iter->u.hyp.off[u] = tdiminfo[u].start + (tdiminfo[u].stride * iter_count[u]) + iter_offset[u];
     } /* end if */
     /* Must be an irregular hyperslab selection */
     else {
@@ -820,15 +846,13 @@ H5S__hyper_iter_next(H5S_sel_iter_t *iter, size_t nelem)
                     /* Decrement the number of elements advanced */
                     nelem -= actual_elem;
                 } /* end if */
-                else {
+                else
                     /* Move to the next row in the current dimension */
                     abs_arr[curr_dim]++;
-                } /* end else */
 
                 /* Check if we are still within the span */
-                if(abs_arr[curr_dim] <= curr_span->high) {
+                if(abs_arr[curr_dim] <= curr_span->high)
                     break;
-                } /* end if */
                 /* If we walked off that span, advance to the next span */
                 else {
                     /* Advance span in this dimension */
@@ -844,10 +868,9 @@ H5S__hyper_iter_next(H5S_sel_iter_t *iter, size_t nelem)
 
                         break;
                     } /* end if */
-                    else {
+                    else
                         /* If we finished the span list in this dimension, decrement the dimension worked on and loop again */
                         curr_dim--;
-                    } /* end else */
                 } /* end else */
             } /* end while */
 
@@ -906,22 +929,20 @@ H5S__hyper_iter_next_block(H5S_sel_iter_t *iter)
     FUNC_ENTER_STATIC_NOERR
 
     /* Check for the special case of just one H5Sselect_hyperslab call made */
-    /* (i.e. a regular hyperslab selection */
+    /* (i.e. a regular hyperslab selection) */
     if(iter->u.hyp.diminfo_valid) {
         const H5S_hyper_dim_t *tdiminfo;    /* Temporary pointer to diminfo information */
-        hsize_t iter_offset[H5O_LAYOUT_NDIMS];
-        hsize_t iter_count[H5O_LAYOUT_NDIMS];
+        hsize_t iter_offset[H5S_MAX_RANK];
+        hsize_t iter_count[H5S_MAX_RANK];
         int temp_dim;  /* Temporary rank holder */
 
         /* Check if this is a "flattened" regular hyperslab selection */
-        if(iter->u.hyp.iter_rank != 0 && iter->u.hyp.iter_rank < iter->rank) {
+        if(iter->u.hyp.iter_rank != 0 && iter->u.hyp.iter_rank < iter->rank)
             /* Set the aliases for the dimension rank */
             ndims = iter->u.hyp.iter_rank;
-        } /* end if */
-        else {
+        else
             /* Set the aliases for the dimension rank */
             ndims = iter->rank;
-        } /* end else */
 
         /* Set the fastest dimension rank */
         fast_dim = (int)ndims - 1;
@@ -944,14 +965,12 @@ H5S__hyper_iter_next_block(H5S_sel_iter_t *iter)
         /* Advance one block */
         temp_dim = fast_dim; /* Start with the fastest changing dimension */
         while(temp_dim >= 0) {
-            if(temp_dim == fast_dim) {
+            if(temp_dim == fast_dim)
                 /* Move iterator over current block */
                 iter_offset[temp_dim] += tdiminfo[temp_dim].block;
-            } /* end if */
-            else {
+            else
                 /* Move to the next row in the current dimension */
                 iter_offset[temp_dim]++;
-            } /* end else */
 
             /* If this block is still in the range of blocks to output for the dimension, break out of loop */
             if(iter_offset[temp_dim] < tdiminfo[temp_dim].block)
@@ -1000,19 +1019,16 @@ H5S__hyper_iter_next_block(H5S_sel_iter_t *iter)
             curr_span = ispan[curr_dim];
 
             /* Increment absolute position */
-            if(curr_dim == fast_dim) {
+            if(curr_dim == fast_dim)
                 /* Move the iterator over rest of element in span */
                 abs_arr[curr_dim] = curr_span->high + 1;
-            } /* end if */
-            else {
+            else
                 /* Move to the next row in the current dimension */
                 abs_arr[curr_dim]++;
-            } /* end else */
 
             /* Check if we are still within the span */
-            if(abs_arr[curr_dim] <= curr_span->high) {
+            if(abs_arr[curr_dim] <= curr_span->high)
                 break;
-            } /* end if */
             /* If we walked off that span, advance to the next span */
             else {
                 /* Advance span in this dimension */
@@ -1028,10 +1044,9 @@ H5S__hyper_iter_next_block(H5S_sel_iter_t *iter)
 
                     break;
                 } /* end if */
-                else {
+                else
                     /* If we finished the span list in this dimension, decrement the dimension worked on and loop again */
                     curr_dim--;
-                } /* end else */
             } /* end else */
         } /* end while */
 
@@ -1062,7 +1077,7 @@ H5S__hyper_iter_next_block(H5S_sel_iter_t *iter)
     } /* end else */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5S__hyper_iter_next() */
+} /* end H5S__hyper_iter_next_block() */
 
 
 /*--------------------------------------------------------------------------
@@ -1403,6 +1418,7 @@ H5S__hyper_copy_span(H5S_hyper_span_info_t *spans)
 
     FUNC_ENTER_STATIC
 
+    /* Sanity check */
     HDassert(spans);
 
     /* Copy the hyperslab span tree */
@@ -1421,92 +1437,88 @@ done:
  NAME
     H5S__hyper_cmp_spans
  PURPOSE
-    Check if two hyperslab slabs are the same
+    Check if two hyperslab span trees are the same
  USAGE
     hbool_t H5S__hyper_cmp_spans(span1, span2)
-        H5S_hyper_span_t *span1;    IN: First span tree to compare
-        H5S_hyper_span_t *span2;    IN: Second span tree to compare
+        H5S_hyper_span_info_t *span_info1;      IN: First span tree to compare
+        H5S_hyper_span_info_t *span_info2;      IN: Second span tree to compare
  RETURNS
     TRUE (1) or FALSE (0) on success, can't fail
  DESCRIPTION
-    Compare two hyperslab slabs to determine if they refer to the same
-    selection.  If span1 & span2 are both NULL, that counts as equal
+    Compare two hyperslab span trees to determine if they refer to the same
+    selection.  If span1 & span2 are both NULL, that counts as equal.
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static hbool_t
-H5S__hyper_cmp_spans(const H5S_hyper_span_info_t *span_info1, const H5S_hyper_span_info_t *span_info2)
+static H5_ATTR_PURE hbool_t
+H5S__hyper_cmp_spans(const H5S_hyper_span_info_t *span_info1,
+    const H5S_hyper_span_info_t *span_info2)
 {
     hbool_t ret_value = FALSE;    /* Return value */
 
     FUNC_ENTER_STATIC_NOERR
 
-    /* Check for redundant comparison */
+    /* Check for redundant comparison (or both spans being NULL) */
     if(span_info1 == span_info2)
         ret_value = TRUE;
     else {
-        const H5S_hyper_span_t *span1;
-        const H5S_hyper_span_t *span2;
-
-        /* Check for both spans being NULL */
-        if(span_info1 == NULL && span_info2 == NULL)
-            ret_value = TRUE;
+        /* Check for one span being NULL */
+        if(span_info1 == NULL || span_info2 == NULL)
+            ret_value = FALSE;
         else {
-            /* Check for one span being NULL */
-            if(span_info1 == NULL || span_info2 == NULL)
-                ret_value = FALSE;
-            else {
-                /* Get the pointers to the actual lists of spans */
-                span1 = span_info1->head;
-                span2 = span_info2->head;
+            const H5S_hyper_span_t *span1;
+            const H5S_hyper_span_t *span2;
 
-                /* Sanity checking */
-                HDassert(span1);
-                HDassert(span2);
+            /* Get the pointers to the actual lists of spans */
+            span1 = span_info1->head;
+            span2 = span_info2->head;
 
-                /* infinite loop which must be broken out of */
-                while(1) {
-                    /* Check for both spans being NULL */
-                    if(span1 == NULL && span2 == NULL) {
-                        ret_value = TRUE;
+            /* Sanity checking */
+            HDassert(span1);
+            HDassert(span2);
+
+            /* infinite loop which must be broken out of */
+            while(1) {
+                /* Check for both spans being NULL */
+                if(span1 == NULL && span2 == NULL) {
+                    ret_value = TRUE;
+                    break;
+                } /* end if */
+                else {
+                    /* Check for one span being NULL */
+                    if(span1 == NULL || span2 == NULL) {
+                        ret_value = FALSE;
                         break;
                     } /* end if */
                     else {
-                        /* Check for one span being NULL */
-                        if(span1 == NULL || span2 == NULL) {
+                        /* Check if the actual low & high span information is the same */
+                        if(span1->low != span2->low || span1->high != span2->high) {
                             ret_value = FALSE;
                             break;
                         } /* end if */
                         else {
-                            /* Check if the actual low & high span information is the same */
-                            if(span1->low != span2->low || span1->high != span2->high) {
-                                ret_value = FALSE;
-                                break;
-                            } /* end if */
-                            else {
-                                if(span1->down != NULL || span2 != NULL) {
-                                    if(!H5S__hyper_cmp_spans(span1->down, span2->down)) {
-                                        ret_value = FALSE;
-                                        break;
-                                    } /* end if */
-                                    else {
-                                        /* Keep going... */
-                                    } /* end else */
+                            if(span1->down != NULL || span2 != NULL) {
+                                if(!H5S__hyper_cmp_spans(span1->down, span2->down)) {
+                                    ret_value = FALSE;
+                                    break;
                                 } /* end if */
                                 else {
                                     /* Keep going... */
                                 } /* end else */
+                            } /* end if */
+                            else {
+                                /* Keep going... */
                             } /* end else */
                         } /* end else */
                     } /* end else */
+                } /* end else */
 
-                    /* Advance to the next nodes in the span list */
-                    span1 = span1->next;
-                    span2 = span2->next;
-                } /* end while */
-            } /* end else */
+                /* Advance to the next nodes in the span list */
+                span1 = span1->next;
+                span2 = span2->next;
+            } /* end while */
         } /* end else */
     } /* end else */
 
@@ -1614,9 +1626,10 @@ done:
  PURPOSE
     Copy a selection from one dataspace to another
  USAGE
-    herr_t H5S__hyper_copy(dst, src)
+    herr_t H5S__hyper_copy(dst, src, share_selection)
         H5S_t *dst;  OUT: Pointer to the destination dataspace
         H5S_t *src;  IN: Pointer to the source dataspace
+        hbool_t;     IN: Whether to share the selection between the dataspaces
  RETURNS
     Non-negative on success/Negative on failure
  DESCRIPTION
@@ -2049,7 +2062,7 @@ H5S__hyper_serialize_helper(const H5S_hyper_span_info_t *spans,
     HDassert(spans);
     HDassert(start);
     HDassert(end);
-    HDassert(rank < H5O_LAYOUT_NDIMS);
+    HDassert(rank < H5S_MAX_RANK);
     HDassert(p && pp);
 
     /* Walk through the list of spans, recursing or outputting them */
@@ -2092,7 +2105,7 @@ H5S__hyper_serialize_helper(const H5S_hyper_span_info_t *spans,
     *p = pp;
 
     FUNC_LEAVE_NOAPI_VOID
-}   /* H5S__hyper_serialize_helper() */
+} /* end H5S__hyper_serialize_helper() */
 
 
 /*--------------------------------------------------------------------------
@@ -2174,8 +2187,8 @@ H5S__hyper_serialize(const H5S_t *space, uint8_t **p)
     /* Check for a "regular" hyperslab selection */
     else if(space->select.sel_info.hslab->diminfo_valid) {
         const H5S_hyper_dim_t *diminfo;         /* Alias for dataspace's diminfo information */
-        hsize_t offset[H5O_LAYOUT_NDIMS];       /* Offset of element in dataspace */
-        hsize_t tmp_count[H5O_LAYOUT_NDIMS];    /* Temporary hyperslab counts */
+        hsize_t offset[H5S_MAX_RANK];       /* Offset of element in dataspace */
+        hsize_t tmp_count[H5S_MAX_RANK];    /* Temporary hyperslab counts */
         unsigned fast_dim;      /* Rank of the fastest changing dimension for the dataspace */
         unsigned ndims;         /* Rank of the dataspace */
         unsigned u;             /* Local counting variable */
@@ -2265,8 +2278,8 @@ H5S__hyper_serialize(const H5S_t *space, uint8_t **p)
         } /* end while */
     } /* end if */
     else {
-        hsize_t start[H5O_LAYOUT_NDIMS];   /* Location of start of hyperslab */
-        hsize_t end[H5O_LAYOUT_NDIMS];     /* Location of end of hyperslab */
+        hsize_t start[H5S_MAX_RANK];    /* Location of start of hyperslab */
+        hsize_t end[H5S_MAX_RANK];      /* Location of end of hyperslab */
 
         /* Encode number of hyperslabs */
         block_count = H5S__hyper_span_nblocks(space->select.sel_info.hslab->span_lst);
@@ -2322,8 +2335,8 @@ H5S__hyper_deserialize(H5S_t *space, uint32_t H5_ATTR_UNUSED version, uint8_t fl
 {
     unsigned rank;           	/* Rank of points */
     const uint8_t *pp;          /* Local pointer for decoding */
-    hsize_t start[H5O_LAYOUT_NDIMS];	/* Hyperslab start information */
-    hsize_t block[H5O_LAYOUT_NDIMS];    /* Hyperslab block information */
+    hsize_t start[H5S_MAX_RANK]; /* Hyperslab start information */
+    hsize_t block[H5S_MAX_RANK]; /* Hyperslab block information */
     unsigned u;             	/* Local counting variable */
     herr_t ret_value = FAIL;  	/* Return value */
 
@@ -2341,8 +2354,8 @@ H5S__hyper_deserialize(H5S_t *space, uint32_t H5_ATTR_UNUSED version, uint8_t fl
 
     /* If there is an unlimited dimension, only encode opt_unlim_diminfo */
     if(flags & H5S_SELECT_FLAG_UNLIM) {
-        hsize_t stride[H5O_LAYOUT_NDIMS];	/* Hyperslab stride information */
-        hsize_t count[H5O_LAYOUT_NDIMS];	/* Hyperslab count information */
+        hsize_t stride[H5S_MAX_RANK];   /* Hyperslab stride information */
+        hsize_t count[H5S_MAX_RANK];	/* Hyperslab count information */
 
         /* Sanity checks */
         HDassert(H5S_UNLIMITED == HSIZE_UNDEF);
@@ -2364,21 +2377,21 @@ H5S__hyper_deserialize(H5S_t *space, uint32_t H5_ATTR_UNUSED version, uint8_t fl
     else {
         const hsize_t *stride;  /* Hyperslab stride information */
         const hsize_t *count;   /* Hyperslab count information */
-        hsize_t end[H5O_LAYOUT_NDIMS];	/* Hyperslab end information */
+        hsize_t end[H5S_MAX_RANK]; /* Hyperslab end information */
         hsize_t *tstart;	/* Temporary hyperslab pointers */
         hsize_t *tend;		/* Temporary hyperslab pointers */
         hsize_t *tblock;	/* Temporary hyperslab pointers */
-        size_t num_elem;      	/* Number of elements in selection */
+        size_t block_count;     /* Number of blocks in selection */
         unsigned v;            	/* Local counting variable */
 
-        /* Decode the number of points */
-        UINT32DECODE(pp, num_elem);
+        /* Decode the number of blocks */
+        UINT32DECODE(pp, block_count);
 
         /* Set the count & stride for all blocks */
         stride = count = H5S_hyper_ones_g;
 
         /* Retrieve the coordinates from the buffer */
-        for(u = 0; u < num_elem; u++) {
+        for(u = 0; u < block_count; u++) {
             /* Decode the starting points */
             for(tstart = start, v = 0; v < rank; v++, tstart++)
                 UINT32DECODE(pp, *tstart);
@@ -2451,7 +2464,7 @@ H5S__hyper_span_blocklist(const H5S_hyper_span_info_t *spans, hsize_t start[],
 
     /* Sanity checks */
     HDassert(spans);
-    HDassert(rank < H5O_LAYOUT_NDIMS);
+    HDassert(rank < H5S_MAX_RANK);
     HDassert(start);
     HDassert(end);
     HDassert(startblock);
@@ -2555,8 +2568,8 @@ H5S__get_select_hyper_blocklist(H5S_t *space, hbool_t internal, hsize_t startblo
     /* Check for a "regular" hyperslab selection */
     if(space->select.sel_info.hslab->diminfo_valid) {
         const H5S_hyper_dim_t *diminfo; /* Alias for dataspace's diminfo information */
-        hsize_t tmp_count[H5O_LAYOUT_NDIMS];    /* Temporary hyperslab counts */
-        hsize_t offset[H5O_LAYOUT_NDIMS];      /* Offset of element in dataspace */
+        hsize_t tmp_count[H5S_MAX_RANK]; /* Temporary hyperslab counts */
+        hsize_t offset[H5S_MAX_RANK];   /* Offset of element in dataspace */
         unsigned fast_dim;          /* Rank of the fastest changing dimension for the dataspace */
         unsigned ndims;             /* Rank of the dataspace */
         hbool_t done;               /* Whether we are done with the iteration */
@@ -2666,8 +2679,8 @@ H5S__get_select_hyper_blocklist(H5S_t *space, hbool_t internal, hsize_t startblo
         } /* end while */
     } /* end if */
     else {
-        hsize_t start[H5O_LAYOUT_NDIMS];   /* Location of start of hyperslab */
-        hsize_t end[H5O_LAYOUT_NDIMS];     /* Location of end of hyperslab */
+        hsize_t start[H5S_MAX_RANK];    /* Location of start of hyperslab */
+        hsize_t end[H5S_MAX_RANK];      /* Location of end of hyperslab */
 
         ret_value = H5S__hyper_span_blocklist(space->select.sel_info.hslab->span_lst, start, end, (hsize_t)0, &startblock, &numblocks, &buf);
     } /* end else */
@@ -2775,7 +2788,7 @@ H5S_hyper_bounds_helper(const H5S_hyper_span_info_t *spans, const hssize_t *offs
 
     HDassert(spans);
     HDassert(offset);
-    HDassert(rank < H5O_LAYOUT_NDIMS);
+    HDassert(rank < H5S_MAX_RANK);
     HDassert(start);
     HDassert(end);
 
@@ -3079,7 +3092,7 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static htri_t
+static H5_ATTR_PURE htri_t
 H5S__hyper_is_contiguous(const H5S_t *space)
 {
     hbool_t small_contiguous,       /* Flag for small contiguous block */
@@ -3149,10 +3162,10 @@ H5S__hyper_is_contiguous(const H5S_t *space)
 
         /*
          * For a hyperslab to be contiguous, it must have only one block and
-         * (either it's size must be the same as the dataspace extent's in all
-         * but the slowest changing dimension
-         * OR
-         * block size must be 1 in all but the fastest changing dimension).
+         * either it's size must be the same as the dataspace extent's in all
+         *      but the slowest changing dimension
+         *   OR
+         *      block size must be 1 in all but the fastest changing dimension.
          */
         /* Initialize flags */
         large_contiguous = TRUE;	/* assume true and reset if the dimensions don't match */
@@ -3264,7 +3277,7 @@ H5S__hyper_is_contiguous(const H5S_t *space)
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static htri_t
+static H5_ATTR_PURE htri_t
 H5S__hyper_is_single(const H5S_t *space)
 {
     htri_t ret_value = TRUE;        /* return value */
@@ -3283,10 +3296,9 @@ H5S__hyper_is_single(const H5S_t *space)
          */
 
         /* Check for a single block */
-        for(u = 0; u < space->extent.rank; u++) {
+        for(u = 0; u < space->extent.rank; u++)
             if(space->select.sel_info.hslab->opt_diminfo[u].count > 1)
                 HGOTO_DONE(FALSE)
-        } /* end for */
     } /* end if */
     else {
         H5S_hyper_span_info_t *spans;   /* Hyperslab span info node */
@@ -4019,13 +4031,12 @@ done:
  PURPOSE
     Helper routine to detect intersections in span trees
  USAGE
-    htri_t H5S_hyper_intersect_block_helper(spans, start, end)
+    hbool_t H5S__hyper_intersect_block_helper(spans, start, end)
         H5S_hyper_span_info_t *spans;     IN: First span tree to operate with
-        hssize_t *offset;   IN: Selection offset coordinate
         hsize_t *start;    IN: Starting coordinate for block
         hsize_t *end;      IN: Ending coordinate for block
  RETURN
-    Non-negative on success, negative on failure
+    Non-negative (TRUE/FALSE) on success, can't fail
  DESCRIPTION
     Quickly detect intersections between span tree and block
  GLOBAL VARIABLES
@@ -4248,7 +4259,7 @@ H5S__hyper_adjust_u(H5S_t *space, const hsize_t *offset)
  * Purpose:	Projects a single element hyperslab selection into a scalar
  *              dataspace
  *
- * Return:	non-negative on success, negative on failure.
+ * Return:	Non-negative on success, negative on failure.
  *
  * Programmer:	Quincey Koziol
  *              Sunday, July 18, 2010
@@ -4311,7 +4322,7 @@ H5S__hyper_project_scalar(const H5S_t *space, hsize_t *offset)
  * Purpose:	Projects a hyperslab selection onto/into a simple dataspace
  *              of a lower rank
  *
- * Return:	non-negative on success, negative on failure.
+ * Return:	Non-negative on success, negative on failure.
  *
  * Programmer:	Quincey Koziol
  *              Sunday, July 18, 2010
@@ -4358,7 +4369,7 @@ H5S__hyper_project_simple_lower(const H5S_t *base_space, H5S_t *new_space)
  * Purpose:	Projects a hyperslab selection onto/into a simple dataspace
  *              of a higher rank
  *
- * Return:	non-negative on success, negative on failure.
+ * Return:	Non-negative on success, negative on failure.
  *
  * Programmer:	Quincey Koziol
  *              Sunday, July 18, 2010
@@ -4369,6 +4380,7 @@ static herr_t
 H5S__hyper_project_simple_higher(const H5S_t *base_space, H5S_t *new_space)
 {
     H5S_hyper_span_t *prev_span = NULL; /* Pointer to previous list of spans */
+    unsigned delta_rank;                /* Difference in dataspace ranks */
     unsigned curr_dim;                  /* Current dimension being operated on */
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -4382,7 +4394,8 @@ H5S__hyper_project_simple_higher(const H5S_t *base_space, H5S_t *new_space)
     /* Create nodes until reaching the correct # of dimensions */
     new_space->select.sel_info.hslab->span_lst = NULL;
     curr_dim = 0;
-    while(curr_dim < (new_space->extent.rank - base_space->extent.rank)) {
+    delta_rank = (new_space->extent.rank - base_space->extent.rank);
+    while(curr_dim < delta_rank) {
         H5S_hyper_span_info_t *new_span_info;  /* Pointer to list of spans */
         H5S_hyper_span_t *new_span;     /* Temporary hyperslab span */
 
@@ -4446,7 +4459,7 @@ done:
  * Purpose:	Projects a hyperslab selection onto/into a simple dataspace
  *              of a different rank
  *
- * Return:	non-negative on success, negative on failure.
+ * Return:	Non-negative on success, negative on failure.
  *
  * Programmer:	Quincey Koziol
  *              Sunday, July 18, 2010
@@ -4454,7 +4467,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5S__hyper_project_simple(const H5S_t *base_space, H5S_t *new_space, hsize_t *offset)
+H5S__hyper_project_simple(const H5S_t *base_space, H5S_t *new_space,
+    hsize_t *offset)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -4723,11 +4737,11 @@ done:
     "Normalize" a hyperslab selection by adjusting it's coordinates by the
     amount of the selection offset.
  USAGE
-    hbool_t H5S_hyper_normalize_offset(space, old_offset)
+    htri_t H5S_hyper_normalize_offset(space, old_offset)
         H5S_t *space;           IN/OUT: Pointer to dataspace to move
         hssize_t *old_offset;   OUT: Pointer to space to store old offset
  RETURNS
-    TRUE if space has been normalized, FALSE if not
+    TRUE/FALSE for hyperslab selection, FAIL on error
  DESCRIPTION
     Copies the current selection offset into the array provided, then
     inverts the selection offset, subtracts the offset from the hyperslab
@@ -4740,7 +4754,7 @@ done:
 htri_t
 H5S_hyper_normalize_offset(H5S_t *space, hssize_t *old_offset)
 {
-    htri_t ret_value = FALSE;           /* Return value */
+    htri_t ret_value = FALSE;          /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -4943,9 +4957,10 @@ done:
  DESCRIPTION
     Clip one span tree ('a') against another span tree ('b').  Creates span
     trees for the area defined by the 'a' span tree which does not overlap the
-    'b' span tree, the area defined by the overlap of the 'a' hyperslab span
-    tree and the 'b' span tree, and the area defined by the 'b' hyperslab span
-    tree which does not overlap the 'a' span tree.
+    'b' span tree ("a not b"), the area defined by the overlap of the 'a'
+    hyperslab span tree and the 'b' span tree ("a and b"), and the area defined
+    by the 'b' hyperslab span tree which does not overlap the 'a' span
+    tree ("b not a").
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
  EXAMPLES
@@ -5101,10 +5116,10 @@ H5S__hyper_clip_spans(H5S_hyper_span_info_t *a_spans, H5S_hyper_span_info_t *b_s
                     /* Split off upper part of span 'b' at upper span of span 'a' */
 
                     /* Check if there is actually an upper part of span 'b' to split off */
-                    if(span_a->high<span_b->high) {
+                    if(span_a->high < span_b->high) {
                         /* Allocate new span node for upper part of span 'b' */
                         if(NULL == (tmp_span = H5S__hyper_new_span(span_a->high + 1, span_b->high, span_b->down, span_b->next)))
-                            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate hyperslab span")
+                            HGOTO_ERROR(H5E_DATASPACE, H5E_NOSPACE, FAIL, "can't allocate hyperslab span")
 
                         /* Advance span 'a' */
                         H5S__hyper_recover_span(&recover_a,&span_a,span_a->next);
@@ -5269,12 +5284,12 @@ H5S__hyper_clip_spans(H5S_hyper_span_info_t *a_spans, H5S_hyper_span_info_t *b_s
                     } /* end else */
 
                     /* Check if there is actually an upper part of span 'b' to split off */
-                    if(span_a->high<span_b->high) {
+                    if(span_a->high < span_b->high) {
                         /* Split off upper part of span 'b' at upper span of span 'a' */
 
                         /* Allocate new span node for upper part of spans 'a' */
                         if(NULL == (tmp_span = H5S__hyper_new_span(span_a->high + 1, span_b->high, span_b->down, span_b->next)))
-                            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate hyperslab span")
+                            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate hyperslab span")
 
                         /* And advance span 'a' */
                         H5S__hyper_recover_span(&recover_a,&span_a,span_a->next);
@@ -5294,9 +5309,9 @@ H5S__hyper_clip_spans(H5S_hyper_span_info_t *a_spans, H5S_hyper_span_info_t *b_s
                 /*                AAAAAAAAAA             */
                 /* <-----------------------------------> */
                 /*             BBBBBBBBBB                */
-                else if((span_a->low>=span_b->low && span_a->low<=span_b->high) && span_a->high>span_b->high) {
+                else if((span_a->low >= span_b->low && span_a->low <= span_b->high) && span_a->high > span_b->high) {
                     /* Check if there is actually a lower part of span 'b' to split off */
-                    if(span_a->low>span_b->low) {
+                    if(span_a->low > span_b->low) {
                         /* Split off lower part of span 'b' at lower span of span 'a' */
 
                         /* Merge/add lower part of span 'b' with/to b_not_a list */
@@ -5364,7 +5379,7 @@ H5S__hyper_clip_spans(H5S_hyper_span_info_t *a_spans, H5S_hyper_span_info_t *b_s
 
                     /* Allocate new span node for upper part of span 'a' */
                     if(NULL == (tmp_span = H5S__hyper_new_span(span_b->high + 1, span_a->high, span_a->down, span_a->next)))
-                        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate hyperslab span")
+                        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate hyperslab span")
 
                     /* Make upper part of span 'a' into new span 'a' */
                     H5S__hyper_recover_span(&recover_a,&span_a,tmp_span);
@@ -5448,12 +5463,6 @@ static H5S_hyper_span_info_t *
 H5S__hyper_merge_spans_helper(H5S_hyper_span_info_t *a_spans, H5S_hyper_span_info_t *b_spans)
 {
     H5S_hyper_span_info_t *merged_spans = NULL; /* Pointer to the merged span tree */
-    H5S_hyper_span_info_t *tmp_spans;   /* Pointer to temporary new span tree */
-    H5S_hyper_span_t *tmp_span;         /* Pointer to temporary new span */
-    H5S_hyper_span_t *span_a;           /* Pointer to current span 'a' working on */
-    H5S_hyper_span_t *span_b;           /* Pointer to current span 'b' working on */
-    H5S_hyper_span_t *prev_span_merge;  /* Pointer to previous merged span */
-    hbool_t recover_a, recover_b;         /* Flags to indicate when to recover temporary spans */
     H5S_hyper_span_info_t *ret_value = NULL;    /* Return value */
 
     FUNC_ENTER_STATIC
@@ -5472,6 +5481,11 @@ H5S__hyper_merge_spans_helper(H5S_hyper_span_info_t *a_spans, H5S_hyper_span_inf
         } /* end else */
     } /* end if */
     else {
+        H5S_hyper_span_t *span_a;           /* Pointer to current span 'a' working on */
+        H5S_hyper_span_t *span_b;           /* Pointer to current span 'b' working on */
+        H5S_hyper_span_t *prev_span_merge;  /* Pointer to previous merged span */
+        hbool_t recover_a, recover_b;       /* Flags to indicate when to recover temporary spans */
+
         /* Get the pointers to the 'a' and 'b' span lists */
         span_a = a_spans->head;
         span_b = b_spans->head;
@@ -5484,6 +5498,9 @@ H5S__hyper_merge_spans_helper(H5S_hyper_span_info_t *a_spans, H5S_hyper_span_inf
 
         /* Work through the list of spans in the new list */
         while(span_a != NULL && span_b != NULL) {
+            H5S_hyper_span_info_t *tmp_spans;   /* Pointer to temporary new span tree */
+            H5S_hyper_span_t *tmp_span;         /* Pointer to temporary new span */
+
             /* Check if the 'a' span is completely before 'b' span */
             /*    AAAAAAA                            */
             /* <-----------------------------------> */
@@ -5766,7 +5783,7 @@ done:
 static herr_t
 H5S__hyper_merge_spans(H5S_t *space, H5S_hyper_span_info_t *new_spans, hbool_t can_own)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* Check args */
     HDassert(space);
@@ -5852,12 +5869,12 @@ H5S__hyper_spans_nelem(const H5S_hyper_span_info_t *spans)
     Create a span tree
  USAGE
     H5S_hyper_span_t *H5S__hyper_make_spans(rank, start, stride, count, block)
-        unsigned rank;               IN: # of dimensions of the space
-        const hsize_t *start;    IN: Starting location of the hyperslabs
-        const hsize_t *stride;    IN: Stride from the beginning of one block to
+        unsigned rank;          IN: # of dimensions of the space
+        const hsize_t *start;   IN: Starting location of the hyperslabs
+        const hsize_t *stride;  IN: Stride from the beginning of one block to
                                         the next
-        const hsize_t *count;     IN: Number of blocks
-        const hsize_t *block;     IN: Size of hyperslab block
+        const hsize_t *count;   IN: Number of blocks
+        const hsize_t *block;   IN: Size of hyperslab block
  RETURNS
     Pointer to new span tree on success, NULL on failure
  DESCRIPTION
@@ -6141,7 +6158,7 @@ done:
 static hbool_t
 H5S__hyper_rebuild(H5S_t *space)
 {
-    H5S_hyper_dim_t top_span_slab_info[H5O_LAYOUT_NDIMS];
+    H5S_hyper_dim_t top_span_slab_info[H5S_MAX_RANK];
     unsigned rank, curr_dim;
     hbool_t ret_value = TRUE;      /* Return value */
 
@@ -6203,12 +6220,12 @@ done:
 static herr_t
 H5S__hyper_generate_spans(H5S_t *space)
 {
-    hsize_t tmp_start[H5O_LAYOUT_NDIMS];    /* Temporary start information */
-    hsize_t tmp_stride[H5O_LAYOUT_NDIMS];   /* Temporary stride information */
-    hsize_t tmp_count[H5O_LAYOUT_NDIMS];    /* Temporary count information */
-    hsize_t tmp_block[H5O_LAYOUT_NDIMS];    /* Temporary block information */
-    unsigned u;                             /* Local index variable */
-    herr_t ret_value = SUCCEED;             /* Return value */
+    hsize_t tmp_start[H5S_MAX_RANK];    /* Temporary start information */
+    hsize_t tmp_stride[H5S_MAX_RANK];   /* Temporary stride information */
+    hsize_t tmp_count[H5S_MAX_RANK];    /* Temporary count information */
+    hsize_t tmp_block[H5S_MAX_RANK];    /* Temporary block information */
+    unsigned u;                         /* Local index variable */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -6249,19 +6266,14 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol (split from HS_select_hyperslab()).
+ * Programmer:	Quincey Koziol
  *              Tuesday, September 12, 2000
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5S__generate_hyperslab (H5S_t *space, H5S_seloper_t op,
-		      const hsize_t start[],
-		      const hsize_t stride[],
-		      const hsize_t count[],
-		      const hsize_t block[])
+H5S__generate_hyperslab(H5S_t *space, H5S_seloper_t op, const hsize_t start[],
+    const hsize_t stride[], const hsize_t count[], const hsize_t block[])
 {
     H5S_hyper_span_info_t *new_spans=NULL;  /* Span tree for new hyperslab */
     H5S_hyper_span_info_t *a_not_b = NULL;      /* Span tree for hyperslab spans in old span tree and not in new span tree */
@@ -6293,7 +6305,7 @@ H5S__generate_hyperslab (H5S_t *space, H5S_seloper_t op,
         space->select.num_elem = H5S__hyper_spans_nelem(new_spans);
 
         /* Indicate that the new_spans are owned */
-        new_spans=NULL;
+        new_spans = NULL;
     } /* end if */
     else {
         hbool_t updated_spans = FALSE;  /* Whether the spans in the selection were modified */
@@ -6502,9 +6514,9 @@ herr_t
 H5S_select_hyperslab(H5S_t *space, H5S_seloper_t op, const hsize_t start[],
     const hsize_t *stride, const hsize_t count[], const hsize_t *block)
 {
-    hsize_t int_stride[H5O_LAYOUT_NDIMS];   /* Internal storage for stride information */
-    hsize_t int_count[H5O_LAYOUT_NDIMS];    /* Internal storage for count information */
-    hsize_t int_block[H5O_LAYOUT_NDIMS];    /* Internal storage for block information */
+    hsize_t int_stride[H5S_MAX_RANK];   /* Internal storage for stride information */
+    hsize_t int_count[H5S_MAX_RANK];    /* Internal storage for count information */
+    hsize_t int_block[H5S_MAX_RANK];    /* Internal storage for block information */
     const hsize_t *opt_stride;      /* Optimized stride information */
     const hsize_t *opt_count;       /* Optimized count information */
     const hsize_t *opt_block;       /* Optimized block information */
@@ -6528,9 +6540,7 @@ H5S_select_hyperslab(H5S_t *space, H5S_seloper_t op, const hsize_t start[],
     if(block == NULL)
         block = H5S_hyper_ones_g;
 
-    /*
-     * Check new selection.
-     */
+    /* Check new selection */
     for(u = 0; u < space->extent.rank; u++) {
         /* Check for overlapping hyperslab blocks in new selection. */
         if(count[u] > 1 && stride[u] < block[u])
@@ -6566,7 +6576,7 @@ H5S_select_hyperslab(H5S_t *space, H5S_seloper_t op, const hsize_t start[],
             if(unlim_dim >= 0)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "cannot have more than one unlimited dimension in selection")
             else {
-                if(count[u] == block[u] /* == H5S_UNLIMITED */)
+                if(count[u] == block[u]) /* Both are H5S_UNLIMITED */
                     HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "count and block cannot both be unlimited")
                 unlim_dim = (int)u;
             } /* end else */
@@ -6795,7 +6805,8 @@ H5S_select_hyperslab(H5S_t *space, H5S_seloper_t op, const hsize_t start[],
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't get selection bounds")
 
             /* Patch count and block to remove unlimited and include the
-             * existing selection */
+             * existing selection.
+             */
             H5S__hyper_get_clip_diminfo(start[unlim_dim], opt_stride[unlim_dim], &tmp_count, &tmp_block, bounds_end[unlim_dim] + (hsize_t)1);
             HDassert((tmp_count == 1) || (opt_count != H5S_hyper_ones_g));
             HDassert((tmp_block == 1) || (opt_block != H5S_hyper_ones_g));
@@ -7195,9 +7206,9 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
 		      const hsize_t count[],
 		      const hsize_t *block)
 {
-    hsize_t int_stride[H5O_LAYOUT_NDIMS];   /* Internal storage for stride information */
-    hsize_t int_count[H5O_LAYOUT_NDIMS];    /* Internal storage for count information */
-    hsize_t int_block[H5O_LAYOUT_NDIMS];    /* Internal storage for block information */
+    hsize_t int_stride[H5S_MAX_RANK];   /* Internal storage for stride information */
+    hsize_t int_count[H5S_MAX_RANK];    /* Internal storage for count information */
+    hsize_t int_block[H5S_MAX_RANK];    /* Internal storage for block information */
     const hsize_t *opt_stride;      /* Optimized stride information */
     const hsize_t *opt_count;       /* Optimized count information */
     const hsize_t *opt_block;       /* Optimized block information */
@@ -7214,11 +7225,11 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
     HDassert(op > H5S_SELECT_NOOP && op < H5S_SELECT_INVALID);
 
     /* Point to the correct stride values */
-    if(stride==NULL)
+    if(stride == NULL)
         stride = H5S_hyper_ones_g;
 
     /* Point to the correct block values */
-    if(block==NULL)
+    if(block == NULL)
         block = H5S_hyper_ones_g;
 
     /* Check for unlimited dimension */
@@ -7238,7 +7249,7 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
      */
     for(u=0; u<space->extent.rank; u++) {
         /* Check for overlapping hyperslab blocks in new selection. */
-        if(count[u]>1 && stride[u]<block[u])
+        if(count[u] > 1 && stride[u] < block[u])
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "hyperslab blocks overlap")
 
         /* Detect zero-sized hyperslabs in new selection */
@@ -7366,10 +7377,10 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
                     /* Convert current "all" selection to "real" hyperslab selection */
                     /* Then allow operation to proceed */
                     {
-                        hsize_t tmp_start[H5O_LAYOUT_NDIMS];   /* Temporary start information */
-                        hsize_t tmp_stride[H5O_LAYOUT_NDIMS];   /* Temporary stride information */
-                        hsize_t tmp_count[H5O_LAYOUT_NDIMS];    /* Temporary count information */
-                        hsize_t tmp_block[H5O_LAYOUT_NDIMS];    /* Temporary block information */
+                        hsize_t tmp_start[H5S_MAX_RANK];   /* Temporary start information */
+                        hsize_t tmp_stride[H5S_MAX_RANK];   /* Temporary stride information */
+                        hsize_t tmp_count[H5S_MAX_RANK];    /* Temporary count information */
+                        hsize_t tmp_block[H5S_MAX_RANK];    /* Temporary block information */
 
                         /* Fill in temporary information for the dimensions */
                         for(u=0; u<space->extent.rank; u++) {
@@ -7659,9 +7670,6 @@ done:
  * Programmer:	Quincey Koziol
  *              Tuesday, October 30, 2001
  *
- *              Chao Mei
- *              Wednesday, June 29, 2011
- *
  *-------------------------------------------------------------------------
  */
 static H5S_t *
@@ -7791,8 +7799,6 @@ done:
  * Programmer:	Quincey Koziol
  *              Tuesday, October 30, 2001
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -7894,7 +7900,7 @@ H5Sselect_select(hid_t space1_id, H5S_seloper_t op, hid_t space2_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "dataspaces don't have hyperslab selections")
 
     /* Go refine the first selection */
-    if (H5S_select_select(space1, op, space2)<0)
+    if(H5S_select_select(space1, op, space2) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to modify hyperslab selection")
 
 done:
@@ -7940,7 +7946,7 @@ H5S__hyper_get_seq_list_gen(const H5S_t *space, H5S_sel_iter_t *iter,
 {
     H5S_hyper_span_t *curr_span;    /* Current hyperslab span node */
     H5S_hyper_span_t **ispan;       /* Iterator's hyperslab span nodes */
-    hsize_t slab[H5O_LAYOUT_NDIMS]; /* Cumulative size of each dimension in bytes */
+    hsize_t slab[H5S_MAX_RANK]; /* Cumulative size of each dimension in bytes */
     hsize_t acc;       /* Accumulator for computing cumulative sizes */
     hsize_t loc_off;   /* Element offset in the dataspace */
     hsize_t last_span_end = 0; /* The offset of the end of the last span */
@@ -8360,13 +8366,13 @@ H5S__hyper_get_seq_list_opt(const H5S_t *space, H5S_sel_iter_t *iter,
     hsize_t *off, size_t *len)
 {
     hsize_t *mem_size;                  /* Size of the source buffer */
-    hsize_t slab[H5O_LAYOUT_NDIMS];     /* Hyperslab size */
+    hsize_t slab[H5S_MAX_RANK];     /* Hyperslab size */
     const hssize_t *sel_off;            /* Selection offset in dataspace */
-    hsize_t offset[H5O_LAYOUT_NDIMS];   /* Coordinate offset in dataspace */
-    hsize_t tmp_count[H5O_LAYOUT_NDIMS];/* Temporary block count */
-    hsize_t tmp_block[H5O_LAYOUT_NDIMS];/* Temporary block offset */
-    hsize_t wrap[H5O_LAYOUT_NDIMS];     /* Bytes to wrap around at the end of a row */
-    hsize_t skip[H5O_LAYOUT_NDIMS];     /* Bytes to skip between blocks */
+    hsize_t offset[H5S_MAX_RANK];   /* Coordinate offset in dataspace */
+    hsize_t tmp_count[H5S_MAX_RANK];/* Temporary block count */
+    hsize_t tmp_block[H5S_MAX_RANK];/* Temporary block offset */
+    hsize_t wrap[H5S_MAX_RANK];     /* Bytes to wrap around at the end of a row */
+    hsize_t skip[H5S_MAX_RANK];     /* Bytes to skip between blocks */
     const H5S_hyper_dim_t *tdiminfo;    /* Temporary pointer to diminfo information */
     hsize_t fast_dim_start,    /* Local copies of fastest changing dimension info */
         fast_dim_stride,
@@ -8809,9 +8815,9 @@ H5S__hyper_get_seq_list_single(const H5S_t *space, H5S_sel_iter_t *iter,
     const H5S_hyper_dim_t *tdiminfo;    /* Temporary pointer to diminfo information */
     const hssize_t *sel_off;    /* Selection offset in dataspace */
     hsize_t *mem_size;      /* Size of the source buffer */
-    hsize_t base_offset[H5O_LAYOUT_NDIMS];   /* Base coordinate offset in dataspace */
-    hsize_t offset[H5O_LAYOUT_NDIMS];   /* Coordinate offset in dataspace */
-    hsize_t slab[H5O_LAYOUT_NDIMS];     /* Hyperslab size */
+    hsize_t base_offset[H5S_MAX_RANK];   /* Base coordinate offset in dataspace */
+    hsize_t offset[H5S_MAX_RANK];   /* Coordinate offset in dataspace */
+    hsize_t slab[H5S_MAX_RANK];     /* Hyperslab size */
     hsize_t fast_dim_block;     /* Local copies of fastest changing dimension info */
     hsize_t acc;	        /* Accumulator */
     hsize_t loc;                /* Coordinate offset */
@@ -8951,8 +8957,8 @@ H5S__hyper_get_seq_list_single(const H5S_t *space, H5S_sel_iter_t *iter,
                 offset[skip_dim] += tot_blk_count;
             } /* end if */
             else {
-                hsize_t tmp_block[H5O_LAYOUT_NDIMS];/* Temporary block offset */
-                hsize_t skip[H5O_LAYOUT_NDIMS];     /* Bytes to skip between blocks */
+                hsize_t tmp_block[H5S_MAX_RANK];/* Temporary block offset */
+                hsize_t skip[H5S_MAX_RANK];     /* Bytes to skip between blocks */
                 int temp_dim;               /* Temporary rank holder */
 
                 /* Set the starting block location */
@@ -9146,7 +9152,7 @@ H5S__hyper_get_seq_list(const H5S_t *space, unsigned H5_ATTR_UNUSED flags, H5S_s
         /* Check if we stopped in the middle of a sequence of elements */
         if((iter->u.hyp.off[fast_dim] - tdiminfo[fast_dim].start) % tdiminfo[fast_dim].stride != 0 ||
                 ((iter->u.hyp.off[fast_dim] != tdiminfo[fast_dim].start) && tdiminfo[fast_dim].count == 1)) {
-            hsize_t slab[H5O_LAYOUT_NDIMS];     /* Hyperslab size */
+            hsize_t slab[H5S_MAX_RANK];     /* Hyperslab size */
             hsize_t loc;                /* Coordinate offset */
             hsize_t acc;	        /* Accumulator */
             size_t leftover;            /* The number of elements left over from the last sequence */
@@ -9251,11 +9257,10 @@ H5S__hyper_get_seq_list(const H5S_t *space, unsigned H5_ATTR_UNUSED flags, H5S_s
  DESCRIPTION
     Projects the intersection of of the selections of src_space and
     src_intersect_space within the selection of src_space as a selection
-    within the selection of dst_space.  The result is placed in the
-    selection of proj_space.  Note src_space, dst_space, and
-    src_intersect_space do not need to use hyperslab selections, but they
-    cannot use point selections.  The result is always a hyperslab
-    selection.
+    within the selection of dst_space.  The result is placed in the selection
+    of proj_space.  Note src_space, dst_space, and src_intersect_space do not
+    need to use hyperslab selections, but they cannot use point selections.
+    The result is always a hyperslab selection.
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
  EXAMPLES
@@ -9317,21 +9322,17 @@ H5S__hyper_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
 
     /* Assert that src_space and src_intersect_space have same extent and there
      * are no point selections */
-    HDassert(H5S_GET_EXTENT_NDIMS(src_space)
-            == H5S_GET_EXTENT_NDIMS(src_intersect_space));
+    HDassert(H5S_GET_EXTENT_NDIMS(src_space) == H5S_GET_EXTENT_NDIMS(src_intersect_space));
     HDassert(!HDmemcmp(src_space->extent.size, src_intersect_space->extent.size,
-            (size_t)H5S_GET_EXTENT_NDIMS(src_space)
-            * sizeof(src_space->extent.size[0])));
+            (size_t)H5S_GET_EXTENT_NDIMS(src_space) * sizeof(src_space->extent.size[0])));
     HDassert(H5S_GET_SELECT_TYPE(src_space) != H5S_SEL_POINTS);
     HDassert(H5S_GET_SELECT_TYPE(dst_space) != H5S_SEL_POINTS);
     HDassert(H5S_GET_SELECT_TYPE(src_intersect_space) != H5S_SEL_POINTS);
 
     /* Initialize prev_space, curr_span_tree, and curr_span_up_dim */
-    for(i = 0; i < H5S_MAX_RANK; i++) {
-        curr_span_tree[i] = NULL;
-        prev_span[i] = NULL;
-        curr_span_up_dim[i] = (hsize_t)0;
-    } /* end for */
+    HDmemset(curr_span_tree, 0, sizeof(curr_span_tree));
+    HDmemset(prev_span, 0, sizeof(prev_span));
+    HDmemset(curr_span_up_dim, 0, sizeof(curr_span_up_dim));
 
     /* Save rank of projected space */
     proj_rank = proj_space->extent.rank;
@@ -9343,8 +9344,7 @@ H5S__hyper_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
     sis_nelem = (size_t)H5S_GET_SELECT_NPOINTS(src_intersect_space);
     HDassert(ss_nelem == ds_nelem);
 
-    /* Calculate proj_down_dims (note loop relies on unsigned i wrapping around)
-     */
+    /* Calculate proj_down_dims */
     if(H5VM_array_down(proj_rank, proj_space->extent.size, proj_down_dims) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSET, FAIL, "can't compute 'down' chunk size value")
 
@@ -9358,7 +9358,7 @@ H5S__hyper_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
 
     /* Allocate space for the hyperslab selection information (note this sets
      * diminfo_valid to FALSE, diminfo arrays to 0, and span list to NULL) */
-    if((proj_space->select.sel_info.hslab = H5FL_CALLOC(H5S_hyper_sel_t)) == NULL)
+    if(NULL == (proj_space->select.sel_info.hslab = H5FL_CALLOC(H5S_hyper_sel_t)))
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate hyperslab info")
 
     /* Set selection type */
@@ -9367,9 +9367,9 @@ H5S__hyper_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
     /* Set unlim_dim */
     proj_space->select.sel_info.hslab->unlim_dim = -1;
 
-    /* Allocate the source space iterator */
+    /* Allocate the source selection iterator */
     if(NULL == (ss_iter = H5FL_MALLOC(H5S_sel_iter_t)))
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate source space iterator")
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate source selection iterator")
 
     /* Initialize source space iterator */
     if(H5S_select_iter_init(ss_iter, src_space, (size_t)1) < 0)
@@ -9382,9 +9382,9 @@ H5S__hyper_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
     ss_nelem -= nelem;
     HDassert(ss_nseq > 0);
 
-    /* Allocate the destination space iterator */
+    /* Allocate the destination selection iterator */
     if(NULL == (ds_iter = H5FL_MALLOC(H5S_sel_iter_t)))
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate destination space iterator")
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate destination selection iterator")
 
     /* Initialize destination space iterator */
     if(H5S_select_iter_init(ds_iter, dst_space, (size_t)1) < 0)
@@ -9443,9 +9443,8 @@ H5S__hyper_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
 
             /* Reset advance_ss */
             advance_ss = FALSE;
-        } /* end if */
-        if(advance_sis
-                || (sis_off[sis_i] + sis_len[sis_i] <= ss_off[ss_i])) {
+        } /* end while */
+        if(advance_sis || (sis_off[sis_i] + sis_len[sis_i] <= ss_off[ss_i])) {
             do {
                 /* Either we finished the current source intersect sequence or
                  * the sequences do not intersect.  Advance source intersect
@@ -9524,8 +9523,7 @@ H5S__hyper_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
                 HDassert(ds_sel_off <= int_sel_off);
                 proj_off = ds_off[ds_i] + int_sel_off - ds_sel_off;
                 proj_len = proj_len_rem = (size_t)MIN(int_len,
-                        (size_t)(ds_sel_off + (hsize_t)ds_len[ds_i]
-                        - int_sel_off));
+                        (size_t)(ds_sel_off + (hsize_t)ds_len[ds_i] - int_sel_off));
 
                 /* Add to span tree */
                 while(proj_len_rem > (size_t)0) {
@@ -9565,7 +9563,7 @@ H5S__hyper_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
                             (size_t)(proj_space->extent.size[proj_rank - 1]
                             - low));
                     HDassert(proj_len_rem >= span_len);
-                    high = low + (hsize_t)span_len - (hsize_t)1;
+                    high = (low + (hsize_t)span_len) - (hsize_t)1;
 
                     /* Append span in lowest dimension */
                     if(H5S__hyper_append_span(&prev_span[proj_rank - 1], &curr_span_tree[proj_rank - 1], low, high, NULL, NULL) < 0)
@@ -9608,8 +9606,9 @@ loop_end:
         /* Set the number of elements in current selection */
         proj_space->select.num_elem = H5S__hyper_spans_nelem(proj_space->select.sel_info.hslab->span_lst);
 
-        /* Attempt to rebuild "optimized" start/stride/count/block information.
-         * from resulting hyperslab span tree */
+        /* Attempt to build "optimized" start/stride/count/block information
+         * from resulting hyperslab span tree.
+         */
         H5S__hyper_rebuild(proj_space);
     } /* end if */
     else
@@ -9791,11 +9790,11 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-void
+static void
 H5S__hyper_get_clip_diminfo(hsize_t start, hsize_t stride, hsize_t *count,
     hsize_t *block, hsize_t clip_size)
 {
-    FUNC_ENTER_PACKAGE_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* Check for selection outside clip size */
     if(start >= clip_size) {
@@ -9819,7 +9818,7 @@ H5S__hyper_get_clip_diminfo(hsize_t start, hsize_t stride, hsize_t *count,
     } /* end else */
 
     FUNC_LEAVE_NOAPI_VOID
-} /* end H5S_hyper_get_clip_diminfo() */
+} /* end H5S__hyper_get_clip_diminfo() */
 
 
 /*--------------------------------------------------------------------------
@@ -9836,8 +9835,7 @@ H5S__hyper_get_clip_diminfo(hsize_t start, hsize_t stride, hsize_t *count,
     Non-negative on success/Negative on failure.
  DESCRIPTION
     This function changes the unlimited selection into a limited selection
-    with the extent of the formerly unlimited dimension specified by
-    * clip_size.
+    with the extent of the formerly unlimited dimension specified by clip_size.
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
     Note this function does not take the offset into account.
@@ -9851,7 +9849,7 @@ H5S_hyper_clip_unlim(H5S_t *space, hsize_t clip_size)
     hsize_t orig_count;         /* Original count in unlimited dimension */
     int orig_unlim_dim;         /* Original unliminted dimension */
     H5S_hyper_dim_t *diminfo;   /* Convenience pointer to opt_diminfo in unlimited dimension */
-    herr_t ret_value = SUCCEED;
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -9892,8 +9890,7 @@ H5S_hyper_clip_unlim(H5S_t *space, hsize_t clip_size)
     } /* end if */
     else {
         /* Calculate number of elements */
-        space->select.num_elem = diminfo->count * diminfo->block
-                * hslab->num_elem_non_unlim;
+        space->select.num_elem = diminfo->count * diminfo->block * hslab->num_elem_non_unlim;
 
         /* Check if last block is partial.  If superset is set, just keep the
          * last block complete to speed computation. */
@@ -9924,8 +9921,7 @@ H5S_hyper_clip_unlim(H5S_t *space, hsize_t clip_size)
             /* Indicate that the regular dimensions are no longer valid */
             hslab->diminfo_valid = FALSE;
 
-            /* "And" selection with calculated block to perform clip operation
-             */
+            /* "And" selection with calculated block to perform clip operation */
             if(H5S__generate_hyperslab(space, H5S_SELECT_AND, start, H5S_hyper_ones_g, H5S_hyper_ones_g, block) < 0)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINSERT, FAIL, "can't generate hyperslabs")
         } /* end if */
@@ -10237,7 +10233,7 @@ H5S_hyper_get_unlim_block(const H5S_t *space, hsize_t block_index)
     /* Create output space, copy extent */
     if(NULL == (space_out = H5S_create(H5S_SIMPLE)))
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, NULL, "unable to create output dataspace")
-    if(H5S_extent_copy_real(&space_out->extent, &space->extent, TRUE) < 0)
+    if(H5S__extent_copy_real(&space_out->extent, &space->extent, TRUE) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, NULL, "unable to copy destination space extent")
 
     /* Select block as defined by start/stride/count/block computed above */
@@ -10364,12 +10360,12 @@ H5Sis_regular_hyperslab(hid_t spaceid)
 
 done:
     FUNC_LEAVE_API(ret_value)
-}   /* H5Sis_regular_hyperslab() */
+} /* end H5Sis_regular_hyperslab() */
 
 
 /*--------------------------------------------------------------------------
  NAME
-    H5Sgetregular_hyperslab
+    H5Sget_regular_hyperslab
  PURPOSE
     Retrieve a regular hyperslab selection
  USAGE
@@ -10428,4 +10424,4 @@ H5Sget_regular_hyperslab(hid_t spaceid, hsize_t start[], hsize_t stride[],
 
 done:
     FUNC_LEAVE_API(ret_value)
-}   /* H5Sget_regular_hyperslab() */
+} /* end H5Sget_regular_hyperslab() */

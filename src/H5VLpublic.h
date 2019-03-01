@@ -22,6 +22,7 @@
 #include "H5Apublic.h"          /* Attributes                           */
 #include "H5ESpublic.h"         /* Event Stack                          */
 #include "H5Fpublic.h"          /* Files                                */
+#include "H5Ipublic.h"		/* IDs			  		*/
 #include "H5Lpublic.h"          /* Links                                */
 #include "H5Opublic.h"          /* Objects                              */
 #include "H5Rpublic.h"          /* References                           */
@@ -115,7 +116,7 @@ typedef enum H5VL_file_get_t {
     H5VL_FILE_GET_INTENT,	            /* file intent           		*/
     H5VL_FILE_GET_NAME,	                    /* file name             		*/
     H5VL_FILE_GET_OBJ_COUNT,	            /* object count in file	       	*/
-    H5VL_FILE_GET_OBJ_IDS 	            /* object ids in file     		*/
+    H5VL_FILE_GET_OBJ_IDS	            /* object ids in file     		*/
 } H5VL_file_get_t;
 
 /* types for file SPECIFIC callback */
@@ -124,8 +125,7 @@ typedef enum H5VL_file_specific_t {
     H5VL_FILE_REOPEN,                       /* Reopen the file                  */
     H5VL_FILE_MOUNT,                        /* Mount a file                     */
     H5VL_FILE_UNMOUNT,                      /* Unmount a file                   */
-    H5VL_FILE_IS_ACCESSIBLE,                /* Check if a file is accessible    */
-    H5VL_FILE_CACHE_VOL_CONN                /* Cache VOL connector ID & info    */
+    H5VL_FILE_IS_ACCESSIBLE                 /* Check if a file is accessible    */
 } H5VL_file_specific_t;
 
 /* types for group GET callback */
@@ -384,7 +384,7 @@ typedef struct H5VL_class_t {
     herr_t  (*str_to_info)(const char *str, void **info); /* Callback to deserialize a string into connector's info */
     void *  (*get_object)(const void *obj);         /* Callback to retrieve underlying object       */
     herr_t  (*get_wrap_ctx)(const void *obj, void **wrap_ctx); /* Callback to retrieve the object wrapping context for the connector */
-    void*   (*wrap_object)(void *obj, void *wrap_ctx); /* Callback to wrap a library object */
+    void*   (*wrap_object)(void *obj, H5I_type_t obj_type, void *wrap_ctx); /* Callback to wrap a library object */
     herr_t  (*free_wrap_ctx)(void *wrap_ctx);       /* Callback to release the object wrapping context for the connector */
 
     /* Data Model */
@@ -434,6 +434,8 @@ H5_DLL herr_t H5VLunregister_connector(hid_t connector_id);
 
 /* Helper routines for VOL connector authors */
 H5_DLL herr_t H5VLcmp_connector_cls(int *cmp, hid_t connector_id1, hid_t connector_id2);
+H5_DLL hid_t H5VLwrap_register(void *obj, H5I_type_t type);
+H5_DLL void *H5VLobject(hid_t obj_id);
 
 
 /* Public wrappers for generic callbacks */
@@ -449,7 +451,8 @@ H5_DLL herr_t H5VLconnector_info_to_str(const void *info, hid_t connector_id, ch
 H5_DLL herr_t H5VLconnector_str_to_info(const char *str, hid_t connector_id, void **info);
 H5_DLL void *H5VLget_object(void *obj, hid_t connector_id);
 H5_DLL herr_t H5VLget_wrap_ctx(void *obj, hid_t connector_id, void **wrap_ctx);
-H5_DLL void *H5VLwrap_object(void *obj, hid_t connector_id, void *wrap_ctx);
+H5_DLL void *H5VLwrap_object(void *obj, H5I_type_t obj_type, hid_t connector_id,
+    void *wrap_ctx);
 H5_DLL herr_t H5VLfree_wrap_ctx(void *wrap_ctx, hid_t connector_id);
 
 /* Public wrappers for attribute callbacks */

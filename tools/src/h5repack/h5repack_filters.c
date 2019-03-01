@@ -338,12 +338,14 @@ int apply_filters(const char* name, /* object name from traverse list */
 
             sm_nbytes = msize;
             for (i = rank; i > 0; --i) {
-                hsize_t size = H5TOOLS_BUFSIZE / sm_nbytes;
+                hsize_t size = 0;
+                if(sm_nbytes == 0)
+                    HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "number of bytes per stripmine must be > 0");
+                size = H5TOOLS_BUFSIZE / sm_nbytes;
                 if (size == 0) /* datum size > H5TOOLS_BUFSIZE */
                     size = 1;
                 sm_size[i - 1] = MIN(dims[i - 1], size);
                 sm_nbytes *= sm_size[i - 1];
-                HDassert(sm_nbytes > 0);
             }
 
             for (i = 0; i < rank; i++) {

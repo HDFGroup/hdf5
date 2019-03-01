@@ -173,28 +173,25 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_family_init
+ * Function:    H5FD_family_init
  *
- * Purpose:	Initialize this driver by registering the driver with the
- *		library.
+ * Purpose:     Initialize this driver by registering the driver with the
+ *              library.
  *
- * Return:	Success:	The driver ID for the family driver.
+ * Return:      Success:    The driver ID for the family driver
+ *              Failure:    H5I_INVALID_HID
  *
- *		Failure:	Negative
- *
- * Programmer:	Robb Matzke
+ * Programmer:  Robb Matzke
  *              Wednesday, August  4, 1999
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
 hid_t
 H5FD_family_init(void)
 {
-    hid_t ret_value = H5FD_FAMILY_g;   /* Return value */
+    hid_t ret_value = H5I_INVALID_HID;   /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI(H5I_INVALID_HID)
 
     if(H5I_VFL != H5I_get_type(H5FD_FAMILY_g))
         H5FD_FAMILY_g = H5FD_register(&H5FD_family_g, sizeof(H5FD_class_t), FALSE);

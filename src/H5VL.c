@@ -11,7 +11,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Purpose:	The Virtual Object Layer as described in documentation.
+ * Purpose:     The Virtual Object Layer as described in documentation.
  *              The pupose is to provide an abstraction on how to access the
  *              underlying HDF5 container, whether in a local file with
  *              a specific file format, or remotely on other machines, etc...
@@ -295,7 +295,7 @@ H5VLregister_connector_by_value(H5VL_class_value_t value, hid_t vipl_id)
         const H5VL_class_t *cls;
 
         /* Try loading the connector */
-        key.vol.kind = H5VL_GET_CONNECTOR_BY_NAME;
+        key.vol.kind = H5VL_GET_CONNECTOR_BY_VALUE;
         key.vol.u.value = value;
         if(NULL == (cls = (const H5VL_class_t *)H5PL_load(H5PL_TYPE_VOL, &key)))
             HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, H5I_INVALID_HID, "unable to load VOL connector")
@@ -486,14 +486,11 @@ done:
 /*---------------------------------------------------------------------------
  * Function:    H5VLcmp_connector_cls
  *
- * Purpose:     Compares two connector classes
+ * Purpose:     Compares two connector classes (based on their value field)
  *
- * Return:      Success:    Non-negative, with *cmp set to positive if
- *		connector_id1 is greater than connector_id2, negative if connector_id2
- *		is greater than connector_id1 and zero if connector_id1 and connector_id2
- *		are equal.
+ * Return:      Success:    Non-negative, *cmp set to a value like strcmp
  *
- *              Failure:    Negative
+ *              Failure:    Negative, *cmp unset
  *
  *---------------------------------------------------------------------------
  */
@@ -519,4 +516,74 @@ H5VLcmp_connector_cls(int *cmp, hid_t connector_id1, hid_t connector_id2)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* H5VLcmp_connector_cls() */
+
+
+/*---------------------------------------------------------------------------
+ * Function:    H5VLwrap_register
+ *
+ * Purpose:     Wrap an internal object with a "wrap context" and register an
+ *		hid_t for the resulting object.
+ *
+ * Note:	This routine is mainly targeted toward wrapping objects for
+ *		iteration routine callbacks (i.e. the callbacks from H5Aiterate*,
+ *		H5Literate* / H5Lvisit*, and H5Ovisit* ).
+ *
+ * Return:      Success:    Non-negative hid_t for the object.
+ *              Failure:    Negative (H5I_INVALID_HID)
+ *
+ *---------------------------------------------------------------------------
+ */
+hid_t
+H5VLwrap_register(void *obj, H5I_type_t type)
+{
+    hid_t ret_value;            /* Return value */
+
+    /* Use FUNC_ENTER_API_NOINIT here, so the API context doesn't get reset */
+    FUNC_ENTER_API_NOINIT
+    H5TRACE2("i", "*xIt", obj, type);
+
+    /* Check args */
+    if(type <= H5I_BADID || type >= H5I_NTYPES)
+        HGOTO_ERROR(H5E_VOL, H5E_BADRANGE, H5I_INVALID_HID, "invalid type number")
+    if(NULL == obj)
+        HGOTO_ERROR(H5E_VOL, H5E_BADVALUE, H5I_INVALID_HID, "obj is NULL")
+
+    /* Wrap the object and register an ID for it */
+    if((ret_value = H5VL_wrap_register(type, obj, TRUE)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to wrap object")
+
+done:
+    FUNC_LEAVE_API_NOINIT(ret_value)
+} /* H5VLwrap_register() */
+
+
+/*---------------------------------------------------------------------------
+ * Function:    H5VLobject
+ *
+ * Purpose:     Retrieve the object pointer associated with an hid_t for a.
+ *		VOL object.
+ *
+ * Note:	This routine is mainly targeted toward unwrapping objects for
+ *		testing.
+ *
+ * Return:      Success:    Object pointer
+ *              Failure:    NULL
+ *
+ *---------------------------------------------------------------------------
+ */
+void *
+H5VLobject(hid_t id)
+{
+    void *ret_value;            /* Return value */
+
+    FUNC_ENTER_API(NULL)
+    H5TRACE1("*x", "i", id);
+
+    /* Retrieve the object pointer for the ID */
+    if(NULL == (ret_value = H5VL_object(id)))
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, NULL, "unable to retrieve object")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5VLobject() */
 

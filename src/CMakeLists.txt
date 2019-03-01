@@ -39,7 +39,6 @@ IDE_GENERATED_PROPERTIES ("H5A" "${H5A_HDRS}" "${H5A_SOURCES}" )
 set (H5AC_SOURCES
     ${HDF5_SRC_DIR}/H5AC.c
     ${HDF5_SRC_DIR}/H5ACdbg.c
-    ${HDF5_SRC_DIR}/H5AClog.c
     ${HDF5_SRC_DIR}/H5ACmpio.c
     ${HDF5_SRC_DIR}/H5ACproxy_entry.c
 )
@@ -81,6 +80,8 @@ set (H5C_SOURCES
     ${HDF5_SRC_DIR}/H5Cepoch.c
     ${HDF5_SRC_DIR}/H5Cimage.c
     ${HDF5_SRC_DIR}/H5Clog.c
+    ${HDF5_SRC_DIR}/H5Clog_json.c
+    ${HDF5_SRC_DIR}/H5Clog_trace.c
     ${HDF5_SRC_DIR}/H5Cmpio.c
     ${HDF5_SRC_DIR}/H5Cprefetched.c
     ${HDF5_SRC_DIR}/H5Cquery.c
@@ -628,6 +629,13 @@ set (H5VL_SOURCES
     ${HDF5_SRC_DIR}/H5VLcallback.c
     ${HDF5_SRC_DIR}/H5VLint.c
     ${HDF5_SRC_DIR}/H5VLnative.c
+    ${HDF5_SRC_DIR}/H5VLnative_attr.c
+    ${HDF5_SRC_DIR}/H5VLnative_dataset.c
+    ${HDF5_SRC_DIR}/H5VLnative_datatype.c
+    ${HDF5_SRC_DIR}/H5VLnative_file.c
+    ${HDF5_SRC_DIR}/H5VLnative_group.c
+    ${HDF5_SRC_DIR}/H5VLnative_link.c
+    ${HDF5_SRC_DIR}/H5VLnative_object.c
     ${HDF5_SRC_DIR}/H5VLpassthru.c
 )
 set (H5VL_HDRS
@@ -772,6 +780,7 @@ set (H5_PRIVATE_HEADERS
     ${HDF5_SRC_DIR}/H5B2pkg.h
     ${HDF5_SRC_DIR}/H5B2private.h
 
+    ${HDF5_SRC_DIR}/H5Clog.h
     ${HDF5_SRC_DIR}/H5Cpkg.h
     ${HDF5_SRC_DIR}/H5Cprivate.h
 
@@ -869,6 +878,7 @@ set (H5_PRIVATE_HEADERS
 
     ${HDF5_SRC_DIR}/H5UCprivate.h
 
+    ${HDF5_SRC_DIR}/H5VLnative_private.h
     ${HDF5_SRC_DIR}/H5VLpkg.h
     ${HDF5_SRC_DIR}/H5VLprivate.h
 
@@ -931,6 +941,27 @@ endif ()
 
 if (BUILD_SHARED_LIBS)
   file (MAKE_DIRECTORY "${HDF5_BINARY_DIR}/shared")
+endif ()
+
+if (LOCAL_BATCH_TEST)
+  if (${LOCAL_BATCH_SCRIPT_COMMAND} STREQUAL "raybsub")
+    configure_file (
+        ${HDF5_SOURCE_DIR}/bin/batch/${LOCAL_BATCH_SCRIPT_COMMAND}
+        ${HDF5_BINARY_DIR}/${LOCAL_BATCH_SCRIPT_COMMAND} ESCAPE_QUOTES @ONLY
+    )
+  endif ()
+  if (LOCAL_BATCH_SCRIPT_NAME)
+    configure_file (
+        ${HDF5_SOURCE_DIR}/bin/batch/${LOCAL_BATCH_SCRIPT_NAME}.in.cmake
+        ${HDF5_BINARY_DIR}/${LOCAL_BATCH_SCRIPT_NAME} ESCAPE_QUOTES @ONLY
+    )
+  endif ()
+  if (LOCAL_BATCH_SCRIPT_PARALLEL_NAME)
+    configure_file (
+        ${HDF5_SOURCE_DIR}/bin/batch/${LOCAL_BATCH_SCRIPT_PARALLEL_NAME}.in.cmake
+        ${HDF5_BINARY_DIR}/${LOCAL_BATCH_SCRIPT_PARALLEL_NAME} ESCAPE_QUOTES @ONLY
+    )
+  endif ()
 endif ()
 
 if (NOT EXISTS ${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c)

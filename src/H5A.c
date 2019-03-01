@@ -951,6 +951,8 @@ H5Aget_name_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
     if(!obj_name || !*obj_name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
+    if(!name && size)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "name cannot be NULL if size is non-zero")
     if(idx_type <= H5_INDEX_UNKNOWN || idx_type >= H5_INDEX_N)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index type specified")
     if(order <= H5_ITER_UNKNOWN || order >= H5_ITER_N)
@@ -1201,10 +1203,16 @@ H5Arename(hid_t loc_id, const char *old_name, const char *new_name)
     H5TRACE3("e", "i*s*s", loc_id, old_name, new_name);
 
     /* check arguments */
-    if(!old_name || !new_name)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "name is nil")
     if(H5I_ATTR == H5I_get_type(loc_id))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
+    if(!old_name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "old attribute name cannot be NULL")
+    if(!*old_name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "old attribute name cannot be an empty string")
+    if(!new_name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "new attribute name cannot be NULL")
+    if(!*new_name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "new attribute name cannot be an empty string")
 
     /* Avoid thrashing things if the names are the same */
     if(HDstrcmp(old_name, new_name)) {
@@ -1360,7 +1368,7 @@ H5Aiterate2(hid_t loc_id, H5_index_t idx_type, H5_iter_order_t order,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
     /* Iterate over attributes */
-    if((ret_value = H5VL_attr_specific(vol_obj, &loc_params, H5VL_ATTR_ITER, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, idx_type, order, idx, op, op_data)) < 0)
+    if((ret_value = H5VL_attr_specific(vol_obj, &loc_params, H5VL_ATTR_ITER, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, (int)idx_type, (int)order, idx, op, op_data)) < 0)
         HERROR(H5E_ATTR, H5E_BADITER, "error iterating over attributes");
 
 done:
@@ -1448,7 +1456,7 @@ H5Aiterate_by_name(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
     /* Iterate over attributes */
-    if((ret_value = H5VL_attr_specific(vol_obj, &loc_params, H5VL_ATTR_ITER, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, idx_type, order, idx, op, op_data)) < 0)
+    if((ret_value = H5VL_attr_specific(vol_obj, &loc_params, H5VL_ATTR_ITER, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, (int)idx_type, (int)order, idx, op, op_data)) < 0)
         HERROR(H5E_ATTR, H5E_BADITER, "attribute iteration failed");
 
 done:
