@@ -332,8 +332,8 @@ static const H5FD_class_mpi_t H5FD_mpio_g = {
     H5FD__mpio_get_handle,                      /*get_handle            */
     H5FD__mpio_read,				/*read			*/
     H5FD__mpio_write,				/*write			*/
-    H5FD_mpio_custom_read,          /*select_read           */
-    H5FD_mpio_custom_write,         /*select_write          */
+    H5FD__mpio_custom_read,          /*select_read           */
+    H5FD__mpio_custom_write,         /*select_write          */
     H5FD__mpio_flush,				/*flush			*/
     H5FD__mpio_truncate,			/*truncate		*/
     NULL,                                       /*lock                  */
@@ -1936,7 +1936,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5FD_mpio_setup_flatbuf
  *
- * Purpose:	Define the flatbuf structure needed by H5FD_mpio_custom_write.
+ * Purpose:	Define the flatbuf structure needed by H5FD__mpio_custom_write.
  *		This is a helper function to avoid repeating code. The flatbuf can
  *		be a file or memory flatbuf -- and the structure depends on the type
  *		of selection.
@@ -1945,7 +1945,7 @@ done:
  *			Failure:	Negative
  *
  * Programmer:	Rick Zamora, 2018-07-03
- *				(Based on code originally in H5FD_mpio_custom_write)
+ *				(Based on code originally in H5FD__mpio_custom_write)
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2142,7 +2142,7 @@ H5FD_mpio_setup_flatbuf( H5S_sel_type space_sel_type, H5S_flatbuf_t *curflatbuf,
 } /* H5FD_mpio_setup_flatbuf */
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_mpio_custom_write
+ * Function:	H5FD__mpio_custom_write
  *
  * Purpose:	Writes data from a memory flatbuf into a file flatbuf. The memory
  *		and file flatbuf structures are defined using the H5S_<*>_get_seq_list
@@ -2163,7 +2163,7 @@ H5FD_mpio_setup_flatbuf( H5S_sel_type space_sel_type, H5S_flatbuf_t *curflatbuf,
  *
  *-------------------------------------------------------------------------
  */
-static herr_t H5FD_mpio_custom_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id,
+static herr_t H5FD__mpio_custom_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id,
     hid_t file_space, hid_t mem_space, size_t elmt_size, haddr_t addr, const void *buf)
 {
     H5FD_mpio_t                 *file = (H5FD_mpio_t*)_file;
@@ -2343,7 +2343,7 @@ done:
 }
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_mpio_custom_read
+ * Function:	H5FD__mpio_custom_read
  *
  * Purpose:	Reads data from a file flatbuf into a memory flatbuf. The memory
  *		and file flatbuf structures are defined using the H5S_<*>_get_seq_list
@@ -2364,7 +2364,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t H5FD_mpio_custom_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id,
+static herr_t H5FD__mpio_custom_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id,
         hid_t file_space, hid_t mem_space, size_t elmt_size, haddr_t addr, void *buf)
 {
 
