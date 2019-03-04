@@ -327,6 +327,13 @@ Bug Fixes since HDF5-1.10.4 release
 
     Library
     -------
+    - Fixed memory leak in scale offset filter
+
+      The data buffer was not freed in a special case like the general case.
+      It caused the memory usage to grow.  
+
+      (RL - 2019/3/4, HDFFV-10705) 
+
     - Fix hangs with collective metadata reads during chunked dataset I/O
 
       In the parallel library, it was discovered that when a particular
