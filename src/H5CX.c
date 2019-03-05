@@ -501,7 +501,7 @@ H5CX__init_package(void)
 
     /* Get the default DCPL cache information */
 
-    /* Get the default link access property list */
+    /* Get the default dataset creation property list */
     if(NULL == (dc_plist = (H5P_genplist_t *)H5I_object(H5P_DATASET_CREATE_DEFAULT)))
         HGOTO_ERROR(H5E_CONTEXT, H5E_BADTYPE, FAIL, "not a dataset create property list")
 
