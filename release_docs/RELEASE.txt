@@ -139,6 +139,12 @@ Bug Fixes since HDF5-1.8.20
 
     Library
     -------
+    - Fixed a bug that could cause an error or cause fill values to be
+      incorrectly read from a dataset that was written to using H5Dwrite_chunk
+      if the dataset was not closed after writing.
+
+      (NAF - 2019/03/06, HDFFV-10716)
+
     - Fixed a potential invalid memory access and failure that could occur when
       decoding an unknown object header message (from a future version of the
       library).

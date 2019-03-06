@@ -2333,7 +2333,8 @@ H5D__set_extent(H5D_t *dset, const hsize_t *size, hid_t dxpl_id)
          *-------------------------------------------------------------------------
          */
         if(shrink && H5D_CHUNKED == dset->shared->layout.type &&
-                (*dset->shared->layout.ops->is_space_alloc)(&dset->shared->layout.storage))
+                ((*dset->shared->layout.ops->is_space_alloc)(&dset->shared->layout.storage)
+                || (dset->shared->layout.ops->is_data_cached && (*dset->shared->layout.ops->is_data_cached)(dset->shared))))
             /* Remove excess chunks */
             if(H5D__chunk_prune_by_extent(dset, dxpl_id, curr_dims) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to remove chunks")
