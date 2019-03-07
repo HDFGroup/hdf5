@@ -193,13 +193,13 @@ H5B__assert(H5F_t *f, haddr_t addr, const H5B_class_t *type, void *udata)
     FUNC_ENTER_PACKAGE
 
     if(0 == ncalls++) {
-	if(H5DEBUG(B))
-	    fprintf(H5DEBUG(B), "H5B: debugging B-trees (expensive)\n");
+        if(H5DEBUG(B))
+            HDfprintf(H5DEBUG(B), "H5B: debugging B-trees (expensive)\n");
     } /* end if */
 
     /* Get shared info for B-tree */
     if(NULL == (rc_shared = (type->get_shared)(f, udata)))
-	HGOTO_ERROR(H5E_BTREE, H5E_CANTGET, FAIL, "can't retrieve B-tree's shared ref. count object")
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTGET, FAIL, "can't retrieve B-tree's shared ref. count object")
     shared = (H5B_shared_t *)H5UC_GET_OBJ(rc_shared);
     HDassert(shared);
 

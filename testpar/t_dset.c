@@ -2649,7 +2649,7 @@ compress_readAll(void)
 
             /* Try reading the data */
             ret = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, xfer_plist, data_read);
-            VRFY((ret >= 0), "H5Pset_dxpl_mpio succeeded");
+            VRFY((ret >= 0), "H5Dread succeeded");
 
             /* Verify data read */
             for(u=0; u<dim; u++)
@@ -2659,8 +2659,10 @@ compress_readAll(void)
                     nerrors++;
                 }
 
+#if MPI_VERSION >= 3
             ret = H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, xfer_plist, data_read);
             VRFY((ret >= 0), "H5Dwrite succeeded");
+#endif
 
             ret = H5Pclose(xfer_plist);
             VRFY((ret >= 0), "H5Pclose succeeded");

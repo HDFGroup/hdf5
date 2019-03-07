@@ -436,8 +436,8 @@ H5B__split(H5F_t *f, H5B_ins_ud_t *bt_ud, unsigned idx,
 	    side = "LEFT";
 	else
 	    side = "MIDDLE";
-	fprintf(H5DEBUG(B), "H5B__split: %3u {%5.3f,%5.3f,%5.3f} %6s",
-		shared->two_k, split_ratios[0], split_ratios[1], split_ratios[2], side);
+        HDfprintf(H5DEBUG(B), "H5B__split: %3u {%5.3f,%5.3f,%5.3f} %6s",
+            shared->two_k, split_ratios[0], split_ratios[1], split_ratios[2], side);
     }
 #endif
 
@@ -464,7 +464,7 @@ H5B__split(H5F_t *f, H5B_ins_ud_t *bt_ud, unsigned idx,
     nright = shared->two_k - nleft;
 #ifdef H5B_DEBUG
     if(H5DEBUG(B))
-	fprintf(H5DEBUG(B), " split %3d/%-3d\n", nleft, nright);
+        HDfprintf(H5DEBUG(B), " split %3d/%-3d\n", nleft, nright);
 #endif
 
     /*

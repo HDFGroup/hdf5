@@ -20,6 +20,7 @@
 *************************************************************/
 
 #include "testhdf5.h"
+#include "H5srcdir.h"
 
 #define DATAFILE   "titerate.h5"
 
@@ -52,6 +53,17 @@ typedef struct {
     H5O_type_t type;        /* The type of the object */
     iter_enum command;      /* The type of return value */
 } iter_info;
+
+/* Definition for test_corrupted_attnamelen */
+#define CORRUPTED_ATNAMELEN_FILE   "memleak_H5O_dtype_decode_helper_H5Odtype.h5"
+#define DSET_NAME   "image"
+typedef struct searched_err_t {
+    char message[256];
+    bool found;
+} searched_err_t;
+
+/* Call back function for test_corrupted_attnamelen */
+static int find_err_msg_cb(unsigned n, const H5E_error2_t *err_desc, void *_client_data);
 
 /* Local functions */
 int iter_strcmp(const void *s1, const void *s2);
@@ -104,7 +116,7 @@ liter_cb(hid_t H5_ATTR_UNUSED group, const char *name, const H5L_info_t H5_ATTR_
             return(count2 > 10 ? 1 : 0);
 
         default:
-            printf("invalid iteration command");
+            HDprintf("invalid iteration command");
             return(-1);
     } /* end switch */
 } /* end liter_cb() */
@@ -151,7 +163,7 @@ test_iter_group(hid_t fapl, hbool_t new_format)
     CHECK(filespace, FAIL, "H5Screate");
 
     for(i=0; i< NDATASETS; i++) {
-        sprintf(name,"Dataset %d",i);
+        HDsprintf(name,"Dataset %d",i);
         dataset = H5Dcreate2(file, name, datatype, filespace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         CHECK(dataset, FAIL, "H5Dcreate2");
 
@@ -725,7 +737,7 @@ static void test_grp_memb_funcs(hid_t fapl)
     CHECK(filespace, FAIL, "H5Screate");
 
     for(i = 0; i < NDATASETS; i++) {
-        sprintf(name, "Dataset %d", i);
+        HDsprintf(name, "Dataset %d", i);
         dataset = H5Dcreate2(file, name, datatype, filespace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         CHECK(dataset, FAIL, "H5Dcreate2");
 
@@ -915,6 +927,92 @@ static void test_links(hid_t fapl)
     CHECK(ret, FAIL, "H5Fclose");
 } /* test_links() */
 
+/*-------------------------------------------------------------------------
+ * Function:    find_err_msg_cb
+ *
+ * Purpose:     Callback function to find the given error message.
+ *              Helper function for test_corrupted_attnamelen().
+ *
+ * Return:      H5_ITER_STOP when the message is found
+ *              H5_ITER_CONT, otherwise
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+find_err_msg_cb(unsigned n, const H5E_error2_t *err_desc, void *_client_data)
+{
+    int status = H5_ITER_CONT;
+    searched_err_t *searched_err = (searched_err_t *)_client_data;
+
+    if (searched_err == NULL)
+        return -1;
+    
+    /* If the searched error message is found, stop the iteration */
+    if (err_desc->desc != NULL && strcmp(err_desc->desc, searched_err->message) == 0)
+    {
+        searched_err->found = true;
+        status = H5_ITER_STOP;
+    }
+    return status;
+} /* end find_err_msg_cb() */
+
+/**************************************************************************
+**
+**  test_corrupted_attnamelen(): Test the fix for the JIRA issue HDFFV-10588,
+**                      where corrupted attribute's name length can be
+**                      detected and invalid read can be avoided.
+**
+**************************************************************************/
+static void test_corrupted_attnamelen(void)
+{
+    hid_t          fid = -1;            /* File ID */
+    hid_t          did = -1;            /* Dataset ID */
+    searched_err_t err_caught;          /* Data to be passed to callback func */
+    int            err_status;          /* Status returned by H5Aiterate2 */
+    herr_t         ret;                 /* Return value */
+    const char *testfile = H5_get_srcdir_filename(CORRUPTED_ATNAMELEN_FILE); /* Corrected test file name */
+
+    const char *err_message = "attribute name has different length than stored length";
+                        /* the error message produced when the failure occurs */
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing the Handling of Corrupted Attribute's Name Length\n"));
+
+    fid = H5Fopen(testfile, H5F_ACC_RDONLY, H5P_DEFAULT);
+    CHECK(fid, FAIL, "H5Fopen");
+
+    /* Open the dataset */
+    did = H5Dopen2(fid, DSET_NAME, H5P_DEFAULT);
+    CHECK(did, FAIL, "H5Dopen2");
+
+    /* Call H5Aiterate2 to trigger the failure in HDFFV-10588.  Failure should
+       occur in the decoding stage, so some arguments are not needed. */
+    err_status = H5Aiterate2(did, H5_INDEX_NAME, H5_ITER_INC, NULL, NULL, NULL);
+
+    /* Make sure the intended error was caught */
+    if(err_status == -1)
+    {
+        /* Initialize client data */
+        HDstrcpy(err_caught.message, err_message);
+        err_caught.found = false;
+
+        /* Look for the correct error message */
+        ret = H5Ewalk2(H5E_DEFAULT, H5E_WALK_UPWARD, find_err_msg_cb, &err_caught);
+        CHECK(ret, FAIL, "H5Ewalk2");
+
+        /* Fail if the indicated message is not found */
+        CHECK(err_caught.found, false, "test_corrupted_attnamelen: Expected error not found");
+    }
+
+    /* Close the dataset and file */
+    ret = H5Dclose(did);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+} /* test_corrupted_attnamelen() */
+
 /****************************************************************
 **
 **  test_iterate(): Main iteration testing routine.
@@ -951,6 +1049,9 @@ test_iterate(void)
         test_links(new_format ? fapl2 : fapl);              /* Test soft and hard link iteration */
     } /* end for */
 
+    /* Test the fix for issue HDFFV-10588 */
+    test_corrupted_attnamelen();
+
     /* Close FAPLs */
     ret = H5Pclose(fapl);
     CHECK(ret, FAIL, "H5Pclose");
@@ -976,6 +1077,6 @@ test_iterate(void)
 void
 cleanup_iterate(void)
 {
-    remove(DATAFILE);
+    HDremove(DATAFILE);
 }
 

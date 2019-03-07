@@ -1,4 +1,4 @@
-HDF5 version 1.11.4 currently under development
+ version 1.11.4 currently under development
 ================================================================================
 
 
@@ -48,6 +48,15 @@ New Features
 
     Configuration:
     -------------
+    - Keep stderr and stdout separate in tests
+
+      Changed test handling of output capture. Tests now keep the stderr
+      output separate from the stdout output. It is up to the test to decide
+      which output to check against a reference. Also added the option
+      to grep for a string in either output.
+
+      (ADB - 2018/12/12, HDFFV-10632)
+
     - Add toolchain and cross-compile support
 
       Added info on using a toolchain file to INSTALL_CMAKE.txt. A
@@ -110,7 +119,7 @@ New Features
 
       (ADB - 2018/07/16)
 
- 
+
     Library:
     --------
     - Allow pre-generated H5Tinit.c and H5make_libsettings.c to be used.
@@ -120,67 +129,71 @@ New Features
 
       (ADB - 2018/09/18, HDFFV-10332)
 
+    - Remove H5I_REFERENCE from the library
+
+      This ID class was never used by the library and has been removed.
+
+      (DER - 2018/12/08, HDFFV-10252)
+
 
     Parallel Library:
     -----------------
-    -
+    - Changed the default behavior in parallel when reading the same dataset in its entirely
+      (i.e. H5S_ALL dataset selection) which is being read by all the processes collectively.
+      The dataset mush be contiguous, less than 2GB, and of an atomic datatype.
+      The new behavior is the HDF5 library will use an MPI_Bcast to pass the data read from 
+      the disk by the root process to the remain processes in the MPI communicator associated 
+      with the HDF5 file.
+
+      (MSB - 2019/01/02, HDFFV-10652)
 
     Fortran Library:
     ----------------
-    -
+    - Added new Fortran derived type, c_h5o_info_t, which is interoperable with
+      C's h5o_info_t. This is needed for callback functions which
+      pass C's h5o_info_t data type definition.
+
+      (MSB, 2019/01/08, HDFFV-10443)
+
+    - Added new Fortran API, H5gmtime, which converts (C) 'time_t' structure
+      to Fortran DATE AND TIME storage format.
+      
+      (MSB, 2019/01/08, HDFFV-10443)
+
+    - Added new Fortran 'fields' optional parameter to: h5ovisit_f, h5oget_info_by_name_f, 
+      h5oget_info, h5oget_info_by_idx and h5ovisit_by_name_f.
+
+      (MSB, 2019/01/08, HDFFV-10443)
 
     C++ Library:
     ------------
-    - New wrappers
+    - Added new function to the C++ interface
 
-      Added the following items:
+      Added wrapper for H5Ovisit2:
+          H5Object::visit()
 
-      + Class DSetAccPropList for the dataset access property list.
-
-      + Wrapper for H5Dget_access_plist to class DataSet
-        // Gets the access property list of this dataset.
-        DSetAccPropList getAccessPlist() const;
-
-      + Wrappers for H5Pset_chunk_cache and H5Pget_chunk_cache to class DSetAccPropList
-        // Sets the raw data chunk cache parameters.
-        void setChunkCache(size_t rdcc_nslots, size_t rdcc_nbytes, double rdcc_w0)
-
-        // Retrieves the raw data chunk cache parameters.
-        void getChunkCache(size_t &rdcc_nslots, size_t &rdcc_nbytes, double &rdcc_w0)
-
-      + New operator!= to class DataType (HDFFV-10472)
-        // Determines whether two datatypes are not the same.
-        bool operator!=(const DataType& compared_type)
-
-      + Wrappers for H5Oget_info2, H5Oget_info_by_name2, and H5Oget_info_by_idx2
-        (HDFFV-10458)
-
-        // Retrieves information about an HDF5 object.
-        void getObjinfo(H5O_info_t& objinfo, unsigned fields = H5O_INFO_BASIC) const;
-
-        // Retrieves information about an HDF5 object, given its name.
-        void getObjinfo(const char* name, H5O_info_t& objinfo,
-                unsigned fields = H5O_INFO_BASIC,
-                const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
-        void getObjinfo(const H5std_string& name, H5O_info_t& objinfo,
-                unsigned fields = H5O_INFO_BASIC,
-                const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
-
-        // Retrieves information about an HDF5 object, given its index.
-        void getObjinfo(const char* grp_name, H5_index_t idx_type,
-                H5_iter_order_t order, hsize_t idx, H5O_info_t& objinfo,
-                unsigned fields = H5O_INFO_BASIC,
-                const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
-        void getObjinfo(const H5std_string& grp_name, H5_index_t idx_type,
-                H5_iter_order_t order, hsize_t idx, H5O_info_t& objinfo,
-                unsigned fields = H5O_INFO_BASIC,
-                const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
-
-      (BMR - 2018/07/22, HDFFV-10150, HDFFV-10458, HDFFV-1047)
+      (BMR - 2019/02/14, HDFFV-10532)
 
 
     Java Library:
     ----------------
+    - Duplicate the data read/write functions of Datasets for Attributes.
+
+      Region references could not be displayed for attributes as they could
+      for datasets. Datasets had overloaded read and write functions for different
+      datatypes that were not available for attributes. After adding similar
+      functions, attribute region references work normally.
+
+      (ADB - 2018/12/12, HDFVIEW-4)
+
+
+    - Removed H5I_REFERENCE from the Java wrappers
+
+      This ID class was never used by the library and has been removed
+      from the Java wrappers.
+
+      (DER - 2018/12/08, HDFFV-10252)
+
 
     Tools:
     ------
@@ -211,6 +224,51 @@ Bug Fixes since HDF5-1.10.3 release
 
     Library
     -------
+    - Fix hangs with collective metadata reads during chunked dataset I/O
+
+      In the parallel library, it was discovered that when a particular
+      sequence of operations following a pattern of:
+
+      "write to chunked dataset" -> "flush file" -> "read from dataset"
+
+      occurred with collective metadata reads enabled, hangs could be
+      observed due to certain MPI ranks not participating in the collective
+      metadata reads.
+
+      To fix the issue, collective metadata reads are now disabled during
+      chunked dataset raw data I/O.
+
+      (JTH - 2019/02/11, HDFFV-10563, HDFFV-10688)
+
+    - Performance issue when closing an object
+
+      The slow down is due to the search of the "tag_list" to find
+      out the "corked" status of an object and "uncork" it if so.
+
+      Improve porformance by skipping the search of the "tag_list"
+      if there are no "corked" objects when closing an object.
+
+      (VC - 2019/2/6)
+
+    - Fixed a potential invalid memory access and failure that could occur when
+      decoding an unknown object header message (from a future version of the
+      library).
+
+      (NAF - 2019/01/07)
+
+    - Deleting attributes in dense storage
+
+      The library aborts with "infinite loop closing library" after
+      attributes in dense storage are created and then deleted.
+
+      When deleting the attribute nodes from the name index v2 B-tree,
+      if an attribute is found in the intermediate B-tree nodes,
+      which may be merged/redistributed in the process, we need to 
+      free the dynamically allocated spaces for the intermediate 
+      decoded attribute.
+
+      (VC - 2018/12/26, HDFFV-10659)
+
     - Allow H5detect and H5make_libsettings to take a file as an argument.
 
       Rather than only writing to stdout, add a command argument to name
@@ -282,12 +340,27 @@ Bug Fixes since HDF5-1.10.3 release
 
     Fortran
     --------
+    - Added symbolic links libhdf5_hl_fortran.so to libhdf5hl_fortran.so and
+      libhdf5_hl_fortran.a to libhdf5hl_fortran.a in hdf5/lib directory for 
+      autotools installs.  These were added to match the name of the files 
+      installed by cmake and the general pattern of hl lib files.  We will 
+      change the names of the installed lib files to the matching name in 
+      the next major release.
+
+      (LRK - 2019/01/04, HDFFV-10596)
+
     - Made Fortran specific subroutines PRIVATE in generic procedures.
 
       Effected generic procedures were functions in H5A, H5D, H5P, H5R and H5T.
-    
+
       (MSB, 2018/12/04, HDFFV-10511)
- 
+
+    - Fixed issue with Fortran not returning h5o_info_t field values 
+      meta_size%attr%index_size and  meta_size%attr%heap_size.
+
+      (MSB, 2018/1/8, HDFFV-10443)
+
+
     Tools
     -----
     -
@@ -314,6 +387,11 @@ Bug Fixes since HDF5-1.10.3 release
 
     Testing
     -------
+    - Fixed a test failure in testpar/t_dset.c caused by
+      the test trying to use the parallel filters feature
+      on MPI-2 implementations.
+
+      (JTH, 2019/2/7)
 
 Bug Fixes since HDF5-1.10.2 release
 ==================================
@@ -556,6 +634,15 @@ Bug Fixes since HDF5-1.10.2 release
 
     Testing
     -------
+    - The dt_arith test failed on IBM Power8 and Power9 machines when testing
+      conversions from or to long double types, especially when special values
+      such as infinity or NAN were involved.  In some cases the results differed
+      by extremely small amounts from those on other machines, while some other
+      tests resulted in segmentation faults.  These conversion tests with long 
+      double types have been disabled for ppc64 machines until the problems are 
+      better understood and can be properly addressed.
+    
+      (SRL - 2019/01/07, TRILAB-98)
 
 Supported Platforms
 ===================

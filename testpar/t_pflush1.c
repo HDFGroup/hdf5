@@ -15,11 +15,11 @@
  * Programmer:  Leon Arber  <larber@uiuc.edu>
  *              Sept. 28, 2006.
  *
- * Purpose:    This is the first half of a two-part test that makes sure
- *        that a file can be read after a parallel application crashes as long
- *        as the file was flushed first.  We simulate a crash by
- *        calling _exit(0) since this doesn't flush HDF5 caches but
- *        still exits with success.
+ * Purpose:     This is the first half of a two-part test that makes sure
+ *              that a file can be read after a parallel application crashes
+ *              as long as the file was flushed first.  We simulate a crash by
+ *              calling _exit() since this doesn't flush HDF5 caches but
+ *              still exits with success.
  */
 #include "h5test.h"
 
@@ -29,171 +29,190 @@ const char *FILENAME[] = {
     NULL
 };
 
-static double    the_data[100][100];
+static int  data_g[100][100];
 
+#define N_GROUPS    100
+
+
 /*-------------------------------------------------------------------------
- * Function:    create_file
+ * Function:    create_test_file
  *
- * Purpose:    Creates file used in part 1 of the test
+ * Purpose:     Creates the file used in part 1 of the test
  *
- * Return:    Success:    0
+ * Return:      Success:    A valid file ID
+ *              Failure:    H5I_INVALID_HID
  *
- *        Failure:    1
- *
- * Programmer:    Leon Arber
+ * Programmer:  Leon Arber
  *              Sept. 26, 2006
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
 static hid_t
-create_file(char* name, hid_t fapl)
+create_test_file(char *name, hid_t fapl_id)
 {
-    hid_t    file, dcpl, space, dset, groups, grp, plist;
-    hsize_t    ds_size[2] = {100, 100};
-    hsize_t    ch_size[2] = {5, 5};
-    hsize_t    i, j;
+    hid_t       fid             = H5I_INVALID_HID;
+    hid_t       dcpl_id         = H5I_INVALID_HID;
+    hid_t       sid             = H5I_INVALID_HID;
+    hid_t       did             = H5I_INVALID_HID;
+    hid_t       top_level_gid   = H5I_INVALID_HID;
+    hid_t       gid             = H5I_INVALID_HID;
+    hid_t       dxpl_id         = H5I_INVALID_HID;
+    hsize_t     dims[2]         = {100, 100};
+    hsize_t     chunk_dims[2]   = {5, 5};
+    hsize_t     i, j;
 
-
-
-    if((file=H5Fcreate(name, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) goto error;
+    if((fid = H5Fcreate(name, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
+        goto error;
 
     /* Create a chunked dataset */
-    if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) goto error;
-    if(H5Pset_chunk(dcpl, 2, ch_size) < 0) goto error;
-    if((space = H5Screate_simple(2, ds_size, NULL)) < 0) goto error;
-    if((dset = H5Dcreate2(file, "dset", H5T_NATIVE_FLOAT, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-    goto error;
+    if((dcpl_id = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        goto error;
+    if(H5Pset_chunk(dcpl_id, 2, chunk_dims) < 0)
+        goto error;
+    if((sid = H5Screate_simple(2, dims, NULL)) < 0)
+        goto error;
+    if((did = H5Dcreate2(fid, "dset", H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        goto error;
 
-    plist = H5Pcreate(H5P_DATASET_XFER);
-    H5Pset_dxpl_mpio(plist, H5FD_MPIO_COLLECTIVE);
-
+    if((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0)
+        goto error;
+    if(H5Pset_dxpl_mpio(dxpl_id, H5FD_MPIO_COLLECTIVE) < 0)
+        goto error;
 
     /* Write some data */
-    for(i = 0; i < ds_size[0]; i++) {
-    /*
-    * The extra cast in the following statement is a bug workaround
-    * for the Win32 version 5.0 compiler.
-    * 1998-11-06 ptl
-    */
-    for(j = 0; j < ds_size[1]; j++)
-        the_data[i][j] = (double)(hssize_t)i/(hssize_t)(j+1);
-    }
-    if(H5Dwrite(dset, H5T_NATIVE_DOUBLE, space, space, plist, the_data) < 0) goto error;
+    for(i = 0; i < dims[0]; i++)
+        for(j = 0; j < dims[1]; j++)
+            data_g[i][j] = (int)(i + (i * j) + j);
+
+    if(H5Dwrite(did, H5T_NATIVE_INT, sid, sid, dxpl_id, data_g) < 0)
+        goto error;
 
     /* Create some groups */
-    if((groups = H5Gcreate2(file, "some_groups", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) goto error;
-    for(i = 0; i < 100; i++) {
-    sprintf(name, "grp%02u", (unsigned)i);
-    if((grp = H5Gcreate2(groups, name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) goto error;
-    if(H5Gclose(grp) < 0) goto error;
+    if((top_level_gid = H5Gcreate2(fid, "some_groups", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        goto error;
+    for(i = 0; i < N_GROUPS; i++) {
+        HDsprintf(name, "grp%02u", (unsigned)i);
+        if((gid = H5Gcreate2(top_level_gid, name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+            goto error;
+        if(H5Gclose(gid) < 0)
+            goto error;
     }
 
-    return file;
+    return fid;
 
 error:
-    HD_exit(1);
-}
+    return H5I_INVALID_HID;
+} /* end create_test_file() */
 
+
 /*-------------------------------------------------------------------------
  * Function:    main
  *
- * Purpose:    Part 1 of a two-part H5Fflush() test.
+ * Purpose:     Part 1 of a two-part parallel H5Fflush() test.
  *
- * Return:    Success:    0
+ * Return:      EXIT_FAILURE (always)
  *
- *        Failure:    1
- *
- * Programmer:    Robb Matzke
+ * Programmer:  Robb Matzke
  *              Friday, October 23, 1998
- *
- * Modifications:
- *         Leon Arber
- *         Sept. 26, 2006, expand test to check for failure if H5Fflush is not called.
- *
  *
  *-------------------------------------------------------------------------
  */
 int
 main(int argc, char* argv[])
 {
-    hid_t file1, file2, fapl;
-    MPI_File    *mpifh_p = NULL;
-    char    name[1024];
-    const char  *envval = NULL;
-    int mpi_size, mpi_rank;
-    MPI_Comm comm  = MPI_COMM_WORLD;
-    MPI_Info info  = MPI_INFO_NULL;
+    hid_t       fid1        = H5I_INVALID_HID;
+    hid_t       fid2        = H5I_INVALID_HID;
+    hid_t       fapl_id     = H5I_INVALID_HID;
+    MPI_File    *mpifh_p    = NULL;
+    char        name[1024];
+    const char  *envval     = NULL;
+    int         mpi_size;
+    int         mpi_rank;
+    MPI_Comm    comm        = MPI_COMM_WORLD;
+    MPI_Info    info        = MPI_INFO_NULL;
 
     MPI_Init(&argc, &argv);
     MPI_Comm_size(comm, &mpi_size);
     MPI_Comm_rank(comm, &mpi_rank);
 
-    fapl = H5Pcreate(H5P_FILE_ACCESS);
-    H5Pset_fapl_mpio(fapl, comm, info);
-
     if(mpi_rank == 0)
-    TESTING("H5Fflush (part1)");
+        TESTING("H5Fflush (part1)");
+
+    /* Don't run using the split VFD */
     envval = HDgetenv("HDF5_DRIVER");
     if(envval == NULL)
         envval = "nomatch";
-    if(HDstrcmp(envval, "split")) {
+
+    if(!HDstrcmp(envval, "split")) {
+        if(mpi_rank == 0) {
+            SKIPPED();
+            HDputs("    Test not compatible with current Virtual File Driver");
+        }
+        MPI_Finalize();
+        HDexit(EXIT_FAILURE);
+    }
+
+    if((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        goto error;
+    if(H5Pset_fapl_mpio(fapl_id, comm, info) < 0)
+        goto error;
+
     /* Create the file */
-    h5_fixname(FILENAME[0], fapl, name, sizeof name);
-    file1 = create_file(name, fapl);
+    h5_fixname(FILENAME[0], fapl_id, name, sizeof(name));
+    if((fid1 = create_test_file(name, fapl_id)) < 0)
+        goto error;
     /* Flush and exit without closing the library */
-    if(H5Fflush(file1, H5F_SCOPE_GLOBAL) < 0) goto error;
+    if(H5Fflush(fid1, H5F_SCOPE_GLOBAL) < 0)
+        goto error;
 
     /* Create the other file which will not be flushed */
-    h5_fixname(FILENAME[1], fapl, name, sizeof name);
-    file2 = create_file(name, fapl);
-
+    h5_fixname(FILENAME[1], fapl_id, name, sizeof(name));
+    if((fid2 = create_test_file(name, fapl_id)) < 0)
+        goto error;
 
     if(mpi_rank == 0)
         PASSED();
-    fflush(stdout);
-    fflush(stderr);
-    } /* end if */
-    else {
-        SKIPPED();
-        puts("    Test not compatible with current Virtual File Driver");
-    } /* end else */
 
-    /*
-     * Some systems like AIX do not like files not closed when MPI_Finalize
+    HDfflush(stdout);
+    HDfflush(stderr);
+
+    /* Some systems like AIX do not like files not being closed when MPI_Finalize
      * is called.  So, we need to get the MPI file handles, close them by hand.
      * Then the _exit is still needed to stop at_exit from happening in some systems.
      * Note that MPIO VFD returns the address of the file-handle in the VFD struct
      * because MPI_File_close wants to modify the file-handle variable.
      */
 
-    /* close file1 */
-    if(H5Fget_vfd_handle(file1, fapl, (void **)&mpifh_p) < 0) {
-    printf("H5Fget_vfd_handle for file1 failed\n");
-    goto error;
-    } /* end if */
-    if(MPI_File_close(mpifh_p) != MPI_SUCCESS) {
-    printf("MPI_File_close for file1 failed\n");
-    goto error;
-    } /* end if */
-    /* close file2 */
-    if(H5Fget_vfd_handle(file2, fapl, (void **)&mpifh_p) < 0) {
-    printf("H5Fget_vfd_handle for file2 failed\n");
-    goto error;
-    } /* end if */
-    if(MPI_File_close(mpifh_p) != MPI_SUCCESS) {
-    printf("MPI_File_close for file2 failed\n");
-    goto error;
-    } /* end if */
+    /* Close file 1 */
+    if(H5Fget_vfd_handle(fid1, fapl_id, (void **)&mpifh_p) < 0)
+        goto error;
+    if(MPI_File_close(mpifh_p) != MPI_SUCCESS)
+        goto error;
 
-    fflush(stdout);
-    fflush(stderr);
-    HD_exit(0);
+    /* Close file 2 */
+    if(H5Fget_vfd_handle(fid2, fapl_id, (void **)&mpifh_p) < 0)
+        goto error;
+    if(MPI_File_close(mpifh_p) != MPI_SUCCESS)
+        goto error;
+
+    HDfflush(stdout);
+    HDfflush(stderr);
+
+    /* Always exit with a failure code!
+     *
+     * In accordance with the standard, not having all processes
+     * call MPI_Finalize() can be considered an error, so mpiexec
+     * et al. may indicate failure on return. It's much easier to
+     * always ignore the failure condition than to handle some
+     * platforms returning success and others failure.
+     */
+    HD_exit(EXIT_FAILURE);
 
 error:
-    fflush(stdout);
-    fflush(stderr);
-    HD_exit(1);
-}
+    HDfflush(stdout);
+    HDfflush(stderr);
+    HDprintf("*** ERROR ***\n");
+    HDprintf("THERE WAS A REAL ERROR IN t_pflush1.\n");
+    HD_exit(EXIT_FAILURE);
+} /* end main() */
 

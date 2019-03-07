@@ -2334,9 +2334,9 @@ lower_dim_size_comp_test__run_test(const int chunk_edge_size,
     /* verify that H5S_select_shape_same() reports the two
      * selections as having the same shape.
      */
-    check = H5S_select_shape_same_test(mem_large_ds_sid,
+    check = H5S__select_shape_same_test(mem_large_ds_sid,
                                        file_small_ds_sid);
-    VRFY((check == TRUE), "H5S_select_shape_same_test passed (1)");
+    VRFY((check == TRUE), "H5S__select_shape_same_test passed (1)");
 
 
     ret = H5Dread(small_dataset,
@@ -2455,9 +2455,9 @@ lower_dim_size_comp_test__run_test(const int chunk_edge_size,
     /* verify that H5S_select_shape_same() reports the two
      * selections as having the same shape.
      */
-    check = H5S_select_shape_same_test(mem_small_ds_sid,
+    check = H5S__select_shape_same_test(mem_small_ds_sid,
                                        file_large_ds_sid);
-    VRFY((check == TRUE), "H5S_select_shape_same_test passed (2)");
+    VRFY((check == TRUE), "H5S__select_shape_same_test passed (2)");
 
 
     ret = H5Dread(large_dataset,
@@ -2622,31 +2622,27 @@ void
 lower_dim_size_comp_test(void)
 {
     /* const char *fcnName = "lower_dim_size_comp_test()"; */
-    int        chunk_edge_size = 0;
-    int      use_collective_io = 1;
-    hid_t    dset_type = H5T_NATIVE_UINT;
+    int      chunk_edge_size = 0;
+    int      use_collective_io;
+
 #if 0
    HDsleep(60);
 #endif
-    HDcompile_assert(sizeof(uint32_t) == sizeof(unsigned));
-    for ( use_collective_io = (hbool_t)0;
-          (int)use_collective_io <= 1;
-          (hbool_t)(use_collective_io++) ) {
 
+    HDcompile_assert(sizeof(uint32_t) == sizeof(unsigned));
+    for(use_collective_io = 0; use_collective_io <= 1; use_collective_io++) {
         chunk_edge_size = 0;
         lower_dim_size_comp_test__run_test(chunk_edge_size,
                                            (hbool_t)use_collective_io,
-                                           dset_type);
-
+                                           H5T_NATIVE_UINT);
 
         chunk_edge_size = 5;
         lower_dim_size_comp_test__run_test(chunk_edge_size,
                                            (hbool_t)use_collective_io,
-                                           dset_type);
-    }
+                                           H5T_NATIVE_UINT);
+    } /* end for */
 
     return;
-
 } /* lower_dim_size_comp_test() */
 
 

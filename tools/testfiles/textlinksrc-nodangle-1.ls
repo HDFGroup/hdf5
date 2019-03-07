@@ -56,5 +56,3 @@ usage: h5ls [OPTIONS] file[/OBJECT] [file[/[OBJECT]...]
                       Replaced by --follow-symlinks.
    -e, --errors       Show all HDF5 error reporting
                       Replaced by --enable-error-stack.
-Error: --no-dangling-links must be used along with --follow-symlinks option!
-

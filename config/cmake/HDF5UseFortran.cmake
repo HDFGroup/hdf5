@@ -18,16 +18,6 @@ ENABLE_LANGUAGE (Fortran)
 set (HDF_PREFIX "H5")
 include (CheckFortranFunctionExists)
 
-## Check for non-standard extenstion quadmath.h
-
-CHECK_INCLUDE_FILES(quadmath.h C_HAVE_QUADMATH)
-
-if (${C_HAVE_QUADMATH})
-  set(${HDF_PREFIX}_HAVE_QUADMATH_H 1)
-else ()
-  set(${HDF_PREFIX}_HAVE_QUADMATH_H 0)
-endif ()
-
 # The provided CMake Fortran macros don't provide a general compile/run function
 # so this one is used.
 #-----------------------------------------------------------------------------
@@ -40,7 +30,7 @@ macro (FORTRAN_RUN FUNCTION_NAME SOURCE_CODE RUN_RESULT_VAR1 COMPILE_RESULT_VAR1
     TRY_RUN (RUN_RESULT_VAR COMPILE_RESULT_VAR
         ${CMAKE_BINARY_DIR}
         ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testFortranCompiler1.f90
-        LINK_LIBRARIES "${CMAKE_REQUIRED_LIBRARIES}"
+        LINK_LIBRARIES "${HDF5_REQUIRED_LIBRARIES}"
     )
 
     if (${COMPILE_RESULT_VAR})
@@ -67,8 +57,8 @@ endmacro ()
 
 # Read source line beginning at the line matching Input:"START" and ending at the line matching Input:"END"
 macro (READ_SOURCE SOURCE_START SOURCE_END RETURN_VAR)
-  file (READ "${HDF5_SOURCE_DIR}/m4/aclocal_fc.f90" SOURCE_CODE)
-  string (REGEX MATCH "${SOURCE_START}[\\\t\\\n\\\r[].+]*${SOURCE_END}" SOURCE_CODE ${SOURCE_CODE})
+  file (READ "${HDF5_SOURCE_DIR}/m4/aclocal_fc.f90" SOURCE_MASTER)
+  string (REGEX MATCH "${SOURCE_START}[\\\t\\\n\\\r[].+]*${SOURCE_END}" SOURCE_CODE ${SOURCE_MASTER})
   set (RETURN_VAR "${SOURCE_CODE}")
 endmacro ()
 
@@ -244,7 +234,7 @@ foreach (KIND ${VAR} )
   set (pack_real_sizeof "${pack_real_sizeof} ${PROG_OUTPUT1},")
 endforeach ()
 
-if (pack_int_sizeof STREQUAL "")
+if (pack_real_sizeof STREQUAL "")
    message (FATAL_ERROR "Failed to find available REAL KINDs for Fortran")
 endif ()
 
@@ -367,9 +357,9 @@ ENABLE_LANGUAGE (C)
 #-----------------------------------------------------------------------------
 macro (C_RUN FUNCTION_NAME SOURCE_CODE RETURN_VAR)
     message (STATUS "Detecting C ${FUNCTION_NAME}")
-    if (CMAKE_REQUIRED_LIBRARIES)
+    if (HDF5_REQUIRED_LIBRARIES)
       set (CHECK_FUNCTION_EXISTS_ADD_LIBRARIES
-          "-DLINK_LIBRARIES:STRING=${CMAKE_REQUIRED_LIBRARIES}")
+          "-DLINK_LIBRARIES:STRING=${HDF5_REQUIRED_LIBRARIES}")
     else ()
       set (CHECK_FUNCTION_EXISTS_ADD_LIBRARIES)
     endif ()

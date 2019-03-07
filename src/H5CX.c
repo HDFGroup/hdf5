@@ -53,7 +53,7 @@
  * each thread individually. The association of contexts to threads will
  * be handled by the pthread library.
  *
- * In order for this macro to work, H5E__get_my_stack() must be preceeded
+ * In order for this macro to work, H5CX_get_my_context() must be preceeded
  * by "H5CX_node_t *ctx =".
  */
 #define H5CX_get_my_context()  H5CX__get_context()
@@ -186,6 +186,10 @@ typedef struct H5CX_t {
     hid_t lapl_id;              /* LAPL ID for API operation */
     H5P_genplist_t *lapl;       /* Link Access Property List */
 
+    /* DCPL */
+    hid_t dcpl_id;              /* DCPL ID for API operation */
+    H5P_genplist_t *dcpl;       /* Dataset Creation Property List */
+
     /* Internal: Object tagging info */
     haddr_t tag;                /* Current object's tag (ohdr chunk #0 address) */
 
@@ -198,6 +202,7 @@ typedef struct H5CX_t {
     MPI_Datatype btype;         /* MPI datatype for buffer, when using collective I/O */
     MPI_Datatype ftype;         /* MPI datatype for file, when using collective I/O */
     hbool_t mpi_file_flushing;  /* Whether an MPI-opened file is being flushed */
+    hbool_t rank0_bcast;        /* Whether a dataset meets read-with-rank0-and-bcast requirements */
 #endif /* H5_HAVE_PARALLEL */
 
     /* Cached DXPL properties */
@@ -261,6 +266,8 @@ typedef struct H5CX_t {
     hbool_t mpio_coll_chunk_multi_ratio_coll_set; /* Whether instrumented "collective chunk multi ratio coll" value is set */
     int mpio_coll_chunk_multi_ratio_ind;  /* Instrumented "collective chunk multi ratio ind" value (H5D_XFER_COLL_CHUNK_MULTI_RATIO_IND_NAME) */
     hbool_t mpio_coll_chunk_multi_ratio_ind_set; /* Whether instrumented "collective chunk multi ratio ind" value is set */
+    hbool_t mpio_coll_rank0_bcast;  /* Instrumented "collective chunk multi ratio ind" value (H5D_XFER_COLL_CHUNK_MULTI_RATIO_IND_NAME) */
+    hbool_t mpio_coll_rank0_bcast_set; /* Whether instrumented "collective chunk multi ratio ind" value is set */
 #endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
 #endif /* H5_HAVE_PARALLEL */
 
@@ -268,9 +275,15 @@ typedef struct H5CX_t {
     size_t nlinks;              /* Number of soft / UD links to traverse (H5L_ACS_NLINKS_NAME) */
     hbool_t nlinks_valid;       /* Whether number of soft / UD links to traverse is valid */
 
-    /* Cached VOL properties */
-    void *vol_wrap_ctx;         /* VOL plugin's "wrap context" for creating IDs */
-    hbool_t vol_wrap_ctx_valid; /* Whether VOL plugin's "wrap context" for creating IDs is valid */
+    /* Cached DCPL properties */
+    hbool_t do_min_dset_ohdr;   /* Whether to minimize dataset object header */
+    hbool_t do_min_dset_ohdr_valid;   /* Whether minimize dataset object header flag is valid */
+
+    /* Cached VOL settings */
+    H5VL_connector_prop_t vol_connector_prop;  /* Property for VOL connector ID & info */
+    hbool_t vol_connector_prop_valid; /* Whether property for VOL connector ID & info is valid */
+    void *vol_wrap_ctx;         /* VOL connector's "wrap context" for creating IDs */
+    hbool_t vol_wrap_ctx_valid; /* Whether VOL connector's "wrap context" for creating IDs is valid */
 } H5CX_t;
 
 /* Typedef for nodes on the API context stack */
@@ -320,6 +333,12 @@ typedef struct H5CX_lapl_cache_t {
     size_t nlinks;                  /* Number of soft / UD links to traverse (H5L_ACS_NLINKS_NAME) */
 } H5CX_lapl_cache_t;
 
+/* Typedef for cached default dataset creation property list information */
+/* (Same as the cached DXPL struct, above, except for the default DCPL) */
+typedef struct H5CX_dcpl_cache_t {
+    hbool_t do_min_dset_ohdr;   /* Whether to minimize dataset object header */
+} H5CX_dcpl_cache_t;
+
 
 /********************/
 /* Local Prototypes */
@@ -353,6 +372,9 @@ static H5CX_dxpl_cache_t H5CX_def_dxpl_cache;
 /* Define a "default" link access property list cache structure to use for default LAPLs */
 static H5CX_lapl_cache_t H5CX_def_lapl_cache;
 
+/* Define a "default" dataset creation property list cache structure to use for default DCPLs */
+static H5CX_dcpl_cache_t H5CX_def_dcpl_cache;
+
 /* Declare a static free list to manage H5CX_node_t structs */
 H5FL_DEFINE_STATIC(H5CX_node_t);
 
@@ -373,6 +395,7 @@ H5CX__init_package(void)
 {
     H5P_genplist_t *dx_plist;           /* Data transfer property list */
     H5P_genplist_t *la_plist;           /* Link access property list */
+    H5P_genplist_t *dc_plist;           /* Dataset creation property list */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
@@ -471,6 +494,20 @@ H5CX__init_package(void)
     /* Get number of soft / UD links to traverse */
     if(H5P_get(la_plist, H5L_ACS_NLINKS_NAME, &H5CX_def_lapl_cache.nlinks) < 0)
         HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve number of soft / UD links to traverse")
+
+
+    /* Reset the "default DCPL cache" information */
+    HDmemset(&H5CX_def_dcpl_cache, 0, sizeof(H5CX_dcpl_cache_t));
+
+    /* Get the default DCPL cache information */
+
+    /* Get the default dataset creation property list */
+    if(NULL == (dc_plist = (H5P_genplist_t *)H5I_object(H5P_DATASET_CREATE_DEFAULT)))
+        HGOTO_ERROR(H5E_CONTEXT, H5E_BADTYPE, FAIL, "not a dataset create property list")
+
+    /* Get flag to indicate whether to minimize dataset object header */
+    if(H5P_get(dc_plist, H5D_CRT_MIN_DSET_HDR_SIZE_NAME, &H5CX_def_dcpl_cache.do_min_dset_ohdr) < 0)
+        HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve dataset minimize flag")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -727,6 +764,35 @@ H5CX_set_dxpl(hid_t dxpl_id)
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5CX_set_dcpl
+ *
+ * Purpose:     Sets the DCPL for the current API call context.
+ *
+ * Return:      <none>
+ *
+ * Programmer:  Quincey Koziol
+ *              March 6, 2019
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+H5CX_set_dcpl(hid_t dcpl_id)
+{
+    H5CX_node_t **head = H5CX_get_my_context();  /* Get the pointer to the head of the API context, for this thread */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    /* Sanity check */
+    HDassert(*head);
+
+    /* Set the API context's DCPL to a new value */
+    (*head)->ctx.dcpl_id = dcpl_id;
+
+    FUNC_LEAVE_NOAPI_VOID
+} /* end H5CX_set_dcpl() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5CX_set_lapl
  *
  * Purpose:     Sets the LAPL for the current API call context.
@@ -810,8 +876,8 @@ H5CX_set_apl(hid_t *acspl_id, const H5P_libclass_t *libclass,
 
 #ifdef H5_HAVE_PARALLEL
         /* If this routine is not guaranteed to be collective (i.e. it doesn't
-         * modify the structural metadata in a file), check if we should use
-         * a collective metadata read.
+         * modify the structural metadata in a file), check if the application
+         * specified a collective metadata read for just this operation.
          */
         if(!is_collective) {
             H5P_genplist_t *plist;                  /* Property list pointer */
@@ -956,6 +1022,40 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5CX_set_vol_connector_prop
+ *
+ * Purpose:     Sets the VOL connector ID & info for an operation.
+ *
+ * Return:      Non-negative on success / Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              January 3, 2019
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5CX_set_vol_connector_prop(const H5VL_connector_prop_t *vol_connector_prop)
+{
+    H5CX_node_t **head = H5CX_get_my_context();  /* Get the pointer to the head of the API context, for this thread */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(head && *head);
+
+    /* Set the API context value */
+    HDmemcpy(&(*head)->ctx.vol_connector_prop, vol_connector_prop, sizeof(H5VL_connector_prop_t));
+
+    /* Mark the value as valid */
+    (*head)->ctx.vol_connector_prop_valid = TRUE;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5CX_set_vol_connector_prop() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5CX_get_dxpl
  *
  * Purpose:     Retrieves the DXPL ID for the current API call context.
@@ -1041,6 +1141,42 @@ H5CX_get_vol_wrap_ctx(void **vol_wrap_ctx)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5CX_get_vol_wrap_ctx() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5CX_get_vol_connector_prop
+ *
+ * Purpose:     Retrieves the VOL connector ID & info for an operation.
+ *
+ * Return:      Non-negative on success / Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              January 3, 2019
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5CX_get_vol_connector_prop(H5VL_connector_prop_t *vol_connector_prop)
+{
+    H5CX_node_t **head = H5CX_get_my_context();  /* Get the pointer to the head of the API context, for this thread */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(vol_connector_prop);
+    HDassert(head && *head);
+
+    /* Check for value that was set */
+    if((*head)->ctx.vol_connector_prop_valid)
+        /* Get the value */
+        HDmemcpy(vol_connector_prop, &(*head)->ctx.vol_connector_prop, sizeof(H5VL_connector_prop_t));
+    else
+        HDmemset(vol_connector_prop, 0, sizeof(H5VL_connector_prop_t));
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5CX_get_vol_connector_prop() */
 
 
 /*-------------------------------------------------------------------------
@@ -1182,6 +1318,32 @@ H5CX_get_mpi_file_flushing(void)
 
     FUNC_LEAVE_NOAPI((*head)->ctx.mpi_file_flushing)
 } /* end H5CX_get_mpi_file_flushing() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5CX_get_mpio_rank0_bcast 
+ *
+ * Purpose:     Retrieves if the dataset meets read-with-rank0-and-bcast requirements for the current API call context.
+ *
+ * Return:      Non-negative on success / Negative on failure
+ *
+ * Programmer:  M. Breitenfeld
+ *              December 31, 2018
+ *
+ *-------------------------------------------------------------------------
+ */
+hbool_t
+H5CX_get_mpio_rank0_bcast(void)
+{
+    H5CX_node_t **head = H5CX_get_my_context();  /* Get the pointer to the head of the API context, for this thread */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    /* Sanity check */
+    HDassert(head && *head);
+
+    FUNC_LEAVE_NOAPI((*head)->ctx.rank0_bcast)
+} /* end H5CX_get_mpio_rank0_bcast() */
 #endif /* H5_HAVE_PARALLEL */
 
 
@@ -1900,6 +2062,42 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5CX_get_dset_min_ohdr_flag
+ *
+ * Purpose:     Retrieves the flag that indicates whether the dataset object
+ *		header should be minimized
+ *
+ * Return:      Non-negative on success / Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              March 6, 2019
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5CX_get_dset_min_ohdr_flag(hbool_t *dset_min_ohdr_flag)
+{
+    H5CX_node_t **head = H5CX_get_my_context();  /* Get the pointer to the head of the API context, for this thread */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(dset_min_ohdr_flag);
+    HDassert(head && *head);
+    HDassert(H5P_DEFAULT != (*head)->ctx.dcpl_id);
+
+    H5CX_RETRIEVE_PROP_VALID(dcpl, H5P_DATASET_CREATE_DEFAULT, H5D_CRT_MIN_DSET_HDR_SIZE_NAME, do_min_dset_ohdr)
+
+    /* Get the value */
+    *dset_min_ohdr_flag = (*head)->ctx.do_min_dset_ohdr;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5CX_get_dset_min_ohdr_flag() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5CX_set_tag
  *
  * Purpose:     Sets the object tag for the current API call context.
@@ -2113,6 +2311,34 @@ H5CX_set_mpi_file_flushing(hbool_t flushing)
 
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5CX_set_mpi_file_flushing() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5CX_set_mpio_rank0_bcast
+ *
+ * Purpose:     Sets the "dataset meets read-with-rank0-and-bcast requirements" flag for the current API call context.
+ *
+ * Return:      <none>
+ *
+ * Programmer:  M. Breitenfeld
+ *              December 31, 2018
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+H5CX_set_mpio_rank0_bcast(hbool_t rank0_bcast)
+{
+    H5CX_node_t **head = H5CX_get_my_context();  /* Get the pointer to the head of the API context, for this thread */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    /* Sanity checks */
+    HDassert(head && *head);
+
+    (*head)->ctx.rank0_bcast = rank0_bcast;
+
+    FUNC_LEAVE_NOAPI_VOID
+} /* end H5CX_set_mpio_rank0_bcast() */
 #endif /* H5_HAVE_PARALLEL */
 
 
@@ -2524,6 +2750,40 @@ H5CX_test_set_mpio_coll_chunk_multi_ratio_ind(int mpio_coll_chunk_multi_ratio_in
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5CX_test_set_mpio_coll_chunk_multi_ratio_ind() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5CX_test_set_mpio_coll_rank0_bcast
+ *
+ * Purpose:     Sets the instrumented "read-with-rank0-bcast" flag for the current API call context.
+ *
+ * Note:        Only sets value if property set in DXPL
+ *
+ * Return:      Non-negative on success / Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              January 2, 2019
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5CX_test_set_mpio_coll_rank0_bcast(hbool_t mpio_coll_rank0_bcast)
+{
+    H5CX_node_t **head = H5CX_get_my_context();  /* Get the pointer to the head of the API context, for this thread */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* Sanity checks */
+    HDassert(head && *head);
+    HDassert(!((*head)->ctx.dxpl_id == H5P_DEFAULT || 
+            (*head)->ctx.dxpl_id == H5P_DATASET_XFER_DEFAULT));
+
+    H5CX_TEST_SET_PROP(H5D_XFER_COLL_RANK0_BCAST_NAME, mpio_coll_rank0_bcast)
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5CX_test_set_mpio_coll_rank0_bcast() */
 #endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
 #endif /* H5_HAVE_PARALLEL */
 
@@ -2568,6 +2828,7 @@ H5CX__pop_common(void)
     H5CX_SET_PROP(H5D_XFER_COLL_CHUNK_LINK_NUM_FALSE_NAME, mpio_coll_chunk_link_num_false)
     H5CX_SET_PROP(H5D_XFER_COLL_CHUNK_MULTI_RATIO_COLL_NAME, mpio_coll_chunk_multi_ratio_coll)
     H5CX_SET_PROP(H5D_XFER_COLL_CHUNK_MULTI_RATIO_IND_NAME, mpio_coll_chunk_multi_ratio_ind)
+    H5CX_SET_PROP(H5D_XFER_COLL_RANK0_BCAST_NAME, mpio_coll_rank0_bcast)
 #endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
 #endif /* H5_HAVE_PARALLEL */
 

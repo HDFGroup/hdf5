@@ -26,6 +26,9 @@ extern "C" {
 #include "h5jni.h"
 #include "h5oImp.h"
 
+/*
+ * Pointer to the JNI's Virtual Machine; used for callback functions.
+ */
 extern JavaVM *jvm;
 
 typedef struct _cb_wrapper {
@@ -48,18 +51,22 @@ JNIEXPORT jlong JNICALL
 Java_hdf_hdf5lib_H5__1H5Oopen
     (JNIEnv *env, jclass clss, jlong loc_id, jstring name, jlong access_plist_id)
 {
-    hid_t       status = -1;
-    const char *oName;
+    const char *objName = NULL;
+    hid_t       status = H5I_INVALID_HID;
 
-    PIN_JAVA_STRING(name, oName);
-    if (oName != NULL) {
-        status = H5Oopen((hid_t)loc_id, oName, (hid_t)access_plist_id );
+    UNUSED(clss);
 
-        UNPIN_JAVA_STRING(name, oName);
+    if (NULL == name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Oopen: object name is NULL");
 
-        if (status < 0)
-            h5libraryError(env);
-    }
+    PIN_JAVA_STRING(ENVONLY, name, objName, NULL, "H5Oopen: object name not pinned");
+
+    if ((status = H5Oopen((hid_t)loc_id, objName, (hid_t)access_plist_id)) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+
+done:
+    if (objName)
+        UNPIN_JAVA_STRING(ENVONLY, name, objName);
 
     return (jlong)status;
 } /* end Java_hdf_hdf5lib_H5__1H5Oopen */
@@ -73,11 +80,14 @@ JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_H5__1H5Oclose
     (JNIEnv *env, jclass clss, jlong object_id)
 {
-    herr_t retVal = H5Oclose((hid_t)object_id);
+    herr_t retVal = FAIL;
 
-    if (retVal < 0)
-        h5libraryError(env);
+    UNUSED(clss);
 
+    if ((retVal = H5Oclose((hid_t)object_id)) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+
+done:
     return (jint)retVal;
 } /* end Java_hdf_hdf5lib_H5__1H5Oclose */
 
@@ -91,19 +101,28 @@ Java_hdf_hdf5lib_H5_H5Ocopy
     (JNIEnv *env, jclass clss, jlong cur_loc_id, jstring cur_name,
         jlong dst_loc_id, jstring dst_name, jlong create_id, jlong access_id)
 {
-    herr_t      status = -1;
-    const char *lCurName;
-    const char *lDstName;
+    const char *lCurName = NULL;
+    const char *lDstName = NULL;
+    herr_t      status = FAIL;
 
-    PIN_JAVA_STRING_TWO(cur_name, lCurName, dst_name, lDstName);
-    if (lCurName != NULL && lDstName != NULL) {
-        status = H5Ocopy((hid_t)cur_loc_id, lCurName, (hid_t)dst_loc_id, lDstName, (hid_t)create_id, (hid_t)access_id);
+    UNUSED(clss);
 
-        UNPIN_JAVA_STRING_TWO(cur_name, lCurName, dst_name, lDstName);
+    if (NULL == cur_name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Ocopy: src name is NULL");
+    if (NULL == dst_name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Ocopy: dst name is NULL");
 
-        if (status < 0)
-            h5libraryError(env);
-    }
+    PIN_JAVA_STRING(ENVONLY, cur_name, lCurName, NULL, "H5Ocopy: src name not pinned");
+    PIN_JAVA_STRING(ENVONLY, dst_name, lDstName, NULL, "H5Ocopy: dest name not pinned");
+
+    if ((status = H5Ocopy((hid_t)cur_loc_id, lCurName, (hid_t)dst_loc_id, lDstName, (hid_t)create_id, (hid_t)access_id)) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+
+done:
+    if (lDstName)
+        UNPIN_JAVA_STRING(ENVONLY, dst_name, lDstName);
+    if (lCurName)
+        UNPIN_JAVA_STRING(ENVONLY, cur_name, lCurName);
 } /* end Java_hdf_hdf5lib_H5_H5Ocopy */
 
 /*
@@ -115,57 +134,61 @@ JNIEXPORT jobject JNICALL
 Java_hdf_hdf5lib_H5_H5Oget_1info
     (JNIEnv *env, jclass clss, jlong loc_id, jint fields)
 {
-    herr_t      status = -1;
-    H5O_info_t  infobuf;
-    jvalue      args[12];
-    jobject     hdrinfobuf;
-    jobject     ihinfobuf1;
-    jobject     ihinfobuf2;
-    jobject     ret_obj = NULL;
+    H5O_info_t infobuf;
+    jobject    hdrinfobuf;
+    jobject    ihinfobuf1;
+    jobject    ihinfobuf2;
+    jvalue     args[12];
+    herr_t     status = FAIL;
+    jobject    ret_obj = NULL;
 
-    status = H5Oget_info2((hid_t)loc_id, &infobuf, (unsigned)fields);
+    UNUSED(clss);
 
-    if (status < 0) {
-        h5libraryError(env);
-    } /* end if */
-    else {
-        args[0].i = (jint)infobuf.hdr.version;
-        args[1].i = (jint)infobuf.hdr.nmesgs;
-        args[2].i = (jint)infobuf.hdr.nchunks;
-        args[3].i = (jint)infobuf.hdr.flags;
-        args[4].j = (jlong)infobuf.hdr.space.total;
-        args[5].j = (jlong)infobuf.hdr.space.meta;
-        args[6].j = (jlong)infobuf.hdr.space.mesg;
-        args[7].j = (jlong)infobuf.hdr.space.free;
-        args[8].j = (jlong)infobuf.hdr.mesg.present;
-        args[9].j = (jlong)infobuf.hdr.mesg.shared;
-        CALL_CONSTRUCTOR("hdf/hdf5lib/structs/H5O_hdr_info_t", "(IIIIJJJJJJ)V", args);
-        hdrinfobuf = ret_obj;
+    if ((status = H5Oget_info2((hid_t)loc_id, &infobuf, (unsigned)fields)) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
 
-        args[0].j = (jlong)infobuf.meta_size.obj.index_size;
-        args[1].j = (jlong)infobuf.meta_size.obj.heap_size;
-        CALL_CONSTRUCTOR("hdf/hdf5lib/structs/H5_ih_info_t", "(JJ)V", args);
-        ihinfobuf1 = ret_obj;
-        args[0].j = (jlong)infobuf.meta_size.attr.index_size;
-        args[1].j = (jlong)infobuf.meta_size.attr.heap_size;
-        CALL_CONSTRUCTOR("hdf/hdf5lib/structs/H5_ih_info_t", "(JJ)V", args);
-        ihinfobuf2 = ret_obj;
+    args[0].i = (jint)infobuf.hdr.version;
+    args[1].i = (jint)infobuf.hdr.nmesgs;
+    args[2].i = (jint)infobuf.hdr.nchunks;
+    args[3].i = (jint)infobuf.hdr.flags;
+    args[4].j = (jlong)infobuf.hdr.space.total;
+    args[5].j = (jlong)infobuf.hdr.space.meta;
+    args[6].j = (jlong)infobuf.hdr.space.mesg;
+    args[7].j = (jlong)infobuf.hdr.space.free;
+    args[8].j = (jlong)infobuf.hdr.mesg.present;
+    args[9].j = (jlong)infobuf.hdr.mesg.shared;
 
-        args[0].j = (jlong)infobuf.fileno;
-        args[1].j = (jlong)infobuf.addr;
-        args[2].i = infobuf.type;
-        args[3].i = (jint)infobuf.rc;
-        args[4].j = (jlong)infobuf.num_attrs;
-        args[5].j = infobuf.atime;
-        args[6].j = infobuf.mtime;
-        args[7].j = infobuf.ctime;
-        args[8].j = infobuf.btime;
-        args[9].l = hdrinfobuf;
-        args[10].l = ihinfobuf1;
-        args[11].l = ihinfobuf2;
-        CALL_CONSTRUCTOR("hdf/hdf5lib/structs/H5O_info_t", "(JJIIJJJJJLhdf/hdf5lib/structs/H5O_hdr_info_t;Lhdf/hdf5lib/structs/H5_ih_info_t;Lhdf/hdf5lib/structs/H5_ih_info_t;)V", args);
-    }
+    CALL_CONSTRUCTOR(ENVONLY, "hdf/hdf5lib/structs/H5O_hdr_info_t", "(IIIIJJJJJJ)V", args, ret_obj);
+    hdrinfobuf = ret_obj;
 
+    args[0].j = (jlong)infobuf.meta_size.obj.index_size;
+    args[1].j = (jlong)infobuf.meta_size.obj.heap_size;
+
+    CALL_CONSTRUCTOR(ENVONLY, "hdf/hdf5lib/structs/H5_ih_info_t", "(JJ)V", args, ret_obj);
+    ihinfobuf1 = ret_obj;
+
+    args[0].j = (jlong)infobuf.meta_size.attr.index_size;
+    args[1].j = (jlong)infobuf.meta_size.attr.heap_size;
+
+    CALL_CONSTRUCTOR(ENVONLY, "hdf/hdf5lib/structs/H5_ih_info_t", "(JJ)V", args, ret_obj);
+    ihinfobuf2 = ret_obj;
+
+    args[0].j = (jlong)infobuf.fileno;
+    args[1].j = (jlong)infobuf.addr;
+    args[2].i = infobuf.type;
+    args[3].i = (jint)infobuf.rc;
+    args[4].j = (jlong)infobuf.num_attrs;
+    args[5].j = infobuf.atime;
+    args[6].j = infobuf.mtime;
+    args[7].j = infobuf.ctime;
+    args[8].j = infobuf.btime;
+    args[9].l = hdrinfobuf;
+    args[10].l = ihinfobuf1;
+    args[11].l = ihinfobuf2;
+
+    CALL_CONSTRUCTOR(ENVONLY, "hdf/hdf5lib/structs/H5O_info_t", "(JJIIJJJJJLhdf/hdf5lib/structs/H5O_hdr_info_t;Lhdf/hdf5lib/structs/H5_ih_info_t;Lhdf/hdf5lib/structs/H5_ih_info_t;)V", args, ret_obj);
+
+done:
     return ret_obj;
 } /* end Java_hdf_hdf5lib_H5_H5Oget_1info */
 
@@ -178,62 +201,69 @@ JNIEXPORT jobject JNICALL
 Java_hdf_hdf5lib_H5_H5Oget_1info_1by_1name
     (JNIEnv *env, jclass clss, jlong loc_id, jstring name, jint fields, jlong access_id)
 {
-    const char *lName;
-    herr_t      status = -1;
     H5O_info_t  infobuf;
-    jvalue      args[12];
+    const char *objName = NULL;
     jobject     hdrinfobuf;
     jobject     ihinfobuf1;
     jobject     ihinfobuf2;
+    jvalue      args[12];
+    herr_t      status = FAIL;
     jobject     ret_obj = NULL;
 
-    PIN_JAVA_STRING(name, lName);
-    if (lName != NULL) {
-        status = H5Oget_info_by_name2((hid_t)loc_id, lName, &infobuf, (unsigned)fields, (hid_t)access_id);
+    UNUSED(clss);
 
-        UNPIN_JAVA_STRING(name, lName);
+    if (NULL == name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Oget_info_by_name: object name is NULL");
 
-        if (status < 0) {
-            h5libraryError(env);
-        } /* end if */
-        else {
-            args[0].i = (jint)infobuf.hdr.version;
-            args[1].i = (jint)infobuf.hdr.nmesgs;
-            args[2].i = (jint)infobuf.hdr.nchunks;
-            args[3].i = (jint)infobuf.hdr.flags;
-            args[4].j = (jlong)infobuf.hdr.space.total;
-            args[5].j = (jlong)infobuf.hdr.space.meta;
-            args[6].j = (jlong)infobuf.hdr.space.mesg;
-            args[7].j = (jlong)infobuf.hdr.space.free;
-            args[8].j = (jlong)infobuf.hdr.mesg.present;
-            args[9].j = (jlong)infobuf.hdr.mesg.shared;
-            CALL_CONSTRUCTOR("hdf/hdf5lib/structs/H5O_hdr_info_t", "(IIIIJJJJJJ)V", args);
-            hdrinfobuf = ret_obj;
+    PIN_JAVA_STRING(ENVONLY, name, objName, NULL, "H5Oget_info_by_name: object name not pinned");
 
-            args[0].j = (jlong)infobuf.meta_size.obj.index_size;
-            args[1].j = (jlong)infobuf.meta_size.obj.heap_size;
-            CALL_CONSTRUCTOR("hdf/hdf5lib/structs/H5_ih_info_t", "(JJ)V", args);
-            ihinfobuf1 = ret_obj;
-            args[0].j = (jlong)infobuf.meta_size.attr.index_size;
-            args[1].j = (jlong)infobuf.meta_size.attr.heap_size;
-            CALL_CONSTRUCTOR("hdf/hdf5lib/structs/H5_ih_info_t", "(JJ)V", args);
-            ihinfobuf2 = ret_obj;
+    if ((status = H5Oget_info_by_name2((hid_t)loc_id, objName, &infobuf, (unsigned)fields, (hid_t)access_id)) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
 
-            args[0].j = (jlong)infobuf.fileno;
-            args[1].j = (jlong)infobuf.addr;
-            args[2].i = infobuf.type;
-            args[3].i = (jint)infobuf.rc;
-            args[4].j = (jlong)infobuf.num_attrs;
-            args[5].j = infobuf.atime;
-            args[6].j = infobuf.mtime;
-            args[7].j = infobuf.ctime;
-            args[8].j = infobuf.btime;
-            args[9].l = hdrinfobuf;
-            args[10].l = ihinfobuf1;
-            args[11].l = ihinfobuf2;
-            CALL_CONSTRUCTOR("hdf/hdf5lib/structs/H5O_info_t", "(JJIIJJJJJLhdf/hdf5lib/structs/H5O_hdr_info_t;Lhdf/hdf5lib/structs/H5_ih_info_t;Lhdf/hdf5lib/structs/H5_ih_info_t;)V", args);
-        }
-    }
+    args[0].i = (jint)infobuf.hdr.version;
+    args[1].i = (jint)infobuf.hdr.nmesgs;
+    args[2].i = (jint)infobuf.hdr.nchunks;
+    args[3].i = (jint)infobuf.hdr.flags;
+    args[4].j = (jlong)infobuf.hdr.space.total;
+    args[5].j = (jlong)infobuf.hdr.space.meta;
+    args[6].j = (jlong)infobuf.hdr.space.mesg;
+    args[7].j = (jlong)infobuf.hdr.space.free;
+    args[8].j = (jlong)infobuf.hdr.mesg.present;
+    args[9].j = (jlong)infobuf.hdr.mesg.shared;
+
+    CALL_CONSTRUCTOR(ENVONLY, "hdf/hdf5lib/structs/H5O_hdr_info_t", "(IIIIJJJJJJ)V", args, ret_obj);
+    hdrinfobuf = ret_obj;
+
+    args[0].j = (jlong)infobuf.meta_size.obj.index_size;
+    args[1].j = (jlong)infobuf.meta_size.obj.heap_size;
+
+    CALL_CONSTRUCTOR(ENVONLY, "hdf/hdf5lib/structs/H5_ih_info_t", "(JJ)V", args, ret_obj);
+    ihinfobuf1 = ret_obj;
+
+    args[0].j = (jlong)infobuf.meta_size.attr.index_size;
+    args[1].j = (jlong)infobuf.meta_size.attr.heap_size;
+
+    CALL_CONSTRUCTOR(ENVONLY, "hdf/hdf5lib/structs/H5_ih_info_t", "(JJ)V", args, ret_obj);
+    ihinfobuf2 = ret_obj;
+
+    args[0].j = (jlong)infobuf.fileno;
+    args[1].j = (jlong)infobuf.addr;
+    args[2].i = infobuf.type;
+    args[3].i = (jint)infobuf.rc;
+    args[4].j = (jlong)infobuf.num_attrs;
+    args[5].j = infobuf.atime;
+    args[6].j = infobuf.mtime;
+    args[7].j = infobuf.ctime;
+    args[8].j = infobuf.btime;
+    args[9].l = hdrinfobuf;
+    args[10].l = ihinfobuf1;
+    args[11].l = ihinfobuf2;
+
+    CALL_CONSTRUCTOR(ENVONLY, "hdf/hdf5lib/structs/H5O_info_t", "(JJIIJJJJJLhdf/hdf5lib/structs/H5O_hdr_info_t;Lhdf/hdf5lib/structs/H5_ih_info_t;Lhdf/hdf5lib/structs/H5_ih_info_t;)V", args, ret_obj);
+
+done:
+    if (objName)
+        UNPIN_JAVA_STRING(ENVONLY, name, objName);
 
     return ret_obj;
 } /* end Java_hdf_hdf5lib_H5_H5Oget_1info_1by_1name */
@@ -248,62 +278,69 @@ Java_hdf_hdf5lib_H5_H5Oget_1info_1by_1idx
     (JNIEnv *env, jclass clss, jlong loc_id,
         jstring name, jint index_field, jint order, jlong link_n, jint fields, jlong access_id)
 {
-    const char *lName;
-    herr_t      status;
     H5O_info_t  infobuf;
-    jvalue      args[12];
+    const char *grpName = NULL;
     jobject     hdrinfobuf;
     jobject     ihinfobuf1;
     jobject     ihinfobuf2;
+    jvalue      args[12];
+    herr_t      status = FAIL;
     jobject     ret_obj = NULL;
 
-    PIN_JAVA_STRING(name, lName);
-    if (lName != NULL) {
-        status = H5Oget_info_by_idx2((hid_t)loc_id, lName, (H5_index_t)index_field, (H5_iter_order_t)order, (hsize_t)link_n, &infobuf, (unsigned)fields, (hid_t)access_id);
+    UNUSED(clss);
 
-        UNPIN_JAVA_STRING(name, lName);
+    if (NULL == name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Oget_info_by_idx: group name is NULL");
 
-        if (status < 0) {
-            h5libraryError(env);
-        } /* end if */
-        else {
-            args[0].i = (jint)infobuf.hdr.version;
-            args[1].i = (jint)infobuf.hdr.nmesgs;
-            args[2].i = (jint)infobuf.hdr.nchunks;
-            args[3].i = (jint)infobuf.hdr.flags;
-            args[4].j = (jlong)infobuf.hdr.space.total;
-            args[5].j = (jlong)infobuf.hdr.space.meta;
-            args[6].j = (jlong)infobuf.hdr.space.mesg;
-            args[7].j = (jlong)infobuf.hdr.space.free;
-            args[8].j = (jlong)infobuf.hdr.mesg.present;
-            args[9].j = (jlong)infobuf.hdr.mesg.shared;
-            CALL_CONSTRUCTOR("hdf/hdf5lib/structs/H5O_hdr_info_t", "(IIIIJJJJJJ)V", args);
-            hdrinfobuf = ret_obj;
+    PIN_JAVA_STRING(ENVONLY, name, grpName, NULL, "H5Oget_info_by_idx: group name not pinned");
 
-            args[0].j = (jlong)infobuf.meta_size.obj.index_size;
-            args[1].j = (jlong)infobuf.meta_size.obj.heap_size;
-            CALL_CONSTRUCTOR("hdf/hdf5lib/structs/H5_ih_info_t", "(JJ)V", args);
-            ihinfobuf1 = ret_obj;
-            args[0].j = (jlong)infobuf.meta_size.attr.index_size;
-            args[1].j = (jlong)infobuf.meta_size.attr.heap_size;
-            CALL_CONSTRUCTOR("hdf/hdf5lib/structs/H5_ih_info_t", "(JJ)V", args);
-            ihinfobuf2 = ret_obj;
+    if ((status = H5Oget_info_by_idx2((hid_t)loc_id, grpName, (H5_index_t)index_field, (H5_iter_order_t)order, (hsize_t)link_n, &infobuf, (unsigned)fields, (hid_t)access_id)) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
 
-            args[0].j = (jlong)infobuf.fileno;
-            args[1].j = (jlong)infobuf.addr;
-            args[2].i = infobuf.type;
-            args[3].i = (jint)infobuf.rc;
-            args[4].j = (jlong)infobuf.num_attrs;
-            args[5].j = infobuf.atime;
-            args[6].j = infobuf.mtime;
-            args[7].j = infobuf.ctime;
-            args[8].j = infobuf.btime;
-            args[9].l = hdrinfobuf;
-            args[10].l = ihinfobuf1;
-            args[11].l = ihinfobuf2;
-            CALL_CONSTRUCTOR("hdf/hdf5lib/structs/H5O_info_t", "(JJIIJJJJJLhdf/hdf5lib/structs/H5O_hdr_info_t;Lhdf/hdf5lib/structs/H5_ih_info_t;Lhdf/hdf5lib/structs/H5_ih_info_t;)V", args);
-        }
-    }
+    args[0].i = (jint)infobuf.hdr.version;
+    args[1].i = (jint)infobuf.hdr.nmesgs;
+    args[2].i = (jint)infobuf.hdr.nchunks;
+    args[3].i = (jint)infobuf.hdr.flags;
+    args[4].j = (jlong)infobuf.hdr.space.total;
+    args[5].j = (jlong)infobuf.hdr.space.meta;
+    args[6].j = (jlong)infobuf.hdr.space.mesg;
+    args[7].j = (jlong)infobuf.hdr.space.free;
+    args[8].j = (jlong)infobuf.hdr.mesg.present;
+    args[9].j = (jlong)infobuf.hdr.mesg.shared;
+
+    CALL_CONSTRUCTOR(ENVONLY, "hdf/hdf5lib/structs/H5O_hdr_info_t", "(IIIIJJJJJJ)V", args, ret_obj);
+    hdrinfobuf = ret_obj;
+
+    args[0].j = (jlong)infobuf.meta_size.obj.index_size;
+    args[1].j = (jlong)infobuf.meta_size.obj.heap_size;
+
+    CALL_CONSTRUCTOR(ENVONLY, "hdf/hdf5lib/structs/H5_ih_info_t", "(JJ)V", args, ret_obj);
+    ihinfobuf1 = ret_obj;
+
+    args[0].j = (jlong)infobuf.meta_size.attr.index_size;
+    args[1].j = (jlong)infobuf.meta_size.attr.heap_size;
+
+    CALL_CONSTRUCTOR(ENVONLY, "hdf/hdf5lib/structs/H5_ih_info_t", "(JJ)V", args, ret_obj);
+    ihinfobuf2 = ret_obj;
+
+    args[0].j = (jlong)infobuf.fileno;
+    args[1].j = (jlong)infobuf.addr;
+    args[2].i = infobuf.type;
+    args[3].i = (jint)infobuf.rc;
+    args[4].j = (jlong)infobuf.num_attrs;
+    args[5].j = infobuf.atime;
+    args[6].j = infobuf.mtime;
+    args[7].j = infobuf.ctime;
+    args[8].j = infobuf.btime;
+    args[9].l = hdrinfobuf;
+    args[10].l = ihinfobuf1;
+    args[11].l = ihinfobuf2;
+
+    CALL_CONSTRUCTOR(ENVONLY, "hdf/hdf5lib/structs/H5O_info_t", "(JJIIJJJJJLhdf/hdf5lib/structs/H5O_hdr_info_t;Lhdf/hdf5lib/structs/H5_ih_info_t;Lhdf/hdf5lib/structs/H5_ih_info_t;)V", args, ret_obj);
+
+done:
+    if (grpName)
+        UNPIN_JAVA_STRING(ENVONLY, name, grpName);
 
     return ret_obj;
 } /* end Java_hdf_hdf5lib_H5_H5Oget_1info_1by_1idx */
@@ -318,130 +355,138 @@ Java_hdf_hdf5lib_H5_H5Olink
     (JNIEnv *env, jclass clss, jlong cur_loc_id, jlong dst_loc_id,
         jstring dst_name, jlong create_id, jlong access_id)
 {
-    herr_t      status = -1;
-    const char *lDstName;
+    const char *linkDstName = NULL;
+    herr_t      status = FAIL;
 
-    PIN_JAVA_STRING(dst_name, lDstName);
-    if (lDstName != NULL) {
-        status = H5Olink((hid_t)cur_loc_id, (hid_t)dst_loc_id, lDstName, (hid_t)create_id, (hid_t)access_id);
+    UNUSED(clss);
 
-        UNPIN_JAVA_STRING(dst_name, lDstName);
+    if (NULL == dst_name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Olink: link destination name is NULL");
 
-        if (status < 0)
-            h5libraryError(env);
-    }
+    PIN_JAVA_STRING(ENVONLY, dst_name, linkDstName, NULL, "H5Olink: link destination name not pinned");
+
+    if ((status = H5Olink((hid_t)cur_loc_id, (hid_t)dst_loc_id, linkDstName, (hid_t)create_id, (hid_t)access_id)) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+
+done:
+    if (linkDstName)
+        UNPIN_JAVA_STRING(ENVONLY, dst_name, linkDstName);
 } /* end Java_hdf_hdf5lib_H5_H5Olink */
 
 static herr_t
 H5O_iterate_cb
     (hid_t g_id, const char *name, const H5O_info_t *info, void *cb_data)
 {
-    JNIEnv    *cbenv;
-    jint       status = -1;
-    jclass     cls;
-    jmethodID  mid;
-    jstring    str;
-    jmethodID  constructor;
-    jvalue     args[12];
-    jobject    hdrinfobuf;
-    jobject    ihinfobuf1;
-    jobject    ihinfobuf2;
-    jobject    cb_info_t = NULL;
     cb_wrapper *wrapper = (cb_wrapper *)cb_data;
-    void *op_data = (void *)wrapper->op_data;
-    jobject visit_callback = wrapper->visit_callback;
+    jmethodID   constructor, mid;
+    jobject     cb_info_t = NULL;
+    jobject     visit_callback = wrapper->visit_callback;
+    jobject     hdrinfobuf;
+    jobject     ihinfobuf1;
+    jobject     ihinfobuf2;
+    jstring     str;
+    JNIEnv     *cbenv = NULL;
+    jclass      cls;
+    jvalue      args[12];
+    void       *op_data = (void *)wrapper->op_data;
+    jint        status = FAIL;
 
-    if(JVMPTR->AttachCurrentThread(JVMPAR2 (void**)&cbenv, NULL) != 0) {
-        /* printf("JNI H5O_iterate_cb error: AttachCurrentThread failed\n"); */
+    if (JVMPTR->AttachCurrentThread(JVMPAR, (void **)&cbenv, NULL) < 0) {
+        CHECK_JNI_EXCEPTION(CBENVONLY, JNI_TRUE);
+        H5_JNI_FATAL_ERROR(CBENVONLY, "H5O_iterate_cb: failed to attach current thread to JVM");
+    }
+
+    if (NULL == (cls = CBENVPTR->GetObjectClass(CBENVONLY, visit_callback)))
+        CHECK_JNI_EXCEPTION(CBENVONLY, JNI_FALSE);
+
+    if (NULL == (mid = CBENVPTR->GetMethodID(CBENVONLY, cls, "callback", "(JLjava/lang/String;Lhdf/hdf5lib/structs/H5O_info_t;Lhdf/hdf5lib/callbacks/H5O_iterate_t;)I")))
+        CHECK_JNI_EXCEPTION(CBENVONLY, JNI_FALSE);
+
+    if (NULL == (str = CBENVPTR->NewStringUTF(CBENVONLY, name)))
+        CHECK_JNI_EXCEPTION(CBENVONLY, JNI_FALSE);
+
+    args[0].i = (jint)info->hdr.version;
+    args[1].i = (jint)info->hdr.nmesgs;
+    args[2].i = (jint)info->hdr.nchunks;
+    args[3].i = (jint)info->hdr.flags;
+    args[4].j = (jlong)info->hdr.space.total;
+    args[5].j = (jlong)info->hdr.space.meta;
+    args[6].j = (jlong)info->hdr.space.mesg;
+    args[7].j = (jlong)info->hdr.space.free;
+    args[8].j = (jlong)info->hdr.mesg.present;
+    args[9].j = (jlong)info->hdr.mesg.shared;
+
+    /* Get a reference to the H5_hdr_info_t class */
+    if (NULL == (cls = CBENVPTR->FindClass(CBENVONLY, "hdf/hdf5lib/structs/H5O_hdr_info_t")))
+        CHECK_JNI_EXCEPTION(CBENVONLY, JNI_FALSE);
+
+    /* Get a reference to the constructor; the name is <init> */
+    if (NULL == (constructor = CBENVPTR->GetMethodID(CBENVONLY, cls, "<init>", "(IIIIJJJJJJ)V")))
+        CHECK_JNI_EXCEPTION(CBENVONLY, JNI_FALSE);
+
+    if (NULL == (hdrinfobuf = CBENVPTR->NewObjectA(CBENVONLY, cls, constructor, args))) {
+        HDprintf("H5O_iterate_cb ERROR: hdf/hdf5lib/structs/H5O_hdr_info_t: Creation failed\n");
+        CHECK_JNI_EXCEPTION(CBENVONLY, JNI_FALSE);
+    }
+
+    args[0].j = (jlong)info->meta_size.obj.index_size;
+    args[1].j = (jlong)info->meta_size.obj.heap_size;
+
+    /* Get a reference to the H5_ih_info_t class */
+    if (NULL == (cls = CBENVPTR->FindClass(CBENVONLY, "hdf/hdf5lib/structs/H5_ih_info_t")))
+        CHECK_JNI_EXCEPTION(CBENVONLY, JNI_FALSE);
+
+    /* Get a reference to the constructor; the name is <init> */
+    if (NULL == (constructor = CBENVPTR->GetMethodID(CBENVONLY, cls, "<init>", "(JJ)V")))
+        CHECK_JNI_EXCEPTION(CBENVONLY, JNI_FALSE);
+
+    if (NULL == (ihinfobuf1 = CBENVPTR->NewObjectA(CBENVONLY, cls, constructor, args))) {
+        HDprintf("H5O_iterate_cb ERROR: hdf/hdf5lib/structs/H5_ih_info_t: Creation failed\n");
+        CHECK_JNI_EXCEPTION(CBENVONLY, JNI_FALSE);
+    }
+
+    args[0].j = (jlong)info->meta_size.attr.index_size;
+    args[1].j = (jlong)info->meta_size.attr.heap_size;
+
+    if (NULL == (ihinfobuf2 = CBENVPTR->NewObjectA(CBENVONLY, cls, constructor, args))) {
+        HDprintf("H5O_iterate_cb ERROR: hdf/hdf5lib/structs/H5_ih_info_t: Creation failed\n");
+        CHECK_JNI_EXCEPTION(CBENVONLY, JNI_FALSE);
+    }
+
+    args[0].j = (jlong)info->fileno;
+    args[1].j = (jlong)info->addr;
+    args[2].i = info->type;
+    args[3].i = (jint)info->rc;
+    args[4].j = (jlong)info->num_attrs;
+    args[5].j = info->atime;
+    args[6].j = info->mtime;
+    args[7].j = info->ctime;
+    args[8].j = info->btime;
+    args[9].l = hdrinfobuf;
+    args[10].l = ihinfobuf1;
+    args[11].l = ihinfobuf2;
+
+    /* Get a reference to the H5O_info_t class */
+    if (NULL == (cls = CBENVPTR->FindClass(CBENVONLY, "hdf/hdf5lib/structs/H5O_info_t")))
+        CHECK_JNI_EXCEPTION(CBENVONLY, JNI_FALSE);
+
+    /* Get a reference to the constructor; the name is <init> */
+    if (NULL == (constructor = CBENVPTR->GetMethodID(CBENVONLY, cls, "<init>", "(JJIIJJJJJLhdf/hdf5lib/structs/H5O_hdr_info_t;Lhdf/hdf5lib/structs/H5_ih_info_t;Lhdf/hdf5lib/structs/H5_ih_info_t;)V")))
+        CHECK_JNI_EXCEPTION(CBENVONLY, JNI_FALSE);
+
+    if (NULL == (cb_info_t = CBENVPTR->NewObjectA(CBENVONLY, cls, constructor, args))) {
+        HDprintf("H5O_iterate_cb ERROR: hdf/hdf5lib/structs/H5O_info_t: Creation failed\n");
+        CHECK_JNI_EXCEPTION(CBENVONLY, JNI_FALSE);
+    }
+
+    status = CBENVPTR->CallIntMethod(CBENVONLY, visit_callback, mid, g_id, str, cb_info_t, op_data);
+    CHECK_JNI_EXCEPTION(CBENVONLY, JNI_FALSE);
+
+done:
+    if (cbenv)
         JVMPTR->DetachCurrentThread(JVMPAR);
-        return -1;
-    } /* end if */
-    cls = CBENVPTR->GetObjectClass(CBENVPAR visit_callback);
-    if (cls != 0) {
-        mid = CBENVPTR->GetMethodID(CBENVPAR cls, "callback", "(JLjava/lang/String;Lhdf/hdf5lib/structs/H5O_info_t;Lhdf/hdf5lib/callbacks/H5O_iterate_t;)I");
-        if (mid != 0) {
-            str = CBENVPTR->NewStringUTF(CBENVPAR name);
 
-            args[0].i = (jint)info->hdr.version;
-            args[1].i = (jint)info->hdr.nmesgs;
-            args[2].i = (jint)info->hdr.nchunks;
-            args[3].i = (jint)info->hdr.flags;
-            args[4].j = (jlong)info->hdr.space.total;
-            args[5].j = (jlong)info->hdr.space.meta;
-            args[6].j = (jlong)info->hdr.space.mesg;
-            args[7].j = (jlong)info->hdr.space.free;
-            args[8].j = (jlong)info->hdr.mesg.present;
-            args[9].j = (jlong)info->hdr.mesg.shared;
-            // get a reference to the H5_hdr_info_t class
-            cls = CBENVPTR->FindClass(CBENVPAR "hdf/hdf5lib/structs/H5O_hdr_info_t");
-            if (cls != 0) {
-                // get a reference to the constructor; the name is <init>
-                constructor = CBENVPTR->GetMethodID(CBENVPAR cls, "<init>", "(IIIIJJJJJJ)V");
-                if (constructor != 0) {
-                    hdrinfobuf = CBENVPTR->NewObjectA(CBENVPAR cls, constructor, args);
-                    if (hdrinfobuf == NULL) {
-                        printf("H5O_iterate_cb ERROR: hdf/hdf5lib/structs/H5O_hdr_info_t: Creation failed\n");
-                    }
-                    else {
-                        args[0].j = (jlong)info->meta_size.obj.index_size;
-                        args[1].j = (jlong)info->meta_size.obj.heap_size;
-                        // get a reference to the H5_ih_info_t class
-                        cls = CBENVPTR->FindClass(CBENVPAR "hdf/hdf5lib/structs/H5_ih_info_t");
-                        if (cls != 0) {
-                            // get a reference to the constructor; the name is <init>
-                            constructor = CBENVPTR->GetMethodID(CBENVPAR cls, "<init>", "(JJ)V");
-                            if (constructor != 0) {
-                                ihinfobuf1 = CBENVPTR->NewObjectA(CBENVPAR cls, constructor, args);
-                                if (ihinfobuf1 == NULL) {
-                                    printf("H5O_iterate_cb ERROR: hdf/hdf5lib/structs/H5_ih_info_t: Creation failed\n");
-                                }
-                                else {
-                                    args[0].j = (jlong)info->meta_size.attr.index_size;
-                                    args[1].j = (jlong)info->meta_size.attr.heap_size;
-                                    ihinfobuf2 = CBENVPTR->NewObjectA(CBENVPAR cls, constructor, args);
-                                    if (ihinfobuf2 == NULL) {
-                                        printf("H5O_iterate_cb ERROR: hdf/hdf5lib/structs/H5_ih_info_t: Creation failed\n");
-                                    }
-                                    else {
-                                        args[0].j = (jlong)info->fileno;
-                                        args[1].j = (jlong)info->addr;
-                                        args[2].i = info->type;
-                                        args[3].i = (jint)info->rc;
-                                        args[4].j = (jlong)info->num_attrs;
-                                        args[5].j = info->atime;
-                                        args[6].j = info->mtime;
-                                        args[7].j = info->ctime;
-                                        args[8].j = info->btime;
-                                        args[9].l = hdrinfobuf;
-                                        args[10].l = ihinfobuf1;
-                                        args[11].l = ihinfobuf2;
-                                        // get a reference to the H5O_info_t class
-                                        cls = CBENVPTR->FindClass(CBENVPAR "hdf/hdf5lib/structs/H5O_info_t");
-                                        if (cls != 0) {
-                                            // get a reference to the constructor; the name is <init>
-                                            constructor = CBENVPTR->GetMethodID(CBENVPAR cls, "<init>", "(JJIIJJJJJLhdf/hdf5lib/structs/H5O_hdr_info_t;Lhdf/hdf5lib/structs/H5_ih_info_t;Lhdf/hdf5lib/structs/H5_ih_info_t;)V");
-                                            if (constructor != 0) {
-                                                cb_info_t = CBENVPTR->NewObjectA(CBENVPAR cls, constructor, args);
-                                                if (cb_info_t == NULL) {
-                                                    printf("H5O_iterate_cb ERROR: hdf/hdf5lib/structs/H5O_info_t: Creation failed\n");
-                                                }
-                                                else {
-                                                    status = CBENVPTR->CallIntMethod(CBENVPAR visit_callback, mid, g_id, str, cb_info_t, op_data);
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    } /* end if */
-    JVMPTR->DetachCurrentThread(JVMPAR);
-
-    return status;
+    return (herr_t)status;
 } /* end H5O_iterate_cb */
 
 /*
@@ -454,24 +499,23 @@ Java_hdf_hdf5lib_H5_H5Ovisit
     (JNIEnv *env, jclass clss, jlong grp_id, jint idx_type, jint order,
         jobject callback_op, jobject op_data, jint fields)
 {
-    herr_t   status = -1;
-    cb_wrapper wrapper = {callback_op, op_data};
+    cb_wrapper wrapper = { callback_op, op_data };
+    herr_t     status = FAIL;
 
-    ENVPTR->GetJavaVM(ENVPAR &jvm);
+    UNUSED(clss);
 
-    if (op_data == NULL) {
-        h5nullArgument(env, "H5Ovisit:  op_data is NULL");
-    } /* end if */
-    else if (callback_op == NULL) {
-        h5nullArgument(env, "H5Ovisit:  callback_op is NULL");
-    } /* end if */
-    else {
-        status = H5Ovisit2((hid_t)grp_id, (H5_index_t)idx_type, (H5_iter_order_t)order, (H5O_iterate_t)H5O_iterate_cb, (void*)&wrapper, (unsigned)fields);
+    ENVPTR->GetJavaVM(ENVONLY, &jvm);
+    CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
 
-        if (status < 0)
-            h5libraryError(env);
-    }
+    if (NULL == op_data)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Ovisit: op_data is NULL");
+    if (NULL == callback_op)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Ovisit: callback_op is NULL");
 
+    if ((status = H5Ovisit2((hid_t)grp_id, (H5_index_t)idx_type, (H5_iter_order_t)order, (H5O_iterate_t)H5O_iterate_cb, (void *)&wrapper, (unsigned)fields)) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+
+done:
     return status;
 } /* end Java_hdf_hdf5lib_H5_H5Ovisit */
 
@@ -485,31 +529,30 @@ Java_hdf_hdf5lib_H5_H5Ovisit_1by_1name
     (JNIEnv *env, jclass clss, jlong grp_id, jstring name, jint idx_type, jint order,
         jobject callback_op, jobject op_data, jint fields, jlong access_id)
 {
-    herr_t        status = -1;
-    const char   *lName;
-    cb_wrapper wrapper = {callback_op, op_data};
+    cb_wrapper  wrapper = { callback_op, op_data };
+    const char *objName = NULL;
+    herr_t      status = FAIL;
 
-    ENVPTR->GetJavaVM(ENVPAR &jvm);
+    UNUSED(clss);
 
-    if (op_data == NULL) {
-        h5nullArgument(env, "H5Ovisit_by_name:  op_data is NULL");
-        return -1;
-    } /* end if */
-    else if (callback_op == NULL) {
-        h5nullArgument(env, "H5Ovisit_by_name:  callback_op is NULL");
-        return -1;
-    } /* end if */
-    else {
-        PIN_JAVA_STRING(name, lName);
-        if (lName != NULL) {
-            status = H5Ovisit_by_name2((hid_t)grp_id, lName, (H5_index_t)idx_type, (H5_iter_order_t)order, (H5O_iterate_t)H5O_iterate_cb, (void*)&wrapper, (unsigned)fields, (hid_t)access_id);
+    ENVPTR->GetJavaVM(ENVONLY, &jvm);
+    CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
 
-            UNPIN_JAVA_STRING(name, lName);
+    if (NULL == op_data)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Ovisit_by_name: op_data is NULL");
+    if (NULL == callback_op)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Ovisit_by_name: callback_op is NULL");
+    if (NULL == name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Ovisit_by_name: object name is NULL");
 
-            if (status < 0)
-                h5libraryError(env);
-        }
-    }
+    PIN_JAVA_STRING(ENVONLY, name, objName, NULL, "H5Ovisit_by_name: object name not pinned");
+
+    if ((status = H5Ovisit_by_name2((hid_t)grp_id, objName, (H5_index_t)idx_type, (H5_iter_order_t)order, (H5O_iterate_t)H5O_iterate_cb, (void *)&wrapper, (unsigned)fields, (hid_t)access_id)) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+
+done:
+    if (objName)
+        UNPIN_JAVA_STRING(ENVONLY, name, objName);
 
     return status;
 } /* end Java_hdf_hdf5lib_H5_H5Ovisit_1by_1name */
@@ -523,24 +566,20 @@ JNIEXPORT void JNICALL
 Java_hdf_hdf5lib_H5_H5Oset_1comment
     (JNIEnv *env, jclass clss, jlong loc_id, jstring comment)
 {
-    herr_t      status = -1;
     const char *oComment = NULL;
-    jboolean    isCopy;
+    herr_t      status = FAIL;
 
-    if (comment == NULL) {
-        status = H5Oset_comment((hid_t)loc_id, oComment);
-    } /* end if */
-    else {
-        oComment = ENVPTR->GetStringUTFChars(ENVPAR comment, &isCopy);
-        if (oComment != NULL) {
-            status = H5Oset_comment((hid_t)loc_id, oComment);
+    UNUSED(clss);
 
-            ENVPTR->ReleaseStringUTFChars(ENVPAR comment, oComment);
-        }
-    } /* end else */
+    if (NULL != comment)
+        PIN_JAVA_STRING(ENVONLY, comment, oComment, NULL, "H5Oset_comment: object comment not pinned");
 
-    if (status < 0)
-        h5libraryError(env);
+    if ((status = H5Oset_comment((hid_t)loc_id, oComment)) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+
+done:
+    if (oComment)
+        UNPIN_JAVA_STRING(ENVONLY, comment, oComment);
 } /* end Java_hdf_hdf5lib_H5_H5Oset_1comment */
 
 /*
@@ -553,29 +592,29 @@ Java_hdf_hdf5lib_H5_H5Oset_1comment_1by_1name
     (JNIEnv *env, jclass clss, jlong loc_id,
         jstring name, jstring comment, jlong access_id)
 {
-    herr_t      status = -1;
-    const char *oName;
-    const char *oComment;
+    const char *objName = NULL;
+    const char *objComment = NULL;
+    jboolean    isCopy;
+    herr_t      status = FAIL;
 
-    PIN_JAVA_STRING(name, oName);
-    if (oName != NULL) {
-        if (comment == NULL) {
-            status = H5Oset_comment_by_name((hid_t)loc_id, oName, NULL, (hid_t)access_id);
-        } /* end if */
-        else {
-            jboolean    isCopy;
-            oComment = ENVPTR->GetStringUTFChars(ENVPAR comment, &isCopy);
-            if (oComment != NULL) {
-                status = H5Oset_comment_by_name((hid_t)loc_id, oName, oComment, (hid_t)access_id);
-                ENVPTR->ReleaseStringUTFChars(ENVPAR comment, oComment);
-            } /* end if */
-        } /* end else */
+    UNUSED(clss);
 
-        UNPIN_JAVA_STRING(name, oName);
+    if (NULL == name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Oset_comment_by_name: object name is NULL");
 
-        if (status < 0)
-            h5libraryError(env);
-    }
+    PIN_JAVA_STRING(ENVONLY, name, objName, NULL, "H5Oset_comment_by_name: object name not pinned");
+
+    if (NULL != comment)
+        PIN_JAVA_STRING(ENVONLY, comment, objComment, &isCopy, "H5Oset_comment_by_name: object comment not pinned");
+
+    if ((status = H5Oset_comment_by_name((hid_t)loc_id, objName, objComment, (hid_t)access_id)) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+
+done:
+    if (objComment)
+        UNPIN_JAVA_STRING(ENVONLY, comment, objComment);
+    if (objName)
+        UNPIN_JAVA_STRING(ENVONLY, name, objName);
 } /* end Java_hdf_hdf5lib_H5_H5Oset_1comment_1by_1name */
 
 /*
@@ -587,39 +626,32 @@ JNIEXPORT jstring JNICALL
 Java_hdf_hdf5lib_H5_H5Oget_1comment
     (JNIEnv *env, jclass clss, jlong loc_id)
 {
-    char    *oComment;
-    ssize_t  buf_size;
-    ssize_t  status;
     jstring  str = NULL;
+    ssize_t  buf_size;
+    ssize_t  status = -1;
+    char    *oComment = NULL;
 
-    /* get the length of the comment */
-    buf_size = H5Oget_comment((hid_t)loc_id, NULL, 0);
-    if (buf_size < 0) {
-        h5badArgument( env, "H5Oget_comment:  buf_size < 0");
-    } /* end if */
-    else if (buf_size > 0) {
-        buf_size++; /* add extra space for the null terminator */
-        oComment = (char *)HDmalloc(sizeof(char) * (size_t)buf_size);
-        if (oComment == NULL) {
-            /* exception -- out of memory */
-            h5outOfMemory( env, "H5Oget_comment:  malloc failed");
-        } /* end if */
-        else {
-            status = H5Oget_comment((hid_t)loc_id, oComment, (size_t)buf_size);
+    UNUSED(clss);
 
-            if (status < 0) {
-                h5libraryError(env);
-            } /* end if */
-            else {
-                /*  may throw OutOfMemoryError */
-                str = ENVPTR->NewStringUTF(ENVPAR oComment);
-                if (str == NULL) {
-                    h5JNIFatalError( env, "H5Oget_comment:  return string not allocated");
-                } /* end if */
-            } /* end else */
-            HDfree(oComment);
-        }
-    } /* end else if */
+    /* Get the length of the comment */
+    if ((buf_size = H5Oget_comment((hid_t)loc_id, NULL, 0)) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+
+    if (buf_size) {
+        if (NULL == (oComment = (char *) HDmalloc(sizeof(char) * (size_t)buf_size + 1)))
+            H5_JNI_FATAL_ERROR(ENVONLY, "H5Oget_comment: failed to allocate object comment buffer");
+
+        if ((status = H5Oget_comment((hid_t)loc_id, oComment, (size_t)buf_size + 1)) < 0)
+            H5_LIBRARY_ERROR(ENVONLY);
+        oComment[buf_size] = '\0';
+
+        if (NULL == (str = ENVPTR->NewStringUTF(ENVONLY, oComment)))
+            CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+    }
+
+done:
+    if (oComment)
+        HDfree(oComment);
 
     return (jstring)str;
 } /* end Java_hdf_hdf5lib_H5_H5Oget_1comment */
@@ -633,43 +665,40 @@ JNIEXPORT jstring JNICALL
 Java_hdf_hdf5lib_H5_H5Oget_1comment_1by_1name
     (JNIEnv *env, jclass clss, jlong loc_id, jstring name, jlong access_id)
 {
-    char       *oComment;
-    const char *oName;
+    const char *objName = NULL;
+    jstring     str = NULL;
     ssize_t     buf_size;
     ssize_t     status;
-    jstring     str = NULL;
+    char       *objComment = NULL;
 
-    PIN_JAVA_STRING(name, oName);
-    if (oName != NULL) {
-        /* get the length of the comment */
-        buf_size = H5Oget_comment_by_name((hid_t)loc_id, oName, NULL, 0, (hid_t)access_id);
-        if (buf_size < 0) {
-            h5badArgument( env, "H5Oget_comment_by_name:  buf_size < 0");
-        } /* end if */
-        else if (buf_size > 0) {
-            buf_size++; /* add extra space for the null terminator */
-            oComment = (char *)HDmalloc(sizeof(char) * (size_t)buf_size);
-            if (oComment == NULL) {
-                h5outOfMemory( env, "H5Oget_comment_by_name:  malloc failed");
-            } /* end if */
-            else {
-                status = H5Oget_comment_by_name((hid_t)loc_id, oName, oComment, (size_t)buf_size, (hid_t)access_id);
+    UNUSED(clss);
 
-                if (status < 0) {
-                    h5libraryError(env);
-                } /* end if */
-                else {
-                    /*  may throw OutOfMemoryError */
-                    str = ENVPTR->NewStringUTF(ENVPAR oComment);
-                    if (str == NULL) {
-                        h5JNIFatalError( env, "H5Oget_comment_by_name:  return string not allocated");
-                    } /* end if */
-                } /* end else */
-                HDfree(oComment);
-            }
-        } /* end if */
-        UNPIN_JAVA_STRING(name, oName);
+    if (NULL == name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Oget_comment_by_name: object name is NULL");
+
+    PIN_JAVA_STRING(ENVONLY, name, objName, NULL, "H5Oget_comment_by_name: object name not pinned");
+
+    /* Get the length of the comment */
+    if ((buf_size = H5Oget_comment_by_name((hid_t)loc_id, objName, NULL, 0, (hid_t)access_id)) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+
+    if (buf_size) {
+        if (NULL == (objComment = (char *) HDmalloc(sizeof(char) * (size_t)buf_size + 1)))
+            H5_JNI_FATAL_ERROR(ENVONLY, "H5Oget_comment_by_name: failed to allocate buffer for object comment");
+
+        if ((status = H5Oget_comment_by_name((hid_t)loc_id, objName, objComment, (size_t)buf_size + 1, (hid_t)access_id)) < 0)
+            H5_LIBRARY_ERROR(ENVONLY);
+        objComment[buf_size] = '\0';
+
+        if (NULL == (str = ENVPTR->NewStringUTF(ENVONLY, objComment)))
+            CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
     }
+
+done:
+    if (objComment)
+        HDfree(objComment);
+    if (objName)
+        UNPIN_JAVA_STRING(ENVONLY, name, objName);
 
     return (jstring)str;
 } /* end Java_hdf_hdf5lib_H5_H5Oget_1comment_1by_1name */
@@ -683,20 +712,24 @@ JNIEXPORT jboolean JNICALL
 Java_hdf_hdf5lib_H5_H5Oexists_1by_1name
     (JNIEnv *env, jclass clss, jlong loc_id, jstring name, jlong access_id)
 {
+    const char *objName = NULL;
     htri_t      bval = JNI_FALSE;
-    const char *oName;
 
-    PIN_JAVA_STRING(name, oName);
-    if (oName != NULL) {
-        bval = H5Oexists_by_name((hid_t)loc_id, oName, (hid_t)access_id);
+    UNUSED(clss);
 
-        UNPIN_JAVA_STRING(name, oName);
+    if (NULL == name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Oexists_by_name: object name is NULL");
 
-        if (bval > 0)
-            bval = JNI_TRUE;
-        else if (bval < 0)
-            h5libraryError(env);
-    }
+    PIN_JAVA_STRING(ENVONLY, name, objName, NULL, "H5Oexists_by_name: object name not pinned");
+
+    if ((bval = H5Oexists_by_name((hid_t)loc_id, objName, (hid_t)access_id)) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+
+    bval = (bval > 0) ? JNI_TRUE : JNI_FALSE;
+
+done:
+    if (objName)
+        UNPIN_JAVA_STRING(ENVONLY, name, objName);
 
     return (jboolean)bval;
 } /* end Java_hdf_hdf5lib_H5_H5Oexists_1by_1name */
@@ -710,8 +743,13 @@ JNIEXPORT void JNICALL
 Java_hdf_hdf5lib_H5_H5Odecr_1refcount
     (JNIEnv *env, jclass clss, jlong object_id)
 {
+    UNUSED(clss);
+
     if (H5Odecr_refcount((hid_t)object_id) < 0)
-        h5libraryError(env);
+        H5_LIBRARY_ERROR(ENVONLY);
+
+done:
+    return;
 }
 /* end Java_hdf_hdf5lib_H5_H5Odecr_1refcount */
 /*
@@ -723,8 +761,13 @@ JNIEXPORT void JNICALL
 Java_hdf_hdf5lib_H5_H5Oincr_1refcount
     (JNIEnv *env, jclass clss, jlong object_id)
 {
+    UNUSED(clss);
+
     if (H5Oincr_refcount((hid_t)object_id) < 0)
-        h5libraryError(env);
+        H5_LIBRARY_ERROR(ENVONLY);
+
+done:
+    return;
 } /* end Java_hdf_hdf5lib_H5_H5Oincr_1refcount */
 
 /*
@@ -736,12 +779,14 @@ JNIEXPORT jlong JNICALL
 Java_hdf_hdf5lib_H5__1H5Oopen_1by_1addr
     (JNIEnv *env, jclass clss, jlong loc_id, jlong addr)
 {
-    hid_t retVal = -1;
+    hid_t retVal = H5I_INVALID_HID;
 
-    retVal = H5Oopen_by_addr((hid_t)loc_id, (haddr_t)addr );
-    if (retVal < 0)
-        h5libraryError(env);
+    UNUSED(clss);
 
+    if ((retVal = H5Oopen_by_addr((hid_t)loc_id, (haddr_t)addr)) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+
+done:
     return (jlong)retVal;
 } /* end Java_hdf_hdf5lib_H5__1H5Oopen_1by_1addr */
 
@@ -755,18 +800,22 @@ Java_hdf_hdf5lib_H5__1H5Oopen_1by_1idx
     (JNIEnv *env, jclass clss, jlong loc_id, jstring name,
         jint index_field, jint order, jlong link_n, jlong lapl_id)
 {
-    hid_t       retVal = -1;
-    const char *oName;
+    const char *grpName = NULL;
+    hid_t       retVal = H5I_INVALID_HID;
 
-    PIN_JAVA_STRING(name, oName);
-    if (oName != NULL) {
-        retVal = H5Oopen_by_idx((hid_t)loc_id, oName, (H5_index_t)index_field, (H5_iter_order_t)order, (hsize_t)link_n, (hid_t)lapl_id );
+    UNUSED(clss);
 
-        UNPIN_JAVA_STRING(name, oName);
+    if (NULL == name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Oopen_by_idx: object name is NULL");
 
-        if (retVal < 0)
-            h5libraryError(env);
-    }
+    PIN_JAVA_STRING(ENVONLY, name, grpName, NULL, "H5Oopen_by_idx: object name not pinned");
+
+    if ((retVal = H5Oopen_by_idx((hid_t)loc_id, grpName, (H5_index_t)index_field, (H5_iter_order_t)order, (hsize_t)link_n, (hid_t)lapl_id)) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+
+done:
+    if (grpName)
+        UNPIN_JAVA_STRING(ENVONLY, name, grpName);
 
     return (jlong)retVal;
 } /* end Java_hdf_hdf5lib_H5__1H5Oopen_1by_1idx */
@@ -780,8 +829,13 @@ JNIEXPORT void JNICALL
 Java_hdf_hdf5lib_H5_H5Oflush
     (JNIEnv *env, jclass clss, jlong loc_id)
 {
+    UNUSED(clss);
+
     if (H5Oflush((hid_t)loc_id) < 0)
-        h5libraryError(env);
+        H5_LIBRARY_ERROR(ENVONLY);
+
+done:
+    return;
 } /* end Java_hdf_hdf5lib_H5_H5Oflush */
 
 /*
@@ -793,8 +847,13 @@ JNIEXPORT void JNICALL
 Java_hdf_hdf5lib_H5_H5Orefresh
     (JNIEnv *env, jclass clss, jlong loc_id)
 {
+    UNUSED(clss);
+
     if (H5Orefresh((hid_t)loc_id) < 0)
-        h5libraryError(env);
+        H5_LIBRARY_ERROR(ENVONLY);
+
+done:
+    return;
 } /* end Java_hdf_hdf5lib_H5_H5Orefresh */
 
 

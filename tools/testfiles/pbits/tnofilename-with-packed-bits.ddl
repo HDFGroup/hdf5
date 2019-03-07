@@ -135,4 +135,3 @@ usage: h5dump [OPTIONS] files
 
       h5dump -d /foo -f family fam%05d.h5
 
-h5dump error: missing file name

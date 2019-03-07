@@ -146,6 +146,9 @@ main(void)
     if((H5Pset_fill_value(dcpl, H5T_NATIVE_DOUBLE, &fill)) < 0)
         FAIL_STACK_ERROR
 
+    if((H5Pset_dset_no_attrs_hint(dcpl, FALSE)) < 0)
+        FAIL_STACK_ERROR
+
     max_size[0] = 100;
     if((H5Pset_external(dcpl, "ext1.data", (off_t)0, 
                          (hsize_t)(max_size[0] * sizeof(int)/4))) < 0)
@@ -459,8 +462,6 @@ main(void)
     if((H5Pset_mdc_config(fapl, &my_cache_config)) < 0)
         FAIL_STACK_ERROR
     if((H5Pset_mdc_image_config(fapl, &my_cache_image_config)) < 0)
-        FAIL_STACK_ERROR
-    if((H5Pset_core_write_tracking(fapl, TRUE, 1024 * 1024)) < 0)
         FAIL_STACK_ERROR
 
     /* Test encoding & decoding property list */

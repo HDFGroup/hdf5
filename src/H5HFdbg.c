@@ -483,7 +483,7 @@ H5HF_dblock_debug_cb(H5FS_section_info_t *_sect, void *_udata)
 
         /* Flag overlaps */
         if (overlap)
-            fprintf(udata->stream, "***THAT FREE BLOCK OVERLAPPED A PREVIOUS ONE!\n");
+            HDfprintf(udata->stream, "***THAT FREE BLOCK OVERLAPPED A PREVIOUS ONE!\n");
         else
             udata->amount_free += len;
     } /* end if */

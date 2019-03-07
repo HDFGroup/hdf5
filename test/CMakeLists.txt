@@ -45,7 +45,7 @@ if (BUILD_SHARED_LIBS)
       INTERFACE "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
   )
   target_compile_definitions(${HDF5_TEST_LIBSH_TARGET}
-      PUBLIC "H5_BUILT_AS_DYNAMIC_LIB" $<$<BOOL:${HDF5_ENABLE_THREADSAFE}>:H5_HAVE_THREADSAFE>
+      PUBLIC "H5_BUILT_AS_DYNAMIC_LIB"
   )
   TARGET_C_PROPERTIES (${HDF5_TEST_LIBSH_TARGET} SHARED)
   target_link_libraries (${HDF5_TEST_LIBSH_TARGET}
@@ -133,7 +133,7 @@ if (BUILD_SHARED_LIBS)
   # Define VOL Plugin Test Sources
   #-----------------------------------------------------------------------------
   set (VOL_PLUGIN_LIBS
-      echo_vol
+      null_vol_connector
   )
 
   foreach (vol_lib ${VOL_PLUGIN_LIBS})
@@ -293,9 +293,9 @@ set (H5_TESTS_MULTIPLE
     ttsafe
 )
 # Only build single source tests here
-foreach (test ${H5_TESTS})
-  if (NOT ${test} IN_LIST H5_TESTS_MULTIPLE)
-    ADD_H5_EXE(${test})
+foreach (h5_test ${H5_TESTS})
+  if (NOT h5_test IN_LIST H5_TESTS_MULTIPLE)
+    ADD_H5_EXE(${h5_test})
   endif ()
 endforeach ()
 
@@ -374,18 +374,19 @@ set (H5_CHECK_TESTS
     atomic_reader
     links_env
     filenotclosed
+    del_many_dense_attrs
     flushrefresh
 )
 
-foreach (test ${H5_CHECK_TESTS})
-  ADD_H5_EXE(${test})
+foreach (h5_test ${H5_CHECK_TESTS})
+  ADD_H5_EXE(${h5_test})
 endforeach ()
 
 #-- Adding test for libinfo
 set (GREP_RUNNER ${PROJECT_BINARY_DIR}/GrepRunner.cmake)
 file (WRITE ${GREP_RUNNER}
   "file (STRINGS \${TEST_PROGRAM} TEST_RESULT REGEX \"SUMMARY OF THE HDF5 CONFIGURATION\")
-if (\${TEST_RESULT} STREQUAL \"0\")
+if (NOT TEST_RESULT)
   message (FATAL_ERROR \"Failed: The output: \${TEST_RESULT} of \${TEST_PROGRAM} did not contain SUMMARY OF THE HDF5 CONFIGURATION\")
 else ()
   message (STATUS \"COMMAND Result: \${TEST_RESULT}\")
@@ -410,8 +411,8 @@ set (H5_SWMR_TESTS
     swmr_writer
 )
 
-foreach (test ${H5_SWMR_TESTS})
-  ADD_H5_EXE(${test})
+foreach (h5_test ${H5_SWMR_TESTS})
+  ADD_H5_EXE(${h5_test})
 endforeach ()
 
 set (H5_VDS_SWMR_TESTS
@@ -420,8 +421,8 @@ set (H5_VDS_SWMR_TESTS
     vds_swmr_writer
 )
 
-foreach (test ${H5_VDS_SWMR_TESTS})
-  ADD_H5_EXE(${test})
+foreach (h5_test ${H5_VDS_SWMR_TESTS})
+  ADD_H5_EXE(${h5_test})
 endforeach ()
 
 #-- Adding test for accum_swmr_reader

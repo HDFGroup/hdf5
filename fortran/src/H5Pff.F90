@@ -8022,8 +8022,97 @@ SUBROUTINE h5pget_virtual_dsetname_f(dcpl_id, index, name, hdferr, name_len)
 
 END SUBROUTINE h5pget_virtual_dsetname_f
 
+!****s* H5P (F03)/h5pget_dset_no_attrs_hint_f_F03
+!
+! NAME
+!  h5pget_dset_no_attrs_hint_f
+!
+! PURPOSE
+!  Gets the value of the "minimize dataset headers" value which creates
+!  smaller dataset object headers when its set and no attributes are present.
+!
+! INPUTS
+!  dcpl_id    - Target dataset creation property list identifier.
+!
+! OUTPUTS
+!  minimize   - Value of the setting.
+!  hdferr     - error code:
+!                 0 on success and -1 on failure
+!
+! AUTHOR
+!  Dana Robinson
+!  January 2019
+!
+! Fortran2003 Interface:
+  SUBROUTINE h5pget_dset_no_attrs_hint_f(dcpl_id, minimize, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T) , INTENT(IN)              :: dcpl_id
+    LOGICAL        , INTENT(OUT)             :: minimize
+    INTEGER        , INTENT(OUT)             :: hdferr
+!*****
+    LOGICAL(C_BOOL) :: c_minimize
+
+    INTERFACE
+       INTEGER FUNCTION h5pget_dset_no_attrs_hint_c(dcpl_id, minimize) BIND(C, NAME='H5Pget_dset_no_attrs_hint')
+         IMPORT :: HID_T, C_BOOL
+         IMPLICIT NONE
+         INTEGER(HID_T), INTENT(IN), VALUE :: dcpl_id
+         LOGICAL(C_BOOL), INTENT(OUT) :: minimize
+       END FUNCTION h5pget_dset_no_attrs_hint_c
+    END INTERFACE
+
+    hdferr = INT(h5pget_dset_no_attrs_hint_c(dcpl_id, c_minimize))
+
+    ! Transfer value of C C_BOOL type to Fortran LOGICAL 
+    minimize = c_minimize
+
+   END SUBROUTINE h5pget_dset_no_attrs_hint_f
+
+!****s* H5P (F03)/h5pset_dset_no_attrs_hint_f_F03
+!
+! NAME
+!  h5pset_dset_no_attrs_hint_f
+!
+! PURPOSE
+!  Sets the value of the "minimize dataset headers" value which creates
+!  smaller dataset object headers when its set and no attributes are present.
+!
+! INPUTS
+!  dcpl_id    - Target dataset creation property list identifier.
+!  minimize   - Value of the setting.
+!
+! OUTPUTS
+!  hdferr     - error code:
+!                 0 on success and -1 on failure
+!
+! AUTHOR
+!  Dana Robinson
+!  January 2019
+!
+! Fortran2003 Interface:
+  SUBROUTINE h5pset_dset_no_attrs_hint_f(dcpl_id, minimize, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T) , INTENT(IN)              :: dcpl_id
+    LOGICAL        , INTENT(IN)              :: minimize
+    INTEGER        , INTENT(OUT)             :: hdferr
+!*****
+    LOGICAL(C_BOOL) :: c_minimize
+
+    INTERFACE
+       INTEGER FUNCTION h5pset_dset_no_attrs_hint_c(dcpl_id, minimize) BIND(C, NAME='H5Pset_dset_no_attrs_hint')
+         IMPORT :: HID_T, C_BOOL
+         IMPLICIT NONE
+         INTEGER(HID_T), INTENT(IN), VALUE :: dcpl_id
+         LOGICAL(C_BOOL), INTENT(IN), VALUE :: minimize
+       END FUNCTION h5pset_dset_no_attrs_hint_c
+    END INTERFACE
+
+    ! Transfer value of Fortran LOGICAL to C C_BOOL type
+    c_minimize = minimize
+
+    hdferr = INT(h5pset_dset_no_attrs_hint_c(dcpl_id, c_minimize))
+
+  END SUBROUTINE h5pset_dset_no_attrs_hint_f
 
 END MODULE H5P
-
-
 

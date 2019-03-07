@@ -104,6 +104,12 @@ endif ()
 # Configure the hdf5-config-version .cmake file for the install directory
 #-----------------------------------------------------------------------------
 if (NOT HDF5_EXTERNALLY_CONFIGURED)
+  # 3.11 or greater
+  #write_basic_package_version_file (
+  #  ${HDF5_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${HDF5_PACKAGE}${HDF_PACKAGE_EXT}-config-version.cmake
+  #  VERSION ${HDF5_PACKAGE_VERSION}
+  #  COMPATIBILITY SameMinorVersion
+  #)
   configure_file (
       ${HDF_RESOURCES_DIR}/hdf5-config-version.cmake.in
       ${HDF5_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${HDF5_PACKAGE}${HDF_PACKAGE_EXT}-config-version.cmake @ONLY
@@ -134,7 +140,7 @@ install (
 )
 
 #-----------------------------------------------------------------------------
-# Configure the HDF518_Examples.cmake file and the examples
+# Configure the HDF5_Examples.cmake file and the examples
 #-----------------------------------------------------------------------------
 option (HDF5_PACK_EXAMPLES  "Package the HDF5 Library Examples Compressed File" OFF)
 if (HDF5_PACK_EXAMPLES)

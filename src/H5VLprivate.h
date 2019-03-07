@@ -95,7 +95,7 @@ H5_DLL herr_t H5VL_free_wrap_ctx(const H5VL_class_t *connector, void *wrap_ctx);
 H5_DLL herr_t H5VL_set_vol_wrapper(void *obj, const H5VL_t *vol_connector);
 H5_DLL herr_t H5VL_reset_vol_wrapper(void);
 H5_DLL void * H5VL_wrap_object(const H5VL_class_t *connector, void *wrap_ctx,
-    void *obj);
+    void *obj, H5I_type_t obj_type);
 
 /* ID registration functions */
 H5_DLL hid_t H5VL_register(H5I_type_t type, void *object, H5VL_t *vol_connector, hbool_t app_ref);

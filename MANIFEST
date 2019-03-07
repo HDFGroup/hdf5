@@ -92,13 +92,20 @@
 ./bin/timekeeper      _DO_NOT_DISTRIBUTE_
 ./bin/trace
 ./bin/yodconfigure
-./bin/batch/knl_ctestP.sl
-./bin/batch/knl_ctestS.sl
-./bin/batch/knl_ctestSP.sl
+./bin/batch/cori_ctestP.sl.in.cmake
+./bin/batch/cori_ctestS.sl.in.cmake
+./bin/batch/cori_knl_ctestP.sl.in.cmake
+./bin/batch/cori_knl_ctestS.sl.in.cmake
+./bin/batch/ctestP.lsf.in.cmake
+./bin/batch/ctestP.sl.in.cmake
+./bin/batch/ctestS.lsf.in.cmake
+./bin/batch/ctestS.sl.in.cmake
+./bin/batch/knl_ctestP.sl.in.cmake
+./bin/batch/knl_ctestS.sl.in.cmake
 ./bin/batch/knl_H5detect.sl.in.cmake
-./bin/batch/sbatch_ctestS.sl
-./bin/batch/sbatch_ctestP.sl
-./bin/batch/sbatch_ctestSP.sl
+./bin/batch/ray_ctestP.lsf.in.cmake
+./bin/batch/ray_ctestS.lsf.in.cmake
+./bin/batch/raybsub
 ./bin/pkgscrpts/h5rmflags                  _DO_NOT_DISTRIBUTE_
 ./bin/pkgscrpts/makeHDF5BinaryTarfiles.pl  _DO_NOT_DISTRIBUTE_
 ./bin/pkgscrpts/makeInternalREADME.pl      _DO_NOT_DISTRIBUTE_
@@ -456,6 +463,7 @@
 ./release_docs/INSTALL_Warnings.txt
 ./release_docs/INSTALL_Windows.txt
 ./release_docs/RELEASE.txt
+./release_docs/README_HPC
 ./release_docs/USING_HDF5_CMake.txt
 ./release_docs/USING_HDF5_VS.txt
 
@@ -490,7 +498,6 @@
 ./src/H5Apublic.h
 ./src/H5AC.c
 ./src/H5ACdbg.c
-./src/H5AClog.c
 ./src/H5ACmodule.h
 ./src/H5ACmpio.c
 ./src/H5ACpkg.h
@@ -520,6 +527,9 @@
 ./src/H5Cepoch.c
 ./src/H5Cimage.c
 ./src/H5Clog.c
+./src/H5Clog.h
+./src/H5Clog_json.c
+./src/H5Clog_trace.c
 ./src/H5Cmodule.h
 ./src/H5Cmpio.c
 ./src/H5Cpkg.h
@@ -895,6 +905,14 @@
 ./src/H5VLmodule.h
 ./src/H5VLnative.c
 ./src/H5VLnative.h
+./src/H5VLnative_attr.c
+./src/H5VLnative_dataset.c
+./src/H5VLnative_datatype.c
+./src/H5VLnative_file.c
+./src/H5VLnative_group.c
+./src/H5VLnative_link.c
+./src/H5VLnative_object.c
+./src/H5VLnative_private.h
 ./src/H5VLpassthru.c
 ./src/H5VLpassthru.h
 ./src/H5VLpkg.h
@@ -959,13 +977,13 @@
 ./test/cross_read.c
 ./test/dangle.c
 ./test/deflate.h5
+./test/del_many_dense_attrs.c
 ./test/direct_chunk.c
 ./test/dsets.c
 ./test/dt_arith.c
 ./test/dtypes.c
 ./test/dtransform.c
 ./test/earray.c
-./test/echo_vol.c
 ./test/efc.c
 ./test/enc_dec_plist.c
 ./test/enc_dec_plist_cross_platform.c
@@ -1013,6 +1031,7 @@
 ./test/gen_deflate.c
 ./test/gen_file_image.c
 ./test/gen_filespace.c
+./test/gen_filters.c
 ./test/gen_mergemsg.c
 ./test/gen_new_array.c
 ./test/gen_new_fill.c
@@ -1047,6 +1066,7 @@
 ./test/le_extlink2.h5
 ./test/lheap.c
 ./test/links.c
+./test/memleak_H5O_dtype_decode_helper_H5Odtype.h5
 ./test/mergemsg.h5
 ./test/mf.c
 ./test/mount.c
@@ -1056,6 +1076,8 @@
 ./test/noencoder.h5
 ./test/none.h5
 ./test/ntypes.c
+./test/null_vol_connector.c
+./test/null_vol_connector.h
 ./test/ohdr.c
 ./test/objcopy.c
 ./test/page_buffer.c
@@ -1091,17 +1113,20 @@
 ./test/tcheck_version.c
 ./test/tconfig.c
 ./test/tcoords.c
+./test/testabort_fail.sh.in
 ./test/testcheck_version.sh.in
 ./test/testerror.sh.in
 ./test/testlinks_env.sh.in
-./test/test_filenotclosed.sh.in
 ./test/test_filter_plugin.sh.in
+./test/test_filters_le.h5
+./test/test_filters_be.h5
 ./test/testflushrefresh.sh.in
 ./test/testframe.c
 ./test/testhdf5.c
 ./test/testhdf5.h
 ./test/testlibinfo.sh.in
 ./test/test_usecases.sh.in
+./test/test_vol_plugin.sh.in
 ./test/testmeta.c
 ./test/testswmr.sh.in
 ./test/testvdsswmr.sh.in
@@ -1143,16 +1168,14 @@
 ./test/use_common.c
 ./test/use_disable_mdc_flushes.c
 ./test/use.h
-./test/vfd.c
-./test/vol.c
-./test/test_filters_le.h5
-./test/test_filters_be.h5
-./test/gen_filters.c
 ./test/vds.c
 ./test/vds_swmr.h
 ./test/vds_swmr_gen.c
 ./test/vds_swmr_reader.c
 ./test/vds_swmr_writer.c
+./test/vfd.c
+./test/vol.c
+./test/vol_plugin.c
 
 ./test/testfiles/err_compat_1
 ./test/testfiles/err_compat_2
@@ -1283,6 +1306,7 @@
 ./testpar/t_span_tree.c
 ./testpar/t_init_term.c
 ./testpar/testpar.h
+./testpar/testpflush.sh.in
 ./testpar/testphdf5.c
 ./testpar/testphdf5.h
 
@@ -1389,14 +1413,17 @@
 ./tools/test/h5format_convert/testfiles/h5fc_v_err.ddl.err
 ./tools/test/h5format_convert/testfiles/h5fc_v_non_chunked.ddl
 ./tools/test/h5format_convert/testfiles/h5fc_d_file.ddl
+./tools/test/h5format_convert/testfiles/h5fc_d_file.ddl.err
+./tools/test/h5format_convert/testfiles/h5fc_d_file-d.ddl
 ./tools/test/h5format_convert/testfiles/h5fc_v_ndata_bt1.ddl
 ./tools/test/h5format_convert/testfiles/h5fc_dname.ddl
-./tools/test/h5format_convert/testfiles/h5fc_nonexistdset_file.ddl
+./tools/test/h5format_convert/testfiles/h5fc_dname.err
+./tools/test/h5format_convert/testfiles/h5fc_nonexistfile.ddl.err
+./tools/test/h5format_convert/testfiles/h5fc_nonexistdset_file.ddl.err
 ./tools/test/h5format_convert/testfiles/h5fc_help.ddl
 ./tools/test/h5format_convert/testfiles/h5fc_v_all.ddl
 ./tools/test/h5format_convert/testfiles/h5fc_nooption.ddl
 ./tools/test/h5format_convert/testfiles/h5fc_v_n_1d.ddl
-./tools/test/h5format_convert/testfiles/h5fc_nonexistfile.ddl
 ./tools/test/h5format_convert/testfiles/h5fc_non_v3.h5
 ./tools/test/h5format_convert/testfiles/h5fc_edge_v3.h5
 ./tools/test/h5format_convert/testfiles/h5fc_err_level.h5
@@ -1466,6 +1493,11 @@
 ./tools/test/h5ls/vds_prefix/tvds-4.ls
 ./tools/test/h5ls/vds_prefix/tvds-5.ls
 
+# h5ls test error files
+./tools/test/h5ls/errfiles/nosuchfile.err
+./tools/test/h5ls/errfiles/textlinksrc-nodangle-1.err
+./tools/test/h5ls/errfiles/tgroup-1.err
+
 # h5copy sources
 ./tools/src/h5copy/Makefile.am
 ./tools/src/h5copy/h5copy.c
@@ -1521,10 +1553,11 @@
 ./tools/test/misc/testfiles/h5clear_less_after_size.ddl
 ./tools/test/misc/testfiles/h5clear_less_before_size.ddl
 ./tools/test/misc/testfiles/h5clear_missing_file.ddl
+./tools/test/misc/testfiles/h5clear_missing_file.err
 ./tools/test/misc/testfiles/h5clear_noclose_after_size.ddl
 ./tools/test/misc/testfiles/h5clear_noclose_before_size.ddl
-./tools/test/misc/testfiles/h5clear_no_mdc_image.ddl
-./tools/test/misc/testfiles/h5clear_open_fail.ddl
+./tools/test/misc/testfiles/h5clear_no_mdc_image.err
+./tools/test/misc/testfiles/h5clear_open_fail.err
 ./tools/test/misc/testfiles/h5clear_status_noclose_after_size.ddl
 ./tools/test/misc/testfiles/h5clear_usage.ddl
 ./tools/test/misc/testfiles/h5clear_user_equal_after_size.ddl
@@ -1578,10 +1611,6 @@
 ./tools/test/h5stat/testh5stat.sh.in
 ./tools/test/h5stat/testfiles/h5stat_dims1.ddl
 ./tools/test/h5stat/testfiles/h5stat_dims2.ddl
-./tools/test/h5stat/testfiles/h5stat_err1_dims.ddl
-./tools/test/h5stat/testfiles/h5stat_err1_links.ddl
-./tools/test/h5stat/testfiles/h5stat_err1_numattrs.ddl
-./tools/test/h5stat/testfiles/h5stat_err2_numattrs.ddl
 ./tools/test/h5stat/testfiles/h5stat_err_old_fill.h5
 ./tools/test/h5stat/testfiles/h5stat_err_old_fill.ddl
 ./tools/test/h5stat/testfiles/h5stat_err_old_layout.h5
@@ -1619,6 +1648,15 @@
 ./tools/test/h5stat/testfiles/h5stat_threshold.h5
 ./tools/test/h5stat/testfiles/h5stat_tsohm.ddl
 ./tools/test/h5stat/testfiles/h5stat_tsohm.h5
+./tools/test/h5stat/testfiles/h5stat_err_refcount.err
+./tools/test/h5stat/testfiles/h5stat_err_old_layout.err
+./tools/test/h5stat/testfiles/h5stat_err_old_fill.err
+./tools/test/h5stat/testfiles/h5stat_err1_dims.err
+./tools/test/h5stat/testfiles/h5stat_err1_links.err
+./tools/test/h5stat/testfiles/h5stat_err1_numattrs.err
+./tools/test/h5stat/testfiles/h5stat_err2_numattrs.err
+./tools/test/h5stat/testfiles/h5stat_notexist.err
+./tools/test/h5stat/testfiles/h5stat_nofile.err
 
 # h5dump test files
 ./tools/testfiles/charsets.h5
@@ -2280,7 +2318,6 @@
 ./tools/test/h5diff/testfiles/h5diff_600.txt
 ./tools/test/h5diff/testfiles/h5diff_601.txt
 ./tools/test/h5diff/testfiles/h5diff_601_ERR.err
-./tools/test/h5diff/testfiles/h5diff_601_ERR.txt
 ./tools/test/h5diff/testfiles/h5diff_603.txt
 ./tools/test/h5diff/testfiles/h5diff_604.txt
 ./tools/test/h5diff/testfiles/h5diff_605.txt
@@ -2387,21 +2424,12 @@
 ./tools/test/h5diff/testfiles/h5diff_452.txt
 ./tools/test/h5diff/testfiles/h5diff_453.txt
 ./tools/test/h5diff/testfiles/h5diff_454.txt
-./tools/test/h5diff/testfiles/h5diff_454_ERR.err
-./tools/test/h5diff/testfiles/h5diff_454_ERR.txt
+./tools/test/h5diff/testfiles/dangling_link.err
 ./tools/test/h5diff/testfiles/h5diff_455.txt
-./tools/test/h5diff/testfiles/h5diff_455_ERR.err
-./tools/test/h5diff/testfiles/h5diff_455_ERR.txt
 ./tools/test/h5diff/testfiles/h5diff_456.txt
 ./tools/test/h5diff/testfiles/h5diff_457.txt
-./tools/test/h5diff/testfiles/h5diff_457_ERR.err
-./tools/test/h5diff/testfiles/h5diff_457_ERR.txt
 ./tools/test/h5diff/testfiles/h5diff_458.txt
-./tools/test/h5diff/testfiles/h5diff_458_ERR.err
-./tools/test/h5diff/testfiles/h5diff_458_ERR.txt
 ./tools/test/h5diff/testfiles/h5diff_459.txt
-./tools/test/h5diff/testfiles/h5diff_459_ERR.err
-./tools/test/h5diff/testfiles/h5diff_459_ERR.txt
 ./tools/test/h5diff/testfiles/h5diff_465.txt
 ./tools/test/h5diff/testfiles/h5diff_466.txt
 ./tools/test/h5diff/testfiles/h5diff_467.txt
@@ -2491,6 +2519,7 @@
 ./tools/test/h5diff/testfiles/tudfilter.h5
 ./tools/test/h5diff/testfiles/tudfilter2.h5
 ./tools/test/h5diff/testfiles/h5diff_ud.txt
+./tools/test/h5diff/testfiles/h5diff_udfail.err
 ./tools/test/h5diff/testfiles/h5diff_udfail.txt
 ./tools/test/h5diff/testfiles/diff_strings1.h5
 ./tools/test/h5diff/testfiles/diff_strings2.h5
@@ -2591,6 +2620,7 @@
 ./tools/test/h5copy/testfiles/h5copy_extlinks_src.h5
 ./tools/test/h5copy/testfiles/h5copy_extlinks_trg.h5
 ./tools/test/h5copy/testfiles/h5copy_extlinks_src.out.ls
+./tools/test/h5copy/testfiles/h5copy_misc1.err
 ./tools/test/h5copy/testfiles/h5copy_misc1.out
 ./tools/test/h5copy/testfiles/h5copytst_new.h5
 ./tools/test/h5copy/testfiles/h5copytst_new.out.ls
@@ -2759,16 +2789,17 @@
 
 # expected test output from testing h5watch
 #
-./hl/tools/testfiles/w-err-cmpd1.ddl
-./hl/tools/testfiles/w-err-cmpd2.ddl
-./hl/tools/testfiles/w-err-cmpd3.ddl
-./hl/tools/testfiles/w-err-cmpd4.ddl
-./hl/tools/testfiles/w-err-cmpd5.ddl
-./hl/tools/testfiles/w-err-dset1.ddl
-./hl/tools/testfiles/w-err-dset2.ddl
-./hl/tools/testfiles/w-err-dset-nomax.ddl
-./hl/tools/testfiles/w-err-dset-none.ddl
-./hl/tools/testfiles/w-err-file.ddl
+./hl/tools/testfiles/w-err-std.ddl
+./hl/tools/testfiles/w-err-cmpd1.err
+./hl/tools/testfiles/w-err-cmpd2.err
+./hl/tools/testfiles/w-err-cmpd3.err
+./hl/tools/testfiles/w-err-cmpd4.err
+./hl/tools/testfiles/w-err-cmpd5.err
+./hl/tools/testfiles/w-err-dset1.err
+./hl/tools/testfiles/w-err-dset2.err
+./hl/tools/testfiles/w-err-dset-nomax.err
+./hl/tools/testfiles/w-err-dset-none.err
+./hl/tools/testfiles/w-err-file.err
 ./hl/tools/testfiles/w-err-poll0.ddl
 ./hl/tools/testfiles/w-err-poll.ddl
 ./hl/tools/testfiles/w-err-width.ddl
@@ -2870,6 +2901,32 @@
 ./java/src/jni/h5oImp.h
 ./java/src/jni/h5pImp.c
 ./java/src/jni/h5pImp.h
+./java/src/jni/h5pACPLImp.c
+./java/src/jni/h5pACPLImp.h
+./java/src/jni/h5pDAPLImp.c
+./java/src/jni/h5pDAPLImp.h
+./java/src/jni/h5pDCPLImp.c
+./java/src/jni/h5pDCPLImp.h
+./java/src/jni/h5pDXPLImp.c
+./java/src/jni/h5pDXPLImp.h
+./java/src/jni/h5pFAPLImp.c
+./java/src/jni/h5pFAPLImp.h
+./java/src/jni/h5pFCPLImp.c
+./java/src/jni/h5pFCPLImp.h
+./java/src/jni/h5pGAPLImp.c
+./java/src/jni/h5pGAPLImp.h
+./java/src/jni/h5pGCPLImp.c
+./java/src/jni/h5pGCPLImp.h
+./java/src/jni/h5pLAPLImp.c
+./java/src/jni/h5pLAPLImp.h
+./java/src/jni/h5pLCPLImp.c
+./java/src/jni/h5pLCPLImp.h
+./java/src/jni/h5pOCPLImp.c
+./java/src/jni/h5pOCPLImp.h
+./java/src/jni/h5pOCpyPLImp.c
+./java/src/jni/h5pOCpyPLImp.h
+./java/src/jni/h5pStrCPLImp.c
+./java/src/jni/h5pStrCPLImp.h
 ./java/src/jni/h5plImp.c
 ./java/src/jni/h5plImp.h
 ./java/src/jni/h5rImp.c
@@ -2878,6 +2935,8 @@
 ./java/src/jni/h5sImp.h
 ./java/src/jni/h5tImp.c
 ./java/src/jni/h5tImp.h
+./java/src/jni/h5vlImp.c
+./java/src/jni/h5vlImp.h
 ./java/src/jni/h5zImp.c
 ./java/src/jni/h5zImp.h
 
@@ -3116,6 +3175,7 @@
 ./java/test/testfiles/JUnit-TestH5Tparams.txt
 ./java/test/testfiles/JUnit-TestH5Tbasic.txt
 ./java/test/testfiles/JUnit-TestH5T.txt
+./java/test/testfiles/JUnit-TestH5VL.txt
 ./java/test/testfiles/JUnit-TestH5Z.txt
 ./java/test/h5ex_g_iterate.orig
 ./java/test/TestH5.java
@@ -3153,6 +3213,7 @@
 ./java/test/TestH5Tparams.java
 ./java/test/TestH5Tbasic.java
 ./java/test/TestH5T.java
+./java/test/TestH5VL.java
 ./java/test/TestH5Z.java
 ./java/test/TestAll.java
 
@@ -3167,6 +3228,7 @@
 ./config/toolchain/crayle.cmake
 ./config/toolchain/GCC.cmake
 ./config/toolchain/intel.cmake
+./config/toolchain/PGI.cmake
 
 ./config/cmake/cacheinit.cmake
 ./config/cmake/CMakeFindJavaCommon.cmake
@@ -3197,6 +3259,7 @@
 ./config/cmake/UseJavaSymlinks.cmake
 ./config/cmake/userblockTest.cmake
 ./config/cmake/vfdTest.cmake
+./config/cmake/volTest.cmake
 ./config/cmake/wait_H5Tinit.cmake
 
 ./config/cmake_ext_mod/ConfigureChecks.cmake
@@ -3223,7 +3286,6 @@
 
 # CMake-specific Examples Files
 ./config/cmake/HDF5_Examples.cmake.in
-./config/cmake/HDF518_Examples.cmake.in
 ./release_docs/USING_CMake_Examples.txt
 
 ./CMakeLists.txt
@@ -3237,6 +3299,7 @@
 ./c++/src/CMakeLists.txt
 ./c++/test/CMakeLists.txt
 ./c++/test/CMakeTests.cmake
+./c++/test/CMakeVFDTests.cmake
 ./examples/CMakeLists.txt
 ./examples/CMakeTests.cmake
 ./examples/run-all-ex.sh
@@ -3276,10 +3339,12 @@
 ./test/CMakeLists.txt
 ./test/CMakeTests.cmake
 ./test/CMakeVFDTests.cmake
+./test/CMakeVOLTests.cmake
 ./test/flushrefreshTest.cmake
 ./test/ShellTests.cmake
 ./testpar/CMakeLists.txt
 ./testpar/CMakeTests.cmake
+./testpar/CMakeVFDTests.cmake
 ./tools/CMakeLists.txt
 ./tools/lib/CMakeLists.txt
 ./tools/src/CMakeLists.txt
@@ -3312,6 +3377,7 @@
 ./tools/src/h5repack/CMakeLists.txt
 ./tools/test/h5repack/CMakeLists.txt
 ./tools/test/h5repack/CMakeTests.cmake
+./tools/test/h5repack/CMakeVFDTests.cmake
 ./tools/src/h5stat/CMakeLists.txt
 ./tools/test/h5stat/CMakeLists.txt
 ./tools/test/h5stat/CMakeTests.cmake
@@ -3330,6 +3396,11 @@
 ./config/cmake/scripts/CTestScript.cmake
 ./config/cmake/scripts/HDF5config.cmake
 ./config/cmake/scripts/HDF5options.cmake
+
+# CMake-specific HPC Scripts
+./config/cmake/scripts/HPC/sbatch-HDF5options.cmake
+./config/cmake/scripts/HPC/bsub-HDF5options.cmake
+./config/cmake/scripts/HPC/raybsub-HDF5options.cmake
 
 # Files generated by autogen
 ./aclocal.m4
