@@ -1340,8 +1340,9 @@ typedef off_t               h5_stat_size_t;
         #define HDsrandom(S)    srand(S)
     #endif /* HDsrandom */
 #endif /* H5_HAVE_RAND_R */
-/* sscanf() variable arguments */
-
+#ifndef HDsscanf
+    #define HDsscanf(S,FMT,...)   sscanf(S,FMT,__VA_ARGS__)
+#endif /* HDsscanf */
 #ifndef HDstrcat
     #define HDstrcat(X,Y)    strcat(X,Y)
 #endif /* HDstrcat */

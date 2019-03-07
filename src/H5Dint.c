@@ -488,6 +488,9 @@ H5D__new(hid_t dcpl_id, hbool_t creating, hbool_t vl_type)
         new_dset->dcpl_id = H5P_copy_plist(plist, FALSE);
     } /* end else */
 
+    /* Set the DCPL for the API context */
+    H5CX_set_dcpl(new_dset->dcpl_id);
+
     /* Set return value */
     ret_value = new_dset;
 
@@ -678,7 +681,6 @@ done:
 static herr_t
 H5D__use_minimized_dset_headers(H5F_t *file, H5D_t *dset, hbool_t *minimize)
 {
-    H5P_genplist_t *plist     = NULL;
     herr_t          ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT;
@@ -687,11 +689,9 @@ H5D__use_minimized_dset_headers(H5F_t *file, H5D_t *dset, hbool_t *minimize)
     HDassert(dset);
     HDassert(minimize);
 
-    plist = H5P_object_verify(dset->shared->dcpl_id, H5P_DATASET_CREATE);
-    if(NULL == plist)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "problem getting dcpl")
-    if(H5P_get(plist, H5D_CRT_MIN_DSET_HDR_SIZE_NAME, minimize) == FAIL)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get minimize value from dcpl")
+    /* Get the dataset object header minimize flag for this call */
+    if(H5CX_get_dset_min_ohdr_flag(minimize) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get dataset object header minimize flag from API context")
 
     if(FALSE == *minimize)
         *minimize = H5F_get_min_dset_ohdr(file);

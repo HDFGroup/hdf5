@@ -199,7 +199,7 @@ endif ()
                       ${vfdname}-shared/${vfdname}-${vfdtest}-shared.out
                       ${vfdname}-shared/${vfdname}-${vfdtest}-shared.out.err
           )
-          add_test (NAME VFD-${vfdname}-${test}-shared
+          add_test (NAME VFD-${vfdname}-${vfdtest}-shared
               COMMAND "${CMAKE_COMMAND}"
                 -D "TEST_PROGRAM=$<TARGET_FILE:${vfdtest}-shared>"
                 -D "TEST_ARGS:STRING="

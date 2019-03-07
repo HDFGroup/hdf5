@@ -11560,7 +11560,7 @@ test_space_rebuild(void)
 
     rebuild_stat = FALSE;
     rebuild_stat = H5S__get_rebuild_status_test(sid_reg1);
-    assert(rebuild_stat!=FAIL);
+    HDassert(rebuild_stat!=FAIL);
     /* In this case, rebuild_stat should be TRUE. */
     if(!rebuild_stat){
        ret = FAIL;
@@ -11639,7 +11639,7 @@ test_space_rebuild(void)
 
     rebuild_stat = FALSE;
     rebuild_stat = H5S__get_rebuild_status_test(sid_reg2);
-    assert(rebuild_stat!=FAIL);
+    HDassert(rebuild_stat!=FAIL);
     /* In this case, rebuild_stat should be TRUE. */
     if(!rebuild_stat){
        ret = FAIL;
@@ -11676,7 +11676,7 @@ test_space_rebuild(void)
 
     rebuild_stat = TRUE;
     rebuild_stat = H5S__get_rebuild_status_test(sid_irreg2);
-    assert(rebuild_stat!=FAIL);
+    HDassert(rebuild_stat!=FAIL);
     /* In this case, rebuild_stat should be FALSE. */
     if(rebuild_stat){
        ret = FAIL;
@@ -11728,7 +11728,7 @@ test_space_rebuild(void)
 
     rebuild_stat = FALSE;
     rebuild_stat = H5S__get_rebuild_status_test(sid_reg3);
-    assert(rebuild_stat!=FAIL);
+    HDassert(rebuild_stat!=FAIL);
 
     /* In this case, rebuild_stat should be TRUE. */
     if(!rebuild_stat){
@@ -11771,7 +11771,7 @@ test_space_rebuild(void)
 
     rebuild_stat = TRUE;
     rebuild_stat = H5S__get_rebuild_status_test(sid_irreg3);
-    assert(rebuild_stat!=FAIL);
+    HDassert(rebuild_stat!=FAIL);
     /* In this case, rebuild_stat should be FALSE. */
     if(rebuild_stat){
        ret = FAIL;
@@ -11831,7 +11831,7 @@ test_space_rebuild(void)
 
     rebuild_stat = FALSE;
     rebuild_stat = H5S__get_rebuild_status_test(sid_reg4);
-    assert(rebuild_stat!=FAIL);
+    HDassert(rebuild_stat!=FAIL);
     /* In this case, rebuild_stat should be TRUE. */
     if(!rebuild_stat){
        ret = FAIL;
@@ -11884,7 +11884,7 @@ test_space_rebuild(void)
 
     rebuild_stat = TRUE;
     rebuild_stat = H5S__get_rebuild_status_test(sid_irreg4);
-    assert(rebuild_stat!=FAIL);
+    HDassert(rebuild_stat!=FAIL);
     /* In this case, rebuild_stat should be FALSE. */
     if(rebuild_stat){
        ret = FAIL;
@@ -11948,7 +11948,7 @@ test_space_rebuild(void)
 
     rebuild_stat = FALSE;
     rebuild_stat = H5S__get_rebuild_status_test(sid_reg5);
-    assert(rebuild_stat!=FAIL);
+    HDassert(rebuild_stat!=FAIL);
     /* In this case, rebuild_stat should be TRUE. */
     if(!rebuild_stat){
        ret = FAIL;
@@ -12006,7 +12006,7 @@ test_space_rebuild(void)
 
     rebuild_stat = TRUE;
     rebuild_stat = H5S__get_rebuild_status_test(sid_irreg5);
-    assert(rebuild_stat!=FAIL);
+    HDassert(rebuild_stat!=FAIL);
     /* In this case, rebuild_stat should be FALSE. */
     if(rebuild_stat){
        ret = FAIL;
@@ -12069,7 +12069,7 @@ test_space_rebuild(void)
 
     rebuild_stat = TRUE;
     rebuild_stat = H5S__get_rebuild_status_test(sid_spec);
-    assert(rebuild_stat!=FAIL);
+    HDassert(rebuild_stat!=FAIL);
     /* In this case, rebuild_stat should be FALSE. */
     if(rebuild_stat){
        ret = FAIL;
@@ -12092,7 +12092,7 @@ test_space_rebuild(void)
 
     rebuild_stat = FALSE;
     rebuild_stat = H5S__get_rebuild_status_test(sid_spec);
-    assert(rebuild_stat!=FAIL);
+    HDassert(rebuild_stat!=FAIL);
     /* In this case, rebuild_stat should be FALSE. */
     if(!rebuild_stat){
        ret = FAIL;
@@ -13422,6 +13422,6 @@ test_select(void)
 void
 cleanup_select(void)
 {
-    remove(FILENAME);
+    HDremove(FILENAME);
 }
 

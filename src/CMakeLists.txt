@@ -1118,6 +1118,11 @@ target_link_libraries (${HDF5_LIB_TARGET}
     PRIVATE ${LINK_LIBS} ${LINK_COMP_LIBS} "$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_LIBRARIES}>"
     PUBLIC $<$<NOT:$<PLATFORM_ID:Windows>>:${CMAKE_DL_LIBS}>
 )
+if (NOT WIN32)
+  target_link_libraries (${HDF5_LIB_TARGET}
+    PUBLIC $<$<BOOL:${HDF5_ENABLE_THREADSAFE}>:Threads::Threads>
+  )
+endif ()
 set_global_variable (HDF5_LIBRARIES_TO_EXPORT ${HDF5_LIB_TARGET})
 H5_SET_LIB_OPTIONS (${HDF5_LIB_TARGET} ${HDF5_LIB_NAME} STATIC 0)
 set_target_properties (${HDF5_LIB_TARGET} PROPERTIES FOLDER libraries)
