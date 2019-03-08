@@ -329,9 +329,11 @@ Bug Fixes since HDF5-1.10.4 release
     -------
     - Fixed memory leak in scale offset filter
 
-      The data buffer was not freed in a special case like the general case.
-      The special case is when the MinBits is the same as the number of bits in
-      the datatype's precision.  It caused the memory usage to grow.
+      In a special case where the MinBits is the same as the number of bits in
+      the datatype's precision, the filter's data buffer was not freed, causing 
+      the memory usage to grow. In general the buffer was freed correctly.  The
+      Minbits are the minimal number of bits to store the data values.  Please 
+      see the reference manual for H5Pset_scaleoffset for the detail.
 
       (RL - 2019/3/4, HDFFV-10705) 
 
