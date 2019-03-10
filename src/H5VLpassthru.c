@@ -20,6 +20,11 @@
  *              include _any_ private HDF5 header files.  This connector should
  *              therefore only make public HDF5 API calls and use standard C /
  *              POSIX calls.
+ *
+ *              Note that the HDF5 error stack must be preserved on code paths
+ *              that could be invoked when the underlying VOL connector's
+ *              callback can fail.
+ *
  */
 
 
@@ -297,6 +302,9 @@ H5VL_pass_through_new_obj(void *under_obj, hid_t under_vol_id)
  *
  * Purpose:     Release a pass through object
  *
+ * Note:	Take care to preserve the current HDF5 error stack
+ *		when calling HDF5 API calls.
+ *
  * Return:      Success:    0
  *              Failure:    -1
  *
@@ -308,7 +316,14 @@ H5VL_pass_through_new_obj(void *under_obj, hid_t under_vol_id)
 static herr_t
 H5VL_pass_through_free_obj(H5VL_pass_through_t *obj)
 {
+    hid_t err_id;
+
+    err_id = H5Eget_current_stack();
+
     H5Idec_ref(obj->under_vol_id);
+
+    H5Eset_current_stack(err_id);
+
     free(obj);
 
     return 0;
@@ -332,11 +347,8 @@ H5VL_pass_through_free_obj(H5VL_pass_through_t *obj)
 hid_t
 H5VL_pass_through_register(void)
 {
-    /* Clear the error stack */
-    H5Eclear2(H5E_DEFAULT);
-
     /* Singleton register the pass-through VOL connector ID */
-    if(H5I_VOL != H5Iget_type(H5VL_PASSTHRU_g))
+    if(H5VL_PASSTHRU_g < 0)
         H5VL_PASSTHRU_g = H5VLregister_connector(&H5VL_pass_through_g, H5P_DEFAULT);
 
     return H5VL_PASSTHRU_g;
@@ -476,6 +488,9 @@ H5VL_pass_through_info_cmp(int *cmp_value, const void *_info1, const void *_info
  *
  * Purpose:     Release an info object for the connector.
  *
+ * Note:	Take care to preserve the current HDF5 error stack
+ *		when calling HDF5 API calls.
+ *
  * Return:      Success:    0
  *              Failure:    -1
  *
@@ -485,15 +500,20 @@ static herr_t
 H5VL_pass_through_info_free(void *_info)
 {
     H5VL_pass_through_info_t *info = (H5VL_pass_through_info_t *)_info;
+    hid_t err_id;
 
 #ifdef ENABLE_PASSTHRU_LOGGING
     printf("------- PASS THROUGH VOL INFO Free\n");
 #endif
 
+    err_id = H5Eget_current_stack();
+
     /* Release underlying VOL ID and info */
     if(info->under_vol_info)
         H5VLfree_connector_info(info->under_vol_id, info->under_vol_info);
     H5Idec_ref(info->under_vol_id);
+
+    H5Eset_current_stack(err_id);
 
     /* Free pass through info object itself */
     free(info);
@@ -695,6 +715,9 @@ H5VL_pass_through_wrap_object(void *obj, H5I_type_t obj_type, void *_wrap_ctx)
  *
  * Purpose:     Release a "wrapper context" for an object
  *
+ * Note:	Take care to preserve the current HDF5 error stack
+ *		when calling HDF5 API calls.
+ *
  * Return:      Success:    0
  *              Failure:    -1
  *
@@ -704,15 +727,20 @@ static herr_t
 H5VL_pass_through_free_wrap_ctx(void *_wrap_ctx)
 {
     H5VL_pass_through_wrap_ctx_t *wrap_ctx = (H5VL_pass_through_wrap_ctx_t *)_wrap_ctx;
+    hid_t err_id;
 
 #ifdef ENABLE_PASSTHRU_LOGGING
     printf("------- PASS THROUGH VOL WRAP CTX Free\n");
 #endif
 
+    err_id = H5Eget_current_stack();
+
     /* Release underlying VOL ID and wrap context */
     if(wrap_ctx->under_wrap_ctx)
         H5VLfree_wrap_ctx(wrap_ctx->under_wrap_ctx, wrap_ctx->under_vol_id);
     H5Idec_ref(wrap_ctx->under_vol_id);
+
+    H5Eset_current_stack(err_id);
 
     /* Free pass through wrap context object itself */
     free(wrap_ctx);

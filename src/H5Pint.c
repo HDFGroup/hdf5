@@ -3061,6 +3061,116 @@ done:
 
 /*--------------------------------------------------------------------------
  NAME
+    H5P__class_get
+ PURPOSE
+    Internal routine to get a property's value from a property class.
+ USAGE
+    herr_t H5P__class_get(pclass, name, value)
+        const H5P_genclass_t *pclass; IN: Property class to find property in
+        const char *name;       IN: Name of property to get
+        void *value;            IN: Pointer to the value for the property
+ RETURNS
+    Returns non-negative on success, negative on failure.
+ DESCRIPTION
+        Gets the current value for a property in a property class.  The property
+    name must exist or this routine will fail.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+        The 'get' callback routine registered for this property will _NOT_ be
+    called, this routine is designed for internal library use only!
+    
+        This routine may not be called for zero-sized properties and will
+    return an error in that case.
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5P__class_get(const H5P_genclass_t *pclass, const char *name, void *value)
+{
+    H5P_genprop_t *prop;        /* Temporary property pointer */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* Sanity check */
+    HDassert(pclass);
+    HDassert(name);
+    HDassert(value);
+
+    /* Find property in list */
+    if(NULL == (prop = (H5P_genprop_t *)H5SL_search(pclass->props, name)))
+        HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, FAIL, "property doesn't exist")
+
+    /* Check for property size >0 */
+    if(0 == prop->size)
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "property has zero size")
+
+    /* Copy the property value */
+    HDmemcpy(value, prop->value, prop->size);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5P__class_get() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5P__class_set
+ PURPOSE
+    Internal routine to set a property's value in a property class.
+ USAGE
+    herr_t H5P__class_set(pclass, name, value)
+        const H5P_genclass_t *pclass; IN: Property class to find property in
+        const char *name;       IN: Name of property to set
+        const void *value;      IN: Pointer to the value for the property
+ RETURNS
+    Returns non-negative on success, negative on failure.
+ DESCRIPTION
+        Sets a new value for a property in a property class.  The property name
+    must exist or this routine will fail.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+        The 'set' callback routine registered for this property will _NOT_ be
+    called, this routine is designed for internal library use only!
+    
+        This routine may not be called for zero-sized properties and will
+    return an error in that case.
+
+        The previous value is overwritten, not released in any way.
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5P__class_set(const H5P_genclass_t *pclass, const char *name, const void *value)
+{
+    H5P_genprop_t *prop;        /* Temporary property pointer */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* Sanity check */
+    HDassert(pclass);
+    HDassert(name);
+    HDassert(value);
+
+    /* Find property in list */
+    if(NULL == (prop = (H5P_genprop_t *)H5SL_search(pclass->props, name)))
+        HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, FAIL, "property doesn't exist")
+
+    /* Check for property size >0 */
+    if(0 == prop->size)
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "property has zero size")
+
+    /* Copy the property value */
+    HDmemcpy(prop->value, value, prop->size);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5P__class_set() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
     H5P_exist_plist
  PURPOSE
     Internal routine to query the existance of a property in a property list.

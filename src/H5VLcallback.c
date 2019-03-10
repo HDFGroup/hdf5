@@ -506,20 +506,25 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_free_connector_info(const H5VL_class_t *connector, void *info)
+H5VL_free_connector_info(hid_t connector_id, void *info)
 {
-    herr_t ret_value = SUCCEED;   /* Return value */
+    H5VL_class_t *cls;                  /* VOL connector's class struct */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    /* Sanity checks */
-    HDassert(connector);
+    /* Sanity check */
+    HDassert(connector_id > 0);
+
+    /* Check args and get class pointer */
+    if(NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_VOL, H5E_BADTYPE, FAIL, "not a VOL connector ID")
 
     /* Only free info object, if it's non-NULL */
     if(info) {
         /* Allow the connector to free info or do it ourselves */
-        if(connector->info_cls.free) {
-            if((connector->info_cls.free)(info) < 0)
+        if(cls->info_cls.free) {
+            if((cls->info_cls.free)(info) < 0)
                 HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "connector info free request failed")
         } /* end if */
         else
@@ -544,18 +549,13 @@ done:
 herr_t
 H5VLfree_connector_info(hid_t connector_id, void *info)
 {
-    H5VL_class_t *cls;                  /* VOL connector's class struct */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API_NOINIT
     H5TRACE2("e", "i*x", connector_id, info);
 
-    /* Check args and get class pointer */
-    if(NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID")
-
     /* Free the VOL connector info object */
-    if(H5VL_free_connector_info(cls, info) < 0)
+    if(H5VL_free_connector_info(connector_id, info) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "unable to release VOL connector info object")
 
 done:
@@ -623,24 +623,9 @@ H5VLconnector_str_to_info(const char *str, hid_t connector_id, void **info)
     FUNC_ENTER_API_NOINIT
     H5TRACE3("e", "*si**x", str, connector_id, info);
 
-    /* Only deserialize string, if it's non-NULL */
-    if(str) {
-        H5VL_class_t *cls;                  /* VOL connector's class struct */
-
-        /* Check args and get class pointer */
-        if(NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID")
-
-        /* Allow the connector to deserialize info */
-        if(cls->info_cls.from_str) {
-            if((cls->info_cls.from_str)(str, info) < 0)
-                HGOTO_ERROR(H5E_VOL, H5E_CANTUNSERIALIZE, FAIL, "can't deserialize connector info")
-        } /* end if */
-        else
-            *info = NULL;
-    } /* end if */
-    else
-        *info = NULL;
+    /* Call internal routine */
+    if(H5VL__connector_str_to_info(str, connector_id, info) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTDECODE, FAIL, "can't deserialize connector info")
 
 done:
     FUNC_LEAVE_API_NOINIT(ret_value)
