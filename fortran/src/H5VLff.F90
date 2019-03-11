@@ -96,7 +96,7 @@ CONTAINS
 
   SUBROUTINE H5VLregister_connector_by_value_f(connector_value, vol_id, hdferr, vipl_id)
     IMPLICIT NONE
-    INTEGER :: connector_value
+    INTEGER, INTENT(IN) :: connector_value
     INTEGER(HID_T), INTENT(OUT) :: vol_id
     INTEGER, INTENT(OUT) :: hdferr
     INTEGER(HID_T), OPTIONAL, INTENT(IN) :: vipl_id
@@ -108,7 +108,7 @@ CONTAINS
             BIND(C,NAME='H5VLregister_connector_by_value')
          IMPORT :: HID_T
          IMPORT :: C_INT
-         INTEGER(C_INT) :: connector_value
+         INTEGER(C_INT), VALUE :: connector_value
          INTEGER(HID_T), INTENT(IN), VALUE :: vipl_id
        END FUNCTION H5VLregister_connector_by_value
     END INTERFACE
@@ -174,7 +174,7 @@ CONTAINS
 !  H5VLis_connector_registered_f
 !
 ! PURPOSE
-!  Tests whether a VOL class has been registered or not.
+!  Retrieves the ID for a registered VOL connector.
 !
 ! INPUTS
 !  cls - 
@@ -202,8 +202,10 @@ CONTAINS
     c_name = TRIM(name)//C_NULL_CHAR
     vol_id = H5VLget_connector_id(c_name)
 
-    hdferr = 0
-    IF(vol_id.LT.0) hdferr = H5I_INVALID_HID_F
+    IF(vol_id.LT.0)THEN
+       hdferr = -1
+       vol_id = H5I_INVALID_HID_F
+    ENDIF
 
   END SUBROUTINE H5VLget_connector_id_f
 
@@ -215,29 +217,34 @@ CONTAINS
     INTEGER(SIZE_T), OPTIONAL     :: name_len
 !*****
     CHARACTER(LEN=1,KIND=C_CHAR), DIMENSION(1:LEN(name)+1), TARGET :: c_name
+    INTEGER(SIZE_T) :: l
     TYPE(C_PTR) :: f_ptr
 
     INTERFACE
        INTEGER(SIZE_T) FUNCTION H5VLget_connector_name(obj_id, name, size) BIND(C,NAME='H5VLget_connector_name')
-         IMPORT :: HID_T, SIZE_T, C_PTR
+         IMPORT :: HID_T, SIZE_T, C_PTR, C_CHAR
          IMPLICIT NONE
          INTEGER(HID_T) , INTENT(IN), VALUE :: obj_id
-         TYPE(C_PTR), VALUE :: name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(OUT) :: name
+        ! TYPE(C_PTR), value :: name
          INTEGER(SIZE_T), INTENT(IN), VALUE :: size
        END FUNCTION H5VLget_connector_name
     END INTERFACE
 
     hdferr = 0
     IF(PRESENT(name_len))THEN
-       name_len = INT(H5VLget_connector_name(obj_id, C_NULL_PTR, 0_SIZE_T), SIZE_T)
+       name_len = INT(H5VLget_connector_name(obj_id, c_name, 0_SIZE_T), SIZE_T)
        IF(name_len.LT.0) hdferr = H5I_INVALID_HID_F
     ELSE
-       f_ptr = C_LOC(c_name(1)(1:1))
-
-       IF(INT(H5VLget_connector_name(obj_id, f_ptr, INT(LEN(name)+1,SIZE_T)), SIZE_T).LT.0)THEN
+     !  f_ptr = C_LOC(c_name(1)(1:1))
+       PRINT*,LEN(name)+1
+       l = INT(LEN(name)+1,SIZE_T)
+       IF(INT(H5VLget_connector_name(obj_id, c_name, l), SIZE_T).LT.0)THEN
           hdferr = H5I_INVALID_HID_F
        ELSE
+          PRINT*,c_name
           CALL HD5c2fstring(name,c_name,LEN(name))
+          PRINT*,"name", name
        ENDIF
     ENDIF
 
@@ -310,8 +317,17 @@ CONTAINS
 
   END SUBROUTINE H5VLunregister_connector_f
 
-! H5VLcmp_connector_cls 
-
+  !---------------------------------------------------------------------------
+  ! Function:    H5VLcmp_connector_cls_f
+  !
+  ! Purpose:     Compares two connector classes (based on their value field)
+  !
+  ! Return:      Success:    Non-negative, *cmp set to a value like strcmp
+  !
+  !              Failure:    Negative, *cmp unset
+  !
+  !---------------------------------------------------------------------------
+  
   SUBROUTINE H5VLcmp_connector_cls_f(cmp, connector_id1, connector_id2, hdferr)
     IMPLICIT NONE
     INTEGER, INTENT(OUT), TARGET :: cmp

@@ -30,14 +30,35 @@ noinst_LTLIBRARIES=libh5test_fortran.la
 # want to build a shared C library and a static Fortran library.  If so,
 # pass the -static flag to the library linker.
 if FORTRAN_SHARED_CONDITIONAL
+  TEST_SCRIPT = test_vol_connector.sh
+  SCRIPT_DEPEND = vol_connector$(EXEEXT)
 else
    AM_LDFLAGS+=-static
 endif
+
+check_SCRIPTS = $(TEST_SCRIPT)
 
 # Our main targets, the tests themselves
 TEST_PROG=fortranlib_test fflush1 fflush2 fortranlib_test_1_8 fortranlib_test_F03
 
 check_PROGRAMS=$(TEST_PROG)
+if FORTRAN_SHARED_CONDITIONAL
+  check_PROGRAMS+=  vol_connector
+endif
+
+if FORTRAN_SHARED_CONDITIONAL
+  # The libh5test library provides common support code for the tests.
+  # The filter_plugin* libraries are for use in filter_plugin.c.
+  # Build them as shared libraries if that option was enabled in configure.
+  noinst_LTLIBRARIES += libnull_vol_connector.la
+
+  # VOL plugin test libraries
+  #
+  # null_vol_connector is used for testing basic VOL plugin functionality.
+  libnull_vol_connector_la_SOURCES=null_vol_connector.c
+  libnull_vol_connector_la_LDFLAGS=$(AM_LDFLAGS) -avoid-version -module -shared -export-dynamic -rpath /nowhere
+endif
+
 
 libh5test_fortran_la_SOURCES = tf_gen.F90 tf.F90  t.c
 
@@ -50,6 +71,7 @@ fortranlib_test_1_8_SOURCES = tH5O.F90 tH5A_1_8.F90 tH5G_1_8.F90 tH5MISC_1_8.F90
 fortranlib_test_F03_SOURCES = tH5E_F03.F90 tH5F_F03.F90 tH5L_F03.F90 \
         tH5O_F03.F90 tH5P_F03.F90 tH5T_F03.F90 tHDF5_F03.F90 fortranlib_test_F03.F90
 
+vol_connector_SOURCES=vol_connector.F90
 
 fflush1_SOURCES=fflush1.F90
 fflush2_SOURCES=fflush2.F90
@@ -94,6 +116,8 @@ H5_test_buildiface_SOURCES = H5_test_buildiface.F90
 # to nothing.
 
 H5_test_buildiface_LDADD =
+
+DISTCLEANFILES=test_vol_connector.sh # TODO:CHECK IF WORKS MSB
 
 # fflush2 depends on files created by fflush1
 fflush2.chkexe_: fflush1.chkexe_
