@@ -3551,6 +3551,7 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  fortran/src/Makefile
                  fortran/src/H5fort_type_defines.h
                  fortran/test/Makefile
+                 fortran/test/test_vol_connector.sh
                  fortran/testpar/Makefile
                  fortran/examples/Makefile
                  fortran/examples/run-fortran-ex.sh
