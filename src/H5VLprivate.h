@@ -43,8 +43,8 @@ typedef struct H5VL_object_t {
 
 /* Internal structure to hold the connector ID & info for FAPLs */
 typedef struct H5VL_connector_prop_t {
-    hid_t               connector_id;   /* VOL connector's ID                                   */
-    const void         *connector_info; /* VOL connector info, for open callbacks               */
+    hid_t       connector_id;           /* VOL connector's ID                                   */
+    void        *connector_info;        /* VOL connector info, for open callbacks               */
 } H5VL_connector_prop_t;
 
 /* Which kind of VOL connector field to use for searching */
@@ -94,10 +94,18 @@ H5_DLL herr_t H5VL_free_object(H5VL_object_t *obj);
 H5_DLL herr_t H5VL_get_wrap_ctx(const H5VL_class_t *connector, void *obj,
     void **wrap_ctx);
 H5_DLL herr_t H5VL_free_wrap_ctx(const H5VL_class_t *connector, void *wrap_ctx);
-H5_DLL herr_t H5VL_set_vol_wrapper(void *obj, const H5VL_t *vol_connector);
+H5_DLL herr_t H5VL_set_vol_wrapper(void *obj, H5VL_t *vol_connector);
+H5_DLL herr_t H5VL_inc_vol_wrapper(void *vol_wrap_ctx);
+H5_DLL herr_t H5VL_dec_vol_wrapper(void *vol_wrap_ctx);
 H5_DLL herr_t H5VL_reset_vol_wrapper(void);
 H5_DLL void * H5VL_wrap_object(const H5VL_class_t *connector, void *wrap_ctx,
     void *obj, H5I_type_t obj_type);
+
+/* Library state functions */
+H5_DLL herr_t H5VL_retrieve_lib_state(void **state);
+H5_DLL herr_t H5VL_restore_lib_state(const void *state);
+H5_DLL herr_t H5VL_reset_lib_state(void);
+H5_DLL herr_t H5VL_free_lib_state(void *state);
 
 /* ID registration functions */
 H5_DLL hid_t H5VL_register(H5I_type_t type, void *object, H5VL_t *vol_connector, hbool_t app_ref);
