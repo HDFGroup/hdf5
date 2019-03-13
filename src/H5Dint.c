@@ -488,9 +488,6 @@ H5D__new(hid_t dcpl_id, hbool_t creating, hbool_t vl_type)
         new_dset->dcpl_id = H5P_copy_plist(plist, FALSE);
     } /* end else */
 
-    /* Set the DCPL for the API context */
-    H5CX_set_dcpl(new_dset->dcpl_id);
-
     /* Set return value */
     ret_value = new_dset;
 
@@ -1083,8 +1080,7 @@ done:
  *--------------------------------------------------------------------------
  */
 static herr_t
-H5D__build_file_prefix(const H5D_t *dset, hid_t dapl_id, const char *prefix_type,
-    char **file_prefix /*out*/)
+H5D__build_file_prefix(const H5D_t *dset, hid_t dapl_id, const char *prefix_type, char **file_prefix /*out*/)
 {
     char            *prefix = NULL;       /* prefix used to look for the file               */
     char            *filepath = NULL;     /* absolute path of directory the HDF5 file is in */
@@ -1105,20 +1101,22 @@ H5D__build_file_prefix(const H5D_t *dset, hid_t dapl_id, const char *prefix_type
     /* XXX: Future thread-safety note - getenv is not required
      *      to be reentrant.
      */
-    if(HDstrcmp(prefix_type, H5D_ACS_VDS_PREFIX_NAME) == 0)
+    if(HDstrcmp(prefix_type, H5D_ACS_VDS_PREFIX_NAME) == 0) {
         prefix = HDgetenv("HDF5_VDS_PREFIX");
-    else if(HDstrcmp(prefix_type, H5D_ACS_EFILE_PREFIX_NAME) == 0)
-        prefix = HDgetenv("HDF5_EXTFILE_PREFIX");
-    else
-        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "prefix name is not sensible")
 
-    if(prefix == NULL || *prefix == '\0') {
-        /* Set prefix to value of prefix_type property */
-        if(NULL == (plist = H5P_object_verify(dapl_id, H5P_DATASET_ACCESS)))
-            HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
-        if(H5P_peek(plist, prefix_type, &prefix) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get file prefix")
-    } /* end if */
+        if(prefix == NULL || *prefix == '\0') {
+            if(H5CX_get_vds_prefix(&prefix) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get the prefix for vds file")
+        }
+    } else if(HDstrcmp(prefix_type, H5D_ACS_EFILE_PREFIX_NAME) == 0) {
+        prefix = HDgetenv("HDF5_EXTFILE_PREFIX");
+
+        if(prefix == NULL || *prefix == '\0') {
+            if(H5CX_get_ext_file_prefix(&prefix) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get the prefix for the external file")
+        }
+    } else
+        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "prefix name is not sensible")
 
     /* Prefix has to be checked for NULL / empty string again because the
      * code above might have updated it.
@@ -1552,8 +1550,10 @@ H5D_open(const H5G_loc_t *loc, hid_t dapl_id)
     ret_value = dataset;
 
 done:
-    extfile_prefix = (char *)H5MM_xfree(extfile_prefix);
-    vds_prefix = (char *)H5MM_xfree(vds_prefix);
+    if(extfile_prefix)
+        extfile_prefix = (char *)H5MM_xfree(extfile_prefix);
+    if(vds_prefix)
+        vds_prefix = (char *)H5MM_xfree(vds_prefix);
 
     if(ret_value == NULL) {
         /* Free the location--casting away const*/

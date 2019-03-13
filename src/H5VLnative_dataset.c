@@ -18,6 +18,7 @@
 #define H5D_FRIEND              /* Suppress error about including H5Dpkg    */
 
 #include "H5private.h"          /* Generic Functions                        */
+#include "H5CXprivate.h"        /* API Contexts                             */
 #include "H5Dpkg.h"             /* Datasets                                 */
 #include "H5Eprivate.h"         /* Error handling                           */
 #include "H5Fprivate.h"         /* Files                                    */
@@ -62,12 +63,9 @@ H5VL__native_dataset_create(void *obj, const H5VL_loc_params_t *loc_params,
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, NULL, "can't find object for ID")
 
     /* Get creation properties */
-    if(H5P_get(plist, H5VL_PROP_DSET_TYPE_ID, &type_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get property value for datatype id")
-    if(H5P_get(plist, H5VL_PROP_DSET_SPACE_ID, &space_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get property value for space id")
-    if(H5P_get(plist, H5VL_PROP_DSET_LCPL_ID, &lcpl_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get property value for lcpl id")
+    H5CX_get_vl_prop_dset_type_id(&type_id);
+    H5CX_get_vl_prop_dset_space_id(&space_id);
+    H5CX_get_vl_prop_dset_lcpl_id(&lcpl_id);
 
     /* Check arguments */
     if(H5G_loc_real(obj, loc_params->obj_type, &loc) < 0)

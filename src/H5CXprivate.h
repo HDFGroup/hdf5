@@ -126,6 +126,13 @@ H5_DLL herr_t H5CX_get_nlinks(size_t *nlinks);
 
 /* "Getter" routines for DCPL properties cached in API context */
 H5_DLL herr_t H5CX_get_dset_min_ohdr_flag(hbool_t *dset_min_ohdr_flag);
+H5_DLL herr_t H5CX_get_vl_prop_dset_type_id(hid_t *dset_type_id);
+H5_DLL herr_t H5CX_get_vl_prop_dset_space_id(hid_t *dset_space_id);
+H5_DLL herr_t H5CX_get_vl_prop_dset_lcpl_id(hid_t *dset_lcpl_id);
+
+/* "Getter" routines for DAPL properties cached in API context */
+H5_DLL herr_t H5CX_get_ext_file_prefix(char **prefix_extfile);
+H5_DLL herr_t H5CX_get_vds_prefix(char **prefix_vds);
 
 /* "Setter" routines for API context info */
 H5_DLL void H5CX_set_tag(haddr_t tag);
@@ -144,6 +151,11 @@ H5_DLL herr_t H5CX_set_io_xfer_mode(H5FD_mpio_xfer_t io_xfer_mode);
 #endif /* H5_HAVE_PARALLEL */
 H5_DLL herr_t H5CX_set_vlen_alloc_info(H5MM_allocate_t alloc_func,
     void *alloc_info, H5MM_free_t free_func, void *free_info);
+
+/* "Setter" routines for DCPL properties cached in API context */
+H5_DLL herr_t H5CX_set_vl_prop_dset_type_id(hid_t dset_type_id);
+H5_DLL herr_t H5CX_set_vl_prop_dset_space_id(hid_t dset_space_id);
+H5_DLL herr_t H5CX_set_vl_prop_dset_lcpl_id(hid_t dset_lcpl_id);
 
 /* "Setter" routines for LAPL properties cached in API context */
 H5_DLL herr_t H5CX_set_nlinks(size_t nlinks);
