@@ -135,6 +135,14 @@ New Features
 
       (DER - 2018/12/08, HDFFV-10252)
 
+    - Added the ability to open files with UTF-8 file names on Windows.
+
+      The POSIX open(2) API call on Windows is limited to ASCII
+      file names. The library has been updated to convert incoming file
+      names to UTF-16 (via MultiByteToWideChar(CP_UTF8, ...) and use
+      _wopen() instead.
+
+     (DER - 2019/03/15, HDFFV-2714, HDFFV-3914, HDFFV-3895, HDFFV-8237, HDFFV-10413, HDFFV-10691)
 
     Parallel Library:
     -----------------
