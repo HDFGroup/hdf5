@@ -236,6 +236,16 @@ Bug Fixes since HDF5-1.10.3 release
 
       (NAF - 2019/03/06, HDFFV-10716)
 
+    - Fixed memory leak in scale offset filter
+
+      In a special case where the MinBits is the same as the number of bits in
+      the datatype's precision, the filter's data buffer was not freed, causing 
+      the memory usage to grow. In general the buffer was freed correctly.  The
+      Minbits are the minimal number of bits to store the data values.  Please 
+      see the reference manual for H5Pset_scaleoffset for the detail.
+
+      (RL - 2019/3/4, HDFFV-10705) 
+
     - Fix hangs with collective metadata reads during chunked dataset I/O
 
       In the parallel library, it was discovered that when a particular
