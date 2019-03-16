@@ -21,6 +21,7 @@
 /* Private headers needed by this file */
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5MMprivate.h"	/* Memory management			*/
 
 /* Vector-Vector sequence operation callback */
 typedef herr_t (*H5VM_opvv_func_t)(hsize_t dst_off, hsize_t src_off,

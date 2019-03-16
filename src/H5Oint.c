@@ -38,9 +38,7 @@
 #include "H5Iprivate.h"         /* IDs                                      */
 #include "H5Lprivate.h"         /* Links                                    */
 #include "H5MFprivate.h"        /* File memory management                   */
-#ifdef H5O_ENABLE_BOGUS
 #include "H5MMprivate.h"        /* Memory management                        */
-#endif /* H5O_ENABLE_BOGUS */
 #include "H5Opkg.h"             /* Object headers                           */
 #include "H5VLprivate.h"        /* Virtual Object Layer                     */
 

@@ -568,7 +568,8 @@ H5MM_xfree(void *mem)
 /*-------------------------------------------------------------------------
  * Function:    H5MM_memcpy
  *
- * Purpose:     Like memcpy(3) but with a check for buffer overlap.
+ * Purpose:     Like memcpy(3) but with sanity checks on the parameters,
+ *              particularly buffer overlap.
  *
  * Return:      Success:    pointer to dest
  *              Failure:    NULL
@@ -588,7 +589,8 @@ H5MM_memcpy(void *dest, const void *src, size_t n)
 
     HDassert(dest);
     HDassert(src);
-    HDassert(dest >= src + n || src >= dest + n);
+    HDassert(n > 0);
+    HDassert((char *)dest >= (const char *)src + n || (const char *)src >= (char *)dest + n);
 
     ret = HDmemcpy(dest, src, n);
 

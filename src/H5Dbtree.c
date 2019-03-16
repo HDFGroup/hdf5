@@ -39,6 +39,7 @@
 #include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MFprivate.h"	/* File space management		*/
+#include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Oprivate.h"		/* Object headers		  	*/
 #include "H5Sprivate.h"         /* Dataspaces                           */
 #include "H5VMprivate.h"		/* Vector and array functions		*/

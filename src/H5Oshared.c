@@ -39,6 +39,7 @@
 #include "H5Fprivate.h"		/* File access				*/
 #include "H5Gprivate.h"		/* Groups				*/
 #include "H5HFprivate.h"        /* Fractal heap				*/
+#include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Opkg.h"             /* Object headers			*/
 #include "H5SMprivate.h"        /* Shared object header messages        */
 #include "H5WBprivate.h"        /* Wrapped Buffers                      */

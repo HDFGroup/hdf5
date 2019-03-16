@@ -36,6 +36,7 @@
 #include "H5Fpkg.h"		/* Files				*/
 #include "H5FDprivate.h"	/* File drivers				*/
 #include "H5Iprivate.h"		/* IDs			  		*/
+#include "H5MMprivate.h"	/* Memory management			*/
 #include "H5PBpkg.h"            /* File access				*/
 #include "H5SLprivate.h"	/* Skip List				*/
 

@@ -32,6 +32,7 @@
 #include "H5Eprivate.h"		/* Error handling			*/
 #include "H5FLprivate.h"	/* Free Lists				*/
 #include "H5Iprivate.h"		/* ID Functions				*/
+#include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Spkg.h"		/* Dataspace functions			*/
 #include "H5VMprivate.h"        /* Vector functions			*/
 
