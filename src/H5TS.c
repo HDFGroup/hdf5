@@ -35,6 +35,7 @@ H5TS_once_t H5TS_first_init_g = PTHREAD_ONCE_INIT;
 H5TS_key_t H5TS_errstk_key_g;
 H5TS_key_t H5TS_funcstk_key_g;
 H5TS_key_t H5TS_apictx_key_g;
+H5TS_key_t H5TS_hyper_op_gen_key_g;
 H5TS_key_t H5TS_cancel_key_g;
 
 
@@ -112,6 +113,9 @@ H5TS_pthread_first_thread_init(void)
 
     /* initialize key for thread-specific API contexts */
     pthread_key_create(&H5TS_apictx_key_g, H5TS_key_destructor);
+
+    /* initialize key for thread-specific hyperslab operation generation */
+    pthread_key_create(&H5TS_hyper_op_gen_key_g, H5TS_key_destructor);
 
     /* initialize key for thread cancellability mechanism */
     pthread_key_create(&H5TS_cancel_key_g, H5TS_key_destructor);
@@ -362,6 +366,9 @@ H5TS_win32_process_enter(PINIT_ONCE InitOnce, PVOID Parameter, PVOID *lpContex)
     if(TLS_OUT_OF_INDEXES == (H5TS_apictx_key_g = TlsAlloc()))
         ret_value = FALSE;
 
+    if(TLS_OUT_OF_INDEXES == (H5TS_hyper_op_gen_key_g = TlsAlloc()))
+        ret_value = FALSE;
+
     return ret_value;
 } /* H5TS_win32_process_enter() */
 #endif /* H5_HAVE_WIN_THREADS */
@@ -431,6 +438,7 @@ H5TS_win32_process_exit(void)
     TlsFree(H5TS_funcstk_key_g);
 #endif /* H5_HAVE_CODESTACK */
     TlsFree(H5TS_apictx_key_g);
+    TlsFree(H5TS_hyper_op_gen_key_g);
 
     return;
 } /* H5TS_win32_process_exit() */
@@ -476,6 +484,10 @@ H5TS_win32_thread_exit(void)
 #endif /* H5_HAVE_CODESTACK */
 
     lpvData = TlsGetValue(H5TS_apictx_key_g);
+    if(lpvData)
+        LocalFree((HLOCAL)lpvData);
+
+    lpvData = TlsGetValue(H5TS_hyper_op_gen_key_g);
     if(lpvData)
         LocalFree((HLOCAL)lpvData);
 

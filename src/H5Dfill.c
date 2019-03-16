@@ -275,12 +275,12 @@ H5D__fill(const void *fill, const H5T_t *fill_type, void *buf,
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate memory selection iterator")
 
             /* Create a selection iterator for scattering the elements to memory buffer */
-            if(H5S_select_iter_init(mem_iter, space, dst_type_size) < 0)
+            if(H5S_select_iter_init(mem_iter, space, dst_type_size, 0) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize memory selection information")
             mem_iter_init = TRUE;
 
             /* Scatter the data into memory */
-            if(H5D__scatter_mem(tmp_buf, space, mem_iter, (size_t)nelmts, buf/*out*/) < 0)
+            if(H5D__scatter_mem(tmp_buf, mem_iter, (size_t)nelmts, buf/*out*/) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "scatter failed")
         } /* end if */
         else {

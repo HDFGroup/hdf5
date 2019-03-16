@@ -175,12 +175,12 @@ H5D__select_io(const H5D_io_info_t *io_info, size_t elmt_size,
             HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate file iterator")
 
         /* Initialize file iterator */
-        if(H5S_select_iter_init(file_iter, file_space, elmt_size) < 0)
+        if(H5S_select_iter_init(file_iter, file_space, elmt_size, H5S_SEL_ITER_GET_SEQ_LIST_SORTED) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize selection iterator")
         file_iter_init = 1;	/* File selection iteration info has been initialized */
 
         /* Initialize memory iterator */
-        if(H5S_select_iter_init(mem_iter, mem_space, elmt_size) < 0)
+        if(H5S_select_iter_init(mem_iter, mem_space, elmt_size, 0) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize selection iterator")
         mem_iter_init = 1;	/* Memory selection iteration info has been initialized */
 
@@ -193,7 +193,7 @@ H5D__select_io(const H5D_io_info_t *io_info, size_t elmt_size,
             /* Check if more file sequences are needed */
             if(curr_file_seq >= file_nseq) {
                 /* Get sequences for file selection */
-                if(H5S_SELECT_GET_SEQ_LIST(file_space, H5S_GET_SEQ_LIST_SORTED, file_iter, vec_size, nelmts, &file_nseq, &file_nelem, file_off, file_len) < 0)
+                if(H5S_SELECT_ITER_GET_SEQ_LIST(file_iter, vec_size, nelmts, &file_nseq, &file_nelem, file_off, file_len) < 0)
                     HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "sequence length generation failed")
 
                 /* Start at the beginning of the sequences again */
@@ -203,7 +203,7 @@ H5D__select_io(const H5D_io_info_t *io_info, size_t elmt_size,
             /* Check if more memory sequences are needed */
             if(curr_mem_seq >= mem_nseq) {
                 /* Get sequences for memory selection */
-                if(H5S_SELECT_GET_SEQ_LIST(mem_space, 0, mem_iter, vec_size, nelmts, &mem_nseq, &mem_nelem, mem_off, mem_len) < 0)
+                if(H5S_SELECT_ITER_GET_SEQ_LIST(mem_iter, vec_size, nelmts, &mem_nseq, &mem_nelem, mem_off, mem_len) < 0)
                     HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "sequence length generation failed")
 
                 /* Start at the beginning of the sequences again */
