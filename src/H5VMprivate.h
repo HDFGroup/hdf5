@@ -41,7 +41,7 @@ typedef herr_t (*H5VM_opvv_func_t)(hsize_t dst_off, hsize_t src_off,
 /* Other functions */
 #define H5VM_vector_cpy(N,DST,SRC) {                                           \
     HDassert(sizeof(*(DST))==sizeof(*(SRC)));				                  \
-    if (SRC) HDmemcpy (DST, SRC, (N)*sizeof(*(DST)));                         \
+    if (SRC) H5MM_memcpy (DST, SRC, (N)*sizeof(*(DST)));                         \
     else HDmemset (DST, 0, (N)*sizeof(*(DST)));                               \
 }
 

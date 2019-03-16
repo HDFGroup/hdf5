@@ -104,7 +104,7 @@ H5HF_op_read(const void *obj, size_t obj_len, void *op_data)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Perform "read", using memcpy() */
-    HDmemcpy(op_data, obj, obj_len);
+    H5MM_memcpy(op_data, obj, obj_len);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5HF_op_read() */
@@ -129,7 +129,7 @@ H5HF_op_write(const void *obj, size_t obj_len, void *op_data)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Perform "write", using memcpy() */
-    HDmemcpy((void *)obj, op_data, obj_len);    /* Casting away const OK -QAK */
+    H5MM_memcpy((void *)obj, op_data, obj_len);    /* Casting away const OK -QAK */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5HF_op_write() */

@@ -464,7 +464,7 @@ H5HL__cache_prefix_deserialize(const void *_image, size_t len, void *_udata,
             image = ((const uint8_t *)_image) + heap->prfx_size;
 
             /* Copy the heap data from the speculative read buffer */
-            HDmemcpy(heap->dblk_image, image, heap->dblk_size);
+            H5MM_memcpy(heap->dblk_image, image, heap->dblk_size);
 
             /* Build free list */
             if(H5HL__fl_deserialize(heap) < 0)
@@ -587,7 +587,7 @@ H5HL__cache_prefix_serialize(const H5F_t *f, void *_image, size_t len,
     heap->free_block = heap->freelist ? heap->freelist->offset : H5HL_FREE_NULL;
 
     /* Serialize the heap prefix */
-    HDmemcpy(image, H5HL_MAGIC, (size_t)H5_SIZEOF_MAGIC);
+    H5MM_memcpy(image, H5HL_MAGIC, (size_t)H5_SIZEOF_MAGIC);
     image += H5_SIZEOF_MAGIC;
     *image++ = H5HL_VERSION;
     *image++ = 0;       /*reserved*/
@@ -615,7 +615,7 @@ H5HL__cache_prefix_serialize(const H5F_t *f, void *_image, size_t len,
         H5HL__fl_serialize(heap);
 
         /* Copy the heap data block into the cache image */
-        HDmemcpy(image, heap->dblk_image, heap->dblk_size);
+        H5MM_memcpy(image, heap->dblk_image, heap->dblk_size);
 
         /* Sanity check */
         HDassert((size_t)(image - (uint8_t *)_image) + heap->dblk_size == len);
@@ -756,7 +756,7 @@ H5HL__cache_datablock_deserialize(const void *image, size_t len, void *_udata,
             HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "can't allocate data block image buffer");
 
         /* copy the datablock from the read buffer */
-        HDmemcpy(heap->dblk_image, image, len);
+        H5MM_memcpy(heap->dblk_image, image, len);
 
         /* Build free list */
         if(FAIL == H5HL__fl_deserialize(heap))
@@ -851,7 +851,7 @@ H5HL__cache_datablock_serialize(const H5F_t *f, void *image, size_t len,
     H5HL__fl_serialize(heap);
 
     /* Copy the heap's data block into the cache's image */
-    HDmemcpy(image, heap->dblk_image, heap->dblk_size);
+    H5MM_memcpy(image, heap->dblk_image, heap->dblk_size);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5HL__cache_datablock_serialize() */

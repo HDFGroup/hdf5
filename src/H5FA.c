@@ -371,7 +371,7 @@ H5FA_set(const H5FA_t *fa, hsize_t idx, const void *elmt))
     /* Check for paging data block */
     if(!dblock->npages) {
         /* Set element in data block */
-        HDmemcpy(((uint8_t *)dblock->elmts) + (hdr->cparam.cls->nat_elmt_size * idx), elmt, hdr->cparam.cls->nat_elmt_size);
+        H5MM_memcpy(((uint8_t *)dblock->elmts) + (hdr->cparam.cls->nat_elmt_size * idx), elmt, hdr->cparam.cls->nat_elmt_size);
         dblock_cache_flags |= H5AC__DIRTIED_FLAG;
     } /* end if */
     else { /* paging */
@@ -410,7 +410,7 @@ H5FA_set(const H5FA_t *fa, hsize_t idx, const void *elmt))
 	    H5E_THROW(H5E_CANTPROTECT, "unable to protect fixed array data block page, address = %llu", (unsigned long long)dblk_page_addr)
 
         /* Set the element in the data block page */
-        HDmemcpy(((uint8_t *)dblk_page->elmts) + (hdr->cparam.cls->nat_elmt_size * elmt_idx), elmt, hdr->cparam.cls->nat_elmt_size);
+        H5MM_memcpy(((uint8_t *)dblk_page->elmts) + (hdr->cparam.cls->nat_elmt_size * elmt_idx), elmt, hdr->cparam.cls->nat_elmt_size);
         dblk_page_cache_flags |= H5AC__DIRTIED_FLAG;
     } /* end else */
 
@@ -474,7 +474,7 @@ H5FA_get(const H5FA_t *fa, hsize_t idx, void *elmt))
         /* Check for paged data block */
         if(!dblock->npages)
             /* Retrieve element from data block */
-            HDmemcpy(elmt, ((uint8_t *)dblock->elmts) + (hdr->cparam.cls->nat_elmt_size * idx), hdr->cparam.cls->nat_elmt_size);
+            H5MM_memcpy(elmt, ((uint8_t *)dblock->elmts) + (hdr->cparam.cls->nat_elmt_size * idx), hdr->cparam.cls->nat_elmt_size);
         else { /* paging */
             size_t  page_idx;           /* Index of page within data block */
 
@@ -512,7 +512,7 @@ H5FA_get(const H5FA_t *fa, hsize_t idx, void *elmt))
                     H5E_THROW(H5E_CANTPROTECT, "unable to protect fixed array data block page, address = %llu", (unsigned long long)dblk_page_addr)
 
                 /* Retrieve element from data block */
-                HDmemcpy(elmt, ((uint8_t *)dblk_page->elmts) + (hdr->cparam.cls->nat_elmt_size * elmt_idx), hdr->cparam.cls->nat_elmt_size);
+                H5MM_memcpy(elmt, ((uint8_t *)dblk_page->elmts) + (hdr->cparam.cls->nat_elmt_size * elmt_idx), hdr->cparam.cls->nat_elmt_size);
             } /* end else */
         } /* end else */
     } /* end else */

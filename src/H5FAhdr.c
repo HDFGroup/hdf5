@@ -207,7 +207,7 @@ H5FA__hdr_create(H5F_t *f, const H5FA_create_t *cparam, void *ctx_udata))
     hdr->dblk_addr = HADDR_UNDEF;
 
     /* Set the creation parameters for the array */
-    HDmemcpy(&hdr->cparam, cparam, sizeof(hdr->cparam));
+    H5MM_memcpy(&hdr->cparam, cparam, sizeof(hdr->cparam));
 
     /* Finish initializing fixed array header */
     if(H5FA__hdr_init(hdr, ctx_udata) < 0)

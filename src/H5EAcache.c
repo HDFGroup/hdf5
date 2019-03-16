@@ -479,7 +479,7 @@ H5EA__cache_hdr_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED le
     HDassert(hdr);
 
     /* Magic number */
-    HDmemcpy(image, H5EA_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC);
+    H5MM_memcpy(image, H5EA_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC);
     image += H5_SIZEOF_MAGIC;
 
     /* Version # */
@@ -867,7 +867,7 @@ H5EA__cache_iblock_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED
     /* Get temporary pointer to serialized info */
 
     /* Magic number */
-    HDmemcpy(image, H5EA_IBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC);
+    H5MM_memcpy(image, H5EA_IBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC);
     image += H5_SIZEOF_MAGIC;
 
     /* Version # */
@@ -1179,7 +1179,7 @@ H5EA__cache_sblock_deserialize(const void *_image, size_t len,
         size_t tot_page_init_size = sblock->ndblks * sblock->dblk_page_init_size;        /* Compute total size of 'page init' buffer */
 
         /* Retrieve the 'page init' bitmasks */
-        HDmemcpy(sblock->page_init, image, tot_page_init_size);
+        H5MM_memcpy(sblock->page_init, image, tot_page_init_size);
         image += tot_page_init_size;
     } /* end if */
 
@@ -1276,7 +1276,7 @@ H5EA__cache_sblock_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED
     HDassert(sblock->hdr);
 
     /* Magic number */
-    HDmemcpy(image, H5EA_SBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC);
+    H5MM_memcpy(image, H5EA_SBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC);
     image += H5_SIZEOF_MAGIC;
 
     /* Version # */
@@ -1298,7 +1298,7 @@ H5EA__cache_sblock_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED
         size_t tot_page_init_size = sblock->ndblks * sblock->dblk_page_init_size;        /* Compute total size of 'page init' buffer */
 
         /* Store the 'page init' bitmasks */
-        HDmemcpy(image, sblock->page_init, tot_page_init_size);
+        H5MM_memcpy(image, sblock->page_init, tot_page_init_size);
         image += tot_page_init_size;
     } /* end if */
 
@@ -1690,7 +1690,7 @@ H5EA__cache_dblock_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED
     HDassert(dblock->hdr);
 
     /* Magic number */
-    HDmemcpy(image, H5EA_DBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC);
+    H5MM_memcpy(image, H5EA_DBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC);
     image += H5_SIZEOF_MAGIC;
 
     /* Version # */

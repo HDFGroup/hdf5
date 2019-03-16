@@ -542,7 +542,7 @@ H5O__cache_serialize(const H5F_t *f, void *image, size_t len, void *_thing)
      * Can we rework things so that the object header and the cache 
      * share a buffer?
      */
-    HDmemcpy(image, oh->chunk[0].image, len);
+    H5MM_memcpy(image, oh->chunk[0].image, len);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -900,7 +900,7 @@ H5O__cache_chk_serialize(const H5F_t *f, void *image, size_t len, void *_thing)
     /* copy the chunk into the image -- this is potentially expensive.
      * Can we rework things so that the chunk and the cache share a buffer?
      */
-    HDmemcpy(image, chk_proxy->oh->chunk[chk_proxy->chunkno].image, len);
+    H5MM_memcpy(image, chk_proxy->oh->chunk[chk_proxy->chunkno].image, len);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1352,7 +1352,7 @@ H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t len, const uint8_t *image
     oh->chunk[chunkno].chunk_proxy = NULL;
 
     /* Copy disk image into chunk's image */
-    HDmemcpy(oh->chunk[chunkno].image, image, oh->chunk[chunkno].size);
+    H5MM_memcpy(oh->chunk[chunkno].image, image, oh->chunk[chunkno].size);
 
     /* Point into chunk image to decode */
     chunk_image = oh->chunk[chunkno].image;

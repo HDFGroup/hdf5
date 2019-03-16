@@ -355,7 +355,7 @@ H5VL_copy_connector_info(const H5VL_class_t *connector, void **dst_info,
         else if(connector->info_cls.size > 0) {
             if(NULL == (new_connector_info = H5MM_malloc(connector->info_cls.size)))
                 HGOTO_ERROR(H5E_VOL, H5E_CANTALLOC, FAIL, "connector info allocation failed")
-            HDmemcpy(new_connector_info, src_info, connector->info_cls.size);
+            H5MM_memcpy(new_connector_info, src_info, connector->info_cls.size);
         } /* end else-if */
         else
             HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "no way to copy connector info")

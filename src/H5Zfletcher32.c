@@ -108,7 +108,7 @@ H5Z_filter_fletcher32 (unsigned flags, size_t H5_ATTR_UNUSED cd_nelmts, const un
              * system.  We'll check both the correct checksum and the wrong
              * checksum to be consistent with Release 1.6.2 and before.
              */
-            HDmemcpy(c, &fletcher, (size_t)4);
+            H5MM_memcpy(c, &fletcher, (size_t)4);
 
             tmp  = c[1];
             c[1] = c[0];
@@ -118,7 +118,7 @@ H5Z_filter_fletcher32 (unsigned flags, size_t H5_ATTR_UNUSED cd_nelmts, const un
             c[3] = c[2];
             c[2] = tmp;
 
-            HDmemcpy(&reversed_fletcher, c, (size_t)4);
+            H5MM_memcpy(&reversed_fletcher, c, (size_t)4);
 
             /* Verify computed checksum matches stored checksum */
             if(stored_fletcher != fletcher && stored_fletcher != reversed_fletcher)
@@ -140,7 +140,7 @@ H5Z_filter_fletcher32 (unsigned flags, size_t H5_ATTR_UNUSED cd_nelmts, const un
         dst = (unsigned char *) outbuf;
 
         /* Copy raw data */
-        HDmemcpy((void*)dst, (void*)(*buf), nbytes);
+        H5MM_memcpy((void*)dst, (void*)(*buf), nbytes);
 
         /* Append checksum to raw data for storage */
         dst += nbytes;

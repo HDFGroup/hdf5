@@ -227,7 +227,7 @@ H5D__efl_io_init(const H5D_io_info_t *io_info, const H5D_type_info_t H5_ATTR_UNU
 {
     FUNC_ENTER_STATIC_NOERR
 
-    HDmemcpy(&io_info->store->efl, &(io_info->dset->shared->dcpl_cache.efl), sizeof(H5O_efl_t));
+    H5MM_memcpy(&io_info->store->efl, &(io_info->dset->shared->dcpl_cache.efl), sizeof(H5O_efl_t));
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5D__efl_io_init() */
