@@ -293,7 +293,7 @@ H5FD_register(const void *_cls, size_t size, hbool_t app_ref)
     /* Copy the class structure so the caller can reuse or free it */
     if(NULL == (saved = (H5FD_class_t *)H5MM_malloc(size)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, H5I_INVALID_HID, "memory allocation failed for file driver class struct")
-    HDmemcpy(saved, cls, size);
+    H5MM_memcpy(saved, cls, size);
 
     /* Create the new class ID */
     if((ret_value = H5I_register(H5I_VFL, saved, app_ref)) < 0)
@@ -1367,7 +1367,7 @@ H5FD_get_fs_type_map(const H5FD_t *file, H5FD_mem_t *type_map)
     } /* end if */
     else
         /* Copy class's default free space type mapping */
-        HDmemcpy(type_map, file->cls->fl_map, sizeof(file->cls->fl_map));
+        H5MM_memcpy(type_map, file->cls->fl_map, sizeof(file->cls->fl_map));
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

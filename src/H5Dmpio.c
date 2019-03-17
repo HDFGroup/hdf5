@@ -1427,7 +1427,7 @@ H5D__link_chunk_filtered_collective_io(H5D_io_info_t *io_info, const H5D_type_in
             for (i = 0, offset = 0; i < (size_t) mpi_rank; i++)
                 offset += num_chunks_selected_array[i];
 
-            HDmemcpy(chunk_list, &collective_chunk_list[offset], num_chunks_selected_array[mpi_rank] * sizeof(H5D_filtered_collective_io_info_t));
+            H5MM_memcpy(chunk_list, &collective_chunk_list[offset], num_chunks_selected_array[mpi_rank] * sizeof(H5D_filtered_collective_io_info_t));
 
             /* Create single MPI type encompassing each selection in the dataspace */
             if (H5D__mpio_filtered_collective_write_type(chunk_list, chunk_list_num_entries,
@@ -1553,7 +1553,7 @@ if(H5DEBUG(D))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTRECV, FAIL, "unable to obtain MPIO mode")
 
     /* Set up contiguous I/O info object */
-    HDmemcpy(&ctg_io_info, io_info, sizeof(ctg_io_info));
+    H5MM_memcpy(&ctg_io_info, io_info, sizeof(ctg_io_info));
     ctg_io_info.store = &ctg_store;
     ctg_io_info.layout_ops = *H5D_LOPS_CONTIG;
 
@@ -1561,7 +1561,7 @@ if(H5DEBUG(D))
     ctg_store.contig.dset_size = (hsize_t)io_info->dset->shared->layout.u.chunk.size;
 
     /* Set up compact I/O info object */
-    HDmemcpy(&cpt_io_info, io_info, sizeof(cpt_io_info));
+    H5MM_memcpy(&cpt_io_info, io_info, sizeof(cpt_io_info));
     cpt_io_info.store = &cpt_store;
     cpt_io_info.layout_ops = *H5D_LOPS_COMPACT;
 
@@ -1788,7 +1788,7 @@ H5D__multi_chunk_filtered_collective_io(H5D_io_info_t *io_info, const H5D_type_i
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "couldn't construct filtered I/O info list")
 
     /* Set up contiguous I/O info object */
-    HDmemcpy(&ctg_io_info, io_info, sizeof(ctg_io_info));
+    H5MM_memcpy(&ctg_io_info, io_info, sizeof(ctg_io_info));
     ctg_io_info.store = &ctg_store;
     ctg_io_info.layout_ops = *H5D_LOPS_CONTIG;
 
@@ -1893,7 +1893,7 @@ H5D__multi_chunk_filtered_collective_io(H5D_io_info_t *io_info, const H5D_type_i
 
                 /* Collect the new chunk info back to the local copy, since only the record in the
                  * collective array gets updated by the chunk re-allocation */
-                HDmemcpy(&chunk_list[i].chunk_states.new_chunk, &collective_chunk_list[offset].chunk_states.new_chunk, sizeof(chunk_list[i].chunk_states.new_chunk));
+                H5MM_memcpy(&chunk_list[i].chunk_states.new_chunk, &collective_chunk_list[offset].chunk_states.new_chunk, sizeof(chunk_list[i].chunk_states.new_chunk));
 
                 H5_CHECKED_ASSIGN(mpi_type_count, int, chunk_list[i].chunk_states.new_chunk.length, hsize_t);
 
@@ -2517,8 +2517,8 @@ H5D__obtain_mpio_mode(H5D_io_info_t* io_info, H5D_chunk_map_t *fm,
 
 
         /* merge buffer io_mode info and chunk addr into one */
-        HDmemcpy(mergebuf, assign_io_mode, total_chunks);
-        HDmemcpy(tempbuf, chunk_addr, sizeof(haddr_t) * total_chunks);
+        H5MM_memcpy(mergebuf, assign_io_mode, total_chunks);
+        H5MM_memcpy(tempbuf, chunk_addr, sizeof(haddr_t) * total_chunks);
 
         H5MM_free(nproc_per_chunk);
     } /* end if */
@@ -2527,8 +2527,8 @@ H5D__obtain_mpio_mode(H5D_io_info_t* io_info, H5D_chunk_map_t *fm,
     if(MPI_SUCCESS != (mpi_code = MPI_Bcast(mergebuf, ((sizeof(haddr_t) + 1) * total_chunks), MPI_BYTE, root, comm)))
         HMPI_GOTO_ERROR(FAIL, "MPI_BCast failed", mpi_code)
 
-    HDmemcpy(assign_io_mode, mergebuf, total_chunks);
-    HDmemcpy(chunk_addr, tempbuf, sizeof(haddr_t) * total_chunks);
+    H5MM_memcpy(assign_io_mode, mergebuf, total_chunks);
+    H5MM_memcpy(chunk_addr, tempbuf, sizeof(haddr_t) * total_chunks);
 
 #ifdef H5_HAVE_INSTRUMENTED_LIBRARY
 {
@@ -2630,7 +2630,7 @@ H5D__construct_filtered_io_info_list(const H5D_io_info_t *io_info, const H5D_typ
             local_info_array[i].async_info.receive_buffer_array = NULL;
             local_info_array[i].async_info.receive_requests_array = NULL;
 
-            HDmemcpy(local_info_array[i].scaled, chunk_info->scaled, sizeof(chunk_info->scaled));
+            H5MM_memcpy(local_info_array[i].scaled, chunk_info->scaled, sizeof(chunk_info->scaled));
 
             if ((select_npoints = H5S_GET_SELECT_NPOINTS(chunk_info->mspace)) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTCOUNT, FAIL, "dataspace is invalid")

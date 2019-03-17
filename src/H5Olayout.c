@@ -189,7 +189,7 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh,
             if(mesg->storage.u.compact.size > 0) {
                 if(NULL == (mesg->storage.u.compact.buf = H5MM_malloc(mesg->storage.u.compact.size)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for compact data buffer")
-                HDmemcpy(mesg->storage.u.compact.buf, p, mesg->storage.u.compact.size);
+                H5MM_memcpy(mesg->storage.u.compact.buf, p, mesg->storage.u.compact.size);
                 p += mesg->storage.u.compact.size;
             } /* end if */
         } /* end if */
@@ -210,7 +210,7 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh,
                         HGOTO_ERROR(H5E_OHDR, H5E_CANTALLOC, NULL, "memory allocation failed for compact data buffer")
 
                     /* Compact data */
-                    HDmemcpy(mesg->storage.u.compact.buf, p, mesg->storage.u.compact.size);
+                    H5MM_memcpy(mesg->storage.u.compact.buf, p, mesg->storage.u.compact.size);
                     p += mesg->storage.u.compact.size;
                 } /* end if */
 
@@ -425,14 +425,14 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh,
                         tmp_size = HDstrlen((const char *)heap_block_p) + 1;
                         if(NULL == (mesg->storage.u.virt.list[i].source_file_name = (char *)H5MM_malloc(tmp_size)))
                             HGOTO_ERROR(H5E_OHDR, H5E_RESOURCE, NULL, "unable to allocate memory for source file name")
-                        (void)HDmemcpy(mesg->storage.u.virt.list[i].source_file_name, heap_block_p, tmp_size);
+                        (void)H5MM_memcpy(mesg->storage.u.virt.list[i].source_file_name, heap_block_p, tmp_size);
                         heap_block_p += tmp_size;
 
                         /* Source dataset name */
                         tmp_size = HDstrlen((const char *)heap_block_p) + 1;
                         if(NULL == (mesg->storage.u.virt.list[i].source_dset_name = (char *)H5MM_malloc(tmp_size)))
                             HGOTO_ERROR(H5E_OHDR, H5E_RESOURCE, NULL, "unable to allocate memory for source dataset name")
-                        (void)HDmemcpy(mesg->storage.u.virt.list[i].source_dset_name, heap_block_p, tmp_size);
+                        (void)H5MM_memcpy(mesg->storage.u.virt.list[i].source_dset_name, heap_block_p, tmp_size);
                         heap_block_p += tmp_size;
 
                         /* Source selection */
@@ -581,7 +581,7 @@ H5O__layout_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, 
             /* Raw data */
             if(mesg->storage.u.compact.size > 0) {
                 if(mesg->storage.u.compact.buf)
-                    HDmemcpy(p, mesg->storage.u.compact.buf, mesg->storage.u.compact.size);
+                    H5MM_memcpy(p, mesg->storage.u.compact.buf, mesg->storage.u.compact.size);
                 else
                     HDmemset(p, 0, mesg->storage.u.compact.size);
                 p += mesg->storage.u.compact.size;
@@ -742,7 +742,7 @@ H5O__layout_copy(const void *_mesg, void *_dest)
                     HGOTO_ERROR(H5E_OHDR, H5E_NOSPACE, NULL, "unable to allocate memory for compact dataset")
 
                 /* Copy over the raw data */
-                HDmemcpy(dest->storage.u.compact.buf, mesg->storage.u.compact.buf, dest->storage.u.compact.size);
+                H5MM_memcpy(dest->storage.u.compact.buf, mesg->storage.u.compact.buf, dest->storage.u.compact.size);
             } /* end if */
             else
                 HDassert(dest->storage.u.compact.buf == NULL);
@@ -1039,7 +1039,8 @@ H5O__layout_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst,
                 layout_dst->storage.u.contig.size = H5S_extent_nelem(udata->src_space_extent) *
                                         H5T_get_size(udata->src_dtype);
 
-            if(H5D__contig_is_space_alloc(&layout_src->storage)) {
+            if(H5D__contig_is_space_alloc(&layout_src->storage)
+                    || (cpy_info->shared_fo && H5D__contig_is_data_cached((const H5D_shared_t *)cpy_info->shared_fo))) {
                 /* copy contiguous raw data */
                 if(H5D__contig_copy(file_src, &layout_src->storage.u.contig, file_dst, &layout_dst->storage.u.contig, udata->src_dtype, cpy_info) < 0)
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "unable to copy contiguous storage")
@@ -1048,7 +1049,8 @@ H5O__layout_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst,
             break;
 
         case H5D_CHUNKED:
-            if(H5D__chunk_is_space_alloc(&layout_src->storage)) {
+            if(H5D__chunk_is_space_alloc(&layout_src->storage)
+                    || (cpy_info->shared_fo && H5D__chunk_is_data_cached((const H5D_shared_t *)cpy_info->shared_fo))) {
                 /* Create chunked layout */
                 if(H5D__chunk_copy(file_src, &layout_src->storage.u.chunk, &layout_src->u.chunk, file_dst, &layout_dst->storage.u.chunk, udata->src_space_extent, udata->src_dtype, udata->common.src_pline, cpy_info) < 0)
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "unable to copy chunked storage")

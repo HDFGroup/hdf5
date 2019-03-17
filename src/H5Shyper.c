@@ -32,6 +32,7 @@
 #include "H5Eprivate.h"		/* Error handling			*/
 #include "H5FLprivate.h"	/* Free Lists				*/
 #include "H5Iprivate.h"		/* ID Functions				*/
+#include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Spkg.h"		/* Dataspace functions			*/
 #include "H5VMprivate.h"        /* Vector functions			*/
 
@@ -751,7 +752,7 @@ H5S__hyper_iter_init(const H5S_t *space, H5S_sel_iter_t *iter)
         else {
             /* Make local copy of the regular selection information */
             HDcompile_assert(sizeof(iter->u.hyp.diminfo) == sizeof(space->select.sel_info.hslab->diminfo.opt));
-            HDmemcpy(iter->u.hyp.diminfo, tdiminfo, sizeof(iter->u.hyp.diminfo));
+            H5MM_memcpy(iter->u.hyp.diminfo, tdiminfo, sizeof(iter->u.hyp.diminfo));
 
             /* Initialize position to initial location */
             for(u = 0; u < rank; u++)
@@ -899,10 +900,10 @@ H5S__hyper_iter_coords(const H5S_sel_iter_t *iter, hsize_t *coords)
             HDassert(v < 0);
         } /* end if */
         else
-            HDmemcpy(coords, iter->u.hyp.off, sizeof(hsize_t) * iter->rank);
+            H5MM_memcpy(coords, iter->u.hyp.off, sizeof(hsize_t) * iter->rank);
     } /* end if */
     else
-        HDmemcpy(coords, iter->u.hyp.off, sizeof(hsize_t) * iter->rank);
+        H5MM_memcpy(coords, iter->u.hyp.off, sizeof(hsize_t) * iter->rank);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5S__hyper_iter_coords() */
@@ -2921,8 +2922,8 @@ H5S__hyper_copy_span_helper(H5S_hyper_span_info_t *spans, unsigned rank,
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, NULL, "can't allocate hyperslab span info")
 
         /* Set the non-zero span_info information */
-        HDmemcpy(ret_value->low_bounds, spans->low_bounds, rank * sizeof(hsize_t));
-        HDmemcpy(ret_value->high_bounds, spans->high_bounds, rank * sizeof(hsize_t));
+        H5MM_memcpy(ret_value->low_bounds, spans->low_bounds, rank * sizeof(hsize_t));
+        H5MM_memcpy(ret_value->high_bounds, spans->high_bounds, rank * sizeof(hsize_t));
         ret_value->count = 1;
 
         /* Set the operation generation for the span info, to avoid future copies */
@@ -3251,7 +3252,7 @@ H5S__hyper_copy(H5S_t *dst, const H5S_t *src, hbool_t share_selection)
     /* Copy the hyperslab information */
     dst_hslab->diminfo_valid = src_hslab->diminfo_valid;
     if(src_hslab->diminfo_valid == H5S_DIMINFO_VALID_YES)
-        HDmemcpy(&dst_hslab->diminfo, &src_hslab->diminfo, sizeof(H5S_hyper_diminfo_t));
+        H5MM_memcpy(&dst_hslab->diminfo, &src_hslab->diminfo, sizeof(H5S_hyper_diminfo_t));
 
     /* Check if there is hyperslab span information to copy */
     /* (Regular hyperslab information is copied with the selection structure) */
@@ -4066,7 +4067,7 @@ H5S__hyper_span_blocklist(const H5S_hyper_span_info_t *spans, hsize_t start[],
                 /* Encode all the previous dimensions starting & ending points */
 
                 /* Copy previous starting points */
-                HDmemcpy(*buf, start, rank * sizeof(hsize_t));
+                H5MM_memcpy(*buf, start, rank * sizeof(hsize_t));
                 (*buf) += rank;
 
                 /* Copy starting point for this span */
@@ -4074,7 +4075,7 @@ H5S__hyper_span_blocklist(const H5S_hyper_span_info_t *spans, hsize_t start[],
                 (*buf)++;
 
                 /* Copy previous ending points */
-                HDmemcpy(*buf, end, rank * sizeof(hsize_t));
+                H5MM_memcpy(*buf, end, rank * sizeof(hsize_t));
                 (*buf) += rank;
 
                 /* Copy ending point for this span */
@@ -4211,11 +4212,11 @@ H5S__get_select_hyper_blocklist(H5S_t *space, hsize_t startblock,
                 HDassert(startblock == 0);
 
                 /* Copy the starting location */
-                HDmemcpy(buf, offset, sizeof(hsize_t) * ndims);
+                H5MM_memcpy(buf, offset, sizeof(hsize_t) * ndims);
                 buf += ndims;
 
                 /* Compute the ending location */
-                HDmemcpy(buf, end, sizeof(hsize_t) * ndims);
+                H5MM_memcpy(buf, end, sizeof(hsize_t) * ndims);
                 buf += ndims;
 
                 /* Decrement the number of blocks to retrieve */
@@ -5324,8 +5325,8 @@ H5S__hyper_coord_to_span(unsigned rank, const hsize_t *coords)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, NULL, "can't allocate hyperslab span")
 
         /* Set the low & high bounds for this span info node */
-        HDmemcpy(down->low_bounds, &coords[1], (rank - 1) * sizeof(hsize_t));
-        HDmemcpy(down->high_bounds, &coords[1], (rank - 1) * sizeof(hsize_t));
+        H5MM_memcpy(down->low_bounds, &coords[1], (rank - 1) * sizeof(hsize_t));
+        H5MM_memcpy(down->high_bounds, &coords[1], (rank - 1) * sizeof(hsize_t));
 
         /* Build span tree for coordinates below this one */
         if(NULL == (down->head = H5S__hyper_coord_to_span(rank - 1, &coords[1])))
@@ -5639,8 +5640,8 @@ H5S_hyper_add_span_element(H5S_t *space, unsigned rank, const hsize_t *coords)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate hyperslab span info")
 
         /* Set the low & high bounds for this span info node */
-        HDmemcpy(head->low_bounds, coords, rank * sizeof(hsize_t));
-        HDmemcpy(head->high_bounds, coords, rank * sizeof(hsize_t));
+        H5MM_memcpy(head->low_bounds, coords, rank * sizeof(hsize_t));
+        H5MM_memcpy(head->high_bounds, coords, rank * sizeof(hsize_t));
 
         /* Set the reference count */
         head->count = 1;
@@ -6676,7 +6677,7 @@ H5S_hyper_denormalize_offset(H5S_t *space, const hssize_t *old_offset)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSET, FAIL, "can't adjust selection")
 
     /* Copy the selection offset over */
-    HDmemcpy(space->select.offset, old_offset, sizeof(hssize_t) * space->extent.rank);
+    H5MM_memcpy(space->select.offset, old_offset, sizeof(hssize_t) * space->extent.rank);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -6740,8 +6741,8 @@ H5S__hyper_append_span(H5S_hyper_span_info_t **span_tree, unsigned ndims,
             /* Sanity check */
             HDassert(ndims > 1);
 
-            HDmemcpy(&((*span_tree)->low_bounds[1]), down->low_bounds, sizeof(hsize_t) * (ndims - 1));
-            HDmemcpy(&((*span_tree)->high_bounds[1]), down->high_bounds, sizeof(hsize_t) * (ndims - 1));
+            H5MM_memcpy(&((*span_tree)->low_bounds[1]), down->low_bounds, sizeof(hsize_t) * (ndims - 1));
+            H5MM_memcpy(&((*span_tree)->high_bounds[1]), down->high_bounds, sizeof(hsize_t) * (ndims - 1));
         } /* end if */
     } /* end if */
     /* Merge or append to existing merged spans list */
@@ -8055,8 +8056,8 @@ H5S__hyper_make_spans(unsigned rank, const hsize_t *start, const hsize_t *stride
         /* Copy bounds from lower dimensions */
         /* (head & tail pointers share lower dimensions, so using either is OK) */
         if(head->down) {
-            HDmemcpy(&down->low_bounds[1], &head->down->low_bounds[0], sizeof(hsize_t) * ((rank - 1) - (unsigned)i));
-            HDmemcpy(&down->high_bounds[1], &head->down->high_bounds[0], sizeof(hsize_t) * ((rank - 1) - (unsigned)i));
+            H5MM_memcpy(&down->low_bounds[1], &head->down->low_bounds[0], sizeof(hsize_t) * ((rank - 1) - (unsigned)i));
+            H5MM_memcpy(&down->high_bounds[1], &head->down->high_bounds[0], sizeof(hsize_t) * ((rank - 1) - (unsigned)i));
         } /* end if */
     } /* end for */
 
@@ -8147,7 +8148,7 @@ H5S__hyper_update_diminfo(H5S_t *space, H5S_seloper_t op,
         unsigned curr_dim;
 
         /* Copy current diminfo.opt values */
-        HDmemcpy(tmp_diminfo, space->select.sel_info.hslab->diminfo.opt, sizeof(tmp_diminfo));
+        H5MM_memcpy(tmp_diminfo, space->select.sel_info.hslab->diminfo.opt, sizeof(tmp_diminfo));
 
         /* Loop over dimensions */
         for(curr_dim = 0; curr_dim < space->extent.rank; curr_dim++) {
@@ -8462,10 +8463,10 @@ H5S__hyper_rebuild(H5S_t *space)
         space->select.sel_info.hslab->diminfo_valid = H5S_DIMINFO_VALID_IMPOSSIBLE;
     else {
         /* Set the dimension info & bounds for the dataspace, from the rebuilt info */
-        HDmemcpy(space->select.sel_info.hslab->diminfo.app, rebuilt_slab_info, sizeof(rebuilt_slab_info));
-        HDmemcpy(space->select.sel_info.hslab->diminfo.opt, rebuilt_slab_info, sizeof(rebuilt_slab_info));
-        HDmemcpy(space->select.sel_info.hslab->diminfo.low_bounds, space->select.sel_info.hslab->span_lst->low_bounds, sizeof(hsize_t) * space->extent.rank);
-        HDmemcpy(space->select.sel_info.hslab->diminfo.high_bounds, space->select.sel_info.hslab->span_lst->high_bounds, sizeof(hsize_t) * space->extent.rank);
+        H5MM_memcpy(space->select.sel_info.hslab->diminfo.app, rebuilt_slab_info, sizeof(rebuilt_slab_info));
+        H5MM_memcpy(space->select.sel_info.hslab->diminfo.opt, rebuilt_slab_info, sizeof(rebuilt_slab_info));
+        H5MM_memcpy(space->select.sel_info.hslab->diminfo.low_bounds, space->select.sel_info.hslab->span_lst->low_bounds, sizeof(hsize_t) * space->extent.rank);
+        H5MM_memcpy(space->select.sel_info.hslab->diminfo.high_bounds, space->select.sel_info.hslab->span_lst->high_bounds, sizeof(hsize_t) * space->extent.rank);
 
         space->select.sel_info.hslab->diminfo_valid = H5S_DIMINFO_VALID_YES;
     } /* end else */

@@ -135,6 +135,14 @@ New Features
 
       (DER - 2018/12/08, HDFFV-10252)
 
+    - Added the ability to open files with UTF-8 file names on Windows.
+
+      The POSIX open(2) API call on Windows is limited to ASCII
+      file names. The library has been updated to convert incoming file
+      names to UTF-16 (via MultiByteToWideChar(CP_UTF8, ...) and use
+      _wopen() instead.
+
+     (DER - 2019/03/15, HDFFV-2714, HDFFV-3914, HDFFV-3895, HDFFV-8237, HDFFV-10413, HDFFV-10691)
 
     Parallel Library:
     -----------------
@@ -224,6 +232,18 @@ Bug Fixes since HDF5-1.10.3 release
 
     Library
     -------
+    - Fixed a bug that would cause an error or cause fill values to be
+      incorrectly read from a chunked dataset using the "single chunk" index if
+      the data was held in cache and there was no data on disk.
+
+      (NAF - 2019/03/06)
+
+    - Fixed a bug that could cause an error or cause fill values to be
+      incorrectly read from a dataset that was written to using H5Dwrite_chunk
+      if the dataset was not closed after writing.
+
+      (NAF - 2019/03/06, HDFFV-10716)
+
     - Fixed memory leak in scale offset filter
 
       In a special case where the MinBits is the same as the number of bits in
