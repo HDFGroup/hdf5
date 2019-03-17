@@ -681,7 +681,7 @@ H5VL_register_connector(const void *_cls, hbool_t app_ref, hid_t vipl_id)
     /* Copy the class structure so the caller can reuse or free it */
     if (NULL == (saved = H5FL_CALLOC(H5VL_class_t)))
         HGOTO_ERROR(H5E_VOL, H5E_CANTALLOC, H5I_INVALID_HID, "memory allocation failed for VOL connector class struct")
-    HDmemcpy(saved, cls, sizeof(H5VL_class_t));
+    H5MM_memcpy(saved, cls, sizeof(H5VL_class_t));
     if(NULL == (saved->name = H5MM_strdup(cls->name)))
         HGOTO_ERROR(H5E_VOL, H5E_CANTALLOC, H5I_INVALID_HID, "memory allocation failed for VOL connector name")
 

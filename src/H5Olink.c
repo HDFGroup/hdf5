@@ -202,7 +202,7 @@ H5O__link_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh,
     /* Get the link's name */
     if(NULL == (lnk->name = (char *)H5MM_malloc(len + 1)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
-    HDmemcpy(lnk->name, p, len);
+    H5MM_memcpy(lnk->name, p, len);
     lnk->name[len] = '\0';
     p += len;
 
@@ -220,7 +220,7 @@ H5O__link_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh,
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "invalid link length")
             if(NULL == (lnk->u.soft.name = (char *)H5MM_malloc((size_t)len + 1)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
-            HDmemcpy(lnk->u.soft.name, p, len);
+            H5MM_memcpy(lnk->u.soft.name, p, len);
             lnk->u.soft.name[len] = '\0';
             p += len;
             break;
@@ -240,7 +240,7 @@ H5O__link_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh,
             {
                 if(NULL == (lnk->u.ud.udata = H5MM_malloc((size_t)len)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
-                HDmemcpy(lnk->u.ud.udata, p, len);
+                H5MM_memcpy(lnk->u.ud.udata, p, len);
                 p += len;
             }
             else
@@ -349,7 +349,7 @@ H5O_link_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, con
     } /* end switch */
 
     /* Store the link's name */
-    HDmemcpy(p, lnk->name, (size_t)len);
+    H5MM_memcpy(p, lnk->name, (size_t)len);
     p += len;
 
     /* Store the appropriate information for each type of link */
@@ -364,7 +364,7 @@ H5O_link_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, con
             len = (uint16_t)HDstrlen(lnk->u.soft.name);
             HDassert(len > 0);
             UINT16ENCODE(p, len)
-            HDmemcpy(p, lnk->u.soft.name, (size_t)len);
+            H5MM_memcpy(p, lnk->u.soft.name, (size_t)len);
             p += len;
             break;
 
@@ -380,7 +380,7 @@ H5O_link_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, con
             UINT16ENCODE(p, len)
             if(len > 0)
             {
-                HDmemcpy(p, lnk->u.ud.udata, (size_t)len);
+                H5MM_memcpy(p, lnk->u.ud.udata, (size_t)len);
                 p+=len;
             }
             break;
@@ -437,7 +437,7 @@ H5O_link_copy(const void *_mesg, void *_dest)
         if(lnk->u.ud.size > 0) {
             if(NULL == (dest->u.ud.udata = H5MM_malloc(lnk->u.ud.size)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
-            HDmemcpy(dest->u.ud.udata, lnk->u.ud.udata, lnk->u.ud.size);
+            H5MM_memcpy(dest->u.ud.udata, lnk->u.ud.udata, lnk->u.ud.size);
         } /* end if */
     } /* end if */
 

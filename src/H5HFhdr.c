@@ -36,6 +36,7 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5HFpkg.h"		/* Fractal heaps			*/
 #include "H5MFprivate.h"	/* File memory management		*/
+#include "H5MMprivate.h"	/* Memory management			*/
 #include "H5VMprivate.h"		/* Vectors and arrays 			*/
 
 /****************/
@@ -387,7 +388,7 @@ H5HF_hdr_create(H5F_t *f, const H5HF_create_t *cparam)
     /* Set the creation parameters for the heap */
     hdr->max_man_size = cparam->max_man_size;
     hdr->checksum_dblocks = cparam->checksum_dblocks;
-    HDmemcpy(&(hdr->man_dtable.cparam), &(cparam->managed), sizeof(H5HF_dtable_cparam_t));
+    H5MM_memcpy(&(hdr->man_dtable.cparam), &(cparam->managed), sizeof(H5HF_dtable_cparam_t));
 
     /* Set root table address to indicate that the heap is empty currently */
     hdr->man_dtable.table_addr = HADDR_UNDEF;
