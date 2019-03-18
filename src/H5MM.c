@@ -589,7 +589,6 @@ H5MM_memcpy(void *dest, const void *src, size_t n)
 
     HDassert(dest);
     HDassert(src);
-    HDassert(n > 0);
     HDassert((char *)dest >= (const char *)src + n || (const char *)src >= (char *)dest + n);
 
     ret = HDmemcpy(dest, src, n);
