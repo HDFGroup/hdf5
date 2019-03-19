@@ -985,6 +985,132 @@ Wroundf(float arg)
     return (float)(arg < 0.0F ? HDceil(arg - 0.5F) : HDfloor(arg + 0.5F));
 }
 
+/*-------------------------------------------------------------------------
+* Function:     H5_get_utf16_str
+*
+* Purpose:      Gets a UTF-16 string from an UTF-8 (or ASCII) string.
+*
+* Return:       Success:    A pointer to a UTF-16 string
+*                           This must be freed by the caller using H5MM_xfree()
+*               Failure:    NULL
+*
+* Programmer:  Dana Robinson
+*              Spring 2019
+*
+*-------------------------------------------------------------------------
+*/
+const wchar_t *
+H5_get_utf16_str(const char *s)
+{
+    int     nwchars = -1;       /* Length of the UTF-16 buffer */
+    wchar_t *ret_s  = NULL;     /* UTF-16 version of the string */
+
+    /* Get the number of UTF-16 characters needed */
+    if(0 == (nwchars = MultiByteToWideChar(CP_UTF8, 0, s, -1, NULL, 0)))
+        goto error;
+
+    /* Allocate a buffer for the UTF-16 string */
+    if(NULL == (ret_s = (wchar_t *)H5MM_calloc(sizeof(wchar_t) * (size_t)nwchars)))
+        goto error;
+
+    /* Convert the input UTF-8 string to UTF-16 */
+    if(0 == MultiByteToWideChar(CP_UTF8, 0, s, -1, ret_s, nwchars))
+        goto error;
+
+    return ret_s;
+
+error:
+    if(ret_s)
+        H5MM_xfree((void *)ret_s);
+    return NULL;
+}   /* end H5_get_utf16_str() */
+
+/*-------------------------------------------------------------------------
+ * Function:     Wopen_utf8
+ *
+ * Purpose:      UTF-8 equivalent of open(2) for use on Windows.
+ *               Converts a UTF-8 input path to UTF-16 and then opens the
+ *               file via _wopen() under the hood
+ *
+ * Return:       Success:    A POSIX file descriptor
+ *               Failure:    -1
+ *
+ * Programmer:  Dana Robinson
+ *              Spring 2019
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+Wopen_utf8(const char *path, int oflag, ...)
+{
+    int fd          = -1;       /* POSIX file descriptor to be returned */
+    wchar_t *wpath  = NULL;     /* UTF-16 version of the path */
+    int pmode       = 0;        /* mode (optionally set via variable args) */
+
+    /* Convert the input UTF-8 path to UTF-16 */
+    if(NULL == (wpath = H5_get_utf16_str(path)))
+        goto done;
+
+    /* _O_BINARY must be set in Windows to avoid CR-LF <-> LF EOL
+    * transformations when performing I/O. Note that this will
+    * produce Unix-style text files, though.
+    */
+    oflag |= _O_BINARY;
+
+    /* Get the mode, if O_CREAT was specified */
+    if(oflag & O_CREAT) {
+        va_list vl;
+
+        HDva_start(vl, oflag);
+        pmode = HDva_arg(vl, int);
+        HDva_end(vl);
+    }
+
+    /* Open the file */
+    fd = _wopen(wpath, oflag, pmode);
+
+done:
+    if(wpath)
+        H5MM_xfree((void *)wpath);
+
+    return fd;
+}   /* end Wopen_utf8() */
+
+/*-------------------------------------------------------------------------
+ * Function:     Wremove_utf8
+ *
+ * Purpose:      UTF-8 equivalent of remove(3) for use on Windows.
+ *               Converts a UTF-8 input path to UTF-16 and then opens the
+ *               file via _wremove() under the hood
+ *
+ * Return:       Success:    0
+ *               Failure:    -1
+ *
+ * Programmer:  Dana Robinson
+ *              Spring 2019
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+Wremove_utf8(const char *path)
+{
+    wchar_t *wpath = NULL;     /* UTF-16 version of the path */
+    int ret;
+
+    /* Convert the input UTF-8 path to UTF-16 */
+    if(NULL == (wpath = H5_get_utf16_str(path)))
+        goto done;
+
+    /* Open the file */
+    ret = _wremove(wpath);
+
+done:
+    if(wpath)
+        H5MM_xfree((void *)wpath);
+
+    return ret;
+}   /* end Wremove_utf8() */
+
 #endif /* H5_HAVE_WIN32_API */
 
 
