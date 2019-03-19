@@ -331,6 +331,7 @@ const H5D_layout_ops_t H5D_LOPS_CHUNK[1] = {{
     H5D__chunk_construct,
     H5D__chunk_init,
     H5D__chunk_is_space_alloc,
+    H5D__chunk_is_data_cached,
     H5D__chunk_io_init,
     H5D__chunk_read,
     H5D__chunk_write,
@@ -352,6 +353,7 @@ const H5D_layout_ops_t H5D_LOPS_CHUNK[1] = {{
 
 /* "nonexistent" storage layout I/O ops */
 const H5D_layout_ops_t H5D_LOPS_NONEXISTENT[1] = {{
+    NULL,
     NULL,
     NULL,
     NULL,
@@ -412,10 +414,13 @@ H5D__chunk_direct_write(const H5D_t *dset, uint32_t filters, hsize_t *offset,
 
     FUNC_ENTER_PACKAGE_TAG(dset->oloc.addr)
 
+    /* Sanity checks */
+    HDassert(layout->type == H5D_CHUNKED);
+
     io_info.dset = dset;
 
     /* Allocate dataspace and initialize it if it hasn't been. */
-    if(!(*layout->ops->is_space_alloc)(&layout->storage))
+    if(!H5D__chunk_is_space_alloc(&layout->storage))
         /* Allocate storage */
         if(H5D__alloc_storage(&io_info, H5D_ALLOC_WRITE, FALSE, NULL) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize storage")
@@ -453,12 +458,16 @@ H5D__chunk_direct_write(const H5D_t *dset, uint32_t filters, hsize_t *offset,
     if(0 == idx_info.pline->nused && H5F_addr_defined(old_chunk.offset))
         /* If there are no filters and we are overwriting the chunk we can just set values */
         need_insert = FALSE;
-    else
+    else {
         /* Otherwise, create the chunk it if it doesn't exist, or reallocate the chunk
          * if its size has changed.
          */
         if(H5D__chunk_file_alloc(&idx_info, &old_chunk, &udata.chunk_block, &need_insert, scaled) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "unable to allocate chunk")
+
+        /* Cache the new chunk information */
+        H5D__chunk_cinfo_cache_update(&dset->shared->cache.chunk.last, &udata);
+    } /* end else */
 
     /* Make sure the address of the chunk is returned. */
     if(!H5F_addr_defined(udata.chunk_block.offset))
@@ -524,7 +533,8 @@ H5D__chunk_direct_read(const H5D_t *dset, hsize_t *offset, uint32_t* filters,
     *filters = 0;
 
     /* Allocate dataspace and initialize it if it hasn't been. */
-    if(!(*layout->ops->is_space_alloc)(&layout->storage))
+    if(!H5D__chunk_is_space_alloc(&layout->storage)
+            && !H5D__chunk_is_data_cached(dset->shared))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "storage is not initialized")
 
     /* Calculate the index of this chunk */
@@ -1034,6 +1044,30 @@ H5D__chunk_is_space_alloc(const H5O_storage_t *storage)
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__chunk_is_space_alloc() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D__chunk_is_data_cached
+ *
+ * Purpose:     Query if raw data is cached for dataset
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Neil Fortner
+ *              Wednessday, March 6, 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+hbool_t
+H5D__chunk_is_data_cached(const H5D_shared_t *shared_dset)
+{
+    FUNC_ENTER_PACKAGE_NOERR
+
+    /* Sanity checks */
+    HDassert(shared_dset);
+
+    FUNC_LEAVE_NOAPI(shared_dset->cache.chunk.nused > 0)
+} /* end H5D__chunk_is_data_cached() */
 
 
 /*-------------------------------------------------------------------------
