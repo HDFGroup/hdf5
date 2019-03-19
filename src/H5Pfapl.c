@@ -5012,6 +5012,34 @@ H5Pget_vol_info(hid_t plist_id, void **vol_info)
     if(NULL == (plist = (H5P_genplist_t *)H5I_object_verify(plist_id, H5I_GENPROP_LST)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
 
+    /* Call the internal function */
+    if(H5P_get_vol_info(plist, vol_info) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get VOL connector info")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pget_vol_info() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P_get_vol_info
+ *
+ * Purpose:     Private version of H5Pget_vol_info().
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5P_get_vol_info(H5P_genplist_t *plist, void **vol_info)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity checks */
+    HDassert(plist);
+
     /* Get the current VOL info */
     if(TRUE == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS)) {
         void *new_connector_info = NULL;   /* Copy of connector info */
@@ -5041,8 +5069,8 @@ H5Pget_vol_info(hid_t plist_id, void **vol_info)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
 
 done:
-    FUNC_LEAVE_API(ret_value)
-} /* end H5Pget_vol_info() */
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P_get_vol_info() */
 
 
 /*-------------------------------------------------------------------------

@@ -35,6 +35,10 @@
 #include "H5public.h"
 #include "H5Ipublic.h"
 
+#define H5VL_RADOS_VERSION      1
+#define H5VL_RADOS_VALUE        268
+#define H5VL_RADOS_NAME         "rados_vol_connector"
+
 #ifdef __cplusplus
 extern "C" {
 #endif

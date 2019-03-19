@@ -169,6 +169,7 @@ H5_DLL herr_t H5P_remove(H5P_genplist_t *plist, const char *name);
 H5_DLL htri_t H5P_exist_plist(const H5P_genplist_t *plist, const char *name);
 H5_DLL htri_t H5P_class_isa(const H5P_genclass_t *pclass1, const H5P_genclass_t *pclass2);
 H5_DLL char *H5P_get_class_name(H5P_genclass_t *pclass);
+H5_DLL herr_t H5P_get_vol_info(H5P_genplist_t *plist, void **vol_info);
 
 /* Internal helper routines */
 H5_DLL herr_t H5P_get_nprops_pclass(const H5P_genclass_t *pclass, size_t *nprops,
