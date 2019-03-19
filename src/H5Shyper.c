@@ -83,24 +83,6 @@
         (curr_span) = saved_next_span;                          \
     } while(0)
 
-#ifdef H5_HAVE_THREADSAFE
-/*
- * The per-thread operation generation. pthread_once() initializes a special
- * key that will be used by all threads to create a stack specific to
- * each thread individually. The association of operation generations to threads
- * will be handled by the pthread library.
- *
- * In order for this macro to work, H5S_hyper_get_my_op_gen() must be preceeded
- * by "uint64_t *gen =".
- */
-#define H5S_hyper_get_my_op_gen()  H5S__hyper_op_gen()
-#else /* H5_HAVE_THREADSAFE */
-/*
- * The current operation generation.
- */
-#define H5S_hyper_get_my_op_gen() (&H5S_hyper_op_gen_g)
-#endif /* H5_HAVE_THREADSAFE */
-
 
 /******************/
 /* Local Typedefs */
@@ -114,9 +96,6 @@ typedef hsize_t hbounds_t;
 /********************/
 /* Local Prototypes */
 /********************/
-#ifdef H5_HAVE_THREADSAFE
-static uint64_t *H5S__hyper_op_gen(void);
-#endif /* H5_HAVE_THREADSAFE */
 static H5S_hyper_span_t *H5S__hyper_new_span(hsize_t low, hsize_t high,
     H5S_hyper_span_info_t *down, H5S_hyper_span_t *next);
 static H5S_hyper_span_info_t *H5S__hyper_new_span_info(unsigned rank);
@@ -285,10 +264,9 @@ H5FL_BARR_DEFINE_STATIC(H5S_hyper_span_info_t, hbounds_t, H5S_MAX_RANK * 2);
 /* Declare extern free list to manage the H5S_sel_iter_t struct */
 H5FL_EXTERN(H5S_sel_iter_t);
 
-#ifndef H5_HAVE_THREADSAFE
-static uint64_t H5S_hyper_op_gen_g = 1; /* Current operation generation */
-                                        /* (Use '1' to avoid clashing with '0' value in newly allocated structs) */
-#endif /* H5_HAVE_THREADSAFE */
+/* Current operation generation */
+/* (Start with '1' to avoid clashing with '0' value in newly allocated structs) */
+static uint64_t H5S_hyper_op_gen_g = 1;
 
 
 /* Uncomment this, to provide the debugging routines for printing selection info */
@@ -518,60 +496,6 @@ H5S__hyper_print_space_dfs(FILE *f, const H5S_t *space)
 } /* end H5S__hyper_print_space_dfs() */
 #endif /* H5S_HYPER_DEBUG */
 
-#ifdef H5_HAVE_THREADSAFE
-
-/*-------------------------------------------------------------------------
- * Function:	H5S__hyper_op_gen
- *
- * Purpose:	Support function for H5S_hyper_get_my_op_gen() to initialize and
- *              acquire per-thread hyperslab operation generation.
- *
- * Return:	Success: Non-NULL pointer to hyperslab operation generation for thread
- *		Failure: NULL
- *
- * Programmer:	Quincey Koziol
- *              January 19, 2019
- *
- *-------------------------------------------------------------------------
- */
-static uint64_t *
-H5S__hyper_op_gen(void)
-{
-    uint64_t *op_gen = NULL;
-
-    FUNC_ENTER_STATIC_NOERR
-
-    op_gen = (uint64_t *)H5TS_get_thread_local_value(H5TS_hyper_op_gen_key_g);
-
-    if(!op_gen) {
-        /* No associated value with current thread - create one */
-#ifdef H5_HAVE_WIN_THREADS
-        /* Win32 has to use LocalAlloc to match the LocalFree in DllMain */
-        op_gen = (uint64_t *)LocalAlloc(LPTR, sizeof(uint64_t));
-#else
-        /* Use HDmalloc here since this has to match the HDfree in the
-         * destructor and we want to avoid the codestack there.
-         */
-        op_gen = (uint64_t *)HDmalloc(sizeof(uint64_t));
-#endif /* H5_HAVE_WIN_THREADS */
-        HDassert(op_gen);
-
-        /* Reset the thread-specific info */
-        /* (Use '1' to avoid clashing with '0' value in newly allocated structs) */
-        *op_gen = 1;
-
-        /* (It's not necessary to release this in this API, it is
-         *      released by the "key destructor" set up in the H5TS
-         *      routines.  See calls to pthread_key_create() in H5TS.c -QAK)
-         */
-        H5TS_set_thread_local_value(H5TS_hyper_op_gen_key_g, (void *)op_gen);
-    } /* end if */
-
-    /* Set return value */
-    FUNC_LEAVE_NOAPI(op_gen)
-} /* end H5S__hyper_op_gen() */
-#endif  /* H5_HAVE_THREADSAFE */
-
 
 /*-------------------------------------------------------------------------
  * Function:	H5S__hyper_get_op_gen
@@ -591,14 +515,9 @@ H5S__hyper_op_gen(void)
 uint64_t
 H5S__hyper_get_op_gen(void)
 {
-    uint64_t *op_gen = H5S_hyper_get_my_op_gen();  /* Get the pointer to the hyperslab operation generation, for this thread */
-
     FUNC_ENTER_PACKAGE_NOERR
 
-    /* Check args */
-    HDassert(op_gen);
-
-    FUNC_LEAVE_NOAPI((*op_gen)++);
+    FUNC_LEAVE_NOAPI(H5S_hyper_op_gen_g++);
 } /* end H5S__hyper_op_gen() */
 
 
