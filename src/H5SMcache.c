@@ -388,7 +388,7 @@ H5SM__cache_table_serialize(const H5F_t *f, void *_image, size_t len,
     HDassert(H5F_SOHM_VERS(f) == HDF5_SHAREDHEADER_VERSION);
 
     /* Encode magic number */
-    HDmemcpy(image, H5SM_TABLE_MAGIC, (size_t)H5_SIZEOF_MAGIC);
+    H5MM_memcpy(image, H5SM_TABLE_MAGIC, (size_t)H5_SIZEOF_MAGIC);
     image += H5_SIZEOF_MAGIC;
 
     /* Encode each index header */
@@ -710,7 +710,7 @@ H5SM__cache_list_serialize(const H5F_t *f, void *_image, size_t len,
     HDassert(list->header->list_size == len);
 
     /* Encode magic number */
-    HDmemcpy(image, H5SM_LIST_MAGIC, (size_t)H5_SIZEOF_MAGIC);
+    H5MM_memcpy(image, H5SM_LIST_MAGIC, (size_t)H5_SIZEOF_MAGIC);
     image += H5_SIZEOF_MAGIC;
 
     /* serialize messages from the messages array */

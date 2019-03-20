@@ -40,6 +40,7 @@
 #include "H5FLprivate.h"    /* Free Lists                   */
 #include "H5Iprivate.h"     /* IDs                          */
 #include "H5MFprivate.h"    /* File memory management       */
+#include "H5MMprivate.h"	/* Memory management			*/
 #include "H5FOprivate.h"    /* File objects                 */
 #include "H5Oprivate.h"     /* Object headers               */
 #include "H5Pprivate.h"     /* Property lists               */
@@ -118,6 +119,7 @@ const H5D_layout_ops_t H5D_LOPS_CONTIG[1] = {{
     H5D__contig_construct,
     H5D__contig_init,
     H5D__contig_is_space_alloc,
+    H5D__contig_is_data_cached,
     H5D__contig_io_init,
     H5D__contig_read,
     H5D__contig_write,
@@ -538,6 +540,30 @@ H5D__contig_is_space_alloc(const H5O_storage_t *storage)
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5D__contig_is_data_cached
+ *
+ * Purpose:     Query if raw data is cached for dataset
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Neil Fortner
+ *              Wednessday, March 6, 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+hbool_t
+H5D__contig_is_data_cached(const H5D_shared_t *shared_dset)
+{
+    FUNC_ENTER_PACKAGE_NOERR
+
+    /* Sanity checks */
+    HDassert(shared_dset);
+
+    FUNC_LEAVE_NOAPI(shared_dset->cache.contig.sieve_size > 0)
+} /* end H5D__contig_is_data_cached() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5D__contig_io_init
  *
  * Purpose:	Performs initialization before any sort of I/O on the raw data
@@ -751,7 +777,7 @@ H5D__contig_readvv_sieve_cb(hsize_t dst_off, hsize_t src_off, size_t len,
                 HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "block read failed")
 
             /* Grab the data out of the buffer (must be first piece of data in buffer ) */
-            HDmemcpy(buf, dset_contig->sieve_buf, len);
+            H5MM_memcpy(buf, dset_contig->sieve_buf, len);
 
             /* Reset sieve buffer dirty flag */
             dset_contig->sieve_dirty = FALSE;
@@ -771,7 +797,7 @@ H5D__contig_readvv_sieve_cb(hsize_t dst_off, hsize_t src_off, size_t len,
             unsigned char *base_sieve_buf = dset_contig->sieve_buf + (addr - sieve_start);
 
             /* Grab the data out of the buffer */
-            HDmemcpy(buf, base_sieve_buf, len);
+            H5MM_memcpy(buf, base_sieve_buf, len);
         } /* end if */
         /* Entire request is not within this data sieve buffer */
         else {
@@ -835,7 +861,7 @@ H5D__contig_readvv_sieve_cb(hsize_t dst_off, hsize_t src_off, size_t len,
                     HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "block read failed")
 
                 /* Grab the data out of the buffer (must be first piece of data in buffer ) */
-                HDmemcpy(buf, dset_contig->sieve_buf, len);
+                H5MM_memcpy(buf, dset_contig->sieve_buf, len);
 
                 /* Reset sieve buffer dirty flag */
                 dset_contig->sieve_dirty = FALSE;
@@ -1033,7 +1059,7 @@ H5D__contig_writevv_sieve_cb(hsize_t dst_off, hsize_t src_off, size_t len,
             } /* end if */
 
             /* Grab the data out of the buffer (must be first piece of data in buffer ) */
-            HDmemcpy(dset_contig->sieve_buf, buf, len);
+            H5MM_memcpy(dset_contig->sieve_buf, buf, len);
 
             /* Set sieve buffer dirty flag */
             dset_contig->sieve_dirty = TRUE;
@@ -1053,7 +1079,7 @@ H5D__contig_writevv_sieve_cb(hsize_t dst_off, hsize_t src_off, size_t len,
             unsigned char *base_sieve_buf = dset_contig->sieve_buf + (addr - sieve_start);
 
             /* Put the data into the sieve buffer */
-            HDmemcpy(base_sieve_buf, buf, len);
+            H5MM_memcpy(base_sieve_buf, buf, len);
 
             /* Set sieve buffer dirty flag */
             dset_contig->sieve_dirty = TRUE;
@@ -1096,7 +1122,7 @@ H5D__contig_writevv_sieve_cb(hsize_t dst_off, hsize_t src_off, size_t len,
                         HDmemmove(dset_contig->sieve_buf + len, dset_contig->sieve_buf, dset_contig->sieve_size);
 
                         /* Copy in new information (must be first in sieve buffer) */
-                        HDmemcpy(dset_contig->sieve_buf, buf, len);
+                        H5MM_memcpy(dset_contig->sieve_buf, buf, len);
 
                         /* Adjust sieve location */
                         dset_contig->sieve_loc = addr;
@@ -1105,7 +1131,7 @@ H5D__contig_writevv_sieve_cb(hsize_t dst_off, hsize_t src_off, size_t len,
                     /* Append to existing sieve buffer */
                     else {
                         /* Copy in new information */
-                        HDmemcpy(dset_contig->sieve_buf + sieve_size, buf, len);
+                        H5MM_memcpy(dset_contig->sieve_buf + sieve_size, buf, len);
                     } /* end else */
 
                     /* Adjust sieve size */
@@ -1159,7 +1185,7 @@ H5D__contig_writevv_sieve_cb(hsize_t dst_off, hsize_t src_off, size_t len,
                     } /* end if */
 
                     /* Grab the data out of the buffer (must be first piece of data in buffer ) */
-                    HDmemcpy(dset_contig->sieve_buf, buf, len);
+                    H5MM_memcpy(dset_contig->sieve_buf, buf, len);
 
                     /* Set sieve buffer dirty flag */
                     dset_contig->sieve_dirty = TRUE;
@@ -1514,7 +1540,7 @@ H5D__contig_copy(H5F_t *f_src, const H5O_storage_contig_t *storage_src,
         if(try_sieve && (addr_src >= sieve_start) && ((addr_src + src_nbytes -1) < sieve_end)) {
             unsigned char *base_sieve_buf = shared_fo->cache.contig.sieve_buf + (addr_src - sieve_start);
 
-            HDmemcpy(buf, base_sieve_buf, src_nbytes);
+            H5MM_memcpy(buf, base_sieve_buf, src_nbytes);
         } else
             /* Read raw data from source file */
             if(H5F_block_read(f_src, H5FD_MEM_DRAW, addr_src, src_nbytes, buf) < 0)
@@ -1527,7 +1553,7 @@ H5D__contig_copy(H5F_t *f_src, const H5O_storage_contig_t *storage_src,
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "datatype conversion failed")
 
             /* Copy into another buffer, to reclaim memory later */
-            HDmemcpy(reclaim_buf, buf, mem_nbytes);
+            H5MM_memcpy(reclaim_buf, buf, mem_nbytes);
 
             /* Set background buffer to all zeros */
             HDmemset(bkg, 0, buf_size);
@@ -1553,7 +1579,7 @@ H5D__contig_copy(H5F_t *f_src, const H5O_storage_contig_t *storage_src,
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "unable to copy reference attribute")
 
                 /* After fix ref, copy the new reference elements to the buffer to write out */
-                HDmemcpy(buf, bkg,  buf_size);
+                H5MM_memcpy(buf, bkg,  buf_size);
             } /* end if */
             else
                 /* Reset value to zero */

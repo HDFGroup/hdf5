@@ -286,7 +286,7 @@ H5::DataType getArr()
     *dims = 5; 
     H5::ArrayType ret; 
     ret = H5::ArrayType(H5::PredType::NATIVE_INT, 1, dims); 
-    delete[] dims; 
+    delete dims; 
     return ret;
 }
 
@@ -371,7 +371,6 @@ static void test_array_info()
     s1_t rdata[SPACE1_DIM1][ARRAY1_DIM1];   // Information read in
     hsize_t sdims1[] = {SPACE1_DIM1};
     hsize_t tdims1[] = {ARRAY1_DIM1};
-    int     nmemb;      // Number of compound members
     int     ii;         // counting variables
     hsize_t idxi, idxj, idxk; // dimension indicing variables
     H5T_class_t mclass; // Datatype class for field

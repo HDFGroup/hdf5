@@ -1397,7 +1397,7 @@ H5T_top_term_package(void)
                         if((path->conv.u.lib_func)((hid_t)FAIL, (hid_t)FAIL, &(path->cdata), (size_t)0, (size_t)0, (size_t)0, NULL, NULL) < 0) {
 #ifdef H5T_DEBUG
                             if (H5DEBUG(T)) {
-                                fprintf(H5DEBUG(T), "H5T: conversion function "
+                                HDfprintf(H5DEBUG(T), "H5T: conversion function "
                                         "0x%08lx failed to free private data for "
                                         "%s (ignored)\n",
                                         (unsigned long)(path->conv.u.lib_func), path->name);
@@ -3338,7 +3338,7 @@ H5T_copy(H5T_t *old_dt, H5T_copy_t method)
                         if (NULL == new_dt->shared->u.compnd.memb)
                             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
-                        HDmemcpy(new_dt->shared->u.compnd.memb, old_dt->shared->u.compnd.memb,
+                        H5MM_memcpy(new_dt->shared->u.compnd.memb, old_dt->shared->u.compnd.memb,
                                 new_dt->shared->u.compnd.nmembs * sizeof(H5T_cmemb_t));
                     } /* end if */
 
@@ -3404,7 +3404,7 @@ H5T_copy(H5T_t *old_dt, H5T_copy_t method)
                         (uint8_t *)H5MM_malloc(new_dt->shared->u.enumer.nalloc * new_dt->shared->size);
                 if(NULL == new_dt->shared->u.enumer.value)
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
-                HDmemcpy(new_dt->shared->u.enumer.value, old_dt->shared->u.enumer.value,
+                H5MM_memcpy(new_dt->shared->u.enumer.value, old_dt->shared->u.enumer.value,
                         new_dt->shared->u.enumer.nmembs * new_dt->shared->size);
                 for(i = 0; i < new_dt->shared->u.enumer.nmembs; i++) {
                     s = old_dt->shared->u.enumer.name[i];

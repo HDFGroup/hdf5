@@ -38,6 +38,7 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fpkg.h"             /* File access				*/
 #include "H5FDprivate.h"	/* File drivers				*/
+#include "H5MMprivate.h"	/* Memory management			*/
 #include "H5VMprivate.h"	/* Vectors and arrays 			*/
 
 
@@ -198,7 +199,7 @@ H5F__accum_read(H5F_t *f, H5FD_mem_t map_type, haddr_t addr,
                 } /* end if */
 
                 /* Copy the data out of the buffer */
-                HDmemcpy(buf, accum->buf + (addr - new_addr), size);
+                H5MM_memcpy(buf, accum->buf + (addr - new_addr), size);
 
                 /* Adjust the accumulator address & size */
                 accum->loc = new_addr;
@@ -250,7 +251,7 @@ H5F__accum_read(H5F_t *f, H5FD_mem_t map_type, haddr_t addr,
                 } /* end else */
 
                 /* Copy the dirty region to buffer */
-                HDmemcpy((unsigned char *)buf + buf_off, (unsigned char *)accum->buf + accum->dirty_off + dirty_off, overlap_size);
+                H5MM_memcpy((unsigned char *)buf + buf_off, (unsigned char *)accum->buf + accum->dirty_off + dirty_off, overlap_size);
             } /* end if */
         } /* end else */
     } /* end if */
@@ -457,7 +458,7 @@ H5F__accum_write(H5F_t *f, H5FD_mem_t map_type, haddr_t addr,
                     HDmemmove(accum->buf + size, accum->buf, accum->size);
 
                     /* Copy the new metadata at the front */
-                    HDmemcpy(accum->buf, buf, size);
+                    H5MM_memcpy(accum->buf, buf, size);
 
                     /* Set the new size & location of the metadata accumulator */
                     accum->loc = addr;
@@ -479,7 +480,7 @@ H5F__accum_write(H5F_t *f, H5FD_mem_t map_type, haddr_t addr,
                         HGOTO_ERROR(H5E_IO, H5E_CANTRESIZE, FAIL, "can't adjust metadata accumulator")
 
                     /* Copy the new metadata to the end */
-                    HDmemcpy(accum->buf + accum->size, buf, size);
+                    H5MM_memcpy(accum->buf + accum->size, buf, size);
 
                     /* Adjust the dirty region and mark accumulator dirty */
                     if(accum->dirty)
@@ -502,7 +503,7 @@ H5F__accum_write(H5F_t *f, H5FD_mem_t map_type, haddr_t addr,
                         size_t dirty_off = (size_t)(addr - accum->loc);
 
                         /* Copy the new metadata to the proper location within the accumulator */
-                        HDmemcpy(accum->buf + dirty_off, buf, size);
+                        H5MM_memcpy(accum->buf + dirty_off, buf, size);
 
                         /* Adjust the dirty region and mark accumulator dirty */
                         if(accum->dirty) {
@@ -545,7 +546,7 @@ H5F__accum_write(H5F_t *f, H5FD_mem_t map_type, haddr_t addr,
                         HDmemmove(accum->buf + size, accum->buf + old_offset, (accum->size - old_offset));
 
                         /* Copy the new metadata at the front */
-                        HDmemcpy(accum->buf, buf, size);
+                        H5MM_memcpy(accum->buf, buf, size);
 
                         /* Set the new size & location of the metadata accumulator */
                         accum->loc = addr;
@@ -582,7 +583,7 @@ H5F__accum_write(H5F_t *f, H5FD_mem_t map_type, haddr_t addr,
                         dirty_off = (size_t)(addr - accum->loc);
 
                         /* Copy the new metadata to the end */
-                        HDmemcpy(accum->buf + dirty_off, buf, size);
+                        H5MM_memcpy(accum->buf + dirty_off, buf, size);
 
                         /* Set the new size of the metadata accumulator */
                         accum->size += add_size;
@@ -625,7 +626,7 @@ H5F__accum_write(H5F_t *f, H5FD_mem_t map_type, haddr_t addr,
                         } /* end if */
 
                         /* Copy the new metadata to the buffer */
-                        HDmemcpy(accum->buf, buf, size);
+                        H5MM_memcpy(accum->buf, buf, size);
 
                         /* Set the new size & location of the metadata accumulator */
                         accum->loc = addr;
@@ -688,7 +689,7 @@ H5F__accum_write(H5F_t *f, H5FD_mem_t map_type, haddr_t addr,
                     accum->size = size;
 
                     /* Store the piece of metadata in the accumulator */
-                    HDmemcpy(accum->buf, buf, size);
+                    H5MM_memcpy(accum->buf, buf, size);
 
                     /* Adjust the dirty region and mark accumulator dirty */
                     accum->dirty_off = 0;
@@ -721,7 +722,7 @@ H5F__accum_write(H5F_t *f, H5FD_mem_t map_type, haddr_t addr,
                 accum->size = size;
 
                 /* Store the piece of metadata in the accumulator */
-                HDmemcpy(accum->buf, buf, size);
+                H5MM_memcpy(accum->buf, buf, size);
 
                 /* Adjust the dirty region and mark accumulator dirty */
                 accum->dirty_off = 0;

@@ -135,6 +135,14 @@ New Features
 
       (DER - 2018/12/08, HDFFV-10252)
 
+    - Added the ability to open files with UTF-8 file names on Windows.
+
+      The POSIX open(2) API call on Windows is limited to ASCII
+      file names. The library has been updated to convert incoming file
+      names to UTF-16 (via MultiByteToWideChar(CP_UTF8, ...) and use
+      _wopen() instead.
+
+     (DER - 2019/03/15, HDFFV-2714, HDFFV-3914, HDFFV-3895, HDFFV-8237, HDFFV-10413, HDFFV-10691)
 
     Parallel Library:
     -----------------
@@ -167,52 +175,12 @@ New Features
 
     C++ Library:
     ------------
-    - New wrappers
+    - Added new function to the C++ interface
 
-      Added the following items:
+      Added wrapper for H5Ovisit2:
+          H5Object::visit()
 
-      + Class DSetAccPropList for the dataset access property list.
-
-      + Wrapper for H5Dget_access_plist to class DataSet
-        // Gets the access property list of this dataset.
-        DSetAccPropList getAccessPlist() const;
-
-      + Wrappers for H5Pset_chunk_cache and H5Pget_chunk_cache to class DSetAccPropList
-        // Sets the raw data chunk cache parameters.
-        void setChunkCache(size_t rdcc_nslots, size_t rdcc_nbytes, double rdcc_w0)
-
-        // Retrieves the raw data chunk cache parameters.
-        void getChunkCache(size_t &rdcc_nslots, size_t &rdcc_nbytes, double &rdcc_w0)
-
-      + New operator!= to class DataType (HDFFV-10472)
-        // Determines whether two datatypes are not the same.
-        bool operator!=(const DataType& compared_type)
-
-      + Wrappers for H5Oget_info2, H5Oget_info_by_name2, and H5Oget_info_by_idx2
-        (HDFFV-10458)
-
-        // Retrieves information about an HDF5 object.
-        void getObjinfo(H5O_info_t& objinfo, unsigned fields = H5O_INFO_BASIC) const;
-
-        // Retrieves information about an HDF5 object, given its name.
-        void getObjinfo(const char* name, H5O_info_t& objinfo,
-                unsigned fields = H5O_INFO_BASIC,
-                const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
-        void getObjinfo(const H5std_string& name, H5O_info_t& objinfo,
-                unsigned fields = H5O_INFO_BASIC,
-                const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
-
-        // Retrieves information about an HDF5 object, given its index.
-        void getObjinfo(const char* grp_name, H5_index_t idx_type,
-                H5_iter_order_t order, hsize_t idx, H5O_info_t& objinfo,
-                unsigned fields = H5O_INFO_BASIC,
-                const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
-        void getObjinfo(const H5std_string& grp_name, H5_index_t idx_type,
-                H5_iter_order_t order, hsize_t idx, H5O_info_t& objinfo,
-                unsigned fields = H5O_INFO_BASIC,
-                const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
-
-      (BMR - 2018/07/22, HDFFV-10150, HDFFV-10458, HDFFV-1047)
+      (BMR - 2019/02/14, HDFFV-10532)
 
 
     Java Library:
@@ -264,6 +232,60 @@ Bug Fixes since HDF5-1.10.3 release
 
     Library
     -------
+    - Fixed a bug that would cause an error or cause fill values to be
+      incorrectly read from a chunked dataset using the "single chunk" index if
+      the data was held in cache and there was no data on disk.
+
+      (NAF - 2019/03/06)
+
+    - Fixed a bug that could cause an error or cause fill values to be
+      incorrectly read from a dataset that was written to using H5Dwrite_chunk
+      if the dataset was not closed after writing.
+
+      (NAF - 2019/03/06, HDFFV-10716)
+
+    - Fixed memory leak in scale offset filter
+
+      In a special case where the MinBits is the same as the number of bits in
+      the datatype's precision, the filter's data buffer was not freed, causing 
+      the memory usage to grow. In general the buffer was freed correctly.  The
+      Minbits are the minimal number of bits to store the data values.  Please 
+      see the reference manual for H5Pset_scaleoffset for the detail.
+
+      (RL - 2019/3/4, HDFFV-10705) 
+
+    - Fix hangs with collective metadata reads during chunked dataset I/O
+
+      In the parallel library, it was discovered that when a particular
+      sequence of operations following a pattern of:
+
+      "write to chunked dataset" -> "flush file" -> "read from dataset"
+
+      occurred with collective metadata reads enabled, hangs could be
+      observed due to certain MPI ranks not participating in the collective
+      metadata reads.
+
+      To fix the issue, collective metadata reads are now disabled during
+      chunked dataset raw data I/O.
+
+      (JTH - 2019/02/11, HDFFV-10563, HDFFV-10688)
+
+    - Performance issue when closing an object
+
+      The slow down is due to the search of the "tag_list" to find
+      out the "corked" status of an object and "uncork" it if so.
+
+      Improve porformance by skipping the search of the "tag_list"
+      if there are no "corked" objects when closing an object.
+
+      (VC - 2019/2/6)
+
+    - Fixed a potential invalid memory access and failure that could occur when
+      decoding an unknown object header message (from a future version of the
+      library).
+
+      (NAF - 2019/01/07)
+
     - Deleting attributes in dense storage
 
       The library aborts with "infinite loop closing library" after
@@ -395,6 +417,11 @@ Bug Fixes since HDF5-1.10.3 release
 
     Testing
     -------
+    - Fixed a test failure in testpar/t_dset.c caused by
+      the test trying to use the parallel filters feature
+      on MPI-2 implementations.
+
+      (JTH, 2019/2/7)
 
 Bug Fixes since HDF5-1.10.2 release
 ==================================
@@ -637,6 +664,15 @@ Bug Fixes since HDF5-1.10.2 release
 
     Testing
     -------
+    - The dt_arith test failed on IBM Power8 and Power9 machines when testing
+      conversions from or to long double types, especially when special values
+      such as infinity or NAN were involved.  In some cases the results differed
+      by extremely small amounts from those on other machines, while some other
+      tests resulted in segmentation faults.  These conversion tests with long 
+      double types have been disabled for ppc64 machines until the problems are 
+      better understood and can be properly addressed.
+    
+      (SRL - 2019/01/07, TRILAB-98)
 
 Supported Platforms
 ===================

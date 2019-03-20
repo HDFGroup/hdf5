@@ -41,6 +41,7 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5FApkg.h"		/* Fixed Arrays				*/
 #include "H5MFprivate.h"	/* File memory management		*/
+#include "H5MMprivate.h"	/* Memory management			*/
 #include "H5VMprivate.h"	/* Vectors and arrays 			*/
 #include "H5WBprivate.h"        /* Wrapped Buffers                      */
 
@@ -409,7 +410,7 @@ H5FA__cache_hdr_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED le
     HDassert(hdr);
 
     /* Magic number */
-    HDmemcpy(image, H5FA_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC);
+    H5MM_memcpy(image, H5FA_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC);
     image += H5_SIZEOF_MAGIC;
 
     /* Version # */
@@ -693,7 +694,7 @@ H5FA__cache_dblock_deserialize(const void *_image, size_t len,
 
     /* Page initialization flags */
     if(dblock->npages > 0) {
-	HDmemcpy(dblock->dblk_page_init, image, dblock->dblk_page_init_size);
+	H5MM_memcpy(dblock->dblk_page_init, image, dblock->dblk_page_init_size);
         image += dblock->dblk_page_init_size;
     } /* end if */
 
@@ -797,7 +798,7 @@ H5FA__cache_dblock_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED
     HDassert(dblock->hdr);
 
     /* Magic number */
-    HDmemcpy(image, H5FA_DBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC);
+    H5MM_memcpy(image, H5FA_DBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC);
     image += H5_SIZEOF_MAGIC;
 
     /* Version # */
@@ -812,7 +813,7 @@ H5FA__cache_dblock_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED
     /* Page init flags */
     if(dblock->npages > 0) {
         /* Store the 'page init' bitmasks */
-        HDmemcpy(image, dblock->dblk_page_init, dblock->dblk_page_init_size);
+        H5MM_memcpy(image, dblock->dblk_page_init, dblock->dblk_page_init_size);
         image += dblock->dblk_page_init_size;
     } /* end if */
 

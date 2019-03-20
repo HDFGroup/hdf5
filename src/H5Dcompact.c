@@ -80,6 +80,7 @@ const H5D_layout_ops_t H5D_LOPS_COMPACT[1] = {{
     H5D__compact_construct,
     NULL,
     H5D__compact_is_space_alloc,
+    NULL,
     H5D__compact_io_init,
     H5D__contig_read,
     H5D__contig_write,
@@ -528,7 +529,7 @@ H5D__compact_copy(H5F_t *f_src, H5O_storage_compact_t *_storage_src, H5F_t *f_ds
         if(NULL == (buf = H5FL_BLK_MALLOC(type_conv, buf_size)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
-        HDmemcpy(buf, storage_src->buf, storage_src->size);
+        H5MM_memcpy(buf, storage_src->buf, storage_src->size);
 
         /* allocate temporary bkg buff for data conversion */
         if(NULL == (bkg = H5FL_BLK_MALLOC(type_conv, buf_size)))
@@ -539,7 +540,7 @@ H5D__compact_copy(H5F_t *f_src, H5O_storage_compact_t *_storage_src, H5F_t *f_ds
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "datatype conversion failed")
 
         /* Copy into another buffer, to reclaim memory later */
-        HDmemcpy(reclaim_buf, buf, buf_size);
+        H5MM_memcpy(reclaim_buf, buf, buf_size);
 
         /* Set background buffer to all zeros */
         HDmemset(bkg, 0, buf_size);
@@ -548,7 +549,7 @@ H5D__compact_copy(H5F_t *f_src, H5O_storage_compact_t *_storage_src, H5F_t *f_ds
         if(H5T_convert(tpath_mem_dst, tid_mem, tid_dst, nelmts, (size_t)0, (size_t)0, buf, bkg) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "datatype conversion failed")
 
-        HDmemcpy(storage_dst->buf, buf, storage_dst->size);
+        H5MM_memcpy(storage_dst->buf, buf, storage_dst->size);
 
         if(H5D_vlen_reclaim(tid_mem, buf_space, reclaim_buf) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_BADITER, FAIL, "unable to reclaim variable-length data")
@@ -573,11 +574,11 @@ H5D__compact_copy(H5F_t *f_src, H5O_storage_compact_t *_storage_src, H5F_t *f_ds
         } /* end if */
         else
             /* Type conversion not necessary */
-            HDmemcpy(storage_dst->buf, storage_src->buf, storage_src->size);
+            H5MM_memcpy(storage_dst->buf, storage_src->buf, storage_src->size);
     } /* end if */
     else
         /* Type conversion not necessary */
-        HDmemcpy(storage_dst->buf, storage_src->buf, storage_src->size);
+        H5MM_memcpy(storage_dst->buf, storage_src->buf, storage_src->size);
 
     /* Mark destination buffer as dirty */
     storage_dst->dirty = TRUE;

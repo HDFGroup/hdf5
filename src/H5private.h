@@ -1104,12 +1104,8 @@ typedef off_t               h5_stat_size_t;
 #ifndef HDmemcmp
     #define HDmemcmp(X,Y,Z)    memcmp(X,Y,Z)
 #endif /* HDmemcmp */
-/*
- * The (char*) casts are required for the DEC when optimizations are turned
- * on and the source and/or destination are not aligned.
- */
 #ifndef HDmemcpy
-    #define HDmemcpy(X,Y,Z)    memcpy((char*)(X),(const char*)(Y),Z)
+    #define HDmemcpy(X,Y,Z)    memcpy(X,Y,Z)
 #endif /* HDmemcpy */
 #ifndef HDmemmove
     #define HDmemmove(X,Y,Z)  memmove((char*)(X),(const char*)(Y),Z)
@@ -1156,6 +1152,9 @@ typedef off_t               h5_stat_size_t;
 #ifndef HDpowf
     #define HDpowf(X,Y)   powf(X,Y)
 #endif /* HDpowf */
+#ifndef HDpread
+    #define HDpread(F,B,C,O)    pread(F,B,C,O)
+#endif /* HDpread */
 #ifndef HDprintf
     #define HDprintf(...)   HDfprintf(stdout, __VA_ARGS__)
 #endif /* HDprintf */
@@ -1168,6 +1167,9 @@ typedef off_t               h5_stat_size_t;
 #ifndef HDputs
     #define HDputs(S)    puts(S)
 #endif /* HDputs */
+#ifndef HDpwrite
+    #define HDpwrite(F,B,C,O)    pwrite(F,B,C,O)
+#endif /* HDpwrite */
 #ifndef HDqsort
     #define HDqsort(M,N,Z,F)  qsort(M,N,Z,F)
 #endif /* HDqsort*/
@@ -1334,8 +1336,9 @@ typedef off_t               h5_stat_size_t;
         #define HDsrandom(S)    srand(S)
     #endif /* HDsrandom */
 #endif /* H5_HAVE_RAND_R */
-/* sscanf() variable arguments */
-
+#ifndef HDsscanf
+    #define HDsscanf(S,FMT,...)   sscanf(S,FMT,__VA_ARGS__)
+#endif /* HDsscanf */
 #ifndef HDstrcat
     #define HDstrcat(X,Y)    strcat(X,Y)
 #endif /* HDstrcat */

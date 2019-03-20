@@ -82,7 +82,7 @@ static herr_t H5C__trace_write_protect_entry_log_msg(void *udata, const H5C_cach
 static herr_t H5C__trace_write_resize_entry_log_msg(void *udata, const H5C_cache_entry_t *entry, size_t new_size, herr_t fxn_ret_value);
 static herr_t H5C__trace_write_unpin_entry_log_msg(void *udata, const H5C_cache_entry_t *entry, herr_t fxn_ret_value);
 static herr_t H5C__trace_write_destroy_fd_log_msg(void *udata, const H5C_cache_entry_t *parent, const H5C_cache_entry_t *child, herr_t fxn_ret_value);
-static herr_t H5C__trace_write_unprotect_entry_log_msg(void *udata, const H5C_cache_entry_t *entry, int type_id, unsigned flags, herr_t fxn_ret_value);
+static herr_t H5C__trace_write_unprotect_entry_log_msg(void *udata, haddr_t address, int type_id, unsigned flags, herr_t fxn_ret_value);
 static herr_t H5C__trace_write_set_cache_config_log_msg(void *udata, const H5AC_cache_config_t *config, herr_t fxn_ret_value);
 static herr_t H5C__trace_write_remove_entry_log_msg(void *udata, const H5C_cache_entry_t *entry, herr_t fxn_ret_value);
 
@@ -872,7 +872,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5C__trace_write_unprotect_entry_log_msg(void *udata, const H5C_cache_entry_t *entry,
+H5C__trace_write_unprotect_entry_log_msg(void *udata, haddr_t address,
     int type_id, unsigned flags, herr_t fxn_ret_value)
 {
     H5C_log_trace_udata_t *trace_udata = (H5C_log_trace_udata_t *)(udata);
@@ -883,11 +883,10 @@ H5C__trace_write_unprotect_entry_log_msg(void *udata, const H5C_cache_entry_t *e
     /* Sanity checks */
     HDassert(trace_udata);
     HDassert(trace_udata->message);
-    HDassert(entry);
 
     /* Create the log message string */
     HDsnprintf(trace_udata->message, H5C_MAX_TRACE_LOG_MSG_SIZE, "H5AC_unprotect 0x%lx %d 0x%x %d\n", 
-            (unsigned long)(entry->addr), type_id, flags, (int)fxn_ret_value);
+            (unsigned long)(address), type_id, flags, (int)fxn_ret_value);
 
     /* Write the log message to the file */
     if(H5C__trace_write_log_message(trace_udata) < 0)

@@ -267,6 +267,9 @@
 /* Define if we have parallel support */
 #cmakedefine H5_HAVE_PARALLEL @H5_HAVE_PARALLEL@
 
+/* Define if both pread and pwrite exist. */
+#cmakedefine H5_HAVE_PREADWRITE @H5_HAVE_PREADWRITE@
+
 /* Define to 1 if you have the <pthread.h> header file. */
 #cmakedefine H5_HAVE_PTHREAD_H @H5_HAVE_PTHREAD_H@
 
@@ -387,8 +390,13 @@
 /* Define to 1 if you have the <szlib.h> header file. */
 #cmakedefine H5_HAVE_SZLIB_H @H5_HAVE_SZLIB_H@
 
+#if defined(_WIN32) && !defined(H5_BUILT_AS_DYNAMIC_LIB)
+/* Not supported on WIN32 platforms with static linking */
+/* #undef H5_HAVE_THREADSAFE */
+#else
 /* Define if we have thread safe support */
-#cmakedefine H5_HAVE_THREADSAFE @H5_HAVE_THREADSAFE@
+# cmakedefine H5_HAVE_THREADSAFE @H5_HAVE_THREADSAFE@
+#endif
 
 /* Define if timezone is a global variable */
 #cmakedefine H5_HAVE_TIMEZONE @H5_HAVE_TIMEZONE@

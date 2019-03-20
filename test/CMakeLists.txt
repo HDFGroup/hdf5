@@ -45,7 +45,7 @@ if (BUILD_SHARED_LIBS)
       INTERFACE "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
   )
   target_compile_definitions(${HDF5_TEST_LIBSH_TARGET}
-      PUBLIC "H5_BUILT_AS_DYNAMIC_LIB" $<$<BOOL:${HDF5_ENABLE_THREADSAFE}>:H5_HAVE_THREADSAFE>
+      PUBLIC "H5_BUILT_AS_DYNAMIC_LIB"
   )
   TARGET_C_PROPERTIES (${HDF5_TEST_LIBSH_TARGET} SHARED)
   target_link_libraries (${HDF5_TEST_LIBSH_TARGET}
@@ -293,9 +293,9 @@ set (H5_TESTS_MULTIPLE
     ttsafe
 )
 # Only build single source tests here
-foreach (test ${H5_TESTS})
-  if (NOT ${test} IN_LIST H5_TESTS_MULTIPLE)
-    ADD_H5_EXE(${test})
+foreach (h5_test ${H5_TESTS})
+  if (NOT h5_test IN_LIST H5_TESTS_MULTIPLE)
+    ADD_H5_EXE(${h5_test})
   endif ()
 endforeach ()
 
@@ -352,12 +352,17 @@ add_executable (ttsafe ${ttsafe_SOURCES})
 target_include_directories(ttsafe PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
 TARGET_C_PROPERTIES (ttsafe STATIC)
 target_link_libraries (ttsafe PRIVATE ${HDF5_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
+if (NOT WIN32)
+  target_link_libraries (ttsafe
+    PRIVATE $<$<BOOL:${HDF5_ENABLE_THREADSAFE}>:Threads::Threads>
+  )
+endif ()
 set_target_properties (ttsafe PROPERTIES FOLDER test)
 if (BUILD_SHARED_LIBS)
   add_executable (ttsafe-shared ${ttsafe_SOURCES})
   target_include_directories(ttsafe-shared PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
   TARGET_C_PROPERTIES (ttsafe-shared SHARED)
-  target_link_libraries (ttsafe-shared PRIVATE ${HDF5_TEST_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
+  target_link_libraries (ttsafe-shared PRIVATE ${HDF5_TEST_LIBSH_TARGET} ${HDF5_LIBSH_TARGET} $<$<BOOL:${HDF5_ENABLE_THREADSAFE}>:Threads::Threads>)
   set_target_properties (ttsafe-shared PROPERTIES FOLDER test)
 endif ()
 
@@ -378,15 +383,15 @@ set (H5_CHECK_TESTS
     flushrefresh
 )
 
-foreach (test ${H5_CHECK_TESTS})
-  ADD_H5_EXE(${test})
+foreach (h5_test ${H5_CHECK_TESTS})
+  ADD_H5_EXE(${h5_test})
 endforeach ()
 
 #-- Adding test for libinfo
 set (GREP_RUNNER ${PROJECT_BINARY_DIR}/GrepRunner.cmake)
 file (WRITE ${GREP_RUNNER}
   "file (STRINGS \${TEST_PROGRAM} TEST_RESULT REGEX \"SUMMARY OF THE HDF5 CONFIGURATION\")
-if (\${TEST_RESULT} STREQUAL \"0\")
+if (NOT TEST_RESULT)
   message (FATAL_ERROR \"Failed: The output: \${TEST_RESULT} of \${TEST_PROGRAM} did not contain SUMMARY OF THE HDF5 CONFIGURATION\")
 else ()
   message (STATUS \"COMMAND Result: \${TEST_RESULT}\")
@@ -411,8 +416,8 @@ set (H5_SWMR_TESTS
     swmr_writer
 )
 
-foreach (test ${H5_SWMR_TESTS})
-  ADD_H5_EXE(${test})
+foreach (h5_test ${H5_SWMR_TESTS})
+  ADD_H5_EXE(${h5_test})
 endforeach ()
 
 set (H5_VDS_SWMR_TESTS
@@ -421,8 +426,8 @@ set (H5_VDS_SWMR_TESTS
     vds_swmr_writer
 )
 
-foreach (test ${H5_VDS_SWMR_TESTS})
-  ADD_H5_EXE(${test})
+foreach (h5_test ${H5_VDS_SWMR_TESTS})
+  ADD_H5_EXE(${h5_test})
 endforeach ()
 
 #-- Adding test for accum_swmr_reader

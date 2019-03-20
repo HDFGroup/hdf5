@@ -518,7 +518,8 @@ H5D__read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
      * has been overwritten.  So just proceed in reading.
      */
     if(nelmts > 0 && dataset->shared->dcpl_cache.efl.nused == 0 &&
-            !(*dataset->shared->layout.ops->is_space_alloc)(&dataset->shared->layout.storage)) {
+            !(*dataset->shared->layout.ops->is_space_alloc)(&dataset->shared->layout.storage) &&
+            !(dataset->shared->layout.ops->is_data_cached && (*dataset->shared->layout.ops->is_data_cached)(dataset->shared))) {
         H5D_fill_value_t fill_status;   /* Whether/How the fill value is defined */
 
         /* Retrieve dataset's fill-value properties */
@@ -550,6 +551,7 @@ H5D__read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
     /* Sanity check that space is allocated, if there are elements */
     if(nelmts > 0)
         HDassert((*dataset->shared->layout.ops->is_space_alloc)(&dataset->shared->layout.storage)
+                || (dataset->shared->layout.ops->is_data_cached && (*dataset->shared->layout.ops->is_data_cached)(dataset->shared))
                 || dataset->shared->dcpl_cache.efl.nused > 0
                 || dataset->shared->layout.type == H5D_COMPACT);
 
@@ -1031,16 +1033,13 @@ H5D__typeinfo_init(const H5D_t *dset, hid_t mem_type_id, hbool_t do_write,
         if(type_info->request_nelmts == 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "temporary buffer max size is too small")
 
-        /*
-         * Get a temporary buffer for type conversion unless the app has already
+        /* Get a temporary buffer for type conversion unless the app has already
          * supplied one through the xfer properties. Instead of allocating a
-         * buffer which is the exact size, we allocate the target size.  The
-         * malloc() is usually less resource-intensive if we allocate/free the
-         * same size over and over.
+         * buffer which is the exact size, we allocate the target size.
          */
         if(NULL == (type_info->tconv_buf = (uint8_t *)tconv_buf)) {
             /* Allocate temporary buffer */
-            if(NULL == (type_info->tconv_buf = H5FL_BLK_MALLOC(type_conv, target_size)))
+            if(NULL == (type_info->tconv_buf = H5FL_BLK_CALLOC(type_conv, target_size)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion")
             type_info->tconv_buf_allocated = TRUE;
         } /* end if */

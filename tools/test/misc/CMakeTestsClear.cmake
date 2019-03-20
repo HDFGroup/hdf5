@@ -94,7 +94,7 @@
                   testfiles/${testname}.out
                   testfiles/${testname}.out.err
       )
-      if (NOT "${last_test}" STREQUAL "")
+      if (last_test)
         set_tests_properties (H5CLEAR_CMP-${testname}-clear-objects PROPERTIES DEPENDS ${last_test})
       endif ()
       add_test (
@@ -122,7 +122,7 @@
                   testfiles/${testname}.out
                   testfiles/${testname}.out.err
       )
-      if (NOT "${last_test}" STREQUAL "")
+      if (last_test)
         set_tests_properties (H5CLEAR_CMP-${testname}-clear-objects PROPERTIES DEPENDS ${last_test})
       endif ()
       add_test (
@@ -152,7 +152,7 @@
                   testfiles/${testname}.out.err
                   testfiles/${testfile}
       )
-      if (NOT "${last_test}" STREQUAL "")
+      if (last_test)
         set_tests_properties (H5CLEAR_CMP-${testname}-clear-objects PROPERTIES DEPENDS ${last_test})
       endif ()
       add_test (
@@ -188,7 +188,7 @@
                   testfiles/${testname}.out.err
                   testfiles/${testfile}
       )
-      if (NOT "${last_test}" STREQUAL "")
+      if (last_test)
         set_tests_properties (H5CLEAR_CMP-${testname}-clear-objects PROPERTIES DEPENDS ${last_test})
       endif ()
       add_test (
@@ -223,7 +223,7 @@
       )
       set_tests_properties (H5CLEAR_RET-${testname} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
       set_tests_properties (H5CLEAR_RET-${testname} PROPERTIES WILL_FAIL "${resultcode}")
-      if (NOT "${last_test}" STREQUAL "")
+      if (last_test)
         set_tests_properties (H5CLEAR_RET-${testname} PROPERTIES DEPENDS ${last_test})
       endif ()
       set (last_test "H5CLEAR_RET-${testname}")
@@ -242,7 +242,7 @@
                   testfiles/${testname}_after_size.out.err
                   testfiles/${testname}.h5
       )
-      if (NOT "${last_test}" STREQUAL "")
+      if (last_test)
         set_tests_properties (H5CLEAR_FILESIZE_TEST-${testname}-clear-objects PROPERTIES DEPENDS ${last_test})
       endif ()
       add_test (
@@ -302,7 +302,7 @@
               -E copy_if_different
               "${PROJECT_SOURCE_DIR}/testfiles/${testfile}.h5" "${PROJECT_BINARY_DIR}/testfiles/${testfile}.h5"
       )
-      if (NOT "${last_test}" STREQUAL "")
+      if (last_test)
         set_tests_properties (H5CLEAR-clr_open_chk-copy_${testname}.h5 PROPERTIES DEPENDS ${last_test})
       endif ()
       set (last_test "H5CLEAR-clr_open_chk-copy_${testname}.h5")
@@ -312,7 +312,7 @@
       add_test (NAME H5CLEAR-clr_open_chk-${testname}_${resultcode} COMMAND $<TARGET_FILE:clear_open_chk> ${testfile}.h5)
       set_tests_properties (H5CLEAR-clr_open_chk-${testname}_${resultcode} PROPERTIES WILL_FAIL "${resultcode}")
       set_tests_properties (H5CLEAR-clr_open_chk-${testname}_${resultcode} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
-      if (NOT "${last_test}" STREQUAL "")
+      if (last_test)
         set_tests_properties (H5CLEAR-clr_open_chk-${testname}_${resultcode} PROPERTIES DEPENDS ${last_test})
       endif ()
 
@@ -356,7 +356,7 @@ if (HDF5_ENABLE_USING_MEMCHECKER)
         mod_h5clear_mdc_image2.h5
         ${HDF5_TEST_FILES}
   )
-  if (NOT "${last_test}" STREQUAL "")
+  if (last_test)
     set_tests_properties (H5CLEAR-clearall-objects PROPERTIES DEPENDS ${last_test})
   endif ()
   set (last_test "H5CLEAR-clearall-objects")
@@ -368,7 +368,7 @@ if (HDF5_ENABLE_USING_MEMCHECKER)
           -E copy_if_different
           "${PROJECT_SOURCE_DIR}/testfiles/${h5_file}" "${PROJECT_BINARY_DIR}/testfiles/${h5_file}"
     )
-    if (NOT "${last_test}" STREQUAL "")
+    if (last_test)
       set_tests_properties (H5CLEAR-copy_${h5_file} PROPERTIES DEPENDS ${last_test})
     endif ()
     set (last_test "H5CLEAR-copy_${h5_file}")
@@ -381,7 +381,7 @@ if (HDF5_ENABLE_USING_MEMCHECKER)
           -E copy_if_different
           "${PROJECT_SOURCE_DIR}/testfiles/${h5_file}" "${PROJECT_BINARY_DIR}/testfiles/orig_${h5_file}"
     )
-    if (NOT "${last_test}" STREQUAL "")
+    if (last_test)
       set_tests_properties (H5CLEAR-copy_orig_${h5_file} PROPERTIES DEPENDS ${last_test})
     endif ()
     set (last_test "H5CLEAR-copy_orig_${h5_file}")
@@ -393,7 +393,7 @@ if (HDF5_ENABLE_USING_MEMCHECKER)
           -E copy_if_different
           "${PROJECT_SOURCE_DIR}/testfiles/mod_h5clear_mdc_image.h5" "${PROJECT_BINARY_DIR}/testfiles/mod_h5clear_mdc_image2.h5"
   )
-  if (NOT "${last_test}" STREQUAL "")
+  if (last_test)
     set_tests_properties (H5CLEAR-copy_mod_h5clr_mdc_image2.h5 PROPERTIES DEPENDS ${last_test})
   endif ()
   set (last_test "H5CLEAR-copy_mod_h5clr_mdc_image2.h5")
