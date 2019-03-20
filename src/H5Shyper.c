@@ -4877,37 +4877,35 @@ H5S__hyper_spans_shape_same_helper(const H5S_hyper_span_info_t *span_info1,
             /* Check for both spans being NULL */
             if(span1 == NULL && span2 == NULL)
                 HGOTO_DONE(TRUE)
-            else {
-                /* Check for one span being NULL */
-                if(span1 == NULL || span2 == NULL)
-                    HGOTO_DONE(FALSE)
-                else {
-                    /* Check if the actual low & high span information is the same */
-                    if((hsize_t)((hssize_t)span1->low + offset[0]) != span2->low || (hsize_t)((hssize_t)span1->high + offset[0]) != span2->high)
+
+            /* Check for one span being NULL */
+            if(span1 == NULL || span2 == NULL)
+                HGOTO_DONE(FALSE)
+
+            /* Check if the actual low & high span information is the same */
+            if((hsize_t)((hssize_t)span1->low + offset[0]) != span2->low || (hsize_t)((hssize_t)span1->high + offset[0]) != span2->high)
+                HGOTO_DONE(FALSE)
+
+            /* Check for down tree for this span */
+            if(span1->down != NULL || span2->down != NULL) {
+                /* If the rest of the span trees have a zero offset, use the faster comparison routine */
+                if(rest_zeros[0]) {
+                    if(!H5S__hyper_cmp_spans(span1->down, span2->down))
                         HGOTO_DONE(FALSE)
                     else {
-                        if(span1->down != NULL || span2->down != NULL) {
-                            /* If the rest of the span trees have a zero offset, use the faster comparison routine */
-                            if(rest_zeros[0]) {
-                                if(!H5S__hyper_cmp_spans(span1->down, span2->down))
-                                    HGOTO_DONE(FALSE)
-                                else {
-                                    /* Keep going... */
-                                } /* end else */
-                            } /* end if */
-                            else {
-                                if(!H5S__hyper_spans_shape_same_helper(span1->down, span2->down, &offset[1], &rest_zeros[1]))
-                                    HGOTO_DONE(FALSE)
-                                else {
-                                    /* Keep going... */
-                                } /* end else */
-                            } /* end else */
-                        } /* end if */
-                        else {
-                            /* Keep going... */
-                        } /* end else */
+                        /* Keep going... */
+                    } /* end else */
+                } /* end if */
+                else {
+                    if(!H5S__hyper_spans_shape_same_helper(span1->down, span2->down, &offset[1], &rest_zeros[1]))
+                        HGOTO_DONE(FALSE)
+                    else {
+                        /* Keep going... */
                     } /* end else */
                 } /* end else */
+            } /* end if */
+            else {
+                /* Keep going... */
             } /* end else */
 
             /* Advance to the next nodes in the span list */
