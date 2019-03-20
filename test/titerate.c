@@ -946,7 +946,7 @@ find_err_msg_cb(unsigned n, const H5E_error2_t *err_desc, void *_client_data)
 
     if (searched_err == NULL)
         return -1;
-    
+
     /* If the searched error message is found, stop the iteration */
     if (err_desc->desc != NULL && strcmp(err_desc->desc, searched_err->message) == 0)
     {

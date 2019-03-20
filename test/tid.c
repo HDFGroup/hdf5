@@ -224,6 +224,21 @@ static int basic_id_test(void)
             goto out;
     H5E_END_TRY
 
+    /* Test that H5Itype_exists cannot be called on library types because
+     * it is a public function
+     */
+    H5E_BEGIN_TRY
+        err = H5Itype_exists(H5I_GROUP);
+        if(err >= 0)
+            goto out;
+    H5E_END_TRY
+
+    H5E_BEGIN_TRY
+        err = H5Itype_exists(H5I_ATTR);
+        if(err >= 0)
+            goto out;
+    H5E_END_TRY
+
     return 0;
 
 out:
