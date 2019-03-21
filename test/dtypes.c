@@ -6837,8 +6837,8 @@ test_delete_obj_named(hid_t fapl)
 
     /* Loop through all valid the combinations of low/high library format bounds,
        to test delete objects that use named datatypes through different file IDs */
-    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
-        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
+    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, low)) {
+        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, high)) {
 
             /* Skip invalid low/high combination */
             if ((high == H5F_LIBVER_EARLIEST) || (low > high))
@@ -6938,8 +6938,8 @@ test_delete_obj_named_fileid(hid_t fapl)
     h5_fixname(FILENAME[9], fapl2, filename2, sizeof filename2);
 
     /* Loop through all the combinations of low/high library format bounds */
-    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
-        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
+    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, low)) {
+        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, high)) {
 
             /* Skip invalid low/high combination */
             if ((high == H5F_LIBVER_EARLIEST) || (low > high))
@@ -7691,19 +7691,19 @@ test_versionbounds(void)
     ret = H5Tenum_insert(enum_type, "RED", &enum_val);
     if (ret < 0) TEST_ERROR
 
-    enum_val++;
+    H5_INC_ENUM(color_t, enum_val);
     ret = H5Tenum_insert(enum_type, "GREEN", &enum_val);
     if (ret < 0) TEST_ERROR
 
-    enum_val++;
+    H5_INC_ENUM(color_t, enum_val);
     ret = H5Tenum_insert(enum_type, "BLUE", &enum_val);
     if (ret < 0) TEST_ERROR
 
-    enum_val++;
+    H5_INC_ENUM(color_t, enum_val);
     ret = H5Tenum_insert(enum_type, "ORANGE", &enum_val);
     if (ret < 0) TEST_ERROR
 
-    enum_val++;
+    H5_INC_ENUM(color_t, enum_val);
     ret = H5Tenum_insert(enum_type, "YELLOW", &enum_val);
     if (ret < 0) TEST_ERROR
 
@@ -7727,8 +7727,8 @@ test_versionbounds(void)
        skipping invalid combinations */
     /* Create the file, create and write to a dataset with compound datatype */
     /* Verify the dataset's datatype and its members */
-    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
-        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
+    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, low)) {
+        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, high)) {
 
             /* Set version bounds */
             H5E_BEGIN_TRY {
