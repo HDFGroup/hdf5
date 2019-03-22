@@ -281,12 +281,6 @@ typedef struct H5CX_t {
     /* Cached DCPL properties */
     hbool_t   do_min_dset_ohdr;   /* Whether to minimize dataset object header */
     hbool_t   do_min_dset_ohdr_valid;   /* Whether minimize dataset object header flag is valid */
-    hid_t     vl_prop_dset_type_id;
-    hbool_t   vl_prop_dset_type_id_valid;
-    hid_t     vl_prop_dset_space_id;
-    hbool_t   vl_prop_dset_space_id_valid;
-    hid_t     vl_prop_dset_lcpl_id;
-    hbool_t   vl_prop_dset_lcpl_id_valid;
 
     /* Cached DAPL properties */
     char *extfile_prefix;
@@ -352,9 +346,6 @@ typedef struct H5CX_lapl_cache_t {
 /* (Same as the cached DXPL struct, above, except for the default DCPL) */
 typedef struct H5CX_dcpl_cache_t {
     hbool_t do_min_dset_ohdr;   /* Whether to minimize dataset object header */
-    hid_t   vl_prop_dset_type_id;
-    hid_t   vl_prop_dset_space_id;
-    hid_t   vl_prop_dset_lcpl_id;
 } H5CX_dcpl_cache_t;
 
 /* Typedef for cached default dataset access property list information */
@@ -539,14 +530,6 @@ H5CX__init_package(void)
     /* Get flag to indicate whether to minimize dataset object header */
     if(H5P_get(dc_plist, H5D_CRT_MIN_DSET_HDR_SIZE_NAME, &H5CX_def_dcpl_cache.do_min_dset_ohdr) < 0)
         HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve dataset minimize flag")
-
-    if(H5P_get(dc_plist, H5VL_PROP_DSET_TYPE_ID, &H5CX_def_dcpl_cache.vl_prop_dset_type_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for datatype id")
-    if(H5P_get(dc_plist, H5VL_PROP_DSET_SPACE_ID, &H5CX_def_dcpl_cache.vl_prop_dset_space_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for space id")
-    if(H5P_get(dc_plist, H5VL_PROP_DSET_LCPL_ID, &H5CX_def_dcpl_cache.vl_prop_dset_lcpl_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for lcpl id")
-
 
 
     /* Reset the "default DAPL cache" information */
@@ -2388,112 +2371,6 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5CX_get_vl_prop_dset_type_id
- *
- * Purpose:     Retrieves the datatype ID of the dataset for VOL connector
- *
- * Return:      Non-negative on success / Negative on failure
- *
- * Programmer:  Raymond Lu
- *              March 12, 2019
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5CX_get_vl_prop_dset_type_id(hid_t *dset_type_id)
-{
-    H5CX_node_t **head = H5CX_get_my_context();  /* Get the pointer to the head of the API context, for this thread */
-    herr_t ret_value = SUCCEED;         /* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    /* Sanity check */
-    HDassert(dset_type_id);
-    HDassert(head && *head);
-    HDassert(H5P_DEFAULT != (*head)->ctx.dcpl_id);
-
-    H5CX_RETRIEVE_PROP_VALID(dcpl, H5P_DATASET_CREATE_DEFAULT, H5VL_PROP_DSET_TYPE_ID, vl_prop_dset_type_id);
-
-    /* Get the value */
-    *dset_type_id = (*head)->ctx.vl_prop_dset_type_id;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5CX_get_vl_prop_dset_type_id */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5CX_get_vl_prop_dset_space_id
- *
- * Purpose:     Retrieves the space ID of the dataset for VOL connector
- *
- * Return:      Non-negative on success / Negative on failure
- *
- * Programmer:  Raymond Lu
- *              March 12, 2019
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5CX_get_vl_prop_dset_space_id(hid_t *dset_space_id)
-{
-    H5CX_node_t **head = H5CX_get_my_context();  /* Get the pointer to the head of the API context, for this thread */
-    herr_t ret_value = SUCCEED;         /* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    /* Sanity check */
-    HDassert(dset_space_id);
-    HDassert(head && *head);
-    HDassert(H5P_DEFAULT != (*head)->ctx.dcpl_id);
-
-    H5CX_RETRIEVE_PROP_VALID(dcpl, H5P_DATASET_CREATE_DEFAULT, H5VL_PROP_DSET_SPACE_ID, vl_prop_dset_space_id);
-
-    /* Get the value */
-    *dset_space_id = (*head)->ctx.vl_prop_dset_space_id;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5CX_get_vl_prop_dset_space_id */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5CX_get_vl_prop_dset_space_id
- *
- * Purpose:     Retrieves the LCPL ID of the dataset for VOL connector
- *
- * Return:      Non-negative on success / Negative on failure
- *
- * Programmer:  Raymond Lu
- *              March 12, 2019
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5CX_get_vl_prop_dset_lcpl_id(hid_t *dset_lcpl_id)
-{
-    H5CX_node_t **head = H5CX_get_my_context();  /* Get the pointer to the head of the API context, for this thread */
-    herr_t ret_value = SUCCEED;         /* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    /* Sanity check */
-    HDassert(dset_lcpl_id);
-    HDassert(head && *head);
-    HDassert(H5P_DEFAULT != (*head)->ctx.dcpl_id);
-
-    H5CX_RETRIEVE_PROP_VALID(dcpl, H5P_DATASET_CREATE_DEFAULT, H5VL_PROP_DSET_TYPE_ID, vl_prop_dset_lcpl_id);
-
-    /* Get the value */
-    *dset_lcpl_id = (*head)->ctx.vl_prop_dset_lcpl_id;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5CX_get_vl_prop_dset_lcpl_id */
-
-
-
-/*-------------------------------------------------------------------------
  * Function:    H5CX_get_ext_file_prefix
  *
  * Purpose:     Retrieves the prefix for external file
@@ -2876,106 +2753,6 @@ H5CX_set_nlinks(size_t nlinks)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5CX_set_nlinks() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5CX_set_vl_prop_dset_type_id
- *
- * Purpose:     Sets the datatype ID of the dataset for the current API call context.
- *
- * Return:      Non-negative on success / Negative on failure
- *
- * Programmer:  Raymond Lu
- *              March 12, 2019
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5CX_set_vl_prop_dset_type_id(hid_t dset_type_id)
-{
-    H5CX_node_t **head = H5CX_get_my_context();  /* Get the pointer to the head of the API context, for this thread */
-    herr_t ret_value = SUCCEED;         /* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    /* Sanity check */
-    HDassert(head && *head);
-
-    /* Set the API context value */
-    (*head)->ctx.vl_prop_dset_type_id = dset_type_id;
-
-    /* Mark the value as valid */
-    (*head)->ctx.vl_prop_dset_type_id_valid = TRUE;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5CX_set_vl_prop_dset_type_id */
-
-/*-------------------------------------------------------------------------
- * Function:    H5CX_set_vl_prop_dset_space_id
- *
- * Purpose:     Sets the data space ID of the dataset for the current API call context.
- *
- * Return:      Non-negative on success / Negative on failure
- *
- * Programmer:  Raymond Lu
- *              March 12, 2019
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5CX_set_vl_prop_dset_space_id(hid_t dset_space_id)
-{
-    H5CX_node_t **head = H5CX_get_my_context();  /* Get the pointer to the head of the API context, for this thread */
-    herr_t ret_value = SUCCEED;         /* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    /* Sanity check */
-    HDassert(head && *head);
-
-    /* Set the API context value */
-    (*head)->ctx.vl_prop_dset_space_id = dset_space_id;
-
-    /* Mark the value as valid */
-    (*head)->ctx.vl_prop_dset_space_id_valid = TRUE;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5CX_set_vl_prop_dset_space_id */
-
-/*-------------------------------------------------------------------------
- * Function:    H5CX_set_vl_prop_dset_lcpl_id
- *
- * Purpose:     Sets the LCPL ID of the dataset for the current API call context.
- *
- * Return:      Non-negative on success / Negative on failure
- *
- * Programmer:  Raymond Lu
- *              March 12, 2019
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5CX_set_vl_prop_dset_lcpl_id(hid_t dset_lcpl_id)
-{
-    H5CX_node_t **head = H5CX_get_my_context();  /* Get the pointer to the head of the API context, for this thread */
-    herr_t ret_value = SUCCEED;         /* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    /* Sanity check */
-    HDassert(head && *head);
-
-    /* Set the API context value */
-    (*head)->ctx.vl_prop_dset_lcpl_id = dset_lcpl_id;
-
-    /* Mark the value as valid */
-    (*head)->ctx.vl_prop_dset_lcpl_id_valid = TRUE;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-}
 
 #ifdef H5_HAVE_PARALLEL
 
