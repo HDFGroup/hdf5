@@ -433,8 +433,8 @@ static int do_layouts( hid_t fapl )
 
     TESTING("storage layout use - tested with all low/high library format bounds");
     /* Loop through all the combinations of low/high library format bounds */
-    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
-        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
+    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, low)) {
+        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, high)) {
 
             /* Copy plist to use locally to avoid modifying the original */
             new_fapl = H5Pcopy(fapl);

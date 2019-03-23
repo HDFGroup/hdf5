@@ -6837,8 +6837,8 @@ test_delete_obj_named(hid_t fapl)
 
     /* Loop through all valid the combinations of low/high library format bounds,
        to test delete objects that use named datatypes through different file IDs */
-    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
-        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
+    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, low)) {
+        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, high)) {
 
             /* Skip invalid low/high combination */
             if ((high == H5F_LIBVER_EARLIEST) || (low > high))
@@ -6938,8 +6938,8 @@ test_delete_obj_named_fileid(hid_t fapl)
     h5_fixname(FILENAME[9], fapl2, filename2, sizeof filename2);
 
     /* Loop through all the combinations of low/high library format bounds */
-    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
-        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
+    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, low)) {
+        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, high)) {
 
             /* Skip invalid low/high combination */
             if ((high == H5F_LIBVER_EARLIEST) || (low > high))
@@ -7627,7 +7627,10 @@ test_versionbounds(void)
     H5F_t *filep = NULL;       /* Pointer to internal structure of a file */
     H5T_t *dtypep = NULL;      /* Pointer to internal structure of a datatype */
     hsize_t arr_dim[] = {ARRAY_LEN}; /* Length of the array */
+    int i, j;                   /* Indices for iterating over versions */
     H5F_libver_t low, high;    /* File format bounds */
+    H5F_libver_t versions[] = {H5F_LIBVER_EARLIEST, H5F_LIBVER_V18, H5F_LIBVER_V110};
+    int versions_count = 3;     /* Number of version bounds in the array */
     unsigned highest_version;  /* Highest version in nested datatypes */
     color_t enum_val;          /* Enum type index */
     herr_t ret = 0;            /* Generic return value */
@@ -7691,19 +7694,19 @@ test_versionbounds(void)
     ret = H5Tenum_insert(enum_type, "RED", &enum_val);
     if (ret < 0) TEST_ERROR
 
-    enum_val++;
+    enum_val = E1_GREEN;
     ret = H5Tenum_insert(enum_type, "GREEN", &enum_val);
     if (ret < 0) TEST_ERROR
 
-    enum_val++;
+    enum_val = E1_BLUE;
     ret = H5Tenum_insert(enum_type, "BLUE", &enum_val);
     if (ret < 0) TEST_ERROR
 
-    enum_val++;
+    enum_val = E1_ORANGE;
     ret = H5Tenum_insert(enum_type, "ORANGE", &enum_val);
     if (ret < 0) TEST_ERROR
 
-    enum_val++;
+    enum_val = E1_YELLOW;
     ret = H5Tenum_insert(enum_type, "YELLOW", &enum_val);
     if (ret < 0) TEST_ERROR
 
@@ -7727,8 +7730,9 @@ test_versionbounds(void)
        skipping invalid combinations */
     /* Create the file, create and write to a dataset with compound datatype */
     /* Verify the dataset's datatype and its members */
-    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
-        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
+    for(i = 0, low = versions[i]; i < versions_count; i++) {
+
+        for(j = 0, high = versions[j]; j < versions_count; j++) {
 
             /* Set version bounds */
             H5E_BEGIN_TRY {
