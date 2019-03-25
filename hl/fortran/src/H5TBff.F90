@@ -532,7 +532,7 @@ CONTAINS
     INTEGER(hsize_t), INTENT(in) :: start                            ! start record
     INTEGER(hsize_t), INTENT(in) :: nrecords                         ! records
     INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
-    INTEGER, INTENT(in), DIMENSION(*), TARGET :: buf                 ! data buffer
+    INTEGER, INTENT(INOUT), DIMENSION(*), TARGET :: buf              ! data buffer
     INTEGER :: errcode                                               ! error code
     INTEGER(size_t) :: namelen                                       ! name length
     INTEGER(size_t) :: namelen1
@@ -564,7 +564,7 @@ CONTAINS
     INTEGER(hsize_t), INTENT(in) :: start                            ! start record
     INTEGER(hsize_t), INTENT(in) :: nrecords                         ! records
     INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
-    CHARACTER(LEN=*), INTENT(in), DIMENSION(*), TARGET :: buf        ! data buffer
+    CHARACTER(LEN=*), INTENT(INOUT), DIMENSION(*), TARGET :: buf     ! data buffer
     INTEGER :: errcode                                               ! error code
     INTEGER(size_t) :: namelen                                       ! name length
     INTEGER(size_t) :: namelen1                                      ! name length
@@ -687,7 +687,7 @@ CONTAINS
     INTEGER(hsize_t), INTENT(in) :: start                            ! start record
     INTEGER(hsize_t), INTENT(in) :: nrecords                         ! records
     INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
-    INTEGER, INTENT(in), DIMENSION(*), TARGET :: buf                 ! data buffer
+    INTEGER, INTENT(INOUT), DIMENSION(*), TARGET :: buf              ! data buffer
     INTEGER :: errcode                                               ! error code
     INTEGER(size_t) :: namelen                                       ! name length
     TYPE(C_PTR) :: f_ptr
@@ -716,7 +716,7 @@ CONTAINS
     INTEGER(hsize_t), INTENT(in) :: start                            ! start record
     INTEGER(hsize_t), INTENT(in) :: nrecords                         ! records
     INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
-    CHARACTER(LEN=*), INTENT(in), DIMENSION(*), TARGET :: buf        ! data buffer
+    CHARACTER(LEN=*), INTENT(INOUT), DIMENSION(*), TARGET :: buf     ! data buffer
     INTEGER :: errcode                                               ! error code
     INTEGER(size_t) :: namelen                                       ! name length
     TYPE(C_PTR) :: f_ptr
