@@ -23,6 +23,7 @@
 ./.autom4te.cfg        _DO_NOT_DISTRIBUTE_
 ./.h5chkright.ini      _DO_NOT_DISTRIBUTE_
 ./ACKNOWLEDGMENTS
+./BRANCH.txt
 ./COPYING
 ./COPYING_LBNL_HDF5
 ./HOW_TO_BUILD.txt
@@ -192,6 +193,8 @@
 ./examples/h5_vds-percival.c
 ./examples/h5_vds-percival-unlim.c
 ./examples/h5_vds-percival-unlim-maxmin.c
+./examples/run_mobject_examples.sh
+./examples/run_rados_examples.sh
 ./examples/testh5cc.sh.in
 ./examples/README
 
