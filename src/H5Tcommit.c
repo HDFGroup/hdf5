@@ -155,7 +155,7 @@ H5Tcommit2(hid_t loc_id, const char *name, hid_t type_id, hid_t lcpl_id,
 
     /* Set up VOL object */
     if(NULL == (new_obj = H5FL_CALLOC(H5VL_object_t)))
-        HGOTO_ERROR(H5E_VOL, H5E_NOSPACE, FAIL, "can't allocate top object structure")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL, "can't allocate top object structure")
     new_obj->connector = vol_obj->connector;
     new_obj->connector->nrefs ++;
     new_obj->data = data;
@@ -308,7 +308,7 @@ H5Tcommit_anon(hid_t loc_id, hid_t type_id, hid_t tcpl_id, hid_t tapl_id)
 
     /* Setup VOL object */
     if(NULL == (new_obj = H5FL_CALLOC(H5VL_object_t)))
-        HGOTO_ERROR(H5E_VOL, H5E_NOSPACE, FAIL, "can't allocate top object structure")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL, "can't allocate top object structure")
     new_obj->connector = vol_obj->connector;
     new_obj->connector->nrefs ++;
     new_obj->data = dt;
@@ -1211,7 +1211,7 @@ H5T_save_refresh_state(hid_t tid, H5O_shared_t *cached_H5O_shared)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINC, FAIL, "can't increment object count")
 
     /* Cache the H5O_shared_t data */
-    HDmemcpy(cached_H5O_shared, &(vol_dt->sh_loc), sizeof(H5O_shared_t));
+    H5MM_memcpy(cached_H5O_shared, &(vol_dt->sh_loc), sizeof(H5O_shared_t));
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1245,7 +1245,7 @@ H5T_restore_refresh_state(hid_t tid, H5O_shared_t *cached_H5O_shared)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "tid is not not a named datatype ID")
 
     /* Restore the H5O_shared_t data */
-    HDmemcpy(&(vol_dt->sh_loc), cached_H5O_shared, sizeof(H5O_shared_t));
+    H5MM_memcpy(&(vol_dt->sh_loc), cached_H5O_shared, sizeof(H5O_shared_t));
 
     /* Decrement the ref. count for this object in the top file */
     if(H5FO_top_decr(vol_dt->sh_loc.file, vol_dt->sh_loc.u.loc.oh_addr) < 0)

@@ -28,6 +28,7 @@ typedef struct H5F_t H5F_t;
 #include "H5FDpublic.h"        /* File drivers                */
 
 /* Private headers needed by this file */
+#include "H5MMprivate.h"	/* Memory management			*/
 #ifdef H5_HAVE_PARALLEL
 #include "H5Pprivate.h"        /* Property lists            */
 #endif /* H5_HAVE_PARALLEL */
@@ -134,7 +135,7 @@ typedef struct H5F_t H5F_t;
                                         \
     HDcompile_assert(sizeof(double) == 8);                      \
     HDcompile_assert(sizeof(double) == sizeof(uint64_t));              \
-    HDmemcpy(&_n, &n, sizeof(double));                          \
+    H5MM_memcpy(&_n, &n, sizeof(double));                          \
     for(_u = 0; _u < sizeof(uint64_t); _u++, _n >>= 8)                  \
         *_p++ = (uint8_t)(_n & 0xff);                          \
     (p) = (uint8_t *)(p) + 8;                              \
@@ -240,7 +241,7 @@ typedef struct H5F_t H5F_t;
     (p) += 8;                                      \
     for(_u = 0; _u < sizeof(uint64_t); _u++)                      \
         _n = (_n << 8) | *(--p);                          \
-    HDmemcpy(&(n), &_n, sizeof(double));                          \
+    H5MM_memcpy(&(n), &_n, sizeof(double));                          \
     (p) += 8;                                      \
 }
 
@@ -331,6 +332,8 @@ typedef struct H5F_t H5F_t;
 #define H5F_POINT_OF_NO_RETURN(F) ((F)->shared->fs.point_of_no_return)
 #define H5F_FIRST_ALLOC_DEALLOC(F) ((F)->shared->first_alloc_dealloc)
 #define H5F_EOA_PRE_FSM_FSALLOC(F) ((F)->shared->eoa_pre_fsm_fsalloc)
+#define H5F_GET_MIN_DSET_OHDR(F) ((F)->shared->crt_dset_min_ohdr_flag)
+#define H5F_SET_MIN_DSET_OHDR(F, V) ((F)->shared->crt_dset_min_ohdr_flag = (V))
 #else /* H5F_MODULE */
 #define H5F_LOW_BOUND(F)        (H5F_get_low_bound(F))
 #define H5F_HIGH_BOUND(F)       (H5F_get_high_bound(F))
@@ -388,6 +391,8 @@ typedef struct H5F_t H5F_t;
 #define H5F_POINT_OF_NO_RETURN(F) (H5F_get_point_of_no_return(F))
 #define H5F_FIRST_ALLOC_DEALLOC(F) (H5F_get_first_alloc_dealloc(F))
 #define H5F_EOA_PRE_FSM_FSALLOC(F) (H5F_get_eoa_pre_fsm_fsalloc(F))
+#define H5F_GET_MIN_DSET_OHDR(F) (H5F_get_min_dset_ohdr(F))
+#define H5F_SET_MIN_DSET_OHDR(F, V) (H5F_set_min_dset_ohdr((F), (V)))
 #endif /* H5F_MODULE */
 
 
@@ -500,9 +505,7 @@ typedef struct H5F_t H5F_t;
 #define H5F_ACS_USE_MDC_LOGGING_NAME            "use_mdc_logging" /* Whether to use metadata cache logging */
 #define H5F_ACS_MDC_LOG_LOCATION_NAME           "mdc_log_location" /* Name of metadata cache log location */
 #define H5F_ACS_START_MDC_LOG_ON_ACCESS_NAME    "start_mdc_log_on_access" /* Whether logging starts on file create/open */
-#define H5F_ACS_CORE_WRITE_TRACKING_FLAG_NAME   "core_write_tracking_flag" /* Whether or not core VFD backing store write tracking is enabled */
 #define H5F_ACS_EVICT_ON_CLOSE_FLAG_NAME        "evict_on_close_flag" /* Whether or not the metadata cache will evict objects on close */
-#define H5F_ACS_CORE_WRITE_TRACKING_PAGE_SIZE_NAME "core_write_tracking_page_size" /* The page size in kiB when core VFD write tracking is enabled */
 #define H5F_ACS_COLL_MD_WRITE_FLAG_NAME         "collective_metadata_write" /* property indicating whether metadata writes are done collectively or not */
 #define H5F_ACS_META_CACHE_INIT_IMAGE_CONFIG_NAME "mdc_initCacheImageCfg" /* Initial metadata cache image creation configuration */
 #define H5F_ACS_PAGE_BUFFER_SIZE_NAME           "page_buffer_size" /* the maximum size for the page buffer cache */
@@ -742,6 +745,8 @@ H5_DLL hsize_t H5F_get_pgend_meta_thres(const H5F_t *f);
 H5_DLL hbool_t H5F_get_point_of_no_return(const H5F_t *f);
 H5_DLL hbool_t H5F_get_first_alloc_dealloc(const H5F_t *f);
 H5_DLL haddr_t H5F_get_eoa_pre_fsm_fsalloc(const H5F_t *f);
+H5_DLL hbool_t H5F_get_min_dset_ohdr(const H5F_t *f);
+H5_DLL herr_t H5F_set_min_dset_ohdr(H5F_t *f, hbool_t minimize);
 
 /* Functions than retrieve values set/cached from the superblock/FCPL */
 H5_DLL haddr_t H5F_get_base_addr(const H5F_t *f);

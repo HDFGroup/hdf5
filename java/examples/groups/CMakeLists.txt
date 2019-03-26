@@ -55,7 +55,7 @@ foreach (h5_file ${HDF_JAVA_TEST_FILES})
 endforeach ()
 add_custom_target(H5Ex_G_Visit_files ALL COMMENT "Copying files needed by H5Ex_G_Visit tests" DEPENDS ${H5Ex_G_Visit_files_list})
 
-MACRO (ADD_H5_TEST resultfile resultcode)
+macro (ADD_H5_TEST resultfile resultcode)
   set (CMD_ARGS "-Dhdf.hdf5lib.H5.loadLibraryName=$<TARGET_PROPERTY:${HDF5_JAVA_JNI_LIB_TARGET},OUTPUT_NAME$<$<CONFIG:Debug>:_DEBUG>>;")
   add_test (
       NAME JAVA_groups-${resultfile}
@@ -71,16 +71,16 @@ MACRO (ADD_H5_TEST resultfile resultcode)
           -D "TEST_REFERENCE=groups/${resultfile}.txt"
           -P "${HDF_RESOURCES_DIR}/jrunTest.cmake"
   )
-  if (NOT "${last_test}" STREQUAL "")
+  if (last_test)
     set_tests_properties (JAVA_groups-${resultfile} PROPERTIES DEPENDS ${last_test})
   endif ()
   set (last_test "JAVA_groups-${resultfile}")
-ENDMACRO ()
+endmacro ()
 
 if (BUILD_TESTING)
   foreach (example ${HDF_JAVA_EXAMPLES})
-    if (NOT "${example}" STREQUAL "H5Ex_G_Iterate" AND NOT "${example}" STREQUAL "H5Ex_G_Visit")
-      if ("${example}" STREQUAL "H5Ex_G_Compact")
+    if (NOT example STREQUAL "H5Ex_G_Iterate" AND NOT example STREQUAL "H5Ex_G_Visit")
+      if (example STREQUAL "H5Ex_G_Compact")
         add_test (
             NAME JAVA_groups-${example}-clear-h5s
             COMMAND    ${CMAKE_COMMAND}
@@ -96,7 +96,7 @@ if (BUILD_TESTING)
                 ${HDFJAVA_EXAMPLES_BINARY_DIR}/${example}.h5
         )
       endif ()
-      if (NOT "${last_test}" STREQUAL "")
+      if (last_test)
         set_tests_properties (JAVA_groups-${example}-clear-h5s PROPERTIES DEPENDS ${last_test})
       endif ()
       set (last_test "JAVA_groups-${example}-clear-h5s")
@@ -108,7 +108,7 @@ if (BUILD_TESTING)
             ${HDFJAVA_EXAMPLES_SOURCE_DIR}/testfiles/examples.groups.${example}.txt
             ${HDFJAVA_EXAMPLES_GROUPS_BINARY_DIR}/${example}.txt
     )
-    if (NOT "${last_test}" STREQUAL "")
+    if (last_test)
       set_tests_properties (JAVA_groups-${example}-copy-objects PROPERTIES DEPENDS ${last_test})
     endif ()
     set (last_test "JAVA_groups-${example}-copy-objects")

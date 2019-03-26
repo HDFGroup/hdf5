@@ -948,9 +948,9 @@ contig_hs_dr_pio_test__d2m_l2s(struct hs_dr_pio_test_vars_t * tv_ptr)
                     /* verify that H5S_select_shape_same() reports the two
                      * selections as having the same shape.
                      */
-                    check = H5S_select_shape_same_test(tv_ptr->small_ds_slice_sid,
+                    check = H5S__select_shape_same_test(tv_ptr->small_ds_slice_sid,
                                                        tv_ptr->file_large_ds_sid_0);
-                    VRFY((check == TRUE), "H5S_select_shape_same_test passed");
+                    VRFY((check == TRUE), "H5S__select_shape_same_test passed");
 
 
                     /* Read selection from disk */
@@ -1216,9 +1216,9 @@ contig_hs_dr_pio_test__d2m_s2l(struct hs_dr_pio_test_vars_t * tv_ptr)
                     /* verify that H5S_select_shape_same() reports the two
                      * selections as having the same shape.
                      */
-                    check = H5S_select_shape_same_test(tv_ptr->file_small_ds_sid_0,
+                    check = H5S__select_shape_same_test(tv_ptr->file_small_ds_sid_0,
                                                        tv_ptr->mem_large_ds_sid);
-                    VRFY((check == TRUE), "H5S_select_shape_same_test passed");
+                    VRFY((check == TRUE), "H5S__select_shape_same_test passed");
 
 
                     /* Read selection from disk */
@@ -1531,9 +1531,9 @@ contig_hs_dr_pio_test__m2d_l2s(struct hs_dr_pio_test_vars_t * tv_ptr)
                      * memory slice through the cube selection and the
                      * on disk full square selections as having the same shape.
                      */
-                    check = H5S_select_shape_same_test(tv_ptr->file_small_ds_sid_0,
+                    check = H5S__select_shape_same_test(tv_ptr->file_small_ds_sid_0,
                                                        tv_ptr->mem_large_ds_sid);
-                    VRFY((check == TRUE), "H5S_select_shape_same_test passed.");
+                    VRFY((check == TRUE), "H5S__select_shape_same_test passed.");
 
 
                     /* write the slice from the in memory large data set to the
@@ -1864,9 +1864,9 @@ contig_hs_dr_pio_test__m2d_s2l(struct hs_dr_pio_test_vars_t * tv_ptr)
                      * on disk slice through the large data set selection
                      * as having the same shape.
                      */
-                    check = H5S_select_shape_same_test(tv_ptr->mem_small_ds_sid,
+                    check = H5S__select_shape_same_test(tv_ptr->mem_small_ds_sid,
                                                        tv_ptr->file_large_ds_sid_0);
-                    VRFY((check == TRUE), "H5S_select_shape_same_test passed");
+                    VRFY((check == TRUE), "H5S__select_shape_same_test passed");
 
 
                     /* write the small data set slice from memory to the
@@ -3149,9 +3149,9 @@ ckrbrd_hs_dr_pio_test__d2m_l2s(struct hs_dr_pio_test_vars_t * tv_ptr)
                     /* verify that H5S_select_shape_same() reports the two
                      * selections as having the same shape.
                      */
-                    check = H5S_select_shape_same_test(tv_ptr->small_ds_slice_sid,
+                    check = H5S__select_shape_same_test(tv_ptr->small_ds_slice_sid,
                                                        tv_ptr->file_large_ds_sid_0);
-                    VRFY((check == TRUE), "H5S_select_shape_same_test passed");
+                    VRFY((check == TRUE), "H5S__select_shape_same_test passed");
 
 
                     /* Read selection from disk */
@@ -3415,9 +3415,9 @@ ckrbrd_hs_dr_pio_test__d2m_s2l(struct hs_dr_pio_test_vars_t * tv_ptr)
                     /* verify that H5S_select_shape_same() reports the two
                      * selections as having the same shape.
                      */
-                    check = H5S_select_shape_same_test(tv_ptr->file_small_ds_sid_0,
+                    check = H5S__select_shape_same_test(tv_ptr->file_small_ds_sid_0,
                                                        tv_ptr->mem_large_ds_sid);
-                    VRFY((check == TRUE), "H5S_select_shape_same_test passed");
+                    VRFY((check == TRUE), "H5S__select_shape_same_test passed");
 
 
                     /* Read selection from disk */
@@ -3800,9 +3800,9 @@ ckrbrd_hs_dr_pio_test__m2d_l2s(struct hs_dr_pio_test_vars_t * tv_ptr)
                      * large dataset and the checkerboard selection of the process
                      * slice of the small data set as having the same shape.
                      */
-                    check = H5S_select_shape_same_test(tv_ptr->file_small_ds_sid_1,
+                    check = H5S__select_shape_same_test(tv_ptr->file_small_ds_sid_1,
                                                        tv_ptr->mem_large_ds_sid);
-                    VRFY((check == TRUE), "H5S_select_shape_same_test passed.");
+                    VRFY((check == TRUE), "H5S__select_shape_same_test passed.");
 
 
                     /* write the checker board selection of the slice from the in
@@ -4155,9 +4155,9 @@ ckrbrd_hs_dr_pio_test__m2d_s2l(struct hs_dr_pio_test_vars_t * tv_ptr)
                      * on disk slice through the large data set selection
                      * as having the same shape.
                      */
-                    check = H5S_select_shape_same_test(tv_ptr->mem_small_ds_sid,
+                    check = H5S__select_shape_same_test(tv_ptr->mem_small_ds_sid,
                                                        tv_ptr->file_large_ds_sid_1);
-                    VRFY((check == TRUE), "H5S_select_shape_same_test passed");
+                    VRFY((check == TRUE), "H5S__select_shape_same_test passed");
 
 
                     /* write the small data set slice from memory to the

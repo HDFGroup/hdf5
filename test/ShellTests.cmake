@@ -171,6 +171,7 @@ if (UNIX)
     #    atomic_writer
     #    atomic_reader
     #    filenotclosed
+    #    del_many_dense_attrs
     #    flushrefresh
     ##############################################################################
     # autotools script tests
@@ -178,7 +179,7 @@ if (UNIX)
     # NOT CONVERTED accum_swmr_reader is used by accum.c.
     # NOT CONVERTED atomic_writer and atomic_reader are standalone programs.
     # links_env is used by testlinks_env.sh
-    # filenotclosed is used by test_filenotclosed.sh
+    # filenotclosed and del_many_dense_attrs are used by testabort_fail.sh
     # NOT CONVERTED flushrefresh is used by testflushrefresh.sh.
     # NOT CONVERTED use_append_chunk, use_append_mchunks and use_disable_mdc_flushes are used by test_usecases.sh
     # NOT CONVERTED swmr_* files (besides swmr.c) are used by testswmr.sh.

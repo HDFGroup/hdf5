@@ -25,14 +25,19 @@
 #define H5_HAVE_EFF 1 /* DSMINC */
 
 /* External headers needed by this file */
+#ifdef HDF5_USE_MOBJECT
+#include <librados-mobject-store.h>
+#else
 #include <rados/librados.h>
+#endif
 
 /* Public headers needed by this file */
 #include "H5public.h"
 #include "H5Ipublic.h"
 
-#define H5_VOL_RADOS   2022         /* RADOS VOL connector ID*/
-
+#define H5VL_RADOS_VERSION      1
+#define H5VL_RADOS_VALUE        268
+#define H5VL_RADOS_NAME         "rados_vol_connector"
 
 #ifdef __cplusplus
 extern "C" {

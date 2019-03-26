@@ -32,6 +32,7 @@
 #include "H5Dpkg.h"		/* Datasets				*/
 #include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5MFprivate.h"     	/* File space management                */
+#include "H5MMprivate.h"	/* Memory management			*/
 #include "H5VMprivate.h"	/* Vector and array functions		*/
 
 
@@ -248,7 +249,7 @@ H5D__bt2_crt_context(void *_udata)
     /* Set up the "local" information for this dataset's chunk dimension sizes */
     if(NULL == (my_dim = (uint32_t *)H5FL_BLK_MALLOC(chunk_dim, H5O_LAYOUT_NDIMS * sizeof(uint32_t))))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, NULL, "can't allocate chunk dims")
-    HDmemcpy(my_dim, udata->dim, H5O_LAYOUT_NDIMS * sizeof(uint32_t));
+    H5MM_memcpy(my_dim, udata->dim, H5O_LAYOUT_NDIMS * sizeof(uint32_t));
     ctx->dim = my_dim;
 
     /* 

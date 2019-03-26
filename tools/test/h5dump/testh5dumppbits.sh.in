@@ -235,7 +235,6 @@ TOOLTEST() {
     STDOUT_FILTER $actual
     cp $actual_err $actual_err_sav
     STDERR_FILTER $actual_err
-    cat $actual_err >> $actual
 
   if [ ! -f $expect ]; then
     # Create the expect file if it doesn't yet exist.
@@ -278,7 +277,6 @@ TOOLTEST2() {
       cd $TESTDIR
       $RUNSERIAL $DUMPER_BIN "$@"
     ) >$actual 2>$actual_err
-    cat $actual_err >> $actual
 
     if [ ! -f $expect ]; then
     # Create the expect file if it doesn't yet exist.
@@ -348,7 +346,6 @@ TOOLTEST3() {
         -e 's/H5Eget_auto[1-2]*/H5Eget_auto(1 or 2)/' \
         -e 's/H5Eset_auto[1-2]*/H5Eset_auto(1 or 2)/' \
      $actual_err > $actual_ext
-    cat $actual_ext >> $actual
 
     if [ ! -f $expect ]; then
     # Create the expect file if it doesn't yet exist.
@@ -406,7 +403,6 @@ TOOLTEST4() {
         -e 's/H5Eget_auto[1-2]*/H5Eget_auto(1 or 2)/' \
         -e 's/H5Eset_auto[1-2]*/H5Eset_auto(1 or 2)/' \
      $actual_err > $actual_ext
-    #cat $actual_ext >> $actual
 
     if [ ! -f $expect ]; then
     # Create the expect file if it doesn't yet exist.

@@ -1,0 +1,39 @@
+How to do an out-of-source build of the hdf5_rados branch on jelly.
+Assumes you are in a separate build directory and that the source is in
+a directory named hdf5_rados.
+
+First run autogen in the source directory.
+
+./autogen.sh
+
+
+Now set up the environment. We're using Jerome's spack packages.
+
+module load GCC
+
+export SPACK_ROOT=/mnt/hdf/jsoumagne/spack
+source $SPACK_ROOT/share/spack/setup-env.sh
+source <(spack module tcl loads --dependencies mobject)
+
+export CFLAGS=`pkg-config --cflags mobject-store`
+export LDFLAGS=`pkg-config --libs mobject-store`
+export CPPFLAGS=-DHDF5_USE_MOBJECT
+
+
+Now change to your build directory and configure/build.
+
+../hdf5_rados/configure --enable-parallel
+make -j5
+make install
+
+
+Now switch to the examples directory and test mobject. You
+will have to fire up mobject-store. I do this in the same
+shell and set it to be a background test with CTRL-Z and bg.
+
+cd hdf5/share/hdf5_examples/c
+export MOBJECT_CLUSTER_FILE=/tmp/mobject-cluster-test.gid
+mobject-server-daemon na+sm /tmp/mobject-cluster-test.gid
+CTRL-Z
+bg
+sh run_mobject_examples.sh

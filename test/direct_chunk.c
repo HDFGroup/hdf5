@@ -58,6 +58,14 @@
 #define OVERWRITE_CHUNK_NY      2
 #define OVERWRITE_VALUE         42
 
+/* Test configurations */
+#define CONFIG_LATEST       0x01
+#define CONFIG_REOPEN_FILE  0x02
+#define CONFIG_REOPEN_DSET  0x04
+#define CONFIG_DIRECT_WRITE 0x08
+#define CONFIG_DIRECT_READ  0x10
+#define CONFIG_END          0x20
+
 /* Defines used in test_single_chunk_latest() */
 #define FILE            "single_latest.h5"
 #define DATASET         "dataset"
@@ -1910,10 +1918,10 @@ test_read_unallocated_chunk (hid_t file)
         goto error;
 
     /* Write a single chunk to intialize the chunk storage */
-    HDmemset(&chunk_dims, 0, sizeof(chunk_dims));
+    HDmemset(direct_buf, 0, CHUNK_NX * CHUNK_NY * sizeof(int));
     offset[0] = 0; offset[1] = 0;
 
-    if(H5Dwrite_chunk(dataset, dxpl, filter_mask, offset, chunk_nbytes, &chunk_dims) < 0)
+    if(H5Dwrite_chunk(dataset, dxpl, filter_mask, offset, chunk_nbytes, direct_buf) < 0)
         goto error;
 
     /* Attempt to read each chunk in the dataset. Chunks are not allocated,
@@ -1973,7 +1981,7 @@ error:
 } /* test_read_unallocated_chunk() */
 
 /*-------------------------------------------------------------------------
- * Function:    test_single_chunk_latest
+ * Function:    test_single_chunk
  *
  * Purpose:     This is to verify the fix for jira issue HDFFV-10425.
  *              The problem was due to a bug in the internal ilbrary routine
@@ -1989,13 +1997,16 @@ error:
  *                  index for the dataset.  
  *                  Verify that the data read is the same as the written data.
  *
+ *              Since expanded to test multiple combinations of cases
+ *              involving a single chunk
+ *
  * Return:      Success:        0
  *              Failure:        1
  *
  *-------------------------------------------------------------------------
  */
 static int
-test_single_chunk_latest(void)
+test_single_chunk(unsigned config)
 {
     hid_t fid;              /* File ID */
     hid_t fapl;             /* File access property list ID */
@@ -2005,11 +2016,12 @@ test_single_chunk_latest(void)
     hsize_t dims[2] = {DIM0, DIM1};         /* Dimension sizes */
     hsize_t chunk[2] = {CHUNK0, CHUNK1};    /* Chunk dimension sizes */
     hsize_t offset[2] = {0,0};              /* Offset for writing */
+    uint32_t filters;       /* Filter mask out */
     int wdata[DIM0][DIM1];  /* Write buffer */
     int rdata[DIM0][DIM1];  /* Read buffer */
     int i, j;               /* Local index variable */
 
-    TESTING("H5Dwrite_chunk with single chunk and latest format");
+    TESTING("Single chunk I/O");
 
     /* Initialize data */
     for (i=0; i<DIM0; i++) {
@@ -2020,8 +2032,9 @@ test_single_chunk_latest(void)
     /* Create a new file with the latest format  */
     if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
         goto error;
-    if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
-        goto error;
+    if(config & CONFIG_LATEST)
+        if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
+            goto error;
     if((fid = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         goto error;
 
@@ -2039,37 +2052,57 @@ test_single_chunk_latest(void)
     if((did = H5Dcreate2(fid, DATASET, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
         goto error;
 
-    /* Write the data directly to the dataset */
-    if(H5Dwrite_chunk(did, H5P_DEFAULT, 0, offset, CHUNK0*CHUNK1*4, (void *)wdata) < 0)
-        goto error;
+    if(config & CONFIG_DIRECT_WRITE) {
+        /* Write the data directly to the dataset */
+        if(H5Dwrite_chunk(did, H5P_DEFAULT, 0, offset, CHUNK0*CHUNK1*4, (void *)wdata) < 0)
+            goto error;
+    } /* end if */
+    else
+        /* Write the data to the dataset */
+        if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, (void *)wdata) < 0)
+            goto error;
 
     /*
      * Close and release resources.
      */
     if(H5Pclose(dcpl) < 0)
         goto error;
-    if(H5Dclose(did) < 0)
-        goto error;
+    if(config & CONFIG_REOPEN_DSET)
+        if(H5Dclose(did) < 0)
+            goto error;
     if(H5Sclose(sid) < 0)
         goto error;
     if(H5Pclose(fapl) < 0)
         goto error;
-    if(H5Fclose(fid) < 0)
-        goto error;
+    if(config & CONFIG_REOPEN_FILE)
+        if(H5Fclose(fid) < 0)
+            goto error;
 
     /* Open the file and dataset with default properties  */
-    if((fid = H5Fopen(FILE, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
-        goto error;
-    if((did = H5Dopen2(fid, DATASET, H5P_DEFAULT)) < 0)
-        goto error;
+    if(config & CONFIG_REOPEN_FILE)
+        if((fid = H5Fopen(FILE, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+            goto error;
+    if(config & CONFIG_REOPEN_DSET)
+        if((did = H5Dopen2(fid, DATASET, H5P_DEFAULT)) < 0)
+            goto error;
 
     /* Retrieve dataset creation property list */
     if((dcpl = H5Dget_create_plist(did)) < 0)
         goto error;
 
-    /* Read the data */
-    if(H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata) < 0)
-        goto error;
+    if(config & CONFIG_DIRECT_READ) {
+        /* Read the data directly */
+        if(H5Dread_chunk(did, H5P_DEFAULT, offset, &filters, rdata) < 0)
+            goto error;
+
+        /* Verify returned filter mask */
+        if(filters != 0)
+            goto error;
+    } /* end if */
+    else
+        /* Read the data */
+        if(H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata) < 0)
+            goto error;
 
     /* Verify that the data read was correct.  */
     for (i = 0; i < DIM0; i++) {
@@ -2122,6 +2155,7 @@ error:
 int main( void )
 {
     hid_t file_id;
+    unsigned config;
     int   nerrors=0;
 
     /*
@@ -2149,7 +2183,53 @@ int main( void )
     nerrors += test_read_unfiltered_dset(file_id);
     nerrors += test_read_unallocated_chunk(file_id);
 
-    nerrors += test_single_chunk_latest();
+    /* Loop over test configurations */
+    for(config = 0; config < CONFIG_END; config++) {
+        hbool_t need_comma = FALSE;
+
+        /* Check for invalid combinations */
+        if((config & CONFIG_REOPEN_FILE) && !(config & CONFIG_REOPEN_DSET))
+            continue;
+
+        /* Print configuration */
+        printf("Configuration: ");
+        if(config == 0)
+            printf("<empty>");
+        if(config & CONFIG_LATEST) {
+            if(need_comma)
+                printf(", ");
+            printf("latest format");
+            need_comma = TRUE;
+        } /* end if */
+        if(config & CONFIG_REOPEN_FILE) {
+            if(need_comma)
+                printf(", ");
+            printf("reopen file");
+            need_comma = TRUE;
+        } /* end if */
+        else if(config & CONFIG_REOPEN_DSET) {
+            if(need_comma)
+                printf(", ");
+            printf("reopen dataset");
+            need_comma = TRUE;
+        } /* end if */
+        if(config & CONFIG_DIRECT_WRITE) {
+            if(need_comma)
+                printf(", ");
+            printf("direct write");
+            need_comma = TRUE;
+        } /* end if */
+        if(config & CONFIG_DIRECT_READ) {
+            if(need_comma)
+                printf(", ");
+            printf("direct read");
+            need_comma = TRUE;
+        } /* end if */
+        printf(":\n");
+        fflush(stdout);
+
+        nerrors += test_single_chunk(config);
+    } /* end for */
 
     if(H5Fclose(file_id) < 0)
         goto error;
@@ -2165,3 +2245,4 @@ error:
     HDputs("*** TESTS FAILED ***");
     return EXIT_FAILURE;
 }
+

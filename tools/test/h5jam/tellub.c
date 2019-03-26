@@ -53,7 +53,7 @@ usage (const char *prog)
 /*-------------------------------------------------------------------------
  * Function:    parse_command_line
  *
- * Purpose:     Parse the command line for the h5dumper.
+ * Purpose:     Parse the command line.
  *
  * Return:      Success:    void
  *              Failure:    Exits program with EXIT_FAILURE value.
@@ -89,7 +89,7 @@ parse_command_line (int argc, const char *argv[])
 /*-------------------------------------------------------------------------
  * Function:    main
  *
- * Purpose:     HDF5 user block unjammer
+ * Purpose:     HDF5 user block tell size
  *
  * Return:      EXIT_SUCCESS/EXIT_FAILURE
  *-------------------------------------------------------------------------
@@ -104,7 +104,7 @@ main (int argc, const char *argv[])
     hsize_t usize;
     htri_t testval;
     herr_t status;
-    hid_t plist = -1;
+    hid_t plist = H5I_INVALID_HID;
 
     h5tools_setprogname(PROGRAMNAME);
     h5tools_setstatus(EXIT_SUCCESS);

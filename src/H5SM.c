@@ -2318,7 +2318,7 @@ H5SM__read_iter_op(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/, unsigned sequence,
             HGOTO_ERROR(H5E_SOHM, H5E_NOSPACE, H5_ITER_ERROR, "memory allocation failed")
 
         /* Copy the encoded message into the buffer to return */
-        HDmemcpy(udata->encoding_buf, mesg->raw, udata->buf_size);
+        H5MM_memcpy(udata->encoding_buf, mesg->raw, udata->buf_size);
 
         /* Found the message we were looking for */
         ret_value = H5_ITER_STOP;
@@ -2356,7 +2356,7 @@ H5SM__read_mesg_fh_cb(const void *obj, size_t obj_len, void *_udata)
         HGOTO_ERROR(H5E_SOHM, H5E_NOSPACE, FAIL, "memory allocation failed")
 
     /* Copy the message from the heap */
-    HDmemcpy(udata->encoding_buf, obj, obj_len);
+    H5MM_memcpy(udata->encoding_buf, obj, obj_len);
     udata->buf_size = obj_len;
 
 done:

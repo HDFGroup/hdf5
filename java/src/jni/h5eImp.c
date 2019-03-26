@@ -39,26 +39,15 @@ extern "C" {
 #include "h5jni.h"
 #include "h5eImp.h"
 
+/*
+ * Pointer to the JNI's Virtual Machine; used for callback functions.
+ */
 extern JavaVM *jvm;
 
 typedef struct _cb_wrapper {
     jobject visit_callback;
     jobject op_data;
 } cb_wrapper;
-
-#ifdef __cplusplus
-  #define CBENVPTR (cbenv)
-  #define CBENVPAR
-  #define JVMPTR (jvm)
-  #define JVMPAR
-  #define JVMPAR2
-#else /* __cplusplus */
-  #define CBENVPTR (*cbenv)
-  #define CBENVPAR cbenv,
-  #define JVMPTR (*jvm)
-  #define JVMPAR jvm
-  #define JVMPAR2 jvm,
-#endif /* __cplusplus */
 
 /********************/
 /* Local Prototypes */
@@ -77,12 +66,15 @@ Java_hdf_hdf5lib_H5_H5Eauto_1is_1v2
 {
     unsigned int is_stack = 0;
 
-    if (stk_id < 0) {
-        h5badArgument(env, "H5Eauto_is_v2: invalid argument");
-    } /* end if */
-    else if (H5Eauto_is_v2((hid_t)stk_id, &is_stack) < 0)
-        h5libraryError(env);
+    UNUSED(cls);
 
+    if (stk_id < 0)
+        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Eauto_is_v2: invalid stack ID");
+
+    if (H5Eauto_is_v2((hid_t)stk_id, &is_stack) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+
+done:
     return (jboolean)is_stack;
 } /* end Java_hdf_hdf5lib_H5_H5Eauto_1is_1v2 */
 
@@ -95,20 +87,34 @@ JNIEXPORT jlong JNICALL
 Java_hdf_hdf5lib_H5_H5Eregister_1class
     (JNIEnv *env, jclass cls, jstring cls_name, jstring lib_name, jstring version)
 {
-    hid_t       ret_val = -1;
-    const char* the_cls_name;
-    const char* the_lib_name;
-    const char* the_version;
+    const char* the_cls_name = NULL;
+    const char* the_lib_name = NULL;
+    const char* the_version = NULL;
+    hid_t       ret_val = H5I_INVALID_HID;
 
-    PIN_JAVA_STRING_THREE(cls_name, the_cls_name, lib_name, the_lib_name, version, the_version);
-    if (the_cls_name != NULL && the_lib_name != NULL && the_version != NULL) {
-        ret_val = H5Eregister_class(the_cls_name, the_lib_name, the_version);
+    UNUSED(cls);
 
-        UNPIN_JAVA_STRING_THREE(cls_name, the_cls_name, lib_name, the_lib_name, version, the_version);
+    if (NULL == cls_name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Eregister_class: class name is NULL");
+    if (NULL == lib_name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Eregister_class: lib name is NULL");
+    if (NULL == version)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Eregister_class: version string is NULL");
 
-        if (ret_val < 0)
-            h5libraryError(env);
-    }
+    PIN_JAVA_STRING(ENVONLY, cls_name, the_cls_name, NULL, "H5Eregister_class: class name not pinned");
+    PIN_JAVA_STRING(ENVONLY, lib_name, the_lib_name, NULL, "H5Eregister_class: lib name not pinned");
+    PIN_JAVA_STRING(ENVONLY, version, the_version, NULL, "H5Eregister_class: version string not pinned");
+
+    if ((ret_val = H5Eregister_class(the_cls_name, the_lib_name, the_version)) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+
+done:
+    if (the_version)
+        UNPIN_JAVA_STRING(ENVONLY, version, the_version);
+    if (the_lib_name)
+        UNPIN_JAVA_STRING(ENVONLY, lib_name, the_lib_name);
+    if (the_cls_name)
+        UNPIN_JAVA_STRING(ENVONLY, cls_name, the_cls_name);
 
     return (jlong)ret_val;
 } /* end Java_hdf_hdf5lib_H5_H5Eregister_1class */
@@ -122,11 +128,16 @@ JNIEXPORT void JNICALL
 Java_hdf_hdf5lib_H5_H5Eunregister_1class
     (JNIEnv *env, jclass cls, jlong cls_id)
 {
-    if (cls_id < 0) {
-        h5badArgument(env, "H5Eunregister_class: invalid argument");
-    } /* end if */
-    else if (H5Eunregister_class((hid_t)cls_id) < 0)
-        h5libraryError(env);
+    UNUSED(cls);
+
+    if (cls_id < 0)
+        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Eunregister_class: invalid error class ID");
+
+    if (H5Eunregister_class((hid_t)cls_id) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+
+done:
+    return;
 } /* end Java_hdf_hdf5lib_H5_H5Eunregister_1class */
 
 /*
@@ -138,11 +149,16 @@ JNIEXPORT void JNICALL
 Java_hdf_hdf5lib_H5_H5Eclose_1msg
     (JNIEnv *env, jclass cls, jlong err_id)
 {
-    if (err_id < 0) {
-        h5badArgument(env, "H5Eclose_msg: invalid argument");
-    } /* end if */
-    else if (H5Eclose_msg((hid_t)err_id) < 0)
-        h5libraryError(env);
+    UNUSED(cls);
+
+    if (err_id < 0)
+        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Eclose_msg: invalid error message ID");
+
+    if (H5Eclose_msg((hid_t)err_id) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+
+done:
+    return;
 } /* end Java_hdf_hdf5lib_H5_H5Eclose_1msg */
 
 /*
@@ -154,24 +170,25 @@ JNIEXPORT jlong JNICALL
 Java_hdf_hdf5lib_H5_H5Ecreate_1msg
     (JNIEnv *env, jclass cls, jlong err_id, jint msg_type, jstring err_msg)
 {
-    hid_t       ret_val = -1;
-    const char *the_err_msg;
     H5E_type_t  error_msg_type = (H5E_type_t)msg_type;
+    const char *the_err_msg = NULL;
+    hid_t       ret_val = H5I_INVALID_HID;
 
-    if (err_id < 0) {
-        h5badArgument(env, "H5Ecreate_msg: invalid argument");
-    } /* end if */
-    else {
-        PIN_JAVA_STRING(err_msg, the_err_msg);
-        if (the_err_msg != NULL) {
-            ret_val = H5Ecreate_msg((hid_t)err_id, error_msg_type, the_err_msg);
+    UNUSED(cls);
 
-            UNPIN_JAVA_STRING(err_msg, the_err_msg);
+    if (err_id < 0)
+        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Ecreate_msg: invalid error class ID");
+    if (NULL == err_msg)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Ecreate_msg: error message string is NULL");
 
-            if (ret_val < 0)
-                h5libraryError(env);
-        }
-    } /* end else */
+    PIN_JAVA_STRING(ENVONLY, err_msg, the_err_msg, NULL, "H5Ecreate_msg: error message string not pinned");
+
+    if ((ret_val = H5Ecreate_msg((hid_t)err_id, error_msg_type, the_err_msg)) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+
+done:
+    if (the_err_msg)
+        UNPIN_JAVA_STRING(ENVONLY, err_msg, the_err_msg);
 
     return (jlong)ret_val;
 } /* end Java_hdf_hdf5lib_H5_H5Ecreate_1msg */
@@ -185,12 +202,14 @@ JNIEXPORT jlong JNICALL
 Java_hdf_hdf5lib_H5_H5Ecreate_1stack
     (JNIEnv *env, jclass cls)
 {
-    hid_t ret_val = -1;
+    hid_t ret_val = H5I_INVALID_HID;
 
-    ret_val = H5Ecreate_stack();
-    if (ret_val < 0)
-        h5libraryError(env);
+    UNUSED(cls);
 
+    if ((ret_val = H5Ecreate_stack()) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+
+done:
     return (jlong)ret_val;
 } /* end Java_hdf_hdf5lib_H5_H5Ecreate_1stack */
 
@@ -203,12 +222,14 @@ JNIEXPORT jlong JNICALL
 Java_hdf_hdf5lib_H5_H5Eget_1current_1stack
     (JNIEnv *env, jclass cls)
 {
-    hid_t ret_val = -1;
+    hid_t ret_val = H5I_INVALID_HID;
 
-    ret_val = H5Eget_current_stack();
-    if (ret_val < 0)
-        h5libraryError(env);
+    UNUSED(cls);
 
+    if ((ret_val = H5Eget_current_stack()) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+
+done:
     return (jlong)ret_val;
 } /* end Java_hdf_hdf5lib_H5_H5Eget_1current_1stack */
 
@@ -221,11 +242,16 @@ JNIEXPORT void JNICALL
 Java_hdf_hdf5lib_H5_H5Eclose_1stack
     (JNIEnv *env, jclass cls, jlong stk_id)
 {
-    if (stk_id < 0) {
-        h5badArgument(env, "H5Eclose_stack: invalid argument");
-    } /* end if */
-    else if (H5Eclose_stack((hid_t)stk_id) < 0)
-        h5libraryError(env);
+    UNUSED(cls);
+
+    if (stk_id < 0)
+        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Eclose_stack: invalid error stack ID");
+
+    if (H5Eclose_stack((hid_t)stk_id) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+
+done:
+    return;
 } /* end Java_hdf_hdf5lib_H5_H5Eclose_1stack */
 
 /*
@@ -237,20 +263,24 @@ JNIEXPORT void JNICALL
 Java_hdf_hdf5lib_H5_H5Eprint2
     (JNIEnv *env, jclass cls, jlong stk_id, jobject stream_obj)
 {
-    herr_t ret_val = -1;
+    herr_t ret_val = FAIL;
 
-    if (stk_id < 0) {
-        h5badArgument(env, "H5Eprint2: invalid argument");
-    } /* end if */
+    UNUSED(cls);
+
+    if (stk_id < 0)
+        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Eprint2: invalid error stack ID");
+
+    if (!stream_obj) {
+        if ((ret_val = H5Eprint2((hid_t)stk_id, stdout)) < 0)
+            H5_LIBRARY_ERROR(ENVONLY);
+    }
     else {
-        if(!stream_obj)
-            ret_val = H5Eprint2((hid_t)stk_id, stdout);
-        else
-            ret_val = H5Eprint2((hid_t)stk_id, (FILE*)stream_obj);
+        if ((ret_val = H5Eprint2((hid_t)stk_id, (FILE *)stream_obj)) < 0)
+            H5_LIBRARY_ERROR(ENVONLY);
+    }
 
-        if (ret_val < 0)
-            h5libraryError(env);
-    } /* end else */
+done:
+    return;
 } /* end Java_hdf_hdf5lib_H5_H5Eprint2 */
 
 /*
@@ -262,43 +292,36 @@ JNIEXPORT jstring JNICALL
 Java_hdf_hdf5lib_H5_H5Eget_1class_1name
     (JNIEnv *env, jclass cls, jlong cls_id)
 {
-    char   *namePtr;
-    jstring str = NULL;
-    ssize_t buf_size;
+    jstring  str = NULL;
+    ssize_t  buf_size;
+    char    *namePtr = NULL;
 
-    if (cls_id < 0) {
-        h5badArgument(env, "H5Eget_class_name: invalid argument");
-    } /* end if */
-    else {
-        /* get the length of the name */
-        buf_size = H5Eget_class_name((hid_t)cls_id, NULL, 0);
+    UNUSED(cls);
 
-        if (buf_size < 0) {
-            h5badArgument( env, "H5Eget_class_name:  buf_size < 0");
-        } /* end if */
-        else if (buf_size == 0) {
-            h5badArgument( env, "H5Eget_class_name:  No class name");
-        } /* end else if */
-        else {
-            buf_size++; /* add extra space for the null terminator */
-            namePtr = (char*)HDmalloc(sizeof(char) * (size_t)buf_size);
-            if (namePtr == NULL) {
-                h5outOfMemory( env, "H5Eget_class_name:  malloc failed");
-            } /* end if */
-            else {
-                buf_size = H5Eget_class_name((hid_t)cls_id, (char *)namePtr, (size_t)buf_size);
+    if (cls_id < 0)
+        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Eget_class_name: invalid error class ID");
 
-                if (buf_size < 0) {
-                    HDfree(namePtr);
-                    h5libraryError(env);
-                } /* end if */
-                else {
-                    str = ENVPTR->NewStringUTF(ENVPAR namePtr);
-                    HDfree(namePtr);
-                } /* end else */
-            } /* end else */
-        } /* end else */
-    } /* end else */
+    /* Get the length of the name */
+    if ((buf_size = H5Eget_class_name((hid_t)cls_id, NULL, 0)) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+
+    if (!buf_size)
+        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Eget_class_name: no class name");
+
+    if (NULL == (namePtr = (char *) HDmalloc(sizeof(char) * (size_t)buf_size + 1)))
+        H5_JNI_FATAL_ERROR(ENVONLY, "H5Eget_class_name: malloc failed");
+
+    if ((H5Eget_class_name((hid_t)cls_id, (char *)namePtr, (size_t)buf_size + 1)) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+    namePtr[buf_size] = '\0';
+
+    if (NULL == (str = ENVPTR->NewStringUTF(ENVONLY, namePtr)))
+        CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+
+done:
+    if (namePtr)
+        HDfree(namePtr);
+
     return str;
 } /* end Java_hdf_hdf5lib_H5_H5Eget_1class_1name */
 
@@ -311,11 +334,16 @@ JNIEXPORT void JNICALL
 Java_hdf_hdf5lib_H5_H5Eset_1current_1stack
     (JNIEnv *env, jclass cls, jlong stk_id)
 {
-    if (stk_id < 0) {
-        h5badArgument(env, "H5Eset_current_stack: invalid argument");
-    } /* end if */
-    else if (H5Eset_current_stack((hid_t)stk_id) < 0)
-        h5libraryError(env);
+    UNUSED(cls);
+
+    if (stk_id < 0)
+        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Eset_current_stack: invalid error stack ID");
+
+    if (H5Eset_current_stack((hid_t)stk_id) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+
+done:
+    return;
 } /* end Java_hdf_hdf5lib_H5_H5Eset_1current_1stack */
 
 /*
@@ -327,11 +355,16 @@ JNIEXPORT void JNICALL
 Java_hdf_hdf5lib_H5_H5Epop
     (JNIEnv *env, jclass cls, jlong stk_id, jlong count)
 {
-    if (stk_id < 0) {
-        h5badArgument(env, "H5Epop: invalid argument");
-    } /* end if */
-    else if (H5Epop((hid_t)stk_id, (size_t)count) < 0)
-        h5libraryError(env);
+    UNUSED(cls);
+
+    if (stk_id < 0)
+        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Epop: invalid error stack ID");
+
+    if (H5Epop((hid_t)stk_id, (size_t)count) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+
+done:
+    return;
 } /* end Java_hdf_hdf5lib_H5_H5Epop */
 
 /*
@@ -344,35 +377,43 @@ Java_hdf_hdf5lib_H5_H5Epush2
     (JNIEnv *env, jclass cls, jlong stk_id, jstring filename, jstring funcname,
         jint linenumber, jlong class_id, jlong major_id, jlong minor_id, jstring err_desc)
 {
-    herr_t      ret_val = -1;
-    const char* fName;
-    const char* fncName;
-    const char* errMsg;
+    const char *fName = NULL;
+    const char *fncName = NULL;
+    const char *errMsg = NULL;
+    herr_t      ret_val = FAIL;
 
-    if (stk_id < 0) {
-        h5badArgument(env, "H5Epush: invalid argument");
-    } /* end if */
-    else if (class_id < 0) {
-        h5badArgument(env, "H5Epush: invalid class_id argument");
-    } /* end else if */
-    else if (major_id < 0) {
-        h5badArgument(env, "H5Epush: invalid major_id argument");
-    } /* end else if */
-    else if (minor_id < 0) {
-        h5badArgument(env, "H5Epush: invalid minor_id argument");
-    } /* end else if */
-    else {
-        PIN_JAVA_STRING_THREE(filename, fName, funcname, fncName, err_desc, errMsg);
-        if (fName != NULL && fncName != NULL && errMsg != NULL) {
-            ret_val = H5Epush2((hid_t)stk_id, fName, fncName, (unsigned)linenumber, (hid_t)class_id,
-                    (hid_t)major_id, (hid_t)minor_id, errMsg);
+    UNUSED(cls);
 
-            UNPIN_JAVA_STRING_THREE(filename, fName, funcname, fncName, err_desc, errMsg);
+    if (stk_id < 0)
+        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Epush2: invalid error stack ID");
+    if (class_id < 0)
+        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Epush2: invalid error class ID");
+    if (major_id < 0)
+        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Epush2: invalid major error class ID");
+    if (minor_id < 0)
+        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Epush2: invalid minor error class ID");
+    if (NULL == filename)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Epush2: filename is NULL");
+    if (NULL == funcname)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Epush2: function name is NULL");
+    if (NULL == err_desc)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Epush2: error message is NULL");
 
-            if (ret_val < 0)
-                h5libraryError(env);
-        }
-    } /* end else */
+    PIN_JAVA_STRING(ENVONLY, filename, fName, NULL, "H5Epush2: filename not pinned");
+    PIN_JAVA_STRING(ENVONLY, funcname, fncName, NULL, "H5Epush2: function name not pinned");
+    PIN_JAVA_STRING(ENVONLY, err_desc, errMsg, NULL, "H5Epush2: error message not pinned");
+
+    if ((ret_val = H5Epush2((hid_t)stk_id, fName, fncName, (unsigned)linenumber, (hid_t)class_id,
+            (hid_t)major_id, (hid_t)minor_id, errMsg)) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+
+done:
+    if (errMsg)
+        UNPIN_JAVA_STRING(ENVONLY, err_desc, errMsg);
+    if (fncName)
+        UNPIN_JAVA_STRING(ENVONLY, funcname, fncName);
+    if (fName)
+        UNPIN_JAVA_STRING(ENVONLY, filename, fName);
 } /* end Java_hdf_hdf5lib_H5_H5Epush2 */
 
 /*
@@ -384,11 +425,16 @@ JNIEXPORT void JNICALL
 Java_hdf_hdf5lib_H5_H5Eclear2
     (JNIEnv *env, jclass cls, jlong stk_id)
 {
-    if (stk_id < 0) {
-        h5badArgument(env, "H5Eclear2: invalid argument");
-    } /* end if */
-    else if (H5Eclear2((hid_t)stk_id) < 0)
-        h5libraryError(env);
+    UNUSED(cls);
+
+    if (stk_id < 0)
+        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Eclear2: invalid error stack ID");
+
+    if (H5Eclear2((hid_t)stk_id) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+
+done:
+    return;
 } /* end Java_hdf_hdf5lib_H5_H5Eclear2 */
 
 /*
@@ -400,57 +446,45 @@ JNIEXPORT jstring JNICALL
 Java_hdf_hdf5lib_H5_H5Eget_1msg
     (JNIEnv *env, jclass cls, jlong msg_id, jintArray error_msg_type_list)
 {
-    char      *namePtr;
-    jstring    str = NULL;
-    jboolean   isCopy;
-    ssize_t    buf_size;
-    jint      *theArray;
-    H5E_type_t error_msg_type;
+    H5E_type_t  error_msg_type;
+    jstring     str = NULL;
+    ssize_t     buf_size;
+    jint       *theArray = NULL;
+    char       *namePtr = NULL;
 
-    if (msg_id < 0) {
-        h5badArgument(env, "H5Eget_msg: invalid argument");
-    } /* end if */
-    else if (error_msg_type_list == NULL) {
-        h5nullArgument(env, "H5Eget_msg:  error_msg_type_list is NULL");
-    } /* end if */
-    else {
-        /* get the length of the name */
-        buf_size = H5Eget_msg((hid_t)msg_id, NULL, NULL, 0);
+    UNUSED(cls);
 
-        if ((buf_size < 0) || (buf_size == 0)) {
-            h5JNIFatalError(env, "H5Eget_msg:  Invalid message");
-        } /* end if */
-        else {
-            buf_size++; /* add extra space for the null terminator */
-            namePtr = (char*)HDmalloc(sizeof(char) * (size_t)buf_size);
-            if (namePtr == NULL) {
-                h5outOfMemory(env, "H5Eget_msg:  malloc failed");
-            } /* end if */
-            else {
-                theArray = (jint*)ENVPTR->GetIntArrayElements(ENVPAR error_msg_type_list, &isCopy);
-                if (theArray == NULL) {
-                    HDfree(namePtr);
-                    h5JNIFatalError(env, "H5Eget_msg:  error_msg_type_list not pinned");
-                } /* end if */
-                else {
-                    buf_size = H5Eget_msg((hid_t)msg_id, &error_msg_type, (char *)namePtr, (size_t)buf_size);
+    if (msg_id < 0)
+        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Eget_msg: invalid error message ID");
+    if (NULL == error_msg_type_list)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Eget_msg: error_msg_type_list is NULL");
 
-                    if (buf_size < 0) {
-                        HDfree(namePtr);
-                        ENVPTR->ReleaseIntArrayElements(ENVPAR error_msg_type_list, theArray, JNI_ABORT);
-                        h5libraryError(env);
-                    } /* end if */
-                    else {
-                        theArray[0] = error_msg_type;
-                        ENVPTR->ReleaseIntArrayElements(ENVPAR error_msg_type_list, theArray, 0);
+    /* Get the length of the name */
+    if ((buf_size = H5Eget_msg((hid_t)msg_id, NULL, NULL, 0)) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
 
-                        str = ENVPTR->NewStringUTF(ENVPAR namePtr);
-                        HDfree(namePtr);
-                    } /* end else */
-                } /* end else */
-            } /* end else */
-        } /* end else */
-    } /* end else */
+    if (!buf_size)
+        H5_JNI_FATAL_ERROR(ENVONLY, "H5Eget_msg: invalid message");
+
+    if (NULL == (namePtr = (char *) HDmalloc(sizeof(char) * (size_t)buf_size + 1)))
+        H5_JNI_FATAL_ERROR(ENVONLY, "H5Eget_msg: malloc failed");
+
+    PIN_INT_ARRAY(ENVONLY, error_msg_type_list, theArray, NULL, "H5Eget_msg: error_msg_type_list not pinned");
+
+    if ((H5Eget_msg((hid_t)msg_id, &error_msg_type, (char *)namePtr, (size_t)buf_size + 1)) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+    namePtr[buf_size] = '\0';
+
+    theArray[0] = error_msg_type;
+
+    if (NULL == (str = ENVPTR->NewStringUTF(ENVONLY, namePtr)))
+        CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+
+done:
+    if (theArray)
+        UNPIN_INT_ARRAY(ENVONLY, error_msg_type_list, theArray, 0);
+    if (namePtr)
+        HDfree(namePtr);
 
     return str;
 } /* end Java_hdf_hdf5lib_H5_H5Eget_1msg */
@@ -466,14 +500,15 @@ Java_hdf_hdf5lib_H5_H5Eget_1num
 {
     ssize_t ret_val = -1;
 
-    if (stk_id < 0) {
-        h5badArgument(env, "H5Eget_num: invalid argument");
-    } /* end if */
-    else {
-        ret_val = H5Eget_num((hid_t)stk_id);
-        if (ret_val < 0)
-            h5libraryError(env);
-    } /* end else */
+    UNUSED(cls);
+
+    if (stk_id < 0)
+        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Eget_num: invalid error stack ID");
+
+    if ((ret_val = H5Eget_num((hid_t)stk_id)) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+
+done:
     return (jlong)ret_val;
 } /* end Java_hdf_hdf5lib_H5_H5Eget_1num */
 
@@ -481,52 +516,67 @@ static herr_t
 H5E_walk_cb
     (int nindx, const H5E_error2_t *info, void *cb_data)
 {
-    JNIEnv    *cbenv;
-    jint       status = -1;
-    jclass     cls;
-    jmethodID  mid;
-    jstring    str1, str2, str3;
-    jmethodID  constructor;
-    jvalue     args[7];
-    jobject    cb_info_t = NULL;
     cb_wrapper *wrapper = (cb_wrapper *)cb_data;
-    void *op_data = (void *)wrapper->op_data;
-    jobject visit_callback = wrapper->visit_callback;
+    jmethodID   constructor;
+    jmethodID   mid;
+    jobject     visit_callback = wrapper->visit_callback;
+    jstring     str1, str2, str3;
+    jobject     cb_info_t = NULL;
+    jvalue      args[7];
+    JNIEnv     *cbenv = NULL;
+    jclass      cls;
+    void       *op_data = (void *)wrapper->op_data;
+    jint        status = FAIL;
 
-    if(JVMPTR->AttachCurrentThread(JVMPAR2 (void**)&cbenv, NULL) == 0) {
-        cls = CBENVPTR->GetObjectClass(CBENVPAR visit_callback);
-        if (cls != 0) {
-            mid = CBENVPTR->GetMethodID(CBENVPAR cls, "callback", "(ILhdf/hdf5lib/structs/H5E_error2_t;Lhdf/hdf5lib/callbacks/H5E_walk_t;)I");
-            if (mid != 0) {
-                args[0].j = info->cls_id;
-                args[1].j = info->maj_num;
-                args[2].j = info->min_num;
-                args[3].i = (jint)info->line;
-                str1 = CBENVPTR->NewStringUTF(CBENVPAR info->func_name);
-                args[4].l = str1;
-                str2 = CBENVPTR->NewStringUTF(CBENVPAR info->file_name);
-                args[5].l = str2;
-                str3 = CBENVPTR->NewStringUTF(CBENVPAR info->desc);
-                args[6].l = str3;
-                // get a reference to your class if you don't have it already
-                cls = CBENVPTR->FindClass(CBENVPAR "hdf/hdf5lib/structs/H5E_error2_t");
-                if (cls != 0) {
-                    // get a reference to the constructor; the name is <init>
-                    constructor = CBENVPTR->GetMethodID(CBENVPAR cls, "<init>", "(JJJILjava/lang/String;Ljava/lang/String;Ljava/lang/String;)V");
-                    if (constructor != 0) {
-                        cb_info_t = CBENVPTR->NewObjectA(CBENVPAR cls, constructor, args);
-                        if (cb_info_t == NULL) {
-                            printf("FATAL ERROR: hdf/hdf5lib/structs/H5E_error2_t: Creation failed\n");
-                        }
-                        else {
-                            status = CBENVPTR->CallIntMethod(CBENVPAR visit_callback, mid, nindx, cb_info_t, op_data);
-                        }
-                    } /* end if (constructor != 0) */
-                } /* end if(cls != 0) */
-            } /* end if (mid != 0) */
-        } /* end if (cls != 0) */
-    } /* end if */
-    JVMPTR->DetachCurrentThread(JVMPAR);
+    if (JVMPTR->AttachCurrentThread(JVMPAR, (void **)&cbenv, NULL) < 0) {
+        CHECK_JNI_EXCEPTION(CBENVONLY, JNI_TRUE);
+        H5_JNI_FATAL_ERROR(CBENVONLY, "H5E_walk_cb: failed to attach current thread to JVM");
+    }
+
+    if (NULL == (cls = CBENVPTR->GetObjectClass(CBENVONLY, visit_callback)))
+        CHECK_JNI_EXCEPTION(CBENVONLY, JNI_FALSE);
+
+    if (NULL == (mid = CBENVPTR->GetMethodID(CBENVONLY, cls, "callback", "(ILhdf/hdf5lib/structs/H5E_error2_t;Lhdf/hdf5lib/callbacks/H5E_walk_t;)I")))
+        CHECK_JNI_EXCEPTION(CBENVONLY, JNI_FALSE);
+
+    args[0].j = info->cls_id;
+    args[1].j = info->maj_num;
+    args[2].j = info->min_num;
+    args[3].i = (jint)info->line;
+
+    if (NULL == (str1 = CBENVPTR->NewStringUTF(CBENVONLY, info->func_name)))
+        CHECK_JNI_EXCEPTION(CBENVONLY, JNI_FALSE);
+
+    args[4].l = str1;
+
+    if (NULL == (str2 = CBENVPTR->NewStringUTF(CBENVONLY, info->file_name)))
+        CHECK_JNI_EXCEPTION(CBENVONLY, JNI_FALSE);
+
+    args[5].l = str2;
+
+    if (NULL == (str3 = CBENVPTR->NewStringUTF(CBENVONLY, info->desc)))
+        CHECK_JNI_EXCEPTION(CBENVONLY, JNI_FALSE);
+
+    args[6].l = str3;
+
+    /* Get a reference to your class if you don't have it already */
+    if (NULL == (cls = CBENVPTR->FindClass(CBENVONLY, "hdf/hdf5lib/structs/H5E_error2_t")))
+        CHECK_JNI_EXCEPTION(CBENVONLY, JNI_FALSE);
+
+    /* get a reference to the constructor; the name is <init> */
+    if (NULL == (constructor = CBENVPTR->GetMethodID(CBENVONLY, cls, "<init>", "(JJJILjava/lang/String;Ljava/lang/String;Ljava/lang/String;)V")))
+        CHECK_JNI_EXCEPTION(CBENVONLY, JNI_FALSE);
+
+    if (NULL == (cb_info_t = CBENVPTR->NewObjectA(CBENVONLY, cls, constructor, args)))
+        CHECK_JNI_EXCEPTION(CBENVONLY, JNI_FALSE);
+
+    status = CBENVPTR->CallIntMethod(CBENVONLY, visit_callback, mid, nindx, cb_info_t, op_data);
+    CHECK_JNI_EXCEPTION(CBENVONLY, JNI_FALSE);
+
+done:
+    if (CBENVONLY)
+        JVMPTR->DetachCurrentThread(JVMPAR);
+
     return (herr_t)status;
 } /* end H5E_walk_cb */
 
@@ -539,15 +589,23 @@ JNIEXPORT void JNICALL
 Java_hdf_hdf5lib_H5_H5Ewalk2
     (JNIEnv *env, jclass cls, jlong stk_id, jlong direction, jobject callback_op, jobject op_data)
 {
-    cb_wrapper wrapper = {callback_op, op_data};
+    cb_wrapper wrapper = { callback_op, op_data };
 
-    ENVPTR->GetJavaVM(ENVPAR &jvm);
+    UNUSED(cls);
 
-    if ((op_data == NULL) || (callback_op == NULL)) {
-        h5nullArgument(env,  "H5Ewalk2:  op_data or callback_op is NULL");
-    } /* end if */
-    else if (H5Ewalk2(stk_id, (H5E_direction_t)direction, (H5E_walk2_t)H5E_walk_cb, (void*)&wrapper) < 0)
-            h5libraryError(env);
+    ENVPTR->GetJavaVM(ENVONLY, &jvm);
+    CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+
+    if (NULL == op_data)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Ewalk2: op_data is NULL");
+    if (NULL == callback_op)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Ewalk2: callback_op is NULL");
+
+    if (H5Ewalk2(stk_id, (H5E_direction_t)direction, (H5E_walk2_t)H5E_walk_cb, (void *)&wrapper) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+
+done:
+    return;
 } /* end iJava_hdf_hdf5lib_H5_H5Ewalk2f */
 
 #ifdef __cplusplus

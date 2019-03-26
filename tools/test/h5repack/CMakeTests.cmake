@@ -16,39 +16,6 @@
 ##############################################################################
 ##############################################################################
 
-  if (HDF5_TEST_VFD)
-    set (VFD_LIST
-        sec2
-        stdio
-        core
-        split
-        multi
-        family
-    )
-
-    if (DIRECT_VFD)
-      set (VFD_LIST ${VFD_LIST} direct)
-    endif ()
-
-    macro (ADD_VFD_TEST vfdname resultcode)
-      add_test (
-        NAME H5REPACK-VFD-${vfdname}-h5repacktest
-        COMMAND "${CMAKE_COMMAND}"
-            -D "TEST_PROGRAM=$<TARGET_FILE:h5repacktest>"
-            -D "TEST_ARGS:STRING="
-            -D "TEST_VFD:STRING=${vfdname}"
-            -D "TEST_EXPECT=${resultcode}"
-            -D "TEST_OUTPUT=h5repacktest"
-            -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
-            -P "${HDF_RESOURCES_DIR}/vfdTest.cmake"
-      )
-      if (NOT "${last_test}" STREQUAL "")
-        set_tests_properties (H5REPACK-VFD-${vfdname}-h5repacktest PROPERTIES DEPENDS ${last_test})
-      endif ()
-      set (last_test "H5REPACK-VFD-${vfdname}-h5repacktest")
-    endmacro ()
-  endif ()
-
   # --------------------------------------------------------------------
   # Copy all the HDF5 files from the source directory into the test directory
   # --------------------------------------------------------------------
@@ -195,7 +162,7 @@
     if (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (NAME H5REPACK-h5repack-${testname} COMMAND $<TARGET_FILE:h5repack> ${ARGN})
       set_tests_properties (H5REPACK-h5repack-${testname} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
-      if (NOT "${last_test}" STREQUAL "")
+      if (last_test)
         set_tests_properties (H5REPACK-h5repack-${testname} PROPERTIES DEPENDS ${last_test})
       endif ()
       set (last_test "H5REPACK-h5repack-${testname}")
@@ -207,7 +174,7 @@
               testfiles/h5repack-${testname}.out
               testfiles/h5repack-${testname}.out.err
       )
-      if (NOT "${last_test}" STREQUAL "")
+      if (last_test)
         set_tests_properties (H5REPACK-h5repack-${testname}-clear-objects PROPERTIES DEPENDS ${last_test})
       endif ()
       add_test (
@@ -241,7 +208,7 @@
               -E remove
               testfiles/out-${testname}.${testfile}
       )
-      if (NOT "${last_test}" STREQUAL "")
+      if (last_test)
         set_tests_properties (H5REPACK_OLD-${testname}-clear-objects PROPERTIES DEPENDS ${last_test})
       endif ()
       add_test (
@@ -273,7 +240,7 @@
               -E remove
               testfiles/out-${testname}.${testfile}
       )
-      if (NOT "${last_test}" STREQUAL "")
+      if (last_test)
         set_tests_properties (H5REPACK-${testname}-clear-objects PROPERTIES DEPENDS ${last_test})
       endif ()
       add_test (
@@ -305,7 +272,7 @@
             NAME H5REPACK_CMP-${testname}
             COMMAND $<TARGET_FILE:h5repack> ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${resultfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${resultfile}
         )
-        if (NOT "${last_test}" STREQUAL "")
+        if (last_test)
           set_tests_properties (H5REPACK_CMP-${testname} PROPERTIES DEPENDS ${last_test})
         endif ()
       else ()
@@ -317,7 +284,7 @@
                 testfiles/${resultfile}-${testname}.out
                 testfiles/${resultfile}-${testname}.out.err
         )
-        if (NOT "${last_test}" STREQUAL "")
+        if (last_test)
           set_tests_properties (H5REPACK_CMP-${testname}-clear-objects PROPERTIES DEPENDS ${last_test})
         endif ()
         add_test (
@@ -353,7 +320,7 @@
             NAME H5REPACK_MASK-${testname}
             COMMAND $<TARGET_FILE:h5repack> ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${resultfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${resultfile}
         )
-        if (NOT "${last_test}" STREQUAL "")
+        if (last_test)
           set_tests_properties (H5REPACK_MASK-${testname} PROPERTIES DEPENDS ${last_test})
         endif ()
       else (HDF5_ENABLE_USING_MEMCHECKER)
@@ -365,7 +332,7 @@
                 testfiles/${resultfile}-${testname}.out
                 testfiles/${resultfile}-${testname}.out.err
         )
-        if (NOT "${last_test}" STREQUAL "")
+        if (last_test)
           set_tests_properties (H5REPACK_MASK-${testname}-clear-objects PROPERTIES DEPENDS ${last_test})
         endif ()
         add_test (
@@ -377,7 +344,8 @@
                 -D "TEST_OUTPUT=${resultfile}-${testname}.out"
                 -D "TEST_EXPECT=${resultcode}"
                 -D "TEST_MASK_ERROR=true"
-                -D "TEST_REFERENCE=${resultfile}-${testname}.tst"
+                -D "TEST_REFERENCE=${resultfile}.mty"
+                -D "TEST_ERRREF=${resultfile}-${testname}.tst"
                 -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
         )
         set_tests_properties (H5REPACK_MASK-${testname} PROPERTIES DEPENDS H5REPACK_MASK-${testname}-clear-objects)
@@ -403,7 +371,7 @@
               testfiles/${resultfile}-${testname}.out
               testfiles/${resultfile}-${testname}.out.err
       )
-      if (NOT "${last_test}" STREQUAL "")
+      if (last_test)
         set_tests_properties (H5REPACK_DMP-${testname}-clear-objects PROPERTIES DEPENDS ${last_test})
       endif ()
       add_test (
@@ -446,7 +414,7 @@
               testfiles/${resultfile}-${testname}.out
               testfiles/${resultfile}-${testname}.out.err
       )
-      if (NOT "${last_test}" STREQUAL "")
+      if (last_test)
         set_tests_properties (H5REPACK_STAT-${testname}-clear-objects PROPERTIES DEPENDS ${last_test})
       endif ()
       add_test (
@@ -490,7 +458,7 @@
                 testfiles/${testfile}-${testname}-v.out
                 testfiles/${testfile}-${testname}-v.out.err
         )
-        if (NOT "${last_test}" STREQUAL "")
+        if (last_test)
           set_tests_properties (H5REPACK_VERIFY_LAYOUT-${testname}-clear-objects PROPERTIES DEPENDS ${last_test})
         endif ()
         add_test (
@@ -503,7 +471,7 @@
             COMMAND $<TARGET_FILE:h5diff> ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
         )
         set_tests_properties (H5REPACK_VERIFY_LAYOUT-${testname}_DFF PROPERTIES DEPENDS H5REPACK_VERIFY_LAYOUT-${testname})
-        if ("${resultcode}" STREQUAL "0")
+        if (NOT ${resultcode})
           add_test (
               NAME H5REPACK_VERIFY_LAYOUT-${testname}_DMP
               COMMAND "${CMAKE_COMMAND}"
@@ -565,7 +533,7 @@
                 testfiles/${testfile}-${testname}-v.out
                 testfiles/${testfile}-${testname}-v.out.err
         )
-        if (NOT "${last_test}" STREQUAL "")
+        if (last_test)
           set_tests_properties (H5REPACK_VERIFY_LAYOUT_VDS-${testname}-clear-objects PROPERTIES DEPENDS ${last_test})
         endif ()
         add_test (
@@ -602,7 +570,7 @@
               testfiles/${testfile}-${testname}-v.out
               testfiles/${testfile}-${testname}-v.out.err
       )
-      if (NOT "${last_test}" STREQUAL "")
+      if (last_test)
         set_tests_properties (H5REPACK_VERIFY_SUPERBLOCK-${testname}-clear-objects PROPERTIES DEPENDS ${last_test})
       endif ()
       add_test (
@@ -633,7 +601,7 @@
               -E remove
               testfiles/out-${testname}.${testfile}
       )
-      if (NOT "${last_test}" STREQUAL "")
+      if (last_test)
         set_tests_properties (ADD_H5_VERIFY_INVALIDBOUNDS-h5repack-${testname}-clear-objects PROPERTIES DEPENDS ${last_test})
       endif ()
       add_test (
@@ -656,7 +624,7 @@
               testfiles/out-${testname}_N.${testname}.h5
               testfiles/out-${testname}_M.${testname}.h5
       )
-      if (NOT "${last_test}" STREQUAL "")
+      if (last_test)
         set_tests_properties (H5REPACK_META-${testname}_N-clear-objects PROPERTIES DEPENDS ${last_test})
       endif ()
       add_test (
@@ -688,7 +656,7 @@
               testfiles/${resultfile}-${testname}.out
               testfiles/${resultfile}-${testname}.out.err
       )
-      if (NOT "${last_test}" STREQUAL "")
+      if (last_test)
         set_tests_properties (H5REPACK_UD-${testname}-clear-objects PROPERTIES DEPENDS ${last_test})
       endif ()
       add_test (
@@ -933,7 +901,7 @@
         COMMAND ${CMAKE_COMMAND} -E remove ${LIST_TO_CLEAR}
     )
     set_tests_properties (H5REPACK-clearall-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
-    if (NOT "${last_test}" STREQUAL "")
+    if (last_test)
       set_tests_properties (H5REPACK-clearall-objects PROPERTIES DEPENDS ${last_test})
     endif ()
   endif ()
@@ -1458,9 +1426,12 @@ if (BUILD_SHARED_LIBS)
   ADD_H5_UD_TEST (plugin_zero 0 h5repack_layout.h5 -v -f UD=250,0,0)
 endif ()
 
-  if (HDF5_TEST_VFD)
-    # Run test with different Virtual File Driver
-    foreach (vfd ${VFD_LIST})
-      ADD_VFD_TEST (${vfd} 0)
-    endforeach ()
-  endif ()
+##############################################################################
+##############################################################################
+###                         V F D   T E S T S                              ###
+##############################################################################
+##############################################################################
+
+if (HDF5_TEST_VFD)
+  include (CMakeVFDTests.cmake)
+endif ()

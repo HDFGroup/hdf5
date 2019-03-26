@@ -176,7 +176,12 @@ H5O_attr_decode(H5F_t *f, H5O_t *open_oh, unsigned H5_ATTR_UNUSED mesg_flags,
 
     /* Decode and store the name */
     if(NULL == (attr->shared->name = H5MM_strdup((const char *)p)))
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+
+    /* Make an attempt to detect corrupted name or name length - HDFFV-10588 */
+    if(name_len != (HDstrlen(attr->shared->name) + 1))
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTDECODE, NULL, "attribute name has different length than stored length")
+
     if(attr->shared->version < H5O_ATTR_VERSION_2)
         p += H5O_ALIGN_OLD(name_len);    /* advance the memory pointer */
     else
@@ -203,7 +208,7 @@ H5O_attr_decode(H5F_t *f, H5O_t *open_oh, unsigned H5_ATTR_UNUSED mesg_flags,
         HGOTO_ERROR(H5E_ATTR, H5E_CANTDECODE, NULL, "can't decode attribute dataspace")
 
     /* Copy the extent information to the dataspace */
-    HDmemcpy(&(attr->shared->ds->extent), extent, sizeof(H5S_extent_t));
+    H5MM_memcpy(&(attr->shared->ds->extent), extent, sizeof(H5S_extent_t));
 
     /* Release temporary extent information */
     extent = H5FL_FREE(H5S_extent_t, extent);
@@ -235,7 +240,7 @@ H5O_attr_decode(H5F_t *f, H5O_t *open_oh, unsigned H5_ATTR_UNUSED mesg_flags,
     if(attr->shared->data_size) {
         if(NULL == (attr->shared->data = H5FL_BLK_MALLOC(attr_buf, attr->shared->data_size)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
-        HDmemcpy(attr->shared->data, p, attr->shared->data_size);
+        H5MM_memcpy(attr->shared->data, p, attr->shared->data_size);
     } /* end if */
 
     /* Increment the reference count for this object header message in cache(compact
@@ -331,7 +336,7 @@ H5O_attr_encode(H5F_t *f, uint8_t *p, const void *mesg)
         *p++ = attr->shared->encoding;
 
     /* Write the name including null terminator */
-    HDmemcpy(p, attr->shared->name, name_len);
+    H5MM_memcpy(p, attr->shared->name, name_len);
     if(attr->shared->version < H5O_ATTR_VERSION_2) {
         /* Pad to the correct number of bytes */
         HDmemset(p + name_len, 0, H5O_ALIGN_OLD(name_len) - name_len);
@@ -364,7 +369,7 @@ H5O_attr_encode(H5F_t *f, uint8_t *p, const void *mesg)
 
     /* Store attribute data.  If there's no data, store 0 as fill value. */
     if(attr->shared->data)
-        HDmemcpy(p, attr->shared->data, attr->shared->data_size);
+        H5MM_memcpy(p, attr->shared->data, attr->shared->data_size);
     else
         HDmemset(p, 0, attr->shared->data_size);
 

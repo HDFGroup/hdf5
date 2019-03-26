@@ -12,6 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include "testphdf5.h"
+#include "H5Dprivate.h"
 
 #define DIM  2
 #define SIZE 32
@@ -311,12 +312,26 @@ void compact_dataset(void)
      VRFY((ret>= 0),"set independent IO collectively succeeded");
     }
 
-
     dataset = H5Dopen2(iof, dname, H5P_DEFAULT);
     VRFY((dataset >= 0), "H5Dopen2 succeeded");
 
+#ifdef H5_HAVE_INSTRUMENTED_LIBRARY
+    hbool_t prop_value;
+    prop_value = H5D_XFER_COLL_RANK0_BCAST_DEF;
+    ret = H5Pinsert2(dxpl, H5D_XFER_COLL_RANK0_BCAST_NAME, H5D_XFER_COLL_RANK0_BCAST_SIZE, &prop_value,
+                     NULL, NULL, NULL, NULL, NULL, NULL);
+    VRFY((ret >= 0), "H5Pinsert2() succeeded");
+#endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
+
     ret = H5Dread(dataset, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, dxpl, inme);
     VRFY((ret >= 0), "H5Dread succeeded");
+
+#ifdef H5_HAVE_INSTRUMENTED_LIBRARY
+    prop_value = FALSE;
+    ret = H5Pget(dxpl, H5D_XFER_COLL_RANK0_BCAST_NAME, &prop_value);
+    VRFY((ret >= 0), "H5Pget succeeded");
+    VRFY((prop_value == FALSE && dxfer_coll_type == DXFER_COLLECTIVE_IO),"rank 0 Bcast optimization was performed for a compact dataset");
+#endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
 
     /* Verify data value */
     for(i = 0; i < size; i++)
@@ -603,8 +618,8 @@ void dataset_fillvalue(void)
     hsize_t     req_count[4] = {1, 6, 7, 8};
     hsize_t     dset_size;      /* Dataset size */
     int *rdata, *wdata;         /* Buffers for data to read and write */
-    int *twdata, *trdata;        /* Temporary pointer into buffer */
-    int acc, i, j, k, l;        /* Local index variables */
+    int *twdata, *trdata;       /* Temporary pointer into buffer */
+    int acc, i, j, k, l, ii;    /* Local index variables */
     herr_t ret;                 /* Generic return value */
     const char *filename;
 
@@ -645,27 +660,60 @@ void dataset_fillvalue(void)
     /*
      * Read dataset before any data is written.
      */
-    /* set entire read buffer with the constant 2 */
-    HDmemset(rdata,2,(size_t)(dset_size*sizeof(int)));
-    /* Independently read the entire dataset back */
-    ret = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata);
-    VRFY((ret >= 0), "H5Dread succeeded");
 
-    /* Verify all data read are the fill value 0 */
-    trdata = rdata;
-    err_num = 0;
-    for(i = 0; i < (int)dset_dims[0]; i++)
+    /* Create DXPL for I/O */
+    dxpl = H5Pcreate(H5P_DATASET_XFER);
+    VRFY((dxpl >= 0), "H5Pcreate succeeded");
+
+#ifdef H5_HAVE_INSTRUMENTED_LIBRARY
+      hbool_t prop_value;
+      prop_value = H5D_XFER_COLL_RANK0_BCAST_DEF;
+      ret = H5Pinsert2(dxpl, H5D_XFER_COLL_RANK0_BCAST_NAME, H5D_XFER_COLL_RANK0_BCAST_SIZE, &prop_value,
+                   NULL, NULL, NULL, NULL, NULL, NULL);
+      VRFY((ret >= 0),"testing property list inserted succeeded");
+#endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
+
+    for(ii = 0; ii < 2; ii++) {
+
+      if(ii == 0)
+        ret = H5Pset_dxpl_mpio(dxpl, H5FD_MPIO_INDEPENDENT);
+      else
+        ret = H5Pset_dxpl_mpio(dxpl, H5FD_MPIO_COLLECTIVE);
+      VRFY((ret >= 0), "H5Pset_dxpl_mpio succeeded");
+
+      /* set entire read buffer with the constant 2 */
+      HDmemset(rdata,2,(size_t)(dset_size*sizeof(int)));
+
+      /* Read the entire dataset back */
+      ret = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, rdata);
+      VRFY((ret >= 0), "H5Dread succeeded");
+
+#ifdef H5_HAVE_INSTRUMENTED_LIBRARY
+      prop_value = FALSE;
+      ret = H5Pget(dxpl, H5D_XFER_COLL_RANK0_BCAST_NAME, &prop_value);
+      VRFY((ret >= 0), "testing property list get succeeded");
+      if(ii == 0)
+        VRFY((prop_value == FALSE), "correctly handled rank 0 Bcast");
+      else
+        VRFY((prop_value == TRUE), "correctly handled rank 0 Bcast");
+#endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
+
+      /* Verify all data read are the fill value 0 */
+      trdata = rdata;
+      err_num = 0;
+      for(i = 0; i < (int)dset_dims[0]; i++)
         for(j = 0; j < (int)dset_dims[1]; j++)
-            for(k = 0; k < (int)dset_dims[2]; k++)
-                for(l = 0; l < (int)dset_dims[3]; l++, twdata++, trdata++)
-		    if(*trdata != 0)
-			if(err_num++ < MAX_ERR_REPORT || VERBOSE_MED)
-			    printf("Dataset Verify failed at [%d][%d][%d][%d]: expect 0, got %d\n", i, j, k, l, *trdata);
-    if(err_num > MAX_ERR_REPORT && !VERBOSE_MED)
+          for(k = 0; k < (int)dset_dims[2]; k++)
+            for(l = 0; l < (int)dset_dims[3]; l++, twdata++, trdata++)
+              if(*trdata != 0)
+                if(err_num++ < MAX_ERR_REPORT || VERBOSE_MED)
+                  printf("Dataset Verify failed at [%d][%d][%d][%d]: expect 0, got %d\n", i, j, k, l, *trdata);
+      if(err_num > MAX_ERR_REPORT && !VERBOSE_MED)
         printf("[more errors ...]\n");
-    if(err_num){
+      if(err_num) {
         printf("%d errors found in check_value\n", err_num);
-	nerrors++;
+        nerrors++;
+      }
     }
 
     /* Barrier to ensure all processes have completed the above test. */
@@ -680,10 +728,6 @@ void dataset_fillvalue(void)
     VRFY((ret >= 0), "H5Sselect_hyperslab succeeded on memory dataspace");
     ret = H5Sselect_hyperslab(memspace, H5S_SELECT_SET, req_start, NULL, req_count, NULL);
     VRFY((ret >= 0), "H5Sselect_hyperslab succeeded on memory dataspace");
-
-    /* Create DXPL for collective I/O */
-    dxpl = H5Pcreate(H5P_DATASET_XFER);
-    VRFY((dxpl >= 0), "H5Pcreate succeeded");
 
     ret = H5Pset_dxpl_mpio(dxpl, H5FD_MPIO_COLLECTIVE);
     VRFY((ret >= 0), "H5Pset_dxpl_mpio succeeded");
@@ -711,37 +755,64 @@ void dataset_fillvalue(void)
     /*
      * Read dataset after partial write.
      */
-    /* set entire read buffer with the constant 2 */
-    HDmemset(rdata,2,(size_t)(dset_size*sizeof(int)));
-    /* Independently read the entire dataset back */
-    ret = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata);
-    VRFY((ret >= 0), "H5Dread succeeded");
 
-    /* Verify correct data read */
-    twdata=wdata;
-    trdata=rdata;
-    err_num=0;
-    for(i=0; i<(int)dset_dims[0]; i++)
+#ifdef H5_HAVE_INSTRUMENTED_LIBRARY
+      prop_value = H5D_XFER_COLL_RANK0_BCAST_DEF;
+      ret = H5Pset(dxpl, H5D_XFER_COLL_RANK0_BCAST_NAME, &prop_value);
+      VRFY((ret >= 0), " H5Pset succeeded");
+#endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
+
+    for(ii = 0; ii < 2; ii++) {
+
+      if(ii == 0)
+        ret = H5Pset_dxpl_mpio(dxpl, H5FD_MPIO_INDEPENDENT);
+      else
+        ret = H5Pset_dxpl_mpio(dxpl, H5FD_MPIO_COLLECTIVE);
+      VRFY((ret >= 0), "H5Pset_dxpl_mpio succeeded");
+
+      /* set entire read buffer with the constant 2 */
+      HDmemset(rdata,2,(size_t)(dset_size*sizeof(int)));
+
+      /* Read the entire dataset back */
+      ret = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, rdata);
+      VRFY((ret >= 0), "H5Dread succeeded");
+
+#ifdef H5_HAVE_INSTRUMENTED_LIBRARY
+      prop_value = FALSE;
+      ret = H5Pget(dxpl, H5D_XFER_COLL_RANK0_BCAST_NAME, &prop_value);
+      VRFY((ret >= 0), "testing property list get succeeded");
+      if(ii == 0)
+        VRFY((prop_value == FALSE), "correctly handled rank 0 Bcast");
+      else
+        VRFY((prop_value == TRUE), "correctly handled rank 0 Bcast");
+#endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
+
+      /* Verify correct data read */
+      twdata=wdata;
+      trdata=rdata;
+      err_num=0;
+      for(i=0; i<(int)dset_dims[0]; i++)
         for(j=0; j<(int)dset_dims[1]; j++)
-            for(k=0; k<(int)dset_dims[2]; k++)
-                for(l=0; l<(int)dset_dims[3]; l++, twdata++, trdata++)
-                    if(i<mpi_size) {
-                        if(*twdata != *trdata )
-                            if(err_num++ < MAX_ERR_REPORT || VERBOSE_MED)
-                                printf("Dataset Verify failed at [%d][%d][%d][%d]: expect %d, got %d\n", i,j,k,l, *twdata, *trdata);
-                    } /* end if */
-                    else {
-                        if(*trdata != 0)
-                            if(err_num++ < MAX_ERR_REPORT || VERBOSE_MED)
-                                printf("Dataset Verify failed at [%d][%d][%d][%d]: expect 0, got %d\n", i,j,k,l, *trdata);
-                    } /* end else */
-    if(err_num > MAX_ERR_REPORT && !VERBOSE_MED)
+          for(k=0; k<(int)dset_dims[2]; k++)
+            for(l=0; l<(int)dset_dims[3]; l++, twdata++, trdata++)
+              if(i<mpi_size) {
+                if(*twdata != *trdata )
+                  if(err_num++ < MAX_ERR_REPORT || VERBOSE_MED)
+                    printf("Dataset Verify failed at [%d][%d][%d][%d]: expect %d, got %d\n", i,j,k,l, *twdata, *trdata);
+              } /* end if */
+              else {
+                if(*trdata != 0)
+                  if(err_num++ < MAX_ERR_REPORT || VERBOSE_MED)
+                    printf("Dataset Verify failed at [%d][%d][%d][%d]: expect 0, got %d\n", i,j,k,l, *trdata);
+              } /* end else */
+      if(err_num > MAX_ERR_REPORT && !VERBOSE_MED)
         printf("[more errors ...]\n");
-    if(err_num){
+      if(err_num){
         printf("%d errors found in check_value\n", err_num);
-	nerrors++;
+        nerrors++;
+      }
     }
-
+    
     /* Close all file objects */
     ret = H5Dclose(dataset);
     VRFY((ret >= 0), "H5Dclose succeeded");
@@ -856,7 +927,7 @@ void collective_group_write(void)
         if(!((m+1) % 10)) {
             printf("created %d groups\n", m+1);
             MPI_Barrier(MPI_COMM_WORLD);
-	}
+        }
 #endif /* BARRIER_CHECKS */
     }
 

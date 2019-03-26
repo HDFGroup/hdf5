@@ -1,0 +1,206 @@
+************************************************************************
+*    Using CMake to build and test HDF5 source on HPC machines         *
+************************************************************************ 
+
+                    Contents
+
+Section I:     Prerequisites
+Section II:    Obtain HDF5 source
+Section III:   Using ctest command to build and test
+Section IV:    Cross compiling
+Section V:     Manual alternatives
+Section VI:    Other cross compiling options
+
+************************************************************************
+
+========================================================================
+I. Prerequisites
+========================================================================
+    1. Create a working directory that is accessible from the compute nodes for 
+       running tests; the working directory should be in a scratch space or a
+       parallel file system space since testing will use this space.  Building
+       from HDF5 source in a 'home' directory typically results in test 
+       failures and should be avoided.
+	  
+    2. Load modules for desired compilers, module for cmake version 3.10 or greater, 
+       and set any needed environment variables for compilers (i.e., CC, FC, CXX).
+       Unload any problematic modules (i.e., craype-hugepages2M).
+
+========================================================================
+II. Obtain HDF5 source
+========================================================================
+Obtain HDF5 source code from the HDF5 repository using a git command or 
+from a release tar file in a working directory:
+
+    git clone https://git@bitbucket.hdfgroup.org/scm/hdffv/hdf5.git 
+        [-b branch] [source directory]
+
+If no branch is specified, then the 'develop' version will be checked out.
+If no source directory is specified, then the source will be located in the 
+'hdf5' directory. The Cmake scripts expect the source to be in a directory 
+named hdf5-<version string>, where 'version string' uses the format '1.xx.xx'.
+For example, for the current 'develop' version, the "hdf5" directory should 
+be renamed "hdf5-1.11.4", or for the first hdf5_1_10_5 pre-release version, 
+it should be renamed "hdf5-1.10.5-pre1".
+
+If the version number is not known a priori, the version string 
+can be obtained by running bin/h5vers in the top level directory of the source clone, and
+the source directory renamed 'hdf5-<version string>'.
+
+Release or snapshot tar files may also be extracted and used.
+
+========================================================================
+III. Using ctest command to build and test
+========================================================================
+
+The ctest command [1]:
+
+  ctest -S HDF5config.cmake,BUILD_GENERATOR=Unix -C Release -V -O hdf5.log
+
+will configure, build, test and package HDF5 from the downloaded source 
+after the setup steps outlined below are followed.
+
+CMake option variables are available to allow running test programs in batch 
+scripts on compute nodes and to cross-compile for compute node hardware using 
+a cross-compiling emulator.  The setup steps will make default settings for
+parallel or serial only builds available to the CMake command.  
+
+    1. For the current 'develop' version the "hdf5" directory should be renamed 
+       "hdf5-1.11.4".
+
+    2. Three cmake script files need to be copied to the working directory, or
+       have symbolic links to them, created in the working directory:
+   
+       hdf5-1.11.4/config/cmake/scripts/HDF5config.cmake
+       hdf5-1.11.4/config/cmake/scripts/CTestScript.cmake
+       hdf5-1.11.4/config/cmake/scripts/HDF5options.cmake 
+
+       should be copied to the working directory.
+
+    3. The resulting contents of the working directory are then:
+
+       CTestScript.cmake
+       HDF5config.cmake
+       HDF5options.cmake
+       hdf5-1.11.4
+
+       Additionally, when the ctest command runs [1], it will add a build directory 
+       in the working directory.
+
+    4. The following options (among others) can be added to the ctest
+       command [1], following '-S HDF5config.cmake,' and separated by ',':
+
+       HPC=sbatch   (or 'bsub' or 'raybsub') indicates which type of batch
+                     files to use for running tests.  If omitted, test 
+                     will run on the local machine or login node.
+
+       KNL=true      to cross-compile for KNL compute nodes on CrayXC40
+                     (see section IV)
+
+       MPI=true      enables parallel, disables c++, java, and threadsafe
+
+       LOCAL_BATCH_SCRIPT_ARGS="--account=<account#>"  to supply user account
+                                                       information for batch jobs
+
+       The HPC options will add BUILD_GENERATOR=Unix for the three HPC options.
+       An example ctest command for a parallel build on a system using sbatch is
+   
+         ctest -S HDF5config.cmake,HPC=sbatch,MPI=true -C Release -V -O hdf5.log
+
+       Adding the option 'KNL=true' to the above list will compile for KNL nodes, 
+       for example, on 'mutrino' and other CrayXC40 machines.
+
+       Changing -V to -VV will produce more logging information in HDF5.log. 
+
+    More detailed CMake information can be found in the HDF5 source in 
+    release_docs/INSTALL_CMake.txt.
+
+========================================================================
+IV. Cross-compiling
+========================================================================
+For cross-compiling on Cray, set environment variables CC=cc, FC=ftn 
+and CXX=CC (for c++) after all compiler modules are loaded since switching
+compiler modules may unset or reset these variables.
+
+CMake provides options for cross-compiling.  To cross-compile for KNL hardware 
+on mutrino and other CrayXC40 machines, add HPC=sbatch,KNL=true to the 
+ctest command line.  This will set the following options from the 
+config/cmake/scripts/HPC/sbatch-HDF5options.cmake file:
+
+    set (COMPILENODE_HWCOMPILE_MODULE "craype-haswell")
+    set (COMPUTENODE_HWCOMPILE_MODULE "craype-mic-knl")
+    set (LOCAL_BATCH_SCRIPT_NAME "knl_ctestS.sl")
+    set (LOCAL_BATCH_SCRIPT_PARALLEL_NAME "knl_ctestP.sl")
+    set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DCMAKE_TOOLCHAIN_FILE:STRING=config/toolchain/crayle.cmake")
+
+On the Cray XC40 the craype-haswell module is needed for configuring, and the 
+craype-mic-knl module is needed for building to run on the KNL nodes. CMake
+with the above options will swap modules after configuring is complete, 
+but before compiling programs for KNL.
+
+The sbatch script arguments for running jobs on KNL nodes may differ on CrayXC40
+machines other than mutrino.  The batch scripts knl_ctestS.sl and knl_ctestP.sl 
+have the correct arguments for mutrino:  "#SBATCH -p knl -C quad,cache".  For 
+cori, another CrayXC40, that line is replaced by "#SBATCH -C knl,quad,cache".  
+For cori (and other machines), the values in LOCAL_BATCH_SCRIPT_NAME and 
+LOCAL_BATCH_SCRIPT_PARALLEL_NAME in the config/cmake/scripts/HPC/sbatch-HDF5options.cmake 
+file can be replaced by cori_knl_ctestS.sl and cori_knl_ctestS.sl, or the lines 
+can be edited in the batch files in hdf5-1.11.4/bin/batch.
+
+========================================================================
+V. Manual alternatives
+========================================================================
+If using ctest is undesirable, one can create a build directory and run the cmake 
+configure command, for example
+
+"/projects/Mutrino/hpcsoft/cle6.0/common/cmake/3.10.2/bin/cmake" 
+-C "<working directory>/hdf5-1.11.4/config/cmake/cacheinit.cmake" 
+-DCMAKE_BUILD_TYPE:STRING=Release -DHDF5_BUILD_FORTRAN:BOOL=ON 
+-DHDF5_BUILD_JAVA:BOOL=OFF 
+-DCMAKE_INSTALL_PREFIX:PATH=<working directory>/HDF_Group/HDF5/1.11.4 
+-DHDF5_ENABLE_Z_LIB_SUPPORT:BOOL=OFF -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF 
+-DHDF5_ENABLE_PARALLEL:BOOL=ON -DHDF5_BUILD_CPP_LIB:BOOL=OFF 
+-DHDF5_BUILD_JAVA:BOOL=OFF -DHDF5_ENABLE_THREADSAFE:BOOL=OFF 
+-DHDF5_PACKAGE_EXTLIBS:BOOL=ON -DLOCAL_BATCH_TEST:BOOL=ON 
+-DMPIEXEC_EXECUTABLE:STRING=srun -DMPIEXEC_NUMPROC_FLAG:STRING=-n 
+-DMPIEXEC_MAX_NUMPROCS:STRING=6 
+-DCMAKE_TOOLCHAIN_FILE:STRING=config/toolchain/crayle.cmake 
+-DLOCAL_BATCH_SCRIPT_NAME:STRING=knl_ctestS.sl 
+-DLOCAL_BATCH_SCRIPT_PARALLEL_NAME:STRING=knl_ctestP.sl -DSITE:STRING=mutrino 
+-DBUILDNAME:STRING=par-knl_GCC493-SHARED-Linux-4.4.156-94.61.1.16335.0.PTF.1107299-default-x86_64 
+"-GUnix Makefiles" "" "<working directory>/hdf5-1.11.4"
+
+followed by make and batch jobs to run tests.
+
+To cross-compile on CrayXC40, run the configure command with the craype-haswell 
+module loaded, then switch to the craype-mic-knl module for the build process.
+
+Tests on machines using slurm can be run with 
+
+"sbatch -p knl -C quad,cache ctestS.sl" 
+
+or 
+
+"sbatch -p knl -C quad,cache ctestP.sl" 
+
+for parallel builds.
+ 
+Tests on machines using LSF will typically use "bsub ctestS.lsf", etc.
+
+========================================================================
+VI.    Other cross compiling options
+========================================================================
+Settings for two other cross-compiling options are also in the config/toolchain 
+files which do not seem to be necessary with the Cray PrgEnv-* modules
+
+1.  HDF5_USE_PREGEN.  This option, along with the HDF5_USE_PREGEN_DIR CMake 
+    variable would allow the use of an appropriate H5Tinit.c file with type 
+	information generated on a compute node to be used when cross compiling 
+	for those compute nodes.  The use of the variables in lines 110 and 111 
+	of HDF5options.cmake file seem to preclude needing this option with the 
+	available Cray modules and CMake option.
+
+2.  HDF5_BATCH_H5DETECT and associated CMake variables.  This option when 
+    properly configured will run H5detect in a batch job on a compute node 
+	at the beginning of the CMake build process.  It was also found to be 
+	unnecessary with the available Cray modules and CMake options.
