@@ -61,10 +61,10 @@ hid_t H5VL_RADOS_g = -1;
  * Typedefs
  */
 /* RADOS-specific file access properties */
-typedef struct H5VL_rados_fapl_t {
+typedef struct H5VL_rados_info_t {
     MPI_Comm            comm;           /*communicator                  */
     MPI_Info            info;           /*file information              */
-} H5VL_rados_fapl_t;
+} H5VL_rados_info_t;
 
 /* Enum to indicate if the supplied read buffer can be used as a type conversion
  * or background buffer */
@@ -93,8 +93,8 @@ typedef struct H5VL_rados_select_chunk_info_t {
 /*
  * Prototypes
  */
-static void *H5VL_rados_fapl_copy(const void *_old_fa);
-static herr_t H5VL_rados_fapl_free(void *_fa);
+static void *H5VL_rados_info_copy(const void *_old_info);
+static herr_t H5VL_rados_info_free(void *_info);
 static herr_t H5VL_rados_term(void);
 
 /* File callbacks */
@@ -141,22 +141,17 @@ static herr_t H5VL_rados_dataset_close(void *_dset, hid_t dxpl_id, void **req);
 /* Helper routines */
 static herr_t H5VL_rados_write_max_oid(H5VL_rados_file_t *file);
 static herr_t H5VL_rados_file_flush(H5VL_rados_file_t *file);
-static herr_t H5VL_rados_file_close_helper(H5VL_rados_file_t *file,
-    hid_t dxpl_id, void **req);
+static herr_t H5VL_rados_file_close_helper(H5VL_rados_file_t *file, hid_t dxpl_id, void **req);
 
 /* read/write_op equivalents for some RADOS calls */
 static int H5VL_rados_read(rados_ioctx_t io, const char *oid, char *buf, size_t len, uint64_t off);
 static int H5VL_rados_write_full(rados_ioctx_t io, const char *oid, const char *buf, size_t len);
 static int H5VL_rados_stat(rados_ioctx_t io, const char *oid, uint64_t *psize, time_t * pmtime);
 
-static herr_t H5VL_rados_link_read(H5VL_rados_group_t *grp, const char *name,
-    H5VL_rados_link_val_t *val);
-static herr_t H5VL_rados_link_write(H5VL_rados_group_t *grp, const char *name,
-    H5VL_rados_link_val_t *val);
-static herr_t H5VL_rados_link_follow(H5VL_rados_group_t *grp, const char *name,
-    hid_t dxpl_id, void **req, uint64_t *oid);
-static herr_t H5VL_rados_link_follow_comp(H5VL_rados_group_t *grp, char *name,
-    size_t name_len, hid_t dxpl_id, void **req, uint64_t *oid);
+static herr_t H5VL_rados_link_read(H5VL_rados_group_t *grp, const char *name, H5VL_rados_link_val_t *val);
+static herr_t H5VL_rados_link_write(H5VL_rados_group_t *grp, const char *name, H5VL_rados_link_val_t *val);
+static herr_t H5VL_rados_link_follow(H5VL_rados_group_t *grp, const char *name, hid_t dxpl_id, void **req, uint64_t *oid);
+static herr_t H5VL_rados_link_follow_comp(H5VL_rados_group_t *grp, char *name, size_t name_len, hid_t dxpl_id, void **req, uint64_t *oid);
 
 static H5VL_rados_group_t *H5VL_rados_group_traverse(H5VL_rados_item_t *item,
     char *path, hid_t dxpl_id, void **req, char **obj_name,
@@ -207,10 +202,10 @@ static H5VL_class_t H5VL_rados_g = {
     NULL,                                       /* initialize */
     H5VL_rados_term,                            /* terminate */
     {   /* info_cls - may need more here (DER) */
-        sizeof(H5VL_rados_fapl_t),                  /* info size    */
-        H5VL_rados_fapl_copy,                       /* info copy    */
+        sizeof(H5VL_rados_info_t),                  /* info size    */
+        H5VL_rados_info_copy,                       /* info copy    */
         NULL,                                       /* info compare */
-        H5VL_rados_fapl_free,                       /* info free    */
+        H5VL_rados_info_free,                       /* info free    */
         NULL,                                       /* info to str  */
         NULL                                        /* str to info  */
     },
@@ -789,7 +784,7 @@ H5VL_rados_term(void)
 herr_t
 H5Pset_fapl_rados(hid_t fapl_id, MPI_Comm file_comm, MPI_Info file_info)
 {
-    H5VL_rados_fapl_t fa;
+    H5VL_rados_info_t info;
     H5P_genplist_t  *plist;      /* Property list pointer */
     herr_t          ret_value;
 
@@ -809,10 +804,10 @@ H5Pset_fapl_rados(hid_t fapl_id, MPI_Comm file_comm, MPI_Info file_info)
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a valid communicator")
 
     /* Initialize driver specific properties */
-    fa.comm = file_comm;
-    fa.info = file_info;
+    info.comm = file_comm;
+    info.info = file_info;
 
-    ret_value = H5P_set_vol(plist, H5VL_RADOS_g, &fa);
+    ret_value = H5P_set_vol(plist, H5VL_RADOS_g, &info);
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -820,7 +815,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5VL_rados_fapl_copy
+ * Function:    H5VL_rados_info_copy
  *
  * Purpose:     Copies the rados-specific file access properties.
  *
@@ -833,43 +828,43 @@ done:
  *-------------------------------------------------------------------------
  */
 static void *
-H5VL_rados_fapl_copy(const void *_old_fa)
+H5VL_rados_info_copy(const void *_old_info)
 {
-    const H5VL_rados_fapl_t *old_fa = (const H5VL_rados_fapl_t*)_old_fa;
-    H5VL_rados_fapl_t     *new_fa = NULL;
-    void                  *ret_value = NULL;
+    const H5VL_rados_info_t *old_info = (const H5VL_rados_info_t *)_old_info;
+    H5VL_rados_info_t       *new_info = NULL;
+    void                    *ret_value = NULL;
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if(NULL == (new_fa = (H5VL_rados_fapl_t *)H5MM_malloc(sizeof(H5VL_rados_fapl_t))))
+    if(NULL == (new_info = (H5VL_rados_info_t *)H5MM_malloc(sizeof(H5VL_rados_info_t))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Copy the general information */
-    HDmemcpy(new_fa, old_fa, sizeof(H5VL_rados_fapl_t));
+    HDmemcpy(new_info, old_info, sizeof(H5VL_rados_info_t));
 
     /* Clear allocated fields, so they aren't freed if something goes wrong.  No
      * need to clear info since it is only freed if comm is not null. */
-    new_fa->comm = MPI_COMM_NULL;
+    new_info->comm = MPI_COMM_NULL;
 
     /* Duplicate communicator and Info object. */
-    if(FAIL == H5FD_mpi_comm_info_dup(old_fa->comm, old_fa->info, &new_fa->comm, &new_fa->info))
+    if(FAIL == H5FD_mpi_comm_info_dup(old_info->comm, old_info->info, &new_info->comm, &new_info->info))
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTCOPY, NULL, "Communicator/Info duplicate failed")
 
-    ret_value = new_fa;
+    ret_value = new_info;
 
 done:
-    if (NULL == ret_value) {
+    if(NULL == ret_value) {
         /* cleanup */
-        if(new_fa && H5VL_rados_fapl_free(new_fa) < 0)
+        if(new_info && H5VL_rados_info_free(new_info) < 0)
             HDONE_ERROR(H5E_PLIST, H5E_CANTFREE, NULL, "can't free fapl")
-    } /* end if */
+    }
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_rados_fapl_copy() */
+} /* end H5VL_rados_info_copy() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5VL_rados_fapl_free
+ * Function:    H5VL_rados_info_free
  *
  * Purpose:     Frees the rados-specific file access properties.
  *
@@ -882,26 +877,26 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_rados_fapl_free(void *_fa)
+H5VL_rados_info_free(void *_info)
 {
     herr_t              ret_value = SUCCEED;
-    H5VL_rados_fapl_t   *fa = (H5VL_rados_fapl_t*)_fa;
+    H5VL_rados_info_t   *info = (H5VL_rados_info_t *)_info;
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    assert(fa);
+    assert(info);
 
     /* Free the internal communicator and INFO object */
-    if(fa->comm != MPI_COMM_NULL)
-        if(H5FD_mpi_comm_info_free(&fa->comm, &fa->info) < 0)
+    if(info->comm != MPI_COMM_NULL)
+        if(H5FD_mpi_comm_info_free(&info->comm, &info->info) < 0)
             HGOTO_ERROR(H5E_INTERNAL, H5E_CANTFREE, FAIL, "Communicator/Info free failed")
 
     /* free the struct */
-    H5MM_xfree(fa);
+    H5MM_xfree(info);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_rados_fapl_free() */
+} /* end H5VL_rados_info_free() */
 
 
 /*-------------------------------------------------------------------------
@@ -921,7 +916,7 @@ static void *
 H5VL_rados_file_create(const char *name, unsigned flags, hid_t fcpl_id,
     hid_t fapl_id, hid_t dxpl_id, void **req)
 {
-    H5VL_rados_fapl_t *fa = NULL;
+    H5VL_rados_info_t *info = NULL;
     H5P_genplist_t *plist = NULL;      /* Property list pointer */
     H5VL_rados_file_t *file = NULL;
     void *ret_value = NULL;
@@ -933,14 +928,14 @@ H5VL_rados_file_create(const char *name, unsigned flags, hid_t fcpl_id,
      * the EXCL or TRUNC bit is set.  All newly-created files are opened for
      * reading and writing.
      */
-    if(0==(flags & (H5F_ACC_EXCL|H5F_ACC_TRUNC)))
+    if(0 == (flags & (H5F_ACC_EXCL|H5F_ACC_TRUNC)))
         flags |= H5F_ACC_EXCL;      /*default*/
     flags |= H5F_ACC_RDWR | H5F_ACC_CREAT;
 
     /* Get information from the FAPL */
     if(NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list")
-    if(H5P_get_vol_info(plist, (void **)&fa) < 0)
+    if(H5P_get_vol_info(plist, (void **)&info) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't get RADOS info struct")
 
     /* allocate the file object that is returned to the user */
@@ -969,13 +964,13 @@ H5VL_rados_file_create(const char *name, unsigned flags, hid_t fcpl_id,
         HGOTO_ERROR(H5E_FILE, H5E_CANTCOPY, NULL, "failed to copy fapl")
 
     /* Duplicate communicator and Info object. */
-    if(FAIL == H5FD_mpi_comm_info_dup(fa->comm, fa->info, &file->comm, &file->info))
+    if(FAIL == H5FD_mpi_comm_info_dup(info->comm, info->info, &file->comm, &file->info))
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTCOPY, NULL, "Communicator/Info duplicate failed")
 
     /* Obtain the process rank and size from the communicator attached to the
      * fapl ID */
-    MPI_Comm_rank(fa->comm, &file->my_rank);
-    MPI_Comm_size(fa->comm, &file->num_procs);
+    MPI_Comm_rank(info->comm, &file->my_rank);
+    MPI_Comm_size(info->comm, &file->num_procs);
 
     /* Determine if we requested collective object ops for the file */
     if(H5Pget_all_coll_metadata_ops(fapl_id, &file->collective) < 0)
@@ -1019,7 +1014,7 @@ static void *
 H5VL_rados_file_open(const char *name, unsigned flags, hid_t fapl_id,
     hid_t dxpl_id, void **req)
 {
-    H5VL_rados_fapl_t *fa = NULL;
+    H5VL_rados_info_t *info = NULL;
     H5P_genplist_t *plist = NULL;      /* Property list pointer */
     H5VL_rados_file_t *file = NULL;
     char foi_buf_static[H5VL_RADOS_FOI_BUF_SIZE];
@@ -1038,7 +1033,7 @@ H5VL_rados_file_open(const char *name, unsigned flags, hid_t fapl_id,
     /* Get information from the FAPL */
     if(NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list")
-    if(H5P_get_vol_info(plist, (void **)&fa) < 0)
+    if(H5P_get_vol_info(plist, (void **)&info) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, NULL, "can't get RADOS info struct")
 
     /* allocate the file object that is returned to the user */
@@ -1063,13 +1058,13 @@ H5VL_rados_file_open(const char *name, unsigned flags, hid_t fapl_id,
         HGOTO_ERROR(H5E_FILE, H5E_CANTCOPY, NULL, "failed to copy fapl")
 
     /* Duplicate communicator and Info object. */
-    if(FAIL == H5FD_mpi_comm_info_dup(fa->comm, fa->info, &file->comm, &file->info))
+    if(FAIL == H5FD_mpi_comm_info_dup(info->comm, info->info, &file->comm, &file->info))
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTCOPY, NULL, "Communicator/Info duplicate failed")
 
     /* Obtain the process rank and size from the communicator attached to the
      * fapl ID */
-    MPI_Comm_rank(fa->comm, &file->my_rank);
-    MPI_Comm_size(fa->comm, &file->num_procs);
+    MPI_Comm_rank(info->comm, &file->my_rank);
+    MPI_Comm_size(info->comm, &file->num_procs);
 
     /* Generate root group oid */
     H5VL_rados_oid_create_binary((uint64_t)1, H5I_GROUP, &root_grp_oid);
@@ -1125,12 +1120,12 @@ H5VL_rados_file_open(const char *name, unsigned flags, hid_t fapl_id,
             must_bcast = FALSE;
 
             /* MPI_Bcast foi_buf */
-            if(MPI_SUCCESS != MPI_Bcast(foi_buf, (int)sizeof(foi_buf_static), MPI_BYTE, 0, fa->comm))
+            if(MPI_SUCCESS != MPI_Bcast(foi_buf, (int)sizeof(foi_buf_static), MPI_BYTE, 0, info->comm))
                 HGOTO_ERROR(H5E_FILE, H5E_MPI, NULL, "can't bcast global container handle")
 
             /* Need a second bcast if we had to allocate a dynamic buffer */
             if(foi_buf == foi_buf_dyn)
-                if(MPI_SUCCESS != MPI_Bcast((char *)p, (int)(gcpl_len), MPI_BYTE, 0, fa->comm))
+                if(MPI_SUCCESS != MPI_Bcast((char *)p, (int)(gcpl_len), MPI_BYTE, 0, info->comm))
                     HGOTO_ERROR(H5E_FILE, H5E_MPI, NULL, "can't bcast file open info (second bcast)")
         } /* end if */
     } /* end if */
@@ -1138,7 +1133,7 @@ H5VL_rados_file_open(const char *name, unsigned flags, hid_t fapl_id,
         HDassert(sizeof(foi_buf_static) >= 2 * sizeof(uint64_t));
 
         /* Receive file open info */
-        if(MPI_SUCCESS != MPI_Bcast(foi_buf, (int)sizeof(foi_buf_static), MPI_BYTE, 0, fa->comm))
+        if(MPI_SUCCESS != MPI_Bcast(foi_buf, (int)sizeof(foi_buf_static), MPI_BYTE, 0, info->comm))
             HGOTO_ERROR(H5E_FILE, H5E_MPI, NULL, "can't bcast global container handle")
 
         /* Decode max OID */
@@ -1163,7 +1158,7 @@ H5VL_rados_file_open(const char *name, unsigned flags, hid_t fapl_id,
             } /* end if */
 
             /* Receive info buffer */
-            if(MPI_SUCCESS != MPI_Bcast(foi_buf_dyn, (int)(gcpl_len), MPI_BYTE, 0, fa->comm))
+            if(MPI_SUCCESS != MPI_Bcast(foi_buf_dyn, (int)(gcpl_len), MPI_BYTE, 0, info->comm))
                 HGOTO_ERROR(H5E_FILE, H5E_MPI, NULL, "can't bcast global container handle (second bcast)")
 
             p = (uint8_t *)foi_buf;
@@ -1189,7 +1184,7 @@ done:
          * in the other processes so we do not need to do the second bcast. */
         if(must_bcast) {
             HDmemset(foi_buf_static, 0, sizeof(foi_buf_static));
-            if(MPI_SUCCESS != MPI_Bcast(foi_buf_static, sizeof(foi_buf_static), MPI_BYTE, 0, fa->comm))
+            if(MPI_SUCCESS != MPI_Bcast(foi_buf_static, sizeof(foi_buf_static), MPI_BYTE, 0, info->comm))
                 HDONE_ERROR(H5E_FILE, H5E_MPI, NULL, "can't bcast global handle sizes")
         } /* end if */
 
