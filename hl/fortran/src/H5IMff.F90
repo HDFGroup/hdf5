@@ -539,7 +539,7 @@ CONTAINS
     INTEGER, INTENT(in) :: pal_number                     ! palette number
     INTEGER(hsize_t), DIMENSION(*), INTENT(inout) :: dims ! dimensions
     INTEGER :: errcode                                    ! error code
-    INTEGER(size_t) :: namelen                                    ! name length
+    INTEGER(size_t) :: namelen                            ! name length
     
     INTERFACE
        INTEGER FUNCTION h5imget_palette_info_c(loc_id,namelen,dset_name,pal_number,dims) &
@@ -551,7 +551,7 @@ CONTAINS
          CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: dset_name             ! name of the dataset
          INTEGER, INTENT(in) :: pal_number                     ! palette number
          INTEGER(hsize_t), DIMENSION(*), INTENT(inout) :: dims ! dimensions
-         INTEGER(size_t) :: namelen                                    ! name length
+         INTEGER(size_t) :: namelen                            ! name length
        END FUNCTION h5imget_palette_info_c
     END INTERFACE
     
