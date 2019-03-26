@@ -250,7 +250,7 @@ Java_hdf_hdf5lib_H5_H5Dread_1VLStrings
 /*
  * Class:     hdf_hdf5lib_H5
  * Method:    H5Dwrite_VLStrings
- * Signature: (JJJJJ[BZ)I
+ * Signature: (JJJJJ[B)I
  */
 JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_H5_H5Dwrite_1VLStrings
@@ -264,15 +264,6 @@ Java_hdf_hdf5lib_H5_H5Dwrite_1VLStrings
 JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_H5_H5Dread_1reg_1ref
 (JNIEnv*, jclass, jlong, jlong, jlong, jlong, jlong, jobjectArray);
-
-/*
- * Class:     hdf_hdf5lib_H5
- * Method:    H5Dread_reg_ref_data
- * Signature: (JJJJJ[Ljava/lang/String;)I
- */
-JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Dread_1reg_1ref_1data
-  (JNIEnv*, jclass, jlong, jlong, jlong, jlong, jlong, jobjectArray);
 
 /*
  * Class:     hdf_hdf5lib_H5

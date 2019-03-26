@@ -121,7 +121,7 @@ HDfprintf(FILE *stream, const char *fmt, ...)
     HDassert(stream);
     HDassert(fmt);
 
-    va_start (ap, fmt);
+    HDva_start (ap, fmt);
     while (*fmt) {
         fwidth = prec = 0;
         zerofill = 0;
@@ -170,7 +170,7 @@ HDfprintf(FILE *stream, const char *fmt, ...)
                 s = rest;
             } /* end if */
             else if ('*'==*s) {
-                fwidth = va_arg(ap, int);
+                fwidth = HDva_arg(ap, int);
                 if(fwidth < 0) {
                     leftjust = 1;
                     fwidth = -fwidth;
@@ -185,7 +185,7 @@ HDfprintf(FILE *stream, const char *fmt, ...)
                     prec = (int)HDstrtol(s, &rest, 10);
                     s = rest;
                 } else if('*'==*s) {
-                    prec = va_arg(ap, int);
+                    prec = HDva_arg(ap, int);
                     s++;
                 }
                 if(prec < 1)
@@ -272,16 +272,16 @@ HDfprintf(FILE *stream, const char *fmt, ...)
                 case 'd':
                 case 'i':
                     if(!HDstrcmp(modifier, "h")) {
-                        short x = (short)va_arg(ap, int);
+                        short x = (short)HDva_arg(ap, int);
                         n = fprintf(stream, format_templ, x);
                     } else if(!*modifier) {
-                        int x = va_arg(ap, int);
+                        int x = HDva_arg(ap, int);
                         n = fprintf(stream, format_templ, x);
                     } else if(!HDstrcmp(modifier, "l")) {
-                        long x = va_arg(ap, long);
+                        long x = HDva_arg(ap, long);
                         n = fprintf(stream, format_templ, x);
                     } else {
-                        int64_t x = va_arg(ap, int64_t);
+                        int64_t x = HDva_arg(ap, int64_t);
                         n = fprintf(stream, format_templ, x);
                     }
                     break;
@@ -291,16 +291,16 @@ HDfprintf(FILE *stream, const char *fmt, ...)
                 case 'x':
                 case 'X':
                     if(!HDstrcmp(modifier, "h")) {
-                        unsigned short x = (unsigned short)va_arg(ap, unsigned int);
+                        unsigned short x = (unsigned short)HDva_arg(ap, unsigned int);
                         n = fprintf(stream, format_templ, x);
                     } else if(!*modifier) {
-                        unsigned int x = va_arg(ap, unsigned int);
+                        unsigned int x = HDva_arg(ap, unsigned int);
                         n = fprintf(stream, format_templ, x);
                     } else if(!HDstrcmp(modifier, "l")) {
-                        unsigned long x = va_arg(ap, unsigned long);
+                        unsigned long x = HDva_arg(ap, unsigned long);
                         n = fprintf(stream, format_templ, x);
                     } else {
-                        uint64_t x = va_arg(ap, uint64_t);
+                        uint64_t x = HDva_arg(ap, uint64_t);
                         n = fprintf(stream, format_templ, x);
                     }
                     break;
@@ -311,10 +311,10 @@ HDfprintf(FILE *stream, const char *fmt, ...)
                 case 'g':
                 case 'G':
                     if(!HDstrcmp(modifier, "h")) {
-                        float x = (float)va_arg(ap, double);
+                        float x = (float)HDva_arg(ap, double);
                         n = fprintf(stream, format_templ, (double)x);
                     } else if(!*modifier || !HDstrcmp(modifier, "l")) {
-                        double x = va_arg(ap, double);
+                        double x = HDva_arg(ap, double);
                         n = fprintf(stream, format_templ, x);
                     } else {
                     /*
@@ -322,10 +322,10 @@ HDfprintf(FILE *stream, const char *fmt, ...)
                     * `double' are the same thing.
                     */
 #if H5_SIZEOF_LONG_DOUBLE != H5_SIZEOF_DOUBLE
-                        long double x = va_arg(ap, long double);
+                        long double x = HDva_arg(ap, long double);
                         n = fprintf(stream, format_templ, x);
 #else
-                        double x = va_arg(ap, double);
+                        double x = HDva_arg(ap, double);
                         n = fprintf(stream, format_templ, x);
 #endif
                     }
@@ -333,7 +333,7 @@ HDfprintf(FILE *stream, const char *fmt, ...)
 
                 case 'a':
                     {
-                        haddr_t x = va_arg(ap, haddr_t);
+                        haddr_t x = HDva_arg(ap, haddr_t);
 
                         if(H5F_addr_defined(x)) {
                             len = 0;
@@ -379,7 +379,7 @@ HDfprintf(FILE *stream, const char *fmt, ...)
 
                 case 'c':
                     {
-                        char x = (char)va_arg(ap, int);
+                        char x = (char)HDva_arg(ap, int);
                         n = fprintf(stream, format_templ, x);
                     }
                     break;
@@ -387,7 +387,7 @@ HDfprintf(FILE *stream, const char *fmt, ...)
                 case 's':
                 case 'p':
                     {
-                        char *x = va_arg(ap, char*);
+                        char *x = HDva_arg(ap, char*);
                         n = fprintf(stream, format_templ, x);
                     }
                     break;
@@ -399,7 +399,7 @@ HDfprintf(FILE *stream, const char *fmt, ...)
 
                 case 't':
                     {
-                        htri_t tri_var = va_arg(ap, htri_t);
+                        htri_t tri_var = HDva_arg(ap, htri_t);
 
                         if(tri_var > 0)
                             fprintf(stream, "TRUE");
@@ -423,7 +423,7 @@ HDfprintf(FILE *stream, const char *fmt, ...)
             nout++;
         }
     }
-    va_end(ap);
+    HDva_end(ap);
     return nout;
 } /* end HDfprintf() */
 
@@ -492,7 +492,8 @@ HDstrtoll(const char *s, const char **rest, int base)
     /* Optional minus or plus sign */
     if ('+'==*s) {
         s++;
-    } else if ('-'==*s) {
+    }
+    else if ('-'==*s) {
         sign = -1;
         s++;
     }
@@ -501,10 +502,12 @@ HDstrtoll(const char *s, const char **rest, int base)
     if (0==base && '0'==*s && ('x'==s[1] || 'X'==s[1])) {
         base = 16;
         s += 2;
-    } else if (0==base && '0'==*s) {
+    }
+    else if (0==base && '0'==*s) {
         base = 8;
         s++;
-    } else if (0==base) {
+    }
+    else if (0==base) {
         base = 10;
     }
 
@@ -525,7 +528,8 @@ HDstrtoll(const char *s, const char **rest, int base)
 
             if (acc*base+digit < acc) {
                 overflow = TRUE;
-            } else {
+            }
+            else {
                 acc = acc*base + digit;
             }
         }
@@ -536,7 +540,8 @@ HDstrtoll(const char *s, const char **rest, int base)
     if (overflow) {
         if (sign>0) {
             acc = ((uint64_t)1<<(8*sizeof(int64_t)-1))-1;
-        } else {
+        }
+        else {
             acc = (int64_t)((uint64_t)1<<(8*sizeof(int64_t)-1));
         }
         errno = ERANGE;
@@ -843,9 +848,9 @@ int c99_snprintf(char* str, size_t size, const char* format, ...)
     int count;
     va_list ap;
 
-    va_start(ap, format);
+    HDva_start(ap, format);
     count = c99_vsnprintf(str, size, format, ap);
-    va_end(ap);
+    HDva_end(ap);
 
     return count;
 }
@@ -979,6 +984,132 @@ Wroundf(float arg)
 {
     return (float)(arg < 0.0F ? HDceil(arg - 0.5F) : HDfloor(arg + 0.5F));
 }
+
+/*-------------------------------------------------------------------------
+* Function:     H5_get_utf16_str
+*
+* Purpose:      Gets a UTF-16 string from an UTF-8 (or ASCII) string.
+*
+* Return:       Success:    A pointer to a UTF-16 string
+*                           This must be freed by the caller using H5MM_xfree()
+*               Failure:    NULL
+*
+* Programmer:  Dana Robinson
+*              Spring 2019
+*
+*-------------------------------------------------------------------------
+*/
+const wchar_t *
+H5_get_utf16_str(const char *s)
+{
+    int     nwchars = -1;       /* Length of the UTF-16 buffer */
+    wchar_t *ret_s  = NULL;     /* UTF-16 version of the string */
+
+    /* Get the number of UTF-16 characters needed */
+    if(0 == (nwchars = MultiByteToWideChar(CP_UTF8, 0, s, -1, NULL, 0)))
+        goto error;
+
+    /* Allocate a buffer for the UTF-16 string */
+    if(NULL == (ret_s = (wchar_t *)H5MM_calloc(sizeof(wchar_t) * (size_t)nwchars)))
+        goto error;
+
+    /* Convert the input UTF-8 string to UTF-16 */
+    if(0 == MultiByteToWideChar(CP_UTF8, 0, s, -1, ret_s, nwchars))
+        goto error;
+
+    return ret_s;
+
+error:
+    if(ret_s)
+        H5MM_xfree((void *)ret_s);
+    return NULL;
+}   /* end H5_get_utf16_str() */
+
+/*-------------------------------------------------------------------------
+ * Function:     Wopen_utf8
+ *
+ * Purpose:      UTF-8 equivalent of open(2) for use on Windows.
+ *               Converts a UTF-8 input path to UTF-16 and then opens the
+ *               file via _wopen() under the hood
+ *
+ * Return:       Success:    A POSIX file descriptor
+ *               Failure:    -1
+ *
+ * Programmer:  Dana Robinson
+ *              Spring 2019
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+Wopen_utf8(const char *path, int oflag, ...)
+{
+    int fd          = -1;       /* POSIX file descriptor to be returned */
+    wchar_t *wpath  = NULL;     /* UTF-16 version of the path */
+    int pmode       = 0;        /* mode (optionally set via variable args) */
+
+    /* Convert the input UTF-8 path to UTF-16 */
+    if(NULL == (wpath = H5_get_utf16_str(path)))
+        goto done;
+
+    /* _O_BINARY must be set in Windows to avoid CR-LF <-> LF EOL
+    * transformations when performing I/O. Note that this will
+    * produce Unix-style text files, though.
+    */
+    oflag |= _O_BINARY;
+
+    /* Get the mode, if O_CREAT was specified */
+    if(oflag & O_CREAT) {
+        va_list vl;
+
+        HDva_start(vl, oflag);
+        pmode = HDva_arg(vl, int);
+        HDva_end(vl);
+    }
+
+    /* Open the file */
+    fd = _wopen(wpath, oflag, pmode);
+
+done:
+    if(wpath)
+        H5MM_xfree((void *)wpath);
+
+    return fd;
+}   /* end Wopen_utf8() */
+
+/*-------------------------------------------------------------------------
+ * Function:     Wremove_utf8
+ *
+ * Purpose:      UTF-8 equivalent of remove(3) for use on Windows.
+ *               Converts a UTF-8 input path to UTF-16 and then opens the
+ *               file via _wremove() under the hood
+ *
+ * Return:       Success:    0
+ *               Failure:    -1
+ *
+ * Programmer:  Dana Robinson
+ *              Spring 2019
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+Wremove_utf8(const char *path)
+{
+    wchar_t *wpath = NULL;     /* UTF-16 version of the path */
+    int ret;
+
+    /* Convert the input UTF-8 path to UTF-16 */
+    if(NULL == (wpath = H5_get_utf16_str(path)))
+        goto done;
+
+    /* Open the file */
+    ret = _wremove(wpath);
+
+done:
+    if(wpath)
+        H5MM_xfree((void *)wpath);
+
+    return ret;
+}   /* end Wremove_utf8() */
 
 #endif /* H5_HAVE_WIN32_API */
 

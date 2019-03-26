@@ -561,6 +561,8 @@ herr_t
 init_objs(hid_t fid, find_objs_t *info, table_t **group_table,
     table_t **dset_table, table_t **type_table)
 {
+    herr_t ret_value = SUCCEED;
+
     /* Initialize the tables */
     init_table(group_table);
     init_table(dset_table);
@@ -573,7 +575,20 @@ init_objs(hid_t fid, find_objs_t *info, table_t **group_table,
     info->dset_table = *dset_table;
 
     /* Find all shared objects */
-    return(h5trav_visit(fid, "/", TRUE, TRUE, find_objs_cb, NULL, info, H5O_INFO_BASIC));
+    if((ret_value = h5trav_visit(fid, "/", TRUE, TRUE, find_objs_cb, NULL, info, H5O_INFO_BASIC)) < 0)
+        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "finding shared objects failed")
+
+done:
+    /* Release resources */
+    if(ret_value < 0) {
+        free_table(*group_table);
+        info->group_table = NULL;
+        free_table(*type_table);
+        info->type_table = NULL;
+        free_table(*dset_table);
+        info->dset_table = NULL;
+    }
+    return ret_value;
 }
 
 

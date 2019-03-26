@@ -262,7 +262,7 @@ H5PL_load(H5PL_type_t type, const H5PL_key_t *key)
 
     /* Set up the search parameters */
     search_params.type = type;
-    search_params.key.id = key->id;
+    search_params.key = key;
 
     /* Search in the table of already loaded plugin libraries */
     if(H5PL__find_plugin_in_cache(&search_params, &found, &plugin_info) < 0)
@@ -311,6 +311,7 @@ H5PL__open(const char *path, H5PL_type_t type, const H5PL_key_t *key,
     hbool_t *success, const void **plugin_info)
 {
     H5PL_HANDLE             handle = NULL;
+    H5PL_get_plugin_type_t  get_plugin_type = NULL;
     H5PL_get_plugin_info_t  get_plugin_info = NULL;
     herr_t                  ret_value = SUCCEED;
 
@@ -333,10 +334,20 @@ H5PL__open(const char *path, H5PL_type_t type, const H5PL_key_t *key,
         HGOTO_DONE(SUCCEED)
     }
 
+    /* Return a handle for the function H5PLget_plugin_type in the dynamic library.
+     * The plugin library is supposed to define this function.
+     */
+    if (NULL == (get_plugin_type = (H5PL_get_plugin_type_t)H5PL_GET_LIB_FUNC(handle, "H5PLget_plugin_type")))
+        HGOTO_DONE(SUCCEED)
+
     /* Return a handle for the function H5PLget_plugin_info in the dynamic library.
-     * The plugin library is suppose to define this function.
+     * The plugin library is supposed to define this function.
      */
     if (NULL == (get_plugin_info = (H5PL_get_plugin_info_t)H5PL_GET_LIB_FUNC(handle, "H5PLget_plugin_info")))
+        HGOTO_DONE(SUCCEED)
+
+    /* Check the plugin type and return if it doesn't match the one passed in */
+    if(type != (H5PL_type_t)(*get_plugin_type)())
         HGOTO_DONE(SUCCEED)
 
     /* Get the plugin information */
@@ -364,7 +375,7 @@ H5PL__open(const char *path, H5PL_type_t type, const H5PL_key_t *key,
 
             /* Get the plugin info */
             if(NULL == (cls = (const H5VL_class_t *)(*get_plugin_info)()))
-                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "can't get VOL driver info from plugin")
+                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "can't get VOL connector info from plugin")
 
             /* Which kind of key are we looking for? */
             if(key->vol.kind == H5VL_GET_CONNECTOR_BY_NAME) {

@@ -86,4 +86,3 @@ HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
   #004: (file name) line (number) in H5L_get_info_cb(): name doesn't exist
     major: Symbol table
     minor: Object not found
-h5dump error: unable to get link info from "Dataset1"

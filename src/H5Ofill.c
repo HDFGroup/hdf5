@@ -232,7 +232,7 @@ H5O_fill_new_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh,
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "destination buffer too small")
                 if(NULL == (fill->buf = H5MM_malloc((size_t)fill->size)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for fill value")
-                HDmemcpy(fill->buf, p, (size_t)fill->size);
+                H5MM_memcpy(fill->buf, p, (size_t)fill->size);
             } /* end if */
         } /* end if */
         else
@@ -270,7 +270,7 @@ H5O_fill_new_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh,
             H5_CHECK_OVERFLOW(fill->size, ssize_t, size_t);
             if(NULL == (fill->buf = H5MM_malloc((size_t)fill->size)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for fill value")
-            HDmemcpy(fill->buf, p, (size_t)fill->size);
+            H5MM_memcpy(fill->buf, p, (size_t)fill->size);
 
             /* Set the "defined" flag */
             fill->fill_defined = TRUE;
@@ -353,7 +353,7 @@ H5O_fill_old_decode(H5F_t *f, H5O_t *open_oh,
 
         if(NULL == (fill->buf = H5MM_malloc((size_t)fill->size)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for fill value")
-        HDmemcpy(fill->buf, p, (size_t)fill->size);
+        H5MM_memcpy(fill->buf, p, (size_t)fill->size);
         fill->fill_defined = TRUE;
     } /* end if */
     else
@@ -420,7 +420,7 @@ H5O_fill_new_encode(H5F_t H5_ATTR_UNUSED *f, uint8_t *p, const void *_fill)
             if(fill->size > 0)
                 if(fill->buf) {
                     H5_CHECK_OVERFLOW(fill->size, ssize_t, size_t);
-                    HDmemcpy(p, fill->buf, (size_t)fill->size);
+                    H5MM_memcpy(p, fill->buf, (size_t)fill->size);
                 } /* end if */
         } /* end if */
     } /* end if */
@@ -459,7 +459,7 @@ H5O_fill_new_encode(H5F_t H5_ATTR_UNUSED *f, uint8_t *p, const void *_fill)
             /* Encode the fill value */
             HDassert(fill->buf);
             H5_CHECK_OVERFLOW(fill->size, ssize_t, size_t);
-            HDmemcpy(p, fill->buf, (size_t)fill->size);
+            H5MM_memcpy(p, fill->buf, (size_t)fill->size);
         } /* end if */
         else {
             /* Flags */
@@ -499,7 +499,7 @@ H5O_fill_old_encode(H5F_t H5_ATTR_UNUSED *f, uint8_t *p, const void *_fill)
 
     UINT32ENCODE(p, fill->size);
     if(fill->buf)
-        HDmemcpy(p, fill->buf, (size_t)fill->size);
+        H5MM_memcpy(p, fill->buf, (size_t)fill->size);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O_fill_old_encode() */
@@ -551,7 +551,7 @@ H5O_fill_copy(const void *_src, void *_dst)
         H5_CHECK_OVERFLOW(src->size, ssize_t, size_t);
         if(NULL == (dst->buf = H5MM_malloc((size_t)src->size)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for fill value")
-        HDmemcpy(dst->buf, src->buf, (size_t)src->size);
+        H5MM_memcpy(dst->buf, src->buf, (size_t)src->size);
 
         /* Check for needing to convert/copy fill value */
         if(src->type) {
@@ -890,40 +890,40 @@ H5O__fill_debug(H5F_t H5_ATTR_UNUSED *f, const void *_fill, FILE *stream,
     HDfprintf(stream, "%*s%-*s ", indent, "", fwidth, "Space Allocation Time:");
     switch(fill->alloc_time) {
         case H5D_ALLOC_TIME_EARLY:
-            fprintf(stream,"Early\n");
+            HDfprintf(stream,"Early\n");
             break;
 
         case H5D_ALLOC_TIME_LATE:
-            fprintf(stream,"Late\n");
+            HDfprintf(stream,"Late\n");
             break;
 
         case H5D_ALLOC_TIME_INCR:
-            fprintf(stream,"Incremental\n");
+            HDfprintf(stream,"Incremental\n");
             break;
 
         case H5D_ALLOC_TIME_DEFAULT:
         case H5D_ALLOC_TIME_ERROR:
         default:
-            fprintf(stream,"Unknown!\n");
+            HDfprintf(stream,"Unknown!\n");
             break;
     } /* end switch */
     HDfprintf(stream, "%*s%-*s ", indent, "", fwidth, "Fill Time:");
     switch(fill->fill_time) {
         case H5D_FILL_TIME_ALLOC:
-            fprintf(stream,"On Allocation\n");
+            HDfprintf(stream,"On Allocation\n");
             break;
 
         case H5D_FILL_TIME_NEVER:
-            fprintf(stream,"Never\n");
+            HDfprintf(stream,"Never\n");
             break;
 
         case H5D_FILL_TIME_IFSET:
-            fprintf(stream,"If Set\n");
+            HDfprintf(stream,"If Set\n");
             break;
 
         case H5D_FILL_TIME_ERROR:
         default:
-            fprintf(stream,"Unknown!\n");
+            HDfprintf(stream,"Unknown!\n");
             break;
 
     } /* end switch */
@@ -931,20 +931,20 @@ H5O__fill_debug(H5F_t H5_ATTR_UNUSED *f, const void *_fill, FILE *stream,
     H5P_is_fill_value_defined((const H5O_fill_t *)fill, &fill_status);
     switch(fill_status) {
         case H5D_FILL_VALUE_UNDEFINED:
-            fprintf(stream,"Undefined\n");
+            HDfprintf(stream,"Undefined\n");
             break;
 
         case H5D_FILL_VALUE_DEFAULT:
-            fprintf(stream,"Default\n");
+            HDfprintf(stream,"Default\n");
             break;
 
         case H5D_FILL_VALUE_USER_DEFINED:
-            fprintf(stream,"User Defined\n");
+            HDfprintf(stream,"User Defined\n");
             break;
 
         case H5D_FILL_VALUE_ERROR:
         default:
-            fprintf(stream,"Unknown!\n");
+            HDfprintf(stream,"Unknown!\n");
             break;
 
     } /* end switch */
@@ -1025,7 +1025,7 @@ H5O_fill_convert(H5O_fill_t *fill, H5T_t *dset_type, hbool_t *fill_changed)
         else {
             if(NULL == (buf = H5MM_malloc(H5T_get_size(dset_type))))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion")
-            HDmemcpy(buf, fill->buf, H5T_get_size(fill->type));
+            H5MM_memcpy(buf, fill->buf, H5T_get_size(fill->type));
         } /* end else */
 
         /* Use CALLOC here to clear the buffer in case later the library thinks there's

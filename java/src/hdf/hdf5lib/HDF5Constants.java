@@ -195,6 +195,11 @@ public class HDF5Constants {
     public static final long H5E_WALK_UPWARD = H5E_WALK_UPWARD();
     public static final long H5E_WRITEERROR = H5E_WRITEERROR();
 
+    private static final int H5ES_STATUS_IN_PROGRESS = H5ES_STATUS_IN_PROGRESS();
+    private static final int H5ES_STATUS_SUCCEED = H5ES_STATUS_SUCCEED();
+    private static final int H5ES_STATUS_FAIL = H5ES_STATUS_FAIL();
+    private static final int H5ES_STATUS_CANCELED = H5ES_STATUS_CANCELED();
+
     public static final int H5F_ACC_CREAT = H5F_ACC_CREAT();
     public static final int H5F_ACC_EXCL = H5F_ACC_EXCL();
     public static final int H5F_ACC_RDONLY = H5F_ACC_RDONLY();
@@ -315,7 +320,6 @@ public class HDF5Constants {
     public static final int H5I_GROUP = H5I_GROUP();
     public static final int H5I_INVALID_HID = H5I_INVALID_HID();
     public static final int H5I_NTYPES = H5I_NTYPES();
-    public static final int H5I_REFERENCE = H5I_REFERENCE();
     public static final int H5I_UNINIT = H5I_UNINIT();
     public static final int H5I_VFL = H5I_VFL();
     public static final int H5I_VOL = H5I_VOL();
@@ -390,7 +394,10 @@ public class HDF5Constants {
 
     public static final int H5PL_TYPE_ERROR = H5PL_TYPE_ERROR();
     public static final int H5PL_TYPE_FILTER = H5PL_TYPE_FILTER();
+    public static final int H5PL_TYPE_VOL = H5PL_TYPE_VOL();
+    public static final int H5PL_TYPE_NONE = H5PL_TYPE_NONE();
     public static final int H5PL_FILTER_PLUGIN = H5PL_FILTER_PLUGIN();
+    public static final int H5PL_VOL_PLUGIN = H5PL_VOL_PLUGIN();
     public static final int H5PL_ALL_PLUGIN = H5PL_ALL_PLUGIN();
 
     public static final int H5R_BADTYPE = H5R_BADTYPE();
@@ -626,6 +633,18 @@ public class HDF5Constants {
     public static final long H5T_VARIABLE = H5T_VARIABLE();
     public static final int H5T_VLEN = H5T_VLEN();
     public static final int H5T_VL_T = H5T_VL_T();
+
+    public static final int H5VL_CAP_FLAG_NONE = H5VL_CAP_FLAG_NONE();
+    public static final int H5VL_CAP_FLAG_THREADSAFE = H5VL_CAP_FLAG_THREADSAFE();
+    public static final long H5VL_NATIVE = H5VL_NATIVE();
+    public static final String H5VL_NATIVE_NAME = H5VL_NATIVE_NAME();
+    public static final int H5VL_NATIVE_VALUE = H5VL_NATIVE_VALUE();
+    public static final int H5VL_NATIVE_VERSION = H5VL_NATIVE_VERSION();
+    public static final int H5_VOL_INVALID = H5_VOL_INVALID();
+    public static final int H5_VOL_NATIVE = H5_VOL_NATIVE();
+    public static final int H5_VOL_RESERVED = H5_VOL_RESERVED();
+    public static final int H5_VOL_MAX = H5_VOL_MAX();
+
     public static final int H5Z_CB_CONT = H5Z_CB_CONT();
     public static final int H5Z_CB_ERROR = H5Z_CB_ERROR();
     public static final int H5Z_CB_FAIL = H5Z_CB_FAIL();
@@ -990,6 +1009,14 @@ public class HDF5Constants {
 
     private static native final long H5E_WRITEERROR();
 
+    private static native final int H5ES_STATUS_IN_PROGRESS();
+
+    private static native final int H5ES_STATUS_SUCCEED();
+
+    private static native final int H5ES_STATUS_FAIL();
+
+    private static native final int H5ES_STATUS_CANCELED();
+
     private static native final int H5F_ACC_CREAT();
 
     private static native final int H5F_ACC_EXCL();
@@ -1222,8 +1249,6 @@ public class HDF5Constants {
 
     private static native final int H5I_NTYPES();
 
-    private static native final int H5I_REFERENCE();
-
     private static native final int H5I_UNINIT();
 
     private static native final int H5I_VFL();
@@ -1364,9 +1389,15 @@ public class HDF5Constants {
 
     private static native final int H5PL_TYPE_FILTER();
 
+    private static native final int H5PL_TYPE_VOL();
+
+    private static native final int H5PL_TYPE_NONE();
+
     private static native final int H5PL_FILTER_PLUGIN();
 
     private static native final int H5PL_ALL_PLUGIN();
+
+    private static native final int H5PL_VOL_PLUGIN();
 
     private static native final int H5R_BADTYPE();
 
@@ -1833,6 +1864,26 @@ public class HDF5Constants {
     private static native final int H5T_VLEN();
 
     private static native final int H5T_VL_T();
+
+    private static native final int H5VL_CAP_FLAG_NONE();
+
+    private static native final int H5VL_CAP_FLAG_THREADSAFE();
+
+    private static native final long H5VL_NATIVE();
+
+    private static native final String H5VL_NATIVE_NAME();
+
+    private static native final int H5VL_NATIVE_VALUE();
+
+    private static native final int H5VL_NATIVE_VERSION();
+
+    private static native final int H5_VOL_INVALID();
+
+    private static native final int H5_VOL_NATIVE();
+
+    private static native final int H5_VOL_RESERVED();
+
+    private static native final int H5_VOL_MAX();
 
     private static native final int H5Z_CB_CONT();
 

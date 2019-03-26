@@ -45,6 +45,8 @@
 #include "H5Opkg.h"             /* Object headers                           */
 #include "H5VLprivate.h"        /* Virtual object layer                     */
 
+#include "H5VLnative_private.h" /* Native VOL connector                     */
+
 
 /****************/
 /* Local Macros */
@@ -343,7 +345,7 @@ H5Aget_num_attrs(hid_t loc_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, (-1), "invalid location identifier")
 
     /* Get the number of attributes for the object */
-    if(H5VL_object_optional(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, H5VL_OBJECT_GET_INFO, &loc_params, &oinfo, H5O_INFO_ALL) < 0)
+    if(H5VL_object_optional(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, H5VL_NATIVE_OBJECT_GET_INFO, &loc_params, &oinfo, H5O_INFO_ALL) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, (-1), "unable to get attribute count for object")
 
     H5_CHECKED_ASSIGN(ret_value, int, oinfo.num_attrs, hsize_t);
@@ -408,7 +410,7 @@ H5Aiterate1(hid_t loc_id, unsigned *attr_num, H5A_operator1_t op, void *op_data)
         HGOTO_ERROR(H5E_VOL, H5E_BADTYPE, H5_ITER_ERROR, "invalid location identifier")
 
     /* Call attribute iteration routine */
-    if((ret_value = H5VL_attr_optional(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, H5VL_ATTR_ITERATE_OLD, loc_id, attr_num, op, op_data)) < 0)
+    if((ret_value = H5VL_attr_optional(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, H5VL_NATIVE_ATTR_ITERATE_OLD, loc_id, attr_num, op, op_data)) < 0)
         HERROR(H5E_VOL, H5E_BADITER, "error iterating over attributes");
 
 done:

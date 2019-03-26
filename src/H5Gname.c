@@ -522,7 +522,7 @@ H5G_name_copy(H5G_name_t *dst, const H5G_name_t *src, H5_copy_depth_t depth)
     HDassert(depth == H5_COPY_SHALLOW || depth == H5_COPY_DEEP);
 
     /* Copy the top level information */
-    HDmemcpy(dst, src, sizeof(H5G_name_t));
+    H5MM_memcpy(dst, src, sizeof(H5G_name_t));
 
     /* Deep copy the names */
     if(depth == H5_COPY_DEEP) {
@@ -821,7 +821,6 @@ H5G_name_replace_cb(void *obj_ptr, hid_t obj_id, void *key)
         case H5I_FILE:
         case H5I_DATASPACE:
         case H5I_ATTR:
-        case H5I_REFERENCE:
         case H5I_VFL:
         case H5I_VOL:
         case H5I_GENPROP_CLS:
