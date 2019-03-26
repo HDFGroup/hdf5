@@ -28,6 +28,7 @@
 ./COPYING_LBNL_HDF5
 ./HOW_TO_BUILD.txt
 ./MANIFEST
+./MOBJECT_ON_JELLY.txt _DO_NOT_DISTRIBUTE_
 ./Makefile.dist
 ./Makefile.am
 ./README.txt
