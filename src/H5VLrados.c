@@ -983,11 +983,20 @@ H5VL_rados_file_create(const char *name, unsigned flags, hid_t fcpl_id,
     /* Create root group oid */
     HDassert(H5VL_rados_oid_to_idx(file->root_grp->obj.bin_oid) == (uint64_t)1);
 
+    /* Free info */
+    if(H5VL_rados_info_free(info) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTFREE, NULL, "can't free connector info")
+
     ret_value = (void *)file;
 
 done:
     /* Cleanup on failure */
     if(NULL == ret_value) {
+        /* Free info */
+        if(info)
+            if(H5VL_rados_info_free(info) < 0)
+                HGOTO_ERROR(H5E_VOL, H5E_CANTFREE, NULL, "can't free connector info")
+
         /* Close file */
         if(file && H5VL_rados_file_close_helper(file, dxpl_id, req) < 0)
             HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, NULL, "can't close file")
@@ -1175,11 +1184,20 @@ H5VL_rados_file_open(const char *name, unsigned flags, hid_t fapl_id,
     if(H5Iinc_ref(file->fcpl_id) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTINC, NULL, "can't increment FCPL ref count")
 
+    /* Free info */
+    if(H5VL_rados_info_free(info) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTFREE, NULL, "can't free connector info")
+
     ret_value = (void *)file;
 
 done:
     /* Cleanup on failure */
     if(NULL == ret_value) {
+        /* Free info */
+        if(info)
+            if(H5VL_rados_info_free(info) < 0)
+                HGOTO_ERROR(H5E_VOL, H5E_CANTFREE, NULL, "can't free connector info")
+
         /* Bcast bcast_buf_64 as '0' if necessary - this will trigger failures
          * in the other processes so we do not need to do the second bcast. */
         if(must_bcast) {
