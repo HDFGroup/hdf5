@@ -125,18 +125,26 @@
       if (last_test)
         set_tests_properties (H5CLEAR_CMP-${testname}-clear-objects PROPERTIES DEPENDS ${last_test})
       endif ()
-      add_test (
-          NAME H5CLEAR_CMP-${testname}
-          COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5clear>"
-              -D "TEST_ARGS:STRING=${ARGN}"
-              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
-              -D "TEST_OUTPUT=${testname}.out"
-              -D "TEST_EXPECT=${resultcode}"
-              -D "TEST_REFERENCE=${resultfile}.mty"
-              -D "TEST_ERRREF=${resultfile}.err"
-              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
-      )
+      if (SKIP_ERROR_STACK_TESTS)
+        add_test (
+            NAME H5CLEAR_CMP-${testname}
+            COMMAND ${CMAKE_COMMAND} -E echo "SKIP Error Stack Test"
+        )
+        set_property(TEST H5WATCH_ARGS-h5watch-${resultfile} PROPERTY DISABLED)
+      else ()
+        add_test (
+            NAME H5CLEAR_CMP-${testname}
+            COMMAND "${CMAKE_COMMAND}"
+                -D "TEST_PROGRAM=$<TARGET_FILE:h5clear>"
+                -D "TEST_ARGS:STRING=${ARGN}"
+                -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
+                -D "TEST_OUTPUT=${testname}.out"
+                -D "TEST_EXPECT=${resultcode}"
+                -D "TEST_REFERENCE=${resultfile}.mty"
+                -D "TEST_ERRREF=${resultfile}.err"
+                -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+        )
+      endif ()
       set_tests_properties (H5CLEAR_CMP-${testname} PROPERTIES DEPENDS H5CLEAR_CMP-${testname}-clear-objects)
       set (last_test "H5CLEAR_CMP-${testname}")
     endif ()
@@ -198,18 +206,26 @@
               "${PROJECT_SOURCE_DIR}/testfiles/${testfile}" "${PROJECT_BINARY_DIR}/testfiles/${testfile}"
       )
       set_tests_properties (H5CLEAR_CMP-copy_${testname} PROPERTIES DEPENDS H5CLEAR_CMP-${testname}-clear-objects)
-      add_test (
-          NAME H5CLEAR_CMP-${testname}
-          COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5clear>"
-              -D "TEST_ARGS:STRING=${ARGN};${testfile}"
-              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
-              -D "TEST_OUTPUT=${testname}.out"
-              -D "TEST_EXPECT=${resultcode}"
-              -D "TEST_REFERENCE=${resultfile}.mty"
-              -D "TEST_ERRREF=${resultfile}.err"
-              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
-      )
+      if (SKIP_ERROR_STACK_TESTS)
+        add_test (
+            NAME H5CLEAR_CMP-${testname}
+            COMMAND ${CMAKE_COMMAND} -E echo "SKIP Error Stack Test"
+        )
+        set_property(TEST H5CLEAR_CMP-${testname} PROPERTY DISABLED)
+      else ()
+        add_test (
+            NAME H5CLEAR_CMP-${testname}
+            COMMAND "${CMAKE_COMMAND}"
+                -D "TEST_PROGRAM=$<TARGET_FILE:h5clear>"
+                -D "TEST_ARGS:STRING=${ARGN};${testfile}"
+                -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
+                -D "TEST_OUTPUT=${testname}.out"
+                -D "TEST_EXPECT=${resultcode}"
+                -D "TEST_REFERENCE=${resultfile}.mty"
+                -D "TEST_ERRREF=${resultfile}.err"
+                -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+        )
+      endif ()
       set_tests_properties (H5CLEAR_CMP-${testname} PROPERTIES DEPENDS H5CLEAR_CMP-copy_${testname})
       set (last_test "H5CLEAR_CMP-${testname}")
     endif ()
