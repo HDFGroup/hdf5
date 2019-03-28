@@ -48,7 +48,11 @@ set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DCTEST_CONFIGURATION_TYPE:STRING=${
 ##################################################################
 
 if(NOT DEFINED INSTALLDIR)
-  set(INSTALLDIR "C:/Program Files/HDF_Group/@HDF5_PACKAGE_NAME@/@HDF5_PACKAGE_VERSION@")
+  if(WIN32)
+    set(INSTALLDIR "C:/Program Files/HDF_Group/@HDF5_PACKAGE_NAME@/@HDF5_PACKAGE_VERSION@")
+  else()
+    set(INSTALLDIR "@CMAKE_INSTALL_PREFIX@")
+  endif()
 endif()
 
 if(NOT DEFINED CTEST_SOURCE_NAME)
@@ -66,11 +70,11 @@ endif()
 if(NOT DEFINED CTEST_BUILD_NAME)
   set(CTEST_BUILD_NAME "examples")
 endif()
-set(BUILD_OPTIONS "${BUILD_OPTIONS} -DSITE:STRING=${CTEST_SITE} -DBUILDNAME:STRING=${CTEST_BUILD_NAME}")
+set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DSITE:STRING=${CTEST_SITE} -DBUILDNAME:STRING=${CTEST_BUILD_NAME}")
 
 #TAR_SOURCE - name of tarfile
 #if(NOT DEFINED TAR_SOURCE)
-#  set(CTEST_USE_TAR_SOURCE "HDF5Examples-0.2.8-Source")
+#  set(CTEST_USE_TAR_SOURCE "HDF5Examples-0.2.10-Source")
 #endif()
 
 ###############################################################################################################
@@ -88,9 +92,9 @@ else()
   set(CTEST_BINARY_DIRECTORY "${CTEST_DASHBOARD_ROOT}/${CTEST_BINARY_NAME}")
 endif()
 if(${CDASH_LOCAL})
-  set(BUILD_OPTIONS "${BUILD_OPTIONS} -DCDASH_LOCAL:BOOL=ON")
+  set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DCDASH_LOCAL:BOOL=ON")
 endif()
-set(BUILD_OPTIONS "${BUILD_OPTIONS} -DHDF5_PACKAGE_NAME:STRING=@HDF5_PACKAGE@@HDF_PACKAGE_EXT@")
+set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_PACKAGE_NAME:STRING=@HDF5_PACKAGE@@HDF_PACKAGE_EXT@")
 
 ###############################################################################################################
 # For any comments please contact cdashhelp@hdfgroup.org
