@@ -103,6 +103,8 @@ set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_PACKAGE_NAME:STRING=@HDF5_PAC
 
 if(WIN32)
   include(${CTEST_SCRIPT_DIRECTORY}\\HDF5_Examples_options.cmake)
+  include(${CTEST_SCRIPT_DIRECTORY}\\CTestScript.cmake)
 else()
   include(${CTEST_SCRIPT_DIRECTORY}/HDF5_Examples_options.cmake)
+  include(${CTEST_SCRIPT_DIRECTORY}/CTestScript.cmake)
 endif()
