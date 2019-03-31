@@ -37,6 +37,7 @@
 #include "H5EAprivate.h"	/* Extensible arrays		  	*/
 #include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5MFprivate.h"	/* File space management		*/
+#include "H5MMprivate.h"	/* Memory management			*/
 #include "H5VMprivate.h"        /* Vector functions			*/
 
 
@@ -437,7 +438,7 @@ H5D__earray_debug(FILE *stream, int indent, int fwidth, hsize_t idx,
     HDassert(elmt);
 
     /* Print element */
-    sprintf(temp_str, "Element #%llu:", (unsigned long long)idx);
+    HDsprintf(temp_str, "Element #%llu:", (unsigned long long)idx);
     HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth, temp_str,
         *(const haddr_t *)elmt);
 
@@ -596,7 +597,7 @@ H5D__earray_filt_debug(FILE *stream, int indent, int fwidth, hsize_t idx,
     HDassert(elmt);
 
     /* Print element */
-    sprintf(temp_str, "Element #%llu:", (unsigned long long)idx);
+    HDsprintf(temp_str, "Element #%llu:", (unsigned long long)idx);
     HDfprintf(stream, "%*s%-*s {%a, %u, %0x}\n", indent, "", fwidth, temp_str,
         elmt->addr, elmt->nbytes, elmt->filter_mask);
 
@@ -1197,11 +1198,11 @@ H5D__earray_idx_resize(H5O_layout_chunk_t *layout)
         hsize_t swizzled_max_chunks[H5O_LAYOUT_NDIMS];  /* Swizzled form of max # of chunks in each dimension */
 
         /* Get the swizzled chunk dimensions */
-        HDmemcpy(layout->u.earray.swizzled_dim, layout->dim, (layout->ndims - 1) * sizeof(layout->dim[0]));
+        H5MM_memcpy(layout->u.earray.swizzled_dim, layout->dim, (layout->ndims - 1) * sizeof(layout->dim[0]));
         H5VM_swizzle_coords(uint32_t, layout->u.earray.swizzled_dim, layout->u.earray.unlim_dim);
 
         /* Get the swizzled number of chunks in each dimension */
-        HDmemcpy(swizzled_chunks, layout->chunks, (layout->ndims - 1) * sizeof(swizzled_chunks[0]));
+        H5MM_memcpy(swizzled_chunks, layout->chunks, (layout->ndims - 1) * sizeof(swizzled_chunks[0]));
         H5VM_swizzle_coords(hsize_t, swizzled_chunks, layout->u.earray.unlim_dim);
 
         /* Get the swizzled "down" sizes for each dimension */
@@ -1209,7 +1210,7 @@ H5D__earray_idx_resize(H5O_layout_chunk_t *layout)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't compute swizzled 'down' chunk size value")
 
         /* Get the swizzled max number of chunks in each dimension */
-        HDmemcpy(swizzled_max_chunks, layout->max_chunks, (layout->ndims - 1) * sizeof(swizzled_max_chunks[0]));
+        H5MM_memcpy(swizzled_max_chunks, layout->max_chunks, (layout->ndims - 1) * sizeof(swizzled_max_chunks[0]));
         H5VM_swizzle_coords(hsize_t, swizzled_max_chunks, layout->u.earray.unlim_dim);
 
         /* Get the swizzled max "down" sizes for each dimension */

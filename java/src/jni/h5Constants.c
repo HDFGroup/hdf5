@@ -1260,7 +1260,7 @@ Java_hdf_hdf5lib_HDF5Constants_H5VL_1CAP_1FLAG_1THREADSAFE(JNIEnv *env, jclass c
 JNIEXPORT jlong JNICALL
 Java_hdf_hdf5lib_HDF5Constants_H5VL_1NATIVE(JNIEnv *env, jclass cls) { return H5VL_NATIVE; }
 JNIEXPORT jobject JNICALL
-Java_hdf_hdf5lib_HDF5Constants_H5VL_1NATIVE_1NAME(JNIEnv *env, jclass cls) { return (jstring)ENVPTR->NewStringUTF(ENVPAR H5VL_NATIVE_NAME); }
+Java_hdf_hdf5lib_HDF5Constants_H5VL_1NATIVE_1NAME(JNIEnv *env, jclass cls) { return (jstring)ENVPTR->NewStringUTF(ENVONLY, H5VL_NATIVE_NAME); }
 JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_HDF5Constants_H5VL_1NATIVE_1VALUE(JNIEnv *env, jclass cls) { return H5VL_NATIVE_VALUE; }
 JNIEXPORT jint JNICALL

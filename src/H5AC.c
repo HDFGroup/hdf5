@@ -349,7 +349,7 @@ H5AC_create(const H5F_t *f, H5AC_cache_config_t *config_ptr, H5AC_cache_image_co
         aux_ptr->sync_point_done = NULL;
         aux_ptr->p0_image_len = 0;
 
-        sprintf(prefix, "%d:", mpi_rank);
+        HDsprintf(prefix, "%d:", mpi_rank);
 
         if(mpi_rank == 0) {
             if(NULL == (aux_ptr->d_slist_ptr = H5SL_create(H5SL_TYPE_HADDR, NULL)))
@@ -1612,7 +1612,7 @@ H5AC_unprotect(H5F_t *f, const H5AC_class_t *type, haddr_t addr, void *thing,
 done:
     /* If currently logging, generate a message */
     if(f->shared->cache->log_info->logging)
-        if(H5C_log_write_unprotect_entry_msg(f->shared->cache, (H5AC_info_t *)thing, type->id, flags, ret_value) < 0)
+        if(H5C_log_write_unprotect_entry_msg(f->shared->cache, addr, type->id, flags, ret_value) < 0)
             HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2403,8 +2403,18 @@ H5AC_cork(H5F_t *f, haddr_t obj_addr, unsigned action, hbool_t *corked)
     HDassert(H5F_addr_defined(obj_addr));
     HDassert(action == H5AC__SET_CORK || action == H5AC__UNCORK || action == H5AC__GET_CORKED);
 
-    if(action == H5AC__GET_CORKED)
-	HDassert(corked);
+    /*  Skip the search on "tag_list" when there are no "corked" objects.
+     *  This is done to mitigate the slow down when closing objects.
+     *  Re-visit this optimization when we optimize tag info management
+     *  in the future.
+     */
+    if(action == H5AC__GET_CORKED) {
+        HDassert(corked);
+        if(H5C_get_num_objs_corked(f->shared->cache) == 0) {
+            *corked = FALSE;
+            HGOTO_DONE(SUCCEED)
+        }
+    }
 
     if(H5C_cork(f->shared->cache, obj_addr, action, corked) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Cannot perform the cork action")

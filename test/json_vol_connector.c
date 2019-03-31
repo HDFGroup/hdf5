@@ -45,22 +45,26 @@ static herr_t jvc_file_close(void *file, hid_t dxpl_id, void **req);
 
 /* The VOL class struct */
 static const H5VL_class_t json_vol_g = {
-    0,                                              /* version      */
+    JSON_VOL_CONNECTOR_VERSION,                     /* version      */
     JSON_VOL_CONNECTOR_VALUE,                       /* value        */
     JSON_VOL_CONNECTOR_NAME,                        /* name         */
     0,                                              /* capability flags */
     NULL,                                           /* initialize   */
     NULL,                                           /* terminate    */
-    (size_t)0,                                      /* info size    */
-    NULL,                                           /* info copy    */
-    NULL,                                           /* info compare */
-    NULL,                                           /* info free    */
-    NULL,                                           /* info to str  */
-    NULL,                                           /* str to info  */
-    NULL,                                           /* get_object   */
-    NULL,                                           /* get_wrap_ctx */
-    NULL,                                           /* wrap_object  */
-    NULL,                                           /* free_wrap_ctx */
+    {   /* info_cls */
+        (size_t)0,                                  /* info size    */
+        NULL,                                       /* info copy    */
+        NULL,                                       /* info compare */
+        NULL,                                       /* info free    */
+        NULL,                                       /* info to str  */
+        NULL                                        /* str to info  */
+    },
+    {   /* wrap_cls */
+        NULL,                                       /* get_object   */
+        NULL,                                       /* get_wrap_ctx */
+        NULL,                                       /* wrap_object  */
+        NULL                                        /* free_wrap_ctx */
+    },
     {   /* attribute_cls */
         NULL,                                       /* create       */
         NULL,                                       /* open         */

@@ -348,14 +348,17 @@ H5FD__core_write_to_bstore(H5FD_core_t *file, haddr_t addr, size_t size)
 
     HDassert(file);
 
-    /* Write to backing store */
-    if((off_t)addr != HDlseek(file->fd, (off_t)addr, SEEK_SET))
+#ifndef H5_HAVE_PREADWRITE
+    /* Seek to the correct location (if we don't have pwrite) */
+    if((HDoff_t)addr != HDlseek(file->fd, (off_t)addr, SEEK_SET))
         HGOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "error seeking in backing store")
+#endif /* H5_HAVE_PREADWRITE */
 
     while (size > 0) {
 
         h5_posix_io_t       bytes_in        = 0;    /* # of bytes to write  */
         h5_posix_io_ret_t   bytes_wrote     = -1;   /* # of bytes written   */
+        HDoff_t             offset          = (HDoff_t)addr;
 
         /* Trying to write more bytes than the return type can handle is
          * undefined behavior in POSIX.
@@ -366,15 +369,21 @@ H5FD__core_write_to_bstore(H5FD_core_t *file, haddr_t addr, size_t size)
             bytes_in = (h5_posix_io_t)size;
 
         do {
+#ifdef H5_HAVE_PREADWRITE
+            bytes_wrote = HDpwrite(file->fd, ptr, bytes_in, offset);
+            offset += bytes_wrote;
+#else
             bytes_wrote = HDwrite(file->fd, ptr, bytes_in);
+#endif /* H5_HAVE_PREADWRITE */
         } while(-1 == bytes_wrote && EINTR == errno);
 
         if(-1 == bytes_wrote) { /* error */
             int myerrno = errno;
             time_t mytime = HDtime(NULL);
-            HDoff_t myoffset = HDlseek(file->fd, (HDoff_t)0, SEEK_CUR);
 
-            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "write to backing store failed: time = %s, filename = '%s', file descriptor = %d, errno = %d, error message = '%s', ptr = %p, total write size = %llu, bytes this sub-write = %llu, bytes actually written = %llu, offset = %llu", HDctime(&mytime), file->name, file->fd, myerrno, HDstrerror(myerrno), ptr, (unsigned long long)size, (unsigned long long)bytes_in, (unsigned long long)bytes_wrote, (unsigned long long)myoffset);
+            offset = HDlseek(file->fd, (HDoff_t)0, SEEK_CUR);
+
+            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "write to backing store failed: time = %s, filename = '%s', file descriptor = %d, errno = %d, error message = '%s', ptr = %p, total write size = %llu, bytes this sub-write = %llu, bytes actually written = %llu, offset = %llu", HDctime(&mytime), file->name, file->fd, myerrno, HDstrerror(myerrno), ptr, (unsigned long long)size, (unsigned long long)bytes_in, (unsigned long long)bytes_wrote, (unsigned long long)offset);
         } /* end if */
 
         HDassert(bytes_wrote > 0);
@@ -839,7 +848,7 @@ H5FD__core_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
                         HGOTO_ERROR(H5E_FILE, H5E_CANTCOPY, NULL, "image_memcpy callback failed")
                 } /* end if */
                 else
-                    HDmemcpy(file->mem, file_image_info.buffer, size);
+                    H5MM_memcpy(file->mem, file_image_info.buffer, size);
             } /* end if */
             /* Read in existing data from the file if there is no image */
             else {
@@ -852,6 +861,7 @@ H5FD__core_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
                 while(size > 0) {
                     h5_posix_io_t       bytes_in        = 0;    /* # of bytes to read       */
                     h5_posix_io_ret_t   bytes_read      = -1;   /* # of bytes actually read */
+                    HDoff_t             offset          = (HDoff_t)0;
                     
                     /* Trying to read more bytes than the return type can handle is
                      * undefined behavior in POSIX.
@@ -862,15 +872,21 @@ H5FD__core_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
                         bytes_in = (h5_posix_io_t)size;
                     
                     do {
+#ifdef H5_HAVE_PREADWRITE
+                        bytes_read = HDpread(file->fd, mem, bytes_in, offset);
+                        offset += bytes_read;
+#else
                         bytes_read = HDread(file->fd, mem, bytes_in);
+#endif /* H5_HAVE_PREADWRITE */
                     } while(-1 == bytes_read && EINTR == errno);
                     
                     if(-1 == bytes_read) { /* error */
                         int myerrno = errno;
                         time_t mytime = HDtime(NULL);
-                        HDoff_t myoffset = HDlseek(file->fd, (HDoff_t)0, SEEK_CUR);
 
-                        HGOTO_ERROR(H5E_IO, H5E_READERROR, NULL, "file read failed: time = %s, filename = '%s', file descriptor = %d, errno = %d, error message = '%s', file->mem = %p, total read size = %llu, bytes this sub-read = %llu, bytes actually read = %llu, offset = %llu", HDctime(&mytime), file->name, file->fd, myerrno, HDstrerror(myerrno), file->mem, (unsigned long long)size, (unsigned long long)bytes_in, (unsigned long long)bytes_read, (unsigned long long)myoffset);
+                        offset = HDlseek(file->fd, (HDoff_t)0, SEEK_CUR);
+
+                        HGOTO_ERROR(H5E_IO, H5E_READERROR, NULL, "file read failed: time = %s, filename = '%s', file descriptor = %d, errno = %d, error message = '%s', file->mem = %p, total read size = %llu, bytes this sub-read = %llu, bytes actually read = %llu, offset = %llu", HDctime(&mytime), file->name, file->fd, myerrno, HDstrerror(myerrno), file->mem, (unsigned long long)size, (unsigned long long)bytes_in, (unsigned long long)bytes_read, (unsigned long long)offset);
                     } /* end if */
                     
                     HDassert(bytes_read >= 0);
@@ -1284,7 +1300,7 @@ H5FD__core_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
         nbytes = MIN(size,(size_t)(file->eof-addr));
 #endif /* NDEBUG */
 
-        HDmemcpy(buf, file->mem + addr, nbytes);
+        H5MM_memcpy(buf, file->mem + addr, nbytes);
         size -= nbytes;
         addr += nbytes;
         buf = (char *)buf + nbytes;
@@ -1370,7 +1386,7 @@ H5FD__core_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UN
     }
 
     /* Write from BUF to memory */
-    HDmemcpy(file->mem + addr, buf, size);
+    H5MM_memcpy(file->mem + addr, buf, size);
 
     /* Mark memory buffer as modified */
     file->dirty = TRUE;

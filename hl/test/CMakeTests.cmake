@@ -61,7 +61,7 @@ macro (HL_ADD_TEST hl_name)
         -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
     )
   endif ()
-  if (NOT "${last_test}" STREQUAL "")
+  if (last_test)
     set_tests_properties (HL_${hl_name} PROPERTIES DEPENDS ${last_test}
       ENVIRONMENT "srcdir=${HDF5_HL_TEST_BINARY_DIR}"
       WORKING_DIRECTORY ${HDF5_HL_TEST_BINARY_DIR}
@@ -104,7 +104,7 @@ add_test (
         testfl_packet_table_vlen.h5
         test_table.h5
 )
-if (NOT "${last_test}" STREQUAL "")
+if (last_test)
   set_tests_properties (HL_test-clear-objects PROPERTIES DEPENDS ${last_test})
 endif ()
 set (last_test "HL_test-clear-objects")

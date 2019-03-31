@@ -243,7 +243,7 @@ public class TestH5Edefault {
         H5.H5Eget_class_name(-1);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = HDF5LibraryException.class)
     public void testH5Eget_class_name_invalid_classname() throws Throwable {
         H5.H5Eget_class_name(HDF5Constants.H5E_DEFAULT);
     }

@@ -18,16 +18,36 @@
  * Purpose:	"All" selection dataspace I/O functions.
  */
 
+/****************/
+/* Module Setup */
+/****************/
+
 #include "H5Smodule.h"          /* This source code file is part of the H5S module */
 
 
+/***********/
+/* Headers */
+/***********/
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		        */
 #include "H5Iprivate.h"		/* ID Functions		                */
 #include "H5Spkg.h"		/* Dataspace functions			*/
-#include "H5VMprivate.h"         /* Vector functions                     */
+#include "H5VMprivate.h"        /* Vector functions                     */
 
-/* Static function prototypes */
+
+/****************/
+/* Local Macros */
+/****************/
+
+
+/******************/
+/* Local Typedefs */
+/******************/
+
+
+/********************/
+/* Local Prototypes */
+/********************/
 
 /* Selection callbacks */
 static herr_t H5S__all_copy(H5S_t *dst, const H5S_t *src, hbool_t share_selection);
@@ -60,6 +80,16 @@ static herr_t H5S__all_iter_next(H5S_sel_iter_t *sel_iter, size_t nelem);
 static herr_t H5S__all_iter_next_block(H5S_sel_iter_t *sel_iter);
 static herr_t H5S__all_iter_release(H5S_sel_iter_t *sel_iter);
 
+
+/*****************************/
+/* Library Private Variables */
+/*****************************/
+
+
+/*********************/
+/* Package Variables */
+/*********************/
+
 /* Selection properties for "all" selections */
 const H5S_select_class_t H5S_sel_all[1] = {{
     H5S_SEL_ALL,
@@ -85,6 +115,11 @@ const H5S_select_class_t H5S_sel_all[1] = {{
     H5S__all_iter_init,
 }};
 
+
+/*******************/
+/* Local Variables */
+/*******************/
+
 /* Iteration properties for "all" selections */
 static const H5S_sel_iter_class_t H5S_sel_iter_all[1] = {{
     H5S_SEL_ALL,
@@ -99,13 +134,14 @@ static const H5S_sel_iter_class_t H5S_sel_iter_all[1] = {{
     H5S__all_iter_release,
 }};
 
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5S__all_iter_init
  *
  * Purpose:	Initializes iteration information for "all" selection.
  *
- * Return:	non-negative on success, negative on failure.
+ * Return:	Non-negative on success, negative on failure.
  *
  * Programmer:	Quincey Koziol
  *              Tuesday, June 16, 1998
@@ -132,7 +168,7 @@ H5S__all_iter_init(H5S_sel_iter_t *iter, const H5S_t *space)
     iter->type = H5S_sel_iter_all;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-}   /* H5S__all_iter_init() */
+} /* end H5S__all_iter_init() */
 
 
 /*-------------------------------------------------------------------------
@@ -141,7 +177,7 @@ H5S__all_iter_init(H5S_sel_iter_t *iter, const H5S_t *space)
  * Purpose:	Retrieve the current coordinates of iterator for current
  *              selection
  *
- * Return:	non-negative on success, negative on failure
+ * Return:	Non-negative on success, negative on failure
  *
  * Programmer:	Quincey Koziol
  *              Tuesday, April 22, 2003
@@ -165,7 +201,7 @@ H5S__all_iter_coords(const H5S_sel_iter_t *iter, hsize_t *coords)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}   /* H5S__all_iter_coords() */
+} /* end H5S__all_iter_coords() */
 
 
 /*-------------------------------------------------------------------------
@@ -174,7 +210,7 @@ done:
  * Purpose:	Retrieve the current block of iterator for current
  *              selection
  *
- * Return:	non-negative on success, negative on failure
+ * Return:	Non-negative on success, negative on failure
  *
  * Programmer:	Quincey Koziol
  *              Monday, June 2, 2003
@@ -204,7 +240,7 @@ H5S__all_iter_block(const H5S_sel_iter_t *iter, hsize_t *start, hsize_t *end)
     } /* end for */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-}   /* H5S__all_iter_block() */
+} /* end H5S__all_iter_block() */
 
 
 /*-------------------------------------------------------------------------
@@ -212,7 +248,7 @@ H5S__all_iter_block(const H5S_sel_iter_t *iter, hsize_t *start, hsize_t *end)
  *
  * Purpose:	Return number of elements left to process in iterator
  *
- * Return:	non-negative number of elements on success, zero on failure
+ * Return:	Non-negative number of elements on success, zero on failure
  *
  * Programmer:	Quincey Koziol
  *              Tuesday, June 16, 1998
@@ -228,7 +264,7 @@ H5S__all_iter_nelmts(const H5S_sel_iter_t *iter)
     HDassert(iter);
 
     FUNC_LEAVE_NOAPI(iter->elmt_left)
-}   /* H5S__all_iter_nelmts() */
+} /* end H5S__all_iter_nelmts() */
 
 
 /*--------------------------------------------------------------------------
@@ -257,7 +293,7 @@ H5S__all_iter_has_next_block(const H5S_sel_iter_t H5_ATTR_UNUSED *iter)
     HDassert(iter);
 
     FUNC_LEAVE_NOAPI(FALSE)
-}   /* H5S__all_iter_has_next_block() */
+} /* end H5S__all_iter_has_next_block() */
 
 
 /*--------------------------------------------------------------------------
@@ -292,7 +328,7 @@ H5S__all_iter_next(H5S_sel_iter_t *iter, size_t nelem)
     iter->u.all.byte_offset += (nelem * iter->elmt_size);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-}   /* H5S__all_iter_next() */
+} /* end H5S__all_iter_next() */
 
 
 /*--------------------------------------------------------------------------
@@ -321,7 +357,81 @@ H5S__all_iter_next_block(H5S_sel_iter_t H5_ATTR_UNUSED *iter)
     HDassert(iter);
 
     FUNC_LEAVE_NOAPI(FAIL)
-}   /* H5S__all_iter_next_block() */
+} /* end H5S__all_iter_next_block() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S__all_get_seq_list
+ PURPOSE
+    Create a list of offsets & lengths for a selection
+ USAGE
+    herr_t H5S__all_get_seq_list(space,flags,iter,maxseq,maxelem,nseq,nelem,off,len)
+        H5S_t *space;           IN: Dataspace containing selection to use.
+        unsigned flags;         IN: Flags for extra information about operation
+        H5S_sel_iter_t *iter;   IN/OUT: Selection iterator describing last
+                                    position of interest in selection.
+        size_t maxseq;          IN: Maximum number of sequences to generate
+        size_t maxelem;         IN: Maximum number of elements to include in the
+                                    generated sequences
+        size_t *nseq;           OUT: Actual number of sequences generated
+        size_t *nelem;          OUT: Actual number of elements in sequences generated
+        hsize_t *off;           OUT: Array of offsets
+        size_t *len;            OUT: Array of lengths
+ RETURNS
+    Non-negative on success/Negative on failure.
+ DESCRIPTION
+    Use the selection in the dataspace to generate a list of byte offsets and
+    lengths for the region(s) selected.  Start/Restart from the position in the
+    ITER parameter.  The number of sequences generated is limited by the MAXSEQ
+    parameter and the number of sequences actually generated is stored in the
+    NSEQ parameter.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+static herr_t
+H5S__all_get_seq_list(const H5S_t H5_ATTR_UNUSED *space, unsigned H5_ATTR_UNUSED flags, H5S_sel_iter_t *iter,
+    size_t H5_ATTR_UNUSED maxseq, size_t maxelem, size_t *nseq, size_t *nelem,
+    hsize_t *off, size_t *len)
+{
+    size_t elem_used;           /* The number of elements used */
+
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Check args */
+    HDassert(space);
+    HDassert(iter);
+    HDassert(maxseq > 0);
+    HDassert(maxelem > 0);
+    HDassert(nseq);
+    HDassert(nelem);
+    HDassert(off);
+    HDassert(len);
+
+    /* Determine the actual number of elements to use */
+    H5_CHECK_OVERFLOW(iter->elmt_left, hsize_t, size_t);
+    elem_used = MIN(maxelem, (size_t)iter->elmt_left);
+    HDassert(elem_used > 0);
+
+    /* Compute the offset in the dataset */
+    off[0] = iter->u.all.byte_offset;
+    len[0] = elem_used * iter->elmt_size;
+
+    /* Should only need one sequence for 'all' selections */
+    *nseq = 1;
+
+    /* Set the number of elements used */
+    *nelem = elem_used;
+
+    /* Update the iterator */
+    iter->elmt_left -= elem_used;
+    iter->u.all.elmt_offset += elem_used;
+    iter->u.all.byte_offset += len[0];
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5S__all_get_seq_list() */
 
 
 /*--------------------------------------------------------------------------
@@ -350,7 +460,7 @@ H5S__all_iter_release(H5S_sel_iter_t H5_ATTR_UNUSED * iter)
     HDassert(iter);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-}   /* H5S__all_iter_release() */
+} /* end H5S__all_iter_release() */
 
 
 /*--------------------------------------------------------------------------
@@ -382,7 +492,7 @@ H5S__all_release(H5S_t *space)
     space->select.num_elem = 0;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-}   /* H5S__all_release() */
+} /* end H5S__all_release() */
 
 
 /*--------------------------------------------------------------------------
@@ -391,9 +501,10 @@ H5S__all_release(H5S_t *space)
  PURPOSE
     Copy a selection from one dataspace to another
  USAGE
-    herr_t H5S__all_copy(dst, src)
+    herr_t H5S__all_copy(dst, src, share_selection)
         H5S_t *dst;  OUT: Pointer to the destination dataspace
         H5S_t *src;  IN: Pointer to the source dataspace
+        hbool_t;     IN: Whether to share the selection between the dataspaces
  RETURNS
     Non-negative on success/Negative on failure
  DESCRIPTION
@@ -527,7 +638,7 @@ H5S__all_serialize(const H5S_t *space, uint8_t **p)
     *p = pp;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-}   /* H5S__all_serialize() */
+} /* end H5S__all_serialize() */
 
 
 /*--------------------------------------------------------------------------
@@ -572,7 +683,7 @@ H5S__all_deserialize(H5S_t *space, uint32_t H5_ATTR_UNUSED version, uint8_t H5_A
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}   /* H5S__all_deserialize() */
+} /* end H5S__all_deserialize() */
 
 
 /*--------------------------------------------------------------------------
@@ -622,7 +733,7 @@ H5S__all_bounds(const H5S_t *space, hsize_t *start, hsize_t *end)
     } /* end for */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-}   /* H5S__all_bounds() */
+} /* end H5S__all_bounds() */
 
 
 /*--------------------------------------------------------------------------
@@ -657,7 +768,7 @@ H5S__all_offset(const H5S_t H5_ATTR_UNUSED *space, hsize_t *offset)
     *offset = 0;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-}   /* H5S__all_offset() */
+} /* end H5S__all_offset() */
 
 
 /*--------------------------------------------------------------------------
@@ -716,7 +827,7 @@ H5S__all_is_contiguous(const H5S_t H5_ATTR_UNUSED *space)
     HDassert(space);
 
     FUNC_LEAVE_NOAPI(TRUE)
-}   /* H5S__all_is_contiguous() */
+} /* end H5S__all_is_contiguous() */
 
 
 /*--------------------------------------------------------------------------
@@ -745,7 +856,7 @@ H5S__all_is_single(const H5S_t H5_ATTR_UNUSED *space)
     HDassert(space);
 
     FUNC_LEAVE_NOAPI(TRUE)
-}   /* H5S__all_is_single() */
+} /* end H5S__all_is_single() */
 
 
 /*--------------------------------------------------------------------------
@@ -776,7 +887,7 @@ H5S__all_is_regular(const H5S_t H5_ATTR_UNUSED *space)
     HDassert(space);
 
     FUNC_LEAVE_NOAPI(TRUE)
-}   /* H5S__all_is_regular() */
+} /* end H5S__all_is_regular() */
 
 
 /*--------------------------------------------------------------------------
@@ -807,7 +918,7 @@ H5S__all_adjust_u(H5S_t H5_ATTR_UNUSED *space, const hsize_t H5_ATTR_UNUSED *off
     HDassert(offset);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-}   /* H5S__all_adjust_u() */
+} /* end H5S__all_adjust_u() */
 
 
 /*-------------------------------------------------------------------------
@@ -816,7 +927,7 @@ H5S__all_adjust_u(H5S_t H5_ATTR_UNUSED *space, const hsize_t H5_ATTR_UNUSED *off
  * Purpose:	Projects a single element 'all' selection into a scalar
  *              dataspace
  *
- * Return:	non-negative on success, negative on failure.
+ * Return:	Non-negative on success, negative on failure.
  *
  * Programmer:	Quincey Koziol
  *              Sunday, July 18, 2010
@@ -836,7 +947,7 @@ H5S__all_project_scalar(const H5S_t H5_ATTR_UNUSED *space, hsize_t *offset)
     *offset = 0;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-}   /* H5S__all_project_scalar() */
+} /* end H5S__all_project_scalar() */
 
 
 /*-------------------------------------------------------------------------
@@ -845,7 +956,7 @@ H5S__all_project_scalar(const H5S_t H5_ATTR_UNUSED *space, hsize_t *offset)
  * Purpose:	Projects an 'all' selection onto/into a simple dataspace
  *              of a different rank
  *
- * Return:	non-negative on success, negative on failure.
+ * Return:	Non-negative on success, negative on failure.
  *
  * Programmer:	Quincey Koziol
  *              Sunday, July 18, 2010
@@ -853,7 +964,8 @@ H5S__all_project_scalar(const H5S_t H5_ATTR_UNUSED *space, hsize_t *offset)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5S__all_project_simple(const H5S_t *base_space, H5S_t *new_space, hsize_t *offset)
+H5S__all_project_simple(const H5S_t H5_ATTR_UNUSED *base_space,
+    H5S_t *new_space, hsize_t H5_ATTR_UNUSED *offset)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -870,7 +982,7 @@ H5S__all_project_simple(const H5S_t *base_space, H5S_t *new_space, hsize_t *offs
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}   /* H5S__all_project_simple() */
+} /* end H5S__all_project_simple() */
 
 
 /*--------------------------------------------------------------------------
@@ -914,7 +1026,7 @@ H5S_select_all(H5S_t *space, hbool_t rel_prev)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}   /* H5S_select_all() */
+} /* end H5S_select_all() */
 
 
 /*--------------------------------------------------------------------------
@@ -953,79 +1065,5 @@ H5Sselect_all(hid_t spaceid)
 
 done:
     FUNC_LEAVE_API(ret_value)
-}   /* H5Sselect_all() */
-
-
-/*--------------------------------------------------------------------------
- NAME
-    H5S__all_get_seq_list
- PURPOSE
-    Create a list of offsets & lengths for a selection
- USAGE
-    herr_t H5S__all_get_seq_list(space,flags,iter,maxseq,maxelem,nseq,nelem,off,len)
-        H5S_t *space;           IN: Dataspace containing selection to use.
-        unsigned flags;         IN: Flags for extra information about operation
-        H5S_sel_iter_t *iter;   IN/OUT: Selection iterator describing last
-                                    position of interest in selection.
-        size_t maxseq;          IN: Maximum number of sequences to generate
-        size_t maxelem;         IN: Maximum number of elements to include in the
-                                    generated sequences
-        size_t *nseq;           OUT: Actual number of sequences generated
-        size_t *nelem;          OUT: Actual number of elements in sequences generated
-        hsize_t *off;           OUT: Array of offsets
-        size_t *len;            OUT: Array of lengths
- RETURNS
-    Non-negative on success/Negative on failure.
- DESCRIPTION
-    Use the selection in the dataspace to generate a list of byte offsets and
-    lengths for the region(s) selected.  Start/Restart from the position in the
-    ITER parameter.  The number of sequences generated is limited by the MAXSEQ
-    parameter and the number of sequences actually generated is stored in the
-    NSEQ parameter.
- GLOBAL VARIABLES
- COMMENTS, BUGS, ASSUMPTIONS
- EXAMPLES
- REVISION LOG
---------------------------------------------------------------------------*/
-static herr_t
-H5S__all_get_seq_list(const H5S_t H5_ATTR_UNUSED *space, unsigned H5_ATTR_UNUSED flags, H5S_sel_iter_t *iter,
-    size_t H5_ATTR_UNUSED maxseq, size_t maxelem, size_t *nseq, size_t *nelem,
-    hsize_t *off, size_t *len)
-{
-    size_t elem_used;           /* The number of elements used */
-
-    FUNC_ENTER_STATIC_NOERR
-
-    /* Check args */
-    HDassert(space);
-    HDassert(iter);
-    HDassert(maxseq > 0);
-    HDassert(maxelem > 0);
-    HDassert(nseq);
-    HDassert(nelem);
-    HDassert(off);
-    HDassert(len);
-
-    /* Determine the actual number of elements to use */
-    H5_CHECK_OVERFLOW(iter->elmt_left, hsize_t, size_t);
-    elem_used = MIN(maxelem, (size_t)iter->elmt_left);
-    HDassert(elem_used > 0);
-
-    /* Compute the offset in the dataset */
-    off[0] = iter->u.all.byte_offset;
-    len[0] = elem_used * iter->elmt_size;
-
-    /* Should only need one sequence for 'all' selections */
-    *nseq = 1;
-
-    /* Set the number of elements used */
-    *nelem = elem_used;
-
-    /* Update the iterator */
-    iter->elmt_left -= elem_used;
-    iter->u.all.elmt_offset += elem_used;
-    iter->u.all.byte_offset += len[0];
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5S__all_get_seq_list() */
+} /* end H5Sselect_all() */
 

@@ -39,6 +39,19 @@
 /* Library Private Typedefs */
 /****************************/
 
+/* API context state */
+typedef struct H5CX_state_t {
+    hid_t dxpl_id;              /* DXPL for operation */
+    hid_t lapl_id;              /* LAPL for operation */
+    void *vol_wrap_ctx;         /* VOL connector's "wrap context" for creating IDs */
+    H5VL_connector_prop_t vol_connector_prop;   /* VOL connector property */
+
+#ifdef H5_HAVE_PARALLEL
+    /* Internal: Parallel I/O settings */
+    hbool_t coll_metadata_read; /* Whether to use collective I/O for metadata read */
+#endif /* H5_HAVE_PARALLEL */
+} H5CX_state_t;
+
 
 /*****************************/
 /* Library-private Variables */
@@ -57,24 +70,33 @@ H5_DLL herr_t H5CX_pop(void);
 H5_DLL void H5CX_push_special(void);
 H5_DLL hbool_t H5CX_is_def_dxpl(void);
 
+/* API context state routines */
+H5_DLL herr_t H5CX_retrieve_state(H5CX_state_t **api_state);
+H5_DLL herr_t H5CX_restore_state(const H5CX_state_t *api_state);
+H5_DLL herr_t H5CX_free_state(H5CX_state_t *api_state);
+
 /* "Setter" routines for API context info */
 H5_DLL void H5CX_set_dxpl(hid_t dxpl_id);
 H5_DLL void H5CX_set_lapl(hid_t lapl_id);
+H5_DLL void H5CX_set_dcpl(hid_t dcpl_id);
 H5_DLL herr_t H5CX_set_apl(hid_t *acspl_id, const H5P_libclass_t *libclass,
     hid_t loc_id, hbool_t is_collective);
 H5_DLL herr_t H5CX_set_loc(hid_t loc_id);
 H5_DLL herr_t H5CX_set_vol_wrap_ctx(void *wrap_ctx);
+H5_DLL herr_t H5CX_set_vol_connector_prop(const H5VL_connector_prop_t *vol_connector_prop);
 
 /* "Getter" routines for API context info */
 H5_DLL hid_t H5CX_get_dxpl(void);
 H5_DLL hid_t H5CX_get_lapl(void);
 H5_DLL herr_t H5CX_get_vol_wrap_ctx(void **wrap_ctx);
+H5_DLL herr_t H5CX_get_vol_connector_prop(H5VL_connector_prop_t *vol_connector_prop);
 H5_DLL haddr_t H5CX_get_tag(void);
 H5_DLL H5AC_ring_t H5CX_get_ring(void);
 #ifdef H5_HAVE_PARALLEL
 H5_DLL hbool_t H5CX_get_coll_metadata_read(void);
 H5_DLL herr_t H5CX_get_mpi_coll_datatypes(MPI_Datatype *btype, MPI_Datatype *ftype);
 H5_DLL hbool_t H5CX_get_mpi_file_flushing(void);
+H5_DLL hbool_t H5CX_get_mpio_rank0_bcast(void);
 #endif /* H5_HAVE_PARALLEL */
 
 /* "Getter" routines for DXPL properties cached in API context */
@@ -102,6 +124,9 @@ H5_DLL herr_t H5CX_get_dt_conv_cb(H5T_conv_cb_t *cb_struct);
 /* "Getter" routines for LAPL properties cached in API context */
 H5_DLL herr_t H5CX_get_nlinks(size_t *nlinks);
 
+/* "Getter" routines for DCPL properties cached in API context */
+H5_DLL herr_t H5CX_get_dset_min_ohdr_flag(hbool_t *dset_min_ohdr_flag);
+
 /* "Setter" routines for API context info */
 H5_DLL void H5CX_set_tag(haddr_t tag);
 H5_DLL void H5CX_set_ring(H5AC_ring_t ring);
@@ -110,6 +135,7 @@ H5_DLL void H5CX_set_coll_metadata_read(hbool_t cmdr);
 H5_DLL herr_t H5CX_set_mpi_coll_datatypes(MPI_Datatype btype, MPI_Datatype ftype);
 H5_DLL herr_t H5CX_set_mpio_coll_opt(H5FD_mpio_collective_opt_t mpio_coll_opt);
 H5_DLL void H5CX_set_mpi_file_flushing(hbool_t flushing);
+H5_DLL void H5CX_set_mpio_rank0_bcast(hbool_t rank0_bcast);
 #endif /* H5_HAVE_PARALLEL */
 
 /* "Setter" routines for DXPL properties cached in API context */
@@ -135,6 +161,7 @@ H5_DLL herr_t H5CX_test_set_mpio_coll_chunk_link_num_true(int mpio_coll_chunk_li
 H5_DLL herr_t H5CX_test_set_mpio_coll_chunk_link_num_false(int mpio_coll_chunk_link_num_false);
 H5_DLL herr_t H5CX_test_set_mpio_coll_chunk_multi_ratio_coll(int mpio_coll_chunk_multi_ratio_coll);
 H5_DLL herr_t H5CX_test_set_mpio_coll_chunk_multi_ratio_ind(int mpio_coll_chunk_multi_ratio_ind);
+H5_DLL herr_t H5CX_test_set_mpio_coll_rank0_bcast(hbool_t rank0_bcast);
 #endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
 #endif /* H5_HAVE_PARALLEL */
 

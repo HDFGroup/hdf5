@@ -2070,7 +2070,7 @@ test_ooo_order(char *filename, hid_t fapl_id)
     /* Close and reopen the file */
     if(H5Tclose(dtype)) TEST_ERROR
     if(H5Fclose(file)) TEST_ERROR
-    if((file = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((file = H5Fopen(filename, H5F_ACC_RDWR, fapl_id)) < 0) TEST_ERROR
 
     /* Open the type */
     if((dtype_tmp = H5Topen2(file, "dtype", H5P_DEFAULT)) < 0) TEST_ERROR
@@ -2123,7 +2123,7 @@ test_ooo_order(char *filename, hid_t fapl_id)
     if(H5Tclose(dtype_tmp)) TEST_ERROR
     if(H5Tclose(dtype)) TEST_ERROR
     if(H5Fclose(file)) TEST_ERROR
-    if((file = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl_id)) < 0) TEST_ERROR
 
     /* Open the type, and verify status */
     if((dtype_tmp = H5Topen2(file, "dtype2", H5P_DEFAULT)) < 0) TEST_ERROR

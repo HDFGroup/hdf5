@@ -213,26 +213,26 @@ H5_bandwidth(char *buf/*out*/, double nbytes, double nseconds)
         if(H5_DBL_ABS_EQUAL(bw, (double)0.0F))
             HDstrcpy(buf, "0.000  B/s");
         else if(bw < (double)1.0F)
-            sprintf(buf, "%10.4e", bw);
+            HDsprintf(buf, "%10.4e", bw);
         else if(bw < (double)H5_KB) {
-            sprintf(buf, "%05.4f", bw);
+            HDsprintf(buf, "%05.4f", bw);
             HDstrcpy(buf+5, "  B/s");
         } else if(bw < (double)H5_MB) {
-            sprintf(buf, "%05.4f", bw / (double)H5_KB);
+            HDsprintf(buf, "%05.4f", bw / (double)H5_KB);
             HDstrcpy(buf+5, " kB/s");
         } else if(bw < (double)H5_GB) {
-            sprintf(buf, "%05.4f", bw / (double)H5_MB);
+            HDsprintf(buf, "%05.4f", bw / (double)H5_MB);
             HDstrcpy(buf+5, " MB/s");
         } else if(bw < (double)H5_TB) {
-            sprintf(buf, "%05.4f", bw / (double)H5_GB);
+            HDsprintf(buf, "%05.4f", bw / (double)H5_GB);
             HDstrcpy(buf+5, " GB/s");
         } else if(bw < (double)H5_PB) {
-            sprintf(buf, "%05.4f", bw / (double)H5_TB);
+            HDsprintf(buf, "%05.4f", bw / (double)H5_TB);
             HDstrcpy(buf+5, " TB/s");
         } else {
-            sprintf(buf, "%10.4e", bw);
+            HDsprintf(buf, "%10.4e", bw);
             if(HDstrlen(buf) > 10)
-                sprintf(buf, "%10.3e", bw);
+                HDsprintf(buf, "%10.3e", bw);
         }
     }
 } /* end H5_bandwidth() */

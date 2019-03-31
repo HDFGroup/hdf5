@@ -41,6 +41,7 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5EApkg.h"		/* Extensible Arrays			*/
 #include "H5MFprivate.h"	/* File memory management		*/
+#include "H5MMprivate.h"	/* Memory management			*/
 #include "H5VMprivate.h"	/* Vectors and arrays 			*/
 
 
@@ -407,7 +408,7 @@ H5EA__hdr_create(H5F_t *f, const H5EA_create_t *cparam, void *ctx_udata))
     hdr->idx_blk_addr = HADDR_UNDEF;
 
     /* Set the creation parameters for the array */
-    HDmemcpy(&hdr->cparam, cparam, sizeof(hdr->cparam));
+    H5MM_memcpy(&hdr->cparam, cparam, sizeof(hdr->cparam));
 
     /* Finish initializing extensible array header */
     if(H5EA__hdr_init(hdr, ctx_udata) < 0)

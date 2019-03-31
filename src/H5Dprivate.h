@@ -95,7 +95,13 @@
 /* Definitions for all collective chunk instrumentation properties */
 #define H5D_XFER_COLL_CHUNK_SIZE        sizeof(unsigned)
 #define H5D_XFER_COLL_CHUNK_DEF         1
-#define H5D_XFER_COLL_CHUNK_FIX         0
+
+/* General collective I/O instrumentation properties */
+#define H5D_XFER_COLL_RANK0_BCAST_NAME  "coll_rank0_bcast"
+
+/* Definitions for general collective I/O instrumentation properties */
+#define H5D_XFER_COLL_RANK0_BCAST_SIZE  sizeof(hbool_t)
+#define H5D_XFER_COLL_RANK0_BCAST_DEF   FALSE
 #endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
 
 /* Default temporary buffer size */

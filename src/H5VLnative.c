@@ -38,16 +38,20 @@ static H5VL_class_t H5VL_native_cls_g = {
     0,                                              /* capability flags */
     NULL,                                           /* initialize   */
     H5VL__native_term,                              /* terminate    */
-    (size_t)0,                                      /* info size    */
-    NULL,                                           /* info copy    */
-    NULL,                                           /* info compare */
-    NULL,                                           /* info free    */
-    NULL,                                           /* info to str  */
-    NULL,                                           /* str to info  */
-    NULL,                                           /* get_object   */
-    NULL,                                           /* get_wrap_ctx */
-    NULL,                                           /* wrap_object  */
-    NULL,                                           /* free_wrap_ctx */
+    {   /* info_cls */
+        (size_t)0,                                  /* info size    */
+        NULL,                                       /* info copy    */
+        NULL,                                       /* info compare */
+        NULL,                                       /* info free    */
+        NULL,                                       /* info to str  */
+        NULL                                        /* str to info  */
+    },
+    {   /* wrap_cls */
+        NULL,                                       /* get_object   */
+        NULL,                                       /* get_wrap_ctx */
+        NULL,                                       /* wrap_object  */
+        NULL                                        /* free_wrap_ctx */
+    },
     {   /* attribute_cls */
         H5VL__native_attr_create,                   /* create       */
         H5VL__native_attr_open,                     /* open         */

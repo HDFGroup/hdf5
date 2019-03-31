@@ -26,6 +26,7 @@
 /* Header files needed */
 /* (Public HDF5 and standard C / POSIX only) */
 #include <assert.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -81,15 +82,20 @@ static herr_t H5VL_pass_through_free_obj(H5VL_pass_through_t *obj);
 /* "Management" callbacks */
 static herr_t H5VL_pass_through_init(hid_t vipl_id);
 static herr_t H5VL_pass_through_term(void);
+
+/* VOL info callbacks */
 static void *H5VL_pass_through_info_copy(const void *info);
 static herr_t H5VL_pass_through_info_cmp(int *cmp_value, const void *info1, const void *info2);
 static herr_t H5VL_pass_through_info_free(void *info);
 static herr_t H5VL_pass_through_info_to_str(const void *info, char **str);
 static herr_t H5VL_pass_through_str_to_info(const char *str, void **info);
+
+/* VOL object wrap / retrieval callbacks */
 static void *H5VL_pass_through_get_object(const void *obj);
 static herr_t H5VL_pass_through_get_wrap_ctx(const void *obj, void **wrap_ctx);
 static herr_t H5VL_pass_through_free_wrap_ctx(void *obj);
-static void *H5VL_pass_through_wrap_object(void *obj, void *wrap_ctx);
+static void *H5VL_pass_through_wrap_object(void *obj, H5I_type_t obj_type,
+    void *wrap_ctx);
 
 /* Attribute callbacks */
 static void *H5VL_pass_through_attr_create(void *obj, const H5VL_loc_params_t *loc_params, const char *name, hid_t acpl_id, hid_t aapl_id, hid_t dxpl_id, void **req);
@@ -171,82 +177,86 @@ static const H5VL_class_t H5VL_pass_through_g = {
     0,                                              /* capability flags */
     H5VL_pass_through_init,                         /* initialize   */
     H5VL_pass_through_term,                         /* terminate    */
-    sizeof(H5VL_pass_through_t),                    /* info size    */
-    H5VL_pass_through_info_copy,                    /* info copy    */
-    H5VL_pass_through_info_cmp,                     /* info compare */
-    H5VL_pass_through_info_free,                    /* info free    */
-    H5VL_pass_through_info_to_str,                  /* info to str  */
-    H5VL_pass_through_str_to_info,                  /* str to info  */
-    H5VL_pass_through_get_object,                   /* get_object   */
-    H5VL_pass_through_get_wrap_ctx,                 /* get_wrap_ctx */
-    H5VL_pass_through_wrap_object,                  /* wrap_object  */
-    H5VL_pass_through_free_wrap_ctx,                /* free_wrap_ctx */
+    {                                           /* info_cls */
+        sizeof(H5VL_pass_through_info_t),           /* size    */
+        H5VL_pass_through_info_copy,                /* copy    */
+        H5VL_pass_through_info_cmp,                 /* compare */
+        H5VL_pass_through_info_free,                /* free    */
+        H5VL_pass_through_info_to_str,              /* to_str  */
+        H5VL_pass_through_str_to_info,              /* from_str */
+    },
+    {                                           /* wrap_cls */
+        H5VL_pass_through_get_object,               /* get_object   */
+        H5VL_pass_through_get_wrap_ctx,             /* get_wrap_ctx */
+        H5VL_pass_through_wrap_object,              /* wrap_object  */
+        H5VL_pass_through_free_wrap_ctx,            /* free_wrap_ctx */
+    },
     {                                           /* attribute_cls */
-        H5VL_pass_through_attr_create,                       /* create */
-        H5VL_pass_through_attr_open,                         /* open */
-        H5VL_pass_through_attr_read,                         /* read */
-        H5VL_pass_through_attr_write,                        /* write */
-        H5VL_pass_through_attr_get,                          /* get */
-        H5VL_pass_through_attr_specific,                     /* specific */
-        H5VL_pass_through_attr_optional,                     /* optional */
-        H5VL_pass_through_attr_close                         /* close */
+        H5VL_pass_through_attr_create,              /* create */
+        H5VL_pass_through_attr_open,                /* open */
+        H5VL_pass_through_attr_read,                /* read */
+        H5VL_pass_through_attr_write,               /* write */
+        H5VL_pass_through_attr_get,                 /* get */
+        H5VL_pass_through_attr_specific,            /* specific */
+        H5VL_pass_through_attr_optional,            /* optional */
+        H5VL_pass_through_attr_close                /* close */
     },
     {                                           /* dataset_cls */
-        H5VL_pass_through_dataset_create,                    /* create */
-        H5VL_pass_through_dataset_open,                      /* open */
-        H5VL_pass_through_dataset_read,                      /* read */
-        H5VL_pass_through_dataset_write,                     /* write */
-        H5VL_pass_through_dataset_get,                       /* get */
-        H5VL_pass_through_dataset_specific,                  /* specific */
-        H5VL_pass_through_dataset_optional,                  /* optional */
-        H5VL_pass_through_dataset_close                      /* close */
+        H5VL_pass_through_dataset_create,           /* create */
+        H5VL_pass_through_dataset_open,             /* open */
+        H5VL_pass_through_dataset_read,             /* read */
+        H5VL_pass_through_dataset_write,            /* write */
+        H5VL_pass_through_dataset_get,              /* get */
+        H5VL_pass_through_dataset_specific,         /* specific */
+        H5VL_pass_through_dataset_optional,         /* optional */
+        H5VL_pass_through_dataset_close             /* close */
     },
-    {                                               /* datatype_cls */
-        H5VL_pass_through_datatype_commit,                   /* commit */
-        H5VL_pass_through_datatype_open,                     /* open */
-        H5VL_pass_through_datatype_get,                      /* get_size */
-        H5VL_pass_through_datatype_specific,                 /* specific */
-        H5VL_pass_through_datatype_optional,                 /* optional */
-        H5VL_pass_through_datatype_close                     /* close */
+    {                                           /* datatype_cls */
+        H5VL_pass_through_datatype_commit,          /* commit */
+        H5VL_pass_through_datatype_open,            /* open */
+        H5VL_pass_through_datatype_get,             /* get_size */
+        H5VL_pass_through_datatype_specific,        /* specific */
+        H5VL_pass_through_datatype_optional,        /* optional */
+        H5VL_pass_through_datatype_close            /* close */
     },
     {                                           /* file_cls */
-        H5VL_pass_through_file_create,                       /* create */
-        H5VL_pass_through_file_open,                         /* open */
-        H5VL_pass_through_file_get,                          /* get */
-        H5VL_pass_through_file_specific,                     /* specific */
-        H5VL_pass_through_file_optional,                     /* optional */
-        H5VL_pass_through_file_close                         /* close */
+        H5VL_pass_through_file_create,              /* create */
+        H5VL_pass_through_file_open,                /* open */
+        H5VL_pass_through_file_get,                 /* get */
+        H5VL_pass_through_file_specific,            /* specific */
+        H5VL_pass_through_file_optional,            /* optional */
+        H5VL_pass_through_file_close                /* close */
     },
     {                                           /* group_cls */
-        H5VL_pass_through_group_create,                      /* create */
-        H5VL_pass_through_group_open,                        /* open */
-        H5VL_pass_through_group_get,                         /* get */
-        H5VL_pass_through_group_specific,                    /* specific */
-        H5VL_pass_through_group_optional,                    /* optional */
-        H5VL_pass_through_group_close                        /* close */
+        H5VL_pass_through_group_create,             /* create */
+        H5VL_pass_through_group_open,               /* open */
+        H5VL_pass_through_group_get,                /* get */
+        H5VL_pass_through_group_specific,           /* specific */
+        H5VL_pass_through_group_optional,           /* optional */
+        H5VL_pass_through_group_close               /* close */
     },
     {                                           /* link_cls */
-        H5VL_pass_through_link_create,                       /* create */
-        H5VL_pass_through_link_copy,                         /* copy */
-        H5VL_pass_through_link_move,                         /* move */
-        H5VL_pass_through_link_get,                          /* get */
-        H5VL_pass_through_link_specific,                     /* specific */
-        H5VL_pass_through_link_optional,                     /* optional */
+        H5VL_pass_through_link_create,              /* create */
+        H5VL_pass_through_link_copy,                /* copy */
+        H5VL_pass_through_link_move,                /* move */
+        H5VL_pass_through_link_get,                 /* get */
+        H5VL_pass_through_link_specific,            /* specific */
+        H5VL_pass_through_link_optional,            /* optional */
     },
     {                                           /* object_cls */
-        H5VL_pass_through_object_open,                       /* open */
-        H5VL_pass_through_object_copy,                       /* copy */
-        H5VL_pass_through_object_get,                        /* get */
-        H5VL_pass_through_object_specific,                   /* specific */
-        H5VL_pass_through_object_optional,                   /* optional */
+        H5VL_pass_through_object_open,              /* open */
+        H5VL_pass_through_object_copy,              /* copy */
+        H5VL_pass_through_object_get,               /* get */
+        H5VL_pass_through_object_specific,          /* specific */
+        H5VL_pass_through_object_optional,          /* optional */
     },
     {                                           /* request_cls */
-        H5VL_pass_through_request_wait,                      /* wait */
-        H5VL_pass_through_request_notify,                    /* notify */
-        H5VL_pass_through_request_cancel,                    /* cancel */
-        H5VL_pass_through_request_specific,                  /* specific */
-        H5VL_pass_through_request_optional,                  /* optional */
-        H5VL_pass_through_request_free                       /* free */
+        H5VL_pass_through_request_wait,             /* wait */
+        H5VL_pass_through_request_notify,           /* notify */
+        H5VL_pass_through_request_cancel,           /* cancel */
+        H5VL_pass_through_request_specific,         /* specific */
+        H5VL_pass_through_request_optional,         /* optional */
+        H5VL_pass_through_request_free              /* free */
     },
     NULL                                        /* optional */
 };
@@ -659,7 +669,7 @@ H5VL_pass_through_get_wrap_ctx(const void *obj, void **wrap_ctx)
  *---------------------------------------------------------------------------
  */
 static void *
-H5VL_pass_through_wrap_object(void *obj, void *_wrap_ctx)
+H5VL_pass_through_wrap_object(void *obj, H5I_type_t obj_type, void *_wrap_ctx)
 {
     H5VL_pass_through_wrap_ctx_t *wrap_ctx = (H5VL_pass_through_wrap_ctx_t *)_wrap_ctx;
     H5VL_pass_through_t *new_obj;
@@ -670,7 +680,7 @@ H5VL_pass_through_wrap_object(void *obj, void *_wrap_ctx)
 #endif
 
     /* Wrap the object with the underlying VOL */
-    under = H5VLwrap_object(obj, wrap_ctx->under_vol_id, wrap_ctx->under_wrap_ctx);
+    under = H5VLwrap_object(obj, obj_type, wrap_ctx->under_vol_id, wrap_ctx->under_wrap_ctx);
     if(under)
         new_obj = H5VL_pass_through_new_obj(under, wrap_ctx->under_vol_id);
     else

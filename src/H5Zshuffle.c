@@ -210,7 +210,7 @@ H5Z_filter_shuffle(unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
             if(leftover>0) {
                 /* Adjust back to end of shuffled bytes */
                 _dest -= (bytesoftype - 1);     /*lint !e794 _dest is initialized */
-                HDmemcpy((void*)_dest, (void*)_src, leftover);
+                H5MM_memcpy((void*)_dest, (void*)_src, leftover);
             }
         } /* end if */
         else {
@@ -268,7 +268,7 @@ H5Z_filter_shuffle(unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
             if(leftover>0) {
                 /* Adjust back to end of shuffled bytes */
                 _src -= (bytesoftype - 1);      /*lint !e794 _src is initialized */
-                HDmemcpy((void*)_dest, (void*)_src, leftover);
+                H5MM_memcpy((void*)_dest, (void*)_src, leftover);
             }
         } /* end else */
 
