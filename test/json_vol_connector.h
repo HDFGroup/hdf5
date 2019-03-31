@@ -17,6 +17,7 @@
 #ifndef _json_vol_connector_H
 #define _json_vol_connector_H
 
+#define JSON_VOL_CONNECTOR_VERSION  1
 #define JSON_VOL_CONNECTOR_VALUE    ((H5VL_class_value_t)104)
 #define JSON_VOL_CONNECTOR_NAME     "json_vol_connector"
 
