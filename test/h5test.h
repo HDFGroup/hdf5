@@ -102,7 +102,7 @@ H5TEST_DLLVAR MPI_Info h5_io_info_g;         /* MPI INFO object for IO */
  * the H5_FAILED() macro is invoked automatically when an API function fails.
  */
 #define TESTING(WHAT)  {printf("Testing %-62s",WHAT); fflush(stdout);}
-#define TESTING_2(WHAT)  {printf(" Testing %-62s",WHAT); fflush(stdout);}
+#define TESTING_2(WHAT)  {printf("  Testing %-60s",WHAT); fflush(stdout);}
 #define PASSED()  {puts(" PASSED");fflush(stdout);}
 #define H5_FAILED()  {puts("*FAILED*");fflush(stdout);}
 #define H5_WARNING()  {puts("*WARNING*");fflush(stdout);}
@@ -121,6 +121,11 @@ H5TEST_DLLVAR MPI_Info h5_io_info_g;         /* MPI INFO object for IO */
 #define ALARM_ON  TestAlarmOn()
 #define ALARM_OFF  HDalarm(0)
 
+/* Flags for h5_fileaccess_flags() */
+#define H5_FILEACCESS_VFD       0x01
+#define H5_FILEACCESS_VOL       0x02
+#define H5_FILEACCESS_LIBVER    0x04
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -132,6 +137,7 @@ H5TEST_DLL char *h5_fixname(const char *base_name, hid_t fapl, char *fullname, s
 H5TEST_DLL char *h5_fixname_no_suffix(const char *base_name, hid_t fapl, char *fullname, size_t size);
 H5TEST_DLL char *h5_fixname_printf(const char *base_name, hid_t fapl, char *fullname, size_t size);
 H5TEST_DLL hid_t h5_fileaccess(void);
+H5TEST_DLL hid_t h5_fileaccess_flags(unsigned flags);
 H5TEST_DLL void h5_no_hwconv(void);
 H5TEST_DLL const char *h5_rmprefix(const char *filename);
 H5TEST_DLL void h5_reset(void);

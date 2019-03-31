@@ -745,7 +745,7 @@ if(H5FD_mpio_Debug[(int)'t'])
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Copy the general information */
-    HDmemcpy(new_fa, old_fa, sizeof(H5FD_mpio_fapl_t));
+    H5MM_memcpy(new_fa, old_fa, sizeof(H5FD_mpio_fapl_t));
 
     /* Duplicate communicator and Info object. */
     if(H5FD_mpi_comm_info_dup(old_fa->comm, old_fa->info, &new_fa->comm, &new_fa->info) < 0)
@@ -1354,6 +1354,7 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type,
     int         n;
 #endif
     hbool_t     use_view_this_time = FALSE;
+    hbool_t     rank0_bcast = FALSE; /* If read-with-rank0-and-bcast flag was used */
     herr_t      ret_value = SUCCEED;
 
     FUNC_ENTER_STATIC
@@ -1437,8 +1438,25 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type,
             if(H5FD_mpio_Debug[(int)'r'])
                 HDfprintf(stdout, "%s: doing MPI collective IO\n", FUNC);
 #endif
-            if(MPI_SUCCESS != (mpi_code = MPI_File_read_at_all(file->f, mpi_off, buf, size_i, buf_type, &mpi_stat)))
-                HMPI_GOTO_ERROR(FAIL, "MPI_File_read_at_all failed", mpi_code)
+            /* Check whether we should read from rank 0 and broadcast to other ranks */
+            if(H5CX_get_mpio_rank0_bcast()) {
+#ifdef H5FDmpio_DEBUG
+                if(H5FD_mpio_Debug[(int)'r'])
+                    HDfprintf(stdout, "%s: doing read-rank0-and-MPI_Bcast\n", FUNC);
+#endif
+                /* Indicate path we've taken */
+                rank0_bcast = TRUE;
+
+                /* Read on rank 0 Bcast to other ranks */
+                if(file->mpi_rank == 0)
+                    if(MPI_SUCCESS != (mpi_code = MPI_File_read_at(file->f, mpi_off, buf, size_i, buf_type, &mpi_stat)))
+                        HMPI_GOTO_ERROR(FAIL, "MPI_File_read_at failed", mpi_code)
+                if(MPI_SUCCESS != (mpi_code = MPI_Bcast(buf, size_i, buf_type, 0, file->comm)))
+                    HMPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", mpi_code)
+            } /* end if */
+            else
+                if(MPI_SUCCESS != (mpi_code = MPI_File_read_at_all(file->f, mpi_off, buf, size_i, buf_type, &mpi_stat)))
+                    HMPI_GOTO_ERROR(FAIL, "MPI_File_read_at_all failed", mpi_code)
         } /* end if */
         else {
 #ifdef H5FDmpio_DEBUG
@@ -1460,13 +1478,26 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type,
         if(MPI_SUCCESS != (mpi_code = MPI_File_read_at(file->f, mpi_off, buf, size_i, buf_type, &mpi_stat)))
             HMPI_GOTO_ERROR(FAIL, "MPI_File_read_at failed", mpi_code)
 
-    /* How many bytes were actually read? */
+    /* Only retrieve bytes read if this rank _actually_ participated in I/O */
+    if(!rank0_bcast || (rank0_bcast && file->mpi_rank == 0) ) {
+        /* How many bytes were actually read? */
 #if MPI_VERSION >= 3
-    if(MPI_SUCCESS != (mpi_code = MPI_Get_elements_x(&mpi_stat, buf_type, &bytes_read)))
+        if(MPI_SUCCESS != (mpi_code = MPI_Get_elements_x(&mpi_stat, buf_type, &bytes_read)))
 #else
-    if(MPI_SUCCESS != (mpi_code = MPI_Get_elements(&mpi_stat, MPI_BYTE, &bytes_read)))
+        if(MPI_SUCCESS != (mpi_code = MPI_Get_elements(&mpi_stat, MPI_BYTE, &bytes_read)))
 #endif
-        HMPI_GOTO_ERROR(FAIL, "MPI_Get_elements failed", mpi_code)
+            HMPI_GOTO_ERROR(FAIL, "MPI_Get_elements failed", mpi_code)
+    } /* end if */
+ 
+    /* If the rank0-bcast feature was used, broadcast the # of bytes read to
+     * other ranks, which didn't perform any I/O.
+     */
+    /* NOTE: This could be optimized further to be combined with the broadcast
+     *          of the data.  (QAK - 2019/1/2)
+     */
+    if(rank0_bcast)
+        if(MPI_SUCCESS != MPI_Bcast(&bytes_read, 1, MPI_LONG_LONG, 0, file->comm))
+            HMPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", 0)
 
     /* Get the type's size */
 #if MPI_VERSION >= 3

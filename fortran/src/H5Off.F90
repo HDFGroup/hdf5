@@ -69,6 +69,15 @@ MODULE H5O
      TYPE(mesg_t)   :: mesg
   END TYPE hdr_t
 
+  TYPE, BIND(C) :: c_hdr_t
+     INTEGER(C_INT) :: version ! Version number of header format in file
+     INTEGER(C_INT) :: nmesgs  ! Number of object header messages
+     INTEGER(C_INT) :: nchunks ! Number of object header chunks
+     INTEGER(C_INT) :: flags   ! Object header status flags
+     TYPE(space_t)  :: space   
+     TYPE(mesg_t)   :: mesg
+  END TYPE c_hdr_t
+
   ! Extra metadata storage for obj & attributes
   TYPE, BIND(C) :: H5_ih_info_t
      INTEGER(hsize_t) :: index_size ! btree and/or list
@@ -83,7 +92,7 @@ MODULE H5O
   TYPE, BIND(C) :: h5o_info_t
      INTEGER(C_LONG)  :: fileno     ! File number that object is located in
      INTEGER(haddr_t) :: addr       ! Object address in file  
-     INTEGER(C_INT)   :: type       ! Basic object type (group, dataset, etc.) 
+     INTEGER(C_INT)   :: type       ! Basic object type (group, dataset, etc.)
      INTEGER          :: rc         ! Reference count of object
 
      INTEGER, DIMENSION(8) :: atime ! Access time         !    -- NOTE --
@@ -97,6 +106,28 @@ MODULE H5O
 
      TYPE(meta_size_t) :: meta_size
   END TYPE h5o_info_t
+
+! C interoperable structure for h5o_info_t. The Fortran derived type returns the time
+! values as an integer array as specified in the Fortran intrinsic DATE_AND_TIME(VALUES).
+! Whereas, this derived type does not.
+
+  TYPE, BIND(C) :: c_h5o_info_t
+     INTEGER(C_LONG)  :: fileno     ! File number that object is located in
+     INTEGER(haddr_t) :: addr       ! Object address in file  
+     INTEGER(C_INT)   :: type       ! Basic object type (group, dataset, etc.)
+     INTEGER(C_INT)   :: rc         ! Reference count of object
+
+     INTEGER(KIND=TIME_T) :: atime ! Access time
+     INTEGER(KIND=TIME_T) :: mtime ! modify time
+     INTEGER(KIND=TIME_T) :: ctime ! create time
+     INTEGER(KIND=TIME_T) :: btime ! Access time
+
+     INTEGER(hsize_t) :: num_attrs  ! # of attributes attached to object
+
+     TYPE(c_hdr_t) :: hdr
+
+     TYPE(meta_size_t) :: meta_size
+  END TYPE c_h5o_info_t
 
 !*****
 
@@ -834,12 +865,16 @@ CONTAINS
 !  return_value - returns the return value of the first operator that returns a positive value, or 
 !                 zero if all members were processed with no operator returning non-zero.
 !  hdferr       - Returns 0 if successful and -1 if fails
+!
+! Optional parameters:
+!  fields      - Flags specifying the fields to include in object_info.
+!
 ! AUTHOR
 !  M. Scot Breitenfeld
 !  November 19, 2008
 !
 ! Fortran2003 Interface:
-  SUBROUTINE h5ovisit_f(object_id, index_type, order, op, op_data, return_value, hdferr)
+  SUBROUTINE h5ovisit_f(object_id, index_type, order, op, op_data, return_value, hdferr, fields)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: object_id
     INTEGER, INTENT(IN) :: index_type 
@@ -849,10 +884,12 @@ CONTAINS
     TYPE(C_PTR)   :: op_data
     INTEGER, INTENT(OUT) :: return_value
     INTEGER, INTENT(OUT) :: hdferr
+    INTEGER, INTENT(IN), OPTIONAL  :: fields 
 !*****
+    INTEGER :: fields_c
 
     INTERFACE
-       INTEGER FUNCTION h5ovisit_c(object_id, index_type, order, op, op_data) &
+       INTEGER FUNCTION h5ovisit_c(object_id, index_type, order, op, op_data, fields) &
             BIND(C, NAME='h5ovisit_c')
          IMPORT :: C_FUNPTR, C_PTR
          IMPORT :: HID_T
@@ -862,10 +899,14 @@ CONTAINS
          INTEGER, INTENT(IN) :: order
          TYPE(C_FUNPTR), VALUE :: op
          TYPE(C_PTR), VALUE :: op_data
+         INTEGER, INTENT(IN) :: fields
        END FUNCTION h5ovisit_c
     END INTERFACE
 
-    return_value = h5ovisit_c(object_id, index_type, order, op, op_data)
+    fields_c = H5O_INFO_ALL_F
+    IF(PRESENT(fields)) fields_c = fields
+
+    return_value = h5ovisit_c(object_id, index_type, order, op, op_data, fields_c)
 
     IF(return_value.GE.0)THEN
        hdferr = 0
@@ -894,26 +935,29 @@ CONTAINS
 !
 ! Optional parameters:
 !  lapl_id     - Link access property list.
+!  fields      - Flags specifying the fields to include in object_info.
 !
 ! AUTHOR
 !  M. Scot Breitenfeld
 !  December 1, 2008
 !
 ! Fortran2003 Interface:
-  SUBROUTINE h5oget_info_by_name_f(loc_id, name, object_info, hdferr, lapl_id)
+  SUBROUTINE h5oget_info_by_name_f(loc_id, name, object_info, hdferr, lapl_id, fields)
     IMPLICIT NONE
     INTEGER(HID_T)  , INTENT(IN)            :: loc_id
     CHARACTER(LEN=*), INTENT(IN)            :: name
     TYPE(h5o_info_t), INTENT(OUT), TARGET   :: object_info
     INTEGER         , INTENT(OUT)           :: hdferr
     INTEGER(HID_T)  , INTENT(IN) , OPTIONAL :: lapl_id
+    INTEGER         , INTENT(IN) , OPTIONAL :: fields 
 !*****
     INTEGER(SIZE_T) :: namelen
     INTEGER(HID_T)  :: lapl_id_default
     TYPE(C_PTR)     :: ptr
+    INTEGER :: fields_c
     
     INTERFACE
-       INTEGER FUNCTION h5oget_info_by_name_c(loc_id, name, namelen, lapl_id_default, object_info) &
+       INTEGER FUNCTION h5oget_info_by_name_c(loc_id, name, namelen, lapl_id_default, object_info, fields) &
             BIND(C, NAME='h5oget_info_by_name_c')
          IMPORT :: c_char, c_ptr
          IMPORT :: HID_T, SIZE_T
@@ -923,9 +967,12 @@ CONTAINS
          INTEGER(SIZE_T) , INTENT(IN)  :: namelen
          INTEGER(HID_T)  , INTENT(IN)  :: lapl_id_default
          TYPE(C_PTR),VALUE             :: object_info
-
+         INTEGER         , INTENT(IN)  :: fields
        END FUNCTION h5oget_info_by_name_c
     END INTERFACE
+
+    fields_c = H5O_INFO_ALL_F
+    IF(PRESENT(fields)) fields_c = fields
 
     namelen = LEN(name)
 
@@ -934,7 +981,7 @@ CONTAINS
 
     ptr = C_LOC(object_info)
 
-    hdferr = H5Oget_info_by_name_c(loc_id, name, namelen, lapl_id_default, ptr)
+    hdferr = H5Oget_info_by_name_c(loc_id, name, namelen, lapl_id_default, ptr, fields_c)
 
   END SUBROUTINE H5Oget_info_by_name_f
 
@@ -953,34 +1000,43 @@ CONTAINS
 !  object_info - Buffer in which to return object information.
 !  hdferr      - Returns 0 if successful and -1 if fails.
 !
+! Optional parameters:
+!  fields      - Flags specifying the fields to include in object_info.
+!
 ! AUTHOR
 !  M. Scot Breitenfeld
 !  May 11, 2012
 !
 ! Fortran2003 Interface:
-  SUBROUTINE h5oget_info_f(object_id, object_info, hdferr)
+  SUBROUTINE h5oget_info_f(object_id, object_info, hdferr, fields)
 
     USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T)  , INTENT(IN)            :: object_id
     TYPE(h5o_info_t), INTENT(OUT), TARGET   :: object_info
     INTEGER         , INTENT(OUT)           :: hdferr
+    INTEGER         , INTENT(IN), OPTIONAL  :: fields 
 !*****
     TYPE(C_PTR) :: ptr
-    
+    INTEGER :: fields_c
+
     INTERFACE
-       INTEGER FUNCTION h5oget_info_c(object_id, object_info) &
+       INTEGER FUNCTION h5oget_info_c(object_id, object_info, fields) &
             BIND(C, NAME='h5oget_info_c')
          IMPORT :: C_PTR
          IMPORT :: HID_T
          IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN)  :: object_id
          TYPE(C_PTR), VALUE          :: object_info
+         INTEGER, INTENT(IN)         :: fields
        END FUNCTION h5oget_info_c
     END INTERFACE
 
+    fields_c = H5O_INFO_ALL_F
+    IF(PRESENT(fields)) fields_c = fields
+
     ptr = C_LOC(object_info)
-    hdferr = H5Oget_info_c(object_id, ptr)
+    hdferr = H5Oget_info_c(object_id, ptr, fields_c)
 
   END SUBROUTINE H5Oget_info_f
 
@@ -1006,6 +1062,7 @@ CONTAINS
 !
 ! Optional parameters:
 !  lapl_id     - Link access property list. (Not currently used.)
+!  fields      - Flags specifying the fields to include in object_info.
 !
 ! AUTHOR
 !  M. Scot Breitenfeld
@@ -1013,7 +1070,7 @@ CONTAINS
 !
 ! Fortran2003 Interface:
   SUBROUTINE h5oget_info_by_idx_f(loc_id, group_name, index_field, order, n, &
-       object_info, hdferr, lapl_id)
+       object_info, hdferr, lapl_id, fields)
 
     USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
@@ -1025,14 +1082,16 @@ CONTAINS
     TYPE(h5o_info_t), INTENT(OUT), TARGET   :: object_info
     INTEGER         , INTENT(OUT)           :: hdferr
     INTEGER(HID_T)  , INTENT(IN) , OPTIONAL :: lapl_id
+    INTEGER         , INTENT(IN) , OPTIONAL :: fields 
 !*****
     INTEGER(SIZE_T) :: namelen
     INTEGER(HID_T)  :: lapl_id_default
     TYPE(C_PTR)     :: ptr
+    INTEGER         :: fields_c
     
     INTERFACE
        INTEGER FUNCTION h5oget_info_by_idx_c(loc_id, group_name, namelen, &
-            index_field, order, n, lapl_id_default, object_info) BIND(C, NAME='h5oget_info_by_idx_c')
+            index_field, order, n, lapl_id_default, object_info, fields) BIND(C, NAME='h5oget_info_by_idx_c')
          IMPORT :: c_char, c_ptr, c_funptr
          IMPORT :: HID_T, SIZE_T, HSIZE_T
          INTEGER(HID_T)  , INTENT(IN)  :: loc_id
@@ -1043,9 +1102,12 @@ CONTAINS
          INTEGER(HSIZE_T), INTENT(IN)  :: n
          INTEGER(HID_T)  , INTENT(IN)  :: lapl_id_default
          TYPE(C_PTR), VALUE            :: object_info
-
+         INTEGER, INTENT(IN)           :: fields
        END FUNCTION h5oget_info_by_idx_c
     END INTERFACE
+
+    fields_c = H5O_INFO_ALL_F
+    IF(PRESENT(fields)) fields_c = fields
 
     namelen = LEN(group_name)
 
@@ -1053,7 +1115,7 @@ CONTAINS
     IF(PRESENT(lapl_id)) lapl_id_default = lapl_id
 
     ptr = C_LOC(object_info)
-    hdferr = H5Oget_info_by_idx_c(loc_id, group_name, namelen, index_field, order, n, lapl_id_default, ptr)
+    hdferr = H5Oget_info_by_idx_c(loc_id, group_name, namelen, index_field, order, n, lapl_id_default, ptr, fields_c)
 
   END SUBROUTINE H5Oget_info_by_idx_f
 
@@ -1086,6 +1148,7 @@ CONTAINS
 !
 ! Optional parameters:
 !  lapl_id      - Link access property list identifier.
+!  fields       - Flags specifying the fields to include in object_info.
 !
 ! AUTHOR
 !  M. Scot Breitenfeld
@@ -1093,7 +1156,7 @@ CONTAINS
 !
 ! Fortran2003 Interface:
   SUBROUTINE h5ovisit_by_name_f(loc_id, object_name, index_type, order, op, op_data, &
-       return_value, hdferr, lapl_id)
+       return_value, hdferr, lapl_id, fields)
     IMPLICIT NONE
     INTEGER(HID_T)  , INTENT(IN)             :: loc_id
     CHARACTER(LEN=*), INTENT(IN)             :: object_name
@@ -1105,14 +1168,16 @@ CONTAINS
     INTEGER         , INTENT(OUT)            :: return_value
     INTEGER         , INTENT(OUT)            :: hdferr
     INTEGER(HID_T)  , INTENT(IN) , OPTIONAL  :: lapl_id
+    INTEGER         , INTENT(IN) , OPTIONAL  :: fields 
 !*****
 
     INTEGER(SIZE_T) :: namelen
     INTEGER(HID_T)  :: lapl_id_default
+    INTEGER :: fields_c
 
     INTERFACE
        INTEGER FUNCTION h5ovisit_by_name_c(loc_id, object_name, namelen, index_type, order, &
-            op, op_data, lapl_id) BIND(C, NAME='h5ovisit_by_name_c')
+            op, op_data, lapl_id, fields) BIND(C, NAME='h5ovisit_by_name_c')
          IMPORT :: C_CHAR, C_PTR, C_FUNPTR
          IMPORT :: HID_T, SIZE_T
          IMPLICIT NONE
@@ -1124,8 +1189,12 @@ CONTAINS
          TYPE(C_FUNPTR)  , VALUE      :: op
          TYPE(C_PTR)     , VALUE      :: op_data
          INTEGER(HID_T)  , INTENT(IN) :: lapl_id
+         INTEGER         , INTENT(IN) :: fields
        END FUNCTION h5ovisit_by_name_c
     END INTERFACE
+
+    fields_c = H5O_INFO_ALL_F
+    IF(PRESENT(fields)) fields_c = fields
 
     namelen = LEN(object_name)
 
@@ -1133,7 +1202,7 @@ CONTAINS
     IF(PRESENT(lapl_id)) lapl_id_default = lapl_id
 
     return_value = h5ovisit_by_name_c(loc_id, object_name, namelen, index_type, order, &
-         op, op_data, lapl_id_default)
+         op, op_data, lapl_id_default, fields_c)
 
     IF(return_value.GE.0)THEN
        hdferr = 0

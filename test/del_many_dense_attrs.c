@@ -163,7 +163,7 @@ main(void)
         TEST_ERROR
 
     /* Open the group */
-    if((gid = H5Gopen(fid, "group", H5P_DEFAULT)) < 0)
+    if((gid = H5Gopen2(fid, "group", H5P_DEFAULT)) < 0)
         TEST_ERROR
 
     /* Delete the attributes */

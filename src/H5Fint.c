@@ -76,7 +76,7 @@ typedef struct H5F_olist_t {
 /* Local Prototypes */
 /********************/
 
-static herr_t H5F__set_vol_conn(H5F_t *file, hid_t vol_id, const void *vol_info);
+static herr_t H5F__set_vol_conn(H5F_t *file);
 static herr_t H5F__get_objects(const H5F_t *f, unsigned types, size_t max_index, hid_t *obj_id_list, hbool_t app_ref, size_t *obj_id_count_ptr);
 static int H5F__get_objects_cb(void *obj_ptr, hid_t obj_id, void *key);
 static herr_t H5F__build_name(const char *prefix, const char *file_name, char **full_name/*out*/);
@@ -119,8 +119,9 @@ H5FL_DEFINE(H5F_file_t);
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F__set_vol_conn(H5F_t *file, hid_t vol_id, const void *vol_info)
+H5F__set_vol_conn(H5F_t *file)
 {
+    H5VL_connector_prop_t connector_prop; /* Property for VOL connector ID & info */
     void *new_connector_info = NULL;    /* Copy of connector info */
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -129,21 +130,30 @@ H5F__set_vol_conn(H5F_t *file, hid_t vol_id, const void *vol_info)
     /* Sanity check */
     HDassert(file);
 
+    /* Retrieve a copy of the "top-level" connector property, before any pass-through
+     *  connectors modified or unwrapped it.
+     */
+    if(H5CX_get_vol_connector_prop(&connector_prop) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get VOL connector info from API context")
+
+    /* Sanity check */
+    HDassert(0 != connector_prop.connector_id);
+
     /* Copy connector info, if it exists */
-    if(vol_info) {
+    if(connector_prop.connector_info) {
         H5VL_class_t *connector;           /* Pointer to connector */
 
         /* Retrieve the connector for the ID */
-        if(NULL == (connector = (H5VL_class_t *)H5I_object(vol_id)))
+        if(NULL == (connector = (H5VL_class_t *)H5I_object(connector_prop.connector_id)))
             HGOTO_ERROR(H5E_FILE, H5E_BADTYPE, FAIL, "not a VOL connector ID")
 
         /* Allocate and copy connector info */
-        if(H5VL_copy_connector_info(connector, &new_connector_info, vol_info) < 0)
+        if(H5VL_copy_connector_info(connector, &new_connector_info, connector_prop.connector_info) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTCOPY, FAIL, "connector info copy failed")
     } /* end if */
 
     /* Cache the connector ID & info for the container */
-    file->shared->vol_id = vol_id;
+    file->shared->vol_id = connector_prop.connector_id;
     file->shared->vol_info = new_connector_info;
     if(H5I_inc_ref(file->shared->vol_id, FALSE) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINC, FAIL, "incrementing VOL connector ID failed")
@@ -792,14 +802,12 @@ H5F_prefix_open_file(H5F_t *primary_file, H5F_prefix_open_t prefix_type,
 
         /* get last component of file_name */
         H5_GET_LAST_DELIMITER(actual_file_name, ptr)
-        if(!ptr)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file, file name = '%s', temp_file_name = '%s'", file_name, temp_file_name)
-
-        /* Truncate filename portion from actual file name path */
-        *ptr = '\0';
+        if(ptr)
+            /* Truncate filename portion from actual file name path */
+            *ptr = '\0';
 
         /* Build new file name for the external file */
-        if(H5F__build_name(actual_file_name, temp_file_name, &full_name/*out*/) < 0)
+        if(H5F__build_name((ptr ? actual_file_name : ""), temp_file_name, &full_name/*out*/) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't prepend prefix to filename")
         actual_file_name = (char *)H5MM_xfree(actual_file_name);
 
@@ -815,7 +823,7 @@ H5F_prefix_open_file(H5F_t *primary_file, H5F_prefix_open_t prefix_type,
             H5E_clear_stack(NULL);
     } /* end if */
 
-    /* Success */
+    /* Set return value (possibly NULL or valid H5F_t *) */
     ret_value = src_file;
 
 done:
@@ -1090,14 +1098,8 @@ H5F__new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't get object flush cb info")
 
         /* Get the VOL connector info */
-        {
-            H5VL_connector_prop_t  connector_prop;      /* Property for VOL connector ID & info */
-
-            if(H5P_peek(plist, H5F_ACS_VOL_CONN_NAME, &connector_prop) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't get VOL connector info")
-            if(H5F__set_vol_conn(f, connector_prop.connector_id, connector_prop.connector_info) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't cache VOL connector info")
-        } /* end block */
+        if(H5F__set_vol_conn(f) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't cache VOL connector info")
 
         /* Create a metadata cache with the specified number of elements.
          * The cache might be created with a different number of elements and
@@ -3252,7 +3254,7 @@ H5F_get_metadata_read_retry_info(H5F_t *file, H5F_retry_info_t *info)
                         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
                     /* Copy the information */
-                    HDmemcpy(info->retries[j], file->shared->retries[i], tot_size);
+                    H5MM_memcpy(info->retries[j], file->shared->retries[i], tot_size);
                 }
 
                 /* Increment location in info->retries[] array */

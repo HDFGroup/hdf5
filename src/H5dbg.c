@@ -113,7 +113,7 @@ H5_buffer_dump(FILE *stream, int indent, const uint8_t *buf,
 		} /* end else */
 	    } /* end if */
             else
-		fprintf(stream, "   ");
+		HDfprintf(stream, "   ");
 	    if(7 == v)
 		HDfputc(' ', stream);
 	} /* end for */

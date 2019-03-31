@@ -28,6 +28,7 @@ typedef struct H5F_t H5F_t;
 #include "H5FDpublic.h"        /* File drivers                */
 
 /* Private headers needed by this file */
+#include "H5MMprivate.h"	/* Memory management			*/
 #ifdef H5_HAVE_PARALLEL
 #include "H5Pprivate.h"        /* Property lists            */
 #endif /* H5_HAVE_PARALLEL */
@@ -134,7 +135,7 @@ typedef struct H5F_t H5F_t;
                                         \
     HDcompile_assert(sizeof(double) == 8);                      \
     HDcompile_assert(sizeof(double) == sizeof(uint64_t));              \
-    HDmemcpy(&_n, &n, sizeof(double));                          \
+    H5MM_memcpy(&_n, &n, sizeof(double));                          \
     for(_u = 0; _u < sizeof(uint64_t); _u++, _n >>= 8)                  \
         *_p++ = (uint8_t)(_n & 0xff);                          \
     (p) = (uint8_t *)(p) + 8;                              \
@@ -240,7 +241,7 @@ typedef struct H5F_t H5F_t;
     (p) += 8;                                      \
     for(_u = 0; _u < sizeof(uint64_t); _u++)                      \
         _n = (_n << 8) | *(--p);                          \
-    HDmemcpy(&(n), &_n, sizeof(double));                          \
+    H5MM_memcpy(&(n), &_n, sizeof(double));                          \
     (p) += 8;                                      \
 }
 

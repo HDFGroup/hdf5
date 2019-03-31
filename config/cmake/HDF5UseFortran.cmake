@@ -57,8 +57,8 @@ endmacro ()
 
 # Read source line beginning at the line matching Input:"START" and ending at the line matching Input:"END"
 macro (READ_SOURCE SOURCE_START SOURCE_END RETURN_VAR)
-  file (READ "${HDF5_SOURCE_DIR}/m4/aclocal_fc.f90" SOURCE_CODE)
-  string (REGEX MATCH "${SOURCE_START}[\\\t\\\n\\\r[].+]*${SOURCE_END}" SOURCE_CODE ${SOURCE_CODE})
+  file (READ "${HDF5_SOURCE_DIR}/m4/aclocal_fc.f90" SOURCE_MASTER)
+  string (REGEX MATCH "${SOURCE_START}[\\\t\\\n\\\r[].+]*${SOURCE_END}" SOURCE_CODE ${SOURCE_MASTER})
   set (RETURN_VAR "${SOURCE_CODE}")
 endmacro ()
 
@@ -234,7 +234,7 @@ foreach (KIND ${VAR} )
   set (pack_real_sizeof "${pack_real_sizeof} ${PROG_OUTPUT1},")
 endforeach ()
 
-if (pack_int_sizeof STREQUAL "")
+if (pack_real_sizeof STREQUAL "")
    message (FATAL_ERROR "Failed to find available REAL KINDs for Fortran")
 endif ()
 

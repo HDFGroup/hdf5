@@ -35,6 +35,7 @@
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Bpkg.h"		/* B-link trees				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5MMprivate.h"	/* Memory management			*/
 
 
 /****************/
@@ -304,7 +305,7 @@ H5B__cache_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED len,
     HDassert(shared->type->encode);
 
     /* magic number */
-    HDmemcpy(image, H5B_MAGIC, (size_t)H5_SIZEOF_MAGIC);
+    H5MM_memcpy(image, H5B_MAGIC, (size_t)H5_SIZEOF_MAGIC);
     image += 4;
 
     /* node type and level */

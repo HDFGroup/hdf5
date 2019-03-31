@@ -671,7 +671,7 @@ dataset_big_write(void)
     /* create a memory dataspace independently */
     mem_dataspace = H5Screate_simple (RANK, dims, NULL);
     VRFY((mem_dataspace >= 0), "");
-    if(!mpi_rank == 0) {
+    if(mpi_rank != 0) {
         ret = H5Sselect_none(mem_dataspace);
         VRFY((ret >= 0), "H5Sset_none succeeded");
     }
@@ -980,7 +980,7 @@ dataset_big_read(void)
     /* create a memory dataspace independently */
     mem_dataspace = H5Screate_simple (RANK, dims, NULL);
     VRFY((mem_dataspace >= 0), "");
-    if(!mpi_rank == 0) {
+    if(mpi_rank != 0) {
         ret = H5Sselect_none(mem_dataspace);
         VRFY((ret >= 0), "H5Sset_none succeeded");
     }

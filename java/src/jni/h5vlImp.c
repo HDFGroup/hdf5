@@ -21,9 +21,9 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#include "hdf5.h"
 #include <jni.h>
 #include <stdlib.h>
+#include "hdf5.h"
 #include "h5jni.h"
 #include "h5vlImp.h"
 
@@ -36,18 +36,22 @@ JNIEXPORT jlong JNICALL
 Java_hdf_hdf5lib_H5_H5VLregister_1connector_1by_1name
   (JNIEnv *env, jclass clss, jobject connector_name, jlong vipl_id)
 {
-    hid_t       status = -1;
-    const char *vlName;
+    const char *volName = NULL;
+    hid_t       status = H5I_INVALID_HID;
 
-    PIN_JAVA_STRING(connector_name, vlName);
-    if (vlName != NULL) {
-        status = H5VLregister_connector_by_name(vlName, (hid_t)vipl_id);
+    UNUSED(clss);
 
-        UNPIN_JAVA_STRING(connector_name, vlName);
+    if (NULL == connector_name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5VLregister_connector_by_name: VOL connector name is NULL");
 
-        if (status < 0)
-            h5libraryError(env);
-    }
+    PIN_JAVA_STRING(ENVONLY, connector_name, volName, NULL, "H5VLregister_connector_by_name: VOL connector name not pinned");
+
+    if ((status = H5VLregister_connector_by_name(volName, (hid_t)vipl_id)) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+
+done:
+    if (volName)
+        UNPIN_JAVA_STRING(ENVONLY, connector_name, volName);
 
     return (jlong)status;
 } /* end Java_hdf_hdf5lib_H5_H5VLregister_1connector_1by_1name */
@@ -61,11 +65,14 @@ JNIEXPORT jlong JNICALL
 Java_hdf_hdf5lib_H5_H5VLregister_1connector_1by_1value
   (JNIEnv *env, jclass clss, jint connector_value, jlong vipl_id)
 {
-    hid_t status = H5VLregister_connector_by_value((H5VL_class_value_t)connector_value, (hid_t)vipl_id);
+    hid_t status = H5I_INVALID_HID;
 
-    if (status < 0)
-        h5libraryError(env);
+    UNUSED(clss);
 
+    if ((status = H5VLregister_connector_by_value((H5VL_class_value_t)connector_value, (hid_t)vipl_id)) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+
+done:
     return (jlong)status;
 } /* end Java_hdf_hdf5lib_H5_H5VLregister_1connector_1by_1value */
 
@@ -78,20 +85,24 @@ JNIEXPORT jboolean JNICALL
 Java_hdf_hdf5lib_H5_H5VLis_1connector_1registered
   (JNIEnv *env, jclass clss, jobject connector_name)
 {
+    const char *volName = NULL;
     htri_t      bval = JNI_FALSE;
-    const char *vlName;
 
-    PIN_JAVA_STRING(connector_name, vlName);
-    if (vlName != NULL) {
-        bval = H5VLis_connector_registered(vlName);
+    UNUSED(clss);
 
-        UNPIN_JAVA_STRING(connector_name, vlName);
+    if (NULL == connector_name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5VLis_connector_registered: VOL connector name is NULL");
 
-        if (bval > 0)
-            bval = JNI_TRUE;
-        else if (bval < 0)
-            h5libraryError(env);
-    }
+    PIN_JAVA_STRING(ENVONLY, connector_name, volName, NULL, "H5VLis_connector_registered: VOL connector name not pinned");
+
+    if ((bval = H5VLis_connector_registered(volName)) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+
+    bval = (bval > 0) ? JNI_TRUE : JNI_FALSE;
+
+done:
+    if (volName)
+        UNPIN_JAVA_STRING(ENVONLY, connector_name, volName);
 
     return (jboolean)bval;
 } /* end Java_hdf_hdf5lib_H5_H5VLis_1connector_1registered */
@@ -105,18 +116,22 @@ JNIEXPORT jlong JNICALL
 Java_hdf_hdf5lib_H5_H5VLget_1connector_1id
   (JNIEnv *env, jclass clss, jobject connector_name)
 {
-    hid_t       status = -1;
-    const char *vlName;
+    const char *volName = NULL;
+    hid_t       status = H5I_INVALID_HID;
 
-    PIN_JAVA_STRING(connector_name, vlName);
-    if (vlName != NULL) {
-        status = H5VLget_connector_id(vlName);
+    UNUSED(clss);
 
-        UNPIN_JAVA_STRING(connector_name, vlName);
+    if (NULL == connector_name)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5VLget_connector_id: VOL connector name is NULL");
 
-        if (status < 0)
-            h5libraryError(env);
-    }
+    PIN_JAVA_STRING(ENVONLY, connector_name, volName, NULL, "H5VLget_connector_id: VOL connector name not pinned");
+
+    if ((status = H5VLget_connector_id(volName)) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+
+done:
+    if (volName)
+        UNPIN_JAVA_STRING(ENVONLY, connector_name, volName);
 
     return (jlong)status;
 } /* end Java_hdf_hdf5lib_H5_H5VLget_1connector_1id */
@@ -131,41 +146,31 @@ JNIEXPORT jobject JNICALL
 Java_hdf_hdf5lib_H5_H5VLget_1connector_1name
   (JNIEnv *env, jclass clss, jlong object_id)
 {
-    char    *vlName;
-    ssize_t  buf_size;
-    ssize_t  status;
+    ssize_t  buf_size, status;
+    char    *volName = NULL;
     jstring  str = NULL;
 
-    /* get the length of the comment */
-    buf_size = H5VLget_connector_name((hid_t)object_id, NULL, 0);
-    if (buf_size < 0) {
-        H5Eprint2(H5E_DEFAULT, NULL);
+    UNUSED(clss);
 
-        h5badArgument(env, "H5VLget_connector_name:  buf_size < 0");
-    } /* end if */
-    else if (buf_size > 0) {
-        buf_size++; /* add extra space for the null terminator */
-        vlName = (char *)HDmalloc(sizeof(char) * (size_t)buf_size);
-        if (vlName == NULL) {
-            /* exception -- out of memory */
-            h5outOfMemory(env, "H5VLget_connector_name:  malloc failed");
-        } /* end if */
-        else {
-            status = H5VLget_connector_name((hid_t)object_id, vlName, (size_t)buf_size);
+    /* Get the length of the comment */
+    if ((buf_size = H5VLget_connector_name((hid_t)object_id, NULL, 0)) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
 
-            if (status < 0) {
-                h5libraryError(env);
-            } /* end if */
-            else {
-                /*  may throw OutOfMemoryError */
-                str = ENVPTR->NewStringUTF(ENVPAR vlName);
-                if (str == NULL) {
-                    h5JNIFatalError(env, "H5VLget_connector_name:  return string not allocated");
-                } /* end if */
-            } /* end else */
-            HDfree(vlName);
-        }
-    } /* end else if */
+    if (buf_size > 0) {
+        if (NULL == (volName = (char *) HDmalloc(sizeof(char) * (size_t)buf_size + 1)))
+            H5_JNI_FATAL_ERROR(ENVONLY, "H5VLget_connector_name: failed to allocated VOL connector name buffer");
+
+        if ((status = H5VLget_connector_name((hid_t)object_id, volName, (size_t)buf_size + 1)) < 0)
+            H5_LIBRARY_ERROR(ENVONLY);
+        volName[buf_size] = '\0';
+
+        if (NULL == (str = ENVPTR->NewStringUTF(ENVONLY, volName)))
+            CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+    }
+
+done:
+    if (volName)
+        HDfree(volName);
 
     return (jstring)str;
 } /* end Java_hdf_hdf5lib_H5_H5VLget_1connector_1name */
@@ -179,10 +184,15 @@ JNIEXPORT void JNICALL
 Java_hdf_hdf5lib_H5_H5VLclose
   (JNIEnv *env, jclass clss, jlong connector_id)
 {
-    herr_t retValue = H5VLclose((hid_t)connector_id);
+    herr_t retValue = FAIL;
 
-    if (retValue < 0)
-        h5libraryError(env);
+    UNUSED(clss);
+
+    if ((retValue = H5VLclose((hid_t)connector_id)) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+
+done:
+    return;
 } /* end Java_hdf_hdf5lib_H5_H5VLclose */
 
 /*
@@ -194,10 +204,15 @@ JNIEXPORT void JNICALL
 Java_hdf_hdf5lib_H5_H5VLunregister_1connector
     (JNIEnv *env, jclass clss, jlong connector_id)
 {
-    herr_t retValue = H5VLunregister_connector((hid_t)connector_id);
+    herr_t retValue = FAIL;
 
-    if (retValue < 0)
-        h5libraryError(env);
+    UNUSED(clss);
+
+    if ((retValue = H5VLunregister_connector((hid_t)connector_id)) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+
+done:
+    return;
 } /* end Java_hdf_hdf5lib_H5_H5VLunregister_1connector */
 
 

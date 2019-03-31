@@ -38,9 +38,7 @@
 #include "H5Iprivate.h"         /* IDs                                      */
 #include "H5Lprivate.h"         /* Links                                    */
 #include "H5MFprivate.h"        /* File memory management                   */
-#ifdef H5O_ENABLE_BOGUS
 #include "H5MMprivate.h"        /* Memory management                        */
-#endif /* H5O_ENABLE_BOGUS */
 #include "H5Opkg.h"             /* Object headers                           */
 #include "H5VLprivate.h"        /* Virtual Object Layer                     */
 
@@ -125,12 +123,7 @@ const H5O_msg_class_t *const H5O_msg_class_g[] = {
     H5O_MSG_REFCOUNT,		/*0x0016 Object's ref. count		*/
     H5O_MSG_FSINFO,		/*0x0017 Free-space manager info        */
     H5O_MSG_MDCI,               /*0x0018 Metadata cache image           */
-    H5O_MSG_UNKNOWN,		/*0x0019 Placeholder for unknown message */
-#ifdef H5O_ENABLE_BOGUS
-    H5O_MSG_BOGUS_INVALID, 	/*0x001A "Bogus invalid" (for testing) 	*/
-#else /* H5O_ENABLE_BOGUS */
-    NULL,                       /*0x001A "Bogus invalid" (for testing) 	*/
-#endif /* H5O_ENABLE_BOGUS */
+    H5O_MSG_UNKNOWN		/*0x0019 Placeholder for unknown message */
 };
 
 /* Format version bounds for object header */
@@ -501,7 +494,7 @@ H5O__apply_ohdr(H5F_t *f, H5O_t *oh, hid_t ocpl_id, size_t size_hint, size_t ini
 
     /* Put magic # for object header in first chunk */
     if(H5O_VERSION_1 < oh->version)
-        HDmemcpy(oh->chunk[0].image, H5O_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC);
+        H5MM_memcpy(oh->chunk[0].image, H5O_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC);
 
     /* Create the message list */
     oh->nmesgs = 1;
@@ -1926,7 +1919,7 @@ H5O_loc_copy(H5O_loc_t *dst, H5O_loc_t *src, H5_copy_depth_t depth)
     HDassert(depth == H5_COPY_SHALLOW || depth == H5_COPY_DEEP);
 
     /* Copy the top level information */
-    HDmemcpy(dst, src, sizeof(H5O_loc_t));
+    H5MM_memcpy(dst, src, sizeof(H5O_loc_t));
 
     /* Deep copy the names */
     if(depth == H5_COPY_DEEP) {

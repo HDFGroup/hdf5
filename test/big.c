@@ -524,7 +524,7 @@ reader(char *filename, hid_t fapl)
                     }
         if(zero) {
             H5_FAILED();
-            printf("    %d zero%s\n", zero, 1 == zero ? "" : "s");
+            HDprintf("    %d zero%s\n", zero, 1 == zero ? "" : "s");
         } else if(wrong) {
             SKIPPED();
             HDputs("    Possible overlap with another region.");
@@ -765,7 +765,7 @@ main (int ac, char **av)
                 family_size_def = (hsize_t)HDstrtoull(*av, NULL, 0);
             }
             else{
-                printf("***Missing fsize value***\n");
+                HDprintf("***Missing fsize value***\n");
                 usage();
                 return 1;
             }

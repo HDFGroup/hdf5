@@ -36,12 +36,15 @@ JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_H5_H5Zunregister
     (JNIEnv *env, jclass clss, jint filter)
 {
-    herr_t retValue = H5Zunregister((H5Z_filter_t)filter);
+    herr_t retVal = FAIL;
 
-    if (retValue < 0)
-        h5libraryError(env);
+    UNUSED(clss);
 
-    return (jint)retValue;
+    if ((retVal = H5Zunregister((H5Z_filter_t)filter)) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+
+done:
+    return (jint)retVal;
 } /* end Java_hdf_hdf5lib_H5_H5Zunregister */
 
 /*
@@ -53,12 +56,15 @@ JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_H5_H5Zfilter_1avail
     (JNIEnv *env, jclass clss, jint filter)
 {
-    herr_t retValue = H5Zfilter_avail((H5Z_filter_t)filter);
+    herr_t retVal = FAIL;
 
-    if (retValue < 0)
-        h5libraryError(env);
+    UNUSED(clss);
 
-    return (jint)retValue;
+    if ((retVal = H5Zfilter_avail((H5Z_filter_t)filter)) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+
+done:
+    return (jint)retVal;
 } /* end Java_hdf_hdf5lib_H5_H5Zfilter_1avail */
 
 /*
@@ -73,9 +79,12 @@ Java_hdf_hdf5lib_H5_H5Zget_1filter_1info
 {
     unsigned int flags = 0;
 
-    if (H5Zget_filter_info ((H5Z_filter_t) filter, (unsigned *) &flags) < 0)
-        h5libraryError(env);
+    UNUSED(clss);
 
+    if (H5Zget_filter_info((H5Z_filter_t) filter, (unsigned *) &flags) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+
+done:
     return (jint)flags;
 } /* end Java_hdf_hdf5lib_H5_H5Zget_1filter_1info */
 

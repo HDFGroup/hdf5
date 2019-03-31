@@ -295,6 +295,7 @@ static htri_t H5T__compiler_conv(H5T_t *src, H5T_t *dst);
 static herr_t H5T__set_size(H5T_t *dt, size_t size);
 static herr_t H5T__close_cb(H5T_t *dt);
 static H5T_path_t *H5T__path_find_real(const H5T_t *src, const H5T_t *dst, const char *name, H5T_conv_func_t *conv);
+static hbool_t H5T__detect_reg_ref(const H5T_t *dt);
 
 
 /*****************************/
@@ -1396,7 +1397,7 @@ H5T_top_term_package(void)
                         if((path->conv.u.lib_func)((hid_t)FAIL, (hid_t)FAIL, &(path->cdata), (size_t)0, (size_t)0, (size_t)0, NULL, NULL) < 0) {
 #ifdef H5T_DEBUG
                             if (H5DEBUG(T)) {
-                                fprintf(H5DEBUG(T), "H5T: conversion function "
+                                HDfprintf(H5DEBUG(T), "H5T: conversion function "
                                         "0x%08lx failed to free private data for "
                                         "%s (ignored)\n",
                                         (unsigned long)(path->conv.u.lib_func), path->name);
@@ -3337,7 +3338,7 @@ H5T_copy(H5T_t *old_dt, H5T_copy_t method)
                         if (NULL == new_dt->shared->u.compnd.memb)
                             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
-                        HDmemcpy(new_dt->shared->u.compnd.memb, old_dt->shared->u.compnd.memb,
+                        H5MM_memcpy(new_dt->shared->u.compnd.memb, old_dt->shared->u.compnd.memb,
                                 new_dt->shared->u.compnd.nmembs * sizeof(H5T_cmemb_t));
                     } /* end if */
 
@@ -3403,7 +3404,7 @@ H5T_copy(H5T_t *old_dt, H5T_copy_t method)
                         (uint8_t *)H5MM_malloc(new_dt->shared->u.enumer.nalloc * new_dt->shared->size);
                 if(NULL == new_dt->shared->u.enumer.value)
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
-                HDmemcpy(new_dt->shared->u.enumer.value, old_dt->shared->u.enumer.value,
+                H5MM_memcpy(new_dt->shared->u.enumer.value, old_dt->shared->u.enumer.value,
                         new_dt->shared->u.enumer.nmembs * new_dt->shared->size);
                 for(i = 0; i < new_dt->shared->u.enumer.nmembs; i++) {
                     s = old_dt->shared->u.enumer.name[i];
@@ -5503,6 +5504,111 @@ H5T_is_relocatable(const H5T_t *dt)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T_is_relocatable() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:   H5T_detect_reg_ref
+ *
+ * Purpose:    Check whether a datatype contains (or is) a region reference
+ *             datatype.
+ *
+ * Return:      TRUE (1) or FALSE (0) on success
+ *		(Can't fail)
+ *
+ * Programmer:  Quincey Koziol
+ *              Saturday, January 5, 2019
+ *
+ *-------------------------------------------------------------------------
+ */
+static hbool_t
+H5T__detect_reg_ref(const H5T_t *dt)
+{
+    unsigned    u;                      /* Local index variable */
+    hbool_t     ret_value = FALSE;      /* Return value */
+
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Sanity checks */
+    HDassert(dt);
+
+    /* Check if this datatype is a region reference */
+    if(H5T_REFERENCE == dt->shared->type && H5R_DATASET_REGION == dt->shared->u.atomic.u.r.rtype)
+        HGOTO_DONE(TRUE);
+
+    /* Check for types that might have the correct type as a component */
+    switch(dt->shared->type) {
+        case H5T_COMPOUND:
+            /* Iterate over all the compound datatype's fields */
+            for(u = 0; u < dt->shared->u.compnd.nmembs; u++)
+                /* Recurse on field's datatype */
+                if(H5T__detect_reg_ref(dt->shared->u.compnd.memb[u].type))
+                    HGOTO_DONE(TRUE);
+            break;
+
+        case H5T_ARRAY:
+        case H5T_VLEN:
+        case H5T_ENUM:
+            HGOTO_DONE(H5T__detect_reg_ref(dt->shared->parent));
+            break;
+
+        case H5T_NO_CLASS:
+        case H5T_INTEGER:
+        case H5T_FLOAT:
+        case H5T_TIME:
+        case H5T_STRING:
+        case H5T_BITFIELD:
+        case H5T_OPAQUE:
+        case H5T_REFERENCE:
+        case H5T_NCLASSES:
+        default:
+            break;
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5T__detect_reg_ref() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5T_is_vl_storage
+ *
+ * Purpose:     Check if a datatype will be stored in a variable-length form.
+ *
+ * Notes:       Currently, only variable-length string & sequences and region
+ *              references are stored in a variable-length form.
+ *
+ * Return:
+ *  One of two values on success:
+ *      TRUE - If the datatype will be stored in a variable-length form
+ *      FALSE - If the datatype will NOT be stored in a variable-length form
+ *  <0 is returned on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              Saturday, January 5, 2019
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5T_is_vl_storage(const H5T_t *dt)
+{
+    htri_t ret_value = FALSE;
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(dt);
+
+    /* VL and region reference datatypes are stored in variable-length form */
+    if(H5T_detect_class(dt, H5T_VLEN, FALSE))
+        ret_value = TRUE;
+    else if(H5T_detect_class(dt, H5T_REFERENCE, FALSE))
+        ret_value = H5T__detect_reg_ref(dt);
+    else
+        ret_value = FALSE;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5T_is_vl_storage() */
 
 
 /*-------------------------------------------------------------------------

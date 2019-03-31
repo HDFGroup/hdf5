@@ -229,7 +229,7 @@ macro (HDF_FUNCTION_TEST OTHER_TEST)
     endif ()
 
     #message (STATUS "Performing ${OTHER_TEST}")
-    TRY_COMPILE (${OTHER_TEST}
+    try_compile (${OTHER_TEST}
         ${CMAKE_BINARY_DIR}
         ${HDF_RESOURCES_EXT_DIR}/HDFTests.c
         COMPILE_DEFINITIONS "${MACRO_CHECK_FUNCTION_DEFINITIONS}"
@@ -286,7 +286,7 @@ if (NOT WINDOWS)
   option (HDF_ENABLE_LARGE_FILE "Enable support for large (64-bit) files on Linux." ON)
   if (HDF_ENABLE_LARGE_FILE AND NOT DEFINED TEST_LFS_WORKS_RUN)
     set (msg "Performing TEST_LFS_WORKS")
-    TRY_RUN (TEST_LFS_WORKS_RUN   TEST_LFS_WORKS_COMPILE
+    try_run (TEST_LFS_WORKS_RUN   TEST_LFS_WORKS_COMPILE
         ${CMAKE_BINARY_DIR}
         ${HDF_RESOURCES_EXT_DIR}/HDFTests.c
         COMPILE_DEFINITIONS "-DTEST_LFS_WORKS"
@@ -413,6 +413,7 @@ HDF_CHECK_TYPE_SIZE (off64_t        ${HDF_PREFIX}_SIZEOF_OFF64_T)
 if (NOT ${HDF_PREFIX}_SIZEOF_OFF64_T)
   set (${HDF_PREFIX}_SIZEOF_OFF64_T 0)
 endif ()
+HDF_CHECK_TYPE_SIZE (time_t          ${HDF_PREFIX}_SIZEOF_TIME_T)
 
 #-----------------------------------------------------------------------------
 # Extra C99 types
@@ -442,7 +443,7 @@ if (NOT WINDOWS)
   # Check a bunch of time functions
   #-----------------------------------------------------------------------------
   CHECK_FUNCTION_EXISTS (gettimeofday      ${HDF_PREFIX}_HAVE_GETTIMEOFDAY)
-  foreach (test
+  foreach (time_test
       HAVE_TM_GMTOFF
       HAVE___TM_GMTOFF
 #      HAVE_TIMEZONE
@@ -452,7 +453,7 @@ if (NOT WINDOWS)
       HAVE_TM_ZONE
       HAVE_STRUCT_TM_TM_ZONE
   )
-    HDF_FUNCTION_TEST (${test})
+    HDF_FUNCTION_TEST (${time_test})
   endforeach ()
   if (NOT CYGWIN AND NOT MINGW)
       HDF_FUNCTION_TEST (HAVE_TIMEZONE)
@@ -505,6 +506,8 @@ CHECK_FUNCTION_EXISTS (lround            ${HDF_PREFIX}_HAVE_LROUND)
 CHECK_FUNCTION_EXISTS (lroundf           ${HDF_PREFIX}_HAVE_LROUNDF)
 CHECK_FUNCTION_EXISTS (lstat             ${HDF_PREFIX}_HAVE_LSTAT)
 
+CHECK_FUNCTION_EXISTS (pread             ${HDF_PREFIX}_HAVE_PREAD)
+CHECK_FUNCTION_EXISTS (pwrite            ${HDF_PREFIX}_HAVE_PWRITE)
 CHECK_FUNCTION_EXISTS (rand_r            ${HDF_PREFIX}_HAVE_RAND_R)
 CHECK_FUNCTION_EXISTS (random            ${HDF_PREFIX}_HAVE_RANDOM)
 CHECK_FUNCTION_EXISTS (round             ${HDF_PREFIX}_HAVE_ROUND)
@@ -554,7 +557,7 @@ endif ()
 # Check a bunch of other functions
 #-----------------------------------------------------------------------------
 if (NOT WINDOWS)
-  foreach (test
+  foreach (other_test
       HAVE_ATTRIBUTE
       HAVE_C99_FUNC
 #      STDC_HEADERS
@@ -563,7 +566,7 @@ if (NOT WINDOWS)
       SYSTEM_SCOPE_THREADS
       HAVE_SOCKLEN_T
   )
-    HDF_FUNCTION_TEST (${test})
+    HDF_FUNCTION_TEST (${other_test})
   endforeach ()
 endif ()
 

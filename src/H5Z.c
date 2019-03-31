@@ -322,7 +322,7 @@ H5Z_register (const H5Z_class2_t *cls)
 
         /* Initialize */
         i = H5Z_table_used_g++;
-        HDmemcpy(H5Z_table_g+i, cls, sizeof(H5Z_class2_t));
+        H5MM_memcpy(H5Z_table_g+i, cls, sizeof(H5Z_class2_t));
 #ifdef H5Z_DEBUG
         HDmemset(H5Z_stat_table_g+i, 0, sizeof(H5Z_stats_t));
 #endif /* H5Z_DEBUG */
@@ -330,7 +330,7 @@ H5Z_register (const H5Z_class2_t *cls)
     /* Filter already registered */
     else {
         /* Replace old contents */
-        HDmemcpy(H5Z_table_g+i, cls, sizeof(H5Z_class2_t));
+        H5MM_memcpy(H5Z_table_g+i, cls, sizeof(H5Z_class2_t));
     } /* end else */
 
 done:
@@ -611,7 +611,7 @@ H5Z__flush_file_cb(void *obj_ptr, hid_t H5_ATTR_UNUSED obj_id, void *key)
             /* Sanity check for collectively calling H5Zunregister, if requested */
             /* (Sanity check assumes that a barrier on one file's comm
              *  is sufficient (i.e. that there aren't different comms for
-             *  different files).  -QAK, 2018/02/14
+             *  different files).  -QAK, 2018/02/14)
              */
             if(H5_coll_api_sanity_check_g && !object->sanity_checked) {
                 MPI_Comm mpi_comm;      /* File's communicator */

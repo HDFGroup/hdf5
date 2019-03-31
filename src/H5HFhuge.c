@@ -355,7 +355,7 @@ HDfprintf(stderr, "%s: obj_size = %Zu\n", FUNC, obj_size);
         write_size = obj_size;
         if(NULL == (write_buf = H5MM_malloc(write_size)))
             HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, FAIL, "memory allocation failed for pipeline buffer")
-        HDmemcpy(write_buf, obj, write_size);
+        H5MM_memcpy(write_buf, obj, write_size);
 
         /* Push direct block data through I/O filter pipeline */
         nbytes = write_size;
@@ -794,7 +794,7 @@ H5HF__huge_op_real(H5HF_hdr_t *hdr, const uint8_t *id, hbool_t is_read,
         /* Copy object to user's buffer if there's filters on heap data */
         /* (if there's no filters, the object was read directly into the user's buffer) */
         if(hdr->filter_len > 0)
-            HDmemcpy(op_data, read_buf, (size_t)obj_size);
+            H5MM_memcpy(op_data, read_buf, (size_t)obj_size);
     } /* end if */
     else {
         /* Call the user's 'op' callback */

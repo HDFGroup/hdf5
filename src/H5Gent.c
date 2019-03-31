@@ -32,6 +32,7 @@
 #include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5Gpkg.h"		/* Groups		  		*/
 #include "H5HLprivate.h"	/* Local Heaps				*/
+#include "H5MMprivate.h"	/* Memory management			*/
 
 
 /****************/
@@ -331,7 +332,7 @@ H5G__ent_copy(H5G_entry_t *dst, const H5G_entry_t *src, H5_copy_depth_t depth)
     HDassert(depth == H5_COPY_SHALLOW || depth == H5_COPY_DEEP);
 
     /* Copy the top level information */
-    HDmemcpy(dst, src, sizeof(H5G_entry_t));
+    H5MM_memcpy(dst, src, sizeof(H5G_entry_t));
 
     /* Deep copy the names */
     if(depth == H5_COPY_DEEP) {
