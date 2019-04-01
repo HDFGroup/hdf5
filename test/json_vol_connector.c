@@ -18,10 +18,7 @@
  *              (https://github.com/HDFGroup/hdf5-json)
  */
 
-/* Until we get a platform-independence library working, we'll cheat and
- * use H5private.h functionality as needed.
- */
-#include "H5private.h"
+#include "hdf5.h"
 
 #include "H5PLextern.h"
 
@@ -36,6 +33,9 @@
 
 /* libuuid for generating UUIDs */
 #include <uuid/uuid.h>
+
+#define SUCCEED    0
+#define FAIL    (-1)
 
 /* Callbacks */
 /* File */
@@ -162,17 +162,16 @@ jvc_helper_create_group(json_vol_file_t *jfile, char *group_name)
 
 /* File callback implementation */
 static void *
-jvc_file_create(const char *name, unsigned H5_ATTR_UNUSED flags, hid_t H5_ATTR_UNUSED fcpl_id,
-        hid_t H5_ATTR_UNUSED fapl_id, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req)
+jvc_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t dxpl_id, void **req)
 {
     json_vol_file_t *jfile = NULL;
 
     /* Set up */
-    if(NULL == (jfile = (json_vol_file_t *)HDcalloc((size_t)1, sizeof(json_vol_file_t))))
+    if(NULL == (jfile = (json_vol_file_t *)calloc((size_t)1, sizeof(json_vol_file_t))))
         goto error;
 
     /* Create the file */
-    if(NULL == (jfile->fp = HDfopen(name, "w")))
+    if(NULL == (jfile->fp = fopen(name, "w")))
         goto error;
 
     /* Create the JSON root */
@@ -186,15 +185,14 @@ jvc_file_create(const char *name, unsigned H5_ATTR_UNUSED flags, hid_t H5_ATTR_U
 
 error:
     if(jfile->fp)
-        HDfclose(jfile->fp);
+        fclose(jfile->fp);
     if(jfile)
-        HDfree(jfile);
+        free(jfile);
     return NULL;
 } /* end jvc_file_create() */
 
 static void *
-jvc_file_open(const char *name, unsigned H5_ATTR_UNUSED flags, hid_t H5_ATTR_UNUSED fapl_id,
-        hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req)
+jvc_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t dxpl_id, void **req)
 {
     json_vol_file_t *jfile = NULL;
     char            *json_in = NULL;
@@ -202,55 +200,55 @@ jvc_file_open(const char *name, unsigned H5_ATTR_UNUSED flags, hid_t H5_ATTR_UNU
     json_error_t    jerror;
 
     /* Set up */
-    if(NULL == (jfile = (json_vol_file_t *)HDcalloc((size_t)1, sizeof(json_vol_file_t))))
+    if(NULL == (jfile = (json_vol_file_t *)calloc((size_t)1, sizeof(json_vol_file_t))))
         goto error;
 
     /* Open the file and get the size */
-    if(NULL == (jfile->fp = HDfopen(name, "r")))
+    if(NULL == (jfile->fp = fopen(name, "r")))
         goto error;
     fseek(jfile->fp, 0, SEEK_END);
     file_size = ftell(jfile->fp);
     fseek(jfile->fp, 0, SEEK_SET);
 
     /* Create the JSON root */
-    if(NULL == (json_in = (char *)HDmalloc((size_t)(file_size + 1) * sizeof(char))))
+    if(NULL == (json_in = (char *)malloc((size_t)(file_size + 1) * sizeof(char))))
         goto error;
     fread(json_in, (size_t)file_size, 1, jfile->fp);
     jfile->root = json_loads(json_in, 0, &jerror);
 
     /* Will still need to parse out the groups array */
 
-    HDfree(json_in);
+    free(json_in);
 
     return (void *)jfile;
 
 error:
     if(json_in)
-        HDfree(json_in);
+        free(json_in);
     if(jfile->fp)
-        HDfclose(jfile->fp);
+        fclose(jfile->fp);
     if(jfile)
-        HDfree(jfile);
+        free(jfile);
     return NULL;
 } /* end jvc_file_open() */
 
 static herr_t
-jvc_file_close(void *file, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req)
+jvc_file_close(void *file, hid_t dxpl_id, void **req)
 {
     json_vol_file_t *jfile = (json_vol_file_t *)file;
 
     /* Dump the JSON string to the file */
-    HDfprintf(jfile->fp, "%s", json_dumps(jfile->root, 0));
+    fprintf(jfile->fp, "%s", json_dumps(jfile->root, 0));
 
     /* Close the file */
-    if(EOF == HDfclose(jfile->fp))
+    if(EOF == fclose(jfile->fp))
         goto error;
 
     /* Decrement the reference count on the JSON root, closing it */
     json_decref(jfile->root);
 
     /* Tear down */
-    HDfree(jfile);
+    free(jfile);
 
     return SUCCEED;
 
