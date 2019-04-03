@@ -187,9 +187,8 @@ check-vfd:
 	done
 
 # Run tests with different Virtual Object Layer Connectors.
-# Currently, only invoke check-vol in the test directory.
 check-vol:
-	for d in src test; do                                 \
+	for d in $(SUBDIRS); do                                \
 	  if test $$d != .; then                                       \
 	    (cd $$d && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;          \
 	  fi;                                                          \

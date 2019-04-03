@@ -781,11 +781,6 @@ H5D__contig_readvv_sieve_cb(hsize_t dst_off, hsize_t src_off, size_t len,
 
             /* Reset sieve buffer dirty flag */
             dset_contig->sieve_dirty = FALSE;
-
-            /* Stash local copies of these value */
-            sieve_start = dset_contig->sieve_loc;
-            sieve_size = dset_contig->sieve_size;
-            sieve_end = sieve_start+sieve_size;
         } /* end else */
     } /* end if */
     else {
@@ -850,11 +845,6 @@ H5D__contig_readvv_sieve_cb(hsize_t dst_off, hsize_t src_off, size_t len,
                  */
                 min = MIN3(rel_eoa - dset_contig->sieve_loc, max_data, dset_contig->sieve_buf_size); 
                 H5_CHECKED_ASSIGN(dset_contig->sieve_size, size_t, min, hsize_t);
-
-                /* Update local copies of sieve information */
-                sieve_start = dset_contig->sieve_loc;
-                sieve_size = dset_contig->sieve_size;
-                sieve_end = sieve_start + sieve_size;
 
                 /* Read the new sieve buffer */
                 if(H5F_block_read(file, H5FD_MEM_DRAW, dset_contig->sieve_loc, dset_contig->sieve_size, dset_contig->sieve_buf) < 0)
@@ -1136,11 +1126,6 @@ H5D__contig_writevv_sieve_cb(hsize_t dst_off, hsize_t src_off, size_t len,
 
                     /* Adjust sieve size */
                     dset_contig->sieve_size += len;
-
-                    /* Update local copies of sieve information */
-                    sieve_start = dset_contig->sieve_loc;
-                    sieve_size = dset_contig->sieve_size;
-                    sieve_end = sieve_start + sieve_size;
                 } /* end if */
                 /* Can't add the new data onto the existing sieve buffer */
                 else {
@@ -1171,11 +1156,6 @@ H5D__contig_writevv_sieve_cb(hsize_t dst_off, hsize_t src_off, size_t len,
                      */
                     min = MIN3(rel_eoa - dset_contig->sieve_loc, max_data, dset_contig->sieve_buf_size); 
                     H5_CHECKED_ASSIGN(dset_contig->sieve_size, size_t, min, hsize_t);
-
-                    /* Update local copies of sieve information */
-                    sieve_start = dset_contig->sieve_loc;
-                    sieve_size = dset_contig->sieve_size;
-                    sieve_end = sieve_start + sieve_size;
 
                     /* Check if there is any point in reading the data from the file */
                     if(dset_contig->sieve_size > len) {

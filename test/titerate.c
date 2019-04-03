@@ -945,14 +945,15 @@ find_err_msg_cb(unsigned n, const H5E_error2_t *err_desc, void *_client_data)
     searched_err_t *searched_err = (searched_err_t *)_client_data;
 
     if (searched_err == NULL)
-        return -1;
-
+        return H5_ITER_ERROR;
+    
     /* If the searched error message is found, stop the iteration */
     if (err_desc->desc != NULL && strcmp(err_desc->desc, searched_err->message) == 0)
     {
         searched_err->found = true;
         status = H5_ITER_STOP;
     }
+
     return status;
 } /* end find_err_msg_cb() */
 
@@ -988,6 +989,7 @@ static void test_corrupted_attnamelen(void)
     /* Call H5Aiterate2 to trigger the failure in HDFFV-10588.  Failure should
        occur in the decoding stage, so some arguments are not needed. */
     err_status = H5Aiterate2(did, H5_INDEX_NAME, H5_ITER_INC, NULL, NULL, NULL);
+    VERIFY(err_status, FAIL, "H5Aiterate2");
 
     /* Make sure the intended error was caught */
     if(err_status == -1)
