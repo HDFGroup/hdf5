@@ -66,19 +66,27 @@
               ${expectfile}.out
               ${expectfile}.out.err
       )
-      add_test (
-          NAME H5JAM-${expectfile}
-          COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5jam>"
-              -D "TEST_ARGS:STRING=${ARGN}"
-              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
-              -D "TEST_OUTPUT=${expectfile}.out"
-              -D "TEST_EXPECT=${resultcode}"
-              -D "TEST_ERRREF=testfiles/${expectfile}.txt"
-              -D "TEST_SKIP_COMPARE=1"
-              -D "TEST_REFERENCE=testfiles/${expectfile}.txt"
-              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
-      )
+      if (SKIP_ERROR_STACK_TESTS)
+        add_test (
+            NAME H5JAM-${resultfile}
+            COMMAND ${CMAKE_COMMAND} -E echo "SKIP Error Stack Test"
+        )
+        set_property(TEST H5JAM-${resultfile} PROPERTY DISABLED)
+      else ()
+        add_test (
+            NAME H5JAM-${expectfile}
+            COMMAND "${CMAKE_COMMAND}"
+                -D "TEST_PROGRAM=$<TARGET_FILE:h5jam>"
+                -D "TEST_ARGS:STRING=${ARGN}"
+                -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
+                -D "TEST_OUTPUT=${expectfile}.out"
+                -D "TEST_EXPECT=${resultcode}"
+                -D "TEST_ERRREF=testfiles/${expectfile}.txt"
+                -D "TEST_SKIP_COMPARE=1"
+                -D "TEST_REFERENCE=testfiles/${expectfile}.txt"
+                -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+        )
+      endif ()
       set_tests_properties (H5JAM-${expectfile} PROPERTIES DEPENDS "H5JAM-${expectfile}-clear-objects")
     endif ()
   endmacro ()

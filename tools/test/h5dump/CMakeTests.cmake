@@ -679,19 +679,27 @@
               ${resultfile}.out.err
       )
       set_tests_properties (H5DUMP-${resultfile}-clear-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
-      add_test (
-          NAME H5DUMP-${resultfile}
-          COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
-              -D "TEST_ARGS:STRING=${ARGN}"
-              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/std"
-              -D "TEST_OUTPUT=${resultfile}.out"
-              -D "TEST_EXPECT=${resultcode}"
-              -D "TEST_REFERENCE=${resultfile}.ddl"
-              -D "TEST_ERRREF=${resultfile}.err"
-              -D "TEST_MASK_ERROR=true"
-              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
-      )
+      if (SKIP_ERROR_STACK_TESTS)
+        add_test (
+            NAME H5DUMP-${resultfile}
+            COMMAND ${CMAKE_COMMAND} -E echo "SKIP Error Stack Test"
+        )
+        set_property(TEST H5DUMP-${resultfile} PROPERTY DISABLED)
+      else ()
+        add_test (
+            NAME H5DUMP-${resultfile}
+            COMMAND "${CMAKE_COMMAND}"
+                -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
+                -D "TEST_ARGS:STRING=${ARGN}"
+                -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/std"
+                -D "TEST_OUTPUT=${resultfile}.out"
+                -D "TEST_EXPECT=${resultcode}"
+                -D "TEST_REFERENCE=${resultfile}.ddl"
+                -D "TEST_ERRREF=${resultfile}.err"
+                -D "TEST_MASK_ERROR=true"
+                -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+        )
+      endif ()
       set_tests_properties (H5DUMP-${resultfile} PROPERTIES DEPENDS "H5DUMP-${resultfile}-clear-objects")
     endif ()
   endmacro ()
@@ -707,21 +715,29 @@
               ${resultfile}.out.err
       )
       set_tests_properties (H5DUMP-${resultfile}-clear-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
-      add_test (
-          NAME H5DUMP-${resultfile}
-          COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
-              -D "TEST_ARGS:STRING=${ARGN}"
-              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/std"
-              -D "TEST_OUTPUT=${resultfile}.out"
-              -D "TEST_EXPECT=${resultcode}"
-              -D "TEST_REFERENCE=${resultfile}.ddl"
-              -D "TEST_ERRREF=${resultfile}.err"
-              -D "TEST_MASK_ERROR=true"
-              -D "TEST_ENV_VAR:STRING=${envvar}"
-              -D "TEST_ENV_VALUE:STRING=${envval}"
-              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
-      )
+      if (SKIP_ERROR_STACK_TESTS)
+        add_test (
+            NAME H5DUMP-${resultfile}
+            COMMAND ${CMAKE_COMMAND} -E echo "SKIP Error Stack Test"
+        )
+        set_property(TEST H5DUMP-${resultfile} PROPERTY DISABLED)
+      else ()
+        add_test (
+            NAME H5DUMP-${resultfile}
+            COMMAND "${CMAKE_COMMAND}"
+                -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
+                -D "TEST_ARGS:STRING=${ARGN}"
+                -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/std"
+                -D "TEST_OUTPUT=${resultfile}.out"
+                -D "TEST_EXPECT=${resultcode}"
+                -D "TEST_REFERENCE=${resultfile}.ddl"
+                -D "TEST_ERRREF=${resultfile}.err"
+                -D "TEST_MASK_ERROR=true"
+                -D "TEST_ENV_VAR:STRING=${envvar}"
+                -D "TEST_ENV_VALUE:STRING=${envval}"
+                -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+        )
+      endif ()
       set_tests_properties (H5DUMP-${resultfile} PROPERTIES DEPENDS "H5DUMP-${resultfile}-clear-objects")
     endif ()
   endmacro ()
