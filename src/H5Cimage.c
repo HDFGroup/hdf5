@@ -2020,11 +2020,11 @@ H5C__decode_cache_image_entry(const H5F_t *f, const H5C_t *cache_ptr,
 	HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL, "memory allocation failed for on disk image buffer")
 
 #if H5C_DO_MEMORY_SANITY_CHECKS
-    HDmemcpy(((uint8_t *)image_ptr) + size, H5C_IMAGE_SANITY_VALUE, H5C_IMAGE_EXTRA_SPACE);
+    H5MM_memcpy(((uint8_t *)image_ptr) + size, H5C_IMAGE_SANITY_VALUE, H5C_IMAGE_EXTRA_SPACE);
 #endif /* H5C_DO_MEMORY_SANITY_CHECKS */
 
     /* Copy the entry image from the cache image block */
-    HDmemcpy(image_ptr, p, size);
+    H5MM_memcpy(image_ptr, p, size);
     p += size;
 
     /* Copy data into target */
@@ -2219,7 +2219,7 @@ H5C__encode_cache_image_header(const H5F_t *f, const H5C_t *cache_ptr,
     p = *buf;
 
     /* write signature */
-    HDmemcpy(p, H5C__MDCI_BLOCK_SIGNATURE, (size_t)H5C__MDCI_BLOCK_SIGNATURE_LEN);
+    H5MM_memcpy(p, H5C__MDCI_BLOCK_SIGNATURE, (size_t)H5C__MDCI_BLOCK_SIGNATURE_LEN);
     p += H5C__MDCI_BLOCK_SIGNATURE_LEN;
 
     /* write version */
@@ -2355,7 +2355,7 @@ H5C__encode_cache_image_entry(H5F_t *f, H5C_t *cache_ptr, uint8_t **buf,
 	H5F_addr_encode(f, &p, ie_ptr->fd_parent_addrs[u]);
 
     /* Copy entry image */
-    HDmemcpy(p, ie_ptr->image_ptr, ie_ptr->size);
+    H5MM_memcpy(p, ie_ptr->image_ptr, ie_ptr->size);
     p += ie_ptr->size;
 
     /* Update buffer pointer */
@@ -3422,11 +3422,11 @@ H5C__reconstruct_cache_entry(const H5F_t *f, H5C_t *cache_ptr,
     if(NULL == (pf_entry_ptr->image_ptr = H5MM_malloc(pf_entry_ptr->size + H5C_IMAGE_EXTRA_SPACE)))
 	HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, NULL, "memory allocation failed for on disk image buffer")
 #if H5C_DO_MEMORY_SANITY_CHECKS
-    HDmemcpy(((uint8_t *)pf_entry_ptr->image_ptr) + size, H5C_IMAGE_SANITY_VALUE, H5C_IMAGE_EXTRA_SPACE);
+    H5MM_memcpy(((uint8_t *)pf_entry_ptr->image_ptr) + size, H5C_IMAGE_SANITY_VALUE, H5C_IMAGE_EXTRA_SPACE);
 #endif /* H5C_DO_MEMORY_SANITY_CHECKS */
 
     /* Copy the entry image from the cache image block */
-    HDmemcpy(pf_entry_ptr->image_ptr, p, pf_entry_ptr->size);
+    H5MM_memcpy(pf_entry_ptr->image_ptr, p, pf_entry_ptr->size);
     p += pf_entry_ptr->size;
 
     /* Initialize the rest of the fields in the prefetched entry */

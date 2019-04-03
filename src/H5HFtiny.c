@@ -35,6 +35,7 @@
 #include "H5private.h"      /* Generic Functions        */
 #include "H5Eprivate.h"     /* Error handling           */
 #include "H5HFpkg.h"        /* Fractal heaps            */
+#include "H5MMprivate.h"	/* Memory management			*/
 
 
 /****************/
@@ -176,7 +177,7 @@ HDfprintf(stderr, "%s: obj_size = %Zu\n", FUNC, obj_size);
         *id++ = enc_obj_size & H5HF_TINY_MASK_EXT_2;
     } /* end else */
 
-    HDmemcpy(id, obj, obj_size);
+    H5MM_memcpy(id, obj, obj_size);
     HDmemset(id + obj_size, 0, (hdr->id_len - ((size_t)1 + (size_t)hdr->tiny_len_extended + obj_size)));
 
     /* Update statistics about heap */

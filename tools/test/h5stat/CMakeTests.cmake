@@ -150,18 +150,26 @@
       if (last_test)
         set_tests_properties (H5STAT-${resultfile}-clear-objects PROPERTIES DEPENDS ${last_test})
       endif ()
-      add_test (
-          NAME H5STAT-${resultfile}
-          COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5stat>"
-              -D "TEST_ARGS=${ARGN}"
-              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
-              -D "TEST_OUTPUT=${resultfile}.out"
-              -D "TEST_EXPECT=${resultcode}"
-              -D "TEST_REFERENCE=${resultfile}.mty"
-              -D "TEST_ERRREF=${resultfile}.err"
-              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
-      )
+      if (SKIP_ERROR_STACK_TESTS)
+        add_test (
+            NAME H5STAT-${resultfile}
+            COMMAND ${CMAKE_COMMAND} -E echo "SKIP Error Stack Test"
+        )
+        set_property(TEST H5STAT-${resultfile} PROPERTY DISABLED)
+      else ()
+        add_test (
+            NAME H5STAT-${resultfile}
+            COMMAND "${CMAKE_COMMAND}"
+                -D "TEST_PROGRAM=$<TARGET_FILE:h5stat>"
+                -D "TEST_ARGS=${ARGN}"
+                -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
+                -D "TEST_OUTPUT=${resultfile}.out"
+                -D "TEST_EXPECT=${resultcode}"
+                -D "TEST_REFERENCE=${resultfile}.mty"
+                -D "TEST_ERRREF=${resultfile}.err"
+                -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+        )
+      endif ()
       set_tests_properties (H5STAT-${resultfile} PROPERTIES DEPENDS H5STAT-${resultfile}-clear-objects)
     endif ()
   endmacro ()

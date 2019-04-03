@@ -756,7 +756,7 @@ endif ()
 option (BUILD_TESTING "Build HDF5 Unit Testing" ON)
 if (BUILD_TESTING)
   set (DART_TESTING_TIMEOUT 1200
-      CACHE INTEGER
+      CACHE STRING
       "Timeout in seconds for each test (default 1200=20minutes)"
   )
 
@@ -806,6 +806,7 @@ endif ()
 if (EXISTS "${HDF5_SOURCE_DIR}/tools" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/tools")
   option (HDF5_BUILD_TOOLS  "Build HDF5 Tools" ON)
   if (HDF5_BUILD_TOOLS)
+    option (SKIP_ERROR_STACK_TESTS  "Skip HDF5 Tools Error Stack Tests" OFF)
     add_subdirectory (tools)
   endif ()
 endif ()

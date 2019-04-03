@@ -242,19 +242,27 @@
               ./testfiles/${testname}.out.out
               ./testfiles/${testname}.out.out.err
       )
-      add_test (
-          NAME H5COPY-CMP-${testname}
-          COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5copy>"
-              -D "TEST_ARGS=-i;./testfiles/${infile};-o;./testfiles/${testname}.out.h5;${vparam};${sparam};${srcname};${dparam};${dstname}"
-              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
-              -D "TEST_OUTPUT=./testfiles/${testname}.out.out"
-              -D "TEST_EXPECT=${resultcode}"
-              -D "TEST_REFERENCE=./testfiles/${testname}.out"
-              -D "TEST_ERRREF=./testfiles/${testname}.err"
-              -D "TEST_MASK=true"
-              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
-      )
+      if (SKIP_ERROR_STACK_TESTS)
+        add_test (
+            NAME H5COPY-CMP-${resultfile}
+            COMMAND ${CMAKE_COMMAND} -E echo "SKIP Error Stack Test"
+        )
+        set_property(TEST H5COPY-CMP-${resultfile} PROPERTY DISABLED)
+      else ()
+        add_test (
+            NAME H5COPY-CMP-${testname}
+            COMMAND "${CMAKE_COMMAND}"
+                -D "TEST_PROGRAM=$<TARGET_FILE:h5copy>"
+                -D "TEST_ARGS=-i;./testfiles/${infile};-o;./testfiles/${testname}.out.h5;${vparam};${sparam};${srcname};${dparam};${dstname}"
+                -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
+                -D "TEST_OUTPUT=./testfiles/${testname}.out.out"
+                -D "TEST_EXPECT=${resultcode}"
+                -D "TEST_REFERENCE=./testfiles/${testname}.out"
+                -D "TEST_ERRREF=./testfiles/${testname}.err"
+                -D "TEST_MASK=true"
+                -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+        )
+      endif ()
       set_tests_properties (H5COPY-CMP-${testname} PROPERTIES DEPENDS H5COPY-CMP-${testname}-clear-objects)
     endif ()
   endmacro ()
