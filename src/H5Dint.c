@@ -120,8 +120,8 @@ static hbool_t H5D_top_package_initialize_s = FALSE;
 
 /* Prefixes of VDS and external file from the environment variables
  * HDF5_EXTFILE_PREFIX and HDF5_VDS_PREFIX */ 
-static char *H5D_prefix_ext_env = NULL;
-static char *H5D_prefix_vds_env = NULL;
+const static char *H5D_prefix_ext_env = NULL;
+const static char *H5D_prefix_vds_env = NULL;
 
 
 /*-------------------------------------------------------------------------
@@ -1116,14 +1116,14 @@ H5D__build_file_prefix(const H5D_t *dset, H5D_prefix_type_t prefix_type, char **
      *      to be reentrant.
      */
     if(H5D_PREFIX_TYPE_VDS == prefix_type) {
-        prefix = H5D_prefix_vds_env;
+        prefix = (char *)H5D_prefix_vds_env;
 
         if(prefix == NULL || *prefix == '\0') {
             if(H5CX_get_vds_prefix(&prefix) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get the prefix for vds file")
         }
     } else if(H5D_PREFIX_TYPE_EXT == prefix_type) {
-        prefix = H5D_prefix_ext_env;
+        prefix = (char *)H5D_prefix_ext_env;
 
         if(prefix == NULL || *prefix == '\0') {
             if(H5CX_get_ext_file_prefix(&prefix) < 0)

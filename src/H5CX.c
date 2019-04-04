@@ -2390,18 +2390,41 @@ H5CX_get_ext_file_prefix(char **extfile_prefix)
 
     FUNC_ENTER_NOAPI(FAIL)
 
+    /* Sanity check */
     HDassert(extfile_prefix);
     HDassert(head && *head);
     HDassert(H5P_DEFAULT != (*head)->ctx.dapl_id);
 
-    H5CX_RETRIEVE_PROP_VALID(dapl, H5P_DATASET_ACCESS_DEFAULT, H5D_ACS_EFILE_PREFIX_NAME, extfile_prefix);
+    /* Check if the value has been retrieved already */
+    if(!(*head)->ctx.extfile_prefix_valid) {
+        /* Check for default DAPL */
+        if((*head)->ctx.dapl_id == H5P_DATASET_ACCESS_DEFAULT)
+            (*head)->ctx.extfile_prefix = H5CX_def_dapl_cache.extfile_prefix;
+        else {
+            /* Check if the property list is already available */
+            if(NULL == (*head)->ctx.dapl)
+                /* Get the dataset access property list pointer */
+                if(NULL == ((*head)->ctx.dapl = (H5P_genplist_t *)H5I_object((*head)->ctx.dapl_id)))
+                    HGOTO_ERROR(H5E_CONTEXT, H5E_BADTYPE, FAIL, "can't get default dataset access property list")
+
+            /* Get the prefix for the external file */
+            /* (Note: 'peek', not 'get' - if this turns out to be a problem, we may need
+             *          to copy it and free this in the H5CX pop routine. -QAK)
+             */
+            if(H5P_peek((*head)->ctx.dapl, H5D_ACS_EFILE_PREFIX_NAME, &(*head)->ctx.extfile_prefix) < 0)
+                HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve external file prefix")
+        } /* end else */
+
+        /* Mark the value as valid */
+        (*head)->ctx.extfile_prefix_valid = TRUE;
+    } /* end if */
 
     /* Get the value */
     *extfile_prefix = (*head)->ctx.extfile_prefix;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5CX_get_ext_file_prefix */
+} /* end H5CX_get_ext_file_prefix() */
 
 
 /*-------------------------------------------------------------------------
@@ -2424,18 +2447,41 @@ H5CX_get_vds_prefix(char **vds_prefix)
 
     FUNC_ENTER_NOAPI(FAIL)
 
+    /* Sanity check */
     HDassert(vds_prefix);
     HDassert(head && *head);
     HDassert(H5P_DEFAULT != (*head)->ctx.dapl_id);
 
-    H5CX_RETRIEVE_PROP_VALID(dapl, H5P_DATASET_ACCESS_DEFAULT, H5D_ACS_VDS_PREFIX_NAME, vds_prefix);
+    /* Check if the value has been retrieved already */
+    if(!(*head)->ctx.vds_prefix_valid) {
+        /* Check for default DAPL */
+        if((*head)->ctx.dapl_id == H5P_DATASET_ACCESS_DEFAULT)
+            (*head)->ctx.vds_prefix = H5CX_def_dapl_cache.vds_prefix;
+        else {
+            /* Check if the property list is already available */
+            if(NULL == (*head)->ctx.dapl)
+                /* Get the dataset access property list pointer */
+                if(NULL == ((*head)->ctx.dapl = (H5P_genplist_t *)H5I_object((*head)->ctx.dapl_id)))
+                    HGOTO_ERROR(H5E_CONTEXT, H5E_BADTYPE, FAIL, "can't get default dataset access property list")
+
+            /* Get the prefix for the VDS */
+            /* (Note: 'peek', not 'get' - if this turns out to be a problem, we may need
+             *          to copy it and free this in the H5CX pop routine. -QAK)
+             */
+            if(H5P_peek((*head)->ctx.dapl, H5D_ACS_VDS_PREFIX_NAME, &(*head)->ctx.vds_prefix) < 0)
+                HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve VDS prefix")
+        } /* end else */
+
+        /* Mark the value as valid */
+        (*head)->ctx.vds_prefix_valid = TRUE;
+    } /* end if */
 
     /* Get the value */
     *vds_prefix = (*head)->ctx.vds_prefix;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5CX_get_vds_prefix */
+} /* end H5CX_get_vds_prefix() */
 
 
 /*-------------------------------------------------------------------------
