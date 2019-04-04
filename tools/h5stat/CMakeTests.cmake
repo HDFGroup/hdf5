@@ -86,10 +86,10 @@
     # If using memchecker add tests without using scripts
     if (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (NAME H5STAT-${resultfile} COMMAND $<TARGET_FILE:h5stat> ${ARGN})
-      if (NOT "${resultcode}" STREQUAL "0")
+      if (${resultcode})
         set_tests_properties (H5STAT-${resultfile} PROPERTIES WILL_FAIL "true")
       endif ()
-      if (NOT "${last_test}" STREQUAL "")
+      if (last_test)
         set_tests_properties (H5STAT-${resultfile} PROPERTIES DEPENDS ${last_test})
       endif ()
     else (HDF5_ENABLE_USING_MEMCHECKER)
@@ -100,7 +100,7 @@
               ${resultfile}.out
               ${resultfile}.out.err
       )
-      if (NOT "${last_test}" STREQUAL "")
+      if (last_test)
         set_tests_properties (H5STAT-${resultfile}-clear-objects PROPERTIES DEPENDS ${last_test})
       endif ()
       add_test (
@@ -122,10 +122,10 @@
     # If using memchecker add tests without using scripts
     if (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (NAME H5STAT-${resultfile} COMMAND $<TARGET_FILE:h5stat> ${ARGN})
-      if (NOT "${resultcode}" STREQUAL "0")
+      if (${resultcode})
         set_tests_properties (H5STAT-${resultfile} PROPERTIES WILL_FAIL "true")
       endif ()
-      if (NOT "${last_test}" STREQUAL "")
+      if (last_test)
         set_tests_properties (H5STAT-${resultfile} PROPERTIES DEPENDS ${last_test})
       endif ()
     else (HDF5_ENABLE_USING_MEMCHECKER)
@@ -136,7 +136,7 @@
               ${resultfile}.out
               ${resultfile}.out.err
       )
-      if (NOT "${last_test}" STREQUAL "")
+      if (last_test)
         set_tests_properties (H5STAT-${resultfile}-clear-objects PROPERTIES DEPENDS ${last_test})
       endif ()
       add_test (
@@ -171,7 +171,7 @@
       COMMAND    ${CMAKE_COMMAND}
           -E remove ${CLEAR_LIST}
     )
-    if (NOT "${last_test}" STREQUAL "")
+    if (last_test)
       set_tests_properties (H5STAT-clearall-objects PROPERTIES DEPENDS ${last_test})
     endif ()
     set (last_test "H5STAT-clearall-objects")

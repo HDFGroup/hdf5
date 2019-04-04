@@ -8,7 +8,7 @@
 # distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
-
+#
 
 ##############################################################################
 ##############################################################################
@@ -41,7 +41,7 @@
   )
 
   foreach (h5_file ${HDF5_REFERENCE_TEST_FILES})
-    HDFTEST_COPY_FILE("${HDF5_TOOLS_DIR}/testfiles/${h5_file}" "${PROJECT_BINARY_DIR}/${h5_file}" "h5repart_files")
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_SRC_DIR}/testfiles/${h5_file}" "${PROJECT_BINARY_DIR}/${h5_file}" "h5repart_files")
   endforeach ()
   add_custom_target(h5repart_files ALL COMMENT "Copying files needed by h5repart tests" DEPENDS ${h5repart_files_list})
 
@@ -71,26 +71,31 @@
         scd_family00003.h5
         family_to_sec2.h5
   )
-  if (NOT "${last_test}" STREQUAL "")
-    set_tests_properties (H5REPART-clearall-objects PROPERTIES DEPENDS ${last_test})
-  endif ()
-  set (last_test "H5REPART-clearall-objects")
+  set_tests_properties (H5REPART-clearall-objects PROPERTIES FIXTURES_SETUP clear_testrepart)
 
   # repartition family member size to 20,000 bytes.
   add_test (NAME H5REPART-h5repart_20K COMMAND $<TARGET_FILE:h5repart> -m 20000 family_file%05d.h5 fst_family%05d.h5)
-  set_tests_properties (H5REPART-h5repart_20K PROPERTIES DEPENDS H5REPART-clearall-objects)
+  set_tests_properties (H5REPART-h5repart_20K PROPERTIES
+      FIXTURES_REQUIRED clear_testrepart
+  )
 
   # repartition family member size to 5 KB.
   add_test (NAME H5REPART-h5repart_5K COMMAND $<TARGET_FILE:h5repart> -m 5k family_file%05d.h5 scd_family%05d.h5)
-  set_tests_properties (H5REPART-h5repart_5K PROPERTIES DEPENDS H5REPART-clearall-objects)
+  set_tests_properties (H5REPART-h5repart_5K PROPERTIES
+      FIXTURES_REQUIRED clear_testrepart
+  )
 
   # convert family file to sec2 file of 20,000 bytes
   add_test (NAME H5REPART-h5repart_sec2 COMMAND $<TARGET_FILE:h5repart> -m 20000 -family_to_sec2 family_file%05d.h5 family_to_sec2.h5)
-  set_tests_properties (H5REPART-h5repart_sec2 PROPERTIES DEPENDS H5REPART-clearall-objects)
+  set_tests_properties (H5REPART-h5repart_sec2 PROPERTIES
+      FIXTURES_REQUIRED clear_testrepart
+  )
 
   # test the output files repartitioned above.
   add_test (NAME H5REPART-h5repart_test COMMAND $<TARGET_FILE:h5repart_test>)
-  set_tests_properties (H5REPART-h5repart_test PROPERTIES DEPENDS "H5REPART-clearall-objects;H5REPART-h5repart_20K;H5REPART-h5repart_5K;H5REPART-h5repart_sec2")
+  set_tests_properties (H5REPART-h5repart_test PROPERTIES
+      DEPENDS "H5REPART-h5repart_20K;H5REPART-h5repart_5K;H5REPART-h5repart_single;H5REPART-h5repart_sec2"
+  )
 
   set (H5_DEP_EXECUTABLES ${H5_DEP_EXECUTABLES}
         h5repart_test

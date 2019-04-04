@@ -320,15 +320,15 @@ set (H5_CHECK_TESTS
     links_env
 )
 
-foreach (test ${H5_CHECK_TESTS})
-  ADD_H5_EXE(${test})
+foreach (h5_test ${H5_CHECK_TESTS})
+  ADD_H5_EXE(${h5_test})
 endforeach ()
 
 #-- Adding test for libinfo
 set (GREP_RUNNER ${PROJECT_BINARY_DIR}/GrepRunner.cmake)
 file (WRITE ${GREP_RUNNER}
   "file (STRINGS \${TEST_PROGRAM} TEST_RESULT REGEX \"SUMMARY OF THE HDF5 CONFIGURATION\")
-if (\${TEST_RESULT} STREQUAL \"0\")
+if (NOT TEST_RESULT)
   message (FATAL_ERROR \"Failed: The output: \${TEST_RESULT} of \${TEST_PROGRAM} did not contain SUMMARY OF THE HDF5 CONFIGURATION\")
 else ()
   message (STATUS \"COMMAND Result: \${TEST_RESULT}\")

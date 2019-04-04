@@ -55,7 +55,7 @@
     # If using memchecker add tests without using scripts
     if (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (NAME H5JAM-${expectfile} COMMAND $<TARGET_FILE:h5jam> ${ARGN})
-      if (NOT "${resultcode}" STREQUAL "0")
+      if (${resultcode})
         set_tests_properties (H5JAM-${expectfile} PROPERTIES WILL_FAIL "true")
       endif ()
     else ()
@@ -91,7 +91,7 @@
     # If using memchecker add tests without using scripts
     if (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (NAME H5JAM-UNJAM-${expectfile} COMMAND $<TARGET_FILE:h5unjam> ${ARGN})
-      if (NOT "${resultcode}" STREQUAL "0")
+      if (${resultcode})
         set_tests_properties (H5JAM-UNJAM-${expectfile} PROPERTIES WILL_FAIL "true")
       endif ()
     else ()
@@ -205,7 +205,7 @@
           set (compare_test "")
         endif ()
       endif ()
-      if (NOT "${compare_test}" STREQUAL "")
+      if (${compare_test})
         add_test (
             NAME H5JAM-${testname}-UNJAM-CHECK_UB_1-clear-objects
             COMMAND    ${CMAKE_COMMAND}
@@ -244,7 +244,7 @@
               -D "TEST_OFILE=NULL"
               -P "${HDF_RESOURCES_DIR}/userblockTest.cmake"
       )
-      if (NOT "${compare_test}" STREQUAL "")
+      if (${compare_test})
         set_tests_properties (H5JAM-${testname}-UNJAM-CHECK_NOUB PROPERTIES DEPENDS H5JAM-${testname}-UNJAM-CHECK_UB_1)
       else ()
         set_tests_properties (H5JAM-${testname}-UNJAM-CHECK_NOUB PROPERTIES DEPENDS H5JAM-${testname}-UNJAM)
