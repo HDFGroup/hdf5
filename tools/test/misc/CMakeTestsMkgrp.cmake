@@ -76,7 +76,7 @@
       if (last_test)
         set_tests_properties (H5MKGRP-${resultfile} PROPERTIES DEPENDS ${last_test})
       endif ()
-    else (HDF5_ENABLE_USING_MEMCHECKER)
+    else ()
       set_tests_properties (H5MKGRP-${resultfile} PROPERTIES DEPENDS H5MKGRP-${resultfile}-clear-objects)
       add_test (
           NAME H5MKGRP-${resultfile}-h5ls
