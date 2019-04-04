@@ -304,7 +304,7 @@ CONTAINS
          IMPLICIT NONE
          INTEGER(hid_t),   INTENT(in) :: did        ! The dataset
          INTEGER       ,   INTENT(in) :: idx        ! The dimension
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: label      ! The label
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: label ! The label
          INTEGER(SIZE_T),  INTENT(in) :: label_len  ! Length of label
        END FUNCTION H5DSset_label_c
     END INTERFACE
@@ -337,11 +337,11 @@ CONTAINS
 
     IMPLICIT NONE
 
-    INTEGER(hid_t),   INTENT(in) :: did     ! The dataget
-    INTEGER       ,   INTENT(in) :: idx     ! The dimension
-    CHARACTER(LEN=*), INTENT(in) :: label   ! The label
-    INTEGER(size_t) , INTENT(inout) :: size ! The length of the label buffer
-    INTEGER :: errcode                      ! Error code
+    INTEGER(hid_t),   INTENT(in) :: did      ! The dataget
+    INTEGER       ,   INTENT(in) :: idx      ! The dimension
+    CHARACTER(LEN=*), INTENT(INOUT) :: label ! The label
+    INTEGER(size_t) , INTENT(INOUT) :: size  ! The length of the label buffer
+    INTEGER :: errcode                       ! Error code
     INTEGER :: c_idx
 
     INTERFACE
@@ -352,7 +352,7 @@ CONTAINS
          IMPLICIT NONE
          INTEGER(hid_t),   INTENT(in)    :: did        ! The dataget
          INTEGER       ,   INTENT(in)    :: idx        ! The dimension
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: label      ! The label
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(INOUT) :: label ! The label
          INTEGER(SIZE_T),  INTENT(inout) :: size       ! Length of label
        END FUNCTION H5DSget_label_c
     END INTERFACE
@@ -386,8 +386,8 @@ CONTAINS
     IMPLICIT NONE
 
     INTEGER(hid_t),   INTENT(in) :: did     ! The dataget
-    CHARACTER(LEN=*), INTENT(out) :: name   ! The name
-    INTEGER(size_t) , INTENT(inout) :: size ! The length of the name buffer
+    CHARACTER(LEN=*), INTENT(INOUT) :: name ! The name
+    INTEGER(size_t) , INTENT(INOUT) :: size ! The length of the name buffer
     INTEGER :: errcode                      ! Error code
 
     INTERFACE
@@ -397,7 +397,7 @@ CONTAINS
          IMPORT :: HID_T, SIZE_T
          IMPLICIT NONE
          INTEGER(hid_t),   INTENT(in)    :: did       ! The dataget
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(out) :: name      ! The name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(INOUT) :: name ! The name
          INTEGER(SIZE_T),  INTENT(inout) :: size      ! Length of name
        END FUNCTION H5DSget_scale_name_c
     END INTERFACE
@@ -426,10 +426,10 @@ CONTAINS
   SUBROUTINE H5DSget_num_scales_f( did, idx, num_scales, errcode)
 
     IMPLICIT NONE
-    INTEGER(hid_t), INTENT(in)  :: did         ! the dataset
-    INTEGER       , INTENT(in)  :: idx         ! the dimension of did to query
-    INTEGER       , INTENT(out) :: num_scales  ! the number of Dimension Scales associated with did
-    INTEGER                     :: errcode     ! error code
+    INTEGER(hid_t), INTENT(in)  :: did          ! the dataset
+    INTEGER       , INTENT(in)  :: idx          ! the dimension of did to query
+    INTEGER       , INTENT(INOUT) :: num_scales ! the number of Dimension Scales associated with did
+    INTEGER                     :: errcode      ! error code
     INTEGER                     :: c_idx
     
     INTERFACE
@@ -437,9 +437,9 @@ CONTAINS
             BIND(C,NAME='h5dsget_num_scales_c')
          IMPORT :: HID_T
          IMPLICIT NONE
-         INTEGER(hid_t), INTENT(in)  :: did        ! the dataset
-         INTEGER       , INTENT(in)  :: idx        ! the dimension of did to query
-         INTEGER       , INTENT(out) :: num_scales ! the number of Dimension Scales associated with did
+         INTEGER(hid_t), INTENT(in)  :: did          ! the dataset
+         INTEGER       , INTENT(in)  :: idx          ! the dimension of did to query
+         INTEGER       , INTENT(INOUT) :: num_scales ! the number of Dimension Scales associated with did
        END FUNCTION H5DSget_num_scales_c
     END INTERFACE
     

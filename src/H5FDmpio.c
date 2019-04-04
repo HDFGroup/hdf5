@@ -745,7 +745,7 @@ if(H5FD_mpio_Debug[(int)'t'])
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Copy the general information */
-    HDmemcpy(new_fa, old_fa, sizeof(H5FD_mpio_fapl_t));
+    H5MM_memcpy(new_fa, old_fa, sizeof(H5FD_mpio_fapl_t));
 
     /* Duplicate communicator and Info object. */
     if(H5FD_mpi_comm_info_dup(old_fa->comm, old_fa->info, &new_fa->comm, &new_fa->info) < 0)

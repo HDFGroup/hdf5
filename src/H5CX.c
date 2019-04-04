@@ -76,7 +76,7 @@
 #define H5CX_RETRIEVE_PROP_COMMON(PL, DEF_PL, PROP_NAME, PROP_FIELD)          \
     /* Check for default property list */                                     \
     if((*head)->ctx.H5_GLUE(PL,_id) == (DEF_PL))                              \
-        HDmemcpy(&(*head)->ctx.PROP_FIELD, &H5_GLUE3(H5CX_def_,PL,_cache).PROP_FIELD, sizeof(H5_GLUE3(H5CX_def_,PL,_cache).PROP_FIELD)); \
+        H5MM_memcpy(&(*head)->ctx.PROP_FIELD, &H5_GLUE3(H5CX_def_,PL,_cache).PROP_FIELD, sizeof(H5_GLUE3(H5CX_def_,PL,_cache).PROP_FIELD)); \
     else {                                                                    \
         /* Retrieve the property list */                                      \
         H5CX_RETRIEVE_PLIST(PL, FAIL)                                         \
@@ -816,7 +816,7 @@ H5CX_retrieve_state(H5CX_state_t **api_state)
     /* Keep a copy of the VOL connector property, if there is one */
     if((*head)->ctx.vol_connector_prop_valid && (*head)->ctx.vol_connector_prop.connector_id > 0) {
         /* Get the connector property */
-        HDmemcpy(&(*api_state)->vol_connector_prop, &(*head)->ctx.vol_connector_prop, sizeof(H5VL_connector_prop_t));
+        H5MM_memcpy(&(*api_state)->vol_connector_prop, &(*head)->ctx.vol_connector_prop, sizeof(H5VL_connector_prop_t));
 
         /* Check for actual VOL connector property */
         if((*api_state)->vol_connector_prop.connector_id) {
@@ -892,7 +892,7 @@ H5CX_restore_state(const H5CX_state_t *api_state)
 
     /* Restore the VOL connector info */
     if(api_state->vol_connector_prop.connector_id) {
-        HDmemcpy(&(*head)->ctx.vol_connector_prop, &api_state->vol_connector_prop, sizeof(H5VL_connector_prop_t));
+        H5MM_memcpy(&(*head)->ctx.vol_connector_prop, &api_state->vol_connector_prop, sizeof(H5VL_connector_prop_t));
         (*head)->ctx.vol_connector_prop_valid = TRUE;
     } /* end if */
 
@@ -1318,7 +1318,7 @@ H5CX_set_vol_connector_prop(const H5VL_connector_prop_t *vol_connector_prop)
     HDassert(head && *head);
 
     /* Set the API context value */
-    HDmemcpy(&(*head)->ctx.vol_connector_prop, vol_connector_prop, sizeof(H5VL_connector_prop_t));
+    H5MM_memcpy(&(*head)->ctx.vol_connector_prop, vol_connector_prop, sizeof(H5VL_connector_prop_t));
 
     /* Mark the value as valid */
     (*head)->ctx.vol_connector_prop_valid = TRUE;
@@ -1443,7 +1443,7 @@ H5CX_get_vol_connector_prop(H5VL_connector_prop_t *vol_connector_prop)
     /* Check for value that was set */
     if((*head)->ctx.vol_connector_prop_valid)
         /* Get the value */
-        HDmemcpy(vol_connector_prop, &(*head)->ctx.vol_connector_prop, sizeof(H5VL_connector_prop_t));
+        H5MM_memcpy(vol_connector_prop, &(*head)->ctx.vol_connector_prop, sizeof(H5VL_connector_prop_t));
     else
         HDmemset(vol_connector_prop, 0, sizeof(H5VL_connector_prop_t));
 
@@ -1648,7 +1648,7 @@ H5CX_get_btree_split_ratios(double split_ratio[3])
     H5CX_RETRIEVE_PROP_VALID(dxpl, H5P_DATASET_XFER_DEFAULT, H5D_XFER_BTREE_SPLIT_RATIO_NAME, btree_split_ratio)
 
     /* Get the B-tree split ratio values */
-    HDmemcpy(split_ratio, &(*head)->ctx.btree_split_ratio, sizeof((*head)->ctx.btree_split_ratio));
+    H5MM_memcpy(split_ratio, &(*head)->ctx.btree_split_ratio, sizeof((*head)->ctx.btree_split_ratio));
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

@@ -32,6 +32,7 @@
 #include "H5Eprivate.h"		/* Error handling			*/
 #include "H5FLprivate.h"	/* Free Lists				*/
 #include "H5Iprivate.h"		/* ID Functions				*/
+#include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Spkg.h"		/* Dataspace functions			*/
 #include "H5VMprivate.h"        /* Vector functions			*/
 
@@ -554,10 +555,10 @@ H5S__hyper_iter_coords(const H5S_sel_iter_t *iter, hsize_t *coords)
             HDassert(v < 0);
         } /* end if */
         else
-            HDmemcpy(coords, iter->u.hyp.off, sizeof(hsize_t) * iter->rank);
+            H5MM_memcpy(coords, iter->u.hyp.off, sizeof(hsize_t) * iter->rank);
     } /* end if */
     else
-        HDmemcpy(coords, iter->u.hyp.off, sizeof(hsize_t) * iter->rank);
+        H5MM_memcpy(coords, iter->u.hyp.off, sizeof(hsize_t) * iter->rank);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5S__hyper_iter_coords() */
@@ -3819,18 +3820,18 @@ H5S__hyper_span_blocklist(const H5S_hyper_span_info_t *spans, hsize_t start[],
 
                 /* Copy previous starting points */
                 for(u = 0; u < rank; u++, (*buf)++)
-                    HDmemcpy(*buf, &start[u], sizeof(hsize_t));
+                    H5MM_memcpy(*buf, &start[u], sizeof(hsize_t));
 
                 /* Copy starting point for this span */
-                HDmemcpy(*buf, &curr->low, sizeof(hsize_t));
+                H5MM_memcpy(*buf, &curr->low, sizeof(hsize_t));
                 (*buf)++;
 
                 /* Copy previous ending points */
                 for(u = 0; u < rank; u++, (*buf)++)
-                    HDmemcpy(*buf, &end[u], sizeof(hsize_t));
+                    H5MM_memcpy(*buf, &end[u], sizeof(hsize_t));
 
                 /* Copy starting point for this span */
-                HDmemcpy(*buf, &curr->high, sizeof(hsize_t));
+                H5MM_memcpy(*buf, &curr->high, sizeof(hsize_t));
                 (*buf)++;
 
                 /* Decrement the number of blocks processed */
@@ -3943,11 +3944,11 @@ H5S__get_select_hyper_blocklist(H5S_t *space, hbool_t internal, hsize_t startblo
                 /* Check if we should copy this block information */
                 if(startblock == 0) {
                     /* Copy the starting location */
-                    HDmemcpy(buf, offset, sizeof(hsize_t) * ndims);
+                    H5MM_memcpy(buf, offset, sizeof(hsize_t) * ndims);
                     buf += ndims;
 
                     /* Compute the ending location */
-                    HDmemcpy(buf, offset, sizeof(hsize_t) * ndims);
+                    H5MM_memcpy(buf, offset, sizeof(hsize_t) * ndims);
                     for(u = 0; u < ndims; u++)
                         buf[u] += (diminfo[u].block - 1);
                     buf += ndims;
@@ -6029,7 +6030,7 @@ H5S_hyper_denormalize_offset(H5S_t *space, const hssize_t *old_offset)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSET, FAIL, "can't adjust selection")
 
     /* Copy the selection offset over */
-    HDmemcpy(space->select.offset, old_offset, sizeof(hssize_t) * space->extent.rank);
+    H5MM_memcpy(space->select.offset, old_offset, sizeof(hssize_t) * space->extent.rank);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -7255,7 +7256,7 @@ H5S__hyper_rebuild_helper(const H5S_hyper_span_t *span, H5S_hyper_dim_t span_sla
             if(!H5S__hyper_rebuild_helper(span->down->head, span_slab_info, rank - 1))
                 HGOTO_DONE(FALSE)
 
-            HDmemcpy(canon_down_span_slab_info, span_slab_info, sizeof(H5S_hyper_dim_t) * rank);
+            H5MM_memcpy(canon_down_span_slab_info, span_slab_info, sizeof(H5S_hyper_dim_t) * rank);
         } /* end if */
 
         /* Assign the initial starting point & block size */
