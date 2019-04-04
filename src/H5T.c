@@ -513,6 +513,7 @@ H5FL_DEFINE(H5T_shared_t);
 const unsigned H5O_dtype_ver_bounds[] = {
     H5O_DTYPE_VERSION_1,        /* H5F_LIBVER_EARLIEST */
     H5O_DTYPE_VERSION_3,        /* H5F_LIBVER_V18 */
+    H5O_DTYPE_VERSION_3,        /* H5F_LIBVER_V110 */
     H5O_DTYPE_VERSION_LATEST    /* H5F_LIBVER_LATEST */
 };
 
