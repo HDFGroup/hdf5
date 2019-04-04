@@ -31,6 +31,11 @@ JAVA_API=yes
 
 SUBDIRS=src test examples
 
+# Test with just the native connector, with a single pass-through connector
+# and with a doubly-stacked pass-through.
+VOL_LIST = native "pass_through under_vol=0;under_info={}" \
+           "pass_through under_vol=505;under_info={under_vol=0;under_info={}}"
+
 endif
 
 include $(top_srcdir)/config/conclude.am

@@ -1362,19 +1362,10 @@ H5F__dest(H5F_t *f, hbool_t flush)
             HDONE_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "can't close property list")
 
         /* Clean up the cached VOL connector ID & info */
-        if(f->shared->vol_info) {
-            H5VL_class_t *connector;       /* Pointer to connector */
-
-            /* Retrieve the connector for the ID */
-            if(NULL == (connector = (H5VL_class_t *)H5I_object(f->shared->vol_id)))
-                /* Push error, but keep going*/
-                HDONE_ERROR(H5E_FILE, H5E_BADTYPE, FAIL, "not a VOL connector ID")
-
-            /* Free the connector info */
-            if(H5VL_free_connector_info(connector, f->shared->vol_info) < 0)
+        if(f->shared->vol_info)
+            if(H5VL_free_connector_info(f->shared->vol_id, f->shared->vol_info) < 0)
                 /* Push error, but keep going*/
                 HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "unable to release VOL connector info object")
-        } /* end if */
         if(f->shared->vol_id > 0)
             if(H5I_dec_ref(f->shared->vol_id) < 0)
                 /* Push error, but keep going*/

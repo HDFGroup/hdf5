@@ -609,10 +609,10 @@ static void test_getobjectinfo_same_file()
     catch (Exception& E)
     {
         cerr << " in Exception " << E.getCFuncName() << "detail: " << E.getCDetailMsg() << endl;
-        issue_fail_msg("test_file_name()", __LINE__, __FILE__, E.getCDetailMsg());
+        issue_fail_msg("test_getobjectinfo_same_file()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 
-}   // test_h5o_getinfo_same_file
+}   // test_getobjectinfo_same_file
 
 /*-------------------------------------------------------------------------
  * Function:    test_object
