@@ -890,7 +890,7 @@ H5VL_rados_info_cmp(int *cmp_value, const void *_info1, const void *_info2)
     assert(info1);
     assert(info2);
 
-    *cmp_value = memcmp(info1, info2, sizeof(H5VL_rados_info_t);
+    *cmp_value = memcmp(info1, info2, sizeof(H5VL_rados_info_t));
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
