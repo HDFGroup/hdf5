@@ -471,8 +471,8 @@ done:
 
 /* Create a RADOS string oid given the file name and binary oid */
 static herr_t
-H5VL_rados_oid_create_string(const H5VL_rados_file_t *file, uint64_t bin_oid,
-    char **oid)
+H5VL_rados_oid_create_string_name(const char *file_name, size_t file_name_len,
+    uint64_t bin_oid, char **oid)
 {
     char *tmp_oid = NULL;
     herr_t ret_value = SUCCEED;
@@ -480,13 +480,13 @@ H5VL_rados_oid_create_string(const H5VL_rados_file_t *file, uint64_t bin_oid,
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Allocate space for oid */
-    if(NULL == (tmp_oid = (char *)H5MM_malloc(2 + file->file_name_len + 16 + 1)))
+    if(NULL == (tmp_oid = (char *)H5MM_malloc(2 + file_name_len + 16 + 1)))
         HGOTO_ERROR(H5E_VOL, H5E_CANTALLOC, FAIL, "can't allocate RADOS object id")
 
     /* Encode file name and binary oid into string oid */
-    if(HDsnprintf(tmp_oid, 2 + file->file_name_len + 16 + 1, "ob%s%016llX",
-            file->file_name, (long long unsigned)bin_oid)
-            != 2 + (int)file->file_name_len + 16)
+    if(HDsnprintf(tmp_oid, 2 + file_name_len + 16 + 1, "ob%s%016llX",
+            file_name, (long long unsigned)bin_oid)
+            != 2 + (int)file_name_len + 16)
         HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't encode string object id")
 
     /* Return oid string value */
@@ -497,6 +497,16 @@ done:
     H5MM_xfree(tmp_oid);
 
     FUNC_LEAVE_NOAPI(ret_value)
+}
+
+
+/* Create a RADOS string oid given the file name and binary oid */
+static herr_t
+H5VL_rados_oid_create_string(const H5VL_rados_file_t *file, uint64_t bin_oid,
+    char **oid)
+{
+    return H5VL_rados_oid_create_string_name(file->file_name,
+        file->file_name_len, bin_oid, oid);
 } /* end H5VL_rados_oid_create_string() */
 
 
@@ -1304,7 +1314,6 @@ H5VL_rados_file_specific(void *item, H5VL_file_specific_t specific_type,
     hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req,
     va_list H5_ATTR_UNUSED arguments)
 {
-    H5VL_rados_file_t *file = ((H5VL_rados_item_t *)item)->file;
     herr_t       ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1312,16 +1321,44 @@ H5VL_rados_file_specific(void *item, H5VL_file_specific_t specific_type,
     switch (specific_type) {
         /* H5Fflush` */
         case H5VL_FILE_FLUSH:
+        {
+            H5VL_rados_file_t *file = ((H5VL_rados_item_t *)item)->file;
+
             if(H5VL_rados_file_flush(file) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "can't flush file")
 
             break;
+        }
         /* H5Fmount */
         case H5VL_FILE_MOUNT:
         /* H5Fmount */
         case H5VL_FILE_UNMOUNT:
         /* H5Fis_accessible */
         case H5VL_FILE_IS_ACCESSIBLE:
+        {
+            hid_t       fapl_id = HDva_arg(arguments, hid_t);
+            const char *name    = HDva_arg(arguments, const char *);
+            htri_t     *ret     = HDva_arg(arguments, htri_t *);
+            char       *glob_md_oid = NULL;
+            uint64_t    gcpl_len = 0;
+            time_t      pmtime;
+
+            /* Get global metadata ID */
+            if(H5VL_rados_oid_create_string_name(name, HDstrlen(name), 0, &glob_md_oid) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTENCODE, FAIL, "can't encode string oid")
+
+            /* Get the object size and time */
+            if(H5VL_rados_stat(ioctx_g, glob_md_oid, &gcpl_len, &pmtime) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't read metadata size from group")
+
+            /* Check for metadata not found */
+            if(gcpl_len == (uint64_t)0)
+                *ret = FALSE;
+            else
+                *ret = TRUE;
+            break;
+        }
+
         case H5VL_FILE_REOPEN:
         default:
             HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "invalid or unsupported specific operation")
