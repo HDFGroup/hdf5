@@ -1,4 +1,4 @@
- version 1.11.4 currently under development
+HDF5 version 1.11.5 currently under development
 ================================================================================
 
 
@@ -48,6 +48,14 @@ New Features
 
     Configuration:
     -------------
+    - Skip tools test that test the error stack
+
+      There are some use cases which can cause the error stack of tools to be
+      different then the expected. An option, SKIP_ERROR_STACK_TESTS, was added
+      that will skip over tests that test the error stack.
+
+      (ADB - 2019/03/26, HDFFV-10741)
+
     - Keep stderr and stdout separate in tests
 
       Changed test handling of output capture. Tests now keep the stderr
@@ -149,8 +157,8 @@ New Features
     - Changed the default behavior in parallel when reading the same dataset in its entirely
       (i.e. H5S_ALL dataset selection) which is being read by all the processes collectively.
       The dataset mush be contiguous, less than 2GB, and of an atomic datatype.
-      The new behavior is the HDF5 library will use an MPI_Bcast to pass the data read from 
-      the disk by the root process to the remain processes in the MPI communicator associated 
+      The new behavior is the HDF5 library will use an MPI_Bcast to pass the data read from
+      the disk by the root process to the remain processes in the MPI communicator associated
       with the HDF5 file.
 
       (MSB - 2019/01/02, HDFFV-10652)
@@ -165,10 +173,10 @@ New Features
 
     - Added new Fortran API, H5gmtime, which converts (C) 'time_t' structure
       to Fortran DATE AND TIME storage format.
-      
+
       (MSB, 2019/01/08, HDFFV-10443)
 
-    - Added new Fortran 'fields' optional parameter to: h5ovisit_f, h5oget_info_by_name_f, 
+    - Added new Fortran 'fields' optional parameter to: h5ovisit_f, h5oget_info_by_name_f,
       h5oget_info, h5oget_info_by_idx and h5ovisit_by_name_f.
 
       (MSB, 2019/01/08, HDFFV-10443)
@@ -247,12 +255,12 @@ Bug Fixes since HDF5-1.10.3 release
     - Fixed memory leak in scale offset filter
 
       In a special case where the MinBits is the same as the number of bits in
-      the datatype's precision, the filter's data buffer was not freed, causing 
+      the datatype's precision, the filter's data buffer was not freed, causing
       the memory usage to grow. In general the buffer was freed correctly.  The
-      Minbits are the minimal number of bits to store the data values.  Please 
+      Minbits are the minimal number of bits to store the data values.  Please
       see the reference manual for H5Pset_scaleoffset for the detail.
 
-      (RL - 2019/3/4, HDFFV-10705) 
+      (RL - 2019/3/4, HDFFV-10705)
 
     - Fix hangs with collective metadata reads during chunked dataset I/O
 
@@ -293,8 +301,8 @@ Bug Fixes since HDF5-1.10.3 release
 
       When deleting the attribute nodes from the name index v2 B-tree,
       if an attribute is found in the intermediate B-tree nodes,
-      which may be merged/redistributed in the process, we need to 
-      free the dynamically allocated spaces for the intermediate 
+      which may be merged/redistributed in the process, we need to
+      free the dynamically allocated spaces for the intermediate
       decoded attribute.
 
       (VC - 2018/12/26, HDFFV-10659)
@@ -371,10 +379,10 @@ Bug Fixes since HDF5-1.10.3 release
     Fortran
     --------
     - Added symbolic links libhdf5_hl_fortran.so to libhdf5hl_fortran.so and
-      libhdf5_hl_fortran.a to libhdf5hl_fortran.a in hdf5/lib directory for 
-      autotools installs.  These were added to match the name of the files 
-      installed by cmake and the general pattern of hl lib files.  We will 
-      change the names of the installed lib files to the matching name in 
+      libhdf5_hl_fortran.a to libhdf5hl_fortran.a in hdf5/lib directory for
+      autotools installs.  These were added to match the name of the files
+      installed by cmake and the general pattern of hl lib files.  We will
+      change the names of the installed lib files to the matching name in
       the next major release.
 
       (LRK - 2019/01/04, HDFFV-10596)
@@ -385,7 +393,7 @@ Bug Fixes since HDF5-1.10.3 release
 
       (MSB, 2018/12/04, HDFFV-10511)
 
-    - Fixed issue with Fortran not returning h5o_info_t field values 
+    - Fixed issue with Fortran not returning h5o_info_t field values
       meta_size%attr%index_size and  meta_size%attr%heap_size.
 
       (MSB, 2018/1/8, HDFFV-10443)
@@ -668,10 +676,10 @@ Bug Fixes since HDF5-1.10.2 release
       conversions from or to long double types, especially when special values
       such as infinity or NAN were involved.  In some cases the results differed
       by extremely small amounts from those on other machines, while some other
-      tests resulted in segmentation faults.  These conversion tests with long 
-      double types have been disabled for ppc64 machines until the problems are 
+      tests resulted in segmentation faults.  These conversion tests with long
+      double types have been disabled for ppc64 machines until the problems are
       better understood and can be properly addressed.
-    
+
       (SRL - 2019/01/07, TRILAB-98)
 
 Supported Platforms

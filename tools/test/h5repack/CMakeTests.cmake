@@ -335,19 +335,27 @@
         if (last_test)
           set_tests_properties (H5REPACK_MASK-${testname}-clear-objects PROPERTIES DEPENDS ${last_test})
         endif ()
-        add_test (
-            NAME H5REPACK_MASK-${testname}
-            COMMAND "${CMAKE_COMMAND}"
-                -D "TEST_PROGRAM=$<TARGET_FILE:h5repack>"
-                -D "TEST_ARGS:STRING=${ARGN};${resultfile};out-${testname}.${resultfile}"
-                -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
-                -D "TEST_OUTPUT=${resultfile}-${testname}.out"
-                -D "TEST_EXPECT=${resultcode}"
-                -D "TEST_MASK_ERROR=true"
-                -D "TEST_REFERENCE=${resultfile}.mty"
-                -D "TEST_ERRREF=${resultfile}-${testname}.tst"
-                -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
-        )
+        if (SKIP_ERROR_STACK_TESTS)
+          add_test (
+              NAME H5REPACK_MASK-${testname}
+              COMMAND ${CMAKE_COMMAND} -E echo "SKIP Error Stack Test"
+          )
+          set_property(TEST H5REPACK_MASK-${testname} PROPERTY DISABLED)
+        else ()
+          add_test (
+              NAME H5REPACK_MASK-${testname}
+              COMMAND "${CMAKE_COMMAND}"
+                  -D "TEST_PROGRAM=$<TARGET_FILE:h5repack>"
+                  -D "TEST_ARGS:STRING=${ARGN};${resultfile};out-${testname}.${resultfile}"
+                  -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
+                  -D "TEST_OUTPUT=${resultfile}-${testname}.out"
+                  -D "TEST_EXPECT=${resultcode}"
+                  -D "TEST_MASK_ERROR=true"
+                  -D "TEST_REFERENCE=${resultfile}.mty"
+                  -D "TEST_ERRREF=${resultfile}-${testname}.tst"
+                  -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+          )
+        endif ()
         set_tests_properties (H5REPACK_MASK-${testname} PROPERTIES DEPENDS H5REPACK_MASK-${testname}-clear-objects)
       endif ()
     endif ()

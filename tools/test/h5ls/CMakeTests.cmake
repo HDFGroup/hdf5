@@ -189,18 +189,26 @@
               testfiles/${resultfile}.out
               testfiles/${resultfile}.out.err
       )
-      add_test (
-          NAME H5LS-${resultfile}
-          COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5ls>"
-              -D "TEST_ARGS=${ARGN}"
-              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
-              -D "TEST_OUTPUT=${resultfile}.out"
-              -D "TEST_EXPECT=${resultcode}"
-              -D "TEST_REFERENCE=${resultfile}.ls"
-              -D "TEST_ERRREF=${resultfile}.err"
-              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
-      )
+      if (SKIP_ERROR_STACK_TESTS)
+        add_test (
+            NAME HH5LS-${resultfile}
+            COMMAND ${CMAKE_COMMAND} -E echo "SKIP Error Stack Test"
+        )
+        set_property(TEST H5LS-${resultfile} PROPERTY DISABLED)
+      else ()
+        add_test (
+            NAME H5LS-${resultfile}
+            COMMAND "${CMAKE_COMMAND}"
+                -D "TEST_PROGRAM=$<TARGET_FILE:h5ls>"
+                -D "TEST_ARGS=${ARGN}"
+                -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
+                -D "TEST_OUTPUT=${resultfile}.out"
+                -D "TEST_EXPECT=${resultcode}"
+                -D "TEST_REFERENCE=${resultfile}.ls"
+                -D "TEST_ERRREF=${resultfile}.err"
+                -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+        )
+      endif ()
       set_tests_properties (H5LS-${resultfile} PROPERTIES DEPENDS H5LS-${resultfile}-clear-objects)
     endif ()
   endmacro ()

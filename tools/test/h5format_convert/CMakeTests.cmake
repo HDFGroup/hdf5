@@ -118,18 +118,26 @@
                   -E copy_if_different ${HDF5_TOOLS_TEST_H5FC_SOURCE_DIR}/testfiles/${testfile} ./testfiles/outtmp.h5
           )
           set_tests_properties (H5FC-${testname}-${testfile}-tmpfile PROPERTIES DEPENDS "H5FC-${testname}-clear-objects")
-          add_test (
-              NAME H5FC-${testname}-${testfile}
-              COMMAND "${CMAKE_COMMAND}"
-                  -D "TEST_PROGRAM=$<TARGET_FILE:h5format_convert>"
-                  -D "TEST_ARGS=${ARGN};outtmp.h5"
-                  -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
-                  -D "TEST_OUTPUT=${testname}.out"
-                  -D "TEST_EXPECT=${resultcode}"
-                  -D "TEST_REFERENCE=${resultfile}"
-                  -D "TEST_ERRREF=${resultfile}.err"
-                  -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
-          )
+          if (SKIP_ERROR_STACK_TESTS)
+            add_test (
+                NAME H5FC-${testname}-${testfile}
+               COMMAND ${CMAKE_COMMAND} -E echo "SKIP Error Stack Test"
+            )
+            set_property(TEST H5FC-${testname}-${testfile} PROPERTY DISABLED)
+          else ()
+            add_test (
+                NAME H5FC-${testname}-${testfile}
+                COMMAND "${CMAKE_COMMAND}"
+                    -D "TEST_PROGRAM=$<TARGET_FILE:h5format_convert>"
+                    -D "TEST_ARGS=${ARGN};outtmp.h5"
+                    -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
+                    -D "TEST_OUTPUT=${testname}.out"
+                    -D "TEST_EXPECT=${resultcode}"
+                    -D "TEST_REFERENCE=${resultfile}"
+                    -D "TEST_ERRREF=${resultfile}.err"
+                    -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+            )
+          endif ()
           set_tests_properties (H5FC-${testname}-${testfile} PROPERTIES DEPENDS "H5FC-${testname}-${testfile}-tmpfile")
           set (last_test "H5FC-${testname}-${testfile}")
       else ()
@@ -206,19 +214,27 @@
               -E copy_if_different ${HDF5_TOOLS_TEST_H5FC_SOURCE_DIR}/testfiles/${testfile} ./testfiles/outtmp.h5
       )
       set_tests_properties (H5FC-${testname}-${testfile}-tmpfile PROPERTIES DEPENDS "H5FC-${testname}-clear-objects")
-      add_test (
-          NAME H5FC-${testname}-${testfile}
-          COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5format_convert>"
-              -D "TEST_ARGS=${ARGN};outtmp.h5"
-              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
-              -D "TEST_OUTPUT=${testname}.out"
-              -D "TEST_EXPECT=${resultcode}"
-              -D "TEST_REFERENCE=${resultfile}"
-              -D "TEST_ERRREF=${resultfile}.err"
-              -D "TEST_MASK_ERROR=true"
-              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
-      )
+      if (SKIP_ERROR_STACK_TESTS)
+        add_test (
+            NAME H5FC-${testname}-${testfile}
+            COMMAND ${CMAKE_COMMAND} -E echo "SKIP Error Stack Test"
+        )
+        set_property(TEST H5FC-${testname}-${testfile} PROPERTY DISABLED)
+      else ()
+        add_test (
+            NAME H5FC-${testname}-${testfile}
+            COMMAND "${CMAKE_COMMAND}"
+                -D "TEST_PROGRAM=$<TARGET_FILE:h5format_convert>"
+                -D "TEST_ARGS=${ARGN};outtmp.h5"
+                -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
+                -D "TEST_OUTPUT=${testname}.out"
+                -D "TEST_EXPECT=${resultcode}"
+                -D "TEST_REFERENCE=${resultfile}"
+                -D "TEST_ERRREF=${resultfile}.err"
+                -D "TEST_MASK_ERROR=true"
+                -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+        )
+      endif ()
       set_tests_properties (H5FC-${testname}-${testfile} PROPERTIES DEPENDS "H5FC-${testname}-${testfile}-tmpfile")
       set (last_test "H5FC-${testname}-${testfile}")
     endif ()

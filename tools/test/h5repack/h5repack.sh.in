@@ -48,6 +48,10 @@ DIRNAME='dirname'
 LS='ls'
 AWK='awk'
 
+# Reset the VOL connector to only use the native connector, because of the
+#       error stack checking.   QAK - 2019/03/09
+ENVCMD="env HDF5_VOL_CONNECTOR=native"
+
 H5DETECTSZIP=testh5repack_detect_szip
 H5DETECTSZIP_BIN=`pwd`/$H5DETECTSZIP
 
@@ -284,7 +288,7 @@ TOOLTEST()
     TESTING $H5REPACK $@
     (
         cd $TESTDIR
-        $RUNSERIAL $H5REPACK_BIN "$@" $infile $outfile
+        $ENVCMD $RUNSERIAL $H5REPACK_BIN "$@" $infile $outfile
     )
     RET=$?
     if [ $RET != 0 ] ; then
@@ -716,7 +720,7 @@ TOOLTESTM() {
     TESTING $H5REPACK $@
     (
         cd $TESTDIR
-        $RUNSERIAL $H5REPACK_BIN "$@" $infile $outfile
+        $ENVCMD $RUNSERIAL $H5REPACK_BIN "$@" $infile $outfile
     ) >$actual 2>$actual_err
 
     # save actual and actual_err in case they are needed later.

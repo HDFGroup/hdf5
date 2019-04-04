@@ -652,6 +652,7 @@ HDF5_STRICT_FORMAT_CHECKS      "Whether to perform strict file format checks"   
 HDF_TEST_EXPRESS               "Control testing framework (0-3)"                              "0"
 HDF5_TEST_VFD                  "Execute tests with different VFDs"                            OFF
 HDF5_TEST_VOL                  "Execute tests with different VOL connectors"                  OFF
+SKIP_ERROR_STACK_TESTS         "Skip tests that check the error stack"                        OFF
 HDF5_USE_16_API_DEFAULT        "Use the HDF5 1.6.x API by default"                            OFF
 HDF5_USE_18_API_DEFAULT        "Use the HDF5 1.8.x API by default"                            OFF
 HDF5_USE_110_API_DEFAULT       "Use the HDF5 1.10.x API by default"                           OFF
