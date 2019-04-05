@@ -544,101 +544,44 @@ H5S_select_valid(const H5S_t *space)
 herr_t
 H5S_select_deserialize(H5S_t **space, const uint8_t **p)
 {
-    H5S_t *tmp_space = NULL;    /* Pointer to actual dataspace to use, either
-                                 *space or a newly allocated one */
     uint32_t sel_type;          /* Pointer to the selection type */
-    uint32_t version;           /* Version number */
-    uint8_t flags = 0;          /* Flags */
     herr_t ret_value = FAIL;    /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     HDassert(space);
 
-    /* Allocate space if not provided */
-    if(!*space) {
-        if(NULL == (tmp_space = H5S_create(H5S_SIMPLE)))
-            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, FAIL, "can't create dataspace")
-    } /* end if */
-    else
-        tmp_space = *space;
+    /* Selection-type specific coding is moved to the callbacks. */
 
     /* Decode selection type */
     UINT32DECODE(*p, sel_type);
 
-    /* Decode version */
-    UINT32DECODE(*p, version);
-
-    if(version >= (uint32_t)2) {
-        /* Decode flags */
-        flags = *(*p)++;
-
-        /* Check for unknown flags */
-        if(flags & ~H5S_SELECT_FLAG_BITS)
-            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTLOAD, FAIL, "unknown flag for selection")
-
-        /* Skip over the remainder of the header */
-        *p += 4;
-    } /* end if */
-    else
-        /* Skip over the remainder of the header */
-        *p += 8;
-
-    /* Decode and check or patch rank for point and hyperslab selections */
-    if((sel_type == H5S_SEL_POINTS) || (sel_type == H5S_SEL_HYPERSLABS)) {
-        uint32_t rank;              /* Rank of dataspace */
-
-        /* Decode the rank of the point selection */
-        UINT32DECODE(*p,rank);
-
-        if(!*space) {
-            hsize_t dims[H5S_MAX_RANK];
-
-            /* Patch the rank of the allocated dataspace */
-            (void)HDmemset(dims, 0, (size_t)rank * sizeof(dims[0]));
-            if(H5S_set_extent_simple(tmp_space, rank, dims, NULL) < 0)
-                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "can't set dimensions")
-        } /* end if */
-        else
-            /* Verify the rank of the provided dataspace */
-            if(rank != tmp_space->extent.rank)
-                HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "rank of serialized selection does not match dataspace")
-    } /* end if */
-
     /* Make routine for selection type */
     switch(sel_type) {
         case H5S_SEL_POINTS:         /* Sequence of points selected */
-            ret_value = (*H5S_sel_point->deserialize)(tmp_space, version, flags, p);
+            ret_value = (*H5S_sel_point->deserialize)(space, p);
             break;
 
         case H5S_SEL_HYPERSLABS:     /* Hyperslab selection defined */
-            ret_value = (*H5S_sel_hyper->deserialize)(tmp_space, version, flags, p);
+            ret_value = (*H5S_sel_hyper->deserialize)(space, p);
             break;
 
         case H5S_SEL_ALL:            /* Entire extent selected */
-            ret_value = (*H5S_sel_all->deserialize)(tmp_space, version, flags, p);
+            ret_value = (*H5S_sel_all->deserialize)(space, p);
             break;
 
         case H5S_SEL_NONE:           /* Nothing selected */
-            ret_value = (*H5S_sel_none->deserialize)(tmp_space, version, flags, p);
+            ret_value = (*H5S_sel_none->deserialize)(space, p);
             break;
 
         default:
             break;
     } /* end switch */
+
     if(ret_value < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTLOAD, FAIL, "can't deserialize selection")
 
-    /* Return space to the caller if allocated */
-    if(!*space)
-        *space = tmp_space;
-
 done:
-    /* Free temporary space if not passed to caller (only happens on error) */
-    if(!*space && tmp_space)
-        if(H5S_close(tmp_space) < 0)
-            HDONE_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "can't close dataspace")
-
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S_select_deserialize() */
 
