@@ -96,6 +96,7 @@ typedef struct H5VL_rados_select_chunk_info_t {
  * Prototypes
  */
 static void *H5VL_rados_info_copy(const void *_old_info);
+static herr_t H5VL_rados_info_cmp(int *cmp_value, const void *_info1, const void *_info2);
 static herr_t H5VL_rados_info_free(void *_info);
 static herr_t H5VL_rados_term(void);
 
