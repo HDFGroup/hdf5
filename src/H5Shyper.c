@@ -3507,6 +3507,7 @@ H5S__hyper_serialize(const H5S_t *space, uint8_t **p)
             UINT64ENCODE(pp, space->select.sel_info.hslab->opt_diminfo[i].count);
             UINT64ENCODE(pp, space->select.sel_info.hslab->opt_diminfo[i].block);
         } /* end for */
+        len += (4 * space->extent.rank * 8);
     } /* end if */
     /* Check for a "regular" hyperslab selection */
     else if(space->select.sel_info.hslab->diminfo_valid) {
