@@ -96,6 +96,7 @@ typedef struct H5VL_rados_select_chunk_info_t {
  * Prototypes
  */
 static void *H5VL_rados_info_copy(const void *_old_info);
+static herr_t H5VL_rados_info_cmp(int *cmp_value, const void *_info1, const void *_info2);
 static herr_t H5VL_rados_info_free(void *_info);
 static herr_t H5VL_rados_term(void);
 
@@ -206,7 +207,7 @@ static H5VL_class_t H5VL_rados_g = {
     {   /* info_cls - may need more here (DER) */
         sizeof(H5VL_rados_info_t),                  /* info size    */
         H5VL_rados_info_copy,                       /* info copy    */
-        NULL,                                       /* info compare */
+        H5VL_rados_info_cmp,                        /* info compare */
         H5VL_rados_info_free,                       /* info free    */
         NULL,                                       /* info to str  */
         NULL                                        /* str to info  */
@@ -873,6 +874,38 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_rados_info_copy() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_rados_info_cmp
+ *
+ * Purpose:     Compare rados-specific file access properties.
+ *
+ * Return:      Success:    0, cmp_value set to a value like strcmp
+ *              Failure:    -1
+ *
+ * Programmer:  Dana Robinson
+ *              April, 2019
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL_rados_info_cmp(int *cmp_value, const void *_info1, const void *_info2)
+{
+    H5VL_rados_info_t   *info1 = (H5VL_rados_info_t *)_info1;
+    H5VL_rados_info_t   *info2 = (H5VL_rados_info_t *)_info2;
+    herr_t              ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    assert(info1);
+    assert(info2);
+
+    *cmp_value = memcmp(info1, info2, sizeof(H5VL_rados_info_t));
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_rados_info_cmp() */
 
 
 /*-------------------------------------------------------------------------
