@@ -214,7 +214,7 @@ public class TestH5P {
 
     @Test(expected = HDF5FunctionArgumentException.class)
     public void testH5Pset_libver_bounds_invalidhigh() throws Throwable {
-        H5.H5Pset_libver_bounds(fapl_id, HDF5Constants.H5F_LIBVER_V110, HDF5Constants.H5F_LIBVER_V110+1);
+        H5.H5Pset_libver_bounds(fapl_id, HDF5Constants.H5F_LIBVER_V112, HDF5Constants.H5F_LIBVER_V112+1);
     }
 
     @Test

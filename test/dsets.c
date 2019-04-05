@@ -12990,7 +12990,7 @@ test_versionbounds(void)
             if (vdset > 0) /* dataset created successfully */
             {
                 /* Virtual dataset is only available starting in V110 */
-                VERIFY(high, H5F_LIBVER_V110, "virtual dataset");
+                VERIFY(high >= H5F_LIBVER_V110, TRUE, "virtual dataset");
 
                 if(H5Dclose(vdset) < 0) TEST_ERROR
                 vdset = -1;
