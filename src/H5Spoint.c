@@ -66,8 +66,7 @@ static herr_t H5S__point_release(H5S_t *space);
 static htri_t H5S__point_is_valid(const H5S_t *space);
 static hssize_t H5S__point_serial_size(const H5S_t *space);
 static herr_t H5S__point_serialize(const H5S_t *space, uint8_t **p);
-static herr_t H5S__point_deserialize(H5S_t *space, uint32_t version, uint8_t flags,
-    const uint8_t **p);
+static herr_t H5S__point_deserialize(H5S_t **space, const uint8_t **p);
 static herr_t H5S__point_bounds(const H5S_t *space, hsize_t *start, hsize_t *end);
 static herr_t H5S__point_offset(const H5S_t *space, hsize_t *off);
 static int H5S__point_unlim_dim(const H5S_t *space);
@@ -1072,7 +1071,7 @@ static herr_t
 H5S__point_serialize(const H5S_t *space, uint8_t **p)
 {
     H5S_pnt_node_t *curr;       /* Point information nodes */
-    uint8_t *pp = (*p);         /* Local pointer for decoding */
+    uint8_t *pp;                /* Local pointer for encoding */
     uint8_t *lenp;              /* Pointer to length location for later storage */
     uint32_t len = 0;           /* Number of bytes used */
     unsigned u;                 /* Local counting variable */
@@ -1082,6 +1081,7 @@ H5S__point_serialize(const H5S_t *space, uint8_t **p)
     /* Check args */
     HDassert(space);
     HDassert(p);
+    pp = (*p);
     HDassert(pp);
 
     /* Store the preamble information */
@@ -1129,10 +1129,8 @@ H5S__point_serialize(const H5S_t *space, uint8_t **p)
     Deserialize the current selection from a user-provided buffer.
  USAGE
     herr_t H5S__point_deserialize(space, p)
-        H5S_t *space;           IN/OUT: Dataspace pointer to place
+        H5S_t **space;          IN/OUT: Dataspace pointer to place
                                 selection into
-        uint32_t version        IN: Selection version
-        uint8_t flags           IN: Selection flags
         uint8 **p;              OUT: Pointer to buffer holding serialized
                                 selection.  Will be advanced to end of
                                 serialized selection.
@@ -1147,11 +1145,14 @@ H5S__point_serialize(const H5S_t *space, uint8_t **p)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S__point_deserialize(H5S_t *space, uint32_t H5_ATTR_UNUSED version, uint8_t H5_ATTR_UNUSED flags,
-    const uint8_t **p)
+H5S__point_deserialize(H5S_t **space, const uint8_t **p)
 {
+    H5S_t *tmp_space = NULL;    /* Pointer to actual dataspace to use,
+                                   either *space or a newly allocated one */
+    hsize_t dims[H5S_MAX_RANK]; /* Dimension sizes */
+    uint32_t version;           /* Version number */
     hsize_t *coord = NULL, *tcoord;     /* Pointer to array of elements */
-    const uint8_t *pp = (*p);   /* Local pointer for decoding */
+    const uint8_t *pp;          /* Local pointer for decoding */
     size_t num_elem = 0;        /* Number of elements in selection */
     unsigned rank;              /* Rank of points */
     unsigned i, j;              /* local counting variables */
@@ -1160,13 +1161,43 @@ H5S__point_deserialize(H5S_t *space, uint32_t H5_ATTR_UNUSED version, uint8_t H5
     FUNC_ENTER_STATIC
 
     /* Check args */
-    HDassert(space);
     HDassert(p);
+    pp = (*p);
     HDassert(pp);
 
+    /* As part of the efforts to push all selection-type specific coding
+       to the callbacks, the coding for the allocation of a null dataspace
+       is moved from H5S_select_deserialize() in H5Sselect.c to here.
+       This is needed for decoding virtual layout in H5O__layout_decode() */
+    /* Allocate space if not provided */
+    if(!*space) {
+        if(NULL == (tmp_space = H5S_create(H5S_SIMPLE)))
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, FAIL, "can't create dataspace")
+    } /* end if */
+    else
+        tmp_space = *space;
+
+    /* Decode version */
+    UINT32DECODE(pp, version);
+
+    /* Skip over the remainder of the header */
+    pp += 8;
+
+    /* Decode the rank of the point selection */
+    UINT32DECODE(pp,rank);
+
+    if(!*space) {
+        /* Patch the rank of the allocated dataspace */
+        (void)HDmemset(dims, 0, (size_t)rank * sizeof(dims[0]));
+        if(H5S_set_extent_simple(tmp_space, rank, dims, NULL) < 0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "can't set dimensions")
+    } /* end if */
+    else
+        /* Verify the rank of the provided dataspace */
+        if(rank != tmp_space->extent.rank)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "rank of serialized selection does not match dataspace")
+
     /* Deserialize points to select */
-    /* (The header and rank have already beed decoded) */
-    rank = space->extent.rank;  /* Retrieve rank from space */
     UINT32DECODE(pp, num_elem); /* decode the number of points */
 
     /* Allocate space for the coordinates */
@@ -1179,13 +1210,22 @@ H5S__point_deserialize(H5S_t *space, uint32_t H5_ATTR_UNUSED version, uint8_t H5
             UINT32DECODE(pp, *tcoord);
 
     /* Select points */
-    if(H5S_select_elements(space, H5S_SELECT_SET, num_elem, (const hsize_t *)coord) < 0)
+    if(H5S_select_elements(tmp_space, H5S_SELECT_SET, num_elem, (const hsize_t *)coord) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't change selection")
 
     /* Update decoding pointer */
     *p = pp;
 
+    /* Return space to the caller if allocated */
+    if(!*space)
+        *space = tmp_space;
+
 done:
+    /* Free temporary space if not passed to caller (only happens on error) */
+    if(!*space && tmp_space)
+        if(H5S_close(tmp_space) < 0)
+            HDONE_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "can't close dataspace")
+
     /* Free the coordinate array if necessary */
     if(coord != NULL)
         H5MM_xfree(coord);
