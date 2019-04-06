@@ -99,7 +99,7 @@
     # If using memchecker skip macro based tests
     if (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (NAME H5IMPORT-${testname} COMMAND $<TARGET_FILE:h5import> ${importfile} -c ${conffile} -o ${testfile})
-      if (NOT "${last_test}" STREQUAL "")
+      if (last_test)
         set_tests_properties (H5IMPORT-${testname} PROPERTIES DEPENDS H5IMPORT-h5importtest)
       endif ()
     else ()
@@ -499,7 +499,7 @@
           binuin32.bin
           binuin32.conf
   )
-  if (NOT "${last_test}" STREQUAL "")
+  if (last_test)
     set_tests_properties (H5IMPORT-h5importtest-clear-objects PROPERTIES DEPENDS ${last_test})
   endif ()
   set (last_test "H5IMPORT-clear-objects")

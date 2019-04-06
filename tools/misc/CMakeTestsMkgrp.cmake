@@ -8,7 +8,7 @@
 # distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
-
+#
 
 ##############################################################################
 ##############################################################################
@@ -40,13 +40,13 @@
   file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
 
   foreach (h5_mkgrp_file ${HDF5_MKGRP_TEST_FILES})
-    HDFTEST_COPY_FILE("${HDF5_TOOLS_DIR}/testfiles/${h5_mkgrp_file}" "${PROJECT_BINARY_DIR}/testfiles/${h5_mkgrp_file}" "h5mkgrp_files")
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_SRC_DIR}/testfiles/${h5_mkgrp_file}" "${PROJECT_BINARY_DIR}/testfiles/${h5_mkgrp_file}" "h5mkgrp_files")
   endforeach ()
 
-  HDFTEST_COPY_FILE("${HDF5_TOOLS_MISC_SOURCE_DIR}/testfiles/h5mkgrp_help.txt" "${PROJECT_BINARY_DIR}/testfiles/h5mkgrp_help.txt" "h5mkgrp_files")
+  HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/testfiles/h5mkgrp_help.txt" "${PROJECT_BINARY_DIR}/testfiles/h5mkgrp_help.txt" "h5mkgrp_files")
   add_custom_target(h5mkgrp_files ALL COMMENT "Copying files needed by h5mkgrp tests" DEPENDS ${h5mkgrp_files_list})
 
-  configure_file (${HDF5_TOOLS_MISC_SOURCE_DIR}/testfiles/h5mkgrp_version.txt.in ${PROJECT_BINARY_DIR}/testfiles/h5mkgrp_version.txt @ONLY)
+  configure_file (${PROJECT_SOURCE_DIR}/testfiles/h5mkgrp_version.txt.in ${PROJECT_BINARY_DIR}/testfiles/h5mkgrp_version.txt @ONLY)
 
 ##############################################################################
 ##############################################################################
@@ -73,7 +73,7 @@
     )
     set_tests_properties (H5MKGRP-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
     if (HDF5_ENABLE_USING_MEMCHECKER)
-      if (NOT "${last_test}" STREQUAL "")
+      if (last_test)
         set_tests_properties (H5MKGRP-${resultfile} PROPERTIES DEPENDS ${last_test})
       endif ()
     else ()
@@ -174,7 +174,7 @@
                 h5mkgrp_nested_mult_lp.out.err
     )
     set_tests_properties (H5MKGRP-clearall-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
-    if (NOT "${last_test}" STREQUAL "")
+    if (last_test)
       set_tests_properties (H5MKGRP-clearall-objects PROPERTIES DEPENDS ${last_test})
     endif ()
     set (last_test "H5MKGRP-clearall-objects")

@@ -244,7 +244,7 @@ foreach (KIND ${VAR} )
   set (pack_real_sizeof "${pack_real_sizeof} ${PROG_OUTPUT1},")
 endforeach ()
 
-if (pack_int_sizeof STREQUAL "")
+if (pack_real_sizeof STREQUAL "")
    message (FATAL_ERROR "Failed to find available REAL KINDs for Fortran")
 endif ()
 
