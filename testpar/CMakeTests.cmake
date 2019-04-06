@@ -89,7 +89,7 @@ endforeach ()
 
 # The t_pflush1 test is hard-coded to fail.
 set_tests_properties (MPI_TEST_t_pflush1 PROPERTIES WILL_FAIL "true")
-#set_property (TEST MPI_TEST_t_pflush1 PROPERTY PASS_REGULAR_EXPRESSION "PASSED")
+#set_property (MPI_TEST_t_pflush1 PROPERTY PASS_REGULAR_EXPRESSION "PASSED")
 set_tests_properties (MPI_TEST_t_pflush2 PROPERTIES DEPENDS MPI_TEST_t_pflush1)
 set_tests_properties (MPI_TEST_t_prestart PROPERTIES DEPENDS MPI_TEST_t_pshutdown)
 
