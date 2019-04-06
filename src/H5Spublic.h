@@ -97,7 +97,7 @@ H5_DLL herr_t H5Sset_extent_simple(hid_t space_id, int rank,
     const hsize_t dims[], const hsize_t max[]);
 H5_DLL hid_t H5Scopy(hid_t space_id);
 H5_DLL herr_t H5Sclose(hid_t space_id);
-H5_DLL herr_t H5Sencode(hid_t obj_id, void *buf, size_t *nalloc);
+H5_DLL herr_t H5Sencode2(hid_t obj_id, void *buf, size_t *nalloc, hid_t fapl);
 H5_DLL hid_t H5Sdecode(const void *buf);
 H5_DLL hssize_t H5Sget_simple_extent_npoints(hid_t space_id);
 H5_DLL int H5Sget_simple_extent_ndims(hid_t space_id);
@@ -133,6 +133,16 @@ H5_DLL htri_t H5Sget_regular_hyperslab(hid_t spaceid, hsize_t start[],
 H5_DLL hssize_t H5Sget_select_hyper_nblocks(hid_t spaceid);
 H5_DLL herr_t H5Sget_select_hyper_blocklist(hid_t spaceid, hsize_t startblock,
     hsize_t numblocks, hsize_t buf[/*numblocks*/]);
+
+/* Symbols defined for compatibility with previous versions of the HDF5 API.
+ *
+ * Use of these symbols is deprecated.
+ */
+#ifndef H5_NO_DEPRECATED_SYMBOLS
+/* Function prototypes */
+H5_DLL herr_t H5Sencode1(hid_t obj_id, void *buf, size_t *nalloc);
+
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 #ifdef __cplusplus
 }

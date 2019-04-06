@@ -1149,7 +1149,7 @@ h5sdecode_c ( _fcd buf, hid_t_f *obj_id )
 */
 
 int_f
-h5sencode_c (_fcd buf, hid_t_f *obj_id, size_t_f *nalloc )
+h5sencode_c (_fcd buf, hid_t_f *obj_id, size_t_f *nalloc, hid_t_f *fapl_id )
 /******/
 {
   int ret_value = -1;
@@ -1162,7 +1162,7 @@ h5sencode_c (_fcd buf, hid_t_f *obj_id, size_t_f *nalloc )
 
   if (*nalloc == 0) {
 
-    if(H5Sencode((hid_t)*obj_id, c_buf, &c_size) < 0)
+    if(H5Sencode2((hid_t)*obj_id, c_buf, &c_size, (hid_t)*fapl_id) < 0)
       return ret_value;
 
     *nalloc = (size_t_f)c_size;
@@ -1180,7 +1180,7 @@ h5sencode_c (_fcd buf, hid_t_f *obj_id, size_t_f *nalloc )
   /*
    * Call H5Sencode function.
    */
-  if(H5Sencode((hid_t)*obj_id, c_buf, &c_size) < 0){
+  if(H5Sencode2((hid_t)*obj_id, c_buf, &c_size, (hid_t)*fapl_id) < 0){
     return ret_value;
   }
 
