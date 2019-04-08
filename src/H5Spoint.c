@@ -1272,7 +1272,7 @@ H5S__point_deserialize(H5S_t **space, const uint8_t **p)
     uint8_t enc_size = 0;       /* Encoded size of selection info */
     hsize_t *coord = NULL, *tcoord;     /* Pointer to array of elements */
     const uint8_t *pp;          /* Local pointer for decoding */
-    hsize_t num_elem = 0;       /* Number of elements in selection */
+    uint64_t num_elem = 0;      /* Number of elements in selection */
     unsigned rank;              /* Rank of points */
     unsigned i, j;              /* local counting variables */
     herr_t ret_value = SUCCEED; /* Return value */
