@@ -847,6 +847,7 @@
 ./src/H5S.c
 ./src/H5Sall.c
 ./src/H5Sdbg.c
+./src/H5Sdeprec.c
 ./src/H5Shyper.c
 ./src/H5Smodule.h
 ./src/H5Smpio.c

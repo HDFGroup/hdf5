@@ -189,8 +189,9 @@ SUBROUTINE test_h5s_encode(total_error)
 
   INTEGER(hid_t) :: sid1, sid3!	 Dataspace ID		
   INTEGER(hid_t) :: decoded_sid1, decoded_sid3
+  INTEGER(hid_t) :: fapl    ! File access property
   INTEGER :: rank    ! LOGICAL rank of dataspace	
-  INTEGER(size_t) :: sbuf_size=0, scalar_size=0
+  INTEGER(size_t) :: new_size = 0, old_size = 0, orig_size=0, scalar_size=0
 
 ! Make sure the size is large
   CHARACTER(LEN=288) :: sbuf
@@ -228,18 +229,36 @@ SUBROUTINE test_h5s_encode(total_error)
 
   ! Encode simple data space in a buffer 
 
-  !         First find the buffer size
-  CALL H5Sencode_f(sid1, sbuf, sbuf_size, error)
-  CALL check("H5Sencode", error, total_error)
+  ! Find the buffer size without fapl
+  CALL H5Sencode_f(sid1, sbuf, orig_size, error)
+  CALL check("H5Sencode_f", error, total_error)
+  CALL verify("H5Sencode_f", INT(orig_size), 279, total_error)
+ 
+  ! Create file access property list
+  CALL h5pcreate_f(H5P_FILE_ACCESS_F, fapl, error)
+  CALL check("h5pcreate_f", error, total_error)
 
+  ! Find the buffer size with fapl (default old format)
+  CALL H5Sencode_f(sid1, sbuf, old_size, error, fapl)
+  CALL check("H5Sencode_f", error, total_error)
+  CALL verify("H5Sencode_f", INT(old_size), 279, total_error)
+
+  ! Set fapl to latest file format
+  CALL H5Pset_libver_bounds_f(fapl, H5F_LIBVER_LATEST_F, H5F_LIBVER_LATEST_F, error)
+  CALL check("H5Pset_libver_bounds_f",error, total_error)
+
+  ! Find the buffer size with fapl set to latest format
+  CALL H5Sencode_f(sid1, sbuf, new_size, error, fapl)
+  CALL check("H5Sencode_f", error, total_error)
+  CALL verify("H5Sencode_f", INT(new_size), 101, total_error)
 
   !  Try decoding bogus buffer 
-
   CALL H5Sdecode_f(sbuf, decoded_sid1, error)
   CALL verify("H5Sdecode", error, -1, total_error)
 
-  CALL H5Sencode_f(sid1, sbuf, sbuf_size, error)
-  CALL check("H5Sencode", error, total_error)
+  !  Encode according to the latest file format
+  CALL H5Sencode_f(sid1, sbuf, new_size, error, fapl)
+  CALL check("H5Sencode_f", error, total_error)
 
   !  Decode from the dataspace buffer and return an object handle 
   CALL H5Sdecode_f(sbuf, decoded_sid1, error)

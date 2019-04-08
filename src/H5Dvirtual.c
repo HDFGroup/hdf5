@@ -430,6 +430,10 @@ H5D__virtual_store_layout(H5F_t *f, H5O_layout_t *layout)
 
     /* Create block if # of used entries > 0 */
     if(layout->storage.u.virt.list_nused > 0) {
+
+        /* Set the low/high bounds according to 'f' for the API context */
+        H5CX_set_libver_bounds(f);
+
         /* Allocate array for caching results of strlen */
         if(NULL == (str_size = (size_t *)H5MM_malloc(2 * layout->storage.u.virt.list_nused * sizeof(size_t))))
             HGOTO_ERROR(H5E_OHDR, H5E_RESOURCE, FAIL, "unable to allocate string length array")

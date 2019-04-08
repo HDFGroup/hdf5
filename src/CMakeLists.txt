@@ -533,6 +533,7 @@ set (H5S_SOURCES
     ${HDF5_SRC_DIR}/H5S.c
     ${HDF5_SRC_DIR}/H5Sall.c
     ${HDF5_SRC_DIR}/H5Sdbg.c
+    ${HDF5_SRC_DIR}/H5Sdeprec.c
     ${HDF5_SRC_DIR}/H5Shyper.c
     ${HDF5_SRC_DIR}/H5Smpio.c
     ${HDF5_SRC_DIR}/H5Snone.c
