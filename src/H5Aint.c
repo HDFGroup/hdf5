@@ -108,6 +108,7 @@ static herr_t H5A__iterate_common(hid_t loc_id, H5_index_t idx_type,
 const unsigned H5O_attr_ver_bounds[] = {
     H5O_ATTR_VERSION_1,         /* H5F_LIBVER_EARLIEST */
     H5O_ATTR_VERSION_3,         /* H5F_LIBVER_V18 */
+    H5O_ATTR_VERSION_3,         /* H5F_LIBVER_V110 */
     H5O_ATTR_VERSION_LATEST     /* H5F_LIBVER_LATEST */
 };
 

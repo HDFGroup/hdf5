@@ -193,6 +193,10 @@ typedef struct H5CX_t {
     hid_t dapl_id;              /* DAPL ID for API operation */
     H5P_genplist_t *dapl;       /* Dataset Access Property List */
 
+    /* FAPL */
+    hid_t fapl_id;              /* FAPL ID for API operation */
+    H5P_genplist_t *fapl;       /* File Access Property List */
+
     /* Internal: Object tagging info */
     haddr_t tag;                /* Current object's tag (ohdr chunk #0 address) */
 
@@ -288,6 +292,12 @@ typedef struct H5CX_t {
     char *vds_prefix;
     hbool_t vds_prefix_valid;
 
+    /* Cached FAPL properties */
+    H5F_libver_t low_bound;     /* low_bound property for H5Pset_libver_bounds() */
+    hbool_t low_bound_valid;    /* Whether low_bound property is valid */
+    H5F_libver_t high_bound;    /* high_bound property for H5Pset_libver_bounds */
+    hbool_t high_bound_valid;   /* Whether high_bound property is valid */
+
     /* Cached VOL settings */
     H5VL_connector_prop_t vol_connector_prop;  /* Property for VOL connector ID & info */
     hbool_t vol_connector_prop_valid; /* Whether property for VOL connector ID & info is valid */
@@ -355,6 +365,13 @@ typedef struct H5CX_dapl_cache_t {
     char *vds_prefix;
 } H5CX_dapl_cache_t;
 
+/* Typedef for cached default file access property list information */
+/* (Same as the cached DXPL struct, above, except for the default DCPL) */
+typedef struct H5CX_fapl_cache_t {
+    H5F_libver_t low_bound;     /* low_bound property for H5Pset_libver_bounds() */
+    H5F_libver_t high_bound;    /* high_bound property for H5Pset_libver_bounds */
+} H5CX_fapl_cache_t;
+
 /********************/
 /* Local Prototypes */
 /********************/
@@ -393,6 +410,9 @@ static H5CX_dcpl_cache_t H5CX_def_dcpl_cache;
 /* Define a "default" dataset access property list cache structure to use for default DAPLs */
 static H5CX_dapl_cache_t H5CX_def_dapl_cache;
 
+/* Define a "default" file access property list cache structure to use for default FAPLs */
+static H5CX_fapl_cache_t H5CX_def_fapl_cache;
+
 /* Declare a static free list to manage H5CX_node_t structs */
 H5FL_DEFINE_STATIC(H5CX_node_t);
 
@@ -418,6 +438,7 @@ H5CX__init_package(void)
     H5P_genplist_t *la_plist;           /* Link access property list */
     H5P_genplist_t *dc_plist;           /* Dataset creation property list */
     H5P_genplist_t *da_plist;           /* Dataset access property list */
+    H5P_genplist_t *fa_plist;           /* File access property list */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
@@ -531,7 +552,6 @@ H5CX__init_package(void)
     if(H5P_get(dc_plist, H5D_CRT_MIN_DSET_HDR_SIZE_NAME, &H5CX_def_dcpl_cache.do_min_dset_ohdr) < 0)
         HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve dataset minimize flag")
 
-
     /* Reset the "default DAPL cache" information */
     HDmemset(&H5CX_def_dapl_cache, 0, sizeof(H5CX_dapl_cache_t));
 
@@ -548,6 +568,22 @@ H5CX__init_package(void)
     /* Get the prefix for the VDS file */
     if(H5P_peek(da_plist, H5D_ACS_VDS_PREFIX_NAME, &H5CX_def_dapl_cache.vds_prefix) < 0)
         HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve prefix for VDS")
+
+    /* Reset the "default FAPL cache" information */
+    HDmemset(&H5CX_def_fapl_cache, 0, sizeof(H5CX_fapl_cache_t));
+
+    /* Get the default FAPL cache information */
+
+    /* Get the default file access property list */
+    if(NULL == (fa_plist = (H5P_genplist_t *)H5I_object(H5P_FILE_ACCESS_DEFAULT)))
+        HGOTO_ERROR(H5E_CONTEXT, H5E_BADTYPE, FAIL, "not a dataset create property list")
+
+    /* Get low_bound */
+    if(H5P_get(fa_plist, H5F_ACS_LIBVER_LOW_BOUND_NAME, &H5CX_def_fapl_cache.low_bound) < 0)
+        HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve dataset minimize flag")
+
+    if(H5P_get(fa_plist, H5F_ACS_LIBVER_HIGH_BOUND_NAME, &H5CX_def_fapl_cache.high_bound) < 0)
+        HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve dataset minimize flag")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -675,6 +711,7 @@ H5CX__push_common(H5CX_node_t *cnode)
     cnode->ctx.dcpl_id = H5P_DATASET_CREATE_DEFAULT;
     cnode->ctx.dapl_id = H5P_DATASET_ACCESS_DEFAULT;
     cnode->ctx.lapl_id = H5P_LINK_ACCESS_DEFAULT;
+    cnode->ctx.fapl_id = H5P_FILE_ACCESS_DEFAULT;
     cnode->ctx.tag = H5AC__INVALID_TAG;
     cnode->ctx.ring = H5AC_RING_USER;
 
@@ -1053,6 +1090,42 @@ H5CX_set_dcpl(hid_t dcpl_id)
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5CX_set_dcpl() */
 
+/*-------------------------------------------------------------------------
+ * Function:    H5CX_set_libver_bounds
+ *
+ * Purpose:     Sets the low/high bounds according to "f" for the current API call context.
+ *              When "f" is NULL, the low/high bounds are set to latest format.
+ *
+ * Return:      Non-negative on success / Negative on failure
+ *
+ * Programmer:  Vailin Choi
+ *              March 27, 2019
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5CX_set_libver_bounds(H5F_t *f)
+{
+    H5CX_node_t **head = H5CX_get_my_context();  /* Get the pointer to the head of the API context, for this thread */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(head && *head);
+
+    /* Set the API context value */
+    (*head)->ctx.low_bound = (f == NULL) ? H5F_LIBVER_LATEST : H5F_LOW_BOUND(f);
+    (*head)->ctx.high_bound = (f == NULL) ? H5F_LIBVER_LATEST : H5F_HIGH_BOUND(f);
+
+    /* Mark the values as valid */
+    (*head)->ctx.low_bound_valid = TRUE;
+    (*head)->ctx.high_bound_valid = TRUE;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5CX_set_libver_bounds() */
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5CX_set_lapl
@@ -1124,6 +1197,7 @@ H5CX_set_apl(hid_t *acspl_id, const H5P_libclass_t *libclass,
     else {
         htri_t is_lapl;         /* Whether the access property list is (or is derived from) a link access property list */
         htri_t is_dapl;         /* Whether the access property list is (or is derived from) a dataset access property list */
+        htri_t is_fapl;         /* Whether the access property list is (or is derived from) a file access property list */
 
 #ifdef H5CX_DEBUG
         /* Sanity check the access property list class */
@@ -1142,6 +1216,12 @@ H5CX_set_apl(hid_t *acspl_id, const H5P_libclass_t *libclass,
             HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "can't check for dataset access class")
         else if(is_dapl)
             (*head)->ctx.dapl_id = *acspl_id;
+
+        /* Check for file access property and set API context if so */
+        if((is_fapl = H5P_class_isa(*libclass->pclass, *H5P_CLS_FACC->pclass)) < 0)
+            HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "can't check for file access class")
+        else if(is_fapl)
+            (*head)->ctx.fapl_id = *acspl_id;
 
 #ifdef H5_HAVE_PARALLEL
         /* If this routine is not guaranteed to be collective (i.e. it doesn't
@@ -2332,6 +2412,43 @@ H5CX_get_nlinks(size_t *nlinks)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5CX_get_nlinks() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5CX_get_libver_bounds
+ *
+ * Purpose:     Retrieves the low/high bounds for the current API call context.
+ *
+ * Return:      Non-negative on success / Negative on failure
+ *
+ * Programmer:  Vailin Choi
+ *              March 27, 2019
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5CX_get_libver_bounds(H5F_libver_t *low_bound, H5F_libver_t *high_bound)
+{
+    H5CX_node_t **head = H5CX_get_my_context();  /* Get the pointer to the head of the API context, for this thread */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(low_bound);
+    HDassert(high_bound);
+    HDassert(head && *head);
+    HDassert(H5P_DEFAULT != (*head)->ctx.fapl_id);
+
+    H5CX_RETRIEVE_PROP_VALID(fapl, H5P_FILE_ACCESS_DEFAULT, H5F_ACS_LIBVER_LOW_BOUND_NAME, low_bound)
+    H5CX_RETRIEVE_PROP_VALID(fapl, H5P_FILE_ACCESS_DEFAULT, H5F_ACS_LIBVER_HIGH_BOUND_NAME, high_bound)
+
+    /* Get the values */
+    *low_bound = (*head)->ctx.low_bound;
+    *high_bound = (*head)->ctx.high_bound;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5CX_get_libver_bounds() */
 
 
 /*-------------------------------------------------------------------------

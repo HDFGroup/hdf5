@@ -1627,45 +1627,6 @@ error:
     return FAIL;
 } /* test_minimized_dset_ohdr_fillvalue_backwards_compatability */
 
-#define STR_EARLIEST "earliest"
-#define STR_V18 "v18"
-#define STR_LATEST "latest"
-static char *
-version_string(H5F_libver_t libver)
-{
-    char *str = NULL;
-
-    str = (char *) HDmalloc(20);
-    if (str == NULL) {
-        HDfprintf(stderr, "Allocation failed\n");
-        HDexit(1);
-    }
-
-    switch(libver) {
-      case H5F_LIBVER_EARLIEST:
-          HDstrcpy(str, STR_EARLIEST);
-          break;
-
-      case H5F_LIBVER_V18:
-          HDstrcpy(str, STR_V18);
-          break;
-
-      case H5F_LIBVER_V110:
-          HDassert(H5F_LIBVER_LATEST == H5F_LIBVER_V110);
-          HDstrcpy(str, STR_LATEST);
-          break;
-
-      case H5F_LIBVER_ERROR:
-      case H5F_LIBVER_NBOUNDS:
-      default:
-          HDsprintf(str, "%ld", (long)libver);
-          break;
-    } /* end switch */
-
-    /* Return the formed version bound string */
-    return str;
-} /* end version_string() */
-
 
 /*-------------------------------------------------------------------------
  * Function:    main
@@ -1693,7 +1654,6 @@ main(void)
     H5O_loc_t      oh_loc;    /* Object header locations */
     H5F_libver_t low, high;   /* File format bounds */
     time_t time_new, ro;
-    char msg[80];             /* Message for file format version */
     int    i;                 /* Local index variable */
     hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t ret;               /* Generic return value */
@@ -1718,8 +1678,9 @@ main(void)
     /* Loop through all the combinations of low/high library format bounds */
     for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, low)) {
       for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, high)) {
-        char *low_string = NULL;
-        char *high_string = NULL;
+        char *low_string = NULL;    /* Message for library version low bound */
+        char *high_string = NULL;   /* Message for library version high bound */
+        char msg[80];               /* Message for file format version */
 
         /* Set version bounds before opening the file */
         H5E_BEGIN_TRY {
@@ -1730,13 +1691,11 @@ main(void)
             continue;
 
         /* Display info about testing */
-        low_string = version_string(low);
-        high_string = version_string(high);
+        low_string = h5_get_version_string(low);
+        high_string = h5_get_version_string(high);
         sprintf(msg, "Using file format version: (%s, %s)", low_string,
                 high_string);
         HDputs(msg);
-        HDfree(high_string);
-        HDfree(low_string);
 
         /* test on object continuation block */
         if(test_cont(filename, fapl) < 0)
