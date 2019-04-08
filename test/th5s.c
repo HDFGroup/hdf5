@@ -1375,6 +1375,196 @@ test_h5s_encode(H5F_libver_t low, H5F_libver_t high)
         HDfree(scalar_buf);
 } /* test_h5s_encode() */
 
+#ifndef H5_NO_DEPRECATED_SYMBOLS
+
+/****************************************************************
+**
+**  test_h5s_encode(): Test H5S (dataspace) encoding and decoding.
+**
+****************************************************************/
+static void
+test_h5s_encode1(void)
+{
+    hid_t sid1, sid2, sid3; /* Dataspace ID */
+    hid_t decoded_sid1, decoded_sid2, decoded_sid3;
+    int rank;               /* Logical rank of dataspace */
+    hsize_t dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
+    size_t sbuf_size=0, null_size=0, scalar_size=0;
+    unsigned char *sbuf=NULL, *null_sbuf=NULL, *scalar_buf=NULL;
+    hsize_t tdims[4];       /* Dimension array to test with */
+    hssize_t n;             /* Number of dataspace elements */
+    hsize_t start[] = {0, 0, 0};
+    hsize_t stride[] = {2, 5, 3};
+    hsize_t count[] = {2, 2, 2};
+    hsize_t block[] = {1, 3, 1};
+    H5S_sel_type sel_type;
+    H5S_class_t space_type;
+    hssize_t nblocks;
+    hid_t ret_id;           /* Generic hid_t return value   */
+    herr_t ret;             /* Generic return value     */
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing Dataspace Encoding (H5Sencode1) and Decoding\n"));
+
+    /*-------------------------------------------------------------------------
+     * Test encoding and decoding of simple dataspace and hyperslab selection.
+     *-------------------------------------------------------------------------
+     */
+    /* Create the dataspace */
+    sid1 = H5Screate_simple(SPACE1_RANK, dims1, NULL);
+    CHECK(sid1, FAIL, "H5Screate_simple");
+
+    /* Set the hyperslab selection */
+    ret = H5Sselect_hyperslab(sid1, H5S_SELECT_SET, start, stride, count, block);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* Encode simple data space in a buffer with the fapl setting */
+    ret = H5Sencode1(sid1, NULL, &sbuf_size);
+    CHECK(ret, FAIL, "H5Sencode2");
+
+    if(sbuf_size>0) {
+        sbuf = (unsigned char*)HDcalloc((size_t)1, sbuf_size);
+        CHECK(sbuf, NULL, "HDcalloc");
+    }
+
+    /* Try decoding bogus buffer */
+    H5E_BEGIN_TRY {
+        ret_id = H5Sdecode(sbuf);
+    } H5E_END_TRY;
+    VERIFY(ret_id, FAIL, "H5Sdecode");
+
+    /* Encode the simple data space in a buffer */
+    ret = H5Sencode1(sid1, sbuf, &sbuf_size);
+    CHECK(ret, FAIL, "H5Sencode");
+
+    /* Decode from the dataspace buffer and return an object handle */
+    decoded_sid1=H5Sdecode(sbuf);
+    CHECK(decoded_sid1, FAIL, "H5Sdecode");
+
+    /* Verify the decoded dataspace */
+    n = H5Sget_simple_extent_npoints(decoded_sid1);
+    CHECK(n, FAIL, "H5Sget_simple_extent_npoints");
+    VERIFY(n, SPACE1_DIM1 * SPACE1_DIM2 * SPACE1_DIM3,
+    "H5Sget_simple_extent_npoints");
+
+    /* Retrieve and verify the dataspace rank */
+    rank = H5Sget_simple_extent_ndims(decoded_sid1);
+    CHECK(rank, FAIL, "H5Sget_simple_extent_ndims");
+    VERIFY(rank, SPACE1_RANK, "H5Sget_simple_extent_ndims");
+
+     /* Retrieve and verify the dataspace dimensions */
+    rank = H5Sget_simple_extent_dims(decoded_sid1, tdims, NULL);
+    CHECK(rank, FAIL, "H5Sget_simple_extent_dims");
+    VERIFY(HDmemcmp(tdims, dims1, SPACE1_RANK * sizeof(hsize_t)), 0,
+    "H5Sget_simple_extent_dims");
+
+    /* Verify the type of dataspace selection */
+    sel_type = H5Sget_select_type(decoded_sid1);
+    VERIFY(sel_type, H5S_SEL_HYPERSLABS, "H5Sget_select_type");
+
+    /* Verify the number of hyperslab blocks */
+    nblocks = H5Sget_select_hyper_nblocks(decoded_sid1);
+    VERIFY(nblocks, 2*2*2, "H5Sget_select_hyper_nblocks");
+
+    /* Close the dataspaces */
+    ret = H5Sclose(sid1);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    ret = H5Sclose(decoded_sid1);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    /*-------------------------------------------------------------------------
+     * Test encoding and decoding of null dataspace.
+     *-------------------------------------------------------------------------
+     */
+    sid2 = H5Screate(H5S_NULL);
+    CHECK(sid2, FAIL, "H5Screate");
+
+    /* Encode null data space in a buffer */
+    ret = H5Sencode1(sid2, NULL, &null_size);
+    CHECK(ret, FAIL, "H5Sencode");
+
+    if(null_size>0) {
+        null_sbuf = (unsigned char*)HDcalloc((size_t)1, null_size);
+        CHECK(null_sbuf, NULL, "HDcalloc");
+    }
+
+    /* Encode the null data space in the buffer */
+    ret = H5Sencode1(sid2, null_sbuf, &null_size);
+    CHECK(ret, FAIL, "H5Sencode2");
+
+    /* Decode from the dataspace buffer and return an object handle */
+    decoded_sid2=H5Sdecode(null_sbuf);
+    CHECK(decoded_sid2, FAIL, "H5Sdecode");
+
+    /* Verify the decoded dataspace type */
+    space_type = H5Sget_simple_extent_type(decoded_sid2);
+    VERIFY(space_type, H5S_NULL, "H5Sget_simple_extent_type");
+
+    /* Close the dataspaces */
+    ret = H5Sclose(sid2);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    ret = H5Sclose(decoded_sid2);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    /*-------------------------------------------------------------------------
+     * Test encoding and decoding of scalar dataspace.
+     *-------------------------------------------------------------------------
+     */
+    /* Create scalar dataspace */
+    sid3 = H5Screate(H5S_SCALAR);
+    CHECK(sid3, FAIL, "H5Screate_simple");
+
+    /* Encode scalar data space in a buffer */
+    ret = H5Sencode1(sid3, NULL, &scalar_size);
+    CHECK(ret, FAIL, "H5Sencode");
+
+    if(scalar_size>0) {
+        scalar_buf = (unsigned char*)HDcalloc((size_t)1, scalar_size);
+        CHECK(scalar_buf, NULL, "HDcalloc");
+    }
+
+    /* Encode the scalar data space in the buffer */
+    ret = H5Sencode1(sid3, scalar_buf, &scalar_size);
+    CHECK(ret, FAIL, "H5Sencode2");
+
+    /* Decode from the dataspace buffer and return an object handle */
+    decoded_sid3=H5Sdecode(scalar_buf);
+    CHECK(decoded_sid3, FAIL, "H5Sdecode");
+
+    /* Verify extent type */
+    space_type = H5Sget_simple_extent_type(decoded_sid3);
+    VERIFY(space_type, H5S_SCALAR, "H5Sget_simple_extent_type");
+
+    /* Verify decoded dataspace */
+    n = H5Sget_simple_extent_npoints(decoded_sid3);
+    CHECK(n, FAIL, "H5Sget_simple_extent_npoints");
+    VERIFY(n, 1, "H5Sget_simple_extent_npoints");
+
+    /* Retrieve and verify the dataspace rank */
+    rank = H5Sget_simple_extent_ndims(decoded_sid3);
+    CHECK(rank, FAIL, "H5Sget_simple_extent_ndims");
+    VERIFY(rank, 0, "H5Sget_simple_extent_ndims");
+
+    /* Close the dataspaces */
+    ret = H5Sclose(sid3);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    ret = H5Sclose(decoded_sid3);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    /* Release resources */
+    if(sbuf)
+        HDfree(sbuf);
+    if(null_sbuf)
+        HDfree(null_sbuf);
+    if(scalar_buf)
+        HDfree(scalar_buf);
+} /* test_h5s_encode1() */
+
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
+
 
 /****************************************************************
 **
@@ -3191,6 +3381,10 @@ test_h5s(void)
     } /* end low bound */
 
     test_h5s_encode_length();   /* Test version 2 hyperslab encoding length is correct */
+#ifndef H5_NO_DEPRECATED_SYMBOLS
+    test_h5s_encode1();         /* Test operations with old API routine (H5Sencode1) */
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
+
     test_h5s_scalar_write();    /* Test scalar H5S writing code */
     test_h5s_scalar_read();     /* Test scalar H5S reading code */
 
