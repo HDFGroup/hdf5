@@ -1379,25 +1379,32 @@ CONTAINS
 !  M. Scot Breitenfeld
 !  March 26, 2008
 ! SOURCE
-  SUBROUTINE h5sencode_f(obj_id, buf, nalloc, hdferr)
+  SUBROUTINE h5sencode_f(obj_id, buf, nalloc, hdferr, fapl_id)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: obj_id
     CHARACTER(LEN=*), INTENT(OUT) :: buf
     INTEGER(SIZE_T), INTENT(INOUT) :: nalloc
     INTEGER, INTENT(OUT) :: hdferr
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: fapl_id ! File access property list
 !*****
+    INTEGER(HID_T) :: fapl_id_default
 
     INTERFACE
-       INTEGER FUNCTION h5sencode_c(buf, obj_id, nalloc) BIND(C,NAME='h5sencode_c')
+       INTEGER FUNCTION h5sencode_c(buf, obj_id, nalloc, fapl_id_default) BIND(C,NAME='h5sencode_c')
          IMPORT :: C_CHAR
          IMPORT :: HID_T, SIZE_T
          INTEGER(HID_T), INTENT(IN) :: obj_id
          CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(OUT) :: buf
          INTEGER(SIZE_T), INTENT(INOUT) :: nalloc
+         INTEGER(HID_T) :: fapl_id_default
        END FUNCTION h5sencode_c
     END INTERFACE
 
-    hdferr = h5sencode_c(buf, obj_id, nalloc)
+    fapl_id_default = H5P_DEFAULT_F
+
+    IF(PRESENT(fapl_id)) fapl_id_default = fapl_id
+
+    hdferr = h5sencode_c(buf, obj_id, nalloc, fapl_id_default)
 
   END SUBROUTINE h5sencode_f
 
