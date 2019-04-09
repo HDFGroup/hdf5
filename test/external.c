@@ -17,8 +17,7 @@
  *
  * Purpose:	Tests datasets stored in external raw files.
  */
-#include "h5test.h"
-#include "external.h"
+#include "external_common.h"
 
 
 /*-------------------------------------------------------------------------
@@ -643,7 +642,7 @@ test_read_file_set(hid_t fapl)
      * debugging to be emitted before we start playing games with what the
      * output looks like.
      */
-    h5_fixname(FILENAME[1], fapl, filename, sizeof(filename));
+    h5_fixname(EXT_FNAME[1], fapl, filename, sizeof(filename));
     if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         FAIL_STACK_ERROR
     if((grp = H5Gcreate2(file, "emit-diagnostics", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
@@ -754,7 +753,7 @@ test_write_file_set(hid_t fapl)
         TEST_ERROR
 
     /* Create another file */
-    h5_fixname(FILENAME[2], fapl, filename, sizeof(filename));
+    h5_fixname(EXT_FNAME[2], fapl, filename, sizeof(filename));
     if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         FAIL_STACK_ERROR
 
@@ -872,7 +871,7 @@ test_path_absolute(hid_t fapl)
 
     TESTING("absolute filenames for external file");
 
-    h5_fixname(FILENAME[3], fapl, filename, sizeof(filename));
+    h5_fixname(EXT_FNAME[3], fapl, filename, sizeof(filename));
     if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         FAIL_STACK_ERROR
 
@@ -968,7 +967,7 @@ test_path_relative(hid_t fapl)
     if (HDmkdir("extern_dir", (mode_t)0755) < 0 && errno != EEXIST)
         TEST_ERROR;
 
-    h5_fixname(FILENAME[4], fapl, filename, sizeof(filename));
+    h5_fixname(EXT_FNAME[4], fapl, filename, sizeof(filename));
     if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         FAIL_STACK_ERROR;
 
@@ -1063,7 +1062,7 @@ test_path_relative_cwd(hid_t fapl)
     if(HDmkdir("extern_dir", (mode_t)0755) < 0 && errno != EEXIST)
         TEST_ERROR;
 
-    h5_fixname(FILENAME[4], fapl, filename, sizeof(filename));
+    h5_fixname(EXT_FNAME[4], fapl, filename, sizeof(filename));
     if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         FAIL_STACK_ERROR;
 
@@ -1214,7 +1213,7 @@ test_h5d_get_access_plist(hid_t fapl_id)
         TEST_ERROR
 
     /* Create the file */
-    h5_fixname(FILENAME[5], fapl_id, filename, sizeof(filename));
+    h5_fixname(EXT_FNAME[5], fapl_id, filename, sizeof(filename));
     if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
         FAIL_STACK_ERROR
 
@@ -1305,7 +1304,7 @@ main(void)
 
     /* Get a fapl for the old (default) file format */
     fapl_id_old = h5_fileaccess();
-    h5_fixname(FILENAME[0], fapl_id_old, filename, sizeof(filename));
+    h5_fixname(EXT_FNAME[0], fapl_id_old, filename, sizeof(filename));
 
     /* Copy and set up a fapl for the latest file format */
     if((fapl_id_new = H5Pcopy(fapl_id_old)) < 0)
@@ -1360,7 +1359,7 @@ main(void)
         nerrors += test_path_relative_cwd(current_fapl_id);
  
         /* Verify symbol table messages are cached */
-        nerrors += (h5_verify_cached_stabs(FILENAME, current_fapl_id) < 0 ? 1 : 0);
+        nerrors += (h5_verify_cached_stabs(EXT_FNAME, current_fapl_id) < 0 ? 1 : 0);
 
         /* Close the common file */
         if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
@@ -1375,7 +1374,7 @@ main(void)
     HDputs("All external storage tests passed.");
 
     /* Clean up files used by file set tests */
-    if(h5_cleanup(FILENAME, fapl_id_old)) {
+    if(h5_cleanup(EXT_FNAME, fapl_id_old)) {
         HDremove("extern_1r.raw");
         HDremove("extern_2r.raw");
         HDremove("extern_3r.raw");
