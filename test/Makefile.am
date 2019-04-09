@@ -63,7 +63,7 @@ TEST_PROG= testhdf5 \
            flush1 flush2 app_ref enum set_extent ttsafe enc_dec_plist \
            enc_dec_plist_cross_platform getname vfd ntypes dangle dtransform \
            reserved cross_read freespace mf vds file_image unregister \
-           cache_logging cork swmr vol
+           cache_logging cork swmr vol_tst
 
 # List programs to be built when testing here.
 # error_test and err_compat are built at the same time as the other tests, but executed by testerror.sh.
@@ -135,7 +135,7 @@ else
   noinst_LTLIBRARIES=libh5test.la
 endif
 
-libh5test_la_SOURCES=h5test.c testframe.c cache_common.c swmr_common.c
+libh5test_la_SOURCES=h5test.c testframe.c cache_common.c swmr_common.c external_common.c
 
 # Use libhd5test.la to compile all of the tests
 LDADD=libh5test.la $(LIBHDF5)

@@ -61,6 +61,7 @@ H5VL__native_dataset_create(void *obj, const H5VL_loc_params_t *loc_params,
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(dcpl_id)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, NULL, "can't find object for ID")
 
+    /* Get creation properties */
     if(H5P_get(plist, H5VL_PROP_DSET_TYPE_ID, &type_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get property value for datatype id")
     if(H5P_get(plist, H5VL_PROP_DSET_SPACE_ID, &space_id) < 0)

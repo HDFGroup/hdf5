@@ -12,34 +12,13 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol <koziol@hdfgroup.org>
- *              Wednesday, March 17, 2010
+ * Programmer:  Raymond Lu <songyulu@hdfgroup.org>
+ *              April, 2019
  *
- * Purpose:     srcdir querying support.
+ * Purpose:     Private function for external.c and external_env.c
  */
-#ifndef _EXTERNAL_H
-#define _EXTERNAL_H
 
-/* Include test header files */
-#include "h5test.h"
-
-const char *FILENAME[] = {
-    "extern_1",
-    "extern_2",
-    "extern_3",
-    "extern_4",
-    "extern_dir/file_1",
-    "extern_5",
-    NULL
-};
-
-/* A similar collection of files is used for the tests that
- * perform file I/O.
- */
-#define N_EXT_FILES         4
-#define PART_SIZE           25
-#define TOTAL_SIZE          100
-#define GARBAGE_PER_FILE    10
+#include "external_common.h"
 
 
 /*-------------------------------------------------------------------------
@@ -55,7 +34,7 @@ const char *FILENAME[] = {
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+herr_t
 reset_raw_data_files(void)
 {
     int		    fd = 0;             /* external file descriptor             */
@@ -139,6 +118,4 @@ error:
     if(garbage)
         HDfree(garbage);
     return FAIL;
-} /* end reset_raw_data_files() */
-#endif /* _EXTERNAL_H */
-
+}

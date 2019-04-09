@@ -991,6 +991,9 @@
 ./test/evict_on_close.c
 ./test/extend.c
 ./test/external.c
+./test/external_common.c
+./test/external_common.h
+./test/external_env.c
 ./test/error_test.c
 ./test/err_compat.c
 ./test/filter_error.h5
@@ -1115,6 +1118,7 @@
 ./test/tcoords.c
 ./test/testabort_fail.sh.in
 ./test/testcheck_version.sh.in
+./test/testexternal_env.sh.in
 ./test/testerror.sh.in
 ./test/testlinks_env.sh.in
 ./test/test_filter_plugin.sh.in

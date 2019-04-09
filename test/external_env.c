@@ -17,8 +17,7 @@
  *
  * Purpose:	Tests datasets stored in external raw files.
  */
-#include "h5test.h"
-#include "external.h"
+#include "external_common.h"
 
 
 /*-------------------------------------------------------------------------
@@ -63,7 +62,7 @@ test_path_env(hid_t fapl)
     if(HDmkdir("extern_dir", (mode_t)0755) < 0 && errno != EEXIST)
         TEST_ERROR;
 
-    h5_fixname(FILENAME[4], fapl, filename, sizeof(filename));
+    h5_fixname(EXT_FNAME[4], fapl, filename, sizeof(filename));
     if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         FAIL_STACK_ERROR
 
@@ -156,7 +155,7 @@ main(void)
 
     /* Get a fapl for the old (default) file format */
     fapl_id_old = h5_fileaccess();
-    h5_fixname(FILENAME[0], fapl_id_old, filename, sizeof(filename));
+    h5_fixname(EXT_FNAME[0], fapl_id_old, filename, sizeof(filename));
 
     /* Copy and set up a fapl for the latest file format */
     if((fapl_id_new = H5Pcopy(fapl_id_old)) < 0)
@@ -189,7 +188,7 @@ main(void)
     HDputs("All external storage tests passed.");
 
     /* Clean up files used by file set tests */
-    if(h5_cleanup(FILENAME, fapl_id_old)) {
+    if(h5_cleanup(EXT_FNAME, fapl_id_old)) {
         HDremove("extern_1r.raw");
         HDremove("extern_2r.raw");
         HDremove("extern_3r.raw");
