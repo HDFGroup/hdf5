@@ -503,7 +503,7 @@ test_reference_obj(void)
 **
 ****************************************************************/
 static void
-test_reference_region(hbool_t new_format)
+test_reference_region(H5F_libver_t libver_low, H5F_libver_t libver_high)
 {
     hid_t fid1;         /* HDF5 File IDs */
     hid_t fapl = -1;    /* File access property list */
@@ -549,11 +549,7 @@ test_reference_region(hbool_t new_format)
     hsize_t start3, count3, block3;
 
     /* Output message about test being performed */
-    if(new_format) {
-        MESSAGE(5, ("Testing Dataset Region Reference Functions for new format\n"));
-    } else {
-        MESSAGE(5, ("Testing Dataset Region Reference Functions for old format\n"));
-    }
+    MESSAGE(5, ("Testing Object Reference Functions\n"));
 
     /* Allocate write & read buffers */
     wbuf = (hdset_reg_ref_t *)HDcalloc(sizeof(hdset_reg_ref_t), (size_t)SPACE1_DIM1);
@@ -564,12 +560,12 @@ test_reference_region(hbool_t new_format)
     /* Set to use the latest file format */
     fapl = H5Pcreate(H5P_FILE_ACCESS);
     CHECK(fapl, FAIL, "H5Pcreate");
-    if(new_format) {
-        ret = H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST);
-        CHECK(ret, FAIL, "H5Pset_libver_bounds");
-    }
 
-    /* Create file */
+    /* Set the low/high version bounds in fapl */
+    ret = H5Pset_libver_bounds(fapl, libver_low, libver_high);
+    CHECK(ret, FAIL, "H5Pset_libver_bounds");
+
+    /* Create file with the fapl */
     fid1 = H5Fcreate(FILE2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
     CHECK(fid1, FAIL, "H5Fcreate");
 
@@ -676,19 +672,32 @@ test_reference_region(hbool_t new_format)
     VERIFY(hssize_ret, (hssize_t)H5S_UNLIMITED, "H5Sget_select_npoints");
 
     /* Store third dataset region */
-    ret = H5Rcreate(&wbuf[2], fid1, "/Dataset2", H5R_DATASET_REGION, sid2);
-    CHECK(ret, FAIL, "H5Rcreate");
-    ret = H5Rget_obj_type2(dset1, H5R_DATASET_REGION, &wbuf[2], &obj_type);
-    CHECK(ret, FAIL, "H5Rget_obj_type2");
-    VERIFY(obj_type, H5O_TYPE_DATASET, "H5Rget_obj_type2");
+    H5E_BEGIN_TRY {
+        ret = H5Rcreate(&wbuf[2], fid1, "/Dataset2", H5R_DATASET_REGION, sid2);
+    } H5E_END_TRY;
+
+    if(libver_high < H5F_LIBVER_V110)
+        VERIFY(ret, FAIL, "H5Rcreate");
+    else {
+        CHECK(ret, FAIL, "H5Rcreate");
+        ret = H5Rget_obj_type2(dset1, H5R_DATASET_REGION, &wbuf[2], &obj_type);
+        CHECK(ret, FAIL, "H5Rget_obj_type2");
+        VERIFY(obj_type, H5O_TYPE_DATASET, "H5Rget_obj_type2");
+    }
 
     /* Store fourth dataset region */
-    ret = H5Rcreate(&wbuf[3], fid1, "/Dataset3", H5R_DATASET_REGION, sid3);
-    CHECK(ret, FAIL, "H5Rcreate");
-    ret = H5Rget_obj_type2(dset1, H5R_DATASET_REGION, &wbuf[3], &obj_type);
-    CHECK(ret, FAIL, "H5Rget_obj_type2");
-    VERIFY(obj_type, H5O_TYPE_DATASET, "H5Rget_obj_type2");
+    H5E_BEGIN_TRY {
+        ret = H5Rcreate(&wbuf[3], fid1, "/Dataset3", H5R_DATASET_REGION, sid3);
+    } H5E_END_TRY;
 
+    if(libver_high < H5F_LIBVER_V110)
+        VERIFY(ret, FAIL, "H5Rcreate");
+    else {
+        CHECK(ret, FAIL, "H5Rcreate");
+        ret = H5Rget_obj_type2(dset1, H5R_DATASET_REGION, &wbuf[3], &obj_type);
+        CHECK(ret, FAIL, "H5Rget_obj_type2");
+        VERIFY(obj_type, H5O_TYPE_DATASET, "H5Rget_obj_type2");
+    }
 
     /* Write selection to disk */
     ret = H5Dwrite(dset1, H5T_STD_REF_DSETREG, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf);
@@ -791,25 +800,27 @@ test_reference_region(hbool_t new_format)
 
 
     /* Try to open the referenced dataset with dataspace exceeding 32 bits */
-    dset3 = H5Rdereference2(dset1, dapl_id, H5R_DATASET_REGION, &rbuf[3]);
-    CHECK(dset3, FAIL, "H5Rdereference2");
+    if(libver_high == H5F_LIBVER_V110) {
+        dset3 = H5Rdereference2(dset1, dapl_id, H5R_DATASET_REGION, &rbuf[3]);
+        CHECK(dset3, FAIL, "H5Rdereference2");
 
-    /* Check what H5Rget_obj_type2 function returns */
-    ret = H5Rget_obj_type2(dset1, H5R_DATASET_REGION, &rbuf[3], &obj_type);
-    CHECK(ret, FAIL, "H5Rget_obj_type2");
-    VERIFY(obj_type, H5O_TYPE_DATASET, "H5Rget_obj_type2");
+        /* Check what H5Rget_obj_type2 function returns */
+        ret = H5Rget_obj_type2(dset1, H5R_DATASET_REGION, &rbuf[3], &obj_type);
+        CHECK(ret, FAIL, "H5Rget_obj_type2");
+        VERIFY(obj_type, H5O_TYPE_DATASET, "H5Rget_obj_type2");
 
-    /* Check information in the referenced dataset */
-    sid3 = H5Dget_space(dset3);
-    CHECK(sid3, FAIL, "H5Dget_space");
-    ret_particles = H5Sget_select_npoints(sid3);
-    VERIFY(ret_particles, total_particles, "H5Sget_select_npoints");
-
-    /* Close the dataspace and dataset */
-    ret = H5Sclose(sid3);
-    CHECK(ret, FAIL, "H5Sclose");
-    ret = H5Dclose(dset3);
-    CHECK(ret, FAIL, "H5Dclose");
+        /* Check information in the referenced dataset */
+        sid3 = H5Dget_space(dset3);
+        CHECK(sid3, FAIL, "H5Dget_space");
+        ret_particles = H5Sget_select_npoints(sid3);
+        VERIFY(ret_particles, total_particles, "H5Sget_select_npoints");
+    
+        /* Close the dataspace and dataset */
+        ret = H5Sclose(sid3);
+        CHECK(ret, FAIL, "H5Sclose");
+        ret = H5Dclose(dset3);
+        CHECK(ret, FAIL, "H5Dclose");
+    }
 
     /* Try to open objects */
     dset2 = H5Rdereference2(dset1, dapl_id, H5R_DATASET_REGION, &rbuf[0]);
@@ -906,30 +917,33 @@ test_reference_region(hbool_t new_format)
     ret = H5Sclose(sid2);
     CHECK(ret, FAIL, "H5Sclose");
 
+
     /* Get the unlimited selection */
-    sid2 = H5Rget_region(dset1, H5R_DATASET_REGION, &rbuf[2]);
-    CHECK(sid2, FAIL, "H5Rget_region");
+    if(libver_high == H5F_LIBVER_V110) {
+        sid2 = H5Rget_region(dset1, H5R_DATASET_REGION, &rbuf[2]);
+        CHECK(sid2, FAIL, "H5Rget_region");
 
-    /* Verify correct hyperslab selected */
-    hssize_ret = H5Sget_select_npoints(sid2);
-    VERIFY(hssize_ret, (hssize_t)H5S_UNLIMITED, "H5Sget_select_npoints");
-    tri_ret = H5Sis_regular_hyperslab(sid2);
-    CHECK(tri_ret, FAIL, "H5Sis_regular_hyperslab");
-    VERIFY(tri_ret, TRUE, "H5Sis_regular_hyperslab Result");
-    ret = H5Sget_regular_hyperslab(sid2, start, stride, count, block);
-    CHECK(ret, FAIL, "H5Sget_regular_hyperslab");
-    VERIFY(start[0], (hsize_t)1, "Hyperslab Coordinates");
-    VERIFY(start[1], (hsize_t)8, "Hyperslab Coordinates");
-    VERIFY(stride[0], (hsize_t)4, "Hyperslab Coordinates");
-    VERIFY(stride[1], (hsize_t)1, "Hyperslab Coordinates");
-    VERIFY(count[0], H5S_UNLIMITED, "Hyperslab Coordinates");
-    VERIFY(count[1], (hsize_t)1, "Hyperslab Coordinates");
-    VERIFY(block[0], (hsize_t)2, "Hyperslab Coordinates");
-    VERIFY(block[1], (hsize_t)2, "Hyperslab Coordinates");
+        /* Verify correct hyperslab selected */
+        hssize_ret = H5Sget_select_npoints(sid2);
+        VERIFY(hssize_ret, (hssize_t)H5S_UNLIMITED, "H5Sget_select_npoints");
+        tri_ret = H5Sis_regular_hyperslab(sid2);
+        CHECK(tri_ret, FAIL, "H5Sis_regular_hyperslab");
+        VERIFY(tri_ret, TRUE, "H5Sis_regular_hyperslab Result");
+        ret = H5Sget_regular_hyperslab(sid2, start, stride, count, block);
+        CHECK(ret, FAIL, "H5Sget_regular_hyperslab");
+        VERIFY(start[0], (hsize_t)1, "Hyperslab Coordinates");
+        VERIFY(start[1], (hsize_t)8, "Hyperslab Coordinates");
+        VERIFY(stride[0], (hsize_t)4, "Hyperslab Coordinates");
+        VERIFY(stride[1], (hsize_t)1, "Hyperslab Coordinates");
+        VERIFY(count[0], H5S_UNLIMITED, "Hyperslab Coordinates");
+        VERIFY(count[1], (hsize_t)1, "Hyperslab Coordinates");
+        VERIFY(block[0], (hsize_t)2, "Hyperslab Coordinates");
+        VERIFY(block[1], (hsize_t)2, "Hyperslab Coordinates");
 
-    /* Close region space */
-    ret = H5Sclose(sid2);
-    CHECK(ret, FAIL, "H5Sclose");
+        /* Close region space */
+        ret = H5Sclose(sid2);
+        CHECK(ret, FAIL, "H5Sclose");
+    }
 
     /* Close first space */
     ret = H5Sclose(sid1);
@@ -973,32 +987,33 @@ test_reference_region(hbool_t new_format)
 **
 ****************************************************************/
 static void
-test_reference_region_1D(hbool_t new_format)
+test_reference_region_1D(H5F_libver_t libver_low, H5F_libver_t libver_high)
 {
-    hid_t    fid1;           /* HDF5 File IDs        */
-    hid_t    dset1,          /* Dataset ID            */
-                dset3;          /* Dereferenced dataset ID */
-    hid_t    sid1,           /* Dataspace ID    #1        */
-                sid3;           /* Dataspace ID    #3        */
-    hid_t       dapl_id;        /* Dataset access property list */
-    hsize_t    dims1[] = {SPACE1_DIM1},
-                dims3[] = {SPACE3_DIM1};
-    hsize_t    start[SPACE3_RANK];     /* Starting location of hyperslab */
-    hsize_t    stride[SPACE3_RANK];    /* Stride of hyperslab */
-    hsize_t    count[SPACE3_RANK];     /* Element count of hyperslab */
-    hsize_t    block[SPACE3_RANK];     /* Block size of hyperslab */
-    hsize_t    coord1[POINT1_NPOINTS][SPACE3_RANK]; /* Coordinates for point selection */
-    hsize_t *   coords;                 /* Coordinate buffer */
-    hsize_t    low[SPACE3_RANK];       /* Selection bounds */
-    hsize_t    high[SPACE3_RANK];      /* Selection bounds */
-    hdset_reg_ref_t      *wbuf,         /* buffer to write to disk */
-               *rbuf;   /* buffer read from disk */
-    uint8_t    *dwbuf,  /* Buffer for writing numeric data to disk */
-               *drbuf;  /* Buffer for reading numeric data from disk */
-    uint8_t    *tu8;    /* Temporary pointer to uint8 data */
-    H5O_type_t  obj_type;       /* Object type */
-    int         i;      /* counting variables */
-    herr_t    ret;    /* Generic return value        */
+    hid_t fid1;        /* HDF5 File IDs        */
+    hid_t fapl = -1;    /* File access property list */
+    hid_t dset1,        /* Dataset ID            */
+          dset3;        /* Dereferenced dataset ID */
+    hid_t sid1,         /* Dataspace ID    #1        */
+          sid3;         /* Dataspace ID    #3        */
+    hid_t dapl_id;      /* Dataset access property list */
+    hsize_t dims1[] = {SPACE1_DIM1},
+            dims3[] = {SPACE3_DIM1};
+    hsize_t start[SPACE3_RANK];     /* Starting location of hyperslab */
+    hsize_t stride[SPACE3_RANK];    /* Stride of hyperslab */
+    hsize_t count[SPACE3_RANK];     /* Element count of hyperslab */
+    hsize_t block[SPACE3_RANK];     /* Block size of hyperslab */
+    hsize_t coord1[POINT1_NPOINTS][SPACE3_RANK]; /* Coordinates for point selection */
+    hsize_t *coords;                /* Coordinate buffer */
+    hsize_t low[SPACE3_RANK];       /* Selection bounds */
+    hsize_t high[SPACE3_RANK];      /* Selection bounds */
+    hdset_reg_ref_t *wbuf,          /* buffer to write to disk */
+                    *rbuf;          /* buffer read from disk */
+    uint8_t *dwbuf,  /* Buffer for writing numeric data to disk */
+            *drbuf;  /* Buffer for reading numeric data from disk */
+    uint8_t *tu8;    /* Temporary pointer to uint8 data */
+    H5O_type_t obj_type;            /* Object type */
+    int i;          /* counting variables */
+    herr_t ret;     /* Generic return value */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing 1-D Dataset Region Reference Functions\n"));
@@ -1009,8 +1024,16 @@ test_reference_region_1D(hbool_t new_format)
     dwbuf = (uint8_t *)HDmalloc(sizeof(uint8_t) * SPACE3_DIM1);
     drbuf = (uint8_t *)HDcalloc(sizeof(uint8_t), (size_t)SPACE3_DIM1);
 
-    /* Create file */
-    fid1 = H5Fcreate(FILE2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    /* Create the file access property list */
+    fapl = H5Pcreate(H5P_FILE_ACCESS);
+    CHECK(fapl, FAIL, "H5Pcreate");
+
+    /* Set the low/high version bounds in fapl */
+    ret = H5Pset_libver_bounds(fapl, libver_low, libver_high);
+    CHECK(ret, FAIL, "H5Pset_libver_bounds");
+
+    /* Create file with the fapl */
+    fid1 = H5Fcreate(FILE2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
     CHECK(fid1, FAIL, "H5Fcreate");
 
     /* Create dataspace for datasets */
@@ -1106,7 +1129,7 @@ test_reference_region_1D(hbool_t new_format)
     CHECK(ret, FAIL, "H5Fclose");
 
     /* Re-open the file */
-    fid1 = H5Fopen(FILE2, H5F_ACC_RDWR, H5P_DEFAULT);
+    fid1 = H5Fopen(FILE2, H5F_ACC_RDWR, fapl);
     CHECK(fid1, FAIL, "H5Fopen");
 
     /* Open the dataset */
@@ -1238,6 +1261,10 @@ test_reference_region_1D(hbool_t new_format)
 
     /* Close dataset access property list */
     ret = H5Pclose(dapl_id);
+    CHECK(ret, FAIL, "H5Pclose");
+
+    /* Close file access property list */
+    ret = H5Pclose(fapl);
     CHECK(ret, FAIL, "H5Pclose");
 
     /* Close file */
@@ -1817,15 +1844,28 @@ test_reference_compat(void)
 void
 test_reference(void)
 {
+    H5F_libver_t low, high;     /* Low and high bounds */
+
     /* Output message about test being performed */
     MESSAGE(5, ("Testing References\n"));
 
     test_reference_params();        /* Test for correct parameter checking */
     test_reference_obj();           /* Test basic H5R object reference code */
-    test_reference_region(FALSE);   /* Test basic H5R dataset region reference code */
-    test_reference_region(TRUE);    /* Test basic H5R dataset region reference code */
-    test_reference_region_1D(FALSE);    /* Test H5R dataset region reference code for 1-D datasets */
-    test_reference_region_1D(TRUE);     /* Test H5R dataset region reference code for 1-D datasets */
+
+     /* Loop through all the combinations of low/high version bounds */
+    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
+        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
+
+            /* Invalid combinations, just continue */
+            if(high == H5F_LIBVER_EARLIEST || high < low)
+                continue;
+
+            test_reference_region(low, high);       /* Test basic H5R dataset region reference code */
+            test_reference_region_1D(low, high);    /* Test H5R dataset region reference code for 1-D datasets */
+
+        } /* end high bound */
+    } /* end low bound */
+
     test_reference_obj_deleted();       /* Test H5R object reference code for deleted objects */
     test_reference_group();             /* Test operations on dereferenced groups */
 #ifndef H5_NO_DEPRECATED_SYMBOLS
