@@ -236,6 +236,7 @@ set (H5_TESTS
     extend
     direct_chunk # compression lib link
     external
+    external_env
     efc
     objcopy
     links
@@ -255,6 +256,7 @@ set (H5_TESTS
     enc_dec_plist_cross_platform
     getname
     vfd
+    vfd_env
     ntypes
     dangle
     dtransform
