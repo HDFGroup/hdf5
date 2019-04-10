@@ -702,11 +702,9 @@ typedef enum H5F_mem_page_t {
 
 /* Type of prefix for opening prefixed files */
 typedef enum H5F_prefix_open_t {
-    H5F_PREFIX_ERROR = -1,          /* Error                  */
     H5F_PREFIX_VDS   = 0,           /* Virtual dataset prefix */
     H5F_PREFIX_ELINK = 1,           /* External link prefix   */
-    H5F_PREFIX_EFILE = 2,           /* External file prefix   */
-    H5F_PREFIX_NONE  = 3            /* Must be the last       */
+    H5F_PREFIX_EFILE = 2            /* External file prefix   */
 } H5F_prefix_open_t;
 
 
