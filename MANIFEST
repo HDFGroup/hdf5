@@ -3338,9 +3338,9 @@
 ./hl/tools/h5watch/CMakeTests.cmake
 ./src/CMakeLists.txt
 ./test/CMakeLists.txt
+./test/CMakePassthroughVOLTests.cmake
 ./test/CMakeTests.cmake
 ./test/CMakeVFDTests.cmake
-./test/CMakeVOLTests.cmake
 ./test/flushrefreshTest.cmake
 ./test/ShellTests.cmake
 ./testpar/CMakeLists.txt
