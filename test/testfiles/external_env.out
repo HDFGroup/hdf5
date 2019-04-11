@@ -1,8 +1,0 @@
-Testing external file with HDF5_EXTFILE_PREFIX
-Testing with the default file format:
-Testing prefix in HDF5_EXTFILE_PREFIX                                  PASSED
-
-Testing with the latest file format:
-Testing prefix in HDF5_EXTFILE_PREFIX                                  PASSED
-All external storage tests passed.
-Test prefix for HDF5_EXTFILE_PREFIX PASSED

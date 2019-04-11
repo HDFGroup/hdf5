@@ -310,7 +310,7 @@ main(void)
 
      /* Loop through all the combinations of low/high version bounds */
     for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, low)) {
-        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
+        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, high)) {
             char msg[80];       /* Message for file version bounds */
             char *low_string;   /* The low bound string */
             char *high_string;  /* The high bound string */
