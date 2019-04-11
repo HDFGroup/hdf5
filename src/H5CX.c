@@ -287,10 +287,10 @@ typedef struct H5CX_t {
     hbool_t   do_min_dset_ohdr_valid;   /* Whether minimize dataset object header flag is valid */
 
     /* Cached DAPL properties */
-    char *extfile_prefix;
-    hbool_t extfile_prefix_valid;
-    char *vds_prefix;
-    hbool_t vds_prefix_valid;
+    char *extfile_prefix;               /* Prefix for external file                      */
+    hbool_t extfile_prefix_valid;       /* Whether the prefix for external file is valid */
+    char *vds_prefix;                   /* Prefix for VDS                                */
+    hbool_t vds_prefix_valid;           /* Whether the prefix for VDS is valid           */
 
     /* Cached FAPL properties */
     H5F_libver_t low_bound;     /* low_bound property for H5Pset_libver_bounds() */
@@ -361,8 +361,8 @@ typedef struct H5CX_dcpl_cache_t {
 /* Typedef for cached default dataset access property list information */
 /* (Same as the cached DXPL struct, above, except for the default DXPL) */
 typedef struct H5CX_dapl_cache_t {
-    char *extfile_prefix;
-    char *vds_prefix;
+    char *extfile_prefix;       /* Prefix for external file */
+    char *vds_prefix;           /* Prefix for VDS           */
 } H5CX_dapl_cache_t;
 
 /* Typedef for cached default file access property list information */
