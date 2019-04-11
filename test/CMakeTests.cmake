@@ -1115,7 +1115,7 @@ if (BUILD_SHARED_LIBS)
   )
   set_tests_properties (H5TEST-shared-external_env PROPERTIES
       FIXTURES_REQUIRED shared_external_env_clear_objects
-      ENVIRONMENT "HDF5_EXTFILE_PREFIX=\${ORIGIN}"
+      ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST-shared"
       WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST-shared
   )
 
@@ -1143,7 +1143,7 @@ if (BUILD_SHARED_LIBS)
   )
   set_tests_properties (H5TEST-shared-vds_env PROPERTIES
       FIXTURES_REQUIRED shared_vds_env_clear_objects
-      ENVIRONMENT "HDF5_VDS_PREFIX=\${ORIGIN}/tmp"
+      ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST-shared"
       WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST-shared
   )
 
