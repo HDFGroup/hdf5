@@ -25,9 +25,9 @@ nerrors=0
 
 # test for external file with HDF5_EXTFILE_PREFIX
 echo "Testing external file with HDF5_EXTFILE_PREFIX"
-TEST_NAME=external_env 		# The test name
-TEST_BIN=`pwd`/$TEST_NAME 	# The path of the test binary
-ENVCMD="env HDF5_EXTFILE_PREFIX=\${ORIGIN}" 	# The environment variable & value
+TEST_NAME=external_env                         # The test name
+TEST_BIN=`pwd`/$TEST_NAME                      # The path of the test binary
+ENVCMD="env HDF5_EXTFILE_PREFIX=\${ORIGIN}"    # The environment variable & value
 #
 # Run the test
 # echo "$ENVCMD $RUNSERIAL $TEST_BIN"

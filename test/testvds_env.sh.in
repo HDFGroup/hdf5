@@ -25,10 +25,10 @@ nerrors=0
 
 # test for VDS with HDF5_VDS_PREFIX
 echo "Testing basic virtual dataset I/O via H5Pset_vds_prefix(): all selection with ENV prefix"
-TEST_NAME=vds_env 		# The test name
-TEST_BIN=`pwd`/$TEST_NAME 	# The path of the test binary
-ENVCMD="env HDF5_VDS_PREFIX=\${ORIGIN}/tmp" 	# Set the environment variable & value
-UNENVCMD="unset HDF5_VDS_PREFIX" 		# Unset the environment variable & value
+TEST_NAME=vds_env                               # The test name
+TEST_BIN=`pwd`/$TEST_NAME                       # The path of the test binary
+ENVCMD="env HDF5_VDS_PREFIX=\${ORIGIN}/tmp"     # Set the environment variable & value
+UNENVCMD="unset HDF5_VDS_PREFIX"                # Unset the environment variable & value
 #
 # Run the test
 # echo "$ENVCMD $RUNSERIAL $TEST_BIN"

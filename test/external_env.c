@@ -12,9 +12,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke <matzke@llnl.gov>
- *              Tuesday, March  3, 1998
- *
  * Purpose:	Tests datasets stored in external raw files.
  */
 #include "external_common.h"

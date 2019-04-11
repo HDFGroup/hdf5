@@ -28,7 +28,7 @@ AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_builddir)/src
 #       testlinks_env.sh: links_env
 #       testexternal_env.sh: external_env
 #       testflushrefresh.sh: flushrefresh
-#	testvds_env.sh: vds_env
+#       testvds_env.sh: vds_env
 #       testswmr.sh: swmr*
 #       testvdsswmr.sh: vds_swmr*
 #       testabort_fail.sh: filenotclosed.c and del_many_dense_attrs.c
@@ -63,7 +63,7 @@ TEST_PROG= testhdf5 \
            flush1 flush2 app_ref enum set_extent ttsafe enc_dec_plist \
            enc_dec_plist_cross_platform getname vfd ntypes dangle dtransform \
            reserved cross_read freespace mf vds file_image unregister \
-           cache_logging cork swmr vol_tst
+           cache_logging cork swmr vol
 
 # List programs to be built when testing here.
 # error_test and err_compat are built at the same time as the other tests, but executed by testerror.sh.
