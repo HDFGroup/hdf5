@@ -80,7 +80,7 @@ endforeach ()
 
 # The following will only be correct on windows shared
 #set_tests_properties (MPI_TEST_t_pflush1 PROPERTIES WILL_FAIL "true")
-set_property (MPI_TEST_t_pflush1 PROPERTY PASS_REGULAR_EXPRESSION "PASSED")
+set_property (TEST MPI_TEST_t_pflush1 PROPERTY PASS_REGULAR_EXPRESSION "PASSED")
 set_tests_properties (MPI_TEST_t_pflush2 PROPERTIES DEPENDS MPI_TEST_t_pflush1)
 
 if (HDF5_TEST_VFD)
