@@ -685,6 +685,15 @@ endif ()
 add_test (
     NAME H5TEST-clear-external_env-objects
     COMMAND    ${CMAKE_COMMAND}
+        -D "TEST_PROGRAM=$<TARGET_FILE:external_env>"
+        -D "TEST_ARGS:STRING="
+        -D "TEST_ENV_VAR:STRING=HDF5_EXTFILE_PREFIX"
+        -D "TEST_ENV_VALUE:STRING=\${ORIGIN}"
+        -D "TEST_EXPECT=0"
+        -D "TEST_OUTPUT=external_env.txt"
+        -D "TEST_REFERENCE=external_env.out"
+        -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/H5TEST"
+        -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
         -E remove
         extern_1r.raw
         extern_2r.raw
@@ -694,6 +703,8 @@ add_test (
         extern_2w.raw
         extern_3w.raw
         extern_4w.raw
+        external_env.txt
+        external_env.out
     WORKING_DIRECTORY
         ${HDF5_TEST_BINARY_DIR}/H5TEST
 )
@@ -701,7 +712,7 @@ set_tests_properties (H5TEST-clear-external_env-objects PROPERTIES FIXTURES_SETU
 add_test (NAME H5TEST-external_env COMMAND $<TARGET_FILE:external_env>)
 set_tests_properties (H5TEST-external_env PROPERTIES
     FIXTURES_REQUIRED external_env_clear_objects
-    ENVIRONMENT "HDF5_EXTFILE_PREFIX=\${ORIGIN}"
+    ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST;HDF5TestExpress=${HDF_TEST_EXPRESS}"
     WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
 )
 
@@ -709,10 +720,21 @@ set_tests_properties (H5TEST-external_env PROPERTIES
 add_test (
     NAME H5TEST-clear-vds_env-objects
     COMMAND    ${CMAKE_COMMAND}
+        -D "TEST_PROGRAM=$<TARGET_FILE:vds_env>"
+        -D "TEST_ARGS:STRING="
+        -D "TEST_ENV_VAR:STRING=HDF5_VDS_PREFIX"
+        -D "TEST_ENV_VALUE:STRING=\${ORIGIN}/tmp"
+        -D "TEST_EXPECT=0"
+        -D "TEST_OUTPUT=vds_env.txt"
+        -D "TEST_REFERENCE=vds_env.out"
+        -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/H5TEST"
+        -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
         -E remove
         vds_virt_0.h5
         vds_virt_3.h5
         vds_src_2.h5
+        vds_env.txt
+        vds_env.out
     WORKING_DIRECTORY
         ${HDF5_TEST_BINARY_DIR}/H5TEST
 )
@@ -720,7 +742,7 @@ set_tests_properties (H5TEST-clear-vds_env-objects PROPERTIES FIXTURES_SETUP vds
 add_test (NAME H5TEST-vds_env COMMAND $<TARGET_FILE:vds_env>)
 set_tests_properties (H5TEST-vds_env PROPERTIES
     FIXTURES_REQUIRED vds_env_clear_objects
-    ENVIRONMENT "HDF5_VDS_PREFIX=\${ORIGIN}/tmp"
+    ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST;HDF5TestExpress=${HDF_TEST_EXPRESS}"
     WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
 )
 
