@@ -936,6 +936,7 @@ H5Fget_fileno(hid_t file_id, unsigned long *fileno)
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "i*Ul", file_id, fileno);
 
     /* If no fileno pointer was passed in, exit quietly */
     if(fileno) {
