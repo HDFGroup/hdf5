@@ -420,11 +420,11 @@ test_api_get_ex_dcpl(test_api_config_t config, hid_t fapl, hid_t dcpl,
         size_t plist_buf_size;
 
         /* Encode property list to plist_buf */
-        if(H5Pencode(dcpl, NULL, &plist_buf_size) < 0)
+        if(H5Pencode2(dcpl, NULL, &plist_buf_size, fapl) < 0)
             TEST_ERROR
         if(NULL == (plist_buf = HDmalloc(plist_buf_size)))
             TEST_ERROR
-        if(H5Pencode(dcpl, plist_buf, &plist_buf_size) < 0)
+        if(H5Pencode2(dcpl, plist_buf, &plist_buf_size, fapl) < 0)
             TEST_ERROR
 
         /* Decode serialized property list to *ex_dcpl */
@@ -469,7 +469,7 @@ error:
 
 /* Main test function */
 static int
-test_api(test_api_config_t config, hid_t fapl)
+test_api(test_api_config_t config, hid_t fapl, H5F_libver_t low)
 {
     char        filename[FILENAME_BUF_SIZE];
     hid_t       dcpl = -1;      /* Dataset creation property list */
@@ -618,7 +618,8 @@ test_api(test_api_config_t config, hid_t fapl)
         TEST_ERROR
 
     /* Get examination DCPL */
-    if(test_api_get_ex_dcpl(config, fapl, dcpl, &ex_dcpl, vspace[0], filename, (hsize_t)213) < 0)
+    if(test_api_get_ex_dcpl(config, fapl, dcpl, &ex_dcpl, vspace[0], filename, 
+                            (low >= H5F_LIBVER_V112)?(hsize_t)99:(low >= H5F_LIBVER_V110?174:213)) < 0)
         TEST_ERROR
 
     /* Test H5Pget_virtual_count */
@@ -1025,7 +1026,8 @@ test_api(test_api_config_t config, hid_t fapl)
     }
 
     /* Get examination DCPL */
-    if(test_api_get_ex_dcpl(config, fapl, dcpl, &ex_dcpl, vspace[0], filename, (hsize_t)697) < 0)
+    if(test_api_get_ex_dcpl(config, fapl, dcpl, &ex_dcpl, vspace[0], filename, 
+                            (low >= H5F_LIBVER_V112)?(hsize_t)607:(hsize_t)697) < 0)
         TEST_ERROR
 
     /* Test H5Pget_virtual_count */
@@ -11598,6 +11600,11 @@ test_dapl_values(hid_t fapl_id)
  *
  * Purpose:     Tests datasets with virtual layout
  *
+ * Note: 
+ *  Tests are modified to test with the low/high bounds combination
+ *  set in fapl.  
+ *  Please see RFC for "H5Sencode/H5Sdecode Format Change".
+ *
  * Return:      EXIT_SUCCESS/EXIT_FAILURE
  *-------------------------------------------------------------------------
  */
@@ -11606,8 +11613,11 @@ main(void)
 {
     char filename[FILENAME_BUF_SIZE];
     hid_t fapl;
+    hid_t my_fapl = -1;         /* File access property list */
     int test_api_config;
     unsigned bit_config;
+    unsigned latest = FALSE;    /* Using the latest library version bound */
+    H5F_libver_t low, high;     /* Low and high bounds */
     int nerrors = 0;
 
     /* Testing setup */
@@ -11616,21 +11626,59 @@ main(void)
 
     h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
 
-    for(test_api_config = (int)TEST_API_BASIC; test_api_config < (int)TEST_API_NTESTS; test_api_config++)
-        nerrors += test_api((test_api_config_t)test_api_config, fapl);
-    for(bit_config = 0; bit_config < TEST_IO_NTESTS; bit_config++) {
-        HDprintf("Config: %s%s%s\n", bit_config & TEST_IO_CLOSE_SRC ? "closed source dataset, " : "", bit_config & TEST_IO_DIFFERENT_FILE ? "different source file" : "same source file", bit_config & TEST_IO_REOPEN_VIRT ? ", reopen virtual file" : "");
-        nerrors += test_basic_io(bit_config, fapl);
-        nerrors += test_vds_prefix(bit_config, fapl);
-        nerrors += test_unlim(bit_config, fapl);
-        nerrors += test_printf(bit_config, fapl);
-        nerrors += test_all(bit_config, fapl);
-    }
+    /* Set to use the latest file format */
+    if((my_fapl = H5Pcopy(fapl)) < 0) TEST_ERROR
 
-    nerrors += test_dapl_values(fapl);
+     /* Loop through all the combinations of low/high version bounds */
+    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
+        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
+            char msg[80];       /* Message for file version bounds */
+            char *low_string;   /* The low bound string */
+            char *high_string;  /* The high bound string */
 
-    /* Verify symbol table messages are cached */
-    nerrors += (h5_verify_cached_stabs(FILENAME, fapl) < 0 ? 1 : 0);
+            /* Invalid combinations, just continue */
+            if(high == H5F_LIBVER_EARLIEST || high < low)
+                continue;
+
+            /* Test virtual dataset only for V110 and above */
+            if(high < H5F_LIBVER_V110)
+                continue;
+
+            /* Whether to use latest hyperslab/point selection version */
+            if(low >= H5F_LIBVER_V112)
+                latest = TRUE;
+
+            /* Set the low/high version bounds */
+            if(H5Pset_libver_bounds(my_fapl, low, high) < 0)
+                TEST_ERROR
+
+            /* Display testing info */
+            low_string = h5_get_version_string(low);
+            high_string = h5_get_version_string(high);
+            HDsprintf(msg, "Testing virtual dataset with file version bounds: (%s, %s):", low_string, high_string);
+            HDputs(msg);
+    
+            for(test_api_config = (int)TEST_API_BASIC; test_api_config < (int)TEST_API_NTESTS; test_api_config++)
+                nerrors += test_api((test_api_config_t)test_api_config, my_fapl, low);
+            for(bit_config = 0; bit_config < TEST_IO_NTESTS; bit_config++) {
+                HDprintf("Config: %s%s%s\n", bit_config & TEST_IO_CLOSE_SRC ? "closed source dataset, " : "", bit_config & TEST_IO_DIFFERENT_FILE ? "different source file" : "same source file", bit_config & TEST_IO_REOPEN_VIRT ? ", reopen virtual file" : "");
+                nerrors += test_basic_io(bit_config, my_fapl);
+                nerrors += test_vds_prefix(bit_config, my_fapl);
+                nerrors += test_unlim(bit_config, my_fapl);
+                nerrors += test_printf(bit_config, my_fapl);
+                nerrors += test_all(bit_config, my_fapl);
+            }
+
+            nerrors += test_dapl_values(my_fapl);
+
+            /* Verify symbol table messages are cached */
+            nerrors += (h5_verify_cached_stabs(FILENAME, my_fapl) < 0 ? 1 : 0);
+
+       } /* end for high */
+    } /* end for low */
+
+    if(H5Pclose(my_fapl) < 0)
+        TEST_ERROR
 
     if(nerrors)
         goto error;

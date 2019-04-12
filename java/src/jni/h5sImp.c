@@ -1141,7 +1141,7 @@ Java_hdf_hdf5lib_H5_H5Sencode
     if (obj_id < 0)
         H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Sencode: invalid object ID");
 
-    if ((status = H5Sencode(obj_id, NULL, &buf_size)) < 0)
+    if ((status = H5Sencode2(obj_id, NULL, &buf_size, H5P_DEFAULT)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
     if (buf_size == 0)
@@ -1150,7 +1150,7 @@ Java_hdf_hdf5lib_H5_H5Sencode
     if (NULL == (bufPtr = (unsigned char *) HDcalloc((size_t) 1, buf_size)))
         H5_JNI_FATAL_ERROR(ENVONLY, "H5Sencode: failed to allocate encoding buffer");
 
-    if ((status = H5Sencode((hid_t) obj_id, bufPtr, &buf_size)) < 0)
+    if ((status = H5Sencode2((hid_t) obj_id, bufPtr, &buf_size, H5P_DEFAULT)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
     if (NULL == (returnedArray = ENVPTR->NewByteArray(ENVONLY, (jsize) buf_size)))

@@ -33,12 +33,12 @@ test_encode_decode(hid_t orig_pl, int mpi_rank, int recv_proc)
         int send_size = 0;
 
         /* first call to encode returns only the size of the buffer needed */
-        ret = H5Pencode(orig_pl, NULL, &buf_size);
+        ret = H5Pencode2(orig_pl, NULL, &buf_size, H5P_DEFAULT);
         VRFY((ret >= 0), "H5Pencode succeeded");
 
         sbuf = (uint8_t *)HDmalloc(buf_size);
 
-        ret = H5Pencode(orig_pl, sbuf, &buf_size);
+        ret = H5Pencode2(orig_pl, sbuf, &buf_size, H5P_DEFAULT);
         VRFY((ret >= 0), "H5Pencode succeeded");
 
         /* this is a temp fix to send this size_t */
