@@ -1921,6 +1921,7 @@ test_file_open_overlap(void)
     hid_t sid;
     ssize_t nobjs;      /* # of open objects */
     unsigned intent;
+    unsigned long fileno1, fileno2;     /* File number */
     herr_t ret;         /* Generic return value */
 
     /* Output message about test being performed */
@@ -1938,6 +1939,19 @@ test_file_open_overlap(void)
     ret = H5Fget_intent(fid1, &intent);
     CHECK(ret, FAIL, "H5Fget_intent");
     VERIFY(intent, H5F_ACC_RDWR, "H5Fget_intent");
+
+    /* Check the file numbers */
+    fileno1 = 0;
+    ret = H5Fget_fileno(fid1, &fileno1);
+    CHECK(ret, FAIL, "H5Fget_fileno");
+    fileno2 = 0;
+    ret = H5Fget_fileno(fid2, &fileno2);
+    CHECK(ret, FAIL, "H5Fget_fileno");
+    VERIFY(fileno1, fileno2, "H5Fget_fileno");
+
+    /* Check that a file number pointer of NULL is ignored */
+    ret = H5Fget_fileno(fid1, NULL);
+    CHECK(ret, FAIL, "H5Fget_fileno");
 
     /* Create a group in file */
     gid = H5Gcreate2(fid1, GROUP1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
@@ -2652,6 +2666,7 @@ test_userblock_file_size(void)
     hid_t fcpl2_id;
     hsize_t dims[2] = {3, 4};
     hsize_t filesize1, filesize2, filesize;
+    unsigned long fileno1, fileno2;     /* File number */
     herr_t ret;         /* Generic return value */
 
     /* Output message about test being performed */
@@ -2668,6 +2683,15 @@ test_userblock_file_size(void)
     CHECK(file1_id, FAIL, "H5Fcreate");
     file2_id = H5Fcreate(FILE2, H5F_ACC_TRUNC, fcpl2_id, H5P_DEFAULT);
     CHECK(file2_id, FAIL, "H5Fcreate");
+
+    /* Check the file numbers */
+    fileno1 = 0;
+    ret = H5Fget_fileno(file1_id, &fileno1);
+    CHECK(ret, FAIL, "H5Fget_fileno");
+    fileno2 = 0;
+    ret = H5Fget_fileno(file2_id, &fileno2);
+    CHECK(ret, FAIL, "H5Fget_fileno");
+    CHECK(fileno1, fileno2, "H5Fget_fileno");
 
     /* Create groups */
     group1_id = H5Gcreate2(file1_id, GROUP1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
