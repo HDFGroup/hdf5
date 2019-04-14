@@ -91,6 +91,7 @@ H5_FCDLL int_f h5fget_file_image_c(hid_t_f *file_id, void *buf_ptr, size_t_f *bu
 H5_FCDLL int_f h5fflush_c(hid_t_f *obj_id, int_f *scope);
 H5_FCDLL int_f h5fget_name_c(hid_t_f *obj_id, size_t_f *size, _fcd buf, size_t_f *buflen);
 H5_FCDLL int_f h5fget_filesize_c(hid_t_f *file_id, hsize_t_f *size);
+H5_FCDLL int_f h5fget_fileno_c(hid_t_f *file_id, int_f *fileno);
 
 /*
  * Functions from H5Sf.c

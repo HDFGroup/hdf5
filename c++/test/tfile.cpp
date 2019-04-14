@@ -412,6 +412,64 @@ static void test_file_size()
 
 
 /*-------------------------------------------------------------------------
+ * Function:    test_file_num
+ *
+ * Purpose      Test file number.
+ *
+ * Return       None
+ *
+ * Programmer   Quincey Koziol
+ *              April, 2019
+ *-------------------------------------------------------------------------
+ */
+static void test_file_num()
+{
+    // Output message about test being performed
+    SUBTEST("File Number");
+
+    hid_t        fapl_id;
+    fapl_id = h5_fileaccess(); // in h5test.c, returns a file access template
+
+    try {
+        // Use the file access template id to create a file access prop.
+        // list object to pass in H5File::H5File
+        FileAccPropList fapl(fapl_id);
+
+        // Create two files
+        H5File file1(FILE1, H5F_ACC_TRUNC, FileCreatPropList::DEFAULT, fapl);
+        H5File file2(FILE2, H5F_ACC_TRUNC, FileCreatPropList::DEFAULT, fapl);
+
+        // Open the first file again
+        H5File file3(FILE1, H5F_ACC_RDWR);
+
+        // Get file numbers
+        unsigned long file_num1 = file1.getFileNum();
+        unsigned long file_num2 = file2.getFileNum();
+        unsigned long file_num3 = file3.getFileNum();
+
+        // Check file numbers
+        if (file_num1 == file_num2)
+            issue_fail_msg("test_file_num()", __LINE__, __FILE__, "getFileNum() returned wrong value");
+        if (file_num1 != file_num3)
+            issue_fail_msg("test_file_num()", __LINE__, __FILE__, "getFileNum() returned wrong value");
+
+        PASSED();
+    }   // end of try block
+
+    catch (Exception& E)
+    {
+        issue_fail_msg("test_file_num()", __LINE__, __FILE__, E.getCDetailMsg());
+    }
+
+    // use C test utility routine to close property list.
+    herr_t ret = H5Pclose(fapl_id);
+    if (ret < 0)
+        issue_fail_msg("test_file_num()", __LINE__, __FILE__, "H5Pclose failed");
+
+}   // test_file_num()
+
+
+/*-------------------------------------------------------------------------
  * Function:    test_file_name
  *
  * Purpose      Test getting file's name.
@@ -966,6 +1024,7 @@ void test_file()
     test_file_create();      // Test file creation (also creation templates)
     test_file_open();        // Test file opening
     test_file_size();        // Test file size
+    test_file_num();         // Test file number
     test_file_name();        // Test getting file's name
     test_file_attribute();   // Test file attribute feature
     test_libver_bounds();    // Test format version
