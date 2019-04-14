@@ -580,6 +580,27 @@ hsize_t H5File::getFileSize() const
 }
 
 //--------------------------------------------------------------------------
+// Function:    H5File::getFileNum
+///\brief       Returns the file number of the HDF5 file.
+///\return      File number
+///\exception   H5::FileIException
+///\par Description
+///             This function is called after an existing file is opened in
+///             order to retrieve the unique 'file number' for the file.
+// Programmer   Quincey Koziol - April 13, 2019
+//--------------------------------------------------------------------------
+unsigned long H5File::getFileNum() const
+{
+    unsigned long fileno = 0;
+    herr_t ret_value = H5Fget_fileno(id, &fileno);
+    if (ret_value < 0)
+    {
+        throw FileIException("H5File::getFileNum", "H5Fget_fileno failed");
+    }
+    return (fileno);
+}
+
+//--------------------------------------------------------------------------
 // Function:    H5File::getId
 ///\brief       Get the id of this file
 ///\return      File identifier

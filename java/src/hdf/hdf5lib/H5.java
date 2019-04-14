@@ -2968,6 +2968,19 @@ public class H5 implements java.io.Serializable {
     public synchronized static native int H5Fget_intent(long file_id) throws HDF5LibraryException;
 
     /**
+     * H5Fget_fileno retrieves the "file number" for an open file.
+     *
+     * @param file_id
+     *            IN: File identifier for a currently-open HDF5 file
+     *
+     * @return the unique file number for the file.
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     **/
+    public synchronized static native long H5Fget_fileno(long file_id) throws HDF5LibraryException;
+
+    /**
      * H5Fget_mdc_hit_rate queries the metadata cache of the target file to obtain its hit rate (cache hits / (cache
      * hits + cache misses)) since the last time hit rate statistics were reset.
      *

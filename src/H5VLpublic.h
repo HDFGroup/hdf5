@@ -114,6 +114,7 @@ typedef enum H5VL_file_get_t {
     H5VL_FILE_GET_FAPL,                     /* file access property list	*/
     H5VL_FILE_GET_FCPL,	                    /* file creation property list	*/
     H5VL_FILE_GET_INTENT,	            /* file intent           		*/
+    H5VL_FILE_GET_FILENO,	            /* file number           		*/
     H5VL_FILE_GET_NAME,	                    /* file name             		*/
     H5VL_FILE_GET_OBJ_COUNT,	            /* object count in file	       	*/
     H5VL_FILE_GET_OBJ_IDS	            /* object ids in file     		*/
