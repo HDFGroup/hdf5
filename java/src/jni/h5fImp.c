@@ -260,11 +260,11 @@ done:
  */
 JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_H5_H5Fget_1intent
-    (JNIEnv *env, jclass cls, jlong file_id)
+    (JNIEnv *env, jclass clss, jlong file_id)
 {
     unsigned intent = 0;
 
-    UNUSED(cls);
+    UNUSED(clss);
 
     if (H5Fget_intent((hid_t)file_id, &intent) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
@@ -280,18 +280,18 @@ done:
  */
 JNIEXPORT jlong JNICALL
 Java_hdf_hdf5lib_H5_H5Fget_1fileno
-    (JNIEnv *env, jclass cls, jlong file_id)
+    (JNIEnv *env, jclass clss, jlong file_id)
 {
     unsigned long fileno = 0;
 
-    UNUSED(cls);
+    UNUSED(clss);
 
-    if (H5Fget_intent((hid_t)file_id, &fileno) < 0)
+    if (H5Fget_fileno((hid_t)file_id, &fileno) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
 done:
     return (jlong)fileno;
-} /* end Java_hdf_hdf5lib_H5_H5Fget_1intent */
+} /* end Java_hdf_hdf5lib_H5_H5Fget_1fileno */
 
 /*
  * Class:     hdf_hdf5lib_H5
