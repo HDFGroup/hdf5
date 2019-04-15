@@ -88,26 +88,18 @@ add_custom_target(H5WATCH_files ALL COMMENT "Copying files needed by H5WATCH tes
 
   macro (ADD_H5_ERR_TEST resultfile resultcode)
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
-      if (SKIP_ERROR_STACK_TESTS)
-        add_test (
-            NAME H5WATCH_ARGS-h5watch-${resultfile}
-            COMMAND ${CMAKE_COMMAND} -E echo "SKIP Error Stack Test"
-        )
-        set_property(TEST H5WATCH_ARGS-h5watch-${resultfile} PROPERTY DISABLED)
-      else ()
-        add_test (
-            NAME H5WATCH_ARGS-h5watch-${resultfile}
-            COMMAND "${CMAKE_COMMAND}"
-                -D "TEST_PROGRAM=$<TARGET_FILE:h5watch>"
-                -D "TEST_ARGS:STRING=${ARGN}"
-                -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
-                -D "TEST_OUTPUT=${resultfile}.out"
-                -D "TEST_EXPECT=${resultcode}"
-                -D "TEST_REFERENCE=${resultfile}.mty"
-                -D "TEST_ERRREF=${resultfile}.err"
-                -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
-        )
-      endif ()
+      add_test (
+          NAME H5WATCH_ARGS-h5watch-${resultfile}
+          COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5watch>"
+              -D "TEST_ARGS:STRING=${ARGN}"
+              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
+              -D "TEST_OUTPUT=${resultfile}.out"
+              -D "TEST_EXPECT=${resultcode}"
+              -D "TEST_REFERENCE=${resultfile}.mty"
+              -D "TEST_ERRREF=${resultfile}.err"
+              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+      )
       set_tests_properties (H5WATCH_ARGS-h5watch-${resultfile} PROPERTIES DEPENDS ${last_test})
       set (last_test "H5WATCH_ARGS-h5watch-${resultfile}")
     endif ()
