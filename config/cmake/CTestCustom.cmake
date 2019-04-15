@@ -39,7 +39,6 @@ set (CTEST_CUSTOM_MEMCHECK_IGNORE
     H5TEST-flush2           #designed to need flush1
     H5TEST-error_test       #uses runTest.cmake
     H5TEST-err_compat       #uses runTest.cmake
-    H5TEST-links_env        #uses runTest.cmake
     H5TEST-testlibinfo      #uses grepTest.cmake
     #########
     H5TEST-clear-objects

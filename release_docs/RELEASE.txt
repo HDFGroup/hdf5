@@ -48,13 +48,13 @@ New Features
 
     Configuration:
     -------------
-    - Skip tools test that test the error stack
+    - Change tools test that test the error stack
 
       There are some use cases which can cause the error stack of tools to be
-      different then the expected. An option, SKIP_ERROR_STACK_TESTS, was added
-      that will skip over tests that test the error stack.
+      different then the expected. These tests now use grepTest.cmake, this was
+      changed to allow the error file to be searched for an expected string.
 
-      (ADB - 2019/03/26, HDFFV-10741)
+      (ADB - 2019/04/15, HDFFV-10741)
 
     - Keep stderr and stdout separate in tests
 
