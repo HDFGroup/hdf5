@@ -50,7 +50,6 @@ public class TestH5F {
             HDF5Constants.H5F_OBJ_DATATYPE, HDF5Constants.H5F_OBJ_ATTR,
             HDF5Constants.H5F_OBJ_ALL };
     long H5fid = -1;
-    long H5fid2 = -1;
 
     private final void _deleteFile(String filename) {
         File file = new File(filename);
@@ -69,10 +68,6 @@ public class TestH5F {
         H5fid = H5.H5Fcreate(H5_FILE, HDF5Constants.H5F_ACC_TRUNC,
                 HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
         H5.H5Fflush(H5fid, HDF5Constants.H5F_SCOPE_LOCAL);
-
-        H5fid2 = H5.H5Fcreate(H5_FILE2, HDF5Constants.H5F_ACC_TRUNC,
-                HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
-        H5.H5Fflush(H5fid2, HDF5Constants.H5F_SCOPE_LOCAL);
     }
 
     @After
@@ -81,12 +76,7 @@ public class TestH5F {
             try {H5.H5Fclose(H5fid);} catch (Exception ex) {}
             H5fid = -1;
         }
-        if (H5fid2 > 0) {
-            try {H5.H5Fclose(H5fid2);} catch (Exception ex) {}
-            H5fid2 = -1;
-        }
         _deleteFile(H5_FILE);
-        _deleteFile(H5_FILE2);
         System.out.println();
     }
 
@@ -106,28 +96,12 @@ public class TestH5F {
 
     @Test(expected = HDF5LibraryException.class)
     public void testH5Fget_create_plist_closed() throws Throwable {
-        long fid = -1;
-
         if (H5fid > 0) {
             try {H5.H5Fclose(H5fid);} catch (Exception ex) {}
-            H5fid = -1;
-        }
-
-        try {
-            fid = H5.H5Fopen(H5_FILE, HDF5Constants.H5F_ACC_RDWR,
-                    HDF5Constants.H5P_DEFAULT);
-        }
-        catch (Throwable err) {
-            fail("H5.H5Fopen: " + err);
-        }
-        try {
-            H5.H5Fclose(fid);
-        }
-        catch (Exception ex) {
         }
 
         // it should fail because the file was closed.
-        H5.H5Fget_create_plist(fid);
+        H5.H5Fget_create_plist(H5fid);
     }
 
     @Test
@@ -146,34 +120,17 @@ public class TestH5F {
 
     @Test(expected = HDF5LibraryException.class)
     public void testH5Fget_access_plist_closed() throws Throwable {
-        long fid = -1;
-
         if (H5fid > 0) {
             try {H5.H5Fclose(H5fid);} catch (Exception ex) {}
-            H5fid = -1;
-        }
-
-        try {
-            fid = H5.H5Fopen(H5_FILE, HDF5Constants.H5F_ACC_RDWR,
-                    HDF5Constants.H5P_DEFAULT);
-        }
-        catch (Throwable err) {
-            fail("H5.H5Fopen: " + err);
-        }
-        try {
-            H5.H5Fclose(fid);
-        }
-        catch (Exception ex) {
         }
 
         // it should fail because the file was closed.
-        H5.H5Fget_access_plist(fid);
+        H5.H5Fget_access_plist(H5fid);
     }
 
     @Test
     public void testH5Fget_intent_rdwr() {
         int intent = 0;
-        long fid = -1;
 
         if (H5fid > 0) {
             try {H5.H5Fclose(H5fid);} catch (Exception ex) {}
@@ -181,31 +138,24 @@ public class TestH5F {
         }
 
         try {
-            fid = H5.H5Fopen(H5_FILE, HDF5Constants.H5F_ACC_RDWR,
+            H5fid = H5.H5Fopen(H5_FILE, HDF5Constants.H5F_ACC_RDWR,
                     HDF5Constants.H5P_DEFAULT);
         }
         catch (Throwable err) {
             fail("H5.H5Fopen: " + err);
         }
         try {
-            intent = H5.H5Fget_intent(fid);
+            intent = H5.H5Fget_intent(H5fid);
         }
         catch (Throwable err) {
             fail("H5.H5Fget_intent: " + err);
         }
         assertEquals(HDF5Constants.H5F_ACC_RDWR, intent);
-
-        try {
-            H5.H5Fclose(fid);
-        }
-        catch (Exception ex) {
-        }
     }
 
     @Test
     public void testH5Fget_intent_rdonly() {
         int intent = 0;
-        long fid = -1;
 
         if (H5fid > 0) {
             try {H5.H5Fclose(H5fid);} catch (Exception ex) {}
@@ -213,25 +163,19 @@ public class TestH5F {
         }
 
         try {
-            fid = H5.H5Fopen(H5_FILE, HDF5Constants.H5F_ACC_RDONLY,
+            H5fid = H5.H5Fopen(H5_FILE, HDF5Constants.H5F_ACC_RDONLY,
                     HDF5Constants.H5P_DEFAULT);
         }
         catch (Throwable err) {
             fail("H5.H5Fopen: " + err);
         }
         try {
-            intent = H5.H5Fget_intent(fid);
+            intent = H5.H5Fget_intent(H5fid);
         }
         catch (Throwable err) {
             fail("H5.H5Fget_intent: " + err);
         }
         assertEquals(HDF5Constants.H5F_ACC_RDONLY, intent);
-
-        try {
-            H5.H5Fclose(fid);
-        }
-        catch (Exception ex) {
-        }
     }
 
     @Test
@@ -241,53 +185,27 @@ public class TestH5F {
         long fid1 = -1;
         long fid2 = -1;
 
-        if (H5fid > 0) {
-            try {H5.H5Fclose(H5fid);} catch (Exception ex) {}
-            H5fid = -1;
-        }
-
         try {
-            fid1 = H5.H5Fopen(H5_FILE, HDF5Constants.H5F_ACC_RDWR,
+            fid1 = H5.H5Fcreate(H5_FILE2, HDF5Constants.H5F_ACC_TRUNC,
+                    HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+            H5.H5Fflush(fid1, HDF5Constants.H5F_SCOPE_LOCAL);
+            assertTrue("H5Fcreate failed", fid1 > 0);
+            fid2 = H5.H5Fopen(H5_FILE2, HDF5Constants.H5F_ACC_RDWR,
                     HDF5Constants.H5P_DEFAULT);
-        }
-        catch (Throwable err) {
-            fail("H5.H5Fopen: " + err);
-        }
-
-        try {
-            fid2 = H5.H5Fopen(H5_FILE, HDF5Constants.H5F_ACC_RDWR,
-                    HDF5Constants.H5P_DEFAULT);
-        }
-        catch (Throwable err) {
-            fail("H5.H5Fopen: " + err);
-        }
-
-        try {
+            assertTrue("H5Fopen failed", fid2 > 0);
             fileno1 = H5.H5Fget_fileno(fid1);
-        }
-        catch (Throwable err) {
-            fail("H5.H5Fget_fileno: " + err);
-        }
-
-        try {
+            assertTrue("H5Fget_fileno1="+fileno1, fileno1 > 0);
             fileno2 = H5.H5Fget_fileno(fid2);
+            assertTrue("H5Fget_fileno2="+fileno2, fileno2 > 0);
+
+            assertEquals("fileno1["+fileno1+"]!=fileno2["+fileno2+"]", fileno1, fileno2);
         }
         catch (Throwable err) {
-            fail("H5.H5Fget_fileno: " + err);
+            fail("testH5Fget_fileno_same: " + err);
         }
-
-        assertEquals(fileno1, fileno2);
-
-        try {
+        finally {
             H5.H5Fclose(fid1);
-        }
-        catch (Exception ex) {
-        }
-
-        try {
             H5.H5Fclose(fid2);
-        }
-        catch (Exception ex) {
         }
     }
 
@@ -295,60 +213,26 @@ public class TestH5F {
     public void testH5Fget_fileno_diff() {
         long fileno1 = 0;
         long fileno2 = 0;
-        long fid1 = -1;
         long fid2 = -1;
 
-        if (H5fid > 0) {
-            try {H5.H5Fclose(H5fid);} catch (Exception ex) {}
-            H5fid = -1;
-        }
-        if (H5fid2 > 0) {
-            try {H5.H5Fclose(H5fid2);} catch (Exception ex) {}
-            H5fid2 = -1;
-        }
-
         try {
-            fid1 = H5.H5Fopen(H5_FILE, HDF5Constants.H5F_ACC_RDWR,
-                    HDF5Constants.H5P_DEFAULT);
-        }
-        catch (Throwable err) {
-            fail("H5.H5Fopen: " + err);
-        }
+            fid2 = H5.H5Fcreate(H5_FILE2, HDF5Constants.H5F_ACC_TRUNC,
+                    HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+            H5.H5Fflush(fid2, HDF5Constants.H5F_SCOPE_LOCAL);
+            assertTrue("H5Fcreate failed", fid2 > 0);
 
-        try {
-            fid2 = H5.H5Fopen(H5_FILE2, HDF5Constants.H5F_ACC_RDWR,
-                    HDF5Constants.H5P_DEFAULT);
-        }
-        catch (Throwable err) {
-            fail("H5.H5Fopen: " + err);
-        }
-
-        try {
-            fileno1 = H5.H5Fget_fileno(fid1);
-        }
-        catch (Throwable err) {
-            fail("H5.H5Fget_fileno: " + err);
-        }
-
-        try {
+            fileno1 = H5.H5Fget_fileno(H5fid);
+            assertTrue("H5Fget_fileno1="+fileno1, fileno1 > 0);
             fileno2 = H5.H5Fget_fileno(fid2);
+            assertTrue("H5Fget_fileno2="+fileno2, fileno2 > 0);
+
+            assertNotEquals("fileno1["+fileno1+"]==fileno2["+fileno2+"]", fileno1, fileno2);
         }
         catch (Throwable err) {
-            fail("H5.H5Fget_fileno: " + err);
+            fail("testH5Fget_fileno_diff: " + err);
         }
-
-        assertNotEquals(fileno1, fileno2);
-
-        try {
-            H5.H5Fclose(fid1);
-        }
-        catch (Exception ex) {
-        }
-
-        try {
+        finally {
             H5.H5Fclose(fid2);
-        }
-        catch (Exception ex) {
         }
     }
 
