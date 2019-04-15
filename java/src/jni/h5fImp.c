@@ -275,6 +275,26 @@ done:
 
 /*
  * Class:     hdf_hdf5lib_H5
+ * Method:    H5Fget_fileno
+ * Signature: (J)J
+ */
+JNIEXPORT jlong JNICALL
+Java_hdf_hdf5lib_H5_H5Fget_1fileno
+    (JNIEnv *env, jclass cls, jlong file_id)
+{
+    unsigned long fileno = 0;
+
+    UNUSED(cls);
+
+    if (H5Fget_intent((hid_t)file_id, &fileno) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+
+done:
+    return (jlong)fileno;
+} /* end Java_hdf_hdf5lib_H5_H5Fget_1intent */
+
+/*
+ * Class:     hdf_hdf5lib_H5
  * Method:    H5Fclose
  * Signature: (J)I
  */

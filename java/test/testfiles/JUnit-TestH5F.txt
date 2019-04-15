@@ -7,8 +7,10 @@ JUnit version 4.11
 .testH5Fget_intent_rdonly
 .testH5Fget_create_plist
 .testH5Fget_obj_count
+.testH5Fget_fileno_same
+.testH5Fget_fileno_diff
 
 Time:  XXXX
 
-OK (8 tests)
+OK (10 tests)
 

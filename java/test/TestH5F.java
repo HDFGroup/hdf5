@@ -14,6 +14,7 @@
 package test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -32,6 +33,7 @@ import org.junit.rules.TestName;
 public class TestH5F {
     @Rule public TestName testname = new TestName();
     private static final String H5_FILE = "testF.h5";
+    private static final String H5_FILE2 = "testF2.h5";
 
     private static final int COUNT_OBJ_FILE = 1;
     private static final int COUNT_OBJ_DATASET = 0;
@@ -48,6 +50,7 @@ public class TestH5F {
             HDF5Constants.H5F_OBJ_DATATYPE, HDF5Constants.H5F_OBJ_ATTR,
             HDF5Constants.H5F_OBJ_ALL };
     long H5fid = -1;
+    long H5fid2 = -1;
 
     private final void _deleteFile(String filename) {
         File file = new File(filename);
@@ -66,6 +69,10 @@ public class TestH5F {
         H5fid = H5.H5Fcreate(H5_FILE, HDF5Constants.H5F_ACC_TRUNC,
                 HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
         H5.H5Fflush(H5fid, HDF5Constants.H5F_SCOPE_LOCAL);
+
+        H5fid2 = H5.H5Fcreate(H5_FILE2, HDF5Constants.H5F_ACC_TRUNC,
+                HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+        H5.H5Fflush(H5fid2, HDF5Constants.H5F_SCOPE_LOCAL);
     }
 
     @After
@@ -74,7 +81,12 @@ public class TestH5F {
             try {H5.H5Fclose(H5fid);} catch (Exception ex) {}
             H5fid = -1;
         }
+        if (H5fid2 > 0) {
+            try {H5.H5Fclose(H5fid2);} catch (Exception ex) {}
+            H5fid2 = -1;
+        }
         _deleteFile(H5_FILE);
+        _deleteFile(H5_FILE2);
         System.out.println();
     }
 
@@ -217,6 +229,124 @@ public class TestH5F {
 
         try {
             H5.H5Fclose(fid);
+        }
+        catch (Exception ex) {
+        }
+    }
+
+    @Test
+    public void testH5Fget_fileno_same() {
+        long fileno1 = 0;
+        long fileno2 = 0;
+        long fid1 = -1;
+        long fid2 = -1;
+
+        if (H5fid > 0) {
+            try {H5.H5Fclose(H5fid);} catch (Exception ex) {}
+            H5fid = -1;
+        }
+
+        try {
+            fid1 = H5.H5Fopen(H5_FILE, HDF5Constants.H5F_ACC_RDWR,
+                    HDF5Constants.H5P_DEFAULT);
+        }
+        catch (Throwable err) {
+            fail("H5.H5Fopen: " + err);
+        }
+
+        try {
+            fid2 = H5.H5Fopen(H5_FILE, HDF5Constants.H5F_ACC_RDWR,
+                    HDF5Constants.H5P_DEFAULT);
+        }
+        catch (Throwable err) {
+            fail("H5.H5Fopen: " + err);
+        }
+
+        try {
+            fileno1 = H5.H5Fget_fileno(fid1);
+        }
+        catch (Throwable err) {
+            fail("H5.H5Fget_fileno: " + err);
+        }
+
+        try {
+            fileno2 = H5.H5Fget_fileno(fid2);
+        }
+        catch (Throwable err) {
+            fail("H5.H5Fget_fileno: " + err);
+        }
+
+        assertEquals(fileno1, fileno2);
+
+        try {
+            H5.H5Fclose(fid1);
+        }
+        catch (Exception ex) {
+        }
+
+        try {
+            H5.H5Fclose(fid2);
+        }
+        catch (Exception ex) {
+        }
+    }
+
+    @Test
+    public void testH5Fget_fileno_diff() {
+        long fileno1 = 0;
+        long fileno2 = 0;
+        long fid1 = -1;
+        long fid2 = -1;
+
+        if (H5fid > 0) {
+            try {H5.H5Fclose(H5fid);} catch (Exception ex) {}
+            H5fid = -1;
+        }
+        if (H5fid2 > 0) {
+            try {H5.H5Fclose(H5fid2);} catch (Exception ex) {}
+            H5fid2 = -1;
+        }
+
+        try {
+            fid1 = H5.H5Fopen(H5_FILE, HDF5Constants.H5F_ACC_RDWR,
+                    HDF5Constants.H5P_DEFAULT);
+        }
+        catch (Throwable err) {
+            fail("H5.H5Fopen: " + err);
+        }
+
+        try {
+            fid2 = H5.H5Fopen(H5_FILE2, HDF5Constants.H5F_ACC_RDWR,
+                    HDF5Constants.H5P_DEFAULT);
+        }
+        catch (Throwable err) {
+            fail("H5.H5Fopen: " + err);
+        }
+
+        try {
+            fileno1 = H5.H5Fget_fileno(fid1);
+        }
+        catch (Throwable err) {
+            fail("H5.H5Fget_fileno: " + err);
+        }
+
+        try {
+            fileno2 = H5.H5Fget_fileno(fid2);
+        }
+        catch (Throwable err) {
+            fail("H5.H5Fget_fileno: " + err);
+        }
+
+        assertNotEquals(fileno1, fileno2);
+
+        try {
+            H5.H5Fclose(fid1);
+        }
+        catch (Exception ex) {
+        }
+
+        try {
+            H5.H5Fclose(fid2);
         }
         catch (Exception ex) {
         }
