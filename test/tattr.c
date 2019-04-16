@@ -2642,7 +2642,7 @@ test_attr_dense_rename(hid_t fcpl, hid_t fapl)
         CHECK(ret, FAIL, "H5Pset_file_space_strategy");
     }
     fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, fapl);
-    CHECK(fid, FAIL, "H5Fcreate");
+    CHECK(fid, H5I_INVALID_HID, "H5Fcreate");
     if (use_min_dset_oh)
         CHECK(H5Pclose(fcpl), FAIL, "H5Pclose");
 
@@ -2657,19 +2657,19 @@ test_attr_dense_rename(hid_t fcpl, hid_t fapl)
 
     /* Re-open file */
     fid = H5Fopen(FILENAME, H5F_ACC_RDWR, fapl);
-    CHECK(fid, FAIL, "H5Fopen");
+    CHECK(fid, H5I_INVALID_HID, "H5Fopen");
 
     /* Create dataspace for dataset */
     sid = H5Screate(H5S_SCALAR);
-    CHECK(sid, FAIL, "H5Screate");
+    CHECK(sid, H5I_INVALID_HID, "H5Screate");
 
     /* need DCPL to query the group creation properties */
     if (use_min_dset_oh) {
         dcpl = H5Pcopy(dcpl_g);
-        CHECK(dcpl, FAIL, "H5Pcopy");
+        CHECK(dcpl, H5I_INVALID_HID, "H5Pcopy");
     } else {
         dcpl = H5Pcreate(H5P_DATASET_CREATE);
-        CHECK(dcpl, FAIL, "H5Pcreate");
+        CHECK(dcpl, H5I_INVALID_HID, "H5Pcreate");
     }
 
     /* Retrieve limits for compact/dense attribute storage */
@@ -2686,7 +2686,7 @@ test_attr_dense_rename(hid_t fcpl, hid_t fapl)
 
         /* Create a dataset */
         dataset = H5Dcreate2(fid, DSET1_NAME, H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
-        CHECK(dataset, FAIL, "H5Dcreate2");
+        CHECK(dataset, H5I_INVALID_HID, "H5Dcreate2");
 
         /* Check on dataset's attribute storage status */
         is_dense = H5O__is_attr_dense_test(dataset);
@@ -2697,7 +2697,7 @@ test_attr_dense_rename(hid_t fcpl, hid_t fapl)
             /* Create attribute */
             sprintf(attrname, "attr %02u", u);
             attr = H5Acreate2(dataset, attrname, H5T_NATIVE_UINT, sid, H5P_DEFAULT, H5P_DEFAULT);
-            CHECK(attr, FAIL, "H5Acreate2");
+            CHECK(attr, H5I_INVALID_HID, "H5Acreate2");
 
             /* Write data into the attribute */
             ret = H5Awrite(attr, H5T_NATIVE_UINT, &u);
@@ -2751,11 +2751,11 @@ test_attr_dense_rename(hid_t fcpl, hid_t fapl)
 
     /* Re-open file */
     fid = H5Fopen(FILENAME, H5F_ACC_RDWR, fapl);
-    CHECK(fid, FAIL, "H5Fopen");
+    CHECK(fid, H5I_INVALID_HID, "H5Fopen");
 
     /* Open dataset */
     dataset = H5Dopen2(fid, DSET1_NAME, H5P_DEFAULT);
-    CHECK(dataset, FAIL, "H5Dopen2");
+    CHECK(dataset, H5I_INVALID_HID, "H5Dopen2");
 
     /* Verify renamed attributes */
     for(u = 0; u < (max_compact * 2); u++) {
@@ -2764,7 +2764,7 @@ test_attr_dense_rename(hid_t fcpl, hid_t fapl)
         /* Open attribute */
         sprintf(attrname, "new attr %02u", u);
         attr = H5Aopen(dataset, attrname, H5P_DEFAULT);
-        CHECK(attr, FAIL, "H5Aopen");
+        CHECK(attr, H5I_INVALID_HID, "H5Aopen");
 
         /* Read data from the attribute */
         ret = H5Aread(attr, H5T_NATIVE_UINT, &value);
