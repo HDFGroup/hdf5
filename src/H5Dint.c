@@ -2872,7 +2872,7 @@ H5D__set_extent(H5D_t *dset, const hsize_t *size)
                 dset->shared->layout.storage.u.virt.list[u].virtual_space_status = H5O_VIRTUAL_STATUS_CORRECT;
 
                 /* Patch sub-source datasets */
-                for(v = 0; v < dset->shared->layout.storage.u.virt.list[u].sub_dset_nalloc; v++)
+                for(v = 0; v < dset->shared->layout.storage.u.virt.list[u].sub_dset_nused; v++)
                     if(H5S_set_extent(dset->shared->layout.storage.u.virt.list[u].sub_dset[v].virtual_select, size) < 0)
                         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to modify size of dataspace")
             } /* end for */
