@@ -1124,7 +1124,7 @@ H5D__build_file_prefix(const H5D_t *dset, H5F_prefix_open_t prefix_type, char **
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get the prefix for the external file")
         }
     } else
-        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "prefix name is not sensible")
+        HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "prefix name is not sensible")
 
     /* Prefix has to be checked for NULL / empty string again because the
      * code above might have updated it.
@@ -1133,8 +1133,7 @@ H5D__build_file_prefix(const H5D_t *dset, H5F_prefix_open_t prefix_type, char **
         /* filename is interpreted as relative to the current directory,
          * does not need to be expanded
          */
-        if(NULL == (*file_prefix = (char *)H5MM_strdup("")))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+        *file_prefix = "";
     } /* end if */
     else {
         if(HDstrncmp(prefix, "${ORIGIN}", HDstrlen("${ORIGIN}")) == 0) {
@@ -1383,8 +1382,10 @@ done:
             } /* end if */
             if(new_dset->shared->dcpl_id != 0 && H5I_dec_ref(new_dset->shared->dcpl_id) < 0)
                 HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, NULL, "unable to decrement ref count on property list")
-            new_dset->shared->extfile_prefix = (char *)H5MM_xfree(new_dset->shared->extfile_prefix);
-            new_dset->shared->vds_prefix = (char *)H5MM_xfree(new_dset->shared->vds_prefix);
+            if(new_dset->shared->extfile_prefix != "")
+                new_dset->shared->extfile_prefix = (char *)H5MM_xfree(new_dset->shared->extfile_prefix);
+            if(new_dset->shared->vds_prefix != "")
+                new_dset->shared->vds_prefix = (char *)H5MM_xfree(new_dset->shared->vds_prefix);
             new_dset->shared = H5FL_FREE(H5D_shared_t, new_dset->shared);
         } /* end if */
         new_dset->oloc.file = NULL;
@@ -1558,15 +1559,19 @@ H5D_open(const H5G_loc_t *loc, hid_t dapl_id)
     ret_value = dataset;
 
 done:
-    extfile_prefix = (char *)H5MM_xfree(extfile_prefix);
-    vds_prefix = (char *)H5MM_xfree(vds_prefix);
+    if(extfile_prefix != "")
+        extfile_prefix = (char *)H5MM_xfree(extfile_prefix);
+    if(vds_prefix != "")
+        vds_prefix = (char *)H5MM_xfree(vds_prefix);
 
     if(ret_value == NULL) {
         /* Free the location--casting away const*/
         if(dataset) {
             if(shared_fo == NULL && dataset->shared) {   /* Need to free shared fo */
-                dataset->shared->extfile_prefix = (char *)H5MM_xfree(dataset->shared->extfile_prefix);
-                dataset->shared->vds_prefix = (char *)H5MM_xfree(dataset->shared->vds_prefix);
+                if(dataset->shared->extfile_prefix != "")
+                    dataset->shared->extfile_prefix = (char *)H5MM_xfree(dataset->shared->extfile_prefix);
+                if(dataset->shared->vds_prefix != "")
+                    dataset->shared->vds_prefix = (char *)H5MM_xfree(dataset->shared->vds_prefix);
                 dataset->shared = H5FL_FREE(H5D_shared_t, dataset->shared);
             }
 
@@ -1945,10 +1950,12 @@ H5D_close(H5D_t *dataset)
             HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "unable to destroy layout info")
 
         /* Free the external file prefix */
-        dataset->shared->extfile_prefix = (char *)H5MM_xfree(dataset->shared->extfile_prefix);
+        if(dataset->shared->extfile_prefix != "")
+            dataset->shared->extfile_prefix = (char *)H5MM_xfree(dataset->shared->extfile_prefix);
 
         /* Free the vds file prefix */
-        dataset->shared->vds_prefix = (char *)H5MM_xfree(dataset->shared->vds_prefix);
+        if(dataset->shared->vds_prefix != "")
+            dataset->shared->vds_prefix = (char *)H5MM_xfree(dataset->shared->vds_prefix);
 
         /* Release layout, fill-value, efl & pipeline messages */
         if(dataset->shared->dcpl_id != H5P_DATASET_CREATE_DEFAULT)
