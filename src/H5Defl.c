@@ -287,8 +287,13 @@ H5D__efl_read(const H5O_efl_t *efl, const H5D_t *dset, haddr_t addr, size_t size
             HGOTO_ERROR(H5E_EFL, H5E_OVERFLOW, FAIL, "read past logical end of file")
         if(H5F_OVERFLOW_HSIZET2OFFT((hsize_t)efl->slot[u].offset + skip))
             HGOTO_ERROR(H5E_EFL, H5E_OVERFLOW, FAIL, "external file address overflowed")
-        if(H5_combine_path(dset->shared->extfile_prefix, efl->slot[u].name, &full_name) < 0)
-            HGOTO_ERROR(H5E_EFL, H5E_NOSPACE, FAIL, "can't build external file name")
+        if(dset->shared->extfile_prefix) {
+            if(H5_combine_path(dset->shared->extfile_prefix, efl->slot[u].name, &full_name) < 0)
+                HGOTO_ERROR(H5E_EFL, H5E_NOSPACE, FAIL, "can't build external file name")
+        } else {
+            if(H5_combine_path("", efl->slot[u].name, &full_name) < 0)
+                HGOTO_ERROR(H5E_EFL, H5E_NOSPACE, FAIL, "can't build external file name")
+        }
         if((fd = HDopen(full_name, O_RDONLY)) < 0)
             HGOTO_ERROR(H5E_EFL, H5E_CANTOPENFILE, FAIL, "unable to open external raw data file")
         if(HDlseek(fd, (HDoff_t)(efl->slot[u].offset + (HDoff_t)skip), SEEK_SET) < 0)
@@ -379,8 +384,13 @@ H5D__efl_write(const H5O_efl_t *efl, const H5D_t *dset, haddr_t addr, size_t siz
             HGOTO_ERROR(H5E_EFL, H5E_OVERFLOW, FAIL, "write past logical end of file")
         if(H5F_OVERFLOW_HSIZET2OFFT((hsize_t)efl->slot[u].offset + skip))
             HGOTO_ERROR(H5E_EFL, H5E_OVERFLOW, FAIL, "external file address overflowed")
-        if(H5_combine_path(dset->shared->extfile_prefix, efl->slot[u].name, &full_name) < 0)
-            HGOTO_ERROR(H5E_EFL, H5E_NOSPACE, FAIL, "can't build external file name")
+        if(dset->shared->extfile_prefix) {
+            if(H5_combine_path(dset->shared->extfile_prefix, efl->slot[u].name, &full_name) < 0)
+                HGOTO_ERROR(H5E_EFL, H5E_NOSPACE, FAIL, "can't build external file name")
+        } else {
+            if(H5_combine_path("", efl->slot[u].name, &full_name) < 0)
+                HGOTO_ERROR(H5E_EFL, H5E_NOSPACE, FAIL, "can't build external file name")
+        }
         if((fd = HDopen(full_name, O_CREAT | O_RDWR, H5_POSIX_CREATE_MODE_RW)) < 0) {
             if(HDaccess(full_name, F_OK) < 0)
                 HGOTO_ERROR(H5E_EFL, H5E_CANTOPENFILE, FAIL, "external raw data file does not exist")
@@ -477,7 +487,6 @@ H5D__efl_readvv(const H5D_io_info_t *io_info,
     HDassert(io_info->u.rbuf);
     HDassert(io_info->dset);
     HDassert(io_info->dset->shared);
-    HDassert(io_info->dset->shared->extfile_prefix);
     HDassert(dset_curr_seq);
     HDassert(dset_len_arr);
     HDassert(dset_off_arr);
@@ -561,7 +570,6 @@ H5D__efl_writevv(const H5D_io_info_t *io_info,
     HDassert(io_info->u.wbuf);
     HDassert(io_info->dset);
     HDassert(io_info->dset->shared);
-    HDassert(io_info->dset->shared->extfile_prefix);
     HDassert(dset_curr_seq);
     HDassert(dset_len_arr);
     HDassert(dset_off_arr);
