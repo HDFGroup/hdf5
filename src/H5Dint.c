@@ -1382,9 +1382,9 @@ done:
             } /* end if */
             if(new_dset->shared->dcpl_id != 0 && H5I_dec_ref(new_dset->shared->dcpl_id) < 0)
                 HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, NULL, "unable to decrement ref count on property list")
-            if(new_dset->shared->extfile_prefix != "")
+            if(new_dset->shared->extfile_prefix && new_dset->shared->extfile_prefix[0] != '\0')
                 new_dset->shared->extfile_prefix = (char *)H5MM_xfree(new_dset->shared->extfile_prefix);
-            if(new_dset->shared->vds_prefix != "")
+            if(new_dset->shared->vds_prefix && new_dset->shared->vds_prefix[0] != '\0')
                 new_dset->shared->vds_prefix = (char *)H5MM_xfree(new_dset->shared->vds_prefix);
             new_dset->shared = H5FL_FREE(H5D_shared_t, new_dset->shared);
         } /* end if */
@@ -1559,18 +1559,18 @@ H5D_open(const H5G_loc_t *loc, hid_t dapl_id)
     ret_value = dataset;
 
 done:
-    if(extfile_prefix != "")
+    if(extfile_prefix && extfile_prefix[0] != '\0')
         extfile_prefix = (char *)H5MM_xfree(extfile_prefix);
-    if(vds_prefix != "")
+    if(vds_prefix && vds_prefix[0] != '\0')
         vds_prefix = (char *)H5MM_xfree(vds_prefix);
 
     if(ret_value == NULL) {
         /* Free the location--casting away const*/
         if(dataset) {
             if(shared_fo == NULL && dataset->shared) {   /* Need to free shared fo */
-                if(dataset->shared->extfile_prefix != "")
+                if(dataset->shared->extfile_prefix && dataset->shared->extfile_prefix[0] != '\0')
                     dataset->shared->extfile_prefix = (char *)H5MM_xfree(dataset->shared->extfile_prefix);
-                if(dataset->shared->vds_prefix != "")
+                if(dataset->shared->vds_prefix && dataset->shared->vds_prefix[0] != '\0')
                     dataset->shared->vds_prefix = (char *)H5MM_xfree(dataset->shared->vds_prefix);
                 dataset->shared = H5FL_FREE(H5D_shared_t, dataset->shared);
             }
@@ -1950,11 +1950,11 @@ H5D_close(H5D_t *dataset)
             HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "unable to destroy layout info")
 
         /* Free the external file prefix */
-        if(dataset->shared->extfile_prefix != "")
+        if(dataset->shared->extfile_prefix && dataset->shared->extfile_prefix[0] != '\0')
             dataset->shared->extfile_prefix = (char *)H5MM_xfree(dataset->shared->extfile_prefix);
 
         /* Free the vds file prefix */
-        if(dataset->shared->vds_prefix != "")
+        if(dataset->shared->vds_prefix && dataset->shared->vds_prefix[0] != '\0')
             dataset->shared->vds_prefix = (char *)H5MM_xfree(dataset->shared->vds_prefix);
 
         /* Release layout, fill-value, efl & pipeline messages */
