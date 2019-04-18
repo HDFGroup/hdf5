@@ -97,6 +97,16 @@ static const char *multi_letters = "msbrglo";
 /* The # of seconds to wait for the message file--used by h5_wait_message() */
 #define MESSAGE_TIMEOUT         300             /* Timeout in seconds */
 
+/*  The strings that correspond to library version bounds H5F_libver_t in H5Fpublic.h */
+/*  This is used by h5_get_version_string() */
+const char *LIBVER_NAMES[] = {
+    "earliest", /* H5F_LIBVER_EARLIEST = 0  */
+    "v18",      /* H5F_LIBVER_V18 = 1       */
+    "v110",     /* H5F_LIBVER_V110 = 2      */
+    "latest",   /* H5F_LIBVER_V112 = 3      */
+    NULL
+};
+
 /* Previous error reporting function */
 static H5E_auto2_t err_func = NULL;
 
@@ -1931,3 +1941,17 @@ error:
     return NULL;
 } /* h5_get_dummy_vfd_class */
 
+/*-------------------------------------------------------------------------
+ * Function:    h5_get_version_string
+ *
+ * Purpose:     Get the string that corresponds to the libvery version bound.
+ *
+ * Return:      The string
+ * 
+ *-------------------------------------------------------------------------
+ */
+char *
+h5_get_version_string(H5F_libver_t libver)
+{
+    return(LIBVER_NAMES[libver]);
+} /* end of h5_get_version_string */
