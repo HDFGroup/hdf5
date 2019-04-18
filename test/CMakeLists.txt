@@ -258,7 +258,6 @@ set (H5_TESTS
     enc_dec_plist_cross_platform
     getname
     vfd
-    vfd_env
     ntypes
     dangle
     dtransform
@@ -267,6 +266,7 @@ set (H5_TESTS
     freespace
     mf
     vds
+    vds_env
     file_image
     unregister
     cache_logging
