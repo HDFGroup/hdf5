@@ -87,8 +87,7 @@ static herr_t H5S__hyper_release(H5S_t *space);
 static htri_t H5S__hyper_is_valid(const H5S_t *space);
 static hssize_t H5S__hyper_serial_size(const H5S_t *space, H5F_t *f);
 static herr_t H5S__hyper_serialize(const H5S_t *space, uint8_t **p, H5F_t *f);
-static herr_t H5S__hyper_deserialize(H5S_t *space, uint32_t version, uint8_t flags,
-    const uint8_t **p);
+static herr_t H5S__hyper_deserialize(H5S_t **space, const uint8_t **p);
 static herr_t H5S__hyper_bounds(const H5S_t *space, hsize_t *start, hsize_t *end);
 static herr_t H5S__hyper_offset(const H5S_t *space, hsize_t *offset);
 static int H5S__hyper_unlim_dim(const H5S_t *space);
@@ -2273,12 +2272,11 @@ static herr_t
 H5S__hyper_serialize(const H5S_t *space, uint8_t **p, H5F_t *f)
 {
     const H5S_hyper_dim_t *diminfo;         /* Alias for dataspace's diminfo information */
-    uint8_t *pp = (*p);                     /* Local pointer for decoding */
+    uint8_t *pp;            /* Local pointer for encoding */
     hsize_t tmp_count[H5O_LAYOUT_NDIMS];    /* Temporary hyperslab counts */
     hsize_t offset[H5O_LAYOUT_NDIMS];       /* Offset of element in dataspace */
     hsize_t start[H5O_LAYOUT_NDIMS];   /* Location of start of hyperslab */
     hsize_t end[H5O_LAYOUT_NDIMS];     /* Location of end of hyperslab */
-    hsize_t temp_off; /* Offset in a given dimension */
     uint8_t *lenp;          /* pointer to length location for later storage */
     uint32_t len = 0;       /* number of bytes used */
     uint32_t version;       /* Version number */
@@ -2479,10 +2477,8 @@ done:
     Deserialize the current selection from a user-provided buffer.
  USAGE
     herr_t H5S__hyper_deserialize(space, p)
-        H5S_t *space;           IN/OUT: Dataspace pointer to place
+        H5S_t **space;          IN/OUT: Dataspace pointer to place
                                 selection into
-        uint32_t version        IN: Selection version
-        uint8_t flags           IN: Selection flags
         uint8 **p;              OUT: Pointer to buffer holding serialized
                                 selection.  Will be advanced to end of
                                 serialized selection.
@@ -2497,27 +2493,65 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S__hyper_deserialize(H5S_t *space, uint32_t H5_ATTR_UNUSED version, uint8_t flags,
-    const uint8_t **p)
+H5S__hyper_deserialize(H5S_t **space, const uint8_t **p)
 {
-    unsigned rank;           	/* Rank of points */
-    const uint8_t *pp;          /* Local pointer for decoding */
-    hsize_t start[H5O_LAYOUT_NDIMS];	/* Hyperslab start information */
-    hsize_t block[H5O_LAYOUT_NDIMS];    /* Hyperslab block information */
-    unsigned u;             	/* Local counting variable */
-    herr_t ret_value = FAIL;  	/* Return value */
+    H5S_t *tmp_space = NULL;        /* Pointer to actual dataspace to use,
+                                       either *space or a newly allocated one */
+    hsize_t dims[H5S_MAX_RANK];     /* Dimenion sizes */
+    hsize_t start[H5S_MAX_RANK];    /* Hyperslab start information */
+    hsize_t block[H5S_MAX_RANK];    /* Hyperslab block information */
+    uint32_t version;               /* Version number */
+    uint8_t flags = 0;              /* Flags */
+    unsigned rank;                  /* Rank of points */
+    const uint8_t *pp;              /* Local pointer for decoding */
+    unsigned u;                     /* Local counting variable */
+    herr_t ret_value = FAIL;        /* Return value */
 
     FUNC_ENTER_STATIC
 
     /* Check args */
-    HDassert(space);
     HDassert(p);
     pp = (*p);
     HDassert(pp);
 
-    /* Deserialize slabs to select */
-    /* (The header and rank have already beed decoded) */
-    rank = space->extent.rank;  /* Retrieve rank from space */
+    /* As part of the efforts to push all selection-type specific coding
+       to the callbacks, the coding for the allocation of a null dataspace
+       is moved from H5S_select_deserialize() in H5Sselect.c to here.
+       This is needed for decoding virtual layout in H5O__layout_decode() */
+    /* Allocate space if not provided */
+    if(!*space) {
+        if(NULL == (tmp_space = H5S_create(H5S_SIMPLE)))
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, FAIL, "can't create dataspace")
+    } /* end if */
+    else
+        tmp_space = *space;
+
+    /* Decode version */
+    UINT32DECODE(pp, version);
+
+    if(version >= (uint32_t)2) {
+        /* Decode flags */
+        flags = *(pp)++;
+
+        /* Skip over the remainder of the header */
+        pp += 4;
+    } else
+        /* Skip over the remainder of the header */
+        pp += 8;
+
+    /* Decode the rank of the point selection */
+    UINT32DECODE(pp,rank);
+
+    if(!*space) {
+        /* Patch the rank of the allocated dataspace */
+        (void)HDmemset(dims, 0, (size_t)rank * sizeof(dims[0]));
+        if(H5S_set_extent_simple(tmp_space, rank, dims, NULL) < 0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "can't set dimensions")
+    } /* end if */
+    else
+        /* Verify the rank of the provided dataspace */
+        if(rank != tmp_space->extent.rank)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "rank of serialized selection does not match dataspace")
 
     if(flags & H5S_HYPER_REGULAR) {
         hsize_t stride[H5O_LAYOUT_NDIMS];	/* Hyperslab stride information */
@@ -2537,7 +2571,7 @@ H5S__hyper_deserialize(H5S_t *space, uint32_t H5_ATTR_UNUSED version, uint8_t fl
         } /* end for */
 
         /* Select the hyperslab to the current selection */
-        if((ret_value = H5S_select_hyperslab(space, H5S_SELECT_SET, start, stride, count, block)) < 0)
+        if((ret_value = H5S_select_hyperslab(tmp_space, H5S_SELECT_SET, start, stride, count, block)) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSET, FAIL, "can't change selection")
     } /* end if */
     else {
@@ -2571,7 +2605,7 @@ H5S__hyper_deserialize(H5S_t *space, uint32_t H5_ATTR_UNUSED version, uint8_t fl
                 *tblock = (*tend - *tstart) + 1;
 
             /* Select or add the hyperslab to the current selection */
-            if((ret_value = H5S_select_hyperslab(space, (u == 0 ? H5S_SELECT_SET : H5S_SELECT_OR), start, stride, count, block)) < 0)
+            if((ret_value = H5S_select_hyperslab(tmp_space, (u == 0 ? H5S_SELECT_SET : H5S_SELECT_OR), start, stride, count, block)) < 0)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSET, FAIL, "can't change selection")
         } /* end for */
     } /* end else */
@@ -2579,7 +2613,16 @@ H5S__hyper_deserialize(H5S_t *space, uint32_t H5_ATTR_UNUSED version, uint8_t fl
     /* Update decoding pointer */
     *p = pp;
 
+    /* Return space to the caller if allocated */
+    if(!*space)
+        *space = tmp_space;
+
 done:
+    /* Free temporary space if not passed to caller (only happens on error) */
+    if(!*space && tmp_space)
+        if(H5S_close(tmp_space) < 0)
+            HDONE_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "can't close dataspace")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__hyper_deserialize() */
 
