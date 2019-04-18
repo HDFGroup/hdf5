@@ -2690,6 +2690,83 @@ test_h5s_encode_points_exceed32(void)
 
 /****************************************************************
 **
+**  test_h5s_encode_length(): 
+**      Test to verify HDFFV-10271 is fixed.
+**      Verify that version 2 hyperslab encoding length is correct.
+**
+**  See "RFC: H5Sencode/H5Sdecode Format Change" for the 
+**  description of the encoding format.
+**
+****************************************************************/
+static void
+test_h5s_encode_length(void)
+{
+    hid_t sid;                  /* Dataspace ID */
+    hid_t decoded_sid;          /* Dataspace ID from H5Sdecode2 */
+    size_t sbuf_size=0;         /* Buffer size for H5Sencode2/1 */
+    unsigned char *sbuf=NULL;   /* Buffer for H5Sencode2/1 */
+    hsize_t dims[1] = {500};    /* Dimension size */
+    hsize_t start, count, block, stride;    /* Hyperslab selection specifications */
+    herr_t ret;                 /* Generic return value */
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing Version 2 Hyperslab Encoding Length is correct\n"));
+
+    /* Create dataspace */
+    sid = H5Screate_simple(1, dims, NULL);
+    CHECK(sid, FAIL, "H5Screate_simple");
+
+    /* Setting H5S_UNLIMITED in count will use version 2 for hyperslab encoding */
+    start = 0;
+    stride = 10;
+    block = 4;
+    count = H5S_UNLIMITED;
+
+    /* Set hyperslab selection */
+    ret = H5Sselect_hyperslab(sid, H5S_SELECT_SET, &start, &stride, &count, &block);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* Encode simple data space in a buffer */
+    ret = H5Sencode(sid, NULL, &sbuf_size);
+    CHECK(ret, FAIL, "H5Sencode");
+
+    /* Allocate the buffer */
+    if(sbuf_size > 0) {
+        sbuf = (unsigned char*)HDcalloc((size_t)1, sbuf_size);
+        CHECK(sbuf, NULL, "H5Sencode2");
+    }
+
+    /* Encode the dataspace */
+    ret = H5Sencode(sid, sbuf, &sbuf_size);
+    CHECK(ret, FAIL, "H5Sencode");
+
+    /* Verify that length stored at this location in the buffer is correct */
+    VERIFY((uint32_t)sbuf[40], 36, "Length for encoding version 2");
+    VERIFY((uint32_t)sbuf[35], 2, "Hyperslab encoding version is 2");
+
+    /* Decode from the dataspace buffer and return an object handle */
+    decoded_sid = H5Sdecode(sbuf);
+    CHECK(decoded_sid, FAIL, "H5Sdecode");
+
+    /* Verify that the original and the decoded dataspace are equal */
+    VERIFY(H5Sget_select_npoints(sid), H5Sget_select_npoints(decoded_sid), "Compare npoints");
+
+    /* Close the decoded dataspace */
+    ret = H5Sclose(decoded_sid);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    /* Free the buffer */
+    if(sbuf)
+        HDfree(sbuf);
+
+    /* Close the original dataspace */
+    ret = H5Sclose(sid);
+    CHECK(ret, FAIL, "H5Sclose");
+
+} /* test_h5s_encode_length() */
+
+/****************************************************************
+**
 **  test_h5s(): Main H5S (dataspace) testing routine.
 **
 ****************************************************************/
@@ -2706,6 +2783,7 @@ test_h5s(void)
     test_h5s_encode_regular_exceed32();     /* Test encoding regular hyperslab selection that exceeds 32 bits */
     test_h5s_encode_irregular_exceed32();   /* Testing encoding irregular hyperslab selection that exceeds 32 bits */
     test_h5s_encode_points_exceed32();      /* Testing encoding point selection that exceeds 32 bits */
+    test_h5s_encode_length();               /* Test version 2 hyperslab encoding length is correct */
 
     test_h5s_scalar_write();	/* Test scalar H5S writing code */
     test_h5s_scalar_read();	    /* Test scalar H5S reading code */
