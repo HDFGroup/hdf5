@@ -17,25 +17,7 @@
  *
  * Purpose:	Tests datasets stored in external raw files.
  */
-#include "h5test.h"
-
-const char *FILENAME[] = {
-    "extern_1",
-    "extern_2",
-    "extern_3",
-    "extern_4",
-    "extern_dir/file_1",
-    "extern_5",
-    NULL
-};
-
-/* A similar collection of files is used for the tests that
- * perform file I/O.
- */
-#define N_EXT_FILES         4
-#define PART_SIZE           25
-#define TOTAL_SIZE          100
-#define GARBAGE_PER_FILE    10
+#include "external_common.h"
 
 
 /*-------------------------------------------------------------------------
@@ -96,106 +78,6 @@ out:
         HDclose(fd2);
     return ret;
 } /* end files_have_same_contents() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    reset_raw_data_files
- *
- * Purpose:     Resets the data in the raw data files for tests that
- *              perform dataset I/O on a set of files.
- *
- * Return:      SUCCEED/FAIL
- *
- * Programmer:  Dana Robinson
- *              February 2016
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-reset_raw_data_files(void)
-{
-    int		    fd = 0;             /* external file descriptor             */
-    size_t	    i, j;               /* iterators                            */
-    hssize_t	n;                  /* bytes of I/O                         */
-    char	    filename[1024];     /* file name                            */
-    int		    data[PART_SIZE];    /* raw data buffer                      */
-    uint8_t     *garbage = NULL;    /* buffer of garbage data               */
-    size_t      garbage_count;      /* size of garbage buffer               */
-    size_t      garbage_bytes;      /* # of garbage bytes written to file   */
-
-    /* Set up garbage buffer */
-    garbage_count = N_EXT_FILES * GARBAGE_PER_FILE;
-    if(NULL == (garbage = (uint8_t *)HDcalloc(garbage_count, sizeof(uint8_t))))
-        goto error;
-    for(i = 0; i < garbage_count; i++)
-        garbage[i] = 0xFF;
-
-    /* The *r files are pre-filled with data and are used to
-     * verify that read operations work correctly.
-     */
-    for(i = 0; i < N_EXT_FILES; i++) {
-
-        /* Open file */
-        HDsprintf(filename, "extern_%lur.raw", (unsigned long)i + 1);
-        if((fd = HDopen(filename, O_RDWR|O_CREAT|O_TRUNC, H5_POSIX_CREATE_MODE_RW)) < 0)
-            goto error;
-        
-        /* Write garbage data to the file. This allows us to test the
-         * the ability to set an offset in the raw data file.
-         */
-        garbage_bytes = i * 10;
-        n = HDwrite(fd, garbage, garbage_bytes);
-        if(n < 0 || (size_t)n != garbage_bytes)
-            goto error;
-
-        /* Fill array with data */
-        for(j = 0; j < PART_SIZE; j++) {
-            data[j] = (int)(i * 25 + j);
-        } /* end for */
-
-        /* Write raw data to the file. */
-        n = HDwrite(fd, data, sizeof(data));
-        if(n != sizeof(data))
-            goto error;
-
-        /* Close this file */
-        HDclose(fd);
-
-    } /* end for */
-
-    /* The *w files are only pre-filled with the garbage data and are
-     * used to verify that write operations work correctly. The individual
-     * tests fill in the actual data.
-     */
-    for(i = 0; i < N_EXT_FILES; i++) {
-
-        /* Open file */
-        HDsprintf(filename, "extern_%luw.raw", (unsigned long)i + 1);
-        if((fd = HDopen(filename, O_RDWR|O_CREAT|O_TRUNC, H5_POSIX_CREATE_MODE_RW)) < 0)
-            goto error;
-        
-        /* Write garbage data to the file. This allows us to test the
-         * the ability to set an offset in the raw data file.
-         */
-        garbage_bytes = i * 10;
-        n = HDwrite(fd, garbage, garbage_bytes);
-        if(n < 0 || (size_t)n != garbage_bytes)
-            goto error;
-
-        /* Close this file */
-        HDclose(fd);
-
-    } /* end for */
-    HDfree(garbage);
-    return SUCCEED;
-
-error:
-    if(fd)
-        HDclose(fd);
-    if(garbage)
-        HDfree(garbage);
-    return FAIL;
-} /* end reset_raw_data_files() */
 
 
 /*-------------------------------------------------------------------------
@@ -760,7 +642,7 @@ test_read_file_set(hid_t fapl)
      * debugging to be emitted before we start playing games with what the
      * output looks like.
      */
-    h5_fixname(FILENAME[1], fapl, filename, sizeof(filename));
+    h5_fixname(EXT_FNAME[1], fapl, filename, sizeof(filename));
     if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         FAIL_STACK_ERROR
     if((grp = H5Gcreate2(file, "emit-diagnostics", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
@@ -871,7 +753,7 @@ test_write_file_set(hid_t fapl)
         TEST_ERROR
 
     /* Create another file */
-    h5_fixname(FILENAME[2], fapl, filename, sizeof(filename));
+    h5_fixname(EXT_FNAME[2], fapl, filename, sizeof(filename));
     if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         FAIL_STACK_ERROR
 
@@ -989,7 +871,7 @@ test_path_absolute(hid_t fapl)
 
     TESTING("absolute filenames for external file");
 
-    h5_fixname(FILENAME[3], fapl, filename, sizeof(filename));
+    h5_fixname(EXT_FNAME[3], fapl, filename, sizeof(filename));
     if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         FAIL_STACK_ERROR
 
@@ -1085,7 +967,7 @@ test_path_relative(hid_t fapl)
     if (HDmkdir("extern_dir", (mode_t)0755) < 0 && errno != EEXIST)
         TEST_ERROR;
 
-    h5_fixname(FILENAME[4], fapl, filename, sizeof(filename));
+    h5_fixname(EXT_FNAME[4], fapl, filename, sizeof(filename));
     if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         FAIL_STACK_ERROR;
 
@@ -1180,7 +1062,7 @@ test_path_relative_cwd(hid_t fapl)
     if(HDmkdir("extern_dir", (mode_t)0755) < 0 && errno != EEXIST)
         TEST_ERROR;
 
-    h5_fixname(FILENAME[4], fapl, filename, sizeof(filename));
+    h5_fixname(EXT_FNAME[4], fapl, filename, sizeof(filename));
     if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         FAIL_STACK_ERROR;
 
@@ -1297,116 +1179,6 @@ error:
 
 
 /*-------------------------------------------------------------------------
- * Function:    test_path_env
- *
- * Purpose:     Test whether the value of HDF5_EXTFILE_PREFIX will overwrite
- *              the efile_prefix dataset access property.
- *              This will create an HDF5 file in a subdirectory which will
- *              refer to ../extern_*a.raw
- *              The files are then accessed by setting the HDF5_EXTFILE_PREFIX
- *              environment variable to "${ORIGIN}".
- *              The efile_prefix dataset access property is set to "someprefix",
- *              which will cause an error if the value is not overwritten by
- *              the environment variable.
- *
- * Return:      Success:    0
- *              Failure:    1
- *
- * Programmer:  Steffen Kiess
- *              March 10, 2015
- *
- *-------------------------------------------------------------------------
- */
-static int
-test_path_env(hid_t fapl)
-{
-    hid_t	file = -1;          /* file to write to                     */
-    hid_t	dcpl = -1;          /* dataset creation properties          */
-    hid_t	space = -1;         /* data space                           */
-    hid_t	dapl = -1;          /* dataset access property list         */
-    hid_t	dset = -1;          /* dataset                              */
-    size_t	i;                  /* miscellaneous counters               */
-    char	cwdpath[1024];		/* working directory                    */
-    char	filename[1024];		/* file name                            */
-    int	    part[PART_SIZE];    /* raw data buffer (partial)            */
-    int     whole[TOTAL_SIZE];  /* raw data buffer (total)              */
-    hsize_t	cur_size;           /* current data space size              */
-    char	buffer[1024];       /* buffer to read efile_prefix          */
-
-    TESTING("prefix in HDF5_EXTFILE_PREFIX");
-
-    if(HDsetenv("HDF5_EXTFILE_PREFIX", "${ORIGIN}", 1))
-        TEST_ERROR
-
-    if(HDmkdir("extern_dir", (mode_t)0755) < 0 && errno != EEXIST)
-        TEST_ERROR;
-
-    h5_fixname(FILENAME[4], fapl, filename, sizeof(filename));
-    if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-        FAIL_STACK_ERROR
-
-    /* Reset the raw data files */
-    if(reset_raw_data_files() < 0)
-        TEST_ERROR
-
-    /* Create the dataset */
-    if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-        FAIL_STACK_ERROR
-    if(NULL == HDgetcwd(cwdpath, sizeof(cwdpath)))
-        TEST_ERROR
-    for(i = 0; i < N_EXT_FILES; i++) {
-        HDsnprintf(filename, sizeof(filename), "..%sextern_%dr.raw", H5_DIR_SEPS, (int) i + 1);
-        if(H5Pset_external(dcpl, filename, (off_t)(i * GARBAGE_PER_FILE), (hsize_t)sizeof(part)) < 0)
-            FAIL_STACK_ERROR
-    } /* end for */
-
-    cur_size = TOTAL_SIZE;
-    if((space = H5Screate_simple(1, &cur_size, NULL)) < 0)
-        FAIL_STACK_ERROR
-    if((dapl = H5Pcreate(H5P_DATASET_ACCESS)) < 0)
-        FAIL_STACK_ERROR
-
-    /* Set prefix to a nonexistent directory, will be overwritten by environment variable */
-    if(H5Pset_efile_prefix(dapl, "someprefix") < 0)
-        FAIL_STACK_ERROR
-    if(H5Pget_efile_prefix(dapl, buffer, sizeof(buffer)) < 0)
-        FAIL_STACK_ERROR
-    if(HDstrcmp(buffer, "someprefix") != 0)
-        FAIL_PUTS_ERROR("efile prefix not set correctly");
-
-    /* Create dataset */
-    if((dset = H5Dcreate2(file, "dset1", H5T_NATIVE_INT, space, H5P_DEFAULT, dcpl, dapl)) < 0)
-        FAIL_STACK_ERROR
-
-    /* Read the entire dataset and compare with the original */
-    HDmemset(whole, 0, sizeof(whole));
-    if(H5Dread(dset, H5T_NATIVE_INT, space, space, H5P_DEFAULT, whole) < 0)
-        FAIL_STACK_ERROR
-    for(i = 0; i < TOTAL_SIZE; i++)
-        if(whole[i] != (signed)i)
-            FAIL_PUTS_ERROR("Incorrect value(s) read.");
-
-    if(H5Dclose(dset) < 0) FAIL_STACK_ERROR
-    if(H5Pclose(dapl) < 0) FAIL_STACK_ERROR
-    if(H5Pclose(dcpl) < 0) FAIL_STACK_ERROR
-    if(H5Sclose(space) < 0) FAIL_STACK_ERROR
-    if(H5Fclose(file) < 0) FAIL_STACK_ERROR
-    PASSED();
-    return 0;
-
-error:
-    H5E_BEGIN_TRY {
-        H5Pclose(dapl);
-        H5Dclose(dset);
-        H5Pclose(dcpl);
-        H5Sclose(space);
-        H5Fclose(file);
-    } H5E_END_TRY;
-    return 1;
-} /* end test_path_env() */
-
-
-/*-------------------------------------------------------------------------
  * Function:    test_h5d_get_access_plist
  *
  * Purpose:     Ensure that H5Dget_access_plist returns correct values.
@@ -1441,7 +1213,7 @@ test_h5d_get_access_plist(hid_t fapl_id)
         TEST_ERROR
 
     /* Create the file */
-    h5_fixname(FILENAME[5], fapl_id, filename, sizeof(filename));
+    h5_fixname(EXT_FNAME[5], fapl_id, filename, sizeof(filename));
     if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
         FAIL_STACK_ERROR
 
@@ -1532,7 +1304,7 @@ main(void)
 
     /* Get a fapl for the old (default) file format */
     fapl_id_old = h5_fileaccess();
-    h5_fixname(FILENAME[0], fapl_id_old, filename, sizeof(filename));
+    h5_fixname(EXT_FNAME[0], fapl_id_old, filename, sizeof(filename));
 
     /* Copy and set up a fapl for the latest file format */
     if((fapl_id_new = H5Pcopy(fapl_id_old)) < 0)
@@ -1585,10 +1357,9 @@ main(void)
         nerrors += test_path_absolute(current_fapl_id);
         nerrors += test_path_relative(current_fapl_id);
         nerrors += test_path_relative_cwd(current_fapl_id);
-        nerrors += test_path_env(current_fapl_id);
  
         /* Verify symbol table messages are cached */
-        nerrors += (h5_verify_cached_stabs(FILENAME, current_fapl_id) < 0 ? 1 : 0);
+        nerrors += (h5_verify_cached_stabs(EXT_FNAME, current_fapl_id) < 0 ? 1 : 0);
 
         /* Close the common file */
         if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
@@ -1603,7 +1374,7 @@ main(void)
     HDputs("All external storage tests passed.");
 
     /* Clean up files used by file set tests */
-    if(h5_cleanup(FILENAME, fapl_id_old)) {
+    if(h5_cleanup(EXT_FNAME, fapl_id_old)) {
         HDremove("extern_1r.raw");
         HDremove("extern_2r.raw");
         HDremove("extern_3r.raw");
@@ -1630,4 +1401,3 @@ error:
     printf("%d TEST%s FAILED.\n", nerrors, 1 == nerrors ? "" : "s");
     return EXIT_FAILURE;
 } /* end main() */
-

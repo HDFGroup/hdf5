@@ -14,12 +14,14 @@ set (TEST_LIB_SOURCES
     ${HDF5_TEST_SOURCE_DIR}/h5test.c
     ${HDF5_TEST_SOURCE_DIR}/testframe.c
     ${HDF5_TEST_SOURCE_DIR}/cache_common.c
+    ${HDF5_TEST_SOURCE_DIR}/external_common.c
     ${HDF5_TEST_SOURCE_DIR}/swmr_common.c
 )
 
 set (TEST_LIB_HEADERS
     ${HDF5_TEST_SOURCE_DIR}/h5test.h
     ${HDF5_TEST_SOURCE_DIR}/cache_common.h
+    ${HDF5_TEST_SOURCE_DIR}/external_common.h
     ${HDF5_TEST_SOURCE_DIR}/swmr_common.h
 )
 
@@ -236,6 +238,7 @@ set (H5_TESTS
     extend
     direct_chunk # compression lib link
     external
+    external_env
     efc
     objcopy
     links
@@ -255,6 +258,7 @@ set (H5_TESTS
     enc_dec_plist_cross_platform
     getname
     vfd
+    vfd_env
     ntypes
     dangle
     dtransform

@@ -1,0 +1,42 @@
+#! /bin/sh
+#
+# Copyright by The HDF Group.
+# Copyright by the Board of Trustees of the University of Illinois.
+# All rights reserved.
+#
+# This file is part of HDF5.  The full HDF5 copyright notice, including
+# terms governing use, modification, and redistribution, is contained in
+# the COPYING file, which can be found at the root of the source code
+# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# If you do not have access to either file, you may request a copy from
+# help@hdfgroup.org.
+#
+# Test for external file with environment variable: HDF5_EXTFILE_PREFIX
+
+srcdir=@srcdir@
+
+nerrors=0
+
+##############################################################################
+##############################################################################
+###			  T H E   T E S T S                                ###
+##############################################################################
+##############################################################################
+
+# test for external file with HDF5_EXTFILE_PREFIX
+echo "Testing external file with HDF5_EXTFILE_PREFIX"
+TEST_NAME=external_env                         # The test name
+TEST_BIN=`pwd`/$TEST_NAME                      # The path of the test binary
+ENVCMD="env HDF5_EXTFILE_PREFIX=\${ORIGIN}"    # The environment variable & value
+#
+# Run the test
+# echo "$ENVCMD $RUNSERIAL $TEST_BIN"
+$ENVCMD $RUNSERIAL $TEST_BIN
+exitcode=$?
+if [ $exitcode -eq 0 ]; then
+        echo "Test prefix for HDF5_EXTFILE_PREFIX PASSED"
+    else
+ 	nerrors="`expr $nerrors + 1`"
+	echo "***Error encountered for HDF5_EXTFILE_PREFIX test***"
+fi
+exit $nerrors
