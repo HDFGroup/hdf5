@@ -19,10 +19,10 @@
 #include "h5test.h"
 
 const char *FILENAME[] = {
-    "vds_virt_0",
-    "vds_virt_3",
-    "vds_src_2",
-    "vds%%_src2",
+    "vds_env_virt_0",
+    "vds_env_virt_3",
+    "vds_env_src_2",
+    "vds_env%%_src2",
     NULL
 };
 
@@ -293,9 +293,7 @@ test_vds_prefix_second(unsigned config, hid_t fapl)
 int
 main(void)
 {
-    char filename[FILENAME_BUF_SIZE];
     hid_t fapl, my_fapl;
-    int test_api_config;
     unsigned bit_config;
     H5F_libver_t low, high;     /* Low and high bounds */
     unsigned latest = FALSE;    /* Using the latest library version bound */
