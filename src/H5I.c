@@ -1134,7 +1134,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-void *
+static void *
 H5I__remove_verify(hid_t id, H5I_type_t id_type)
 {
     void * ret_value = NULL;	/*return value			*/

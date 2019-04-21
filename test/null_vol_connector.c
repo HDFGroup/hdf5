@@ -27,16 +27,21 @@ static const H5VL_class_t null_vol_g = {
     0,                                              /* capability flags */
     NULL,                                           /* initialize   */
     NULL,                                           /* terminate    */
-    (size_t)0,                                      /* info size    */
-    NULL,                                           /* info copy    */
-    NULL,                                           /* info compare */
-    NULL,                                           /* info free    */
-    NULL,                                           /* info to str  */
-    NULL,                                           /* str to info  */
-    NULL,                                           /* get_object   */
-    NULL,                                           /* get_wrap_ctx */
-    NULL,                                           /* wrap_object  */
-    NULL,                                           /* free_wrap_ctx */
+    {   /* info_cls */
+        (size_t)0,                                  /* size    */
+        NULL,                                       /* copy    */
+        NULL,                                       /* compare */
+        NULL,                                       /* free    */
+        NULL,                                       /* to_str  */
+        NULL,                                       /* from_str */
+    },
+    {   /* wrap_cls */
+        NULL,                                       /* get_object   */
+        NULL,                                       /* get_wrap_ctx */
+        NULL,                                       /* wrap_object  */
+        NULL,                                       /* unwrap_object */
+        NULL,                                       /* free_wrap_ctx */
+    },
     {   /* attribute_cls */
         NULL,                                       /* create       */
         NULL,                                       /* open         */

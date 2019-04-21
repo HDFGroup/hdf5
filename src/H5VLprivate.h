@@ -86,6 +86,7 @@ H5_DLL hid_t H5VL_register_connector(const void *cls, hbool_t app_ref, hid_t vip
 /* Functions that manipulate VOL objects */
 H5_DLL void *H5VL_object(hid_t id);
 H5_DLL void *H5VL_object_data(const H5VL_object_t *vol_obj);
+H5_DLL void *H5VL_object_unwrap(const H5VL_object_t *vol_obj);
 H5_DLL void *H5VL_object_verify(hid_t id, H5I_type_t obj_type);
 H5_DLL H5VL_object_t *H5VL_vol_object(hid_t id);
 H5_DLL herr_t H5VL_free_object(H5VL_object_t *obj);
@@ -93,13 +94,14 @@ H5_DLL herr_t H5VL_free_object(H5VL_object_t *obj);
 /* Functions that wrap / unwrap VOL objects */
 H5_DLL herr_t H5VL_get_wrap_ctx(const H5VL_class_t *connector, void *obj,
     void **wrap_ctx);
+H5_DLL void * H5VL_wrap_object(const H5VL_class_t *connector, void *wrap_ctx,
+    void *obj, H5I_type_t obj_type);
+H5_DLL void * H5VL_unwrap_object(const H5VL_class_t *connector, void *obj);
 H5_DLL herr_t H5VL_free_wrap_ctx(const H5VL_class_t *connector, void *wrap_ctx);
 H5_DLL herr_t H5VL_set_vol_wrapper(void *obj, H5VL_t *vol_connector);
 H5_DLL herr_t H5VL_inc_vol_wrapper(void *vol_wrap_ctx);
 H5_DLL herr_t H5VL_dec_vol_wrapper(void *vol_wrap_ctx);
 H5_DLL herr_t H5VL_reset_vol_wrapper(void);
-H5_DLL void * H5VL_wrap_object(const H5VL_class_t *connector, void *wrap_ctx,
-    void *obj, H5I_type_t obj_type);
 
 /* Library state functions */
 H5_DLL herr_t H5VL_retrieve_lib_state(void **state);
