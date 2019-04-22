@@ -35,7 +35,7 @@
  *-------------------------------------------------------------------------
  */
 herr_t
-reset_raw_data_files(void)
+reset_raw_data_files(int is_env)
 {
     int		    fd = 0;             /* external file descriptor             */
     size_t	    i, j;               /* iterators                            */
@@ -59,7 +59,10 @@ reset_raw_data_files(void)
     for(i = 0; i < N_EXT_FILES; i++) {
 
         /* Open file */
-        HDsprintf(filename, "extern_%lur.raw", (unsigned long)i + 1);
+        if(is_env)
+            HDsprintf(filename, "extern_env_%lur.raw", (unsigned long)i + 1);
+        else
+            HDsprintf(filename, "extern_%lur.raw", (unsigned long)i + 1);
         if((fd = HDopen(filename, O_RDWR|O_CREAT|O_TRUNC, H5_POSIX_CREATE_MODE_RW)) < 0)
             goto error;
         
@@ -93,7 +96,10 @@ reset_raw_data_files(void)
     for(i = 0; i < N_EXT_FILES; i++) {
 
         /* Open file */
-        HDsprintf(filename, "extern_%luw.raw", (unsigned long)i + 1);
+        if(is_env)
+            HDsprintf(filename, "extern_env_%luw.raw", (unsigned long)i + 1);
+        else
+            HDsprintf(filename, "extern_%luw.raw", (unsigned long)i + 1);
         if((fd = HDopen(filename, O_RDWR|O_CREAT|O_TRUNC, H5_POSIX_CREATE_MODE_RW)) < 0)
             goto error;
         
