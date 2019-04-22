@@ -106,7 +106,8 @@ LinkCreatPropList::LinkCreatPropList(const hid_t plist_id) : PropList(plist_id) 
 // Function:    LinkCreatPropList::setCreateIntermediateGroup
 ///\brief       Specifies in property list whether to create missing
 ///             intermediate groups.
-///
+///\param       crt_intmd_group - IN: Flag specifying whether to create
+///                               intermediate groups upon the creation of an object
 ///\exception   H5::PropListIException
 // April, 2019
 //--------------------------------------------------------------------------
@@ -124,7 +125,7 @@ void LinkCreatPropList::setCreateIntermediateGroup(bool crt_intmd_group) const
 // Function:    LinkCreatPropList::getCreateIntermediateGroup
 ///\brief       Determines whether property is set to enable creating missing
 ///             intermediate groups.
-///
+///\return      true if creating intermediate groups is enabled, and false, otherwise
 ///\exception   H5::PropListIException
 // April, 2019
 //--------------------------------------------------------------------------
