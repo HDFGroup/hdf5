@@ -103,6 +103,45 @@ LinkCreatPropList::LinkCreatPropList(const LinkCreatPropList& original) : PropLi
 LinkCreatPropList::LinkCreatPropList(const hid_t plist_id) : PropList(plist_id) {}
 
 //--------------------------------------------------------------------------
+// Function:    LinkCreatPropList::setCreateIntermediateGroup
+///\brief       Specifies in property list whether to create missing
+///             intermediate groups.
+///
+///\exception   H5::PropListIException
+// April, 2019
+//--------------------------------------------------------------------------
+void LinkCreatPropList::setCreateIntermediateGroup(bool crt_intmd_group) const
+{
+    herr_t ret_value = H5Pset_create_intermediate_group(id, (unsigned)crt_intmd_group);
+    // Throw exception if H5Pset_create_intermediate_group returns failure
+    if (ret_value < 0)
+    {
+        throw PropListIException("setCreateIntermediateGroup", "H5Pset_create_intermediate_group failed");
+    }
+}
+
+//--------------------------------------------------------------------------
+// Function:    LinkCreatPropList::getCreateIntermediateGroup
+///\brief       Determines whether property is set to enable creating missing
+///             intermediate groups.
+///
+///\exception   H5::PropListIException
+// April, 2019
+//--------------------------------------------------------------------------
+bool LinkCreatPropList::getCreateIntermediateGroup() const
+{
+    unsigned crt_intmd_group;
+    herr_t ret_value = H5Pget_create_intermediate_group(id, &crt_intmd_group);
+    // Throw exception if H5Pget_create_intermediate_group returns failure
+    if (ret_value < 0)
+    {
+        throw PropListIException("getCreateIntermediateGroup", "H5Pget_create_intermediate_group failed");
+    }
+
+    return((bool)crt_intmd_group);
+}
+
+//--------------------------------------------------------------------------
 // Function:    LinkCreatPropList::setCharEncoding
 ///\brief       Sets the character encoding of the string.
 ///
