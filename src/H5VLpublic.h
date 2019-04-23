@@ -253,6 +253,7 @@ typedef struct H5VL_wrap_class_t {
     void * (*get_object)(const void *obj);          /* Callback to retrieve underlying object       */
     herr_t (*get_wrap_ctx)(const void *obj, void **wrap_ctx); /* Callback to retrieve the object wrapping context for the connector */
     void * (*wrap_object)(void *obj, H5I_type_t obj_type, void *wrap_ctx); /* Callback to wrap a library object */
+    void * (*unwrap_object)(void *obj);             /* Callback to unwrap a library object */
     herr_t (*free_wrap_ctx)(void *wrap_ctx);        /* Callback to release the object wrapping context for the connector */
 } H5VL_wrap_class_t;
 
@@ -472,6 +473,7 @@ H5_DLL void *H5VLget_object(void *obj, hid_t connector_id);
 H5_DLL herr_t H5VLget_wrap_ctx(void *obj, hid_t connector_id, void **wrap_ctx);
 H5_DLL void *H5VLwrap_object(void *obj, H5I_type_t obj_type, hid_t connector_id,
     void *wrap_ctx);
+H5_DLL void *H5VLunwrap_object(void *obj, hid_t connector_id);
 H5_DLL herr_t H5VLfree_wrap_ctx(void *wrap_ctx, hid_t connector_id);
 
 /* Public wrappers for attribute callbacks */

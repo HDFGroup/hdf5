@@ -1358,6 +1358,32 @@ H5VL_object_data(const H5VL_object_t *vol_obj)
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5VL_object_unwrap
+ *
+ * Purpose:     Correctly unwrap the 'data' field for a VOL object (H5VL_object),
+ *              even for nested / stacked VOL connectors.
+ *
+ * Return:      Success:        Object pointer
+ *              Failure:        NULL
+ *
+ *-------------------------------------------------------------------------
+ */
+void *
+H5VL_object_unwrap(const H5VL_object_t *vol_obj)
+{
+    void *ret_value = NULL;
+
+    FUNC_ENTER_NOAPI(NULL)
+
+    if(NULL == (ret_value = H5VL_unwrap_object(vol_obj->connector->cls, vol_obj->data)))
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, NULL, "can't unwrap object")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_object_unwrap() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5VL__object
  *
  * Purpose:     Internal function to return the VOL object pointer associated
@@ -1444,7 +1470,7 @@ H5VL_object(hid_t id)
 
     /* Get the underlying object */
     if(NULL == (ret_value = H5VL__object(id, H5I_get_type(id))))
-        HGOTO_ERROR(H5E_ARGS, H5E_CANTGET, NULL, "can't retrieve object for ID")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, NULL, "can't retrieve object for ID")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
