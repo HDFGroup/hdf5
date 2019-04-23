@@ -619,9 +619,8 @@ test_api(test_api_config_t config, hid_t fapl)
 
     /* Get examination DCPL */
 
-    
-    /* Should be a value of 174, not 213. HDFFV-10469 */
-    if(test_api_get_ex_dcpl(config, fapl, dcpl, &ex_dcpl, vspace[0], filename, (hsize_t)174) < 0)
+    /* Correct previous fix for HDFFV-10469 */
+    if(test_api_get_ex_dcpl(config, fapl, dcpl, &ex_dcpl, vspace[0], filename, (hsize_t)213) < 0)
         TEST_ERROR
 
     /* Test H5Pget_virtual_count */

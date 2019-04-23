@@ -223,7 +223,7 @@ done:
  *-------------------------------------------------------------------------
  */
 hssize_t
-H5S_select_serial_size(const H5S_t *space, H5F_t *f)
+H5S_select_serial_size(const H5S_t *space)
 {
     hssize_t ret_value = -1;   /* Return value */
 
@@ -232,7 +232,7 @@ H5S_select_serial_size(const H5S_t *space, H5F_t *f)
     HDassert(space);
 
     /* Call the selection type's serial_size function */
-    ret_value=(*space->select.type->serial_size)(space, f);
+    ret_value=(*space->select.type->serial_size)(space);
 
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* end H5S_select_serial_size() */
@@ -249,7 +249,6 @@ H5S_select_serial_size(const H5S_t *space, H5F_t *f)
         uint8_t **p;            OUT: Pointer to buffer to put serialized
                                 selection.  Will be advanced to end of
                                 serialized selection.
-        H5F_t *f;               IN: File pointer
  RETURNS
     Non-negative on success/Negative on failure
  DESCRIPTION
@@ -264,7 +263,7 @@ H5S_select_serial_size(const H5S_t *space, H5F_t *f)
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5S_select_serialize(const H5S_t *space, uint8_t **p, H5F_t *f)
+H5S_select_serialize(const H5S_t *space, uint8_t **p)
 {
     herr_t ret_value=SUCCEED;   /* Return value */
 
@@ -274,7 +273,7 @@ H5S_select_serialize(const H5S_t *space, uint8_t **p, H5F_t *f)
     HDassert(p);
 
     /* Call the selection type's serialize function */
-    ret_value=(*space->select.type->serialize)(space,p,f);
+    ret_value=(*space->select.type->serialize)(space,p);
 
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* end H5S_select_serialize() */
