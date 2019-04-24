@@ -247,6 +247,12 @@ New Features
 
     C++ Library:
     ------------
+    - Added new wrappers for H5Pset/get_create_intermediate_group()
+        LinkCreatPropList::setCreateIntermediateGroup()
+        LinkCreatPropList::getCreateIntermediateGroup()
+
+      (BMR - 2019/04/22, HDFFV-10622)
+
     - Added new function to the C++ interface
 
       Added wrapper for H5Ovisit2:
