@@ -58,8 +58,8 @@ CONTAINS
     CHARACTER(LEN=64) :: name
     INTEGER(SIZE_T) :: name_len
     INTEGER :: cmp = -1
-    CHARACTER(LEN=12) :: filename = "h5null.posix"
-    INTEGER(HID_T) :: file_id
+!    CHARACTER(LEN=12) :: filename = "h5null.posix"
+!    INTEGER(HID_T) :: file_id
 
     ! The null VOL connector should not be registered at the start of the test
     CALL H5VLis_connector_registered_f( NULL_VOL_CONNECTOR_NAME, is_registered, error)
@@ -77,6 +77,14 @@ CONTAINS
 
     CALL H5VLget_connector_id_f(NULL_VOL_CONNECTOR_NAME, vol_id_out, error)
     CALL check("H5VLget_connector_id_f",error,total_error)
+
+    PRINT*,vol_id_out
+
+    CALL H5VLget_connector_name_f(vol_id_out, name, error, name_len)
+    CALL check("H5VLget_connector_name_f",error,total_error)
+
+ !   CALL H5VLget_connector_name_f(vol_id_out, name, error)
+ !   CALL check("H5VLget_connector_name_f",error,total_error)
 
     CALL H5VLcmp_connector_cls_f( cmp, vol_id_out, vol_id, error)
     CALL check("H5VLcmp_connector_cls_f",error, total_error)
