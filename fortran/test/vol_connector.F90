@@ -1,0 +1,187 @@
+!****h* root/fortran/test/vol_connector.F90
+!
+! NAME
+!  vol_connector.F90
+!
+! FUNCTION
+!
+!  Tests basic Fortran VOL plugin operations (registration, etc.).
+!  Uses the null VOL connector (built with the testing code)
+!  which is loaded as a dynamic plugin.
+!
+! COPYRIGHT
+! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+!   Copyright by The HDF Group.                                               *
+!   Copyright by the Board of Trustees of the University of Illinois.         *
+!   All rights reserved.                                                      *
+!                                                                             *
+!   This file is part of HDF5.  The full HDF5 copyright notice, including     *
+!   terms governing use, modification, and redistribution, is contained in    *
+!   the COPYING file, which can be found at the root of the source code       *
+!   distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+!   If you do not have access to either file, you may request a copy from     *
+!   help@hdfgroup.org.                                                        *
+! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+!
+!*****
+
+MODULE VOL_TMOD
+
+  USE HDF5
+  USE THDF5_F03
+  IMPLICIT NONE
+
+  
+  INTEGER, PARAMETER :: NULL_VOL_CONNECTOR_VALUE = 160
+  CHARACTER(LEN=18), PARAMETER :: NULL_VOL_CONNECTOR_NAME = "null_vol_connector"
+
+CONTAINS
+
+  !-------------------------------------------------------------------------
+  ! Function:    test_registration_by_name()
+  !
+  ! Purpose:     Tests if we can load, register, and close a VOL
+  !              connector by name.
+  !
+  !-------------------------------------------------------------------------
+  !
+
+  SUBROUTINE test_registration_by_name(total_error)
+
+    IMPLICIT NONE
+
+    INTEGER, INTENT(INOUT) :: total_error
+    INTEGER :: error = 0
+
+    LOGICAL :: is_registered = .FALSE.
+    INTEGER(hid_t) :: vol_id = 0, vol_id_out = 1
+    CHARACTER(LEN=64) :: name
+    INTEGER(SIZE_T) :: name_len
+    INTEGER :: cmp = -1
+    CHARACTER(LEN=12) :: filename = "h5null.posix"
+    INTEGER(HID_T) :: file_id
+
+    ! The null VOL connector should not be registered at the start of the test
+    CALL H5VLis_connector_registered_f( NULL_VOL_CONNECTOR_NAME, is_registered, error)
+    CALL check("H5VLis_connector_registered_f",error,total_error)
+    CALL VERIFY("H5VLis_connector_registered_f", is_registered, .FALSE., total_error)
+
+    ! Register the connector by name
+    CALL H5VLregister_connector_by_name_f(NULL_VOL_CONNECTOR_NAME, vol_id, error)
+    CALL check("H5VLregister_connector_by_name_f",error,total_error)
+    
+    ! The connector should be registered now
+    CALL H5VLis_connector_registered_f(NULL_VOL_CONNECTOR_NAME, is_registered, error)
+    CALL check("H5VLis_connector_registered_f",error,total_error)
+    CALL VERIFY("H5VLis_connector_registered_f", is_registered, .TRUE., total_error)
+
+    CALL H5VLget_connector_id_f(NULL_VOL_CONNECTOR_NAME, vol_id_out, error)
+    CALL check("H5VLget_connector_id_f",error,total_error)
+
+    CALL H5VLcmp_connector_cls_f( cmp, vol_id_out, vol_id, error)
+    CALL check("H5VLcmp_connector_cls_f",error, total_error)
+    CALL VERIFY("H5VLcmp_connector_cls_f", cmp, 0, total_error)
+
+    CALL H5VLclose_f(vol_id_out, error)
+
+    ! Unregister the connector
+    CALL H5VLunregister_connector_f(vol_id, error)
+    CALL check("H5VLunregister_connector_f", error, total_error)
+
+    ! The connector should not be registered now
+    CALL H5VLis_connector_registered_f( NULL_VOL_CONNECTOR_NAME, is_registered, error)
+    CALL check("H5VLis_connector_registered_f",error,total_error)
+    CALL VERIFY("H5VLis_connector_registered_f", is_registered, .FALSE., total_error)
+
+  END SUBROUTINE test_registration_by_name
+
+  !-------------------------------------------------------------------------
+  ! Function:    test_registration_by_value()
+  !
+  ! Purpose:     Tests if we can load, register, and close a VOL
+  !              connector by value.
+  !
+  !-------------------------------------------------------------------------
+
+  SUBROUTINE test_registration_by_value(total_error)
+
+    IMPLICIT NONE
+
+    INTEGER, INTENT(INOUT) :: total_error
+    INTEGER :: error = 0
+    
+    LOGICAL :: is_registered = .FALSE.
+    INTEGER(hid_t) :: vol_id = 0
+
+
+    ! The null VOL connector should not be registered at the start of the test
+    CALL H5VLis_connector_registered_f( NULL_VOL_CONNECTOR_NAME, is_registered, error)
+    CALL check("H5VLis_connector_registered_f",error,total_error)
+    CALL VERIFY("H5VLis_connector_registered_f", is_registered, .FALSE., total_error)
+
+    ! Register the connector by value
+    CALL H5VLregister_connector_by_value_f(NULL_VOL_CONNECTOR_VALUE, vol_id, error)
+    CALL check("H5VLregister_connector_by_value_f", error, total_error)
+
+    ! The connector should be registered now
+    CALL H5VLis_connector_registered_f(NULL_VOL_CONNECTOR_NAME, is_registered, error)
+    CALL check("H5VLis_connector_registered_f",error,total_error)
+    CALL VERIFY("H5VLis_connector_registered_f", is_registered, .TRUE., total_error)
+
+    ! Unregister the connector
+    CALL H5VLunregister_connector_f(vol_id, error)
+    CALL check("H5VLunregister_connector_f", error, total_error)
+
+    ! The connector should not be registered now 
+    CALL H5VLis_connector_registered_f( NULL_VOL_CONNECTOR_NAME, is_registered, error)
+    CALL check("H5VLis_connector_registered_f",error,total_error)
+    CALL VERIFY("H5VLis_connector_registered_f", is_registered, .FALSE., total_error)
+
+  END SUBROUTINE test_registration_by_value
+
+END MODULE VOL_TMOD
+
+
+PROGRAM vol_connector
+
+  USE HDF5
+  USE THDF5_F03
+  USE VOL_TMOD
+
+  IMPLICIT NONE
+  INTEGER :: total_error = 0
+  INTEGER :: error
+  INTEGER :: ret_total_error
+  LOGICAL :: cleanup, status
+
+  CALL h5open_f(error)
+
+  cleanup = .TRUE.
+  CALL h5_env_nocleanup_f(status)
+  IF(status) cleanup=.FALSE.
+
+  WRITE(*,'(18X,A)') '=============================='
+  WRITE(*,'(24X,A)') 'FORTRAN VOL tests'
+  WRITE(*,'(18X,A)') '=============================='
+
+  WRITE(*,'(A)') "Testing VOL connector plugin functionality."
+  ret_total_error = 0
+  CALL test_registration_by_name(ret_total_error)
+  CALL write_test_status(ret_total_error, ' Testing VOL registration by name', total_error)
+
+  ret_total_error = 0
+  CALL test_registration_by_value(ret_total_error)
+  CALL write_test_status(ret_total_error, ' Testing VOL registration by value', total_error)
+
+  WRITE(*, fmt = '(/18X,A)') '============================================'
+  WRITE(*, fmt = '(19X, A)', advance='NO') ' FORTRAN VOL tests completed with '
+  WRITE(*, fmt = '(I4)', advance='NO') total_error
+  WRITE(*, fmt = '(A)' ) ' error(s) ! '
+  WRITE(*,'(18X,A)') '============================================'
+  
+  CALL h5close_f(error)
+
+  ! if errors detected, exit with non-zero code.
+  IF (total_error .NE. 0) CALL h5_exit_f(1)
+
+END PROGRAM vol_connector
