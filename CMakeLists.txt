@@ -756,7 +756,7 @@ endif ()
 option (BUILD_TESTING "Build HDF5 Unit Testing" ON)
 if (BUILD_TESTING)
   set (DART_TESTING_TIMEOUT 1200
-      CACHE INTEGER
+      CACHE STRING
       "Timeout in seconds for each test (default 1200=20minutes)"
   )
 
@@ -772,11 +772,11 @@ if (BUILD_TESTING)
     mark_as_advanced (HDF5_TEST_FHEAP_VFD)
   endif ()
 
-  option (HDF5_TEST_VOL "Execute tests with different VOL connectors" OFF)
-  mark_as_advanced (HDF5_TEST_VOL)
-  if (HDF5_TEST_VOL)
-    option (HDF5_TEST_FHEAP_VOL "Execute fheap test with different VOL connectors" ON)
-    mark_as_advanced (HDF5_TEST_FHEAP_VOL)
+  option (HDF5_TEST_PASSTHROUGH_VOL "Execute tests with different passthrough VOL connectors" OFF)
+  mark_as_advanced (HDF5_TEST_PASSTHROUGH_VOL)
+  if (HDF5_TEST_PASSTHROUGH_VOL)
+    option (HDF5_TEST_FHEAP_PASSTHROUGH_VOL "Execute fheap test with different passthrough VOL connectors" ON)
+    mark_as_advanced (HDF5_TEST_FHEAP_PASSTHROUGH VOL)
   endif ()
 
   option (HDF_TEST_EXPRESS "Control testing framework (0-3)" "0")

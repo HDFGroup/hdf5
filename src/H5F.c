@@ -921,6 +921,42 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5Fget_fileno
+ *
+ * Purpose:     Public API to retrieve the file's 'file number' that uniquely
+ *              identifies each open file.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Fget_fileno(hid_t file_id, unsigned long *fileno)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "i*Ul", file_id, fileno);
+
+    /* If no fileno pointer was passed in, exit quietly */
+    if(fileno) {
+        H5VL_object_t   *vol_obj;                      /* File info */
+
+        /* Get the internal file structure */
+        if(NULL == (vol_obj = (H5VL_object_t *)H5I_object(file_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+
+        /* Get the flags */
+        if((ret_value = H5VL_file_get(vol_obj, H5VL_FILE_GET_FILENO, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, fileno)) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to get file's 'file number'")
+    } /* end if */
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Fget_fileno() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5Fget_freespace
  *
  * Purpose:     Retrieves the amount of free space in the file.

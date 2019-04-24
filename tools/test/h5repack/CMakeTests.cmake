@@ -304,7 +304,7 @@
     endif ()
   endmacro ()
 
-  macro (ADD_H5_MASK_TEST testname testtype resultcode resultfile)
+  macro (ADD_H5_MASK_TEST testname testtype resultcode result_errcheck resultfile)
     if ("${testtype}" STREQUAL "SKIP")
       if (NOT HDF5_ENABLE_USING_MEMCHECKER)
         add_test (
@@ -343,10 +343,10 @@
                 -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
                 -D "TEST_OUTPUT=${resultfile}-${testname}.out"
                 -D "TEST_EXPECT=${resultcode}"
-                -D "TEST_MASK_ERROR=true"
+                -D "TEST_SKIP_COMPARE=true"
                 -D "TEST_REFERENCE=${resultfile}.mty"
-                -D "TEST_ERRREF=${resultfile}-${testname}.tst"
-                -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+                -D "TEST_ERRREF=${result_errcheck}"
+                -P "${HDF_RESOURCES_EXT_DIR}/grepTest.cmake"
         )
         set_tests_properties (H5REPACK_MASK-${testname} PROPERTIES DEPENDS H5REPACK_MASK-${testname}-clear-objects)
       endif ()
@@ -1222,7 +1222,7 @@
   ADD_H5_VERIFY_TEST (conti "TEST" 1 ${FILE4} null CONTIGUOUS -l CONTI)
   ADD_H5_VERIFY_TEST (dset2_compa "TEST" 0 ${FILE4} dset2 COMPACT -l dset2:COMPA)
   ADD_H5_VERIFY_TEST (compa "TEST" 1 ${FILE4} null COMPACT -l COMPA)
-  ADD_H5_MASK_TEST (dset2_chunk_20x10-errstk "TEST" 0 ${FILE4} --layout=dset2:CHUNK=20x10x5 --enable-error-stack)
+  ADD_H5_MASK_TEST (dset2_chunk_20x10-errstk "TEST" 0 "dimensionality of chunks doesn't match the dataspace" ${FILE4} --layout=dset2:CHUNK=20x10x5 --enable-error-stack)
 
 ################################################################
 # layout conversions (file has no filters)

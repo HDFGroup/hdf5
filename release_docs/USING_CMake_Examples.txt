@@ -38,12 +38,14 @@ II. Building HDF5 Examples with CMake
 
 Files in the HDF5 install directory:
        HDF5Examples folder
+       CTestScript.cmake
        HDF5_Examples.cmake
        HDF5_Examples_options.cmake
 
 Default installation process:
        Create a directory to run the examples, i.e. \test_hdf5.
        Copy HDF5Examples folder to this directory.
+       Copy CTestScript.cmake to this directory.
        Copy HDF5_Examples.cmake to this directory.
        Copy HDF5_Examples_options.cmake to this directory.
        The default source folder is defined as "HDF5Examples". It can be changed

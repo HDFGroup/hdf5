@@ -38,6 +38,7 @@
 #include "H5Fprivate.h"		/* File          			*/
 #include "H5FSpkg.h"		/* File free space			*/
 #include "H5MFprivate.h"	/* File memory management		*/
+#include "H5MMprivate.h"	/* Memory management			*/
 #include "H5VMprivate.h"	/* Vectors and arrays 			*/
 #include "H5WBprivate.h"        /* Wrapped Buffers                      */
 
@@ -707,7 +708,7 @@ H5FS__cache_hdr_serialize(const H5F_t *f, void *_image, size_t len,
                   (fspace->alloc_sect_size == (size_t)fspace->sect_size)));
 
     /* Magic number */
-    HDmemcpy(image, H5FS_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC);
+    H5MM_memcpy(image, H5FS_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC);
     image += H5_SIZEOF_MAGIC;
 
     /* Version # */
@@ -1265,7 +1266,7 @@ H5FS__cache_sinfo_serialize(const H5F_t *f, void *_image, size_t len,
     HDassert(fspace->sect_cls);
 
     /* Magic number */
-    HDmemcpy(image, H5FS_SINFO_MAGIC, (size_t)H5_SIZEOF_MAGIC);
+    H5MM_memcpy(image, H5FS_SINFO_MAGIC, (size_t)H5_SIZEOF_MAGIC);
     image += H5_SIZEOF_MAGIC;
 
     /* Version # */

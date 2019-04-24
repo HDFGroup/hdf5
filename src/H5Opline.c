@@ -93,6 +93,7 @@ const H5O_msg_class_t H5O_MSG_PLINE[1] = {{
 const unsigned H5O_pline_ver_bounds[] = {
     H5O_PLINE_VERSION_1,        /* H5F_LIBVER_EARLIEST */
     H5O_PLINE_VERSION_2,        /* H5F_LIBVER_V18 */
+    H5O_PLINE_VERSION_2,        /* H5F_LIBVER_V110 */
     H5O_PLINE_VERSION_LATEST    /* H5F_LIBVER_LATEST */
 };
 
@@ -318,7 +319,7 @@ H5O_pline_encode(H5F_t H5_ATTR_UNUSED *f, uint8_t *p/*out*/, const void *mesg)
         /* Encode name, if there is one to encode */
 	if(name_length > 0) {
             /* Store name, with null terminator */
-	    HDmemcpy(p, name, name_length);
+	    H5MM_memcpy(p, name, name_length);
 	    p += name_length;
 
             /* Pad out name to alignment, in older versions */
@@ -409,7 +410,7 @@ H5O_pline_copy(const void *_src, void *_dst/*out*/)
                     if(NULL == (dst->filter[i].cd_values = (unsigned *)H5MM_malloc(src->filter[i].cd_nelmts* sizeof(unsigned))))
                         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
-                    HDmemcpy(dst->filter[i].cd_values, src->filter[i].cd_values,
+                    H5MM_memcpy(dst->filter[i].cd_values, src->filter[i].cd_values,
                             src->filter[i].cd_nelmts * sizeof(unsigned));
                 } /* end if */
                 else

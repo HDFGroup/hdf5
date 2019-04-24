@@ -36,6 +36,7 @@
 #include "H5Eprivate.h"     /* Error handling                           */
 #include "H5FSpkg.h"        /* File free space                          */
 #include "H5MFprivate.h"    /* File memory management                   */
+#include "H5MMprivate.h"	/* Memory management			*/
 
 
 /****************/
@@ -615,7 +616,7 @@ H5FS__new(const H5F_t *f, uint16_t nclasses, const H5FS_section_class_t *classes
             HDassert(u == classes[u]->type);
 
             /* Copy the class information into the free space manager */
-            HDmemcpy(&fspace->sect_cls[u], classes[u], sizeof(H5FS_section_class_t));
+            H5MM_memcpy(&fspace->sect_cls[u], classes[u], sizeof(H5FS_section_class_t));
 
             /* Call the class initialization routine, if there is one */
             if(fspace->sect_cls[u].init_cls)

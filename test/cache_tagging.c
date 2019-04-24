@@ -448,7 +448,7 @@ check_file_creation_tags(hid_t fcpl_id, int type)
     TESTING("tag application during file creation");
 
     /* Create Fapl */
-    if ( (fapl = h5_fileaccess_flags(H5_FILEACCESS_VOL | H5_FILEACCESS_LIBVER)) < 0 ) TEST_ERROR;
+    if ( (fapl = h5_fileaccess_flags(H5_FILEACCESS_LIBVER)) < 0 ) TEST_ERROR;
 
     /* Create a test file with provided fcpl_t */
     if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl_id, fapl)) < 0 ) TEST_ERROR;
@@ -539,7 +539,7 @@ check_file_open_tags(hid_t fcpl, int type)
     /* ===== */
 
     /* Create Fapl */
-    if ( (fapl = h5_fileaccess_flags(H5_FILEACCESS_VOL | H5_FILEACCESS_LIBVER)) < 0 ) TEST_ERROR;
+    if ( (fapl = h5_fileaccess_flags(H5_FILEACCESS_LIBVER)) < 0 ) TEST_ERROR;
 
     /* Create a test file with provided fcpl_t */
     if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, fapl)) < 0 ) TEST_ERROR;
@@ -652,7 +652,7 @@ check_group_creation_tags(void)
     /* ===== */
 
     /* Create Fapl */
-    if ( (fapl = h5_fileaccess_flags(H5_FILEACCESS_VOL | H5_FILEACCESS_LIBVER)) < 0 ) TEST_ERROR;
+    if ( (fapl = h5_fileaccess_flags(H5_FILEACCESS_LIBVER)) < 0 ) TEST_ERROR;
 
     /* Create a test file with provided fcpl_t */
     if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0 ) TEST_ERROR;
@@ -751,7 +751,7 @@ check_multi_group_creation_tags(void)
     TESTING("tag application during multiple group creation");
 
     /* Create Fapl */
-    if ( (fapl = h5_fileaccess_flags(H5_FILEACCESS_VOL | H5_FILEACCESS_LIBVER)) < 0 ) TEST_ERROR;
+    if ( (fapl = h5_fileaccess_flags(H5_FILEACCESS_LIBVER)) < 0 ) TEST_ERROR;
 
     /* Set latest version of library */
     if ( H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0 ) TEST_ERROR;
@@ -881,7 +881,7 @@ check_link_iteration_tags(void)
     TESTING("tag application during iteration over links in a group");
 
     /* Create Fapl */
-    if ( (fapl = h5_fileaccess_flags(H5_FILEACCESS_VOL | H5_FILEACCESS_LIBVER)) < 0 ) TEST_ERROR;
+    if ( (fapl = h5_fileaccess_flags(H5_FILEACCESS_LIBVER)) < 0 ) TEST_ERROR;
 
     /* =========== */
     /* Create File */
@@ -1000,7 +1000,7 @@ check_dense_attribute_tags(void)
     TESTING("tag application during dense attribute manipulation");
 
     /* Create Fapl */
-    if ( (fapl = h5_fileaccess_flags(H5_FILEACCESS_VOL | H5_FILEACCESS_LIBVER)) < 0 ) TEST_ERROR;
+    if ( (fapl = h5_fileaccess_flags(H5_FILEACCESS_LIBVER)) < 0 ) TEST_ERROR;
     if ( H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0 ) TEST_ERROR;
 
     /* Create Dcpl */
@@ -1184,7 +1184,7 @@ check_group_open_tags(void)
     /* ===== */
 
     /* Create Fapl */
-    if ( (fapl = h5_fileaccess_flags(H5_FILEACCESS_VOL | H5_FILEACCESS_LIBVER)) < 0 ) TEST_ERROR;
+    if ( (fapl = h5_fileaccess_flags(H5_FILEACCESS_LIBVER)) < 0 ) TEST_ERROR;
 
     /* Create a test file with provided fcpl_t */
     if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0 ) TEST_ERROR;
@@ -1295,7 +1295,7 @@ check_attribute_creation_tags(hid_t fcpl, int type)
     /* ===== */
 
     /* Create Fapl */
-    if ( (fapl = h5_fileaccess_flags(H5_FILEACCESS_VOL | H5_FILEACCESS_LIBVER)) < 0 ) TEST_ERROR;
+    if ( (fapl = h5_fileaccess_flags(H5_FILEACCESS_LIBVER)) < 0 ) TEST_ERROR;
 
     /* Create a test file with provided fcpl_t */
     if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, fapl)) < 0 ) TEST_ERROR;
@@ -1429,7 +1429,7 @@ check_attribute_open_tags(hid_t fcpl, int type)
     /* ===== */
 
     /* Create Fapl */
-    if ( (fapl = h5_fileaccess_flags(H5_FILEACCESS_VOL | H5_FILEACCESS_LIBVER)) < 0 ) TEST_ERROR;
+    if ( (fapl = h5_fileaccess_flags(H5_FILEACCESS_LIBVER)) < 0 ) TEST_ERROR;
 
     /* Create a test file with provided fcpl_t */
     if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, fapl)) < 0 ) TEST_ERROR;
@@ -1576,7 +1576,7 @@ check_attribute_rename_tags(hid_t fcpl, int type)
     if ( (NULL == (data = (int *)HDcalloc(DIMS * DIMS, sizeof(int)))) ) TEST_ERROR;
 
     /* Create Fapl */
-    if ( (fapl = h5_fileaccess_flags(H5_FILEACCESS_VOL | H5_FILEACCESS_LIBVER)) < 0 ) TEST_ERROR;
+    if ( (fapl = h5_fileaccess_flags(H5_FILEACCESS_LIBVER)) < 0 ) TEST_ERROR;
 
     /* Create a test file with provided fcpl_t */
     if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, fapl)) < 0 ) TEST_ERROR;
@@ -1761,7 +1761,7 @@ check_attribute_delete_tags(hid_t fcpl, int type)
     if ( (NULL == (data = (int *)HDcalloc(DIMS * DIMS, sizeof(int)))) ) TEST_ERROR;
 
     /* Create Fapl */
-    if ( (fapl = h5_fileaccess_flags(H5_FILEACCESS_VOL | H5_FILEACCESS_LIBVER)) < 0 ) TEST_ERROR;
+    if ( (fapl = h5_fileaccess_flags(H5_FILEACCESS_LIBVER)) < 0 ) TEST_ERROR;
 
     /* Create a test file with provided fcpl_t */
     if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, fapl)) < 0 ) TEST_ERROR;
@@ -1917,7 +1917,7 @@ check_dataset_creation_tags(hid_t fcpl, int type)
     /* ===== */
 
     /* Create Fapl */
-    if ( (fapl = h5_fileaccess_flags(H5_FILEACCESS_VOL | H5_FILEACCESS_LIBVER)) < 0 ) TEST_ERROR;
+    if ( (fapl = h5_fileaccess_flags(H5_FILEACCESS_LIBVER)) < 0 ) TEST_ERROR;
 
     if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, fapl)) < 0 ) TEST_ERROR;
 
@@ -2051,7 +2051,7 @@ check_dataset_creation_earlyalloc_tags(hid_t fcpl, int type)
     /* ===== */
 
     /* Create Fapl */
-    if ( (fapl = h5_fileaccess_flags(H5_FILEACCESS_VOL | H5_FILEACCESS_LIBVER)) < 0 ) TEST_ERROR;
+    if ( (fapl = h5_fileaccess_flags(H5_FILEACCESS_LIBVER)) < 0 ) TEST_ERROR;
 
     if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, fapl)) < 0 ) TEST_ERROR;
 
@@ -2187,7 +2187,7 @@ check_dataset_open_tags(void)
     /* ========= */
 
     /* Create Fapl */
-    if ( (fapl = h5_fileaccess_flags(H5_FILEACCESS_VOL | H5_FILEACCESS_LIBVER)) < 0 ) TEST_ERROR;
+    if ( (fapl = h5_fileaccess_flags(H5_FILEACCESS_LIBVER)) < 0 ) TEST_ERROR;
 
     /* Create file */
     if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0 ) TEST_ERROR;
@@ -2318,7 +2318,7 @@ check_dataset_write_tags(void)
     if ( (NULL == (data = (int *)HDcalloc(DIMS * DIMS, sizeof(int)))) ) TEST_ERROR;
 
     /* Create Fapl */
-    if ( (fapl = h5_fileaccess_flags(H5_FILEACCESS_VOL | H5_FILEACCESS_LIBVER)) < 0 ) TEST_ERROR;
+    if ( (fapl = h5_fileaccess_flags(H5_FILEACCESS_LIBVER)) < 0 ) TEST_ERROR;
 
     /* Create file */
     if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0 ) TEST_ERROR;
@@ -2457,7 +2457,7 @@ check_attribute_write_tags(hid_t fcpl, int type)
     if ( (NULL == (data = (int *)HDcalloc(DIMS * DIMS, sizeof(int)))) ) TEST_ERROR;
 
     /* Create Fapl */
-    if ( (fapl = h5_fileaccess_flags(H5_FILEACCESS_VOL | H5_FILEACCESS_LIBVER)) < 0 ) TEST_ERROR;
+    if ( (fapl = h5_fileaccess_flags(H5_FILEACCESS_LIBVER)) < 0 ) TEST_ERROR;
 
     /* Create a test file with provided fcpl_t */
     if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, fapl)) < 0 ) TEST_ERROR;
@@ -2613,7 +2613,7 @@ check_dataset_read_tags(void)
     if ( (NULL == (data = (int *)HDcalloc(DIMS * DIMS, sizeof(int)))) ) TEST_ERROR;
 
     /* Create Fapl */
-    if ( (fapl = h5_fileaccess_flags(H5_FILEACCESS_VOL | H5_FILEACCESS_LIBVER)) < 0 ) TEST_ERROR;
+    if ( (fapl = h5_fileaccess_flags(H5_FILEACCESS_LIBVER)) < 0 ) TEST_ERROR;
 
     /* Create file */
     if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0 ) TEST_ERROR;
@@ -2751,7 +2751,7 @@ check_dataset_size_retrieval(void)
     if ( (NULL == (data = (int *)HDcalloc(DIMS * DIMS, sizeof(int)))) ) TEST_ERROR;
 
     /* Create Fapl */
-    if ( (fapl = h5_fileaccess_flags(H5_FILEACCESS_VOL | H5_FILEACCESS_LIBVER)) < 0 ) TEST_ERROR;
+    if ( (fapl = h5_fileaccess_flags(H5_FILEACCESS_LIBVER)) < 0 ) TEST_ERROR;
 
     /* Create file */
     if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0 ) TEST_ERROR;
@@ -2890,7 +2890,7 @@ check_dataset_extend_tags(void)
     if ( (NULL == (data = (int *)HDcalloc(DIMS * DIMS, sizeof(int)))) ) TEST_ERROR;
 
     /* Create Fapl */
-    if ( (fapl = h5_fileaccess_flags(H5_FILEACCESS_VOL | H5_FILEACCESS_LIBVER)) < 0 ) TEST_ERROR;
+    if ( (fapl = h5_fileaccess_flags(H5_FILEACCESS_LIBVER)) < 0 ) TEST_ERROR;
 
     /* Create file */
     if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0 ) TEST_ERROR;
@@ -3017,7 +3017,7 @@ check_object_info_tags(void)
     /* ===== */
 
     /* Create Fapl */
-    if ( (fapl = h5_fileaccess_flags(H5_FILEACCESS_VOL | H5_FILEACCESS_LIBVER)) < 0 ) TEST_ERROR;
+    if ( (fapl = h5_fileaccess_flags(H5_FILEACCESS_LIBVER)) < 0 ) TEST_ERROR;
 
     /* Create a test file */
     if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0 ) TEST_ERROR;
@@ -3126,7 +3126,7 @@ check_object_copy_tags(void)
     /* ===== */
 
     /* Create Fapl */
-    if ( (fapl = h5_fileaccess_flags(H5_FILEACCESS_VOL | H5_FILEACCESS_LIBVER)) < 0 ) TEST_ERROR;
+    if ( (fapl = h5_fileaccess_flags(H5_FILEACCESS_LIBVER)) < 0 ) TEST_ERROR;
 
     /* Create a test file */
     if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0 ) TEST_ERROR;
@@ -3257,7 +3257,7 @@ check_link_removal_tags(hid_t fcpl, int type)
     if ( (NULL == (data = (int *)HDcalloc(DIMS * DIMS, sizeof(int)))) ) TEST_ERROR;
 
     /* Create Fapl */
-    if ( (fapl = h5_fileaccess_flags(H5_FILEACCESS_VOL | H5_FILEACCESS_LIBVER)) < 0 ) TEST_ERROR;
+    if ( (fapl = h5_fileaccess_flags(H5_FILEACCESS_LIBVER)) < 0 ) TEST_ERROR;
 
     /* Create file */
     if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, fapl)) < 0 ) TEST_ERROR;
@@ -3416,7 +3416,7 @@ check_link_getname_tags(void)
     if ( (NULL == (data = (int *)HDcalloc(DIMS * DIMS, sizeof(int)))) ) TEST_ERROR;
 
     /* Create Fapl */
-    if ( (fapl = h5_fileaccess_flags(H5_FILEACCESS_VOL | H5_FILEACCESS_LIBVER)) < 0 ) TEST_ERROR;
+    if ( (fapl = h5_fileaccess_flags(H5_FILEACCESS_LIBVER)) < 0 ) TEST_ERROR;
 
     /* Create file */
     if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0 ) TEST_ERROR;
@@ -3553,7 +3553,7 @@ check_external_link_creation_tags(void)
     /* ===== */
 
     /* Create Fapl */
-    if ( (fapl = h5_fileaccess_flags(H5_FILEACCESS_VOL | H5_FILEACCESS_LIBVER)) < 0 ) TEST_ERROR;
+    if ( (fapl = h5_fileaccess_flags(H5_FILEACCESS_LIBVER)) < 0 ) TEST_ERROR;
 
     /* Create a test file */
     if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0 ) TEST_ERROR;
@@ -3660,7 +3660,7 @@ check_external_link_open_tags(void)
     /* ===== */
 
     /* Create Fapl */
-    if ( (fapl = h5_fileaccess_flags(H5_FILEACCESS_VOL | H5_FILEACCESS_LIBVER)) < 0 ) TEST_ERROR;
+    if ( (fapl = h5_fileaccess_flags(H5_FILEACCESS_LIBVER)) < 0 ) TEST_ERROR;
 
     /* Create a test file */
     if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0 ) TEST_ERROR;
@@ -3787,7 +3787,7 @@ check_invalid_tag_application(void)
     
 #if H5C_DO_TAGGING_SANITY_CHECKS
     /* Create Fapl */
-    if ( (fapl = h5_fileaccess_flags(H5_FILEACCESS_VOL | H5_FILEACCESS_LIBVER)) < 0 ) TEST_ERROR;
+    if ( (fapl = h5_fileaccess_flags(H5_FILEACCESS_LIBVER)) < 0 ) TEST_ERROR;
 
     /* Create a test file */
     if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0 ) TEST_ERROR;

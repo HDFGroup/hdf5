@@ -886,6 +886,44 @@ CONTAINS
     hdferr = h5fget_filesize_c(file_id, size)
   END SUBROUTINE h5fget_filesize_f
 
+!****s* H5F/h5fget_fileno_f
+!
+! NAME
+!  h5fget_fileno_f
+!
+! PURPOSE
+!  Retrieves the file number of the HDF5 file.
+!
+! INPUTS
+!  file_id 	 - file identifier
+! OUTPUTS
+!  fileno 	 - file number
+!  hdferr 	 - Returns 0 if successful and -1 if fails
+!
+! AUTHOR
+!  Quincey Koziol
+!  April 13, 2019
+!
+! SOURCE
+  SUBROUTINE h5fget_fileno_f(file_id, fileno, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: file_id  ! file identifier
+    INTEGER, INTENT(OUT) :: fileno         ! File number
+    INTEGER, INTENT(OUT) :: hdferr         ! Error code: 0 on success,
+                                           !   	 -1 if fail
+!*****
+    INTERFACE
+       INTEGER FUNCTION h5fget_fileno_c(file_id, fileno) &
+            BIND(C,NAME='h5fget_fileno_c')
+         IMPORT :: HID_T, HSIZE_T
+         IMPLICIT NONE
+         INTEGER(HID_T), INTENT(IN) :: file_id
+         INTEGER, INTENT(OUT) :: fileno
+       END FUNCTION h5fget_fileno_c
+    END INTERFACE
+    hdferr = h5fget_fileno_c(file_id, fileno)
+  END SUBROUTINE h5fget_fileno_f
+
 !****s* H5F (F03)/h5fget_file_image_f_F03
 !
 ! NAME

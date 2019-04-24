@@ -1501,7 +1501,7 @@ H5P__ocrt_pipeline_enc(const void *value, void **_pp, size_t *size)
                 *(*pp)++ = (uint8_t)TRUE;
 
                 /* encode filter name */
-                HDmemcpy(*pp, (uint8_t *)(pline->filter[u].name), H5Z_COMMON_NAME_LEN);
+                H5MM_memcpy(*pp, (uint8_t *)(pline->filter[u].name), H5Z_COMMON_NAME_LEN);
                 *pp += H5Z_COMMON_NAME_LEN;
             } /* end if */
             else

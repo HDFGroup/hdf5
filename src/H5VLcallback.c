@@ -355,7 +355,7 @@ H5VL_copy_connector_info(const H5VL_class_t *connector, void **dst_info,
         else if(connector->info_cls.size > 0) {
             if(NULL == (new_connector_info = H5MM_malloc(connector->info_cls.size)))
                 HGOTO_ERROR(H5E_VOL, H5E_CANTALLOC, FAIL, "connector info allocation failed")
-            HDmemcpy(new_connector_info, src_info, connector->info_cls.size);
+            H5MM_memcpy(new_connector_info, src_info, connector->info_cls.size);
         } /* end else-if */
         else
             HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "no way to copy connector info")
@@ -506,20 +506,25 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_free_connector_info(const H5VL_class_t *connector, void *info)
+H5VL_free_connector_info(hid_t connector_id, void *info)
 {
-    herr_t ret_value = SUCCEED;   /* Return value */
+    H5VL_class_t *cls;                  /* VOL connector's class struct */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    /* Sanity checks */
-    HDassert(connector);
+    /* Sanity check */
+    HDassert(connector_id > 0);
+
+    /* Check args and get class pointer */
+    if(NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_VOL, H5E_BADTYPE, FAIL, "not a VOL connector ID")
 
     /* Only free info object, if it's non-NULL */
     if(info) {
         /* Allow the connector to free info or do it ourselves */
-        if(connector->info_cls.free) {
-            if((connector->info_cls.free)(info) < 0)
+        if(cls->info_cls.free) {
+            if((cls->info_cls.free)(info) < 0)
                 HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "connector info free request failed")
         } /* end if */
         else
@@ -544,18 +549,13 @@ done:
 herr_t
 H5VLfree_connector_info(hid_t connector_id, void *info)
 {
-    H5VL_class_t *cls;                  /* VOL connector's class struct */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API_NOINIT
     H5TRACE2("e", "i*x", connector_id, info);
 
-    /* Check args and get class pointer */
-    if(NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID")
-
     /* Free the VOL connector info object */
-    if(H5VL_free_connector_info(cls, info) < 0)
+    if(H5VL_free_connector_info(connector_id, info) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "unable to release VOL connector info object")
 
 done:
@@ -623,24 +623,9 @@ H5VLconnector_str_to_info(const char *str, hid_t connector_id, void **info)
     FUNC_ENTER_API_NOINIT
     H5TRACE3("e", "*si**x", str, connector_id, info);
 
-    /* Only deserialize string, if it's non-NULL */
-    if(str) {
-        H5VL_class_t *cls;                  /* VOL connector's class struct */
-
-        /* Check args and get class pointer */
-        if(NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID")
-
-        /* Allow the connector to deserialize info */
-        if(cls->info_cls.from_str) {
-            if((cls->info_cls.from_str)(str, info) < 0)
-                HGOTO_ERROR(H5E_VOL, H5E_CANTUNSERIALIZE, FAIL, "can't deserialize connector info")
-        } /* end if */
-        else
-            *info = NULL;
-    } /* end if */
-    else
-        *info = NULL;
+    /* Call internal routine */
+    if(H5VL__connector_str_to_info(str, connector_id, info) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTDECODE, FAIL, "can't deserialize connector info")
 
 done:
     FUNC_LEAVE_API_NOINIT(ret_value)
@@ -755,6 +740,145 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5VL_wrap_object
+ *
+ * Purpose:     Wrap an object with connector
+ *
+ * Return:      Success:    Non-NULL
+ *              Failure:    NULL
+ *
+ *-------------------------------------------------------------------------
+ */
+void *
+H5VL_wrap_object(const H5VL_class_t *connector, void *wrap_ctx, void *obj,
+    H5I_type_t obj_type)
+{
+    void *ret_value;            /* Return value */
+
+    FUNC_ENTER_NOAPI(NULL)
+
+    /* Sanity checks */
+    HDassert(connector);
+    HDassert(obj);
+
+    /* Only wrap object if there's a wrap context */
+    if(wrap_ctx) {
+        /* Ask the connector to wrap the object */
+        if(NULL == (ret_value = (connector->wrap_cls.wrap_object)(obj, obj_type, wrap_ctx)))
+            HGOTO_ERROR(H5E_VOL, H5E_CANTGET, NULL, "can't wrap object")
+    } /* end if */
+    else
+        ret_value = obj;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_wrap_object() */
+
+
+/*---------------------------------------------------------------------------
+ * Function:    H5VLwrap_object
+ *
+ * Purpose:     Asks a connector to wrap an underlying object.
+ *
+ * Return:      Success:    Non-NULL
+ *              Failure:    NULL
+ *
+ *---------------------------------------------------------------------------
+ */
+void *
+H5VLwrap_object(void *obj, H5I_type_t obj_type, hid_t connector_id, void *wrap_ctx)
+{
+    H5VL_class_t *cls;          /* VOL connector's class struct */
+    void *ret_value = NULL;     /* Return value */
+
+    FUNC_ENTER_API_NOINIT
+    H5TRACE4("*x", "*xIti*x", obj, obj_type, connector_id, wrap_ctx);
+
+    /* Check args and get class pointer */
+    if(NULL == obj)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid object")
+    if(NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a VOL connector ID")
+
+    /* Wrap the object */
+    if(NULL == (ret_value = H5VL_wrap_object(cls, wrap_ctx, obj, obj_type)))
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, NULL, "unable to wrap object")
+
+done:
+    FUNC_LEAVE_API_NOINIT(ret_value)
+} /* H5VLwrap_object */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_unwrap_object
+ *
+ * Purpose:     Unwrap an object from connector
+ *
+ * Return:      Success:    Non-NULL
+ *              Failure:    NULL
+ *
+ *-------------------------------------------------------------------------
+ */
+void *
+H5VL_unwrap_object(const H5VL_class_t *connector, void *obj)
+{
+    void *ret_value;            /* Return value */
+
+    FUNC_ENTER_NOAPI(NULL)
+
+    /* Sanity checks */
+    HDassert(connector);
+    HDassert(obj);
+
+    /* Only unwrap object if there's an unwrap callback */
+    if(connector->wrap_cls.wrap_object) {
+        /* Ask the connector to unwrap the object */
+        if(NULL == (ret_value = (connector->wrap_cls.unwrap_object)(obj)))
+            HGOTO_ERROR(H5E_VOL, H5E_CANTGET, NULL, "can't unwrap object")
+    } /* end if */
+    else
+        ret_value = obj;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_unwrap_object() */
+
+
+/*---------------------------------------------------------------------------
+ * Function:    H5VLunwrap_object
+ *
+ * Purpose:     Unwrap an object from connector
+ *
+ * Return:      Success:    Non-NULL
+ *              Failure:    NULL
+ *
+ *---------------------------------------------------------------------------
+ */
+void *
+H5VLunwrap_object(void *obj, hid_t connector_id)
+{
+    H5VL_class_t *cls;          /* VOL connector's class struct */
+    void *ret_value = NULL;     /* Return value */
+
+    FUNC_ENTER_API_NOINIT
+    H5TRACE2("*x", "*xi", obj, connector_id);
+
+    /* Check args and get class pointer */
+    if(NULL == obj)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid object")
+    if(NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a VOL connector ID")
+
+    /* Unwrap the object */
+    if(NULL == (ret_value = H5VL_unwrap_object(cls, obj)))
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, NULL, "unable to unwrap object")
+
+done:
+    FUNC_LEAVE_API_NOINIT(ret_value)
+} /* H5VLunwrap_object */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5VL_free_wrap_ctx
  *
  * Purpose:     Free object wrapping context for a connector
@@ -816,76 +940,6 @@ H5VLfree_wrap_ctx(void *wrap_ctx, hid_t connector_id)
 done:
     FUNC_LEAVE_API_NOINIT(ret_value)
 } /* H5VLfree_wrap_ctx() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5VL_wrap_object
- *
- * Purpose:     Wrap an object with connector
- *
- * Return:      Success:    Non-negative
- *              Failure:    Negative
- *
- *-------------------------------------------------------------------------
- */
-void *
-H5VL_wrap_object(const H5VL_class_t *connector, void *wrap_ctx, void *obj,
-    H5I_type_t obj_type)
-{
-    void *ret_value = SUCCEED;   /* Return value */
-
-    FUNC_ENTER_NOAPI(NULL)
-
-    /* Sanity checks */
-    HDassert(connector);
-    HDassert(obj);
-
-    /* Only wrap object if there's a wrap context */
-    if(wrap_ctx) {
-        /* Ask the connector to wrap the object */
-        if(NULL == (ret_value = (connector->wrap_cls.wrap_object)(obj, obj_type, wrap_ctx)))
-            HGOTO_ERROR(H5E_VOL, H5E_CANTGET, NULL, "can't wrap object")
-    } /* end if */
-    else
-        ret_value = obj;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_wrap_object() */
-
-
-/*---------------------------------------------------------------------------
- * Function:    H5VLwrap_object
- *
- * Purpose:     Asks a connector to wrap an underlying object.
- *
- * Return:      Success:    Non-NULL
- *              Failure:    NULL
- *
- *---------------------------------------------------------------------------
- */
-void *
-H5VLwrap_object(void *obj, H5I_type_t obj_type, hid_t connector_id, void *wrap_ctx)
-{
-    H5VL_class_t *cls;          /* VOL connector's class struct */
-    void *ret_value = NULL;     /* Return value */
-
-    FUNC_ENTER_API_NOINIT
-    H5TRACE4("*x", "*xIti*x", obj, obj_type, connector_id, wrap_ctx);
-
-    /* Check args and get class pointer */
-    if(NULL == obj)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid object")
-    if(NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a VOL connector ID")
-
-    /* Wrap the object */
-    if(NULL == (ret_value = H5VL_wrap_object(cls, wrap_ctx, obj, obj_type)))
-        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, NULL, "unable to wrap object")
-
-done:
-    FUNC_LEAVE_API_NOINIT(ret_value)
-} /* H5VLwrap_object */
 
 
 /*-------------------------------------------------------------------------

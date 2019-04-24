@@ -542,8 +542,10 @@ set (H5TEST_SEPARATE_TESTS
     testhdf5
     cache
     cache_image
+    external_env
     flush1
     flush2
+    vds_env
 )
 foreach (h5_test ${H5_TESTS})
   if (NOT h5_test IN_LIST H5TEST_SEPARATE_TESTS)
@@ -678,6 +680,83 @@ set_tests_properties (H5TEST-cache_image PROPERTIES
     WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
 )
 endif ()
+
+#-- Adding test for external_env
+add_test (
+    NAME H5TEST-clear-external_env-objects
+    COMMAND    ${CMAKE_COMMAND}
+        -E remove
+        extern_1r.raw
+        extern_2r.raw
+        extern_3r.raw
+        extern_4r.raw
+        extern_1w.raw
+        extern_2w.raw
+        extern_3w.raw
+        extern_4w.raw
+        external_env.txt
+        external_env.out
+    WORKING_DIRECTORY
+        ${HDF5_TEST_BINARY_DIR}/H5TEST
+)
+set_tests_properties (H5TEST-clear-external_env-objects PROPERTIES FIXTURES_SETUP external_env_clear_objects)
+if (HDF5_ENABLE_USING_MEMCHECKER)
+  add_test (NAME H5TEST-external_env COMMAND $<TARGET_FILE:external_env>)
+else ()
+  add_test (NAME H5TEST-external_env COMMAND "${CMAKE_COMMAND}"
+        -D "TEST_PROGRAM=$<TARGET_FILE:external_env>"
+        -D "TEST_ARGS:STRING="
+        -D "TEST_ENV_VAR:STRING=HDF5_EXTFILE_PREFIX"
+        -D "TEST_ENV_VALUE:STRING=\${ORIGIN}"
+        -D "TEST_EXPECT=0"
+        -D "TEST_SKIP_COMPARE=TRUE"
+        -D "TEST_OUTPUT=external_env.txt"
+        #-D "TEST_REFERENCE=external_env.out"
+        -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/H5TEST"
+        -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+  )
+endif ()
+set_tests_properties (H5TEST-external_env PROPERTIES
+    FIXTURES_REQUIRED external_env_clear_objects
+    ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST;HDF5TestExpress=${HDF_TEST_EXPRESS}"
+    WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
+)
+
+#-- Adding test for vds_env
+add_test (
+    NAME H5TEST-clear-vds_env-objects
+    COMMAND    ${CMAKE_COMMAND}
+        -E remove
+        vds_virt_0.h5
+        vds_virt_3.h5
+        vds_src_2.h5
+        vds_env.txt
+        vds_env.out
+    WORKING_DIRECTORY
+        ${HDF5_TEST_BINARY_DIR}/H5TEST
+)
+set_tests_properties (H5TEST-clear-vds_env-objects PROPERTIES FIXTURES_SETUP vds_env_clear_objects)
+if (HDF5_ENABLE_USING_MEMCHECKER)
+  add_test (NAME H5TEST-vds_env COMMAND $<TARGET_FILE:vds_env>)
+else ()
+  add_test (NAME H5TEST-vds_env COMMAND "${CMAKE_COMMAND}"
+        -D "TEST_PROGRAM=$<TARGET_FILE:vds_env>"
+        -D "TEST_ARGS:STRING="
+        -D "TEST_ENV_VAR:STRING=HDF5_VDS_PREFIX"
+        -D "TEST_ENV_VALUE:STRING=\${ORIGIN}/tmp"
+        -D "TEST_EXPECT=0"
+        -D "TEST_SKIP_COMPARE=TRUE"
+        -D "TEST_OUTPUT=vds_env.txt"
+        #-D "TEST_REFERENCE=vds_env.out"
+        -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/H5TEST"
+        -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+  )
+endif ()
+set_tests_properties (H5TEST-vds_env PROPERTIES
+    FIXTURES_REQUIRED vds_env_clear_objects
+    ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST;HDF5TestExpress=${HDF_TEST_EXPRESS}"
+    WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
+)
 
 if (BUILD_SHARED_LIBS)
   #-- Adding test for cache
@@ -922,20 +1001,24 @@ add_test (NAME H5TEST-clear-links_env-objects
         ${HDF5_TEST_BINARY_DIR}/H5TEST
 )
 set_tests_properties (H5TEST-clear-links_env-objects PROPERTIES FIXTURES_SETUP links_env_clear_objects)
-add_test (NAME H5TEST-links_env COMMAND "${CMAKE_COMMAND}"
-    -D "TEST_PROGRAM=$<TARGET_FILE:links_env>"
-    -D "TEST_ARGS:STRING="
-    -D "TEST_ENV_VAR:STRING=HDF5_EXT_PREFIX"
-    -D "TEST_ENV_VALUE:STRING=.:tmp"
-    -D "TEST_EXPECT=0"
-    -D "TEST_OUTPUT=links_env.txt"
-    -D "TEST_REFERENCE=links_env.out"
-    -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/H5TEST"
-    -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
-)
+if (HDF5_ENABLE_USING_MEMCHECKER)
+  add_test (NAME H5TEST-links_env COMMAND $<TARGET_FILE:links_env>)
+else ()
+  add_test (NAME H5TEST-links_env COMMAND "${CMAKE_COMMAND}"
+      -D "TEST_PROGRAM=$<TARGET_FILE:links_env>"
+      -D "TEST_ARGS:STRING="
+      #-D "TEST_ENV_VAR:STRING=HDF5_EXT_PREFIX"
+      #-D "TEST_ENV_VALUE:STRING=.:tmp"
+      -D "TEST_EXPECT=0"
+      -D "TEST_OUTPUT=links_env.txt"
+      -D "TEST_REFERENCE=links_env.out"
+      -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/H5TEST"
+      -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+  )
+endif ()
 set_tests_properties (H5TEST-links_env PROPERTIES
     FIXTURES_REQUIRED links_env_clear_objects
-    ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST"
+    ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST;HDF5_EXT_PREFIX=.:tmp"
     WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
 )
 
@@ -1027,8 +1110,8 @@ if (BUILD_SHARED_LIBS)
   add_test (NAME H5TEST-shared-links_env COMMAND "${CMAKE_COMMAND}"
       -D "TEST_PROGRAM=$<TARGET_FILE:links_env-shared>"
       -D "TEST_ARGS:STRING="
-      -D "TEST_ENV_VAR:STRING=HDF5_EXT_PREFIX"
-      -D "TEST_ENV_VALUE:STRING=.:tmp"
+      #-D "TEST_ENV_VAR:STRING=HDF5_EXT_PREFIX"
+      #-D "TEST_ENV_VALUE:STRING=.:tmp"
       -D "TEST_EXPECT=0"
       -D "TEST_OUTPUT=links_env.txt"
       -D "TEST_REFERENCE=links_env.out"
@@ -1037,6 +1120,67 @@ if (BUILD_SHARED_LIBS)
   )
   set_tests_properties (H5TEST-shared-links_env PROPERTIES
       FIXTURES_REQUIRED shared_links_env_clear_objects
+      ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST-shared;HDF5_EXT_PREFIX=.:tmp"
+      WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST-shared
+  )
+
+  #-- Adding test for external_env
+  add_test (NAME H5TEST-shared-clear-external_env-objects
+      COMMAND    ${CMAKE_COMMAND}
+          -E remove
+          extern_1r.raw
+          extern_2r.raw
+          extern_3r.raw
+          extern_4r.raw
+          extern_1w.raw
+          extern_2w.raw
+          extern_3w.raw
+          extern_4w.raw
+      WORKING_DIRECTORY
+          ${HDF5_TEST_BINARY_DIR}/H5TEST-shared
+  )
+  set_tests_properties (H5TEST-shared-clear-external_env-objects PROPERTIES FIXTURES_SETUP shared_external_env_clear_objects)
+  add_test (NAME H5TEST-shared-external_env COMMAND "${CMAKE_COMMAND}"
+      -D "TEST_PROGRAM=$<TARGET_FILE:external_env-shared>"
+      -D "TEST_ARGS:STRING="
+      -D "TEST_ENV_VAR:STRING=HDF5_EXTFILE_PREFIX"
+      -D "TEST_ENV_VALUE:STRING=\${ORIGIN}"
+      -D "TEST_EXPECT=0"
+      -D "TEST_OUTPUT=external_env.txt"
+      -D "TEST_REFERENCE=external_env.out"
+      -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/H5TEST-shared"
+      -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+  )
+  set_tests_properties (H5TEST-shared-external_env PROPERTIES
+      FIXTURES_REQUIRED shared_external_env_clear_objects
+      ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST-shared"
+      WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST-shared
+  )
+
+  #-- Adding test for vds_env
+  add_test (NAME H5TEST-shared-clear-vds_env-objects
+      COMMAND    ${CMAKE_COMMAND}
+          -E remove
+          vds_virt_0.h5
+          vds_virt_3.h5
+          vds_src_2.h5
+      WORKING_DIRECTORY
+          ${HDF5_TEST_BINARY_DIR}/H5TEST-shared
+  )
+  set_tests_properties (H5TEST-shared-clear-vds_env-objects PROPERTIES FIXTURES_SETUP shared_vds_env_clear_objects)
+  add_test (NAME H5TEST-shared-vds_env COMMAND "${CMAKE_COMMAND}"
+      -D "TEST_PROGRAM=$<TARGET_FILE:vds_env-shared>"
+      -D "TEST_ARGS:STRING="
+      -D "TEST_ENV_VAR:STRING=HDF5_VDS_PREFIX"
+      -D "TEST_ENV_VALUE:STRING=\${ORIGIN}/tmp"
+      -D "TEST_EXPECT=0"
+      -D "TEST_OUTPUT=vds_env.txt"
+      -D "TEST_REFERENCE=vds_env.out"
+      -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/H5TEST-shared"
+      -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+  )
+  set_tests_properties (H5TEST-shared-vds_env PROPERTIES
+      FIXTURES_REQUIRED shared_vds_env_clear_objects
       ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST-shared"
       WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST-shared
   )
@@ -1149,8 +1293,8 @@ endif ()
 ##############################################################################
 ##############################################################################
 
-if (HDF5_TEST_VOL)
-  include (CMakeVOLTests.cmake)
+if (HDF5_TEST_PASSTHROUGH_VOL)
+  include (CMakePassthroughVOLTests.cmake)
 endif ()
 
 ##############################################################################

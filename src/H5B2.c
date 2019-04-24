@@ -662,7 +662,7 @@ H5B2_find(H5B2_t *bt2, void *udata, H5B2_found_t op, void *op_data)
                         if(hdr->min_native_rec == NULL)
                             if(NULL == (hdr->min_native_rec = H5MM_malloc(hdr->cls->nrec_size)))
                                 HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, FAIL, "memory allocation failed for v2 B-tree min record info")
-                        HDmemcpy(hdr->min_native_rec, H5B2_LEAF_NREC(leaf, hdr, idx), hdr->cls->nrec_size);
+                        H5MM_memcpy(hdr->min_native_rec, H5B2_LEAF_NREC(leaf, hdr, idx), hdr->cls->nrec_size);
                     } /* end if */
                 } /* end if */
                 if(idx == (unsigned)(leaf->nrec - 1)) {
@@ -670,7 +670,7 @@ H5B2_find(H5B2_t *bt2, void *udata, H5B2_found_t op, void *op_data)
                         if(hdr->max_native_rec == NULL)
                             if(NULL == (hdr->max_native_rec = H5MM_malloc(hdr->cls->nrec_size)))
                                 HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, FAIL, "memory allocation failed for v2 B-tree max record info")
-                        HDmemcpy(hdr->max_native_rec, H5B2_LEAF_NREC(leaf, hdr, idx), hdr->cls->nrec_size);
+                        H5MM_memcpy(hdr->max_native_rec, H5B2_LEAF_NREC(leaf, hdr, idx), hdr->cls->nrec_size);
                     } /* end if */
                 } /* end if */
             } /* end if */
@@ -1343,7 +1343,7 @@ H5B2_modify(H5B2_t *bt2, void *udata, H5B2_modify_t op, void *op_data)
                         if(hdr->min_native_rec == NULL)
                             if(NULL == (hdr->min_native_rec = H5MM_malloc(hdr->cls->nrec_size)))
                                 HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, FAIL, "memory allocation failed for v2 B-tree min record info")
-                        HDmemcpy(hdr->min_native_rec, H5B2_LEAF_NREC(leaf, hdr, idx), hdr->cls->nrec_size);
+                        H5MM_memcpy(hdr->min_native_rec, H5B2_LEAF_NREC(leaf, hdr, idx), hdr->cls->nrec_size);
                     } /* end if */
                 } /* end if */
                 if(idx == (unsigned)(leaf->nrec - 1)) {
@@ -1351,7 +1351,7 @@ H5B2_modify(H5B2_t *bt2, void *udata, H5B2_modify_t op, void *op_data)
                         if(hdr->max_native_rec == NULL)
                             if(NULL == (hdr->max_native_rec = H5MM_malloc(hdr->cls->nrec_size)))
                                 HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, FAIL, "memory allocation failed for v2 B-tree max record info")
-                        HDmemcpy(hdr->max_native_rec, H5B2_LEAF_NREC(leaf, hdr, idx), hdr->cls->nrec_size);
+                        H5MM_memcpy(hdr->max_native_rec, H5B2_LEAF_NREC(leaf, hdr, idx), hdr->cls->nrec_size);
                     } /* end if */
                 } /* end if */
             } /* end if */

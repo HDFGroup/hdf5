@@ -24,6 +24,7 @@
 
 #include "H5ACpkg.h"
 #include "H5Cpkg.h"
+#include "H5CXprivate.h"
 #include "H5Fpkg.h"
 #include "H5Iprivate.h"
 #include "H5MFprivate.h"

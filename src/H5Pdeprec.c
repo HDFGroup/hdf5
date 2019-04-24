@@ -486,6 +486,54 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_version() */
 
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5Pencode1
+ PURPOSE
+    Routine to convert the property values in a property list into a binary buffer
+ USAGE
+    herr_t H5Pencode1(plist_id, buf, nalloc)
+        hid_t plist_id;         IN: Identifier to property list to encode
+        void *buf:              OUT: buffer to gold the encoded plist
+        size_t *nalloc;         IN/OUT: size of buffer needed to encode plist
+ RETURNS
+    Returns non-negative on success, negative on failure.
+ DESCRIPTION
+    Encodes a property list into a binary buffer. If the buffer is NULL, then
+    the call will set the size needed to encode the plist in nalloc. Otherwise
+    the routine will encode the plist in buf.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5Pencode1(hid_t plist_id, void *buf, size_t *nalloc)
+{
+    H5P_genplist_t  *plist;         /* Property list to query */
+    hid_t temp_fapl_id = H5P_DEFAULT;
+    herr_t ret_value = SUCCEED;          /* return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE3("e", "i*x*z", plist_id, buf, nalloc);
+
+    /* Check arguments. */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object_verify(plist_id, H5I_GENPROP_LST)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+
+    /* Verify access property list and set up collective metadata if appropriate */
+    if(H5CX_set_apl(&temp_fapl_id, H5P_CLS_FACC, H5I_INVALID_HID, TRUE) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID, "can't set access property list info")
+
+    /* Call the internal encode routine */
+    if((ret_value = H5P__encode(plist, TRUE, buf, nalloc)) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
+
+done:
+    FUNC_LEAVE_API(ret_value)
+}   /* H5Pencode1() */
+
 /*-------------------------------------------------------------------------
  * Function:	H5Pset_file_space
  *

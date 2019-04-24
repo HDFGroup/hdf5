@@ -23,9 +23,11 @@
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5CXprivate.h"    /* API Contexts         */
 #include "H5Fprivate.h"		/* Files				*/
 #include "H5FLprivate.h"	/* Free lists                           */
 #include "H5Iprivate.h"		/* IDs			  		*/
+#include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Oprivate.h"		/* Object headers		  	*/
 #include "H5Spkg.h"		/* Dataspaces 				*/
 
@@ -65,6 +67,7 @@ hbool_t H5_PKG_INIT_VAR = FALSE;
 const unsigned H5O_sdspace_ver_bounds[] = {
     H5O_SDSPACE_VERSION_1,      /* H5F_LIBVER_EARLIEST */
     H5O_SDSPACE_VERSION_2,      /* H5F_LIBVER_V18 */
+    H5O_SDSPACE_VERSION_2,      /* H5F_LIBVER_V110 */
     H5O_SDSPACE_VERSION_LATEST  /* H5F_LIBVER_LATEST */
 };
 
@@ -1359,7 +1362,7 @@ H5S_set_extent_simple(H5S_t *space, unsigned rank, const hsize_t *dims,
          * same as the dimension */
         space->extent.max = (hsize_t *)H5FL_ARR_MALLOC(hsize_t, (size_t)rank);
         if(max != NULL)
-            HDmemcpy(space->extent.max, max, sizeof(hsize_t) * rank);
+            H5MM_memcpy(space->extent.max, max, sizeof(hsize_t) * rank);
         else
             for(u = 0; u < space->extent.rank; u++)
                 space->extent.max[u] = dims[u];
@@ -1485,13 +1488,15 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Sencode
+ * Function:	H5Sencode2
  *
  * Purpose:	Given a dataspace ID, converts the object description
  *              (including selection) into binary in a buffer.
+ *          The selection will be encoded according to the file 
+ *          format setting in fapl.
  *
  * Return:	Success:	non-negative
- *		Failure:	negative
+ *          Failure: negative
  *
  * Programmer:	Raymond Lu
  *              slu@ncsa.uiuc.edu
@@ -1500,24 +1505,29 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Sencode(hid_t obj_id, void *buf, size_t *nalloc)
+H5Sencode2(hid_t obj_id, void *buf, size_t *nalloc, hid_t fapl_id)
 {
     H5S_t       *dspace;
     herr_t      ret_value=SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "i*x*z", obj_id, buf, nalloc);
+    H5TRACE4("e", "i*x*zi", obj_id, buf, nalloc, fapl_id);
 
     /* Check argument and retrieve object */
     if(NULL == (dspace = (H5S_t *)H5I_object_verify(obj_id, H5I_DATASPACE)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
+         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
+
+     /* Verify access property list and set up collective metadata if appropriate */
+    if(H5CX_set_apl(&fapl_id, H5P_CLS_FACC, H5I_INVALID_HID, TRUE) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID, "can't set access property list info")
+
 
     if(H5S_encode(dspace, (unsigned char **)&buf, nalloc) < 0)
-	HGOTO_ERROR(H5E_DATASPACE, H5E_CANTENCODE, FAIL, "can't encode dataspace")
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTENCODE, FAIL, "can't encode dataspace")
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5Sencode() */
+} /* H5Sencode2() */
 
 
 /*-------------------------------------------------------------------------

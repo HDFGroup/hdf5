@@ -21,6 +21,7 @@
 /* Private headers needed by this file */
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5MMprivate.h"	/* Memory management			*/
 
 /* Vector-Vector sequence operation callback */
 typedef herr_t (*H5VM_opvv_func_t)(hsize_t dst_off, hsize_t src_off,
@@ -41,7 +42,7 @@ typedef herr_t (*H5VM_opvv_func_t)(hsize_t dst_off, hsize_t src_off,
 /* Other functions */
 #define H5VM_vector_cpy(N,DST,SRC) {                                           \
     HDassert(sizeof(*(DST))==sizeof(*(SRC)));				                  \
-    if (SRC) HDmemcpy (DST, SRC, (N)*sizeof(*(DST)));                         \
+    if (SRC) H5MM_memcpy (DST, SRC, (N)*sizeof(*(DST)));                         \
     else HDmemset (DST, 0, (N)*sizeof(*(DST)));                               \
 }
 

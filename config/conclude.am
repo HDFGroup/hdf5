@@ -282,8 +282,10 @@ check-vfd: $(LIB) $(PROGS) $(chk_TESTS)
 	    fi;                                                               \
 	done
 
-# Run test with different Virtual Object Layer Connector
-check-vol: $(LIB) $(PROGS) $(chk_TESTS)
+# Run test with different passthrough Virtual Object Layer Connector
+# NOTE: Will only succeed with passthrough VOL connectors that use
+#       the native VOL connector as the terminal connector.
+check-passthrough-vol: $(LIB) $(PROGS) $(chk_TESTS)
 	@for vol in $(VOL_LIST) dummy; do                                     \
 	    if test "$$vol" != dummy; then                                    \
 	        echo "============================";                          \

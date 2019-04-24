@@ -513,6 +513,7 @@ H5FL_DEFINE(H5T_shared_t);
 const unsigned H5O_dtype_ver_bounds[] = {
     H5O_DTYPE_VERSION_1,        /* H5F_LIBVER_EARLIEST */
     H5O_DTYPE_VERSION_3,        /* H5F_LIBVER_V18 */
+    H5O_DTYPE_VERSION_3,        /* H5F_LIBVER_V110 */
     H5O_DTYPE_VERSION_LATEST    /* H5F_LIBVER_LATEST */
 };
 
@@ -3338,7 +3339,7 @@ H5T_copy(H5T_t *old_dt, H5T_copy_t method)
                         if (NULL == new_dt->shared->u.compnd.memb)
                             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
-                        HDmemcpy(new_dt->shared->u.compnd.memb, old_dt->shared->u.compnd.memb,
+                        H5MM_memcpy(new_dt->shared->u.compnd.memb, old_dt->shared->u.compnd.memb,
                                 new_dt->shared->u.compnd.nmembs * sizeof(H5T_cmemb_t));
                     } /* end if */
 
@@ -3404,7 +3405,7 @@ H5T_copy(H5T_t *old_dt, H5T_copy_t method)
                         (uint8_t *)H5MM_malloc(new_dt->shared->u.enumer.nalloc * new_dt->shared->size);
                 if(NULL == new_dt->shared->u.enumer.value)
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
-                HDmemcpy(new_dt->shared->u.enumer.value, old_dt->shared->u.enumer.value,
+                H5MM_memcpy(new_dt->shared->u.enumer.value, old_dt->shared->u.enumer.value,
                         new_dt->shared->u.enumer.nmembs * new_dt->shared->size);
                 for(i = 0; i < new_dt->shared->u.enumer.nmembs; i++) {
                     s = old_dt->shared->u.enumer.name[i];

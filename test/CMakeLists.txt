@@ -14,12 +14,14 @@ set (TEST_LIB_SOURCES
     ${HDF5_TEST_SOURCE_DIR}/h5test.c
     ${HDF5_TEST_SOURCE_DIR}/testframe.c
     ${HDF5_TEST_SOURCE_DIR}/cache_common.c
+    ${HDF5_TEST_SOURCE_DIR}/external_common.c
     ${HDF5_TEST_SOURCE_DIR}/swmr_common.c
 )
 
 set (TEST_LIB_HEADERS
     ${HDF5_TEST_SOURCE_DIR}/h5test.h
     ${HDF5_TEST_SOURCE_DIR}/cache_common.h
+    ${HDF5_TEST_SOURCE_DIR}/external_common.h
     ${HDF5_TEST_SOURCE_DIR}/swmr_common.h
 )
 
@@ -236,6 +238,7 @@ set (H5_TESTS
     extend
     direct_chunk # compression lib link
     external
+    external_env
     efc
     objcopy
     links
@@ -263,6 +266,7 @@ set (H5_TESTS
     freespace
     mf
     vds
+    vds_env
     file_image
     unregister
     cache_logging
@@ -352,12 +356,17 @@ add_executable (ttsafe ${ttsafe_SOURCES})
 target_include_directories(ttsafe PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
 TARGET_C_PROPERTIES (ttsafe STATIC)
 target_link_libraries (ttsafe PRIVATE ${HDF5_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
+if (NOT WIN32)
+  target_link_libraries (ttsafe
+    PRIVATE $<$<BOOL:${HDF5_ENABLE_THREADSAFE}>:Threads::Threads>
+  )
+endif ()
 set_target_properties (ttsafe PROPERTIES FOLDER test)
 if (BUILD_SHARED_LIBS)
   add_executable (ttsafe-shared ${ttsafe_SOURCES})
   target_include_directories(ttsafe-shared PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
   TARGET_C_PROPERTIES (ttsafe-shared SHARED)
-  target_link_libraries (ttsafe-shared PRIVATE ${HDF5_TEST_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
+  target_link_libraries (ttsafe-shared PRIVATE ${HDF5_TEST_LIBSH_TARGET} ${HDF5_LIBSH_TARGET} $<$<BOOL:${HDF5_ENABLE_THREADSAFE}>:Threads::Threads>)
   set_target_properties (ttsafe-shared PROPERTIES FOLDER test)
 endif ()
 

@@ -40,7 +40,9 @@ LS='ls'
 AWK='awk'
 
 # Skip plugin module to test missing filter
-ENVCMD="env HDF5_PLUGIN_PRELOAD=::"
+# Also reset the VOL connector to only use the native connector, because of the
+#       error stack checking.   QAK - 2019/03/09
+ENVCMD="env HDF5_PLUGIN_PRELOAD=:: HDF5_VOL_CONNECTOR=native"
 
 WORDS_BIGENDIAN="@WORDS_BIGENDIAN@"
 
@@ -754,7 +756,7 @@ TOOLTEST4() {
     TESTING $DUMPER $@
     (
       cd $TESTDIR
-      $RUNSERIAL $DUMPER_BIN "$@"
+      $ENVCMD $RUNSERIAL $DUMPER_BIN "$@"
     ) >$actual 2>$actual_err
 
     # save actual and actual_err in case they are needed later.

@@ -114,6 +114,7 @@ typedef enum H5VL_file_get_t {
     H5VL_FILE_GET_FAPL,                     /* file access property list	*/
     H5VL_FILE_GET_FCPL,	                    /* file creation property list	*/
     H5VL_FILE_GET_INTENT,	            /* file intent           		*/
+    H5VL_FILE_GET_FILENO,	            /* file number           		*/
     H5VL_FILE_GET_NAME,	                    /* file name             		*/
     H5VL_FILE_GET_OBJ_COUNT,	            /* object count in file	       	*/
     H5VL_FILE_GET_OBJ_IDS	            /* object ids in file     		*/
@@ -252,6 +253,7 @@ typedef struct H5VL_wrap_class_t {
     void * (*get_object)(const void *obj);          /* Callback to retrieve underlying object       */
     herr_t (*get_wrap_ctx)(const void *obj, void **wrap_ctx); /* Callback to retrieve the object wrapping context for the connector */
     void * (*wrap_object)(void *obj, H5I_type_t obj_type, void *wrap_ctx); /* Callback to wrap a library object */
+    void * (*unwrap_object)(void *obj);             /* Callback to unwrap a library object */
     herr_t (*free_wrap_ctx)(void *wrap_ctx);        /* Callback to release the object wrapping context for the connector */
 } H5VL_wrap_class_t;
 
@@ -450,6 +452,10 @@ H5_DLL herr_t H5VLunregister_connector(hid_t connector_id);
 H5_DLL herr_t H5VLcmp_connector_cls(int *cmp, hid_t connector_id1, hid_t connector_id2);
 H5_DLL hid_t H5VLwrap_register(void *obj, H5I_type_t type);
 H5_DLL void *H5VLobject(hid_t obj_id);
+H5_DLL herr_t H5VLretrieve_lib_state(void **state);
+H5_DLL herr_t H5VLrestore_lib_state(const void *state);
+H5_DLL herr_t H5VLreset_lib_state(void);
+H5_DLL herr_t H5VLfree_lib_state(void *state);
 
 
 /* Public wrappers for generic callbacks */
@@ -467,6 +473,7 @@ H5_DLL void *H5VLget_object(void *obj, hid_t connector_id);
 H5_DLL herr_t H5VLget_wrap_ctx(void *obj, hid_t connector_id, void **wrap_ctx);
 H5_DLL void *H5VLwrap_object(void *obj, H5I_type_t obj_type, hid_t connector_id,
     void *wrap_ctx);
+H5_DLL void *H5VLunwrap_object(void *obj, hid_t connector_id);
 H5_DLL herr_t H5VLfree_wrap_ctx(void *wrap_ctx, hid_t connector_id);
 
 /* Public wrappers for attribute callbacks */

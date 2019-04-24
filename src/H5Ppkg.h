@@ -151,6 +151,10 @@ H5_DLL herr_t H5P__register(H5P_genclass_t **pclass, const char *name, size_t si
     H5P_prp_close_func_t prp_close);
 H5_DLL herr_t H5P__add_prop(H5SL_t *props, H5P_genprop_t *prop);
 H5_DLL herr_t H5P__access_class(H5P_genclass_t *pclass, H5P_class_mod_t mod);
+H5_DLL herr_t H5P__class_get(const H5P_genclass_t *pclass, const char *name,
+    void *value);
+H5_DLL herr_t H5P__class_set(const H5P_genclass_t *pclass, const char *name,
+    const void *value);
 H5_DLL htri_t H5P__exist_pclass(H5P_genclass_t *pclass, const char *name);
 H5_DLL herr_t H5P__get_size_plist(const H5P_genplist_t *plist, const char *name,
     size_t *size);

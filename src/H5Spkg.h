@@ -37,8 +37,35 @@
 #define H5S_VALID_PERM	0x02
 
 /* Flags for serialization of selections */
-#define H5S_SELECT_FLAG_UNLIM   0x01
-#define H5S_SELECT_FLAG_BITS    (H5S_SELECT_FLAG_UNLIM)
+#define H5S_HYPER_REGULAR       0x01
+#define H5S_SELECT_FLAG_BITS    (H5S_HYPER_REGULAR)
+
+/* Versions for H5S_SEL_HYPER selection info */
+#define H5S_HYPER_VERSION_1     1
+#define H5S_HYPER_VERSION_2     2
+#define H5S_HYPER_VERSION_3     3
+
+/* Versions for H5S_SEL_POINTS selection info */
+#define H5S_POINT_VERSION_1     1
+#define H5S_POINT_VERSION_2     2
+
+/* Versions for H5S_SEL_NONE selection info */
+#define H5S_NONE_VERSION_1      1
+
+/* Versions for H5S_SEL_ALL selection info */
+#define H5S_ALL_VERSION_1       1
+
+/* Encoded size of selection info for H5S_SEL_POINTS/H5S_SEL_HYPER */
+#define H5S_SELECT_INFO_ENC_SIZE_2 0x02        /* 2 bytes: 16 bits */
+#define H5S_SELECT_INFO_ENC_SIZE_4 0x04        /* 4 bytes: 32 bits */
+#define H5S_SELECT_INFO_ENC_SIZE_8 0x08        /* 8 bytes: 64 bits */
+#define H5S_SELECT_INFO_ENC_SIZE_BITS   ( H5S_SELECT_INFO_ENC_SIZE_2 |    \
+                                          H5S_SELECT_INFO_ENC_SIZE_4 |    \
+                                          H5S_SELECT_INFO_ENC_SIZE_8 )
+
+#define H5S_UINT16_MAX      0x0000FFFF  /* 2^16 - 1 = 65,535                            */
+#define H5S_UINT32_MAX      0xFFFFFFFF  /* 2^32 - 1 = 4,294,967,295                     */
+#define H5S_UINT64_MAX      ((hsize_t)(-1L))   /* 2^64 - 1 = 18,446,744,073,709,551,615 */
 
 /* Length of stack-allocated sequences for "project intersect" routines */
 #define H5S_PROJECT_INTERSECT_NSEQS 256
@@ -148,8 +175,7 @@ typedef hssize_t (*H5S_sel_serial_size_func_t)(const H5S_t *space);
 /* Method to store current selection in "serialized" form (a byte sequence suitable for storing on disk) */
 typedef herr_t (*H5S_sel_serialize_func_t)(const H5S_t *space, uint8_t **p);
 /* Method to create selection from "serialized" form (a byte sequence suitable for storing on disk) */
-typedef herr_t (*H5S_sel_deserialize_func_t)(H5S_t *space, uint32_t version, uint8_t flags,
-    const uint8_t **p);
+typedef herr_t (*H5S_sel_deserialize_func_t)(H5S_t **space, const uint8_t **p);
 /* Method to determine smallest n-D bounding box containing the current selection */
 typedef herr_t (*H5S_sel_bounds_func_t)(const H5S_t *space, hsize_t *start, hsize_t *end);
 /* Method to determine linear offset of initial element in selection within dataspace */

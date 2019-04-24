@@ -44,12 +44,6 @@
  *      is interpreted according to the driver.  See
  *      h5_get_vfd_fapl() for details.
  *
- * HDF5_VOL_CONNECTOR:    This string describes what VOL connector to
- *      use for HDF5 file access.  The first word in the
- *      value is the name of the connector and subsequent data
- *      is interpreted according to the connector.  See
- *      h5_get_vol_fapl() for details.
- *
  * HDF5_LIBVER_BOUNDS:    This string describes what library version bounds to
  *      use for HDF5 file access.  See h5_get_libver_fapl() for details.
  *
@@ -105,6 +99,17 @@ static const char *multi_letters = "msbrglo";
 
 /* The # of seconds to wait for the message file--used by h5_wait_message() */
 #define MESSAGE_TIMEOUT         300             /* Timeout in seconds */
+
+/*  The strings that correspond to library version bounds H5F_libver_t in H5Fpublic.h */
+/*  This is used by h5_get_version_string() */
+const char *LIBVER_NAMES[] = {
+    "earliest", /* H5F_LIBVER_EARLIEST = 0  */
+    "v18",      /* H5F_LIBVER_V18 = 1       */
+    "v110",     /* H5F_LIBVER_V110 = 2      */
+    "latest",   /* H5F_LIBVER_V112 = 3      */
+    NULL
+};
+
 
 /* Previous error reporting function */
 static H5E_auto2_t err_func = NULL;
@@ -785,10 +790,6 @@ h5_fileaccess(void)
     if(h5_get_vfd_fapl(fapl_id) < 0)
         goto error;
 
-    /* Next, try to set up a VOL connector */
-    if(h5_get_vol_fapl(fapl_id) < 0)
-        goto error;
- 
     /* Finally, check for libver bounds */
     if(h5_get_libver_fapl(fapl_id) < 0)
         goto error;
@@ -829,10 +830,6 @@ h5_fileaccess_flags(unsigned flags)
     if((flags & H5_FILEACCESS_VFD) && h5_get_vfd_fapl(fapl_id) < 0)
         goto error;
 
-    /* Next, try to set up a VOL connector */
-    if((flags & H5_FILEACCESS_VOL) && h5_get_vol_fapl(fapl_id) < 0)
-        goto error;
- 
     /* Finally, check for libver bounds */
     if((flags & H5_FILEACCESS_LIBVER) && h5_get_libver_fapl(fapl_id) < 0)
         goto error;
@@ -1043,110 +1040,6 @@ done:
 error:
     return -1;
 } /* end h5_get_libver_fapl() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    h5_get_vol_fapl
- *
- * Purpose:     Returns a file access property list which is the default
- *              fapl but with a VOL connector set according to the constant
- *              or environment variable HDF5_VOL_CONNECTOR.
- *
- * Return:      Success:    0
- *              Failure:    -1
- *
- * Programmer:  Jordan Henderson
- *              November 2018
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-h5_get_vol_fapl(hid_t fapl)
-{
-    const char *env = NULL;
-    const char *tok = NULL;
-    char        *lasts = NULL;  /* Context pointer for strtok_r() call */
-    htri_t      connector_is_registered;
-    char        buf[1024];              /* Buffer for tokenizing HDF5_VOL_CONNECTOR */
-    void       *vol_info = NULL;        /* VOL connector info */
-    hid_t       connector_id = -1;
-
-    /* Get the environment variable, if it exists */
-    env = HDgetenv("HDF5_VOL_CONNECTOR");
-#ifdef HDF5_VOL_CONNECTOR
-    /* Use the environment variable, then the compile-time constant */
-    if(!env)
-        env = HDF5_VOL_CONNECTOR;
-#endif
-
-    /* If the environment variable was not set, just return. */
-    if(!env || !*env)
-        goto done;
-
-    /* Get the first 'word' of the environment variable.
-     * If it's nothing (environment variable was whitespace) just return.
-     */
-    HDstrncpy(buf, env, sizeof(buf));
-    buf[sizeof(buf) - 1] = '\0';
-    if(NULL == (tok = HDstrtok_r(buf, " \t\n\r", &lasts)))
-        goto done;
-
-    /* First, check to see if the connector is already registered */
-    if((connector_is_registered = H5VLis_connector_registered(tok)) < 0)
-        goto done;
-    else if(connector_is_registered) {
-        /* Retrieve the ID of the already-registered VOL connector */
-        if((connector_id = H5VLget_connector_id(tok)) < 0)
-            goto error;
-    } /* end else-if */
-    else {
-        /* Check for VOL connectors that ship with the library */
-        if(!HDstrcmp(tok, "native")) {
-            connector_id = H5VL_NATIVE;
-            if(H5Iinc_ref(connector_id) < 0)
-                goto error;
-        } else if(!HDstrcmp(tok, "pass_through")) {
-            connector_id = H5VL_PASSTHRU;
-            if(H5Iinc_ref(connector_id) < 0)
-                goto error;
-        } else {
-            /* Register the VOL connector */
-            /* (NOTE: No provisions for vipl_id currently) */
-            if((connector_id = H5VLregister_connector_by_name(tok, H5P_DEFAULT)) < 0)
-                goto error;
-        } /* end else */
-    } /* end else */
-
-    /* Was there any connector info specified in the environment variable? */
-    if(NULL != (tok = HDstrtok_r(NULL, " \t\n\r", &lasts)))
-        if(H5VLconnector_str_to_info(tok, connector_id, &vol_info) < 0)
-            goto error;
-
-    /* Set the VOL connector in the FAPL */
-    if(H5Pset_vol(fapl, connector_id, vol_info) < 0)
-        goto error;
-
-    /* Release VOL connector info, if there was any */
-    if(vol_info)
-        if(H5VLfree_connector_info(connector_id, vol_info) < 0)
-            goto error;
-
-    /* Close the connector ID */
-    if(connector_id >= 0)
-        if(H5VLunregister_connector(connector_id) < 0)
-            goto error;
-
-done:
-    return 0;
-
-error:
-    if(vol_info)
-        H5VLfree_connector_info(connector_id, vol_info);
-    if(connector_id >= 0)
-        H5VLunregister_connector(connector_id);
-
-    return -1;
-} /* end h5_get_vol_fapl() */
 
 
 /*-------------------------------------------------------------------------
@@ -2058,3 +1951,17 @@ error:
     return NULL;
 } /* h5_get_dummy_vol_class */
 
+/*-------------------------------------------------------------------------
+ * Function:    h5_get_version_string
+ *
+ * Purpose:     Get the string that corresponds to the libvery version bound.
+ *
+ * Return:      The string
+ * 
+ *-------------------------------------------------------------------------
+ */
+char *
+h5_get_version_string(H5F_libver_t libver)
+{
+    return(LIBVER_NAMES[libver]);
+} /* end of h5_get_version_string */

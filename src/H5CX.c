@@ -64,17 +64,22 @@
 #define H5CX_get_my_context() (&H5CX_head_g)
 #endif /* H5_HAVE_THREADSAFE */
 
+/* Common macro for the retrieving the pointer to a property list */
+#define H5CX_RETRIEVE_PLIST(PL, FAILVAL)                                      \
+    /* Check if the property list is already available */                     \
+    if(NULL == (*head)->ctx.PL)                                               \
+        /* Get the property list pointer */                                   \
+        if(NULL == ((*head)->ctx.PL = (H5P_genplist_t *)H5I_object((*head)->ctx.H5_GLUE(PL,_id)))) \
+            HGOTO_ERROR(H5E_CONTEXT, H5E_BADTYPE, (FAILVAL), "can't get property list")
+
 /* Common macro for the duplicated code to retrieve properties from a property list */
 #define H5CX_RETRIEVE_PROP_COMMON(PL, DEF_PL, PROP_NAME, PROP_FIELD)          \
     /* Check for default property list */                                     \
     if((*head)->ctx.H5_GLUE(PL,_id) == (DEF_PL))                              \
-        HDmemcpy(&(*head)->ctx.PROP_FIELD, &H5_GLUE3(H5CX_def_,PL,_cache).PROP_FIELD, sizeof(H5_GLUE3(H5CX_def_,PL,_cache).PROP_FIELD)); \
+        H5MM_memcpy(&(*head)->ctx.PROP_FIELD, &H5_GLUE3(H5CX_def_,PL,_cache).PROP_FIELD, sizeof(H5_GLUE3(H5CX_def_,PL,_cache).PROP_FIELD)); \
     else {                                                                    \
-        /* Check if the property list is already available */                 \
-        if(NULL == (*head)->ctx.PL)                                           \
-            /* Get the dataset transfer property list pointer */              \
-            if(NULL == ((*head)->ctx.PL = (H5P_genplist_t *)H5I_object((*head)->ctx.H5_GLUE(PL,_id)))) \
-                HGOTO_ERROR(H5E_CONTEXT, H5E_BADTYPE, FAIL, "can't get default dataset transfer property list") \
+        /* Retrieve the property list */                                      \
+        H5CX_RETRIEVE_PLIST(PL, FAIL)                                         \
                                                                               \
         /* Get the property */                                                \
         if(H5P_get((*head)->ctx.PL, (PROP_NAME), &(*head)->ctx.PROP_FIELD) < 0) \
@@ -108,11 +113,8 @@
                                                                               \
     /* Check if property exists in DXPL */                                    \
     if(!(*head)->ctx.H5_GLUE(PROP_FIELD,_set)) {                              \
-        /* Check if the property list is already available */                 \
-        if(NULL == (*head)->ctx.dxpl)                                         \
-            /* Get the dataset transfer property list pointer */              \
-            if(NULL == ((*head)->ctx.dxpl = (H5P_genplist_t *)H5I_object((*head)->ctx.dxpl_id))) \
-                HGOTO_ERROR(H5E_CONTEXT, H5E_BADTYPE, FAIL, "can't get default dataset transfer property list") \
+        /* Retrieve the dataset transfer property list */                     \
+        H5CX_RETRIEVE_PLIST(dxpl, FAIL)                                       \
                                                                               \
         if((check_prop = H5P_exist_plist((*head)->ctx.dxpl, PROP_NAME)) < 0)  \
             HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "error checking for property") \
@@ -129,15 +131,12 @@
 /* Macro for the duplicated code to test and set properties for a property list */
 #define H5CX_SET_PROP(PROP_NAME, PROP_FIELD)                                  \
     if((*head)->ctx.H5_GLUE(PROP_FIELD,_set)) {                               \
-        /* Check if the property list is already available */                 \
-        if(NULL == (*head)->ctx.dxpl)                                         \
-            /* Get the dataset transfer property list pointer */              \
-            if(NULL == ((*head)->ctx.dxpl = (H5P_genplist_t *)H5I_object((*head)->ctx.dxpl_id))) \
-                HGOTO_ERROR(H5E_CONTEXT, H5E_BADTYPE, NULL, "can't get default dataset transfer property list") \
+        /* Retrieve the dataset transfer property list */                     \
+        H5CX_RETRIEVE_PLIST(dxpl, NULL)                                       \
                                                                               \
-        /* Set the chunk filter mask property */                              \
+        /* Set the property */                              		      \
         if(H5P_set((*head)->ctx.dxpl, PROP_NAME, &(*head)->ctx.PROP_FIELD) < 0) \
-            HGOTO_ERROR(H5E_CONTEXT, H5E_CANTSET, NULL, "error setting filter mask xfer property") \
+            HGOTO_ERROR(H5E_CONTEXT, H5E_CANTSET, NULL, "error setting data xfer property") \
     } /* end if */
 #endif /* H5_HAVE_PARALLEL */
 
@@ -175,7 +174,7 @@
  *      corresponding property in the property list to be set when the API
  *      context is popped, when returning from the API routine.  Note that the
  *      naming of these fields, <foo> and <foo>_set, is important for the
-*       H5CX_TEST_SET_PROP and H5CX_SET_PROP macros to work properly.
+ *      H5CX_TEST_SET_PROP and H5CX_SET_PROP macros to work properly.
  */
 typedef struct H5CX_t {
     /* DXPL */
@@ -189,6 +188,14 @@ typedef struct H5CX_t {
     /* DCPL */
     hid_t dcpl_id;              /* DCPL ID for API operation */
     H5P_genplist_t *dcpl;       /* Dataset Creation Property List */
+
+    /* DAPL */
+    hid_t dapl_id;              /* DAPL ID for API operation */
+    H5P_genplist_t *dapl;       /* Dataset Access Property List */
+
+    /* FAPL */
+    hid_t fapl_id;              /* FAPL ID for API operation */
+    H5P_genplist_t *fapl;       /* File Access Property List */
 
     /* Internal: Object tagging info */
     haddr_t tag;                /* Current object's tag (ohdr chunk #0 address) */
@@ -276,8 +283,20 @@ typedef struct H5CX_t {
     hbool_t nlinks_valid;       /* Whether number of soft / UD links to traverse is valid */
 
     /* Cached DCPL properties */
-    hbool_t do_min_dset_ohdr;   /* Whether to minimize dataset object header */
-    hbool_t do_min_dset_ohdr_valid;   /* Whether minimize dataset object header flag is valid */
+    hbool_t   do_min_dset_ohdr;   /* Whether to minimize dataset object header */
+    hbool_t   do_min_dset_ohdr_valid;   /* Whether minimize dataset object header flag is valid */
+
+    /* Cached DAPL properties */
+    char *extfile_prefix;               /* Prefix for external file                      */
+    hbool_t extfile_prefix_valid;       /* Whether the prefix for external file is valid */
+    char *vds_prefix;                   /* Prefix for VDS                                */
+    hbool_t vds_prefix_valid;           /* Whether the prefix for VDS is valid           */
+
+    /* Cached FAPL properties */
+    H5F_libver_t low_bound;     /* low_bound property for H5Pset_libver_bounds() */
+    hbool_t low_bound_valid;    /* Whether low_bound property is valid */
+    H5F_libver_t high_bound;    /* high_bound property for H5Pset_libver_bounds */
+    hbool_t high_bound_valid;   /* Whether high_bound property is valid */
 
     /* Cached VOL settings */
     H5VL_connector_prop_t vol_connector_prop;  /* Property for VOL connector ID & info */
@@ -339,6 +358,19 @@ typedef struct H5CX_dcpl_cache_t {
     hbool_t do_min_dset_ohdr;   /* Whether to minimize dataset object header */
 } H5CX_dcpl_cache_t;
 
+/* Typedef for cached default dataset access property list information */
+/* (Same as the cached DXPL struct, above, except for the default DXPL) */
+typedef struct H5CX_dapl_cache_t {
+    char *extfile_prefix;       /* Prefix for external file */
+    char *vds_prefix;           /* Prefix for VDS           */
+} H5CX_dapl_cache_t;
+
+/* Typedef for cached default file access property list information */
+/* (Same as the cached DXPL struct, above, except for the default DCPL) */
+typedef struct H5CX_fapl_cache_t {
+    H5F_libver_t low_bound;     /* low_bound property for H5Pset_libver_bounds() */
+    H5F_libver_t high_bound;    /* high_bound property for H5Pset_libver_bounds */
+} H5CX_fapl_cache_t;
 
 /********************/
 /* Local Prototypes */
@@ -375,8 +407,17 @@ static H5CX_lapl_cache_t H5CX_def_lapl_cache;
 /* Define a "default" dataset creation property list cache structure to use for default DCPLs */
 static H5CX_dcpl_cache_t H5CX_def_dcpl_cache;
 
+/* Define a "default" dataset access property list cache structure to use for default DAPLs */
+static H5CX_dapl_cache_t H5CX_def_dapl_cache;
+
+/* Define a "default" file access property list cache structure to use for default FAPLs */
+static H5CX_fapl_cache_t H5CX_def_fapl_cache;
+
 /* Declare a static free list to manage H5CX_node_t structs */
 H5FL_DEFINE_STATIC(H5CX_node_t);
+
+/* Declare a static free list to manage H5CX_state_t structs */
+H5FL_DEFINE_STATIC(H5CX_state_t);
 
 
 
@@ -396,6 +437,8 @@ H5CX__init_package(void)
     H5P_genplist_t *dx_plist;           /* Data transfer property list */
     H5P_genplist_t *la_plist;           /* Link access property list */
     H5P_genplist_t *dc_plist;           /* Dataset creation property list */
+    H5P_genplist_t *da_plist;           /* Dataset access property list */
+    H5P_genplist_t *fa_plist;           /* File access property list */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
@@ -507,6 +550,39 @@ H5CX__init_package(void)
 
     /* Get flag to indicate whether to minimize dataset object header */
     if(H5P_get(dc_plist, H5D_CRT_MIN_DSET_HDR_SIZE_NAME, &H5CX_def_dcpl_cache.do_min_dset_ohdr) < 0)
+        HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve dataset minimize flag")
+
+    /* Reset the "default DAPL cache" information */
+    HDmemset(&H5CX_def_dapl_cache, 0, sizeof(H5CX_dapl_cache_t));
+
+    /* Get the default DAPL cache information */
+
+    /* Get the default dataset access property list */
+    if(NULL == (da_plist = (H5P_genplist_t *)H5I_object(H5P_DATASET_ACCESS_DEFAULT)))
+        HGOTO_ERROR(H5E_CONTEXT, H5E_BADTYPE, FAIL, "not a dataset create property list")
+
+    /* Get the prefix for the external file */
+    if(H5P_peek(da_plist, H5D_ACS_EFILE_PREFIX_NAME, &H5CX_def_dapl_cache.extfile_prefix) < 0)
+        HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve prefix for external file")
+
+    /* Get the prefix for the VDS file */
+    if(H5P_peek(da_plist, H5D_ACS_VDS_PREFIX_NAME, &H5CX_def_dapl_cache.vds_prefix) < 0)
+        HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve prefix for VDS")
+
+    /* Reset the "default FAPL cache" information */
+    HDmemset(&H5CX_def_fapl_cache, 0, sizeof(H5CX_fapl_cache_t));
+
+    /* Get the default FAPL cache information */
+
+    /* Get the default file access property list */
+    if(NULL == (fa_plist = (H5P_genplist_t *)H5I_object(H5P_FILE_ACCESS_DEFAULT)))
+        HGOTO_ERROR(H5E_CONTEXT, H5E_BADTYPE, FAIL, "not a dataset create property list")
+
+    /* Get low_bound */
+    if(H5P_get(fa_plist, H5F_ACS_LIBVER_LOW_BOUND_NAME, &H5CX_def_fapl_cache.low_bound) < 0)
+        HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve dataset minimize flag")
+
+    if(H5P_get(fa_plist, H5F_ACS_LIBVER_HIGH_BOUND_NAME, &H5CX_def_fapl_cache.high_bound) < 0)
         HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve dataset minimize flag")
 
 done:
@@ -632,7 +708,10 @@ H5CX__push_common(H5CX_node_t *cnode)
 
     /* Set non-zero context info */
     cnode->ctx.dxpl_id = H5P_DATASET_XFER_DEFAULT;
+    cnode->ctx.dcpl_id = H5P_DATASET_CREATE_DEFAULT;
+    cnode->ctx.dapl_id = H5P_DATASET_ACCESS_DEFAULT;
     cnode->ctx.lapl_id = H5P_LINK_ACCESS_DEFAULT;
+    cnode->ctx.fapl_id = H5P_FILE_ACCESS_DEFAULT;
     cnode->ctx.tag = H5AC__INVALID_TAG;
     cnode->ctx.ring = H5AC_RING_USER;
 
@@ -706,6 +785,226 @@ H5CX_push_special(void)
 
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5CX_push_special() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5CX_retrieve_state
+ *
+ * Purpose:     Retrieve the state of an API context, for later resumption.
+ *
+ * Note:	This routine _only_ tracks the state of API context information
+ *		set before the VOL callback is invoked, not values that are
+ *		set internal to the library.  It's main purpose is to provide
+ *		API context state to VOL connectors.
+ *
+ * Return:      Non-negative on success / Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              January 8, 2019
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5CX_retrieve_state(H5CX_state_t **api_state)
+{
+    H5CX_node_t **head = H5CX_get_my_context();  /* Get the pointer to the head of the API context, for this thread */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(head && *head);
+    HDassert(api_state);
+
+    /* Allocate & clear API context state */
+    if(NULL == (*api_state = H5FL_CALLOC(H5CX_state_t)))
+        HGOTO_ERROR(H5E_CONTEXT, H5E_CANTALLOC, FAIL, "unable to allocate new API context state")
+
+    /* Check for non-default DXPL */
+    if(H5P_DATASET_XFER_DEFAULT != (*head)->ctx.dxpl_id) {
+        /* Retrieve the DXPL property list */
+        H5CX_RETRIEVE_PLIST(dxpl, FAIL)
+
+        /* Copy the DXPL ID */
+        if(((*api_state)->dxpl_id = H5P_copy_plist((H5P_genplist_t *)(*head)->ctx.dxpl, FALSE)) < 0)
+            HGOTO_ERROR(H5E_CONTEXT, H5E_CANTCOPY, FAIL, "can't copy property list")
+    } /* end if */
+    else
+        (*api_state)->dxpl_id = H5P_DATASET_XFER_DEFAULT;
+
+    /* Check for non-default LAPL */
+    if(H5P_LINK_ACCESS_DEFAULT != (*head)->ctx.lapl_id) {
+        /* Retrieve the LAPL property list */
+        H5CX_RETRIEVE_PLIST(lapl, FAIL)
+
+        /* Copy the LAPL ID */
+        if(((*api_state)->lapl_id = H5P_copy_plist((H5P_genplist_t *)(*head)->ctx.lapl, FALSE)) < 0)
+            HGOTO_ERROR(H5E_CONTEXT, H5E_CANTCOPY, FAIL, "can't copy property list")
+    } /* end if */
+    else
+        (*api_state)->lapl_id = H5P_LINK_ACCESS_DEFAULT;
+
+    /* Keep a reference to the current VOL wrapping context */
+    (*api_state)->vol_wrap_ctx = (*head)->ctx.vol_wrap_ctx;
+    if(NULL != (*api_state)->vol_wrap_ctx)
+        if(H5VL_inc_vol_wrapper((*api_state)->vol_wrap_ctx) < 0)
+            HGOTO_ERROR(H5E_CONTEXT, H5E_CANTINC, FAIL, "can't increment refcount on VOL wrapping context")
+
+    /* Keep a copy of the VOL connector property, if there is one */
+    if((*head)->ctx.vol_connector_prop_valid && (*head)->ctx.vol_connector_prop.connector_id > 0) {
+        /* Get the connector property */
+        H5MM_memcpy(&(*api_state)->vol_connector_prop, &(*head)->ctx.vol_connector_prop, sizeof(H5VL_connector_prop_t));
+
+        /* Check for actual VOL connector property */
+        if((*api_state)->vol_connector_prop.connector_id) {
+            /* Copy connector info, if it exists */
+            if((*api_state)->vol_connector_prop.connector_info) {
+                H5VL_class_t *connector;           /* Pointer to connector */
+                void *new_connector_info = NULL;    /* Copy of connector info */
+
+                /* Retrieve the connector for the ID */
+                if(NULL == (connector = (H5VL_class_t *)H5I_object((*api_state)->vol_connector_prop.connector_id)))
+                    HGOTO_ERROR(H5E_CONTEXT, H5E_BADTYPE, FAIL, "not a VOL connector ID")
+
+                /* Allocate and copy connector info */
+                if(H5VL_copy_connector_info(connector, &new_connector_info, (*api_state)->vol_connector_prop.connector_info) < 0)
+                    HGOTO_ERROR(H5E_CONTEXT, H5E_CANTCOPY, FAIL, "connector info copy failed")
+                (*api_state)->vol_connector_prop.connector_info = new_connector_info;
+            } /* end if */
+
+            /* Increment the refcount on the connector ID */
+            if(H5I_inc_ref((*api_state)->vol_connector_prop.connector_id, FALSE) < 0)
+                HGOTO_ERROR(H5E_CONTEXT, H5E_CANTINC, FAIL, "incrementing VOL connector ID failed")
+        } /* end if */
+    } /* end if */
+
+#ifdef H5_HAVE_PARALLEL
+    /* Save parallel I/O settings */
+    (*api_state)->coll_metadata_read = (*head)->ctx.coll_metadata_read;
+#endif /* H5_HAVE_PARALLEL */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5CX_retrieve_state() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5CX_restore_state
+ *
+ * Purpose:     Restore an API context, from a previously retrieved state.
+ *
+ * Note:	This routine _only_ resets the state of API context information
+ *		set before the VOL callback is invoked, not values that are
+ *		set internal to the library.  It's main purpose is to restore
+ *		API context state from VOL connectors.
+ *
+ * Return:      Non-negative on success / Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              January 9, 2019
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5CX_restore_state(const H5CX_state_t *api_state)
+{
+    H5CX_node_t **head = H5CX_get_my_context();  /* Get the pointer to the head of the API context, for this thread */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    /* Sanity check */
+    HDassert(head && *head);
+    HDassert(api_state);
+
+    /* Restore the DXPL info */
+    (*head)->ctx.dxpl_id = api_state->dxpl_id;
+    (*head)->ctx.dxpl = NULL;
+
+    /* Restore the LAPL info */
+    (*head)->ctx.lapl_id = api_state->lapl_id;
+    (*head)->ctx.lapl = NULL;
+
+    /* Restore the VOL wrapper context */
+    (*head)->ctx.vol_wrap_ctx = api_state->vol_wrap_ctx;
+
+    /* Restore the VOL connector info */
+    if(api_state->vol_connector_prop.connector_id) {
+        H5MM_memcpy(&(*head)->ctx.vol_connector_prop, &api_state->vol_connector_prop, sizeof(H5VL_connector_prop_t));
+        (*head)->ctx.vol_connector_prop_valid = TRUE;
+    } /* end if */
+
+#ifdef H5_HAVE_PARALLEL
+    /* Restore parallel I/O settings */
+    (*head)->ctx.coll_metadata_read = api_state->coll_metadata_read;
+#endif /* H5_HAVE_PARALLEL */
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5CX_restore_state() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5CX_free_state
+ *
+ * Purpose:     Free a previously retrievedAPI context state
+ *
+ * Return:      Non-negative on success / Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              January 9, 2019
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5CX_free_state(H5CX_state_t *api_state)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(api_state);
+
+    /* Release the DXPL */
+    if(api_state->dxpl_id != H5P_DATASET_XFER_DEFAULT)
+        if(H5I_dec_ref(api_state->dxpl_id) < 0)
+            HGOTO_ERROR(H5E_CONTEXT, H5E_CANTDEC, FAIL, "can't decrement refcount on DXPL")
+
+    /* Release the LAPL */
+    if(api_state->lapl_id != H5P_LINK_ACCESS_DEFAULT)
+        if(H5I_dec_ref(api_state->lapl_id) < 0)
+            HGOTO_ERROR(H5E_CONTEXT, H5E_CANTDEC, FAIL, "can't decrement refcount on LAPL")
+
+    /* Release the VOL wrapper context */
+    if(api_state->vol_wrap_ctx)
+        if(H5VL_dec_vol_wrapper(api_state->vol_wrap_ctx) < 0)
+            HGOTO_ERROR(H5E_CONTEXT, H5E_CANTDEC, FAIL, "can't decrement refcount on VOL wrapping context")
+
+    /* Release the VOL connector property, if it was set */
+    if(api_state->vol_connector_prop.connector_id) {
+        /* Clean up any VOL connector info */
+        if(api_state->vol_connector_prop.connector_info) {
+            H5VL_class_t *connector;       /* Pointer to connector */
+
+            /* Retrieve the connector for the ID */
+            if(NULL == (connector = (H5VL_class_t *)H5I_object(api_state->vol_connector_prop.connector_id)))
+                HGOTO_ERROR(H5E_CONTEXT, H5E_BADTYPE, FAIL, "not a VOL connector ID")
+
+            /* Free the connector info */
+            if(H5VL_free_connector_info(connector, api_state->vol_connector_prop.connector_info) < 0)
+                HGOTO_ERROR(H5E_CONTEXT, H5E_CANTRELEASE, FAIL, "unable to release VOL connector info object")
+        } /* end if */
+
+        /* Decrement connector ID */
+        if(H5I_dec_ref(api_state->vol_connector_prop.connector_id) < 0)
+            HDONE_ERROR(H5E_CONTEXT, H5E_CANTDEC, FAIL, "can't close VOL connector ID")
+    } /* end if */
+
+    /* Free the state */
+    api_state = H5FL_FREE(H5CX_state_t, api_state);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5CX_free_state() */
 
 
 /*-------------------------------------------------------------------------
@@ -791,6 +1090,42 @@ H5CX_set_dcpl(hid_t dcpl_id)
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5CX_set_dcpl() */
 
+/*-------------------------------------------------------------------------
+ * Function:    H5CX_set_libver_bounds
+ *
+ * Purpose:     Sets the low/high bounds according to "f" for the current API call context.
+ *              When "f" is NULL, the low/high bounds are set to latest format.
+ *
+ * Return:      Non-negative on success / Negative on failure
+ *
+ * Programmer:  Vailin Choi
+ *              March 27, 2019
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5CX_set_libver_bounds(H5F_t *f)
+{
+    H5CX_node_t **head = H5CX_get_my_context();  /* Get the pointer to the head of the API context, for this thread */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(head && *head);
+
+    /* Set the API context value */
+    (*head)->ctx.low_bound = (f == NULL) ? H5F_LIBVER_LATEST : H5F_LOW_BOUND(f);
+    (*head)->ctx.high_bound = (f == NULL) ? H5F_LIBVER_LATEST : H5F_HIGH_BOUND(f);
+
+    /* Mark the values as valid */
+    (*head)->ctx.low_bound_valid = TRUE;
+    (*head)->ctx.high_bound_valid = TRUE;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5CX_set_libver_bounds() */
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5CX_set_lapl
@@ -861,6 +1196,8 @@ H5CX_set_apl(hid_t *acspl_id, const H5P_libclass_t *libclass,
         *acspl_id = *libclass->def_plist_id;
     else {
         htri_t is_lapl;         /* Whether the access property list is (or is derived from) a link access property list */
+        htri_t is_dapl;         /* Whether the access property list is (or is derived from) a dataset access property list */
+        htri_t is_fapl;         /* Whether the access property list is (or is derived from) a file access property list */
 
 #ifdef H5CX_DEBUG
         /* Sanity check the access property list class */
@@ -873,6 +1210,18 @@ H5CX_set_apl(hid_t *acspl_id, const H5P_libclass_t *libclass,
             HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "can't check for link access class")
         else if(is_lapl)
             (*head)->ctx.lapl_id = *acspl_id;
+
+        /* Check for dataset access property and set API context if so */
+        if((is_dapl = H5P_class_isa(*libclass->pclass, *H5P_CLS_DACC->pclass)) < 0)
+            HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "can't check for dataset access class")
+        else if(is_dapl)
+            (*head)->ctx.dapl_id = *acspl_id;
+
+        /* Check for file access property and set API context if so */
+        if((is_fapl = H5P_class_isa(*libclass->pclass, *H5P_CLS_FACC->pclass)) < 0)
+            HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "can't check for file access class")
+        else if(is_fapl)
+            (*head)->ctx.fapl_id = *acspl_id;
 
 #ifdef H5_HAVE_PARALLEL
         /* If this routine is not guaranteed to be collective (i.e. it doesn't
@@ -951,6 +1300,7 @@ H5CX_set_loc(hid_t
 #endif /* H5_HAVE_PARALLEL */
    loc_id)
 {
+#ifdef H5_HAVE_PARALLEL
     H5CX_node_t **head = H5CX_get_my_context();  /* Get the pointer to the head of the API context, for this thread */
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -959,7 +1309,6 @@ H5CX_set_loc(hid_t
     /* Sanity check */
     HDassert(head && *head);
 
-#ifdef H5_HAVE_PARALLEL
     /* Set collective metadata read flag */
     (*head)->ctx.coll_metadata_read = TRUE;
 
@@ -980,10 +1329,14 @@ H5CX_set_loc(hid_t
         if(mpi_comm != MPI_COMM_NULL)
             MPI_Barrier(mpi_comm);
     } /* end if */
-#endif /* H5_HAVE_PARALLEL */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
+#else /* H5_HAVE_PARALLEL */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+#endif /* H5_HAVE_PARALLEL */
 } /* end H5CX_set_loc() */
 
 
@@ -1045,7 +1398,7 @@ H5CX_set_vol_connector_prop(const H5VL_connector_prop_t *vol_connector_prop)
     HDassert(head && *head);
 
     /* Set the API context value */
-    HDmemcpy(&(*head)->ctx.vol_connector_prop, vol_connector_prop, sizeof(H5VL_connector_prop_t));
+    H5MM_memcpy(&(*head)->ctx.vol_connector_prop, vol_connector_prop, sizeof(H5VL_connector_prop_t));
 
     /* Mark the value as valid */
     (*head)->ctx.vol_connector_prop_valid = TRUE;
@@ -1170,7 +1523,7 @@ H5CX_get_vol_connector_prop(H5VL_connector_prop_t *vol_connector_prop)
     /* Check for value that was set */
     if((*head)->ctx.vol_connector_prop_valid)
         /* Get the value */
-        HDmemcpy(vol_connector_prop, &(*head)->ctx.vol_connector_prop, sizeof(H5VL_connector_prop_t));
+        H5MM_memcpy(vol_connector_prop, &(*head)->ctx.vol_connector_prop, sizeof(H5VL_connector_prop_t));
     else
         HDmemset(vol_connector_prop, 0, sizeof(H5VL_connector_prop_t));
 
@@ -1375,7 +1728,7 @@ H5CX_get_btree_split_ratios(double split_ratio[3])
     H5CX_RETRIEVE_PROP_VALID(dxpl, H5P_DATASET_XFER_DEFAULT, H5D_XFER_BTREE_SPLIT_RATIO_NAME, btree_split_ratio)
 
     /* Get the B-tree split ratio values */
-    HDmemcpy(split_ratio, &(*head)->ctx.btree_split_ratio, sizeof((*head)->ctx.btree_split_ratio));
+    H5MM_memcpy(split_ratio, &(*head)->ctx.btree_split_ratio, sizeof((*head)->ctx.btree_split_ratio));
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2060,6 +2413,43 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5CX_get_nlinks() */
 
+/*-------------------------------------------------------------------------
+ * Function:    H5CX_get_libver_bounds
+ *
+ * Purpose:     Retrieves the low/high bounds for the current API call context.
+ *
+ * Return:      Non-negative on success / Negative on failure
+ *
+ * Programmer:  Vailin Choi
+ *              March 27, 2019
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5CX_get_libver_bounds(H5F_libver_t *low_bound, H5F_libver_t *high_bound)
+{
+    H5CX_node_t **head = H5CX_get_my_context();  /* Get the pointer to the head of the API context, for this thread */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(low_bound);
+    HDassert(high_bound);
+    HDassert(head && *head);
+    HDassert(H5P_DEFAULT != (*head)->ctx.fapl_id);
+
+    H5CX_RETRIEVE_PROP_VALID(fapl, H5P_FILE_ACCESS_DEFAULT, H5F_ACS_LIBVER_LOW_BOUND_NAME, low_bound)
+    H5CX_RETRIEVE_PROP_VALID(fapl, H5P_FILE_ACCESS_DEFAULT, H5F_ACS_LIBVER_HIGH_BOUND_NAME, high_bound)
+
+    /* Get the values */
+    *low_bound = (*head)->ctx.low_bound;
+    *high_bound = (*head)->ctx.high_bound;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5CX_get_libver_bounds() */
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5CX_get_dset_min_ohdr_flag
@@ -2095,6 +2485,120 @@ H5CX_get_dset_min_ohdr_flag(hbool_t *dset_min_ohdr_flag)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5CX_get_dset_min_ohdr_flag() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5CX_get_ext_file_prefix
+ *
+ * Purpose:     Retrieves the prefix for external file
+ *
+ * Return:      Non-negative on success / Negative on failure
+ *
+ * Programmer:  Raymond Lu
+ *              March 6, 2019
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5CX_get_ext_file_prefix(char **extfile_prefix)
+{
+    H5CX_node_t **head = H5CX_get_my_context();  /* Get the pointer to the head of the API context, for this thread */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(extfile_prefix);
+    HDassert(head && *head);
+    HDassert(H5P_DEFAULT != (*head)->ctx.dapl_id);
+
+    /* Check if the value has been retrieved already */
+    if(!(*head)->ctx.extfile_prefix_valid) {
+        /* Check for default DAPL */
+        if((*head)->ctx.dapl_id == H5P_DATASET_ACCESS_DEFAULT)
+            (*head)->ctx.extfile_prefix = H5CX_def_dapl_cache.extfile_prefix;
+        else {
+            /* Check if the property list is already available */
+            if(NULL == (*head)->ctx.dapl)
+                /* Get the dataset access property list pointer */
+                if(NULL == ((*head)->ctx.dapl = (H5P_genplist_t *)H5I_object((*head)->ctx.dapl_id)))
+                    HGOTO_ERROR(H5E_CONTEXT, H5E_BADTYPE, FAIL, "can't get default dataset access property list")
+
+            /* Get the prefix for the external file */
+            /* (Note: 'peek', not 'get' - if this turns out to be a problem, we may need
+             *          to copy it and free this in the H5CX pop routine. -QAK)
+             */
+            if(H5P_peek((*head)->ctx.dapl, H5D_ACS_EFILE_PREFIX_NAME, &(*head)->ctx.extfile_prefix) < 0)
+                HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve external file prefix")
+        } /* end else */
+
+        /* Mark the value as valid */
+        (*head)->ctx.extfile_prefix_valid = TRUE;
+    } /* end if */
+
+    /* Get the value */
+    *extfile_prefix = (*head)->ctx.extfile_prefix;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5CX_get_ext_file_prefix() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5CX_get_vds_prefix
+ *
+ * Purpose:     Retrieves the prefix for VDS
+ *
+ * Return:      Non-negative on success / Negative on failure
+ *
+ * Programmer:  Raymond Lu
+ *              March 6, 2019
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5CX_get_vds_prefix(char **vds_prefix)
+{
+    H5CX_node_t **head = H5CX_get_my_context();  /* Get the pointer to the head of the API context, for this thread */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(vds_prefix);
+    HDassert(head && *head);
+    HDassert(H5P_DEFAULT != (*head)->ctx.dapl_id);
+
+    /* Check if the value has been retrieved already */
+    if(!(*head)->ctx.vds_prefix_valid) {
+        /* Check for default DAPL */
+        if((*head)->ctx.dapl_id == H5P_DATASET_ACCESS_DEFAULT)
+            (*head)->ctx.vds_prefix = H5CX_def_dapl_cache.vds_prefix;
+        else {
+            /* Check if the property list is already available */
+            if(NULL == (*head)->ctx.dapl)
+                /* Get the dataset access property list pointer */
+                if(NULL == ((*head)->ctx.dapl = (H5P_genplist_t *)H5I_object((*head)->ctx.dapl_id)))
+                    HGOTO_ERROR(H5E_CONTEXT, H5E_BADTYPE, FAIL, "can't get default dataset access property list")
+
+            /* Get the prefix for the VDS */
+            /* (Note: 'peek', not 'get' - if this turns out to be a problem, we may need
+             *          to copy it and free this in the H5CX pop routine. -QAK)
+             */
+            if(H5P_peek((*head)->ctx.dapl, H5D_ACS_VDS_PREFIX_NAME, &(*head)->ctx.vds_prefix) < 0)
+                HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve VDS prefix")
+        } /* end else */
+
+        /* Mark the value as valid */
+        (*head)->ctx.vds_prefix_valid = TRUE;
+    } /* end if */
+
+    /* Get the value */
+    *vds_prefix = (*head)->ctx.vds_prefix;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5CX_get_vds_prefix() */
 
 
 /*-------------------------------------------------------------------------

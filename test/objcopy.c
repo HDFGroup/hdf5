@@ -2197,8 +2197,8 @@ test_copy_dataset_versionbounds(hid_t fcpl_src, hid_t fapl_src)
     /* Loop through all the combinations of low/high library format bounds,
        skipping invalid combinations.  Create a destination file and copy the
        source dataset to it, then verify */
-    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
-        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
+    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, low)) {
+        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, high)) {
 
             /* Set version bounds */
             H5E_BEGIN_TRY {
@@ -7869,7 +7869,7 @@ test_copy_old_layout(hid_t fcpl_dst, hid_t fapl, hbool_t test_open)
     addr_reset();
 
     /* Setup */
-    if((src_fapl = h5_fileaccess_flags(H5_FILEACCESS_VOL | H5_FILEACCESS_LIBVER)) < 0) TEST_ERROR
+    if((src_fapl = h5_fileaccess_flags(H5_FILEACCESS_LIBVER)) < 0) TEST_ERROR
 
     /* open source file (read-only) */
     if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, src_fapl)) < 0) TEST_ERROR

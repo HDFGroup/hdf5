@@ -835,8 +835,8 @@ test_compact_io(hid_t fapl)
        skipping invalid combinations.
        - Create a file, create and write a compact dataset, and verify its data
        - Verify the dataset's layout and fill message versions */
-    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
-        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
+    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, low)) {
+        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, high)) {
 
             /* Set version bounds */
             H5E_BEGIN_TRY {
@@ -10331,8 +10331,8 @@ test_zero_dim_dset(hid_t fapl)
     /* Loop through all the combinations of low/high library format bounds,
        skipping invalid combination, and verify support for reading a 1D
        chunked dataset with dimension size = 0 */
-    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
-        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
+    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, low)) {
+        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, high)) {
 
             /* Set version bounds before opening the file */
             H5E_BEGIN_TRY {
@@ -12961,8 +12961,8 @@ test_versionbounds(void)
     /* Create a source file and a dataset in it.  Create a virtual file and
        virtual dataset.  Creation of virtual dataset should only succeed in
        H5F_LIBVER_V110 */
-    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
-        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
+    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, low)) {
+        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, high)) {
 
             /* Set version bounds, skip for invalid low/high combination */
             H5E_BEGIN_TRY {
@@ -12990,7 +12990,7 @@ test_versionbounds(void)
             if (vdset > 0) /* dataset created successfully */
             {
                 /* Virtual dataset is only available starting in V110 */
-                VERIFY(high, H5F_LIBVER_V110, "virtual dataset");
+                VERIFY(high >= H5F_LIBVER_V110, TRUE, "virtual dataset");
 
                 if(H5Dclose(vdset) < 0) TEST_ERROR
                 vdset = -1;

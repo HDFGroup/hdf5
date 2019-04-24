@@ -668,7 +668,7 @@
     endif ()
   endmacro ()
 
-  macro (ADD_H5ERR_MASK_TEST resultfile resultcode)
+  macro (ADD_H5ERR_MASK_TEST resultfile resultcode result_errcheck)
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
       # Remove any output file left over from previous test run
       add_test (
@@ -688,15 +688,14 @@
               -D "TEST_OUTPUT=${resultfile}.out"
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=${resultfile}.ddl"
-              -D "TEST_ERRREF=${resultfile}.err"
-              -D "TEST_MASK_ERROR=true"
-              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+              -D "TEST_ERRREF=${result_errcheck}"
+              -P "${HDF_RESOURCES_EXT_DIR}/grepTest.cmake"
       )
-      set_tests_properties (H5DUMP-${resultfile} PROPERTIES DEPENDS "H5DUMP-${resultfile}-clear-objects")
+    set_tests_properties (H5DUMP-${resultfile} PROPERTIES DEPENDS "H5DUMP-${resultfile}-clear-objects")
     endif ()
   endmacro ()
 
-  macro (ADD_H5ERR_MASK_ENV_TEST resultfile resultcode envvar envval)
+  macro (ADD_H5ERR_MASK_ENV_TEST resultfile resultcode result_errcheck envvar envval)
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
       # Remove any output file left over from previous test run
       add_test (
@@ -716,11 +715,10 @@
               -D "TEST_OUTPUT=${resultfile}.out"
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=${resultfile}.ddl"
-              -D "TEST_ERRREF=${resultfile}.err"
-              -D "TEST_MASK_ERROR=true"
+              -D "TEST_ERRREF=${result_errcheck}"
               -D "TEST_ENV_VAR:STRING=${envvar}"
               -D "TEST_ENV_VALUE:STRING=${envval}"
-              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+              -P "${HDF_RESOURCES_EXT_DIR}/grepTest.cmake"
       )
       set_tests_properties (H5DUMP-${resultfile} PROPERTIES DEPENDS "H5DUMP-${resultfile}-clear-objects")
     endif ()
@@ -1199,12 +1197,12 @@
   # test for displaying groups
   ADD_H5_TEST (tgroup-1 0 --enable-error-stack tgroup.h5)
   # test for displaying the selected groups
-  ADD_H5ERR_MASK_TEST (tgroup-2 1 --enable-error-stack --group=/g2 --group / -g /y tgroup.h5)
+  ADD_H5ERR_MASK_TEST (tgroup-2 1 "h5dump error: unable to open group \"/y\"" --enable-error-stack --group=/g2 --group / -g /y tgroup.h5)
 
   # test for displaying simple space datasets
   ADD_H5_TEST (tdset-1 0 --enable-error-stack tdset.h5)
   # test for displaying selected datasets
-  ADD_H5ERR_MASK_TEST (tdset-2 1 --enable-error-stack -H -d dset1 -d /dset2 --dataset=dset3 tdset.h5)
+  ADD_H5ERR_MASK_TEST (tdset-2 1 "h5dump error: unable to get link info from \"dset3\"" --enable-error-stack -H -d dset1 -d /dset2 --dataset=dset3 tdset.h5)
 
   # test for displaying attributes
   ADD_H5_TEST (tattr-1 0 --enable-error-stack tattr.h5)
@@ -1212,7 +1210,7 @@
   ADD_H5_TEST (tattr-2 0 --enable-error-stack -a /\\\\/attr1 --attribute /attr4 --attribute=/attr5 tattr.h5)
   ADD_H5_TEST_N (tattr-2 0 --enable-error-stack -N /\\\\/attr1 --any_path /attr4 --any_path=/attr5 tattr.h5)
   # test for header and error messages
-  ADD_H5ERR_MASK_TEST (tattr-3 1 --enable-error-stack --header -a /attr2 --attribute=/attr tattr.h5)
+  ADD_H5ERR_MASK_TEST (tattr-3 1 "h5dump error: unable to open attribute \"attr\"" --enable-error-stack --header -a /attr2 --attribute=/attr tattr.h5)
   # test for displaying at least 9 attributes on root from a be machine
   ADD_H5_TEST (tattr-4_be 0 --enable-error-stack tattr4_be.h5)
   # test for displaying attributes in shared datatype (also in group and dataset)
@@ -1226,7 +1224,7 @@
   ADD_H5_TEST_N (tslink-2 0 --enable-error-stack -N slink2 tslink.h5)
   ADD_H5_TEST (tudlink-2 0 --enable-error-stack -l udlink2 tudlink.h5)
   # test for displaying dangling soft links
-  ADD_H5ERR_MASK_TEST (tslink-D 0 --enable-error-stack -d /slink1 tslink.h5)
+  ADD_H5ERR_MASK_TEST (tslink-D 0 "component not found" --enable-error-stack -d /slink1 tslink.h5)
 
   # tests for hard links
   ADD_H5_TEST (thlink-1 0 --enable-error-stack thlink.h5)
@@ -1243,7 +1241,7 @@
   ADD_H5_TEST (tcomp-2 0 --enable-error-stack -t /type1 --datatype /type2 --datatype=/group1/type3 tcompound.h5)
   ADD_H5_TEST_N (tcomp-2 0 --enable-error-stack -N /type1 --any_path /type2 --any_path=/group1/type3 tcompound.h5)
   # test for unamed type
-  ADD_H5ERR_MASK_TEST (tcomp-3 0 "--enable-error-stack;-t;/#6632;-g;/group2;tcompound.h5")
+  ADD_H5ERR_MASK_TEST (tcomp-3 0 "object '#6632' doesn't exist" "--enable-error-stack;-t;/#6632;-g;/group2;tcompound.h5")
   # test complicated compound datatype
   ADD_H5_TEST (tcomp-4 0 --enable-error-stack tcompound_complex.h5)
   ADD_H5_TEST (tcompound_complex2 0 --enable-error-stack tcompound_complex2.h5)
@@ -1259,7 +1257,7 @@
   ADD_H5_TEST (tnestedcmpddt 0 --enable-error-stack tnestedcmpddt.h5)
 
   # test for options
-  ADD_H5ERR_MASK_TEST (tall-1 0 --enable-error-stack tall.h5)
+  ADD_H5ERR_MASK_TEST (tall-1 0 "unable to open external file, external link file name = 'somefile'" --enable-error-stack tall.h5)
   ADD_H5_TEST (tall-2 0 --enable-error-stack --header -g /g1/g1.1 -a attr2 tall.h5)
   ADD_H5_TEST (tall-3 0 --enable-error-stack -d /g2/dset2.1 -l /g1/g1.2/g1.2.1/slink tall.h5)
   ADD_H5_TEST_N (tall-3 0 --enable-error-stack -N /g2/dset2.1 -N /g1/g1.2/g1.2.1/slink tall.h5)
@@ -1290,7 +1288,7 @@
   # test for files with array data
   ADD_H5_TEST (tarray1 0 --enable-error-stack tarray1.h5)
   # # added for bug# 2092 - tarray1_big.h5
-  ADD_H5ERR_MASK_TEST (tarray1_big 0 --enable-error-stack -R tarray1_big.h5)
+  ADD_H5ERR_MASK_TEST (tarray1_big 0 "Undefined reference pointer" --enable-error-stack -R tarray1_big.h5)
   ADD_H5_TEST (tarray2 0 --enable-error-stack tarray2.h5)
   ADD_H5_TEST (tarray3 0 --enable-error-stack tarray3.h5)
   ADD_H5_TEST (tarray4 0 --enable-error-stack tarray4.h5)
@@ -1319,13 +1317,13 @@
   ADD_H5_TEST (tlarge_objname 0 --enable-error-stack -w157 tlarge_objname.h5)
 
   # test '-A' to suppress data but print attr's
-  ADD_H5ERR_MASK_TEST (tall-2A 0 --enable-error-stack -A tall.h5)
+  ADD_H5ERR_MASK_TEST (tall-2A 0 "unable to open external file, external link file name = 'somefile'" --enable-error-stack -A tall.h5)
 
   # test '-A' to suppress attr's but print data
-  ADD_H5ERR_MASK_TEST (tall-2A0 0 --enable-error-stack -A 0 tall.h5)
+  ADD_H5ERR_MASK_TEST (tall-2A0 0 "unable to open external file, external link file name = 'somefile'" --enable-error-stack -A 0 tall.h5)
 
   # test '-r' to print attributes in ASCII instead of decimal
-  ADD_H5ERR_MASK_TEST (tall-2B 0 --enable-error-stack -A -r tall.h5)
+  ADD_H5ERR_MASK_TEST (tall-2B 0 "unable to open external file, external link file name = 'somefile'" --enable-error-stack -A -r tall.h5)
 
   # test Subsetting
   ADD_H5_TEST (tall-4s 0 --enable-error-stack --dataset=/g1/g1.1/dset1.1.1 --start=1,1 --stride=2,3 --count=3,2 --block=1,1 tall.h5)
@@ -1354,7 +1352,7 @@
   ADD_H5_TEST (file_space 0 --enable-error-stack -B file_space.h5)
 
   # test -p with a non existing dataset
-  ADD_H5ERR_MASK_TEST (tperror 1 --enable-error-stack -p -d bogus tfcontents1.h5)
+  ADD_H5ERR_MASK_TEST (tperror 1 "h5dump error: unable to get link info from \"bogus\"" --enable-error-stack -p -d bogus tfcontents1.h5)
 
   # test for file contents
   ADD_H5_TEST (tcontents 0 --enable-error-stack -n tfcontents1.h5)
@@ -1501,9 +1499,9 @@
 
   # test for dataset region references
   ADD_H5_TEST (tdatareg 0 --enable-error-stack tdatareg.h5)
-  ADD_H5ERR_MASK_TEST (tdataregR 0 --enable-error-stack -R tdatareg.h5)
+  ADD_H5ERR_MASK_TEST (tdataregR 0 "Undefined reference pointer" --enable-error-stack -R tdatareg.h5)
   ADD_H5_TEST (tattrreg 0 --enable-error-stack tattrreg.h5)
-  ADD_H5ERR_MASK_TEST (tattrregR 0 -R --enable-error-stack tattrreg.h5)
+  ADD_H5ERR_MASK_TEST (tattrregR 0 "Undefined reference pointer" -R --enable-error-stack tattrreg.h5)
   ADD_H5_EXPORT_TEST (tbinregR tdatareg.h5 0 --enable-error-stack -d /Dataset1 -s 0 -R -y -o)
 
   # tests for group creation order
@@ -1521,21 +1519,21 @@
   ADD_H5_TEST (torderattr4 0 --enable-error-stack -H --sort_by=creation_order --sort_order=descending torderattr.h5)
 
   # tests for link references and order
-  ADD_H5ERR_MASK_TEST (torderlinks1 0 --enable-error-stack --sort_by=name --sort_order=ascending tfcontents1.h5)
-  ADD_H5ERR_MASK_TEST (torderlinks2 0 --enable-error-stack --sort_by=name --sort_order=descending tfcontents1.h5)
+  ADD_H5ERR_MASK_TEST (torderlinks1 0 "unable to open external file, external link file name = 'fname'" --enable-error-stack --sort_by=name --sort_order=ascending tfcontents1.h5)
+  ADD_H5ERR_MASK_TEST (torderlinks2 0 "unable to open external file, external link file name = 'fname'" --enable-error-stack --sort_by=name --sort_order=descending tfcontents1.h5)
 
   # tests for floating point user defined printf format
   ADD_H5_TEST (tfpformat 0 --enable-error-stack -m %.7f tfpformat.h5)
 
   # tests for traversal of external links
-  ADD_H5ERR_MASK_TEST (textlinksrc 0 --enable-error-stack textlinksrc.h5)
-  ADD_H5ERR_MASK_TEST (textlinkfar 0 --enable-error-stack textlinkfar.h5)
+  ADD_H5ERR_MASK_TEST (textlinksrc 0 "Too many soft links in path" --enable-error-stack textlinksrc.h5)
+  ADD_H5ERR_MASK_TEST (textlinkfar 0 "Too many soft links in path" --enable-error-stack textlinkfar.h5)
 
   # test for dangling external links
-  ADD_H5ERR_MASK_TEST (textlink 0 --enable-error-stack textlink.h5)
+  ADD_H5ERR_MASK_TEST (textlink 0 "unable to open external file, external link file name = 'anotherfile'" --enable-error-stack textlink.h5)
 
   # test for error stack display (BZ2048)
-  ADD_H5ERR_MASK_ENV_TEST (filter_fail 1 "HDF5_PLUGIN_PRELOAD" "::" --enable-error-stack filter_fail.h5)
+  ADD_H5ERR_MASK_ENV_TEST (filter_fail 1 "filter plugins disabled" "HDF5_PLUGIN_PRELOAD" "::" --enable-error-stack filter_fail.h5)
 
   # test for -o -y for dataset with attributes
   ADD_H5_TEST_EXPORT (tall-6 tall.h5 0 --enable-error-stack -d /g1/g1.1/dset1.1.1 -y -o)
