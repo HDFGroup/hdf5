@@ -40,10 +40,6 @@
 /* Local Macros */
 /****************/
 
-/* Definitions for locations parameters */
-#define H5A_CRT_LOCATION_SIZE   sizeof(H5VL_loc_params_t)
-#define H5A_CRT_LOCATION_DEF    H5I_BADID
-
 
 /******************/
 /* Local Typedefs */
@@ -58,9 +54,6 @@
 /********************/
 /* Local Prototypes */
 /********************/
-
-/* Property class callbacks */
-static herr_t H5P_acrt_reg_prop(H5P_genclass_t *pclass);
 
 
 /*********************/
