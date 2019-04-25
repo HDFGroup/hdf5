@@ -108,8 +108,8 @@ static herr_t H5VL__file_optional(void *obj, const H5VL_class_t *cls, hid_t dxpl
 static herr_t H5VL__file_close(void *obj, const H5VL_class_t *cls, hid_t dxpl_id,
     void **req);
 static void *H5VL__group_create(void *obj, const H5VL_loc_params_t *loc_params,
-    const H5VL_class_t *cls, const char *name, hid_t gcpl_id, hid_t gapl_id,
-    hid_t dxpl_id, void **req);
+    const H5VL_class_t *cls, const char *name, hid_t lcpl_id, hid_t gcpl_id,
+    hid_t gapl_id, hid_t dxpl_id, void **req);
 static void *H5VL__group_open(void *obj, const H5VL_loc_params_t *loc_params,
     const H5VL_class_t *cls, const char *name, hid_t gapl_id, hid_t dxpl_id,
     void **req);
@@ -3354,7 +3354,8 @@ done:
  */
 static void *
 H5VL__group_create(void *obj, const H5VL_loc_params_t *loc_params, const H5VL_class_t *cls,
-    const char *name, hid_t gcpl_id, hid_t gapl_id, hid_t dxpl_id, void **req)
+    const char *name, hid_t lcpl_id, hid_t gcpl_id, hid_t gapl_id,
+    hid_t dxpl_id, void **req)
 {
     void *ret_value = NULL;     /* Return value */
 
@@ -3365,7 +3366,7 @@ H5VL__group_create(void *obj, const H5VL_loc_params_t *loc_params, const H5VL_cl
         HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, NULL, "VOL connector has no 'group create' method")
 
     /* Call the corresponding VOL callback */
-    if(NULL == (ret_value = (cls->group_cls.create)(obj, loc_params, name, gcpl_id, gapl_id, dxpl_id, req)))
+    if(NULL == (ret_value = (cls->group_cls.create)(obj, loc_params, name, lcpl_id, gcpl_id, gapl_id, dxpl_id, req)))
         HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, NULL, "group create failed")
 
 done:
@@ -3385,7 +3386,8 @@ done:
  */
 void *
 H5VL_group_create(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *loc_params,
-    const char *name, hid_t gcpl_id, hid_t gapl_id, hid_t dxpl_id, void **req)
+    const char *name, hid_t lcpl_id, hid_t gcpl_id, hid_t gapl_id, hid_t dxpl_id,
+    void **req)
 {
     hbool_t vol_wrapper_set = FALSE;    /* Whether the VOL object wrapping context was set up */
     void *ret_value = NULL;     /* Return value */
@@ -3398,7 +3400,7 @@ H5VL_group_create(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *loc_par
     vol_wrapper_set = TRUE;
 
     /* Call the corresponding internal VOL routine */
-    if(NULL == (ret_value = H5VL__group_create(vol_obj->data, loc_params, vol_obj->connector->cls, name, gcpl_id, gapl_id, dxpl_id, req)))
+    if(NULL == (ret_value = H5VL__group_create(vol_obj->data, loc_params, vol_obj->connector->cls, name, lcpl_id, gcpl_id, gapl_id, dxpl_id, req)))
         HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, NULL, "group create failed")
 
 done:
@@ -3421,15 +3423,16 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VLgroup_create(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, const char *name,
-    hid_t gcpl_id, hid_t gapl_id, hid_t dxpl_id, void **req)
+H5VLgroup_create(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id,
+    const char *name, hid_t lcpl_id, hid_t gcpl_id, hid_t gapl_id,hid_t dxpl_id,
+    void **req)
 {
     H5VL_class_t *cls;                  /* VOL connector's class struct */
     void *ret_value = NULL;             /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE8("*x", "*x*xi*siii**x", obj, loc_params, connector_id, name, gcpl_id,
-             gapl_id, dxpl_id, req);
+    H5TRACE9("*x", "*x*xi*siiii**x", obj, loc_params, connector_id, name, lcpl_id,
+             gcpl_id, gapl_id, dxpl_id, req);
 
     /* Check args and get class pointer */
     if(NULL == obj)
@@ -3438,7 +3441,7 @@ H5VLgroup_create(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a VOL connector ID")
 
     /* Call the corresponding internal VOL routine */
-    if(NULL == (ret_value = H5VL__group_create(obj, loc_params, cls, name, gcpl_id, gapl_id, dxpl_id, req)))
+    if(NULL == (ret_value = H5VL__group_create(obj, loc_params, cls, name, lcpl_id, gcpl_id, gapl_id, dxpl_id, req)))
         HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, NULL, "unable to create group")
 
 done:

@@ -172,7 +172,6 @@ H5Gcreate1(hid_t loc_id, const char *name, size_t size_hint)
     void *grp = NULL;                   /* New group created */
     H5VL_object_t *vol_obj;             /* Object token of loc_id */
     H5VL_loc_params_t loc_params;
-    H5P_genplist_t *plist;              /* Property list pointer */
     hid_t tmp_gcpl = H5I_INVALID_HID;               /* Temporary group creation property list */
     hid_t lcpl_id = H5P_LINK_CREATE_DEFAULT;
     hid_t ret_value = H5I_INVALID_HID;              /* Return value */
@@ -217,14 +216,6 @@ H5Gcreate1(hid_t loc_id, const char *name, size_t size_hint)
     if(H5CX_set_loc(loc_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTSET, H5I_INVALID_HID, "can't set collective metadata read info")
 
-    /* Get the plist structure */
-    if(NULL == (plist = (H5P_genplist_t *)H5I_object(tmp_gcpl)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, H5I_INVALID_HID, "can't find object for ID")
-
-    /* get creation properties */
-    if(H5P_set(plist, H5VL_PROP_GRP_LCPL_ID, &lcpl_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, H5I_INVALID_HID, "can't get property value for lcpl id")
-
     /* Set location parameters */
     loc_params.type         = H5VL_OBJECT_BY_SELF;
     loc_params.obj_type     = H5I_get_type(loc_id);
@@ -234,7 +225,7 @@ H5Gcreate1(hid_t loc_id, const char *name, size_t size_hint)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier")
 
     /* Create the group */
-    if(NULL == (grp = H5VL_group_create(vol_obj, &loc_params, name, tmp_gcpl, H5P_GROUP_ACCESS_DEFAULT, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
+    if(NULL == (grp = H5VL_group_create(vol_obj, &loc_params, name, lcpl_id, tmp_gcpl, H5P_GROUP_ACCESS_DEFAULT, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, H5I_INVALID_HID, "unable to create group")
 
     /* Get an atom for the group */

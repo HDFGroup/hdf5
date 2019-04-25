@@ -32,9 +32,6 @@
 /* Public Macros */
 /*****************/
 
-/* Group creation property names */
-#define H5VL_PROP_GRP_LCPL_ID               "group_lcpl_id"
-
 /* Default VOL connector value */
 #define H5VL_VOL_DEFAULT                    0
 
@@ -301,7 +298,7 @@ typedef struct H5VL_file_class_t {
 /* H5G routines */
 typedef struct H5VL_group_class_t {
     void *(*create)(void *obj, const H5VL_loc_params_t *loc_params, const char *name,
-                    hid_t gcpl_id, hid_t gapl_id, hid_t dxpl_id, void **req);
+        hid_t lcpl_id, hid_t gcpl_id, hid_t gapl_id, hid_t dxpl_id, void **req);
     void *(*open)(void *obj, const H5VL_loc_params_t *loc_params, const char *name,
                   hid_t gapl_id, hid_t dxpl_id, void **req);
     herr_t (*get)(void *obj, H5VL_group_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
@@ -489,7 +486,7 @@ H5_DLL herr_t H5VLfile_optional(void *obj, hid_t connector_id, hid_t dxpl_id, vo
 H5_DLL herr_t H5VLfile_close(void *file, hid_t connector_id, hid_t dxpl_id, void **req);
 
 /* Public wrappers for group callbacks */
-H5_DLL void *H5VLgroup_create(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, const char *name, hid_t gcpl_id, hid_t gapl_id, hid_t dxpl_id, void **req);
+H5_DLL void *H5VLgroup_create(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, const char *name, hid_t lcpl_id, hid_t gcpl_id, hid_t gapl_id, hid_t dxpl_id, void **req);
 H5_DLL void *H5VLgroup_open(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, const char *name, hid_t gapl_id, hid_t dxpl_id, void **req);
 H5_DLL herr_t H5VLgroup_get(void *obj, hid_t connector_id, H5VL_group_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
 H5_DLL herr_t H5VLgroup_specific(void *obj, hid_t connector_id, H5VL_group_specific_t specific_type, hid_t dxpl_id, void **req, va_list arguments);

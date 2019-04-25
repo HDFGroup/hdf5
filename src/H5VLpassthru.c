@@ -144,7 +144,7 @@ static herr_t H5VL_pass_through_file_optional(void *file, hid_t dxpl_id, void **
 static herr_t H5VL_pass_through_file_close(void *file, hid_t dxpl_id, void **req);
 
 /* Group callbacks */
-static void *H5VL_pass_through_group_create(void *obj, const H5VL_loc_params_t *loc_params, const char *name, hid_t gcpl_id, hid_t gapl_id, hid_t dxpl_id, void **req);
+static void *H5VL_pass_through_group_create(void *obj, const H5VL_loc_params_t *loc_params, const char *name, hid_t lcpl_id, hid_t gcpl_id, hid_t gapl_id, hid_t dxpl_id, void **req);
 static void *H5VL_pass_through_group_open(void *obj, const H5VL_loc_params_t *loc_params, const char *name, hid_t gapl_id, hid_t dxpl_id, void **req);
 static herr_t H5VL_pass_through_group_get(void *obj, H5VL_group_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
 static herr_t H5VL_pass_through_group_specific(void *obj, H5VL_group_specific_t specific_type, hid_t dxpl_id, void **req, va_list arguments);
@@ -1876,7 +1876,8 @@ H5VL_pass_through_file_close(void *file, hid_t dxpl_id, void **req)
  */
 static void *
 H5VL_pass_through_group_create(void *obj, const H5VL_loc_params_t *loc_params,
-    const char *name, hid_t gcpl_id, hid_t gapl_id, hid_t dxpl_id, void **req)
+    const char *name, hid_t lcpl_id, hid_t gcpl_id, hid_t gapl_id,
+    hid_t dxpl_id, void **req)
 {
     H5VL_pass_through_t *group;
     H5VL_pass_through_t *o = (H5VL_pass_through_t *)obj;
@@ -1886,7 +1887,7 @@ H5VL_pass_through_group_create(void *obj, const H5VL_loc_params_t *loc_params,
     printf("------- PASS THROUGH VOL GROUP Create\n");
 #endif
 
-    under = H5VLgroup_create(o->under_object, loc_params, o->under_vol_id, name, gcpl_id,  gapl_id, dxpl_id, req);
+    under = H5VLgroup_create(o->under_object, loc_params, o->under_vol_id, name, lcpl_id, gcpl_id,  gapl_id, dxpl_id, req);
     if(under) {
         group = H5VL_pass_through_new_obj(under, o->under_vol_id);
 
