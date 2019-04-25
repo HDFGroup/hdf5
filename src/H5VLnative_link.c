@@ -109,7 +109,7 @@ H5VL__native_link_create(H5VL_link_create_type_t create_type, void *obj,
         case H5VL_LINK_CREATE_UD:
             {
                 H5G_loc_t   link_loc;               /* Group location for new link */
-                H5L_type_t link_type = HDva_arg(arguments, H5L_type_t);
+                H5L_type_t link_type = (H5L_type_t)HDva_arg(arguments, int);
                 void *udata = HDva_arg(arguments, void *);
                 size_t udata_size = HDva_arg(arguments, size_t);
 
