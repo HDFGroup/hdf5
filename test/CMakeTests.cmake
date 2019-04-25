@@ -1293,6 +1293,25 @@ endif ()
 ##############################################################################
 ##############################################################################
 
+##############################################################################
+###    V O L  P L U G I N  T E S T S
+##############################################################################
+if (BUILD_SHARED_LIBS)
+  if (WIN32)
+    set (CMAKE_SEP "\;")
+    set (BIN_REL_PATH "../../")
+  else ()
+    set (CMAKE_SEP ":")
+    set (BIN_REL_PATH "../")
+  endif ()
+
+  add_test (NAME H5PLUGIN-vol_plugin COMMAND $<TARGET_FILE:vol_plugin>)
+  set_tests_properties (H5PLUGIN-vol_plugin PROPERTIES
+      ENVIRONMENT "HDF5_PLUGIN_PATH=${CMAKE_BINARY_DIR}/null_vol_plugin_dir;srcdir=${HDF5_TEST_BINARY_DIR}"
+      WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}
+  )
+endif ()
+
 if (HDF5_TEST_PASSTHROUGH_VOL)
   include (CMakePassthroughVOLTests.cmake)
 endif ()
