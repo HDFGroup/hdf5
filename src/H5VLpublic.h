@@ -32,11 +32,6 @@
 /* Public Macros */
 /*****************/
 
-/* Attribute creation property names */
-#define H5VL_PROP_ATTR_TYPE_ID              "attr_type_id"
-#define H5VL_PROP_ATTR_SPACE_ID             "attr_space_id"
-#define H5VL_PROP_ATTR_LOC_PARAMS           "attr_location"
-
 /* Link creation property names */
 #define H5VL_PROP_LINK_TARGET               "target_location_object"
 #define H5VL_PROP_LINK_TARGET_LOC_PARAMS    "target_params"
@@ -255,7 +250,8 @@ typedef struct H5VL_wrap_class_t {
 /* H5A routines */
 typedef struct H5VL_attr_class_t {
     void *(*create)(void *obj, const H5VL_loc_params_t *loc_params, const char *attr_name,
-                    hid_t acpl_id, hid_t aapl_id, hid_t dxpl_id, void **req);
+            hid_t type_id, hid_t space_id, hid_t acpl_id, hid_t aapl_id,
+            hid_t dxpl_id, void **req);
     void *(*open)(void *obj, const H5VL_loc_params_t *loc_params, const char *attr_name,
                   hid_t aapl_id, hid_t dxpl_id, void **req);
     herr_t (*read)(void *attr, hid_t mem_type_id, void *buf, hid_t dxpl_id, void **req);
@@ -473,7 +469,7 @@ H5_DLL void *H5VLunwrap_object(void *obj, hid_t connector_id);
 H5_DLL herr_t H5VLfree_wrap_ctx(void *wrap_ctx, hid_t connector_id);
 
 /* Public wrappers for attribute callbacks */
-H5_DLL void *H5VLattr_create(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, const char *attr_name, hid_t acpl_id, hid_t aapl_id, hid_t dxpl_id, void **req);
+H5_DLL void *H5VLattr_create(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, const char *attr_name, hid_t type_id, hid_t space_id, hid_t acpl_id, hid_t aapl_id, hid_t dxpl_id, void **req);
 H5_DLL void *H5VLattr_open(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, const char *name, hid_t aapl_id, hid_t dxpl_id, void **req);
 H5_DLL herr_t H5VLattr_read(void *attr, hid_t connector_id, hid_t dtype_id, void *buf, hid_t dxpl_id, void **req);
 H5_DLL herr_t H5VLattr_write(void *attr, hid_t connector_id, hid_t dtype_id, const void *buf, hid_t dxpl_id, void **req);

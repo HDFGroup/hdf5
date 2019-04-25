@@ -104,7 +104,7 @@ static void *H5VL_pass_through_unwrap_object(void *obj);
 static herr_t H5VL_pass_through_free_wrap_ctx(void *obj);
 
 /* Attribute callbacks */
-static void *H5VL_pass_through_attr_create(void *obj, const H5VL_loc_params_t *loc_params, const char *name, hid_t acpl_id, hid_t aapl_id, hid_t dxpl_id, void **req);
+static void *H5VL_pass_through_attr_create(void *obj, const H5VL_loc_params_t *loc_params, const char *name, hid_t type_id, hid_t space_id, hid_t acpl_id, hid_t aapl_id, hid_t dxpl_id, void **req);
 static void *H5VL_pass_through_attr_open(void *obj, const H5VL_loc_params_t *loc_params, const char *name, hid_t aapl_id, hid_t dxpl_id, void **req);
 static herr_t H5VL_pass_through_attr_read(void *attr, hid_t mem_type_id, void *buf, hid_t dxpl_id, void **req);
 static herr_t H5VL_pass_through_attr_write(void *attr, hid_t mem_type_id, const void *buf, hid_t dxpl_id, void **req);
@@ -794,7 +794,8 @@ H5VL_pass_through_free_wrap_ctx(void *_wrap_ctx)
  */
 static void *
 H5VL_pass_through_attr_create(void *obj, const H5VL_loc_params_t *loc_params,
-    const char *name, hid_t acpl_id, hid_t aapl_id, hid_t dxpl_id, void **req)
+    const char *name, hid_t type_id, hid_t space_id, hid_t acpl_id,
+    hid_t aapl_id, hid_t dxpl_id, void **req)
 {
     H5VL_pass_through_t *attr;
     H5VL_pass_through_t *o = (H5VL_pass_through_t *)obj;
@@ -804,7 +805,7 @@ H5VL_pass_through_attr_create(void *obj, const H5VL_loc_params_t *loc_params,
     printf("------- PASS THROUGH VOL ATTRIBUTE Create\n");
 #endif
 
-    under = H5VLattr_create(o->under_object, loc_params, o->under_vol_id, name, acpl_id, aapl_id, dxpl_id, req);
+    under = H5VLattr_create(o->under_object, loc_params, o->under_vol_id, name, type_id, space_id, acpl_id, aapl_id, dxpl_id, req);
     if(under) {
         attr = H5VL_pass_through_new_obj(under, o->under_vol_id);
 

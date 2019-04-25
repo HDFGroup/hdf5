@@ -57,8 +57,8 @@
 /* Local Prototypes */
 /********************/
 static void *H5VL__attr_create(void *obj, const H5VL_loc_params_t *loc_params,
-    const H5VL_class_t *cls, const char *name, hid_t acpl_id, hid_t aapl_id,
-    hid_t dxpl_id, void **req);
+    const H5VL_class_t *cls, const char *name, hid_t type_id, hid_t space_id,
+    hid_t acpl_id, hid_t aapl_id, hid_t dxpl_id, void **req);
 static void *H5VL__attr_open(void *obj, const H5VL_loc_params_t *loc_params,
     const H5VL_class_t *cls, const char *name, hid_t aapl_id, hid_t dxpl_id,
     void **req);
@@ -753,7 +753,7 @@ void *
 H5VL_wrap_object(const H5VL_class_t *connector, void *wrap_ctx, void *obj,
     H5I_type_t obj_type)
 {
-    void *ret_value;            /* Return value */
+    void *ret_value = NULL;     /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -822,7 +822,7 @@ done:
 void *
 H5VL_unwrap_object(const H5VL_class_t *connector, void *obj)
 {
-    void *ret_value;            /* Return value */
+    void *ret_value = NULL;     /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -954,7 +954,8 @@ done:
  */
 static void *
 H5VL__attr_create(void *obj, const H5VL_loc_params_t *loc_params, const H5VL_class_t *cls,
-    const char *name, hid_t acpl_id, hid_t aapl_id, hid_t dxpl_id, void **req)
+    const char *name, hid_t type_id, hid_t space_id, hid_t acpl_id,
+    hid_t aapl_id, hid_t dxpl_id, void **req)
 {
     void *ret_value = NULL;     /* Return value */
 
@@ -965,12 +966,12 @@ H5VL__attr_create(void *obj, const H5VL_loc_params_t *loc_params, const H5VL_cla
         HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, NULL, "VOL connector has no 'attr create' method")
 
     /* Call the corresponding VOL callback */
-    if(NULL == (ret_value = (cls->attr_cls.create)(obj, loc_params, name, acpl_id, aapl_id, dxpl_id, req)))
+    if(NULL == (ret_value = (cls->attr_cls.create)(obj, loc_params, name, type_id, space_id, acpl_id, aapl_id, dxpl_id, req)))
         HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, NULL, "attribute create failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_attr_create() */
+} /* end H5VL__attr_create() */
 
 
 /*-------------------------------------------------------------------------
@@ -985,7 +986,8 @@ done:
  */
 void *
 H5VL_attr_create(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *loc_params, 
-    const char *name, hid_t acpl_id, hid_t aapl_id, hid_t dxpl_id, void **req)
+    const char *name, hid_t type_id, hid_t space_id, hid_t acpl_id,
+    hid_t aapl_id, hid_t dxpl_id, void **req)
 {
     hbool_t vol_wrapper_set = FALSE;    /* Whether the VOL object wrapping context was set up */
     void *ret_value = NULL;             /* Return value */
@@ -998,7 +1000,7 @@ H5VL_attr_create(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *loc_para
     vol_wrapper_set = TRUE;
 
     /* Call the corresponding internal VOL routine */
-    if(NULL == (ret_value = H5VL__attr_create(vol_obj->data, loc_params, vol_obj->connector->cls, name, acpl_id, aapl_id, dxpl_id, req)))
+    if(NULL == (ret_value = H5VL__attr_create(vol_obj->data, loc_params, vol_obj->connector->cls, name, type_id, space_id, acpl_id, aapl_id, dxpl_id, req)))
         HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, NULL, "attribute create failed")
 
 done:
@@ -1022,14 +1024,15 @@ done:
  */
 void *
 H5VLattr_create(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id,
-    const char *name, hid_t acpl_id, hid_t aapl_id, hid_t dxpl_id, void **req)
+    const char *name, hid_t type_id, hid_t space_id, hid_t acpl_id,
+    hid_t aapl_id, hid_t dxpl_id, void **req)
 {
     H5VL_class_t *cls;          /* VOL connector's class struct */
     void *ret_value = NULL;     /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE8("*x", "*x*xi*siii**x", obj, loc_params, connector_id, name, acpl_id,
-             aapl_id, dxpl_id, req);
+    H5TRACE10("*x", "*x*xi*siiiii**x", obj, loc_params, connector_id, name,
+             type_id, space_id, acpl_id, aapl_id, dxpl_id, req);
 
     /* Check args and get class pointer */
     if(NULL == obj)
@@ -1038,7 +1041,7 @@ H5VLattr_create(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a VOL connector ID")
 
     /* Call the corresponding internal VOL routine */
-    if(NULL == (ret_value = H5VL__attr_create(obj, loc_params, cls, name, acpl_id, aapl_id, dxpl_id, req)))
+    if(NULL == (ret_value = H5VL__attr_create(obj, loc_params, cls, name, type_id, space_id, acpl_id, aapl_id, dxpl_id, req)))
         HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, NULL, "unable to create attribute")
 
 done:

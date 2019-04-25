@@ -44,30 +44,18 @@
  */
 void *
 H5VL__native_attr_create(void *obj, const H5VL_loc_params_t *loc_params, const char *attr_name,
-    hid_t acpl_id, hid_t H5_ATTR_UNUSED aapl_id, hid_t H5_ATTR_UNUSED dxpl_id,
-    void H5_ATTR_UNUSED **req)
+    hid_t type_id, hid_t space_id, hid_t acpl_id, hid_t H5_ATTR_UNUSED aapl_id,
+    hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req)
 {
     H5G_loc_t       loc;                /* Object location */
     H5G_loc_t       obj_loc;            /* Location used to open group */
     hbool_t         loc_found = FALSE;  
-    H5P_genplist_t  *plist;             /* Property list pointer */
-    hid_t           type_id, space_id;
     H5T_t           *type, *dt;         /* Datatype to use for attribute */
     H5S_t           *space;             /* Dataspace to use for attribute */
     H5A_t           *attr = NULL;
     void            *ret_value = NULL;
 
     FUNC_ENTER_PACKAGE
-
-    /* Get the plist structure */
-    if(NULL == (plist = (H5P_genplist_t *)H5I_object(acpl_id)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, NULL, "can't find object for ID")
-
-    /* get creation properties */
-    if(H5P_get(plist, H5VL_PROP_ATTR_TYPE_ID, &type_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get property value for datatype id")
-    if(H5P_get(plist, H5VL_PROP_ATTR_SPACE_ID, &space_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get property value for space id")
 
     if(H5G_loc_real(obj, loc_params->obj_type, &loc) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file or file object")
