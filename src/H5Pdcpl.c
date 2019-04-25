@@ -246,9 +246,6 @@ static hbool_t H5P_dcrt_def_layout_init_g = FALSE;
 static herr_t
 H5P__dcrt_reg_prop(H5P_genclass_t *pclass)
 {
-    hid_t   type_id     = H5I_INVALID_HID;
-    hid_t   space_id    = H5I_INVALID_HID;
-    hid_t   lcpl_id     = H5P_LINK_CREATE_DEFAULT;
     herr_t  ret_value   = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
