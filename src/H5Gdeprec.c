@@ -323,7 +323,6 @@ herr_t
 H5Glink(hid_t cur_loc_id, H5G_link_t type, const char *cur_name, const char *new_name)
 {
     hid_t  lcpl_id   = H5P_LINK_CREATE_DEFAULT;
-    H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -338,10 +337,6 @@ H5Glink(hid_t cur_loc_id, H5G_link_t type, const char *cur_name, const char *new
     /* Set up collective metadata if appropriate */
     if(H5CX_set_loc(cur_loc_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set collective metadata read info")
-
-    /* Get the plist structure */
-    if(NULL == (plist = (H5P_genplist_t *)H5I_object(lcpl_id)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Create link */
     if(type == H5L_TYPE_HARD) {
@@ -363,18 +358,12 @@ H5Glink(hid_t cur_loc_id, H5G_link_t type, const char *cur_name, const char *new
         if(NULL == (vol_obj = (H5VL_object_t *)H5I_object(cur_loc_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
-        /* set creation properties */
-        if(H5P_set(plist, H5VL_PROP_LINK_TARGET, &vol_obj->data) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for target")
-        if(H5P_set(plist, H5VL_PROP_LINK_TARGET_LOC_PARAMS, &loc_params1) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for target loc params")
-
         /* Construct a temporary VOL object */
         tmp_vol_obj.data = NULL;
         tmp_vol_obj.connector = vol_obj->connector;
 
         /* Create the link through the VOL */
-        if(H5VL_link_create(H5VL_LINK_CREATE_HARD, &tmp_vol_obj, &loc_params2, lcpl_id, H5P_DEFAULT, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+        if(H5VL_link_create(H5VL_LINK_CREATE_HARD, &tmp_vol_obj, &loc_params2, lcpl_id, H5P_DEFAULT, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, vol_obj->data, loc_params1) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
     } /* end if */
     else if(type == H5L_TYPE_SOFT) {
@@ -390,12 +379,8 @@ H5Glink(hid_t cur_loc_id, H5G_link_t type, const char *cur_name, const char *new
         if(NULL == (vol_obj = (H5VL_object_t *)H5I_object(cur_loc_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
-        /* set creation properties */
-        if(H5P_set(plist, H5VL_PROP_LINK_TARGET_NAME, &cur_name) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for target name")
-
         /* Create the link through the VOL */
-        if(H5VL_link_create(H5VL_LINK_CREATE_SOFT, vol_obj, &loc_params, lcpl_id, H5P_DEFAULT, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+        if(H5VL_link_create(H5VL_LINK_CREATE_SOFT, vol_obj, &loc_params, lcpl_id, H5P_DEFAULT, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, cur_name) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
     } /* end else-if */
     else
@@ -419,7 +404,6 @@ H5Glink2(hid_t cur_loc_id, const char *cur_name, H5G_link_t type,
     hid_t new_loc_id, const char *new_name)
 {
     hid_t  lcpl_id   = H5P_LINK_CREATE_DEFAULT;
-    H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -434,10 +418,6 @@ H5Glink2(hid_t cur_loc_id, const char *cur_name, H5G_link_t type,
     /* Set up collective metadata if appropriate */
     if(H5CX_set_loc(cur_loc_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set collective metadata read info")
-
-    /* Get the plist structure */
-    if(NULL == (plist = (H5P_genplist_t *)H5I_object(lcpl_id)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Create the appropriate kind of link */
     if(type == H5L_TYPE_HARD) {
@@ -462,14 +442,8 @@ H5Glink2(hid_t cur_loc_id, const char *cur_name, H5G_link_t type,
         if(NULL == (vol_obj2 = (H5VL_object_t *)H5I_object(new_loc_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
-        /* set creation properties */
-        if(H5P_set(plist, H5VL_PROP_LINK_TARGET, &vol_obj1->data) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for target id")
-        if(H5P_set(plist, H5VL_PROP_LINK_TARGET_LOC_PARAMS, &loc_params1) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for target name")
-
         /* Create the link through the VOL */
-        if(H5VL_link_create(H5VL_LINK_CREATE_HARD, vol_obj2, &loc_params2, lcpl_id, H5P_DEFAULT, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+        if(H5VL_link_create(H5VL_LINK_CREATE_HARD, vol_obj2, &loc_params2, lcpl_id, H5P_DEFAULT, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, vol_obj1->data, loc_params1) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
     } /* end if */
     else if(type == H5L_TYPE_SOFT) {
@@ -490,12 +464,8 @@ H5Glink2(hid_t cur_loc_id, const char *cur_name, H5G_link_t type,
         if(NULL == (vol_obj = (H5VL_object_t *)H5I_object(new_loc_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
-        /* set creation properties */
-        if(H5P_set(plist, H5VL_PROP_LINK_TARGET_NAME, &cur_name) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for target name")
-
         /* Create the link through the VOL */
-        if(H5VL_link_create(H5VL_LINK_CREATE_SOFT, vol_obj, &loc_params, lcpl_id, H5P_DEFAULT, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+        if(H5VL_link_create(H5VL_LINK_CREATE_SOFT, vol_obj, &loc_params, lcpl_id, H5P_DEFAULT, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, cur_name) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
     } /* end else-if */
     else

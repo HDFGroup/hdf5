@@ -314,7 +314,6 @@ H5Olink(hid_t obj_id, hid_t new_loc_id, const char *new_name, hid_t lcpl_id,
     H5VL_object_t     tmp_vol_obj;            /* Temporary object token of */
     H5VL_loc_params_t loc_params1;
     H5VL_loc_params_t loc_params2;
-    H5P_genplist_t *plist;      /* Property list pointer */
     herr_t         ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -363,22 +362,12 @@ H5Olink(hid_t obj_id, hid_t new_loc_id, const char *new_name, hid_t lcpl_id,
         if (vol_obj1->connector->cls->value != vol_obj2->connector->cls->value)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "Objects are accessed through different VOL connectors and can't be linked")
 
-    /* Get the plist structure */
-    if(NULL == (plist = (H5P_genplist_t *)H5I_object(lcpl_id)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
-
-    /* set creation properties */
-    if(H5P_set(plist, H5VL_PROP_LINK_TARGET, &vol_obj1->data) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for target id")
-    if(H5P_set(plist, H5VL_PROP_LINK_TARGET_LOC_PARAMS, &loc_params1) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for target id")
-
     /* Construct a temporary VOL object */
     tmp_vol_obj.data = vol_obj2->data;
     tmp_vol_obj.connector = (vol_obj1 != NULL ? vol_obj1->connector : vol_obj2->connector);
 
     /* Create a link to the object */
-    if(H5VL_link_create(H5VL_LINK_CREATE_HARD, &tmp_vol_obj, &loc_params2, lcpl_id, lapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+    if(H5VL_link_create(H5VL_LINK_CREATE_HARD, &tmp_vol_obj, &loc_params2, lcpl_id, lapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, vol_obj1->data, loc_params1) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTCREATE, FAIL, "unable to create link")
 
 done:
