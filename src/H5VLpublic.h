@@ -32,11 +32,6 @@
 /* Public Macros */
 /*****************/
 
-/* Dataset creation property names */
-#define H5VL_PROP_DSET_TYPE_ID              "dataset_type_id"
-#define H5VL_PROP_DSET_SPACE_ID             "dataset_space_id"
-#define H5VL_PROP_DSET_LCPL_ID              "dataset_lcpl_id"
-
 /* Attribute creation property names */
 #define H5VL_PROP_ATTR_TYPE_ID              "attr_type_id"
 #define H5VL_PROP_ATTR_SPACE_ID             "attr_space_id"
@@ -275,7 +270,8 @@ typedef struct H5VL_attr_class_t {
 /* H5D routines */
 typedef struct H5VL_dataset_class_t {
     void *(*create)(void *obj, const H5VL_loc_params_t *loc_params, const char *name,
-                    hid_t dcpl_id, hid_t dapl_id, hid_t dxpl_id, void **req);
+            hid_t lcpl_id, hid_t type_id, hid_t space_id, hid_t dcpl_id,
+            hid_t dapl_id, hid_t dxpl_id, void **req);
     void *(*open)(void *obj, const H5VL_loc_params_t *loc_params, const char *name,
                   hid_t dapl_id, hid_t dxpl_id, void **req);
     herr_t (*read)(void *dset, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id,
@@ -487,7 +483,7 @@ H5_DLL herr_t H5VLattr_optional(void *obj, hid_t connector_id, hid_t dxpl_id, vo
 H5_DLL herr_t H5VLattr_close(void *attr, hid_t connector_id, hid_t dxpl_id, void **req);
 
 /* Public wrappers for dataset callbacks */
-H5_DLL void *H5VLdataset_create(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, const char *name, hid_t dcpl_id, hid_t dapl_id, hid_t dxpl_id, void **req);
+H5_DLL void *H5VLdataset_create(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, const char *name, hid_t lcpl_id, hid_t type_id, hid_t space_id, hid_t dcpl_id, hid_t dapl_id, hid_t dxpl_id, void **req);
 H5_DLL void *H5VLdataset_open(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, const char *name, hid_t dapl_id, hid_t dxpl_id, void **req);
 H5_DLL herr_t H5VLdataset_read(void *dset, hid_t connector_id, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id, hid_t plist_id, void *buf, void **req);
 H5_DLL herr_t H5VLdataset_write(void *dset, hid_t connector_id, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id, hid_t plist_id, const void *buf, void **req);

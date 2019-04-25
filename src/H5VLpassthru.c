@@ -114,7 +114,7 @@ static herr_t H5VL_pass_through_attr_optional(void *obj, hid_t dxpl_id, void **r
 static herr_t H5VL_pass_through_attr_close(void *attr, hid_t dxpl_id, void **req); 
 
 /* Dataset callbacks */
-static void *H5VL_pass_through_dataset_create(void *obj, const H5VL_loc_params_t *loc_params, const char *name, hid_t dcpl_id, hid_t dapl_id, hid_t dxpl_id, void **req);
+static void *H5VL_pass_through_dataset_create(void *obj, const H5VL_loc_params_t *loc_params, const char *name, hid_t lcpl_id, hid_t type_id, hid_t space_id, hid_t dcpl_id, hid_t dapl_id, hid_t dxpl_id, void **req);
 static void *H5VL_pass_through_dataset_open(void *obj, const H5VL_loc_params_t *loc_params, const char *name, hid_t dapl_id, hid_t dxpl_id, void **req);
 static herr_t H5VL_pass_through_dataset_read(void *dset, hid_t mem_type_id, hid_t mem_space_id,
                                     hid_t file_space_id, hid_t plist_id, void *buf, void **req);
@@ -1057,7 +1057,8 @@ H5VL_pass_through_attr_close(void *attr, hid_t dxpl_id, void **req)
  */
 static void *
 H5VL_pass_through_dataset_create(void *obj, const H5VL_loc_params_t *loc_params,
-    const char *name, hid_t dcpl_id, hid_t dapl_id, hid_t dxpl_id, void **req) 
+    const char *name, hid_t lcpl_id, hid_t type_id, hid_t space_id,
+    hid_t dcpl_id, hid_t dapl_id, hid_t dxpl_id, void **req) 
 {
     H5VL_pass_through_t *dset;
     H5VL_pass_through_t *o = (H5VL_pass_through_t *)obj;
@@ -1067,7 +1068,7 @@ H5VL_pass_through_dataset_create(void *obj, const H5VL_loc_params_t *loc_params,
     printf("------- PASS THROUGH VOL DATASET Create\n");
 #endif
 
-    under = H5VLdataset_create(o->under_object, loc_params, o->under_vol_id, name, dcpl_id,  dapl_id, dxpl_id, req);
+    under = H5VLdataset_create(o->under_object, loc_params, o->under_vol_id, name, lcpl_id, type_id, space_id, dcpl_id,  dapl_id, dxpl_id, req);
     if(under) {
         dset = H5VL_pass_through_new_obj(under, o->under_vol_id);
 
