@@ -1594,54 +1594,72 @@ test_file_perm2(void)
 **      H5Fis_accessible() API call.
 **
 *****************************************************************/
+#define FILE_IS_ACCESSIBLE  "tfile_is_accessible"
 static void
 test_file_is_accessible(const char *env_h5_drvr)
 {
-    hid_t    fid;               /* File opened with read-write permission */
-    hid_t    fcpl_id;           /* File creation property list */
-    hid_t    fapl = -1;         /* File access property list */
-    int      fd;                /* POSIX file descriptor */
-    char filename[FILENAME_LEN]; /* Filename to use */
-    ssize_t  nbytes;            /* Number of bytes written */
-    unsigned u;                 /* Local index variable */
-    unsigned char buf[1024];    /* Buffer of data to write */
-    htri_t   status;            /* Whether a file is an HDF5 file */
-    hbool_t  single_file_vfd;   /* Whether VFD used is a single file */
-    herr_t   ret;
+    hid_t           fid = H5I_INVALID_HID;          /* File opened with read-write permission */
+    hid_t           fcpl_id = H5I_INVALID_HID;      /* File creation property list */
+    hid_t           fapl_id = H5I_INVALID_HID;      /* File access property list */
+    int             fd;                             /* POSIX file descriptor */
+    char filename[FILENAME_LEN];                    /* Filename to use */
+    char sb_filename[FILENAME_LEN];                 /* Name of file w/ superblock */
+    ssize_t         nbytes;                         /* Number of bytes written */
+    unsigned        u;                              /* Local index variable */
+    unsigned char   buf[1024];                      /* Buffer of data to write */
+    htri_t          is_hdf5;                        /* Whether a file is an HDF5 file */
+    int             posix_ret;                      /* Return value from POSIX calls */
+    herr_t          ret;                            /* Return value from HDF5 calls */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Detection of HDF5 Files\n"));
 
     /* Get FAPL */
-    fapl = h5_fileaccess();
-    CHECK(fapl, FAIL, "H5Pcreate");
-    h5_fixname(FILE1, fapl, filename, sizeof filename);
+    fapl_id = h5_fileaccess();
+    CHECK(fapl_id, H5I_INVALID_HID, "H5Pcreate");
+
+    /* Fix up filenames
+     * For VFDs that create multiple files, we also need the name
+     * of the file with the superblock. With single-file VFDs, this
+     * will be equal to the one from h5_fixname().
+     */
+    h5_fixname(FILE_IS_ACCESSIBLE, fapl_id, filename, sizeof(filename));
+    h5_fixname_superblock(FILE_IS_ACCESSIBLE, fapl_id, sb_filename, sizeof(filename));
+
+    /****************/
+    /* Normal usage */
+    /****************/
 
     /* Create a file */
-    fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
-    CHECK(fid, FAIL, "H5Fcreate");
+    fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
+    CHECK(fid, H5I_INVALID_HID, "H5Fcreate");
 
     /* Close file */
     ret = H5Fclose(fid);
     CHECK(ret, FAIL, "H5Fclose");
 
     /* Verify that the file is an HDF5 file */
-    status = H5Fis_accessible(filename, fapl);
-    VERIFY(status, TRUE, "H5Fis_accessible");
+    is_hdf5 = H5Fis_accessible(filename, fapl_id);
+    VERIFY(is_hdf5, TRUE, "H5Fis_accessible");
 
+    /*******************************/
+    /* Non-default user block size */
+    /*******************************/
 
-    /* This test is not currently working for the family VFD */
+    /* This test is not currently working for the family VFD.
+     * There are failures when creating files with userblocks.
+     */
     if(0 != HDstrcmp(env_h5_drvr, "family")) {
         /* Create a file creation property list with a non-default user block size */
         fcpl_id = H5Pcreate(H5P_FILE_CREATE);
-        CHECK(fcpl_id, FAIL, "H5Pcreate");
+        CHECK(fcpl_id, H5I_INVALID_HID, "H5Pcreate");
 
         ret = H5Pset_userblock(fcpl_id, (hsize_t)2048);
         CHECK(ret, FAIL, "H5Pset_userblock");
 
         /* Create file with non-default user block */
-        fid = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl_id, fapl);
-        CHECK(fid, FAIL, "H5Fcreate");
+        fid = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl_id, fapl_id);
+        CHECK(fid, H5I_INVALID_HID, "H5Fcreate");
 
         /* Release file-creation property list */
         ret = H5Pclose(fcpl_id);
@@ -1652,37 +1670,56 @@ test_file_is_accessible(const char *env_h5_drvr)
         CHECK(ret, FAIL, "H5Fclose");
 
         /* Verify that the file is an HDF5 file */
-        status = H5Fis_accessible(filename, fapl);
-        VERIFY(status, TRUE, "H5Fis_accessible");
+        is_hdf5 = H5Fis_accessible(filename, fapl_id);
+        VERIFY(is_hdf5, TRUE, "H5Fis_accessible");
     } /* end if */
 
+    /***********************/
+    /* EMPTY non-HDF5 file */
+    /***********************/
 
-    /* This test only works for VFDs with a single file */
-    single_file_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "split") && HDstrcmp(env_h5_drvr, "multi") && HDstrcmp(env_h5_drvr, "family"));
-    if(single_file_vfd) {
-        /* Create non-HDF5 file and check it */
-        fd = HDopen(filename, O_RDWR|O_CREAT|O_TRUNC, H5_POSIX_CREATE_MODE_RW);
-        CHECK(fd, FAIL, "HDopen");
+    /* Create non-HDF5 file and check it */
+    fd = HDopen(sb_filename, O_RDWR | O_CREAT | O_TRUNC, H5_POSIX_CREATE_MODE_RW);
+    CHECK(fd, (-1), "HDopen");
 
-        /* Initialize information to write */
-        for (u=0; u<1024; u++)
-            buf[u]=(unsigned char)u;
+    /* Close the file */
+    posix_ret = HDclose(fd);
+    CHECK(posix_ret, (-1), "HDclose");
 
-        /* Write some information */
-        nbytes = HDwrite(fd, buf, (size_t)1024);
-        VERIFY(nbytes, 1024, "HDwrite");
+    /* Verify that the file is NOT an HDF5 file */
+    is_hdf5 = H5Fis_accessible(filename, fapl_id);
+    VERIFY(is_hdf5, FALSE, "H5Fis_accessible (empty non-HDF5 file)");
 
-        /* Close the file */
-        ret = HDclose(fd);
-        CHECK(ret, FAIL, "HDclose");
+    /***************************/
+    /* Non-empty non-HDF5 file */
+    /***************************/
 
-        /* Verify that the file is not an HDF5 file */
-        status = H5Fis_accessible(filename, fapl);
-        VERIFY(status, FALSE, "H5Fis_accessible");
-    } /* end if */
+    /* Create non-HDF5 file and check it */
+    fd = HDopen(sb_filename, O_RDWR | O_CREAT | O_TRUNC, H5_POSIX_CREATE_MODE_RW);
+    CHECK(fd, (-1), "HDopen");
+
+    /* Initialize information to write */
+    for (u = 0; u < 1024; u++)
+        buf[u]=(unsigned char)u;
+
+    /* Write some information */
+    nbytes = HDwrite(fd, buf, (size_t)1024);
+    VERIFY(nbytes, 1024, "HDwrite");
+
+    /* Close the file */
+    posix_ret = HDclose(fd);
+    CHECK(posix_ret, (-1), "HDclose");
+
+    /* Verify that the file is not an HDF5 file */
+    is_hdf5 = H5Fis_accessible(filename, fapl_id);
+    VERIFY(is_hdf5, FALSE, "H5Fis_accessible (non-HDF5 file)");
+
+
+    /* Clean up files */
+    h5_delete_test_file(filename, fapl_id);
 
     /* Close property list */
-    ret = H5Pclose(fapl);
+    ret = H5Pclose(fapl_id);
     CHECK(ret, FAIL, "H5Pclose");
 
 } /* end test_file_is_accessible() */
@@ -1697,70 +1734,97 @@ test_file_is_accessible(const char *env_h5_drvr)
 *****************************************************************/
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 static void
-test_file_ishdf5(void)
+test_file_ishdf5(const char *env_h5_drvr)
 {
-    hid_t    file;      /* File opened with read-write permission */
-    hid_t    fcpl;      /* File creation property list */
-    hid_t    fapl = -1; /* File access property list */
-    int      fd;        /* File Descriptor */
-    char filename[FILENAME_LEN]; /* Filename to use */
-    ssize_t  nbytes;    /* Number of bytes written */
-    unsigned u;         /* Local index variable */
-    unsigned char buf[1024];    /* Buffer of data to write */
-    htri_t   status;    /* Whether a file is an HDF5 file */
-    herr_t   ret;
+    hid_t           fid = H5I_INVALID_HID;          /* File opened with read-write permission */
+    hid_t           fcpl_id = H5I_INVALID_HID;      /* File creation property list */
+    hid_t           fapl_id = H5I_INVALID_HID;      /* File access property list */
+    int             fd;                             /* POSIX file descriptor */
+    char filename[FILENAME_LEN];                    /* Filename to use */
+    char sb_filename[FILENAME_LEN];                 /* Name of file w/ superblock */
+    ssize_t         nbytes;                         /* Number of bytes written */
+    unsigned        u;                              /* Local index variable */
+    unsigned char   buf[1024];                      /* Buffer of data to write */
+    htri_t          is_hdf5;                        /* Whether a file is an HDF5 file */
+    int             posix_ret;                      /* Return value from POSIX calls */
+    herr_t          ret;                            /* Return value from HDF5 calls */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Detection of HDF5 Files (using deprecated H5Fis_hdf5() call)\n"));
 
     /* Get FAPL */
-    fapl = h5_fileaccess();
-    CHECK(fapl, FAIL, "H5Pcreate");
-    h5_fixname(FILE1, fapl, filename, sizeof filename);
+    fapl_id = h5_fileaccess();
+    CHECK(fapl_id, H5I_INVALID_HID, "H5Pcreate");
+
+    /* Fix up filenames
+     * For VFDs that create multiple files, we also need the name
+     * of the file with the superblock. With single-file VFDs, this
+     * will be equal to the one from h5_fixname().
+     */
+    h5_fixname(FILE_IS_ACCESSIBLE, fapl_id, filename, sizeof(filename));
+    h5_fixname_superblock(FILE_IS_ACCESSIBLE, fapl_id, sb_filename, sizeof(filename));
+
+    /****************/
+    /* Normal usage */
+    /****************/
 
     /* Create a file */
-    file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
-    CHECK(file, FAIL, "H5Fcreate");
+    fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
+    CHECK(fid, H5I_INVALID_HID, "H5Fcreate");
 
     /* Close file */
-    ret = H5Fclose(file);
+    ret = H5Fclose(fid);
     CHECK(ret, FAIL, "H5Fclose");
 
     /* Verify that the file is an HDF5 file */
-    status = H5Fis_hdf5(filename);
-    VERIFY(status, TRUE, "H5Fis_hdf5");
+    is_hdf5 = H5Fis_hdf5(sb_filename);
+    VERIFY(is_hdf5, TRUE, "H5Fis_hdf5");
 
+    /*******************************/
+    /* Non-default user block size */
+    /*******************************/
 
-    /* Create a file creation property list with a non-default user block size */
-    fcpl = H5Pcreate(H5P_FILE_CREATE);
-    CHECK(fcpl, FAIL, "H5Pcreate");
+    /* This test is not currently working for the family VFD.
+     * There are failures when creating files with userblocks.
+     */
+    if(0 != HDstrcmp(env_h5_drvr, "family")) {
+        /* Create a file creation property list with a non-default user block size */
+        fcpl_id = H5Pcreate(H5P_FILE_CREATE);
+        CHECK(fcpl_id, H5I_INVALID_HID, "H5Pcreate");
 
-    ret = H5Pset_userblock(fcpl, (hsize_t)2048);
-    CHECK(ret, FAIL, "H5Pset_userblock");
+        ret = H5Pset_userblock(fcpl_id, (hsize_t)2048);
+        CHECK(ret, FAIL, "H5Pset_userblock");
 
-    /* Create file with non-default user block */
-    file = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl);
-    CHECK(file, FAIL, "H5Fcreate");
+        /* Create file with non-default user block */
+        fid = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl_id, fapl_id);
+        CHECK(fid, H5I_INVALID_HID, "H5Fcreate");
 
-    /* Release file-creation property list */
-    ret = H5Pclose(fcpl);
-    CHECK(ret, FAIL, "H5Pclose");
+        /* Release file creation property list */
+        ret = H5Pclose(fcpl_id);
+        CHECK(ret, FAIL, "H5Pclose");
 
-    /* Close file */
-    ret = H5Fclose(file);
-    CHECK(ret, FAIL, "H5Fclose");
+        /* Close file */
+        ret = H5Fclose(fid);
+        CHECK(ret, FAIL, "H5Fclose");
 
-    /* Verify that the file is an HDF5 file */
-    status = H5Fis_hdf5(filename);
-    VERIFY(status, TRUE, "H5Fis_hdf5");
+        /* Verify that the file is an HDF5 file */
+        is_hdf5 = H5Fis_hdf5(sb_filename);
+        VERIFY(is_hdf5, TRUE, "H5Fis_hdf5");
+    } /* end if */
 
+    /***************************/
+    /* Non-empty non-HDF5 file */
+    /***************************/
 
-    /* Create non-HDF5 file and check it */
-    fd = HDopen(filename, O_RDWR|O_CREAT|O_TRUNC, H5_POSIX_CREATE_MODE_RW);
-    CHECK(fd, FAIL, "HDopen");
+    /* Create non-HDF5 file. Use the calculated superblock
+     * filename to avoid the format strings that will make
+     * open(2) sad.
+     */
+    fd = HDopen(sb_filename, O_RDWR | O_CREAT | O_TRUNC, H5_POSIX_CREATE_MODE_RW);
+    CHECK(fd, (-1), "HDopen");
 
     /* Initialize information to write */
-    for(u=0; u<1024; u++)
+    for(u = 0; u < 1024; u++)
         buf[u]=(unsigned char)u;
 
     /* Write some information */
@@ -1768,15 +1832,19 @@ test_file_ishdf5(void)
     VERIFY(nbytes, 1024, "HDwrite");
 
     /* Close the file */
-    ret = HDclose(fd);
-    CHECK(ret, FAIL, "HDclose");
+    posix_ret = HDclose(fd);
+    CHECK(posix_ret, (-1), "HDclose");
 
     /* Verify that the file is not an HDF5 file */
-    status = H5Fis_hdf5(filename);
-    VERIFY(status, FALSE, "H5Fis_hdf5");
+    is_hdf5 = H5Fis_hdf5(sb_filename);
+    VERIFY(is_hdf5, FALSE, "H5Fis_hdf5");
+
+
+    /* Clean up files */
+    h5_delete_test_file(filename, fapl_id);
 
     /* Close property list */
-    ret = H5Pclose(fapl);
+    ret = H5Pclose(fapl_id);
     CHECK(ret, FAIL, "H5Pclose");
 
 } /* end test_file_ishdf5() */
@@ -7537,7 +7605,6 @@ test_deprec(void)
 void
 test_file(void)
 {
-    hbool_t  single_file_vfd;   /* Whether VFD used is a single file */
     const char  *env_h5_drvr;         /* File Driver value from environment */
 
     /* Output message about test being performed */
@@ -7547,7 +7614,6 @@ test_file(void)
     env_h5_drvr = HDgetenv("HDF5_DRIVER");
     if(env_h5_drvr == NULL)
         env_h5_drvr = "nomatch";
-    single_file_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "split") && HDstrcmp(env_h5_drvr, "multi") && HDstrcmp(env_h5_drvr, "family"));
 
     test_file_create();                         /* Test file creation(also creation templates)*/
     test_file_open();                           /* Test file opening */
@@ -7593,10 +7659,7 @@ test_file(void)
     test_incr_filesize();                       /* Test H5Fincrement_filesize() and H5Fget_eoa() */
     test_min_dset_ohdr();                       /* Test datset object header minimization */
 #ifndef H5_NO_DEPRECATED_SYMBOLS
-    if(single_file_vfd)
-        test_file_ishdf5();                         /* Test detecting HDF5 files correctly */
-    else
-        MESSAGE(5, ("Skipping testing detection of HDF5 Files (using deprecated H5Fis_hdf5() call for non-single file VFDs)\n"));
+    test_file_ishdf5(env_h5_drvr);              /* Test detecting HDF5 files correctly */
     test_deprec();                              /* Test deprecated routines */
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 } /* test_file() */

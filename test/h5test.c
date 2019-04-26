@@ -115,8 +115,8 @@ const char *LIBVER_NAMES[] = {
 static H5E_auto2_t err_func = NULL;
 
 static herr_t h5_errors(hid_t estack, void *client_data);
-static char * h5_fixname_real(const char *base_name, hid_t fapl, const char *suffix, 
-                              char *fullname, size_t size, hbool_t nest_printf);
+static char *h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix, 
+    char *fullname, size_t size, hbool_t nest_printf, hbool_t subst_for_superblock);
 
 
 /*-------------------------------------------------------------------------
@@ -471,7 +471,33 @@ h5_test_init(void)
 char *
 h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
 {
-    return (h5_fixname_real(base_name, fapl, ".h5", fullname, size, FALSE));
+    return (h5_fixname_real(base_name, fapl, ".h5", fullname, size, FALSE, FALSE));
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:    h5_fixname_superblock
+ *
+ * Purpose:     Like h5_fixname() but returns the name of the file you'd
+ *              open to find the superblock. Useful for when you have to
+ *              open a file with open(2) but the h5_fixname() string
+ *              contains stuff like format strings.
+ *
+ * Return:      Success:    The FULLNAME pointer.
+ *
+ *              Failure:    NULL if BASENAME or FULLNAME is the null
+ *                          pointer or if FULLNAME isn't large enough for
+ *                          the result.
+ *
+ * Programmer:  Dana Robinson
+ *              Spring 2019
+ *
+ *-------------------------------------------------------------------------
+ */
+char *
+h5_fixname_superblock(const char *base_name, hid_t fapl_id, char *fullname, size_t size)
+{
+    return (h5_fixname_real(base_name, fapl_id, ".h5", fullname, size, FALSE, TRUE));
 }
 
 
@@ -491,7 +517,7 @@ h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
 char *
 h5_fixname_no_suffix(const char *base_name, hid_t fapl, char *fullname, size_t size)
 {
-    return (h5_fixname_real(base_name, fapl, NULL, fullname, size, FALSE));
+    return (h5_fixname_real(base_name, fapl, NULL, fullname, size, FALSE, FALSE));
 }
 
 
@@ -517,7 +543,7 @@ h5_fixname_no_suffix(const char *base_name, hid_t fapl, char *fullname, size_t s
 char *
 h5_fixname_printf(const char *base_name, hid_t fapl, char *fullname, size_t size)
 {
-    return (h5_fixname_real(base_name, fapl, ".h5", fullname, size, TRUE));
+    return (h5_fixname_real(base_name, fapl, ".h5", fullname, size, TRUE, FALSE));
 }
 
 
@@ -545,9 +571,10 @@ h5_fixname_printf(const char *base_name, hid_t fapl, char *fullname, size_t size
  */
 static char *
 h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix, 
-                char *fullname, size_t size, hbool_t nest_printf)
+    char *fullname, size_t size, hbool_t nest_printf, hbool_t subst_for_superblock)
 {
     const char     *prefix = NULL;
+    const char     *env = NULL;    /* HDF5_DRIVER environment variable     */
     char           *ptr, last = '\0';
     const char     *suffix = _suffix;
     size_t          i, j;
@@ -565,17 +592,46 @@ h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix,
             return NULL;
 
         if(suffix) {
-            if(H5FD_FAMILY == driver)
-                suffix = nest_printf ? "%%05d.h5" : "%05d.h5";
-            else if (H5FD_MULTI == driver)
-                suffix = NULL;
+            if(H5FD_FAMILY == driver) {
+                if(subst_for_superblock)
+                    suffix = "00000.h5";
+                else
+                    suffix = nest_printf ? "%%05d.h5" : "%05d.h5";
+            }
+            else if (H5FD_MULTI == driver) {
+
+                /* Get the environment variable, if it exists, in case
+                 * we are using the split driver since both of those
+                 * use the multi VFD under the hood.
+                 */
+                env = HDgetenv("HDF5_DRIVER");
+#ifdef HDF5_DRIVER
+                /* Use the environment variable, then the compile-time constant */
+                if(!env)
+                    env = HDF5_DRIVER;
+#endif
+                if(!HDstrcmp(env, "split")) {
+                    /* split VFD */
+                    if(subst_for_superblock)
+                        suffix = "-m.h5";
+                    else
+                        suffix = NULL;
+                }
+                else {
+                    /* multi VFD */
+                    if(subst_for_superblock)
+                        suffix = "-s.h5";
+                    else
+                        suffix = NULL;
+                }
+            }
         }
     }
 
     /* Must first check fapl is not H5P_DEFAULT (-1) because H5FD_XXX
      * could be of value -1 if it is not defined.
      */
-    isppdriver = H5P_DEFAULT != fapl && (H5FD_MPIO==driver);
+    isppdriver = H5P_DEFAULT != fapl && (H5FD_MPIO == driver);
 
     /* Check HDF5_NOCLEANUP environment setting.
      * (The #ifdef is needed to prevent compile failure in case MPI is not
