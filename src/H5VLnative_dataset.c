@@ -43,31 +43,16 @@
  */
 void *
 H5VL__native_dataset_create(void *obj, const H5VL_loc_params_t *loc_params,
-    const char *name, hid_t dcpl_id, hid_t dapl_id, hid_t H5_ATTR_UNUSED dxpl_id,
+    const char *name, hid_t lcpl_id, hid_t type_id, hid_t space_id,
+    hid_t dcpl_id, hid_t dapl_id, hid_t H5_ATTR_UNUSED dxpl_id,
     void H5_ATTR_UNUSED **req)
 {
-    H5P_genplist_t *plist;              /* Property list pointer */
     H5G_loc_t       loc;                 /* Object location to insert dataset into */
-    hid_t           type_id = H5I_INVALID_HID;
-    hid_t           space_id = H5I_INVALID_HID;
-    hid_t           lcpl_id = H5I_INVALID_HID;
     H5D_t          *dset = NULL;        /* New dataset's info */
     const H5S_t    *space;              /* Dataspace for dataset */
     void           *ret_value;
 
     FUNC_ENTER_PACKAGE
-
-    /* Get the plist structure */
-    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dcpl_id)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, NULL, "can't find object for ID")
-
-    /* Get creation properties */
-    if(H5P_get(plist, H5VL_PROP_DSET_TYPE_ID, &type_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get property value for datatype id")
-    if(H5P_get(plist, H5VL_PROP_DSET_SPACE_ID, &space_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get property value for space id")
-    if(H5P_get(plist, H5VL_PROP_DSET_LCPL_ID, &lcpl_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get property value for lcpl id")
 
     /* Check arguments */
     if(H5G_loc_real(obj, loc_params->obj_type, &loc) < 0)
