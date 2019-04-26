@@ -1715,6 +1715,9 @@ test_file_is_accessible(const char *env_h5_drvr)
     VERIFY(is_hdf5, FALSE, "H5Fis_accessible (non-HDF5 file)");
 
 
+    /* Clean up files */
+    h5_delete_test_file(filename, fapl_id);
+
     /* Close property list */
     ret = H5Pclose(fapl_id);
     CHECK(ret, FAIL, "H5Pclose");
@@ -1836,6 +1839,9 @@ test_file_ishdf5(const char *env_h5_drvr)
     is_hdf5 = H5Fis_hdf5(sb_filename);
     VERIFY(is_hdf5, FALSE, "H5Fis_hdf5");
 
+
+    /* Clean up files */
+    h5_delete_test_file(filename, fapl_id);
 
     /* Close property list */
     ret = H5Pclose(fapl_id);

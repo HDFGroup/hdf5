@@ -574,6 +574,7 @@ h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix,
     char *fullname, size_t size, hbool_t nest_printf, hbool_t subst_for_superblock)
 {
     const char     *prefix = NULL;
+    const char     *env = NULL;    /* HDF5_DRIVER environment variable     */
     char           *ptr, last = '\0';
     const char     *suffix = _suffix;
     size_t          i, j;
@@ -598,10 +599,31 @@ h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix,
                     suffix = nest_printf ? "%%05d.h5" : "%05d.h5";
             }
             else if (H5FD_MULTI == driver) {
-                if(subst_for_superblock)
-                    suffix = "-s.h5";
-                else
-                    suffix = NULL;
+
+                /* Get the environment variable, if it exists, in case
+                 * we are using the split driver since both of those
+                 * use the multi VFD under the hood.
+                 */
+                env = HDgetenv("HDF5_DRIVER");
+#ifdef HDF5_DRIVER
+                /* Use the environment variable, then the compile-time constant */
+                if(!env)
+                    env = HDF5_DRIVER;
+#endif
+                if(!HDstrcmp(env, "split")) {
+                    /* split VFD */
+                    if(subst_for_superblock)
+                        suffix = "-m.h5";
+                    else
+                        suffix = NULL;
+                }
+                else {
+                    /* multi VFD */
+                    if(subst_for_superblock)
+                        suffix = "-s.h5";
+                    else
+                        suffix = NULL;
+                }
             }
         }
     }
