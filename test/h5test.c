@@ -610,7 +610,7 @@ h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix,
                 if(!env)
                     env = HDF5_DRIVER;
 #endif
-                if(!HDstrcmp(env, "split")) {
+                if(env && !HDstrcmp(env, "split")) {
                     /* split VFD */
                     if(subst_for_superblock)
                         suffix = "-m.h5";
