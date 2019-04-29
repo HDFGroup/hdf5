@@ -581,7 +581,7 @@ H5S__none_serialize(const H5S_t *space, uint8_t **p)
 
     /* Store the preamble information */
     UINT32ENCODE(pp, (uint32_t)H5S_GET_SELECT_TYPE(space));  /* Store the type of selection */
-    UINT32ENCODE(pp, (uint32_t)1);  /* Store the version number */
+    UINT32ENCODE(pp, (uint32_t)H5S_NONE_VERSION_1);  /* Store the version number */
     UINT32ENCODE(pp, (uint32_t)0);  /* Store the un-used padding */
     UINT32ENCODE(pp, (uint32_t)0);  /* Store the additional information length */
 

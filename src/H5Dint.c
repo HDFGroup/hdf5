@@ -54,7 +54,7 @@ static herr_t H5D__init_type(H5F_t *file, const H5D_t *dset, hid_t type_id, cons
 static herr_t H5D__cache_dataspace_info(const H5D_t *dset);
 static herr_t H5D__init_space(H5F_t *file, const H5D_t *dset, const H5S_t *space);
 static herr_t H5D__update_oh_info(H5F_t *file, H5D_t *dset, hid_t dapl_id);
-static herr_t H5D__build_file_prefix(const H5D_t *dset, hid_t dapl_id, const char *prefix_type, char **file_prefix);
+static herr_t H5D__build_file_prefix(const H5D_t *dset, H5F_prefix_open_t prefix_type, char **file_prefix);
 static herr_t H5D__open_oid(H5D_t *dataset, hid_t dapl_id);
 static herr_t H5D__init_storage(const H5D_io_info_t *io_info, hbool_t full_overwrite,
         hsize_t old_dim[]);
@@ -112,6 +112,10 @@ static const H5I_class_t H5I_DATASET_CLS[1] = {{
 /* Flag indicating "top" of interface has been initialized */
 static hbool_t H5D_top_package_initialize_s = FALSE;
 
+/* Prefixes of VDS and external file from the environment variables
+ * HDF5_EXTFILE_PREFIX and HDF5_VDS_PREFIX */ 
+const static char *H5D_prefix_ext_env = NULL;
+const static char *H5D_prefix_vds_env = NULL;
 
 
 /*-------------------------------------------------------------------------
@@ -187,6 +191,10 @@ H5D__init_package(void)
 
     /* Mark "top" of interface as initialized, too */
     H5D_top_package_initialize_s = TRUE;
+
+    /* Retrieve the prefixes of VDS and external file from the environment variable */
+    H5D_prefix_vds_env = HDgetenv("HDF5_VDS_PREFIX");
+    H5D_prefix_ext_env = HDgetenv("HDF5_EXTFILE_PREFIX");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -487,9 +495,6 @@ H5D__new(hid_t dcpl_id, hbool_t creating, hbool_t vl_type)
 
         new_dset->dcpl_id = H5P_copy_plist(plist, FALSE);
     } /* end else */
-
-    /* Set the DCPL for the API context */
-    H5CX_set_dcpl(new_dset->dcpl_id);
 
     /* Set return value */
     ret_value = new_dset;
@@ -1083,8 +1088,7 @@ done:
  *--------------------------------------------------------------------------
  */
 static herr_t
-H5D__build_file_prefix(const H5D_t *dset, hid_t dapl_id, const char *prefix_type,
-    char **file_prefix /*out*/)
+H5D__build_file_prefix(const H5D_t *dset, H5F_prefix_open_t prefix_type, char **file_prefix /*out*/)
 {
     char            *prefix = NULL;       /* prefix used to look for the file               */
     char            *filepath = NULL;     /* absolute path of directory the HDF5 file is in */
@@ -1105,20 +1109,22 @@ H5D__build_file_prefix(const H5D_t *dset, hid_t dapl_id, const char *prefix_type
     /* XXX: Future thread-safety note - getenv is not required
      *      to be reentrant.
      */
-    if(HDstrcmp(prefix_type, H5D_ACS_VDS_PREFIX_NAME) == 0)
-        prefix = HDgetenv("HDF5_VDS_PREFIX");
-    else if(HDstrcmp(prefix_type, H5D_ACS_EFILE_PREFIX_NAME) == 0)
-        prefix = HDgetenv("HDF5_EXTFILE_PREFIX");
-    else
-        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "prefix name is not sensible")
+    if(H5F_PREFIX_VDS == prefix_type) {
+        prefix = (char *)H5D_prefix_vds_env;
 
-    if(prefix == NULL || *prefix == '\0') {
-        /* Set prefix to value of prefix_type property */
-        if(NULL == (plist = H5P_object_verify(dapl_id, H5P_DATASET_ACCESS)))
-            HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
-        if(H5P_peek(plist, prefix_type, &prefix) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get file prefix")
-    } /* end if */
+        if(prefix == NULL || *prefix == '\0') {
+            if(H5CX_get_vds_prefix(&prefix) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get the prefix for vds file")
+        }
+    } else if(H5F_PREFIX_EFILE == prefix_type) {
+        prefix = (char *)H5D_prefix_ext_env;
+
+        if(prefix == NULL || *prefix == '\0') {
+            if(H5CX_get_ext_file_prefix(&prefix) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get the prefix for the external file")
+        }
+    } else
+        HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "prefix name is not sensible")
 
     /* Prefix has to be checked for NULL / empty string again because the
      * code above might have updated it.
@@ -1127,8 +1133,7 @@ H5D__build_file_prefix(const H5D_t *dset, hid_t dapl_id, const char *prefix_type
         /* filename is interpreted as relative to the current directory,
          * does not need to be expanded
          */
-        if(NULL == (*file_prefix = (char *)H5MM_strdup("")))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+        *file_prefix = NULL;
     } /* end if */
     else {
         if(HDstrncmp(prefix, "${ORIGIN}", HDstrlen("${ORIGIN}")) == 0) {
@@ -1326,11 +1331,11 @@ H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id,
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to set up flush append property")
 
     /* Set the external file prefix */
-    if(H5D__build_file_prefix(new_dset, dapl_id, H5D_ACS_EFILE_PREFIX_NAME, &new_dset->shared->extfile_prefix) < 0)
+    if(H5D__build_file_prefix(new_dset, H5F_PREFIX_EFILE, &new_dset->shared->extfile_prefix) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to initialize external file prefix")
 
     /* Set the VDS file prefix */
-    if(H5D__build_file_prefix(new_dset, dapl_id, H5D_ACS_VDS_PREFIX_NAME, &new_dset->shared->vds_prefix) < 0)
+    if(H5D__build_file_prefix(new_dset, H5F_PREFIX_VDS, &new_dset->shared->vds_prefix) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to initialize VDS prefix")
 
     /* Add the dataset to the list of opened objects in the file */
@@ -1485,11 +1490,11 @@ H5D_open(const H5G_loc_t *loc, hid_t dapl_id)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, NULL, "can't copy path")
 
     /* Get the external file prefix */
-    if(H5D__build_file_prefix(dataset, dapl_id, H5D_ACS_EFILE_PREFIX_NAME, &extfile_prefix) < 0)
+    if(H5D__build_file_prefix(dataset, H5F_PREFIX_EFILE, &extfile_prefix) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to initialize external file prefix")
 
     /* Get the VDS prefix */
-    if(H5D__build_file_prefix(dataset, dapl_id, H5D_ACS_VDS_PREFIX_NAME, &vds_prefix) < 0)
+    if(H5D__build_file_prefix(dataset, H5F_PREFIX_VDS, &vds_prefix) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to initialize VDS prefix")
 
     /* Check if dataset was already open */
@@ -1533,8 +1538,13 @@ H5D_open(const H5G_loc_t *loc, hid_t dapl_id)
         /* Check whether the external file prefix of the already open dataset
          * matches the new external file prefix
          */
-        if(HDstrcmp(extfile_prefix, dataset->shared->extfile_prefix) != 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, NULL, "new external file prefix does not match external file prefix of already open dataset")
+        if(extfile_prefix && dataset->shared->extfile_prefix) {
+            if(HDstrcmp(extfile_prefix, dataset->shared->extfile_prefix) != 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, NULL, "new external file prefix does not match external file prefix of already open dataset")
+        } else {
+            if(extfile_prefix || dataset->shared->extfile_prefix)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, NULL, "new external file prefix does not match external file prefix of already open dataset")
+        }
 
         /* Check if the object has been opened through the top file yet */
         if(H5FO_top_count(dataset->oloc.file, dataset->oloc.addr) == 0) {
@@ -2872,7 +2882,7 @@ H5D__set_extent(H5D_t *dset, const hsize_t *size)
                 dset->shared->layout.storage.u.virt.list[u].virtual_space_status = H5O_VIRTUAL_STATUS_CORRECT;
 
                 /* Patch sub-source datasets */
-                for(v = 0; v < dset->shared->layout.storage.u.virt.list[u].sub_dset_nalloc; v++)
+                for(v = 0; v < dset->shared->layout.storage.u.virt.list[u].sub_dset_nused; v++)
                     if(H5S_set_extent(dset->shared->layout.storage.u.virt.list[u].sub_dset[v].virtual_select, size) < 0)
                         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to modify size of dataspace")
             } /* end for */

@@ -3477,10 +3477,12 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  test/testabort_fail.sh
                  test/testcheck_version.sh
                  test/testerror.sh
+                 test/testexternal_env.sh
                  test/testflushrefresh.sh
                  test/testlibinfo.sh
                  test/testlinks_env.sh
                  test/testswmr.sh
+                 test/testvds_env.sh
                  test/testvdsswmr.sh
                  test/test_filter_plugin.sh
                  test/test_usecases.sh

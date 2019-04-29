@@ -981,8 +981,7 @@ H5FD_multi_fapl_free(void *_fa)
  *-------------------------------------------------------------------------
  */
 static H5FD_t *
-H5FD_multi_open(const char *name, unsigned flags, hid_t fapl_id,
-		haddr_t maxaddr)
+H5FD_multi_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 {
     H5FD_multi_t	*file=NULL;
     hid_t		close_fapl=-1;
@@ -996,7 +995,7 @@ H5FD_multi_open(const char *name, unsigned flags, hid_t fapl_id,
     /* Check arguments */
     if (!name || !*name)
         H5Epush_ret(func, H5E_ERR_CLS, H5E_ARGS, H5E_BADVALUE, "invalid file name", NULL)
-    if (0==maxaddr || HADDR_UNDEF==maxaddr)
+    if (0 == maxaddr || HADDR_UNDEF == maxaddr)
         H5Epush_ret(func, H5E_ERR_CLS, H5E_ARGS, H5E_BADRANGE, "bogus maxaddr", NULL)
 
     /*
@@ -1007,41 +1006,41 @@ H5FD_multi_open(const char *name, unsigned flags, hid_t fapl_id,
      */
     if(NULL == (file = (H5FD_multi_t *)calloc((size_t)1, sizeof(H5FD_multi_t))))
         H5Epush_ret(func, H5E_ERR_CLS, H5E_RESOURCE, H5E_NOSPACE, "memory allocation failed", NULL)
-    if(H5P_FILE_ACCESS_DEFAULT==fapl_id || H5FD_MULTI!=H5Pget_driver(fapl_id)) {
+    if(H5P_FILE_ACCESS_DEFAULT == fapl_id || H5FD_MULTI != H5Pget_driver(fapl_id)) {
         close_fapl = fapl_id = H5Pcreate(H5P_FILE_ACCESS);
-        if(H5Pset_fapl_multi(fapl_id, NULL, NULL, NULL, NULL, TRUE)<0)
+        if(H5Pset_fapl_multi(fapl_id, NULL, NULL, NULL, NULL, TRUE) < 0)
             H5Epush_goto(func, H5E_ERR_CLS, H5E_FILE, H5E_CANTSET, "can't set property value", error)
     }
     fa = (const H5FD_multi_fapl_t *)H5Pget_driver_info(fapl_id);
     assert(fa);
     ALL_MEMBERS(mt) {
-	file->fa.memb_map[mt] = fa->memb_map[mt];
-	file->fa.memb_addr[mt] = fa->memb_addr[mt];
-	if (fa->memb_fapl[mt]>=0)
-	    H5Iinc_ref(fa->memb_fapl[mt]);
+        file->fa.memb_map[mt] = fa->memb_map[mt];
+        file->fa.memb_addr[mt] = fa->memb_addr[mt];
+        if (fa->memb_fapl[mt] >= 0)
+            H5Iinc_ref(fa->memb_fapl[mt]);
         file->fa.memb_fapl[mt] = fa->memb_fapl[mt];
-	if (fa->memb_name[mt])
-	    file->fa.memb_name[mt] = my_strdup(fa->memb_name[mt]);
-	else
-	    file->fa.memb_name[mt] = NULL;
+        if (fa->memb_name[mt])
+            file->fa.memb_name[mt] = my_strdup(fa->memb_name[mt]);
+        else
+            file->fa.memb_name[mt] = NULL;
     } END_MEMBERS;
     file->fa.relax = fa->relax;
     file->flags = flags;
     file->name = my_strdup(name);
-    if (close_fapl>=0)
-        if(H5Pclose(close_fapl)<0)
+    if (close_fapl >= 0)
+        if(H5Pclose(close_fapl) < 0)
             H5Epush_goto(func, H5E_ERR_CLS, H5E_FILE, H5E_CANTCLOSEOBJ, "can't close property list", error)
 
     /* Compute derived properties and open member files */
-    if (compute_next(file)<0)
+    if (compute_next(file) < 0)
         H5Epush_goto(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "compute_next() failed", error);
-    if (open_members(file)<0)
+    if (open_members(file) < 0)
         H5Epush_goto(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "open_members() failed", error);
 
     /* We must have opened at least the superblock file */
-    if (H5FD_MEM_DEFAULT==(m=file->fa.memb_map[H5FD_MEM_SUPER]))
+    if (H5FD_MEM_DEFAULT == (m = file->fa.memb_map[H5FD_MEM_SUPER]))
         m = H5FD_MEM_SUPER;
-    if (NULL==file->memb[m])
+    if (NULL == file->memb[m])
         goto error;
 
     return (H5FD_t*)file;
@@ -1049,13 +1048,14 @@ H5FD_multi_open(const char *name, unsigned flags, hid_t fapl_id,
 error:
     /* Cleanup and fail */
     if (file) {
-	ALL_MEMBERS(mt) {
-	    if (file->memb[mt]) (void)H5FDclose(file->memb[mt]);
-	    if (file->fa.memb_fapl[mt]>=0) (void)H5Idec_ref(file->fa.memb_fapl[mt]);
-	    if (file->fa.memb_name[mt]) free(file->fa.memb_name[mt]);
-	} END_MEMBERS;
-	if (file->name) free(file->name);
-	free(file);
+        ALL_MEMBERS(mt) {
+            if (file->memb[mt]) (void)H5FDclose(file->memb[mt]);
+            if (file->fa.memb_fapl[mt] >= 0) (void)H5Idec_ref(file->fa.memb_fapl[mt]);
+            if (file->fa.memb_name[mt]) free(file->fa.memb_name[mt]);
+        } END_MEMBERS;
+        if (file->name)
+            free(file->name);
+        free(file);
     }
     return NULL;
 }

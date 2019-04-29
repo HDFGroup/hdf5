@@ -186,8 +186,10 @@ check-vfd:
 	  fi;                                                          \
 	done
 
-# Run tests with different Virtual Object Layer Connectors.
-check-vol:
+# Run tests with different passthrough Virtual Object Layer Connectors.
+# NOTE: Will only succeed with passthrough VOL connectors that use
+#       the native VOL connector as the terminal connector.
+check-passthrough-vol:
 	for d in $(SUBDIRS); do                                \
 	  if test $$d != .; then                                       \
 	    (cd $$d && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;          \

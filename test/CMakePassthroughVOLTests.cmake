@@ -99,6 +99,8 @@ endif ()
       tcheck_version
       testmeta
       links_env
+      external_env
+      vds_env
   )
   if (NOT CYGWIN)
     list (REMOVE_ITEM H5_VOL_SKIP_TESTS big cache)
@@ -340,7 +342,7 @@ endif ()
         set_tests_properties (VOL-${volname}-cache-shared PROPERTIES TIMEOUT ${CTEST_VERY_LONG_TIMEOUT})
       endif ()
     endif ()
-    if (HDF5_TEST_FHEAP_VOL)
+    if (HDF5_TEST_FHEAP_PASSTHROUGH_VOL)
       add_test (
           NAME VOL-${volname}-fheap-clear-objects
           COMMAND    ${CMAKE_COMMAND}

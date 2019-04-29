@@ -118,26 +118,18 @@
                   -E copy_if_different ${HDF5_TOOLS_TEST_H5FC_SOURCE_DIR}/testfiles/${testfile} ./testfiles/outtmp.h5
           )
           set_tests_properties (H5FC-${testname}-${testfile}-tmpfile PROPERTIES DEPENDS "H5FC-${testname}-clear-objects")
-          if (SKIP_ERROR_STACK_TESTS)
-            add_test (
-                NAME H5FC-${testname}-${testfile}
-               COMMAND ${CMAKE_COMMAND} -E echo "SKIP Error Stack Test"
-            )
-            set_property(TEST H5FC-${testname}-${testfile} PROPERTY DISABLED)
-          else ()
-            add_test (
-                NAME H5FC-${testname}-${testfile}
-                COMMAND "${CMAKE_COMMAND}"
-                    -D "TEST_PROGRAM=$<TARGET_FILE:h5format_convert>"
-                    -D "TEST_ARGS=${ARGN};outtmp.h5"
-                    -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
-                    -D "TEST_OUTPUT=${testname}.out"
-                    -D "TEST_EXPECT=${resultcode}"
-                    -D "TEST_REFERENCE=${resultfile}"
-                    -D "TEST_ERRREF=${resultfile}.err"
-                    -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
-            )
-          endif ()
+          add_test (
+              NAME H5FC-${testname}-${testfile}
+              COMMAND "${CMAKE_COMMAND}"
+                  -D "TEST_PROGRAM=$<TARGET_FILE:h5format_convert>"
+                  -D "TEST_ARGS=${ARGN};outtmp.h5"
+                  -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
+                  -D "TEST_OUTPUT=${testname}.out"
+                  -D "TEST_EXPECT=${resultcode}"
+                  -D "TEST_REFERENCE=${resultfile}"
+                  -D "TEST_ERRREF=${resultfile}.err"
+                  -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+          )
           set_tests_properties (H5FC-${testname}-${testfile} PROPERTIES DEPENDS "H5FC-${testname}-${testfile}-tmpfile")
           set (last_test "H5FC-${testname}-${testfile}")
       else ()
@@ -194,7 +186,7 @@
     endif ()
   endmacro ()
 
-  macro (ADD_H5_MASK_OUTPUT testname resultfile resultcode testfile)
+  macro (ADD_H5_MASK_OUTPUT testname resultfile resultcode result_errcheck testfile)
     # If using memchecker add tests without using scripts
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
       add_test (
@@ -214,27 +206,18 @@
               -E copy_if_different ${HDF5_TOOLS_TEST_H5FC_SOURCE_DIR}/testfiles/${testfile} ./testfiles/outtmp.h5
       )
       set_tests_properties (H5FC-${testname}-${testfile}-tmpfile PROPERTIES DEPENDS "H5FC-${testname}-clear-objects")
-      if (SKIP_ERROR_STACK_TESTS)
-        add_test (
-            NAME H5FC-${testname}-${testfile}
-            COMMAND ${CMAKE_COMMAND} -E echo "SKIP Error Stack Test"
-        )
-        set_property(TEST H5FC-${testname}-${testfile} PROPERTY DISABLED)
-      else ()
-        add_test (
-            NAME H5FC-${testname}-${testfile}
-            COMMAND "${CMAKE_COMMAND}"
-                -D "TEST_PROGRAM=$<TARGET_FILE:h5format_convert>"
-                -D "TEST_ARGS=${ARGN};outtmp.h5"
-                -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
-                -D "TEST_OUTPUT=${testname}.out"
-                -D "TEST_EXPECT=${resultcode}"
-                -D "TEST_REFERENCE=${resultfile}"
-                -D "TEST_ERRREF=${resultfile}.err"
-                -D "TEST_MASK_ERROR=true"
-                -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
-        )
-      endif ()
+      add_test (
+          NAME H5FC-${testname}-${testfile}
+          COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5format_convert>"
+              -D "TEST_ARGS=${ARGN};outtmp.h5"
+              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
+              -D "TEST_OUTPUT=${testname}.out"
+              -D "TEST_EXPECT=${resultcode}"
+              -D "TEST_REFERENCE=${resultfile}"
+              -D "TEST_ERRREF=${result_errcheck}"
+              -P "${HDF_RESOURCES_EXT_DIR}/grepTest.cmake"
+      )
       set_tests_properties (H5FC-${testname}-${testfile} PROPERTIES DEPENDS "H5FC-${testname}-${testfile}-tmpfile")
       set (last_test "H5FC-${testname}-${testfile}")
     endif ()
@@ -491,7 +474,7 @@
 #
 #
 # h5format_convert -v h5fc_err_level.h5 (error encountered in converting the dataset)
-  ADD_H5_MASK_OUTPUT (h5fc_v_err h5fc_v_err.ddl 1 h5fc_err_level.h5 -v)
+  ADD_H5_MASK_OUTPUT (h5fc_v_err h5fc_v_err.ddl 1 "h5format_convert error: unable to downgrade dataset \"/DSET_ERR\"" h5fc_err_level.h5 -v)
 #
 #
 #

@@ -50,6 +50,7 @@ static H5VL_class_t H5VL_native_cls_g = {
         NULL,                                       /* get_object   */
         NULL,                                       /* get_wrap_ctx */
         NULL,                                       /* wrap_object  */
+        NULL,                                       /* unwrap_object */
         NULL                                        /* free_wrap_ctx */
     },
     {   /* attribute_cls */

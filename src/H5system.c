@@ -1256,13 +1256,13 @@ H5_combine_path(const char* path1, const char* path2, char **full_name /*out*/)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    HDassert(path1);
     HDassert(path2);
 
-    path1_len = HDstrlen(path1);
+    if(path1)
+        path1_len = HDstrlen(path1);
     path2_len = HDstrlen(path2);
 
-    if(*path1 == '\0' || H5_CHECK_ABSOLUTE(path2)) {
+    if(path1 == NULL || *path1 == '\0' || H5_CHECK_ABSOLUTE(path2)) {
 
         /* If path1 is empty or path2 is absolute, simply use path2 */
         if(NULL == (*full_name = (char *)H5MM_strdup(path2)))

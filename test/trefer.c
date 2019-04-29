@@ -490,16 +490,20 @@ test_reference_obj(void)
 **  test_reference_region(): Test basic H5R (reference) object reference code.
 **      Tests references to various kinds of objects
 **
+**  Note: The libver_low/libver_high parameters are added to create the file
+**        with the low and high bounds setting in fapl.  
+**        Please see the RFC for "H5Sencode/H5Sdecode Format Change".
+**
 ****************************************************************/
 static void
 test_reference_region(H5F_libver_t libver_low, H5F_libver_t libver_high)
 {
-    hid_t fid1;         /* HDF5 File IDs        */
+    hid_t fid1;         /* HDF5 File IDs */
     hid_t fapl = -1;    /* File access property list */
-    hid_t dset1,        /* Dataset ID            */
+    hid_t dset1,        /* Dataset ID */
           dset2;        /* Dereferenced dataset ID */
-    hid_t sid1,         /* Dataspace ID    #1        */
-          sid2;         /* Dataspace ID    #2        */
+    hid_t sid1,         /* Dataspace ID #1 */
+          sid2;         /* Dataspace ID #2 */
     hid_t dapl_id;      /* Dataset access property list */
     hsize_t dims1[] = {SPACE1_DIM1},
             dims2[] = {SPACE2_DIM1, SPACE2_DIM2};
@@ -508,24 +512,24 @@ test_reference_region(H5F_libver_t libver_low, H5F_libver_t libver_high)
     hsize_t count[SPACE2_RANK];     /* Element count of hyperslab */
     hsize_t block[SPACE2_RANK];     /* Block size of hyperslab */
     hsize_t coord1[POINT1_NPOINTS][SPACE2_RANK]; /* Coordinates for point selection */
-    hsize_t *coords;                /* Coordinate buffer */
-    hsize_t low[SPACE2_RANK];       /* Selection bounds */
-    hsize_t high[SPACE2_RANK];      /* Selection bounds */
-    hdset_reg_ref_t *wbuf,          /* buffer to write to disk */
-                    *rbuf;          /* buffer read from disk */
-    hdset_reg_ref_t nvrbuf[3]={{0},{101},{255}}; /* buffer with non-valid refs */
-    uint8_t *dwbuf,                 /* Buffer for writing numeric data to disk */
-            *drbuf;                 /* Buffer for reading numeric data from disk */
-    uint8_t *tu8;                   /* Temporary pointer to uint8 data */
-    H5O_type_t obj_type;            /* Type of object */
-    int i, j;                       /* counting variables */
-    hssize_t hssize_ret;            /* hssize_t return value */
-    htri_t tri_ret;                 /* htri_t return value */
-    herr_t ret;                     /* Generic return value        */
-    haddr_t addr = HADDR_UNDEF;     /* test for undefined reference */
-    hid_t dset_NA;                  /* Dataset id for undefined reference */
-    hid_t space_NA;                 /* Dataspace id for undefined reference */
-    hsize_t dims_NA[1] = {1};       /* Dims array for undefined reference */
+    hsize_t *coords;            /* Coordinate buffer */
+    hsize_t low[SPACE2_RANK];   /* Selection bounds */
+    hsize_t high[SPACE2_RANK];  /* Selection bounds */
+    hdset_reg_ref_t *wbuf,      /* buffer to write to disk */
+                    *rbuf;      /* buffer read from disk */
+    hdset_reg_ref_t  nvrbuf[3]={{0},{101},{255}}; /* buffer with non-valid refs */
+    uint8_t *dwbuf,             /* Buffer for writing numeric data to disk */
+            *drbuf;             /* Buffer for reading numeric data from disk */
+    uint8_t *tu8;               /* Temporary pointer to uint8 data */
+    H5O_type_t obj_type;        /* Type of object */
+    int i, j;                   /* counting variables */
+    hssize_t hssize_ret;        /* hssize_t return value */
+    htri_t tri_ret;             /* htri_t return value */
+    herr_t ret;                 /* Generic return value     */
+    haddr_t addr = HADDR_UNDEF; /* test for undefined reference */
+    hid_t dset_NA;              /* Dataset id for undefined reference */
+    hid_t space_NA;             /* Dataspace id for undefined reference */
+    hsize_t dims_NA[1] = {1};   /* Dims array for undefined reference */
     hdset_reg_ref_t wdata_NA[1],    /* Write buffer */
                     rdata_NA[1];    /* Read buffer */
 
@@ -634,8 +638,14 @@ test_reference_region(H5F_libver_t libver_low, H5F_libver_t libver_high)
     VERIFY(hssize_ret, (hssize_t)H5S_UNLIMITED, "H5Sget_select_npoints");
 
     /* Store third dataset region */
-    ret = H5Rcreate(&wbuf[2], fid1, "/Dataset2", H5R_DATASET_REGION, sid2);
-    CHECK(ret, FAIL, "H5Rcreate");
+    H5E_BEGIN_TRY {
+        ret = H5Rcreate(&wbuf[2], fid1, "/Dataset2", H5R_DATASET_REGION, sid2);
+    } H5E_END_TRY;
+
+    if(libver_high < H5F_LIBVER_V110)
+        VERIFY(ret, FAIL, "H5Rcreate");
+    else
+        CHECK(ret, FAIL, "H5Rcreate");
 
     ret = H5Rget_obj_type2(dset1, H5R_DATASET_REGION, &wbuf[0], &obj_type);
     CHECK(ret, FAIL, "H5Rget_obj_type2");
