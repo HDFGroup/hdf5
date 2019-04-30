@@ -2867,12 +2867,12 @@ H5D__chunk_redistribute_shared_chunks(const H5D_io_info_t *io_info, const H5D_ty
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTENCODE, FAIL, "unable to encode dataspace")
 
             /* Initialize iterator for memory selection */
-            if(H5S_select_iter_init(mem_iter, chunk_info->mspace, type_info->src_type_size) < 0)
+            if(H5S_select_iter_init(mem_iter, chunk_info->mspace, type_info->src_type_size, 0) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize memory selection information")
             mem_iter_init = TRUE;
 
             /* Collect the modification data into the buffer */
-            if(0 == H5D__gather_mem(io_info->u.wbuf, chunk_info->mspace, mem_iter, (size_t)iter_nelmts, mod_data_p))
+            if(0 == H5D__gather_mem(io_info->u.wbuf, mem_iter, (size_t)iter_nelmts, mod_data_p))
                 HGOTO_ERROR(H5E_IO, H5E_CANTGATHER, FAIL, "couldn't gather from write buffer")
 
             /* Send modification data to new owner */
@@ -3173,7 +3173,7 @@ H5D__filtered_collective_chunk_entry_io(H5D_filtered_collective_io_info_t *chunk
     if (NULL == (mem_iter = (H5S_sel_iter_t *) H5MM_malloc(sizeof(H5S_sel_iter_t))))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate memory iterator")
 
-    if(H5S_select_iter_init(mem_iter, chunk_info->mspace, type_info->src_type_size) < 0)
+    if(H5S_select_iter_init(mem_iter, chunk_info->mspace, type_info->src_type_size, 0) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize memory selection information")
     mem_iter_init = TRUE;
 
@@ -3188,7 +3188,7 @@ H5D__filtered_collective_chunk_entry_io(H5D_filtered_collective_io_info_t *chunk
             if(NULL == (file_iter = (H5S_sel_iter_t *) H5MM_malloc(sizeof(H5S_sel_iter_t))))
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate file iterator")
 
-            if(H5S_select_iter_init(file_iter, chunk_info->fspace, type_info->src_type_size) < 0)
+            if(H5S_select_iter_init(file_iter, chunk_info->fspace, type_info->src_type_size, 0) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize memory selection information")
             file_iter_init = TRUE;
 
@@ -3198,13 +3198,13 @@ H5D__filtered_collective_chunk_entry_io(H5D_filtered_collective_io_info_t *chunk
             if(NULL == (tmp_gath_buf = H5MM_malloc((hsize_t) iter_nelmts * type_info->src_type_size)))
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate temporary gather buffer")
 
-            if(!H5D__gather_mem(chunk_entry->buf, chunk_info->fspace, file_iter, (size_t) iter_nelmts, tmp_gath_buf))
+            if(!H5D__gather_mem(chunk_entry->buf, file_iter, (size_t) iter_nelmts, tmp_gath_buf))
                 HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "couldn't gather from chunk buffer")
 
             if((iter_nelmts = H5S_GET_SELECT_NPOINTS(chunk_info->mspace)) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTCOUNT, FAIL, "dataspace is invalid")
 
-            if(H5D__scatter_mem(tmp_gath_buf, chunk_info->mspace, mem_iter, (size_t) iter_nelmts, io_info->u.rbuf) < 0)
+            if(H5D__scatter_mem(tmp_gath_buf, mem_iter, (size_t) iter_nelmts, io_info->u.rbuf) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "couldn't scatter to read buffer")
 
             break;
@@ -3217,7 +3217,7 @@ H5D__filtered_collective_chunk_entry_io(H5D_filtered_collective_io_info_t *chunk
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate temporary gather buffer")
 
             /* Gather modification data from the application write buffer into a temporary buffer */
-            if(0 == H5D__gather_mem(io_info->u.wbuf, chunk_info->mspace, mem_iter, (size_t) iter_nelmts, tmp_gath_buf))
+            if(0 == H5D__gather_mem(io_info->u.wbuf, mem_iter, (size_t) iter_nelmts, tmp_gath_buf))
                 HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "couldn't gather from write buffer")
 
             if(H5S_SELECT_ITER_RELEASE(mem_iter) < 0)
@@ -3225,7 +3225,7 @@ H5D__filtered_collective_chunk_entry_io(H5D_filtered_collective_io_info_t *chunk
             mem_iter_init = FALSE;
 
             /* Initialize iterator for file selection */
-            if(H5S_select_iter_init(mem_iter, chunk_info->fspace, type_info->dst_type_size) < 0)
+            if(H5S_select_iter_init(mem_iter, chunk_info->fspace, type_info->dst_type_size, 0) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize file selection information")
             mem_iter_init = TRUE;
 
@@ -3235,7 +3235,7 @@ H5D__filtered_collective_chunk_entry_io(H5D_filtered_collective_io_info_t *chunk
             /* Scatter the owner's modification data into the chunk data buffer according to
              * the file space.
              */
-            if(H5D__scatter_mem(tmp_gath_buf, chunk_info->fspace, mem_iter, (size_t) iter_nelmts, chunk_entry->buf) < 0)
+            if(H5D__scatter_mem(tmp_gath_buf, mem_iter, (size_t) iter_nelmts, chunk_entry->buf) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "couldn't scatter to chunk data buffer")
 
             if(H5S_SELECT_ITER_RELEASE(mem_iter) < 0)
@@ -3257,7 +3257,7 @@ H5D__filtered_collective_chunk_entry_io(H5D_filtered_collective_io_info_t *chunk
                 if(NULL == (dataspace = H5S_decode(&mod_data_p)))
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTDECODE, FAIL, "unable to decode dataspace")
 
-                if(H5S_select_iter_init(mem_iter, dataspace, type_info->dst_type_size) < 0)
+                if(H5S_select_iter_init(mem_iter, dataspace, type_info->dst_type_size, 0) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize memory selection information")
                 mem_iter_init = TRUE;
 
@@ -3265,7 +3265,7 @@ H5D__filtered_collective_chunk_entry_io(H5D_filtered_collective_io_info_t *chunk
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTCOUNT, FAIL, "dataspace is invalid")
 
                 /* Update the chunk data with the received modification data */
-                if(H5D__scatter_mem(mod_data_p, dataspace, mem_iter, (size_t) iter_nelmts, chunk_entry->buf) < 0)
+                if(H5D__scatter_mem(mod_data_p, mem_iter, (size_t) iter_nelmts, chunk_entry->buf) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "couldn't scatter to write buffer")
 
                 if(H5S_SELECT_ITER_RELEASE(mem_iter) < 0)

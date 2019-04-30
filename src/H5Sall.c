@@ -51,9 +51,6 @@
 
 /* Selection callbacks */
 static herr_t H5S__all_copy(H5S_t *dst, const H5S_t *src, hbool_t share_selection);
-static herr_t H5S__all_get_seq_list(const H5S_t *space, unsigned flags,
-    H5S_sel_iter_t *iter, size_t maxseq, size_t maxbytes,
-    size_t *nseq, size_t *nbytes, hsize_t *off, size_t *len);
 static herr_t H5S__all_release(H5S_t *space);
 static htri_t H5S__all_is_valid(const H5S_t *space);
 static hssize_t H5S__all_serial_size(const H5S_t *space);
@@ -65,10 +62,11 @@ static int H5S__all_unlim_dim(const H5S_t *space);
 static htri_t H5S__all_is_contiguous(const H5S_t *space);
 static htri_t H5S__all_is_single(const H5S_t *space);
 static htri_t H5S__all_is_regular(const H5S_t *space);
+static htri_t H5S__all_shape_same(const H5S_t *space1, const H5S_t *space2);
 static herr_t H5S__all_adjust_u(H5S_t *space, const hsize_t *offset);
 static herr_t H5S__all_project_scalar(const H5S_t *space, hsize_t *offset);
 static herr_t H5S__all_project_simple(const H5S_t *space, H5S_t *new_space, hsize_t *offset);
-static herr_t H5S__all_iter_init(H5S_sel_iter_t *iter, const H5S_t *space);
+static herr_t H5S__all_iter_init(const H5S_t *space, H5S_sel_iter_t *iter);
 
 /* Selection iteration callbacks */
 static herr_t H5S__all_iter_coords(const H5S_sel_iter_t *iter, hsize_t *coords);
@@ -77,6 +75,8 @@ static hsize_t H5S__all_iter_nelmts(const H5S_sel_iter_t *iter);
 static htri_t H5S__all_iter_has_next_block(const H5S_sel_iter_t *iter);
 static herr_t H5S__all_iter_next(H5S_sel_iter_t *sel_iter, size_t nelem);
 static herr_t H5S__all_iter_next_block(H5S_sel_iter_t *sel_iter);
+static herr_t H5S__all_iter_get_seq_list(H5S_sel_iter_t *iter, size_t maxseq,
+    size_t maxbytes, size_t *nseq, size_t *nbytes, hsize_t *off, size_t *len);
 static herr_t H5S__all_iter_release(H5S_sel_iter_t *sel_iter);
 
 
@@ -95,7 +95,6 @@ const H5S_select_class_t H5S_sel_all[1] = {{
 
     /* Methods on selection */
     H5S__all_copy,
-    H5S__all_get_seq_list,
     H5S__all_release,
     H5S__all_is_valid,
     H5S__all_serial_size,
@@ -108,6 +107,7 @@ const H5S_select_class_t H5S_sel_all[1] = {{
     H5S__all_is_contiguous,
     H5S__all_is_single,
     H5S__all_is_regular,
+    H5S__all_shape_same,
     H5S__all_adjust_u,
     H5S__all_project_scalar,
     H5S__all_project_simple,
@@ -130,6 +130,7 @@ static const H5S_sel_iter_class_t H5S_sel_iter_all[1] = {{
     H5S__all_iter_has_next_block,
     H5S__all_iter_next,
     H5S__all_iter_next_block,
+    H5S__all_iter_get_seq_list,
     H5S__all_iter_release,
 }};
 
@@ -148,16 +149,13 @@ static const H5S_sel_iter_class_t H5S_sel_iter_all[1] = {{
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5S__all_iter_init(H5S_sel_iter_t *iter, const H5S_t *space)
+H5S__all_iter_init(const H5S_t H5_ATTR_UNUSED *space, H5S_sel_iter_t *iter)
 {
     FUNC_ENTER_STATIC_NOERR
 
     /* Check args */
     HDassert(space && H5S_SEL_ALL == H5S_GET_SELECT_TYPE(space));
     HDassert(iter);
-
-    /* Initialize the number of elements to iterate over */
-    iter->elmt_left = H5S_GET_SELECT_NPOINTS(space);
 
     /* Start at the upper left location */
     iter->u.all.elmt_offset = 0;
@@ -361,13 +359,11 @@ H5S__all_iter_next_block(H5S_sel_iter_t H5_ATTR_UNUSED *iter)
 
 /*--------------------------------------------------------------------------
  NAME
-    H5S__all_get_seq_list
+    H5S__all_iter_get_seq_list
  PURPOSE
     Create a list of offsets & lengths for a selection
  USAGE
-    herr_t H5S__all_get_seq_list(space,flags,iter,maxseq,maxelem,nseq,nelem,off,len)
-        H5S_t *space;           IN: Dataspace containing selection to use.
-        unsigned flags;         IN: Flags for extra information about operation
+    herr_t H5S__all_iter_get_seq_list(iter,maxseq,maxelem,nseq,nelem,off,len)
         H5S_sel_iter_t *iter;   IN/OUT: Selection iterator describing last
                                     position of interest in selection.
         size_t maxseq;          IN: Maximum number of sequences to generate
@@ -391,16 +387,14 @@ H5S__all_iter_next_block(H5S_sel_iter_t H5_ATTR_UNUSED *iter)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S__all_get_seq_list(const H5S_t H5_ATTR_UNUSED *space, unsigned H5_ATTR_UNUSED flags, H5S_sel_iter_t *iter,
-    size_t H5_ATTR_UNUSED maxseq, size_t maxelem, size_t *nseq, size_t *nelem,
-    hsize_t *off, size_t *len)
+H5S__all_iter_get_seq_list(H5S_sel_iter_t *iter, size_t H5_ATTR_UNUSED maxseq,
+    size_t maxelem, size_t *nseq, size_t *nelem, hsize_t *off, size_t *len)
 {
     size_t elem_used;           /* The number of elements used */
 
     FUNC_ENTER_STATIC_NOERR
 
     /* Check args */
-    HDassert(space);
     HDassert(iter);
     HDassert(maxseq > 0);
     HDassert(maxelem > 0);
@@ -430,7 +424,7 @@ H5S__all_get_seq_list(const H5S_t H5_ATTR_UNUSED *space, unsigned H5_ATTR_UNUSED
     iter->u.all.byte_offset += len[0];
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5S__all_get_seq_list() */
+} /* end H5S__all_iter_get_seq_list() */
 
 
 /*--------------------------------------------------------------------------
@@ -914,6 +908,70 @@ H5S__all_is_regular(const H5S_t H5_ATTR_UNUSED *space)
 
     FUNC_LEAVE_NOAPI(TRUE)
 } /* end H5S__all_is_regular() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S__all_shape_same
+ PURPOSE
+    Check if a two "all" selections are the same shape
+ USAGE
+    htri_t H5S__all_shape_same(space1, space2)
+        const H5S_t *space1;     IN: First dataspace to check
+        const H5S_t *space2;     IN: Second dataspace to check
+ RETURNS
+    TRUE / FALSE / FAIL
+ DESCRIPTION
+    Checks to see if the current selection in each dataspace are the same
+    shape.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+static htri_t
+H5S__all_shape_same(const H5S_t *space1, const H5S_t *space2)
+{
+    int space1_dim;             /* Current dimension in first dataspace */
+    int space2_dim;             /* Current dimension in second dataspace */
+    htri_t ret_value = TRUE;    /* Return value */
+
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Check args */
+    HDassert(space1);
+    HDassert(space2);
+
+    /* Initialize dataspace dims */
+    space1_dim = (int)space1->extent.rank - 1;
+    space2_dim = (int)space2->extent.rank - 1;
+
+    /* Recall that space1_rank >= space2_rank.
+     *
+     * In the following while loop, we test to see if space1 and space2
+     * have identical size in all dimensions they have in common.
+     */
+    while(space2_dim >= 0) {
+        if(space1->extent.size[space1_dim] != space2->extent.size[space2_dim])
+            HGOTO_DONE(FALSE)
+
+        space1_dim--;
+        space2_dim--;
+    } /* end while */
+
+    /* Since we are selecting the entire space, we must also verify that space1
+     * has size 1 in all dimensions that it does not share with space2.
+     */
+    while(space1_dim >= 0) {
+        if(space1->extent.size[space1_dim] != 1)
+            HGOTO_DONE(FALSE)
+
+        space1_dim--;
+    } /* end while */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5S__all_shape_same() */
 
 
 /*--------------------------------------------------------------------------

@@ -31,6 +31,7 @@
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Dprivate.h"		/* Datasets				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5FLprivate.h"	/* Free Lists				*/
 #include "H5MMprivate.h"        /* Memory management                    */
 #include "H5Spkg.h"		/* Dataspaces 				*/
 #include "H5VMprivate.h"        /* Vector and array functions		*/
@@ -50,6 +51,18 @@
 /******************/
 /* Local Typedefs */
 /******************/
+
+/* Node in linked list of MPI data types created during traversal of irregular hyperslab selection */
+typedef struct H5S_mpio_mpitype_node_t {
+    MPI_Datatype type;                          /* MPI Datatype */
+    struct H5S_mpio_mpitype_node_t *next;       /* Pointer to next node in list */
+} H5S_mpio_mpitype_node_t;
+
+/* List to track MPI data types generated during traversal of irregular hyperslab selection */
+typedef struct H5S_mpio_mpitype_list_t {
+    H5S_mpio_mpitype_node_t *head;      /* Pointer to head of list */
+    H5S_mpio_mpitype_node_t *tail;      /* Pointer to tail of list */
+} H5S_mpio_mpitype_list_t;
 
 
 /********************/
@@ -71,9 +84,12 @@ static herr_t H5S__mpio_reg_hyper_type(const H5S_t *space, size_t elmt_size,
     MPI_Datatype *new_type, int *count, hbool_t *is_derived_type);
 static herr_t H5S__mpio_span_hyper_type(const H5S_t *space, size_t elmt_size,
     MPI_Datatype *new_type, int *count, hbool_t *is_derived_type);
-static herr_t H5S__obtain_datatype(const hsize_t down[], H5S_hyper_span_t* span,
-    const MPI_Datatype *elmt_type, MPI_Datatype *span_type, size_t elmt_size);
-static herr_t H5S__mpio_create_large_type(hsize_t, MPI_Aint, MPI_Datatype , MPI_Datatype *);
+static herr_t H5S__release_datatype(H5S_mpio_mpitype_list_t *type_list);
+static herr_t H5S__obtain_datatype(H5S_hyper_span_info_t *spans, const hsize_t *down,
+    size_t elmt_size, const MPI_Datatype *elmt_type, MPI_Datatype *span_type,
+    H5S_mpio_mpitype_list_t *type_list, uint64_t op_gen);
+static herr_t H5S__mpio_create_large_type(hsize_t num_elements, MPI_Aint stride_bytes,
+    MPI_Datatype old_type, MPI_Datatype *new_type);
 
 
 /*****************************/
@@ -91,6 +107,8 @@ static herr_t H5S__mpio_create_large_type(hsize_t, MPI_Aint, MPI_Datatype , MPI_
 /*******************/
 static hsize_t bigio_count = H5S_MAX_MPI_COUNT;
 
+/* Declare a free list to manage the H5S_mpio_mpitype_node_t struct */
+H5FL_DEFINE_STATIC(H5S_mpio_mpitype_node_t);
 
 
 
@@ -542,7 +560,7 @@ H5S__mpio_permute_type(const H5S_t *space, size_t elmt_size, hsize_t **permute,
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate array of displacements")
 
     /* Initialize selection iterator */
-    if(H5S_select_iter_init(&sel_iter, space, elmt_size) < 0)
+    if(H5S_select_iter_init(&sel_iter, space, elmt_size, 0) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize selection iterator")
     sel_iter_init = TRUE;	/* Selection iteration info has been initialized */
 
@@ -559,7 +577,7 @@ H5S__mpio_permute_type(const H5S_t *space, size_t elmt_size, hsize_t **permute,
         size_t curr_seq;            /* Current sequence being worked on */
 
         /* Get the sequences of bytes */
-        if(H5S_SELECT_GET_SEQ_LIST(space, 0, &sel_iter, (size_t)H5D_IO_VECTOR_SIZE, max_elem, &nseq, &nelem, off, len) < 0)
+        if(H5S_SELECT_ITER_GET_SEQ_LIST(&sel_iter, (size_t)H5D_IO_VECTOR_SIZE, max_elem, &nseq, &nelem, off, len) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "sequence length generation failed")
 
         /* Loop, while sequences left to process */
@@ -679,7 +697,7 @@ H5S__mpio_reg_hyper_type(const H5S_t *space, size_t elmt_size,
     HDassert(sizeof(MPI_Aint) >= sizeof(elmt_size));
 
     /* Initialize selection iterator */
-    if(H5S_select_iter_init(&sel_iter, space, elmt_size) < 0)
+    if(H5S_select_iter_init(&sel_iter, space, elmt_size, 0) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize selection iterator")
     sel_iter_init = TRUE;	/* Selection iteration info has been initialized */
 
@@ -979,10 +997,12 @@ static herr_t
 H5S__mpio_span_hyper_type(const H5S_t *space, size_t elmt_size,
     MPI_Datatype *new_type, int *count, hbool_t *is_derived_type)
 {
+    H5S_mpio_mpitype_list_t type_list;  /* List to track MPI data types created */
     MPI_Datatype  elmt_type;            /* MPI datatype for an element */
     hbool_t elmt_type_is_derived = FALSE;       /* Whether the element type has been created */
     MPI_Datatype  span_type;            /* MPI datatype for overall span tree */
     hsize_t       down[H5S_MAX_RANK];   /* 'down' sizes for each dimension */
+    uint64_t      op_gen;               /* Operation generation value */
     int           mpi_code;             /* MPI return code */
     herr_t        ret_value = SUCCEED;  /* Return value */
 
@@ -1008,12 +1028,21 @@ H5S__mpio_span_hyper_type(const H5S_t *space, size_t elmt_size,
     if(H5VM_array_down(space->extent.rank, space->extent.size, down) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGETSIZE, FAIL, "couldn't compute 'down' dimension sizes")
 
-    /* Obtain derived data type */
-    if(H5S__obtain_datatype(down, space->select.sel_info.hslab->span_lst->head, &elmt_type, &span_type, elmt_size) < 0)
+    /* Acquire an operation generation value for creating MPI datatypes */
+    op_gen = H5S__hyper_get_op_gen();
+
+    /* Obtain derived MPI data type */
+    type_list.head = type_list.tail = NULL;
+    if(H5S__obtain_datatype(space->select.sel_info.hslab->span_lst, down, elmt_size, &elmt_type, &span_type, &type_list, op_gen) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "couldn't obtain MPI derived data type")
-    if(MPI_SUCCESS != (mpi_code = MPI_Type_commit(&span_type)))
+    if(MPI_SUCCESS != (mpi_code = MPI_Type_dup(span_type, new_type)))
         HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit failed", mpi_code)
-    *new_type = span_type;
+    if(MPI_SUCCESS != (mpi_code = MPI_Type_commit(new_type)))
+        HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit failed", mpi_code)
+
+    /* Release MPI data types generated during span tree traversal */
+    if(H5S__release_datatype(&type_list) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "couldn't release MPI derived data type")
 
     /* fill in the remaining return values */
     *count = 1;
@@ -1030,6 +1059,53 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5S__release_datatype
+ *
+ * Purpose:	Release the MPI derived datatypes for span-tree hyperslab selection
+ *
+ * Return:	Non-negative on success, negative on failure.
+ *
+ * Programmer:	Quincey Koziol, February 2, 2019
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5S__release_datatype(H5S_mpio_mpitype_list_t *type_list)
+{
+    H5S_mpio_mpitype_node_t *curr;      /* Pointer to head of list */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity check */
+    HDassert(type_list);
+
+    /* Iterate over the list, freeing the MPI data types */
+    curr = type_list->head;
+    while(curr) {
+        H5S_mpio_mpitype_node_t *next;  /* Pointer to next node in list */
+        int mpi_code;                   /* MPI return status code */
+
+        /* Release the MPI data type for this span tree */
+        if(MPI_SUCCESS != (mpi_code = MPI_Type_free(&curr->type)))
+            HMPI_GOTO_ERROR(FAIL, "MPI_Type_free failed", mpi_code)
+
+        /* Get pointer to next node in list */
+        next = curr->next;
+
+        /* Free the current node */
+        curr = H5FL_FREE(H5S_mpio_mpitype_node_t, curr);
+
+        /* Advance to next node */
+        curr = next;
+    } /* end while */
+
+done:
+  FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5S__release_datatype() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5S__obtain_datatype
  *
  * Purpose:	Obtain an MPI derived datatype for span-tree hyperslab selection
@@ -1043,219 +1119,225 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5S__obtain_datatype(const hsize_t *down, H5S_hyper_span_t *span,
-    const MPI_Datatype *elmt_type, MPI_Datatype *span_type, size_t elmt_size)
+H5S__obtain_datatype(H5S_hyper_span_info_t *spans, const hsize_t *down,
+    size_t elmt_size, const MPI_Datatype *elmt_type, MPI_Datatype *span_type,
+    H5S_mpio_mpitype_list_t *type_list, uint64_t op_gen)
 {
+    H5S_hyper_span_t      *span;                /* Hyperslab span to iterate with */
     size_t                alloc_count = 0;      /* Number of span tree nodes allocated at this level */
     size_t                outercount;           /* Number of span tree nodes at this level */
     MPI_Datatype          *inner_type = NULL;
     hbool_t inner_types_freed = FALSE;          /* Whether the inner_type MPI datatypes have been freed */
-    hbool_t span_type_valid = FALSE;            /* Whether the span_type MPI datatypes is valid */
-    hbool_t large_block = FALSE;                /* Wether the block length is larger than 32 bit integer */
     int                   *blocklen = NULL;
     MPI_Aint              *disp = NULL;
-    H5S_hyper_span_t      *tspan = NULL;        /* Temporary pointer to span tree node */
+    size_t                u;                    /* Local index variable */
     int                   mpi_code;             /* MPI return status code */
     herr_t                ret_value = SUCCEED;  /* Return value */
 
     FUNC_ENTER_STATIC
 
     /* Sanity check */
-    HDassert(span);
+    HDassert(spans);
+    HDassert(type_list);
 
-    /* Allocate the initial displacement & block length buffers */
-    alloc_count = H5S_MPIO_INITIAL_ALLOC_COUNT;
-    if(NULL == (disp = (MPI_Aint *)H5MM_malloc(alloc_count * sizeof(MPI_Aint))))
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate array of displacements")
-    if(NULL == (blocklen = (int *)H5MM_malloc(alloc_count * sizeof(int))))
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate array of block lengths")
+    /* Check if we've visited this span tree before */
+    if(spans->op_gen != op_gen) {
+        H5S_mpio_mpitype_node_t *type_node;     /* Pointer to new node in MPI data type list */
 
-    /* if this is the fastest changing dimension, it is the base case for derived datatype. */
-    if(NULL == span->down) {
-        tspan = span;
-        outercount = 0;
-        while(tspan) {
-            /* Check if we need to increase the size of the buffers */
-            if(outercount >= alloc_count) {
-                MPI_Aint     *tmp_disp;         /* Temporary pointer to new displacement buffer */
-                int          *tmp_blocklen;     /* Temporary pointer to new block length buffer */
+        /* Allocate the initial displacement & block length buffers */
+        alloc_count = H5S_MPIO_INITIAL_ALLOC_COUNT;
+        if(NULL == (disp = (MPI_Aint *)H5MM_malloc(alloc_count * sizeof(MPI_Aint))))
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate array of displacements")
+        if(NULL == (blocklen = (int *)H5MM_malloc(alloc_count * sizeof(int))))
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate array of block lengths")
 
-                /* Double the allocation count */
-                alloc_count *= 2;
+        /* If this is the fastest changing dimension, it is the base case for derived datatype. */
+        span = spans->head;
+        if(NULL == span->down) {
+            hbool_t large_block = FALSE;                /* Wether the block length is larger than 32 bit integer */
 
-                /* Re-allocate the buffers */
-                if(NULL == (tmp_disp = (MPI_Aint *)H5MM_realloc(disp, alloc_count * sizeof(MPI_Aint))))
-                    HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate array of displacements")
-                disp = tmp_disp;
-                if(NULL == (tmp_blocklen = (int *)H5MM_realloc(blocklen, alloc_count * sizeof(int))))
-                    HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate array of block lengths")
-                blocklen = tmp_blocklen;
+            outercount = 0;
+            while(span) {
+                hsize_t nelmts;     /* # of elements covered by current span */
+
+                /* Check if we need to increase the size of the buffers */
+                if(outercount >= alloc_count) {
+                    MPI_Aint     *tmp_disp;         /* Temporary pointer to new displacement buffer */
+                    int          *tmp_blocklen;     /* Temporary pointer to new block length buffer */
+
+                    /* Double the allocation count */
+                    alloc_count *= 2;
+
+                    /* Re-allocate the buffers */
+                    if(NULL == (tmp_disp = (MPI_Aint *)H5MM_realloc(disp, alloc_count * sizeof(MPI_Aint))))
+                        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate array of displacements")
+                    disp = tmp_disp;
+                    if(NULL == (tmp_blocklen = (int *)H5MM_realloc(blocklen, alloc_count * sizeof(int))))
+                        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate array of block lengths")
+                    blocklen = tmp_blocklen;
+                } /* end if */
+
+                /* Compute the number of elements to attempt in this span */
+                nelmts = (span->high - span->low) + 1;
+
+                /* Store displacement & block length */
+                disp[outercount]      = (MPI_Aint)elmt_size * span->low;
+                H5_CHECK_OVERFLOW(nelmts, hsize_t, int)
+                blocklen[outercount]  = (int)nelmts;
+
+                if(bigio_count < blocklen[outercount])
+                    large_block = TRUE; /* at least one block type is large, so set this flag to true */
+
+                span = span->next;
+                outercount++;
+            } /* end while */
+
+            /* Everything fits into integers, so cast them and use hindexed */
+            if(bigio_count >= outercount && large_block == FALSE) {
+                if(MPI_SUCCESS != (mpi_code = MPI_Type_create_hindexed((int)outercount, blocklen, disp, *elmt_type, &spans->u.down_type)))
+                   HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hindexed failed", mpi_code)
             } /* end if */
+            else {      /* LARGE_DATATYPE:: Something doesn't fit into a 32 bit integer */
+                for(u = 0 ; u < outercount; u++) {
+                    MPI_Datatype temp_type = MPI_DATATYPE_NULL;
 
-            /* Store displacement & block length */
-            disp[outercount]      = (MPI_Aint)elmt_size * tspan->low;
-            H5_CHECK_OVERFLOW(tspan->nelem, hsize_t, int)
-            blocklen[outercount]  = (int)tspan->nelem;
-            tspan                 = tspan->next;
+                    /* create the block type from elmt_type while checking the 32 bit int limit */
+                    if(blocklen[u] > bigio_count) {
+                        if(H5S__mpio_create_large_type(blocklen[u], 0, *elmt_type, &temp_type) < 0)
+                            HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "couldn't create a large element datatype in span_hyper selection")
+                    } /* end if */
+                    else
+                        if(MPI_SUCCESS != (mpi_code = MPI_Type_contiguous((int)blocklen[u], *elmt_type, &temp_type)))
+                            HMPI_GOTO_ERROR(FAIL, "MPI_Type_contiguous failed", mpi_code)
 
-            if(bigio_count < blocklen[outercount])
-                large_block = TRUE; /* at least one block type is large, so set this flag to true */
+                    /* Combine the current datatype that is created with this current block type */
+                    if(0 == u)      /* first iteration, there is no combined datatype yet */
+                        spans->u.down_type = temp_type;
+                    else {
+                        int bl[2] = {1, 1};
+                        MPI_Aint ds[2] = {disp[u - 1], disp[u]};
+                        MPI_Datatype dt[2] = {spans->u.down_type, temp_type};
 
-            outercount++;
-        } /* end while */
+                        if(MPI_SUCCESS != (mpi_code = MPI_Type_create_struct(2,              /* count */
+                                                                             bl,             /* blocklength */
+                                                                             ds,             /* stride in bytes*/
+                                                                             dt,             /* old type */
+                                                                             &spans->u.down_type)))  /* new type */
+                            HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_struct failed", mpi_code)
 
-        /* Everything fits into integers, so cast them and use hindexed */
-        if(bigio_count >= outercount && large_block == FALSE) {
-            if(MPI_SUCCESS != (mpi_code = MPI_Type_create_hindexed((int)outercount, blocklen, disp, *elmt_type, span_type)))
-               HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hindexed failed", mpi_code)
-            span_type_valid = TRUE;
-        }
-	else { /* LARGE_DATATYPE:: Something doesn't fit into a 32 bit integer */
-            size_t i;
-
-            for (i=0 ; i<outercount ; i++) {
-	      MPI_Datatype temp_type = MPI_DATATYPE_NULL, outer_type = MPI_DATATYPE_NULL;
-                /* create the block type from elmt_type while checking the 32 bit int limit */
-                if (blocklen[i] > bigio_count) {
-                    if (H5S__mpio_create_large_type (blocklen[i], 0, *elmt_type, &temp_type) < 0) {
-                        HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL,
-                                    "couldn't create a large element datatype in span_hyper selection")
-                    }
-                }
-                else {
-                    if(MPI_SUCCESS != (mpi_code = MPI_Type_contiguous((int)blocklen[i], 
-                                                                      *elmt_type, 
-                                                                      &temp_type)))
-                        HMPI_GOTO_ERROR(FAIL, "MPI_Type_contiguous failed", mpi_code)
-                }
-
-                /* combine the current datatype that is created with this current block type */
-                if (0 == i) { /* first iteration, there is no combined datatype yet */
-                    *span_type = temp_type;
-                }
-                else {
-                    int bl[2] = {1,1};
-                    MPI_Aint ds[2] = {disp[i-1],disp[i]};
-                    MPI_Datatype dt[2] = {*span_type, temp_type};
-
-                    if (MPI_SUCCESS != (mpi_code = MPI_Type_create_struct (2,              /* count */
-                                                                           bl,             /* blocklength */
-                                                                           ds,             /* stride in bytes*/
-                                                                           dt,             /* old type */
-                                                                           &outer_type))){ /* new type */
-                        HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_struct failed", mpi_code)
-                    }
-		    *span_type = outer_type;
-                }
-
-		if (outer_type != MPI_DATATYPE_NULL) 
-		  MPI_Type_free(&outer_type);
-		/* temp_type shouldn't be freed here...
-		 * Note that we have simply copied it above (not MPI_Type_dup)
-		 * into the 'span_type' argument of the caller. 
-		 * The caller needs to deal with it there!
-		 */
-            }
-        } /* end (LARGE_DATATYPE::) */
-
-    } /* end if */
-    else {
-        size_t u;               /* Local index variable */
-
-        if(NULL == (inner_type = (MPI_Datatype *)H5MM_malloc(alloc_count * sizeof(MPI_Datatype))))
-            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate array of inner MPI datatypes")
-
-        tspan = span;
-        outercount = 0;
-        while(tspan) {
-            MPI_Datatype down_type;     /* Temporary MPI datatype for a span tree node's children */
+                        /* Release previous temporary datatype */
+                        if(MPI_SUCCESS != (mpi_code = MPI_Type_free(&temp_type)))
+                            HMPI_GOTO_ERROR(FAIL, "MPI_Type_free failed", mpi_code)
+                    } /* end else */
+                } /* end for */
+            } /* end else (LARGE_DATATYPE::) */
+        } /* end if */
+        else {
             MPI_Aint stride;            /* Distance between inner MPI datatypes */
 
-            /* Check if we need to increase the size of the buffers */
-            if(outercount >= alloc_count) {
-                MPI_Aint     *tmp_disp;         /* Temporary pointer to new displacement buffer */
-                int          *tmp_blocklen;     /* Temporary pointer to new block length buffer */
-                MPI_Datatype *tmp_inner_type;   /* Temporary pointer to inner MPI datatype buffer */
+            if(NULL == (inner_type = (MPI_Datatype *)H5MM_malloc(alloc_count * sizeof(MPI_Datatype))))
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate array of inner MPI datatypes")
 
-                /* Double the allocation count */
-                alloc_count *= 2;
-
-                /* Re-allocate the buffers */
-                if(NULL == (tmp_disp = (MPI_Aint *)H5MM_realloc(disp, alloc_count * sizeof(MPI_Aint))))
-                    HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate array of displacements")
-                disp = tmp_disp;
-                if(NULL == (tmp_blocklen = (int *)H5MM_realloc(blocklen, alloc_count * sizeof(int))))
-                    HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate array of block lengths")
-                blocklen = tmp_blocklen;
-                if(NULL == (tmp_inner_type = (MPI_Datatype *)H5MM_realloc(inner_type, alloc_count * sizeof(MPI_Datatype))))
-                    HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate array of inner MPI datatypes")
-                inner_type = tmp_inner_type;
-            } /* end if */
-
-            /* Displacement should be in byte and should have dimension information */
-            /* First using MPI Type vector to build derived data type for this span only */
-            /* Need to calculate the disp in byte for this dimension. */
             /* Calculate the total bytes of the lower dimension */
-            disp[outercount]      = tspan->low * (*down) * elmt_size;
-            blocklen[outercount]  = 1;
-
-            /* Generate MPI datatype for next dimension down */
-            if(H5S__obtain_datatype(down + 1, tspan->down->head, elmt_type, &down_type, elmt_size) < 0)
-                HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "couldn't obtain  MPI derived data type")
-
-            /* Build the MPI datatype for this node */
             stride = (*down) * elmt_size;
-            H5_CHECK_OVERFLOW(tspan->nelem, hsize_t, int)
-            if(MPI_SUCCESS != (mpi_code = MPI_Type_create_hvector((int)tspan->nelem, 1, stride, down_type, &inner_type[outercount]))) {
-                MPI_Type_free(&down_type);
-                HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hvector failed", mpi_code)
-            } /* end if */
 
-            /* Release MPI datatype for next dimension down */
-            if(MPI_SUCCESS != (mpi_code = MPI_Type_free(&down_type)))
-                HMPI_GOTO_ERROR(FAIL, "MPI_Type_free failed", mpi_code)
+            /* Loop over span nodes */
+            outercount = 0;
+            while(span) {
+                MPI_Datatype down_type;     /* Temporary MPI datatype for a span tree node's children */
+                hsize_t nelmts;             /* # of elements covered by current span */
 
-            tspan = tspan->next;
-            outercount++;
-         } /* end while */
+                /* Check if we need to increase the size of the buffers */
+                if(outercount >= alloc_count) {
+                    MPI_Aint     *tmp_disp;         /* Temporary pointer to new displacement buffer */
+                    int          *tmp_blocklen;     /* Temporary pointer to new block length buffer */
+                    MPI_Datatype *tmp_inner_type;   /* Temporary pointer to inner MPI datatype buffer */
 
-        /* building the whole vector datatype */
-        H5_CHECK_OVERFLOW(outercount, size_t, int)
-        if(MPI_SUCCESS != (mpi_code = MPI_Type_create_struct((int)outercount, blocklen, disp, inner_type, span_type)))
-            HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_struct failed", mpi_code)
-        span_type_valid = TRUE;
+                    /* Double the allocation count */
+                    alloc_count *= 2;
 
-        /* Release inner node types */
-        for(u = 0; u < outercount; u++)
-            if(MPI_SUCCESS != (mpi_code = MPI_Type_free(&inner_type[u])))
-                HMPI_GOTO_ERROR(FAIL, "MPI_Type_free failed", mpi_code)
-        inner_types_freed = TRUE;
+                    /* Re-allocate the buffers */
+                    if(NULL == (tmp_disp = (MPI_Aint *)H5MM_realloc(disp, alloc_count * sizeof(MPI_Aint))))
+                        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate array of displacements")
+                    disp = tmp_disp;
+                    if(NULL == (tmp_blocklen = (int *)H5MM_realloc(blocklen, alloc_count * sizeof(int))))
+                        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate array of block lengths")
+                    blocklen = tmp_blocklen;
+                    if(NULL == (tmp_inner_type = (MPI_Datatype *)H5MM_realloc(inner_type, alloc_count * sizeof(MPI_Datatype))))
+                        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate array of inner MPI datatypes")
+                    inner_type = tmp_inner_type;
+                } /* end if */
+
+                /* Displacement should be in byte and should have dimension information */
+                /* First using MPI Type vector to build derived data type for this span only */
+                /* Need to calculate the disp in byte for this dimension. */
+                disp[outercount]      = span->low * stride;
+                blocklen[outercount]  = 1;
+
+                /* Generate MPI datatype for next dimension down */
+                if(H5S__obtain_datatype(span->down, down + 1, elmt_size, elmt_type, &down_type, type_list, op_gen) < 0)
+                    HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "couldn't obtain MPI derived data type")
+
+                /* Compute the number of elements to attempt in this span */
+                nelmts = (span->high - span->low) + 1;
+
+                /* Build the MPI datatype for this node */
+                H5_CHECK_OVERFLOW(nelmts, hsize_t, int)
+                if(MPI_SUCCESS != (mpi_code = MPI_Type_create_hvector((int)nelmts, 1, stride, down_type, &inner_type[outercount])))
+                    HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hvector failed", mpi_code)
+
+                span = span->next;
+                outercount++;
+             } /* end while */
+
+            /* Building the whole vector datatype */
+            H5_CHECK_OVERFLOW(outercount, size_t, int)
+            if(MPI_SUCCESS != (mpi_code = MPI_Type_create_struct((int)outercount, blocklen, disp, inner_type, &spans->u.down_type)))
+                HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_struct failed", mpi_code)
+
+            /* Release inner node types */
+            for(u = 0; u < outercount; u++)
+                if(MPI_SUCCESS != (mpi_code = MPI_Type_free(&inner_type[u])))
+                    HMPI_GOTO_ERROR(FAIL, "MPI_Type_free failed", mpi_code)
+            inner_types_freed = TRUE;
+        } /* end else */
+
+        /* Allocate space for the MPI data type list node */
+        if(NULL == (type_node = H5FL_MALLOC(H5S_mpio_mpitype_node_t)))
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate MPI data type list node")
+
+        /* Set up MPI type node */
+        type_node->type = spans->u.down_type;
+        type_node->next = NULL;
+
+        /* Add MPI type node to list */
+        if(type_list->head == NULL)
+            type_list->head = type_list->tail = type_node;
+        else {
+            type_list->tail->next = type_node;
+            type_list->tail = type_node;
+        } /* end else */
+
+        /* Remember that we've visited this span tree */
+        spans->op_gen = op_gen;
     } /* end else */
+
+    /* Return MPI data type for span tree */
+    *span_type = spans->u.down_type;
 
 done:
     /* General cleanup */
     if(inner_type != NULL) {
-        if(!inner_types_freed) {
-            size_t u;          /* Local index variable */
-
+        if(!inner_types_freed)
             for(u = 0; u < outercount; u++)
                 if(MPI_SUCCESS != (mpi_code = MPI_Type_free(&inner_type[u])))
                     HMPI_DONE_ERROR(FAIL, "MPI_Type_free failed", mpi_code)
-        } /* end if */
-
         H5MM_free(inner_type);
     } /* end if */
     if(blocklen != NULL)
         H5MM_free(blocklen);
     if(disp != NULL)
         H5MM_free(disp);
-
-    /* Error cleanup */
-    if(ret_value < 0) {
-        if(span_type_valid)
-            if(MPI_SUCCESS != (mpi_code = MPI_Type_free(span_type)))
-                HMPI_DONE_ERROR(FAIL, "MPI_Type_free failed", mpi_code)
-    } /* end if */
 
   FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__obtain_datatype() */
