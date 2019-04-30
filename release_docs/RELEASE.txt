@@ -197,6 +197,10 @@ New Features
 
     Java Library:
     ----------------
+    - Fix a failure in JUnit-TestH5P on 32-bit architectures
+
+      (JTH - 2019/04/30)
+
     - Duplicate the data read/write functions of Datasets for Attributes.
 
       Region references could not be displayed for attributes as they could

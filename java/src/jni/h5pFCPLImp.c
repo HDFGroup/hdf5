@@ -201,7 +201,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1sym_1k
 
 done:
     if (theArray)
-        UNPIN_LONG_ARRAY(ENVONLY, size, theArray, (status < 0) ? JNI_ABORT : 0);
+        UNPIN_INT_ARRAY(ENVONLY, size, theArray, (status < 0) ? JNI_ABORT : 0);
 
     return (jint)status;
 } /* end Java_hdf_hdf5lib_H5_H5Pget_1sym_1k */
