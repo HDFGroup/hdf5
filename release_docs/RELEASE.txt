@@ -263,6 +263,10 @@ New Features
 
     Java Library:
     ----------------
+    - Fix a failure in JUnit-TestH5P on 32-bit architectures
+
+      (JTH - 2019/04/30)
+
     - Rewrote the JNI error handling to be much cleaner
 
       (JTH - 2019/02/12)
