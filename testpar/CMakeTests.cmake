@@ -25,12 +25,12 @@ add_test (NAME MPI_TEST-clear-testphdf5-objects
 )
 set_tests_properties (MPI_TEST-clear-testphdf5-objects PROPERTIES FIXTURES_SETUP par_clear_testphdf5)
 
-set (SKIP_testphdf5
+set (SKIP_tests
     cchunk3
     tldsc
 )
 set (SKIP_testphdf5 "")
-foreach (skiptest SKIP_testphdf5)
+foreach (skiptest SKIP_tests)
   set (SKIP_testphdf5 "${SKIP_testphdf5};-x;${skiptest}")
 endforeach ()
 
@@ -46,7 +46,7 @@ endif ()
 set (last_test "MPI_TEST_testphdf5")
 
 #execute the skipped tests
-foreach (skiptest SKIP_testphdf5)
+foreach (skiptest SKIP_tests)
   add_test (NAME MPI_TEST_testphdf5_${skiptest} COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_PREFLAGS} $<TARGET_FILE:testphdf5> ${MPIEXEC_POSTFLAGS} -o ${skiptest})
   set_tests_properties (MPI_TEST_testphdf5_${skiptest} PROPERTIES
       FIXTURES_REQUIRED par_clear_testphdf5
