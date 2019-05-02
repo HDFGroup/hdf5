@@ -26,10 +26,20 @@ add_test (NAME MPI_TEST-clear-testphdf5-objects
 set_tests_properties (MPI_TEST-clear-testphdf5-objects PROPERTIES FIXTURES_SETUP par_clear_testphdf5)
 
 set (SKIP_tests
+    cchunk1
+    cchunk2
     cchunk3
+    cchunk4
     ecdsetw
     eidsetw2
+    selnone
+    cngrpw
+    ingrpr
+    cschunkw
+    ccchunkw
     tldsc
+    actualio
+    MC_coll_MD_read
 )
 set (SKIP_testphdf5 "")
 foreach (skiptest ${SKIP_tests})
