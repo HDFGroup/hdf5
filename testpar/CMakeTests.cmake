@@ -28,6 +28,7 @@ set_tests_properties (MPI_TEST-clear-testphdf5-objects PROPERTIES FIXTURES_SETUP
 set (SKIP_tests
     cchunk3
     ecdsetw
+    eidsetw2
     tldsc
 )
 set (SKIP_testphdf5 "")
