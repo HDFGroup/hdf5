@@ -33,8 +33,7 @@ set (SKIP_tests
     ecdsetw
     eidsetw2
     selnone
-    cngrpw
-    ingrpr
+    cngrpw-ingrpr
     cschunkw
     ccchunkw
     tldsc

@@ -409,10 +409,10 @@ int main(int argc, char **argv)
 
     collngroups_params.name = PARATESTFILE;
     collngroups_params.count = ngroups;
-    AddTest("cngrpw", collective_group_write, NULL,
-        "collective group and dataset write", &collngroups_params);
-    AddTest("ingrpr", independent_group_read, NULL,
-        "independent group and dataset read", &collngroups_params);
+    /* combined cngrpw and ingrpr tests because ingrpr reads file created by cngrpw. */
+    AddTest("cngrpw-ingrpr", collective_group_write_independent_group_read, NULL,
+            "collective grp/dset write - independent grp/dset read",
+            &collngroups_params);
 #ifndef H5_HAVE_WIN32_API
     AddTest("bigdset", big_dataset, NULL,
             "big dataset test", PARATESTFILE);
