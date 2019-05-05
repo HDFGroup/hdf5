@@ -2396,9 +2396,13 @@ H5A__attr_post_copy_file(const H5O_loc_t *src_oloc, const H5A_t *attr_src,
         /* Check for expanding references */
         if(cpy_info->expand_ref) {
             size_t ref_count;
+            size_t dst_dt_size;         /* Destination datatype size */
 
+            /* Determine size of the destination datatype */
+            if(0 == (dst_dt_size = H5T_get_size(attr_dst->shared->dt)))
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to determine datatype size")
             /* Determine # of reference elements to copy */
-            ref_count = attr_dst->shared->data_size / H5T_get_size(attr_dst->shared->dt);
+            ref_count = attr_dst->shared->data_size / dst_dt_size;
 
             /* Copy objects referenced in source buffer to destination file and set destination elements */
             if(H5O_copy_expand_ref(file_src, attr_dst->shared->data, file_dst, attr_dst->shared->data, ref_count, H5T_get_ref_type(attr_dst->shared->dt), cpy_info) < 0)
