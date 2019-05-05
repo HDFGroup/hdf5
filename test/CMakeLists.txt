@@ -62,7 +62,7 @@ if (BUILD_SHARED_LIBS)
 endif ()
 
 #################################################################################
-# If filter plugin tests can be tested
+# If filter and vol plugin tests can be tested
 #################################################################################
 if (BUILD_SHARED_LIBS)
   # make plugins dir
@@ -131,6 +131,11 @@ if (BUILD_SHARED_LIBS)
     )
   endforeach ()
 
+  #################################################################################
+  # make vol plugins dir
+  #################################################################################
+  file (MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/null_vol_plugin_dir")
+
   #-----------------------------------------------------------------------------
   # Define VOL Plugin Test Sources
   #-----------------------------------------------------------------------------
@@ -159,7 +164,7 @@ if (BUILD_SHARED_LIBS)
         COMMAND    ${CMAKE_COMMAND}
         ARGS       -E copy_if_different
           "$<TARGET_FILE:${HDF5_VOL_PLUGIN_LIB_TARGET}>"
-          "${CMAKE_BINARY_DIR}/vol/$<TARGET_FILE_NAME:${HDF5_VOL_PLUGIN_LIB_TARGET}>"
+          "${CMAKE_BINARY_DIR}/null_vol_plugin_dir/$<TARGET_FILE_NAME:${HDF5_VOL_PLUGIN_LIB_TARGET}>"
     )
   endforeach ()
 endif ()
@@ -458,12 +463,24 @@ if (BUILD_SHARED_LIBS)
   TARGET_C_PROPERTIES (filter_plugin SHARED)
   target_link_libraries (filter_plugin PRIVATE ${HDF5_TEST_LIB_TARGET})
   set_target_properties (filter_plugin PROPERTIES FOLDER test)
+
+  add_executable (vol_plugin ${HDF5_TEST_SOURCE_DIR}/vol_plugin.c)
+  target_include_directories(vol_plugin PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+  TARGET_C_PROPERTIES (vol_plugin SHARED)
+  target_link_libraries (vol_plugin PRIVATE ${HDF5_TEST_LIB_TARGET})
+  set_target_properties (vol_plugin PROPERTIES FOLDER test)
 else ()
   add_executable (filter_plugin ${HDF5_TEST_SOURCE_DIR}/filter_plugin.c)
   target_include_directories(filter_plugin PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
   TARGET_C_PROPERTIES (filter_plugin STATIC)
   target_link_libraries (filter_plugin PRIVATE ${HDF5_TEST_LIB_TARGET})
   set_target_properties (filter_plugin PROPERTIES FOLDER test)
+
+  add_executable (vol_plugin ${HDF5_TEST_SOURCE_DIR}/vol_plugin.c)
+  target_include_directories(vol_plugin PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+  TARGET_C_PROPERTIES (vol_plugin STATIC)
+  target_link_libraries (vol_plugin PRIVATE ${HDF5_TEST_LIB_TARGET})
+  set_target_properties (vol_plugin PROPERTIES FOLDER test)
 endif ()
 
 ##############################################################################

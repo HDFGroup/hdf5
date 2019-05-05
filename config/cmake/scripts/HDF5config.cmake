@@ -34,7 +34,7 @@ cmake_minimum_required (VERSION 3.10)
 #     CTEST_SOURCE_NAME  -  source folder
 ##############################################################################
 
-set (CTEST_SOURCE_VERSION "1.11.5")
+set (CTEST_SOURCE_VERSION "1.11.6")
 set (CTEST_SOURCE_VERSEXT "")
 
 ##############################################################################
@@ -177,6 +177,7 @@ if (NOT DEFINED HPC)
     endif ()
   endif ()
 else ()
+  set (CTEST_SITE "${SITE_OS_NAME}")
   set (CTEST_CMAKE_GENERATOR "Unix Makefiles")
   include (${CTEST_SOURCE_DIRECTORY}/config/cmake/scripts/HPC/${HPC}-HDF5options.cmake)
 endif ()

@@ -33,6 +33,11 @@ static const char *EXT_FNAME[] = {
     NULL
 };
 
+static const char *EXT_ENV_FNAME[] = {
+    "extern_env_dir/env_file_1",
+    NULL
+};
+
 /* A similar collection of files is used for the tests that
  * perform file I/O.
  */
@@ -41,5 +46,5 @@ static const char *EXT_FNAME[] = {
 #define TOTAL_SIZE          100
 #define GARBAGE_PER_FILE    10
 
-H5TEST_DLL herr_t reset_raw_data_files(void);
+H5TEST_DLL herr_t reset_raw_data_files(int);
 #endif /* _EXTERNAL_COMMON_H */

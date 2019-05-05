@@ -56,15 +56,15 @@ test_path_env(hid_t fapl)
 
     TESTING("prefix in HDF5_EXTFILE_PREFIX");
 
-    if(HDmkdir("extern_dir", (mode_t)0755) < 0 && errno != EEXIST)
+    if(HDmkdir("extern_env_dir", (mode_t)0755) < 0 && errno != EEXIST)
         TEST_ERROR;
 
-    h5_fixname(EXT_FNAME[4], fapl, filename, sizeof(filename));
+    h5_fixname(EXT_ENV_FNAME[0], fapl, filename, sizeof(filename));
     if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         FAIL_STACK_ERROR
 
     /* Reset the raw data files */
-    if(reset_raw_data_files() < 0)
+    if(reset_raw_data_files(1) < 0)
         TEST_ERROR
 
     /* Create the dataset */
@@ -73,7 +73,7 @@ test_path_env(hid_t fapl)
     if(NULL == HDgetcwd(cwdpath, sizeof(cwdpath)))
         TEST_ERROR
     for(i = 0; i < N_EXT_FILES; i++) {
-        HDsnprintf(filename, sizeof(filename), "..%sextern_%dr.raw", H5_DIR_SEPS, (int) i + 1);
+        HDsnprintf(filename, sizeof(filename), "..%sextern_env_%dr.raw", H5_DIR_SEPS, (int) i + 1);
         if(H5Pset_external(dcpl, filename, (off_t)(i * GARBAGE_PER_FILE), (hsize_t)sizeof(part)) < 0)
             FAIL_STACK_ERROR
     } /* end for */
@@ -144,7 +144,6 @@ main(void)
     hid_t	fapl_id_new = -1;   /* file access properties (new format)  */
     hid_t	fid = -1;           /* file for test_1* functions           */
     hid_t	gid = -1;           /* group to emit diagnostics            */
-    char	filename[1024];     /* file name for test_1* funcs          */
     unsigned latest_format;     /* default or latest file format        */
     int		nerrors = 0;        /* number of errors                     */
 
@@ -152,7 +151,6 @@ main(void)
 
     /* Get a fapl for the old (default) file format */
     fapl_id_old = h5_fileaccess();
-    h5_fixname(EXT_FNAME[0], fapl_id_old, filename, sizeof(filename));
 
     /* Copy and set up a fapl for the latest file format */
     if((fapl_id_new = H5Pcopy(fapl_id_old)) < 0)
@@ -186,17 +184,17 @@ main(void)
 
     /* Clean up files used by file set tests */
     if(h5_cleanup(EXT_FNAME, fapl_id_old)) {
-        HDremove("extern_1r.raw");
-        HDremove("extern_2r.raw");
-        HDremove("extern_3r.raw");
-        HDremove("extern_4r.raw");
+        HDremove("extern_env_1r.raw");
+        HDremove("extern_env_2r.raw");
+        HDremove("extern_env_3r.raw");
+        HDremove("extern_env_4r.raw");
 
-        HDremove("extern_1w.raw");
-        HDremove("extern_2w.raw");
-        HDremove("extern_3w.raw");
-        HDremove("extern_4w.raw");
+        HDremove("extern_env_1w.raw");
+        HDremove("extern_env_2w.raw");
+        HDremove("extern_env_3w.raw");
+        HDremove("extern_env_4w.raw");
 
-        HDrmdir("extern_dir");
+        HDrmdir("extern_env_dir");
     } /* end if */
 
     return EXIT_SUCCESS;

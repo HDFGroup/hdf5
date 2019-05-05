@@ -1134,7 +1134,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-void *
+static void *
 H5I__remove_verify(hid_t id, H5I_type_t id_type)
 {
     void * ret_value = NULL;	/*return value			*/
@@ -1943,6 +1943,8 @@ H5I__iterate_pub_cb(void H5_ATTR_UNUSED *obj, hid_t id, void *_udata)
         ret_value = H5_ITER_STOP;	/* terminate iteration early */
     else if(cb_ret_val < 0)
         ret_value = H5_ITER_ERROR;  /* indicate failure (which terminates iteration) */
+    else
+        ret_value = H5_ITER_CONT; /* continue iteration */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I__iterate_pub_cb() */

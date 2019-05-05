@@ -61,6 +61,7 @@ static const H5VL_class_t fake_vol_g = {
         NULL,                                       /* get_object   */
         NULL,                                       /* get_wrap_ctx */
         NULL,                                       /* wrap_object  */
+        NULL,                                       /* unwrap_object */
         NULL,                                       /* free_wrap_ctx */
     },
     {   /* attribute_cls */

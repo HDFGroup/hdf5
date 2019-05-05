@@ -635,7 +635,7 @@ test_read_file_set(hid_t fapl)
         TEST_ERROR
 
     /* Reset the raw data files */
-    if(reset_raw_data_files() < 0)
+    if(reset_raw_data_files(0) < 0)
         TEST_ERROR
 
     /* Create the file and an initial group.  This causes messages about
@@ -775,7 +775,7 @@ test_write_file_set(hid_t fapl)
     } /* end for */
 
     /* Reset the raw data files */
-    if(reset_raw_data_files() < 0)
+    if(reset_raw_data_files(0) < 0)
         TEST_ERROR
 
     /* Create the dataset */
@@ -876,7 +876,7 @@ test_path_absolute(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Reset the raw data files */
-    if(reset_raw_data_files() < 0)
+    if(reset_raw_data_files(0) < 0)
         TEST_ERROR
 
     /* Create the dcpl */
@@ -972,7 +972,7 @@ test_path_relative(hid_t fapl)
         FAIL_STACK_ERROR;
 
     /* Reset the raw data files */
-    if(reset_raw_data_files() < 0)
+    if(reset_raw_data_files(0) < 0)
         TEST_ERROR
 
     /* Create the dataset */
@@ -1067,7 +1067,7 @@ test_path_relative_cwd(hid_t fapl)
         FAIL_STACK_ERROR;
 
     /* Reset the raw data files */
-    if(reset_raw_data_files() < 0)
+    if(reset_raw_data_files(0) < 0)
         TEST_ERROR
 
     /* Create the dataset */
@@ -1209,7 +1209,7 @@ test_h5d_get_access_plist(hid_t fapl_id)
         TEST_ERROR
 
     /* Reset the raw data files */
-    if(reset_raw_data_files() < 0)
+    if(reset_raw_data_files(0) < 0)
         TEST_ERROR
 
     /* Create the file */

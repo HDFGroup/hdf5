@@ -715,7 +715,7 @@ H5FD_family_open(const char *name, unsigned flags, hid_t fapl_id,
                 (0==file->nmembs ? flags : t_flags), file->memb_fapl_id, HADDR_UNDEF);
         } H5E_END_TRY;
         if (!file->memb[file->nmembs]) {
-            if (0==file->nmembs)
+            if (0 == file->nmembs)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open member file")
             H5E_clear_stack(NULL);
             break;
@@ -723,7 +723,7 @@ H5FD_family_open(const char *name, unsigned flags, hid_t fapl_id,
         file->nmembs++;
     }
 
-    /* If the file is reopened and there's only one member file existing, this file maybe
+    /* If the file is reopened and there's only one member file existing, this file may be
      * smaller than the size specified through H5Pset_fapl_family().  Update the actual
      * member size.
      */
