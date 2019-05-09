@@ -2048,7 +2048,7 @@ test_single_chunk(unsigned config)
 
     if(config & CONFIG_DIRECT_WRITE) {
         /* Write the data directly to the dataset */
-        if(H5Dwrite_chunk(did, H5P_DEFAULT, 0, offset, CHUNK0*CHUNK1*4, (void *)wdata) < 0)
+        if(H5DOwrite_chunk(did, H5P_DEFAULT, 0, offset, CHUNK0*CHUNK1*4, (void *)wdata) < 0)
             goto error;
     } /* end if */
     else
@@ -2086,7 +2086,7 @@ test_single_chunk(unsigned config)
 
     if(config & CONFIG_DIRECT_READ) {
         /* Read the data directly */
-        if(H5Dread_chunk(did, H5P_DEFAULT, offset, &filters, rdata) < 0)
+        if(H5DOread_chunk(did, H5P_DEFAULT, offset, &filters, rdata) < 0)
             goto error;
 
         /* Verify returned filter mask */
