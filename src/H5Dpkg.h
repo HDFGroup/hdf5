@@ -96,12 +96,14 @@ typedef struct H5D_type_info_t {
 /* Forward declaration of structs used below */
 struct H5D_io_info_t;
 struct H5D_chunk_map_t;
+typedef struct H5D_shared_t H5D_shared_t;
 
 /* Function pointers for I/O on particular types of dataset layouts */
 typedef herr_t (*H5D_layout_construct_func_t)(H5F_t *f, H5D_t *dset);
 typedef herr_t (*H5D_layout_init_func_t)(H5F_t *f, hid_t dxpl_id, const H5D_t *dset,
     hid_t dapl_id);
 typedef hbool_t (*H5D_layout_is_space_alloc_func_t)(const H5O_storage_t *storage);
+typedef hbool_t (*H5D_layout_is_data_cached_func_t)(const H5D_shared_t *shared_dset);
 typedef herr_t (*H5D_layout_io_init_func_t)(const struct H5D_io_info_t *io_info,
     const H5D_type_info_t *type_info,
     hsize_t nelmts, const H5S_t *file_space, const H5S_t *mem_space,
@@ -126,6 +128,7 @@ typedef struct H5D_layout_ops_t {
     H5D_layout_construct_func_t construct;      /* Layout constructor for new datasets */
     H5D_layout_init_func_t init;        /* Layout initializer for dataset */
     H5D_layout_is_space_alloc_func_t is_space_alloc;    /* Query routine to determine if storage is allocated */
+    H5D_layout_is_data_cached_func_t is_data_cached;    /* Query routine to determine if any raw data is cached.  If routine is not present then the layout type never caches raw data. */
     H5D_layout_io_init_func_t io_init;  /* I/O initialization routine */
     H5D_layout_read_func_t ser_read;    /* High-level I/O routine for reading data in serial */
     H5D_layout_write_func_t ser_write;  /* High-level I/O routine for writing data in serial */
@@ -405,7 +408,7 @@ typedef struct H5D_rdcdc_t {
  * created once for a given dataset.  Thus, if a dataset is opened twice,
  * there will be two IDs and two H5D_t structs, both sharing one H5D_shared_t.
  */
-typedef struct H5D_shared_t {
+struct H5D_shared_t {
     size_t              fo_count;       /* Reference count */
     hid_t               type_id;        /* ID for dataset's datatype    */
     H5T_t              *type;           /* Datatype for this dataset     */
@@ -428,7 +431,7 @@ typedef struct H5D_shared_t {
     } cache;
 
     char                *extfile_prefix; /* expanded external file prefix */
-} H5D_shared_t;
+};
 
 struct H5D_t {
     H5O_loc_t           oloc;           /* Object header location       */
@@ -587,6 +590,7 @@ H5_DLL herr_t H5D__layout_oh_write(H5D_t *dataset, hid_t dxpl_id, H5O_t *oh,
 H5_DLL herr_t H5D__contig_alloc(H5F_t *f, hid_t dxpl_id,
     H5O_storage_contig_t *storage);
 H5_DLL hbool_t H5D__contig_is_space_alloc(const H5O_storage_t *storage);
+H5_DLL hbool_t H5D__contig_is_data_cached(const H5D_shared_t *shared_dset);
 H5_DLL herr_t H5D__contig_fill(const H5D_t *dset, hid_t dxpl_id);
 H5_DLL herr_t H5D__contig_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
     hsize_t nelmts, const H5S_t *file_space, const H5S_t *mem_space,
@@ -609,6 +613,7 @@ H5_DLL herr_t H5D__chunk_set_info(const H5D_t *dset);
 H5_DLL herr_t H5D__chunk_init(H5F_t *f, hid_t dxpl_id, const H5D_t *dset,
     hid_t dapl_id);
 H5_DLL hbool_t H5D__chunk_is_space_alloc(const H5O_storage_t *storage);
+H5_DLL hbool_t H5D__chunk_is_data_cached(const H5D_shared_t *shared_dset);
 H5_DLL herr_t H5D__chunk_lookup(const H5D_t *dset, hid_t dxpl_id,
     const hsize_t *chunk_offset, hsize_t chunk_idx, H5D_chunk_ud_t *udata);
 H5_DLL void *H5D__chunk_lock(const H5D_io_info_t *io_info,
