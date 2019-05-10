@@ -129,7 +129,7 @@ Support for New Platforms, Languages, and Compilers
 
 
 
-Bug Fixes since HDF5-1.8.20
+Bug Fixes since HDF5-1.8.21
 ===========================
 
     Configuration
@@ -178,8 +178,14 @@ Bug Fixes since HDF5-1.8.20
 
     Fortran API
     -----------
-    - None
+    - Added symbolic links libhdf5_hl_fortran.so to libhdf5hl_fortran.so and
+      libhdf5_hl_fortran.a to libhdf5hl_fortran.a in hdf5/lib directory for
+      autotools installs.  These were added to match the name of the files
+      installed by CMmake and the general pattern of hl lib files.  We will
+      change the names of the installed lib files to the matching name in
+      the next major release.
 
+      (LRK - 2019/05/09, HDFFV-10596)
 
     C++ API
     -------
