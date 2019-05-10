@@ -29,6 +29,7 @@ endif ()
 #############################################################################################
 ### options to run test scripts in batch commands
 set (LOCAL_BATCH_SCRIPT_NAME "ctest.qsub")
+set (LOCAL_BATCH_SCRIPT_PARALLEL_NAME "ctest.qsub")
 if (DEFINED KNL)
   ### some additions and alternatives to cross compile on haswell for knl
   set (COMPUTENODE_HWCOMPILE_MODULE "craype-mic-knl")
@@ -38,6 +39,7 @@ set (LOCAL_BATCH_SCRIPT_COMMAND "qsub")
 set (LOCAL_BATCH_TEST "TRUE")
 set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DLOCAL_BATCH_TEST:BOOL=ON")
 set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DLOCAL_BATCH_SCRIPT_NAME:STRING=${LOCAL_BATCH_SCRIPT_NAME}")
+set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DLOCAL_BATCH_SCRIPT_PARALLEL_NAME:STRING=${LOCAL_BATCH_SCRIPT_PARALLEL_NAME}")
 set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DMPIEXEC_EXECUTABLE:STRING=aprun")
 # Option to suppress writing job statistics; to avoid issues with h5diff comparisons.
 set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DMPIEXEC_PREFLAGS:STRING=-q")
