@@ -44,7 +44,7 @@ set (CTEST_SOURCE_VERSEXT "")
 #CTEST_CONFIGURATION_TYPE - Release, Debug, RelWithDebInfo
 #CTEST_SOURCE_NAME - name of source folder; HDF5-1.10.0
 #MODEL - CDash group name
-#HPC - run alternate configurations for HPC machines; sbatch, bsub, raybsub
+#HPC - run alternate configurations for HPC machines; sbatch, bsub, raybsub, qsub
 #MPI - enable MPI;
 if (DEFINED CTEST_SCRIPT_ARG)
     # transform ctest script arguments of the form
