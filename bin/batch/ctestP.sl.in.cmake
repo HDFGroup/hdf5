@@ -8,7 +8,7 @@
 #SBATCH --job-name=h5_ctestP
 
 cd @HDF5_BINARY_DIR@
-ctest . -M HPC -R MPI_TEST_ -C Release -T test >& ctestP.out
+ctest . -R MPI_TEST_ -C Release -T test >& ctestP.out
 
 echo "Done running ctestP.sl" 
 
