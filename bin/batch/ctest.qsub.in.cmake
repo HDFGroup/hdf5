@@ -11,9 +11,9 @@ CTEST_CMD=`which ctest`
 
 cd @HDF5_BINARY_DIR@
 if [[ $SUMMARY_FILE == *"ctestS"* ]]; then
-  CMD="${CTEST_CMD} . -E MPI_TEST_ -C Release -j 32 -T test"      
+  CMD="${CTEST_CMD} . -M HPC -E MPI_TEST_ -C Release -j 32 -T test"
 else
-  CMD="${CTEST_CMD} . -R MPI_TEST_ ${SKIP_TESTS} -C Release -T test " 
+  CMD="${CTEST_CMD} . -M HPC -R MPI_TEST_ ${SKIP_TESTS} -C Release -T test"
 fi
 
 qsub -t 60 -n 1 -q debug-flat-quad -A ${ACCOUNT_ID} ${CMD} >& ${SUMMARY_FILE}
