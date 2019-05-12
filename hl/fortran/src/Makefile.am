@@ -54,15 +54,15 @@ libhdf5hl_fortran_la_LIBADD=$(LIBH5_HL) $(LIBH5F)
 # files, namely libhdf5_hl_*.  Add a symlink with the compliant name to the
 # actual lib file.
 install-exec-hook:
-        cd $(DESTDIR)$(libdir) && \
-            if test -f libhdf5hl_fortran.a -a \
-            ! -f libhdf5_hl_fortran.a; then \
-                $(LN_S) libhdf5hl_fortran.a libhdf5_hl_fortran.a; \
-            fi; \
-            if test -f libhdf5hl_fortran.so -a \
-            ! -f libhdf5_hl_fortran.so; then \
-                $(LN_S) libhdf5hl_fortran.so libhdf5_hl_fortran.so; \
-            fi;
+	cd $(DESTDIR)$(libdir) && \
+	    if test -f libhdf5hl_fortran.a -a \
+	    ! -f libhdf5_hl_fortran.a; then \
+	        $(LN_S) libhdf5hl_fortran.a libhdf5_hl_fortran.a; \
+	    fi; \
+	    if test -f libhdf5hl_fortran.so -a \
+	    ! -f libhdf5_hl_fortran.so; then \
+	        $(LN_S) libhdf5hl_fortran.so libhdf5_hl_fortran.so; \
+	    fi;
 
 
 # Fortran module files can have different extensions and different names
