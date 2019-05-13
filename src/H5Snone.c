@@ -37,8 +37,8 @@ static herr_t H5S_none_get_seq_list(const H5S_t *space, unsigned flags,
     size_t *nseq, size_t *nbytes, hsize_t *off, size_t *len);
 static herr_t H5S_none_release(H5S_t *space);
 static htri_t H5S_none_is_valid(const H5S_t *space);
-static hssize_t H5S_none_serial_size(const H5S_t *space, H5F_t *f);
-static herr_t H5S_none_serialize(const H5S_t *space, uint8_t **p, H5F_t *f);
+static hssize_t H5S_none_serial_size(const H5S_t *space);
+static herr_t H5S_none_serialize(const H5S_t *space, uint8_t **p);
 static herr_t H5S_none_deserialize(H5S_t **space, const uint8_t **p);
 static herr_t H5S_none_bounds(const H5S_t *space, hsize_t *start, hsize_t *end);
 static herr_t H5S_none_offset(const H5S_t *space, hsize_t *off);
@@ -56,7 +56,7 @@ static herr_t H5S_none_iter_coords(const H5S_sel_iter_t *iter, hsize_t *coords);
 static herr_t H5S_none_iter_block(const H5S_sel_iter_t *iter, hsize_t *start, hsize_t *end);
 static hsize_t H5S_none_iter_nelmts(const H5S_sel_iter_t *iter);
 static htri_t H5S_none_iter_has_next_block(const H5S_sel_iter_t *iter);
-static herr_t H5S_none_iter_next(H5S_sel_iter_t *sel_iter, hsize_t nelem);
+static herr_t H5S_none_iter_next(H5S_sel_iter_t *sel_iter, size_t nelem);
 static herr_t H5S_none_iter_next_block(H5S_sel_iter_t *sel_iter);
 static herr_t H5S_none_iter_release(H5S_sel_iter_t *sel_iter);
 
@@ -250,7 +250,7 @@ H5S_none_iter_has_next_block(const H5S_sel_iter_t H5_ATTR_UNUSED *iter)
  USAGE
     herr_t H5S_none_iter_next(iter, nelem)
         H5S_sel_iter_t *iter;       IN: Pointer to selection iterator
-        hsize_t nelem;              IN: Number of elements to advance by
+        size_t nelem;               IN: Number of elements to advance by
  RETURNS
     Non-negative on success/Negative on failure
  DESCRIPTION
@@ -261,7 +261,7 @@ H5S_none_iter_has_next_block(const H5S_sel_iter_t H5_ATTR_UNUSED *iter)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S_none_iter_next(H5S_sel_iter_t H5_ATTR_UNUSED *iter, hsize_t H5_ATTR_UNUSED nelem)
+H5S_none_iter_next(H5S_sel_iter_t H5_ATTR_UNUSED *iter, size_t H5_ATTR_UNUSED nelem)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -434,7 +434,6 @@ H5S_none_is_valid(const H5S_t H5_ATTR_UNUSED *space)
  USAGE
     hssize_t H5S_none_serial_size(space, f)
         H5S_t *space;             IN: Dataspace pointer to query
-        H5F_t *f;                 IN: File pointer
  RETURNS
     The number of bytes required on success, negative on an error.
  DESCRIPTION
@@ -446,7 +445,7 @@ H5S_none_is_valid(const H5S_t H5_ATTR_UNUSED *space)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static hssize_t
-H5S_none_serial_size(const H5S_t H5_ATTR_UNUSED *space, H5F_t H5_ATTR_UNUSED *f)
+H5S_none_serial_size(const H5S_t H5_ATTR_UNUSED *space)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -466,12 +465,11 @@ H5S_none_serial_size(const H5S_t H5_ATTR_UNUSED *space, H5F_t H5_ATTR_UNUSED *f)
  PURPOSE
     Serialize the current selection into a user-provided buffer.
  USAGE
-    herr_t H5S_none_serialize(space, p, f)
+    herr_t H5S_none_serialize(space, p)
         const H5S_t *space;     IN: Dataspace with selection to serialize
         uint8_t **p;            OUT: Pointer to buffer to put serialized
                                 selection.  Will be advanced to end of
                                 serialized selection.
-         H5F_t *f;              IN: File pointer
  RETURNS
     Non-negative on success/Negative on failure
  DESCRIPTION
@@ -483,7 +481,7 @@ H5S_none_serial_size(const H5S_t H5_ATTR_UNUSED *space, H5F_t H5_ATTR_UNUSED *f)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S_none_serialize(const H5S_t *space, uint8_t **p, H5F_t H5_ATTR_UNUSED *f)
+H5S_none_serialize(const H5S_t *space, uint8_t **p)
 {
     uint8_t *pp = (*p);         /* Local pointer for decoding */
 

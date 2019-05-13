@@ -38,8 +38,8 @@ static herr_t H5S_point_get_seq_list(const H5S_t *space, unsigned flags,
     size_t *nseq, size_t *nbytes, hsize_t *off, size_t *len);
 static herr_t H5S_point_release(H5S_t *space);
 static htri_t H5S_point_is_valid(const H5S_t *space);
-static hssize_t H5S_point_serial_size(const H5S_t *space, H5F_t *f);
-static herr_t H5S_point_serialize(const H5S_t *space, uint8_t **p, H5F_t *f);
+static hssize_t H5S_point_serial_size(const H5S_t *space);
+static herr_t H5S_point_serialize(const H5S_t *space, uint8_t **p);
 static herr_t H5S_point_deserialize(H5S_t **space, const uint8_t **p);
 static herr_t H5S_point_bounds(const H5S_t *space, hsize_t *start, hsize_t *end);
 static herr_t H5S_point_offset(const H5S_t *space, hsize_t *off);
@@ -51,6 +51,8 @@ static void H5S_point_adjust_u(H5S_t *space, const hsize_t *offset);
 static herr_t H5S_point_project_scalar(const H5S_t *space, hsize_t *offset);
 static herr_t H5S_point_project_simple(const H5S_t *space, H5S_t *new_space, hsize_t *offset);
 static herr_t H5S_point_iter_init(H5S_sel_iter_t *iter, const H5S_t *space);
+static herr_t
+    H5S_point_get_version_enc_size(const H5S_t *space, uint32_t *version, uint8_t *enc_size);
 
 /* Selection iteration callbacks */
 static herr_t H5S_point_iter_coords(const H5S_sel_iter_t *iter, hsize_t *coords);
@@ -753,20 +755,19 @@ done:
 
 /*--------------------------------------------------------------------------
  NAME
-    H5S_point_set_version
+    H5S_point_get_version_enc_size
  PURPOSE
-    Determine the version to use for encoding points selection info
+    Determine the version and the size (4 bytes) to encode point selection info
  USAGE
-    hssize_t H5S_point_set_version(space, bounds_end, f, version)
+    hssize_t H5S_point_get_version_enc_size(space, uint32_t *version, uint8_t *enc_size
         const H5S_t *space;  IN: The dataspace
-        hsize_t bounds_end:  IN: The selection high bounds
-        H5F_t *f:            IN: The file pointer
         uint32_t *version:   OUT: The version to use for encoding
+        uint8_t *enc_size:   OUT: The size to use for encoding
  RETURNS
-    The version to use
+    The version and the encoded size to use
  DESCRIPTION
-    Determine the version to use for encoding points selection info:
-        For 1.10, return 1
+    Determine the version and the encoded size to use for encoding points selection info.
+    Detect whether the number of points or the high bound exceeds 2^32 -1.
 
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
@@ -774,15 +775,20 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S_point_set_version(const H5S_t *space, hsize_t bounds_end[], H5F_t *f, uint32_t *version)
+H5S_point_get_version_enc_size(const H5S_t *space, uint32_t *version, uint8_t *enc_size)
 {
     hbool_t exceed = FALSE;
+    hsize_t bounds_start[H5S_MAX_RANK];
+    hsize_t bounds_end[H5S_MAX_RANK];
     unsigned u;
     herr_t ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    *version = H5S_POINT_VERSION_1;
+    /* Get bounding box for the selection */
+    HDmemset(bounds_end, 0, sizeof(bounds_end));
+    if(H5S_point_bounds(space, bounds_start, bounds_end) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't get selection bounds")
 
     /* Determine whether the number of points or the high bounds in the selection exceed (2^32 - 1) */
     for(u = 0; u < space->extent.rank; u++)
@@ -796,47 +802,12 @@ H5S_point_set_version(const H5S_t *space, hsize_t bounds_end[], H5F_t *f, uint32
     else if(exceed)
         HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "The end of bounding box in point selection exceeds 2^32")
 
+    *version = H5S_POINT_VERSION_1;
+    *enc_size = H5S_SELECT_INFO_ENC_SIZE_4;
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5S_point_set_version() */
-
-
-/*--------------------------------------------------------------------------
- NAME
-    H5S_point_set_info_size
- PURPOSE
-    Determine the size of point info to use for encoding selection info
- USAGE
-    hssize_t H5S_point_set_info_size(space, bounds_end, version, point_size)
-        const H5S_t *space:         IN: Dataspace ID of selection to query
-        hsize_t bounds_end[]:       IN: The selection high bounds
-        uint32_t version:           IN: The version used for encoding
-        uint8_t *point_size:        OUT: The size of point info
- RETURNS
-    The size of the points selection info
- DESCRIPTION
-    Determine the size for encoding points selection info:
-        For 1.10, return 4
-
- GLOBAL VARIABLES
- COMMENTS, BUGS, ASSUMPTIONS
- EXAMPLES
- REVISION LOG
---------------------------------------------------------------------------*/
-static herr_t
-H5S_point_set_info_size(const H5S_t *space, hsize_t H5_ATTR_UNUSED bounds_end[], uint32_t H5_ATTR_UNUSED version, uint8_t H5_ATTR_UNUSED *point_size)
-{
-    hsize_t max_size = 0;
-    unsigned u;
-
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    HDassert(version == H5S_POINT_VERSION_1);
-
-    *point_size = H5S_INFO_SIZE_4;
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* H5S_point_set_info_size() */
+} /* H5S_point_get_version_enc_size() */
 
 
 /*--------------------------------------------------------------------------
@@ -846,9 +817,8 @@ H5S_point_set_info_size(const H5S_t *space, hsize_t H5_ATTR_UNUSED bounds_end[],
     Determine the number of bytes needed to store the serialized point selection
     information.
  USAGE
-    hssize_t H5S_point_serial_size(space, f)
+    hssize_t H5S_point_serial_size(space)
         H5S_t *space;             IN: Dataspace pointer to query
-        H5F_t *f;                 IN: File pointer
  RETURNS
     The number of bytes required on success, negative on an error.
  DESCRIPTION
@@ -860,34 +830,23 @@ H5S_point_set_info_size(const H5S_t *space, hsize_t H5_ATTR_UNUSED bounds_end[],
  REVISION LOG
 --------------------------------------------------------------------------*/
 static hssize_t
-H5S_point_serial_size (const H5S_t *space, H5F_t *f)
+H5S_point_serial_size (const H5S_t *space)
 {
     H5S_pnt_node_t *curr;       /* Point information nodes */
-    hsize_t bounds_start[H5S_MAX_RANK];
-    hsize_t bounds_end[H5S_MAX_RANK];
     uint32_t version;           /* Version number */
-    uint8_t point_size;         /* Size of point info */
+    uint8_t enc_size;           /* Size of point info */
     hssize_t ret_value = -1;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(space);
 
-    /* Get bounding box for the selection */
-    HDmemset(bounds_end, 0, sizeof(bounds_end));
-    if(H5S_point_bounds(space, bounds_start, bounds_end) < 0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't get selection bounds")
-
     /* Determine the version */
-    if(H5S_point_set_version(space, bounds_end, f, &version) < 0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't determine hyper version")
-
-    /* Determine the size of point info */
-    if(H5S_point_set_info_size(space, bounds_end, version, &point_size) < 0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't determine hyper version")
+    if(H5S_point_get_version_enc_size(space, &version, &enc_size) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't determine version and enc_size")
 
     HDassert(version == H5S_POINT_VERSION_1);
-    HDassert(point_size == H5S_INFO_SIZE_4);
+    HDassert(enc_size == H5S_SELECT_INFO_ENC_SIZE_4);
 
     /* Basic number of bytes required to serialize point selection: */
     /*
@@ -896,14 +855,14 @@ H5S_point_serial_size (const H5S_t *space, H5F_t *f)
      */
     ret_value=20;
 
-    /* <num points (depend on point_size)> */
-    ret_value += point_size;
+    /* <num points (depend on enc_size)> */
+    ret_value += enc_size;
 
     /* Count points in selection */
     curr=space->select.sel_info.pnt_lst->head;
     while(curr!=NULL) {
-        /* Add <point_size> bytes times the rank for each element selected */
-        ret_value += point_size * space->extent.rank;
+        /* Add <enc_size> bytes times the rank for each element selected */
+        ret_value += enc_size * space->extent.rank;
         curr = curr->next;
     } /* end while */
 
@@ -918,12 +877,11 @@ done:
  PURPOSE
     Serialize the current selection into a user-provided buffer.
  USAGE
-    herr_t H5S_point_serialize(space, p, f)
+    herr_t H5S_point_serialize(space, p)
         const H5S_t *space;     IN: Dataspace with selection to serialize
         uint8_t **p;            OUT: Pointer to buffer to put serialized
                                 selection.  Will be advanced to end of
                                 serialized selection.
-        H5F_t *f;               IN: File pointer
  RETURNS
     Non-negative on success/Negative on failure
  DESCRIPTION
@@ -935,7 +893,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S_point_serialize (const H5S_t *space, uint8_t **p, H5F_t *f)
+H5S_point_serialize (const H5S_t *space, uint8_t **p)
 {
     H5S_pnt_node_t *curr;       /* Point information nodes */
     uint8_t *pp;                /* Local pointer for encoding */
@@ -943,9 +901,7 @@ H5S_point_serialize (const H5S_t *space, uint8_t **p, H5F_t *f)
     uint32_t len=0;             /* number of bytes used */
     unsigned u;                 /* local counting variable */
     uint32_t version;           /* Version number */
-    uint8_t point_size;         /* Size of point info */
-    hsize_t bounds_start[H5S_MAX_RANK];
-    hsize_t bounds_end[H5S_MAX_RANK];
+    uint8_t enc_size;         /* Size of point info */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -956,20 +912,11 @@ H5S_point_serialize (const H5S_t *space, uint8_t **p, H5F_t *f)
     pp = (*p);
     HDassert(pp);
 
-    /* Get bounding box for the selection */
-    HDmemset(bounds_end, 0, sizeof(bounds_end));
-    if(H5S_point_bounds(space, bounds_start, bounds_end) < 0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't get selection bounds")
-
     /* Determine the version */
-    if(H5S_point_set_version(space, bounds_end, f, &version) < 0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't determine hyper version")
+    if(H5S_point_get_version_enc_size(space, &version, &enc_size) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't determine version and enc_size")
 
-    /* Determine the size of point info */
-    if(H5S_point_set_info_size(space, bounds_end, version, &point_size) < 0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't determine hyper version")
-
-    HDassert(point_size == H5S_INFO_SIZE_4);
+    HDassert(enc_size ==  H5S_SELECT_INFO_ENC_SIZE_4);
     HDassert(version == H5S_POINT_VERSION_1);
 
     /* Store the preamble information */
