@@ -10,7 +10,7 @@
 
 cd @HDF5_BINARY_DIR@
 #run parallel tests except t_cache_image test
-ctest . -R MPI_TEST_ -E t_cache_image -C Release -T test >& ctestP.out
+ctest . -R MPI_TEST_ -C Release -T test >& ctestP.out
 
 echo "Done running $CMD"
 
