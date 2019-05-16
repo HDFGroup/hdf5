@@ -4,7 +4,7 @@
 !  MODULE H5VL
 !
 ! PURPOSE
-!  This file contains Fortran interfaces for H5VL functions.
+!  This file contains Fortran interfaces for H5VL (VOL) functions.
 !
 ! COPYRIGHT
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -57,9 +57,9 @@ CONTAINS
 !  layer class by name.
 !
 ! INPUTS
-!  cls - 
+!  name - Connector name
 ! OUTPUTS
-!  vol_id - 
+!  vol_id - VOL id
 !  hdferr - Returns 0 if successful and -1 if fails
 ! SOURCE
 
@@ -72,10 +72,10 @@ CONTAINS
 !*****
     CHARACTER(LEN=LEN_TRIM(name)+1,KIND=C_CHAR) :: c_name
     INTEGER(HID_T) :: vipl_id_default
-    
 
     INTERFACE
-       INTEGER(HID_T) FUNCTION H5VLregister_connector_by_name(name, vipl_id) BIND(C,NAME='H5VLregister_connector_by_name')
+       INTEGER(HID_T) FUNCTION H5VLregister_connector_by_name(name, vipl_id) &
+            BIND(C,NAME='H5VLregister_connector_by_name')
          IMPORT :: C_CHAR
          IMPORT :: HID_T
          CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name
@@ -113,7 +113,6 @@ CONTAINS
        END FUNCTION H5VLregister_connector_by_value
     END INTERFACE
 
-    
     vipl_id_default = H5P_DEFAULT_F
     IF(PRESENT(vipl_id)) vipl_id_default = vipl_id
 
@@ -134,9 +133,9 @@ CONTAINS
 !  Tests whether a VOL class has been registered or not.
 !
 ! INPUTS
-!  cls - 
+!  name - Connector name
 ! OUTPUTS
-!  vol_id - 
+!  registered - state of VOL class registration 
 !  hdferr - Returns 0 if successful and -1 if fails
 ! SOURCE
 
@@ -177,9 +176,9 @@ CONTAINS
 !  Retrieves the ID for a registered VOL connector.
 !
 ! INPUTS
-!  cls - 
+!  name - Connector name
 ! OUTPUTS
-!  vol_id - 
+!  vol_id - Connector id
 !  hdferr - Returns 0 if successful and -1 if fails
 ! SOURCE
 
@@ -236,15 +235,11 @@ CONTAINS
        name_len = INT(H5VLget_connector_name(obj_id, c_name, 0_SIZE_T), SIZE_T)
        IF(name_len.LT.0) hdferr = H5I_INVALID_HID_F
     ELSE
-     !  f_ptr = C_LOC(c_name(1)(1:1))
-       PRINT*,LEN(name)+1
        l = INT(LEN(name)+1,SIZE_T)
        IF(INT(H5VLget_connector_name(obj_id, c_name, l), SIZE_T).LT.0)THEN
           hdferr = H5I_INVALID_HID_F
        ELSE
-          PRINT*,"C_NAME", c_name
           CALL HD5c2fstring(name,c_name,LEN(name))
-          PRINT*,"name", name
        ENDIF
     ENDIF
 
@@ -261,7 +256,7 @@ CONTAINS
 !  Closes a VOL connector ID.
 !
 ! INPUTS
-!  plugin_id - A valid identifier of the connectory to unregister.
+!  vol_id - A valid identifier of the connectory to unregister.
 !
 ! OUTPUTS
 !  hdferr - Returns 0 if successful and -1 if fails
@@ -316,41 +311,5 @@ CONTAINS
     hdferr = INT(H5VLunregister_connector(plugin_id))
 
   END SUBROUTINE H5VLunregister_connector_f
-
-  !---------------------------------------------------------------------------
-  ! Function:    H5VLcmp_connector_cls_f
-  !
-  ! Purpose:     Compares two connector classes (based on their value field)
-  !
-  ! Return:      Success:    Non-negative, *cmp set to a value like strcmp
-  !
-  !              Failure:    Negative, *cmp unset
-  !
-  !---------------------------------------------------------------------------
-  
-  SUBROUTINE H5VLcmp_connector_cls_f(cmp, connector_id1, connector_id2, hdferr)
-    IMPLICIT NONE
-    INTEGER, INTENT(OUT), TARGET :: cmp
-    INTEGER(HID_T), INTENT(IN) :: connector_id1
-    INTEGER(HID_T), INTENT(IN) :: connector_id2
-    INTEGER, INTENT(OUT) :: hdferr
-!*****
-
-    INTEGER(C_INT) :: cmp_c
-    
-    INTERFACE
-       INTEGER FUNCTION H5VLcmp_connector_cls(cmp, connector_id1, connector_id2) BIND(C, NAME='H5VLcmp_connector_cls')
-         IMPORT :: HID_T
-         IMPORT :: C_INT
-         INTEGER(C_INT) :: cmp
-         INTEGER(HID_T), INTENT(IN), VALUE :: connector_id1
-         INTEGER(HID_T), INTENT(IN), VALUE :: connector_id2
-       END FUNCTION H5VLcmp_connector_cls
-    END INTERFACE
-
-    hdferr = INT(H5VLcmp_connector_cls(cmp_c, connector_id1, connector_id2))
-    cmp = INT(cmp_c)
-
-  END SUBROUTINE H5VLcmp_connector_cls_f
 
 END MODULE H5VL

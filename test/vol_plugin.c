@@ -114,6 +114,11 @@ test_registration_by_name(void)
     if(FALSE == is_registered)
         FAIL_PUTS_ERROR("NULL VOL connector was not registered");
 
+    hid_t acc_tpl = H5Pcreate(H5P_FILE_ACCESS);
+    H5Pset_vol(acc_tpl, vol_id, NULL);
+
+    H5Pclose(acc_tpl);
+
     /* Unregister the connector */
     if(H5VLunregister_connector(vol_id) < 0)
         TEST_ERROR;

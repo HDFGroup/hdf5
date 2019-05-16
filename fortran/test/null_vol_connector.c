@@ -127,6 +127,8 @@ H5VL_file_create(const char *name)
 {
     hid_t under_fapl;
     H5VL_t *file;
+    
+    printf(" H5VL_file_create \n");
 
     file = (H5VL_t *)calloc(1, sizeof(H5VL_t));
 
