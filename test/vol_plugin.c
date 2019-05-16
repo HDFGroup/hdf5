@@ -114,11 +114,6 @@ test_registration_by_name(void)
     if(FALSE == is_registered)
         FAIL_PUTS_ERROR("NULL VOL connector was not registered");
 
-    hid_t acc_tpl = H5Pcreate(H5P_FILE_ACCESS);
-    H5Pset_vol(acc_tpl, vol_id, NULL);
-
-    H5Pclose(acc_tpl);
-
     /* Unregister the connector */
     if(H5VLunregister_connector(vol_id) < 0)
         TEST_ERROR;
@@ -224,8 +219,6 @@ test_getters(void)
     htri_t  is_registered   = FAIL;
     hid_t   vol_id          = H5I_INVALID_HID;
     hid_t   vol_id_out      = H5I_INVALID_HID;
-    char name[64];
-    size_t size = 0;
 
     TESTING("VOL getters");
 
@@ -244,12 +237,6 @@ test_getters(void)
         TEST_ERROR;
     if(vol_id != vol_id_out)
         FAIL_PUTS_ERROR("VOL connector IDs don't match");
-
-    if((vol_id_out = H5VLget_connector_name(vol_id_out, name, size)) < 0)
-      TEST_ERROR;
-
-    printf("%s %ld \n", name, size);
-
 
     /* Unregister the connector */
     if(H5VLunregister_connector(vol_id) < 0)
