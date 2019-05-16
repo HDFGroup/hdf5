@@ -2077,7 +2077,7 @@ H5D__chunk_mem_cb(void H5_ATTR_UNUSED *elem, const H5T_t H5_ATTR_UNUSED *type, u
     } /* end else */
 
     /* Move memory selection iterator to next element in selection */
-    if(H5S_SELECT_ITER_NEXT(&fm->mem_iter, (hsize_t)1) < 0)
+    if(H5S_SELECT_ITER_NEXT(&fm->mem_iter, (size_t)1) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTNEXT, FAIL, "unable to move to next iterator location")
 
 done:

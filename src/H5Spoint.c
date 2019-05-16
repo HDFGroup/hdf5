@@ -59,7 +59,7 @@ static herr_t H5S_point_iter_coords(const H5S_sel_iter_t *iter, hsize_t *coords)
 static herr_t H5S_point_iter_block(const H5S_sel_iter_t *iter, hsize_t *start, hsize_t *end);
 static hsize_t H5S_point_iter_nelmts(const H5S_sel_iter_t *iter);
 static htri_t H5S_point_iter_has_next_block(const H5S_sel_iter_t *iter);
-static herr_t H5S_point_iter_next(H5S_sel_iter_t *sel_iter, hsize_t nelem);
+static herr_t H5S_point_iter_next(H5S_sel_iter_t *sel_iter, size_t nelem);
 static herr_t H5S_point_iter_next_block(H5S_sel_iter_t *sel_iter);
 static herr_t H5S_point_iter_release(H5S_sel_iter_t *sel_iter);
 
@@ -279,7 +279,7 @@ done:
  USAGE
     herr_t H5S_point_iter_next(iter, nelem)
         H5S_sel_iter_t *iter;       IN: Pointer to selection iterator
-        hsize_t nelem;              IN: Number of elements to advance by
+        size_t nelem;               IN: Number of elements to advance by
  RETURNS
     Non-negative on success/Negative on failure
  DESCRIPTION
@@ -290,7 +290,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S_point_iter_next(H5S_sel_iter_t *iter, hsize_t nelem)
+H5S_point_iter_next(H5S_sel_iter_t *iter, size_t nelem)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 

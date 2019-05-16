@@ -306,7 +306,7 @@ H5_DLL hsize_t H5S_hyper_get_first_inc_block(const H5S_t *space,
 H5_DLL herr_t H5S_select_iter_init(H5S_sel_iter_t *iter, const H5S_t *space, size_t elmt_size);
 H5_DLL herr_t H5S_select_iter_coords(const H5S_sel_iter_t *sel_iter, hsize_t *coords);
 H5_DLL hsize_t H5S_select_iter_nelmts(const H5S_sel_iter_t *sel_iter);
-H5_DLL herr_t H5S_select_iter_next(H5S_sel_iter_t *sel_iter, hsize_t nelem);
+H5_DLL herr_t H5S_select_iter_next(H5S_sel_iter_t *sel_iter, size_t nelem);
 H5_DLL herr_t H5S_select_iter_release(H5S_sel_iter_t *sel_iter);
 
 #ifdef H5_HAVE_PARALLEL
