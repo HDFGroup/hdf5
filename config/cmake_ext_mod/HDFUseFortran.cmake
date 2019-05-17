@@ -65,9 +65,9 @@ macro (CHECK_FORTRAN_FEATURE FUNCTION CODE VARIABLE)
         OUTPUT_VARIABLE OUTPUT
     )
 
-#    message ( "* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ")
-#    message ( "Test result ${OUTPUT}")
-#    message ( "* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ")
+#    message (STATUS "* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ")
+#    message (STATUS "Test result ${OUTPUT}")
+#    message (STATUS "* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ")
 
     if (${RESULT_VAR})
       set (${VARIABLE} 1 CACHE INTERNAL "Have Fortran function ${FUNCTION}")
