@@ -20,7 +20,7 @@ if (NOT TEST_GET_PROGRAM)
   message (FATAL_ERROR "Require TEST_GET_PROGRAM getub to be defined")
 endif ()
 if (NOT TEST_FOLDER)
-  message ( FATAL_ERROR "Require TEST_FOLDER to be defined")
+  message (FATAL_ERROR "Require TEST_FOLDER to be defined")
 endif ()
 if (NOT TEST_HFILE)
   message (FATAL_ERROR "Require TEST_HFILE the hdf file to be defined")
@@ -127,5 +127,5 @@ else ()
 endif ()
 
 # everything went fine...
-message ("Passed: The output of CHECK matched expectation")
+message (STATUS "Passed: The output of CHECK matched expectation")
 

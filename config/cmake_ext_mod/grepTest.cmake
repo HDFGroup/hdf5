@@ -20,7 +20,7 @@ endif ()
 #  message (STATUS "Require TEST_ARGS to be defined")
 #endif ()
 if (NOT TEST_FOLDER)
-  message ( FATAL_ERROR "Require TEST_FOLDER to be defined")
+  message (FATAL_ERROR "Require TEST_FOLDER to be defined")
 endif ()
 if (NOT TEST_OUTPUT)
   message (FATAL_ERROR "Require TEST_OUTPUT to be defined")
@@ -71,5 +71,5 @@ if (TEST_EXPECT)
 endif ()
 
 # everything went fine...
-message ("Passed: The output of ${TEST_PROGRAM} matched")
+message (STATUS "Passed: The output of ${TEST_PROGRAM} matched")
 
