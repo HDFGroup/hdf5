@@ -17,7 +17,7 @@
 !  function SIZEOF is available. It generates code that makes use of SIZEOF in
 !  H5fortran_detect.f90 which is a portable solution but is not standard
 !  compliant. The program H5test_kind_C_SIZEOF uses F2008 standard intrinsic
-!  function instead, which is the preferred method. 
+!  function instead, which is the preferred method.
 !
 !  The availability of SIZEOF is checked at configure time and the TRUE/FALSE
 !  condition is set in the configure variable "FORTRAN_HAVE_SIZEOF".
