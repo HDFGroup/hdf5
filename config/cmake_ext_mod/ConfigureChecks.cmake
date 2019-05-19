@@ -656,7 +656,7 @@ if (NOT ${HDF_PREFIX}_PRINTF_LL_WIDTH OR ${HDF_PREFIX}_PRINTF_LL_WIDTH MATCHES "
       set (${HDF_PREFIX}_PRINTF_LL_WIDTH "\"${${HDF_PREFIX}_PRINTF_LL}\"" CACHE INTERNAL "Width for printf for type `long long' or `__int64', us. `ll")
       set (PRINT_LL_FOUND 1)
     else ()
-      message ("Width test failed with result: ${${HDF_PREFIX}_PRINTF_LL_TEST_RUN}")
+      message (STATUS "Width test failed with result: ${${HDF_PREFIX}_PRINTF_LL_TEST_RUN}")
     endif ()
   else ()
     file (APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log
