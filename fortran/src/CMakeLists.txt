@@ -27,7 +27,7 @@ set (Fortran_COMPILER_ID CMAKE_Fortran_COMPILER_ID)
 # H5fortran_detect.f90     used to generate H5fort_type_defines.h
 # H5fort_type_defines.h    used to generate H5f90i_gen.h + H5fortran_types.f90
 #-----------------------------------------------------------------------------
-if (FORTRAN_HAVE_STORAGE_SIZE)
+if (H5_FORTRAN_HAVE_STORAGE_SIZE)
   add_executable (H5test_FortranHavekind
       ${HDF5_F90_SRC_SOURCE_DIR}/H5test_kind_STORAGE_SIZE.f90
   )
@@ -38,7 +38,7 @@ if (FORTRAN_HAVE_STORAGE_SIZE)
   endif ()
   set (H5_TEST_KIND_NAME "h5test_kind_storage_size_mod")
 else ()
-    if (FORTRAN_HAVE_SIZEOF)
+    if (H5_FORTRAN_HAVE_SIZEOF)
       add_executable (H5test_FortranHavekind
           ${HDF5_F90_SRC_SOURCE_DIR}/H5test_kind_SIZEOF.f90
       )

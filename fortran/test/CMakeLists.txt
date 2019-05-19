@@ -55,7 +55,7 @@ endif ()
 # fall back to F2003. If F2003 not supported then use F90 for the tests.
 
 set_source_files_properties (tf_F90.f90 tf_F03.f90 tf_F08.f90 tf.f90 PROPERTIES LANGUAGE Fortran)
-if (FORTRAN_HAVE_STORAGE_SIZE AND FORTRAN_HAVE_C_SIZEOF)
+if (H5_FORTRAN_HAVE_STORAGE_SIZE AND H5_FORTRAN_HAVE_C_SIZEOF)
   add_library (${HDF5_F90_TEST_LIB_TARGET} STATIC tf_F08.f90 tf.f90)
   if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
     add_library (${HDF5_F90_TEST_LIBSH_TARGET} SHARED tf_F08.f90 tf.f90)
