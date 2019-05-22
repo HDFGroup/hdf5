@@ -138,6 +138,99 @@ CONTAINS
 
   END SUBROUTINE test_registration_by_value
 
+
+  !-------------------------------------------------------------------------
+  ! Function:    test_registration_by_name()
+  !
+  ! Purpose:     Tests if we can load, register, and close a VOL
+  !              connector by name.
+  !
+  !-------------------------------------------------------------------------
+  !
+
+  SUBROUTINE test_registration_by_fapl(total_error)
+
+    IMPLICIT NONE
+
+    INTEGER, INTENT(INOUT) :: total_error
+    INTEGER :: error = 0
+
+    LOGICAL :: is_registered = .FALSE.
+    INTEGER(hid_t) :: vol_id = 0, vol_id_out = 1
+    CHARACTER(LEN=64) :: name
+    INTEGER(SIZE_T) :: name_len
+    INTEGER(hid_t) :: file_id
+    INTEGER :: cmp = -1
+    INTEGER(hid_t) :: fapl_id
+    TYPE(C_PTR) :: f_ptr
+    INTEGER(hid_t), TARGET :: under_fapl
+
+    CALL H5VLis_connector_registered_f( "FAKE_VOL_CONNECTOR_NAME", is_registered, error)
+    CALL check("H5VLis_connector_registered_f",error,total_error)
+    CALL VERIFY("H5VLis_connector_registered_f", is_registered, .FALSE., total_error)
+
+
+    ! The null VOL connector should not be registered at the start of the test
+    CALL H5VLis_connector_registered_f( "FAKE_VOL_CONNECTOR_NAME", is_registered, error)
+    CALL check("H5VLis_connector_registered_f",error,total_error)
+    CALL VERIFY("H5VLis_connector_registered_f", is_registered, .FALSE., total_error)
+
+    CALL H5VLregister_connector_by_name_f(NATIVE_VOL_CONNECTOR_NAME, vol_id, error)
+    CALL check("H5VLregister_connector_by_name_f",error,total_error)
+    
+    ! The connector should be registered now
+    CALL H5VLis_connector_registered_f(NATIVE_VOL_CONNECTOR_NAME, is_registered, error)
+    CALL check("H5VLis_connector_registered_f",error,total_error)
+    CALL VERIFY("H5VLis_connector_registered_f", is_registered, .TRUE., total_error)
+
+    ! Register the connector
+    CALL H5Pcreate_f(H5P_FILE_ACCESS_F, fapl_id, error)
+    CALL check("H5Pcreate_f",error,total_error)
+
+    f_ptr = C_NULL_PTR
+    CALL H5Pset_vol_f(fapl_id, vol_id, f_ptr, error)
+    CALL check("H5Pset_vol_f",error,total_error)
+
+    CALL H5Pget_vol_id_f(fapl_id, vol_id_out, error)
+    CALL check("H5Pget_vol_id_f",error,total_error)
+    CALL VERIFY("H5Pget_vol_id_f", vol_id_out, vol_id, total_error)
+#if 0
+    CALL H5Pcreate_f(H5P_FILE_ACCESS_F, under_fapl, error)
+    CALL check("H5Pcreate_f",error,total_error)
+    f_ptr = C_LOC(under_fapl)
+    CALL H5Pset_vol_f(fapl_id, vol_id, f_ptr, error)
+    CALL check("H5Pset_vol_f",error,total_error)
+
+    CALL H5Pget_vol_id_f(fapl_id, vol_id_out, error)
+    CALL check("H5Pget_vol_id_f",error,total_error)
+    CALL VERIFY("H5Pget_vol_id_f", vol_id_out, vol_id, total_error)
+#endif
+    CALL H5VLget_connector_id_f(NATIVE_VOL_CONNECTOR_NAME, vol_id_out, error)
+    CALL check("H5VLget_connector_id_f",error,total_error)
+    CALL VERIFY("H5VLget_connector_id_f", vol_id_out, vol_id, total_error)
+
+    CALL H5Fcreate_f("voltest.h5",H5F_ACC_TRUNC_F, file_id, error, H5P_DEFAULT_F, fapl_id)
+    CALL check("H5F_create_f",error,total_error)
+
+    CALL H5VLclose_f(vol_id_out, error)
+    CALL check("H5VLclose_f",error, total_error)
+
+    CALL H5VLclose_f(vol_id, error)
+    CALL check("H5VLclose_f",error, total_error)
+
+    ! Unregister the connector
+    CALL H5VLunregister_connector_f(vol_id, error)
+    CALL check("H5VLunregister_connector_f", error, total_error)
+
+    CALL H5Fclose_f(file_id, error)
+    CALL check("H5Fclose_f",error,total_error)
+
+    CALL H5Pclose_f(fapl_id, error)
+    CALL check("H5Pclose_f",error,total_error)
+
+  END SUBROUTINE test_registration_by_fapl
+
+
 END MODULE VOL_TMOD
 
 
@@ -171,6 +264,10 @@ PROGRAM vol_connector
   ret_total_error = 0
   CALL test_registration_by_value(ret_total_error)
   CALL write_test_status(ret_total_error, ' Testing VOL registration by value', total_error)
+
+  ret_total_error = 0
+  CALL test_registration_by_fapl(ret_total_error)
+  CALL write_test_status(ret_total_error, ' Testing VOL registration by fapl', total_error)
 
   WRITE(*, fmt = '(/18X,A)') '============================================'
   WRITE(*, fmt = '(19X, A)', advance='NO') ' FORTRAN VOL tests completed with '
