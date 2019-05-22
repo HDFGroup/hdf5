@@ -230,6 +230,29 @@ H5VL__native_object_get(void *obj, const H5VL_loc_params_t *loc_params, H5VL_obj
                 break;
             }
 
+        /* Object type */
+        case H5VL_OBJECT_GET_TYPE:
+            {
+                H5O_type_t *obj_type = HDva_arg(arguments, H5O_type_t *);
+
+                if(loc_params->type == H5VL_OBJECT_BY_TOKEN) {
+                    H5O_loc_t obj_oloc; /* Object location */
+                    unsigned rc;        /* Reference count of object */
+
+                    /* Initialize the object location */
+                    H5O_loc_reset(&obj_oloc);
+                    obj_oloc.file = loc.oloc->file;
+                    obj_oloc.addr = *(haddr_t *)loc_params->loc_data.loc_by_token.token;
+
+                    /* Get the # of links for object, and its type */
+                    /* (To check to make certain that this object hasn't been deleted) */
+                    if(H5O_get_rc_and_type(&obj_oloc, &rc, obj_type) < 0 || 0 == rc)
+                        HGOTO_ERROR(H5E_REFERENCE, H5E_LINKCOUNT, FAIL, "dereferencing deleted object")
+                } else
+                    HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "unknown get_type parameters")
+                break;
+            }
+
         default:
             HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't get this type of information from object")
     } /* end switch */
@@ -282,6 +305,37 @@ H5VL__native_object_specific(void *obj, const H5VL_loc_params_t *loc_params, H5V
                     /* Check if the object exists */
                     if((*ret = H5G_loc_exists(&loc, loc_params->loc_data.loc_by_name.name)) < 0)
                         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to determine if '%s' exists", loc_params->loc_data.loc_by_name.name)
+                } /* end if */
+                else
+                    HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "unknown object exists parameters")
+                break;
+            }
+
+        /* Lookup object */
+        case H5VL_OBJECT_LOOKUP:
+            {
+                void *token = va_arg(arguments, void *);
+
+                HDassert(token);
+
+                if(loc_params->type == H5VL_OBJECT_BY_NAME) {
+                    H5G_loc_t obj_loc;      /* Group hier. location of object */
+                    H5G_name_t obj_path;    /* Object group hier. path */
+                    H5O_loc_t obj_oloc;     /* Object object location */
+
+                    /* Set up opened group location to fill in */
+                    obj_loc.oloc = &obj_oloc;
+                    obj_loc.path = &obj_path;
+                    H5G_loc_reset(&obj_loc);
+
+                    /* Find the object */
+                    if(H5G_loc_find(&loc, loc_params->loc_data.loc_by_name.name, &obj_loc) < 0)
+                        HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, FAIL, "object not found")
+                    *(haddr_t *)token = obj_loc.oloc->addr;
+
+                    /* Release the object location */
+                    if(H5G_loc_free(&obj_loc) < 0)
+                        HGOTO_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "can't free location")
                 } /* end if */
                 else
                     HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "unknown object exists parameters")

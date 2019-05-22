@@ -2970,6 +2970,9 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                                 case H5VL_OBJECT_GET_NAME:
                                     HDfprintf(out, "H5VL_OBJECT_GET_NAME");
                                     break;
+                                case H5VL_OBJECT_GET_TYPE:
+                                    HDfprintf(out, "H5VL_OBJECT_GET_TYPE");
+                                    break;
                                 default:
                                     HDfprintf(out, "%ld", (long)get);
                                     break;
@@ -2992,6 +2995,9 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                                     break;
                                 case H5VL_OBJECT_EXISTS:
                                     HDfprintf(out, "H5VL_OBJECT_EXISTS");
+                                    break;
+                                case H5VL_OBJECT_LOOKUP:
+                                    HDfprintf(out, "H5VL_OBJECT_LOOKUP");
                                     break;
                                 case H5VL_OBJECT_VISIT:
                                     HDfprintf(out, "H5VL_OBJECT_VISIT");

@@ -162,13 +162,15 @@ typedef enum H5VL_object_get_t {
     H5VL_REF_GET_NAME,                 /* object name, for reference        */
     H5VL_REF_GET_REGION,               /* dataspace of region               */
     H5VL_REF_GET_TYPE,                 /* type of object                    */
-    H5VL_OBJECT_GET_NAME               /* object name                       */
+    H5VL_OBJECT_GET_NAME,              /* object name                       */
+    H5VL_OBJECT_GET_TYPE               /* object type                       */
 } H5VL_object_get_t;
 
 /* types for object SPECIFIC callback */
 typedef enum H5VL_object_specific_t {
     H5VL_OBJECT_CHANGE_REF_COUNT,       /* H5Oincr/decr_refcount             */
     H5VL_OBJECT_EXISTS,                 /* H5Oexists_by_name                 */
+    H5VL_OBJECT_LOOKUP,                 /* Lookup object                     */
     H5VL_OBJECT_VISIT,                  /* H5Ovisit(_by_name)                */
     H5VL_REF_CREATE,                    /* H5Rcreate                         */
     H5VL_OBJECT_FLUSH,                  /* H5{D|G|O|T}flush                  */
