@@ -33,6 +33,8 @@
 #include "H5Iprivate.h"         /* IDs                                  */
 #include "H5VLpkg.h"            /* Virtual Object Layer                 */
 
+/* VOL connectors */
+#include "H5VLnative.h"         /* Native VOL connector                 */
 
 /****************/
 /* Local Macros */
@@ -321,6 +323,7 @@ done:
 herr_t
 H5VLunregister_connector(hid_t vol_id)
 {
+    hid_t native_id = H5I_INVALID_HID;
     herr_t ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -328,13 +331,23 @@ H5VLunregister_connector(hid_t vol_id)
 
     /* Check arguments */
     if(NULL == H5I_object_verify(vol_id, H5I_VOL))
-        HGOTO_ERROR(H5E_VOL, H5E_BADTYPE, FAIL, "not a VOL connector")
+        HGOTO_ERROR(H5E_VOL, H5E_BADTYPE, FAIL, "not a VOL connector ID")
+
+    /* For the time being, we disallow unregistering the native VOL connector */
+    if(H5I_INVALID_HID == (native_id = H5VL__get_connector_id(H5VL_NATIVE_NAME, FALSE)))
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "unable to find the native VOL connector ID")
+    if(vol_id == native_id)
+        HGOTO_ERROR(H5E_VOL, H5E_BADVALUE, FAIL, "unregistering the native VOL connector is not allowed")
 
     /* The H5VL_class_t struct will be freed by this function */
-    if (H5I_dec_app_ref(vol_id) < 0)
+    if(H5I_dec_app_ref(vol_id) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTDEC, FAIL, "unable to unregister VOL connector")
 
 done:
+    if(native_id != H5I_INVALID_HID)
+        if(H5I_dec_ref(native_id) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTDEC, FAIL, "unable to decrement count on native_id")
+
     FUNC_LEAVE_API(ret_value)
 } /* end H5VLunregister_connector() */
 
@@ -344,8 +357,8 @@ done:
  *
  * Purpose:     Compares two connector classes (based on their value field)
  *
- * Note:	This routine is _only_ for HDF5 VOL connector authors!  It is
- *		_not_ part of the public API for HDF5 application developers.
+ * Note:        This routine is _only_ for HDF5 VOL connector authors!  It is
+ *              _not_ part of the public API for HDF5 application developers.
  *
  * Return:      Success:    Non-negative, *cmp set to a value like strcmp
  *
@@ -381,11 +394,11 @@ done:
  * Function:    H5VLwrap_register
  *
  * Purpose:     Wrap an internal object with a "wrap context" and register an
- *		hid_t for the resulting object.
+ *              hid_t for the resulting object.
  *
- * Note:	This routine is mainly targeted toward wrapping objects for
- *		iteration routine callbacks (i.e. the callbacks from H5Aiterate*,
- *		H5Literate* / H5Lvisit*, and H5Ovisit* ).
+ * Note:        This routine is mainly targeted toward wrapping objects for
+ *              iteration routine callbacks (i.e. the callbacks from H5Aiterate*,
+ *              H5Literate* / H5Lvisit*, and H5Ovisit* ).
  *
  * Return:      Success:    Non-negative hid_t for the object.
  *              Failure:    Negative (H5I_INVALID_HID)
@@ -420,10 +433,10 @@ done:
  * Function:    H5VLobject
  *
  * Purpose:     Retrieve the object pointer associated with an hid_t for a.
- *		VOL object.
+ *              VOL object.
  *
- * Note:	This routine is mainly targeted toward unwrapping objects for
- *		testing.
+ * Note:        This routine is mainly targeted toward unwrapping objects for
+ *              testing.
  *
  * Return:      Success:    Object pointer
  *              Failure:    NULL
@@ -451,16 +464,16 @@ done:
  * Function:    H5VLretrieve_lib_state
  *
  * Purpose:     Retrieves a copy of the internal state of the HDF5 library,
- *		so that it can be restored later.
+ *              so that it can be restored later.
  *
- * Note:	This routine is _only_ for HDF5 VOL connector authors!  It is
- *		_not_ part of the public API for HDF5 application developers.
+ * Note:        This routine is _only_ for HDF5 VOL connector authors!  It is
+ *              _not_ part of the public API for HDF5 application developers.
  *
  * Return:      Success:    Non-negative, *state set
  *              Failure:    Negative, *state unset
  *
- * Programmer:	Quincey Koziol
- *		Thursday, January 10, 2019
+ * Programmer:  Quincey Koziol
+ *              Thursday, January 10, 2019
  *
  *---------------------------------------------------------------------------
  */
@@ -491,14 +504,14 @@ done:
  *
  * Purpose:     Restores the internal state of the HDF5 library.
  *
- * Note:	This routine is _only_ for HDF5 VOL connector authors!  It is
- *		_not_ part of the public API for HDF5 application developers.
+ * Note:        This routine is _only_ for HDF5 VOL connector authors!  It is
+ *              _not_ part of the public API for HDF5 application developers.
  *
  * Return:      Success:    Non-negative
  *              Failure:    Negative
  *
- * Programmer:	Quincey Koziol
- *		Thursday, January 10, 2019
+ * Programmer:  Quincey Koziol
+ *              Thursday, January 10, 2019
  *
  *---------------------------------------------------------------------------
  */
@@ -528,20 +541,20 @@ done:
  * Function:    H5VLreset_lib_state
  *
  * Purpose:     Resets the internal state of the HDF5 library, undoing the
- *		affects of H5VLrestore_lib_state.
+ *              affects of H5VLrestore_lib_state.
  *
- * Note:	This routine is _only_ for HDF5 VOL connector authors!  It is
- *		_not_ part of the public API for HDF5 application developers.
+ * Note:        This routine is _only_ for HDF5 VOL connector authors!  It is
+ *              _not_ part of the public API for HDF5 application developers.
  *
- * Note:	This routine must be called as a "pair" with
- * 		H5VLrestore_lib_state.  It can be called before / after /
- * 		independently of H5VLfree_lib_state.
+ * Note:        This routine must be called as a "pair" with
+ *              H5VLrestore_lib_state.  It can be called before / after /
+ *              independently of H5VLfree_lib_state.
  *
  * Return:      Success:    Non-negative
  *              Failure:    Negative
  *
- * Programmer:	Quincey Koziol
- *		Saturday, February 23, 2019
+ * Programmer:  Quincey Koziol
+ *              Saturday, February 23, 2019
  *
  *---------------------------------------------------------------------------
  */
@@ -568,17 +581,17 @@ done:
  *
  * Purpose:     Free a retrieved library state.
  *
- * Note:	This routine is _only_ for HDF5 VOL connector authors!  It is
- *		_not_ part of the public API for HDF5 application developers.
+ * Note:        This routine is _only_ for HDF5 VOL connector authors!  It is
+ *              _not_ part of the public API for HDF5 application developers.
  *
- * Note:	This routine must be called as a "pair" with
- * 		H5VLretrieve_lib_state.
+ * Note:        This routine must be called as a "pair" with
+ *              H5VLretrieve_lib_state.
  *
  * Return:      Success:    Non-negative
  *              Failure:    Negative
  *
- * Programmer:	Quincey Koziol
- *		Thursday, January 10, 2019
+ * Programmer:  Quincey Koziol
+ *              Thursday, January 10, 2019
  *
  *---------------------------------------------------------------------------
  */
