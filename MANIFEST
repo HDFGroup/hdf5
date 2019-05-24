@@ -899,6 +899,8 @@
 ./src/H5TSprivate.h
 ./src/H5VL.c
 ./src/H5VLcallback.c
+./src/H5VLconnector.h
+./src/H5VLconnector_passthru.h
 ./src/H5VLint.c
 ./src/H5VLmodule.h
 ./src/H5VLnative.c
