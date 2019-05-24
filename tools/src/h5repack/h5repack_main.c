@@ -23,7 +23,8 @@ static void leave(int ret) H5_ATTR_NORETURN;
 
 
 /* module-scoped variables */
-static int has_i_o = 0;
+static int has_i = 0;
+static int has_o = 0;
 const char *infile = NULL;
 const char *outfile = NULL;
 
@@ -33,34 +34,34 @@ const char *outfile = NULL;
  */
 static const char *s_opts = "hVvf:l:m:e:nLj:k:c:d:s:u:b:M:t:a:i:o:S:P:T:G:q:z:E";
 static struct long_options l_opts[] = {
-    { "help", no_arg, 'h' },
-    { "version", no_arg, 'V' },
-    { "verbose", no_arg, 'v' },
-    { "filter", require_arg, 'f' },
-    { "layout", require_arg, 'l' },
-    { "minimum", require_arg, 'm' },
-    { "file", require_arg, 'e' },
-    { "native", no_arg, 'n' },
-    { "latest", no_arg, 'L' },
-    { "low", require_arg, 'j' },
-    { "high", require_arg, 'k' },
-    { "compact", require_arg, 'c' },
-    { "indexed", require_arg, 'd' },
-    { "ssize", require_arg, 's' },
-    { "ublock", require_arg, 'u' },
-    { "block", require_arg, 'b' },
+    { "help",                no_arg,      'h' },
+    { "version",             no_arg,      'V' },
+    { "verbose",             no_arg,      'v' },
+    { "filter",              require_arg, 'f' },
+    { "layout",              require_arg, 'l' },
+    { "minimum",             require_arg, 'm' },
+    { "file",                require_arg, 'e' },
+    { "native",              no_arg,      'n' },
+    { "latest",              no_arg,      'L' },
+    { "low",                 require_arg, 'j' },
+    { "high",                require_arg, 'k' },
+    { "compact",             require_arg, 'c' },
+    { "indexed",             require_arg, 'd' },
+    { "ssize",               require_arg, 's' },
+    { "ublock",              require_arg, 'u' },
+    { "block",               require_arg, 'b' },
     { "metadata_block_size", require_arg, 'M' },
-    { "threshold", require_arg, 't' },
-    { "alignment", require_arg, 'a' },
-    { "infile", require_arg, 'i' },   /* -i for backward compability */
-    { "outfile", require_arg, 'o' },  /* -o for backward compability */
-    { "fs_strategy", require_arg, 'S' },
-    { "fs_persist", require_arg, 'P' },
-    { "fs_threshold", require_arg, 'T' },
-    { "fs_pagesize", require_arg, 'G' },
-    { "sort_by", require_arg, 'q' },
-    { "sort_order", require_arg, 'z' },
-    { "enable-error-stack", no_arg, 'E' },
+    { "threshold",           require_arg, 't' },
+    { "alignment",           require_arg, 'a' },
+    { "infile",              require_arg, 'i' }, /* for backward compability */
+    { "outfile",             require_arg, 'o' }, /* for backward compability */
+    { "fs_strategy",         require_arg, 'S' },
+    { "fs_persist",          require_arg, 'P' },
+    { "fs_threshold",        require_arg, 'T' },
+    { "fs_pagesize",         require_arg, 'G' },
+    { "sort_by",             require_arg, 'q' },
+    { "sort_order",          require_arg, 'z' },
+    { "enable-error-stack",  no_arg,      'E' },
     { NULL, 0, '\0' }
 };
 
@@ -281,7 +282,8 @@ int read_info(const char *filename, pack_opt_t *options)
     int i, rc = 1;
     int ret_value = EXIT_SUCCESS;
 
-    if ((fp = HDfopen(filename, "r")) == (FILE *) NULL) {
+    fp = HDfopen(filename, "r");
+    if ((FILE *)NULL == fp) {
         error_msg("cannot open options file %s\n", filename);
         h5tools_setstatus(EXIT_FAILURE);
         ret_value = EXIT_FAILURE;
@@ -290,90 +292,46 @@ int read_info(const char *filename, pack_opt_t *options)
 
     /* cycle until end of file reached */
     while (1) {
-        rc = fscanf(fp, "%s", stype);
-        if (rc == -1)
-            break;
 
-        /*-------------------------------------------------------------------------
-         * filter
-         *-------------------------------------------------------------------------
-         */
-        if (HDstrcmp(stype,"-f") == 0) {
-            /* find begining of info */
-            i = 0;
-            c = '0';
-            while (c != ' ') {
-                if(fscanf(fp, "%c", &c) < 0 && HDferror(fp)) {
-                    error_msg("fscanf error\n");
-                    h5tools_setstatus(EXIT_FAILURE);
-                    ret_value = EXIT_FAILURE;
-                    goto done;
-                } /* end if */
-                if (HDfeof(fp))
-                    break;
-            }
-            c = '0';
-            /* go until end */
-            while (c != ' ') {
-                if(fscanf(fp, "%c", &c) < 0 && HDferror(fp)) {
-                    error_msg("fscanf error\n");
-                    h5tools_setstatus(EXIT_FAILURE);
-                    ret_value = EXIT_FAILURE;
-                    goto done;
-                } /* end if */
-                comp_info[i] = c;
-                i++;
-                if (HDfeof(fp))
-                    break;
-                if (c == 10 /*eol*/)
-                    break;
-            }
-            comp_info[i - 1] = '\0'; /*cut the last " */
+        /* Info indicator must be for layout or filter */
+        if (HDstrcmp(stype,"-l") && HDstrcmp(stype, "-f")) {
+            error_msg("bad file format for %s", filename);
+            h5tools_setstatus(EXIT_FAILURE);
+            ret_value = EXIT_FAILURE;
+            goto done;
+        }
 
-            if (h5repack_addfilter(comp_info, options) == -1) {
-                error_msg("could not add compression option\n");
+        /* find begining of info */
+        i = 0;
+        c = '0';
+        while (c != ' ') {
+            if (fscanf(fp, "%c", &c) < 0 && HDferror(fp)) {
+                error_msg("fscanf error\n");
                 h5tools_setstatus(EXIT_FAILURE);
                 ret_value = EXIT_FAILURE;
                 goto done;
             }
+            if (HDfeof(fp))
+                break;
         }
-        /*-------------------------------------------------------------------------
-         * layout
-         *-------------------------------------------------------------------------
-         */
-        else if (HDstrcmp(stype,"-l") == 0) {
-
-            /* find begining of info */
-            i = 0;
-            c = '0';
-            while (c != ' ') {
-                if(fscanf(fp, "%c", &c) < 0 && HDferror(fp)) {
-                    error_msg("fscanf error\n");
-                    h5tools_setstatus(EXIT_FAILURE);
-                    ret_value = EXIT_FAILURE;
-                    goto done;
-                } /* end if */
-                if (HDfeof(fp))
-                    break;
+        c = '0';
+        /* go until end */
+        while (c != ' ') {
+            if (fscanf(fp, "%c", &c) < 0 && HDferror(fp)) {
+                error_msg("fscanf error\n");
+                h5tools_setstatus(EXIT_FAILURE);
+                ret_value = EXIT_FAILURE;
+                goto done;
             }
-            c = '0';
-            /* go until end */
-            while (c != ' ') {
-                if(fscanf(fp, "%c", &c) < 0 && HDferror(fp)) {
-                    error_msg("fscanf error\n");
-                    h5tools_setstatus(EXIT_FAILURE);
-                    ret_value = EXIT_FAILURE;
-                    goto done;
-                } /* end if */
-                comp_info[i] = c;
-                i++;
-                if (HDfeof(fp))
-                    break;
-                if (c == 10 /*eol*/)
-                    break;
-            }
-            comp_info[i - 1] = '\0'; /*cut the last " */
+            comp_info[i++] = c;
+            if (HDfeof(fp))
+                break;
+            if (c == 10 /*eol*/)
+                break;
+        }
+        comp_info[i - 1] = '\0'; /*cut the last " */
 
+        if (!HDstrcmp(stype, "-l")) {
             if (h5repack_addlayout(comp_info, options) == -1) {
                 error_msg("could not add chunck option\n");
                 h5tools_setstatus(EXIT_FAILURE);
@@ -381,17 +339,15 @@ int read_info(const char *filename, pack_opt_t *options)
                 goto done;
             }
         }
-        /*-------------------------------------------------------------------------
-         * not valid
-         *-------------------------------------------------------------------------
-         */
         else {
-            error_msg("bad file format for %s", filename);
-            h5tools_setstatus(EXIT_FAILURE);
-            ret_value = EXIT_FAILURE;
-            goto done;
+            if (h5repack_addfilter(comp_info, options) == -1) {
+                error_msg("could not add compression option\n");
+                h5tools_setstatus(EXIT_FAILURE);
+                ret_value = EXIT_FAILURE;
+                goto done;
+            }
         }
-    }
+    } /* end while info-read cycling */
 
 done:
     if (fp)
@@ -415,9 +371,10 @@ set_sort_by(const char *form)
 {
     H5_index_t idx_type = H5_INDEX_UNKNOWN;
 
-    if (HDstrcmp(form,"name")==0) /* H5_INDEX_NAME */
+    if (!HDstrcmp(form, "name"))
         idx_type = H5_INDEX_NAME;
-    else if (HDstrcmp(form,"creation_order")==0) /* H5_INDEX_CRT_ORDER */
+    else
+    if (!HDstrcmp(form, "creation_order"))
         idx_type = H5_INDEX_CRT_ORDER;
 
     return idx_type;
@@ -438,9 +395,10 @@ set_sort_order(const char *form)
 {
     H5_iter_order_t iter_order = H5_ITER_UNKNOWN;
 
-    if (HDstrcmp(form,"ascending")==0) /* H5_ITER_INC */
+    if (!HDstrcmp(form, "ascending"))
         iter_order = H5_ITER_INC;
-    else if (HDstrcmp(form,"descending")==0) /* H5_ITER_DEC */
+    else
+    if (!HDstrcmp(form, "descending"))
         iter_order = H5_ITER_DEC;
 
     return iter_order;
@@ -459,19 +417,19 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options)
     int ret_value = 0;
 
     /* parse command line options */
-    while ((opt = get_option(argc, argv, s_opts, l_opts)) != EOF) {
+    while (EOF != (opt = get_option(argc, argv, s_opts, l_opts))) {
         switch ((char) opt) {
 
             /* -i for backward compatibility */
             case 'i':
                 infile = opt_arg;
-                has_i_o = 1;
+                has_i++;
                 break;
 
             /* -o for backward compatibility */
             case 'o':
                 outfile = opt_arg;
-                has_i_o = 1;
+                has_o++;
                 break;
 
             case 'h':
@@ -536,7 +494,7 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options)
 
             case 'j':
                 options->low_bound = (H5F_libver_t)HDatoi(opt_arg);
-                if(options->low_bound < H5F_LIBVER_EARLIEST || options->low_bound > H5F_LIBVER_LATEST) {
+                if (options->low_bound < H5F_LIBVER_EARLIEST || options->low_bound > H5F_LIBVER_LATEST) {
                     error_msg("in parsing low bound\n");
                     goto done;
                 }
@@ -544,7 +502,7 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options)
 
             case 'k':
                 options->high_bound = (H5F_libver_t)HDatoi(opt_arg);
-                if(options->high_bound < H5F_LIBVER_EARLIEST || options->high_bound > H5F_LIBVER_LATEST) {
+                if (options->high_bound < H5F_LIBVER_EARLIEST || options->high_bound > H5F_LIBVER_LATEST) {
                     error_msg("in parsing high bound\n");
                     goto done;
                 }
@@ -566,10 +524,10 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options)
                 {
                     int idx = 0;
                     int ssize = 0;
-                    char *msgPtr = HDstrchr( opt_arg, ':');
+                    char *msgPtr = HDstrchr(opt_arg, ':');
                     options->latest = TRUE; /* must use latest format */
                     if (msgPtr == NULL) {
-                        ssize = HDatoi( opt_arg );
+                        ssize = HDatoi(opt_arg);
                         for (idx = 0; idx < 5; idx++)
                             options->msg_size[idx] = ssize;
                     }
@@ -579,15 +537,19 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options)
                         HDstrcpy(msgType, msgPtr + 1);
                         msgPtr[0] = '\0';
                         ssize = HDatoi( opt_arg );
-                        if (HDstrncmp(msgType, "dspace",6) == 0)
+                        if (!HDstrncmp(msgType, "dspace", 6))
                             options->msg_size[0] = ssize;
-                        else if (HDstrncmp(msgType, "dtype", 5) == 0)
+                        else
+                        if (!HDstrncmp(msgType, "dtype", 5))
                             options->msg_size[1] = ssize;
-                        else if (HDstrncmp(msgType, "fill", 4) == 0)
+                        else
+                        if (!HDstrncmp(msgType, "fill", 4))
                             options->msg_size[2] = ssize;
-                        else if (HDstrncmp(msgType, "pline", 5) == 0)
+                        else
+                        if (!HDstrncmp(msgType, "pline", 5))
                             options->msg_size[3] = ssize;
-                        else if (HDstrncmp(msgType, "attr", 4) == 0)
+                        else
+                        if (!HDstrncmp(msgType, "attr", 4))
                             options->msg_size[4] = ssize;
                     }
                 }
@@ -624,13 +586,16 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options)
                     char strategy[MAX_NC_NAME];
 
                     HDstrcpy(strategy, opt_arg);
-                    if(!HDstrcmp(strategy, "FSM_AGGR"))
+                    if (!HDstrcmp(strategy, "FSM_AGGR"))
                         options->fs_strategy = H5F_FSPACE_STRATEGY_FSM_AGGR;
-                    else if(!HDstrcmp(strategy, "PAGE"))
+                    else
+                    if (!HDstrcmp(strategy, "PAGE"))
                         options->fs_strategy = H5F_FSPACE_STRATEGY_PAGE;
-                    else if(!HDstrcmp(strategy, "AGGR"))
+                    else
+                    if (!HDstrcmp(strategy, "AGGR"))
                         options->fs_strategy = H5F_FSPACE_STRATEGY_AGGR;
-                    else if(!HDstrcmp(strategy, "NONE"))
+                    else
+                    if (!HDstrcmp(strategy, "NONE"))
                         options->fs_strategy = H5F_FSPACE_STRATEGY_NONE;
                     else {
                         error_msg("invalid file space management strategy\n", opt_arg);
@@ -638,7 +603,7 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options)
                         ret_value = -1;
                         goto done;
                     }
-                    if(options->fs_strategy == (H5F_fspace_strategy_t)0)
+                    if (options->fs_strategy == (H5F_fspace_strategy_t)0)
                         /* To distinguish the "specified" zero value */
                         options->fs_strategy = (H5F_fspace_strategy_t)-1;
                 }
@@ -646,27 +611,27 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options)
 
             case 'P':
                 options->fs_persist = HDatoi(opt_arg);
-                if(options->fs_persist == 0)
+                if (options->fs_persist == 0)
                     /* To distinguish the "specified" zero value */
                     options->fs_persist = -1;
                 break;
 
             case 'T':
                 options->fs_threshold = HDatol(opt_arg);
-                if(options->fs_threshold == 0)
+                if (options->fs_threshold == 0)
                     /* To distinguish the "specified" zero value */
                     options->fs_threshold = -1;
                 break;
 
             case 'G':
                 options->fs_pagesize = HDstrtoll(opt_arg, NULL, 0);
-                if(options->fs_pagesize == 0)
+                if (options->fs_pagesize == 0)
                     /* To distinguish the "specified" zero value */
                    options->fs_pagesize = -1;
                 break;
 
             case 'q':
-                if((sort_by = set_sort_by(opt_arg)) < 0) {
+                if (H5_INDEX_UNKNOWN == set_sort_by(opt_arg)) {
                     error_msg(" failed to set sort by form <%s>\n", opt_arg);
                     h5tools_setstatus(EXIT_FAILURE);
                     ret_value = -1;
@@ -675,7 +640,7 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options)
                 break;
 
             case 'z':
-                if((sort_order = set_sort_order(opt_arg)) < 0) {
+                if (H5_ITER_UNKNOWN == set_sort_order(opt_arg)) {
                     error_msg(" failed to set sort order form <%s>\n", opt_arg);
                     h5tools_setstatus(EXIT_FAILURE);
                     ret_value = -1;
@@ -690,17 +655,35 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options)
             default:
                 break;
         } /* switch */
-    } /* while */
+    } /* end while there are more options to parse */
 
-    if (has_i_o == 0) {
-        /* check for file names to be processed */
-        if (argc <= opt_ind || argv[opt_ind + 1] == NULL) {
-            error_msg("missing file names\n");
-            usage(h5tools_getprogname());
-            h5tools_setstatus(EXIT_FAILURE);
-            ret_value = -1;
-        }
-    }
+    /* If neither -i nor -o given, get in and out files positionally */
+    if (0 == (has_i + has_o)) {
+         if (argv[opt_ind] != NULL && argv[opt_ind + 1] != NULL) {
+             infile = argv[opt_ind];
+             outfile = argv[opt_ind + 1];
+ 
+             if (!HDstrcmp(infile, outfile)) {
+                 error_msg("file names cannot be the same\n");
+                 usage(h5tools_getprogname());
+                 h5tools_setstatus(EXIT_FAILURE);
+                 ret_value = -1;
+             }
+         }
+         else {
+             error_msg("file names missing\n");
+             usage(h5tools_getprogname());
+             h5tools_setstatus(EXIT_FAILURE);
+             ret_value = -1;
+         }
+     }
+     else
+     if (has_i != 1 || has_o != 1) {
+         error_msg("filenames must be either both -i -o or both positional\n");
+         usage(h5tools_getprogname());
+         h5tools_setstatus(EXIT_FAILURE);
+         ret_value = -1;
+     }
 
 done:
     return ret_value;
@@ -756,28 +739,6 @@ int main(int argc, const char **argv)
 
     if (parse_command_line(argc, argv, &options) < 0)
         goto done;
-
-    /* get file names if they were not yet got */
-    if (has_i_o == 0) {
-
-        if (argv[opt_ind] != NULL && argv[opt_ind + 1] != NULL) {
-            infile = argv[opt_ind];
-            outfile = argv[opt_ind + 1];
-
-            if ( HDstrcmp( infile, outfile ) == 0) {
-                error_msg("file names cannot be the same\n");
-                usage(h5tools_getprogname());
-                h5tools_setstatus(EXIT_FAILURE);
-                goto done;
-            }
-        }
-        else {
-            error_msg("file names missing\n");
-            usage(h5tools_getprogname());
-            h5tools_setstatus(EXIT_FAILURE);
-            goto done;
-        }
-    }
 
     if (enable_error_stack > 0) {
         H5Eset_auto2(H5E_DEFAULT, func, edata);
