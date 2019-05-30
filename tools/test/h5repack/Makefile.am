@@ -22,10 +22,12 @@ include $(top_srcdir)/config/commence.am
 AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_srcdir)/test -I$(top_srcdir)/tools/lib -I$(top_srcdir)/tools/src/h5repack
 
 # Test programs and scripts
+TEST_PROG=h5repackgentest
 TEST_SCRIPT=h5repack.sh
 
 noinst_PROGRAMS=h5repacktst testh5repack_detect_szip
 
+check_PROGRAMS=$(TEST_PROG)
 SCRIPT_DEPEND=../../src/h5repack/h5repack$(EXEEXT) h5repacktst$(EXEEXT)
 if HAVE_SHARED_CONDITIONAL
 if USE_PLUGINS_CONDITIONAL

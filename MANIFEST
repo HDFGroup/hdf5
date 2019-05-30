@@ -1478,6 +1478,7 @@
 ./tools/test/h5repack/dynlib_rpk.c
 ./tools/test/h5repack/dynlib_vrpk.c
 ./tools/test/h5repack/h5repack.sh.in
+./tools/test/h5repack/h5repackgentest.c
 ./tools/test/h5repack/h5repack_plugin.sh.in
 ./tools/test/h5repack/h5repacktst.c
 ./tools/test/h5repack/testh5repack_detect_szip.c
