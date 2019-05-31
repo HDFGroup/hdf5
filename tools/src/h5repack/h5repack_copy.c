@@ -807,8 +807,17 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
                         HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dget_type failed");
                     if ((dcpl_in = H5Dget_create_plist(dset_in)) < 0)
                         HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dget_create_plist failed");
-                    if ((dcpl_out = H5Pcopy(dcpl_in)) < 0)
-                        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pcopy failed");
+                    /* If the input dataset has external storage, it must be contiguous.
+                     * Accordingly, there would be no filter or chunk properties to preserve.
+                     */
+                    if (H5Pget_external_count(dcpl_in)) {
+                        if ((dcpl_out = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+                            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pcreate failed");
+                    }
+                    else {
+                        if ((dcpl_out = H5Pcopy(dcpl_in)) < 0)
+                            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pcopy failed");
+                    }
                     if ((rank = H5Sget_simple_extent_ndims(f_space_id)) < 0)
                         HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Sget_simple_extent_ndims failed");
                     HDmemset(dims, 0, sizeof dims);
@@ -1175,7 +1184,7 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
                         HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dclose failed");
                 }
                 /*-------------------------------------------------------------------------
-                 * we do not have request for filter/chunking use H5Ocopy instead
+                 * we do not have request for filter/chunking; use H5Ocopy instead
                  *-------------------------------------------------------------------------
                  */
                 else {

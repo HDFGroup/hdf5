@@ -8,7 +8,7 @@
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  */
 static void
-generate_external_int32le(hbool_t external)
+generate_int32le(hbool_t external)
 {
     char    filename[MAX_NAME_SIZE];
     hid_t   file;
@@ -67,7 +67,7 @@ generate_external_int32le(hbool_t external)
     HDassert(H5Dclose(dset) >= 0);
     HDassert(H5Sclose(dspace) >= 0);
     HDassert(H5Fclose(file) >= 0);
-} /* end generate_external_int32le() */
+} /* end generate_int32le() */
 
 
 /* ----------------------------------------------------------------------------
@@ -75,8 +75,8 @@ generate_external_int32le(hbool_t external)
 int
 main(void)
 {
-    generate_external_int32le(FALSE);
-    generate_external_int32le(TRUE);
+    generate_int32le(FALSE);
+    generate_int32le(TRUE);
     return 0;
 } /* end main() */
 

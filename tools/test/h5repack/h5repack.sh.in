@@ -675,7 +675,8 @@ VERIFY_EXTERNAL_CONSOLIDATION()
         )
 
         # flag if any of the above checks failed
-        if [ $prev_nerrors != $nerrors ]; then
+        if [ $prev_nerrors != $nerrors ]
+        then
              echo ". . . *FAILED*"
              nerrors="`expr $prev_nerrors + 1`"
         else
