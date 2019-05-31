@@ -51,6 +51,8 @@ message (STATUS "COMMAND: ${TEST_TESTER} -Xmx1024M -Dorg.slf4j.simpleLogger.defa
 
 if (WIN32 AND NOT MINGW)
   set (ENV{PATH} "$ENV{PATH}\\;${TEST_LIBRARY_DIRECTORY}")
+else ()
+  set (ENV{LD_LIBRARY_PATH} "$ENV{LD_LIBRARY_PATH}:${TEST_LIBRARY_DIRECTORY}")
 endif ()
 
 # run the test program, capture the stdout/stderr and the result var
@@ -64,6 +66,7 @@ execute_process (
     RESULT_VARIABLE TEST_RESULT
     OUTPUT_FILE ${TEST_OUTPUT}
     ERROR_FILE ${TEST_OUTPUT}.err
+    OUTPUT_VARIABLE TEST_OUT
     ERROR_VARIABLE TEST_ERROR
 )
 
@@ -126,11 +129,22 @@ if (NOT TEST_SKIP_COMPARE)
       file (WRITE ${TEST_FOLDER}/${TEST_REFERENCE} "${TEST_STREAM}")
     endif ()
 
-    # now compare the output with the reference
-    execute_process (
-        COMMAND ${CMAKE_COMMAND} -E compare_files ${TEST_FOLDER}/${TEST_OUTPUT} ${TEST_FOLDER}/${TEST_REFERENCE}
-        RESULT_VARIABLE TEST_RESULT
-    )
+    if (NOT TEST_SORT_COMPARE)
+      # now compare the output with the reference
+      execute_process (
+          COMMAND ${CMAKE_COMMAND} -E compare_files ${TEST_FOLDER}/${TEST_OUTPUT} ${TEST_FOLDER}/${TEST_REFERENCE}
+          RESULT_VARIABLE TEST_RESULT
+      )
+    else ()
+      file (STRINGS ${TEST_FOLDER}/${TEST_OUTPUT} v1)
+      file (STRINGS ${TEST_FOLDER}/${TEST_REFERENCE} v2)
+      list (SORT v1)
+      list (SORT v2)
+      if (NOT v1 STREQUAL v2)
+        set(TEST_RESULT 1)
+      endif ()
+    endif ()
+
     if (TEST_RESULT)
       set (TEST_RESULT 0)
       file (STRINGS ${TEST_FOLDER}/${TEST_OUTPUT} test_act)
