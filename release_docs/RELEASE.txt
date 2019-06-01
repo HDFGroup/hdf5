@@ -130,6 +130,14 @@ New Features
 
     Library:
     --------
+    - Improved the performance of virtual dataset I/O
+
+      Refactored the internal dataspace routines used by the virtual dataset
+      code to improve performance, especially when one of the selections
+      involved is very long and non-contiguous.
+
+      (NAF - 2019/05/31, HDFFV-10693)
+
     - Allow pre-generated H5Tinit.c and H5make_libsettings.c to be used.
 
       Rather than always running H5detect and generating H5Tinit.c and
