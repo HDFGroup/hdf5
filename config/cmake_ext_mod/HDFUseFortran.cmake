@@ -13,7 +13,7 @@
 # This file provides functions for Fortran support.
 #
 #-------------------------------------------------------------------------------
-ENABLE_LANGUAGE (Fortran)
+enable_language (Fortran)
 set (HDF_PREFIX "H5")
 
 #-------------------------------------------------------------------------------
