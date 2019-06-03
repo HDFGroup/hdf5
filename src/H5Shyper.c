@@ -50,7 +50,7 @@
  */
 /* (Assumes that low & high bounds are _inclusive_) */
 #define H5S_RANGE_OVERLAP(L1, H1, L2, H2)             \
-    !((L1) > (H2) || (L2) > (H1))
+    (!((L1) > (H2) || (L2) > (H1)))
 
 /* Flags for which hyperslab fragments to compute */
 #define H5S_HYPER_COMPUTE_B_NOT_A 0x01
@@ -112,7 +112,7 @@ typedef struct {
  * (ps_clean_bitmap) works.  If H5S_MAX_RANK increases either increase the size
  * of ps_clean_bitmap or change the algorithm to use an array. */
 #if H5S_MAX_RANK > 32
-#error H5S_MAX_RANK too small for ps_clean_bitmap field in H5S_hyper_project_intersect_ud_t struct
+#error H5S_MAX_RANK too large for ps_clean_bitmap field in H5S_hyper_project_intersect_ud_t struct
 #endif
 
 
@@ -10893,7 +10893,7 @@ H5S__hyper_proj_int_iterate(const H5S_hyper_span_info_t *ss_span_info,
                             H5S_HYPER_PROJ_INT_ADD_SKIP(udata, sis_low - ss_low, FAIL);
                         } /* end if */
                         else
-                            low = ss_span->low;
+                            low = ss_low;
 
                         /* Add overlapping elements */
                         udata->nelem += high - low + 1;
@@ -10952,20 +10952,22 @@ H5S__hyper_proj_int_iterate(const H5S_hyper_span_info_t *ss_span_info,
 
             if(ss_span && !((depth == 0) && (u == count - 1))) {
                 /* Count remaining elements in ss_span_info */
-                if(ss_span->down)
-                    do {
-                        H5S_HYPER_PROJ_INT_ADD_SKIP(udata, H5S__hyper_spans_nelem_helper(ss_span->down, udata->op_gen) * (ss_span->high - ss_low + 1), FAIL);
+                if(ss_span->down) {
+                    H5S_HYPER_PROJ_INT_ADD_SKIP(udata, H5S__hyper_spans_nelem_helper(ss_span->down, udata->op_gen) * (ss_span->high - ss_low + 1), FAIL);
+                    ss_span = ss_span->next;
+                    while(ss_span) {
+                        H5S_HYPER_PROJ_INT_ADD_SKIP(udata, H5S__hyper_spans_nelem_helper(ss_span->down, udata->op_gen) * (ss_span->high - ss_span->low + 1), FAIL);
                         ss_span = ss_span->next;
-                        if(ss_span)
-                            ss_low = ss_span->low;
-                    } while(ss_span);
-                else
-                    do {
-                        H5S_HYPER_PROJ_INT_ADD_SKIP(udata, ss_span->high - ss_low + 1, FAIL);
+                    } /* end while */
+                } /* end if */
+                else {
+                    H5S_HYPER_PROJ_INT_ADD_SKIP(udata, ss_span->high - ss_low + 1, FAIL);
+                    ss_span = ss_span->next;
+                    while(ss_span) {
+                        H5S_HYPER_PROJ_INT_ADD_SKIP(udata, ss_span->high - ss_span->low + 1, FAIL);
                         ss_span = ss_span->next;
-                        if(ss_span)
-                            ss_low = ss_span->low;
-                    } while(ss_span);
+                    } /* end while */
+                } /* end else */
             } /* end if */
 
             /* Check if the projected space was not changed since we started the
