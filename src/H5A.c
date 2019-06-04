@@ -254,7 +254,6 @@ H5Acreate2(hid_t loc_id, const char *attr_name, hid_t type_id, hid_t space_id,
 {
     void           *attr = NULL;                        /* Attribute created            */
     H5VL_object_t  *vol_obj = NULL;                         /* Object token of loc_id       */
-    H5P_genplist_t *plist;                              /* Property list pointer        */
     H5VL_loc_params_t   loc_params;
     hid_t           ret_value = H5I_INVALID_HID;        /* Return value                 */
 
@@ -277,16 +276,6 @@ H5Acreate2(hid_t loc_id, const char *attr_name, hid_t type_id, hid_t space_id,
     if(H5CX_set_apl(&aapl_id, H5P_CLS_AACC, loc_id, TRUE) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, H5I_INVALID_HID, "can't set access property list info")
 
-    /* Get the property list structure for the acpl */
-    if(NULL == (plist = (H5P_genplist_t *)H5I_object(acpl_id)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
-
-    /* Set creation properties */
-    if(H5P_set(plist, H5VL_PROP_ATTR_TYPE_ID, &type_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, H5I_INVALID_HID, "can't set property value for datatype id")
-    if(H5P_set(plist, H5VL_PROP_ATTR_SPACE_ID, &space_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, H5I_INVALID_HID, "can't set property value for space id")
-
     /* Get the location object */
     if(NULL == (vol_obj = H5VL_vol_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier")
@@ -296,7 +285,7 @@ H5Acreate2(hid_t loc_id, const char *attr_name, hid_t type_id, hid_t space_id,
     loc_params.obj_type = H5I_get_type(loc_id);
 
     /* Create the attribute */
-    if(NULL == (attr = H5VL_attr_create(vol_obj, &loc_params, attr_name, acpl_id, aapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
+    if(NULL == (attr = H5VL_attr_create(vol_obj, &loc_params, attr_name, type_id, space_id, acpl_id, aapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, H5I_INVALID_HID, "unable to create attribute")
 
     /* Register the new attribute and get an ID for it */
@@ -350,7 +339,6 @@ H5Acreate_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
 {
     void               *attr = NULL;                /* attr token from VOL connector */
     H5VL_object_t      *vol_obj = NULL;        /* object token of loc_id */
-    H5P_genplist_t     *plist;       /* Property list pointer */
     H5VL_loc_params_t   loc_params;
     hid_t               ret_value = H5I_INVALID_HID;    /* Return value */
 
@@ -380,16 +368,6 @@ H5Acreate_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
         H5CX_set_lapl(lapl_id);
     }
 
-    /* Get the plist structure */
-    if(NULL == (plist = (H5P_genplist_t *)H5I_object(acpl_id)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, H5I_INVALID_HID, "can't find object for ID")
-
-    /* Set creation properties */
-    if(H5P_set(plist, H5VL_PROP_ATTR_TYPE_ID, &type_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, H5I_INVALID_HID, "can't set property value for datatype id")
-    if(H5P_set(plist, H5VL_PROP_ATTR_SPACE_ID, &space_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, H5I_INVALID_HID, "can't set property value for space id")
-
     /* Set up location struct */
     loc_params.type                         = H5VL_OBJECT_BY_NAME;
     loc_params.obj_type                     = H5I_get_type(loc_id);
@@ -401,7 +379,7 @@ H5Acreate_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier")
 
     /* Create the attribute */
-    if(NULL == (attr = H5VL_attr_create(vol_obj, &loc_params, attr_name, acpl_id, aapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
+    if(NULL == (attr = H5VL_attr_create(vol_obj, &loc_params, attr_name, type_id, space_id, acpl_id, aapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, H5I_INVALID_HID, "unable to create attribute")
 
     /* Register the new attribute and get an ID for it */

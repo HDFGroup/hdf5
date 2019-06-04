@@ -41,24 +41,14 @@
  */
 void *
 H5VL__native_group_create(void *obj, const H5VL_loc_params_t *loc_params, const char *name,
-    hid_t gcpl_id, hid_t H5_ATTR_UNUSED gapl_id, hid_t H5_ATTR_UNUSED dxpl_id,
-    void H5_ATTR_UNUSED **req)
+    hid_t lcpl_id, hid_t gcpl_id, hid_t H5_ATTR_UNUSED gapl_id,
+    hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req)
 {
-    H5P_genplist_t *plist;              /* Property list pointer        */
     H5G_loc_t       loc;                /* Location to create group     */
     H5G_t          *grp = NULL;         /* New group created            */
-    hid_t           lcpl_id;
     void           *ret_value;
 
     FUNC_ENTER_PACKAGE
-
-    /* Get the property list structure */
-    if(NULL == (plist = (H5P_genplist_t *)H5I_object(gcpl_id)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, NULL, "can't find object for ID")
-
-    /* Get creation properties */
-    if(H5P_get(plist, H5VL_PROP_GRP_LCPL_ID, &lcpl_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get property value for lcpl id")
 
     /* Set up the location */
     if(H5G_loc_real(obj, loc_params->obj_type, &loc) < 0)

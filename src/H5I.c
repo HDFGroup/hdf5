@@ -1943,6 +1943,8 @@ H5I__iterate_pub_cb(void H5_ATTR_UNUSED *obj, hid_t id, void *_udata)
         ret_value = H5_ITER_STOP;	/* terminate iteration early */
     else if(cb_ret_val < 0)
         ret_value = H5_ITER_ERROR;  /* indicate failure (which terminates iteration) */
+    else
+        ret_value = H5_ITER_CONT; /* continue iteration */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I__iterate_pub_cb() */
@@ -2184,7 +2186,7 @@ H5Iget_name(hid_t id, char *name/*out*/, size_t size)
     loc_params.obj_type     = H5I_get_type(id);
 
     /* Retrieve object's name */
-    if(H5VL_object_get(vol_obj, &loc_params, H5VL_ID_GET_NAME, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &ret_value, name, size) < 0)
+    if(H5VL_object_get(vol_obj, &loc_params, H5VL_OBJECT_GET_NAME, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &ret_value, name, size) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, (-1), "can't retrieve object name")
 
 done:

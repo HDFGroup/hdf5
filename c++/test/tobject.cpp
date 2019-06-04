@@ -615,6 +615,117 @@ static void test_getobjectinfo_same_file()
 }   // test_getobjectinfo_same_file
 
 /*-------------------------------------------------------------------------
+ * Function:    test_intermediate_groups
+ *
+ * Purpose      Test that intermediate groups are created as specified by
+ *              the property setting.
+ *
+ * Return       None
+ *
+ * April, 2019
+ *-------------------------------------------------------------------------
+ */
+const H5std_string FILE_INTERGRPS("tobject_intergrps.h5");
+const H5std_string GROUP10NAME("/group10");
+const H5std_string GROUP11NAME("/group10/group11");
+const H5std_string GROUP12NAME("/group10/group11/group12");
+const H5std_string GROUP13NAME("/group10/group11/group12/group13");
+const H5std_string GROUP14NAME("/group10/group11/group12/group13/group14");
+const H5std_string GROUP14FROM13NAME("group14");
+const H5std_string GROUP20NAME("/group20");
+const H5std_string GROUP21NAME("/group20/group21");
+const H5std_string GROUP22NAME("group21/group22");
+const H5std_string GROUP22FULLNAME("/group20/group21/group22");
+static void test_intermediate_groups()
+{
+    // Output message about test being performed
+    SUBTEST("Group::set/getCreateIntermediateGroup");
+
+    try {
+        // Create a new HDF5 file
+        H5File file(FILE_INTERGRPS, H5F_ACC_TRUNC);
+
+        // Create a link create property list and set the "create
+        // intermediate groups" flag
+        LinkCreatPropList lcpl;
+        lcpl.setCreateIntermediateGroup(true);
+
+        // Verify value of create missing groups flag
+        bool crt_int_grps = lcpl.getCreateIntermediateGroup();
+        verify_val(crt_int_grps, true, "LinkCreatPropList::getCreateIntermediateGroup", __LINE__, __FILE__);
+
+        // Create GROUP12NAME with creating missing groups
+        Group grp12(file.createGroup(GROUP12NAME, lcpl));
+
+        // Missing groups: GROUP10NAME and GROUP11NAME
+
+        // Create GROUP14NAME without the use of link create plist, should
+        // fail because group GROUP13NAME is missing
+        try {
+            Group grp14_nopl(file.createGroup(GROUP14NAME));
+        } catch (FileIException& expected1) {} // Failure is ignored
+
+        // Create GROUP14NAME with the flag to create missing groups set
+        // to FALSE, should fail because group GROUP13NAME is missing
+
+        // Reset flag to not create missing groups
+        lcpl.setCreateIntermediateGroup(false);
+
+        // Verify value of create missing groups flag
+        crt_int_grps = lcpl.getCreateIntermediateGroup();
+        verify_val(crt_int_grps, false, "LinkCreatPropList::getCreateIntermediateGroup", __LINE__, __FILE__);
+
+        try {
+            Group grp14_false(file.createGroup(GROUP14NAME, lcpl));
+        } catch (FileIException& expected2) {} // Failure is ignored
+
+        // Set the flag to create missing groups set to TRUE
+        lcpl.setCreateIntermediateGroup(true);
+        crt_int_grps = lcpl.getCreateIntermediateGroup();
+        verify_val(crt_int_grps, true, "LinkCreatPropList::getCreateIntermediateGroup", __LINE__, __FILE__);
+
+
+        // Create GROUP14NAME with the use of link create plist
+        Group grp14(file.createGroup(GROUP14NAME, lcpl));
+
+        // Missing groups: GROUP13NAME
+
+        // Create group GROUP20NAME
+        Group grp20(file.createGroup(GROUP20NAME));
+
+        // Create group GROUP22NAME with missing group GROUP21NAME
+        Group grp22(grp20.createGroup(GROUP22NAME, lcpl));
+
+        // Close groups and file
+        grp12.close();
+        grp14.close();
+        grp20.close();
+        grp22.close();
+        file.close();
+
+        // Reopen the file
+        file.openFile(FILE_INTERGRPS, H5F_ACC_RDWR);
+
+        // Open the missing groups and various combinations
+        Group grp10(file.openGroup(GROUP10NAME));
+        Group grp11(file.openGroup(GROUP11NAME));
+        Group grp13(file.openGroup(GROUP13NAME));
+        Group grp14from13(grp13.openGroup(GROUP14FROM13NAME));
+        Group grp21(file.openGroup(GROUP21NAME));
+        Group grp22fromfile(file.openGroup(GROUP22FULLNAME));
+
+        PASSED();
+    }   // end of try block
+    // catch all other exceptions
+    catch (Exception& E)
+    {
+        cerr << " in Exception " << E.getCFuncName() << "detail: " << E.getCDetailMsg() << endl;
+        issue_fail_msg("test_intermediate_groups()", __LINE__, __FILE__, E.getCDetailMsg());
+    }
+
+}   // test_intermediate_groups
+
+/*-------------------------------------------------------------------------
  * Function:    test_object
  *
  * Purpose      Tests HDF5 object related functionality
@@ -631,12 +742,13 @@ void test_object()
     // Output message about test being performed
     MESSAGE(5, ("Testing Object Functions\n"));
 
-    test_get_objname();    // Test get object name from groups/datasets
-    test_existance();      // Test check for object existance
-    test_get_objname_ontypes();        // Test get object name from types
-    test_get_objtype();    // Test get object type
-    test_open_object_header();    // Test object header functions (H5O)
-    test_getobjectinfo_same_file();    // Test object info in same file
+    test_get_objname();             // Test get object name from groups/datasets
+    test_existance();               // Test check for object existance
+    test_get_objname_ontypes();     // Test get object name from types
+    test_get_objtype();             // Test get object type
+    test_open_object_header();      // Test object header functions (H5O)
+    test_getobjectinfo_same_file(); // Test object info in same file
+    test_intermediate_groups();     // Test intermediate group property
 
 }   // test_object
 

@@ -51,9 +51,6 @@
 
 /* Selection callbacks */
 static herr_t H5S__none_copy(H5S_t *dst, const H5S_t *src, hbool_t share_selection);
-static herr_t H5S__none_get_seq_list(const H5S_t *space, unsigned flags,
-    H5S_sel_iter_t *iter, size_t maxseq, size_t maxbytes,
-    size_t *nseq, size_t *nbytes, hsize_t *off, size_t *len);
 static herr_t H5S__none_release(H5S_t *space);
 static htri_t H5S__none_is_valid(const H5S_t *space);
 static hssize_t H5S__none_serial_size(const H5S_t *space);
@@ -65,10 +62,11 @@ static int H5S__none_unlim_dim(const H5S_t *space);
 static htri_t H5S__none_is_contiguous(const H5S_t *space);
 static htri_t H5S__none_is_single(const H5S_t *space);
 static htri_t H5S__none_is_regular(const H5S_t *space);
+static htri_t H5S__none_shape_same(const H5S_t *space1, const H5S_t *space2);
 static herr_t H5S__none_adjust_u(H5S_t *space, const hsize_t *offset);
 static herr_t H5S__none_project_scalar(const H5S_t *space, hsize_t *offset);
 static herr_t H5S__none_project_simple(const H5S_t *space, H5S_t *new_space, hsize_t *offset);
-static herr_t H5S__none_iter_init(H5S_sel_iter_t *iter, const H5S_t *space);
+static herr_t H5S__none_iter_init(const H5S_t *space, H5S_sel_iter_t *iter);
 
 /* Selection iteration callbacks */
 static herr_t H5S__none_iter_coords(const H5S_sel_iter_t *iter, hsize_t *coords);
@@ -77,6 +75,8 @@ static hsize_t H5S__none_iter_nelmts(const H5S_sel_iter_t *iter);
 static htri_t H5S__none_iter_has_next_block(const H5S_sel_iter_t *iter);
 static herr_t H5S__none_iter_next(H5S_sel_iter_t *sel_iter, size_t nelem);
 static herr_t H5S__none_iter_next_block(H5S_sel_iter_t *sel_iter);
+static herr_t H5S__none_iter_get_seq_list(H5S_sel_iter_t *iter, size_t maxseq,
+    size_t maxbytes, size_t *nseq, size_t *nbytes, hsize_t *off, size_t *len);
 static herr_t H5S__none_iter_release(H5S_sel_iter_t *sel_iter);
 
 
@@ -95,7 +95,6 @@ const H5S_select_class_t H5S_sel_none[1] = {{
 
     /* Methods on selection */
     H5S__none_copy,
-    H5S__none_get_seq_list,
     H5S__none_release,
     H5S__none_is_valid,
     H5S__none_serial_size,
@@ -108,6 +107,7 @@ const H5S_select_class_t H5S_sel_none[1] = {{
     H5S__none_is_contiguous,
     H5S__none_is_single,
     H5S__none_is_regular,
+    H5S__none_shape_same,
     H5S__none_adjust_u,
     H5S__none_project_scalar,
     H5S__none_project_simple,
@@ -130,6 +130,7 @@ static const H5S_sel_iter_class_t H5S_sel_iter_none[1] = {{
     H5S__none_iter_has_next_block,
     H5S__none_iter_next,
     H5S__none_iter_next_block,
+    H5S__none_iter_get_seq_list,
     H5S__none_iter_release,
 }};
 
@@ -148,7 +149,7 @@ static const H5S_sel_iter_class_t H5S_sel_iter_none[1] = {{
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5S__none_iter_init(H5S_sel_iter_t *iter, const H5S_t H5_ATTR_UNUSED *space)
+H5S__none_iter_init(const H5S_t H5_ATTR_UNUSED *space, H5S_sel_iter_t *iter)
 {
     FUNC_ENTER_STATIC_NOERR
 
@@ -333,13 +334,11 @@ H5S__none_iter_next_block(H5S_sel_iter_t H5_ATTR_UNUSED *iter)
 
 /*--------------------------------------------------------------------------
  NAME
-    H5S__none_get_seq_list
+    H5S__none_iter_get_seq_list
  PURPOSE
     Create a list of offsets & lengths for a selection
  USAGE
-    herr_t H5S__none_get_seq_list(space,flags,iter,maxseq,maxelem,nseq,nelem,off,len)
-        H5S_t *space;           IN: Dataspace containing selection to use.
-        unsigned flags;         IN: Flags for extra information about operation
+    herr_t H5S__none_iter_get_seq_list(iter,maxseq,maxelem,nseq,nelem,off,len)
         H5S_sel_iter_t *iter;   IN/OUT: Selection iterator describing last
                                     position of interest in selection.
         size_t maxseq;          IN: Maximum number of sequences to generate
@@ -363,14 +362,13 @@ H5S__none_iter_next_block(H5S_sel_iter_t H5_ATTR_UNUSED *iter)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S__none_get_seq_list(const H5S_t H5_ATTR_UNUSED *space, unsigned H5_ATTR_UNUSED flags, H5S_sel_iter_t H5_ATTR_UNUSED *iter,
-    size_t H5_ATTR_UNUSED maxseq, size_t H5_ATTR_UNUSED maxelem, size_t *nseq, size_t *nelem,
-    hsize_t H5_ATTR_UNUSED *off, size_t H5_ATTR_UNUSED *len)
+H5S__none_iter_get_seq_list(H5S_sel_iter_t H5_ATTR_UNUSED *iter,
+    size_t H5_ATTR_UNUSED maxseq, size_t H5_ATTR_UNUSED maxelem, size_t *nseq,
+    size_t *nelem, hsize_t H5_ATTR_UNUSED *off, size_t H5_ATTR_UNUSED *len)
 {
     FUNC_ENTER_STATIC_NOERR
 
     /* Check args */
-    HDassert(space);
     HDassert(iter);
     HDassert(maxseq > 0);
     HDassert(maxelem > 0);
@@ -386,7 +384,7 @@ H5S__none_get_seq_list(const H5S_t H5_ATTR_UNUSED *space, unsigned H5_ATTR_UNUSE
     *nelem = 0;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5S__none_get_seq_list() */
+} /* end H5S__none_iter_get_seq_list() */
 
 
 /*--------------------------------------------------------------------------
@@ -855,7 +853,40 @@ H5S__none_is_regular(const H5S_t H5_ATTR_UNUSED *space)
 
 /*--------------------------------------------------------------------------
  NAME
-    H5S_none_adjust_u
+    H5S__none_shape_same
+ PURPOSE
+    Check if a two "none" selections are the same shape
+ USAGE
+    htri_t H5S__none_shape_same(space1, space2)
+        const H5S_t *space1;     IN: First dataspace to check
+        const H5S_t *space2;     IN: Second dataspace to check
+ RETURNS
+    TRUE / FALSE / FAIL
+ DESCRIPTION
+    Checks to see if the current selection in each dataspace are the same
+    shape.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+static htri_t
+H5S__none_shape_same(const H5S_t H5_ATTR_UNUSED *space1,
+    const H5S_t H5_ATTR_UNUSED *space2)
+{
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Check args */
+    HDassert(space1);
+    HDassert(space2);
+
+    FUNC_LEAVE_NOAPI(TRUE)
+} /* end H5S__none_shape_same() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S__none_adjust_u
  PURPOSE
     Adjust an "none" selection by subtracting an offset
  USAGE

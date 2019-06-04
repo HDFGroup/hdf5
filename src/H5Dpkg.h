@@ -594,10 +594,10 @@ H5_DLL herr_t H5D__select_write(const H5D_io_info_t *io_info,
     hsize_t nelmts, const H5S_t *file_space, const H5S_t *mem_space);
 
 /* Functions that perform scatter-gather serial I/O operations */
-H5_DLL herr_t H5D__scatter_mem(const void *_tscat_buf, const H5S_t *space,
-    H5S_sel_iter_t *iter, size_t nelmts, void *_buf);
-H5_DLL size_t H5D__gather_mem(const void *_buf, const H5S_t *space,
-    H5S_sel_iter_t *iter, size_t nelmts, void *_tgath_buf/*out*/);
+H5_DLL herr_t H5D__scatter_mem(const void *_tscat_buf, H5S_sel_iter_t *iter,
+    size_t nelmts, void *_buf);
+H5_DLL size_t H5D__gather_mem(const void *_buf, H5S_sel_iter_t *iter,
+    size_t nelmts, void *_tgath_buf/*out*/);
 H5_DLL herr_t H5D__scatgath_read(const H5D_io_info_t *io_info,
     const H5D_type_info_t *type_info,
     hsize_t nelmts, const H5S_t *file_space, const H5S_t *mem_space);

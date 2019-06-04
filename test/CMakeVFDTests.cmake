@@ -102,6 +102,8 @@ endif ()
       tcheck_version
       testmeta
       links_env
+      external_env
+      vds_env
   )
   if (NOT CYGWIN)
     list (REMOVE_ITEM H5_VFD_SKIP_TESTS big cache)

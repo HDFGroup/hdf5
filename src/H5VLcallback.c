@@ -57,8 +57,8 @@
 /* Local Prototypes */
 /********************/
 static void *H5VL__attr_create(void *obj, const H5VL_loc_params_t *loc_params,
-    const H5VL_class_t *cls, const char *name, hid_t acpl_id, hid_t aapl_id,
-    hid_t dxpl_id, void **req);
+    const H5VL_class_t *cls, const char *name, hid_t type_id, hid_t space_id,
+    hid_t acpl_id, hid_t aapl_id, hid_t dxpl_id, void **req);
 static void *H5VL__attr_open(void *obj, const H5VL_loc_params_t *loc_params,
     const H5VL_class_t *cls, const char *name, hid_t aapl_id, hid_t dxpl_id,
     void **req);
@@ -76,8 +76,8 @@ static herr_t H5VL__attr_optional(void *obj, const H5VL_class_t *cls, hid_t dxpl
 static herr_t H5VL__attr_close(void *obj, const H5VL_class_t *cls, hid_t dxpl_id,
     void **req);
 static void *H5VL__dataset_create(void *obj, const H5VL_loc_params_t *loc_params,
-    const H5VL_class_t *cls, const char *name, hid_t dcpl_id, hid_t dapl_id,
-    hid_t dxpl_id, void **req);
+    const H5VL_class_t *cls, const char *name, hid_t lcpl_id, hid_t type_id,
+    hid_t space_id, hid_t dcpl_id, hid_t dapl_id, hid_t dxpl_id, void **req);
 static void *H5VL__dataset_open(void *obj, const H5VL_loc_params_t *loc_params,
     const H5VL_class_t *cls, const char *name, hid_t dapl_id, hid_t dxpl_id,
     void **req);
@@ -108,8 +108,8 @@ static herr_t H5VL__file_optional(void *obj, const H5VL_class_t *cls, hid_t dxpl
 static herr_t H5VL__file_close(void *obj, const H5VL_class_t *cls, hid_t dxpl_id,
     void **req);
 static void *H5VL__group_create(void *obj, const H5VL_loc_params_t *loc_params,
-    const H5VL_class_t *cls, const char *name, hid_t gcpl_id, hid_t gapl_id,
-    hid_t dxpl_id, void **req);
+    const H5VL_class_t *cls, const char *name, hid_t lcpl_id, hid_t gcpl_id,
+    hid_t gapl_id, hid_t dxpl_id, void **req);
 static void *H5VL__group_open(void *obj, const H5VL_loc_params_t *loc_params,
     const H5VL_class_t *cls, const char *name, hid_t gapl_id, hid_t dxpl_id,
     void **req);
@@ -123,7 +123,7 @@ static herr_t H5VL__group_close(void *obj, const H5VL_class_t *cls,
     hid_t dxpl_id, void **req);
 static herr_t H5VL__link_create(H5VL_link_create_type_t create_type, void *obj,
     const H5VL_loc_params_t *loc_params, const H5VL_class_t *cls, hid_t lcpl_id,
-    hid_t lapl_id, hid_t dxpl_id, void **req);
+    hid_t lapl_id, hid_t dxpl_id, void **req, va_list arguments);
 static herr_t H5VL__link_copy(void *src_obj, const H5VL_loc_params_t *loc_params1,
     void *dst_obj, const H5VL_loc_params_t *loc_params2, const H5VL_class_t *cls,
     hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req);
@@ -753,7 +753,7 @@ void *
 H5VL_wrap_object(const H5VL_class_t *connector, void *wrap_ctx, void *obj,
     H5I_type_t obj_type)
 {
-    void *ret_value;            /* Return value */
+    void *ret_value = NULL;     /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -822,7 +822,7 @@ done:
 void *
 H5VL_unwrap_object(const H5VL_class_t *connector, void *obj)
 {
-    void *ret_value;            /* Return value */
+    void *ret_value = NULL;     /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -954,7 +954,8 @@ done:
  */
 static void *
 H5VL__attr_create(void *obj, const H5VL_loc_params_t *loc_params, const H5VL_class_t *cls,
-    const char *name, hid_t acpl_id, hid_t aapl_id, hid_t dxpl_id, void **req)
+    const char *name, hid_t type_id, hid_t space_id, hid_t acpl_id,
+    hid_t aapl_id, hid_t dxpl_id, void **req)
 {
     void *ret_value = NULL;     /* Return value */
 
@@ -965,12 +966,12 @@ H5VL__attr_create(void *obj, const H5VL_loc_params_t *loc_params, const H5VL_cla
         HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, NULL, "VOL connector has no 'attr create' method")
 
     /* Call the corresponding VOL callback */
-    if(NULL == (ret_value = (cls->attr_cls.create)(obj, loc_params, name, acpl_id, aapl_id, dxpl_id, req)))
+    if(NULL == (ret_value = (cls->attr_cls.create)(obj, loc_params, name, type_id, space_id, acpl_id, aapl_id, dxpl_id, req)))
         HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, NULL, "attribute create failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_attr_create() */
+} /* end H5VL__attr_create() */
 
 
 /*-------------------------------------------------------------------------
@@ -985,7 +986,8 @@ done:
  */
 void *
 H5VL_attr_create(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *loc_params, 
-    const char *name, hid_t acpl_id, hid_t aapl_id, hid_t dxpl_id, void **req)
+    const char *name, hid_t type_id, hid_t space_id, hid_t acpl_id,
+    hid_t aapl_id, hid_t dxpl_id, void **req)
 {
     hbool_t vol_wrapper_set = FALSE;    /* Whether the VOL object wrapping context was set up */
     void *ret_value = NULL;             /* Return value */
@@ -998,7 +1000,7 @@ H5VL_attr_create(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *loc_para
     vol_wrapper_set = TRUE;
 
     /* Call the corresponding internal VOL routine */
-    if(NULL == (ret_value = H5VL__attr_create(vol_obj->data, loc_params, vol_obj->connector->cls, name, acpl_id, aapl_id, dxpl_id, req)))
+    if(NULL == (ret_value = H5VL__attr_create(vol_obj->data, loc_params, vol_obj->connector->cls, name, type_id, space_id, acpl_id, aapl_id, dxpl_id, req)))
         HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, NULL, "attribute create failed")
 
 done:
@@ -1022,14 +1024,15 @@ done:
  */
 void *
 H5VLattr_create(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id,
-    const char *name, hid_t acpl_id, hid_t aapl_id, hid_t dxpl_id, void **req)
+    const char *name, hid_t type_id, hid_t space_id, hid_t acpl_id,
+    hid_t aapl_id, hid_t dxpl_id, void **req)
 {
     H5VL_class_t *cls;          /* VOL connector's class struct */
     void *ret_value = NULL;     /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE8("*x", "*x*xi*siii**x", obj, loc_params, connector_id, name, acpl_id,
-             aapl_id, dxpl_id, req);
+    H5TRACE10("*x", "*x*xi*siiiii**x", obj, loc_params, connector_id, name,
+             type_id, space_id, acpl_id, aapl_id, dxpl_id, req);
 
     /* Check args and get class pointer */
     if(NULL == obj)
@@ -1038,7 +1041,7 @@ H5VLattr_create(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a VOL connector ID")
 
     /* Call the corresponding internal VOL routine */
-    if(NULL == (ret_value = H5VL__attr_create(obj, loc_params, cls, name, acpl_id, aapl_id, dxpl_id, req)))
+    if(NULL == (ret_value = H5VL__attr_create(obj, loc_params, cls, name, type_id, space_id, acpl_id, aapl_id, dxpl_id, req)))
         HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, NULL, "unable to create attribute")
 
 done:
@@ -1794,7 +1797,8 @@ done:
  */
 static void *
 H5VL__dataset_create(void *obj, const H5VL_loc_params_t *loc_params, const H5VL_class_t *cls,
-    const char *name, hid_t dcpl_id, hid_t dapl_id, hid_t dxpl_id, void **req)
+    const char *name, hid_t lcpl_id, hid_t type_id, hid_t space_id,
+    hid_t dcpl_id, hid_t dapl_id, hid_t dxpl_id, void **req)
 {
     void *ret_value = NULL;     /* Return value */
 
@@ -1805,7 +1809,7 @@ H5VL__dataset_create(void *obj, const H5VL_loc_params_t *loc_params, const H5VL_
         HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, NULL, "VOL connector has no 'dataset create' method")
 
     /* Call the corresponding VOL callback */
-    if(NULL == (ret_value = (cls->dataset_cls.create)(obj, loc_params, name, dcpl_id, dapl_id, dxpl_id, req)))
+    if(NULL == (ret_value = (cls->dataset_cls.create)(obj, loc_params, name, lcpl_id, type_id, space_id, dcpl_id, dapl_id, dxpl_id, req)))
         HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, NULL, "dataset create failed")
 
 done:
@@ -1825,7 +1829,8 @@ done:
  */
 void *
 H5VL_dataset_create(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *loc_params,
-    const char *name, hid_t dcpl_id, hid_t dapl_id, hid_t dxpl_id, void **req)
+    const char *name, hid_t lcpl_id, hid_t type_id, hid_t space_id,
+    hid_t dcpl_id, hid_t dapl_id, hid_t dxpl_id, void **req)
 {
     hbool_t vol_wrapper_set = FALSE;    /* Whether the VOL object wrapping context was set up */
     void *ret_value = NULL;             /* Return value */
@@ -1838,7 +1843,7 @@ H5VL_dataset_create(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *loc_p
     vol_wrapper_set = TRUE;
 
     /* Call the corresponding internal VOL routine */
-    if(NULL == (ret_value = H5VL__dataset_create(vol_obj->data, loc_params, vol_obj->connector->cls, name, dcpl_id, dapl_id, dxpl_id, req)))
+    if(NULL == (ret_value = H5VL__dataset_create(vol_obj->data, loc_params, vol_obj->connector->cls, name, lcpl_id, type_id, space_id, dcpl_id, dapl_id, dxpl_id, req)))
         HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, NULL, "dataset create failed")
 
 done:
@@ -1862,14 +1867,15 @@ done:
  */
 void *
 H5VLdataset_create(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id,
-    const char *name, hid_t dcpl_id, hid_t dapl_id, hid_t dxpl_id, void **req)
+    const char *name, hid_t lcpl_id, hid_t type_id, hid_t space_id,
+    hid_t dcpl_id, hid_t dapl_id, hid_t dxpl_id, void **req)
 {
     H5VL_class_t *cls;                  /* VOL connector's class struct */
     void *ret_value = NULL;             /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE8("*x", "*x*xi*siii**x", obj, loc_params, connector_id, name, dcpl_id,
-             dapl_id, dxpl_id, req);
+    H5TRACE11("*x", "*x*xi*siiiiii**x", obj, loc_params, connector_id, name,
+             lcpl_id, type_id, space_id, dcpl_id, dapl_id, dxpl_id, req);
 
     /* Check args and get class pointer */
     if(NULL == obj)
@@ -1878,7 +1884,7 @@ H5VLdataset_create(void *obj, const H5VL_loc_params_t *loc_params, hid_t connect
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a VOL connector ID")
 
     /* Call the corresponding internal VOL routine */
-    if(NULL == (ret_value = H5VL__dataset_create(obj, loc_params, cls, name, dcpl_id, dapl_id, dxpl_id, req)))
+    if(NULL == (ret_value = H5VL__dataset_create(obj, loc_params, cls, name, lcpl_id, type_id, space_id, dcpl_id, dapl_id, dxpl_id, req)))
         HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, NULL, "unable to create dataset")
 
 done:
@@ -3348,7 +3354,8 @@ done:
  */
 static void *
 H5VL__group_create(void *obj, const H5VL_loc_params_t *loc_params, const H5VL_class_t *cls,
-    const char *name, hid_t gcpl_id, hid_t gapl_id, hid_t dxpl_id, void **req)
+    const char *name, hid_t lcpl_id, hid_t gcpl_id, hid_t gapl_id,
+    hid_t dxpl_id, void **req)
 {
     void *ret_value = NULL;     /* Return value */
 
@@ -3359,7 +3366,7 @@ H5VL__group_create(void *obj, const H5VL_loc_params_t *loc_params, const H5VL_cl
         HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, NULL, "VOL connector has no 'group create' method")
 
     /* Call the corresponding VOL callback */
-    if(NULL == (ret_value = (cls->group_cls.create)(obj, loc_params, name, gcpl_id, gapl_id, dxpl_id, req)))
+    if(NULL == (ret_value = (cls->group_cls.create)(obj, loc_params, name, lcpl_id, gcpl_id, gapl_id, dxpl_id, req)))
         HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, NULL, "group create failed")
 
 done:
@@ -3379,7 +3386,8 @@ done:
  */
 void *
 H5VL_group_create(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *loc_params,
-    const char *name, hid_t gcpl_id, hid_t gapl_id, hid_t dxpl_id, void **req)
+    const char *name, hid_t lcpl_id, hid_t gcpl_id, hid_t gapl_id, hid_t dxpl_id,
+    void **req)
 {
     hbool_t vol_wrapper_set = FALSE;    /* Whether the VOL object wrapping context was set up */
     void *ret_value = NULL;     /* Return value */
@@ -3392,7 +3400,7 @@ H5VL_group_create(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *loc_par
     vol_wrapper_set = TRUE;
 
     /* Call the corresponding internal VOL routine */
-    if(NULL == (ret_value = H5VL__group_create(vol_obj->data, loc_params, vol_obj->connector->cls, name, gcpl_id, gapl_id, dxpl_id, req)))
+    if(NULL == (ret_value = H5VL__group_create(vol_obj->data, loc_params, vol_obj->connector->cls, name, lcpl_id, gcpl_id, gapl_id, dxpl_id, req)))
         HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, NULL, "group create failed")
 
 done:
@@ -3415,15 +3423,16 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VLgroup_create(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, const char *name,
-    hid_t gcpl_id, hid_t gapl_id, hid_t dxpl_id, void **req)
+H5VLgroup_create(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id,
+    const char *name, hid_t lcpl_id, hid_t gcpl_id, hid_t gapl_id,hid_t dxpl_id,
+    void **req)
 {
     H5VL_class_t *cls;                  /* VOL connector's class struct */
     void *ret_value = NULL;             /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE8("*x", "*x*xi*siii**x", obj, loc_params, connector_id, name, gcpl_id,
-             gapl_id, dxpl_id, req);
+    H5TRACE9("*x", "*x*xi*siiii**x", obj, loc_params, connector_id, name, lcpl_id,
+             gcpl_id, gapl_id, dxpl_id, req);
 
     /* Check args and get class pointer */
     if(NULL == obj)
@@ -3432,7 +3441,7 @@ H5VLgroup_create(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a VOL connector ID")
 
     /* Call the corresponding internal VOL routine */
-    if(NULL == (ret_value = H5VL__group_create(obj, loc_params, cls, name, gcpl_id, gapl_id, dxpl_id, req)))
+    if(NULL == (ret_value = H5VL__group_create(obj, loc_params, cls, name, lcpl_id, gcpl_id, gapl_id, dxpl_id, req)))
         HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, NULL, "unable to create group")
 
 done:
@@ -3996,7 +4005,8 @@ done:
  */
 static herr_t
 H5VL__link_create(H5VL_link_create_type_t create_type, void *obj, const H5VL_loc_params_t *loc_params, 
-    const H5VL_class_t *cls, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req)
+    const H5VL_class_t *cls, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req,
+    va_list arguments)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -4007,7 +4017,7 @@ H5VL__link_create(H5VL_link_create_type_t create_type, void *obj, const H5VL_loc
         HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL connector has no 'link create' method")
 
     /* Call the corresponding VOL callback */
-    if((cls->link_cls.create)(create_type, obj, loc_params, lcpl_id, lapl_id, dxpl_id, req) < 0)
+    if((cls->link_cls.create)(create_type, obj, loc_params, lcpl_id, lapl_id, dxpl_id, req, arguments) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, FAIL, "link create failed")
 
 done:
@@ -4028,23 +4038,28 @@ done:
 herr_t
 H5VL_link_create(H5VL_link_create_type_t create_type, const H5VL_object_t *vol_obj,
     const H5VL_loc_params_t *loc_params, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id,
-    void **req)
+    void **req, ...)
 {
     H5VL_object_t tmp_vol_obj;          /* Temporary object token of */
+    va_list arguments;                  /* Argument list passed from the API call */
+    hbool_t arg_started = FALSE;        /* Whether the va_list has been started */
     hbool_t vol_wrapper_set = FALSE;    /* Whether the VOL object wrapping context was set up */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
+    /* Start the varargs, so they can be copied */
+    HDva_start(arguments, req);
+    arg_started = TRUE;
+
     /* Special case for hard links */
     if(H5VL_LINK_CREATE_HARD == create_type && NULL == vol_obj->data) {
-        H5P_genplist_t *plist;              /* Property list pointer */
+        va_list tmp_arguments;  /* Copy of argument list passed in */
 
-        /* Get the VOL data pointer from the fapl */
-        if(NULL == (plist = (H5P_genplist_t *)H5I_object(lcpl_id)))
-            HGOTO_ERROR(H5E_VOL, H5E_BADTYPE, FAIL, "not a file access property list")
-        if(H5P_peek(plist, H5VL_PROP_LINK_TARGET, &tmp_vol_obj.data) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't get VOL connector info")
+        /* Get the VOL data pointer from the varargs */
+        HDva_copy(tmp_arguments, arguments);
+        tmp_vol_obj.data = HDva_arg(tmp_arguments, void *);
+        HDva_end(tmp_arguments);
     } /* end if */
     else
         /* Use the VOL object passed in */
@@ -4057,10 +4072,14 @@ H5VL_link_create(H5VL_link_create_type_t create_type, const H5VL_object_t *vol_o
     vol_wrapper_set = TRUE;
 
     /* Call the corresponding internal VOL routine */
-    if(H5VL__link_create(create_type, vol_obj->data, loc_params, vol_obj->connector->cls, lcpl_id, lapl_id, dxpl_id, req) < 0)
+    if(H5VL__link_create(create_type, vol_obj->data, loc_params, vol_obj->connector->cls, lcpl_id, lapl_id, dxpl_id, req, arguments) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, FAIL, "link create failed")
 
 done:
+    /* End access to the va_list, if we started it */
+    if(arg_started)
+        HDva_end(arguments);
+
     /* Reset object wrapping info in API context */
     if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
         HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
@@ -4083,21 +4102,22 @@ done:
  */
 herr_t
 H5VLlink_create(H5VL_link_create_type_t create_type, void *obj, const H5VL_loc_params_t *loc_params,
-    hid_t connector_id, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req)
+    hid_t connector_id, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req,
+    va_list arguments)
 {
     H5VL_class_t *cls;                  /* VOL connector's class struct */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE8("e", "Vk*x*xiiii**x", create_type, obj, loc_params, connector_id,
-             lcpl_id, lapl_id, dxpl_id, req);
+    H5TRACE9("e", "Vk*x*xiiii**xx", create_type, obj, loc_params, connector_id,
+             lcpl_id, lapl_id, dxpl_id, req, arguments);
 
     /* Get class pointer */
     if(NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID")
 
     /* Call the corresponding internal VOL routine */
-    if(H5VL__link_create(create_type, obj, loc_params, cls, lcpl_id, lapl_id, dxpl_id, req) < 0)
+    if(H5VL__link_create(create_type, obj, loc_params, cls, lcpl_id, lapl_id, dxpl_id, req, arguments) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, FAIL, "unable to create link")
 
 done:

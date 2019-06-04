@@ -246,9 +246,6 @@ static hbool_t H5P_dcrt_def_layout_init_g = FALSE;
 static herr_t
 H5P__dcrt_reg_prop(H5P_genclass_t *pclass)
 {
-    hid_t   type_id     = H5I_INVALID_HID;
-    hid_t   space_id    = H5I_INVALID_HID;
-    hid_t   lcpl_id     = H5P_LINK_CREATE_DEFAULT;
     herr_t  ret_value   = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
@@ -282,21 +279,6 @@ H5P__dcrt_reg_prop(H5P_genclass_t *pclass)
             NULL, NULL, NULL, H5D_CRT_MIN_DSET_HDR_SIZE_ENC, H5D_CRT_MIN_DSET_HDR_SIZE_DEC,
             NULL, NULL, NULL, NULL) < 0)
        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
-
-    /* Register the type ID property*/
-    if(H5P__register_real(pclass, H5VL_PROP_DSET_TYPE_ID, sizeof(hid_t), &type_id, 
-                         NULL, NULL, NULL, NULL, NULL, NULL, NULL, H5P_ignore_cmp, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
-
-    /* Register the space ID property */
-    if(H5P__register_real(pclass, H5VL_PROP_DSET_SPACE_ID, sizeof(hid_t), &space_id, 
-                         NULL, NULL, NULL, NULL, NULL, NULL, NULL, H5P_ignore_cmp, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
-
-    /* Register the lcpl ID property */
-    if(H5P__register_real(pclass, H5VL_PROP_DSET_LCPL_ID, sizeof(hid_t), &lcpl_id, 
-                         NULL, NULL, NULL, NULL, NULL, NULL, NULL, H5P_ignore_cmp, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

@@ -33,6 +33,11 @@ static const char *EXT_FNAME[] = {
     NULL
 };
 
+static const char *EXT_ENV_FNAME[] = {
+    "extern_env_dir/env_file_1",
+    NULL
+};
+
 /* A similar collection of files is used for the tests that
  * perform file I/O.
  */

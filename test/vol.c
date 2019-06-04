@@ -148,8 +148,11 @@ static const H5VL_class_t fake_vol_g = {
 static herr_t
 test_vol_registration(void)
 {
-    htri_t is_registered;
-    hid_t vol_id = -1, vol_id2 = -1;
+    hid_t native_id = H5I_INVALID_HID;
+    herr_t ret = SUCCEED;
+    htri_t is_registered = FAIL;
+    hid_t vol_id = H5I_INVALID_HID;
+    hid_t vol_id2 = H5I_INVALID_HID;
 
     TESTING("VOL registration");
 
@@ -157,7 +160,7 @@ test_vol_registration(void)
     if ((is_registered = H5VLis_connector_registered(FAKE_VOL_NAME)) < 0)
         FAIL_STACK_ERROR;
     if (is_registered > 0)
-        FAIL_PUTS_ERROR("native VOL connector is inappropriately registered");
+        FAIL_PUTS_ERROR("VOL connector is inappropriately registered");
 
     /* Load a VOL interface */
     if ((vol_id = H5VLregister_connector(&fake_vol_g, H5P_DEFAULT)) < 0)
@@ -167,7 +170,7 @@ test_vol_registration(void)
     if ((is_registered = H5VLis_connector_registered(FAKE_VOL_NAME)) < 0)
         FAIL_STACK_ERROR;
     if (0 == is_registered)
-        FAIL_PUTS_ERROR("native VOL connector is un-registered");
+        FAIL_PUTS_ERROR("VOL connector is un-registered");
 
     /* Re-register a VOL connector */
     if ((vol_id2 = H5VLregister_connector(&fake_vol_g, H5P_DEFAULT)) < 0)
@@ -177,7 +180,7 @@ test_vol_registration(void)
     if ((is_registered = H5VLis_connector_registered(FAKE_VOL_NAME)) < 0)
         FAIL_STACK_ERROR;
     if (0 == is_registered)
-        FAIL_PUTS_ERROR("native VOL connector is un-registered");
+        FAIL_PUTS_ERROR("VOL connector is un-registered");
 
     /* Unregister the second test/fake VOL ID */
     if (H5VLunregister_connector(vol_id2) < 0)
@@ -187,11 +190,20 @@ test_vol_registration(void)
     if ((is_registered = H5VLis_connector_registered(FAKE_VOL_NAME)) < 0)
         FAIL_STACK_ERROR;
     if (0 == is_registered)
-        FAIL_PUTS_ERROR("native VOL connector is un-registered");
+        FAIL_PUTS_ERROR("VOL connector is un-registered");
 
     /* Unregister the original test/fake VOL ID */
     if (H5VLunregister_connector(vol_id) < 0)
         FAIL_STACK_ERROR;
+
+    /* Try to unregister the native VOL connector (should fail) */
+    if (H5I_INVALID_HID == (native_id = H5VLget_connector_id(H5VL_NATIVE_NAME)))
+        FAIL_STACK_ERROR;
+    H5E_BEGIN_TRY {
+        ret = H5VLunregister_connector(native_id);
+    } H5E_END_TRY;
+    if (FAIL != ret)
+        FAIL_PUTS_ERROR("should not be able to unregister the native VOL connector");
 
     PASSED();
     return SUCCEED;

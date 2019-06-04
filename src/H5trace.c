@@ -2905,8 +2905,8 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                                 case H5VL_REF_GET_NAME:
                                     HDfprintf(out, "H5VL_REF_GET_NAME");
                                     break;
-                                case H5VL_ID_GET_NAME:
-                                    HDfprintf(out, "H5VL_ID_GET_NAME");
+                                case H5VL_OBJECT_GET_NAME:
+                                    HDfprintf(out, "H5VL_OBJECT_GET_NAME");
                                     break;
                                 default:
                                     HDfprintf(out, "%ld", (long)get);
