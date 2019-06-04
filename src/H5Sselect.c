@@ -2374,10 +2374,11 @@ H5S_select_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
         if(H5S_select_copy(new_space, dst_space, FALSE) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "can't copy destination space selection")
     } /* end if */
-    /* If any of the spaces are "none", the projection must also be "none" */
-    else if((src_intersect_space->select.type->type == H5S_SEL_NONE)
-            || (src_space->select.type->type == H5S_SEL_NONE)
-            || (dst_space->select.type->type == H5S_SEL_NONE)) {
+    /* If any of the selections contain no elements, the projection must be
+     * "none" */
+    else if((H5S_GET_SELECT_NPOINTS(src_intersect_space) == 0)
+            || (H5S_GET_SELECT_NPOINTS(src_space) == 0)
+            || (H5S_GET_SELECT_NPOINTS(dst_space) == 0)) {
         /* Change to "none" selection */
         if(H5S_select_none(new_space) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't change selection")
@@ -2389,6 +2390,8 @@ H5S_select_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
         HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "point selections not currently supported")
     else {
         HDassert(src_intersect_space->select.type->type == H5S_SEL_HYPERSLABS);
+        HDassert(src_space->select.type->type != H5S_SEL_NONE);
+        HDassert(dst_space->select.type->type != H5S_SEL_NONE);
 
         /* Intersecting space is hyperslab selection.  Call the hyperslab
          * routine to project to another hyperslab selection. */

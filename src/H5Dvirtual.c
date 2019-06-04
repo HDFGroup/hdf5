@@ -35,6 +35,13 @@
  *      until the virtual dataset is closed.
  */
 
+/*
+ * Note: H5S_select_project_intersection has been updated to no longer require
+ * that the source and source intersect spaces have the same extent.  This file
+ * should therefore be updated to remove code that ensures this condition, which
+ * should improve both maintainability and performance.
+ */
+
 /****************/
 /* Module Setup */
 /****************/
