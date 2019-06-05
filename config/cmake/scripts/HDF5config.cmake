@@ -44,7 +44,7 @@ set (CTEST_SOURCE_VERSEXT "-snap1")
 #CTEST_CONFIGURATION_TYPE - Release, Debug, RelWithDebInfo
 #CTEST_SOURCE_NAME - name of source folder; HDF5-1.10.0
 #MODEL - CDash group name
-#HPC - run alternate configurations for HPC machines; sbatch, bsub, raybsub
+#HPC - run alternate configurations for HPC machines; sbatch, bsub, raybsub, qsub
 #MPI - enable MPI;
 if (DEFINED CTEST_SCRIPT_ARG)
     # transform ctest script arguments of the form
@@ -177,8 +177,8 @@ if (NOT DEFINED HPC)
     endif ()
   endif ()
 else ()
+  set (CTEST_SITE "${SITE_OS_NAME}")
   set (CTEST_CMAKE_GENERATOR "Unix Makefiles")
-  include (${CTEST_SOURCE_DIRECTORY}/config/cmake/scripts/HPC/${HPC}-HDF5options.cmake)
 endif ()
 ###################################################################
 
@@ -203,7 +203,7 @@ endif ()
 #####       Following controls source update                  #####
 #set (LOCAL_UPDATE "TRUE")
 set (REPOSITORY_URL "https://git@bitbucket.hdfgroup.org/scm/hdffv/hdf5.git")
-set (REPOSITORY_BRANCH "hdf5_1_10_5")
+set (REPOSITORY_BRANCH "hdf5_1_10_6")
 
 #uncomment to use a compressed source file: *.tar on linux or mac *.zip on windows
 #set(CTEST_USE_TAR_SOURCE "${CTEST_SOURCE_VERSION}")
@@ -228,6 +228,9 @@ if (WIN32)
 else ()
   set (BINFILEBASE "HDF5-${CTEST_SOURCE_VERSION}${CTEST_SOURCE_VERSEXT}")
   include (${CTEST_SCRIPT_DIRECTORY}/HDF5options.cmake)
+  if (DEFINED HPC)
+    include (${CTEST_SOURCE_DIRECTORY}/config/cmake/scripts/HPC/${HPC}-HDF5options.cmake)
+  endif ()
   include (${CTEST_SCRIPT_DIRECTORY}/CTestScript.cmake)
   if (APPLE)
     if (EXISTS "${CTEST_BINARY_DIRECTORY}/${BINFILEBASE}-Darwin.dmg")
