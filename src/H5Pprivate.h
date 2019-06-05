@@ -78,6 +78,7 @@ typedef enum H5P_plist_type_t {
     H5P_TYPE_LINK_CREATE       = 16,
     H5P_TYPE_LINK_ACCESS       = 17,
     H5P_TYPE_ATTRIBUTE_ACCESS  = 18,
+    H5P_TYPE_VOL_INITIALIZE    = 19,
     H5P_TYPE_MAX_TYPE
 } H5P_plist_type_t;
 

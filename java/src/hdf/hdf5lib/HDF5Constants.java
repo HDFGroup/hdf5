@@ -374,6 +374,7 @@ public class HDF5Constants {
     public static final long H5P_OBJECT_COPY = H5P_OBJECT_COPY();
     public static final long H5P_LINK_CREATE = H5P_LINK_CREATE();
     public static final long H5P_LINK_ACCESS = H5P_LINK_ACCESS();
+    public static final long H5P_VOL_INITIALIZE = H5P_VOL_INITIALIZE();
     public static final long H5P_FILE_CREATE_DEFAULT = H5P_FILE_CREATE_DEFAULT();
     public static final long H5P_FILE_ACCESS_DEFAULT = H5P_FILE_ACCESS_DEFAULT();
     public static final long H5P_DATASET_CREATE_DEFAULT = H5P_DATASET_CREATE_DEFAULT();
@@ -389,6 +390,7 @@ public class HDF5Constants {
     public static final long H5P_OBJECT_COPY_DEFAULT = H5P_OBJECT_COPY_DEFAULT();
     public static final long H5P_LINK_CREATE_DEFAULT = H5P_LINK_CREATE_DEFAULT();
     public static final long H5P_LINK_ACCESS_DEFAULT = H5P_LINK_ACCESS_DEFAULT();
+    public static final long H5P_VOL_INITIALIZE_DEFAULT = H5P_VOL_INITIALIZE_DEFAULT();
     public static final int H5P_CRT_ORDER_TRACKED = H5P_CRT_ORDER_TRACKED();
     public static final int H5P_CRT_ORDER_INDEXED = H5P_CRT_ORDER_INDEXED();
     public static final long H5P_DEFAULT = H5P_DEFAULT();
@@ -1352,6 +1354,8 @@ public class HDF5Constants {
 
     private static native final long H5P_LINK_ACCESS();
 
+    private static native final long H5P_VOL_INITIALIZE();
+
     private static native final long H5P_FILE_CREATE_DEFAULT();
 
     private static native final long H5P_FILE_ACCESS_DEFAULT();
@@ -1381,6 +1385,8 @@ public class HDF5Constants {
     private static native final long H5P_LINK_CREATE_DEFAULT();
 
     private static native final long H5P_LINK_ACCESS_DEFAULT();
+
+    private static native final long H5P_VOL_INITIALIZE_DEFAULT();
 
     private static native final int H5P_CRT_ORDER_TRACKED();
 
