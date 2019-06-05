@@ -13,7 +13,10 @@
 ####  Change default configuration of options in config/cmake/cacheinit.cmake file        ###
 ####  format: set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DXXX:YY=ZZZZ")                 ###
 #############################################################################################
-
+if (DEFINED MPI)
+    # maximum parallel processor count for build and test       ####
+    set (MAX_PROC_COUNT 8)
+endif()
 #############################################################################################
 ### options to run test scripts in batch commands
 set (LOCAL_BATCH_SCRIPT_NAME "ctest.qsub")
