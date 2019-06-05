@@ -2714,6 +2714,9 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                                 case H5VL_FILE_GET_INTENT:
                                     HDfprintf(out, "H5VL_FILE_GET_INTENT");
                                     break;
+                                case H5VL_FILE_GET_FILENO:
+                                    HDfprintf(out, "H5VL_FILE_GET_FILENO");
+                                    break;
                                 case H5VL_FILE_GET_NAME:
                                     HDfprintf(out, "H5VL_FILE_GET_NAME");
                                     break;
