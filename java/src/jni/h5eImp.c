@@ -62,11 +62,11 @@ static herr_t H5E_walk_cb(int nindx, const H5E_error2_t *info, void *cb_data);
  */
 JNIEXPORT jboolean JNICALL
 Java_hdf_hdf5lib_H5_H5Eauto_1is_1v2
-    (JNIEnv *env, jclass cls, jlong stk_id)
+    (JNIEnv *env, jclass clss, jlong stk_id)
 {
     unsigned int is_stack = 0;
 
-    UNUSED(cls);
+    UNUSED(clss);
 
     if (stk_id < 0)
         H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Eauto_is_v2: invalid stack ID");
@@ -85,14 +85,14 @@ done:
  */
 JNIEXPORT jlong JNICALL
 Java_hdf_hdf5lib_H5_H5Eregister_1class
-    (JNIEnv *env, jclass cls, jstring cls_name, jstring lib_name, jstring version)
+    (JNIEnv *env, jclass clss, jstring cls_name, jstring lib_name, jstring version)
 {
     const char* the_cls_name = NULL;
     const char* the_lib_name = NULL;
     const char* the_version = NULL;
     hid_t       ret_val = H5I_INVALID_HID;
 
-    UNUSED(cls);
+    UNUSED(clss);
 
     if (NULL == cls_name)
         H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Eregister_class: class name is NULL");
@@ -126,9 +126,9 @@ done:
  */
 JNIEXPORT void JNICALL
 Java_hdf_hdf5lib_H5_H5Eunregister_1class
-    (JNIEnv *env, jclass cls, jlong cls_id)
+    (JNIEnv *env, jclass clss, jlong cls_id)
 {
-    UNUSED(cls);
+    UNUSED(clss);
 
     if (cls_id < 0)
         H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Eunregister_class: invalid error class ID");
@@ -147,9 +147,9 @@ done:
  */
 JNIEXPORT void JNICALL
 Java_hdf_hdf5lib_H5_H5Eclose_1msg
-    (JNIEnv *env, jclass cls, jlong err_id)
+    (JNIEnv *env, jclass clss, jlong err_id)
 {
-    UNUSED(cls);
+    UNUSED(clss);
 
     if (err_id < 0)
         H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Eclose_msg: invalid error message ID");
@@ -168,13 +168,13 @@ done:
  */
 JNIEXPORT jlong JNICALL
 Java_hdf_hdf5lib_H5_H5Ecreate_1msg
-    (JNIEnv *env, jclass cls, jlong err_id, jint msg_type, jstring err_msg)
+    (JNIEnv *env, jclass clss, jlong err_id, jint msg_type, jstring err_msg)
 {
     H5E_type_t  error_msg_type = (H5E_type_t)msg_type;
     const char *the_err_msg = NULL;
     hid_t       ret_val = H5I_INVALID_HID;
 
-    UNUSED(cls);
+    UNUSED(clss);
 
     if (err_id < 0)
         H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Ecreate_msg: invalid error class ID");
@@ -200,11 +200,11 @@ done:
  */
 JNIEXPORT jlong JNICALL
 Java_hdf_hdf5lib_H5_H5Ecreate_1stack
-    (JNIEnv *env, jclass cls)
+    (JNIEnv *env, jclass clss)
 {
     hid_t ret_val = H5I_INVALID_HID;
 
-    UNUSED(cls);
+    UNUSED(clss);
 
     if ((ret_val = H5Ecreate_stack()) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
@@ -220,11 +220,11 @@ done:
  */
 JNIEXPORT jlong JNICALL
 Java_hdf_hdf5lib_H5_H5Eget_1current_1stack
-    (JNIEnv *env, jclass cls)
+    (JNIEnv *env, jclass clss)
 {
     hid_t ret_val = H5I_INVALID_HID;
 
-    UNUSED(cls);
+    UNUSED(clss);
 
     if ((ret_val = H5Eget_current_stack()) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
@@ -240,9 +240,9 @@ done:
  */
 JNIEXPORT void JNICALL
 Java_hdf_hdf5lib_H5_H5Eclose_1stack
-    (JNIEnv *env, jclass cls, jlong stk_id)
+    (JNIEnv *env, jclass clss, jlong stk_id)
 {
-    UNUSED(cls);
+    UNUSED(clss);
 
     if (stk_id < 0)
         H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Eclose_stack: invalid error stack ID");
@@ -261,11 +261,11 @@ done:
  */
 JNIEXPORT void JNICALL
 Java_hdf_hdf5lib_H5_H5Eprint2
-    (JNIEnv *env, jclass cls, jlong stk_id, jobject stream_obj)
+    (JNIEnv *env, jclass clss, jlong stk_id, jobject stream_obj)
 {
     herr_t ret_val = FAIL;
 
-    UNUSED(cls);
+    UNUSED(clss);
 
     if (stk_id < 0)
         H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Eprint2: invalid error stack ID");
@@ -290,13 +290,13 @@ done:
  */
 JNIEXPORT jstring JNICALL
 Java_hdf_hdf5lib_H5_H5Eget_1class_1name
-    (JNIEnv *env, jclass cls, jlong cls_id)
+    (JNIEnv *env, jclass clss, jlong cls_id)
 {
     jstring  str = NULL;
     ssize_t  buf_size;
     char    *namePtr = NULL;
 
-    UNUSED(cls);
+    UNUSED(clss);
 
     if (cls_id < 0)
         H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Eget_class_name: invalid error class ID");
@@ -332,9 +332,9 @@ done:
  */
 JNIEXPORT void JNICALL
 Java_hdf_hdf5lib_H5_H5Eset_1current_1stack
-    (JNIEnv *env, jclass cls, jlong stk_id)
+    (JNIEnv *env, jclass clss, jlong stk_id)
 {
-    UNUSED(cls);
+    UNUSED(clss);
 
     if (stk_id < 0)
         H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Eset_current_stack: invalid error stack ID");
@@ -353,9 +353,9 @@ done:
  */
 JNIEXPORT void JNICALL
 Java_hdf_hdf5lib_H5_H5Epop
-    (JNIEnv *env, jclass cls, jlong stk_id, jlong count)
+    (JNIEnv *env, jclass clss, jlong stk_id, jlong count)
 {
-    UNUSED(cls);
+    UNUSED(clss);
 
     if (stk_id < 0)
         H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Epop: invalid error stack ID");
@@ -374,7 +374,7 @@ done:
  */
 JNIEXPORT void JNICALL
 Java_hdf_hdf5lib_H5_H5Epush2
-    (JNIEnv *env, jclass cls, jlong stk_id, jstring filename, jstring funcname,
+    (JNIEnv *env, jclass clss, jlong stk_id, jstring filename, jstring funcname,
         jint linenumber, jlong class_id, jlong major_id, jlong minor_id, jstring err_desc)
 {
     const char *fName = NULL;
@@ -382,7 +382,7 @@ Java_hdf_hdf5lib_H5_H5Epush2
     const char *errMsg = NULL;
     herr_t      ret_val = FAIL;
 
-    UNUSED(cls);
+    UNUSED(clss);
 
     if (stk_id < 0)
         H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Epush2: invalid error stack ID");
@@ -423,9 +423,9 @@ done:
  */
 JNIEXPORT void JNICALL
 Java_hdf_hdf5lib_H5_H5Eclear2
-    (JNIEnv *env, jclass cls, jlong stk_id)
+    (JNIEnv *env, jclass clss, jlong stk_id)
 {
-    UNUSED(cls);
+    UNUSED(clss);
 
     if (stk_id < 0)
         H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Eclear2: invalid error stack ID");
@@ -444,7 +444,7 @@ done:
  */
 JNIEXPORT jstring JNICALL
 Java_hdf_hdf5lib_H5_H5Eget_1msg
-    (JNIEnv *env, jclass cls, jlong msg_id, jintArray error_msg_type_list)
+    (JNIEnv *env, jclass clss, jlong msg_id, jintArray error_msg_type_list)
 {
     H5E_type_t  error_msg_type;
     jstring     str = NULL;
@@ -452,7 +452,7 @@ Java_hdf_hdf5lib_H5_H5Eget_1msg
     jint       *theArray = NULL;
     char       *namePtr = NULL;
 
-    UNUSED(cls);
+    UNUSED(clss);
 
     if (msg_id < 0)
         H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Eget_msg: invalid error message ID");
@@ -496,11 +496,11 @@ done:
  */
 JNIEXPORT jlong JNICALL
 Java_hdf_hdf5lib_H5_H5Eget_1num
-    (JNIEnv *env, jclass cls, jlong stk_id)
+    (JNIEnv *env, jclass clss, jlong stk_id)
 {
     ssize_t ret_val = -1;
 
-    UNUSED(cls);
+    UNUSED(clss);
 
     if (stk_id < 0)
         H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Eget_num: invalid error stack ID");
@@ -587,11 +587,11 @@ done:
  */
 JNIEXPORT void JNICALL
 Java_hdf_hdf5lib_H5_H5Ewalk2
-    (JNIEnv *env, jclass cls, jlong stk_id, jlong direction, jobject callback_op, jobject op_data)
+    (JNIEnv *env, jclass clss, jlong stk_id, jlong direction, jobject callback_op, jobject op_data)
 {
     cb_wrapper wrapper = { callback_op, op_data };
 
-    UNUSED(cls);
+    UNUSED(clss);
 
     ENVPTR->GetJavaVM(ENVONLY, &jvm);
     CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
