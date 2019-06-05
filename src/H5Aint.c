@@ -2400,7 +2400,7 @@ H5A__attr_post_copy_file(const H5O_loc_t *src_oloc, const H5A_t *attr_src,
 
             /* Determine size of the destination datatype */
             if(0 == (dst_dt_size = H5T_get_size(attr_dst->shared->dt)))
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to determine datatype size")
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to determine datatype size")
             /* Determine # of reference elements to copy */
             ref_count = attr_dst->shared->data_size / dst_dt_size;
 
