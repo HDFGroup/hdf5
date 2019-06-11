@@ -188,23 +188,21 @@ CONTAINS
     CALL check("H5Pcreate_f",error,total_error)
 
     f_ptr = C_NULL_PTR
-    CALL H5Pset_vol_f(fapl_id, vol_id, f_ptr, error)
+    CALL H5Pset_vol_f(fapl_id, vol_id, error)
     CALL check("H5Pset_vol_f",error,total_error)
 
     CALL H5Pget_vol_id_f(fapl_id, vol_id_out, error)
     CALL check("H5Pget_vol_id_f",error,total_error)
     CALL VERIFY("H5Pget_vol_id_f", vol_id_out, vol_id, total_error)
-#if 0
-    CALL H5Pcreate_f(H5P_FILE_ACCESS_F, under_fapl, error)
-    CALL check("H5Pcreate_f",error,total_error)
-    f_ptr = C_LOC(under_fapl)
-    CALL H5Pset_vol_f(fapl_id, vol_id, f_ptr, error)
+
+    f_ptr = C_NULL_PTR
+    CALL H5Pset_vol_f(fapl_id, vol_id, error, f_ptr)
     CALL check("H5Pset_vol_f",error,total_error)
 
     CALL H5Pget_vol_id_f(fapl_id, vol_id_out, error)
     CALL check("H5Pget_vol_id_f",error,total_error)
     CALL VERIFY("H5Pget_vol_id_f", vol_id_out, vol_id, total_error)
-#endif
+
     CALL H5VLget_connector_id_f(NATIVE_VOL_CONNECTOR_NAME, vol_id_out, error)
     CALL check("H5VLget_connector_id_f",error,total_error)
     CALL VERIFY("H5VLget_connector_id_f", vol_id_out, vol_id, total_error)

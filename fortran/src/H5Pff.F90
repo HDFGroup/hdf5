@@ -9,7 +9,7 @@
 ! COPYRIGHT
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
-!   Copyright by the Board of Trustees of the University of Illinois.         *S
+!   Copyright by the Board of Trustees of the University of Illinois.         *
 !   All rights reserved.                                                      *
 !                                                                             *
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -8125,24 +8125,28 @@ END SUBROUTINE h5pget_virtual_dsetname_f
 ! INPUTS
 !  plist_id     - access property list identifier.
 !  new_vol_id   - VOL connector id.
-!  new_vol_info - VOL connector info.
 !
 ! OUTPUTS
-!  hdferr     - error code:
-!                 0 on success and -1 on failure
+!  hdferr       - error code:
+!                  0 on success and -1 on failure
+!
+! OPTIONAL
+!  new_vol_info - VOL connector info.
 !
 ! AUTHOR
 !  M.S. Breitenfeld
 !  May 2019
 !
 ! Fortran Interface:
-  SUBROUTINE h5pset_vol_f(plist_id, new_vol_id, new_vol_info, hdferr)
+  SUBROUTINE h5pset_vol_f(plist_id, new_vol_id, hdferr, new_vol_info)
     IMPLICIT NONE
     INTEGER(HID_T) , INTENT(IN)   :: plist_id
     INTEGER(HID_T) , INTENT(IN)   :: new_vol_id
-    TYPE(C_PTR)    , INTENT(IN)   :: new_vol_info
     INTEGER        , INTENT(OUT)  :: hdferr
+    TYPE(C_PTR)    , OPTIONAL     :: new_vol_info
 !*****
+
+    TYPE(C_PTR) :: new_vol_info_default
 
     INTERFACE
        INTEGER FUNCTION h5pset_vol(plist_id, new_vol_id, new_vol_info) BIND(C, NAME='H5Pset_vol')
@@ -8154,7 +8158,10 @@ END SUBROUTINE h5pget_virtual_dsetname_f
        END FUNCTION h5pset_vol
     END INTERFACE
 
-    hdferr = INT(h5pset_vol(plist_id, new_vol_id, new_vol_info))
+    new_vol_info_default = C_NULL_PTR
+    IF(PRESENT(new_vol_info)) new_vol_info_default=new_vol_info
+
+    hdferr = INT(h5pset_vol(plist_id, new_vol_id, new_vol_info_default))
 
   END SUBROUTINE h5pset_vol_f
 
