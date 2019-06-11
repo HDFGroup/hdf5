@@ -867,7 +867,7 @@ H5Fdelete(const char *filename, hid_t fapl_id)
         fapl_id = H5P_FILE_ACCESS_DEFAULT;
     else
         if(TRUE != H5P_isa_class(fapl_id, H5P_FILE_ACCESS))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not file access property list")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
 
     /* Verify access property list and set up collective metadata if appropriate */
     if(H5CX_set_apl(&fapl_id, H5P_CLS_FACC, H5I_INVALID_HID, TRUE) < 0)
