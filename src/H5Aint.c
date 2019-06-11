@@ -1092,29 +1092,29 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5A__free
+ * Function:    H5A__shared_free
  *
- * Purpose:     Frees all memory associated with an attribute, but does not
- *              free the H5A_t structure (which should be done in H5T_close).
+ * Purpose:     Cleans up the shared attribute data. This will free
+ *              the attribute's shared structure as well.
+ *
+ *              attr and attr->shared must not be NULL
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Monday, November 15, 2004
+ * Programmer:  Quincey Koziol
+ *              Monday, November 15, 2004
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5A__free(H5A_t *attr)
+H5A__shared_free(H5A_t *attr)
 {
     herr_t ret_value = SUCCEED;           /* Return value */
 
     FUNC_ENTER_PACKAGE
 
     HDassert(attr);
-
-    if(!attr->shared)
-        HGOTO_DONE(SUCCEED)
+    HDassert(attr->shared);
 
     /* Free dynamically allocated items.
      * When possible, keep trying to shut things down (via HDONE_ERROR).
@@ -1139,9 +1139,8 @@ H5A__free(H5A_t *attr)
     /* Destroy shared attribute struct */
     attr->shared = H5FL_FREE(H5A_shared_t, attr->shared);
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5A__free() */
+} /* end H5A__shared_free() */
 
 
 /*-------------------------------------------------------------------------
@@ -1205,8 +1204,9 @@ H5A__close(H5A_t *attr)
     /* Reference count can be 0.  It only happens when H5A__create fails. */
     if(attr->shared->nrefs <= 1) {
         /* Free dynamically allocated items */
-        if(H5A__free(attr) < 0)
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't release attribute info")
+        if(attr->shared)
+            if(H5A__shared_free(attr) < 0)
+                HGOTO_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't release attribute info")
     } /* end if */
     else {
         /* There are other references to the shared part of the attribute.

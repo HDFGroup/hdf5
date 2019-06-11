@@ -254,8 +254,9 @@ done:
     if(NULL == ret_value)
         if(attr) {
             /* Free any dynamically allocated items */
-            if(H5A__free(attr) < 0)
-                HDONE_ERROR(H5E_ATTR, H5E_CANTRELEASE, NULL, "can't release attribute info")
+            if(attr->shared)
+                if(H5A__shared_free(attr) < 0)
+                    HDONE_ERROR(H5E_ATTR, H5E_CANTRELEASE, NULL, "can't release attribute info")
 
             attr = H5FL_FREE(H5A_t, attr);
         } /* end if */

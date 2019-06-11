@@ -327,8 +327,9 @@ H5A__dense_fnd_cb(const H5A_t *attr, hbool_t *took_ownership, void *_user_attr)
         H5A_t *old_attr = *user_attr;
 
         /* Free any dynamically allocated items */
-        if(H5A__free(old_attr) < 0)
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't release attribute info")
+        if(old_attr->shared)
+            if(H5A__shared_free(old_attr) < 0)
+                HGOTO_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't release attribute info")
 
         old_attr = H5FL_FREE(H5A_t, old_attr);
      } /* end if */
