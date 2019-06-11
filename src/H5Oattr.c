@@ -200,7 +200,7 @@ H5O_attr_decode(H5F_t *f, H5O_t *open_oh, unsigned H5_ATTR_UNUSED mesg_flags,
      * What's actually shared, though, is only the extent.
      */
     if(NULL == (attr->shared->ds = H5FL_CALLOC(H5S_t)))
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Decode attribute's dataspace extent */
     if((extent = (H5S_extent_t *)(H5O_MSG_SDSPACE->decode)(f, open_oh,
@@ -253,6 +253,8 @@ H5O_attr_decode(H5F_t *f, H5O_t *open_oh, unsigned H5_ATTR_UNUSED mesg_flags,
 done:
     if(NULL == ret_value)
         if(attr) {
+            if(attr->shared->ds)
+                attr->shared->ds = H5FL_FREE(H5S_t, attr->shared->ds);
             if(attr->shared) {
                 /* Free any dynamically allocated items */
                 if(H5A__free(attr) < 0)
