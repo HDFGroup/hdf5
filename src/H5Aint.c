@@ -1113,23 +1113,31 @@ H5A__free(H5A_t *attr)
 
     HDassert(attr);
 
-    /* Free dynamically allocated items */
+    if(!attr->shared)
+        HGOTO_DONE(SUCCEED)
+
+    /* Free dynamically allocated items.
+     * When possible, keep trying to shut things down (via HDONE_ERROR).
+     */
     if(attr->shared->name) {
         H5MM_xfree(attr->shared->name);
         attr->shared->name = NULL;
     }
     if(attr->shared->dt) {
         if(H5T_close_real(attr->shared->dt) < 0)
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't release datatype info")
+            HDONE_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't release datatype info")
         attr->shared->dt = NULL;
     }
     if(attr->shared->ds) {
         if(H5S_close(attr->shared->ds) < 0)
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't release dataspace info")
+            HDONE_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't release dataspace info")
         attr->shared->ds = NULL;
     }
     if(attr->shared->data)
         attr->shared->data = H5FL_BLK_FREE(attr_buf, attr->shared->data);
+
+    /* Destroy shared attribute struct */
+    attr->shared = H5FL_FREE(H5A_shared_t, attr->shared);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1199,9 +1207,6 @@ H5A__close(H5A_t *attr)
         /* Free dynamically allocated items */
         if(H5A__free(attr) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't release attribute info")
-
-        /* Destroy shared attribute struct */
-        attr->shared = H5FL_FREE(H5A_shared_t, attr->shared);
     } /* end if */
     else {
         /* There are other references to the shared part of the attribute.
