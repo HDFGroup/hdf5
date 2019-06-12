@@ -3518,6 +3518,7 @@ AM_CONDITIONAL([HAVE_SHARED_CONDITIONAL], [test "X$enable_shared" = "Xyes"])
 AC_CONFIG_FILES([src/libhdf5.settings
                  Makefile
                  src/Makefile
+                 src/h5cc
                  test/Makefile
                  test/H5srcdir_str.h
                  test/testabort_fail.sh
@@ -3546,7 +3547,6 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  tools/src/h5ls/Makefile
                  tools/src/h5copy/Makefile
                  tools/src/misc/Makefile
-                 tools/src/misc/h5cc
                  tools/src/h5stat/Makefile
                  tools/test/Makefile
                  tools/test/h5dump/Makefile
@@ -3648,7 +3648,7 @@ AC_CONFIG_COMMANDS([.classes], [], [$MKDIR_P java/src/.classes;
 
 AC_OUTPUT
 
-chmod 755 tools/src/misc/h5cc
+chmod 755 src/h5cc
 if test "X$HDF_CXX" = "Xyes"; then
   chmod 755 c++/src/h5c++
 fi

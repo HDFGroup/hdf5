@@ -934,6 +934,7 @@
 ./src/H5Ztrans.c
 ./src/Makefile.am
 ./src/hdf5.h
+./src/h5cc.in
 ./src/libhdf5.settings.in
 ./src/H5win32defs.h
 
@@ -1538,7 +1539,6 @@
 ./tools/lib/io_timer.h
 
 ./tools/src/misc/Makefile.am
-./tools/src/misc/h5cc.in
 ./tools/src/misc/h5clear.c
 ./tools/src/misc/h5debug.c
 ./tools/src/misc/h5mkgrp.c
