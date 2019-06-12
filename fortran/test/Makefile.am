@@ -34,8 +34,6 @@ else
    AM_LDFLAGS+=-static
 endif
 
-check_SCRIPTS = $(TEST_SCRIPT)
-
 # Our main targets, the tests themselves
 TEST_PROG=fortranlib_test fflush1 fflush2 fortranlib_test_1_8 fortranlib_test_F03 vol_connector
 
