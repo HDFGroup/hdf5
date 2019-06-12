@@ -130,6 +130,10 @@ set_tests_properties (FORTRAN_fflush1 PROPERTIES DEPENDS FORTRAN_testhdf5-clear-
 add_test (NAME FORTRAN_fflush2 COMMAND $<TARGET_FILE:fflush2>)
 set_tests_properties (FORTRAN_fflush2 PROPERTIES DEPENDS FORTRAN_fflush1)
 
+#-- Adding test for vol_connector
+add_test (NAME FORTRAN_vol_connector COMMAND $<TARGET_FILE:vol_connector>)
+set_tests_properties (FORTRAN_vol_connector PROPERTIES DEPENDS FORTRAN_testhdf5-clear-objects)
+
 if (BUILD_SHARED_LIBS)
   add_test (
     NAME FORTRAN_testhdf5-shared-clear-objects
@@ -239,4 +243,8 @@ if (BUILD_SHARED_LIBS)
   #-- Adding test for fflush2
   add_test (NAME FORTRAN_fflush2-shared COMMAND $<TARGET_FILE:fflush2-shared>)
   set_tests_properties (FORTRAN_fflush2-shared PROPERTIES DEPENDS FORTRAN_fflush1-shared)
+
+  #-- Adding test for vol_connector
+  add_test (NAME FORTRAN_vol_connector-shared COMMAND $<TARGET_FILE:vol_connector-shared>)
+  set_tests_properties (FORTRAN_vol_connector-shared PROPERTIES DEPENDS FORTRAN_vol_connector-shared)
 endif ()
