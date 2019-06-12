@@ -48,6 +48,18 @@ New Features
 
     Configuration:
     -------------
+    - Add options to enable or disable building tools and tests
+    
+      Configure options --enable-tests and --enable-tools were added for 
+      autotools configure.  These options are enabled by default, and can be
+      disabled with either --disable-tests (or tools) or --enable-tests=no 
+      (or --enable-tools=no).  Build time is reduced ~20% when tools are 
+      disabled, 35% when tests are disabled, 45% when both are disabled.
+      Reenabling them after the initial build requires running configure
+      again with the option(s) enabled.
+
+      (LRK - 2019/06/12, HDFFV-9976)
+
     - Change tools test that test the error stack
 
       There are some use cases which can cause the error stack of tools to be
