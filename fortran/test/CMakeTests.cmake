@@ -148,7 +148,7 @@ else ()
   )
 endif ()
 #  set_tests_properties (FORTRAN_vol_connector PROPERTIES PASS_REGULAR_EXPRESSION "[ ]*0 error.s")
-  set_tests_properties (FORTRAN_vol_connector PROPERTIES DEPENDS FORTRAN_fortranlib_test_F03)
+  set_tests_properties (FORTRAN_vol_connector PROPERTIES DEPENDS FORTRAN_testhdf5-clear-objects)
 
 if (BUILD_SHARED_LIBS)
   add_test (
