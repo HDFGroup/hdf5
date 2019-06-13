@@ -232,7 +232,8 @@ CONTAINS
 
     hdferr = 0
     IF(PRESENT(name_len))THEN
-       name_len = INT(H5VLget_connector_name(obj_id, c_name, 0_SIZE_T), SIZE_T)
+       c_name(1:1)(1:1) = C_NULL_CHAR
+       name_len = INT(H5VLget_connector_name(obj_id, c_name, 1_SIZE_T), SIZE_T)
        IF(name_len.LT.0) hdferr = H5I_INVALID_HID_F
     ELSE
        l = INT(LEN(name)+1,SIZE_T)
