@@ -93,10 +93,6 @@ CONTAINS
     CALL H5VLclose_f(vol_id_out, error)
     CALL check("H5VLclose_f",error, total_error)
 
-    ! Unregister the connector
-    CALL H5VLunregister_connector_f(vol_id, error)
-    CALL check("H5VLunregister_connector_f", error, total_error)
-
   END SUBROUTINE test_registration_by_name
 
   !-------------------------------------------------------------------------
@@ -131,10 +127,6 @@ CONTAINS
     CALL H5VLis_connector_registered_f(NATIVE_VOL_CONNECTOR_NAME, is_registered, error)
     CALL check("H5VLis_connector_registered_f",error,total_error)
     CALL VERIFY("H5VLis_connector_registered_f", is_registered, .TRUE., total_error)
-
-    ! Unregister the connector
-    CALL H5VLunregister_connector_f(vol_id, error)
-    CALL check("H5VLunregister_connector_f", error, total_error)
 
   END SUBROUTINE test_registration_by_value
 
@@ -215,10 +207,6 @@ CONTAINS
 
     CALL H5VLclose_f(vol_id, error)
     CALL check("H5VLclose_f",error, total_error)
-
-    ! Unregister the connector
-    CALL H5VLunregister_connector_f(vol_id, error)
-    CALL check("H5VLunregister_connector_f", error, total_error)
 
     CALL H5Fclose_f(file_id, error)
     CALL check("H5Fclose_f",error,total_error)
