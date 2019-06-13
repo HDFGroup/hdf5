@@ -570,7 +570,11 @@ if (BUILD_SHARED_LIBS)
 endif ()
 
 #-- Adding test for vol_connector
-add_executable (vol_connector vol_connector.F90)
+add_executable (vol_connector 
+      vol_connector.F90
+      tH5L_F03.F90
+      tHDF5_F03.F90)
+
 target_include_directories (vol_connector
     PRIVATE
         ${CMAKE_Fortran_MODULE_DIRECTORY}/static
@@ -600,7 +604,10 @@ set_target_properties (vol_connector PROPERTIES
 add_dependencies (vol_connector ${HDF5_F90_TEST_LIB_TARGET})
 
 if (BUILD_SHARED_LIBS)
-  add_executable (vol_connector-shared vol_connector.F90)
+  add_executable (vol_connector-shared
+      vol_connector.F90
+      tH5L_F03.F90
+      tHDF5_F03.F90)
   target_include_directories (vol_connector-shared
       PRIVATE
           ${CMAKE_Fortran_MODULE_DIRECTORY}/shared

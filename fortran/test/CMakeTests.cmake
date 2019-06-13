@@ -281,7 +281,4 @@ if (BUILD_SHARED_LIBS)
   add_test (NAME FORTRAN_fflush2-shared COMMAND $<TARGET_FILE:fflush2-shared>)
   set_tests_properties (FORTRAN_fflush2-shared PROPERTIES DEPENDS FORTRAN_fflush1-shared)
 
-  #-- Adding test for vol_connector
-  add_test (NAME FORTRAN_vol_connector-shared COMMAND $<TARGET_FILE:vol_connector-shared>)
-  set_tests_properties (FORTRAN_vol_connector-shared PROPERTIES DEPENDS FORTRAN_vol_connector-shared)
 endif ()
