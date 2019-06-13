@@ -55,9 +55,10 @@ CONTAINS
     LOGICAL :: is_registered = .FALSE.
     INTEGER(hid_t) :: vol_id = 0, vol_id_out = 1
     CHARACTER(LEN=64) :: name
+    CHARACTER(LEN=1) :: name_null
+    CHARACTER(LEN=6) :: name_exact
     INTEGER(SIZE_T) :: name_len
     INTEGER(hid_t) :: file_id
-    INTEGER :: cmp = -1
 
     ! The null VOL connector should not be registered at the start of the test
     CALL H5VLis_connector_registered_f( "FAKE_VOL_CONNECTOR_NAME", is_registered, error)
@@ -86,6 +87,22 @@ CONTAINS
     CALL H5VLget_connector_name_f(file_id, name, error)
     CALL check("H5VLget_connector_name_f",error,total_error)
     CALL VERIFY("H5VLget_connector_name_f", name, NATIVE_VOL_CONNECTOR_NAME, total_error)
+
+    CALL H5VLget_connector_name_f(file_id, name_null, error, name_len)
+    CALL check("H5VLget_connector_name_f",error,total_error)
+    CALL VERIFY("H5VLget_connector_name_f", INT(name_len), LEN_TRIM(NATIVE_VOL_CONNECTOR_NAME), total_error)
+
+    CALL H5VLget_connector_name_f(file_id, name_null, error)
+    CALL check("H5VLget_connector_name_f",error,total_error)
+    CALL VERIFY("H5VLget_connector_name_f", name_null, NATIVE_VOL_CONNECTOR_NAME(1:1), total_error)
+
+    CALL H5VLget_connector_name_f(file_id, name_exact, error, name_len)
+    CALL check("H5VLget_connector_name_f",error,total_error)
+    CALL VERIFY("H5VLget_connector_name_f", INT(name_len), LEN_TRIM(NATIVE_VOL_CONNECTOR_NAME), total_error)
+
+    CALL H5VLget_connector_name_f(file_id, name_exact, error)
+    CALL check("H5VLget_connector_name_f",error,total_error)
+    CALL VERIFY("H5VLget_connector_name_f", name_exact, NATIVE_VOL_CONNECTOR_NAME, total_error)
 
     CALL H5Fclose_f(file_id, error)
     CALL check("H5Fclose_f",error,total_error)
@@ -149,18 +166,14 @@ CONTAINS
 
     LOGICAL :: is_registered = .FALSE.
     INTEGER(hid_t) :: vol_id = 0, vol_id_out = 1
-    CHARACTER(LEN=64) :: name
-    INTEGER(SIZE_T) :: name_len
     INTEGER(hid_t) :: file_id
-    INTEGER :: cmp = -1
     INTEGER(hid_t) :: fapl_id
     TYPE(C_PTR) :: f_ptr
-    INTEGER(hid_t), TARGET :: under_fapl
 
     CALL H5VLis_connector_registered_f( "FAKE_VOL_CONNECTOR_NAME", is_registered, error)
+
     CALL check("H5VLis_connector_registered_f",error,total_error)
     CALL VERIFY("H5VLis_connector_registered_f", is_registered, .FALSE., total_error)
-
 
     ! The null VOL connector should not be registered at the start of the test
     CALL H5VLis_connector_registered_f( "FAKE_VOL_CONNECTOR_NAME", is_registered, error)
@@ -169,7 +182,7 @@ CONTAINS
 
     CALL H5VLregister_connector_by_name_f(NATIVE_VOL_CONNECTOR_NAME, vol_id, error)
     CALL check("H5VLregister_connector_by_name_f",error,total_error)
-    
+  
     ! The connector should be registered now
     CALL H5VLis_connector_registered_f(NATIVE_VOL_CONNECTOR_NAME, is_registered, error)
     CALL check("H5VLis_connector_registered_f",error,total_error)
