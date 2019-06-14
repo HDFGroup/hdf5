@@ -3518,7 +3518,6 @@ AM_CONDITIONAL([HAVE_SHARED_CONDITIONAL], [test "X$enable_shared" = "Xyes"])
 AC_CONFIG_FILES([src/libhdf5.settings
                  Makefile
                  src/Makefile
-                 src/h5cc
                  test/Makefile
                  test/H5srcdir_str.h
                  test/testabort_fail.sh
@@ -3586,6 +3585,8 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  examples/Makefile
                  examples/run-c-ex.sh
                  examples/testh5cc.sh
+                 bin/h5cc
+                 bin/Makefile
                  c++/Makefile
                  c++/src/Makefile
                  c++/src/h5c++
