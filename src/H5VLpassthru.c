@@ -1733,7 +1733,7 @@ H5VL_pass_through_file_specific(void *file, H5VL_file_specific_t specific_type,
         /* Re-issue 'file specific' call, using the unwrapped pieces */
         ret_value = H5VL_pass_through_file_specific_reissue(o->under_object, o->under_vol_id, specific_type, dxpl_id, req, (int)loc_type, name, child_file->under_object, plist_id);
     } /* end if */
-    else if(specific_type == H5VL_FILE_IS_ACCESSIBLE) {
+    else if(specific_type == H5VL_FILE_IS_ACCESSIBLE || specific_type == H5VL_FILE_DELETE) {
         H5VL_pass_through_info_t *info;
         hid_t fapl_id, under_fapl_id;
         const char *name;

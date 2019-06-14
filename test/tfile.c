@@ -1850,6 +1850,102 @@ test_file_ishdf5(const char *env_h5_drvr)
 } /* end test_file_ishdf5() */
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
+
+/****************************************************************
+**
+**  test_file_delete(): tests H5Fdelete for all VFDs
+**
+*****************************************************************/
+#define FILE_DELETE             "test_file_delete"
+#define FILE_DELETE_NOT_HDF5    "test_file_delete_not_hdf5"
+static void
+test_file_delete(hid_t fapl_id)
+{
+    hid_t       fid = H5I_INVALID_HID;  /* File to be deleted */
+    char        filename[FILENAME_LEN]; /* Filename to use */
+    htri_t      is_hdf5;                /* Whether a file is an HDF5 file */
+    int         fd;                     /* POSIX file descriptor */
+    int         iret;
+    herr_t      ret;
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing Deletion of HDF5 Files\n"));
+
+    /*************/
+    /* HDF5 FILE */
+    /*************/
+
+    /* This is just a placeholder until the native VOL connector supports
+     * H5Fdelete().
+     */
+
+    /* Get fapl-dependent filename */
+    h5_fixname(FILE_DELETE, fapl_id, filename, sizeof(filename));
+
+    /* Create a file */
+    fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
+    CHECK(fid, H5I_INVALID_HID, "H5Fcreate");
+
+    /* Close file */
+    ret = H5Fclose(fid);
+    VERIFY(ret, SUCCEED, "H5Fclose");
+
+    /* Verify that the file is an HDF5 file */
+    is_hdf5 = H5Fis_accessible(filename, fapl_id);
+    VERIFY(is_hdf5, TRUE, "H5Fis_accessible");
+
+    /* Attempt to delete the file - should fail */
+    H5E_BEGIN_TRY {
+        ret = H5Fdelete(filename, fapl_id);
+    } H5E_END_TRY;
+    VERIFY(ret, FAIL, "H5Fdelete");
+
+    /* Verify that the file still exists */
+    is_hdf5 = H5Fis_accessible(filename, fapl_id);
+    VERIFY(is_hdf5, TRUE, "H5Fis_accessible");
+
+    /* Actually delete the test file */
+    h5_delete_test_file(FILE_DELETE, fapl_id);
+
+    /*****************/
+    /* NON-HDF5 FILE */
+    /*****************/
+
+    /* Get fapl-dependent filename */
+    h5_fixname(FILE_DELETE_NOT_HDF5, fapl_id, filename, sizeof(filename));
+
+    /* Create a non-HDF5 file */
+    fd = HDopen(filename, O_RDWR | O_CREAT | O_TRUNC, H5_POSIX_CREATE_MODE_RW);
+    CHECK_I(fd, "HDopen");
+
+    /* Close the file */
+    ret = HDclose(fd);
+    VERIFY(ret, 0, "HDclose");
+
+    /* Verify that the file is not an HDF5 file */
+    /* Note that you can get a FAIL result when h5_fixname()
+     * perturbs the filename as a file with that exact name
+     * may not have been created since we created it with
+     * open(2) and not the library.
+     */
+    H5E_BEGIN_TRY {
+        is_hdf5 = H5Fis_accessible(filename, fapl_id);
+    } H5E_END_TRY;
+    VERIFY(is_hdf5, SUCCEED, "H5Fis_accessible");
+
+    /* Try to delete it (should fail) */
+    H5E_BEGIN_TRY {
+        ret = H5Fdelete(filename, fapl_id);
+    } H5E_END_TRY;
+    VERIFY(ret, FAIL, "H5Fdelete");
+
+    /* Delete the file */
+    iret = HDremove(filename);
+    VERIFY(iret, 0, "HDremove");
+
+} /* end test_file_delete() */
+
+
 /****************************************************************
 **
 **  test_file_open_dot(): low-level file test routine.
@@ -7606,6 +7702,8 @@ void
 test_file(void)
 {
     const char  *env_h5_drvr;         /* File Driver value from environment */
+    hid_t fapl_id = H5I_INVALID_HID;    /* VFD-dependent fapl ID */
+    herr_t   ret;
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Low-Level File I/O\n"));
@@ -7614,6 +7712,10 @@ test_file(void)
     env_h5_drvr = HDgetenv("HDF5_DRIVER");
     if(env_h5_drvr == NULL)
         env_h5_drvr = "nomatch";
+
+    /* Improved version of VFD-dependent checks */
+    fapl_id = h5_fileaccess();
+    CHECK(fapl_id, H5I_INVALID_HID, "h5_fileaccess");
 
     test_file_create();                         /* Test file creation(also creation templates)*/
     test_file_open();                           /* Test file opening */
@@ -7624,6 +7726,7 @@ test_file(void)
     test_file_perm();                           /* Test file access permissions */
     test_file_perm2();                          /* Test file access permission again */
     test_file_is_accessible(env_h5_drvr);       /* Test detecting HDF5 files correctly */
+    test_file_delete(fapl_id);                  /* Test H5Fdelete */
     test_file_open_dot();                       /* Test opening objects with "." for a name */
     test_file_open_overlap();                   /* Test opening files in an overlapping manner */
     test_file_getname();                        /* Test basic H5Fget_name() functionality */
@@ -7662,6 +7765,10 @@ test_file(void)
     test_file_ishdf5(env_h5_drvr);              /* Test detecting HDF5 files correctly */
     test_deprec();                              /* Test deprecated routines */
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
+
+    ret = H5Pclose(fapl_id);
+    CHECK(ret, FAIL, "H5Pclose");
+
 } /* test_file() */
 
 

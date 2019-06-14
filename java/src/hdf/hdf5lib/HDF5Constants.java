@@ -121,6 +121,7 @@ public class HDF5Constants {
     public static final long H5E_CANTDEC = H5E_CANTDEC();
     public static final long H5E_CANTDECODE = H5E_CANTDECODE();
     public static final long H5E_CANTDELETE = H5E_CANTDELETE();
+    public static final long H5E_CANTDELETEFILE = H5E_CANTDELETEFILE();
     public static final long H5E_CANTENCODE = H5E_CANTENCODE();
     public static final long H5E_CANTFLUSH = H5E_CANTFLUSH();
     public static final long H5E_CANTFREE = H5E_CANTFREE();
@@ -862,6 +863,8 @@ public class HDF5Constants {
     private static native final long H5E_CANTDECODE();
 
     private static native final long H5E_CANTDELETE();
+
+    private static native final long H5E_CANTDELETEFILE();
 
     private static native final long H5E_CANTENCODE();
 
