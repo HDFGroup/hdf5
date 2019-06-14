@@ -863,7 +863,7 @@ H5F__is_hdf5(const char *name, hid_t fapl_id)
      *          should work with arbitrary VFDs, unlike H5Fis_hdf5().
      */
     if(NULL == (file = H5FD_open(name, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF)))
-        HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "unable to open file")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to open file")
 
     /* The file is an hdf5 file if the hdf5 file signature can be found */
     if(H5FD_locate_signature(file, &sig_addr) < 0)
@@ -874,7 +874,7 @@ done:
     /* Close the file */
     if(file)
         if(H5FD_close(file) < 0 && TRUE == ret_value)
-            HDONE_ERROR(H5E_IO, H5E_CANTCLOSEFILE, FAIL, "unable to close file")
+            HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to close file")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__is_hdf5() */

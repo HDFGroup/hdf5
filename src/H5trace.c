@@ -2758,6 +2758,9 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                                 case H5VL_FILE_IS_ACCESSIBLE:
                                     HDfprintf(out, "H5VL_FILE_IS_ACCESSIBLE");
                                     break;
+                                case H5VL_FILE_DELETE:
+                                    HDfprintf(out, "H5VL_FILE_DELETE");
+                                    break;
                                 default:
                                     HDfprintf(out, "%ld", (long)specific);
                                     break;
