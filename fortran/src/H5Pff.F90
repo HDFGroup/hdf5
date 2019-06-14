@@ -9,7 +9,7 @@
 ! COPYRIGHT
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
-!   Copyright by the Board of Trustees of the University of Illinois.         *S
+!   Copyright by the Board of Trustees of the University of Illinois.         *
 !   All rights reserved.                                                      *
 !                                                                             *
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -7929,7 +7929,7 @@ SUBROUTINE h5pget_virtual_filename_f(dcpl_id, index, name, hdferr, name_len)
   
   INTERFACE
      INTEGER(SIZE_T) FUNCTION h5pget_virtual_filename(dcpl_id, index, name, size) BIND(C, NAME='H5Pget_virtual_filename')
-       IMPORT :: HID_T, SIZE_T, C_PTR, C_CHAR
+       IMPORT :: HID_T, SIZE_T, C_PTR
          IMPLICIT NONE
        INTEGER(HID_T) , INTENT(IN), VALUE :: dcpl_id
        INTEGER(SIZE_T), INTENT(IN), VALUE :: index
@@ -7997,7 +7997,7 @@ SUBROUTINE h5pget_virtual_dsetname_f(dcpl_id, index, name, hdferr, name_len)
   
   INTERFACE
      INTEGER(SIZE_T) FUNCTION h5pget_virtual_dsetname(dcpl_id, index, name, size) BIND(C, NAME='H5Pget_virtual_dsetname')
-       IMPORT :: HID_T, SIZE_T, C_PTR, C_CHAR
+       IMPORT :: HID_T, SIZE_T, C_PTR
          IMPLICIT NONE
        INTEGER(HID_T) , INTENT(IN), VALUE :: dcpl_id
        INTEGER(SIZE_T), INTENT(IN), VALUE :: index
@@ -8018,7 +8018,6 @@ SUBROUTINE h5pget_virtual_dsetname_f(dcpl_id, index, name, hdferr, name_len)
      ELSE
         CALL HD5c2fstring(name,c_name,LEN(name))
      ENDIF
-
   ENDIF
 
 END SUBROUTINE h5pget_virtual_dsetname_f
@@ -8114,6 +8113,98 @@ END SUBROUTINE h5pget_virtual_dsetname_f
     hdferr = INT(h5pset_dset_no_attrs_hint_c(dcpl_id, c_minimize))
 
   END SUBROUTINE h5pset_dset_no_attrs_hint_f
+
+!****s* H5P/H5Pset_vol_f
+!
+! NAME
+!  H5Pset_vol_f
+!
+! PURPOSE
+!  Set the file VOL connector (VOL_ID) for a file access
+!  property list (PLIST_ID)
+! INPUTS
+!  plist_id     - access property list identifier.
+!  new_vol_id   - VOL connector id.
+!
+! OUTPUTS
+!  hdferr       - error code:
+!                  0 on success and -1 on failure
+!
+! OPTIONAL
+!  new_vol_info - VOL connector info.
+!
+! AUTHOR
+!  M.S. Breitenfeld
+!  May 2019
+!
+! Fortran Interface:
+  SUBROUTINE h5pset_vol_f(plist_id, new_vol_id, hdferr, new_vol_info)
+    IMPLICIT NONE
+    INTEGER(HID_T) , INTENT(IN)   :: plist_id
+    INTEGER(HID_T) , INTENT(IN)   :: new_vol_id
+    INTEGER        , INTENT(OUT)  :: hdferr
+    TYPE(C_PTR)    , OPTIONAL     :: new_vol_info
+!*****
+
+    TYPE(C_PTR) :: new_vol_info_default
+
+    INTERFACE
+       INTEGER FUNCTION h5pset_vol(plist_id, new_vol_id, new_vol_info) BIND(C, NAME='H5Pset_vol')
+         IMPORT :: HID_T, C_PTR
+         IMPLICIT NONE
+         INTEGER(HID_T), INTENT(IN), VALUE :: plist_id
+         INTEGER(HID_T), INTENT(IN), VALUE :: new_vol_id
+         TYPE(C_PTR)   , INTENT(IN), VALUE :: new_vol_info
+       END FUNCTION h5pset_vol
+    END INTERFACE
+
+    new_vol_info_default = C_NULL_PTR
+    IF(PRESENT(new_vol_info)) new_vol_info_default=new_vol_info
+
+    hdferr = INT(h5pset_vol(plist_id, new_vol_id, new_vol_info_default))
+
+  END SUBROUTINE h5pset_vol_f
+
+!****s* H5P/H5Pget_vol_id_f
+!
+! NAME
+!  H5Pget_vol_id_f
+!
+! PURPOSE
+!  Get the file VOL connector (VOL_ID) for a file access
+!  property list (PLIST_ID)
+! INPUTS
+!  plist_id - access property list identifier.
+!
+! OUTPUTS
+!  vol_id   - VOL connector id.
+!  hdferr   - error code:
+!               0 on success and -1 on failure
+!
+! AUTHOR
+!  M.S. Breitenfeld
+!  May 2019
+!
+! Fortran Interface:
+  SUBROUTINE h5pget_vol_id_f(plist_id, vol_id, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T) , INTENT(IN)   :: plist_id
+    INTEGER(HID_T) , INTENT(OUT)  :: vol_id
+    INTEGER        , INTENT(OUT)  :: hdferr
+!*****
+
+    INTERFACE
+       INTEGER FUNCTION h5pget_vol_id(plist_id, vol_id) BIND(C, NAME='H5Pget_vol_id')
+         IMPORT :: HID_T, C_PTR
+         IMPLICIT NONE
+         INTEGER(HID_T), INTENT(IN), VALUE :: plist_id
+         INTEGER(HID_T), INTENT(OUT) :: vol_id
+       END FUNCTION h5pget_vol_id
+    END INTERFACE
+
+    hdferr = INT(h5pget_vol_id(plist_id, vol_id))
+
+  END SUBROUTINE h5pget_vol_id_f
 
 END MODULE H5P
 

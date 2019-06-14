@@ -628,7 +628,7 @@ H5L_iterate_cb
     jclass      cls;
     jvalue      args[5];
     void       *op_data = (void *)wrapper->op_data;
-    jint        status;
+    jint        status = -1;
 
     if (JVMPTR->AttachCurrentThread(JVMPAR, (void **)&cbenv, NULL) < 0) {
         CHECK_JNI_EXCEPTION(CBENVONLY, JNI_TRUE);

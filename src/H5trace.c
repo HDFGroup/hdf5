@@ -2714,6 +2714,9 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                                 case H5VL_FILE_GET_INTENT:
                                     HDfprintf(out, "H5VL_FILE_GET_INTENT");
                                     break;
+                                case H5VL_FILE_GET_FILENO:
+                                    HDfprintf(out, "H5VL_FILE_GET_FILENO");
+                                    break;
                                 case H5VL_FILE_GET_NAME:
                                     HDfprintf(out, "H5VL_FILE_GET_NAME");
                                     break;
@@ -2754,6 +2757,9 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                                     break;
                                 case H5VL_FILE_IS_ACCESSIBLE:
                                     HDfprintf(out, "H5VL_FILE_IS_ACCESSIBLE");
+                                    break;
+                                case H5VL_FILE_DELETE:
+                                    HDfprintf(out, "H5VL_FILE_DELETE");
                                     break;
                                 default:
                                     HDfprintf(out, "%ld", (long)specific);

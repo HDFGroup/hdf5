@@ -569,4 +569,68 @@ if (BUILD_SHARED_LIBS)
   add_dependencies (fflush2-shared ${HDF5_F90_TEST_LIBSH_TARGET})
 endif ()
 
+#-- Adding test for vol_connector
+add_executable (vol_connector 
+      vol_connector.F90)
+
+target_include_directories (vol_connector
+    PRIVATE
+        ${CMAKE_Fortran_MODULE_DIRECTORY}/static
+)
+target_compile_options(vol_connector
+    PRIVATE
+        $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_COMPILE_FLAGS}>
+)
+target_link_libraries (vol_connector
+    PRIVATE
+        ${HDF5_F90_LIB_TARGET} ${HDF5_F90_TEST_LIB_TARGET} ${HDF5_LIB_TARGET} $<$<PLATFORM_ID:Windows>:ws2_32.lib>
+)
+#set_property(TARGET vol_connector APPEND PROPERTY
+#    LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">
+#)
+#set_property(TARGET vol_connector APPEND PROPERTY
+#    LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
+#)
+if(MSVC)
+  set_property(TARGET vol_connector PROPERTY LINK_FLAGS "/SUBSYSTEM:CONSOLE ${WIN_LINK_FLAGS}")
+endif()
+set_target_properties (vol_connector PROPERTIES
+    LINKER_LANGUAGE Fortran
+    FOLDER test/fortran
+    Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/static
+)
+add_dependencies (vol_connector ${HDF5_F90_TEST_LIB_TARGET})
+
+if (BUILD_SHARED_LIBS)
+  add_executable (vol_connector-shared
+      vol_connector.F90)
+  target_include_directories (vol_connector-shared
+      PRIVATE
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/shared
+  )
+  target_compile_options(vol_connector-shared
+      PRIVATE
+          $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_COMPILE_FLAGS}>
+  )
+  target_link_libraries (vol_connector-shared
+      PRIVATE
+          ${HDF5_F90_LIBSH_TARGET} ${HDF5_F90_TEST_LIBSH_TARGET} ${HDF5_LIBSH_TARGET} $<$<PLATFORM_ID:Windows>:ws2_32.lib>
+  )
+#  set_property(TARGET vol_connector-shared APPEND PROPERTY
+#      LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">
+#  )
+#  set_property(TARGET vol_connector-shared APPEND PROPERTY
+#      LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
+#  )
+  if(MSVC)
+    set_property(TARGET vol_connector-shared  PROPERTY LINK_FLAGS "/SUBSYSTEM:CONSOLE ${WIN_LINK_FLAGS}")
+  endif()
+  set_target_properties (vol_connector-shared PROPERTIES
+      LINKER_LANGUAGE Fortran
+      FOLDER test/fortran
+      Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/shared
+  )
+  add_dependencies (vol_connector-shared ${HDF5_F90_TEST_LIBSH_TARGET})
+endif ()
+
 include (CMakeTests.cmake)

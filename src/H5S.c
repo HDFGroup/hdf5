@@ -448,10 +448,14 @@ H5S_close(H5S_t *ds)
     if(H5S__extent_release(&ds->extent) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release dataspace extent")
 
-    /* Release the main structure */
-    ds = H5FL_FREE(H5S_t, ds);
-
 done:
+    /* Release the main structure.
+     * Always do this to ensure that we don't leak memory when calling this
+     * function on partially constructed dataspaces (which will fail one or
+     * both of the above calls)
+     */
+    H5FL_FREE(H5S_t, ds);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S_close() */
 

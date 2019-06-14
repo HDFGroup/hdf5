@@ -40,19 +40,6 @@ DISTCLEANFILES=h5cc
 # All programs rely on hdf5 library and h5tools library
 LDADD=$(LIBH5TOOLS) $(LIBHDF5)
 
-# h5cc needs custom install and uninstall rules, since it may be
-# named h5pcc if hdf5 is being built in parallel mode.
-if BUILD_PARALLEL_CONDITIONAL
-  H5CC_NAME=h5pcc
-else
-  H5CC_NAME=h5cc
-endif
-
-install-exec-local:
-	@$(INSTALL) h5cc $(DESTDIR)$(bindir)/$(H5CC_NAME)
-uninstall-local:
-	@$(RM) $(DESTDIR)$(bindir)/$(H5CC_NAME)
-
 # How to build h5redeploy script
 h5redeploy: h5redeploy.in
 	@cp $(srcdir)/$@.in $@

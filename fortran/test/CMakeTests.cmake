@@ -130,6 +130,26 @@ set_tests_properties (FORTRAN_fflush1 PROPERTIES DEPENDS FORTRAN_testhdf5-clear-
 add_test (NAME FORTRAN_fflush2 COMMAND $<TARGET_FILE:fflush2>)
 set_tests_properties (FORTRAN_fflush2 PROPERTIES DEPENDS FORTRAN_fflush1)
 
+#-- Adding test for vol_connector
+if (HDF5_ENABLE_USING_MEMCHECKER)
+  add_test (NAME FORTRAN_vol_connector COMMAND $<TARGET_FILE:vol_connector>)
+else ()
+  add_test (NAME FORTRAN_vol_connector COMMAND "${CMAKE_COMMAND}"
+      -D "TEST_PROGRAM=$<TARGET_FILE:vol_connector>"
+      -D "TEST_ARGS:STRING="
+      -D "TEST_EXPECT=0"
+      -D "TEST_SKIP_COMPARE=TRUE"
+      -D "TEST_REGEX= 0 error.s."
+      -D "TEST_MATCH= 0 error(s)"
+      -D "TEST_OUTPUT=vol_connector.txt"
+      #-D "TEST_REFERENCE=vol_connector.out"
+      -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
+      -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+  )
+endif ()
+#  set_tests_properties (FORTRAN_vol_connector PROPERTIES PASS_REGULAR_EXPRESSION "[ ]*0 error.s")
+  set_tests_properties (FORTRAN_vol_connector PROPERTIES DEPENDS FORTRAN_testhdf5-clear-objects)
+
 if (BUILD_SHARED_LIBS)
   add_test (
     NAME FORTRAN_testhdf5-shared-clear-objects
@@ -211,6 +231,7 @@ if (BUILD_SHARED_LIBS)
   endif ()
 #  set_tests_properties (FORTRAN_testhdf5_fortran_1_8-shared PROPERTIES PASS_REGULAR_EXPRESSION "[ ]*0 error.s")
   set_tests_properties (FORTRAN_testhdf5_fortran_1_8-shared PROPERTIES DEPENDS FORTRAN_testhdf5_fortran_1_8)
+  
 
   #-- Adding test for fortranlib_test_F03
   if (HDF5_ENABLE_USING_MEMCHECKER)
@@ -232,6 +253,26 @@ if (BUILD_SHARED_LIBS)
 #    set_tests_properties (FORTRAN_fortranlib_test_F03-shared PROPERTIES PASS_REGULAR_EXPRESSION "[ ]*0 error.s")
   set_tests_properties (FORTRAN_fortranlib_test_F03-shared PROPERTIES DEPENDS FORTRAN_fortranlib_test_F03)
 
+  #-- Adding test for vol_connector
+  if (HDF5_ENABLE_USING_MEMCHECKER)
+    add_test (NAME FORTRAN_vol_connector-shared COMMAND $<TARGET_FILE:vol_connector-shared>)
+  else ()
+    add_test (NAME FORTRAN_vol_connector-shared COMMAND "${CMAKE_COMMAND}"
+        -D "TEST_PROGRAM=$<TARGET_FILE:vol_connector-shared>"
+        -D "TEST_ARGS:STRING="
+        -D "TEST_EXPECT=0"
+        -D "TEST_SKIP_COMPARE=TRUE"
+        -D "TEST_REGEX= 0 error.s."
+        -D "TEST_MATCH= 0 error(s)"
+        -D "TEST_OUTPUT=vol_connector.txt"
+        #-D "TEST_REFERENCE=vol_connector.out"
+        -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/fshared"
+        -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+    )
+  endif ()
+#    set_tests_properties (FORTRAN_vol_connector-shared PROPERTIES PASS_REGULAR_EXPRESSION "[ ]*0 error.s")
+  set_tests_properties (FORTRAN_vol_connector-shared PROPERTIES DEPENDS FORTRAN_vol_connector)
+
   #-- Adding test for fflush1
   add_test (NAME FORTRAN_fflush1-shared COMMAND $<TARGET_FILE:fflush1-shared>)
   set_tests_properties (FORTRAN_fflush1-shared PROPERTIES DEPENDS FORTRAN_fflush2)
@@ -239,4 +280,5 @@ if (BUILD_SHARED_LIBS)
   #-- Adding test for fflush2
   add_test (NAME FORTRAN_fflush2-shared COMMAND $<TARGET_FILE:fflush2-shared>)
   set_tests_properties (FORTRAN_fflush2-shared PROPERTIES DEPENDS FORTRAN_fflush1-shared)
+
 endif ()

@@ -242,6 +242,7 @@
 ./fortran/src/H5Sff.F90
 ./fortran/src/H5Tf.c
 ./fortran/src/H5Tff.F90
+./fortran/src/H5VLff.F90
 ./fortran/src/H5Zf.c
 ./fortran/src/H5Zff.F90
 ./fortran/src/H5config_f.inc.cmake
@@ -261,8 +262,8 @@
 ./fortran/src/h5fc.in
 ./fortran/src/hdf5_fortrandll.def.in
 
-
 ./fortran/test/Makefile.am
+./fortran/test/vol_connector.F90
 ./fortran/test/fflush1.F90
 ./fortran/test/fflush2.F90
 ./fortran/test/fortranlib_test.F90
@@ -936,6 +937,7 @@
 ./src/H5Ztrans.c
 ./src/Makefile.am
 ./src/hdf5.h
+./src/h5cc.in
 ./src/libhdf5.settings.in
 ./src/H5win32defs.h
 
@@ -1540,7 +1542,6 @@
 ./tools/lib/io_timer.h
 
 ./tools/src/misc/Makefile.am
-./tools/src/misc/h5cc.in
 ./tools/src/misc/h5clear.c
 ./tools/src/misc/h5debug.c
 ./tools/src/misc/h5mkgrp.c

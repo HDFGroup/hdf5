@@ -1092,48 +1092,55 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5A__free
+ * Function:    H5A__shared_free
  *
- * Purpose:     Frees all memory associated with an attribute, but does not
- *              free the H5A_t structure (which should be done in H5T_close).
+ * Purpose:     Cleans up the shared attribute data. This will free
+ *              the attribute's shared structure as well.
+ *
+ *              attr and attr->shared must not be NULL
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Monday, November 15, 2004
+ * Programmer:  Quincey Koziol
+ *              Monday, November 15, 2004
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5A__free(H5A_t *attr)
+H5A__shared_free(H5A_t *attr)
 {
     herr_t ret_value = SUCCEED;           /* Return value */
 
     FUNC_ENTER_PACKAGE
 
     HDassert(attr);
+    HDassert(attr->shared);
 
-    /* Free dynamically allocated items */
+    /* Free dynamically allocated items.
+     * When possible, keep trying to shut things down (via HDONE_ERROR).
+     */
     if(attr->shared->name) {
         H5MM_xfree(attr->shared->name);
         attr->shared->name = NULL;
     }
     if(attr->shared->dt) {
         if(H5T_close_real(attr->shared->dt) < 0)
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't release datatype info")
+            HDONE_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't release datatype info")
         attr->shared->dt = NULL;
     }
     if(attr->shared->ds) {
         if(H5S_close(attr->shared->ds) < 0)
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't release dataspace info")
+            HDONE_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't release dataspace info")
         attr->shared->ds = NULL;
     }
     if(attr->shared->data)
         attr->shared->data = H5FL_BLK_FREE(attr_buf, attr->shared->data);
 
-done:
+    /* Destroy shared attribute struct */
+    attr->shared = H5FL_FREE(H5A_shared_t, attr->shared);
+
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5A__free() */
+} /* end H5A__shared_free() */
 
 
 /*-------------------------------------------------------------------------
@@ -1197,11 +1204,9 @@ H5A__close(H5A_t *attr)
     /* Reference count can be 0.  It only happens when H5A__create fails. */
     if(attr->shared->nrefs <= 1) {
         /* Free dynamically allocated items */
-        if(H5A__free(attr) < 0)
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't release attribute info")
-
-        /* Destroy shared attribute struct */
-        attr->shared = H5FL_FREE(H5A_shared_t, attr->shared);
+        if(attr->shared)
+            if(H5A__shared_free(attr) < 0)
+                HGOTO_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't release attribute info")
     } /* end if */
     else {
         /* There are other references to the shared part of the attribute.
@@ -2396,9 +2401,13 @@ H5A__attr_post_copy_file(const H5O_loc_t *src_oloc, const H5A_t *attr_src,
         /* Check for expanding references */
         if(cpy_info->expand_ref) {
             size_t ref_count;
+            size_t dst_dt_size;         /* Destination datatype size */
 
+            /* Determine size of the destination datatype */
+            if(0 == (dst_dt_size = H5T_get_size(attr_dst->shared->dt)))
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to determine datatype size")
             /* Determine # of reference elements to copy */
-            ref_count = attr_dst->shared->data_size / H5T_get_size(attr_dst->shared->dt);
+            ref_count = attr_dst->shared->data_size / dst_dt_size;
 
             /* Copy objects referenced in source buffer to destination file and set destination elements */
             if(H5O_copy_expand_ref(file_src, attr_dst->shared->data, file_dst, attr_dst->shared->data, ref_count, H5T_get_ref_type(attr_dst->shared->dt), cpy_info) < 0)

@@ -3453,7 +3453,7 @@ done:
  */
 JNIEXPORT void JNICALL
 Java_hdf_hdf5lib_H5_H5export_1dataset
-    (JNIEnv *env, jclass cls, jstring file_export_name, jstring file_name, jstring object_path, jint binary_order)
+    (JNIEnv *env, jclass clss, jstring file_export_name, jstring file_name, jstring object_path, jint binary_order)
 {
     const char *file_export = NULL;
     const char *object_name = NULL;
@@ -3462,9 +3462,9 @@ Java_hdf_hdf5lib_H5_H5export_1dataset
     herr_t      ret_val = FAIL;
     hid_t       file_id = H5I_INVALID_HID;
     hid_t       dataset_id = H5I_INVALID_HID;
-    FILE       *stream;
+    FILE       *stream = NULL;
 
-    UNUSED(cls);
+    UNUSED(clss);
 
     if (NULL == file_export_name)
         H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5export_dataset: file_export_name is NULL");

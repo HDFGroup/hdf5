@@ -196,7 +196,7 @@ H5_DLL H5A_t *H5A__copy(H5A_t *new_attr, const H5A_t *old_attr);
 H5_DLL hid_t H5A__get_type(H5A_t *attr);
 H5_DLL herr_t H5A__get_info(const H5A_t *attr, H5A_info_t *ainfo);
 H5_DLL hid_t H5A__get_create_plist(H5A_t* attr);
-H5_DLL herr_t H5A__free(H5A_t *attr);
+H5_DLL herr_t H5A__shared_free(H5A_t *attr);
 H5_DLL herr_t H5A__close(H5A_t *attr);
 H5_DLL herr_t H5A__close_cb(H5VL_object_t *attr_vol_obj);
 H5_DLL htri_t H5A__get_ainfo(H5F_t *f, H5O_t *oh, H5O_ainfo_t *ainfo);
