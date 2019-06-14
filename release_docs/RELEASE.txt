@@ -256,16 +256,18 @@ Bug Fixes since HDF5-1.10.3 release
 
     Library
     -------
-    - H5Ocopy a dataset in a 1.8 library file created with the latest format
+    - Fixed an issue where copying a version 1.8 dataset between files using
+      H5Ocopy fails due to an incompatible fill version
 
-      When H5Ocopy the dataset in the 1.8 library file to a 1.10 library file 
-      created with (v18, v18) version bounds, the library fails with error stack 
-      indicating that the fill value message version is out of bounds.
+      When using the HDF5 1.10.x H5Ocopy() API call to copy a version 1.8
+      dataset to a file created with both high and low library bounds set to
+      H5F_LIBVER_V18, the H5Ocopy() call will fail with the error stack indicating
+      that the fill value version is out of bounds.
 
-      The value for the H5F_LIBVER_V18 index in H5O_fill_ver_bounds[], the format 
-      version bounds array for fill value message, should be version 3 not 2.
+      This was fixed by changing the fill value message version to H5O_FILL_VERSION_3 
+      (from H5O_FILL_VERSION_2) for H5F_LIBVER_V18.
 
-      (VC - 2019/6/11, HDFFV-10800)
+      (VC - 2019/6/14, HDFFV-10800)
 
     - Fixed a bug that would cause an error or cause fill values to be
       incorrectly read from a chunked dataset using the "single chunk" index if
