@@ -85,8 +85,8 @@ else
    TOOLS_DIR=
 endif
 
-SUBDIRS = src $(TESTSERIAL_DIR) $(TESTPARALLEL_DIR) $(TOOLS_DIR) . $(CXX_DIR) \
-          $(FORTRAN_DIR) $(JAVA_DIR) $(HDF5_HL_DIR)
+SUBDIRS = src $(TESTSERIAL_DIR) $(TESTPARALLEL_DIR) bin $(TOOLS_DIR) . \
+          $(CXX_DIR) $(FORTRAN_DIR) $(JAVA_DIR) $(HDF5_HL_DIR)
 DIST_SUBDIRS = src test testpar tools . c++ fortran hl examples java
 
 # Some files generated during configure that should be cleaned
