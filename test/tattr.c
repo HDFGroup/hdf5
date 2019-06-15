@@ -581,107 +581,118 @@ test_attr_flush(hid_t fapl)
 static void
 test_attr_plist(hid_t fapl)
 {
-    hid_t        fid1;           /* HDF5 File IDs        */
-    hid_t        dataset;        /* Dataset ID            */
-    hid_t        sid1,sid2;      /* Dataspace ID            */
-    hid_t        attr;           /* Attribute ID        */
-    hid_t        plist;          /* Property list ID             */
-    hsize_t      dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
-    hsize_t      dims2[] = {ATTR1_DIM1};
-    H5T_cset_t   cset;           /* Character set for attributes */
-    herr_t       ret;            /* Generic return value        */
+    hid_t       fid = H5I_INVALID_HID;          /* File ID */
+    hid_t       did = H5I_INVALID_HID;          /* Dataset ID */
+    hid_t       dsid = H5I_INVALID_HID;         /* Dataspace ID (for dataset) */
+    hid_t       asid = H5I_INVALID_HID;         /* Dataspace ID (for attribute) */
+    hid_t       aid = H5I_INVALID_HID;          /* Attribute ID */
+    hid_t       acpl_id = H5I_INVALID_HID;      /* Attribute creation property list ID */
+    hid_t       aapl_id = H5I_INVALID_HID;      /* Attribute access property list ID */
+    hsize_t     dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
+    hsize_t     dims2[] = {ATTR1_DIM1};
+    H5T_cset_t  cset;                           /* Character set for attributes */
+    herr_t      ret;                            /* Generic return value */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Attribute Property Lists\n"));
 
     /* Create file */
-    fid1 = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
-    CHECK(fid1, FAIL, "H5Fcreate");
+    fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+    CHECK(fid, H5I_INVALID_HID, "H5Fcreate");
 
     /* Create dataspace for dataset */
-    sid1 = H5Screate_simple(SPACE1_RANK, dims1, NULL);
-    CHECK(sid1, FAIL, "H5Screate_simple");
+    dsid = H5Screate_simple(SPACE1_RANK, dims1, NULL);
+    CHECK(dsid, H5I_INVALID_HID, "H5Screate_simple");
 
     /* Create a dataset */
-    dataset = H5Dcreate2(fid1, DSET1_NAME, H5T_NATIVE_UCHAR, sid1, H5P_DEFAULT, dcpl_g, H5P_DEFAULT);
-    CHECK(dataset, FAIL, "H5Dcreate2");
+    did = H5Dcreate2(fid, DSET1_NAME, H5T_NATIVE_UCHAR, dsid, H5P_DEFAULT, dcpl_g, H5P_DEFAULT);
+    CHECK(did, H5I_INVALID_HID, "H5Dcreate2");
 
     /* Create dataspace for attribute */
-    sid2 = H5Screate_simple(ATTR1_RANK, dims2, NULL);
-    CHECK(sid2, FAIL, "H5Screate_simple");
+    asid = H5Screate_simple(ATTR1_RANK, dims2, NULL);
+    CHECK(asid, H5I_INVALID_HID, "H5Screate_simple");
 
-    /* Create default property list for attribute */
-    plist = H5Pcreate(H5P_ATTRIBUTE_CREATE);
-    CHECK(plist, FAIL, "H5Pcreate");
+    /* Create default creation property list for attribute */
+    acpl_id = H5Pcreate(H5P_ATTRIBUTE_CREATE);
+    CHECK(acpl_id, H5I_INVALID_HID, "H5Pcreate");
+
+    /* Create default access property list for attribute
+     * This currently has no properties, but we need to test its creation
+     * and use.
+     */
+    aapl_id = H5Pcreate(H5P_ATTRIBUTE_ACCESS);
+    CHECK(aapl_id, H5I_INVALID_HID, "H5Pcreate");
 
     /* Get the character encoding and ensure that it is the default (ASCII) */
-    ret = H5Pget_char_encoding(plist, &cset);
+    ret = H5Pget_char_encoding(acpl_id, &cset);
     CHECK(ret, FAIL, "H5Pget_char_encoding");
     VERIFY(cset, H5T_CSET_ASCII, "H5Pget_char_encoding");
 
     /* Create an attribute for the dataset using the property list */
-    attr = H5Acreate2(dataset, ATTR1_NAME, H5T_NATIVE_INT, sid2, plist, H5P_DEFAULT);
-    CHECK(attr, FAIL, "H5Acreate2");
+    aid = H5Acreate2(did, ATTR1_NAME, H5T_NATIVE_INT, asid, acpl_id, aapl_id);
+    CHECK(aid, H5I_INVALID_HID, "H5Acreate2");
 
-    /* Close the property list, and get the attribute's property list */
-    ret = H5Pclose(plist);
+    /* Close the property list, and get the attribute's creation property list */
+    ret = H5Pclose(acpl_id);
     CHECK(ret, FAIL, "H5Pclose");
-    plist = H5Aget_create_plist(attr);
-    CHECK(plist, FAIL, "H5Aget_create_plist");
+    acpl_id = H5Aget_create_plist(aid);
+    CHECK(acpl_id, H5I_INVALID_HID, "H5Aget_create_plist");
 
     /* Get the character encoding and ensure that it is the default (ASCII) */
-    ret = H5Pget_char_encoding(plist, &cset);
+    ret = H5Pget_char_encoding(acpl_id, &cset);
     CHECK(ret, FAIL, "H5Pget_char_encoding");
     VERIFY(cset, H5T_CSET_ASCII, "H5Pget_char_encoding");
 
     /* Close the property list and attribute */
-    ret = H5Pclose(plist);
+    ret = H5Pclose(acpl_id);
     CHECK(ret, FAIL, "H5Pclose");
-    ret = H5Aclose(attr);
+    ret = H5Aclose(aid);
     CHECK(ret, FAIL, "H5Aclose");
 
     /* Create a new property list and modify it to use a different encoding */
-    plist = H5Pcreate(H5P_ATTRIBUTE_CREATE);
-    CHECK(plist, FAIL, "H5Pcreate");
-    ret = H5Pset_char_encoding(plist, H5T_CSET_UTF8);
+    acpl_id = H5Pcreate(H5P_ATTRIBUTE_CREATE);
+    CHECK(acpl_id, H5I_INVALID_HID, "H5Pcreate");
+    ret = H5Pset_char_encoding(acpl_id, H5T_CSET_UTF8);
     CHECK(ret, FAIL, "H5Pset_char_encoding");
 
     /* Get the character encoding and ensure that it has been changed */
-    ret = H5Pget_char_encoding(plist, &cset);
+    ret = H5Pget_char_encoding(acpl_id, &cset);
     CHECK(ret, FAIL, "H5Pget_char_encoding");
     VERIFY(cset, H5T_CSET_UTF8, "H5Pget_char_encoding");
 
     /* Create an attribute for the dataset using the modified property list */
-    attr = H5Acreate2(dataset, ATTR2_NAME, H5T_NATIVE_INT, sid2, plist, H5P_DEFAULT);
-    CHECK(attr, FAIL, "H5Acreate2");
+    aid = H5Acreate2(did, ATTR2_NAME, H5T_NATIVE_INT, asid, acpl_id, aapl_id);
+    CHECK(aid, H5I_INVALID_HID, "H5Acreate2");
 
     /* Close the property list and attribute */
-    ret = H5Pclose(plist);
+    ret = H5Pclose(acpl_id);
     CHECK(ret, FAIL, "H5Pclose");
-    ret = H5Aclose(attr);
+    ret = H5Aclose(aid);
     CHECK(ret, FAIL, "H5Aclose");
 
     /* Re-open the second attribute and ensure that its character encoding is correct */
-    attr = H5Aopen(dataset, ATTR2_NAME, H5P_DEFAULT);
-    CHECK(attr, FAIL, "H5Aopen");
-    plist = H5Aget_create_plist(attr);
-    CHECK(plist, FAIL, "H5Aget_create_plist");
-    ret = H5Pget_char_encoding(plist, &cset);
+    aid = H5Aopen(did, ATTR2_NAME, H5P_DEFAULT);
+    CHECK(aid, H5I_INVALID_HID, "H5Aopen");
+    acpl_id = H5Aget_create_plist(aid);
+    CHECK(acpl_id, H5I_INVALID_HID, "H5Aget_create_plist");
+    ret = H5Pget_char_encoding(acpl_id, &cset);
     CHECK(ret, FAIL, "H5Pget_char_encoding");
     VERIFY(cset, H5T_CSET_UTF8, "H5Pget_char_encoding");
 
     /* Close everything */
-    ret=H5Sclose(sid1);
+    ret = H5Sclose(dsid);
     CHECK(ret, FAIL, "H5Sclose");
-    ret=H5Sclose(sid2);
+    ret = H5Sclose(asid);
     CHECK(ret, FAIL, "H5Sclose");
-    ret = H5Pclose(plist);
+    ret = H5Pclose(aapl_id);
     CHECK(ret, FAIL, "H5Pclose");
-    ret=H5Aclose(attr);
+    ret = H5Pclose(acpl_id);
+    CHECK(ret, FAIL, "H5Pclose");
+    ret = H5Aclose(aid);
     CHECK(ret, FAIL, "H5Aclose");
-    ret=H5Dclose(dataset);
+    ret = H5Dclose(did);
     CHECK(ret, FAIL, "H5Dclose");
-    ret=H5Fclose(fid1);
+    ret = H5Fclose(fid);
     CHECK(ret, FAIL, "H5Fclose");
 }  /* test_attr_plist() */
 
