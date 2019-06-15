@@ -29,13 +29,17 @@
 
 
 /* Header files needed */
-/* (Public HDF5 and standard C / POSIX only) */
+/* Do NOT include private HDF5 files here! */
 #include <assert.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+/* Public HDF5 file */
 #include "hdf5.h"
+
+/* This connector's header */
 #include "H5VLpassthru.h"
 
 

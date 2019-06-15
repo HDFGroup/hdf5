@@ -640,6 +640,8 @@ set (H5VL_SOURCES
     ${HDF5_SRC_DIR}/H5VLpassthru.c
 )
 set (H5VL_HDRS
+    ${HDF5_SRC_DIR}/H5VLconnector.h
+    ${HDF5_SRC_DIR}/H5VLconnector_passthru.h
     ${HDF5_SRC_DIR}/H5VLnative.h
     ${HDF5_SRC_DIR}/H5VLpassthru.h
     ${HDF5_SRC_DIR}/H5VLpublic.h
