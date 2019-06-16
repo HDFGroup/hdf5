@@ -144,12 +144,23 @@ H5_DLL herr_t H5Sget_select_elem_pointlist(hid_t spaceid, hsize_t startpoint,
 H5_DLL herr_t H5Sselect_hyperslab(hid_t space_id, H5S_seloper_t op,
     const hsize_t start[], const hsize_t _stride[], const hsize_t count[],
     const hsize_t _block[]);
+H5_DLL hid_t H5Scombine_hyperslab(hid_t space_id, H5S_seloper_t op,
+    const hsize_t start[], const hsize_t _stride[], const hsize_t count[],
+    const hsize_t _block[]);
+H5_DLL herr_t H5Smodify_select(hid_t space1_id, H5S_seloper_t op, hid_t space2_id);
+H5_DLL hid_t H5Scombine_select(hid_t space1_id, H5S_seloper_t op, hid_t space2_id);
 H5_DLL htri_t H5Sis_regular_hyperslab(hid_t spaceid);
 H5_DLL htri_t H5Sget_regular_hyperslab(hid_t spaceid, hsize_t start[],
     hsize_t stride[], hsize_t count[], hsize_t block[]);
 H5_DLL hssize_t H5Sget_select_hyper_nblocks(hid_t spaceid);
 H5_DLL herr_t H5Sget_select_hyper_blocklist(hid_t spaceid, hsize_t startblock,
     hsize_t numblocks, hsize_t buf[/*numblocks*/]);
+
+/* Operations on dataspace selection iterators */
+H5_DLL hid_t H5Ssel_iter_create(hid_t spaceid, size_t elmt_size, unsigned flags);
+H5_DLL herr_t H5Ssel_iter_get_seq_list(hid_t sel_iter_id, size_t maxseq,
+    size_t maxbytes, size_t *nseq, size_t *nbytes, hsize_t *off, size_t *len);
+H5_DLL herr_t H5Ssel_iter_close(hid_t sel_iter_id);
 
 /* Symbols defined for compatibility with previous versions of the HDF5 API.
  *

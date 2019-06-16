@@ -1387,6 +1387,10 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                                 HDfprintf(out, "%ld (err stack)", (long)obj);
                                 break;
 
+                            case H5I_SPACE_SEL_ITER:
+                                HDfprintf(out, "%ld (dataspace selection iterator)", (long)obj);
+                                break;
+
                             case H5I_NTYPES:
                                 HDfprintf (out, "%ld (ntypes - error)", (long)obj);
                                 break;
@@ -1566,6 +1570,10 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
 
                                 case H5I_ERROR_STACK:
                                     HDfprintf(out, "H5I_ERROR_STACK");
+                                    break;
+
+                                case H5I_SPACE_SEL_ITER:
+                                    HDfprintf(out, "H5I_SPACE_SEL_ITER");
                                     break;
 
                                 case H5I_NTYPES:
