@@ -1931,7 +1931,7 @@ test_file_delete(hid_t fapl_id)
     H5E_BEGIN_TRY {
         is_hdf5 = H5Fis_accessible(filename, fapl_id);
     } H5E_END_TRY;
-    VERIFY(is_hdf5, SUCCEED, "H5Fis_accessible");
+    CHECK(is_hdf5, TRUE, "H5Fis_accessible");
 
     /* Try to delete it (should fail) */
     H5E_BEGIN_TRY {
