@@ -158,6 +158,7 @@ set (HDF5_REFERENCE_TEST_FILES
     filespace_1_6.h5
     filespace_1_8.h5
     fill_old.h5
+    fill18.h5
     filter_error.h5
     fsm_aggr_nopersist.h5
     fsm_aggr_persist.h5
