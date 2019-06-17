@@ -188,10 +188,17 @@ H5S__point_iter_init(const H5S_t *space, H5S_sel_iter_t *iter)
     HDassert(space && H5S_SEL_POINTS == H5S_GET_SELECT_TYPE(space));
     HDassert(iter);
 
-    /* If this iterator is created from an API call, we must clone the
+    /* If this iterator is created from an API call, by default we clone the
      *  selection now, as the dataspace could be modified or go out of scope.
+     *  
+     *  However, if the H5S_SEL_ITER_SHARE_WITH_DATASPACE flag is given,
+     *  the selection is shared between the selection iterator and the
+     *  dataspace.  In this case, the application _must_not_ modify or
+     *  close the dataspace that the iterator is operating on, or undefined
+     *  behavior will occur.
      */
-    if(iter->flags & H5S_SEL_ITER_API_CALL) {
+    if((iter->flags & H5S_SEL_ITER_API_CALL) && 
+            !(iter->flags & H5S_SEL_ITER_SHARE_WITH_DATASPACE)) {
         /* Copy the point list */
         if(NULL == (iter->u.pnt.pnt_lst = H5S__copy_pnt_list(space->select.sel_info.pnt_lst, space->extent.rank)))
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "can't copy point list")
@@ -556,8 +563,9 @@ H5S__point_iter_release(H5S_sel_iter_t * iter)
     /* Check args */
     HDassert(iter);
 
-    /* If this iterator is created from an API call, we must free the point list */
-    if(iter->flags & H5S_SEL_ITER_API_CALL)
+    /* If this iterator copied the point list, we must free it */
+    if((iter->flags & H5S_SEL_ITER_API_CALL) && 
+            !(iter->flags & H5S_SEL_ITER_SHARE_WITH_DATASPACE))
         H5S__free_pnt_list(iter->u.pnt.pnt_lst);
 
     FUNC_LEAVE_NOAPI(SUCCEED)

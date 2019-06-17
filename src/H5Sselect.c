@@ -41,7 +41,8 @@
 /****************/
 
 /* All the valid public flags to H5Ssel_iter_create() */
-#define H5S_SEL_ITER_ALL_PUBLIC_FLAGS (H5S_SEL_ITER_GET_SEQ_LIST_SORTED)
+#define H5S_SEL_ITER_ALL_PUBLIC_FLAGS (H5S_SEL_ITER_GET_SEQ_LIST_SORTED | \
+                H5S_SEL_ITER_SHARE_WITH_DATASPACE)
 
 
 /******************/

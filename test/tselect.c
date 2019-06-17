@@ -14936,7 +14936,8 @@ test_sel_iter(void)
     hsize_t     off[SEL_ITER_MAX_SEQ];  /* Offsets for retrieved sequences */
     size_t      len[SEL_ITER_MAX_SEQ];  /* Lengths for retrieved sequences */
     H5S_sel_type sel_type;      /* Selection type */
-    unsigned    u;              /* Local index variable */
+    unsigned    sel_share;      /* Whether to share selection with dataspace */
+    unsigned    sel_iter_flags; /* Flags for selection iterator creation */
     herr_t	ret;		/* Generic return value	*/
 
     /* Output message about test being performed */
@@ -14945,6 +14946,7 @@ test_sel_iter(void)
     /* Create dataspace */
     sid = H5Screate_simple(2, dims1, NULL);
     CHECK(sid, FAIL, "H5Screate_simple");
+
 
     /* Try creating selection iterator object with bad parameters */
     H5E_BEGIN_TRY {     /* Bad dataspace ID */
@@ -14971,208 +14973,217 @@ test_sel_iter(void)
     VERIFY(ret, FAIL, "H5Ssel_iter_close");
 
 
-    /* Create selection iterator object */
-    iter_id = H5Ssel_iter_create(sid, (size_t)1, (unsigned)0);
-    CHECK(iter_id, FAIL, "H5Ssel_iter_create");
-
-    /* Close selection iterator */
-    ret = H5Ssel_iter_close(iter_id);
-    CHECK(ret, FAIL, "H5Ssel_iter_close");
-
-    /* Try closing selection iterator twice */
-    H5E_BEGIN_TRY {     /* Invalid ID */
-        ret = H5Ssel_iter_close(iter_id);
-    } H5E_END_TRY;
-    VERIFY(ret, FAIL, "H5Ssel_iter_close");
-
-
-    /* Create selection iterator object */
-    iter_id = H5Ssel_iter_create(sid, (size_t)1, (unsigned)0);
-    CHECK(iter_id, FAIL, "H5Ssel_iter_create");
-
-    /* Try retrieving sequences, with bad parameters */
-    H5E_BEGIN_TRY {     /* Invalid ID */
-        ret = H5Ssel_iter_get_seq_list(H5I_INVALID_HID, (size_t)1, (size_t)1, &nseq, &nbytes, off, len);
-    } H5E_END_TRY;
-    VERIFY(ret, FAIL, "H5Ssel_iter_get_seq_list");
-    H5E_BEGIN_TRY {     /* Invalid nseq pointer */
-        ret = H5Ssel_iter_get_seq_list(iter_id, (size_t)1, (size_t)1, NULL, &nbytes, off, len);
-    } H5E_END_TRY;
-    VERIFY(ret, FAIL, "H5Ssel_iter_get_seq_list");
-    H5E_BEGIN_TRY {     /* Invalid nbytes pointer */
-        ret = H5Ssel_iter_get_seq_list(iter_id, (size_t)1, (size_t)1, &nseq, NULL, off, len);
-    } H5E_END_TRY;
-    VERIFY(ret, FAIL, "H5Ssel_iter_get_seq_list");
-    H5E_BEGIN_TRY {     /* Invalid offset array */
-        ret = H5Ssel_iter_get_seq_list(iter_id, (size_t)1, (size_t)1, &nseq, &nbytes, NULL, len);
-    } H5E_END_TRY;
-    VERIFY(ret, FAIL, "H5Ssel_iter_get_seq_list");
-    H5E_BEGIN_TRY {     /* Invalid length array */
-        ret = H5Ssel_iter_get_seq_list(iter_id, (size_t)1, (size_t)1, &nseq, &nbytes, off, NULL);
-    } H5E_END_TRY;
-    VERIFY(ret, FAIL, "H5Ssel_iter_get_seq_list");
-
-    /* Close selection iterator */
-    ret = H5Ssel_iter_close(iter_id);
-    CHECK(ret, FAIL, "H5Ssel_iter_close");
-
-
-    /* Test iterators on various basic selection types */
-    for(sel_type = H5S_SEL_NONE; sel_type <= H5S_SEL_ALL; sel_type = (H5S_sel_type)(sel_type + 1)) {
-        switch(sel_type) {
-            case H5S_SEL_NONE:          /* "None" selection */
-                ret = H5Sselect_none(sid);
-                CHECK(ret, FAIL, "H5Sselect_none");
-                break;
-
-            case H5S_SEL_POINTS:        /* Point selection */
-                /* Select sequence of ten points */
-                coord1[0][0] = 0;       coord1[0][1] = 9;
-                coord1[1][0] = 1;       coord1[1][1] = 2;
-                coord1[2][0] = 2;       coord1[2][1] = 4;
-                coord1[3][0] = 0;       coord1[3][1] = 6;
-                coord1[4][0] = 1;       coord1[4][1] = 8;
-                coord1[5][0] = 2;       coord1[5][1] = 10;
-                coord1[6][0] = 0;       coord1[6][1] = 11;
-                coord1[7][0] = 1;       coord1[7][1] = 4;
-                coord1[8][0] = 2;       coord1[8][1] = 1;
-                coord1[9][0] = 0;       coord1[9][1] = 3;
-                ret = H5Sselect_elements(sid, H5S_SELECT_SET, (size_t)POINT1_NPOINTS, (const hsize_t *)coord1);
-                CHECK(ret, FAIL, "H5Sselect_elements");
-                break;
-
-            case H5S_SEL_HYPERSLABS:    /* Hyperslab selection */
-                /* Select regular hyperslab */
-                start[0] = 3;   start[1] = 0;
-                stride[0] = 2;  stride[1] = 2;
-                count[0] = 2;   count[1] = 5;
-                block[0] = 1;   block[1] = 1;
-                ret = H5Sselect_hyperslab(sid, H5S_SELECT_SET, start, stride, count, block);
-                CHECK(ret, FAIL, "H5Sselect_hyperslab");
-                break;
-
-            case H5S_SEL_ALL:           /* "All" selection */
-                ret = H5Sselect_all(sid);
-                CHECK(ret, FAIL, "H5Sselect_all");
-                break;
-
-            case H5S_SEL_ERROR:
-            case H5S_SEL_N:
-            default:
-                HDassert(0 && "Can't occur");
-                break;
-        } /* end switch */
+    /* Try with no selection sharing, and with sharing */
+    for(sel_share = 0; sel_share < 2; sel_share++) {
+        /* Set selection iterator sharing flags */
+        if(sel_share)
+            sel_iter_flags = H5S_SEL_ITER_SHARE_WITH_DATASPACE;
+        else
+            sel_iter_flags = 0;
 
         /* Create selection iterator object */
-        iter_id = H5Ssel_iter_create(sid, (size_t)1, (unsigned)0);
+        iter_id = H5Ssel_iter_create(sid, (size_t)1, (unsigned)sel_iter_flags);
         CHECK(iter_id, FAIL, "H5Ssel_iter_create");
-
-        /* Try retrieving no sequences, with 0 for maxseq & maxbytes */
-        ret = H5Ssel_iter_get_seq_list(iter_id, (size_t)0, (size_t)1, &nseq, &nbytes, off, len);
-        CHECK(ret, FAIL, "H5Ssel_iter_get_seq_list");
-        VERIFY(nseq, 0, "H5Ssel_iter_get_seq_list");
-        VERIFY(nbytes, 0, "H5Ssel_iter_get_seq_list");
-        ret = H5Ssel_iter_get_seq_list(iter_id, (size_t)1, (size_t)0, &nseq, &nbytes, off, len);
-        CHECK(ret, FAIL, "H5Ssel_iter_create");
-        VERIFY(nseq, 0, "H5Ssel_iter_get_seq_list");
-        VERIFY(nbytes, 0, "H5Ssel_iter_get_seq_list");
-
-        /* Try retrieving all sequences */
-        ret = H5Ssel_iter_get_seq_list(iter_id, (size_t)SEL_ITER_MAX_SEQ, (size_t)(1024 * 1024), &nseq, &nbytes, off, len);
-        CHECK(ret, FAIL, "H5Ssel_iter_get_seq_list");
-
-        /* Check results from retrieving sequence list */
-        switch(sel_type) {
-            case H5S_SEL_NONE:          /* "None" selection */
-                VERIFY(nseq, 0, "H5Ssel_iter_get_seq_list");
-                VERIFY(nbytes, 0, "H5Ssel_iter_get_seq_list");
-                break;
-
-            case H5S_SEL_POINTS:        /* Point selection */
-                VERIFY(nseq, 10, "H5Ssel_iter_get_seq_list");
-                VERIFY(nbytes, 10, "H5Ssel_iter_get_seq_list");
-                break;
-
-            case H5S_SEL_HYPERSLABS:    /* Hyperslab selection */
-                VERIFY(nseq, 10, "H5Ssel_iter_get_seq_list");
-                VERIFY(nbytes, 10, "H5Ssel_iter_get_seq_list");
-                break;
-
-            case H5S_SEL_ALL:           /* "All" selection */
-                VERIFY(nseq, 1, "H5Ssel_iter_get_seq_list");
-                VERIFY(nbytes, 72, "H5Ssel_iter_get_seq_list");
-                break;
-
-            case H5S_SEL_ERROR:
-            case H5S_SEL_N:
-            default:
-                HDassert(0 && "Can't occur");
-                break;
-        } /* end switch */
 
         /* Close selection iterator */
         ret = H5Ssel_iter_close(iter_id);
         CHECK(ret, FAIL, "H5Ssel_iter_close");
+
+        /* Try closing selection iterator twice */
+        H5E_BEGIN_TRY {     /* Invalid ID */
+            ret = H5Ssel_iter_close(iter_id);
+        } H5E_END_TRY;
+        VERIFY(ret, FAIL, "H5Ssel_iter_close");
+
+
+        /* Create selection iterator object */
+        iter_id = H5Ssel_iter_create(sid, (size_t)1, (unsigned)sel_iter_flags);
+        CHECK(iter_id, FAIL, "H5Ssel_iter_create");
+
+        /* Try retrieving sequences, with bad parameters */
+        H5E_BEGIN_TRY {     /* Invalid ID */
+            ret = H5Ssel_iter_get_seq_list(H5I_INVALID_HID, (size_t)1, (size_t)1, &nseq, &nbytes, off, len);
+        } H5E_END_TRY;
+        VERIFY(ret, FAIL, "H5Ssel_iter_get_seq_list");
+        H5E_BEGIN_TRY {     /* Invalid nseq pointer */
+            ret = H5Ssel_iter_get_seq_list(iter_id, (size_t)1, (size_t)1, NULL, &nbytes, off, len);
+        } H5E_END_TRY;
+        VERIFY(ret, FAIL, "H5Ssel_iter_get_seq_list");
+        H5E_BEGIN_TRY {     /* Invalid nbytes pointer */
+            ret = H5Ssel_iter_get_seq_list(iter_id, (size_t)1, (size_t)1, &nseq, NULL, off, len);
+        } H5E_END_TRY;
+        VERIFY(ret, FAIL, "H5Ssel_iter_get_seq_list");
+        H5E_BEGIN_TRY {     /* Invalid offset array */
+            ret = H5Ssel_iter_get_seq_list(iter_id, (size_t)1, (size_t)1, &nseq, &nbytes, NULL, len);
+        } H5E_END_TRY;
+        VERIFY(ret, FAIL, "H5Ssel_iter_get_seq_list");
+        H5E_BEGIN_TRY {     /* Invalid length array */
+            ret = H5Ssel_iter_get_seq_list(iter_id, (size_t)1, (size_t)1, &nseq, &nbytes, off, NULL);
+        } H5E_END_TRY;
+        VERIFY(ret, FAIL, "H5Ssel_iter_get_seq_list");
+
+        /* Close selection iterator */
+        ret = H5Ssel_iter_close(iter_id);
+        CHECK(ret, FAIL, "H5Ssel_iter_close");
+
+
+        /* Test iterators on various basic selection types */
+        for(sel_type = H5S_SEL_NONE; sel_type <= H5S_SEL_ALL; sel_type = (H5S_sel_type)(sel_type + 1)) {
+            switch(sel_type) {
+                case H5S_SEL_NONE:          /* "None" selection */
+                    ret = H5Sselect_none(sid);
+                    CHECK(ret, FAIL, "H5Sselect_none");
+                    break;
+
+                case H5S_SEL_POINTS:        /* Point selection */
+                    /* Select sequence of ten points */
+                    coord1[0][0] = 0;       coord1[0][1] = 9;
+                    coord1[1][0] = 1;       coord1[1][1] = 2;
+                    coord1[2][0] = 2;       coord1[2][1] = 4;
+                    coord1[3][0] = 0;       coord1[3][1] = 6;
+                    coord1[4][0] = 1;       coord1[4][1] = 8;
+                    coord1[5][0] = 2;       coord1[5][1] = 10;
+                    coord1[6][0] = 0;       coord1[6][1] = 11;
+                    coord1[7][0] = 1;       coord1[7][1] = 4;
+                    coord1[8][0] = 2;       coord1[8][1] = 1;
+                    coord1[9][0] = 0;       coord1[9][1] = 3;
+                    ret = H5Sselect_elements(sid, H5S_SELECT_SET, (size_t)POINT1_NPOINTS, (const hsize_t *)coord1);
+                    CHECK(ret, FAIL, "H5Sselect_elements");
+                    break;
+
+                case H5S_SEL_HYPERSLABS:    /* Hyperslab selection */
+                    /* Select regular hyperslab */
+                    start[0] = 3;   start[1] = 0;
+                    stride[0] = 2;  stride[1] = 2;
+                    count[0] = 2;   count[1] = 5;
+                    block[0] = 1;   block[1] = 1;
+                    ret = H5Sselect_hyperslab(sid, H5S_SELECT_SET, start, stride, count, block);
+                    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+                    break;
+
+                case H5S_SEL_ALL:           /* "All" selection */
+                    ret = H5Sselect_all(sid);
+                    CHECK(ret, FAIL, "H5Sselect_all");
+                    break;
+
+                case H5S_SEL_ERROR:
+                case H5S_SEL_N:
+                default:
+                    HDassert(0 && "Can't occur");
+                    break;
+            } /* end switch */
+
+            /* Create selection iterator object */
+            iter_id = H5Ssel_iter_create(sid, (size_t)1, (unsigned)sel_iter_flags);
+            CHECK(iter_id, FAIL, "H5Ssel_iter_create");
+
+            /* Try retrieving no sequences, with 0 for maxseq & maxbytes */
+            ret = H5Ssel_iter_get_seq_list(iter_id, (size_t)0, (size_t)1, &nseq, &nbytes, off, len);
+            CHECK(ret, FAIL, "H5Ssel_iter_get_seq_list");
+            VERIFY(nseq, 0, "H5Ssel_iter_get_seq_list");
+            VERIFY(nbytes, 0, "H5Ssel_iter_get_seq_list");
+            ret = H5Ssel_iter_get_seq_list(iter_id, (size_t)1, (size_t)0, &nseq, &nbytes, off, len);
+            CHECK(ret, FAIL, "H5Ssel_iter_get_seq_list");
+            VERIFY(nseq, 0, "H5Ssel_iter_get_seq_list");
+            VERIFY(nbytes, 0, "H5Ssel_iter_get_seq_list");
+
+            /* Try retrieving all sequences */
+            ret = H5Ssel_iter_get_seq_list(iter_id, (size_t)SEL_ITER_MAX_SEQ, (size_t)(1024 * 1024), &nseq, &nbytes, off, len);
+            CHECK(ret, FAIL, "H5Ssel_iter_get_seq_list");
+
+            /* Check results from retrieving sequence list */
+            switch(sel_type) {
+                case H5S_SEL_NONE:          /* "None" selection */
+                    VERIFY(nseq, 0, "H5Ssel_iter_get_seq_list");
+                    VERIFY(nbytes, 0, "H5Ssel_iter_get_seq_list");
+                    break;
+
+                case H5S_SEL_POINTS:        /* Point selection */
+                    VERIFY(nseq, 10, "H5Ssel_iter_get_seq_list");
+                    VERIFY(nbytes, 10, "H5Ssel_iter_get_seq_list");
+                    break;
+
+                case H5S_SEL_HYPERSLABS:    /* Hyperslab selection */
+                    VERIFY(nseq, 10, "H5Ssel_iter_get_seq_list");
+                    VERIFY(nbytes, 10, "H5Ssel_iter_get_seq_list");
+                    break;
+
+                case H5S_SEL_ALL:           /* "All" selection */
+                    VERIFY(nseq, 1, "H5Ssel_iter_get_seq_list");
+                    VERIFY(nbytes, 72, "H5Ssel_iter_get_seq_list");
+                    break;
+
+                case H5S_SEL_ERROR:
+                case H5S_SEL_N:
+                default:
+                    HDassert(0 && "Can't occur");
+                    break;
+            } /* end switch */
+
+            /* Close selection iterator */
+            ret = H5Ssel_iter_close(iter_id);
+            CHECK(ret, FAIL, "H5Ssel_iter_close");
+        } /* end for */
+
+        /* Point selection which will merge into smaller # of sequences */
+        coord1[0][0] = 0;       coord1[0][1] = 9;
+        coord1[1][0] = 0;       coord1[1][1] = 10;
+        coord1[2][0] = 0;       coord1[2][1] = 11;
+        coord1[3][0] = 0;       coord1[3][1] = 6;
+        coord1[4][0] = 1;       coord1[4][1] = 8;
+        coord1[5][0] = 2;       coord1[5][1] = 10;
+        coord1[6][0] = 0;       coord1[6][1] = 11;
+        coord1[7][0] = 1;       coord1[7][1] = 4;
+        coord1[8][0] = 1;       coord1[8][1] = 5;
+        coord1[9][0] = 1;       coord1[9][1] = 6;
+        ret = H5Sselect_elements(sid, H5S_SELECT_SET, (size_t)POINT1_NPOINTS, (const hsize_t *)coord1);
+        CHECK(ret, FAIL, "H5Sselect_elements");
+
+        /* Create selection iterator object */
+        iter_id = H5Ssel_iter_create(sid, (size_t)1, (unsigned)sel_iter_flags);
+        CHECK(iter_id, FAIL, "H5Ssel_iter_create");
+
+        /* Try retrieving all sequences */
+        ret = H5Ssel_iter_get_seq_list(iter_id, (size_t)SEL_ITER_MAX_SEQ, (size_t)(1024 * 1024), &nseq, &nbytes, off, len);
+        CHECK(ret, FAIL, "H5Ssel_iter_get_seq_list");
+        VERIFY(nseq, 6, "H5Ssel_iter_get_seq_list");
+        VERIFY(nbytes, 10, "H5Ssel_iter_get_seq_list");
+
+        /* Close selection iterator */
+        ret = H5Ssel_iter_close(iter_id);
+        CHECK(ret, FAIL, "H5Ssel_iter_close");
+
+
+        /* Select irregular hyperslab, which will merge into smaller # of sequences  */
+        start[0] = 3;   start[1] = 0;
+        stride[0] = 2;  stride[1] = 2;
+        count[0] = 2;   count[1] = 5;
+        block[0] = 1;   block[1] = 1;
+        ret = H5Sselect_hyperslab(sid, H5S_SELECT_SET, start, stride, count, block);
+        CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+        start[0] = 3;   start[1] = 3;
+        stride[0] = 2;  stride[1] = 2;
+        count[0] = 2;   count[1] = 5;
+        block[0] = 1;   block[1] = 1;
+        ret = H5Sselect_hyperslab(sid, H5S_SELECT_OR, start, stride, count, block);
+        CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+        /* Create selection iterator object */
+        iter_id = H5Ssel_iter_create(sid, (size_t)1, (unsigned)sel_iter_flags);
+        CHECK(iter_id, FAIL, "H5Ssel_iter_create");
+
+        /* Try retrieving all sequences */
+        ret = H5Ssel_iter_get_seq_list(iter_id, (size_t)SEL_ITER_MAX_SEQ, (size_t)(1024 * 1024), &nseq, &nbytes, off, len);
+        CHECK(ret, FAIL, "H5Ssel_iter_get_seq_list");
+        VERIFY(nseq, 6, "H5Ssel_iter_get_seq_list");
+        VERIFY(nbytes, 20, "H5Ssel_iter_get_seq_list");
+
+        /* Close selection iterator */
+        ret = H5Ssel_iter_close(iter_id);
+        CHECK(ret, FAIL, "H5Ssel_iter_close");
+
     } /* end for */
-
-    /* Point selection which will merge into smaller # of sequences */
-    coord1[0][0] = 0;       coord1[0][1] = 9;
-    coord1[1][0] = 0;       coord1[1][1] = 10;
-    coord1[2][0] = 0;       coord1[2][1] = 11;
-    coord1[3][0] = 0;       coord1[3][1] = 6;
-    coord1[4][0] = 1;       coord1[4][1] = 8;
-    coord1[5][0] = 2;       coord1[5][1] = 10;
-    coord1[6][0] = 0;       coord1[6][1] = 11;
-    coord1[7][0] = 1;       coord1[7][1] = 4;
-    coord1[8][0] = 1;       coord1[8][1] = 5;
-    coord1[9][0] = 1;       coord1[9][1] = 6;
-    ret = H5Sselect_elements(sid, H5S_SELECT_SET, (size_t)POINT1_NPOINTS, (const hsize_t *)coord1);
-    CHECK(ret, FAIL, "H5Sselect_elements");
-
-    /* Create selection iterator object */
-    iter_id = H5Ssel_iter_create(sid, (size_t)1, (unsigned)0);
-    CHECK(iter_id, FAIL, "H5Ssel_iter_create");
-
-    /* Try retrieving all sequences */
-    ret = H5Ssel_iter_get_seq_list(iter_id, (size_t)SEL_ITER_MAX_SEQ, (size_t)(1024 * 1024), &nseq, &nbytes, off, len);
-    CHECK(ret, FAIL, "H5Ssel_iter_get_seq_list");
-    VERIFY(nseq, 6, "H5Ssel_iter_get_seq_list");
-    VERIFY(nbytes, 10, "H5Ssel_iter_get_seq_list");
-
-    /* Close selection iterator */
-    ret = H5Ssel_iter_close(iter_id);
-    CHECK(ret, FAIL, "H5Ssel_iter_close");
-
-
-    /* Select irregular hyperslab, which will merge into smaller # of sequences  */
-    start[0] = 3;   start[1] = 0;
-    stride[0] = 2;  stride[1] = 2;
-    count[0] = 2;   count[1] = 5;
-    block[0] = 1;   block[1] = 1;
-    ret = H5Sselect_hyperslab(sid, H5S_SELECT_SET, start, stride, count, block);
-    CHECK(ret, FAIL, "H5Sselect_hyperslab");
-
-    start[0] = 3;   start[1] = 3;
-    stride[0] = 2;  stride[1] = 2;
-    count[0] = 2;   count[1] = 5;
-    block[0] = 1;   block[1] = 1;
-    ret = H5Sselect_hyperslab(sid, H5S_SELECT_OR, start, stride, count, block);
-    CHECK(ret, FAIL, "H5Sselect_hyperslab");
-
-    /* Create selection iterator object */
-    iter_id = H5Ssel_iter_create(sid, (size_t)1, (unsigned)0);
-    CHECK(iter_id, FAIL, "H5Ssel_iter_create");
-
-    /* Try retrieving all sequences */
-    ret = H5Ssel_iter_get_seq_list(iter_id, (size_t)SEL_ITER_MAX_SEQ, (size_t)(1024 * 1024), &nseq, &nbytes, off, len);
-    CHECK(ret, FAIL, "H5Ssel_iter_get_seq_list");
-    VERIFY(nseq, 6, "H5Ssel_iter_get_seq_list");
-    VERIFY(nbytes, 20, "H5Ssel_iter_get_seq_list");
-
-    /* Close selection iterator */
-    ret = H5Ssel_iter_close(iter_id);
-    CHECK(ret, FAIL, "H5Ssel_iter_close");
-
 
     /* Close dataspace */
     ret = H5Sclose(sid);

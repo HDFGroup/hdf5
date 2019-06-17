@@ -726,10 +726,17 @@ H5S__hyper_iter_init(const H5S_t *space, H5S_sel_iter_t *iter)
     else {      /* Initialize the information needed for non-regular hyperslab I/O */
         H5S_hyper_span_info_t *spans;   /* Pointer to hyperslab span info node */
 
-        /* If this iterator is created from an API call, we must clone the
+        /* If this iterator is created from an API call, by default we clone the
          *  selection now, as the dataspace could be modified or go out of scope.
+         *  
+         *  However, if the H5S_SEL_ITER_SHARE_WITH_DATASPACE flag is given,
+         *  the selection is shared between the selection iterator and the
+         *  dataspace.  In this case, the application _must_not_ modify or
+         *  close the dataspace that the iterator is operating on, or undefined
+         *  behavior will occur.
          */
-        if(iter->flags & H5S_SEL_ITER_API_CALL) {
+        if((iter->flags & H5S_SEL_ITER_API_CALL) && 
+                !(iter->flags & H5S_SEL_ITER_SHARE_WITH_DATASPACE)) {
             /* Copy the span tree */
             if(NULL == (iter->u.hyp.spans = H5S__hyper_copy_span(space->select.sel_info.hslab->span_lst, space->extent.rank)))
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "can't copy span tree")

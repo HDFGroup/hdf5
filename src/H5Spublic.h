@@ -44,6 +44,18 @@
                                                  * earlier offset than the previous
                                                  * one.
                                                  */
+#define H5S_SEL_ITER_SHARE_WITH_DATASPACE 0x0002 /* Don't copy the dataspace
+                                                 * selection when creating the
+                                                 * selection iterator.
+                                                 * 
+                                                 * This can improve performance
+                                                 * of creating the iterator, but
+                                                 * the dataspace _MUST_NOT_ be
+                                                 * modified or closed until the
+                                                 * selection iterator is closed
+                                                 * or the iterator's behavior
+                                                 * will be undefined.
+                                                 */
 
 /* Different types of dataspaces */
 typedef enum H5S_class_t {
