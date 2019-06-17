@@ -2136,7 +2136,7 @@ test_copy_dataset_versionbounds(hid_t fcpl_src, hid_t fapl_src)
     char src_fname[NAME_BUF_SIZE];      /* Name of source file */
     char dst_fname[NAME_BUF_SIZE];      /* Name of destination file */
     H5F_libver_t low, high;             /* File format bounds */
-    unsigned srcdset_fillversion;       /* Fill version of source dataset */
+    unsigned srcdset_layoutversion;     /* Layout version of source dataset */
     int i, j;                           /* Local index variables */
     H5D_t *dsetp = NULL;                /* Pointer to internal dset structure */
     herr_t ret;                         /* Generic return value */
@@ -2179,7 +2179,8 @@ test_copy_dataset_versionbounds(hid_t fcpl_src, hid_t fapl_src)
 
     /* Get the internal dset ptr to get the fill version for verifying later */
     if ((dsetp = (H5D_t *)H5VL_object(did_src)) == NULL) TEST_ERROR
-    srcdset_fillversion = dsetp->shared->dcpl_cache.fill.version;
+
+    srcdset_layoutversion = dsetp->shared->layout.version;
 
     /* Close dataspace */
     if(H5Sclose(sid) < 0) TEST_ERROR
@@ -2224,9 +2225,9 @@ test_copy_dataset_versionbounds(hid_t fcpl_src, hid_t fapl_src)
             /* If copy failed, check if the failure is expected */
             if (ret < 0)
             {
-                /* Failure is valid if fill version of source dataset is
+                /* Failure is valid if layout version of source dataset is
                    greater than destination */
-                if (srcdset_fillversion <= H5O_fill_ver_bounds[high])
+                if (srcdset_layoutversion <= H5O_layout_ver_bounds[high])
                     TEST_ERROR
 
                 /* Close the DST file before continue */
