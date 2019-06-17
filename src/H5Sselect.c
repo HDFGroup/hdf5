@@ -2512,7 +2512,7 @@ done:
     hid_t H5Ssel_iter_create(space)
         hid_t   space;  IN: ID of the dataspace with selection to iterate over
  RETURNS
-    Valid dataspace selection iterator ID on success, negative on failure
+    Valid dataspace selection iterator ID on success, H5I_INVALID_HID on failure
  DESCRIPTION
     Creates a selection iterator and initializes it to start at the first
     element selected in the dataspace.
@@ -2574,7 +2574,7 @@ done:
         size_t *nseq;         OUT: # of sequences retrieved
         size_t *nbytes;       OUT: # of bytes retrieved, in all sequences
         hsize_t *off;         OUT: Array of sequence offsets
-        size_t *len;          OUT: Arrray of sequence lengths
+        size_t *len;          OUT: Array of sequence lengths
  RETURNS
     Non-negative on success / Negative on failure
  DESCRIPTION

@@ -10426,7 +10426,7 @@ done:
     return a new dataspace with the combined selection as the selection in the
     new dataspace.
  USAGE
-    hid_t H5Srefine_hyperslab(dsid, op, start, stride, count, block)
+    hid_t H5Scombine_hyperslab(dsid, op, start, stride, count, block)
         hid_t dsid;             IN: Dataspace ID of selection to use
         H5S_seloper_t op;       IN: Operation to perform on current selection
         const hsize_t *start;        IN: Offset of start of hyperslab
@@ -10434,7 +10434,7 @@ done:
         const hsize_t *count;        IN: Number of blocks included in hyperslab
         const hsize_t *block;        IN: Size of block in hyperslab
  RETURNS
-    Dataspace ID on success/Negative on failure
+    Dataspace ID on success / H5I_INVALID_HID on failure
  DESCRIPTION
     Combines a hyperslab selection with the current selection for a dataspace,
     creating a new dataspace to return the generated selection.
@@ -10455,24 +10455,24 @@ H5Scombine_hyperslab(hid_t space_id, H5S_seloper_t op, const hsize_t start[],
     H5S_t	*new_space = NULL;      /* New dataspace created */
     hid_t	ret_value;              /* Return value */
 
-    FUNC_ENTER_API(FAIL)
+    FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE6("i", "iSs*h*h*h*h", space_id, op, start, stride, count, block);
 
     /* Check args */
     if(NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a dataspace")
     if(start == NULL || count == NULL)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "hyperslab not specified")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "hyperslab not specified")
     if(!(op >= H5S_SELECT_SET && op <= H5S_SELECT_NOTA))
-        HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "invalid selection operation")
+        HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, H5I_INVALID_HID, "invalid selection operation")
 
     /* Generate new space, with combination of selections */
     if(H5S_combine_hyperslab(space, op, start, stride, count, block, &new_space) < 0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to set hyperslab selection")
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, H5I_INVALID_HID, "unable to set hyperslab selection")
 
     /* Atomize */
     if((ret_value = H5I_register(H5I_DATASPACE, new_space, TRUE)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register dataspace atom")
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register dataspace atom")
 
 done:
     if(ret_value < 0 && new_space)
@@ -10562,7 +10562,7 @@ done:
         H5S_seloper_t op;       IN: Selection operation
         hid_t space2;           IN: Second Dataspace ID
  RETURNS
-    Dataspace ID on success/Negative on failure
+    Dataspace ID on success / H5I_INVALID_HID on failure
  DESCRIPTION
     Combine two existing hyperslab selections with an operation, returning
     a new dataspace with the resulting selection.  The dataspace extent from
@@ -10580,20 +10580,20 @@ H5Scombine_select(hid_t space1_id, H5S_seloper_t op, hid_t space2_id)
     H5S_t	*new_space = NULL;      /* New Dataspace */
     hid_t	ret_value;              /* Return value */
 
-    FUNC_ENTER_API(FAIL)
+    FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE3("i", "iSsi", space1_id, op, space2_id);
 
     /* Check args */
     if(NULL == (space1 = (H5S_t *)H5I_object_verify(space1_id, H5I_DATASPACE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a dataspace")
     if(NULL == (space2 = (H5S_t *)H5I_object_verify(space2_id, H5I_DATASPACE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a dataspace")
     if(!(op >= H5S_SELECT_OR && op <= H5S_SELECT_NOTA))
-        HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "invalid selection operation")
+        HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, H5I_INVALID_HID, "invalid selection operation")
 
     /* Check that both dataspaces have the same rank */
     if(space1->extent.rank != space2->extent.rank)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "dataspaces not same rank")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "dataspaces not same rank")
 
     /* Note: currently, the offset of each dataspace is ignored */
 #if 0
@@ -10601,21 +10601,21 @@ H5Scombine_select(hid_t space1_id, H5S_seloper_t op, hid_t space2_id)
     /* Same note as in H5Smodify_select */
     for(u=0; u<space1->extent.rank; u++) {
         if(space1->select.offset[u] != space2->select.offset[u])
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "dataspaces not same offset")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "dataspaces not same offset")
     } /* end for */
 #endif
 
     /* Check that both dataspaces have hyperslab selections */
     if(H5S_GET_SELECT_TYPE(space1) != H5S_SEL_HYPERSLABS || H5S_GET_SELECT_TYPE(space2) != H5S_SEL_HYPERSLABS)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "dataspaces don't have hyperslab selections")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "dataspaces don't have hyperslab selections")
 
     /* Go combine the dataspaces */
     if(NULL == (new_space = H5S__combine_select(space1, op, space2)))
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to create hyperslab selection")
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, H5I_INVALID_HID, "unable to create hyperslab selection")
 
     /* Atomize */
     if((ret_value = H5I_register(H5I_DATASPACE, new_space, TRUE)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register dataspace atom")
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register dataspace atom")
 
 done:
     if(ret_value < 0 && new_space)
