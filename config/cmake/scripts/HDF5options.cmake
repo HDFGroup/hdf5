@@ -27,7 +27,9 @@
 #############################################################################################
 ####      Only build static libraries       ####
 #set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DBUILD_SHARED_LIBS:BOOL=OFF")
-####      Add PICC option on linux/mac       ####
+####      Only build shared libraries       ####
+#set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DONLY_SHARED_LIBS:BOOL=OFF")
+####      Add PIC option on linux/mac       ####
 #set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DCMAKE_ANSI_CFLAGS:STRING=-fPIC")
 
 #############################################################################################

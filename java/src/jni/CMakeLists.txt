@@ -76,7 +76,7 @@ set (CMAKE_INCLUDE_CURRENT_DIR_IN_INTERFACE ON)
 
 ########### JNI libraries always must be built shared  ###############
 add_library (${HDF5_JAVA_JNI_LIB_TARGET} SHARED ${HDF5_JAVA_JNI_CSRCS} ${HDF5_JAVA_JNI_CHDRS})
-target_include_directories(${HDF5_JAVA_JNI_LIB_TARGET}
+target_include_directories (${HDF5_JAVA_JNI_LIB_TARGET}
     PRIVATE "${HDF5_BINARY_DIR};${HDF5_JAVA_JNI_SOURCE_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>"
 )
 TARGET_C_PROPERTIES (${HDF5_JAVA_JNI_LIB_TARGET} SHARED)
