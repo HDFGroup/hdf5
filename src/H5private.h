@@ -1171,7 +1171,7 @@ typedef off_t               h5_stat_size_t;
     #define HDpwrite(F,B,C,O)    pwrite(F,B,C,O)
 #endif /* HDpwrite */
 #ifndef HDqsort
-    #define HDqsort(M,N,Z,F)  qsort(M,N,Z,F)
+    #define HDqsort(M,N,Z,F)  do {HDassert(M); qsort(M,N,Z,F);} while(0)
 #endif /* HDqsort*/
 #ifndef HDraise
     #define HDraise(N)    raise(N)
