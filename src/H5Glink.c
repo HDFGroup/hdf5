@@ -402,15 +402,14 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5G__link_sort_table
+ * Function:    H5G__link_sort_table
  *
  * Purpose:     Sort table containing a list of links for a group
  *
- * Return:	Success:        Non-negative
- *		Failure:	Negative
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *	        Nov 20, 2006
+ * Programmer:  Quincey Koziol
+ *              Nov 20, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -422,6 +421,13 @@ H5G__link_sort_table(H5G_link_table_t *ltable, H5_index_t idx_type,
 
     /* Sanity check */
     HDassert(ltable);
+
+    /* Can't sort when empty since the links table will be NULL */
+    if(0 == ltable->nlinks)
+        return SUCCEED;
+
+    /* This should never be NULL if the number of links is non-zero */
+    HDassert(ltable->lnks);
 
     /* Pick appropriate sorting routine */
     if(idx_type == H5_INDEX_NAME) {
