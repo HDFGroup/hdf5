@@ -110,8 +110,7 @@ add_custom_target(H5WATCH_files ALL COMMENT "Copying files needed by H5WATCH tes
       add_test (
           NAME H5WATCH-${resultfile}-clear-objects
           COMMAND    ${CMAKE_COMMAND}
-              -E remove
-                  ${resultfile}.h5
+              -E remove ${resultfile}.h5
       )
       set_tests_properties (H5WATCH-${resultfile}-clear-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
       add_test (

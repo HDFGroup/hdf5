@@ -48,6 +48,16 @@ New Features
 
     Configuration:
     -------------
+    - Add option to build only shared libs
+
+      A request was made to prevent building static libraries and only build
+      shared.  A new option was added to CMake, ONLY_SHARED_LIBS, which will
+      skip building static libraries. Certain utility functions will build with
+      static libs but are not published. Tests are adjusted to use the correct
+      libraries.
+
+      (ADB - 2019/06/12, HDFFV-10805)
+
     - Add options to enable or disable building tools and tests
     
       Configure options --enable-tests and --enable-tools were added for 
