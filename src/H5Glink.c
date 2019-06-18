@@ -417,6 +417,8 @@ herr_t
 H5G__link_sort_table(H5G_link_table_t *ltable, H5_index_t idx_type,
     H5_iter_order_t order)
 {
+    herr_t  ret_value = SUCCEED;
+
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
@@ -424,7 +426,7 @@ H5G__link_sort_table(H5G_link_table_t *ltable, H5_index_t idx_type,
 
     /* Can't sort when empty since the links table will be NULL */
     if(0 == ltable->nlinks)
-        return SUCCEED;
+        HGOTO_DONE(ret_value);
 
     /* This should never be NULL if the number of links is non-zero */
     HDassert(ltable->lnks);
@@ -448,6 +450,7 @@ H5G__link_sort_table(H5G_link_table_t *ltable, H5_index_t idx_type,
             HDassert(order == H5_ITER_NATIVE);
     } /* end else */
 
+done:
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5G__link_sort_table() */
 
