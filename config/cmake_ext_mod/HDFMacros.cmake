@@ -28,7 +28,7 @@ macro (SET_HDF_BUILD_TYPE)
     endif()
   endif()
   if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
-    message(STATUS "Setting build type to 'RelWithDebInfo' as none was specified.")
+    message (STATUS "Setting build type to 'RelWithDebInfo' as none was specified.")
     set(CMAKE_BUILD_TYPE RelWithDebInfo CACHE STRING "Choose the type of build." FORCE)
     # Set the possible values of build type for cmake-gui
     set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release"
@@ -224,10 +224,9 @@ macro (TARGET_C_PROPERTIES wintarget libtype)
       $<$<C_COMPILER_ID:MSVC>:${WIN_COMPILE_FLAGS}>
       $<$<CXX_COMPILER_ID:MSVC>:${WIN_COMPILE_FLAGS}>
   )
-  target_link_libraries(${wintarget} INTERFACE
-      $<$<C_COMPILER_ID:MSVC>:${WIN_LINK_FLAGS}>
-      $<$<CXX_COMPILER_ID:MSVC>:${WIN_LINK_FLAGS}>
-  )
+  if(MSVC)
+    set_property(TARGET ${wintarget} APPEND PROPERTY LINK_FLAGS "${WIN_LINK_FLAGS}")
+  endif()
 endmacro ()
 
 #-----------------------------------------------------------------------------
