@@ -11306,11 +11306,11 @@ H5S__hyper_get_clip_diminfo(hsize_t start, hsize_t stride, hsize_t *count,
 herr_t
 H5S_hyper_clip_unlim(H5S_t *space, hsize_t clip_size)
 {
-    H5S_hyper_sel_t *hslab = NULL;  /* Convenience pointer to hyperslab info */
-    hsize_t orig_count;             /* Original count in unlimited dimension */
-    int orig_unlim_dim;             /* Original unliminted dimension */
-    H5S_hyper_dim_t *diminfo;       /* Convenience pointer to diminfo.opt in unlimited dimension */
-    herr_t ret_value = SUCCEED;     /* Return value */
+    H5S_hyper_sel_t *hslab = NULL;      /* Convenience pointer to hyperslab info */
+    hsize_t orig_count;                 /* Original count in unlimited dimension */
+    int orig_unlim_dim;                 /* Original unliminted dimension */
+    H5S_hyper_dim_t *diminfo = NULL;    /* Convenience pointer to diminfo.opt in unlimited dimension */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -11342,8 +11342,9 @@ H5S_hyper_clip_unlim(H5S_t *space, hsize_t clip_size)
         if(H5S_select_none(space) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't convert selection")
 
-        /* Reset the convenience pointer */
+        /* Reset the convenience pointers */
         hslab = NULL;
+        diminfo = NULL;
     } /* end if */
     /* Check for single block in unlimited dimension */
     else if(orig_count == (hsize_t)1) {
