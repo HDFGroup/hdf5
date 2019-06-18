@@ -70,6 +70,9 @@
 /* Length of stack-allocated sequences for "project intersect" routines */
 #define H5S_PROJECT_INTERSECT_NSEQS 256
 
+/* Internal flags for initializing selection iterators */
+#define H5S_SEL_ITER_API_CALL   0x1000 /* Selection iterator created from API call */
+
 
 /* Initial version of the dataspace information */
 #define H5O_SDSPACE_VERSION_1	1

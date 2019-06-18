@@ -40,6 +40,9 @@
 /* Local Macros */
 /****************/
 
+/* All the valid public flags to H5Ssel_iter_create() */
+#define H5S_SEL_ITER_ALL_PUBLIC_FLAGS (H5S_SEL_ITER_GET_SEQ_LIST_SORTED | \
+                H5S_SEL_ITER_SHARE_WITH_DATASPACE)
 
 
 /******************/
@@ -2499,4 +2502,218 @@ H5S_select_subtract(H5S_t *space, H5S_t *subtract_space)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S_select_subtract() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5Ssel_iter_create
+ PURPOSE
+    Create a dataspace selection iterator for a dataspace's selection
+ USAGE
+    hid_t H5Ssel_iter_create(space)
+        hid_t   space;  IN: ID of the dataspace with selection to iterate over
+ RETURNS
+    Valid dataspace selection iterator ID on success, H5I_INVALID_HID on failure
+ DESCRIPTION
+    Creates a selection iterator and initializes it to start at the first
+    element selected in the dataspace.
+ PROGRAMMER
+    Quincey Koziol -  February 11, 2019
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+hid_t
+H5Ssel_iter_create(hid_t space_id, size_t elmt_size, unsigned flags)
+{
+    H5S_t  *space;              /* Dataspace with selection to iterate over */
+    H5S_sel_iter_t *sel_iter;   /* Selection iterator created */
+    hid_t  ret_value;           /* Return value */
+
+    FUNC_ENTER_API(H5I_INVALID_HID)
+    H5TRACE3("i", "izIu", space_id, elmt_size, flags);
+
+    /* Check args */
+    if(NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, H5I_INVALID_HID, "not a dataspace")
+    if(elmt_size == 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, H5I_INVALID_HID, "element size must be greater than 0")
+    if(flags != (flags & H5S_SEL_ITER_ALL_PUBLIC_FLAGS))
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, H5I_INVALID_HID, "invalid selection iterator flag")
+
+    /* Allocate the iterator */
+    if(NULL == (sel_iter = H5FL_MALLOC(H5S_sel_iter_t)))
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, H5I_INVALID_HID, "can't allocate selection iterator")
+
+    /* Add flag to indicate that this iterator is from an API call */
+    flags |= H5S_SEL_ITER_API_CALL;
+
+    /* Initialize the selection iterator */
+    if(H5S_select_iter_init(sel_iter, space, elmt_size, flags) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, H5I_INVALID_HID, "unable to initialize selection iterator")
+
+    /* Atomize */
+    if((ret_value = H5I_register(H5I_SPACE_SEL_ITER, sel_iter, TRUE)) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register dataspace selection iterator atom")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Ssel_iter_create() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5Ssel_iter_get_seq_list
+ PURPOSE
+    Retrieve a list of offset / length sequences for the elements in an iterator
+ USAGE
+    herr_t H5Ssel_iter_get_seq_list(sel_iter_id, maxseq, maxbytes, nseq, nbytes, off, len)
+        hid_t   sel_iter_id;  IN: ID of the dataspace selection iterator to retrieve sequence from
+        size_t  maxseq;       IN: Max. # of sequences to retrieve
+        size_t  maxbytes;     IN: Max. # of bytes to retrieve in sequences
+        size_t *nseq;         OUT: # of sequences retrieved
+        size_t *nbytes;       OUT: # of bytes retrieved, in all sequences
+        hsize_t *off;         OUT: Array of sequence offsets
+        size_t *len;          OUT: Array of sequence lengths
+ RETURNS
+    Non-negative on success / Negative on failure
+ DESCRIPTION
+    Retrieve a list of offset / length pairs (a list of "sequences") matching
+    the selected elements for an iterator, according to the iteration order for
+    the iterator.  The lengths returned are in _bytes_, not elements.
+    
+    Note that the iteration order for "all" and "hyperslab" selections is
+    row-major (i.e. "C-ordered"), but the iteration order for "point"
+    selections is "in order selected", unless the H5S_SEL_ITER_GET_SEQ_LIST_SORTED
+    flag is passed to H5Sset_iter_create for a point selection.
+
+    MAXSEQ and MAXBYTES specify the most sequences or bytes possible to
+    place into the OFF and LEN arrays. *NSEQ and *NBYTES return the actual
+    number of sequences and bytes put into the arrays.
+
+    Each call to H5Ssel_iter_get_seq_list() will retrieve the next set
+    of sequences for the selection being iterated over.
+
+    The total number of bytes possible to retrieve from a selection iterator
+    is the 'elmt_size' passed to H5Ssel_iter_create multiplied by the number
+    of elements selected in the dataspace the iterator was created from
+    (which can be retrieved with H5Sget_select_npoints).  When there are no
+    further sequences of elements to retrieve, calls to this routine will
+    set *NSEQ and *NBYTES to zero.
+ PROGRAMMER
+    Quincey Koziol -  February 11, 2019
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5Ssel_iter_get_seq_list(hid_t sel_iter_id, size_t maxseq, size_t maxbytes,
+    size_t *nseq, size_t *nbytes, hsize_t *off, size_t *len)
+{
+    H5S_sel_iter_t *sel_iter;           /* Dataspace selection iterator to operate on */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE7("e", "izz*z*z*h*z", sel_iter_id, maxseq, maxbytes, nseq, nbytes, off,
+             len);
+
+    /* Check args */
+    if(NULL == (sel_iter = (H5S_sel_iter_t *)H5I_object_verify(sel_iter_id, H5I_SPACE_SEL_ITER)))
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "not a dataspace selection iterator")
+    if(NULL == nseq)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "'nseq' pointer is NULL")
+    if(NULL == nbytes)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "'nbytes' pointer is NULL")
+    if(NULL == off)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "offset array pointer is NULL")
+    if(NULL == len)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "length array pointer is NULL")
+
+    /* Get the sequences of bytes */
+    if(maxseq > 0 && maxbytes > 0) {
+        if(H5S_SELECT_ITER_GET_SEQ_LIST(sel_iter, maxseq, maxbytes, nseq, nbytes, off, len) < 0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "sequence length generation failed")
+    } /* end if */
+    else
+        *nseq = *nbytes = 0;
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Ssel_iter_get_seq_list() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5S_sel_iter_close
+ *
+ * Purpose:	Releases a dataspace selection iterator and its memory.
+ *
+ * Return:	Non-negative on success / Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		Monday, February 11, 2019
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5S_sel_iter_close(H5S_sel_iter_t *sel_iter)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(sel_iter);
+
+    /* Call selection type-specific release routine */
+    if(H5S_SELECT_ITER_RELEASE(sel_iter) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "problem releasing a selection iterator's type-specific info")
+
+    /* Release the structure */
+    sel_iter = H5FL_FREE(H5S_sel_iter_t, sel_iter);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5S_sel_iter_close() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5Ssel_iter_close
+ PURPOSE
+    Close a dataspace selection iterator
+ USAGE
+    herr_t H5Ssel_iter_close(sel_iter_id)
+        hid_t   sel_iter_id;  IN: ID of the dataspace selection iterator to close
+ RETURNS
+    Non-negative on success / Negative on failure
+ DESCRIPTION
+    Close a dataspace selection iterator, releasing its state.
+ PROGRAMMER
+    Quincey Koziol -  February 11, 2019
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5Ssel_iter_close(hid_t sel_iter_id)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE1("e", "i", sel_iter_id);
+
+    /* Check args */
+    if(NULL == H5I_object_verify(sel_iter_id, H5I_SPACE_SEL_ITER))
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "not a dataspace selection iterator")
+
+    /* When the reference count reaches zero the resources are freed */
+    if(H5I_dec_app_ref(sel_iter_id) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDEC, FAIL, "problem freeing dataspace selection iterator ID")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Ssel_iter_close() */
 

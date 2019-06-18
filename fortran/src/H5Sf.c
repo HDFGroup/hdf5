@@ -994,6 +994,165 @@ done:
     return ret_value;
 }
 
+/****if* H5Sf/h5scombine_hyperslab_c
+ * NAME
+ *  h5scombine_hyperslab_c
+ * PURPOSE
+ *  Call H5Scombine_hyperslab
+ * INPUTS
+ *  space_id - identifier of the dataspace
+ *  operator - defines how the new selection is combined
+ *  start    - offset of start of hyperslab
+ *  count    - number of blocks included in the hyperslab
+ *  stride   - hyperslab stride (interval between blocks)
+ *  block    - size of block in the hyperslab
+ * OUTPUTS
+ *  hyper_id - identifier for the new dataspace
+ * RETURNS
+ *  0 on success, -1 on failure
+ * AUTHOR
+ *  Elena Pourmal
+ *  Monday, October 7, 2002
+ * HISTORY
+ *
+ * SOURCE
+*/
+
+int_f
+h5scombine_hyperslab_c ( hid_t_f *space_id , int_f *op, hsize_t_f *start, hsize_t_f *count, hsize_t_f *stride, hsize_t_f *block, hid_t_f *hyper_id)
+/******/
+{
+  int ret_value = -1;
+  hid_t c_space_id;
+  hid_t c_hyper_id;
+  hsize_t *c_start = NULL;
+  hsize_t *c_count = NULL;
+  hsize_t *c_stride = NULL;
+  hsize_t *c_block = NULL;
+
+  H5S_seloper_t c_op;
+  herr_t  status;
+  int rank;
+  int i;
+
+  rank = H5Sget_simple_extent_ndims(*space_id);
+  if (rank < 0 ) return ret_value;
+  c_start = (hsize_t *)HDmalloc(sizeof(hsize_t)*rank);
+  if (c_start == NULL) goto DONE;
+
+  c_count = (hsize_t *)HDmalloc(sizeof(hsize_t)*rank);
+  if (c_count == NULL) goto DONE;
+
+  c_stride = (hsize_t *)HDmalloc(sizeof(hsize_t)*rank);
+  if (c_stride == NULL) goto DONE;
+
+  c_block = (hsize_t *)HDmalloc(sizeof(hsize_t)*rank);
+  if (c_block == NULL) goto DONE;
+
+
+  /*
+   * Reverse dimensions due to C-FORTRAN storage order.
+   */
+
+  for (i=0; i < rank; i++) {
+      int t= (rank - i) - 1;
+      c_start[i] = (hsize_t)start[t];
+      c_count[i] = (hsize_t)count[t];
+      c_stride[i] = (hsize_t)stride[t];
+      c_block[i] = (hsize_t)block[t];
+  }
+
+   c_op = (H5S_seloper_t)*op;
+
+  c_space_id = (hid_t)*space_id;
+  c_hyper_id = H5Scombine_hyperslab(c_space_id, c_op, c_start, c_stride, c_count, c_block);
+  if ( c_hyper_id < 0  ) goto DONE;
+  *hyper_id = (hid_t_f)c_hyper_id;
+  ret_value = 0;
+DONE:
+  if(c_start != NULL) HDfree(c_start);
+  if(c_count != NULL) HDfree(c_count);
+  if(c_stride!= NULL) HDfree(c_stride);
+  if(c_block != NULL) HDfree(c_block);
+  return ret_value;
+}
+/****if* H5Sf/h5scombine_select_c
+ * NAME
+ *  h5scombine_select_c
+ * PURPOSE
+ *  Call H5Scombine_ select
+ * INPUTS
+ *  space1_id - identifier of the first dataspace
+ *  operator  - defines how the new selection is combined
+ *  space2_id - identifier of the second dataspace
+ * OUTPUTS
+ *  ds_id     - identifier for the new dataspace
+ * RETURNS
+ *  0 on success, -1 on failure
+ * AUTHOR
+ *  Elena Pourmal
+ *  Monday, October 7, 2002
+ * HISTORY
+ *
+ * SOURCE
+*/
+
+int_f
+h5scombine_select_c ( hid_t_f *space1_id , int_f *op, hid_t_f *space2_id, hid_t_f *ds_id)
+/******/
+{
+  int ret_value = -1;
+  hid_t c_space1_id;
+  hid_t c_space2_id;
+  hid_t c_ds_id;
+  H5S_seloper_t c_op;
+
+  c_op = (H5S_seloper_t)*op;
+
+  c_space1_id = (hid_t)*space1_id;
+  c_space2_id = (hid_t)*space2_id;
+  c_ds_id = H5Scombine_select(c_space1_id, c_op, c_space2_id);
+  if ( c_ds_id < 0  ) return ret_value;
+  *ds_id = (hid_t_f)c_ds_id;
+  ret_value = 0;
+  return ret_value;
+}
+/****if* H5Sf/h5smodify_select_c
+ * NAME
+ *  h5smodify_select_c
+ * PURPOSE
+ *  Call H5Smodify_select
+ * INPUTS
+ *  space1_id - identifier of the first dataspace  to modify
+ *  operator - defines how the new selection is combined
+ *  space2_id - identifier of the second dataspace
+ * RETURNS
+ *  0 on success, -1 on failure
+ * AUTHOR
+ *  Elena Pourmal
+ *  Monday, October 7, 2002
+ * HISTORY
+ *
+ * SOURCE
+*/
+
+int_f
+h5smodify_select_c ( hid_t_f *space1_id , int_f *op, hid_t_f *space2_id)
+/******/
+{
+  int ret_value = -1;
+  hid_t c_space1_id;
+  hid_t c_space2_id;
+  H5S_seloper_t c_op;
+
+  c_op = (H5S_seloper_t)*op;
+
+  c_space1_id = (hid_t)*space1_id;
+  c_space2_id = (hid_t)*space2_id;
+  if( H5Smodify_select(c_space1_id, c_op, c_space2_id)< 0) return ret_value;
+  ret_value = 0;
+  return ret_value;
+}
 
 /****if* H5Sf/h5sget_select_type_c
  * NAME
