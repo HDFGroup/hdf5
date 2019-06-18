@@ -982,18 +982,9 @@ H5CX_free_state(H5CX_state_t *api_state)
     /* Release the VOL connector property, if it was set */
     if(api_state->vol_connector_prop.connector_id) {
         /* Clean up any VOL connector info */
-        if(api_state->vol_connector_prop.connector_info) {
-            H5VL_class_t *connector;       /* Pointer to connector */
-
-            /* Retrieve the connector for the ID */
-            if(NULL == (connector = (H5VL_class_t *)H5I_object(api_state->vol_connector_prop.connector_id)))
-                HGOTO_ERROR(H5E_CONTEXT, H5E_BADTYPE, FAIL, "not a VOL connector ID")
-
-            /* Free the connector info */
-            if(H5VL_free_connector_info(connector, api_state->vol_connector_prop.connector_info) < 0)
+        if(api_state->vol_connector_prop.connector_info)
+            if(H5VL_free_connector_info(api_state->vol_connector_prop.connector_id, api_state->vol_connector_prop.connector_info) < 0)
                 HGOTO_ERROR(H5E_CONTEXT, H5E_CANTRELEASE, FAIL, "unable to release VOL connector info object")
-        } /* end if */
-
         /* Decrement connector ID */
         if(H5I_dec_ref(api_state->vol_connector_prop.connector_id) < 0)
             HDONE_ERROR(H5E_CONTEXT, H5E_CANTDEC, FAIL, "can't close VOL connector ID")
