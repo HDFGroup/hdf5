@@ -93,6 +93,14 @@ static const H5I_class_t H5I_DATASPACE_CLS[1] = {{
     (H5I_free_t)H5S_close	/* Callback routine for closing objects of this class */
 }};
 
+/* Dataspace selection iterator ID class */
+static const H5I_class_t H5I_SPACE_SEL_ITER_CLS[1] = {{
+    H5I_SPACE_SEL_ITER,		/* ID class value */
+    0,				/* Class flags */
+    0,				/* # of reserved IDs for class */
+    (H5I_free_t)H5S_sel_iter_close	/* Callback routine for closing objects of this class */
+}};
+
 
 /* Flag indicating "top" of interface has been initialized */
 static hbool_t H5S_top_package_initialize_s = FALSE;
@@ -119,6 +127,10 @@ H5S__init_package(void)
     /* Initialize the atom group for the dataspace IDs */
     if(H5I_register_type(H5I_DATASPACE_CLS) < 0)
 	HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize dataspace ID class")
+
+    /* Initialize the atom group for the dataspace selction iterator IDs */
+    if(H5I_register_type(H5I_SPACE_SEL_ITER_CLS) < 0)
+	HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize dataspace selection iterator ID class")
 
     /* Mark "top" of interface as initialized, too */
     H5S_top_package_initialize_s = TRUE;
@@ -156,6 +168,11 @@ H5S_top_term_package(void)
     if(H5S_top_package_initialize_s) {
 	if(H5I_nmembers(H5I_DATASPACE) > 0) {
 	    (void)H5I_clear_type(H5I_DATASPACE, FALSE, FALSE);
+            n++; /*H5I*/
+	} /* end if */
+
+	if(H5I_nmembers(H5I_SPACE_SEL_ITER) > 0) {
+	    (void)H5I_clear_type(H5I_SPACE_SEL_ITER, FALSE, FALSE);
             n++; /*H5I*/
 	} /* end if */
 
@@ -198,10 +215,14 @@ H5S_term_package(void)
     if(H5_PKG_INIT_VAR) {
         /* Sanity checks */
         HDassert(0 == H5I_nmembers(H5I_DATASPACE));
+        HDassert(0 == H5I_nmembers(H5I_SPACE_SEL_ITER));
         HDassert(FALSE == H5S_top_package_initialize_s);
 
         /* Destroy the dataspace object id group */
         n += (H5I_dec_type_ref(H5I_DATASPACE) > 0);
+
+        /* Destroy the dataspace selection iterator object id group */
+        n += (H5I_dec_type_ref(H5I_SPACE_SEL_ITER) > 0);
 
 	/* Mark interface as closed */
         if(0 == n)
