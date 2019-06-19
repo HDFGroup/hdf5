@@ -33,7 +33,7 @@ MODULE VOL_TMOD
   IMPLICIT NONE
 
   INTEGER, PARAMETER :: NATIVE_VOL_CONNECTOR_VALUE = 0
-  CHARACTER(LEN=6), PARAMETER :: NATIVE_VOL_CONNECTOR_NAME = "native"
+  CHARACTER(LEN=180) :: NATIVE_VOL_CONNECTOR_NAME
 
 CONTAINS
 
@@ -57,7 +57,6 @@ CONTAINS
     INTEGER(hid_t) :: vol_id = 0, vol_id_out = 1
     CHARACTER(LEN=64) :: name
     CHARACTER(LEN=1) :: name_null
-    CHARACTER(LEN=6) :: name_exact
     INTEGER(SIZE_T) :: name_len
     INTEGER(hid_t) :: file_id
 
@@ -87,7 +86,7 @@ CONTAINS
 
     CALL H5VLget_connector_name_f(file_id, name, error)
     CALL check("H5VLget_connector_name_f",error,total_error)
-    CALL VERIFY("H5VLget_connector_name_f", name, NATIVE_VOL_CONNECTOR_NAME, total_error)
+    CALL VERIFY("H5VLget_connector_name_f", TRIM(name), NATIVE_VOL_CONNECTOR_NAME, total_error)
 
     CALL H5VLget_connector_name_f(file_id, name_null, error, name_len)
     CALL check("H5VLget_connector_name_f",error,total_error)
@@ -96,14 +95,6 @@ CONTAINS
     CALL H5VLget_connector_name_f(file_id, name_null, error)
     CALL check("H5VLget_connector_name_f",error,total_error)
     CALL VERIFY("H5VLget_connector_name_f", name_null, NATIVE_VOL_CONNECTOR_NAME(1:1), total_error)
-
-    CALL H5VLget_connector_name_f(file_id, name_exact, error, name_len)
-    CALL check("H5VLget_connector_name_f",error,total_error)
-    CALL VERIFY("H5VLget_connector_name_f", INT(name_len), LEN_TRIM(NATIVE_VOL_CONNECTOR_NAME), total_error)
-
-    CALL H5VLget_connector_name_f(file_id, name_exact, error)
-    CALL check("H5VLget_connector_name_f",error,total_error)
-    CALL VERIFY("H5VLget_connector_name_f", name_exact, NATIVE_VOL_CONNECTOR_NAME, total_error)
 
     CALL H5Fclose_f(file_id, error)
     CALL check("H5Fclose_f",error,total_error)
@@ -193,27 +184,28 @@ CONTAINS
     CALL H5Pcreate_f(H5P_FILE_ACCESS_F, fapl_id, error)
     CALL check("H5Pcreate_f",error,total_error)
 
-    f_ptr = C_NULL_PTR
-    CALL H5Pset_vol_f(fapl_id, vol_id, error)
-    CALL check("H5Pset_vol_f",error,total_error)
+    IF(TRIM(NATIVE_VOL_CONNECTOR_NAME) .EQ. "native")THEN
+       CALL H5Pset_vol_f(fapl_id, vol_id, error)
+       CALL check("H5Pset_vol_f",error,total_error)
 
-    CALL H5Pget_vol_id_f(fapl_id, vol_id_out, error)
-    CALL check("H5Pget_vol_id_f",error,total_error)
-    CALL VERIFY("H5Pget_vol_id_f", vol_id_out, vol_id, total_error)
+       CALL H5Pget_vol_id_f(fapl_id, vol_id_out, error)
+       CALL check("H5Pget_vol_id_f",error,total_error)
+       CALL VERIFY("H5Pget_vol_id_f", vol_id_out, vol_id, total_error)
 
-    f_ptr = C_NULL_PTR
-    CALL H5Pset_vol_f(fapl_id, vol_id, error, f_ptr)
-    CALL check("H5Pset_vol_f",error,total_error)
-
-    CALL H5Pget_vol_id_f(fapl_id, vol_id_out, error)
-    CALL check("H5Pget_vol_id_f",error,total_error)
-    CALL VERIFY("H5Pget_vol_id_f", vol_id_out, vol_id, total_error)
+       f_ptr = C_NULL_PTR
+       CALL H5Pset_vol_f(fapl_id, vol_id, error, f_ptr)
+       CALL check("H5Pset_vol_f",error,total_error)
+       
+       CALL H5Pget_vol_id_f(fapl_id, vol_id_out, error)
+       CALL check("H5Pget_vol_id_f",error,total_error)
+       CALL VERIFY("H5Pget_vol_id_f", vol_id_out, vol_id, total_error)
+    ENDIF
 
     CALL H5VLget_connector_id_f(NATIVE_VOL_CONNECTOR_NAME, vol_id_out, error)
     CALL check("H5VLget_connector_id_f",error,total_error)
     CALL VERIFY("H5VLget_connector_id_f", vol_id_out, vol_id, total_error)
-
     CALL H5Fcreate_f("voltest.h5",H5F_ACC_TRUNC_F, file_id, error, H5P_DEFAULT_F, fapl_id)
+
     CALL check("H5F_create_f",error,total_error)
 
     CALL H5VLclose_f(vol_id_out, error)
@@ -244,9 +236,10 @@ PROGRAM vol_connector
   INTEGER :: error
   INTEGER :: ret_total_error
   LOGICAL :: cleanup, status
+  CHARACTER(LEN=12) :: VOL_CONNECTOR_ENV
+  INTEGER :: LEN = 0
 
   CALL h5open_f(error)
-
   cleanup = .TRUE.
   CALL h5_env_nocleanup_f(status)
   IF(status) cleanup=.FALSE.
@@ -256,6 +249,15 @@ PROGRAM vol_connector
   WRITE(*,'(18X,A)') '=============================='
 
   WRITE(*,'(A)') "Testing VOL connector plugin functionality."
+
+  ! Check to see if the VOL connector was set with an env variable
+  CALL GET_ENVIRONMENT_VARIABLE("HDF5_VOL_CONNECTOR", VOL_CONNECTOR_ENV, LEN)
+  IF(LEN.NE.0)THEN
+     NATIVE_VOL_CONNECTOR_NAME = TRIM(VOL_CONNECTOR_ENV)
+  ELSE
+     NATIVE_VOL_CONNECTOR_NAME = "native"
+  ENDIF
+
   ret_total_error = 0
   CALL test_registration_by_name(ret_total_error)
   CALL write_test_status(ret_total_error, ' Testing VOL registration by name', total_error)
