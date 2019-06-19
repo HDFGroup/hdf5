@@ -385,6 +385,18 @@ Bug Fixes since HDF5-1.10.3 release
 
       (JTH - 2018/08/25, HDFFV-10501)
 
+    - When iterating over an old-style group (i.e., when not using the latest
+      file format) of size 0, a NULL pointer representing the empty links
+      table would be sent to qsort(3) for sorting, which is undefined behavior.
+
+      Iterating over an empty group is explicitly tested in the links test.
+      This has not caused any failures to date and was flagged by gcc's
+      -fsanitize=undefined.
+
+      The library no longer attempts to sort an empty array.
+
+      (DER - 2019/06/18, HDFFV-10829)
+
     Java Library:
     ----------------
     - JNI native library dependencies
