@@ -1620,7 +1620,7 @@ done:
 
 /*
  * Class:     hdf_hdf5lib_H5
- * Method:    H5Tarray_get_dims2
+ * Method:    H5Tget_array_dims2
  * Signature: (J[J)I
  */
 JNIEXPORT jint JNICALL

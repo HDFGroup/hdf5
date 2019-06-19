@@ -751,27 +751,6 @@ error:
 } /* test_unknown() */
 
 /*
- * Set an attribute with the given information.
- * If the out parameter `attr_id` is negative, a new attribute will be
- * created with the given information. Else, it will attempt to update the
- * attribute with the new value.
- *
- * `dataspace_id` ignored if `attribute_id` >= 0
- */
-static herr_t
-put_attribute(hid_t loc_id, const char *attrname, const void *attrvalue, hid_t datatype_id, hid_t dataspace_id, hid_t *attribute_id)
-{   
-    if((*attribute_id) < 0) {
-        hid_t id = -1;
-        id = H5Acreate2(loc_id, attrname, datatype_id, dataspace_id, H5P_DEFAULT, H5P_DEFAULT);
-        if(id < 0) 
-            return FAIL;
-        *attribute_id = id;
-    }
-    return H5Awrite(*attribute_id, datatype_id, attrvalue);
-} /* put_attribute */
-
-/*
  * Count the number of attributes attached to an object.
  * Returns negative in event of error.
  */
@@ -830,216 +809,181 @@ oh_compare(hid_t did1, hid_t did2)
  * Conduct additions side-by-side with a standard datataset and one with
  * minimized dataset object headers.
  */
+#define ATTR_NAME_MAX   16
+#define ATTR_SHORT      "first"
+#define ATTR_LONG       "second"
+#define N_ATTRS         64
 static herr_t
 test_minimized_dset_ohdr_attribute_addition(hid_t fapl_id)
 {
-    hsize_t array_10[1]      = {10}; /* dataspace extent */
-    char    buffer[10]       = "";   /* to inspect string attribute */
-    int     a_out            = 0;
-    char    filename[512]    = "";
-    hid_t   int_type_id      = -1;
-    hid_t   char_type_id     = -1;
-    hid_t   dcpl_id          = -1;
-    hid_t   dspace_id        = -1;
-    hid_t   dspace_scalar_id = -1;
-    hid_t   dset_id          = -1;
-    hid_t   mindset_id       = -1;
-    hid_t   attr_1_id        = -1;
-    hid_t   attr_1a_id       = -1;
-    hid_t   attr_2_id        = -1;
-    hid_t   attr_2a_id       = -1;
-    hid_t   attr_3_id        = -1;
-    hid_t   attr_3a_id       = -1;
-    hid_t   file_id          = -1;
-    herr_t  ret;
-    int     count = 0;
+    hsize_t dims[1]             = {0};  /* dataspace extent */
+    char    filename[512]       = "";
+    char    attr_name[ATTR_NAME_MAX] = "";
+    hid_t   fid                 = H5I_INVALID_HID;
+    hid_t   dcpl_id             = H5I_INVALID_HID;
+    hid_t   sid                 = H5I_INVALID_HID;
+    hid_t   did                 = H5I_INVALID_HID;
+    hid_t   aid                 = H5I_INVALID_HID;
+    char    *in_buf             = NULL;
+    char    *out_buf            = NULL;
+    size_t  buf_size            = 0;
+    int     out_val             = 0;
+    int     in_val              = 0;
+    int     i;
 
-    TESTING("minimized dset object headers attribute additions")
+    TESTING("adding attributes to datasets created with H5Pset_dset_no_attrs_hint()")
 
-    /*********
-     * SETUP *
-     *********/
+    /* Create the test file */
+    if(NULL == h5_fixname(FILENAME[1], fapl_id, filename, sizeof(filename)))
+        TEST_ERROR;
+    if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) == H5I_INVALID_HID)
+        TEST_ERROR;
 
-    if(h5_fixname(FILENAME[1], fapl_id, filename, sizeof(filename)) == NULL)
-        TEST_ERROR
+    /* Set the 'no attrs' hint on the dcpl */
+    if((dcpl_id = H5Pcreate(H5P_DATASET_CREATE)) == H5I_INVALID_HID)
+        TEST_ERROR;
+    if(H5Pset_dset_no_attrs_hint(dcpl_id, TRUE) < 0)
+        TEST_ERROR;
 
-    dspace_id = H5Screate_simple(1, array_10, NULL);
-    if(dspace_id < 0) TEST_ERROR
+    /* The dataset doesn't need to contain data */
+    dims[0] = 0;
+    if((sid = H5Screate_simple(1, dims, NULL)) == H5I_INVALID_HID)
+        TEST_ERROR;
 
-    dspace_scalar_id = H5Screate(H5S_SCALAR);
-    if(dspace_scalar_id < 0) TEST_ERROR
+    /* Create the dataset */
+    if((did = H5Dcreate2(fid, "H5Pset_dset_no_attrs_hint", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl_id, H5P_DEFAULT)) == H5I_INVALID_HID)
+        TEST_ERROR;
 
-    char_type_id = H5Tcopy(H5T_NATIVE_CHAR);
-    if(char_type_id < 0) TEST_ERROR
+    /* Close */
+    if(H5Pclose(dcpl_id) < 0)
+        TEST_ERROR;
+    if(H5Sclose(sid) < 0)
+        TEST_ERROR;
 
-    int_type_id = H5Tcopy(H5T_NATIVE_INT);
-    if(int_type_id < 0) TEST_ERROR
+    /**********************************************
+     * ADD A (STRING) ATTRIBUTE AND MANIPULATE IT *
+     **********************************************/
 
-    dcpl_id = H5Pcreate(H5P_DATASET_CREATE);
-    if(dcpl_id < 0) TEST_ERROR
+    buf_size = HDstrlen(ATTR_LONG) + 1;
+    if(NULL == (in_buf = (char *)HDcalloc(buf_size, sizeof(char))))
+        TEST_ERROR;
+    if(NULL == (out_buf = (char *)HDcalloc(buf_size, sizeof(char))))
+        TEST_ERROR;
 
-    ret = H5Pset_dset_no_attrs_hint(dcpl_id, TRUE);
-    if(ret < 0) TEST_ERROR
-
-    file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
-    if(file_id < 0) TEST_ERROR
-
-    H5E_BEGIN_TRY {
-        count = count_attributes(dset_id);
-    } H5E_END_TRY;
-    if(count != -1) TEST_ERROR
-
-    dset_id = H5Dcreate2(file_id, "dataset", int_type_id, dspace_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    if(dset_id < 0) TEST_ERROR
-
-    mindset_id  = H5Dcreate2(file_id, "mindataset", int_type_id, dspace_id, H5P_DEFAULT, dcpl_id, H5P_DEFAULT);
-    if(mindset_id < 0) TEST_ERROR
-
-    /********************
-     * TEST/DEMONSTRATE *
-     ********************/
-
-    /* -------------------
-     * no attributes added
+    /* Create a string attribute on the dataset
+     *
+     * It has to be long enough to hold the longest string we're going to write
+     * to it.
      */
+    dims[0] = buf_size;
+    if((sid = H5Screate_simple(1, dims, NULL)) == H5I_INVALID_HID)
+        TEST_ERROR;
+    if((aid = H5Acreate2(did, "string_attr", H5T_NATIVE_CHAR, sid, H5P_DEFAULT, H5P_DEFAULT)) == H5I_INVALID_HID)
+        TEST_ERROR;
 
-    count = count_attributes(dset_id);
-    if(count != 0) TEST_ERROR
-    count = count_attributes(mindset_id);
-    if(count != 0) TEST_ERROR
+    /* Write attribute data */
+    HDstrcpy(in_buf, ATTR_SHORT);
+    if(H5Awrite(aid, H5T_NATIVE_CHAR, in_buf) < 0)
+        TEST_ERROR;
 
-    /* -----------------
-     * add one attribute
-     */
-    ret = put_attribute(dset_id, "PURPOSE", "DEMO", char_type_id, dspace_id, &attr_1_id);
-    if(ret < 0) TEST_ERROR
+    /* Make sure the count is correct */
+    if(count_attributes(did) != 1)
+        TEST_ERROR;
 
-    ret = put_attribute(mindset_id, "PURPOSE", "DEMO", char_type_id, dspace_id, &attr_1a_id);
-    if(ret < 0) TEST_ERROR
+    /* Read the data back and verify */
+    if(H5Aread(aid, H5T_NATIVE_CHAR, out_buf) < 0)
+        TEST_ERROR;
+    if(HDstrcmp(in_buf, out_buf))
+        TEST_ERROR;
 
-    count = count_attributes(dset_id);
-    if(count != 1) TEST_ERROR
-    count = count_attributes(mindset_id);
-    if(count != 1) TEST_ERROR
+    /* modify the string attribute */
+    HDmemset(in_buf, 0, buf_size);
+    HDstrcpy(in_buf, ATTR_LONG);
+    if(H5Awrite(aid, H5T_NATIVE_CHAR, in_buf) < 0)
+        TEST_ERROR;
 
-    ret = H5Aread(attr_1_id, char_type_id, buffer);
-    if(ret < 0) TEST_ERROR
-    if(HDstrcmp("DEMO", buffer)) TEST_ERROR
+    if(count_attributes(did) != 1)
+        TEST_ERROR;
 
-    ret = H5Aread(attr_1a_id, char_type_id, buffer);
-    if(ret < 0) TEST_ERROR
-    if(HDstrcmp("DEMO", buffer)) TEST_ERROR
+    /* Read the data back and verify */
+    if(H5Aread(aid, H5T_NATIVE_CHAR, out_buf) < 0)
+        TEST_ERROR;
+    if(HDstrcmp(in_buf, out_buf))
+        TEST_ERROR;
 
-    /* -----------------
-     * modify one attribute
-     */
+    /* Close */
+    if(H5Sclose(sid) < 0)
+        TEST_ERROR;
+    if(H5Aclose(aid) < 0)
+        TEST_ERROR;
 
-    ret = put_attribute(dset_id, "PURPOSE", "REWRITE", char_type_id, -1, &attr_1_id);
-    if(ret < 0) TEST_ERROR
+    /***************************************
+     * ADD A BUNCH OF (INTEGER) ATTRIBUTES *
+     ***************************************/
 
-    ret = put_attribute(mindset_id, "PURPOSE", "REWRITE", char_type_id, -1, &attr_1a_id);
-    if(ret < 0) TEST_ERROR
+    if((sid = H5Screate(H5S_SCALAR)) == H5I_INVALID_HID)
+        TEST_ERROR;
 
-    count = count_attributes(dset_id);
-    if(count != 1) TEST_ERROR
-    count = count_attributes(mindset_id);
-    if(count != 1) TEST_ERROR
+    /* Loop over a reasonable number of attributes */
+    for(i = 0; i < N_ATTRS; i++) {
 
-    ret = H5Aread(attr_1_id, char_type_id, buffer);
-    if(ret < 0) TEST_ERROR
-    if(HDstrcmp("REWRITE", buffer)) TEST_ERROR
+        /* Set the attribute's name */
+        if(HDsnprintf(attr_name, ATTR_NAME_MAX, "int_attr_%d", i) < 0)
+            TEST_ERROR;
 
-    ret = H5Aread(attr_1a_id, char_type_id, buffer);
-    if(ret < 0) TEST_ERROR
-    if(HDstrcmp("REWRITE", buffer)) TEST_ERROR
+        /* Create an integer attribute on the dataset */
+        if((aid = H5Acreate2(did, attr_name, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT)) == H5I_INVALID_HID)
+            TEST_ERROR;
 
-    /* -----------------
-     * add second attribute
-     */
+        /* Write attribute data */
+        in_val = i;
+        if(H5Awrite(aid, H5T_NATIVE_INT, &in_val) < 0)
+            TEST_ERROR;
 
-    a_out = 5;
-    ret = put_attribute(dset_id, "RANK", &a_out, int_type_id, dspace_scalar_id, &attr_2_id);
-    if(ret < 0) TEST_ERROR
+        /* Make sure the count is correct (already has one attribute) */
+        if(count_attributes(did) != i + 2)
+            TEST_ERROR;
 
-    a_out = 3;
-    ret = put_attribute(mindset_id, "RANK", &a_out, int_type_id, dspace_scalar_id, &attr_2a_id);
-    if(ret < 0) TEST_ERROR
+        /* Read the data back and verify */
+        if(H5Aread(aid, H5T_NATIVE_INT, &out_val) < 0)
+            TEST_ERROR;
+        if(in_val != out_val)
+            TEST_ERROR;
 
-    count = count_attributes(dset_id);
-    if(count != 2) TEST_ERROR
-    count = count_attributes(mindset_id);
-    if(count != 2) TEST_ERROR
+        /* Close */
+        if(H5Aclose(aid) < 0)
+            TEST_ERROR;
+    }
 
-    ret = H5Aread(attr_2_id, int_type_id, &a_out);
-    if(ret < 0) TEST_ERROR
-    if(a_out != 5) TEST_ERROR
+    /* Close */
+    if(H5Sclose(sid) < 0)
+        TEST_ERROR;
 
-    ret = H5Aread(attr_2a_id, int_type_id, &a_out);
-    if(ret < 0) TEST_ERROR
-    if(a_out != 3) TEST_ERROR
+    /* Close the remaining IDs */
+    if(H5Dclose(did) < 0)
+        TEST_ERROR;
+    if(H5Fclose(fid) < 0)
+        TEST_ERROR;
 
-    /* -----------------
-     * add third attribute
-     */
+    /* Free memory */
+    HDfree(in_buf);
+    HDfree(out_buf);
 
-    a_out = -86;
-    ret = put_attribute(dset_id, "FLAVOR", &a_out, int_type_id, dspace_scalar_id, &attr_3_id);
-    if(ret < 0) TEST_ERROR
-
-    a_out = 2185;
-    ret = put_attribute(mindset_id, "FLAVOR", &a_out, int_type_id, dspace_scalar_id, &attr_3a_id);
-    if(ret < 0) TEST_ERROR
-
-    count = count_attributes(dset_id);
-    if(count != 3) TEST_ERROR
-    count = count_attributes(mindset_id);
-    if(count != 3) TEST_ERROR
-
-    ret = H5Aread(attr_3_id, int_type_id, &a_out);
-    if(ret < 0) TEST_ERROR
-    if(a_out != -86) TEST_ERROR
-
-    ret = H5Aread(attr_3a_id, int_type_id, &a_out);
-    if(ret < 0) TEST_ERROR
-    if(a_out != 2185) TEST_ERROR
-
-    /************
-     * TEARDOWN *
-     ************/
-
-    if(H5Tclose(int_type_id) < 0) TEST_ERROR
-    if(H5Tclose(char_type_id) < 0) TEST_ERROR
-    if(H5Pclose(dcpl_id) < 0) TEST_ERROR
-    if(H5Sclose(dspace_id) < 0) TEST_ERROR
-    if(H5Dclose(dset_id) < 0) TEST_ERROR
-    if(H5Dclose(mindset_id) < 0) TEST_ERROR
-    if(H5Aclose(attr_1_id) < 0) TEST_ERROR
-    if(H5Aclose(attr_1a_id) < 0) TEST_ERROR
-    if(H5Aclose(attr_2_id) < 0) TEST_ERROR
-    if(H5Aclose(attr_2a_id) < 0) TEST_ERROR
-    if(H5Aclose(attr_3_id) < 0) TEST_ERROR
-    if(H5Aclose(attr_3a_id) < 0) TEST_ERROR
-    if(H5Fclose(file_id) < 0) TEST_ERROR
-
-    PASSED()
+    PASSED();
     return SUCCEED;
 
 error :
     H5E_BEGIN_TRY {
-        (void)H5Tclose(int_type_id);
-        (void)H5Tclose(char_type_id);
         (void)H5Pclose(dcpl_id);
-        (void)H5Sclose(dspace_id);
-        (void)H5Dclose(dset_id);
-        (void)H5Dclose(mindset_id);
-        (void)H5Aclose(attr_1_id);
-        (void)H5Aclose(attr_1a_id);
-        (void)H5Aclose(attr_2_id);
-        (void)H5Aclose(attr_2a_id);
-        (void)H5Aclose(attr_3_id);
-        (void)H5Aclose(attr_3a_id);
-        (void)H5Fclose(file_id);
+        (void)H5Sclose(sid);
+        (void)H5Dclose(did);
+        (void)H5Aclose(aid);
+        (void)H5Fclose(fid);
     } H5E_END_TRY;
+
+    HDfree(in_buf);
+    HDfree(out_buf);
+
     return FAIL;
 } /* test_minimized_dset_ohdr_attribute_addition */
 
@@ -1085,19 +1029,24 @@ test_minimized_dset_ohdr_size_comparisons(hid_t fapl_id)
      * file-minimized |   F_x   |   F_Y    |   F_N
      */
 
-    TESTING("minimized dset object headers size comparisons");
 
     /*********
      * SETUP *
      *********/
 
+    /* Set filenames (not in a test, can't use TEST_ERROR) */
     if(h5_fixname(FILENAME[1], fapl_id, filename_a, sizeof(filename_a)) == NULL)
-        TEST_ERROR
-
+        return FAIL;
     if(h5_fixname(FILENAME[2], fapl_id, filename_b, sizeof(filename_b)) == NULL)
-        TEST_ERROR
+        return FAIL;
 
     for (compact = 0; compact < 2; compact++) { /* 0 or 1 */
+
+        if(compact)
+            TESTING("minimized dset object headers size comparisons (compact)")
+        else
+            TESTING("minimized dset object headers size comparisons")
+
         dcpl_default = H5Pcreate(H5P_DATASET_CREATE);
         if(dcpl_default < 0) TEST_ERROR
  
@@ -1112,15 +1061,13 @@ test_minimized_dset_ohdr_size_comparisons(hid_t fapl_id)
         if(ret < 0) TEST_ERROR
 
         if(compact) {
-            HDprintf("...compact ");
             ret = H5Pset_layout(dcpl_default, H5D_COMPACT);
             if(ret < 0) TEST_ERROR
             ret = H5Pset_layout(dcpl_minimize, H5D_COMPACT);
             if(ret < 0) TEST_ERROR
             ret = H5Pset_layout(dcpl_dontmin, H5D_COMPACT);
             if(ret < 0) TEST_ERROR
-        } else 
-            HDprintf("...not compact ");
+        }
 
         dspace_id = H5Screate_simple(1, array_10, NULL);
         if(dspace_id < 0) TEST_ERROR
@@ -1191,9 +1138,10 @@ test_minimized_dset_ohdr_size_comparisons(hid_t fapl_id)
         if(H5Dclose(dset_F_N_id) < 0) TEST_ERROR
         if(H5Dclose(dset_F_Y_id) < 0) TEST_ERROR
 
+        PASSED()
+
     } /* compact and non-compact */
 
-    PASSED()
     return SUCCEED;
 
 error :

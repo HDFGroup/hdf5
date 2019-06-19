@@ -31,37 +31,23 @@ foreach (voltest ${VOL_LIST})
   file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/${voltest}")
   file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/${voltest}/testfiles")
   file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/${voltest}/testfiles/plist_files")
-  if (BUILD_SHARED_LIBS)
-    file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/${voltest}-shared")
-    file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/${voltest}-shared/testfiles")
-    file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/${voltest}-shared/testfiles/plist_files")
-  endif ()
 endforeach ()
 
 foreach (voltest ${VOL_LIST})
   foreach (h5_tfile ${HDF5_TEST_FILES})
     HDFTEST_COPY_FILE("${HDF5_TOOLS_DIR}/testfiles/${h5_tfile}" "${PROJECT_BINARY_DIR}/${voltest}/${h5_tfile}" "HDF5_VOLTEST_LIB_files")
-    if (BUILD_SHARED_LIBS)
-      HDFTEST_COPY_FILE("${HDF5_TOOLS_DIR}/testfiles/${h5_tfile}" "${PROJECT_BINARY_DIR}/${voltest}-shared/${h5_tfile}" "HDF5_VOLTEST_LIBSH_files")
-    endif ()
   endforeach ()
 endforeach ()
 
 foreach (voltest ${VOL_LIST})
   foreach (ref_file ${HDF5_REFERENCE_FILES})
     HDFTEST_COPY_FILE("${HDF5_TEST_SOURCE_DIR}/testfiles/${ref_file}" "${PROJECT_BINARY_DIR}/${voltest}/${ref_file}" "HDF5_VOLTEST_LIB_files")
-    if (BUILD_SHARED_LIBS)
-      HDFTEST_COPY_FILE("${HDF5_TEST_SOURCE_DIR}/testfiles/${ref_file}" "${PROJECT_BINARY_DIR}/${voltest}-shared/${ref_file}" "HDF5_VOLTEST_LIBSH_files")
-    endif ()
   endforeach ()
 endforeach ()
 
 foreach (voltest ${VOL_LIST})
   foreach (h5_file ${HDF5_REFERENCE_TEST_FILES})
     HDFTEST_COPY_FILE("${HDF5_TEST_SOURCE_DIR}/${h5_file}" "${HDF5_TEST_BINARY_DIR}/${voltest}/${h5_file}" "HDF5_VOLTEST_LIB_files")
-    if (BUILD_SHARED_LIBS)
-      HDFTEST_COPY_FILE("${HDF5_TEST_SOURCE_DIR}/${h5_file}" "${HDF5_TEST_BINARY_DIR}/${voltest}-shared/${h5_file}" "HDF5_VOLTEST_LIBSH_files")
-    endif ()
   endforeach ()
 endforeach ()
 
@@ -69,17 +55,10 @@ foreach (voltest ${VOL_LIST})
   foreach (plistfile ${HDF5_REFERENCE_PLIST_FILES})
     HDFTEST_COPY_FILE("${HDF5_TEST_SOURCE_DIR}/testfiles/plist_files/${plistfile}" "${PROJECT_BINARY_DIR}/${voltest}/testfiles/plist_files/${plistfile}" "HDF5_VOLTEST_LIB_files")
     HDFTEST_COPY_FILE("${HDF5_TEST_SOURCE_DIR}/testfiles/plist_files/def_${plistfile}" "${PROJECT_BINARY_DIR}/${voltest}/testfiles/plist_files/def_${plistfile}" "HDF5_VOLTEST_LIB_files")
-    if (BUILD_SHARED_LIBS)
-      HDFTEST_COPY_FILE("${HDF5_TEST_SOURCE_DIR}/testfiles/plist_files/${plistfile}" "${PROJECT_BINARY_DIR}/${voltest}-shared/testfiles/plist_files/${plistfile}" "HDF5_VOLTEST_LIBSH_files")
-      HDFTEST_COPY_FILE("${HDF5_TEST_SOURCE_DIR}/testfiles/plist_files/def_${plistfile}" "${PROJECT_BINARY_DIR}/${voltest}-shared/testfiles/plist_files/def_${plistfile}" "HDF5_VOLTEST_LIBSH_files")
-    endif ()
   endforeach ()
 endforeach ()
 
 add_custom_target(HDF5_VOLTEST_LIB_files ALL COMMENT "Copying files needed by HDF5_VOLTEST_LIB tests" DEPENDS ${HDF5_VOLTEST_LIB_files_list})
-if (BUILD_SHARED_LIBS)
-  add_custom_target(HDF5_VOLTEST_LIBSH_files ALL COMMENT "Copying files needed by HDF5_VOLTEST_LIBSH tests" DEPENDS ${HDF5_VOLTEST_LIBSH_files_list})
-endif ()
 
 ##############################################################################
 ##############################################################################
@@ -133,39 +112,10 @@ endif ()
               ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${volname}"
               WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/${volname}
           )
-          if (BUILD_SHARED_LIBS)
-            add_test (
-                NAME VOL-${volname}-${voltest}-shared-clear-objects
-                COMMAND    ${CMAKE_COMMAND}
-                    -E remove
-                        ${volname}-shared/${volname}-${voltest}-shared.out
-                        ${volname}-shared/${volname}-${voltest}-shared.out.err
-            )
-            add_test (NAME VOL-${volname}-${voltest}-shared
-                COMMAND "${CMAKE_COMMAND}"
-                    -D "TEST_PROGRAM=$<TARGET_FILE:${voltest}-shared>"
-                    -D "TEST_ARGS:STRING="
-                    -D "TEST_VOL:STRING=${volinfo}"
-                    -D "TEST_EXPECT=${resultcode}"
-                    -D "TEST_OUTPUT=${volname}-${voltest}-shared.out"
-                    -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/${volname}-shared"
-                    -P "${HDF_RESOURCES_DIR}/volTest.cmake"
-            )
-            set_tests_properties (VOL-${volname}-${voltest}-shared PROPERTIES
-                DEPENDS VOL-${volname}-${voltest}-shared-clear-objects
-                ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${volname}-shared"
-                WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/${volname}-shared
-            )
-          endif ()
         else ()
           add_test (NAME VOL-${volname}-${voltest}
               COMMAND ${CMAKE_COMMAND} -E echo "SKIP VOL-${volname}-${voltest}"
           )
-          if (BUILD_SHARED_LIBS)
-            add_test (NAME VOL-${volname}-${voltest}-shared
-                COMMAND ${CMAKE_COMMAND} -E echo "SKIP VOL-${volname}-${voltest}-shared"
-            )
-          endif ()
         endif ()
       else ()
         add_test (
@@ -190,30 +140,6 @@ endif ()
             ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${volname}"
             WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/${volname}
         )
-        if (BUILD_SHARED_LIBS)
-          add_test (
-              NAME VOL-${volname}-${voltest}-shared-clear-objects
-              COMMAND    ${CMAKE_COMMAND}
-                  -E remove
-                      ${volname}-shared/${volname}-${voltest}-shared.out
-                      ${volname}-shared/${volname}-${voltest}-shared.out.err
-          )
-          add_test (NAME VOL-${volname}-${voltest}-shared
-              COMMAND "${CMAKE_COMMAND}"
-                -D "TEST_PROGRAM=$<TARGET_FILE:${voltest}-shared>"
-                -D "TEST_ARGS:STRING="
-                -D "TEST_VOL:STRING=${volinfo}"
-                -D "TEST_EXPECT=${resultcode}"
-                -D "TEST_OUTPUT=${volname}-${voltest}-shared.out"
-                -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/${volname}-shared"
-                -P "${HDF_RESOURCES_DIR}/volTest.cmake"
-          )
-          set_tests_properties (VOL-${volname}-${voltest}-shared PROPERTIES
-              DEPENDS VOL-${volname}-${voltest}-shared-clear-objects
-              ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${volname}-shared"
-              WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/${volname}-shared
-          )
-        endif ()
       endif ()
     else ()
       add_test (
@@ -238,30 +164,6 @@ endif ()
           ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${volname};HDF5TestExpress=${HDF_TEST_EXPRESS}"
           WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/${volname}
       )
-      if (BUILD_SHARED_LIBS AND NOT "${voltest}" STREQUAL "cache")
-        add_test (
-            NAME VOL-${volname}-${voltest}-shared-clear-objects
-            COMMAND    ${CMAKE_COMMAND}
-                -E remove
-                    ${volname}-shared/${volname}-${voltest}-shared.out
-                    ${volname}-shared/${volname}-${voltest}-shared.out.err
-        )
-        add_test (NAME VOL-${volname}-${voltest}-shared
-            COMMAND "${CMAKE_COMMAND}"
-                -D "TEST_PROGRAM=$<TARGET_FILE:${voltest}-shared>"
-                -D "TEST_ARGS:STRING="
-                -D "TEST_VOL:STRING=${volinfo}"
-                -D "TEST_EXPECT=${resultcode}"
-                -D "TEST_OUTPUT=${volname}-${voltest}-shared.out"
-                -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/${volname}-shared"
-                -P "${HDF_RESOURCES_DIR}/volTest.cmake"
-        )
-        set_tests_properties (VOL-${volname}-${voltest}-shared PROPERTIES
-            DEPENDS VOL-${volname}-${voltest}-shared-clear-objects
-            ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${volname}-shared;HDF5TestExpress=${HDF_TEST_EXPRESS}"
-            WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/${volname}-shared
-        )
-        endif ()
     endif ()
   endmacro ()
 
@@ -289,30 +191,6 @@ endif ()
           ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${volname}"
           WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/${volname}
       )
-      if (BUILD_SHARED_LIBS)
-        add_test (
-            NAME VOL-${volname}-${voltest}-shared-clear-objects
-            COMMAND    ${CMAKE_COMMAND}
-                -E remove
-                    ${volname}-shared/${volname}-${voltest}-shared.out
-                    ${volname}-shared/${volname}-${voltest}-shared.out.err
-        )
-        add_test (NAME VOL-${volname}-${voltest}-shared
-            COMMAND "${CMAKE_COMMAND}"
-                -D "TEST_PROGRAM=$<TARGET_FILE:${voltest}-shared>"
-                -D "TEST_ARGS:STRING="
-                -D "TEST_VOL:STRING=${volinfo}"
-                -D "TEST_EXPECT=${resultcode}"
-                -D "TEST_OUTPUT=${volname}-${voltest}-shared.out"
-                -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/${volname}-shared"
-                -P "${HDF_RESOURCES_DIR}/volTest.cmake"
-        )
-        set_tests_properties (VOL-${volname}-${voltest}-shared PROPERTIES
-            DEPENDS VOL-${volname}-${voltest}-shared-clear-objects
-            ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${volname}-shared"
-            WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/${volname}-shared
-        )
-      endif ()
   endmacro ()
 
   macro (ADD_VOL_TEST volname volinfo resultcode)
@@ -332,15 +210,6 @@ endif ()
     set_tests_properties (VOL-${volname}-istore PROPERTIES TIMEOUT ${CTEST_VERY_LONG_TIMEOUT})
     if (NOT CYGWIN)
       set_tests_properties (VOL-${volname}-cache PROPERTIES TIMEOUT ${CTEST_VERY_LONG_TIMEOUT})
-    endif ()
-    if (BUILD_SHARED_LIBS)
-      set_tests_properties (VOL-${volname}-flush2-shared PROPERTIES DEPENDS VOL-${volname}-flush1-shared)
-      set_tests_properties (VOL-${volname}-flush1-shared PROPERTIES TIMEOUT 10)
-      set_tests_properties (VOL-${volname}-flush2-shared PROPERTIES TIMEOUT 10)
-      set_tests_properties (VOL-${volname}-istore-shared PROPERTIES TIMEOUT ${CTEST_VERY_LONG_TIMEOUT})
-      if (NOT CYGWIN AND NOT WIN32)
-        set_tests_properties (VOL-${volname}-cache-shared PROPERTIES TIMEOUT ${CTEST_VERY_LONG_TIMEOUT})
-      endif ()
     endif ()
     if (HDF5_TEST_FHEAP_PASSTHROUGH_VOL)
       add_test (
@@ -366,31 +235,6 @@ endif ()
           ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${volname};HDF5TestExpress=${HDF_TEST_EXPRESS}"
           WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/${volname}
       )
-      if (BUILD_SHARED_LIBS)
-        add_test (
-            NAME VOL-${volname}-fheap-shared-clear-objects
-            COMMAND    ${CMAKE_COMMAND}
-                -E remove
-                    ${volname}-shared/${volname}-fheap-shared.out
-                    ${volname}-shared/${volname}-fheap-shared.out.err
-        )
-        add_test (NAME VOL-${volname}-fheap-shared
-            COMMAND "${CMAKE_COMMAND}"
-                -D "TEST_PROGRAM=$<TARGET_FILE:fheap-shared>"
-                -D "TEST_ARGS:STRING="
-                -D "TEST_VOL:STRING=${volinfo}"
-                -D "TEST_EXPECT=${resultcode}"
-                -D "TEST_OUTPUT=${volname}-fheap-shared.out"
-                -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/${volname}-shared"
-                -P "${HDF_RESOURCES_DIR}/volTest.cmake"
-        )
-        set_tests_properties (VOL-${volname}-fheap-shared PROPERTIES
-            DEPENDS VOL-${volname}-fheap-shared-clear-objects
-            TIMEOUT ${CTEST_VERY_LONG_TIMEOUT}
-            ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${volname}-shared;HDF5TestExpress=${HDF_TEST_EXPRESS}"
-            WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/${volname}-shared
-        )
-      endif ()
     endif ()
   endmacro ()
 

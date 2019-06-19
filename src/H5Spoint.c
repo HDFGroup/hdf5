@@ -180,14 +180,32 @@ H5FL_DEFINE_STATIC(H5S_pnt_list_t);
 static herr_t
 H5S__point_iter_init(const H5S_t *space, H5S_sel_iter_t *iter)
 {
-    FUNC_ENTER_STATIC_NOERR
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
 
     /* Check args */
     HDassert(space && H5S_SEL_POINTS == H5S_GET_SELECT_TYPE(space));
     HDassert(iter);
 
-    /* Share point list for internal iterations */
-    iter->u.pnt.pnt_lst = space->select.sel_info.pnt_lst;
+    /* If this iterator is created from an API call, by default we clone the
+     *  selection now, as the dataspace could be modified or go out of scope.
+     *  
+     *  However, if the H5S_SEL_ITER_SHARE_WITH_DATASPACE flag is given,
+     *  the selection is shared between the selection iterator and the
+     *  dataspace.  In this case, the application _must_not_ modify or
+     *  close the dataspace that the iterator is operating on, or undefined
+     *  behavior will occur.
+     */
+    if((iter->flags & H5S_SEL_ITER_API_CALL) && 
+            !(iter->flags & H5S_SEL_ITER_SHARE_WITH_DATASPACE)) {
+        /* Copy the point list */
+        if(NULL == (iter->u.pnt.pnt_lst = H5S__copy_pnt_list(space->select.sel_info.pnt_lst, space->extent.rank)))
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "can't copy point list")
+    } /* end if */
+    else
+        /* OK to share point list for internal iterations */
+        iter->u.pnt.pnt_lst = space->select.sel_info.pnt_lst;
 
     /* Start at the head of the list of points */
     iter->u.pnt.curr = iter->u.pnt.pnt_lst->head;
@@ -195,7 +213,8 @@ H5S__point_iter_init(const H5S_t *space, H5S_sel_iter_t *iter)
     /* Initialize type of selection iterator */
     iter->type = H5S_sel_iter_point;
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__point_iter_init() */
 
 
@@ -537,12 +556,17 @@ H5S__point_iter_get_seq_list(H5S_sel_iter_t *iter, size_t maxseq, size_t maxelem
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S__point_iter_release(H5S_sel_iter_t H5_ATTR_UNUSED * iter)
+H5S__point_iter_release(H5S_sel_iter_t * iter)
 {
     FUNC_ENTER_STATIC_NOERR
 
     /* Check args */
     HDassert(iter);
+
+    /* If this iterator copied the point list, we must free it */
+    if((iter->flags & H5S_SEL_ITER_API_CALL) && 
+            !(iter->flags & H5S_SEL_ITER_SHARE_WITH_DATASPACE))
+        H5S__free_pnt_list(iter->u.pnt.pnt_lst);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5S__point_iter_release() */

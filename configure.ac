@@ -943,6 +943,48 @@ fi
 AM_CONDITIONAL([FORTRAN_SHARED_CONDITIONAL], [test "X$H5_FORTRAN_SHARED" = "Xyes"])
 
 ## ----------------------------------------------------------------------
+## Check if they would like to disable building tests 
+##
+
+## This needs to be exposed for the library info file.
+AC_SUBST([HDF5_TESTS])
+
+## Default is to build tests
+HDF5_TESTS=yes
+
+AC_MSG_CHECKING([if building tests is disabled])
+
+AC_ARG_ENABLE([tests],
+              [AS_HELP_STRING([--enable-tests],
+                              [Compile the HDF5 tests [default=yes]])],
+              [HDF5_TESTS=$enableval])
+
+if test "X$HDF5_TESTS" = "Xno"; then
+  echo "Building HDF5 tests is disabled"
+fi
+
+## ----------------------------------------------------------------------
+## Check if they would like to disable building tools
+##
+
+## This needs to be exposed for the library info file.
+AC_SUBST([HDF5_TOOLS])
+
+## Default is to build tests and tools
+HDF5_TOOLS=yes
+
+AC_MSG_CHECKING([if building tools is disabled])
+
+AC_ARG_ENABLE([tools],
+              [AS_HELP_STRING([--enable-tools],
+                              [Compile the HDF5 tools [default=yes]])],
+              [HDF5_TOOLS=$enableval])
+
+if test "X$HDF5_TOOLS" = "Xno"; then
+  echo "Building HDF5 tools is disabled"
+fi
+
+## ----------------------------------------------------------------------
 ## Create libtool.  If shared/static libraries are going to be enabled
 ## or disabled, it should happen before these macros.
 LT_PREREQ([2.2])
@@ -2511,8 +2553,10 @@ AC_SUBST([PARALLEL_FILTERED_WRITES])
 AC_SUBST([LARGE_PARALLEL_IO])
 
 if test -n "$PARALLEL"; then
-  ## The 'testpar' directory should participate in the build
-  TESTPARALLEL=testpar
+  if test "X$HDF5_TESTS" = "Xyes"; then
+    ## The 'testpar' directory should participate in the build
+    TESTPARALLEL=testpar
+  fi
 
   ## We are building a parallel library
   AC_DEFINE([HAVE_PARALLEL], [1], [Define if we have parallel support])
@@ -3361,11 +3405,13 @@ LDFLAGS="$saved_user_LDFLAGS"
 ## need to be compiled
 
 AM_CONDITIONAL([BUILD_CXX_CONDITIONAL], [test "X$HDF_CXX" = "Xyes"])
-AM_CONDITIONAL([BUILD_PARALLEL_CONDITIONAL], [test -n "$TESTPARALLEL"])
+AM_CONDITIONAL([BUILD_PARALLEL_CONDITIONAL], [test "X$PARALLEL" = "Xyes"])
 AM_CONDITIONAL([BUILD_FORTRAN_CONDITIONAL], [test "X$HDF_FORTRAN" = "Xyes"])
 AM_CONDITIONAL([BUILD_JAVA_CONDITIONAL], [test "X$HDF_JAVA" = "Xyes"])
 AM_CONDITIONAL([BUILD_HDF5_HL_CONDITIONAL], [test "X$HDF5_HL" = "Xyes"])
-
+AM_CONDITIONAL([BUILD_TESTS_CONDITIONAL], [test "X$HDF5_TESTS" = "Xyes"])
+AM_CONDITIONAL([BUILD_TESTS_PARALLEL_CONDITIONAL], [test -n "$TESTPARALLEL"])
+AM_CONDITIONAL([BUILD_TOOLS_CONDITIONAL], [test "X$HDF5_TOOLS" = "Xyes"])
 
 ## ----------------------------------------------------------------------
 ## Build the Makefiles.
@@ -3500,7 +3546,6 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  tools/src/h5ls/Makefile
                  tools/src/h5copy/Makefile
                  tools/src/misc/Makefile
-                 tools/src/misc/h5cc
                  tools/src/h5stat/Makefile
                  tools/test/Makefile
                  tools/test/h5dump/Makefile
@@ -3540,6 +3585,8 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  examples/Makefile
                  examples/run-c-ex.sh
                  examples/testh5cc.sh
+                 bin/h5cc
+                 bin/Makefile
                  c++/Makefile
                  c++/src/Makefile
                  c++/src/h5c++
@@ -3602,7 +3649,7 @@ AC_CONFIG_COMMANDS([.classes], [], [$MKDIR_P java/src/.classes;
 
 AC_OUTPUT
 
-chmod 755 tools/src/misc/h5cc
+chmod 755 src/h5cc
 if test "X$HDF_CXX" = "Xyes"; then
   chmod 755 c++/src/h5c++
 fi

@@ -19,10 +19,16 @@
 
 include $(top_srcdir)/config/commence.am
 
+if BUILD_TESTS_CONDITIONAL
+   TESTSERIAL_DIR =test
+else
+   TESTSERIAL_DIR=
+endif
+
 CONFIG=ordered
 
 # All subdirectories
-SUBDIRS=lib src test
+SUBDIRS=lib src $(TESTSERIAL_DIR)
 
 # Test with just the native connector, with a single pass-through connector
 # and with a doubly-stacked pass-through.

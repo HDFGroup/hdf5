@@ -127,62 +127,65 @@ static herr_t H5P__free_del_name_cb(void *item, void H5_ATTR_UNUSED *key, void H
  * Predefined property list classes. These are initialized at runtime by
  * H5P__init_package() in this source file.
  */
-hid_t H5P_CLS_ROOT_ID_g                         = FAIL;
+hid_t H5P_CLS_ROOT_ID_g                         = H5I_INVALID_HID;
 H5P_genclass_t *H5P_CLS_ROOT_g                  = NULL;
-hid_t H5P_CLS_OBJECT_CREATE_ID_g                = FAIL;
+hid_t H5P_CLS_OBJECT_CREATE_ID_g                = H5I_INVALID_HID;
 H5P_genclass_t *H5P_CLS_OBJECT_CREATE_g         = NULL;
-hid_t H5P_CLS_FILE_CREATE_ID_g                  = FAIL;
+hid_t H5P_CLS_FILE_CREATE_ID_g                  = H5I_INVALID_HID;
 H5P_genclass_t *H5P_CLS_FILE_CREATE_g           = NULL;
-hid_t H5P_CLS_FILE_ACCESS_ID_g                  = FAIL;
+hid_t H5P_CLS_FILE_ACCESS_ID_g                  = H5I_INVALID_HID;
 H5P_genclass_t *H5P_CLS_FILE_ACCESS_g           = NULL;
-hid_t H5P_CLS_DATASET_CREATE_ID_g               = FAIL;
+hid_t H5P_CLS_DATASET_CREATE_ID_g               = H5I_INVALID_HID;
 H5P_genclass_t *H5P_CLS_DATASET_CREATE_g        = NULL;
-hid_t H5P_CLS_DATASET_ACCESS_ID_g               = FAIL;
+hid_t H5P_CLS_DATASET_ACCESS_ID_g               = H5I_INVALID_HID;
 H5P_genclass_t *H5P_CLS_DATASET_ACCESS_g        = NULL;
-hid_t H5P_CLS_DATASET_XFER_ID_g                 = FAIL;
+hid_t H5P_CLS_DATASET_XFER_ID_g                 = H5I_INVALID_HID;
 H5P_genclass_t *H5P_CLS_DATASET_XFER_g          = NULL;
-hid_t H5P_CLS_FILE_MOUNT_ID_g                   = FAIL;
+hid_t H5P_CLS_FILE_MOUNT_ID_g                   = H5I_INVALID_HID;
 H5P_genclass_t *H5P_CLS_FILE_MOUNT_g            = NULL;
-hid_t H5P_CLS_GROUP_CREATE_ID_g                 = FAIL;
+hid_t H5P_CLS_GROUP_CREATE_ID_g                 = H5I_INVALID_HID;
 H5P_genclass_t *H5P_CLS_GROUP_CREATE_g          = NULL;
-hid_t H5P_CLS_GROUP_ACCESS_ID_g                 = FAIL;
+hid_t H5P_CLS_GROUP_ACCESS_ID_g                 = H5I_INVALID_HID;
 H5P_genclass_t *H5P_CLS_GROUP_ACCESS_g          = NULL;
-hid_t H5P_CLS_DATATYPE_CREATE_ID_g              = FAIL;
+hid_t H5P_CLS_DATATYPE_CREATE_ID_g              = H5I_INVALID_HID;
 H5P_genclass_t *H5P_CLS_DATATYPE_CREATE_g       = NULL;
-hid_t H5P_CLS_DATATYPE_ACCESS_ID_g              = FAIL;
+hid_t H5P_CLS_DATATYPE_ACCESS_ID_g              = H5I_INVALID_HID;
 H5P_genclass_t *H5P_CLS_DATATYPE_ACCESS_g       = NULL;
-hid_t H5P_CLS_ATTRIBUTE_CREATE_ID_g             = FAIL;
+hid_t H5P_CLS_ATTRIBUTE_CREATE_ID_g             = H5I_INVALID_HID;
 H5P_genclass_t *H5P_CLS_ATTRIBUTE_CREATE_g      = NULL;
-hid_t H5P_CLS_ATTRIBUTE_ACCESS_ID_g             = FAIL;
+hid_t H5P_CLS_ATTRIBUTE_ACCESS_ID_g             = H5I_INVALID_HID;
 H5P_genclass_t *H5P_CLS_ATTRIBUTE_ACCESS_g      = NULL;
-hid_t H5P_CLS_OBJECT_COPY_ID_g                  = FAIL;
+hid_t H5P_CLS_OBJECT_COPY_ID_g                  = H5I_INVALID_HID;
 H5P_genclass_t *H5P_CLS_OBJECT_COPY_g           = NULL;
-hid_t H5P_CLS_LINK_CREATE_ID_g                  = FAIL;
+hid_t H5P_CLS_LINK_CREATE_ID_g                  = H5I_INVALID_HID;
 H5P_genclass_t *H5P_CLS_LINK_CREATE_g           = NULL;
-hid_t H5P_CLS_LINK_ACCESS_ID_g                  = FAIL;
+hid_t H5P_CLS_LINK_ACCESS_ID_g                  = H5I_INVALID_HID;
 H5P_genclass_t *H5P_CLS_LINK_ACCESS_g           = NULL;
-hid_t H5P_CLS_STRING_CREATE_ID_g                = FAIL;
+hid_t H5P_CLS_STRING_CREATE_ID_g                = H5I_INVALID_HID;
 H5P_genclass_t *H5P_CLS_STRING_CREATE_g         = NULL;
+hid_t H5P_CLS_VOL_INITIALIZE_ID_g               = H5I_INVALID_HID;
+H5P_genclass_t *H5P_CLS_VOL_INITIALIZE_g        = NULL;
 
 /*
  * Predefined property lists for each predefined class. These are initialized
  * at runtime by H5P__init_package() in this source file.
  */
-hid_t H5P_LST_FILE_CREATE_ID_g          = FAIL;
-hid_t H5P_LST_FILE_ACCESS_ID_g          = FAIL;
-hid_t H5P_LST_DATASET_CREATE_ID_g       = FAIL;
-hid_t H5P_LST_DATASET_ACCESS_ID_g       = FAIL;
-hid_t H5P_LST_DATASET_XFER_ID_g         = FAIL;
-hid_t H5P_LST_FILE_MOUNT_ID_g           = FAIL;
-hid_t H5P_LST_GROUP_CREATE_ID_g         = FAIL;
-hid_t H5P_LST_GROUP_ACCESS_ID_g         = FAIL;
-hid_t H5P_LST_DATATYPE_CREATE_ID_g      = FAIL;
-hid_t H5P_LST_DATATYPE_ACCESS_ID_g      = FAIL;
-hid_t H5P_LST_ATTRIBUTE_CREATE_ID_g     = FAIL;
-hid_t H5P_LST_ATTRIBUTE_ACCESS_ID_g     = FAIL;
-hid_t H5P_LST_OBJECT_COPY_ID_g          = FAIL;
-hid_t H5P_LST_LINK_CREATE_ID_g          = FAIL;
-hid_t H5P_LST_LINK_ACCESS_ID_g          = FAIL;
+hid_t H5P_LST_FILE_CREATE_ID_g          = H5I_INVALID_HID;
+hid_t H5P_LST_FILE_ACCESS_ID_g          = H5I_INVALID_HID;
+hid_t H5P_LST_DATASET_CREATE_ID_g       = H5I_INVALID_HID;
+hid_t H5P_LST_DATASET_ACCESS_ID_g       = H5I_INVALID_HID;
+hid_t H5P_LST_DATASET_XFER_ID_g         = H5I_INVALID_HID;
+hid_t H5P_LST_FILE_MOUNT_ID_g           = H5I_INVALID_HID;
+hid_t H5P_LST_GROUP_CREATE_ID_g         = H5I_INVALID_HID;
+hid_t H5P_LST_GROUP_ACCESS_ID_g         = H5I_INVALID_HID;
+hid_t H5P_LST_DATATYPE_CREATE_ID_g      = H5I_INVALID_HID;
+hid_t H5P_LST_DATATYPE_ACCESS_ID_g      = H5I_INVALID_HID;
+hid_t H5P_LST_ATTRIBUTE_CREATE_ID_g     = H5I_INVALID_HID;
+hid_t H5P_LST_ATTRIBUTE_ACCESS_ID_g     = H5I_INVALID_HID;
+hid_t H5P_LST_OBJECT_COPY_ID_g          = H5I_INVALID_HID;
+hid_t H5P_LST_LINK_CREATE_ID_g          = H5I_INVALID_HID;
+hid_t H5P_LST_LINK_ACCESS_ID_g          = H5I_INVALID_HID;
+hid_t H5P_LST_VOL_INITIALIZE_ID_g       = H5I_INVALID_HID;
 
 /* Root property list class library initialization object */
 const H5P_libclass_t H5P_CLS_ROOT[1] = {{
@@ -283,6 +286,26 @@ const H5P_libclass_t H5P_CLS_TACC[1] = {{
     NULL 		        /* Class close callback info    */
 }};
 
+/* VOL initialization property list class library initialization object */
+/* (move to proper source code file when used for real) */
+const H5P_libclass_t H5P_CLS_VINI[1] = {{
+    "VOL initialization",		/* Class name for debugging     */
+    H5P_TYPE_VOL_INITIALIZE,  /* Class type                   */
+
+    &H5P_CLS_ROOT_g,	/* Parent class                 */
+    &H5P_CLS_VOL_INITIALIZE_g,	/* Pointer to class             */
+    &H5P_CLS_VOL_INITIALIZE_ID_g,	/* Pointer to class ID          */
+    &H5P_LST_VOL_INITIALIZE_ID_g,	/* Pointer to default property list ID */
+    NULL,			/* Default property registration routine */
+
+    NULL,		        /* Class creation callback      */
+    NULL,		        /* Class creation callback info */
+    NULL,			/* Class copy callback          */
+    NULL,		        /* Class copy callback info     */
+    NULL,			/* Class close callback         */
+    NULL 		        /* Class close callback info    */
+}};
+
 
 /* Library property list classes defined in other code modules */
 /* (And not present in src/H5Pprivate.h) */
@@ -331,7 +354,8 @@ static H5P_libclass_t const * const init_class[] = {
     H5P_CLS_TACC,       /* Datatype access */
     H5P_CLS_ACRT,       /* Attribute creation */
     H5P_CLS_AACC,       /* Attribute access */
-    H5P_CLS_LCRT        /* Link creation */
+    H5P_CLS_LCRT,       /* Link creation */
+    H5P_CLS_VINI        /* VOL initialization */
 };
 
 /* Declare a free list to manage the H5P_genclass_t struct */
@@ -525,7 +549,8 @@ H5P_term_package(void)
                         H5P_LST_OBJECT_COPY_ID_g =
                         H5P_LST_LINK_CREATE_ID_g =
                         H5P_LST_LINK_ACCESS_ID_g =
-                        H5P_LST_FILE_MOUNT_ID_g = (-1);
+                        H5P_LST_VOL_INITIALIZE_ID_g =
+                        H5P_LST_FILE_MOUNT_ID_g = H5I_INVALID_HID;
                 } /* end if */
             } /* end if */
 
@@ -552,6 +577,7 @@ H5P_term_package(void)
                         H5P_CLS_OBJECT_COPY_g =
                         H5P_CLS_LINK_CREATE_g =
                         H5P_CLS_LINK_ACCESS_g =
+                        H5P_CLS_VOL_INITIALIZE_g =
                         H5P_CLS_FILE_MOUNT_g = NULL;
 
                         H5P_CLS_ROOT_ID_g =
@@ -571,7 +597,8 @@ H5P_term_package(void)
                         H5P_CLS_OBJECT_COPY_ID_g =
                         H5P_CLS_LINK_CREATE_ID_g =
                         H5P_CLS_LINK_ACCESS_ID_g =
-                        H5P_CLS_FILE_MOUNT_ID_g = (-1);
+                        H5P_CLS_VOL_INITIALIZE_ID_g =
+                        H5P_CLS_FILE_MOUNT_ID_g = H5I_INVALID_HID;
                 } /* end if */
             } /* end if */
 
@@ -5408,7 +5435,7 @@ H5P__new_plist_of_type(H5P_plist_type_t type)
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDcompile_assert(H5P_TYPE_ATTRIBUTE_ACCESS == (H5P_TYPE_MAX_TYPE - 1));
+    HDcompile_assert(H5P_TYPE_VOL_INITIALIZE == (H5P_TYPE_MAX_TYPE - 1));
     HDassert(type >= H5P_TYPE_USER && type <= H5P_TYPE_LINK_ACCESS);
 
     /* Check arguments */
@@ -5485,6 +5512,10 @@ H5P__new_plist_of_type(H5P_plist_type_t type)
 
         case H5P_TYPE_LINK_ACCESS:
             class_id = H5P_CLS_LINK_ACCESS_ID_g;
+            break;
+
+        case H5P_TYPE_VOL_INITIALIZE:
+            class_id = H5P_CLS_VOL_INITIALIZE_ID_g;
             break;
 
         case H5P_TYPE_USER:     /* shut compiler warnings up */

@@ -31,6 +31,7 @@
 #include "H5private.h"          /* Generic Functions                    */
 #include "H5Eprivate.h"         /* Error handling                       */
 #include "H5Iprivate.h"         /* IDs                                  */
+#include "H5Pprivate.h"         /* Property lists                       */
 #include "H5VLpkg.h"            /* Virtual Object Layer                 */
 
 /* VOL connectors */
@@ -73,6 +74,9 @@
  * Purpose:     Registers a new VOL connector as a member of the virtual object
  *              layer class.
  *
+ *              VIPL_ID is a VOL initialization property list which must be
+ *              created with H5Pcreate(H5P_VOL_INITIALIZE) (or H5P_DEFAULT).
+ *
  * Return:      Success:    A VOL connector ID which is good until the
  *                          library is closed or the connector is
  *                          unregistered.
@@ -101,6 +105,13 @@ H5VLregister_connector(const H5VL_class_t *cls, hid_t vipl_id)
     if (cls->wrap_cls.get_wrap_ctx && !cls->wrap_cls.free_wrap_ctx)
         HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID, "VOL connector must provide free callback for object wrapping contexts when a get callback is provided")
 
+   /* Check VOL initialization property list */
+    if(H5P_DEFAULT == vipl_id)
+        vipl_id = H5P_VOL_INITIALIZE_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(vipl_id, H5P_VOL_INITIALIZE))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a VOL initialize property list")
+
     /* Register connector */
     if((ret_value = H5VL__register_connector(cls, TRUE, vipl_id)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register VOL connector")
@@ -115,6 +126,9 @@ done:
  *
  * Purpose:     Registers a new VOL connector as a member of the virtual object
  *              layer class.
+ *
+ *              VIPL_ID is a VOL initialization property list which must be
+ *              created with H5Pcreate(H5P_VOL_INITIALIZE) (or H5P_DEFAULT).
  *
  * Return:      Success:    A VOL connector ID which is good until the
  *                          library is closed or the connector is
@@ -138,6 +152,13 @@ H5VLregister_connector_by_name(const char *name, hid_t vipl_id)
     if (0 == HDstrlen(name))
         HGOTO_ERROR(H5E_ARGS, H5E_UNINITIALIZED, H5I_INVALID_HID, "zero-length VOL connector name is disallowed")
 
+   /* Check VOL initialization property list */
+    if(H5P_DEFAULT == vipl_id)
+        vipl_id = H5P_VOL_INITIALIZE_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(vipl_id, H5P_VOL_INITIALIZE))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a VOL initialize property list")
+
     /* Register connector */
     if((ret_value = H5VL__register_connector_by_name(name, TRUE, vipl_id)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register VOL connector")
@@ -152,6 +173,9 @@ done:
  *
  * Purpose:     Registers a new VOL connector as a member of the virtual object
  *              layer class.
+ *
+ *              VIPL_ID is a VOL initialization property list which must be
+ *              created with H5Pcreate(H5P_VOL_INITIALIZE) (or H5P_DEFAULT).
  *
  * Return:      Success:    A VOL connector ID which is good until the
  *                          library is closed or the connector is
@@ -173,6 +197,13 @@ H5VLregister_connector_by_value(H5VL_class_value_t value, hid_t vipl_id)
     if(value < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_UNINITIALIZED, H5I_INVALID_HID, "negative VOL connector value is disallowed")
 
+   /* Check VOL initialization property list */
+    if(H5P_DEFAULT == vipl_id)
+        vipl_id = H5P_VOL_INITIALIZE_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(vipl_id, H5P_VOL_INITIALIZE))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a VOL initialize property list")
+
     /* Register connector */
     if((ret_value = H5VL__register_connector_by_value(value, TRUE, vipl_id)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register VOL connector")
@@ -187,9 +218,9 @@ done:
  *
  * Purpose:     Tests whether a VOL class has been registered or not
  *
- * Return:      >0 if the VOL class has been registered
- *              0 if it is unregistered
- *              <0 on error (if the class is not a valid class ID)
+ * Return:      >0 if a VOL connector with that name has been registered
+ *              0 if a VOL connector with that name has NOT been registered
+ *              <0 on errors
  *
  * Programmer:  Dana Robinson
  *              June 17, 2017
@@ -218,8 +249,12 @@ done:
  *
  * Purpose:     Retrieves the ID for a registered VOL connector.
  *
- * Return:      Positive if the VOL class has been registered
- *              Negative on error (if the class is not a valid class or not registered)
+ * Return:      A valid VOL connector ID if a connector by that name has
+ *              been registered. This ID will need to be closed using
+ *              H5VLclose().
+ *
+ *              H5I_INVALID_HID on error or if a VOL connector of that
+ *              name has not been registered.
  *
  * Programmer:  Dana Robinson
  *              June 17, 2017
@@ -247,7 +282,12 @@ done:
  * Function:    H5VLget_connector_name
  *
  * Purpose:     Returns the connector name for the VOL associated with the
- *              object or file ID
+ *              object or file ID.
+ *
+ *              This works like other calls where the caller must provide a
+ *              buffer of the appropriate size for the library to fill in.
+ *              i.e., passing in a NULL pointer for NAME will return the
+ *              required size of the buffer.
  *
  * Return:      Success:        The length of the connector name
  *
@@ -313,6 +353,9 @@ done:
  *              file access property lists which have been defined to use
  *              this VOL connector or files which are already opened under with
  *              this connector.
+ *
+ *              The native VOL connector cannot be unregistered and attempts
+ *              to do so are considered an error.
  *
  * Return:      Success:    Non-negative
  *

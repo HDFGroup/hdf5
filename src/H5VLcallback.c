@@ -3041,7 +3041,7 @@ H5VL_file_specific(const H5VL_object_t *vol_obj, H5VL_file_specific_t specific_t
     arg_started = TRUE;
 
     /* Special treatment of file access check */
-    if(specific_type == H5VL_FILE_IS_ACCESSIBLE) {
+    if(specific_type == H5VL_FILE_IS_ACCESSIBLE || specific_type == H5VL_FILE_DELETE) {
         H5P_genplist_t     *plist;          /* Property list pointer */
         H5VL_connector_prop_t  connector_prop;    /* Property for VOL connector ID & info */
         va_list             tmp_args;       /* argument list passed from the API call */

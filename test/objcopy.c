@@ -2136,7 +2136,7 @@ test_copy_dataset_versionbounds(hid_t fcpl_src, hid_t fapl_src)
     char src_fname[NAME_BUF_SIZE];      /* Name of source file */
     char dst_fname[NAME_BUF_SIZE];      /* Name of destination file */
     H5F_libver_t low, high;             /* File format bounds */
-    unsigned srcdset_fillversion;       /* Fill version of source dataset */
+    unsigned srcdset_layoutversion;     /* Layout version of source dataset */
     int i, j;                           /* Local index variables */
     H5D_t *dsetp = NULL;                /* Pointer to internal dset structure */
     herr_t ret;                         /* Generic return value */
@@ -2179,7 +2179,8 @@ test_copy_dataset_versionbounds(hid_t fcpl_src, hid_t fapl_src)
 
     /* Get the internal dset ptr to get the fill version for verifying later */
     if ((dsetp = (H5D_t *)H5VL_object(did_src)) == NULL) TEST_ERROR
-    srcdset_fillversion = dsetp->shared->dcpl_cache.fill.version;
+
+    srcdset_layoutversion = dsetp->shared->layout.version;
 
     /* Close dataspace */
     if(H5Sclose(sid) < 0) TEST_ERROR
@@ -2224,9 +2225,9 @@ test_copy_dataset_versionbounds(hid_t fcpl_src, hid_t fapl_src)
             /* If copy failed, check if the failure is expected */
             if (ret < 0)
             {
-                /* Failure is valid if fill version of source dataset is
+                /* Failure is valid if layout version of source dataset is
                    greater than destination */
-                if (srcdset_fillversion <= H5O_fill_ver_bounds[high])
+                if (srcdset_layoutversion <= H5O_layout_ver_bounds[high])
                     TEST_ERROR
 
                 /* Close the DST file before continue */
@@ -5870,12 +5871,14 @@ compare_attribute_compound_vlstr(hid_t loc, hid_t loc2)
 {
     hid_t aid = -1, aid2 = -1;    /* Attribute IDs */
     hid_t tid = -1, tid2 = -1;    /* Datatype IDs */
+    hid_t sid = -1, sid2 = -1;    /* Dataspace IDs */
+    hid_t dxpl_id = -1;
     typedef struct {        /* Compound structure for the attribute */
     int i;
     char *v;
     } s1;
     s1 rbuf;            /* Buffer for data read */
-    s1 rbuf2;            /* Buffer for data read */
+    s1 rbuf2;           /* Buffer for data read */
 
     /* Open the attributes attached to the objects */
     if((aid = H5Aopen_by_idx(loc, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)0, H5P_DEFAULT, H5P_DEFAULT)) < 0)
@@ -5887,6 +5890,12 @@ compare_attribute_compound_vlstr(hid_t loc, hid_t loc2)
     if((tid = H5Aget_type(aid)) < 0)
     FAIL_STACK_ERROR
     if((tid2 = H5Aget_type(aid2)) < 0)
+    FAIL_STACK_ERROR
+
+    /* Get the attributes' dataspaces */
+    if((sid = H5Aget_space(aid)) < 0)
+    FAIL_STACK_ERROR
+    if((sid2 = H5Aget_space(aid2)) < 0)
     FAIL_STACK_ERROR
 
     /* Read the attributes */
@@ -5903,6 +5912,19 @@ compare_attribute_compound_vlstr(hid_t loc, hid_t loc2)
     if(HDmemcmp(rbuf.v, rbuf2.v, HDstrlen(rbuf.v)))
     FAIL_STACK_ERROR
 
+    /* Reclaim vlen buffer */
+    if((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0) TEST_ERROR
+    if(H5Pset_vlen_mem_manager(dxpl_id, NULL, NULL, NULL, NULL) < 0) TEST_ERROR
+    if(H5Dvlen_reclaim(tid, sid, dxpl_id, &rbuf) < 0) TEST_ERROR
+    if(H5Dvlen_reclaim(tid, sid, dxpl_id, &rbuf2) < 0) TEST_ERROR
+    if(H5Pclose(dxpl_id) < 0) TEST_ERROR
+
+    /* Close the dataspaces */
+    if(H5Sclose(sid) < 0)
+    FAIL_STACK_ERROR
+    if(H5Sclose(sid2) < 0)
+    FAIL_STACK_ERROR
+
     /* Close the attributes */
     if(H5Aclose(aid) < 0)
     FAIL_STACK_ERROR
@@ -5914,8 +5936,13 @@ error:
     H5E_BEGIN_TRY {
         H5Aclose(aid);
         H5Aclose(aid2);
+        H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, &rbuf);
+        H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, &rbuf2);
+        H5Sclose(sid);
+        H5Sclose(sid2);
         H5Tclose(tid);
         H5Tclose(tid2);
+        H5Pclose(dxpl_id);
     } H5E_END_TRY;
     return FALSE;
 
