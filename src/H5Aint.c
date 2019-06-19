@@ -771,7 +771,7 @@ H5A__write(H5A_t *attr, const H5T_t *mem_type, const void *buf)
                 if(NULL == (attr->shared->data = H5FL_BLK_MALLOC(attr_buf, dst_type_size * nelmts)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
-            /* Copy the attribute data into the user's buffer */
+            /* Copy the attribute data into the attribute data buffer */
             H5MM_memcpy(attr->shared->data, buf, (dst_type_size * nelmts));
         } /* end else */
 
