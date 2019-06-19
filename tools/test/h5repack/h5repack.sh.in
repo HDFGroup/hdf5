@@ -625,17 +625,19 @@ DIFFFAIL()
 # Catchall test for repacking with external files
 # Loops over all (internally-listed) cases and applies the given arguments
 # to h5repack.
+# Each test file family must be listed in the for loop at the start of the
+# 'function'.
 # Expects case files to be of format:
 # + h5repack_<NAME>.h5
 # + h5repack_<NAME>_ex.h5
 # + h5repack_<NAME>_ex-<N>.dat
 # ...where NAME is part of the internal list, and N is a positive decimal
 # number; multiple external files (*.dat) are allowed per file, but they must
-# follow the same pattern and be in numerical sequence starting at 0.
+# follow the pattern and be in contiguous numerical sequence starting at 0.
 # -----------------------------------------------------------------------------
 VERIFY_EXTERNAL_CONSOLIDATION()
 {
-    for name in int32le
+    for name in int32le uint8be
     do
         basename="h5repack_${name}"
         base_ext="${basename}_ex"
@@ -1551,10 +1553,10 @@ VERIFY_SUPERBLOCK 2 2 3 h5repack_layout.h5 -j 2 -k 2 h5repack_layout.h5
 # -j 0 -k 1, file cannot be opened
 VERIFY_INVALIDBOUNDS 0 1 bounds_latest_latest.h5 
 
-#
+########################################
 # Testing external storage
-#
-VERIFY_EXTERNAL_CONSOLIDATION
+########################################
+VERIFY_EXTERNAL_CONSOLIDATION -l CONTI
 
 # Clean up temporary files/directories
 CLEAN_TESTFILES_AND_TESTDIR
