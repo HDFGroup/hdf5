@@ -5871,12 +5871,14 @@ compare_attribute_compound_vlstr(hid_t loc, hid_t loc2)
 {
     hid_t aid = -1, aid2 = -1;    /* Attribute IDs */
     hid_t tid = -1, tid2 = -1;    /* Datatype IDs */
+    hid_t sid = -1, sid2 = -1;    /* Dataspace IDs */
+    hid_t dxpl_id = -1;
     typedef struct {        /* Compound structure for the attribute */
     int i;
     char *v;
     } s1;
     s1 rbuf;            /* Buffer for data read */
-    s1 rbuf2;            /* Buffer for data read */
+    s1 rbuf2;           /* Buffer for data read */
 
     /* Open the attributes attached to the objects */
     if((aid = H5Aopen_by_idx(loc, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)0, H5P_DEFAULT, H5P_DEFAULT)) < 0)
@@ -5888,6 +5890,12 @@ compare_attribute_compound_vlstr(hid_t loc, hid_t loc2)
     if((tid = H5Aget_type(aid)) < 0)
     FAIL_STACK_ERROR
     if((tid2 = H5Aget_type(aid2)) < 0)
+    FAIL_STACK_ERROR
+
+    /* Get the attributes' dataspaces */
+    if((sid = H5Aget_space(aid)) < 0)
+    FAIL_STACK_ERROR
+    if((sid2 = H5Aget_space(aid2)) < 0)
     FAIL_STACK_ERROR
 
     /* Read the attributes */
@@ -5904,6 +5912,19 @@ compare_attribute_compound_vlstr(hid_t loc, hid_t loc2)
     if(HDmemcmp(rbuf.v, rbuf2.v, HDstrlen(rbuf.v)))
     FAIL_STACK_ERROR
 
+    /* Reclaim vlen buffer */
+    if((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0) TEST_ERROR
+    if(H5Pset_vlen_mem_manager(dxpl_id, NULL, NULL, NULL, NULL) < 0) TEST_ERROR
+    if(H5Dvlen_reclaim(tid, sid, dxpl_id, &rbuf) < 0) TEST_ERROR
+    if(H5Dvlen_reclaim(tid, sid, dxpl_id, &rbuf2) < 0) TEST_ERROR
+    if(H5Pclose(dxpl_id) < 0) TEST_ERROR
+
+    /* Close the dataspaces */
+    if(H5Sclose(sid) < 0)
+    FAIL_STACK_ERROR
+    if(H5Sclose(sid2) < 0)
+    FAIL_STACK_ERROR
+
     /* Close the attributes */
     if(H5Aclose(aid) < 0)
     FAIL_STACK_ERROR
@@ -5915,8 +5936,13 @@ error:
     H5E_BEGIN_TRY {
         H5Aclose(aid);
         H5Aclose(aid2);
+        H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, &rbuf);
+        H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, &rbuf2);
+        H5Sclose(sid);
+        H5Sclose(sid2);
         H5Tclose(tid);
         H5Tclose(tid2);
+        H5Pclose(dxpl_id);
     } H5E_END_TRY;
     return FALSE;
 
