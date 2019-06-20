@@ -698,46 +698,6 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5AC_force_cache_image_load()
- *
- * Purpose:     On rare occasions, it is necessary to run 
- *              H5MF_tidy_self_referential_fsm_hack() prior to the first
- *              metadata cache access.  This is a problem as if there is a 
- *              cache image at the end of the file, that routine will 
- *              discard it.
- *
- *              We solve this issue by calling this function, which will
- *              load the cache image and then call 
- *              H5MF_tidy_self_referential_fsm_hack() to discard it.
- *
- * Return:      SUCCEED on success, and FAIL on failure.
- *
- * Programmer:  John Mainzer
- *              1/11/17
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5AC_force_cache_image_load(H5F_t *f)
-{
-    herr_t ret_value = SUCCEED;      /* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    /* Sanity checks */
-    HDassert(f);
-    HDassert(f->shared);
-    HDassert(f->shared->cache);
-
-    if(H5C_force_cache_image_load(f) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, FAIL, "Can't load cache image")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5AC_force_cache_image_load() */
-
-
-/*-------------------------------------------------------------------------
  * Function:    H5AC_get_entry_status
  *
  * Purpose:     Given a file address, determine whether the metadata
@@ -1744,6 +1704,33 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5AC_get_cache_flush_in_progess
+ *
+ * Purpose:     Wrapper function for H5C_get_cache_flush_in_progress().
+ *
+ * Return:      SUCCEED on success, and FAIL on failure.
+ *
+ * Programmer:  John Mainzer
+ *              3/11/05
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5AC_get_cache_flush_in_progress(H5AC_t *cache_ptr, hbool_t *flush_in_progress_ptr)
+{
+    herr_t ret_value = SUCCEED;      /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    if(H5C_get_cache_flush_in_progress((H5C_t *)cache_ptr, flush_in_progress_ptr) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5C_get_cache_flush_in_progress() failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5AC_get_cache_flush_in_progress() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5AC_get_cache_hit_rate
  *
  * Purpose:     Wrapper function for H5C_get_cache_hit_rate().
@@ -2682,4 +2669,3 @@ H5AC_get_mdc_image_info(H5AC_t *cache_ptr, haddr_t *image_addr, hsize_t *image_l
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC_get_mdc_image_info() */
-

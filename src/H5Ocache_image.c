@@ -27,11 +27,12 @@
  */
 
 #include "H5Omodule.h"          /* This source code file is part of the H5O module */
+#define H5F_FRIEND              /*suppress error about including H5Fpkg   */
 
 
 #include "H5private.h"          /* Generic Functions                     */
 #include "H5Eprivate.h"         /* Error handling                        */
-#include "H5Fprivate.h"		/* Files				*/
+#include "H5Fpkg.h"             /* Files                                 */
 #include "H5FLprivate.h"        /* Free Lists                            */
 #include "H5Opkg.h"             /* Object headers                        */
 #include "H5MFprivate.h"        /* File space management                 */
@@ -275,16 +276,16 @@ H5O__mdci_free(void *mesg)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O__mdci_delete(H5F_t *f, H5O_t *open_oh, void *_mesg)
+H5O__mdci_delete(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, void *_mesg)
 {
     H5O_mdci_t *mesg = (H5O_mdci_t *)_mesg;
-    herr_t ret_value = SUCCEED;   /* Return value */
+    haddr_t final_eoa;          /* For sanity check */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_STATIC
 
     /* check args */
     HDassert(f);
-    HDassert(open_oh);
     HDassert(mesg);
 
     /* Free file space for cache image */
@@ -321,16 +322,24 @@ H5O__mdci_delete(H5F_t *f, H5O_t *open_oh, void *_mesg)
          * before the first metadata cache access.  However, given
          * time constraints, I don't want to go there now.
          */
-        if(H5F_FIRST_ALLOC_DEALLOC(f)) {
-            HDassert(HADDR_UNDEF != H5F_EOA_PRE_FSM_FSALLOC(f));
-            HDassert(H5F_addr_ge(mesg->addr, H5F_EOA_PRE_FSM_FSALLOC(f)));
-            if(H5MF_tidy_self_referential_fsm_hack(f) < 0)
-                HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "tidy of self referential fsm hack failed")
-        } /* end if */
-        else {
+
+
+
+        if(f->closing) {
+
+            /* Get the eoa, and verify that it has the expected value */
+            if(HADDR_UNDEF == (final_eoa = H5FD_get_eoa(f->shared->lf, H5FD_MEM_DEFAULT)) )
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "unable to get file size")
+
+            HDassert(H5F_addr_eq(final_eoa, mesg->addr + mesg->size));
+
+            if(H5FD_free(f->shared->lf, H5FD_MEM_SUPER, f, mesg->addr, mesg->size) < 0)
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTFREE, FAIL, "can't free MDC image")
+        } else {
             if(H5MF_xfree(f, H5FD_MEM_SUPER, mesg->addr, mesg->size) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free file space for cache image block")
-        } /* end else */
+        }
+
     } /* end if */
 
 done:

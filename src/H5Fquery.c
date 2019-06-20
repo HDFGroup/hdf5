@@ -1190,18 +1190,17 @@ H5F_get_point_of_no_return(const H5F_t *f)
     FUNC_LEAVE_NOAPI(f->shared->point_of_no_return)
 } /* end H5F_get_point_of_no_return() */
 
-
 /*-------------------------------------------------------------------------
- * Function: H5F_get_first_alloc_dealloc
+ * Function: H5F_get_null_fsm_addr
  *
- * Purpose:  Retrieve the 'first alloc / dealloc' value for the file.
+ * Purpose:  Retrieve the 'null_fsm_addr' value for the file.
  *
- * Return:   Success:    Non-negative, the 'first_alloc_dealloc'
+ * Return:   Success:    Non-negative, the 'null_fsm_addr'
  *           Failure:    (can't happen)
  *-------------------------------------------------------------------------
  */
 hbool_t
-H5F_get_first_alloc_dealloc(const H5F_t *f)
+H5F_get_null_fsm_addr(const H5F_t *f)
 {
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
     FUNC_ENTER_NOAPI_NOINIT_NOERR
@@ -1209,28 +1208,5 @@ H5F_get_first_alloc_dealloc(const H5F_t *f)
     HDassert(f);
     HDassert(f->shared);
 
-    FUNC_LEAVE_NOAPI(f->shared->first_alloc_dealloc)
-} /* end H5F_get_first_alloc_dealloc() */
-
-
-/*-------------------------------------------------------------------------
- * Function: H5F_get_eoa_pre_fsm_fsalloc
- *
- * Purpose:  Retrieve the 'EOA pre-FSM fsalloc' value for the file.
- *
- * Return:   Success:    Non-negative, the 'EOA pre-FSM fsalloc'
- *           Failure:    (can't happen)
- *-------------------------------------------------------------------------
- */
-haddr_t
-H5F_get_eoa_pre_fsm_fsalloc(const H5F_t *f)
-{
-    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    HDassert(f);
-    HDassert(f->shared);
-
-    FUNC_LEAVE_NOAPI(f->shared->eoa_pre_fsm_fsalloc)
-} /* end H5F_get_eoa_pre_fsm_fsalloc() */
-
+    FUNC_LEAVE_NOAPI(f->shared->null_fsm_addr)
+} /* end H5F_get_null_fsm_addr() */

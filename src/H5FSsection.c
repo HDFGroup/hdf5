@@ -357,6 +357,11 @@ HDfprintf(stderr, "%s: fspace->alloc_sect_size = %Hu, fspace->sect_size = %Hu\n"
     /* Check if section info lock count dropped to zero */
     if(fspace->sinfo_lock_count == 0) {
         hbool_t release_sinfo_space = FALSE;    /* Flag to indicate section info space in file should be released */
+        hbool_t flush_in_progress = FALSE;      /* Is flushing in progress */
+
+        /* Check whether cache is flush_in_progress */
+        if(H5AC_get_cache_flush_in_progress(f->shared->cache, &flush_in_progress) < 0)
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Can't get flush_in_progress")
 
         /* Check if we actually protected the section info */
         if(fspace->sinfo_protected) {
@@ -370,9 +375,17 @@ HDfprintf(stderr, "%s: fspace->alloc_sect_size = %Hu, fspace->sect_size = %Hu\n"
                 /* Note that we've modified the section info */
                 cache_flags |= H5AC__DIRTIED_FLAG;
 
+                /* On file close or flushing, does not allow section info to shrink in size */
+                if(f->closing || flush_in_progress) {
+                    if(fspace->sect_size > fspace->alloc_sect_size)
+                        cache_flags |= H5AC__DELETED_FLAG | H5AC__TAKE_OWNERSHIP_FLAG;
+                    else
+                        fspace->sect_size = fspace->alloc_sect_size;
+
                 /* Check if the section info size in the file has changed */
-                if(fspace->sect_size != fspace->alloc_sect_size)
+                } else if(fspace->sect_size != fspace->alloc_sect_size)
                     cache_flags |= H5AC__DELETED_FLAG | H5AC__TAKE_OWNERSHIP_FLAG;
+
             } /* end if */
 
             /* Sanity check */
@@ -410,11 +423,20 @@ HDfprintf(stderr, "%s: Relinquishing section info ownership\n", FUNC);
             /* Check if the section info was modified */
             if(fspace->sinfo_modified) {
                 /* Check if we need to release section info in the file */
-                if(H5F_addr_defined(fspace->sect_addr))
+                if(H5F_addr_defined(fspace->sect_addr)) {
                     /* Set flag to release section info space in file */
-                    release_sinfo_space = TRUE;
-                else
+                    /* On file close or flushing, only need to release section info with size 
+                       bigger than previous section */
+                    if(f->closing || flush_in_progress) {
+                        if(fspace->sect_size > fspace->alloc_sect_size)
+                            release_sinfo_space = TRUE;
+                        else
+                            fspace->sect_size = fspace->alloc_sect_size;
+                    } else
+                        release_sinfo_space = TRUE;
+                } else
                     HDassert(fspace->alloc_sect_size == 0);
+
             } /* end if */
             else {
                 /* Sanity checks... */
@@ -2525,12 +2547,6 @@ H5FS_vfd_alloc_hdr_and_section_info_if_needed(H5F_t *f, H5FS_t *fspace,
     /* the section info should be unlocked */
     HDassert(fspace->sinfo_lock_count == 0);
 
-    /* no space should be allocated */
-    HDassert(*fs_addr_ptr == HADDR_UNDEF);
-    HDassert(fspace->addr == HADDR_UNDEF);
-    HDassert(fspace->sect_addr == HADDR_UNDEF);
-    HDassert(fspace->alloc_sect_size == 0);
-
     /* persistent free space managers must be enabled */
     HDassert(f->shared->fs_persist);
 
@@ -2542,125 +2558,109 @@ H5FS_vfd_alloc_hdr_and_section_info_if_needed(H5F_t *f, H5FS_t *fspace,
     HDassert((f->shared->fs_strategy == H5F_FSPACE_STRATEGY_FSM_AGGR) ||
              (f->shared->fs_strategy == H5F_FSPACE_STRATEGY_PAGE));
 
-    if(fspace->serial_sect_count > 0) {
+    if(fspace->serial_sect_count > 0 && fspace->sinfo) {
         /* the section info is floating, so space->sinfo should be defined */
-        HDassert(fspace->sinfo);
 
-        /* start by allocating file space for the header */
+        if(!H5F_addr_defined(fspace->addr)) {
 
-        /* Get the EOA for the file -- need for sanity check below */
-        if(HADDR_UNDEF == (eoa = H5F_get_eoa(f, H5FD_MEM_FSPACE_HDR)))
-           HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "Unable to get eoa")
+            /* start by allocating file space for the header */
 
-        /* check for overlap into temporary allocation space */
-        if(H5F_IS_TMP_ADDR(f, (eoa + fspace->sect_size)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_BADRANGE, FAIL, "hdr file space alloc will overlap into 'temporary' file space")
+            /* Get the EOA for the file -- need for sanity check below */
+            if(HADDR_UNDEF == (eoa = H5F_get_eoa(f, H5FD_MEM_FSPACE_HDR)))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "Unable to get eoa")
 
-        hdr_alloc_size = H5FS_HEADER_SIZE(f);
+            /* check for overlap into temporary allocation space */
+            if(H5F_IS_TMP_ADDR(f, (eoa + fspace->sect_size)))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_BADRANGE, FAIL, "hdr file space alloc will overlap into 'temporary' file space")
 
-        /* if page allocation is enabled, extend the hdr_alloc_size to the 
-         * next page boundary.
-         */
-        if(H5F_PAGED_AGGR(f)) {
-            HDassert(0 == (eoa % f->shared->fs_page_size));
+            hdr_alloc_size = H5FS_HEADER_SIZE(f);
 
-            hdr_alloc_size = ((hdr_alloc_size / f->shared->fs_page_size) + 1) * f->shared->fs_page_size;
+            if(H5F_PAGED_AGGR(f))
+                HDassert(0 == (eoa % f->shared->fs_page_size));
 
-            HDassert(hdr_alloc_size >= H5FS_HEADER_SIZE(f));
-            HDassert((hdr_alloc_size % f->shared->fs_page_size) == 0);
-        } /* end if */
+            /* Allocate space for the free space header */
+            if(HADDR_UNDEF == (fspace->addr = H5MF_alloc(f, H5FD_MEM_FSPACE_HDR, hdr_alloc_size)))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "file allocation failed for free space header")
 
-        /* allocate space for the hdr */
-        if(HADDR_UNDEF == (fspace->addr = H5FD_alloc(f->shared->lf, H5FD_MEM_FSPACE_HDR,
-                f, hdr_alloc_size, &eoa_frag_addr, &eoa_frag_size)))
-            HGOTO_ERROR(H5E_FSPACE, H5E_CANTALLOC, FAIL, "can't allocate file space for hdr")
+            /* Cache the new free space header (pinned) */
+            if(H5AC_insert_entry(f, H5AC_FSPACE_HDR, fspace->addr, fspace, H5AC__PIN_ENTRY_FLAG) < 0)
+                HGOTO_ERROR(H5E_FSPACE, H5E_CANTINIT, FAIL, "can't add free space header to cache")
 
-        /* if the file alignment is 1, there should be no
-         * eoa fragment.  Otherwise, drop any fragment on the floor.
-         */
-        HDassert((eoa_frag_size == 0) || (f->shared->alignment != 1));
+            *fs_addr_ptr = fspace->addr;
+        }
 
-        /* Cache the new free space header (pinned) */
-        if(H5AC_insert_entry(f, H5AC_FSPACE_HDR, fspace->addr, fspace, H5AC__PIN_ENTRY_FLAG) < 0)
-            HGOTO_ERROR(H5E_FSPACE, H5E_CANTINIT, FAIL, "can't add free space header to cache")
+        if(!H5F_addr_defined(fspace->sect_addr)) {
 
-        *fs_addr_ptr = fspace->addr;
+            /* now allocate file space for the section info */
 
-        /* now allocate file space for the section info */
+            /* Get the EOA for the file -- need for sanity check below */
+            if(HADDR_UNDEF == (eoa = H5F_get_eoa(f, H5FD_MEM_FSPACE_SINFO)))
+                HGOTO_ERROR(H5E_FSPACE, H5E_CANTGET, FAIL, "Unable to get eoa")
 
-        /* Get the EOA for the file -- need for sanity check below */
-        if(HADDR_UNDEF == (eoa = H5F_get_eoa(f, H5FD_MEM_FSPACE_SINFO)))
-            HGOTO_ERROR(H5E_FSPACE, H5E_CANTGET, FAIL, "Unable to get eoa")
+            /* check for overlap into temporary allocation space */
+            if(H5F_IS_TMP_ADDR(f, (eoa + fspace->sect_size)))
+                HGOTO_ERROR(H5E_FSPACE, H5E_BADRANGE, FAIL, "sinfo file space alloc will overlap into 'temporary' file space")
 
-        /* check for overlap into temporary allocation space */
-        if(H5F_IS_TMP_ADDR(f, (eoa + fspace->sect_size)))
-            HGOTO_ERROR(H5E_FSPACE, H5E_BADRANGE, FAIL, "sinfo file space alloc will overlap into 'temporary' file space")
+            sinfo_alloc_size = fspace->sect_size;
 
-        sinfo_alloc_size = fspace->sect_size;
+            if(H5F_PAGED_AGGR(f))
+                HDassert(0 == (eoa % f->shared->fs_page_size));
 
-        /* if paged allocation is enabled, extend the sinfo_alloc_size to the 
-         * next page boundary.
-         */
-        if(H5F_PAGED_AGGR(f)) {
-            HDassert(0 == (eoa % f->shared->fs_page_size));
+            /* allocate space for the section info */
+            if(HADDR_UNDEF == (sect_addr = H5MF_alloc(f, H5FD_MEM_FSPACE_SINFO, sinfo_alloc_size)))
+                HGOTO_ERROR(H5E_FSPACE, H5E_NOSPACE, FAIL, "file allocation failed for section info")
 
-            sinfo_alloc_size = ((sinfo_alloc_size / f->shared->fs_page_size) + 1) * f->shared->fs_page_size;
+            /* update fspace->alloc_sect_size and fspace->sect_addr to reflect
+             * the allocation
+             */
+            if(fspace->sect_size > sinfo_alloc_size) {
+                hsize_t saved_sect_size = fspace->sect_size;
 
-            HDassert(sinfo_alloc_size >= fspace->sect_size);
-            HDassert((sinfo_alloc_size % f->shared->fs_page_size) == 0);
-        } /* end if */
+                if(H5MF_xfree(f, H5FD_MEM_FSPACE_SINFO, sect_addr, sinfo_alloc_size) < 0)
+                    HGOTO_ERROR(H5E_FSPACE, H5E_CANTFREE, FAIL, "unable to free free space sections")
+                fspace->sect_size = saved_sect_size;
+            } else {
+                fspace->alloc_sect_size = sinfo_alloc_size;
+                fspace->sect_size = sinfo_alloc_size;
+                fspace->sect_addr = sect_addr;
 
-        /* allocate space for the section info */
-        if(HADDR_UNDEF == (sect_addr = H5FD_alloc(f->shared->lf, H5FD_MEM_FSPACE_SINFO,
-                f, sinfo_alloc_size, &eoa_frag_addr, &eoa_frag_size)))
-            HGOTO_ERROR(H5E_FSPACE, H5E_CANTALLOC, FAIL, "can't allocate file space")
+                /* insert the new section info into the metadata cache.  */
 
-        /* if the file alignment is 1, there should be no
-         * eoa fragment.  Otherwise, drop the fragment on the floor.
-         */
-        HDassert((eoa_frag_size == 0) || (f->shared->alignment != 1));
+                /* Question: Do we need to worry about this insertion causing an
+                 * eviction from the metadata cache?  Think on this.  If so, add a
+                 * flag to H5AC_insert() to force it to skip the call to make space in
+                 * cache.
+                 *
+                 * On reflection, no.
+                 *
+                 * On a regular file close, any eviction will not change the
+                 * the contents of the free space manager(s), as all entries
+                 * should have correct file space allocated by the time this
+                 * function is called.
+                 *
+                 * In the cache image case, the selection of entries for inclusion
+                 * in the cache image will not take place until after this call.
+                 * (Recall that this call is made during the metadata fsm settle
+                 * routine, which is called during the serialization routine in
+                 * the cache image case.  Entries are not selected for inclusion
+                 * in the image until after the cache is serialized.)
+                 *
+                 *                                        JRM -- 11/4/16
+                 */
+                if(H5AC_insert_entry(f, H5AC_FSPACE_SINFO, sect_addr, fspace->sinfo, H5AC__NO_FLAGS_SET) < 0)
+                    HGOTO_ERROR(H5E_FSPACE, H5E_CANTINIT, FAIL, "can't add free space sinfo to cache")
 
-        /* update fspace->alloc_sect_size and fspace->sect_addr to reflect
-         * the allocation
-         */
-        fspace->alloc_sect_size = fspace->sect_size;
-        fspace->sect_addr = sect_addr;
+                /* We have changed the sinfo address -- Mark free space header dirty */
+                if(H5AC_mark_entry_dirty(fspace) < 0)
+                    HGOTO_ERROR(H5E_FSPACE, H5E_CANTMARKDIRTY, FAIL, "unable to mark free space header as dirty")
 
-        /* insert the new section info into the metadata cache.  */
-
-        /* Question: Do we need to worry about this insertion causing an
-         * eviction from the metadata cache?  Think on this.  If so, add a
-         * flag to H5AC_insert() to force it to skip the call to make space in
-         * cache.
-         *
-         * On reflection, no.
-         *
-         * On a regular file close, any eviction will not change the
-         * the contents of the free space manager(s), as all entries
-         * should have correct file space allocated by the time this
-         * function is called.
-         *
-         * In the cache image case, the selection of entries for inclusion
-         * in the cache image will not take place until after this call.
-         * (Recall that this call is made during the metadata fsm settle
-         * routine, which is called during the serialization routine in
-         * the cache image case.  Entries are not selected for inclusion
-         * in the image until after the cache is serialized.)
-         *
-         *                                        JRM -- 11/4/16
-         */
-        if(H5AC_insert_entry(f, H5AC_FSPACE_SINFO, sect_addr, fspace->sinfo, H5AC__NO_FLAGS_SET) < 0)
-            HGOTO_ERROR(H5E_FSPACE, H5E_CANTINIT, FAIL, "can't add free space sinfo to cache")
-
-        /* We have changed the sinfo address -- Mark free space header dirty */
-        if(H5AC_mark_entry_dirty(fspace) < 0)
-            HGOTO_ERROR(H5E_FSPACE, H5E_CANTMARKDIRTY, FAIL, "unable to mark free space header as dirty")
-
-        /* since space has been allocated for the section info and the sinfo
-         * has been inserted into the cache, relinquish ownership (i.e. float)
-         * the section info.
-         */
-        fspace->sinfo = NULL;
+                /* since space has been allocated for the section info and the sinfo
+                 * has been inserted into the cache, relinquish ownership (i.e. float)
+                 * the section info.
+                 */
+                 fspace->sinfo = NULL;
+            }
+        }
     } /* end if */
 
 done:

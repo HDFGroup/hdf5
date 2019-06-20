@@ -183,7 +183,7 @@ HDfprintf(stderr, "%s: type = %u, size = %Hu\n", FUNC, (unsigned)type, size);
      * allocate "generic" space and sub-allocate out of that, if possible.
      * Otherwise just allocate through H5F__alloc().
      */
-    if((f->shared->feature_flags & aggr->feature_flag) && f->shared->fs_strategy != H5F_FSPACE_STRATEGY_NONE) {
+    if((f->shared->feature_flags & aggr->feature_flag) && f->shared->fs_strategy != H5F_FSPACE_STRATEGY_NONE && !f->closing) {
         haddr_t	aggr_frag_addr = HADDR_UNDEF;   /* Address of aggregrator fragment */
         hsize_t	aggr_frag_size = 0;             /* Size of aggregator fragment */
         hsize_t alignment;                      /* Alignment of this section */

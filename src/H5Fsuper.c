@@ -771,13 +771,13 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, hbool_t initial_read)
             /* If message is NOT marked "unknown"--set up file space info  */
             if(!(flags & H5O_MSG_FLAG_WAS_UNKNOWN)) {
                 H5O_fsinfo_t fsinfo;   /* File space info message from superblock extension */
-                hbool_t null_fsm_addr = FALSE;  /* Whether to drop free-space to the floor */
 
+                /* f->shared->null_fsm_addr: Whether to drop free-space to the floor */
                 /* The h5clear tool uses this property to tell the library
                  * to drop free-space to the floor
                  */
                 if(H5P_exist_plist(fa_plist, H5F_ACS_NULL_FSM_ADDR_NAME) > 0)
-                    if(H5P_get(fa_plist, H5F_ACS_NULL_FSM_ADDR_NAME, &null_fsm_addr) < 0)
+                    if(H5P_get(fa_plist, H5F_ACS_NULL_FSM_ADDR_NAME, &f->shared->null_fsm_addr) < 0)
                         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get clearance for persisting fsm addr")
 
                 /* Retrieve the 'file space info' structure */
@@ -820,23 +820,22 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, hbool_t initial_read)
                     /* Initialize page end meta threshold */
                     f->shared->pgend_meta_thres = fsinfo.pgend_meta_thres;
 
-                if(f->shared->eoa_pre_fsm_fsalloc != fsinfo.eoa_pre_fsm_fsalloc)
-                    f->shared->eoa_pre_fsm_fsalloc = fsinfo.eoa_pre_fsm_fsalloc;
+                if(f->shared->eoa_fsm_fsalloc != fsinfo.eoa_pre_fsm_fsalloc)
+                    f->shared->eoa_fsm_fsalloc = fsinfo.eoa_pre_fsm_fsalloc;
 
                /* f->shared->eoa_pre_fsm_fsalloc must always be HADDR_UNDEF
                 * in the absence of persistent free space managers.
                 */
                 /* If the following two conditions are true:
                  *       (1) skipping EOF check (skip_eof_check)
-                 *       (2) dropping free-space to the floor (null_fsm_addr)
+                 *       (2) dropping free-space to the floor (f->shared->null_fsm_addr)
                  *  skip the asserts as "eoa_pre_fsm_fsalloc" may be undefined
                  *  for a crashed file with persistent free space managers.
                  *  #1 and #2 are enabled when the tool h5clear --increment
                  *  option is used.
                  */
-                if(!skip_eof_check && !null_fsm_addr) {
-                     HDassert((!f->shared->fs_persist) || (f->shared->eoa_pre_fsm_fsalloc != HADDR_UNDEF));
-                     HDassert(!f->shared->first_alloc_dealloc);
+                if(!skip_eof_check && !f->shared->null_fsm_addr) {
+                     HDassert((!f->shared->fs_persist) || (f->shared->eoa_fsm_fsalloc != HADDR_UNDEF));
                 }
 
                 /* As "eoa_pre_fsm_fsalloc" may be undefined for a crashed file
@@ -846,9 +845,16 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, hbool_t initial_read)
                  * This will ensure that no action is done to settle things on file
                  * close via H5MF_settle_meta_data_fsm() and H5MF_settle_raw_data_fsm().
                  */
-                if((f->shared->eoa_pre_fsm_fsalloc != HADDR_UNDEF || null_fsm_addr) &&
-                        (H5F_INTENT(f) & H5F_ACC_RDWR))
-                    f->shared->first_alloc_dealloc = TRUE;
+                /* The following check is removed:
+                 *   if((f->shared->eoa_pre_fsm_fsalloc != HADDR_UNDEF || null_fsm_addr) &&
+                 *       (H5F_INTENT(f) & H5F_ACC_RDWR))
+                 *
+                 * --there is no more eoa_pre_fsm_fsalloc
+                 * --the check for null_fsm_addr is directly done in H5MF_settle_meta_data_fsm() 
+                 *   and H5MF_settle_raw_data_fsm()
+                 */
+
+
 
                 f->shared->fs_addr[0] = HADDR_UNDEF;
                 for(u = 1; u < NELMTS(f->shared->fs_addr); u++)
@@ -856,17 +862,17 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, hbool_t initial_read)
 
                 /* If the following two conditions are true:
                  *      (1) file is persisting free-space 
-                 *      (2) dropping free-space to the floor (null_fsm_addr)
+                 *      (2) dropping free-space to the floor (f->shared->null_fsm_addr)
                  * nullify the addresses of the FSMs 
                  */
-                if(f->shared->fs_persist && null_fsm_addr)
+                if(f->shared->fs_persist && f->shared->null_fsm_addr)
                     for(u = 0; u < NELMTS(fsinfo.fs_addr); u++)
                         f->shared->fs_addr[u] = fsinfo.fs_addr[u] = HADDR_UNDEF;
 
                 /* For fsinfo.mapped: remove the FSINFO message from the superblock extension
                    and write a new message to the extension */
-                /* For null_fsm_addr: just update FSINFO message in the superblock extension */
-                if(((fsinfo.mapped || null_fsm_addr) && (rw_flags & H5AC__READ_ONLY_FLAG) == 0)) {
+                /* For f->shared->null_fsm_addr: just update FSINFO message in the superblock extension */
+                if(((fsinfo.mapped || f->shared->null_fsm_addr) && (rw_flags & H5AC__READ_ONLY_FLAG) == 0)) {
 
                     /* Do the same kluge until we know for sure.  VC */
 #if 1 /* bug fix test code -- tidy this up if all goes well */ /* JRM */
@@ -880,7 +886,7 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, hbool_t initial_read)
                      f->shared->sblock = sblock;
 #endif /* JRM */
 
-                    if(null_fsm_addr) {
+                    if(f->shared->null_fsm_addr) {
                         if(H5F__super_ext_write_msg(f, H5O_FSINFO_ID, &fsinfo, FALSE, H5O_MSG_FLAG_MARK_IF_UNKNOWN) < 0)
                             HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "error in writing fsinfo message to superblock extension")
                     }

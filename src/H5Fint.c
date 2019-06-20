@@ -933,9 +933,9 @@ H5F__new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_
             f->shared->fs_addr[u] = HADDR_UNDEF;
             f->shared->fs_man[u] = NULL;
         }
-        f->shared->first_alloc_dealloc = FALSE;
-        f->shared->eoa_pre_fsm_fsalloc = HADDR_UNDEF;
-        f->shared->eoa_post_fsm_fsalloc = HADDR_UNDEF;
+        /* This will be stored as eoa_pre_fsm_fsalloc in the fsinfo message */
+        /* This is done to be backward compatible with 1.10 library that has the FSM hack */
+        f->shared->eoa_fsm_fsalloc = HADDR_UNDEF;
         f->shared->eoa_post_mdci_fsalloc = HADDR_UNDEF;
 
         /* Initialization for handling file space (for paged aggregation) */

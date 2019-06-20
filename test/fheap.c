@@ -1904,7 +1904,7 @@ test_create(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
         TEST_ERROR
 
     /* Close the fractal heap */
-    if(H5HF_close(fh) < 0)
+    if((fh = H5HF_close(fh)) < 0)
         FAIL_STACK_ERROR
 
     /* Delete heap */
@@ -6643,7 +6643,7 @@ test_man_remove_one(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpara
         FAIL_STACK_ERROR
 
     /* Close the fractal heap */
-    if(H5HF_close(fh) < 0)
+    if((fh = H5HF_close(fh)) < 0)
         TEST_ERROR
 
     /* Close the file */
@@ -6834,7 +6834,7 @@ test_man_remove_two(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpara
         FAIL_STACK_ERROR
 
     /* Close the fractal heap */
-    if(H5HF_close(fh) < 0)
+    if((fh = H5HF_close(fh)) < 0)
         TEST_ERROR
 
     /* Close the file */
@@ -7001,7 +7001,7 @@ test_man_remove_one_larger(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t
         FAIL_STACK_ERROR
 
     /* Close the fractal heap */
-    if(H5HF_close(fh) < 0)
+    if((fh = H5HF_close(fh)) < 0)
         FAIL_STACK_ERROR
 
     /* Close the file */
@@ -7239,7 +7239,7 @@ test_man_remove_two_larger(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t
         FAIL_STACK_ERROR
 
     /* Close the fractal heap */
-    if(H5HF_close(fh) < 0)
+    if((fh = H5HF_close(fh)) < 0)
         TEST_ERROR
 
     /* Close the file */
@@ -7541,7 +7541,7 @@ test_man_remove_three_larger(hid_t fapl, H5HF_create_t *cparam, fheap_test_param
         FAIL_STACK_ERROR
 
     /* Close the fractal heap */
-    if(H5HF_close(fh) < 0)
+    if((fh = H5HF_close(fh)) < 0)
         TEST_ERROR
 
     /* Close the file */
@@ -13682,23 +13682,23 @@ test_filtered_huge(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
     haddr_t     fh_addr;                /* Address of fractal heap */
-    H5HF_create_t tmp_cparam;           /* Local heap creation parameters */
-    fheap_heap_ids_t keep_ids;          /* Structure to retain heap IDs */
-    size_t      id_len;                 /* Size of fractal heap IDs */
-    h5_stat_size_t       empty_size;             /* Size of a file with an empty heap */
-    h5_stat_size_t       file_size;              /* Size of file currently */
-    unsigned char *heap_id = NULL;      /* Heap ID for object */
-    size_t      obj_size;               /* Size of object */
-    size_t      robj_size;              /* Size of object read */
-    unsigned char obj_type;             /* Type of storage for object */
-    fheap_heap_state_t state;           /* State of fractal heap */
-    unsigned    deflate_level;          /* Deflation level */
-    size_t      old_actual_id_len =0 ;  /* Old actual ID length */
-    hbool_t     huge_ids_direct;        /* Are 'huge' objects directly acccessed? */
-    const char *base_desc = "insert 'huge' object into heap with I/O filters, then remove %s";       /* Test description */
+        H5HF_create_t tmp_cparam;           /* Local heap creation parameters */
+        fheap_heap_ids_t keep_ids;          /* Structure to retain heap IDs */
+        size_t      id_len;                 /* Size of fractal heap IDs */
+        h5_stat_size_t       empty_size;             /* Size of a file with an empty heap */
+        h5_stat_size_t       file_size;              /* Size of file currently */
+        unsigned char *heap_id = NULL;      /* Heap ID for object */
+        size_t      obj_size;               /* Size of object */
+        size_t      robj_size;              /* Size of object read */
+        unsigned char obj_type;             /* Type of storage for object */
+        fheap_heap_state_t state;           /* State of fractal heap */
+        unsigned    deflate_level;          /* Deflation level */
+        size_t      old_actual_id_len =0 ;  /* Old actual ID length */
+        hbool_t     huge_ids_direct;        /* Are 'huge' objects directly acccessed? */
+        const char *base_desc = "insert 'huge' object into heap with I/O filters, then remove %s";       /* Test description */
 
-    /* Copy heap creation properties */
-    HDmemcpy(&tmp_cparam, cparam, sizeof(H5HF_create_t));
+        /* Copy heap creation properties */
+        HDmemcpy(&tmp_cparam, cparam, sizeof(H5HF_create_t));
 
     /* Set an I/O filter for heap data */
     deflate_level = 6;
@@ -13866,7 +13866,9 @@ error:
         H5MM_xfree(heap_id);
         if(fh)
             H5HF_close(fh);
-	H5Fclose(file);
+        if(&tmp_cparam.pline)
+            H5O_msg_reset(H5O_PLINE_ID, &tmp_cparam.pline); /* Release the I/O pipeline filter information */
+        H5Fclose(file);
     } H5E_END_TRY;
     return(1);
 } /* test_filtered_huge() */
@@ -15570,9 +15572,12 @@ error:
         H5MM_xfree(keep_ids.ids);
         H5MM_xfree(keep_ids.lens);
         H5MM_xfree(keep_ids.offs);
+
+        if(tparam->comp == FHEAP_TEST_COMPRESS)
+            H5O_msg_reset(H5O_PLINE_ID, &tmp_cparam.pline); /* Release the I/O pipeline filter information */
         if(fh)
             H5HF_close(fh);
-	H5Fclose(file);
+        H5Fclose(file);
     } H5E_END_TRY;
     return(1);
 } /* test_random() */
@@ -15788,7 +15793,9 @@ error:
         H5MM_xfree(keep_ids.offs);
         if(fh)
             H5HF_close(fh);
-	H5Fclose(file);
+        if(tparam->comp == FHEAP_TEST_COMPRESS)
+            H5O_msg_reset(H5O_PLINE_ID, &tmp_cparam.pline); /* Release the I/O pipeline filter information */
+        H5Fclose(file);
     } H5E_END_TRY;
     return(1);
 } /* test_random_pow2() */
