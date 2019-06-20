@@ -117,6 +117,8 @@ $SRC_H5REPACK_TESTFILES/h5repack_paged_nopersist.h5
 $SRC_H5REPACK_TESTFILES/h5repack_paged_persist.h5
 $SRC_H5REPACK_TESTFILES/h5repack_int32le.h5
 $SRC_H5REPACK_TESTFILES/h5repack_int32le_ex.h5
+$SRC_H5REPACK_TESTFILES/h5repack_uint8be.h5
+$SRC_H5REPACK_TESTFILES/h5repack_uint8be_ex.h5
 $SRC_H5DIFF_TESTFILES/h5diff_attr1.h5
 $SRC_TOOLS_TESTFILES/tfamily00000.h5
 $SRC_TOOLS_TESTFILES/tfamily00001.h5
@@ -167,6 +169,14 @@ $SRC_H5REPACK_TESTFILES/h5repack_layout.h5.ddl
 $SRC_H5REPACK_TESTFILES/h5repack_filters.h5-gzip_verbose_filters.tst
 $SRC_H5REPACK_TESTFILES/h5repack_layout.h5-dset2_chunk_20x10-errstk.tst
 $SRC_H5REPACK_TESTFILES/h5repack_layout.h5-plugin_test.ddl
+$SRC_H5REPACK_TESTFILES/h5repack_uint8be_ex-0.dat
+$SRC_H5REPACK_TESTFILES/h5repack_uint8be_ex-1.dat
+$SRC_H5REPACK_TESTFILES/h5repack_uint8be_ex-2.dat
+$SRC_H5REPACK_TESTFILES/h5repack_uint8be_ex-3.dat
+$SRC_H5REPACK_TESTFILES/h5repack_uint8be_ex-4.dat
+$SRC_H5REPACK_TESTFILES/h5repack_uint8be_ex-5.dat
+$SRC_H5REPACK_TESTFILES/h5repack_uint8be_ex-6.dat
+$SRC_H5REPACK_TESTFILES/h5repack_uint8be_ex-7.dat
 $SRC_H5REPACK_TESTFILES/plugin_test.h5repack_layout.h5.tst
 $SRC_H5REPACK_TESTFILES/1_vds.h5-vds_dset_chunk20x10x5-v.ddl
 $SRC_H5REPACK_TESTFILES/2_vds.h5-vds_chunk3x6x9-v.ddl
