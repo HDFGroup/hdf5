@@ -49,7 +49,6 @@ foreach (example ${examples})
     TARGET_C_PROPERTIES (${example} SHARED)
     target_link_libraries (${example} PRIVATE ${HDF5_LIBSH_TARGET})
   endif ()
-    target_link_libraries (${example} PRIVATE ${HDF5_LIB_TARGET})
   set_target_properties (${example} PROPERTIES FOLDER examples)
 endforeach ()
 

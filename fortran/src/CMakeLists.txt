@@ -383,6 +383,7 @@ if (NOT ONLY_SHARED_LIBS)
       ${MOD_BUILD_DIR}/h5r.mod
       ${MOD_BUILD_DIR}/h5s.mod
       ${MOD_BUILD_DIR}/h5t.mod
+      ${MOD_BUILD_DIR}/h5vl.mod
       ${MOD_BUILD_DIR}/h5z.mod
       ${MOD_BUILD_DIR}/h5_gen.mod
   )
@@ -415,6 +416,7 @@ if (BUILD_SHARED_LIBS)
       ${MODSH_BUILD_DIR}/h5r.mod
       ${MODSH_BUILD_DIR}/h5s.mod
       ${MODSH_BUILD_DIR}/h5t.mod
+      ${MODSH_BUILD_DIR}/h5vl.mod
       ${MODSH_BUILD_DIR}/h5z.mod
       ${MODSH_BUILD_DIR}/h5_gen.mod
   )
