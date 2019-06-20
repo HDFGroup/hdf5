@@ -11,7 +11,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Purpose:	Tests the virtual object layer (H5VL)
+ * Purpose: Tests the virtual object layer (H5VL)
  *
  *          This is a minimal test to ensure VOL usage (setting a VOL, etc.)
  *          works as expected. Actual VOL functionality is tested using
@@ -148,50 +148,83 @@ static const H5VL_class_t fake_vol_g = {
 static herr_t
 test_vol_registration(void)
 {
-    htri_t is_registered;
-    hid_t vol_id = -1, vol_id2 = -1;
+    hid_t native_id = H5I_INVALID_HID;
+    hid_t lapl_id = H5I_INVALID_HID;
+    hid_t vipl_id = H5I_INVALID_HID;
+    herr_t ret = SUCCEED;
+    htri_t is_registered = FAIL;
+    hid_t vol_id = H5I_INVALID_HID;
+    hid_t vol_id2 = H5I_INVALID_HID;
 
     TESTING("VOL registration");
 
     /* The test/fake VOL connector should not be registered at the start of the test */
     if ((is_registered = H5VLis_connector_registered(FAKE_VOL_NAME)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (is_registered > 0)
-        FAIL_PUTS_ERROR("native VOL connector is inappropriately registered");
+        FAIL_PUTS_ERROR("VOL connector is inappropriately registered");
 
-    /* Load a VOL interface */
-    if ((vol_id = H5VLregister_connector(&fake_vol_g, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+    /* Test registering a connector with an incorrect property list (SHOULD FAIL) */
+    if ((lapl_id = H5Pcreate(H5P_LINK_ACCESS)) < 0)
+        TEST_ERROR;
+    H5E_BEGIN_TRY {
+        vol_id = H5VLregister_connector(&fake_vol_g, lapl_id);
+    } H5E_END_TRY;
+    if (H5I_INVALID_HID != vol_id)
+        FAIL_PUTS_ERROR("should not be able to register a connector with an incorrect property list");
+    if (H5Pclose(lapl_id) < 0)
+        TEST_ERROR;
+
+    /* Load a VOL interface
+     * The vipl_id does nothing without a VOL that needs it, but we do need to
+     * test creating a property list of that class and passing it along as a
+     * smoke check.
+     */
+    if ((vipl_id = H5Pcreate(H5P_VOL_INITIALIZE)) < 0)
+        TEST_ERROR;
+    if ((vol_id = H5VLregister_connector(&fake_vol_g, vipl_id)) < 0)
+        TEST_ERROR;
+    if (H5Pclose(vipl_id) < 0)
+        TEST_ERROR;
 
     /* The test/fake VOL connector should be registered now */
     if ((is_registered = H5VLis_connector_registered(FAKE_VOL_NAME)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (0 == is_registered)
-        FAIL_PUTS_ERROR("native VOL connector is un-registered");
+        FAIL_PUTS_ERROR("VOL connector is un-registered");
 
     /* Re-register a VOL connector */
     if ((vol_id2 = H5VLregister_connector(&fake_vol_g, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* The test/fake VOL connector should still be registered now */
     if ((is_registered = H5VLis_connector_registered(FAKE_VOL_NAME)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (0 == is_registered)
-        FAIL_PUTS_ERROR("native VOL connector is un-registered");
+        FAIL_PUTS_ERROR("VOL connector is un-registered");
 
     /* Unregister the second test/fake VOL ID */
     if (H5VLunregister_connector(vol_id2) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* The test/fake VOL connector should still be registered now */
     if ((is_registered = H5VLis_connector_registered(FAKE_VOL_NAME)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (0 == is_registered)
-        FAIL_PUTS_ERROR("native VOL connector is un-registered");
+        FAIL_PUTS_ERROR("VOL connector is un-registered");
 
     /* Unregister the original test/fake VOL ID */
     if (H5VLunregister_connector(vol_id) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
+
+    /* Try to unregister the native VOL connector (should fail) */
+    if (H5I_INVALID_HID == (native_id = H5VLget_connector_id(H5VL_NATIVE_NAME)))
+        TEST_ERROR;
+    H5E_BEGIN_TRY {
+        ret = H5VLunregister_connector(native_id);
+    } H5E_END_TRY;
+    if (FAIL != ret)
+        FAIL_PUTS_ERROR("should not be able to unregister the native VOL connector");
 
     PASSED();
     return SUCCEED;
@@ -199,6 +232,8 @@ test_vol_registration(void)
 error:
     H5E_BEGIN_TRY {
         H5VLunregister_connector(vol_id);
+        H5Pclose(lapl_id);
+        H5Pclose(vipl_id);
     } H5E_END_TRY;
     return FAIL;
 
@@ -223,7 +258,7 @@ test_native_vol_init(void)
 
     /* The native VOL connector should always be registered */
     if ((is_registered = H5VLis_connector_registered(H5VL_NATIVE_NAME)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (0 == is_registered)
         FAIL_PUTS_ERROR("native VOL connector is un-registered");
 
@@ -281,7 +316,7 @@ test_basic_file_operation(const char *env_h5_drvr)
     if(H5Pset_fclose_degree(fapl_id, H5F_CLOSE_SEMI) < 0)
         TEST_ERROR;
     if(H5Pset_metadata_read_attempts(fapl_id, 9) < 0)
-        FAIL_STACK_ERROR
+        TEST_ERROR
 
     /* H5Fcreate */
     if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)

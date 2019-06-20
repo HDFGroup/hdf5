@@ -325,14 +325,11 @@ H5A__dense_fnd_cb(const H5A_t *attr, hbool_t *took_ownership, void *_user_attr)
      */
     if(*user_attr != NULL) {
         H5A_t *old_attr = *user_attr;
-        if(old_attr->shared) {
-            /* Free any dynamically allocated items */
-            if(H5A__free(old_attr) < 0)
-                HGOTO_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't release attribute info")
 
-            /* Destroy shared attribute struct */
-            old_attr->shared = H5FL_FREE(H5A_shared_t, old_attr->shared);
-        } /* end if */
+        /* Free any dynamically allocated items */
+        if(old_attr->shared)
+            if(H5A__shared_free(old_attr) < 0)
+                HGOTO_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't release attribute info")
 
         old_attr = H5FL_FREE(H5A_t, old_attr);
      } /* end if */

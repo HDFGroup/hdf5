@@ -5,11 +5,16 @@ project (HDF5_TOOLS_TEST_H5REPACK C)
 # Add h5Repack test executables
 # --------------------------------------------------------------------
 add_executable (testh5repack_detect_szip ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testh5repack_detect_szip.c)
-target_include_directories(testh5repack_detect_szip
+target_include_directories (testh5repack_detect_szip
     PRIVATE "${HDF5_TOOLS_SRC_H5REPACK_SOURCE_DIR};${HDF5_TOOLS_DIR}/lib;${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>"
 )
-TARGET_C_PROPERTIES (testh5repack_detect_szip STATIC)
-target_link_libraries (testh5repack_detect_szip PRIVATE ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
+if (NOT ONLY_SHARED_LIBS)
+  TARGET_C_PROPERTIES (testh5repack_detect_szip STATIC)
+  target_link_libraries (testh5repack_detect_szip PRIVATE ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
+else ()
+  TARGET_C_PROPERTIES (testh5repack_detect_szip SHARED)
+  target_link_libraries (testh5repack_detect_szip PRIVATE ${HDF5_TOOLS_LIBSH_TARGET} ${HDF5_LIBSH_TARGET} ${HDF5_TEST_LIBSH_TARGET})
+endif ()
 set_target_properties (testh5repack_detect_szip PROPERTIES FOLDER tools)
 
 set (REPACK_COMMON_SOURCES
@@ -22,11 +27,16 @@ set (REPACK_COMMON_SOURCES
     ${HDF5_TOOLS_SRC_H5REPACK_SOURCE_DIR}/h5repack.c
 )
 add_executable (h5repacktest ${REPACK_COMMON_SOURCES} ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/h5repacktst.c)
-target_include_directories(h5repacktest
+target_include_directories (h5repacktest
     PRIVATE "${HDF5_TOOLS_SRC_H5REPACK_SOURCE_DIR};${HDF5_TOOLS_DIR}/lib;${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>"
 )
-TARGET_C_PROPERTIES (h5repacktest STATIC)
-target_link_libraries (h5repacktest PRIVATE ${HDF5_TOOLS_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
+if (NOT ONLY_SHARED_LIBS)
+  TARGET_C_PROPERTIES (h5repacktest STATIC)
+  target_link_libraries (h5repacktest PRIVATE ${HDF5_TOOLS_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
+else ()
+  TARGET_C_PROPERTIES (h5repacktest SHARED)
+  target_link_libraries (h5repacktest PRIVATE ${HDF5_TOOLS_LIBSH_TARGET} ${HDF5_TEST_LIBSH_TARGET})
+endif ()
 set_target_properties (h5repacktest PROPERTIES FOLDER tools)
 
 #-----------------------------------------------------------------------------
@@ -41,15 +51,15 @@ if (BUILD_SHARED_LIBS)
   set (HDF5_TOOL_PLUGIN_LIB_VTARGET          ${HDF5_TOOL_PLUGIN_LIB_VCORENAME})
 
   add_library (${HDF5_TOOL_PLUGIN_LIB_TARGET} SHARED dynlib_rpk.c)
-  target_include_directories(${HDF5_TOOL_PLUGIN_LIB_TARGET} PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+  target_include_directories (${HDF5_TOOL_PLUGIN_LIB_TARGET} PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
   TARGET_C_PROPERTIES (${HDF5_TOOL_PLUGIN_LIB_TARGET} SHARED)
-  target_link_libraries (${HDF5_TOOL_PLUGIN_LIB_TARGET} PRIVATE ${HDF5_TEST_LIB_TARGET})
+  target_link_libraries (${HDF5_TOOL_PLUGIN_LIB_TARGET} PRIVATE ${HDF5_TEST_LIBSH_TARGET})
   H5_SET_LIB_OPTIONS (${HDF5_TOOL_PLUGIN_LIB_TARGET} ${HDF5_TOOL_PLUGIN_LIB_NAME} SHARED "LIB")
 
   add_library (${HDF5_TOOL_PLUGIN_LIB_VTARGET} SHARED dynlib_vrpk.c)
-  target_include_directories(${HDF5_TOOL_PLUGIN_LIB_VTARGET} PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+  target_include_directories (${HDF5_TOOL_PLUGIN_LIB_VTARGET} PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
   TARGET_C_PROPERTIES (${HDF5_TOOL_PLUGIN_LIB_VTARGET} SHARED)
-  target_link_libraries (${HDF5_TOOL_PLUGIN_LIB_VTARGET} PRIVATE ${HDF5_TEST_LIB_TARGET})
+  target_link_libraries (${HDF5_TOOL_PLUGIN_LIB_VTARGET} PRIVATE ${HDF5_TEST_LIBSH_TARGET})
   H5_SET_LIB_OPTIONS (${HDF5_TOOL_PLUGIN_LIB_VTARGET} ${HDF5_TOOL_PLUGIN_LIB_VNAME} SHARED "LIB")
 
   # make plugins dir

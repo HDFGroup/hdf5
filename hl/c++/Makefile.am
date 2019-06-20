@@ -18,7 +18,13 @@
 
 include $(top_srcdir)/config/commence.am
 
-SUBDIRS=src test
+if BUILD_TESTS_CONDITIONAL
+   TESTSERIAL_DIR =test
+else
+   TESTSERIAL_DIR=
+endif
+
+SUBDIRS=src $(TESTSERIAL_DIR)
 DIST_SUBDIRS=src test examples
 
 # Install examples

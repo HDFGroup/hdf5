@@ -97,6 +97,12 @@
 ##############################################################################
 ##############################################################################
 
+  if (NOT BUILD_SHARED_LIBS)
+    set (tgt_ext "")
+  else ()
+    set (tgt_ext "-shared")
+  endif ()
+
   macro (ADD_H5_OUTPUT testname resultfile resultcode testfile)
     # If using memchecker add tests without using scripts
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
@@ -121,7 +127,7 @@
           add_test (
               NAME H5FC-${testname}-${testfile}
               COMMAND "${CMAKE_COMMAND}"
-                  -D "TEST_PROGRAM=$<TARGET_FILE:h5format_convert>"
+                  -D "TEST_PROGRAM=$<TARGET_FILE:h5format_convert${tgt_ext}>"
                   -D "TEST_ARGS=${ARGN};outtmp.h5"
                   -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
                   -D "TEST_OUTPUT=${testname}.out"
@@ -136,7 +142,7 @@
           add_test (
               NAME H5FC-${testname}-NA
               COMMAND "${CMAKE_COMMAND}"
-                  -D "TEST_PROGRAM=$<TARGET_FILE:h5format_convert>"
+                  -D "TEST_PROGRAM=$<TARGET_FILE:h5format_convert${tgt_ext}>"
                   -D "TEST_ARGS=${ARGN}"
                   -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
                   -D "TEST_OUTPUT=${testname}.out"
@@ -173,7 +179,7 @@
       add_test (
           NAME H5FC-${testname}-${testfile}
           COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5format_convert>"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5format_convert${tgt_ext}>"
               -D "TEST_ARGS=${ARGN};outtmp.h5"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
               -D "TEST_OUTPUT=${testname}.out"
@@ -209,7 +215,7 @@
       add_test (
           NAME H5FC-${testname}-${testfile}
           COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5format_convert>"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5format_convert${tgt_ext}>"
               -D "TEST_ARGS=${ARGN};outtmp.h5"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
               -D "TEST_OUTPUT=${testname}.out"
@@ -246,7 +252,7 @@
       add_test (
           NAME H5FC-${testname}
           COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5format_convert>"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5format_convert${tgt_ext}>"
               -D "TEST_ARGS=${ARGN};./testfiles/tmp.h5"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
               -D "TEST_OUTPUT=testfiles/${testname}.out"
@@ -293,7 +299,7 @@
       add_test (
           NAME H5FC-${testname}
           COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5format_convert>"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5format_convert${tgt_ext}>"
               -D "TEST_ARGS=-d;${ARGN};./testfiles/chktmp.h5"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
               -D "TEST_OUTPUT=testfiles/${testname}.out"
@@ -336,7 +342,7 @@
       add_test (
           NAME H5FC-${testname}
           COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5format_convert>"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5format_convert${tgt_ext}>"
               -D "TEST_ARGS=${ARGN};./testfiles/dmptmp.h5"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
               -D "TEST_OUTPUT=testfiles/${testname}.out"
@@ -348,7 +354,7 @@
       add_test (
           NAME H5FC_CHECK_DUMP-${testname}
           COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump${tgt_ext}>"
               -D "TEST_ARGS:STRING=-BH;./testfiles/dmptmp.h5"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
               -D "TEST_OUTPUT=testfiles/${testname}_chk.out"

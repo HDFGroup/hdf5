@@ -559,9 +559,14 @@ H5D__compact_copy(H5F_t *f_src, H5O_storage_compact_t *_storage_src, H5F_t *f_ds
             /* Check for expanding references */
             if(cpy_info->expand_ref) {
                 size_t ref_count;
+                size_t src_dt_size;         /* Source datatype size */
+
+                /* Determine largest datatype size */
+                if(0 == (src_dt_size = H5T_get_size(dt_src)))
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to determine datatype size")
 
                 /* Determine # of reference elements to copy */
-                ref_count = storage_src->size / H5T_get_size(dt_src);
+                ref_count = storage_src->size / src_dt_size;
 
                 /* Copy objects referenced in source buffer to destination file and set destination elements */
                 if(H5O_copy_expand_ref(f_src, storage_src->buf, f_dst,

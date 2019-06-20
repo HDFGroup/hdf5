@@ -211,7 +211,7 @@ Java_hdf_hdf5lib_H5_H5Rget_1obj_1type2
     jboolean  isCopy, isCopy2;
     jbyte    *refBuf = NULL;
     jint     *ref_objP = NULL;
-    jint      status;
+    jint      status = -1;
     int       retVal = -1;
 
     UNUSED(clss);

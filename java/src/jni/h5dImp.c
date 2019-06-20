@@ -1838,7 +1838,7 @@ Java_hdf_hdf5lib_H5_H5Dfill
 {
     jboolean  isCopy1;
     jboolean  isCopy2;
-    herr_t    status;
+    herr_t    status = FAIL;
     jbyte    *fillP = NULL;
     jbyte    *buffP = NULL;
 

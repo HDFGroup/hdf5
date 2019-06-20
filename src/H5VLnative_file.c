@@ -386,10 +386,16 @@ H5VL__native_file_specific(void *obj, H5VL_file_specific_t specific_type,
 
                 /* Call private routine */
                 if((*ret = H5F__is_hdf5(name, fapl_id)) < 0)
-                    HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "error in HDF5 file check")
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "error in HDF5 file check")
                 break;
             }
 
+        /* H5Fdelete */
+        case H5VL_FILE_DELETE:
+            {
+                HGOTO_ERROR(H5E_FILE, H5E_UNSUPPORTED, FAIL, "H5Fdelete() is currently not supported in the native VOL connector")
+                break;
+            }
 
 
         default:

@@ -170,10 +170,16 @@
 ##############################################################################
 ##############################################################################
 
+  if (NOT BUILD_SHARED_LIBS)
+    set (tgt_ext "")
+  else ()
+    set (tgt_ext "-shared")
+  endif ()
+
   macro (ADD_HELP_TEST testname resultcode)
     # If using memchecker add tests without using scripts
     if (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (NAME H5REPACK-h5repack-${testname} COMMAND $<TARGET_FILE:h5repack> ${ARGN})
+      add_test (NAME H5REPACK-h5repack-${testname} COMMAND $<TARGET_FILE:h5repack${tgt_ext}> ${ARGN})
       set_tests_properties (H5REPACK-h5repack-${testname} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
       if (last_test)
         set_tests_properties (H5REPACK-h5repack-${testname} PROPERTIES DEPENDS ${last_test})
@@ -193,7 +199,7 @@
       add_test (
           NAME H5REPACK-h5repack-${testname}
           COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5repack>"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5repack${tgt_ext}>"
               -D "TEST_ARGS:STRING=${ARGN}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
               -D "TEST_OUTPUT=h5repack-${testname}.out"
@@ -226,12 +232,12 @@
       endif ()
       add_test (
           NAME H5REPACK_OLD-${testname}
-          COMMAND $<TARGET_FILE:h5repack> ${ARGN} -i ${PROJECT_BINARY_DIR}/testfiles/${testfile} -o ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
+          COMMAND $<TARGET_FILE:h5repack${tgt_ext}> ${ARGN} -i ${PROJECT_BINARY_DIR}/testfiles/${testfile} -o ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
       )
       set_tests_properties (H5REPACK_OLD-${testname} PROPERTIES DEPENDS H5REPACK_OLD-${testname}-clear-objects)
       add_test (
           NAME H5REPACK_OLD-${testname}_DFF
-          COMMAND $<TARGET_FILE:h5diff> ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
+          COMMAND $<TARGET_FILE:h5diff${tgt_ext}> ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
       )
       set_tests_properties (H5REPACK_OLD-${testname}_DFF PROPERTIES DEPENDS H5REPACK_OLD-${testname})
     endif ()
@@ -258,12 +264,12 @@
       endif ()
       add_test (
           NAME H5REPACK-${testname}
-          COMMAND $<TARGET_FILE:h5repack> --enable-error-stack ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
+          COMMAND $<TARGET_FILE:h5repack${tgt_ext}> --enable-error-stack ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
       )
       set_tests_properties (H5REPACK-${testname} PROPERTIES DEPENDS H5REPACK-${testname}-clear-objects)
       add_test (
           NAME H5REPACK-${testname}_DFF
-          COMMAND $<TARGET_FILE:h5diff> --enable-error-stack ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
+          COMMAND $<TARGET_FILE:h5diff${tgt_ext}> --enable-error-stack ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
       )
       set_tests_properties (H5REPACK-${testname}_DFF PROPERTIES DEPENDS H5REPACK-${testname})
     endif ()
@@ -283,7 +289,7 @@
       if (HDF5_ENABLE_USING_MEMCHECKER)
         add_test (
             NAME H5REPACK_CMP-${testname}
-            COMMAND $<TARGET_FILE:h5repack> ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${resultfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${resultfile}
+            COMMAND $<TARGET_FILE:h5repack${tgt_ext}> ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${resultfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${resultfile}
         )
         if (last_test)
           set_tests_properties (H5REPACK_CMP-${testname} PROPERTIES DEPENDS ${last_test})
@@ -303,7 +309,7 @@
         add_test (
             NAME H5REPACK_CMP-${testname}
             COMMAND "${CMAKE_COMMAND}"
-                -D "TEST_PROGRAM=$<TARGET_FILE:h5repack>"
+                -D "TEST_PROGRAM=$<TARGET_FILE:h5repack${tgt_ext}>"
                 -D "TEST_ARGS:STRING=${ARGN};${resultfile};out-${testname}.${resultfile}"
                 -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
                 -D "TEST_OUTPUT=${resultfile}-${testname}.out"
@@ -331,7 +337,7 @@
       if (HDF5_ENABLE_USING_MEMCHECKER)
         add_test (
             NAME H5REPACK_MASK-${testname}
-            COMMAND $<TARGET_FILE:h5repack> ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${resultfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${resultfile}
+            COMMAND $<TARGET_FILE:h5repack${tgt_ext}> ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${resultfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${resultfile}
         )
         if (last_test)
           set_tests_properties (H5REPACK_MASK-${testname} PROPERTIES DEPENDS ${last_test})
@@ -351,7 +357,7 @@
         add_test (
             NAME H5REPACK_MASK-${testname}
             COMMAND "${CMAKE_COMMAND}"
-                -D "TEST_PROGRAM=$<TARGET_FILE:h5repack>"
+                -D "TEST_PROGRAM=$<TARGET_FILE:h5repack${tgt_ext}>"
                 -D "TEST_ARGS:STRING=${ARGN};${resultfile};out-${testname}.${resultfile}"
                 -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
                 -D "TEST_OUTPUT=${resultfile}-${testname}.out"
@@ -389,14 +395,14 @@
       endif ()
       add_test (
           NAME H5REPACK_DMP-${testname}
-          COMMAND $<TARGET_FILE:h5repack> ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${resultfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${resultfile}
+          COMMAND $<TARGET_FILE:h5repack${tgt_ext}> ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${resultfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${resultfile}
       )
       set_tests_properties (H5REPACK_DMP-${testname} PROPERTIES DEPENDS H5REPACK_DMP-${testname}-clear-objects)
       if (NOT HDF5_ENABLE_USING_MEMCHECKER)
         add_test (
             NAME H5REPACK_DMP-h5dump-${testname}
             COMMAND "${CMAKE_COMMAND}"
-                -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
+                -D "TEST_PROGRAM=$<TARGET_FILE:h5dump${tgt_ext}>"
                 -D "TEST_ARGS:STRING=-q;creation_order;-pH;out-${testname}.${resultfile}"
                 -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
                 -D "TEST_OUTPUT=${resultfile}-${testname}.out"
@@ -432,14 +438,14 @@
       endif ()
       add_test (
           NAME H5REPACK_STAT-${testname}
-          COMMAND $<TARGET_FILE:h5repack> ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${resultfile} ${PROJECT_BINARY_DIR}/testfiles/out-${statarg}.${resultfile}
+          COMMAND $<TARGET_FILE:h5repack${tgt_ext}> ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${resultfile} ${PROJECT_BINARY_DIR}/testfiles/out-${statarg}.${resultfile}
       )
       set_tests_properties (H5REPACK_STAT-${testname} PROPERTIES DEPENDS H5REPACK_STAT-${testname}-clear-objects)
       if (NOT HDF5_ENABLE_USING_MEMCHECKER)
         add_test (
             NAME H5REPACK_STAT-h5stat-${testname}
             COMMAND "${CMAKE_COMMAND}"
-                -D "TEST_PROGRAM=$<TARGET_FILE:h5stat>"
+                -D "TEST_PROGRAM=$<TARGET_FILE:h5stat${tgt_ext}>"
                 -D "TEST_ARGS:STRING=-S;-s;out-${statarg}.${resultfile}"
                 -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
                 -D "TEST_OUTPUT=${resultfile}-${testname}.out"
@@ -476,19 +482,19 @@
         endif ()
         add_test (
             NAME H5REPACK_VERIFY_LAYOUT-${testname}
-            COMMAND $<TARGET_FILE:h5repack> ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
+            COMMAND $<TARGET_FILE:h5repack${tgt_ext}> ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
         )
         set_tests_properties (H5REPACK_VERIFY_LAYOUT-${testname} PROPERTIES DEPENDS H5REPACK_VERIFY_LAYOUT-${testname}-clear-objects)
         add_test (
             NAME H5REPACK_VERIFY_LAYOUT-${testname}_DFF
-            COMMAND $<TARGET_FILE:h5diff> ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
+            COMMAND $<TARGET_FILE:h5diff${tgt_ext}> ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
         )
         set_tests_properties (H5REPACK_VERIFY_LAYOUT-${testname}_DFF PROPERTIES DEPENDS H5REPACK_VERIFY_LAYOUT-${testname})
         if (NOT ${resultcode})
           add_test (
               NAME H5REPACK_VERIFY_LAYOUT-${testname}_DMP
               COMMAND "${CMAKE_COMMAND}"
-                  -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
+                  -D "TEST_PROGRAM=$<TARGET_FILE:h5dump${tgt_ext}>"
                   -D "TEST_ARGS:STRING=-d;${testdset};-pH;out-${testname}.${testfile}"
                   -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
                   -D "TEST_OUTPUT=${testfile}-${testname}-v.out"
@@ -511,7 +517,7 @@
           add_test (
               NAME H5REPACK_VERIFY_LAYOUT-${testname}_DMP
               COMMAND "${CMAKE_COMMAND}"
-                  -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
+                  -D "TEST_PROGRAM=$<TARGET_FILE:h5dump${tgt_ext}>"
                   -D "TEST_ARGS:STRING=-pH;out-${testname}.${testfile}"
                   -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
                   -D "TEST_OUTPUT=${testfile}-${testname}-v.out"
@@ -551,14 +557,14 @@
         endif ()
         add_test (
             NAME H5REPACK_VERIFY_LAYOUT_VDS-${testname}
-            COMMAND $<TARGET_FILE:h5repack> ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
+            COMMAND $<TARGET_FILE:h5repack${tgt_ext}> ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
         )
         set_tests_properties (H5REPACK_VERIFY_LAYOUT_VDS-${testname} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
         set_tests_properties (H5REPACK_VERIFY_LAYOUT_VDS-${testname} PROPERTIES DEPENDS H5REPACK_VERIFY_LAYOUT_VDS-${testname}-clear-objects)
         add_test (
             NAME H5REPACK_VERIFY_LAYOUT_VDS-${testname}_DMP
             COMMAND "${CMAKE_COMMAND}"
-                -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
+                -D "TEST_PROGRAM=$<TARGET_FILE:h5dump${tgt_ext}>"
                 -D "TEST_ARGS:STRING=-d;${testdset};-p;out-${testname}.${testfile}"
                 -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
                 -D "TEST_OUTPUT=${testfile}-${testname}-v.out"
@@ -588,13 +594,13 @@
       endif ()
       add_test (
           NAME H5REPACK_VERIFY_SUPERBLOCK-${testname}
-          COMMAND $<TARGET_FILE:h5repack> -j;${lowbound};-k;${highbound} ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
+          COMMAND $<TARGET_FILE:h5repack${tgt_ext}> -j;${lowbound};-k;${highbound} ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
       )
       set_tests_properties (H5REPACK_VERIFY_SUPERBLOCK-${testname} PROPERTIES DEPENDS H5REPACK_VERIFY_SUPERBLOCK-${testname}-clear-objects)
       add_test (
           NAME H5REPACK_VERIFY_SUPERBLOCK-${testname}_DMP
           COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump${tgt_ext}>"
               -D "TEST_ARGS:STRING=-H;-B;out-${testname}.${testfile}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
               -D "TEST_OUTPUT=${testfile}-${testname}-v.out"
@@ -619,7 +625,7 @@
       endif ()
       add_test (
           NAME ADD_H5_VERIFY_INVALIDBOUNDS-h5repack-${testname}
-          COMMAND $<TARGET_FILE:h5repack> -j;${lowbound};-k;${highbound} ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
+          COMMAND $<TARGET_FILE:h5repack${tgt_ext}> -j;${lowbound};-k;${highbound} ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
       )
       set_tests_properties (
           ADD_H5_VERIFY_INVALIDBOUNDS-h5repack-${testname} PROPERTIES
@@ -642,12 +648,12 @@
       endif ()
       add_test (
           NAME H5REPACK_META-${testname}_N
-          COMMAND $<TARGET_FILE:h5repack> ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}_N.${testname}.h5
+          COMMAND $<TARGET_FILE:h5repack${tgt_ext}> ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}_N.${testname}.h5
       )
       set_tests_properties (H5REPACK_META-${testname}_N PROPERTIES DEPENDS H5REPACK_META-${testname}_N-clear-objects)
       add_test (
           NAME H5REPACK_META-${testname}_M
-          COMMAND $<TARGET_FILE:h5repack> ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}_M.${testname}.h5
+          COMMAND $<TARGET_FILE:h5repack${tgt_ext}> ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}_M.${testname}.h5
       )
       set_tests_properties (H5REPACK_META-${testname}_M PROPERTIES DEPENDS H5REPACK_META-${testname}_N)
 
@@ -675,7 +681,7 @@
       add_test (
           NAME H5REPACK_UD-${testname}
           COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5repack>"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5repack-shared>"
               -D "TEST_ARGS:STRING=${ARGN};${resultfile};out-${testname}.${resultfile}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
               -D "TEST_EXPECT=${resultcode}"
@@ -690,7 +696,7 @@
       add_test (
           NAME H5REPACK_UD-${testname}-h5dump
           COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump-shared>"
               -D "TEST_ARGS:STRING=-pH;out-${testname}.${resultfile}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
               -D "TEST_OUTPUT=${resultfile}-${testname}.out"

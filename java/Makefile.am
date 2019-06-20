@@ -23,13 +23,21 @@
 
 include $(top_srcdir)/config/commence.am
 
+if BUILD_TESTS_CONDITIONAL
+   TESTSERIAL_DIR =test
+   TESTEXAMPLES_DIR =examples
+else
+   TESTSERIAL_DIR=
+   TESTEXAMPLES_DIR=
+endif
+
 ## Only recurse into subdirectories if the Java (JNI) interface is enabled.
 if BUILD_JAVA_CONDITIONAL
 
 # Mark this directory as part of the JNI API
 JAVA_API=yes
 
-SUBDIRS=src test examples
+SUBDIRS=src $(TESTSERIAL_DIR) $(TESTEXAMPLES_DIR)
 
 # Test with just the native connector, with a single pass-through connector
 # and with a doubly-stacked pass-through.

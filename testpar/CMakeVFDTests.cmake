@@ -44,8 +44,8 @@ endforeach ()
             NAME MPI_TEST_VFD-${vfdname}-${h5_test}-clear-objects
             COMMAND    ${CMAKE_COMMAND}
                 -E remove
-                    ${vfdname}-shared/${vfdname}-${h5_test}.out
-                    ${vfdname}-shared/${vfdname}-${h5_test}.out.err
+                    ${vfdname}/${vfdname}-${h5_test}.out
+                    ${vfdname}/${vfdname}-${h5_test}.out.err
         )
         add_test (
           NAME MPI_TEST_VFD-${vfdname}-${h5_test}

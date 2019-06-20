@@ -1387,6 +1387,10 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                                 HDfprintf(out, "%ld (err stack)", (long)obj);
                                 break;
 
+                            case H5I_SPACE_SEL_ITER:
+                                HDfprintf(out, "%ld (dataspace selection iterator)", (long)obj);
+                                break;
+
                             case H5I_NTYPES:
                                 HDfprintf (out, "%ld (ntypes - error)", (long)obj);
                                 break;
@@ -1566,6 +1570,10 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
 
                                 case H5I_ERROR_STACK:
                                     HDfprintf(out, "H5I_ERROR_STACK");
+                                    break;
+
+                                case H5I_SPACE_SEL_ITER:
+                                    HDfprintf(out, "H5I_SPACE_SEL_ITER");
                                     break;
 
                                 case H5I_NTYPES:
@@ -2714,6 +2722,9 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                                 case H5VL_FILE_GET_INTENT:
                                     HDfprintf(out, "H5VL_FILE_GET_INTENT");
                                     break;
+                                case H5VL_FILE_GET_FILENO:
+                                    HDfprintf(out, "H5VL_FILE_GET_FILENO");
+                                    break;
                                 case H5VL_FILE_GET_NAME:
                                     HDfprintf(out, "H5VL_FILE_GET_NAME");
                                     break;
@@ -2754,6 +2765,9 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                                     break;
                                 case H5VL_FILE_IS_ACCESSIBLE:
                                     HDfprintf(out, "H5VL_FILE_IS_ACCESSIBLE");
+                                    break;
+                                case H5VL_FILE_DELETE:
+                                    HDfprintf(out, "H5VL_FILE_DELETE");
                                     break;
                                 default:
                                     HDfprintf(out, "%ld", (long)specific);
@@ -2905,8 +2919,8 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                                 case H5VL_REF_GET_NAME:
                                     HDfprintf(out, "H5VL_REF_GET_NAME");
                                     break;
-                                case H5VL_ID_GET_NAME:
-                                    HDfprintf(out, "H5VL_ID_GET_NAME");
+                                case H5VL_OBJECT_GET_NAME:
+                                    HDfprintf(out, "H5VL_OBJECT_GET_NAME");
                                     break;
                                 default:
                                     HDfprintf(out, "%ld", (long)get);

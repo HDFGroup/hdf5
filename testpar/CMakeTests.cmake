@@ -18,8 +18,7 @@
 # Remove any output file left over from previous test run
 add_test (NAME MPI_TEST-clear-testphdf5-objects
     COMMAND    ${CMAKE_COMMAND}
-        -E remove
-        ParaTest.h5
+        -E remove ParaTest.h5
     WORKING_DIRECTORY
         ${HDF5_TEST_PAR_BINARY_DIR}
 )
