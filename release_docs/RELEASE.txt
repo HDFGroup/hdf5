@@ -47,6 +47,24 @@ New Features
 
     Configuration:
     -------------
+    - Add option to build only shared libs
+
+      A request was made to prevent building static libraries and only build
+      shared.  A new option was added to CMake, ONLY_SHARED_LIBS, which will
+      skip building static libraries. Certain utility functions will build with
+      static libs but are not published. Tests are adjusted to use the correct
+      libraries.
+
+      (ADB - 2019/06/12, HDFFV-10805)
+
+    - Change tools test that test the error stack
+
+      There are some use cases which can cause the error stack of tools to be
+      different then the expected. These tests now use grepTest.cmake, this was
+      changed to allow the error file to be searched for an expected string.
+
+      (ADB - 2019/04/15, HDFFV-10741)
+
     - Rework CMake command files to fix MPI testing.
 
       Added setup fixture to remove any test generated files and added DEPENDS
