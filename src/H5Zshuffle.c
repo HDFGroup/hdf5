@@ -185,18 +185,25 @@ H5Z_filter_shuffle(unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
                         do
                           {
                             DUFF_GUTS
+                            H5_ATTR_FALLTHROUGH
                     case 7:
                             DUFF_GUTS
+                            H5_ATTR_FALLTHROUGH
                     case 6:
                             DUFF_GUTS
+                            H5_ATTR_FALLTHROUGH
                     case 5:
                             DUFF_GUTS
+                            H5_ATTR_FALLTHROUGH
                     case 4:
                             DUFF_GUTS
+                            H5_ATTR_FALLTHROUGH
                     case 3:
                             DUFF_GUTS
+                            H5_ATTR_FALLTHROUGH
                     case 2:
                             DUFF_GUTS
+                            H5_ATTR_FALLTHROUGH
                     case 1:
                             DUFF_GUTS
                       } while (--duffs_index > 0);
@@ -243,18 +250,25 @@ H5Z_filter_shuffle(unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
                         do
                           {
                             DUFF_GUTS
+                            H5_ATTR_FALLTHROUGH
                     case 7:
                             DUFF_GUTS
+                            H5_ATTR_FALLTHROUGH
                     case 6:
                             DUFF_GUTS
+                            H5_ATTR_FALLTHROUGH
                     case 5:
                             DUFF_GUTS
+                            H5_ATTR_FALLTHROUGH
                     case 4:
                             DUFF_GUTS
+                            H5_ATTR_FALLTHROUGH
                     case 3:
                             DUFF_GUTS
+                            H5_ATTR_FALLTHROUGH
                     case 2:
                             DUFF_GUTS
+                            H5_ATTR_FALLTHROUGH
                     case 1:
                             DUFF_GUTS
                       } while (--duffs_index > 0);

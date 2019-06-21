@@ -713,7 +713,7 @@ static int check_objects(const char* fname, pack_opt_t *options) {
     hid_t         did = -1;
     hid_t         sid = -1;
     unsigned int  i;
-    unsigned int  uf;
+    int  ifil;
     trav_table_t *travt = NULL;
 
     /* nothing to do */
@@ -747,7 +747,7 @@ static int check_objects(const char* fname, pack_opt_t *options) {
      */
 
     if (options->verbose)
-        printf("Opening file. Searching %d objects to modify ...\n", travt->nobjs);
+        printf("Opening file. Searching %zu objects to modify ...\n", travt->nobjs);
 
     for (i = 0; i < options->op_tbl->nelems; i++) {
         char* name = options->op_tbl->objs[i].path;
@@ -761,17 +761,17 @@ static int check_objects(const char* fname, pack_opt_t *options) {
         if (options->verbose)
             printf("...Found\n");
 
-        for (uf = 0; uf < options->op_tbl->objs[i].nfilters; uf++) {
-            if (options->op_tbl->objs[i].filter[uf].filtn < 0)
+        for (ifil = 0; ifil < options->op_tbl->objs[i].nfilters; ifil++) {
+            if (options->op_tbl->objs[i].filter[ifil].filtn < 0)
                 HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "invalid filter");
             /* check for extra filter conditions */
-            switch (options->op_tbl->objs[i].filter[uf].filtn) {
+            switch (options->op_tbl->objs[i].filter[ifil].filtn) {
             /* chunk size must be smaller than pixels per block */
             case H5Z_FILTER_SZIP:
                 {
                     int j;
                     hsize_t csize = 1;
-                    unsigned ppb = options->op_tbl->objs[i].filter[uf].cd_values[0];
+                    unsigned ppb = options->op_tbl->objs[i].filter[ifil].cd_values[0];
                     hsize_t dims[H5S_MAX_RANK];
                     int rank;
 
@@ -807,7 +807,7 @@ static int check_objects(const char* fname, pack_opt_t *options) {
             default:
                 break;
             }
-        } /* for uf */
+        } /* for ifil */
     } /* for i */
 
 done:

@@ -819,12 +819,8 @@ test_transpose(size_t nx, size_t ny)
     dst_stride[1] = (hsize_t)(nx * sizeof(*src));
 
     /* Copy and transpose */
-    if(nx == ny)
-        H5VM_stride_copy(2, (hsize_t)sizeof(*src), size, dst_stride, dst,
-                src_stride, src);
-    else
-        H5VM_stride_copy(2, (hsize_t)sizeof(*src), size, dst_stride, dst,
-                src_stride, src);
+    H5VM_stride_copy(2, (hsize_t)sizeof(*src), size, dst_stride, dst,
+            src_stride, src);
 
     /* Check */
     for(i = 0; i < nx; i++) {

@@ -16,6 +16,11 @@
  */
 #include "external_common.h"
 
+static const char *EXT_ENV_FNAME[] = {
+    "extern_env_dir/env_file_1",
+    NULL
+};
+
 
 /*-------------------------------------------------------------------------
  * Function:    test_path_env

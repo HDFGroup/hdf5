@@ -1808,7 +1808,7 @@ test_pack_ooo(void)
     unsigned    free_order[PACK_NMEMBS]; /* Index of remaining free slots in order */
     unsigned    num_free;           /* Number of free slots in order */
     unsigned    sub_cmpd_order;     /* Order to insert the inner compound */
-    char        name[6];            /* Member name */
+    char        name[16];           /* Member name */
     unsigned    extra_space;        /* Whether to add extra space to the end of
                                      * the compound */
     unsigned    i, j;               /* Indices */

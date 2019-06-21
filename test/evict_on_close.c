@@ -73,7 +73,7 @@ const char *FILENAMES[] = {
 #define SUBGROUP_NAME_SIZE          16
 
 /* Prototypes */
-static hbool_t verify_tag_not_in_cache(H5F_t *f, haddr_t tag);
+static hbool_t verify_tag_not_in_cache(const H5F_t *f, haddr_t tag);
 static herr_t check_evict_on_close_api(void);
 static hid_t generate_eoc_test_file(hid_t fapl_id);
 static herr_t check_dset_scheme(hid_t fid, const char *dset_name);
@@ -90,8 +90,8 @@ static herr_t check_group_layout(hid_t fid, const char *group_name);
  *
  *-------------------------------------------------------------------------
  */
-static hbool_t
-verify_tag_not_in_cache(H5F_t *f, haddr_t tag)
+static H5_ATTR_PURE hbool_t
+verify_tag_not_in_cache(const H5F_t *f, haddr_t tag)
 {
     H5C_t *cache_ptr = NULL;                /* cache pointer                */
     int i = 0;                              /* iterator                     */
