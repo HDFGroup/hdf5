@@ -5813,7 +5813,7 @@ test_write_parallel_read_serial(void)
 static void
 test_shrinking_growing_chunks(void)
 {
-    float   *data = NULL;
+    double  *data = NULL;
     hsize_t  dataset_dims[SHRINKING_GROWING_CHUNKS_DATASET_DIMS];
     hsize_t  chunk_dims[SHRINKING_GROWING_CHUNKS_DATASET_DIMS];
     hsize_t  sel_dims[SHRINKING_GROWING_CHUNKS_DATASET_DIMS];
@@ -5908,9 +5908,9 @@ test_shrinking_growing_chunks(void)
     VRFY((H5Pset_dxpl_mpio(plist_id, H5FD_MPIO_COLLECTIVE) >= 0),
             "Set DXPL MPIO succeeded");
 
-    data_size = sel_dims[0] * sel_dims[1] * sizeof(*data);
+    data_size = sel_dims[0] * sel_dims[1] * sizeof(double);
 
-    data = (float *) HDcalloc(1, data_size);
+    data = (double *) HDcalloc(1, data_size);
     VRFY((NULL != data), "HDcalloc succeeded");
 
     for (i = 0; i < SHRINKING_GROWING_CHUNKS_NLOOPS; i++) {
