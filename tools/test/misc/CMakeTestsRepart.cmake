@@ -58,6 +58,12 @@
 ##############################################################################
 ##############################################################################
 
+  if (NOT BUILD_SHARED_LIBS)
+    set (tgt_ext "")
+  else ()
+    set (tgt_ext "-shared")
+  endif ()
+
   # Remove any output file left over from previous test run
   add_test (
     NAME H5REPART-clearall-objects
@@ -74,25 +80,25 @@
   set_tests_properties (H5REPART-clearall-objects PROPERTIES FIXTURES_SETUP clear_testrepart)
 
   # repartition family member size to 20,000 bytes.
-  add_test (NAME H5REPART-h5repart_20K COMMAND $<TARGET_FILE:h5repart> -m 20000 family_file%05d.h5 fst_family%05d.h5)
+  add_test (NAME H5REPART-h5repart_20K COMMAND $<TARGET_FILE:h5repart${tgt_ext}> -m 20000 family_file%05d.h5 fst_family%05d.h5)
   set_tests_properties (H5REPART-h5repart_20K PROPERTIES
       FIXTURES_REQUIRED clear_testrepart
   )
 
   # repartition family member size to 5 KB.
-  add_test (NAME H5REPART-h5repart_5K COMMAND $<TARGET_FILE:h5repart> -m 5k family_file%05d.h5 scd_family%05d.h5)
+  add_test (NAME H5REPART-h5repart_5K COMMAND $<TARGET_FILE:h5repart${tgt_ext}> -m 5k family_file%05d.h5 scd_family%05d.h5)
   set_tests_properties (H5REPART-h5repart_5K PROPERTIES
       FIXTURES_REQUIRED clear_testrepart
   )
 
   # convert family file to sec2 file of 20,000 bytes
-  add_test (NAME H5REPART-h5repart_single COMMAND $<TARGET_FILE:h5repart> -m 20000 -family_to_single family_file%05d.h5 family_to_single.h5)
+  add_test (NAME H5REPART-h5repart_single COMMAND $<TARGET_FILE:h5repart${tgt_ext}> -m 20000 -family_to_single family_file%05d.h5 family_to_single.h5)
   set_tests_properties (H5REPART-h5repart_single PROPERTIES
       FIXTURES_REQUIRED clear_testrepart
   )
 
   # convert family file to sec2 file of 20,000 bytes (old argument)
-  add_test (NAME H5REPART-h5repart_sec2 COMMAND $<TARGET_FILE:h5repart> -m 20000 -family_to_sec2 family_file%05d.h5 family_to_sec2.h5)
+  add_test (NAME H5REPART-h5repart_sec2 COMMAND $<TARGET_FILE:h5repart${tgt_ext}> -m 20000 -family_to_sec2 family_file%05d.h5 family_to_sec2.h5)
   set_tests_properties (H5REPART-h5repart_sec2 PROPERTIES
       FIXTURES_REQUIRED clear_testrepart
   )

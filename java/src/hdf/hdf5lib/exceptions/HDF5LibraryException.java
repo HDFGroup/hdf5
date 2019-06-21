@@ -262,7 +262,7 @@ public class HDF5LibraryException extends HDF5Exception {
             return "unrecognized message";
         }
         else if (err_code == HDF5Constants.H5E_CANTDELETE) {
-            return " Can't delete message";
+            return "Can't delete message";
         }
         else if (err_code == HDF5Constants.H5E_CANTOPENOBJ) {
             return "Can't open object";
