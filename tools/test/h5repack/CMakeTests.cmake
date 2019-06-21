@@ -677,6 +677,7 @@
               -D "TEST_REFERENCE=${testname}.${resultfile}.tst"
               -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
               -D "TEST_ENV_VALUE=${CMAKE_BINARY_DIR}/plugins"
+              -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}"
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
       set_tests_properties (H5REPACK_UD-${testname} PROPERTIES DEPENDS H5REPACK_UD-${testname}-clear-objects)
@@ -691,6 +692,7 @@
               -D "TEST_REFERENCE=${resultfile}-${testname}.ddl"
               -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
               -D "TEST_ENV_VALUE=${CMAKE_BINARY_DIR}/plugins"
+              -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}"
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
       set_tests_properties (H5REPACK_UD-${testname}-h5dump PROPERTIES DEPENDS "H5REPACK_UD-${testname}")
