@@ -3683,6 +3683,8 @@ test_read_filtered_dataset_point_selection(void)
     if (read_buf) HDfree(read_buf);
     if (correct_buf) HDfree(correct_buf);
 
+    HDfree(coords);
+
     VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
     VRFY((H5Sclose(memspace) >= 0), "Memory dataspace close succeeded");
@@ -5791,6 +5793,9 @@ test_write_parallel_read_serial(void)
 
         VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
         VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
+
+        HDfree(correct_buf);
+        HDfree(read_buf);
     }
 
     return;
