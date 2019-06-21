@@ -282,8 +282,7 @@ int read_info(const char *filename, pack_opt_t *options)
     int i, rc = 1;
     int ret_value = EXIT_SUCCESS;
 
-    fp = HDfopen(filename, "r");
-    if ((FILE *)NULL == fp) {
+    if (NULL == (fp = HDfopen(filename, "r"))) {
         error_msg("cannot open options file %s\n", filename);
         h5tools_setstatus(EXIT_FAILURE);
         ret_value = EXIT_FAILURE;
@@ -417,7 +416,14 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options)
     int ret_value = 0;
 
     /* parse command line options */
+#if 0
     while (EOF != (opt = get_option(argc, argv, s_opts, l_opts))) {
+#else
+    for (opt = get_option(argc, argv, s_opts, l_opts);
+         opt != EOF;
+         opt = get_option(argc, argv, s_opts, l_opts))
+    {
+#endif
         switch ((char) opt) {
 
             /* -i for backward compatibility */
@@ -654,7 +660,7 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options)
 
             default:
                 break;
-        } /* switch */
+        } /* end switch */
     } /* end while there are more options to parse */
 
     /* If neither -i nor -o given, get in and out files positionally */

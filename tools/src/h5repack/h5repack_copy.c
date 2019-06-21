@@ -785,9 +785,6 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
                 if (H5Dclose(dset_in) < 0)
                     HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dclose failed");
 
-/* TODO: be smart about external storage */
-/* can we use the dcpl_in/out to adjust any external storage? */
-/* what about the case with just H5Ocopy? */
                 /*-------------------------------------------------------------------------
                  * check if we should use H5Ocopy or not
                  * if there is a request for filters/layout, we read/write the object
@@ -914,8 +911,8 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
                                     /* unset unlimited max dims */
                                     if (limit_maxdims)
                                         H5Sset_extent_simple(f_space_id, rank, dims, NULL);
-                                } /* if not chunked */
-                            } /* if layout change requested for entire file or individual object */
+                                } /* end if not chunked */
+                            } /* end if layout change requested for entire file or individual object */
 
                             /*-------------------------------------------------------------------------
                              * create the output dataset;
@@ -930,6 +927,7 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
                                     H5P_DEFAULT,
                                     dcpl_out,
                                     H5P_DEFAULT);
+                            /* if unable to create, retry with original DCPL */
                             if (dset_out < 0) {
                                 H5Epush2(H5tools_ERR_STACK_g,
                                         __FILE__,
@@ -952,7 +950,7 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
                                 if (dset_out < 0)
                                     HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dcreate2 failed");
                                 apply_f = 0;
-                            } /* if opening dataset with original DCPL (retry) */
+                            } /* end if retry dataset create */
 
                             /*-------------------------------------------------------------------------
                              * read/write
@@ -1079,7 +1077,7 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
                                             H5Sselect_all(f_space_id);
                                             H5Sselect_all(hslab_space);
                                             hs_select_nelmts = 1;
-                                        } /* rank  == 0 */
+                                        } /* end (else) rank  == 0 */
 
                                         if (H5Dread(
                                                 dset_in,
@@ -1112,7 +1110,7 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
                                             else
                                                 carry = 0;
                                         }
-                                    } /* hyperslab selection loop */
+                                    } /* end for (hyperslab selection loop) */
 
                                     H5Sclose(hslab_space);
                                     if (hslab_buf != NULL) {
@@ -1120,7 +1118,7 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
                                         hslab_buf = NULL;
                                     }
                                 } /* end if reading/writing by hyperslab */
-                            } /* if (nelmts > 0 && space_status != H5D_SPACE_STATUS_NOT_ALLOCATED) */
+                            } /* end if (nelmts > 0 && space_status != H5D_SPACE_STATUS_NOT_ALLOCATED) */
 
                             /*-------------------------------------------------------------------------
                              * print amount of compression used
@@ -1152,7 +1150,7 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
 
                                 if (has_filter && apply_f == 0)
                                     printf(" <warning: could not apply the filter to %s>\n", travt->objs[i].name);
-                            } /* if verbose (print compression) */
+                            } /* end if verbose (print compression) */
 
                             /*-------------------------------------------------------------------------
                              * copy attrs
@@ -1163,11 +1161,11 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
 
                             if (H5Dclose(dset_out) < 0)
                                 HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dclose failed");
-                        } /* !H5T_REFERENCE */
-                    } /* if h5tools_canreadf (filter availability check) */
+                        } /* end if not a reference */
+                    } /* end if h5tools_canreadf (filter availability check) */
 
                     /*-------------------------------------------------------------------------
-                     * close
+                     * Close
                      *-------------------------------------------------------------------------
                      */
                     if (H5Tclose(ftype_id) < 0)
@@ -1184,7 +1182,7 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
                         HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dclose failed");
                 }
                 /*-------------------------------------------------------------------------
-                 * we do not have request for filter/chunking; use H5Ocopy instead
+                 * We do not have request for filter/chunking; use H5Ocopy instead
                  *-------------------------------------------------------------------------
                  */
                 else {
@@ -1210,7 +1208,7 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
                         HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pclose failed");
 
                     /*-------------------------------------------------------------------------
-                     * copy attrs manually
+                     * Copy attrs manually
                      *-------------------------------------------------------------------------
                      */
                     if ((dset_in = H5Dopen2(fidin, travt->objs[i].name, H5P_DEFAULT)) < 0)
@@ -1420,8 +1418,8 @@ print_dataset_info(hid_t dcpl_id, char *objname, double ratio, int pr)
             default:
                 HDstrcat(strfilter, "UD ");
                 break;
-        } /* switch */
-    } /* for each filter */
+        } /* end switch */
+    } /* end for each filter */
 
     if (!pr)
         printf(FORMAT_OBJ, "dset", objname);
