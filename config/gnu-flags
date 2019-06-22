@@ -227,11 +227,11 @@ case "$cc_vendor-$cc_version" in
     H5_CFLAGS="$H5_CFLAGS -Warray-bounds=2 -Wc99-c11-compat"
 
     # Append warning flags that only gcc 6.x+ knows about
-    H5_CFLAGS="$H5_CFLAGS -Wnull-dereference -Wunused-const-variable -Wduplicated-cond -Whsa"
+    H5_CFLAGS="$H5_CFLAGS -Wnull-dereference -Wunused-const-variable -Wduplicated-cond -Whsa -Wnormalized"
 
     # Append warning flags that only gcc 7.x+ knows about
     DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS -Wstringop-overflow=2"
-    H5_CFLAGS="$H5_CFLAGS -Walloc-zero -Walloca -Wduplicated-branches -Wformat-overflow=2 -Wformat-truncation=2 -Wimplicit-fallthrough=5 -Wnormalized -Wrestrict"
+    H5_CFLAGS="$H5_CFLAGS -Walloc-zero -Walloca -Wduplicated-branches -Wformat-overflow=2 -Wformat-truncation=2 -Wimplicit-fallthrough=5 -Wrestrict"
     ;;
 
   gcc-6*)
@@ -271,7 +271,7 @@ case "$cc_vendor-$cc_version" in
     H5_CFLAGS="$H5_CFLAGS -Warray-bounds=2 -Wc99-c11-compat"
 
     # Append warning flags that only gcc 6.x+ knows about
-    H5_CFLAGS="$H5_CFLAGS -Wnull-dereference -Wunused-const-variable -Wduplicated-cond -Whsa"
+    H5_CFLAGS="$H5_CFLAGS -Wnull-dereference -Wunused-const-variable -Wduplicated-cond -Whsa -Wnormalized"
     ;;
 
   gcc-5*)
