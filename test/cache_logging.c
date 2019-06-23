@@ -43,7 +43,7 @@ test_logging_api(void)
     hid_t       fid = -1;
     hid_t       gid = -1;
     hbool_t     is_currently_logging;
-    char        group_name[8];
+    char        group_name[12];
     char        filename[1024];
     int         i;
 
@@ -111,8 +111,8 @@ test_logging_api(void)
 
     /* Perform some manipulations */
     for(i = 0; i < N_GROUPS; i++) {
-        HDmemset(group_name, 0, 8);
-        HDsnprintf(group_name, 8, "%d", i);
+        HDmemset(group_name, 0, sizeof(group_name));
+        HDsnprintf(group_name, sizeof(group_name), "%d", i);
         if((gid = H5Gcreate2(fid, group_name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             TEST_ERROR;
         if(H5Gclose(gid) < 0)

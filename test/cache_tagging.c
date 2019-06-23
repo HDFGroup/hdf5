@@ -741,7 +741,7 @@ check_multi_group_creation_tags(void)
     hid_t fid = -1;          /* File Identifier */
     hid_t gid = -1;          /* Group Identifier */
     int verbose = FALSE;     /* verbose file outout */
-    char gname[10];          /* group name buffer */
+    char gname[16];          /* group name buffer */
     int i = 0;               /* iterator */
     hid_t fapl = -1;         /* File access prop list */
     haddr_t g_tag = 0;       /* Group tag value */

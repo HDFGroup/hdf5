@@ -1095,7 +1095,6 @@ H5D__build_file_prefix(const H5D_t *dset, H5F_prefix_open_t prefix_type, char **
     size_t          filepath_len;         /* length of file path                            */
     size_t          prefix_len;           /* length of prefix                               */
     size_t          file_prefix_len;      /* length of expanded prefix                      */
-    H5P_genplist_t  *plist = NULL;        /* Property list pointer                          */
     herr_t          ret_value = SUCCEED;  /* Return value                                   */
 
     FUNC_ENTER_STATIC

@@ -7599,7 +7599,7 @@ test_man_incr_insert_remove(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_
     unsigned char heap_id[100][MAX_HEAP_ID_LEN]; /* Heap ID for object inserted */
     struct a_type_t1 {
         char a[10];
-        char b[29];
+        char b[40];
     } obj1, obj2;                       /* Objects to insert/remove */
     size_t      id_len;                 /* Size of fractal heap IDs */
     fheap_heap_state_t state;           /* State of fractal heap */
@@ -7640,14 +7640,14 @@ test_man_incr_insert_remove(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_
      */
     TESTING("incremental object insertion and removal")
 
+    HDmemset(&obj1, 0, sizeof(obj1));
+    HDmemset(&obj2, 0, sizeof(obj2));
     for(i = 0; i < 100; i++) {
-        HDsprintf(obj1.b, "%s%d", "ABCDEFGHIJKLMNOPQRSTUVWXYZ", i);
-
         for(j = 0; j < i; j++) {
-            HDsprintf(obj2.b, "%s%d", "ABCDEFGHIJKLMNOPQRSTUVWXYZ", j);
-
             if(H5HF_remove(fh, heap_id[j]) < 0)
                 FAIL_STACK_ERROR
+
+            HDsprintf(obj2.b, "%s%2d", "ABCDEFGHIJKLMNOPQRSTUVWXYZ", j);
             if(H5HF_insert(fh, (sizeof(obj2)), &obj2, heap_id[j]) < 0)
                 FAIL_STACK_ERROR
         } /* end for */
@@ -7658,6 +7658,7 @@ test_man_incr_insert_remove(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_
 
         /* Insert object */
         HDmemset(heap_id[i], 0, id_len);
+        HDsprintf(obj1.b, "%s%2d", "ABCDEFGHIJKLMNOPQRSTUVWXYZ", i);
         if(H5HF_insert(fh, (sizeof(obj1)), &obj1, heap_id[i]) < 0)
             FAIL_STACK_ERROR
     } /* end for */

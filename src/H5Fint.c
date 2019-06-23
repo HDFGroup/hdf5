@@ -509,6 +509,7 @@ H5F__get_objects_cb(void *obj_ptr, hid_t obj_id, void *key)
             case H5I_ERROR_CLASS:
             case H5I_ERROR_MSG:
             case H5I_ERROR_STACK:
+            case H5I_SPACE_SEL_ITER:
             case H5I_NTYPES:
             default:
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5_ITER_ERROR, "unknown or invalid data object")
@@ -3610,6 +3611,7 @@ H5F__get_file(void *obj, H5I_type_t type)
         case H5I_ERROR_CLASS:
         case H5I_ERROR_MSG:
         case H5I_ERROR_STACK:
+        case H5I_SPACE_SEL_ITER:
         case H5I_NTYPES:
         default:
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file or file object")

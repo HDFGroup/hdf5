@@ -42,7 +42,8 @@ static int aux_copy_obj(hid_t dcpl_id, /* dataset creation property list */
     H5D_layout_t layout;
     int          rank;           /* rank of dataset */
     hsize_t      chsize[64];     /* chunk size in elements */
-    unsigned int i;
+    int i;
+    unsigned u;
 
     /* get information about input filters */
     if ((nfilters = H5Pget_nfilters(dcpl_id)) < 0)
@@ -65,8 +66,8 @@ static int aux_copy_obj(hid_t dcpl_id, /* dataset creation property list */
         if ((rank = H5Pget_chunk(dcpl_id, NELMTS(chsize), chsize/*out*/)) < 0)
             HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pget_chunk failed");
         objout->chunk.rank = rank;
-        for (i = 0; i < rank; i++)
-            objout->chunk.chunk_lengths[i] = chsize[i];
+        for (u = 0; u < (unsigned)rank; u++)
+            objout->chunk.chunk_lengths[u] = chsize[u];
     }
 
 done:
@@ -85,8 +86,7 @@ static int aux_find_obj(const char* name, /* object name from traverse list */
         pack_info_t *obj                  /*OUT*/) /* info about object to filter */
 {
     char         *pdest = NULL;
-    char         *pname = NULL;
-    int          result;
+    const char   *pname = NULL;
     unsigned int i;
 
     for (i = 0; i < options->op_tbl->nelems; i++) {

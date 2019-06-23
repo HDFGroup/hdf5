@@ -939,10 +939,10 @@ CONTAINS
     INTEGER(size_t),  DIMENSION(nfields), INTENT(inout) :: field_offsets  ! field offsets
     INTEGER(size_t),  INTENT(inout):: type_size                           ! type size
     INTEGER :: errcode                                                    ! error code
-    INTEGER, OPTIONAL :: maxlen_out                                       ! maximum character len of the field names
+    INTEGER(size_t), OPTIONAL :: maxlen_out                               ! maximum character len of the field names
     INTEGER(size_t) :: namelen                                            ! name length
     INTEGER(size_t), DIMENSION(nfields) :: namelen2                       ! name lengths
-    INTEGER(hsize_t) :: i                                                          ! general purpose integer
+    INTEGER(hsize_t) :: i                                                 ! general purpose integer
     INTEGER(size_t) :: maxlen
     INTEGER(size_t) :: c_maxlen_out
     

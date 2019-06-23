@@ -274,6 +274,7 @@ H5SM__type_to_flag(unsigned type_id, unsigned *type_flag)
         case H5O_FILL_ID:
             type_id = H5O_FILL_NEW_ID;
             /* Fall through... */
+            H5_ATTR_FALLTHROUGH
 
         case H5O_SDSPACE_ID:
         case H5O_DTYPE_ID:

@@ -173,7 +173,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
         if(current_depth < last_call_depth) {
             /* We are at the beginning of a line */
             if(H5_debug_g.ttimes) {
-                char tmp[128];
+                char tmp[320];
 
                 HDsprintf(tmp, "%.6f", event_time.etime-first_time.etime);
                 HDfprintf(out, " %*s ", (int)HDstrlen(tmp), "");
