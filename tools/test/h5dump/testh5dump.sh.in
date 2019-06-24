@@ -928,6 +928,11 @@ GREPTEST()
         echo " FAILED"
         nerrors="`expr $nerrors + 1`"
     fi
+
+    # Clean up output file
+    if test -z "$HDF5_NOCLEANUP"; then
+     rm -f $actual $actual_err
+    fi
 }
 
 # Print a "SKIP" message
