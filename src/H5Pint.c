@@ -3133,7 +3133,7 @@ H5P__class_get(const H5P_genclass_t *pclass, const char *name, void *value)
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "property has zero size")
 
     /* Copy the property value */
-    HDmemcpy(value, prop->value, prop->size);
+    H5MM_memcpy(value, prop->value, prop->size);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3189,7 +3189,7 @@ H5P__class_set(const H5P_genclass_t *pclass, const char *name, const void *value
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "property has zero size")
 
     /* Copy the property value */
-    HDmemcpy(prop->value, value, prop->size);
+    H5MM_memcpy(prop->value, value, prop->size);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

@@ -1437,6 +1437,7 @@ H5VL__object(hid_t id, H5I_type_t obj_type)
         case H5I_ERROR_CLASS:
         case H5I_ERROR_MSG:
         case H5I_ERROR_STACK:
+        case H5I_SPACE_SEL_ITER:
         case H5I_NTYPES:
         default:
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "unknown data object type")

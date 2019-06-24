@@ -867,12 +867,19 @@ set_tests_properties (H5TEST-links_env PROPERTIES
     WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
 )
 
-#-- Adding test for libinfo
-add_test (NAME H5TEST-testlibinfo
-    COMMAND ${CMAKE_COMMAND} -D "TEST_PROGRAM=$<TARGET_FILE:${HDF5_LIB_TARGET}>" -P "${GREP_RUNNER}"
-    WORKING_DIRECTORY
-        ${HDF5_TEST_BINARY_DIR}/H5TEST
-)
+if (NOT BUILD_SHARED_LIBS)
+  #-- Adding test for libinfo
+  add_test (NAME H5TEST-testlibinfo
+      COMMAND ${CMAKE_COMMAND} -D "TEST_PROGRAM=$<TARGET_FILE:${HDF5_LIB_TARGET}>" -P "${GREP_RUNNER}"
+      WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
+  )
+else ()
+  #-- Adding test for libinfo
+  add_test (NAME H5TEST-testlibinfo
+      COMMAND ${CMAKE_COMMAND} -D "TEST_PROGRAM=$<TARGET_FILE:${HDF5_LIBSH_TARGET}>" -P "${GREP_RUNNER}"
+      WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
+  )
+endif ()
 
 ##############################################################################
 ###    F I L T E R  P L U G I N  T E S T S

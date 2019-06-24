@@ -589,13 +589,11 @@ H5MM_memcpy(void *dest, const void *src, size_t n)
 
     HDassert(dest);
     HDassert(src);
-#if 0
-    /* Commented out while we investigate overlapping buffers in the
-     * parallel filter code (HDFFV-10735).
-     */
-    HDassert((char *)dest >= (const char *)src + n || (const char *)src >= (char *)dest + n);
-#endif
 
+    /* Check for buffer overlap */
+    HDassert((char *)dest >= (const char *)src + n || (const char *)src >= (char *)dest + n);
+
+    /* Copy */
     ret = HDmemcpy(dest, src, n);
 
     FUNC_LEAVE_NOAPI(ret)

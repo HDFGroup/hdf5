@@ -1138,7 +1138,7 @@ static int test_detachscales(void)
     int     rank3 = 3;
     hsize_t dims[] = {1,2,3}; /*some bogus numbers, not important for the test*/
     int     *buf = NULL;
-    char    dname[10];
+    char    dname[16];
     int     i;
 
     /* This tests creates two three dimensional datasets; then it creates

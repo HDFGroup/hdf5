@@ -155,6 +155,7 @@ while (<>) {
     my $toss;
     my $offset;
     my $warning;
+    my $extra;
 
     # Retain last FORTRAN compile line, which comes a few lines before warning
     if($_ =~ /.*\.[fF]90:.*/) {
@@ -176,12 +177,12 @@ while (<>) {
     if($_ =~ /^cc1: warning:.*/) {
         $name = $last_c_name;
         $line = "??";
-        ($toss, $toss, $warning) = split /\:/, $_;
+        ($toss, $toss, $warning, $extra) = split /\:/, $_;
     # Check for FORTRAN warning output
     } elsif($_ =~ /^Warning:.*/) {
         $name = $last_fort_name;
         $line = $last_fort_line;
-        ($toss, $warning) = split /\:/, $_;
+        ($toss, $warning, $extra) = split /\:/, $_;
 #print "1:",$.,":",$_;
 #        $_ = <>;
 #print "2:",$.,":",$_;
@@ -203,10 +204,17 @@ while (<>) {
     } else {
         # Check for 'character offset' field
         if($_ =~ /^.*[0-9]+\:[0-9]+\:/) {
-            ($name, $line, $offset, $toss, $warning) = split /\:/, $_;
+            ($name, $line, $offset, $toss, $warning, $extra) = split /\:/, $_;
         } else {
-            ($name, $line, $toss, $warning) = split /\:/, $_;
+            ($name, $line, $toss, $warning, $extra) = split /\:/, $_;
         }
+    }
+
+    # Check for extra ':' followed by more text in original warning string,
+    #  and append the ':' and text back onto the parsed warning
+    #  (Use 'length $extra' idiom to avoid warning when $extra is undefined)
+    if(length $extra ) {
+        $warning = join ':', $warning, $extra;
     }
 
     # Trim leading '..' paths from filename
@@ -401,6 +409,28 @@ while (<>) {
     } elsif($warning =~ /function might be candidate for attribute '[A-Za-z_0-9]*' \[-Wsuggest-attribute=[A-Za-z_0-9]*\].*/) {
         $warning =~ s/'[A-Za-z_0-9]*'/'-'/g;
         $warning =~ s/=[A-Za-z_0-9]*\]/=-\]/g;
+    } elsif($warning =~ /passing argument [0-9]+ of '[A-Za-z_0-9]*' makes integer from pointer without a cast \[-Wint-conversion\].*/) {
+        $warning =~ s/'[A-Za-z_0-9]*'/'-'/g;
+        $warning =~ s/[0-9]+/-/g;
+    } elsif($warning =~ /function '[A-Za-z_0-9]*' might be a candidate for '[A-Za-z_0-9]*' format attribute \[-Wsuggest-attribute=format\].*/) {
+        $warning =~ s/'[A-Za-z_0-9]*'/'-'/g;
+    } elsif($warning =~ /inlining failed in call to '[A-Za-z_0-9]*': call is unlikely and code size would grow \[-Winline\].*/) {
+        $warning =~ s/'[A-Za-z_0-9]*'/'-'/g;
+    } elsif($warning =~ /'%[0-9]*[\.\*]*[0-9]*[dfsu]' directive writing between [0-9]+ and [0-9]+ bytes into a region of size [0-9]+ \[-Wformat-overflow=\].*/) {
+        $warning =~ s/'%[0-9]*[\.\*]*[0-9]*[dfsu]'/'-'/g;
+        $warning =~ s/[0-9]+/-/g;
+    } elsif($warning =~ /'%[0-9]*[\.\*]*[0-9]*[dfsu]' directive writing between [0-9]+ and [0-9]+ bytes into a region of size between [0-9]+ and [0-9]+ \[-Wformat-overflow=\].*/) {
+        $warning =~ s/'%[0-9]*[\.\*]*[0-9]*[dfsu]'/'-'/g;
+        $warning =~ s/[0-9]+/-/g;
+    } elsif($warning =~ /'%[0-9]*[\.\*]*[0-9]*[dfsu]' directive output may be truncated writing between [0-9]+ and [0-9]+ bytes into a region of size [0-9]+ \[-Wformat-truncation=\].*/) {
+        $warning =~ s/'%[0-9]*[\.\*]*[0-9]*[dfsu]'/'-'/g;
+        $warning =~ s/[0-9]+/-/g;
+    } elsif($warning =~ /'%[0-9]*[\.\*]*[0-9]*[dfsu]' directive output may be truncated writing up to [0-9]+ bytes into a region of size [0-9]+ \[-Wformat-truncation=\].*/) {
+        $warning =~ s/'%[0-9]*[\.\*]*[0-9]*[dfsu]'/'-'/g;
+        $warning =~ s/[0-9]+/-/g;
+    } elsif($warning =~ /'%[0-9]*[\.\*]*[0-9]*[dfsu]' directive output may be truncated writing between [0-9]+ and [0-9]+ bytes into a region of size between [0-9]+ and [0-9]+ \[-Wformat-truncation=\].*/) {
+        $warning =~ s/'%[0-9]*[\.\*]*[0-9]*[dfsu]'/'-'/g;
+        $warning =~ s/[0-9]+/-/g;
     }
 
     # Increment count for [generic] warning

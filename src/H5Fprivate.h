@@ -160,16 +160,16 @@ typedef struct H5F_t H5F_t;
    (i) |= (uint16_t)((*(p) & 0xff) << 8); (p)++;                  \
 }
 
-#  define INT32DECODE(p, i) {                              \
-   (i)    = ((int32_t)(*(p) & (unsigned)0xff));      (p)++;              \
-   (i) |= ((int32_t)(*(p) & (unsigned)0xff) <<  8); (p)++;              \
-   (i) |= ((int32_t)(*(p) & (unsigned)0xff) << 16); (p)++;              \
-   (i) |= ((int32_t)(((*(p) & (unsigned)0xff) << 24) |                        \
-                   ((*(p) & (unsigned)0x80) ? (unsigned)(~0xffffffff) : (unsigned)0x0))); (p)++; \
+#  define INT32DECODE(p, i) {                                \
+   (i)  = ((int32_t)(*(p) & 0xff));      (p)++;              \
+   (i) |= ((int32_t)(*(p) & 0xff) <<  8); (p)++;             \
+   (i) |= ((int32_t)(*(p) & 0xff) << 16); (p)++;             \
+   (i) |= ((int32_t)(((*(p) & (unsigned)0xff) << 24) |                 \
+            ((*(p) & 0x80) ? ~0xffffffffULL : 0x0ULL))); (p)++;    \
 }
 
-#  define UINT32DECODE(p, i) {                              \
-   (i)    =  (uint32_t)(*(p) & 0xff);       (p)++;                  \
+#  define UINT32DECODE(p, i) {                                     \
+   (i)  =  (uint32_t)(*(p) & 0xff);       (p)++;                   \
    (i) |= ((uint32_t)(*(p) & 0xff) <<  8); (p)++;                  \
    (i) |= ((uint32_t)(*(p) & 0xff) << 16); (p)++;                  \
    (i) |= ((uint32_t)(*(p) & 0xff) << 24); (p)++;                  \

@@ -1697,33 +1697,42 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5Tcopy(hid_t type_id)
+H5Tcopy(hid_t obj_id)
 {
-    H5T_t    *dt        = NULL;     /* Pointer to the datatype to copy */
-    H5T_t    *new_dt    = NULL;
-    hid_t    ret_value  = H5I_INVALID_HID;  /* Return value */
+    H5T_t  *dt          = NULL;     /* Pointer to the datatype to copy */
+    H5T_t  *new_dt      = NULL;     /* Pointer to the new datatype */
+    hid_t   dset_tid    = H5I_INVALID_HID;  /* Datatype ID from dataset */
+    hid_t   ret_value   = H5I_INVALID_HID;  /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE1("i", "i", type_id);
+    H5TRACE1("i", "i", obj_id);
 
-    switch(H5I_get_type(type_id)) {
+    switch(H5I_get_type(obj_id)) {
         case H5I_DATATYPE:
-            /* The argument is a datatype handle */
-            if(NULL == (dt = (H5T_t *)H5I_object(type_id)))
-                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a datatype")
+            if(NULL == (dt = (H5T_t *)H5I_object(obj_id)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "type_id is not a datatype ID")
             break;
 
         case H5I_DATASET:
-            {
-                H5D_t    *dset;          /* Dataset for datatype */
+        {
+            H5VL_object_t  *vol_obj     = NULL;             /* Dataset structure */
 
-                /* The argument is a dataset handle */
-                if(NULL == (dset = (H5D_t *)H5VL_object(type_id)))
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a dataset")
-                if(NULL == (dt = H5D_typeof(dset)))
-                    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, H5I_INVALID_HID, "unable to get the dataset datatype")
-            }
+            /* Check args */
+            if(NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(obj_id, H5I_DATASET)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "type_id is not a dataset ID")
+
+            /* Get the datatype from the dataset
+             * NOTE: This will have to be closed after we're done with it.
+             */
+            if(H5VL_dataset_get(vol_obj, H5VL_DATASET_GET_TYPE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &dset_tid) < 0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, H5I_INVALID_HID, "unable to get datatype from the dataset")
+
+            /* Unwrap the type ID */
+            if(NULL == (dt = (H5T_t *)H5I_object(dset_tid)))
+                HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, H5I_INVALID_HID, "received invalid datatype from the dataset")
+
             break;
+        }
 
         case H5I_UNINIT:
         case H5I_BADID:
@@ -1738,6 +1747,7 @@ H5Tcopy(hid_t type_id)
         case H5I_ERROR_CLASS:
         case H5I_ERROR_MSG:
         case H5I_ERROR_STACK:
+        case H5I_SPACE_SEL_ITER:
         case H5I_NTYPES:
         default:
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a datatype or dataset")
@@ -1747,11 +1757,18 @@ H5Tcopy(hid_t type_id)
     if(NULL == (new_dt = H5T_copy(dt, H5T_COPY_TRANSIENT)))
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5I_INVALID_HID, "unable to copy")
 
-    /* Atomize result */
+    /* Get an ID for the copied datatype */
     if((ret_value = H5I_register(H5I_DATATYPE, new_dt, TRUE)) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register datatype atom")
 
 done:
+
+    /* If we got a type ID from a passed-in dataset, we need to close that */
+    if(dset_tid != H5I_INVALID_HID)
+        if(H5I_dec_app_ref(dset_tid) < 0)
+            HGOTO_ERROR(H5E_DATATYPE, H5E_BADATOM, FAIL, "problem freeing temporary dataset type ID")
+
+    /* Close the new datatype on errors */
     if(H5I_INVALID_HID == ret_value)
         if(new_dt && H5T_close_real(new_dt) < 0)
             HDONE_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, H5I_INVALID_HID, "unable to release datatype info")

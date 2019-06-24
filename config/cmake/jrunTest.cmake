@@ -9,7 +9,7 @@
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
-# runTest.cmake executes a command and captures the output in a file. File is then compared
+# jrunTest.cmake executes a command and captures the output in a file. File is then compared
 # against a reference file. Exit status of command can also be compared.
 cmake_policy(SET CMP0007 NEW)
 

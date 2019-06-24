@@ -580,7 +580,7 @@ test_core(void)
     file = H5Fopen(copied_filename, H5F_ACC_RDONLY, fapl);
     VERIFY(file >= 0, "H5Fopen failed");
     VERIFY((udata->used_callbacks == MALLOC) || 
-            (udata->used_callbacks == MALLOC | UDATA_COPY | UDATA_FREE), "opening a core file used the wrong callbacks");
+            (udata->used_callbacks == (MALLOC | UDATA_COPY | UDATA_FREE)), "opening a core file used the wrong callbacks");
     VERIFY(udata->malloc_src == H5FD_FILE_IMAGE_OP_FILE_OPEN, "Malloc callback came from wrong sourc in core open");
 
     /* Close file */

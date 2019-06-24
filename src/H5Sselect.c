@@ -1395,7 +1395,7 @@ done:
  PURPOSE
     Release a selection iterator's resources.
  USAGE
-    hssize_t H5S_select_iter_release(sel_iter)
+    herr_t H5S_select_iter_release(sel_iter)
         H5S_sel_iter_t *sel_iter; IN: Selection iterator to query
  RETURNS
     The number of elements in selection on success, 0 on failure
