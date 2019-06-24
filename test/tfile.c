@@ -181,8 +181,8 @@ const char *FILESPACE_NAME[] = {
 /* Local test function declarations for version bounds */
 static void test_libver_bounds_low_high(void);
 static void test_libver_bounds_super(hid_t fapl);
-static void test_libver_bounds_super_create(hid_t fapl, hid_t fcpl, htri_t is_swmr);
-static void test_libver_bounds_super_open(hid_t fapl, hid_t fcpl, htri_t is_swmr);
+static void test_libver_bounds_super_create(hid_t fapl, hid_t fcpl, htri_t is_swmr, htri_t non_def_fsm);
+static void test_libver_bounds_super_open(hid_t fapl, hid_t fcpl, htri_t is_swmr, htri_t non_def_fsm);
 static void test_libver_bounds_obj(hid_t fapl);
 static void test_libver_bounds_dataset(hid_t fapl);
 static void test_libver_bounds_dataspace(hid_t fapl);
@@ -4819,7 +4819,7 @@ test_filespace_1_10_0_compatible(void)
     for(j = 0; j < NELMTS(OLD_1_10_0_FILENAME); j++) {
         /* Make a copy of the test file */
         status = h5_make_local_copy(OLD_1_10_0_FILENAME[j], FILE5);
-    CHECK(status, FAIL, "h5_make_local_copy");
+        CHECK(status, FAIL, "h5_make_local_copy");
 
         /* Open the temporary test file */
         fid = H5Fopen(FILE5, H5F_ACC_RDWR, H5P_DEFAULT);
@@ -5583,13 +5583,13 @@ test_libver_bounds_super(hid_t fapl)
 
     /* Verify superblock version when creating a file with input fapl,
        fcpl #A and with/without SWMR access */
-    test_libver_bounds_super_create(fapl, fcpl, TRUE);
-    test_libver_bounds_super_create(fapl, fcpl, FALSE);
+    test_libver_bounds_super_create(fapl, fcpl, TRUE, FALSE);
+    test_libver_bounds_super_create(fapl, fcpl, FALSE, FALSE);
 
     /* Verify superblock version when opening a file which is created
        with input fapl, fcpl #A and with/without SWMR access */
-    test_libver_bounds_super_open(fapl, fcpl, TRUE);
-    test_libver_bounds_super_open(fapl, fcpl, FALSE);
+    test_libver_bounds_super_open(fapl, fcpl, TRUE, FALSE);
+    test_libver_bounds_super_open(fapl, fcpl, FALSE, FALSE);
 
     /* Close the fcpl */
     ret = H5Pclose(fcpl);
@@ -5604,13 +5604,13 @@ test_libver_bounds_super(hid_t fapl)
 
     /* Verify superblock version when creating a file with input fapl,
        fcpl #B and with/without SWMR access */
-    test_libver_bounds_super_create(fapl, fcpl, TRUE);
-    test_libver_bounds_super_create(fapl, fcpl, FALSE);
+    test_libver_bounds_super_create(fapl, fcpl, TRUE, FALSE);
+    test_libver_bounds_super_create(fapl, fcpl, FALSE, FALSE);
 
     /* Verify superblock version when opening a file which is created
        with input fapl, fcpl #B and with/without SWMR access */
-    test_libver_bounds_super_open(fapl, fcpl, TRUE);
-    test_libver_bounds_super_open(fapl, fcpl, FALSE);
+    test_libver_bounds_super_open(fapl, fcpl, TRUE, FALSE);
+    test_libver_bounds_super_open(fapl, fcpl, FALSE, FALSE);
 
     /* Close the fcpl */
     ret = H5Pclose(fcpl);
@@ -5627,13 +5627,13 @@ test_libver_bounds_super(hid_t fapl)
 
     /* Verify superblock version when creating a file with input fapl,
        fcpl #C and with/without SWMR access */
-    test_libver_bounds_super_create(fapl, fcpl, TRUE);
-    test_libver_bounds_super_create(fapl, fcpl, FALSE);
+    test_libver_bounds_super_create(fapl, fcpl, TRUE, FALSE);
+    test_libver_bounds_super_create(fapl, fcpl, FALSE, FALSE);
 
     /* Verify superblock version when opening a file which is created
        with input fapl, fcpl #C and with/without SWMR access */
-    test_libver_bounds_super_open(fapl, fcpl, TRUE);
-    test_libver_bounds_super_open(fapl, fcpl, FALSE);
+    test_libver_bounds_super_open(fapl, fcpl, TRUE, FALSE);
+    test_libver_bounds_super_open(fapl, fcpl, FALSE, FALSE);
 
     /* Close the fcpl */
     ret = H5Pclose(fcpl);
@@ -5648,13 +5648,13 @@ test_libver_bounds_super(hid_t fapl)
 
     /* Verify superblock version when creating a file with input fapl,
        fcpl #D and with/without SWMR access */
-    test_libver_bounds_super_create(fapl, fcpl, TRUE);
-    test_libver_bounds_super_create(fapl, fcpl, FALSE);
+    test_libver_bounds_super_create(fapl, fcpl, TRUE, TRUE);
+    test_libver_bounds_super_create(fapl, fcpl, FALSE, TRUE);
 
     /* Verify superblock version when opening a file which is created
        with input fapl, fcpl #D and with/without SWMR access */
-    test_libver_bounds_super_open(fapl, fcpl, TRUE);
-    test_libver_bounds_super_open(fapl, fcpl, FALSE);
+    test_libver_bounds_super_open(fapl, fcpl, TRUE, TRUE);
+    test_libver_bounds_super_open(fapl, fcpl, FALSE, TRUE);
 
     /* Close the fcpl */
     ret = H5Pclose(fcpl);
@@ -5666,8 +5666,8 @@ test_libver_bounds_super(hid_t fapl)
 /**************************************************************************************************
 **
 **  test_libver_bounds_super_create():
-**      Verify the following when the file is created with the input fapl, fcpl, and
-**      with/without SWMR access:
+**      Verify the following when the file is created with the input fapl, fcpl,
+**      and with/without SWMR access:
 **          (a) the superblock version #
 **          (b) the file's low bound setting
 **          (c) fail or succeed in creating the file
@@ -5679,7 +5679,10 @@ test_libver_bounds_super(hid_t fapl)
 **      in the input fapl. The next three rows list the expected results for #a to #c.
 **      "-->" indicates "upgrade to"
 **
-**                                          Creating a file with write access
+**      The last table lists the expected results in creating the file when non-default
+**      free-space info (fsinfo) is enabled in fcpl.
+**
+**                                  Creating a file with write access
 **                    --------------------------------------------------------------------------------
 **                    | (earliest, v18) | (earliest, v110) | (v18, v18) | (v18, v110) | (v110, v110) |
 **                    |______________________________________________________________________________|
@@ -5690,7 +5693,7 @@ test_libver_bounds_super(hid_t fapl)
 ** File creation      |                             succeed                                          |
 **                    |______________________________________________________________________________|
 **
-**                                          Creating a file with SWMR-write access
+**                                  Creating a file with SWMR-write access 
 **                    --------------------------------------------------------------------------------
 **                    | (earliest, v18) | (earliest, v110) | (v18, v18) | (v18, v110) | (v110, v110) |
 **                    |______________________________________________________________________________|
@@ -5698,12 +5701,19 @@ test_libver_bounds_super(hid_t fapl)
 **                    |------------------------------------------------------------------------------|
 ** File's low bound   | --              | ->v110           | --         | ->v110      | no change    |
 **                    |------------------------------------------------------------------------------|
-** File creation      | fail            | succeed          | fail       | succeed     | succed       |
+** File creation      | fail            | succeed          | fail       | succeed     | succeed      |
+**                    |______________________________________________________________________________|
+**
+**                                  Creating a file with write/SWMR-write access + non-default fsinfo
+**                    --------------------------------------------------------------------------------
+**                    | (earliest, v18) | (earliest, v110) | (v18, v18) | (v18, v110) | (v110, v110) |
+**                    |______________________________________________________________________________|
+** File creation      |  fail            | succeed         | fail       | succeed      | succeed     |
 **                    |______________________________________________________________________________|
 **
 ******************************************************************************************************/
 static void
-test_libver_bounds_super_create(hid_t fapl, hid_t fcpl, htri_t is_swmr)
+test_libver_bounds_super_create(hid_t fapl, hid_t fcpl, htri_t is_swmr, htri_t non_def_fsm)
 {
     hid_t fid = -1;            /* File ID */
     H5F_t *f = NULL;        /* Internal file pointer */
@@ -5726,8 +5736,10 @@ test_libver_bounds_super_create(hid_t fapl, hid_t fcpl, htri_t is_swmr)
     ret = H5Pget_libver_bounds(fapl, &low, &high);
     CHECK(ret, FAIL, "H5Pget_libver_bounds");
 
-    if(is_swmr) { /* SWMR is enabled */
+    if(non_def_fsm && high < H5F_LIBVER_V110)
+        VERIFY(fid, FAIL, "H5Fcreate");
 
+    else if(is_swmr) { /* SWMR is enabled */
         if(high >= H5F_LIBVER_V110) { /* Should succeed */
             VERIFY(fid >= 0, TRUE, "H5Fcreate");
             VERIFY(HDF5_SUPERBLOCK_VERSION_3, f->shared->sblock->super_vers, "HDF5_superblock_ver_bounds");
@@ -5736,37 +5748,37 @@ test_libver_bounds_super_create(hid_t fapl, hid_t fcpl, htri_t is_swmr)
         } else /* Should fail */
             VERIFY(fid >= 0, FALSE, "H5Fcreate");
 
-    }
-    else { /* Should succeed */
+    } else { /* Should succeed */
         VERIFY(fid >= 0, TRUE, "H5Fcreate");
         VERIFY(low, f->shared->low_bound, "HDF5_superblock_ver_bounds");
 
         switch(low) {
             case H5F_LIBVER_EARLIEST:
-                ok = (f->shared->sblock->super_vers == HDF5_SUPERBLOCK_VERSION_DEF  ||
-                      f->shared->sblock->super_vers == HDF5_SUPERBLOCK_VERSION_1 ||
-                      f->shared->sblock->super_vers == HDF5_SUPERBLOCK_VERSION_2);
-                VERIFY(ok, TRUE, "HDF5_superblock_ver_bounds");
-                break;
+               ok = (f->shared->sblock->super_vers == HDF5_SUPERBLOCK_VERSION_DEF  ||
+                     f->shared->sblock->super_vers == HDF5_SUPERBLOCK_VERSION_1 ||
+                     f->shared->sblock->super_vers == HDF5_SUPERBLOCK_VERSION_2);
+               VERIFY(ok, TRUE, "HDF5_superblock_ver_bounds");
+               break;
 
             case H5F_LIBVER_V18:
-                ok = (f->shared->sblock->super_vers == HDF5_SUPERBLOCK_VERSION_2);
-                VERIFY(ok, TRUE, "HDF5_superblock_ver_bounds");
-                break;
+               ok = (f->shared->sblock->super_vers == HDF5_SUPERBLOCK_VERSION_2);
+               VERIFY(ok, TRUE, "HDF5_superblock_ver_bounds");
+               break;
 
             case H5F_LIBVER_V110:
             case H5F_LIBVER_V112:
-                ok = (f->shared->sblock->super_vers == HDF5_SUPERBLOCK_VERSION_3);
-                VERIFY(ok, TRUE, "HDF5_superblock_ver_bounds");
-                break;
+               ok = (f->shared->sblock->super_vers == HDF5_SUPERBLOCK_VERSION_3);
+               VERIFY(ok, TRUE, "HDF5_superblock_ver_bounds");
+               break;
 
             case H5F_LIBVER_ERROR:
             case H5F_LIBVER_NBOUNDS:
             default:
-               ERROR("H5Pget_libver_bounds");
+                ERROR("H5Pget_libver_bounds");
 
         } /* end switch */
-    }
+
+    } /* end else */
 
     if(fid >= 0) { /* Close the file */
         ret = H5Fclose(fid);
@@ -5793,11 +5805,14 @@ test_libver_bounds_super_create(hid_t fapl, hid_t fcpl, htri_t is_swmr)
 **      For file open, the file's superblock version, the low/high bounds setting in fapl,
 **      and with/without SWMR file access will determine the results for #a and #b.
 **
-**      The first row for the following tables is the 5 pairs of low/high bounds setting
+**      The first row for the following tables (#A - #B) is the 5 pairs of low/high bounds setting
 **      in the input fapl. The next two rows list the expected results for #a and #b.
 **      "-->" indicates "upgrade to"
 **
-**                                        Opening a file with write access
+**      The last table (#C) lists the expected results in opening the file when non-default
+**      free-space info (fsinfo) is enabled in fcpl.
+**
+**                      (A) Opening a file with write access
 **
 **                                              Superblock version 0, 1
 **                  --------------------------------------------------------------------------------
@@ -5829,7 +5844,7 @@ test_libver_bounds_super_create(hid_t fapl, hid_t fcpl, htri_t is_swmr)
 **
 **
 **
-**                                        Opening a file with SWMR-write access
+**                     (B) Opening a file with SWMR-write access
 **
 **                                              Superblock version 0, 1, 2
 **                  -------------------------------------------------------------------------------
@@ -5851,9 +5866,17 @@ test_libver_bounds_super_create(hid_t fapl, hid_t fcpl, htri_t is_swmr)
 **                  |_____________________________________________________________________________|
 **
 **
+**                      (C) Opening a file with write/SWMR-write access + non-default fsinfo
+**                  -------------------------------------------------------------------------------
+**                  | (earliest, v18) | (earliest, v10) | (v18, v18) | (v18, v110) | (v110, v110) |
+**                  |_____________________________________________________________________________|
+** File open        | fail            | succeed         | fail       | succeed     | succeed      |
+**                  |_____________________________________________________________________________|
+**
+**
 ******************************************************************************************************/
 static void
-test_libver_bounds_super_open(hid_t fapl, hid_t fcpl, htri_t is_swmr)
+test_libver_bounds_super_open(hid_t fapl, hid_t fcpl, htri_t is_swmr, htri_t non_def_fsm)
 {
     hid_t fid = -1;            /* File ID */
     H5F_t *f = NULL;        /* Internal file pointer */
@@ -5863,96 +5886,113 @@ test_libver_bounds_super_open(hid_t fapl, hid_t fcpl, htri_t is_swmr)
     herr_t ret;                /* Return value */
 
     /* Create the file with the input fcpl and fapl */
-    fid = H5Fcreate(FILE8, H5F_ACC_TRUNC, fcpl, fapl);
-    CHECK(fid, FAIL, "H5Fcreate");
+    H5E_BEGIN_TRY {
+        fid = H5Fcreate(FILE8, H5F_ACC_TRUNC, fcpl, fapl);
+    } H5E_END_TRY;
 
-    /* Get the internal file pointer */
-    f = (H5F_t *)H5VL_object(fid);
-    CHECK(f, NULL, "H5VL_object");
+    /* Retrieve the low/high bounds */
+    ret = H5Pget_libver_bounds(fapl, &low, &high);
+    CHECK(ret, FAIL, "H5Pget_libver_bounds");
 
-    /* The file's superblock version */
-    super_vers = f->shared->sblock->super_vers;
+    if(non_def_fsm && high < H5F_LIBVER_V110) {
+        VERIFY(fid, FAIL, "H5Fcreate");
 
-    /* Close the file */
-    ret = H5Fclose(fid);
-    CHECK(ret, FAIL, "H5Fclose");
+    } else {
+        VERIFY(fid >= 0, TRUE, "H5Fcreate");
 
-    /* Create a default file access property list */
-    new_fapl = H5Pcreate(H5P_FILE_ACCESS);
-    CHECK(new_fapl, FAIL, "H5Pcreate");
+        /* Get the internal file pointer */
+        f = (H5F_t *)H5VL_object(fid);
+        CHECK(f, NULL, "H5VL_object");
 
-    /* Loop through all the combinations of low/high bounds in new_fapl */
-    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, low)) {
-        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, high)) {
-            H5E_BEGIN_TRY {
-                ret = H5Pset_libver_bounds(new_fapl, low, high);
-            } H5E_END_TRY;
+        /* The file's superblock version */
+        super_vers = f->shared->sblock->super_vers;
 
-            /* Invalid combinations */
-            if (ret < 0)
-                continue;
+        /* Close the file */
+        ret = H5Fclose(fid);
+        CHECK(ret, FAIL, "H5Fclose");
 
-            /* Open the file with or without SWMR access */
-            H5E_BEGIN_TRY {
-                fid = H5Fopen(FILE8, H5F_ACC_RDWR | (is_swmr ? H5F_ACC_SWMR_WRITE : 0), new_fapl);
-            } H5E_END_TRY;
+        /* Create a default file access property list */
+        new_fapl = H5Pcreate(H5P_FILE_ACCESS);
+        CHECK(new_fapl, FAIL, "H5Pcreate");
 
-            /* Get the internal file pointer if the open succeeds */
-            if(fid >= 0) {
-                f = (H5F_t *)H5VL_object(fid);
-                CHECK(f, NULL, "H5VL_object");
-            }
+        /* Loop through all the combinations of low/high bounds in new_fapl */
+        for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, low)) {
+            for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, high)) {
+                H5E_BEGIN_TRY {
+                    ret = H5Pset_libver_bounds(new_fapl, low, high);
+                } H5E_END_TRY;
 
-            /* Verify the file open succeeds or fails */
-            switch(super_vers) {
-                case 3:
-                    if(high >= H5F_LIBVER_V110) {
-                        /* Should succeed */
-                        VERIFY(fid >= 0, TRUE, "H5Fopen");
-                        VERIFY(f->shared->low_bound >= H5F_LIBVER_V110, TRUE, "HDF5_superblock_ver_bounds");
+                /* Invalid combinations */
+                if (ret < 0)
+                    continue;
 
-                        /* Close the file */
-                        ret = H5Fclose(fid);
-                        CHECK(ret, FAIL, "H5Fclose");
-                    } else /* Should fail */
-                        VERIFY(fid >= 0, FALSE, "H5Fopen");
-                    break;
+                /* Open the file with or without SWMR access */
+                H5E_BEGIN_TRY {
+                    fid = H5Fopen(FILE8, H5F_ACC_RDWR | (is_swmr ? H5F_ACC_SWMR_WRITE : 0), new_fapl);
+                } H5E_END_TRY;
 
-                case 2:
-                    if(is_swmr)  /* Should fail */
-                        VERIFY(fid >= 0, FALSE, "H5Fopen");
-                    else { /* Should succeed */
-                        VERIFY(fid >= 0, TRUE, "H5Fopen");
-                        VERIFY(f->shared->low_bound >= H5F_LIBVER_V18, TRUE, "HDF5_superblock_ver_bounds");
+                if(non_def_fsm && high < H5F_LIBVER_V110) {
+                    VERIFY(fid, FAIL, "H5Fopen");
+                    continue;
+                }
 
-                        /* Close the file */
-                        ret = H5Fclose(fid);
-                        CHECK(ret, FAIL, "H5Fclose");
-                    }
-                    break;
+                /* Get the internal file pointer if the open succeeds */
+                if(fid >= 0) {
+                    f = (H5F_t *)H5VL_object(fid);
+                    CHECK(f, NULL, "H5VL_object");
+                }
 
-                case 1:
-                case 0:
-                    if(is_swmr)  /* Should fail */
-                        VERIFY(fid >= 0, FALSE, "H5Fopen");
-                    else { /* Should succeed */
-                        VERIFY(fid >= 0, TRUE, "H5Fopen");
-                        VERIFY(f->shared->low_bound, low, "HDF5_superblock_ver_bounds");
+                /* Verify the file open succeeds or fails */
+                switch(super_vers) {
+                    case 3:
+                        if(high >= H5F_LIBVER_V110) {
+                            /* Should succeed */
+                            VERIFY(fid >= 0, TRUE, "H5Fopen");
+                            VERIFY(f->shared->low_bound >= H5F_LIBVER_V110, TRUE, "HDF5_superblock_ver_bounds");
 
-                        ret = H5Fclose(fid);
-                        CHECK(ret, FAIL, "H5Fclose");
-                    }
-                    break;
+                            /* Close the file */
+                            ret = H5Fclose(fid);
+                            CHECK(ret, FAIL, "H5Fclose");
+                        } else /* Should fail */
+                            VERIFY(fid >= 0, FALSE, "H5Fopen");
+                        break;
 
-                default:
-                    break;
-            } /* end switch */
+                    case 2:
+                        if(is_swmr)  /* Should fail */
+                            VERIFY(fid >= 0, FALSE, "H5Fopen");
+                        else { /* Should succeed */
+                            VERIFY(fid >= 0, TRUE, "H5Fopen");
+                            VERIFY(f->shared->low_bound >= H5F_LIBVER_V18, TRUE, "HDF5_superblock_ver_bounds");
+
+                            /* Close the file */
+                            ret = H5Fclose(fid);
+                            CHECK(ret, FAIL, "H5Fclose");
+                        }
+                        break;
+
+                    case 1:
+                    case 0:
+                        if(is_swmr)  /* Should fail */
+                            VERIFY(fid >= 0, FALSE, "H5Fopen");
+                        else { /* Should succeed */
+                            VERIFY(fid >= 0, TRUE, "H5Fopen");
+                            VERIFY(f->shared->low_bound, low, "HDF5_superblock_ver_bounds");
+
+                            ret = H5Fclose(fid);
+                            CHECK(ret, FAIL, "H5Fclose");
+                        }
+                        break;
+
+                    default:
+                        break;
+                } /* end switch */
+            } /* end for */
         } /* end for */
-    } /* end for */
 
-    /* Close the file access property list */
-    ret = H5Pclose(new_fapl);
-    CHECK(ret, FAIL, "H5Pclose");
+        /* Close the file access property list */
+        ret = H5Pclose(new_fapl);
+        CHECK(ret, FAIL, "H5Pclose");
+    } /* end else */
 
 } /* end test_libver_bounds_super_open() */
 
