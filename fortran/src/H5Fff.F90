@@ -591,7 +591,6 @@ CONTAINS
                                            ! is an HDF5 file
     INTEGER, INTENT(OUT) :: hdferr         ! Error code
 !*****
-    INTEGER(HID_T) :: access_prp_default
     CHARACTER(LEN=LEN_TRIM(name)+1,KIND=C_CHAR) :: c_name
     INTEGER(C_INT) :: flag    ! "TRUE/FALSE/ERROR" flag from C routine
                               ! to define status value.

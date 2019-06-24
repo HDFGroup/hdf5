@@ -2806,8 +2806,9 @@ H5D__chunk_redistribute_shared_chunks(const H5D_io_info_t *io_info, const H5D_ty
         /* Sort the new list in order of previous owner so that each original owner of a chunk
          * entry gets that entry back, with the possibly newly-modified "new_owner" field
          */
-        HDqsort(shared_chunks_info_array, shared_chunks_info_array_num_entries,
-                sizeof(H5D_filtered_collective_io_info_t), H5D__cmp_filtered_collective_io_info_entry_owner);
+        if(shared_chunks_info_array_num_entries > 1)
+            HDqsort(shared_chunks_info_array, shared_chunks_info_array_num_entries,
+                    sizeof(H5D_filtered_collective_io_info_t), H5D__cmp_filtered_collective_io_info_entry_owner);
 
         send_displacements[0] = 0;
         for (i = 1; i < (size_t) mpi_size; i++)

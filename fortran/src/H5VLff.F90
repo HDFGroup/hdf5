@@ -217,7 +217,6 @@ CONTAINS
 !*****
     CHARACTER(LEN=1,KIND=C_CHAR), DIMENSION(1:LEN(name)+1), TARGET :: c_name
     INTEGER(SIZE_T) :: l
-    TYPE(C_PTR) :: f_ptr
 
     INTERFACE
        INTEGER(SIZE_T) FUNCTION H5VLget_connector_name(obj_id, name, size) BIND(C,NAME='H5VLget_connector_name')

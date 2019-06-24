@@ -2142,18 +2142,25 @@ loc += fast_dim_buf_off;
                     do
                       {
                         DUFF_GUTS
+                        H5_ATTR_FALLTHROUGH
                 case 7:
                         DUFF_GUTS
+                        H5_ATTR_FALLTHROUGH
                 case 6:
                         DUFF_GUTS
+                        H5_ATTR_FALLTHROUGH
                 case 5:
                         DUFF_GUTS
+                        H5_ATTR_FALLTHROUGH
                 case 4:
                         DUFF_GUTS
+                        H5_ATTR_FALLTHROUGH
                 case 3:
                         DUFF_GUTS
+                        H5_ATTR_FALLTHROUGH
                 case 2:
                         DUFF_GUTS
+                        H5_ATTR_FALLTHROUGH
                 case 1:
                         DUFF_GUTS
                   } while (--duffs_index > 0);
@@ -10013,6 +10020,7 @@ H5S_select_hyperslab(H5S_t *space, H5S_seloper_t op, const hsize_t start[],
             if(op == H5S_SELECT_SET)      /* Allow only "set" operation to proceed */
                 break;
             /* Else fall through to error */
+            H5_ATTR_FALLTHROUGH
 
         case H5S_SEL_ERROR:
         case H5S_SEL_N:

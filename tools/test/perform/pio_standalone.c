@@ -170,6 +170,7 @@ print_version(const char *progname)
 MPI_Info    h5_io_info_g=MPI_INFO_NULL;/* MPI INFO object for IO */
 #endif
 
+#if 0
 int
 h5_set_info_object(void)
 {
@@ -277,3 +278,6 @@ h5_dump_info_object(MPI_Info info)
 
     }
 }
+
+#endif
+

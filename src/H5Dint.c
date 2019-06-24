@@ -1095,7 +1095,6 @@ H5D__build_file_prefix(const H5D_t *dset, H5F_prefix_open_t prefix_type, char **
     size_t          filepath_len;         /* length of file path                            */
     size_t          prefix_len;           /* length of prefix                               */
     size_t          file_prefix_len;      /* length of expanded prefix                      */
-    H5P_genplist_t  *plist = NULL;        /* Property list pointer                          */
     herr_t          ret_value = SUCCEED;  /* Return value                                   */
 
     FUNC_ENTER_STATIC
@@ -2199,30 +2198,6 @@ H5D_nameof(const H5D_t *dataset)
 
     FUNC_LEAVE_NOAPI(dataset ? (H5G_name_t *)&(dataset->path) : (H5G_name_t *)NULL)
 } /* end H5D_nameof() */
-
-
-/*-------------------------------------------------------------------------
- * Function: H5D_typeof
- *
- * Purpose:  Returns a pointer to the dataset's datatype.  The datatype
- *           is not copied.
- *
- * Return:   Success:    Ptr to the dataset's datatype, uncopied.
- *           Failure:    NULL
- *-------------------------------------------------------------------------
- */
-H5T_t *
-H5D_typeof(const H5D_t *dset)
-{
-    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    HDassert(dset);
-    HDassert(dset->shared);
-    HDassert(dset->shared->type);
-
-    FUNC_LEAVE_NOAPI(dset->shared->type)
-} /* end H5D_typeof() */
 
 
 /*-------------------------------------------------------------------------

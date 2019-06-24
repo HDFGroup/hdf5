@@ -551,6 +551,9 @@ H5T__get_native_integer(size_t prec, H5T_sign_t sign, H5T_direction_t direction,
     FUNC_ENTER_STATIC
 
     if(direction == H5T_DIR_DEFAULT || direction == H5T_DIR_ASCEND) {
+/* Disable warning for intentional identical branches here -QAK */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wduplicated-branches"
         if(prec <= H5T_get_precision((H5T_t *)H5I_object(H5T_NATIVE_SCHAR_g))) {
             match = H5T_NATIVE_INT_MATCH_CHAR;
             native_size = sizeof(char);
@@ -570,6 +573,7 @@ H5T__get_native_integer(size_t prec, H5T_sign_t sign, H5T_direction_t direction,
             match = H5T_NATIVE_INT_MATCH_LLONG;
             native_size = sizeof(long long);
         }
+#pragma GCC diagnostic pop
     } else if(direction == H5T_DIR_DESCEND) {
         if(prec > H5T_get_precision((H5T_t *)H5I_object(H5T_NATIVE_LONG_g))) {
             match = H5T_NATIVE_INT_MATCH_LLONG;
@@ -694,6 +698,9 @@ H5T__get_native_float(size_t size, H5T_direction_t direction, size_t *struct_ali
     HDassert(size>0);
 
     if(direction == H5T_DIR_DEFAULT || direction == H5T_DIR_ASCEND) {
+/* Disable warning for intentional identical branches here -QAK */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wduplicated-branches"
         if(size<=sizeof(float)) {
             match=H5T_NATIVE_FLOAT_MATCH_FLOAT;
 	    native_size = sizeof(float);
@@ -717,6 +724,7 @@ H5T__get_native_float(size_t size, H5T_direction_t direction, size_t *struct_ali
             native_size = sizeof(double);
 #endif
 	}
+#pragma GCC diagnostic pop
     } else {
 #if H5_SIZEOF_LONG_DOUBLE !=0
         if(size>sizeof(double)) {
@@ -810,6 +818,9 @@ H5T__get_native_bitfield(size_t prec, H5T_direction_t direction,
     FUNC_ENTER_STATIC
 
     if(direction == H5T_DIR_DEFAULT || direction == H5T_DIR_ASCEND) {
+/* Disable warning for intentional identical branches here -QAK */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wduplicated-branches"
         if(prec<=H5T_get_precision((H5T_t *)H5I_object(H5T_NATIVE_B8_g))) {
             tid = H5T_NATIVE_B8;
             native_size = 1;
@@ -831,6 +842,7 @@ H5T__get_native_bitfield(size_t prec, H5T_direction_t direction,
             native_size = 8;
             align = H5T_NATIVE_UINT64_ALIGN_g;
         }
+#pragma GCC diagnostic pop
     } else if(direction == H5T_DIR_DESCEND) {
         if(prec>H5T_get_precision((H5T_t *)H5I_object(H5T_NATIVE_B32_g))) {
             tid = H5T_NATIVE_B64;

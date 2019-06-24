@@ -27,7 +27,7 @@
 # Result variables
 ###################
 
-This module will set the following variables in your project:
+# This module will set the following variables in your project:
 
 #  SZIP_FOUND, true if the SZIP headers and libraries were found.
 #  SZIP_INCLUDE_DIR, the directory containing the SZIP headers.
