@@ -2201,30 +2201,6 @@ H5D_nameof(const H5D_t *dataset)
 
 
 /*-------------------------------------------------------------------------
- * Function: H5D_typeof
- *
- * Purpose:  Returns a pointer to the dataset's datatype.  The datatype
- *           is not copied.
- *
- * Return:   Success:    Ptr to the dataset's datatype, uncopied.
- *           Failure:    NULL
- *-------------------------------------------------------------------------
- */
-H5T_t *
-H5D_typeof(const H5D_t *dset)
-{
-    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    HDassert(dset);
-    HDassert(dset->shared);
-    HDassert(dset->shared->type);
-
-    FUNC_LEAVE_NOAPI(dset->shared->type)
-} /* end H5D_typeof() */
-
-
-/*-------------------------------------------------------------------------
  * Function: H5D__alloc_storage
  *
  * Purpose:  Allocate storage for the raw data of a dataset.
