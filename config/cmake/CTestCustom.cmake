@@ -93,6 +93,7 @@ set (CTEST_CUSTOM_MEMCHECK_IGNORE
     H5DUMP_PACKED_BITS-clearall-objects
     H5DUMP-XML-clearall-objects
     H5DUMP_VDS-clearall-objects
+    H5DUMP-t128bit_float      #uses grepTest.cmake
     ######### tools/h5format_convert #########
     H5FC-clearall-objects
     ######### tools/h5import #########

@@ -320,6 +320,7 @@
       ${HDF5_TOOLS_DIR}/testfiles/tvlenstr_array.h5
       ${HDF5_TOOLS_DIR}/testfiles/tvlstr.h5
       ${HDF5_TOOLS_DIR}/testfiles/tvms.h5
+      ${HDF5_TOOLS_DIR}/testfiles/t128bit_float.h5
       ${HDF5_TOOLS_DIR}/testfiles/zerodim.h5
   )
   set (HDF5_ERROR_REFERENCE_TEST_FILES
@@ -671,6 +672,32 @@
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
       set_tests_properties (H5DUMP-${resultfile} PROPERTIES DEPENDS "H5DUMP-${resultfile}-clear-objects")
+    endif ()
+  endmacro ()
+
+  macro (ADD_H5_GREP_TEST resultfile resultcode result_check)
+    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+      # Remove any output file left over from previous test run
+      add_test (
+          NAME H5DUMP-${resultfile}-clear-objects
+          COMMAND    ${CMAKE_COMMAND}
+              -E remove
+              ${resultfile}.out
+              ${resultfile}.out.err
+      )
+      set_tests_properties (H5DUMP-${resultfile}-clear-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
+      add_test (
+          NAME H5DUMP-${resultfile}
+          COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump${tgt_ext}>"
+              -D "TEST_ARGS:STRING=${ARGN}"
+              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/std"
+              -D "TEST_OUTPUT=${resultfile}.out"
+              -D "TEST_EXPECT=${resultcode}"
+              -D "TEST_REFERENCE=${result_check}"
+              -P "${HDF_RESOURCES_EXT_DIR}/grepTest.cmake"
+      )
+    set_tests_properties (H5DUMP-${resultfile} PROPERTIES DEPENDS "H5DUMP-${resultfile}-clear-objects")
     endif ()
   endmacro ()
 
@@ -1550,6 +1577,9 @@
 
   # test to verify HDFFV-10333: error similar to H5O_attr_decode in the jira issue
   ADD_H5_TEST (err_attr_dspace 1 err_attr_dspace.h5)
+
+  # test to verify HDFFV-9407: long double full precision
+  ADD_H5_GREP_TEST (t128bit_float 1 "1.123456789012345" -m %.35Lf t128bit_float.h5)
 
 ##############################################################################
 ###    P L U G I N  T E S T S
