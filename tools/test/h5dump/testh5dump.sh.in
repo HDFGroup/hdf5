@@ -913,6 +913,7 @@ GREPTEST()
     actual=$TESTDIR/$2
     actual_err="$TESTDIR/`basename $2 .ddl`.oerr"
     shift
+    shift
 
     # Run test.
     TESTING $DUMPER -p $@
