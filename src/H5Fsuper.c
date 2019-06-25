@@ -1850,9 +1850,8 @@ H5O__fsinfo_set_version(H5F_t *f, H5O_fsinfo_t *fsinfo)
     version = H5O_FSINFO_VERSION_1;
 
     /* Upgrade to the version indicated by the file's low bound if higher */
-    if(H5O_fsinfo_ver_bounds[H5F_LOW_BOUND(f)] != H5O_INVALID_VERSION) {
+    if(H5O_fsinfo_ver_bounds[H5F_LOW_BOUND(f)] != H5O_INVALID_VERSION)
         version = MAX(version, H5O_fsinfo_ver_bounds[H5F_LOW_BOUND(f)]);
-    }
 
     /* Version bounds check */
     if(H5O_fsinfo_ver_bounds[H5F_HIGH_BOUND(f)] == H5O_INVALID_VERSION ||
