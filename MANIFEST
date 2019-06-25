@@ -1663,6 +1663,7 @@
 ./tools/testfiles/h5dump-help.txt
 ./tools/testfiles/non_existing.ddl
 ./tools/testfiles/packedbits.ddl
+./tools/testfiles/t128bit_float.h5
 ./tools/testfiles/taindices.h5
 ./tools/testfiles/tall-1.ddl
 ./tools/testfiles/tall-2.ddl
