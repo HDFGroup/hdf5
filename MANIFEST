@@ -71,12 +71,15 @@
 ./bin/errors              _DO_NOT_DISTRIBUTE_
 ./bin/genparser
 ./bin/gcov_script            _DO_NOT_DISTRIBUTE_
+./bin/h5cc.in
+./bin/h5redeploy.in
 ./bin/h5vers
 ./bin/iostats
 ./bin/locate_sw
 ./bin/make_err
 ./bin/make_overflow
 ./bin/make_vers
+./bin/Makefile.am
 ./bin/makehelp
 ./bin/mkdirs
 ./bin/newer
@@ -1511,11 +1514,9 @@
 ./tools/lib/io_timer.h
 
 ./tools/src/misc/Makefile.am
-./tools/src/misc/h5cc.in
 ./tools/src/misc/h5clear.c
 ./tools/src/misc/h5debug.c
 ./tools/src/misc/h5mkgrp.c
-./tools/src/misc/h5redeploy.in
 ./tools/src/misc/h5repart.c
 ./tools/test/misc/Makefile.am
 ./tools/test/misc/h5repart_gentest.c
@@ -3383,6 +3384,7 @@
 ./c++/examples/Makefile.in
 ./c++/Makefile.in
 ./configure
+./bin/Makefile.in
 ./c++/src/Makefile.in
 ./c++/test/Makefile.in
 ./examples/Makefile.in

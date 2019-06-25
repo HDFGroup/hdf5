@@ -19,9 +19,15 @@
 
 include $(top_srcdir)/config/commence.am
 
+if BUILD_TESTS_CONDITIONAL
+   TESTSERIAL_DIR =test
+else
+   TESTSERIAL_DIR=
+endif
+
 CONFIG=ordered
 
 # All subdirectories
-SUBDIRS=lib src test
+SUBDIRS=lib src $(TESTSERIAL_DIR)
 
 include $(top_srcdir)/config/conclude.am
