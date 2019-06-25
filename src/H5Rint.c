@@ -23,6 +23,7 @@
 /***********/
 #include "H5private.h"          /* Generic Functions                        */
 #include "H5ACprivate.h"        /* Metadata cache                           */
+#include "H5CXprivate.h"        /* API Contexts                             */
 #include "H5Dprivate.h"         /* Datasets                                 */
 #include "H5Eprivate.h"         /* Error handling                           */
 #include "H5Gprivate.h"         /* Groups                                   */
@@ -214,6 +215,9 @@ H5R__create(void *_ref, H5G_loc_t *loc, const char *name, H5R_type_t ref_type, H
     obj_loc.oloc = &oloc;
     obj_loc.path = &path;
     H5G_loc_reset(&obj_loc);
+
+    /* Set the FAPL for the API context */
+    H5CX_set_libver_bounds(loc->oloc->file);
 
     /* Find the object */
     if(H5G_loc_find(loc, name, &obj_loc) < 0)

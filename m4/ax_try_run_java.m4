@@ -1,5 +1,5 @@
 # ===========================================================================
-#      http://www.gnu.org/software/autoconf-archive/ax_try_run_java.html
+#     https://www.gnu.org/software/autoconf-archive/ax_try_run_java.html
 # ===========================================================================
 #
 # SYNOPSIS
@@ -29,7 +29,7 @@
 #   and this notice are preserved. This file is offered as-is, without any
 #   warranty.
 
-#serial 2
+#serial 3
 
 AU_ALIAS([AC_TRY_RUN_JAVA], [AX_TRY_RUN_JAVA])
 AC_DEFUN([AX_TRY_RUN_JAVA],[

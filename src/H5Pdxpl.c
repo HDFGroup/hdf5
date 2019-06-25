@@ -695,7 +695,7 @@ H5P__dxfr_xform_enc(const void *value, void **_pp, size_t *size)
             HDassert(pexp);
 
             /* Copy the expression into the buffer */
-            HDmemcpy(*pp, (const uint8_t *)pexp, len);
+            H5MM_memcpy(*pp, (const uint8_t *)pexp, len);
             *pp += len;
             *pp[0] = '\0';
         } /* end if */

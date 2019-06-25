@@ -309,6 +309,7 @@
 #   define H5_ATTR_NORETURN     /*void*/
 #   define H5_ATTR_CONST        /*void*/
 #   define H5_ATTR_PURE         /*void*/
+#   define H5_ATTR_FALLTHROUGH  /*void*/
 #else /* __cplusplus */
 #if defined(H5_HAVE_ATTRIBUTE) && !defined(__SUNPRO_C)
 #   define H5_ATTR_FORMAT(X,Y,Z)  __attribute__((format(X, Y, Z)))
@@ -316,12 +317,14 @@
 #   define H5_ATTR_NORETURN     __attribute__((noreturn))
 #   define H5_ATTR_CONST        __attribute__((const))
 #   define H5_ATTR_PURE         __attribute__((pure))
+#   define H5_ATTR_FALLTHROUGH  __attribute__((fallthrough));
 #else
 #   define H5_ATTR_FORMAT(X,Y,Z)  /*void*/
 #   define H5_ATTR_UNUSED       /*void*/
 #   define H5_ATTR_NORETURN     /*void*/
 #   define H5_ATTR_CONST        /*void*/
 #   define H5_ATTR_PURE         /*void*/
+#   define H5_ATTR_FALLTHROUGH  /*void*/
 #endif
 #endif /* __cplusplus */
 
@@ -1104,12 +1107,8 @@ typedef off_t               h5_stat_size_t;
 #ifndef HDmemcmp
     #define HDmemcmp(X,Y,Z)    memcmp(X,Y,Z)
 #endif /* HDmemcmp */
-/*
- * The (char*) casts are required for the DEC when optimizations are turned
- * on and the source and/or destination are not aligned.
- */
 #ifndef HDmemcpy
-    #define HDmemcpy(X,Y,Z)    memcpy((char*)(X),(const char*)(Y),Z)
+    #define HDmemcpy(X,Y,Z)    memcpy(X,Y,Z)
 #endif /* HDmemcpy */
 #ifndef HDmemmove
     #define HDmemmove(X,Y,Z)  memmove((char*)(X),(const char*)(Y),Z)
@@ -1340,8 +1339,9 @@ typedef off_t               h5_stat_size_t;
         #define HDsrandom(S)    srand(S)
     #endif /* HDsrandom */
 #endif /* H5_HAVE_RAND_R */
-/* sscanf() variable arguments */
-
+#ifndef HDsscanf
+    #define HDsscanf(S,FMT,...)   sscanf(S,FMT,__VA_ARGS__)
+#endif /* HDsscanf */
 #ifndef HDstrcat
     #define HDstrcat(X,Y)    strcat(X,Y)
 #endif /* HDstrcat */

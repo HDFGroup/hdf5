@@ -228,6 +228,19 @@ H5VL__native_file_get(void *obj, H5VL_file_get_t get_type,
                 break;
             }
 
+        /* H5Fget_fileno */
+        case H5VL_FILE_GET_FILENO:
+            {
+                unsigned long *fileno = HDva_arg(arguments, unsigned long *);
+                unsigned long my_fileno = 0;
+
+                f = (H5F_t *)obj;
+                H5F_GET_FILENO(f, my_fileno);
+                *fileno = my_fileno;    /* sigh */
+
+                break;
+            }
+
         /* H5Fget_name */
         case H5VL_FILE_GET_NAME:
             {
@@ -373,10 +386,16 @@ H5VL__native_file_specific(void *obj, H5VL_file_specific_t specific_type,
 
                 /* Call private routine */
                 if((*ret = H5F__is_hdf5(name, fapl_id)) < 0)
-                    HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "error in HDF5 file check")
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "error in HDF5 file check")
                 break;
             }
 
+        /* H5Fdelete */
+        case H5VL_FILE_DELETE:
+            {
+                HGOTO_ERROR(H5E_FILE, H5E_UNSUPPORTED, FAIL, "H5Fdelete() is currently not supported in the native VOL connector")
+                break;
+            }
 
 
         default:
@@ -755,7 +774,7 @@ H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR
         /* H5Fget_dset_no_attrs_hint */
         case H5VL_NATIVE_FILE_GET_MIN_DSET_OHDR_FLAG:
             {
-                hbool_t *minimize = va_arg(arguments, hbool_t *);
+                hbool_t *minimize = HDva_arg(arguments, hbool_t *);
                 *minimize = H5F_GET_MIN_DSET_OHDR(f);
                 break;
             }
@@ -763,7 +782,7 @@ H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR
         /* H5Fset_dset_no_attrs_hint */
         case H5VL_NATIVE_FILE_SET_MIN_DSET_OHDR_FLAG:
             {
-                int minimize = va_arg(arguments, int);
+                int minimize = HDva_arg(arguments, int);
                 if(H5F_set_min_dset_ohdr(f, (hbool_t)minimize) < 0)
                     HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "cannot set file's dataset object header minimization flag")
                 break;

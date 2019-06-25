@@ -835,8 +835,8 @@ test_compact_io(hid_t fapl)
        skipping invalid combinations.
        - Create a file, create and write a compact dataset, and verify its data
        - Verify the dataset's layout and fill message versions */
-    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
-        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
+    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, low)) {
+        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, high)) {
 
             /* Set version bounds */
             H5E_BEGIN_TRY {
@@ -1233,14 +1233,19 @@ test_conv_buffer(hid_t fid)
     CmpField     *cf = NULL;
     CmpFieldR    *cfrR = NULL;
 
-    hid_t       dataset = -1; /* dataset ID             */
-    hid_t       space   = -1; /* data space ID          */
-    hid_t       ctype1, ctype2; /* data type ID           */
-    hid_t       arr_type1, arr_type2, arr_type3, arr_type4, arr_type5;
+    hid_t       dataset = H5I_INVALID_HID; /* dataset ID             */
+    hid_t       space   = H5I_INVALID_HID; /* data space ID          */
+    hid_t       ctype1 = H5I_INVALID_HID,
+                ctype2 = H5I_INVALID_HID; /* data type ID           */
+    hid_t       arr_type1 = H5I_INVALID_HID,
+                arr_type2 = H5I_INVALID_HID,
+                arr_type3 = H5I_INVALID_HID,
+                arr_type4 = H5I_INVALID_HID,
+                arr_type5 = H5I_INVALID_HID;
     hsize_t     dimsa[3];
     hsize_t     dimsb[1];
     hsize_t     dimsc[1];
-    hid_t       xfer_list;
+    hid_t       xfer_list = H5I_INVALID_HID;
     size_t      size;
 
     TESTING("data type conversion buffer size");
@@ -10331,8 +10336,8 @@ test_zero_dim_dset(hid_t fapl)
     /* Loop through all the combinations of low/high library format bounds,
        skipping invalid combination, and verify support for reading a 1D
        chunked dataset with dimension size = 0 */
-    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
-        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
+    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, low)) {
+        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, high)) {
 
             /* Set version bounds before opening the file */
             H5E_BEGIN_TRY {
@@ -12920,7 +12925,6 @@ test_versionbounds(void)
     hid_t vspace = -1;    /* Virtual dset dataspaces */
     hid_t srcdset = -1;   /* Source datset */
     hid_t vdset = -1;     /* Virtual dataset */
-    hid_t null_dspace = -1;     /* Data space of H5S_NULL */
     hsize_t dims[1] = {3};      /* Data space current size */
     char  srcfilename[FILENAME_BUF_SIZE];
     char  vfilename1[FILENAME_BUF_SIZE];
@@ -12961,8 +12965,8 @@ test_versionbounds(void)
     /* Create a source file and a dataset in it.  Create a virtual file and
        virtual dataset.  Creation of virtual dataset should only succeed in
        H5F_LIBVER_V110 */
-    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
-        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
+    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, low)) {
+        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, high)) {
 
             /* Set version bounds, skip for invalid low/high combination */
             H5E_BEGIN_TRY {
@@ -12990,7 +12994,7 @@ test_versionbounds(void)
             if (vdset > 0) /* dataset created successfully */
             {
                 /* Virtual dataset is only available starting in V110 */
-                VERIFY(high, H5F_LIBVER_V110, "virtual dataset");
+                VERIFY(high >= H5F_LIBVER_V110, TRUE, "virtual dataset");
 
                 if(H5Dclose(vdset) < 0) TEST_ERROR
                 vdset = -1;

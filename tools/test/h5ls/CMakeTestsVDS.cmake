@@ -80,15 +80,21 @@
 ##############################################################################
 ##############################################################################
 
+  if (NOT BUILD_SHARED_LIBS)
+    set (tgt_ext "")
+  else ()
+    set (tgt_ext "-shared")
+  endif ()
+
   macro (ADD_H5_VDS_TEST resultfile resultcode)
     # If using memchecker add tests without using scripts
     if (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (NAME H5LS-${resultfile} COMMAND $<TARGET_FILE:h5ls> ${ARGN})
+      add_test (NAME H5LS-${resultfile} COMMAND $<TARGET_FILE:h5ls${tgt_ext}> ${ARGN})
       set_tests_properties (H5LS-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/vds")
-      if ("${resultcode}" STREQUAL "1")
+      if (${resultcode} EQUAL 1)
         set_tests_properties (H5LS-${resultfile} PROPERTIES WILL_FAIL "true")
       endif ()
-      if (NOT "${last_test}" STREQUAL "")
+      if (last_test)
         set_tests_properties (H5LS-${resultfile} PROPERTIES DEPENDS ${last_test})
       endif ()
     else ()
@@ -103,7 +109,7 @@
       add_test (
           NAME H5LS-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5ls>"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5ls${tgt_ext}>"
               -D "TEST_ARGS=${ARGN}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/vds"
               -D "TEST_OUTPUT=${resultfile}.out"
@@ -118,15 +124,15 @@
   macro (ADD_H5_VDS_PREFIX_TEST resultfile resultcode)
     # If using memchecker add tests without using scripts
     if (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (NAME H5LS_PREFIX-${resultfile} COMMAND $<TARGET_FILE:h5ls> ${ARGN})
+      add_test (NAME H5LS_PREFIX-${resultfile} COMMAND $<TARGET_FILE:h5ls${tgt_ext}> ${ARGN})
       set_tests_properties (H5LS_PREFIX-${resultfile} PROPERTIES
           ENVIRONMENT "HDF5_VDS_PREFIX=\${ORIGIN}"
           WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
       )
-      if ("${resultcode}" STREQUAL "1")
+      if (${resultcode} EQUAL 1)
         set_tests_properties (H5LS_PREFIX-${resultfile} PROPERTIES WILL_FAIL "true")
       endif ()
-      if (NOT "${last_test}" STREQUAL "")
+      if (last_test)
         set_tests_properties (H5LS_PREFIX-${resultfile} PROPERTIES DEPENDS ${last_test})
       endif ()
     else ()
@@ -141,7 +147,7 @@
       add_test (
           NAME H5LS_PREFIX-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5ls>"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5ls${tgt_ext}>"
               -D "TEST_ARGS=${ARGN}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
               -D "TEST_OUTPUT=vds/prefix/${resultfile}.out"
@@ -193,7 +199,7 @@
           tvds_layout-5.out.err
     )
     set_tests_properties (H5LS_VDS-clearall-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/vds")
-    if (NOT "${last_test}" STREQUAL "")
+    if (last_test)
       set_tests_properties (H5LS_VDS-clearall-objects PROPERTIES DEPENDS ${last_test})
     endif ()
     set (last_test "H5LS_VDS-clearall-objects")

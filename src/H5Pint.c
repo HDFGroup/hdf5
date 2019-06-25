@@ -127,62 +127,65 @@ static herr_t H5P__free_del_name_cb(void *item, void H5_ATTR_UNUSED *key, void H
  * Predefined property list classes. These are initialized at runtime by
  * H5P__init_package() in this source file.
  */
-hid_t H5P_CLS_ROOT_ID_g                         = FAIL;
+hid_t H5P_CLS_ROOT_ID_g                         = H5I_INVALID_HID;
 H5P_genclass_t *H5P_CLS_ROOT_g                  = NULL;
-hid_t H5P_CLS_OBJECT_CREATE_ID_g                = FAIL;
+hid_t H5P_CLS_OBJECT_CREATE_ID_g                = H5I_INVALID_HID;
 H5P_genclass_t *H5P_CLS_OBJECT_CREATE_g         = NULL;
-hid_t H5P_CLS_FILE_CREATE_ID_g                  = FAIL;
+hid_t H5P_CLS_FILE_CREATE_ID_g                  = H5I_INVALID_HID;
 H5P_genclass_t *H5P_CLS_FILE_CREATE_g           = NULL;
-hid_t H5P_CLS_FILE_ACCESS_ID_g                  = FAIL;
+hid_t H5P_CLS_FILE_ACCESS_ID_g                  = H5I_INVALID_HID;
 H5P_genclass_t *H5P_CLS_FILE_ACCESS_g           = NULL;
-hid_t H5P_CLS_DATASET_CREATE_ID_g               = FAIL;
+hid_t H5P_CLS_DATASET_CREATE_ID_g               = H5I_INVALID_HID;
 H5P_genclass_t *H5P_CLS_DATASET_CREATE_g        = NULL;
-hid_t H5P_CLS_DATASET_ACCESS_ID_g               = FAIL;
+hid_t H5P_CLS_DATASET_ACCESS_ID_g               = H5I_INVALID_HID;
 H5P_genclass_t *H5P_CLS_DATASET_ACCESS_g        = NULL;
-hid_t H5P_CLS_DATASET_XFER_ID_g                 = FAIL;
+hid_t H5P_CLS_DATASET_XFER_ID_g                 = H5I_INVALID_HID;
 H5P_genclass_t *H5P_CLS_DATASET_XFER_g          = NULL;
-hid_t H5P_CLS_FILE_MOUNT_ID_g                   = FAIL;
+hid_t H5P_CLS_FILE_MOUNT_ID_g                   = H5I_INVALID_HID;
 H5P_genclass_t *H5P_CLS_FILE_MOUNT_g            = NULL;
-hid_t H5P_CLS_GROUP_CREATE_ID_g                 = FAIL;
+hid_t H5P_CLS_GROUP_CREATE_ID_g                 = H5I_INVALID_HID;
 H5P_genclass_t *H5P_CLS_GROUP_CREATE_g          = NULL;
-hid_t H5P_CLS_GROUP_ACCESS_ID_g                 = FAIL;
+hid_t H5P_CLS_GROUP_ACCESS_ID_g                 = H5I_INVALID_HID;
 H5P_genclass_t *H5P_CLS_GROUP_ACCESS_g          = NULL;
-hid_t H5P_CLS_DATATYPE_CREATE_ID_g              = FAIL;
+hid_t H5P_CLS_DATATYPE_CREATE_ID_g              = H5I_INVALID_HID;
 H5P_genclass_t *H5P_CLS_DATATYPE_CREATE_g       = NULL;
-hid_t H5P_CLS_DATATYPE_ACCESS_ID_g              = FAIL;
+hid_t H5P_CLS_DATATYPE_ACCESS_ID_g              = H5I_INVALID_HID;
 H5P_genclass_t *H5P_CLS_DATATYPE_ACCESS_g       = NULL;
-hid_t H5P_CLS_ATTRIBUTE_CREATE_ID_g             = FAIL;
+hid_t H5P_CLS_ATTRIBUTE_CREATE_ID_g             = H5I_INVALID_HID;
 H5P_genclass_t *H5P_CLS_ATTRIBUTE_CREATE_g      = NULL;
-hid_t H5P_CLS_ATTRIBUTE_ACCESS_ID_g             = FAIL;
+hid_t H5P_CLS_ATTRIBUTE_ACCESS_ID_g             = H5I_INVALID_HID;
 H5P_genclass_t *H5P_CLS_ATTRIBUTE_ACCESS_g      = NULL;
-hid_t H5P_CLS_OBJECT_COPY_ID_g                  = FAIL;
+hid_t H5P_CLS_OBJECT_COPY_ID_g                  = H5I_INVALID_HID;
 H5P_genclass_t *H5P_CLS_OBJECT_COPY_g           = NULL;
-hid_t H5P_CLS_LINK_CREATE_ID_g                  = FAIL;
+hid_t H5P_CLS_LINK_CREATE_ID_g                  = H5I_INVALID_HID;
 H5P_genclass_t *H5P_CLS_LINK_CREATE_g           = NULL;
-hid_t H5P_CLS_LINK_ACCESS_ID_g                  = FAIL;
+hid_t H5P_CLS_LINK_ACCESS_ID_g                  = H5I_INVALID_HID;
 H5P_genclass_t *H5P_CLS_LINK_ACCESS_g           = NULL;
-hid_t H5P_CLS_STRING_CREATE_ID_g                = FAIL;
+hid_t H5P_CLS_STRING_CREATE_ID_g                = H5I_INVALID_HID;
 H5P_genclass_t *H5P_CLS_STRING_CREATE_g         = NULL;
+hid_t H5P_CLS_VOL_INITIALIZE_ID_g               = H5I_INVALID_HID;
+H5P_genclass_t *H5P_CLS_VOL_INITIALIZE_g        = NULL;
 
 /*
  * Predefined property lists for each predefined class. These are initialized
  * at runtime by H5P__init_package() in this source file.
  */
-hid_t H5P_LST_FILE_CREATE_ID_g          = FAIL;
-hid_t H5P_LST_FILE_ACCESS_ID_g          = FAIL;
-hid_t H5P_LST_DATASET_CREATE_ID_g       = FAIL;
-hid_t H5P_LST_DATASET_ACCESS_ID_g       = FAIL;
-hid_t H5P_LST_DATASET_XFER_ID_g         = FAIL;
-hid_t H5P_LST_FILE_MOUNT_ID_g           = FAIL;
-hid_t H5P_LST_GROUP_CREATE_ID_g         = FAIL;
-hid_t H5P_LST_GROUP_ACCESS_ID_g         = FAIL;
-hid_t H5P_LST_DATATYPE_CREATE_ID_g      = FAIL;
-hid_t H5P_LST_DATATYPE_ACCESS_ID_g      = FAIL;
-hid_t H5P_LST_ATTRIBUTE_CREATE_ID_g     = FAIL;
-hid_t H5P_LST_ATTRIBUTE_ACCESS_ID_g     = FAIL;
-hid_t H5P_LST_OBJECT_COPY_ID_g          = FAIL;
-hid_t H5P_LST_LINK_CREATE_ID_g          = FAIL;
-hid_t H5P_LST_LINK_ACCESS_ID_g          = FAIL;
+hid_t H5P_LST_FILE_CREATE_ID_g          = H5I_INVALID_HID;
+hid_t H5P_LST_FILE_ACCESS_ID_g          = H5I_INVALID_HID;
+hid_t H5P_LST_DATASET_CREATE_ID_g       = H5I_INVALID_HID;
+hid_t H5P_LST_DATASET_ACCESS_ID_g       = H5I_INVALID_HID;
+hid_t H5P_LST_DATASET_XFER_ID_g         = H5I_INVALID_HID;
+hid_t H5P_LST_FILE_MOUNT_ID_g           = H5I_INVALID_HID;
+hid_t H5P_LST_GROUP_CREATE_ID_g         = H5I_INVALID_HID;
+hid_t H5P_LST_GROUP_ACCESS_ID_g         = H5I_INVALID_HID;
+hid_t H5P_LST_DATATYPE_CREATE_ID_g      = H5I_INVALID_HID;
+hid_t H5P_LST_DATATYPE_ACCESS_ID_g      = H5I_INVALID_HID;
+hid_t H5P_LST_ATTRIBUTE_CREATE_ID_g     = H5I_INVALID_HID;
+hid_t H5P_LST_ATTRIBUTE_ACCESS_ID_g     = H5I_INVALID_HID;
+hid_t H5P_LST_OBJECT_COPY_ID_g          = H5I_INVALID_HID;
+hid_t H5P_LST_LINK_CREATE_ID_g          = H5I_INVALID_HID;
+hid_t H5P_LST_LINK_ACCESS_ID_g          = H5I_INVALID_HID;
+hid_t H5P_LST_VOL_INITIALIZE_ID_g       = H5I_INVALID_HID;
 
 /* Root property list class library initialization object */
 const H5P_libclass_t H5P_CLS_ROOT[1] = {{
@@ -283,6 +286,26 @@ const H5P_libclass_t H5P_CLS_TACC[1] = {{
     NULL 		        /* Class close callback info    */
 }};
 
+/* VOL initialization property list class library initialization object */
+/* (move to proper source code file when used for real) */
+const H5P_libclass_t H5P_CLS_VINI[1] = {{
+    "VOL initialization",		/* Class name for debugging     */
+    H5P_TYPE_VOL_INITIALIZE,  /* Class type                   */
+
+    &H5P_CLS_ROOT_g,	/* Parent class                 */
+    &H5P_CLS_VOL_INITIALIZE_g,	/* Pointer to class             */
+    &H5P_CLS_VOL_INITIALIZE_ID_g,	/* Pointer to class ID          */
+    &H5P_LST_VOL_INITIALIZE_ID_g,	/* Pointer to default property list ID */
+    NULL,			/* Default property registration routine */
+
+    NULL,		        /* Class creation callback      */
+    NULL,		        /* Class creation callback info */
+    NULL,			/* Class copy callback          */
+    NULL,		        /* Class copy callback info     */
+    NULL,			/* Class close callback         */
+    NULL 		        /* Class close callback info    */
+}};
+
 
 /* Library property list classes defined in other code modules */
 /* (And not present in src/H5Pprivate.h) */
@@ -331,7 +354,8 @@ static H5P_libclass_t const * const init_class[] = {
     H5P_CLS_TACC,       /* Datatype access */
     H5P_CLS_ACRT,       /* Attribute creation */
     H5P_CLS_AACC,       /* Attribute access */
-    H5P_CLS_LCRT        /* Link creation */
+    H5P_CLS_LCRT,       /* Link creation */
+    H5P_CLS_VINI        /* VOL initialization */
 };
 
 /* Declare a free list to manage the H5P_genclass_t struct */
@@ -525,7 +549,8 @@ H5P_term_package(void)
                         H5P_LST_OBJECT_COPY_ID_g =
                         H5P_LST_LINK_CREATE_ID_g =
                         H5P_LST_LINK_ACCESS_ID_g =
-                        H5P_LST_FILE_MOUNT_ID_g = (-1);
+                        H5P_LST_VOL_INITIALIZE_ID_g =
+                        H5P_LST_FILE_MOUNT_ID_g = H5I_INVALID_HID;
                 } /* end if */
             } /* end if */
 
@@ -552,6 +577,7 @@ H5P_term_package(void)
                         H5P_CLS_OBJECT_COPY_g =
                         H5P_CLS_LINK_CREATE_g =
                         H5P_CLS_LINK_ACCESS_g =
+                        H5P_CLS_VOL_INITIALIZE_g =
                         H5P_CLS_FILE_MOUNT_g = NULL;
 
                         H5P_CLS_ROOT_ID_g =
@@ -571,7 +597,8 @@ H5P_term_package(void)
                         H5P_CLS_OBJECT_COPY_ID_g =
                         H5P_CLS_LINK_CREATE_ID_g =
                         H5P_CLS_LINK_ACCESS_ID_g =
-                        H5P_CLS_FILE_MOUNT_ID_g = (-1);
+                        H5P_CLS_VOL_INITIALIZE_ID_g =
+                        H5P_CLS_FILE_MOUNT_ID_g = H5I_INVALID_HID;
                 } /* end if */
             } /* end if */
 
@@ -631,7 +658,7 @@ H5P__do_prop_cb1(H5SL_t *slist, H5P_genprop_t *prop, H5P_prp_cb1_t cb)
     /* Allocate space for a temporary copy of the property value */
     if(NULL == (tmp_value = H5MM_malloc(prop->size)))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, FAIL, "memory allocation failed for temporary property value")
-    HDmemcpy(tmp_value, prop->value, prop->size);
+    H5MM_memcpy(tmp_value, prop->value, prop->size);
 
     /* Call "type 1" callback ('create', 'copy' or 'close') */
     if(cb(prop->name, prop->size, tmp_value) < 0)
@@ -642,7 +669,7 @@ H5P__do_prop_cb1(H5SL_t *slist, H5P_genprop_t *prop, H5P_prp_cb1_t cb)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "Can't copy property")
 
     /* Copy the changed value into the new property */
-    HDmemcpy(pcopy->value, tmp_value, prop->size);
+    H5MM_memcpy(pcopy->value, tmp_value, prop->size);
 
     /* Insert the changed property into the property list */
     if(H5P__add_prop(slist, pcopy) < 0)
@@ -990,7 +1017,7 @@ H5P__dup_prop(H5P_genprop_t *oprop, H5P_prop_within_t type)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Copy basic property information */
-    HDmemcpy(prop, oprop, sizeof(H5P_genprop_t));
+    H5MM_memcpy(prop, oprop, sizeof(H5P_genprop_t));
 
     /* Check if we should duplicate the name or share it */
 
@@ -1030,7 +1057,7 @@ H5P__dup_prop(H5P_genprop_t *oprop, H5P_prop_within_t type)
         HDassert(prop->size > 0);
         if(NULL == (prop->value = H5MM_malloc(prop->size)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
-        HDmemcpy(prop->value, oprop->value, prop->size);
+        H5MM_memcpy(prop->value, oprop->value, prop->size);
     } /* end if */
 
     /* Set return value */
@@ -1117,7 +1144,7 @@ H5P__create_prop(const char *name, size_t size, H5P_prop_within_t type,
     if(value != NULL) {
         if(NULL == (prop->value = H5MM_malloc (prop->size)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
-        HDmemcpy(prop->value, value, prop->size);
+        H5MM_memcpy(prop->value, value, prop->size);
     } /* end if */
     else
         prop->value = NULL;
@@ -2727,7 +2754,7 @@ H5P__poke_plist_cb(H5P_genplist_t *plist, const char *name, H5P_genprop_t *prop,
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "property has zero size")
 
     /* Overwrite value in property */
-    HDmemcpy(prop->value, udata->value, prop->size);
+    H5MM_memcpy(prop->value, udata->value, prop->size);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2779,7 +2806,7 @@ H5P__poke_pclass_cb(H5P_genplist_t *plist, const char *name, H5P_genprop_t *prop
     if(NULL == (pcopy = H5P__dup_prop(prop, H5P_PROP_WITHIN_LIST)))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "Can't copy property")
 
-    HDmemcpy(pcopy->value, udata->value, pcopy->size);
+    H5MM_memcpy(pcopy->value, udata->value, pcopy->size);
 
     /* Insert the changed property into the property list */
     if(H5P__add_prop(plist->props, pcopy) < 0)
@@ -2888,7 +2915,7 @@ H5P__set_plist_cb(H5P_genplist_t *plist, const char *name, H5P_genprop_t *prop,
         /* Make a copy of the current value, in case the callback fails */
         if(NULL == (tmp_value = H5MM_malloc(prop->size)))
             HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, FAIL, "memory allocation failed temporary property value")
-        HDmemcpy(tmp_value, udata->value, prop->size);
+        H5MM_memcpy(tmp_value, udata->value, prop->size);
 
         /* Call user's callback */
         if((*(prop->set))(plist->plist_id, name, prop->size, tmp_value) < 0)
@@ -2909,7 +2936,7 @@ H5P__set_plist_cb(H5P_genplist_t *plist, const char *name, H5P_genprop_t *prop,
     } /* end if */
 
     /* Copy new [possibly unchanged] value into property value */
-    HDmemcpy(prop->value, prp_value, prop->size);
+    H5MM_memcpy(prop->value, prp_value, prop->size);
 
 done:
     /* Free the temporary value buffer */
@@ -2968,7 +2995,7 @@ H5P__set_pclass_cb(H5P_genplist_t *plist, const char *name, H5P_genprop_t *prop,
         /* Make a copy of the current value, in case the callback fails */
         if(NULL == (tmp_value = H5MM_malloc(prop->size)))
             HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, FAIL, "memory allocation failed temporary property value")
-        HDmemcpy(tmp_value, udata->value, prop->size);
+        H5MM_memcpy(tmp_value, udata->value, prop->size);
 
         /* Call user's callback */
         if((*(prop->set))(plist->plist_id, name, prop->size, tmp_value) < 0)
@@ -2985,7 +3012,7 @@ H5P__set_pclass_cb(H5P_genplist_t *plist, const char *name, H5P_genprop_t *prop,
     if(NULL == (pcopy = H5P__dup_prop(prop, H5P_PROP_WITHIN_LIST)))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "Can't copy property")
 
-    HDmemcpy(pcopy->value, prp_value, pcopy->size);
+    H5MM_memcpy(pcopy->value, prp_value, pcopy->size);
 
     /* Insert the changed property into the property list */
     if(H5P__add_prop(plist->props, pcopy) < 0)
@@ -3057,6 +3084,116 @@ H5P_set(H5P_genplist_t *plist, const char *name, const void *value)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* H5P_set() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5P__class_get
+ PURPOSE
+    Internal routine to get a property's value from a property class.
+ USAGE
+    herr_t H5P__class_get(pclass, name, value)
+        const H5P_genclass_t *pclass; IN: Property class to find property in
+        const char *name;       IN: Name of property to get
+        void *value;            IN: Pointer to the value for the property
+ RETURNS
+    Returns non-negative on success, negative on failure.
+ DESCRIPTION
+        Gets the current value for a property in a property class.  The property
+    name must exist or this routine will fail.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+        The 'get' callback routine registered for this property will _NOT_ be
+    called, this routine is designed for internal library use only!
+    
+        This routine may not be called for zero-sized properties and will
+    return an error in that case.
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5P__class_get(const H5P_genclass_t *pclass, const char *name, void *value)
+{
+    H5P_genprop_t *prop;        /* Temporary property pointer */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* Sanity check */
+    HDassert(pclass);
+    HDassert(name);
+    HDassert(value);
+
+    /* Find property in list */
+    if(NULL == (prop = (H5P_genprop_t *)H5SL_search(pclass->props, name)))
+        HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, FAIL, "property doesn't exist")
+
+    /* Check for property size >0 */
+    if(0 == prop->size)
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "property has zero size")
+
+    /* Copy the property value */
+    H5MM_memcpy(value, prop->value, prop->size);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5P__class_get() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5P__class_set
+ PURPOSE
+    Internal routine to set a property's value in a property class.
+ USAGE
+    herr_t H5P__class_set(pclass, name, value)
+        const H5P_genclass_t *pclass; IN: Property class to find property in
+        const char *name;       IN: Name of property to set
+        const void *value;      IN: Pointer to the value for the property
+ RETURNS
+    Returns non-negative on success, negative on failure.
+ DESCRIPTION
+        Sets a new value for a property in a property class.  The property name
+    must exist or this routine will fail.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+        The 'set' callback routine registered for this property will _NOT_ be
+    called, this routine is designed for internal library use only!
+    
+        This routine may not be called for zero-sized properties and will
+    return an error in that case.
+
+        The previous value is overwritten, not released in any way.
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5P__class_set(const H5P_genclass_t *pclass, const char *name, const void *value)
+{
+    H5P_genprop_t *prop;        /* Temporary property pointer */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* Sanity check */
+    HDassert(pclass);
+    HDassert(name);
+    HDassert(value);
+
+    /* Find property in list */
+    if(NULL == (prop = (H5P_genprop_t *)H5SL_search(pclass->props, name)))
+        HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, FAIL, "property doesn't exist")
+
+    /* Check for property size >0 */
+    if(0 == prop->size)
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "property has zero size")
+
+    /* Copy the property value */
+    H5MM_memcpy(prop->value, value, prop->size);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5P__class_set() */
 
 
 /*--------------------------------------------------------------------------
@@ -4234,7 +4371,7 @@ H5P__peek_cb(H5P_genplist_t *plist, const char *name, H5P_genprop_t *prop,
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "property has zero size")
 
     /* Make a (shallow) copy of the value */
-    HDmemcpy(udata->value, prop->value, prop->size);
+    H5MM_memcpy(udata->value, prop->value, prop->size);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -4334,18 +4471,18 @@ H5P__get_cb(H5P_genplist_t *plist, const char *name, H5P_genprop_t *prop,
         /* Make a copy of the current value, in case the callback fails */
         if(NULL == (tmp_value = H5MM_malloc(prop->size)))
             HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, FAIL, "memory allocation failed temporary property value")
-        HDmemcpy(tmp_value, prop->value, prop->size);
+        H5MM_memcpy(tmp_value, prop->value, prop->size);
 
         /* Call user's callback */
         if((*(prop->get))(plist->plist_id, name, prop->size, tmp_value) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't set property value")
 
         /* Copy new [possibly unchanged] value into return value */
-        HDmemcpy(udata->value, tmp_value, prop->size);
+        H5MM_memcpy(udata->value, tmp_value, prop->size);
     } /* end if */
     /* No 'get' callback, just copy value */
     else
-        HDmemcpy(udata->value, prop->value, prop->size);
+        H5MM_memcpy(udata->value, prop->value, prop->size);
 
 done:
     /* Free the temporary value buffer */
@@ -4518,7 +4655,7 @@ H5P__del_pclass_cb(H5P_genplist_t *plist, const char *name, H5P_genprop_t *prop,
         /* Allocate space for a temporary copy of the property value */
         if(NULL == (tmp_value = H5MM_malloc(prop->size)))
             HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, FAIL, "memory allocation failed for temporary property value")
-        HDmemcpy(tmp_value, prop->value, prop->size);
+        H5MM_memcpy(tmp_value, prop->value, prop->size);
 
         /* Call user's callback */
         if((*(prop->del))(plist->plist_id, name, prop->size, tmp_value) < 0)
@@ -4967,7 +5104,7 @@ H5P_close(void *_plist)
                         /* Allocate space for a temporary copy of the property value */
                         if(NULL==(tmp_value=H5MM_malloc(tmp->size)))
                             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for temporary property value")
-                        HDmemcpy(tmp_value,tmp->value,tmp->size);
+                        H5MM_memcpy(tmp_value,tmp->value,tmp->size);
 
                         /* Call the 'close' callback */
                         (tmp->close)(tmp->name,tmp->size,tmp_value);
@@ -5298,7 +5435,7 @@ H5P__new_plist_of_type(H5P_plist_type_t type)
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDcompile_assert(H5P_TYPE_ATTRIBUTE_ACCESS == (H5P_TYPE_MAX_TYPE - 1));
+    HDcompile_assert(H5P_TYPE_VOL_INITIALIZE == (H5P_TYPE_MAX_TYPE - 1));
     HDassert(type >= H5P_TYPE_USER && type <= H5P_TYPE_LINK_ACCESS);
 
     /* Check arguments */
@@ -5375,6 +5512,10 @@ H5P__new_plist_of_type(H5P_plist_type_t type)
 
         case H5P_TYPE_LINK_ACCESS:
             class_id = H5P_CLS_LINK_ACCESS_ID_g;
+            break;
+
+        case H5P_TYPE_VOL_INITIALIZE:
+            class_id = H5P_CLS_VOL_INITIALIZE_ID_g;
             break;
 
         case H5P_TYPE_USER:     /* shut compiler warnings up */

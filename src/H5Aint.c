@@ -108,6 +108,7 @@ static herr_t H5A__iterate_common(hid_t loc_id, H5_index_t idx_type,
 const unsigned H5O_attr_ver_bounds[] = {
     H5O_ATTR_VERSION_1,         /* H5F_LIBVER_EARLIEST */
     H5O_ATTR_VERSION_3,         /* H5F_LIBVER_V18 */
+    H5O_ATTR_VERSION_3,         /* H5F_LIBVER_V110 */
     H5O_ATTR_VERSION_LATEST     /* H5F_LIBVER_LATEST */
 };
 
@@ -646,21 +647,21 @@ H5A__read(const H5A_t *attr, const H5T_t *mem_type, void *buf)
                     HGOTO_ERROR(H5E_ATTR, H5E_NOSPACE, FAIL, "memory allocation failed")
 
                 /* Copy the attribute data into the buffer for conversion */
-                HDmemcpy(tconv_buf, attr->shared->data, (src_type_size * nelmts));
+                H5MM_memcpy(tconv_buf, attr->shared->data, (src_type_size * nelmts));
 
                 /* Perform datatype conversion.  */
                 if(H5T_convert(tpath, src_id, dst_id, nelmts, (size_t)0, (size_t)0, tconv_buf, bkg_buf) < 0)
                     HGOTO_ERROR(H5E_ATTR, H5E_CANTENCODE, FAIL, "datatype conversion failed")
 
                 /* Copy the converted data into the user's buffer */
-                HDmemcpy(buf, tconv_buf, (dst_type_size * nelmts));
+                H5MM_memcpy(buf, tconv_buf, (dst_type_size * nelmts));
             } /* end if */
             /* No type conversion necessary */
             else {
                 HDassert(dst_type_size == src_type_size);
 
                 /* Copy the attribute data into the user's buffer */
-                HDmemcpy(buf, attr->shared->data, (dst_type_size * nelmts));
+                H5MM_memcpy(buf, attr->shared->data, (dst_type_size * nelmts));
             } /* end else */
         } /* end else */
     } /* end if */
@@ -747,7 +748,7 @@ H5A__write(H5A_t *attr, const H5T_t *mem_type, const void *buf)
                 HGOTO_ERROR(H5E_ATTR, H5E_CANTALLOC, FAIL, "memory allocation failed")
 
             /* Copy the user's data into the buffer for conversion */
-            HDmemcpy(tconv_buf, buf, (src_type_size * nelmts));
+            H5MM_memcpy(tconv_buf, buf, (src_type_size * nelmts));
 
             /* Perform datatype conversion */
             if(H5T_convert(tpath, src_id, dst_id, nelmts, (size_t)0, (size_t)0, tconv_buf, bkg_buf) < 0)
@@ -770,8 +771,8 @@ H5A__write(H5A_t *attr, const H5T_t *mem_type, const void *buf)
                 if(NULL == (attr->shared->data = H5FL_BLK_MALLOC(attr_buf, dst_type_size * nelmts)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
-            /* Copy the attribute data into the user's buffer */
-            HDmemcpy(attr->shared->data, buf, (dst_type_size * nelmts));
+            /* Copy the attribute data into the attribute data buffer */
+            H5MM_memcpy(attr->shared->data, buf, (dst_type_size * nelmts));
         } /* end else */
 
         /* Modify the attribute in the object header */
@@ -827,7 +828,7 @@ H5A__get_name(H5A_t *attr, size_t buf_size, char *buf)
 
     /* Copy all/some of the name */
     if(buf && copy_len > 0) {
-        HDmemcpy(buf, attr->shared->name, copy_len);
+        H5MM_memcpy(buf, attr->shared->name, copy_len);
 
         /* Terminate the string */
         buf[copy_len]='\0';
@@ -1091,48 +1092,55 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5A__free
+ * Function:    H5A__shared_free
  *
- * Purpose:     Frees all memory associated with an attribute, but does not
- *              free the H5A_t structure (which should be done in H5T_close).
+ * Purpose:     Cleans up the shared attribute data. This will free
+ *              the attribute's shared structure as well.
+ *
+ *              attr and attr->shared must not be NULL
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Monday, November 15, 2004
+ * Programmer:  Quincey Koziol
+ *              Monday, November 15, 2004
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5A__free(H5A_t *attr)
+H5A__shared_free(H5A_t *attr)
 {
     herr_t ret_value = SUCCEED;           /* Return value */
 
     FUNC_ENTER_PACKAGE
 
     HDassert(attr);
+    HDassert(attr->shared);
 
-    /* Free dynamically allocated items */
+    /* Free dynamically allocated items.
+     * When possible, keep trying to shut things down (via HDONE_ERROR).
+     */
     if(attr->shared->name) {
         H5MM_xfree(attr->shared->name);
         attr->shared->name = NULL;
     }
     if(attr->shared->dt) {
         if(H5T_close_real(attr->shared->dt) < 0)
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't release datatype info")
+            HDONE_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't release datatype info")
         attr->shared->dt = NULL;
     }
     if(attr->shared->ds) {
         if(H5S_close(attr->shared->ds) < 0)
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't release dataspace info")
+            HDONE_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't release dataspace info")
         attr->shared->ds = NULL;
     }
     if(attr->shared->data)
         attr->shared->data = H5FL_BLK_FREE(attr_buf, attr->shared->data);
 
-done:
+    /* Destroy shared attribute struct */
+    attr->shared = H5FL_FREE(H5A_shared_t, attr->shared);
+
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5A__free() */
+} /* end H5A__shared_free() */
 
 
 /*-------------------------------------------------------------------------
@@ -1196,11 +1204,9 @@ H5A__close(H5A_t *attr)
     /* Reference count can be 0.  It only happens when H5A__create fails. */
     if(attr->shared->nrefs <= 1) {
         /* Free dynamically allocated items */
-        if(H5A__free(attr) < 0)
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't release attribute info")
-
-        /* Destroy shared attribute struct */
-        attr->shared = H5FL_FREE(H5A_shared_t, attr->shared);
+        if(attr->shared)
+            if(H5A__shared_free(attr) < 0)
+                HGOTO_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't release attribute info")
     } /* end if */
     else {
         /* There are other references to the shared part of the attribute.
@@ -2240,7 +2246,7 @@ H5A__attr_copy_file(const H5A_t *attr_src, H5F_t *file_dst, hbool_t *recompute_s
             if(NULL == (buf = H5FL_BLK_MALLOC(attr_buf, buf_size)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation NULLed for raw data chunk")
 
-            HDmemcpy(buf, attr_src->shared->data, attr_src->shared->data_size);
+            H5MM_memcpy(buf, attr_src->shared->data, attr_src->shared->data_size);
 
 	    /* Allocate background memory */
 	    if(H5T_path_bkg(tpath_src_mem) || H5T_path_bkg(tpath_mem_dst))
@@ -2251,7 +2257,7 @@ H5A__attr_copy_file(const H5A_t *attr_src, H5F_t *file_dst, hbool_t *recompute_s
             if(H5T_convert(tpath_src_mem, tid_src, tid_mem, nelmts, (size_t)0, (size_t)0, buf, bkg_buf) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "datatype conversion NULLed")
 
-            HDmemcpy(reclaim_buf, buf, buf_size);
+            H5MM_memcpy(reclaim_buf, buf, buf_size);
 
 	    /* Set background buffer to all zeros */
 	    if(bkg_buf)
@@ -2261,14 +2267,14 @@ H5A__attr_copy_file(const H5A_t *attr_src, H5F_t *file_dst, hbool_t *recompute_s
             if(H5T_convert(tpath_mem_dst, tid_mem, tid_dst, nelmts, (size_t)0, (size_t)0, buf, bkg_buf) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "datatype conversion NULLed")
 
-            HDmemcpy(attr_dst->shared->data, buf, attr_dst->shared->data_size);
+            H5MM_memcpy(attr_dst->shared->data, buf, attr_dst->shared->data_size);
 
             if(H5D_vlen_reclaim(tid_mem, buf_space, reclaim_buf) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_BADITER, NULL, "unable to reclaim variable-length data")
         }  /* end if */
         else {
             HDassert(attr_dst->shared->data_size == attr_src->shared->data_size);
-            HDmemcpy(attr_dst->shared->data, attr_src->shared->data, attr_src->shared->data_size);
+            H5MM_memcpy(attr_dst->shared->data, attr_src->shared->data, attr_src->shared->data_size);
         } /* end else */
     } /* end if(attr_src->shared->data) */
 
@@ -2395,9 +2401,13 @@ H5A__attr_post_copy_file(const H5O_loc_t *src_oloc, const H5A_t *attr_src,
         /* Check for expanding references */
         if(cpy_info->expand_ref) {
             size_t ref_count;
+            size_t dst_dt_size;         /* Destination datatype size */
 
+            /* Determine size of the destination datatype */
+            if(0 == (dst_dt_size = H5T_get_size(attr_dst->shared->dt)))
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to determine datatype size")
             /* Determine # of reference elements to copy */
-            ref_count = attr_dst->shared->data_size / H5T_get_size(attr_dst->shared->dt);
+            ref_count = attr_dst->shared->data_size / dst_dt_size;
 
             /* Copy objects referenced in source buffer to destination file and set destination elements */
             if(H5O_copy_expand_ref(file_src, attr_dst->shared->data, file_dst, attr_dst->shared->data, ref_count, H5T_get_ref_type(attr_dst->shared->dt), cpy_info) < 0)

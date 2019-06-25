@@ -509,6 +509,7 @@ H5F__get_objects_cb(void *obj_ptr, hid_t obj_id, void *key)
             case H5I_ERROR_CLASS:
             case H5I_ERROR_MSG:
             case H5I_ERROR_STACK:
+            case H5I_SPACE_SEL_ITER:
             case H5I_NTYPES:
             default:
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5_ITER_ERROR, "unknown or invalid data object")
@@ -853,7 +854,7 @@ htri_t
 H5F__is_hdf5(const char *name, hid_t fapl_id)
 {
     H5FD_t         *file = NULL;            /* Low-level file struct                    */
-    haddr_t         sig_addr;               /* Addess of hdf5 file signature            */
+    haddr_t         sig_addr = HADDR_UNDEF; /* Addess of hdf5 file signature            */
     htri_t          ret_value = FAIL;       /* Return value                             */
 
     FUNC_ENTER_PACKAGE
@@ -863,7 +864,7 @@ H5F__is_hdf5(const char *name, hid_t fapl_id)
      *          should work with arbitrary VFDs, unlike H5Fis_hdf5().
      */
     if(NULL == (file = H5FD_open(name, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF)))
-        HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "unable to open file")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to open file")
 
     /* The file is an hdf5 file if the hdf5 file signature can be found */
     if(H5FD_locate_signature(file, &sig_addr) < 0)
@@ -874,7 +875,7 @@ done:
     /* Close the file */
     if(file)
         if(H5FD_close(file) < 0 && TRUE == ret_value)
-            HDONE_ERROR(H5E_IO, H5E_CANTCLOSEFILE, FAIL, "unable to close file")
+            HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to close file")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__is_hdf5() */
@@ -1362,19 +1363,10 @@ H5F__dest(H5F_t *f, hbool_t flush)
             HDONE_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "can't close property list")
 
         /* Clean up the cached VOL connector ID & info */
-        if(f->shared->vol_info) {
-            H5VL_class_t *connector;       /* Pointer to connector */
-
-            /* Retrieve the connector for the ID */
-            if(NULL == (connector = (H5VL_class_t *)H5I_object(f->shared->vol_id)))
-                /* Push error, but keep going*/
-                HDONE_ERROR(H5E_FILE, H5E_BADTYPE, FAIL, "not a VOL connector ID")
-
-            /* Free the connector info */
-            if(H5VL_free_connector_info(connector, f->shared->vol_info) < 0)
+        if(f->shared->vol_info)
+            if(H5VL_free_connector_info(f->shared->vol_id, f->shared->vol_info) < 0)
                 /* Push error, but keep going*/
                 HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "unable to release VOL connector info object")
-        } /* end if */
         if(f->shared->vol_id > 0)
             if(H5I_dec_ref(f->shared->vol_id) < 0)
                 /* Push error, but keep going*/
@@ -3261,7 +3253,7 @@ H5F_get_metadata_read_retry_info(H5F_t *file, H5F_retry_info_t *info)
                         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
                     /* Copy the information */
-                    HDmemcpy(info->retries[j], file->shared->retries[i], tot_size);
+                    H5MM_memcpy(info->retries[j], file->shared->retries[i], tot_size);
                 }
 
                 /* Increment location in info->retries[] array */
@@ -3343,7 +3335,7 @@ H5F__start_swmr_write(H5F_t *f)
         HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "file superblock version - should be at least 3")
 
     /* Check for correct file format version */
-    if((f->shared->low_bound != H5F_LIBVER_V110) || (f->shared->high_bound != H5F_LIBVER_V110))
+    if((f->shared->low_bound < H5F_LIBVER_V110) || (f->shared->high_bound < H5F_LIBVER_V110))
         HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "file format version does not support SWMR - needs to be 1.10 or greater")
 
     /* Should not be marked for SWMR writing mode already */
@@ -3626,6 +3618,7 @@ H5F__get_file(void *obj, H5I_type_t type)
         case H5I_ERROR_CLASS:
         case H5I_ERROR_MSG:
         case H5I_ERROR_STACK:
+        case H5I_SPACE_SEL_ITER:
         case H5I_NTYPES:
         default:
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file or file object")

@@ -135,7 +135,7 @@ file_ok(const char *filename, hid_t fapl_id, hbool_t check_second_dset)
     hid_t   fid = -1;               /* file ID                          */
     hid_t   top_gid = -1;           /* containing group ID              */
     hid_t   gid = -1;               /* subgroup ID                      */
-    char    group_name[16];         /* group name                       */
+    char    group_name[32];         /* group name                       */
     int     i;                      /* iterator                         */
 
     /* open file */

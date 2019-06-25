@@ -498,6 +498,16 @@ h5init_flags_c( int_f *h5d_flags, size_t_f *h5d_size_flags,
     h5i_flags[4] = (int_f)H5I_DATASET;
     h5i_flags[5] = (int_f)H5I_ATTR;
     h5i_flags[6] = (int_f)H5I_BADID;
+    h5i_flags[7] = (int_f)H5I_UNINIT;
+    h5i_flags[8] = (int_f)H5I_VFL;
+    h5i_flags[9] = (int_f)H5I_VOL;
+    h5i_flags[10] = (int_f)H5I_GENPROP_CLS;
+    h5i_flags[11] = (int_f)H5I_GENPROP_LST;
+    h5i_flags[12] = (int_f)H5I_ERROR_CLASS;
+    h5i_flags[13] = (int_f)H5I_ERROR_MSG;
+    h5i_flags[14] = (int_f)H5I_ERROR_STACK;
+    h5i_flags[15] = (int_f)H5I_NTYPES;
+    h5i_flags[16] = (int_f)H5I_INVALID_HID;
 /*
  *  H5L flags
  */
@@ -632,7 +642,6 @@ h5init_flags_c( int_f *h5d_flags, size_t_f *h5d_size_flags,
       h5s_flags[15] = (int_f)H5S_SEL_POINTS;
       h5s_flags[16] = (int_f)H5S_SEL_HYPERSLABS;
       h5s_flags[17] = (int_f)H5S_SEL_ALL;
-
 /*
  *  H5T flags
  */
@@ -671,7 +680,6 @@ h5init_flags_c( int_f *h5d_flags, size_t_f *h5d_size_flags,
       h5t_flags[32] = (int_f)H5T_ARRAY;
       h5t_flags[33] = (int_f)H5T_DIR_ASCEND;
       h5t_flags[34] = (int_f)H5T_DIR_DESCEND;
-
 /*
  *  H5Z flags
  */
@@ -695,10 +703,6 @@ h5init_flags_c( int_f *h5d_flags, size_t_f *h5d_size_flags,
       h5z_flags[17] = (int_f)H5Z_SO_FLOAT_ESCALE;
       h5z_flags[18] = (int_f)H5Z_SO_INT;
       h5z_flags[19] = (int_f)H5Z_SO_INT_MINBITS_DEFAULT;
-/*
- *  H5A flags
- */
-
 
 /*
  *  H5 Generic flags introduced in version 1.8

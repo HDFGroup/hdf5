@@ -73,7 +73,7 @@ create_file(const char *filename, hid_t fapl_id, hbool_t swmr)
     hid_t   fid = -1;               /* file ID                          */
     hid_t   top_gid = -1;           /* containing group ID              */
     hid_t   gid = -1;               /* subgroup ID                      */
-    char    group_name[16];         /* group name                       */
+    char    group_name[32];         /* group name                       */
     unsigned    flags;              /* file open flags                  */
     int     i;                      /* iterator                         */
 

@@ -1,4 +1,4 @@
-#							-*- shell-script -*-
+#                            -*- shell-script -*-
 #
 # Copyright by The HDF Group.
 # Copyright by the Board of Trustees of the University of Illinois.
@@ -37,10 +37,10 @@ if test X = "X$cc_flags_set"; then
     cc_vendor=`echo $cc_version |sed 's/\([a-z]*\).*/\1/'`
     cc_version=`echo $cc_version |sed 's/[-a-z]//g'`
     if test X = "X$cc_vendor" -a X != "X$cc_version"; then
-	cc_vendor=gcc
+    cc_vendor=gcc
     fi
     if test "-" != "$cc_vendor-$cc_version"; then
-	echo "compiler '$CC' is GNU $cc_vendor-$cc_version"
+    echo "compiler '$CC' is GNU $cc_vendor-$cc_version"
     fi
 
     # Some version numbers
@@ -87,7 +87,7 @@ case "$cc_vendor-$cc_version" in
     case "$host_os-$host_cpu" in
         # cygwin needs the "-std=c99" flag removed, so make
         # a specific case for Cygwin without the flag and a default
-        # case to add the flag everywhere else   
+        # case to add the flag everywhere else
         cygwin-*)
             ;;
 
@@ -111,13 +111,13 @@ case "$cc_vendor-$cc_version" in
     # know if they do start showing up.
     #
     # NOTE: Don't add -Wpadded here since we can't/won't fix the (many)
-    # warnings that are emitted. If you need it, add it from the 
+    # warnings that are emitted. If you need it, add it from the
     # environment variable at configure time.
     H5_CFLAGS="$H5_CFLAGS $arch -pedantic -Wall -Wextra -Wbad-function-cast -Wc++-compat -Wcast-align"
     H5_CFLAGS="$H5_CFLAGS -Wcast-qual -Wconversion -Wdeclaration-after-statement -Wdisabled-optimization -Wfloat-equal"
     H5_CFLAGS="$H5_CFLAGS -Wformat=2 -Winit-self -Winvalid-pch -Wmissing-declarations -Wmissing-include-dirs"
     H5_CFLAGS="$H5_CFLAGS -Wmissing-prototypes -Wnested-externs -Wold-style-definition -Wpacked -Wpointer-arith"
-    H5_CFLAGS="$H5_CFLAGS -Wredundant-decls -Wshadow -Wstrict-prototypes -Wswitch-default -Wswitch-enum"
+    H5_CFLAGS="$H5_CFLAGS -Wredundant-decls -Wshadow -Wstrict-prototypes -Wswitch-enum -Wswitch-default"
     H5_CFLAGS="$H5_CFLAGS -Wundef -Wunused-macros -Wunsafe-loop-optimizations -Wwrite-strings"
 
     # Production
@@ -126,7 +126,7 @@ case "$cc_vendor-$cc_version" in
       gcc-4.*)
         PROD_CFLAGS=
         ;;
-      gcc-[56].*)
+      gcc-[56789].*)
         PROD_CFLAGS="-fstdarg-opt"
         ;;
       *)
@@ -140,7 +140,7 @@ case "$cc_vendor-$cc_version" in
     # NDEBUG is handled explicitly by the configure script
     # -g is handled by the symbols flags
     case "$cc_vendor-$cc_version" in
-      gcc-[56].*)
+      gcc-[56789].*)
         DEBUG_CFLAGS="-ftrapv -fno-common"
         ;;
       *)
@@ -165,7 +165,7 @@ case "$cc_vendor-$cc_version" in
         HIGH_OPT_CFLAGS="-O3"
         DEBUG_OPT_CFLAGS=
         ;;
-      gcc-[56].*)
+      gcc-[56789].*)
         HIGH_OPT_CFLAGS="-O3"
         DEBUG_OPT_CFLAGS="-Og"
         ;;
@@ -187,9 +187,53 @@ esac
 # the information from the previous version and adding modifications to that.
 case "$cc_vendor-$cc_version" in
 
-# When the gcc 7.x release is out, we should check for additional flags to
+# When the gcc 8.x release is out, we should check for additional flags to
 # include and break it out into it's own section, like the other versions
 # below. -QAK
+  gcc-[789].*)
+    # Append warning flags that only gcc 4.2+ knows about
+    # (none, or incorporated in -Wall / -Wextra now)
+
+    # Append warning flags that only gcc 4.3+ knows about
+    #
+    # Technically, variable-length arrays are part of the C99 standard, but
+    #   we should approach them a bit cautiously... -QAK
+    H5_CFLAGS="$H5_CFLAGS -Wlogical-op -Wlarger-than=2048 -Wvla"
+
+    # Append warning flags that only gcc 4.4+ knows about
+    H5_CFLAGS="$H5_CFLAGS -Wsync-nand -Wframe-larger-than=16384 -Wpacked-bitfield-compat"
+
+    # Append warning flags that only gcc 4.5+ knows about
+    H5_CFLAGS="$H5_CFLAGS -Wstrict-overflow=5 -Wjump-misses-init -Wunsuffixed-float-constants"
+
+    # Append warning flags that only gcc 4.6+ knows about
+    H5_CFLAGS="$H5_CFLAGS -Wdouble-promotion -Wtrampolines"
+    DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS -Wsuggest-attribute=const"
+    NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS -Wno-suggest-attribute=const"
+
+    # Append warning flags that only gcc 4.7+ knows about
+    H5_CFLAGS="$H5_CFLAGS -Wstack-usage=8192 -Wvector-operation-performance"
+    DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS -Wsuggest-attribute=pure -Wsuggest-attribute=noreturn"
+    NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS -Wno-suggest-attribute=pure -Wno-suggest-attribute=noreturn"
+
+    # Append warning flags that only gcc 4.8+ knows about
+    DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS -Wsuggest-attribute=format"
+    NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS -Wno-suggest-attribute=format"
+
+    # Append warning flags that only gcc 4.9+ knows about
+    H5_CFLAGS="$H5_CFLAGS -Wdate-time"
+
+    # Append warning flags that only gcc 5.x+ knows about
+    H5_CFLAGS="$H5_CFLAGS -Warray-bounds=2 -Wc99-c11-compat"
+
+    # Append warning flags that only gcc 6.x+ knows about
+    H5_CFLAGS="$H5_CFLAGS -Wnull-dereference -Wunused-const-variable -Wduplicated-cond -Whsa -Wnormalized"
+
+    # Append warning flags that only gcc 7.x+ knows about
+    DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS -Wstringop-overflow=2"
+    H5_CFLAGS="$H5_CFLAGS -Walloc-zero -Walloca -Wduplicated-branches -Wformat-overflow=2 -Wformat-truncation=2 -Wimplicit-fallthrough=5 -Wrestrict"
+    ;;
+
   gcc-6*)
     # Append warning flags that only gcc 4.2+ knows about
     # (none, or incorporated in -Wall / -Wextra now)
@@ -227,7 +271,7 @@ case "$cc_vendor-$cc_version" in
     H5_CFLAGS="$H5_CFLAGS -Warray-bounds=2 -Wc99-c11-compat"
 
     # Append warning flags that only gcc 6.x+ knows about
-    H5_CFLAGS="$H5_CFLAGS -Wnull-dereference -Wunused-const-variable -Wduplicated-cond -Whsa"
+    H5_CFLAGS="$H5_CFLAGS -Wnull-dereference -Wunused-const-variable -Wduplicated-cond -Whsa -Wnormalized"
     ;;
 
   gcc-5*)

@@ -119,15 +119,21 @@
 ##############################################################################
 ##############################################################################
 
+  if (NOT BUILD_SHARED_LIBS)
+    set (tgt_ext "")
+  else ()
+    set (tgt_ext "-shared")
+  endif ()
+
   macro (ADD_H5_PBITS_TEST resultfile resultcode)
     # If using memchecker add tests without using scripts
     if (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (NAME H5DUMP-${resultfile} COMMAND $<TARGET_FILE:h5dump> ${ARGN})
+      add_test (NAME H5DUMP-${resultfile} COMMAND $<TARGET_FILE:h5dump${tgt_ext}> ${ARGN})
       set_tests_properties (H5DUMP-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/pbits")
-      if (NOT ${resultcode} STREQUAL "0")
+      if (${resultcode})
         set_tests_properties (H5DUMP-${resultfile} PROPERTIES WILL_FAIL "true")
       endif ()
-      if (NOT "${last_pbits_test}" STREQUAL "")
+      if (last_pbits_test)
         set_tests_properties (H5DUMP-${resultfile} PROPERTIES DEPENDS ${last_pbits_test})
       endif ()
     else ()
@@ -143,7 +149,7 @@
       add_test (
           NAME H5DUMP-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump${tgt_ext}>"
               -D "TEST_ARGS:STRING=${ARGN}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/pbits"
               -D "TEST_OUTPUT=${resultfile}.out"
@@ -275,7 +281,7 @@
           tpbitsUnsignedLongLong16.out.err
     )
     set_tests_properties (H5DUMP_PACKED_BITS-clearall-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/pbits")
-    if (NOT "${last_pbits_test}" STREQUAL "")
+    if (last_pbits_test)
       set_tests_properties (H5DUMP_PACKED_BITS-clearall-objects PROPERTIES DEPENDS ${last_pbits_test})
     endif ()
     set (last_pbits_test "H5DUMP_PACKED_BITS-clearall-objects")

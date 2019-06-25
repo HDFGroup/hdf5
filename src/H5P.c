@@ -817,14 +817,17 @@ done:
 
 /*--------------------------------------------------------------------------
  NAME
-    H5Pencode
+    H5Pencode2
  PURPOSE
-    Routine to convert the property values in a property list into a binary buffer
+    Routine to convert the property values in a property list into a binary buffer.
+    The encoding of property values will be done according to the file format 
+    setting in fapl_id.
  USAGE
-    herr_t H5Pencode(plist_id, buf, nalloc)
+    herr_t H5Pencode(plist_id, buf, nalloc, fapl_id)
         hid_t plist_id;         IN: Identifier to property list to encode
         void *buf:              OUT: buffer to gold the encoded plist
         size_t *nalloc;         IN/OUT: size of buffer needed to encode plist
+        hid_t fapl_id;          IN: File access property list ID
  RETURNS
     Returns non-negative on success, negative on failure.
  DESCRIPTION
@@ -837,17 +840,21 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5Pencode(hid_t plist_id, void *buf, size_t *nalloc)
+H5Pencode2(hid_t plist_id, void *buf, size_t *nalloc, hid_t fapl_id)
 {
     H5P_genplist_t	*plist;         /* Property list to query */
     herr_t ret_value = SUCCEED;          /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "i*x*z", plist_id, buf, nalloc);
+    H5TRACE4("e", "i*x*zi", plist_id, buf, nalloc, fapl_id);
 
     /* Check arguments. */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object_verify(plist_id, H5I_GENPROP_LST)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+
+    /* Verify access property list and set up collective metadata if appropriate */
+    if(H5CX_set_apl(&fapl_id, H5P_CLS_FACC, H5I_INVALID_HID, TRUE) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID, "can't set access property list info")
 
     /* Call the internal encode routine */
     if((ret_value = H5P__encode(plist, TRUE, buf, nalloc)) < 0)
@@ -855,7 +862,7 @@ H5Pencode(hid_t plist_id, void *buf, size_t *nalloc)
 
 done:
     FUNC_LEAVE_API(ret_value)
-}   /* H5Pencode() */
+}   /* H5Pencode2() */
 
 
 /*--------------------------------------------------------------------------

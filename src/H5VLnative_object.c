@@ -213,17 +213,32 @@ H5VL__native_object_get(void *obj, const H5VL_loc_params_t *loc_params, H5VL_obj
                 break;
             }
 
-        /* H5Iget_name */
-        case H5VL_ID_GET_NAME:
+        /* Object name */
+        case H5VL_OBJECT_GET_NAME:
             {
                 ssize_t *ret = HDva_arg(arguments, ssize_t *);
                 char *name = HDva_arg(arguments, char *);
                 size_t size = HDva_arg(arguments, size_t);
 
-                /* Retrieve object's name */
-                if((*ret = H5G_get_name(&loc, name, size, NULL)) < 0)
-                    HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't retrieve object name")
+                if(loc_params->type == H5VL_OBJECT_BY_SELF) {
+                    /* Retrieve object's name */
+                    if((*ret = H5G_get_name(&loc, name, size, NULL)) < 0)
+                        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't retrieve object name")
+                } /* end if */
+                else if(loc_params->type == H5VL_OBJECT_BY_ADDR) {
+                    H5O_loc_t obj_oloc; /* Object location */
 
+                    /* Initialize the object location */
+                    H5O_loc_reset(&obj_oloc);
+                    obj_oloc.file = loc.oloc->file;
+                    obj_oloc.addr = loc_params->loc_data.loc_by_addr.addr;
+
+                    /* Retrieve object's name */
+                    if((*ret = H5G_get_name_by_addr(loc.oloc->file, &obj_oloc, name, size)) < 0)
+                        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't determine object name")
+                } /* end else-if */
+                else
+                    HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "unknown get_name parameters")
                 break;
             }
 

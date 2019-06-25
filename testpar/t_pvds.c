@@ -524,11 +524,11 @@ test_api_get_ex_dcpl(test_api_config_t config, hid_t fapl, hid_t dcpl,
         size_t plist_buf_size;
 
         /* Encode property list to plist_buf */
-        if(H5Pencode(dcpl, NULL, &plist_buf_size) < 0)
+        if(H5Pencode2(dcpl, NULL, &plist_buf_size, H5P_DEFAULT) < 0)
             TEST_ERROR
         if(NULL == (plist_buf = HDmalloc(plist_buf_size)))
             TEST_ERROR
-        if(H5Pencode(dcpl, plist_buf, &plist_buf_size) < 0)
+        if(H5Pencode2(dcpl, plist_buf, &plist_buf_size, H5P_DEFAULT) < 0)
             TEST_ERROR
 
         /* Decode serialized property list to *ex_dcpl */

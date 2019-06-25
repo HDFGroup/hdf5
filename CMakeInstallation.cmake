@@ -33,7 +33,7 @@ if (NOT HDF5_EXTERNALLY_CONFIGURED)
         EXPORT ${HDF5_EXPORTED_TARGETS}
         DESTINATION ${HDF5_INSTALL_CMAKE_DIR}/hdf5
         FILE ${HDF5_PACKAGE}${HDF_PACKAGE_EXT}-targets.cmake
-        NAMESPACE ${HDF5_PACKAGE}::
+        NAMESPACE ${HDF_PACKAGE_NAMESPACE}
         COMPONENT configinstall
     )
   endif ()
@@ -45,7 +45,7 @@ if (NOT HDF5_EXTERNALLY_CONFIGURED)
     export (
         TARGETS ${HDF5_LIBRARIES_TO_EXPORT} ${HDF5_LIB_DEPENDENCIES} ${HDF5_UTILS_TO_EXPORT}
         FILE ${HDF5_PACKAGE}${HDF_PACKAGE_EXT}-targets.cmake
-        NAMESPACE ${HDF5_PACKAGE}::
+        NAMESPACE ${HDF_PACKAGE_NAMESPACE}
     )
   endif ()
 endif ()
@@ -104,6 +104,12 @@ endif ()
 # Configure the hdf5-config-version .cmake file for the install directory
 #-----------------------------------------------------------------------------
 if (NOT HDF5_EXTERNALLY_CONFIGURED)
+  # 3.11 or greater
+  #write_basic_package_version_file (
+  #  ${HDF5_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${HDF5_PACKAGE}${HDF_PACKAGE_EXT}-config-version.cmake
+  #  VERSION ${HDF5_PACKAGE_VERSION}
+  #  COMPATIBILITY SameMinorVersion
+  #)
   configure_file (
       ${HDF_RESOURCES_DIR}/hdf5-config-version.cmake.in
       ${HDF5_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${HDF5_PACKAGE}${HDF_PACKAGE_EXT}-config-version.cmake @ONLY

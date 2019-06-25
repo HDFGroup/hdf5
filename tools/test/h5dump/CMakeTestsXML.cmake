@@ -160,6 +160,12 @@
 ##############################################################################
 ##############################################################################
 
+  if (NOT BUILD_SHARED_LIBS)
+    set (tgt_ext "")
+  else ()
+    set (tgt_ext "-shared")
+  endif ()
+
   macro (ADD_XML_SKIP_H5_TEST skipresultfile skipresultcode testtype)
     if ("${testtype}" STREQUAL "SKIP")
       if (NOT HDF5_ENABLE_USING_MEMCHECKER)
@@ -176,12 +182,12 @@
 
   macro (ADD_XML_H5_TEST resultfile resultcode)
     if (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (NAME H5DUMP_XML-${resultfile} COMMAND $<TARGET_FILE:h5dump> --xml ${ARGN})
+      add_test (NAME H5DUMP_XML-${resultfile} COMMAND $<TARGET_FILE:h5dump${tgt_ext}> --xml ${ARGN})
       set_tests_properties (H5DUMP_XML-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/xml")
-      if (NOT "${resultcode}" STREQUAL "0")
+      if (${resultcode})
         set_tests_properties (H5DUMP_XML-${resultfile} PROPERTIES WILL_FAIL "true")
       endif ()
-      if (NOT "${last_xml_test}" STREQUAL "")
+      if (last_xml_test)
         set_tests_properties (H5DUMP_XML-${resultfile} PROPERTIES DEPENDS ${last_xml_test})
       endif ()
     else ()
@@ -197,7 +203,7 @@
       add_test (
           NAME H5DUMP_XML-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump${tgt_ext}>"
               -D "TEST_ARGS:STRING=--xml;${ARGN}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/xml"
               -D "TEST_OUTPUT=${resultfile}.out"
@@ -357,7 +363,7 @@
           tvlstr.h5.out.err
     )
     set_tests_properties (H5DUMP-XML-clearall-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/xml")
-    if (NOT "${last_xml_test}" STREQUAL "")
+    if (last_xml_test)
       set_tests_properties (H5DUMP-XML-clearall-objects PROPERTIES DEPENDS ${last_xml_test})
     endif ()
     set (last_test "H5DUMP-XML-clearall-objects")

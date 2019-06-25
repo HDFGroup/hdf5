@@ -41,7 +41,7 @@
 herr_t
 H5VL__native_link_create(H5VL_link_create_type_t create_type, void *obj,
     const H5VL_loc_params_t *loc_params, hid_t lcpl_id, hid_t H5_ATTR_UNUSED lapl_id,
-    hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req)
+    hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req, va_list arguments)
 {
     H5P_genplist_t   *plist;                     /* Property list pointer */
     herr_t           ret_value = SUCCEED;        /* Return value */
@@ -57,13 +57,8 @@ H5VL__native_link_create(H5VL_link_create_type_t create_type, void *obj,
             {
                 H5G_loc_t    cur_loc;
                 H5G_loc_t    link_loc;
-                void         *cur_obj;
-                H5VL_loc_params_t cur_params;
-
-                if(H5P_get(plist, H5VL_PROP_LINK_TARGET, &cur_obj) < 0)
-                    HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for current location id")
-                if(H5P_get(plist, H5VL_PROP_LINK_TARGET_LOC_PARAMS, &cur_params) < 0)
-                    HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for current name")
+                void         *cur_obj = HDva_arg(arguments, void *);
+                H5VL_loc_params_t cur_params = HDva_arg(arguments, H5VL_loc_params_t);
 
                 if(NULL != cur_obj && H5G_loc_real(cur_obj, cur_params.obj_type, &cur_loc) < 0)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
@@ -99,14 +94,11 @@ H5VL__native_link_create(H5VL_link_create_type_t create_type, void *obj,
 
         case H5VL_LINK_CREATE_SOFT:
             {
-                char        *target_name;
+                char        *target_name = HDva_arg(arguments, char *);
                 H5G_loc_t   link_loc;               /* Group location for new link */
 
                 if(H5G_loc_real(obj, loc_params->obj_type, &link_loc) < 0)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
-
-                if(H5P_get(plist, H5VL_PROP_LINK_TARGET_NAME, &target_name) < 0)
-                    HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for targe name")
 
                 /* Create the link */
                 if((ret_value = H5L_create_soft(target_name, &link_loc, loc_params->loc_data.loc_by_name.name, lcpl_id)) < 0)
@@ -117,23 +109,15 @@ H5VL__native_link_create(H5VL_link_create_type_t create_type, void *obj,
         case H5VL_LINK_CREATE_UD:
             {
                 H5G_loc_t   link_loc;               /* Group location for new link */
-                H5L_type_t link_type;
-                void *udata;
-                size_t udata_size;
+                H5L_type_t link_type = (H5L_type_t)HDva_arg(arguments, int);
+                void *udata = HDva_arg(arguments, void *);
+                size_t udata_size = HDva_arg(arguments, size_t);
 
                 if(H5G_loc_real(obj, loc_params->obj_type, &link_loc) < 0)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
 
-                if(H5P_get(plist, H5VL_PROP_LINK_TYPE, &link_type) < 0)
-                    HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for link type")
-                if(H5P_get(plist, H5VL_PROP_LINK_UDATA, &udata) < 0)
-                    HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for udata")
-                if(H5P_get(plist, H5VL_PROP_LINK_UDATA_SIZE, &udata_size) < 0)
-                    HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for udata size")
-
                 /* Create link */
-                if(H5L__create_ud(&link_loc, loc_params->loc_data.loc_by_name.name, udata, udata_size, 
-                                 link_type, lcpl_id) < 0)
+                if(H5L__create_ud(&link_loc, loc_params->loc_data.loc_by_name.name, udata, udata_size, link_type, lcpl_id) < 0)
                     HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to create link")
                 break;
             }

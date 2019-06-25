@@ -49,11 +49,6 @@ include $(top_srcdir)/config/commence.am
 
 # Conditionals.  These conditionals are defined during configure
 # Define each variable to empty if it is not used to placate pmake
-if BUILD_PARALLEL_CONDITIONAL
-   TESTPARALLEL_DIR =testpar
-else
-   TESTPARALLEL_DIR=
-endif
 if BUILD_CXX_CONDITIONAL
    CXX_DIR =c++
 else
@@ -74,9 +69,24 @@ if BUILD_HDF5_HL_CONDITIONAL
 else
    HDF5_HL_DIR=
 endif
+if BUILD_TESTS_CONDITIONAL
+   TESTSERIAL_DIR =test
+else
+   TESTSERIAL_DIR=
+endif
+if BUILD_TESTS_PARALLEL_CONDITIONAL
+   TESTPARALLEL_DIR =testpar
+else
+   TESTPARALLEL_DIR=
+endif
+if BUILD_TOOLS_CONDITIONAL
+   TOOLS_DIR =tools
+else
+   TOOLS_DIR=
+endif
 
-SUBDIRS = src test $(TESTPARALLEL_DIR) tools . $(CXX_DIR) $(FORTRAN_DIR) \
-          $(JAVA_DIR) $(HDF5_HL_DIR)
+SUBDIRS = src $(TESTSERIAL_DIR) $(TESTPARALLEL_DIR) bin $(TOOLS_DIR) . \
+          $(CXX_DIR) $(FORTRAN_DIR) $(JAVA_DIR) $(HDF5_HL_DIR)
 DIST_SUBDIRS = src test testpar tools . c++ fortran hl examples java
 
 # Some files generated during configure that should be cleaned
@@ -186,10 +196,11 @@ check-vfd:
 	  fi;                                                          \
 	done
 
-# Run tests with different Virtual Object Layer Connectors.
-# Currently, only invoke check-vol in the test directory.
-check-vol:
-	for d in src test; do                                 \
+# Run tests with different passthrough Virtual Object Layer Connectors.
+# NOTE: Will only succeed with passthrough VOL connectors that use
+#       the native VOL connector as the terminal connector.
+check-passthrough-vol:
+	for d in $(SUBDIRS); do                                \
 	  if test $$d != .; then                                       \
 	    (cd $$d && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;          \
 	  fi;                                                          \

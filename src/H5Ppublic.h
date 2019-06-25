@@ -68,6 +68,7 @@
 #define H5P_OBJECT_COPY         (H5OPEN H5P_CLS_OBJECT_COPY_ID_g)
 #define H5P_LINK_CREATE         (H5OPEN H5P_CLS_LINK_CREATE_ID_g)
 #define H5P_LINK_ACCESS         (H5OPEN H5P_CLS_LINK_ACCESS_ID_g)
+#define H5P_VOL_INITIALIZE      (H5OPEN H5P_CLS_VOL_INITIALIZE_ID_g)
 
 /*
  * The library's default property lists
@@ -87,6 +88,7 @@
 #define H5P_OBJECT_COPY_DEFAULT        (H5OPEN H5P_LST_OBJECT_COPY_ID_g)
 #define H5P_LINK_CREATE_DEFAULT        (H5OPEN H5P_LST_LINK_CREATE_ID_g)
 #define H5P_LINK_ACCESS_DEFAULT        (H5OPEN H5P_LST_LINK_ACCESS_ID_g)
+#define H5P_VOL_INITIALIZE_DEFAULT     (H5OPEN H5P_LST_VOL_INITIALIZE_ID_g)
 
 /* Common creation order flags (for links in groups and attributes on objects) */
 #define H5P_CRT_ORDER_TRACKED           0x0001
@@ -195,6 +197,7 @@ H5_DLLVAR hid_t H5P_CLS_ATTRIBUTE_ACCESS_ID_g;
 H5_DLLVAR hid_t H5P_CLS_OBJECT_COPY_ID_g;
 H5_DLLVAR hid_t H5P_CLS_LINK_CREATE_ID_g;
 H5_DLLVAR hid_t H5P_CLS_LINK_ACCESS_ID_g;
+H5_DLLVAR hid_t H5P_CLS_VOL_INITIALIZE_ID_g;
 
 /* Default roperty list IDs */
 /* (Internal to library, do not use!  Use macros above) */
@@ -213,6 +216,7 @@ H5_DLLVAR hid_t H5P_LST_ATTRIBUTE_ACCESS_ID_g;
 H5_DLLVAR hid_t H5P_LST_OBJECT_COPY_ID_g;
 H5_DLLVAR hid_t H5P_LST_LINK_CREATE_ID_g;
 H5_DLLVAR hid_t H5P_LST_LINK_ACCESS_ID_g;
+H5_DLLVAR hid_t H5P_LST_VOL_INITIALIZE_ID_g;
 
 /*********************/
 /* Public Prototypes */
@@ -236,7 +240,7 @@ H5_DLL herr_t H5Pinsert2(hid_t plist_id, const char *name, size_t size,
     H5P_prp_compare_func_t prp_cmp, H5P_prp_close_func_t prp_close);
 H5_DLL herr_t H5Pset(hid_t plist_id, const char *name, const void *value);
 H5_DLL htri_t H5Pexist(hid_t plist_id, const char *name);
-H5_DLL herr_t H5Pencode(hid_t plist_id, void *buf, size_t *nalloc);
+H5_DLL herr_t H5Pencode2(hid_t plist_id, void *buf, size_t *nalloc, hid_t fapl_id);
 H5_DLL hid_t  H5Pdecode(const void *buf);
 H5_DLL herr_t H5Pget_size(hid_t id, const char *name, size_t *size);
 H5_DLL herr_t H5Pget_nprops(hid_t id, size_t *nprops);
@@ -536,6 +540,7 @@ H5_DLL herr_t H5Pinsert1(hid_t plist_id, const char *name, size_t size,
     void *value, H5P_prp_set_func_t prp_set, H5P_prp_get_func_t prp_get,
     H5P_prp_delete_func_t prp_delete, H5P_prp_copy_func_t prp_copy,
     H5P_prp_close_func_t prp_close);
+H5_DLL herr_t H5Pencode1(hid_t plist_id, void *buf, size_t *nalloc);
 H5_DLL H5Z_filter_t H5Pget_filter1(hid_t plist_id, unsigned filter,
     unsigned int *flags/*out*/, size_t *cd_nelmts/*out*/,
     unsigned cd_values[]/*out*/, size_t namelen, char name[]);

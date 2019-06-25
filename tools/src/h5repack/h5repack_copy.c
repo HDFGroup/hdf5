@@ -33,20 +33,6 @@
 /* size of buffer/# of bytes to xfer at a time when copying userblock */
 #define USERBLOCK_XFER_SIZE     512
 
-/* check H5Dread()/H5Dwrite() error, e.g. memory allocation error inside the library. */
-#define CHECK_H5DRW_ERROR(_fun, _fail, _did, _mtid, _msid, _fsid, _pid, _buf)  {  \
-    H5E_BEGIN_TRY {  \
-        if(_fun(_did, _mtid, _msid, _fsid, _pid, _buf) < 0) {  \
-            hid_t _err_num = 0; \
-            char _msg[80]; \
-            H5Ewalk2(H5E_DEFAULT, H5E_WALK_DOWNWARD, walk_error_callback, &_err_num); \
-            H5Eget_msg(_err_num, NULL, _msg, (size_t)80); \
-            error_msg("%s %s -- %s\n", #_fun, "failed", _msg); \
-            HGOTO_DONE(_fail) \
-        } \
-    } H5E_END_TRY; \
-}
-
 /*-------------------------------------------------------------------------
  * local functions
  *-------------------------------------------------------------------------
@@ -61,15 +47,7 @@ static int copy_user_block(const char *infile, const char *outfile,
 #if defined (H5REPACK_DEBUG_USER_BLOCK)
 static void print_user_block(const char *filename, hid_t fid);
 #endif
-static herr_t walk_error_callback(unsigned n, const H5E_error2_t *err_desc, void *udata);
 
-/* get the major number from the error stack. */
-static herr_t walk_error_callback(H5_ATTR_UNUSED unsigned n, const H5E_error2_t *err_desc, void *udata) {
-    if (err_desc)
-        *((hid_t *) udata) = err_desc->maj_num;
-
-    return 0;
-}
 
 /*-------------------------------------------------------------------------
  * Function: copy_objects
@@ -634,7 +612,7 @@ int do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
     unsigned crt_order_flags; /* group creation order flag */
     unsigned i;
     unsigned u;
-    unsigned uf;
+    int ifil;
     int is_ref = 0;
     htri_t is_named;
     hbool_t limit_maxdims;
@@ -740,8 +718,8 @@ int do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
                 if (options->op_tbl->objs) {
                     for (u = 0; u < options->op_tbl->nelems; u++) {
                         if (HDstrcmp(travt->objs[i].name, options->op_tbl->objs[u].path) == 0)
-                            for (uf = 0; uf < options->op_tbl->objs[uf].nfilters; uf++) {
-                                if (options->op_tbl->objs[u].filter[uf].filtn > 0)
+                            for (ifil = 0; ifil < options->op_tbl->objs[ifil].nfilters; ifil++) {
+                                if (options->op_tbl->objs[u].filter[ifil].filtn > 0)
                                     req_filter = 1;
                             }
                     }
@@ -1350,7 +1328,7 @@ print_dataset_info(hid_t dcpl_id, char *objname, double ratio, int pr)
     if (!pr)
         printf(FORMAT_OBJ, "dset", objname);
     else {
-        char str[255], temp[28];
+        char str[512], temp[512];
 
         HDstrcpy(str, "dset     ");
         HDstrcat(str, strfilter);

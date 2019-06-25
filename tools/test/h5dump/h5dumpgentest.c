@@ -1889,7 +1889,7 @@ static void gent_str2(void)
 
 
     int i;
-    char buf[LENSTR+10];
+    char buf[LENSTR+20];
     char buf2[3*LENSTR2];
     hsize_t sdim;
 
@@ -1941,7 +1941,7 @@ static void gent_str2(void)
 
     for(i = 0; (hsize_t)i < sdim; i++) {
         start[0] = (hsize_t)i;
-        sprintf(buf, "This is row %1d of type H5T_STR_NULLTERM of", i);
+        sprintf(buf, "This is row %d of type H5T_STR_NULLTERM of", i);
         H5Tset_size(memtype, HDstrlen(buf)+1);
         H5Sselect_hyperslab(hyper_space, H5S_SELECT_SET, start, stride, count, block);
         H5Dwrite(dataset, memtype, mem_space, hyper_space, H5P_DEFAULT, buf);
@@ -1954,7 +1954,7 @@ static void gent_str2(void)
 
     for(i = 0; (hsize_t)i < sdim; i++) {
         start[0] = (hsize_t)i;
-        sprintf(buf, "This is row %1d of type H5T_STR_NULLTERM of string array", i);
+        sprintf(buf, "This is row %d of type H5T_STR_NULLTERM of string array", i);
         H5Tset_size(memtype, HDstrlen(buf)+1);
         H5Sselect_hyperslab(hyper_space, H5S_SELECT_SET, start, stride, count, block);
         H5Dwrite(dataset, memtype, mem_space, hyper_space, H5P_DEFAULT, buf);
@@ -1974,7 +1974,7 @@ static void gent_str2(void)
 
     for(i = 0;(hsize_t) i < sdim; i++) {
         start[0] = (hsize_t)i;
-        sprintf(buf, "This is row %1d of type H5T_STR_NULLPAD of", i);
+        sprintf(buf, "This is row %d of type H5T_STR_NULLPAD of", i);
         H5Tset_size(memtype, HDstrlen(buf)+1);
         H5Sselect_hyperslab(hyper_space, H5S_SELECT_SET, start, stride, count, block);
         H5Dwrite(dataset, memtype, mem_space, hyper_space, H5P_DEFAULT, buf);
@@ -1988,7 +1988,7 @@ static void gent_str2(void)
 
     for(i = 0; (hsize_t)i < sdim; i++) {
         start[0] = (hsize_t)i;
-        sprintf(buf, "This is row %1d of type H5T_STR_NULLPAD of string array", i);
+        sprintf(buf, "This is row %d of type H5T_STR_NULLPAD of string array", i);
         H5Tset_size(memtype, HDstrlen(buf)+1);
         H5Sselect_hyperslab(hyper_space, H5S_SELECT_SET, start, stride, count, block);
         H5Dwrite(dataset, memtype, mem_space, hyper_space, H5P_DEFAULT, buf);
@@ -2007,7 +2007,7 @@ static void gent_str2(void)
 
     for(i = 0; (hsize_t)i < sdim; i++) {
         start[0] = (hsize_t)i;
-        sprintf(buf, "This is row %1d of type H5T_STR_SPACEPAD of", i);
+        sprintf(buf, "This is row %d of type H5T_STR_SPACEPAD of", i);
         H5Tset_size(memtype, HDstrlen(buf) + 1);
         H5Sselect_hyperslab(hyper_space, H5S_SELECT_SET, start, stride, count, block);
         H5Dwrite(dataset, memtype, mem_space, hyper_space, H5P_DEFAULT, buf);
@@ -2021,7 +2021,7 @@ static void gent_str2(void)
 
     for(i = 0; (hsize_t)i < sdim; i++) {
         start[0] = (hsize_t)i;
-        sprintf(buf, "This is row %1d of type H5T_STR_SPACEPAD of string array", i);
+        sprintf(buf, "This is row %d of type H5T_STR_SPACEPAD of string array", i);
         H5Tset_size(memtype, HDstrlen(buf) + 1);
         H5Sselect_hyperslab(hyper_space, H5S_SELECT_SET, start, stride, count, block);
         H5Dwrite(dataset, memtype, mem_space, hyper_space, H5P_DEFAULT, buf);
@@ -7532,16 +7532,6 @@ gent_nodata(void)
 {
     hid_t fid, dataset, space;
     hsize_t dims[2];
-    uint8_t  dsetu8[F66_XDIM][F66_YDIM8],   valu8bits;
-    uint16_t dsetu16[F66_XDIM][F66_YDIM16], valu16bits;
-    uint32_t dsetu32[F66_XDIM][F66_YDIM32], valu32bits;
-    uint64_t dsetu64[F66_XDIM][F66_YDIM64], valu64bits;
-    int8_t  dset8[F66_XDIM][F66_YDIM8],   val8bits;
-    int16_t dset16[F66_XDIM][F66_YDIM16], val16bits;
-    int32_t dset32[F66_XDIM][F66_YDIM32], val32bits;
-    int64_t dset64[F66_XDIM][F66_YDIM64], val64bits;
-    double  dsetdbl[F66_XDIM][F66_YDIM8];
-    unsigned int i, j;
 
     fid = H5Fcreate(FILE87, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 

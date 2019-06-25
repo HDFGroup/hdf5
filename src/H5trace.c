@@ -173,7 +173,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
         if(current_depth < last_call_depth) {
             /* We are at the beginning of a line */
             if(H5_debug_g.ttimes) {
-                char tmp[128];
+                char tmp[320];
 
                 HDsprintf(tmp, "%.6f", event_time.etime-first_time.etime);
                 HDfprintf(out, " %*s ", (int)HDstrlen(tmp), "");
@@ -1054,7 +1054,11 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                                     break;
 
                                 case H5F_LIBVER_V110:
-                                    HDcompile_assert(H5F_LIBVER_LATEST == H5F_LIBVER_V110);
+                                    HDfprintf(out, "H5F_LIBVER_V110");
+                                    break;
+
+                                case H5F_LIBVER_V112:
+                                    HDcompile_assert(H5F_LIBVER_LATEST == H5F_LIBVER_V112);
                                     HDfprintf(out, "H5F_LIBVER_LATEST");
                                     break;
 
@@ -1383,6 +1387,10 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                                 HDfprintf(out, "%ld (err stack)", (long)obj);
                                 break;
 
+                            case H5I_SPACE_SEL_ITER:
+                                HDfprintf(out, "%ld (dataspace selection iterator)", (long)obj);
+                                break;
+
                             case H5I_NTYPES:
                                 HDfprintf (out, "%ld (ntypes - error)", (long)obj);
                                 break;
@@ -1562,6 +1570,10 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
 
                                 case H5I_ERROR_STACK:
                                     HDfprintf(out, "H5I_ERROR_STACK");
+                                    break;
+
+                                case H5I_SPACE_SEL_ITER:
+                                    HDfprintf(out, "H5I_SPACE_SEL_ITER");
                                     break;
 
                                 case H5I_NTYPES:
@@ -2710,6 +2722,9 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                                 case H5VL_FILE_GET_INTENT:
                                     HDfprintf(out, "H5VL_FILE_GET_INTENT");
                                     break;
+                                case H5VL_FILE_GET_FILENO:
+                                    HDfprintf(out, "H5VL_FILE_GET_FILENO");
+                                    break;
                                 case H5VL_FILE_GET_NAME:
                                     HDfprintf(out, "H5VL_FILE_GET_NAME");
                                     break;
@@ -2750,6 +2765,9 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                                     break;
                                 case H5VL_FILE_IS_ACCESSIBLE:
                                     HDfprintf(out, "H5VL_FILE_IS_ACCESSIBLE");
+                                    break;
+                                case H5VL_FILE_DELETE:
+                                    HDfprintf(out, "H5VL_FILE_DELETE");
                                     break;
                                 default:
                                     HDfprintf(out, "%ld", (long)specific);
@@ -2901,8 +2919,8 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                                 case H5VL_REF_GET_NAME:
                                     HDfprintf(out, "H5VL_REF_GET_NAME");
                                     break;
-                                case H5VL_ID_GET_NAME:
-                                    HDfprintf(out, "H5VL_ID_GET_NAME");
+                                case H5VL_OBJECT_GET_NAME:
+                                    HDfprintf(out, "H5VL_OBJECT_GET_NAME");
                                     break;
                                 default:
                                     HDfprintf(out, "%ld", (long)get);

@@ -71,12 +71,15 @@
 ./bin/errors              _DO_NOT_DISTRIBUTE_
 ./bin/genparser
 ./bin/gcov_script            _DO_NOT_DISTRIBUTE_
+./bin/h5cc.in
+./bin/h5redeploy.in
 ./bin/h5vers
 ./bin/iostats
 ./bin/locate_sw
 ./bin/make_err
 ./bin/make_overflow
 ./bin/make_vers
+./bin/Makefile.am
 ./bin/makehelp
 ./bin/mkdirs
 ./bin/newer
@@ -91,11 +94,8 @@
 ./bin/switch_maint_mode      _DO_NOT_DISTRIBUTE_
 ./bin/timekeeper      _DO_NOT_DISTRIBUTE_
 ./bin/trace
+./bin/warnhist      _DO_NOT_DISTRIBUTE_
 ./bin/yodconfigure
-./bin/batch/cori_ctestP.sl.in.cmake
-./bin/batch/cori_ctestS.sl.in.cmake
-./bin/batch/cori_knl_ctestP.sl.in.cmake
-./bin/batch/cori_knl_ctestS.sl.in.cmake
 ./bin/batch/ctestP.lsf.in.cmake
 ./bin/batch/ctestP.sl.in.cmake
 ./bin/batch/ctestS.lsf.in.cmake
@@ -103,6 +103,7 @@
 ./bin/batch/knl_ctestP.sl.in.cmake
 ./bin/batch/knl_ctestS.sl.in.cmake
 ./bin/batch/knl_H5detect.sl.in.cmake
+./bin/batch/ctest.qsub.in.cmake
 ./bin/batch/ray_ctestP.lsf.in.cmake
 ./bin/batch/ray_ctestS.lsf.in.cmake
 ./bin/batch/raybsub
@@ -245,6 +246,7 @@
 ./fortran/src/H5Sff.F90
 ./fortran/src/H5Tf.c
 ./fortran/src/H5Tff.F90
+./fortran/src/H5VLff.F90
 ./fortran/src/H5Zf.c
 ./fortran/src/H5Zff.F90
 ./fortran/src/H5config_f.inc.cmake
@@ -264,8 +266,8 @@
 ./fortran/src/h5fc.in
 ./fortran/src/hdf5_fortrandll.def.in
 
-
 ./fortran/test/Makefile.am
+./fortran/test/vol_connector.F90
 ./fortran/test/fflush1.F90
 ./fortran/test/fflush2.F90
 ./fortran/test/fortranlib_test.F90
@@ -461,8 +463,9 @@
 ./release_docs/INSTALL_parallel
 ./release_docs/INSTALL_Warnings.txt
 ./release_docs/INSTALL_Windows.txt
-./release_docs/RELEASE.txt
+./release_docs/README_HDF5_CMake
 ./release_docs/README_HPC
+./release_docs/RELEASE.txt
 ./release_docs/USING_HDF5_CMake.txt
 ./release_docs/USING_HDF5_VS.txt
 
@@ -846,6 +849,7 @@
 ./src/H5S.c
 ./src/H5Sall.c
 ./src/H5Sdbg.c
+./src/H5Sdeprec.c
 ./src/H5Shyper.c
 ./src/H5Smodule.h
 ./src/H5Smpio.c
@@ -900,6 +904,8 @@
 ./src/H5TSprivate.h
 ./src/H5VL.c
 ./src/H5VLcallback.c
+./src/H5VLconnector.h
+./src/H5VLconnector_passthru.h
 ./src/H5VLint.c
 ./src/H5VLmodule.h
 ./src/H5VLnative.c
@@ -990,6 +996,9 @@
 ./test/evict_on_close.c
 ./test/extend.c
 ./test/external.c
+./test/external_common.c
+./test/external_common.h
+./test/external_env.c
 ./test/error_test.c
 ./test/err_compat.c
 ./test/filter_error.h5
@@ -1007,6 +1016,7 @@
 ./test/file_image.c
 ./test/file_image_core_test.h5
 ./test/fill_old.h5
+./test/fill18.h5
 ./test/fillval.c
 ./test/filter_fail.c
 ./test/filter_plugin.c
@@ -1114,6 +1124,7 @@
 ./test/tcoords.c
 ./test/testabort_fail.sh.in
 ./test/testcheck_version.sh.in
+./test/testexternal_env.sh.in
 ./test/testerror.sh.in
 ./test/testlinks_env.sh.in
 ./test/test_filter_plugin.sh.in
@@ -1129,6 +1140,7 @@
 ./test/testmeta.c
 ./test/testswmr.sh.in
 ./test/testvdsswmr.sh.in
+./test/testvds_env.sh.in
 ./test/tfile.c
 ./test/tgenprop.c
 ./test/th5o.c
@@ -1168,6 +1180,7 @@
 ./test/use_disable_mdc_flushes.c
 ./test/use.h
 ./test/vds.c
+./test/vds_env.c
 ./test/vds_swmr.h
 ./test/vds_swmr_gen.c
 ./test/vds_swmr_reader.c
@@ -1535,11 +1548,9 @@
 ./tools/lib/io_timer.h
 
 ./tools/src/misc/Makefile.am
-./tools/src/misc/h5cc.in
 ./tools/src/misc/h5clear.c
 ./tools/src/misc/h5debug.c
 ./tools/src/misc/h5mkgrp.c
-./tools/src/misc/h5redeploy.in
 ./tools/src/misc/h5repart.c
 ./tools/test/misc/Makefile.am
 ./tools/test/misc/h5repart_gentest.c
@@ -1689,6 +1700,7 @@
 ./tools/testfiles/h5dump-help.txt
 ./tools/testfiles/non_existing.ddl
 ./tools/testfiles/packedbits.ddl
+./tools/testfiles/t128bit_float.h5
 ./tools/testfiles/taindices.h5
 ./tools/testfiles/tall-1.ddl
 ./tools/testfiles/tall-2.ddl
@@ -2902,6 +2914,32 @@
 ./java/src/jni/h5oImp.h
 ./java/src/jni/h5pImp.c
 ./java/src/jni/h5pImp.h
+./java/src/jni/h5pACPLImp.c
+./java/src/jni/h5pACPLImp.h
+./java/src/jni/h5pDAPLImp.c
+./java/src/jni/h5pDAPLImp.h
+./java/src/jni/h5pDCPLImp.c
+./java/src/jni/h5pDCPLImp.h
+./java/src/jni/h5pDXPLImp.c
+./java/src/jni/h5pDXPLImp.h
+./java/src/jni/h5pFAPLImp.c
+./java/src/jni/h5pFAPLImp.h
+./java/src/jni/h5pFCPLImp.c
+./java/src/jni/h5pFCPLImp.h
+./java/src/jni/h5pGAPLImp.c
+./java/src/jni/h5pGAPLImp.h
+./java/src/jni/h5pGCPLImp.c
+./java/src/jni/h5pGCPLImp.h
+./java/src/jni/h5pLAPLImp.c
+./java/src/jni/h5pLAPLImp.h
+./java/src/jni/h5pLCPLImp.c
+./java/src/jni/h5pLCPLImp.h
+./java/src/jni/h5pOCPLImp.c
+./java/src/jni/h5pOCPLImp.h
+./java/src/jni/h5pOCpyPLImp.c
+./java/src/jni/h5pOCpyPLImp.h
+./java/src/jni/h5pStrCPLImp.c
+./java/src/jni/h5pStrCPLImp.h
 ./java/src/jni/h5plImp.c
 ./java/src/jni/h5plImp.h
 ./java/src/jni/h5rImp.c
@@ -3211,8 +3249,6 @@
 ./config/cmake/ConfigureChecks.cmake
 ./config/cmake/CPack.Info.plist.in
 ./config/cmake/CTestCustom.cmake
-./config/cmake/FindHDFJAVA.cmake.in
-./config/cmake/FindJNI.cmake
 ./config/cmake/H5cxx_config.h.in
 ./config/cmake/H5pubconf.h.in
 ./config/cmake/hdf5-config.cmake.in
@@ -3312,9 +3348,9 @@
 ./hl/tools/h5watch/CMakeTests.cmake
 ./src/CMakeLists.txt
 ./test/CMakeLists.txt
+./test/CMakePassthroughVOLTests.cmake
 ./test/CMakeTests.cmake
 ./test/CMakeVFDTests.cmake
-./test/CMakeVOLTests.cmake
 ./test/flushrefreshTest.cmake
 ./test/ShellTests.cmake
 ./testpar/CMakeLists.txt
@@ -3371,8 +3407,12 @@
 ./config/cmake/scripts/CTestScript.cmake
 ./config/cmake/scripts/HDF5config.cmake
 ./config/cmake/scripts/HDF5options.cmake
-./config/cmake/scripts/HPC/par-HDF5options.cmake
-./config/cmake/scripts/HPC/ser-HDF5options.cmake
+
+# CMake-specific HPC Scripts
+./config/cmake/scripts/HPC/sbatch-HDF5options.cmake
+./config/cmake/scripts/HPC/bsub-HDF5options.cmake
+./config/cmake/scripts/HPC/qsub-HDF5options.cmake
+./config/cmake/scripts/HPC/raybsub-HDF5options.cmake
 
 # Files generated by autogen
 ./aclocal.m4
@@ -3387,6 +3427,7 @@
 ./c++/examples/Makefile.in
 ./c++/Makefile.in
 ./configure
+./bin/Makefile.in
 ./c++/src/Makefile.in
 ./c++/test/Makefile.in
 ./examples/Makefile.in

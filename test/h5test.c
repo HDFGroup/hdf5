@@ -44,12 +44,6 @@
  *      is interpreted according to the driver.  See
  *      h5_get_vfd_fapl() for details.
  *
- * HDF5_VOL_CONNECTOR:    This string describes what VOL connector to
- *      use for HDF5 file access.  The first word in the
- *      value is the name of the connector and subsequent data
- *      is interpreted according to the connector.  See
- *      h5_get_vol_fapl() for details.
- *
  * HDF5_LIBVER_BOUNDS:    This string describes what library version bounds to
  *      use for HDF5 file access.  See h5_get_libver_fapl() for details.
  *
@@ -106,12 +100,23 @@ static const char *multi_letters = "msbrglo";
 /* The # of seconds to wait for the message file--used by h5_wait_message() */
 #define MESSAGE_TIMEOUT         300             /* Timeout in seconds */
 
+/*  The strings that correspond to library version bounds H5F_libver_t in H5Fpublic.h */
+/*  This is used by h5_get_version_string() */
+const char *LIBVER_NAMES[] = {
+    "earliest", /* H5F_LIBVER_EARLIEST = 0  */
+    "v18",      /* H5F_LIBVER_V18 = 1       */
+    "v110",     /* H5F_LIBVER_V110 = 2      */
+    "latest",   /* H5F_LIBVER_V112 = 3      */
+    NULL
+};
+
+
 /* Previous error reporting function */
 static H5E_auto2_t err_func = NULL;
 
 static herr_t h5_errors(hid_t estack, void *client_data);
-static char * h5_fixname_real(const char *base_name, hid_t fapl, const char *suffix, 
-                              char *fullname, size_t size, hbool_t nest_printf);
+static char *h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix, 
+    char *fullname, size_t size, hbool_t nest_printf, hbool_t subst_for_superblock);
 
 
 /*-------------------------------------------------------------------------
@@ -466,7 +471,33 @@ h5_test_init(void)
 char *
 h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
 {
-    return (h5_fixname_real(base_name, fapl, ".h5", fullname, size, FALSE));
+    return (h5_fixname_real(base_name, fapl, ".h5", fullname, size, FALSE, FALSE));
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:    h5_fixname_superblock
+ *
+ * Purpose:     Like h5_fixname() but returns the name of the file you'd
+ *              open to find the superblock. Useful for when you have to
+ *              open a file with open(2) but the h5_fixname() string
+ *              contains stuff like format strings.
+ *
+ * Return:      Success:    The FULLNAME pointer.
+ *
+ *              Failure:    NULL if BASENAME or FULLNAME is the null
+ *                          pointer or if FULLNAME isn't large enough for
+ *                          the result.
+ *
+ * Programmer:  Dana Robinson
+ *              Spring 2019
+ *
+ *-------------------------------------------------------------------------
+ */
+char *
+h5_fixname_superblock(const char *base_name, hid_t fapl_id, char *fullname, size_t size)
+{
+    return (h5_fixname_real(base_name, fapl_id, ".h5", fullname, size, FALSE, TRUE));
 }
 
 
@@ -486,7 +517,7 @@ h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
 char *
 h5_fixname_no_suffix(const char *base_name, hid_t fapl, char *fullname, size_t size)
 {
-    return (h5_fixname_real(base_name, fapl, NULL, fullname, size, FALSE));
+    return (h5_fixname_real(base_name, fapl, NULL, fullname, size, FALSE, FALSE));
 }
 
 
@@ -512,7 +543,7 @@ h5_fixname_no_suffix(const char *base_name, hid_t fapl, char *fullname, size_t s
 char *
 h5_fixname_printf(const char *base_name, hid_t fapl, char *fullname, size_t size)
 {
-    return (h5_fixname_real(base_name, fapl, ".h5", fullname, size, TRUE));
+    return (h5_fixname_real(base_name, fapl, ".h5", fullname, size, TRUE, FALSE));
 }
 
 
@@ -540,9 +571,10 @@ h5_fixname_printf(const char *base_name, hid_t fapl, char *fullname, size_t size
  */
 static char *
 h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix, 
-                char *fullname, size_t size, hbool_t nest_printf)
+    char *fullname, size_t size, hbool_t nest_printf, hbool_t subst_for_superblock)
 {
     const char     *prefix = NULL;
+    const char     *env = NULL;    /* HDF5_DRIVER environment variable     */
     char           *ptr, last = '\0';
     const char     *suffix = _suffix;
     size_t          i, j;
@@ -560,17 +592,46 @@ h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix,
             return NULL;
 
         if(suffix) {
-            if(H5FD_FAMILY == driver)
-                suffix = nest_printf ? "%%05d.h5" : "%05d.h5";
-            else if (H5FD_MULTI == driver)
-                suffix = NULL;
+            if(H5FD_FAMILY == driver) {
+                if(subst_for_superblock)
+                    suffix = "00000.h5";
+                else
+                    suffix = nest_printf ? "%%05d.h5" : "%05d.h5";
+            }
+            else if (H5FD_MULTI == driver) {
+
+                /* Get the environment variable, if it exists, in case
+                 * we are using the split driver since both of those
+                 * use the multi VFD under the hood.
+                 */
+                env = HDgetenv("HDF5_DRIVER");
+#ifdef HDF5_DRIVER
+                /* Use the environment variable, then the compile-time constant */
+                if(!env)
+                    env = HDF5_DRIVER;
+#endif
+                if(env && !HDstrcmp(env, "split")) {
+                    /* split VFD */
+                    if(subst_for_superblock)
+                        suffix = "-m.h5";
+                    else
+                        suffix = NULL;
+                }
+                else {
+                    /* multi VFD */
+                    if(subst_for_superblock)
+                        suffix = "-s.h5";
+                    else
+                        suffix = NULL;
+                }
+            }
         }
     }
 
     /* Must first check fapl is not H5P_DEFAULT (-1) because H5FD_XXX
      * could be of value -1 if it is not defined.
      */
-    isppdriver = H5P_DEFAULT != fapl && (H5FD_MPIO==driver);
+    isppdriver = H5P_DEFAULT != fapl && (H5FD_MPIO == driver);
 
     /* Check HDF5_NOCLEANUP environment setting.
      * (The #ifdef is needed to prevent compile failure in case MPI is not
@@ -785,10 +846,6 @@ h5_fileaccess(void)
     if(h5_get_vfd_fapl(fapl_id) < 0)
         goto error;
 
-    /* Next, try to set up a VOL connector */
-    if(h5_get_vol_fapl(fapl_id) < 0)
-        goto error;
- 
     /* Finally, check for libver bounds */
     if(h5_get_libver_fapl(fapl_id) < 0)
         goto error;
@@ -829,10 +886,6 @@ h5_fileaccess_flags(unsigned flags)
     if((flags & H5_FILEACCESS_VFD) && h5_get_vfd_fapl(fapl_id) < 0)
         goto error;
 
-    /* Next, try to set up a VOL connector */
-    if((flags & H5_FILEACCESS_VOL) && h5_get_vol_fapl(fapl_id) < 0)
-        goto error;
- 
     /* Finally, check for libver bounds */
     if((flags & H5_FILEACCESS_LIBVER) && h5_get_libver_fapl(fapl_id) < 0)
         goto error;
@@ -1046,110 +1099,6 @@ error:
 
 
 /*-------------------------------------------------------------------------
- * Function:    h5_get_vol_fapl
- *
- * Purpose:     Returns a file access property list which is the default
- *              fapl but with a VOL connector set according to the constant
- *              or environment variable HDF5_VOL_CONNECTOR.
- *
- * Return:      Success:    0
- *              Failure:    -1
- *
- * Programmer:  Jordan Henderson
- *              November 2018
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-h5_get_vol_fapl(hid_t fapl)
-{
-    const char *env = NULL;
-    const char *tok = NULL;
-    char        *lasts = NULL;  /* Context pointer for strtok_r() call */
-    htri_t      connector_is_registered;
-    char        buf[1024];              /* Buffer for tokenizing HDF5_VOL_CONNECTOR */
-    void       *vol_info = NULL;        /* VOL connector info */
-    hid_t       connector_id = -1;
-
-    /* Get the environment variable, if it exists */
-    env = HDgetenv("HDF5_VOL_CONNECTOR");
-#ifdef HDF5_VOL_CONNECTOR
-    /* Use the environment variable, then the compile-time constant */
-    if(!env)
-        env = HDF5_VOL_CONNECTOR;
-#endif
-
-    /* If the environment variable was not set, just return. */
-    if(!env || !*env)
-        goto done;
-
-    /* Get the first 'word' of the environment variable.
-     * If it's nothing (environment variable was whitespace) just return.
-     */
-    HDstrncpy(buf, env, sizeof(buf));
-    buf[sizeof(buf) - 1] = '\0';
-    if(NULL == (tok = HDstrtok_r(buf, " \t\n\r", &lasts)))
-        goto done;
-
-    /* First, check to see if the connector is already registered */
-    if((connector_is_registered = H5VLis_connector_registered(tok)) < 0)
-        goto done;
-    else if(connector_is_registered) {
-        /* Retrieve the ID of the already-registered VOL connector */
-        if((connector_id = H5VLget_connector_id(tok)) < 0)
-            goto error;
-    } /* end else-if */
-    else {
-        /* Check for VOL connectors that ship with the library */
-        if(!HDstrcmp(tok, "native")) {
-            connector_id = H5VL_NATIVE;
-            if(H5Iinc_ref(connector_id) < 0)
-                goto error;
-        } else if(!HDstrcmp(tok, "pass_through")) {
-            connector_id = H5VL_PASSTHRU;
-            if(H5Iinc_ref(connector_id) < 0)
-                goto error;
-        } else {
-            /* Register the VOL connector */
-            /* (NOTE: No provisions for vipl_id currently) */
-            if((connector_id = H5VLregister_connector_by_name(tok, H5P_DEFAULT)) < 0)
-                goto error;
-        } /* end else */
-    } /* end else */
-
-    /* Was there any connector info specified in the environment variable? */
-    if(NULL != (tok = HDstrtok_r(NULL, " \t\n\r", &lasts)))
-        if(H5VLconnector_str_to_info(tok, connector_id, &vol_info) < 0)
-            goto error;
-
-    /* Set the VOL connector in the FAPL */
-    if(H5Pset_vol(fapl, connector_id, vol_info) < 0)
-        goto error;
-
-    /* Release VOL connector info, if there was any */
-    if(vol_info)
-        if(H5VLfree_connector_info(connector_id, vol_info) < 0)
-            goto error;
-
-    /* Close the connector ID */
-    if(connector_id >= 0)
-        if(H5VLunregister_connector(connector_id) < 0)
-            goto error;
-
-done:
-    return 0;
-
-error:
-    if(vol_info)
-        H5VLfree_connector_info(connector_id, vol_info);
-    if(connector_id >= 0)
-        H5VLunregister_connector(connector_id);
-
-    return -1;
-} /* end h5_get_vol_fapl() */
-
-
-/*-------------------------------------------------------------------------
  * Function:  h5_no_hwconv
  *
  * Purpose:  Turn off hardware data type conversions.
@@ -1270,7 +1219,7 @@ h5_set_info_object(void)
     int    ret_value=0;
 
     /* handle any MPI INFO hints via $HDF5_MPI_INFO */
-    if ((envp = getenv("HDF5_MPI_INFO")) != NULL){
+    if ((envp = HDgetenv("HDF5_MPI_INFO")) != NULL){
         char *next, *valp;
 
         valp = envp = next = HDstrdup(envp);
@@ -1332,7 +1281,7 @@ h5_set_info_object(void)
 
                 /* actually set the darned thing */
                 if (MPI_SUCCESS != MPI_Info_set(h5_io_info_g, namep, valp)) {
-                    printf("MPI_Info_set failed\n");
+                    HDprintf("MPI_Info_set failed\n");
                     ret_value = -1;
                 }
             }
@@ -1508,9 +1457,9 @@ print_func(const char *format, ...)
   va_list arglist;
   int ret_value;
 
-  va_start(arglist, format);
+  HDva_start(arglist, format);
   ret_value = vprintf(format, arglist);
-  va_end(arglist);
+  HDva_end(arglist);
   return ret_value;
 }
 
@@ -1595,7 +1544,7 @@ getenv_all(MPI_Comm comm, int root, const char* name)
     int len;
     static char* env = NULL;
 
-    assert(name);
+    HDassert(name);
 
     MPI_Initialized(&mpi_initialized);
     MPI_Finalized(&mpi_finalized);
@@ -1603,7 +1552,7 @@ getenv_all(MPI_Comm comm, int root, const char* name)
     if(mpi_initialized && !mpi_finalized) {
         MPI_Comm_rank(comm, &mpi_rank);
         MPI_Comm_size(comm, &mpi_size);
-        assert(root < mpi_size);
+        HDassert(root < mpi_size);
 
         /* The root task does the getenv call
          * and sends the result to the other tasks */
@@ -2058,3 +2007,17 @@ error:
     return NULL;
 } /* h5_get_dummy_vol_class */
 
+/*-------------------------------------------------------------------------
+ * Function:    h5_get_version_string
+ *
+ * Purpose:     Get the string that corresponds to the libvery version bound.
+ *
+ * Return:      The string
+ * 
+ *-------------------------------------------------------------------------
+ */
+char *
+h5_get_version_string(H5F_libver_t libver)
+{
+    return(LIBVER_NAMES[libver]);
+} /* end of h5_get_version_string */

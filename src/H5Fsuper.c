@@ -76,6 +76,7 @@ H5FL_DEFINE(H5F_super_t);
 static const unsigned HDF5_superblock_ver_bounds[] = {
     HDF5_SUPERBLOCK_VERSION_DEF,    /* H5F_LIBVER_EARLIEST */
     HDF5_SUPERBLOCK_VERSION_2,      /* H5F_LIBVER_V18 */
+    HDF5_SUPERBLOCK_VERSION_3,      /* H5F_LIBVER_V110 */
     HDF5_SUPERBLOCK_VERSION_LATEST  /* H5F_LIBVER_LATEST */
 };
 
@@ -512,15 +513,12 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, hbool_t initial_read)
 #endif /* H5_HAVE_PARALLEL */
 
     /* Check if superblock address is different from base address and adjust
-     * base address and "end of address" address if so.
+     * base address and "end of file" address if so.
      */
     if(!H5F_addr_eq(super_addr, sblock->base_addr)) {
-        /* Check if the superblock moved earlier in the file */
-        if(H5F_addr_lt(super_addr, sblock->base_addr))
-            udata.stored_eof -= (sblock->base_addr - super_addr);
-        else
-            /* The superblock moved later in the file */
-            udata.stored_eof += (super_addr - sblock->base_addr);
+        /* If the superblock moved in the file, adjust the EOF */
+        /* (Handles moving earlier & later) */
+        udata.stored_eof -= (sblock->base_addr - super_addr);
 
         /* Adjust base address for offsets of the HDF5 data in the file */
         sblock->base_addr = super_addr;
@@ -555,7 +553,7 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, hbool_t initial_read)
         /* Set the B-tree internal node values, etc */
         if(H5P_set(c_plist, H5F_CRT_BTREE_RANK_NAME, udata.btree_k) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "unable to set rank for btree internal nodes")
-        HDmemcpy(sblock->btree_k, udata.btree_k, sizeof(unsigned) * (size_t)H5B_NUM_BTREE_ID);
+        H5MM_memcpy(sblock->btree_k, udata.btree_k, sizeof(unsigned) * (size_t)H5B_NUM_BTREE_ID);
     } /* end if */
     else {
         /* Get the (default) B-tree internal node values, etc */

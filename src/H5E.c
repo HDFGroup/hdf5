@@ -866,7 +866,7 @@ H5Eget_msg(hid_t msg_id, H5E_type_t *type, char *msg_str, size_t size)
     H5E_msg_t   *msg;           /* Pointer to error message */
     ssize_t      ret_value = -1;     /* Return value */
 
-    FUNC_ENTER_API((-1))
+    FUNC_ENTER_API_NOCLEAR((-1))
     H5TRACE4("Zs", "i*Et*sz", msg_id, type, msg_str, size);
 
     /* Get the message object */
@@ -1386,7 +1386,7 @@ H5Epush2(hid_t err_stack, const char *file, const char *func, unsigned line,
  */
 
     /* Format the description */
-    va_start(ap, fmt);
+    HDva_start(ap, fmt);
     va_started = TRUE;
 
 #ifdef H5_HAVE_VASPRINTF
@@ -1402,8 +1402,8 @@ H5Epush2(hid_t err_stack, const char *file, const char *func, unsigned line,
     /* If the description doesn't fit into the initial buffer size, allocate more space and try again */
     while((desc_len = HDvsnprintf(tmp, (size_t)tmp_len, fmt, ap)) > (tmp_len - 1)) {
         /* shutdown & restart the va_list */
-        va_end(ap);
-        va_start(ap, fmt);
+        HDva_end(ap);
+        HDva_start(ap, fmt);
 
         /* Release the previous description, it's too small */
         H5MM_xfree(tmp);
@@ -1421,7 +1421,7 @@ H5Epush2(hid_t err_stack, const char *file, const char *func, unsigned line,
 
 done:
     if(va_started)
-        va_end(ap);
+        HDva_end(ap);
 #ifdef H5_HAVE_VASPRINTF
     /* Memory was allocated with HDvasprintf so it needs to be freed
      * with HDfree

@@ -157,6 +157,12 @@
 #define SPACERE5_DIM3            12
 #define SPACERE5_DIM4            8
 
+/* Information for Space update diminfo test */
+#define SPACEUD1_DIM0            20
+#define SPACEUD3_DIM0            9
+#define SPACEUD3_DIM1            12
+#define SPACEUD3_DIM2            13
+
 /* #defines for shape same / different rank tests */
 #define SS_DR_MAX_RANK		5
 
@@ -166,6 +172,9 @@
 #define SPACE13_DIM2    50
 #define SPACE13_DIM3    50
 #define SPACE13_NPOINTS 4
+
+/* Information for testing selection iterators */
+#define SEL_ITER_MAX_SEQ        256
 
 
 /* Location comparison function */
@@ -1888,9 +1897,9 @@ test_select_hyper_contig_dr__run_test(int test_num, const uint16_t *cube_buf,
                     /* verify that H5S_select_shape_same() reports the two
                      * selections as having the same shape.
                      */
-                    check = H5S_select_shape_same_test(small_cube_sid,
+                    check = H5S__select_shape_same_test(small_cube_sid,
                                                        file_large_cube_sid);
-                    VERIFY(check, TRUE, "H5S_select_shape_same_test");
+                    VERIFY(check, TRUE, "H5S__select_shape_same_test");
 
                     /* Read selection from disk */
                     ret = H5Dread(large_cube_dataset,
@@ -1965,9 +1974,9 @@ test_select_hyper_contig_dr__run_test(int test_num, const uint16_t *cube_buf,
                     /* verify that H5S_select_shape_same() reports the two
                      * selections as having the same shape.
                      */
-                    check = H5S_select_shape_same_test(small_cube_sid,
+                    check = H5S__select_shape_same_test(small_cube_sid,
                                                        mem_large_cube_sid);
-                    VERIFY(check, TRUE, "H5S_select_shape_same_test");
+                    VERIFY(check, TRUE, "H5S__select_shape_same_test");
 
 
                     /* Read selection from disk */
@@ -2082,9 +2091,9 @@ test_select_hyper_contig_dr__run_test(int test_num, const uint16_t *cube_buf,
                      * memory slice through the cube selection and the
                      * on disk full small cube selections as having the same shape.
                      */
-                    check = H5S_select_shape_same_test(small_cube_sid,
+                    check = H5S__select_shape_same_test(small_cube_sid,
                                                        mem_large_cube_sid);
-                    VERIFY(check, TRUE, "H5S_select_shape_same_test");
+                    VERIFY(check, TRUE, "H5S__select_shape_same_test");
 
 
 	            /* write the slice from the in memory large cube to the on disk small cube */
@@ -2193,9 +2202,9 @@ test_select_hyper_contig_dr__run_test(int test_num, const uint16_t *cube_buf,
                      * on disk slice through the large cube selection
                      * as having the same shape.
                      */
-                    check = H5S_select_shape_same_test(small_cube_sid,
+                    check = H5S__select_shape_same_test(small_cube_sid,
                                                        file_large_cube_sid);
-                    VERIFY(check, TRUE, "H5S_select_shape_same_test");
+                    VERIFY(check, TRUE, "H5S__select_shape_same_test");
 
 
 	            /* write the cube from memory to the target slice of the disk cube */
@@ -2998,9 +3007,9 @@ test_select_hyper_checker_board_dr__run_test(int test_num, const uint16_t *cube_
                     /* verify that H5S_select_shape_same() reports the two
                      * selections as having the same shape.
                      */
-                    check = H5S_select_shape_same_test(mem_small_cube_sid,
+                    check = H5S__select_shape_same_test(mem_small_cube_sid,
                                                        file_large_cube_sid);
-                    VERIFY(check, TRUE, "H5S_select_shape_same_test");
+                    VERIFY(check, TRUE, "H5S__select_shape_same_test");
 
                     /* zero the buffer that we will be using for reading */
                     HDmemset(small_cube_buf_1, 0, sizeof(*small_cube_buf_1) * small_cube_size);
@@ -3105,9 +3114,9 @@ test_select_hyper_checker_board_dr__run_test(int test_num, const uint16_t *cube_
                     /* verify that H5S_select_shape_same() reports the two
                      * selections as having the same shape.
                      */
-                    check = H5S_select_shape_same_test(file_small_cube_sid,
+                    check = H5S__select_shape_same_test(file_small_cube_sid,
                                                        mem_large_cube_sid);
-                    VERIFY(check, TRUE, "H5S_select_shape_same_test");
+                    VERIFY(check, TRUE, "H5S__select_shape_same_test");
 
 
                     /* zero out the in memory large cube */
@@ -3258,9 +3267,9 @@ test_select_hyper_checker_board_dr__run_test(int test_num, const uint16_t *cube_
                     /* verify that H5S_select_shape_same() reports the two
                      * selections as having the same shape.
                      */
-                    check = H5S_select_shape_same_test(file_small_cube_sid,
+                    check = H5S__select_shape_same_test(file_small_cube_sid,
                                                        mem_large_cube_sid);
-                    VERIFY(check, TRUE, "H5S_select_shape_same_test");
+                    VERIFY(check, TRUE, "H5S__select_shape_same_test");
 
 
 	            /* write the slice from the in memory large cube to the
@@ -3390,9 +3399,9 @@ test_select_hyper_checker_board_dr__run_test(int test_num, const uint16_t *cube_
                     /* verify that H5S_select_shape_same() reports the two
                      * selections as having the same shape.
                      */
-                    check = H5S_select_shape_same_test(file_large_cube_sid,
+                    check = H5S__select_shape_same_test(file_large_cube_sid,
                                                        mem_small_cube_sid);
-                    VERIFY(check, TRUE, "H5S_select_shape_same_test");
+                    VERIFY(check, TRUE, "H5S__select_shape_same_test");
 
 
 	            /* write the checker board selection of the in memory
@@ -3525,13 +3534,13 @@ test_select_hyper_checker_board_dr__run_test(int test_num, const uint16_t *cube_
 
 /****************************************************************
 **
-**  test_select_hyper_checker_board_dr(): Test H5S (dataspace) 
-**	selection code with checkerboard source and target having 
+**  test_select_hyper_checker_board_dr(): Test H5S (dataspace)
+**	selection code with checkerboard source and target having
 **	different ranks but the same shape.  We have already
-**	tested H5S_shape_same in isolation, so now we try to do 
+**	tested H5S_shape_same in isolation, so now we try to do
 **	I/O.
 **
-**	This is just an initial smoke check, so we will work 
+**	This is just an initial smoke check, so we will work
 **	with a slice through a cube only.
 **
 ****************************************************************/
@@ -4910,12 +4919,11 @@ test_select_hyper_union(void)
     HDfree(rbuf);
 }   /* test_select_hyper_union() */
 
-#ifdef NEW_HYPERSLAB_API
 /****************************************************************
 **
 **  test_select_hyper_union_stagger(): Test basic H5S (dataspace) selection code.
 **      Tests unions of staggered hyperslabs.  (Uses H5Scombine_hyperslab
-**      and H5Sselect_select instead of H5Sselect_hyperslab)
+**      and H5Smodify_select instead of H5Sselect_hyperslab)
 **
 ****************************************************************/
 static void
@@ -4932,11 +4940,11 @@ test_select_hyper_union_stagger(void)
     hsize_t count[2]={3,1}; /* 1st Hyperslab size */
     hsize_t count2[2]={3,1}; /* 2nd Hyperslab size */
     hsize_t count3[2]={2,1}; /* 3rd Hyperslab size */
-    hssize_t offset[2]={0,0}; /* 1st Hyperslab offset */
-    hssize_t offset2[2]={2,1}; /* 2nd Hyperslab offset */
-    hssize_t offset3[2]={4,2}; /* 3rd Hyperslab offset */
+    hsize_t start[2]={0,0};  /* 1st Hyperslab offset */
+    hsize_t start2[2]={2,1}; /* 2nd Hyperslab offset */
+    hsize_t start3[2]={4,2}; /* 3rd Hyperslab offset */
     hsize_t count_out[2]={4,2}; /* Hyperslab size in memory */
-    hssize_t offset_out[2]={0,3}; /* Hyperslab offset in memory */
+    hsize_t start_out[2]={0,3}; /* Hyperslab offset in memory */
     int data[6][5];     /* Data to write */
     int data_out[7][7]; /* Data read in */
     int input_loc[8][2]={{0,0},
@@ -5007,27 +5015,27 @@ test_select_hyper_union_stagger(void)
     CHECK(dataspace, FAIL, "H5Dget_space");
 
     /* Select the hyperslabs */
-    error = H5Sselect_hyperslab(dataspace, H5S_SELECT_SET, offset, stride, count, block);
+    error = H5Sselect_hyperslab(dataspace, H5S_SELECT_SET, start, stride, count, block);
     CHECK(error, FAIL, "H5Sselect_hyperslab");
-    tmp_space = H5Scombine_hyperslab(dataspace, H5S_SELECT_OR, offset2, stride, count2, block);
+    tmp_space = H5Scombine_hyperslab(dataspace, H5S_SELECT_OR, start2, stride, count2, block);
     CHECK(tmp_space, FAIL, "H5Scombine_hyperslab");
 
     /* Copy the file dataspace and select hyperslab */
     tmp2_space = H5Scopy(dataspace);
     CHECK(tmp2_space, FAIL, "H5Scopy");
-    error=H5Sselect_hyperslab(tmp2_space,H5S_SELECT_SET,offset3,stride,count3,block);
+    error=H5Sselect_hyperslab(tmp2_space, H5S_SELECT_SET, start3, stride, count3, block);
     CHECK(error, FAIL, "H5Sselect_hyperslab");
 
     /* Combine the copied dataspace with the temporary dataspace */
-    error=H5Sselect_select(tmp_space,H5S_SELECT_OR,tmp2_space);
-    CHECK(error, FAIL, "H5Sselect_select");
+    error=H5Smodify_select(tmp_space,H5S_SELECT_OR,tmp2_space);
+    CHECK(error, FAIL, "H5Smodify_select");
 
     /* Create Memory Dataspace */
     memspace=H5Screate_simple(memrank,dimsm,NULL);
     CHECK(memspace, FAIL, "H5Screate_simple");
 
     /* Select hyperslab in memory */
-    error=H5Sselect_hyperslab(memspace,H5S_SELECT_SET,offset_out,stride,count_out,block);
+    error=H5Sselect_hyperslab(memspace, H5S_SELECT_SET, start_out, stride, count_out, block);
     CHECK(error, FAIL, "H5Sselect_hyperslab");
 
     /* Read File Dataset */
@@ -5267,7 +5275,109 @@ test_select_hyper_union_3d(void)
     HDfree(wbuf);
     HDfree(rbuf);
 }   /* test_select_hyper_union_3d() */
-#endif /* NEW_HYPERSLAB_API */
+
+/****************************************************************
+**
+**  test_select_hyper_valid_combination(): Tests invalid and valid
+**  combinations of selections on dataspace for H5Scombine_select
+**  and H5Smodify_select.
+**
+****************************************************************/
+static void
+test_select_hyper_valid_combination(void)
+{
+    hid_t	single_pt_sid;	/* Dataspace ID	with single point selection */
+    hid_t	single_hyper_sid;	/* Dataspace ID	with single block hyperslab selection */
+    hid_t	regular_hyper_sid;	/* Dataspace ID	with regular hyperslab selection */
+	hid_t   non_existent_sid = -1; /* A non-existent space id */
+    hid_t	tmp_sid;	/* Temporary dataspace ID */
+    hsize_t	dims2D[] = {SPACE9_DIM1, SPACE9_DIM2};
+	hsize_t	dims3D[] = {SPACE4_DIM1, SPACE4_DIM2, SPACE4_DIM3};
+
+    hsize_t	coord1[1][SPACE2_RANK]; /* Coordinates for single point selection */
+    hsize_t     start[SPACE4_RANK]; /* Hyperslab start */
+    hsize_t     stride[SPACE4_RANK]; /* Hyperslab stride */
+    hsize_t     count[SPACE4_RANK]; /* Hyperslab block count */
+    hsize_t     block[SPACE4_RANK]; /* Hyperslab block size */
+    herr_t	ret;		/* Generic return value	*/
+
+    /* Output message about test being performed */
+    MESSAGE(6, ("Testing Selection Combination Validity\n"));
+    assert(SPACE9_DIM2>=POINT1_NPOINTS);
+
+    /* Create dataspace for single point selection */
+    single_pt_sid = H5Screate_simple(SPACE9_RANK, dims2D, NULL);
+    CHECK(single_pt_sid, FAIL, "H5Screate_simple");
+
+    /* Select sequence of ten points for multiple point selection */
+    coord1[0][0] = 2; coord1[0][1] = 2;
+    ret = H5Sselect_elements(single_pt_sid, H5S_SELECT_SET, (size_t)1, (const hsize_t *)coord1);
+    CHECK(ret, FAIL, "H5Sselect_elements");
+
+    /* Create dataspace for single hyperslab selection */
+    single_hyper_sid = H5Screate_simple(SPACE9_RANK, dims2D, NULL);
+    CHECK(single_hyper_sid, FAIL, "H5Screate_simple");
+
+    /* Select 10x10 hyperslab for single hyperslab selection  */
+    start[0]=1; start[1]=1;
+    stride[0]=1; stride[1]=1;
+    count[0]=1; count[1]=1;
+    block[0]=(SPACE9_DIM1-2); block[1]=(SPACE9_DIM2-2);
+    ret = H5Sselect_hyperslab(single_hyper_sid,H5S_SELECT_SET,start,stride,count,block);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* Create dataspace for regular hyperslab selection */
+    regular_hyper_sid = H5Screate_simple(SPACE4_RANK, dims3D, NULL);
+    CHECK(regular_hyper_sid, FAIL, "H5Screate_simple");
+
+    /* Select regular, strided hyperslab selection */
+    start[0]=2; start[1]=2; start[2]=2;
+    stride[0]=2; stride[1]=2; stride[2]=2;
+    count[0]=5; count[1]=2; count[2]=5;
+    block[0]=1; block[1]=1; block[2]=1;
+    ret = H5Sselect_hyperslab(regular_hyper_sid,H5S_SELECT_SET,start,stride,count,block);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+
+    /* Test all the selections created */
+
+	/* Test the invalid combinations between point and hyperslab */
+	tmp_sid = H5Scombine_select(single_pt_sid, H5S_SELECT_AND, single_hyper_sid);
+	VERIFY(tmp_sid, FAIL, "H5Scombine_select");
+
+	tmp_sid = H5Smodify_select(single_pt_sid, H5S_SELECT_AND, single_hyper_sid);
+	VERIFY(tmp_sid, FAIL, "H5Smodify_select");
+
+	/* Test the invalid combination between two hyperslab but of different dimension size */
+	tmp_sid = H5Scombine_select(single_hyper_sid, H5S_SELECT_AND, regular_hyper_sid);
+	VERIFY(tmp_sid, FAIL, "H5Scombine_select");
+
+	tmp_sid = H5Smodify_select(single_hyper_sid, H5S_SELECT_AND, regular_hyper_sid);
+	VERIFY(tmp_sid, FAIL, "H5Smodify_select");
+
+	/* Test invalid operation inputs to the two functions */
+	tmp_sid = H5Scombine_select(single_hyper_sid, H5S_SELECT_SET, single_hyper_sid);
+	VERIFY(tmp_sid, FAIL, "H5Scombine_select");
+
+	tmp_sid = H5Smodify_select(single_hyper_sid, H5S_SELECT_SET, single_hyper_sid);
+	VERIFY(tmp_sid, FAIL, "H5Smodify_select");
+
+	/* Test inputs in case of non-existent space ids */
+	tmp_sid = H5Scombine_select(single_hyper_sid, H5S_SELECT_AND, non_existent_sid);
+	VERIFY(tmp_sid, FAIL, "H5Scombine_select");
+
+	tmp_sid = H5Smodify_select(single_hyper_sid, H5S_SELECT_AND, non_existent_sid);
+	VERIFY(tmp_sid, FAIL, "H5Smodify_select");
+
+	/* Close dataspaces */
+    ret = H5Sclose(single_pt_sid);
+    CHECK(ret, FAIL, "H5Sclose");
+    ret = H5Sclose(single_hyper_sid);
+    CHECK(ret, FAIL, "H5Sclose");
+    ret = H5Sclose(regular_hyper_sid);
+    CHECK(ret, FAIL, "H5Sclose");
+}   /* test_select_hyper_valid_combination() */
+
 
 /****************************************************************
 **
@@ -5902,6 +6012,10 @@ test_select_hyper_union_random_5d(hid_t read_plist)
             /* Select hyperslab */
             ret = H5Sselect_hyperslab(sid1, (i == 0 ? H5S_SELECT_SET : H5S_SELECT_OR), start, NULL, count, NULL);
             CHECK(ret, FAIL, "H5Sselect_hyperslab");
+            if(ret < 0) {
+                TestErrPrintf("Random hyperslabs for seed %u failed!\n", seed);
+                break;
+            } /* end if */
         } /* end for */
 
         /* Get the number of elements selected */
@@ -5920,14 +6034,18 @@ test_select_hyper_union_random_5d(hid_t read_plist)
         /* Read selection from disk */
         ret=H5Dread(dataset,H5T_NATIVE_INT,sid2,sid1,read_plist,rbuf);
         CHECK(ret, FAIL, "H5Dread");
+        if(ret < 0) {
+            TestErrPrintf("Random hyperslabs for seed %u failed!\n", seed);
+            break;
+        } /* end if */
 
         /* Compare data read with data written out */
         tbuf=rbuf;
         ret = H5Diterate(wbuf,H5T_NATIVE_INT,sid1,test_select_hyper_iter2,&tbuf);
-        if(ret<0) {
-            TestErrPrintf("Random hyperslabs for seed %u failed!\n",seed);
+        if(ret < 0) {
+            TestErrPrintf("Random hyperslabs for seed %u failed!\n", seed);
             break;
-        }
+        } /* end if */
 
         /* Set the read buffer back to all zeroes */
         HDmemset(rbuf, 0, (size_t)SPACE6_DIM1);
@@ -6214,9 +6332,6 @@ test_select_point_chunk(void)
     herr_t      ret;                            /* Generic return value */
 
     unsigned    *data_out;			/* output buffer */
-#ifdef LATER
-    unsigned    *tmpdata_out;			/* output buffer */
-#endif /* LATER */
 
     hsize_t     start[SPACE7_RANK];             /* hyperslab offset */
     hsize_t     count[SPACE7_RANK];             /* size of the hyperslab */
@@ -6585,7 +6700,7 @@ test_select_combine(void)
     hsize_t dims[SPACE7_RANK]={SPACE7_DIM1,SPACE7_DIM2};        /* Dimensions of dataspace */
     H5S_sel_type sel_type;      /* Selection type */
     hssize_t nblocks;   /* Number of hyperslab blocks */
-    hsize_t blocks[128][2][SPACE7_RANK];    /* List of blocks */
+    hsize_t blocks[16][2][SPACE7_RANK];    /* List of blocks */
     herr_t error;
 
     /* Output message about test being performed */
@@ -8087,290 +8202,290 @@ test_shape_same(void)
 
     /* Compare "all" selection to all the selections created */
         /* Compare against itself */
-        check=H5S_select_shape_same_test(all_sid,all_sid);
-        VERIFY(check, TRUE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(all_sid,all_sid);
+        VERIFY(check, TRUE, "H5S__select_shape_same_test");
 
         /* Compare against copy of itself */
         tmp_sid=H5Scopy(all_sid);
         CHECK(tmp_sid, FAIL, "H5Scopy");
 
-        check=H5S_select_shape_same_test(all_sid,tmp_sid);
-        VERIFY(check, TRUE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(all_sid,tmp_sid);
+        VERIFY(check, TRUE, "H5S__select_shape_same_test");
 
         ret = H5Sclose(tmp_sid);
         CHECK(ret, FAIL, "H5Sclose");
 
         /* Compare against "none" selection */
-        check=H5S_select_shape_same_test(all_sid,none_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(all_sid,none_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against single point selection */
-        check=H5S_select_shape_same_test(all_sid,single_pt_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(all_sid,single_pt_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against multiple point selection */
-        check=H5S_select_shape_same_test(all_sid,mult_pt_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(all_sid,mult_pt_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against "plain" single hyperslab selection */
-        check=H5S_select_shape_same_test(all_sid,single_hyper_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(all_sid,single_hyper_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against "all" single hyperslab selection */
-        check=H5S_select_shape_same_test(all_sid,single_hyper_all_sid);
-        VERIFY(check, TRUE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(all_sid,single_hyper_all_sid);
+        VERIFY(check, TRUE, "H5S__select_shape_same_test");
 
         /* Compare against "single point" single hyperslab selection */
-        check=H5S_select_shape_same_test(all_sid,single_hyper_pt_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(all_sid,single_hyper_pt_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against regular, strided hyperslab selection */
-        check=H5S_select_shape_same_test(all_sid,regular_hyper_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(all_sid,regular_hyper_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against irregular hyperslab selection */
-        check=H5S_select_shape_same_test(all_sid,irreg_hyper_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(all_sid,irreg_hyper_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against "no" hyperslab selection */
-        check=H5S_select_shape_same_test(all_sid,none_hyper_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(all_sid,none_hyper_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against scalar "all" hyperslab selection */
-        check = H5S_select_shape_same_test(all_sid, scalar_all_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(all_sid, scalar_all_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against scalar "none" hyperslab selection */
-        check = H5S_select_shape_same_test(all_sid, scalar_none_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(all_sid, scalar_none_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
     /* Compare "none" selection to all the selections created */
         /* Compare against itself */
-        check=H5S_select_shape_same_test(none_sid,none_sid);
-        VERIFY(check, TRUE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(none_sid,none_sid);
+        VERIFY(check, TRUE, "H5S__select_shape_same_test");
 
         /* Compare against copy of itself */
         tmp_sid=H5Scopy(none_sid);
         CHECK(tmp_sid, FAIL, "H5Scopy");
 
-        check=H5S_select_shape_same_test(none_sid,tmp_sid);
-        VERIFY(check, TRUE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(none_sid,tmp_sid);
+        VERIFY(check, TRUE, "H5S__select_shape_same_test");
 
         ret = H5Sclose(tmp_sid);
         CHECK(ret, FAIL, "H5Sclose");
 
         /* Compare against "all" selection */
-        check=H5S_select_shape_same_test(none_sid,all_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(none_sid,all_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against single point selection */
-        check=H5S_select_shape_same_test(none_sid,single_pt_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(none_sid,single_pt_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against multiple point selection */
-        check=H5S_select_shape_same_test(none_sid,mult_pt_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(none_sid,mult_pt_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against "plain" single hyperslab selection */
-        check=H5S_select_shape_same_test(none_sid,single_hyper_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(none_sid,single_hyper_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against "all" single hyperslab selection */
-        check=H5S_select_shape_same_test(none_sid,single_hyper_all_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(none_sid,single_hyper_all_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against "single point" single hyperslab selection */
-        check=H5S_select_shape_same_test(none_sid,single_hyper_pt_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(none_sid,single_hyper_pt_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against regular, strided hyperslab selection */
-        check=H5S_select_shape_same_test(none_sid,regular_hyper_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(none_sid,regular_hyper_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against irregular hyperslab selection */
-        check=H5S_select_shape_same_test(none_sid,irreg_hyper_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(none_sid,irreg_hyper_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against "no" hyperslab selection */
-        check=H5S_select_shape_same_test(none_sid,none_hyper_sid);
-        VERIFY(check, TRUE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(none_sid,none_hyper_sid);
+        VERIFY(check, TRUE, "H5S__select_shape_same_test");
 
         /* Compare against scalar "all" hyperslab selection */
-        check = H5S_select_shape_same_test(none_sid, scalar_all_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(none_sid, scalar_all_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against scalar "none" hyperslab selection */
-        check = H5S_select_shape_same_test(none_sid, scalar_none_sid);
-        VERIFY(check, TRUE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(none_sid, scalar_none_sid);
+        VERIFY(check, TRUE, "H5S__select_shape_same_test");
 
     /* Compare single point selection to all the selections created */
         /* Compare against itself */
-        check=H5S_select_shape_same_test(single_pt_sid,single_pt_sid);
-        VERIFY(check, TRUE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(single_pt_sid,single_pt_sid);
+        VERIFY(check, TRUE, "H5S__select_shape_same_test");
 
         /* Compare against copy of itself */
         tmp_sid=H5Scopy(single_pt_sid);
         CHECK(tmp_sid, FAIL, "H5Scopy");
 
-        check=H5S_select_shape_same_test(single_pt_sid,tmp_sid);
-        VERIFY(check, TRUE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(single_pt_sid,tmp_sid);
+        VERIFY(check, TRUE, "H5S__select_shape_same_test");
 
         ret = H5Sclose(tmp_sid);
         CHECK(ret, FAIL, "H5Sclose");
 
         /* Compare against "all" selection */
-        check=H5S_select_shape_same_test(single_pt_sid,all_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(single_pt_sid,all_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against "none" selection */
-        check=H5S_select_shape_same_test(single_pt_sid,none_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(single_pt_sid,none_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against multiple point selection */
-        check=H5S_select_shape_same_test(single_pt_sid,mult_pt_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(single_pt_sid,mult_pt_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against "plain" single hyperslab selection */
-        check=H5S_select_shape_same_test(single_pt_sid,single_hyper_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(single_pt_sid,single_hyper_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against "all" single hyperslab selection */
-        check=H5S_select_shape_same_test(single_pt_sid,single_hyper_all_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(single_pt_sid,single_hyper_all_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against "single point" single hyperslab selection */
-        check=H5S_select_shape_same_test(single_pt_sid,single_hyper_pt_sid);
-        VERIFY(check, TRUE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(single_pt_sid,single_hyper_pt_sid);
+        VERIFY(check, TRUE, "H5S__select_shape_same_test");
 
         /* Compare against regular, strided hyperslab selection */
-        check=H5S_select_shape_same_test(single_pt_sid,regular_hyper_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(single_pt_sid,regular_hyper_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against irregular hyperslab selection */
-        check=H5S_select_shape_same_test(single_pt_sid,irreg_hyper_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(single_pt_sid,irreg_hyper_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against "no" hyperslab selection */
-        check=H5S_select_shape_same_test(single_pt_sid,none_hyper_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(single_pt_sid,none_hyper_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against scalar "all" hyperslab selection */
-        check = H5S_select_shape_same_test(single_pt_sid, scalar_all_sid);
-        VERIFY(check, TRUE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(single_pt_sid, scalar_all_sid);
+        VERIFY(check, TRUE, "H5S__select_shape_same_test");
 
         /* Compare against scalar "none" hyperslab selection */
-        check = H5S_select_shape_same_test(single_pt_sid, scalar_none_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(single_pt_sid, scalar_none_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
     /* Compare multiple point selection to all the selections created */
         /* Compare against itself */
-        check=H5S_select_shape_same_test(mult_pt_sid,mult_pt_sid);
-        VERIFY(check, TRUE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(mult_pt_sid,mult_pt_sid);
+        VERIFY(check, TRUE, "H5S__select_shape_same_test");
 
         /* Compare against copy of itself */
         tmp_sid=H5Scopy(mult_pt_sid);
         CHECK(tmp_sid, FAIL, "H5Scopy");
 
-        check=H5S_select_shape_same_test(mult_pt_sid,tmp_sid);
-        VERIFY(check, TRUE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(mult_pt_sid,tmp_sid);
+        VERIFY(check, TRUE, "H5S__select_shape_same_test");
 
         ret = H5Sclose(tmp_sid);
         CHECK(ret, FAIL, "H5Sclose");
 
         /* Compare against "all" selection */
-        check=H5S_select_shape_same_test(mult_pt_sid,all_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(mult_pt_sid,all_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against "none" selection */
-        check=H5S_select_shape_same_test(mult_pt_sid,none_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(mult_pt_sid,none_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against single point selection */
-        check=H5S_select_shape_same_test(mult_pt_sid,single_pt_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(mult_pt_sid,single_pt_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against "plain" single hyperslab selection */
-        check=H5S_select_shape_same_test(mult_pt_sid,single_hyper_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(mult_pt_sid,single_hyper_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against "all" single hyperslab selection */
-        check=H5S_select_shape_same_test(mult_pt_sid,single_hyper_all_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(mult_pt_sid,single_hyper_all_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against "single point" single hyperslab selection */
-        check=H5S_select_shape_same_test(mult_pt_sid,single_hyper_pt_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(mult_pt_sid,single_hyper_pt_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against regular, strided hyperslab selection */
-        check=H5S_select_shape_same_test(mult_pt_sid,regular_hyper_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(mult_pt_sid,regular_hyper_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against irregular hyperslab selection */
-        check=H5S_select_shape_same_test(mult_pt_sid,irreg_hyper_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(mult_pt_sid,irreg_hyper_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against "no" hyperslab selection */
-        check=H5S_select_shape_same_test(mult_pt_sid,none_hyper_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(mult_pt_sid,none_hyper_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against scalar "all" hyperslab selection */
-        check = H5S_select_shape_same_test(mult_pt_sid, scalar_all_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(mult_pt_sid, scalar_all_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against scalar "none" hyperslab selection */
-        check = H5S_select_shape_same_test(mult_pt_sid, scalar_none_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(mult_pt_sid, scalar_none_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
     /* Compare single "normal" hyperslab selection to all the selections created */
         /* Compare against itself */
-        check=H5S_select_shape_same_test(single_hyper_sid,single_hyper_sid);
-        VERIFY(check, TRUE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(single_hyper_sid,single_hyper_sid);
+        VERIFY(check, TRUE, "H5S__select_shape_same_test");
 
         /* Compare against copy of itself */
         tmp_sid=H5Scopy(single_hyper_sid);
         CHECK(tmp_sid, FAIL, "H5Scopy");
 
-        check=H5S_select_shape_same_test(single_hyper_sid,tmp_sid);
-        VERIFY(check, TRUE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(single_hyper_sid,tmp_sid);
+        VERIFY(check, TRUE, "H5S__select_shape_same_test");
 
         ret = H5Sclose(tmp_sid);
         CHECK(ret, FAIL, "H5Sclose");
 
         /* Compare against "all" selection */
-        check=H5S_select_shape_same_test(single_hyper_sid,all_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(single_hyper_sid,all_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against "none" selection */
-        check=H5S_select_shape_same_test(single_hyper_sid,none_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(single_hyper_sid,none_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against single point selection */
-        check=H5S_select_shape_same_test(single_hyper_sid,single_pt_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(single_hyper_sid,single_pt_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against multiple point selection */
-        check=H5S_select_shape_same_test(single_hyper_sid,mult_pt_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(single_hyper_sid,mult_pt_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against "all" single hyperslab selection */
-        check=H5S_select_shape_same_test(single_hyper_sid,single_hyper_all_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(single_hyper_sid,single_hyper_all_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against "single point" single hyperslab selection */
-        check=H5S_select_shape_same_test(single_hyper_sid,single_hyper_pt_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(single_hyper_sid,single_hyper_pt_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against regular, strided hyperslab selection */
-        check=H5S_select_shape_same_test(single_hyper_sid,regular_hyper_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(single_hyper_sid,regular_hyper_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against irregular hyperslab selection */
-        check=H5S_select_shape_same_test(single_hyper_sid,irreg_hyper_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(single_hyper_sid,irreg_hyper_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against "no" hyperslab selection */
-        check=H5S_select_shape_same_test(single_hyper_sid,none_hyper_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(single_hyper_sid,none_hyper_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
 #ifdef NOT_YET
 /* In theory, these two selections are the same shape, but the
@@ -8394,8 +8509,8 @@ test_shape_same(void)
             } /* end for */
 
             /* Compare against hyperslab selection */
-            check=H5S_select_shape_same_test(single_hyper_sid,tmp_sid);
-            VERIFY(check, TRUE, "H5S_select_shape_same_test");
+            check = H5S__select_shape_same_test(single_hyper_sid,tmp_sid);
+            VERIFY(check, TRUE, "H5S__select_shape_same_test");
 
             ret = H5Sclose(tmp_sid);
             CHECK(ret, FAIL, "H5Sclose");
@@ -8421,70 +8536,70 @@ test_shape_same(void)
             } /* end for */
 
             /* Compare against hyperslab selection */
-            check=H5S_select_shape_same_test(single_hyper_sid,tmp_sid);
-            VERIFY(check, TRUE, "H5S_select_shape_same_test");
+            check = H5S__select_shape_same_test(single_hyper_sid,tmp_sid);
+            VERIFY(check, TRUE, "H5S__select_shape_same_test");
 
             ret = H5Sclose(tmp_sid);
             CHECK(ret, FAIL, "H5Sclose");
 
         /* Compare against scalar "all" hyperslab selection */
-        check = H5S_select_shape_same_test(single_hyper_sid, scalar_all_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(single_hyper_sid, scalar_all_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against scalar "none" hyperslab selection */
-        check = H5S_select_shape_same_test(single_hyper_sid, scalar_none_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(single_hyper_sid, scalar_none_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
     /* Compare single "all" hyperslab selection to all the selections created */
         /* Compare against itself */
-        check=H5S_select_shape_same_test(single_hyper_all_sid,single_hyper_all_sid);
-        VERIFY(check, TRUE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(single_hyper_all_sid,single_hyper_all_sid);
+        VERIFY(check, TRUE, "H5S__select_shape_same_test");
 
         /* Compare against copy of itself */
         tmp_sid=H5Scopy(single_hyper_all_sid);
         CHECK(tmp_sid, FAIL, "H5Scopy");
 
-        check=H5S_select_shape_same_test(single_hyper_all_sid,tmp_sid);
-        VERIFY(check, TRUE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(single_hyper_all_sid,tmp_sid);
+        VERIFY(check, TRUE, "H5S__select_shape_same_test");
 
         ret = H5Sclose(tmp_sid);
         CHECK(ret, FAIL, "H5Sclose");
 
         /* Compare against "all" selection */
-        check=H5S_select_shape_same_test(single_hyper_all_sid,all_sid);
-        VERIFY(check, TRUE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(single_hyper_all_sid,all_sid);
+        VERIFY(check, TRUE, "H5S__select_shape_same_test");
 
         /* Compare against "none" selection */
-        check=H5S_select_shape_same_test(single_hyper_all_sid,none_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(single_hyper_all_sid,none_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against single point selection */
-        check=H5S_select_shape_same_test(single_hyper_all_sid,single_pt_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(single_hyper_all_sid,single_pt_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against multiple point selection */
-        check=H5S_select_shape_same_test(single_hyper_all_sid,mult_pt_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(single_hyper_all_sid,mult_pt_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against "plain" single hyperslab selection */
-        check=H5S_select_shape_same_test(single_hyper_all_sid,single_hyper_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(single_hyper_all_sid,single_hyper_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against "single point" single hyperslab selection */
-        check=H5S_select_shape_same_test(single_hyper_all_sid,single_hyper_pt_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(single_hyper_all_sid,single_hyper_pt_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against regular, strided hyperslab selection */
-        check=H5S_select_shape_same_test(single_hyper_all_sid,regular_hyper_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(single_hyper_all_sid,regular_hyper_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against irregular hyperslab selection */
-        check=H5S_select_shape_same_test(single_hyper_all_sid,irreg_hyper_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(single_hyper_all_sid,irreg_hyper_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against "no" hyperslab selection */
-        check=H5S_select_shape_same_test(single_hyper_all_sid,none_hyper_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(single_hyper_all_sid,none_hyper_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
 #ifdef NOT_YET
 /* In theory, these two selections are the same shape, but the
@@ -8508,8 +8623,8 @@ test_shape_same(void)
             } /* end for */
 
             /* Compare against hyperslab selection */
-            check=H5S_select_shape_same_test(single_hyper_all_sid,tmp_sid);
-            VERIFY(check, TRUE, "H5S_select_shape_same_test");
+            check = H5S__select_shape_same_test(single_hyper_all_sid,tmp_sid);
+            VERIFY(check, TRUE, "H5S__select_shape_same_test");
 
             ret = H5Sclose(tmp_sid);
             CHECK(ret, FAIL, "H5Sclose");
@@ -8535,129 +8650,129 @@ test_shape_same(void)
             } /* end for */
 
             /* Compare against hyperslab selection */
-            check=H5S_select_shape_same_test(single_hyper_all_sid,tmp_sid);
-            VERIFY(check, TRUE, "H5S_select_shape_same_test");
+            check = H5S__select_shape_same_test(single_hyper_all_sid,tmp_sid);
+            VERIFY(check, TRUE, "H5S__select_shape_same_test");
 
             ret = H5Sclose(tmp_sid);
             CHECK(ret, FAIL, "H5Sclose");
 
         /* Compare against scalar "all" hyperslab selection */
-        check = H5S_select_shape_same_test(single_hyper_all_sid, scalar_all_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(single_hyper_all_sid, scalar_all_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against scalar "none" hyperslab selection */
-        check = H5S_select_shape_same_test(single_hyper_all_sid, scalar_none_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(single_hyper_all_sid, scalar_none_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
     /* Compare single "point" hyperslab selection to all the selections created */
         /* Compare against itself */
-        check=H5S_select_shape_same_test(single_hyper_pt_sid,single_hyper_pt_sid);
-        VERIFY(check, TRUE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(single_hyper_pt_sid,single_hyper_pt_sid);
+        VERIFY(check, TRUE, "H5S__select_shape_same_test");
 
         /* Compare against copy of itself */
         tmp_sid=H5Scopy(single_hyper_pt_sid);
         CHECK(tmp_sid, FAIL, "H5Scopy");
 
-        check=H5S_select_shape_same_test(single_hyper_pt_sid,tmp_sid);
-        VERIFY(check, TRUE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(single_hyper_pt_sid,tmp_sid);
+        VERIFY(check, TRUE, "H5S__select_shape_same_test");
 
         ret = H5Sclose(tmp_sid);
         CHECK(ret, FAIL, "H5Sclose");
 
         /* Compare against "all" selection */
-        check=H5S_select_shape_same_test(single_hyper_pt_sid,all_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(single_hyper_pt_sid,all_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against "none" selection */
-        check=H5S_select_shape_same_test(single_hyper_pt_sid,none_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(single_hyper_pt_sid,none_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against single point selection */
-        check=H5S_select_shape_same_test(single_hyper_pt_sid,single_pt_sid);
-        VERIFY(check, TRUE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(single_hyper_pt_sid,single_pt_sid);
+        VERIFY(check, TRUE, "H5S__select_shape_same_test");
 
         /* Compare against multiple point selection */
-        check=H5S_select_shape_same_test(single_hyper_pt_sid,mult_pt_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(single_hyper_pt_sid,mult_pt_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against "plain" single hyperslab selection */
-        check=H5S_select_shape_same_test(single_hyper_pt_sid,single_hyper_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(single_hyper_pt_sid,single_hyper_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against "all" single hyperslab selection */
-        check=H5S_select_shape_same_test(single_hyper_pt_sid,single_hyper_all_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(single_hyper_pt_sid,single_hyper_all_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against regular, strided hyperslab selection */
-        check=H5S_select_shape_same_test(single_hyper_pt_sid,regular_hyper_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(single_hyper_pt_sid,regular_hyper_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against irregular hyperslab selection */
-        check=H5S_select_shape_same_test(single_hyper_pt_sid,irreg_hyper_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(single_hyper_pt_sid,irreg_hyper_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against "no" hyperslab selection */
-        check=H5S_select_shape_same_test(single_hyper_pt_sid,none_hyper_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(single_hyper_pt_sid,none_hyper_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against scalar "all" hyperslab selection */
-        check = H5S_select_shape_same_test(single_hyper_pt_sid, scalar_all_sid);
-        VERIFY(check, TRUE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(single_hyper_pt_sid, scalar_all_sid);
+        VERIFY(check, TRUE, "H5S__select_shape_same_test");
 
         /* Compare against scalar "none" hyperslab selection */
-        check = H5S_select_shape_same_test(single_hyper_pt_sid, scalar_none_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(single_hyper_pt_sid, scalar_none_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
     /* Compare regular, strided hyperslab selection to all the selections created */
         /* Compare against itself */
-        check=H5S_select_shape_same_test(regular_hyper_sid,regular_hyper_sid);
-        VERIFY(check, TRUE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(regular_hyper_sid,regular_hyper_sid);
+        VERIFY(check, TRUE, "H5S__select_shape_same_test");
 
         /* Compare against copy of itself */
         tmp_sid=H5Scopy(regular_hyper_sid);
         CHECK(tmp_sid, FAIL, "H5Scopy");
 
-        check=H5S_select_shape_same_test(regular_hyper_sid,tmp_sid);
-        VERIFY(check, TRUE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(regular_hyper_sid,tmp_sid);
+        VERIFY(check, TRUE, "H5S__select_shape_same_test");
 
         ret = H5Sclose(tmp_sid);
         CHECK(ret, FAIL, "H5Sclose");
 
         /* Compare against "all" selection */
-        check=H5S_select_shape_same_test(regular_hyper_sid,all_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(regular_hyper_sid,all_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against "none" selection */
-        check=H5S_select_shape_same_test(regular_hyper_sid,none_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(regular_hyper_sid,none_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against single point selection */
-        check=H5S_select_shape_same_test(regular_hyper_sid,single_pt_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(regular_hyper_sid,single_pt_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against multiple point selection */
-        check=H5S_select_shape_same_test(regular_hyper_sid,mult_pt_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(regular_hyper_sid,mult_pt_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against "plain" single hyperslab selection */
-        check=H5S_select_shape_same_test(regular_hyper_sid,single_hyper_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(regular_hyper_sid,single_hyper_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against "all" single hyperslab selection */
-        check=H5S_select_shape_same_test(regular_hyper_sid,single_hyper_all_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(regular_hyper_sid,single_hyper_all_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against "single point" single hyperslab selection */
-        check=H5S_select_shape_same_test(regular_hyper_sid,single_hyper_pt_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(regular_hyper_sid,single_hyper_pt_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against irregular hyperslab selection */
-        check=H5S_select_shape_same_test(regular_hyper_sid,irreg_hyper_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(regular_hyper_sid,irreg_hyper_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against "no" hyperslab selection */
-        check=H5S_select_shape_same_test(regular_hyper_sid,none_hyper_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(regular_hyper_sid,none_hyper_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Construct point selection which matches regular, strided hyperslab selection */
             /* Create dataspace for point selection */
@@ -8674,8 +8789,8 @@ test_shape_same(void)
             } /* end for */
 
             /* Compare against hyperslab selection */
-            check=H5S_select_shape_same_test(regular_hyper_sid,tmp_sid);
-            VERIFY(check, TRUE, "H5S_select_shape_same_test");
+            check = H5S__select_shape_same_test(regular_hyper_sid,tmp_sid);
+            VERIFY(check, TRUE, "H5S__select_shape_same_test");
 
             ret = H5Sclose(tmp_sid);
             CHECK(ret, FAIL, "H5Sclose");
@@ -8700,8 +8815,8 @@ test_shape_same(void)
             } /* end for */
 
             /* Compare against hyperslab selection */
-            check=H5S_select_shape_same_test(regular_hyper_sid,tmp_sid);
-            VERIFY(check, TRUE, "H5S_select_shape_same_test");
+            check = H5S__select_shape_same_test(regular_hyper_sid,tmp_sid);
+            VERIFY(check, TRUE, "H5S__select_shape_same_test");
 
             ret = H5Sclose(tmp_sid);
             CHECK(ret, FAIL, "H5Sclose");
@@ -8720,70 +8835,70 @@ test_shape_same(void)
             CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
             /* Compare against hyperslab selection */
-            check=H5S_select_shape_same_test(regular_hyper_sid,tmp_sid);
-            VERIFY(check, TRUE, "H5S_select_shape_same_test");
+            check = H5S__select_shape_same_test(regular_hyper_sid,tmp_sid);
+            VERIFY(check, TRUE, "H5S__select_shape_same_test");
 
             ret = H5Sclose(tmp_sid);
             CHECK(ret, FAIL, "H5Sclose");
 
         /* Compare against scalar "all" hyperslab selection */
-        check = H5S_select_shape_same_test(regular_hyper_sid, scalar_all_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(regular_hyper_sid, scalar_all_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against scalar "none" hyperslab selection */
-        check = H5S_select_shape_same_test(regular_hyper_sid, scalar_none_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(regular_hyper_sid, scalar_none_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
     /* Compare irregular hyperslab selection to all the selections created */
         /* Compare against itself */
-        check=H5S_select_shape_same_test(irreg_hyper_sid,irreg_hyper_sid);
-        VERIFY(check, TRUE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(irreg_hyper_sid,irreg_hyper_sid);
+        VERIFY(check, TRUE, "H5S__select_shape_same_test");
 
         /* Compare against copy of itself */
         tmp_sid=H5Scopy(irreg_hyper_sid);
         CHECK(tmp_sid, FAIL, "H5Scopy");
 
-        check=H5S_select_shape_same_test(irreg_hyper_sid,tmp_sid);
-        VERIFY(check, TRUE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(irreg_hyper_sid,tmp_sid);
+        VERIFY(check, TRUE, "H5S__select_shape_same_test");
 
         ret = H5Sclose(tmp_sid);
         CHECK(ret, FAIL, "H5Sclose");
 
         /* Compare against "all" selection */
-        check=H5S_select_shape_same_test(irreg_hyper_sid,all_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(irreg_hyper_sid,all_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against "none" selection */
-        check=H5S_select_shape_same_test(irreg_hyper_sid,none_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(irreg_hyper_sid,none_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against single point selection */
-        check=H5S_select_shape_same_test(irreg_hyper_sid,single_pt_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(irreg_hyper_sid,single_pt_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against multiple point selection */
-        check=H5S_select_shape_same_test(irreg_hyper_sid,mult_pt_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(irreg_hyper_sid,mult_pt_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against "plain" single hyperslab selection */
-        check=H5S_select_shape_same_test(irreg_hyper_sid,single_hyper_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(irreg_hyper_sid,single_hyper_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against "all" single hyperslab selection */
-        check=H5S_select_shape_same_test(irreg_hyper_sid,single_hyper_all_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(irreg_hyper_sid,single_hyper_all_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against "single point" single hyperslab selection */
-        check=H5S_select_shape_same_test(irreg_hyper_sid,single_hyper_pt_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(irreg_hyper_sid,single_hyper_pt_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against regular, strided hyperslab selection */
-        check=H5S_select_shape_same_test(irreg_hyper_sid,regular_hyper_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(irreg_hyper_sid,regular_hyper_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against "no" hyperslab selection */
-        check=H5S_select_shape_same_test(irreg_hyper_sid,none_hyper_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(irreg_hyper_sid,none_hyper_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Construct hyperslab selection which matches irregular hyperslab selection */
             /* Create dataspace for hyperslab selection */
@@ -8808,141 +8923,141 @@ test_shape_same(void)
             } /* end for */
 
             /* Compare against hyperslab selection */
-            check=H5S_select_shape_same_test(irreg_hyper_sid,tmp_sid);
-            VERIFY(check, TRUE, "H5S_select_shape_same_test");
+            check = H5S__select_shape_same_test(irreg_hyper_sid,tmp_sid);
+            VERIFY(check, TRUE, "H5S__select_shape_same_test");
 
             ret = H5Sclose(tmp_sid);
             CHECK(ret, FAIL, "H5Sclose");
 
         /* Compare against scalar "all" hyperslab selection */
-        check = H5S_select_shape_same_test(irreg_hyper_sid, scalar_all_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(irreg_hyper_sid, scalar_all_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against scalar "none" hyperslab selection */
-        check = H5S_select_shape_same_test(irreg_hyper_sid, scalar_none_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(irreg_hyper_sid, scalar_none_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
 
     /* Compare scalar "all" dataspace with all selections created */
 
         /* Compare against itself */
-        check = H5S_select_shape_same_test(scalar_all_sid, scalar_all_sid);
-        VERIFY(check, TRUE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(scalar_all_sid, scalar_all_sid);
+        VERIFY(check, TRUE, "H5S__select_shape_same_test");
 
         /* Compare against copy of itself */
         tmp_sid = H5Scopy(scalar_all_sid);
         CHECK(tmp_sid, FAIL, "H5Scopy");
 
-        check = H5S_select_shape_same_test(scalar_all_sid, tmp_sid);
-        VERIFY(check, TRUE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(scalar_all_sid, tmp_sid);
+        VERIFY(check, TRUE, "H5S__select_shape_same_test");
 
         ret = H5Sclose(tmp_sid);
         CHECK(ret, FAIL, "H5Sclose");
 
         /* Compare against "all" selection */
-        check = H5S_select_shape_same_test(scalar_all_sid, all_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(scalar_all_sid, all_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against "none" selection */
-        check = H5S_select_shape_same_test(scalar_all_sid, none_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(scalar_all_sid, none_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against single point selection */
-        check = H5S_select_shape_same_test(scalar_all_sid, single_pt_sid);
-        VERIFY(check, TRUE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(scalar_all_sid, single_pt_sid);
+        VERIFY(check, TRUE, "H5S__select_shape_same_test");
 
         /* Compare against multiple point selection */
-        check = H5S_select_shape_same_test(scalar_all_sid, mult_pt_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(scalar_all_sid, mult_pt_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against "plain" single hyperslab selection */
-        check = H5S_select_shape_same_test(scalar_all_sid, single_hyper_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(scalar_all_sid, single_hyper_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against "all" single hyperslab selection */
-        check = H5S_select_shape_same_test(scalar_all_sid, single_hyper_all_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(scalar_all_sid, single_hyper_all_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against "single point" single hyperslab selection */
-        check = H5S_select_shape_same_test(scalar_all_sid, single_hyper_pt_sid);
-        VERIFY(check, TRUE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(scalar_all_sid, single_hyper_pt_sid);
+        VERIFY(check, TRUE, "H5S__select_shape_same_test");
 
         /* Compare against regular, strided hyperslab selection */
-        check = H5S_select_shape_same_test(scalar_all_sid, regular_hyper_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(scalar_all_sid, regular_hyper_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against irregular hyperslab selection */
-        check = H5S_select_shape_same_test(scalar_all_sid, irreg_hyper_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(scalar_all_sid, irreg_hyper_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against "no" hyperslab selection */
-        check = H5S_select_shape_same_test(scalar_all_sid, none_hyper_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(scalar_all_sid, none_hyper_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against scalar "none" hyperslab selection */
-        check = H5S_select_shape_same_test(scalar_all_sid, scalar_none_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(scalar_all_sid, scalar_none_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
 
     /* Compare scalar "none" dataspace with all selections created */
 
         /* Compare against itself */
-        check = H5S_select_shape_same_test(scalar_none_sid, scalar_none_sid);
-        VERIFY(check, TRUE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(scalar_none_sid, scalar_none_sid);
+        VERIFY(check, TRUE, "H5S__select_shape_same_test");
 
         /* Compare against copy of itself */
         tmp_sid = H5Scopy(scalar_none_sid);
         CHECK(tmp_sid, FAIL, "H5Scopy");
 
-        check = H5S_select_shape_same_test(scalar_none_sid, tmp_sid);
-        VERIFY(check, TRUE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(scalar_none_sid, tmp_sid);
+        VERIFY(check, TRUE, "H5S__select_shape_same_test");
 
         ret = H5Sclose(tmp_sid);
         CHECK(ret, FAIL, "H5Sclose");
 
         /* Compare against "all" selection */
-        check = H5S_select_shape_same_test(scalar_none_sid, all_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(scalar_none_sid, all_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against "none" selection */
-        check = H5S_select_shape_same_test(scalar_none_sid, none_sid);
-        VERIFY(check, TRUE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(scalar_none_sid, none_sid);
+        VERIFY(check, TRUE, "H5S__select_shape_same_test");
 
         /* Compare against single point selection */
-        check = H5S_select_shape_same_test(scalar_none_sid, single_pt_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(scalar_none_sid, single_pt_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against multiple point selection */
-        check = H5S_select_shape_same_test(scalar_none_sid, mult_pt_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(scalar_none_sid, mult_pt_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against "plain" single hyperslab selection */
-        check = H5S_select_shape_same_test(scalar_none_sid, single_hyper_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(scalar_none_sid, single_hyper_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against "all" single hyperslab selection */
-        check = H5S_select_shape_same_test(scalar_none_sid, single_hyper_all_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(scalar_none_sid, single_hyper_all_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against "single point" single hyperslab selection */
-        check = H5S_select_shape_same_test(scalar_none_sid, single_hyper_pt_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(scalar_none_sid, single_hyper_pt_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against regular, strided hyperslab selection */
-        check = H5S_select_shape_same_test(scalar_none_sid, regular_hyper_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(scalar_none_sid, regular_hyper_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against irregular hyperslab selection */
-        check = H5S_select_shape_same_test(scalar_none_sid, irreg_hyper_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(scalar_none_sid, irreg_hyper_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
         /* Compare against "no" hyperslab selection */
-        check = H5S_select_shape_same_test(scalar_none_sid, none_hyper_sid);
-        VERIFY(check, TRUE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(scalar_none_sid, none_hyper_sid);
+        VERIFY(check, TRUE, "H5S__select_shape_same_test");
 
         /* Compare against scalar "all" hyperslab selection */
-        check = H5S_select_shape_same_test(scalar_none_sid, scalar_all_sid);
-        VERIFY(check, FALSE, "H5S_select_shape_same_test");
+        check = H5S__select_shape_same_test(scalar_none_sid, scalar_all_sid);
+        VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
 
     /* Close dataspaces */
@@ -8974,27 +9089,27 @@ test_shape_same(void)
 
 /****************************************************************
 **
-**  test_shape_same_dr__smoke_check_1(): 
+**  test_shape_same_dr__smoke_check_1():
 **
-**	Create a square, 2 D data space (10 X 10), and select 
+**	Create a square, 2 D data space (10 X 10), and select
 **	all of it.
 **
-**      Similarly, create nine, 3 D data spaces (10 X 10 X 10), 
-**	and select (10 X 10 X 1) hyper slabs in each, three with 
-**	the slab parallel to the xy plane, three parallel to the 
+**      Similarly, create nine, 3 D data spaces (10 X 10 X 10),
+**	and select (10 X 10 X 1) hyper slabs in each, three with
+**	the slab parallel to the xy plane, three parallel to the
 **	xz plane, and three parallel to the yz plane.
 **
-**	Assuming that z is the fastest changing dimension, 
-**	H5S_select_shape_same() should return TRUE when comparing 
-**	the full 2 D space against any hyperslab parallel to the 
-**	yz plane in the 3 D space, and FALSE when comparing the 
+**	Assuming that z is the fastest changing dimension,
+**	H5S_select_shape_same() should return TRUE when comparing
+**	the full 2 D space against any hyperslab parallel to the
+**	yz plane in the 3 D space, and FALSE when comparing the
 **	full 2 D space against the other two hyper slabs.
 **
-**	Also create two additional 3 D data spaces (10 X 10 X 10), 
-**	and select a (10 X 10 X 2) hyper slab parallel to the yz 
-**	axis in one of them, and two parallel (10 X 10 X 1) hyper 
-**	slabs parallel to the yz axis in the other.  
-**	H5S_select_shape_same() should return FALSE when comparing 
+**	Also create two additional 3 D data spaces (10 X 10 X 10),
+**	and select a (10 X 10 X 2) hyper slab parallel to the yz
+**	axis in one of them, and two parallel (10 X 10 X 1) hyper
+**	slabs parallel to the yz axis in the other.
+**	H5S_select_shape_same() should return FALSE when comparing
 **	each to the 2 D selection.
 **
 ****************************************************************/
@@ -9183,42 +9298,42 @@ test_shape_same_dr__smoke_check_1(void)
     /* setup is done -- run the tests: */
 
     /* Compare against "xy" selection */
-    check = H5S_select_shape_same_test(small_cube_xy_slice_0_sid, small_square_sid);
-    VERIFY(check, FALSE, "H5S_select_shape_same_test");
+    check = H5S__select_shape_same_test(small_cube_xy_slice_0_sid, small_square_sid);
+    VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
-    check = H5S_select_shape_same_test(small_cube_xy_slice_1_sid, small_square_sid);
-    VERIFY(check, FALSE, "H5S_select_shape_same_test");
+    check = H5S__select_shape_same_test(small_cube_xy_slice_1_sid, small_square_sid);
+    VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
-    check = H5S_select_shape_same_test(small_cube_xy_slice_2_sid, small_square_sid);
-    VERIFY(check, FALSE, "H5S_select_shape_same_test");
+    check = H5S__select_shape_same_test(small_cube_xy_slice_2_sid, small_square_sid);
+    VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
 
     /* Compare against "xz" selection */
-    check = H5S_select_shape_same_test(small_cube_xz_slice_0_sid, small_square_sid);
-    VERIFY(check, FALSE, "H5S_select_shape_same_test");
+    check = H5S__select_shape_same_test(small_cube_xz_slice_0_sid, small_square_sid);
+    VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
-    check = H5S_select_shape_same_test(small_cube_xz_slice_1_sid, small_square_sid);
-    VERIFY(check, FALSE, "H5S_select_shape_same_test");
+    check = H5S__select_shape_same_test(small_cube_xz_slice_1_sid, small_square_sid);
+    VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
-    check = H5S_select_shape_same_test(small_cube_xz_slice_2_sid, small_square_sid);
-    VERIFY(check, FALSE, "H5S_select_shape_same_test");
+    check = H5S__select_shape_same_test(small_cube_xz_slice_2_sid, small_square_sid);
+    VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
 
     /* Compare against "yz" selection */
-    check = H5S_select_shape_same_test(small_cube_yz_slice_0_sid, small_square_sid);
-    VERIFY(check, TRUE, "H5S_select_shape_same_test");
+    check = H5S__select_shape_same_test(small_cube_yz_slice_0_sid, small_square_sid);
+    VERIFY(check, TRUE, "H5S__select_shape_same_test");
 
-    check = H5S_select_shape_same_test(small_cube_yz_slice_1_sid, small_square_sid);
-    VERIFY(check, TRUE, "H5S_select_shape_same_test");
+    check = H5S__select_shape_same_test(small_cube_yz_slice_1_sid, small_square_sid);
+    VERIFY(check, TRUE, "H5S__select_shape_same_test");
 
-    check = H5S_select_shape_same_test(small_cube_yz_slice_2_sid, small_square_sid);
-    VERIFY(check, TRUE, "H5S_select_shape_same_test");
+    check = H5S__select_shape_same_test(small_cube_yz_slice_2_sid, small_square_sid);
+    VERIFY(check, TRUE, "H5S__select_shape_same_test");
 
-    check = H5S_select_shape_same_test(small_cube_yz_slice_3_sid, small_square_sid);
-    VERIFY(check, FALSE, "H5S_select_shape_same_test");
+    check = H5S__select_shape_same_test(small_cube_yz_slice_3_sid, small_square_sid);
+    VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
-    check = H5S_select_shape_same_test(small_cube_yz_slice_4_sid, small_square_sid);
-    VERIFY(check, FALSE, "H5S_select_shape_same_test");
+    check = H5S__select_shape_same_test(small_cube_yz_slice_4_sid, small_square_sid);
+    VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
 
     /* Close dataspaces */
@@ -9265,9 +9380,9 @@ test_shape_same_dr__smoke_check_1(void)
 
 /****************************************************************
 **
-**  test_shape_same_dr__smoke_check_2(): 
+**  test_shape_same_dr__smoke_check_2():
 **
-**	Create a square, 2 D data space (10 X 10), and select 
+**	Create a square, 2 D data space (10 X 10), and select
 **	a "checker board" hyper slab as follows:
 **
 **		* * - - * * - - * *
@@ -9281,27 +9396,27 @@ test_shape_same_dr__smoke_check_1(void)
 **		* * - - * * - - * *
 **              * * - - * * - - * *
 **
-**	where asterisks indicate selected elements, and dashes 
+**	where asterisks indicate selected elements, and dashes
 **	indicate unselected elements.
 **
-**	Similarly, create nine, 3 D data spaces (10 X 10 X 10), 
-**	and select similar (10 X 10 X 1) checker board hyper 
-**	slabs in each, three with the slab parallel to  the xy 
-**	plane, three parallel to the xz plane, and three parallel 
+**	Similarly, create nine, 3 D data spaces (10 X 10 X 10),
+**	and select similar (10 X 10 X 1) checker board hyper
+**	slabs in each, three with the slab parallel to  the xy
+**	plane, three parallel to the xz plane, and three parallel
 **	to the yz plane.
 **
-**	Assuming that z is the fastest changing dimension, 
-**	H5S_select_shape_same() should return TRUE when comparing 
-**	the 2 D space checker board selection against a checker 
-**	board hyperslab parallel to the yz plane in the 3 D 
-**	space, and FALSE when comparing the 2 D checkerboard 
-**	selection against two hyper slabs parallel to the xy 
+**	Assuming that z is the fastest changing dimension,
+**	H5S_select_shape_same() should return TRUE when comparing
+**	the 2 D space checker board selection against a checker
+**	board hyperslab parallel to the yz plane in the 3 D
+**	space, and FALSE when comparing the 2 D checkerboard
+**	selection against two hyper slabs parallel to the xy
 **	or xz planes.
 **
-**	Also create an additional 3 D data spaces (10 X 10 X 10), 
-**	and select a checker board parallel with the yz axis, 
-**	save with some squares being on different planes.  
-**	H5S_select_shape_same() should return FALSE when 
+**	Also create an additional 3 D data spaces (10 X 10 X 10),
+**	and select a checker board parallel with the yz axis,
+**	save with some squares being on different planes.
+**	H5S_select_shape_same() should return FALSE when
 **	comparing this selection to the 2 D selection.
 **
 ****************************************************************/
@@ -9584,7 +9699,7 @@ test_shape_same_dr__smoke_check_2(void)
 
     start[0] = 4;
     /* This test gets the right answer, but it fails the shape same
-     * test in an unexpected point.  Bring this up with Quincey, as 
+     * test in an unexpected point.  Bring this up with Quincey, as
      * the oddness looks like it is not related to my code.
      *                                      -- JRM
      */
@@ -9596,39 +9711,39 @@ test_shape_same_dr__smoke_check_2(void)
     /* setup is done -- run the tests: */
 
     /* Compare against "xy" selection */
-    check = H5S_select_shape_same_test(small_cube_xy_slice_0_sid, small_square_sid);
-    VERIFY(check, FALSE, "H5S_select_shape_same_test");
+    check = H5S__select_shape_same_test(small_cube_xy_slice_0_sid, small_square_sid);
+    VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
-    check = H5S_select_shape_same_test(small_cube_xy_slice_1_sid, small_square_sid);
-    VERIFY(check, FALSE, "H5S_select_shape_same_test");
+    check = H5S__select_shape_same_test(small_cube_xy_slice_1_sid, small_square_sid);
+    VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
-    check = H5S_select_shape_same_test(small_cube_xy_slice_2_sid, small_square_sid);
-    VERIFY(check, FALSE, "H5S_select_shape_same_test");
+    check = H5S__select_shape_same_test(small_cube_xy_slice_2_sid, small_square_sid);
+    VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
 
     /* Compare against "xz" selection */
-    check = H5S_select_shape_same_test(small_cube_xz_slice_0_sid, small_square_sid);
-    VERIFY(check, FALSE, "H5S_select_shape_same_test");
+    check = H5S__select_shape_same_test(small_cube_xz_slice_0_sid, small_square_sid);
+    VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
-    check = H5S_select_shape_same_test(small_cube_xz_slice_1_sid, small_square_sid);
-    VERIFY(check, FALSE, "H5S_select_shape_same_test");
+    check = H5S__select_shape_same_test(small_cube_xz_slice_1_sid, small_square_sid);
+    VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
-    check = H5S_select_shape_same_test(small_cube_xz_slice_2_sid, small_square_sid);
-    VERIFY(check, FALSE, "H5S_select_shape_same_test");
+    check = H5S__select_shape_same_test(small_cube_xz_slice_2_sid, small_square_sid);
+    VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
 
     /* Compare against "yz" selection */
-    check = H5S_select_shape_same_test(small_cube_yz_slice_0_sid, small_square_sid);
-    VERIFY(check, TRUE, "H5S_select_shape_same_test");
+    check = H5S__select_shape_same_test(small_cube_yz_slice_0_sid, small_square_sid);
+    VERIFY(check, TRUE, "H5S__select_shape_same_test");
 
-    check = H5S_select_shape_same_test(small_cube_yz_slice_1_sid, small_square_sid);
-    VERIFY(check, TRUE, "H5S_select_shape_same_test");
+    check = H5S__select_shape_same_test(small_cube_yz_slice_1_sid, small_square_sid);
+    VERIFY(check, TRUE, "H5S__select_shape_same_test");
 
-    check = H5S_select_shape_same_test(small_cube_yz_slice_2_sid, small_square_sid);
-    VERIFY(check, TRUE, "H5S_select_shape_same_test");
+    check = H5S__select_shape_same_test(small_cube_yz_slice_2_sid, small_square_sid);
+    VERIFY(check, TRUE, "H5S__select_shape_same_test");
 
-    check = H5S_select_shape_same_test(small_cube_yz_slice_3_sid, small_square_sid);
-    VERIFY(check, FALSE, "H5S_select_shape_same_test");
+    check = H5S__select_shape_same_test(small_cube_yz_slice_3_sid, small_square_sid);
+    VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
 
     /* Close dataspaces */
@@ -9673,9 +9788,9 @@ test_shape_same_dr__smoke_check_2(void)
 
 /****************************************************************
 **
-**  test_shape_same_dr__smoke_check_3(): 
+**  test_shape_same_dr__smoke_check_3():
 **
-**	Create a square, 2 D data space (10 X 10), and select an 
+**	Create a square, 2 D data space (10 X 10), and select an
 **	irregular hyper slab as follows:
 **
 **		y
@@ -9691,22 +9806,22 @@ test_shape_same_dr__smoke_check_2(void)
 **	 	0 - - - - - - - - - -
 **                0 1 2 3 4 5 6 7 8 9 x
 **
-**	where asterisks indicate selected elements, and dashes 
+**	where asterisks indicate selected elements, and dashes
 **	indicate unselected elements.
 **
-**	Similarly, create nine, 3 D data spaces (10 X 10 X 10), 
-**	and select similar irregular hyper slabs in each, three 
-**	with the slab parallel to the xy plane, three parallel 
-**	to the xz plane, and three parallel to the yz plane.  
-**	Further, translate the irregular slab in 2/3rds of the 
+**	Similarly, create nine, 3 D data spaces (10 X 10 X 10),
+**	and select similar irregular hyper slabs in each, three
+**	with the slab parallel to the xy plane, three parallel
+**	to the xz plane, and three parallel to the yz plane.
+**	Further, translate the irregular slab in 2/3rds of the
 **	cases.
 **
-**	Assuming that z is the fastest changing dimension, 
-**	H5S_select_shape_same() should return TRUE when 
-**	comparing the 2 D irregular hyperslab selection 
-**	against the irregular hyperslab selections parallel 
-**	to the yz plane in the 3 D space, and FALSE when 
-**	comparing it against the irregular hyper slabs 
+**	Assuming that z is the fastest changing dimension,
+**	H5S_select_shape_same() should return TRUE when
+**	comparing the 2 D irregular hyperslab selection
+**	against the irregular hyperslab selections parallel
+**	to the yz plane in the 3 D space, and FALSE when
+**	comparing it against the irregular hyper slabs
 **	selections parallel to the xy or xz planes.
 **
 ****************************************************************/
@@ -10119,36 +10234,36 @@ test_shape_same_dr__smoke_check_3(void)
     /* setup is done -- run the tests: */
 
     /* Compare against "xy" selection */
-    check = H5S_select_shape_same_test(small_cube_xy_slice_0_sid, small_square_sid);
-    VERIFY(check, FALSE, "H5S_select_shape_same_test");
+    check = H5S__select_shape_same_test(small_cube_xy_slice_0_sid, small_square_sid);
+    VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
-    check = H5S_select_shape_same_test(small_cube_xy_slice_1_sid, small_square_sid);
-    VERIFY(check, FALSE, "H5S_select_shape_same_test");
+    check = H5S__select_shape_same_test(small_cube_xy_slice_1_sid, small_square_sid);
+    VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
-    check = H5S_select_shape_same_test(small_cube_xy_slice_2_sid, small_square_sid);
-    VERIFY(check, FALSE, "H5S_select_shape_same_test");
+    check = H5S__select_shape_same_test(small_cube_xy_slice_2_sid, small_square_sid);
+    VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
 
     /* Compare against "xz" selection */
-    check = H5S_select_shape_same_test(small_cube_xz_slice_0_sid, small_square_sid);
-    VERIFY(check, FALSE, "H5S_select_shape_same_test");
+    check = H5S__select_shape_same_test(small_cube_xz_slice_0_sid, small_square_sid);
+    VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
-    check = H5S_select_shape_same_test(small_cube_xz_slice_1_sid, small_square_sid);
-    VERIFY(check, FALSE, "H5S_select_shape_same_test");
+    check = H5S__select_shape_same_test(small_cube_xz_slice_1_sid, small_square_sid);
+    VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
-    check = H5S_select_shape_same_test(small_cube_xz_slice_2_sid, small_square_sid);
-    VERIFY(check, FALSE, "H5S_select_shape_same_test");
+    check = H5S__select_shape_same_test(small_cube_xz_slice_2_sid, small_square_sid);
+    VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
 
     /* Compare against "yz" selection */
-    check = H5S_select_shape_same_test(small_cube_yz_slice_0_sid, small_square_sid);
-    VERIFY(check, TRUE, "H5S_select_shape_same_test");
+    check = H5S__select_shape_same_test(small_cube_yz_slice_0_sid, small_square_sid);
+    VERIFY(check, TRUE, "H5S__select_shape_same_test");
 
-    check = H5S_select_shape_same_test(small_cube_yz_slice_1_sid, small_square_sid);
-    VERIFY(check, TRUE, "H5S_select_shape_same_test");
+    check = H5S__select_shape_same_test(small_cube_yz_slice_1_sid, small_square_sid);
+    VERIFY(check, TRUE, "H5S__select_shape_same_test");
 
-    check = H5S_select_shape_same_test(small_cube_yz_slice_2_sid, small_square_sid);
-    VERIFY(check, TRUE, "H5S_select_shape_same_test");
+    check = H5S__select_shape_same_test(small_cube_yz_slice_2_sid, small_square_sid);
+    VERIFY(check, TRUE, "H5S__select_shape_same_test");
 
 
     /* Close dataspaces */
@@ -10190,9 +10305,9 @@ test_shape_same_dr__smoke_check_3(void)
 
 /****************************************************************
 **
-**  test_shape_same_dr__smoke_check_4(): 
+**  test_shape_same_dr__smoke_check_4():
 **
-**	Create a square, 2 D data space (10 X 10), and select 
+**	Create a square, 2 D data space (10 X 10), and select
 **	the entire space.
 **
 **	Similarly, create 3 D and 4 D data spaces:
@@ -10213,7 +10328,7 @@ test_shape_same_dr__smoke_check_3(void)
 **	And select these entire spaces as well.
 **
 **	Compare the 2 D space against all the other spaces
-**	with H5S_select_shape_same().  The (1 X 10 X 10) & 
+**	with H5S_select_shape_same().  The (1 X 10 X 10) &
 **	(1 X 1 X 10 X 10) should return TRUE.  All others
 **	should return FALSE.
 **
@@ -10331,39 +10446,39 @@ test_shape_same_dr__smoke_check_4(void)
 
     /* setup is done -- run the tests: */
 
-    check = H5S_select_shape_same_test(three_d_space_0_sid, square_sid);
-    VERIFY(check, TRUE, "H5S_select_shape_same_test");
+    check = H5S__select_shape_same_test(three_d_space_0_sid, square_sid);
+    VERIFY(check, TRUE, "H5S__select_shape_same_test");
 
-    check = H5S_select_shape_same_test(three_d_space_1_sid, square_sid);
-    VERIFY(check, FALSE, "H5S_select_shape_same_test");
+    check = H5S__select_shape_same_test(three_d_space_1_sid, square_sid);
+    VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
-    check = H5S_select_shape_same_test(three_d_space_2_sid, square_sid);
-    VERIFY(check, FALSE, "H5S_select_shape_same_test");
+    check = H5S__select_shape_same_test(three_d_space_2_sid, square_sid);
+    VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
-    check = H5S_select_shape_same_test(three_d_space_3_sid, square_sid);
-    VERIFY(check, FALSE, "H5S_select_shape_same_test");
+    check = H5S__select_shape_same_test(three_d_space_3_sid, square_sid);
+    VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
 
-    check = H5S_select_shape_same_test(four_d_space_0_sid, square_sid);
-    VERIFY(check, TRUE, "H5S_select_shape_same_test");
+    check = H5S__select_shape_same_test(four_d_space_0_sid, square_sid);
+    VERIFY(check, TRUE, "H5S__select_shape_same_test");
 
-    check = H5S_select_shape_same_test(four_d_space_1_sid, square_sid);
-    VERIFY(check, FALSE, "H5S_select_shape_same_test");
+    check = H5S__select_shape_same_test(four_d_space_1_sid, square_sid);
+    VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
-    check = H5S_select_shape_same_test(four_d_space_2_sid, square_sid);
-    VERIFY(check, FALSE, "H5S_select_shape_same_test");
+    check = H5S__select_shape_same_test(four_d_space_2_sid, square_sid);
+    VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
-    check = H5S_select_shape_same_test(four_d_space_3_sid, square_sid);
-    VERIFY(check, FALSE, "H5S_select_shape_same_test");
+    check = H5S__select_shape_same_test(four_d_space_3_sid, square_sid);
+    VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
-    check = H5S_select_shape_same_test(four_d_space_4_sid, square_sid);
-    VERIFY(check, FALSE, "H5S_select_shape_same_test");
+    check = H5S__select_shape_same_test(four_d_space_4_sid, square_sid);
+    VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
-    check = H5S_select_shape_same_test(four_d_space_5_sid, square_sid);
-    VERIFY(check, FALSE, "H5S_select_shape_same_test");
+    check = H5S__select_shape_same_test(four_d_space_5_sid, square_sid);
+    VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
-    check = H5S_select_shape_same_test(four_d_space_6_sid, square_sid);
-    VERIFY(check, FALSE, "H5S_select_shape_same_test");
+    check = H5S__select_shape_same_test(four_d_space_6_sid, square_sid);
+    VERIFY(check, FALSE, "H5S__select_shape_same_test");
 
 
     /* Close dataspaces */
@@ -10410,12 +10525,12 @@ test_shape_same_dr__smoke_check_4(void)
 /****************************************************************
 **
 **  test_shape_same_dr__full_space_vs_slice(): Tests selection
-**	of a full n-cube data space vs an n-dimensional slice of 
-**	of an m-cube (m > n) in a call to H5S_select_shape_same().  
-**	Note that this test does not require the n-cube and the 
+**	of a full n-cube data space vs an n-dimensional slice of
+**	of an m-cube (m > n) in a call to H5S_select_shape_same().
+**	Note that this test does not require the n-cube and the
 **	n-dimensional slice to have the same rank (although
-**	H5S_select_shape_same() should always return FALSE if 
-**	they don't). 
+**	H5S_select_shape_same() should always return FALSE if
+**	they don't).
 **
 **	Per Quincey's suggestion, only test up to 5 dimensional
 **	spaces.
@@ -10431,7 +10546,7 @@ test_shape_same_dr__full_space_vs_slice(int test_num,
                                         hbool_t expected_result)
 {
     char	test_desc_0[128];
-    char	test_desc_1[128];
+    char	test_desc_1[256];
     int         i;
     hid_t	n_cube_0_sid;  /* the fully selected hyper cube */
     hid_t	n_cube_1_sid;  /* the hyper cube in which a slice is selected */
@@ -10452,16 +10567,16 @@ test_shape_same_dr__full_space_vs_slice(int test_num,
     HDassert( large_rank <= SS_DR_MAX_RANK );
     HDassert( 0 <= offset );
     HDassert( offset < large_rank );
-    HDassert( edge_size > 0 ); 
-    HDassert( edge_size <= 1000 ); 
+    HDassert( edge_size > 0 );
+    HDassert( edge_size <= 1000 );
 
-    sprintf(test_desc_0, 
-              "\tn-cube slice through m-cube (n <= m) test %d.\n", 
+    sprintf(test_desc_0,
+              "\tn-cube slice through m-cube (n <= m) test %d.\n",
               test_num);
     MESSAGE(7, (test_desc_0));
 
     /* This statement must be updated if SS_DR_MAX_RANK is changed */
-    sprintf(test_desc_1, 
+    sprintf(test_desc_1,
               "\t\tranks: %d/%d offset: %d dim_selected: %d/%d/%d/%d/%d.\n",
               small_rank, large_rank, offset,
               (int)dim_selected[0],
@@ -10526,7 +10641,7 @@ test_shape_same_dr__full_space_vs_slice(int test_num,
 
 
     /* setup is done -- run the test: */
-    check = H5S_select_shape_same_test(n_cube_0_sid, n_cube_1_sid);
+    check = H5S__select_shape_same_test(n_cube_0_sid, n_cube_1_sid);
     VERIFY(check, expected_result, "test_shape_same_dr__full_space_vs_slice");
 
 
@@ -10542,27 +10657,27 @@ test_shape_same_dr__full_space_vs_slice(int test_num,
 
 /****************************************************************
 **
-**  test_shape_same_dr__run_full_space_vs_slice_tests(): 
+**  test_shape_same_dr__run_full_space_vs_slice_tests():
 **
 **	Run the est_shape_same_dr__full_space_vs_slice() test
 **	over a variety of ranks and offsets.
 **
-**	At present, we test H5S_select_shape_same() with 
+**	At present, we test H5S_select_shape_same() with
 **	fully selected 1, 2, 3, and 4 cubes as one parameter, and
 **	1, 2, 3, and 4 dimensional slices through a n-cube of rank
-**	no more than 5 (and at least the rank of the slice).  
-**	 We stop at rank 5, as Quincey suggested that it would be 
+**	no more than 5 (and at least the rank of the slice).
+**	 We stop at rank 5, as Quincey suggested that it would be
 **	sufficient.
 **
-**	All the n-cubes will have lengths of the same size, so 
+**	All the n-cubes will have lengths of the same size, so
 **	H5S_select_shape_same() should return true iff:
 **
-**	1) the rank for the fully selected n cube equals the 
+**	1) the rank for the fully selected n cube equals the
 **         number of dimensions selected in the slice through the
 **         m-cube (m >= n).
 **
 **	2) The dimensions selected in the slice through the m-cube
-**	   are the dimesnions with the most quickly changing 
+**	   are the dimesnions with the most quickly changing
 **	   indices.
 **
 ****************************************************************/
@@ -10668,7 +10783,7 @@ test_shape_same_dr__run_full_space_vs_slice_tests(void)
                                     dim_selected,
                                     expected_result
                                 );
-                                    
+
                                 z++;
                             } while((z < 2) && (large_rank >= 1));
 
@@ -10691,15 +10806,15 @@ test_shape_same_dr__run_full_space_vs_slice_tests(void)
 
 /****************************************************************
 **
-**  test_shape_same_dr__checkerboard(): Tests selection of a 
-**	"checker board" subset of a full n-cube data space vs 
+**  test_shape_same_dr__checkerboard(): Tests selection of a
+**	"checker board" subset of a full n-cube data space vs
 ** 	a "checker board" n-dimensional slice of an m-cube (m > n).
-**	in a call to H5S_select_shape_same().  
+**	in a call to H5S_select_shape_same().
 **
-**	Note that this test does not require the n-cube and the 
+**	Note that this test does not require the n-cube and the
 **	n-dimensional slice to have the same rank (although
-**	H5S_select_shape_same() should always return FALSE if 
-**	they don't). 
+**	H5S_select_shape_same() should always return FALSE if
+**	they don't).
 **
 **	Per Quincey's suggestion, only test up to 5 dimensional
 **	spaces.
@@ -10716,14 +10831,14 @@ test_shape_same_dr__checkerboard(int test_num,
                                  hbool_t expected_result)
 {
     char	test_desc_0[128];
-    char	test_desc_1[128];
+    char	test_desc_1[256];
     int         i;
     int		dims_selected = 0;
-    hid_t	n_cube_0_sid;  /* the checker board selected 
-                                * hyper cube 
+    hid_t	n_cube_0_sid;  /* the checker board selected
+                                * hyper cube
                                 */
-    hid_t	n_cube_1_sid;  /* the hyper cube in which a 
-                                * checkerboard slice is selected 
+    hid_t	n_cube_1_sid;  /* the hyper cube in which a
+                                * checkerboard slice is selected
                                 */
     hsize_t	dims[SS_DR_MAX_RANK];
     hsize_t	base_start[2];
@@ -10745,8 +10860,8 @@ test_shape_same_dr__checkerboard(int test_num,
     HDassert( small_rank <= large_rank );
     HDassert( large_rank <= SS_DR_MAX_RANK );
     HDassert( 0 < checker_size );
-    HDassert( checker_size <= edge_size ); 
-    HDassert( edge_size <= 1000 ); 
+    HDassert( checker_size <= edge_size );
+    HDassert( edge_size <= 1000 );
     HDassert( 0 <= offset );
     HDassert( offset < (int)edge_size );
 
@@ -10757,13 +10872,13 @@ test_shape_same_dr__checkerboard(int test_num,
     HDassert( dims_selected >= 0 );
     HDassert( dims_selected <= large_rank );
 
-    sprintf(test_desc_0, 
-              "\tcheckerboard n-cube slice through m-cube (n <= m) test %d.\n", 
+    sprintf(test_desc_0,
+              "\tcheckerboard n-cube slice through m-cube (n <= m) test %d.\n",
               test_num);
     MESSAGE(7, (test_desc_0));
 
     /* This statement must be updated if SS_DR_MAX_RANK is changed */
-    sprintf(test_desc_1, 
+    sprintf(test_desc_1,
               "\tranks: %d/%d edge/chkr size: %d/%d offset: %d dim_selected: %d/%d/%d/%d/%d:%d.\n",
               small_rank, large_rank,
               (int)edge_size, (int)checker_size,
@@ -10803,17 +10918,17 @@ test_shape_same_dr__checkerboard(int test_num,
      *		* * - - * * - - * *
      *          * * - - * * - - * *
      *
-     * In both cases, asterisks indicate selected elements, 
+     * In both cases, asterisks indicate selected elements,
      * and dashes indicate unselected elements.
      *
      * 3-D and 4-D ascii art is somewhat painful, so I'll
      * leave those selections to your imagination. :-)
      *
      * Note, that since the edge_size and checker_size are
-     * parameters that are passed in, the selection need 
+     * parameters that are passed in, the selection need
      * not look exactly like the selection shown above.
-     * At present, the function allows checker sizes that 
-     * are not even divisors of the edge size -- thus 
+     * At present, the function allows checker sizes that
+     * are not even divisors of the edge size -- thus
      * something like the following is also possible:
      *
      *		* * * - - - * * * -
@@ -10827,14 +10942,14 @@ test_shape_same_dr__checkerboard(int test_num,
      *		* * * - - - * * * -
      *          - - - * * * - - - *
      *
-     * As the above pattern can't be selected in one 
+     * As the above pattern can't be selected in one
      * call to H5Sselect_hyperslab(), and since the
      * values in the start, stride, count, and block
-     * arrays will be repeated over all entries in 
+     * arrays will be repeated over all entries in
      * the selected space case, and over all selected
      * dimensions in the selected hyperslab case, we
-     * compute these values first and store them in 
-     * in the base_start, base_stride, base_count, 
+     * compute these values first and store them in
+     * in the base_start, base_stride, base_count,
      * and base_block arrays.
      */
 
@@ -10844,9 +10959,9 @@ test_shape_same_dr__checkerboard(int test_num,
     base_stride[0] = 2 * checker_size;
     base_stride[1] = 2 * checker_size;
 
-    /* Note that the following computation depends on the C99 
-     * requirement that integer division discard any fraction 
-     * (truncation towards zero) to function correctly. As we 
+    /* Note that the following computation depends on the C99
+     * requirement that integer division discard any fraction
+     * (truncation towards zero) to function correctly. As we
      * now require C99, this shouldn't be a problem, but noting
      * it may save us some pain if we are ever obliged to support
      * pre-C99 compilers again.
@@ -10863,7 +10978,7 @@ test_shape_same_dr__checkerboard(int test_num,
     base_block[0] = checker_size;
     base_block[1] = checker_size;
 
-    /* now setup start, stride, count, and block arrays for 
+    /* now setup start, stride, count, and block arrays for
      * the first call to H5Sselect_hyperslab().
      */
     for(i = 0; i < SS_DR_MAX_RANK; i++) {
@@ -10877,10 +10992,10 @@ test_shape_same_dr__checkerboard(int test_num,
                               start, stride, count, block);
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
-    /* if small_rank == 1, or if edge_size == checker_size, we 
+    /* if small_rank == 1, or if edge_size == checker_size, we
      * are done, as either there is no added dimension in which
      * to place offset selected "checkers".
-     * 
+     *
      * Otherwise, set up start, stride, count and block, and
      * make the additional selection.
      */
@@ -10900,7 +11015,7 @@ test_shape_same_dr__checkerboard(int test_num,
 
     /* Wierdness alert:
      *
-     * Some how, it seems that selections can extend beyond the 
+     * Some how, it seems that selections can extend beyond the
      * boundaries of the target data space -- hence the following
      * code to manually clip the selection back to the data space
      * proper.
@@ -10923,8 +11038,8 @@ test_shape_same_dr__checkerboard(int test_num,
 
 
     /* Now select the checkerboard selection in the (possibly larger) n-cube.
-     * 
-     * Since we have already calculated the base start, stride, count, 
+     *
+     * Since we have already calculated the base start, stride, count,
      * and block, re-use the values in setting up start, stride, count,
      * and block.
      */
@@ -10968,10 +11083,10 @@ test_shape_same_dr__checkerboard(int test_num,
                               start_ptr, stride_ptr, count_ptr, block_ptr);
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
-    /* As before, if the number of dimensions selected is less than or 
-     * equal to 1, or if edge_size == checker_size, we are done, as 
-     * either there is no added dimension in which to place offset selected 
-     * "checkers", or the hyperslab is completely occupied by one 
+    /* As before, if the number of dimensions selected is less than or
+     * equal to 1, or if edge_size == checker_size, we are done, as
+     * either there is no added dimension in which to place offset selected
+     * "checkers", or the hyperslab is completely occupied by one
      * "checker".
      *
      * Otherwise, set up start, stride, count and block, and
@@ -11001,7 +11116,7 @@ test_shape_same_dr__checkerboard(int test_num,
 
     /* Wierdness alert:
      *
-     * Again, it seems that selections can extend beyond the 
+     * Again, it seems that selections can extend beyond the
      * boundaries of the target data space -- hence the following
      * code to manually clip the selection back to the data space
      * proper.
@@ -11018,7 +11133,7 @@ test_shape_same_dr__checkerboard(int test_num,
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
     /* setup is done -- run the test: */
-    check = H5S_select_shape_same_test(n_cube_0_sid, n_cube_1_sid);
+    check = H5S__select_shape_same_test(n_cube_0_sid, n_cube_1_sid);
     VERIFY(check, expected_result, "test_shape_same_dr__checkerboard");
 
 
@@ -11034,23 +11149,23 @@ test_shape_same_dr__checkerboard(int test_num,
 
 /****************************************************************
 **
-**  test_shape_same_dr__run_checkerboard_tests(): 
+**  test_shape_same_dr__run_checkerboard_tests():
 **
-**	In this set of tests, we test H5S_select_shape_same() 
-**      with a "checkerboard" selection of 1, 2, 3, and 4 cubes as 
-**      one parameter, and 1, 2, 3, and 4 dimensional checkerboard 
-**      slices through a n-cube of rank no more than 5 (and at 
-**      least the rank of the slice).  
+**	In this set of tests, we test H5S_select_shape_same()
+**      with a "checkerboard" selection of 1, 2, 3, and 4 cubes as
+**      one parameter, and 1, 2, 3, and 4 dimensional checkerboard
+**      slices through a n-cube of rank no more than 5 (and at
+**      least the rank of the slice).
 **
-**      All the n-cubes will have lengths of the same size, so 
+**      All the n-cubes will have lengths of the same size, so
 **      H5S_select_shape_same() should return true iff:
 **
-**      1) the rank of the n cube equals the number of dimensions 
-**         selected in the checker board slice through the m-cube 
+**      1) the rank of the n cube equals the number of dimensions
+**         selected in the checker board slice through the m-cube
 **         (m >= n).
 **
-**      2) The dimensions selected in the checkerboard slice 
-**         through the m-cube are the dimensions with the most 
+**      2) The dimensions selected in the checkerboard slice
+**         through the m-cube are the dimensions with the most
 **         quickly changing indices.
 **
 ****************************************************************/
@@ -11101,7 +11216,7 @@ test_shape_same_dr__run_checkerboard_tests(void)
                                     dim_selected[4] = FALSE;
                                 else
                                     dim_selected[4] = TRUE;
-                                
+
 
                                 /* compute the expected result: */
                                 i = 0;
@@ -11305,17 +11420,17 @@ test_shape_same_dr__run_checkerboard_tests(void)
 
 /****************************************************************
 **
-**  test_shape_same_dr__irregular(): 
+**  test_shape_same_dr__irregular():
 **
-**	Tests selection of an "irregular" subset of a full 
+**	Tests selection of an "irregular" subset of a full
 **      n-cube data space vs an identical "irregular" subset
 **	of an n-dimensional slice of an m-cube (m > n).
-**	in a call to H5S_select_shape_same().  
+**	in a call to H5S_select_shape_same().
 **
-**	Note that this test does not require the n-cube and the 
+**	Note that this test does not require the n-cube and the
 **	n-dimensional slice to have the same rank (although
-**	H5S_select_shape_same() should always return FALSE if 
-**	they don't). 
+**	H5S_select_shape_same() should always return FALSE if
+**	they don't).
 **
 ****************************************************************/
 static void
@@ -11328,7 +11443,7 @@ test_shape_same_dr__irregular(int test_num,
                               hbool_t expected_result)
 {
     char	test_desc_0[128];
-    char	test_desc_1[128];
+    char	test_desc_1[256];
     int		edge_size = 10;
     int         i;
     int         j;
@@ -11337,7 +11452,7 @@ test_shape_same_dr__irregular(int test_num,
     hid_t	n_cube_0_sid;  /* the hyper cube containing
                                 * an irregular selection
                                 */
-    hid_t	n_cube_1_sid;  /* the hyper cube in which a 
+    hid_t	n_cube_1_sid;  /* the hyper cube in which a
                                 * slice contains an irregular
                                 * selection.
                                 */
@@ -11373,7 +11488,7 @@ test_shape_same_dr__irregular(int test_num,
     hsize_t     clip_block[SS_DR_MAX_RANK]  = {10, 10, 10, 10, 10};
 
 
-    hsize_t	*(starts[SS_DR_MAX_RANK]) = 
+    hsize_t	*(starts[SS_DR_MAX_RANK]) =
                 	{start_0, start_1, start_2, start_3, start_4};
     hsize_t     *(strides[SS_DR_MAX_RANK]) =
                 	{stride_0, stride_1, stride_2, stride_3, stride_4};
@@ -11396,8 +11511,8 @@ test_shape_same_dr__irregular(int test_num,
     HDassert( 0 < small_rank );
     HDassert( small_rank <= large_rank );
     HDassert( large_rank <= SS_DR_MAX_RANK );
-    HDassert( 9 <= edge_size ); 
-    HDassert( edge_size <= 1000 ); 
+    HDassert( 9 <= edge_size );
+    HDassert( edge_size <= 1000 );
     HDassert( 0 <= slice_offset );
     HDassert( slice_offset < edge_size );
     HDassert( -2 <= pattern_offset );
@@ -11410,16 +11525,16 @@ test_shape_same_dr__irregular(int test_num,
     HDassert( dims_selected >= 0 );
     HDassert( dims_selected <= large_rank );
 
-    sprintf(test_desc_0, 
-              "\tirregular sub set of n-cube slice through m-cube (n <= m) test %d.\n", 
+    sprintf(test_desc_0,
+              "\tirregular sub set of n-cube slice through m-cube (n <= m) test %d.\n",
               test_num);
     MESSAGE(7, (test_desc_0));
 
     /* This statement must be updated if SS_DR_MAX_RANK is changed */
-    sprintf(test_desc_1, 
+    sprintf(test_desc_1,
               "\tranks: %d/%d edge: %d s/p offset: %d/%d dim_selected: %d/%d/%d/%d/%d:%d.\n",
               small_rank, large_rank,
-              edge_size, 
+              edge_size,
               slice_offset, pattern_offset,
               (int)dim_selected[0],
               (int)dim_selected[1],
@@ -11438,11 +11553,11 @@ test_shape_same_dr__irregular(int test_num,
     CHECK(n_cube_0_sid, FAIL, "H5Screate_simple");
 
     /* Select an "irregular" pattern in the small n-cube.  This
-     * pattern can be though of a set of four 3 x 2 x 2 X 2 
-     * four dimensional prisims, each parallel to one of the 
-     * axies and none of them intersecting with the other. 
+     * pattern can be though of a set of four 3 x 2 x 2 X 2
+     * four dimensional prisims, each parallel to one of the
+     * axies and none of them intersecting with the other.
      *
-     * In the lesser dimensional cases, this 4D pattern is 
+     * In the lesser dimensional cases, this 4D pattern is
      * projected onto the lower dimensional space.
      *
      * In the 1-D case, the projection of the pattern looks
@@ -11467,12 +11582,12 @@ test_shape_same_dr__irregular(int test_num,
      *	 	0 - - - - - - - - - -
      *            0 1 2 3 4 5 6 7 8 9 x
      *
-     * In both cases, asterisks indicate selected elements, 
+     * In both cases, asterisks indicate selected elements,
      * and dashes indicate unselected elements.
      *
      * Note that is this case, since the edge size is fixed,
-     * the pattern does not change.  However, we do use the 
-     * displacement parameter to allow it to be moved around 
+     * the pattern does not change.  However, we do use the
+     * displacement parameter to allow it to be moved around
      * within the n-cube or hyper slab.
      */
 
@@ -11487,7 +11602,7 @@ test_shape_same_dr__irregular(int test_num,
         CHECK(ret, FAIL, "H5Sselect_hyperslab");
     } /* end for */
 
-    /* finally, clip the selection to ensure that it lies fully 
+    /* finally, clip the selection to ensure that it lies fully
      * within the n-cube.
      */
     ret = H5Sselect_hyperslab(n_cube_0_sid, H5S_SELECT_AND,
@@ -11526,8 +11641,8 @@ test_shape_same_dr__irregular(int test_num,
 
 
     /* Now select the irregular selection in the (possibly larger) n-cube.
-     * 
-     * Basic idea is to project the pattern used in the smaller n-cube 
+     *
+     * Basic idea is to project the pattern used in the smaller n-cube
      * onto the dimensions selected in the larger n-cube, with the displacement
      * specified.
      */
@@ -11564,7 +11679,7 @@ test_shape_same_dr__irregular(int test_num,
 
 
     /* setup is done -- run the test: */
-    check = H5S_select_shape_same_test(n_cube_0_sid, n_cube_1_sid);
+    check = H5S__select_shape_same_test(n_cube_0_sid, n_cube_1_sid);
     VERIFY(check, expected_result, "test_shape_same_dr__checkerboard");
 
 
@@ -11580,25 +11695,25 @@ test_shape_same_dr__irregular(int test_num,
 
 /****************************************************************
 **
-**  test_shape_same_dr__run_irregular_tests(): 
+**  test_shape_same_dr__run_irregular_tests():
 **
-**	In this set of tests, we test H5S_select_shape_same() 
-**      with an "irregular" subselection of 1, 2, 3, and 4 cubes as 
-**      one parameter, and irregular subselections of 1, 2, 3, 
-**      and 4 dimensional slices through a n-cube of rank no more 
-**      than 5 (and at least the rank of the slice) as the other.  
-**      Note that the "irregular" selection may be offset between 
+**	In this set of tests, we test H5S_select_shape_same()
+**      with an "irregular" subselection of 1, 2, 3, and 4 cubes as
+**      one parameter, and irregular subselections of 1, 2, 3,
+**      and 4 dimensional slices through a n-cube of rank no more
+**      than 5 (and at least the rank of the slice) as the other.
+**      Note that the "irregular" selection may be offset between
 **	the n-cube and the slice.
 **
 **      All the irregular selections will be identical (modulo rank)
 **      so H5S_select_shape_same() should return true iff:
 **
-**      1) the rank of the n cube equals the number of dimensions 
-**         selected in the irregular slice through the m-cube 
+**      1) the rank of the n cube equals the number of dimensions
+**         selected in the irregular slice through the m-cube
 **         (m >= n).
 **
-**      2) The dimensions selected in the irregular slice 
-**         through the m-cube are the dimensions with the most 
+**      2) The dimensions selected in the irregular slice
+**         through the m-cube are the dimensions with the most
 **         quickly changing indices.
 **
 ****************************************************************/
@@ -11649,7 +11764,7 @@ test_shape_same_dr__run_irregular_tests(void)
                                     dim_selected[4] = FALSE;
                                 else
                                     dim_selected[4] = TRUE;
-                                
+
 
                                 /* compute the expected result: */
                                 i = 0;
@@ -11795,8 +11910,8 @@ test_shape_same_dr__run_irregular_tests(void)
 
 /****************************************************************
 **
-**  test_shape_same_dr(): Tests selections on dataspace with 
-**      different ranks, to verify that "shape same" routine 
+**  test_shape_same_dr(): Tests selections on dataspace with
+**      different ranks, to verify that "shape same" routine
 **	is now handling this case correctly.
 **
 ****************************************************************/
@@ -11843,7 +11958,8 @@ test_space_rebuild(void)
    hid_t sid_irreg1,sid_irreg2,sid_irreg3,sid_irreg4,sid_irreg5;
 
    /* rebuild status state */
-   htri_t rebuild_stat,rebuild_check;
+   H5S_diminfo_valid_t rebuild_stat1,rebuild_stat2;
+   htri_t rebuild_check;
    herr_t ret;
 
    /* dimensions of rank 1 to rank 5 */
@@ -11912,19 +12028,23 @@ test_space_rebuild(void)
     ret = H5Sselect_hyperslab(sid_reg1,H5S_SELECT_OR,start1,stride1,count1,block1);
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
-    rebuild_stat = FALSE;
-    rebuild_stat = H5S_get_rebuild_status_test(sid_reg1);
-    assert(rebuild_stat!=FAIL);
-    /* In this case, rebuild_stat should be TRUE. */
-    if(!rebuild_stat){
+    ret = H5S__get_rebuild_status_test(sid_reg1,&rebuild_stat1,&rebuild_stat2);
+    CHECK(ret, FAIL, "H5S__get_rebuild_status_test");
+    /* In this case, rebuild_stat1 and rebuild_stat2 should be
+     * H5S_DIMINFO_VALID_YES. */
+    if(rebuild_stat1 != H5S_DIMINFO_VALID_YES) {
        ret = FAIL;
        CHECK(ret,FAIL,"H5S_hyper_rebuild");
-    }
-    else {
+    } /* end if */
+    if(rebuild_stat2 != H5S_DIMINFO_VALID_YES) {
+       ret = FAIL;
+       CHECK(ret,FAIL,"H5S_hyper_rebuild");
+    } /* end if */
+    if(ret != FAIL) {
        /* In this case, rebuild_check should be TRUE. */
-       rebuild_check = H5S_select_shape_same_test(sid_reg1,sid_reg_ori1);
+       rebuild_check = H5S__select_shape_same_test(sid_reg1,sid_reg_ori1);
        CHECK(rebuild_check,FALSE,"H5S_hyper_rebuild");
-    }
+    } /* end if */
 
     /* For irregular hyperslab */
     sid_irreg1     = H5Screate_simple(SPACERE1_RANK,dims1,NULL);
@@ -11944,14 +12064,19 @@ test_space_rebuild(void)
     ret = H5Sselect_hyperslab(sid_irreg1,H5S_SELECT_OR,start1,stride1,count1,block1);
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
-    rebuild_stat = TRUE;
-    rebuild_stat = H5S_get_rebuild_status_test(sid_irreg1);
-    assert(rebuild_stat!=FAIL);
-    /* In this case, rebuild_stat should be FALSE. */
-    if(rebuild_stat){
+    ret = H5S__get_rebuild_status_test(sid_irreg1,&rebuild_stat1,&rebuild_stat2);
+    CHECK(ret, FAIL, "H5S__get_rebuild_status_test");
+    /* In this case, rebuild_stat1 should be H5S_DIMINFO_VALID_NO and
+     * rebuild_stat2 should be H5S_DIMINFO_VALID_IMPOSSIBLE. */
+    if(rebuild_stat1 != H5S_DIMINFO_VALID_NO) {
        ret = FAIL;
        CHECK(ret,FAIL,"H5S_hyper_rebuild");
-    }/* No need to do shape comparision */
+    } /* end if */
+    if(rebuild_stat2 != H5S_DIMINFO_VALID_IMPOSSIBLE) {
+       ret = FAIL;
+       CHECK(ret,FAIL,"H5S_hyper_rebuild");
+    } /* end if */
+    /* No need to do shape comparision */
 
 
     MESSAGE(7, ("Testing functionality to rebuild 2-D hyperslab selection\n"));
@@ -11991,19 +12116,23 @@ test_space_rebuild(void)
     ret = H5Sselect_hyperslab(sid_reg2,H5S_SELECT_OR,start2,stride2,count2,block2);
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
-    rebuild_stat = FALSE;
-    rebuild_stat = H5S_get_rebuild_status_test(sid_reg2);
-    assert(rebuild_stat!=FAIL);
-    /* In this case, rebuild_stat should be TRUE. */
-    if(!rebuild_stat){
+    ret = H5S__get_rebuild_status_test(sid_reg2,&rebuild_stat1,&rebuild_stat2);
+    CHECK(ret, FAIL, "H5S__get_rebuild_status_test");
+    /* In this case, rebuild_stat1 and rebuild_stat2 should be
+     * H5S_DIMINFO_VALID_YES. */
+    if(rebuild_stat1 != H5S_DIMINFO_VALID_YES) {
        ret = FAIL;
        CHECK(ret,FAIL,"H5S_hyper_rebuild");
-    }
-    else {
+    } /* end if */
+    if(rebuild_stat2 != H5S_DIMINFO_VALID_YES) {
+       ret = FAIL;
+       CHECK(ret,FAIL,"H5S_hyper_rebuild");
+    } /* end if */
+    if(ret != FAIL) {
        /* In this case, rebuild_check should be TRUE. */
-       rebuild_check = H5S_select_shape_same_test(sid_reg2,sid_reg_ori2);
+       rebuild_check = H5S__select_shape_same_test(sid_reg2,sid_reg_ori2);
        CHECK(rebuild_check,FALSE,"H5S_hyper_rebuild");
-    }
+    } /* end if */
 
     /* 2-D irregular case */
     sid_irreg2     = H5Screate_simple(SPACERE2_RANK,dims2,NULL);
@@ -12028,14 +12157,19 @@ test_space_rebuild(void)
     ret = H5Sselect_hyperslab(sid_irreg2,H5S_SELECT_OR,start2,stride2,count2,block2);
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
-    rebuild_stat = TRUE;
-    rebuild_stat = H5S_get_rebuild_status_test(sid_irreg2);
-    assert(rebuild_stat!=FAIL);
-    /* In this case, rebuild_stat should be FALSE. */
-    if(rebuild_stat){
+    ret = H5S__get_rebuild_status_test(sid_irreg2,&rebuild_stat1,&rebuild_stat2);
+    CHECK(ret, FAIL, "H5S__get_rebuild_status_test");
+    /* In this case, rebuild_stat1 should be H5S_DIMINFO_VALID_NO and
+     * rebuild_stat2 should be H5S_DIMINFO_VALID_IMPOSSIBLE. */
+    if(rebuild_stat1 != H5S_DIMINFO_VALID_NO) {
        ret = FAIL;
        CHECK(ret,FAIL,"H5S_hyper_rebuild");
-    }/* No need to do shape comparision */
+    } /* end if */
+    if(rebuild_stat2 != H5S_DIMINFO_VALID_IMPOSSIBLE) {
+       ret = FAIL;
+       CHECK(ret,FAIL,"H5S_hyper_rebuild");
+    } /* end if */
+    /* No need to do shape comparision */
 
     MESSAGE(7, ("Testing functionality to rebuild 3-D hyperslab selection\n"));
 
@@ -12080,20 +12214,23 @@ test_space_rebuild(void)
     ret = H5Sselect_hyperslab(sid_reg3,H5S_SELECT_OR,start3,stride3,count3,block3);
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
-    rebuild_stat = FALSE;
-    rebuild_stat = H5S_get_rebuild_status_test(sid_reg3);
-    assert(rebuild_stat!=FAIL);
-
-    /* In this case, rebuild_stat should be TRUE. */
-    if(!rebuild_stat){
+    ret = H5S__get_rebuild_status_test(sid_reg3,&rebuild_stat1,&rebuild_stat2);
+    CHECK(ret, FAIL, "H5S__get_rebuild_status_test");
+    /* In this case, rebuild_stat1 and rebuild_stat2 should be
+     * H5S_DIMINFO_VALID_YES. */
+    if(rebuild_stat1 != H5S_DIMINFO_VALID_YES) {
        ret = FAIL;
        CHECK(ret,FAIL,"H5S_hyper_rebuild");
-    }
-    else {
+    } /* end if */
+    if(rebuild_stat2 != H5S_DIMINFO_VALID_YES) {
+       ret = FAIL;
+       CHECK(ret,FAIL,"H5S_hyper_rebuild");
+    } /* end if */
+    if(ret != FAIL) {
        /* In this case, rebuild_check should be TRUE. */
-       rebuild_check = H5S_select_shape_same_test(sid_reg3,sid_reg_ori3);
+       rebuild_check = H5S__select_shape_same_test(sid_reg3,sid_reg_ori3);
        CHECK(rebuild_check,FALSE,"H5S_hyper_rebuild");
-    }
+    } /* end if */
 
     sid_irreg3     = H5Screate_simple(SPACERE3_RANK,dims3,NULL);
 
@@ -12123,14 +12260,19 @@ test_space_rebuild(void)
     ret = H5Sselect_hyperslab(sid_irreg3,H5S_SELECT_OR,start3,stride3,count3,block3);
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
-    rebuild_stat = TRUE;
-    rebuild_stat = H5S_get_rebuild_status_test(sid_irreg3);
-    assert(rebuild_stat!=FAIL);
-    /* In this case, rebuild_stat should be FALSE. */
-    if(rebuild_stat){
+    ret = H5S__get_rebuild_status_test(sid_irreg3,&rebuild_stat1,&rebuild_stat2);
+    CHECK(ret, FAIL, "H5S__get_rebuild_status_test");
+    /* In this case, rebuild_stat1 should be H5S_DIMINFO_VALID_NO and
+     * rebuild_stat2 should be H5S_DIMINFO_VALID_IMPOSSIBLE. */
+    if(rebuild_stat1 != H5S_DIMINFO_VALID_NO) {
        ret = FAIL;
        CHECK(ret,FAIL,"H5S_hyper_rebuild");
-    }/* No need to do shape comparision */
+    } /* end if */
+    if(rebuild_stat2 != H5S_DIMINFO_VALID_IMPOSSIBLE) {
+       ret = FAIL;
+       CHECK(ret,FAIL,"H5S_hyper_rebuild");
+    } /* end if */
+    /* No need to do shape comparision */
 
     MESSAGE(7, ("Testing functionality to rebuild 4-D hyperslab selection\n"));
 
@@ -12183,19 +12325,23 @@ test_space_rebuild(void)
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
 
-    rebuild_stat = FALSE;
-    rebuild_stat = H5S_get_rebuild_status_test(sid_reg4);
-    assert(rebuild_stat!=FAIL);
-    /* In this case, rebuild_stat should be TRUE. */
-    if(!rebuild_stat){
+    ret = H5S__get_rebuild_status_test(sid_reg4,&rebuild_stat1,&rebuild_stat2);
+    CHECK(ret, FAIL, "H5S__get_rebuild_status_test");
+    /* In this case, rebuild_stat1 and rebuild_stat2 should be
+     * H5S_DIMINFO_VALID_YES. */
+    if(rebuild_stat1 != H5S_DIMINFO_VALID_YES) {
        ret = FAIL;
        CHECK(ret,FAIL,"H5S_hyper_rebuild");
-    }
-    else {
+    } /* end if */
+    if(rebuild_stat2 != H5S_DIMINFO_VALID_YES) {
+       ret = FAIL;
+       CHECK(ret,FAIL,"H5S_hyper_rebuild");
+    } /* end if */
+    if(ret != FAIL) {
        /* In this case, rebuild_check should be TRUE. */
-       rebuild_check = H5S_select_shape_same_test(sid_reg4,sid_reg_ori4);
+       rebuild_check = H5S__select_shape_same_test(sid_reg4,sid_reg_ori4);
        CHECK(rebuild_check,FALSE,"H5S_hyper_rebuild");
-    }
+    } /* end if */
 
     /* Testing irregular selection */
     sid_irreg4     = H5Screate_simple(SPACERE4_RANK,dims4,NULL);
@@ -12236,14 +12382,19 @@ test_space_rebuild(void)
     ret = H5Sselect_hyperslab(sid_irreg4,H5S_SELECT_OR,start4,stride4,count4,block4);
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
-    rebuild_stat = TRUE;
-    rebuild_stat = H5S_get_rebuild_status_test(sid_irreg4);
-    assert(rebuild_stat!=FAIL);
-    /* In this case, rebuild_stat should be FALSE. */
-    if(rebuild_stat){
+    ret = H5S__get_rebuild_status_test(sid_irreg4,&rebuild_stat1,&rebuild_stat2);
+    CHECK(ret, FAIL, "H5S__get_rebuild_status_test");
+    /* In this case, rebuild_stat1 should be H5S_DIMINFO_VALID_NO and
+     * rebuild_stat2 should be H5S_DIMINFO_VALID_IMPOSSIBLE. */
+    if(rebuild_stat1 != H5S_DIMINFO_VALID_NO) {
        ret = FAIL;
        CHECK(ret,FAIL,"H5S_hyper_rebuild");
-    }/* No need to do shape comparision */
+    } /* end if */
+    if(rebuild_stat2 != H5S_DIMINFO_VALID_IMPOSSIBLE) {
+       ret = FAIL;
+       CHECK(ret,FAIL,"H5S_hyper_rebuild");
+    } /* end if */
+    /* No need to do shape comparision */
 
     MESSAGE(7, ("Testing functionality to rebuild 5-D hyperslab selection\n"));
 
@@ -12300,19 +12451,23 @@ test_space_rebuild(void)
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
 
-    rebuild_stat = FALSE;
-    rebuild_stat = H5S_get_rebuild_status_test(sid_reg5);
-    assert(rebuild_stat!=FAIL);
-    /* In this case, rebuild_stat should be TRUE. */
-    if(!rebuild_stat){
+    ret = H5S__get_rebuild_status_test(sid_reg5,&rebuild_stat1,&rebuild_stat2);
+    CHECK(ret, FAIL, "H5S__get_rebuild_status_test");
+    /* In this case, rebuild_stat1 and rebuild_stat2 should be
+     * H5S_DIMINFO_VALID_YES. */
+    if(rebuild_stat1 != H5S_DIMINFO_VALID_YES) {
        ret = FAIL;
        CHECK(ret,FAIL,"H5S_hyper_rebuild");
-    }
-    else {
+    } /* end if */
+    if(rebuild_stat2 != H5S_DIMINFO_VALID_YES) {
+       ret = FAIL;
+       CHECK(ret,FAIL,"H5S_hyper_rebuild");
+    } /* end if */
+    if(ret != FAIL) {
        /* In this case, rebuild_check should be TRUE. */
-       rebuild_check = H5S_select_shape_same_test(sid_reg5,sid_reg_ori5);
+       rebuild_check = H5S__select_shape_same_test(sid_reg5,sid_reg_ori5);
        CHECK(rebuild_check,FALSE,"H5S_hyper_rebuild");
-    }
+    } /* end if */
 
     sid_irreg5     = H5Screate_simple(SPACERE5_RANK,dims5,NULL);
 
@@ -12358,14 +12513,19 @@ test_space_rebuild(void)
     ret = H5Sselect_hyperslab(sid_irreg5,H5S_SELECT_OR,start5,stride5,count5,block5);
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
-    rebuild_stat = TRUE;
-    rebuild_stat = H5S_get_rebuild_status_test(sid_irreg5);
-    assert(rebuild_stat!=FAIL);
-    /* In this case, rebuild_stat should be FALSE. */
-    if(rebuild_stat){
+    ret = H5S__get_rebuild_status_test(sid_irreg5,&rebuild_stat1,&rebuild_stat2);
+    CHECK(ret, FAIL, "H5S__get_rebuild_status_test");
+    /* In this case, rebuild_stat1 should be H5S_DIMINFO_VALID_NO and
+     * rebuild_stat2 should be H5S_DIMINFO_VALID_IMPOSSIBLE. */
+    if(rebuild_stat1 != H5S_DIMINFO_VALID_NO) {
        ret = FAIL;
        CHECK(ret,FAIL,"H5S_hyper_rebuild");
-    }/* No need to do shape comparision */
+    } /* end if */
+    if(rebuild_stat2 != H5S_DIMINFO_VALID_IMPOSSIBLE) {
+       ret = FAIL;
+       CHECK(ret,FAIL,"H5S_hyper_rebuild");
+    } /* end if */
+    /* No need to do shape comparision */
 
    /* We use 5-D to test a special case with
       rebuilding routine TRUE, FALSE and TRUE */
@@ -12399,13 +12559,20 @@ test_space_rebuild(void)
 
     ret = H5Sselect_hyperslab(sid_spec,H5S_SELECT_SET,start5,stride5,count5,block5);
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
-    rebuild_stat = FALSE;
-    rebuild_stat = H5S_get_rebuild_status_test(sid_spec);
-    /* In this case, rebuild_stat should be TRUE. */
-    if(!rebuild_stat){
+
+    ret = H5S__get_rebuild_status_test(sid_spec,&rebuild_stat1,&rebuild_stat2);
+    CHECK(ret, FAIL, "H5S__get_rebuild_status_test");
+    /* In this case, rebuild_stat1 and rebuild_stat2 should both be
+     * H5S_DIMINFO_VALID_YES. */
+    if(rebuild_stat1 != H5S_DIMINFO_VALID_YES) {
        ret = FAIL;
        CHECK(ret,FAIL,"H5S_hyper_rebuild");
-    }/* No need to do shape comparision */
+    } /* end if */
+    if(rebuild_stat2 != H5S_DIMINFO_VALID_YES) {
+       ret = FAIL;
+       CHECK(ret,FAIL,"H5S_hyper_rebuild");
+    } /* end if */
+    /* No need to do shape comparision */
 
     /* Adding some selections to make it real irregular */
     start5[3]  = 1;
@@ -12421,14 +12588,19 @@ test_space_rebuild(void)
     ret = H5Sselect_hyperslab(sid_spec,H5S_SELECT_OR,start5,stride5,count5,block5);
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
-    rebuild_stat = TRUE;
-    rebuild_stat = H5S_get_rebuild_status_test(sid_spec);
-    assert(rebuild_stat!=FAIL);
-    /* In this case, rebuild_stat should be FALSE. */
-    if(rebuild_stat){
+    ret = H5S__get_rebuild_status_test(sid_spec,&rebuild_stat1,&rebuild_stat2);
+    CHECK(ret, FAIL, "H5S__get_rebuild_status_test");
+    /* In this case, rebuild_stat1 should be H5S_DIMINFO_VALID_NO and
+     * rebuild_stat2 should be H5S_DIMINFO_VALID_IMPOSSIBLE. */
+    if(rebuild_stat1 != H5S_DIMINFO_VALID_NO) {
        ret = FAIL;
        CHECK(ret,FAIL,"H5S_hyper_rebuild");
-    }/* No need to do shape comparision */
+    } /* end if */
+    if(rebuild_stat2 != H5S_DIMINFO_VALID_IMPOSSIBLE) {
+       ret = FAIL;
+       CHECK(ret,FAIL,"H5S_hyper_rebuild");
+    } /* end if */
+    /* No need to do shape comparision */
 
     /* Add more selections to make it regular again */
     start5[3]  = 5;
@@ -12444,14 +12616,19 @@ test_space_rebuild(void)
     ret = H5Sselect_hyperslab(sid_spec,H5S_SELECT_OR,start5,stride5,count5,block5);
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
-    rebuild_stat = FALSE;
-    rebuild_stat = H5S_get_rebuild_status_test(sid_spec);
-    assert(rebuild_stat!=FAIL);
-    /* In this case, rebuild_stat should be FALSE. */
-    if(!rebuild_stat){
+    ret = H5S__get_rebuild_status_test(sid_spec,&rebuild_stat1,&rebuild_stat2);
+    CHECK(ret, FAIL, "H5S__get_rebuild_status_test");
+    /* In this case, rebuild_stat1 should be H5S_DIMINFO_VALID_NO and
+     * rebuild_stat2 should be H5S_DIMINFO_VALID_YES. */
+    if(rebuild_stat1 != H5S_DIMINFO_VALID_NO) {
        ret = FAIL;
        CHECK(ret,FAIL,"H5S_hyper_rebuild");
-    }/* No need to do shape comparision */
+    } /* end if */
+    if(rebuild_stat2 != H5S_DIMINFO_VALID_YES) {
+       ret = FAIL;
+       CHECK(ret,FAIL,"H5S_hyper_rebuild");
+    } /* end if */
+    /* No need to do shape comparision */
 
     H5Sclose(sid_reg1);
     CHECK(ret, FAIL, "H5Sclose");
@@ -12481,6 +12658,791 @@ test_space_rebuild(void)
     H5Sclose(sid_spec);
     CHECK(ret, FAIL, "H5Sclose");
 }
+
+
+/****************************************************************
+**
+**  test_space_update_diminfo(): Tests selection diminfo update
+**  routine.  We will test whether regular selections can be
+**  quickly updated when the selection is modified.
+**
+**
+****************************************************************/
+static void
+test_space_update_diminfo(void)
+{
+   hid_t space_id;                      /* Dataspace id */
+   H5S_diminfo_valid_t diminfo_valid;   /* Diminfo status */
+   H5S_diminfo_valid_t rebuild_status;  /* Diminfo status after rebuid */
+   H5S_sel_type sel_type;               /* Selection type */
+   herr_t ret;                          /* Return value */
+
+   /* dimensions of rank 1 to rank 5 */
+   hsize_t dims1[] ={SPACEUD1_DIM0};
+   hsize_t dims3[] ={SPACEUD3_DIM0, SPACEUD3_DIM1, SPACEUD3_DIM2};
+
+   /* The start of the hyperslab */
+   hsize_t start1[1], start3[3];
+
+   /* The stride of the hyperslab */
+   hsize_t stride1[1], stride3[3];
+
+   /* The number of blocks for the hyperslab */
+   hsize_t count1[1], count3[3];
+
+   /* The size of each block for the hyperslab */
+   hsize_t block1[1], block3[3];
+
+
+    /* Output message about test being performed */
+    MESSAGE(6, ("Testing functionality to update hyperslab dimension info\n"));
+
+
+    MESSAGE(7, ("Testing functionality to update 1-D hyperslab dimension info\n"));
+
+    /*
+     * Test adding regularly spaced distinct blocks
+     */
+
+    /* Create 1-D dataspace */
+    space_id       = H5Screate_simple(1, dims1, NULL);
+
+    /* Create single block */
+    start1[0]  = 3;
+    count1[0]  = 1;
+    block1[0]  = 2;
+    ret = H5Sselect_hyperslab(space_id, H5S_SELECT_SET, start1, NULL, count1, block1);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* diminfo_valid should be YES */
+    ret = H5S__get_diminfo_status_test(space_id, &diminfo_valid);
+    CHECK(ret, FAIL, "H5S__get_diminfo_status_test");
+    if(diminfo_valid != H5S_DIMINFO_VALID_YES) {
+       ret = FAIL;
+       CHECK(ret, FAIL, "H5S_hyper_update_diminfo");
+    } /* end if */
+
+    /* Add block after first, with OR */
+    start1[0]  = 6;
+    count1[0]  = 1;
+    block1[0]  = 2;
+    ret = H5Sselect_hyperslab(space_id, H5S_SELECT_OR, start1, NULL, count1, block1);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* diminfo_valid should be YES */
+    ret = H5S__get_diminfo_status_test(space_id, &diminfo_valid);
+    CHECK(ret, FAIL, "H5S__get_diminfo_status_test");
+    if(diminfo_valid != H5S_DIMINFO_VALID_YES) {
+       ret = FAIL;
+       CHECK(ret, FAIL, "H5S_hyper_update_diminfo");
+    } /* end if */
+
+    /* Add block before first, this time with XOR */
+    start1[0]  = 0;
+    count1[0]  = 1;
+    block1[0]  = 2;
+    ret = H5Sselect_hyperslab(space_id, H5S_SELECT_XOR, start1, NULL, count1, block1);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* diminfo_valid should be YES */
+    ret = H5S__get_diminfo_status_test(space_id, &diminfo_valid);
+    CHECK(ret, FAIL, "H5S__get_diminfo_status_test");
+    if(diminfo_valid != H5S_DIMINFO_VALID_YES) {
+       ret = FAIL;
+       CHECK(ret, FAIL, "H5S_hyper_update_diminfo");
+    } /* end if */
+
+    /* Add two blocks after current block */
+    start1[0]  = 9;
+    stride1[0] = 3;
+    count1[0]  = 2;
+    block1[0]  = 2;
+    ret = H5Sselect_hyperslab(space_id, H5S_SELECT_OR, start1, stride1, count1, block1);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* diminfo_valid should be YES */
+    ret = H5S__get_diminfo_status_test(space_id, &diminfo_valid);
+    CHECK(ret, FAIL, "H5S__get_diminfo_status_test");
+    if(diminfo_valid != H5S_DIMINFO_VALID_YES) {
+       ret = FAIL;
+       CHECK(ret, FAIL, "H5S_hyper_update_diminfo");
+    } /* end if */
+
+    /* Add two blocks overlapping current block, with OR */
+    start1[0]  = 9;
+    stride1[0] = 3;
+    count1[0]  = 2;
+    block1[0]  = 2;
+    ret = H5Sselect_hyperslab(space_id, H5S_SELECT_OR, start1, stride1, count1, block1);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* diminfo_valid should be YES */
+    ret = H5S__get_diminfo_status_test(space_id, &diminfo_valid);
+    CHECK(ret, FAIL, "H5S__get_diminfo_status_test");
+    if(diminfo_valid != H5S_DIMINFO_VALID_YES) {
+       ret = FAIL;
+       CHECK(ret, FAIL, "H5S_hyper_update_diminfo");
+    } /* end if */
+
+    /* Add two blocks partially overlapping current block, with OR */
+    start1[0]  = 12;
+    stride1[0] = 3;
+    count1[0]  = 2;
+    block1[0]  = 2;
+    ret = H5Sselect_hyperslab(space_id, H5S_SELECT_OR, start1, stride1, count1, block1);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* diminfo_valid should be YES */
+    ret = H5S__get_diminfo_status_test(space_id, &diminfo_valid);
+    CHECK(ret, FAIL, "H5S__get_diminfo_status_test");
+    if(diminfo_valid != H5S_DIMINFO_VALID_YES) {
+       ret = FAIL;
+       CHECK(ret, FAIL, "H5S_hyper_update_diminfo");
+    } /* end if */
+
+    /* Add two blocks partially overlapping current block, with XOR */
+    start1[0]  = 15;
+    stride1[0] = 3;
+    count1[0]  = 2;
+    block1[0]  = 2;
+    ret = H5Sselect_hyperslab(space_id, H5S_SELECT_XOR, start1, stride1, count1, block1);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* diminfo_valid should be NO, after rebuild it should be IMPOSSIBLE */
+    ret = H5S__get_rebuild_status_test(space_id, &diminfo_valid,
+            &rebuild_status);
+    CHECK(ret, FAIL, "H5S__get_diminfo_status_test");
+    if(diminfo_valid != H5S_DIMINFO_VALID_NO) {
+       ret = FAIL;
+       CHECK(ret, FAIL, "H5S_hyper_update_diminfo");
+    } /* end if */
+    if(rebuild_status != H5S_DIMINFO_VALID_IMPOSSIBLE) {
+       ret = FAIL;
+       CHECK(ret, FAIL, "H5S_hyper_rebuild");
+    } /* end if */
+
+    /* Fill in missing block */
+    start1[0]  = 15;
+    count1[0]  = 1;
+    block1[0]  = 2;
+    ret = H5Sselect_hyperslab(space_id, H5S_SELECT_XOR, start1, NULL, count1, block1);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* diminfo_valid should be NO, after rebuild it should be YES */
+    ret = H5S__get_rebuild_status_test(space_id, &diminfo_valid,
+            &rebuild_status);
+    CHECK(ret, FAIL, "H5S__get_diminfo_status_test");
+    if(diminfo_valid != H5S_DIMINFO_VALID_NO) {
+       ret = FAIL;
+       CHECK(ret, FAIL, "H5S_hyper_update_diminfo");
+    } /* end if */
+    if(rebuild_status != H5S_DIMINFO_VALID_YES) {
+       ret = FAIL;
+       CHECK(ret, FAIL, "H5S_hyper_rebuild");
+    } /* end if */
+
+    /*
+     * Test adding contiguous blocks
+     */
+
+    /* Create single block */
+    start1[0]  = 3;
+    count1[0]  = 1;
+    block1[0]  = 2;
+    ret = H5Sselect_hyperslab(space_id, H5S_SELECT_SET, start1, NULL, count1, block1);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* diminfo_valid should be YES */
+    ret = H5S__get_diminfo_status_test(space_id, &diminfo_valid);
+    CHECK(ret, FAIL, "H5S__get_diminfo_status_test");
+    if(diminfo_valid != H5S_DIMINFO_VALID_YES) {
+       ret = FAIL;
+       CHECK(ret, FAIL, "H5S_hyper_update_diminfo");
+    } /* end if */
+
+    /* Add block immediately after first, with OR */
+    start1[0]  = 5;
+    count1[0]  = 1;
+    block1[0]  = 2;
+    ret = H5Sselect_hyperslab(space_id, H5S_SELECT_OR, start1, NULL, count1, block1);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* diminfo_valid should be YES */
+    ret = H5S__get_diminfo_status_test(space_id, &diminfo_valid);
+    CHECK(ret, FAIL, "H5S__get_diminfo_status_test");
+    if(diminfo_valid != H5S_DIMINFO_VALID_YES) {
+       ret = FAIL;
+       CHECK(ret, FAIL, "H5S_hyper_update_diminfo");
+    } /* end if */
+
+    /* Add block immediately before first, with XOR */
+    start1[0]  = 1;
+    count1[0]  = 1;
+    block1[0]  = 2;
+    ret = H5Sselect_hyperslab(space_id, H5S_SELECT_OR, start1, NULL, count1, block1);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* diminfo_valid should be YES */
+    ret = H5S__get_diminfo_status_test(space_id, &diminfo_valid);
+    CHECK(ret, FAIL, "H5S__get_diminfo_status_test");
+    if(diminfo_valid != H5S_DIMINFO_VALID_YES) {
+       ret = FAIL;
+       CHECK(ret, FAIL, "H5S_hyper_update_diminfo");
+    } /* end if */
+
+    /* Add differently size block immediately after current, with OR */
+    start1[0]  = 7;
+    count1[0]  = 1;
+    block1[0]  = 7;
+    ret = H5Sselect_hyperslab(space_id, H5S_SELECT_OR, start1, NULL, count1, block1);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* diminfo_valid should be YES */
+    ret = H5S__get_diminfo_status_test(space_id, &diminfo_valid);
+    CHECK(ret, FAIL, "H5S__get_diminfo_status_test");
+    if(diminfo_valid != H5S_DIMINFO_VALID_YES) {
+       ret = FAIL;
+       CHECK(ret, FAIL, "H5S_hyper_update_diminfo");
+    } /* end if */
+
+    /*
+     * Test adding overlapping blocks
+     */
+
+    /* Create single block */
+    start1[0]  = 3;
+    count1[0]  = 1;
+    block1[0]  = 2;
+    ret = H5Sselect_hyperslab(space_id, H5S_SELECT_SET, start1, NULL, count1, block1);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* diminfo_valid should be YES */
+    ret = H5S__get_diminfo_status_test(space_id, &diminfo_valid);
+    CHECK(ret, FAIL, "H5S__get_diminfo_status_test");
+    if(diminfo_valid != H5S_DIMINFO_VALID_YES) {
+       ret = FAIL;
+       CHECK(ret, FAIL, "H5S_hyper_update_diminfo");
+    } /* end if */
+
+    /* Add block completely overlapping first, with OR */
+    start1[0]  = 3;
+    count1[0]  = 1;
+    block1[0]  = 2;
+    ret = H5Sselect_hyperslab(space_id, H5S_SELECT_OR, start1, NULL, count1, block1);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* diminfo_valid should be YES */
+    ret = H5S__get_diminfo_status_test(space_id, &diminfo_valid);
+    CHECK(ret, FAIL, "H5S__get_diminfo_status_test");
+    if(diminfo_valid != H5S_DIMINFO_VALID_YES) {
+       ret = FAIL;
+       CHECK(ret, FAIL, "H5S_hyper_update_diminfo");
+    } /* end if */
+
+    /* Add block parially overlapping first, with OR */
+    start1[0]  = 4;
+    count1[0]  = 1;
+    block1[0]  = 2;
+    ret = H5Sselect_hyperslab(space_id, H5S_SELECT_OR, start1, NULL, count1, block1);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* diminfo_valid should be YES */
+    ret = H5S__get_diminfo_status_test(space_id, &diminfo_valid);
+    CHECK(ret, FAIL, "H5S__get_diminfo_status_test");
+    if(diminfo_valid != H5S_DIMINFO_VALID_YES) {
+       ret = FAIL;
+       CHECK(ret, FAIL, "H5S_hyper_update_diminfo");
+    } /* end if */
+
+    /* Add block completely enclosing current, with OR */
+    start1[0]  = 2;
+    count1[0]  = 1;
+    block1[0]  = 5;
+    ret = H5Sselect_hyperslab(space_id, H5S_SELECT_OR, start1, NULL, count1, block1);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* diminfo_valid should be YES */
+    ret = H5S__get_diminfo_status_test(space_id, &diminfo_valid);
+    CHECK(ret, FAIL, "H5S__get_diminfo_status_test");
+    if(diminfo_valid != H5S_DIMINFO_VALID_YES) {
+       ret = FAIL;
+       CHECK(ret, FAIL, "H5S_hyper_update_diminfo");
+    } /* end if */
+
+    /* Add block completely enclosed by current, with OR */
+    start1[0]  = 3;
+    count1[0]  = 1;
+    block1[0]  = 2;
+    ret = H5Sselect_hyperslab(space_id, H5S_SELECT_OR, start1, NULL, count1, block1);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* diminfo_valid should be YES */
+    ret = H5S__get_diminfo_status_test(space_id, &diminfo_valid);
+    CHECK(ret, FAIL, "H5S__get_diminfo_status_test");
+    if(diminfo_valid != H5S_DIMINFO_VALID_YES) {
+       ret = FAIL;
+       CHECK(ret, FAIL, "H5S_hyper_update_diminfo");
+    } /* end if */
+
+    /* Add equally sized block parially overlapping current, with XOR */
+    start1[0]  = 3;
+    count1[0]  = 1;
+    block1[0]  = 5;
+    ret = H5Sselect_hyperslab(space_id, H5S_SELECT_XOR, start1, NULL, count1, block1);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* diminfo_valid should be YES */
+    ret = H5S__get_diminfo_status_test(space_id, &diminfo_valid);
+    CHECK(ret, FAIL, "H5S__get_diminfo_status_test");
+    if(diminfo_valid != H5S_DIMINFO_VALID_YES) {
+       ret = FAIL;
+       CHECK(ret, FAIL, "H5S_hyper_update_diminfo");
+    } /* end if */
+
+    /* Fill in hole in block */
+    start1[0]  = 3;
+    count1[0]  = 1;
+    block1[0]  = 4;
+    ret = H5Sselect_hyperslab(space_id, H5S_SELECT_OR, start1, NULL, count1, block1);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* diminfo_valid should be NO, after rebuild it should be YES */
+    ret = H5S__get_rebuild_status_test(space_id, &diminfo_valid,
+            &rebuild_status);
+    CHECK(ret, FAIL, "H5S__get_diminfo_status_test");
+    if(diminfo_valid != H5S_DIMINFO_VALID_NO) {
+       ret = FAIL;
+       CHECK(ret, FAIL, "H5S_hyper_update_diminfo");
+    } /* end if */
+    if(rebuild_status != H5S_DIMINFO_VALID_YES) {
+       ret = FAIL;
+       CHECK(ret, FAIL, "H5S_hyper_rebuild");
+    } /* end if */
+
+    /* Add differently sized block parially overlapping current, with XOR */
+    start1[0]  = 4;
+    count1[0]  = 1;
+    block1[0]  = 5;
+    ret = H5Sselect_hyperslab(space_id, H5S_SELECT_XOR, start1, NULL, count1, block1);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* diminfo_valid should be NO */
+    ret = H5S__get_diminfo_status_test(space_id, &diminfo_valid);
+    CHECK(ret, FAIL, "H5S__get_diminfo_status_test");
+    if(diminfo_valid != H5S_DIMINFO_VALID_NO) {
+       ret = FAIL;
+       CHECK(ret, FAIL, "H5S_hyper_update_diminfo");
+    } /* end if */
+
+    /* Fill in hole in block */
+    start1[0]  = 4;
+    count1[0]  = 1;
+    block1[0]  = 4;
+    ret = H5Sselect_hyperslab(space_id, H5S_SELECT_OR, start1, NULL, count1, block1);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* diminfo_valid should be NO, after rebuild it should be YES */
+    ret = H5S__get_rebuild_status_test(space_id, &diminfo_valid,
+            &rebuild_status);
+    CHECK(ret, FAIL, "H5S__get_rebuild_status_test");
+    if(diminfo_valid != H5S_DIMINFO_VALID_NO) {
+       ret = FAIL;
+       CHECK(ret, FAIL, "H5S_hyper_update_diminfo");
+    } /* end if */
+    if(rebuild_status != H5S_DIMINFO_VALID_YES) {
+       ret = FAIL;
+       CHECK(ret, FAIL, "H5S_hyper_rebuild");
+    } /* end if */
+
+    /* Add block completely overlapping current, with XOR */
+    start1[0]  = 2;
+    count1[0]  = 1;
+    block1[0]  = 7;
+    ret = H5Sselect_hyperslab(space_id, H5S_SELECT_XOR, start1, NULL, count1, block1);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    sel_type = H5Sget_select_type(space_id);
+    VERIFY(sel_type, H5S_SEL_NONE, "H5Sget_select_type");
+
+    /*
+     * Test various conditions that break the fast algorithm
+     */
+
+    /* Create multiple blocks */
+    start1[0]  = 3;
+    stride1[0] = 3;
+    count1[0]  = 2;
+    block1[0]  = 2;
+    ret = H5Sselect_hyperslab(space_id, H5S_SELECT_SET, start1, stride1, count1, block1);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* diminfo_valid should be YES */
+    ret = H5S__get_diminfo_status_test(space_id, &diminfo_valid);
+    CHECK(ret, FAIL, "H5S__get_diminfo_status_test");
+    if(diminfo_valid != H5S_DIMINFO_VALID_YES) {
+       ret = FAIL;
+       CHECK(ret, FAIL, "H5S_hyper_update_diminfo");
+    } /* end if */
+
+    /* Create single block with start out of phase */
+    start1[0]  = 8;
+    count1[0]  = 1;
+    block1[0]  = 2;
+    ret = H5Sselect_hyperslab(space_id, H5S_SELECT_OR, start1, NULL, count1, block1);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* diminfo_valid should be NO */
+    ret = H5S__get_diminfo_status_test(space_id, &diminfo_valid);
+    CHECK(ret, FAIL, "H5S__get_diminfo_status_test");
+    if(diminfo_valid != H5S_DIMINFO_VALID_NO) {
+       ret = FAIL;
+       CHECK(ret, FAIL, "H5S_hyper_update_diminfo");
+    } /* end if */
+
+    /* Create multiple blocks */
+    start1[0]  = 3;
+    stride1[0] = 3;
+    count1[0]  = 2;
+    block1[0]  = 2;
+    ret = H5Sselect_hyperslab(space_id, H5S_SELECT_SET, start1, stride1, count1, block1);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* diminfo_valid should be YES */
+    ret = H5S__get_diminfo_status_test(space_id, &diminfo_valid);
+    CHECK(ret, FAIL, "H5S__get_diminfo_status_test");
+    if(diminfo_valid != H5S_DIMINFO_VALID_YES) {
+       ret = FAIL;
+       CHECK(ret, FAIL, "H5S_hyper_update_diminfo");
+    } /* end if */
+
+    /* Create multiple blocks with start out of phase */
+    start1[0]  = 8;
+    stride1[0] = 3;
+    count1[0]  = 2;
+    block1[0]  = 2;
+    ret = H5Sselect_hyperslab(space_id, H5S_SELECT_OR, start1, stride1, count1, block1);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* diminfo_valid should be NO */
+    ret = H5S__get_diminfo_status_test(space_id, &diminfo_valid);
+    CHECK(ret, FAIL, "H5S__get_diminfo_status_test");
+    if(diminfo_valid != H5S_DIMINFO_VALID_NO) {
+       ret = FAIL;
+       CHECK(ret, FAIL, "H5S_hyper_update_diminfo");
+    } /* end if */
+
+    /* Create multiple blocks */
+    start1[0]  = 3;
+    stride1[0] = 3;
+    count1[0]  = 2;
+    block1[0]  = 2;
+    ret = H5Sselect_hyperslab(space_id, H5S_SELECT_SET, start1, stride1, count1, block1);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* diminfo_valid should be YES */
+    ret = H5S__get_diminfo_status_test(space_id, &diminfo_valid);
+    CHECK(ret, FAIL, "H5S__get_diminfo_status_test");
+    if(diminfo_valid != H5S_DIMINFO_VALID_YES) {
+       ret = FAIL;
+       CHECK(ret, FAIL, "H5S_hyper_update_diminfo");
+    } /* end if */
+
+    /* Create multiple blocks with wrong stride */
+    start1[0]  = 9;
+    stride1[0] = 4;
+    count1[0]  = 2;
+    block1[0]  = 2;
+    ret = H5Sselect_hyperslab(space_id, H5S_SELECT_OR, start1, stride1, count1, block1);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* diminfo_valid should be NO */
+    ret = H5S__get_diminfo_status_test(space_id, &diminfo_valid);
+    CHECK(ret, FAIL, "H5S__get_diminfo_status_test");
+    if(diminfo_valid != H5S_DIMINFO_VALID_NO) {
+       ret = FAIL;
+       CHECK(ret, FAIL, "H5S_hyper_update_diminfo");
+    } /* end if */
+
+    /* Create single block */
+    start1[0]  = 3;
+    count1[0]  = 1;
+    block1[0]  = 2;
+    ret = H5Sselect_hyperslab(space_id, H5S_SELECT_SET, start1, NULL, count1, block1);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* diminfo_valid should be YES */
+    ret = H5S__get_diminfo_status_test(space_id, &diminfo_valid);
+    CHECK(ret, FAIL, "H5S__get_diminfo_status_test");
+    if(diminfo_valid != H5S_DIMINFO_VALID_YES) {
+       ret = FAIL;
+       CHECK(ret, FAIL, "H5S_hyper_update_diminfo");
+    } /* end if */
+
+    /* Create single block with wrong size */
+    start1[0]  = 6;
+    count1[0]  = 1;
+    block1[0]  = 1;
+    ret = H5Sselect_hyperslab(space_id, H5S_SELECT_OR, start1, NULL, count1, block1);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* diminfo_valid should be NO */
+    ret = H5S__get_diminfo_status_test(space_id, &diminfo_valid);
+    CHECK(ret, FAIL, "H5S__get_diminfo_status_test");
+    if(diminfo_valid != H5S_DIMINFO_VALID_NO) {
+       ret = FAIL;
+       CHECK(ret, FAIL, "H5S_hyper_update_diminfo");
+    } /* end if */
+
+    /* Create single block */
+    start1[0]  = 3;
+    count1[0]  = 1;
+    block1[0]  = 2;
+    ret = H5Sselect_hyperslab(space_id, H5S_SELECT_SET, start1, NULL, count1, block1);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* diminfo_valid should be YES */
+    ret = H5S__get_diminfo_status_test(space_id, &diminfo_valid);
+    CHECK(ret, FAIL, "H5S__get_diminfo_status_test");
+    if(diminfo_valid != H5S_DIMINFO_VALID_YES) {
+       ret = FAIL;
+       CHECK(ret, FAIL, "H5S_hyper_update_diminfo");
+    } /* end if */
+
+    /* Create multiple blocks with wrong size */
+    start1[0]  = 6;
+    stride1[0] = 3;
+    count1[0]  = 2;
+    block1[0]  = 1;
+    ret = H5Sselect_hyperslab(space_id, H5S_SELECT_OR, start1, stride1, count1, block1);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* diminfo_valid should be NO */
+    ret = H5S__get_diminfo_status_test(space_id, &diminfo_valid);
+    CHECK(ret, FAIL, "H5S__get_diminfo_status_test");
+    if(diminfo_valid != H5S_DIMINFO_VALID_NO) {
+       ret = FAIL;
+       CHECK(ret, FAIL, "H5S_hyper_update_diminfo");
+    } /* end if */
+
+    /* Create multiple blocks */
+    start1[0]  = 3;
+    stride1[0] = 3;
+    count1[0]  = 2;
+    block1[0]  = 2;
+    ret = H5Sselect_hyperslab(space_id, H5S_SELECT_SET, start1, stride1, count1, block1);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* diminfo_valid should be YES */
+    ret = H5S__get_diminfo_status_test(space_id, &diminfo_valid);
+    CHECK(ret, FAIL, "H5S__get_diminfo_status_test");
+    if(diminfo_valid != H5S_DIMINFO_VALID_YES) {
+       ret = FAIL;
+       CHECK(ret, FAIL, "H5S_hyper_update_diminfo");
+    } /* end if */
+
+    /* Create single block with wrong size */
+    start1[0]  = 9;
+    count1[0]  = 1;
+    block1[0]  = 1;
+    ret = H5Sselect_hyperslab(space_id, H5S_SELECT_OR, start1, NULL, count1, block1);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* diminfo_valid should be NO */
+    ret = H5S__get_diminfo_status_test(space_id, &diminfo_valid);
+    CHECK(ret, FAIL, "H5S__get_diminfo_status_test");
+    if(diminfo_valid != H5S_DIMINFO_VALID_NO) {
+       ret = FAIL;
+       CHECK(ret, FAIL, "H5S_hyper_update_diminfo");
+    } /* end if */
+
+    /* Create multiple blocks */
+    start1[0]  = 3;
+    stride1[0] = 3;
+    count1[0]  = 2;
+    block1[0]  = 2;
+    ret = H5Sselect_hyperslab(space_id, H5S_SELECT_SET, start1, stride1, count1, block1);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* diminfo_valid should be YES */
+    ret = H5S__get_diminfo_status_test(space_id, &diminfo_valid);
+    CHECK(ret, FAIL, "H5S__get_diminfo_status_test");
+    if(diminfo_valid != H5S_DIMINFO_VALID_YES) {
+       ret = FAIL;
+       CHECK(ret, FAIL, "H5S_hyper_update_diminfo");
+    } /* end if */
+
+    /* Create multiple blocks with wrong size */
+    start1[0]  = 9;
+    stride1[0] = 3;
+    count1[0]  = 2;
+    block1[0]  = 1;
+    ret = H5Sselect_hyperslab(space_id, H5S_SELECT_OR, start1, stride1, count1, block1);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* diminfo_valid should be NO */
+    ret = H5S__get_diminfo_status_test(space_id, &diminfo_valid);
+    CHECK(ret, FAIL, "H5S__get_diminfo_status_test");
+    if(diminfo_valid != H5S_DIMINFO_VALID_NO) {
+       ret = FAIL;
+       CHECK(ret, FAIL, "H5S_hyper_update_diminfo");
+    } /* end if */
+
+    ret = H5Sclose(space_id);
+    CHECK(ret, FAIL, "H5Sclose");
+
+
+    MESSAGE(7, ("Testing functionality to update 3-D hyperslab dimension info\n"));
+
+    /* Create 3-D dataspace */
+    space_id       = H5Screate_simple(3, dims3, NULL);
+
+    /* Create multiple blocks */
+    start3[0]  = 0;
+    start3[1]  = 1;
+    start3[2]  = 2;
+    stride3[0] = 2;
+    stride3[1] = 3;
+    stride3[2] = 4;
+    count3[0]  = 4;
+    count3[1]  = 3;
+    count3[2]  = 2;
+    block3[0]  = 1;
+    block3[1]  = 2;
+    block3[2]  = 3;
+    ret = H5Sselect_hyperslab(space_id, H5S_SELECT_SET, start3, stride3, count3, block3);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* diminfo_valid should be YES */
+    ret = H5S__get_diminfo_status_test(space_id, &diminfo_valid);
+    CHECK(ret, FAIL, "H5S__get_diminfo_status_test");
+    if(diminfo_valid != H5S_DIMINFO_VALID_YES) {
+       ret = FAIL;
+       CHECK(ret, FAIL, "H5S_hyper_update_diminfo");
+    } /* end if */
+
+    /* Add blocks with same values in all dimensions */
+    ret = H5Sselect_hyperslab(space_id, H5S_SELECT_OR, start3, stride3, count3, block3);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* diminfo_valid should be YES */
+    ret = H5S__get_diminfo_status_test(space_id, &diminfo_valid);
+    CHECK(ret, FAIL, "H5S__get_diminfo_status_test");
+    if(diminfo_valid != H5S_DIMINFO_VALID_YES) {
+       ret = FAIL;
+       CHECK(ret, FAIL, "H5S_hyper_update_diminfo");
+    } /* end if */
+
+    /* Add blocks with same values in two dimensions */
+    start3[0]  = 8;
+    stride3[0] = 1;
+    count3[0]  = 1;
+    block3[0]  = 1;
+    ret = H5Sselect_hyperslab(space_id, H5S_SELECT_OR, start3, stride3, count3, block3);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* diminfo_valid should be YES */
+    ret = H5S__get_diminfo_status_test(space_id, &diminfo_valid);
+    CHECK(ret, FAIL, "H5S__get_diminfo_status_test");
+    if(diminfo_valid != H5S_DIMINFO_VALID_YES) {
+       ret = FAIL;
+       CHECK(ret, FAIL, "H5S_hyper_update_diminfo");
+    } /* end if */
+
+    /* Create multiple blocks */
+    start3[0]  = 0;
+    start3[1]  = 1;
+    start3[2]  = 2;
+    stride3[0] = 2;
+    stride3[1] = 3;
+    stride3[2] = 4;
+    count3[0]  = 4;
+    count3[1]  = 3;
+    count3[2]  = 2;
+    block3[0]  = 1;
+    block3[1]  = 2;
+    block3[2]  = 3;
+    ret = H5Sselect_hyperslab(space_id, H5S_SELECT_SET, start3, stride3, count3, block3);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* diminfo_valid should be YES */
+    ret = H5S__get_diminfo_status_test(space_id, &diminfo_valid);
+    CHECK(ret, FAIL, "H5S__get_diminfo_status_test");
+    if(diminfo_valid != H5S_DIMINFO_VALID_YES) {
+       ret = FAIL;
+       CHECK(ret, FAIL, "H5S_hyper_update_diminfo");
+    } /* end if */
+
+    /* Add blocks with same values in one dimension */
+    start3[0]  = 8;
+    start3[1]  = 10;
+    stride3[0] = 1;
+    stride3[1] = 1;
+    count3[0]  = 1;
+    count3[1]  = 1;
+    block3[0]  = 1;
+    block3[1]  = 2;
+    ret = H5Sselect_hyperslab(space_id, H5S_SELECT_OR, start3, stride3, count3, block3);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* diminfo_valid should be NO */
+    ret = H5S__get_diminfo_status_test(space_id, &diminfo_valid);
+    CHECK(ret, FAIL, "H5S__get_diminfo_status_test");
+    if(diminfo_valid != H5S_DIMINFO_VALID_NO) {
+       ret = FAIL;
+       CHECK(ret, FAIL, "H5S_hyper_update_diminfo");
+    } /* end if */
+
+    /* Create multiple blocks */
+    start3[0]  = 0;
+    start3[1]  = 1;
+    start3[2]  = 2;
+    stride3[0] = 2;
+    stride3[1] = 3;
+    stride3[2] = 4;
+    count3[0]  = 4;
+    count3[1]  = 3;
+    count3[2]  = 2;
+    block3[0]  = 1;
+    block3[1]  = 2;
+    block3[2]  = 3;
+    ret = H5Sselect_hyperslab(space_id, H5S_SELECT_SET, start3, stride3, count3, block3);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* diminfo_valid should be YES */
+    ret = H5S__get_diminfo_status_test(space_id, &diminfo_valid);
+    CHECK(ret, FAIL, "H5S__get_diminfo_status_test");
+    if(diminfo_valid != H5S_DIMINFO_VALID_YES) {
+       ret = FAIL;
+       CHECK(ret, FAIL, "H5S_hyper_update_diminfo");
+    } /* end if */
+
+    /* Add blocks with same values in no dimensions */
+    start3[0]  = 8;
+    start3[1]  = 10;
+    start3[2]  = 10;
+    stride3[0] = 1;
+    stride3[1] = 1;
+    stride3[2] = 1;
+    count3[0]  = 1;
+    count3[1]  = 1;
+    count3[2]  = 1;
+    block3[0]  = 1;
+    block3[1]  = 2;
+    block3[2]  = 3;
+    ret = H5Sselect_hyperslab(space_id, H5S_SELECT_OR, start3, stride3, count3, block3);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* diminfo_valid should be NO */
+    ret = H5S__get_diminfo_status_test(space_id, &diminfo_valid);
+    CHECK(ret, FAIL, "H5S__get_diminfo_status_test");
+    if(diminfo_valid != H5S_DIMINFO_VALID_NO) {
+       ret = FAIL;
+       CHECK(ret, FAIL, "H5S_hyper_update_diminfo");
+    } /* end if */
+
+    ret = H5Sclose(space_id);
+    CHECK(ret, FAIL, "H5Sclose");
+} /* end test_space_update_diminfo() */
 
 
 /****************************************************************
@@ -12861,9 +13823,9 @@ test_select_bounds(void)
     /* Get bounds for 'none' selection */
     H5E_BEGIN_TRY {
         ret = H5Sget_select_bounds(sid, low_bounds, high_bounds);
-    } H5E_END_TRY;                                  
-    VERIFY(ret, FAIL, "H5Sget_select_bo unds");     
-                                                    
+    } H5E_END_TRY;
+    VERIFY(ret, FAIL, "H5Sget_select_bo unds");
+
     /* Set point selection */
     coord[0][0] =  3; coord[0][1] =  3;
     coord[1][0] =  3; coord[1][1] = 96;
@@ -13040,14 +14002,14 @@ test_hyper_regular(void)
     /* Query if 'all' selection is regular hyperslab (should fail) */
     H5E_BEGIN_TRY {
         is_regular = H5Sis_regular_hyperslab(sid);
-    } H5E_END_TRY;                                  
-    VERIFY(is_regular, FAIL, "H5Sis_regular_hyperslab");     
+    } H5E_END_TRY;
+    VERIFY(is_regular, FAIL, "H5Sis_regular_hyperslab");
 
     /* Query regular hyperslab selection info (should fail) */
     H5E_BEGIN_TRY {
         ret = H5Sget_regular_hyperslab(sid, q_start, q_stride, q_count, q_block);
-    } H5E_END_TRY;                                  
-    VERIFY(ret, FAIL, "H5Sget_regular_hyperslab");     
+    } H5E_END_TRY;
+    VERIFY(ret, FAIL, "H5Sget_regular_hyperslab");
 
     /* Set 'none' selection */
     ret = H5Sselect_none(sid);
@@ -13056,14 +14018,14 @@ test_hyper_regular(void)
     /* Query if 'none' selection is regular hyperslab (should fail) */
     H5E_BEGIN_TRY {
         is_regular = H5Sis_regular_hyperslab(sid);
-    } H5E_END_TRY;                                  
-    VERIFY(is_regular, FAIL, "H5Sis_regular_hyperslab");     
+    } H5E_END_TRY;
+    VERIFY(is_regular, FAIL, "H5Sis_regular_hyperslab");
 
     /* Query regular hyperslab selection info (should fail) */
     H5E_BEGIN_TRY {
         ret = H5Sget_regular_hyperslab(sid, q_start, q_stride, q_count, q_block);
-    } H5E_END_TRY;                                  
-    VERIFY(ret, FAIL, "H5Sget_regular_hyperslab");     
+    } H5E_END_TRY;
+    VERIFY(ret, FAIL, "H5Sget_regular_hyperslab");
 
     /* Set point selection */
     coord[0][0] =  3; coord[0][1] =  3; coord[0][2] = 3;
@@ -13076,14 +14038,14 @@ test_hyper_regular(void)
     /* Query if 'point' selection is regular hyperslab (should fail) */
     H5E_BEGIN_TRY {
         is_regular = H5Sis_regular_hyperslab(sid);
-    } H5E_END_TRY;                                  
-    VERIFY(is_regular, FAIL, "H5Sis_regular_hyperslab");     
+    } H5E_END_TRY;
+    VERIFY(is_regular, FAIL, "H5Sis_regular_hyperslab");
 
     /* Query regular hyperslab selection info (should fail) */
     H5E_BEGIN_TRY {
         ret = H5Sget_regular_hyperslab(sid, q_start, q_stride, q_count, q_block);
-    } H5E_END_TRY;                                  
-    VERIFY(ret, FAIL, "H5Sget_regular_hyperslab");     
+    } H5E_END_TRY;
+    VERIFY(ret, FAIL, "H5Sget_regular_hyperslab");
 
     /* Set "regular" hyperslab selection */
     start[0]  = 2; start[1]  = 2; start[2]  = 2;
@@ -13095,7 +14057,7 @@ test_hyper_regular(void)
 
     /* Query if 'hyperslab' selection is regular hyperslab (should be TRUE) */
     is_regular = H5Sis_regular_hyperslab(sid);
-    VERIFY(is_regular, TRUE, "H5Sis_regular_hyperslab");     
+    VERIFY(is_regular, TRUE, "H5Sis_regular_hyperslab");
 
     /* Retrieve the hyperslab parameters */
     ret = H5Sget_regular_hyperslab(sid, q_start, q_stride, q_count, q_block);
@@ -13121,13 +14083,13 @@ test_hyper_regular(void)
 
     /* Query if 'hyperslab' selection is regular hyperslab (should be FALSE) */
     is_regular = H5Sis_regular_hyperslab(sid);
-    VERIFY(is_regular, FALSE, "H5Sis_regular_hyperslab");     
+    VERIFY(is_regular, FALSE, "H5Sis_regular_hyperslab");
 
     /* Query regular hyperslab selection info (should fail) */
     H5E_BEGIN_TRY {
         ret = H5Sget_regular_hyperslab(sid, q_start, q_stride, q_count, q_block);
-    } H5E_END_TRY;                                  
-    VERIFY(ret, FAIL, "H5Sget_regular_hyperslab");     
+    } H5E_END_TRY;
+    VERIFY(ret, FAIL, "H5Sget_regular_hyperslab");
 
     /* 'XOR' in the point again, to remove it, which should make it regular again */
     t_start[0]  = 0; t_start[1]  = 0; t_start[2]  = 0;
@@ -13137,7 +14099,7 @@ test_hyper_regular(void)
 
     /* Query if 'hyperslab' selection is regular hyperslab (should be TRUE) */
     is_regular = H5Sis_regular_hyperslab(sid);
-    VERIFY(is_regular, TRUE, "H5Sis_regular_hyperslab");     
+    VERIFY(is_regular, TRUE, "H5Sis_regular_hyperslab");
 
     /* Retrieve the hyperslab parameters */
     ret = H5Sget_regular_hyperslab(sid, q_start, q_stride, q_count, q_block);
@@ -13595,6 +14557,642 @@ test_hyper_unlim(void)
 
 /****************************************************************
 **
+**  test_internal_consistency(): Tests selections on dataspace, then
+**  verify that internal states of data structures of selections are
+**  consistent.
+**
+****************************************************************/
+static void
+test_internal_consistency(void)
+{
+    hid_t	all_sid;	/* Dataspace ID	with "all" selection */
+    hid_t	none_sid;	/* Dataspace ID	with "none" selection */
+    hid_t	single_pt_sid;	/* Dataspace ID	with single point selection */
+    hid_t	mult_pt_sid;	/* Dataspace ID	with multiple point selection */
+    hid_t	single_hyper_sid;	/* Dataspace ID	with single block hyperslab selection */
+    hid_t	single_hyper_all_sid;	/* Dataspace ID	with single block hyperslab
+                                         * selection that is the entire dataspace
+                                         */
+    hid_t	single_hyper_pt_sid;	/* Dataspace ID	with single block hyperslab
+                                         * selection that is the same as the single
+                                         * point selection
+                                         */
+    hid_t	regular_hyper_sid;	/* Dataspace ID	with regular hyperslab selection */
+    hid_t	irreg_hyper_sid;	/* Dataspace ID	with irregular hyperslab selection */
+    hid_t	none_hyper_sid;	/* Dataspace ID	with "no hyperslabs" selection */
+    hid_t	scalar_all_sid;	/* ID for scalar dataspace with "all" selection */
+    hid_t	scalar_none_sid;	/* ID for scalar dataspace with "none" selection */
+    hid_t	tmp_sid;	/* Temporary dataspace ID */
+    hsize_t	dims[] = {SPACE9_DIM1, SPACE9_DIM2};
+    hsize_t	coord1[1][SPACE2_RANK]; /* Coordinates for single point selection */
+    hsize_t	coord2[SPACE9_DIM2][SPACE9_RANK]; /* Coordinates for multiple point selection */
+    hsize_t     start[SPACE9_RANK]; /* Hyperslab start */
+    hsize_t     stride[SPACE9_RANK]; /* Hyperslab stride */
+    hsize_t     count[SPACE9_RANK]; /* Hyperslab block count */
+    hsize_t     block[SPACE9_RANK]; /* Hyperslab block size */
+    htri_t	check;		/* Shape comparison return value */
+    herr_t	ret;		/* Generic return value	*/
+
+    /* Output message about test being performed */
+    MESSAGE(6, ("Testing Consistency of Internal States\n"));
+    assert(SPACE9_DIM2>=POINT1_NPOINTS);
+
+    /* Create dataspace for "all" selection */
+    all_sid = H5Screate_simple(SPACE9_RANK, dims, NULL);
+    CHECK(all_sid, FAIL, "H5Screate_simple");
+
+    /* Select entire extent for dataspace */
+    ret = H5Sselect_all(all_sid);
+    CHECK(ret, FAIL, "H5Sselect_all");
+
+    /* Create dataspace for "none" selection */
+    none_sid = H5Screate_simple(SPACE9_RANK, dims, NULL);
+    CHECK(none_sid, FAIL, "H5Screate_simple");
+
+    /* Un-Select entire extent for dataspace */
+    ret = H5Sselect_none(none_sid);
+    CHECK(ret, FAIL, "H5Sselect_none");
+
+    /* Create dataspace for single point selection */
+    single_pt_sid = H5Screate_simple(SPACE9_RANK, dims, NULL);
+    CHECK(single_pt_sid, FAIL, "H5Screate_simple");
+
+    /* Select sequence of ten points for multiple point selection */
+    coord1[0][0] = 2; coord1[0][1] = 2;
+    ret = H5Sselect_elements(single_pt_sid, H5S_SELECT_SET, (size_t)1, (const hsize_t *)coord1);
+    CHECK(ret, FAIL, "H5Sselect_elements");
+
+    /* Create dataspace for multiple point selection */
+    mult_pt_sid = H5Screate_simple(SPACE9_RANK, dims, NULL);
+    CHECK(mult_pt_sid, FAIL, "H5Screate_simple");
+
+    /* Select sequence of ten points for multiple point selection */
+    coord2[0][0]=2; coord2[0][1]=2;
+    coord2[1][0]=7; coord2[1][1]=2;
+    coord2[2][0]=1; coord2[2][1]=4;
+    coord2[3][0]=2; coord2[3][1]=6;
+    coord2[4][0]=0; coord2[4][1]=8;
+    coord2[5][0]=3; coord2[5][1]=2;
+    coord2[6][0]=4; coord2[6][1]=4;
+    coord2[7][0]=1; coord2[7][1]=0;
+    coord2[8][0]=5; coord2[8][1]=1;
+    coord2[9][0]=9; coord2[9][1]=3;
+    ret = H5Sselect_elements(mult_pt_sid, H5S_SELECT_SET, (size_t)POINT1_NPOINTS, (const hsize_t *)coord2);
+    CHECK(ret, FAIL, "H5Sselect_elements");
+
+    /* Create dataspace for single hyperslab selection */
+    single_hyper_sid = H5Screate_simple(SPACE9_RANK, dims, NULL);
+    CHECK(single_hyper_sid, FAIL, "H5Screate_simple");
+
+    /* Select 10x10 hyperslab for single hyperslab selection  */
+    start[0]=1; start[1]=1;
+    stride[0]=1; stride[1]=1;
+    count[0]=1; count[1]=1;
+    block[0]=(SPACE9_DIM1-2); block[1]=(SPACE9_DIM2-2);
+    ret = H5Sselect_hyperslab(single_hyper_sid,H5S_SELECT_SET,start,stride,count,block);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* Create dataspace for single hyperslab selection with entire extent selected */
+    single_hyper_all_sid = H5Screate_simple(SPACE9_RANK, dims, NULL);
+    CHECK(single_hyper_all_sid, FAIL, "H5Screate_simple");
+
+    /* Select entire extent for hyperslab selection */
+    start[0]=0; start[1]=0;
+    stride[0]=1; stride[1]=1;
+    count[0]=1; count[1]=1;
+    block[0]=SPACE9_DIM1; block[1]=SPACE9_DIM2;
+    ret = H5Sselect_hyperslab(single_hyper_all_sid,H5S_SELECT_SET,start,stride,count,block);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* Create dataspace for single hyperslab selection with single point selected */
+    single_hyper_pt_sid = H5Screate_simple(SPACE9_RANK, dims, NULL);
+    CHECK(single_hyper_pt_sid, FAIL, "H5Screate_simple");
+
+    /* Select entire extent for hyperslab selection */
+    start[0]=2; start[1]=2;
+    stride[0]=1; stride[1]=1;
+    count[0]=1; count[1]=1;
+    block[0]=1; block[1]=1;
+    ret = H5Sselect_hyperslab(single_hyper_pt_sid,H5S_SELECT_SET,start,stride,count,block);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* Create dataspace for regular hyperslab selection */
+    regular_hyper_sid = H5Screate_simple(SPACE9_RANK, dims, NULL);
+    CHECK(regular_hyper_sid, FAIL, "H5Screate_simple");
+
+    /* Select regular, strided hyperslab selection */
+    start[0]=2; start[1]=2;
+    stride[0]=2; stride[1]=2;
+    count[0]=5; count[1]=2;
+    block[0]=1; block[1]=1;
+    ret = H5Sselect_hyperslab(regular_hyper_sid,H5S_SELECT_SET,start,stride,count,block);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* Create dataspace for irregular hyperslab selection */
+    irreg_hyper_sid = H5Screate_simple(SPACE9_RANK, dims, NULL);
+    CHECK(irreg_hyper_sid, FAIL, "H5Screate_simple");
+
+    /* Create irregular hyperslab selection by OR'ing two blocks together */
+    start[0]=2; start[1]=2;
+    stride[0]=1; stride[1]=1;
+    count[0]=1; count[1]=1;
+    block[0]=1; block[1]=1;
+    ret = H5Sselect_hyperslab(irreg_hyper_sid,H5S_SELECT_SET,start,stride,count,block);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    start[0]=4; start[1]=4;
+    stride[0]=1; stride[1]=1;
+    count[0]=1; count[1]=1;
+    block[0]=3; block[1]=3;
+    ret = H5Sselect_hyperslab(irreg_hyper_sid,H5S_SELECT_OR,start,stride,count,block);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* Create dataspace for "no" hyperslab selection */
+    none_hyper_sid = H5Screate_simple(SPACE9_RANK, dims, NULL);
+    CHECK(none_hyper_sid, FAIL, "H5Screate_simple");
+
+    /* Create "no" hyperslab selection by XOR'ing same blocks together */
+    start[0]=2; start[1]=2;
+    stride[0]=1; stride[1]=1;
+    count[0]=1; count[1]=1;
+    block[0]=1; block[1]=1;
+    ret = H5Sselect_hyperslab(none_hyper_sid,H5S_SELECT_SET,start,stride,count,block);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    ret = H5Sselect_hyperslab(none_hyper_sid,H5S_SELECT_XOR,start,stride,count,block);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* Create scalar dataspace for "all" selection */
+    scalar_all_sid = H5Screate(H5S_SCALAR);
+    CHECK(scalar_all_sid, FAIL, "H5Screate");
+
+    /* Create scalar dataspace for "none" selection */
+    scalar_none_sid = H5Screate(H5S_SCALAR);
+    CHECK(scalar_none_sid, FAIL, "H5Screate");
+
+    /* Un-Select entire extent for dataspace */
+    ret = H5Sselect_none(scalar_none_sid);
+    CHECK(ret, FAIL, "H5Sselect_none");
+
+    /* Test all the selections created */
+
+	/* Test the copy of itself */
+	tmp_sid=H5Scopy(all_sid);
+	CHECK(tmp_sid, FAIL, "H5Scopy");
+
+	check = H5S__internal_consistency_test(tmp_sid);
+	VERIFY(check, TRUE, "H5S__internal_consistency_test");
+
+	ret = H5Sclose(tmp_sid);
+	CHECK(ret, FAIL, "H5Sclose");
+
+	/* Test "none" selection */
+	check = H5S__internal_consistency_test(none_sid);
+	VERIFY(check, TRUE, "H5S__internal_consistency_test");
+
+	/* Test single point selection */
+	check = H5S__internal_consistency_test(single_pt_sid);
+	VERIFY(check, TRUE, "H5S__internal_consistency_test");
+
+	/* Test multiple point selection */
+	check = H5S__internal_consistency_test(mult_pt_sid);
+	VERIFY(check, TRUE, "H5S__internal_consistency_test");
+
+	/* Test "plain" single hyperslab selection */
+	check = H5S__internal_consistency_test(single_hyper_sid);
+	VERIFY(check, TRUE, "H5S__internal_consistency_test");
+
+	/* Test "all" single hyperslab selection */
+	check = H5S__internal_consistency_test(single_hyper_all_sid);
+	VERIFY(check, TRUE, "H5S__internal_consistency_test");
+
+	/* Test "single point" single hyperslab selection */
+	check = H5S__internal_consistency_test(single_hyper_pt_sid);
+	VERIFY(check, TRUE, "H5S__internal_consistency_test");
+
+	/* Test regular, strided hyperslab selection */
+	check = H5S__internal_consistency_test(regular_hyper_sid);
+	VERIFY(check, TRUE, "H5S__internal_consistency_test");
+
+	/* Test irregular hyperslab selection */
+	check = H5S__internal_consistency_test(irreg_hyper_sid);
+	VERIFY(check, TRUE, "H5S__internal_consistency_test");
+
+	/* Test "no" hyperslab selection */
+	check = H5S__internal_consistency_test(none_hyper_sid);
+	VERIFY(check, TRUE, "H5S__internal_consistency_test");
+
+	/* Test scalar "all" hyperslab selection */
+	check = H5S__internal_consistency_test(scalar_all_sid);
+	VERIFY(check, TRUE, "H5S__internal_consistency_test");
+
+	/* Test scalar "none" hyperslab selection */
+	check = H5S__internal_consistency_test(scalar_none_sid);
+	VERIFY(check, TRUE, "H5S__internal_consistency_test");
+
+    /* Close dataspaces */
+    ret = H5Sclose(all_sid);
+    CHECK(ret, FAIL, "H5Sclose");
+    ret = H5Sclose(none_sid);
+    CHECK(ret, FAIL, "H5Sclose");
+    ret = H5Sclose(single_pt_sid);
+    CHECK(ret, FAIL, "H5Sclose");
+    ret = H5Sclose(mult_pt_sid);
+    CHECK(ret, FAIL, "H5Sclose");
+    ret = H5Sclose(single_hyper_sid);
+    CHECK(ret, FAIL, "H5Sclose");
+    ret = H5Sclose(single_hyper_all_sid);
+    CHECK(ret, FAIL, "H5Sclose");
+    ret = H5Sclose(single_hyper_pt_sid);
+    CHECK(ret, FAIL, "H5Sclose");
+    ret = H5Sclose(regular_hyper_sid);
+    CHECK(ret, FAIL, "H5Sclose");
+    ret = H5Sclose(irreg_hyper_sid);
+    CHECK(ret, FAIL, "H5Sclose");
+    ret = H5Sclose(none_hyper_sid);
+    CHECK(ret, FAIL, "H5Sclose");
+    ret = H5Sclose(scalar_all_sid);
+    CHECK(ret, FAIL, "H5Sclose");
+    ret = H5Sclose(scalar_none_sid);
+    CHECK(ret, FAIL, "H5Sclose");
+}   /* test_internal_consistency() */
+
+/****************************************************************
+**
+**  test_irreg_io(): Tests unusual selections on datasets, to stress the
+**  new hyperslab code.
+**
+****************************************************************/
+static void
+test_irreg_io(void)
+{
+    hid_t       fid;            /* File ID */
+    hid_t       did;            /* Dataset ID */
+    hid_t       dcpl_id;        /* Dataset creation property list ID */
+    hid_t       sid;            /* File dataspace ID */
+    hid_t       mem_sid;        /* Memory dataspace ID */
+    hsize_t	dims[] = {6, 12};       /* Dataspace dimensions */
+    hsize_t	chunk_dims[] = {2, 2};  /* Chunk dimensions */
+    hsize_t	mem_dims[] = {32};      /* Memory dataspace dimensions */
+    hsize_t     start[2];       /* Hyperslab start */
+    hsize_t     stride[2];      /* Hyperslab stride */
+    hsize_t     count[2];       /* Hyperslab block count */
+    hsize_t     block[2];       /* Hyperslab block size */
+    unsigned char wbuf[72];     /* Write buffer */
+    unsigned char rbuf[32];     /* Read buffer */
+    unsigned    u;              /* Local index variable */
+    herr_t	ret;		/* Generic return value	*/
+
+    /* Output message about test being performed */
+    MESSAGE(6, ("Testing Irregular Hyperslab I/O\n"));
+
+    /* Create file */
+    fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(fid, FAIL, "H5Fcreate");
+
+    /* Create dataspace for dataset */
+    sid = H5Screate_simple(2, dims, NULL);
+    CHECK(sid, FAIL, "H5Screate_simple");
+
+    /* Set chunk dimensions for dataset */
+    dcpl_id = H5Pcreate(H5P_DATASET_CREATE);
+    CHECK(dcpl_id, FAIL, "H5Pcreate");
+    ret = H5Pset_chunk(dcpl_id, 2, chunk_dims);
+    CHECK(ret, FAIL, "H5Pset_chunk");
+
+    /* Create a dataset */
+    did = H5Dcreate2(fid, SPACE1_NAME, H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, dcpl_id, H5P_DEFAULT);
+    CHECK(did, FAIL, "H5Dcreate2");
+
+    /* Initialize the write buffer */
+    for(u = 0; u < 72; u++)
+        wbuf[u] = (unsigned char)u;
+
+    /* Write entire dataset to disk */
+    ret = H5Dwrite(did, H5T_NATIVE_UCHAR, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf);
+    CHECK(ret, FAIL, "H5Dwrite");
+
+    /* Close the DCPL */
+    ret = H5Pclose(dcpl_id);
+    CHECK(ret, FAIL, "H5Pclose");
+
+    /* Create dataspace for memory selection */
+    mem_sid = H5Screate_simple(1, mem_dims, NULL);
+    CHECK(mem_sid, FAIL, "H5Screate_simple");
+
+    /* Select 'L'-shaped region within dataset */
+    start[0] = 0; start[1] = 10;
+    stride[0] = 1; stride[1] = 1;
+    count[0] = 4; count[1] = 2;
+    block[0] = 1; block[1] = 1;
+    ret = H5Sselect_hyperslab(sid, H5S_SELECT_SET, start, stride, count, block);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    start[0] = 4; start[1] = 0;
+    stride[0] = 1; stride[1] = 1;
+    count[0] = 2; count[1] = 12;
+    block[0] = 1; block[1] = 1;
+    ret = H5Sselect_hyperslab(sid, H5S_SELECT_OR, start, stride, count, block);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* Reset the buffer */
+    HDmemset(rbuf, 0, sizeof(rbuf));
+
+    /* Read selection from disk */
+    ret = H5Dread(did, H5T_NATIVE_UCHAR, mem_sid, sid, H5P_DEFAULT, rbuf);
+    CHECK(ret, FAIL, "H5Dread");
+
+
+    /* Close everything */
+    ret = H5Sclose(mem_sid);
+    CHECK(ret, FAIL, "H5Sclose");
+    ret = H5Sclose(sid);
+    CHECK(ret, FAIL, "H5Sclose");
+    ret = H5Dclose(did);
+    CHECK(ret, FAIL, "H5Dclose");
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+}   /* test_irreg_io() */
+
+/****************************************************************
+**
+**  test_sel_iter(): Test selection iterator API routines.
+**
+****************************************************************/
+static void
+test_sel_iter(void)
+{
+    hid_t       sid;            /* Dataspace ID */
+    hid_t       iter_id;        /* Dataspace selection iterator ID */
+    hsize_t	dims1[] = {6, 12};  /* 2-D Dataspace dimensions */
+    hsize_t	dims2[] = {32}; /* 1-D dataspace dimensions */
+    hsize_t	coord1[POINT1_NPOINTS][2]; /* Coordinates for point selection */
+    hsize_t     start[2];       /* Hyperslab start */
+    hsize_t     stride[2];      /* Hyperslab stride */
+    hsize_t     count[2];       /* Hyperslab block count */
+    hsize_t     block[2];       /* Hyperslab block size */
+    size_t      nseq;           /* # of sequences retrieved */
+    size_t      nbytes;         /* # of bytes retrieved */
+    hsize_t     off[SEL_ITER_MAX_SEQ];  /* Offsets for retrieved sequences */
+    size_t      len[SEL_ITER_MAX_SEQ];  /* Lengths for retrieved sequences */
+    H5S_sel_type sel_type;      /* Selection type */
+    unsigned    sel_share;      /* Whether to share selection with dataspace */
+    unsigned    sel_iter_flags; /* Flags for selection iterator creation */
+    herr_t	ret;		/* Generic return value	*/
+
+    /* Output message about test being performed */
+    MESSAGE(6, ("Testing Dataspace Selection Iterators\n"));
+
+    /* Create dataspace */
+    sid = H5Screate_simple(2, dims1, NULL);
+    CHECK(sid, FAIL, "H5Screate_simple");
+
+
+    /* Try creating selection iterator object with bad parameters */
+    H5E_BEGIN_TRY {     /* Bad dataspace ID */
+        iter_id = H5Ssel_iter_create(H5I_INVALID_HID, (size_t)1, (unsigned)0);
+    } H5E_END_TRY;
+    VERIFY(iter_id, FAIL, "H5Ssel_iter_create");
+    H5E_BEGIN_TRY {     /* Bad element size */
+        iter_id = H5Ssel_iter_create(sid, (size_t)0, (unsigned)0);
+    } H5E_END_TRY;
+    VERIFY(iter_id, FAIL, "H5Ssel_iter_create");
+    H5E_BEGIN_TRY {     /* Bad flag(s) */
+        iter_id = H5Ssel_iter_create(sid, (size_t)1, (unsigned)0xffff);
+    } H5E_END_TRY;
+    VERIFY(iter_id, FAIL, "H5Ssel_iter_create");
+
+    /* Try closing selection iterator, with bad parameters */
+    H5E_BEGIN_TRY {     /* Invalid ID */
+        ret = H5Ssel_iter_close(H5I_INVALID_HID);
+    } H5E_END_TRY;
+    VERIFY(ret, FAIL, "H5Ssel_iter_close");
+    H5E_BEGIN_TRY {     /* Not a selection iterator ID */
+        ret = H5Ssel_iter_close(sid);
+    } H5E_END_TRY;
+    VERIFY(ret, FAIL, "H5Ssel_iter_close");
+
+
+    /* Try with no selection sharing, and with sharing */
+    for(sel_share = 0; sel_share < 2; sel_share++) {
+        /* Set selection iterator sharing flags */
+        if(sel_share)
+            sel_iter_flags = H5S_SEL_ITER_SHARE_WITH_DATASPACE;
+        else
+            sel_iter_flags = 0;
+
+        /* Create selection iterator object */
+        iter_id = H5Ssel_iter_create(sid, (size_t)1, (unsigned)sel_iter_flags);
+        CHECK(iter_id, FAIL, "H5Ssel_iter_create");
+
+        /* Close selection iterator */
+        ret = H5Ssel_iter_close(iter_id);
+        CHECK(ret, FAIL, "H5Ssel_iter_close");
+
+        /* Try closing selection iterator twice */
+        H5E_BEGIN_TRY {     /* Invalid ID */
+            ret = H5Ssel_iter_close(iter_id);
+        } H5E_END_TRY;
+        VERIFY(ret, FAIL, "H5Ssel_iter_close");
+
+
+        /* Create selection iterator object */
+        iter_id = H5Ssel_iter_create(sid, (size_t)1, (unsigned)sel_iter_flags);
+        CHECK(iter_id, FAIL, "H5Ssel_iter_create");
+
+        /* Try retrieving sequences, with bad parameters */
+        H5E_BEGIN_TRY {     /* Invalid ID */
+            ret = H5Ssel_iter_get_seq_list(H5I_INVALID_HID, (size_t)1, (size_t)1, &nseq, &nbytes, off, len);
+        } H5E_END_TRY;
+        VERIFY(ret, FAIL, "H5Ssel_iter_get_seq_list");
+        H5E_BEGIN_TRY {     /* Invalid nseq pointer */
+            ret = H5Ssel_iter_get_seq_list(iter_id, (size_t)1, (size_t)1, NULL, &nbytes, off, len);
+        } H5E_END_TRY;
+        VERIFY(ret, FAIL, "H5Ssel_iter_get_seq_list");
+        H5E_BEGIN_TRY {     /* Invalid nbytes pointer */
+            ret = H5Ssel_iter_get_seq_list(iter_id, (size_t)1, (size_t)1, &nseq, NULL, off, len);
+        } H5E_END_TRY;
+        VERIFY(ret, FAIL, "H5Ssel_iter_get_seq_list");
+        H5E_BEGIN_TRY {     /* Invalid offset array */
+            ret = H5Ssel_iter_get_seq_list(iter_id, (size_t)1, (size_t)1, &nseq, &nbytes, NULL, len);
+        } H5E_END_TRY;
+        VERIFY(ret, FAIL, "H5Ssel_iter_get_seq_list");
+        H5E_BEGIN_TRY {     /* Invalid length array */
+            ret = H5Ssel_iter_get_seq_list(iter_id, (size_t)1, (size_t)1, &nseq, &nbytes, off, NULL);
+        } H5E_END_TRY;
+        VERIFY(ret, FAIL, "H5Ssel_iter_get_seq_list");
+
+        /* Close selection iterator */
+        ret = H5Ssel_iter_close(iter_id);
+        CHECK(ret, FAIL, "H5Ssel_iter_close");
+
+
+        /* Test iterators on various basic selection types */
+        for(sel_type = H5S_SEL_NONE; sel_type <= H5S_SEL_ALL; sel_type = (H5S_sel_type)(sel_type + 1)) {
+            switch(sel_type) {
+                case H5S_SEL_NONE:          /* "None" selection */
+                    ret = H5Sselect_none(sid);
+                    CHECK(ret, FAIL, "H5Sselect_none");
+                    break;
+
+                case H5S_SEL_POINTS:        /* Point selection */
+                    /* Select sequence of ten points */
+                    coord1[0][0] = 0;       coord1[0][1] = 9;
+                    coord1[1][0] = 1;       coord1[1][1] = 2;
+                    coord1[2][0] = 2;       coord1[2][1] = 4;
+                    coord1[3][0] = 0;       coord1[3][1] = 6;
+                    coord1[4][0] = 1;       coord1[4][1] = 8;
+                    coord1[5][0] = 2;       coord1[5][1] = 10;
+                    coord1[6][0] = 0;       coord1[6][1] = 11;
+                    coord1[7][0] = 1;       coord1[7][1] = 4;
+                    coord1[8][0] = 2;       coord1[8][1] = 1;
+                    coord1[9][0] = 0;       coord1[9][1] = 3;
+                    ret = H5Sselect_elements(sid, H5S_SELECT_SET, (size_t)POINT1_NPOINTS, (const hsize_t *)coord1);
+                    CHECK(ret, FAIL, "H5Sselect_elements");
+                    break;
+
+                case H5S_SEL_HYPERSLABS:    /* Hyperslab selection */
+                    /* Select regular hyperslab */
+                    start[0] = 3;   start[1] = 0;
+                    stride[0] = 2;  stride[1] = 2;
+                    count[0] = 2;   count[1] = 5;
+                    block[0] = 1;   block[1] = 1;
+                    ret = H5Sselect_hyperslab(sid, H5S_SELECT_SET, start, stride, count, block);
+                    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+                    break;
+
+                case H5S_SEL_ALL:           /* "All" selection */
+                    ret = H5Sselect_all(sid);
+                    CHECK(ret, FAIL, "H5Sselect_all");
+                    break;
+
+                case H5S_SEL_ERROR:
+                case H5S_SEL_N:
+                default:
+                    HDassert(0 && "Can't occur");
+                    break;
+            } /* end switch */
+
+            /* Create selection iterator object */
+            iter_id = H5Ssel_iter_create(sid, (size_t)1, (unsigned)sel_iter_flags);
+            CHECK(iter_id, FAIL, "H5Ssel_iter_create");
+
+            /* Try retrieving no sequences, with 0 for maxseq & maxbytes */
+            ret = H5Ssel_iter_get_seq_list(iter_id, (size_t)0, (size_t)1, &nseq, &nbytes, off, len);
+            CHECK(ret, FAIL, "H5Ssel_iter_get_seq_list");
+            VERIFY(nseq, 0, "H5Ssel_iter_get_seq_list");
+            VERIFY(nbytes, 0, "H5Ssel_iter_get_seq_list");
+            ret = H5Ssel_iter_get_seq_list(iter_id, (size_t)1, (size_t)0, &nseq, &nbytes, off, len);
+            CHECK(ret, FAIL, "H5Ssel_iter_get_seq_list");
+            VERIFY(nseq, 0, "H5Ssel_iter_get_seq_list");
+            VERIFY(nbytes, 0, "H5Ssel_iter_get_seq_list");
+
+            /* Try retrieving all sequences */
+            ret = H5Ssel_iter_get_seq_list(iter_id, (size_t)SEL_ITER_MAX_SEQ, (size_t)(1024 * 1024), &nseq, &nbytes, off, len);
+            CHECK(ret, FAIL, "H5Ssel_iter_get_seq_list");
+
+            /* Check results from retrieving sequence list */
+            switch(sel_type) {
+                case H5S_SEL_NONE:          /* "None" selection */
+                    VERIFY(nseq, 0, "H5Ssel_iter_get_seq_list");
+                    VERIFY(nbytes, 0, "H5Ssel_iter_get_seq_list");
+                    break;
+
+                case H5S_SEL_POINTS:        /* Point selection */
+                    VERIFY(nseq, 10, "H5Ssel_iter_get_seq_list");
+                    VERIFY(nbytes, 10, "H5Ssel_iter_get_seq_list");
+                    break;
+
+                case H5S_SEL_HYPERSLABS:    /* Hyperslab selection */
+                    VERIFY(nseq, 10, "H5Ssel_iter_get_seq_list");
+                    VERIFY(nbytes, 10, "H5Ssel_iter_get_seq_list");
+                    break;
+
+                case H5S_SEL_ALL:           /* "All" selection */
+                    VERIFY(nseq, 1, "H5Ssel_iter_get_seq_list");
+                    VERIFY(nbytes, 72, "H5Ssel_iter_get_seq_list");
+                    break;
+
+                case H5S_SEL_ERROR:
+                case H5S_SEL_N:
+                default:
+                    HDassert(0 && "Can't occur");
+                    break;
+            } /* end switch */
+
+            /* Close selection iterator */
+            ret = H5Ssel_iter_close(iter_id);
+            CHECK(ret, FAIL, "H5Ssel_iter_close");
+        } /* end for */
+
+        /* Point selection which will merge into smaller # of sequences */
+        coord1[0][0] = 0;       coord1[0][1] = 9;
+        coord1[1][0] = 0;       coord1[1][1] = 10;
+        coord1[2][0] = 0;       coord1[2][1] = 11;
+        coord1[3][0] = 0;       coord1[3][1] = 6;
+        coord1[4][0] = 1;       coord1[4][1] = 8;
+        coord1[5][0] = 2;       coord1[5][1] = 10;
+        coord1[6][0] = 0;       coord1[6][1] = 11;
+        coord1[7][0] = 1;       coord1[7][1] = 4;
+        coord1[8][0] = 1;       coord1[8][1] = 5;
+        coord1[9][0] = 1;       coord1[9][1] = 6;
+        ret = H5Sselect_elements(sid, H5S_SELECT_SET, (size_t)POINT1_NPOINTS, (const hsize_t *)coord1);
+        CHECK(ret, FAIL, "H5Sselect_elements");
+
+        /* Create selection iterator object */
+        iter_id = H5Ssel_iter_create(sid, (size_t)1, (unsigned)sel_iter_flags);
+        CHECK(iter_id, FAIL, "H5Ssel_iter_create");
+
+        /* Try retrieving all sequences */
+        ret = H5Ssel_iter_get_seq_list(iter_id, (size_t)SEL_ITER_MAX_SEQ, (size_t)(1024 * 1024), &nseq, &nbytes, off, len);
+        CHECK(ret, FAIL, "H5Ssel_iter_get_seq_list");
+        VERIFY(nseq, 6, "H5Ssel_iter_get_seq_list");
+        VERIFY(nbytes, 10, "H5Ssel_iter_get_seq_list");
+
+        /* Close selection iterator */
+        ret = H5Ssel_iter_close(iter_id);
+        CHECK(ret, FAIL, "H5Ssel_iter_close");
+
+
+        /* Select irregular hyperslab, which will merge into smaller # of sequences  */
+        start[0] = 3;   start[1] = 0;
+        stride[0] = 2;  stride[1] = 2;
+        count[0] = 2;   count[1] = 5;
+        block[0] = 1;   block[1] = 1;
+        ret = H5Sselect_hyperslab(sid, H5S_SELECT_SET, start, stride, count, block);
+        CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+        start[0] = 3;   start[1] = 3;
+        stride[0] = 2;  stride[1] = 2;
+        count[0] = 2;   count[1] = 5;
+        block[0] = 1;   block[1] = 1;
+        ret = H5Sselect_hyperslab(sid, H5S_SELECT_OR, start, stride, count, block);
+        CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+        /* Create selection iterator object */
+        iter_id = H5Ssel_iter_create(sid, (size_t)1, (unsigned)sel_iter_flags);
+        CHECK(iter_id, FAIL, "H5Ssel_iter_create");
+
+        /* Try retrieving all sequences */
+        ret = H5Ssel_iter_get_seq_list(iter_id, (size_t)SEL_ITER_MAX_SEQ, (size_t)(1024 * 1024), &nseq, &nbytes, off, len);
+        CHECK(ret, FAIL, "H5Ssel_iter_get_seq_list");
+        VERIFY(nseq, 6, "H5Ssel_iter_get_seq_list");
+        VERIFY(nbytes, 20, "H5Ssel_iter_get_seq_list");
+
+        /* Close selection iterator */
+        ret = H5Ssel_iter_close(iter_id);
+        CHECK(ret, FAIL, "H5Ssel_iter_close");
+
+    } /* end for */
+
+    /* Close dataspace */
+    ret = H5Sclose(sid);
+    CHECK(ret, FAIL, "H5Sclose");
+}   /* test_sel_iter() */
+
+
+/****************************************************************
+**
 **  test_select(): Main H5S selection testing routine.
 **
 ****************************************************************/
@@ -13661,10 +15259,12 @@ test_select(void)
     test_select_hyper_offset2();/* Test more selection offset code with hyperslabs */
     test_select_point_offset(); /* Test selection offset code with elements */
     test_select_hyper_union();  /* Test hyperslab union code */
-#ifdef NEW_HYPERSLAB_API
+
+    /* Fancy hyperslab API tests */
     test_select_hyper_union_stagger();  /* Test hyperslab union code for staggered slabs */
     test_select_hyper_union_3d();  /* Test hyperslab union code for 3-D dataset */
-#endif /* NEW_HYPERSLAB_API */
+    test_select_hyper_valid_combination(); /* Test different input combinations */
+
     test_select_hyper_and_2d(); /* Test hyperslab intersection (AND) code for 2-D dataset */
     test_select_hyper_xor_2d(); /* Test hyperslab XOR code for 2-D dataset */
     test_select_hyper_notb_2d(); /* Test hyperslab NOTB code for 2-D dataset */
@@ -13740,6 +15340,8 @@ test_select(void)
     /* Test "re-build" routine */
     test_space_rebuild();
 
+    /* Test "update diminfo" routine */
+    test_space_update_diminfo();
 
     /* Test point selections in chunked datasets */
     test_select_point_chunk();
@@ -13760,6 +15362,14 @@ test_select(void)
     /* Test unlimited hyperslab selections */
     test_hyper_unlim();
 
+    /* Test the consistency of internal data structures of selection */
+    test_internal_consistency();
+
+    /* Test irregular selection I/O */
+    test_irreg_io();
+
+    /* Test selection iterators */
+    test_sel_iter();
 }   /* test_select() */
 
 
@@ -13780,6 +15390,6 @@ test_select(void)
 void
 cleanup_select(void)
 {
-    remove(FILENAME);
+    HDremove(FILENAME);
 }
 

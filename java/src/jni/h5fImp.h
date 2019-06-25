@@ -72,7 +72,7 @@ Java_hdf_hdf5lib_H5_H5Fis_1hdf5
  * Signature: (Ljava/lang/String;J)Z
  */
 JNIEXPORT jboolean JNICALL
-Java_hdf_hdf5lib_H5_H5Fis_1ccessible
+Java_hdf_hdf5lib_H5_H5Fis_1accessible
   (JNIEnv*, jclass, jstring, jlong);
 
 /*
@@ -100,6 +100,15 @@ Java_hdf_hdf5lib_H5__1H5Fget_1access_1plist
  */
 JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_H5_H5Fget_1intent
+  (JNIEnv*, jclass, jlong);
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Fget_fileno
+ * Signature: (J)J
+ */
+JNIEXPORT jlong JNICALL
+Java_hdf_hdf5lib_H5_H5Fget_1fileno
   (JNIEnv*, jclass, jlong);
 
 /*

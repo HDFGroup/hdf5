@@ -106,8 +106,8 @@ cleanup (void)
  */
 static int create_dset1(hid_t file)
 {
-    hid_t        dataspace, dataset;
-    hid_t        dcpl;
+    hid_t        dataspace = H5I_INVALID_HID, dataset = H5I_INVALID_HID;
+    hid_t        dcpl = H5I_INVALID_HID;
     hsize_t      dims[RANK]  = {DSET1_DIM1, DSET1_DIM2};
     hsize_t      chunk_dims[RANK] = {CHUNK1_DIM1, CHUNK1_DIM2};
     int          data[DSET1_DIM1][DSET1_DIM2];    /* data for writing */
@@ -167,8 +167,8 @@ error:
  */
 static int create_dset2(hid_t file)
 {
-    hid_t        dataspace, dataset;
-    hid_t        dcpl;
+    hid_t        dataspace = H5I_INVALID_HID, dataset = H5I_INVALID_HID;
+    hid_t        dcpl = H5I_INVALID_HID;
     hsize_t      dims[RANK]  = {DSET2_DIM1, DSET2_DIM2};
     hsize_t      chunk_dims[RANK] = {CHUNK2_DIM1, CHUNK2_DIM2};
     int          data[DSET2_DIM1][DSET2_DIM2];    /* data for writing */
@@ -226,10 +226,10 @@ error:
  */
 static int check_partial_chunks_perf(hid_t file)
 {
-    hid_t        dataset;
-    hid_t        filespace;
-    hid_t        memspace;
-    hid_t        dapl;
+    hid_t        dataset = H5I_INVALID_HID;
+    hid_t        filespace = H5I_INVALID_HID;
+    hid_t        memspace = H5I_INVALID_HID;
+    hid_t        dapl = H5I_INVALID_HID;
     
     int          rdata[DSET1_DIM2];   /* data for reading */
     int          i;
@@ -297,10 +297,10 @@ error:
  */
 static int check_hash_value_perf(hid_t file)
 {
-    hid_t        dataset;
-    hid_t        filespace;
-    hid_t        memspace;
-    hid_t        dapl;
+    hid_t        dataset = H5I_INVALID_HID;
+    hid_t        filespace = H5I_INVALID_HID;
+    hid_t        memspace = H5I_INVALID_HID;
+    hid_t        dapl = H5I_INVALID_HID;
     
     int          rdata[DSET2_DIM1];   /* data for reading */
     int          i;

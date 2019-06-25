@@ -240,6 +240,7 @@ void test_file_properties(void);
 void multiple_dset_write(void);
 void multiple_group_write(void);
 void multiple_group_read(void);
+void collective_group_write_independent_group_read(void);
 void collective_group_write(void);
 void independent_group_read(void);
 void test_fapl_mpio_dup(void);
@@ -295,6 +296,8 @@ void compress_readAll(void);
 #endif /* H5_HAVE_FILTER_DEFLATE */
 void test_dense_attr(void);
 void test_partial_no_selection_coll_md_read(void);
+void test_multi_chunk_io_addrmap_issue(void);
+void test_link_chunk_io_sort_chunk_issue(void);
 
 /* commonly used prototypes */
 hid_t create_faccess_plist(MPI_Comm comm, MPI_Info info, int l_facc_type);

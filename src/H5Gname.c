@@ -522,7 +522,7 @@ H5G_name_copy(H5G_name_t *dst, const H5G_name_t *src, H5_copy_depth_t depth)
     HDassert(depth == H5_COPY_SHALLOW || depth == H5_COPY_DEEP);
 
     /* Copy the top level information */
-    HDmemcpy(dst, src, sizeof(H5G_name_t));
+    H5MM_memcpy(dst, src, sizeof(H5G_name_t));
 
     /* Deep copy the names */
     if(depth == H5_COPY_DEEP) {
@@ -828,6 +828,7 @@ H5G_name_replace_cb(void *obj_ptr, hid_t obj_id, void *key)
         case H5I_ERROR_CLASS:
         case H5I_ERROR_MSG:
         case H5I_ERROR_STACK:
+        case H5I_SPACE_SEL_ITER:
         case H5I_NTYPES:
         default:
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "unknown data object")

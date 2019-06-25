@@ -10,7 +10,7 @@ project (HDF5 C)
 # set CMAKE_INSTALL_PREFIX to the required install path.
 # Make install can be used to install all components for system-wide use.
 #
-if ("${CMAKE_CURRENT_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_BINARY_DIR}")
+if (CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_CURRENT_BINARY_DIR)
     MESSAGE(FATAL_ERROR "\nERROR! ${PROJECT_NAME} DOES NOT SUPPORT IN SOURCE BUILDS!\n"
       "CMAKE_CURRENT_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}"
       " == CMAKE_CURRENT_BINARY_DIR=${CMAKE_CURRENT_BINARY_DIR}\n"
@@ -314,7 +314,7 @@ set (HDF5_PACKAGE_NAME "HDF5")
 set (HDF5_PACKAGE_VERSION "${H5_VERS_MAJOR}.${H5_VERS_MINOR}.${H5_VERS_RELEASE}")
 set (HDF5_PACKAGE_VERSION_MAJOR "${H5_VERS_MAJOR}.${H5_VERS_MINOR}")
 set (HDF5_PACKAGE_VERSION_MINOR "${H5_VERS_RELEASE}")
-if (NOT "${H5_VERS_SUBRELEASE}" STREQUAL "")
+if (H5_VERS_SUBRELEASE)
   set (HDF5_PACKAGE_VERSION_STRING "${HDF5_PACKAGE_VERSION}-${H5_VERS_SUBRELEASE}")
 else ()
   set (HDF5_PACKAGE_VERSION_STRING "${HDF5_PACKAGE_VERSION}")
@@ -416,18 +416,23 @@ set (CMAKE_INCLUDE_CURRENT_DIR_IN_INTERFACE ON)
 # Mac OS X Options
 #-----------------------------------------------------------------------------
 if (HDF5_BUILD_FRAMEWORKS AND NOT BUILD_SHARED_LIBS)
-  set (BUILD_SHARED_LIBS ON CACHE BOOL "Build Shared Libraries")
+  set (BUILD_SHARED_LIBS ON CACHE BOOL "Build Shared Libraries" FORCE)
 endif ()
 
 #-----------------------------------------------------------------------------
 # Option to Build Shared and Static libs, default is both
 #-----------------------------------------------------------------------------
+option (ONLY_SHARED_LIBS "Only Build Shared Libraries" OFF)
+set (H5_ENABLE_STATIC_LIB YES)
+if (ONLY_SHARED_LIBS)
+  set (H5_ENABLE_STATIC_LIB NO)
+  set (BUILD_SHARED_LIBS ON CACHE BOOL "Build Shared Libraries")
+endif ()
 option (BUILD_SHARED_LIBS "Build Shared Libraries" ON)
 set (H5_ENABLE_SHARED_LIB NO)
 if (BUILD_SHARED_LIBS)
   set (H5_ENABLE_SHARED_LIB YES)
 endif ()
-set (H5_ENABLE_STATIC_LIB YES)
 set (CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 #-----------------------------------------------------------------------------
@@ -683,8 +688,10 @@ endif ()
 option (HDF5_ENABLE_THREADSAFE "Enable thread-safety" OFF)
 if (HDF5_ENABLE_THREADSAFE)
   # check for unsupported options
-  message (STATUS " **** thread-safety option not supported with static library **** ")
-  message (STATUS " **** thread-safety option will not be used building static library **** ")
+  if (WIN32)
+    message (STATUS " **** thread-safety option not supported with static library **** ")
+    message (STATUS " **** thread-safety option will not be used building static library **** ")
+  endif ()
   if (HDF5_ENABLE_PARALLEL)
     if (NOT ALLOW_UNSUPPORTED)
       message (FATAL_ERROR " **** parallel and thread-safety options are not supported **** ")
@@ -722,9 +729,9 @@ if (HDF5_ENABLE_THREADSAFE)
     endif ()
   endif ()
   set(THREADS_PREFER_PTHREAD_FLAG ON)
-  find_package(Threads)
-  if (NOT Threads_FOUND)
-    message (STATUS " **** thread-safe package not found - threads still might work **** ")
+  find_package(Threads REQUIRED)
+  if (Threads_FOUND)
+    set (H5_HAVE_THREADSAFE 1)
   endif ()
 endif ()
 
@@ -735,13 +742,17 @@ add_subdirectory (src)
 
 if (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "GIT" OR HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "TGZ")
   if (ZLIB_FOUND AND ZLIB_USE_EXTERNAL)
-    add_dependencies (${HDF5_LIB_TARGET} ZLIB)
+    if (NOT ONLY_SHARED_LIBS)
+      add_dependencies (${HDF5_LIB_TARGET} ZLIB)
+    endif ()
     if (BUILD_SHARED_LIBS)
       add_dependencies (${HDF5_LIBSH_TARGET} ZLIB)
     endif ()
   endif ()
   if (SZIP_FOUND AND SZIP_USE_EXTERNAL)
-    add_dependencies (${HDF5_LIB_TARGET} SZIP)
+    if (NOT ONLY_SHARED_LIBS)
+      add_dependencies (${HDF5_LIB_TARGET} SZIP)
+    endif ()
     if (BUILD_SHARED_LIBS)
       add_dependencies (${HDF5_LIBSH_TARGET} SZIP)
     endif ()
@@ -754,7 +765,7 @@ endif ()
 option (BUILD_TESTING "Build HDF5 Unit Testing" ON)
 if (BUILD_TESTING)
   set (DART_TESTING_TIMEOUT 1200
-      CACHE INTEGER
+      CACHE STRING
       "Timeout in seconds for each test (default 1200=20minutes)"
   )
 
@@ -770,11 +781,11 @@ if (BUILD_TESTING)
     mark_as_advanced (HDF5_TEST_FHEAP_VFD)
   endif ()
 
-  option (HDF5_TEST_VOL "Execute tests with different VOL connectors" OFF)
-  mark_as_advanced (HDF5_TEST_VOL)
-  if (HDF5_TEST_VOL)
-    option (HDF5_TEST_FHEAP_VOL "Execute fheap test with different VOL connectors" ON)
-    mark_as_advanced (HDF5_TEST_FHEAP_VOL)
+  option (HDF5_TEST_PASSTHROUGH_VOL "Execute tests with different passthrough VOL connectors" OFF)
+  mark_as_advanced (HDF5_TEST_PASSTHROUGH_VOL)
+  if (HDF5_TEST_PASSTHROUGH_VOL)
+    option (HDF5_TEST_FHEAP_PASSTHROUGH_VOL "Execute fheap test with different passthrough VOL connectors" ON)
+    mark_as_advanced (HDF5_TEST_FHEAP_PASSTHROUGH VOL)
   endif ()
 
   option (HDF_TEST_EXPRESS "Control testing framework (0-3)" "0")
@@ -845,7 +856,7 @@ if (EXISTS "${HDF5_SOURCE_DIR}/fortran" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/for
     message (STATUS "Fortran compiler ID is ${CMAKE_Fortran_COMPILER_ID}")
     # Building with PGI requires CMake 3.3 or greater  because previous versions
     # of CMake add the wrong compiler flag for the PGI Fortran compiler.
-    if ("${CMAKE_Fortran_COMPILER_ID}" MATCHES "PGI" AND "${CMAKE_VERSION}" VERSION_LESS "3.3")
+    if (CMAKE_Fortran_COMPILER_ID MATCHES "PGI" AND CMAKE_VERSION VERSION_LESS "3.3")
       message (FATAL_ERROR " **** PGI FORTRAN REQUIRES CMAKE VERSION 3.3 OR GREATER **** ")
     endif ()
 

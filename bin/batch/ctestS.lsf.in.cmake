@@ -11,7 +11,7 @@
 
 cd @HDF5_BINARY_DIR@
 echo "Run command. Test output will be in build/ctestS.out"
-ctest . -E 'TEST_PAR|PH5DIFF|PERFORM' -C Release -j 32 -T test >& ctestS.out
+ctest . -E MPI_TEST_ -C Release -j 32 -T test >& ctestS.out
 
 ##$CMD  >& ctestS.out
 echo "Done running command."

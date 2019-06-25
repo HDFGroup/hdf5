@@ -28,7 +28,7 @@ if (APPLE)
   list (LENGTH CMAKE_OSX_ARCHITECTURES ARCH_LENGTH)
   if (ARCH_LENGTH GREATER 1)
     set (CMAKE_OSX_ARCHITECTURES "" CACHE STRING "" FORCE)
-    message(FATAL_ERROR "Building Universal Binaries on OS X is NOT supported by the HDF5 project. This is"
+    message (FATAL_ERROR "Building Universal Binaries on OS X is NOT supported by the HDF5 project. This is"
     "due to technical reasons. The best approach would be build each architecture in separate directories"
     "and use the 'lipo' tool to combine them into a single executable or library. The 'CMAKE_OSX_ARCHITECTURES'"
     "variable has been set to a blank value which will build the default architecture for this system.")
@@ -229,7 +229,7 @@ macro (HDF_FUNCTION_TEST OTHER_TEST)
     endif ()
 
     #message (STATUS "Performing ${OTHER_TEST}")
-    TRY_COMPILE (${OTHER_TEST}
+    try_compile (${OTHER_TEST}
         ${CMAKE_BINARY_DIR}
         ${HDF_RESOURCES_EXT_DIR}/HDFTests.c
         COMPILE_DEFINITIONS "${MACRO_CHECK_FUNCTION_DEFINITIONS}"
@@ -274,12 +274,10 @@ if (NOT WINDOWS)
   # functionality so clock_gettime and CLOCK_MONOTONIC are defined
   # correctly. This was later updated to 200112L so that
   # posix_memalign() is visible for the direct VFD code on Linux
-  # systems. Even later, this was changed to 200809L to support
-  # pread/pwrite in VFDs.
-  #
+  # systems.
   # POSIX feature information can be found in the gcc manual at:
   # http://www.gnu.org/s/libc/manual/html_node/Feature-Test-Macros.html
-  set (HDF_EXTRA_C_FLAGS -D_POSIX_C_SOURCE=200809L)
+  set (HDF_EXTRA_C_FLAGS -D_POSIX_C_SOURCE=200112L)
 
   # Need to add this so that O_DIRECT is visible for the direct
   # VFD on Linux systems.
@@ -288,7 +286,7 @@ if (NOT WINDOWS)
   option (HDF_ENABLE_LARGE_FILE "Enable support for large (64-bit) files on Linux." ON)
   if (HDF_ENABLE_LARGE_FILE AND NOT DEFINED TEST_LFS_WORKS_RUN)
     set (msg "Performing TEST_LFS_WORKS")
-    TRY_RUN (TEST_LFS_WORKS_RUN   TEST_LFS_WORKS_COMPILE
+    try_run (TEST_LFS_WORKS_RUN   TEST_LFS_WORKS_COMPILE
         ${CMAKE_BINARY_DIR}
         ${HDF_RESOURCES_EXT_DIR}/HDFTests.c
         COMPILE_DEFINITIONS "-DTEST_LFS_WORKS"
@@ -445,7 +443,7 @@ if (NOT WINDOWS)
   # Check a bunch of time functions
   #-----------------------------------------------------------------------------
   CHECK_FUNCTION_EXISTS (gettimeofday      ${HDF_PREFIX}_HAVE_GETTIMEOFDAY)
-  foreach (test
+  foreach (time_test
       HAVE_TM_GMTOFF
       HAVE___TM_GMTOFF
 #      HAVE_TIMEZONE
@@ -455,7 +453,7 @@ if (NOT WINDOWS)
       HAVE_TM_ZONE
       HAVE_STRUCT_TM_TM_ZONE
   )
-    HDF_FUNCTION_TEST (${test})
+    HDF_FUNCTION_TEST (${time_test})
   endforeach ()
   if (NOT CYGWIN AND NOT MINGW)
       HDF_FUNCTION_TEST (HAVE_TIMEZONE)
@@ -559,7 +557,7 @@ endif ()
 # Check a bunch of other functions
 #-----------------------------------------------------------------------------
 if (NOT WINDOWS)
-  foreach (test
+  foreach (other_test
       HAVE_ATTRIBUTE
       HAVE_C99_FUNC
 #      STDC_HEADERS
@@ -568,7 +566,7 @@ if (NOT WINDOWS)
       SYSTEM_SCOPE_THREADS
       HAVE_SOCKLEN_T
   )
-    HDF_FUNCTION_TEST (${test})
+    HDF_FUNCTION_TEST (${other_test})
   endforeach ()
 endif ()
 
@@ -658,7 +656,7 @@ if (NOT ${HDF_PREFIX}_PRINTF_LL_WIDTH OR ${HDF_PREFIX}_PRINTF_LL_WIDTH MATCHES "
       set (${HDF_PREFIX}_PRINTF_LL_WIDTH "\"${${HDF_PREFIX}_PRINTF_LL}\"" CACHE INTERNAL "Width for printf for type `long long' or `__int64', us. `ll")
       set (PRINT_LL_FOUND 1)
     else ()
-      message ("Width test failed with result: ${${HDF_PREFIX}_PRINTF_LL_TEST_RUN}")
+      message (STATUS "Width test failed with result: ${${HDF_PREFIX}_PRINTF_LL_TEST_RUN}")
     endif ()
   else ()
     file (APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log

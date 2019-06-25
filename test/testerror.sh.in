@@ -22,7 +22,9 @@ CMP='cmp -s'
 DIFF='diff -c'
 
 # Skip plugin module to test missing filter
-ENVCMD="env HDF5_PLUGIN_PRELOAD=::"
+# Also reset the VOL connector to only use the native connector, because of the
+#       error stack checking.   QAK - 2019/03/09
+ENVCMD="env HDF5_PLUGIN_PRELOAD=:: HDF5_VOL_CONNECTOR=native"
 
 nerrors=0
 verbose=yes

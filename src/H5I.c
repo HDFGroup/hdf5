@@ -355,6 +355,9 @@ H5Itype_exists(H5I_type_t type)
     FUNC_ENTER_API(FAIL)
     H5TRACE1("t", "It", type);
 
+    if(H5I_IS_LIB_TYPE(type))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADGROUP, FAIL, "cannot call public function on library type")
+
     if (type <= H5I_BADID || type >= H5I_next_type)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid type number")
 
@@ -1131,7 +1134,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-void *
+static void *
 H5I__remove_verify(hid_t id, H5I_type_t id_type)
 {
     void * ret_value = NULL;	/*return value			*/
@@ -1940,6 +1943,8 @@ H5I__iterate_pub_cb(void H5_ATTR_UNUSED *obj, hid_t id, void *_udata)
         ret_value = H5_ITER_STOP;	/* terminate iteration early */
     else if(cb_ret_val < 0)
         ret_value = H5_ITER_ERROR;  /* indicate failure (which terminates iteration) */
+    else
+        ret_value = H5_ITER_CONT; /* continue iteration */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I__iterate_pub_cb() */
@@ -2166,7 +2171,6 @@ H5Iget_name(hid_t id, char *name/*out*/, size_t size)
 {
     H5VL_object_t *vol_obj;     /* Object token of loc_id */
     H5VL_loc_params_t loc_params;
-    H5G_loc_t     loc;          /* Object location */
     ssize_t       ret_value;    /* Return value */
 
     FUNC_ENTER_API((-1))
@@ -2181,7 +2185,7 @@ H5Iget_name(hid_t id, char *name/*out*/, size_t size)
     loc_params.obj_type     = H5I_get_type(id);
 
     /* Retrieve object's name */
-    if(H5VL_object_get(vol_obj, &loc_params, H5VL_ID_GET_NAME, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &ret_value, name, size) < 0)
+    if(H5VL_object_get(vol_obj, &loc_params, H5VL_OBJECT_GET_NAME, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &ret_value, name, size) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, (-1), "can't retrieve object name")
 
 done:
@@ -2379,6 +2383,7 @@ H5I__id_dump_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
         case H5I_ERROR_CLASS:
         case H5I_ERROR_MSG:
         case H5I_ERROR_STACK:
+        case H5I_SPACE_SEL_ITER:
         case H5I_NTYPES:
         default:
             break;   /* Other types of IDs are not stored in files */

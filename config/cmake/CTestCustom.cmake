@@ -39,7 +39,6 @@ set (CTEST_CUSTOM_MEMCHECK_IGNORE
     H5TEST-flush2           #designed to need flush1
     H5TEST-error_test       #uses runTest.cmake
     H5TEST-err_compat       #uses runTest.cmake
-    H5TEST-links_env        #uses runTest.cmake
     H5TEST-testlibinfo      #uses grepTest.cmake
     #########
     H5TEST-clear-objects
@@ -64,11 +63,19 @@ set (CTEST_CUSTOM_MEMCHECK_IGNORE
     CPP_testhdf5-clear-objects
     ######### tools/h5clear #########
     H5CLEAR-clearall-objects
+    H5CLEAR-copy_h5clear_fsm_persist_equal.h5
+    H5CLEAR-copy_h5clear_fsm_persist_greater.h5
+    H5CLEAR-copy_h5clear_fsm_persist_less.h5
+    H5CLEAR-copy_h5clear_fsm_persist_noclose.h5
+    H5CLEAR-copy_h5clear_fsm_persist_user_equal.h5
+    H5CLEAR-copy_h5clear_fsm_persist_user_greater.h5
+    H5CLEAR-copy_h5clear_fsm_persist_user_less.h5
     H5CLEAR-copy_h5clear_log_v3.h5
     H5CLEAR-copy_h5clear_mdc_image.h5
     H5CLEAR-copy_h5clear_sec2_v0.h5
     H5CLEAR-copy_h5clear_sec2_v2.h5
     H5CLEAR-copy_h5clear_sec2_v3.h5
+    H5CLEAR-copy_h5clear_status_noclear.h5
     H5CLEAR-copy_latest_h5clear_log_v3.h5
     H5CLEAR-copy_latest_h5clear_sec2_v3.h5
     H5CLEAR-copy_mod_h5clear_mdc_image.h5
@@ -86,6 +93,7 @@ set (CTEST_CUSTOM_MEMCHECK_IGNORE
     H5DUMP_PACKED_BITS-clearall-objects
     H5DUMP-XML-clearall-objects
     H5DUMP_VDS-clearall-objects
+    H5DUMP-t128bit_float      #uses grepTest.cmake
     ######### tools/h5format_convert #########
     H5FC-clearall-objects
     ######### tools/h5import #########

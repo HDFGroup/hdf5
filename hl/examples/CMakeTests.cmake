@@ -51,7 +51,7 @@ add_custom_target(hl_ex_ex_ds1_files ALL COMMENT "Copying files needed by hl_ex_
     ex_table_12.h5
     ex_ds1.h5
   )
-  if (NOT "${last_test}" STREQUAL "")
+  if (last_test)
     set_tests_properties (HL_ex-clear-objects PROPERTIES DEPENDS ${last_test})
   endif ()
   set (last_test "HL_ex-clear-objects")
@@ -71,7 +71,7 @@ foreach (example ${examples})
         -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
     )
   endif ()
-  if (NOT "${last_test}" STREQUAL "")
+  if (last_test)
     set_tests_properties (HL_ex_${example} PROPERTIES DEPENDS ${last_test})
   endif ()
   set (last_test "HL_ex_${example}")

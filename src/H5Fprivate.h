@@ -28,6 +28,7 @@ typedef struct H5F_t H5F_t;
 #include "H5FDpublic.h"        /* File drivers                */
 
 /* Private headers needed by this file */
+#include "H5MMprivate.h"	/* Memory management			*/
 #ifdef H5_HAVE_PARALLEL
 #include "H5Pprivate.h"        /* Property lists            */
 #endif /* H5_HAVE_PARALLEL */
@@ -134,7 +135,7 @@ typedef struct H5F_t H5F_t;
                                         \
     HDcompile_assert(sizeof(double) == 8);                      \
     HDcompile_assert(sizeof(double) == sizeof(uint64_t));              \
-    HDmemcpy(&_n, &n, sizeof(double));                          \
+    H5MM_memcpy(&_n, &n, sizeof(double));                          \
     for(_u = 0; _u < sizeof(uint64_t); _u++, _n >>= 8)                  \
         *_p++ = (uint8_t)(_n & 0xff);                          \
     (p) = (uint8_t *)(p) + 8;                              \
@@ -159,16 +160,16 @@ typedef struct H5F_t H5F_t;
    (i) |= (uint16_t)((*(p) & 0xff) << 8); (p)++;                  \
 }
 
-#  define INT32DECODE(p, i) {                              \
-   (i)    = ((int32_t)(*(p) & (unsigned)0xff));      (p)++;              \
-   (i) |= ((int32_t)(*(p) & (unsigned)0xff) <<  8); (p)++;              \
-   (i) |= ((int32_t)(*(p) & (unsigned)0xff) << 16); (p)++;              \
-   (i) |= ((int32_t)(((*(p) & (unsigned)0xff) << 24) |                        \
-                   ((*(p) & (unsigned)0x80) ? (unsigned)(~0xffffffff) : (unsigned)0x0))); (p)++; \
+#  define INT32DECODE(p, i) {                                \
+   (i)  = ((int32_t)(*(p) & 0xff));      (p)++;              \
+   (i) |= ((int32_t)(*(p) & 0xff) <<  8); (p)++;             \
+   (i) |= ((int32_t)(*(p) & 0xff) << 16); (p)++;             \
+   (i) |= ((int32_t)(((*(p) & (unsigned)0xff) << 24) |                 \
+            ((*(p) & 0x80) ? ~0xffffffffULL : 0x0ULL))); (p)++;    \
 }
 
-#  define UINT32DECODE(p, i) {                              \
-   (i)    =  (uint32_t)(*(p) & 0xff);       (p)++;                  \
+#  define UINT32DECODE(p, i) {                                     \
+   (i)  =  (uint32_t)(*(p) & 0xff);       (p)++;                   \
    (i) |= ((uint32_t)(*(p) & 0xff) <<  8); (p)++;                  \
    (i) |= ((uint32_t)(*(p) & 0xff) << 16); (p)++;                  \
    (i) |= ((uint32_t)(*(p) & 0xff) << 24); (p)++;                  \
@@ -240,7 +241,7 @@ typedef struct H5F_t H5F_t;
     (p) += 8;                                      \
     for(_u = 0; _u < sizeof(uint64_t); _u++)                      \
         _n = (_n << 8) | *(--p);                          \
-    HDmemcpy(&(n), &_n, sizeof(double));                          \
+    H5MM_memcpy(&(n), &_n, sizeof(double));                          \
     (p) += 8;                                      \
 }
 
@@ -701,8 +702,9 @@ typedef enum H5F_mem_page_t {
 
 /* Type of prefix for opening prefixed files */
 typedef enum H5F_prefix_open_t {
-    H5F_PREFIX_VDS,             /* Virtual dataset prefix */
-    H5F_PREFIX_ELINK            /* External link prefix */
+    H5F_PREFIX_VDS   = 0,           /* Virtual dataset prefix */
+    H5F_PREFIX_ELINK = 1,           /* External link prefix   */
+    H5F_PREFIX_EFILE = 2            /* External file prefix   */
 } H5F_prefix_open_t;
 
 

@@ -93,14 +93,20 @@
 ##############################################################################
 ##############################################################################
 
+  if (NOT BUILD_SHARED_LIBS)
+    set (tgt_ext "")
+  else ()
+    set (tgt_ext "-shared")
+  endif ()
+
   macro (ADD_H5_TEST resultfile resultcode)
     # If using memchecker add tests without using scripts
     if (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (NAME H5STAT-${resultfile} COMMAND $<TARGET_FILE:h5stat> ${ARGN})
-      if (NOT "${resultcode}" STREQUAL "0")
+      add_test (NAME H5STAT-${resultfile} COMMAND $<TARGET_FILE:h5stat${tgt_ext}> ${ARGN})
+      if (${resultcode})
         set_tests_properties (H5STAT-${resultfile} PROPERTIES WILL_FAIL "true")
       endif ()
-      if (NOT "${last_test}" STREQUAL "")
+      if (last_test)
         set_tests_properties (H5STAT-${resultfile} PROPERTIES DEPENDS ${last_test})
       endif ()
     else (HDF5_ENABLE_USING_MEMCHECKER)
@@ -111,13 +117,13 @@
               ${resultfile}.out
               ${resultfile}.out.err
       )
-      if (NOT "${last_test}" STREQUAL "")
+      if (last_test)
         set_tests_properties (H5STAT-${resultfile}-clear-objects PROPERTIES DEPENDS ${last_test})
       endif ()
       add_test (
           NAME H5STAT-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5stat>"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5stat${tgt_ext}>"
               -D "TEST_ARGS=${ARGN}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
               -D "TEST_OUTPUT=${resultfile}.out"
@@ -132,11 +138,11 @@
   macro (ADD_H5_ERR_TEST resultfile resultcode)
     # If using memchecker add tests without using scripts
     if (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (NAME H5STAT-${resultfile} COMMAND $<TARGET_FILE:h5stat> ${ARGN})
-      if (NOT "${resultcode}" STREQUAL "0")
+      add_test (NAME H5STAT-${resultfile} COMMAND $<TARGET_FILE:h5stat${tgt_ext}> ${ARGN})
+      if (${resultcode})
         set_tests_properties (H5STAT-${resultfile} PROPERTIES WILL_FAIL "true")
       endif ()
-      if (NOT "${last_test}" STREQUAL "")
+      if (last_test)
         set_tests_properties (H5STAT-${resultfile} PROPERTIES DEPENDS ${last_test})
       endif ()
     else (HDF5_ENABLE_USING_MEMCHECKER)
@@ -147,13 +153,13 @@
               ${resultfile}.out
               ${resultfile}.out.err
       )
-      if (NOT "${last_test}" STREQUAL "")
+      if (last_test)
         set_tests_properties (H5STAT-${resultfile}-clear-objects PROPERTIES DEPENDS ${last_test})
       endif ()
       add_test (
           NAME H5STAT-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5stat>"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5stat${tgt_ext}>"
               -D "TEST_ARGS=${ARGN}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
               -D "TEST_OUTPUT=${resultfile}.out"
@@ -182,7 +188,7 @@
       COMMAND    ${CMAKE_COMMAND}
           -E remove ${CLEAR_LIST}
     )
-    if (NOT "${last_test}" STREQUAL "")
+    if (last_test)
       set_tests_properties (H5STAT-clearall-objects PROPERTIES DEPENDS ${last_test})
     endif ()
     set (last_test "H5STAT-clearall-objects")
