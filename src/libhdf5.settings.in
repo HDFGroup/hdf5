@@ -72,7 +72,7 @@ Parallel Filtered Dataset Writes: @PARALLEL_FILTERED_WRITES@
               Large Parallel I/O: @LARGE_PARALLEL_IO@
               High-level library: @HDF5_HL@
                 Build HDF5 Tests: @HDF5_TESTS@
-                Build HDF5 TOOLS: @HDF5_TOOLS@
+                Build HDF5 Tools: @HDF5_TOOLS@
                     Threadsafety: @THREADSAFE@
              Default API mapping: @DEFAULT_API_VERSION@
   With deprecated public symbols: @DEPRECATED_SYMBOLS@
