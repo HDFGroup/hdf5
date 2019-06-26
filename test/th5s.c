@@ -3366,8 +3366,8 @@ test_h5s(void)
     test_h5s_zero_dim();        /* Test dataspace with zero dimension size */
 
     /* Loop through all the combinations of low/high version bounds */
-    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
-        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
+    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, low)) {
+        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, high)) {
 
             /* Invalid combinations, just continue */
             if(high == H5F_LIBVER_EARLIEST || high < low)
