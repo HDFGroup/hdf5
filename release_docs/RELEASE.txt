@@ -376,6 +376,22 @@ Bug Fixes since HDF5-1.10.4 release
 
     Library
     -------
+    - Fixed an issue where creating a file with non-default file space info
+      together with library high bound setting to H5F_LIBVER_V18.
+
+      When setting non-default file space info in fcpl via
+      H5Pset_file_space_strategy() and then creating a file with 
+      both high and low library bounds set to
+      H5F_LIBVER_V18 in fapl, the library succeeds in creating the file.
+      File creation should fail because the feature of setting non-default
+      file space info does not exist in library release 1.8 or earlier.
+
+      This was fixed by setting and checking the proper version in the 
+      file space info message based on the library low and high bounds
+      when creating and opening the HDF5 file.
+
+      (VC - 2019/6/25, HDFFV-10808)
+
     - Fixed an issue where copying a version 1.8 dataset between files using
       H5Ocopy fails due to an incompatible fill version
 
