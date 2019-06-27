@@ -837,38 +837,39 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, hbool_t initial_read)
                 if(f->shared->eoa_fsm_fsalloc != fsinfo.eoa_pre_fsm_fsalloc)
                     f->shared->eoa_fsm_fsalloc = fsinfo.eoa_pre_fsm_fsalloc;
 
-               /* f->shared->eoa_pre_fsm_fsalloc must always be HADDR_UNDEF
-                * in the absence of persistent free space managers.
-                */
-                /* If the following two conditions are true:
+                /* 
+                 * If the following two conditions are true:
                  *       (1) skipping EOF check (skip_eof_check)
                  *       (2) dropping free-space to the floor (f->shared->null_fsm_addr)
-                 *  skip the asserts as "eoa_pre_fsm_fsalloc" may be undefined
+                 *  skip the asserts as "eoa_fsm_fsalloc" may be undefined
                  *  for a crashed file with persistent free space managers.
-                 *  #1 and #2 are enabled when the tool h5clear --increment
+                 *  The above two conditions are enabled when the tool h5clear --increment
                  *  option is used.
                  */
-                if(!skip_eof_check && !f->shared->null_fsm_addr) {
+                if(!skip_eof_check && !f->shared->null_fsm_addr)
                      HDassert((!f->shared->fs_persist) || (f->shared->eoa_fsm_fsalloc != HADDR_UNDEF));
-                }
 
-                /* As "eoa_pre_fsm_fsalloc" may be undefined for a crashed file
-                 * with persistent free space managers, therefore, set
-                 * "first_alloc_dealloc" when the condition 
-                 * "dropping free-space to the floor is true.
-                 * This will ensure that no action is done to settle things on file
-                 * close via H5MF_settle_meta_data_fsm() and H5MF_settle_raw_data_fsm().
-                 */
-                /* The following check is removed:
+                /* 
+                 * A crashed file with persistent free-space managers may have
+                 * undefined f->shared->eoa_fsm_fsalloc.  
+                 * eoa_fsm_fsalloc is the final eoa which is saved in the free-space
+                 * info message's eoa_pre_fsm_fsalloc field for backward compatibility.
+                 * If the tool h5clear sets to dropping free-space to the floor
+                 * as indicated by f->shared->null_fsm_addr, we are not going to
+                 * perform actions to settle things on file close in the routines
+                 * H5MF_settle_meta_data_fsm() and H5MF_settle_raw_data_fsm().
+                 *
+                 * We remove the following check:
                  *   if((f->shared->eoa_pre_fsm_fsalloc != HADDR_UNDEF || null_fsm_addr) &&
                  *       (H5F_INTENT(f) & H5F_ACC_RDWR))
+                 *      f->shared->first_alloc_dealloc = TRUE;
                  *
-                 * --there is no more eoa_pre_fsm_fsalloc
+                 * Because:
+                 * --there is no more f->shared->eoa_pre_fsm_fsalloc and
+                 *   f->shared->first_alloc_dealloc
                  * --the check for null_fsm_addr is directly done in H5MF_settle_meta_data_fsm() 
                  *   and H5MF_settle_raw_data_fsm()
                  */
-
-
 
                 f->shared->fs_addr[0] = HADDR_UNDEF;
                 for(u = 1; u < NELMTS(f->shared->fs_addr); u++)

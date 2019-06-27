@@ -307,6 +307,20 @@ HDfprintf(stderr, "%s: fspace->alloc_sect_size = %Hu, fspace->sect_size = %Hu\n"
  * Purpose:     Release the section info, either giving ownership back to
  *              the cache or letting the free space header keep it.
  *
+ *              Add the fix in this routine to resolve the potential infinite loop 
+ *              problem when allocating file space for the meta data of the 
+ *              self-referential free-space managers at file closing. 
+ *
+ *              On file close or flushing, when the section info is modified
+ *              and protected/unprotected, does not allow the section info size
+ *              to shrink:
+ *              --if the current allocated section info size in fspace->sect_size is
+ *                larger than the previous section info size in fpsace->alloc_sect_size,
+ *                 release the section info
+ *              --Otherwise, set the fspace->sect_size to be the same as 
+ *                fpsace->alloc_sect_size.  This means fspace->sect_size may be larger 
+ *                than what is actually needed.
+ *
  * Return:      SUCCEED/FAIL
  *
  * Programmer:  Quincey Koziol
@@ -2436,84 +2450,31 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5FS_vfd_alloc_hdr_and_section_info_if_needed
  *
- * Purpose:     This function is part of a hack to patch over a design
- *              flaw in the free space managers for file space allocation.
- *              Specifically, if a free space manager allocates space for
- *              its own section info, it is possible for it to
- *              go into an infinite loop as it:
- *
- *                      1) computes the size of the section info
- *
- *                      2) allocates file space for the section info
- *
- *                      3) notices that the size of the section info
- *                         has changed
- *
- *                      4) deallocates the section info file space and
- *                         returns to 1) above.
- *
- *              Similarly, if it allocates space for its own header, it
- *              can go into an infinite loop as it:
- *
- *                      1) allocates space for the header
- *
- *                      2) notices that the free space manager is empty
- *                         and thus should not have file space allocated
- *                         to its header
- *
- *                      3) frees the space allocated to the header
- *
- *                      4) notices that the free space manager is not
- *                         empty and thus must have file space allocated
- *                         to it, and thus returns to 1) above.
- *
- *              In a nutshell, the solution applied in this hack is to
- *              deallocate file space for the free space manager(s) that
- *              handle FSM header and/or section info file space allocations,
- *              wait until all other allocation/deallocation requests have
- *              been handled, and then test to see if the free space manager(s)
- *              in question are empty.  If they are, do nothing.  If they
- *              are not, allocate space for them at end of file bypassing the
- *              usual file space allocation calls, and thus avoiding the
- *              potential infinite loops.
- *
- *              The purpose of this function is to allocate file space for
+ * Purpose:     The purpose of this function is to allocate file space for
  *              the header and section info of the target free space manager
- *              directly from the VFD if needed.  In this case the function
- *              also re-inserts the header and section info in the metadata
- *              cache with this allocation.
+ *              if they are not allocated yet.
  *
- *		When paged allocation is not enabled, allocation of space 
- *		for the free space manager header and section info is 
- *		straight forward -- we simply allocate the space directly 
- *		from file driver.
+ *              The previous hack in this routine to avoid the potential infinite
+ *              loops by allocating file space directly from the end of the file
+ *              is removed.  The allocation can now be done via the usual
+ *              file space allocation call H5MF_alloc().  
  *
- *              Note that if f->shared->alignment > 1, and EOA is not a
- *              multiple of the alignment, it is possible that performing
- *              these allocations may generate a fragment of file space in
- *              addition to the space allocated for the section info.  This
- *		excess space is dropped on the floor.  As shall be seen,
- *		it will usually be reclaimed later.
- *
- *		When page allocation is enabled, things are more difficult,
- *		as there is the possibility that page buffering will be 
- *		enabled when the free space managers are read.  To allow
- *		for this, we must ensure that space allocated for the 
- *		free space manager header and section info is either larger
- *		than a page, or resides completely within a page.
- *
- *		Do this by allocating space for the free space header and 
- *		section info starting at page boundaries, and extending 
- *		allocation to the next page boundary.  This of course wastes
- *		space, but see below.
- *
- *              On the first free space allocation / deallocation after the 
- *		next file open, we will read the self referential free space 
- *		managers, float them and reduce the EOA to its value prior 
- *		to allocation of file space for the self referential free 
- *              space managers on the preceeding file close.  This EOA value 
- *		is stored in the free space manager superblock extension 
- *		message.
+ *              The design flaw is addressed by not allowing the size 
+ *              of section info to shrink.  This means, when trying to allocate 
+ *              section info size X via H5MF_alloc() and the section info size 
+ *              after H5MF_alloc() changes to Y:
+ *              --if Y is larger than X, free the just allocated file space X 
+ *                via H5MF_xfree() and set fspace->sect_size to Y.
+ *                This routine will be called again later from 
+ *                H5MF_settle_meta_data_fsm() to allocate section info with the 
+ *                larger fpsace->sect_size Y.
+ *              --if Y is smaller than X, no further allocation is needed and 
+ *                fspace->sect_size and fspace->alloc_sect_size are set to X.
+ *                This means fspace->sect_size may be larger than what is
+ *                actually needed.
+ *                
+ *              This routine also re-inserts the header and section info in the
+ *              metadata cache with this allocation.
  *
  * Return:      Success:        non-negative
  *              Failure:        negative
@@ -2530,8 +2491,6 @@ H5FS_vfd_alloc_hdr_and_section_info_if_needed(H5F_t *f, H5FS_t *fspace,
     hsize_t	hdr_alloc_size;
     hsize_t	sinfo_alloc_size;
     haddr_t     sect_addr = HADDR_UNDEF;        /* address of sinfo */
-    haddr_t     eoa_frag_addr = HADDR_UNDEF;    /* Address of fragment at EOA */
-    hsize_t     eoa_frag_size = 0;      /* Size of fragment at EOA */
     haddr_t     eoa = HADDR_UNDEF;      /* Initial EOA for the file */
     herr_t ret_value = SUCCEED;         /* Return value */
 

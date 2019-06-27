@@ -51,6 +51,7 @@
 #define H5MF_FSPACE_EXPAND      120             /* Percent of "normal" size to expand serialized free space size */
 
 #define H5MF_CHECK_FSM(FSM, CF)                                             \
+    HDassert(*CF == FALSE);                                                 \
     if(!H5F_addr_defined(FSM->addr) || !H5F_addr_defined(FSM->sect_addr))   \
         *CF = TRUE;
 
@@ -2644,8 +2645,9 @@ H5MF_settle_raw_data_fsm(H5F_t *f, hbool_t *fsm_settled)
     HDassert(f->shared);
     HDassert(fsm_settled);
 
-    /* Only need to settle things if we are persisting the free space info 
-     * and allocation/deallocation has occurred.
+    /* 
+     * Only need to settle things if we are persisting free space and
+     * the private property in f->shared->null_fsm_addr is not enabled.
      */
     if(f->shared->fs_persist && !H5F_NULL_FSM_ADDR(f)) {
         hbool_t fsm_opened[H5F_MEM_PAGE_NTYPES];        /* State of FSM */
@@ -2987,7 +2989,6 @@ done:
 
 
 
-/* NEED TO remove/modify the comments in this routine */
 /*-------------------------------------------------------------------------
  * Function:    H5MF_settle_meta_data_fsm()
  *
@@ -3005,7 +3006,7 @@ done:
  *		On entry to this function, the raw data settle routine
  *		(H5MF_settle_raw_data_fsm()) should have:
  *
- *              1) Freed the aggregators.
+ *      1) Freed the aggregators.
  *
  *		2) Freed all file space allocated to the free space managers.
  *
@@ -3041,12 +3042,12 @@ done:
  *		1) Verify that the free space manager(s) involved in file
  *		   space allocation for free space managers are still floating.
  *
- *              2) Free the aggregators.
+ *      2) Free the aggregators.
  *
- *              3) Reduce the EOA to the extent possible, and make note
+ *      3) Reduce the EOA to the extent possible, and make note
  *		   of the resulting value.  This value will be stored 
  *		   in the fsinfo superblock extension message and be used
- *                 in the subsequent file open.
+ *          in the subsequent file open.
  *
  *		4) Re-allocate space for any free space manager(s) that:
  *
@@ -3067,21 +3068,15 @@ done:
  *		   allocation has changed the size of the section info -- 
  *		   forcing us to deallocate and start the loop over again.
  *
- *		   To avoid this, simply allocate file space for these
- *		   FSM(s) directly from the VFD layer if allocation is 
- *		   indicated.  This avoids the issue by bypassing the FSMs
- *		   in this case.  
- *
- *		   Note that this may increase the size of the file needlessly. 
- *		   A better solution would be to modify the FSM code to 
+ *		   The solution is to modify the FSM code to 
  *		   save empty FSMs to file, and to allow section info blocks
- *		   to be oversized.  However, given that the FSM code is 
- *		   also used by the fractal heaps, and that we are under 
- *		   severe time pressure at the moment, the above brute 
- *		   force solution is attractive. 
+ *		   to be oversized.  That is, only allow section info to increase
+ *         in size, not shrink.  The solution is now implemented.
  *
- *              5) Make note of the EOA -- used for sanity checking on 
- *                 FSM shutdown.
+ *      5) Make note of the EOA -- used for sanity checking on 
+ *         FSM shutdown.  This is saved as eoa_pre_fsm_fsalloc in
+ *         the free-space info message for backward compatibility
+ *         with the 1.10 library that has the hack.
  *
  * Return:	SUCCEED/FAIL
  *
@@ -3114,8 +3109,9 @@ H5MF_settle_meta_data_fsm(H5F_t *f, hbool_t *fsm_settled)
     HDassert(f->shared);
     HDassert(fsm_settled);
 
-    /* Only need to settle things if we are persisting the free space info 
-     * and allocation/deallocation has occurred.
+    /* 
+     * Only need to settle things if we are persisting free space and
+     * the private property in f->shared->null_fsm_addr is not enabled.
      */
     if(f->shared->fs_persist && !H5F_NULL_FSM_ADDR(f)) {
         /* Sanity check */
@@ -3221,7 +3217,6 @@ H5MF_settle_meta_data_fsm(H5F_t *f, hbool_t *fsm_settled)
          * Note that the aggregators will not exist if paged aggregation 
          * is enabled -- don't attempt to free if this is the case.
          */
-        /* Vailin -- is this correct? */
         /* (for space not at EOF, it may be put into free space managers) */
         if((!H5F_PAGED_AGGR(f)) && (H5MF_free_aggrs(f) < 0))
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "can't free aggregators")
@@ -3230,21 +3225,7 @@ H5MF_settle_meta_data_fsm(H5F_t *f, hbool_t *fsm_settled)
         if(H5MF__close_shrink_eoa(f) < 0)
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTSHRINK, FAIL, "can't shrink eoa")
 
-        /* At this point, the EOA should be set to a value that contains 
-         * the allocation for all user data, all non self referential FSMs,
-         * the superblock and all superblock extension messages.
-         * 
-         * Make note of the current EOA.  We will store this value in the 
-         * free space manager superblock extension message.  Since space for
-         * everything other than the self referential FSMs (and possibly the
-         * cache image) has been allocated at this point, this allows us to 
-         * to float the self referential FSMs on the first file space allocation / 
-         * deallocation and then set the EOA to this value before we handle
-         * the allocation / deallocation. (If a cache image exists, the 
-         * first allocation / deallocation will be the deallocation of space
-         * for the cache image).   
-         *
-         * WARNING:  This approach settling the self referential free space 
+        /* WARNING:  This approach settling the self referential free space 
          *           managers and allocating space for them in the file will 
          *           not work as currently implemented with the split and 
          *           multi file drivers, as the self referential free space 
@@ -3263,58 +3244,13 @@ H5MF_settle_meta_data_fsm(H5F_t *f, hbool_t *fsm_settled)
          *           We should be able to support the split file driver 
          *           without a file format change.  However, the code to 
          *           do so does not exist at present.
+         * NOTE: not sure whether to remove or keep the above comments
          */
 
-        /* ******************* PROBLEM: ********************
-         *
-         * If the file has an alignment other than 1, and if
-         * the EOA is not a multiple of this alignment, allocating space
-         * for the section via the VFD info has the potential of generating
-         * a fragment that will be added to the free space manager.  This
-         * of course undoes everything we have been doing here.
-         *
-         * Need a way around this.  Obvious solution is to force the EOA to
-         * be a multiple of the alignment.
-         *
-         * Fortunately, alignment is typically 1, so this is a non-issue in
-         * most cases.  In cases where the alignment is not 1, for now we
-         * have decided to drop the fragment on the floor.
-         *
-         * Eventually, we should fix this by modifying the on disk representations
-         * of free space managers to allow for empty space, so as to bypass the
-         * issues created by self-referential free space managers, and make
-         * this issue moot.
+        /* 
+         * Continue allocating file space for the header and section info until 
+         * they are all settled,
          */
-        /* HDassert(f->shared->alignment == 1); */
-
-
-        /* The free space manager(s) that handle space allocations for free
-         * space managers should be settled now, albeit without file space
-         * allocated to them.  To avoid the possibility of changing the sizes
-         * of their section info blocks, allocate space for them now at the
-         * end of file via H5FD_alloc().
-         *
-         * In the past, this issue of allocating space without touching the
-         * free space managers has been dealt with by calling
-         * H5MF_aggr_vfd_alloc(), which in turn calls H5MF_aggr_alloc().
-         * This is problematic since (if I read the code correctly) it will
-         * re-constitute the metadata aggregator, which will add any leftover
-         * space to one of the free space managers when freed.
-         *
-         * This is a non-starter, since the entire objective is to settle the
-         * free space managers.
-         *
-         * Hence the decision to call H5FD_alloc() directly.
-         *
-         * As discussed in PROBLEM above, if f->shared->alignment is not 1,
-         * this has the possibility of generating a fragment of file space
-         * that would typically be inserted into one of the free space managers.
-         *
-         * This is isn't good, but due to schedule pressure, we will just drop
-         * the fragment on the floor for now.
-         */
-
-
         do {
             continue_alloc_fsm = FALSE;
             if(sm_hdr_fspace)
@@ -3349,10 +3285,12 @@ H5MF_settle_meta_data_fsm(H5F_t *f, hbool_t *fsm_settled)
 
 
         /* All free space managers should have file space allocated for them
-         * now, and should see no further allocations / deallocations.  Store
-         * the pre and post file space allocation for self referential FSMs EOA
-         * for use when we actually write the free space manager superblock 
-         * extension message.
+         * now, and should see no further allocations / deallocations.  
+         * For backward compatibility, store the eoa in f->shared->eoa_fsm_fsalloc 
+         * which will be set to fsinfo.eoa_pre_fsm_fsalloc when we actually write 
+         * the free-space info message to the superblock extension.
+         * This will allow the 1.10 library with the hack to open the file with
+         * the new solution.
          */
         /* Get the eoa after allocation of file space for the self referential
          * free space managers.  Assuming no cache image, this should be the 
@@ -3379,12 +3317,14 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5MF__continue_alloc_fsm
  *
- * Purpose: 	To determine whether any of the input FSMs has allocated its
+ * Purpose: 	To determine whether any of the input FSMs has allocated
  *              its "addr" and "sect_addr".
  *              Return TRUE or FALSE in *continue_alloc_fsm.
  *
  * Return:	    SUCCEED/FAIL
  *
+ * Programmer:  Vailin Choi
+ *              6/24/2019
  *-------------------------------------------------------------------------
  */
 static herr_t
