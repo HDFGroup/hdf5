@@ -14925,7 +14925,6 @@ test_sel_iter(void)
     hid_t       sid;            /* Dataspace ID */
     hid_t       iter_id;        /* Dataspace selection iterator ID */
     hsize_t	dims1[] = {6, 12};  /* 2-D Dataspace dimensions */
-    hsize_t	dims2[] = {32}; /* 1-D dataspace dimensions */
     hsize_t	coord1[POINT1_NPOINTS][2]; /* Coordinates for point selection */
     hsize_t     start[2];       /* Hyperslab start */
     hsize_t     stride[2];      /* Hyperslab stride */

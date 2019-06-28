@@ -114,8 +114,8 @@ static hbool_t H5D_top_package_initialize_s = FALSE;
 
 /* Prefixes of VDS and external file from the environment variables
  * HDF5_EXTFILE_PREFIX and HDF5_VDS_PREFIX */ 
-const static char *H5D_prefix_ext_env = NULL;
-const static char *H5D_prefix_vds_env = NULL;
+static const char *H5D_prefix_ext_env = NULL;
+static const char *H5D_prefix_vds_env = NULL;
 
 
 /*-------------------------------------------------------------------------
