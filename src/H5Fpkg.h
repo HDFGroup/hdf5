@@ -328,14 +328,9 @@ struct H5F_file_t {
     H5F_fs_state_t fs_state[H5F_MEM_PAGE_NTYPES];   /* State of free space manager for each type */
     haddr_t fs_addr[H5F_MEM_PAGE_NTYPES];   /* Address of free space manager info for each type */
     H5FS_t *fs_man[H5F_MEM_PAGE_NTYPES];    /* Free space manager for each file space type */
-    hbool_t first_alloc_dealloc;            /* TRUE iff free space managers   */
-                                            /* are persistent and have not    */
-                                            /* been used accessed for either  */
-                                            /* allocation or deallocation     */
-                                            /* since file open.               */
-    haddr_t eoa_pre_fsm_fsalloc;            /* eoa pre file space allocation  */
-                                            /* for self referential FSMs      */
-    haddr_t eoa_post_fsm_fsalloc;           /* eoa post file space allocation */
+    hbool_t null_fsm_addr;                  /* Used by h5clear tool to tell the library  */
+                                            /* to drop free-space to the floor */
+    haddr_t eoa_fsm_fsalloc;                /* eoa after file space allocation */
                                             /* for self referential FSMs      */
     haddr_t eoa_post_mdci_fsalloc;          /* eoa past file space allocation */
                                             /* for metadata cache image, or   */
