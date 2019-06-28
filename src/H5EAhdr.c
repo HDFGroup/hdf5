@@ -63,6 +63,9 @@
 /* Local Typedefs */
 /******************/
 
+/* Alias for pointer to factory, for use when allocating sequences of them */
+typedef H5FL_fac_head_t *H5FL_fac_head_ptr_t;
+
 
 /********************/
 /* Package Typedefs */
@@ -82,9 +85,6 @@
 /*****************************/
 /* Library Private Variables */
 /*****************************/
-
-/* Alias for pointer to factory, for use when allocating sequences of them */
-typedef H5FL_fac_head_t *H5FL_fac_head_ptr_t;
 
 
 /*******************/

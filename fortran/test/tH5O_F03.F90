@@ -273,7 +273,6 @@ CONTAINS
     INTEGER :: len, i
     INTEGER :: idx
     INTEGER :: ierr
-    TYPE(C_PTR) :: cptr
 
     visit_obj_cb = 0
 

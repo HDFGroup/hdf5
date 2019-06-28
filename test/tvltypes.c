@@ -88,7 +88,7 @@ void test_vltypes_free_custom(void *_mem, void *mem_used)
                                                                  */
         unsigned char *mem = ((unsigned char *)_mem) - extra;   /* Pointer to actual block allocated */
 
-        *(size_t *)mem_used -= *(size_t *)mem;
+        *(size_t *)mem_used -= *(size_t *)((void *)mem);
         HDfree(mem);
     } /* end if */
 }

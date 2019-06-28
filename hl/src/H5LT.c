@@ -2423,9 +2423,9 @@ print_enum(hid_t type, char* str, size_t *str_len, hbool_t no_ubuf, size_t indt)
             goto out;
 
         if (H5T_SGN_NONE == H5Tget_sign(native))
-            HDsnprintf(tmp_str, TMP_LEN, "%u", *((unsigned int*)(value + (size_t)i * dst_size)));
+            HDsnprintf(tmp_str, TMP_LEN, "%u", *((unsigned int *)((void *)(value + (size_t)i * dst_size))));
         else
-            HDsnprintf(tmp_str, TMP_LEN, "%d", *((int*)(value + (size_t)i * dst_size)));
+            HDsnprintf(tmp_str, TMP_LEN, "%d", *((int *)((void *)(value + (size_t)i * dst_size))));
         if(!(str = realloc_and_append(no_ubuf, str_len, str, tmp_str)))
             goto out;
 

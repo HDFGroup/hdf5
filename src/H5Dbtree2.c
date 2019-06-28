@@ -204,9 +204,9 @@ const H5B2_class_t H5D_BT2_FILT[1] = {{	/* B-tree class information */
 
 /* Declare a free list to manage the H5D_bt2_ctx_t struct */
 H5FL_DEFINE_STATIC(H5D_bt2_ctx_t);
-/* Declare a free list to manage the page elements */
-H5FL_BLK_DEFINE(chunk_dim);
 
+/* Declare a free list to manage the page elements */
+H5FL_ARR_DEFINE_STATIC(uint32_t, H5O_LAYOUT_NDIMS);
 
 
 
@@ -247,7 +247,7 @@ H5D__bt2_crt_context(void *_udata)
     ctx->ndims = udata->ndims;
 
     /* Set up the "local" information for this dataset's chunk dimension sizes */
-    if(NULL == (my_dim = (uint32_t *)H5FL_BLK_MALLOC(chunk_dim, H5O_LAYOUT_NDIMS * sizeof(uint32_t))))
+    if(NULL == (my_dim = (uint32_t *)H5FL_ARR_MALLOC(uint32_t, H5O_LAYOUT_NDIMS)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, NULL, "can't allocate chunk dims")
     H5MM_memcpy(my_dim, udata->dim, H5O_LAYOUT_NDIMS * sizeof(uint32_t));
     ctx->dim = my_dim;
@@ -292,7 +292,7 @@ H5D__bt2_dst_context(void *_ctx)
 
     /* Free array for chunk dimension sizes */
     if(ctx->dim)
-	(void)H5FL_BLK_FREE(chunk_dim, ctx->dim); 
+	(void)H5FL_ARR_FREE(uint32_t, ctx->dim); 
     /* Release callback context */
     ctx = H5FL_FREE(H5D_bt2_ctx_t, ctx);
 

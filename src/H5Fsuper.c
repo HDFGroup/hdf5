@@ -54,6 +54,7 @@
 /********************/
 static herr_t H5F__super_ext_create(H5F_t *f, H5O_loc_t *ext_ptr);
 static herr_t H5F__update_super_ext_driver_msg(H5F_t *f);
+static herr_t H5F__fsinfo_set_version(const H5F_t *f, H5O_fsinfo_t *fsinfo);
 
 
 /*********************/
@@ -1393,7 +1394,7 @@ H5F__super_init(H5F_t *f)
             fsinfo.mapped = FALSE;
 
             /* Set the version for the fsinfo message */
-            if(H5O__fsinfo_set_version(f, &fsinfo) < 0)
+            if(H5F__fsinfo_set_version(f, &fsinfo) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set version of fsinfo")
             f->shared->fs_version = fsinfo.version;
 
@@ -1825,7 +1826,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5O__fsinfo_set_version
+ * Function:    H5F__fsinfo_set_version
  *
  * Purpose:     Set the version to encode the fsinfo message with.
  *
@@ -1835,13 +1836,13 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5O__fsinfo_set_version(H5F_t *f, H5O_fsinfo_t *fsinfo)
+static herr_t
+H5F__fsinfo_set_version(const H5F_t *f, H5O_fsinfo_t *fsinfo)
 {
     unsigned version;           /* Message version */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_STATIC
 
     /* Sanity check */
     HDassert(f);
@@ -1855,12 +1856,12 @@ H5O__fsinfo_set_version(H5F_t *f, H5O_fsinfo_t *fsinfo)
 
     /* Version bounds check */
     if(H5O_fsinfo_ver_bounds[H5F_HIGH_BOUND(f)] == H5O_INVALID_VERSION ||
-       version > H5O_fsinfo_ver_bounds[H5F_HIGH_BOUND(f)])
-        HGOTO_ERROR(H5E_DATASET, H5E_BADRANGE, FAIL, "File space info message's version out of bounds")
+            version > H5O_fsinfo_ver_bounds[H5F_HIGH_BOUND(f)])
+        HGOTO_ERROR(H5E_FILE, H5E_BADRANGE, FAIL, "File space info message's version out of bounds")
 
     /* Set the message version */
     fsinfo->version = version;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O__fsinfo_set_version() */
+} /* end H5F__fsinfo_set_version() */

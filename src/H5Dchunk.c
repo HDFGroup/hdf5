@@ -2018,7 +2018,7 @@ H5D__create_chunk_mem_map_hyper(const H5D_chunk_map_t *fm)
             if(H5S_SEL_ALL == chunk_sel_type) {
                 /* Adjust the chunk coordinates */
                 for(u = 0; u < fm->f_ndims; u++)
-                    coords[u] -= adjust[u];
+                    coords[u] = (hsize_t)((hssize_t)coords[u] - adjust[u]);
 
                 /* Set to same shape as chunk */
                 if(H5S_select_hyperslab(chunk_info->mspace, H5S_SELECT_SET, coords, NULL, fm->chunk_dim, NULL) < 0)
@@ -6703,7 +6703,7 @@ done:
  */
 herr_t
 H5D__chunk_file_alloc(const H5D_chk_idx_info_t *idx_info, const H5F_block_t *old_chunk,
-    H5F_block_t *new_chunk, hbool_t *need_insert, hsize_t scaled[])
+    H5F_block_t *new_chunk, hbool_t *need_insert, const hsize_t *scaled)
 {
     hbool_t alloc_chunk = FALSE;	/* Whether to allocate chunk */
     herr_t ret_value = SUCCEED;   	/* Return value         */

@@ -1031,22 +1031,21 @@ h5scombine_hyperslab_c ( hid_t_f *space_id , int_f *op, hsize_t_f *start, hsize_
   hsize_t *c_block = NULL;
 
   H5S_seloper_t c_op;
-  herr_t  status;
   int rank;
   int i;
 
   rank = H5Sget_simple_extent_ndims(*space_id);
   if (rank < 0 ) return ret_value;
-  c_start = (hsize_t *)HDmalloc(sizeof(hsize_t)*rank);
+  c_start = (hsize_t *)HDmalloc(sizeof(hsize_t)*(unsigned)rank);
   if (c_start == NULL) goto DONE;
 
-  c_count = (hsize_t *)HDmalloc(sizeof(hsize_t)*rank);
+  c_count = (hsize_t *)HDmalloc(sizeof(hsize_t)*(unsigned)rank);
   if (c_count == NULL) goto DONE;
 
-  c_stride = (hsize_t *)HDmalloc(sizeof(hsize_t)*rank);
+  c_stride = (hsize_t *)HDmalloc(sizeof(hsize_t)*(unsigned)rank);
   if (c_stride == NULL) goto DONE;
 
-  c_block = (hsize_t *)HDmalloc(sizeof(hsize_t)*rank);
+  c_block = (hsize_t *)HDmalloc(sizeof(hsize_t)*(unsigned)rank);
   if (c_block == NULL) goto DONE;
 
 

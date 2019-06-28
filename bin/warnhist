@@ -156,6 +156,7 @@ while (<>) {
     my $offset;
     my $warning;
     my $extra;
+    my $extra2;
 
     # Retain last FORTRAN compile line, which comes a few lines before warning
     if($_ =~ /.*\.[fF]90:.*/) {
@@ -168,21 +169,27 @@ while (<>) {
         ($last_c_name, $toss) = split /\:/, $_;
     }
 
+    # Skip lines that don't have the word "warning"
     next if $_ !~ /[Ww]arning:/;
 
     # Skip warnings from linker
     next if $_ =~ /ld: warning:/;
 
+    # "Hide" the C++ '::' symbol until we've parsed out the parts of the line
+    while($_ =~ /\:\:/) {
+	$_ =~ s/\:\:/@@@@/g;
+    }
+
     # Check for weird formatting of warning message
     if($_ =~ /^cc1: warning:.*/) {
         $name = $last_c_name;
         $line = "??";
-        ($toss, $toss, $warning, $extra) = split /\:/, $_;
+        ($toss, $toss, $warning, $extra, $extra2) = split /\:/, $_;
     # Check for FORTRAN warning output
     } elsif($_ =~ /^Warning:.*/) {
         $name = $last_fort_name;
         $line = $last_fort_line;
-        ($toss, $warning, $extra) = split /\:/, $_;
+        ($toss, $warning, $extra, $extra2) = split /\:/, $_;
 #print "1:",$.,":",$_;
 #        $_ = <>;
 #print "2:",$.,":",$_;
@@ -202,11 +209,11 @@ while (<>) {
             next
         }
     } else {
-        # Check for 'character offset' field
+        # Check for 'character offset' field appended to file & line #
         if($_ =~ /^.*[0-9]+\:[0-9]+\:/) {
-            ($name, $line, $offset, $toss, $warning, $extra) = split /\:/, $_;
+            ($name, $line, $offset, $toss, $warning, $extra, $extra2) = split /\:/, $_;
         } else {
-            ($name, $line, $toss, $warning, $extra) = split /\:/, $_;
+            ($name, $line, $toss, $warning, $extra, $extra2) = split /\:/, $_;
         }
     }
 
@@ -215,6 +222,14 @@ while (<>) {
     #  (Use 'length $extra' idiom to avoid warning when $extra is undefined)
     if(length $extra ) {
         $warning = join ':', $warning, $extra;
+    }
+    if(length $extra2 ) {
+        $warning = join ':', $warning, $extra2;
+    }
+
+    # Restore the C++ '::' symbol now that we've parsed out the parts of the line
+    while($warning =~ /@@@@/) {
+        $warning =~ s/@@@@/\:\:/g;
     }
 
     # Trim leading '..' paths from filename
@@ -265,14 +280,18 @@ while (<>) {
     # Skip supplemental warning message
     next if $warning =~ /near initialization for/;
 
+    # Skip C++ supplemental warning message
+    next if $warning =~ /in call to/;
+
     # Skip GCC warning that should be a note
     next if $_ =~ /\(this will be reported only once per input file\)/;
 
-    # Eliminate "{aka <some type>}" info
-    if($warning =~ /\s\{aka [A-Za-z_0-9\s\*]*\}'/) {
-        $warning =~ s/\s\{aka [A-Za-z_0-9\s\*]*\}//g;
+    # Eliminate "{aka <some type>}" and "{aka '<some type>'}" info
+    if($warning =~ /\s\{aka '?[A-Za-z_0-9]+[A-Za-z_0-9\(\)\*\,\ ]*'?/) {
+        $warning =~ s/\s\{aka '?[A-Za-z_0-9]+[A-Za-z_0-9\(\)\*\,\ ]*'?\}//g;
     }
 
+# print "warning = $warning\n";
     # Genericize warnings
     if($warning =~ /variable '[A-Za-z_0-9]*' set but not used.*/) {
         $warning =~ s/'[A-Za-z_0-9]*'/'-'/g;
@@ -293,9 +312,9 @@ while (<>) {
         $warning =~ s/'[A-Za-z_0-9\s]*'/'-'/g;
     } elsif($warning =~ /cast discards '[A-Za-z_0-9\(\)\s]*'.*/) {
         $warning =~ s/'[A-Za-z_0-9\(\)\s]*'/'-'/g;
-    } elsif($warning =~ /size of '[A-Za-z_0-9\(\)\s\*]*' is [0-9]* bytes.*/) {
+    } elsif($warning =~ /size of '[A-Za-z_0-9\(\)\s\*\.]*' is [0-9]* bytes.*/) {
         $warning =~ s/is [0-9]* bytes/is - bytes/g;
-        $warning =~ s/'[A-Za-z_0-9\(\)\s\*]*'/'-'/g;
+        $warning =~ s/'[A-Za-z_0-9\(\)\s\*\.]*'/'-'/g;
     } elsif($warning =~ /passing argument [0-9]* of '[A-Za-z_0-9\(\)\s]*' from incompatible.*/) {
         $warning =~ s/passing argument [0-9]*/passing argument -/g;
         $warning =~ s/'[A-Za-z_0-9\(\)\s]*'/'-'/g;
@@ -416,21 +435,37 @@ while (<>) {
         $warning =~ s/'[A-Za-z_0-9]*'/'-'/g;
     } elsif($warning =~ /inlining failed in call to '[A-Za-z_0-9]*': call is unlikely and code size would grow \[-Winline\].*/) {
         $warning =~ s/'[A-Za-z_0-9]*'/'-'/g;
-    } elsif($warning =~ /'%[0-9]*[\.\*]*[0-9]*[dfsu]' directive writing between [0-9]+ and [0-9]+ bytes into a region of size [0-9]+ \[-Wformat-overflow=\].*/) {
-        $warning =~ s/'%[0-9]*[\.\*]*[0-9]*[dfsu]'/'-'/g;
+    } elsif($warning =~ /'%[0-9]*[\.\*]*[0-9]*[L]*[dfsu]' directive writing (between [0-9]+ and [0-9]+)|(up to [0-9]+) bytes into a region of size (between [0-9]+ and [0-9]+)|([0-9]+) \[-Wformat-overflow=\].*/) {
+        $warning =~ s/'%[0-9]*[\.\*]*[0-9]*[L]*[dfsu]'/'-'/g;
         $warning =~ s/[0-9]+/-/g;
-    } elsif($warning =~ /'%[0-9]*[\.\*]*[0-9]*[dfsu]' directive writing between [0-9]+ and [0-9]+ bytes into a region of size between [0-9]+ and [0-9]+ \[-Wformat-overflow=\].*/) {
+    } elsif($warning =~ /'(%[0-9]*[\.\*]*[0-9]*[dfsu])|([A-Za-z_0-9\/]+)' directive output may be truncated writing (between [0-9]+ and [0-9]+)|(up to [0-9]+)|(likely 1 or more) byte(s)? into a region of size (between [0-9]+ and [0-9]+)|([0-9]+) \[-Wformat-truncation=\].*/) {
         $warning =~ s/'%[0-9]*[\.\*]*[0-9]*[dfsu]'/'-'/g;
+        $warning =~ s/'[A-Za-z_0-9\/]+'/'-'/g;
         $warning =~ s/[0-9]+/-/g;
-    } elsif($warning =~ /'%[0-9]*[\.\*]*[0-9]*[dfsu]' directive output may be truncated writing between [0-9]+ and [0-9]+ bytes into a region of size [0-9]+ \[-Wformat-truncation=\].*/) {
-        $warning =~ s/'%[0-9]*[\.\*]*[0-9]*[dfsu]'/'-'/g;
-        $warning =~ s/[0-9]+/-/g;
-    } elsif($warning =~ /'%[0-9]*[\.\*]*[0-9]*[dfsu]' directive output may be truncated writing up to [0-9]+ bytes into a region of size [0-9]+ \[-Wformat-truncation=\].*/) {
-        $warning =~ s/'%[0-9]*[\.\*]*[0-9]*[dfsu]'/'-'/g;
-        $warning =~ s/[0-9]+/-/g;
-    } elsif($warning =~ /'%[0-9]*[\.\*]*[0-9]*[dfsu]' directive output may be truncated writing between [0-9]+ and [0-9]+ bytes into a region of size between [0-9]+ and [0-9]+ \[-Wformat-truncation=\].*/) {
-        $warning =~ s/'%[0-9]*[\.\*]*[0-9]*[dfsu]'/'-'/g;
-        $warning =~ s/[0-9]+/-/g;
+    } elsif($warning =~ /conversion to '[A-Za-z_0-9]+[A-Za-z_0-9\ ]*' from '[A-Za-z_0-9]+[A-Za-z_0-9\ ]*' may change the sign of the result \[-Wsign-conversion\].*/) {
+        $warning =~ s/'[A-Za-z_0-9]+[A-Za-z_0-9\ ]*'/'-'/g;
+    } elsif($warning =~ /unsigned conversion from '[A-Za-z_0-9]+[A-Za-z_0-9\ ]*' to '[A-Za-z_0-9]+[A-Za-z_0-9\ ]*' changes value from '-?[0-9]+' to '[0-9]+' \[-Wsign-conversion\].*/) {
+        $warning =~ s/'[A-Za-z_0-9]+[A-Za-z_0-9\ ]*'/'-'/g;
+        $warning =~ s/'-?[0-9]+'/'-'/g;
+    } elsif($warning =~ /conversion from '[A-Za-z_0-9]+[A-Za-z_0-9\ ]*' to '[A-Za-z_0-9]+[A-Za-z_0-9\ ]*' may change value \[-Wconversion\].*/) {
+        $warning =~ s/'[A-Za-z_0-9]+[A-Za-z_0-9\ ]*'/'-'/g;
+    } elsif($warning =~ /overflow in conversion from '[A-Za-z_0-9]+[A-Za-z_0-9\ ]*' to '[A-Za-z_0-9]+[A-Za-z_0-9\ ]*' changes value from '-?[0-9]+' to '-?[0-9]+' \[-Woverflow\].*/) {
+        $warning =~ s/'[A-Za-z_0-9]+[A-Za-z_0-9\ ]*'/'-'/g;
+        $warning =~ s/'-?[0-9]+'/'-'/g;
+    } elsif($warning =~ /cast between incompatible function types from '[A-Za-z_0-9]+[A-Za-z_0-9\(\)\*\,\ ]*' to '[A-Za-z_0-9]+[A-Za-z_0-9\(\)\*\,\ ]*' \[-Wcast-function-type\].*/) {
+        $warning =~ s/'[A-Za-z_0-9]+[A-Za-z_0-9\(\)\*\,\ ]*'/'-'/g;
+    } elsif($warning =~ /(return|initialization|assignment) discards '[A-Za-z_0-9]*' qualifier from pointer target type \[-Wdiscarded-qualifiers\].*/) {
+        $warning =~ s/'[A-Za-z_0-9]*'/'-'/g;
+    } elsif($warning =~ /'[A-Za-z_0-9]*' attribute on function returning '[A-Za-z_0-9]*' \[-Wattributes\].*/) {
+        $warning =~ s/'[A-Za-z_0-9]*'/'-'/g;
+    } elsif($warning =~ /ignoring return value of '[A-Za-z_0-9]*', declared with attribute warn_unused_result \[-Wunused-result\].*/) {
+        $warning =~ s/'[A-Za-z_0-9]*'/'-'/g;
+    } elsif($warning =~ /passing '[A-Za-z_0-9]+[A-Za-z_0-9\ ]*' chooses '[A-Za-z_0-9]+[A-Za-z_0-9\ ]*' over '[A-Za-z_0-9]+[A-Za-z_0-9\ ]*' \[-Wsign-promo\].*/) {
+        $warning =~ s/'[A-Za-z_0-9]+[A-Za-z_0-9\ ]*'/'-'/g;
+    } elsif($warning =~ /'[A-Za-z_\:0-9]+[A-Za-z_\:0-9\ ]*' should be initialized in the member initialization list \[-Weffc\+\+\].*/) {
+        $warning =~ s/'[A-Za-z_\:0-9]+[A-Za-z_\:0-9\ ]*'/'-'/g;
+    } elsif($warning =~ /\[deprecation\] [A-Za-z_0-9]*\([A-Za-z_,0-9]*\) in [A-Za-z_0-9]* has been deprecated.*/) {
+        $warning =~ s/[A-Za-z_0-9]*\([A-Za-z_,0-9]*\) in [A-Za-z_0-9]*/-\(-\) in -/g;
     }
 
     # Increment count for [generic] warning

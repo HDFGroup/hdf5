@@ -416,7 +416,7 @@ H5T_debug(const H5T_t *dt, FILE *stream)
 
             HDfprintf(stream, "\n\"%s\" = 0x", dt->shared->u.enumer.name[i]);
             for (k = 0; k < base_size; k++)
-                HDfprintf(stream, "%02lx", (unsigned long)(dt->shared->u.enumer.value + (i * base_size) + k));
+                HDfprintf(stream, "%02lx", (unsigned long)((uint8_t *)dt->shared->u.enumer.value + (i * base_size) + k));
         } /* end for */
         HDfprintf(stream, "\n");
     }

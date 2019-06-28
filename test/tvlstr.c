@@ -94,7 +94,7 @@ void test_vlstr_free_custom(void *_mem, void *info)
 
     if(_mem!=NULL) {
         mem=((unsigned char *)_mem)-extra;
-        *mem_used-=*(size_t *)mem;
+        *mem_used-=*(size_t *)((void *)mem);
         HDfree(mem);
     } /* end if */
 }

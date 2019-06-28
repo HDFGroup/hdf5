@@ -787,7 +787,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
                     if(H5Tis_variable_str(type)) {
                         /* cp_vp is the pointer into the struct where a `char*' is stored. So we have
                          * to dereference the pointer to get the `char*' to pass to HDstrlen(). */
-                        s = *(char**) cp_vp;
+                        s = *(char **)((void *)cp_vp);
                         if(s != NULL) size = HDstrlen(s);
                     }
                     else {
@@ -1240,7 +1240,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
                     h5tools_str_append(str, "%s", OPT(info->vlen_pre, "("));
 
                     /* Get the number of sequence elements */
-                    nelmts = ((hvl_t *) cp_vp)->len;
+                    nelmts = ((hvl_t *)((void *)cp_vp))->len;
 
                     for(i = 0; i < nelmts; i++) {
                         if(i) h5tools_str_append(str, "%s", OPT(info->vlen_sep, "," OPTIONAL_LINE_BREAK));
@@ -1264,7 +1264,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
                         ctx->indent_level++;
 
                         /* Dump the array element */
-                        h5tools_str_sprint(str, info, container, memb, ((char *) (((hvl_t *) cp_vp)->p)) + i * size, ctx);
+                        h5tools_str_sprint(str, info, container, memb, ((char *) (((hvl_t *)((void *)cp_vp))->p)) + i * size, ctx);
 
                         ctx->indent_level--;
                     } /* end for */

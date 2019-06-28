@@ -12152,7 +12152,6 @@ main(void)
     hid_t my_fapl = -1;         /* File access property list */
     int test_api_config;
     unsigned bit_config;
-    unsigned latest = FALSE;    /* Using the latest library version bound */
     H5F_libver_t low, high;     /* Low and high bounds */
     int nerrors = 0;
 
@@ -12179,10 +12178,6 @@ main(void)
             /* Test virtual dataset only for V110 and above */
             if(high < H5F_LIBVER_V110)
                 continue;
-
-            /* Whether to use latest hyperslab/point selection version */
-            if(low >= H5F_LIBVER_V112)
-                latest = TRUE;
 
             /* Set the low/high version bounds */
             if(H5Pset_libver_bounds(my_fapl, low, high) < 0)

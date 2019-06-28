@@ -89,7 +89,6 @@ H5R__init_package(void)
     /* Mark "top" of interface as initialized */
     H5R_top_package_initialize_s = TRUE;
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5R__init_package() */
 

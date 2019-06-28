@@ -43,7 +43,7 @@
 #define H5MM_SIG_SIZE           4
 #define H5MM_HEAD_GUARD_SIZE    8
 #define H5MM_TAIL_GUARD_SIZE    8
-#define H5MM_BLOCK_FROM_BUF(mem) ((H5MM_block_t *)((unsigned char *)mem - (offsetof(H5MM_block_t, b) + H5MM_HEAD_GUARD_SIZE)))
+#define H5MM_BLOCK_FROM_BUF(mem) ((H5MM_block_t *)((void *)((unsigned char *)mem - (offsetof(H5MM_block_t, b) + H5MM_HEAD_GUARD_SIZE))))
 #endif /* H5_MEMORY_ALLOC_SANITY_CHECK */
 
 
@@ -154,7 +154,7 @@ H5MM__is_our_block(void *mem)
  *
  *-------------------------------------------------------------------------
  */
-H5_ATTR_PURE static void
+static void
 H5MM__sanity_check_block(const H5MM_block_t *block)
 {
     HDassert(block->u.info.size > 0);
@@ -180,7 +180,7 @@ H5MM__sanity_check_block(const H5MM_block_t *block)
  *
  *-------------------------------------------------------------------------
  */
-H5_ATTR_PURE static void
+static void
 H5MM__sanity_check(void *mem)
 {
     H5MM_block_t *block = H5MM_BLOCK_FROM_BUF(mem);
@@ -201,7 +201,7 @@ H5MM__sanity_check(void *mem)
  *
  *-------------------------------------------------------------------------
  */
-H5_ATTR_PURE void
+void
 H5MM_sanity_check_all(void)
 {
     H5MM_block_t *curr = NULL;
@@ -226,7 +226,7 @@ H5MM_sanity_check_all(void)
  *
  *-------------------------------------------------------------------------
  */
-H5_ATTR_PURE void
+void
 H5MM_final_sanity_check(void)
 {
     HDassert(0 == H5MM_curr_alloc_bytes_s);
