@@ -215,14 +215,14 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5MF_sects_dump(H5F_t *f, FILE *stream)
+H5MF__sects_dump(H5F_t *f, FILE *stream)
 {
     haddr_t eoa;                        /* End of allocated space in the file */
     int indent = 0;                     /* Amount to indent */
     int fwidth = 50;                    /* Field width */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_PACKAGE_TAG(H5AC__FREESPACE_TAG, FAIL)
+    FUNC_ENTER_PACKAGE_TAG(H5AC__FREESPACE_TAG)
 #ifdef H5MF_ALLOC_DEBUG
 HDfprintf(stderr, "%s: Dumping file free space sections\n", FUNC);
 #endif /* H5MF_ALLOC_DEBUG */
@@ -261,7 +261,7 @@ HDfprintf(stderr, "%s: for type = H5FD_MEM_DEFAULT, eoa = %a\n", FUNC, eoa);
                 udata.fwidth = MAX(0, fwidth - 6);
 
                 /* Iterate over all the free space sections */
-                if(H5FS_sect_iterate(f, f->shared->fs_man[ptype], H5MF_sects_debug_cb, &udata) < 0)
+                if(H5FS_sect_iterate(f, f->shared->fs_man[ptype], H5MF__sects_debug_cb, &udata) < 0)
                     HGOTO_ERROR(H5E_HEAP, H5E_BADITER, FAIL, "can't iterate over heap's free space")
             } /* end if */
             else
@@ -314,7 +314,7 @@ HDfprintf(stderr, "%s: sda_addr = %a, sda_size = %Hu, end of sda = %a\n", FUNC, 
                     udata.fwidth = MAX(0, fwidth - 6);
 
                     /* Iterate over all the free space sections */
-                    if(H5FS_sect_iterate(f, f->shared->fs_man[atype], H5MF_sects_debug_cb, &udata) < 0)
+                    if(H5FS_sect_iterate(f, f->shared->fs_man[atype], H5MF__sects_debug_cb, &udata) < 0)
                         HGOTO_ERROR(H5E_HEAP, H5E_BADITER, FAIL, "can't iterate over heap's free space")
                 } /* end if */
                 else /* No sections of this type */

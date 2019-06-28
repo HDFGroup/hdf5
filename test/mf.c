@@ -6822,16 +6822,6 @@ test_mf_fs_persist(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
         if(!H5F_addr_defined(f->shared->fs_addr[tt]))
             TEST_ERROR
 
-        /* Since we are about to open a self referential free space 
-         * manager prior to the first file space allocation / deallocation
-         * call H5MF_tidy_self_referential_fsm_hack() first so as to avoid
-         * assertion failures on the first file space alloc / dealloc.
-         */
-        if((f->shared->first_alloc_dealloc) &&
-           (SUCCEED != 
-            H5MF_tidy_self_referential_fsm_hack(f)))
-            FAIL_STACK_ERROR
-
         /* Start up H5FD_MEM_SUPER free-space manager */
         if(!(f->shared->fs_man[tt]))
             if(H5MF__open_fstype(f, (H5F_mem_page_t)tt) < 0)
@@ -6925,7 +6915,7 @@ test_mf_fs_gone(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
     haddr_t addrx;
     H5FD_mem_t  fs_type; 
     hbool_t contig_addr_vfd;
-    hbool_t ran_H5MF_tidy_self_referential_fsm_hack = FALSE;
+
 
     if(new_format)
         TESTING("File's free-space is going away with new library format")
@@ -6944,9 +6934,13 @@ test_mf_fs_gone(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
         /* Copy the file access property list */
         if((fapl2 = H5Pcopy(fapl)) < 0) FAIL_STACK_ERROR
 
-        if(new_format)
+        if(new_format) {
             if(H5Pset_libver_bounds(fapl2, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
                 FAIL_STACK_ERROR
+        } else {
+            if(H5Pset_libver_bounds(fapl2, H5F_LIBVER_V18, H5F_LIBVER_LATEST) < 0)
+                FAIL_STACK_ERROR
+        }
 
         /* Set to aggregation and persisting free-space */
         if(H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_FSM_AGGR, TRUE, (hsize_t)1) < 0)
@@ -7022,17 +7016,6 @@ test_mf_fs_gone(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
         if(!H5F_addr_defined(f->shared->fs_addr[fs_type]))
             TEST_ERROR
 
-        /* Since we are about to open a self referential free space 
-         * manager prior to the first file space allocation / deallocation
-         * call H5MF_tidy_self_referential_fsm_hack() first so as to avoid
-         * assertion failures on the first file space alloc / dealloc.
-         */
-         if(f->shared->first_alloc_dealloc){
-             if(SUCCEED != H5MF_tidy_self_referential_fsm_hack(f))
-                FAIL_STACK_ERROR
-            ran_H5MF_tidy_self_referential_fsm_hack = TRUE;
-        }
-
         /* Start up H5FD_MEM_SUPER free-space manager */
         if(!(f->shared->fs_man[fs_type]))
             if(H5MF__open_fstype(f, (H5F_mem_page_t)fs_type) < 0)
@@ -7042,24 +7025,18 @@ test_mf_fs_gone(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
         if(H5FS_stat_info(f, f->shared->fs_man[fs_type], &fs_stat) < 0)
             FAIL_STACK_ERROR
 
-        /* if we ran H5MF_tidy_self_referential_fsm_hack(), the 
-         * H5FD_MEM_SUPER free space manager must be floating.
-         * Thus fs_stat.addr must be undefined.
-         */
-        if((!ran_H5MF_tidy_self_referential_fsm_hack) &&
-           (!H5F_addr_defined(fs_stat.addr)))
+        if(!H5F_addr_defined(fs_stat.addr))
             TEST_ERROR
 
         if(fs_stat.tot_space < TBLOCK_SIZE3)
             TEST_ERROR
 
-        /* Put block #4 to H5FD_MEM_SUPER free-space manager */
-        if(H5MF_xfree(f, type, addr4, (hsize_t)TBLOCK_SIZE4) < 0)
-            FAIL_STACK_ERROR
-
-        if(!new_format) {
-            /* Need to take up this space so that the free-space manager will go away */
-            if(HADDR_UNDEF == (addrx = H5MF_alloc(f, type, (hsize_t)103)))
+        /* Allocate/free space accordingly so that the free-space manager will go away */
+        if(new_format) {
+            if(H5MF_xfree(f, type, addr4, (hsize_t)TBLOCK_SIZE4) < 0)
+                FAIL_STACK_ERROR
+        } else {
+            if(HADDR_UNDEF == (addrx = H5MF_alloc(f, type, (hsize_t)3)))
                 FAIL_STACK_ERROR
         }
 
@@ -7740,16 +7717,6 @@ test_page_alloc_xfree(const char *env_h5_drvr, hid_t fapl)
                 H5MF__alloc_to_fs_type(f, H5FD_MEM_OHDR, f->shared->fs_page_size - 1, (H5F_mem_page_t *)&fs_type);
                 if(!H5F_addr_defined(f->shared->fs_addr[fs_type]))
                     TEST_ERROR
-
-                  /* Since we are about to open a self referential free space
-                   * manager prior to the first file space allocation / deallocation
-                   * call H5MF_tidy_self_referential_fsm_hack() first so as to avoid
-                   * assertion failures on the first file space alloc / dealloc.
-                   */
-                if(f->shared->first_alloc_dealloc){
-                    if(SUCCEED != H5MF_tidy_self_referential_fsm_hack(f))
-                        FAIL_STACK_ERROR
-                }
 
                 /* Set up to use the small metadata manager */
                 if(!(f->shared->fs_man[fs_type]))

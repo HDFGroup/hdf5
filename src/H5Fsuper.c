@@ -81,15 +81,6 @@ static const unsigned HDF5_superblock_ver_bounds[] = {
     HDF5_SUPERBLOCK_VERSION_LATEST  /* H5F_LIBVER_LATEST */
 };
 
-/* Format version bounds for fsinfo message */
-/* This message exists starting library release v1.10 */
-static const unsigned H5O_fsinfo_ver_bounds[] = {
-    H5O_INVALID_VERSION,            /* H5F_LIBVER_EARLIEST */
-    H5O_INVALID_VERSION,            /* H5F_LIBVER_V18 */
-    H5O_FSINFO_VERSION_1,           /* H5F_LIBVER_V110 */
-    H5O_FSINFO_VERSION_LATEST       /* H5F_LIBVER_LATEST */
-};
-
 
 /*-------------------------------------------------------------------------
  * Function:    H5F__super_ext_create
@@ -778,28 +769,26 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, hbool_t initial_read)
             /* If message is NOT marked "unknown"--set up file space info  */
             if(!(flags & H5O_MSG_FLAG_WAS_UNKNOWN)) {
                 H5O_fsinfo_t fsinfo;   /* File space info message from superblock extension */
-                hbool_t null_fsm_addr = FALSE;  /* Whether to drop free-space to the floor */
 
+                /* f->shared->null_fsm_addr: Whether to drop free-space to the floor */
                 /* The h5clear tool uses this property to tell the library
                  * to drop free-space to the floor
                  */
                 if(H5P_exist_plist(fa_plist, H5F_ACS_NULL_FSM_ADDR_NAME) > 0)
-                    if(H5P_get(fa_plist, H5F_ACS_NULL_FSM_ADDR_NAME, &null_fsm_addr) < 0)
+                    if(H5P_get(fa_plist, H5F_ACS_NULL_FSM_ADDR_NAME, &f->shared->null_fsm_addr) < 0)
                         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get clearance for persisting fsm addr")
 
                 /* Retrieve the 'file space info' structure */
                 if(NULL == H5O_msg_read(&ext_loc, H5O_FSINFO_ID, &fsinfo))
                     HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to get free-space manager info message")
 
-                /* Update changed values */
-
                 /* Version bounds check */
-                if(H5O_fsinfo_ver_bounds[H5F_HIGH_BOUND(f)] == H5O_INVALID_VERSION ||
-                   fsinfo.version > H5O_fsinfo_ver_bounds[H5F_HIGH_BOUND(f)])
+                if(H5O_fsinfo_check_version(H5F_HIGH_BOUND(f), &fsinfo) < 0)
                     HGOTO_ERROR(H5E_FILE, H5E_BADRANGE, FAIL, "File space info message's version out of bounds")
+
+                /* Update changed values */
                 if(f->shared->fs_version != fsinfo.version)
                     f->shared->fs_version = fsinfo.version;
-
                 if(f->shared->fs_strategy != fsinfo.strategy) {
                     f->shared->fs_strategy = fsinfo.strategy;
 
@@ -835,35 +824,42 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, hbool_t initial_read)
                     /* Initialize page end meta threshold */
                     f->shared->pgend_meta_thres = fsinfo.pgend_meta_thres;
 
-                if(f->shared->eoa_pre_fsm_fsalloc != fsinfo.eoa_pre_fsm_fsalloc)
-                    f->shared->eoa_pre_fsm_fsalloc = fsinfo.eoa_pre_fsm_fsalloc;
+                if(f->shared->eoa_fsm_fsalloc != fsinfo.eoa_pre_fsm_fsalloc)
+                    f->shared->eoa_fsm_fsalloc = fsinfo.eoa_pre_fsm_fsalloc;
 
-               /* f->shared->eoa_pre_fsm_fsalloc must always be HADDR_UNDEF
-                * in the absence of persistent free space managers.
-                */
-                /* If the following two conditions are true:
+                /* 
+                 * If the following two conditions are true:
                  *       (1) skipping EOF check (skip_eof_check)
-                 *       (2) dropping free-space to the floor (null_fsm_addr)
-                 *  skip the asserts as "eoa_pre_fsm_fsalloc" may be undefined
+                 *       (2) dropping free-space to the floor (f->shared->null_fsm_addr)
+                 *  skip the asserts as "eoa_fsm_fsalloc" may be undefined
                  *  for a crashed file with persistent free space managers.
-                 *  #1 and #2 are enabled when the tool h5clear --increment
+                 *  The above two conditions are enabled when the tool h5clear --increment
                  *  option is used.
                  */
-                if(!skip_eof_check && !null_fsm_addr) {
-                     HDassert((!f->shared->fs_persist) || (f->shared->eoa_pre_fsm_fsalloc != HADDR_UNDEF));
-                     HDassert(!f->shared->first_alloc_dealloc);
-                }
+                if(!skip_eof_check && !f->shared->null_fsm_addr)
+                     HDassert((!f->shared->fs_persist) || (f->shared->eoa_fsm_fsalloc != HADDR_UNDEF));
 
-                /* As "eoa_pre_fsm_fsalloc" may be undefined for a crashed file
-                 * with persistent free space managers, therefore, set
-                 * "first_alloc_dealloc" when the condition 
-                 * "dropping free-space to the floor is true.
-                 * This will ensure that no action is done to settle things on file
-                 * close via H5MF_settle_meta_data_fsm() and H5MF_settle_raw_data_fsm().
+                /* 
+                 * A crashed file with persistent free-space managers may have
+                 * undefined f->shared->eoa_fsm_fsalloc.  
+                 * eoa_fsm_fsalloc is the final eoa which is saved in the free-space
+                 * info message's eoa_pre_fsm_fsalloc field for backward compatibility.
+                 * If the tool h5clear sets to dropping free-space to the floor
+                 * as indicated by f->shared->null_fsm_addr, we are not going to
+                 * perform actions to settle things on file close in the routines
+                 * H5MF_settle_meta_data_fsm() and H5MF_settle_raw_data_fsm().
+                 *
+                 * We remove the following check:
+                 *   if((f->shared->eoa_pre_fsm_fsalloc != HADDR_UNDEF || null_fsm_addr) &&
+                 *       (H5F_INTENT(f) & H5F_ACC_RDWR))
+                 *      f->shared->first_alloc_dealloc = TRUE;
+                 *
+                 * Because:
+                 * --there is no more f->shared->eoa_pre_fsm_fsalloc and
+                 *   f->shared->first_alloc_dealloc
+                 * --the check for null_fsm_addr is directly done in H5MF_settle_meta_data_fsm() 
+                 *   and H5MF_settle_raw_data_fsm()
                  */
-                if((f->shared->eoa_pre_fsm_fsalloc != HADDR_UNDEF || null_fsm_addr) &&
-                        (H5F_INTENT(f) & H5F_ACC_RDWR))
-                    f->shared->first_alloc_dealloc = TRUE;
 
                 f->shared->fs_addr[0] = HADDR_UNDEF;
                 for(u = 1; u < NELMTS(f->shared->fs_addr); u++)
@@ -871,17 +867,17 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, hbool_t initial_read)
 
                 /* If the following two conditions are true:
                  *      (1) file is persisting free-space 
-                 *      (2) dropping free-space to the floor (null_fsm_addr)
+                 *      (2) dropping free-space to the floor (f->shared->null_fsm_addr)
                  * nullify the addresses of the FSMs 
                  */
-                if(f->shared->fs_persist && null_fsm_addr)
+                if(f->shared->fs_persist && f->shared->null_fsm_addr)
                     for(u = 0; u < NELMTS(fsinfo.fs_addr); u++)
                         f->shared->fs_addr[u] = fsinfo.fs_addr[u] = HADDR_UNDEF;
 
                 /* For fsinfo.mapped: remove the FSINFO message from the superblock extension
                    and write a new message to the extension */
-                /* For null_fsm_addr: just update FSINFO message in the superblock extension */
-                if(((fsinfo.mapped || null_fsm_addr) && (rw_flags & H5AC__READ_ONLY_FLAG) == 0)) {
+                /* For f->shared->null_fsm_addr: just update FSINFO message in the superblock extension */
+                if(((fsinfo.mapped || f->shared->null_fsm_addr) && (rw_flags & H5AC__READ_ONLY_FLAG) == 0)) {
 
                     /* Do the same kluge until we know for sure.  VC */
 #if 1 /* bug fix test code -- tidy this up if all goes well */ /* JRM */
@@ -895,7 +891,7 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, hbool_t initial_read)
                      f->shared->sblock = sblock;
 #endif /* JRM */
 
-                    if(null_fsm_addr) {
+                    if(f->shared->null_fsm_addr) {
                         if(H5F__super_ext_write_msg(f, H5O_FSINFO_ID, &fsinfo, FALSE, H5O_MSG_FLAG_MARK_IF_UNKNOWN) < 0)
                             HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "error in writing fsinfo message to superblock extension")
                     }
@@ -1394,7 +1390,7 @@ H5F__super_init(H5F_t *f)
             fsinfo.mapped = FALSE;
 
             /* Set the version for the fsinfo message */
-            if(H5F__fsinfo_set_version(f, &fsinfo) < 0)
+            if(H5O_fsinfo_set_version(H5F_LOW_BOUND(f), H5F_HIGH_BOUND(f), &fsinfo) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set version of fsinfo")
             f->shared->fs_version = fsinfo.version;
 
@@ -1824,44 +1820,3 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5F__super_ext_remove_msg() */
 
-
-/*-------------------------------------------------------------------------
- * Function:    H5F__fsinfo_set_version
- *
- * Purpose:     Set the version to encode the fsinfo message with.
- *
- * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Vailin Choi; June 2019
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5F__fsinfo_set_version(const H5F_t *f, H5O_fsinfo_t *fsinfo)
-{
-    unsigned version;           /* Message version */
-    herr_t ret_value = SUCCEED; /* Return value */
-
-    FUNC_ENTER_STATIC
-
-    /* Sanity check */
-    HDassert(f);
-    HDassert(fsinfo);
-
-    version = H5O_FSINFO_VERSION_1;
-
-    /* Upgrade to the version indicated by the file's low bound if higher */
-    if(H5O_fsinfo_ver_bounds[H5F_LOW_BOUND(f)] != H5O_INVALID_VERSION)
-        version = MAX(version, H5O_fsinfo_ver_bounds[H5F_LOW_BOUND(f)]);
-
-    /* Version bounds check */
-    if(H5O_fsinfo_ver_bounds[H5F_HIGH_BOUND(f)] == H5O_INVALID_VERSION ||
-            version > H5O_fsinfo_ver_bounds[H5F_HIGH_BOUND(f)])
-        HGOTO_ERROR(H5E_FILE, H5E_BADRANGE, FAIL, "File space info message's version out of bounds")
-
-    /* Set the message version */
-    fsinfo->version = version;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5F__fsinfo_set_version() */
