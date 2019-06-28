@@ -260,8 +260,9 @@ convert(hid_t fid, const char *dname)
             h5tools_setstatus(EXIT_FAILURE);
             goto error;
 	    }
-        else if(verbose_g)
+        else if(verbose_g) {
             HDfprintf(stdout, "Retrieve the dataset's chunk indexing type\n");
+        }
 
         if(idx_type == H5D_CHUNK_IDX_BTREE) {
             if(verbose_g)
@@ -269,8 +270,9 @@ convert(hid_t fid, const char *dname)
             h5tools_setstatus(EXIT_SUCCESS);
             goto done;
 	    }
-        else if (verbose_g)
+        else if(verbose_g) {
             HDfprintf(stdout, "Dataset's chunk indexing type is not version 1 B-tree\n");
+        }
 
 	    break;
 
@@ -302,8 +304,8 @@ convert(hid_t fid, const char *dname)
     if(noop_g) {
         if(verbose_g)
             HDfprintf(stdout, "Not converting the dataset\n");
-            h5tools_setstatus(EXIT_SUCCESS);
-            goto done;
+        h5tools_setstatus(EXIT_SUCCESS);
+        goto done;
     }
 
     if(verbose_g)
