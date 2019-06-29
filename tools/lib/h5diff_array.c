@@ -516,14 +516,14 @@ static hsize_t diff_datum(
             if (H5Tis_variable_str(m_type)) {
                 h5difftrace("diff_datum H5T_STRING variable\n");
                 /* Get pointer to first string */
-                s1 = *(char**) mem1;
+                s1 = *(char **)((void *)mem1);
                 if (s1)
                     size1 = HDstrlen(s1);
                 else
                     size1 = 0;
 
                 /* Get pointer to second string */
-                s2 = *(char**) mem2;
+                s2 = *(char **)((void *)mem2);
                 if (s2)
                     size2 = HDstrlen(s2);
                 else
@@ -828,10 +828,10 @@ static hsize_t diff_datum(
             size = H5Tget_size(memb_type);
 
             /* get the number of sequence elements */
-            nelmts = ((hvl_t *) mem1)->len;
+            nelmts = ((hvl_t *)((void *)mem1))->len;
 
             for (j = 0; j < nelmts; j++)
-                nfound += diff_datum(((char *) (((hvl_t *) mem1)->p)) + j * size, ((char *) (((hvl_t *) mem2)->p)) + j * size, memb_type, index,
+                nfound += diff_datum(((char *) (((hvl_t *)((void *)mem1))->p)) + j * size, ((char *) (((hvl_t *) mem2)->p)) + j * size, memb_type, index,
                         rank, dims, acc, pos, opts, obj1, obj2, container1_id, container2_id, ph, members);
 
             H5Tclose(memb_type);

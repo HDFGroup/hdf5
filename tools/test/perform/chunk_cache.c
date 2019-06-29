@@ -79,7 +79,7 @@ counter (unsigned flags, size_t cd_nelmts,
 }
 
 /*---------------------------------------------------------------------------*/
-double retrieve_time(void)
+static double retrieve_time(void)
 {
 #ifdef H5_HAVE_GETTIMEOFDAY
     struct timeval t;

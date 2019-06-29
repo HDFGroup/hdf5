@@ -287,9 +287,9 @@ typedef struct H5CX_t {
     hbool_t   do_min_dset_ohdr_valid;   /* Whether minimize dataset object header flag is valid */
 
     /* Cached DAPL properties */
-    char *extfile_prefix;               /* Prefix for external file                      */
+    const char *extfile_prefix;         /* Prefix for external file                      */
     hbool_t extfile_prefix_valid;       /* Whether the prefix for external file is valid */
-    char *vds_prefix;                   /* Prefix for VDS                                */
+    const char *vds_prefix;             /* Prefix for VDS                                */
     hbool_t vds_prefix_valid;           /* Whether the prefix for VDS is valid           */
 
     /* Cached FAPL properties */
@@ -361,8 +361,8 @@ typedef struct H5CX_dcpl_cache_t {
 /* Typedef for cached default dataset access property list information */
 /* (Same as the cached DXPL struct, above, except for the default DXPL) */
 typedef struct H5CX_dapl_cache_t {
-    char *extfile_prefix;       /* Prefix for external file */
-    char *vds_prefix;           /* Prefix for VDS           */
+    const char *extfile_prefix; /* Prefix for external file */
+    const char *vds_prefix;     /* Prefix for VDS           */
 } H5CX_dapl_cache_t;
 
 /* Typedef for cached default file access property list information */
@@ -2491,7 +2491,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5CX_get_ext_file_prefix(char **extfile_prefix)
+H5CX_get_ext_file_prefix(const char **extfile_prefix)
 {
     H5CX_node_t **head = H5CX_get_my_context();  /* Get the pointer to the head of the API context, for this thread */
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -2548,7 +2548,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5CX_get_vds_prefix(char **vds_prefix)
+H5CX_get_vds_prefix(const char **vds_prefix)
 {
     H5CX_node_t **head = H5CX_get_my_context();  /* Get the pointer to the head of the API context, for this thread */
     herr_t ret_value = SUCCEED;         /* Return value */

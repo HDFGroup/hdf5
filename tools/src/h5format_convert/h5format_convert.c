@@ -259,22 +259,20 @@ convert(hid_t fid, const char *dname)
             error_msg("unable to get the chunk indexing type for \"%s\"\n", dname);
             h5tools_setstatus(EXIT_FAILURE);
             goto error;
-	    }
-        else if(verbose_g) {
-            HDfprintf(stdout, "Retrieve the dataset's chunk indexing type\n");
         }
+        else if(verbose_g)
+            HDfprintf(stdout, "Retrieve the dataset's chunk indexing type\n");
 
         if(idx_type == H5D_CHUNK_IDX_BTREE) {
             if(verbose_g)
                 HDfprintf(stdout, "Dataset's chunk indexing type is already version 1 B-tree: no further action\n");
             h5tools_setstatus(EXIT_SUCCESS);
             goto done;
-	    }
-        else if(verbose_g) {
-            HDfprintf(stdout, "Dataset's chunk indexing type is not version 1 B-tree\n");
         }
+        else if (verbose_g)
+            HDfprintf(stdout, "Dataset's chunk indexing type is not version 1 B-tree\n");
 
-	    break;
+        break;
 
     case H5D_CONTIGUOUS:
         if(verbose_g)

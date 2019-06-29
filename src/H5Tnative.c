@@ -516,6 +516,11 @@ done:
 } /* end H5T__get_native_type() */
 
 /* Disable warning for intentional identical branches here -QAK */
+/*
+ *       This pragma only needs to surround the "duplicated branches" in
+ *       the code below, but early (4.4.7, at least) gcc only allows
+ *       diagnostic pragmas to be toggled outside of functions.
+ */
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wduplicated-branches"
 
@@ -661,6 +666,11 @@ done:
 #pragma GCC diagnostic pop
 
 /* Disable warning for intentional identical branches here -QAK */
+/*
+ *       This pragma only needs to surround the "duplicated branches" in
+ *       the code below, but early (4.4.7, at least) gcc only allows
+ *       diagnostic pragmas to be toggled outside of functions.
+ */
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wduplicated-branches"
 
@@ -790,6 +800,11 @@ done:
 #pragma GCC diagnostic pop
 
 /* Disable warning for intentional identical branches here -QAK */
+/*
+ *       This pragma only needs to surround the "duplicated branches" in
+ *       the code below, but early (4.4.7, at least) gcc only allows
+ *       diagnostic pragmas to be toggled outside of functions.
+ */
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wduplicated-branches"
 

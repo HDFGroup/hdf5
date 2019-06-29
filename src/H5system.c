@@ -95,12 +95,16 @@ static hbool_t H5_ntzset = FALSE;
  * Programmer:  Robb Matzke
  *              Thursday, April  9, 1998
  *
- * Modifications:
- *    Robb Matzke, 1999-07-27
- *    The `%a' format refers to an argument of `haddr_t' type
- *    instead of `haddr_t*' and the return value is correct.
  *-------------------------------------------------------------------------
  */
+/* Disable warning for "format not a string literal" here -QAK */
+/*
+ *      This pragma only needs to surround the fprintf() calls with
+ *      format_templ in the code below, but early (4.4.7, at least) gcc only
+ *      allows diagnostic pragmas to be toggled outside of functions.
+ */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-nonliteral"
 int
 HDfprintf(FILE *stream, const char *fmt, ...)
 {
@@ -426,6 +430,7 @@ HDfprintf(FILE *stream, const char *fmt, ...)
     HDva_end(ap);
     return nout;
 } /* end HDfprintf() */
+#pragma GCC diagnostic pop
 
 
 /*-------------------------------------------------------------------------

@@ -742,7 +742,8 @@ size1_helper(hid_t file, const char *filename, hid_t fapl_id, hbool_t test_file_
  *----------------------------------------------------------------------------
  */
 static h5_stat_size_t
-getsize_testsize1(const char *filename, hid_t fcpl_id, hid_t fapl_id, hbool_t test_file_closing, H5O_info_t *oinfo)
+getsize_testsize1(const char *filename, hid_t fcpl_id, hid_t fapl_id,
+    hbool_t test_file_closing, H5O_info_t *oinfo)
 {
     hid_t fid = H5I_INVALID_HID;
     herr_t ret;
@@ -828,7 +829,6 @@ test_sohm_size1(void)
 
     for (use_shared = 0; use_shared < 2; use_shared++) {
         for (use_btree = 0; use_btree < 2; use_btree++) {
-
             hbool_t test_open_close;
 
             /* cannot use btree indexing without shared messages; skip case */
@@ -1020,7 +1020,7 @@ test_sohm_size_consistency_open_create(void)
          * Add messages to previously-created file */
         file = H5Fopen(FILENAME, H5F_ACC_RDWR, fapl_id);
         CHECK_I(file, "H5Fopen");
-        file = size1_helper(file, FILENAME, fapl_id, 0);
+        file = size1_helper(file, FILENAME, fapl_id, FALSE);
         CHECK_I(file, "size1_helper");
 
         /* Get the size of a dataset object header */
@@ -1035,7 +1035,7 @@ test_sohm_size_consistency_open_create(void)
          * Add messages to a newly-created file */
         file = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl_id, fapl_id);
         CHECK_I(file, "H5Fcreate");
-        file = size1_helper(file, FILENAME, fapl_id, 0);
+        file = size1_helper(file, FILENAME, fapl_id, FALSE);
         CHECK_I(file, "size1_helper");
 
         /* Get the size of a dataset object header */

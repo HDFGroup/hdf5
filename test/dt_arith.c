@@ -627,7 +627,7 @@ test_hard_query(void)
 
     /* Unregister the hard conversion from int to float.  Verify the conversion
      * is a soft conversion. */
-    H5Tunregister(H5T_PERS_HARD, NULL, H5T_NATIVE_INT, H5T_NATIVE_FLOAT, H5T__conv_int_float);
+    H5Tunregister(H5T_PERS_HARD, NULL, H5T_NATIVE_INT, H5T_NATIVE_FLOAT, (H5T_conv_t)((void (*) (void))H5T__conv_int_float));
     if(H5Tcompiler_conv(H5T_NATIVE_INT, H5T_NATIVE_FLOAT) != FALSE) {
         H5_FAILED();
         printf("Can't query conversion function\n");
@@ -636,7 +636,7 @@ test_hard_query(void)
 
     /* Register the hard conversion from int to float.  Verify the conversion
      * is a hard conversion. */
-    H5Tregister(H5T_PERS_HARD, "int_flt", H5T_NATIVE_INT, H5T_NATIVE_FLOAT, H5T__conv_int_float);
+    H5Tregister(H5T_PERS_HARD, "int_flt", H5T_NATIVE_INT, H5T_NATIVE_FLOAT, (H5T_conv_t)((void (*) (void))H5T__conv_int_float));
     if(H5Tcompiler_conv(H5T_NATIVE_INT, H5T_NATIVE_FLOAT) != TRUE) {
         H5_FAILED();
         printf("Can't query conversion function\n");
@@ -2578,34 +2578,34 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
         printf("%*s", (int)(3*MAX(0, (ssize_t)src_size-(ssize_t)dst_size)), "");
         switch (dst_type) {
             case INT_SCHAR:
-                printf(" %29d\n", (int)*((signed char*)hw));
+                printf(" %29d\n", (int)*((signed char*)((void *)hw)));
                 break;
             case INT_UCHAR:
-                printf(" %29u\n", (unsigned)*((unsigned char*)hw));
+                printf(" %29u\n", (unsigned)*((unsigned char*)((void *)hw)));
                 break;
             case INT_SHORT:
-                printf(" %29hd\n", *((short*)hw));
+                printf(" %29hd\n", *((short*)((void *)hw)));
                 break;
             case INT_USHORT:
-                printf(" %29hu\n", *((unsigned short*)hw));
+                printf(" %29hu\n", *((unsigned short*)((void *)hw)));
                 break;
             case INT_INT:
-                printf(" %29d\n", *((int*)hw));
+                printf(" %29d\n", *((int*)((void *)hw)));
                 break;
             case INT_UINT:
-                printf(" %29u\n", *((unsigned*)hw));
+                printf(" %29u\n", *((unsigned*)((void *)hw)));
                 break;
             case INT_LONG:
-                printf(" %29ld\n", *((long*)hw));
+                printf(" %29ld\n", *((long*)((void *)hw)));
                 break;
             case INT_ULONG:
-                printf(" %29lu\n", *((unsigned long*)hw));
+                printf(" %29lu\n", *((unsigned long*)((void *)hw)));
                 break;
             case INT_LLONG:
-                HDfprintf(stdout," %29"H5_PRINTF_LL_WIDTH"d\n", *((long long*)hw));
+                HDfprintf(stdout," %29"H5_PRINTF_LL_WIDTH"d\n", *((long long*)((void *)hw)));
                 break;
             case INT_ULLONG:
-                HDfprintf(stdout," %29"H5_PRINTF_LL_WIDTH"u\n", *((unsigned long long*)hw));
+                HDfprintf(stdout," %29"H5_PRINTF_LL_WIDTH"u\n", *((unsigned long long*)((void *)hw)));
                 break;
             case FLT_FLOAT:
             case FLT_DOUBLE:
@@ -4485,44 +4485,44 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
         printf("%*s", (int)(3*MAX(0, (ssize_t)src_size-(ssize_t)dst_size)), "");
         switch (dst_type) {
             case INT_SCHAR:
-                printf(" %29d\n", (int)*((signed char*)hw));
+                printf(" %29d\n", (int)*((signed char*)((void *)hw)));
                 break;
             case INT_UCHAR:
-                printf(" %29u\n", (unsigned)*((unsigned char*)hw));
+                printf(" %29u\n", (unsigned)*((unsigned char*)((void *)hw)));
                 break;
             case INT_SHORT:
-                printf(" %29hd\n", *((short*)hw));
+                printf(" %29hd\n", *((short*)((void *)hw)));
                 break;
             case INT_USHORT:
-                printf(" %29hu\n", *((unsigned short*)hw));
+                printf(" %29hu\n", *((unsigned short*)((void *)hw)));
                 break;
             case INT_INT:
-                printf(" %29d\n", *((int*)hw));
+                printf(" %29d\n", *((int*)((void *)hw)));
                 break;
             case INT_UINT:
-                printf(" %29u\n", *((unsigned int*)hw));
+                printf(" %29u\n", *((unsigned int*)((void *)hw)));
                 break;
             case INT_LONG:
-                printf(" %29ld\n", *((long*)hw));
+                printf(" %29ld\n", *((long*)((void *)hw)));
                 break;
             case INT_ULONG:
-                printf(" %29lu\n", *((unsigned long*)hw));
+                printf(" %29lu\n", *((unsigned long*)((void *)hw)));
                 break;
             case INT_LLONG:
-                HDfprintf(stdout, " %29"H5_PRINTF_LL_WIDTH"d\n", *((long long*)hw));
+                HDfprintf(stdout, " %29"H5_PRINTF_LL_WIDTH"d\n", *((long long*)((void *)hw)));
                 break;
             case INT_ULLONG:
-                HDfprintf(stdout, " %29"H5_PRINTF_LL_WIDTH"u\n", *((unsigned long long*)hw));
+                HDfprintf(stdout, " %29"H5_PRINTF_LL_WIDTH"u\n", *((unsigned long long*)((void *)hw)));
                 break;
             case FLT_FLOAT:
-                printf(" %29f\n", (double)*((float*)hw));
+                printf(" %29f\n", (double)*((float*)((void *)hw)));
                 break;
             case FLT_DOUBLE:
-                printf(" %29f\n", *((double*)hw));
+                printf(" %29f\n", *((double*)((void *)hw)));
                 break;
 #if H5_SIZEOF_LONG_DOUBLE !=0
             case FLT_LDOUBLE:
-                printf(" %29Lf\n", *((long double*)hw));
+                printf(" %29Lf\n", *((long double*)((void *)hw)));
                 break;
 #endif
             case OTHER:

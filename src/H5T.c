@@ -4287,8 +4287,8 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2, hbool_t superset)
                     idx = u;
                 } /* end else */
 
-                tmp = HDmemcmp(dt1->shared->u.enumer.value+idx1[u]*base_size,
-                       dt2->shared->u.enumer.value+idx2[idx]*base_size,
+                tmp = HDmemcmp((uint8_t *)dt1->shared->u.enumer.value + idx1[u] * base_size,
+                       (uint8_t *)dt2->shared->u.enumer.value + idx2[idx] * base_size,
                        base_size);
                 if(tmp<0) HGOTO_DONE(-1);
                 if(tmp>0) HGOTO_DONE(1);
