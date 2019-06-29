@@ -1430,7 +1430,7 @@ H5FL_arr_free(H5FL_arr_head_t *head, void *obj)
     HDassert(head->init);
 
     /* Get the pointer to the info header in front of the block to free */
-    temp = (H5FL_arr_list_t *)((void *)((unsigned char *)obj - -sizeof(H5FL_arr_list_t))); /*lint !e826 Pointer-to-pointer cast is appropriate here */
+    temp = (H5FL_arr_list_t *)((void *)((unsigned char *)obj - sizeof(H5FL_arr_list_t))); /*lint !e826 Pointer-to-pointer cast is appropriate here */
 
     /* Get the number of elements */
     free_nelem=temp->nelem;

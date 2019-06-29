@@ -113,9 +113,11 @@ case "$cc_vendor-$cc_version" in
     # NOTE: Don't add -Wpadded here since we can't/won't fix the (many)
     # warnings that are emitted. If you need it, add it from the
     # environment variable at configure time.
+    # NOTE: Disable the -Wformat-nonliteral from -Wformat=2 here and re-add
+    # it to the developer flags.
     H5_CFLAGS="$H5_CFLAGS $arch -pedantic -Wall -Wextra -Wbad-function-cast -Wc++-compat -Wcast-align"
     H5_CFLAGS="$H5_CFLAGS -Wcast-qual -Wconversion -Wdeclaration-after-statement -Wdisabled-optimization -Wfloat-equal"
-    H5_CFLAGS="$H5_CFLAGS -Wformat=2 -Winit-self -Winvalid-pch -Wmissing-declarations -Wmissing-include-dirs"
+    H5_CFLAGS="$H5_CFLAGS -Wformat=2 -Wno-format-nonliteral -Winit-self -Winvalid-pch -Wmissing-declarations -Wmissing-include-dirs"
     H5_CFLAGS="$H5_CFLAGS -Wmissing-prototypes -Wnested-externs -Wold-style-definition -Wpacked -Wpointer-arith"
     H5_CFLAGS="$H5_CFLAGS -Wredundant-decls -Wshadow -Wstrict-prototypes -Wswitch-enum -Wswitch-default"
     # As of GCC 8.x, the -Wunsafe-loop-optimizations has been removed
@@ -150,7 +152,8 @@ case "$cc_vendor-$cc_version" in
     esac
 
     # Developer warnings (suggestions from gcc, not code problems)
-    DEVELOPER_WARNING_CFLAGS="-Winline -Waggregate-return -Wmissing-format-attribute -Wmissing-noreturn"
+    # NOTE: -Wformat-nonliteral added back in here (from being disabled in H5_CFLAGS)
+    DEVELOPER_WARNING_CFLAGS="-Winline -Waggregate-return -Wmissing-format-attribute -Wmissing-noreturn -Wformat-nonliteral"
     NO_DEVELOPER_WARNING_CFLAGS="-Wno-inline -Wno-aggregate-return -Wno-missing-format-attribute -Wno-missing-noreturn"
 
     # Symbols

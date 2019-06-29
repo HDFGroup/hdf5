@@ -950,7 +950,6 @@ test_sohm_size1(void)
 
 } /* test_sohm_size1 */
 
-#if 0 /* TODO: REVEALS BUG TO BE FIXED - SEE JIRA HDFFV-10645 */
 
 /*---------------------------------------------------------------------------
  * Function:    test_sohm_size_consistency_open_create
