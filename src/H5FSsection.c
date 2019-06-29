@@ -2539,7 +2539,7 @@ H5FS_vfd_alloc_hdr_and_section_info_if_needed(H5F_t *f, H5FS_t *fspace,
 
             /* Allocate space for the free space header */
             if(HADDR_UNDEF == (fspace->addr = H5MF_alloc(f, H5FD_MEM_FSPACE_HDR, hdr_alloc_size)))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "file allocation failed for free space header")
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "file allocation failed for free space header")
 
             /* Cache the new free space header (pinned) */
             if(H5AC_insert_entry(f, H5AC_FSPACE_HDR, fspace->addr, fspace, H5AC__PIN_ENTRY_FLAG) < 0)

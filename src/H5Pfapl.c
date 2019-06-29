@@ -4892,7 +4892,7 @@ H5P_set_vol(H5P_genplist_t *plist, hid_t vol_id, const void *vol_info)
 
         /* Prepare the VOL connector property */
         vol_prop.connector_id = vol_id;
-        vol_prop.connector_info = vol_info;
+        vol_prop.connector_info = (void *)vol_info;
 
         /* Set the connector ID & info property */
         if(H5P_set(plist, H5F_ACS_VOL_CONN_NAME, &vol_prop) < 0)

@@ -809,7 +809,7 @@ oh_compare(hid_t did1, hid_t did2)
  * Conduct additions side-by-side with a standard datataset and one with
  * minimized dataset object headers.
  */
-#define ATTR_NAME_MAX   16
+#define ATTR_NAME_MAX   64
 #define ATTR_SHORT      "first"
 #define ATTR_LONG       "second"
 #define N_ATTRS         64
