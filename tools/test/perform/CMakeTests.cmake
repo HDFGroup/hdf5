@@ -169,6 +169,22 @@ else ()
 endif ()
 set_tests_properties (PERFORM_zip_perf PROPERTIES DEPENDS "PERFORM_zip_perf_help;PERFORM_h5perform-clearall-objects")
 
+if (HDF5_ENABLE_USING_MEMCHECKER)
+  add_test (NAME PERFORM_perf COMMAND $<TARGET_FILE:perf>)
+else ()
+  add_test (NAME PERFORM_perf COMMAND "${CMAKE_COMMAND}"
+      -D "TEST_PROGRAM=$<TARGET_FILE:perf>"
+      -D "TEST_ARGS:STRING="
+      -D "TEST_EXPECT=0"
+      -D "TEST_SKIP_COMPARE=TRUE"
+      -D "TEST_OUTPUT=perf.txt"
+      #-D "TEST_REFERENCE=perf.out"
+      -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
+      -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+  )
+endif ()
+set_tests_properties (PERFORM_perf PROPERTIES DEPENDS "PERFORM_h5perform-clearall-objects")
+
 if (H5_HAVE_PARALLEL)
   add_test (NAME MPI_TEST_PERFORM_h5perf COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_PREFLAGS} $<TARGET_FILE:h5perf> ${MPIEXEC_POSTFLAGS})
 
