@@ -241,7 +241,6 @@ case "$cc_vendor-$cc_version" in
     H5_CFLAGS="$H5_CFLAGS -Wattribute-alias -Wcast-align=strict -Wshift-overflow=2"
 
     # Append warning flags that only gcc 9.x+ knows about
-    DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS "
     H5_CFLAGS="$H5_CFLAGS -Wattribute-alias=2 -Wmissing-profile"
     ;;
 
