@@ -140,14 +140,14 @@
 
 /* For superblock version 0 & 1:
    Offset to the file consistency flags (status_flags) in the superblock (excluding H5F_SUPERBLOCK_FIXED_SIZE) */
-#define H5F_SUPER_STATUS_OFF_V01                                                \
-        (2  /* freespace, and root group versions */                    \
-        + 1 /* reserved */                                              \
-        + 3 /* shared header vers, size of address, size of lengths */  \
-        + 1 /* reserved */                                              \
-        + 4) /* group leaf k, group internal k */
+#define H5F_SUPER_STATUS_OFF_V01                                        \
+        (unsigned)(2  /* freespace, and root group versions */          \
+                  + 1 /* reserved */                                    \
+                  + 3 /* shared header vers, size of address, size of lengths */ \
+                  + 1 /* reserved */                                    \
+                  + 4) /* group leaf k, group internal k */
 
-#define H5F_SUPER_STATUS_OFF(v)   (v >= 2 ? 2 : H5F_SUPER_STATUS_OFF_V01)
+#define H5F_SUPER_STATUS_OFF(v)   (v >= 2 ? (unsigned)2 : H5F_SUPER_STATUS_OFF_V01)
 
 /* Offset to the file consistency flags (status_flags) in the superblock */
 #define H5F_SUPER_STATUS_FLAGS_OFF(v) (H5F_SUPERBLOCK_FIXED_SIZE + H5F_SUPER_STATUS_OFF(v))

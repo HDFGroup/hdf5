@@ -2016,7 +2016,7 @@ error:
  * 
  *-------------------------------------------------------------------------
  */
-char *
+const char *
 h5_get_version_string(H5F_libver_t libver)
 {
     return(LIBVER_NAMES[libver]);

@@ -15,6 +15,7 @@
  * Purpose:	Tests datasets stored in external raw files.
  */
 #include "external_common.h"
+#include "external_fname.h"
 
 static const char *EXT_ENV_FNAME[] = {
     "extern_env_dir/env_file_1",

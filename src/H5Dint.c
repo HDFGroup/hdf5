@@ -50,7 +50,7 @@
 
 /* General stuff */
 static H5D_shared_t *H5D__new(hid_t dcpl_id, hbool_t creating, hbool_t vl_type);
-static herr_t H5D__init_type(H5F_t *file, const H5D_t *dset, hid_t type_id, H5T_t *type);
+static herr_t H5D__init_type(H5F_t *file, const H5D_t *dset, hid_t type_id, const H5T_t *type);
 static herr_t H5D__cache_dataspace_info(const H5D_t *dset);
 static herr_t H5D__init_space(H5F_t *file, const H5D_t *dset, const H5S_t *space);
 static herr_t H5D__update_oh_info(H5F_t *file, H5D_t *dset, hid_t dapl_id);
@@ -522,7 +522,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__init_type(H5F_t *file, const H5D_t *dset, hid_t type_id, H5T_t *type)
+H5D__init_type(H5F_t *file, const H5D_t *dset, hid_t type_id, const H5T_t *type)
 {
     htri_t relocatable;            /* Flag whether the type is relocatable */
     htri_t immutable;              /* Flag whether the type is immutable */
@@ -1199,6 +1199,7 @@ H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id,
     /* Get the dataset's datatype */
     if(NULL == (dt = (H5T_t *)H5I_object(type_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a datatype")
+
     /* If this is a named datatype, get the pointer via the VOL plugin */
     type = H5T_get_actual_type(dt);
 

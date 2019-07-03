@@ -673,12 +673,12 @@ H5PL__find_plugin_in_path(const H5PL_search_params_t *search_params, hbool_t *fo
             size_t      len;
 
             /* Allocate & initialize the path name */
-            len = HDstrlen(dir) + HDstrlen(H5PL_PATH_SEPARATOR) + HDstrlen(dp->d_name) + 1 /*\0*/;
+            len = HDstrlen(dir) + HDstrlen(H5PL_PATH_SEPARATOR) + HDstrlen(dp->d_name) + 5 /*\0*/;
 
             if (NULL == (path = (char *)H5MM_calloc(len)))
                 HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't allocate memory for path")
 
-            HDsnprintf(path, len, "%s/%s", dir, dp->d_name);
+            HDsnprintf(path, len, "%s%s%s", dir, H5PL_PATH_SEPARATOR, dp->d_name);
 
             /* Get info for directory entry */
             if (HDstat(path, &my_stat) == -1)

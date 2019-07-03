@@ -70,9 +70,9 @@ const H5Z_class2_t H5Z_COUNTER[1] = {{
  *      track of the data of chunks being read from file into memory.
  */
 static size_t
-counter (unsigned flags, size_t cd_nelmts,
-         const unsigned *cd_values, size_t nbytes,
-         size_t *buf_size, void **buf)
+counter (unsigned H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_nelmts,
+         const unsigned H5_ATTR_UNUSED *cd_values, size_t nbytes,
+         size_t H5_ATTR_UNUSED *buf_size, void H5_ATTR_UNUSED **buf)
 {
     nbytes_global += nbytes;
     return nbytes;

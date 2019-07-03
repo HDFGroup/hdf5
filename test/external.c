@@ -18,6 +18,7 @@
  * Purpose:	Tests datasets stored in external raw files.
  */
 #include "external_common.h"
+#include "external_fname.h"
 
 
 /*-------------------------------------------------------------------------
@@ -864,7 +865,7 @@ test_path_absolute(hid_t fapl)
     hid_t	dset = -1;          /* dataset                              */
     size_t	i;                  /* miscellaneous counter                */
     char	cwdpath[1024];      /* working directory                    */
-    char	filename[1024];     /* file name                            */
+    char	filename[1536];     /* file name                            */
     int	    part[PART_SIZE];    /* raw data buffer (partial)            */
     int     whole[TOTAL_SIZE];  /* raw data buffer (total)              */
     hsize_t	cur_size;           /* current data space size              */
