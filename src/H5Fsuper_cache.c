@@ -1108,8 +1108,8 @@ H5F__cache_drvrinfo_free_icr(void *_thing)
  *              is created, for the most part, this function simply 
  *              verifies the expected values.
  *
- * Return:	Success:	Pointer to new object
- *		Failure:	NULL
+ * Return:	Success:	SUCCEED
+ *		Failure:	FAIL
  *
  * Programmer:	John Mainzer
  *		12/21/19
@@ -1303,7 +1303,9 @@ H5F__cache_superblock_refresh(H5F_t *f, void * _thing, const void * _image,
         if ( status_flags != sblock->status_flags )
             HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "unexpected status_flags")
 
-	/* Base, superblock extension, end of file & root group object header addresses */
+	/* Base, superblock extension, end of file & root group object 
+         * header addresses 
+         */
 	H5F_addr_decode(f, (const uint8_t **)&image, &base_addr/*out*/);
 	H5F_addr_decode(f, (const uint8_t **)&image, &ext_addr/*out*/);
 	H5F_addr_decode(f, (const uint8_t **)&image, &stored_eof/*out*/);

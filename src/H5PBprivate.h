@@ -199,7 +199,6 @@ typedef struct H5PB_entry_t H5PB_entry_t;
  *              linked by their il_next and il_prev fields.
  *
  *              This field is NULL if the index is empty.
-
  *
  *
  * Fields supporting the modified LRU policy:
@@ -288,7 +287,7 @@ typedef struct H5PB_entry_t H5PB_entry_t;
  *
  * vfd_swmr_writer: Boolean flag that is set to TRUE iff the file is 
  *              the file is opened in VFD SWMR mode.  The remaining 
- *              VFD SWMR flags are defined iff vfd_swmr_writer is TRUE.
+ *              VFD SWMR fields are defined iff vfd_swmr_writer is TRUE.
  *
  * mpmde_count: int64_t containing the number of multi-page metadata 
  *              entries currently resident in the page buffer.  Observe 
@@ -385,7 +384,7 @@ typedef struct H5PB_entry_t H5PB_entry_t;
  * bypasses:    Array of int64_t of length H5PB__NUM_STAT_TYPES containing
  *              the number of times that the page buffer has been 
  *              bypassed for raw data, metadata, and for multi-page 
- *               metadata entries (VFD SWMR only) as indexed by 5PB__STATS_MD, 
+ *              metadata entries (VFD SWMR only) as indexed by 5PB__STATS_MD, 
  *              H5PB__STATS_RD, and H5PB__STATS_MPMDE respectively.
  *
  * accesses:    Array of int64_t of length H5PB__NUM_STAT_TYPES containing 
@@ -506,14 +505,6 @@ typedef struct H5PB_entry_t H5PB_entry_t;
  *              page buffer.
  *
  * lru_tl_skips: When searching for an entry to evict, metadata entries on 
- *              the LRU must be skipped if they also reside on the tick list.
- *
- *              This int64_t is used to keep a count of these skips.
- *
- *              If this number becomes excessive, it will be necessary to 
- *              add a holding tank for such entries.
- *
- * lru_dwl_skips: When searching for an entry to evict, metadata entries on 
  *              the LRU must be skipped if they also reside on the tick list.
  *
  *              This int64_t is used to keep a count of these skips.
@@ -647,7 +638,6 @@ typedef struct H5PB_t {
     /* vfd swmr statistics */
     int64_t max_mpmde_count;
     int64_t lru_tl_skips;
-    int64_t lru_dwl_skips;
     int64_t max_tl_len;
     int64_t max_tl_size;
     int64_t delayed_writes;

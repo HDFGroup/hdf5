@@ -49,9 +49,9 @@
  * We maintain doubly linked lists of instances of H5PB_entry_t for a
  * variety of reasons -- LRU list, tick list, and the delayed write list
  * at present.  The following macros support linking and unlinking
- * of instances of H5PB_entry_t by both their regular and tick list next
- * and previous pointers.  Note that the tick list is only used in the 
- * context of VFD SWMR
+ * instances of H5PB_entry_t by both their regular and tick list next
+ * and previous pointers.  Note that the tick list and the delayed write
+ * list are only used in the context of VFD SWMR
  *
  * The size and length fields are also maintained.
  *
@@ -639,12 +639,6 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
 {                                                  \
     HDassert(pb_ptr->vfd_swmr_writer);             \
     ((pb_ptr)->lru_tl_skips)++;                    \
-}
-
-#define H5PB__UPDATE_STATS_FOR_LRU_DWL_SKIP(pb_ptr) \
-{                                                   \
-    HDassert((pb_ptr)->vfd_swmr_writer);            \
-    ((pb_ptr)->lru_dwl_skips)++;                    \
 }
 
 #define H5PB__UPDATE_TL_SIZE_STATS(pb_ptr)           \

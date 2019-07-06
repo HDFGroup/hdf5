@@ -197,7 +197,6 @@ H5PB_reset_stats(H5PB_t *pb_ptr)
     pb_ptr->max_md_pages                     = 0;
     pb_ptr->max_mpmde_count                  = 0;
     pb_ptr->lru_tl_skips                     = 0;
-    pb_ptr->lru_dwl_skips                    = 0;
     pb_ptr->max_tl_len                       = 0;
     pb_ptr->max_tl_size                      = 0;
     pb_ptr->delayed_writes                   = 0;
@@ -217,12 +216,23 @@ H5PB_reset_stats(H5PB_t *pb_ptr)
  * Purpose:     This function was created without documentation.
  *              What follows is my best understanding of Mohamad's intent.
  *
- *              Retrieve statistics collected about page accesses for the page buffer layer.
- *              --accesses: the number of metadata and raw data accesses to the page buffer layer
- *              --hits: the number of metadata and raw data hits in the page buffer layer
- *              --misses: the number of metadata and raw data misses in the page buffer layer
- *              --evictions: the number of metadata and raw data evictions from the page buffer layer
- *              --bypasses: the number of metadata and raw data accesses that bypass the page buffer layer
+ *              Retrieve statistics collected about page accesses for the 
+ *              page buffer layer.
+ *
+ *              --accesses: the number of metadata and raw data accesses 
+ *                          to the page buffer layer
+ *
+ *              --hits: the number of metadata and raw data hits in 
+ *                          the page buffer layer
+ *
+ *              --misses: the number of metadata and raw data misses in 
+ *                          the page buffer layer
+ *
+ *              --evictions: the number of metadata and raw data evictions 
+ *                          from the page buffer layer
+ *
+ *              --bypasses: the number of metadata and raw data accesses 
+ *                          that bypass the page buffer layer
  *
  * Return:	    Non-negative on success/Negative on failure
  *
@@ -331,9 +341,9 @@ H5PB_print_stats(const H5PB_t *pb_ptr)
               pb_ptr->max_lru_len, pb_ptr->max_lru_size);
 
     HDfprintf(stdout, 
-              "LRU make space md/rd/tl/dwl skips = %lld/%lld/%lld/%lld\n",
+              "LRU make space md/rd/tl skips = %lld/%lld/%lld\n",
               pb_ptr->lru_md_skips, pb_ptr->lru_rd_skips, 
-              pb_ptr->lru_tl_skips, pb_ptr->lru_dwl_skips);
+              pb_ptr->lru_tl_skips);
 
     HDfprintf(stdout, "hash table insertions / deletions = %lld / %lld\n",
               pb_ptr->total_ht_insertions, pb_ptr->total_ht_deletions);
