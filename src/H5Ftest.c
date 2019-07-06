@@ -564,15 +564,11 @@ H5F__vfd_swmr_writer_md_test(hid_t file_id, unsigned num_entries, H5FD_vfd_swmr_
     if(H5F_update_vfd_swmr_metadata_file(f, num_entries, index) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL, "error updating the md file with the index")
 
+    printf("Delayed list num entries: f->shared->dl_len = %u, num_dl_entries=%u\n", f->shared->dl_len, num_dl_entries);
+
     /* Verify the number of entries in the delayed list is as expected */
-#ifdef OUT
-    if(f->shared->dl_len != num_dl_entries)
+    if(f->shared->dl_len < num_dl_entries)
         HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "incorrect # of entries in the delayed list")
-#endif
-    if(f->shared->dl_len != num_dl_entries)
-        printf("DIFFERENT: f->shared->dl_len = %u, num_dl_entries=%u\n", f->shared->dl_len, num_dl_entries);
-    else
-        printf("SAME: f->shared->dl_len = %u, num_dl_entries=%u\n", f->shared->dl_len, num_dl_entries);
 
     /* Open the metadata file */
     if((md_fd = HDopen(f->shared->vfd_swmr_config.md_file_path, O_RDONLY)) < 0)

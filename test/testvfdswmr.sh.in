@@ -27,7 +27,7 @@ srcdir=@srcdir@
 
 Nreaders=5              # number of readers to launch
 Nrdrs_spa=3             # number of sparse readers to launch
-Nrecords=200000         # number of records to write
+Nrecords=400000         # number of records to write
 Nrecs_rem=40000         # number of times to shrink
 Nrecs_spa=20000         # number of records to write in the sparse test
 Nsecs_add=5             # number of seconds per read interval

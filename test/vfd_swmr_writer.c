@@ -150,7 +150,7 @@ open_skeleton(const char *filename, hbool_t verbose, FILE *verbose_file,
 
     /* Emit informational message */
     if(verbose)
-        HDfprintf(verbose_file, "Opening datasets\n");
+        HDfprintf(verbose_file, "WRITER: Opening datasets\n");
 
     /* Open the datasets */
     for(u = 0; u < NLEVELS; u++)
@@ -291,7 +291,7 @@ add_records(hid_t fid, hbool_t verbose, FILE *verbose_file,
 
     /* Emit informational message */
     if(verbose)
-        HDfprintf(verbose_file, "Closing datasets\n");
+        HDfprintf(verbose_file, "WRITER: Closing datasets\n");
 
     /* Close the datasets */
     for(u = 0; u < NLEVELS; u++)
@@ -406,14 +406,14 @@ int main(int argc, const char *argv[])
 
         HDsnprintf(verbose_name, sizeof(verbose_name), "vfd_swmr_writer.out.%u", random_seed);
         if(NULL == (verbose_file = HDfopen(verbose_name, "w"))) {
-            HDfprintf(stderr, "Can't open verbose output file!\n");
+            HDfprintf(stderr, "WRITER: Can't open verbose output file!\n");
             HDexit(1);
         }
     } /* end if */
 
     /* Emit informational message */
     if(verbose) {
-        HDfprintf(verbose_file, "Parameters:\n");
+        HDfprintf(verbose_file, "WRITER: Parameters:\n");
         HDfprintf(verbose_file, "\t# of records between flushes = %ld\n", flush_count);
         HDfprintf(verbose_file, "\t# of records to write = %ld\n", nrecords);
     } /* end if */
@@ -423,7 +423,7 @@ int main(int argc, const char *argv[])
 
     /* Emit informational message */
     if(verbose)
-        HDfprintf(verbose_file, "Generating symbol names\n");
+        HDfprintf(verbose_file, "WRITER: Generating symbol names\n");
 
     /* Generate dataset names */
     if(generate_symbols() < 0)
@@ -431,11 +431,11 @@ int main(int argc, const char *argv[])
 
     /* Emit informational message */
     if(verbose)
-        HDfprintf(verbose_file, "Opening skeleton file: %s\n", FILENAME);
+        HDfprintf(verbose_file, "WRITER: Opening skeleton file: %s\n", FILENAME);
 
     /* Open file skeleton */
     if((fid = open_skeleton(FILENAME, verbose, verbose_file, random_seed, old)) < 0) {
-        HDfprintf(stderr, "Error opening skeleton file!\n");
+        HDfprintf(stderr, "WRITER: Error opening skeleton file!\n");
         HDexit(1);
     } /* end if */
 
@@ -444,31 +444,31 @@ int main(int argc, const char *argv[])
 
     /* Emit informational message */
     if(verbose)
-        HDfprintf(verbose_file, "Adding records\n");
+        HDfprintf(verbose_file, "WRITER: Adding records\n");
 
     /* Append records to datasets */
     if(add_records(fid, verbose, verbose_file, (unsigned long)nrecords, (unsigned long)flush_count) < 0) {
-        HDfprintf(stderr, "Error appending records to datasets!\n");
+        HDfprintf(stderr, "WRITER: Error appending records to datasets!\n");
         HDexit(1);
     } /* end if */
 
     /* Emit informational message */
     if(verbose)
-        HDfprintf(verbose_file, "Releasing symbols\n");
+        HDfprintf(verbose_file, "WRITER: Releasing symbols\n");
 
     /* Clean up the symbols */
     if(shutdown_symbols() < 0) {
-        HDfprintf(stderr, "Error releasing symbols!\n");
+        HDfprintf(stderr, "WRITER: Error releasing symbols!\n");
         HDexit(1);
     } /* end if */
 
     /* Emit informational message */
     if(verbose)
-        HDfprintf(verbose_file, "Closing objects\n");
+        HDfprintf(verbose_file, "WRITER: Closing objects/file\n");
 
     /* Close objects opened */
     if(H5Fclose(fid) < 0) {
-        HDfprintf(stderr, "Error closing file!\n");
+        HDfprintf(stderr, "WRITER: Error closing file!\n");
         HDexit(1);
     } /* end if */
 
