@@ -58,7 +58,7 @@ foreach (example ${HDF_JAVA_OBJECT_EXAMPLES})
 endforeach ()
 
 MACRO (ADD_H5_TEST resultfile resultcode)
-  set (CMD_ARGS "-Dhdf.hdf5lib.H5.loadLibraryName=$<TARGET_PROPERTY:${HDF5_JAVA_JNI_LIB_TARGET},OUTPUT_NAME$<$<CONFIG:Debug>:_DEBUG>>;")
+  set (CMD_ARGS "-Dhdf.hdf5lib.H5.loadLibraryName=$<TARGET_PROPERTY:${HDF5_JAVA_JNI_LIB_TARGET}>;")
   add_test (
       NAME JAVA_intro-${resultfile}
       COMMAND "${CMAKE_COMMAND}"
