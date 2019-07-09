@@ -47,6 +47,15 @@ New Features
 
     Configuration:
     -------------
+    - Windows PDB files are installed incorrectly
+
+      For static builds, the PDB files for windows should be installed next
+      to the static libraries in the lib folder. Also the debug versions of
+      libraries and PDB files are now correctly built using the default
+      CMAKE_DEBUG_POSTFIX setting.
+
+      (ADB - 2019/07/09, HDFFV-10581)
+
     - Add option to build only shared libs
 
       A request was made to prevent building static libraries and only build
