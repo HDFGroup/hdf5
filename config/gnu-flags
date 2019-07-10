@@ -23,7 +23,7 @@
 #   cc_vendor:    The compiler name: gcc
 #   cc_version:   Version number: 2.91.60, 2.7.2.1
 #
-if test X = "X$cc_flags_set"; then
+if test "X-" = "X-$cc_flags_set"; then
     # PathScale compiler spits out gcc version string too. Need to
     # filter it out.
     # icc beginning with version 12 includes a "gcc version compatiblilty"
@@ -104,7 +104,7 @@ if test "X-gcc" = "X-$cc_vendor"; then
     ##############
 
     # NDEBUG is handled explicitly by the configure script
-    if test $cc_vers_major -eq 4; then
+    if test $cc_vers_major -le 4; then
         PROD_CFLAGS=
     else
         PROD_CFLAGS="-fstdarg-opt"
@@ -116,7 +116,7 @@ if test "X-gcc" = "X-$cc_vendor"; then
 
     # NDEBUG is handled explicitly by the configure script
     # -g is handled by the symbols flags
-    if test $cc_vers_major -eq 4; then
+    if test $cc_vers_major -le 4; then
         DEBUG_CFLAGS=
     else
         DEBUG_CFLAGS="-ftrapv -fno-common"
@@ -139,7 +139,7 @@ if test "X-gcc" = "X-$cc_vendor"; then
     # Optimization #
     ################
     
-    if test $cc_vers_major -eq 4; then
+    if test "$cc_vers_major" -le 4; then
         HIGH_OPT_CFLAGS="-O3"
         DEBUG_OPT_CFLAGS=
     else
@@ -189,24 +189,24 @@ if test "X-gcc" = "X-$cc_vendor"; then
     #######################
 
     # Disable warnings about using the 'long long' type w/ gcc 4.6 and earlier
-    if test $cc_vers_major -eq 4 -a $cc_vers_minor -ge 2 -o $cc_vers_major -eq 4 -a $$cc_vers_minor -le 6; then
+    if test $cc_vers_major -eq 4 -a $cc_vers_minor -ge 2 -o $cc_vers_major -eq 4 -a $cc_vers_minor -le 6; then
         H5_CFLAGS="$H5_CFLAGS -Wno-long-long"
     fi
 
     # -Wvolatile-register-var was later incorporated into -Wall and
     # only needs to be specified explicitly for gcc 4.2-4.3
-    if test $cc_vers_major -eq 4 -a $cc_vers_minor -ge 2 -o $cc_vers_major -eq 4 -a $$cc_vers_minor -le 3; then
+    if test $cc_vers_major -eq 4 -a $cc_vers_minor -ge 2 -o $cc_vers_major -eq 4 -a $cc_vers_minor -le 3; then
         H5_CFLAGS="$H5_CFLAGS -Wvolatile-register-var"
     fi
 
     # -Wstrict-aliasing was later incorporated into -Wall and
     # only needs to be specified explicitly for gcc 4.5-4.6
-    if test $cc_vers_major -eq 4 -a $cc_vers_minor -ge 5 -o $cc_vers_major -eq 4 -a $$cc_vers_minor -le 6; then
+    if test $cc_vers_major -eq 4 -a $cc_vers_minor -ge 5 -o $cc_vers_major -eq 4 -a $cc_vers_minor -le 6; then
         H5_CFLAGS="$H5_CFLAGS -Wstrict-aliasing"
     fi
 
     # The non-valued form of -Wstrict-overflow is used in gcc 4.2-4.4
-    if test $cc_vers_major -eq 4 -a $cc_vers_minor -ge 2 -o $cc_vers_major -eq 4 -a $$cc_vers_minor -le 4; then
+    if test $cc_vers_major -eq 4 -a $cc_vers_minor -ge 2 -o $cc_vers_major -eq 4 -a $cc_vers_minor -le 4; then
         H5_CFLAGS="$H5_CFLAGS -Wstrict-overflow"
     fi
 
