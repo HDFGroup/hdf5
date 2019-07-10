@@ -139,7 +139,7 @@ if test "X-gcc" = "X-$cc_vendor"; then
     # Optimization #
     ################
     
-    if test "$cc_vers_major" -le 4; then
+    if test $cc_vers_major -le 4; then
         HIGH_OPT_CFLAGS="-O3"
         DEBUG_OPT_CFLAGS=
     else
