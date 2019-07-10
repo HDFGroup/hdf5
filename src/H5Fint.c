@@ -572,11 +572,11 @@ H5F__build_name(const char *prefix, const char *file_name, char **full_name/*out
     fname_len = HDstrlen(file_name);
 
     /* Allocate a buffer to hold the filename + prefix + possibly the delimiter + terminating null byte */
-    if(NULL == (*full_name = (char *)H5MM_malloc(prefix_len + fname_len + 2)))
+    if(NULL == (*full_name = (char *)H5MM_malloc(prefix_len + fname_len + 2 + 2))) /* Extra "+2" to quiet GCC warning - 2019/07/05, QAK */
         HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL, "unable to allocate filename buffer")
 
     /* Compose the full file name */
-    HDsnprintf(*full_name, (prefix_len + fname_len + 2), "%s%s%s", prefix,
+    HDsnprintf(*full_name, (prefix_len + fname_len + 2 + 2), "%s%s%s", prefix,  /* Extra "+2" to quiet GCC warning - 2019/07/05, QAK */
         ((prefix_len == 0 || H5_CHECK_DELIMITER(prefix[prefix_len - 1])) ? "" : H5_DIR_SEPS), file_name);
 
 done:
@@ -2840,8 +2840,7 @@ H5F__get_file_image(H5F_t *file, void *buf_ptr, size_t buf_len)
     /* test to see if a buffer was provided -- if not, we are done */
     if(buf_ptr != NULL) {
         size_t    space_needed;        /* size of file image */
-        hsize_t tmp;
-        size_t tmp_size;
+        unsigned tmp, tmp_size;
 
         /* Check for buffer too small */
         if((haddr_t)buf_len < eoa)
@@ -2856,12 +2855,12 @@ H5F__get_file_image(H5F_t *file, void *buf_ptr, size_t buf_len)
 
         /* Offset to "status_flags" in the superblock */
         tmp = H5F_SUPER_STATUS_FLAGS_OFF(file->shared->sblock->super_vers);
+
         /* Size of "status_flags" depends on the superblock version */
         tmp_size = H5F_SUPER_STATUS_FLAGS_SIZE(file->shared->sblock->super_vers);
 
         /* Clear "status_flags" */
-        HDmemset((uint8_t *)(buf_ptr) + tmp, 0, tmp_size);
-
+        HDmemset((uint8_t *)buf_ptr + tmp, 0, tmp_size);
     } /* end if */
 
 done:

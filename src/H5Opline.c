@@ -459,9 +459,9 @@ H5O_pline_size(const H5F_t H5_ATTR_UNUSED *f, const void *mesg)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Message header */
-    ret_value = 1 +			/*version			*/
+    ret_value = (size_t)(1 +		/*version			*/
 	   1 +				/*number of filters		*/
-	   (pline->version == H5O_PLINE_VERSION_1 ? 6 : 0);	/*reserved			*/
+	   (pline->version == H5O_PLINE_VERSION_1 ? 6 : 0));	/*reserved			*/
 
     /* Calculate size of each filter in pipeline */
     for(i = 0; i < pline->nused; i++) {

@@ -12,26 +12,26 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Raymond Lu <songyulu@hdfgroup.org>
- *              April, 2019
+ * Programmer:  Quincey Koziol <koziol@lbl.gov>
+ *              July, 2019
  *
- * Purpose:     Private function for external.c and external_env.c
+ * Purpose:     Private declaration for external.c and external_env.c
  */
-#ifndef _EXTERNAL_COMMON_H
-#define _EXTERNAL_COMMON_H
+#ifndef _EXTERNAL_FNAME_H
+#define _EXTERNAL_FNAME_H
 
 /* Include test header files */
 #include "h5test.h"
 
-/* A similar collection of files is used for the tests that
- * perform file I/O.
- */
-#define N_EXT_FILES         4
-#define PART_SIZE           25
-#define TOTAL_SIZE          100
-#define GARBAGE_PER_FILE    10
+static const char *EXT_FNAME[] = {
+    "extern_1",
+    "extern_2",
+    "extern_3",
+    "extern_4",
+    "extern_dir/file_1",
+    "extern_5",
+    NULL
+};
 
-H5TEST_DLL herr_t reset_raw_data_files(int);
-
-#endif /* _EXTERNAL_COMMON_H */
+#endif /* _EXTERNAL_FNAME_H */
 

@@ -355,11 +355,11 @@ H5O_sdspace_size(const H5F_t *f, const void *_mesg)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Basic information for all dataspace messages */
-    ret_value = 1 +             /* Version */
+    ret_value = (size_t)(1 +    /* Version */
             1 +                 /* Rank */
             1 +                 /* Flags */
             1 +                 /* Dataspace type/reserved */
-            ((space->version > H5O_SDSPACE_VERSION_1) ? 0 : 4); /* Eliminated/reserved */
+            ((space->version > H5O_SDSPACE_VERSION_1) ? 0 : 4)); /* Eliminated/reserved */
 
     /* Add in the dimension sizes */
     ret_value += space->rank * H5F_SIZEOF_SIZE(f);

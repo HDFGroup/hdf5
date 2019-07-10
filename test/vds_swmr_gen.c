@@ -14,6 +14,52 @@
 #include "h5test.h"
 #include "vds_swmr.h"
 
+/* Max number of planes in the dataset */
+#define N_MAX_PLANES   H5S_UNLIMITED
+
+/* Dataset datatypes */
+#define SOURCE_DATATYPE    H5T_STD_I32LE
+#define VDS_DATATYPE       H5T_STD_I32LE
+
+/* Starting size of datasets, both source and VDS */
+static hsize_t DIMS[N_SOURCES][RANK] = {
+    {0, SM_HEIGHT, WIDTH},
+    {0, LG_HEIGHT, WIDTH},
+    {0, SM_HEIGHT, WIDTH},
+    {0, LG_HEIGHT, WIDTH},
+    {0, SM_HEIGHT, WIDTH},
+    {0, LG_HEIGHT, WIDTH}
+};
+static hsize_t VDS_DIMS[RANK] = {0, FULL_HEIGHT, WIDTH};
+
+/* Maximum size of datasets, both source and VDS.
+ * NOTE: Theoretical (i.e.: H5S_UNLIMITED), not the actual max
+ * number of planes written out by the writers before they stop.
+ * That number is specified separately.
+ */
+static hsize_t MAX_DIMS[N_SOURCES][RANK] = {
+    {N_MAX_PLANES, SM_HEIGHT, WIDTH},
+    {N_MAX_PLANES, LG_HEIGHT, WIDTH},
+    {N_MAX_PLANES, SM_HEIGHT, WIDTH},
+    {N_MAX_PLANES, LG_HEIGHT, WIDTH},
+    {N_MAX_PLANES, SM_HEIGHT, WIDTH},
+    {N_MAX_PLANES, LG_HEIGHT, WIDTH}
+};
+static hsize_t VDS_MAX_DIMS[RANK] = {N_MAX_PLANES, FULL_HEIGHT, WIDTH};
+
+static char SOURCE_DSET_NAME[NAME_LEN] = "source_dset";
+
+static int32_t FILL_VALUES[N_SOURCES] = {
+    -1,
+    -2,
+    -3,
+    -4,
+    -5,
+    -6
+};
+
+static int32_t VDS_FILL_VALUE = -9;
+
 int
 main(void)
 {

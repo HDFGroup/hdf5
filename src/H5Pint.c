@@ -5235,7 +5235,7 @@ H5P__get_class_path(H5P_genclass_t *pclass)
             /* Allocate enough space for the parent class's path, plus the '/'
              * separator, this class's name and the string terminator
              */
-            ret_str_len = HDstrlen(par_path) + 1 + HDstrlen(pclass->name) + 1;
+            ret_str_len = HDstrlen(par_path) + HDstrlen(pclass->name) + 1 + 3; /* Extra "+3" to quiet GCC warning - 2019/07/05, QAK */
             if(NULL == (ret_value = (char *)H5MM_malloc(ret_str_len)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for class name")
 

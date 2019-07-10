@@ -999,6 +999,7 @@
 ./test/external_common.c
 ./test/external_common.h
 ./test/external_env.c
+./test/external_fname.h
 ./test/error_test.c
 ./test/err_compat.c
 ./test/filter_error.h5

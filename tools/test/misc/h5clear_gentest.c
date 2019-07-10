@@ -172,7 +172,7 @@ gen_enhance_files(hbool_t user)
     int data[NUM_ELMTS];    /* Buffer for data */
     int fd = -1;            /* The file descriptor ID */
     int64_t eoa;            /* The EOA value */
-    int32_t chksum;         /* The chksum value */
+    uint32_t chksum;        /* The chksum value */
     int i = 0 , j = 0, u = 0;   /* Local index variable */
 
     /* Get a copy of the default file creation property */
