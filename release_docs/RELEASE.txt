@@ -48,13 +48,22 @@ New Features
 
     Configuration:
     -------------
+    - Windows PDB files are installed incorrectly
+
+      For static builds, the PDB files for windows should be installed next
+      to the static libraries in the lib folder. Also the debug versions of
+      libraries and PDB files are now correctly built using the default
+      CMAKE_DEBUG_POSTFIX setting.
+
+      (ADB - 2019/07/09, HDFFV-10581)
+
     - Add option to build only shared libs
 
       A request was made to prevent building static libraries and only build
       shared.  A new option was added to CMake, ONLY_SHARED_LIBS, which will
       skip building static libraries. Certain utility functions will build with
       static libs but are not published. Tests are adjusted to use the correct
-      libraries.
+      libraries depending on SHARED/STATIC settings.
 
       (ADB - 2019/06/12, HDFFV-10805)
 
@@ -73,8 +82,8 @@ New Features
     - Change tools test that test the error stack
 
       There are some use cases which can cause the error stack of tools to be
-      different then the expected. These tests now use grepTest.cmake, this was
-      changed to allow the error file to be searched for an expected string.
+      different then the expected output. These tests now use grepTest.cmake,
+      this was changed to allow the error file to be searched for an expected string.
 
       (ADB - 2019/04/15, HDFFV-10741)
 
@@ -286,13 +295,13 @@ Bug Fixes since HDF5-1.10.3 release
       together with library high bound setting to H5F_LIBVER_V18.
 
       When setting non-default file space info in fcpl via
-      H5Pset_file_space_strategy() and then creating a file with 
+      H5Pset_file_space_strategy() and then creating a file with
       both high and low library bounds set to
       H5F_LIBVER_V18 in fapl, the library succeeds in creating the file.
       File creation should fail because the feature of setting non-default
       file space info does not exist in library release 1.8 or earlier.
 
-      This was fixed by setting and checking the proper version in the 
+      This was fixed by setting and checking the proper version in the
       file space info message based on the library low and high bounds
       when creating and opening the HDF5 file.
 
