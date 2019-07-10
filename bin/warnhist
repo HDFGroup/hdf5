@@ -252,8 +252,18 @@ while (<>) {
             print "Line is a null string! Input line #$. is: '$_'";
             next
         }
+    # Check for non-GCC warning (Solaris/Oracle?)
+    } elsif($_ =~ /^\".*, line [0-9]+: *[Ww]arning:.*/) {
+        ($name, $toss, $warning, $extra, $extra2) = split /\:/, $_;
+        ($name, $line) = split /\,/, $name;
+	$name =~ s/^\"//g;
+	$name =~ s/\"$//g;
+	$line =~ s/^\s*line\s*//g;
+# print "name:'", $name, "'-'", $line, "'\n";
+# print "warning:'", $warning, "'\n";
     } else {
         # Check for 'character offset' field appended to file & line #
+	# (This is probably specific to GCC)
         if($_ =~ /^.*[0-9]+\:[0-9]+\:/) {
             ($name, $line, $offset, $toss, $warning, $extra, $extra2) = split /\:/, $_;
         } else {
@@ -339,9 +349,10 @@ while (<>) {
 	    $warning =~ s/\s(\{|\()aka '?[A-Za-z_0-9\(\)\*\,\[\]\.\<\>\&\:\+\#]+[A-Za-z_0-9\(\)\*\,\[\]\.\<\>\&\:\+\#\ ]*'?(\}|\))//g;
 	}
 
-	# Genericize C/C++ '<some type>' and printf format '%<some format>' into '-'
-	if($warning =~ /'[A-Za-z_0-9\(\)\*\,\[\]\.\<\>\&\:\+\#]+[A-Za-z_0-9\(\)\*\,\[\]\.\<\>\&\:\+\#\ ]*'/) {
-	    $warning =~ s/'[A-Za-z_0-9\(\)\*\,\[\]\.\<\>\&\:\+\#]+[A-Za-z_0-9\(\)\*\,\[\]\.\<\>\&\:\+\#\ ]*'/'-'/g;
+	# Genericize C/C++ '<some type>', printf format '%<some format>', and
+	# "unknown warning group" into '-'
+	if($warning =~ /'[A-Za-z_0-9\(\)\*\,\[\]\.\<\>\&\:\+\#\-\=]+[A-Za-z_0-9\(\)\*\,\[\]\.\<\>\&\:\+\#\-\=\ ]*'/) {
+	    $warning =~ s/'[A-Za-z_0-9\(\)\*\,\[\]\.\<\>\&\:\+\#\-\=]+[A-Za-z_0-9\(\)\*\,\[\]\.\<\>\&\:\+\#\-\=\ ]*'/'-'/g;
 	}
 	if($warning =~ /'%[\#0\-\ \+]*[,;\:_]?[0-9\*]*\.?[0-9\*]*[hjltzL]*[aAcdeEfFgGinosuxX]'/) {
 	    $warning =~ s/'%[\#0\-\ \+]*[,;\:_]?[0-9\*]*\.?[0-9\*]*[hjltzL]*[aAcdeEfFgGinosuxX]'/'-'/g;
@@ -370,8 +381,8 @@ while (<>) {
 	}
 
 	# Genericize standalone numbers in warnings
-	if($warning =~ /\s-?[0-9]+\s/) {
-	    $warning =~ s/\s-?[0-9]+\s/\ -\ /g;
+	if($warning =~ /(\s|')-?[0-9]+(\s|')/) {
+	    $warning =~ s/-?[0-9]+/-/g;
 	}
 
 	# Genericize unusual GCC/G++/GFORTRAN warnings that aren't handled above
@@ -442,7 +453,7 @@ for my $x (sort {$warn_count{$b} <=> $warn_count{$a}} keys(%warn_count)) {
             for my $y (sort {$warn_file{$x}{$b} <=> $warn_file{$x}{$a}} keys(%{$warn_file{$x}})) {
                 printf ("\t%4d - %s\n", $warn_file{$x}{$y}, $y);
                 if(exists $options{l}) {
-		    my $lines = join ", ", sort {$a <=> $b} keys $warn_file_line{$x}{$y};
+		    my $lines = join ", ", sort {$a <=> $b} keys %{$warn_file_line{$x}{$y}};
                     printf("\t\tLines: $lines \n");
                 }
             }
@@ -480,7 +491,7 @@ for my $x (sort {$file_count{$b} <=> $file_count{$a}} keys(%file_count)) {
             for my $y (sort {$file_warn{$x}{$b} <=> $file_warn{$x}{$a}} keys(%{$file_warn{$x}})) {
                 printf ("\t%4d - %s\n", $file_warn{$x}{$y}, $y);
                 if(exists $options{l}) {
-		    my $lines = join ", ", sort {$a <=> $b} keys $file_warn_line{$x}{$y};
+		    my $lines = join ", ", sort {$a <=> $b} keys %{$file_warn_line{$x}{$y}};
                     printf("\t\tLines: $lines \n");
                 }
             }

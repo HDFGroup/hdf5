@@ -613,6 +613,14 @@ done:
  *
  *-------------------------------------------------------------------------
  */
+/* Disable warning for "format not a string literal" here -QAK */
+/*
+ *      This pragma only needs to surround the snprintf() calls with
+ *      memb_name & temp in the code below, but early (4.4.7, at least) gcc only
+ *      allows diagnostic pragmas to be toggled outside of functions.
+ */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-nonliteral"
 static H5FD_t *
 H5FD_family_open(const char *name, unsigned flags, hid_t fapl_id,
 		 haddr_t maxaddr)
@@ -763,6 +771,7 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_family_open() */
+#pragma GCC diagnostic pop
 
 
 /*-------------------------------------------------------------------------
@@ -942,6 +951,14 @@ H5FD_family_get_eoa(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
  *
  *-------------------------------------------------------------------------
  */
+/* Disable warning for "format not a string literal" here -QAK */
+/*
+ *      This pragma only needs to surround the snprintf() call with
+ *      memb_name in the code below, but early (4.4.7, at least) gcc only
+ *      allows diagnostic pragmas to be toggled outside of functions.
+ */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-nonliteral"
 static herr_t
 H5FD_family_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t abs_eoa)
 {
@@ -1008,6 +1025,7 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 }
+#pragma GCC diagnostic pop
 
 
 /*-------------------------------------------------------------------------

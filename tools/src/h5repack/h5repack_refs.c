@@ -692,7 +692,7 @@ static int copy_refs_attr(hid_t loc_in,
                             size_t idx = (i * msize) + H5Tget_member_offset(mtype_id, ref_comp_index[j]);
                             hobj_ref_t ref_out;
 
-                            if (update_ref_value(attr_id, H5R_OBJECT, (hobj_ref_t *)((void *)(((char *)buf)+idx)), fidout, &ref_out, travt)<0)
+                            if (update_ref_value(attr_id, H5R_OBJECT, (hobj_ref_t *)((void *)(((char *)buf)+idx)), fidout, &ref_out, travt) < 0) /* Extra (void *) cast to quiet "cast to create alignment" warning - 2019/07/05, QAK */
                                 continue;
                             HDmemcpy(((char *)buf)+idx, &ref_out, ref_comp_size[j]);
                         } /* if */

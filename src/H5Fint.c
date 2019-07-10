@@ -572,11 +572,11 @@ H5F__build_name(const char *prefix, const char *file_name, char **full_name/*out
     fname_len = HDstrlen(file_name);
 
     /* Allocate a buffer to hold the filename + prefix + possibly the delimiter + terminating null byte */
-    if(NULL == (*full_name = (char *)H5MM_malloc(prefix_len + fname_len + 4)))
+    if(NULL == (*full_name = (char *)H5MM_malloc(prefix_len + fname_len + 2 + 2))) /* Extra "+2" to quiet GCC warning - 2019/07/05, QAK */
         HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL, "unable to allocate filename buffer")
 
     /* Compose the full file name */
-    HDsnprintf(*full_name, (prefix_len + fname_len + 4), "%s%s%s", prefix,
+    HDsnprintf(*full_name, (prefix_len + fname_len + 2 + 2), "%s%s%s", prefix,  /* Extra "+2" to quiet GCC warning - 2019/07/05, QAK */
         ((prefix_len == 0 || H5_CHECK_DELIMITER(prefix[prefix_len - 1])) ? "" : H5_DIR_SEPS), file_name);
 
 done:

@@ -771,7 +771,7 @@ H5FD_multi_sb_decode(H5FD_t *_file, const char *name, const unsigned char *buf)
     buf += nseen*2*8;
     if (H5Tconvert(H5T_STD_U64LE, H5T_NATIVE_HADDR, nseen*2, x, NULL, H5P_DEFAULT)<0)
         H5Epush_ret(func, H5E_ERR_CLS, H5E_DATATYPE, H5E_CANTCONVERT, "can't convert superblock info", -1)
-    ap = (haddr_t*)((void *)x);
+    ap = (haddr_t*)((void *)x); /* Extra (void *) cast to quiet "cast to create alignment" warning - 2019/07/05, QAK */
     UNIQUE_MEMBERS(map, mt) {
         memb_addr[_unmapped] = *ap++;
         memb_eoa[_unmapped] = *ap++;
