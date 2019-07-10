@@ -265,7 +265,7 @@ static int H5D__chunk_format_convert_cb(const H5D_chunk_rec_t *chunk_rec, void *
 static herr_t H5D__chunk_set_info_real(H5O_layout_chunk_t *layout, unsigned ndims,
     const hsize_t *curr_dims, const hsize_t *max_dims);
 static void *H5D__chunk_mem_alloc(size_t size, const H5O_pline_t *pline);
-static void *H5D__chunk_mem_xfree(void *chk, const H5O_pline_t *pline);
+static void *H5D__chunk_mem_xfree(void *chk, const void *pline);
 static void *H5D__chunk_mem_realloc(void *chk, size_t size,
     const H5O_pline_t *pline);
 static herr_t H5D__chunk_cinfo_cache_reset(H5D_chunk_cached_t *last);
@@ -1354,7 +1354,7 @@ H5D__chunk_mem_alloc(size_t size, const H5O_pline_t *pline)
 /*-------------------------------------------------------------------------
  * Function:	H5D__chunk_mem_xfree
  *
- * Purpose:	Free space for a chunk in memory.  This routine allocates
+ * Purpose:	Free space for a chunk in memory.  This routine releases
  *              memory space for non-filtered chunks from a block free list
  *              and uses malloc()/free() for filtered chunks.
  *
@@ -1366,8 +1366,10 @@ H5D__chunk_mem_alloc(size_t size, const H5O_pline_t *pline)
  *-------------------------------------------------------------------------
  */
 static void *
-H5D__chunk_mem_xfree(void *chk, const H5O_pline_t *pline)
+H5D__chunk_mem_xfree(void *chk, const void *_pline)
 {
+    const H5O_pline_t *pline = (const H5O_pline_t *)_pline;
+
     FUNC_ENTER_STATIC_NOERR
 
     if(chk) {

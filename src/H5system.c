@@ -1301,11 +1301,11 @@ H5_combine_path(const char* path1, const char* path2, char **full_name /*out*/)
          * Allocate a buffer to hold path1 + path2 + possibly the delimiter
          *      + terminating null byte
          */
-        if(NULL == (*full_name = (char *)H5MM_malloc(path1_len + path2_len + 2)))
+        if(NULL == (*full_name = (char *)H5MM_malloc(path1_len + path2_len + 2 + 2))) /* Extra "+2" to quiet GCC warning - 2019/07/05, QAK */
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate filename buffer")
 
         /* Compose the full file name */
-        HDsnprintf(*full_name, (path1_len + path2_len + 2), "%s%s%s", path1,
+        HDsnprintf(*full_name, (path1_len + path2_len + 2 + 2), "%s%s%s", path1, /* Extra "+2" to quiet GCC warning - 2019/07/05, QAK */
                    (H5_CHECK_DELIMITER(path1[path1_len - 1]) ? "" : H5_DIR_SEPS), path2);
     } /* end else */
 

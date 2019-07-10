@@ -299,7 +299,7 @@ done:
 static herr_t
 H5A__dense_fnd_cb(const H5A_t *attr, hbool_t *took_ownership, void *_user_attr)
 {
-    H5A_t const **user_attr = (H5A_t const **)_user_attr; /* User data from v2 B-tree attribute lookup */
+    const H5A_t **user_attr = (const H5A_t **)_user_attr; /* User data from v2 B-tree attribute lookup */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
@@ -308,6 +308,7 @@ H5A__dense_fnd_cb(const H5A_t *attr, hbool_t *took_ownership, void *_user_attr)
     HDassert(attr);
     HDassert(user_attr);
     HDassert(took_ownership);
+
     /*
      *  If there is an attribute already stored in "user_attr", 
      *  we need to free the dynamially allocated spaces for the 
@@ -324,7 +325,7 @@ H5A__dense_fnd_cb(const H5A_t *attr, hbool_t *took_ownership, void *_user_attr)
      *      allocated spaces for the intermediate decoded attribute.
      */
     if(*user_attr != NULL) {
-        H5A_t *old_attr = *user_attr;
+        H5A_t *old_attr = *(H5A_t **)_user_attr;
 
         /* Free any dynamically allocated items */
         if(old_attr->shared)

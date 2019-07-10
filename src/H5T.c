@@ -4732,14 +4732,14 @@ H5T__path_find_real(const H5T_t *src, const H5T_t *dst, const char *name,
         if(H5T_g.soft[i].conv.is_app) {
             if((H5T_g.soft[i].conv.u.app_func)(src_id, dst_id, &(path->cdata), (size_t)0, (size_t)0, (size_t)0, NULL, NULL, H5CX_get_dxpl()) < 0) {
                 HDmemset(&(path->cdata), 0, sizeof(H5T_cdata_t));
-                H5E_clear_stack(H5E_DEFAULT); /*ignore the error*/
+                H5E_clear_stack(NULL); /*ignore the error*/
                 path_init_error = TRUE;
             } /* end if */
         } /* end if */
         else
             if((H5T_g.soft[i].conv.u.lib_func)(src_id, dst_id, &(path->cdata), (size_t)0, (size_t)0, (size_t)0, NULL, NULL) < 0) {
                 HDmemset(&(path->cdata), 0, sizeof(H5T_cdata_t));
-                H5E_clear_stack(H5E_DEFAULT); /*ignore the error*/
+                H5E_clear_stack(NULL); /*ignore the error*/
                 path_init_error = TRUE;
             } /* end if */
 

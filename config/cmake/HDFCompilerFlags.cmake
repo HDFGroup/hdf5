@@ -208,6 +208,11 @@ if (NOT MSVC AND CMAKE_COMPILER_IS_GNUCC)
       set (H5_CFLAGS4 "${H5_CFLAGS4} -Wattribute-alias -Wcast-align=strict -Wshift-overflow=2 -Wno-suggest-attribute=cold -Wno-suggest-attribute=malloc")
     endif ()
 
+    # Append more extra warning flags that only gcc 9.x+ know about
+    if (CMAKE_C_COMPILER_ID STREQUAL "GNU" AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 9.0)
+      set (H5_CFLAGS4 "${H5_CFLAGS4} Wattribute-alias=2 -Wmissing-profile")
+    endif ()
+
 endif ()
 
 #-----------------------------------------------------------------------------

@@ -113,14 +113,15 @@ case "$cc_vendor-$cc_version" in
     # NOTE: Don't add -Wpadded here since we can't/won't fix the (many)
     # warnings that are emitted. If you need it, add it from the
     # environment variable at configure time.
+    #
     # NOTE: Disable the -Wformat-nonliteral from -Wformat=2 here and re-add
     # it to the developer flags.
+    #
     H5_CFLAGS="$H5_CFLAGS $arch -pedantic -Wall -Wextra -Wbad-function-cast -Wc++-compat -Wcast-align"
     H5_CFLAGS="$H5_CFLAGS -Wcast-qual -Wconversion -Wdeclaration-after-statement -Wdisabled-optimization -Wfloat-equal"
     H5_CFLAGS="$H5_CFLAGS -Wformat=2 -Wno-format-nonliteral -Winit-self -Winvalid-pch -Wmissing-declarations -Wmissing-include-dirs"
-    H5_CFLAGS="$H5_CFLAGS -Wmissing-prototypes -Wnested-externs -Wold-style-definition -Wpacked -Wpointer-arith"
+    H5_CFLAGS="$H5_CFLAGS -Wmissing-prototypes -Wnested-externs -Wold-style-definition -Wpacked"
     H5_CFLAGS="$H5_CFLAGS -Wredundant-decls -Wshadow -Wstrict-prototypes -Wswitch-enum -Wswitch-default"
-    # As of GCC 8.x, the -Wunsafe-loop-optimizations has been removed
     H5_CFLAGS="$H5_CFLAGS -Wundef -Wunused-macros -Wunsafe-loop-optimizations -Wwrite-strings"
 
     # Production
@@ -191,18 +192,15 @@ esac
 # the information from the previous version and adding modifications to that.
 case "$cc_vendor-$cc_version" in
 
-# When the gcc 9.x release is out, we should check for additional flags to
+# When the gcc 10.x release is out, we should check for additional flags to
 # include and break it out into it's own section, like the other versions
 # below. -QAK
-  gcc-[89].*)
+  gcc-9*)
     # Append warning flags that only gcc 4.2+ knows about
     # (none, or incorporated in -Wall / -Wextra now)
 
     # Append warning flags that only gcc 4.3+ knows about
-    #
-    # Technically, variable-length arrays are part of the C99 standard, but
-    #   we should approach them a bit cautiously... -QAK
-    H5_CFLAGS="$H5_CFLAGS -Wlogical-op -Wlarger-than=2560 -Wvla"
+    H5_CFLAGS="$H5_CFLAGS -Wlogical-op -Wlarger-than=2560"
 
     # Append warning flags that only gcc 4.4+ knows about
     H5_CFLAGS="$H5_CFLAGS -Wsync-nand -Wframe-larger-than=16384 -Wpacked-bitfield-compat"
@@ -239,9 +237,61 @@ case "$cc_vendor-$cc_version" in
 
     # Append warning flags that only gcc 8.x+ knows about
     DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS -Wstringop-overflow=4 -Wsuggest-attribute=cold -Wsuggest-attribute=malloc"
-    H5_CFLAGS="$H5_CFLAGS -Wattribute-alias -Wcast-align=strict -Wshift-overflow=2 -Wno-suggest-attribute=cold -Wno-suggest-attribute=malloc"
+    NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS -Wno-suggest-attribute=cold -Wno-suggest-attribute=malloc"
+    H5_CFLAGS="$H5_CFLAGS -Wattribute-alias -Wcast-align=strict -Wshift-overflow=2"
+
+    # Append warning flags that only gcc 9.x+ knows about
+    H5_CFLAGS="$H5_CFLAGS -Wattribute-alias=2 -Wmissing-profile"
     ;;
 
+  gcc-8*)
+    # Append warning flags that only gcc 4.2+ knows about
+    # (none, or incorporated in -Wall / -Wextra now)
+
+    # Append warning flags that only gcc 4.3+ knows about
+    #
+    # Technically, variable-length arrays are part of the C99 standard, but
+    #   we should approach them a bit cautiously... -QAK
+    H5_CFLAGS="$H5_CFLAGS -Wlogical-op -Wlarger-than=2560"
+
+    # Append warning flags that only gcc 4.4+ knows about
+    H5_CFLAGS="$H5_CFLAGS -Wsync-nand -Wframe-larger-than=16384 -Wpacked-bitfield-compat"
+
+    # Append warning flags that only gcc 4.5+ knows about
+    H5_CFLAGS="$H5_CFLAGS -Wstrict-overflow=5 -Wjump-misses-init -Wunsuffixed-float-constants"
+
+    # Append warning flags that only gcc 4.6+ knows about
+    H5_CFLAGS="$H5_CFLAGS -Wdouble-promotion -Wtrampolines"
+    DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS -Wsuggest-attribute=const"
+    NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS -Wno-suggest-attribute=const"
+
+    # Append warning flags that only gcc 4.7+ knows about
+    H5_CFLAGS="$H5_CFLAGS -Wstack-usage=8192 -Wvector-operation-performance"
+    DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS -Wsuggest-attribute=pure -Wsuggest-attribute=noreturn"
+    NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS -Wno-suggest-attribute=pure -Wno-suggest-attribute=noreturn"
+
+    # Append warning flags that only gcc 4.8+ knows about
+    DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS -Wsuggest-attribute=format"
+    NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS -Wno-suggest-attribute=format"
+
+    # Append warning flags that only gcc 4.9+ knows about
+    H5_CFLAGS="$H5_CFLAGS -Wdate-time"
+
+    # Append warning flags that only gcc 5.x+ knows about
+    H5_CFLAGS="$H5_CFLAGS -Warray-bounds=2 -Wc99-c11-compat"
+
+    # Append warning flags that only gcc 6.x+ knows about
+    H5_CFLAGS="$H5_CFLAGS -Wnull-dereference -Wunused-const-variable -Wduplicated-cond -Whsa -Wnormalized"
+
+    # Append warning flags that only gcc 7.x+ knows about
+    DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS -Wstringop-overflow=2"
+    H5_CFLAGS="$H5_CFLAGS -Walloc-zero -Walloca -Wduplicated-branches -Wformat-overflow=2 -Wformat-truncation=2 -Wimplicit-fallthrough=5 -Wrestrict"
+
+    # Append warning flags that only gcc 8.x+ knows about
+    DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS -Wstringop-overflow=4 -Wsuggest-attribute=cold -Wsuggest-attribute=malloc"
+    NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS -Wno-suggest-attribute=cold -Wno-suggest-attribute=malloc"
+    H5_CFLAGS="$H5_CFLAGS -Wattribute-alias -Wcast-align=strict -Wshift-overflow=2"
+    ;;
 
   gcc-7*)
     # Append warning flags that only gcc 4.2+ knows about
@@ -251,7 +301,7 @@ case "$cc_vendor-$cc_version" in
     #
     # Technically, variable-length arrays are part of the C99 standard, but
     #   we should approach them a bit cautiously... -QAK
-    H5_CFLAGS="$H5_CFLAGS -Wlogical-op -Wlarger-than=2560 -Wvla"
+    H5_CFLAGS="$H5_CFLAGS -Wlogical-op -Wlarger-than=2560"
 
     # Append warning flags that only gcc 4.4+ knows about
     H5_CFLAGS="$H5_CFLAGS -Wsync-nand -Wframe-larger-than=16384 -Wpacked-bitfield-compat"
@@ -295,7 +345,7 @@ case "$cc_vendor-$cc_version" in
     #
     # Technically, variable-length arrays are part of the C99 standard, but
     #   we should approach them a bit cautiously... -QAK
-    H5_CFLAGS="$H5_CFLAGS -Wlogical-op -Wlarger-than=2560 -Wvla"
+    H5_CFLAGS="$H5_CFLAGS -Wlogical-op -Wlarger-than=2560"
 
     # Append warning flags that only gcc 4.4+ knows about
     H5_CFLAGS="$H5_CFLAGS -Wsync-nand -Wframe-larger-than=16384 -Wpacked-bitfield-compat"
@@ -335,7 +385,7 @@ case "$cc_vendor-$cc_version" in
     #
     # Technically, variable-length arrays are part of the C99 standard, but
     #   we should approach them a bit cautiously... -QAK
-    H5_CFLAGS="$H5_CFLAGS -Wlogical-op -Wlarger-than=2560 -Wvla"
+    H5_CFLAGS="$H5_CFLAGS -Wlogical-op -Wlarger-than=2560"
 
     # Append warning flags that only gcc 4.4+ knows about
     H5_CFLAGS="$H5_CFLAGS -Wsync-nand -Wframe-larger-than=16384 -Wpacked-bitfield-compat"

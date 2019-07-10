@@ -498,7 +498,7 @@ static int test_id_type_list(void)
         goto out;
 
     /* Sanity check */
-    if(startType >= H5I_MAX_NUM_TYPES || startType < H5I_NTYPES)
+    if((int)startType >= H5I_MAX_NUM_TYPES || startType < H5I_NTYPES)
     {
         /* Error condition, throw an error */
         CHECK(1, 1, "H5Iregister_type");

@@ -769,6 +769,14 @@ error:
  *
  *-------------------------------------------------------------------------
  */
+/* Disable warning for "format not a string literal" here -QAK */
+/*
+ *      This pragma only needs to surround the snprintf() calls with
+ *      'first_name' in the code below, but early (4.4.7, at least) gcc only
+ *      allows diagnostic pragmas to be toggled outside of functions.
+ */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-nonliteral"
 static herr_t
 test_family_opens(char *fname, hid_t fa_pl)
 {
@@ -825,6 +833,7 @@ test_family_opens(char *fname, hid_t fa_pl)
 error:
     return -1;
 } /* end test_family_opens() */
+#pragma GCC diagnostic pop
 
 
 /*-------------------------------------------------------------------------
@@ -1027,6 +1036,14 @@ error:
  *
  *-------------------------------------------------------------------------
  */
+/* Disable warning for "format not a string literal" here -QAK */
+/*
+ *      This pragma only needs to surround the snprintf() calls with
+ *      'newname_individual', etc. in the code below, but early (4.4.7, at least) gcc only
+ *      allows diagnostic pragmas to be toggled outside of functions.
+ */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-nonliteral"
 static herr_t
 test_family_compat(void)
 {
@@ -1110,6 +1127,7 @@ error:
 
     return -1;
 } /* end test_family_compat() */
+#pragma GCC diagnostic pop
 
 
 /*-------------------------------------------------------------------------
@@ -1125,6 +1143,14 @@ error:
  *
  *-------------------------------------------------------------------------
  */
+/* Disable warning for "format not a string literal" here -QAK */
+/*
+ *      This pragma only needs to surround the snprintf() calls with
+ *      'sf_name' in the code below, but early (4.4.7, at least) gcc only
+ *      allows diagnostic pragmas to be toggled outside of functions.
+ */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-nonliteral"
 static herr_t
 test_multi_opens(char *fname)
 {
@@ -1142,6 +1168,7 @@ test_multi_opens(char *fname)
 
     return(fid >= 0 ? FAIL : SUCCEED);
 } /* end test_multi_opens() */
+#pragma GCC diagnostic pop
 
 
 /*-------------------------------------------------------------------------

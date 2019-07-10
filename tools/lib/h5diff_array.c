@@ -831,7 +831,7 @@ static hsize_t diff_datum(
             nelmts = ((hvl_t *)((void *)mem1))->len;
 
             for (j = 0; j < nelmts; j++)
-                nfound += diff_datum(((char *) (((hvl_t *)((void *)mem1))->p)) + j * size, ((char *) (((hvl_t *) mem2)->p)) + j * size, memb_type, index,
+                nfound += diff_datum(((char *) (((hvl_t *)((void *)mem1))->p)) + j * size, ((char *) (((hvl_t *)((void *)mem2))->p)) + j * size, memb_type, index,      /* Extra (void *) cast to quiet "cast to create alignment" warning - 2019/07/05, QAK */
                         rank, dims, acc, pos, opts, obj1, obj2, container1_id, container2_id, ph, members);
 
             H5Tclose(memb_type);

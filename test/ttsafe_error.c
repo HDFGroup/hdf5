@@ -38,7 +38,7 @@
 
 /* Having a common dataset name is an error */
 #define DATASETNAME             "commonname"
-#define EXPECTED_ERROR_DEPTH    9
+#define EXPECTED_ERROR_DEPTH    10
 #define WRITE_NUMBER            37
 
 /* Typedefs */
