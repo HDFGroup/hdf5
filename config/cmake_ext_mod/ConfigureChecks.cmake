@@ -21,6 +21,9 @@ include (CheckTypeSize)
 include (CheckVariableExists)
 include (TestBigEndian)
 
+set (HDF_EXTRA_C_FLAGS)
+set (HDF_EXTRA_FLAGS)
+
 #-----------------------------------------------------------------------------
 # APPLE/Darwin setup
 #-----------------------------------------------------------------------------
@@ -66,12 +69,16 @@ set (WINDOWS)
 if (MINGW)
   set (${HDF_PREFIX}_HAVE_MINGW 1)
   set (WINDOWS 1) # MinGW tries to imitate Windows
+  set (CMAKE_REQUIRED_FLAGS "-DWIN32_LEAN_AND_MEAN=1 -DNOGDI=1")
+  set (HDF_EXTRA_C_FLAGS "-DWIN32_LEAN_AND_MEAN=1 -DNOGDI=1")
   set (${HDF_PREFIX}_HAVE_WINSOCK2_H 1)
 endif ()
 
 if (WIN32)
   if (NOT UNIX)
     set (WINDOWS 1)
+    set (CMAKE_REQUIRED_FLAGS "/DWIN32_LEAN_AND_MEAN=1 /DNOGDI=1")
+    set (HDF_EXTRA_C_FLAGS "/DWIN32_LEAN_AND_MEAN=1 /DNOGDI=1")
     if (MSVC)
       set (${HDF_PREFIX}_HAVE_VISUAL_STUDIO 1)
     endif ()
@@ -79,7 +86,6 @@ if (WIN32)
 endif ()
 
 if (WINDOWS)
-  set (CMAKE_REQUIRED_FLAGS "/DWIN32_LEAN_AND_MEAN=1 /DNOGDI=1")
   set (HDF5_REQUIRED_LIBRARIES "ws2_32.lib;wsock32.lib")
   set (${HDF_PREFIX}_HAVE_WIN32_API 1)
   set (${HDF_PREFIX}_HAVE_STDDEF_H 1)
@@ -260,8 +266,6 @@ HDF_FUNCTION_TEST (STDC_HEADERS)
 # The linux-lfs option is deprecated.
 set (LINUX_LFS 0)
 
-set (HDF_EXTRA_C_FLAGS)
-set (HDF_EXTRA_FLAGS)
 if (NOT WINDOWS)
   # Might want to check explicitly for Linux and possibly Cygwin
   # instead of checking for not Solaris or Darwin.
