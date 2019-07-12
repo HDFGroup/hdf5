@@ -13,7 +13,7 @@ set (HDF_JAVA_EXAMPLES
     H5_ReadWrite
 )
 
-if (WIN32)
+if (WIN32 OR MINGW)
   set (CMAKE_JAVA_INCLUDE_FLAG_SEP ";")
 else ()
   set (CMAKE_JAVA_INCLUDE_FLAG_SEP ":")

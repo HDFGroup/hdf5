@@ -49,7 +49,7 @@ endif ()
 
 message (STATUS "COMMAND: ${TEST_TESTER} -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=${LOG_LEVEL} -Djava.library.path=\"${TEST_LIBRARY_DIRECTORY}\" -cp \"${TEST_CLASSPATH}\" ${TEST_ARGS} ${TEST_PROGRAM} ${ARGN}")
 
-if (WIN32 AND NOT MINGW)
+if (WIN32 OR MINGW)
   set (ENV{PATH} "$ENV{PATH}\\;${TEST_LIBRARY_DIRECTORY}")
 else ()
   set (ENV{LD_LIBRARY_PATH} "$ENV{LD_LIBRARY_PATH}:${TEST_LIBRARY_DIRECTORY}")
@@ -124,7 +124,7 @@ message (STATUS "COMMAND Error: ${TEST_ERROR}")
 # compare output files to references unless this must be skipped
 if (NOT TEST_SKIP_COMPARE)
   if (EXISTS ${TEST_FOLDER}/${TEST_REFERENCE})
-    if (WIN32 AND NOT MINGW)
+    if (WIN32 OR MINGW)
       file (READ ${TEST_FOLDER}/${TEST_REFERENCE} TEST_STREAM)
       file (WRITE ${TEST_FOLDER}/${TEST_REFERENCE} "${TEST_STREAM}")
     endif ()
@@ -186,7 +186,7 @@ if (NOT TEST_SKIP_COMPARE)
 
   # now compare the .err file with the error reference, if supplied
   if (TEST_ERRREF)
-    if (WIN32 AND NOT MINGW)
+    if (WIN32 OR MINGW)
       file (READ ${TEST_FOLDER}/${TEST_ERRREF} TEST_STREAM)
       file (WRITE ${TEST_FOLDER}/${TEST_ERRREF} "${TEST_STREAM}")
     endif ()

@@ -512,7 +512,7 @@ endif ()
 # and we need to call the executable from inside the CMake configuration
 #-----------------------------------------------------------------------------
 set (EXE_EXT "")
-if (WIN32)
+if (WIN32 OR MINGW)
   set (EXE_EXT ".exe")
   add_definitions (-D_BIND_TO_CURRENT_VCLIBS_VERSION=1)
   add_definitions (-D_CRT_SECURE_NO_WARNINGS)
@@ -688,7 +688,7 @@ endif ()
 option (HDF5_ENABLE_THREADSAFE "Enable thread-safety" OFF)
 if (HDF5_ENABLE_THREADSAFE)
   # check for unsupported options
-  if (WIN32)
+  if (WIN32 OR MINGW)
     message (STATUS " **** thread-safety option not supported with static library **** ")
     message (STATUS " **** thread-safety option will not be used building static library **** ")
   endif ()

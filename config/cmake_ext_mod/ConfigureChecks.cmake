@@ -74,7 +74,7 @@ if (MINGW)
   set (${HDF_PREFIX}_HAVE_WINSOCK2_H 1)
 endif ()
 
-if (WIN32)
+if (WIN32 AND NOT MINGW)
   if (NOT UNIX)
     set (WINDOWS 1)
     set (CMAKE_REQUIRED_FLAGS "/DWIN32_LEAN_AND_MEAN=1 /DNOGDI=1")
