@@ -52,7 +52,11 @@ typedef __int64             h5_stat_size_t;
 /* Note that the variadic HDopen macro is using a VC++ extension
  * where the comma is dropped if nothing is passed to the ellipsis.
  */
+#ifndef H5_HAVE_MINGW
 #define HDopen(S,F,...)     Wopen_utf8(S,F,__VA_ARGS__)
+#else
+#define HDopen(S,F,...)     Wopen_utf8(S,F,##__VA_ARGS__)
+#endif
 #define HDread(F,M,Z)       _read(F,M,Z)
 #define HDremove(S)         Wremove_utf8(S)
 #define HDrmdir(S)          _rmdir(S)
@@ -128,7 +132,7 @@ extern "C" {
     H5_DLL int Wnanosleep(const struct timespec *req, struct timespec *rem);
     H5_DLL herr_t H5_expand_windows_env_vars(char **env_var);
     H5_DLL const wchar_t *H5_get_utf16_str(const char *s);
-	H5_DLL int Wopen_utf8(const char *path, int oflag, ...);
+    H5_DLL int Wopen_utf8(const char *path, int oflag, ...);
     H5_DLL int Wremove_utf8(const char *path);
 
     /* Round functions only needed for VS2012 and earlier.
