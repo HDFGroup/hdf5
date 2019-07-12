@@ -61,14 +61,15 @@ endmacro ()
 # ----------------------------------------------------------------------
 # WINDOWS Hard code Values
 # ----------------------------------------------------------------------
-
 set (WINDOWS)
+
+if (MINGW)
+  set (${HDF_PREFIX}_HAVE_MINGW 1)
+  set (WINDOWS 1) # MinGW tries to imitate Windows
+  set (CMAKE_REQUIRED_FLAGS "-DWIN32_LEAN_AND_MEAN=1 -DNOGDI=1")
+endif ()
+
 if (WIN32)
-  if (MINGW)
-    set (${HDF_PREFIX}_HAVE_MINGW 1)
-    set (WINDOWS 1) # MinGW tries to imitate Windows
-    set (CMAKE_REQUIRED_FLAGS "-DWIN32_LEAN_AND_MEAN=1 -DNOGDI=1")
-  endif ()
   set (${HDF_PREFIX}_HAVE_WIN32_API 1)
   set (HDF5_REQUIRED_LIBRARIES "ws2_32.lib;wsock32.lib")
   if (NOT UNIX AND NOT MINGW)
