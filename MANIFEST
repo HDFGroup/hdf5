@@ -268,7 +268,6 @@
 ./fortran/src/h5fc.in
 ./fortran/src/hdf5_fortrandll.def.in
 
-
 ./fortran/test/Makefile.am
 ./fortran/test/fflush1.F90
 ./fortran/test/fflush2.F90
@@ -465,9 +464,9 @@
 ./release_docs/INSTALL_parallel
 ./release_docs/INSTALL_Warnings.txt
 ./release_docs/INSTALL_Windows.txt
-./release_docs/RELEASE.txt
 ./release_docs/README_HDF5_CMake
 ./release_docs/README_HPC
+./release_docs/RELEASE.txt
 ./release_docs/USING_HDF5_CMake.txt
 ./release_docs/USING_HDF5_VS.txt
 
@@ -546,8 +545,8 @@
 ./src/H5CS.c
 ./src/H5CSprivate.h
 ./src/H5CX.c
-./src/H5CXprivate.h
 ./src/H5CXmodule.h
+./src/H5CXprivate.h
 ./src/H5D.c
 ./src/H5Dbtree.c
 ./src/H5Dbtree2.c
@@ -3200,6 +3199,7 @@
 ./config/toolchain/crayle.cmake
 ./config/toolchain/GCC.cmake
 ./config/toolchain/intel.cmake
+./config/toolchain/mingw64.cmake
 ./config/toolchain/PGI.cmake
 
 ./config/cmake/cacheinit.cmake

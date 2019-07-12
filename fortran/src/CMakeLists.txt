@@ -355,8 +355,13 @@ install (
         ${HDF5_F90_SRC_SOURCE_DIR}/H5f90.h
         ${HDF5_F90_SRC_SOURCE_DIR}/H5f90i.h
         ${HDF5_F90_SRC_SOURCE_DIR}/H5f90proto.h
-        ${HDF5_F90_BINARY_DIR}/static/H5f90i_gen.h
-        ${HDF5_F90_BINARY_DIR}/static/H5fortran_types.F90
+        if (NOT ONLY_SHARED_LIBS)
+            ${HDF5_F90_BINARY_DIR}/static/H5f90i_gen.h
+            ${HDF5_F90_BINARY_DIR}/static/H5fortran_types.F90
+        else ()
+            ${HDF5_F90_BINARY_DIR}/shared/H5f90i_gen.h
+            ${HDF5_F90_BINARY_DIR}/shared/H5fortran_types.F90
+        endif ()
     DESTINATION
         ${HDF5_INSTALL_INCLUDE_DIR}
     COMPONENT
