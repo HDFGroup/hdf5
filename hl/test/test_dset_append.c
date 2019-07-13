@@ -691,7 +691,7 @@ test_dataset_append_BUG1(hid_t fid)
         FAIL_STACK_ERROR;
 
     /* Open the dataset again */
-    if((did = H5Dopen(fid, DBUGNAME1, H5P_DEFAULT)) < 0)
+    if((did = H5Dopen2(fid, DBUGNAME1, H5P_DEFAULT)) < 0)
         FAIL_STACK_ERROR;
 
     /* Read the dataset */
@@ -853,7 +853,7 @@ test_dataset_append_BUG2(hid_t fid)
         FAIL_STACK_ERROR;
 
     /* Open the dataset again */
-    if((did = H5Dopen(fid, DBUGNAME2, H5P_DEFAULT)) < 0)
+    if((did = H5Dopen2(fid, DBUGNAME2, H5P_DEFAULT)) < 0)
         FAIL_STACK_ERROR;
 
     /* Read the dataset */
