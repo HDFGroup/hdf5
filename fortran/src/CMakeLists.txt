@@ -84,7 +84,7 @@ if (NOT ONLY_SHARED_LIBS)
   add_custom_command (
       OUTPUT ${HDF5_F90_BINARY_DIR}/static/H5f90i_gen.h
              ${HDF5_F90_BINARY_DIR}/static/H5fortran_types.F90
-      COMMAND $<TARGET_FILE:H5match_types>
+      COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:H5match_types>
       WORKING_DIRECTORY ${HDF5_F90_BINARY_DIR}/static
       DEPENDS H5match_types
   )
@@ -95,7 +95,7 @@ if (BUILD_SHARED_LIBS)
   add_custom_command (
       OUTPUT ${HDF5_F90_BINARY_DIR}/shared/H5f90i_gen.h
              ${HDF5_F90_BINARY_DIR}/shared/H5fortran_types.F90
-      COMMAND $<TARGET_FILE:H5match_types>
+      COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:H5match_types>
       WORKING_DIRECTORY ${HDF5_F90_BINARY_DIR}/shared
       DEPENDS H5match_types
   )
@@ -183,7 +183,7 @@ set (f90_F_GEN_SOURCES
 if (NOT ONLY_SHARED_LIBS)
   add_custom_command (
       OUTPUT ${HDF5_F90_BINARY_DIR}/static/H5_gen.F90
-      COMMAND $<TARGET_FILE:H5_buildiface>
+      COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:H5_buildiface>
       WORKING_DIRECTORY ${HDF5_F90_BINARY_DIR}/static
       DEPENDS ${f90_F_GEN_SOURCES}
       COMMENT "Generating the H5_gen.F90 file"
@@ -197,7 +197,7 @@ endif ()
 if (BUILD_SHARED_LIBS)
   add_custom_command (
       OUTPUT ${HDF5_F90_BINARY_DIR}/shared/H5_gen.F90
-      COMMAND $<TARGET_FILE:H5_buildiface>
+      COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:H5_buildiface>
       WORKING_DIRECTORY ${HDF5_F90_BINARY_DIR}/shared
       DEPENDS ${f90_F_GEN_SOURCES}
       COMMENT "Generating the H5_gen.F90 shared file"
