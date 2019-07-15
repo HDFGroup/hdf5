@@ -39,6 +39,7 @@
     add_test (
       NAME H5REPACK-VFD-${vfdname}-h5repacktest
       COMMAND "${CMAKE_COMMAND}"
+          -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
           -D "TEST_PROGRAM=$<TARGET_FILE:h5repacktest>"
           -D "TEST_ARGS:STRING="
           -D "TEST_VFD:STRING=${vfdname}"

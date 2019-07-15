@@ -35,7 +35,7 @@ if (EXISTS ${TEST_FOLDER}/${TEST_OUTPUT}.err)
   file (REMOVE ${TEST_FOLDER}/${TEST_OUTPUT}.err)
 endif ()
 
-message (STATUS "COMMAND: ${TEST_PROGRAM} ${TEST_ARGS}")
+message (STATUS "COMMAND: ${TEST_EMULATOR} ${TEST_PROGRAM} ${TEST_ARGS}")
 
 if (TEST_LIBRARY_DIRECTORY)
   if (WIN32 OR MINGW)
@@ -53,7 +53,7 @@ endif ()
 if (NOT TEST_INPUT)
   # run the test program, capture the stdout/stderr and the result var
   execute_process (
-      COMMAND ${TEST_PROGRAM} ${TEST_ARGS}
+      COMMAND ${TEST_EMULATOR} ${TEST_PROGRAM} ${TEST_ARGS}
       WORKING_DIRECTORY ${TEST_FOLDER}
       RESULT_VARIABLE TEST_RESULT
       OUTPUT_FILE ${TEST_OUTPUT}
@@ -64,7 +64,7 @@ if (NOT TEST_INPUT)
 else ()
   # run the test program with stdin, capture the stdout/stderr and the result var
   execute_process (
-      COMMAND ${TEST_PROGRAM} ${TEST_ARGS}
+      COMMAND ${TEST_EMULATOR} ${TEST_PROGRAM} ${TEST_ARGS}
       WORKING_DIRECTORY ${TEST_FOLDER}
       RESULT_VARIABLE TEST_RESULT
       INPUT_FILE ${TEST_INPUT}

@@ -28,9 +28,10 @@ add_test (
 
 foreach (example ${examples})
   if (HDF5_ENABLE_USING_MEMCHECKER)
-    add_test (NAME HL_FORTRAN_f90_ex_${example} COMMAND $<TARGET_FILE:hl_f90_ex_${example}>)
+    add_test (NAME HL_FORTRAN_f90_ex_${example} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:hl_f90_ex_${example}>)
   else ()
     add_test (NAME HL_FORTRAN_f90_ex_${example} COMMAND "${CMAKE_COMMAND}"
+        -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
         -D "TEST_PROGRAM=$<TARGET_FILE:hl_f90_ex_${example}>"
         -D "TEST_ARGS:STRING="
         -D "TEST_EXPECT=0"

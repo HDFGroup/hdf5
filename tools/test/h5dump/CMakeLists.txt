@@ -40,7 +40,7 @@ if (HDF5_BUILD_GENERATORS AND NOT ONLY_SHARED_LIBS)
   target_link_libraries (h5dumpgentest PRIVATE ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
   set_target_properties (h5dumpgentest PROPERTIES FOLDER generator/tools)
 
-  #add_test (NAME h5dumpgentest COMMAND $<TARGET_FILE:h5dumpgentest>)
+  #add_test (NAME h5dumpgentest COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dumpgentest>)
 endif ()
 
 include (CMakeTests.cmake)

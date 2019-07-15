@@ -90,7 +90,7 @@ while (verification_done LESS "1")
     else ()
       message (STATUS "execute: ${TEST_PROGRAM} ${param1} ${param2}")
       execute_process (
-          COMMAND ${TEST_PROGRAM} ${param1} ${param2}
+          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} ${TEST_PROGRAM} ${param1} ${param2}
           RESULT_VARIABLE TEST_RESULT
           OUTPUT_FILE ${TEST_OUTPUT}
           ERROR_FILE ${TEST_OUTPUT}.err
@@ -133,7 +133,7 @@ while (verification_done LESS "2")
     else ()
       message (STATUS "execute: ${TEST_PROGRAM} ${param1}")
       execute_process (
-          COMMAND ${TEST_PROGRAM} ${param1}
+          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} ${TEST_PROGRAM} ${param1}
           RESULT_VARIABLE TEST_RESULT
           OUTPUT_FILE ${TEST_OUTPUT}
           ERROR_FILE ${TEST_OUTPUT}.err

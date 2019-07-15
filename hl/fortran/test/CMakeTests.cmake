@@ -30,9 +30,10 @@ set (test_CLEANFILES
 
 macro (ADD_H5_FORTRAN_TEST file)
   if (HDF5_ENABLE_USING_MEMCHECKER)
-    add_test (NAME HL_FORTRAN_f90_${file} COMMAND $<TARGET_FILE:hl_f90_${file}>)
+    add_test (NAME HL_FORTRAN_f90_${file} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:hl_f90_${file}>)
   else ()
     add_test (NAME HL_FORTRAN_f90_${file} COMMAND "${CMAKE_COMMAND}"
+        -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
         -D "TEST_PROGRAM=$<TARGET_FILE:hl_f90_${file}>"
         -D "TEST_ARGS:STRING="
         -D "TEST_EXPECT=0"
