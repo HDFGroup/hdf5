@@ -324,7 +324,7 @@
   #
   # Overwrite system dependent files (Windows) and not VS2015
   #
-  if (WIN32 AND MSVC_VERSION LESS 1900)
+  if (MINGW OR WIN32 AND MSVC_VERSION LESS 1900)
     foreach (h5_tstfiles ${LIST_WIN_TEST_FILES})
       get_filename_component(fname "${h5_tstfiles}" NAME)
       HDFTEST_COPY_FILE("${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/${h5_tstfiles}w.txt" "${PROJECT_BINARY_DIR}/testfiles/${fname}.txt" "h5diff_files")
