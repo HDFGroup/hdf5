@@ -362,13 +362,7 @@
   endforeach ()
 
   foreach (tst_exp_file ${HDF5_REFERENCE_EXP_FILES})
-    if (WIN32 OR MINGW)
-      configure_file(${HDF5_TOOLS_DIR}/testfiles/${tst_exp_file} ${PROJECT_BINARY_DIR}/testfiles/std/${tst_exp_file} NEWLINE_STYLE CRLF)
-      #file (READ ${HDF5_TOOLS_DIR}/testfiles/${tst_exp_file} TEST_STREAM)
-      #file (WRITE ${PROJECT_BINARY_DIR}/testfiles/std/${tst_exp_file} "${TEST_STREAM}")
-    else ()
-      HDFTEST_COPY_FILE("${HDF5_TOOLS_DIR}/testfiles/${tst_exp_file}" "${PROJECT_BINARY_DIR}/testfiles/std/${tst_exp_file}" "h5dump_std_files")
-    endif ()
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_DIR}/testfiles/${tst_exp_file}" "${PROJECT_BINARY_DIR}/testfiles/std/${tst_exp_file}" "h5dump_std_files")
   endforeach ()
 
   foreach (tst_other_file ${HDF5_REFERENCE_FILES})
@@ -569,13 +563,15 @@
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
       set_tests_properties (H5DUMP-${resultfile} PROPERTIES DEPENDS "H5DUMP-${resultfile}-clear-objects")
-      add_test (
-          NAME H5DUMP-${resultfile}-output-cmp
-          COMMAND ${CMAKE_COMMAND}
-                -E compare_files ${resultfile}.txt ${resultfile}.exp
-      )
-      set_tests_properties (H5DUMP-${resultfile}-output-cmp PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
-      set_tests_properties (H5DUMP-${resultfile}-output-cmp PROPERTIES DEPENDS H5DUMP-${resultfile})
+      if(NOT CMAKE_VERSION VERSION_LESS "3.14.0")
+        add_test (
+            NAME H5DUMP-${resultfile}-output-cmp
+            COMMAND ${CMAKE_COMMAND}
+                  -E compare_files --ignore-eol ${resultfile}.txt ${resultfile}.exp
+        )
+        set_tests_properties (H5DUMP-${resultfile}-output-cmp PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
+        set_tests_properties (H5DUMP-${resultfile}-output-cmp PROPERTIES DEPENDS H5DUMP-${resultfile})
+      endif ()
     endif ()
   endmacro ()
 

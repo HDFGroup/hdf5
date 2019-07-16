@@ -28,6 +28,12 @@ if (CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_CURRENT_BINARY_DIR)
       )
 endif ()
 
+# CMake version 3.14 added option --ignore-eol to compare files
+#     cmake -E compare_files --ignore-eol file1 file2
+#if(CMAKE_VERSION VERSION_LESS "3.14.0" AND WIN32)
+#    MESSAGE(FATAL_ERROR "Windows builds requires a minimum of CMake 3.14")
+#endif()
+
 #-----------------------------------------------------------------------------
 # Instructions for use : Sub-Project Build
 #
