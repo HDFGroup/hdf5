@@ -34,6 +34,7 @@
 #include "H5Dprivate.h"     /* Datasets                                 */
 #include "H5Eprivate.h"     /* Error handling                           */
 #include "H5FDprivate.h"    /* File drivers                             */
+#include "H5Rprivate.h"     /* References                               */
 #include "H5Ipkg.h"         /* IDs                                      */
 #include "H5MMprivate.h"    /* Memory management                        */
 #include "H5VLprivate.h"    /* Virtual Object Layer                     */
@@ -1852,22 +1853,51 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                 } /* end else */
                 break;
 
-            case 'r':
-                if(ptr) {
-                    if(vp)
-                        HDfprintf(out, "0x%lx", (unsigned long)vp);
-                    else
-                        HDfprintf(out, "NULL");
-                } /* end if */
-                else {
-                    hobj_ref_t ref = HDva_arg(ap, hobj_ref_t);
-
-                    HDfprintf(out, "Reference Object=%a", ref);
-                } /* end else */
-                break;
-
             case 'R':
                 switch(type[1]) {
+
+                    case 'o':
+                        if(ptr) {
+                            if(vp)
+                                HDfprintf(out, "0x%lx", (unsigned long)vp);
+                            else
+                                HDfprintf(out, "NULL");
+                        } /* end if */
+                        else {
+                            hobj_ref_t ref = HDva_arg(ap, hobj_ref_t);
+
+                            HDfprintf(out, "Reference Object=%a", ref);
+                        } /* end else */
+                        break;
+
+                    case 'd':
+                        if(ptr) {
+                            if(vp)
+                                HDfprintf(out, "0x%lx", (unsigned long)vp);
+                            else
+                                HDfprintf(out, "NULL");
+                        } /* end if */
+                        else {
+                            /* Note! region references are array types */
+                            HDfprintf(out, "Reference Region");
+                            goto error;
+                        } /* end else */
+                        break;
+
+                    case 'r':
+                        if(ptr) {
+                            if(vp)
+                                HDfprintf(out, "0x%lx", (unsigned long)vp);
+                            else
+                                HDfprintf(out, "NULL");
+                        } /* end if */
+                        else {
+                            /* Note! reference types are opaque types */
+                            HDfprintf(out, "Reference Opaque");
+                            goto error;
+                        } /* end else */
+                        break;
+
                     case 't':
                         if(ptr) {
                             if(vp)
@@ -1883,12 +1913,24 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                                     HDfprintf(out, "H5R_BADTYPE");
                                     break;
 
-                                case H5R_OBJECT:
-                                    HDfprintf(out, "H5R_OBJECT");
+                                case H5R_OBJECT1:
+                                    HDfprintf(out, "H5R_OBJECT1");
                                     break;
 
-                                case H5R_DATASET_REGION:
-                                    HDfprintf(out, "H5R_DATASET_REGION");
+                                case H5R_DATASET_REGION1:
+                                    HDfprintf(out, "H5R_DATASET_REGION1");
+                                    break;
+
+                                case H5R_OBJECT2:
+                                    HDfprintf(out, "H5R_OBJECT2");
+                                    break;
+
+                                case H5R_DATASET_REGION2:
+                                    HDfprintf(out, "H5R_DATASET_REGION2");
+                                    break;
+
+                                case H5R_ATTR:
+                                    HDfprintf(out, "H5R_ATTR");
                                     break;
 
                                 case H5R_MAXTYPE:

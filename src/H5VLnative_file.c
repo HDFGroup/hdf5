@@ -409,7 +409,6 @@ H5VL__native_file_specific(void *obj, H5VL_file_specific_t specific_type,
                 break;
             }
 
-
         default:
             HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "invalid specific operation")
     } /* end switch */

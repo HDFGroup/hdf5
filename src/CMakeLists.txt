@@ -446,6 +446,7 @@ set (H5O_SOURCES
     ${HDF5_SRC_DIR}/H5Ochunk.c
     ${HDF5_SRC_DIR}/H5Ocont.c
     ${HDF5_SRC_DIR}/H5Ocopy.c
+    ${HDF5_SRC_DIR}/H5Ocopy_ref.c
     ${HDF5_SRC_DIR}/H5Odbg.c
     ${HDF5_SRC_DIR}/H5Odeprec.c
     ${HDF5_SRC_DIR}/H5Odrvinfo.c
@@ -616,6 +617,7 @@ set (H5T_SOURCES
     ${HDF5_SRC_DIR}/H5Torder.c
     ${HDF5_SRC_DIR}/H5Tpad.c
     ${HDF5_SRC_DIR}/H5Tprecis.c
+    ${HDF5_SRC_DIR}/H5Tref.c
     ${HDF5_SRC_DIR}/H5Tstrpad.c
     ${HDF5_SRC_DIR}/H5Tvisit.c
     ${HDF5_SRC_DIR}/H5Tvlen.c

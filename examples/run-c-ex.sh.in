@@ -112,12 +112,16 @@ then
         rm h5_attribute &&\
         RunTest h5_mount &&\
         rm h5_mount &&\
-        RunTest h5_reference &&\
-        rm h5_reference &&\
+        RunTest h5_reference_deprec &&\
+        rm h5_reference_deprec &&\
+        RunTest h5_ref_extern &&\
+        rm h5_ref_extern &&\
+        RunTest h5_ref_compat &&\
+        rm h5_ref_compat &&\
         RunTest h5_drivers &&\
         rm h5_drivers &&\
-        RunTest h5_ref2reg &&\
-        rm h5_ref2reg &&\
+        RunTest h5_ref2reg_deprec &&\
+        rm h5_ref2reg_deprec &&\
         RunTest h5_extlink &&\
         rm h5_extlink &&\
         RunTest h5_elink_unix2win &&\
