@@ -430,6 +430,9 @@ H5P__init_package(void)
 
     FUNC_ENTER_PACKAGE
 
+    /* Sanity check */
+    HDcompile_assert(H5P_TYPE_VOL_INITIALIZE == (H5P_TYPE_MAX_TYPE - 1));
+
     /*
      * Initialize the Generic Property class & object groups.
      */
@@ -5434,9 +5437,8 @@ H5P__new_plist_of_type(H5P_plist_type_t type)
 
     FUNC_ENTER_PACKAGE
 
-    /* Sanity checks */
-    HDcompile_assert(H5P_TYPE_VOL_INITIALIZE == (H5P_TYPE_MAX_TYPE - 1));
-    HDassert(type >= H5P_TYPE_USER && type <= H5P_TYPE_LINK_ACCESS);
+    /* Sanity check */
+    HDassert(type >= H5P_TYPE_USER && type < H5P_TYPE_MAX_TYPE);
 
     /* Check arguments */
     if(type == H5P_TYPE_USER)
