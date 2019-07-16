@@ -32,11 +32,6 @@
 
 #include "H5VLnative_private.h" /* Native VOL connector                     */
 
-#ifdef H5_HAVE_PARALLEL
-/* Remove this if H5R_DATASET_REGION is no longer used in this file */
-#include "H5Rpublic.h"
-#endif /*H5_HAVE_PARALLEL*/
-
 
 /****************/
 /* Local Macros */

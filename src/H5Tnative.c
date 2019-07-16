@@ -126,7 +126,6 @@ static H5T_t *
 H5T__get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_align,
     size_t *offset, size_t *comp_size)
 {
-    H5T_t       *dt;                /* Datatype to make native */
     H5T_t       *super_type;        /* Super type of VL, array and enum datatypes */
     H5T_t       *nat_super_type;    /* Native form of VL, array & enum super datatype */
     H5T_t       *new_type = NULL;   /* New native datatype */
@@ -218,26 +217,36 @@ H5T__get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_ali
 
         case H5T_REFERENCE:
             {
+                H5T_t *dt;          /* Datatype to make native */
                 size_t align;
                 size_t ref_size;
-                int    not_equal;
 
                 if(NULL == (ret_value = H5T_copy(dtype, H5T_COPY_TRANSIENT)))
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot retrieve float type")
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot copy reference type")
 
-                /* Decide if the data type is object or dataset region reference. */
+                /* Decide if the data type is object reference. */
                 if(NULL == (dt = (H5T_t *)H5I_object(H5T_STD_REF_OBJ_g)))
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a data type")
-                not_equal = H5T_cmp(ret_value, dt, FALSE);
 
                 /* Update size, offset and compound alignment for parent. */
-                if(!not_equal) {
+                if(0 == H5T_cmp(ret_value, dt, FALSE)) {
                     align = H5T_HOBJREF_COMP_ALIGN_g;
                     ref_size = sizeof(hobj_ref_t);
                 } /* end if */
                 else {
-                    align = H5T_HDSETREGREF_COMP_ALIGN_g;
-                    ref_size = sizeof(hdset_reg_ref_t);
+                    /* Decide if the data type is dataset region reference. */
+                    if(NULL == (dt = (H5T_t *)H5I_object(H5T_STD_REF_DSETREG_g)))
+                        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a data type")
+
+                    if (0 == H5T_cmp(ret_value, dt, FALSE)) {
+                        align = H5T_HDSETREGREF_COMP_ALIGN_g;
+                        ref_size = sizeof(hdset_reg_ref_t);
+                    } /* end if */
+                    else {
+                        /* Only pointers to underlying opaque reference types */
+                        align = H5T_REF_COMP_ALIGN_g;
+                        ref_size = sizeof(H5R_ref_t);
+                    } /* end else */
                 } /* end else */
 
                 if(H5T__cmp_offset(comp_size, offset, ref_size, (size_t)1, align, struct_align) < 0)

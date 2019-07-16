@@ -1018,6 +1018,9 @@ H5FL_BLK_DEFINE_STATIC(vlen_seq);
 /* Declare a free list to manage pieces of array data */
 H5FL_BLK_DEFINE_STATIC(array_seq);
 
+/* Declare a free list to manage pieces of reference data */
+H5FL_BLK_DEFINE_STATIC(ref_seq);
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5T__conv_noop
@@ -3475,6 +3478,195 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T__conv_array() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5T__conv_ref
+ *
+ * Purpose: Converts between reference datatypes in memory and on disk.
+ *      This is a soft conversion function.
+ *
+ * Return:  Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T__conv_ref(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
+    size_t buf_stride, size_t bkg_stride, void *buf, void *bkg)
+{
+    H5T_t   *src = NULL;        /* source datatype                      */
+    H5T_t   *dst = NULL;        /* destination datatype                 */
+    uint8_t *s = NULL;          /* source buffer                        */
+    uint8_t *d = NULL;          /* destination buffer                   */
+    uint8_t *b = NULL;          /* background buffer                    */
+    ssize_t s_stride, d_stride; /* src and dst strides                  */
+    ssize_t b_stride;           /* bkg stride                           */
+    size_t  safe;               /* how many elements are safe to process in each pass */
+    void    *conv_buf = NULL;   /* temporary conversion buffer          */
+    size_t  conv_buf_size = 0;  /* size of conversion buffer in bytes   */
+    size_t  elmtno;             /* element number counter               */
+    herr_t ret_value = SUCCEED; /* return value                         */
+
+    FUNC_ENTER_PACKAGE
+
+    switch(cdata->command) {
+        case H5T_CONV_INIT:
+            /*
+             * First, determine if this conversion function applies to the
+             * conversion path SRC_ID-->DST_ID.  If not, return failure;
+             * otherwise initialize the `priv' field of `cdata' with
+             * information that remains (almost) constant for this
+             * conversion path.
+             */
+            if(NULL == (src = (H5T_t *)H5I_object(src_id)) || NULL == (dst = (H5T_t *)H5I_object(dst_id)))
+                HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "not a datatype")
+            if(H5T_REFERENCE != src->shared->type)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "not a H5T_REFERENCE datatype")
+            if(H5T_REFERENCE != dst->shared->type)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "not a H5T_REFERENCE datatype")
+            /* Only allow for source reference that is not an opaque type, destination must be opaque */
+            if(!dst->shared->u.atomic.u.r.opaque)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "not an H5T_STD_REF datatype")
+
+            /* Reference types don't need a background buffer */
+            cdata->need_bkg = H5T_BKG_NO;
+            break;
+
+        case H5T_CONV_FREE:
+            break;
+
+        case H5T_CONV_CONV:
+        {
+            /*
+             * Conversion.
+             */
+            if(NULL == (src = (H5T_t *)H5I_object(src_id)) || NULL == (dst = (H5T_t *)H5I_object(dst_id)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
+
+            HDassert(src->shared->u.atomic.u.r.cls);
+
+            /* Initialize source & destination strides */
+            if(buf_stride) {
+                HDassert(buf_stride >= src->shared->size);
+                HDassert(buf_stride >= dst->shared->size);
+                H5_CHECK_OVERFLOW(buf_stride, size_t, ssize_t);
+                s_stride = d_stride = (ssize_t)buf_stride;
+            } /* end if */
+            else {
+                H5_CHECK_OVERFLOW(src->shared->size, size_t, ssize_t);
+                H5_CHECK_OVERFLOW(dst->shared->size, size_t, ssize_t);
+                s_stride = (ssize_t)src->shared->size;
+                d_stride = (ssize_t)dst->shared->size;
+            } /* end else */
+            if(bkg) {
+                if(bkg_stride)
+                    b_stride = (ssize_t)bkg_stride;
+                else
+                    b_stride = d_stride;
+            } /* end if */
+            else
+                b_stride = 0;
+
+            /* The outer loop of the type conversion macro, controlling which */
+            /* direction the buffer is walked */
+            while(nelmts > 0) {
+                /* Check if we need to go backwards through the buffer */
+                if(d_stride > s_stride) {
+                    /* Sanity check */
+                    HDassert(s_stride > 0);
+                    HDassert(d_stride > 0);
+                    HDassert(b_stride >= 0);
+
+                    /* Compute the number of "safe" destination elements at */
+                    /* the end of the buffer (Those which don't overlap with */
+                    /* any source elements at the beginning of the buffer) */
+                    safe = nelmts - (((nelmts * (size_t)s_stride) + ((size_t)d_stride - 1)) / (size_t)d_stride);
+
+                    /* If we're down to the last few elements, just wrap up */
+                    /* with a "real" reverse copy */
+                    if(safe < 2) {
+                        s = (uint8_t *)buf + (nelmts - 1) * (size_t)s_stride;
+                        d = (uint8_t *)buf + (nelmts - 1) * (size_t)d_stride;
+                        b = (uint8_t *)bkg + (nelmts - 1) * (size_t)b_stride;
+                        s_stride = -s_stride;
+                        d_stride = -d_stride;
+                        b_stride = -b_stride;
+
+                        safe = nelmts;
+                    } /* end if */
+                    else {
+                        s = (uint8_t *)buf + (nelmts - safe) * (size_t)s_stride;
+                        d = (uint8_t *)buf + (nelmts - safe) * (size_t)d_stride;
+                        b = (uint8_t *)bkg + (nelmts - safe) * (size_t)b_stride;
+                    } /* end else */
+                } /* end if */
+                else {
+                    /* Single forward pass over all data */
+                    s = d = (uint8_t *)buf;
+                    b = (uint8_t *)bkg;
+                    safe = nelmts;
+                } /* end else */
+
+                for(elmtno = 0; elmtno < safe; elmtno++) {
+                    size_t buf_size;
+                    hbool_t dst_copy = FALSE;
+
+                    /* Get size of references */
+                    if(0 == (buf_size = src->shared->u.atomic.u.r.cls->getsize(
+                        src->shared->u.atomic.u.r.f, s, src->shared->size,
+                        dst->shared->u.atomic.u.r.f, &dst_copy)))
+                        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "incorrect size")
+
+                    /* Check if conversion buffer is large enough, resize if necessary. */
+                    if(conv_buf_size < buf_size) {
+                        conv_buf_size = buf_size;
+                        if(NULL == (conv_buf = H5FL_BLK_REALLOC(ref_seq, conv_buf, conv_buf_size)))
+                            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion")
+                        HDmemset(conv_buf, 0, conv_buf_size);
+                    } /* end if */
+
+                    if(dst_copy && (src->shared->u.atomic.u.r.loc == H5T_LOC_DISK)) {
+                        H5MM_memcpy(conv_buf, s, buf_size);
+                    } else {
+                        /* Read reference */
+                        if(src->shared->u.atomic.u.r.cls->read(
+                            src->shared->u.atomic.u.r.f, s, src->shared->size,
+                            dst->shared->u.atomic.u.r.f, conv_buf, buf_size) < 0)
+                            HGOTO_ERROR(H5E_DATATYPE, H5E_READERROR, FAIL, "can't read reference data")
+                    }
+
+                    if(dst_copy && (dst->shared->u.atomic.u.r.loc == H5T_LOC_DISK)) {
+                        H5MM_memcpy(d, conv_buf, buf_size);
+                    } else {
+                        /* Write reference to destination location */
+                        if(dst->shared->u.atomic.u.r.cls->write(
+                            src->shared->u.atomic.u.r.f, conv_buf, buf_size, src->shared->u.atomic.u.r.rtype,
+                            dst->shared->u.atomic.u.r.f, d, dst->shared->size, b) < 0)
+                            HGOTO_ERROR(H5E_DATATYPE, H5E_WRITEERROR, FAIL, "can't write reference data")
+                    }
+
+                    /* Advance pointers */
+                    s += s_stride;
+                    d += d_stride;
+                    b += b_stride;
+                } /* end for */
+
+                /* Decrement number of elements left to convert */
+                nelmts -= safe;
+            } /* end while */
+        } /* end case */
+            break;
+
+        default:    /* Some other command we don't know about yet.*/
+            HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "unknown conversion command")
+    }   /* end switch */
+
+done:
+    /* Release the conversion buffer (always allocated, except on errors) */
+    if(conv_buf)
+        conv_buf = H5FL_BLK_FREE(ref_seq, conv_buf);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5T__conv_ref() */
 
 
 /*-------------------------------------------------------------------------
@@ -9307,3 +9499,84 @@ H5T_reverse_order(uint8_t *rev, uint8_t *s, size_t size, H5T_order_t order)
     FUNC_LEAVE_NOAPI(SUCCEED)
 }
 
+
+/*-------------------------------------------------------------------------
+ * Function:    H5T_reclaim
+ *
+ * Purpose: Frees the buffers allocated for storing variable-length data
+ *          in memory. Only frees the VL data in the selection defined in the
+ *          dataspace.
+ *
+ * Return:  Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_reclaim(hid_t type_id, H5S_t *space, void *buf)
+{
+    H5T_t *type;                /* Datatype */
+    H5S_sel_iter_op_t dset_op;  /* Operator for iteration */
+    H5T_vlen_alloc_info_t vl_alloc_info;   /* VL allocation info */
+    herr_t ret_value = FAIL;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* Check args */
+    HDassert(H5I_DATATYPE == H5I_get_type(type_id));
+    HDassert(space);
+    HDassert(buf);
+
+    if(NULL == (type = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an valid base datatype")
+
+    /* Get the allocation info */
+    if(H5CX_get_vlen_alloc_info(&vl_alloc_info) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "unable to retrieve VL allocation info")
+
+    /* Call H5S_select_iterate with args, etc. */
+    dset_op.op_type = H5S_SEL_ITER_OP_LIB;
+    dset_op.u.lib_op = H5T_reclaim_cb;
+
+    ret_value = H5S_select_iterate(buf, type, space, &dset_op, &vl_alloc_info);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}   /* end H5T_reclaim() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5T_reclaim_cb
+ *
+ * Purpose: Iteration callback to reclaim conversion allocated memory for a
+ *          buffer element.
+ *
+ * Return:  Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_reclaim_cb(void *elem, const H5T_t *dt, unsigned H5_ATTR_UNUSED ndim,
+    const hsize_t H5_ATTR_UNUSED *point, void *op_data)
+{
+    herr_t ret_value = SUCCEED;     /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* Sanity check */
+    HDassert(elem);
+    HDassert(dt);
+
+    if(dt->shared->type == H5T_REFERENCE) {
+        if(H5T_ref_reclaim(elem, dt) < 0)
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTFREE, FAIL, "can't reclaim ref elements")
+    } else {
+        HDassert(op_data);
+
+        /* Allow vlen reclaim to recurse into that routine */
+        if(H5T_vlen_reclaim(elem, dt, (H5T_vlen_alloc_info_t *)op_data) < 0)
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTFREE, FAIL, "can't reclaim vlen elements")
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5T_reclaim_cb() */

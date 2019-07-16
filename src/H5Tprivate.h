@@ -52,6 +52,9 @@ typedef struct H5T_t H5T_t;
 typedef struct H5T_stats_t H5T_stats_t;
 typedef struct H5T_path_t H5T_path_t;
 
+/* Forward reference of H5S_t */
+struct H5S_t;
+
 /* How to copy a datatype */
 typedef enum H5T_copy_t {
     H5T_COPY_TRANSIENT,
@@ -130,7 +133,10 @@ H5_DLL H5T_bkg_t H5T_path_bkg(const H5T_path_t *p);
 H5_DLL H5T_subset_info_t *H5T_path_compound_subset(const H5T_path_t *p);
 H5_DLL herr_t H5T_convert(H5T_path_t *tpath, hid_t src_id, hid_t dst_id,
     size_t nelmts, size_t buf_stride, size_t bkg_stride, void *buf, void *bkg);
-H5_DLL herr_t H5T_vlen_reclaim(void *elem, hid_t type_id, unsigned ndim, const hsize_t *point, void *_op_data);
+H5_DLL herr_t H5T_reclaim(hid_t type_id, struct H5S_t *space, void *buf);
+H5_DLL herr_t H5T_reclaim_cb(void *elem, const H5T_t *dt, unsigned ndim, const hsize_t *point, void *op_data);
+H5_DLL herr_t H5T_ref_reclaim(void *elem, const H5T_t *dt);
+H5_DLL herr_t H5T_vlen_reclaim(void *elem, const H5T_t *dt, H5T_vlen_alloc_info_t *alloc_info);
 H5_DLL herr_t H5T_vlen_reclaim_elmt(void *elem, H5T_t *dt);
 H5_DLL htri_t H5T_set_loc(H5T_t *dt, H5F_t *f, H5T_loc_t loc);
 H5_DLL htri_t H5T_is_sensible(const H5T_t *dt);
