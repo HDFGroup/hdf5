@@ -35,8 +35,13 @@ bin_PROGRAMS=h5diff $(H5PDIFF)
 h5diff_LDFLAGS = $(LT_STATIC_EXEC) $(AM_LDFLAGS)
 
 # Test programs and scripts
-TEST_PROG=h5diffgentest
-TEST_SCRIPT=testh5diff.sh
+if BUILD_TESTS_CONDITIONAL
+	TEST_PROG=h5diffgentest
+	TEST_SCRIPT=testh5diff.sh
+else 
+	TEST_PROG=
+	TEST_SCRIPT=
+endif
 
 check_PROGRAMS=$(TEST_PROG)
 check_SCRIPTS=$(TEST_SCRIPT) $(TEST_SCRIPT_PARA)

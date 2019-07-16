@@ -22,7 +22,11 @@ include $(top_srcdir)/config/commence.am
 AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_srcdir)/tools/lib
 
 # Test programs and scripts
-TEST_SCRIPT=testh5ls.sh
+if BUILD_TESTS_CONDITIONAL
+	TEST_SCRIPT=testh5ls.sh
+else 
+	TEST_SCRIPT=
+endif
 check_SCRIPTS=$(TEST_SCRIPT)
 SCRIPT_DEPEND=h5ls$(EXEEXT)
 if HAVE_SHARED_CONDITIONAL

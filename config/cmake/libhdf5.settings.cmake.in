@@ -57,6 +57,8 @@ Features:
 ---------
                   Parallel HDF5: @HDF5_ENABLE_PARALLEL@
              High Level library: @HDF5_BUILD_HL_LIB@
+               Build HDF5 Tests: @BUILD_TESTING@
+               Build HDF5 Tools: @HDF5_BUILD_TOOLS@
                    Threadsafety: @HDF5_ENABLE_THREADSAFE@
             Default API Mapping: @DEFAULT_API_VERSION@
  With Deprecated Public Symbols: @HDF5_ENABLE_DEPRECATED_SYMBOLS@
