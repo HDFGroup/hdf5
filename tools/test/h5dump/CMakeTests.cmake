@@ -610,20 +610,22 @@
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
       set_tests_properties (H5DUMP-${resultfile} PROPERTIES DEPENDS "H5DUMP-${resultfile}-clear-objects")
-      add_test (
-          NAME H5DUMP-${resultfile}-output-cmp
-          COMMAND ${CMAKE_COMMAND}
-                -E compare_files ${resultfile}.txt ${resultfile}.exp
-      )
-      set_tests_properties (H5DUMP-${resultfile}-output-cmp PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
-      set_tests_properties (H5DUMP-${resultfile}-output-cmp PROPERTIES DEPENDS H5DUMP-${resultfile})
-      add_test (
-          NAME H5DUMP-${resultfile}-output-cmp-ddl
-          COMMAND ${CMAKE_COMMAND}
-                -E compare_files ${ddlfile}.txt ${ddlfile}.exp
-      )
-      set_tests_properties (H5DUMP-${resultfile}-output-cmp-ddl PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
-      set_tests_properties (H5DUMP-${resultfile}-output-cmp-ddl PROPERTIES DEPENDS H5DUMP-${resultfile}-output-cmp)
+      if(NOT CMAKE_VERSION VERSION_LESS "3.14.0")
+        add_test (
+            NAME H5DUMP-${resultfile}-output-cmp
+            COMMAND ${CMAKE_COMMAND}
+                  -E compare_files --ignore-eol ${resultfile}.txt ${resultfile}.exp
+        )
+        set_tests_properties (H5DUMP-${resultfile}-output-cmp PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
+        set_tests_properties (H5DUMP-${resultfile}-output-cmp PROPERTIES DEPENDS H5DUMP-${resultfile})
+        add_test (
+            NAME H5DUMP-${resultfile}-output-cmp-ddl
+            COMMAND ${CMAKE_COMMAND}
+                  -E compare_files --ignore-eol ${ddlfile}.txt ${ddlfile}.exp
+        )
+        set_tests_properties (H5DUMP-${resultfile}-output-cmp-ddl PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
+        set_tests_properties (H5DUMP-${resultfile}-output-cmp-ddl PROPERTIES DEPENDS H5DUMP-${resultfile}-output-cmp)
+      endif ()
     endif ()
   endmacro ()
 
@@ -641,13 +643,15 @@
       )
       set_tests_properties (H5DUMP-output-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
       set_tests_properties (H5DUMP-output-${resultfile} PROPERTIES DEPENDS H5DUMP-output-${resultfile}-clear-objects)
-      add_test (
-          NAME H5DUMP-output-cmp-${resultfile}
-          COMMAND ${CMAKE_COMMAND}
-                -E compare_files ${resultfile}.txt ${resultfile}.exp
-      )
-      set_tests_properties (H5DUMP-output-cmp-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
-      set_tests_properties (H5DUMP-output-cmp-${resultfile} PROPERTIES DEPENDS H5DUMP-output-${resultfile})
+      if(NOT CMAKE_VERSION VERSION_LESS "3.14.0")
+        add_test (
+            NAME H5DUMP-output-cmp-${resultfile}
+            COMMAND ${CMAKE_COMMAND}
+                  -E compare_files --ignore-eol ${resultfile}.txt ${resultfile}.exp
+        )
+        set_tests_properties (H5DUMP-output-cmp-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
+        set_tests_properties (H5DUMP-output-cmp-${resultfile} PROPERTIES DEPENDS H5DUMP-output-${resultfile})
+      endif ()
     endif ()
   endmacro ()
 
