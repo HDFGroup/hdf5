@@ -73,7 +73,7 @@ endmacro ()
 
 #-------------------------------------------------------------------------------
 macro (INSTALL_TARGET_PDB libtarget targetdestination targetcomponent)
-  if (WIN32 AND MSVC)
+  if (WIN32 AND MSVC AND NOT DISABLE_PDB_FILES)
     get_target_property (target_type ${libtarget} TYPE)
     if (${libtype} MATCHES "SHARED")
       set (targetfilename $<TARGET_PDB_FILE:${libtarget}>)
