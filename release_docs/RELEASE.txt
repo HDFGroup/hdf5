@@ -50,10 +50,10 @@ New Features
     -------------
     - Windows PDB files are always installed
 
-      There are configuration settings for Windows, that may not generate
-      PDB files. As such the install utility will break because those files
-      are not found. Add an optional variable that can be set to not install
-      PDB files.
+      There are build configuration or flag settings for Windows that may not
+      generate PDB files. If those files are not generated then the install
+      utility will fail because those PDB files are not found. An optional
+      variable, DISABLE_PDB_FILES, was added to not install PDB files.
 
       (ADB - 2019/07/17, HDFFV-100424)
 

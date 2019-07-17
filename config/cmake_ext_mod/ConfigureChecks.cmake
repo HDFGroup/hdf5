@@ -21,9 +21,6 @@ include (CheckTypeSize)
 include (CheckVariableExists)
 include (TestBigEndian)
 
-set (HDF_EXTRA_C_FLAGS)
-set (HDF_EXTRA_FLAGS)
-
 #-----------------------------------------------------------------------------
 # APPLE/Darwin setup
 #-----------------------------------------------------------------------------
@@ -264,6 +261,8 @@ HDF_FUNCTION_TEST (STDC_HEADERS)
 # The linux-lfs option is deprecated.
 set (LINUX_LFS 0)
 
+set (HDF_EXTRA_C_FLAGS)
+set (HDF_EXTRA_FLAGS)
 if (NOT WINDOWS)
   # Might want to check explicitly for Linux and possibly Cygwin
   # instead of checking for not Solaris or Darwin.

@@ -86,7 +86,7 @@ macro (INSTALL_TARGET_PDB libtarget targetdestination targetcomponent)
           ${targetfilename}
       DESTINATION
           ${targetdestination}
-      CONFIGURATIONS $<CONFIG>
+      CONFIGURATIONS Debug RelWithDebInfo
       COMPONENT ${targetcomponent}
       OPTIONAL
     )
@@ -101,7 +101,7 @@ macro (INSTALL_PROGRAM_PDB progtarget targetdestination targetcomponent)
           $<TARGET_PDB_FILE:${progtarget}>
       DESTINATION
           ${targetdestination}
-      CONFIGURATIONS $<CONFIG>
+      CONFIGURATIONS Debug RelWithDebInfo
       COMPONENT ${targetcomponent}
       OPTIONAL
     )
@@ -127,6 +127,12 @@ macro (HDF_SET_LIB_OPTIONS libtarget libname libtype)
       set (LIB_DEBUG_NAME "${libname}${LIB_DEBUG_SUFFIX}")
     endif ()
   endif ()
+
+  set_target_properties (${libtarget}
+      PROPERTIES
+         OUTPUT_NAME
+               ${LIB_RELEASE_NAME}
+  )
 
   if (${libtype} MATCHES "STATIC")
     if (WIN32)
