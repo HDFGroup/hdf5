@@ -165,4 +165,4 @@ HDF5.lo:             $(srcdir)/HDF5.F90 H5f90global.lo H5_ff.lo H5Aff.lo  \
 	             H5Off.lo H5Pff.lo H5Rff.lo \
                      H5Sff.lo H5Tff.lo H5Zff.lo H5_gen.lo
 
-include $(top_srcdir)/config/conclude_fc.am
+include $(top_srcdir)/config/conclude.am
