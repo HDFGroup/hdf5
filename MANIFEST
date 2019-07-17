@@ -992,6 +992,7 @@
 ./test/file_image.c
 ./test/file_image_core_test.h5
 ./test/fill_old.h5
+./test/fill18.h5
 ./test/fillval.c
 ./test/filter_fail.c
 ./test/filter_plugin.c
