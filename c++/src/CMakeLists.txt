@@ -117,7 +117,7 @@ if (BUILD_SHARED_LIBS)
   )
   if (MINGW)
     target_link_options (${HDF5_CPP_LIBSH_TARGET}
-        PUBLIC -static-libgcc -static-libstdc++
+        PRIVATE -static-libgcc -static-libstdc++
     )
   endif ()
   set_global_variable (HDF5_LIBRARIES_TO_EXPORT "${HDF5_LIBRARIES_TO_EXPORT};${HDF5_CPP_LIBSH_TARGET}")
