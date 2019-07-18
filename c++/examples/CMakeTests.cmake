@@ -26,6 +26,7 @@
           SDSextendible.h5
           Select.h5
   )
+  set_tests_properties (CPP_ex-clear-objects PROPERTIES FIXTURES_SETUP clear_cppex)
   if (last_test)
     set_tests_properties (CPP_ex-clear-objects PROPERTIES DEPENDS ${last_test})
   endif ()
