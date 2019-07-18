@@ -5128,11 +5128,11 @@ test_libver_bounds_copy(void)
 
     /* Open the source test file */
     src_fid = H5Fopen(src_fname, H5F_ACC_RDONLY, H5P_DEFAULT);
-    CHECK(src_fid, FAIL, "H5Fopen");
+    CHECK(src_fid, H5I_INVALID_HID, "H5Fopen");
 
     /* Create file access property list */
     fapl = H5Pcreate(H5P_FILE_ACCESS);
-    CHECK(fapl, FAIL, "H5Pcreate");
+    CHECK(fapl, H5I_INVALID_HID, "H5Pcreate");
 
     /* Set library version bounds to (v18, v18) */
     ret = H5Pset_libver_bounds(fapl, H5F_LIBVER_V18, H5F_LIBVER_V18);
@@ -5140,7 +5140,7 @@ test_libver_bounds_copy(void)
 
     /* Create the destination file with the fapl */
     dst_fid = H5Fcreate(DST_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
-    CHECK(dst_fid, FAIL, "H5Pcreate");
+    CHECK(dst_fid, H5I_INVALID_HID, "H5Pcreate");
 
     /* Close the fapl */
     ret = H5Pclose(fapl);
