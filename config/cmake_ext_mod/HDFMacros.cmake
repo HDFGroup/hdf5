@@ -110,21 +110,16 @@ endmacro ()
 
 #-------------------------------------------------------------------------------
 macro (HDF_SET_LIB_OPTIONS libtarget libname libtype)
-  if (WIN32)
-    set (LIB_DEBUG_SUFFIX "_D")
-  else ()
-    set (LIB_DEBUG_SUFFIX "_debug")
-  endif ()
   if (${libtype} MATCHES "SHARED")
     set (LIB_RELEASE_NAME "${libname}")
-    set (LIB_DEBUG_NAME "${libname}${LIB_DEBUG_SUFFIX}")
+    set (LIB_DEBUG_NAME "${libname}${CMAKE_DEBUG_POSTFIX}")
   else ()
-    if (WIN32)
+    if (WIN32 AND NOT MINGW)
       set (LIB_RELEASE_NAME "lib${libname}")
-      set (LIB_DEBUG_NAME "lib${libname}${LIB_DEBUG_SUFFIX}")
+      set (LIB_DEBUG_NAME "lib${libname}${CMAKE_DEBUG_POSTFIX}")
     else ()
       set (LIB_RELEASE_NAME "${libname}")
-      set (LIB_DEBUG_NAME "${libname}${LIB_DEBUG_SUFFIX}")
+      set (LIB_DEBUG_NAME "${libname}${CMAKE_DEBUG_POSTFIX}")
     endif ()
   endif ()
 
@@ -132,7 +127,19 @@ macro (HDF_SET_LIB_OPTIONS libtarget libname libtype)
       PROPERTIES
          OUTPUT_NAME
                ${LIB_RELEASE_NAME}
+         OUTPUT_NAME_DEBUG
+               ${LIB_DEBUG_NAME}
+         OUTPUT_NAME_RELEASE
+               ${LIB_RELEASE_NAME}
+         OUTPUT_NAME_MINSIZEREL
+               ${LIB_RELEASE_NAME}
+         OUTPUT_NAME_RELWITHDEBINFO
+               ${LIB_RELEASE_NAME}
   )
+  #get_property (target_name TARGET ${libtarget} PROPERTY OUTPUT_NAME)
+  #get_property (target_name_debug TARGET ${libtarget} PROPERTY OUTPUT_NAME_DEBUG)
+  #get_property (target_name_rwdi TARGET ${libtarget} PROPERTY OUTPUT_NAME_RELWITHDEBINFO)
+  #message (STATUS "${target_name} : ${target_name_debug} : ${target_name_rwdi}")
 
   if (${libtype} MATCHES "STATIC")
     if (WIN32)
