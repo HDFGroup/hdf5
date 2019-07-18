@@ -56,8 +56,9 @@ endforeach ()
 add_custom_target(H5Ex_G_Visit_files ALL COMMENT "Copying files needed by H5Ex_G_Visit tests" DEPENDS ${H5Ex_G_Visit_files_list})
 
 macro (ADD_H5_TEST resultfile resultcode)
-  get_property (target_name TARGET ${HDF5_JAVA_JNI_LIB_TARGET} PROPERTY $<IF:$<CONFIG:Debug>,OUTPUT_NAME_DEBUG,OUTPUT_NAME_RELWITHDEBINFO>)
-  set (CMD_ARGS "-Dhdf.hdf5lib.H5.loadLibraryName=${target_name};")
+  get_property (target_name TARGET ${HDF5_JAVA_JNI_LIB_TARGET} PROPERTY OUTPUT_NAME)
+  get_property (target_name_debug TARGET ${HDF5_JAVA_JNI_LIB_TARGET} PROPERTY OUTPUT_NAME_DEBUG)
+  set (CMD_ARGS "-Dhdf.hdf5lib.H5.loadLibraryName=$<IF:$<CONFIG:Debug>,${target_name_debug},${target_name}>;")
   add_test (
       NAME JAVA_groups-${resultfile}
       COMMAND "${CMAKE_COMMAND}"

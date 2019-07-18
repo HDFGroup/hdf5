@@ -93,7 +93,6 @@ get_property (target_name_debug TARGET ${HDF5_JAVA_JNI_LIB_TARGET} PROPERTY OUTP
 set (CMD_ARGS "-Dhdf.hdf5lib.H5.loadLibraryName=$<IF:$<CONFIG:Debug>,${target_name_debug},${target_name}>;")
 
 foreach (test_file ${HDF5_JAVA_TEST_SOURCES})
-
   set (CMAKE_JAVA_CLASSPATH ".")
   foreach (CMAKE_INCLUDE_PATH ${CMAKE_JAVA_INCLUDE_PATH})
     set (CMAKE_JAVA_CLASSPATH "${CMAKE_JAVA_CLASSPATH}${CMAKE_JAVA_INCLUDE_FLAG_SEP}${CMAKE_INCLUDE_PATH}")
@@ -125,7 +124,6 @@ foreach (test_file ${HDF5_JAVA_TEST_SOURCES})
           -D "TEST_REFERENCE=JUnit-${test_file}.txt"
           -P "${HDF_RESOURCES_DIR}/jrunTest.cmake"
   )
-
   set_tests_properties (JUnit-${test_file} PROPERTIES
       ENVIRONMENT "HDF5_PLUGIN_PATH=${CMAKE_BINARY_DIR}/testdir2"
       DEPENDS "JUnit-${test_file}-clearall-objects"
