@@ -114,7 +114,7 @@ if (BUILD_SHARED_LIBS)
   TARGET_C_PROPERTIES (${HDF5_CPP_LIBSH_TARGET} SHARED)
   target_link_libraries (${HDF5_CPP_LIBSH_TARGET}
       PUBLIC ${HDF5_LIBSH_TARGET}
-      PRIVATE $<$<PLATFORM_ID:MinGW>:-static -static-libgcc -static-libstdc++ -dynamic>
+      PRIVATE "$<$<PLATFORM_ID:MinGW>:-static -static-libgcc -static-libstdc++ -dynamic>"
   )
   set_global_variable (HDF5_LIBRARIES_TO_EXPORT "${HDF5_LIBRARIES_TO_EXPORT};${HDF5_CPP_LIBSH_TARGET}")
   H5_SET_LIB_OPTIONS (${HDF5_CPP_LIBSH_TARGET} ${HDF5_CPP_LIB_NAME} SHARED "CXX")
