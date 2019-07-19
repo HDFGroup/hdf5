@@ -52,8 +52,14 @@ if test "X-gfortran" = "X-$f9x_vendor"; then
     F9XSUFFIXFLAG=""
     FSEARCH_DIRS=""
 
-    if test $f9x_vers_major -ge 9; then
+    # Need Fortran 2008 support for storage_size() in gcc 4.6 on
+    # (2008ts in some versions)
+    if test $f9x_vers_major -ge 8; then
         H5_FCFLAGS="$H5_FCFLAGS -std=f2008"
+    elif test $f9x_vers_major -ge 5 -o $f9x_vers_major -eq 4 -a $f9x_vers_minor -ge 6; then
+        H5_FCFLAGS="$H5_FCFLAGS -std=f2008ts"
+    else
+        H5_FCFLAGS="$H5_FCFLAGS -std=f2003"
     fi
 
 
@@ -81,8 +87,7 @@ if test "X-gfortran" = "X-$f9x_vendor"; then
     # Debug #
     #########
 
-    # Need to figure out an appropriate version for the switch.
-    if test $f9x_vers_major -ge 9; then
+    if test $f9x_vers_major -ge 5 -o $f9x_vers_major -eq 4 -a $f9x_vers_minor -ge 5; then
         DEBUG_FCFLAGS="-fcheck=all"
     else
         DEBUG_FCFLAGS="-fbounds-check"
@@ -105,8 +110,13 @@ if test "X-gfortran" = "X-$f9x_vendor"; then
     # Optimization #
     ################
 
-    HIGH_OPT_FCFLAGS="-O2"
-    DEBUG_OPT_FCFLAGS="-O0"
+    if test $f9x_vers_major -le 4; then
+        HIGH_OPT_CFLAGS="-O3"
+        DEBUG_OPT_CFLAGS=
+    else
+        HIGH_OPT_CFLAGS="-O3"
+        DEBUG_OPT_CFLAGS="-Og"
+    fi
     NO_OPT_FCFLAGS="-O0"
 
     ############
@@ -118,23 +128,56 @@ if test "X-gfortran" = "X-$f9x_vendor"; then
     ###########
 
     H5_FCFLAGS="$H5_FCFLAGS -pedantic -Wall -Wextra -Wunderflow -Wimplicit-interface -Wsurprising"
-
-    # Turn off warnings for passing non-ANSI types to BIND().
-    # We pass a lot of hid_t, etc. types so this generates a LOT of spurious warnings.
-    H5_FCFLAGS="$H5_FCFLAGS -Wno-c-binding-type"
+    H5_FCFLAGS="$H5_FCFLAGS -Waliasing -Wcharacter-truncation -Wimplicit-procedure"
 
     #############################
     # Version-specific warnings #
     #############################
 
-    # gcc 9
-    # Move to other versions (9 is just the current version)
-    if test $f9x_vers_major -ge 9; then
-        H5_FCFLAGS="$H5_FCFLAGS -Waliasing -Warray-temporaries -Wcharacter-truncation"
-        H5_FCFLAGS="$H5_FCFLAGS -Wconversion-extra -Wfrontend-loop-interchange -Wimplicit-procedure"
-        H5_FCFLAGS="$H5_FCFLAGS -Winteger-division -Wintrinsics-std -Wreal-q-constant"
-        H5_FCFLAGS="$H5_FCFLAGS -Wuse-without-only -Wrealloc-lhs -Wrealloc-lhs-all"
+    # gfortran 4.3 (nothing new)
+
+    # gfortran 4.4
+    if test $f9x_vers_major -ge 5 -o $f9x_vers_major -eq 4 -a $f9x_vers_minor -ge 4; then
+        H5_FCFLAGS="$H5_FCFLAGS -Warray-temporaries -Wintrinsics-std"
     fi
+
+    # gfortran 4.5 (nothing new)
+
+    # gfortran 4.6 (nothing new)
+
+    # gfortran 4.7
+    if test $f9x_vers_major -ge 5 -o $f9x_vers_major -eq 4 -a $f9x_vers_minor -ge 7; then
+        H5_FCFLAGS="$H5_FCFLAGS -Wreal-q-constant -Wfunction-elimination"
+    fi
+
+    # gfortran 4.8
+    if test $f9x_vers_major -ge 5 -o $f9x_vers_major -eq 4 -a $f9x_vers_minor -ge 8; then
+        H5_FCFLAGS="$H5_FCFLAGS -Wrealloc-lhs -Wrealloc-lhs-all"
+        # Turn off warnings for passing non-ANSI types to BIND().
+        # We pass a lot of hid_t, etc. types so this generates a LOT of spurious warnings.
+        H5_FCFLAGS="$H5_FCFLAGS -Wno-c-binding-type"
+    fi
+
+    # gfortran 4.9 (nothing new)
+
+    # gfortran 5
+    if test $f9x_vers_major -ge 5; then
+        H5_FCFLAGS="$H5_FCFLAGS -Wuse-without-only"
+    fi
+
+    # gfortran 6
+    if test $f9x_vers_major -ge 6; then
+        H5_FCFLAGS="$H5_FCFLAGS -Winteger-division"
+    fi
+
+    # gfortran 7 (nothing new)
+
+    # gfortran 8
+    if test $f9x_vers_major -ge 8; then
+        H5_FCFLAGS="$H5_FCFLAGS -Wfrontend-loop-interchange"
+    fi
+
+    # gfortran 9 (nothing new)
 
     #################
     # Flags are set #
