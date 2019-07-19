@@ -18,9 +18,10 @@
 
 SUBROUTINE hyper(length,do_collective,do_chunk, mpi_size, mpi_rank, nerrors)
   USE HDF5
+  USE MPI
   USE TH5_MISC
+
   IMPLICIT NONE
-  INCLUDE 'mpif.h'
 
   INTEGER, INTENT(in) :: length                     ! array length
   LOGICAL, INTENT(in) :: do_collective              ! use collective I/O
