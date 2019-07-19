@@ -48,6 +48,15 @@ New Features
 
     Configuration:
     -------------
+    - Windows PDB files are always installed
+
+      There are configuration settings for Windows, that may not generate
+      PDB files. As such the install utility will break because those files
+      are not found. Add an optional variable that can be set to not install
+      PDB files.
+
+      (ADB - 2019/07/17, HDFFV-100424)
+
     - Windows PDB files are installed incorrectly
 
       For static builds, the PDB files for windows should be installed next
