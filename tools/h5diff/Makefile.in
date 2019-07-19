@@ -105,9 +105,9 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 bin_PROGRAMS = h5diff$(EXEEXT) $(am__EXEEXT_1)
+@BUILD_TESTS_CONDITIONAL_TRUE@@HAVE_SHARED_CONDITIONAL_TRUE@@USE_PLUGINS_CONDITIONAL_TRUE@am__append_1 = h5diff_plugin.sh
 check_PROGRAMS = $(am__EXEEXT_2)
-@HAVE_SHARED_CONDITIONAL_TRUE@@USE_PLUGINS_CONDITIONAL_TRUE@am__append_1 = h5diff_plugin.sh
-TESTS = $(am__EXEEXT_2) $(TEST_SCRIPT)
+TESTS = $(am__EXEEXT_2) $(am__EXEEXT_3)
 subdir = tools/h5diff
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/aclocal_cxx.m4 \
@@ -135,7 +135,7 @@ libdynlibdiff_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
 @HAVE_SHARED_CONDITIONAL_TRUE@@NOT_UNAME_CYGWIN_TRUE@am_libdynlibdiff_la_rpath =
 @BUILD_PARALLEL_CONDITIONAL_TRUE@am__EXEEXT_1 = ph5diff$(EXEEXT)
 am__installdirs = "$(DESTDIR)$(bindir)"
-am__EXEEXT_2 = h5diffgentest$(EXEEXT)
+@BUILD_TESTS_CONDITIONAL_TRUE@am__EXEEXT_2 = h5diffgentest$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS)
 am_h5diff_OBJECTS = h5diff_main.$(OBJEXT) h5diff_common.$(OBJEXT)
 h5diff_OBJECTS = $(am_h5diff_OBJECTS)
@@ -144,8 +144,8 @@ h5diff_DEPENDENCIES = $(LIBH5TOOLS) $(LIBHDF5)
 h5diff_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(h5diff_LDFLAGS) $(LDFLAGS) -o $@
-am_h5diffgentest_OBJECTS = h5diffgentest.$(OBJEXT)
-h5diffgentest_OBJECTS = $(am_h5diffgentest_OBJECTS)
+h5diffgentest_SOURCES = h5diffgentest.c
+h5diffgentest_OBJECTS = h5diffgentest.$(OBJEXT)
 h5diffgentest_LDADD = $(LDADD)
 h5diffgentest_DEPENDENCIES = $(LIBH5TOOLS) $(LIBHDF5)
 am_ph5diff_OBJECTS = ph5diff_main.$(OBJEXT) h5diff_common.$(OBJEXT)
@@ -187,9 +187,9 @@ am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
 SOURCES = $(libdynlibdiff_la_SOURCES) $(h5diff_SOURCES) \
-	$(h5diffgentest_SOURCES) $(ph5diff_SOURCES)
+	h5diffgentest.c $(ph5diff_SOURCES)
 DIST_SOURCES = $(am__libdynlibdiff_la_SOURCES_DIST) $(h5diff_SOURCES) \
-	$(h5diffgentest_SOURCES) $(ph5diff_SOURCES)
+	h5diffgentest.c $(ph5diff_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -398,6 +398,8 @@ am__set_TESTS_bases = \
   bases=`echo $$bases`
 RECHECK_LOGS = $(TEST_LOGS)
 AM_RECURSIVE_TARGETS = check recheck
+@BUILD_TESTS_CONDITIONAL_TRUE@am__EXEEXT_3 = testh5diff.sh \
+@BUILD_TESTS_CONDITIONAL_TRUE@	$(am__append_1)
 TEST_SUITE_LOG = test-suite.log
 LOG_DRIVER = $(SHELL) $(top_srcdir)/bin/test-driver
 LOG_COMPILE = $(LOG_COMPILER) $(AM_LOG_FLAGS) $(LOG_FLAGS)
@@ -506,6 +508,8 @@ HAVE_FORTRAN_2003 = @HAVE_FORTRAN_2003@
 HAVE_PTHREAD = @HAVE_PTHREAD@
 HDF5_HL = @HDF5_HL@
 HDF5_INTERFACES = @HDF5_INTERFACES@
+HDF5_TESTS = @HDF5_TESTS@
+HDF5_TOOLS = @HDF5_TOOLS@
 HDF_CXX = @HDF_CXX@
 HDF_FORTRAN = @HDF_FORTRAN@
 HDF_FORTRAN2003 = @HDF_FORTRAN2003@
@@ -705,10 +709,13 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.clog2 *.h5 expect_sorted \
 
 # Add h5diff specific linker flags here
 h5diff_LDFLAGS = $(LT_STATIC_EXEC) $(AM_LDFLAGS)
+@BUILD_TESTS_CONDITIONAL_FALSE@TEST_PROG = 
 
 # Test programs and scripts
-TEST_PROG = h5diffgentest
-TEST_SCRIPT = testh5diff.sh $(am__append_1)
+@BUILD_TESTS_CONDITIONAL_TRUE@TEST_PROG = h5diffgentest
+@BUILD_TESTS_CONDITIONAL_FALSE@TEST_SCRIPT = 
+@BUILD_TESTS_CONDITIONAL_TRUE@TEST_SCRIPT = testh5diff.sh \
+@BUILD_TESTS_CONDITIONAL_TRUE@	$(am__append_1)
 check_SCRIPTS = $(TEST_SCRIPT) $(TEST_SCRIPT_PARA)
 # The parallel test script testph5diff.sh actually depends on testh5diff.sh.
 SCRIPT_DEPEND = h5diff$(EXEEXT) $(H5PDIFF) testh5diff.sh
@@ -716,7 +723,6 @@ SCRIPT_DEPEND = h5diff$(EXEEXT) $(H5PDIFF) testh5diff.sh
 # Source files for the program
 h5diff_SOURCES = h5diff_main.c h5diff_common.c
 ph5diff_SOURCES = ph5diff_main.c h5diff_common.c
-h5diffgentest_SOURCES = h5diffgentest.c
 
 # Programs depend on the main HDF5 library and tools library
 LDADD = $(LIBH5TOOLS) $(LIBHDF5)
@@ -1291,6 +1297,7 @@ uninstall-am: uninstall-binPROGRAMS
 
 help:
 	@$(top_srcdir)/bin/makehelp
+@BUILD_TESTS_CONDITIONAL_TRUE@	h5diffgentest_SOURCES=h5diffgentest.c
 
 @HAVE_SHARED_CONDITIONAL_TRUE@@NOT_UNAME_CYGWIN_TRUE@  # Build it as shared library if configure is enabled for shared library.
 

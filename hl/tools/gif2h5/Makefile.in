@@ -104,7 +104,7 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 bin_PROGRAMS = gif2h5$(EXEEXT) h52gif$(EXEEXT)
-noinst_PROGRAMS = h52gifgentst$(EXEEXT)
+@BUILD_TESTS_CONDITIONAL_TRUE@noinst_PROGRAMS = h52gifgentst$(EXEEXT)
 TESTS = $(TEST_SCRIPT)
 subdir = hl/tools/gif2h5
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -138,7 +138,9 @@ h52gif_DEPENDENCIES = $(LIBH5_HL) $(LIBH5TOOLS) $(LIBHDF5)
 h52gif_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(h52gif_LDFLAGS) $(LDFLAGS) -o $@
-am_h52gifgentst_OBJECTS = h52gifgentst.$(OBJEXT)
+am__h52gifgentst_SOURCES_DIST = h52gifgentst.c
+@BUILD_TESTS_CONDITIONAL_TRUE@am_h52gifgentst_OBJECTS =  \
+@BUILD_TESTS_CONDITIONAL_TRUE@	h52gifgentst.$(OBJEXT)
 h52gifgentst_OBJECTS = $(am_h52gifgentst_OBJECTS)
 h52gifgentst_LDADD = $(LDADD)
 h52gifgentst_DEPENDENCIES = $(LIBH5_HL) $(LIBH5TOOLS) $(LIBHDF5)
@@ -178,7 +180,7 @@ am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
 SOURCES = $(gif2h5_SOURCES) $(h52gif_SOURCES) $(h52gifgentst_SOURCES)
 DIST_SOURCES = $(gif2h5_SOURCES) $(h52gif_SOURCES) \
-	$(h52gifgentst_SOURCES)
+	$(am__h52gifgentst_SOURCES_DIST)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -492,6 +494,8 @@ HAVE_FORTRAN_2003 = @HAVE_FORTRAN_2003@
 HAVE_PTHREAD = @HAVE_PTHREAD@
 HDF5_HL = @HDF5_HL@
 HDF5_INTERFACES = @HDF5_INTERFACES@
+HDF5_TESTS = @HDF5_TESTS@
+HDF5_TOOLS = @HDF5_TOOLS@
 HDF_CXX = @HDF_CXX@
 HDF_FORTRAN = @HDF_FORTRAN@
 HDF_FORTRAN2003 = @HDF_FORTRAN2003@
@@ -680,20 +684,18 @@ TRACE = perl $(top_srcdir)/bin/trace
 # *.clog and *.clog2 are from the MPE option.
 CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.clog2 *.h5 *.gif
 
-# These are our main targets, the tools
-TEST_SCRIPT = h52giftest.sh
-check_SCRIPTS = $(TEST_SCRIPT)
-
 # Add h52gif and gif2h5 specific linker flags here
 h52gif_LDFLAGS = $(LT_STATIC_EXEC) $(AM_LDFLAGS)
 gif2h5_LDFLAGS = $(LT_STATIC_EXEC) $(AM_LDFLAGS)
 gif2h5_SOURCES = gif2hdf.c gif2mem.c decompress.c gifread.c writehdf.c 
 h52gif_SOURCES = hdf2gif.c hdfgifwr.c 
-h52gifgentst_SOURCES = h52gifgentst.c 
 
 # Programs all depend on the hdf5 library, the tools library, and the HL
 # library.
 LDADD = $(LIBH5_HL) $(LIBH5TOOLS) $(LIBHDF5)
+@BUILD_TESTS_CONDITIONAL_TRUE@TEST_SCRIPT = h52giftest.sh
+@BUILD_TESTS_CONDITIONAL_TRUE@check_SCRIPTS = $(TEST_SCRIPT)
+@BUILD_TESTS_CONDITIONAL_TRUE@h52gifgentst_SOURCES = h52gifgentst.c 
 
 # Automake needs to be taught how to build lib, dyn, progs, and tests targets.
 # These will be filled in automatically for the most part (e.g.,

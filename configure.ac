@@ -2886,7 +2886,9 @@ AM_CONDITIONAL([BUILD_CXX_CONDITIONAL], [test "X$HDF_CXX" = "Xyes"])
 AM_CONDITIONAL([BUILD_PARALLEL_CONDITIONAL], [test -n "$TESTPARALLEL"])
 AM_CONDITIONAL([BUILD_FORTRAN_CONDITIONAL], [test "X$HDF_FORTRAN" = "Xyes"])
 AM_CONDITIONAL([BUILD_HDF5_HL_CONDITIONAL], [test "X$HDF5_HL" = "Xyes"])
-
+AM_CONDITIONAL([BUILD_TESTS_CONDITIONAL], [test "X$HDF5_TESTS" = "Xyes"])
+AM_CONDITIONAL([BUILD_TESTS_PARALLEL_CONDITIONAL], [test -n "$TESTPARALLEL"])
+AM_CONDITIONAL([BUILD_TOOLS_CONDITIONAL], [test "X$HDF5_TOOLS" = "Xyes"])
 
 ## ----------------------------------------------------------------------
 ## Build the Makefiles.
@@ -3029,6 +3031,8 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  examples/Makefile
                  examples/run-c-ex.sh
                  examples/testh5cc.sh
+		 bin/h5cc
+		 bin/Makefile
                  c++/Makefile
                  c++/src/Makefile
                  c++/src/h5c++

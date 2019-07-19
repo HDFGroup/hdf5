@@ -104,9 +104,9 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-@HAVE_SHARED_CONDITIONAL_TRUE@@USE_PLUGINS_CONDITIONAL_TRUE@am__append_1 = h5ls_plugin.sh
+@BUILD_TESTS_CONDITIONAL_TRUE@@HAVE_SHARED_CONDITIONAL_TRUE@@USE_PLUGINS_CONDITIONAL_TRUE@am__append_1 = h5ls_plugin.sh
 bin_PROGRAMS = h5ls$(EXEEXT)
-TESTS = $(TEST_SCRIPT)
+TESTS = $(am__EXEEXT_1)
 subdir = tools/h5ls
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/aclocal_cxx.m4 \
@@ -385,6 +385,8 @@ am__set_TESTS_bases = \
   bases=`echo $$bases`
 RECHECK_LOGS = $(TEST_LOGS)
 AM_RECURSIVE_TARGETS = check recheck
+@BUILD_TESTS_CONDITIONAL_TRUE@am__EXEEXT_1 = testh5ls.sh \
+@BUILD_TESTS_CONDITIONAL_TRUE@	$(am__append_1)
 TEST_SUITE_LOG = test-suite.log
 am__test_logs1 = $(TESTS:=.log)
 am__test_logs2 = $(am__test_logs1:@EXEEXT@.log=.log)
@@ -491,6 +493,8 @@ HAVE_FORTRAN_2003 = @HAVE_FORTRAN_2003@
 HAVE_PTHREAD = @HAVE_PTHREAD@
 HDF5_HL = @HDF5_HL@
 HDF5_INTERFACES = @HDF5_INTERFACES@
+HDF5_TESTS = @HDF5_TESTS@
+HDF5_TOOLS = @HDF5_TOOLS@
 HDF_CXX = @HDF_CXX@
 HDF_FORTRAN = @HDF_FORTRAN@
 HDF_FORTRAN2003 = @HDF_FORTRAN2003@
@@ -678,9 +682,11 @@ TRACE = perl $(top_srcdir)/bin/trace
 # .chklog files are output from those tests.
 # *.clog and *.clog2 are from the MPE option.
 CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.clog2
+@BUILD_TESTS_CONDITIONAL_FALSE@TEST_SCRIPT = 
 
 # Test programs and scripts
-TEST_SCRIPT = testh5ls.sh $(am__append_1)
+@BUILD_TESTS_CONDITIONAL_TRUE@TEST_SCRIPT = testh5ls.sh \
+@BUILD_TESTS_CONDITIONAL_TRUE@	$(am__append_1)
 check_SCRIPTS = $(TEST_SCRIPT)
 SCRIPT_DEPEND = h5ls$(EXEEXT)
 

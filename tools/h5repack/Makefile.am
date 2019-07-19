@@ -23,20 +23,21 @@ AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_srcdir)/test -I$(top_srcdir)/tools/lib
 
 # Test programs and scripts
 if BUILD_TESTS_CONDITIONAL
-	TEST_SCRIPT=h5repack.sh
-	TEST_PROG=h5repacktst
-else
-	TEST_SCRIPT=
-	TEST_PROG=
-endif
-noinst_PROGRAMS=testh5repack_detect_szip
-
-SCRIPT_DEPEND=h5repack$(EXEEXT)
+TEST_SCRIPT=h5repack.sh
+TEST_PROG=h5repacktst
+	h5repacktst_SOURCES=$(COMMON_SOURCES) h5repacktst.c
 if HAVE_SHARED_CONDITIONAL
 if USE_PLUGINS_CONDITIONAL
    TEST_SCRIPT += h5repack_plugin.sh
 endif
 endif
+else
+TEST_SCRIPT=
+TEST_PROG=
+endif
+noinst_PROGRAMS=testh5repack_detect_szip
+
+SCRIPT_DEPEND=h5repack$(EXEEXT)
 
 check_SCRIPTS=$(TEST_SCRIPT)
 check_PROGRAMS=$(TEST_PROG)
@@ -56,8 +57,6 @@ COMMON_SOURCES=h5repack.c h5repack_copy.c h5repack_filters.c \
                h5repack_verify.c
 
 h5repack_SOURCES=$(COMMON_SOURCES) h5repack_main.c
-
-h5repacktst_SOURCES=$(COMMON_SOURCES) h5repacktst.c 
 
 testh5repack_detect_szip_SOURCES=testh5repack_detect_szip.c
 

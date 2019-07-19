@@ -105,7 +105,7 @@ build_triplet = @build@
 host_triplet = @host@
 bin_PROGRAMS = h5jam$(EXEEXT) h5unjam$(EXEEXT)
 check_PROGRAMS = tellub$(EXEEXT) h5jamgentest$(EXEEXT) getub$(EXEEXT)
-TESTS = $(TEST_SCRIPT)
+TESTS =
 subdir = tools/h5jam
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/aclocal_cxx.m4 \
@@ -498,6 +498,8 @@ HAVE_FORTRAN_2003 = @HAVE_FORTRAN_2003@
 HAVE_PTHREAD = @HAVE_PTHREAD@
 HDF5_HL = @HDF5_HL@
 HDF5_INTERFACES = @HDF5_INTERFACES@
+HDF5_TESTS = @HDF5_TESTS@
+HDF5_TOOLS = @HDF5_TOOLS@
 HDF_CXX = @HDF_CXX@
 HDF_FORTRAN = @HDF_FORTRAN@
 HDF_FORTRAN2003 = @HDF_FORTRAN2003@
@@ -689,7 +691,6 @@ TRACE = perl $(top_srcdir)/bin/trace
 # copied to the testfiles/ directory if update is required.
 CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.clog2 *.h5 \
 	testfiles/h5jam-*-sav testfiles/h5unjam-*-sav
-TEST_SCRIPT = testh5jam.sh
 
 # Add h5jam and h5unjam specific linker flags here
 h5jam_LDFLAGS = $(LT_STATIC_EXEC) $(AM_LDFLAGS)
@@ -1247,6 +1248,9 @@ uninstall-am: uninstall-binPROGRAMS
 
 help:
 	@$(top_srcdir)/bin/makehelp
+
+@BUILD_TESTS_CONDITIONAL_TRUE@	TEST_SCRIPT=testh5jam.sh
+@BUILD_TESTS_CONDITIONAL_FALSE@	TEST_SCRIPT=
 # lib/progs/tests targets recurse into subdirectories. build-* targets
 # build files in this directory.
 build-lib: $(LIB)

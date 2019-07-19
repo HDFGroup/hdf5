@@ -104,9 +104,9 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-check_PROGRAMS = $(am__EXEEXT_1) repart_test$(EXEEXT)
+check_PROGRAMS = repart_test$(EXEEXT)
 bin_PROGRAMS = h5debug$(EXEEXT) h5repart$(EXEEXT) h5mkgrp$(EXEEXT)
-TESTS = $(am__EXEEXT_1) $(TEST_SCRIPT)
+TESTS =
 subdir = tools/misc
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/aclocal_cxx.m4 \
@@ -119,7 +119,6 @@ CONFIG_HEADER = $(top_builddir)/src/H5config.h
 CONFIG_CLEAN_FILES = h5cc testh5mkgrp.sh testh5repart.sh
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(bindir)"
-am__EXEEXT_1 = h5repart_gentest$(EXEEXT) talign$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS)
 h5debug_SOURCES = h5debug.c
 h5debug_OBJECTS = h5debug.$(OBJEXT)
@@ -146,18 +145,10 @@ h5repart_DEPENDENCIES = $(LIBH5TOOLS) $(LIBHDF5)
 h5repart_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(h5repart_LDFLAGS) $(LDFLAGS) -o $@
-h5repart_gentest_SOURCES = h5repart_gentest.c
-h5repart_gentest_OBJECTS = h5repart_gentest.$(OBJEXT)
-h5repart_gentest_LDADD = $(LDADD)
-h5repart_gentest_DEPENDENCIES = $(LIBH5TOOLS) $(LIBHDF5)
 repart_test_SOURCES = repart_test.c
 repart_test_OBJECTS = repart_test.$(OBJEXT)
 repart_test_LDADD = $(LDADD)
 repart_test_DEPENDENCIES = $(LIBH5TOOLS) $(LIBHDF5)
-talign_SOURCES = talign.c
-talign_OBJECTS = talign.$(OBJEXT)
-talign_LDADD = $(LDADD)
-talign_DEPENDENCIES = $(LIBH5TOOLS) $(LIBHDF5)
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
 am__vpath_adj = case $$p in \
     $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
@@ -220,10 +211,8 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = h5debug.c h5mkgrp.c h5repart.c h5repart_gentest.c \
-	repart_test.c talign.c
-DIST_SOURCES = h5debug.c h5mkgrp.c h5repart.c h5repart_gentest.c \
-	repart_test.c talign.c
+SOURCES = h5debug.c h5mkgrp.c h5repart.c repart_test.c
+DIST_SOURCES = h5debug.c h5mkgrp.c h5repart.c repart_test.c
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -406,8 +395,11 @@ am__set_TESTS_bases = \
 RECHECK_LOGS = $(TEST_LOGS)
 AM_RECURSIVE_TARGETS = check recheck
 TEST_SUITE_LOG = test-suite.log
-LOG_DRIVER = $(SHELL) $(top_srcdir)/bin/test-driver
-LOG_COMPILE = $(LOG_COMPILER) $(AM_LOG_FLAGS) $(LOG_FLAGS)
+am__test_logs1 = $(TESTS:=.log)
+am__test_logs2 = $(am__test_logs1:@EXEEXT@.log=.log)
+TEST_LOGS = $(am__test_logs2:.sh.log=.log)
+SH_LOG_DRIVER = $(SHELL) $(top_srcdir)/bin/test-driver
+SH_LOG_COMPILE = $(SH_LOG_COMPILER) $(AM_SH_LOG_FLAGS) $(SH_LOG_FLAGS)
 am__set_b = \
   case '$@' in \
     */*) \
@@ -418,11 +410,6 @@ am__set_b = \
     *) \
       b='$*';; \
   esac
-am__test_logs1 = $(TESTS:=.log)
-am__test_logs2 = $(am__test_logs1:@EXEEXT@.log=.log)
-TEST_LOGS = $(am__test_logs2:.sh.log=.log)
-SH_LOG_DRIVER = $(SHELL) $(top_srcdir)/bin/test-driver
-SH_LOG_COMPILE = $(SH_LOG_COMPILER) $(AM_SH_LOG_FLAGS) $(SH_LOG_FLAGS)
 am__DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/h5cc.in \
 	$(srcdir)/testh5mkgrp.sh.in $(srcdir)/testh5repart.sh.in \
 	$(top_srcdir)/bin/depcomp $(top_srcdir)/bin/mkinstalldirs \
@@ -513,6 +500,8 @@ HAVE_FORTRAN_2003 = @HAVE_FORTRAN_2003@
 HAVE_PTHREAD = @HAVE_PTHREAD@
 HDF5_HL = @HDF5_HL@
 HDF5_INTERFACES = @HDF5_INTERFACES@
+HDF5_TESTS = @HDF5_TESTS@
+HDF5_TOOLS = @HDF5_TOOLS@
 HDF_CXX = @HDF_CXX@
 HDF_FORTRAN = @HDF_FORTRAN@
 HDF_FORTRAN2003 = @HDF_FORTRAN2003@
@@ -705,10 +694,6 @@ TRACE = perl $(top_srcdir)/bin/trace
 # and scd_family*.h5 were created by setting the HDF5_NOCLEANUP variable.
 CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.clog2 *.h5 \
 	../testfiles/fst_family*.h5 ../testfiles/scd_family*.h5
-
-#test script and program
-TEST_PROG = h5repart_gentest talign
-TEST_SCRIPT = testh5repart.sh testh5mkgrp.sh
 check_SCRIPTS = $(TEST_SCRIPT)
 SCRIPT_DEPEND = h5repart$(EXEEXT) h5mkgrp$(EXEEXT)
 bin_SCRIPTS = h5redeploy
@@ -863,17 +848,9 @@ h5repart$(EXEEXT): $(h5repart_OBJECTS) $(h5repart_DEPENDENCIES) $(EXTRA_h5repart
 	@rm -f h5repart$(EXEEXT)
 	$(AM_V_CCLD)$(h5repart_LINK) $(h5repart_OBJECTS) $(h5repart_LDADD) $(LIBS)
 
-h5repart_gentest$(EXEEXT): $(h5repart_gentest_OBJECTS) $(h5repart_gentest_DEPENDENCIES) $(EXTRA_h5repart_gentest_DEPENDENCIES) 
-	@rm -f h5repart_gentest$(EXEEXT)
-	$(AM_V_CCLD)$(LINK) $(h5repart_gentest_OBJECTS) $(h5repart_gentest_LDADD) $(LIBS)
-
 repart_test$(EXEEXT): $(repart_test_OBJECTS) $(repart_test_DEPENDENCIES) $(EXTRA_repart_test_DEPENDENCIES) 
 	@rm -f repart_test$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(repart_test_OBJECTS) $(repart_test_LDADD) $(LIBS)
-
-talign$(EXEEXT): $(talign_OBJECTS) $(talign_DEPENDENCIES) $(EXTRA_talign_DEPENDENCIES) 
-	@rm -f talign$(EXEEXT)
-	$(AM_V_CCLD)$(LINK) $(talign_OBJECTS) $(talign_LDADD) $(LIBS)
 install-binSCRIPTS: $(bin_SCRIPTS)
 	@$(NORMAL_INSTALL)
 	@list='$(bin_SCRIPTS)'; test -n "$(bindir)" || list=; \
@@ -919,9 +896,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5debug.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5mkgrp.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5repart.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5repart_gentest.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/repart_test.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/talign.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -1132,20 +1107,6 @@ recheck: all $(check_PROGRAMS) $(check_SCRIPTS)
 	        am__force_recheck=am--force-recheck \
 	        TEST_LOGS="$$log_list"; \
 	exit $$?
-h5repart_gentest.log: h5repart_gentest$(EXEEXT)
-	@p='h5repart_gentest$(EXEEXT)'; \
-	b='h5repart_gentest'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
-talign.log: talign$(EXEEXT)
-	@p='talign$(EXEEXT)'; \
-	b='talign'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
 .sh.log:
 	@p='$<'; \
 	$(am__set_b); \
@@ -1340,6 +1301,12 @@ uninstall-am: uninstall-binPROGRAMS uninstall-binSCRIPTS \
 
 help:
 	@$(top_srcdir)/bin/makehelp
+
+#test script and program
+@BUILD_TESTS_CONDITIONAL_TRUE@	TEST_PROG=h5repart_gentest talign
+@BUILD_TESTS_CONDITIONAL_TRUE@	TEST_SCRIPT=testh5repart.sh testh5mkgrp.sh
+@BUILD_TESTS_CONDITIONAL_FALSE@	TEST_PROG=
+@BUILD_TESTS_CONDITIONAL_FALSE@	TEST_SCRIPT=
 
 install-exec-local:
 	@$(INSTALL) h5cc $(DESTDIR)$(bindir)/$(H5CC_NAME)

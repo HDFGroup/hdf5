@@ -25,6 +25,8 @@ AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_srcdir)/tools/lib
 if BUILD_TESTS_CONDITIONAL
 	TEST_PROG=h5copygentest
 	TEST_SCRIPT=testh5copy.sh
+# source file for the test file generator
+	h5copygentest_SOURCES=h5copygentest.c
 else 
 	TEST_PROG=
 	TEST_SCRIPT=
@@ -39,9 +41,6 @@ check_PROGRAMS=$(TEST_PROG)
 
 # Add h5copy specific linker flags here
 h5copy_LDFLAGS = $(LT_STATIC_EXEC) $(AM_LDFLAGS)
-
-# source file for the test file generator
-h5copygentest_SOURCES=h5copygentest.c
 
 # All programs depend on the hdf5 and h5tools libraries
 LDADD=$(LIBH5TOOLS) $(LIBHDF5)

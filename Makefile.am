@@ -74,8 +74,14 @@ if BUILD_TESTS_PARALLEL_CONDITIONAL
 else
    TESTPARALLEL_DIR=
 endif
-SUBDIRS = src $(TESTSERIAL_DIR) $(TESTPARALLEL_DIR) . \
-          $(CXX_DIR) $(FORTRAN_DIR) $(HDF5_HL_DIR)
+if BUILD_TOOLS_CONDITIONAL
+   TOOLS_DIR =tools
+else
+   TOOLS_DIR=
+endif
+
+SUBDIRS = src $(TESTSERIAL_DIR) $(TESTPARALLEL_DIR) bin $(TOOLS_DIR) . \
+          $(CXX_DIR) $(FORTRAN_DIR) $(HDF5_HL_DIR) 
 DIST_SUBDIRS = src test testpar tools . c++ fortran hl examples
 
 # Some files generated during configure that should be cleaned

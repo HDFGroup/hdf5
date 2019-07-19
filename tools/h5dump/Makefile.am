@@ -23,21 +23,21 @@ AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_srcdir)/tools/lib
 
 # Test programs and scripts
 if BUILD_TESTS_CONDITIONAL
-	TEST_PROG=h5dumpgentest
-	TEST_SCRIPT=testh5dump.sh testh5dumppbits.sh testh5dumpxml.sh
-else 
-	TEST_PROG=
-	TEST_SCRIPT=	
-endif 
-
-check_PROGRAMS=$(TEST_PROG) binread
-check_SCRIPTS=$(TEST_SCRIPT)
-SCRIPT_DEPEND=h5dump$(EXEEXT)
+TEST_PROG=h5dumpgentest
+TEST_SCRIPT=testh5dump.sh testh5dumppbits.sh testh5dumpxml.sh
 if HAVE_SHARED_CONDITIONAL
 if USE_PLUGINS_CONDITIONAL
    TEST_SCRIPT += h5dump_plugin.sh
 endif
 endif
+else 
+TEST_PROG=
+TEST_SCRIPT=	
+endif 
+
+check_PROGRAMS=$(TEST_PROG) binread
+check_SCRIPTS=$(TEST_SCRIPT)
+SCRIPT_DEPEND=h5dump$(EXEEXT)
 
 # Our main target, the h5dump tool.
 bin_PROGRAMS=h5dump
