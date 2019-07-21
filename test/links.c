@@ -4814,7 +4814,7 @@ external_link_win5(hid_t fapl, hbool_t new_format)
 
     /* set up name for target link: "<drive-letter+1>:tmp/extlinks14" */
     if (drive >= 26)
-        drive -= 2; /* account for drive Z
+        drive -= 2; /* account for drive Z */
     HDsnprintf(tmpname, sizeof(tmpname), "%c:%s", ((drive+1)+'A'-1), FILENAME[35]);
     h5_fixname(tmpname, fapl, filename2, sizeof filename2);
 
@@ -4904,7 +4904,7 @@ external_link_win6(hid_t fapl, hbool_t new_format)
         TEST_ERROR
     drive = HDgetdrive();
     if (drive >= 26)
-        drive -= 2; /* account for drive Z
+        drive -= 2; /* account for drive Z */
 
     /* set up name for main file: "extlinks0" */
     h5_fixname(FILENAME[12], fapl, filename1, sizeof filename1);
