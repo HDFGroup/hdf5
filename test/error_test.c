@@ -320,6 +320,14 @@ long_desc_cb(unsigned H5_ATTR_UNUSED n, const H5E_error2_t *err_desc, void *clie
  *
  *-------------------------------------------------------------------------
  */
+/* Disable warning for "format not a string literal" here -QAK */
+/*
+ *      This pragma only needs to surround the snprintf() calls with
+ *      'full_desc' in the code below, but early (4.4.7, at least) gcc only
+ *      allows diagnostic pragmas to be toggled outside of functions.
+ */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-nonliteral"
 static herr_t
 test_long_desc(void)
 {
@@ -374,6 +382,7 @@ error:
 
     return -1;
 } /* end test_long_desc() */
+#pragma GCC diagnostic pop
 
 
 /*-------------------------------------------------------------------------

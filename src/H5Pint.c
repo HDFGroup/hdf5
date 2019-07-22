@@ -430,6 +430,9 @@ H5P__init_package(void)
 
     FUNC_ENTER_PACKAGE
 
+    /* Sanity check */
+    HDcompile_assert(H5P_TYPE_VOL_INITIALIZE == (H5P_TYPE_MAX_TYPE - 1));
+
     /*
      * Initialize the Generic Property class & object groups.
      */
@@ -3133,7 +3136,7 @@ H5P__class_get(const H5P_genclass_t *pclass, const char *name, void *value)
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "property has zero size")
 
     /* Copy the property value */
-    HDmemcpy(value, prop->value, prop->size);
+    H5MM_memcpy(value, prop->value, prop->size);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3189,7 +3192,7 @@ H5P__class_set(const H5P_genclass_t *pclass, const char *name, const void *value
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "property has zero size")
 
     /* Copy the property value */
-    HDmemcpy(prop->value, value, prop->size);
+    H5MM_memcpy(prop->value, value, prop->size);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -5235,7 +5238,7 @@ H5P__get_class_path(H5P_genclass_t *pclass)
             /* Allocate enough space for the parent class's path, plus the '/'
              * separator, this class's name and the string terminator
              */
-            ret_str_len = HDstrlen(par_path) + 1 + HDstrlen(pclass->name) + 1;
+            ret_str_len = HDstrlen(par_path) + HDstrlen(pclass->name) + 1 + 3; /* Extra "+3" to quiet GCC warning - 2019/07/05, QAK */
             if(NULL == (ret_value = (char *)H5MM_malloc(ret_str_len)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for class name")
 
@@ -5434,9 +5437,8 @@ H5P__new_plist_of_type(H5P_plist_type_t type)
 
     FUNC_ENTER_PACKAGE
 
-    /* Sanity checks */
-    HDcompile_assert(H5P_TYPE_VOL_INITIALIZE == (H5P_TYPE_MAX_TYPE - 1));
-    HDassert(type >= H5P_TYPE_USER && type <= H5P_TYPE_LINK_ACCESS);
+    /* Sanity check */
+    HDassert(type >= H5P_TYPE_USER && type < H5P_TYPE_MAX_TYPE);
 
     /* Check arguments */
     if(type == H5P_TYPE_USER)

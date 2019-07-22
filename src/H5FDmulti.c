@@ -771,7 +771,7 @@ H5FD_multi_sb_decode(H5FD_t *_file, const char *name, const unsigned char *buf)
     buf += nseen*2*8;
     if (H5Tconvert(H5T_STD_U64LE, H5T_NATIVE_HADDR, nseen*2, x, NULL, H5P_DEFAULT)<0)
         H5Epush_ret(func, H5E_ERR_CLS, H5E_DATATYPE, H5E_CANTCONVERT, "can't convert superblock info", -1)
-    ap = (haddr_t*)x;
+    ap = (haddr_t*)((void *)x); /* Extra (void *) cast to quiet "cast to create alignment" warning - 2019/07/05, QAK */
     UNIQUE_MEMBERS(map, mt) {
         memb_addr[_unmapped] = *ap++;
         memb_eoa[_unmapped] = *ap++;
@@ -1955,38 +1955,48 @@ compute_next(H5FD_multi_t *file)
  *
  *-------------------------------------------------------------------------
  */
+/* Disable warning for "format not a string literal" here -QAK */
+/*
+ *      This pragma only needs to surround the snprintf() call with
+ *      tmp in the code below, but early (4.4.7, at least) gcc only
+ *      allows diagnostic pragmas to be toggled outside of functions.
+ */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-nonliteral"
 static int
 open_members(H5FD_multi_t *file)
 {
-    char	tmp[H5FD_MULT_MAX_FILE_NAME_LEN];
-    int		nerrors=0;
+    char    tmp[H5FD_MULT_MAX_FILE_NAME_LEN];
+    int     nerrors = 0;
     static const char *func="(H5FD_multi)open_members";  /* Function Name for error reporting */
 
     /* Clear the error stack */
     H5Eclear2(H5E_DEFAULT);
 
     UNIQUE_MEMBERS(file->fa.memb_map, mt) {
-	if(file->memb[mt])
+        if(file->memb[mt])
             continue; /*already open*/
-	assert(file->fa.memb_name[mt]);
+        assert(file->fa.memb_name[mt]);
         /* Note: This truncates the user's filename down to only sizeof(tmp)
          *      characters. -QK & JK, 2013/01/17
          */
-	sprintf(tmp, file->fa.memb_name[mt], file->name);
+        sprintf(tmp, file->fa.memb_name[mt], file->name);
+        tmp[sizeof(tmp) - 1] = '\0';
 
-	H5E_BEGIN_TRY {
-	    file->memb[mt] = H5FDopen(tmp, file->flags, file->fa.memb_fapl[mt], HADDR_UNDEF);
-	} H5E_END_TRY;
-	if(!file->memb[mt]) {
-	    if(!file->fa.relax || (file->flags & H5F_ACC_RDWR))
-		nerrors++;
-	}
+        H5E_BEGIN_TRY {
+            file->memb[mt] = H5FDopen(tmp, file->flags, file->fa.memb_fapl[mt], HADDR_UNDEF);
+        } H5E_END_TRY;
+        if(!file->memb[mt]) {
+            if(!file->fa.relax || (file->flags & H5F_ACC_RDWR))
+            nerrors++;
+        }
     } END_MEMBERS;
     if (nerrors)
         H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "error opening member files", -1)
 
     return 0;
 }
+#pragma GCC diagnostic pop
 
 
 #ifdef _H5private_H

@@ -331,16 +331,22 @@ H5Pset_fapl_log(hid_t fapl_id, const char *logfile, unsigned long long flags, si
 
     HDmemset(&fa, 0, sizeof(H5FD_log_fapl_t));
 
-    /* This shallow copy is correct! The string will be properly 
-     * copied deep down in the H5P code. 
+    /* Duplicate the log file string
+     * A little wasteful, since this string will just be copied later, but
+     * passing it in as a pointer sets off a chain of impossible-to-resolve
+     * const cast warnings.
      */
-    fa.logfile = (char *)logfile;
+    if(logfile != NULL && NULL == (fa.logfile = H5MM_xstrdup(logfile)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to copy log file name")
 
     fa.flags = flags;
     fa.buf_size = buf_size;
     ret_value = H5P_set_driver(plist, H5FD_LOG, &fa);
 
 done:
+    if(fa.logfile)
+        H5MM_free(fa.logfile);
+
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_fapl_log() */
 

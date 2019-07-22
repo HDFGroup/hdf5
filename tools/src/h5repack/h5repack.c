@@ -752,7 +752,7 @@ check_objects(const char* fname, pack_opt_t *options)
     hid_t         did = -1;
     hid_t         sid = -1;
     unsigned int  i;
-    unsigned int  uf;
+    int  ifil;
     trav_table_t *travt = NULL;
     int           ret_value = 0; /*no need to LEAVE() on ERROR: HERR_INIT(int, SUCCEED) */
 
@@ -787,12 +787,13 @@ check_objects(const char* fname, pack_opt_t *options)
      */
 
     if (options->verbose)
-        printf("Opening file. Searching %lu objects to modify ...\n",
+        printf("Opening file. Searching %zu objects to modify ...\n",
                 travt->nobjs);
 
     for (i = 0; i < options->op_tbl->nelems; i++) {
         pack_info_t obj = options->op_tbl->objs[i];
         char* name = obj.path;
+
         if (options->verbose)
             printf(" <%s>", name);
 
@@ -804,17 +805,17 @@ check_objects(const char* fname, pack_opt_t *options)
         if (options->verbose)
             printf("...Found\n");
 
-        for (uf = 0; uf < obj.nfilters; uf++) {
-            if (obj.filter[uf].filtn < 0)
+        for (ifil = 0; ifil < obj.nfilters; ifil++) {
+            if (obj.filter[ifil].filtn < 0)
                 HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "invalid filter");
             /* check for extra filter conditions */
-            switch (obj.filter[uf].filtn) {
+            switch (obj.filter[ifil].filtn) {
             /* chunk size must be smaller than pixels per block */
             case H5Z_FILTER_SZIP:
                 {
                     int j;
                     hsize_t csize = 1;
-                    unsigned ppb = obj.filter[uf].cd_values[0];
+                    unsigned ppb = obj.filter[ifil].cd_values[0];
                     hsize_t dims[H5S_MAX_RANK];
                     int rank;
 
@@ -856,7 +857,7 @@ check_objects(const char* fname, pack_opt_t *options)
             default:
                 break;
             } /* end switch */
-        } /* for uf (each user-defined filter) */
+        } /* for ifil (each user-defined filter) */
     } /* for i (each object in options traversal table) */
 
 done:

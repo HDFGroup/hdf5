@@ -716,7 +716,7 @@ test_compound_2(void)
     bkg = (unsigned char*)HDmalloc(nelmts * sizeof(struct dt));
     orig = (unsigned char*)HDmalloc(nelmts * sizeof(struct st));
     for (i=0; i<(int)nelmts; i++) {
-	s_ptr = ((struct st*)orig) + i;
+	s_ptr = ((struct st*)((void *)orig)) + i;
 	s_ptr->a    = i*8+0;
 	s_ptr->b    = i*8+1;
 	s_ptr->c[0] = i*8+2;
@@ -754,8 +754,8 @@ test_compound_2(void)
 
     /* Compare results */
     for (i=0; i<(int)nelmts; i++) {
-	s_ptr = ((struct st*)orig) + i;
-	d_ptr = ((struct dt*)buf)  + i;
+	s_ptr = ((struct st*)((void *)orig)) + i;
+	d_ptr = ((struct dt*)((void *)buf))  + i;
 	if (s_ptr->a    != d_ptr->a    ||
 	    s_ptr->b    != d_ptr->b    ||
 	    s_ptr->c[0] != d_ptr->c[0] ||
@@ -847,7 +847,7 @@ test_compound_3(void)
     bkg = (unsigned char*)HDmalloc(nelmts * sizeof(struct dt));
     orig = (unsigned char*)HDmalloc(nelmts * sizeof(struct st));
     for (i=0; i<(int)nelmts; i++) {
-        s_ptr = ((struct st*)orig) + i;
+        s_ptr = ((struct st*)((void *)orig)) + i;
         s_ptr->a    = i*8+0;
         s_ptr->b    = i*8+1;
         s_ptr->c[0] = i*8+2;
@@ -884,8 +884,8 @@ test_compound_3(void)
 
     /* Compare results */
     for (i=0; i<(int)nelmts; i++) {
-	s_ptr = ((struct st*)orig) + i;
-	d_ptr = ((struct dt*)buf)  + i;
+	s_ptr = ((struct st*)((void *)orig)) + i;
+	d_ptr = ((struct dt*)((void *)buf))  + i;
 	if (s_ptr->a    != d_ptr->a    ||
 	    s_ptr->c[0] != d_ptr->c[0] ||
 	    s_ptr->c[1] != d_ptr->c[1] ||
@@ -978,7 +978,7 @@ test_compound_4(void)
     bkg = (unsigned char*)HDmalloc(nelmts * sizeof(struct dt));
     orig = (unsigned char*)HDmalloc(nelmts * sizeof(struct st));
     for (i=0; i<(int)nelmts; i++) {
-        s_ptr = ((struct st*)orig) + i;
+        s_ptr = ((struct st*)((void *)orig)) + i;
         s_ptr->a    = i*8+0;
         s_ptr->b    = (i*8+1) & 0x7fff;
         s_ptr->c[0] = i*8+2;
@@ -1017,8 +1017,8 @@ test_compound_4(void)
 
     /* Compare results */
     for (i=0; i<(int)nelmts; i++) {
-	s_ptr = ((struct st*)orig) + i;
-	d_ptr = ((struct dt*)buf)  + i;
+	s_ptr = ((struct st*)((void *)orig)) + i;
+	d_ptr = ((struct dt*)((void *)buf))  + i;
 	if (s_ptr->a    != d_ptr->a    ||
 	    s_ptr->b    != d_ptr->b    ||
 	    s_ptr->c[0] != d_ptr->c[0] ||
@@ -1215,7 +1215,7 @@ test_compound_6(void)
     bkg = (unsigned char*)HDmalloc(nelmts * sizeof(struct dt));
     orig = (unsigned char*)HDmalloc(nelmts * sizeof(struct st));
     for (i=0; i<(int)nelmts; i++) {
-        s_ptr = ((struct st*)orig) + i;
+        s_ptr = ((struct st*)((void *)orig)) + i;
         s_ptr->b    = (i*8+1) & 0x7fff;
         s_ptr->d    = (i*8+6) & 0x7fff;
     }
@@ -1244,8 +1244,8 @@ test_compound_6(void)
 
     /* Compare results */
     for (i=0; i<(int)nelmts; i++) {
-	s_ptr = ((struct st*)orig) + i;
-	d_ptr = ((struct dt*)buf)  + i;
+	s_ptr = ((struct st*)((void *)orig)) + i;
+	d_ptr = ((struct dt*)((void *)buf))  + i;
 	if (s_ptr->b    != d_ptr->b    ||
 	    s_ptr->d    != d_ptr->d) {
 	    H5_FAILED();
@@ -1694,14 +1694,20 @@ test_compound_8(void)
 static int
 test_compound_9(void)
 {
-    typedef struct cmpd_struct {
+    typedef struct cmpd_struct_w {
        int    i1;
        const char* str;
        int    i2;
-    } cmpd_struct;
+    } cmpd_struct_w;
 
-    cmpd_struct wdata = {11, "variable-length string", 22};
-    cmpd_struct rdata;
+    typedef struct cmpd_struct_r {
+       int    i1;
+       char* str;
+       int    i2;
+    } cmpd_struct_r;
+
+    cmpd_struct_w wdata = {11, "variable-length string", 22};
+    cmpd_struct_r rdata;
     hid_t       file;
     hid_t       cmpd_tid, str_id, dup_tid;
     hid_t       space_id;
@@ -1720,13 +1726,13 @@ test_compound_9(void)
     } /* end if */
 
     /* Create first compound datatype */
-    if((cmpd_tid = H5Tcreate( H5T_COMPOUND, sizeof(struct cmpd_struct))) < 0) {
+    if((cmpd_tid = H5Tcreate( H5T_COMPOUND, sizeof(struct cmpd_struct_w))) < 0) {
         H5_FAILED(); AT();
         printf("Can't create datatype!\n");
         goto error;
     } /* end if */
 
-    if(H5Tinsert(cmpd_tid,"i1",HOFFSET(struct cmpd_struct,i1),H5T_NATIVE_INT) < 0) {
+    if(H5Tinsert(cmpd_tid, "i1", HOFFSET(struct cmpd_struct_w, i1), H5T_NATIVE_INT) < 0) {
         H5_FAILED(); AT();
         printf("Can't insert field 'i1'\n");
         goto error;
@@ -1739,13 +1745,13 @@ test_compound_9(void)
         goto error;
     } /* end if */
 
-    if(H5Tinsert(cmpd_tid, "vl_string", HOFFSET(cmpd_struct, str), str_id) < 0) {
+    if(H5Tinsert(cmpd_tid, "vl_string", HOFFSET(cmpd_struct_w, str), str_id) < 0) {
         H5_FAILED(); AT();
         printf("Can't insert field 'i1'\n");
         goto error;
     } /* end if */
 
-    if(H5Tinsert(cmpd_tid, "i2", HOFFSET(struct cmpd_struct, i2), H5T_NATIVE_INT) < 0) {
+    if(H5Tinsert(cmpd_tid, "i2", HOFFSET(struct cmpd_struct_w, i2), H5T_NATIVE_INT) < 0) {
         H5_FAILED(); AT();
         printf("Can't insert field 'i2'\n");
         goto error;
@@ -2541,13 +2547,29 @@ error:
 static int
 test_compound_14(void)
 {
-    typedef struct cmpd_struct_1 {
+    typedef struct cmpd_struct_1_w {
        char         c1;
        char         c2;
        const char*  str;
-    } cmpd_struct_1;
+    } cmpd_struct_1_w;
 
-    typedef struct cmpd_struct_2 {
+    typedef struct cmpd_struct_1_r {
+       char         c1;
+       char         c2;
+       char*        str;
+    } cmpd_struct_1_r;
+
+    typedef struct cmpd_struct_2_w {
+       char         c1;
+       char         c2;
+       const char*  str;
+       long         l1;
+       long         l2;
+       long         l3;
+       long         l4;
+    } cmpd_struct_2_w;
+
+    typedef struct cmpd_struct_2_r {
        char         c1;
        char         c2;
        char*        str;
@@ -2555,13 +2577,12 @@ test_compound_14(void)
        long         l2;
        long         l3;
        long         l4;
-    } cmpd_struct_2;
+    } cmpd_struct_2_r;
 
-    cmpd_struct_1 wdata1 = {'A', 'B', "variable-length string"};
-
-    cmpd_struct_1 rdata1;
-    cmpd_struct_2 wdata2 = {'C', 'D', "another vlen!", 1, 2, -1, 9001};
-    cmpd_struct_2 rdata2;
+    cmpd_struct_1_w wdata1 = {'A', 'B', "variable-length string"};
+    cmpd_struct_1_r rdata1;
+    cmpd_struct_2_w wdata2 = {'C', 'D', "another vlen!", 1, 2, -1, 9001};
+    cmpd_struct_2_r rdata2;
     hid_t       file;
     hid_t       cmpd_m1_tid, cmpd_f1_tid, cmpd_m2_tid, cmpd_f2_tid, str_id;
     hid_t       space_id;
@@ -2580,19 +2601,19 @@ test_compound_14(void)
     } /* end if */
 
     /* Create memory compound datatype 1 */
-    if((cmpd_m1_tid = H5Tcreate( H5T_COMPOUND, sizeof(struct cmpd_struct_1))) < 0) {
+    if((cmpd_m1_tid = H5Tcreate( H5T_COMPOUND, sizeof(struct cmpd_struct_1_w))) < 0) {
         H5_FAILED(); AT();
         printf("Can't create datatype!\n");
         goto error;
     } /* end if */
 
-    if(H5Tinsert(cmpd_m1_tid,"c1",HOFFSET(struct cmpd_struct_1,c1),H5T_NATIVE_CHAR) < 0) {
+    if(H5Tinsert(cmpd_m1_tid,"c1",HOFFSET(struct cmpd_struct_1_w, c1), H5T_NATIVE_CHAR) < 0) {
         H5_FAILED(); AT();
         printf("Can't insert field 'c1'\n");
         goto error;
     } /* end if */
 
-    if(H5Tinsert(cmpd_m1_tid,"c2",HOFFSET(struct cmpd_struct_1,c2),H5T_NATIVE_CHAR) < 0) {
+    if(H5Tinsert(cmpd_m1_tid,"c2",HOFFSET(struct cmpd_struct_1_w, c2), H5T_NATIVE_CHAR) < 0) {
         H5_FAILED(); AT();
         printf("Can't insert field 'c2'\n");
         goto error;
@@ -2605,7 +2626,7 @@ test_compound_14(void)
         goto error;
     } /* end if */
 
-    if(H5Tinsert(cmpd_m1_tid, "vl_string", HOFFSET(cmpd_struct_1, str), str_id) < 0) {
+    if(H5Tinsert(cmpd_m1_tid, "vl_string", HOFFSET(cmpd_struct_1_w, str), str_id) < 0) {
         H5_FAILED(); AT();
         printf("Can't insert field 'vl_string'\n");
         goto error;
@@ -2637,49 +2658,49 @@ test_compound_14(void)
     } /* end if */
 
     /* Create memory compound datatype 2 */
-    if((cmpd_m2_tid = H5Tcreate( H5T_COMPOUND, sizeof(struct cmpd_struct_2))) < 0) {
+    if((cmpd_m2_tid = H5Tcreate( H5T_COMPOUND, sizeof(struct cmpd_struct_2_w))) < 0) {
         H5_FAILED(); AT();
         printf("Can't create datatype!\n");
         goto error;
     } /* end if */
 
-    if(H5Tinsert(cmpd_m2_tid,"c1",HOFFSET(struct cmpd_struct_2,c1),H5T_NATIVE_CHAR) < 0) {
+    if(H5Tinsert(cmpd_m2_tid,"c1",HOFFSET(struct cmpd_struct_2_w, c1), H5T_NATIVE_CHAR) < 0) {
         H5_FAILED(); AT();
         printf("Can't insert field 'c1'\n");
         goto error;
     } /* end if */
 
-    if(H5Tinsert(cmpd_m2_tid,"c2",HOFFSET(struct cmpd_struct_2,c2),H5T_NATIVE_CHAR) < 0) {
+    if(H5Tinsert(cmpd_m2_tid,"c2",HOFFSET(struct cmpd_struct_2_w, c2), H5T_NATIVE_CHAR) < 0) {
         H5_FAILED(); AT();
         printf("Can't insert field 'c2'\n");
         goto error;
     } /* end if */
 
-    if(H5Tinsert(cmpd_m2_tid, "vl_string", HOFFSET(cmpd_struct_2, str), str_id) < 0) {
+    if(H5Tinsert(cmpd_m2_tid, "vl_string", HOFFSET(cmpd_struct_2_w, str), str_id) < 0) {
         H5_FAILED(); AT();
         printf("Can't insert field 'vl_string'\n");
         goto error;
     } /* end if */
 
-    if(H5Tinsert(cmpd_m2_tid,"l1",HOFFSET(struct cmpd_struct_2,l1),H5T_NATIVE_LONG) < 0) {
+    if(H5Tinsert(cmpd_m2_tid,"l1",HOFFSET(struct cmpd_struct_2_w, l1), H5T_NATIVE_LONG) < 0) {
         H5_FAILED(); AT();
         printf("Can't insert field 'l1'\n");
         goto error;
     } /* end if */
 
-    if(H5Tinsert(cmpd_m2_tid,"l2",HOFFSET(struct cmpd_struct_2,l2),H5T_NATIVE_LONG) < 0) {
+    if(H5Tinsert(cmpd_m2_tid,"l2",HOFFSET(struct cmpd_struct_2_w, l2), H5T_NATIVE_LONG) < 0) {
         H5_FAILED(); AT();
         printf("Can't insert field 'l2'\n");
         goto error;
     } /* end if */
 
-    if(H5Tinsert(cmpd_m2_tid,"l3",HOFFSET(struct cmpd_struct_2,l3),H5T_NATIVE_LONG) < 0) {
+    if(H5Tinsert(cmpd_m2_tid,"l3",HOFFSET(struct cmpd_struct_2_w, l3), H5T_NATIVE_LONG) < 0) {
         H5_FAILED(); AT();
         printf("Can't insert field 'l3'\n");
         goto error;
     } /* end if */
 
-    if(H5Tinsert(cmpd_m2_tid,"l4",HOFFSET(struct cmpd_struct_2,l4),H5T_NATIVE_LONG) < 0) {
+    if(H5Tinsert(cmpd_m2_tid,"l4",HOFFSET(struct cmpd_struct_2_w, l4), H5T_NATIVE_LONG) < 0) {
         H5_FAILED(); AT();
         printf("Can't insert field 'l4'\n");
         goto error;

@@ -18,6 +18,7 @@
  * Purpose:    Tests datasets stored in external raw files.
  */
 #include "external_common.h"
+#include "external_fname.h"
 
 
 /*-------------------------------------------------------------------------

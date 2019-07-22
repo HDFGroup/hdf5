@@ -187,9 +187,7 @@ herr_t
 H5T__enum_insert(const H5T_t *dt, const char *name, const void *value)
 {
     unsigned	i;
-    char	**names=NULL;
-    uint8_t	*values=NULL;
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    herr_t      ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -198,15 +196,17 @@ H5T__enum_insert(const H5T_t *dt, const char *name, const void *value)
     HDassert(value);
 
     /* The name and value had better not already exist */
-    for (i=0; i<dt->shared->u.enumer.nmembs; i++) {
-	if (!HDstrcmp(dt->shared->u.enumer.name[i], name))
+    for(i = 0; i < dt->shared->u.enumer.nmembs; i++) {
+	if(!HDstrcmp(dt->shared->u.enumer.name[i], name))
 	    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "name redefinition")
-	if (!HDmemcmp(dt->shared->u.enumer.value+i*dt->shared->size, value, dt->shared->size))
+	if(!HDmemcmp((uint8_t *)dt->shared->u.enumer.value + (i * dt->shared->size), value, dt->shared->size))
 	    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "value redefinition")
-    }
+    } /* end for */
 
     /* Increase table sizes */
     if(dt->shared->u.enumer.nmembs >= dt->shared->u.enumer.nalloc) {
+        char	**names;
+        uint8_t	*values;
 	unsigned n = MAX(32, 2*dt->shared->u.enumer.nalloc);
 
 	if(NULL == (names = (char **)H5MM_realloc(dt->shared->u.enumer.name, n * sizeof(char *))))
@@ -217,13 +217,13 @@ H5T__enum_insert(const H5T_t *dt, const char *name, const void *value)
 	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 	dt->shared->u.enumer.value = values;
 	dt->shared->u.enumer.nalloc = n;
-    }
+    } /* end for */
 
     /* Insert new member at end of member arrays */
     dt->shared->u.enumer.sorted = H5T_SORT_NONE;
     i = dt->shared->u.enumer.nmembs++;
     dt->shared->u.enumer.name[i] = H5MM_xstrdup(name);
-    H5MM_memcpy(dt->shared->u.enumer.value+i*dt->shared->size, value, dt->shared->size);
+    H5MM_memcpy((uint8_t *)dt->shared->u.enumer.value + (i * dt->shared->size), value, dt->shared->size);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -298,7 +298,7 @@ H5T__get_member_value(const H5T_t *dt, unsigned membno, void *value/*out*/)
     HDassert(dt);
     HDassert(value);
 
-    H5MM_memcpy(value, dt->shared->u.enumer.value + membno*dt->shared->size, dt->shared->size);
+    H5MM_memcpy(value, (uint8_t *)dt->shared->u.enumer.value + (membno * dt->shared->size), dt->shared->size);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 }
@@ -416,7 +416,7 @@ H5T_enum_nameof(const H5T_t *dt, const void *value, char *name/*out*/, size_t si
     rt = copied_dt->shared->u.enumer.nmembs;
     while(lt < rt) {
 	md = (lt + rt) / 2;
-	cmp = HDmemcmp(value, copied_dt->shared->u.enumer.value + md * copied_dt->shared->size, copied_dt->shared->size);
+	cmp = HDmemcmp(value, (uint8_t *)copied_dt->shared->u.enumer.value + (md * copied_dt->shared->size), copied_dt->shared->size);
 	if(cmp < 0)
 	    rt = md;
 	else if(cmp > 0)
@@ -569,7 +569,7 @@ H5T_enum_valueof(const H5T_t *dt, const char *name, void *value/*out*/)
     if (cmp!=0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_NOTFOUND, FAIL, "string doesn't exist in the enumeration type")
 
-    H5MM_memcpy(value, copied_dt->shared->u.enumer.value+md*copied_dt->shared->size, copied_dt->shared->size);
+    H5MM_memcpy(value, (uint8_t *)copied_dt->shared->u.enumer.value + (md * copied_dt->shared->size), copied_dt->shared->size);
 
 done:
     if(copied_dt)

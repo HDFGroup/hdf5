@@ -34,6 +34,7 @@ H5IMPORT_BIN=`pwd`/$H5IMPORT      # The path of the h5import  tool binary
 RM='rm -rf'
 CMP='cmp'
 DIFF='diff -c'
+GREP='grep'
 CP='cp'
 DIRNAME='dirname'
 LS='ls'
@@ -83,6 +84,7 @@ $SRC_H5DUMP_TESTFILES/charsets.h5
 $SRC_H5DUMP_TESTFILES/file_space.h5
 $SRC_H5DUMP_TESTFILES/filter_fail.h5
 $SRC_H5DUMP_TESTFILES/packedbits.h5
+$SRC_H5DUMP_TESTFILES/t128bit_float.h5
 $SRC_H5DUMP_TESTFILES/taindices.h5
 $SRC_H5DUMP_TESTFILES/tall.h5
 $SRC_H5DUMP_TESTFILES/tarray1.h5
@@ -903,6 +905,36 @@ TOOLTEST_HELP() {
 
 }
 
+# Call the h5dump tool and grep for a value
+#
+GREPTEST()
+{
+    expectdata=$1
+    actual=$TESTDIR/$2
+    actual_err="$TESTDIR/`basename $2 .ddl`.oerr"
+    shift
+    shift
+
+    # Run test.
+    TESTING $DUMPER -p $@
+    (
+      cd $TESTDIR
+      $ENVCMD $RUNSERIAL $DUMPER_BIN -p "$@"
+    ) >$actual 2>$actual_err
+    $GREP $expectdata $actual > /dev/null
+    if [ $? -eq 0 ]; then
+        echo " PASSED"
+    else
+        echo " FAILED"
+        nerrors="`expr $nerrors + 1`"
+    fi
+
+    # Clean up output file
+    if test -z "$HDF5_NOCLEANUP"; then
+     rm -f $actual $actual_err
+    fi
+}
+
 # Print a "SKIP" message
 SKIP() {
    TESTING $DUMPER $@
@@ -1362,6 +1394,9 @@ TOOLTEST3 non_existing.ddl --enable-error-stack tgroup.h5 non_existing.h5
 
 # test to verify HDFFV-10333: error similar to H5O_attr_decode in the jira issue
 TOOLTEST err_attr_dspace.ddl err_attr_dspace.h5
+
+# test to verify HDFFV-9407: long double full precision
+GREPTEST "1.123456789012345" t128bit_float.ddl -m %.35Lf t128bit_float.h5
 
 # Clean up temporary files/directories
 CLEAN_TESTFILES_AND_TESTDIR

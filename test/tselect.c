@@ -10546,7 +10546,7 @@ test_shape_same_dr__full_space_vs_slice(int test_num,
                                         hbool_t expected_result)
 {
     char	test_desc_0[128];
-    char	test_desc_1[128];
+    char	test_desc_1[256];
     int         i;
     hid_t	n_cube_0_sid;  /* the fully selected hyper cube */
     hid_t	n_cube_1_sid;  /* the hyper cube in which a slice is selected */
@@ -10831,7 +10831,7 @@ test_shape_same_dr__checkerboard(int test_num,
                                  hbool_t expected_result)
 {
     char	test_desc_0[128];
-    char	test_desc_1[128];
+    char	test_desc_1[256];
     int         i;
     int		dims_selected = 0;
     hid_t	n_cube_0_sid;  /* the checker board selected
@@ -11443,7 +11443,7 @@ test_shape_same_dr__irregular(int test_num,
                               hbool_t expected_result)
 {
     char	test_desc_0[128];
-    char	test_desc_1[128];
+    char	test_desc_1[256];
     int		edge_size = 10;
     int         i;
     int         j;
@@ -14925,7 +14925,6 @@ test_sel_iter(void)
     hid_t       sid;            /* Dataspace ID */
     hid_t       iter_id;        /* Dataspace selection iterator ID */
     hsize_t	dims1[] = {6, 12};  /* 2-D Dataspace dimensions */
-    hsize_t	dims2[] = {32}; /* 1-D dataspace dimensions */
     hsize_t	coord1[POINT1_NPOINTS][2]; /* Coordinates for point selection */
     hsize_t     start[2];       /* Hyperslab start */
     hsize_t     stride[2];      /* Hyperslab stride */

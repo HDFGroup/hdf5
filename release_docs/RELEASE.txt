@@ -48,22 +48,40 @@ New Features
 
     Configuration:
     -------------
+    - Windows PDB files are always installed
+
+      There are configuration settings for Windows, that may not generate
+      PDB files. As such the install utility will break because those files
+      are not found. Add an optional variable that can be set to not install
+      PDB files.
+
+      (ADB - 2019/07/17, HDFFV-100424)
+
+    - Windows PDB files are installed incorrectly
+
+      For static builds, the PDB files for windows should be installed next
+      to the static libraries in the lib folder. Also the debug versions of
+      libraries and PDB files are now correctly built using the default
+      CMAKE_DEBUG_POSTFIX setting.
+
+      (ADB - 2019/07/09, HDFFV-10581)
+
     - Add option to build only shared libs
 
       A request was made to prevent building static libraries and only build
       shared.  A new option was added to CMake, ONLY_SHARED_LIBS, which will
       skip building static libraries. Certain utility functions will build with
       static libs but are not published. Tests are adjusted to use the correct
-      libraries.
+      libraries depending on SHARED/STATIC settings.
 
       (ADB - 2019/06/12, HDFFV-10805)
 
     - Add options to enable or disable building tools and tests
-    
-      Configure options --enable-tests and --enable-tools were added for 
+
+      Configure options --enable-tests and --enable-tools were added for
       autotools configure.  These options are enabled by default, and can be
-      disabled with either --disable-tests (or tools) or --enable-tests=no 
-      (or --enable-tools=no).  Build time is reduced ~20% when tools are 
+      disabled with either --disable-tests (or tools) or --enable-tests=no
+      (or --enable-tools=no).  Build time is reduced ~20% when tools are
       disabled, 35% when tests are disabled, 45% when both are disabled.
       Reenabling them after the initial build requires running configure
       again with the option(s) enabled.
@@ -73,8 +91,8 @@ New Features
     - Change tools test that test the error stack
 
       There are some use cases which can cause the error stack of tools to be
-      different then the expected. These tests now use grepTest.cmake, this was
-      changed to allow the error file to be searched for an expected string.
+      different then the expected output. These tests now use grepTest.cmake,
+      this was changed to allow the error file to be searched for an expected string.
 
       (ADB - 2019/04/15, HDFFV-10741)
 
@@ -240,7 +258,6 @@ New Features
 
       (ADB - 2018/12/12, HDFVIEW-4)
 
-
     - Removed H5I_REFERENCE from the Java wrappers
 
       This ID class was never used by the library and has been removed
@@ -251,7 +268,12 @@ New Features
 
     Tools:
     ------
-    -
+    - h5dump was fixed for 128-bit floats, but was missing a test.
+
+      New test greps for the first 15 numbers of the 128-bit value.
+
+      (ADB - 2019/06/23, HDFFV-9407)
+
 
     High-Level APIs:
     ---------------
@@ -278,6 +300,22 @@ Bug Fixes since HDF5-1.10.3 release
 
     Library
     -------
+    - Fixed an issue where creating a file with non-default file space info
+      together with library high bound setting to H5F_LIBVER_V18.
+
+      When setting non-default file space info in fcpl via
+      H5Pset_file_space_strategy() and then creating a file with
+      both high and low library bounds set to
+      H5F_LIBVER_V18 in fapl, the library succeeds in creating the file.
+      File creation should fail because the feature of setting non-default
+      file space info does not exist in library release 1.8 or earlier.
+
+      This was fixed by setting and checking the proper version in the
+      file space info message based on the library low and high bounds
+      when creating and opening the HDF5 file.
+
+      (VC - 2019/6/25, HDFFV-10808)
+
     - Fixed an issue where copying a version 1.8 dataset between files using
       H5Ocopy fails due to an incompatible fill version
 
@@ -286,7 +324,7 @@ Bug Fixes since HDF5-1.10.3 release
       H5F_LIBVER_V18, the H5Ocopy() call will fail with the error stack indicating
       that the fill value version is out of bounds.
 
-      This was fixed by changing the fill value message version to H5O_FILL_VERSION_3 
+      This was fixed by changing the fill value message version to H5O_FILL_VERSION_3
       (from H5O_FILL_VERSION_2) for H5F_LIBVER_V18.
 
       (VC - 2019/6/14, HDFFV-10800)

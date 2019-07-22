@@ -1283,7 +1283,7 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem,  hsize_t
                     mem = ((unsigned char*)_mem) + block_index * size;
 
                     if (H5Tis_variable_str(tid)) {
-                        s = *(char**) mem;
+                        s = *(char **)((void *)mem);
                         if (s != NULL)
                             size = HDstrlen(s);
                         else
@@ -1375,10 +1375,10 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem,  hsize_t
                 for (block_index = 0; block_index < block_nelmts; block_index++) {
                     mem = ((unsigned char*)_mem) + block_index * size;
                     /* Get the number of sequence elements */
-                    nelmts = ((hvl_t *) mem)->len;
+                    nelmts = ((hvl_t *)((void *)mem))->len;
 
                     /* dump the array element */
-                    if (render_bin_output(stream, container, memb, ((char *) (((hvl_t *) mem)->p)), nelmts) < 0) {
+                    if (render_bin_output(stream, container, memb, ((char *) (((hvl_t *)((void *)mem))->p)), nelmts) < 0) {
                         H5Tclose(memb);
                         H5E_THROW(FAIL, H5E_tools_min_id_g, "render_bin_output failed")
                     }

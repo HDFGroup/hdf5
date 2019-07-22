@@ -580,7 +580,7 @@ test_core(void)
     file = H5Fopen(copied_filename, H5F_ACC_RDONLY, fapl);
     VERIFY(file >= 0, "H5Fopen failed");
     VERIFY((udata->used_callbacks == MALLOC) || 
-            (udata->used_callbacks == MALLOC | UDATA_COPY | UDATA_FREE), "opening a core file used the wrong callbacks");
+            (udata->used_callbacks == (MALLOC | UDATA_COPY | UDATA_FREE)), "opening a core file used the wrong callbacks");
     VERIFY(udata->malloc_src == H5FD_FILE_IMAGE_OP_FILE_OPEN, "Malloc callback came from wrong sourc in core open");
 
     /* Close file */
@@ -672,6 +672,14 @@ error:
  *
  ******************************************************************************
  */
+/* Disable warning for "format not a string literal" here -QAK */
+/*
+ *      This pragma only needs to surround the snprintf() calls with
+ *      'member_file_name' in the code below, but early (4.4.7, at least) gcc only
+ *      allows diagnostic pragmas to be toggled outside of functions.
+ */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-nonliteral"
 static int
 test_get_file_image(const char * test_banner,
                     const int file_name_num,
@@ -938,6 +946,7 @@ test_get_file_image(const char * test_banner,
 error:
     return 1;
 } /* end test_get_file_image() */
+#pragma GCC diagnostic pop
 
 
 /******************************************************************************

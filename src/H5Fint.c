@@ -509,6 +509,7 @@ H5F__get_objects_cb(void *obj_ptr, hid_t obj_id, void *key)
             case H5I_ERROR_CLASS:
             case H5I_ERROR_MSG:
             case H5I_ERROR_STACK:
+            case H5I_SPACE_SEL_ITER:
             case H5I_NTYPES:
             default:
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5_ITER_ERROR, "unknown or invalid data object")
@@ -571,11 +572,11 @@ H5F__build_name(const char *prefix, const char *file_name, char **full_name/*out
     fname_len = HDstrlen(file_name);
 
     /* Allocate a buffer to hold the filename + prefix + possibly the delimiter + terminating null byte */
-    if(NULL == (*full_name = (char *)H5MM_malloc(prefix_len + fname_len + 2)))
+    if(NULL == (*full_name = (char *)H5MM_malloc(prefix_len + fname_len + 2 + 2))) /* Extra "+2" to quiet GCC warning - 2019/07/05, QAK */
         HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL, "unable to allocate filename buffer")
 
     /* Compose the full file name */
-    HDsnprintf(*full_name, (prefix_len + fname_len + 2), "%s%s%s", prefix,
+    HDsnprintf(*full_name, (prefix_len + fname_len + 2 + 2), "%s%s%s", prefix,  /* Extra "+2" to quiet GCC warning - 2019/07/05, QAK */
         ((prefix_len == 0 || H5_CHECK_DELIMITER(prefix[prefix_len - 1])) ? "" : H5_DIR_SEPS), file_name);
 
 done:
@@ -933,9 +934,9 @@ H5F__new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_
             f->shared->fs_addr[u] = HADDR_UNDEF;
             f->shared->fs_man[u] = NULL;
         }
-        f->shared->first_alloc_dealloc = FALSE;
-        f->shared->eoa_pre_fsm_fsalloc = HADDR_UNDEF;
-        f->shared->eoa_post_fsm_fsalloc = HADDR_UNDEF;
+        /* This will be stored as eoa_pre_fsm_fsalloc in the fsinfo message */
+        /* This is done to be backward compatible with 1.10 library that has the FSM hack */
+        f->shared->eoa_fsm_fsalloc = HADDR_UNDEF;
         f->shared->eoa_post_mdci_fsalloc = HADDR_UNDEF;
 
         /* Initialization for handling file space (for paged aggregation) */
@@ -2839,8 +2840,7 @@ H5F__get_file_image(H5F_t *file, void *buf_ptr, size_t buf_len)
     /* test to see if a buffer was provided -- if not, we are done */
     if(buf_ptr != NULL) {
         size_t    space_needed;        /* size of file image */
-        hsize_t tmp;
-        size_t tmp_size;
+        unsigned tmp, tmp_size;
 
         /* Check for buffer too small */
         if((haddr_t)buf_len < eoa)
@@ -2855,12 +2855,12 @@ H5F__get_file_image(H5F_t *file, void *buf_ptr, size_t buf_len)
 
         /* Offset to "status_flags" in the superblock */
         tmp = H5F_SUPER_STATUS_FLAGS_OFF(file->shared->sblock->super_vers);
+
         /* Size of "status_flags" depends on the superblock version */
         tmp_size = H5F_SUPER_STATUS_FLAGS_SIZE(file->shared->sblock->super_vers);
 
         /* Clear "status_flags" */
-        HDmemset((uint8_t *)(buf_ptr) + tmp, 0, tmp_size);
-
+        HDmemset((uint8_t *)buf_ptr + tmp, 0, tmp_size);
     } /* end if */
 
 done:
@@ -3610,6 +3610,7 @@ H5F__get_file(void *obj, H5I_type_t type)
         case H5I_ERROR_CLASS:
         case H5I_ERROR_MSG:
         case H5I_ERROR_STACK:
+        case H5I_SPACE_SEL_ITER:
         case H5I_NTYPES:
         default:
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file or file object")

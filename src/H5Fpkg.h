@@ -140,14 +140,14 @@
 
 /* For superblock version 0 & 1:
    Offset to the file consistency flags (status_flags) in the superblock (excluding H5F_SUPERBLOCK_FIXED_SIZE) */
-#define H5F_SUPER_STATUS_OFF_V01                                                \
-        (2  /* freespace, and root group versions */                    \
-        + 1 /* reserved */                                              \
-        + 3 /* shared header vers, size of address, size of lengths */  \
-        + 1 /* reserved */                                              \
-        + 4) /* group leaf k, group internal k */
+#define H5F_SUPER_STATUS_OFF_V01                                        \
+        (unsigned)(2  /* freespace, and root group versions */          \
+                  + 1 /* reserved */                                    \
+                  + 3 /* shared header vers, size of address, size of lengths */ \
+                  + 1 /* reserved */                                    \
+                  + 4) /* group leaf k, group internal k */
 
-#define H5F_SUPER_STATUS_OFF(v)   (v >= 2 ? 2 : H5F_SUPER_STATUS_OFF_V01)
+#define H5F_SUPER_STATUS_OFF(v)   (v >= 2 ? (unsigned)2 : H5F_SUPER_STATUS_OFF_V01)
 
 /* Offset to the file consistency flags (status_flags) in the superblock */
 #define H5F_SUPER_STATUS_FLAGS_OFF(v) (H5F_SUPERBLOCK_FIXED_SIZE + H5F_SUPER_STATUS_OFF(v))
@@ -318,6 +318,9 @@ struct H5F_file_t {
     H5F_fspace_strategy_t fs_strategy; /* File space handling strategy	*/
     hsize_t     fs_threshold;	/* Free space section threshold 	*/
     hbool_t     fs_persist;     /* Free-space persist or not */
+    unsigned    fs_version;     /* Free-space version: */
+                                /* It is used to update fsinfo message in the superblock 
+                                   extension when closing down the free-space managers */
     hbool_t     use_tmp_space;  /* Whether temp. file space allocation is allowed */
     haddr_t	tmp_addr;       /* Next address to use for temp. space in the file */
     hbool_t     point_of_no_return; /* Flag to indicate that we can't go back and delete a freespace header when it's used up */
@@ -325,14 +328,9 @@ struct H5F_file_t {
     H5F_fs_state_t fs_state[H5F_MEM_PAGE_NTYPES];   /* State of free space manager for each type */
     haddr_t fs_addr[H5F_MEM_PAGE_NTYPES];   /* Address of free space manager info for each type */
     H5FS_t *fs_man[H5F_MEM_PAGE_NTYPES];    /* Free space manager for each file space type */
-    hbool_t first_alloc_dealloc;            /* TRUE iff free space managers   */
-                                            /* are persistent and have not    */
-                                            /* been used accessed for either  */
-                                            /* allocation or deallocation     */
-                                            /* since file open.               */
-    haddr_t eoa_pre_fsm_fsalloc;            /* eoa pre file space allocation  */
-                                            /* for self referential FSMs      */
-    haddr_t eoa_post_fsm_fsalloc;           /* eoa post file space allocation */
+    hbool_t null_fsm_addr;                  /* Used by h5clear tool to tell the library  */
+                                            /* to drop free-space to the floor */
+    haddr_t eoa_fsm_fsalloc;                /* eoa after file space allocation */
                                             /* for self referential FSMs      */
     haddr_t eoa_post_mdci_fsalloc;          /* eoa past file space allocation */
                                             /* for metadata cache image, or   */

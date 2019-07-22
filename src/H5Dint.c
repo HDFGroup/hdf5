@@ -114,8 +114,8 @@ static hbool_t H5D_top_package_initialize_s = FALSE;
 
 /* Prefixes of VDS and external file from the environment variables
  * HDF5_EXTFILE_PREFIX and HDF5_VDS_PREFIX */ 
-const static char *H5D_prefix_ext_env = NULL;
-const static char *H5D_prefix_vds_env = NULL;
+static const char *H5D_prefix_ext_env = NULL;
+static const char *H5D_prefix_vds_env = NULL;
 
 
 /*-------------------------------------------------------------------------
@@ -570,7 +570,7 @@ H5D__init_type(H5F_t *file, const H5D_t *dset, hid_t type_id, const H5T_t *type)
         /* Get a datatype ID for the dataset's datatype */
         if((dset->shared->type_id = H5I_register(H5I_DATATYPE, dset->shared->type, FALSE)) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL, "unable to register type")
-    }
+    } /* end if */
     /* Not a custom datatype, just use it directly */
     else {
         if(H5I_inc_ref(type_id, FALSE) < 0)
@@ -579,7 +579,7 @@ H5D__init_type(H5F_t *file, const H5D_t *dset, hid_t type_id, const H5T_t *type)
         /* Use existing datatype */
         dset->shared->type_id = type_id;
         dset->shared->type = (H5T_t *)type; /* (Cast away const OK - QAK) */
-    }
+    } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1090,12 +1090,11 @@ done:
 static herr_t
 H5D__build_file_prefix(const H5D_t *dset, H5F_prefix_open_t prefix_type, char **file_prefix /*out*/)
 {
-    char            *prefix = NULL;       /* prefix used to look for the file               */
+    const char      *prefix = NULL;       /* prefix used to look for the file               */
     char            *filepath = NULL;     /* absolute path of directory the HDF5 file is in */
     size_t          filepath_len;         /* length of file path                            */
     size_t          prefix_len;           /* length of prefix                               */
     size_t          file_prefix_len;      /* length of expanded prefix                      */
-    H5P_genplist_t  *plist = NULL;        /* Property list pointer                          */
     herr_t          ret_value = SUCCEED;  /* Return value                                   */
 
     FUNC_ENTER_STATIC
@@ -1110,20 +1109,20 @@ H5D__build_file_prefix(const H5D_t *dset, H5F_prefix_open_t prefix_type, char **
      *      to be reentrant.
      */
     if(H5F_PREFIX_VDS == prefix_type) {
-        prefix = (char *)H5D_prefix_vds_env;
+        prefix = H5D_prefix_vds_env;
 
-        if(prefix == NULL || *prefix == '\0') {
+        if(prefix == NULL || *prefix == '\0')
             if(H5CX_get_vds_prefix(&prefix) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get the prefix for vds file")
-        }
-    } else if(H5F_PREFIX_EFILE == prefix_type) {
-        prefix = (char *)H5D_prefix_ext_env;
+    } /* end if */
+    else if(H5F_PREFIX_EFILE == prefix_type) {
+        prefix = H5D_prefix_ext_env;
 
-        if(prefix == NULL || *prefix == '\0') {
+        if(prefix == NULL || *prefix == '\0')
             if(H5CX_get_ext_file_prefix(&prefix) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get the prefix for the external file")
-        }
-    } else
+    } /* end else-if */
+    else
         HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "prefix name is not sensible")
 
     /* Prefix has to be checked for NULL / empty string again because the
@@ -1176,7 +1175,7 @@ H5D_t *
 H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id,
     hid_t dapl_id)
 {
-    const H5T_t        *type = NULL;            /* Datatype for dataset (VOL pointer) */
+    H5T_t              *type = NULL;            /* Datatype for dataset (VOL pointer) */
     H5T_t              *dt = NULL;              /* Datatype for dataset (non-VOL pointer) */
     H5D_t              *new_dset = NULL;
     H5P_genplist_t     *dc_plist = NULL;        /* New Property list */
@@ -1198,10 +1197,11 @@ H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id,
     HDassert(H5I_GENPROP_LST == H5I_get_type(dcpl_id));
 
     /* Get the dataset's datatype */
-    if(NULL == (dt = (const H5T_t *)H5I_object(type_id)))
+    if(NULL == (dt = (H5T_t *)H5I_object(type_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a datatype")
+
     /* If this is a named datatype, get the pointer via the VOL plugin */
-    type = (const H5T_t *)H5T_get_actual_type(dt);
+    type = H5T_get_actual_type(dt);
 
     /* Check if the datatype is "sensible" for use in a dataset */
     if(H5T_is_sensible(type) != TRUE)
@@ -2197,32 +2197,8 @@ H5D_nameof(const H5D_t *dataset)
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    FUNC_LEAVE_NOAPI(dataset ? (H5G_name_t *)&(dataset->path) : (H5G_name_t *)NULL)
+    FUNC_LEAVE_NOAPI(dataset ? &(dataset->path) : NULL)
 } /* end H5D_nameof() */
-
-
-/*-------------------------------------------------------------------------
- * Function: H5D_typeof
- *
- * Purpose:  Returns a pointer to the dataset's datatype.  The datatype
- *           is not copied.
- *
- * Return:   Success:    Ptr to the dataset's datatype, uncopied.
- *           Failure:    NULL
- *-------------------------------------------------------------------------
- */
-H5T_t *
-H5D_typeof(const H5D_t *dset)
-{
-    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    HDassert(dset);
-    HDassert(dset->shared);
-    HDassert(dset->shared->type);
-
-    FUNC_LEAVE_NOAPI(dset->shared->type)
-} /* end H5D_typeof() */
 
 
 /*-------------------------------------------------------------------------
@@ -3288,7 +3264,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D_flush_all(const H5F_t *f)
+H5D_flush_all(H5F_t *f)
 {
     herr_t         ret_value = SUCCEED;    /* Return value */
 
@@ -3298,7 +3274,7 @@ H5D_flush_all(const H5F_t *f)
     HDassert(f);
 
     /* Iterate over all the open datasets */
-    if(H5I_iterate(H5I_DATASET, H5D__flush_all_cb, (void *)f, FALSE) < 0) /* Casting away const OK -QAK */
+    if(H5I_iterate(H5I_DATASET, H5D__flush_all_cb, f, FALSE) < 0) /* Casting away const OK -QAK */
         HGOTO_ERROR(H5E_DATASET, H5E_BADITER, FAIL, "unable to flush cached dataset info")
 
 done:

@@ -27,7 +27,7 @@
 # Result variables
 ###################
 
-This module will set the following variables in your project:
+# This module will set the following variables in your project:
 
 #  SZIP_FOUND, true if the SZIP headers and libraries were found.
 #  SZIP_INCLUDE_DIR, the directory containing the SZIP headers.
@@ -57,7 +57,7 @@ endforeach()
 if(NOT SZIP_LIBRARY)
   find_library(SZIP_LIBRARY_RELEASE NAMES ${szip_names})
   find_library(SZIP_LIBRARY_DEBUG NAMES ${szip_names_debug})
-  include(${CMAKE_CURRENT_LIST_DIR}/SelectLibraryConfigurations.cmake)
+  include(SelectLibraryConfigurations)
   select_library_configurations(SZIP)
   mark_as_advanced(SZIP_LIBRARY_RELEASE SZIP_LIBRARY_DEBUG)
 endif()

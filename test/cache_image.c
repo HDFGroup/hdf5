@@ -93,6 +93,7 @@ static unsigned evict_on_close_test(hbool_t single_file_vfd);
 #define DSET_SIZE               (40 * CHUNK_SIZE)
 #define MAX_NUM_DSETS           256
 
+
 static void 
 create_datasets(hid_t file_id, int min_dset, int max_dset)
 {
@@ -3717,8 +3718,7 @@ cache_image_smoke_check_2(hbool_t single_file_vfd)
 
     if ( show_progress ) 
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
- 
- 
+
     /* 4) Open the file.  
      *
      *    Verify that the metadata cache is instructed to load the 
@@ -4486,6 +4486,7 @@ cache_image_smoke_check_4(hbool_t single_file_vfd)
         if ( show_progress ) 
             HDfprintf(stdout, "%s:L3 cp = %d, max_dset = %d, pass = %d.\n", 
                       fcn_name, cp + 2, max_dset, pass);
+
     } /* end while */
     cp += 3;
  
@@ -4638,7 +4639,6 @@ cache_image_smoke_check_4(hbool_t single_file_vfd)
                   FUNC, failure_mssg);
 
     return !pass;
-
 } /* cache_image_smoke_check_4() */
 
 
@@ -5111,8 +5111,7 @@ cache_image_smoke_check_5(hbool_t single_file_vfd)
      *    extension message has been deleted.
      */
     i = min_group;
-    while ( ( pass ) && ( i <= max_group ) ) {
-
+    while ( ( pass ) && ( i <= max_group ) ) { 
 	sprintf(process_group_name, "/process_%d", i);
         validate_zoo(file_id, process_group_name, i++);
     }
@@ -7513,10 +7512,9 @@ get_free_sections_test(hbool_t single_file_vfd)
         /* file_ptr->shared->first_alloc_dealloc is set to FALSE if the 
          * file is opened R/O.
          */
-        if ( ( file_ptr->shared->first_alloc_dealloc ) ||
-             ( ! H5F_addr_defined(file_ptr->shared->eoa_pre_fsm_fsalloc) ) ||
+        if ( ( ! H5F_addr_defined(file_ptr->shared->eoa_fsm_fsalloc) ) ||
              ( ! H5F_addr_defined(file_ptr->shared->cache->image_addr) ) ||
-             ( H5F_addr_gt(file_ptr->shared->eoa_pre_fsm_fsalloc,
+             ( H5F_addr_gt(file_ptr->shared->eoa_fsm_fsalloc,
                            file_ptr->shared->cache->image_addr) ) ) {
 
             pass = FALSE;
@@ -7554,11 +7552,8 @@ get_free_sections_test(hbool_t single_file_vfd)
             pass = FALSE;
             failure_mssg = "cache image not loaded (1).\n";
 
-        } else if ( file_ptr->shared->first_alloc_dealloc ) {
+        } 
 
-            pass = FALSE;
-            failure_mssg = "self referential FSMs not floated (1).\n";
-        }
     }
 
     if ( show_progress ) 
@@ -7634,10 +7629,9 @@ get_free_sections_test(hbool_t single_file_vfd)
      */
     if ( pass ) {
 
-        if ( ( ! file_ptr->shared->first_alloc_dealloc ) ||
-             ( ! H5F_addr_defined(file_ptr->shared->eoa_pre_fsm_fsalloc) ) ||
+        if ( ( ! H5F_addr_defined(file_ptr->shared->eoa_fsm_fsalloc) ) ||
              ( ! H5F_addr_defined(file_ptr->shared->cache->image_addr) ) ||
-             ( H5F_addr_gt(file_ptr->shared->eoa_pre_fsm_fsalloc,
+             ( H5F_addr_gt(file_ptr->shared->eoa_fsm_fsalloc,
                            file_ptr->shared->cache->image_addr) ) ) {
 
             pass = FALSE;
@@ -7675,11 +7669,8 @@ get_free_sections_test(hbool_t single_file_vfd)
             pass = FALSE;
             failure_mssg = "cache image not loaded (2).\n";
 
-        } else if ( file_ptr->shared->first_alloc_dealloc ) {
+        } 
 
-            pass = FALSE;
-            failure_mssg = "self referential FSMs not floated (2).\n";
-        }
     }
 
     if ( show_progress ) 

@@ -999,6 +999,7 @@
 ./test/external_common.c
 ./test/external_common.h
 ./test/external_env.c
+./test/external_fname.h
 ./test/error_test.c
 ./test/err_compat.c
 ./test/filter_error.h5
@@ -1699,6 +1700,7 @@
 ./tools/testfiles/h5dump-help.txt
 ./tools/testfiles/non_existing.ddl
 ./tools/testfiles/packedbits.ddl
+./tools/testfiles/t128bit_float.h5
 ./tools/testfiles/taindices.h5
 ./tools/testfiles/tall-1.ddl
 ./tools/testfiles/tall-2.ddl

@@ -509,8 +509,7 @@ dataset_stats(iter_t *iter, const char *name, const H5O_info_t *oi)
         HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "attribute_stats() failed");
 
     /* Get storage info */
-    if((storage = H5Dget_storage_size(did)) < 0)
-        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dget_storage_size() failed");
+    storage = H5Dget_storage_size(did);
 
     /* Gather layout statistics */
     if((dcpl = H5Dget_create_plist(did)) < 0)

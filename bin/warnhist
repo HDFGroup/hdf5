@@ -40,6 +40,8 @@ my @ignorenames;
 my %ignored_files = ();
 my %warn_file_indices = ();
 my %file_warn_indices = ();
+my @warn_match_strings;
+my @file_match_strings;
 my %file_warn = ();
 my %file_warn_line = ();
 my $current_warning = 0;
@@ -48,15 +50,12 @@ my $warn_index;
 my $last_c_name;
 my $last_fort_name;
 my $last_fort_line;
+my $genericize = 1;
 
-# declare the Perl command line flags/options we want to allow
-my %options=();
-getopts("FWht:w:f:i:l", \%options);
-
-# Display usage, if requested
-if($options{h}) {
-    print "Usage: 'warnhist [-h] [-t <prefix>] [-w <n>] [-W] [-f <n>] [-F] [-l] [-i <name list> [file]'\n";
-    print "\t-h\tDisplay this usage\n";
+# Display usage
+sub do_help {
+    print "Usage: 'warnhist [-h, --help] [-t <prefix>] [-w <n>] [-W] [-f <n>] [-F] [-s <warning string list>] [-S <file string list] [-l] [-u] [-i <name list>] [file]'\n";
+    print "\t-h, --help\tDisplay this usage\n";
     print "\t-t <prefix>\tTrim pathname prefix from filenames, <prefix>\n";
     print "\t-w <n>\tDisplay files for a given warning index list, <n>\n";
     print "\t\t<n> can be a single value, a range, or a comma separated list\n";
@@ -66,13 +65,33 @@ if($options{h}) {
     print "\t\t<n> can be a single value, a range, or a comma separated list\n";
     print "\t\tFor example: '0' or '0,4' or '8-10' or '0,2-4,8-10,13'\n";
     print "\t-F\tDisplay warnings for all files\n";
+    print "\t-s <warning string list>\tDisplay files for warnings which contain a string, <warning string list>\n";
+    print "\t\t<warning string list> is a comma separated list, with no spaces\n";
+    print "\t\tFor example: 'Wunused-dummy-argument' or 'Wunused-dummy-argument,Wunused-variable'\n";
+    print "\t-S <file string list>\tDisplay warnings for files which contain a string, <file string list>\n";
+    print "\t\t<file string list> is a comma separated list, with no spaces\n";
+    print "\t\tFor example: 'H5Fint' or 'H5Fint,H5Gnode'\n";
     print "\t-l\tDisplay line nunbers for file/warning\n";
+    print "\t-u\tLeave 'unique' types in warnings, instead of genericizing them\n";
     print "\t-i <name list>\tIgnore named files, <name list>\n";
     print "\t\t<name list> is a comma separated list, with no spaces\n";
     print "\t\tFor example: 'H5LTparse' or 'H5LTparse,H5LTanalyze'\n";
     print "\tfile\tFilename containing build output\n";
     print "\t\tIf no file is given, standard input is used.\n";
     exit;
+}
+
+sub main::HELP_MESSAGE {
+    do_help();
+}
+
+# declare the Perl command line flags/options we want to allow
+my %options=();
+getopts("FWhut:w:f:s:S:i:l", \%options);
+
+# Display usage, if requested
+if($options{h}) {
+    do_help();
 }
 
 # Parse list of file names to ignore
@@ -98,13 +117,13 @@ if(exists $options{w}) {
 #print "start_index = '$start_index', end_index = '$end_index'\n";
             for my $y ($start_index..$end_index) {
 #print "y = '$y'\n";
-                if(!(exists $warn_file_indices{$y})) {
+                if(!exists $warn_file_indices{$y}) {
                     $warn_file_indices{$y} = $y;
                 }
             }
         }
         else {
-            if(!(exists $warn_file_indices{$x})) {
+            if(!exists $warn_file_indices{$x}) {
                 $warn_file_indices{$x} = $x;
             }
         }
@@ -112,6 +131,12 @@ if(exists $options{w}) {
 #foreach (sort keys %warn_file_indices) {
 #    print "$_ : $warn_file_indices{$_}\n";
 #}
+}
+
+# Parse list of warning strings to expand file names
+if(exists $options{s}) {
+    @warn_match_strings = split /,/, $options{s};
+# print @warn_match_strings;
 }
 
 # Parse list of file indices to expand warnings
@@ -131,13 +156,13 @@ if(exists $options{f}) {
 #print "start_index = '$start_index', end_index = '$end_index'\n";
             for my $y ($start_index..$end_index) {
 #print "y = '$y'\n";
-                if(!(exists $file_warn_indices{$y})) {
+                if(!exists $file_warn_indices{$y}) {
                     $file_warn_indices{$y} = $y;
                 }
             }
         }
         else {
-            if(!(exists $file_warn_indices{$x})) {
+            if(!exists $file_warn_indices{$x}) {
                 $file_warn_indices{$x} = $x;
             }
         }
@@ -145,6 +170,17 @@ if(exists $options{f}) {
 #foreach (sort keys %warn_file_indices) {
 #    print "$_ : $warn_file_indices{$_}\n";
 #}
+}
+
+# Parse list of warning strings for files to expand warnings
+if(exists $options{S}) {
+    @file_match_strings = split /,/, $options{S};
+# print @file_match_strings;
+}
+
+# Check if warnings should stay unique and not be "genericized"
+if($options{u}) {
+    $genericize = 0;
 }
 
 PARSE_LINES:
@@ -155,6 +191,8 @@ while (<>) {
     my $toss;
     my $offset;
     my $warning;
+    my $extra;
+    my $extra2;
 
     # Retain last FORTRAN compile line, which comes a few lines before warning
     if($_ =~ /.*\.[fF]90:.*/) {
@@ -162,26 +200,40 @@ while (<>) {
         ($last_fort_line, $toss) = split /\./, $last_fort_line;
     }
 
-    # Retain last C compile line, which possibly comes a few lines before warning
-    if($_ =~ /.*[A-Za-z0-9_]\.c:.*/) {
+    # Retain last C/C++ compile line, which possibly comes a few lines before warning
+    if($_ =~ /.*[A-Za-z0-9_]\.[cC]:.*/) {
         ($last_c_name, $toss) = split /\:/, $_;
     }
 
+    # Skip lines that don't have the word "warning"
     next if $_ !~ /[Ww]arning:/;
 
     # Skip warnings from linker
     next if $_ =~ /ld: warning:/;
 
+    # Skip warnings from build_py and install_lib 
+    next if $_ =~ /warning: (build_py|install_lib)/;
+
+    # "Hide" the C++ '::' symbol until we've parsed out the parts of the line
+    while($_ =~ /\:\:/) {
+	$_ =~ s/\:\:/@@@@/g;
+    }
+
     # Check for weird formatting of warning message
     if($_ =~ /^cc1: warning:.*/) {
         $name = $last_c_name;
         $line = "??";
-        ($toss, $toss, $warning) = split /\:/, $_;
+        ($toss, $toss, $warning, $extra, $extra2) = split /\:/, $_;
+    # Check for CMAKE build with warning on first line and no filename
+    } elsif($_ =~ /^\s*[Ww]arning:.*/) {
+        $name = $last_c_name;
+        $line = "??";
+        ($toss, $warning, $extra, $extra2) = split /\:/, $_;
     # Check for FORTRAN warning output
     } elsif($_ =~ /^Warning:.*/) {
         $name = $last_fort_name;
         $line = $last_fort_line;
-        ($toss, $warning) = split /\:/, $_;
+        ($toss, $warning, $extra, $extra2) = split /\:/, $_;
 #print "1:",$.,":",$_;
 #        $_ = <>;
 #print "2:",$.,":",$_;
@@ -200,13 +252,38 @@ while (<>) {
             print "Line is a null string! Input line #$. is: '$_'";
             next
         }
+    # Check for non-GCC warning (Solaris/Oracle?)
+    } elsif($_ =~ /^\".*, line [0-9]+: *[Ww]arning:.*/) {
+        ($name, $toss, $warning, $extra, $extra2) = split /\:/, $_;
+        ($name, $line) = split /\,/, $name;
+	$name =~ s/^\"//g;
+	$name =~ s/\"$//g;
+	$line =~ s/^\s*line\s*//g;
+# print "name:'", $name, "'-'", $line, "'\n";
+# print "warning:'", $warning, "'\n";
     } else {
-        # Check for 'character offset' field
+        # Check for 'character offset' field appended to file & line #
+	# (This is probably specific to GCC)
         if($_ =~ /^.*[0-9]+\:[0-9]+\:/) {
-            ($name, $line, $offset, $toss, $warning) = split /\:/, $_;
+            ($name, $line, $offset, $toss, $warning, $extra, $extra2) = split /\:/, $_;
         } else {
-            ($name, $line, $toss, $warning) = split /\:/, $_;
+            ($name, $line, $toss, $warning, $extra, $extra2) = split /\:/, $_;
         }
+    }
+
+    # Check for extra ':' followed by more text in original warning string,
+    #  and append the ':' and text back onto the parsed warning
+    #  (Use 'length $extra' idiom to avoid warning when $extra is undefined)
+    if(length $extra ) {
+        $warning = join ':', $warning, $extra;
+    }
+    if(length $extra2 ) {
+        $warning = join ':', $warning, $extra2;
+    }
+
+    # Restore the C++ '::' symbol now that we've parsed out the parts of the line
+    while($warning =~ /@@@@/) {
+        $warning =~ s/@@@@/\:\:/g;
     }
 
     # Trim leading '..' paths from filename
@@ -254,167 +331,84 @@ while (<>) {
     $warning =~ s/‘/'/g;
     $warning =~ s/’/'/g;
 
+#
+# These skipped messages & "genericizations" may be specific to GCC
+
     # Skip supplemental warning message
     next if $warning =~ /near initialization for/;
+
+    # Skip C++ supplemental warning message
+    next if $warning =~ /in call to/;
 
     # Skip GCC warning that should be a note
     next if $_ =~ /\(this will be reported only once per input file\)/;
 
-    # Eliminate "{aka <some type>}" info
-    if($warning =~ /\s\{aka [A-Za-z_0-9\s\*]*\}'/) {
-        $warning =~ s/\s\{aka [A-Za-z_0-9\s\*]*\}//g;
+    if($genericize) {
+	# Eliminate C/C++ "{aka <some type>}" and "{aka '<some type>'}" info
+	if($warning =~ /\s(\{|\()aka '?[A-Za-z_0-9\(\)\*\,\[\]\.\<\>\&\:\+\#]+[A-Za-z_0-9\(\)\*\,\[\]\.\<\>\&\:\+\#\ ]*'?(\}|\))/) {
+	    $warning =~ s/\s(\{|\()aka '?[A-Za-z_0-9\(\)\*\,\[\]\.\<\>\&\:\+\#]+[A-Za-z_0-9\(\)\*\,\[\]\.\<\>\&\:\+\#\ ]*'?(\}|\))//g;
+	}
+
+	# Genericize C/C++ '<some type>', printf format '%<some format>', and
+	# "unknown warning group" into '-'
+	if($warning =~ /'[A-Za-z_0-9\(\)\*\,\[\]\.\<\>\&\:\+\#\-\=]+[A-Za-z_0-9\(\)\*\,\[\]\.\<\>\&\:\+\#\-\=\ ]*'/) {
+	    $warning =~ s/'[A-Za-z_0-9\(\)\*\,\[\]\.\<\>\&\:\+\#\-\=]+[A-Za-z_0-9\(\)\*\,\[\]\.\<\>\&\:\+\#\-\=\ ]*'/'-'/g;
+	}
+	if($warning =~ /'%[\#0\-\ \+]*[,;\:_]?[0-9\*]*\.?[0-9\*]*[hjltzL]*[aAcdeEfFgGinosuxX]'/) {
+	    $warning =~ s/'%[\#0\-\ \+]*[,;\:_]?[0-9\*]*\.?[0-9\*]*[hjltzL]*[aAcdeEfFgGinosuxX]'/'-'/g;
+	}
+
+	# Genericize C/C++ "<macro>" warnings into "-"
+	if($warning =~ /"[A-Za-z_0-9]*"/) {
+	    $warning =~ s/"[A-Za-z_0-9]*"/"-"/g;
+	}
+
+	# Genericize [GCC?] C/C++ warning text about suggessted attribute
+	if($warning =~ /attribute=[A-Za-z_0-9]*\]/) {
+	    $warning =~ s/=[A-Za-z_0-9]*\]/=-\]/g;
+	}
+
+	# Genericize FORTRAN "at (<n>)" into "at (-)", "REAL(<n>)" into "REAL(-)",
+	# 	and "INTEGER(<n>)" into "INTEGER(-)"
+	if($warning =~ /.*at\s\([0-9]+\).*/) {
+	    $warning =~ s/at\s\([0-9]+\)/at \(-\)/g;
+	}
+	if($warning =~ /.*REAL\([0-9]+\).*/) {
+	    $warning =~ s/REAL\([0-9]+\)/REAL\(-\)/g;
+	}
+	if($warning =~ /.*INTEGER\([0-9]+\).*/) {
+	    $warning =~ s/INTEGER\([0-9]+\)/INTEGER\(-\)/g;
+	}
+
+	# Genericize standalone numbers in warnings
+	if($warning =~ /(\s|')-?[0-9]+(\s|')/) {
+	    $warning =~ s/-?[0-9]+/-/g;
+	}
+
+	# Genericize unusual GCC/G++/GFORTRAN warnings that aren't handled above
+	if($warning =~ /\[deprecation\] [A-Za-z_0-9]*\([A-Za-z_,0-9]*\) in [A-Za-z_0-9]* has been deprecated.*/) {
+	    $warning =~ s/[A-Za-z_0-9]*\([A-Za-z_,0-9]*\) in [A-Za-z_0-9]*/-\(-\) in -/g;
+	}
     }
+# print "warning = $warning\n";
+# <end possible GCC-specific code>
 
-    # Genericize warnings
-    if($warning =~ /variable '[A-Za-z_0-9]*' set but not used.*/) {
-        $warning =~ s/'[A-Za-z_0-9]*'/'-'/g;
-    } elsif($warning =~ /unused variable '[A-Za-z_0-9]*'.*/) {
-        $warning =~ s/'[A-Za-z_0-9]*'/'-'/g;
-    } elsif($warning =~ /implicit conversion from '[A-Za-z_0-9]*' to '[A-Za-z_0-9]*' when passing argument to function.*/) {
-        $warning =~ s/'[A-Za-z_0-9]*'/'-'/g;
-    } elsif($warning =~ /implicit conversion from '[A-Za-z_0-9]*' to '[A-Za-z_0-9]*' to match other operand of binary expression.*/) {
-        $warning =~ s/'[A-Za-z_0-9]*'/'-'/g;
-    } elsif($warning =~ /conversion to '[A-Za-z_0-9\s]*' from '[A-Za-z_0-9\s]*' may alter its value.*/) {
-        $warning =~ s/'[A-Za-z_0-9\s]*'/'-'/g;
-    } elsif($warning =~ /conversion to '[A-Za-z_0-9\s]*' from '[A-Za-z_0-9\s]*' may change the sign of the result.*/) {
-        $warning =~ s/'[A-Za-z_0-9\s]*'/'-'/g;
-    } elsif($warning =~ /passing argument [0-9]* of '[A-Za-z_0-9\s]*' discards '[A-Za-z_0-9\s]*'.*/) {
-        $warning =~ s/passing argument [0-9]*/passing argument -/g;
-        $warning =~ s/'[A-Za-z_0-9\s]*'/'-'/g;
-    } elsif($warning =~ /'[A-Za-z_0-9\s]*' defined but not used.*/) {
-        $warning =~ s/'[A-Za-z_0-9\s]*'/'-'/g;
-    } elsif($warning =~ /cast discards '[A-Za-z_0-9\(\)\s]*'.*/) {
-        $warning =~ s/'[A-Za-z_0-9\(\)\s]*'/'-'/g;
-    } elsif($warning =~ /size of '[A-Za-z_0-9\(\)\s\*]*' is [0-9]* bytes.*/) {
-        $warning =~ s/is [0-9]* bytes/is - bytes/g;
-        $warning =~ s/'[A-Za-z_0-9\(\)\s\*]*'/'-'/g;
-    } elsif($warning =~ /passing argument [0-9]* of '[A-Za-z_0-9\(\)\s]*' from incompatible.*/) {
-        $warning =~ s/passing argument [0-9]*/passing argument -/g;
-        $warning =~ s/'[A-Za-z_0-9\(\)\s]*'/'-'/g;
-    } elsif($warning =~ /stack usage is [0-9]* bytes.*/) {
-        $warning =~ s/stack usage is [0-9]*/stack usage is -/g;
-    } elsif($warning =~ /stack usage might be [0-9]* bytes.*/) {
-        $warning =~ s/stack usage might be [0-9]*/stack usage might be -/g;
-    } elsif($warning =~ /the frame size of [0-9]* bytes is larger than [0-9]* bytes.*/) {
-        $warning =~ s/the frame size of [0-9]* bytes is larger than [0-9]*/the frame size of - bytes is larger than -/g;
-    } elsif($warning =~ /enumeration value '[A-Za-z_0-9\s]*' not handled in switch.*/) {
-        $warning =~ s/'[A-Za-z_0-9\s]*'/'-'/g;
-    } elsif($warning =~ /"[A-Za-z_0-9\s]*" is not defined.*/) {
-        $warning =~ s/"[A-Za-z_0-9\s]*"/"-"/g;
-    } elsif($warning =~ /macro "[A-Za-z_0-9\s]*" is not used.*/) {
-        $warning =~ s/"[A-Za-z_0-9\s]*"/"-"/g;
-    } elsif($warning =~ /unused parameter '[A-Za-z_0-9\s]*'.*/) {
-        $warning =~ s/'[A-Za-z_0-9\s]*'/'-'/g;
-    } elsif($warning =~ /request for implicit conversion from '[A-Za-z_0-9\s\*]*' to '[A-Za-z_0-9\s\<\>\[\]\(\)\*]*' not permitted in C\+\+.*/) {
-        $warning =~ s/'[A-Za-z_0-9\s\*\<\>\[\]\(\)]*'/'-'/g;
-    } elsif($warning =~ /no previous prototype for '[A-Za-z_0-9\s]*'.*/) {
-        $warning =~ s/'[A-Za-z_0-9\s]*'/'-'/g;
-    } elsif($warning =~ /declaration of '[A-Za-z_0-9\s]*' shadows a previous local.*/) {
-        $warning =~ s/'[A-Za-z_0-9\s]*'/'-'/g;
-    } elsif($warning =~ /cast from function call of type '[A-Za-z_0-9\s\*]*' to non-matching type '[A-Za-z_0-9\s\*]*'.*/) {
-        $warning =~ s/'[A-Za-z_0-9\s\*]*'/'-'/g;
-    } elsif($warning =~ /'[A-Za-z_0-9\s]*' declared '[A-Za-z_0-9\s]*' but never defined.*/) {
-        $warning =~ s/'[A-Za-z_0-9\s]*'/'-'/g;
-    } elsif($warning =~ /declaration of '[A-Za-z_0-9\s]*' shadows a global declaration.*/) {
-        $warning =~ s/'[A-Za-z_0-9\s]*'/'-'/g;
-    } elsif($warning =~ /typedef '[A-Za-z_0-9\s]*' locally defined but not used.*/) {
-        $warning =~ s/'[A-Za-z_0-9\s]*'/'-'/g;
-    } elsif($warning =~ /format '%[a-z]*' expects argument of type '[A-Za-z_0-9\s\*]*', but argument [0-9]* has type '[A-Za-z_0-9\s\*\(\),]*'.*/) {
-        $warning =~ s/but argument [0-9]*/but argument -/g;
-        $warning =~ s/'[%A-Za-z_0-9\s\*\(\),]*'/'-'/g;
-    } elsif($warning =~ /conversion to '[A-Za-z_0-9\s]*' alters '[A-Za-z_0-9\s]*' constant value.*/) {
-        $warning =~ s/'[A-Za-z_0-9\s]*'/'-'/g;
-    } elsif($warning =~ /to be safe all intermediate pointers in cast from '[A-Za-z_0-9\s\*]*' to '[A-Za-z_0-9\s\*]*' must be 'const' qualified.*/) {
-        $warning =~ s/'[A-Za-z_0-9\s\*]*'/'-'/g;
-    } elsif($warning =~ /identifier '[A-Za-z_0-9]*' conflicts with C\+\+ keyword.*/) {
-        $warning =~ s/'[A-Za-z_0-9]*'/'-'/g;
-    } elsif($warning =~ /nested extern declaration of '[A-Za-z_0-9]*'.*/) {
-        $warning =~ s/'[A-Za-z_0-9]*'/'-'/g;
-    } elsif($warning =~ /Procedure '[A-Za-z_0-9]*' called with an implicit interface.*/) {
-        $warning =~ s/'[A-Za-z_0-9]*'/'-'/g;
-    } elsif($warning =~ /Unused dummy argument '[A-Za-z_0-9]*'.*/) {
-        $warning =~ s/'[A-Za-z_0-9]*'/'-'/g;
-    } elsif($warning =~ /Unused parameter '[A-Za-z_0-9]*' declared at.*/) {
-        $warning =~ s/'[A-Za-z_0-9]*'/'-'/g;
-    } elsif($warning =~ /Unused variable '[A-Za-z_0-9]*' declared at.*/) {
-        $warning =~ s/'[A-Za-z_0-9]*'/'-'/g;
-    } elsif($warning =~ /Inequality comparison for REAL\([0-9]*\) at.*/) {
-        $warning =~ s/REAL\([0-9]*\)/REAL\(-\)/g;
-    } elsif($warning =~ /Possible change of value in conversion from INTEGER\([0-9]*\) to (INTEGER|REAL)\([0-9]*\) at.*/) {
-        $warning =~ s/INTEGER\([0-9]*\)/INTEGER\(-\)/g;
-        $warning =~ s/REAL\([0-9]*\)/REAL\(-\)/g;
-    } elsif($warning =~ /passing argument [0-9]* of '[A-Za-z_0-9]*' with different width due to prototype.*/) {
-        $warning =~ s/passing argument [0-9]*/passing argument -/g;
-        $warning =~ s/'[A-Za-z_0-9]*'/'-'/g;
-    } elsif($warning =~ /passing argument [0-9]* of '[A-Za-z_0-9]*' as unsigned due to prototype.*/) {
-        $warning =~ s/passing argument [0-9]*/passing argument -/g;
-        $warning =~ s/'[A-Za-z_0-9]*'/'-'/g;
-    } elsif($warning =~ /passing argument [0-9]* of '[A-Za-z_0-9]*' discards qualifiers from pointer target type.*/) {
-        $warning =~ s/passing argument [0-9]*/passing argument -/g;
-        $warning =~ s/'[A-Za-z_0-9]*'/'-'/g;
-    } elsif($warning =~ /passing argument [0-9]* of '[A-Za-z_0-9]*' as floating rather than integer due to prototype.*/) {
-        $warning =~ s/passing argument [0-9]*/passing argument -/g;
-        $warning =~ s/'[A-Za-z_0-9]*'/'-'/g;
-    } elsif($warning =~ /passing argument [0-9]* of '[A-Za-z_0-9]*' as 'float' rather than 'double' due to prototype.*/) {
-        $warning =~ s/passing argument [0-9]*/passing argument -/g;
-        $warning =~ s/'[A-Za-z_0-9]*'/'-'/;
-    } elsif($warning =~ /passing argument [0-9]* of '[A-Za-z_0-9]*' as signed due to prototype.*/) {
-        $warning =~ s/passing argument [0-9]*/passing argument -/g;
-        $warning =~ s/'[A-Za-z_0-9]*'/'-'/g;
-    } elsif($warning =~ /format '\%[A-Za-z0-9]*' expects type '[a-z][a-z\s\*]*', but argument [0-9]* has type '[a-z][a-z\(\)_,\s\*]*'.*/) {
-        $warning =~ s/but argument [0-9]*/but argument -/g;
-        $warning =~ s/'\%[A-Za-z0-9]*'/'\%-'/g;
-        $warning =~ s/'[a-z][a-z_,\s\*\(\)]*'/'-'/g;
-    } elsif($warning =~ /implicit declaration of function '[A-Za-z_0-9]*'.*/) {
-        $warning =~ s/'[A-Za-z_0-9]*'/'-'/g;
-    } elsif($warning =~ /'[A-Za-z_\.\[\]0-9]*' may be used uninitialized in this function.*/) {
-        $warning =~ s/'[A-Za-z_\.\[\]0-9]*'/'-'/g;
-    } elsif($warning =~ /redundant redeclaration of '[A-Za-z_0-9]*'.*/) {
-        $warning =~ s/'[A-Za-z_0-9]*'/'-'/g;
-    } elsif($warning =~ /declaration of '[A-Za-z_0-9]*' shadows a parameter.*/) {
-        $warning =~ s/'[A-Za-z_0-9]*'/'-'/g;
-    } elsif($warning =~ /ISO C90 does not support the '[a-z]*' gnu_scanf length modifier.*/) {
-        $warning =~ s/'[a-z]*'/'-'/g;
-    } elsif($warning =~ /ISO C90 does not support the '[a-z]*' gnu_printf length modifier.*/) {
-        $warning =~ s/'[a-z]*'/'-'/g;
-    } elsif($warning =~ /ISO C90 does not support the '%[a-z]*' gnu_printf format.*/) {
-        $warning =~ s/'%[a-z]*'/'%-'/g;
-    } elsif($warning =~ /string length '[0-9]*' is greater than the length.*/) {
-        $warning =~ s/string length '[0-9]*' is/string length '-' is/g;
-    } elsif($warning =~ /enum conversion when passing argument [0-9]* of '[A-Za-z_0-9]*' is invalid.*/) {
-        $warning =~ s/passing argument [0-9]*/passing argument -/g;
-        $warning =~ s/'[A-Za-z_0-9]*'/'-'/g;
-    } elsif($warning =~ /duplicate declaration of '[A-Za-z_0-9]*' is invalid in.*/) {
-        $warning =~ s/'[A-Za-z_0-9]*'/'-'/g;
-    } elsif($warning =~ /Variable '[A-Za-z_0-9]*' at \([0-9]*\) is a dummy argument of the BIND\(C\) procedure '[A-Za-z_0-9]*' but may not be C interoperable.*/) {
-        $warning =~ s/'[A-Za-z_0-9]*'/'-'/g;
-        $warning =~ s/at \([0-9]*\)/at \(-\)/g;
-    } elsif($warning =~ /Variable '[A-Za-z_0-9]*' at \([0-9]*\) may not be a C interoperable kind but it is BIND\(C\).*/) {
-        $warning =~ s/'[A-Za-z_0-9]*'/'-'/g;
-        $warning =~ s/at \([0-9]*\)/at \(-\)/g;
-    } elsif($warning =~ /Component '[A-Za-z_0-9]*' in derived type '[A-Za-z_0-9]*' at \([0-9]*\) may not be C interoperable, even though derived type '[A-Za-z_0-9]*' is BIND\(C\).*/) {
-        $warning =~ s/'[A-Za-z_0-9]*'/'-'/g;
-        $warning =~ s/at \([0-9]*\)/at \(-\)/g;
-    } elsif($warning =~ /function might be candidate for attribute '[A-Za-z_0-9]*' if it is known to return normally \[-Wsuggest-attribute=[A-Za-z_0-9]*\].*/) {
-        $warning =~ s/'[A-Za-z_0-9]*'/'-'/g;
-        $warning =~ s/=[A-Za-z_0-9]*\]/=-\]/g;
-    } elsif($warning =~ /function might be candidate for attribute '[A-Za-z_0-9]*' \[-Wsuggest-attribute=[A-Za-z_0-9]*\].*/) {
-        $warning =~ s/'[A-Za-z_0-9]*'/'-'/g;
-        $warning =~ s/=[A-Za-z_0-9]*\]/=-\]/g;
+    # Check if we've already seen this warning on this line in this file
+    # (Can happen for warnings from inside header files)
+    if( !exists $warn_file_line{$warning}{$name}{$line} ) {
+	# Increment count for [generic] warning
+	$warn_count{$warning}++;
+	$warn_file{$warning}{$name}++;
+	$warn_file_line{$warning}{$name}{$line}++;
+
+	# Increment count for filename
+	$file_count{$name}++;
+	$file_warn{$name}{$warning}++;
+	$file_warn_line{$name}{$warning}{$line}++;
+
+	# Increment total count of warnings
+	$totalcount++;
     }
-
-    # Increment count for [generic] warning
-    $warn_count{$warning}++;
-    $warn_file{$warning}{$name}++;
-    push(@{ $warn_file_line{$warning}{$name} }, $line);
-
-    # Increment count for filename
-    $file_count{$name}++;
-    $file_warn{$name}{$warning}++;
-    push(@{ $file_warn_line{$name}{$warning} }, $line);
-
-    # Increment total count of warnings
-    $totalcount++;
 
 #    print "name = $name\n";
 #    print "line = $line\n";
@@ -422,7 +416,7 @@ while (<>) {
 #    print "warning = \"$warning\"\n";
 }
 
-print "Total [non-ignored] warnings: $totalcount\n";
+print "Total unique [non-ignored] warnings: $totalcount\n";
 print "Total ignored warnings: $ignorecount\n";
 $warncount = keys %warn_count;
 print "Total unique kinds of warnings: $warncount\n";
@@ -434,18 +428,33 @@ print "# of Warnings by frequency (file count)\n";
 print "=======================================\n";
 for my $x (sort {$warn_count{$b} <=> $warn_count{$a}} keys(%warn_count)) {
     printf ("[%2d] %4d (%2d) - %s\n", $current_warning++, $warn_count{$x}, scalar(keys %{$warn_file_line{$x}}), $x);
-    if((exists $options{W}) || (exists $options{w})) {
+    if((exists $options{W}) || (exists $options{w}) || (exists $options{s})) {
         my $curr_index = $current_warning - 1;
+	my $match = 0;
 
+	# Check for string from list in current warning
+	if(exists $options{s}) {
+	    for my $y (@warn_match_strings) {
+# print "y = '$y'\n";
+		if($x =~ /$y/) {
+# print "matched warning = '$x'\n";
+		    $match = 1;
+		    last;
+		}
+	    }
+	}
+
+	# Check if current warning index matches
         if((exists $warn_file_indices{$curr_index}) && $curr_index == $warn_file_indices{$curr_index}) {
+	    $match = 1;
+	}
+
+        if($match) {
             for my $y (sort {$warn_file{$x}{$b} <=> $warn_file{$x}{$a}} keys(%{$warn_file{$x}})) {
                 printf ("\t%4d - %s\n", $warn_file{$x}{$y}, $y);
                 if(exists $options{l}) {
-                    printf ("\t\tLines: ");
-                    for my $z ( @{ $warn_file_line{$x}{$y} } ) {
-                        printf ("%s, ", $z);
-                    }
-                    printf("\n");
+		    my $lines = join ", ", sort {$a <=> $b} keys %{$warn_file_line{$x}{$y}};
+                    printf("\t\tLines: $lines \n");
                 }
             }
         }
@@ -457,18 +466,33 @@ print "\n# of Warnings by filename (warning type)\n";
 print   "========================================\n";
 for my $x (sort {$file_count{$b} <=> $file_count{$a}} keys(%file_count)) {
     printf ("[%3d] %4d (%2d) - %s\n", $current_file++, $file_count{$x}, scalar(keys %{$file_warn_line{$x}}), $x);
-    if((exists $options{F}) || (exists $options{f})) {
+    if((exists $options{F}) || (exists $options{f}) || (exists $options{S})) {
         my $curr_index = $current_file - 1;
+	my $match = 0;
 
+	# Check for string from list in current file
+	if(exists $options{S}) {
+	    for my $y (@file_match_strings) {
+# print "y = '$y'\n";
+		if($x =~ /$y/) {
+# print "matched warning = '$x'\n";
+		    $match = 1;
+		    last;
+		}
+	    }
+	}
+
+	# Check if current file index matches
         if((exists $file_warn_indices{$curr_index}) && $curr_index == $file_warn_indices{$curr_index}) {
+	    $match = 1;
+	}
+
+        if($match) {
             for my $y (sort {$file_warn{$x}{$b} <=> $file_warn{$x}{$a}} keys(%{$file_warn{$x}})) {
                 printf ("\t%4d - %s\n", $file_warn{$x}{$y}, $y);
                 if(exists $options{l}) {
-                    printf ("\t\tLines: ");
-                    for my $z ( @{ $file_warn_line{$x}{$y} } ) {
-                        printf ("%s, ", $z);
-                    }
-                    printf("\n");
+		    my $lines = join ", ", sort {$a <=> $b} keys %{$file_warn_line{$x}{$y}};
+                    printf("\t\tLines: $lines \n");
                 }
             }
         }
@@ -476,9 +500,12 @@ for my $x (sort {$file_count{$b} <=> $file_count{$a}} keys(%file_count)) {
 }
 
 # Print names of files that were ignored
-print "\nIgnored filenames\n";
-print   "=================\n";
-for my $x (sort keys(%ignored_files)) {
-    print "$x\n";
+# Check for ignored file
+if(exists $options{i}) {
+    print "\nIgnored filenames\n";
+    print   "=================\n";
+    for my $x (sort keys(%ignored_files)) {
+	print "$x\n";
+    }
 }
 

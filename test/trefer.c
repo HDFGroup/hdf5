@@ -526,7 +526,7 @@ test_reference_region(H5F_libver_t libver_low, H5F_libver_t libver_high)
     hssize_t hssize_ret;        /* hssize_t return value */
     htri_t tri_ret;             /* htri_t return value */
     herr_t ret;                 /* Generic return value     */
-    haddr_t addr = HADDR_UNDEF; /* test for undefined reference */
+    hdset_reg_ref_t undef_reg[1];   /* test for undefined reference */
     hid_t dset_NA;              /* Dataset id for undefined reference */
     hid_t space_NA;             /* Dataspace id for undefined reference */
     hsize_t dims_NA[1] = {1};   /* Dims array for undefined reference */
@@ -744,7 +744,7 @@ test_reference_region(H5F_libver_t libver_low, H5F_libver_t libver_high)
     CHECK(ret, FAIL, "H5Dread");
 
     /* Try to read an unaddressed dataset */
-    dset2 = H5Rdereference2(dset1, dapl_id, H5R_DATASET_REGION, &addr);
+    dset2 = H5Rdereference2(dset1, dapl_id, H5R_DATASET_REGION, undef_reg);
     VERIFY(dset2, FAIL, "H5Rdereference2 haddr_undef");
 
     /* Try to open objects */
@@ -1781,8 +1781,8 @@ test_reference(void)
     test_reference_obj();       /* Test basic H5R object reference code */
 
     /* Loop through all the combinations of low/high version bounds */
-    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
-        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
+    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, low)) {
+        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, high)) {
 
             /* Invalid combinations, just continue */
             if(high == H5F_LIBVER_EARLIEST || high < low)

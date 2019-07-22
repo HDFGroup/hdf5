@@ -10065,7 +10065,7 @@ test_attr_bug2(hid_t fcpl, hid_t fapl)
     hid_t   tid;            /* Datatype ID */
     hid_t   gcpl;           /* Group creation property list */
     hsize_t dims[2] = {10, 100}; /* Attribute dimensions */
-    char    aname[4];       /* Attribute name */
+    char    aname[16];       /* Attribute name */
     unsigned i;             /* index */
     herr_t  ret;            /* Generic return status */
     htri_t  tri_ret;        /* htri_t return status */

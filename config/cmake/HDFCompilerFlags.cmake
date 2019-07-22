@@ -143,7 +143,7 @@ if (NOT MSVC AND CMAKE_COMPILER_IS_GNUCC)
       #
       # Technically, variable-length arrays are part of the C99 standard, but
       #   we should approach them a bit cautiously... -QAK
-      set (H5_CFLAGS1 "${H5_CFLAGS1} -Wlogical-op -Wlarger-than=2048 -Wvla")
+      set (H5_CFLAGS1 "${H5_CFLAGS1} -Wlogical-op -Wlarger-than=2560 -Wvla")
 
       # Append more extra warning flags that only gcc 4.4+ know about
       set (H5_CFLAGS1 "${H5_CFLAGS1} -Wsync-nand -Wframe-larger-than=16384 -Wpacked-bitfield-compat")
@@ -195,7 +195,22 @@ if (NOT MSVC AND CMAKE_COMPILER_IS_GNUCC)
 
     # Append more extra warning flags that only gcc 6.x+ know about
     if (CMAKE_C_COMPILER_ID STREQUAL "GNU" AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 6.0)
-      set (H5_CFLAGS4 "${H5_CFLAGS4} -Wnull-dereference -Wunused-const-variable -Wduplicated-cond -Whsa")
+      set (H5_CFLAGS4 "${H5_CFLAGS4} -Wnull-dereference -Wunused-const-variable -Wduplicated-cond -Whsa -Wnormalized")
+    endif ()
+
+    # Append more extra warning flags that only gcc 7.x+ know about
+    if (CMAKE_C_COMPILER_ID STREQUAL "GNU" AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 7.0)
+      set (H5_CFLAGS4 "${H5_CFLAGS4} -Walloc-zero -Walloca -Wduplicated-branches -Wformat-overflow=2 -Wformat-truncation=2 -Wimplicit-fallthrough=5 -Wrestrict")
+    endif ()
+
+    # Append more extra warning flags that only gcc 8.x+ know about
+    if (CMAKE_C_COMPILER_ID STREQUAL "GNU" AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 8.0)
+      set (H5_CFLAGS4 "${H5_CFLAGS4} -Wattribute-alias -Wcast-align=strict -Wshift-overflow=2 -Wno-suggest-attribute=cold -Wno-suggest-attribute=malloc")
+    endif ()
+
+    # Append more extra warning flags that only gcc 9.x+ know about
+    if (CMAKE_C_COMPILER_ID STREQUAL "GNU" AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 9.0)
+      set (H5_CFLAGS4 "${H5_CFLAGS4} Wattribute-alias=2 -Wmissing-profile")
     endif ()
 
 endif ()

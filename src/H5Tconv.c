@@ -668,8 +668,8 @@
 {                                                                             \
     size_t	elmtno;			/*element number		*/    \
     H5T_CONV_DECL_PREC(PREC)            /*declare precision variables, or not */ \
-    uint8_t     *src_buf;		/*'raw' source buffer		*/    \
-    uint8_t     *dst_buf;		/*'raw' destination buffer	*/    \
+    void        *src_buf;		/*'raw' source buffer		*/    \
+    void        *dst_buf;		/*'raw' destination buffer	*/    \
     ST	*src, *s;			/*source buffer			*/    \
     DT	*dst, *d;			/*destination buffer		*/    \
     H5T_t	*st, *dt;		/*datatype descriptors		*/    \
@@ -745,22 +745,22 @@
                 /* If we're down to the last few elements, just wrap up */    \
                 /* with a "real" reverse copy */			      \
                 if(safe<2) {						      \
-                    src = (ST *)(src_buf = (uint8_t *)buf + (nelmts - 1) * (size_t)s_stride); \
-                    dst = (DT *)(dst_buf = (uint8_t *)buf + (nelmts - 1) * (size_t)d_stride); \
+                    src = (ST *)(src_buf = (void *)((uint8_t *)buf + (nelmts - 1) * (size_t)s_stride)); \
+                    dst = (DT *)(dst_buf = (void *)((uint8_t *)buf + (nelmts - 1) * (size_t)d_stride)); \
                     s_stride = -s_stride;				      \
                     d_stride = -d_stride;				      \
 									      \
                     safe=nelmts;					      \
                 } /* end if */						      \
                 else {							      \
-                    src = (ST *)(src_buf = (uint8_t *)buf + (nelmts - safe) * (size_t)s_stride); \
-                    dst = (DT *)(dst_buf = (uint8_t *)buf + (nelmts - safe) * (size_t)d_stride); \
+                    src = (ST *)(src_buf = (void *)((uint8_t *)buf + (nelmts - safe) * (size_t)s_stride)); \
+                    dst = (DT *)(dst_buf = (void *)((uint8_t *)buf + (nelmts - safe) * (size_t)d_stride)); \
                 } /* end else */					      \
             } /* end if */						      \
             else {							      \
                 /* Single forward pass over all data */			      \
-                src = (ST *)(src_buf = (uint8_t*)buf);			      \
-                dst = (DT *)(dst_buf = (uint8_t*)buf);			      \
+                src = (ST *)(src_buf = buf);			              \
+                dst = (DT *)(dst_buf = buf);			              \
                 safe=nelmts;						      \
             } /* end else */						      \
                                                                               \
@@ -889,9 +889,9 @@ done:                                                                         \
         H5_GLUE(H5T_CONV_LOOP_,POST_DALIGN_GUTS)(DT)			      \
                                                                               \
         /* Advance pointers */						      \
-        src_buf += s_stride;						      \
+        src_buf = (void *)((uint8_t *)src_buf + s_stride);		      \
         src = (ST *)src_buf;						      \
-        dst_buf += d_stride;						      \
+        dst_buf = (void *)((uint8_t *)dst_buf + d_stride);		      \
         dst = (DT *)dst_buf;						      \
     }
 
@@ -2658,11 +2658,11 @@ H5T_conv_enum_init(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
     if(1 == src->shared->size || sizeof(short) == src->shared->size || sizeof(int) == src->shared->size) {
 	for(i = 0; i < src->shared->u.enumer.nmembs; i++) {
 	    if(1 == src->shared->size)
-		n = *((signed char *)(src->shared->u.enumer.value + i));
+		n = *((signed char *)((uint8_t *)src->shared->u.enumer.value + i));
 	    else if (sizeof(short) == src->shared->size)
-		n = *((short *)(src->shared->u.enumer.value + i * src->shared->size));
+		n = *((short *)((void *)((uint8_t *)src->shared->u.enumer.value + (i * src->shared->size))));
 	    else
-		n = *((int *)(src->shared->u.enumer.value + i * src->shared->size));
+		n = *((int *)((void *)((uint8_t *)src->shared->u.enumer.value + (i * src->shared->size))));
 	    if(0 == i) {
 		domain[0] = domain[1] = n;
 	    } else {
@@ -2683,11 +2683,11 @@ H5T_conv_enum_init(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
                 map[i] = -1; /*entry unused*/
 	    for(i = 0; i < src->shared->u.enumer.nmembs; i++) {
 		if(1 == src->shared->size)
-		    n = *((signed char *)(src->shared->u.enumer.value + i));
+		    n = *((signed char *)((uint8_t *)src->shared->u.enumer.value + i));
 		else if(sizeof(short) == src->shared->size)
-		    n = *((short *)(src->shared->u.enumer.value + i * src->shared->size));
+		    n = *((short *)((void *)((uint8_t *)src->shared->u.enumer.value + (i * src->shared->size))));
 		else
-		    n = *((int *)(src->shared->u.enumer.value + i * src->shared->size));
+		    n = *((int *)((void *)((uint8_t *)src->shared->u.enumer.value + (i * src->shared->size))));
 		n -= priv->base;
 		HDassert(n >= 0 && (unsigned)n < priv->length);
 		HDassert(map[n] < 0);
@@ -2835,9 +2835,9 @@ H5T__conv_enum(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                     if(1 == src->shared->size)
                         n = *((signed char*)s);
                     else if(sizeof(short) == src->shared->size)
-                        n = *((short*)s);
+                        n = *((short *)((void *)s));
                     else
-                        n = *((int*)s);
+                        n = *((int *)((void *)s));
                     n -= priv->base;
                     if(n < 0 || (unsigned)n >= priv->length || priv->src2dst[n] < 0) {
                         /*overflow*/
@@ -2853,7 +2853,7 @@ H5T__conv_enum(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception")
                     } else
                         H5MM_memcpy(d,
-                                 dst->shared->u.enumer.value + (unsigned)priv->src2dst[n] * dst->shared->size,
+                                 (uint8_t *)dst->shared->u.enumer.value + ((unsigned)priv->src2dst[n] * dst->shared->size),
                                  dst->shared->size);
                 } /* end if */
                 else {
@@ -2865,7 +2865,7 @@ H5T__conv_enum(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 
                     while(lt < rt) {
                         md = (lt + rt) / 2;
-                        cmp = HDmemcmp(s, src->shared->u.enumer.value + md * src->shared->size,
+                        cmp = HDmemcmp(s, (uint8_t *)src->shared->u.enumer.value + (md * src->shared->size),
                                        src->shared->size);
                         if(cmp < 0)
                             rt = md;
@@ -2889,7 +2889,7 @@ H5T__conv_enum(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                     else {
                         HDassert(priv->src2dst[md] >= 0);
                         H5MM_memcpy(d,
-                                 dst->shared->u.enumer.value + (unsigned)priv->src2dst[md] * dst->shared->size,
+                                 (uint8_t *)dst->shared->u.enumer.value + ((unsigned)priv->src2dst[md] * dst->shared->size),
                                  dst->shared->size);
                     } /* end else */
                 } /* end else */

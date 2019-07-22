@@ -411,6 +411,7 @@ H5_DLL herr_t H5AC_get_cache_auto_resize_config(const H5AC_t * cache_ptr,
     H5AC_cache_config_t *config_ptr);
 H5_DLL herr_t H5AC_get_cache_size(H5AC_t *cache_ptr, size_t *max_size_ptr,
     size_t *min_clean_size_ptr, size_t *cur_size_ptr, uint32_t *cur_num_entries_ptr);
+H5_DLL herr_t H5AC_get_cache_flush_in_progress(H5AC_t *cache_ptr, hbool_t *flush_in_progress_ptr);
 H5_DLL herr_t H5AC_get_cache_hit_rate(H5AC_t *cache_ptr, double *hit_rate_ptr);
 H5_DLL herr_t H5AC_reset_cache_hit_rate_stats(H5AC_t *cache_ptr);
 H5_DLL herr_t H5AC_set_cache_auto_resize_config(H5AC_t *cache_ptr,

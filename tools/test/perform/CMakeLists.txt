@@ -133,6 +133,23 @@ endif ()
 set_target_properties (zip_perf PROPERTIES FOLDER perform)
 
 if (H5_HAVE_PARALLEL AND BUILD_TESTING)
+  if (UNIX)
+      #-- Adding test for perf - only on unix systems
+      set (perf_SOURCES
+          ${HDF5_TOOLS_TEST_PERFORM_SOURCE_DIR}/perf.c
+      )
+      add_executable (perf ${perf_SOURCES})
+      target_include_directories (perf PRIVATE "${HDF5_TEST_SRC_DIR};${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+      if (NOT BUILD_SHARED_LIBS)
+        TARGET_C_PROPERTIES (perf STATIC)
+        target_link_libraries (perf PRIVATE ${HDF5_TOOLS_LIB_TARGET} ${HDF5_TEST_LIB_TARGET} ${HDF5_LIB_TARGET})
+      else ()
+        TARGET_C_PROPERTIES (perf SHARED)
+        target_link_libraries (perf PRIVATE ${HDF5_TOOLS_LIBSH_TARGET} ${HDF5_TEST_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
+      endif ()
+      set_target_properties (perf PROPERTIES FOLDER perform)
+  endif ()
+
   #-- Adding test for h5perf
   set (h5perf_SOURCES
       ${HDF5_TOOLS_TEST_PERFORM_SOURCE_DIR}/pio_perf.c

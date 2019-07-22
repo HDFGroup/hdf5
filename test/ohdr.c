@@ -809,7 +809,7 @@ oh_compare(hid_t did1, hid_t did2)
  * Conduct additions side-by-side with a standard datataset and one with
  * minimized dataset object headers.
  */
-#define ATTR_NAME_MAX   16
+#define ATTR_NAME_MAX   64
 #define ATTR_SHORT      "first"
 #define ATTR_LONG       "second"
 #define N_ATTRS         64
@@ -1626,8 +1626,8 @@ main(void)
     /* Loop through all the combinations of low/high library format bounds */
     for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, low)) {
       for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, high)) {
-        char *low_string = NULL;    /* Message for library version low bound */
-        char *high_string = NULL;   /* Message for library version high bound */
+        const char *low_string;     /* Message for library version low bound */
+        const char *high_string;    /* Message for library version high bound */
         char msg[80];               /* Message for file format version */
 
         /* Set version bounds before opening the file */

@@ -65,9 +65,15 @@ const H5O_msg_class_t H5O_MSG_FSINFO[1] = {{
     H5O__fsinfo_debug          	/* debug the message            	*/
 }};
 
-/* Current version of free-space manager info information */
-#define H5O_FSINFO_VERSION_0 	0
-#define H5O_FSINFO_VERSION_1 	1
+/* Format version bounds for fsinfo message */
+/* This message exists starting library release v1.10 */
+static const unsigned H5O_fsinfo_ver_bounds[] = {
+    H5O_INVALID_VERSION,            /* H5F_LIBVER_EARLIEST */
+    H5O_INVALID_VERSION,            /* H5F_LIBVER_V18 */
+    H5O_FSINFO_VERSION_1,           /* H5F_LIBVER_V110 */
+    H5O_FSINFO_VERSION_LATEST       /* H5F_LIBVER_LATEST */
+};
+#define N_FSINFO_VERSION_BOUNDS     4
 
 /* Declare a free list to manage the H5O_fsinfo_t struct */
 H5FL_DEFINE_STATIC(H5O_fsinfo_t);
@@ -157,11 +163,13 @@ H5O_fsinfo_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh,
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid file space strategy")
         } /* end switch */
 
+        fsinfo->version = H5O_FSINFO_VERSION_1;
         fsinfo->mapped = TRUE;
        
     } else {
-        HDassert(vers == H5O_FSINFO_VERSION_1);
+        HDassert(vers >= H5O_FSINFO_VERSION_1);
 
+        fsinfo->version = vers;
         fsinfo->strategy = (H5F_fspace_strategy_t)*p++; /* File space strategy */
         fsinfo->persist = *p++;                         /* Free-space persist or not */
         H5F_DECODE_LENGTH(f, p, fsinfo->threshold);     /* Free-space section threshold */
@@ -214,7 +222,7 @@ H5O_fsinfo_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, c
     HDassert(p);
     HDassert(fsinfo);
 
-    *p++ = H5O_FSINFO_VERSION_1;	/* message version */
+    *p++ = (uint8_t)fsinfo->version;    /* message version */
     *p++ = fsinfo->strategy;	    /* File space strategy */
     *p++ = (unsigned char)fsinfo->persist;	/* Free-space persist or not */
     H5F_ENCODE_LENGTH(f, p, fsinfo->threshold); /* Free-space section size threshold */
@@ -259,7 +267,7 @@ H5O_fsinfo_copy(const void *_mesg, void *_dest)
     /* check args */
     HDassert(fsinfo);
     if(!dest && NULL == (dest = H5FL_CALLOC(H5O_fsinfo_t)))
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* copy */
     *dest = *fsinfo;
@@ -330,6 +338,79 @@ H5O__fsinfo_free(void *mesg)
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O__fsinfo_free() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5O_fsinfo_set_version
+ *
+ * Purpose:     Set the version to encode the fsinfo message with.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ * Programmer:  Vailin Choi; June 2019
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5O_fsinfo_set_version(H5F_libver_t low, H5F_libver_t high, H5O_fsinfo_t *fsinfo)
+{
+    unsigned version;           /* Message version */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDcompile_assert(N_FSINFO_VERSION_BOUNDS == H5F_LIBVER_NBOUNDS);
+    HDassert(fsinfo);
+
+    version = H5O_FSINFO_VERSION_1;
+
+    /* Upgrade to the version indicated by the file's low bound if higher */
+    if(H5O_fsinfo_ver_bounds[low] != H5O_INVALID_VERSION)
+        version = MAX(version, H5O_fsinfo_ver_bounds[low]);
+
+    /* Version bounds check */
+    if(H5O_fsinfo_ver_bounds[high] == H5O_INVALID_VERSION || version > H5O_fsinfo_ver_bounds[high])
+        HGOTO_ERROR(H5E_OHDR, H5E_BADRANGE, FAIL, "File space info message's version out of bounds")
+
+    /* Set the message version */
+    fsinfo->version = version;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_fsinfo_set_version() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5O_fsinfo_check_version
+ *
+ * Purpose:     Validate the fsinfo message version
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ * Programmer:  Dana Robinson
+ *              Summer 2019
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5O_fsinfo_check_version(H5F_libver_t high, H5O_fsinfo_t *fsinfo)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDcompile_assert(N_FSINFO_VERSION_BOUNDS == H5F_LIBVER_NBOUNDS);
+    HDassert(fsinfo);
+
+    /* Check the version */
+    if(H5O_fsinfo_ver_bounds[high] == H5O_INVALID_VERSION || fsinfo->version > H5O_fsinfo_ver_bounds[high])
+        HGOTO_ERROR(H5E_OHDR, H5E_BADRANGE, FAIL, "File space info message's version out of bounds")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_fsinfo_check_version() */
 
 
 /*-------------------------------------------------------------------------

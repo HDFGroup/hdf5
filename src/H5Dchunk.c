@@ -265,7 +265,7 @@ static int H5D__chunk_format_convert_cb(const H5D_chunk_rec_t *chunk_rec, void *
 static herr_t H5D__chunk_set_info_real(H5O_layout_chunk_t *layout, unsigned ndims,
     const hsize_t *curr_dims, const hsize_t *max_dims);
 static void *H5D__chunk_mem_alloc(size_t size, const H5O_pline_t *pline);
-static void *H5D__chunk_mem_xfree(void *chk, const H5O_pline_t *pline);
+static void *H5D__chunk_mem_xfree(void *chk, const void *pline);
 static void *H5D__chunk_mem_realloc(void *chk, size_t size,
     const H5O_pline_t *pline);
 static herr_t H5D__chunk_cinfo_cache_reset(H5D_chunk_cached_t *last);
@@ -1354,7 +1354,7 @@ H5D__chunk_mem_alloc(size_t size, const H5O_pline_t *pline)
 /*-------------------------------------------------------------------------
  * Function:	H5D__chunk_mem_xfree
  *
- * Purpose:	Free space for a chunk in memory.  This routine allocates
+ * Purpose:	Free space for a chunk in memory.  This routine releases
  *              memory space for non-filtered chunks from a block free list
  *              and uses malloc()/free() for filtered chunks.
  *
@@ -1366,8 +1366,10 @@ H5D__chunk_mem_alloc(size_t size, const H5O_pline_t *pline)
  *-------------------------------------------------------------------------
  */
 static void *
-H5D__chunk_mem_xfree(void *chk, const H5O_pline_t *pline)
+H5D__chunk_mem_xfree(void *chk, const void *_pline)
 {
+    const H5O_pline_t *pline = (const H5O_pline_t *)_pline;
+
     FUNC_ENTER_STATIC_NOERR
 
     if(chk) {
@@ -2018,7 +2020,7 @@ H5D__create_chunk_mem_map_hyper(const H5D_chunk_map_t *fm)
             if(H5S_SEL_ALL == chunk_sel_type) {
                 /* Adjust the chunk coordinates */
                 for(u = 0; u < fm->f_ndims; u++)
-                    coords[u] -= adjust[u];
+                    coords[u] = (hsize_t)((hssize_t)coords[u] - adjust[u]);
 
                 /* Set to same shape as chunk */
                 if(H5S_select_hyperslab(chunk_info->mspace, H5S_SELECT_SET, coords, NULL, fm->chunk_dim, NULL) < 0)
@@ -6703,7 +6705,7 @@ done:
  */
 herr_t
 H5D__chunk_file_alloc(const H5D_chk_idx_info_t *idx_info, const H5F_block_t *old_chunk,
-    H5F_block_t *new_chunk, hbool_t *need_insert, hsize_t scaled[])
+    H5F_block_t *new_chunk, hbool_t *need_insert, const hsize_t *scaled)
 {
     hbool_t alloc_chunk = FALSE;	/* Whether to allocate chunk */
     herr_t ret_value = SUCCEED;   	/* Return value         */

@@ -160,16 +160,16 @@ typedef struct H5F_t H5F_t;
    (i) |= (uint16_t)((*(p) & 0xff) << 8); (p)++;                  \
 }
 
-#  define INT32DECODE(p, i) {                              \
-   (i)    = ((int32_t)(*(p) & (unsigned)0xff));      (p)++;              \
-   (i) |= ((int32_t)(*(p) & (unsigned)0xff) <<  8); (p)++;              \
-   (i) |= ((int32_t)(*(p) & (unsigned)0xff) << 16); (p)++;              \
-   (i) |= ((int32_t)(((*(p) & (unsigned)0xff) << 24) |                        \
-                   ((*(p) & (unsigned)0x80) ? (unsigned)(~0xffffffff) : (unsigned)0x0))); (p)++; \
+#  define INT32DECODE(p, i) {                                \
+   (i)  = ((int32_t)(*(p) & 0xff));      (p)++;              \
+   (i) |= ((int32_t)(*(p) & 0xff) <<  8); (p)++;             \
+   (i) |= ((int32_t)(*(p) & 0xff) << 16); (p)++;             \
+   (i) |= ((int32_t)(((*(p) & (unsigned)0xff) << 24) |                 \
+            ((*(p) & 0x80) ? ~0xffffffffULL : 0x0ULL))); (p)++;    \
 }
 
-#  define UINT32DECODE(p, i) {                              \
-   (i)    =  (uint32_t)(*(p) & 0xff);       (p)++;                  \
+#  define UINT32DECODE(p, i) {                                     \
+   (i)  =  (uint32_t)(*(p) & 0xff);       (p)++;                   \
    (i) |= ((uint32_t)(*(p) & 0xff) <<  8); (p)++;                  \
    (i) |= ((uint32_t)(*(p) & 0xff) << 16); (p)++;                  \
    (i) |= ((uint32_t)(*(p) & 0xff) << 24); (p)++;                  \
@@ -330,8 +330,7 @@ typedef struct H5F_t H5F_t;
 #define H5F_THRESHOLD(F)       ((F)->shared->threshold)
 #define H5F_PGEND_META_THRES(F) ((F)->shared->fs.pgend_meta_thres)
 #define H5F_POINT_OF_NO_RETURN(F) ((F)->shared->fs.point_of_no_return)
-#define H5F_FIRST_ALLOC_DEALLOC(F) ((F)->shared->first_alloc_dealloc)
-#define H5F_EOA_PRE_FSM_FSALLOC(F) ((F)->shared->eoa_pre_fsm_fsalloc)
+#define H5F_NULL_FSM_ADDR(F)    ((F)->shared->null_fsm_addr)
 #define H5F_GET_MIN_DSET_OHDR(F) ((F)->shared->crt_dset_min_ohdr_flag)
 #define H5F_SET_MIN_DSET_OHDR(F, V) ((F)->shared->crt_dset_min_ohdr_flag = (V))
 #else /* H5F_MODULE */
@@ -389,8 +388,7 @@ typedef struct H5F_t H5F_t;
 #define H5F_THRESHOLD(F)        (H5F_get_threshold(F))
 #define H5F_PGEND_META_THRES(F) (H5F_get_pgend_meta_thres(F))
 #define H5F_POINT_OF_NO_RETURN(F) (H5F_get_point_of_no_return(F))
-#define H5F_FIRST_ALLOC_DEALLOC(F) (H5F_get_first_alloc_dealloc(F))
-#define H5F_EOA_PRE_FSM_FSALLOC(F) (H5F_get_eoa_pre_fsm_fsalloc(F))
+#define H5F_NULL_FSM_ADDR(F)    (H5F_get_null_fsm_addr(F))
 #define H5F_GET_MIN_DSET_OHDR(F) (H5F_get_min_dset_ohdr(F))
 #define H5F_SET_MIN_DSET_OHDR(F, V) (H5F_set_min_dset_ohdr((F), (V)))
 #endif /* H5F_MODULE */
@@ -744,8 +742,7 @@ H5_DLL herr_t H5F_get_obj_count(const H5F_t *f, unsigned types, hbool_t app_ref,
 H5_DLL herr_t H5F_get_obj_ids(const H5F_t *f, unsigned types, size_t max_objs, hid_t *oid_list, hbool_t app_ref, size_t *obj_id_count_ptr);
 H5_DLL hsize_t H5F_get_pgend_meta_thres(const H5F_t *f);
 H5_DLL hbool_t H5F_get_point_of_no_return(const H5F_t *f);
-H5_DLL hbool_t H5F_get_first_alloc_dealloc(const H5F_t *f);
-H5_DLL haddr_t H5F_get_eoa_pre_fsm_fsalloc(const H5F_t *f);
+H5_DLL hbool_t H5F_get_null_fsm_addr(const H5F_t *f);
 H5_DLL hbool_t H5F_get_min_dset_ohdr(const H5F_t *f);
 H5_DLL herr_t H5F_set_min_dset_ohdr(H5F_t *f, hbool_t minimize);
 

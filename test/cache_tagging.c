@@ -741,7 +741,7 @@ check_multi_group_creation_tags(void)
     hid_t fid = -1;          /* File Identifier */
     hid_t gid = -1;          /* Group Identifier */
     int verbose = FALSE;     /* verbose file outout */
-    char gname[10];          /* group name buffer */
+    char gname[16];          /* group name buffer */
     int i = 0;               /* iterator */
     hid_t fapl = -1;         /* File access prop list */
     haddr_t g_tag = 0;       /* Group tag value */
@@ -1664,21 +1664,11 @@ check_attribute_rename_tags(hid_t fcpl, int type)
         if ( verify_tag(fid, H5AC_SOHM_LIST_ID, H5AC__SOHM_TAG) < 0 ) TEST_ERROR;
 
         /* 
-	 * 3 calls to verify_tag() for verifying free space: 
-	 *   one freespace header tag for H5FD_MEM_DRAW manager, 
-	 *   one freespace header tag for H5FD_MEM_SUPER manager 
-	 *   one freespace section info tag for H5FD_MEM_SUPER manager 
+         *   one freespace header tag for H5FD_MEM_DRAW manager, 
+         *   one freespace header tag for H5FD_MEM_SUPER manager 
          */
         if ( verify_tag(fid, H5AC_FSPACE_HDR_ID, H5AC__FREESPACE_TAG) < 0 ) TEST_ERROR;
-
-        /* If the free space managers are persistent, the
-         * H5MF_tidy_self_referential_fsm_hack() must have been run.
-         * Since this function floats all self referential free space
-         * managers, the H5FD_MEM_SUPER FSM will not be in the metadata
-         * cache.
-         */
-        if(!persistent_fsms && verify_tag(fid, H5AC_FSPACE_HDR_ID, H5AC__FREESPACE_TAG) < 0) TEST_ERROR;
-        if(!persistent_fsms && verify_tag(fid, H5AC_FSPACE_SINFO_ID, H5AC__FREESPACE_TAG) < 0) TEST_ERROR;
+        if ( verify_tag(fid, H5AC_FSPACE_HDR_ID, H5AC__FREESPACE_TAG) < 0 ) TEST_ERROR;
 
         /* verify btree header and leaf node belonging to group */
         if ( verify_tag(fid, H5AC_BT2_HDR_ID, g_tag) < 0 ) TEST_ERROR;
@@ -1828,12 +1818,15 @@ check_attribute_delete_tags(hid_t fcpl, int type)
 
         /* 
          * 2 calls to verify_tag() for verifying free space: 
-         *   one freespace header tag for free-space header,
-         *   one freespace header tag for free-space section info
+         *   one freespace header tag for free-space header raw data
+         *   one freespace header tag for free-space section info raw data
+         *   one freespace header tag for free-space header metadata
          */
         if ( verify_tag(fid, H5AC_FSPACE_HDR_ID, H5AC__FREESPACE_TAG) < 0 ) 
             TEST_ERROR;
         if ( verify_tag(fid, H5AC_FSPACE_SINFO_ID, H5AC__FREESPACE_TAG) < 0 ) 
+            TEST_ERROR;
+        if ( verify_tag(fid, H5AC_FSPACE_HDR_ID, H5AC__FREESPACE_TAG) < 0 ) 
             TEST_ERROR;
 
 #if 0

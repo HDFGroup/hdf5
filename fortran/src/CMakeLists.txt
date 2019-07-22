@@ -356,8 +356,13 @@ install (
         ${HDF5_F90_SRC_SOURCE_DIR}/H5f90.h
         ${HDF5_F90_SRC_SOURCE_DIR}/H5f90i.h
         ${HDF5_F90_SRC_SOURCE_DIR}/H5f90proto.h
-        ${HDF5_F90_BINARY_DIR}/static/H5f90i_gen.h
-        ${HDF5_F90_BINARY_DIR}/static/H5fortran_types.F90
+        if (NOT ONLY_SHARED_LIBS)
+            ${HDF5_F90_BINARY_DIR}/static/H5f90i_gen.h
+            ${HDF5_F90_BINARY_DIR}/static/H5fortran_types.F90
+        else ()
+            ${HDF5_F90_BINARY_DIR}/shared/H5f90i_gen.h
+            ${HDF5_F90_BINARY_DIR}/shared/H5fortran_types.F90
+        endif ()
     DESTINATION
         ${HDF5_INSTALL_INCLUDE_DIR}
     COMPONENT
@@ -383,6 +388,7 @@ if (NOT ONLY_SHARED_LIBS)
       ${MOD_BUILD_DIR}/h5r.mod
       ${MOD_BUILD_DIR}/h5s.mod
       ${MOD_BUILD_DIR}/h5t.mod
+      ${MOD_BUILD_DIR}/h5vl.mod
       ${MOD_BUILD_DIR}/h5z.mod
       ${MOD_BUILD_DIR}/h5_gen.mod
   )
@@ -415,6 +421,7 @@ if (BUILD_SHARED_LIBS)
       ${MODSH_BUILD_DIR}/h5r.mod
       ${MODSH_BUILD_DIR}/h5s.mod
       ${MODSH_BUILD_DIR}/h5t.mod
+      ${MODSH_BUILD_DIR}/h5vl.mod
       ${MODSH_BUILD_DIR}/h5z.mod
       ${MODSH_BUILD_DIR}/h5_gen.mod
   )
@@ -437,8 +444,8 @@ if (HDF5_EXPORTED_TARGETS)
     #INSTALL_TARGET_PDB (${HDF5_F90_LIBSH_TARGET} ${HDF5_INSTALL_BIN_DIR} fortlibraries)
   endif ()
   if (NOT ONLY_SHARED_LIBS)
-    INSTALL_TARGET_PDB (${HDF5_F90_C_LIB_TARGET} ${HDF5_INSTALL_BIN_DIR} fortlibraries)
-    #INSTALL_TARGET_PDB (${HDF5_F90_LIB_TARGET} ${HDF5_INSTALL_BIN_DIR} fortlibraries)
+    INSTALL_TARGET_PDB (${HDF5_F90_C_LIB_TARGET} ${HDF5_INSTALL_LIB_DIR} fortlibraries)
+    #INSTALL_TARGET_PDB (${HDF5_F90_LIB_TARGET} ${HDF5_INSTALL_LIB_DIR} fortlibraries)
   endif ()
 
   install (

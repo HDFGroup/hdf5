@@ -910,7 +910,7 @@ initialize_stype1(unsigned char *buf, size_t num)
     stype1 *s_ptr;
 
     for(i = 0; i < (int)num; i++) {
-	s_ptr = (stype1 *)buf + i;
+	s_ptr = (stype1 *)((void *)buf) + i;
 	s_ptr->a    = i * 8 + 0;
 	s_ptr->b    = i * 8 + 1;
         for(j = 0; j < 8; j++)
@@ -953,7 +953,7 @@ initialize_stype2(unsigned char *buf, size_t num)
     stype2 *s_ptr;
 
     for(i = 0; i < num; i++) {
-	s_ptr = (stype2 *)buf + i;
+	s_ptr = (stype2 *)((void *)buf) + i;
 	s_ptr->a    = (int)(i * 8 + 0);
 	s_ptr->b    = (int)(i * 8 + 1);
         for(j = 0; j < 8; j++)
@@ -1000,7 +1000,7 @@ initialize_stype3(unsigned char *buf, size_t num)
     stype3 *s_ptr;
 
     for(i = 0; i < (int)num; i++) {
-	s_ptr = (stype3 *)buf + i;
+	s_ptr = (stype3 *)((void *)buf) + i;
 	s_ptr->a    = i * 8 + 0;
 	s_ptr->b    = i * 8 + 1;
         for(j = 0; j < 8; j++)
@@ -1031,7 +1031,7 @@ initialize_stype4(unsigned char *buf, size_t num)
     stype4 *s_ptr;
 
     for(i = 0; i < num; i++) {
-	s_ptr = (stype4 *)buf + i;
+	s_ptr = (stype4 *)((void *)buf) + i;
 	s_ptr->a    = (int)(i * 8 + 0);
 	s_ptr->b    = (int)(i * 8 + 1);
         for(j = 0; j < 8; j++)
@@ -1808,7 +1808,7 @@ test_pack_ooo(void)
     unsigned    free_order[PACK_NMEMBS]; /* Index of remaining free slots in order */
     unsigned    num_free;           /* Number of free slots in order */
     unsigned    sub_cmpd_order;     /* Order to insert the inner compound */
-    char        name[6];            /* Member name */
+    char        name[16];           /* Member name */
     unsigned    extra_space;        /* Whether to add extra space to the end of
                                      * the compound */
     unsigned    i, j;               /* Indices */
@@ -2219,7 +2219,7 @@ main (int argc, char *argv[])
 	    fprintf(stderr, "usage: %s [--noopt]\n", argv[0]);
 	    exit(EXIT_FAILURE);
 	}
-	H5Tunregister(H5T_PERS_DONTCARE, NULL, (hid_t)-1, (hid_t)-1, H5T__conv_struct_opt);
+	H5Tunregister(H5T_PERS_DONTCARE, NULL, (hid_t)-1, (hid_t)-1, (H5T_conv_t)((void (*) (void))H5T__conv_struct_opt));
     }
 
     /* Create the file */

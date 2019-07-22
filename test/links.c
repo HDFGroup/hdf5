@@ -3569,27 +3569,27 @@ external_set_elink_fapl1(hid_t fapl, hbool_t new_format)
     memb_map[H5FD_MEM_GHEAP] = H5FD_MEM_GHEAP;
     memb_map[H5FD_MEM_LHEAP] = H5FD_MEM_LHEAP;
 
-    sprintf(sv[H5FD_MEM_SUPER], "%%s-%c.h5", 's');
+    HDsnprintf(sv[H5FD_MEM_SUPER], sizeof(sv[H5FD_MEM_SUPER]), "%%s-%c.h5", 's');
     memb_name[H5FD_MEM_SUPER] = sv[H5FD_MEM_SUPER];
     memb_addr[H5FD_MEM_SUPER] = 0;
 
-    sprintf(sv[H5FD_MEM_BTREE], "%%s-%c.h5", 'b');
+    HDsnprintf(sv[H5FD_MEM_BTREE], sizeof(sv[H5FD_MEM_BTREE]), "%%s-%c.h5", 'b');
     memb_name[H5FD_MEM_BTREE] = sv[H5FD_MEM_BTREE];
     memb_addr[H5FD_MEM_BTREE] = HADDR_MAX/6;
 
-    sprintf(sv[H5FD_MEM_DRAW], "%%s-%c.h5", 'r');
+    HDsnprintf(sv[H5FD_MEM_DRAW], sizeof(sv[H5FD_MEM_DRAW]), "%%s-%c.h5", 'r');
     memb_name[H5FD_MEM_DRAW] = sv[H5FD_MEM_DRAW];
     memb_addr[H5FD_MEM_DRAW] = HADDR_MAX/3;
 
-    sprintf(sv[H5FD_MEM_GHEAP], "%%s-%c.h5", 'g');
+    HDsnprintf(sv[H5FD_MEM_GHEAP], sizeof(sv[H5FD_MEM_GHEAP]), "%%s-%c.h5", 'g');
     memb_name[H5FD_MEM_GHEAP] = sv[H5FD_MEM_GHEAP];
     memb_addr[H5FD_MEM_GHEAP] = HADDR_MAX/2;
 
-    sprintf(sv[H5FD_MEM_LHEAP], "%%s-%c.h5", 'l');
+    HDsnprintf(sv[H5FD_MEM_LHEAP], sizeof(sv[H5FD_MEM_LHEAP]), "%%s-%c.h5", 'l');
     memb_name[H5FD_MEM_LHEAP] = sv[H5FD_MEM_LHEAP];
     memb_addr[H5FD_MEM_LHEAP] = (HADDR_MAX/3)*2;
 
-    sprintf(sv[H5FD_MEM_OHDR], "%%s-%c.h5", 'o');
+    HDsnprintf(sv[H5FD_MEM_OHDR], sizeof(sv[H5FD_MEM_OHDR]), "%%s-%c.h5", 'o');
     memb_name[H5FD_MEM_OHDR] = sv[H5FD_MEM_OHDR];
     memb_addr[H5FD_MEM_OHDR] = (HADDR_MAX/6)*5;
 
@@ -4628,7 +4628,7 @@ external_link_win3(hid_t fapl, hbool_t new_format)
 
     /* set up name for target link: "<drive-letter>:tmp/extlinks12" */
     drive = HDgetdrive();
-    sprintf(tmpname, "%c:%s", (drive+'A'-1), FILENAME[32]);
+    HDsnprintf(tmpname, sizeof(tmpname), "%c:%s", (drive+'A'-1), FILENAME[32]);
     h5_fixname(tmpname, fapl, filename2, sizeof filename2);
 
     /* set up name for target file: "tmp/extlinks12" */
@@ -4713,11 +4713,11 @@ external_link_win4(hid_t fapl, hbool_t new_format)
 
     /* set up name for main file: "<drive-letter>:tmp/extlinks0" */
     drive = HDgetdrive();
-    sprintf(tmpname, "%c:%s", (drive+'A'-1), FILENAME[13]);
+    HDsnprintf(tmpname, sizeof(tmpname), "%c:%s", (drive+'A'-1), FILENAME[13]);
     h5_fixname(tmpname, fapl, filename1, sizeof filename1);
 
     /* set up name for target link: "<drive-letter>:extlinks13" */
-    sprintf(tmpname, "%c:%s", (drive+'A'-1), FILENAME[33]);
+    HDsnprintf(tmpname, sizeof(tmpname), "%c:%s", (drive+'A'-1), FILENAME[33]);
     h5_fixname(tmpname, fapl, filename2, sizeof filename2);
 
     /* set up name for target file: "tmp/extlinks13" */
@@ -4813,7 +4813,7 @@ external_link_win5(hid_t fapl, hbool_t new_format)
     h5_fixname(tmpname, fapl, filename1, sizeof filename1);
 
     /* set up name for target link: "<drive-letter+1>:tmp/extlinks14" */
-    sprintf(tmpname, "%c:%s", ((drive+1)+'A'-1), FILENAME[35]);
+    HDsnprintf(tmpname, sizeof(tmpname), "%c:%s", ((drive+1)+'A'-1), FILENAME[35]);
     h5_fixname(tmpname, fapl, filename2, sizeof filename2);
 
     /* set up name for target file: "tmp/extlinks14" */
@@ -4906,7 +4906,7 @@ external_link_win6(hid_t fapl, hbool_t new_format)
     h5_fixname(FILENAME[12], fapl, filename1, sizeof filename1);
 
     /* set up name for target link: "<drive-letter+1>:tmp/extlinks15" */
-    sprintf(tmpname, "%c:%s", ((drive+1)+'A'-1), FILENAME[36]);
+    HDsnprintf(tmpname, sizeof(tmpname), "%c:%s", ((drive+1)+'A'-1), FILENAME[36]);
     h5_fixname(tmpname, fapl, filename2, sizeof filename2);
 
     /* set up name for target file: "tmp/extlinks15" */
@@ -5085,7 +5085,7 @@ external_link_win8(hid_t fapl, hbool_t new_format)
 
     /* set up name for target link: "<drive-letter>:\CWD\extlinks10" */
     drive = HDgetdrive();
-    sprintf(tmpname, "\\\\?\\%c:%s\\%s", (drive+'A'-1), &cwdpath[2], FILENAME[30]);
+    HDsnprintf(tmpname, sizeof(tmpname), "\\\\?\\%c:%s\\%s", (drive+'A'-1), &cwdpath[2], FILENAME[30]);
     h5_fixname(tmpname, fapl, filename2, sizeof filename2);
 
     /* set up name for target file: "extlinks10" */
@@ -5569,7 +5569,7 @@ external_link_unlink_dense(hid_t fapl, hbool_t new_format)
 
     /* Create enough objects in the root group to change it into a "dense" group */
     for(u = 0; u < max_compact; u++) {
-        sprintf(objname, "filler %u", u);
+        HDsnprintf(objname, sizeof(objname), "filler %u", u);
         if((gid2 = H5Gcreate2(gid, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
         if(H5Gclose(gid2) < 0) TEST_ERROR
     } /* end for */
@@ -5612,7 +5612,7 @@ external_link_unlink_dense(hid_t fapl, hbool_t new_format)
 
     /* Remove enough objects in the root group to change it into a "compact" group */
     for(u = 0; u < ((max_compact - min_dense) + 1); u++) {
-        sprintf(objname, "filler %u", u);
+        HDsnprintf(objname, sizeof(objname), "filler %u", u);
         if(H5Ldelete(gid, objname, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
     } /* end for */
 
@@ -5897,7 +5897,7 @@ external_link_ride(hid_t fapl, hbool_t new_format)
 
     /* Create enough objects in the root group to change it into a "dense" group */
     for(u = 0; u < (max_compact + 1); u++) {
-        sprintf(objname, "filler %u", u);
+        HDsnprintf(objname, sizeof(objname), "filler %u", u);
         if((gid2 = H5Gcreate2(gid, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
         if(H5Gclose(gid2) < 0) TEST_ERROR
     } /* end for */
@@ -5966,7 +5966,7 @@ external_link_ride(hid_t fapl, hbool_t new_format)
 
     /* Remove enough objects in the root group to change it into a "compact" group */
     for(u = 0; u < ((max_compact - min_dense) + 3); u++) {
-        sprintf(objname, "filler %u", u);
+        HDsnprintf(objname, sizeof(objname), "filler %u", u);
         if(H5Ldelete(gid, objname, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
     } /* end for */
 
@@ -7759,6 +7759,7 @@ done:
             case H5I_ERROR_CLASS:
             case H5I_ERROR_MSG:
             case H5I_ERROR_STACK:
+            case H5I_SPACE_SEL_ITER:
             case H5I_NTYPES:
             default:
               return -1;
@@ -7847,6 +7848,7 @@ done:
             case H5I_ERROR_CLASS:
             case H5I_ERROR_MSG:
             case H5I_ERROR_STACK:
+            case H5I_SPACE_SEL_ITER:
             case H5I_NTYPES:
             default:
                 return -1;
@@ -10652,7 +10654,7 @@ corder_create_compact(hid_t fapl)
 
     /* Create several links, but keep group in compact form */
     for(u = 0; u < max_compact; u++) {
-        sprintf(objname, "filler %u", u);
+        HDsnprintf(objname, sizeof(objname), "filler %u", u);
         if((group_id2 = H5Gcreate2(group_id, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
         if(H5Gclose(group_id2) < 0) TEST_ERROR
 
@@ -10691,7 +10693,7 @@ corder_create_compact(hid_t fapl)
         H5L_info_t linfo;           /* Link information */
 
         /* Retrieve information for link */
-        sprintf(objname, "filler %u", u);
+        HDsnprintf(objname, sizeof(objname), "filler %u", u);
         if(H5Lget_info(group_id, objname, &linfo, H5P_DEFAULT) < 0) TEST_ERROR
 
         /* Verify creation order of link */
@@ -10772,7 +10774,7 @@ corder_create_dense(hid_t fapl)
 
     /* Create several links, up to limit of compact form */
     for(u = 0; u < max_compact; u++) {
-        sprintf(objname, "filler %u", u);
+        HDsnprintf(objname, sizeof(objname), "filler %u", u);
         if((group_id2 = H5Gcreate2(group_id, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
         if(H5Gclose(group_id2) < 0) TEST_ERROR
 
@@ -10784,7 +10786,7 @@ corder_create_dense(hid_t fapl)
     } /* end for */
 
     /* Create another link, to push group into dense form */
-    sprintf(objname, "filler %u", max_compact);
+    HDsnprintf(objname, sizeof(objname), "filler %u", max_compact);
     if((group_id2 = H5Gcreate2(group_id, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
     if(H5Gclose(group_id2) < 0) TEST_ERROR
 
@@ -10824,7 +10826,7 @@ corder_create_dense(hid_t fapl)
         H5L_info_t linfo;           /* Link information */
 
         /* Retrieve information for link */
-        sprintf(objname, "filler %u", u);
+        HDsnprintf(objname, sizeof(objname), "filler %u", u);
         if(H5Lget_info(group_id, objname, &linfo, H5P_DEFAULT) < 0) TEST_ERROR
 
         /* Verify creation order of link */
@@ -10926,13 +10928,13 @@ corder_transition(hid_t fapl)
 
     /* Create several links, up to limit of compact form */
     for(u = 0; u < max_compact; u++) {
-        sprintf(objname, "filler %u", u);
+        HDsnprintf(objname, sizeof(objname), "filler %u", u);
         if((group_id2 = H5Gcreate2(group_id, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
         if(H5Gclose(group_id2) < 0) TEST_ERROR
     } /* end for */
 
     /* Create another link, to push group into dense form */
-    sprintf(objname, "filler %u", max_compact);
+    HDsnprintf(objname, sizeof(objname), "filler %u", max_compact);
     if((group_id2 = H5Gcreate2(group_id, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
     if(H5Gclose(group_id2) < 0) TEST_ERROR
 
@@ -10947,7 +10949,7 @@ corder_transition(hid_t fapl)
 
     /* Delete several links from group, until it resumes compact form */
     for(u = max_compact; u >= min_dense; u--) {
-        sprintf(objname, "filler %u", u);
+        HDsnprintf(objname, sizeof(objname), "filler %u", u);
         if(H5Ldelete(group_id, objname, H5P_DEFAULT) < 0) TEST_ERROR
 
         /* Verify state of group */
@@ -10961,7 +10963,7 @@ corder_transition(hid_t fapl)
     } /* end for */
 
     /* Delete another link, to push group into compact form */
-    sprintf(objname, "filler %u", (min_dense - 1));
+    HDsnprintf(objname, sizeof(objname), "filler %u", (min_dense - 1));
     if(H5Ldelete(group_id, objname, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* Verify state of group */
@@ -10972,7 +10974,7 @@ corder_transition(hid_t fapl)
 
     /* Re-add links to get back into dense form */
     for(u = (min_dense - 1); u < (max_compact + 1); u++) {
-        sprintf(objname, "filler %u", u);
+        HDsnprintf(objname, sizeof(objname), "filler %u", u);
         if((group_id2 = H5Gcreate2(group_id, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
         if(H5Gclose(group_id2) < 0) TEST_ERROR
     } /* end for */
@@ -11010,7 +11012,7 @@ corder_transition(hid_t fapl)
 
     /* Delete several links from group, until it resumes compact form */
     for(u = max_compact; u >= min_dense; u--) {
-        sprintf(objname, "filler %u", u);
+        HDsnprintf(objname, sizeof(objname), "filler %u", u);
         if(H5Ldelete(group_id, objname, H5P_DEFAULT) < 0) TEST_ERROR
 
         /* Verify state of group */
@@ -11024,7 +11026,7 @@ corder_transition(hid_t fapl)
     } /* end for */
 
     /* Delete another link, to push group into compact form */
-    sprintf(objname, "filler %u", (min_dense - 1));
+    HDsnprintf(objname, sizeof(objname), "filler %u", (min_dense - 1));
     if(H5Ldelete(group_id, objname, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* Verify state of group */
@@ -11035,7 +11037,7 @@ corder_transition(hid_t fapl)
 
     /* Re-add links to get back into dense form */
     for(u = (min_dense - 1); u < (max_compact + 1); u++) {
-        sprintf(objname, "filler %u", u);
+        HDsnprintf(objname, sizeof(objname), "filler %u", u);
         if((group_id2 = H5Gcreate2(group_id, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
         if(H5Gclose(group_id2) < 0) TEST_ERROR
     } /* end for */
@@ -11051,10 +11053,10 @@ corder_transition(hid_t fapl)
 
     /* Delete all the links */
     for(u = max_compact; u > 0; u--) {
-        sprintf(objname, "filler %u", u);
+        HDsnprintf(objname, sizeof(objname), "filler %u", u);
         if(H5Ldelete(group_id, objname, H5P_DEFAULT) < 0) TEST_ERROR
     } /* end for */
-    sprintf(objname, "filler %u", (unsigned)0);
+    HDsnprintf(objname, sizeof(objname), "filler %u", (unsigned)0);
     if(H5Ldelete(group_id, objname, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* Close the group */
@@ -11154,7 +11156,7 @@ corder_delete(hid_t fapl)
 
         /* Create links until the group is in dense form */
         for(u = 0; u < max_compact * 2; u++) {
-            sprintf(objname, "filler %u", u);
+            HDsnprintf(objname, sizeof(objname), "filler %u", u);
             if((group_id2 = H5Gcreate2(group_id, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
             if(H5Gclose(group_id2) < 0) FAIL_STACK_ERROR
         } /* end for */
@@ -11236,7 +11238,7 @@ link_info_by_idx_check(hid_t group_id, const char *linkname, hsize_t n,
     H5L_info_t  linfo;                  /* Link info struct */
 
     /* Make link value for increasing/native order queries */
-    sprintf(valname, "value %02u", (unsigned)n);
+    HDsnprintf(valname, sizeof(valname), "value %02u", (unsigned)n);
 
     /* Verify the link information for first link, in increasing creation order */
     HDmemset(&linfo, 0, sizeof(linfo));
@@ -11447,7 +11449,7 @@ link_info_by_idx(hid_t fapl)
             /* Create several links, up to limit of compact form */
             for(u = 0; u < max_compact; u++) {
                 /* Make name for link */
-                sprintf(objname, "filler %02u", u);
+                HDsnprintf(objname, sizeof(objname), "filler %02u", u);
 
                 /* Check for creating hard or soft link */
                 if(hard_link) {
@@ -11459,7 +11461,7 @@ link_info_by_idx(hid_t fapl)
                 } /* end if */
                 else {
                     /* Make value for link */
-                    sprintf(valname, "value %02u", u);
+                    HDsnprintf(valname, sizeof(valname), "value %02u", u);
 
                     /* Create soft link */
                     if(H5Lcreate_soft(valname, group_id, objname, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
@@ -11489,7 +11491,7 @@ link_info_by_idx(hid_t fapl)
             /* Create more links, to push group into dense form */
             for(; u < (max_compact * 2); u++) {
                 /* Make name for link */
-                sprintf(objname, "filler %02u", u);
+                HDsnprintf(objname, sizeof(objname), "filler %02u", u);
 
                 /* Check for creating hard or soft link */
                 if(hard_link) {
@@ -11501,7 +11503,7 @@ link_info_by_idx(hid_t fapl)
                 } /* end if */
                 else {
                     /* Make value for link */
-                    sprintf(valname, "value %02u", u);
+                    HDsnprintf(valname, sizeof(valname), "value %02u", u);
 
                     /* Create soft link */
                     if(H5Lcreate_soft(valname, group_id, objname, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
@@ -11601,7 +11603,7 @@ link_info_by_idx_old(hid_t fapl)
         /* Create several links */
         for(u = 0; u < CORDER_NLINKS; u++) {
             /* Make name for link */
-            sprintf(objname, "filler %02u", u);
+            HDsnprintf(objname, sizeof(objname), "filler %02u", u);
 
             /* Check for creating hard or soft link */
             if(hard_link) {
@@ -11619,7 +11621,7 @@ link_info_by_idx_old(hid_t fapl)
             } /* end if */
             else {
                 /* Make value for link */
-                sprintf(valname, "value %02u", u);
+                HDsnprintf(valname, sizeof(valname), "value %02u", u);
 
                 /* Create soft link */
                 if(H5Lcreate_soft(valname, group_id, objname, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
@@ -11631,10 +11633,10 @@ link_info_by_idx_old(hid_t fapl)
             unsigned dec_u = CORDER_NLINKS - (u + 1);       /* Decreasing mapped index */
 
             /* Make link name for increasing/native order queries */
-            sprintf(objname, "filler %02u", u);
+            HDsnprintf(objname, sizeof(objname), "filler %02u", u);
 
             /* Make link value for increasing/native order queries */
-            sprintf(valname, "value %02u", u);
+            HDsnprintf(valname, sizeof(valname), "value %02u", u);
 
             /* Verify link information (in increasing order) */
             if(hard_link) {
@@ -11667,10 +11669,10 @@ link_info_by_idx_old(hid_t fapl)
 
 
             /* Make link name for decreasing order queries */
-            sprintf(objname, "filler %02u", dec_u);
+            HDsnprintf(objname, sizeof(objname), "filler %02u", dec_u);
 
             /* Make link value for decreasing order queries */
-            sprintf(valname, "value %02u", dec_u);
+            HDsnprintf(valname, sizeof(valname), "value %02u", dec_u);
 
             /* Verify link information (in decreasing order) */
             if(hard_link) {
@@ -11825,7 +11827,7 @@ delete_by_idx(hid_t fapl)
                     hid_t group_id2;	        /* Group ID */
 
                     /* Make name for link */
-                    sprintf(objname, "filler %02u", u);
+                    HDsnprintf(objname, sizeof(objname), "filler %02u", u);
 
                     /* Create hard link, with group object */
                     if((group_id2 = H5Gcreate2(group_id, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
@@ -11863,9 +11865,9 @@ delete_by_idx(hid_t fapl)
                     HDmemset(tmpname, 0, (size_t)NAME_BUF_SIZE);
                     if(H5Lget_name_by_idx(group_id, ".", idx_type, order, (hsize_t)0, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0) TEST_ERROR
                     if(order == H5_ITER_INC)
-                        sprintf(objname, "filler %02u", (u + 1));
+                        HDsnprintf(objname, sizeof(objname), "filler %02u", (u + 1));
                     else
-                        sprintf(objname, "filler %02u", (max_compact - (u + 2)));
+                        HDsnprintf(objname, sizeof(objname), "filler %02u", (max_compact - (u + 2)));
                     if(HDstrcmp(objname, tmpname)) TEST_ERROR
                 } /* end for */
 
@@ -11880,7 +11882,7 @@ delete_by_idx(hid_t fapl)
                     hid_t group_id2;	        /* Group ID */
 
                     /* Make name for link */
-                    sprintf(objname, "filler %02u", u);
+                    HDsnprintf(objname, sizeof(objname), "filler %02u", u);
 
                     /* Create hard link, with group object */
                     if((group_id2 = H5Gcreate2(group_id, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
@@ -11919,9 +11921,9 @@ delete_by_idx(hid_t fapl)
                     HDmemset(tmpname, 0, (size_t)NAME_BUF_SIZE);
                     if(H5Lget_name_by_idx(group_id, ".", idx_type, order, (hsize_t)0, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0) TEST_ERROR
                     if(order == H5_ITER_INC)
-                        sprintf(objname, "filler %02u", (u + 1));
+                        HDsnprintf(objname, sizeof(objname), "filler %02u", (u + 1));
                     else
-                        sprintf(objname, "filler %02u", ((max_compact * 2) - (u + 2)));
+                        HDsnprintf(objname, sizeof(objname), "filler %02u", ((max_compact * 2) - (u + 2)));
                     if(HDstrcmp(objname, tmpname)) TEST_ERROR
                 } /* end for */
 
@@ -11947,7 +11949,7 @@ delete_by_idx(hid_t fapl)
                     hid_t group_id2;	        /* Group ID */
 
                     /* Make name for link */
-                    sprintf(objname, "filler %02u", u);
+                    HDsnprintf(objname, sizeof(objname), "filler %02u", u);
 
                     /* Create hard link, with group object */
                     if((group_id2 = H5Gcreate2(group_id, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
@@ -11980,9 +11982,9 @@ delete_by_idx(hid_t fapl)
                     HDmemset(tmpname, 0, (size_t)NAME_BUF_SIZE);
                     if(H5Lget_name_by_idx(group_id, ".", idx_type, order, (hsize_t)u, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0) TEST_ERROR
                     if(order == H5_ITER_INC)
-                        sprintf(objname, "filler %02u", ((u * 2) + 1));
+                        HDsnprintf(objname, sizeof(objname), "filler %02u", ((u * 2) + 1));
                     else
-                        sprintf(objname, "filler %02u", ((max_compact * 2) - ((u * 2) + 2)));
+                        HDsnprintf(objname, sizeof(objname), "filler %02u", ((max_compact * 2) - ((u * 2) + 2)));
                     if(HDstrcmp(objname, tmpname)) TEST_ERROR
                 } /* end for */
 
@@ -12005,9 +12007,9 @@ delete_by_idx(hid_t fapl)
                     HDmemset(tmpname, 0, (size_t)NAME_BUF_SIZE);
                     if(H5Lget_name_by_idx(group_id, ".", idx_type, order, (hsize_t)0, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0) TEST_ERROR
                     if(order == H5_ITER_INC)
-                        sprintf(objname, "filler %02u", ((u * 2) + 3));
+                        HDsnprintf(objname, sizeof(objname), "filler %02u", ((u * 2) + 3));
                     else
-                        sprintf(objname, "filler %02u", ((max_compact * 2) - ((u * 2) + 4)));
+                        HDsnprintf(objname, sizeof(objname), "filler %02u", ((max_compact * 2) - ((u * 2) + 4)));
                     if(HDstrcmp(objname, tmpname)) TEST_ERROR
                 } /* end for */
 
@@ -12104,7 +12106,7 @@ delete_by_idx_old(hid_t fapl)
             H5O_info_t oi;                  /* Buffer for querying object's info */
 
             /* Make name for link */
-            sprintf(objname, "filler %02u", u);
+            HDsnprintf(objname, sizeof(objname), "filler %02u", u);
 
             /* Create group */
             if((group_id2 = H5Gcreate2(group_id, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
@@ -12150,9 +12152,9 @@ delete_by_idx_old(hid_t fapl)
             HDmemset(tmpname, 0, (size_t)NAME_BUF_SIZE);
             if(H5Lget_name_by_idx(group_id, ".", H5_INDEX_NAME, order, (hsize_t)0, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0) TEST_ERROR
             if(order == H5_ITER_INC)
-                sprintf(objname, "filler %02u", (u + 1));
+                HDsnprintf(objname, sizeof(objname), "filler %02u", (u + 1));
             else
-                sprintf(objname, "filler %02u", dec_u);
+                HDsnprintf(objname, sizeof(objname), "filler %02u", dec_u);
             if(HDstrcmp(objname, tmpname)) TEST_ERROR
         } /* end for */
 
@@ -12177,7 +12179,7 @@ delete_by_idx_old(hid_t fapl)
             H5O_info_t oi;                  /* Buffer for querying object's info */
 
             /* Make name for link */
-            sprintf(objname, "filler %02u", u);
+            HDsnprintf(objname, sizeof(objname), "filler %02u", u);
 
             /* Create group */
             if((group_id2 = H5Gcreate2(group_id, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
@@ -12211,9 +12213,9 @@ delete_by_idx_old(hid_t fapl)
             HDmemset(tmpname, 0, (size_t)NAME_BUF_SIZE);
             if(H5Lget_name_by_idx(group_id, ".", H5_INDEX_NAME, order, (hsize_t)u, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0) TEST_ERROR
             if(order == H5_ITER_INC)
-                sprintf(objname, "filler %02u", ((u * 2) + 1));
+                HDsnprintf(objname, sizeof(objname), "filler %02u", ((u * 2) + 1));
             else
-                sprintf(objname, "filler %02u", dec_u);
+                HDsnprintf(objname, sizeof(objname), "filler %02u", dec_u);
             if(HDstrcmp(objname, tmpname)) TEST_ERROR
         } /* end for */
 
@@ -12238,9 +12240,9 @@ delete_by_idx_old(hid_t fapl)
             HDmemset(tmpname, 0, (size_t)NAME_BUF_SIZE);
             if(H5Lget_name_by_idx(group_id, ".", H5_INDEX_NAME, order, (hsize_t)0, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0) TEST_ERROR
             if(order == H5_ITER_INC)
-                sprintf(objname, "filler %02u", ((u * 2) + 3));
+                HDsnprintf(objname, sizeof(objname), "filler %02u", ((u * 2) + 3));
             else
-                sprintf(objname, "filler %02u", dec_u);
+                HDsnprintf(objname, sizeof(objname), "filler %02u", dec_u);
             if(HDstrcmp(objname, tmpname)) TEST_ERROR
         } /* end for */
 
@@ -12321,7 +12323,7 @@ link_iterate_cb(hid_t group_id, const char *link_name, const H5L_info_t *info,
     } /* end if */
 
     /* Verify name of link */
-    sprintf(objname, "filler %02u", (unsigned)my_info.corder);
+    HDsnprintf(objname, sizeof(objname), "filler %02u", (unsigned)my_info.corder);
     if(HDstrcmp(link_name, objname))
         return(H5_ITER_ERROR);
 
@@ -12667,7 +12669,7 @@ link_iterate(hid_t fapl)
                     hid_t group_id2;	        /* Group ID */
 
                     /* Make name for link */
-                    sprintf(objname, "filler %02u", u);
+                    HDsnprintf(objname, sizeof(objname), "filler %02u", u);
 
                     /* Create hard link, with group object */
                     if((group_id2 = H5Gcreate2(group_id, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
@@ -12693,7 +12695,7 @@ link_iterate(hid_t fapl)
                     hid_t group_id2;	        /* Group ID */
 
                     /* Make name for link */
-                    sprintf(objname, "filler %02u", u);
+                    HDsnprintf(objname, sizeof(objname), "filler %02u", u);
 
                     /* Create hard link, with group object */
                     if((group_id2 = H5Gcreate2(group_id, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
@@ -12793,7 +12795,7 @@ link_iterate_old_cb(hid_t group_id, const char *link_name, const H5L_info_t *inf
     } /* end if */
 
     /* Verify name of link */
-    sprintf(objname, "filler %02u", (info ? (unsigned)op_data->curr : (unsigned)((op_data->ncalled - 1) + op_data->nskipped)));
+    HDsnprintf(objname, sizeof(objname), "filler %02u", (info ? (unsigned)op_data->curr : (unsigned)((op_data->ncalled - 1) + op_data->nskipped)));
     if(HDstrcmp(link_name, objname))
         return(H5_ITER_ERROR);
 
@@ -13080,7 +13082,7 @@ link_iterate_old(hid_t fapl)
             hid_t group_id2;	        /* Group ID */
 
             /* Make name for link */
-            sprintf(objname, "filler %02u", u);
+            HDsnprintf(objname, sizeof(objname), "filler %02u", u);
 
             /* Create hard link, with group object */
             if((group_id2 = H5Gcreate2(group_id, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
@@ -13209,7 +13211,7 @@ open_by_idx_check(hid_t main_group_id, hid_t soft_group_id, hid_t mount_file_id,
 
     /* Mount a file over a group in main group */
     mnt_idx = 2;
-    sprintf(mntname, "/%s/filler %02u", CORDER_GROUP_NAME, mnt_idx);
+    HDsnprintf(mntname, sizeof(mntname), "/%s/filler %02u", CORDER_GROUP_NAME, mnt_idx);
     if(H5Fmount(main_group_id, mntname, mount_file_id, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* Open the object that the file is mounted on */
@@ -13267,7 +13269,7 @@ open_by_idx(hid_t fapl)
     H5O_info_t  oi;                     /* Buffer for querying object's info */
     char        filename[NAME_BUF_SIZE];/* File name */
     char        objname[NAME_BUF_SIZE]; /* Object name */
-    char        valname[NAME_BUF_SIZE]; /* Link value */
+    char        valname[2 * NAME_BUF_SIZE]; /* Link value */
     haddr_t     *objno = NULL;          /* Addresses of the objects created */
     unsigned    u;                      /* Local index variable */
     hid_t       ret;                    /* Generic return value */
@@ -13361,7 +13363,7 @@ open_by_idx(hid_t fapl)
                     hid_t group_id2;	        /* Group ID */
 
                     /* Make name for link */
-                    sprintf(objname, "filler %02u", u);
+                    HDsnprintf(objname, sizeof(objname), "filler %02u", u);
 
                     /* Create hard link, with group object */
                     if((group_id2 = H5Gcreate2(group_id, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
@@ -13374,7 +13376,7 @@ open_by_idx(hid_t fapl)
                     if(H5Gclose(group_id2) < 0) TEST_ERROR
 
                     /* Create soft link in another group, to objects in main group */
-                    sprintf(valname, "/%s/%s", CORDER_GROUP_NAME, objname);
+                    HDsnprintf(valname, sizeof(valname), "/%s/%s", CORDER_GROUP_NAME, objname);
                     if(H5Lcreate_soft(valname, soft_group_id, objname, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
                 } /* end for */
 
@@ -13396,7 +13398,7 @@ open_by_idx(hid_t fapl)
                     hid_t group_id2;	        /* Group ID */
 
                     /* Make name for link */
-                    sprintf(objname, "filler %02u", u);
+                    HDsnprintf(objname, sizeof(objname), "filler %02u", u);
 
                     /* Create hard link, with group object */
                     if((group_id2 = H5Gcreate2(group_id, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
@@ -13409,7 +13411,7 @@ open_by_idx(hid_t fapl)
                     if(H5Gclose(group_id2) < 0) TEST_ERROR
 
                     /* Create soft link in another group, to objects in main group */
-                    sprintf(valname, "/%s/%s", CORDER_GROUP_NAME, objname);
+                    HDsnprintf(valname, sizeof(valname), "/%s/%s", CORDER_GROUP_NAME, objname);
                     if(H5Lcreate_soft(valname, soft_group_id, objname, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
                 } /* end for */
 
@@ -13492,7 +13494,7 @@ open_by_idx_old(hid_t fapl)
     H5O_info_t  oi;                     /* Buffer for querying object's info */
     char        filename[NAME_BUF_SIZE];/* File name */
     char        objname[NAME_BUF_SIZE]; /* Object name */
-    char        valname[NAME_BUF_SIZE]; /* Link value */
+    char        valname[2 * NAME_BUF_SIZE]; /* Link value */
     haddr_t     objno[CORDER_NLINKS];   /* Addresses of the objects created */
     unsigned    u;                      /* Local index variable */
     hid_t       ret;                    /* Generic return value */
@@ -13538,7 +13540,7 @@ open_by_idx_old(hid_t fapl)
             hid_t group_id2;	        /* Group ID */
 
             /* Make name for link */
-            sprintf(objname, "filler %02u", u);
+            HDsnprintf(objname, sizeof(objname), "filler %02u", u);
 
             /* Create hard link, with group object */
             if((group_id2 = H5Gcreate2(group_id, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
@@ -13551,7 +13553,7 @@ open_by_idx_old(hid_t fapl)
             if(H5Gclose(group_id2) < 0) TEST_ERROR
 
             /* Create soft link in another group, to objects in main group */
-            sprintf(valname, "/%s/%s", CORDER_GROUP_NAME, objname);
+            HDsnprintf(valname, sizeof(valname), "/%s/%s", CORDER_GROUP_NAME, objname);
             if(H5Lcreate_soft(valname, soft_group_id, objname, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
         } /* end for */
 
@@ -13635,7 +13637,7 @@ object_info_check(hid_t main_group_id, hid_t soft_group_id, H5_index_t idx_type,
         /* Open each object in group by name and check that it's the correct one */
         for(u = 0; u < max_links; u++) {
             /* Make name for link */
-            sprintf(objname, "filler %02u", u);
+            HDsnprintf(objname, sizeof(objname), "filler %02u", u);
 
             /* Query the object's information, by name */
             if(H5Oget_info_by_name2(group_id, objname, &oinfo, H5O_INFO_BASIC|H5O_INFO_NUM_ATTRS, H5P_DEFAULT) < 0) TEST_ERROR
@@ -13703,7 +13705,7 @@ object_info(hid_t fapl)
     H5O_info_t  oinfo;                  /* Buffer for querying object's info */
     char        filename[NAME_BUF_SIZE];/* File name */
     char        objname[NAME_BUF_SIZE]; /* Object name */
-    char        valname[NAME_BUF_SIZE]; /* Link value */
+    char        valname[2 * NAME_BUF_SIZE]; /* Link value */
     char        attrname[NAME_BUF_SIZE]; /* Attribute name */
     haddr_t     *objno = NULL;          /* Addresses of the objects created */
     herr_t      ret;                    /* Generic return value */
@@ -13797,7 +13799,7 @@ object_info(hid_t fapl)
                     hid_t attr_id;              /* Attribute ID */
 
                     /* Make name for link */
-                    sprintf(objname, "filler %02u", u);
+                    HDsnprintf(objname, sizeof(objname), "filler %02u", u);
 
                     /* Create hard link, with group object */
                     if((group_id2 = H5Gcreate2(group_id, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
@@ -13809,7 +13811,7 @@ object_info(hid_t fapl)
                     /* Create attributes on new object */
                     for(v = 0; v < u; v++) {
                         /* Make name for attribute */
-                        sprintf(attrname, "attr %02u", v);
+                        HDsnprintf(attrname, sizeof(attrname), "attr %02u", v);
 
                         /* Create attribute */
                         if((attr_id = H5Acreate2(group_id2, attrname, H5T_NATIVE_INT, space_id, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
@@ -13822,7 +13824,7 @@ object_info(hid_t fapl)
                     if(H5Gclose(group_id2) < 0) TEST_ERROR
 
                     /* Create soft link in another group, to objects in main group */
-                    sprintf(valname, "/%s/%s", CORDER_GROUP_NAME, objname);
+                    HDsnprintf(valname, sizeof(valname), "/%s/%s", CORDER_GROUP_NAME, objname);
                     if(H5Lcreate_soft(valname, soft_group_id, objname, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
                 } /* end for */
 
@@ -13845,7 +13847,7 @@ object_info(hid_t fapl)
                     hid_t attr_id;              /* Attribute ID */
 
                     /* Make name for link */
-                    sprintf(objname, "filler %02u", u);
+                    HDsnprintf(objname, sizeof(objname), "filler %02u", u);
 
                     /* Create hard link, with group object */
                     if((group_id2 = H5Gcreate2(group_id, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
@@ -13857,7 +13859,7 @@ object_info(hid_t fapl)
                     /* Create attributes on new object */
                     for(v = 0; v < u; v++) {
                         /* Make name for attribute */
-                        sprintf(attrname, "attr %02u", v);
+                        HDsnprintf(attrname, sizeof(attrname), "attr %02u", v);
 
                         /* Create attribute */
                         if((attr_id = H5Acreate2(group_id2, attrname, H5T_NATIVE_INT, space_id, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
@@ -13870,7 +13872,7 @@ object_info(hid_t fapl)
                     if(H5Gclose(group_id2) < 0) TEST_ERROR
 
                     /* Create soft link in another group, to objects in main group */
-                    sprintf(valname, "/%s/%s", CORDER_GROUP_NAME, objname);
+                    HDsnprintf(valname, sizeof(valname), "/%s/%s", CORDER_GROUP_NAME, objname);
                     if(H5Lcreate_soft(valname, soft_group_id, objname, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
                 } /* end for */
 
@@ -13948,7 +13950,7 @@ object_info_old(hid_t fapl)
     H5O_info_t  oinfo;                  /* Buffer for querying object's info */
     char        filename[NAME_BUF_SIZE];/* File name */
     char        objname[NAME_BUF_SIZE]; /* Object name */
-    char        valname[NAME_BUF_SIZE]; /* Link value */
+    char        valname[2 * NAME_BUF_SIZE]; /* Link value */
     char        attrname[NAME_BUF_SIZE]; /* Attribute name */
     haddr_t     objno[CORDER_NLINKS];   /* Addresses of the objects created */
     herr_t      ret;                    /* Generic return value */
@@ -13994,7 +13996,7 @@ object_info_old(hid_t fapl)
             hid_t attr_id;              /* Attribute ID */
 
             /* Make name for link */
-            sprintf(objname, "filler %02u", u);
+            HDsnprintf(objname, sizeof(objname), "filler %02u", u);
 
             /* Create hard link, with group object */
             if((group_id2 = H5Gcreate2(group_id, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
@@ -14006,7 +14008,7 @@ object_info_old(hid_t fapl)
             /* Create attributes on new object */
             for(v = 0; v < u; v++) {
                 /* Make name for attribute */
-                sprintf(attrname, "attr %02u", v);
+                HDsnprintf(attrname, sizeof(attrname), "attr %02u", v);
 
                 /* Create attribute */
                 if((attr_id = H5Acreate2(group_id2, attrname, H5T_NATIVE_INT, space_id, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
@@ -14019,7 +14021,7 @@ object_info_old(hid_t fapl)
             if(H5Gclose(group_id2) < 0) TEST_ERROR
 
             /* Create soft link in another group, to objects in main group */
-            sprintf(valname, "/%s/%s", CORDER_GROUP_NAME, objname);
+            HDsnprintf(valname, sizeof(valname), "/%s/%s", CORDER_GROUP_NAME, objname);
             if(H5Lcreate_soft(valname, soft_group_id, objname, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
         } /* end for */
 
@@ -14100,7 +14102,7 @@ group_info(hid_t fapl)
     char        filename[NAME_BUF_SIZE];/* File name */
     char        objname[NAME_BUF_SIZE]; /* Object name */
     char        objname2[NAME_BUF_SIZE]; /* Object name */
-    char        valname[NAME_BUF_SIZE]; /* Link value */
+    char        valname[2 * NAME_BUF_SIZE]; /* Link value */
     herr_t      ret;                    /* Generic return value */
     unsigned    u, v;                   /* Local index variables */
 
@@ -14185,7 +14187,7 @@ group_info(hid_t fapl)
                     hid_t group_id2, group_id3;	        /* Group IDs */
 
                     /* Make name for link */
-                    sprintf(objname, "filler %02u", u);
+                    HDsnprintf(objname, sizeof(objname), "filler %02u", u);
 
                     /* Create hard link, with group object */
                     if((group_id2 = H5Gcreate2(group_id, objname, H5P_DEFAULT, gcpl_id, H5P_DEFAULT)) < 0) TEST_ERROR
@@ -14219,7 +14221,7 @@ group_info(hid_t fapl)
                     /* Create objects in new group created */
                     for(v = 0; v <= u; v++) {
                         /* Make name for link */
-                        sprintf(objname2, "filler %02u", v);
+                        HDsnprintf(objname2, sizeof(objname2), "filler %02u", v);
 
                         /* Create hard link, with group object */
                         if((group_id3 = H5Gcreate2(group_id2, objname2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
@@ -14299,7 +14301,7 @@ group_info(hid_t fapl)
 
 
                     /* Create soft link in another group, to objects in main group */
-                    sprintf(valname, "/%s/%s", CORDER_GROUP_NAME, objname);
+                    HDsnprintf(valname, sizeof(valname), "/%s/%s", CORDER_GROUP_NAME, objname);
                     if(H5Lcreate_soft(valname, soft_group_id, objname, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
                     /* Retrieve soft link group's information, by name */
@@ -14326,7 +14328,7 @@ group_info(hid_t fapl)
                     hid_t group_id2, group_id3;	        /* Group IDs */
 
                     /* Make name for link */
-                    sprintf(objname, "filler %02u", u);
+                    HDsnprintf(objname, sizeof(objname), "filler %02u", u);
 
                     /* Create hard link, with group object */
                     if((group_id2 = H5Gcreate2(group_id, objname, H5P_DEFAULT, gcpl_id, H5P_DEFAULT)) < 0) TEST_ERROR
@@ -14360,7 +14362,7 @@ group_info(hid_t fapl)
                     /* Create objects in new group created */
                     for(v = 0; v <= u; v++) {
                         /* Make name for link */
-                        sprintf(objname2, "filler %02u", v);
+                        HDsnprintf(objname2, sizeof(objname2), "filler %02u", v);
 
                         /* Create hard link, with group object */
                         if((group_id3 = H5Gcreate2(group_id2, objname2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
@@ -14440,7 +14442,7 @@ group_info(hid_t fapl)
 
 
                     /* Create soft link in another group, to objects in main group */
-                    sprintf(valname, "/%s/%s", CORDER_GROUP_NAME, objname);
+                    HDsnprintf(valname, sizeof(valname), "/%s/%s", CORDER_GROUP_NAME, objname);
                     if(H5Lcreate_soft(valname, soft_group_id, objname, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
                     /* Retrieve soft link group's information, by name */
@@ -14517,7 +14519,7 @@ group_info_old(hid_t fapl)
     char        filename[NAME_BUF_SIZE];/* File name */
     char        objname[NAME_BUF_SIZE]; /* Object name */
     char        objname2[NAME_BUF_SIZE]; /* Object name */
-    char        valname[NAME_BUF_SIZE]; /* Link value */
+    char        valname[2 * NAME_BUF_SIZE]; /* Link value */
     herr_t      ret;                    /* Generic return value */
     unsigned    u, v;                   /* Local index variables */
 
@@ -14556,7 +14558,7 @@ group_info_old(hid_t fapl)
             hid_t group_id2, group_id3;	        /* Group IDs */
 
             /* Make name for link */
-            sprintf(objname, "filler %02u", u);
+            HDsnprintf(objname, sizeof(objname), "filler %02u", u);
 
             /* Create hard link, with group object */
             if((group_id2 = H5Gcreate2(group_id, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
@@ -14590,7 +14592,7 @@ group_info_old(hid_t fapl)
             /* Create objects in new group created */
             for(v = 0; v <= u; v++) {
                 /* Make name for link */
-                sprintf(objname2, "filler %02u", v);
+                HDsnprintf(objname2, sizeof(objname2), "filler %02u", v);
 
                 /* Create hard link, with group object */
                 if((group_id3 = H5Gcreate2(group_id2, objname2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
@@ -14670,7 +14672,7 @@ group_info_old(hid_t fapl)
 
 
             /* Create soft link in another group, to objects in main group */
-            sprintf(valname, "/%s/%s", CORDER_GROUP_NAME, objname);
+            HDsnprintf(valname, sizeof(valname), "/%s/%s", CORDER_GROUP_NAME, objname);
             if(H5Lcreate_soft(valname, soft_group_id, objname, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
             /* Retrieve soft link group's information, by name */

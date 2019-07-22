@@ -1212,11 +1212,14 @@ test_vds_prefix_first(unsigned config, hid_t fapl)
 
     /* Create source file if requested */
     if(config & TEST_IO_DIFFERENT_FILE) {
-        HDgetcwd(buffer, 1024);
-        HDchdir(TMPDIR);
+        if(NULL == HDgetcwd(buffer, 1024))
+            TEST_ERROR
+        if(HDchdir(TMPDIR) < 0)
+            TEST_ERROR
         if((srcfile[0] = H5Fcreate(srcfilename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
             TEST_ERROR
-        HDchdir(buffer);
+        if(HDchdir(buffer) < 0)
+            TEST_ERROR
     }
     else {
         srcfile[0] = vfile;
@@ -1293,11 +1296,14 @@ test_vds_prefix_first(unsigned config, hid_t fapl)
     /* Reopen srcdset and srcfile if config option specified */
     if(config & TEST_IO_CLOSE_SRC) {
         if(config & TEST_IO_DIFFERENT_FILE) {
-            HDgetcwd(buffer, 1024);
-            HDchdir(TMPDIR);
+            if(NULL == HDgetcwd(buffer, 1024))
+                TEST_ERROR
+            if(HDchdir(TMPDIR) < 0)
+                TEST_ERROR
             if((srcfile[0] = H5Fopen(srcfilename, H5F_ACC_RDONLY, fapl)) < 0)
                 TEST_ERROR
-            HDchdir(buffer);
+            if(HDchdir(buffer) < 0)
+                TEST_ERROR
         }
         if((srcdset[0] = H5Dopen2(srcfile[0], "src_dset", H5P_DEFAULT)) < 0)
             TEST_ERROR
@@ -12146,7 +12152,6 @@ main(void)
     hid_t my_fapl = -1;         /* File access property list */
     int test_api_config;
     unsigned bit_config;
-    unsigned latest = FALSE;    /* Using the latest library version bound */
     H5F_libver_t low, high;     /* Low and high bounds */
     int nerrors = 0;
 
@@ -12160,11 +12165,11 @@ main(void)
     if((my_fapl = H5Pcopy(fapl)) < 0) TEST_ERROR
 
      /* Loop through all the combinations of low/high version bounds */
-    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
-        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
+    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, low)) {
+        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, high)) {
             char msg[80];       /* Message for file version bounds */
-            char *low_string;   /* The low bound string */
-            char *high_string;  /* The high bound string */
+            const char *low_string;   /* The low bound string */
+            const char *high_string;  /* The high bound string */
 
             /* Invalid combinations, just continue */
             if(high == H5F_LIBVER_EARLIEST || high < low)
@@ -12173,10 +12178,6 @@ main(void)
             /* Test virtual dataset only for V110 and above */
             if(high < H5F_LIBVER_V110)
                 continue;
-
-            /* Whether to use latest hyperslab/point selection version */
-            if(low >= H5F_LIBVER_V112)
-                latest = TRUE;
 
             /* Set the low/high version bounds */
             if(H5Pset_libver_bounds(my_fapl, low, high) < 0)

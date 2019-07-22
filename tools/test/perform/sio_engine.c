@@ -1262,7 +1262,15 @@ done:
  * Programmer:  Albert Cheng 2001/12/12
  * Modifications: Support for file drivers. Christian Chilan, April, 2008
  */
-    static void
+/* Disable warning for "format not a string literal" here -QAK */
+/*
+ *      This pragma only needs to surround the snprintf() calls with
+ *      'temp' in the code below, but early (4.4.7, at least) gcc only
+ *      allows diagnostic pragmas to be toggled outside of functions.
+ */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-nonliteral"
+static void
 do_cleanupfile(iotype iot, char *filename)
 {
     char        temp[2048];
@@ -1275,12 +1283,12 @@ do_cleanupfile(iotype iot, char *filename)
     if (clean_file_g){
 
     switch (iot) {
-    case POSIXIO:
-          HDremove(filename);
-        break;
+        case POSIXIO:
+            HDremove(filename);
+            break;
 
-    case HDF5:
-           driver = H5Pget_driver(fapl);
+        case HDF5:
+            driver = H5Pget_driver(fapl);
 
             if (driver == H5FD_FAMILY) {
                 for (j = 0; /*void*/; j++) {
@@ -1313,14 +1321,15 @@ do_cleanupfile(iotype iot, char *filename)
                 HDremove(filename);
             }
             H5Pclose(fapl);
-        break;
-			
-    default:
-        /* unknown request */
-        HDfprintf(stderr, "Unknown IO type request (%d)\n", (int)iot);
-        HDassert(0 && "Unknown IO type");
-        break;
-    }
+            break;
+                            
+        default:
+            /* unknown request */
+            HDfprintf(stderr, "Unknown IO type request (%d)\n", (int)iot);
+            HDassert(0 && "Unknown IO type");
+            break;
+        }
     }
 }
+#pragma GCC diagnostic pop
 
