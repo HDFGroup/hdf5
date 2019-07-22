@@ -92,16 +92,16 @@ if (WINDOWS)
   set (${HDF_PREFIX}_HAVE_LONGJMP 1)
   if (NOT MINGW)
     set (${HDF_PREFIX}_HAVE_GETHOSTNAME 1)
+    set (${HDF_PREFIX}_HAVE_FUNCTION 1)
   endif ()
   if (NOT UNIX AND NOT CYGWIN)
     set (${HDF_PREFIX}_HAVE_GETCONSOLESCREENBUFFERINFO 1)
+    set (${HDF_PREFIX}_GETTIMEOFDAY_GIVES_TZ 1)
+    set (${HDF_PREFIX}_HAVE_TIMEZONE 1)
+    set (${HDF_PREFIX}_HAVE_GETTIMEOFDAY 1)
+    set (${HDF_PREFIX}_HAVE_LIBWS2_32 1)
+    set (${HDF_PREFIX}_HAVE_LIBWSOCK32 1)
   endif ()
-  set (${HDF_PREFIX}_HAVE_FUNCTION 1)
-  set (${HDF_PREFIX}_GETTIMEOFDAY_GIVES_TZ 1)
-  set (${HDF_PREFIX}_HAVE_TIMEZONE 1)
-  set (${HDF_PREFIX}_HAVE_GETTIMEOFDAY 1)
-  set (${HDF_PREFIX}_HAVE_LIBWS2_32 1)
-  set (${HDF_PREFIX}_HAVE_LIBWSOCK32 1)
 endif ()
 
 # ----------------------------------------------------------------------
@@ -187,7 +187,7 @@ endif ()
 #-----------------------------------------------------------------------------
 #  Check for the math library "m"
 #-----------------------------------------------------------------------------
-if (NOT WINDOWS)
+if (MINGW OR NOT WINDOWS)
   CHECK_LIBRARY_EXISTS_CONCAT ("m" ceil     ${HDF_PREFIX}_HAVE_LIBM)
   CHECK_LIBRARY_EXISTS_CONCAT ("dl" dlopen     ${HDF_PREFIX}_HAVE_LIBDL)
   CHECK_LIBRARY_EXISTS_CONCAT ("ws2_32" WSAStartup  ${HDF_PREFIX}_HAVE_LIBWS2_32)
@@ -263,7 +263,7 @@ set (LINUX_LFS 0)
 
 set (HDF_EXTRA_C_FLAGS)
 set (HDF_EXTRA_FLAGS)
-if (NOT WINDOWS)
+if (MINGW OR NOT WINDOWS)
   # Might want to check explicitly for Linux and possibly Cygwin
   # instead of checking for not Solaris or Darwin.
   if (NOT ${HDF_PREFIX}_HAVE_SOLARIS AND NOT ${HDF_PREFIX}_HAVE_DARWIN)
@@ -323,7 +323,7 @@ endif ()
 #-----------------------------------------------------------------------------
 # Check for HAVE_OFF64_T functionality
 #-----------------------------------------------------------------------------
-if (NOT WINDOWS OR MINGW)
+if (MINGW OR NOT WINDOWS)
   HDF_FUNCTION_TEST (HAVE_OFF64_T)
   if (${HDF_PREFIX}_HAVE_OFF64_T)
     CHECK_FUNCTION_EXISTS (lseek64            ${HDF_PREFIX}_HAVE_LSEEK64)
@@ -402,7 +402,7 @@ if (NOT APPLE)
   if (NOT ${HDF_PREFIX}_SIZEOF_SSIZE_T)
     set (${HDF_PREFIX}_SIZEOF_SSIZE_T 0)
   endif ()
-  if (NOT WINDOWS)
+  if (MINGW OR NOT WINDOWS)
     HDF_CHECK_TYPE_SIZE (ptrdiff_t    ${HDF_PREFIX}_SIZEOF_PTRDIFF_T)
   endif ()
 endif ()
@@ -426,7 +426,7 @@ else ()
   HDF_CHECK_TYPE_SIZE (_Bool        ${HDF_PREFIX}_SIZEOF_BOOL)
 endif ()
 
-if (NOT WINDOWS)
+if (MINGW OR NOT WINDOWS)
   #-----------------------------------------------------------------------------
   # Check if the dev_t type is a scalar type
   #-----------------------------------------------------------------------------
@@ -534,7 +534,7 @@ CHECK_FUNCTION_EXISTS (vasprintf         ${HDF_PREFIX}_HAVE_VASPRINTF)
 CHECK_FUNCTION_EXISTS (waitpid           ${HDF_PREFIX}_HAVE_WAITPID)
 
 CHECK_FUNCTION_EXISTS (vsnprintf         ${HDF_PREFIX}_HAVE_VSNPRINTF)
-if (NOT WINDOWS)
+if (MINGW OR NOT WINDOWS)
   if (${HDF_PREFIX}_HAVE_VSNPRINTF)
     HDF_FUNCTION_TEST (VSNPRINTF_WORKS)
   endif ()
@@ -555,7 +555,7 @@ endif ()
 #-----------------------------------------------------------------------------
 # Check a bunch of other functions
 #-----------------------------------------------------------------------------
-if (NOT WINDOWS)
+if (MINGW OR NOT WINDOWS)
   foreach (other_test
       HAVE_ATTRIBUTE
       HAVE_C99_FUNC
