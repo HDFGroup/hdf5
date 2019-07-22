@@ -382,15 +382,7 @@ copy_attr(
      */
     for (u = 0; u < (unsigned) oinfo.num_attrs; u++) {
         /* open attribute */
-        attr_id = H5Aopen_by_idx(
-                loc_in,
-                ".",
-                H5_INDEX_CRT_ORDER,
-                H5_ITER_INC,
-                (hsize_t) u,
-                H5P_DEFAULT,
-                H5P_DEFAULT);
-        if (attr_id < 0)
+        if((attr_id = H5Aopen_by_idx(loc_in, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t) u, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Aopen_by_idx failed");
 
         if (H5Aget_name(attr_id, (size_t) 255, name) < 0)
@@ -410,13 +402,7 @@ copy_attr(
                 HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Iget_file_id failed");
 
             /* Copy named dt */
-            wtype_id = copy_named_datatype(
-                    ftype_id,
-                    fidout,
-                    named_dt_head_p,
-                    travt,
-                    options);
-            if (wtype_id < 0) {
+            if ((wtype_id = copy_named_datatype(ftype_id, fidout, named_dt_head_p, travt, options)) < 0) {
                 H5Fclose(fidout);
                 HGOTO_ERROR(FAIL, H5E_tools_min_id_g,
                         "copy_named_datatype failed");

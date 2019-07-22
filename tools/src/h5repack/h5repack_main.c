@@ -90,11 +90,11 @@ static void usage(const char *prog) {
     PRINTVALSTREAM(rawoutstream, "                           This option will take precedence over the options\n");
     PRINTVALSTREAM(rawoutstream, "                           --low and --high\n");
     PRINTVALSTREAM(rawoutstream, "   --low=BOUND             The low bound for library release versions to use\n");
-    PRINTVALSTREAM(rawoutstream, "                           when creating objects in the file (default is 0\n");
-    PRINTVALSTREAM(rawoutstream, "                           [H5F_LIBVER_EARLIEST])\n");
+    PRINTVALSTREAM(rawoutstream, "                           when creating objects in the file\n");
+    PRINTVALSTREAM(rawoutstream, "                           (default is H5F_LIBVER_EARLIEST)\n");
     PRINTVALSTREAM(rawoutstream, "   --high=BOUND            The high bound for library release versions to use\n");
-    PRINTVALSTREAM(rawoutstream, "                           when creating objects in the file (default is 2\n");
-    PRINTVALSTREAM(rawoutstream, "                           [H5F_LIBVER_V110 this release; H5F_LIBVER_LATEST])\n");
+    PRINTVALSTREAM(rawoutstream, "                           when creating objects in the file\n");
+    PRINTVALSTREAM(rawoutstream, "                           (default is H5F_LIBVER_LATEST)\n");
     PRINTVALSTREAM(rawoutstream, "   -c L1, --compact=L1     Maximum number of links in header messages\n");
     PRINTVALSTREAM(rawoutstream, "   -d L2, --indexed=L2     Minimum number of links in the indexed format\n");
     PRINTVALSTREAM(rawoutstream, "   -s S[:F], --ssize=S[:F] Shared object header message minimum size\n");

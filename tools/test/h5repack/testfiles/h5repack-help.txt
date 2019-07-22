@@ -12,11 +12,11 @@ usage: h5repack [OPTIONS] file1 file2
                            This option will take precedence over the options
                            --low and --high
    --low=BOUND             The low bound for library release versions to use
-                           when creating objects in the file (default is 0
-                           [H5F_LIBVER_EARLIEST])
+                           when creating objects in the file
+                           (default is H5F_LIBVER_EARLIEST)
    --high=BOUND            The high bound for library release versions to use
-                           when creating objects in the file (default is 2
-                           [H5F_LIBVER_V110 this release; H5F_LIBVER_LATEST])
+                           when creating objects in the file
+                           (default is H5F_LIBVER_LATEST)
    -c L1, --compact=L1     Maximum number of links in header messages
    -d L2, --indexed=L2     Minimum number of links in the indexed format
    -s S[:F], --ssize=S[:F] Shared object header message minimum size
