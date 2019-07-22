@@ -416,14 +416,7 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options)
     int ret_value = 0;
 
     /* parse command line options */
-#if 0
     while (EOF != (opt = get_option(argc, argv, s_opts, l_opts))) {
-#else
-    for (opt = get_option(argc, argv, s_opts, l_opts);
-         opt != EOF;
-         opt = get_option(argc, argv, s_opts, l_opts))
-    {
-#endif
         switch ((char) opt) {
 
             /* -i for backward compatibility */
