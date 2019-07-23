@@ -21,6 +21,7 @@ add_test (
     COMMAND    ${CMAKE_COMMAND}
         -E remove
             PTcppexampleFL.h5
+            ptExampleFL.txt
 )
 
 if (HDF5_ENABLE_USING_MEMCHECKER)

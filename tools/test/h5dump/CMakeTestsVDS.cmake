@@ -133,15 +133,6 @@
         set_tests_properties (H5DUMP-${resultfile} PROPERTIES DEPENDS ${last_VDS_test})
       endif ()
     else ()
-      # Remove any output file left over from previous test run
-      add_test (
-          NAME H5DUMP-${resultfile}-clear-objects
-          COMMAND    ${CMAKE_COMMAND}
-              -E remove
-              ${resultfile}.out
-              ${resultfile}.out.err
-      )
-      set_tests_properties (H5DUMP-${resultfile}-clear-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/vds")
       add_test (
           NAME H5DUMP-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
@@ -154,7 +145,6 @@
               -D "TEST_REFERENCE=${resultfile}.ddl"
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
-      set_tests_properties (H5DUMP-${resultfile} PROPERTIES DEPENDS H5DUMP-${resultfile}-clear-objects)
     endif ()
   endmacro ()
 
@@ -173,15 +163,6 @@
         set_tests_properties (H5DUMP_PREFIX-${resultfile} PROPERTIES DEPENDS ${last_VDS_test})
       endif ()
     else ()
-      # Remove any output file left over from previous test run
-      add_test (
-          NAME H5DUMP_PREFIX-${resultfile}-clear-objects
-          COMMAND    ${CMAKE_COMMAND}
-              -E remove
-              ${resultfile}.out
-              ${resultfile}.out.err
-      )
-      set_tests_properties (H5DUMP_PREFIX-${resultfile}-clear-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/vds/prefix")
       add_test (
           NAME H5DUMP_PREFIX-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
@@ -196,7 +177,6 @@
               -D "TEST_ENV_VALUE=${PROJECT_BINARY_DIR}/testfiles/vds/"
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
-      set_tests_properties (H5DUMP_PREFIX-${resultfile} PROPERTIES DEPENDS H5DUMP_PREFIX-${resultfile}-clear-objects)
     endif ()
   endmacro ()
 
@@ -212,15 +192,6 @@
         set_tests_properties (H5DUMP-${resultfile} PROPERTIES DEPENDS ${last_VDS_test})
       endif ()
     else ()
-      # Remove any output file left over from previous test run
-      add_test (
-          NAME H5DUMP-${resultfile}-clear-objects
-          COMMAND    ${CMAKE_COMMAND}
-              -E remove
-              ${resultfile}.out
-              ${resultfile}.out.err
-      )
-      set_tests_properties (H5DUMP-${resultfile}-clear-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/vds")
       add_test (
           NAME H5DUMP-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
@@ -233,7 +204,6 @@
               -D "TEST_REFERENCE=${resultfile}.ddl"
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
-      set_tests_properties (H5DUMP-${resultfile} PROPERTIES DEPENDS "H5DUMP-${resultfile}-clear-objects")
     endif ()
   endmacro ()
 
@@ -242,54 +212,6 @@
 ###           T H E   T E S T S                                            ###
 ##############################################################################
 ##############################################################################
-
-  if (HDF5_ENABLE_USING_MEMCHECKER)
-    # Remove any output file left over from previous test run
-    add_test (
-      NAME H5DUMP_VDS-clearall-objects
-      COMMAND    ${CMAKE_COMMAND}
-          -E remove
-          tvds-1.out
-          tvds-1.out.err
-          tvds-2.out
-          tvds-2.out.err
-          tvds-3_1.out
-          tvds-3_1.out.err
-          tvds-3_2.out
-          tvds-3_2.out.err
-          tvds-4.out
-          tvds-4.out.err
-          tvds-5.out
-          tvds-5.out.err
-          vds-first.out
-          vds-first.out.err
-          vds-gap1.out
-          vds-gap1.out.err
-          vds-gap2.out
-          vds-gap2.out.err
-          tvds_layout-1.out
-          tvds_layout-1.out.err
-          tvds_layout-2.out
-          tvds_layout-2.out.err
-          tvds_layout-3_1.out
-          tvds_layout-3_1.out.err
-          tvds_layout-3_2.out
-          tvds_layout-3_2.out.err
-          tvds_layout-4.out
-          tvds_layout-4.out.err
-          tvds_layout-5.out
-          tvds_layout-5.out.err
-          vds_layout-eiger.out
-          vds_layout-eiger.out.err
-          vds_layout-maxmin.out
-          vds_layout-maxmin.out.err
-    )
-    set_tests_properties (H5DUMP_VDS-clearall-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/vds")
-    if (last_vds_test)
-      set_tests_properties (H5DUMP_VDS-clearall-objects PROPERTIES DEPENDS ${last_vds_test})
-    endif ()
-    set (last_VDS_test "H5DUMP_VDS-clearall-objects")
-  endif ()
 
 # See which filters are usable (and skip tests for filters we
 # don't have).  Do this by searching H5pubconf.h to see which

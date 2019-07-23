@@ -167,22 +167,10 @@
     # If using memchecker add tests without using scripts
     if (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (NAME H5REPACK-h5repack-${testname} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack${tgt_ext}> ${ARGN})
-      set_tests_properties (H5REPACK-h5repack-${testname} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
-      if (last_test)
-        set_tests_properties (H5REPACK-h5repack-${testname} PROPERTIES DEPENDS ${last_test})
-      endif ()
-      set (last_test "H5REPACK-h5repack-${testname}")
-    else ()
-      add_test (
-          NAME H5REPACK-h5repack-${testname}-clear-objects
-          COMMAND    ${CMAKE_COMMAND}
-              -E remove
-              testfiles/h5repack-${testname}.out
-              testfiles/h5repack-${testname}.out.err
+      set_tests_properties (H5REPACK-h5repack-${testname} PROPERTIES
+          WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
       )
-      if (last_test)
-        set_tests_properties (H5REPACK-h5repack-${testname}-clear-objects PROPERTIES DEPENDS ${last_test})
-      endif ()
+    else ()
       add_test (
           NAME H5REPACK-h5repack-${testname}
           COMMAND "${CMAKE_COMMAND}"
@@ -195,39 +183,43 @@
               -D "TEST_REFERENCE=h5repack-${testname}.txt"
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
-      set_tests_properties (H5REPACK-h5repack-${testname} PROPERTIES DEPENDS H5REPACK-h5repack-${testname}-clear-objects)
     endif ()
+    set_tests_properties (H5REPACK-h5repack-${testname} PROPERTIES
+        FIXTURES_REQUIRED clear_h5repack
+    )
   endmacro ()
 
   macro (ADD_H5_TEST_OLD testname testtype testfile)
-    if ("${testtype}" STREQUAL "SKIP")
-      if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+      if ("${testtype}" STREQUAL "SKIP")
         add_test (
             NAME H5REPACK_OLD-${testname}
             COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${ARGN} -i ${PROJECT_BINARY_DIR}/testfiles/${testfile} -o ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}"
         )
         set_property(TEST H5REPACK_OLD-${testname} PROPERTY DISABLED)
+      else ()
+        add_test (
+            NAME H5REPACK_OLD-${testname}-clear-objects
+            COMMAND ${CMAKE_COMMAND} -E remove testfiles/out-${testname}.${testfile}
+        )
+        set_tests_properties (H5REPACK_OLD-${testname}-clear-objects PROPERTIES
+            FIXTURES_REQUIRED clear_h5repack
+        )
+        add_test (
+            NAME H5REPACK_OLD-${testname}
+            COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack${tgt_ext}> ${ARGN} -i ${PROJECT_BINARY_DIR}/testfiles/${testfile} -o ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
+        )
+        set_tests_properties (H5REPACK_OLD-${testname} PROPERTIES
+            DEPENDS H5REPACK_OLD-${testname}-clear-objects
+        )
+        add_test (
+            NAME H5REPACK_OLD-${testname}_DFF
+            COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diff${tgt_ext}> ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
+        )
+        set_tests_properties (H5REPACK_OLD-${testname}_DFF PROPERTIES
+            DEPENDS H5REPACK_OLD-${testname}
+        )
       endif ()
-    else ()
-      add_test (
-          NAME H5REPACK_OLD-${testname}-clear-objects
-          COMMAND    ${CMAKE_COMMAND}
-              -E remove
-              testfiles/out-${testname}.${testfile}
-      )
-      if (last_test)
-        set_tests_properties (H5REPACK_OLD-${testname}-clear-objects PROPERTIES DEPENDS ${last_test})
-      endif ()
-      add_test (
-          NAME H5REPACK_OLD-${testname}
-          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack${tgt_ext}> ${ARGN} -i ${PROJECT_BINARY_DIR}/testfiles/${testfile} -o ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
-      )
-      set_tests_properties (H5REPACK_OLD-${testname} PROPERTIES DEPENDS H5REPACK_OLD-${testname}-clear-objects)
-      add_test (
-          NAME H5REPACK_OLD-${testname}_DFF
-          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diff${tgt_ext}> ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
-      )
-      set_tests_properties (H5REPACK_OLD-${testname}_DFF PROPERTIES DEPENDS H5REPACK_OLD-${testname})
     endif ()
   endmacro ()
 
@@ -243,23 +235,25 @@
     else ()
       add_test (
           NAME H5REPACK-${testname}-clear-objects
-          COMMAND    ${CMAKE_COMMAND}
-              -E remove
-              testfiles/out-${testname}.${testfile}
+          COMMAND ${CMAKE_COMMAND} -E remove testfiles/out-${testname}.${testfile}
       )
-      if (last_test)
-        set_tests_properties (H5REPACK-${testname}-clear-objects PROPERTIES DEPENDS ${last_test})
-      endif ()
+      set_tests_properties (H5REPACK-${testname}-clear-objects PROPERTIES
+          FIXTURES_REQUIRED clear_h5repack
+      )
       add_test (
           NAME H5REPACK-${testname}
           COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack${tgt_ext}> --enable-error-stack ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
       )
-      set_tests_properties (H5REPACK-${testname} PROPERTIES DEPENDS H5REPACK-${testname}-clear-objects)
+      set_tests_properties (H5REPACK-${testname} PROPERTIES
+          DEPENDS H5REPACK-${testname}-clear-objects
+      )
       add_test (
           NAME H5REPACK-${testname}_DFF
           COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diff${tgt_ext}> --enable-error-stack ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
       )
-      set_tests_properties (H5REPACK-${testname}_DFF PROPERTIES DEPENDS H5REPACK-${testname})
+      set_tests_properties (H5REPACK-${testname}_DFF PROPERTIES
+          DEPENDS H5REPACK-${testname}
+      )
     endif ()
   endmacro ()
 
@@ -279,21 +273,14 @@
             NAME H5REPACK_CMP-${testname}
             COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack${tgt_ext}> ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${resultfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${resultfile}
         )
-        if (last_test)
-          set_tests_properties (H5REPACK_CMP-${testname} PROPERTIES DEPENDS ${last_test})
-        endif ()
       else ()
         add_test (
             NAME H5REPACK_CMP-${testname}-clear-objects
-            COMMAND    ${CMAKE_COMMAND}
-                -E remove
-                testfiles/out-${testname}.${resultfile}
-                testfiles/${resultfile}-${testname}.out
-                testfiles/${resultfile}-${testname}.out.err
+            COMMAND ${CMAKE_COMMAND} -E remove testfiles/out-${testname}.${resultfile}
         )
-        if (last_test)
-          set_tests_properties (H5REPACK_CMP-${testname}-clear-objects PROPERTIES DEPENDS ${last_test})
-        endif ()
+        set_tests_properties (H5REPACK_CMP-${testname}-clear-objects PROPERTIES
+            FIXTURES_REQUIRED clear_h5repack
+        )
         add_test (
             NAME H5REPACK_CMP-${testname}
             COMMAND "${CMAKE_COMMAND}"
@@ -307,7 +294,9 @@
                 -D "TEST_REFERENCE=${resultfile}-${testname}.tst"
                 -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
         )
-        set_tests_properties (H5REPACK_CMP-${testname} PROPERTIES DEPENDS H5REPACK_CMP-${testname}-clear-objects)
+        set_tests_properties (H5REPACK_CMP-${testname} PROPERTIES
+            DEPENDS H5REPACK_CMP-${testname}-clear-objects
+        )
       endif ()
     endif ()
   endmacro ()
@@ -328,21 +317,17 @@
             NAME H5REPACK_MASK-${testname}
             COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack${tgt_ext}> ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${resultfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${resultfile}
         )
-        if (last_test)
-          set_tests_properties (H5REPACK_MASK-${testname} PROPERTIES DEPENDS ${last_test})
-        endif ()
+        set_tests_properties (H5REPACK_MASK-${testname} PROPERTIES
+            FIXTURES_REQUIRED clear_h5repack
+        )
       else (HDF5_ENABLE_USING_MEMCHECKER)
         add_test (
             NAME H5REPACK_MASK-${testname}-clear-objects
-            COMMAND    ${CMAKE_COMMAND}
-                -E remove
-                testfiles/out-${testname}.${resultfile}
-                testfiles/${resultfile}-${testname}.out
-                testfiles/${resultfile}-${testname}.out.err
+            COMMAND ${CMAKE_COMMAND} -E remove testfiles/out-${testname}.${resultfile}
         )
-        if (last_test)
-          set_tests_properties (H5REPACK_MASK-${testname}-clear-objects PROPERTIES DEPENDS ${last_test})
-        endif ()
+        set_tests_properties (H5REPACK_MASK-${testname}-clear-objects PROPERTIES DEPENDS ${last_test}
+            FIXTURES_REQUIRED clear_h5repack
+        )
         add_test (
             NAME H5REPACK_MASK-${testname}
             COMMAND "${CMAKE_COMMAND}"
@@ -374,20 +359,18 @@
     else ()
       add_test (
           NAME H5REPACK_DMP-${testname}-clear-objects
-          COMMAND    ${CMAKE_COMMAND}
-              -E remove
-              testfiles/out-${testname}.${resultfile}
-              testfiles/${resultfile}-${testname}.out
-              testfiles/${resultfile}-${testname}.out.err
+          COMMAND ${CMAKE_COMMAND} -E remove testfiles/out-${testname}.${resultfile}
       )
-      if (last_test)
-        set_tests_properties (H5REPACK_DMP-${testname}-clear-objects PROPERTIES DEPENDS ${last_test})
-      endif ()
+      set_tests_properties (H5REPACK_DMP-${testname}-clear-objects PROPERTIES
+          FIXTURES_REQUIRED clear_h5repack
+      )
       add_test (
           NAME H5REPACK_DMP-${testname}
           COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack${tgt_ext}> ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${resultfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${resultfile}
       )
-      set_tests_properties (H5REPACK_DMP-${testname} PROPERTIES DEPENDS H5REPACK_DMP-${testname}-clear-objects)
+      set_tests_properties (H5REPACK_DMP-${testname} PROPERTIES
+          DEPENDS H5REPACK_DMP-${testname}-clear-objects
+      )
       if (NOT HDF5_ENABLE_USING_MEMCHECKER)
         add_test (
             NAME H5REPACK_DMP-h5dump-${testname}
@@ -401,7 +384,9 @@
                 -D "TEST_REFERENCE=${testname}.${resultfile}.ddl"
                 -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
         )
-        set_tests_properties (H5REPACK_DMP-h5dump-${testname} PROPERTIES DEPENDS "H5REPACK_DMP-${testname}")
+        set_tests_properties (H5REPACK_DMP-h5dump-${testname} PROPERTIES
+            DEPENDS "H5REPACK_DMP-${testname}"
+        )
       endif ()
     endif ()
   endmacro ()
@@ -418,20 +403,18 @@
     else ()
       add_test (
           NAME H5REPACK_STAT-${testname}-clear-objects
-          COMMAND    ${CMAKE_COMMAND}
-              -E remove
-              testfiles/out-${statarg}.${resultfile}
-              testfiles/${resultfile}-${testname}.out
-              testfiles/${resultfile}-${testname}.out.err
+          COMMAND ${CMAKE_COMMAND} -E remove testfiles/out-${statarg}.${resultfile}
       )
-      if (last_test)
-        set_tests_properties (H5REPACK_STAT-${testname}-clear-objects PROPERTIES DEPENDS ${last_test})
-      endif ()
+      set_tests_properties (H5REPACK_STAT-${testname}-clear-objects PROPERTIES
+          FIXTURES_REQUIRED clear_h5repack
+      )
       add_test (
           NAME H5REPACK_STAT-${testname}
           COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack${tgt_ext}> ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${resultfile} ${PROJECT_BINARY_DIR}/testfiles/out-${statarg}.${resultfile}
       )
-      set_tests_properties (H5REPACK_STAT-${testname} PROPERTIES DEPENDS H5REPACK_STAT-${testname}-clear-objects)
+      set_tests_properties (H5REPACK_STAT-${testname} PROPERTIES
+          DEPENDS H5REPACK_STAT-${testname}-clear-objects
+      )
       if (NOT HDF5_ENABLE_USING_MEMCHECKER)
         add_test (
             NAME H5REPACK_STAT-h5stat-${testname}
@@ -445,7 +428,9 @@
                 -D "TEST_REFERENCE=${statarg}.${resultfile}.ddl"
                 -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
         )
-        set_tests_properties (H5REPACK_STAT-h5stat-${testname} PROPERTIES DEPENDS "H5REPACK_STAT-${testname}")
+        set_tests_properties (H5REPACK_STAT-h5stat-${testname} PROPERTIES
+            DEPENDS "H5REPACK_STAT-${testname}"
+        )
       endif ()
     endif ()
   endmacro ()
@@ -463,25 +448,25 @@
       if (NOT HDF5_ENABLE_USING_MEMCHECKER)
         add_test (
             NAME H5REPACK_VERIFY_LAYOUT-${testname}-clear-objects
-            COMMAND    ${CMAKE_COMMAND}
-                -E remove
-                testfiles/out-${testname}.${testfile}
-                testfiles/${testfile}-${testname}-v.out
-                testfiles/${testfile}-${testname}-v.out.err
+            COMMAND ${CMAKE_COMMAND} -E remove testfiles/out-${testname}.${testfile}
         )
-        if (last_test)
-          set_tests_properties (H5REPACK_VERIFY_LAYOUT-${testname}-clear-objects PROPERTIES DEPENDS ${last_test})
-        endif ()
+        set_tests_properties (H5REPACK_VERIFY_LAYOUT-${testname}-clear-objects PROPERTIES
+            FIXTURES_REQUIRED clear_h5repack
+        )
         add_test (
             NAME H5REPACK_VERIFY_LAYOUT-${testname}
             COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack${tgt_ext}> ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
         )
-        set_tests_properties (H5REPACK_VERIFY_LAYOUT-${testname} PROPERTIES DEPENDS H5REPACK_VERIFY_LAYOUT-${testname}-clear-objects)
+        set_tests_properties (H5REPACK_VERIFY_LAYOUT-${testname} PROPERTIES
+            DEPENDS H5REPACK_VERIFY_LAYOUT-${testname}-clear-objects
+        )
         add_test (
             NAME H5REPACK_VERIFY_LAYOUT-${testname}_DFF
             COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diff${tgt_ext}> ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
         )
-        set_tests_properties (H5REPACK_VERIFY_LAYOUT-${testname}_DFF PROPERTIES DEPENDS H5REPACK_VERIFY_LAYOUT-${testname})
+        set_tests_properties (H5REPACK_VERIFY_LAYOUT-${testname}_DFF PROPERTIES
+            DEPENDS H5REPACK_VERIFY_LAYOUT-${testname}
+        )
         if (NOT ${resultcode})
           add_test (
               NAME H5REPACK_VERIFY_LAYOUT-${testname}_DMP
@@ -496,7 +481,9 @@
                   -D "TEST_REFERENCE=${testfilter}"
                   -P "${HDF_RESOURCES_EXT_DIR}/grepTest.cmake"
           )
-          set_tests_properties (H5REPACK_VERIFY_LAYOUT-${testname}_DMP PROPERTIES DEPENDS H5REPACK_VERIFY_LAYOUT-${testname}_DFF)
+          set_tests_properties (H5REPACK_VERIFY_LAYOUT-${testname}_DMP PROPERTIES
+              DEPENDS H5REPACK_VERIFY_LAYOUT-${testname}_DFF
+          )
         else ()
           if ("${testfilter}" STREQUAL "CHUNKED")
             set (nottestfilter "(CONTIGUOUS|COMPACT)")
@@ -520,7 +507,9 @@
                   -D "TEST_REFERENCE=${testfilter}"
                   -P "${HDF_RESOURCES_EXT_DIR}/grepTest.cmake"
           )
-          set_tests_properties (H5REPACK_VERIFY_LAYOUT-${testname}_DMP PROPERTIES DEPENDS H5REPACK_VERIFY_LAYOUT-${testname}_DFF)
+          set_tests_properties (H5REPACK_VERIFY_LAYOUT-${testname}_DMP PROPERTIES
+              DEPENDS H5REPACK_VERIFY_LAYOUT-${testname}_DFF
+          )
         endif ()
       endif ()
     endif ()
@@ -540,21 +529,19 @@
         # Remove any output file left over from previous test run
         add_test (
             NAME H5REPACK_VERIFY_LAYOUT_VDS-${testname}-clear-objects
-            COMMAND    ${CMAKE_COMMAND}
-                -E remove
-                testfiles/out-${testname}.${testfile}
-                testfiles/${testfile}-${testname}-v.out
-                testfiles/${testfile}-${testname}-v.out.err
+            COMMAND ${CMAKE_COMMAND} -E remove testfiles/out-${testname}.${testfile}
         )
-        if (last_test)
-          set_tests_properties (H5REPACK_VERIFY_LAYOUT_VDS-${testname}-clear-objects PROPERTIES DEPENDS ${last_test})
-        endif ()
+        set_tests_properties (H5REPACK_VERIFY_LAYOUT_VDS-${testname}-clear-objects PROPERTIES
+            FIXTURES_REQUIRED clear_h5repack
+        )
         add_test (
             NAME H5REPACK_VERIFY_LAYOUT_VDS-${testname}
             COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack${tgt_ext}> ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
         )
-        set_tests_properties (H5REPACK_VERIFY_LAYOUT_VDS-${testname} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
-        set_tests_properties (H5REPACK_VERIFY_LAYOUT_VDS-${testname} PROPERTIES DEPENDS H5REPACK_VERIFY_LAYOUT_VDS-${testname}-clear-objects)
+        set_tests_properties (H5REPACK_VERIFY_LAYOUT_VDS-${testname} PROPERTIES
+            WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
+            DEPENDS H5REPACK_VERIFY_LAYOUT_VDS-${testname}-clear-objects
+        )
         add_test (
             NAME H5REPACK_VERIFY_LAYOUT_VDS-${testname}_DMP
             COMMAND "${CMAKE_COMMAND}"
@@ -567,8 +554,10 @@
                 -D "TEST_REFERENCE=${testfile}-${testname}-v.ddl"
                 -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
         )
-        set_tests_properties (H5REPACK_VERIFY_LAYOUT_VDS-${testname}_DMP PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
-        set_tests_properties (H5REPACK_VERIFY_LAYOUT_VDS-${testname}_DMP PROPERTIES DEPENDS H5REPACK_VERIFY_LAYOUT_VDS-${testname})
+        set_tests_properties (H5REPACK_VERIFY_LAYOUT_VDS-${testname}_DMP PROPERTIES
+            WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
+            DEPENDS H5REPACK_VERIFY_LAYOUT_VDS-${testname}
+        )
       endif ()
     endif ()
   endmacro ()
@@ -578,20 +567,18 @@
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
       add_test (
           NAME H5REPACK_VERIFY_SUPERBLOCK-${testname}-clear-objects
-          COMMAND    ${CMAKE_COMMAND}
-              -E remove
-              testfiles/out-${testname}.${testfile}
-              testfiles/${testfile}-${testname}-v.out
-              testfiles/${testfile}-${testname}-v.out.err
+          COMMAND ${CMAKE_COMMAND} -E remove testfiles/out-${testname}.${testfile}
       )
-      if (last_test)
-        set_tests_properties (H5REPACK_VERIFY_SUPERBLOCK-${testname}-clear-objects PROPERTIES DEPENDS ${last_test})
-      endif ()
+      set_tests_properties (H5REPACK_VERIFY_SUPERBLOCK-${testname}-clear-objects PROPERTIES
+          FIXTURES_REQUIRED clear_h5repack
+      )
       add_test (
           NAME H5REPACK_VERIFY_SUPERBLOCK-${testname}
           COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack${tgt_ext}> -j;${lowbound};-k;${highbound} ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
       )
-      set_tests_properties (H5REPACK_VERIFY_SUPERBLOCK-${testname} PROPERTIES DEPENDS H5REPACK_VERIFY_SUPERBLOCK-${testname}-clear-objects)
+      set_tests_properties (H5REPACK_VERIFY_SUPERBLOCK-${testname} PROPERTIES
+          DEPENDS H5REPACK_VERIFY_SUPERBLOCK-${testname}-clear-objects
+      )
       add_test (
           NAME H5REPACK_VERIFY_SUPERBLOCK-${testname}_DMP
           COMMAND "${CMAKE_COMMAND}"
@@ -605,28 +592,27 @@
               -D "TEST_REFERENCE=SUPERBLOCK_VERSION ${superblock}"
               -P "${HDF_RESOURCES_EXT_DIR}/grepTest.cmake"
       )
-      set_tests_properties (H5REPACK_VERIFY_SUPERBLOCK-${testname}_DMP PROPERTIES DEPENDS H5REPACK_VERIFY_SUPERBLOCK-${testname})
+      set_tests_properties (H5REPACK_VERIFY_SUPERBLOCK-${testname}_DMP PROPERTIES
+          DEPENDS H5REPACK_VERIFY_SUPERBLOCK-${testname}
+      )
     endif ()
   endmacro ()
 
   macro (ADD_H5_VERIFY_INVALIDBOUNDS testname resultcode lowbound highbound)
       add_test (
           NAME ADD_H5_VERIFY_INVALIDBOUNDS-h5repack-${testname}-clear-objects
-          COMMAND    ${CMAKE_COMMAND}
-              -E remove
-              testfiles/out-${testname}.${testfile}
+          COMMAND ${CMAKE_COMMAND} -E remove testfiles/out-${testname}.${testfile}
       )
-      if (last_test)
-        set_tests_properties (ADD_H5_VERIFY_INVALIDBOUNDS-h5repack-${testname}-clear-objects PROPERTIES DEPENDS ${last_test})
-      endif ()
+      set_tests_properties (ADD_H5_VERIFY_INVALIDBOUNDS-h5repack-${testname}-clear-objects PROPERTIES
+          FIXTURES_REQUIRED clear_h5repack
+      )
       add_test (
           NAME ADD_H5_VERIFY_INVALIDBOUNDS-h5repack-${testname}
           COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack${tgt_ext}> -j;${lowbound};-k;${highbound} ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
       )
-      set_tests_properties (
-          ADD_H5_VERIFY_INVALIDBOUNDS-h5repack-${testname} PROPERTIES
-              DEPENDS ADD_H5_VERIFY_INVALIDBOUNDS-h5repack-${testname}-clear-objects
-              WILL_FAIL "true"
+      set_tests_properties (ADD_H5_VERIFY_INVALIDBOUNDS-h5repack-${testname} PROPERTIES
+          DEPENDS ADD_H5_VERIFY_INVALIDBOUNDS-h5repack-${testname}-clear-objects
+          WILL_FAIL "true"
       )
   endmacro ()
 
@@ -634,28 +620,33 @@
       # Remove any output file left over from previous test run
       add_test (
           NAME H5REPACK_META-${testname}_N-clear-objects
-          COMMAND    ${CMAKE_COMMAND}
-              -E remove
+          COMMAND ${CMAKE_COMMAND} -E remove
               testfiles/out-${testname}_N.${testname}.h5
               testfiles/out-${testname}_M.${testname}.h5
       )
-      if (last_test)
-        set_tests_properties (H5REPACK_META-${testname}_N-clear-objects PROPERTIES DEPENDS ${last_test})
-      endif ()
+      set_tests_properties (H5REPACK_META-${testname}_N-clear-objects PROPERTIES
+          FIXTURES_REQUIRED clear_h5repack
+      )
       add_test (
           NAME H5REPACK_META-${testname}_N
           COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack${tgt_ext}> ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}_N.${testname}.h5
       )
-      set_tests_properties (H5REPACK_META-${testname}_N PROPERTIES DEPENDS H5REPACK_META-${testname}_N-clear-objects)
+      set_tests_properties (H5REPACK_META-${testname}_N PROPERTIES
+          DEPENDS H5REPACK_META-${testname}_N-clear-objects
+      )
       add_test (
           NAME H5REPACK_META-${testname}_M
           COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack${tgt_ext}> ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}_M.${testname}.h5
       )
-      set_tests_properties (H5REPACK_META-${testname}_M PROPERTIES DEPENDS H5REPACK_META-${testname}_N)
+      set_tests_properties (H5REPACK_META-${testname}_M PROPERTIES
+          DEPENDS H5REPACK_META-${testname}_N
+      )
 
       add_test (NAME H5REPACK_META-${testname} COMMAND ${CMAKE_COMMAND} -E compare_files ${PROJECT_BINARY_DIR}/testfiles/out-${testname}_N.${testname}.h5 ${PROJECT_BINARY_DIR}/testfiles/out-${testname}_M.${testname}.h5)
-      set_tests_properties (H5REPACK_META-${testname} PROPERTIES WILL_FAIL "true")
-      set_tests_properties (H5REPACK_META-${testname} PROPERTIES DEPENDS H5REPACK_META-${testname}_M)
+      set_tests_properties (H5REPACK_META-${testname} PROPERTIES
+          WILL_FAIL "true"
+          DEPENDS H5REPACK_META-${testname}_M
+      )
   endmacro ()
 
   macro (ADD_H5_UD_TEST testname resultcode resultfile)
@@ -663,17 +654,11 @@
       # Remove any output file left over from previous test run
       add_test (
           NAME H5REPACK_UD-${testname}-clear-objects
-          COMMAND    ${CMAKE_COMMAND}
-              -E remove
-              testfiles/out-${testname}.${resultfile}
-              testfiles/${testname}.${resultfile}.out
-              testfiles/${testname}.${resultfile}.out.err
-              testfiles/${resultfile}-${testname}.out
-              testfiles/${resultfile}-${testname}.out.err
+          COMMAND ${CMAKE_COMMAND} -E remove testfiles/out-${testname}.${resultfile}
       )
-      if (last_test)
-        set_tests_properties (H5REPACK_UD-${testname}-clear-objects PROPERTIES DEPENDS ${last_test})
-      endif ()
+      set_tests_properties (H5REPACK_UD-${testname}-clear-objects PROPERTIES
+          FIXTURES_REQUIRED clear_h5repack
+      )
       add_test (
           NAME H5REPACK_UD-${testname}
           COMMAND "${CMAKE_COMMAND}"
@@ -690,7 +675,9 @@
               -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}"
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
-      set_tests_properties (H5REPACK_UD-${testname} PROPERTIES DEPENDS H5REPACK_UD-${testname}-clear-objects)
+      set_tests_properties (H5REPACK_UD-${testname} PROPERTIES
+          DEPENDS H5REPACK_UD-${testname}-clear-objects
+      )
       add_test (
           NAME H5REPACK_UD-${testname}-h5dump
           COMMAND "${CMAKE_COMMAND}"
@@ -706,7 +693,9 @@
               -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}"
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
-      set_tests_properties (H5REPACK_UD-${testname}-h5dump PROPERTIES DEPENDS "H5REPACK_UD-${testname}")
+      set_tests_properties (H5REPACK_UD-${testname}-h5dump PROPERTIES
+          DEPENDS "H5REPACK_UD-${testname}"
+      )
     endif ()
   endmacro ()
 
@@ -750,67 +739,6 @@
   if (HDF5_ENABLE_USING_MEMCHECKER)
     # Remove any output file left over from previous test run
     set (LIST_TO_CLEAR
-        h5dump-help.out
-        h5repack_layout.h5-chunk_18x13-v.out
-        h5repack_layout.h5-chunk_18x13-v.out.err
-        h5repack_layout.h5-chunk_20x10-v.out
-        h5repack_layout.h5-chunk_20x10-v.out.err
-        h5repack_layout.h5-chunk_compa-v.out
-        h5repack_layout.h5-chunk_compa-v.out.err
-        h5repack_layout.h5-chunk_conti-v.out
-        h5repack_layout.h5-chunk_conti-v.out.err
-        h5repack_layout.h5-compa-v.out
-        h5repack_layout.h5-compa-v.out.err
-        h5repack_layout.h5-conti-v.out
-        h5repack_layout.h5-conti-v.out.err
-        h5repack_layout.h5-deflate_limit.out
-        h5repack_layout.h5-deflate_limit.out.err
-        h5repack_layout.h5-dset2_chunk_20x10-v.out
-        h5repack_layout.h5-dset2_chunk_20x10-v.out.err
-        h5repack_layout.h5-dset2_chunk_20x10-errstk.out
-        h5repack_layout.h5-dset2_chunk_20x10-errstk.out.err
-        h5repack_layout.h5-dset2_compa-v.out
-        h5repack_layout.h5-dset2_compa-v.out.err
-        h5repack_layout.h5-dset2_conti-v.out
-        h5repack_layout.h5-dset2_conti-v.out.err
-        h5repack_layout.h5-dset_compa_chunk-v.out
-        h5repack_layout.h5-dset_compa_chunk-v.out.err
-        h5repack_layout.h5-dset_compa_compa-v.out
-        h5repack_layout.h5-dset_compa_compa-v.out.err
-        h5repack_layout.h5-dset_compa_conti-v.out
-        h5repack_layout.h5-dset_compa_conti-v.out.err
-        h5repack_layout.h5-dset_conti_chunk-v.out
-        h5repack_layout.h5-dset_conti_chunk-v.out.err
-        h5repack_layout.h5-dset_conti_compa-v.out
-        h5repack_layout.h5-dset_conti_compa-v.out.err
-        h5repack_layout.h5-dset_conti_conti-v.out
-        h5repack_layout.h5-dset_conti_conti-v.out.err
-        h5repack_layout.h5-layout_long_switches-v.out
-        h5repack_layout.h5-layout_long_switches-v.out.err
-        h5repack_layout.h5-layout_short_switches-v.out
-        h5repack_layout.h5-layout_short_switches-v.out.err
-        h5repack_layout.h5-plugin_test.out
-        h5repack_layout.h5-plugin_test.out.err
-        h5repack_layout2.h5-contig_small_compa-v.out
-        h5repack_layout2.h5-contig_small_compa-v.out.err
-        h5repack_layout2.h5-contig_small_fixed_compa-v.out
-        h5repack_layout2.h5-contig_small_fixed_compa-v.out.err
-        h5repack_layout3.h5-ckdim_biger-v.out
-        h5repack_layout3.h5-ckdim_biger-v.out.err
-        h5repack_layout3.h5-ckdim_smaller-v.out
-        h5repack_layout3.h5-ckdim_smaller-v.out.err
-        h5repack_layout3.h5-chunk2chunk-v.out
-        h5repack_layout3.h5-chunk2chunk-v.out.err
-        h5repack_layout3.h5-chunk2compa-v.out
-        h5repack_layout3.h5-chunk2compa-v.out.err
-        h5repack_layout3.h5-chunk2conti-v.out
-        h5repack_layout3.h5-chunk2conti-v.out.err
-        h5repack_layout3.h5-error1-v.out
-        h5repack_layout3.h5-error1-v.out.err
-        h5repack_layout3.h5-error2-v.out
-        h5repack_layout3.h5-error2-v.out.err
-        h5repack_layout3.h5-error3-v.out
-        h5repack_layout3.h5-error3-v.out.err
         out-family.tfamily%05d.h5
         out-HDFFV-7840.h5diff_attr1.h5
         out-attr.h5repack_attr.h5
@@ -919,10 +847,10 @@
         NAME H5REPACK-clearall-objects
         COMMAND ${CMAKE_COMMAND} -E remove ${LIST_TO_CLEAR}
     )
-    set_tests_properties (H5REPACK-clearall-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
-    if (last_test)
-      set_tests_properties (H5REPACK-clearall-objects PROPERTIES DEPENDS ${last_test})
-    endif ()
+    set_tests_properties (H5REPACK-clearall-objects PROPERTIES
+        FIXTURES_SETUP clear_h5repack
+        WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
+    )
   endif ()
 
   ADD_HELP_TEST(help 0 -h)

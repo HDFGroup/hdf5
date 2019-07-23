@@ -65,9 +65,7 @@
       # Remove any output file left over from previous test run
       add_test (
           NAME H5COPY_F-${testname}-clear-objects
-          COMMAND    ${CMAKE_COMMAND}
-              -E remove
-              ./testfiles/${testname}.out.h5
+          COMMAND ${CMAKE_COMMAND} -E remove ./testfiles/${testname}.out.h5
       )
     endif ()
 
@@ -101,9 +99,7 @@
       # Remove any output file left over from previous test run
       add_test (
           NAME H5COPY-${testname}-clear-objects
-          COMMAND    ${CMAKE_COMMAND}
-              -E remove
-              ./testfiles/${testname}.out.h5
+          COMMAND ${CMAKE_COMMAND} -E remove ./testfiles/${testname}.out.h5
       )
     endif ()
 
@@ -147,9 +143,7 @@
       # Remove any output file left over from previous test run
       add_test (
           NAME H5COPY-${testname}-clear-objects
-          COMMAND    ${CMAKE_COMMAND}
-              -E remove
-              ./testfiles/${testname}.out.h5
+          COMMAND ${CMAKE_COMMAND} -E remove ./testfiles/${testname}.out.h5
       )
     endif ()
 
@@ -188,9 +182,7 @@
       # Remove any output file left over from previous test run
       add_test (
           NAME H5COPY_SAME-${testname}-clear-objects
-          COMMAND    ${CMAKE_COMMAND}
-              -E remove
-              ./testfiles/${testname}.out.h5
+          COMMAND ${CMAKE_COMMAND} -E remove ./testfiles/${testname}.out.h5
       )
     endif ()
 
@@ -242,11 +234,7 @@
       # Remove any output file left over from previous test run
       add_test (
           NAME H5COPY-CMP-${testname}-clear-objects
-          COMMAND    ${CMAKE_COMMAND}
-              -E remove
-              ./testfiles/${testname}.out.h5
-              ./testfiles/${testname}.out.out
-              ./testfiles/${testname}.out.out.err
+          COMMAND ${CMAKE_COMMAND} -E remove ./testfiles/${testname}.out.h5
       )
       add_test (
           NAME H5COPY-CMP-${testname}
@@ -271,13 +259,7 @@
       # Remove any output file left over from previous test run
       add_test (
           NAME H5COPY_UD-${testname}-clear-objects
-          COMMAND    ${CMAKE_COMMAND}
-              -E remove
-              testfiles/${testname}.out.h5
-              testfiles/${infile}.out
-              testfiles/${infile}.out.err
-              testfiles/${testname}.out.h5.out
-              testfiles/${testname}.out.h5.out.err
+          COMMAND ${CMAKE_COMMAND} -E remove testfiles/${testname}.out.h5
       )
       if (${resultcode} EQUAL 2)
         add_test (
@@ -340,13 +322,7 @@
       # Remove any output file left over from previous test run
       add_test (
           NAME H5COPY_UD_ERR-${testname}-clearall-objects
-          COMMAND    ${CMAKE_COMMAND}
-              -E remove
-              testfiles/${testname}_ERR.out.h5
-              testfiles/${infile}_ERR.out
-              testfiles/${infile}_ERR.out.err
-              testfiles/${testname}_ERR.out.h5.out
-              testfiles/${testname}_ERR.out.h5.out.err
+          COMMAND ${CMAKE_COMMAND} -E remove testfiles/${testname}_ERR.out.h5
       )
       if (${resultcode} EQUAL 2)
         add_test (
@@ -424,8 +400,7 @@
     # Remove any output file left over from previous test run
     add_test (
         NAME H5COPY-clearall-objects
-        COMMAND    ${CMAKE_COMMAND}
-            -E remove
+        COMMAND ${CMAKE_COMMAND} -E remove
             simple.out.h5
             chunk.out.h5
             compact.out.h5
@@ -458,8 +433,6 @@
             samefile1.out.h5
             samefile2.out.h5
             h5copy_misc1.out.h5
-            h5copy_misc1.out.out
-            h5copy_misc1.out.out.err
     )
     set_tests_properties (H5COPY-clearall-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
     if (last_test)

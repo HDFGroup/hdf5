@@ -148,18 +148,8 @@
       if (${resultcode} EQUAL 1)
         set_tests_properties (H5LS-${resultfile} PROPERTIES WILL_FAIL "true")
       endif ()
-      if (last_test)
-        set_tests_properties (H5LS-${resultfile} PROPERTIES DEPENDS ${last_test})
-      endif ()
     else ()
       # Remove any output file left over from previous test run
-      add_test (
-          NAME H5LS-${resultfile}-clear-objects
-          COMMAND    ${CMAKE_COMMAND}
-              -E remove
-              testfiles/${resultfile}.out
-              testfiles/${resultfile}.out.err
-      )
       add_test (
           NAME H5LS-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
@@ -172,7 +162,6 @@
               -D "TEST_REFERENCE=${resultfile}.ls"
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
-      set_tests_properties (H5LS-${resultfile} PROPERTIES DEPENDS H5LS-${resultfile}-clear-objects)
     endif ()
   endmacro ()
 
@@ -184,18 +173,7 @@
       if (${resultcode} EQUAL 1)
         set_tests_properties (H5LS-${resultfile} PROPERTIES WILL_FAIL "true")
       endif ()
-      if (last_test)
-        set_tests_properties (H5LS-${resultfile} PROPERTIES DEPENDS ${last_test})
-      endif ()
     else ()
-      # Remove any output file left over from previous test run
-      add_test (
-          NAME H5LS-${resultfile}-clear-objects
-          COMMAND    ${CMAKE_COMMAND}
-              -E remove
-              testfiles/${resultfile}.out
-              testfiles/${resultfile}.out.err
-      )
       add_test (
           NAME H5LS-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
@@ -209,20 +187,11 @@
               -D "TEST_ERRREF=${resultfile}.err"
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
-      set_tests_properties (H5LS-${resultfile} PROPERTIES DEPENDS H5LS-${resultfile}-clear-objects)
     endif ()
   endmacro ()
 
   macro (ADD_H5_UD_TEST testname resultcode resultfile)
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
-      # Remove any output file left over from previous test run
-      add_test (
-          NAME H5LS_UD-${testname}-clear-objects
-          COMMAND    ${CMAKE_COMMAND}
-              -E remove
-              testfiles/${resultfile}.out
-              testfiles/${resultfile}.out.err
-      )
       add_test (
           NAME H5LS_UD-${testname}
           COMMAND "${CMAKE_COMMAND}"
@@ -238,7 +207,6 @@
               -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}"
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
-      set_tests_properties (H5LS_UD-${testname} PROPERTIES DEPENDS H5LS_UD-${testname}-clear-objects)
     endif ()
   endmacro ()
 
@@ -247,128 +215,6 @@
 ###           T H E   T E S T S                                            ###
 ##############################################################################
 ##############################################################################
-
-  if (HDF5_ENABLE_USING_MEMCHECKER)
-    # Remove any output file left over from previous test run
-    add_test (
-      NAME H5LS-clearall-objects
-      COMMAND    ${CMAKE_COMMAND}
-          -E remove
-          help-1.out
-          help-1.out.err
-          help-2.out
-          help-2.out.err
-          help-3.out
-          help-3.out.err
-          nosuchfile.out
-          nosuchfile.out.err
-          tall-1.out
-          tall-1.out.err
-          tall-2.out
-          tall-2.out.err
-          tarray1.out
-          tarray1.out.err
-          tattr2.out
-          tattr2.out.err
-          tcomp-1.out
-          tcomp-1.out.err
-          tdataregbe.out
-          tdataregbe.out.err
-          tdataregle.out
-          tdataregle.out.err
-          tdset-1.out
-          tdset-1.out.err
-          tempty.out
-          tempty.out.err
-          textlink-1.out
-          textlink-1.out.err
-          textlinksrc-1.out
-          textlinksrc-1.out.err
-          textlinksrc-2.out
-          textlinksrc-2.out.err
-          textlinksrc-3.out
-          textlinksrc-3.out.err
-          textlinksrc-4.out
-          textlinksrc-4.out.err
-          textlinksrc-5.out
-          textlinksrc-5.out.err
-          textlinksrc-6.out
-          textlinksrc-6.out.err
-          textlinksrc-7.out
-          textlinksrc-7.out.err
-          textlinksrc-1-old.out
-          textlinksrc-1-old.out.err
-          textlinksrc-2-old.out
-          textlinksrc-2-old.out.err
-          textlinksrc-3-old.out
-          textlinksrc-3-old.out.err
-          textlinksrc-6-old.out
-          textlinksrc-6-old.out.err
-          textlinksrc-7-old.out
-          textlinksrc-7-old.out.err
-          tgrp_comments.out
-          tgrp_comments.out.err
-          tgrpnullspace.out
-          tgrpnullspace.out.err
-          tsoftlinks-1.out
-          tsoftlinks-1.out.err
-          tsoftlinks-2.out
-          tsoftlinks-2.out.err
-          tsoftlinks-3.out
-          tsoftlinks-3.out.err
-          tsoftlinks-4.out
-          tsoftlinks-4.out.err
-          tsoftlinks-5.out
-          tsoftlinks-5.out.err
-          textlinksrc-nodangle-1.out
-          textlinksrc-nodangle-1.out.err
-          textlinksrc-nodangle-2.out
-          textlinksrc-nodangle-2.out.err
-          tsoftlinks-nodangle-1.out
-          tsoftlinks-nodangle-1.out.err
-          thlinks-nodangle-1.out
-          thlinks-nodangle-1.out.err
-          tgroup.out
-          tgroup.out.err
-          tgroup-1.out
-          tgroup-1.out.err
-          tgroup-2.out
-          tgroup-2.out.err
-          tgroup-3.out
-          tgroup-3.out.err
-          thlink-1.out
-          thlink-1.out.err
-          tloop-1.out
-          tloop-1.out.err
-          tnestcomp-1.out
-          tnestcomp-1.out.err
-          tnestcomp-2.out
-          tnestcomp-2.out.err
-          tnestcomp-3.out
-          tnestcomp-3.out.err
-          tnestcomp-4.out
-          tnestcomp-4.out.err
-          tsaf.out
-          tsaf.out.err
-          tslink-1.out
-          tslink-1.out.err
-          tstr-1.out
-          tstr-1.out.err
-          tudlink-1.out
-          tudlink-1.out.err
-          tvldtypes1.out
-          tvldtypes1.out.err
-          tvldtypes2le.out
-          tvldtypes2le.out.err
-          tvldtypes2be.out
-          tvldtypes2be.out.err
-    )
-    set_tests_properties (H5LS-clearall-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
-    if (last_test)
-      set_tests_properties (H5LS-clearall-objects PROPERTIES DEPENDS ${last_test})
-    endif ()
-    set (last_test "H5LS-clearall-objects")
-  endif ()
 
 # See which filters are usable (and skip tests for filters we
 # don't have).  Do this by searching H5pubconf.h to see which

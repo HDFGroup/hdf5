@@ -43,20 +43,32 @@ add_test (
         image.gif
         image24.gif
 )
+set_tests_properties (HL_TOOLS-clear-objects PROPERTIES FIXTURES_SETUP clear_tools_hl)
 
 add_test (NAME HL_TOOLS_gif2h5 COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:gif2h5${tgt_ext}> testfiles/image1.gif image1.h5)
-set_tests_properties (HL_TOOLS_gif2h5 PROPERTIES DEPENDS HL_TOOLS-clear-objects)
+set_tests_properties (HL_TOOLS_gif2h5 PROPERTIES
+    FIXTURES_REQUIRED clear_tools_hl
+)
 
 add_test (NAME HL_TOOLS_h52gif COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h52gif${tgt_ext}> testfiles/h52giftst.h5 image1.gif -i image)
-set_tests_properties (HL_TOOLS_h52gif PROPERTIES DEPENDS HL_TOOLS-clear-objects)
+set_tests_properties (HL_TOOLS_h52gif PROPERTIES
+    FIXTURES_REQUIRED clear_tools_hl
+)
 
 add_test (NAME HL_TOOLS_h52gif_none COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h52gif${tgt_ext}> testfiles/h52giftst.h5 image.gif -i nosuch_image)
-set_tests_properties (HL_TOOLS_h52gif_none PROPERTIES WILL_FAIL "true")
-set_tests_properties (HL_TOOLS_h52gif_none PROPERTIES DEPENDS HL_TOOLS-clear-objects)
+set_tests_properties (HL_TOOLS_h52gif_none PROPERTIES
+    WILL_FAIL "true"
+    FIXTURES_REQUIRED clear_tools_hl
+)
 
 #add_test (NAME HL_TOOLS_h52gifpal COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h52gif${tgt_ext}> testfiles/h52giftst.h5 image.gif -i palette)
-#set_tests_properties (HL_TOOLS_h52gifpal PROPERTIES WILL_FAIL "true")
+#set_tests_properties (HL_TOOLS_h52gifpal PROPERTIES
+#    WILL_FAIL "true"
+#    FIXTURES_REQUIRED clear_tools_hl
+#)
 
 add_test (NAME HL_TOOLS_h52gif24bits COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h52gif${tgt_ext}> testfiles/ex_image2.h5 image24.gif -i image24bitpixel)
-set_tests_properties (HL_TOOLS_h52gif24bits PROPERTIES WILL_FAIL "true")
-set_tests_properties (HL_TOOLS_h52gif24bits PROPERTIES DEPENDS HL_TOOLS-clear-objects)
+set_tests_properties (HL_TOOLS_h52gif24bits PROPERTIES
+    WILL_FAIL "true"
+    FIXTURES_REQUIRED clear_tools_hl
+)

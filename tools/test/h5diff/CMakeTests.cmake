@@ -374,17 +374,6 @@
         set_tests_properties (H5DIFF-${resultfile} PROPERTIES DEPENDS ${last_test})
       endif ()
     else ()
-      # Remove any output file left over from previous test run
-      add_test (
-          NAME H5DIFF-${resultfile}-clear-objects
-          COMMAND    ${CMAKE_COMMAND}
-              -E remove
-              testfiles/${resultfile}.out
-              testfiles/${resultfile}.out.err
-      )
-      if (last_test)
-        set_tests_properties (H5DIFF-${resultfile}-clear-objects PROPERTIES DEPENDS ${last_test})
-      endif ()
       add_test (
           NAME H5DIFF-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
@@ -398,7 +387,9 @@
               -D "TEST_APPEND=EXIT CODE:"
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
-      set_tests_properties (H5DIFF-${resultfile} PROPERTIES DEPENDS H5DIFF-${resultfile}-clear-objects)
+      if (last_test)
+        set_tests_properties (H5DIFF-${resultfile} PROPERTIES DEPENDS ${last_test})
+      endif ()
     endif ()
     if (H5_HAVE_PARALLEL)
       ADD_PH5_TEST (${resultfile} ${resultcode} ${ARGN})
@@ -417,17 +408,6 @@
         set_tests_properties (MPI_TEST_H5DIFF-${resultfile} PROPERTIES DEPENDS ${last_test})
       endif ()
     else ()
-      # Remove any output file left over from previous test run
-      add_test (
-          NAME MPI_TEST_H5DIFF-${resultfile}-clear-objects
-          COMMAND    ${CMAKE_COMMAND}
-              -E remove
-              PAR/testfiles/${resultfile}.out
-              PAR/testfiles/${resultfile}.out.err
-      )
-      if (last_test)
-        set_tests_properties (MPI_TEST_H5DIFF-${resultfile}-clear-objects PROPERTIES DEPENDS ${last_test})
-      endif ()
       add_test (
           NAME MPI_TEST_H5DIFF-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
@@ -443,21 +423,15 @@
               -D "TEST_SORT_COMPARE=TRUE"
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
-      set_tests_properties (MPI_TEST_H5DIFF-${resultfile} PROPERTIES DEPENDS MPI_TEST_H5DIFF-${resultfile}-clear-objects)
+      if (last_test)
+        set_tests_properties (MPI_TEST_H5DIFF-${resultfile} PROPERTIES DEPENDS ${last_test})
+      endif ()
       set (last_test "PH5DIFF-${resultfile}")
     endif ()
   endmacro ()
 
   macro (ADD_H5_UD_TEST testname resultcode resultfile)
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
-      # Remove any output file left over from previous test run
-      add_test (
-          NAME H5DIFF_UD-${testname}-clear-objects
-          COMMAND    ${CMAKE_COMMAND}
-              -E remove
-              testfiles/${resultfile}.out
-              testfiles/${resultfile}.out.err
-      )
       if (${resultcode} EQUAL 2)
         add_test (
             NAME H5DIFF_UD-${testname}
@@ -493,7 +467,9 @@
                 -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
         )
       endif ()
-      set_tests_properties (H5DIFF_UD-${testname} PROPERTIES DEPENDS H5DIFF_UD-${testname}-clear-objects)
+      if (last_test)
+        set_tests_properties (H5DIFF_UD-${testname} PROPERTIES DEPENDS ${last_test})
+      endif ()
     endif ()
   endmacro ()
 

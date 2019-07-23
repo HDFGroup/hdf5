@@ -108,11 +108,7 @@
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
       add_test (
           NAME H5FC-${testname}-clear-objects
-          COMMAND    ${CMAKE_COMMAND}
-              -E remove
-              ./testfiles/outtmp.h5
-              ./testfiles/${testname}.out
-              ./testfiles/${testname}.out.err
+          COMMAND ${CMAKE_COMMAND} -E remove ./testfiles/outtmp.h5
       )
       if (last_test)
         set_tests_properties (H5FC-${testname}-clear-objects PROPERTIES DEPENDS ${last_test})
@@ -120,8 +116,7 @@
       if (${testfile})
           add_test (
               NAME H5FC-${testname}-${testfile}-tmpfile
-              COMMAND    ${CMAKE_COMMAND}
-                  -E copy_if_different ${HDF5_TOOLS_TEST_H5FC_SOURCE_DIR}/testfiles/${testfile} ./testfiles/outtmp.h5
+              COMMAND ${CMAKE_COMMAND} -E copy_if_different ${HDF5_TOOLS_TEST_H5FC_SOURCE_DIR}/testfiles/${testfile} ./testfiles/outtmp.h5
           )
           set_tests_properties (H5FC-${testname}-${testfile}-tmpfile PROPERTIES DEPENDS "H5FC-${testname}-clear-objects")
           add_test (
@@ -163,19 +158,14 @@
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
       add_test (
           NAME H5FC-${testname}-clear-objects
-          COMMAND    ${CMAKE_COMMAND}
-              -E remove
-              ./testfiles/outtmp.h5
-              ./testfiles/${testname}.out
-              ./testfiles/${testname}.out.err
+          COMMAND ${CMAKE_COMMAND} -E remove ./testfiles/outtmp.h5
       )
       if (last_test)
         set_tests_properties (H5FC-${testname}-clear-objects PROPERTIES DEPENDS ${last_test})
       endif ()
       add_test (
           NAME H5FC-${testname}-${testfile}-tmpfile
-          COMMAND    ${CMAKE_COMMAND}
-              -E copy_if_different ${HDF5_TOOLS_TEST_H5FC_SOURCE_DIR}/testfiles/${testfile} ./testfiles/outtmp.h5
+          COMMAND ${CMAKE_COMMAND} -E copy_if_different ${HDF5_TOOLS_TEST_H5FC_SOURCE_DIR}/testfiles/${testfile} ./testfiles/outtmp.h5
       )
       set_tests_properties (H5FC-${testname}-${testfile}-tmpfile PROPERTIES DEPENDS "H5FC-${testname}-clear-objects")
       add_test (
@@ -200,19 +190,14 @@
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
       add_test (
           NAME H5FC-${testname}-clear-objects
-          COMMAND    ${CMAKE_COMMAND}
-              -E remove
-              ./testfiles/outtmp.h5
-              ./testfiles/${testname}.out
-              ./testfiles/${testname}.out.err
+          COMMAND ${CMAKE_COMMAND} -E remove ./testfiles/outtmp.h5
       )
       if (last_test)
         set_tests_properties (H5FC-${testname}-clear-objects PROPERTIES DEPENDS ${last_test})
       endif ()
       add_test (
           NAME H5FC-${testname}-${testfile}-tmpfile
-          COMMAND    ${CMAKE_COMMAND}
-              -E copy_if_different ${HDF5_TOOLS_TEST_H5FC_SOURCE_DIR}/testfiles/${testfile} ./testfiles/outtmp.h5
+          COMMAND ${CMAKE_COMMAND} -E copy_if_different ${HDF5_TOOLS_TEST_H5FC_SOURCE_DIR}/testfiles/${testfile} ./testfiles/outtmp.h5
       )
       set_tests_properties (H5FC-${testname}-${testfile}-tmpfile PROPERTIES DEPENDS "H5FC-${testname}-clear-objects")
       add_test (
@@ -238,19 +223,14 @@
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
       add_test (
           NAME H5FC-${testname}-clear-objects
-          COMMAND    ${CMAKE_COMMAND}
-              -E remove
-              ./testfiles/tmp.h5
-              ./testfiles/${testname}.out
-              ./testfiles/${testname}.out.err
+          COMMAND ${CMAKE_COMMAND} -E remove ./testfiles/tmp.h5
       )
       if (last_test)
         set_tests_properties (H5FC-${testname}-clear-objects PROPERTIES DEPENDS ${last_test})
       endif ()
       add_test (
           NAME H5FC-${testname}-tmpfile
-          COMMAND    ${CMAKE_COMMAND}
-              -E copy_if_different ${HDF5_TOOLS_TEST_H5FC_SOURCE_DIR}/testfiles/${testfile} testfiles/tmp.h5
+          COMMAND ${CMAKE_COMMAND} -E copy_if_different ${HDF5_TOOLS_TEST_H5FC_SOURCE_DIR}/testfiles/${testfile} testfiles/tmp.h5
       )
       set_tests_properties (H5FC-${testname}-tmpfile PROPERTIES DEPENDS "H5FC-${testname}-clear-objects")
       add_test (
@@ -286,19 +266,14 @@
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
       add_test (
           NAME H5FC-${testname}-clear-objects
-          COMMAND    ${CMAKE_COMMAND}
-              -E remove
-              ./testfiles/chktmp.h5
-              ./testfiles/${testname}.out
-              ./testfiles/${testname}.out.err
+          COMMAND ${CMAKE_COMMAND} -E remove ./testfiles/chktmp.h5
       )
       if (last_test)
         set_tests_properties (H5FC-${testname}-clear-objects PROPERTIES DEPENDS ${last_test})
       endif ()
       add_test (
           NAME H5FC-${testname}-tmpfile
-          COMMAND    ${CMAKE_COMMAND}
-              -E copy_if_different ${HDF5_TOOLS_TEST_H5FC_SOURCE_DIR}/testfiles/${testfile} testfiles/chktmp.h5
+          COMMAND ${CMAKE_COMMAND} -E copy_if_different ${HDF5_TOOLS_TEST_H5FC_SOURCE_DIR}/testfiles/${testfile} testfiles/chktmp.h5
       )
       set_tests_properties (H5FC-${testname}-tmpfile PROPERTIES DEPENDS "H5FC-${testname}-clear-objects")
       add_test (
@@ -324,25 +299,18 @@
   endmacro ()
 
   macro (ADD_H5_H5DUMP_CHECK testname)
-    # If using memchecker add tests without using scripts
+    # If using memchecker skip tests
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
       add_test (
           NAME H5FC-${testname}-clear-objects
-          COMMAND    ${CMAKE_COMMAND}
-              -E remove
-              ./testfiles/dmptmp.h5
-              ./testfiles/${testname}.out
-              ./testfiles/${testname}.out.err
-              ./testfiles/${testname}_chk.out
-              ./testfiles/${testname}_chk.out.err
+          COMMAND ${CMAKE_COMMAND} -E remove ./testfiles/dmptmp.h5
       )
       if (last_test)
         set_tests_properties (H5FC-${testname}-clear-objects PROPERTIES DEPENDS ${last_test})
       endif ()
       add_test (
           NAME H5FC-${testname}-tmpfile
-          COMMAND    ${CMAKE_COMMAND}
-              -E copy_if_different ${HDF5_TOOLS_TEST_H5FC_SOURCE_DIR}/testfiles/${testname}.h5 testfiles/dmptmp.h5
+          COMMAND ${CMAKE_COMMAND} -E copy_if_different ${HDF5_TOOLS_TEST_H5FC_SOURCE_DIR}/testfiles/${testname}.h5 testfiles/dmptmp.h5
       )
       set_tests_properties (H5FC-${testname}-tmpfile PROPERTIES DEPENDS "H5FC-${testname}-clear-objects")
       add_test (
@@ -385,60 +353,7 @@
     # Remove any output file left over from previous test run
     add_test (
       NAME H5FC-clearall-objects
-      COMMAND    ${CMAKE_COMMAND}
-          -E remove
-          h5fc_help.out
-          h5fc_help.out.err
-          h5fc_nooption.out
-          h5fc_nooption.out.err
-          h5fc_nonexistfile.out
-          h5fc_nonexistfile.out.err
-          h5fc_d_file.out
-          h5fc_d_file.out.err
-          h5fc_d_file-d.out
-          h5fc_d_file-d.out.err
-          h5fc_dname.out
-          h5fc_dname.out.err
-          h5fc_nonexistdset_file.out
-          h5fc_nonexistdset_file.out.err
-          h5fc_v_non_chunked.out
-          h5fc_v_non_chunked.out.err
-          h5fc_v_bt1.out
-          h5fc_v_bt1.out.err
-          h5fc_v_ndata_bt1.out
-          h5fc_v_ndata_bt1.out.err
-          h5fc_v_all.out
-          h5fc_v_all.out.err
-          h5fc_v_n_1d.out
-          h5fc_v_n_1d.out.err
-          h5fc_v_n_all.out
-          h5fc_v_n_all.out.err
-          h5fc_ext1_i.out
-          h5fc_ext1_i.out.err
-          h5fc_ext1_s.out
-          h5fc_ext1_s.out.err
-          h5fc_ext1_f.out
-          h5fc_ext1_f.out.err
-          h5fc_ext2_if.out
-          h5fc_ext2_if.out.err
-          h5fc_ext2_is.out
-          h5fc_ext2_is.out.err
-          h5fc_ext2_sf.out
-          h5fc_ext2_sf.out.err
-          h5fc_ext3_isf.out
-          h5fc_ext3_isf.out.err
-          old_h5fc_ext1_i.out
-          old_h5fc_ext1_i.out.err
-          old_h5fc_ext1_s.out
-          old_h5fc_ext1_s.out.err
-          old_h5fc_ext1_f.out
-          old_h5fc_ext1_f.out.err
-          old_h5fc_ext2_if.out
-          old_h5fc_ext2_is.out.err
-          old_h5fc_ext2_is.out
-          old_h5fc_ext2_sf.out.err
-          old_h5fc_ext3_isf.out
-          old_h5fc_ext3_isf.out.err
+      COMMAND ${CMAKE_COMMAND} -E remove
           outtmp.h5
           tmp.h5
           chktmp.h5
