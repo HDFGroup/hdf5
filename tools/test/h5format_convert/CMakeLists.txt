@@ -22,7 +22,7 @@ if (HDF5_BUILD_GENERATORS AND NOT ONLY_SHARED_LIBS)
   target_link_libraries (h5fc_gentest PRIVATE ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
   set_target_properties (h5fc_gentest PROPERTIES FOLDER generator/tools)
 
-  #add_test (NAME h5fc_gentest COMMAND $<TARGET_FILE:h5fc_gentest>)
+  #add_test (NAME h5fc_gentest COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5fc_gentest>)
 endif ()
 
 include (CMakeTests.cmake)

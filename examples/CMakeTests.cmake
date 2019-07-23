@@ -77,9 +77,10 @@
 
   foreach (example ${examples})
     if (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (NAME EXAMPLES-${example} COMMAND $<TARGET_FILE:${example}>)
+      add_test (NAME EXAMPLES-${example} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:${example}>)
     else ()
       add_test (NAME EXAMPLES-${example} COMMAND "${CMAKE_COMMAND}"
+          -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
           -D "TEST_PROGRAM=$<TARGET_FILE:${example}>"
           -D "TEST_ARGS:STRING="
           -D "TEST_EXPECT=0"

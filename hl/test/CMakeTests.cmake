@@ -48,9 +48,10 @@ add_custom_target(hl_test_files ALL COMMENT "Copying files needed by hl_test tes
 # --------------------------------------------------------------------
 macro (HL_ADD_TEST hl_name)
   if (HDF5_ENABLE_USING_MEMCHECKER)
-    add_test (NAME HL_${hl_name} COMMAND $<TARGET_FILE:hl_${hl_name}>)
+    add_test (NAME HL_${hl_name} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:hl_${hl_name}>)
   else ()
     add_test (NAME HL_${hl_name} COMMAND "${CMAKE_COMMAND}"
+        -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
         -D "TEST_PROGRAM=$<TARGET_FILE:hl_${hl_name}>"
         -D "TEST_ARGS:STRING="
         -D "TEST_EXPECT=0"

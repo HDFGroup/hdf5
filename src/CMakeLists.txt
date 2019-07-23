@@ -973,7 +973,7 @@ if (NOT EXISTS ${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c)
   target_compile_definitions(H5detect PUBLIC ${HDF_EXTRA_C_FLAGS} ${HDF_EXTRA_FLAGS})
   TARGET_C_PROPERTIES (H5detect STATIC)
   target_link_libraries (H5detect
-      PRIVATE "$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_LIBRARIES}>" $<$<PLATFORM_ID:Windows>:ws2_32.lib>
+      PRIVATE "$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_LIBRARIES}>" $<$<OR:$<PLATFORM_ID:Windows>,$<PLATFORM_ID:MinGW>>:ws2_32.lib>
       PRIVATE $<$<PLATFORM_ID:Emscripten>:"-O0">
   )
 
@@ -1014,7 +1014,7 @@ if (NOT EXISTS ${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c)
     add_custom_command (
         OUTPUT ${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c
                ${HDF5_GENERATED_SOURCE_DIR}/gen_SRCS.stamp1
-        COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR}$<TARGET_FILE:H5detect>
+        COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:H5detect>
         ARGS ${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c
         COMMAND    ${CMAKE_COMMAND}
         ARGS       -E touch ${HDF5_GENERATED_SOURCE_DIR}/gen_SRCS.stamp1
@@ -1063,14 +1063,14 @@ target_include_directories (H5make_libsettings PRIVATE "${HDF5_SRC_DIR};${HDF5_B
 target_compile_definitions(H5make_libsettings PUBLIC ${HDF_EXTRA_C_FLAGS} ${HDF_EXTRA_FLAGS})
 TARGET_C_PROPERTIES (H5make_libsettings STATIC)
 target_link_libraries (H5make_libsettings
-    PRIVATE "$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_LIBRARIES}>" $<$<PLATFORM_ID:Windows>:ws2_32.lib>
+    PRIVATE "$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_LIBRARIES}>" $<$<OR:$<PLATFORM_ID:Windows>,$<PLATFORM_ID:MinGW>>:ws2_32.lib>
     PRIVATE $<$<PLATFORM_ID:Emscripten>:"-O0">
 )
 
 add_custom_command (
     OUTPUT ${HDF5_BINARY_DIR}/H5lib_settings.c
            ${HDF5_BINARY_DIR}/gen_SRCS.stamp2
-    COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR}$<TARGET_FILE:H5make_libsettings>
+    COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:H5make_libsettings>
     ARGS ${HDF5_BINARY_DIR}/H5lib_settings.c
     COMMAND    ${CMAKE_COMMAND}
     ARGS       -E touch ${HDF5_GENERATED_SOURCE_DIR}/gen_SRCS.stamp2

@@ -108,7 +108,7 @@ install (
     COMPONENT hlcpplibraries
 )
 
-if (NOT WIN32)
+if (NOT WIN32 AND NOT MINGW)
   set (_PKG_CONFIG_COMPILER ${CMAKE_CXX_COMPILER})
   configure_file (
       ${HDF_RESOURCES_DIR}/libh5cc.in

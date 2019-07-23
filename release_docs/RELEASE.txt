@@ -50,12 +50,25 @@ New Features
     -------------
     - Windows PDB files are always installed
 
-      There are configuration settings for Windows, that may not generate
-      PDB files. As such the install utility will break because those files
-      are not found. Add an optional variable that can be set to not install
-      PDB files.
+      There are build configuration or flag settings for Windows that may not
+      generate PDB files. If those files are not generated then the install
+      utility will fail because those PDB files are not found. An optional
+      variable, DISABLE_PDB_FILES, was added to not install PDB files.
 
       (ADB - 2019/07/17, HDFFV-100424)
+
+    - Add mingw CMake support with a toolchain file
+
+      There has been a number of mingw issues that has been linked under
+      HDFFV-10845. It has been decided to implement the CMake cross-compiling
+      technique of toolchain files. We will use a linux platform with the mingw
+      compiler stack for testing. Only the C language is fully supported, and
+      the error tests are skipped. The C++ language works for static but shared
+      builds has a shared library issue with the mingw Standard Exception Handling
+      library, which is not available on Windows. Fortran has a common cross-compile
+      problem with the fortran configure tests.
+
+      (ADB - 2019/07/12, HDFFV-10845, HDFFV-10595)
 
     - Windows PDB files are installed incorrectly
 

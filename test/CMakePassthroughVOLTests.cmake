@@ -99,6 +99,7 @@ add_custom_target(HDF5_VOLTEST_LIB_files ALL COMMENT "Copying files needed by HD
           )
           add_test (NAME VOL-${volname}-${voltest}
               COMMAND "${CMAKE_COMMAND}"
+                  -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
                   -D "TEST_PROGRAM=$<TARGET_FILE:${voltest}>"
                   -D "TEST_ARGS:STRING="
                   -D "TEST_VOL:STRING=${volinfo}"
@@ -127,6 +128,7 @@ add_custom_target(HDF5_VOLTEST_LIB_files ALL COMMENT "Copying files needed by HD
         )
         add_test (NAME VOL-${volname}-${voltest}
             COMMAND "${CMAKE_COMMAND}"
+                -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
                 -D "TEST_PROGRAM=$<TARGET_FILE:${voltest}>"
                 -D "TEST_ARGS:STRING="
                 -D "TEST_VOL:STRING=${volinfo}"
@@ -151,6 +153,7 @@ add_custom_target(HDF5_VOLTEST_LIB_files ALL COMMENT "Copying files needed by HD
       )
       add_test (NAME VOL-${volname}-${voltest}
           COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
               -D "TEST_PROGRAM=$<TARGET_FILE:${voltest}>"
               -D "TEST_ARGS:STRING="
               -D "TEST_VOL:STRING=${volinfo}"
@@ -178,6 +181,7 @@ add_custom_target(HDF5_VOLTEST_LIB_files ALL COMMENT "Copying files needed by HD
       )
       add_test (NAME VOL-${volname}-${voltest}
           COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
               -D "TEST_PROGRAM=$<TARGET_FILE:${voltest}>"
               -D "TEST_ARGS:STRING="
               -D "TEST_VOL:STRING=${volinfo}"
@@ -221,6 +225,7 @@ add_custom_target(HDF5_VOLTEST_LIB_files ALL COMMENT "Copying files needed by HD
       )
       add_test (NAME VOL-${volname}-fheap
           COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
               -D "TEST_PROGRAM=$<TARGET_FILE:fheap>"
               -D "TEST_ARGS:STRING="
               -D "TEST_VOL:STRING=${volinfo}"

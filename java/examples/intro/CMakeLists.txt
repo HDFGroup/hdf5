@@ -13,7 +13,7 @@ set (HDF_JAVA_EXAMPLES
     H5_ReadWrite
 )
 
-if (WIN32)
+if (WIN32 OR MINGW)
   set (CMAKE_JAVA_INCLUDE_FLAG_SEP ";")
 else ()
   set (CMAKE_JAVA_INCLUDE_FLAG_SEP ":")
@@ -57,51 +57,39 @@ foreach (example ${HDF_JAVA_OBJECT_EXAMPLES})
   add_dependencies (${example} ${HDFJAVA_H5_LIB_TARGET})
 endforeach ()
 
-MACRO (ADD_H5_TEST resultfile resultcode)
-  get_property (target_name TARGET ${HDF5_JAVA_JNI_LIB_TARGET} PROPERTY $<IF:$<CONFIG:Debug>,OUTPUT_NAME_DEBUG,OUTPUT_NAME_RELWITHDEBINFO>)
-  set (CMD_ARGS "-Dhdf.hdf5lib.H5.loadLibraryName=${target_name};")
-  add_test (
-      NAME JAVA_intro-${resultfile}
-      COMMAND "${CMAKE_COMMAND}"
-          -D "TEST_TESTER=${CMAKE_Java_RUNTIME};${CMAKE_Java_RUNTIME_FLAGS}"
-          -D "TEST_PROGRAM=examples.intro.${resultfile}"
-          -D "TEST_ARGS:STRING=${CMD_ARGS}${ARGN}"
-          -D "TEST_CLASSPATH:STRING=${CMAKE_JAVA_CLASSPATH}${CMAKE_JAVA_INCLUDE_FLAG_SEP}${${resultfile}_JAR_FILE}"
-          -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}"
-          -D "TEST_FOLDER=${HDFJAVA_EXAMPLES_BINARY_DIR}"
-          -D "TEST_OUTPUT=intro/${resultfile}.out"
-          -D "TEST_EXPECT=${resultcode}"
-          -D "TEST_REFERENCE=intro/${resultfile}.txt"
-          -P "${HDF_RESOURCES_DIR}/jrunTest.cmake"
-  )
-  if (last_test)
-    set_tests_properties (JAVA_intro-${resultfile} PROPERTIES DEPENDS ${last_test})
-  endif ()
-  set (last_test "JAVA_intro-${resultfile}")
-ENDMACRO ()
-
 if (BUILD_TESTING)
+  get_property (target_name TARGET ${HDF5_JAVA_JNI_LIB_TARGET} PROPERTY OUTPUT_NAME)
+  set (CMD_ARGS "-Dhdf.hdf5lib.H5.loadLibraryName=${target_name}$<$<CONFIG:Debug>:${CMAKE_DEBUG_POSTFIX}>;")
 
   foreach (example ${HDF_JAVA_EXAMPLES})
     add_test (
         NAME JAVA_intro-${example}-clear-objects
-        COMMAND    ${CMAKE_COMMAND}
-            -E remove
-            ${HDFJAVA_EXAMPLES_BINARY_DIR}/${example}.h5
+        COMMAND ${CMAKE_COMMAND} -E remove ${HDFJAVA_EXAMPLES_BINARY_DIR}/${example}.h5
     )
-    if (last_test)
-      set_tests_properties (JAVA_intro-${example}-clear-objects PROPERTIES DEPENDS ${last_test})
-    endif ()
+
     add_test (
         NAME JAVA_intro-${example}-copy-objects
-        COMMAND    ${CMAKE_COMMAND}
-            -E copy_if_different
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
             ${HDFJAVA_EXAMPLES_SOURCE_DIR}/testfiles/examples.intro.${example}.txt
             ${HDFJAVA_EXAMPLES_INTRO_BINARY_DIR}/${example}.txt
     )
     set_tests_properties (JAVA_intro-${example}-copy-objects PROPERTIES DEPENDS JAVA_intro-${example}-clear-objects)
-    set (last_test "JAVA_intro-${example}-copy-objects")
-    ADD_H5_TEST (${example} 0)
+
+    add_test (
+        NAME JAVA_intro-${example}
+        COMMAND "${CMAKE_COMMAND}"
+            -D "TEST_TESTER=${CMAKE_Java_RUNTIME};${CMAKE_Java_RUNTIME_FLAGS}"
+            -D "TEST_PROGRAM=examples.intro.${example}"
+            -D "TEST_ARGS:STRING=${CMD_ARGS}"
+            -D "TEST_CLASSPATH:STRING=${CMAKE_JAVA_CLASSPATH}${CMAKE_JAVA_INCLUDE_FLAG_SEP}${${example}_JAR_FILE}"
+            -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}"
+            -D "TEST_FOLDER=${HDFJAVA_EXAMPLES_BINARY_DIR}"
+            -D "TEST_OUTPUT=intro/${example}.out"
+            -D "TEST_EXPECT=0"
+            -D "TEST_REFERENCE=intro/${example}.txt"
+            -P "${HDF_RESOURCES_DIR}/jrunTest.cmake"
+    )
+    set_tests_properties (JAVA_intro-${example} PROPERTIES DEPENDS JAVA_intro-${example}-copy-objects)
   endforeach ()
 
 endif ()

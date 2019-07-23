@@ -127,6 +127,7 @@
           add_test (
               NAME H5FC-${testname}-${testfile}
               COMMAND "${CMAKE_COMMAND}"
+                  -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
                   -D "TEST_PROGRAM=$<TARGET_FILE:h5format_convert${tgt_ext}>"
                   -D "TEST_ARGS=${ARGN};outtmp.h5"
                   -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
@@ -142,6 +143,7 @@
           add_test (
               NAME H5FC-${testname}-NA
               COMMAND "${CMAKE_COMMAND}"
+                  -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
                   -D "TEST_PROGRAM=$<TARGET_FILE:h5format_convert${tgt_ext}>"
                   -D "TEST_ARGS=${ARGN}"
                   -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
@@ -179,6 +181,7 @@
       add_test (
           NAME H5FC-${testname}-${testfile}
           COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5format_convert${tgt_ext}>"
               -D "TEST_ARGS=${ARGN};outtmp.h5"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
@@ -215,6 +218,7 @@
       add_test (
           NAME H5FC-${testname}-${testfile}
           COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5format_convert${tgt_ext}>"
               -D "TEST_ARGS=${ARGN};outtmp.h5"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
@@ -252,6 +256,7 @@
       add_test (
           NAME H5FC-${testname}
           COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5format_convert${tgt_ext}>"
               -D "TEST_ARGS=${ARGN};./testfiles/tmp.h5"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
@@ -270,7 +275,7 @@
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
       add_test (
           NAME H5FC_CHECK_IDX-${testname}
-          COMMAND "$<TARGET_FILE:h5fc_chk_idx>" "./testfiles/tmp.h5" "${ARGN}"
+          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5fc_chk_idx> ./testfiles/tmp.h5 ${ARGN}
       )
       set_tests_properties (H5FC_CHECK_IDX-${testname} PROPERTIES DEPENDS "H5FC-${dependtest}")
     endif ()
@@ -299,6 +304,7 @@
       add_test (
           NAME H5FC-${testname}
           COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5format_convert${tgt_ext}>"
               -D "TEST_ARGS=-d;${ARGN};./testfiles/chktmp.h5"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
@@ -310,7 +316,7 @@
       set_tests_properties (H5FC-${testname} PROPERTIES DEPENDS "H5FC-${testname}-tmpfile")
       add_test (
           NAME H5FC_CHECK_IDX-${testname}
-          COMMAND "$<TARGET_FILE:h5fc_chk_idx>" "./testfiles/chktmp.h5" "${ARGN}"
+          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5fc_chk_idx> ./testfiles/chktmp.h5 ${ARGN}
       )
       set_tests_properties (H5FC_CHECK_IDX-${testname} PROPERTIES DEPENDS "H5FC-${testname}")
       set (last_test "H5FC_CHECK_IDX-${testname}")
@@ -342,6 +348,7 @@
       add_test (
           NAME H5FC-${testname}
           COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5format_convert${tgt_ext}>"
               -D "TEST_ARGS=${ARGN};./testfiles/dmptmp.h5"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
@@ -354,6 +361,7 @@
       add_test (
           NAME H5FC_CHECK_DUMP-${testname}
           COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5dump${tgt_ext}>"
               -D "TEST_ARGS:STRING=-BH;./testfiles/dmptmp.h5"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"

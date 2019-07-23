@@ -82,17 +82,16 @@ HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/h5ex_g_iterate.orig" "${PROJECT_BINARY_
 
 add_custom_target(${HDF5_JAVA_TEST_LIB_TARGET}_files ALL COMMENT "Copying files needed by ${HDF5_JAVA_TEST_LIB_TARGET} tests" DEPENDS ${${HDF5_JAVA_TEST_LIB_TARGET}_files_list})
 
-if (WIN32)
+if (WIN32 OR MINGW)
   set (CMAKE_JAVA_INCLUDE_FLAG_SEP ";")
 else ()
   set (CMAKE_JAVA_INCLUDE_FLAG_SEP ":")
 endif ()
 
-get_property (target_name TARGET ${HDF5_JAVA_JNI_LIB_TARGET} PROPERTY $<IF:$<CONFIG:Debug>,OUTPUT_NAME_DEBUG,OUTPUT_NAME_RELWITHDEBINFO>)
-set (CMD_ARGS "-Dhdf.hdf5lib.H5.loadLibraryName=${target_name};")
+get_property (target_name TARGET ${HDF5_JAVA_JNI_LIB_TARGET} PROPERTY OUTPUT_NAME)
+set (CMD_ARGS "-Dhdf.hdf5lib.H5.loadLibraryName=${target_name}$<$<CONFIG:Debug>:${CMAKE_DEBUG_POSTFIX}>;")
 
 foreach (test_file ${HDF5_JAVA_TEST_SOURCES})
-
   set (CMAKE_JAVA_CLASSPATH ".")
   foreach (CMAKE_INCLUDE_PATH ${CMAKE_JAVA_INCLUDE_PATH})
     set (CMAKE_JAVA_CLASSPATH "${CMAKE_JAVA_CLASSPATH}${CMAKE_JAVA_INCLUDE_FLAG_SEP}${CMAKE_INCLUDE_PATH}")
@@ -101,8 +100,7 @@ foreach (test_file ${HDF5_JAVA_TEST_SOURCES})
 
   add_test (
     NAME JUnit-${test_file}-clearall-objects
-    COMMAND    ${CMAKE_COMMAND}
-        -E remove
+    COMMAND ${CMAKE_COMMAND} -E remove
         JUnit-${test_file}.out
         JUnit-${test_file}.out.err
   )
@@ -124,7 +122,6 @@ foreach (test_file ${HDF5_JAVA_TEST_SOURCES})
           -D "TEST_REFERENCE=JUnit-${test_file}.txt"
           -P "${HDF_RESOURCES_DIR}/jrunTest.cmake"
   )
-
   set_tests_properties (JUnit-${test_file} PROPERTIES
       ENVIRONMENT "HDF5_PLUGIN_PATH=${CMAKE_BINARY_DIR}/testdir2"
       DEPENDS "JUnit-${test_file}-clearall-objects"

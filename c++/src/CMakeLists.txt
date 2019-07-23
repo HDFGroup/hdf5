@@ -112,7 +112,14 @@ if (BUILD_SHARED_LIBS)
       PRIVATE $<$<BOOL:${HDF5_ENABLE_PARALLEL}>:MPICH_SKIP_MPICXX;MPICH_IGNORE_CXX_SEEK># Parallel/MPI, prevent spurious cpp/cxx warnings
   )
   TARGET_C_PROPERTIES (${HDF5_CPP_LIBSH_TARGET} SHARED)
-  target_link_libraries (${HDF5_CPP_LIBSH_TARGET} PUBLIC ${HDF5_LIBSH_TARGET})
+  target_link_libraries (${HDF5_CPP_LIBSH_TARGET}
+      PUBLIC ${HDF5_LIBSH_TARGET}
+  )
+  if (MINGW)
+    target_link_options (${HDF5_CPP_LIBSH_TARGET}
+        PRIVATE -static-libgcc -static-libstdc++
+    )
+  endif ()
   set_global_variable (HDF5_LIBRARIES_TO_EXPORT "${HDF5_LIBRARIES_TO_EXPORT};${HDF5_CPP_LIBSH_TARGET}")
   H5_SET_LIB_OPTIONS (${HDF5_CPP_LIBSH_TARGET} ${HDF5_CPP_LIB_NAME} SHARED "CXX")
   set_target_properties (${HDF5_CPP_LIBSH_TARGET} PROPERTIES FOLDER libraries/cpp)
@@ -188,7 +195,7 @@ install (
     COMPONENT cpplibraries
 )
 
-if (NOT WIN32)
+if (NOT WIN32 AND NOT MINGW)
   set (_PKG_CONFIG_COMPILER ${CMAKE_CXX_COMPILER})
   configure_file (
       ${HDF_RESOURCES_DIR}/libh5cc.in

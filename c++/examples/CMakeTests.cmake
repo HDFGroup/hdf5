@@ -26,6 +26,7 @@
           SDSextendible.h5
           Select.h5
   )
+  set_tests_properties (CPP_ex-clear-objects PROPERTIES FIXTURES_SETUP clear_cppex)
   if (last_test)
     set_tests_properties (CPP_ex-clear-objects PROPERTIES DEPENDS ${last_test})
   endif ()
@@ -33,9 +34,10 @@
 
   foreach (example ${examples})
     if (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (NAME CPP_ex_${example} COMMAND $<TARGET_FILE:cpp_ex_${example}>)
+      add_test (NAME CPP_ex_${example} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:cpp_ex_${example}>)
     else ()
       add_test (NAME CPP_ex_${example} COMMAND "${CMAKE_COMMAND}"
+          -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
           -D "TEST_PROGRAM=$<TARGET_FILE:cpp_ex_${example}>"
           -D "TEST_ARGS:STRING="
           -D "TEST_EXPECT=0"
@@ -73,9 +75,10 @@
 
   foreach (example ${tutr_examples})
     if (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (NAME CPP_ex_${example} COMMAND $<TARGET_FILE:cpp_ex_${example}>)
+      add_test (NAME CPP_ex_${example} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:cpp_ex_${example}>)
     else ()
       add_test (NAME CPP_ex_${example} COMMAND "${CMAKE_COMMAND}"
+          -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
           -D "TEST_PROGRAM=$<TARGET_FILE:cpp_ex_${example}>"
           -D "TEST_ARGS:STRING="
           -D "TEST_EXPECT=0"

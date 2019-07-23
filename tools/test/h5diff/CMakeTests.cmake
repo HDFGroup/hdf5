@@ -324,7 +324,14 @@
   #
   # Overwrite system dependent files (Windows) and not VS2015
   #
+  set (COPY_WINDOWS_FILES false)
+  if (MINGW)
+    set (COPY_WINDOWS_FILES true)
+  endif ()
   if (WIN32 AND MSVC_VERSION LESS 1900)
+    set (COPY_WINDOWS_FILES true)
+  endif ()
+  if (COPY_WINDOWS_FILES)
     foreach (h5_tstfiles ${LIST_WIN_TEST_FILES})
       get_filename_component(fname "${h5_tstfiles}" NAME)
       HDFTEST_COPY_FILE("${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/${h5_tstfiles}w.txt" "${PROJECT_BINARY_DIR}/testfiles/${fname}.txt" "h5diff_files")
@@ -358,7 +365,7 @@
   macro (ADD_H5_TEST resultfile resultcode)
     # If using memchecker add tests without using scripts
     if (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (NAME H5DIFF-${resultfile} COMMAND $<TARGET_FILE:h5diff${tgt_ext}> ${ARGN})
+      add_test (NAME H5DIFF-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diff${tgt_ext}> ${ARGN})
       set_tests_properties (H5DIFF-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
       if (${resultcode})
         set_tests_properties (H5DIFF-${resultfile} PROPERTIES WILL_FAIL "true")
@@ -381,6 +388,7 @@
       add_test (
           NAME H5DIFF-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5diff${tgt_ext}>"
               -D "TEST_ARGS:STRING=${ARGN}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
@@ -454,6 +462,7 @@
         add_test (
             NAME H5DIFF_UD-${testname}
             COMMAND "${CMAKE_COMMAND}"
+                -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
                 -D "TEST_PROGRAM=$<TARGET_FILE:h5diff-shared>"
                 -D "TEST_ARGS:STRING=${ARGN}"
                 -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
@@ -470,6 +479,7 @@
         add_test (
             NAME H5DIFF_UD-${testname}
             COMMAND "${CMAKE_COMMAND}"
+                -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
                 -D "TEST_PROGRAM=$<TARGET_FILE:h5diff-shared>"
                 -D "TEST_ARGS:STRING=${ARGN}"
                 -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"

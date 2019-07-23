@@ -75,7 +75,7 @@
 
     add_test (
         NAME H5MKGRP-${resultfile}
-        COMMAND $<TARGET_FILE:h5mkgrp${tgt_ext}> ${resultoption} ${resultfile}.h5 ${ARGN}
+        COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5mkgrp${tgt_ext}> ${resultoption} ${resultfile}.h5 ${ARGN}
     )
     set_tests_properties (H5MKGRP-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
     if (HDF5_ENABLE_USING_MEMCHECKER)
@@ -87,6 +87,7 @@
       add_test (
           NAME H5MKGRP-${resultfile}-h5ls
           COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5ls${tgt_ext}>"
               -D "TEST_ARGS:STRING=-v;-r;${resultfile}.h5"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
@@ -102,7 +103,7 @@
 
   macro (ADD_H5_CMP resultfile resultcode)
     if (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (NAME H5MKGRP_CMP-${resultfile} COMMAND $<TARGET_FILE:h5mkgrp> ${ARGN})
+      add_test (NAME H5MKGRP_CMP-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5mkgrp> ${ARGN})
     else ()
       add_test (
           NAME H5MKGRP_CMP-${resultfile}-clear-objects
@@ -116,6 +117,7 @@
       add_test (
           NAME H5MKGRP_CMP-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5mkgrp${tgt_ext}>"
               -D "TEST_ARGS:STRING=${ARGN}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"

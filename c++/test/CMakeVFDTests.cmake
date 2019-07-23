@@ -46,6 +46,7 @@
       add_test (
         NAME CPP_VFD-${vfdname}-cpp_testhdf5
         COMMAND "${CMAKE_COMMAND}"
+            -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
             -D "TEST_PROGRAM=$<TARGET_FILE:cpp_testhdf5>"
             -D "TEST_ARGS:STRING="
             -D "TEST_VFD:STRING=${vfdname}"

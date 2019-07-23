@@ -28,6 +28,12 @@ if (CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_CURRENT_BINARY_DIR)
       )
 endif ()
 
+# CMake version 3.14 added option --ignore-eol to compare files
+#     cmake -E compare_files --ignore-eol file1 file2
+#if(CMAKE_VERSION VERSION_LESS "3.14.0" AND WIN32)
+#    MESSAGE(FATAL_ERROR "Windows builds requires a minimum of CMake 3.14")
+#endif()
+
 #-----------------------------------------------------------------------------
 # Instructions for use : Sub-Project Build
 #
@@ -512,7 +518,7 @@ endif ()
 # and we need to call the executable from inside the CMake configuration
 #-----------------------------------------------------------------------------
 set (EXE_EXT "")
-if (WIN32)
+if (WIN32 OR MINGW)
   set (EXE_EXT ".exe")
   add_definitions (-D_BIND_TO_CURRENT_VCLIBS_VERSION=1)
   add_definitions (-D_CRT_SECURE_NO_WARNINGS)
@@ -688,7 +694,7 @@ endif ()
 option (HDF5_ENABLE_THREADSAFE "Enable thread-safety" OFF)
 if (HDF5_ENABLE_THREADSAFE)
   # check for unsupported options
-  if (WIN32)
+  if (WIN32 OR MINGW)
     message (STATUS " **** thread-safety option not supported with static library **** ")
     message (STATUS " **** thread-safety option will not be used building static library **** ")
   endif ()

@@ -86,7 +86,7 @@ macro (INSTALL_TARGET_PDB libtarget targetdestination targetcomponent)
           ${targetfilename}
       DESTINATION
           ${targetdestination}
-      CONFIGURATIONS $<CONFIG>
+      CONFIGURATIONS Debug RelWithDebInfo
       COMPONENT ${targetcomponent}
       OPTIONAL
     )
@@ -101,7 +101,7 @@ macro (INSTALL_PROGRAM_PDB progtarget targetdestination targetcomponent)
           $<TARGET_PDB_FILE:${progtarget}>
       DESTINATION
           ${targetdestination}
-      CONFIGURATIONS $<CONFIG>
+      CONFIGURATIONS Debug RelWithDebInfo
       COMPONENT ${targetcomponent}
       OPTIONAL
     )
@@ -110,23 +110,36 @@ endmacro ()
 
 #-------------------------------------------------------------------------------
 macro (HDF_SET_LIB_OPTIONS libtarget libname libtype)
-  if (WIN32)
-    set (LIB_DEBUG_SUFFIX "_D")
-  else ()
-    set (LIB_DEBUG_SUFFIX "_debug")
-  endif ()
   if (${libtype} MATCHES "SHARED")
     set (LIB_RELEASE_NAME "${libname}")
-    set (LIB_DEBUG_NAME "${libname}${LIB_DEBUG_SUFFIX}")
+    set (LIB_DEBUG_NAME "${libname}${CMAKE_DEBUG_POSTFIX}")
   else ()
-    if (WIN32)
+    if (WIN32 AND NOT MINGW)
       set (LIB_RELEASE_NAME "lib${libname}")
-      set (LIB_DEBUG_NAME "lib${libname}${LIB_DEBUG_SUFFIX}")
+      set (LIB_DEBUG_NAME "lib${libname}${CMAKE_DEBUG_POSTFIX}")
     else ()
       set (LIB_RELEASE_NAME "${libname}")
-      set (LIB_DEBUG_NAME "${libname}${LIB_DEBUG_SUFFIX}")
+      set (LIB_DEBUG_NAME "${libname}${CMAKE_DEBUG_POSTFIX}")
     endif ()
   endif ()
+
+  set_target_properties (${libtarget}
+      PROPERTIES
+         OUTPUT_NAME
+               ${LIB_RELEASE_NAME}
+         OUTPUT_NAME_DEBUG
+               ${LIB_DEBUG_NAME}
+         OUTPUT_NAME_RELEASE
+               ${LIB_RELEASE_NAME}
+         OUTPUT_NAME_MINSIZEREL
+               ${LIB_RELEASE_NAME}
+         OUTPUT_NAME_RELWITHDEBINFO
+               ${LIB_RELEASE_NAME}
+  )
+  #get_property (target_name TARGET ${libtarget} PROPERTY OUTPUT_NAME)
+  #get_property (target_name_debug TARGET ${libtarget} PROPERTY OUTPUT_NAME_DEBUG)
+  #get_property (target_name_rwdi TARGET ${libtarget} PROPERTY OUTPUT_NAME_RELWITHDEBINFO)
+  #message (STATUS "${target_name} : ${target_name_debug} : ${target_name_rwdi}")
 
   if (${libtype} MATCHES "STATIC")
     if (WIN32)
@@ -179,7 +192,12 @@ macro (HDF_IMPORT_SET_LIB_OPTIONS libtarget libname libtype libversion)
         )
       endif ()
     else ()
-      if (CYGWIN)
+      if (MINGW)
+        set_target_properties (${libtarget} PROPERTIES
+            IMPORTED_IMPLIB "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${IMPORT_LIB_NAME}.lib"
+            IMPORTED_LOCATION "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${IMPORT_LIB_NAME}${CMAKE_SHARED_LIBRARY_SUFFIX}"
+        )
+      elseif (CYGWIN)
         set_target_properties (${libtarget} PROPERTIES
             IMPORTED_IMPLIB "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_IMPORT_LIBRARY_PREFIX}${IMPORT_LIB_NAME}${CMAKE_IMPORT_LIBRARY_SUFFIX}"
             IMPORTED_LOCATION "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_IMPORT_LIBRARY_PREFIX}${IMPORT_LIB_NAME}${CMAKE_SHARED_LIBRARY_SUFFIX}"

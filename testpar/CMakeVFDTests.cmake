@@ -50,6 +50,7 @@ endforeach ()
         add_test (
           NAME MPI_TEST_VFD-${vfdname}-${h5_test}
           COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
               -D "TEST_PROGRAM=$<TARGET_FILE:${h5_test}>"
               -D "TEST_ARGS:STRING="
               -D "TEST_VFD:STRING=${vfdname}"
