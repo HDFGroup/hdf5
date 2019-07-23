@@ -48,6 +48,14 @@ New Features
 
     Configuration:
     -------------
+    - Update CMake tests to use FIXTURES
+
+      CMake test fixtures allow setup/cleanup tests and other dependency
+      requirements as properties for tests. This is more flexible for
+      modern CMake code.
+
+      (ADB - 2019/07/23, HDFFV-10529)
+
     - Windows PDB files are always installed
 
       There are build configuration or flag settings for Windows that may not
@@ -55,7 +63,7 @@ New Features
       utility will fail because those PDB files are not found. An optional
       variable, DISABLE_PDB_FILES, was added to not install PDB files.
 
-      (ADB - 2019/07/17, HDFFV-100424)
+      (ADB - 2019/07/17, HDFFV-10424)
 
     - Add mingw CMake support with a toolchain file
 
