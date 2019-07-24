@@ -25,7 +25,7 @@ AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_srcdir)/test -I$(top_srcdir)/tools/lib
 if BUILD_TESTS_CONDITIONAL
 TEST_SCRIPT=h5repack.sh
 TEST_PROG=h5repacktst
-	h5repacktst_SOURCES=$(COMMON_SOURCES) h5repacktst.c
+noinst_PROGRAMS=testh5repack_detect_szip
 if HAVE_SHARED_CONDITIONAL
 if USE_PLUGINS_CONDITIONAL
    TEST_SCRIPT += h5repack_plugin.sh
@@ -35,7 +35,6 @@ else
 TEST_SCRIPT=
 TEST_PROG=
 endif
-noinst_PROGRAMS=testh5repack_detect_szip
 
 SCRIPT_DEPEND=h5repack$(EXEEXT)
 
@@ -46,10 +45,10 @@ check_PROGRAMS=$(TEST_PROG)
 bin_PROGRAMS=h5repack
 
 # Add h5repack specific linker flags here
-h5repack_LDFLAGS = $(LT_STATIC_EXEC) $(AM_LDFLAGS)
+LDADD=$(LIBH5TOOLS) $(LIBHDF5)
 
 # Depend on the hdf5 library, the tools library, the test library
-LDADD=$(LIBH5TOOLS) $(LIBH5TEST) $(LIBHDF5)
+LDADD=$(LIBH5TOOLS) $(LIBHDF5)
 
 # Source files
 COMMON_SOURCES=h5repack.c h5repack_copy.c h5repack_filters.c \
@@ -58,8 +57,11 @@ COMMON_SOURCES=h5repack.c h5repack_copy.c h5repack_filters.c \
 
 h5repack_SOURCES=$(COMMON_SOURCES) h5repack_main.c
 
+if BUILD_TESTS_CONDITIONAL
+LDADD+=$(LIBH5TEST)
+h5repacktst_SOURCES=$(COMMON_SOURCES) h5repacktst.c
+#testh5repack_detect_szip_LDADD=$(LIBH5TOOLS) $(LIBH5TEST) $(LIBHDF5)
 testh5repack_detect_szip_SOURCES=testh5repack_detect_szip.c
-
 # The h5repack.sh script needs h5repacktst to run first.
 h5repack.sh.chkexe_: h5repacktst.chkexe_
 
@@ -76,6 +78,7 @@ libdynlibadd.la: $(libdynlibadd_la_OBJECTS) $(libdynlibadd_la_DEPENDENCIES) $(EX
 	$(AM_V_CCLD)$(libdynlibadd_la_LINK) $(am_libdynlibadd_la_rpath) $(libdynlibadd_la_OBJECTS) $(libdynlibadd_la_LIBADD)
 libdynlibvers.la: $(libdynlibvers_la_OBJECTS) $(libdynlibvers_la_DEPENDENCIES) $(EXTRA_libdynlibvers_la_DEPENDENCIES)
 	$(AM_V_CCLD)$(libdynlibvers_la_LINK) $(am_libdynlibvers_la_rpath) $(libdynlibvers_la_OBJECTS) $(libdynlibvers_la_LIBADD)
+endif
 endif
 endif
 
