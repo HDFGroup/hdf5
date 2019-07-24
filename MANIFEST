@@ -1191,10 +1191,8 @@
 
 ./tools/misc/Makefile.am
 ./tools/misc/Makefile.in
-./tools/misc/h5cc.in
 ./tools/misc/h5debug.c
 ./tools/misc/h5mkgrp.c
-./tools/misc/h5redeploy.in
 ./tools/misc/h5repart.c
 ./tools/misc/h5repart_gentest.c
 ./tools/misc/repart_test.c

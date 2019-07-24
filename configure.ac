@@ -3022,7 +3022,6 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  tools/h5copy/testh5copy.sh
                  tools/lib/Makefile
                  tools/misc/Makefile
-                 tools/misc/h5cc
                  tools/misc/testh5mkgrp.sh
                  tools/misc/testh5repart.sh
                  tools/h5stat/testh5stat.sh
@@ -3033,7 +3032,7 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  examples/testh5cc.sh
 		 bin/h5cc
 		 bin/Makefile
-                 c++/Makefile
+		 c++/Makefile
                  c++/src/Makefile
                  c++/src/h5c++
                  c++/test/Makefile
