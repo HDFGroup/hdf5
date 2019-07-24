@@ -80,7 +80,7 @@ if (BUILD_TESTING)
       target_link_libraries (hl_h52gifgentest PRIVATE ${HDF5_HL_LIB_TARGET} ${HDF5_LIB_TARGET})
       set_target_properties (hl_h52gifgentest PROPERTIES FOLDER generator/tools/hl)
 
-#      add_test (NAME hl_h52gifgentest COMMAND $<TARGET_FILE:hl_h52gifgentest>)
+#      add_test (NAME hl_h52gifgentest COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:hl_h52gifgentest>)
   endif ()
 
   include (CMakeTests.cmake)

@@ -95,10 +95,6 @@
 ./bin/timekeeper      _DO_NOT_DISTRIBUTE_
 ./bin/trace
 ./bin/yodconfigure
-./bin/batch/cori_ctestP.sl.in.cmake
-./bin/batch/cori_ctestS.sl.in.cmake
-./bin/batch/cori_knl_ctestP.sl.in.cmake
-./bin/batch/cori_knl_ctestS.sl.in.cmake
 ./bin/batch/ctestP.lsf.in.cmake
 ./bin/batch/ctestP.sl.in.cmake
 ./bin/batch/ctestS.lsf.in.cmake

@@ -14,6 +14,6 @@
 
 cd @HDF5_BINARY_DIR@
 echo "Run parallel test command. Test output will be in build/ctestP.out"
-ctest . -R 'TEST_PAR|PH5DIFF|PERFORM' -E t_cache_image -C Release -T test >& ctestP.out
+ctest . -R MPI_TEST_ -C Release -T test >& ctestP.out
 
 echo "Done running ctest parallel command."

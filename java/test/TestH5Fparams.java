@@ -192,7 +192,7 @@ public class TestH5Fparams {
                         HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
             }
             catch (Throwable err) {
-                fail("H5.H5Fopen: " + err);
+                fail("H5.H5Fcreate: " + err);
             }
 
             try {

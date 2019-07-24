@@ -41,15 +41,9 @@ endforeach ()
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
       foreach (h5_test ${H5P_VFD_TESTS})
         add_test (
-            NAME MPI_TEST_VFD-${vfdname}-${h5_test}-clear-objects
-            COMMAND    ${CMAKE_COMMAND}
-                -E remove
-                    ${vfdname}/${vfdname}-${h5_test}.out
-                    ${vfdname}/${vfdname}-${h5_test}.out.err
-        )
-        add_test (
           NAME MPI_TEST_VFD-${vfdname}-${h5_test}
           COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
               -D "TEST_PROGRAM=$<TARGET_FILE:${h5_test}>"
               -D "TEST_ARGS:STRING="
               -D "TEST_VFD:STRING=${vfdname}"
@@ -59,7 +53,6 @@ endforeach ()
               -P "${HDF_RESOURCES_DIR}/vfdTest.cmake"
         )
         set_tests_properties (MPI_TEST_VFD-${vfdname}-${h5_test} PROPERTIES
-            DEPENDS MPI_TEST_VFD-${vfdname}-${h5_test}-clear-objects
             ENVIRONMENT "srcdir=${HDF5_TEST_PAR_BINARY_DIR}/${vfdname}"
             WORKING_DIRECTORY ${HDF5_TEST_PAR_BINARY_DIR}/${vfdname}
         )

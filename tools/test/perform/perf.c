@@ -22,6 +22,7 @@
 
 #include "hdf5.h"
 #include "H5private.h"
+#include "h5test.h"
 
 #ifdef H5_HAVE_PARALLEL
 
@@ -77,7 +78,7 @@
 
 hsize_t dims[RANK];     /* dataset dim sizes */
 hsize_t block[RANK], stride[RANK], count[RANK];
-hssize_t start[RANK];
+hsize_t start[RANK];
 hid_t fid;                  /* HDF5 file ID */
 hid_t acc_tpl;    /* File access templates */
 hid_t sid;       /* Dataspace ID */
@@ -240,7 +241,7 @@ int main(int argc, char **argv)
      */
     for(j=0; j < opt_iter; j++) {
         /* setup a file dataspace selection */
-        start[0] = (j*iter_jump)+(mynod*opt_block);
+        start[0] = (hsize_t)((j * iter_jump) + (mynod * opt_block));
         stride[0] = block[0] = opt_block;
         count[0]= 1;
         ret=H5Sselect_hyperslab(file_dataspace, H5S_SELECT_SET, start, stride, count, block);
@@ -293,7 +294,7 @@ int main(int argc, char **argv)
     /* we are going to repeat the read the same pattern the write used */
     for (j=0; j < opt_iter; j++) {
         /* setup a file dataspace selection */
-        start[0] = (j*iter_jump)+(mynod*opt_block);
+        start[0] = (hsize_t)((j * iter_jump) + (mynod * opt_block));
         stride[0] = block[0] = opt_block;
         count[0]= 1;
         ret=H5Sselect_hyperslab(file_dataspace, H5S_SELECT_SET, start, stride, count, block);
@@ -320,13 +321,13 @@ int main(int argc, char **argv)
         VRFY((ret >= 0), "H5Dwrite dataset1 succeeded", !H5FATAL);
 
 
-       if (ret < 0) fprintf(stderr, "node %d, read error, loc = %Ld: %s\n",
+       if (ret < 0) HDfprintf(stderr, "node %d, read error, loc = %Ld: %s\n",
                     mynod, mynod*opt_block, strerror(myerrno));
 
         /* if the user wanted to check correctness, compare the write
          * buffer to the read buffer */
         if (opt_correct && memcmp(buf, buf2, opt_block)) {
-                fprintf(stderr, "node %d, correctness test failed\n", mynod);
+                HDfprintf(stderr, "node %d, correctness test failed\n", mynod);
                 my_correct = 0;
                 MPI_Allreduce(&my_correct, &correct, 1, MPI_INT, MPI_MIN,
                         MPI_COMM_WORLD);
@@ -435,10 +436,12 @@ parse_args(int argc, char **argv)
                        * e.g., -a4096/512  allocate at 4096 bytes
                        * boundary if request size >= 512.
                        */
-                {char *p;
-                opt_alignment = atoi(optarg);
-                if (p=(char*)strchr(optarg, '/'))
-                    opt_threshold = atoi(p+1);
+                {
+                    char *p;
+
+                    opt_alignment = HDatoi(optarg);
+                    if(NULL != (p = (char*)HDstrchr(optarg, '/')))
+                        opt_threshold = HDatoi(p + 1);
                 }
                 HDfprintf(stdout,
                     "alignment/threshold=%Hu/%Hu\n",

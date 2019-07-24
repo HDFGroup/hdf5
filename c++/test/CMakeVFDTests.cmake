@@ -42,15 +42,17 @@
                   tattr_scalar.h5
                   tfattrs.h5
                   titerate.h5
+          WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/${vfdname}
       )
       add_test (
         NAME CPP_VFD-${vfdname}-cpp_testhdf5
         COMMAND "${CMAKE_COMMAND}"
+            -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
             -D "TEST_PROGRAM=$<TARGET_FILE:cpp_testhdf5>"
             -D "TEST_ARGS:STRING="
             -D "TEST_VFD:STRING=${vfdname}"
             -D "TEST_EXPECT=${resultcode}"
-            -D "TEST_OUTPUT=cpp_testhdf5"
+            -D "TEST_OUTPUT=${vfdname}-cpp_testhdf5.out"
             -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/${vfdname}"
             -P "${HDF_RESOURCES_DIR}/vfdTest.cmake"
       )

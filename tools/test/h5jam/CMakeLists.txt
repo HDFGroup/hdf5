@@ -11,7 +11,7 @@ if (HDF5_BUILD_GENERATORS AND NOT ONLY_SHARED_LIBS)
   target_link_libraries (h5jamgentest PRIVATE ${HDF5_LIB_TARGET})
   set_target_properties (h5jamgentest PROPERTIES FOLDER generator/tools)
 
-  #add_test (NAME h5jamgentest COMMAND $<TARGET_FILE:h5jamgentest>)
+  #add_test (NAME h5jamgentest COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5jamgentest>)
 endif ()
 
 add_executable (getub ${HDF5_TOOLS_TEST_H5JAM_SOURCE_DIR}/getub.c)

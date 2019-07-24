@@ -2907,10 +2907,10 @@ out:
 static
 int make_all_filters(hid_t loc_id)
 {
-    hid_t    dcpl; /* dataset creation property list */
-    hid_t    sid;  /* dataspace ID */
-    hid_t    dtid;
-    hid_t    dsid;
+    hid_t    dcpl = H5I_INVALID_HID; /* dataset creation property list */
+    hid_t    sid = H5I_INVALID_HID;  /* dataspace ID */
+    hid_t    dtid = H5I_INVALID_HID;
+    hid_t    dsid = H5I_INVALID_HID;
 #if defined (H5_HAVE_FILTER_SZIP)
     unsigned szip_options_mask=H5_SZIP_ALLOW_K13_OPTION_MASK|H5_SZIP_NN_OPTION_MASK;
     unsigned szip_pixels_per_block=8;
@@ -3083,7 +3083,7 @@ int make_early(void)
     hid_t   tid=-1;
     hid_t   dcpl=-1;
     int     i;
-    char    name[10];
+    char    name[16];
     int     iter=100;
 
     if ((fid = H5Fcreate(FNAME5, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
@@ -3178,7 +3178,7 @@ int make_layout(hid_t loc_id)
     hsize_t  chunk_dims[RANK]={CDIM1,CDIM2};
     int      buf[DIM1][DIM2];
     int      i, j, n;
-    char     name[6];
+    char     name[16];
 
 
     for (i=n=0; i<DIM1; i++)

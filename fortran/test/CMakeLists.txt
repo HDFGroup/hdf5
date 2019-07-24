@@ -83,7 +83,7 @@ endif ()
 if (NOT BUILD_SHARED_LIBS)
   add_custom_command (
       OUTPUT ${HDF5_FORTRAN_TESTS_BINARY_DIR}/static/tf_gen.F90
-      COMMAND $<TARGET_FILE:H5_test_buildiface>
+      COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:H5_test_buildiface>
       WORKING_DIRECTORY ${HDF5_FORTRAN_TESTS_BINARY_DIR}/static
       DEPENDS H5_test_buildiface
       COMMENT "Generating the tf_gen.F90 file"
@@ -95,7 +95,7 @@ if (NOT BUILD_SHARED_LIBS)
 else ()
   add_custom_command (
       OUTPUT ${HDF5_FORTRAN_TESTS_BINARY_DIR}/shared/tf_gen.F90
-      COMMAND $<TARGET_FILE:H5_test_buildiface>
+      COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:H5_test_buildiface>
       WORKING_DIRECTORY ${HDF5_FORTRAN_TESTS_BINARY_DIR}/shared
       DEPENDS H5_test_buildiface
       COMMENT "Generating the tf_gen.F90 shared file"
