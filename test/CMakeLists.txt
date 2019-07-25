@@ -267,6 +267,9 @@ set (H5_TESTS
     enc_dec_plist_cross_platform
     getname
     vfd
+    ros3
+    s3comms
+    hdfs
     ntypes
     dangle
     dtransform

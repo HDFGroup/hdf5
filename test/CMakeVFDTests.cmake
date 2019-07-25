@@ -18,6 +18,7 @@
 # included from CMakeTEsts.cmake
 
 set (VFD_LIST
+    hdfs
     sec2
     stdio
     core

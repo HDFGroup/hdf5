@@ -155,6 +155,21 @@ if (NOT WINDOWS)
 endif ()
 
 #-----------------------------------------------------------------------------
+#  Check if ROS3 driver works
+#-----------------------------------------------------------------------------
+option (HDF5_ENABLE_ROS3_VFD "Build the ROS3 Virtual File Driver" OFF)
+  if (HDF5_ENABLE_ROS3_VFD)
+    find_package(CURL REQUIRED)
+    find_package(OpenSSL REQUIRED)
+    if (${CURL_FOUND} AND ${OPENSSL_FOUND})
+      set (${HDF_PREFIX}_HAVE_ROS3_VFD 1)
+      list (APPEND LINK_LIBS ${CURL_LIBRARIES} ${OPENSSL_LIBRARIES})
+    else ()
+      message (STATUS "The Read-Only S3 VFD was requested but cannot be built.\nPlease check that openssl and cURL are available on your\nsystem, and/or re-configure without option HDF5_ENABLE_ROS3_VFD.")
+    endif ()
+endif ()
+
+#-----------------------------------------------------------------------------
 # Check if C has __float128 extension
 #-----------------------------------------------------------------------------
 

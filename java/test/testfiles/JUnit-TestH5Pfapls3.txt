@@ -1,0 +1,10 @@
+JUnit version 4.11
+.testH5Pset_fapl_ros3_specified
+.testH5Pset_fapl_ros3
+.testH5Pget_fapl_ros3_invalid_fapl_id
+.testH5Pget_fapl_ros3_fapl_id_of_wrong_driver_type
+
+Time:  XXXX
+
+OK (4 tests)
+
