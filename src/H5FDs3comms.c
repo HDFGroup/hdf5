@@ -1143,9 +1143,8 @@ H5FD_s3comms_s3r_getsize(s3r_t *handle)
         HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "content_length overflows size_t\n");
     }
 
-    if (content_length == 0         ||
-        content_length == ULONG_MAX ||
-        errno          == ERANGE) /* errno set by strtoul */
+    if (content_length == 0 ||    
+        errno          == ERANGE) /* errno set by strtoumax*/
     {
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
             "could not convert found \"Content-Length\" response (\"%s\")",
