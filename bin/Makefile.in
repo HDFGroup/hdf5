@@ -26,12 +26,9 @@
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
-# HDF5 Library Examples Makefile(.in)
+# HDF5 Library Makefile(.in)
 #
 
-# We can't tell automake about example programs, because they need to be
-# built using h5cc (or h5fc, etc.) instead of the standard compilers.
-# This creates some extra work for us.
 VPATH = @srcdir@
 am__is_gnu_make = { \
   if test -z '$(MAKELEVEL)'; then \
@@ -106,8 +103,8 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-TESTS = $(TEST_SCRIPT)
-subdir = c++/examples
+TESTS =
+subdir = bin
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/aclocal_cxx.m4 \
 	$(top_srcdir)/m4/aclocal_fc.m4 $(top_srcdir)/configure.ac
@@ -116,8 +113,37 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 DIST_COMMON = $(srcdir)/Makefile.am $(am__DIST_COMMON)
 mkinstalldirs = $(SHELL) $(top_srcdir)/bin/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/src/H5config.h
-CONFIG_CLEAN_FILES = run-c++-ex.sh testh5c++.sh
+CONFIG_CLEAN_FILES = h5cc
 CONFIG_CLEAN_VPATH_FILES =
+am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
+am__vpath_adj = case $$p in \
+    $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
+    *) f=$$p;; \
+  esac;
+am__strip_dir = f=`echo $$p | sed -e 's|^.*/||'`;
+am__install_max = 40
+am__nobase_strip_setup = \
+  srcdirstrip=`echo "$(srcdir)" | sed 's/[].[^$$\\*|]/\\\\&/g'`
+am__nobase_strip = \
+  for p in $$list; do echo "$$p"; done | sed -e "s|$$srcdirstrip/||"
+am__nobase_list = $(am__nobase_strip_setup); \
+  for p in $$list; do echo "$$p $$p"; done | \
+  sed "s| $$srcdirstrip/| |;"' / .*\//!s/ .*/ ./; s,\( .*\)/[^/]*$$,\1,' | \
+  $(AWK) 'BEGIN { files["."] = "" } { files[$$2] = files[$$2] " " $$1; \
+    if (++n[$$2] == $(am__install_max)) \
+      { print $$2, files[$$2]; n[$$2] = 0; files[$$2] = "" } } \
+    END { for (dir in files) print dir, files[dir] }'
+am__base_list = \
+  sed '$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;s/\n/ /g' | \
+  sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
+am__uninstall_files_from_dir = { \
+  test -z "$$files" \
+    || { test ! -d "$$dir" && test ! -f "$$dir" && test ! -r "$$dir"; } \
+    || { echo " ( cd '$$dir' && rm -f" $$files ")"; \
+         $(am__cd) "$$dir" && rm -f $$files; }; \
+  }
+am__installdirs = "$(DESTDIR)$(bindir)"
+SCRIPTS = $(bin_SCRIPTS)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -160,33 +186,6 @@ am__tty_colors = { \
     std='[m'; \
   fi; \
 }
-am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
-am__vpath_adj = case $$p in \
-    $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
-    *) f=$$p;; \
-  esac;
-am__strip_dir = f=`echo $$p | sed -e 's|^.*/||'`;
-am__install_max = 40
-am__nobase_strip_setup = \
-  srcdirstrip=`echo "$(srcdir)" | sed 's/[].[^$$\\*|]/\\\\&/g'`
-am__nobase_strip = \
-  for p in $$list; do echo "$$p"; done | sed -e "s|$$srcdirstrip/||"
-am__nobase_list = $(am__nobase_strip_setup); \
-  for p in $$list; do echo "$$p $$p"; done | \
-  sed "s| $$srcdirstrip/| |;"' / .*\//!s/ .*/ ./; s,\( .*\)/[^/]*$$,\1,' | \
-  $(AWK) 'BEGIN { files["."] = "" } { files[$$2] = files[$$2] " " $$1; \
-    if (++n[$$2] == $(am__install_max)) \
-      { print $$2, files[$$2]; n[$$2] = 0; files[$$2] = "" } } \
-    END { for (dir in files) print dir, files[dir] }'
-am__base_list = \
-  sed '$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;s/\n/ /g' | \
-  sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
-am__uninstall_files_from_dir = { \
-  test -z "$$files" \
-    || { test ! -d "$$dir" && test ! -f "$$dir" && test ! -r "$$dir"; } \
-    || { echo " ( cd '$$dir' && rm -f" $$files ")"; \
-         $(am__cd) "$$dir" && rm -f $$files; }; \
-  }
 am__recheck_rx = ^[ 	]*:recheck:[ 	]*
 am__global_test_result_rx = ^[ 	]*:global-test-result:[ 	]*
 am__copy_in_global_log_rx = ^[ 	]*:copy-in-global-log:[ 	]*
@@ -338,11 +337,11 @@ am__set_b = \
     *) \
       b='$*';; \
   esac
-am__DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/run-c++-ex.sh.in \
-	$(srcdir)/testh5c++.sh.in $(top_srcdir)/bin/mkinstalldirs \
-	$(top_srcdir)/bin/test-driver $(top_srcdir)/config/commence.am \
-	$(top_srcdir)/config/conclude.am \
-	$(top_srcdir)/config/examples.am
+am__DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/h5cc.in \
+	$(top_srcdir)/config/commence.am \
+	$(top_srcdir)/config/conclude.am COPYING compile config.guess \
+	config.sub depcomp install-sh ltmain.sh missing mkinstalldirs \
+	test-driver
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
 ADD_PARALLEL_FILES = @ADD_PARALLEL_FILES@
@@ -354,7 +353,10 @@ AMTAR = @AMTAR@
 # instead of CFLAGS, as CFLAGS is reserved solely for the user to define.
 # This applies to FCFLAGS, CXXFLAGS, CPPFLAGS, and LDFLAGS as well.
 AM_CFLAGS = @AM_CFLAGS@ @H5_CFLAGS@
-AM_CPPFLAGS = @AM_CPPFLAGS@ @H5_CPPFLAGS@
+
+# Include src directory
+AM_CPPFLAGS = @AM_CPPFLAGS@ @H5_CPPFLAGS@ -I$(top_srcdir)/src \
+	-I$(top_srcdir)/tools/lib
 AM_CXXFLAGS = @AM_CXXFLAGS@ @H5_CXXFLAGS@
 AM_DEFAULT_VERBOSITY = @AM_DEFAULT_VERBOSITY@
 AM_FCFLAGS = @AM_FCFLAGS@ @H5_FCFLAGS@
@@ -613,42 +615,24 @@ TRACE = perl $(top_srcdir)/bin/trace
 # .chkexe files are used to mark tests that have run successfully.
 # .chklog files are output from those tests.
 # *.clog and *.clog2 are from the MPE option.
-CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.clog2 *.h5
-INSTALL_SCRIPT_FILES = run-c++-ex.sh
+CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.clog2
 
-# These are the programs that 'make all' or 'make prog' will build and
-# which 'make check' will run.  List them in the order they should be run.
-EXAMPLE_PROG = create readdata writedata compound extend_ds chunks h5group \
-	     h5tutr_cmprss h5tutr_crtatt h5tutr_crtdat h5tutr_crtgrpar \
-	     h5tutr_crtgrp h5tutr_crtgrpd h5tutr_extend h5tutr_rdwt \
-	     h5tutr_subset
+# These are our main targets
+bin_SCRIPTS = h5redeploy
 
-TEST_SCRIPT = testh5c++.sh
-TEST_EXAMPLES_SCRIPT = $(INSTALL_SCRIPT_FILES)
+# Tell automake to clean h5redeploy script
+CLEANFILES = h5redeploy
 
-# These are the example files to be installed
-INSTALL_FILES = create.cpp readdata.cpp writedata.cpp compound.cpp \
-              extend_ds.cpp chunks.cpp h5group.cpp \
-	      h5tutr_cmprss.cpp h5tutr_crtatt.cpp h5tutr_crtdat.cpp \
-	      h5tutr_crtgrpar.cpp h5tutr_crtgrp.cpp h5tutr_crtgrpd.cpp \
-	      h5tutr_extend.cpp h5tutr_rdwt.cpp h5tutr_subset.cpp
+# These were generated by configure.  Remove them only when distclean.
+DISTCLEANFILES = h5cc
 
+# All programs rely on hdf5 library and h5tools library
+LDADD = $(LIBH5TOOLS) $(LIBHDF5)
+@BUILD_PARALLEL_CONDITIONAL_FALSE@H5CC_NAME = h5cc
 
-# Tell conclude.am that these are C++ tests.
-CXX_API = yes
-
-# Where to install examples
-# Note: no '/' after DESTDIR.  Explanation in commence.am
-EXAMPLEDIR = ${DESTDIR}$(exec_prefix)/share/hdf5_examples/c++
-EXAMPLETOPDIR = ${DESTDIR}$(exec_prefix)/share/hdf5_examples
-
-# Assume that all tests in this directory are examples, and tell
-# conclude.am when to build them.
-EXTRA_PROG = $(EXAMPLE_PROG) $(EXAMPLE_PROG_PARA)
-
-# We need to tell automake what to clean
-MOSTLYCLEANFILES = *.raw *.meta *.o
-CLEANFILES = $(EXAMPLE_PROG) $(EXAMPLE_PROG_PARA)
+# h5cc needs custom install and uninstall rules, since it may be
+# named h5pcc if hdf5 is being built in parallel mode.
+@BUILD_PARALLEL_CONDITIONAL_TRUE@H5CC_NAME = h5pcc
 
 # Automake needs to be taught how to build lib, dyn, progs, and tests targets.
 # These will be filled in automatically for the most part (e.g.,
@@ -674,7 +658,7 @@ all: all-am
 
 .SUFFIXES:
 .SUFFIXES: .log .sh .sh$(EXEEXT) .trs
-$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(top_srcdir)/config/commence.am $(top_srcdir)/config/examples.am $(top_srcdir)/config/conclude.am $(am__configure_deps)
+$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(top_srcdir)/config/commence.am $(top_srcdir)/config/conclude.am $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
@@ -683,9 +667,9 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(top_srcdir
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign c++/examples/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign bin/Makefile'; \
 	$(am__cd) $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign c++/examples/Makefile
+	  $(AUTOMAKE) --foreign bin/Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
 	  *config.status*) \
@@ -694,7 +678,7 @@ Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	    echo ' cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@ $(am__depfiles_maybe)'; \
 	    cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@ $(am__depfiles_maybe);; \
 	esac;
-$(top_srcdir)/config/commence.am $(top_srcdir)/config/examples.am $(top_srcdir)/config/conclude.am $(am__empty):
+$(top_srcdir)/config/commence.am $(top_srcdir)/config/conclude.am $(am__empty):
 
 $(top_builddir)/config.status: $(top_srcdir)/configure $(CONFIG_STATUS_DEPENDENCIES)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
@@ -704,10 +688,43 @@ $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(am__aclocal_m4_deps):
-run-c++-ex.sh: $(top_builddir)/config.status $(srcdir)/run-c++-ex.sh.in
+h5cc: $(top_builddir)/config.status $(srcdir)/h5cc.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
-testh5c++.sh: $(top_builddir)/config.status $(srcdir)/testh5c++.sh.in
-	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
+install-binSCRIPTS: $(bin_SCRIPTS)
+	@$(NORMAL_INSTALL)
+	@list='$(bin_SCRIPTS)'; test -n "$(bindir)" || list=; \
+	if test -n "$$list"; then \
+	  echo " $(MKDIR_P) '$(DESTDIR)$(bindir)'"; \
+	  $(MKDIR_P) "$(DESTDIR)$(bindir)" || exit 1; \
+	fi; \
+	for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  if test -f "$$d$$p"; then echo "$$d$$p"; echo "$$p"; else :; fi; \
+	done | \
+	sed -e 'p;s,.*/,,;n' \
+	    -e 'h;s|.*|.|' \
+	    -e 'p;x;s,.*/,,;$(transform)' | sed 'N;N;N;s,\n, ,g' | \
+	$(AWK) 'BEGIN { files["."] = ""; dirs["."] = 1; } \
+	  { d=$$3; if (dirs[d] != 1) { print "d", d; dirs[d] = 1 } \
+	    if ($$2 == $$4) { files[d] = files[d] " " $$1; \
+	      if (++n[d] == $(am__install_max)) { \
+		print "f", d, files[d]; n[d] = 0; files[d] = "" } } \
+	    else { print "f", d "/" $$4, $$1 } } \
+	  END { for (d in files) print "f", d, files[d] }' | \
+	while read type dir files; do \
+	     if test "$$dir" = .; then dir=; else dir=/$$dir; fi; \
+	     test -z "$$files" || { \
+	       echo " $(INSTALL_SCRIPT) $$files '$(DESTDIR)$(bindir)$$dir'"; \
+	       $(INSTALL_SCRIPT) $$files "$(DESTDIR)$(bindir)$$dir" || exit $$?; \
+	     } \
+	; done
+
+uninstall-binSCRIPTS:
+	@$(NORMAL_UNINSTALL)
+	@list='$(bin_SCRIPTS)'; test -n "$(bindir)" || exit 0; \
+	files=`for p in $$list; do echo "$$p"; done | \
+	       sed -e 's,.*/,,;$(transform)'`; \
+	dir='$(DESTDIR)$(bindir)'; $(am__uninstall_files_from_dir)
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -899,8 +916,11 @@ distdir: $(DISTFILES)
 check-am: all-am
 	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
 check: check-am
-all-am: Makefile all-local
+all-am: Makefile $(SCRIPTS) all-local
 installdirs:
+	for dir in "$(DESTDIR)$(bindir)"; do \
+	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
+	done
 install: install-am
 install-exec: install-exec-am
 install-data: install-data-am
@@ -921,7 +941,6 @@ install-strip:
 	    "INSTALL_PROGRAM_ENV=STRIPPROG='$(STRIP)'" install; \
 	fi
 mostlyclean-generic:
-	-test -z "$(MOSTLYCLEANFILES)" || rm -f $(MOSTLYCLEANFILES)
 	-test -z "$(TEST_LOGS)" || rm -f $(TEST_LOGS)
 	-test -z "$(TEST_LOGS:.log=.trs)" || rm -f $(TEST_LOGS:.log=.trs)
 	-test -z "$(TEST_SUITE_LOG)" || rm -f $(TEST_SUITE_LOG)
@@ -932,6 +951,7 @@ clean-generic:
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
 	-test . = "$(srcdir)" || test -z "$(CONFIG_CLEAN_VPATH_FILES)" || rm -f $(CONFIG_CLEAN_VPATH_FILES)
+	-test -z "$(DISTCLEANFILES)" || rm -f $(DISTCLEANFILES)
 
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
@@ -956,13 +976,13 @@ info: info-am
 
 info-am:
 
-install-data-am: install-data-local
+install-data-am:
 
 install-dvi: install-dvi-am
 
 install-dvi-am:
 
-install-exec-am:
+install-exec-am: install-binSCRIPTS install-exec-local
 
 install-html: install-html-am
 
@@ -982,7 +1002,7 @@ install-ps: install-ps-am
 
 install-ps-am:
 
-installcheck-am: installcheck-local
+installcheck-am:
 
 maintainer-clean: maintainer-clean-am
 	-rm -f Makefile
@@ -1001,23 +1021,23 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-local
+uninstall-am: uninstall-binSCRIPTS uninstall-local
 
 .MAKE: check-am install-am install-strip
 
 .PHONY: all all-am all-local check check-TESTS check-am clean \
 	clean-generic clean-libtool cscopelist-am ctags-am distclean \
 	distclean-generic distclean-libtool distdir dvi dvi-am html \
-	html-am info info-am install install-am install-data \
-	install-data-am install-data-local install-dvi install-dvi-am \
-	install-exec install-exec-am install-html install-html-am \
-	install-info install-info-am install-man install-pdf \
-	install-pdf-am install-ps install-ps-am install-strip \
-	installcheck installcheck-am installcheck-local installdirs \
+	html-am info info-am install install-am install-binSCRIPTS \
+	install-data install-data-am install-dvi install-dvi-am \
+	install-exec install-exec-am install-exec-local install-html \
+	install-html-am install-info install-info-am install-man \
+	install-pdf install-pdf-am install-ps install-ps-am \
+	install-strip installcheck installcheck-am installdirs \
 	maintainer-clean maintainer-clean-generic mostlyclean \
 	mostlyclean-generic mostlyclean-libtool mostlyclean-local pdf \
 	pdf-am ps ps-am recheck tags-am uninstall uninstall-am \
-	uninstall-local
+	uninstall-binSCRIPTS uninstall-local
 
 .PRECIOUS: Makefile
 
@@ -1033,107 +1053,18 @@ uninstall-am: uninstall-local
 help:
 	@$(top_srcdir)/bin/makehelp
 
-# Some of the examples depend on files created by running other examples
-readdata.chkexe_: create.chkexe_
-chunks.chkexe_: extend_ds.chkexe_
-h5tutr_rdwt.chkexe_: h5tutr_crtdat.chkexe
-h5tutrcrtatt.chkexe_: h5tutr_crtdat.chkexe
-h5tutr_crtgrpd.chkexe_: h5tutr_crtgrpar.chkexe
+# How to build h5redeploy script
+h5redeploy: h5redeploy.in
+	@cp $(srcdir)/$@.in $@
 
-# How to build programs using h5c++
-$(EXTRA_PROG): $(H5CPP)
-	$(H5CPP) $(H5CCFLAGS) $(CPPFLAGS) -o $@ $(srcdir)/$@.cpp
+$(DESTDIR)$(bindir):
+	echo " $(MKDIR_P) '$(DESTDIR)$(bindir)'"; \
+	$(MKDIR_P) "$(DESTDIR)$(bindir)" || exit 1;
 
-# List dependencies for each program.  Normally, automake would take
-# care of this for us, but if we tell automake about the programs it
-# will try to build them with the normal C++ compiler, not h5c++.  This is
-# an inelegant way of solving the problem, unfortunately.
-create: $(srcdir)/create.cpp
-readdata: $(srcdir)/readdata.cpp
-writedata: $(srcdir)/writedata.cpp
-compound: $(srcdir)/compound.cpp
-extend_ds: $(srcdir)/extend_ds.cpp
-chunks: $(srcdir)/chunks.cpp
-h5group: $(srcdir)/h5group.cpp
-
-h5tutr_cmprss: $(srcdir)/h5tutr_cmprss.cpp
-h5tutr_crtatt: $(srcdir)/h5tutr_crtatt.cpp
-h5tutr_crtdat: $(srcdir)/h5tutr_crtdat.cpp
-h5tutr_crtgrpar: $(srcdir)/h5tutr_crtgrpar.cpp
-h5tutr_crtgrp: $(srcdir)/h5tutr_crtgrp.cpp
-h5tutr_crtgrpd: $(srcdir)/h5tutr_crtgrpd.cpp
-h5tutr_extend: $(srcdir)/h5tutr_extend.cpp
-h5tutr_rdwt: $(srcdir)/h5tutr_rdwt.cpp
-h5tutr_subset: $(srcdir)/h5tutr_subset.cpp
-
-# How to create EXAMPLEDIR if it doesn't already exist
-$(EXAMPLEDIR):
-	-$(top_srcdir)/bin/mkdirs $@
-$(EXAMPLETOPDIR):
-	-$(top_srcdir)/bin/mkdirs $@
-
-# Install and uninstall rules.  We install the source files, not the
-# example programs themselves.
-install-data-local:
-	@$(MAKE) $(AM_MAKEFLAGS) install-examples
+install-exec-local: $(DESTDIR)$(bindir)
+	@$(INSTALL) h5cc $(DESTDIR)$(bindir)/$(H5CC_NAME)
 uninstall-local:
-	@$(MAKE) $(AM_MAKEFLAGS) uninstall-examples
-
-install-examples: $(EXAMPLEDIR) $(INSTALL_FILES) 
-	@for f in X $(INSTALL_FILES); do                                     \
-	  if test $$f != X; then                                             \
-	    (set -x; $(INSTALL) $(srcdir)/$$f $(EXAMPLEDIR)/. || exit 1);    \
-            chmod a-x $(EXAMPLEDIR)/$$f;                                     \
-	  fi;                                                                \
-	done
-	@for f in X $(INSTALL_SCRIPT_FILES); do                                   \
-	  if test $$f != X; then                                             \
-	    (set -x; $(INSTALL) $$f $(EXAMPLEDIR)/. || exit 1);\
-	  fi;                                                                \
-	done
-	@for f in X $(INSTALL_TOP_FILES); do                       \
-	  if test $$f != X; then                                             \
-	    (set -x; $(INSTALL) $(srcdir)/$$f $(EXAMPLETOPDIR)/. || exit 1); \
-            chmod a-x $(EXAMPLETOPDIR)/$$f;\
-	  fi;                                                                \
-	done
-	@for f in X $(INSTALL_TOP_SCRIPT_FILES); do                       \
-	  if test $$f != X; then                                             \
-	    (set -x; $(INSTALL) $(srcdir)/$$f $(EXAMPLETOPDIR)/. || exit 1); \
-	  fi;                                                                \
-	done
-
-uninstall-examples:
-	@if test -n "$(INSTALL_FILES)" -a -d $(EXAMPLEDIR); then             \
-	  set -x; cd $(EXAMPLEDIR) && $(RM) $(INSTALL_FILES);                \
-	fi
-	@if test -n "$(INSTALL_SCRIPT_FILES)" -a -d $(EXAMPLEDIR); then           \
-	  set -x; cd $(EXAMPLEDIR) && $(RM) $(INSTALL_SCRIPT_FILES);              \
-	fi
-	@if test -n "$(INSTALL_TOP_FILES)" -a -d $(EXAMPLETOPDIR); then    \
-	  set -x; cd $(EXAMPLETOPDIR) && $(RM) $(INSTALL_TOP_FILES);       \
-	fi
-	@if test -n "$(INSTALL_TOP_SCRIPT_FILES)" -a -d $(EXAMPLETOPDIR); then    \
-	  set -x; cd $(EXAMPLETOPDIR) && $(RM) $(INSTALL_TOP_SCRIPT_FILES);       \
-	fi
-
-installcheck-local:
-	@if test "$(STATIC_SHARED)" = "static, shared"; then               \
-	  H5CCFLAGS="-shlib" $(MAKE) $(AM_MAKEFLAGS) check;                \
-	  $(MAKE) $(AM_MAKEFLAGS) clean;                                   \
-	  H5CCFLAGS="" $(MAKE) $(AM_MAKEFLAGS) check;                      \
-	elif test "$(STATIC_SHARED)" = "shared"; then                     \
-	  H5CCFLAGS="-shlib" $(MAKE) $(AM_MAKEFLAGS) check;                \
-	else                                                              \
-	  $(MAKE) $(AM_MAKEFLAGS) check;                                   \
-	fi 
-	@if test "$(INSTALL_FILES)" -a $(TEST_EXAMPLES_SCRIPT) -a -d $(EXAMPLEDIR); then \
-	    echo "============================";                                         \
-	    echo "Testing $(TEST_EXAMPLES_SCRIPT)";                                      \
-	    echo "============================";                                         \
-	    (cd $(EXAMPLEDIR);                                                           \
-	     /bin/sh ./$(TEST_EXAMPLES_SCRIPT);)                                                   \
-	fi
+	@$(RM) $(DESTDIR)$(bindir)/$(H5CC_NAME)
 # lib/progs/tests targets recurse into subdirectories. build-* targets
 # build files in this directory.
 build-lib: $(LIB)

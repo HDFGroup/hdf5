@@ -478,6 +478,8 @@ HAVE_FORTRAN_2003 = @HAVE_FORTRAN_2003@
 HAVE_PTHREAD = @HAVE_PTHREAD@
 HDF5_HL = @HDF5_HL@
 HDF5_INTERFACES = @HDF5_INTERFACES@
+HDF5_TESTS = @HDF5_TESTS@
+HDF5_TOOLS = @HDF5_TOOLS@
 HDF_CXX = @HDF_CXX@
 HDF_FORTRAN = @HDF_FORTRAN@
 HDF_FORTRAN2003 = @HDF_FORTRAN2003@
@@ -665,7 +667,9 @@ TRACE = perl $(top_srcdir)/bin/trace
 # .chklog files are output from those tests.
 # *.clog and *.clog2 are from the MPE option.
 CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.clog2
-@BUILD_CXX_CONDITIONAL_TRUE@SUBDIRS = src test
+@BUILD_TESTS_CONDITIONAL_FALSE@TEST_DIR = 
+@BUILD_TESTS_CONDITIONAL_TRUE@TEST_DIR = test
+@BUILD_CXX_CONDITIONAL_TRUE@SUBDIRS = src $(TEST_DIR)
 DIST_SUBDIRS = src test examples
 
 # Automake needs to be taught how to build lib, dyn, progs, and tests targets.

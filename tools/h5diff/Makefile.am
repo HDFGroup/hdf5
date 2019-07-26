@@ -35,23 +35,28 @@ bin_PROGRAMS=h5diff $(H5PDIFF)
 h5diff_LDFLAGS = $(LT_STATIC_EXEC) $(AM_LDFLAGS)
 
 # Test programs and scripts
+if BUILD_TESTS_CONDITIONAL
 TEST_PROG=h5diffgentest
 TEST_SCRIPT=testh5diff.sh
-
-check_PROGRAMS=$(TEST_PROG)
-check_SCRIPTS=$(TEST_SCRIPT) $(TEST_SCRIPT_PARA)
-# The parallel test script testph5diff.sh actually depends on testh5diff.sh.
-SCRIPT_DEPEND=h5diff$(EXEEXT) $(H5PDIFF) testh5diff.sh
+	h5diffgentest_SOURCES=h5diffgentest.c
 if HAVE_SHARED_CONDITIONAL
 if USE_PLUGINS_CONDITIONAL
    TEST_SCRIPT += h5diff_plugin.sh
 endif
 endif
+else 
+TEST_PROG=
+TEST_SCRIPT=
+endif
+
+check_PROGRAMS=$(TEST_PROG)
+check_SCRIPTS=$(TEST_SCRIPT) $(TEST_SCRIPT_PARA)
+# The parallel test script testph5diff.sh actually depends on testh5diff.sh.
+SCRIPT_DEPEND=h5diff$(EXEEXT) $(H5PDIFF) testh5diff.sh
 
 # Source files for the program
 h5diff_SOURCES=h5diff_main.c h5diff_common.c
 ph5diff_SOURCES=ph5diff_main.c h5diff_common.c
-h5diffgentest_SOURCES=h5diffgentest.c
 
 # Programs depend on the main HDF5 library and tools library
 LDADD=$(LIBH5TOOLS) $(LIBHDF5)

@@ -103,9 +103,9 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-check_PROGRAMS = $(am__EXEEXT_1)
+check_PROGRAMS =
 bin_PROGRAMS = h5import$(EXEEXT)
-TESTS = $(am__EXEEXT_1) $(TEST_SCRIPT)
+TESTS =
 subdir = tools/h5import
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/aclocal_cxx.m4 \
@@ -118,7 +118,6 @@ CONFIG_HEADER = $(top_builddir)/src/H5config.h
 CONFIG_CLEAN_FILES = h5importtestutil.sh
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
-am__EXEEXT_1 = h5importtest$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS)
 h5import_SOURCES = h5import.c
 h5import_OBJECTS = h5import.$(OBJEXT)
@@ -131,10 +130,6 @@ am__v_lt_1 =
 h5import_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(h5import_LDFLAGS) $(LDFLAGS) -o $@
-h5importtest_SOURCES = h5importtest.c
-h5importtest_OBJECTS = h5importtest.$(OBJEXT)
-h5importtest_LDADD = $(LDADD)
-h5importtest_DEPENDENCIES = $(LIBH5TOOLS) $(LIBHDF5)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -169,8 +164,8 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = h5import.c h5importtest.c
-DIST_SOURCES = h5import.c h5importtest.c
+SOURCES = h5import.c
+DIST_SOURCES = h5import.c
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -380,8 +375,11 @@ am__set_TESTS_bases = \
 RECHECK_LOGS = $(TEST_LOGS)
 AM_RECURSIVE_TARGETS = check recheck
 TEST_SUITE_LOG = test-suite.log
-LOG_DRIVER = $(SHELL) $(top_srcdir)/bin/test-driver
-LOG_COMPILE = $(LOG_COMPILER) $(AM_LOG_FLAGS) $(LOG_FLAGS)
+am__test_logs1 = $(TESTS:=.log)
+am__test_logs2 = $(am__test_logs1:@EXEEXT@.log=.log)
+TEST_LOGS = $(am__test_logs2:.sh.log=.log)
+SH_LOG_DRIVER = $(SHELL) $(top_srcdir)/bin/test-driver
+SH_LOG_COMPILE = $(SH_LOG_COMPILER) $(AM_SH_LOG_FLAGS) $(SH_LOG_FLAGS)
 am__set_b = \
   case '$@' in \
     */*) \
@@ -392,11 +390,6 @@ am__set_b = \
     *) \
       b='$*';; \
   esac
-am__test_logs1 = $(TESTS:=.log)
-am__test_logs2 = $(am__test_logs1:@EXEEXT@.log=.log)
-TEST_LOGS = $(am__test_logs2:.sh.log=.log)
-SH_LOG_DRIVER = $(SHELL) $(top_srcdir)/bin/test-driver
-SH_LOG_COMPILE = $(SH_LOG_COMPILER) $(AM_SH_LOG_FLAGS) $(SH_LOG_FLAGS)
 am__DIST_COMMON = $(srcdir)/Makefile.in \
 	$(srcdir)/h5importtestutil.sh.in $(top_srcdir)/bin/depcomp \
 	$(top_srcdir)/bin/mkinstalldirs $(top_srcdir)/bin/test-driver \
@@ -487,6 +480,8 @@ HAVE_FORTRAN_2003 = @HAVE_FORTRAN_2003@
 HAVE_PTHREAD = @HAVE_PTHREAD@
 HDF5_HL = @HDF5_HL@
 HDF5_INTERFACES = @HDF5_INTERFACES@
+HDF5_TESTS = @HDF5_TESTS@
+HDF5_TOOLS = @HDF5_TOOLS@
 HDF_CXX = @HDF_CXX@
 HDF_FORTRAN = @HDF_FORTRAN@
 HDF_FORTRAN2003 = @HDF_FORTRAN2003@
@@ -676,10 +671,6 @@ TRACE = perl $(top_srcdir)/bin/trace
 
 # Temporary files from h5importtest
 CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.clog2 *.bin
-
-# Test programs and scripts
-TEST_PROG = h5importtest
-TEST_SCRIPT = h5importtestutil.sh
 check_SCRIPT = h5importtestutil.sh
 SCRIPT_DEPEND = h5import$(EXEEXT)
 
@@ -808,10 +799,6 @@ h5import$(EXEEXT): $(h5import_OBJECTS) $(h5import_DEPENDENCIES) $(EXTRA_h5import
 	@rm -f h5import$(EXEEXT)
 	$(AM_V_CCLD)$(h5import_LINK) $(h5import_OBJECTS) $(h5import_LDADD) $(LIBS)
 
-h5importtest$(EXEEXT): $(h5importtest_OBJECTS) $(h5importtest_DEPENDENCIES) $(EXTRA_h5importtest_DEPENDENCIES) 
-	@rm -f h5importtest$(EXEEXT)
-	$(AM_V_CCLD)$(LINK) $(h5importtest_OBJECTS) $(h5importtest_LDADD) $(LIBS)
-
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
 
@@ -819,7 +806,6 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5import.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5importtest.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -1030,13 +1016,6 @@ recheck: all $(check_PROGRAMS)
 	        am__force_recheck=am--force-recheck \
 	        TEST_LOGS="$$log_list"; \
 	exit $$?
-h5importtest.log: h5importtest$(EXEEXT)
-	@p='h5importtest$(EXEEXT)'; \
-	b='h5importtest'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
 .sh.log:
 	@p='$<'; \
 	$(am__set_b); \
@@ -1226,6 +1205,12 @@ uninstall-am: uninstall-binPROGRAMS
 
 help:
 	@$(top_srcdir)/bin/makehelp
+
+# Test programs and scripts
+@BUILD_TESTS_CONDITIONAL_TRUE@	TEST_PROG=h5importtest
+@BUILD_TESTS_CONDITIONAL_TRUE@	TEST_SCRIPT=h5importtestutil.sh
+@BUILD_TESTS_CONDITIONAL_FALSE@	TEST_PROG=
+@BUILD_TESTS_CONDITIONAL_FALSE@	TEST_SCRIPT=
 # lib/progs/tests targets recurse into subdirectories. build-* targets
 # build files in this directory.
 build-lib: $(LIB)

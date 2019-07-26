@@ -674,6 +674,47 @@ fi
 AM_CONDITIONAL([FORTRAN_SHARED_CONDITIONAL], [test "X$H5_FORTRAN_SHARED" = "Xyes"])
 
 ## ----------------------------------------------------------------------
+## Check if they would like to disable building tests 
+##
+
+## This needs to be exposed for the library info file.
+AC_SUBST([HDF5_TESTS])
+
+## Default is to build tests
+HDF5_TESTS=yes
+
+AC_MSG_CHECKING([if building tests is disabled])
+
+AC_ARG_ENABLE([tests],
+              [AS_HELP_STRING([--enable-tests],
+                              [Compile the HDF5 tests [default=yes]])],
+              [HDF5_TESTS=$enableval])
+
+if test "X$HDF5_TESTS" = "Xno"; then
+  echo "Building HDF5 tests is disabled"
+fi
+
+## ----------------------------------------------------------------------
+## Check if they would like to disable building tools
+##
+
+## This needs to be exposed for the library info file.
+AC_SUBST([HDF5_TOOLS])
+
+## Default is to build tests and tools
+HDF5_TOOLS=yes
+
+AC_MSG_CHECKING([if building tools is disabled])
+
+AC_ARG_ENABLE([tools],
+              [AS_HELP_STRING([--enable-tools],
+                              [Compile the HDF5 tools [default=yes]])],
+              [HDF5_TOOLS=$enableval])
+
+if test "X$HDF5_TOOLS" = "Xno"; then
+  echo "Building HDF5 tools is disabled"
+fi
+
 ## Create libtool.  If shared/static libraries are going to be enabled
 ## or disabled, it should happen before these macros.
 LT_PREREQ([2.2])
@@ -2845,7 +2886,9 @@ AM_CONDITIONAL([BUILD_CXX_CONDITIONAL], [test "X$HDF_CXX" = "Xyes"])
 AM_CONDITIONAL([BUILD_PARALLEL_CONDITIONAL], [test -n "$TESTPARALLEL"])
 AM_CONDITIONAL([BUILD_FORTRAN_CONDITIONAL], [test "X$HDF_FORTRAN" = "Xyes"])
 AM_CONDITIONAL([BUILD_HDF5_HL_CONDITIONAL], [test "X$HDF5_HL" = "Xyes"])
-
+AM_CONDITIONAL([BUILD_TESTS_CONDITIONAL], [test "X$HDF5_TESTS" = "Xyes"])
+AM_CONDITIONAL([BUILD_TESTS_PARALLEL_CONDITIONAL], [test -n "$TESTPARALLEL"])
+AM_CONDITIONAL([BUILD_TOOLS_CONDITIONAL], [test "X$HDF5_TOOLS" = "Xyes"])
 
 ## ----------------------------------------------------------------------
 ## Build the Makefiles.
@@ -2979,7 +3022,6 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  tools/h5copy/testh5copy.sh
                  tools/lib/Makefile
                  tools/misc/Makefile
-                 tools/misc/h5cc
                  tools/misc/testh5mkgrp.sh
                  tools/misc/testh5repart.sh
                  tools/h5stat/testh5stat.sh
@@ -2988,7 +3030,9 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  examples/Makefile
                  examples/run-c-ex.sh
                  examples/testh5cc.sh
-                 c++/Makefile
+		 bin/h5cc
+		 bin/Makefile
+		 c++/Makefile
                  c++/src/Makefile
                  c++/src/h5c++
                  c++/test/Makefile

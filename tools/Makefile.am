@@ -21,8 +21,14 @@ include $(top_srcdir)/config/commence.am
 
 CONFIG=ordered
 
+if BUILD_TESTS_CONDITIONAL
+PERFORM_DIR=perform
+else 
+PERFORM_DIR=
+endif 
+
 # All subdirectories
 SUBDIRS=lib h5diff h5ls h5dump misc h5import h5repack h5jam h5copy h5stat \
-    perform
+    $(PERFORM_DIR)
 
 include $(top_srcdir)/config/conclude.am

@@ -642,6 +642,12 @@ HAVE_SHARED_CONDITIONAL_FALSE
 HAVE_SHARED_CONDITIONAL_TRUE
 fortran_linux_linker_option
 SEARCH
+BUILD_TOOLS_CONDITIONAL_FALSE
+BUILD_TOOLS_CONDITIONAL_TRUE
+BUILD_TESTS_PARALLEL_CONDITIONAL_FALSE
+BUILD_TESTS_PARALLEL_CONDITIONAL_TRUE
+BUILD_TESTS_CONDITIONAL_FALSE
+BUILD_TESTS_CONDITIONAL_TRUE
 BUILD_HDF5_HL_CONDITIONAL_FALSE
 BUILD_HDF5_HL_CONDITIONAL_TRUE
 BUILD_FORTRAN_CONDITIONAL_FALSE
@@ -708,6 +714,8 @@ EGREP
 GREP
 SED
 LIBTOOL
+HDF5_TOOLS
+HDF5_TESTS
 FORTRAN_SHARED_CONDITIONAL_FALSE
 FORTRAN_SHARED_CONDITIONAL_TRUE
 H5_FORTRAN_SHARED
@@ -888,6 +896,8 @@ enable_fortran
 enable_fortran2003
 enable_cxx
 enable_hl
+enable_tests
+enable_tools
 enable_shared
 enable_static
 with_pic
@@ -1573,6 +1583,8 @@ Optional Features:
                           specify --enable-fortran [default=no]
   --enable-cxx            Compile the C++ interface [default=no]
   --enable-hl             Enable the high level library [default=yes]
+  --enable-tests          Compile the HDF5 tests [default=yes]
+  --enable-tools          Compile the HDF5 tools [default=yes]
   --enable-shared[=PKGS]  build shared libraries [default=yes]
   --enable-static[=PKGS]  build static libraries [default=yes]
   --enable-fast-install[=PKGS]
@@ -7752,6 +7764,51 @@ fi
 
 
 ## ----------------------------------------------------------------------
+## Check if they would like to disable building tests
+##
+
+## This needs to be exposed for the library info file.
+
+
+## Default is to build tests
+HDF5_TESTS=yes
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking if building tests is disabled" >&5
+$as_echo_n "checking if building tests is disabled... " >&6; }
+
+# Check whether --enable-tests was given.
+if test "${enable_tests+set}" = set; then :
+  enableval=$enable_tests; HDF5_TESTS=$enableval
+fi
+
+
+if test "X$HDF5_TESTS" = "Xno"; then
+  echo "Building HDF5 tests is disabled"
+fi
+
+## ----------------------------------------------------------------------
+## Check if they would like to disable building tools
+##
+
+## This needs to be exposed for the library info file.
+
+
+## Default is to build tests and tools
+HDF5_TOOLS=yes
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking if building tools is disabled" >&5
+$as_echo_n "checking if building tools is disabled... " >&6; }
+
+# Check whether --enable-tools was given.
+if test "${enable_tools+set}" = set; then :
+  enableval=$enable_tools; HDF5_TOOLS=$enableval
+fi
+
+
+if test "X$HDF5_TOOLS" = "Xno"; then
+  echo "Building HDF5 tools is disabled"
+fi
+
 ## Create libtool.  If shared/static libraries are going to be enabled
 ## or disabled, it should happen before these macros.
 
@@ -28873,6 +28930,29 @@ else
   BUILD_HDF5_HL_CONDITIONAL_FALSE=
 fi
 
+ if test "X$HDF5_TESTS" = "Xyes"; then
+  BUILD_TESTS_CONDITIONAL_TRUE=
+  BUILD_TESTS_CONDITIONAL_FALSE='#'
+else
+  BUILD_TESTS_CONDITIONAL_TRUE='#'
+  BUILD_TESTS_CONDITIONAL_FALSE=
+fi
+
+ if test -n "$TESTPARALLEL"; then
+  BUILD_TESTS_PARALLEL_CONDITIONAL_TRUE=
+  BUILD_TESTS_PARALLEL_CONDITIONAL_FALSE='#'
+else
+  BUILD_TESTS_PARALLEL_CONDITIONAL_TRUE='#'
+  BUILD_TESTS_PARALLEL_CONDITIONAL_FALSE=
+fi
+
+ if test "X$HDF5_TOOLS" = "Xyes"; then
+  BUILD_TOOLS_CONDITIONAL_TRUE=
+  BUILD_TOOLS_CONDITIONAL_FALSE='#'
+else
+  BUILD_TOOLS_CONDITIONAL_TRUE='#'
+  BUILD_TOOLS_CONDITIONAL_FALSE=
+fi
 
 
 ## ----------------------------------------------------------------------
@@ -30769,7 +30849,7 @@ else
 fi
 
 
-ac_config_files="$ac_config_files src/libhdf5.settings Makefile src/Makefile test/Makefile test/testcheck_version.sh test/testerror.sh test/H5srcdir_str.h test/testlibinfo.sh test/testlinks_env.sh test/test_plugin.sh testpar/Makefile tools/Makefile tools/h5dump/Makefile tools/h5dump/h5dump_plugin.sh tools/h5dump/testh5dump.sh tools/h5dump/testh5dumppbits.sh tools/h5dump/testh5dumpxml.sh tools/h5ls/Makefile tools/h5ls/h5ls_plugin.sh tools/h5ls/testh5ls.sh tools/h5import/Makefile tools/h5import/h5importtestutil.sh tools/h5diff/Makefile tools/h5diff/h5diff_plugin.sh tools/h5diff/testh5diff.sh tools/h5diff/testph5diff.sh tools/h5jam/Makefile tools/h5jam/testh5jam.sh tools/h5repack/Makefile tools/h5repack/h5repack.sh tools/h5repack/h5repack_plugin.sh tools/h5copy/Makefile tools/h5copy/testh5copy.sh tools/lib/Makefile tools/misc/Makefile tools/misc/h5cc tools/misc/testh5mkgrp.sh tools/misc/testh5repart.sh tools/h5stat/testh5stat.sh tools/h5stat/Makefile tools/perform/Makefile examples/Makefile examples/run-c-ex.sh examples/testh5cc.sh c++/Makefile c++/src/Makefile c++/src/h5c++ c++/test/Makefile c++/test/H5srcdir_str.h c++/examples/Makefile c++/examples/run-c++-ex.sh c++/examples/testh5c++.sh fortran/Makefile fortran/src/h5fc fortran/src/Makefile fortran/test/Makefile fortran/testpar/Makefile fortran/examples/Makefile fortran/examples/run-fortran-ex.sh fortran/examples/testh5fc.sh hl/Makefile hl/src/Makefile hl/test/Makefile hl/test/H5srcdir_str.h hl/tools/Makefile hl/tools/gif2h5/Makefile hl/tools/gif2h5/h52giftest.sh hl/examples/Makefile hl/examples/run-hlc-ex.sh hl/c++/Makefile hl/c++/src/Makefile hl/c++/test/Makefile hl/c++/examples/Makefile hl/c++/examples/run-hlc++-ex.sh hl/fortran/Makefile hl/fortran/src/Makefile hl/fortran/test/Makefile hl/fortran/examples/Makefile hl/fortran/examples/run-hlfortran-ex.sh"
+ac_config_files="$ac_config_files src/libhdf5.settings Makefile src/Makefile test/Makefile test/testcheck_version.sh test/testerror.sh test/H5srcdir_str.h test/testlibinfo.sh test/testlinks_env.sh test/test_plugin.sh testpar/Makefile tools/Makefile tools/h5dump/Makefile tools/h5dump/h5dump_plugin.sh tools/h5dump/testh5dump.sh tools/h5dump/testh5dumppbits.sh tools/h5dump/testh5dumpxml.sh tools/h5ls/Makefile tools/h5ls/h5ls_plugin.sh tools/h5ls/testh5ls.sh tools/h5import/Makefile tools/h5import/h5importtestutil.sh tools/h5diff/Makefile tools/h5diff/h5diff_plugin.sh tools/h5diff/testh5diff.sh tools/h5diff/testph5diff.sh tools/h5jam/Makefile tools/h5jam/testh5jam.sh tools/h5repack/Makefile tools/h5repack/h5repack.sh tools/h5repack/h5repack_plugin.sh tools/h5copy/Makefile tools/h5copy/testh5copy.sh tools/lib/Makefile tools/misc/Makefile tools/misc/testh5mkgrp.sh tools/misc/testh5repart.sh tools/h5stat/testh5stat.sh tools/h5stat/Makefile tools/perform/Makefile examples/Makefile examples/run-c-ex.sh examples/testh5cc.sh bin/h5cc bin/Makefile c++/Makefile c++/src/Makefile c++/src/h5c++ c++/test/Makefile c++/test/H5srcdir_str.h c++/examples/Makefile c++/examples/run-c++-ex.sh c++/examples/testh5c++.sh fortran/Makefile fortran/src/h5fc fortran/src/Makefile fortran/test/Makefile fortran/testpar/Makefile fortran/examples/Makefile fortran/examples/run-fortran-ex.sh fortran/examples/testh5fc.sh hl/Makefile hl/src/Makefile hl/test/Makefile hl/test/H5srcdir_str.h hl/tools/Makefile hl/tools/gif2h5/Makefile hl/tools/gif2h5/h52giftest.sh hl/examples/Makefile hl/examples/run-hlc-ex.sh hl/c++/Makefile hl/c++/src/Makefile hl/c++/test/Makefile hl/c++/examples/Makefile hl/c++/examples/run-hlc++-ex.sh hl/fortran/Makefile hl/fortran/src/Makefile hl/fortran/test/Makefile hl/fortran/examples/Makefile hl/fortran/examples/run-hlfortran-ex.sh"
 
 
 cat >confcache <<\_ACEOF
@@ -30972,6 +31052,18 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${BUILD_HDF5_HL_CONDITIONAL_TRUE}" && test -z "${BUILD_HDF5_HL_CONDITIONAL_FALSE}"; then
   as_fn_error $? "conditional \"BUILD_HDF5_HL_CONDITIONAL\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${BUILD_TESTS_CONDITIONAL_TRUE}" && test -z "${BUILD_TESTS_CONDITIONAL_FALSE}"; then
+  as_fn_error $? "conditional \"BUILD_TESTS_CONDITIONAL\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${BUILD_TESTS_PARALLEL_CONDITIONAL_TRUE}" && test -z "${BUILD_TESTS_PARALLEL_CONDITIONAL_FALSE}"; then
+  as_fn_error $? "conditional \"BUILD_TESTS_PARALLEL_CONDITIONAL\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${BUILD_TOOLS_CONDITIONAL_TRUE}" && test -z "${BUILD_TOOLS_CONDITIONAL_FALSE}"; then
+  as_fn_error $? "conditional \"BUILD_TOOLS_CONDITIONAL\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${HAVE_SHARED_CONDITIONAL_TRUE}" && test -z "${HAVE_SHARED_CONDITIONAL_FALSE}"; then
@@ -32077,7 +32169,6 @@ do
     "tools/h5copy/testh5copy.sh") CONFIG_FILES="$CONFIG_FILES tools/h5copy/testh5copy.sh" ;;
     "tools/lib/Makefile") CONFIG_FILES="$CONFIG_FILES tools/lib/Makefile" ;;
     "tools/misc/Makefile") CONFIG_FILES="$CONFIG_FILES tools/misc/Makefile" ;;
-    "tools/misc/h5cc") CONFIG_FILES="$CONFIG_FILES tools/misc/h5cc" ;;
     "tools/misc/testh5mkgrp.sh") CONFIG_FILES="$CONFIG_FILES tools/misc/testh5mkgrp.sh" ;;
     "tools/misc/testh5repart.sh") CONFIG_FILES="$CONFIG_FILES tools/misc/testh5repart.sh" ;;
     "tools/h5stat/testh5stat.sh") CONFIG_FILES="$CONFIG_FILES tools/h5stat/testh5stat.sh" ;;
@@ -32086,6 +32177,8 @@ do
     "examples/Makefile") CONFIG_FILES="$CONFIG_FILES examples/Makefile" ;;
     "examples/run-c-ex.sh") CONFIG_FILES="$CONFIG_FILES examples/run-c-ex.sh" ;;
     "examples/testh5cc.sh") CONFIG_FILES="$CONFIG_FILES examples/testh5cc.sh" ;;
+    "bin/h5cc") CONFIG_FILES="$CONFIG_FILES bin/h5cc" ;;
+    "bin/Makefile") CONFIG_FILES="$CONFIG_FILES bin/Makefile" ;;
     "c++/Makefile") CONFIG_FILES="$CONFIG_FILES c++/Makefile" ;;
     "c++/src/Makefile") CONFIG_FILES="$CONFIG_FILES c++/src/Makefile" ;;
     "c++/src/h5c++") CONFIG_FILES="$CONFIG_FILES c++/src/h5c++" ;;

@@ -367,7 +367,8 @@ am__set_b = \
     *) \
       b='$*';; \
   esac
-DIST_SUBDIRS = $(SUBDIRS)
+DIST_SUBDIRS = lib h5diff h5ls h5dump misc h5import h5repack h5jam \
+	h5copy h5stat perform
 am__DIST_COMMON = $(srcdir)/Makefile.in \
 	$(top_srcdir)/bin/mkinstalldirs $(top_srcdir)/bin/test-driver \
 	$(top_srcdir)/config/commence.am \
@@ -479,6 +480,8 @@ HAVE_FORTRAN_2003 = @HAVE_FORTRAN_2003@
 HAVE_PTHREAD = @HAVE_PTHREAD@
 HDF5_HL = @HDF5_HL@
 HDF5_INTERFACES = @HDF5_INTERFACES@
+HDF5_TESTS = @HDF5_TESTS@
+HDF5_TOOLS = @HDF5_TOOLS@
 HDF_CXX = @HDF_CXX@
 HDF_FORTRAN = @HDF_FORTRAN@
 HDF_FORTRAN2003 = @HDF_FORTRAN2003@
@@ -667,10 +670,12 @@ TRACE = perl $(top_srcdir)/bin/trace
 # *.clog and *.clog2 are from the MPE option.
 CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.clog2
 CONFIG = ordered
+@BUILD_TESTS_CONDITIONAL_FALSE@PERFORM_DIR = 
+@BUILD_TESTS_CONDITIONAL_TRUE@PERFORM_DIR = perform
 
 # All subdirectories
 SUBDIRS = lib h5diff h5ls h5dump misc h5import h5repack h5jam h5copy h5stat \
-    perform
+    $(PERFORM_DIR)
 
 
 # Automake needs to be taught how to build lib, dyn, progs, and tests targets.

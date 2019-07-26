@@ -22,8 +22,13 @@ include $(top_srcdir)/config/commence.am
 AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_srcdir)/tools/lib
 
 # Test programs and scripts
-TEST_PROG=h5importtest
-TEST_SCRIPT=h5importtestutil.sh
+if BUILD_TESTS_CONDITIONAL
+	TEST_PROG=h5importtest
+	TEST_SCRIPT=h5importtestutil.sh
+else
+	TEST_PROG=
+	TEST_SCRIPT=
+endif
 
 check_PROGRAMS=$(TEST_PROG)
 check_SCRIPT=h5importtestutil.sh

@@ -23,7 +23,12 @@ AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_srcdir)/tools/lib
 
 bin_PROGRAMS=h5jam h5unjam
 check_PROGRAMS=tellub h5jamgentest getub
-TEST_SCRIPT=testh5jam.sh
+
+if BUILD_TESTS_CONDITIONAL
+	TEST_SCRIPT=testh5jam.sh
+else 
+	TEST_SCRIPT=
+endif
 
 # Add h5jam and h5unjam specific linker flags here
 h5jam_LDFLAGS = $(LT_STATIC_EXEC) $(AM_LDFLAGS)

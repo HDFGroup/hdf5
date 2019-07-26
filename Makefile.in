@@ -191,9 +191,7 @@ am__DIST_COMMON = $(srcdir)/Makefile.in $(top_srcdir)/bin/compile \
 	$(top_srcdir)/bin/config.guess $(top_srcdir)/bin/config.sub \
 	$(top_srcdir)/bin/install-sh $(top_srcdir)/bin/ltmain.sh \
 	$(top_srcdir)/bin/missing $(top_srcdir)/bin/mkinstalldirs \
-	$(top_srcdir)/config/commence.am COPYING bin/COPYING \
-	bin/compile bin/config.guess bin/config.sub bin/depcomp \
-	bin/install-sh bin/ltmain.sh bin/missing bin/mkinstalldirs
+	$(top_srcdir)/config/commence.am COPYING
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 distdir = $(PACKAGE)-$(VERSION)
 top_distdir = $(distdir)
@@ -317,6 +315,8 @@ HAVE_FORTRAN_2003 = @HAVE_FORTRAN_2003@
 HAVE_PTHREAD = @HAVE_PTHREAD@
 HDF5_HL = @HDF5_HL@
 HDF5_INTERFACES = @HDF5_INTERFACES@
+HDF5_TESTS = @HDF5_TESTS@
+HDF5_TOOLS = @HDF5_TOOLS@
 HDF_CXX = @HDF_CXX@
 HDF_FORTRAN = @HDF_FORTRAN@
 HDF_FORTRAN2003 = @HDF_FORTRAN2003@
@@ -506,7 +506,7 @@ TRACE = perl $(top_srcdir)/bin/trace
 
 # Some files/directories generated during check that should be cleaned
 CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.clog2 *-tmp
-@BUILD_PARALLEL_CONDITIONAL_FALSE@TESTPARALLEL_DIR = 
+@BUILD_CXX_CONDITIONAL_FALSE@CXX_DIR = 
 
 # Define subdirectories to build.
 # Add this directory to SUBDIRS so that examples get built after tools
@@ -518,15 +518,19 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.clog2 *-tmp
 
 # Conditionals.  These conditionals are defined during configure
 # Define each variable to empty if it is not used to placate pmake
-@BUILD_PARALLEL_CONDITIONAL_TRUE@TESTPARALLEL_DIR = testpar
-@BUILD_CXX_CONDITIONAL_FALSE@CXX_DIR = 
 @BUILD_CXX_CONDITIONAL_TRUE@CXX_DIR = c++
 @BUILD_FORTRAN_CONDITIONAL_FALSE@FORTRAN_DIR = 
 @BUILD_FORTRAN_CONDITIONAL_TRUE@FORTRAN_DIR = fortran
 @BUILD_HDF5_HL_CONDITIONAL_FALSE@HDF5_HL_DIR = 
 @BUILD_HDF5_HL_CONDITIONAL_TRUE@HDF5_HL_DIR = hl
-SUBDIRS = src test $(TESTPARALLEL_DIR) tools . $(CXX_DIR) $(FORTRAN_DIR) \
-          $(HDF5_HL_DIR)
+@BUILD_TESTS_CONDITIONAL_FALSE@TESTSERIAL_DIR = 
+@BUILD_TESTS_CONDITIONAL_TRUE@TESTSERIAL_DIR = test
+@BUILD_TESTS_PARALLEL_CONDITIONAL_FALSE@TESTPARALLEL_DIR = 
+@BUILD_TESTS_PARALLEL_CONDITIONAL_TRUE@TESTPARALLEL_DIR = testpar
+@BUILD_TOOLS_CONDITIONAL_FALSE@TOOLS_DIR = 
+@BUILD_TOOLS_CONDITIONAL_TRUE@TOOLS_DIR = tools
+SUBDIRS = src $(TESTSERIAL_DIR) $(TESTPARALLEL_DIR) bin $(TOOLS_DIR) . \
+          $(CXX_DIR) $(FORTRAN_DIR) $(HDF5_HL_DIR) 
 
 DIST_SUBDIRS = src test testpar tools . c++ fortran hl examples
 

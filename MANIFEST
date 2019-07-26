@@ -60,6 +60,8 @@
 ./bin/errors                 _DO_NOT_DISTRIBUTE_
 ./bin/gcov_script            _DO_NOT_DISTRIBUTE_
 ./bin/genltanalyze           _DO_NOT_DISTRIBUTE_
+./bin/h5cc.in
+./bin/h5redeploy.in
 ./bin/h5vers
 ./bin/install-sh
 ./bin/iostats
@@ -68,6 +70,7 @@
 ./bin/make_err
 ./bin/make_overflow
 ./bin/make_vers
+./bin/Makefile.am
 ./bin/makehelp
 ./bin/pkgscrpts/hdf5-1.8.16-1-x86_64-szip.spec
 ./bin/pkgscrpts/make1816TarFiles.pl       _DO_NOT_DISTRIBUTE_
@@ -1188,10 +1191,8 @@
 
 ./tools/misc/Makefile.am
 ./tools/misc/Makefile.in
-./tools/misc/h5cc.in
 ./tools/misc/h5debug.c
 ./tools/misc/h5mkgrp.c
-./tools/misc/h5redeploy.in
 ./tools/misc/h5repart.c
 ./tools/misc/h5repart_gentest.c
 ./tools/misc/repart_test.c
