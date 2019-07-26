@@ -1,18 +1,18 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Read-Only S3 Virtual File Driver (VFD)                                    *
- * Copyright (c) 2017-2018, The HDF Group.                                   *
- *                                                                           *
+ * Copyright by The HDF Group.                                               *
  * All rights reserved.                                                      *
  *                                                                           *
- * NOTICE:                                                                   *
- * All information contained herein is, and remains, the property of The HDF *
- * Group. The intellectual and technical concepts contained herein are       *
- * proprietary to The HDF Group. Dissemination of this information or        *
- * reproduction of this material is strictly forbidden unless prior written  *
- * permission is obtained from The HDF Group.                                *
+ * This file is part of HDF5.  The full HDF5 copyright notice, including     *
+ * terms governing use, modification, and redistribution, is contained in    *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*****************************************************************************
+ * Read-Only S3 Virtual File Driver (VFD)                                   
+ *
  * Source for S3 Communications module
  *
  * ***NOT A FILE DRIVER***
@@ -1005,7 +1005,7 @@ herr_t
 H5FD_s3comms_s3r_getsize(s3r_t *handle)
 {
 #ifdef H5_HAVE_ROS3_VFD
-    unsigned long int      content_length = 0;
+    uintmax_t             content_length = 0;
     CURL                  *curlh          = NULL;
     char                  *end            = NULL;
     char                  *headerresponse = NULL;
@@ -1135,9 +1135,14 @@ H5FD_s3comms_s3r_getsize(s3r_t *handle)
      */
     *end = '\0';
 
-    content_length = strtoul((const char *)start,
+    content_length = strtoumax((const char *)start,
                              NULL,
                              0);
+
+    if (UINTMAX_MAX > SIZE_MAX && content_length > SIZE_MAX) {
+        HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "content_length overflows size_t\n");
+    }
+
     if (content_length == 0         ||
         content_length == ULONG_MAX ||
         errno          == ERANGE) /* errno set by strtoul */
@@ -1156,7 +1161,7 @@ H5FD_s3comms_s3r_getsize(s3r_t *handle)
     if ( CURLE_OK !=
         curl_easy_setopt(curlh,
                          CURLOPT_NOBODY,
-                         0) )
+                         NULL) )
     {
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
                     "error while setting CURL option (CURLOPT_NOBODY). "
@@ -1166,7 +1171,7 @@ H5FD_s3comms_s3r_getsize(s3r_t *handle)
     if ( CURLE_OK !=
         curl_easy_setopt(curlh,
                          CURLOPT_HEADERDATA,
-                         0) )
+                         NULL) )
     {
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
                     "error while setting CURL option (CURLOPT_HEADERDATA). "
@@ -2518,7 +2523,7 @@ done:
  *         + internal error occurred.
  *         + -1 :: unable to format profile label
  *         + -2 :: profile name/label not found in file
- *     + -3 :: some other error
+ *         + -3 :: some other error
  *
  * Programmer: Jacob Smith
  *             2018-02-27
@@ -2602,14 +2607,14 @@ H5FD__s3comms_load_aws_creds_from_file(
                             "unable to format line prefix")
 
             /* found a matching name? */
-            if (!strncmp(line_buffer, line_prefix, setting_name_len + 1)) {
+            if (!HDstrncmp(line_buffer, line_prefix, setting_name_len + 1)) {
                 found_setting = 1;
 
                 /* skip NULL destination buffer */
                 if (setting_pointers[setting_i] == NULL)
                    break;
 
-                /* advance to end fo name in string */
+                /* advance to end of name in string */
                 do {
                     line_buffer++;
                 } while (*line_buffer != 0 && *line_buffer != '=');
@@ -2620,7 +2625,8 @@ H5FD__s3comms_load_aws_creds_from_file(
                 line_buffer++; /* was pointing at '='; advance */
 
                 /* copy line buffer into out pointer */
-                strcpy(setting_pointers[setting_i], (const char *)line_buffer);
+                HDstrncpy(setting_pointers[setting_i], (const char *)line_buffer,
+                        HDstrlen(line_buffer));
 
                 /* "trim" tailing whitespace by replacing with null terminator*/
                 buffer_i = 0;
@@ -2889,7 +2895,7 @@ H5FD_s3comms_parse_url(const char    *str,
      * READ SCHEME *
      ***************/
 
-    tmpstr = strchr(curstr, ':');
+    tmpstr = HDstrchr(curstr, ':');
     if (tmpstr == NULL) {
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
                     "invalid SCHEME construction: probably not URL");

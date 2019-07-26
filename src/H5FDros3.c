@@ -1,18 +1,18 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Read-Only S3 Virtual File Driver (VFD)                                    *
- * Copyright (c) 2017-2018, The HDF Group.                                   *
- *                                                                           *
+ * Copyright by The HDF Group.                                               *
  * All rights reserved.                                                      *
  *                                                                           *
- * NOTICE:                                                                   *
- * All information contained herein is, and remains, the property of The HDF *
- * Group. The intellectual and technical concepts contained herein are       *
- * proprietary to The HDF Group. Dissemination of this information or        *
- * reproduction of this material is strictly forbidden unless prior written  *
- * permission is obtained from The HDF Group.                                *
+ * This file is part of HDF5.  The full HDF5 copyright notice, including     *
+ * terms governing use, modification, and redistribution, is contained in    *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
+ * Read-Only S3 Virtual File Driver (VFD)                                   
+ *
  * Programmer: Jacob Smith <jake.smith@hdfgroup.org>
  *             2017-10-13
  *
@@ -1334,14 +1334,14 @@ H5FD_ros3_cmp(const H5FD_t *_f1,
     HDassert(purl2->host != NULL);
 
     /* URL: SCHEME */
-    if (strcmp(purl1->scheme, purl2->scheme)) HGOTO_DONE(-1);
+    if (HDstrcmp(purl1->scheme, purl2->scheme)) HGOTO_DONE(-1);
 
     /* URL: HOST */
-    if (strcmp(purl1->host, purl2->host)) HGOTO_DONE(-1);
+    if (HDstrcmp(purl1->host, purl2->host)) HGOTO_DONE(-1);
 
     /* URL: PORT */
     if (purl1->port && purl2->port) {
-        if (strcmp(purl1->port, purl2->port)) HGOTO_DONE(-1);
+        if (HDstrcmp(purl1->port, purl2->port)) HGOTO_DONE(-1);
     } else if (purl1->port) {
         HGOTO_DONE(-1);
     } else if (purl2->port) {
@@ -1350,7 +1350,7 @@ H5FD_ros3_cmp(const H5FD_t *_f1,
 
     /* URL: PATH */
     if (purl1->path && purl2->path) {
-        if (strcmp(purl1->path, purl2->path)) HGOTO_DONE(-1);
+        if (HDstrcmp(purl1->path, purl2->path)) HGOTO_DONE(-1);
     } else if (purl1->path && !purl2->path) {
         HGOTO_DONE(-1);
     } else if (purl2->path && !purl1->path) {
@@ -1359,7 +1359,7 @@ H5FD_ros3_cmp(const H5FD_t *_f1,
 
     /* URL: QUERY */
     if (purl1->query && purl2->query) {
-        if (strcmp(purl1->query, purl2->query)) HGOTO_DONE(-1);
+        if (HDstrcmp(purl1->query, purl2->query)) HGOTO_DONE(-1);
     } else if (purl1->query && !purl2->query) {
         HGOTO_DONE(-1);
     } else if (purl2->query && !purl1->query) {
@@ -1368,7 +1368,7 @@ H5FD_ros3_cmp(const H5FD_t *_f1,
 
     /* FAPL: AWS_REGION */
     if (f1->fa.aws_region[0] != '\0' && f1->fa.aws_region[0] != '\0') {
-        if (strcmp(f1->fa.aws_region, f2->fa.aws_region)) HGOTO_DONE(-1);
+        if (HDstrcmp(f1->fa.aws_region, f2->fa.aws_region)) HGOTO_DONE(-1);
     } else if (f1->fa.aws_region[0] != '\0') {
         HGOTO_DONE(-1);
     } else if (f2->fa.aws_region[0] != '\0') {
@@ -1377,7 +1377,7 @@ H5FD_ros3_cmp(const H5FD_t *_f1,
 
     /* FAPL: SECRET_ID */
     if (f1->fa.secret_id[0] != '\0' && f1->fa.secret_id[0] != '\0') {
-        if (strcmp(f1->fa.secret_id, f2->fa.secret_id)) HGOTO_DONE(-1);
+        if (HDstrcmp(f1->fa.secret_id, f2->fa.secret_id)) HGOTO_DONE(-1);
     } else if (f1->fa.secret_id[0] != '\0') {
         HGOTO_DONE(-1);
     } else if (f2->fa.secret_id[0] != '\0') {
@@ -1386,7 +1386,7 @@ H5FD_ros3_cmp(const H5FD_t *_f1,
 
     /* FAPL: SECRET_KEY */
     if (f1->fa.secret_key[0] != '\0' && f1->fa.secret_key[0] != '\0') {
-        if (strcmp(f1->fa.secret_key, f2->fa.secret_key)) HGOTO_DONE(-1);
+        if (HDstrcmp(f1->fa.secret_key, f2->fa.secret_key)) HGOTO_DONE(-1);
     } else if (f1->fa.secret_key[0] != '\0') {
         HGOTO_DONE(-1);
     } else if (f2->fa.secret_key[0] != '\0') {

@@ -1,14 +1,13 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Copyright (c) 2017-2018, The HDF Group.                                   *
- *                                                                           *
+ * Copyright by The HDF Group.                                               *
  * All rights reserved.                                                      *
  *                                                                           *
- * NOTICE:                                                                   *
- * All information contained herein is, and remains, the property of The HDF *
- * Group. The intellectual and technical concepts contained herein are       *
- * proprietary to The HDF Group. Dissemination of this information or        *
- * reproduction of this material is strictly forbidden unless prior written  *
- * permission is obtained from The HDF Group.                                *
+ * This file is part of HDF5.  The full HDF5 copyright notice, including     *
+ * terms governing use, modification, and redistribution, is contained in    *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
@@ -331,7 +330,7 @@ if ((long)(actual) == (long)(expected)) {      \
  *----------------------------------------------------------------------------
  */
 #define JSVERIFY_STR(expected, actual, reason) \
-if (strcmp((actual), (expected)) != 0) {       \
+if (HDstrcmp((actual), (expected)) != 0) {       \
     JSERR_STR((expected), (actual), (reason)); \
     goto error;                                \
 } /* JSVERIFY_STR */
@@ -377,7 +376,7 @@ if ((long)(actual) == (long)(expected)) {      \
  *----------------------------------------------------------------------------
  */
 #define JSVERIFY_STR(actual, expected, reason) \
-if (strcmp((actual), (expected)) != 0) {       \
+if (HDstrcmp((actual), (expected)) != 0) {       \
     JSERR_STR((expected), (actual), (reason)); \
     goto error;                                \
 } /* JSVERIFY_STR */
@@ -773,7 +772,7 @@ test_populate_ros3_fa(void)
 
         if (show_progress) { HDprintf("region overflow\n"); }
 
-        HDassert(strlen(values[0]) > H5FD__ROS3_MAX_REGION_LEN);
+        HDassert(HDstrlen(values[0]) > H5FD__ROS3_MAX_REGION_LEN);
 
         JSVERIFY( 0, h5tools_populate_ros3_fapl(&fa, values),
                   "could not fill fapl" )
@@ -841,7 +840,7 @@ test_populate_ros3_fa(void)
 
         if (show_progress) { HDprintf("id overflow\n"); }
 
-        HDassert(strlen(values[1]) > H5FD__ROS3_MAX_SECRET_ID_LEN);
+        HDassert(HDstrlen(values[1]) > H5FD__ROS3_MAX_SECRET_ID_LEN);
 
         JSVERIFY( 0, h5tools_populate_ros3_fapl(&fa, values),
                   "could not fill fapl" )
@@ -945,7 +944,7 @@ test_populate_ros3_fa(void)
 
         if (show_progress) { HDprintf("key overflow\n"); }
 
-        HDassert(strlen(values[2]) > H5FD__ROS3_MAX_SECRET_KEY_LEN);
+        HDassert(HDstrlen(values[2]) > H5FD__ROS3_MAX_SECRET_KEY_LEN);
 
         JSVERIFY( 0, h5tools_populate_ros3_fapl(&fa, values),
                   "could not fill fapl" )

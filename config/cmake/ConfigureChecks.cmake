@@ -155,7 +155,7 @@ if (NOT WINDOWS)
 endif ()
 
 #-----------------------------------------------------------------------------
-#  Check if ROS3 driver works
+#  Check if ROS3 driver can be built
 #-----------------------------------------------------------------------------
 option (HDF5_ENABLE_ROS3_VFD "Build the ROS3 Virtual File Driver" OFF)
   if (HDF5_ENABLE_ROS3_VFD)

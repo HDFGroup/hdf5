@@ -27,7 +27,7 @@ LDADD=$(LIBH5TOOLS) $(LIBHDF5)
 
 
 # main target
-bin_PROGRAMS=h5tools_utils
+bin_PROGRAMS=h5tools_test_utils
 # check_PROGRAMS=$(TEST_PROG)
 
 
