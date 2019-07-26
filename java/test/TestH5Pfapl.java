@@ -15,6 +15,7 @@ package test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -28,6 +29,8 @@ import hdf.hdf5lib.exceptions.HDF5Exception;
 import hdf.hdf5lib.exceptions.HDF5LibraryException;
 import hdf.hdf5lib.exceptions.HDF5PropertyListInterfaceException;
 import hdf.hdf5lib.structs.H5AC_cache_config_t;
+import hdf.hdf5lib.structs.H5FD_hdfs_fapl_t;
+import hdf.hdf5lib.structs.H5FD_ros3_fapl_t;
 
 import org.junit.After;
 import org.junit.Before;
@@ -1398,4 +1401,5 @@ public class TestH5Pfapl {
             fail("H5P_evict_on_close: " + err);
         }
     }
+
 }

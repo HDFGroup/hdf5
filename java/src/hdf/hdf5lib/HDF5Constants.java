@@ -246,6 +246,8 @@ public class HDF5Constants {
     public static final long H5FD_SEC2 = H5FD_SEC2();
     public static final long H5FD_STDIO = H5FD_STDIO();
     public static final long H5FD_WINDOWS = H5FD_WINDOWS();
+    public static final long H5FD_ROS3 = H5FD_ROS3();
+    public static final long H5FD_HDFS = H5FD_HDFS();
     public static final int H5FD_LOG_LOC_READ = H5FD_LOG_LOC_READ();
     public static final int H5FD_LOG_LOC_WRITE = H5FD_LOG_LOC_WRITE();
     public static final int H5FD_LOG_LOC_SEEK = H5FD_LOG_LOC_SEEK();
@@ -1110,6 +1112,10 @@ public class HDF5Constants {
     private static native final long H5FD_STDIO();
 
     private static native final long H5FD_WINDOWS();
+
+    private static native final long H5FD_ROS3();
+
+    private static native final long H5FD_HDFS();
 
     private static native final int H5FD_LOG_LOC_READ();
 
