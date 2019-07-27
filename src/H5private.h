@@ -126,7 +126,7 @@
 
 /*
  * Unix ioctls.   These are used by h5ls (and perhaps others) to determine a
- * resonable output width.
+ * reasonable output width.
  */
 #ifdef H5_HAVE_SYS_IOCTL_H
 #   include <sys/ioctl.h>
@@ -173,7 +173,7 @@
 #endif
 
 #ifdef H5_HAVE_THREADSAFE
-#include <process.h>            /* For _beginthread() */
+#include <process.h>        /* For _beginthread() */
 #endif
 
 #include <windows.h>
@@ -235,7 +235,6 @@
  * color information down to the BEGIN_MPE_LOG macro (which should have a new
  * BEGIN_MPE_LOG_COLOR variant). -QAK
  */
-
 #define BEGIN_MPE_LOG                                                   \
     if (H5_MPEinit_g){                                                  \
         sprintf(p_event_start, "start %s", FUNC);                       \
@@ -344,6 +343,9 @@
 /* test for number that is a power of 2 */
 /* (from: http://graphics.stanford.edu/~seander/bithacks.html#DetermineIfPowerOf2) */
 #  define POWER_OF_TWO(n)  (!(n & (n - 1)) && n)
+
+/* Raise an integer to a power of 2 */
+#  define H5_EXP2(n)    (1 << (n))
 
 /*
  * HDF Boolean type.
@@ -465,6 +467,15 @@
 #   define H5_POSIX_MAX_IO_BYTES        SSIZET_MAX
 #endif
 
+/* POSIX I/O mode used as the third parameter to open/_open
+ * when creating a new file (O_CREAT is set).
+ */
+#if defined(H5_HAVE_WIN32_API)
+#   define H5_POSIX_CREATE_MODE_RW      (_S_IREAD | _S_IWRITE)
+#else
+#   define H5_POSIX_CREATE_MODE_RW      0666
+#endif
+
 /*
  * A macro to portably increment enumerated types.
  */
@@ -480,7 +491,7 @@
 #endif
 
 /* Double constant wrapper
- * 
+ *
  * Quiets gcc warnings from -Wunsuffixed-float-constants.
  *
  * This is a really annoying warning since the standard specifies that
@@ -612,6 +623,9 @@ typedef struct {
 #ifndef HDatol
     #define HDatol(S)    atol(S)
 #endif /* HDatol */
+#ifndef HDatoll
+    #define HDatoll(S)   atoll(S)
+#endif /* HDatol */
 #ifndef HDbsearch
     #define HDbsearch(K,B,N,Z,F)  bsearch(K,B,N,Z,F)
 #endif /* HDbsearch */
@@ -709,6 +723,9 @@ typedef struct {
 #ifndef HDexp
     #define HDexp(X)    exp(X)
 #endif /* HDexp */
+#ifndef HDexp2
+    #define HDexp2(X)    exp2(X)
+#endif /* HDexp2 */
 #ifndef HDfabs
     #define HDfabs(X)    fabs(X)
 #endif /* HDfabs */
@@ -956,6 +973,15 @@ typedef off_t               h5_stat_size_t;
 #ifndef HDlink
     #define HDlink(OLD,NEW)    link(OLD,NEW)
 #endif /* HDlink */
+#ifndef HDllround
+    #define HDllround(V)     llround(V)
+#endif /* HDround */
+#ifndef HDllroundf
+    #define HDllroundf(V)    llroundf(V)
+#endif /* HDllroundf */
+#ifndef HDllroundl
+    #define HDllroundl(V)    llroundl(V)
+#endif /* HDllroundl */
 #ifndef HDlocaleconv
     #define HDlocaleconv()    localeconv()
 #endif /* HDlocaleconv */
@@ -971,6 +997,15 @@ typedef off_t               h5_stat_size_t;
 #ifndef HDlongjmp
     #define HDlongjmp(J,N)    longjmp(J,N)
 #endif /* HDlongjmp */
+#ifndef HDlround
+    #define HDlround(V)     lround(V)
+#endif /* HDround */
+#ifndef HDlroundf
+    #define HDlroundf(V)    lroundf(V)
+#endif /* HDlroundf */
+#ifndef HDlroundl
+    #define HDlroundl(V)    lroundl(V)
+#endif /* HDroundl */
 #ifndef HDlseek
     #define HDlseek(F,O,W)  lseek(F,O,W)
 #endif /* HDlseek */
@@ -1020,12 +1055,11 @@ typedef off_t               h5_stat_size_t;
 #ifndef HDmodf
     #define HDmodf(X,Y)    modf(X,Y)
 #endif /* HDmodf */
+#ifndef HDnanosleep
+    #define HDnanosleep(N, O)    nanosleep(N, O)
+#endif /* HDnanosleep */
 #ifndef HDopen
-    #ifdef _O_BINARY
-        #define HDopen(S,F,M)    open(S,F|_O_BINARY,M)
-    #else
-        #define HDopen(S,F,M)    open(S,F,M)
-    #endif
+    #define HDopen(F,...)    open(F,__VA_ARGS__)
 #endif /* HDopen */
 #ifndef HDopendir
     #define HDopendir(S)    opendir(S)
@@ -1110,10 +1144,22 @@ typedef off_t               h5_stat_size_t;
 #ifndef HDrewinddir
     #define HDrewinddir(D)    rewinddir(D)
 #endif /* HDrewinddir */
+#ifndef HDround
+    #define HDround(V)    round(V)
+#endif /* HDround */
+#ifndef HDroundf
+    #define HDroundf(V)    roundf(V)
+#endif /* HDroundf */
+#ifndef HDroundl
+    #define HDroundl(V)    roundl(V)
+#endif /* HDroundl */
 #ifndef HDrmdir
     #define HDrmdir(S)    rmdir(S)
 #endif /* HDrmdir */
 /* scanf() variable arguments */
+#ifndef HDselect
+    #define HDselect(N,RD,WR,ER,T)    select(N,RD,WR,ER,T)
+#endif /* HDsetbuf */
 #ifndef HDsetbuf
     #define HDsetbuf(F,S)    setbuf(F,S)
 #endif /* HDsetbuf */
@@ -1212,8 +1258,9 @@ typedef off_t               h5_stat_size_t;
         #define HDsrandom(S)    srand(S)
     #endif /* HDsrandom */
 #endif /* H5_HAVE_RAND_R */
-/* sscanf() variable arguments */
-
+#ifndef HDsscanf
+    #define HDsscanf(S,FMT,...)   sscanf(S,FMT,__VA_ARGS__)
+#endif /* HDsscanf */
 #ifndef HDstrcat
     #define HDstrcat(X,Y)    strcat(X,Y)
 #endif /* HDstrcat */
@@ -1221,7 +1268,7 @@ typedef off_t               h5_stat_size_t;
     #define HDstrchr(S,C)    strchr(S,C)
 #endif /* HDstrchr */
 #ifndef HDstrcmp
-    #define HDstrcmp(X,Y)    strcmp(X,Y)
+    #define HDstrcmp(X,Y)       strcmp(X,Y)
 #endif /* HDstrcmp */
 #ifndef HDstrcasecmp
     #define HDstrcasecmp(X,Y)       strcasecmp(X,Y)
@@ -1270,6 +1317,9 @@ typedef off_t               h5_stat_size_t;
 #endif /* HDstrtod */
 #ifndef HDstrtok
     #define HDstrtok(X,Y)    strtok(X,Y)
+#endif /* HDstrtok */
+#ifndef HDstrtok_r
+    #define HDstrtok_r(X,Y,Z) strtok_r(X,Y,Z)
 #endif /* HDstrtok */
 #ifndef HDstrtol
     #define HDstrtol(S,R,N)    strtol(S,R,N)
@@ -1373,6 +1423,9 @@ typedef off_t               h5_stat_size_t;
 #ifndef HDva_arg
     #define HDva_arg(A,T)    va_arg(A,T)
 #endif /* HDva_arg */
+#ifndef HDva_copy
+#define HDva_copy(D,S)    va_copy(D,S)
+#endif /* HDva_copy */
 #ifndef HDva_end
     #define HDva_end(A)    va_end(A)
 #endif /* HDva_end */
@@ -1438,7 +1491,7 @@ extern char *strdup(const char *s);
 #define H5_CHECK_OVERFLOW(var, vartype, casttype) \
 {                                                 \
     casttype _tmp_overflow = (casttype)(var);     \
-    assert((var) == (vartype)_tmp_overflow);      \
+    HDassert((var) == (vartype)_tmp_overflow);      \
 }
 #else /* NDEBUG */
 #define H5_CHECK_OVERFLOW(var, vartype, casttype)
@@ -1452,7 +1505,7 @@ extern char *strdup(const char *s);
 {                                                       \
     srctype _tmp_src = (srctype)(src);  \
     dsttype _tmp_dst = (dsttype)(_tmp_src);  \
-    assert(_tmp_src == (srctype)_tmp_dst);   \
+    HDassert(_tmp_src == (srctype)_tmp_dst);   \
     (dst) = _tmp_dst;                             \
 }
 
@@ -1463,8 +1516,8 @@ extern char *strdup(const char *s);
 {                                                       \
     srctype _tmp_src = (srctype)(src);  \
     dsttype _tmp_dst = (dsttype)(_tmp_src);  \
-    assert(_tmp_src >= 0);   \
-    assert(_tmp_src == _tmp_dst);   \
+    HDassert(_tmp_src >= 0);   \
+    HDassert(_tmp_src == _tmp_dst);   \
     (dst) = _tmp_dst;                             \
 }
 
@@ -1475,8 +1528,8 @@ extern char *strdup(const char *s);
 {                                                       \
     srctype _tmp_src = (srctype)(src);  \
     dsttype _tmp_dst = (dsttype)(_tmp_src);  \
-    assert(_tmp_dst >= 0);   \
-    assert(_tmp_src == (srctype)_tmp_dst);   \
+    HDassert(_tmp_dst >= 0);   \
+    HDassert(_tmp_src == (srctype)_tmp_dst);   \
     (dst) = _tmp_dst;                             \
 }
 
@@ -1484,8 +1537,8 @@ extern char *strdup(const char *s);
 {                                                       \
     srctype _tmp_src = (srctype)(src);  \
     dsttype _tmp_dst = (dsttype)(_tmp_src);  \
-    assert(_tmp_src >= 0);   \
-    assert(_tmp_src == (srctype)_tmp_dst);   \
+    HDassert(_tmp_src >= 0);   \
+    HDassert(_tmp_src == (srctype)_tmp_dst);   \
     (dst) = _tmp_dst;                             \
 }
 
@@ -1606,19 +1659,16 @@ extern H5_debug_t    H5_debug_g;
 extern char H5libhdf5_settings[]; /* embedded library information */
 
 /*-------------------------------------------------------------------------
- * Purpose:  These macros are inserted automatically just after the
- *    FUNC_ENTER() macro of API functions and are used to trace
- *    application program execution. Unless H5_DEBUG_API has been
- *    defined they are no-ops.
+ * Purpose: These macros are inserted automatically just after the
+ *          FUNC_ENTER() macro of API functions and are used to trace
+ *          application program execution. Unless H5_DEBUG_API has been
+ *          defined they are no-ops.
  *
- * Arguments:  R  - Return type encoded as a string
- *    T  - Argument types encoded as a string
- *    A0-An  - Arguments.  The number at the end of the macro name
- *        indicates the number of arguments.
+ * Arguments:   R  - Return type encoded as a string
+ *              T  - Argument types encoded as a string
+ *              A0-An  - Arguments.  The number at the end of the macro name
+ *                                   indicates the number of arguments.
  *
- * Programmer:  Robb Matzke
- *
- * Modifications:
  *-------------------------------------------------------------------------
  */
 #ifdef H5_DEBUG_API
@@ -2116,6 +2166,11 @@ H5_DLL uint32_t H5_checksum_crc(const void *data, size_t len);
 H5_DLL uint32_t H5_checksum_lookup3(const void *data, size_t len, uint32_t initval);
 H5_DLL uint32_t H5_checksum_metadata(const void *data, size_t len, uint32_t initval);
 H5_DLL uint32_t H5_hash_string(const char *str);
+
+/* Time related routines */
+H5_DLL time_t H5_make_time(struct tm *tm);
+H5_DLL void H5_nanosleep(uint64_t nanosec);
+H5_DLL double H5_get_time(void);
 
 /* Functions for building paths, etc. */
 H5_DLL herr_t   H5_build_extpath(const char *name, char **extpath /*out*/);

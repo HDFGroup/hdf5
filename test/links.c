@@ -4687,6 +4687,10 @@ external_link_win5(hid_t fapl, hbool_t new_format)
     if(NULL == HDgetcwd(cwdpath, (size_t)NAME_BUF_SIZE))
         TEST_ERROR
     drive = HDgetdrive();
+    if (drive >= 26)
+        drive -= 1; /* account for drive Z */
+    else
+        drive += 1;
 
     /* set up name for main file: "/CWD/extlinks0" */
     HDstrcpy(tmpname, &cwdpath[2]); /* stripped the drive letter to make it rel drive but absolute path */
@@ -4695,7 +4699,7 @@ external_link_win5(hid_t fapl, hbool_t new_format)
     h5_fixname(tmpname, fapl, filename1, sizeof filename1);
 
     /* set up name for target link: "<drive-letter+1>:tmp/extlinks14" */
-    sprintf(tmpname, "%c:%s", ((drive+1)+'A'-1), FILENAME[35]);
+    sprintf(tmpname, "%c:%s", (drive+'A'-1), FILENAME[35]);
     h5_fixname(tmpname, fapl, filename2, sizeof filename2);
 
     /* set up name for target file: "tmp/extlinks14" */
@@ -4783,12 +4787,16 @@ external_link_win6(hid_t fapl, hbool_t new_format)
     if (HDmkdir(TMPDIR, (mode_t)0755) < 0 && errno != EEXIST)
         TEST_ERROR
     drive = HDgetdrive();
+    if (drive >= 26)
+        drive -= 1; /* account for drive Z */
+    else
+        drive += 1;
 
     /* set up name for main file: "extlinks0" */
     h5_fixname(FILENAME[12], fapl, filename1, sizeof filename1);
 
     /* set up name for target link: "<drive-letter+1>:tmp/extlinks15" */
-    sprintf(tmpname, "%c:%s", ((drive+1)+'A'-1), FILENAME[36]);
+    sprintf(tmpname, "%c:%s", (drive+'A'-1), FILENAME[36]);
     h5_fixname(tmpname, fapl, filename2, sizeof filename2);
 
     /* set up name for target file: "tmp/extlinks15" */

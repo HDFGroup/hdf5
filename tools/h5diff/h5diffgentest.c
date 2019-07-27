@@ -11,8 +11,6 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <stdio.h>
-#include <stdlib.h>
 #include "hdf5.h"
 #include "H5private.h"
 
@@ -115,17 +113,18 @@ static hid_t UD_traverse(H5_ATTR_UNUSED const char * link_name,
     return -1;
 }
 
-const H5L_class_t UD_link_class[1] = { {
-        H5L_LINK_CLASS_T_VERS, /* H5L_class_t version       */
-        (H5L_type_t) MY_LINKCLASS, /* Link type id number            */
-        "UD link class", /* name for debugging             */
-        NULL, /* Creation callback              */
-        NULL, /* Move/rename callback           */
-        NULL, /* Copy callback                  */
-        UD_traverse, /* The actual traversal function  */
-        NULL, /* Deletion callback              */
-        NULL /* Query callback                 */
-} };
+const H5L_class_t UD_link_class[1] = {{
+    H5L_LINK_CLASS_T_VERS,    /* H5L_class_t version       */
+        (H5L_type_t)MY_LINKCLASS,             /* Link type id number            */
+        "UD link class",          /* name for debugging             */
+        NULL,                     /* Creation callback              */
+        NULL,                     /* Move/rename callback           */
+        NULL,                     /* Copy callback                  */
+        UD_traverse,              /* The actual traversal function  */
+        NULL,                     /* Deletion callback              */
+        NULL                      /* Query callback                 */
+}};
+
 
 /*-------------------------------------------------------------------------
  * prototypes

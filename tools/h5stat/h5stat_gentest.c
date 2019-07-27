@@ -21,6 +21,7 @@
  * of the expected output and update the corresponding *.ddl files.
  */
 #include "hdf5.h"
+#include "H5private.h"
 
 /* For gen_newgrat_file() */
 #define NEWGRAT_FILE     "h5stat_newgrat.h5"

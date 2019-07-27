@@ -46,6 +46,8 @@ FILE *fpGif = NULL;
 int main(int argc , char **argv)
 {
     BYTE *Image;
+    void *edata;
+    H5E_auto2_t func;
 
     /* compression structs */
     CHAR *HDFName = NULL;
@@ -62,7 +64,7 @@ int main(int argc , char **argv)
     int   ColorMapSize, InitCodeSize, Background, BitsPerPixel;
     int   j,nc;
     int   i;
-    int   numcols;
+    int   numcols = 0;
 
     BYTE pc2nc[256] , r1[256] , g1[256] , b1[256];
 
@@ -70,6 +72,10 @@ int main(int argc , char **argv)
     int bool_is_image = 0; /* 0 = false , 1 = true */
     char *image_name = NULL;
     int idx;
+
+    /* Disable error reporting */
+    H5Eget_auto2(H5E_DEFAULT, &func, &edata);
+    H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
 
     /* Initialize h5tools lib */
     h5tools_init();
@@ -328,6 +334,8 @@ int main(int argc , char **argv)
     if (image_name != NULL)
         free(image_name);
 
+    H5Eset_auto2(H5E_DEFAULT, func, edata);
+
     return EXIT_SUCCESS;
 
 
@@ -337,6 +345,8 @@ out:
         fclose(fpGif);
     if (image_name != NULL)
         free(image_name);
+
+    H5Eset_auto2(H5E_DEFAULT, func, edata);
 
     return EXIT_FAILURE;
 }

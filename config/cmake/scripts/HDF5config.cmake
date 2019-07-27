@@ -43,6 +43,8 @@ set (CTEST_SOURCE_VERSEXT "-snap1")
 #INSTALLDIR - HDF5-1.8 root folder
 #CTEST_CONFIGURATION_TYPE - Release, Debug, RelWithDebInfo
 #CTEST_SOURCE_NAME - name of source folder; HDF5-1.8.x
+#MODEL - CDash group name
+#MPI - enable MPI
 if (DEFINED CTEST_SCRIPT_ARG)
     # transform ctest script arguments of the form
     # script.ctest,var1=value1,var2=value2
@@ -169,7 +171,9 @@ endif ()
 ###################################################################
 #########       Following is for submission to CDash   ############
 ###################################################################
-set (MODEL "Experimental")
+if (NOT DEFINED MODEL)
+  set (MODEL "Experimental")
+endif ()
 ###################################################################
 
 ###################################################################
@@ -193,7 +197,7 @@ set (REPOSITORY_BRANCH "hdf5_1_8_22")
 
 ###################################################################
 
-if (WIN32)
+if (WIN32 AND NOT MINGW)
   set (BINFILEBASE "HDF5-${CTEST_SOURCE_VERSION}${CTEST_SOURCE_VERSEXT}-win${SITE_OS_BITS}")
   include (${CTEST_SCRIPT_DIRECTORY}\\HDF5options.cmake)
   include (${CTEST_SCRIPT_DIRECTORY}\\CTestScript.cmake)

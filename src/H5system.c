@@ -71,7 +71,10 @@
 /* Local Variables */
 /*******************/
 
-
+/* Track whether tzset routine was called */
+static hbool_t H5_ntzset = FALSE;
+
+
 /*-------------------------------------------------------------------------
  * Function:  HDfprintf
  *
@@ -93,12 +96,16 @@
  * Programmer:  Robb Matzke
  *              Thursday, April  9, 1998
  *
- * Modifications:
- *    Robb Matzke, 1999-07-27
- *    The `%a' format refers to an argument of `haddr_t' type
- *    instead of `haddr_t*' and the return value is correct.
  *-------------------------------------------------------------------------
  */
+/* Disable warning for "format not a string literal" here -QAK */
+/*
+ *      This pragma only needs to surround the fprintf() calls with
+ *      format_templ in the code below, but early (4.4.7, at least) gcc only
+ *      allows diagnostic pragmas to be toggled outside of functions.
+ */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-nonliteral"
 int
 HDfprintf(FILE *stream, const char *fmt, ...)
 {
@@ -119,7 +126,7 @@ HDfprintf(FILE *stream, const char *fmt, ...)
     HDassert(stream);
     HDassert(fmt);
 
-    va_start (ap, fmt);
+    HDva_start (ap, fmt);
     while (*fmt) {
         fwidth = prec = 0;
         zerofill = 0;
@@ -168,7 +175,7 @@ HDfprintf(FILE *stream, const char *fmt, ...)
                 s = rest;
             } /* end if */
             else if ('*'==*s) {
-                fwidth = va_arg (ap, int);
+                fwidth = HDva_arg(ap, int);
                 if(fwidth < 0) {
                     leftjust = 1;
                     fwidth = -fwidth;
@@ -183,7 +190,7 @@ HDfprintf(FILE *stream, const char *fmt, ...)
                     prec = (int)HDstrtol(s, &rest, 10);
                     s = rest;
                 } else if('*'==*s) {
-                    prec = va_arg(ap, int);
+                    prec = HDva_arg(ap, int);
                     s++;
                 }
                 if(prec < 1)
@@ -265,23 +272,22 @@ HDfprintf(FILE *stream, const char *fmt, ...)
                 len += HDsnprintf(format_templ + len, (sizeof(format_templ) - (size_t)(len + 1)), "%s", modifier);
             HDsnprintf(format_templ + len, (sizeof(format_templ) - (size_t)(len + 1)), "%c", conv);
 
-
             /* Conversion */
             switch (conv) {
                 case 'd':
                 case 'i':
                     if(!HDstrcmp(modifier, "h")) {
-                        short x = (short)va_arg (ap, int);
-                        n = fprintf (stream, format_templ, x);
+                        short x = (short)HDva_arg(ap, int);
+                        n = fprintf(stream, format_templ, x);
                     } else if(!*modifier) {
-                        int x = va_arg (ap, int);
-                        n = fprintf (stream, format_templ, x);
-                    } else if(!HDstrcmp (modifier, "l")) {
-                        long x = va_arg (ap, long);
-                        n = fprintf (stream, format_templ, x);
+                        int x = HDva_arg(ap, int);
+                        n = fprintf(stream, format_templ, x);
+                    } else if(!HDstrcmp(modifier, "l")) {
+                        long x = HDva_arg(ap, long);
+                        n = fprintf(stream, format_templ, x);
                     } else {
-                        int64_t x = va_arg(ap, int64_t);
-                        n = fprintf (stream, format_templ, x);
+                        int64_t x = HDva_arg(ap, int64_t);
+                        n = fprintf(stream, format_templ, x);
                     }
                     break;
 
@@ -290,16 +296,16 @@ HDfprintf(FILE *stream, const char *fmt, ...)
                 case 'x':
                 case 'X':
                     if(!HDstrcmp(modifier, "h")) {
-                        unsigned short x = (unsigned short)va_arg (ap, unsigned int);
+                        unsigned short x = (unsigned short)HDva_arg(ap, unsigned int);
                         n = fprintf(stream, format_templ, x);
                     } else if(!*modifier) {
-                        unsigned int x = va_arg (ap, unsigned int); /*lint !e732 Loss of sign not really occuring */
+                        unsigned int x = HDva_arg(ap, unsigned int);
                         n = fprintf(stream, format_templ, x);
                     } else if(!HDstrcmp(modifier, "l")) {
-                        unsigned long x = va_arg (ap, unsigned long); /*lint !e732 Loss of sign not really occuring */
+                        unsigned long x = HDva_arg(ap, unsigned long);
                         n = fprintf(stream, format_templ, x);
                     } else {
-                        uint64_t x = va_arg(ap, uint64_t); /*lint !e732 Loss of sign not really occuring */
+                        uint64_t x = HDva_arg(ap, uint64_t);
                         n = fprintf(stream, format_templ, x);
                     }
                     break;
@@ -310,10 +316,10 @@ HDfprintf(FILE *stream, const char *fmt, ...)
                 case 'g':
                 case 'G':
                     if(!HDstrcmp(modifier, "h")) {
-                        float x = (float)va_arg(ap, double);
-                        n = fprintf(stream, format_templ, x);
+                        float x = (float)HDva_arg(ap, double);
+                        n = fprintf(stream, format_templ, (double)x);
                     } else if(!*modifier || !HDstrcmp(modifier, "l")) {
-                        double x = va_arg(ap, double);
+                        double x = HDva_arg(ap, double);
                         n = fprintf(stream, format_templ, x);
                     } else {
                     /*
@@ -321,10 +327,10 @@ HDfprintf(FILE *stream, const char *fmt, ...)
                     * `double' are the same thing.
                     */
 #if H5_SIZEOF_LONG_DOUBLE != H5_SIZEOF_DOUBLE
-                        long double x = va_arg(ap, long double);
+                        long double x = HDva_arg(ap, long double);
                         n = fprintf(stream, format_templ, x);
 #else
-                        double x = va_arg(ap, double);
+                        double x = HDva_arg(ap, double);
                         n = fprintf(stream, format_templ, x);
 #endif
                     }
@@ -332,7 +338,7 @@ HDfprintf(FILE *stream, const char *fmt, ...)
 
                 case 'a':
                     {
-                        haddr_t x = va_arg (ap, haddr_t); /*lint !e732 Loss of sign not really occuring */
+                        haddr_t x = HDva_arg(ap, haddr_t);
 
                         if(H5F_addr_defined(x)) {
                             len = 0;
@@ -378,7 +384,7 @@ HDfprintf(FILE *stream, const char *fmt, ...)
 
                 case 'c':
                     {
-                        char x = (char)va_arg(ap, int);
+                        char x = (char)HDva_arg(ap, int);
                         n = fprintf(stream, format_templ, x);
                     }
                     break;
@@ -386,7 +392,7 @@ HDfprintf(FILE *stream, const char *fmt, ...)
                 case 's':
                 case 'p':
                     {
-                        char *x = va_arg(ap, char*); /*lint !e64 Type mismatch not really occuring */
+                        char *x = HDva_arg(ap, char*);
                         n = fprintf(stream, format_templ, x);
                     }
                     break;
@@ -398,10 +404,10 @@ HDfprintf(FILE *stream, const char *fmt, ...)
 
                 case 't':
                     {
-                        htri_t tri_var = va_arg(ap, htri_t);
+                        htri_t tri_var = HDva_arg(ap, htri_t);
 
                         if(tri_var > 0)
-                            fprintf (stream, "TRUE");
+                            fprintf(stream, "TRUE");
                         else if(!tri_var)
                             fprintf(stream, "FALSE");
                         else
@@ -422,11 +428,12 @@ HDfprintf(FILE *stream, const char *fmt, ...)
             nout++;
         }
     }
-    va_end(ap);
+    HDva_end(ap);
     return nout;
 } /* end HDfprintf() */
+#pragma GCC diagnostic pop
 
-
+
 /*-------------------------------------------------------------------------
  * Function:  HDstrtoll
  *
@@ -491,7 +498,8 @@ HDstrtoll(const char *s, const char **rest, int base)
     /* Optional minus or plus sign */
     if ('+'==*s) {
         s++;
-    } else if ('-'==*s) {
+    }
+    else if ('-'==*s) {
         sign = -1;
         s++;
     }
@@ -500,10 +508,12 @@ HDstrtoll(const char *s, const char **rest, int base)
     if (0==base && '0'==*s && ('x'==s[1] || 'X'==s[1])) {
         base = 16;
         s += 2;
-    } else if (0==base && '0'==*s) {
+    }
+    else if (0==base && '0'==*s) {
         base = 8;
         s++;
-    } else if (0==base) {
+    }
+    else if (0==base) {
         base = 10;
     }
 
@@ -524,7 +534,8 @@ HDstrtoll(const char *s, const char **rest, int base)
 
             if (acc*base+digit < acc) {
                 overflow = TRUE;
-            } else {
+            }
+            else {
                 acc = acc*base + digit;
             }
         }
@@ -535,7 +546,8 @@ HDstrtoll(const char *s, const char **rest, int base)
     if (overflow) {
         if (sign>0) {
             acc = ((uint64_t)1<<(8*sizeof(int64_t)-1))-1;
-        } else {
+        }
+        else {
             acc = (int64_t)((uint64_t)1<<(8*sizeof(int64_t)-1));
         }
         errno = ERANGE;
@@ -548,7 +560,7 @@ HDstrtoll(const char *s, const char **rest, int base)
     return acc;
 } /* end HDstrtoll() */
 #endif
-
+
 /*-------------------------------------------------------------------------
  * Function:  HDrand/HDsrand
  *
@@ -585,6 +597,91 @@ void HDsrand(unsigned int seed)
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5_make_time
+ *
+ * Purpose:    Portability routine to abstract converting a 'tm' struct into
+ *        a time_t value.
+ *
+ * Note:    This is a little problematic because mktime() operates on
+ *        local times.  We convert to local time and then figure out the
+ *        adjustment based on the local time zone and daylight savings
+ *        setting.
+ *
+ * Return:    Success:  The value of timezone
+ *        Failure:  -1
+ *
+ * Programmer:  Quincey Koziol
+ *              November 18, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+time_t
+H5_make_time(struct tm *tm)
+{
+    time_t the_time;    /* The converted time */
+#if defined(H5_HAVE_VISUAL_STUDIO) && (_MSC_VER >= 1900)  /* VS 2015 */
+    /* In gcc and in Visual Studio prior to VS 2015 'timezone' is a global
+     * variable declared in time.h. That variable was deprecated and in
+     * VS 2015 is removed, with _get_timezone replacing it.
+     */
+    long timezone = 0;
+#endif /* defined(H5_HAVE_VISUAL_STUDIO) && (_MSC_VER >= 1900) */
+    time_t ret_value;   /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* Sanity check */
+    HDassert(tm);
+
+    /* Initialize timezone information */
+    if(!H5_ntzset) {
+        HDtzset();
+        H5_ntzset = TRUE;
+    } /* end if */
+
+    /* Perform base conversion */
+    if((time_t)-1 == (the_time = HDmktime(tm)))
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTCONVERT, FAIL, "badly formatted modification time message")
+
+    /* Adjust for timezones */
+#if defined(H5_HAVE_TM_GMTOFF)
+    /* BSD-like systems */
+    the_time += tm->tm_gmtoff;
+#elif defined(H5_HAVE_TIMEZONE)
+#if defined(H5_HAVE_VISUAL_STUDIO) && (_MSC_VER >= 1900)  /* VS 2015 */
+    /* In gcc and in Visual Studio prior to VS 2015 'timezone' is a global
+     * variable declared in time.h. That variable was deprecated and in
+     * VS 2015 is removed, with _get_timezone replacing it.
+     */
+    _get_timezone(&timezone);
+#endif /* defined(H5_HAVE_VISUAL_STUDIO) && (_MSC_VER >= 1900) */
+
+    the_time -= timezone - (tm->tm_isdst ? 3600 : 0);
+#else
+    /*
+     * The catch-all.  If we can't convert a character string universal
+     * coordinated time to a time_t value reliably then we can't decode the
+     * modification time message. This really isn't as bad as it sounds -- the
+     * only way a user can get the modification time is from our internal
+     * query routines, which can gracefully recover.
+     */
+    HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "unable to obtain local timezone information")
+#endif
+
+    /* Set return value */
+    ret_value = the_time;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5_make_time() */
+
+#ifdef H5_HAVE_WIN32_API
+
+/* Offset between 1/1/1601 and 1/1/1970 in 100 nanosecond units */
+#define _W32_FT_OFFSET (116444736000000000ULL)
+
+
+/*-------------------------------------------------------------------------
  * Function:  Wgettimeofday
  *
  * Purpose:  Wrapper function for gettimeofday on Windows systems
@@ -605,11 +702,6 @@ void HDsrand(unsigned int seed)
  *
  *-------------------------------------------------------------------------
  */
-#ifdef H5_HAVE_VISUAL_STUDIO
-
-/* Offset between 1/1/1601 and 1/1/1970 in 100 nanosecond units */
-#define _W32_FT_OFFSET (116444736000000000ULL)
-
 int
 Wgettimeofday(struct timeval *tv, struct timezone *tz)
 {
@@ -640,7 +732,7 @@ Wgettimeofday(struct timeval *tv, struct timezone *tz)
   return 0;
 } /* end Wgettimeofday() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    Wsetenv
  *
@@ -700,9 +792,9 @@ int c99_snprintf(char* str, size_t size, const char* format, ...)
     int count;
     va_list ap;
 
-    va_start(ap, format);
+    HDva_start(ap, format);
     count = c99_vsnprintf(str, size, format, ap);
-    va_end(ap);
+    HDva_end(ap);
 
     return count;
 }
@@ -719,9 +811,204 @@ int c99_vsnprintf(char* str, size_t size, const char* format, va_list ap)
     return count;
 }
 
-#endif
+ /*--------------------------------------------------------------------------
+  * Function:    Wnanosleep
+  *
+  * Purpose:     Sleep for a given # of nanoseconds (Windows version)
+  *
+  * Return:      SUCCEED/FAIL
+  *
+  * Programmer:  Dana Robinson
+  *              Fall 2016
+  *--------------------------------------------------------------------------
+  */
+int
+Wnanosleep(const struct timespec *req, struct timespec *rem)
+{
+    /* XXX: Currently just a placeholder */
+    return 0;
 
-
+} /* end Wnanosleep() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    Wllround, Wllroundf, Wlround, Wlroundf, Wround, Wroundf
+ *
+ * Purpose:     Wrapper function for round functions for use with VS2012
+ *              and earlier.
+ *
+ * Return:      The rounded value that was passed in.
+ *
+ * Programmer:  Dana Robinson
+ *              December 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+long long
+Wllround(double arg)
+{
+    return (long long)(arg < 0.0 ? HDceil(arg - 0.5) : HDfloor(arg + 0.5));
+}
+
+long long
+Wllroundf(float arg)
+{
+    return (long long)(arg < 0.0F ? HDceil(arg - 0.5F) : HDfloor(arg + 0.5F));
+}
+
+long
+Wlround(double arg)
+{
+    return (long)(arg < 0.0 ? HDceil(arg - 0.5) : HDfloor(arg + 0.5));
+}
+
+long
+Wlroundf(float arg)
+{
+    return (long)(arg < 0.0F ? HDceil(arg - 0.5F) : HDfloor(arg + 0.5F));
+}
+
+double
+Wround(double arg)
+{
+    return arg < 0.0 ? HDceil(arg - 0.5) : HDfloor(arg + 0.5);
+}
+
+float
+Wroundf(float arg)
+{
+    return (float)(arg < 0.0F ? HDceil(arg - 0.5F) : HDfloor(arg + 0.5F));
+}
+
+/*-------------------------------------------------------------------------
+* Function:     H5_get_utf16_str
+*
+* Purpose:      Gets a UTF-16 string from an UTF-8 (or ASCII) string.
+*
+* Return:       Success:    A pointer to a UTF-16 string
+*                           This must be freed by the caller using H5MM_xfree()
+*               Failure:    NULL
+*
+* Programmer:  Dana Robinson
+*              Spring 2019
+*
+*-------------------------------------------------------------------------
+*/
+const wchar_t *
+H5_get_utf16_str(const char *s)
+{
+    int     nwchars = -1;       /* Length of the UTF-16 buffer */
+    wchar_t *ret_s  = NULL;     /* UTF-16 version of the string */
+
+    /* Get the number of UTF-16 characters needed */
+    if(0 == (nwchars = MultiByteToWideChar(CP_UTF8, 0, s, -1, NULL, 0)))
+        goto error;
+
+    /* Allocate a buffer for the UTF-16 string */
+    if(NULL == (ret_s = (wchar_t *)H5MM_calloc(sizeof(wchar_t) * (size_t)nwchars)))
+        goto error;
+
+    /* Convert the input UTF-8 string to UTF-16 */
+    if(0 == MultiByteToWideChar(CP_UTF8, 0, s, -1, ret_s, nwchars))
+        goto error;
+
+    return ret_s;
+
+error:
+    if(ret_s)
+        H5MM_xfree((void *)ret_s);
+    return NULL;
+}   /* end H5_get_utf16_str() */
+
+/*-------------------------------------------------------------------------
+ * Function:     Wopen_utf8
+ *
+ * Purpose:      UTF-8 equivalent of open(2) for use on Windows.
+ *               Converts a UTF-8 input path to UTF-16 and then opens the
+ *               file via _wopen() under the hood
+ *
+ * Return:       Success:    A POSIX file descriptor
+ *               Failure:    -1
+ *
+ * Programmer:  Dana Robinson
+ *              Spring 2019
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+Wopen_utf8(const char *path, int oflag, ...)
+{
+    int fd          = -1;       /* POSIX file descriptor to be returned */
+    wchar_t *wpath  = NULL;     /* UTF-16 version of the path */
+    int pmode       = 0;        /* mode (optionally set via variable args) */
+
+    /* Convert the input UTF-8 path to UTF-16 */
+    if(NULL == (wpath = H5_get_utf16_str(path)))
+        goto done;
+
+    /* _O_BINARY must be set in Windows to avoid CR-LF <-> LF EOL
+    * transformations when performing I/O. Note that this will
+    * produce Unix-style text files, though.
+    */
+    oflag |= _O_BINARY;
+
+    /* Get the mode, if O_CREAT was specified */
+    if(oflag & O_CREAT) {
+        va_list vl;
+
+        HDva_start(vl, oflag);
+        pmode = HDva_arg(vl, int);
+        HDva_end(vl);
+    }
+
+    /* Open the file */
+    fd = _wopen(wpath, oflag, pmode);
+
+done:
+    if(wpath)
+        H5MM_xfree((void *)wpath);
+
+    return fd;
+}   /* end Wopen_utf8() */
+
+/*-------------------------------------------------------------------------
+ * Function:     Wremove_utf8
+ *
+ * Purpose:      UTF-8 equivalent of remove(3) for use on Windows.
+ *               Converts a UTF-8 input path to UTF-16 and then opens the
+ *               file via _wremove() under the hood
+ *
+ * Return:       Success:    0
+ *               Failure:    -1
+ *
+ * Programmer:  Dana Robinson
+ *              Spring 2019
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+Wremove_utf8(const char *path)
+{
+    wchar_t *wpath = NULL;     /* UTF-16 version of the path */
+    int ret;
+
+    /* Convert the input UTF-8 path to UTF-16 */
+    if(NULL == (wpath = H5_get_utf16_str(path)))
+        goto done;
+
+    /* Open the file */
+    ret = _wremove(wpath);
+
+done:
+    if(wpath)
+        H5MM_xfree((void *)wpath);
+
+    return ret;
+}   /* end Wremove_utf8() */
+
+#endif /* H5_HAVE_WIN32_API */
+
+
 /*-------------------------------------------------------------------------
  * Function:    H5_build_extpath
  *
@@ -841,7 +1128,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5_build_extpath() */
 
-
+
 /*--------------------------------------------------------------------------
  * Function:    H5_combine_path
  *
@@ -864,13 +1151,13 @@ H5_combine_path(const char* path1, const char* path2, char **full_name /*out*/)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    HDassert(path1);
     HDassert(path2);
 
-    path1_len = HDstrlen(path1);
+    if(path1)
+        path1_len = HDstrlen(path1);
     path2_len = HDstrlen(path2);
 
-    if(*path1 == '\0' || H5_CHECK_ABSOLUTE(path2)) {
+    if(path1 == NULL || *path1 == '\0' || H5_CHECK_ABSOLUTE(path2)) {
 
         /* If path1 is empty or path2 is absolute, simply use path2 */
         if(NULL == (*full_name = (char *)H5MM_strdup(path2)))
@@ -914,5 +1201,111 @@ H5_combine_path(const char* path1, const char* path2, char **full_name /*out*/)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5_combine_name() */
+} /* end H5_combine_path() */
+
+
+/*--------------------------------------------------------------------------
+ * Function:    H5_nanosleep
+ *
+ * Purpose:     Sleep for a given # of nanoseconds
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ * Programmer:  Quincey Koziol
+ *              October 01, 2016
+ *--------------------------------------------------------------------------
+ */
+void
+H5_nanosleep(uint64_t nanosec)
+{
+    struct timespec sleeptime;  /* Struct to hold time to sleep */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    /* Set up time to sleep */
+    sleeptime.tv_sec = 0;
+    sleeptime.tv_nsec = (long)nanosec;
+
+    HDnanosleep(&sleeptime, NULL);
+
+    FUNC_LEAVE_NOAPI_VOID
+} /* end H5_nanosleep() */
+
+
+/*--------------------------------------------------------------------------
+ * Function:    H5_get_time
+ *
+ * Purpose:     Get the current time, as the time of seconds after the UNIX epoch
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ * Programmer:  Quincey Koziol
+ *              October 05, 2016
+ *--------------------------------------------------------------------------
+ */
+double
+H5_get_time(void)
+{
+#ifdef H5_HAVE_GETTIMEOFDAY
+    struct timeval curr_time;
+#endif /* H5_HAVE_GETTIMEOFDAY */
+    double ret_value = (double)0.0f;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+#ifdef H5_HAVE_GETTIMEOFDAY
+    HDgettimeofday(&curr_time, NULL);
+
+    ret_value = (double)curr_time.tv_sec + ((double)curr_time.tv_usec / (double)1000000.0f);
+#endif /* H5_HAVE_GETTIMEOFDAY */
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5_get_time() */
+
+
+#ifdef H5_HAVE_WIN32_API
+
+#define H5_WIN32_ENV_VAR_BUFFER_SIZE    32767
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5_expand_windows_env_vars()
+ *
+ * Purpose:     Replaces windows environment variables of the form %foo%
+ *              with user-specific values.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5_expand_windows_env_vars(char **env_var)
+{
+    long    n_chars = 0;
+    char   *temp_buf = NULL;
+    herr_t  ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* Allocate buffer for expanded environment variable string */
+    if (NULL == (temp_buf = (char *)H5MM_calloc((size_t)H5_WIN32_ENV_VAR_BUFFER_SIZE)))
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't allocate memory for expanded path")
+
+    /* Expand the environment variable string */
+    if ((n_chars = ExpandEnvironmentStringsA(*env_var, temp_buf, H5_WIN32_ENV_VAR_BUFFER_SIZE)) > H5_WIN32_ENV_VAR_BUFFER_SIZE)
+        HGOTO_ERROR(H5E_PLUGIN, H5E_NOSPACE, FAIL, "expanded path is too long")
+
+    if (0 == n_chars)
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "failed to expand path")
+
+    *env_var = (char *)H5MM_xfree(*env_var);
+    *env_var = temp_buf;
+
+done:
+    if (FAIL == ret_value && temp_buf)
+        temp_buf = (char *)H5MM_xfree(temp_buf);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5_expand_windows_env_vars() */
+#endif /* H5_HAVE_WIN32_API */
 
