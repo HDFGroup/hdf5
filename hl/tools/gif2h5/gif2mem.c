@@ -295,7 +295,8 @@ Gif2Mem(BYTE *MemGif, GIFTOMEM *GifMemoryStruct)
                             fprintf(stderr,
                                     "Error reading Graphic Control Extension information\n");
 
-                        if (!*MemGif++ == 0)
+                        (*MemGif)++;
+                        if ((!*MemGif) == 0)
                             fprintf(stderr,
                                     "Error reading Graphic Control Extension\n");
 
