@@ -97,15 +97,6 @@
       FIXTURES_REQUIRED clear_testrepart
   )
 
-  # convert family file to sec2 file of 20,000 bytes
-  add_test (
-      NAME H5REPART-h5repart_single
-      COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repart${tgt_ext}> -m 20000 -family_to_single family_file%05d.h5 family_to_single.h5
-  )
-  set_tests_properties (H5REPART-h5repart_single PROPERTIES
-      FIXTURES_REQUIRED clear_testrepart
-  )
-
   # convert family file to sec2 file of 20,000 bytes (old argument)
   add_test (
       NAME H5REPART-h5repart_sec2
