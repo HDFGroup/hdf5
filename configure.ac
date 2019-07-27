@@ -3070,7 +3070,7 @@ AC_CONFIG_FILES([src/libhdf5.settings
 
 AC_OUTPUT
 
-chmod 755 tools/misc/h5cc
+chmod 755 bin/h5cc
 if test "X$HDF_CXX" = "Xyes"; then
   chmod 755 c++/src/h5c++
 fi
