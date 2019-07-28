@@ -943,7 +943,6 @@
   ADD_H5_TEST (tboot2 0 --enable-error-stack -B tfcontents2.h5)
   ADD_H5_TEST (tboot2A 0 --enable-error-stack --boot-block tfcontents2.h5)
   ADD_H5_TEST (tboot2B 0 --enable-error-stack --superblock tfcontents2.h5)
-  ADD_H5_TEST (file_space 0 --enable-error-stack -B file_space.h5)
 
   # test -p with a non existing dataset
   ADD_H5ERR_MASK_TEST (tperror 1 "h5dump error: unable to get link info from \"bogus\"" --enable-error-stack -p -d bogus tfcontents1.h5)
@@ -1127,7 +1126,7 @@
   ADD_H5ERR_MASK_TEST (textlink 0 "unable to open external file, external link file name = 'anotherfile'" --enable-error-stack textlink.h5)
 
   # test for error stack display (BZ2048)
-  ADD_H5ERR_MASK_ENV_TEST (filter_fail 1 "filter plugins disabled" "HDF5_PLUGIN_PRELOAD" "::" --enable-error-stack filter_fail.h5)
+  ADD_H5ERR_MASK_ENV_TEST (filter_fail 1 "is not available" "HDF5_PLUGIN_PRELOAD" "::" --enable-error-stack filter_fail.h5)
 
   # test for -o -y for dataset with attributes
   ADD_H5_TEST_EXPORT (tall-6 tall.h5 0 --enable-error-stack -d /g1/g1.1/dset1.1.1 -y -o)

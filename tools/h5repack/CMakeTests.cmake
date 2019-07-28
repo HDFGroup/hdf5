@@ -202,7 +202,7 @@
       )
       add_test (
           NAME H5REPACK-${testname}_DFF
-          COMMAND $<TARGET_FILE:h5diff> --enable-error-stack ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
+          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diff${tgt_ext}> --enable-error-stack ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
       )
       set_tests_properties (H5REPACK-${testname}_DFF PROPERTIES
           DEPENDS H5REPACK-${testname}
@@ -961,7 +961,7 @@
   ADD_H5_VERIFY_TEST (conti "TEST" 1 ${FILE4} null CONTIGUOUS -l CONTI)
   ADD_H5_VERIFY_TEST (dset2_compa "TEST" 0 ${FILE4} dset2 COMPACT -l dset2:COMPA)
   ADD_H5_VERIFY_TEST (compa "TEST" 1 ${FILE4} null COMPACT -l COMPA)
-  ADD_H5_MASK_TEST (dset2_chunk_20x10-errstk "TEST" 0 ${FILE4} --layout=dset2:CHUNK=20x10x5 --enable-error-stack)
+  ADD_H5_MASK_TEST (dset2_chunk_20x10-errstk "TEST" 0 "dimensionality of chunks doesn't match the dataspace" ${FILE4} --layout=dset2:CHUNK=20x10x5 --enable-error-stack)
 
 ################################################################
 # layout conversions (file has no filters)
