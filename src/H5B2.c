@@ -130,7 +130,7 @@ H5B2_create(H5F_t *f, hid_t dxpl_id, const H5B2_create_t *cparam, void *ctx_udat
     H5B2_hdr_t  *hdr = NULL;            /* Pointer to the B-tree header */
     H5B2_hdr_cache_ud_t cache_udata;    /* User-data for callback */
     haddr_t     hdr_addr;               /* B-tree header address */
-    H5B2_t      *ret_value;             /* Return value */
+    H5B2_t      *ret_value = NULL;      /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -494,7 +494,6 @@ H5B2_find(H5B2_t *bt2, hid_t dxpl_id, void *udata, H5B2_found_t op,
 
         if(cmp > 0)
             idx++;
-
         if(cmp != 0) {
             /* Get node pointer for next node to search */
             next_node_ptr=internal->node_ptrs[idx];
@@ -736,7 +735,7 @@ H5B2_index(H5B2_t *bt2, hid_t dxpl_id, H5_iter_order_t order, hsize_t idx,
             } /* end if */
             else
                 /* Index that is greater than the number of records in the tree? */
-                HDassert("Index off end of tree??" && 0);
+                HDassert(0 && "Index off end of tree??");
         } /* end if */
 
         /* Decrement depth we're at in B-tree */

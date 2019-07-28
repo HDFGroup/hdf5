@@ -129,7 +129,7 @@ H5FL_SEQ_DEFINE(H5A_t_ptr);
  *      H5S_t *space;       IN: Dataspace of attribute
  *      hid_t acpl_id       IN: Attribute creation property list
  *
- * Return: attribute structure on success, NULL on Failure.
+ * Return:      Attribute structure on success, NULL on Failure.
  *
  * Programmer:	Quincey Koziol
  *		April 2, 1998
@@ -148,7 +148,7 @@ H5A_create(const H5G_loc_t *loc, const char *name, const H5T_t *type,
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    /* check args */
+    /* Check args */
     HDassert(loc);
     HDassert(name);
     HDassert(type);
@@ -366,7 +366,7 @@ H5A_open_by_idx(const H5G_loc_t *loc, const char *obj_name, H5_index_t idx_type,
     H5O_loc_t   obj_oloc;            	/* Opened object object location */
     hbool_t     loc_found = FALSE;      /* Entry at 'obj_name' found */
     H5A_t       *attr = NULL;           /* Attribute from object header */
-    H5A_t       *ret_value;             /* Return value */
+    H5A_t       *ret_value = NULL;      /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -412,7 +412,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5A_open_by_name
  *
- * Purpose:	Open an attribute in an object header, according to it's name
+ * Purpose:     Open an attribute in an object header, according to it's name
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -430,7 +430,7 @@ H5A_open_by_name(const H5G_loc_t *loc, const char *obj_name, const char *attr_na
     H5O_loc_t   obj_oloc;            	/* Opened object object location */
     hbool_t     loc_found = FALSE;      /* Entry at 'obj_name' found */
     H5A_t       *attr = NULL;           /* Attribute from object header */
-    H5A_t       *ret_value;             /* Return value */
+    H5A_t       *ret_value = NULL;      /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -909,18 +909,14 @@ H5A_get_info(const H5A_t *attr, H5A_info_t *ainfo)
 /*-------------------------------------------------------------------------
  * Function:	H5A_copy
  *
- * Purpose:	Copies attribute OLD_ATTR.
+ * Purpose:     Copies attribute OLD_ATTR.
  *
- * Return:	Success:	Pointer to a new copy of the OLD_ATTR argument.
+ * Return:      Success:    Pointer to a new copy of the OLD_ATTR argument.
  *
- *		Failure:	NULL
+ *              Failure:    NULL
  *
  * Programmer:	Robb Matzke
  *		Thursday, December  4, 1997
- *
- * Modification:Raymond Lu
- *              4 June 2008
- *              Changed some attribute information to be shared.
  *
  *-------------------------------------------------------------------------
  */
@@ -1023,17 +1019,13 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5A_close
  *
- * Purpose:	Frees an attribute and all associated memory.
+ * Purpose:     Frees an attribute and all associated memory.
  *
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Monday, December  8, 1997
  *
- * Modifications:
- *              Raymond Lu
- *              4 June 2008
- *              Changed some attribute object information to be shared.
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1189,7 +1181,7 @@ H5A_exists_by_name(H5G_loc_t loc, const char *obj_name, const char *attr_name,
     H5G_name_t  obj_path;            	/* Opened object group hier. path */
     H5O_loc_t   obj_oloc;            	/* Opened object object location */
     hbool_t     loc_found = FALSE;      /* Entry at 'obj_name' found */
-    htri_t	ret_value;              /* Return value */
+    htri_t	ret_value = FAIL;       /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -1232,10 +1224,6 @@ done:
  *              24 June 2008
  *              Changed the table of attribute objects to be the table of
  *              pointers to attribute objects for the ease of operation.
- *
- *	Vailin Choi; September 2011
- *	Change "oh_modified" from boolean to unsigned
- *	(See H5Oprivate.h for possible flags)
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1287,11 +1275,10 @@ done:
  * Purpose:     Builds a table containing a sorted list of attributes for
  *              an object
  *
- * Note:	Used for building table of attributes in non-native iteration
+ * Note:        Used for building table of attributes in non-native iteration
  *              order for an index
  *
- * Return:	Success:        Non-negative
- *		Failure:	Negative
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
  *	        Dec 18, 2006
@@ -1396,12 +1383,11 @@ done:
  * Purpose:     Builds a table containing a sorted list of attributes for
  *              an object
  *
- * Note:	Used for building table of attributes in non-native iteration
+ * Note:        Used for building table of attributes in non-native iteration
  *              order for an index.  Uses the "name" index to retrieve records,
- *		but the 'idx_type' index for sorting them.
+ *              but the 'idx_type' index for sorting them.
  *
- * Return:	Success:        Non-negative
- *		Failure:	Negative
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
  *	        Dec 11, 2006
@@ -1552,7 +1538,7 @@ H5A__attr_cmp_name_dec(const void *attr1, const void *attr2)
 static int
 H5A__attr_cmp_corder_inc(const void *attr1, const void *attr2)
 {
-    int ret_value;              /* Return value */
+    int ret_value = 0;          /* Return value */
 
     FUNC_ENTER_STATIC_NOERR
 
@@ -1587,7 +1573,7 @@ H5A__attr_cmp_corder_inc(const void *attr1, const void *attr2)
 static int
 H5A__attr_cmp_corder_dec(const void *attr1, const void *attr2)
 {
-    int ret_value;              /* Return value */
+    int ret_value = 0;              /* Return value */
 
     FUNC_ENTER_STATIC_NOERR
 
@@ -1733,7 +1719,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	  H5A_attr_release_table
  *
- * Purpose:       Release table containing a list of attributes for an object
+ * Purpose:     Release table containing a list of attributes for an object
  *
  * Return:	  Success:        Non-negative
  *		  Failure:	Negative
@@ -1778,8 +1764,8 @@ done:
  * Purpose:     Retrieves the "attribute info" message for an object.  Also
  *              sets the number of attributes correctly, if it isn't set up yet.
  *
- * Return:	Success:	TRUE/FALSE whether message was found & retrieved
- *              Failure:        FAIL if error occurred
+ * Return:      Success:    TRUE/FALSE whether message was found & retrieved
+ *              Failure:    FAIL if error occurred
  *
  * Programmer:  Quincey Koziol
  *              koziol@hdfgroup.org
@@ -1977,7 +1963,7 @@ H5A_attr_copy_file(const H5A_t *attr_src, H5F_t *file_dst, hbool_t *recompute_si
          */
         if(H5O_msg_reset_share(H5O_DTYPE_ID, attr_dst->shared->dt) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "unable to reset datatype sharing")
-    } /* end if */
+    }
 
     /* Copy the dataspace for the attribute. Make sure the maximal dimension is also copied.
      * Otherwise the comparison in the test may complain about it. SLU 2011/4/12 */
@@ -2228,7 +2214,7 @@ H5A_attr_post_copy_file(const H5O_loc_t *src_oloc, const H5A_t *attr_src,
 
         /* Update shared message info from named datatype info */
         H5T_update_shared(attr_dst->shared->dt);
-    } /* end if */
+    }
 
     /* Try to share both the datatype and dataset.  This does nothing if the
      * datatype is committed or sharing is disabled.

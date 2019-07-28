@@ -192,9 +192,7 @@ H5A_dense_create(H5F_t *f, hid_t dxpl_id, H5O_ainfo_t *ainfo)
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    /*
-     * Check arguments.
-     */
+    /* Check arguments */
     HDassert(f);
     HDassert(ainfo);
 
@@ -290,9 +288,9 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5A__dense_fnd_cb
+ * Function:    H5A__dense_fnd_cb
  *
- * Purpose:	Callback when an attribute is located in an index
+ * Purpose:     Callback when an attribute is located in an index
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -326,7 +324,7 @@ H5A__dense_fnd_cb(const H5A_t *attr, hbool_t *took_ownership, void *_user_attr)
 /*-------------------------------------------------------------------------
  * Function:	H5A_dense_open
  *
- * Purpose:	Open an attribute in dense storage structures for an object
+ * Purpose:     Open an attribute in dense storage structures for an object
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -349,9 +347,7 @@ H5A_dense_open(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo, const char *na
 
     FUNC_ENTER_NOAPI(NULL)
 
-    /*
-     * Check arguments.
-     */
+    /* Check arguments */
     HDassert(f);
     HDassert(ainfo);
     HDassert(name);
@@ -418,7 +414,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5A_dense_insert
  *
- * Purpose:	Insert an attribute into dense storage structures for an object
+ * Purpose:     Insert an attribute into dense storage structures for an object
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -444,9 +440,7 @@ H5A_dense_insert(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo, H5A_t *attr)
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    /*
-     * Check arguments.
-     */
+    /* Check arguments */
     HDassert(f);
     HDassert(ainfo);
     HDassert(attr);
@@ -576,13 +570,12 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5A__dense_write_bt2_cb2
+ * Function:    H5A__dense_write_bt2_cb2
  *
- * Purpose:	v2 B-tree 'modify' callback to update the record for a creation
- *		order index
+ * Purpose:     v2 B-tree 'modify' callback to update the record for a creation
+ *              order index
  *
- * Return:	Success:	0
- *		Failure:	1
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
  *              Tuesday, February 20, 2007
@@ -597,9 +590,7 @@ H5A__dense_write_bt2_cb2(void *_record, void *_op_data, hbool_t *changed)
 
     FUNC_ENTER_STATIC_NOERR
 
-    /*
-     * Check arguments.
-     */
+    /* Check arguments */
     HDassert(record);
     HDassert(new_heap_id);
 
@@ -614,12 +605,11 @@ H5A__dense_write_bt2_cb2(void *_record, void *_op_data, hbool_t *changed)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5A__dense_write_bt2_cb
+ * Function:    H5A__dense_write_bt2_cb
  *
- * Purpose:	v2 B-tree 'modify' callback to update the data for an attribute
+ * Purpose:     v2 B-tree 'modify' callback to update the data for an attribute
  *
- * Return:	Success:	0
- *		Failure:	1
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
  *              Tuesday, December  5, 2006
@@ -638,9 +628,7 @@ H5A__dense_write_bt2_cb(void *_record, void *_op_data, hbool_t *changed)
 
     FUNC_ENTER_STATIC
 
-    /*
-     * Check arguments.
-     */
+    /* Check arguments */
     HDassert(record);
     HDassert(op_data);
 
@@ -731,9 +719,9 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5A_dense_write
  *
- * Purpose:	Modify an attribute in dense storage structures for an object
+ * Purpose:     Modify an attribute in dense storage structures for an object
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
  *		koziol@hdfgroup.org
@@ -754,9 +742,7 @@ H5A_dense_write(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo, H5A_t *attr)
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    /*
-     * Check arguments.
-     */
+    /* Check arguments */
     HDassert(f);
     HDassert(ainfo);
     HDassert(H5F_addr_defined(ainfo->fheap_addr));
@@ -829,12 +815,12 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5A__dense_copy_fh_cb
+ * Function:    H5A__dense_copy_fh_cb
  *
- * Purpose:	Callback for fractal heap operator, to make copy of attribute
+ * Purpose:     Callback for fractal heap operator, to make copy of attribute
  *              for calling routine
  *
- * Return:	SUCCEED/FAIL
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
  *		koziol@hdfgroup.org
@@ -875,7 +861,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5A_dense_rename
  *
- * Purpose:	Rename an attribute in dense storage structures for an object
+ * Purpose:     Rename an attribute in dense storage structures for an object
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -902,9 +888,7 @@ H5A_dense_rename(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo, const char *
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    /*
-     * Check arguments.
-     */
+    /* Check arguments */
     HDassert(f);
     HDassert(ainfo);
     HDassert(old_name);
@@ -1001,7 +985,6 @@ H5A_dense_rename(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo, const char *
         }
     }
 
-
     /* Insert renamed attribute back into dense storage */
     /* (Possibly making it shared) */
     if(H5A_dense_insert(f, dxpl_id, ainfo, attr_copy) < 0)
@@ -1059,11 +1042,11 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5A__dense_iterate_bt2_cb
+ * Function:    H5A__dense_iterate_bt2_cb
  *
- * Purpose:	v2 B-tree callback for dense attribute storage iterator
+ * Purpose:     v2 B-tree callback for dense attribute storage iterator
  *
- * Return:	H5_ITER_ERROR/H5_ITER_CONT/H5_ITER_STOP
+ * Return:      H5_ITER_ERROR/H5_ITER_CONT/H5_ITER_STOP
  *
  * Programmer:	Quincey Koziol
  *		koziol@hdfgroup.org
@@ -1158,7 +1141,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5A_dense_iterate
  *
- * Purpose:	Iterate over attributes in dense storage structures for an object
+ * Purpose:     Iterate over attributes in dense storage structures for an object
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -1182,9 +1165,7 @@ H5A_dense_iterate(H5F_t *f, hid_t dxpl_id, hid_t loc_id, const H5O_ainfo_t *ainf
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    /*
-     * Check arguments.
-     */
+    /* Check arguments */
     HDassert(f);
     HDassert(ainfo);
     HDassert(H5F_addr_defined(ainfo->fheap_addr));
@@ -1294,9 +1275,9 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5A__dense_remove_bt2_cb
+ * Function:    H5A__dense_remove_bt2_cb
  *
- * Purpose:	v2 B-tree callback for dense attribute storage record removal
+ * Purpose:     v2 B-tree callback for dense attribute storage record removal
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -1360,7 +1341,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5A_dense_remove
  *
- * Purpose:	Remove an attribute from the dense storage of an object
+ * Purpose:     Remove an attribute from the dense storage of an object
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -1383,9 +1364,7 @@ H5A_dense_remove(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo, const char *
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    /*
-     * Check arguments.
-     */
+    /* Check arguments */
     HDassert(f);
     HDassert(ainfo);
     HDassert(name && *name);
@@ -1449,9 +1428,9 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5A__dense_remove_by_idx_bt2_cb
+ * Function:    H5A__dense_remove_by_idx_bt2_cb
  *
- * Purpose:	v2 B-tree callback for dense attribute storage record removal by index
+ * Purpose:     v2 B-tree callback for dense attribute storage record removal by index
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -1578,8 +1557,8 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5A_dense_remove_by_idx
  *
- * Purpose:	Remove an attribute from the dense storage of an object,
- *		according to the order within an index
+ * Purpose:     Remove an attribute from the dense storage of an object,
+ *              according to the order within an index
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -1602,9 +1581,7 @@ H5A_dense_remove_by_idx(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo,
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    /*
-     * Check arguments.
-     */
+    /* Check arguments */
     HDassert(f);
     HDassert(ainfo);
 
@@ -1709,7 +1686,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5A_dense_exists
  *
- * Purpose:	Check if an attribute exists in dense storage structures for
+ * Purpose:     Check if an attribute exists in dense storage structures for
  *              an object
  *
  * Return:	Non-negative on success/Negative on failure
@@ -1732,9 +1709,7 @@ H5A_dense_exists(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo, const char *
 
     FUNC_ENTER_NOAPI(NULL)
 
-    /*
-     * Check arguments.
-     */
+    /* Check arguments */
     HDassert(f);
     HDassert(ainfo);
     HDassert(name);
@@ -1797,9 +1772,9 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5A__dense_delete_bt2_cb
+ * Function:    H5A__dense_delete_bt2_cb
  *
- * Purpose:	v2 B-tree callback for dense attribute storage deletion
+ * Purpose:     v2 B-tree callback for dense attribute storage deletion
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -1864,7 +1839,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5A_dense_delete
  *
- * Purpose:	Delete all dense storage structures for attributes on an object
+ * Purpose:     Delete all dense storage structures for attributes on an object
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -1883,9 +1858,7 @@ H5A_dense_delete(H5F_t *f, hid_t dxpl_id, H5O_ainfo_t *ainfo)
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    /*
-     * Check arguments.
-     */
+    /* Check arguments */
     HDassert(f);
     HDassert(ainfo);
 

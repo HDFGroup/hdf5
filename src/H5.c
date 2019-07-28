@@ -266,11 +266,11 @@ H5_term_library(void)
      */
 #define DOWN(F)								      \
     (((n = H5##F##_term_interface()) && (at + 8) < sizeof loop)?	      \
-     (sprintf(loop + at, "%s%s", (at ? "," : ""), #F),			      \
+     (HDsprintf(loop + at, "%s%s", (at ? "," : ""), #F),			      \
       at += HDstrlen(loop + at),					      \
       n):                                                                     \
      ((n > 0 && (at + 5) < sizeof loop) ?				      \
-     (sprintf(loop + at, "..."),					      \
+     (HDsprintf(loop + at, "..."),					      \
       at += HDstrlen(loop + at),					      \
      n) : n))
 
@@ -320,8 +320,8 @@ H5_term_library(void)
     if(pending) {
         /* Only display the error message if the user is interested in them. */
         if(func) {
-            fprintf(stderr, "HDF5: infinite loop closing library\n");
-            fprintf(stderr, "      %s\n", loop);
+            HDfprintf(stderr, "HDF5: infinite loop closing library\n");
+            HDfprintf(stderr, "      %s\n", loop);
 #ifndef NDEBUG
             HDabort();
 #endif /* NDEBUG */
@@ -333,18 +333,18 @@ H5_term_library(void)
      * down if any of the below code involves using the instrumentation code.
      */
     if(H5_MPEinit_g) {
-	int mpi_initialized;
-	int mpi_finalized;
-	int mpe_code;
+        int mpi_initialized;
+        int mpi_finalized;
+        int mpe_code;
 
-	MPI_Initialized(&mpi_initialized);
-	MPI_Finalized(&mpi_finalized);
+        MPI_Initialized(&mpi_initialized);
+        MPI_Finalized(&mpi_finalized);
 
         if (mpi_initialized && !mpi_finalized) {
-	    mpe_code = MPE_Finish_log("h5log");
-	    HDassert(mpe_code >=0);
-	} /* end if */
-	H5_MPEinit_g = FALSE;	/* turn it off no matter what */
+            mpe_code = MPE_Finish_log("h5log");
+            HDassert(mpe_code >=0);
+        } /* end if */
+        H5_MPEinit_g = FALSE;	/* turn it off no matter what */
     } /* end if */
 #endif
 
@@ -364,6 +364,7 @@ done:
 #ifdef H5_HAVE_THREADSAFE
     H5_API_UNLOCK
 #endif /* H5_HAVE_THREADSAFE */
+
     return;
 } /* end H5_term_library() */
 
@@ -385,11 +386,6 @@ done:
  *
  *		Failure:	negative if this function is called more than
  *				once or if it is called too late.
- *
- * Programmer:	Robb Matzke
- *              Friday, November 20, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -424,11 +420,6 @@ H5dont_atexit(void)
  * Return:	Success:	non-negative
  *
  *		Failure:	negative
- *
- * Programmer:	Quincey Koziol
- *              Saturday, March 11, 2000
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -474,13 +465,6 @@ done:
  *
  *		Failure:	negative
  *
- * Programmer:	Quincey Koziol
- *              Wednesday, August 2, 2000
- *
- * Modifications:   Neil Fortner
- *                  Wednesday, April 8, 2009
- *                  Added support for factory free lists
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -504,30 +488,26 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5_debug_mask
+ * Function:    H5_debug_mask
  *
- * Purpose:	Set runtime debugging flags according to the string S.  The
- *		string should contain file numbers and package names
- *		separated by other characters. A file number applies to all
- *		following package names up to the next file number. The
- *		initial file number is `2' (the standard error stream). Each
- *		package name can be preceded by a `+' or `-' to add or remove
- *		the package from the debugging list (`+' is the default). The
- *		special name `all' means all packages.
+ * Purpose:     Set runtime debugging flags according to the string S.  The
+ *              string should contain file numbers and package names
+ *              separated by other characters. A file number applies to all
+ *              following package names up to the next file number. The
+ *              initial file number is `2' (the standard error stream). Each
+ *              package name can be preceded by a `+' or `-' to add or remove
+ *              the package from the debugging list (`+' is the default). The
+ *              special name `all' means all packages.
  *
- *		The name `trace' indicates that API tracing is to be turned
- *		on or off.
+ *              The name `trace' indicates that API tracing is to be turned
+ *              on or off.
  *
- * Return:	void
+ *              The name 'ttop' indicates that only top-level API calls
+ *              should be shown. This also turns on tracing as if the
+ *              'trace' word was shown.
  *
- * Programmer:	Robb Matzke
- *              Wednesday, August 19, 1998
+ * Return:      void
  *
- * Modifications:
- *              Robb Matzke, 2002-08-08
- *              Accepts the `ttop' word. If enabled then show only the
- *              top level API calls, otherwise show all API calls.  Also
- *              turns on tracing as if the `trace' word was present.
  *-------------------------------------------------------------------------
  */
 static void
@@ -539,55 +519,57 @@ H5_debug_mask(const char *s)
     hbool_t	clear;
 
     while (s && *s) {
-	if (HDisalpha(*s) || '-'==*s || '+'==*s) {
-	    /* Enable or Disable debugging? */
-	    if ('-'==*s) {
-		clear = TRUE;
-		s++;
-	    } else if ('+'==*s) {
-		clear = FALSE;
-		s++;
-	    } else {
-		clear = FALSE;
-	    }
 
-	    /* Get the name */
-	    for (i=0; HDisalpha(*s); i++, s++)
-		if (i<sizeof pkg_name)
+        if (HDisalpha(*s) || '-'==*s || '+'==*s) {
+
+            /* Enable or Disable debugging? */
+            if ('-'==*s) {
+                clear = TRUE;
+                s++;
+            } else if ('+'==*s) {
+                clear = FALSE;
+                s++;
+            } else {
+                clear = FALSE;
+            } /* end if */
+
+            /* Get the name */
+            for (i=0; HDisalpha(*s); i++, s++)
+                if (i<sizeof pkg_name)
                     pkg_name[i] = *s;
-	    pkg_name[MIN(sizeof(pkg_name)-1, i)] = '\0';
+            pkg_name[MIN(sizeof(pkg_name)-1, i)] = '\0';
 
-	    /* Trace, all, or one? */
-	    if (!HDstrcmp(pkg_name, "trace")) {
-		H5_debug_g.trace = clear ? NULL : stream;
+            /* Trace, all, or one? */
+            if (!HDstrcmp(pkg_name, "trace")) {
+                H5_debug_g.trace = clear ? NULL : stream;
             } else if (!HDstrcmp(pkg_name, "ttop")) {
                 H5_debug_g.trace = stream;
                 H5_debug_g.ttop = (hbool_t)!clear;
             } else if (!HDstrcmp(pkg_name, "ttimes")) {
                 H5_debug_g.trace = stream;
                 H5_debug_g.ttimes = (hbool_t)!clear;
-	    } else if (!HDstrcmp(pkg_name, "all")) {
-		for (i=0; i<(size_t)H5_NPKGS; i++)
-		    H5_debug_g.pkg[i].stream = clear ? NULL : stream;
-	    } else {
-		for (i=0; i<(size_t)H5_NPKGS; i++) {
-		    if (!HDstrcmp(H5_debug_g.pkg[i].name, pkg_name)) {
-			H5_debug_g.pkg[i].stream = clear ? NULL : stream;
-			break;
-		    }
-		}
-		if (i>=(size_t)H5_NPKGS)
-		    fprintf(stderr, "HDF5_DEBUG: ignored %s\n", pkg_name);
-	    }
+            } else if (!HDstrcmp(pkg_name, "all")) {
+                for (i=0; i<(size_t)H5_NPKGS; i++)
+                    H5_debug_g.pkg[i].stream = clear ? NULL : stream;
+            } else {
+                for (i=0; i<(size_t)H5_NPKGS; i++) {
+                    if (!HDstrcmp(H5_debug_g.pkg[i].name, pkg_name)) {
+                        H5_debug_g.pkg[i].stream = clear ? NULL : stream;
+                        break;
+		            } /* end if */
+                } /* end for */
+                if (i>=(size_t)H5_NPKGS)
+                    HDfprintf(stderr, "HDF5_DEBUG: ignored %s\n", pkg_name);
+            } /* end if-else */
 
-	} else if (HDisdigit(*s)) {
-	    int fd = (int)HDstrtol(s, &rest, 0);
-	    H5_debug_open_stream_t *open_stream;
+        } else if (HDisdigit(*s)) {
+            int fd = (int)HDstrtol(s, &rest, 0);
+            H5_debug_open_stream_t *open_stream;
 
-	    if((stream = HDfdopen(fd, "w")) != NULL) {
-	        (void)HDsetvbuf(stream, NULL, _IOLBF, (size_t)0);
+            if((stream = HDfdopen(fd, "w")) != NULL) {
+                (void)HDsetvbuf(stream, NULL, _IOLBF, (size_t)0);
 
-	        if(NULL == (open_stream = (H5_debug_open_stream_t *)H5MM_malloc(sizeof(H5_debug_open_stream_t)))) {
+                if(NULL == (open_stream = (H5_debug_open_stream_t *)H5MM_malloc(sizeof(H5_debug_open_stream_t)))) {
                     (void)HDfclose(stream);
                     return;
                 } /* end if */
@@ -596,11 +578,15 @@ H5_debug_mask(const char *s)
                 open_stream->next = H5_debug_g.open_stream;
                 H5_debug_g.open_stream = open_stream;
             } /* end if */
-	    s = rest;
-	} else {
-	    s++;
-	}
-    }
+
+            s = rest;
+        } else {
+            s++;
+        } /* end if-else */
+    } /* end while */
+
+    return;
+
 } /* end H5_debug_mask() */
 
 #ifdef H5_HAVE_PARALLEL
@@ -612,8 +598,6 @@ H5_debug_mask(const char *s)
  *              library when the communicator is destroyed, i.e. on MPI_Finalize.
  *
  * Return:	MPI_SUCCESS
- *
- * Programmer:	Mohamad Chaarawi, February 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -638,13 +622,6 @@ static int H5_mpi_delete_cb(MPI_Comm H5_ATTR_UNUSED comm, int H5_ATTR_UNUSED key
  *		printf("version %u.%u release %u", maj, min, rel)
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Unknown
- *
- * Modifications:
- * 	Robb Matzke, 4 Mar 1998
- *	Now use "normal" data types for the interface.  Any of the arguments
- *	may be null pointers
  *
  *-------------------------------------------------------------------------
  */
@@ -678,13 +655,6 @@ done:
  * Return:	Success:	SUCCEED
  *
  *		Failure:	abort()
- *
- * Programmer:	Robb Matzke
- *              Tuesday, April 21, 1998
- *
- * Modifications:
- *	Albert Cheng, May 12, 2001
- *	Added verification of H5_VERS_INFO.
  *
  *-------------------------------------------------------------------------
  */
@@ -810,11 +780,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:  Robb Matzke
- *              Tuesday, December  9, 1997
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -836,11 +801,6 @@ done:
  * Purpose:	Terminate the library and release all resources.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *              Friday, January 30, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */

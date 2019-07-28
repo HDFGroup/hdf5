@@ -13,11 +13,9 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:		H5Atest.c
- *			Dec 18 2006
- *			Quincey Koziol <koziol@hdfgroup.org>
+ * Created:     H5Atest.c
  *
- * Purpose:		Attribute testing routines.
+ * Purpose:     Attribute testing routines.
  *
  *-------------------------------------------------------------------------
  */
@@ -93,7 +91,7 @@ htri_t
 H5A_is_shared_test(hid_t attr_id)
 {
     H5A_t	*attr;                  /* Attribute object for ID */
-    htri_t	ret_value;              /* Return value */
+    htri_t	ret_value = FAIL;       /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 

@@ -115,6 +115,9 @@ struct timespec
 #define HDroundf(V)         Wroundf(V)
 #endif /* MSC_VER < 1700 */
 
+#endif /* H5_HAVE_VISUAL_STUDIO */
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -149,15 +152,6 @@ extern "C" {
 #define HDgetlogin()        Wgetlogin()
 #define HDsnprintf          c99_snprintf /*varargs*/
 #define HDvsnprintf         c99_vsnprintf /*varargs*/
-#if _MSC_VER >= 1900  /* VS 2015 */
-    /* In gcc and in Visual Studio prior to VS 2015 'timezone' is a global
-     * variable declared in time.h. That variable was deprecated and in VS 2015
-     * is removed, with _get_timezone replacing it.
-     */
-    #define HDget_timezone(V)    _get_timezone(V);
-#endif /* VS 2015 */
-
-#endif /* H5_HAVE_VISUAL_STUDIO */
 
 /* Non-POSIX functions */
 
