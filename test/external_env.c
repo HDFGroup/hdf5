@@ -194,7 +194,7 @@ main(void)
         HDremove("extern_env_3w.raw");
         HDremove("extern_env_4w.raw");
 
-        HDrmdir("extern_dir");
+        HDrmdir("extern_env_dir");
     } /* end if */
 
     return EXIT_SUCCESS;
