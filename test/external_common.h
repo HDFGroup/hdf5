@@ -30,6 +30,7 @@ static const char *EXT_FNAME[] = {
     "extern_4",
     "extern_dir/file_1",
     "extern_5",
+    "extern_env_dir/file_2",
     NULL
 };
 
@@ -41,5 +42,5 @@ static const char *EXT_FNAME[] = {
 #define TOTAL_SIZE          100
 #define GARBAGE_PER_FILE    10
 
-herr_t reset_raw_data_files(void);
+herr_t reset_raw_data_files(hbool_t is_env);
 #endif /* _EXTERNAL_COMMON_H */
