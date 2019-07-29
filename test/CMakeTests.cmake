@@ -791,9 +791,8 @@ set_tests_properties (H5TEST-links_env PROPERTIES
 
 #-- Adding test for external_env
 add_test (
-    NAME H5TEST-clear-external_env-objects
-    COMMAND    ${CMAKE_COMMAND}
-        -E remove
+    NAME H5TEST-external_env-clear-objects
+    COMMAND ${CMAKE_COMMAND} -E remove
         extern_env_1r.raw
         extern_env_2r.raw
         extern_env_3r.raw
@@ -802,12 +801,10 @@ add_test (
         extern_env_2w.raw
         extern_env_3w.raw
         extern_env_4w.raw
-        external_env.txt
-        external_env.out
     WORKING_DIRECTORY
         ${HDF5_TEST_BINARY_DIR}/H5TEST
 )
-set_tests_properties (H5TEST-clear-external_env-objects PROPERTIES FIXTURES_SETUP external_env_clear_objects)
+set_tests_properties (H5TEST-external_env-clear-objects PROPERTIES FIXTURES_SETUP clear_external_env)
 if (HDF5_ENABLE_USING_MEMCHECKER)
   add_test (NAME H5TEST-external_env COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:external_env>)
 else ()
@@ -826,25 +823,22 @@ else ()
   )
 endif ()
 set_tests_properties (H5TEST-external_env PROPERTIES
-    FIXTURES_REQUIRED external_env_clear_objects
+    FIXTURES_REQUIRED clear_external_env
     ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST;HDF5TestExpress=${HDF_TEST_EXPRESS}"
     WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
 )
 
 #-- Adding test for vds_env
 add_test (
-    NAME H5TEST-clear-vds_env-objects
-    COMMAND    ${CMAKE_COMMAND}
-        -E remove
+    NAME H5TEST-vds_env-clear-objects
+    COMMAND ${CMAKE_COMMAND} -E remove
         vds_virt_0.h5
         vds_virt_3.h5
         vds_src_2.h5
-        vds_env.txt
-        vds_env.out
     WORKING_DIRECTORY
         ${HDF5_TEST_BINARY_DIR}/H5TEST
 )
-set_tests_properties (H5TEST-clear-vds_env-objects PROPERTIES FIXTURES_SETUP vds_env_clear_objects)
+set_tests_properties (H5TEST-vds_env-clear-objects PROPERTIES FIXTURES_SETUP clear_vds_env)
 if (HDF5_ENABLE_USING_MEMCHECKER)
   add_test (NAME H5TEST-vds_env COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:vds_env>)
 else ()
@@ -863,7 +857,7 @@ else ()
   )
 endif ()
 set_tests_properties (H5TEST-vds_env PROPERTIES
-    FIXTURES_REQUIRED vds_env_clear_objects
+    FIXTURES_REQUIRED clear_vds_env
     ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST;HDF5TestExpress=${HDF_TEST_EXPRESS}"
     WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
 )
