@@ -431,7 +431,7 @@ if (NOT ONLY_SHARED_LIBS)
   install (
       FILES
           ${HDF5_F90_BINARY_DIR}/static/H5f90i_gen.h
-          ${HDF5_F90_BINARY_DIR}/static/H5fortran_types.F90
+          ${HDF5_F90_BINARY_DIR}/static/H5fortran_types.f90
       DESTINATION
           ${HDF5_INSTALL_INCLUDE_DIR}
       COMPONENT
@@ -441,7 +441,7 @@ else ()
   install (
       FILES
           ${HDF5_F90_BINARY_DIR}/shared/H5f90i_gen.h
-          ${HDF5_F90_BINARY_DIR}/shared/H5fortran_types.F90
+          ${HDF5_F90_BINARY_DIR}/shared/H5fortran_types.f90
       DESTINATION
           ${HDF5_INSTALL_INCLUDE_DIR}
       COMPONENT
