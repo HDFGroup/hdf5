@@ -460,8 +460,10 @@ set (H5TEST_SEPARATE_TESTS
     testhdf5
     cache
     cache_image
+    external_env
     flush1
     flush2
+    vds_env
 )
 foreach (h5_test ${H5_TESTS})
   if (NOT h5_test IN_LIST H5TEST_SEPARATE_TESTS)
@@ -757,6 +759,79 @@ endif ()
 set_tests_properties (H5TEST-links_env PROPERTIES
     FIXTURES_REQUIRED clear_links_env
     ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST;HDF5_EXT_PREFIX=.:tmp"
+    WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
+)
+
+#-- Adding test for external_env
+add_test (
+    NAME H5TEST-external_env-clear-objects
+    COMMAND ${CMAKE_COMMAND} -E remove
+        extern_env_1r.raw
+        extern_env_2r.raw
+        extern_env_3r.raw
+        extern_env_4r.raw
+        extern_env_1w.raw
+        extern_env_2w.raw
+        extern_env_3w.raw
+        extern_env_4w.raw
+    WORKING_DIRECTORY
+        ${HDF5_TEST_BINARY_DIR}/H5TEST
+)
+set_tests_properties (H5TEST-external_env-clear-objects PROPERTIES FIXTURES_SETUP clear_external_env)
+if (HDF5_ENABLE_USING_MEMCHECKER)
+  add_test (NAME H5TEST-external_env COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:external_env>)
+else ()
+  add_test (NAME H5TEST-external_env COMMAND "${CMAKE_COMMAND}"
+        -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
+        -D "TEST_PROGRAM=$<TARGET_FILE:external_env>"
+        -D "TEST_ARGS:STRING="
+        -D "TEST_ENV_VAR:STRING=HDF5_EXTFILE_PREFIX"
+        -D "TEST_ENV_VALUE:STRING=\${ORIGIN}"
+        -D "TEST_EXPECT=0"
+        -D "TEST_SKIP_COMPARE=TRUE"
+        -D "TEST_OUTPUT=external_env.txt"
+        #-D "TEST_REFERENCE=external_env.out"
+        -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/H5TEST"
+        -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+  )
+endif ()
+set_tests_properties (H5TEST-external_env PROPERTIES
+    FIXTURES_REQUIRED clear_external_env
+    ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST;HDF5TestExpress=${HDF_TEST_EXPRESS}"
+    WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
+)
+
+#-- Adding test for vds_env
+add_test (
+    NAME H5TEST-vds_env-clear-objects
+    COMMAND ${CMAKE_COMMAND} -E remove
+        vds_virt_0.h5
+        vds_virt_3.h5
+        vds_src_2.h5
+    WORKING_DIRECTORY
+        ${HDF5_TEST_BINARY_DIR}/H5TEST
+)
+set_tests_properties (H5TEST-vds_env-clear-objects PROPERTIES FIXTURES_SETUP clear_vds_env)
+if (HDF5_ENABLE_USING_MEMCHECKER)
+  add_test (NAME H5TEST-vds_env COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:vds_env>)
+else ()
+  add_test (NAME H5TEST-vds_env COMMAND "${CMAKE_COMMAND}"
+        -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
+        -D "TEST_PROGRAM=$<TARGET_FILE:vds_env>"
+        -D "TEST_ARGS:STRING="
+        -D "TEST_ENV_VAR:STRING=HDF5_VDS_PREFIX"
+        -D "TEST_ENV_VALUE:STRING=\${ORIGIN}/tmp"
+        -D "TEST_EXPECT=0"
+        -D "TEST_SKIP_COMPARE=TRUE"
+        -D "TEST_OUTPUT=vds_env.txt"
+        #-D "TEST_REFERENCE=vds_env.out"
+        -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/H5TEST"
+        -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+  )
+endif ()
+set_tests_properties (H5TEST-vds_env PROPERTIES
+    FIXTURES_REQUIRED clear_vds_env
+    ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST;HDF5TestExpress=${HDF_TEST_EXPRESS}"
     WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
 )
 

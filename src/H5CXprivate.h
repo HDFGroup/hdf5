@@ -102,6 +102,10 @@ H5_DLL herr_t H5CX_get_dt_conv_cb(H5T_conv_cb_t *cb_struct);
 /* "Getter" routines for LAPL properties cached in API context */
 H5_DLL herr_t H5CX_get_nlinks(size_t *nlinks);
 
+/* "Getter" routines for DAPL properties cached in API context */
+H5_DLL herr_t H5CX_get_ext_file_prefix(char **prefix_extfile);
+H5_DLL herr_t H5CX_get_vds_prefix(char **prefix_vds);
+
 /* "Getter" routines for FAPL properties cached in API context */
 H5_DLL herr_t H5CX_get_libver_bounds(H5F_libver_t *low_bound, H5F_libver_t *high_bound);
 
