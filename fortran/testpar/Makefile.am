@@ -48,4 +48,4 @@ LDADD=$(LIBH5FTEST) $(LIBH5TEST) $(LIBH5F) $(LIBHDF5)
 # Mark this directory as part of the Fortran API
 FORTRAN_API=yes
 
-include $(top_srcdir)/config/conclude_fc.am
+include $(top_srcdir)/config/conclude.am
