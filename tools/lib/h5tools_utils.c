@@ -21,6 +21,10 @@
 #include "H5private.h"
 #include "h5trav.h"
 
+#ifdef H5_HAVE_ROS3_VFD
+#include "H5FDros3.h"
+#endif
+
 /* global variables */
 unsigned h5tools_nCols = 80;
 /* ``get_option'' variables */
@@ -97,7 +101,7 @@ parallel_print(const char* format, ...)
     HDva_end(ap);
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function: error_msg
  *
@@ -122,7 +126,7 @@ error_msg(const char *fmt, ...)
     HDva_end(ap);
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function: warn_msg
  *
@@ -161,7 +165,7 @@ help_ref_msg(FILE *output)
     HDfprintf(output, "see the <%s> entry in the 'HDF5 Reference Manual'.\n",h5tools_getprogname());
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function: get_option
  *
@@ -322,7 +326,229 @@ get_option(int argc, const char **argv, const char *opts, const struct long_opti
     return opt_opt;
 }
 
-
+
+/*****************************************************************************
+ *
+ * Function: parse_tuple()
+ *
+ * Purpose:
+ *
+ *     Create array of pointers to strings, identified as elements in a tuple
+ *     of arbitrary length separated by provided character.
+ *     ("tuple" because "nple" looks strange)
+ *
+ *     * Receives pointer to start of tuple sequence string, '('.
+ *     * Attempts to separate elements by token-character `sep`.
+ *         * If the separator character is preceded by a backslash '\',
+ *           the backslash is deleted and the separator is included in the
+ *           element string as any other character.
+ *     * To end an element with a backslash, escape the backslash, e.g.
+ *       "(myelem\\,otherelem) -> {"myelem\", "otherelem"}
+ *     * In all other cases, a backslash appearing not as part of "\\" or
+ *       "\<sep>" digraph will be included berbatim.
+ *     * Last two characters in the string MUST be ")\0".
+ *
+ *     * Generates a copy of the input string `start`, (src..")\0"), replacing
+ *       separators and close-paren with null charaters.
+ *         * This string is allocated at runtime and should be freed when done.
+ *     * Generates array of char pointers, and directs start of each element
+ *       (each pointer) into this copy.
+ *         * Each tuple element points to the start of its string (substring)
+ *           and ends with a null terminator.
+ *         * This array is allocated at runtime and should be freed when done.
+ *     * Reallocates and expands elements array during parsing.
+ *         * Initially allocated for 2 (plus one null entry), and grows by
+ *           powers of 2.
+ *     * The final 'slot' in the element array (elements[nelements], e.g.)
+ *       always points to NULL.
+ *     * The number of elements found and stored are passed out through pointer
+ *       to unsigned, `nelems`.
+ *
+ * Return:
+ *
+ *     FAIL    If malformed--does not look like a tuple "(...)"
+ *             or major error was encountered while parsing.
+ *     or
+ *     SUCCEED String looks properly formed "(...)" and no major errors.
+ *
+ *             Stores number of elements through pointer `nelems`.
+ *             Stores list of pointers to char (first char in each element
+ *                 string) through pointer `ptrs_out`.
+ *                 NOTE: `ptrs_out[nelems] == NULL` should be true.
+ *                 NOTE: list is malloc'd by function, and should be freed
+ *                       when done.
+ *             Stores "source string" for element pointers through `cpy_out`.
+ *                 NOTE: Each element substring is null-terminated.
+ *                 NOTE: There may be extra characters after the last element
+ *                           (past its null terminator), but is guaranteed to
+ *                           be null-terminated.
+ *                 NOTE: `cpy_out` string is malloc'd by function,
+ *                       and should be freed when done.
+ *
+ * Programmer: Jacob Smith
+ *             2017-11-10
+ *
+ * Changes: None.
+ *
+ *****************************************************************************
+ */
+herr_t
+parse_tuple(const char   *start,
+           int           sep,
+           char        **cpy_out,
+           unsigned     *nelems,
+           char       ***ptrs_out)
+{
+    char      *elem_ptr    = NULL;
+    char      *dest_ptr    = NULL;
+    unsigned   elems_count = 0;
+    char     **elems       = NULL; /* more like *elems[], but complier... */
+    char     **elems_re    = NULL; /* temporary pointer, for realloc */
+    char      *cpy         = NULL;
+    herr_t     ret_value   = SUCCEED;
+    unsigned   init_slots  = 2;
+
+
+
+    /*****************
+     * SANITY-CHECKS *
+     *****************/
+
+    /* must start with "("
+     */
+    if (start[0] != '(') {
+        ret_value = FAIL;
+        goto done;
+    }
+
+    /* must end with ")"
+     */
+    while (start[elems_count] != '\0') {
+        elems_count++;
+    }
+    if (start[elems_count - 1] != ')') {
+        ret_value = FAIL;
+        goto done;
+    }
+
+    elems_count = 0;
+
+
+
+    /***********
+     * PREPARE *
+     ***********/
+
+    /* create list
+     */
+    elems = (char **)HDmalloc(sizeof(char *) * (init_slots + 1));
+    if (elems == NULL) { ret_value = FAIL; goto done; } /* CANTALLOC */
+
+    /* create destination string
+     */
+    start++; /* advance past opening paren '(' */
+    cpy = (char *)HDmalloc(sizeof(char) * (HDstrlen(start))); /* no +1; less '(' */
+    if (cpy == NULL) { ret_value = FAIL; goto done; } /* CANTALLOC */
+
+    /* set pointers
+     */
+    dest_ptr = cpy; /* start writing copy here */
+    elem_ptr = cpy; /* first element starts here */
+    elems[elems_count++] = elem_ptr; /* set first element pointer into list */
+
+
+
+    /*********
+     * PARSE *
+     *********/
+
+    while (*start != '\0') {
+        /* For each character in the source string...
+         */
+        if (*start == '\\') {
+            /* Possibly an escape digraph.
+             */
+            if ((*(start + 1) == '\\') ||
+                (*(start + 1) == sep) )
+            {
+                /* Valid escape digraph of "\\" or "\<sep>".
+                 */
+                start++; /* advance past escape char '\' */
+                *(dest_ptr++) = *(start++); /* Copy subsequent char  */
+                                            /* and advance pointers. */
+            } else {
+               /* Not an accepted escape digraph.
+                * Copy backslash character.
+                */
+                *(dest_ptr++) = *(start++);
+            }
+        } else if (*start == sep) {
+            /* Non-escaped separator.
+             * Terminate elements substring in copy, record element, advance.
+             * Expand elements list if appropriate.
+             */
+            *(dest_ptr++) = 0; /* Null-terminate elem substring in copy */
+                               /* and advance pointer.                  */
+            start++; /* Advance src pointer past separator. */
+            elem_ptr = dest_ptr; /* Element pointer points to start of first */
+                                 /* character after null sep in copy.        */
+            elems[elems_count++] = elem_ptr; /* Set elem pointer in list */
+                                             /* and increment count.     */
+
+            /* Expand elements list, if necessary.
+             */
+            if (elems_count == init_slots) {
+                init_slots *= 2;
+                elems_re = (char **)realloc(elems, sizeof(char *) * \
+                                                   (init_slots + 1));
+                if (elems_re == NULL) {
+                    /* CANTREALLOC */
+                    ret_value = FAIL;
+                    goto done;
+                }
+                elems = elems_re;
+            }
+        } else if (*start == ')' && *(start + 1) == '\0') {
+            /* Found terminal, non-escaped close-paren. Last element.
+             * Write null terminator to copy.
+             * Advance source pointer to gently break from loop.
+             * Requred to prevent ")" from always being added to last element.
+             */
+            start++;
+        } else {
+            /* Copy character into destination. Advance pointers.
+             */
+            *(dest_ptr++) = *(start++);
+        }
+    }
+    *dest_ptr = '\0'; /* Null-terminate destination string. */
+    elems[elems_count] = NULL; /* Null-terminate elements list. */
+
+
+
+    /********************
+     * PASS BACK VALUES *
+     ********************/
+
+    *ptrs_out = elems;
+    *nelems   = elems_count;
+    *cpy_out  = cpy;
+
+done:
+    if (ret_value == FAIL) {
+        /* CLEANUP */
+        if (cpy)   free(cpy);
+        if (elems) free(elems);
+    }
+
+    return ret_value;
+
+} /* parse_tuple */
+
+
+
+
+
 /*-------------------------------------------------------------------------
  * Function: indentation
  *
@@ -344,7 +570,7 @@ indentation(unsigned x)
     }
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function: print_version
  *
@@ -362,7 +588,7 @@ print_version(const char *progname)
            ((const char *)H5_VERS_SUBRELEASE)[0] ? "-" : "", H5_VERS_SUBRELEASE);
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    init_table
  *
@@ -384,7 +610,7 @@ init_table(table_t **tbl)
     *tbl = table;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    free_table
  *
@@ -408,7 +634,7 @@ free_table(table_t *table)
 }
 
 #ifdef H5DUMP_DEBUG
-
+
 /*-------------------------------------------------------------------------
  * Function:    dump_table
  *
@@ -429,7 +655,7 @@ dump_table(char* tablename, table_t *table)
            table->objs[u].displayed, table->objs[u].recorded);
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    dump_tables
  *
@@ -447,7 +673,7 @@ dump_tables(find_objs_t *info)
 }
 #endif  /* H5DUMP_DEBUG */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    search_obj
  *
@@ -470,7 +696,7 @@ search_obj(table_t *table, haddr_t objno)
     return NULL;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    find_objs_cb
  *
@@ -546,7 +772,7 @@ find_objs_cb(const char *name, const H5O_info_t *oinfo, const char *already_seen
     return ret_value;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    init_objs
  *
@@ -591,7 +817,7 @@ done:
     return ret_value;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    add_obj
  *
@@ -622,7 +848,7 @@ add_obj(table_t *table, haddr_t objno, const char *objname, hbool_t record)
     table->objs[u].displayed = 0;
 }
 
-
+
 #ifndef H5_HAVE_TMPFILE
 /*-------------------------------------------------------------------------
  * Function:    tmpfile
@@ -840,4 +1066,267 @@ h5tools_getenv_update_hyperslab_bufsize(void)
 done:
     return ret_value;
 }
+
+
+/*----------------------------------------------------------------------------
+ *
+ * Function: h5tools_populate_ros3_fapl()
+ *
+ * Purpose:
+ *
+ *     Set the values of a ROS3 fapl configuration object.
+ *
+ *     If the values pointer is NULL, sets fapl target `fa` to a default
+ *     (valid, current-version, non-authenticating) fapl config.
+ *
+ *     If `values` pointer is _not_ NULL, expects `values` to contain at least
+ *     three non-null pointers to null-terminated strings, corresponding to:
+ *     {   aws_region,
+ *         secret_id,
+ *         secret_key,
+ *     }
+ *     If all three strings are empty (""), the default fapl will be default.
+ *     Both aws_region and secret_id values must be both empty or both
+ *         populated. If
+ *     Only secret_key is allowed to be empty (the empty string, "").
+ *     All values are checked against overflow as defined in the ros3 vfd
+ *     header file; if a value overruns the permitted space, FAIL is returned
+ *     and the function aborts without resetting the fapl to values initially
+ *     present.
+ *
+ * Return:
+ *
+ *     0 (failure) if...
+ *         * Read-Only S3 VFD is not enabled.
+ *         * NULL fapl pointer: (NULL, {...} )
+ *         * Warning: In all cases below, fapl will be set as "default"
+ *                    before error occurs.
+ *         * NULL value strings: (&fa, {NULL?, NULL? NULL?, ...})
+ *         * Incomplete fapl info:
+ *             * empty region, non-empty id, key either way
+ *                 * (&fa, {"", "...", "?"})
+ *             * empty id, non-empty region, key either way
+ *                 * (&fa, {"...", "", "?"})
+ *             * "non-empty key and either id or region empty
+ *                 * (&fa, {"",    "",    "...")
+ *                 * (&fa, {"",    "...", "...")
+ *                 * (&fa, {"...", "",    "...")
+ *             * Any string would overflow allowed space in fapl definition.
+ *     or
+ *     1 (success)
+ *         * Sets components in fapl_t pointer, copying strings as appropriate.
+ *         * "Default" fapl (valid version, authenticate->False, empty strings)
+ *             * `values` pointer is NULL
+ *                 * (&fa, NULL)
+ *             * first three strings in `values` are empty ("")
+ *                 * (&fa, {"", "", "", ...}
+ *         * Authenticating fapl
+ *             * region, id, and optional key provided
+ *                 * (&fa, {"...", "...", ""})
+ *                 * (&fa, {"...", "...", "..."})
+ *
+ * Programmer: Jacob Smith
+ *             2017-11-13
+ *
+ * Changes: None.
+ *
+ *----------------------------------------------------------------------------
+ */
+int
+h5tools_populate_ros3_fapl(H5FD_ros3_fapl_t  *fa,
+                           const char       **values)
+{
+#ifndef H5_HAVE_ROS3_VFD
+    return 0;
+#else
+    int show_progress = 0; /* set to 1 for debugging */
+    int ret_value     = 1; /* 1 for success, 0 for failure           */
+                           /* e.g.? if (!populate()) { then failed } */
+
+    if (show_progress) {
+        HDprintf("called h5tools_populate_ros3_fapl\n");
+    }
+
+    if (fa == NULL) {
+        if (show_progress) {
+            HDprintf("  ERROR: null pointer to fapl_t\n");
+        }
+        ret_value = 0;
+        goto done;
+    }
+
+    if (show_progress) {
+        HDprintf("  preset fapl with default values\n");
+    }
+    fa->version       = H5FD__CURR_ROS3_FAPL_T_VERSION;
+    fa->authenticate  = FALSE;
+    *(fa->aws_region) = '\0';
+    *(fa->secret_id)  = '\0';
+    *(fa->secret_key) = '\0';
+
+    /* sanity-check supplied values
+     */
+    if (values != NULL) {
+        if (values[0] == NULL) {
+            if (show_progress) {
+                HDprintf("  ERROR: aws_region value cannot be NULL\n");
+            }
+            ret_value = 0;
+            goto done;
+        }
+        if (values[1] == NULL) {
+            if (show_progress) {
+                HDprintf("  ERROR: secret_id value cannot be NULL\n");
+            }
+            ret_value = 0;
+            goto done;
+        }
+        if (values[2] == NULL) {
+            if (show_progress) {
+                HDprintf("  ERROR: secret_key value cannot be NULL\n");
+            }
+            ret_value = 0;
+            goto done;
+        }
+
+        /* if region and ID are supplied (key optional), write to fapl...
+         * fail if value would overflow
+         */
+        if (*values[0] != '\0' &&
+            *values[1] != '\0')
+        {
+            if (HDstrlen(values[0]) > H5FD__ROS3_MAX_REGION_LEN) {
+                if (show_progress) {
+                    HDprintf("  ERROR: aws_region value too long\n");
+                }
+                ret_value = 0;
+                goto done;
+            }
+            HDmemcpy(fa->aws_region,                     values[0],
+                     (HDstrlen(values[0]) + 1));
+            if (show_progress) {
+                HDprintf("  aws_region set\n");
+            }
+
+
+            if (HDstrlen(values[1]) > H5FD__ROS3_MAX_SECRET_ID_LEN) {
+                if (show_progress) {
+                    HDprintf("  ERROR: secret_id value too long\n");
+                }
+                ret_value = 0;
+                goto done;
+            }
+            HDmemcpy(fa->secret_id,
+                     values[1],
+                     (HDstrlen(values[1]) + 1));
+            if (show_progress) {
+                HDprintf("  secret_id set\n");
+            }
+
+            if (HDstrlen(values[2]) > H5FD__ROS3_MAX_SECRET_KEY_LEN) {
+                if (show_progress) {
+                    HDprintf("  ERROR: secret_key value too long\n");
+                }
+                ret_value = 0;
+                goto done;
+            }
+            HDmemcpy(fa->secret_key,
+                     values[2],
+                     (HDstrlen(values[2]) + 1));
+            if (show_progress) {
+                HDprintf("  secret_key set\n");
+            }
+
+            fa->authenticate = TRUE;
+            if (show_progress) {
+                HDprintf("  set to authenticate\n");
+            }
+
+        } else if (*values[0] != '\0' ||
+                   *values[1] != '\0' ||
+                   *values[2] != '\0')
+        {
+            if (show_progress) {
+                HDprintf(
+                    "  ERROR: invalid assortment of empty/non-empty values\n"
+                );
+            }
+            ret_value = 0;
+            goto done;
+        }
+    } /* values != NULL */
+
+done:
+    return ret_value;
+#endif /* H5_HAVE_ROS3_VFD */
+
+} /* h5tools_populate_ros3_fapl */
+
+
+/*-----------------------------------------------------------------------------
+ *
+ * Function: h5tools_set_configured_fapl
+ *
+ * Purpose: prepare fapl_id with the given property list, according to
+ *          VFD prototype.
+ *
+ * Return: 0 on failure, 1 on success
+ *
+ * Programmer: Jacob Smith
+ *             2018-05-21
+ *
+ * Changes: None.
+ *
+ *-----------------------------------------------------------------------------
+ */
+int
+h5tools_set_configured_fapl(hid_t      fapl_id,
+                           const char  vfd_name[],
+                           void       *fapl_t_ptr)
+{
+    int ret_value = 1;
+
+    if (fapl_id < 0) {
+        return 0;
+    }
+
+    if (!strcmp("", vfd_name)) {
+        goto done;
+
+#ifdef H5_HAVE_ROS3_VFD
+    } else if (!strcmp("ros3", vfd_name)) {
+        if ((fapl_id == H5P_DEFAULT) ||
+            (fapl_t_ptr == NULL) ||
+            (FAIL == H5Pset_fapl_ros3(
+                fapl_id,
+                (H5FD_ros3_fapl_t *)fapl_t_ptr)))
+        {
+            ret_value = 0;
+            goto done;
+        }
+#endif /* H5_HAVE_ROS3_VFD */
+
+#ifdef H5_HAVE_LIBHDFS
+    } else if (!strcmp("hdfs", vfd_name)) {
+        if ((fapl_id == H5P_DEFAULT) ||
+            (fapl_t_ptr == NULL) ||
+            (FAIL == H5Pset_fapl_hdfs(
+                fapl_id,
+                (H5FD_hdfs_fapl_t *)fapl_t_ptr)))
+        {
+            ret_value = 0;
+            goto done;
+        }
+#endif /* H5_HAVE_LIBHDFS */
+
+    } else {
+        ret_value = 0; /* unrecognized fapl type "name" */
+    }
+
+done:
+    return ret_value;
+
+} /* h5tools_set_configured_fapl() */
+
+
 
